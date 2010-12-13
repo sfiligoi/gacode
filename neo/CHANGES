@@ -41,4 +41,8 @@ Version 0.4 (4 December 2009)
   frequency.
 - Added output of the zero-th order toroidal and parallel flows.
 - Fixed bug in def of s-alpha B_poloidal.
+- added line
 - Fixed bug of missing dR/dr term for finite rotation dlnN/dr.
+- another line
+- another line
+- line 3
