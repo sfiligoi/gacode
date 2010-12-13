@@ -1747,4 +1747,3 @@ VERSION 9.1 (13 August 2010)
 - Better data descriptions (rho_sD) in run.out.
 - TOOLS:
   = ITERDB netcdf: iterdd2gyro now adds beam ions to ion species.
-- Last version before git.
