@@ -1,0 +1,20 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  gyro.HOPPER
+#
+# FUNCTION:
+#  Parallel execution script
+#
+# Created 14 April 2010
+#
+
+simdir=${1}
+nproc=${2}
+exec=${3}  
+
+cd $simdir
+
+aprun -n $nproc $exec
+
+

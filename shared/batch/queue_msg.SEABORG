@@ -1,0 +1,13 @@
+
+IBM SP (seaborg) queue (LoadLeveler) choices:
+
+ALWAYS USE MULTIPLES OF 16 processors!
+
+[1] debug	 n <= 384   (30 min) 
+[2] interactive  n <= 128   (30 min)
+[3] premium	 n < 512    (12 hrs)
+                 n >= 512   (48 hrs)
+[4] regular	 n < 512    (24 hrs)
+                 n >= 512   (48 hrs)
+[5] low		 n <= 2048  (12 hrs)
+

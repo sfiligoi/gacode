@@ -1,0 +1,37 @@
+#---------------------------------------------------
+# IBM iDataPlex (carver.nersc.gov) 
+#---------------------------------------------------
+
+# SLEPC_LIB and other environment variables are defined in:
+include ${SLEPC_DIR}/conf/slepc_common_variables
+
+# Compilers and flags
+
+FC	= mpif90 ${FC_LINKER_FLAGS} -module $(GYRO_DIR)/modules ${FC_INCLUDES}
+F77	= mpif90
+
+FMATH	= -r8 
+FOPT	= -fast  
+FDEBUG	= -g -Ktrap=fp -Mbounds -Minform,inform
+FBOUND	= -Minform,inform -Mbounds
+FPROF	= -fast -Mprof=func
+
+# System math libraries
+
+LMATH = -L${FFTW_LIBDIR} -l drfftw -L${FFTW_LIBDIR} -l dfftw \
+        ${SLEPC_LIB}
+# -L${SLEPC_DIR}/cray-xt4_g_complex/lib -l slepc
+
+# OPTIONAL: netCDF (for gyro2gkv)
+
+
+# Carver:  NETCDF=-L/usr/common/usg/netcdf/4.0.1/lib -lnetcdf_c++ -lnetcdf -I/usr/common/usg/netcdf/4.0.1/include
+
+NETCDF = -L/usr/common/usg/netcdf/4.0.1/lib -lnetcdf_c++ -lnetcdf
+
+NETCDF_INC =  -I/usr/common/usg/netcdf/4.0.1/include
+
+# Archive 
+
+ARCH = ar cr
+

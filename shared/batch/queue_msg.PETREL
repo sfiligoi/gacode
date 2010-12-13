@@ -1,0 +1,6 @@
+
+Linux PBS queue choices:
+
+[1] gigabit (up to 162 processors)
+[2] myrinet (up to 32 processors, Myrinet communication)
+

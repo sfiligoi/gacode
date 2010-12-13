@@ -1,0 +1,24 @@
+#---------------------------------------------------
+# Generic {P3,Portland Group}  
+#---------------------------------------------------
+
+# Compilers and flags
+
+FC	= mpif90 -module $(GYRO_DIR)/modules
+F77	= mpif90
+
+FMATH	= -r8
+FOPT	= -fastsse -tp piii
+FDEBUG	= -g -Ktrap=fp -Mbounds -Minform,inform
+FBOUND	= -Minform,inform -Mbounds
+FPROF	= -fastsse -tp piii -Mprof=lines
+
+# Ssytem math libraries
+
+LMATH = /opt/LAPACK/lapack.PG_P3.a \
+        /opt/BLAS/libgoto_p3_512-r0.94.so 
+
+# Archive 
+
+ARCH = ar cr
+

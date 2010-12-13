@@ -1,0 +1,26 @@
+vugyro 0.x.x                                    18 Sep 2001
+-----------------------------------------------------------
+
+You should find this file in the directory $GYRO_DIR/vugyro.
+
+Selected program units of interest:
+
+ o vugyro.pro 
+
+   - Run this from IDL command line.
+
+ o loadsim.pro 
+    
+   - all data reads are maintained by this routine.
+
+ o initialize.pro 
+    
+   - routine to set all miscellaneous variables 
+     to acceptable initial values.
+
+ o large_file_read.pro 
+
+   - The large vectors U,g,etc are read from here.
+
+
+ 

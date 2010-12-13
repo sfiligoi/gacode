@@ -1,0 +1,35 @@
+#---------------------------------------------------
+# Generic {Opteron 64,Portland Group,MUMPS}  
+#---------------------------------------------------
+
+# Compilers
+
+FC	= mpif90 -module $(GYRO_DIR)/modules
+F77	= mpif90
+
+FMATH	= -r8 
+FOPT	= -fastsse -tp k8-64
+FDEBUG	= -g -Ktrap=fp -Mbounds -Minform=warn
+FBOUND	= -Minform=warn -Mbounds
+FPROF	= -Mprof=lines
+
+# System math libraries
+
+LMATH = -L/opt/MUMPS_4.3/lib -lzmumps -lpord \
+       /opt/scalapack-1.7.4/libscalapack.a \
+       /opt/BLACS/LIB/blacsF77init_MPI-LINUX-0.a \
+       /opt/BLACS/LIB/blacs_MPI-LINUX-0.a \
+       /opt/BLACS/LIB/blacsF77init_MPI-LINUX-0.a \
+       /opt/BLACS/LIB/blacs_MPI-LINUX-0.a \
+       /opt/LAPACK/lapack.PG_OPT64.a \
+       /opt/BLAS/GotoBLAS/libgoto.a
+
+# OPTIONAL: netCDF (for gyro2gkv)
+
+NETCDF = /opt/netcdf/lib/libnetcdf.a
+NETCDF_INC = /opt/netcdf/include
+
+# Archive 
+
+ARCH = ar cr
+

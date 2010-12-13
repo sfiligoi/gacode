@@ -1,0 +1,5 @@
+ Nonlinear Nonlinear Collision Collision RHS       Field     Field     Field     Diag.     I/O       INTERVAL  
+ Eval.     Commun.   Eval.     Commun.   Linear    Solve     Interp    Vel. Sum  Extras    Calls     TOTAL     
+ --------- --------- --------- --------- --------- --------- --------- --------- --------- --------- --------- 
+ 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00
+ 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00

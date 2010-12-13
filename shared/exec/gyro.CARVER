@@ -1,0 +1,20 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  gyro.CARVER
+#
+# FUNCTION:
+#  Parallel execution script
+#
+# Created 19 April 2010
+#
+
+simdir=${1}
+nproc=${2}
+exec=${3}  
+
+cd $simdir
+
+mpirun -n $nproc $exec
+
+

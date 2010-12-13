@@ -1,0 +1,31 @@
+#---------------------------------------------------
+# Generic {Opteron 64,Portland Group,FFTW}  
+#---------------------------------------------------
+
+# Compilers
+
+FC	= mpif90 -module $(GYRO_DIR)/modules
+F77	= mpif90
+
+FMATH	= -r8 
+FOPT	= -fastsse -tp k8-64
+FDEBUG	= -g -Ktrap=fp -Mbounds -Minform,inform
+FBOUND	= -Minform,inform -Mbounds
+FPROF	= -Mprof=lines
+
+# Libraries
+
+LMATH = /opt/LAPACK/lapack.PG_OPT64.a \
+       /opt/BLAS/libgoto_opt-64_1024-r0.97.so \
+       /opt/fftw/lib/librfftw.a \
+       /opt/fftw/lib/libfftw.a
+
+# OPTIONAL: netCDF (for gyro2gkv)
+
+NETCDF = /opt/netcdf-3.6.0-p1/lib/libnetcdf.a
+NETCDF_INC = /opt/netcdf-3.6.0-p1/include
+
+# Archive 
+
+ARCH = ar cr
+

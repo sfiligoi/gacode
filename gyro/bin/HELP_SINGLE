@@ -1,0 +1,10 @@
+SINGLE TIMESTEP MODE:
+ Run GYRO from the specified simulation directory for a single timestep only.  Useful to verify the Courant numbers are less than 1. Stores "run.out" information in "single.out".
+
+      gyro_single -e <dir> -n <n_proc> [-p <path>]
+
+      <dir>     Simulation directory.
+ 
+      <n_proc>  Number of processors.
+
+      <path>    Optional path to simdir of the form <path>/<dir>.

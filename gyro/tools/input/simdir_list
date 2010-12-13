@@ -1,0 +1,75 @@
+Regression cases
+
+reg01: [ l+gki+ ae+ es+pure+ sa+ sym+ncol+nrot+ p+inp]
+reg02: [ l+gki+dke+ es+pure+ sa+ sym+ncol+nrot+ p+inp]
+reg03: [ l+gki+dke+ es+ imp+ sa+ sym+ncol+nrot+ p+inp]
+reg04: [ l+gki+gke+ es+pure+ sa+ sym+ncol+nrot+ p+inp]
+reg05: [ l+ ai+gke+ es+pure+ sa+ sym+ncol+nrot+ p+inp]
+reg06: [ l+gki+dke+ es+pure+mod+ sym+ncol+nrot+ p+inp]
+reg07: [ l+gki+dke+tem+pure+mod+ sym+ncol+nrot+ p+inp]
+reg08: [ l+gki+dke+cem+pure+mod+ sym+ncol+nrot+ p+inp]
+reg09: [ l+gki+dke+ es+pure+ sa+ sym+ col+nrot+ p+inp]
+reg10: [ l+gki+gke+ es+pure+ sa+ sym+ col+nrot+ p+inp]
+reg11: [ l+gki+ ae+ es+pure+ sa+ sym+ncol+nrot+np+inp]
+reg12: [ l+gki+dke+ es+pure+ sa+ sym+ncol+ rot+ p+inp]
+reg13: [ l+gki+ ae+ es+pure+mod+ sym+ncol+ rot+ p+exp]
+reg14: [ l+gki+dke+tem+pure+mod+asym+ncol+ rot+ p+exp]
+reg15: [ l+gki+dke+tem+pure+gen+asym+ncol+nrot+ p+exp]
+reg16: [ l+gki+dke+tem+ imp+gen+asym+ncol+ rot+ p+exp]
+reg17: [ l+gki+dke+tem+pure+ sa+ sym+ncol+nrot+np+inp]
+reg18: [nl+gki+ ae+ es+pure+ sa+ sym+ncol+nrot+ p+inp]
+reg19: [ l+gki+gke+cem+pure+mod+ sym+ col+nrot+ p+inp]
+reg20: [nl+gki+dke+cem+pure+mod+ sym+ncol+ rot+np+inp]
+
+Full nonlinear cases
+
+nl01: [nl+gki+dke+ es+pure+mod+ sym+ncol+nrot+ p+inp]
+      GA standard case, 16 modes.
+
+Eigenvalue cases:
+
+eig01: [ l+gki+gke+cem+pure+mod+ sym+ncol+nrot+ p+inp]
+eig02: [ l+gki+gke+cem+pure+mod+ sym+ col+nrot+ p+inp]
+
+Gyrokinetic eigenvalues cases:
+
+gkeig01: [ l+gki+ ae+ es+pure+ sa+ sym+ncol+nrot+ p+inp]
+
+------------------------------------------------------
+
+l  = linear
+nl = nonlinear
+
+gki = gyrokinetic ions
+ai  = adiabatic ions
+
+ae  = adiabatic electrons
+dke = drift-kinetic electrons
+gke = gyrokinetic electrons
+
+es  = (phi)
+tem = (phi,Ap)
+cem = (phi,Ap,Bp)
+
+pure = pure plasma
+imp  = impurities
+
+sa  = s-alpha geometry
+mod = model geometry
+gen = general (numerical) geometry
+
+sym  = up-down symmetry
+asym = up-down asymmetric
+
+col  = collisions
+ncol = no collisions
+
+rot  = rotation effects
+nrot = no rotation effects
+
+p  = periodic BCs
+np = nonperiodic BCs
+
+inp = profile parameters via INPUT
+exp = profile input via INPUT_profiles
+ 

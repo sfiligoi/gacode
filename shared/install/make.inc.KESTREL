@@ -1,0 +1,43 @@
+#---------------------------------------------------
+# PPPL Opteron/Pathscale system (kestrel.pppl.gov)
+#---------------------------------------------------
+# D. Mikkelsen (mikk@pppl.gov)
+# L. Peterson (jpeterso@pppl.gov)
+
+# Compilers (pathscale) and flags 
+
+FC	= mpif90 -woff801 -module $(GYRO_DIR)/modules
+F77	= mpif90 -woff801
+
+FMATH	= -r8
+FOPT	= -march=opteron -O2
+FDEBUG	= -C -ansi -g -flist -fullwarn -O0
+FBOUND	= 
+FPROF	= 
+
+# System math libraries
+#
+# Need the following modules, in this order:
+# module load pathscale
+# module load mpich
+# module load acml
+# module load fftw/2.1.5
+
+LAPACK = ${ACML_HOME}/pathscale64/lib/libacml.a
+LMATH = $(LAPACK) \
+        ${FFTWHOME}/lib/librfftw.a \
+        ${FFTWHOME}/lib/libfftw.a 
+
+# OPTIONAL: netCDF (for gyro2gkv)
+# 'module load netcdf' first
+
+NETCDF = ${NETCDFHOME}/lib/libnetcdff.a ${NETCDFHOME}/lib/libnetcdf.a
+NETCDF_INC = ${NETCDFHOME}/include
+
+# OPTIONAL: GATO FLAGS
+GATOFLAGS = -r8 -i8
+
+# Archive
+
+ARCH = ar cr
+

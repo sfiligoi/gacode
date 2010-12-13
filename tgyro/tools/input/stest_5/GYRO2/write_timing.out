@@ -1,0 +1,5 @@
+ write_field:          0.000E+00
+ write_field_spectrum: 4.983E-05
+ get_zonal_moments:    5.823E-03
+ get_nonlinear_flux:   2.176E-03
+ write_nonlinear_flux: 0.000E+00

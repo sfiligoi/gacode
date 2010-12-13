@@ -1,0 +1,34 @@
+#---------------------------------------------------
+# DELPHI, EOS, HESTIA, etc.
+#---------------------------------------------------
+
+# Compilers and flags
+
+FC	= mpif90 -module $(GYRO_DIR)/modules
+F77	= mpif90
+
+FMATH	= -r8 
+FOPT	= -fastsse
+FDEBUG	= -g -Ktrap=fp -Mbounds -Minform,inform
+FBOUND	= -Minform,inform -Mbounds
+FPROF	= -fastsse -Mprof=func
+
+# System math libraries
+
+ROOT=/u/candy/local_software
+
+LMATH = $(ROOT)/LAPACK/liblapack.a \
+        $(ROOT)/GotoBLAS/libgoto.a 
+
+# OPTIONAL: netCDF (for gyro2gkv)
+
+NETCDF = $(ROOT)/netcdf/lib/libnetcdf.a
+NETCDF_INC = $(ROOT)/netcdf/include
+
+#GATOFLAGS = -r8 -i8 
+GATOFLAGS = -r8 
+
+# Archive 
+
+ARCH = ar cr
+

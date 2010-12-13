@@ -1,0 +1,27 @@
+#---------------------------------------------------
+# Cray XT3 (jaguar.ccs.ornl.gov) [M.R. Fahey]
+#---------------------------------------------------
+
+# Compilers and flags
+
+FC	= ftn -module $(GYRO_DIR)/modules
+F77	= ftn 
+
+FMATH	= -r8 
+FOPT	= -O3 -tp barcelona-64 -Msmartalloc
+FDEBUG	= -g -Ktrap=fp -Mbounds -Minform,inform
+FBOUND	= -Minform,inform -Mbounds
+FPROF	= -O3 -tp barcelona-64 -Msmartalloc -Mprof=func
+
+# Need modules: mumps/4.3_par, fftw/2.1.5
+LMATH = -ldrfftw -ldfftw ${MUMPS_PATH} -lzmumps -lpord
+
+# OPTIONAL: netCDF (for gyro2gkv)
+
+NETCDF = /apps/jaguar/netcdf/3.6.2/cnl2.0.14+pgi7.0.5/lib/libnetcdf.a
+NETCDF_INC = /apps/jaguar/netcdf/3.6.2/cnl2.0.14+pgi7.0.5/include
+
+# Archive 
+
+ARCH = ar cr
+

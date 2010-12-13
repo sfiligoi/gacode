@@ -1,0 +1,480 @@
+program vgen
+
+  use vgen_globals
+  use neo_interface
+  use EXPRO_interface
+
+  !---------------------------------------------------
+  implicit none
+
+  character(len=80) :: tag
+
+  integer :: i, j
+  integer :: ia,ib
+  integer :: adiabatic_ele_model, num_ele, indx_ele, n_ions
+  real :: grad_p, vtor_er
+  real :: ya, yb
+  real :: vtor_diff, er0, omega, omega_deriv
+  integer :: rotation_model
+
+  !---------------------------------------------------
+
+  include 'mpif.h'
+
+  !-----------------------------------------------------------------
+  ! Initialize MPI_COMM_WORLD communicator.
+  !
+  call MPI_INIT(i_err)
+  call MPI_COMM_RANK(MPI_COMM_WORLD,i_proc,i_err)
+  call MPI_COMM_SIZE(MPI_COMM_WORLD,n_proc,i_err)
+  !-----------------------------------------------------------------
+
+  !-----------------------------------------------------------------
+  ! Path is cwd:
+  !
+  path= './'
+  !-----------------------------------------------------------------
+
+  !---------------------------------------------------------------------
+  ! Read vgen control parameters
+  !
+  open(unit=1,file='vgen.dat',status='old')
+  read(1,*) er_method
+  read(1,*) vel_method
+  read(1,*) erspecies_indx
+  close(1)
+
+  select case(er_method)
+  case(1)
+     if(i_proc == 0) then
+        print *,'Computing Er from force balance'
+     endif
+  case(2)
+     if(i_proc == 0) then
+        print *, 'Computing Er from NEO (weak rotation limit)'
+     endif
+  case (3)
+     if(i_proc == 0) then
+        print *, 'Computing Er from NEO (strong rotation limit)'
+     endif
+  case(4)
+     if(i_proc == 0) then
+        print *,'Returning given Er'
+     endif
+  case default
+     if(i_proc == 0) then
+        print *,'Invalid er_method'
+     endif
+     call MPI_finalize(i_err)
+     stop
+  end select
+
+  select case(vel_method)
+  case(1)
+     if(i_proc == 0) then
+        print *,'Computing velocities from NEO (weak rotation limit)'
+     endif
+  case(2)
+     if(i_proc == 0) then
+        print *,'Computing velocities from NEO (strong rotation limit)'
+     endif
+  case(3)
+     if(i_proc == 0) then
+        print *,'Returning given velocities'
+     endif
+  case default
+     if(i_proc == 0) then
+        print *,'Invalid vel_method'
+     endif
+     call MPI_finalize(i_err)
+     stop
+  end select
+
+  !---------------------------------------------------------------------
+
+  call neo_read_input()
+  call map_global2interface()
+
+  neo_n_radial_in = 1
+  neo_n_order_in  = 1
+  neo_profile_model_in = 1
+  !neo_write_out_mode_in = 0
+
+  ! Species checks
+
+  num_ele = 0
+  indx_ele = 0
+  if(neo_n_species_in >= 1 .and. neo_z_1_in == -1) then
+     num_ele  = num_ele + 1
+     indx_ele = 1
+  endif
+  if(neo_n_species_in >= 2 .and. neo_z_2_in == -1) then
+     num_ele  = num_ele + 1
+     indx_ele = 2
+  endif
+  if(neo_n_species_in >= 3 .and. neo_z_3_in == -1) then
+     num_ele  = num_ele + 1
+     indx_ele = 3
+  endif
+  if(neo_n_species_in >= 1 .and. neo_z_4_in == -1) then
+     num_ele  = num_ele + 1
+     indx_ele = 4
+  endif
+
+  if(num_ele == 0) then
+     adiabatic_ele_model = 1
+     n_ions = neo_n_species_in
+  else if(num_ele == 1) then
+     adiabatic_ele_model = 0
+     n_ions = neo_n_species_in - 1
+     if(indx_ele /= neo_n_species_in) then
+        if(i_proc == 0) then
+           print *, 'For vgen, electron species must be n_species'
+        endif
+        call MPI_finalize(i_err)
+        stop
+     endif
+  else
+     if(i_proc == 0) then
+        print *, 'Only one electron species allowed'
+     endif
+     call MPI_finalize(i_err)
+     stop
+  end if
+
+  if(n_ions < 1) then
+     if(i_proc == 0) then
+        print *, 'For vgen, there must be at least one ion species'
+     endif
+     call MPI_finalize(i_err)
+     stop
+  endif
+
+  if(erspecies_indx > n_ions) then
+     if(i_proc == 0) then
+        print *, 'Invalid vgen species index'
+     endif
+     call MPI_finalize(i_err)
+     stop
+  endif
+
+  !---------------------------------------------------------------------
+  ! Read experimental profiles using EXPRO library.
+  !
+  call EXPRO_palloc(MPI_COMM_WORLD,path,1)
+
+  ! re-set species 1 density for quasineutrality
+  EXPRO_ctrl_density_method = 2 
+  EXPRO_ctrl_z(:) = 0.0
+  EXPRO_ctrl_z(1) = 1.0*neo_z_1_in
+  if(neo_n_species_in >= 2 .and. neo_z_2_in /= -1) then
+     EXPRO_ctrl_z(2) = 1.0*neo_z_2_in
+  endif
+  if(neo_n_species_in >= 3 .and. neo_z_3_in /= -1) then
+     EXPRO_ctrl_z(3) = 1.0*neo_z_3_in
+  endif
+  if(neo_n_species_in >= 4 .and. neo_z_4_in /= -1) then
+     EXPRO_ctrl_z(4) = 1.0*neo_z_4_in
+  endif
+
+  ! set equilibrium option for EXPRO
+  if(neo_equilibrium_model_in == 3) then
+     EXPRO_ctrl_numeq_flag = 1
+  else
+     EXPRO_ctrl_numeq_flag = 0
+  endif
+
+  ! set sign of b and q for EXPRO
+  if(neo_btccw_in > 0) then
+     EXPRO_ctrl_signb = -1.0
+  else
+     EXPRO_ctrl_signb =  1.0
+  endif
+
+  if(neo_ipccw_in > 0) then
+     EXPRO_ctrl_signq = -EXPRO_ctrl_signb
+  else
+     EXPRO_ctrl_signq =  EXPRO_ctrl_signb
+  endif
+
+  call EXPRO_pread(MPI_COMM_WORLD,path)
+  if (i_proc == 0) call EXPRO_write_derived(path)
+  !---------------------------------------------------------------------
+
+  if(er_method /= 4) then
+     EXPRO_er(:) = 0.0
+  endif
+  if(vel_method /= 3) then
+     do j=1,5
+        if(j /= erspecies_indx) then
+           EXPRO_vpol(j,:) = 0.0
+           EXPRO_vtor(j,:) = 0.0
+        endif
+     enddo
+  endif
+
+  !======================================================================
+  ! Four alternatives for Er calculation:
+  !
+  ! 1. Compute Er from force balance using measured vpol and vtor 
+  ! 2. Compute Er by matching vtor_measured with vtor_neo at theta=0 assuming
+  !    weak rotation
+  ! 3. Compute Er by matching vtor_measured with vtor_neo at theta=0 assuming
+  !    strong rotation
+  ! 4. Return the given Er
+
+  select case (er_method) 
+
+  case (1,4)
+
+     if(er_method == 1) then
+        ! Computer Er from force balance using measured vpol and vtor
+
+        ! Er calculation first
+        
+        open(unit=1,file='ercomp.out',status='replace')
+        do i=2,EXPRO_n_exp-1
+           if(erspecies_indx == 1) then
+              grad_p = -(EXPRO_dlnnidr_new(i) + EXPRO_dlntidr(1,i))
+           else
+              grad_p = -(EXPRO_dlnnidr(erspecies_indx,i) + EXPRO_dlntidr(1,i))
+           endif
+           EXPRO_er(i) = (grad_p * EXPRO_grad_r0(i) &
+                * EXPRO_ti(1,i)*temp_norm_fac &
+                / (EXPRO_ctrl_z(erspecies_indx) * charge_norm_fac) & 
+                + EXPRO_vtor(erspecies_indx,i) * EXPRO_bp0(i) &
+                - EXPRO_vpol(erspecies_indx,i) * EXPRO_bt0(i)) &
+                / 1000
+           write(1,'(e16.8,$)') EXPRO_rho(i)
+           write(1,'(e16.8,$)') grad_p * EXPRO_grad_r0(i) &
+                * EXPRO_ti(1,i)*temp_norm_fac &
+                / (EXPRO_ctrl_z(erspecies_indx) * charge_norm_fac) / 1000
+           write(1,'(e16.8,$)') EXPRO_vtor(erspecies_indx,i) * EXPRO_bp0(i)/1000
+           write(1,'(e16.8,$)') -EXPRO_vpol(erspecies_indx,i) * EXPRO_bt0(i)/1000
+           write(1,*) 
+           
+        enddo
+        close(1)
+     endif
+
+     ! omega and omega_deriv 
+     do i=2,EXPRO_n_exp-1
+        EXPRO_w0(i) = 2.9979e10*EXPRO_q(i)*(EXPRO_er(i)/30.0)/ &
+             ((1e4*EXPRO_bunit(i))*(1e2*EXPRO_rmin(i))*EXPRO_grad_r0(i))
+     enddo
+     ! Compute w0p
+     call bound_deriv(EXPRO_w0p(2:EXPRO_n_exp-1),EXPRO_w0(2:EXPRO_n_exp-1),&
+          EXPRO_rmin,EXPRO_n_exp-2)
+
+     ! Flow calculation 
+
+     do i=2,EXPRO_n_exp-1
+        if(vel_method /= 3) then
+           if(vel_method == 1) then
+              rotation_model = 1   ! weak rotation
+           else
+              rotation_model = 2   ! strong rotation
+           endif
+           er0 = EXPRO_er(i)
+           omega = EXPRO_w0(i) 
+           omega_deriv = EXPRO_w0p(i) 
+           call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
+                omega_deriv)
+           
+           do j=1,n_ions
+              EXPRO_vpol(j,i) = neo_vpol_dke_out(j) &
+                   * vth_norm * EXPRO_rmin(EXPRO_n_exp)
+              EXPRO_vtor(j,i) = neo_vtor_dke_out(j) &
+                   * vth_norm * EXPRO_rmin(EXPRO_n_exp)
+           enddo
+           
+           print '(t3,a,f6.4,t20,a,f12.4,t50,a,f12.4)',&
+                'r/a=', EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp), ' E_r(kV/m)=', EXPRO_er(i), ' vpol_1(m/s)=', EXPRO_vpol(1,i)
+           
+        endif
+     enddo
+
+  case (2)
+
+     ! Compute Er using NEO (weak rotation limit) 
+     ! by matching vtor_measured with vtor_neo at theta=0 
+
+     do i=2,EXPRO_n_exp-1
+
+        rotation_model = 1
+        er0 = 0.0
+        omega = 0.0
+        omega_deriv = 0.0
+        call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
+             omega_deriv)
+
+        ! omega = (vtor_measured - vtor_neo_ater0) / R
+
+        EXPRO_er(i) = (vtor_diff/(vth_norm * EXPRO_rmin(EXPRO_n_exp)))  &
+             / (neo_rmaj_over_a_in + neo_rmin_over_a_in) &
+             * neo_rmin_over_a_in / (abs(neo_q_in) * EXPRO_ctrl_signq) &
+             / (abs(neo_rho_star_in) * EXPRO_ctrl_signb) &
+             * EXPRO_grad_r0(i) &
+             * (temp_norm*temp_norm_fac / charge_norm_fac &
+             / EXPRO_rmin(EXPRO_n_exp)) / 1000
+
+        ! Part of vtor due to Er
+        vtor_er = vtor_diff
+
+        ! Store the new flows
+        if(vel_method /= 3) then
+           do j=1,n_ions
+              EXPRO_vpol(j,i) = neo_vpol_dke_out(j) &
+                   * vth_norm * EXPRO_rmin(EXPRO_n_exp)
+              EXPRO_vtor(j,i) = neo_vtor_dke_out(j) &
+                   * vth_norm * EXPRO_rmin(EXPRO_n_exp) + vtor_er
+           enddo
+        endif
+
+        print '(t3,a,f6.4,t20,a,f12.4,t50,a,f12.4)',&
+             'r/a=', EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp), ' E_r(kV/m)=', EXPRO_er(i), ' vpol_1(m/s)=', EXPRO_vpol(1,i)
+
+     enddo
+     
+     if(vel_method == 2) then
+        print *, 'Re-computing the flows usign NEO in the strong rotation limit'
+        ! Re-compute the flows using strong rotation
+        ! omega and omega_deriv 
+        do i=2,EXPRO_n_exp-1
+           EXPRO_w0(i) = 2.9979e10*EXPRO_q(i)*(EXPRO_er(i)/30.0)/ &
+                ((1e4*EXPRO_bunit(i))*(1e2*EXPRO_rmin(i))*EXPRO_grad_r0(i))
+        enddo
+        ! Compute w0p
+        call bound_deriv(EXPRO_w0p(2:EXPRO_n_exp-1),EXPRO_w0(2:EXPRO_n_exp-1),&
+             EXPRO_rmin,EXPRO_n_exp-2)
+        do i=2,EXPRO_n_exp-1
+           rotation_model = 2  
+           er0 = EXPRO_er(i)
+           omega = EXPRO_w0(i) 
+           omega_deriv = EXPRO_w0p(i) 
+           call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
+                omega_deriv)
+           do j=1,n_ions
+              EXPRO_vpol(j,i) = neo_vpol_dke_out(j) &
+                   * vth_norm * EXPRO_rmin(EXPRO_n_exp)
+              EXPRO_vtor(j,i) = neo_vtor_dke_out(j) &
+                   * vth_norm * EXPRO_rmin(EXPRO_n_exp)
+           enddo
+           
+           print '(t3,a,f6.4,t20,a,f12.4,t50,a,f12.4)',&
+                'r/a=', EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp), ' E_r(kV/m)=', EXPRO_er(i), ' vpol_1(m/s)=', EXPRO_vpol(1,i)
+        enddo
+     endif
+     
+  case (3)
+
+     ! Compute Er using NEO (strong rotation limit) 
+     ! by matching vtor_measured with vtor_neo at theta=0 
+
+     ia = 2  
+     ib = EXPRO_n_exp-1  ! EAB: should be EXPRO_n_exp-1 in final version
+     call vgen_newton(ia,ib,EXPRO_w0(ia:ib))
+
+     ! Compute w0p
+     call bound_deriv(EXPRO_w0p(ia:ib),EXPRO_w0(ia:ib),&
+          EXPRO_rmin,ib-ia+1)
+
+     do i=ia,ib
+
+        EXPRO_er(i) = EXPRO_w0(i) * 30.0 &
+             * ((1e4*EXPRO_bunit(i))*(1e2*EXPRO_rmin(i))*EXPRO_grad_r0(i)) &
+             / (2.9979e10*EXPRO_q(i))
+
+        ! flow calculation
+        if(vel_method /= 3) then
+           if(vel_method == 1) then
+              rotation_model = 1  ! weak limit
+           else
+              rotation_model = 2  ! strong limit
+           endif
+           er0 = EXPRO_er(i)
+           omega = EXPRO_w0(i)
+           omega_deriv = EXPRO_w0p(i)
+           call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
+                omega_deriv)
+           
+           do j=1,n_ions
+              EXPRO_vpol(j,i) = neo_vpol_dke_out(j) &
+                   * vth_norm * EXPRO_rmin(EXPRO_n_exp)
+              EXPRO_vtor(j,i) = neo_vtor_dke_out(j) &
+                   * vth_norm * EXPRO_rmin(EXPRO_n_exp)
+           enddo
+        endif
+
+         print '(t3,a,f6.4,t20,a,f12.4,t50,a,f12.4)',&
+             'r/a=', EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp), ' E_r(kV/m)=', EXPRO_er(i), ' vpol_1(m/s)=', EXPRO_vpol(1,i)
+        
+     enddo
+     
+  end select
+  !======================================================================
+
+  ! extrapolation for r=0 and r=n_exp boundary points
+
+  if(er_method /= 4) then
+     call bound_extrap(ya,yb,EXPRO_er,EXPRO_rmin,EXPRO_n_exp)
+     EXPRO_er(1) = ya
+     EXPRO_er(EXPRO_n_exp) = yb
+  endif
+  
+  if(vel_method /= 3) then
+     do j=1,n_ions
+        call bound_extrap(ya,yb,EXPRO_vpol(j,:),EXPRO_rmin,EXPRO_n_exp)
+        EXPRO_vpol(j,1) = ya
+        EXPRO_vpol(j,EXPRO_n_exp) = yb
+        call bound_extrap(ya,yb,EXPRO_vtor(j,:),EXPRO_rmin,EXPRO_n_exp)
+        EXPRO_vtor(j,1) = ya
+        EXPRO_vtor(j,EXPRO_n_exp) = yb
+     enddo
+  endif
+  
+  ! Write the new INPUT_PROFILES
+  
+  tag = '.new'
+  call EXPRO_write_original(path,tag)
+  
+  ! output omega_E, vtor_1 
+  ! omega
+  do i=2,EXPRO_n_exp-1
+     EXPRO_w0(i) = 2.9979e10*EXPRO_q(i)*(EXPRO_er(i)/30.0)/ &
+          ((1e4*EXPRO_bunit(i))*(1e2*EXPRO_rmin(i))*EXPRO_grad_r0(i))
+  enddo
+  call bound_extrap(ya,yb,EXPRO_w0,EXPRO_rmin,EXPRO_n_exp)
+  EXPRO_w0(1) = ya
+  EXPRO_w0(EXPRO_n_exp) = yb
+  ! omega_p
+  call bound_deriv(EXPRO_w0p(2:EXPRO_n_exp-1),EXPRO_w0(2:EXPRO_n_exp-1),&
+       EXPRO_rmin,EXPRO_n_exp-2)
+  call bound_extrap(ya,yb,EXPRO_w0p,EXPRO_rmin,EXPRO_n_exp)
+  EXPRO_w0p(1) = ya
+  EXPRO_w0p(EXPRO_n_exp) = yb
+  open(unit=1,file='vgen.out',status='replace')
+  do i=1,EXPRO_n_exp
+     write(1,'(e16.8,$)') EXPRO_rho(i)
+     write(1,'(e16.8,$)') EXPRO_er(i)
+     write(1,'(e16.8,$)') EXPRO_w0(i)
+     write(1,'(e16.8,$)') EXPRO_w0p(i)
+     do j=1,n_ions
+        write(1,'(e16.8,$)') EXPRO_vpol(j,i)
+        write(1,'(e16.8,$)') EXPRO_vtor(j,i)
+        write(1,'(e16.8,$)') EXPRO_vpol(j,i) / EXPRO_bp0(i)
+        write(1,'(e16.8,$)') (EXPRO_vtor(j,i) &
+             - EXPRO_vpol(j,i)*EXPRO_bt0(i)/ EXPRO_bp0(i)) &
+             / (EXPRO_rmaj(i)+EXPRO_rmin(i))
+     enddo
+     write(1,*)
+  enddo
+  close(1)
+
+  call vgen_getgeo()
+
+  call MPI_finalize(i_err)
+
+10 format(t2,i2,10(1pe16.8,1x))
+
+end program vgen

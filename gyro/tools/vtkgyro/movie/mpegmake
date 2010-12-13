@@ -1,0 +1,83 @@
+#!/bin/bash
+
+# Comment Information
+TITLE="GYRO SIMULATION c64x64.B.m20"
+COMMENT="480x480 VTK grid; 512 colors"
+AUTHOR="Jeff Candy"
+YEAR=2006
+
+# Main movie definitions
+BASENAME=frame%04d.jpg
+BITRATE=5000k
+FRAMERATE=20
+TYPE=avi
+
+# Title frame definitions
+TNAME=title.jpg
+DURATION=60
+
+#---------------------------------------------
+# Get to work:
+
+# 1. Create main movie
+
+#if [ -e output.avi ] 
+#then
+#   echo "========================================"
+#   echo "NOTE: output.avi exists, not generating."
+#   echo "========================================"
+#else
+ffmpeg -y \
+       -b $BITRATE  \
+       -r $FRAMERATE \
+       -i $BASENAME \
+       -title "$TITLE" \
+       -author "$AUTHOR" \
+       -comment "$COMMENT" \
+       -year $YEAR \
+       -pass 1 \
+       output.$TYPE
+
+ffmpeg -y \
+       -b $BITRATE  \
+       -r $FRAMERATE \
+       -i $BASENAME \
+       -title "$TITLE" \
+       -author "$AUTHOR" \
+       -comment "$COMMENT" \
+       -year $YEAR \
+       -pass 2 \
+       output.$TYPE
+#fi
+
+# 2. Make copies of title image
+
+for ((a=1; a <= DURATION ; a++))  
+do
+   if [ $a -lt 10 ] 
+   then
+      cp $TNAME temp0"$a".jpg
+   else
+      cp $TNAME temp"$a".jpg
+   fi   
+done  
+
+# 3. Create avi of title images
+
+ffmpeg -y \
+       -b $BITRATE  \
+       -r $FRAMERATE \
+       -i temp%2d.jpg \
+       -title "$TITLE" \
+       -author "$AUTHOR" \
+       -comment "$COMMENT" \
+       -year $YEAR \
+       title.$TYPE
+
+# 4. Get rid of gabage
+
+rm temp*
+
+# 5. Merge title and main movie.
+
+avimerge -i title.avi output.avi -o outputf.avi

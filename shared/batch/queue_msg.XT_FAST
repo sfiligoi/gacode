@@ -1,0 +1,12 @@
+
+Cray XT (jaguar running CNL) queue (PBS):
+
+[1] debug (into batch) ( 1 hour)
+[2] batch ( 2 hours)
+[3] batch ( 4 hours)   - 1025 or more cores
+[4] batch (12 hours)   - 9401 or more cores
+[5] batch (24 hours)   - 30000 or more cores
+
+Will request [n_proc]GB memory.
+
+

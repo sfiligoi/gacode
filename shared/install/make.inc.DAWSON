@@ -1,0 +1,54 @@
+#---------------------------------------------------
+# UCLA Dawson Cluster [E. Wang]
+#---------------------------------------------------
+
+# Compilers and flags
+
+# MPI stuff
+
+MPIDIR = /u/local/mpi/mpilam
+
+# Compiler flags:
+
+FC	= xlf90_r \
+		-qsuffix=f=f90 \
+		-qmoddir=/tmp/$(USER)/modules \
+		-I/tmp/$(USER)/modules \
+		-L$(MPIDIR)/lib \
+		-I$(MPIDIR)/include \
+		-llam -lmpi -llamf77mpi -llammpio -llammpi++ \
+		-I/u/local/apps/fftw/include
+
+F77	= mpif77 -qfixed -qmoddir=/tmp/$(USER)/modules \
+		-I/tmp/$(USER)/modules \
+		-L$(MPIDIR)/lib \
+		-I$(MPIDIR)/include \
+		-llam -lmpi -llamf77mpi -llammpio -llammpi++ \
+		-I/u/local/apps/fftw/include
+
+FMATH	  = -qrealsize=8 
+FOPT	  = -O4
+FOPTFCC77 = -O3
+FDEBUG	  = -C -qflag=I:I -qflttrap=overflow:underflow:zerodivide:invalid 
+FBOUND    =
+FPROF	  = -O3 -g -pg
+
+# System math libraries
+
+LMATH = /u/local/apps/lapack/lapack.a \
+        /u/local/apps/lapack/libblas.a \
+        /u/local/apps/lapack/liblapack.a \
+        /u/local/apps/lapack/blas.a \
+        /u/local/apps/lapack/tmglib.a \
+        /u/local/apps/fftw/lib/librfftw.a \
+        /u/local/apps/fftw/lib/libfftw.a
+
+# OPTIONAL: netCDF (for gyro2gkv)
+
+NETCDF = /u/local/apps/netcdf/lib/libnetcdf.a
+NETCDF_INC = /u/local/apps/netcdf/include/
+
+# Archive
+
+ARCH = libtool -v -static -a -o
+

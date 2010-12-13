@@ -1,0 +1,32 @@
+#---------------------------------------------------
+# IBM Power 5 (bassi.nersc.gov)
+#---------------------------------------------------
+
+# Compiler flags:
+
+FC	= mpxlf90_r -blpdata -qsuffix=f=f90 -qmoddir=$(GYRO_DIR)/modules -I$(GYRO_DIR)/modules 
+F77	= mpxlf90_r -blpdata -qfixed
+
+FMATH	= -qrealsize=8 
+FOPT	= -O4 -qnoipa
+FDEBUG	= -C -qflag=I:I -qflttrap=overflow:underflow:zerodivide:invalid 
+FBOUND  = -C -qextchk
+FPROF	= -O3 -g -pg
+
+# Libraries
+
+LMATH = -lessl ${LAPACK}
+
+# OPTIONAL: netCDF (for gyro2gkv)
+# need to run "module load netcdf"
+
+NETCDF_INC = $(NETCDF)
+
+# OPTIONAL: GATO
+
+GATOFLAGS = -qrealsize=8 -qintsize=8
+
+# Archive 
+
+ARCH = ar cr
+

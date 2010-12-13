@@ -1,0 +1,30 @@
+#---------------------------------------------------
+# Generic {Pentium,lf95} 
+#---------------------------------------------------
+
+# Compilers
+
+FC	= mpif90 --mod $(GYRO_DIR)/modules
+F77	= mpif90
+
+FMATH	= --dbl
+FOPT	= --tpp --nap --nchk -ng -O --npca --nsav --ntrace --ntrap
+FDEBUG	= --ap --chk --chkglobal --co --f95 -g --lst --pca --trace --warn
+FBOUND	= 
+FPROF	= 
+
+# Libraries
+
+LMATH = /opt/LAPACK/libLAPACK-lf.a \
+       /opt/BLAS/lib/libBLAS_PII-lf.a
+
+# netCDF (for gyro2gkv)
+
+NETCDF = /opt/netcdf-3.4/lib/libnetcdf.a
+NETCDF_INC = /opt/netcdf-3.4/include
+
+# Archive
+
+ARCH	= ar cr
+
+

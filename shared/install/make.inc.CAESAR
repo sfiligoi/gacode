@@ -1,0 +1,28 @@
+#---------------------------------------------------
+# Generic {Pentium 4,Intel Fortran}
+#---------------------------------------------------
+
+# Compilers and flags
+
+FC	= mpif90 -mod $(GYRO_DIR)/modules -I $(GYRO_DIR)/modules
+F77	= mpif90
+
+FMATH	= -r8
+FOPT	= -O3
+FDEBUG	= -check bounds -warn all -fpe0 -fpstkchk -ftrapuv
+FBOUND	= -check bounds
+FPROF	= -O -p -g 
+
+# System math libraries
+
+LMATH = $(LINK_LAPACK_STATIC)
+
+# OPTIONAL: netCDF (for gyro2gkv)
+
+NETCDF = /opt/netcdf/lib/libnetcdf.a
+NETCDF_INC = /opt/netcdf/include
+
+# Archive 
+
+ARCH = ar cr
+

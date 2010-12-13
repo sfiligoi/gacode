@@ -1,0 +1,29 @@
+#---------------------------------------------------
+# IBM Power 5 (ubgl.llnl.gov)
+#---------------------------------------------------
+
+# Compiler flags:
+
+FC	= mpxlf90 -qsuffix=f=f90 -qmoddir=$(GYRO_DIR)/modules -I$(GYRO_DIR)/modules 
+F77	= mpxlf90 -qfixed
+
+FMATH	= -qrealsize=8 
+FOPT	= -O3 
+FDEBUG	= -C -qflag=I:I -qflttrap=overflow:underflow:zerodivide:invalid 
+FBOUND  =
+FPROF	= -O3 -g -pg
+
+# System math libraries
+
+LMATH = /bgl/local/lib/liblapack440.a \
+       /bgl/local/lib/libblas440.a      
+
+# OPTIONAL netCDF (for gyro2gkv)
+
+NETCDF = /usr/common/usg/netcdf/3.5/serial/lib/libnetcdf.a
+NETCDF_INC = /usr/common/usg/netcdf/3.5/serial/include
+
+# Archive
+
+ARCH = bglar cr
+

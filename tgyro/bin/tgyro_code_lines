@@ -1,0 +1,84 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  tgyro_code_lines 
+#
+# PURPOSE:
+#  Enumerate number of code lines in tgyro suite
+#--------------------------------------------------
+
+tmpfile=/tmp/lines
+scripts=/tmp/scripts
+f90=/tmp/f90
+f77=/tmp/f77
+C=/tmp/C
+python=/tmp/python
+idl=/tmp/idl
+
+touch $tmpfile
+touch $scripts
+touch $f90
+touch $f77
+touch $C
+touch $python
+
+cat $TGYRO_DIR/Makefile >> $tmpfile
+cat $TGYRO_DIR/Makefile >> $scripts
+echo -n "Including toplevel makefile: "
+gyro_trim `wc -l $tmpfile`
+
+cat $TGYRO_DIR/batch/* >> $tmpfile
+cat $TGYRO_DIR/batch/* >> $scripts
+echo -n "Including batch files: "
+gyro_trim `wc -l $tmpfile`
+
+cat $TGYRO_DIR/bin/* >> $tmpfile
+cat $TGYRO_DIR/bin/* >> $scripts
+echo -n "Including scripts in bin: "
+gyro_trim `wc -l $tmpfile`
+
+cat $TGYRO_DIR/exec/* >> $tmpfile
+cat $TGYRO_DIR/exec/* >> $scripts
+echo -n "Including scripts in exec: "
+gyro_trim `wc -l $tmpfile`
+
+cat $TGYRO_DIR/python/*.py >> $tmpfile
+cat $TGYRO_DIR/python/*.py >> $python
+echo -n "Including python scripts: "
+gyro_trim `wc -l $tmpfile`
+
+cat $TGYRO_DIR/src/*.f90 >> $tmpfile
+cat $TGYRO_DIR/src/*.f90 >> $f90
+echo -n "Including main F90 sources: "
+gyro_trim `wc -l $tmpfile`
+
+cat $TGYRO_DIR/*/Makefile >> $tmpfile
+cat $TGYRO_DIR/*/Makefile >> $scripts
+echo -n "Including Makefiles: "
+gyro_trim `wc -l $tmpfile`
+
+echo
+
+echo -n "SCRIPTS   : "
+gyro_trim `wc -l $scripts`
+
+echo -n "FORTRAN 90: "
+gyro_trim `wc -l $f90`
+
+#echo -n "FORTRAN 77: "
+#gyro_trim `wc -l $f77`
+
+#echo -n "PYTHON    : "
+#gyro_trim `wc -l $python`
+
+echo
+
+echo -n "TOTAL     : "
+gyro_trim `wc -l $tmpfile`
+
+rm $tmpfile
+rm $scripts
+rm $f90
+rm $f77
+rm $C
+rm $python

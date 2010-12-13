@@ -1,0 +1,28 @@
+#---------------------------------------------------
+# IBM Power 3+ (seaborg.nersc.gov)  
+#---------------------------------------------------
+
+# Compiler flags:
+
+FC	= mpxlf90_r -bmaxdata:0x70000000 -qsuffix=f=f90 -qmoddir=$(GYRO_DIR)/modules -I$(GYRO_DIR)/modules 
+F77	= mpxlf90_r -bmaxdata:0x70000000 -qfixed
+
+FMATH	= -qrealsize=8 
+FOPT	= -O4
+FDEBUG	= -C -qflag=I:I -qflttrap=overflow:underflow:zerodivide:invalid 
+FBOUND  =
+FPROF	= -O3 -g -pg
+
+# System math libraries
+
+LMATH = -lessl ${LAPACK}
+
+# OPTIONAL: netCDF (for gyro2gkv)
+
+NETCDF = /usr/common/usg/netcdf/3.5/serial/lib/libnetcdf.a
+NETCDF_INC = /usr/common/usg/netcdf/3.5/serial/include
+
+# Archive 
+
+ARCH = ar cr
+

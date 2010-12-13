@@ -1,0 +1,99 @@
+#!/bin/bash
+#------------------------------------------------------
+# tgyro_bat
+#
+# PURPOSE:
+#  Script controlling batch execution of TGYRO.
+#--------------------------------------------------------
+
+code=tgyro
+
+#=============================================================
+# Syntax validity check and help message
+#
+n=$#
+
+if [ $n -eq 0 ]
+then
+   echo
+   echo "Usage:  tgyro_bat -e <dir> -n <n_proc> [-p <path>]"
+   echo
+   echo "        <dir>  Simulation directory."
+   echo "     <n_proc>  Number of processors."
+   echo "       <path>  Optional path to simdir."
+
+  exit 1
+fi
+#=============================================================
+
+# exit if no arguments
+
+HELP=$TGYRO_DIR/bin/HELP_BAT
+
+if [ $n -eq 0 ]
+then
+   cat $HELP ;
+   exit 1
+fi
+
+# determine if optional path was provided
+
+if [ $n -eq 6 ]
+then
+   # set simdir to specified path
+   simpath=${6}
+else
+   # if not specified on command line, set to default
+   simpath=$TGYRO_DIR/sim
+fi
+simdir=$simpath/${2}
+
+# parse first argument:
+
+case "${1}" in
+
+   -h* | -H* | --h* | --H* )
+
+      # help
+
+      cat $HELP ;
+      exit 1 ;;
+
+   -e* | -E* )
+
+      # define executable directory and CONTINUE
+
+      if ! tgyro_sim_warn $simdir
+      then
+         exit 1 ;
+      fi ;;
+
+   -* | * )
+
+      # error trap
+
+      cat $HELP ;
+      exit 1 ;;
+
+esac
+
+# We're continuing from '-e' above, so define
+# number of processors
+
+if [ $n -eq 2 ]
+then
+   # set nproc if not specified on command line
+   nproc=2
+else
+   nproc=${4}
+fi
+
+# Determine queue
+
+cat $GYRO_DIR/batch/queue_msg.${GYRO_PLAT}
+
+read queue_num
+
+$GYRO_DIR/batch/queue_go.${GYRO_PLAT} $nproc $queue_num ${2} $simpath $code
+
+exit 1

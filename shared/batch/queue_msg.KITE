@@ -1,0 +1,7 @@
+
+ PPPL Linux PBS queue choices:
+
+[1] kestrel  (user limit is 96 processors?)
+[2] kite (with Infiniband) (up to 48 processors)
+[3] gridn (up to 36 processors)
+

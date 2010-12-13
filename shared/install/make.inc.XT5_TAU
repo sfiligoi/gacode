@@ -1,0 +1,27 @@
+#---------------------------------------------------
+# Cray XT5 (jaguarpf.ccs.ornl.gov)
+#---------------------------------------------------
+
+# Compilers and flags
+
+# Fortran 90/95 compiler
+FC  = tau_f90.sh -optPdtF95Opts="-R free" -optCompInst -optVerbose -module $(GYRO_DIR)/modules
+# Fortran 77 compiler
+F77 = tau_f90.sh -optCompInst -optVerbose
+# Compiler options/flags
+FOPT   = -default64 -tp istanbul-64 -O3 -fast -Msmartalloc -fastsse
+FDEBUG = -default64 -g -Ktrap=fp -Mbounds -Minform=inform
+FPROF  = -default64 -tp istanbul-64 -O3 -fast -Msmartalloc -Mprof=func
+
+# Execute 'module load fftw/2.1.5'
+# Execute 'module load mumps/4.7.3_par' (parallel version) which defines MUMPS_PATH environment variable
+LMATH = -ldrfftw -ldfftw ${MUMPS_PATH} -lzmumps -lpord
+
+# OPTIONAL : Load netCDF for gyro2gkv tool
+# Execute 'module load netcdf/4.0.1.1'
+NETCDF     = /opt/cray/netcdf/4.0.1.1/netcdf-pgi/lib/libnetcdf.a
+NETCDF_INC = /opt/cray/netcdf/4.0.1.1/netcdf-pgi/include
+
+# Archive 
+ARCH = ar cr
+

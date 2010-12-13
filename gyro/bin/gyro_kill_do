@@ -1,0 +1,21 @@
+#!/bin/sh
+# 
+# SCRIPT:
+#  gyro_kill_do
+#
+# PURPOSE:
+#  Execute series of gyro kills
+#----------------------------------------------------
+
+# Define list of test directories:
+
+HALT=$1
+
+shift
+
+list=`cd $GYRO_DIR/sim ; ls -d $@`
+
+for sim in $list
+do
+   gyro $HALT $sim 
+done

@@ -1,0 +1,28 @@
+#---------------------------------------------------
+# IBM Power 5 (bassi.nersc.gov)
+#---------------------------------------------------
+
+# Compiler flags:
+
+FC	= mpxlf90_r -g -q64 -blpdata -qsuffix=f=f90 -qmoddir=${GYRO_DIR}/modules -I${GYRO_DIR}/modules 
+F77	= mpxlf90_r -g -q64 -blpdata -qfixed
+
+FMATH	= -qrealsize=8 
+FOPT	= -O4
+FDEBUG	= -C -qflag=I:I -qflttrap=overflow:underflow:zerodivide:invalid 
+FBOUND  =
+FPROF	= -O3 -g -pg
+
+# Libraries
+
+LMATH = -L/afs/rzg/@sys/lib/ -lessl -lscalapack -llapack /afs/ipp/@sys/lib/blacsF77init_MPI-POWER4-0.a \
+           /afs/ipp/@sys/lib/blacs_MPI-POWER4-0.a -lmass -lnagfl90_64 -lfftw3	
+
+# OPTIONAL: netCDF (for gyro2gkv)
+
+NETCDF = /usr/common/usg/netcdf/3.5/serial/lib/libnetcdf.a
+NETCDF_INC = /usr/common/usg/netcdf/3.5/serial/include
+
+# Archive 
+ARCH = ar -X64 cr
+

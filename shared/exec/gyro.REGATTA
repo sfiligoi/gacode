@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  gyro.REGATTA
+#
+# FUNCTION:
+#  Parallel execution script
+
+simdir=${1}
+nproc=${2}
+exec=${3}
+  
+cd $simdir
+
+pwd
+
+echo "\"$simdir\"" > inputpath.dat 
+
+poe $exec -procs $nproc -hostfile ${GYRO_DIR}/exec/host.list.REGATTA
+# totalview poe -a $srcdir/BigScience -procs $nproc -hostfile ${GYRO_DIR}/exec/host.list.REGATTA
+
+

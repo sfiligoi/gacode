@@ -1,0 +1,6 @@
+*===============================================*
+* All routines are compiled in single precision *
+*                                               *
+*  (no flags to promote to double precision)    *
+*===============================================*
+

@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  neo_version_message
+#
+# FUNCTION:
+#  Echo version message.
+#------------------------------
+
+echo "====================================================="
+echo "NEO" `cat $GACODE_ROOT/neo/VERSION` `echo $GACODE_PLATFORM` 
+echo "====================================================="

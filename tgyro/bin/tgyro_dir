@@ -1,0 +1,42 @@
+#!/bin/bash
+#
+# SCRIPT:
+#  tgyro_dir
+#
+# PURPOSE:
+#  Replicate GYRO directories for use with TGYRO. 
+#--------------------------------------------------------------
+
+
+if [ $# -lt 2 ]
+then
+   echo "Usage: tgyro_dir <base> <n>"
+   echo " "
+   echo "       <base> is the basename"
+   echo "          <n> is the number of replications"
+   echo " "
+   echo "NOTE: data is copied from base1"
+   exit 1
+fi
+
+# Set basename
+base=$1
+j=1
+
+if [ ! -d "$base$j" ]
+then
+   echo "error: $base$j does not exist"
+   exit 1
+fi
+
+# Set number of replications
+n=$2
+i=2
+
+# Make the copies
+while [ $i -le $n ] ; do
+   echo "$base$j -> $base$i"
+   rm -rf "$base$i"
+   cp -r "$base$j" "$base$i"  
+   let "i+=1"
+done

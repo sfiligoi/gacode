@@ -1,0 +1,34 @@
+#---------------------------------------------------
+# Generic {Intel OSX,gfortran} 
+#---------------------------------------------------
+
+# Reset make command
+
+MAKE = make
+
+# Compilers and flags
+
+FC	= mpif90 -I$(GYRO_DIR)/modules -J$(GYRO_DIR)/modules
+F77	= mpif90
+
+FMATH	= -fdefault-real-8
+FOPT	= -O3
+FDEBUG	= -O -Wall -Wunderflow -W -Wuninitialized -fbounds-check
+FPROF	= -pg
+
+# System math libraries
+
+LMATH = /System/Library/Frameworks/vecLib.framework/Versions/A/vecLib \
+       -lSystemStubs -lSystem
+
+# OPTIONAL: netCDF (for gyro2gkv)
+NETCDF = /usr/local/lib/libnetcdf.a
+NETCDF_INC = /usr/local/include
+ 
+# OPTIONAL: GATO FLAGS
+GATOFLAGS=-fdefault-real-8 -fdefault-integer-8 -O0
+
+# Archive
+
+ARCH = ar cr
+

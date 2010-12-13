@@ -1,0 +1,12 @@
+
+Cray XT3 (jaguar) queue (PBS):
+
+[1] debug ( 1 hour)
+[2] batch ( 2 hours)
+[3] batch ( 8 hours)
+[4] batch (12 hours)
+[5] batch (24 hours)
+
+Will request [n_proc]GB memory.
+
+

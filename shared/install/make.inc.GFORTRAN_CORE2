@@ -1,0 +1,30 @@
+#---------------------------------------------------
+# Generic {Pentium M, gfortran}
+#---------------------------------------------------
+
+MAKE = make
+
+# Compilers
+
+FC	= mpif90 -I $(GYRO_DIR)/modules
+F77	= mpif90
+
+FMATH	= -fdefault-real-8 -M $(GYRO_DIR)/modules 
+FOPT	= -march=nocona -mfpmath=sse -fomit-frame-pointer -O3
+FDEBUG	= -O -Wall -Wunderflow -W -Wuninitialized -fbounds-check
+FPROF	= -march=nocona -mfpmath=sse -O3 -pg
+
+# System math libraries
+
+LMATH = /usr/local/lib/LAPACK/lapack.GFORTRAN_CORE2.a \
+        /usr/local/lib/BLAS/libgoto.GFORTRAN_CORE2.a
+
+# OPTIONAL: netCDF (for gyro2gkv)
+
+NETCDF = /usr/local/lib/libnetcdf.a
+NETCDF_INC = /usr/local/include
+
+# Archive 
+
+ARCH = ar cr
+

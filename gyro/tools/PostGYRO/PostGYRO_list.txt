@@ -1,0 +1,61 @@
+list of routines included in "PostGYRO" distribution
+------------------------------------------------------
+inital release: 11-28-2007
+This is a rough "beta" release of the functions- I make no guarantees that these routines are all fully debugged (although I'd be surprised if there were major ones).  Better documentation will follow.  For now, basic usage is to call:
+
+IDL> data = GET_GYRO_DATA('<simdir>')
+
+to create a large IDL object with all the fields (fluctuations and fluxes).  Results can then be plotted with, e.g.
+
+IDL> plot_gyro_midplane_ralpha, data
+
+which will plot potential fluctions at the outboard midplane in the (r,tor. angle) plane at t = n_time/2.
+
+The files should have some header information describing various keywords.
+
+Updates
+-------
+3-3-2009: added sim_version_test routine for checking version of a particular simulation.
+
+i/o files
+----------
+get_gyro_data.pro	     #Returns a structure contating simulation info
+read_gyro_profile_data.pro   #Creates a structure with profile and diffusivity
+			      information
+read_gyro_timevector.pro     #Reads t.out file from a GYRO simulation
+read_gyro_array.pro	     #Reads general array output from a GYRO simulation
+get_iterdb_data.pro	     #Reads in profiles from an iterdb file
+
+plotting routines
+-----------------
+quick_chi_plot.pro	     #Plots chi_i(t) w/o needing <data> structure
+plot_gyro_transpprofile.pro  #Plots time-avg profile of D(r) or chi(r), doesn't
+			      need <data> structure
+plot_gyro_fluxsurfaces.pro   #Plots contours of constant flux
+plot_gyro_rz.pro	     #Plots a fluctuation field in the (R,Z) plane
+plot_gyro_ralpha_midplane.pro #Plots a fluctuation field in the (r,alpha) plane
+
+GYRO utility functions
+----------------------
+gyro_generate_rzcoords.pro   #Generates (R,Z) arrays as functions of (r,theta)
+gyro_ralpha_midplane_transform.pro #Transforms field from f(theta,r,n) to
+				    f(theta=0,r,alpha)
+gyro_rtheta_transform.pro    #Transfroms field from f(theta,r,n) to
+			      f(theta,r,tor. angle = 0)
+gyro_rz_color_contour.pro    #Does a color_contour of a f(theta,r) field in the
+			      (R,Z) plane
+
+basic utility functions
+-----------------------
+calc_corr1d.pro #calcules auto-correlation function
+calc_fspect1d.pro #calculates S(f) = |cross-spectrum|, w/o assuming S(-f)=S(f)
+calc_coherency1d.pro #calculates coherency
+calc_xphase1d.pro #calculates cross-phase
+envelope.pro	#Calculates envelope of 1D signal via Hilbert transform
+exp_fit.pro #fits exponential to input
+gauss_fit2.pro #fits gaussian to input
+default.pro #sets default value of IDL keyword
+colorbar.pro #plots a colorbar for color contour plots
+numtostring.pro #creates a compressed string from a number
+plotlabel.pro #adds label to an idl plot
+color_contour.pro #plots color-contour of 2D data

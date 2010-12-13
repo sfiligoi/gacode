@@ -1,0 +1,125 @@
+#!/usr/bin/env python
+#
+#-------------------------------------------------
+# SCRIPT:
+#  gyro_summary
+#
+# FUNCTION:
+#  Generate compact postscript summary of various
+#  vugyro plots.
+#--------------------------------------------------
+
+import sys
+import os
+import string
+
+n=len(sys.argv)
+
+if n == 1:
+    print "Usage: gyro_summary [-a] [-pdf|-ps]"
+    print 
+    print " -a  : include all ps/eps files in current directory, otherwise"
+    print "       use the files defined in gyro/tools/summary/include."
+    print
+    print " -pdf : create Adobe PDF file."
+    print " -ps  : create postscript file."
+    print
+    print "NOTES : Command must be run in a sim directory."
+    print
+    print "        Result is summary.ps or summary.pdf"
+    sys.exit(0)	
+
+# Copy Latex template, blank figure for missing files,
+# and list of included files to local directory:
+
+os.system("rm -f summary.ps summary.pdf")
+os.system("cp $GYRO_DIR/tools/summary/format.tex sum.tex")
+
+# See if we need to include everything, or just what is defined 
+# in the include file
+if sys.argv[1] == '-a':
+   os.system("ls -1 *.ps > list")
+   os.system("ls -1 *.eps >> list")
+else:
+   os.system("cp $GYRO_DIR/tools/summary/missing.ps .")
+   os.system("cat $GYRO_DIR/tools/summary/include > list")
+
+# Generate customized header and footer
+
+os.system("basename `pwd` > sim_label")
+f = open('sim_label','r')
+line = f.readlines()
+f.close()
+os.system("rm sim_label")
+
+f = open('VERSION_tag','r')
+tag = f.readlines()
+f.close()
+
+f = open('head.tex','w')
+f.write('\\rhead{{\\tt '+string.strip(line[0])+'}}\n')
+f.write('\\lfoot{GYRO '+string.strip(tag[0])+'}\n')
+f.write('\\rfoot{'+string.strip(tag[1])+'}\n')
+f.close()
+
+# Genrate body
+
+f = open('body.tex','w')
+
+# (insert figures)
+
+print "---------------------------------------------------"
+
+n=0 
+for line in open('list','r').readlines():
+    n = 1-n;
+    line = string.strip(line)
+    
+    if os.path.isfile(line) == 1:
+        print "ADDING "+line
+        f.write('\includegraphics[width=\\figsize]{'+line+'}\n')
+    else:
+        print "** MISSING "+line
+        f.write('\includegraphics[width=\\figsize]{missing.ps}\n')
+    
+    if n == 0:
+        f.write('\n')
+
+#f.close()
+print "---------------------------------------------------"
+
+# Generate input data page (two columns)
+
+f.write('\\begin{multicols}{2}')
+f.write('{\small')
+f.write('\\begin{verbatim}')
+
+for line in open('run.out','r').readlines():
+    line = string.strip(line)
+    f.write(line+'\n')
+
+f.write('\\end{verbatim}')
+f.write('}')
+f.write('\\end{multicols}')
+
+f.close()
+
+# Cure underscore problem:
+os.system("cp head.tex temp.tex")
+os.system("sed -e 's:_:\\\\_:g' temp.tex > head.tex")
+
+# Make postscript output
+os.system("latex sum ; dvips -o sum.ps sum")
+os.system("mv sum.ps summary.ps")
+
+if (sys.argv[1] == '-pdf') or (sys.argv[2] == "-pdf"):
+   # Make pdf output
+   os.system("ps2pdf summary.ps")
+   os.system("rm summary.ps")
+
+# Clean up.
+os.system("rm -f sum.* *.tex list missing.ps")
+
+# Now, we are left with a new file, "summary.ps/pdf" 
+# which can be printed.
+

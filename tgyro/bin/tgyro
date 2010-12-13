@@ -1,0 +1,281 @@
+#!/bin/bash
+#=============================================================
+# tgyro
+#
+# PURPOSE:
+#  Top-level script controlling execution of TGYRO.
+#=============================================================
+
+#=============================================================
+# Syntax validity check and help message
+#
+n=$#
+
+if [ $n -eq 0 ]
+then
+  echo
+  echo "Usage:   tgyro [options]"
+  echo
+  echo "         -p <path>"
+  echo "         Set optional path to simulation directory."
+  echo "         The default path is $PWD."
+  echo
+  echo "EXECUTE MODE"
+  echo
+  echo "         -e <simdir>" 
+  echo "         Run TGYRO using input.tgyro data in <simdir>."
+  echo
+  echo "         -n <nproc>" 
+  echo "         Number of cores."
+  echo
+  echo "TEST MODES"
+  echo
+  echo "         -h"  
+  echo "         Version check only."
+  echo
+  echo "         -i <simdir>" 
+  echo "         Minimal sanity test, plus CPU count."
+  echo
+  echo "         -t <simdir>"  
+  echo "         Sanity test for data in <simdir>."
+  echo
+  echo "HALT"
+  echo
+  echo "         -K <simdir>" 
+  echo "         Set non-persistent halt signal in <simdir>."
+  echo 
+  echo "TEMPLATE GENERATION"
+  echo
+  echo "         -g"
+  echo "         List available simulation templates."
+  echo
+  echo "         -g <template>"
+  echo "         Copy <template> into simulation path."
+  echo
+  echo "UTILITY COMMANDS"
+  echo
+  echo "    tgyro_dir: Replicate TGYRO directories."
+
+  exit 1
+fi
+
+#=============================================================
+# Define variables for flag capture
+#
+# Default simulation root directory
+SIMROOT=$PWD
+TGYRO_DIR=$GACODE_ROOT/tgyro
+# Default number of cores
+NPROC=1
+# Execute/test mode flags
+EXEC_FLAG=0
+TEST_FLAG=0
+INIT_FLAG=0
+GENERATE_FLAG=0
+KILL_STATUS=2
+#=============================================================
+
+#=============================================================
+# Parse command line options
+#
+while [ $# -gt 0 ] ; do
+  case "$1" in
+
+  -p) shift ; SIMROOT=$1 ;;
+
+  -e) shift ; LOCDIR=$1 ; EXEC_FLAG=1 ;;
+
+  -t) shift ; LOCDIR=$1 ; TEST_FLAG=1 ;;
+
+  -i) shift ; LOCDIR=$1 ; INIT_FLAG=1 ;;
+
+  -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
+
+  -n) shift ; NPROC=$1 ;;
+
+  -h) tgyro_version_message ; exit 0 ;;
+
+  -l) tgyro_code_lines ; exit 0 ;;
+
+  -K) shift ; KILL_STATUS=1 ; LOCDIR=$1 ;;
+
+  *) echo "ERROR: incorrect gyro syntax." ; exit 1 ;;
+ 
+  esac
+  shift
+done
+#=============================================================
+
+if [ "$LOCDIR" == "." ]
+then
+   SIMDIR=$PWD
+   cd .. ; LODCIR=$PWD
+else
+   SIMDIR=$SIMROOT/$LOCDIR
+fi
+
+RUN_FILE=$SIMDIR/run.out
+LOG_FILE=$SIMDIR/input.tgyro.log
+
+case "$KILL_STATUS" in
+   1) tgyro_sim_kill $SIMDIR 1  ; exit 0 ;;
+esac
+
+#============================================================
+# Check for inconsistent flags:
+FLAG_SUM=$[ $EXEC_FLAG + $TEST_FLAG + $GENERATE_FLAG 
+                       + $INIT_FLAG]
+
+if [ "$FLAG_SUM" -gt 1 ]
+then
+   echo "ERROR: Can only specify one of -e, -t, -g, -i"
+   exit 1
+fi
+#============================================================
+
+#============================================================
+# Generate simdir if -g set, then exit.
+#
+if [ $GENERATE_FLAG -eq 1 ]
+then
+   if [ ! -f "$TGYRO_DIR/tools/input/$LOCDIR/input.tgyro" ]
+   then
+      cat $TGYRO_DIR/tools/input/simdir_list
+   else
+      cp -ai ${TGYRO_DIR}/tools/input/$LOCDIR $SIMDIR
+   fi
+   exit 0
+fi
+#============================================================
+
+#============================================================
+# Everything else must be done in $SIMDIR; so ensure existence 
+# of $SIMDIR (needed at this point) and go there: 
+#
+if ! tgyro_sim_warn $SIMDIR
+then
+   exit 1 
+fi 
+
+cd $SIMDIR
+#============================================================
+
+#==========================================================
+# Version stamp on top of any pre-existing stamp(s):
+#
+touch VERSION_tag
+mv VERSION_tag VERSION_temp
+cat $TGYRO_DIR/VERSION > VERSION_tag 
+echo $GACODE_PLATFORM >> VERSION_tag
+date >> VERSION_tag
+cat VERSION_temp >> VERSION_tag
+rm VERSION_temp
+#==========================================================
+
+#==========================================================
+# Check for "hard halt", otherwise initialize halt file:
+#
+if [ -f halt ] 
+then
+   if [ `cat halt` = "-1" ] 
+   then
+      exit 1
+   fi   
+fi
+echo 0 > halt
+#==========================================================
+
+#==========================================================
+# echo number of tasks, then parse INPUT
+#
+# Machine information
+echo " -----------------------------------------------------------------" > $RUN_FILE
+echo " TGYRO simdir : $simdir" >> $RUN_FILE
+
+rm -f $LOG_FILE
+python $TGYRO_DIR/bin/tgyro_parse.py >> $LOG_FILE
+
+# See if we returned with an error
+if [ $? -eq 1 ]
+then
+   cat $LOG_FILE
+   exit 1;
+fi
+
+# Capture processor counts from file "proc"
+i=0
+for list in $(cat proc) ; do
+   z[$i]=$list
+   (( i += 1 ))
+done
+TPROC=${z[0]} ; EPROC=${z[1]} ; rm proc
+#==========================================================
+
+#==========================================================
+# See if we are using experimental profiles
+
+if [ -f input.profiles ]
+then
+   python $GACODE_ROOT/shared/bin/profile_parse.py input.profiles >> $LOG_FILE
+else
+   # Halt if we are using TRANSPORT_METHOD<3
+   line=`grep TRANSPORT_METHOD input.tgyro.gen`
+   ntr=${line:0:1}
+
+   if [ $ntr -lt 3 ]
+   then
+      echo "ERROR: input.profiles missing."
+      exit 1
+   fi
+fi
+#==========================================================
+
+#===========================================================
+# Control execute, test or initialize:
+
+# Execute:
+
+tgyro_version_message 
+
+if [ $EXEC_FLAG -eq 1 ]
+then
+   if [ $NPROC -ne $EPROC ]
+   then
+       cat $LOG_FILE
+       echo "ERROR: processor count mismatch."
+       exit 1
+   else
+      echo "0" > "$SIMDIR/gyrotest_flag"
+      # Call platform-specific exec file:
+      echo " Passing control to TGYRO executable ..." >> $RUN_FILE
+      $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM $SIMDIR $NPROC $TGYRO_DIR/src/tgyro_main
+      exit 0
+   fi
+fi
+
+# Test:
+if [ $TEST_FLAG -eq 1 ]
+then
+   if [ $NPROC -ne $TPROC ]
+   then
+      cat $LOG_FILE
+      echo "ERROR: processor count mismatch."
+      exit 1
+   else
+      echo "1" > "$SIMDIR/gyrotest_flag"
+      echo " Passing control to TGYRO executable (test mode) ..." >> $RUN_FILE
+      $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM $SIMDIR $NPROC $TGYRO_DIR/src/tgyro_main
+      exit 0
+   fi
+fi
+
+# Init:
+if [ $INIT_FLAG -eq 1 ]
+then 
+   echo "0" > "$SIMDIR/gyrotest_flag"
+   # Send log file to screen (info. mode).
+   cat $LOG_FILE
+   exit 0
+fi
+#===========================================================
+

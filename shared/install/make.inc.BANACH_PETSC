@@ -1,0 +1,35 @@
+#---------------------------------------------------
+# Generic {Pentium M, gfortran}
+#---------------------------------------------------
+
+include ${SLEPC_DIR}/bmake/slepc_common_variables
+
+# Compilers
+
+FC	= mpif90 ${FC_LINKER_FLAGS} -I $(GYRO_DIR)/modules ${FC_INCLUDES}
+F77	= mpif90
+
+FMATH	= -fdefault-real-8 -M $(GYRO_DIR)/modules
+FOPT	= -march=native -mfpmath=sse -fomit-frame-pointer -O3
+FDEBUG	= -O -Wall -Wunderflow -W -Wuninitialized -fbounds-check -ffpe-trap=invalid,zero,overflow
+FPROF	= -march=native -mfpmath=sse -O3 -pg
+
+# System math libraries
+
+LMATH = /opt/LAPACK/liblapack.a \
+        /opt/BLAS/GotoBLAS/libgoto.a \
+        ${SLEPC_LIB}
+
+
+# OPTIONAL NetCDF:
+NETCDF=-L/usr/local/lib -lnetcdf -lnetcdff
+NETCDF_INC=/usr/local/include
+
+# OPTIONAL: GATO FLAGS
+GATOFLAGS=-fdefault-real-8 -fdefault-integer-8 -O0
+
+# Archive 
+
+ARCH = ar cr
+
+

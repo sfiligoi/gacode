@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  tglf_version_message
+#
+# FUNCTION:
+#  Echo version message.
+#------------------------------
+
+echo "====================================================="
+echo "TGLF" `cat $TGLF_DIR/VERSION` `echo $GYRO_PLAT` 
+echo "====================================================="

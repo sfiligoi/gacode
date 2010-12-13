@@ -1,0 +1,28 @@
+#---------------------------------------------------
+# ATLAS (atlas.llnl.gov)
+#---------------------------------------------------
+
+# Compilers and flags
+
+FC	= mpipgf90 -module $(GYRO_DIR)/modules
+F77	= mpipgf90
+
+FMATH	= -r8 
+FOPT	= -fastsse -tp k8-64 
+FDEBUG	= -g -Ktrap=fp -Mbounds -Minform,inform
+FBOUND	= -Minform,inform -Mbounds
+FPROF	= -fastsse -tp k8-64 -Mprof=func
+
+# System math libraries
+
+LMATH = /usr/local/lib/acml/pgi/libacml.a
+
+# OPTIONAL: netCDF (for gyro2gkv)
+
+NETCDF =
+NETCDF_INC =
+
+# Archive 
+
+ARCH = ar cr
+

@@ -1,0 +1,29 @@
+#---------------------------------------------------
+# Generic g95
+#---------------------------------------------------
+
+# Compilers
+
+FC	= mpif90 -I$(GYRO_DIR)/modules -fmod=$(GYRO_DIR)/modules
+F77	= mpif90
+
+FMATH	= -r8 
+FOPT	= 
+FDEBUG	=
+FBOUND	= 
+FPROF	= 
+
+# Libraries
+
+LMATH = /opt/LAPACK/libLAPACK-G95.a \
+       /opt/BLAS/lib/libBLAS-G95.a 
+
+# netCDF (for gyro2gkv)
+
+NETCDF = /opt/netcdf-3.4/lib/libnetcdf.a
+NETCDF_INC = /opt/netcdf-3.4/include
+
+# Some common definitions:
+
+ARCH	= ar cr
+

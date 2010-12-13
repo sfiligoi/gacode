@@ -1,0 +1,113 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  neo
+#
+# PURPOSE:
+#  Toplevel script controlling execution of NEO
+#--------------------------------------------------------------
+
+n=$#
+
+# exit if no arguments
+
+if [ $n -eq 0 ] 
+then
+   cat $TGLF_DIR/bin/HELP
+   exit 1
+fi
+
+# determine if optional path was provided
+
+if [ $n -eq 6 ] 
+then
+   # set simdir to specified path
+   simdir=${6}/${2}
+else 
+   # if not specified on command line, set to default
+      simdir=$TGLF_DIR/sim/${2}
+fi
+if [[ ${1} = "-g" ]] 
+then
+   # special case of only 4 args because -g was specified
+   if [ $n -eq 4 ] 
+   then
+      simdir=${4}
+   fi
+fi
+
+RUN_FILE=$simdir/run.out
+
+case "${1}" in 
+
+   ##############
+   # Utility Mode
+   ##############
+
+   -h* | -H* | --h* | --H* )
+
+      # help
+   
+      cat $TGLF_DIR/bin/HELP ;
+      exit 1 ;;
+
+    -v* | -V* | --v* | --V* ) 
+
+      # version info.
+
+      tglf_version_message ;
+      exit 1 ;;
+
+  ##############
+   # Execute Mode
+   ##############
+
+   -e* | -E* | -i* )
+
+      # define executable directory and CONTINUE
+      
+      tglf_version_message ;
+      tglf_version_message > $RUN_FILE ;
+      if ! tglf_sim_warn $simdir 
+      then
+         exit 1 ;
+      fi ;
+      srcdir=$TGLF_DIR/src ;;
+
+   -g )
+
+      # Generate INPUT file
+  
+      tglf_sim_generate ${2} $simdir;
+      exit 1 ;;
+
+   -* | * )
+
+      # error trap
+
+      cat $TGLF_DIR/bin/HELP ;
+      exit 1 ;;
+
+esac
+
+# Work in simdir
+
+cd $simdir
+
+# Version stamp:
+
+cat $TGLF_DIR/VERSION > VERSION_tag ; date >> VERSION_tag
+
+# Parse data in INPUT
+
+echo "[Parsing data in INPUT]" >> $RUN_FILE
+tglf_parse INPUT >> $RUN_FILE
+
+# Call platform-specific exec file
+
+nproc=1
+$GYRO_DIR/exec/gyro.$GYRO_PLAT $simdir $nproc $srcdir/tglf
+
+exit 1
+
+

@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  gyro.PG_P3
+#
+# FUNCTION:
+#  Query platform information
+#
+# REVISIONS:
+# 30 April 04: jc
+#  Created.
+
+srcdir=${1}
+simdir=${2}
+nproc=${3}
+
+cd $simdir
+  
+mpirun -np $nproc $srcdir/BigScience
+
+

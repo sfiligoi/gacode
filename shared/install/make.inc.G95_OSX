@@ -1,0 +1,40 @@
+#---------------------------------------------------
+# Generic {PowerPC OSX,g95} 
+#---------------------------------------------------
+
+# NOTES:
+# 12 Dec 06: C. Holland
+# - Have built gyro-6.0.2 with g95 binary for PowerPC OS X
+#   (running 10.4.8, dual 2 GHz G4 tower), and mpich2-1.0.3.
+# - configuring mpich2 was somewhat non-trivial; a 
+#   HOWTO writeup is in the works.
+
+# Reset make command
+
+MAKE = make
+
+# Compilers and flags
+
+FC	= mpif90 -I$(GYRO_DIR)/modules -fmod=$(GYRO_DIR)/modules
+F77	= mpif90
+
+FMATH	= -r8
+FOPT	= -O3
+FDEBUG	= -Wall -ftrace=full
+FBOUND	= -Wall -fbounds-check
+FPROF	= 
+
+# System math libraries
+
+LMATH = /System/Library/Frameworks/vecLib.framework/Versions/A/vecLib \
+       -lSystemStubs -lSystem
+
+# OPTIONAL: netCDF (for gyro2gkv)
+
+NETCDF = /sw/lib/libnetcdf.a
+NETCDF_INC = /sw/include
+
+# Archive
+
+ARCH = ar cr
+

@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  tgyro_version_message
+#
+# FUNCTION:
+#  Echo version message.
+#------------------------------
+
+echo "==================================================="
+echo "TGYRO" `cat $GACODE_ROOT/tgyro/VERSION` `echo $GACODE_PLATFORM` `uname -s` `uname -m`
+echo "==================================================="

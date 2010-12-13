@@ -1,0 +1,45 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  gyro_sim_warn
+#
+# FUNCTION:
+#  Check for existence of sim directory
+#-------------------------------------------------------------
+
+if [ $1 = $PWD ]
+  then
+  echo "ERROR: missing simdir"
+  exit 1
+fi
+
+if [ ! -d "$1" ]
+  then
+  echo "ERROR: $1 is not a valid simulation directory."
+  echo "Create the directory first, or use [gyro -g]."
+  exit 1
+fi
+
+if [ ! -f "$1/input.gyro" ]
+  then
+  cp $GACODE_ROOT/gyro/tools/input/reg01/input.gyro $1
+  echo "********************************************************"
+  echo "*                                                      *"
+  echo "*  input.gyro was not found.  One has been created     *"
+  echo "*  for you using the template in reg01.                *"
+  echo "*                                                      *"
+  echo "********************************************************"
+fi
+
+if [ ! -f "$1/restart.dat" ]
+  then
+  cp $GACODE_ROOT/gyro/tools/input/reg01/restart.dat $1 
+  echo "****************************************************"
+  echo "*                                                  *"
+  echo "*  A restart.dat file was not found. One has been  *"
+  echo "*  created for you.                                *"
+  echo "*                                                  *"
+  echo "****************************************************"
+fi
+
+exit 0

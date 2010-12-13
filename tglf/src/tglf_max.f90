@@ -1,0 +1,301 @@
+      SUBROUTINE tglf_max
+!
+      USE tglf_internal_interface
+!
+      IMPLICIT NONE
+      INTEGER,PARAMETER :: nbmax=4
+      LOGICAL :: save_iflux
+      INTEGER :: nt,i,imax,ntm
+      INTEGER :: save_nbasis
+      INTEGER :: igamma,branch
+      REAL :: width_max=1.65
+      REAL :: width_min=0.15
+      REAL :: tp,ta,tb,dt,ga,gb,dg,fm
+      REAL :: t1,t2,tm,g1,g2,gm
+      REAL :: tmax,tmin,gamma_max,gmax
+      REAL :: save_width,dtmin
+      REAL :: dg1,dg2,dgmin
+      REAL :: gamma_n(nt0),freq_n(nt0),width_n(nt0)
+      REAL :: save_gamma_max
+      REAL :: save_vexb_shear,save_vpar_shear
+!
+      if(new_start)CALL tglf_start
+!
+      save_iflux = iflux_in
+      save_nbasis = nbasis_max_in
+      save_width = width_in
+      save_vexb_shear = vexb_shear_in
+      save_vpar_shear = vpar_shear_in
+      vexb_shear_in = 0.0
+      vpar_shear_in = 0.0
+      width_min = width_min_in
+      width_max = ABS(width_in)
+!
+! for ibranch_in > 0 the most unstable positive frequency mode is stored 
+! in gamma_out(1) and the most unstable negative frequency mode 
+! (ion diamagnetic drift direction) is stored in gamma_out(2)
+! for ibranch_in = -1 the unstable modes in rank order are stored in
+! gamma_out(i) i=1,nmodes_in
+!
+      if(ibranch_in.gt.0)branch = ibranch_in
+      if(ibranch_in.eq.-1)branch = 1
+      iflux_in=.FALSE.
+      if(nbasis_min_in.ne.0)then
+        nbasis_max_in = nbasis_min_in
+      endif
+!       write(*,*)"nbasis_max_in = ",nbasis_max_in
+      tmin=LOG10(width_min)
+      tmax=LOG10(width_max)
+      nt=nwidth_in
+      dtmin=(tmax-tmin)/REAL(nt-1)
+      if(use_bisection_in)nt=5
+!
+!      open(2,file = 'width.dat',status='unknown')
+      dt = (tmax-tmin)/REAL(nt-1)
+      tp = tmin
+      do i=1,nt
+       tp = tmin + REAL(i-1)*dt
+       width_in = 10.0**tp
+!       write(*,*)"width_in = ",width_in
+       new_width = .TRUE.
+       call tglf_LS
+       if(ibranch_in.eq.0)then
+        branch = 1
+        if(gamma_out(2).gt.gamma_out(1))branch = 2
+       endif
+!       write(*,*)i,width_in,gamma_out(branch),freq_out(branch)
+       width_n(i)=width_in
+       gamma_n(i) = gamma_out(branch)
+       freq_n(i) = freq_out(branch)
+      enddo
+!      close(2)
+! find the global maximum
+      gamma_max=gamma_n(nt)
+      imax=nt
+      do i=nt-1,1,-1
+        if(gamma_n(i).gt.gamma_max)then
+          gamma_max=gamma_n(i)
+          imax=i
+        endif
+!        write(*,*)"debug",i,imax,gamma_max,gamma_n(i)
+      enddo
+      width_in = width_n(imax)
+!
+      if(use_bisection_in.and.gamma_max.gt.0.0)then
+!
+! use bounded bisection search to refine width
+!
+         if(imax.eq.1)then
+! maximum is against bottom width
+           g1 = gamma_n(1)
+           t1 = tmin
+           g2 = gamma_n(2)
+           t2 = LOG10(width_n(2))
+           tp = (t2+t1)/2.0    
+           width_in = 10.0**tp
+           new_width = .TRUE.
+           call tglf_LS
+           if(ibranch_in.eq.0)then
+            branch = 1
+            if(gamma_out(2).gt.gamma_out(1))branch = 2
+           endif
+           gm = gamma_out(branch)
+           tm = tp
+         elseif(imax.eq.nt)then
+! maximum is against top width
+           g1 = gamma_n(nt-1)
+           t1 = LOG10(width_n(nt-1))
+           g2 = gamma_n(nt)
+           t2 = tmax           
+           tp = (t2+t1)/2.0    
+           width_in = 10.0**tp
+           new_width = .TRUE.
+           call tglf_LS
+           if(ibranch_in.eq.0)then
+             branch = 1
+            if(gamma_out(2).gt.gamma_out(1))branch = 2
+           endif
+           gm = gamma_out(branch)
+           tm = tp
+         else
+! maximum is away from boundaries
+           g1 = gamma_n(imax-1)
+           t1 = LOG10(width_n(imax-1))
+           g2 = gamma_n(imax+1)
+           t2 = LOG10(width_n(imax+1))
+           gm = gamma_n(imax)
+           tm = LOG10(width_n(imax))
+         endif
+! start bisection search
+         dt=(t2-t1)/2.0
+!         write(*,*)"dtmin=",dtmin,"tmin=",tmin,"tmax=",tmax
+         do while(dt.gt.dtmin)
+           dt=dt/2.0
+           gmax = MAX(gm,MAX(g1,g2))
+!           write(*,*)"dt=",dt,gmax
+!           write(*,*)g1,gm,g2
+!           write(*,*)t1,tm,t2
+!
+           if(g1.eq.gmax)then  
+             if(t1.gt.tmin)then
+! shift past t1 and compute new g1,t1 
+               tp = t1-dt
+               width_in = 10.0**tp
+               new_width = .TRUE.
+               call tglf_LS
+               if(ibranch_in.eq.0)then
+                 branch = 1
+                 if(gamma_out(2).gt.gamma_out(1))branch = 2
+               endif
+               tm = t1
+               gm = g1
+               g1 = gamma_out(branch)
+               t1 = tp
+! compute new g2,t2
+               tp = tm+dt
+               width_in = 10.0**tp
+               new_width = .TRUE.
+               call tglf_LS
+               if(ibranch_in.eq.0)then
+                 branch = 1
+                 if(gamma_out(2).gt.gamma_out(1))branch = 2
+               endif
+               g2 = gamma_out(branch)
+               t2 = tp
+             else   ! t1 at tmin
+! shrink towards t1
+               tp = t1 + dt
+               width_in = 10.0**tp
+               new_width = .TRUE.
+               call tglf_LS
+               if(ibranch_in.eq.0)then
+                 branch = 1
+                 if(gamma_out(2).gt.gamma_out(1))branch = 2
+               endif
+               g2 = gm
+               t2 = tm
+               gm = gamma_out(branch)
+               tm = tp               
+             endif
+           elseif(g2.eq.gmax)then
+             if(t2.lt.tmax)then
+! shift past t2 and compute new g2,t2
+               tp = t2 + dt
+               width_in = 10.0**tp
+               new_width = .TRUE.
+               call tglf_LS
+               if(ibranch_in.eq.0)then
+                 branch = 1
+                 if(gamma_out(2).gt.gamma_out(1))branch = 2
+               endif
+               gm = g2
+               tm = t2
+               g2 = gamma_out(branch)
+               t2 = tp
+! compute new g1,t1
+               tp = tm - dt
+               width_in = 10.0**tp
+               new_width = .TRUE.
+               call tglf_LS
+               if(ibranch_in.eq.0)then
+                 branch = 1
+                 if(gamma_out(2).gt.gamma_out(1))branch = 2
+               endif
+               g1 = gamma_out(branch)
+               t1 = tp
+             else  ! t2 at tmax 
+! shrink towards t2
+               tp = t2 - dt
+               width_in = 10.0**tp
+               new_width = .TRUE.
+               call tglf_LS
+               if(ibranch_in.eq.0)then
+                 branch = 1
+                 if(gamma_out(2).gt.gamma_out(1))branch = 2
+               endif
+               g1 = gm
+               t1 = tm
+               gm = gamma_out(branch)
+               tm = tp               
+             endif
+           else  ! gm.eq.gmax
+! compute new g1,t1 and g2,t2 closer to gm,tm
+             tp = tm - dt
+             width_in = 10.0**tp
+             new_width = .TRUE.
+             call tglf_LS
+             if(ibranch_in.le.0)then
+               branch = 1
+               if(gamma_out(2).gt.gamma_out(1))branch = 2
+             endif
+             g1 = gamma_out(branch)
+             t1 = tp
+!
+             tp = tm + dt
+             width_in = 10.0**tp
+             new_width = .TRUE.
+             call tglf_LS
+             if(ibranch_in.eq.0)then
+               branch = 1
+               if(gamma_out(2).gt.gamma_out(1))branch = 2
+             endif
+             g2 = gamma_out(branch)
+             t2 = tp
+           endif           
+         enddo  ! end of bisection search main loop
+! find final maximum
+         gmax=gm
+         tp=tm
+         if(g1.gt.gmax)then
+          gmax=g1
+          tp=t1
+         endif
+         if(g2.gt.gmax)then
+          gmax=g2
+          tp=t2
+         endif
+         gamma_max = gmax
+         width_in = 10.0**tp        
+      endif ! done with bisection search
+!      write(*,*)"gamma_max=",gamma_max
+       gamma_reference_GQ = gamma_max
+       gamma_nb_min_out = get_gamma_net(gamma_max)
+       if(gamma_nb_min_out.eq.0.0)gamma_max=0.0
+!
+       if(gamma_max.ne.0.0)then
+! refine eigenvalue with more basis functions
+         vexb_shear_in = save_vexb_shear
+         vpar_shear_in = save_vpar_shear
+         nbasis_max_in=save_nbasis
+!         write(*,*)"nbasis=",nbasis_max_in
+         iflux_in=save_iflux
+         new_width=.TRUE.
+         call tglf_LS
+         if(ibranch_in.le.0)then
+            branch = 1
+            if(gamma_out(2).gt.gamma_out(1))branch = 2
+         endif
+         gamma_max = gamma_out(branch)
+!
+!        write(*,*)" maximum gamma for nbasis = ",nbasis_max_in
+!        write(*,*)"gamma_out(1) = ",gamma_out(1)
+!        write(*,*)"freq_out(1) = ",freq_out(1)
+!        write(*,*)"gamma_out(2) = ",gamma_out(2)
+!        write(*,*)"freq_out(2) = ",freq_out(2)
+!        gamma_n(igamma)=gamma_out(branch)
+!        freq_n(igamma) = freq_out(branch)
+       endif
+!
+       if(gamma_max.eq.0.0)then
+         width_in=save_width
+         do i=1,nmodes_in
+          gamma_out(i)=0.0
+         enddo
+       endif
+!
+       nbasis_max_in=save_nbasis
+       iflux_in=save_iflux
+       vexb_shear_in = save_vexb_shear
+       vpar_shear_in = save_vpar_shear
+!
+      END SUBROUTINE tglf_max   

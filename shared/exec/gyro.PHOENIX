@@ -1,0 +1,18 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  gyro.PHOENIX
+#
+# FUNCTION:
+#  Parallel execution script
+
+simdir=${1}
+nproc=${2}
+exec=${3}
+  
+cd $simdir
+
+#pat_hwpc aprun -n $nproc $exec
+aprun -n $nproc $exec
+
+

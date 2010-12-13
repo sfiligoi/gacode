@@ -1,0 +1,68 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  queue_go.ATLAS
+#
+# FUNCTION:
+#  Batch generator for atlas.llnl.gov
+
+nproc=${1}
+queue_num=${2}
+sim=${3}
+simpath=${4}
+code=${5}
+
+# Lets assume we are in coprocessor mode
+
+nodes=`expr $nproc / 8`
+
+case "$queue_num" in
+
+   1 )
+
+      queue="debug" ;
+      time="60" ;; 
+
+  2)
+
+      queue="debug" ;
+      time="240" ;;
+
+  3 )
+
+      queue="debug" ;
+      time="720" ;;
+
+ 4 )
+
+      queue="debug" ;
+      time="1440" ;;
+
+esac
+
+bfile=$simpath/$sim/batch.src
+
+echo "Output written to $bfile"
+ 
+# Copy appropriate commands to batch directory:
+
+echo "#PSUB -c atlas" > $bfile
+echo "#PSUB -o $simpath/$sim/batch.out" >> $bfile
+echo "#PSUB -e $simpath/$sim/batch.err" >> $bfile
+echo "#PSUB -r $sim" >> $bfile
+echo "#PSUB -ln $nodes" >> $bfile
+echo "#PSUB -tM $time" >> $bfile
+
+# Submit to queue?
+
+echo "$code -e $sim -n $nproc -p $simpath" >> $bfile 
+
+echo "Submit your job [y,n]?"
+   
+read submit
+   
+if [ "$submit" = "y" ] ; then
+   psub $bfile
+fi
+
+exit 1

@@ -1,0 +1,32 @@
+#---------------------------------------------------
+# Generic {core2, gfortran}
+#---------------------------------------------------
+
+export TAU_MAKEFILE=/opt/tau-2.17.1/x86_64/lib/Makefile.tau-callpath-mpi-pdt
+#export TAU_OPTIONS=-optPdtGnuFortranParser -optKeepFiles -optVerbose
+export TAU_OPTIONS=-optKeepFiles -optVerbose
+
+# Compilers
+
+FC	= tau_f90.sh -I $(GYRO_DIR)/modules -I/usr/local/include
+F77	= tau_f90.sh -I/usr/local/include
+
+FMATH	= -fdefault-real-8 -M $(GYRO_DIR)/modules 
+FOPT	= -march=native -mfpmath=sse -fomit-frame-pointer -O3
+FDEBUG	= -O -Wall -Wunderflow -W -Wuninitialized -fbounds-check
+FPROF	= -march=native -mfpmath=sse -O3 -pg
+
+# System math libraries
+
+LMATH = /opt/LAPACK/liblapack.a \
+        /opt/BLAS/GotoBLAS/libgoto.a
+
+# OPTIONAL: netCDF (for gyro2gkv)
+
+NETCDF = /usr/local/lib/libnetcdf.a
+NETCDF_INC = /usr/local/include
+
+# Archive 
+
+ARCH = ar cr
+

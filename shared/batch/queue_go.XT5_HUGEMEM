@@ -1,0 +1,85 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  queue_go.XT5
+#
+# FUNCTION:
+#  Batch generator for JAGUARPF partition (Cray XT5 system)
+
+#---------------------------
+# Set to desired repository:
+repo=${GYRO_REPO:-FUS023JC}
+#---------------------------
+
+nproc=${1}
+queue_num=${2}
+sim=${3}
+simpath=${4}
+code=${5}
+nodes=${nproc}
+
+case "$queue_num" in
+
+   1 )
+
+      queue="batch" ;
+      limit="1:00:00" ;;
+
+   2 )
+
+      queue="batch" ;
+      limit="2:00:00" ;;
+
+   3 )
+
+      queue="batch" ;
+      limit="4:00:00" ;;
+
+   4 )
+
+      queue="batch" ;
+      limit="12:00:00" ;;
+
+   5 )
+
+      queue="batch" ;
+      limit="24:00:00" ;;
+
+esac
+
+bfile=$simpath/$sim/batch.src
+
+echo "Output written to $bfile"
+ 
+# Copy appropriate commands to batch directory:
+
+# Specify job name
+echo "#PBS -N $sim" > $bfile
+# Account to charge
+echo "#PBS -A $repo" >> $bfile
+# STDIO
+echo "#PBS -o $simpath/$sim/batch.out" >> $bfile
+# STDERR
+echo "#PBS -e $simpath/$sim/batch.err" >> $bfile
+# Queue name
+echo "#PBS -q $queue" >> $bfile
+# Max wall-clock time and number of compute cores
+echo "#PBS -l walltime=$limit,size=$nodes" >> $bfile
+echo "cd \${PBS_O_WORKDIR}" >> $bfile
+echo "date" >> $bfile
+# Enable 2MB pages
+echo "export HUGETLB_MORECORE=yes" >> $bfile
+## Node information
+## Try running 'checkjob <jobid>' command
+#echo "/sw/xt5/bin/nodeinfo" >> $bfile
+echo "$code -e $sim -n $nproc -p $simpath" >> $bfile 
+
+echo "Submit your job [y,n]?"
+   
+read submit
+   
+if [ "$submit" = "y" ] ; then
+   qsub $bfile
+fi
+
+exit 1

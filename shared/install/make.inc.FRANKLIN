@@ -1,0 +1,34 @@
+#---------------------------------------------------
+# Cray XT4 (franklin.nersc.gov) 
+#---------------------------------------------------
+
+#include ${SLEPC_DIR}/bmake/slepc_common_variables
+
+# Compilers and flags
+
+FC	= ftn ${FC_LINKER_FLAGS} -module $(GYRO_DIR)/modules ${FC_INCLUDES}
+F77	= ftn
+
+FMATH	= -r8 
+FOPT	= -fastsse  
+FDEBUG	= -g -Ktrap=fp -Mbounds -Minform,inform
+FBOUND	= -Minform,inform -Mbounds
+FPROF	= -fastsse -Mprof=func
+
+# System math libraries
+
+LMATH = /opt/fftw/2.1.5/cnos/lib/libdrfftw.a \
+        /opt/fftw/2.1.5/cnos/lib/libdfftw.a 
+#        ${SLEPC_LIB}
+
+# OPTIONAL: netCDF (for gyro2gkv)
+
+NETCDF = /usr/common/usg/netcdf/default/lib/libnetcdf.a
+NETCDF_INC = /usr/common/usg/netcdf/default/include
+
+# Archive 
+
+GATOFLAGS = -r8 -i8
+
+ARCH = ar cr
+

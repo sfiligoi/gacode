@@ -1,0 +1,12 @@
+do_nlfft_p.o : do_nlfft_p.stub.f90
+	$(FC) $(FMATH) $(FFLAGS) -o do_nlfft_p.o -c do_nlfft_p.stub.f90
+do_nlfft_match.o : do_nlfft_match.stub.f90
+	$(FC) $(FMATH) $(FFLAGS) -o do_nlfft_match.o -c do_nlfft_match.stub.f90
+mumps_private.o : mumps_private.mumps.f90
+	$(FC) $(FMATH) $(FFLAGS) -I/opt/MUMPS_4.3/include -o mumps_private.o -c mumps_private.mumps.f90
+sparse_solve_mumps.o : sparse_solve_mumps.mumps.f90
+	$(FC) $(FMATH) $(FFLAGS) -I/opt/MUMPS_4.3/include -o sparse_solve_mumps.o -c sparse_solve_mumps.mumps.f90
+cleanup_mumps.o : cleanup_mumps.mumps.f90
+	$(FC) $(FMATH) $(FFLAGS) -I/opt/MUMPS_4.3/include -o cleanup_mumps.o -c cleanup_mumps.mumps.f90
+EIGEN_do.o : EIGEN_do.stub.f90
+	$(FC) $(FMATH) $(FFLAGS) -o EIGEN_do.o -c EIGEN_do.stub.f90

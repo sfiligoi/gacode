@@ -1,0 +1,109 @@
+Standard neoclassical templates:
+
+ ade_c1              GA standard case 
+                     - ions, adiabtic electrons
+                     - s-alpha geometry
+                     - Connor collisions
+ 
+ ade_c2              GA standard case
+                     - ions, adiabtic electrons
+                     - s-alpha geometry
+                     - HS0 collisions
+
+ ade_c3              GA standard case
+                     - ions, adiabtic electrons
+                     - s-alpha geometry
+                     - HS collisions
+ 
+ gke_c1              GA standard case
+                     - ions, electrons
+                     - s-alpha geometry
+                     - Connor collisions
+ 
+ gke_c2              GA standard case
+                     - ions, electrons
+                     - s-alpha geometry
+                     - HS0 collisions
+
+ gke_c3              GA standard case
+                     - ions, electrons
+                     - s-alpha geometry
+                     - HS collisions
+
+ imp_c1              GA standard case
+                     - ions, electrons, carbon
+                     - s-alpha geometry
+                     - Connor collisions
+ 
+ imp_c2              GA standard case
+                     - ions, electrons, carbon
+                     - s-alpha geometry
+                     - HS0 collisions
+
+ imp_c3              GA standard case
+                     - ions, electrons, carbon
+                     - s-alpha geometry
+                     - HS collisions
+
+ ade_miller          GA standard case
+                     - ions, adiabtic electrons
+                     - Miller shaped geometry
+                     - HS0 collisions
+ 
+ rot_ade             GA standard case w/ small r/a
+                     - ions, adiabtic electrons
+                     - s-alpha geometry
+                     - Connor collisions
+                     - strong rotation effects w/ zero shear
+     
+ rot_ade_shear       GA standard case w/ small r/a
+                     - ions, adiabtic electrons
+                     - s-alpha geometry
+                     - Connor collisions
+                     - strong rotation effects w/ non-zero shear
+
+ exp_miller_norot    Experimental profiles case
+                     - ions, carbon, electrons
+                     - Miller shaped geometry
+                     - HS0 collisions
+
+ exp_miller_rot      Experimental profiles case
+                     - ions, carbon, electrons
+                     - Miller shaped geometry
+                     - HS0 collisions
+                     - strong rotation effects
+
+ exp_geo_norot       Experimental profiles case
+                     - ions, carbon, electrons
+                     - General shaped geometry
+                     - HS0 collisions
+
+ exp_geo_rot         Experimental profiles case
+                     - ions, carbon, electrons
+                     - General shaped geometry
+                     - HS0 collisions
+
+ exp_geo_rot_multir  Experimental profiles case @ multiple radii
+                     - ions, carbon, electrons
+                     - General shaped geometry
+                     - HS0 collisions
+
+Higher-order templates:
+
+ fow_ade             Satake case
+                     - ions, adiabatic electrons
+                     - s-alpha geometrty
+                     - Connor collisions
+                     - finite-orbit-width effects
+
+ fow_exp_ade         Experimental profiles case
+                     - ions, adiabatic electrons
+                     - General shaped geometrty
+                     - HS0 collisions
+                     - finite-orbit-width effects
+
+ fow_exp_imp         Experimental profiles case
+                     - ions, carbon, electrons
+                     - General shaped geometrty
+                     - HS0 collisions
+                     - finite-orbit-width effects

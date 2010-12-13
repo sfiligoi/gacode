@@ -1,0 +1,30 @@
+gyro_bdoubleave.o : gyro_bdoubleave.f90
+	$(FC) $(FMATH) -Oinlinefrom=${GYRO_DIR}/math/i0.f $(FFLAGS) -c gyro_bdoubleave.f90
+gyro_ave.o : gyro_ave.f90
+	$(FC) $(FMATH) -Oinlinefrom=${GYRO_DIR}/math/j0y0.f $(FFLAGS) -c gyro_ave.f90
+get_field_interpolation.o : get_field_interpolation.f90
+	$(FC) $(FMATH) -Oinlinefrom=${GYRO_DIR}/BLEND $(FFLAGS) -c get_field_interpolation.f90
+get_ampere_coll.o : get_ampere_coll.f90
+	$(FC) $(FMATH) -Oinlinefrom=${GYRO_DIR}/BLEND $(FFLAGS) -c get_ampere_coll.f90
+read_restart.o : read_restart.mpiio.f90
+	$(FC) $(FMATH) $(FFLAGS) -o read_restart.o -c read_restart.mpiio.f90
+write_restart.o : write_restart.mpiio.f90
+	$(FC) $(FMATH) $(FFLAGS) -o write_restart.o -c write_restart.mpiio.f90
+make_nl.o : make_nl.libsci.f90
+	$(FC) $(FMATH) $(FFLAGS) -o make_nl.o -c make_nl.libsci.f90
+do_nlfast_p.o : do_nlfast_p.X1E.f90
+	$(FC) $(FMATH) $(FFLAGS) -o do_nlfast_p.o -c do_nlfast_p.X1E.f90
+do_nlfast_match.o : do_nlfast_match.X1E.f90
+	$(FC) $(FMATH) $(FFLAGS) -o do_nlfast_match.o -c do_nlfast_match.X1E.f90
+do_nlfft_p.o : do_nlfft_p.libsci.f90
+	$(FC) $(FMATH) $(FFLAGS) -o do_nlfft_p.o -c do_nlfft_p.libsci.f90
+do_nlfft_match.o : do_nlfft_match.libsci.f90
+	$(FC) $(FMATH) $(FFLAGS) -o do_nlfft_match.o -c do_nlfft_match.libsci.f90
+mumps_private.o : mumps_private.mumps.f90
+	$(FC) $(FMATH) $(FFLAGS)  -I/apps/MUMPS/4.3/x1_pe5505/include -o mumps_private.o -c mumps_private.mumps.f90
+sparse_solve_mumps.o : sparse_solve_mumps.mumps.f90
+	$(FC) $(FMATH) $(FFLAGS)  -I/apps/MUMPS/4.3/x1_pe5505/include -o sparse_solve_mumps.o -c sparse_solve_mumps.mumps.f90
+cleanup_mumps.o : cleanup_mumps.mumps.f90
+	$(FC) $(FMATH) $(FFLAGS) -I/apps/MUMPS/4.3/x1_pe5505/include -o cleanup_mumps.o -c cleanup_mumps.mumps.f90
+EIGEN_do.o : EIGEN_do.stub.f90
+	$(FC) $(FMATH) $(FFLAGS) -o EIGEN_do.o -c EIGEN_do.stub.f90

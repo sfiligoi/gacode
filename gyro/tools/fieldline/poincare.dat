@@ -1,0 +1,8 @@
+"/home/candy/gyro/sim/L2-std/"
+5000		Number of field line turns
+48		Number of integrator steps per turn
+25		Number of initial conditions
+100		GYRO time slice to integrate
+0		Number of radial modes to decimate
+0		Number of toroidal modes to decimate
+0.045		Stochasticity parameter scaling factor

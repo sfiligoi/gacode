@@ -1,0 +1,147 @@
+!-----------------------------------------------------------
+! gyro_run.f90
+!
+! PURPOSE:
+!  Manage call to local GYRO simulation.
+!---------------------------------------------------------
+
+subroutine gyro_run(&
+     test_flag_in,&
+     restart_method_in,&
+     transport_method_in,&
+     status_out,&
+     message_out)
+
+  use gyro_globals
+  use gyro_interface
+
+  implicit none
+
+  integer :: i_ion
+
+  include 'mpif.h'
+
+  ! Input parameters (IN) - REQUIRED
+  integer, intent(in)             :: test_flag_in
+  integer, intent(in)             :: restart_method_in
+  integer, intent(in)             :: transport_method_in
+
+  ! Input parameters (OUT) - REQUIRED
+  integer,          intent(inout) :: status_out
+  character(len=*), intent(inout) :: message_out
+
+  ! Local variables
+  integer                         :: n_start
+  integer                         :: n_ave
+  integer                         :: err
+  real, parameter                 :: f_ave = 0.9
+
+  interface
+     subroutine gyro_do(skipinit)
+       integer, optional :: skipinit
+     end subroutine gyro_do
+  end interface
+
+  ! Set corresponding global variables
+  gyrotest_flag    = test_flag_in
+  restart_method   = restart_method_in
+  transport_method = transport_method_in
+
+  ! NOTE:
+  !   (1) ion temperature information is currently automatically equated below
+  !       only if 'undefined' (referring to DLNTDR_2=3.0, DLNTDR_3=3.0,
+  !       TI_OVER_TE_2=1.0, and TI_OVER_TE_3=1.0, respectively)
+  !   (2) ion species temperature information can be explicitly set by setting
+  !       the values for the appropriate variables thus overriding the default
+  !       behavior
+
+  ! Set Tz = Ti for all ion species
+  if (gyro_ni_over_ne_2_in == 0.0) then
+     gyro_dlntdr_2_in = gyro_dlntdr_in
+     gyro_ti_over_te_2_in = gyro_ti_over_te_in
+  endif
+  if (gyro_ni_over_ne_3_in == 0.0) then
+     gyro_dlntdr_3_in = gyro_dlntdr_in
+     gyro_ti_over_te_3_in = gyro_ti_over_te_in
+  endif
+
+  ! Map INTERFACE parameters -> GLOBAL variables
+  call map_interface2global
+
+  ! Run GYRO
+  call gyro_do
+
+  ! Get output information
+
+  status_out  = gyro_exit_status
+  message_out = gyro_exit_message
+
+  ! Running in test mode
+  if (gyrotest_flag == 1) then
+     return
+  endif
+
+  ! GYRO failed
+  if (gyro_exit_status == 1) then
+     return
+  endif
+
+  if (i_proc == 0 .and. transport_method == 2) then
+
+     n_start = max(int((1.0-f_ave)*data_step),1)
+
+     n_ave = data_step+2-n_start
+
+     if (electron_method == 2) then
+        ! Gamma_e/Gamma_GB
+        gyro_elec_pflux_out = &
+             sum(gbflux_vec(indx_e,1:n_field,1,n_start:data_step+1))/n_ave
+        ! Q_e/Q_GB
+        gyro_elec_eflux_out = &
+             sum(gbflux_vec(indx_e,1:n_field,2,n_start:data_step+1))/n_ave
+        ! Pi_e/Pi_GB
+        gyro_elec_mflux_out = &
+             sum(gbflux_vec(indx_e,1:n_field,3,n_start:data_step+1))/n_ave
+        ! H_e/H_GB
+        gyro_elec_expwd_out = &
+             sum(gbflux_vec(indx_e,1:n_field,4,n_start:data_step+1))/n_ave
+     endif
+
+     do i_ion=1,n_ion
+
+        ! Gamma_i/Gamma_GB
+        gyro_ion_pflux_out(i_ion) = &
+             sum(gbflux_vec(i_ion,1:n_field,1,n_start:data_step+1))/n_ave
+        ! Q_i/Q_GB
+        gyro_ion_eflux_out(i_ion) = &
+             sum(gbflux_vec(i_ion,1:n_field,2,n_start:data_step+1))/n_ave
+        ! Pi_i/Pi_GB
+        gyro_ion_mflux_out(i_ion) = &
+             sum(gbflux_vec(i_ion,1:n_field,3,n_start:data_step+1))/n_ave
+        ! H_i/H_GB
+        gyro_ion_expwd_out(i_ion) = &
+             sum(gbflux_vec(i_ion,1:n_field,4,n_start:data_step+1))/n_ave
+
+     enddo
+
+  endif
+
+  ! Electrons
+  call MPI_BCAST(gyro_elec_pflux_out, 1, MPI_DOUBLE_PRECISION, 0, GYRO_COMM_WORLD, err)
+  call MPI_BCAST(gyro_elec_eflux_out, 1, MPI_DOUBLE_PRECISION, 0, GYRO_COMM_WORLD, err)
+  call MPI_BCAST(gyro_elec_mflux_out, 1, MPI_DOUBLE_PRECISION, 0, GYRO_COMM_WORLD, err)
+  call MPI_BCAST(gyro_elec_expwd_out, 1, MPI_DOUBLE_PRECISION, 0, GYRO_COMM_WORLD, err)
+
+  ! Ions
+  call MPI_BCAST(gyro_ion_pflux_out, n_ion, MPI_DOUBLE_PRECISION, 0, GYRO_COMM_WORLD, err)
+  call MPI_BCAST(gyro_ion_eflux_out, n_ion, MPI_DOUBLE_PRECISION, 0, GYRO_COMM_WORLD, err)
+  call MPI_BCAST(gyro_ion_mflux_out, n_ion, MPI_DOUBLE_PRECISION, 0, GYRO_COMM_WORLD, err)
+  call MPI_BCAST(gyro_ion_expwd_out, n_ion, MPI_DOUBLE_PRECISION, 0, GYRO_COMM_WORLD, err)
+
+  call gyro_cleanup
+
+  if (debug_flag == 1 .and. i_proc == 0) then
+     print *, '[gyro_run done]'
+  endif
+
+end subroutine gyro_run

@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  gyro_version_message
+#
+# FUNCTION:
+#  Echo version message.
+#------------------------------
+
+echo "=========================================================="
+echo "GYRO" `cat $GACODE_ROOT/gyro/VERSION` `echo $GACODE_PLATFORM` `uname -s` `uname -m`
+echo "=========================================================="

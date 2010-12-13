@@ -1,0 +1,29 @@
+#---------------------------------------------------
+# Generic {Pentium M, gfortran}
+#---------------------------------------------------
+
+# Compilers
+
+FC	= mpif90 -I $(GACODE_ROOT)/modules 
+F77	= mpif90
+
+FMATH	= -fdefault-real-8 -M $(GACODE_ROOT)/modules
+FOPT	= -march=native -mfpmath=sse -fomit-frame-pointer -O3
+FDEBUG	= -O -Wall -Wunderflow -W -Wuninitialized -fbounds-check -ffpe-trap=invalid,zero,overflow
+FPROF	= -march=native -mfpmath=sse -O3 -pg
+
+# System math libraries
+
+LMATH = /opt/LAPACK/liblapack.a \
+        /opt/BLAS/GotoBLAS/libgoto.a
+
+
+# OPTIONAL NetCDF:
+NETCDF=-L/usr/local/lib -lnetcdf -lnetcdff
+NETCDF_INC=/usr/local/include
+
+# Archive 
+
+ARCH = ar cr
+
+

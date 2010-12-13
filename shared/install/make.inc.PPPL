@@ -1,0 +1,45 @@
+#---------------------------------------------------
+# PPPL Systems (kestrel, kite and kruskal) 
+#               with Intel Compuler and OpenMPI
+#---------------------------------------------------
+# L. Peterson (jpeterso@pppl.gov)
+# D. Mikkelsen (mikk@pppl.gov)
+
+# Compilers (intel) and flags 
+
+FC	= mpif90 -mod $(GYRO_DIR)/modules -I $(GYRO_DIR)/modules
+F77	= mpif90
+
+FMATH	= -r8
+FOPT	= -vec-report0 -shared-intel
+FDEBUG	= -warn all -shared-intel -check all -g
+FBOUND	= 
+FPROF	= -pg
+
+# Need the following modules, in this order:
+# module load intel
+# module load openmpi/1.4.1
+# module load acml
+# module load fftw/2.1.5
+
+# System math libraries
+
+LAPACK = ${ACML_HOME}/ifort64/lib/libacml.a
+LMATH = $(LAPACK) \
+        ${FFTWHOME}/lib/librfftw.a \
+        ${FFTWHOME}/lib/libfftw.a \
+        ${ACML_HOME}/ifort64/lib/libimf.a \
+
+# OPTIONAL: netCDF (for gyro2gkv)
+# 'module load netcdf/4.0.1' first
+
+NETCDF = ${NETCDFHOME}/lib/libnetcdff.a ${NETCDFHOME}/lib/libnetcdf.a
+NETCDF_INC = ${NETCDFHOME}/include
+
+# OPTIONAL: GATO FLAGS
+GATOFLAGS = -r8 -i8
+
+# Archive
+
+ARCH = ar cr
+

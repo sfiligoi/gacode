@@ -1,0 +1,16 @@
+EXECUTE MODE:
+
+      tglf -e <dir>
+
+      -e   Run NEO in execute mode.
+
+      <dir>     Simulation directory.
+ 
+UTILITY MODE:
+
+      tglf [OPTION]
+
+      -v   Version and platform information.
+
+      -h   This message.
+

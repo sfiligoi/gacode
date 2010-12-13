@@ -1,0 +1,36 @@
+#!/bin/sh
+# 
+# SCRIPT:
+#  gyro_reg_do
+#
+# PURPOSE:
+#  Run through full suite of GYRO regression tests
+#----------------------------------------------------
+
+n=$#
+
+if [ $n -eq 0 ] 
+then
+  echo "ERROR: Need to set number of CPUs."
+  exit 1
+fi
+
+# Define list of test directories:
+
+n_proc=${1}
+
+list="reg01 reg02 reg03 reg04 reg05 reg06 reg07 reg08 reg09 reg10 reg11 reg12 reg13 reg14 reg15 reg16 reg17 reg18 reg19 reg20 eig01 eig02 gkeig01"
+
+echo "REGRESSION TESTING: $list"
+
+testdir=$PWD/gyro_regression_test
+mkdir $testdir
+cd $testdir
+
+for sim in $list
+do 
+   gyro -g $sim -p $testdir > out
+   rm -f $sim/error.out $sim/prec.out $sim/CVS
+   gyro -e $sim -n $n_proc -p $testdir > out
+   gyro_reg $sim
+done

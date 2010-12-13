@@ -1,0 +1,31 @@
+#---------------------------------------------------
+# Generic {P4,Portland Group,FFTW}  
+#---------------------------------------------------
+
+# Compilers
+
+FC	= mpif90 -module $(GYRO_DIR)/modules
+F77	= mpif90
+
+FMATH	= -r8
+FOPT	= -fast -tp p6
+FDEBUG	= -fast -tp p6 -g -Ktrap=fp -Mbounds -Minform,inform
+FBOUND	= -Minform,inform -Mbounds
+FPROF	= -fast -tp p6 -Mprof=lines
+
+# Libraries
+
+LMATH = /opt/LAPACK/libLAPACK-pg.a \
+       /opt/BLAS/lib/libBLAS_PII-pg.a \
+       /opt/fftw/lib/librfftw.a \
+       /opt/fftw/lib/libfftw.a
+
+# netCDF (for gyro2gkv)
+
+NETCDF = /opt/netcdf-3.4/lib/libnetcdf.a
+NETCDF_INC = /opt/netcdf-3.4/include
+
+# Archive
+
+ARCH	= ar cr
+

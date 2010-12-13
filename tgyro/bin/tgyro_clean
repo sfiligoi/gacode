@@ -1,0 +1,24 @@
+#!/bin/bash
+ 
+n=$#
+
+if [ $n -eq 0 ]
+then
+   echo "Usage: tgyro_clean -l  (remove large GYRO/TGYRO runtime files)"
+   echo "Usage: tgyro_clean -a  (remove all GYRO/TGYRO runtime files)"
+   exit 1
+fi
+
+if [ "$1" == "-l" ]
+then
+   rm -rf */u.out */moment*.out */RE* */sd* */source* */entropy*
+fi 
+
+if [ "$1" == "-a" ]
+then
+   rm -f *.log input*.gen halt VERSION_tag *.out *.dat batch.* *.eps
+   rm -f */*.out */RES* */halt */input.gen */VERSION_tag */*~
+   rm -f */*ps */*.err */*.src */*.log */gyrotest_flag gyrotest_flag
+   rm -f *.dump*
+fi 
+

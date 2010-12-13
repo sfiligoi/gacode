@@ -1,0 +1,34 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  tglf_sim_warn
+#
+# FUNCTION:
+#  Check for existence of sim directory
+#-------------------------------------------------------------
+
+if [ $1 = $TGLF_DIR/sim/ ]
+  then
+  echo "Error: missing simdir"
+  exit 1
+fi
+
+if [ ! -d "$1" ]
+  then
+  echo "$1 is not a valid simulation directory."
+  echo "Please create the directory first, or use [tglf -g]."
+  exit 1
+fi
+
+#if [ ! -f "$1/INPUT" ]
+#  then
+#  cp $NEO_DIR/tools/input/L1-ie/INPUT $1
+#  echo "********************************************************"
+#  echo "*                                                      *"
+#  echo "*  An INPUT file was not found.  One has been created  *"
+#  echo "*  for you using the template in L1-ie.               *"
+#  echo "*                                                      *"
+#  echo "********************************************************"
+#fi
+
+exit 0

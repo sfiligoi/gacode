@@ -1,0 +1,12 @@
+
+Bassi queue (LoadLeveler) choices:
+    as of 11 April 2007
+ALWAYS USE MULTIPLES OF 8 processors!
+
+[1] debug	 n <= 64   (30 min) 
+[2] interactive  n <= 32   (30 min)
+[3] premium	 n < 384   (12 hrs)
+[4] regular	 n <= 120  (36 hrs)
+[5]              n <= 384  (18 hrs)
+[6] low		 n <= 256  (12 hrs)
+

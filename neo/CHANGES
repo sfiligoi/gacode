@@ -1,0 +1,44 @@
+Version 0.1
+
+- Initial stable version of NEO using Chebyshev spectral 
+  energy discretization.
+- Fully operable with INPUT and (optionally) INPUT_profiles 
+  for experimental profiles.
+
+Version 0.2
+
+- Added tools/input, along with simdir generation facility
+  (use neo -g).
+- make system integrated with GYRO.
+- Full toroidal rotation effects added.
+
+Version 0.3 (6 July 2009)
+
+- Added new neo_interface code (together with Wiki documentation). 
+- Added Epar0 (inductive electric field) as an input and updated 
+  HH theory and the Sauter model.
+- Added zmag for Miller geometry and general geometry for experimental 
+  profiles.
+- Added error checking for matrix solve.
+- Assume positive B_ref for experimental profiles.
+- Updated equilibrium to work with new gyro GEO library.
+- Fixed bug in endpt derivative for Chebyshev polynomials
+- Fixed bug in parser for non-existent INPUT file.
+- Fixed bug in experimental_profiles -- grad_r from GEO is 
+  NAN at r=0 -- set dphi0/dr to be 0 there.
+- Fixed bug in HH theory A1e formula.
+
+Version 0.4 (4 December 2009)
+
+- For experimental profiles, removed the assumption that the first species 
+  is deuterium; now it can be any species, but it is still the normalizing
+  species for the outputs.
+- Added computation of the gyro-viscous fluxes.
+- Added Hirshman-Sigmar theory parameters to neo interface output.
+- Added output for theta variation of the flows, including up-down asymmetry
+  effects.
+- Uses the new EXPRO_w0 and EXPRO_w0p from GYRO to determine the rotation
+  frequency.
+- Added output of the zero-th order toroidal and parallel flows.
+- Fixed bug in def of s-alpha B_poloidal.
+- Fixed bug of missing dR/dr term for finite rotation dlnN/dr.

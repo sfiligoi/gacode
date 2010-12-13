@@ -1,0 +1,469 @@
+!-----------------------------------------------------------
+! tgyro_write_data.f90
+!
+! PURPOSE:
+!  Manage I/O for everything but iteration diagnostics.
+!
+! NOTES:
+!  Files are opened and closed at each iteration.
+!----------------------------------------------------------
+
+subroutine tgyro_write_data(i_print)
+
+  use tgyro_globals
+
+  implicit none
+
+  integer :: i
+  integer :: ip
+  integer :: i_print
+  integer :: i_ion
+
+  if (i_proc_global > 0) return
+
+  if (i_print == 0) then
+
+     open(unit=1,file='geometry.out',status='replace')
+     close(1)
+
+     open(unit=1,file='geometry_extra.out',status='replace')
+     close(1)
+
+     open(unit=1,file='nu_rho.out',status='replace')
+     close(1)
+
+     open(unit=1,file='power.out',status='replace')
+     close(1)
+
+     open(unit=1,file='flux_target.out',status='replace')
+     close(1)
+
+     open(unit=1,file='mflux_target.out',status='replace')
+     close(1)
+
+     open(unit=1,file='gyrobohm.out',status='replace')
+     close(1)
+
+     open(unit=1,file='gradient.out',status='replace')
+     close(1)
+
+     open(unit=1,file='residual.out',status='replace')
+     close(1)
+
+     do i_ion=1,loc_n_ion
+        open(unit=1,file='flux_i'//trim(ion_tag(i_ion))//'.out',status='replace')
+        close(1)
+        open(unit=1,file='mflux_i'//trim(ion_tag(i_ion))//'.out',status='replace')
+        close(1)
+        open(unit=1,file='chi_i'//trim(ion_tag(i_ion))//'.out',status='replace')
+        close(1)
+        open(unit=1,file='profile'//trim(ion_tag(i_ion))//'.out',status='replace')
+        close(1)
+     enddo
+
+     open(unit=1,file='flux_e.out',status='replace')
+     close(1)
+
+     open(unit=1,file='mflux_e.out',status='replace')
+     close(1)
+
+     open(unit=1,file='chi_e.out',status='replace')
+     close(1)
+
+     open(unit=1,file='profile.out',status='replace')
+     close(1)
+
+     open(unit=1,file='control.out',status='replace')
+     write(1,*) n_r
+     write(1,*) n_evolve
+     write(1,*) 0
+     close(1)
+
+     ! Special case: iteration status file (see loc_write_intermediate)
+     open(unit=1,file='iterate.out',status='replace')
+     close(1)
+
+     return
+
+  endif
+
+  ! Geometry (geometry.out) [** constant **]
+
+  open(unit=1,file='geometry.out',status='old',position='append')
+
+  write(1,20) 'r/a','rho','q','s','kappa','s_kappa','delta','s_delta','shift','rmaj/a','b_unit'
+  write(1,20) '','','','','','','','','','','(T)'
+  do i=1,n_r
+     write(1,10) r(i)/r_min,&
+          rho(i),&
+          q(i),&
+          s(i),&
+          kappa(i),&
+          s_kappa(i),&
+          delta(i),&
+          s_delta(i),&
+          shift(i),&
+          r_maj(i)/r_min,&
+          b_unit(i)/1e4
+  enddo
+
+  close(1)
+
+  ! Geometry (geometry_extra.out) [** constant **]
+
+  open(unit=1,file='geometry_extra.out',status='old',position='append')
+
+  write(1,20) 'r/a','zmag/a','dzmag','zeta','s_zeta','volume','d(vol)/dr'
+  write(1,20) '','','','','','m^3','m^2'
+  do i=1,n_r
+     write(1,10) r(i)/r_min,&
+          zmag(i)/r_min,&
+          dzmag(i),&
+          zeta(i),&
+          s_zeta(i),&
+          vol(i)/1e6,&
+          volp(i)/1e4
+  enddo
+
+  close(1)
+
+  ! Collisions and gyroradii (nu_rho.out)
+
+  open(unit=1,file='nu_rho.out',status='old',position='append')
+
+  write(1,20) 'r/a','(a/cs)/t_ii','(a/cs)/t_ee','(a/cs)nu_exch','rho_i/a','rho_s/a'
+  do i=1,n_r
+     write(1,10) r(i)/r_min,&
+          nui(1,i)*r_min/c_s(i),&
+          nue(i)*r_min/c_s(i),&
+          nu_exch(i)*r_min/c_s(i),&
+          rho_i(i)/r_min,&
+          rho_s(i)/r_min
+  enddo
+
+  close(1)
+
+  ! Power (power.out)
+
+  open(unit=1,file='power.out',status='old',position='append')
+
+  write(1,20) 'r/a','p_alpha','p_brem','p_exch','p_i_aux','p_e_aux','p_i','p_e'
+  write(1,20) '','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)'
+  do i=1,n_r
+     write(1,10) &
+          r(i)/r_min,&
+          p_alpha(i)*1e-7*1e-6,&
+          -p_brem(i)*1e-7*1e-6,&
+          p_exch(i)*1e-7*1e-6,&
+          p_i_aux_in(i)*1e-7*1e-6,&
+          p_e_aux_in(i)*1e-7*1e-6,&
+          p_i(i)*1e-7*1e-6,&
+          p_e(i)*1e-7*1e-6
+  enddo
+
+  close(1) 
+
+  ! Transport+target fluxes (flux_target.out)
+
+  open(unit=1,file='flux_target.out',status='old',position='append')
+
+  write(1,20) 'r/a','eflux_i_tot','eflux_i_target','eflux_e_tot','eflux_e_target','pflux_e_tot','pflux_e_target'
+  write(1,20) '','(GB)','(GB)','(GB)','(GB)','(GB)','(GB)'
+  do i=1,n_r
+     write(1,10) r(i)/r_min,&
+          eflux_i_tot(i),&
+          eflux_i_target(i),&
+          eflux_e_tot(i),&
+          eflux_e_target(i),&
+          pflux_e_tot(i),&
+          pflux_e_target(i)
+  enddo
+
+  close(1)
+
+  ! Transport+target fluxes for momentum (mflux_target.out)
+
+  open(unit=1,file='mflux_target.out',status='old',position='append')
+
+  write(1,20) 'r/a','mflux_tot','mflux_target'
+  write(1,20) '','(GB)','(GB)'
+  do i=1,n_r
+     write(1,10) r(i)/r_min,&
+          mflux_tot(i),&
+          mflux_target(i)
+  enddo
+
+  close(1)
+
+  ! Ion particle and energy fluxes (flux_i.out)
+
+  open(unit=1,file='flux_i.out',status='old',position='append')
+
+  write(1,20) 'r/a','pflux_i_neo','pflux_i_tur','eflux_i_neo','eflux_i_tur'
+  write(1,20) '','(GB)','(GB)','(GB)','(GB)'
+  do i=1,n_r
+     write(1,10) r(i)/r_min,&
+          pflux_i_neo(1,i),&
+          pflux_i_tur(1,i),&
+          eflux_i_neo(1,i),&
+          eflux_i_tur(1,i)
+  enddo
+
+  close(1)
+
+  ! Ion momentum fluxes and exchange powers (mflux_i.out)
+
+  open(unit=1,file='mflux_i.out',status='old',position='append')
+
+  write(1,20) 'r/a','mflux_i_neo','mflux_i_tur','expwd_i_tur'
+  write(1,20) '','(GB)','(GB)','(GB)'
+  do i=1,n_r
+     write(1,10) r(i)/r_min,&
+          mflux_i_neo(1,i),&
+          mflux_i_tur(1,i),&
+          expwd_i_tur(1,i)
+  enddo
+
+  close(1)
+
+  ! Electron particle and energy fluxes (flux_e.out)
+
+  open(unit=1,file='flux_e.out',status='old',position='append')
+
+  write(1,20) 'r/a','pflux_e_neo','pflux_e_tur','eflux_e_neo','eflux_e_tur'
+  write(1,20) '','(GB)','(GB)','(GB)','(GB)'
+  do i=1,n_r
+     write(1,10) r(i)/r_min,&
+          pflux_e_neo(i),&
+          pflux_e_tur(i),&
+          eflux_e_neo(i),&
+          eflux_e_tur(i)
+  enddo
+
+  close(1)
+
+  ! Electron momentum fluxes and exchange powers (mflux_e.out)
+
+  open(unit=1,file='mflux_e.out',status='old',position='append')
+
+  write(1,20) 'r/a','mflux_e_neo','mflux_e_tur','expwd_e_tur'
+  write(1,20) '','(GB)','(GB)','(GB)'
+  do i=1,n_r
+     write(1,10) r(i)/r_min,&
+          mflux_e_neo(i),&
+          mflux_e_tur(i),&
+          expwd_e_tur(i)
+  enddo
+
+  close(1)
+
+  ! Chi_i (chi_i.out)
+
+  open(unit=1,file='chi_i.out',status='old',position='append')
+
+  write(1,20) 'r/a','Di_neo','Di_tur','chii_neo','chii_tur'
+  write(1,20) '','(GB)','(GB)','(GB)','(GB)'
+  do i=1,n_r
+     if (i == 1) then
+        write(1,10) 0.0,0.0,0.0,0.0,0.0
+     else
+        write(1,10) r(i)/r_min,&
+             pflux_i_neo(1,i)/(r_min*dlnnidr(1,i)*ni(1,i)/ne(i)),&
+             pflux_i_tur(1,i)/(r_min*dlnnidr(1,i)*ni(1,i)/ne(i)),&
+             eflux_i_neo(1,i)/(r_min*dlntidr(1,i)*ni(1,i)/ne(i)*ti(1,i)/te(i)),&
+             eflux_i_tur(1,i)/(r_min*dlntidr(1,i)*ni(1,i)/ne(i)*ti(1,i)/te(i))
+     endif
+  enddo
+
+  close(1)
+
+  ! Chi_e (chi_e.out)
+
+  open(unit=1,file='chi_e.out',status='old',position='append')
+
+  write(1,20) 'r/a','De_neo','De_tur','chie_neo','chie_tur'
+  write(1,20) '','(GB)','(GB)','(GB)','(GB)'
+  do i=1,n_r
+     if (i == 1) then
+        write(1,10) 0.0,0.0,0.0,0.0,0.0
+     else
+        write(1,10) r(i)/r_min,&
+             pflux_e_neo(i)/(r_min*dlnnedr(i)),&
+             pflux_e_tur(i)/(r_min*dlnnedr(i)),&
+             eflux_e_neo(i)/(r_min*dlntedr(i)),&
+             eflux_e_tur(i)/(r_min*dlntedr(i))
+     endif
+  enddo
+
+  close(1)
+
+  ! gyroBohm factors in physical units (gyroBohm.out)
+
+  open(unit=1,file='gyrobohm.out',status='old',position='append')
+
+  write(1,20) 'r/a','Chi_GB','Q_GB','Gamma_GB','Pi_GB','c_s'
+  write(1,20) '','m^2/s','MW/m^2','10^19/m^2/s','J/m^2','m/s'
+  do i=1,n_r
+     write(1,10) r(i)/r_min,&
+          chi_gb(i)*1e-4,&
+          q_gb(i)*1e-7*1e-6/1e-4,&
+          gamma_gb(i)*1e-19/1e-4,&
+          pi_gb(i)*1e-7/1e-4,&
+          c_s(i)/100.0
+  enddo
+
+  close(1)
+
+  ! Temperature and density profiles (profile.out)
+
+  open(unit=1,file='profile.out',status='old',position='append')
+
+  write(1,20) 'r/a','ni','ne','ti','te','ti/te','betae_unit','M=wR/cs'
+  write(1,20) '','(1/cm^3)','(1/cm^3)','(keV)','(keV)','','',''
+  do i=1,n_r
+     write(1,10) r(i)/r_min,&
+          ni(1,i),&
+          ne(i),&
+          ti(1,i)/1e3,&
+          te(i)/1e3,&
+          ti(1,i)/te(i),&
+          betae_unit(i),&
+          u00(i)/c_s(i)/(-tgyro_ipccw_in)
+  enddo
+
+  close(1)
+
+  ! Temperature and density gradient profiles (gradient.out)
+
+  open(unit=1,file='gradient.out',status='old',position='append')
+
+  write(1,20) 'r/a','a/Lni','a/Lne','a/LTi','a/LTe','a/Lp','a*gamma_e/cs','a*gamma_p/cs'
+  write(1,20) '','','','','',''
+  do i=1,n_r
+     write(1,10) r(i)/r_min,&
+          r_min*dlnnidr(1,i),&
+          r_min*dlnnedr(i),&
+          r_min*dlntidr(1,i),&
+          r_min*dlntedr(i),&
+          r_min*dlnpdr(i),&
+          r_min/c_s(i)*gamma_eb(i)/(-tgyro_btccw_in),&
+          r_min/c_s(i)*gamma_p(i)/(-tgyro_ipccw_in)
+  enddo
+
+  close(1)
+
+  do i_ion=2,loc_n_ion
+
+     ! Ion 2 particle and energy fluxes (flux_i*.out)
+
+     open(unit=1,&
+          file='flux_i'//trim(ion_tag(i_ion))//'.out',&
+          status='old',position='append')
+
+     write(1,20) 'r/a','pflux_i_neo','pflux_i_tur','eflux_i_neo','eflux_i_tur'
+     write(1,20) '','(GB)','(GB)','(GB)','(GB)'
+     do i=1,n_r
+        write(1,10) r(i)/r_min,&
+             pflux_i_neo(i_ion,i),&
+             pflux_i_tur(i_ion,i),&
+             eflux_i_neo(i_ion,i),&
+             eflux_i_tur(i_ion,i)
+     enddo
+
+     close(1)
+
+     ! Ion 2 momentum fluxes and exchange powers (mflux_i*.out)
+
+     open(unit=1,&
+          file='mflux_i'//trim(ion_tag(i_ion))//'.out',&
+          status='old',position='append')
+
+     write(1,20) 'r/a','mflux_i_neo','mflux_i_tur','expwd_i_tur'
+     write(1,20) '','(GB)','(GB)','(GB)'
+     do i=1,n_r
+        write(1,10) r(i)/r_min,&
+             mflux_i_neo(i_ion,i),&
+             mflux_i_tur(i_ion,i),&
+             expwd_i_tur(i_ion,i)
+     enddo
+
+     close(1)
+
+     ! Chi_i2 (chi_i2.out)
+
+     open(unit=1,&
+          file='chi_i'//trim(ion_tag(i_ion))//'.out',&
+          status='old',position='append')
+
+     write(1,20) 'r/a','Di_neo','Di_tur','chii_neo','chii_tur'
+     write(1,20) '','(GB)','(GB)','(GB)','(GB)'
+     do i=1,n_r
+        if (i == 1) then
+           write(1,10) 0.0,0.0,0.0,0.0,0.0
+        else
+           write(1,10) r(i)/r_min,&
+                pflux_i_neo(i_ion,i)/(r_min*dlnnidr(i_ion,i)*ni(i_ion,i)/ne(i)),&
+                pflux_i_tur(i_ion,i)/(r_min*dlnnidr(i_ion,i)*ni(i_ion,i)/ne(i)),&
+                eflux_i_neo(i_ion,i)/(r_min*dlntidr(i_ion,i)*ni(i_ion,i)/ne(i)*&
+                ti(i_ion,i)/te(i)),&
+                eflux_i_tur(i_ion,i)/(r_min*dlntidr(i_ion,i)*ni(i_ion,i)/ne(i)*&
+                ti(i_ion,i)/te(i))
+        endif
+     enddo
+     close(1)
+
+     ! Impurity profiles
+
+     open(unit=1,&
+          file='profile'//trim(ion_tag(i_ion))//'.out',&
+          status='old',position='append')
+
+     write(1,20) 'r/a','ni','a/Lni','Ti','a/LTi'
+     write(1,20) '','(1/cm^3)','','(keV)',''
+     do i=1,n_r
+        write(1,10) r(i)/r_min,&
+             ni(i_ion,i),&
+             r_min*dlnnidr(i_ion,i),&
+	     ti(i_ion,i)/1e3,&
+	     r_min*dlntidr(i_ion,i)
+     enddo
+
+     close(1)
+
+  enddo ! i_ion
+
+  ! Residuals (residual.out)
+
+  open(unit=1,file='residual.out',status='old',position='append')
+
+  if (tgyro_relax_iterations == 0) then
+     write(1,30) 'ITERATION*: ',i_tran,sum(res)/size(res),flux_counter*n_worker*n_inst
+  else 
+     write(1,30) 'ITERATION : ',i_tran,sum(res)/size(res),flux_counter*n_worker*n_inst
+  endif
+
+  do i=2,n_r
+     write(1,40) &
+          r(i)/r_min,(res(pmap(i,ip))/size(res),relax(pmap(i,ip)),ip=1,n_evolve)
+  enddo
+
+  close(1)
+
+  ! Control (control.out)
+
+  open(unit=1,file='control.out',status='old',position='append')
+  backspace(1)
+  write(1,*) i_tran
+  close(1)
+
+  ! Data
+10 format(t1,11(1pe13.6,1x))
+  !10 format(t1,11(1pe19.12,1x))
+  ! Text headers
+20 format(t2,a,t16,a,t30,a,t44,a,t58,a,t72,a,t86,a,t100,a,t114,a,t128,a,t142,a)
+  ! Residual header
+30 format(t2,a,i3,1pe12.5,2x,'[',i4,']')
+  ! Residuals
+40 format(t2,f8.6,4(2x,2(1pe10.3,1x)))
+
+end subroutine tgyro_write_data

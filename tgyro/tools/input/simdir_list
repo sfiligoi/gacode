@@ -1,0 +1,51 @@
+Local templates:
+
+wtest_1:  DIII-D case 128913
+          - 16 radii
+          - TGLF (no ETG, APS07, Z_eff=1)
+          - Ti, Te, ne evolution
+          - HH theory for neoclassical
+
+wtest_2:  DIII-D case 128913
+          - 16 radii
+          - TGLF (with ETG, APS07)
+          - Ti, Te, ne evolution
+          - HH theory for neoclassical
+
+wtest_3:  DIII-D case 128913
+          - 16 radii
+          - TGLF (with ETG)
+          - Ti, Te, ne evolution
+          - HH theory for neoclassical
+
+stest_1:  DIII-D case 128913
+          - 4 radii
+          - TGLF (with ETG)
+          - Ti, Te evolution
+          - HH theory for neoclassical
+
+stest_2:  DIII-D case 128913
+          - 4 radii
+          - IFS-PPPL
+          - Ti, Te evolution
+          - HH theory for neoclassical
+
+stest_3:  DIII-D case 128913
+          - 4 radii
+          - TGLF (with ETG)
+          - Ti, Te evolution
+          - NEO for neoclassical
+
+stest_4:  DIII-D case 128913
+          - 4 radii
+          - TGLF (with ETG)
+          - Ti, Te, ne evolution
+          - HH theory for neoclassical
+
+stest_5:  DIII-D case 128913
+          - 4 radii
+          - GYRO (quaslinear)
+          - Ti, Te, ne evolution
+          - HH theory for neoclassical
+
+       

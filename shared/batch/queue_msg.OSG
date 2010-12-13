@@ -1,0 +1,15 @@
+Generic OSG submission.
+
+Enter OSG destination and queue:
+
+ [1] NERSC FRANKLIN / debug (<30m, n<=512)
+ [2] NERSC FRANKLIN / premium (<24h, n<=16384)
+ [3] NERSC FRANKLIN / regular (<24h, n<=24572)
+ [4] NERSC FRANKLIN / low (<24h, n<=4828)
+ [5] NERSC FRANKLIN / special (arrange)
+ [6] NERSC JACQUARD / debug (<30m)
+ [7] NERSC JACQUARD / batch (<48h, n<=16; <24h, n<=32; <12h, n<=64; <6h)
+ [8] NERSC JACQUARD / low (<12h, n<=64)
+ [9] Purdue CAESAR / short (<4h)
+[10] Purdue CAESAR / standby (<4h)
+-> 

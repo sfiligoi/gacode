@@ -1,0 +1,724 @@
+module neo_transport
+
+  implicit none
+
+  public :: TRANSP_alloc, TRANSP_do, TRANSP_write
+
+  ! transport coefficients
+  real, dimension(:), allocatable :: pflux        ! (ns): gamma/(n0*vt0)
+  real, dimension(:), allocatable :: eflux        ! (ns): Q/(n0*vt0*T0)
+  real, dimension(:), allocatable :: mflux        ! (ns): Pi/(n0*a*T0)     
+  real, dimension(:), allocatable :: uparB        ! (ns): upar*B/(vto*B0)
+  real, dimension(:), allocatable :: uparBN       ! (ns): upar*B*n/vto*B0*n0
+  real, dimension(:), allocatable :: klittle_upar ! (ns): upar coefficient
+  real, dimension(:), allocatable :: kbig_upar    ! (ns): upar coefficient
+  real, dimension(:), allocatable :: pvisc        ! (ns): B dot del dot Pi
+  real                            :: jpar          ! sum(Z*upar*B*n)
+
+  ! Sugama gyro-viscosity "H" fluxes
+  real, dimension(:), allocatable :: pflux_gv      ! (ns): gamma/(n0*vt0)
+  real, dimension(:), allocatable :: eflux_gv      ! (ns): Q/(n0*vt0*T0)
+  real, dimension(:), allocatable :: mflux_gv      ! (ns): Pi/(n0*a*T0)  
+
+  ! poloidal and toroidal velocities
+  integer :: m_theta
+  real, dimension(:,:), allocatable :: vpol, vtor, upar ! (ns,nt): vel/vt0
+  real, dimension(:,:,:), allocatable :: vpol_fourier  ! (ns,mt,2)
+  real, dimension(:,:,:), allocatable :: vtor_fourier  ! (ns,mt,2)
+  real, dimension(:,:,:), allocatable :: upar_fourier  ! (ns,mt,2)
+  real, dimension(:,:), allocatable :: vtor_0order_fourier  ! (mt,2)
+  real, dimension(:,:), allocatable :: upar_0order_fourier  ! (mt,2)
+  real, dimension(:),   allocatable :: vpol_th0      ! (ns): vel/vt0 at theta=0
+  real, dimension(:),   allocatable :: vtor_th0      ! (ns): vel/vt0 at theta=0
+  real :: vtor_0order_th0 ! 0th order toroidal(at theta=0) (species indep)
+  real :: uparB_0order    ! 0th order <upar B> (species indep)
+
+  ! potential: delta_phi(theta)
+  ! NOTE: defined by sum_s Z_s e int f_s = 0
+  ! -- i.e. really only valid for first-order potential
+  real, dimension(:), allocatable :: d_phi         ! (ntheta)
+  real                            :: d_phi_sqavg ! <d_phi^2>_theta 
+
+  ! coefficients for zonal flow test
+  real :: zf_Pcoeff, zf_Pcoeff_theory
+
+  integer, parameter, private :: io_transp=1, io_phi=2, io_vel=3, &
+       io_exp=4, io_zf=7, io_gv=8, io_check=9
+  logical, private :: initialized = .false.
+  real, private :: check_sum
+
+contains
+
+  subroutine TRANSP_alloc(flag)
+    use neo_globals, only : n_species, n_theta, write_out_mode, profile_model, zf_model, n_xi
+    implicit none
+    integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
+    integer :: is, ie 
+
+    if(flag == 1) then
+       if(initialized) return
+
+       allocate(pflux(n_species))
+       allocate(eflux(n_species))
+       allocate(mflux(n_species))
+       allocate(pflux_gv(n_species))
+       allocate(eflux_gv(n_species))
+       allocate(mflux_gv(n_species))
+       allocate(uparB(n_species))
+       allocate(uparBN(n_species))
+       allocate(klittle_upar(n_species))
+       allocate(kbig_upar(n_species))
+       allocate(pvisc(n_species))
+       allocate(d_phi(n_theta))
+
+       allocate(vpol(n_species,n_theta))
+       allocate(vtor(n_species,n_theta))
+       allocate(upar(n_species,n_theta))
+       m_theta = (n_theta-1)/2-1
+       allocate(vpol_fourier(n_species,0:m_theta,2))
+       allocate(vtor_fourier(n_species,0:m_theta,2))
+       allocate(upar_fourier(n_species,0:m_theta,2))
+       allocate(vtor_0order_fourier(0:m_theta,2))
+       allocate(upar_0order_fourier(0:m_theta,2))
+       allocate(vpol_th0(n_species))
+       allocate(vtor_th0(n_species))
+
+       check_sum=0.0
+       
+       if(write_out_mode > 0) then
+          open(unit=io_transp,file='transport.out',status='replace')
+          open(unit=io_phi,file='phi.out',status='replace')
+          open(unit=io_vel,file='velocity.out',status='replace')
+          open(unit=io_gv,file='transport_gv.out',status='replace')
+          if(zf_model == 1) then
+             open(unit=io_zf,file='zf.out',status='replace')
+          endif
+          if(profile_model >= 2) then
+             open(unit=io_exp,file='transport_exp.out',status='replace')
+          endif
+       endif
+
+       initialized = .true.
+
+    else
+       if(.NOT. initialized) return
+
+       deallocate(pflux)
+       deallocate(eflux)
+       deallocate(mflux)
+       deallocate(pflux_gv)
+       deallocate(eflux_gv)
+       deallocate(mflux_gv)
+       deallocate(uparB)
+       deallocate(uparBN)
+       deallocate(klittle_upar)
+       deallocate(kbig_upar)
+       deallocate(pvisc)
+       deallocate(d_phi)
+       deallocate(vpol)
+       deallocate(vtor)
+       deallocate(upar)
+       deallocate(vpol_fourier)
+       deallocate(vtor_fourier)
+       deallocate(upar_fourier)
+       deallocate(vtor_0order_fourier)
+       deallocate(upar_0order_fourier)
+       deallocate(vpol_th0)
+       deallocate(vtor_th0)
+
+       if(write_out_mode > 0) then
+          close(io_transp)
+          close(io_phi)
+          close(io_vel)
+          close(io_gv)
+          if(zf_model == 1) then
+             close(io_zf)
+          endif
+          if(profile_model >= 2) then
+             close(io_exp)
+          endif
+          open(unit=io_check,file='check.out',status='replace')
+          write (io_check,'(e16.8,$)') check_sum
+          close(io_check)
+       endif
+
+
+       initialized = .false.
+
+    endif
+
+  end subroutine TRANSP_alloc
+
+  subroutine TRANSP_do(ir)
+    use neo_globals
+    use neo_energy_grid
+    use neo_theory
+    use neo_equilibrium
+    use neo_rotation
+    implicit none
+    integer :: i, is, ie, ix, it
+    real :: fac, fac1, fac2, rfac, poisson_F0fac, zf_fac1, zf_fac2, &
+         B2_div_dens, bigR2_avg
+    integer, intent (in) :: ir
+
+    ! Compute the neoclassical transport coefficient
+
+    pflux(:)  = 0.0 
+    eflux(:)  = 0.0
+    mflux(:)  = 0.0
+    upar(:,:) = 0.0
+    uparB(:)  = 0.0
+    uparBN(:) = 0.0
+    pvisc(:)  = 0.0
+    d_phi(:)  = 0.0
+
+    zf_Pcoeff = 0.0
+    zf_Pcoeff_theory = 0.0
+    zf_fac1=0.0
+    zf_fac2=0.0
+
+    do i=1,n_row
+
+       is = is_indx(i)
+       ie = ie_indx(i)
+       ix = ix_indx(i)
+       it = it_indx(i)
+
+       if(case_spitzer) then
+          if(ix==1) then
+             ! Spitzer problem assumes no rotation
+             pflux(is) = pflux(is) + w_theta(it) &
+                  * dens(is,ir) &
+                  * sqrt(2.0) * vth(is,ir) &
+                  * (1.0/3.0) *  g(i) &
+                  * 2.0/sqrt(pi) * evec_e05(ie)
+             eflux(is) = eflux(is) + w_theta(it) &
+                  *  dens(is,ir) &
+                  * sqrt(2.0) * vth(is,ir) &
+                  * (1.0/3.0) * temp(is,ir) *  g(i) &
+                  * 2.0/sqrt(pi) * (evec_e105(ie) - 2.5 * evec_e05(ie))
+             mflux(is) = 0.0
+          endif
+
+       else
+
+          rfac = Z(is)/temp(is,ir) * (phi_rot(it) - phi_rot_avg) &
+               - (omega_rot(ir) * bigR(it) / vth(is,ir))**2 * 0.5
+
+          if (ix == 0) then  
+             pflux(is) = pflux(is) + w_theta(it) &
+                  * dens(is,ir) * dens_fac(is,it) &
+                  * 2.0/sqrt(pi) * g(i) &
+                  * (driftx(is,it) * (4.0/3.0) * evec_e1(ie) &
+                  + driftx_rot0(is,it) * evec_e0(ie))
+
+             eflux(is) = eflux(is) + w_theta(it) * temp(is,ir) &
+                  * dens(is,ir) * dens_fac(is,it) &
+                  * 2.0/sqrt(pi) * g(i) &
+                  * (driftx(is,it) * (4.0/3.0) &
+                  * (evec_e2(ie) + rfac * evec_e1(ie)) &
+                  + driftx_rot0(is,it) &
+                  * (evec_e1(ie) + rfac * evec_e0(ie)))
+
+             mflux(is) = mflux(is) + w_theta(it) * temp(is,ir) &
+                  * dens(is,ir) * dens_fac(is,it) &
+                  * 2.0/sqrt(pi) * g(i) &
+                  * bigR(it) / vth(is,ir) &
+                  * (1.0/3.0 * driftx_rot1(is,it) &
+                  * sqrt(2.0) * Btor(it)/Bmag(it) &
+                  * evec_e1(ie) &
+                  + 4.0/3.0 * driftx(is,it) &
+                  * omega_rot(ir) * bigR(it) / vth(is,ir) &
+                  * evec_e1(ie) &
+                  + driftx_rot0(is,it) &
+                  * omega_rot(ir) * bigR(it) / vth(is,ir) &
+                  * evec_e0(ie))
+
+             ! d_phi = sum_s Z_s int f_s
+             d_phi(it) = d_phi(it) + Z(is) *  dens(is,ir) &
+                  * dens_fac(is,it) * g(i) &
+                  * 2.0/sqrt(pi) * evec_e0(ie)
+
+          else if (ix == 1) then
+             pflux(is) = pflux(is) + w_theta(it) &
+                  * dens(is,ir) * dens_fac(is,it) &
+                  * 2.0/sqrt(pi) * g(i) &
+                  * driftx_rot1(is,it) * (1.0/3.0) * evec_e05(ie)
+
+             eflux(is) = eflux(is) + w_theta(it) * temp(is,ir) &
+                  * dens(is,ir) * dens_fac(is,it) &
+                  * 2.0/sqrt(pi) * g(i) &
+                  * driftx_rot1(is,it) * (1.0/3.0) &
+                  * (evec_e105(ie) + rfac * evec_e05(ie))
+
+             mflux(is) = mflux(is) + w_theta(it) * temp(is,ir) &
+                  * dens(is,ir) * dens_fac(is,it) &
+                  * 2.0/sqrt(pi) * g(i) &
+                  * bigR(it) / vth(is,ir) &
+                  * (8.0/15.0 * driftx(is,it) &
+                  * sqrt(2.0) * Btor(it)/Bmag(it) &
+                  * evec_e105(ie) &
+                  + 1.0/3.0 * driftx_rot0(is,it) &
+                  * sqrt(2.0) * Btor(it)/Bmag(it) &
+                  * evec_e05(ie) &
+                  + 1.0/3.0 * driftx_rot1(is,it) &
+                  * omega_rot(ir) * bigR(it) / vth(is,ir) &
+                  * evec_e05(ie) &
+                  + 2.0/15.0 * driftx_rot2(is,it) &
+                  * evec_e105(ie) )
+
+             ! uparB = < B * 1/n * int vpar * (F0 g)>
+             uparB(is) = uparB(is) + w_theta(it) &
+                  * Bmag(it) * sqrt(2.0) * vth(is,ir) &
+                  * (1.0/3.0) * g(i) &
+                  * 2.0/sqrt(pi) * evec_e05(ie)
+
+             uparBN(is) = uparBN(is) + w_theta(it) &
+                  * Bmag(it) * sqrt(2.0) * vth(is,ir) &
+                  * (1.0/3.0) * g(i) &
+                  * 2.0/sqrt(pi) * evec_e05(ie) &
+                  * dens(is,ir) * dens_fac(is,it)
+
+             upar(is,it) = upar(is,it) &
+                  + sqrt(2.0) * vth(is,ir) &
+                  * (1.0/3.0) * g(i) &
+                  * 2.0/sqrt(pi) * evec_e05(ie)
+             
+          else if (ix == 2) then
+             pflux(is) = pflux(is) + w_theta(it) &
+                  * dens(is,ir) * dens_fac(is,it) &
+                  * 2.0/sqrt(pi) * g(i) &
+                  * driftx(is,it) * (2.0/15.0) * evec_e1(ie)
+
+             eflux(is) = eflux(is) + w_theta(it) * temp(is,ir) &
+                  * dens(is,ir) * dens_fac(is,it) &
+                  * 2.0/sqrt(pi) * g(i) &
+                  * driftx(is,it) * (2.0/15.0) &
+                  * (evec_e2(ie) + rfac * evec_e1(ie))
+
+             mflux(is) = mflux(is) + w_theta(it) * temp(is,ir) &
+                  * dens(is,ir) * dens_fac(is,it) &
+                  * 2.0/sqrt(pi) * g(i) &
+                  * bigR(it) / vth(is,ir) &
+                  * (2.0/15.0 * driftx_rot1(is,it) &
+                  * sqrt(2.0) * Btor(it)/Bmag(it) &
+                  * evec_e1(ie) &
+                  + 2.0/15.0 * driftx(is,it) &
+                  * omega_rot(ir) * bigR(it) / vth(is,ir) &
+                  * evec_e1(ie))
+
+             pvisc(is) = pvisc(is) + w_theta(it) * temp(is,ir) &
+                  * dens(is,ir) * dens_fac(is,it) * gradpar_Bmag(it) &
+                  * 2.0/sqrt(pi) * g(i) * evec_e1(ie) * 2.0/5.0 
+
+          else if(ix == 3) then
+             mflux(is) = mflux(is) + w_theta(it) * temp(is,ir) &
+                  * dens(is,ir) * dens_fac(is,it) &
+                  * 2.0/sqrt(pi) * g(i) &
+                  * bigR(it) / vth(is,ir) &
+                  * (2.0/35.0 * driftx(is,it) &
+                  * sqrt(2.0) * Btor(it)/Bmag(it) &
+                  * evec_e105(ie) &
+                  - 2.0/35.0 * driftx_rot2(is,it) &
+                  * evec_e105(ie))
+
+          endif
+
+       endif
+
+       if(zf_model == 1) then
+          if(ix == 1) then
+             zf_Pcoeff = zf_Pcoeff + w_theta(it) &
+                  * bigR(it) * Btor(it) / Bmag(it) &
+                  * mass(is) * dens(is,ir) * sqrt(2.0) * vth(is,ir) &
+                  * (1.0/3.0) * 2.0/sqrt(pi) * evec_e05(ie) * g(i)
+             if(ie==1) then
+                ! no ene or xi dependence
+                zf_fac1 = zf_fac1 + w_theta(it) &
+                     * bigR(it) * Btor(it) / Bmag(it) &
+                     * mass(is) * dens(is,ir) * vth(is,ir)**2 &
+                     * I_div_psip * rho(ir) &
+                     * mass(is)/(1.0*Z(is)) / Bmag(it) &
+                     * ((Z(is)*1.0)/temp(is,ir) * dphi0dr(ir))
+                zf_fac2 = zf_fac2 + w_theta(it) &
+                     * mass(is) * dens(is,ir) * bigR(it)**2 &
+                     * ((Z(is)*1.0)/temp(is,ir) * dphi0dr(ir)) &
+                     * q(ir) / r(ir) * vth(is,ir)**2 &
+                     * rho(ir) * mass(is)/(1.0*Z(is))
+             endif
+          endif
+       endif
+
+    enddo
+
+    do is=1, n_species
+       eflux(is) = eflux(is) + omega_rot(ir) * mflux(is)
+    enddo
+
+    ! Sugama gyro-viscosity "H" fluxes
+    pflux_gv(:)  = 0.0 
+    eflux_gv(:)  = 0.0
+    mflux_gv(:)  = 0.0
+    do is=1,n_species
+       fac1 = 0.0
+       fac2 = 0.0
+       do it=1,n_theta
+          rfac = Z(is)/temp(is,ir) * (phi_rot(it) - phi_rot_avg) &
+               - (omega_rot(ir) * bigR(it) / vth(is,ir))**2 * 0.5
+          fac1 = fac1 + w_theta(it) * dens(is,ir)  * dens_fac(is,it) &
+               / Bmag(it)**3 * (2.0 * gradr(it) * k_par(it) * gradr_tderiv(it) &
+               - 1.0/Bmag(it) * gradr(it)**2 * gradpar_Bmag(it))
+          fac2 = fac2 + w_theta(it) * dens(is,ir)  * dens_fac(is,it) &
+               / Bmag(it)**3 * (2.0 * gradr(it) * k_par(it) * gradr_tderiv(it) &
+               - 1.0/Bmag(it) * gradr(it)**2 * gradpar_Bmag(it)) &
+               * (1.0 + rfac)
+       enddo
+       pflux_gv(is) = -0.5 * rho(ir)**2 * mass(is) &
+            * temp(is,ir) / (Z(is)*1.0)**2 * I_div_psip * r(ir) / q(ir) &
+            * fac1 * omega_rot_deriv(ir) 
+       mflux_gv(is) =  -0.5 * temp(is,ir) * rho(ir)**2 * mass(is) &
+            * temp(is,ir) / (Z(is)*1.0)**2 * I_div_psip * r(ir) / q(ir) &
+            * (fac2 * dlntdr(is,ir) + fac1 * (dlnndr(is,ir) &
+            - z(is)/temp(is,ir) * dphi0dr(ir) &
+            + omega_rot(ir) * bigR_th0**2 / vth(is,ir)**2 &
+            * omega_rot_deriv(ir) &
+            + omega_rot(ir)**2 * bigR_th0 / vth(is,ir)**2 &
+            * bigR_th0_rderiv &
+            + dlntdr(is,ir) * (1.0 - 0.5 * omega_rot(ir)**2 * bigR_th0**2  &
+            / vth(is,ir)**2 - z(is)/temp(is,ir) * phi_rot_avg) ) )
+       eflux_gv(is) = -0.5  * temp(is,ir) * rho(ir)**2 * mass(is) &
+            * temp(is,ir) / (Z(is)*1.0)**2 * I_div_psip * r(ir) / q(ir) &
+            * fac2 * omega_rot_deriv(ir) &
+            + 2.5 * pflux_gv(is) * temp(is,ir) &
+            + omega_rot(ir) * mflux_gv(is) 
+    enddo
+
+    ! d_phi: sum_s Z_s e int f_s = 0
+    ! (really only valid for first-order, i.e. local solution f_1)
+    ! sum Z^2 n_0s / T0s * d_phi = sum Z int F0s*g
+    if(rotation_model == 2) then
+       ! phi_1 not computed for case with rotation effects included
+       d_phi(:) = 0.0
+       d_phi_sqavg = 0.0
+    else
+       ! Compute the poisson int F0 factor: sum Zs^2/T0s*(int of F0s)
+       poisson_F0fac = 0.0
+       do is=1, n_species
+          poisson_F0fac = poisson_F0fac &
+               + dens(is,ir) * Z(is) * Z(is) / temp(is,ir)
+       enddo
+       if(adiabatic_ele_model == 1) then
+          poisson_F0fac = poisson_F0fac + ne_ade(ir) / te_ade(ir)
+       endif
+       ! EAB: 10/22/08 Changed d_phi_sqavg from theta-average 
+       ! to flux-surface-average -- these are same for s-alpha geometry
+       d_phi_sqavg = 0.0
+       do it=1, n_theta
+          d_phi(it) = d_phi(it) / poisson_F0fac
+          d_phi_sqavg = d_phi_sqavg + d_phi(it) * d_phi(it) * w_theta(it)
+       enddo
+    endif       
+
+    ! Bootstrap current = sum <Z*n*upar Bp>
+    jpar = 0.0
+    do is=1, n_species
+       jpar = jpar + Z(is) * uparBN(is) 
+    enddo
+
+    ! U_parallel coefficient
+    do is=1, n_species
+       ! <B^2 / n_0a>
+       B2_div_dens = 0.0
+       bigR2_avg = 0.0
+       do it=1,n_theta
+          B2_div_dens = B2_div_dens + w_theta(it) &
+               * Bmag(it)**2 / (dens(is,ir) * dens_fac(is,it))
+          bigR2_avg = bigR2_avg + w_theta(it) * bigR(it)**2
+       enddo
+       kbig_upar(is) = (1.0 / B2_div_dens) &
+            * ( uparB(is) &
+            - (I_div_psip * rho(ir) * temp(is,ir) / (z(is)*1.0)) &
+            * (dlnndr(is,ir) &
+            - (z(is)*1.0)/temp(is,ir) * dphi0dr(ir) &
+            + dlntdr(is,ir) & 
+            * (1.0 + z(is) / temp(is,ir) * phi_rot_avg &
+            + omega_rot(ir)**2 * 0.5/vth(is,ir)**2 &
+            * (bigR_th0**2 - bigR2_avg)) &
+            + omega_rot_deriv(ir) &
+            * omega_rot(ir)/vth(is,ir)**2 * (bigR_th0**2 - bigR2_avg) &
+            + omega_rot(ir)**2 * bigR_th0 / vth(is,ir)**2 * bigR_th0_rderiv))
+       if(abs(dlntdr(is,ir)) > epsilon(0.)) then
+          klittle_upar(is) = -kbig_upar(is) *  B2_div_dens &
+               / (dlntdr(is,ir) * &
+               I_div_psip * rho(ir) * temp(is,ir) / (z(is)*1.0))
+       else
+          klittle_upar(is) = 0.0
+       end if
+    enddo
+
+    ! Poloidal and Toroidal Velocity
+    call compute_velocity(ir)
+    
+    ! Zonal flow damping coefficients
+    if(abs(zf_fac2) > epsilon(0.)) then
+       zf_Pcoeff = (zf_Pcoeff + zf_fac1)/ zf_fac2
+       call THEORY_ZF_do(ir,zf_Pcoeff_theory)
+    else
+       zf_Pcoeff = 0.0
+    endif
+
+    if(write_out_mode > 1) then
+       print *, '****************************************'
+       print '(a,i4)', 'ir = ', ir
+       fac=0.0
+       do is=1, n_species
+          fac = fac + Z(is) * pflux(is)
+          print '(a,e16.8)', 'pflux = ', pflux(is)
+          print '(a,e16.8)', 'eflux = ', eflux(is)
+       enddo
+       print '(a,e16.8)', ' sum Z_s * Gamma_s = ', fac
+       print *, '****************************************'
+    endif
+
+    do is=1,n_species
+       check_sum = check_sum &
+            +  (abs(pflux(is)) + abs(eflux(is)) + abs(mflux(is)))/rho(ir)**2 &
+            + abs(uparB(is))/rho(ir)
+    enddo
+
+  end subroutine TRANSP_do
+
+  subroutine compute_velocity(ir)
+    use neo_globals
+    use neo_rotation
+    use neo_equilibrium
+    implicit none
+    integer, intent (in) :: ir
+    integer:: is, it, jt
+    real :: RBt
+
+    ! 0th-order toroidal flow (at theta=0) and <u_par B>
+    vtor_0order_th0  = omega_rot(ir) * bigR_th0 
+    RBt = 0.0
+    do it=1,n_theta
+       RBt = RBt + w_theta(it) * bigR(it) * Btor(it)
+    enddo
+    uparB_0order = omega_rot(ir) * RBt
+
+    do is=1, n_species
+       do it=1, n_theta
+          vpol(is,it) = kbig_upar(is) &
+               * Bpol(it) / (dens(is,ir) * dens_fac(is,it))
+          vtor(is,it) = kbig_upar(is) &
+               * Btor(it) / (dens(is,ir) * dens_fac(is,it)) &
+               + (I_div_psip * rho(ir) * temp(is,ir) / (z(is)*1.0)) &
+               * (1.0 / Btor(it)) &
+               * (dlnndr(is,ir) &
+               - (1.0*z(is))/temp(is,ir) * dphi0dr(ir) &
+               + dlntdr(is,ir) & 
+               * (1.0 + z(is) / temp(is,ir) * phi_rot(it) &
+               + omega_rot(ir)**2 * 0.5/vth(is,ir)**2 &
+               * (bigR_th0**2 - bigR(it)**2)) &
+               + omega_rot_deriv(ir) * omega_rot(ir)/vth(is,ir)**2 &
+               * (bigR_th0**2 - bigR(it)**2))
+       end do
+       
+       vpol_th0(is) = 0.0
+       vtor_th0(is) = 0.0
+       do jt=0, m_theta
+          vpol_fourier(is,jt,:) = 0.0
+          vtor_fourier(is,jt,:) = 0.0
+          upar_fourier(is,jt,:) = 0.0
+          do it=1, n_theta
+             vpol_fourier(is,jt,1) = vpol_fourier(is,jt,1) &
+                  + vpol(is,it) * cos(jt * theta(it))
+             vtor_fourier(is,jt,1) = vtor_fourier(is,jt,1) &
+                  + vtor(is,it) * cos(jt * theta(it))
+             upar_fourier(is,jt,1) = upar_fourier(is,jt,1) &
+                  + upar(is,it) * cos(jt * theta(it))
+             if(jt > 0) then
+                vpol_fourier(is,jt,2) = vpol_fourier(is,jt,2) &
+                     + vpol(is,it) * sin(jt * theta(it))
+                vtor_fourier(is,jt,2) = vtor_fourier(is,jt,2) &
+                     + vtor(is,it) * sin(jt * theta(it))
+                upar_fourier(is,jt,2) = upar_fourier(is,jt,2) &
+                     + upar(is,it) * sin(jt * theta(it))
+             endif
+          enddo
+          if(jt == 0) then
+             vpol_fourier(is,jt,1) = vpol_fourier(is,jt,1) / (1.0*n_theta)
+             vtor_fourier(is,jt,1) = vtor_fourier(is,jt,1) / (1.0*n_theta)
+             upar_fourier(is,jt,1) = upar_fourier(is,jt,1) / (1.0*n_theta)
+          else
+             vpol_fourier(is,jt,:) = vpol_fourier(is,jt,:) / (0.5*n_theta)
+             vtor_fourier(is,jt,:) = vtor_fourier(is,jt,:) / (0.5*n_theta)
+             upar_fourier(is,jt,:) = upar_fourier(is,jt,:) / (0.5*n_theta)
+          end if
+          ! vel(theta=0) = sum vel_fourier cos coefficients
+          vpol_th0(is) = vpol_th0(is) + vpol_fourier(is,jt,1)
+          vtor_th0(is) = vtor_th0(is) + vtor_fourier(is,jt,1)
+       enddo
+       
+    enddo
+
+    do jt=0, m_theta
+       vtor_0order_fourier(jt,:) = 0.0
+       upar_0order_fourier(jt,:) = 0.0
+       do it=1, n_theta
+          vtor_0order_fourier(jt,1) = vtor_0order_fourier(jt,1) &
+               + omega_rot(ir) * bigR(it) &
+               * cos(jt * theta(it))
+          upar_0order_fourier(jt,1)= upar_0order_fourier(jt,1) &
+               + omega_rot(ir) * bigR(it) * Btor(it) / Bmag(it) &
+               * cos(jt * theta(it))
+          if(jt > 0) then
+             vtor_0order_fourier(jt,2) = vtor_0order_fourier(jt,2) &
+                  + omega_rot(ir) * bigR(it) &
+                  * sin(jt * theta(it))
+             upar_0order_fourier(jt,2)= upar_0order_fourier(jt,2) &
+                  + omega_rot(ir) * bigR(it) * Btor(it) / Bmag(it) &
+                  * sin(jt * theta(it))
+          end if
+       enddo
+       if(jt == 0) then
+          vtor_0order_fourier(jt,1) = vtor_0order_fourier(jt,1) / (1.0*n_theta)
+          upar_0order_fourier(jt,1) = upar_0order_fourier(jt,1) / (1.0*n_theta)
+       else
+          vtor_0order_fourier(jt,:) = vtor_0order_fourier(jt,:) / (0.5*n_theta)
+          upar_0order_fourier(jt,:) = upar_0order_fourier(jt,:) / (0.5*n_theta)
+       end if
+    enddo
+
+  end subroutine compute_velocity
+
+  subroutine TRANSP_write(ir)
+    use neo_globals
+    implicit none
+    integer, intent (in) :: ir
+    integer :: is, it, jt
+
+    if(write_out_mode == 0) return
+    
+    ! transport coefficients (normalized)
+    write (io_transp,'(e16.8,$)') r(ir)
+    write (io_transp,'(e16.8,$)') d_phi_sqavg
+    write (io_transp,'(e16.8,$)') jpar
+    write (io_transp,'(e16.8,$)') vtor_0order_th0
+    write (io_transp,'(e16.8,$)') uparB_0order
+    do is=1, n_species
+       write (io_transp,'(e16.8,$)') pflux(is)
+       write (io_transp,'(e16.8,$)') eflux(is)
+       write (io_transp,'(e16.8,$)') mflux(is)
+       write (io_transp,'(e16.8,$)') uparB(is)
+       write (io_transp,'(e16.8,$)') klittle_upar(is)
+       write (io_transp,'(e16.8,$)') kbig_upar(is)
+       write (io_transp,'(e16.8,$)') vpol_th0(is)
+       write (io_transp,'(e16.8,$)') vtor_th0(is)
+    enddo
+    write (io_transp,*)
+    
+    ! transport coefficients (units)
+    if(profile_model >= 2) then
+       write (io_exp,'(e16.8,$)') r(ir) * a_meters
+       ! m
+       write (io_exp,'(e16.8,$)') &
+            d_phi_sqavg * (temp_norm(ir)*temp_norm_fac/charge_norm_fac)**2
+       ! V^2
+       write (io_exp,'(e16.8,$)') &
+            jpar * (charge_norm_fac*dens_norm(ir)*vth_norm(ir)*a_meters)
+       ! A/m^2 (jpar B/Bunit)
+       write (io_exp,'(e16.8,$)') &
+            vtor_0order_th0 * (vth_norm(ir)*a_meters)
+       ! m/s
+       write (io_exp,'(e16.8,$)') &
+            uparB_0order * (vth_norm(ir)*a_meters)
+       ! m/s (upar B/Bunit)
+       do is=1, n_species
+          write (io_exp,'(e16.8,$)') &
+               pflux(is) * (dens_norm(ir)*vth_norm(ir)*a_meters) 
+          ! e19 m-2 s-1
+          write (io_exp,'(e16.8,$)') &
+               eflux(is) * (dens_norm(ir)*vth_norm(ir)*a_meters &
+               *temp_norm(ir)*temp_norm_fac)
+          ! W/m^2 
+          write (io_exp,'(e16.8,$)') & 
+               mflux(is) * (dens_norm(ir)*a_meters*temp_norm(ir)*temp_norm_fac)
+          ! N/m
+          write (io_exp,'(e16.8,$)') &
+               uparB(is) * (vth_norm(ir)*a_meters)
+          ! m/s (upar B/Bunit)
+          write (io_exp,'(e16.8,$)') klittle_upar(is)  ! dimensionless
+          write (io_exp,'(e16.8,$)') &
+               kbig_upar(is) * (dens_norm(ir)*vth_norm(ir)*a_meters/b_unit(ir))
+          ! e19 1/(m^2 s T)
+          write (io_exp,'(e16.8,$)') &
+               vpol_th0(is) * (vth_norm(ir)*a_meters)
+          ! m/s
+          write (io_exp,'(e16.8,$)') &
+               vtor_th0(is) * (vth_norm(ir)*a_meters)
+          ! m/s
+       enddo
+       write (io_exp,*)
+    end if
+    
+    ! delta phi(theta)
+    write(io_phi,*) d_phi(:)
+
+    ! poloidal and toroidal velocities(theta)
+    write (io_vel,'(e16.8,$)') r(ir)
+    write (io_vel,'(i3,$)') m_theta
+    do jt=0,m_theta
+       write (io_vel,'(e16.8,$)') vtor_0order_fourier(jt,1)
+    enddo
+    do jt=1,m_theta
+       write (io_vel,'(e16.8,$)') vtor_0order_fourier(jt,2)
+    enddo
+    do jt=0,m_theta
+       write (io_vel,'(e16.8,$)') upar_0order_fourier(jt,1)
+    enddo
+    do jt=1,m_theta
+       write (io_vel,'(e16.8,$)') upar_0order_fourier(jt,2)
+    enddo
+    do is=1, n_species
+       do jt=0,m_theta
+          write (io_vel,'(e16.8,$)') vpol_fourier(is,jt,1)
+       enddo
+       do jt=1,m_theta
+          write (io_vel,'(e16.8,$)') vpol_fourier(is,jt,2)
+       enddo
+       do jt=0,m_theta
+          write (io_vel,'(e16.8,$)') vtor_fourier(is,jt,1)
+       enddo
+       do jt=1,m_theta
+          write (io_vel,'(e16.8,$)') vtor_fourier(is,jt,2)
+       enddo
+       do jt=0,m_theta
+          write (io_vel,'(e16.8,$)') upar_fourier(is,jt,1)
+       enddo
+       do jt=1,m_theta
+          write (io_vel,'(e16.8,$)') upar_fourier(is,jt,2)
+       enddo
+    enddo
+    write (io_vel,*)
+
+    ! gyroviscosity transport coefficients
+    write (io_gv,'(e16.8,$)') r(ir)
+    do is=1, n_species
+       write (io_gv,'(e16.8,$)') pflux_gv(is)
+       write (io_gv,'(e16.8,$)') eflux_gv(is)
+       write (io_gv,'(e16.8,$)') mflux_gv(is)
+    enddo
+    write (io_gv,*)
+    
+    ! zonal flow coefficients
+    if(zf_model == 1) then
+       write (io_zf,'(e16.8,$)') r(ir)
+       write (io_zf,'(e16.8,$)') zf_time
+       write (io_zf,'(e16.8,$)') zf_Pcoeff
+       write (io_zf,'(e16.8,$)') zf_Pcoeff_theory
+       write (io_zf,*)
+    endif
+
+  end subroutine TRANSP_write
+
+end module neo_transport

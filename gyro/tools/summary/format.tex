@@ -1,0 +1,36 @@
+%CH edit 6-24-2008: changed to use fancyhdr instead of deprecated(?)
+%fancyheadings
+%----------------------------------
+\documentclass[dvips,10pt]{article}
+\usepackage{latexsym}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{epsfig}
+\usepackage{array}
+%\usepackage{fancyheadings}
+\usepackage{fancyhdr}
+\usepackage{multicol}
+%----------------------------------
+
+%----------------------------------
+% Page dimensions
+%
+\setlength{\textwidth}{7.6in}
+\setlength{\textheight}{9.4in}
+\setlength{\hoffset}{-1.5in}
+\setlength{\voffset}{-0.5in}
+\setlength{\parskip}{0.1in}
+\setlength{\parindent}{0.0in}
+%-----------------------------------
+
+\newcommand\figsize{8.7cm}
+
+\pagestyle{fancy}
+
+\input head
+
+\begin{document}
+
+\input body
+
+\end{document}

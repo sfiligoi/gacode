@@ -1,0 +1,22 @@
+#!/bin/csh
+# Set up transp2gyro for GA machines
+# This should be executed from shell rc file:
+# As of 12/2009 grid certificate no longer needed
+
+# Python location
+setenv PYTHON_COMMAND /f/python/linux/bin/python2.6
+
+# For TRANSP / trxpl
+setenv MDS_TRANSP_SERVER transpgrid.pppl.gov
+    
+# Globus and MDS+ for fusiongrid server interaction
+setenv GRID_LOCATION /f/mdsplus/grid/linux
+setenv GLOBUS_LOCATION $GRID_LOCATION/globus
+source $GLOBUS_LOCATION/etc/globus-user-env.csh
+setenv MDSPLUS $GRID_LOCATION/mdsplus
+setenv MDS_PATH $MDSPLUS/tdi
+setenv LD_LIBRARY_PATH $GLOBUS_LOCATION/lib:$MDSPLUS/lib:${LD_LIBRARY_PATH}:/d/linux/lib:/usr/local/lf9562/lib
+
+# Setup TRANSP paths
+source /c/transp/etc/transp_setup-xshare.csh
+

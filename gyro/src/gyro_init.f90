@@ -1,0 +1,82 @@
+!--------------------------------------------------------------
+! gyro_init.f90
+!
+! PURPOSE:
+!  Initialize external GYRO interface.
+!---------------------------------------------------------------
+
+subroutine gyro_init(path_in, mpi_comm_in)
+
+  use gyro_globals
+  use gyro_interface
+
+  implicit none
+
+  include 'mpif.h'
+
+  ! Input parameters (IN) - REQUIRED
+  character(len=*), intent(in) :: path_in
+  integer,          intent(in) :: mpi_comm_in
+
+  ! Local variable
+  logical                      :: inputdat_flag
+
+  ! Set appropriate global variables
+  path = path_in
+  GYRO_COMM_WORLD = mpi_comm_in
+  call MPI_COMM_RANK(GYRO_COMM_WORLD, i_proc, i_err)
+  call MPI_COMM_SIZE(GYRO_COMM_WORLD, n_proc, i_err)
+
+  ! Check if INPUT.gen file exists and set inputdat_flag accordingly
+  ! NOTE: TRUE if INPUT.gen does exist, FALSE if INPUT.gen does NOT exist
+  if (i_proc == 0) then
+     inquire(file=trim(path)//'INPUT.gen',exist=inputdat_flag)
+  endif
+
+  call MPI_BCAST(inputdat_flag, 1, MPI_LOGICAL, 0, GYRO_COMM_WORLD, i_err)
+
+  if (i_proc == 0) then
+     if (inputdat_flag .eqv. .true.) then
+        print '(a,a,a)', '[gyro_init reading ',trim(path),'INPUT.gen]'
+     else
+        print '(a,a,a)', '[gyro_init NOT reading ',trim(path),'INPUT.gen]'
+     endif
+  endif
+
+  if (inputdat_flag .eqv. .true.) then
+
+    ! Only call read_input subroutine if INPUT.gen file exists
+
+     call gyro_read_input
+
+     ! Map GLOBAL variables -> INTERFACE parameters
+     call map_global2interface
+
+  else
+
+     ! If INPUT.gen file does NOT exist then initialize arrays
+     ! NOTE: Vector initialization is normally done by read_input subroutine
+     mu_vec(0:10)           = 0.0
+     dlnndr_vec(0:10)       = 0.0
+     dlntdr_vec(0:10)       = 0.0
+     n_vec(0:10)            = 0.0
+     t_vec(0:10)            = 0.0
+     eps_dlnndr_vec(0:10)   = 0.0
+     eps_dlntdr_vec(0:10)   = 0.0
+     z_vec(0:10)            = 0.0
+     orbit_upwind_vec(0:10) = 0.0
+
+     ! Default parameter values explicitly specified by read_input subroutine
+     ! and NOT definable by user
+     mu_vec(1)      =  1.0
+     n_vec(0)       =  1.0
+     t_vec(0)       =  1.0
+     z_vec(0)       = -1.0
+
+  endif
+
+  if (debug_flag == 1 .and. i_proc == 0) then
+     print *, '[gyro_init done]'
+  endif
+
+end subroutine gyro_init

@@ -1,0 +1,20 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  gyro.KESTREL
+#
+# FUNCTION:
+#  Run on PPPL Linux clusters
+#
+# NOTES:
+#  For PPPL kestrel Linux cluster with Gigabit connection
+ 
+simdir=${1}
+nproc=${2}
+exec=${3}
+
+cd $simdir
+
+mpirun -np $nproc $exec
+
+exit

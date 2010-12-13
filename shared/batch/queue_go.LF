@@ -1,0 +1,60 @@
+#!/bin/sh
+#
+#------------------------------------------------------
+# SCRIPT:
+#  queue_go.LF
+#
+# PURPOSE:
+#  Batch generator for Lahey compiler.
+#--------------------------------------------------------
+
+repository="null"
+
+nproc=${1}
+queue_num=${2}
+sim=${3}
+simpath=${4}
+code=${5}
+
+case "$queue_num" in
+
+   1 )
+    
+      queue="a" ;;
+        
+   2 )
+
+      queue="b" ;;
+
+   3 )
+ 
+      queue="c" ;;
+
+esac
+
+bfile=$simpath/$sim/batch.src
+
+echo "Output written to $bfile"
+ 
+# Copy appropriate commands to batch directory:
+
+echo "#!/bin/sh" > $bfile
+echo "echo -n 'Started : ' ; date" >> $bfile
+
+gyro_opts="-e $sim -n $nproc -p $simpath"
+
+echo "$code $gyro_opts > $simpath/$sim/batch.out" >> $bfile 
+
+echo "echo -n 'Finished: ' ; date" >> $bfile
+
+# Submit to queue?
+
+echo "Submit your job [y,n]?"
+   
+read submit
+   
+if [ "$submit" = "y" ] ; then   
+   at -q $queue -f $bfile -m now
+fi
+   
+exit 1

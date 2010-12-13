@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  tgyro_sim_kill
+#
+# FUNCTION:
+#  Clean simulation kill
+#
+# AUTHOR:
+#  Mark Fahey <faheymr@ornl.gov>
+#
+
+if ! tgyro_sim_warn $1
+then
+   exit 1 
+fi
+
+cd $1
+
+echo 1 > halt
+echo "[Sent kill signal to $1]"
