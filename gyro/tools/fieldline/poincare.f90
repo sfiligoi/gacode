@@ -1,6 +1,6 @@
 program poincare
 
-  use input_data
+  use fieldline_input_data
   use runge_kutta
 
   implicit none

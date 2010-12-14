@@ -1,6 +1,6 @@
 subroutine setup(dir)
 
-  use input_data
+  use fieldline_input_data
 
   implicit none
 

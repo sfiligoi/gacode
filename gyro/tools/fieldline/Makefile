@@ -1,22 +1,27 @@
-include ${GYRO_DIR}/install/make.inc.${GYRO_PLAT}
+include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
+
+ifeq ($(OPT),debug)
+   FFLAGS=${FDEBUG}
+else
+   FFLAGS=${FOPT}
+endif
 
 EXEC = poincare
 
-OBJ = input_data.o \
+OBJ = fieldline_input_data.o \
       runge_kutta.o \
       func.o \
       read_input.o \
       setup.o
 
-
 .SUFFIXES : .o .f90 
 
 all: $(OBJ) $(EXEC).o
-	$(FC) -o $(EXEC) $(EXEC).o $(OBJ)
+	$(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o $(OBJ)
 
 .f90.o :
-	$(FC) $(FMATH) $(FDEBUG) -c $<
+	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:  
-	rm -f *.o $(EXEC) *~
-	cd ${GYRO_DIR}/modules ; rm -f input_data.mod
+	rm -f *.o $(EXEC)
+	rm -f ${GACODE_ROOT}/modules/fieldline_input_data.mod
