@@ -84,18 +84,6 @@ subroutine write_profile_vugyro(datafile,io)
 
         write(io,10) box_multiplier
 
-        write(io,10) 0.0*r(:)
-        write(io,10) 0.0*r(:)
-        write(io,10) 0.0*r(:)
-        write(io,10) 0.0*r(:)
-        write(io,10) 0.0*r(:)
-        write(io,10) 0.0*r(:)
-        write(io,10) 0.0*r(:)
-        write(io,10) 0.0*r(:)
-        write(io,10) 0.0*r(:)
-        write(io,10) 0.0*r(:)
-        write(io,10) 0.0*r(:)
-
         write(io,10) lambda(ir_norm,:)
         write(io,10) energy(:,1)
         write(io,10) lambda_tp(ir_norm)
