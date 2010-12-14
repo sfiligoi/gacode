@@ -254,7 +254,7 @@ pro vugyro, _EXTRA=extra
   
 ;  Reduce name conflicts for those who use IDL in non-GYRO contexts:
 ;  need to have GYRO come before <IDL_DEFAULT> on LOKI
-!PATH=expand_path("$GYRO_DIR/vugyro:$TGYRO_DIR/tools/idl:<IDL_DEFAULT>")
+!PATH=expand_path("$GACODE_ROOT/gyro/vugyro:$GACODE_ROOT/tgyro/tools/idl:<IDL_DEFAULT>")
 ;  while vugyro is run, this over-rides the IDL_PATH set in the user's
 ;  dot-files, which may include many directories with experimental
 ;  ananlysis routines. <IDL_DEFAULT> is recommended for use with 
@@ -275,18 +275,18 @@ pro vugyro, _EXTRA=extra
   usersym,0.8*cos(a),0.8*sin(a),/fill
   ;;---------------------------------------;
 
-  spawn,getenv("GYRO_DIR")+'/bin/'+'gyro_version_message'
+  spawn,getenv("GACODE_ROOT")+'/gyro/bin/'+'gyro_version_message'
 
   ;;---------------------------------------;
   ;; Some control parameters; 
   ;;
   user_control, _EXTRA=extra
   ;;
-  home = getenv('GYRO_DIR')+'/vugyro/'
+  home = getenv('GACODE_ROOT')+'/gyro/vugyro/'
 
-  openr,1,getenv("GYRO_DIR")+'/VERSION',error=i_err
+  openr,1,getenv("GACODE_ROOT")+'/gyro/VERSION',error=i_err
   if (remotedir_flag eq 0) then begin
-     simroot = getenv('GYRO_DIR')+'/sim/'
+     simroot = getenv('PWD')
   endif else begin
      simroot = remotedir
   endelse

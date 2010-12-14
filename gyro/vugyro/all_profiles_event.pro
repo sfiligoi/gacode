@@ -62,8 +62,7 @@ pro all_profiles_event, all_profiles_obj
   if (i_all_profile eq 5) or $
     (i_all_profile eq 6) or $
     (i_all_profile eq 7) or $
-    (i_all_profile eq 8) or $
-    (i_all_profile eq 22) then begin
+    (i_all_profile eq 8) then begin
      pname = spec_label[i_spec]+pname
   endif
 
@@ -81,25 +80,25 @@ pro all_profiles_event, all_profiles_obj
      6: y[*] = dlnndr_s[i_spec,*]
      7: y[*] = tem_s[i_spec,*]
      8: y[*] = den_s[i_spec,*]
-     9: y[*] = phi_doppler[*]
-     10: y[*] = aspect_s[*]
-     11: y[*] = delta_s[*]
-     12: y[*] = zeta_s[*]
-     13: y[*] = kappa_s[*]
-     14: y[*] = shift_s[*]
-     15: y[*] = shat_s[*]
-     16: y[*] = s_delta_s[*]
-     17: y[*] = s_zeta_s[*]
-     18: y[*] = s_kappa_s[*]
-     19: y[*] = zmag_s[*]
-     20: y[*] = dzmag_s[*]
-     21: y[*] = beta_unit_s[*]
-     22: y[*] = pgamma_s[i_spec,*]
-     23: y[*] = b_unit_s[*]
-     24: y[*] = dr_eodr[*]
-     25: y[*] = z_eff_s[*]
-     26: y[*] = nu_s[*]
-     27: y[*] = gamma_eb_s[*]
+     9: y[*] = aspect_s[*]
+     10: y[*] = delta_s[*]
+     11: y[*] = zeta_s[*]
+     12: y[*] = kappa_s[*]
+     13: y[*] = shift_s[*]
+     14: y[*] = shat_s[*]
+     15: y[*] = s_delta_s[*]
+     16: y[*] = s_zeta_s[*]
+     17: y[*] = s_kappa_s[*]
+     18: y[*] = zmag_s[*]
+     19: y[*] = dzmag_s[*]
+     20: y[*] = beta_unit_s[*]
+     21: y[*] = gamma_e_s[i_spec,*]
+     22: y[*] = gamma_p_s[i_spec,*]
+     23: y[*] = mach_s[i_spec,*]
+     24: y[*] = b_unit_s[*]
+     25: y[*] = dr_eodr[*]
+     26: y[*] = z_eff_s[*]
+     27: y[*] = nu_s[*]
      28: y[*] = w0_s[*]
 
      31: begin

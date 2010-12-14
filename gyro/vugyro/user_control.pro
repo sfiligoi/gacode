@@ -1,17 +1,13 @@
 pro user_control, SKIP_LARGE = do_skip_large, REMOTE_DIR=use_remote_dir
-;
-; CH 2-12-2008: added skip_large and remote_dir keywords, set
-; remote_dir to $TGYRO_DIR/sim/ to get all tgyro simulations
-;
+
    common GLOBAL
 
   ;;----------------------------------------------------
   ;; REMOTE SIMULATION DIRECTORY (0=off,1=on)
   ;;
-  DEFAULT, use_remote_dir, 1
+  DEFAULT, use_remote_dir, 0
   remotedir_flag = use_remote_dir
-  ;;remotedir = getenv('TGYRO_DIR') + '/sim/'
-  remotedir = '/home/candy/SIM/2010.11-aps-iter'
+  remotedir = '~/simtest'
   ;;----------------------------------------------------
 
   ;;----------------------------------------------------

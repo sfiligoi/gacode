@@ -5,8 +5,9 @@ pro get_dir_list
   ;;-------------------------------------------------------------
   ;; Get directories  
   ;;
-  spawn,getenv("GYRO_DIR")+'/bin/'+'vugyro_dir_init '+simroot
-  openr,1,getenv("GYRO_DIR")+'/.vugyrorc'
+  print,simroot
+  spawn,getenv("GACODE_ROOT")+'/gyro/bin/'+'vugyro_dir_init '+simroot
+  openr,1,'~/.vugyrorc'
 
   dir = strarr(200)
   x = " "

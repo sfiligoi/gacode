@@ -15,7 +15,7 @@ pro gyro_choices, event
   if (control eq 'sim_pick_dialog') then begin
 
      if (remotedir_flag eq 0) then begin
-        simroot = getenv('GYRO_DIR')+'/sim/'
+        simroot = getenv('PWD')
      endif else begin
         simroot = remotedir
      endelse
@@ -27,7 +27,7 @@ pro gyro_choices, event
      if picked_dir eq '' then return
 
      ;; Test to see if simdir is valid 
-     spawn,getenv("GYRO_DIR")+'/bin/'+'simdir_test '+picked_dir,exit_status=status
+     spawn,getenv("GACODE_ROOT")+'/gyro/bin/'+'simdir_test '+picked_dir,exit_status=status
      if status eq 1 then begin
         ;; Load if valid
         loadsim, picked_dir 

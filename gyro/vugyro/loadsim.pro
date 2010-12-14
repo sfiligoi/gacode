@@ -52,17 +52,15 @@ pro loadsim, input_dir
 
      ;; Read list of input experimental profile
 
-     openr,1,'INPUT_profiles.gen',err=i_err
+     openr,1,'input.profiles.gen',err=i_err
 
      if (i_err eq 0) then begin
 
-        print_found,'INPUT_profiles.gen',1
+        print_found,'input.profiles.gen',1
         exists_exp_profile = 1
 
         readf,1,ncol_exp
         readf,1,nblock_exp
-        readf,1,version_exp
-        readf,1,omega_flag
         readf,1,n_rho
         readf,1,bt_exp 
         readf,1,arho_exp
@@ -81,7 +79,7 @@ pro loadsim, input_dir
      n_exp_derived = 25
 
      exp_derived = fltarr(n_rho,n_exp_derived)
-     read_array,exp_derived,'INPUT_profiles.extra',exists_exp_derived
+     read_array,exp_derived,'input.profiles.extra',exists_exp_derived
 
      ;; For consistency with exp_profile, use the transpose
      exp_derived = transpose(exp_derived)

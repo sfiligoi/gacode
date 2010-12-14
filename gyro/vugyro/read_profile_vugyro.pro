@@ -43,7 +43,6 @@ pro read_profile_vugyro
                    'dlnndr_s',$
                    'tem_s',$
                    'den_s',$
-                   'phi_doppler',$
                    'aspect_s',$
                    'delta_s',$
                    'zeta_s',$
@@ -56,12 +55,13 @@ pro read_profile_vugyro
                    'zmag_s',$
                    'dzmag_s',$
                    'beta_unit_s',$
-                   'pgamma_s',$
+                   'gamma_e_s',$
+                   'gamma_p_s',$
+                   'mach_s',$
                    'b_unit_s',$
                    'dr_eodr',$                   
                    'z_eff_s',$                   
                    'nu_s',$
-                   'gamma_eb_s',$
                    'w0_s', $
                    'density_imbalance']
 
@@ -110,28 +110,28 @@ pro read_profile_vugyro
      dlnndr_s    = fltarr(n_spec,n_r)
      tem_s       = fltarr(n_spec,n_r)
      den_s       = fltarr(n_spec,n_r)
-     phi_doppler = fltarr(n_r)
      aspect_s    = fltarr(n_r)
      delta_s     = fltarr(n_r)
-     sdelta1_s    = fltarr(n_r) ;for backwards compatibility CH
      zeta_s      = fltarr(n_r)
      kappa_s     = fltarr(n_r)
      shift_s     = fltarr(n_r)
      shat_s      = fltarr(n_r)
      s_delta_s   = fltarr(n_r)
-     s_sdelta1_s  = fltarr(n_r) ;for backwards compatibiltiy CH
      s_zeta_s    = fltarr(n_r)
      s_kappa_s   = fltarr(n_r)
      zmag_s      = fltarr(n_r)
      dzmag_s     = fltarr(n_r)
      beta_unit_s = fltarr(n_r)
-     pgamma_s    = fltarr(n_spec,n_r)
+     gamma_e_s   = fltarr(n_r)
+     gamma_p_s   = fltarr(n_r)
+     mach_s      = fltarr(n_r)
      b_unit_s    = fltarr(n_r)
      dr_eodr     = fltarr(n_r)
      z_eff_s     = fltarr(n_r)
      nu_s        = fltarr(n_r)
-     gamma_eb_s  = fltarr(n_r)
      w0_s        = fltarr(n_r)
+
+     ; don't exist anymore
 
      chi_i_exp       = fltarr(n_r)
      chi_e_exp       = fltarr(n_r)
@@ -159,7 +159,6 @@ pro read_profile_vugyro
      readf,1,dlnndr_s
      readf,1,tem_s
      readf,1,den_s
-     readf,1,phi_doppler   
      readf,1,aspect_s
      readf,1,delta_s
      readf,1,zeta_s
@@ -172,28 +171,16 @@ pro read_profile_vugyro
      readf,1,zmag_s
      readf,1,dzmag_s
      readf,1,beta_unit_s
-     readf,1,pgamma_s
+     readf,1,gamma_e_s
+     readf,1,gamma_p_s
+     readf,1,mach_s
      readf,1,b_unit_s
      readf,1,dr_eodr
      readf,1,z_eff_s
      readf,1,nu_s
-     readf,1,gamma_eb_s
      readf,1,w0_s
 
      readf,1,box_multiplier
-
-     ;; power flows
-     readf,1,chi_i_exp
-     readf,1,chi_e_exp    
-     readf,1,diff_to_flow_e1
-     readf,1,diff_to_flow_e2
-     readf,1,eta_i_tot_exp
-     readf,1,diff_to_flow_mi
-     readf,1,aolvi_exp
-     readf,1,diff_ne_exp
-     readf,1,diff_to_flow_ne
-     readf,1,aolne_exp
-     readf,1,diff_to_flow_heating
 
      ;; velocity space, etc
      readf,1,lambda

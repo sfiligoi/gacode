@@ -20,7 +20,7 @@ pro map_exp_profiles
   exp_profile_label[6] = 'te_exp'
   exp_profile_label[7] = 'ne_exp'
   exp_profile_label[8] = 'z_eff_exp'
-  exp_profile_label[9] = 'er_ovr_phi_exp'
+  exp_profile_label[9] = 'w0_exp'
   exp_profile_label[10] = 'flow_mom_exp'
   exp_profile_label[11] = 'pow_e_exp'
   exp_profile_label[12] = 'pow_i_exp'

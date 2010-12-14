@@ -7,7 +7,6 @@ pro profile_sim_common
     dlnndr_s, $     
     aspect_s, $
     delta_s, $
-    sdelta1_s, $
     zeta_s, $
     kappa_s, $
     shift_s, $
@@ -18,12 +17,13 @@ pro profile_sim_common
     zmag_s, $
     dzmag_s, $
     beta_unit_s,$
-    pgamma_s,$
+    gamma_e_s,$
+    gamma_p_s,$
+    mach_s,$
     b_unit_s,$
     dr_eodr,$
     z_eff_s,$
     nu_s,$
-    gamma_eb_s,$
     w0_s
 
 end
