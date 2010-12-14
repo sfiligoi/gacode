@@ -63,28 +63,16 @@ subroutine read_profile_vugyro(dir)
   read(1,*) zmag_s(:)
   read(1,*) dzmag_s(:)
   read(1,*) beta_unit_s(:)
+  read(1,*) gamma_e_s(:) 
   read(1,*) gamma_p_s(:) 
   read(1,*) mach_s(:) 
   read(1,*) b_unit_s(:)
   read(1,*) dr_eodr(:)
   read(1,*) z_eff_s(:)
   read(1,*) nu_s(n_spec,:)
-  read(1,*) gamma_e_s(:)
   read(1,*) w0_s(:)
 
   read(1,*) box_multiplier
-
-  read(1,*) dum
-  read(1,*) dum
-  read(1,*) dum
-  read(1,*) dum
-  read(1,*) dum
-  read(1,*) dum
-  read(1,*) dum
-  read(1,*) dum
-  read(1,*) dum
-  read(1,*) dum
-  read(1,*) dum
 
   close(1)
 
