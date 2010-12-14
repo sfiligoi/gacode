@@ -13,4 +13,4 @@ clean:
 	cd UMFPACK ; make clean
 	cd EXPRO ; make clean
 	cd profiles_gen/src ; make clean
-	cd python ; rm *.pyc	
+	cd python ; rm -f *.pyc	

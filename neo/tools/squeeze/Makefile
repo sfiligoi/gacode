@@ -19,4 +19,4 @@ all: $(OBJECTS)
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:
-	rm -f *.o *~ $(EXEC)
+	rm -f *.o $(EXEC)
