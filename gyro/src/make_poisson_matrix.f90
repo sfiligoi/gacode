@@ -10,7 +10,7 @@ subroutine make_poisson_matrix
 
   use gyro_globals
   use math_constants
-  use poisson_private
+  use gyro_poisson_private
 
   !------------------------
   implicit none

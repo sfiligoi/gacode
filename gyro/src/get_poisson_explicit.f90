@@ -12,7 +12,7 @@
 subroutine get_poisson_explicit
 
   use gyro_globals
-  use poisson_private
+  use gyro_poisson_private
 
   !---------------------------------------------------
   implicit none

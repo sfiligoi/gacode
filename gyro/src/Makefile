@@ -15,9 +15,9 @@ OBJECTS = gyro_globals.o \
           gyro_collision_private.o \
           gyro_fieldeigen_private.o \
           gyro_maxwell_private.o \
-          poisson_private.o \
-	  poissonaperp_private.o \
-          mumps_private.o \
+          gyro_poisson_private.o \
+	  gyro_poissonaperp_private.o \
+          gyro_mumps_private.o \
           gyro_umfpack_private.o \
           ORB_private.o \
           gyro.o \

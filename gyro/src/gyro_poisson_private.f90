@@ -1,4 +1,4 @@
-module poisson_private
+module gyro_poisson_private
 
   !-----------------------------------
   ! Working variables, indices, etc
@@ -18,4 +18,4 @@ module poisson_private
   complex :: val
   !-----------------------------------
 
-end module poisson_private
+end module gyro_poisson_private

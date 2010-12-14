@@ -13,7 +13,7 @@ subroutine gyro_build_sparse_poisson
 
   use gyro_globals
   use math_constants
-  use poisson_private
+  use gyro_poisson_private
 
   !------------------------
   implicit none

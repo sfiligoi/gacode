@@ -6,7 +6,7 @@
 subroutine sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
 
   use gyro_globals
-  use mumps_private
+  use gyro_mumps_private
 
   !---------------------------------------------------
   implicit none

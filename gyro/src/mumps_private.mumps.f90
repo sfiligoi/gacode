@@ -1,4 +1,4 @@
-module mumps_private
+module gyro_mumps_private
 
   !------------------------------------------------------
   ! MUMPS
@@ -7,4 +7,4 @@ module mumps_private
   type(ZMUMPS_STRUC) m_mumps(4)
   !------------------------------------------------------
 
-end module mumps_private
+end module gyro_mumps_private

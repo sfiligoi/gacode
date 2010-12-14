@@ -1,6 +1,6 @@
 subroutine cleanup_mumps
 
-  use mumps_private
+  use gyro_mumps_private
 
   integer :: i
 

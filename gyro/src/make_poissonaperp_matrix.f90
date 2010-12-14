@@ -10,7 +10,7 @@
 subroutine make_poissonaperp_matrix
 
   use gyro_globals
-  use poissonaperp_private
+  use gyro_poissonaperp_private
 
   !------------------------
   implicit none
