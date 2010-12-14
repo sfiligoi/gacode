@@ -57,7 +57,6 @@ subroutine read_input(dir)
   read(1,*) svec(:,:) ! dlnndr_s
   read(1,*) svec(:,:) ! tem_s
   read(1,*) svec(:,:) ! den_s
-  read(1,*) vec(:)    ! phi_dop_s
   read(1,*) aspect_s(:) 
   read(1,*) vec(:)    ! delta_s
   read(1,*) vec(:)    ! zeta_s
@@ -70,20 +69,16 @@ subroutine read_input(dir)
   read(1,*) vec(:)    ! zmag_s
   read(1,*) vec(:)    ! dzmag_s
   read(1,*) vec(:)    ! beta_unit_s
-  read(1,*) svec(:,:) ! pgamma_s 
+  read(1,*) vec(:)    ! gamma_e_s 
+  read(1,*) vec(:)    ! gamma_p_s 
+  read(1,*) vec(:)    ! mach_s 
   read(1,*) vec(:)    ! b_unit_s
   read(1,*) vec(:)    ! dr_eodr
   read(1,*) vec(:)    ! z_eff_s
   read(1,*) vec(:)    ! nu_s
-  read(1,*) vec(:)    ! gamma_eb_s
   read(1,*) vec(:)    ! w0_s
-!  read(1,*) vec(:)    !
-!  read(1,*) vec(:)    ! 
 
   read(1,*) dum ! box_multiplier
-  do i=1,11
-     read(1,*) vec(:) ! diff_to_flows
-  enddo
   do i=1,n_pass+n_trap+n_energy+1
      read(1,*) dum
   enddo
