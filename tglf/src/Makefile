@@ -18,7 +18,7 @@ OBJECTS = tglf_modules.o \
 
 .SUFFIXES : .o .f90
 
-all: (LLIB).a $(EXEC).o
+all: $(LLIB).a $(EXEC).o
 	$(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o $(LLIB).a $(EXTRA_LIBS)
 
 tglf_lib.a: $(OBJECTS)
@@ -30,3 +30,4 @@ tglf_lib.a: $(OBJECTS)
 clean:
 	rm -f *.o $(LLIB).a $(EXEC)
 	rm -f ${GACODE_ROOT}/modules/nuei_coeff.mod 
+	rm -f ${GACODE_ROOT}/modules/tglf*.mod 
