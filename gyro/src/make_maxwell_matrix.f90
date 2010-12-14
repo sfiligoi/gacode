@@ -19,7 +19,7 @@
 subroutine make_maxwell_matrix
 
   use gyro_globals
-  use maxwell_private
+  use gyro_maxwell_private
 
   !------------------------
   implicit none

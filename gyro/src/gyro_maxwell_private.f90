@@ -1,4 +1,4 @@
-module maxwell_private
+module gyro_maxwell_private
 
   !-----------------------------------
   ! Working variables, indices, etc
@@ -18,4 +18,4 @@ module maxwell_private
   complex :: val
   !-----------------------------------
 
-end module maxwell_private
+end module gyro_maxwell_private

@@ -25,7 +25,7 @@ subroutine gyro_build_sparse_maxwell
 
   use gyro_globals
   use math_constants
-  use maxwell_private
+  use gyro_maxwell_private
 
   !------------------------
   implicit none
