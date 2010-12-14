@@ -1,4 +1,10 @@
-include ${GYRO_DIR}/install/make.inc.${GYRO_PLAT}
+include ${GACODE_ROOT}/shared//install/make.inc.${GACODE_PLATFORM}
+
+ifeq ($(OPT),debug)
+   FFLAGS=${FDEBUG}
+else
+   FFLAGS=${FOPT}
+endif
 
 EXEC = gyro2gkv_exec
 
@@ -15,5 +21,5 @@ exec: $(OBJECTS)
 	$(FC) -I$(NETCDF_INC) $(FMATH) $(FFLAGS) -c $<
 
 clean:
-	rm -rf *.o *~ $(EXEC)
-	cd ${GYRO_DIR}/modules ; rm -f gyro2gkv_globals.mod
+	rm -f *.o $(EXEC)
+	rm -f ${GACODE_ROOT}/modules/gyro2gkv_globals.mod
