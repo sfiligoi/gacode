@@ -36,6 +36,7 @@ module gyro_fieldeigen_private
   real :: sgn
   !
   complex :: omega_eigen
+  real, dimension(:), allocatable :: diag_scale
   !
   ! Stacked indices
   integer :: im, impr

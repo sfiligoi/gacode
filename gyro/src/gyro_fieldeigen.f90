@@ -73,8 +73,7 @@ subroutine gyro_fieldeigen
 
   if (i_proc == 0) then
      open(unit=12,file='fieldeigen.out',status='replace')
-    ! print *,' Re(omega)      Im(omega)      Re(det)        Im(det)        error'
-     print *,' Re(omega)      Im(omega)      error'
+     print *,' Re(omega)      Im(omega)      |det|          error'
      close(12)
   endif
 
@@ -100,6 +99,10 @@ subroutine gyro_fieldeigen
   allocate(work_im(n_im))
   allocate(gk_left(n_eigen,n_im))
   allocate(gk_right(n_im,n_eigen))
+
+  allocate(diag_scale(n_eigen))
+
+  diag_scale(:) = -1.0
 
   !-----------------------------------------------------------------------
   ! Extra setup required for collisions
@@ -311,8 +314,7 @@ subroutine gyro_fieldeigen
            print '(t2,5(1pe14.7,1x))',&
                 real(omega_eigen),&
                 aimag(omega_eigen), &
-       !         real(det), &
-       !         aimag(det),&
+                abs(det),&
                 abs(dz)/abs(omega_eigen)
 
            open(unit=1,file='fieldeigen.out',status='old',position='append')
@@ -320,8 +322,7 @@ subroutine gyro_fieldeigen
            write(1,'(t2,5(1pe14.7,1x))') &
                 real(omega_eigen), &
                 aimag(omega_eigen), &
-        !        real(det), &
-        !        aimag(det), &
+                abs(det), &
                 abs(dz)/abs(omega_eigen)
 
            close(1)
@@ -407,8 +408,7 @@ subroutine gyro_fieldeigen
            print '(t2,5(1pe14.7,1x))',&
                 real(omega_eigen),&
                 aimag(omega_eigen), &
-!                real(det), &
-!                aimag(det),&
+                abs(det), &
                 abs(z2-z1)/abs(omega_eigen)
 
            open(unit=1,file='fieldeigen.out',status='old',position='append')
@@ -416,8 +416,7 @@ subroutine gyro_fieldeigen
            write(1,'(t2,5(1pe14.7,1x))') &
                 real(omega_eigen), &
                 aimag(omega_eigen), &
-!                real(det), &
-!                aimag(det), &
+                abs(det), &
                 abs(z2-z1)/abs(omega_eigen)
 
            close(1)
@@ -550,6 +549,8 @@ subroutine gyro_fieldeigen
   deallocate(work_im)
   deallocate(gk_left)
   deallocate(gk_right)
+
+  deallocate(diag_scale)
 
   if (collision_flag == 1) then
      deallocate(nu_op)

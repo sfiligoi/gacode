@@ -374,6 +374,7 @@ subroutine gyro_fieldeigen_kernel
   !
   a_eigen_loc = a_eigen
   call ZGETRF(n_eigen,n_eigen,a_eigen,n_eigen,i_piv_eigen,info_eigen)
+
   !
   ! (2) Compute the determinant by diagonal product 
   !
@@ -384,6 +385,12 @@ subroutine gyro_fieldeigen_kernel
   !       det(P) = {+1 if #row permutations even, 
   !                 -1 if #row permutations odd}
 
+  if (diag_scale(1) < 0.0) then
+     do i=1,n_eigen
+        diag_scale(i) = abs(a_eigen(i,i))
+     enddo
+  endif
+
   det = (1.0,0.0)
   do i=1,n_eigen
      if (i_piv_eigen(i) /= i) then
@@ -391,7 +398,7 @@ subroutine gyro_fieldeigen_kernel
      else
         sgn = 1.0
      endif
-     det = det*a_eigen(i,i)*sgn
+     det = det*a_eigen(i,i)/diag_scale(i)*sgn
   enddo
 
 end subroutine gyro_fieldeigen_kernel
