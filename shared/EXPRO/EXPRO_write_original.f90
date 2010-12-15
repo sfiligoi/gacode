@@ -5,11 +5,8 @@
 !  Rewrite original quantities to input.profiles
 !
 !  NOTE:
-!  (1) q is kept positive definite.  All information
-!       about sign of q is retained in IPCCW and BTCCW.  
-!
-!  (2) EXPRO_w0 is converted here to omega0plus which 
-!      is the entry in input.profiles.
+!   q is kept positive definite.  All information
+!   about sign of q is retained in IPCCW and BTCCW.  
 !--------------------------------------------------------
 
 subroutine EXPRO_write_original(path,tag)
