@@ -14,11 +14,15 @@ export GACODE_ROOT=$HOME/gacode
 
 You can make the entire gacode project by typing
 
+{{{
 $ make
+}}}
 
 You can build a debug version of all libraries by typing
 
+{{{
 $ make OPT=debug
+}}}
 
 The build system is recursive, so this logic works as well in the subdirectories tgyro, gyro, neo, tglf, gato.
 
