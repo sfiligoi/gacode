@@ -4,9 +4,11 @@
 
 The environment variable setup is simplified from the original GYRO/NEO/TGYRO requirements.  Here is all that's required on the Cray XT5, assuming you put the git repository gacode in your home directory:
 
+{{{
 export GACODE_PLATFORM=XT5
 export GACODE_ROOT=$HOME/gacode
 . ${GACODE_ROOT}/shared/bin/gacode_setup
+}}}
 
 === Building ===
 
