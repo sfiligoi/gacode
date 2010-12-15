@@ -43,3 +43,5 @@ Version 0.4 (4 December 2009)
 - Fixed bug in def of s-alpha B_poloidal.
 - added line
 - Fixed bug of missing dR/dr term for finite rotation dlnN/dr.
+- Added line 1 to change.
+- Added line 2.
