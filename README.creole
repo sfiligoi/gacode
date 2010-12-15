@@ -11,3 +11,5 @@ $ make OPT=debug
 The build system is recursive, so this logic works throughout.
 
 See [[https://fusion.gat.com/theory/Gyro|TGYRO Wiki]] for more details.
+
+{{https://fusion.gat.com/THEORY/images/4/47/Supertorus-small-2.jpg|GYRO in action.}}
