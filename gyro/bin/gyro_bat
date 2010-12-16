@@ -9,6 +9,8 @@
 #  to queue if desired.
 #--------------------------------------------------------
 
+GYRO_DIR=$GACODE_ROOT/gyro
+
 code=gyro
 
 n=$#
@@ -77,10 +79,10 @@ fi
 
 # Determine queue
 
-cat $GYRO_DIR/batch/queue_msg.${GYRO_PLAT}
+cat $GACODE_ROOT/shared/batch/queue_msg.${GACODE_PLATFORM}
 
 read queue_num
 
-$GYRO_DIR/batch/queue_go.${GYRO_PLAT} $nproc $queue_num ${2} $simpath $code
+$GACODE_ROOT/shared/batch/queue_go.${GACODE_PLATFORM} $nproc $queue_num ${2} $simpath $code
 
 exit 1
