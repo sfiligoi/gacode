@@ -6,7 +6,6 @@
 subroutine sparse_solve_umfpack(n_elem,n_row,matnum,i_solve)
 
   use gyro_globals
-  use gyro_umfpack_private
 
   !---------------------------------------------------
   implicit none
