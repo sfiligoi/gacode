@@ -49253,51 +49253,58 @@ c 6.0 Return and end
 c    
       return
  1000 format('% Toroidal mode number'
-     &     ,/,'%',/,4x,i3,/)
+     &     ,/,'%',/,4x,i3,/,'%')
  1100 format('% Toroidal magnetic field [Tesla]'
-     &     ,/,'%',/,4x,e14.6,/)
+     &     ,/,'%',/,4x,e14.6,/,'%')
  1110 format('% Major radius [m]'
-     &     ,/,'%',/,4x,e14.6,/)
+     &     ,/,'%',/,4x,e14.6,/,'%')
  1120 format('% Minor radius [m]'
-     &     ,/,'%',/,4x,e14.6,/)
+     &     ,/,'%',/,4x,e14.6,/,'%')
  1130 format('% Elongation'
-     &     ,/,'%',/,4x,e14.6,/)
+     &     ,/,'%',/,4x,e14.6,/,'%')
  1140 format('% Triangularity'
-     &     ,/,'%',/,4x,e14.6,/)
+     &     ,/,'%',/,4x,e14.6,/,'%')
  1200 format('% Zeffective'
-     &     ,/,'%',/,4x,e14.6,/)
- 1500 format(//)
+     &     ,/,'%',/,4x,e14.6,/,'%')
+ 1500 format(/,'%'/,'%')
  2000 format('%',4x,'density data points:'
-     &   ,//,'%',4x,'r/a',6x,'density [10^19/m^-3]'
+     &    ,/,'%'
+     &    ,/,'%',4x,'r/a',6x,'density [10^19/m^-3]'
      &          ,1x,'error [10^19/m^-3]')
  2010 format(3(3x,e13.6))
- 2050 format('-1 -1 -1',//)
+ 2050 format('-1 -1 -1',/,'%',/,'%')
  2100 format('%',4x,'electron temperature data points:'
-     &   ,//,'%',4x,'r/a',9x,'T_e [keV]',6x,'error [keV]')
+     &    ,/,'%'
+     &    ,/,'%',4x,'r/a',9x,'T_e [keV]',6x,'error [keV]')
  2110 format(3(3x,e13.6))
- 2150 format('-1 -1 -1',//)
+ 2150 format('-1 -1 -1',/,'%',/,'%')
  2200 format('%',4x,'ion temperature data points:'
-     &   ,//,'%',4x,'r/a',9x,'T_i [keV]',6x,'error [keV]')
+     &    ,/,'%'
+     &    ,/,'%',4x,'r/a',9x,'T_i [keV]',6x,'error [keV]')
  2210 format(3(3x,e13.6))
- 2250 format('-1 -1 -1',//)
+ 2250 format('-1 -1 -1',/,'%',/,'%')
  2500 format('%',4x,'pressure data points:'
-     &   ,//,'%',4x,'r/a',9x,'pressure [kPa]',6x,'error [kPa]')
+     &    ,/,'%'
+     &    ,/,'%',4x,'r/a',9x,'pressure [kPa]',6x,'error [kPa]')
  2510 format(3(3x,e13.6))
- 2550 format('-1 -1 -1',/)
+ 2550 format('-1 -1 -1',/,'%',/,'%')
  3000 format('%',4x,'q profile data points:'
-     &   ,//,'%',4x,'r/a',13x,'q',8x,'error')
+     &    ,/,'%'
+     &    ,/,'%',4x,'r/a',13x,'q',8x,'error')
  3010 format(3(3x,e13.6))
- 3050 format('-1 -1 -1',//)
+ 3050 format('-1 -1 -1',/,'%',/,'%')
  3100 format('%',4x,'sqrt(psi)data points:'
-     &   ,//,'%',4x,'r/a',9x,'sqrt(psi)',7x,'error')
+     &    ,/,'%'
+     &    ,/,'%',4x,'r/a',9x,'sqrt(psi)',7x,'error')
  3110 format(3(3x,e13.6))
- 3150 format('-1 -1 -1',//)
+ 3150 format('-1 -1 -1',/,'%',/,'%')
  4000 format('%',4x,'Central beta for fast ion species'
-     &    ,//,'%',/,4x,e14.6,/)
+     &    ,/,'%',/,'%',/,4x,e14.6,/,'%')
  4010 format('%',4x,'fast ion species beta profile:'
+     &    ,/,'%'
      &    ,/,'%',4x,'r/a',3x,'beta',3x,'error')
  4020 format(3(3x,e13.6))
- 4050 format('-1 -1 -1',///)
+ 4050 format('-1 -1 -1',/,'%',/,'%',/)
       end
       subroutine writdata(kwmode)
 c
