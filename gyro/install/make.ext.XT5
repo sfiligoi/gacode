@@ -8,8 +8,8 @@ read_restart.o : read_restart.mpiio.f90
 	$(FC) $(FMATH) $(FFLAGS) -o read_restart.o -c read_restart.mpiio.f90
 write_restart.o : write_restart.mpiio.f90
 	$(FC) $(FMATH) $(FFLAGS) -o write_restart.o -c write_restart.mpiio.f90
-mumps_private.o : mumps_private.mumps.f90
-	$(FC) $(FMATH) $(FFLAGS) ${MUMPS_PATH} -o mumps_private.o -c mumps_private.mumps.f90
+gyro_mumps_private.o : gyro_mumps_private.mumps.f90
+	$(FC) $(FMATH) $(FFLAGS) ${MUMPS_PATH} -o gyro_mumps_private.o -c gyro_mumps_private.mumps.f90
 sparse_solve_mumps.o : sparse_solve_mumps.mumps.f90
 	$(FC) $(FMATH) $(FFLAGS) ${MUMPS_PATH} -o sparse_solve_mumps.o -c sparse_solve_mumps.mumps.f90
 cleanup_mumps.o : cleanup_mumps.mumps.f90
