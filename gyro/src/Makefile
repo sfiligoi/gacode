@@ -18,7 +18,6 @@ OBJECTS = gyro_globals.o \
           gyro_poisson_private.o \
 	  gyro_poissonaperp_private.o \
           gyro_mumps_private.o \
-          gyro_umfpack_private.o \
           ORB_private.o \
           gyro.o \
           gyro_adaptive_source.o \
