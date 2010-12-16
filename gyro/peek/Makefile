@@ -1,5 +1,11 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
+ifeq ($(OPT),debug)
+   FFLAGS=${FDEBUG}
+else
+   FFLAGS=${FOPT}
+endif
+
 EXEC = peek
 
 OBJ = peek_globals.o \
