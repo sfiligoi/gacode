@@ -5,7 +5,7 @@
 # Compilers and flags
 
 # Fortran 90/95 compiler
-FC  = ftn -module $(GYRO_DIR)/modules
+FC  = ftn -module $(GACODE_ROOT)/modules
 # Fortran 77 compiler
 F77 = ftn
 # Compiler options/flags

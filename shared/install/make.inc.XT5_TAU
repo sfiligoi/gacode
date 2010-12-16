@@ -5,7 +5,7 @@
 # Compilers and flags
 
 # Fortran 90/95 compiler
-FC  = tau_f90.sh -optPdtF95Opts="-R free" -optCompInst -optVerbose -module $(GYRO_DIR)/modules
+FC  = tau_f90.sh -optPdtF95Opts="-R free" -optCompInst -optVerbose -module $(GACODE_ROOT)/modules
 # Fortran 77 compiler
 F77 = tau_f90.sh -optCompInst -optVerbose
 # Compiler options/flags

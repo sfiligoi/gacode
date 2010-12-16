@@ -4,7 +4,7 @@
 
 # Compilers
 
-FC	= mpif90 --mod $(GYRO_DIR)/modules
+FC	= mpif90 --mod $(GACODE_ROOT)/modules
 F77	= mpif90
 
 FMATH	= --dbl

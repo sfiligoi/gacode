@@ -7,7 +7,7 @@ include ${SLEPC_DIR}/conf/slepc_common_variables
 
 # Compilers and flags
 
-FC	= ftn ${FC_LINKER_FLAGS} -module $(GYRO_DIR)/modules ${FC_INCLUDES}
+FC	= ftn ${FC_LINKER_FLAGS} -module $(GACODE_ROOT)/modules ${FC_INCLUDES}
 F77	= ftn
 
 FMATH	= -r8 

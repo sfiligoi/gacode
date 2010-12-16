@@ -7,7 +7,7 @@ include ${SLEPC_DIR}/conf/slepc_common_variables
 
 # Compilers and flags
 
-FC	= mpif90 ${FC_LINKER_FLAGS} -module $(GYRO_DIR)/modules ${FC_INCLUDES}
+FC	= mpif90 ${FC_LINKER_FLAGS} -module $(GACODE_ROOT)/modules ${FC_INCLUDES}
 F77	= mpif90
 
 FMATH	= -r8 

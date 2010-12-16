@@ -50,12 +50,6 @@ echo "#PBS -m ae" >> $bfile
 echo "#PBS -M ${USER}@psfc.mit.edu" >> $bfile
 echo "date" >> $bfile
 
-if [ $simpath = $GYRO_DIR/sim ]
-then
-   gyro_opts="-e $sim -n $nproc"
-else
-   gyro_opts="-e $sim -n $nproc -p $simpath"
-fi
 echo "$code -e $sim -n $nproc -p $simpath" >> $bfile 
 
 # Submit to queue?

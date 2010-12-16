@@ -7,7 +7,7 @@
 
 # Compilers (intel) and flags 
 
-FC	= mpif90 -mod $(GYRO_DIR)/modules -I $(GYRO_DIR)/modules
+FC	= mpif90 -mod $(GACODE_ROOT)/modules -I $(GACODE_ROOT)/modules
 F77	= mpif90
 
 FMATH	= -r8

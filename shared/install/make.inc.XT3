@@ -4,7 +4,7 @@
 
 # Compilers and flags
 
-FC	= ftn -target=catamount -module $(GYRO_DIR)/modules
+FC	= ftn -target=catamount -module $(GACODE_ROOT)/modules
 F77	= ftn -target=catamount
 
 FMATH	= -r8 

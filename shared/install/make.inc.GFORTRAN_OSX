@@ -12,7 +12,7 @@ MAKE = make
 
 # Compilers and flags
 
-FC	= mpif90 -I$(GYRO_DIR)/modules -J$(GYRO_DIR)/modules
+FC	= mpif90 -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules
 F77	= mpif90
 
 FMATH	= -fdefault-real-8

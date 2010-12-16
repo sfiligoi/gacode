@@ -4,7 +4,7 @@
 
 # Compiler flags:
 
-FC	= mpxlf90 -qsuffix=f=f90 -qmoddir=$(GYRO_DIR)/modules -I$(GYRO_DIR)/modules 
+FC	= mpxlf90 -qsuffix=f=f90 -qmoddir=$(GACODE_ROOT)/modules -I$(GACODE_ROOT)/modules 
 F77	= mpxlf90 -qfixed
 
 FMATH	= -qrealsize=8 
