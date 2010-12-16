@@ -2,21 +2,28 @@
 
 === Environment variables ===
 
-The environment variable setup is simplified from the original GYRO/NEO/TGYRO requirements.  Here is all that's required on the Cray XT5, assuming you put the git repository gacode in your home directory:
+The environment variable setup is simplified from the original GYRO/NEO/TGYRO requirements.\\
+Here is all that's required on the Cray XT5, assuming you put the git repository gacode in your home directory:
 
+{{{
 export GACODE_PLATFORM=XT5
 export GACODE_ROOT=$HOME/gacode
 . ${GACODE_ROOT}/shared/bin/gacode_setup
+}}}
 
 === Building ===
 
 You can make the entire gacode project by typing
 
+{{{
 $ make
+}}}
 
 You can build a debug version of all libraries by typing
 
+{{{
 $ make OPT=debug
+}}}
 
 The build system is recursive, so this logic works as well in the subdirectories tgyro, gyro, neo, tglf, gato.
 
