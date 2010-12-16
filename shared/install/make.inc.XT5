@@ -5,9 +5,11 @@
 # Compilers and flags
 
 # Fortran 90/95 compiler
-FC  = ftn -module $(GYRO_DIR)/modules
+FC  = ftn -module $(GACODE_ROOT)/modules
+
 # Fortran 77 compiler
 F77 = ftn
+
 # Compiler options/flags
 FMATH  = -r8
 FOPT   = -tp istanbul-64 -O3 -fast -Msmartalloc -fastsse
@@ -15,10 +17,11 @@ FDEBUG = -g -Ktrap=fp -Mbounds -Minform=inform
 FPROF  = -tp istanbul-64 -O3 -fast -Msmartalloc -Mprof=func
 
 # Execute 'module load fftw/2.1.5'
-# Execute 'module load mumps/4.7.3_par' (parallel version) which defines MUMPS_PATH environment variable
+# Execute 'module load mumps/4.7.3_par' (parallel version) 
+#  which defines MUMPS_PATH environment variable
 LMATH = -ldrfftw -ldfftw ${MUMPS_PATH} -lzmumps -lpord
 
-# OPTIONAL : Load netCDF for gyro2gkv tool
+# OPTIONAL : Load netCDF
 # Execute 'module load netcdf/4.0.1.1'
 NETCDF     = /opt/cray/netcdf/4.0.1.1/netcdf-pgi/lib/libnetcdf.a
 NETCDF_INC = /opt/cray/netcdf/4.0.1.1/netcdf-pgi/include
