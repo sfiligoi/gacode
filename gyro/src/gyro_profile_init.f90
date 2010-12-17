@@ -438,6 +438,8 @@ subroutine gyro_profile_init
      gamma_p_s(:)  = gamma_p_s(:)/csda_norm*pgamma0_scale
      w0_s(:)       = w0_s(:)/csda_norm*doppler_scale
 
+     omega_eb_s(:) = -n_1(in_1)*w0_s(:)
+
      if (mach0_scale /= 1.0) then
         call send_message_real('INFO: Scaling experimental Mach number by ',&
              mach0_scale)
@@ -454,31 +456,9 @@ subroutine gyro_profile_init
      endif
 
      !---------------------------------------------------------
-     if (gyrotest_flag == 0) then
-
-        call collect_real(omega_eb_s(ir_norm),omega_e_norm(:))
-
-        if (i_proc == 0 .and. output_flag == 1 .and. verbose_flag == 1) then
-           open(unit=1,file=trim(runfile),status='old',position='append')
-           write(1,*)
-           write(1,*) ' n  omega_eb_s(ir_norm)'
-           write(1,*) '------------------------'
-           do in=1,n_n
-              write(1,'(t2,i3,4x,1pe10.3)') n(in),omega_e_norm(in)
-           enddo ! in
-           write(1,*)
-           close(1)
-        endif
-
-     endif
-     !---------------------------------------------------------
-
-     !---------------------------------------------------------
      ! Subtraction of a constant rotational velocity 
      omega_eb_s(:) = omega_eb_s(:)-omega_eb_s(ir_norm)
      !---------------------------------------------------------
-
-     omega_eb_s(:) = -n_1(in_1)*w0_s(:)
 
   else
 
