@@ -6908,7 +6908,7 @@ c 2.2.3.1.1 Extract the left side of ndimensn as npsi
          npsi     = npseq
 c
 c 2.2.3.2.2 Extract the right side of ndimensn as ntht and perform a 32 bit shift
-         ntheq    = and(ndimensn,Z'FFFFFFFF00000000')
+cJC         ntheq    = and(ndimensn,Z'FFFFFFFF00000000')
          ishift   = 32
          ntht     = rshift(ntheq,ishift)
 c
@@ -6920,7 +6920,7 @@ c 2.2.3.2.1 Extract the left side of ndimensn as ntht
          ntht     = ntheq
 c
 c 2.2.3.2.2 Extract the right side of ndimensn as npsi and perform a 32 bit shift
-         npseq    = and(ndimensn,Z'FFFFFFFF00000000')
+cJC         npseq    = and(ndimensn,Z'FFFFFFFF00000000')
          ishift   = 32
          npsi     = rshift(npseq,ishift)
       endif
