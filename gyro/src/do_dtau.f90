@@ -64,7 +64,7 @@ subroutine do_dtau
            fh(i,:)  = fh0(i,:)+ &
                 z(is)*alpha_s(is,i)*gyro_u(:,i,p_nek_loc,is)
 
-           v0(i) = mu_root(i,is)*v_theta(i,ie,k,is)/d_tau(ck)
+           v0(i) = mu(is)*sqrt(tem_s(is,i))*v_theta(i,ie,k,is)/d_tau(ck)
 
            do m=1,n_stack
 

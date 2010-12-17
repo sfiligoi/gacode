@@ -2,10 +2,9 @@
 ! gyro_omegas.f90
 !
 ! PURPOSE:
-!  Compute normalized drift coefficients, velocitites, 
+!  Compute normalized drift coefficients, velocities, 
 !  etc., of the gyrokinetic equation.  
 !---------------------------------------------------------
-
 
 subroutine gyro_omegas
 
@@ -182,15 +181,6 @@ subroutine gyro_omegas
 
   enddo ! p_nek_loc
 
-  !----------------------------------------------------
-  ! Defined this to speed up do_dtau loop on X1.
-  !
-  do is=1,n_spec
-     do i=1,n_x
-        mu_root(i,is) = mu(is)*sqrt(tem_s(is,i))
-     enddo ! i
-  enddo ! is
-  !----------------------------------------------------
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[gyro_omegas done]'

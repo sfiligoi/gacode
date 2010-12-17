@@ -224,7 +224,7 @@ subroutine gyro_fieldeigen
                       - i_c * omega_d1(m,i,p_nek_loc,is)
 
                  ! Sign flip for LHS
-                 v0 = -mu_root(i,is)*v_theta(i,ie,k,is)/d_tau(ck)
+                 v0 = -mu(is)*sqrt(tem_s(is,i))*v_theta(i,ie,k,is)/d_tau(ck)
 
                  p = p_phys(ck,m)
 

@@ -652,7 +652,6 @@ module gyro_globals
   real, dimension(:,:), allocatable :: krho_i
   real, dimension(:), allocatable :: z
   real, dimension(:), allocatable :: mu
-  real, dimension(:,:), allocatable :: mu_root
   !
   real :: nu_ei
   real :: nu_ei_scale

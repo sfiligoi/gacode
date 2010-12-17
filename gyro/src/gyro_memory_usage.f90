@@ -40,7 +40,6 @@ subroutine gyro_memory_usage(data_file,io)
 
         call alloc_add(io,size(v_theta),8,'v_theta')
         call alloc_add(io,size(v_theta),8,'v_theta')
-        call alloc_add(io,size(mu_root),8,'mu_root')
         call alloc_add(io,size(v_para),8,'v_para')
 
         call alloc_add(io,size(nek_n),4,'nek_n')
