@@ -31,6 +31,7 @@ subroutine neo_experimental_profiles
   EXPRO_ctrl_density_method = 2  ! quasi-neutrality density flag
   EXPRO_ctrl_signb = sign_bunit
   EXPRO_ctrl_signq = sign_q
+  EXPRO_ctrl_rotation_method = 1 ! Standard method (Waltz=2 is not consistent with NEO).
 
   if (profile_equilibrium_model == 2) then
      EXPRO_ctrl_numeq_flag = 1

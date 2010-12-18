@@ -21,7 +21,7 @@ tol = 1e-4
 #--------------------------------------------------
 n=len(sys.argv)
 
-if n == 1:
+if n <> 2:
     print "Usage: gyro_reg <testdir>"
     print 
     print "       Note that <testdir> must one of the entries"
@@ -29,29 +29,25 @@ if n == 1:
     sys.exit(0)
 #--------------------------------------------------
 
-path=os.environ.get('GACODE_ROOT')+'/gyro'
-check1=sys.argv[1]+'/prec.out'
-regress=sys.argv[1]+'/regress'
+testdir=sys.argv[1]+'/'
+checkdir=os.environ.get('GACODE_ROOT')+'/gyro/tools/input/'+testdir
 
-if n == 3: 
-    simpath=sys.argv[2]+'/'
-else:
-    simpath='./'
-
+check1='prec.out'
+regress='regress'
 
 #--------------------------------------------------
 # Known data
 #
-if os.path.isfile(path+'/tools/input/'+check1) == 0:
-	print "Regression data does not exist for "+sys.argv[1]
+if os.path.isfile(checkdir+check1) == 0:
+	print "Regression data does not exist for "+checkdir+check1
 	sys.exit(0)
 
 # Get regression text string
-for line in open(path+'/tools/input/'+regress,'r').readlines():
+for line in open(checkdir+regress,'r').readlines():
     regtext = string.strip(line)
 
 # Get correct checksum from prec.out:
-for line in open(path+'/tools/input/'+check1,'r').readlines():
+for line in open(checkdir+check1,'r').readlines():
     line = string.strip(line)
 
 data = string.splitfields(line,' ')
@@ -61,7 +57,11 @@ x1=eval(data[0])
 #--------------------------------------------------
 # Data in question
 #
-for line in open(simpath+check1,'r').readlines():
+if os.path.isfile(testdir+check1) == 0:
+	print "Regression data does not exist for "+testdir+check1
+	sys.exit(0)
+
+for line in open(testdir+check1,'r').readlines():
     line = string.strip(line)
 
 data = string.splitfields(line,' ')

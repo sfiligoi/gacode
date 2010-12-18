@@ -141,7 +141,7 @@ done
 if [ "$LOCDIR" == "." ]
 then
    SIMDIR=$PWD
-   cd .. ; LODCIR=$PWD
+   cd .. ; LOCDIR=$PWD
 else
    SIMDIR=$SIMROOT/$LOCDIR
 fi

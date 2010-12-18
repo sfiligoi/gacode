@@ -94,7 +94,7 @@ done
 if [ "$LOCDIR" == "." ]
 then
    SIMDIR=$PWD
-   cd .. ; LODCIR=$PWD
+   cd .. ; LOCDIR=$PWD
 else
    SIMDIR=$SIMROOT/$LOCDIR
 fi
@@ -121,7 +121,7 @@ then
    then
       cat ${NEO_DIR}/tools/input/simdir_list
    else
-      cp -ir ${NEO_DIR}/tools/input/$LOCDIR $SIMDIR ;
+      cp -ai ${NEO_DIR}/tools/input/$LOCDIR $SIMDIR
    fi
    exit 0
 fi
