@@ -1,4 +1,4 @@
-module runge_kutta
+module fieldline_runge_kutta
 
 contains
 
@@ -54,4 +54,4 @@ contains
 
   end subroutine rk4
 
-end module runge_kutta
+end module fieldline_runge_kutta

@@ -1,6 +1,6 @@
 # Compilation flags
 
-FC	= mpif90 -I $(GACODE_ROOT)/modules -std=f95
+FC	= mpif90 -I $(GACODE_ROOT)/modules
 F77	= mpif90 -std=legacy
 
 FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules

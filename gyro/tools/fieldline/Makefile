@@ -9,7 +9,7 @@ endif
 EXEC = poincare
 
 OBJ = fieldline_input_data.o \
-      runge_kutta.o \
+      fieldline_runge_kutta.o \
       func.o \
       read_input.o \
       setup.o
@@ -24,4 +24,4 @@ all: $(OBJ) $(EXEC).o
 
 clean:  
 	rm -f *.o $(EXEC)
-	rm -f ${GACODE_ROOT}/modules/fieldline_input_data.mod
+	rm -f ${GACODE_ROOT}/modules/fieldline*.mod

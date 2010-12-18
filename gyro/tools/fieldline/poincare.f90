@@ -1,7 +1,7 @@
 program poincare
 
   use fieldline_input_data
-  use runge_kutta
+  use fieldline_runge_kutta
 
   implicit none
 
