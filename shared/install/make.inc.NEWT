@@ -1,11 +1,12 @@
 # Compilation flags
 
-FC	= mpif90 -I $(GACODE_ROOT)/modules
-F77	= mpif90
+FC	= mpif90 -I $(GACODE_ROOT)/modules -std=f95
+F77	= mpif90 -std=legacy
 
 FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules
 FOPT	= -msse2 -O3
 FDEBUG	=  -O -Wall -Wunderflow -W -Wuninitialized -fbounds-check -ffpe-trap=invalid,zero,overflow
+FBOUNDS	=  -O -fbounds-check -ffpe-trap=invalid,zero,overflow
 
 # System math libraries
 

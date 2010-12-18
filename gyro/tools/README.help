@@ -1,3 +1,0 @@
-$ make          -> builds data tools.
-$ make viz      -> builds visualization tools.
-$ make clean    -> clean all tool directories.
