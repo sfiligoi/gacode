@@ -302,8 +302,7 @@ subroutine make_poisson_blend(i_elec)
 
               if (i_gyro /= 1) then 
 
-                 !! JC
-                 ! Correct truncated gyroaverage
+                 ! Correct truncated gyroaverage for n=0
 
                  temp = sum(f_x(is,:))-1.0
                  f_x(is,0) = f_x(is,0)-temp
