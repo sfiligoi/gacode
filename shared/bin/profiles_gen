@@ -419,11 +419,11 @@ then
 
    if [ -f $NEO_DIR/tools/input/vgen/INPUT.v.$VGEN_IN ]
    then
-     cp $NEO_DIR/tools/input/vgen/INPUT.v.$VGEN_IN INPUT
+     cp $NEO_DIR/tools/input/vgen/INPUT.v.$VGEN_IN input.neo
    else 
       if [ -f ../INPUT.v ]
       then
-         cp ../INPUT.v INPUT
+         cp ../INPUT.v input.neo
       else
          echo "ERROR: Specify ion string with -vgen_in, or create INPUT.v"
          exit 1
@@ -436,8 +436,8 @@ then
        cp ../input.profiles.geo .
    fi
 
-   neo_parse INPUT
-   gyro_proparse input.profiles
+   python $NEO_DIR/bin/neo_parse.py
+   python $GACODE_ROOT/shared/bin/profile_parse.py input.profiles 
    echo "$VGEN_E"   > vgen.dat
    echo "$VGEN_V"  >> vgen.dat
    echo "$VGEN_X" >>  vgen.dat

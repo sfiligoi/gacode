@@ -40,10 +40,8 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, omega_deriv
   neo_rotation_model_in  = rotation_model
   neo_dphi0dr_in         = -er0 / EXPRO_grad_r0(i) &
        * EXPRO_rmin(EXPRO_n_exp) / temp_norm
-  neo_omega_rot_in       = omega / vth_norm &
-       / (EXPRO_ctrl_signq / EXPRO_ctrl_signb)
-  neo_omega_rot_deriv_in = omega_deriv / vth_norm * EXPRO_rmin(EXPRO_n_exp) &
-       / (EXPRO_ctrl_signq / EXPRO_ctrl_signb)
+  neo_omega_rot_in       = omega / vth_norm 
+  neo_omega_rot_deriv_in = omega_deriv / vth_norm * EXPRO_rmin(EXPRO_n_exp) 
   
   ! Geometry parameters
   

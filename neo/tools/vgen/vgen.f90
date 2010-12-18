@@ -187,8 +187,17 @@ program vgen
   endif
 
   ! set sign of b and q for EXPRO
-  EXPRO_ctrl_signb = -neo_btccw_in
-  EXPRO_ctrl_signq = neo_btccw_in*neo_ipccw_in
+   if(neo_btccw_in > 0) then
+     EXPRO_ctrl_signb = -1.0
+  else
+     EXPRO_ctrl_signb =  1.0
+  endif
+
+  if(neo_ipccw_in > 0) then
+     EXPRO_ctrl_signq = -EXPRO_ctrl_signb
+  else
+     EXPRO_ctrl_signq =  EXPRO_ctrl_signb
+  endif
 
   call EXPRO_pread(MPI_COMM_WORLD,path)
   if (i_proc == 0) call EXPRO_write_derived(path)
@@ -299,7 +308,7 @@ program vgen
                    * vth_norm * EXPRO_rmin(EXPRO_n_exp)
            enddo
 
-           print 10,EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp),omega/1e3,EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
+           print 10,EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp),er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
 
         endif
      enddo
@@ -341,7 +350,7 @@ program vgen
            enddo
         endif
 
-        print 10,EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp),omega/1e3,EXPRO_vpol(1,i)/1e3
+        print 10,EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp),er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
 
      enddo
 
@@ -370,7 +379,7 @@ program vgen
                    * vth_norm * EXPRO_rmin(EXPRO_n_exp)
            enddo
 
-           print 10,EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp),omega/1e3,EXPRO_vpol(1,i)/1e3
+           print 10,EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp),er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
 
         enddo
      endif
@@ -415,7 +424,7 @@ program vgen
            enddo
         endif
 
-        print 10,EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp),omega/1e3,EXPRO_vpol(1,i)/1e3
+        print 10,EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp),er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
 
      enddo
 
@@ -440,11 +449,6 @@ program vgen
         EXPRO_vtor(j,EXPRO_n_exp) = yb
      enddo
   endif
-
-  ! Write the new INPUT_PROFILES
-
-  tag = '.new'
-  call EXPRO_write_original(path,tag)
 
   ! output omega_E, vtor_1 
   ! omega
@@ -479,12 +483,19 @@ program vgen
   enddo
   close(1)
 
+  ! Write the new INPUT_PROFILES
+
+  tag = '.new'
+  call EXPRO_write_original(path,tag)
+
   call vgen_getgeo()
 
   deallocate(er_exp)
 
   call MPI_finalize(i_err)
 
-10 format('r/a=',f6.4,3x,'omega0(krad/s)=',f9.4,3x,'vtor_1(km/s)=',f9.4,3x,'vpol_1(km/s)=',f9.4)
+! 10 format('r/a=',f6.4,3x,'omega0(krad/s)=',f9.4,3x,'vtor_1(km/s)=',f9.4,3x,'vpol_1(km/s)=',f9.4)
+
+10 format('r/a=',f6.4,3x,'Er_0(kV/m)=',f9.4,3x,'vtor_1(km/s)=',f9.4,3x,'vpol_1(km/s)=',f9.4)
 
 end program vgen

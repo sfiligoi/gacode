@@ -107,8 +107,8 @@ subroutine neo_make_profiles
      te_ade(ir)    = te_ade_in
      ne_ade(ir)    = ne_ade_in
 
-     omega_rot(ir)       = omega_rot_in * (sign_q / sign_bunit)
-     omega_rot_deriv(ir) = omega_rot_deriv_in * (sign_q / sign_bunit)
+     omega_rot(ir)       = omega_rot_in 
+     omega_rot_deriv(ir) = omega_rot_deriv_in 
 
      do is=1,n_species
         z(is)         = z_in(is)
@@ -313,8 +313,8 @@ subroutine neo_make_profiles
         epar0(ir)     = epar0_in
 
         ! assume the rotation params are constants
-        omega_rot(ir)       = omega_rot_in * (sign_q / sign_bunit)
-        omega_rot_deriv(ir) = omega_rot_deriv_in * (sign_q / sign_bunit)
+        omega_rot(ir)       = omega_rot_in 
+        omega_rot_deriv(ir) = omega_rot_deriv_in 
 
         ! radially-dependent quantities are temp and dens
         do is=1,n_species
