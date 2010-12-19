@@ -8,7 +8,7 @@
 
 subroutine ORB_s(lambda,s)
 
-  use ORB_private
+  use gyro_banana_private
   use GEO_interface
 
   !-----------------------------------------------------------
@@ -34,7 +34,7 @@ subroutine ORB_s(lambda,s)
   ! Added '=' in test to take care of
   ! calls at the tp boundary.
 
-  if (lambda <= ORB_lambda_tp) then
+  if (lambda <= lambda_tp) then
 
      ! Passing particle
      !
@@ -57,7 +57,7 @@ subroutine ORB_s(lambda,s)
 
      enddo
 
-     s = d_theta*(0.5*(f(1)+f(n))+sum(f(2:n-1)))/ORB_fluxave
+     s = d_theta*(0.5*(f(1)+f(n))+sum(f(2:n-1)))/fluxave
 
   else
 
@@ -75,7 +75,7 @@ subroutine ORB_s(lambda,s)
         f(i) = sqrt(abs(1.0-lambda*GEO_b))*GEO_g_theta/GEO_b
      enddo
 
-     s = 1.0-d_theta*(0.5*(f(1)+f(n))+sum(f(2:n-1)))/ORB_fluxave
+     s = 1.0-d_theta*(0.5*(f(1)+f(n))+sum(f(2:n-1)))/fluxave
 
   endif
 

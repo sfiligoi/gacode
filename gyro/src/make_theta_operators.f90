@@ -62,7 +62,7 @@ subroutine make_theta_operators
 
      call gyro_to_geo(i)
 
-     call ORB_init(nint_ORB_s)
+     call gyro_banana_init(nint_ORB_s)
 
      do k=1,n_pass
 
@@ -114,7 +114,7 @@ subroutine make_theta_operators
            m_map(ck,j,2) = j+n_theta(ck)
         enddo
 
-        call ORB_do(lambda(i,k),&
+        call gyro_banana_uniform_taugrid(lambda(i,k),&
              n_tau(1)+1,&
              nint_ORB_do,&
              ORB_theta,&
@@ -177,7 +177,7 @@ subroutine make_theta_operators
         enddo
         m_map(ck,1,2) = 1
 
-        call ORB_do(lambda(i,k),&
+        call gyro_banana_uniform_taugrid(lambda(i,k),&
              n_tau(1)+1,&
              nint_ORB_do,&
              ORB_theta,&

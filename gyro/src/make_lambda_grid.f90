@@ -29,11 +29,11 @@ subroutine make_lambda_grid
 
      call gyro_to_geo(i)
 
-     call ORB_init(nint_ORB_s)
+     call gyro_banana_init(nint_ORB_s)
 
      ! Passing
 
-     call ORB_lambda(lambda_tp(i),lambda_max(i))
+     call gyro_banana_getlambda(lambda_tp(i),lambda_max(i))
 
      ! two regions
 

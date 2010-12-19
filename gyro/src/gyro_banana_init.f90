@@ -1,13 +1,13 @@
 !-----------------------------------------------------
-! ORB_init.f90
+! gyro_banana_init.f90
 !
 ! PURPOSE:
 !  Simple routine to initialize internal variables.
 !-----------------------------------------------------
 
-subroutine ORB_init(n_IN)
+subroutine gyro_banana_init(n_IN)
 
-  use ORB_private
+  use gyro_banana_private
   use GEO_interface
 
   !-----------------------------------------------------------
@@ -25,19 +25,17 @@ subroutine ORB_init(n_IN)
 
   allocate(f(n))
 
-  pi = 4.0*atan(1.0)
-
   !----------------------------------------------
   ! Determine maximum lambda, and lambda at
   ! the trapped-passing boundary:
   !
   call GEO_interp(0.0)
   !
-  ORB_lambda_max = 1.0/GEO_b
+  lambda_max = 1.0/GEO_b
   !
   call GEO_interp(pi)
   !
-  ORB_lambda_tp = 1.0/GEO_b
+  lambda_tp = 1.0/GEO_b
   !-----------------------------------------------
 
   d_theta = 2.0*pi/(n-1)
@@ -48,8 +46,8 @@ subroutine ORB_init(n_IN)
      f(i) = GEO_g_theta/GEO_b
   enddo
 
-  ORB_fluxave = (0.5*(f(1)+f(n))+sum(f(2:n-1)))*d_theta
+  fluxave = (0.5*(f(1)+f(n))+sum(f(2:n-1)))*d_theta
 
   deallocate(f)
 
-end subroutine ORB_init
+end subroutine gyro_banana_init

@@ -7,9 +7,9 @@
 !  d(theta) = d(tau) sqrt[ 1-lambda B(theta) ]
 !-----------------------------------------------------
 
-subroutine ORB_do(lambda,n_tau,n_sub,theta,tau)
+subroutine gyro_banana_uniform_taugrid(lambda,n_tau,n_sub,theta,tau)
 
-  use ORB_private
+  use gyro_banana_private
   use GEO_interface
 
   !-----------------------------------------------------------
@@ -35,7 +35,7 @@ subroutine ORB_do(lambda,n_tau,n_sub,theta,tau)
   !-----------------------------------------------------------
 
 
-  if (lambda < ORB_lambda_tp) then
+  if (lambda < lambda_tp) then
 
      ! Passing particles
 
@@ -89,4 +89,4 @@ subroutine ORB_do(lambda,n_tau,n_sub,theta,tau)
   deallocate(x)
   deallocate(f)
 
-end subroutine ORB_do
+end subroutine gyro_banana_uniform_taugrid

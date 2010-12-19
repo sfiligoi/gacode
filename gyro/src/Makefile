@@ -18,7 +18,9 @@ OBJECTS = gyro_globals.o \
           gyro_poisson_private.o \
 	  gyro_poissonaperp_private.o \
           gyro_mumps_private.o \
-          ORB_private.o \
+          gyro_banana_private.o \
+          gyro_banana_init.o \
+          gyro_banana_getlambda.o \
           gyro.o \
           gyro_adaptive_source.o \
           gyro_interface.o \
@@ -35,6 +37,7 @@ OBJECTS = gyro_globals.o \
           gyro_ave_rot.o \
 	  gyro_ave_aperp.o \
           gyro_ballooning_mode.o \
+          gyro_banana_uniform_taugrid.o \
           gyro_build_sparse_ampere.o \
           gyro_build_sparse_poisson.o \
           gyro_build_sparse_poissonaperp.o \
@@ -147,9 +150,6 @@ OBJECTS = gyro_globals.o \
           get_error.o \
           get_phi_squared.o \
           get_g_squared.o \
-          ORB_do.o \
-          ORB_init.o \
-          ORB_lambda.o \
           ORB_s2lambda.o \
           ORB_s.o \
           do_dtau.o \

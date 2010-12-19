@@ -15,7 +15,7 @@
 
 subroutine ORB_s2lambda(s,lambda)
 
-  use ORB_private
+  use gyro_banana_private
 
   !-----------------------------------------------------------
   implicit none
@@ -31,8 +31,8 @@ subroutine ORB_s2lambda(s,lambda)
 
   residual = 1.0
 
-  dlambda = ORB_lambda_max/2.0-eps_lambda
-  lambda  = ORB_lambda_max/2.0
+  dlambda = lambda_max/2.0-eps_lambda
+  lambda  = lambda_max/2.0
 
   do while (residual > eps_lambda)
 
