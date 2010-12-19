@@ -1,5 +1,5 @@
 !-----------------------------------------------------
-! make_theta_operators.f90
+! gyro_banana_operators.f90
 !
 ! PURPOSE:
 !  Compute arrays connected with solution in theta 
@@ -36,7 +36,7 @@
 !   Cyclic version of phase multiplier.
 !-----------------------------------------------------
 
-subroutine make_theta_operators
+subroutine gyro_banana_operators
 
   use gyro_globals
   use math_constants
@@ -47,8 +47,8 @@ subroutine make_theta_operators
   integer :: p
   !
   real :: period
-  real :: ORB_theta(n_tau(1)+1)
-  real :: ORB_tau(n_tau(1)+1)
+  real :: banana_theta(n_tau(1)+1)
+  real :: banana_tau(n_tau(1)+1)
   !-------------------------------------------
 
 
@@ -117,20 +117,20 @@ subroutine make_theta_operators
         call gyro_banana_uniform_taugrid(lambda(i,k),&
              n_tau(1)+1,&
              nint_ORB_do,&
-             ORB_theta,&
-             ORB_tau)
+             banana_theta,&
+             banana_tau)
 
         ! Parameterization of entire orbit, given 
         ! the passing orbit computed by ORB library.
 
-        period = ORB_tau(n_tau(1)+1)
+        period = banana_tau(n_tau(1)+1)
 
         do j=1,n_tau(1)
 
-           tau(i,k,j)           = ORB_tau(j)/period
+           tau(i,k,j)           = banana_tau(j)/period
            tau(i,k,j+n_stack/2) = tau(i,k,j)
 
-           theta_t(i,k,j)           = ORB_theta(j)
+           theta_t(i,k,j)           = banana_theta(j)
            theta_t(i,k,j+n_stack/2) = theta_t(i,k,j)
 
         enddo
@@ -180,23 +180,23 @@ subroutine make_theta_operators
         call gyro_banana_uniform_taugrid(lambda(i,k),&
              n_tau(1)+1,&
              nint_ORB_do,&
-             ORB_theta,&
-             ORB_tau)
+             banana_theta,&
+             banana_tau)
 
         ! Parameterization of entire orbit, given
         ! the trapped orbit computed by ORB library.
 
         ! Period here is really a half-period
 
-        period = ORB_tau(n_tau(1)+1)
+        period = banana_tau(n_tau(1)+1)
 
         do j=1,n_tau(1)+1
-           tau(i,k,j)     = ORB_tau(j)/period
-           theta_t(i,k,j) = ORB_theta(j)
+           tau(i,k,j)     = banana_tau(j)/period
+           theta_t(i,k,j) = banana_theta(j)
         enddo
         do j=2,n_tau(1)
            tau(i,k,j+n_tau(1)) = 2*tau(i,k,n_tau(1)+1)-tau(i,k,n_tau(1)+2-j)
-           theta_t(i,k,j+n_tau(1)) = ORB_theta(n_tau(1)+2-j)
+           theta_t(i,k,j+n_tau(1)) = banana_theta(n_tau(1)+2-j)
         enddo
 
         ! omega(k) => coefficient of d/d_tau
@@ -301,9 +301,9 @@ subroutine make_theta_operators
   !--------------------------------------------------------
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[make_theta_operators done]'
+     print *,'[gyro_banana_operators done]'
   endif
 
 10 format(i2,2x,6(f12.9,1x))
 
-end subroutine make_theta_operators
+end subroutine gyro_banana_operators

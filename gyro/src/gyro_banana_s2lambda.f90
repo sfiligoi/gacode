@@ -1,19 +1,14 @@
-!-----------------------------------------------------
-! ORB_s2lambda.f90
+!----------------------------------------------------------
+! gyro_banana_s2lambda.f90
 !
 ! PURPOSE:
-!  Given s, calculate lambda.
+!  Given s (integral of tau), calculate lambda.
 ! 
 ! NOTES:
-!  Speed not esential, so use bisection for 
-!  stability.
-!
-! REVISIONS
-! 04 Dec 01: jc
-!  Documented.
-!---------------------------------------------
+!  Speed not esential, so use bisection for stability.
+!----------------------------------------------------------
 
-subroutine ORB_s2lambda(s,lambda)
+subroutine gyro_banana_s2lambda(s,lambda)
 
   use gyro_banana_private
 
@@ -36,8 +31,8 @@ subroutine ORB_s2lambda(s,lambda)
 
   do while (residual > eps_lambda)
 
-     call ORB_s(lambda,s1)
-     call ORB_s(lambda+dlambda,s2)
+     call gyro_banana_integrate_tau(lambda,s1)
+     call gyro_banana_integrate_tau(lambda+dlambda,s2)
 
      dlambda = 0.5*dlambda
 
@@ -51,4 +46,4 @@ subroutine ORB_s2lambda(s,lambda)
 
   enddo
 
-end subroutine ORB_s2lambda
+end subroutine gyro_banana_s2lambda

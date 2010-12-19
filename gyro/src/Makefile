@@ -19,8 +19,6 @@ OBJECTS = gyro_globals.o \
 	  gyro_poissonaperp_private.o \
           gyro_mumps_private.o \
           gyro_banana_private.o \
-          gyro_banana_init.o \
-          gyro_banana_getlambda.o \
           gyro.o \
           gyro_adaptive_source.o \
           gyro_interface.o \
@@ -37,7 +35,12 @@ OBJECTS = gyro_globals.o \
           gyro_ave_rot.o \
 	  gyro_ave_aperp.o \
           gyro_ballooning_mode.o \
+          gyro_banana_init.o \
+          gyro_banana_integrate_tau.o \
+          gyro_banana_getlambda.o \
+          gyro_banana_operators.o \
           gyro_banana_uniform_taugrid.o \
+          gyro_banana_s2lambda.o \
           gyro_build_sparse_ampere.o \
           gyro_build_sparse_poisson.o \
           gyro_build_sparse_poissonaperp.o \
@@ -62,6 +65,7 @@ OBJECTS = gyro_globals.o \
 	  gyro_fieldeigen_kernel.o \
 	  gyro_fieldeigen_df.o \
           gyro_fulladvance.o \
+          gyro_lambda_grid.o \
           gyro_memory_usage.o \
           gyro_nonlinear_flux.o \
           gyro_omegas.o \
@@ -110,9 +114,7 @@ OBJECTS = gyro_globals.o \
           make_blend_arrays.o \
           make_theta_grid.o \
           make_geometry_arrays.o \
-          make_theta_operators.o \
           make_gyro.o \
-          make_lambda_grid.o \
           make_phase_space.o \
           make_pointers.o \
           make_pointer_dimensions.o \
@@ -150,8 +152,6 @@ OBJECTS = gyro_globals.o \
           get_error.o \
           get_phi_squared.o \
           get_g_squared.o \
-          ORB_s2lambda.o \
-          ORB_s.o \
           do_dtau.o \
           do_nlfast_p.o \
           do_nlfast_match.o \
@@ -160,7 +160,7 @@ OBJECTS = gyro_globals.o \
           read_restart.o \
           set_exit_status.o \
           write_step.o \
-          write_theta_operators.o \
+          write_banana_operators.o \
           write_radial_operators.o \
           write_freq.o \
           write_h.o \

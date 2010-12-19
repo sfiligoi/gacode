@@ -127,14 +127,14 @@ subroutine gyro_do(skipinit)
   call gyro_alloc_orbit(1)
   !
   ! Lambda (pitch-angle) weights 
-  call make_lambda_grid
+  call gyro_lambda_grid
   !
   ! Energy weights
   call energy_integral(n_energy,energy_max,n_kinetic,energy,w_energy)
   !
   ! Compute myriad arrays (for example, map between poloidal
   ! angle and orbit time) for poloidal discretization.
-  call make_theta_operators
+  call gyro_banana_operators
   !
   ! Total velocity-space-tau weights.
   call make_phase_space(trim(path)//'phase_space.out',1)

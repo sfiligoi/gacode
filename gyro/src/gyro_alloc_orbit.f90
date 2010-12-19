@@ -10,7 +10,7 @@
 !
 !  Need to know n_lambda,n_stack before this is called.
 !
-!  See: make_theta_operators, make_geometry_arrays.
+!  See: gyro_banana_operators, make_geometry_arrays.
 !----------------------------------------------------------
 
 subroutine gyro_alloc_orbit(flag)

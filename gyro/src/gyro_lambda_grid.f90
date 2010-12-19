@@ -1,11 +1,11 @@
 !---------------------------------------------------------
-! make_lambda_grid.f90
+! mgyro_lambda_grid.f90
 !
 ! PURPOSE:
 !  Lambda grid (and tau/theta spacing) setup.
 !---------------------------------------------------------
 
-subroutine make_lambda_grid
+subroutine gyro_lambda_grid
 
   use gyro_globals
   use math_constants
@@ -37,7 +37,7 @@ subroutine make_lambda_grid
 
      ! two regions
 
-     call ORB_s(lambda_tp(i),s_tp)
+     call gyro_banana_integrate_tau(lambda_tp(i),s_tp)
 
      ! s_tp => s at trapped-passing boundary
 
@@ -58,7 +58,7 @@ subroutine make_lambda_grid
      deallocate(w_temp)
 
      do k=1,n_lambda
-        call ORB_s2lambda(s_lambda(k),lambda(i,k))
+        call gyro_banana_s2lambda(s_lambda(k),lambda(i,k))
      enddo
 
      ! Two signs of velocity
@@ -69,9 +69,8 @@ subroutine make_lambda_grid
 
   enddo ! i
 
-
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[make_lambda_grid done]'
+     print *,'[gyro_lambda_grid done]'
   endif
 
-end subroutine make_lambda_grid
+end subroutine gyro_lambda_grid

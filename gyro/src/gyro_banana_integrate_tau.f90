@@ -1,12 +1,11 @@
-!-----------------------------------------------------
-! ORB_s.f90
+!------------------------------------------------------------
+! gyro_banana_integrate_tau.f90
 !
 ! PURPOSE:
-!  Compute s(lambda) = Int[0,lambda] tau(lambda)
-!  numerically.
-!---------------------------------------------
+!  Compute s(lambda) = Int[0,lambda] tau(lambda) numerically.
+!------------------------------------------------------------
 
-subroutine ORB_s(lambda,s)
+subroutine gyro_banana_integrate_tau(lambda,s)
 
   use gyro_banana_private
   use GEO_interface
@@ -81,4 +80,4 @@ subroutine ORB_s(lambda,s)
 
   deallocate(f)
 
-end subroutine ORB_s
+end subroutine gyro_banana_integrate_tau
