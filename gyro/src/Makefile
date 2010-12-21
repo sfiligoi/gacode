@@ -172,9 +172,6 @@ OBJECTS = gyro_globals.o \
           write_error.o \
           write_geometry_arrays.o \
           write_matrix_stat.o \
-          write_distributed_complex.o \
-          write_distributed_real.o \
-          write_local_real.o \
           cleanup_mumps.o 
 
 .SUFFIXES : .o .f90 
