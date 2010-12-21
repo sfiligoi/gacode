@@ -85,6 +85,7 @@ OBJECTS = gyro_globals.o \
           gyro_read_input_extra.o \
           gyro_read_experimental_profiles.o \
           gyro_rhs_total.o \
+          gyro_tau_derivative.o \
           gyro_write_input.o \
           gyro_write_precision.o \
           gyro_write_units.o \
@@ -152,7 +153,6 @@ OBJECTS = gyro_globals.o \
           get_error.o \
           get_phi_squared.o \
           get_g_squared.o \
-          do_dtau.o \
           do_nlfast_p.o \
           do_nlfast_match.o \
           do_nlfft_p.o \

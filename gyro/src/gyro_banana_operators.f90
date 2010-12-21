@@ -287,7 +287,7 @@ subroutine gyro_banana_operators
   !--------------------------------------------------------
 
   !--------------------------------------------------------
-  ! sigma-related operator for do_dtau vectorization:
+  ! sigma-related operator for gyro_tau_derivative vectorization:
   !
   do ck=1,2
      do p=1,2

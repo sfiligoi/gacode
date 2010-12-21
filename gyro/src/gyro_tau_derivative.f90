@@ -1,5 +1,5 @@
 !------------------------------------------------
-! do_dtau.f90 [caller gyro_rhs_total]
+! gyro_tau_derivative.f90 [caller gyro_rhs_total]
 !
 ! PURPOSE:
 !  Compute the tau-derivative terms in the RHS 
@@ -12,7 +12,7 @@
 !  result in "bouncing" instead of damping.
 !------------------------------------------------
 
-subroutine do_dtau
+subroutine gyro_tau_derivative
 
   use gyro_globals
   use gyro_pointers
@@ -112,4 +112,4 @@ subroutine do_dtau
 
   enddo ! is
 
-end subroutine do_dtau
+end subroutine gyro_tau_derivative

@@ -34,7 +34,7 @@ subroutine gyro_rhs_total
   ! Compute orbit-time derivative for ions ONLY,
   ! because this term is explicit for ions.
   !
-  if (kill_i_parallel_flag == 0) call do_dtau
+  if (kill_i_parallel_flag == 0) call gyro_tau_derivative
   !---------------------------------------------
 
   !----------------------------------------------------------------------
