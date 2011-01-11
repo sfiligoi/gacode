@@ -22,13 +22,6 @@ subroutine sparse_solve_umfpack(n_elem,n_row,matnum,i_solve)
   complex, dimension(:), allocatable :: x_UMF
   complex, dimension(:), allocatable :: w_UMF
   !
-  ! UMFPACK control
-  !
-  real, dimension(4,10) :: cntl
-  real, dimension(20) :: rinfo
-  integer, dimension(4,20) :: icntl
-  integer, dimension(40) :: uinfo
-  integer, dimension(4,20) :: keep  
   !---------------------------------------------------
 
   call proc_time(CPU_field2_in)

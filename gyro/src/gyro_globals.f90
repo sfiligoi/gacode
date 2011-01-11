@@ -983,6 +983,16 @@ module gyro_globals
   integer, dimension(:), allocatable :: recv_status
   !------------------------------------------------------
 
+  !------------------------------------------------------
+  ! UMFPACK control
+  !
+  real, dimension(4,10) :: cntl
+  real, dimension(20) :: rinfo
+  integer, dimension(4,20) :: icntl
+  integer, dimension(40) :: uinfo
+  integer, dimension(4,20) :: keep  
+  !------------------------------------------------------
+
   !------------------------------------------
   ! Precision outut file
   !
