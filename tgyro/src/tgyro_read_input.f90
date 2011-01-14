@@ -56,7 +56,6 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(loc_restart_flag) 
   call tgyro_readbc_int(loc_scenario) 
   call tgyro_readbc_int(loc_quasineutral_flag) 
-  call tgyro_readbc_int(loc_ebshear_flag) 
   call tgyro_readbc_int(loc_neo_method) 
   call tgyro_readbc_int(loc_n_ion) 
   call tgyro_readbc_real(zi_vec(1)) 
@@ -85,7 +84,6 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(loc_pflux_method)
   call tgyro_readbc_int(loc_residual_method)
   call tgyro_readbc_int(loc_num_equil_flag)
-  call tgyro_readbc_int(loc_rotation_method)
   call tgyro_readbc_int(neo_gv_flag)
   call tgyro_readbc_int(tglf_q_low_flag)
   call tgyro_readbc_real(tgyro_ipccw_in)
@@ -95,6 +93,7 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(tgyro_iteration_method)
   call tgyro_readbc_real(lm_boost)
   call tgyro_readbc_real(lm_drop)
+  call tgyro_readbc_int(tgyro_rotation_theory_method)
   ! ** END add new parameters
   call tgyro_readbc_int(n_inst)
   !-------------------------------------------------------

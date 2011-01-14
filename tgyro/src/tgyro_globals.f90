@@ -230,7 +230,6 @@ module tgyro_globals
   integer :: loc_restart_flag
   integer :: loc_scenario
   integer :: loc_quasineutral_flag
-  integer :: loc_ebshear_flag
   integer :: loc_neo_method
   integer :: loc_n_ion
   real, dimension(5) :: zi_vec
@@ -253,12 +252,12 @@ module tgyro_globals
   integer :: loc_pflux_method
   integer :: loc_residual_method
   integer :: loc_num_equil_flag
-  integer :: loc_rotation_method
   integer :: neo_gv_flag
   integer :: tglf_q_low_flag
   integer :: tgyro_global_newton_flag
   integer :: tgyro_backtrack_method
   integer :: tgyro_iteration_method
+  integer :: tgyro_rotation_theory_method
   real :: lm_boost
   real :: lm_drop
   !

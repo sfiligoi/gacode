@@ -88,7 +88,7 @@ subroutine tgyro_gyro_map
   ! Note that we have to "deconvert" the rotation parameters to 
   ! omega_0+ form, with sign controlled by gyro_ipccw_in, etc.
 
-  if (loc_ebshear_flag == 1) gyro_gamma_e_in = gamma_eb(i_r)*r_min/c_s(i_r)
+  gyro_gamma_e_in = gamma_eb(i_r)*r_min/c_s(i_r)
   gyro_pgamma_in = gamma_p(i_r)*r_min/c_s(i_r)
   gyro_mach_in = u00(i_r)/c_s(i_r)
 

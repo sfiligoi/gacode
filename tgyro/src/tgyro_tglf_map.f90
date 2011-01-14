@@ -118,10 +118,8 @@ subroutine tgyro_tglf_map
 
   !----------------------------------------------------------------
   ! Gamma_ExB (ExB shearing rate, units of a/cs)
-  if (loc_rotation_method == 3) then
-     if (loc_ebshear_flag == 1) tglf_vexb_shear_in = gamma_eb(i_r)*r_min/c_s(i_r)
-     tglf_vpar_shear_in = gamma_p(i_r)*r_min/c_s(i_r)
-  endif
+  tglf_vexb_shear_in = gamma_eb(i_r)*r_min/c_s(i_r)
+  tglf_vpar_shear_in = gamma_p(i_r)*r_min/c_s(i_r)
   !----------------------------------------------------------------
 
   !-----------------------------------

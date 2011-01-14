@@ -116,15 +116,12 @@ subroutine tgyro_neo_map
 
   endif
 
-  ! Rotation
-  if (loc_rotation_method == 3) then
-     neo_rotation_model_in = 2
-     neo_omega_rot_in = u00(i_r) * r_min / r_maj(i_r) &
-          / (c_s(i_r) * sqrt(ti(1,i_r)/te(i_r))) * (-1.0*tgyro_ipccw_in)
-     neo_omega_rot_deriv_in = -gamma_p(i_r) * r_min**2 / r_maj(i_r) &
-          / (c_s(i_r) * sqrt(ti(1,i_r)/te(i_r))) * (-1.0*tgyro_ipccw_in)
-  endif
-
+  ! Rotation is always active
+  neo_rotation_model_in = 2
+  neo_omega_rot_in = u00(i_r) * r_min / r_maj(i_r) &
+       / (c_s(i_r) * sqrt(ti(1,i_r)/te(i_r))) * (-1.0*tgyro_ipccw_in)
+  neo_omega_rot_deriv_in = -gamma_p(i_r) * r_min**2 / r_maj(i_r) &
+       / (c_s(i_r) * sqrt(ti(1,i_r)/te(i_r))) * (-1.0*tgyro_ipccw_in)
 
   ! Parameter only used for global runs.
   neo_rmin_over_a_2_in = neo_rmin_over_a_in

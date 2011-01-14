@@ -1,7 +1,3 @@
-!-----------------------------------------------------------------
-! Copyright 1999-2009 by Jeff Candy, Ron Waltz and Mark Fahey.
-!-----------------------------------------------------------------
-
 program tgyro_main
 
   use tgyro_globals

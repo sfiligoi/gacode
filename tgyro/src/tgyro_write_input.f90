@@ -282,37 +282,20 @@ subroutine tgyro_write_input
      !--------------------------------------------------------
 
      !--------------------------------------------------------
-     select case (loc_rotation_method)
+     select case (tgyro_rotation_theory_method)
 
      case (1)
 
-        write(1,10) 'LOC_ROTATION_METHOD','Weak rotation limit'
+        write(1,10) 'TGYRO_ROTATION_THEORY_METHOD','Candy method'
 
-     case (3)
+     case (2)
 
-        write(1,10) 'LOC_ROTATION_METHOD','Candy model for strong rotation'
-
-        select case (loc_ebshear_flag)
-
-        case (0)
-
-           write(1,10) 'LOC_EBSHEAR_FLAG','No ExB shear'
-
-        case (1)
-
-           write(1,10) 'LOC_EBSHEAR_FLAG','ExB shear'
-
-        case default
-
-           error_flag = 1
-           error_msg = 'Error: LOC_EBSHEAR_FLAG'
-
-        end select
+        write(1,10) 'TGYRO_ROTATION_THEORY_METHOD','Waltz method'
 
      case default
 
         error_flag = 1
-        error_msg = 'Error: LOC_ROTATION_METHOD'
+        error_msg = 'Error: TGYRO_ROTATION_THEORY_METHOD'
 
      end select
      !--------------------------------------------------------
