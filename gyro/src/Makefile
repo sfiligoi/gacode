@@ -65,6 +65,7 @@ OBJECTS = gyro_globals.o \
 	  gyro_fieldeigen_kernel.o \
 	  gyro_fieldeigen_df.o \
           gyro_fulladvance.o \
+          gyro_kxky_spectrum.o \
           gyro_lambda_grid.o \
           gyro_memory_usage.o \
           gyro_nonlinear_flux.o \
@@ -141,7 +142,6 @@ OBJECTS = gyro_globals.o \
           get_poisson_explicit.o \
           get_ampere_explicit.o \
 	  get_maxwell3_explicit.o \
-          get_field_spectrum.o \
           get_field_plot.o \
           get_field_r0_plot.o \
           get_nonlinear_flux_velocity.o \
