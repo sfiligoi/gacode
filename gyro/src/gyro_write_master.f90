@@ -177,7 +177,7 @@ subroutine gyro_write_master(action)
   !--------------------------------------------------
 
   call proc_time(cp1)
-  call get_field_spectrum
+  call gyro_kxky_spectrum
   call write_distributed_real(&
        trim(path)//'kxkyspec.out',&
        10,&
