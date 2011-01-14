@@ -30,22 +30,22 @@ subroutine gyro_init(path_in, mpi_comm_in)
   ! Check if INPUT.gen file exists and set inputdat_flag accordingly
   ! NOTE: TRUE if INPUT.gen does exist, FALSE if INPUT.gen does NOT exist
   if (i_proc == 0) then
-     inquire(file=trim(path)//'INPUT.gen',exist=inputdat_flag)
+     inquire(file=trim(path)//'input.gyro.gen',exist=inputdat_flag)
   endif
 
   call MPI_BCAST(inputdat_flag, 1, MPI_LOGICAL, 0, GYRO_COMM_WORLD, i_err)
 
   if (i_proc == 0) then
      if (inputdat_flag .eqv. .true.) then
-        print '(a,a,a)', '[gyro_init reading ',trim(path),'INPUT.gen]'
+        print '(a,a,a)', '[gyro_init reading ',trim(path),'input.gyro.gen]'
      else
-        print '(a,a,a)', '[gyro_init NOT reading ',trim(path),'INPUT.gen]'
+        print '(a,a,a)', '[gyro_init NOT reading ',trim(path),'input.gyro.gen]'
      endif
   endif
 
   if (inputdat_flag .eqv. .true.) then
 
-    ! Only call read_input subroutine if INPUT.gen file exists
+    ! Only call read_input subroutine if input.gyro.gen file exists
 
      call gyro_read_input
 

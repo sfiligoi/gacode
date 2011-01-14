@@ -33,6 +33,8 @@ subroutine gyro_cleanup
      if (allocated(indx_ampere)) deallocate(indx_ampere)
      if (allocated(m_maxwell)) deallocate(m_maxwell)
      if (allocated(indx_maxwell)) deallocate(indx_maxwell)
+     if (allocated(m_poissonaperp)) deallocate(m_poissonaperp)
+     if (allocated(indx_poissonaperp)) deallocate(indx_poissonaperp)
 
      ! Blending coefficients
      call BLEND_cleanup
