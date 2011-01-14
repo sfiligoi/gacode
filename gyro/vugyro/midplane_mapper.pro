@@ -14,10 +14,10 @@ pro midplane_mapper
       print, 'adding temp flucs to midplane power'
   endif
 
-  if n_pwr eq 0 then return
-
   rp = indgen(n_r)-(n_r/2-1)
   kr_rho = rp*2*!pi/(r[n_r-1]-r[0])*rho_s
+
+  if n_pwr eq 0 then return
 
 ; release previous allocation of pwr:
   pwr=0

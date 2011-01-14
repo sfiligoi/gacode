@@ -441,9 +441,11 @@ subroutine gyro_write_input
 
 
   if (i_proc == 0 .and. io_mode == 1) then
-
-     write(1,25) 'min(k_x*rho_sD)',2*pi/(x_length/rhos_abs)
-     write(1,25) 'max(k_x*rho_sD)',2*pi/(x_length/rhos_abs)*n_x/4.0
+     write(1,*) ' '
+     write(1,'(t2,a,t27,f10.6)') 'min resolved k_x*rho_sD : ', &
+          2*pi/(x_length/rhos_abs)
+     write(1,'(t2,a,t27,f10.6)') 'max resolved k_x*rho_sD : ', &
+          2*pi/(x_length/rhos_abs)*n_x/4.0
 
      !-----------------------------------------------------------
      ! Compute central box size

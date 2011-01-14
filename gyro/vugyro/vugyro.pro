@@ -530,20 +530,24 @@ pro vugyro, _EXTRA=extra
   x = widget_button(top,value='Spectral Analysis',/menu)
 
   x1 = widget_button(x,$
-                     value='(n,p)-spectrum',$
+                     value='2D (n,p)(t) spectrum',$
                      uvalue='spectrum_np_see')
 
   x1 = widget_button(x,$
-                     value='(n,p)-spectrum (average)',$
+                     value='2D <(n,p)> spectrum',$
                      uvalue='spectrum_np_ave_see')
 
   x1 = widget_button(x,$
-                     value='f(n)(t)',$
+                     value='1D f(n)(t)',$
                      uvalue='spectrum_n_see')
 
   x1 = widget_button(x,$
-                     value='f(n,p)(t)',$
+                     value='1D f(n,p)(t)',$
                      uvalue='each_np_see')
+
+  x1 = widget_button(x,$
+                     value='1D <f(n)>',$
+                     uvalue='spectrum_n_ave_see')
 
   x = widget_button(top,$
                     value='Midplane data',$
