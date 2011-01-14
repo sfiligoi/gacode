@@ -53,7 +53,7 @@ pro spectrum_n_ave_event, spectrum_n_ave
 
   title  = 'Radial asymmetry'
   ytitle = '<'+kr_rho_string+'!4u!u2!n>/<u!u2!n>!3'
-  pname  = 'spectrum_n_ave_'
+  pname  = 'spectrum_n_ave'
   plot_def_new,pname
 
   yt1 = fltarr(n_time)
@@ -92,8 +92,8 @@ pro spectrum_n_ave_event, spectrum_n_ave
   ;;
   if (plot_export eq 1) then begin
      openw,1,pname+'.idlout'
-     for tt=0,n_time-1 do begin
-        printf,1,kr_rho[tt],y[tt]
+     for in=0,n_n-1 do begin
+        printf,1,kt_rho[in],y[in]
      endfor
      close,1
      print,'Exported data to ',pname+'.idlout'
