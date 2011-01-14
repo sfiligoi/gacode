@@ -22,25 +22,17 @@ export EXTRA_LIBS = \
        ${LMATH}
 
 all:
+	cd ${GACODE_ROOT}/shared ; make
+	cd ${GACODE_ROOT}/neo ; make
+	cd ${GACODE_ROOT}/tglf ; make
+	cd ${GACODE_ROOT}/gyro ; make
 	cd math ; make
 	cd qfm ; make
 	cd src ; make
-
-lib:
-	cd ${GACODE_ROOT}/shared ; make
-	cd ${GACODE_ROOT}/gyro ; make
-	cd ${GACODE_ROOT}/neo ; make
-	cd ${GACODE_ROOT}/tglf ; make
 
 clean:
 	cd math ; make clean
 	cd qfm ; make clean
 	cd src ; make clean
 
-lib-clean:
-	cd ${GACODE_ROOT}/shared ; make clean
-	cd ${GACODE_ROOT}/gyro ; make clean
-	cd ${GACODE_ROOT}/neo ; make clean
-	cd ${GACODE_ROOT}/tglf ; make clean
-	
 .IGNORE:
