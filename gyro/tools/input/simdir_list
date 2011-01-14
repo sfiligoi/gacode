@@ -25,6 +25,8 @@ Full nonlinear cases
 
 nl01: [nl+gki+dke+ es+pure+mod+ sym+ncol+nrot+ p+inp]
       GA standard case, 16 modes.
+nl02: [nl+gki+dke+tem+pure+gen+ sym+ col+nrot+ p+exp]
+      Guttenfelder's NSTX microtearing case.
 
 Eigenvalue cases:
 
