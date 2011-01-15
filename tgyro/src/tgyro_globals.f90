@@ -217,7 +217,6 @@ module tgyro_globals
   ! Control variables
   !
   integer :: tgyro_relax_iterations
-  real :: loc_r_ped
   real :: loc_aux_amp
   real :: loc_aux_exp
   real :: loc_alpha_elec
@@ -264,6 +263,9 @@ module tgyro_globals
   integer :: tgyro_stab_flag
   integer :: tgyro_stab_nsearch
   integer :: tgyro_stab_nky
+  real :: tgyro_stab_kymin
+  real :: tgyro_rmin
+  real :: tgyro_rmax
   !
   ! Iteration variables (global)
   !

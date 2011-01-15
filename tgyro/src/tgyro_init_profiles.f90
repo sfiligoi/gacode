@@ -31,7 +31,7 @@ subroutine tgyro_init_profiles
   k       = 1.6022e-12 ! erg/eV
   me      = 9.1094e-28 ! g
   mp      = 1.6726e-24 ! g
-  c       = 2.9979e10 ! cm/s
+  c       = 2.9979e10  ! cm/s
   !------------------------------------------------------
 
   !------------------------------------------------------
@@ -51,12 +51,25 @@ subroutine tgyro_init_profiles
   !----------------------------------------------
   ! Generate radial vector:
   !
-  do i=1,n_r
+  if (tgyro_rmin > 0.0) then
 
-     ! Normalized r (dimensionless)
-     r(i) = (i-1.0)/(n_r-1.0)*loc_r_ped
+     r(1) = 0.0
+     do i=2,n_r
 
-  enddo
+        ! Normalized r (dimensionless)
+        r(i) = tgyro_rmin+(i-2)/(n_r-2.0)*(tgyro_rmax-tgyro_rmin)
+
+     enddo
+
+  else
+
+     do i=1,n_r
+
+        ! Normalized r (dimensionless)
+        r(i) = (i-1)/(n_r-1.0)*tgyro_rmax
+
+     enddo
+  endif
   !----------------------------------------------
 
   !----------------------------------------------

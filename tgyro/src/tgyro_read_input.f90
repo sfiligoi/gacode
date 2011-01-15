@@ -43,7 +43,6 @@ subroutine tgyro_read_input
   !
   call tgyro_readbc_int(transport_method)
   call tgyro_readbc_int(tgyro_relax_iterations)
-  call tgyro_readbc_real(loc_r_ped)
   call tgyro_readbc_real(loc_aux_amp) 
   call tgyro_readbc_real(loc_aux_exp) 
   call tgyro_readbc_real(loc_alpha_elec) 
@@ -98,6 +97,9 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(tgyro_stab_flag)
   call tgyro_readbc_int(tgyro_stab_nsearch)
   call tgyro_readbc_int(tgyro_stab_nky)
+  call tgyro_readbc_real(tgyro_stab_kymin)
+  call tgyro_readbc_real(tgyro_rmin)
+  call tgyro_readbc_real(tgyro_rmax)
   ! ** END add new parameters
   call tgyro_readbc_int(n_inst)
   !-------------------------------------------------------

@@ -12,9 +12,13 @@ subroutine tgyro_stab_driver
 
   implicit none
 
-  integer :: i_search,iky,i_err,i
+  integer :: i_search
+  integer :: iky
+  integer :: i_err
+  integer :: i
   integer :: imax(1)
   real :: wr,wi,err
+
   real, dimension(0:tgyro_stab_nky-1,n_inst) :: wi_ion
   real, dimension(0:tgyro_stab_nky-1,n_inst) :: wi_elec
   real, dimension(0:tgyro_stab_nky-1,n_inst) :: wr_ion
@@ -38,14 +42,19 @@ subroutine tgyro_stab_driver
   ! Map TGYRO parameters to GYRO
   call tgyro_gyro_map
 
+  ! Use FIELDEIGEN
   gyro_linsolve_method_in = 3
+
+  ! Use GK electron (only possibility with FIELDEIGEN)
   gyro_electron_method_in = 4
+
+  ! Set this so was can specify L_Y=ky*rhos exactly.
   gyro_box_multiplier_in = -1.0
 
-  wi_elec = 0.0
-  wr_elec = 0.0
-  wi_ion = 0.0
-  wr_ion = 0.0
+  wi_elec(:,:) = 0.0
+  wr_elec(:,:) = 0.0
+  wi_ion(:,:)  = 0.0
+  wr_ion(:,:)  = 0.0
 
   do iky=0,tgyro_stab_nky-1
 
@@ -54,27 +63,27 @@ subroutine tgyro_stab_driver
      wr_ion_loc  = 0.0
      wr_elec_loc = 0.0
 
-     ky(iky) = 0.2 + iky*0.1
+     ky(iky) = tgyro_stab_kymin + iky*0.1
 
      if (n_worker == 1) then
         wr = 0.0
      else
         wr = ky(iky)*(-1.0+worker*(2.0/(n_worker-1)))
      endif
-     wi = 0.1
 
      gyro_l_y_in = ky(iky)
      gyro_fieldeigen_wr_in = wr
-     gyro_fieldeigen_wi_in = wi
+     
+     ! NOTE: gyro_fieldeigen_wi_in taken from input.gyro (should be about 0.1)
 
      call gyro_run(gyrotest_flag, gyro_restart_method, &
           transport_method, gyro_exit_status(i_r), gyro_exit_message(i_r))
 
+    ! wr and wi are now the COMPUTED eigenvalues
+
      wr  = real(gyro_fieldeigen_omega_out)
      wi  = aimag(gyro_fieldeigen_omega_out)
      err = gyro_fieldeigen_error_out
-
-     !print '(i2,3(1x,1pe13.5))',worker,wr,wi,err
 
      ! electron mode
      if (wr > 0.0 .and. wi > 0.0 .and. err < 0.9) then

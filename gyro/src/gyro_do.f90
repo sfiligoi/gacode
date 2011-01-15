@@ -269,7 +269,7 @@ subroutine gyro_do(skipinit)
      !---------------------------------------
 
   endif
-
+ 
   !---------------------------------------
   ! Dump input parameters runfile
   !
