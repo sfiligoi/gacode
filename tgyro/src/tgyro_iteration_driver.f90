@@ -14,7 +14,7 @@ subroutine tgyro_iteration_driver
 
   n_r   = n_inst+1
   p_max = n_evolve*(n_r-1)
- 
+
   flux_counter = 0
 
   allocate(ipiv(p_max))
@@ -53,14 +53,6 @@ subroutine tgyro_iteration_driver
 
   ! Generate ALL radial profiles.
   call tgyro_init_profiles
-
-  if (loc_restart_flag == 0) then
-     ! Create, but do not write to, datafiles.
-     call tgyro_write_data(0)
-     ! Initialize relaxation parameters to starting value.
-     relax(:) = 1.0
-  endif
-  correct_flag = 0
 
   !----------------------------------------------
   ! Choose flux_method based on path information.
@@ -101,6 +93,19 @@ subroutine tgyro_iteration_driver
   !---------------------------------------------
 
   call tgyro_write_input
+
+  if (tgyro_stab_flag == 1) then
+     call tgyro_stab_driver
+     return
+  endif
+
+  if (loc_restart_flag == 0) then
+     ! Create, but do not write to, datafiles.
+     call tgyro_write_data(0)
+     ! Initialize relaxation parameters to starting value.
+     relax(:) = 1.0
+  endif
+  correct_flag = 0
 
   p = 0
   do i=2,n_r
@@ -147,6 +152,5 @@ subroutine tgyro_iteration_driver
      call tgyro_iteration_parallel
 
   end select
-
 
 end subroutine tgyro_iteration_driver

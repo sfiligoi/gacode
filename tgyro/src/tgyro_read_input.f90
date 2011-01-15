@@ -93,7 +93,11 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(tgyro_iteration_method)
   call tgyro_readbc_real(lm_boost)
   call tgyro_readbc_real(lm_drop)
+  call tgyro_readbc_int(tgyro_rotation_flag)
   call tgyro_readbc_int(tgyro_rotation_theory_method)
+  call tgyro_readbc_int(tgyro_stab_flag)
+  call tgyro_readbc_int(tgyro_stab_nsearch)
+  call tgyro_readbc_int(tgyro_stab_nky)
   ! ** END add new parameters
   call tgyro_readbc_int(n_inst)
   !-------------------------------------------------------

@@ -14,6 +14,7 @@ subroutine gyro_run(&
 
   use gyro_globals
   use gyro_interface
+  use gyro_fieldeigen_private
 
   implicit none
 
@@ -86,6 +87,18 @@ subroutine gyro_run(&
      return
   endif
 
+  ! Linear stability (FIELDEIGEN)
+  if (linsolve_method == 3) then
+
+     gyro_fieldeigen_omega_out = omega_eigen
+     gyro_fieldeigen_error_out = error_eigen
+
+     call gyro_cleanup
+     return
+
+  endif
+
+  ! Nonlinear transport
   if (i_proc == 0 .and. transport_method == 2) then
 
      n_start = max(int((1.0-f_ave)*data_step),1)

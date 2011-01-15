@@ -88,9 +88,19 @@ subroutine tgyro_gyro_map
   ! Note that we have to "deconvert" the rotation parameters to 
   ! omega_0+ form, with sign controlled by gyro_ipccw_in, etc.
 
-  gyro_gamma_e_in = gamma_eb(i_r)*r_min/c_s(i_r)
-  gyro_pgamma_in = gamma_p(i_r)*r_min/c_s(i_r)
-  gyro_mach_in = u00(i_r)/c_s(i_r)
+  if (tgyro_rotation_flag == 1) then
+
+     gyro_gamma_e_in = gamma_eb(i_r)*r_min/c_s(i_r)
+     gyro_pgamma_in = gamma_p(i_r)*r_min/c_s(i_r)
+     gyro_mach_in = u00(i_r)/c_s(i_r)
+
+  else
+
+     gyro_gamma_e_in = 0.0
+     gyro_pgamma_in = 0.0
+     gyro_mach_in = 0.0
+
+  endif
 
   gyro_ipccw_in = tgyro_ipccw_in
   gyro_btccw_in = tgyro_btccw_in

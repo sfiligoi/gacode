@@ -71,10 +71,12 @@ subroutine gyro_fieldeigen
   endif
   !-------------------------------------------------------------------------
 
-  if (i_proc == 0) then
-     open(unit=12,file='fieldeigen.out',status='replace')
+  if (i_proc == 0 .and. output_flag == 1) then
+     open(unit=1,file='fieldeigen.out',status='replace')
+     close(1)
+  endif
+  if (i_proc == 0 .and. silent_flag == 0) then
      print *,' Re(omega)      Im(omega)      |det|          error'
-     close(12)
   endif
 
   !-------------------------------------------------------------
@@ -309,13 +311,18 @@ subroutine gyro_fieldeigen
         ! OUTPUT: det
         call gyro_fieldeigen_kernel
 
-        if (i_proc == 0) then
+        error_eigen = abs(dz)/abs(omega_eigen) 
+
+        if (i_proc == 0 .and. silent_flag == 0) then
 
            print '(t2,5(1pe14.7,1x))',&
                 real(omega_eigen),&
                 aimag(omega_eigen), &
                 abs(det),&
-                abs(dz)/abs(omega_eigen)
+                error_eigen
+
+        endif
+        if (i_proc == 0 .and. output_flag == 1) then
 
            open(unit=1,file='fieldeigen.out',status='old',position='append')
 
@@ -323,7 +330,7 @@ subroutine gyro_fieldeigen
                 real(omega_eigen), &
                 aimag(omega_eigen), &
                 abs(det), &
-                abs(dz)/abs(omega_eigen)
+                error_eigen
 
            close(1)
 
@@ -403,13 +410,18 @@ subroutine gyro_fieldeigen
         ! OUTPUT: det
         call gyro_fieldeigen_kernel
 
-        if (i_proc == 0) then
+        error_eigen = abs(z2-z1)/abs(omega_eigen) 
+
+        if (i_proc == 0 .and. silent_flag == 0) then
 
            print '(t2,5(1pe14.7,1x))',&
                 real(omega_eigen),&
                 aimag(omega_eigen), &
                 abs(det), &
-                abs(z2-z1)/abs(omega_eigen)
+                error_eigen
+
+        endif
+        if (i_proc == 0 .and. output_flag == 1) then
 
            open(unit=1,file='fieldeigen.out',status='old',position='append')
 
@@ -417,7 +429,7 @@ subroutine gyro_fieldeigen
                 real(omega_eigen), &
                 aimag(omega_eigen), &
                 abs(det), &
-                abs(z2-z1)/abs(omega_eigen)
+                error_eigen
 
            close(1)
 
@@ -439,12 +451,12 @@ subroutine gyro_fieldeigen
 
   end select
 
-  if (i_proc == 0) then
-     open(unit=1,file='fieldeigen_INPUT.out',status='replace')
-     write(1,'(a,1pe12.4)') 'FIELDEIGEN_WR=',real(omega_eigen)
-     write(1,'(a,1pe12.4)') 'FIELDEIGEN_WI=',aimag(omega_eigen)
-     close(1)
-  endif
+!  if (i_proc == 0 .and. output_flag == 1) then
+!     open(unit=1,file='fieldeigen_INPUT.out',status='replace')
+!     write(1,'(a,1pe12.4)') 'FIELDEIGEN_WR=',real(omega_eigen)
+!     write(1,'(a,1pe12.4)') 'FIELDEIGEN_WI=',aimag(omega_eigen)
+!     close(1)
+!  endif
 
   !----------------------------------------------------------------------------
   ! Compute the eigenfunction
@@ -504,6 +516,10 @@ subroutine gyro_fieldeigen
            enddo
         enddo
      endif
+
+  else
+
+     error_eigen = 1.0
 
   endif
 

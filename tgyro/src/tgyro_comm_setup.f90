@@ -50,25 +50,43 @@ subroutine tgyro_comm_setup
   ! the number of "workers" (the number of parallel tasks for 
   ! the Jacobian calculation.
 
-  n_evolve = &
-       loc_ti_feedback_flag+&
-       loc_te_feedback_flag+&
-       loc_ne_feedback_flag+&
-       loc_er_feedback_flag
+  if (tgyro_stab_flag == 1) then
 
-  if (tgyro_iteration_method == 5) then
+     !-----------------------------
+     ! Linear stability 
+     !-----------------------------
 
-     ! Parallel Jacobian 
-     n_worker = n_evolve+1
-
-     if (n_proc_global < n_worker*n_inst) then
-        call tgyro_catch_error('ERROR: Bad core count')
-     endif
+     n_worker = tgyro_stab_nsearch
 
   else
 
-     ! Serial Jacobian
-     n_worker = 1
+     !-----------------------------
+     ! Transport
+     !-----------------------------
+
+     n_evolve = &
+          loc_ti_feedback_flag+&
+          loc_te_feedback_flag+&
+          loc_ne_feedback_flag+&
+          loc_er_feedback_flag
+
+     select case (tgyro_iteration_method)
+
+     case(1,2,3,4)
+
+        ! Serial Jacobian
+        n_worker = 1
+
+     case (5)
+
+        ! Parallel Jacobian 
+        n_worker = n_evolve+1
+
+        if (n_proc_global < n_worker*n_inst) then
+           call tgyro_catch_error('ERROR: Bad core count')
+        endif
+
+     end select
 
   endif
 

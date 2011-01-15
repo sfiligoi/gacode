@@ -385,6 +385,7 @@ subroutine gyro_fieldeigen_kernel
   !       det(P) = {+1 if #row permutations even, 
   !                 -1 if #row permutations odd}
 
+  ! Diagonal scaling to normalize inital Det to unity.
   if (diag_scale(1) < 0.0) then
      do i=1,n_eigen
         diag_scale(i) = abs(a_eigen(i,i))

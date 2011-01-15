@@ -257,9 +257,13 @@ module tgyro_globals
   integer :: tgyro_global_newton_flag
   integer :: tgyro_backtrack_method
   integer :: tgyro_iteration_method
-  integer :: tgyro_rotation_theory_method
   real :: lm_boost
   real :: lm_drop
+  integer :: tgyro_rotation_flag
+  integer :: tgyro_rotation_theory_method
+  integer :: tgyro_stab_flag
+  integer :: tgyro_stab_nsearch
+  integer :: tgyro_stab_nky
   !
   ! Iteration variables (global)
   !

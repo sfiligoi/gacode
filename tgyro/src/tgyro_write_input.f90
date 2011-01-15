@@ -29,6 +29,16 @@ subroutine tgyro_write_input
      write(1,*) 'Job control'
      write(1,*) 
 
+     if (tgyro_stab_flag == 1) then
+     
+        write(1,30) 'TGYRO_STAB_NSEARCH',tgyro_stab_nsearch
+
+        ! Ooh the dreaded goto ...
+ 
+        goto 100
+
+    endif 
+
      !--------------------------------------------------------
      select case (loc_restart_flag)
 
@@ -44,25 +54,6 @@ subroutine tgyro_write_input
 
         error_flag = 1
         error_msg = 'Error: LOC_RESTART_FLAG'
-
-     end select
-     !--------------------------------------------------------
-
-     !--------------------------------------------------------
-     select case (loc_lock_profile_flag)
-
-     case (0)
-
-        write(1,10) 'LOC_LOCK_PROFILE_FLAG','Initial profiles from gradients'
-
-     case (1)
-
-        write(1,10) 'LOC_LOCK_PROFILE_FLAG','Initial profiles from data'
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: LOC_LOCK_PROFILE_FLAG'
 
      end select
      !--------------------------------------------------------
@@ -93,11 +84,11 @@ subroutine tgyro_write_input
 
         write(1,10) 'TGYRO_ITERATION_METHOD','Newton with Linesearch'
 
-      case (4)
+     case (4)
 
         write(1,10) 'TGYRO_ITERATION_METHOD','Block method (serial)'
 
-      case (5)
+     case (5)
 
         write(1,10) 'TGYRO_ITERATION_METHOD','Block method (parallel)'
 
@@ -176,12 +167,6 @@ subroutine tgyro_write_input
      write(1,*)
      write(1,*) 'Scenario control'
      write(1,*) 
-
-     if (loc_betae_scale > 0.0) then
-        write(1,10) 'Fluctuations','Electromagnetic'
-     else
-        write(1,10) 'Fluctuations','Electrostatic'
-     endif
 
      !--------------------------------------------------------
      select case (loc_ti_feedback_flag)
@@ -277,83 +262,6 @@ subroutine tgyro_write_input
 
         error_flag = 1
         error_msg = 'Error: LOC_ER_FEEDBACK_FLAG'
-
-     end select
-     !--------------------------------------------------------
-
-     !--------------------------------------------------------
-     select case (tgyro_rotation_theory_method)
-
-     case (1)
-
-        write(1,10) 'TGYRO_ROTATION_THEORY_METHOD','Candy method'
-
-     case (2)
-
-        write(1,10) 'TGYRO_ROTATION_THEORY_METHOD','Waltz method'
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: TGYRO_ROTATION_THEORY_METHOD'
-
-     end select
-     !--------------------------------------------------------
-
-     !--------------------------------------------------------
-     select case (loc_zeff_flag)
-
-     case (0)
-
-        write(1,10) 'LOC_ZEFF_FLAG','Z_eff=1'
-
-     case (1)
-
-        write(1,10) 'LOC_ZEFF_FLAG','Z_eff from data'
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: LOC_ZEFF_FLAG'
-
-     end select
-     !--------------------------------------------------------
-
-     !--------------------------------------------------------
-     select case (loc_quasineutral_flag)
-
-     case (0)
-
-        write(1,10) 'LOC_QUASINEUTRAL_FLAG','Densities unaltered'
-
-     case (1)
-
-        write(1,10) 'LOC_QUASINEUTRAL_FLAG','Forced quasineutrality'
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: LOC_QUASINEUTRAL_FLAG'
-
-     end select
-     !--------------------------------------------------------
-
-
-     !--------------------------------------------------------
-     select case (loc_circ_flag)
-
-     case (0)
-
-        write(1,10) 'LOC_CIRC_FLAG','Use standard Miller expressions'
-
-     case (1)
-
-        write(1,10) 'LOC_CIRC_FLAG','Use Miller circle'
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: LOC_CIRC_FLAG'
 
      end select
      !--------------------------------------------------------
@@ -473,17 +381,118 @@ subroutine tgyro_write_input
      end select
      !--------------------------------------------------------
 
+     write(1,20) 'LOC_R_PED (pedestal r/a)',r(n_r)/r_min
+     write(1,20) 'Pivot radius',r(i_bc)/r_min
+
+ 100 continue 
+
      write(1,*)
      write(1,*) 'Physics parameters'
      write(1,*) 
 
-     write(1,20) 'LOC_R_PED (pedestal r/a)',r(n_r)/r_min
-     write(1,20) 'Pivot radius',r(i_bc)/r_min
      write(1,20) 'LOC_NU_SCALE',loc_nu_scale
      write(1,20) 'LOC_BETAE_SCALE',loc_betae_scale
+     !--------------------------------------------------------
+     select case (loc_zeff_flag)
+
+     case (0)
+
+        write(1,10) 'LOC_ZEFF_FLAG','Z_eff=1'
+
+     case (1)
+
+        write(1,10) 'LOC_ZEFF_FLAG','Z_eff from data'
+
+     case default
+
+        error_flag = 1
+        error_msg = 'Error: LOC_ZEFF_FLAG'
+
+     end select
+     !--------------------------------------------------------
+     !--------------------------------------------------------
+     select case (loc_circ_flag)
+
+     case (0)
+
+        write(1,10) 'LOC_CIRC_FLAG','Use standard Miller expressions'
+
+     case (1)
+
+        write(1,10) 'LOC_CIRC_FLAG','Use Miller circle'
+
+     case default
+
+        error_flag = 1
+        error_msg = 'Error: LOC_CIRC_FLAG'
+
+     end select
+     !--------------------------------------------------------
+    !--------------------------------------------------------
+     select case (tgyro_rotation_theory_method)
+
+     case (1)
+
+        write(1,10) 'TGYRO_ROTATION_THEORY_METHOD','Candy method'
+
+     case (2)
+
+        write(1,10) 'TGYRO_ROTATION_THEORY_METHOD','Waltz method'
+
+     case default
+
+        error_flag = 1
+        error_msg = 'Error: TGYRO_ROTATION_THEORY_METHOD'
+
+     end select
+     !--------------------------------------------------------
+
+     if (loc_betae_scale > 0.0) then
+        write(1,10) 'Fluctuations','Electromagnetic'
+     else
+        write(1,10) 'Fluctuations','Electrostatic'
+     endif
+
+
+     !--------------------------------------------------------
+     select case (loc_quasineutral_flag)
+
+     case (0)
+
+        write(1,10) 'LOC_QUASINEUTRAL_FLAG','Densities unaltered'
+
+     case (1)
+
+        write(1,10) 'LOC_QUASINEUTRAL_FLAG','Forced quasineutrality'
+
+     case default
+
+        error_flag = 1
+        error_msg = 'Error: LOC_QUASINEUTRAL_FLAG'
+
+     end select
+     !--------------------------------------------------------
+     !--------------------------------------------------------
+     select case (loc_lock_profile_flag)
+
+     case (0)
+
+        write(1,10) 'LOC_LOCK_PROFILE_FLAG','Initial profiles from gradients'
+
+     case (1)
+
+        write(1,10) 'LOC_LOCK_PROFILE_FLAG','Initial profiles from data'
+
+     case default
+
+        error_flag = 1
+        error_msg = 'Error: LOC_LOCK_PROFILE_FLAG'
+
+     end select
+     !--------------------------------------------------------
      do i_ion=1,loc_n_ion
-        write(1,20) 'ion '//trim(ion_tag(i_ion))//'mass',mi_vec(i_ion)
-        write(1,20) 'ion '//trim(ion_tag(i_ion))//'charge ',zi_vec(i_ion)
+        write(1,20) 'ion '//trim(ion_tag(i_ion))//' mass',mi_vec(i_ion)
+        write(1,20) 'ion '//trim(ion_tag(i_ion))//' charge ',zi_vec(i_ion)
      enddo
 
      write(1,*)'-----------------------------------------------------------------'

@@ -57,13 +57,17 @@ x.add('TGYRO_BACKTRACK_METHOD','1')
 x.add('TGYRO_ITERATION_METHOD','1')
 x.add('TGYRO_LM_BOOST','1.5')
 x.add('TGYRO_LM_DROP','0.1')
+x.add('TGYRO_ROTATION_FLAG','1')
 x.add('TGYRO_ROTATION_THEORY_METHOD','1')
+x.add('TGYRO_STAB_FLAG','0')
+x.add('TGYRO_STAB_NSEARCH','7')
+x.add('TGYRO_STAB_NKY','2')
 
 # Deprecated parameters
 x.dep('LOC_N_FEEDBACK','new parameter is LOC_NE_FEEDBACK_FLAG')
 x.dep('LOC_RELAX_ITERATIONS','new parameter is TGYRO_RELAX_ITERATIONS')
 x.dep('LOC_ROTATION_METHOD','new parameter is TGYRO_ROTATION_THEORY_METHOD')
-x.dep('LOC_EBSHEAR_FLAG','completely deprecated.')
+x.dep('LOC_EBSHEAR_FLAG','new parameter is TGYRO_ROTATION_FLAG.')
 
 x.read_input('input.tgyro')
 x.write_proc('proc')

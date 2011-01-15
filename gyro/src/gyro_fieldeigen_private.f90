@@ -31,12 +31,13 @@ module gyro_fieldeigen_private
   complex, dimension(:,:), allocatable :: gk_leftk
   complex, dimension(:,:), allocatable :: gk_rightk
   !
-  complex, dimension(:,:), allocatable :: cmk
-  complex :: det
   real :: sgn
-  !
-  complex :: omega_eigen
   real, dimension(:), allocatable :: diag_scale
+  complex :: det
+  complex, dimension(:,:), allocatable :: cmk
+  !
+  real :: error_eigen
+  complex :: omega_eigen
   !
   ! Stacked indices
   integer :: im, impr

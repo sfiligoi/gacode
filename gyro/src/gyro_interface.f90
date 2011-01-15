@@ -217,6 +217,9 @@ module gyro_interface
   real, dimension(5) :: gyro_ion_eflux_out = 0.0
   real, dimension(5) :: gyro_ion_expwd_out = 0.0
 
+  complex :: gyro_fieldeigen_omega_out
+  real :: gyro_fieldeigen_error_out
+
 contains
 
   ! Map GLOBAL variables to INTERFACE parameters

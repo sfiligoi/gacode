@@ -36,6 +36,7 @@ OBJECTS = tgyro_globals.o \
 	  tgyro_residual.o \
           tgyro_restart.o \
           tgyro_source.o \
+          tgyro_stab_driver.o \
           tgyro_target_vector.o \
           tgyro_tglf_map.o \
           tgyro_volume_int.o \
