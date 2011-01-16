@@ -39,10 +39,6 @@ subroutine tgyro_source
 
      s_exch(i) = 1.5*nu_exch(i)*ne(i)*k*(te(i)-ti(1,i))
 
-     ! Auxiliary power
-
-     s_aux(i) = (1.0-r(i)/r_min)**loc_aux_exp*loc_aux_amp
-
   enddo
   !-------------------------------------------------------
 
@@ -57,15 +53,12 @@ subroutine tgyro_source
 
   ! Get integrated exchange power
   call tgyro_volume_int(s_exch,p_exch)
-
-  ! Get integrated auxiliary power
-  call tgyro_volume_int(s_aux,p_aux)
   !-------------------------------------------------------
 
   !-------------------------------------------------------
   select case (loc_scenario)
 
-  case(1)
+  case (1)
 
      ! Experimental, static exchange
      ! 
@@ -77,7 +70,7 @@ subroutine tgyro_source
      p_i(:) = p_i_in(:)
      p_e(:) = p_e_in(:)
 
-  case(2)
+  case (2)
 
      ! Experimental, dynamic exchange
      ! 
@@ -86,7 +79,7 @@ subroutine tgyro_source
      p_i(:) = p_i_in(:)+(p_exch(:)-p_exch_in(:))
      p_e(:) = p_e_in(:)-(p_exch(:)-p_exch_in(:))
 
-  case(3)
+  case (3)
 
      ! Reactor, with self-consistent power, radiation 
      ! and exchange; input auxiliary power.
@@ -98,20 +91,6 @@ subroutine tgyro_source
      p_e = loc_alpha_elec*p_alpha  &
           -p_exch &      
           +p_e_aux_in &                   
-          -p_brem                       
-
-  case(4)
-
-     ! Reactor, with self-consistent power, radiation 
-     ! and exchange; model auxiliary power.
-
-     p_i = (1.0-loc_alpha_elec)*p_alpha & 
-          +p_exch &                       
-          +0.9*p_aux                       
-
-     p_e = loc_alpha_elec*p_alpha  &
-          -p_exch &      
-          +0.1*p_aux &                   
           -p_brem                       
 
   end select

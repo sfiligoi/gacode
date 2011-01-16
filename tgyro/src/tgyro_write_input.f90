@@ -29,15 +29,17 @@ subroutine tgyro_write_input
      write(1,*) 'Job control'
      write(1,*) 
 
-     if (tgyro_stab_flag == 1) then
-     
+     if (tgyro_mode == 2) then
+
         write(1,30) 'TGYRO_STAB_NSEARCH',tgyro_stab_nsearch
+        write(1,30) 'TGYRO_STAB_NKY',tgyro_stab_nky
+        write(1,20) 'TGYRO_STAB_KYMIN',tgyro_stab_kymin
 
         ! Ooh the dreaded goto ...
- 
+
         goto 100
 
-    endif 
+     endif
 
      !--------------------------------------------------------
      select case (loc_restart_flag)
@@ -381,17 +383,19 @@ subroutine tgyro_write_input
      end select
      !--------------------------------------------------------
 
-     write(1,20) 'LOC_R_PED (pedestal r/a)',r(n_r)/r_min
      write(1,20) 'Pivot radius',r(i_bc)/r_min
 
- 100 continue 
+100  continue 
 
      write(1,*)
      write(1,*) 'Physics parameters'
      write(1,*) 
 
+     write(1,20) 'LOC_RMIN',r(n_r)/r_min
+     write(1,20) 'LOC_RMAX',r(n_r)/r_min
      write(1,20) 'LOC_NU_SCALE',loc_nu_scale
      write(1,20) 'LOC_BETAE_SCALE',loc_betae_scale
+
      !--------------------------------------------------------
      select case (loc_zeff_flag)
 
@@ -428,7 +432,7 @@ subroutine tgyro_write_input
 
      end select
      !--------------------------------------------------------
-    !--------------------------------------------------------
+     !--------------------------------------------------------
      select case (tgyro_rotation_theory_method)
 
      case (1)

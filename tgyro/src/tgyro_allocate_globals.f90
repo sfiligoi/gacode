@@ -117,8 +117,6 @@ subroutine tgyro_allocate_globals
   allocate(p_brem(n_r))
   allocate(s_exch(n_r))
   allocate(p_exch(n_r))
-  allocate(s_aux(n_r))
-  allocate(p_aux(n_r))
 
   allocate(res(p_max))
   allocate(res0(p_max))

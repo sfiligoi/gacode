@@ -44,7 +44,6 @@ subroutine tgyro_init_profiles
   !
   p_alpha(:) = 0.0
   p_exch(:)  = 0.0
-  p_aux(:)   = 0.0
   p_brem(:)  = 0.0
   !------------------------------------------------------
 

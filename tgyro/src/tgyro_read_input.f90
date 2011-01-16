@@ -41,10 +41,8 @@ subroutine tgyro_read_input
   !-------------------------------------------------------
   ! Read/BCAST input parameters
   !
-  call tgyro_readbc_int(transport_method)
+  call tgyro_readbc_int(tgyro_mode)
   call tgyro_readbc_int(tgyro_relax_iterations)
-  call tgyro_readbc_real(loc_aux_amp) 
-  call tgyro_readbc_real(loc_aux_exp) 
   call tgyro_readbc_real(loc_alpha_elec) 
   call tgyro_readbc_real(loc_nu_scale) 
   call tgyro_readbc_real(loc_dx)  
@@ -94,7 +92,6 @@ subroutine tgyro_read_input
   call tgyro_readbc_real(lm_drop)
   call tgyro_readbc_int(tgyro_rotation_flag)
   call tgyro_readbc_int(tgyro_rotation_theory_method)
-  call tgyro_readbc_int(tgyro_stab_flag)
   call tgyro_readbc_int(tgyro_stab_nsearch)
   call tgyro_readbc_int(tgyro_stab_nky)
   call tgyro_readbc_real(tgyro_stab_kymin)

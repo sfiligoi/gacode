@@ -94,7 +94,7 @@ subroutine tgyro_iteration_driver
 
   call tgyro_write_input
 
-  if (tgyro_stab_flag == 1) then
+  if (tgyro_mode == 2) then
      call tgyro_stab_driver
      return
   endif

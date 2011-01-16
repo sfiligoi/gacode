@@ -177,14 +177,12 @@ module tgyro_globals
   real, dimension(:), allocatable :: p_alpha
   real, dimension(:), allocatable :: p_brem
   real, dimension(:), allocatable :: p_exch
-  real, dimension(:), allocatable :: p_aux
   real, dimension(:), allocatable :: p_i_aux_in
   real, dimension(:), allocatable :: p_e_aux_in
   real, dimension(:), allocatable :: f_b_in
   real, dimension(:), allocatable :: s_alpha
   real, dimension(:), allocatable :: s_brem
   real, dimension(:), allocatable :: s_exch
-  real, dimension(:), allocatable :: s_aux
 
   real, dimension(:), allocatable :: res
   real, dimension(:), allocatable :: res0
@@ -216,9 +214,8 @@ module tgyro_globals
   !
   ! Control variables
   !
+  integer :: tgyro_mode
   integer :: tgyro_relax_iterations
-  real :: loc_aux_amp
-  real :: loc_aux_exp
   real :: loc_alpha_elec
   real :: loc_nu_scale
   real :: loc_dx
@@ -260,7 +257,6 @@ module tgyro_globals
   real :: lm_drop
   integer :: tgyro_rotation_flag
   integer :: tgyro_rotation_theory_method
-  integer :: tgyro_stab_flag
   integer :: tgyro_stab_nsearch
   integer :: tgyro_stab_nky
   real :: tgyro_stab_kymin

@@ -35,17 +35,9 @@ program tgyro_main
 
   call MPI_BARRIER(MPI_COMM_WORLD,ierr)
 
-  select case (transport_method)
+  select case (tgyro_mode)
 
-  case (1)
-
-     if (i_proc_global == 0) then
-        open(unit=1,file=trim(runfile),position='append')
-        write(1,*) 'TRANSPORT_METHOD=1 deprecated'
-        close(1)
-     endif
-
-  case (2)
+  case (1,2)
 
      ! Local transport model
 

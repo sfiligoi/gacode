@@ -46,23 +46,18 @@ subroutine tgyro_comm_setup
        MPI_COMM_WORLD,&
        ierr)
 
-  ! Number of profiles to evolve.  This is needed to determine
-  ! the number of "workers" (the number of parallel tasks for 
-  ! the Jacobian calculation.
+  ! Determine the number of "workers" at each radius
 
-  if (tgyro_stab_flag == 1) then
+  select case (tgyro_mode)
 
-     !-----------------------------
-     ! Linear stability 
-     !-----------------------------
-
-     n_worker = tgyro_stab_nsearch
-
-  else
+  case (1)
 
      !-----------------------------
      ! Transport
      !-----------------------------
+
+     ! The number of workers is related to the number of profiles 
+     ! to evolve.
 
      n_evolve = &
           loc_ti_feedback_flag+&
@@ -70,14 +65,7 @@ subroutine tgyro_comm_setup
           loc_ne_feedback_flag+&
           loc_er_feedback_flag
 
-     select case (tgyro_iteration_method)
-
-     case(1,2,3,4)
-
-        ! Serial Jacobian
-        n_worker = 1
-
-     case (5)
+     if (tgyro_iteration_method == 5) then
 
         ! Parallel Jacobian 
         n_worker = n_evolve+1
@@ -86,9 +74,29 @@ subroutine tgyro_comm_setup
            call tgyro_catch_error('ERROR: Bad core count')
         endif
 
-     end select
+     endif
 
-  endif
+  case (2) 
+
+     !-----------------------------
+     ! Linear stability 
+     !-----------------------------
+
+     ! The number of workers is the number of search frequencies.
+
+     n_worker = tgyro_stab_nsearch
+
+  case (3)
+
+     ! 1 worker; each DIR line specifies exact number of cores to GYRO
+
+     !-----------------------------
+     ! Multi-job 
+     !-----------------------------
+
+     n_worker = 1
+
+  end select
 
   ! Sort processors into communicators (color), workers
   ! and adjoint (to color).
