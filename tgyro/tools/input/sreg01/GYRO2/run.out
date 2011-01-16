@@ -1,0 +1,1418 @@
+[GYRO MPI tasks: 1]
+[Parsing data in input.gyro]
+ -----------------------------------------------
+ operational mode     : FIELD EIGENVALUE
+ boundary conditions  : PERIODIC
+ profiles             : FLAT
+ geometry             : MODEL SHAPE
+ electron_method      : ALL SPECIES GYROKINETIC
+ fluctuations         : ELECTROSTATIC
+ gyro_method          : ORIGINAL (INTEGRATED) POLARIZATION
+ fluctuation output   : PHI( ) N( ) E( ) V( )                   
+ radial grid          : UNIFORM
+ integrator_method    : RK2
+ field solve          : UMFPACK (SEQUENTIAL)
+ source_flag          : SOURCE OFF
+ pitch-angle coll.    : OFF
+ rotation parameters  : CANDY METHOD
+ nonlinear dynamics   : OFF
+ linear diffusivity   : RESPONSE FUNCTION
+ -----------------------------------------------
+----------------------------------------------------------
+INFO: Forcing up-down symmetry (UDSYMMETRY_FLAG=1).
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: You are using TOROIDAL_REFERENCE=-1
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: TOROIDAL_REFERENCE reset to lowest nonzero mode.
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: nu_ii rescaled by: 0.000
+----------------------------------------------------------
+ ----------- SPARSE MATRIX STATS ---------------
+ EXPLICIT POISSON:     n>0           
+         nonzeros:     2304
+           values:     6960
+          indices:     9313
+       iterations:        1
+ 
+ ----------- UTILITY PARAMETERS ----------------
+ Ion parallel motion     : ON
+ Ion curvature drift     : ON
+ Electron curvature drift: ON
+ ----------- GRID DIMENSIONS -------------------
+ n_n                  :    1
+ n_x                  :    6
+ n_stack              :   28
+ n_blend              :    8
+ n_pass               :    4
+ n_trap               :    4
+ n_energy             :    8
+ n_field              :    1
+ --
+ n_spec               :    2
+ n_ion                :    2
+ n_kinetic            :    2
+ n_gk                 :    2
+ indx_e               :    2
+ --
+ FIELD POINTS:        :        48
+ DIST. POINTS:        :     21504
+ --
+ energy_max           :   6.000000
+ dt                   :   0.200000
+ --------------- LOCAL PARAMETERS ---------------
+  NOTE: use abs(SAFETY_FACTOR) as input
+ # RADIUS [INPUT]     :   0.300000
+ .RADIUS              :   0.300000
+ .ASPECT_RATIO        :   2.839905
+ .SHIFT               :  -0.075863
+ .ZMAG                :   0.000000
+ .DZMAG               :   0.000000
+ .KAPPA               :   1.289229
+ .S_KAPPA             :   0.009996
+ .DELTA               :   0.060742
+ .S_DELTA             :   0.057358
+ .ZETA                :  -0.001150
+ .S_ZETA              :  -0.001915
+ .SAFETY_FACTOR       :   1.576771
+ .SHEAR               :   0.064178
+ .RHO_STAR            :   0.001268
+ .Z_EFF               :   1.264402
+ .MACH                :   0.000000
+ .PGAMMA              :   0.000000
+ .GAMMA_E             :   0.000000
+ .LAMBDA_DEBYE        :   0.000000
+ .NU_EI               :   0.000000
+ .NU_I_KROOK          :   0.000000
+ .IPCCW               :   1.000000
+ .BTCCW               :  -1.000000
+ # Ion  1
+ .NI_OVER_NE          :   1.000000
+ .TI_OVER_TE          :   0.731069
+ .DLNNDR              :   1.068566
+ .DLNTDR              :   2.000143
+ .Z                   :   1.000000
+ (NU_II)              :   0.000000
+ .MU                  :   1.000000
+ # Electrons
+ .DLNNDR_ELECTRON     :   1.068566
+ .DLNTDR_ELECTRON     :   2.082944
+ (Z_ELECTRON)         :  -1.000000
+ .BETAE_UNIT          :   0.003015
+ .MU_ELECTRON         :  60.599098
+ --------------- TGLF PARAMETERS ---------------
+ Q_PRIME              :   1.772896
+ P_PRIME              :   0.003402
+ -------- LOCAL PARAMETERS (diagnostic) ----------
+ n_i*z_i - n_e:       :   0.000000
+ r/R0                 :   0.105637
+ b_unit               :   1.000000
+ beta_unit_norm       :   0.005219
+ betai_unit           :   0.002204
+ betae_unit_norm      :   0.003015
+ beta_*               :   0.016265
+ alpha_MHD            :   0.114844
+ omega_00 (c_s/a)     :   0.000000
+ * Note that f = f_sim exp(i n omega0[r0] t)
+ -------- ALFVEN WAVE PARAMETERS (diagnostic) ----------
+ (v_A/c_s)            :  25.752328
+ Omega_TAE            :   2.875505
+ Omega_A              :   5.751009
+ ----------- UPWIND PARAMETERS -----------------
+ radial_upwind        :   2.000000
+ orbit_upwind         :   1.000000
+ orbit_upwind (elec)  :   0.000000
+ ----------- SOURCE PARAMETERS -----------------
+ nu_source            :   0.100000
+ n_source             :    1
+ ----------- RADIAL DOMAIN PARAMETERS ----------
+ s_grid               :   0.064178
+ box_multiplier       :   1.000000
+ L/a                  :   0.098820
+ --
+ explicit_damp(i)     :   0 (  1.0000)
+ explicit_damp(e)     :   0 (  1.0000)
+ --
+ offset               :   0 (  0.0000)
+ LEFT : r_a           :   0.250590
+ LEFT : r_a_physical  :   0.250590
+ NORM : r(ir_norm)    :   0.300000
+ RIGHT: r_b_physical  :   0.332940
+ RIGHT: r_b           :   0.332940
+ ----------- PARALLELIZATION PARAMETERS --------
+ (nek) per subgroup:  :        32
+ (ine) per subgroup:  :        24
+ ----------- TIME STEPPING PARAMETERS ----------
+ plot_filter          :   1.000000
+ time_skip            :     5
+ restart_data_skip    :    10
+ ----------- STABILITY PARAMETERS ----------------
+ d/dtau Courant       :  20.042832
+   d/dr Courant       :   0.062325
+ ----------- SETUP TIMING ----------------------
+ Grid Setup           :   0.100653
+ Build radial ops     :   0.008630
+ Build advection ops  :   0.000000
+ Build field matrices :   0.037115
+ 
+ TOTAL SETUP          :   0.163180
+ -------- CENTRAL WAVENUMBERS SIMULATED -----------
+     (k_y = nq/r, rho = rho_sD_unit)
+ n =    30   k_y rho =  0.200 [ 0.200][ 0.200]
+  
+ min resolved k_x*rho_sD :  0.080649
+ max resolved k_x*rho_sD :  0.120973
+ --------------- CENTRAL BOX SIZE -----------------
+ abs(Lx/rho_sD)       :    77.907890
+ abs(Ly/rho_sD)       :    31.415927
+ => abs(dx/rho_sD)    :    12.984648
+ --------------------------------------------------
+ ------------ GYRO-OPERATOR BANDWIDTH -------------
+ => EXACT BESSEL.
+ --------------------------------------------------
+ PLEASE SEE: 
+  - units.out for normalizing parameters
+  - alloc.out for memory usage
+  - efficiency.out for parallelization efficiency
+  - phase_space.out for velocity-space nodes and weights
+ -----------------------------------------------
+ operational mode     : FIELD EIGENVALUE
+ boundary conditions  : PERIODIC
+ profiles             : FLAT
+ geometry             : MODEL SHAPE
+ electron_method      : ALL SPECIES GYROKINETIC
+ fluctuations         : ELECTROSTATIC
+ gyro_method          : ORIGINAL (INTEGRATED) POLARIZATION
+ fluctuation output   : PHI( ) N( ) E( ) V( )                   
+ radial grid          : UNIFORM
+ integrator_method    : RK2
+ field solve          : UMFPACK (SEQUENTIAL)
+ source_flag          : SOURCE OFF
+ pitch-angle coll.    : OFF
+ rotation parameters  : CANDY METHOD
+ nonlinear dynamics   : OFF
+ linear diffusivity   : RESPONSE FUNCTION
+ -----------------------------------------------
+----------------------------------------------------------
+INFO: Forcing up-down symmetry (UDSYMMETRY_FLAG=1).
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: You are using TOROIDAL_REFERENCE=-1
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: TOROIDAL_REFERENCE reset to lowest nonzero mode.
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: nu_ii rescaled by: 0.000
+----------------------------------------------------------
+ ----------- SPARSE MATRIX STATS ---------------
+ EXPLICIT POISSON:     n>0           
+         nonzeros:     2304
+           values:     6960
+          indices:     9313
+       iterations:        1
+ 
+ ----------- UTILITY PARAMETERS ----------------
+ Ion parallel motion     : ON
+ Ion curvature drift     : ON
+ Electron curvature drift: ON
+ ----------- GRID DIMENSIONS -------------------
+ n_n                  :    1
+ n_x                  :    6
+ n_stack              :   28
+ n_blend              :    8
+ n_pass               :    4
+ n_trap               :    4
+ n_energy             :    8
+ n_field              :    1
+ --
+ n_spec               :    2
+ n_ion                :    2
+ n_kinetic            :    2
+ n_gk                 :    2
+ indx_e               :    2
+ --
+ FIELD POINTS:        :        48
+ DIST. POINTS:        :     21504
+ --
+ energy_max           :   6.000000
+ dt                   :   0.200000
+ --------------- LOCAL PARAMETERS ---------------
+  NOTE: use abs(SAFETY_FACTOR) as input
+ # RADIUS [INPUT]     :   0.300000
+ .RADIUS              :   0.300000
+ .ASPECT_RATIO        :   2.839905
+ .SHIFT               :  -0.075863
+ .ZMAG                :   0.000000
+ .DZMAG               :   0.000000
+ .KAPPA               :   1.289229
+ .S_KAPPA             :   0.009996
+ .DELTA               :   0.060742
+ .S_DELTA             :   0.057358
+ .ZETA                :  -0.001150
+ .S_ZETA              :  -0.001915
+ .SAFETY_FACTOR       :   1.576771
+ .SHEAR               :   0.064178
+ .RHO_STAR            :   0.001903
+ .Z_EFF               :   1.264402
+ .MACH                :   0.000000
+ .PGAMMA              :   0.000000
+ .GAMMA_E             :   0.000000
+ .LAMBDA_DEBYE        :   0.000000
+ .NU_EI               :   0.000000
+ .NU_I_KROOK          :   0.000000
+ .IPCCW               :   1.000000
+ .BTCCW               :  -1.000000
+ # Ion  1
+ .NI_OVER_NE          :   1.000000
+ .TI_OVER_TE          :   0.731069
+ .DLNNDR              :   1.068566
+ .DLNTDR              :   2.000143
+ .Z                   :   1.000000
+ (NU_II)              :   0.000000
+ .MU                  :   1.000000
+ # Electrons
+ .DLNNDR_ELECTRON     :   1.068566
+ .DLNTDR_ELECTRON     :   2.082944
+ (Z_ELECTRON)         :  -1.000000
+ .BETAE_UNIT          :   0.003015
+ .MU_ELECTRON         :  60.599098
+ --------------- TGLF PARAMETERS ---------------
+ Q_PRIME              :   1.772896
+ P_PRIME              :   0.003402
+ -------- LOCAL PARAMETERS (diagnostic) ----------
+ n_i*z_i - n_e:       :   0.000000
+ r/R0                 :   0.105637
+ b_unit               :   1.000000
+ beta_unit_norm       :   0.005219
+ betai_unit           :   0.002204
+ betae_unit_norm      :   0.003015
+ beta_*               :   0.016265
+ alpha_MHD            :   0.114844
+ omega_00 (c_s/a)     :   0.000000
+ * Note that f = f_sim exp(i n omega0[r0] t)
+ -------- ALFVEN WAVE PARAMETERS (diagnostic) ----------
+ (v_A/c_s)            :  25.752328
+ Omega_TAE            :   2.875505
+ Omega_A              :   5.751009
+ ----------- UPWIND PARAMETERS -----------------
+ radial_upwind        :   2.000000
+ orbit_upwind         :   1.000000
+ orbit_upwind (elec)  :   0.000000
+ ----------- SOURCE PARAMETERS -----------------
+ nu_source            :   0.100000
+ n_source             :    1
+ ----------- RADIAL DOMAIN PARAMETERS ----------
+ s_grid               :   0.064178
+ box_multiplier       :   1.000000
+ L/a                  :   0.098820
+ --
+ explicit_damp(i)     :   0 (  1.0000)
+ explicit_damp(e)     :   0 (  1.0000)
+ --
+ offset               :   0 (  0.0000)
+ LEFT : r_a           :   0.250590
+ LEFT : r_a_physical  :   0.250590
+ NORM : r(ir_norm)    :   0.300000
+ RIGHT: r_b_physical  :   0.332940
+ RIGHT: r_b           :   0.332940
+ ----------- PARALLELIZATION PARAMETERS --------
+ (nek) per subgroup:  :        32
+ (ine) per subgroup:  :        24
+ ----------- TIME STEPPING PARAMETERS ----------
+ plot_filter          :   1.000000
+ time_skip            :     5
+ restart_data_skip    :    10
+ ----------- STABILITY PARAMETERS ----------------
+ d/dtau Courant       :  20.042832
+   d/dr Courant       :   0.093487
+ ----------- SETUP TIMING ----------------------
+ Grid Setup           :   0.055714
+ Build radial ops     :   0.007938
+ Build advection ops  :   0.000000
+ Build field matrices :   0.035541
+ 
+ TOTAL SETUP          :   0.109335
+ -------- CENTRAL WAVENUMBERS SIMULATED -----------
+     (k_y = nq/r, rho = rho_sD_unit)
+ n =    30   k_y rho =  0.300 [ 0.300][ 0.300]
+  
+ min resolved k_x*rho_sD :  0.120973
+ max resolved k_x*rho_sD :  0.181460
+ --------------- CENTRAL BOX SIZE -----------------
+ abs(Lx/rho_sD)       :    51.938593
+ abs(Ly/rho_sD)       :    20.943951
+ => abs(dx/rho_sD)    :     8.656432
+ --------------------------------------------------
+ ------------ GYRO-OPERATOR BANDWIDTH -------------
+ => EXACT BESSEL.
+ --------------------------------------------------
+ PLEASE SEE: 
+  - units.out for normalizing parameters
+  - alloc.out for memory usage
+  - efficiency.out for parallelization efficiency
+  - phase_space.out for velocity-space nodes and weights
+ -----------------------------------------------
+ operational mode     : FIELD EIGENVALUE
+ boundary conditions  : PERIODIC
+ profiles             : FLAT
+ geometry             : MODEL SHAPE
+ electron_method      : ALL SPECIES GYROKINETIC
+ fluctuations         : ELECTROSTATIC
+ gyro_method          : ORIGINAL (INTEGRATED) POLARIZATION
+ fluctuation output   : PHI( ) N( ) E( ) V( )                   
+ radial grid          : UNIFORM
+ integrator_method    : RK2
+ field solve          : UMFPACK (SEQUENTIAL)
+ source_flag          : SOURCE OFF
+ pitch-angle coll.    : OFF
+ rotation parameters  : CANDY METHOD
+ nonlinear dynamics   : OFF
+ linear diffusivity   : RESPONSE FUNCTION
+ -----------------------------------------------
+----------------------------------------------------------
+INFO: Forcing up-down symmetry (UDSYMMETRY_FLAG=1).
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: You are using TOROIDAL_REFERENCE=-1
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: TOROIDAL_REFERENCE reset to lowest nonzero mode.
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: nu_ii rescaled by: 0.000
+----------------------------------------------------------
+ ----------- SPARSE MATRIX STATS ---------------
+ EXPLICIT POISSON:     n>0           
+         nonzeros:     2304
+           values:     6960
+          indices:     9313
+       iterations:        1
+ 
+ ----------- UTILITY PARAMETERS ----------------
+ Ion parallel motion     : ON
+ Ion curvature drift     : ON
+ Electron curvature drift: ON
+ ----------- GRID DIMENSIONS -------------------
+ n_n                  :    1
+ n_x                  :    6
+ n_stack              :   28
+ n_blend              :    8
+ n_pass               :    4
+ n_trap               :    4
+ n_energy             :    8
+ n_field              :    1
+ --
+ n_spec               :    2
+ n_ion                :    2
+ n_kinetic            :    2
+ n_gk                 :    2
+ indx_e               :    2
+ --
+ FIELD POINTS:        :        48
+ DIST. POINTS:        :     21504
+ --
+ energy_max           :   6.000000
+ dt                   :   0.200000
+ --------------- LOCAL PARAMETERS ---------------
+  NOTE: use abs(SAFETY_FACTOR) as input
+ # RADIUS [INPUT]     :   0.300000
+ .RADIUS              :   0.300000
+ .ASPECT_RATIO        :   2.839905
+ .SHIFT               :  -0.075863
+ .ZMAG                :   0.000000
+ .DZMAG               :   0.000000
+ .KAPPA               :   1.289229
+ .S_KAPPA             :   0.009996
+ .DELTA               :   0.060742
+ .S_DELTA             :   0.057358
+ .ZETA                :  -0.001150
+ .S_ZETA              :  -0.001915
+ .SAFETY_FACTOR       :   1.576771
+ .SHEAR               :   0.064178
+ .RHO_STAR            :   0.002537
+ .Z_EFF               :   1.264402
+ .MACH                :   0.000000
+ .PGAMMA              :   0.000000
+ .GAMMA_E             :   0.000000
+ .LAMBDA_DEBYE        :   0.000000
+ .NU_EI               :   0.000000
+ .NU_I_KROOK          :   0.000000
+ .IPCCW               :   1.000000
+ .BTCCW               :  -1.000000
+ # Ion  1
+ .NI_OVER_NE          :   1.000000
+ .TI_OVER_TE          :   0.731069
+ .DLNNDR              :   1.068566
+ .DLNTDR              :   2.000143
+ .Z                   :   1.000000
+ (NU_II)              :   0.000000
+ .MU                  :   1.000000
+ # Electrons
+ .DLNNDR_ELECTRON     :   1.068566
+ .DLNTDR_ELECTRON     :   2.082944
+ (Z_ELECTRON)         :  -1.000000
+ .BETAE_UNIT          :   0.003015
+ .MU_ELECTRON         :  60.599098
+ --------------- TGLF PARAMETERS ---------------
+ Q_PRIME              :   1.772896
+ P_PRIME              :   0.003402
+ -------- LOCAL PARAMETERS (diagnostic) ----------
+ n_i*z_i - n_e:       :   0.000000
+ r/R0                 :   0.105637
+ b_unit               :   1.000000
+ beta_unit_norm       :   0.005219
+ betai_unit           :   0.002204
+ betae_unit_norm      :   0.003015
+ beta_*               :   0.016265
+ alpha_MHD            :   0.114844
+ omega_00 (c_s/a)     :   0.000000
+ * Note that f = f_sim exp(i n omega0[r0] t)
+ -------- ALFVEN WAVE PARAMETERS (diagnostic) ----------
+ (v_A/c_s)            :  25.752328
+ Omega_TAE            :   2.875505
+ Omega_A              :   5.751009
+ ----------- UPWIND PARAMETERS -----------------
+ radial_upwind        :   2.000000
+ orbit_upwind         :   1.000000
+ orbit_upwind (elec)  :   0.000000
+ ----------- SOURCE PARAMETERS -----------------
+ nu_source            :   0.100000
+ n_source             :    1
+ ----------- RADIAL DOMAIN PARAMETERS ----------
+ s_grid               :   0.064178
+ box_multiplier       :   1.000000
+ L/a                  :   0.098820
+ --
+ explicit_damp(i)     :   0 (  1.0000)
+ explicit_damp(e)     :   0 (  1.0000)
+ --
+ offset               :   0 (  0.0000)
+ LEFT : r_a           :   0.250590
+ LEFT : r_a_physical  :   0.250590
+ NORM : r(ir_norm)    :   0.300000
+ RIGHT: r_b_physical  :   0.332940
+ RIGHT: r_b           :   0.332940
+ ----------- PARALLELIZATION PARAMETERS --------
+ (nek) per subgroup:  :        32
+ (ine) per subgroup:  :        24
+ ----------- TIME STEPPING PARAMETERS ----------
+ plot_filter          :   1.000000
+ time_skip            :     5
+ restart_data_skip    :    10
+ ----------- STABILITY PARAMETERS ----------------
+ d/dtau Courant       :  20.042832
+   d/dr Courant       :   0.124649
+ ----------- SETUP TIMING ----------------------
+ Grid Setup           :   0.052502
+ Build radial ops     :   0.008116
+ Build advection ops  :   0.000000
+ Build field matrices :   0.035620
+ 
+ TOTAL SETUP          :   0.106040
+ -------- CENTRAL WAVENUMBERS SIMULATED -----------
+     (k_y = nq/r, rho = rho_sD_unit)
+ n =    30   k_y rho =  0.400 [ 0.400][ 0.400]
+  
+ min resolved k_x*rho_sD :  0.161298
+ max resolved k_x*rho_sD :  0.241947
+ --------------- CENTRAL BOX SIZE -----------------
+ abs(Lx/rho_sD)       :    38.953945
+ abs(Ly/rho_sD)       :    15.707963
+ => abs(dx/rho_sD)    :     6.492324
+ --------------------------------------------------
+ ------------ GYRO-OPERATOR BANDWIDTH -------------
+ => EXACT BESSEL.
+ --------------------------------------------------
+ PLEASE SEE: 
+  - units.out for normalizing parameters
+  - alloc.out for memory usage
+  - efficiency.out for parallelization efficiency
+  - phase_space.out for velocity-space nodes and weights
+ -----------------------------------------------
+ operational mode     : FIELD EIGENVALUE
+ boundary conditions  : PERIODIC
+ profiles             : FLAT
+ geometry             : MODEL SHAPE
+ electron_method      : ALL SPECIES GYROKINETIC
+ fluctuations         : ELECTROSTATIC
+ gyro_method          : ORIGINAL (INTEGRATED) POLARIZATION
+ fluctuation output   : PHI( ) N( ) E( ) V( )                   
+ radial grid          : UNIFORM
+ integrator_method    : RK2
+ field solve          : UMFPACK (SEQUENTIAL)
+ source_flag          : SOURCE OFF
+ pitch-angle coll.    : OFF
+ rotation parameters  : CANDY METHOD
+ nonlinear dynamics   : OFF
+ linear diffusivity   : RESPONSE FUNCTION
+ -----------------------------------------------
+----------------------------------------------------------
+INFO: Forcing up-down symmetry (UDSYMMETRY_FLAG=1).
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: You are using TOROIDAL_REFERENCE=-1
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: TOROIDAL_REFERENCE reset to lowest nonzero mode.
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: nu_ii rescaled by: 0.000
+----------------------------------------------------------
+ ----------- SPARSE MATRIX STATS ---------------
+ EXPLICIT POISSON:     n>0           
+         nonzeros:     2304
+           values:     6960
+          indices:     9313
+       iterations:        1
+ 
+ ----------- UTILITY PARAMETERS ----------------
+ Ion parallel motion     : ON
+ Ion curvature drift     : ON
+ Electron curvature drift: ON
+ ----------- GRID DIMENSIONS -------------------
+ n_n                  :    1
+ n_x                  :    6
+ n_stack              :   28
+ n_blend              :    8
+ n_pass               :    4
+ n_trap               :    4
+ n_energy             :    8
+ n_field              :    1
+ --
+ n_spec               :    2
+ n_ion                :    2
+ n_kinetic            :    2
+ n_gk                 :    2
+ indx_e               :    2
+ --
+ FIELD POINTS:        :        48
+ DIST. POINTS:        :     21504
+ --
+ energy_max           :   6.000000
+ dt                   :   0.200000
+ --------------- LOCAL PARAMETERS ---------------
+  NOTE: use abs(SAFETY_FACTOR) as input
+ # RADIUS [INPUT]     :   0.300000
+ .RADIUS              :   0.300000
+ .ASPECT_RATIO        :   2.839905
+ .SHIFT               :  -0.075863
+ .ZMAG                :   0.000000
+ .DZMAG               :   0.000000
+ .KAPPA               :   1.289229
+ .S_KAPPA             :   0.009996
+ .DELTA               :   0.060742
+ .S_DELTA             :   0.057358
+ .ZETA                :  -0.001150
+ .S_ZETA              :  -0.001915
+ .SAFETY_FACTOR       :   1.576771
+ .SHEAR               :   0.064178
+ .RHO_STAR            :   0.003171
+ .Z_EFF               :   1.264402
+ .MACH                :   0.000000
+ .PGAMMA              :   0.000000
+ .GAMMA_E             :   0.000000
+ .LAMBDA_DEBYE        :   0.000000
+ .NU_EI               :   0.000000
+ .NU_I_KROOK          :   0.000000
+ .IPCCW               :   1.000000
+ .BTCCW               :  -1.000000
+ # Ion  1
+ .NI_OVER_NE          :   1.000000
+ .TI_OVER_TE          :   0.731069
+ .DLNNDR              :   1.068566
+ .DLNTDR              :   2.000143
+ .Z                   :   1.000000
+ (NU_II)              :   0.000000
+ .MU                  :   1.000000
+ # Electrons
+ .DLNNDR_ELECTRON     :   1.068566
+ .DLNTDR_ELECTRON     :   2.082944
+ (Z_ELECTRON)         :  -1.000000
+ .BETAE_UNIT          :   0.003015
+ .MU_ELECTRON         :  60.599098
+ --------------- TGLF PARAMETERS ---------------
+ Q_PRIME              :   1.772896
+ P_PRIME              :   0.003402
+ -------- LOCAL PARAMETERS (diagnostic) ----------
+ n_i*z_i - n_e:       :   0.000000
+ r/R0                 :   0.105637
+ b_unit               :   1.000000
+ beta_unit_norm       :   0.005219
+ betai_unit           :   0.002204
+ betae_unit_norm      :   0.003015
+ beta_*               :   0.016265
+ alpha_MHD            :   0.114844
+ omega_00 (c_s/a)     :   0.000000
+ * Note that f = f_sim exp(i n omega0[r0] t)
+ -------- ALFVEN WAVE PARAMETERS (diagnostic) ----------
+ (v_A/c_s)            :  25.752328
+ Omega_TAE            :   2.875505
+ Omega_A              :   5.751009
+ ----------- UPWIND PARAMETERS -----------------
+ radial_upwind        :   2.000000
+ orbit_upwind         :   1.000000
+ orbit_upwind (elec)  :   0.000000
+ ----------- SOURCE PARAMETERS -----------------
+ nu_source            :   0.100000
+ n_source             :    1
+ ----------- RADIAL DOMAIN PARAMETERS ----------
+ s_grid               :   0.064178
+ box_multiplier       :   1.000000
+ L/a                  :   0.098820
+ --
+ explicit_damp(i)     :   0 (  1.0000)
+ explicit_damp(e)     :   0 (  1.0000)
+ --
+ offset               :   0 (  0.0000)
+ LEFT : r_a           :   0.250590
+ LEFT : r_a_physical  :   0.250590
+ NORM : r(ir_norm)    :   0.300000
+ RIGHT: r_b_physical  :   0.332940
+ RIGHT: r_b           :   0.332940
+ ----------- PARALLELIZATION PARAMETERS --------
+ (nek) per subgroup:  :        32
+ (ine) per subgroup:  :        24
+ ----------- TIME STEPPING PARAMETERS ----------
+ plot_filter          :   1.000000
+ time_skip            :     5
+ restart_data_skip    :    10
+ ----------- STABILITY PARAMETERS ----------------
+ d/dtau Courant       :  20.042832
+   d/dr Courant       :   0.155812
+ ----------- SETUP TIMING ----------------------
+ Grid Setup           :   0.055380
+ Build radial ops     :   0.008209
+ Build advection ops  :   0.000001
+ Build field matrices :   0.035333
+ 
+ TOTAL SETUP          :   0.108926
+ -------- CENTRAL WAVENUMBERS SIMULATED -----------
+     (k_y = nq/r, rho = rho_sD_unit)
+ n =    30   k_y rho =  0.500 [ 0.500][ 0.500]
+  
+ min resolved k_x*rho_sD :  0.201622
+ max resolved k_x*rho_sD :  0.302433
+ --------------- CENTRAL BOX SIZE -----------------
+ abs(Lx/rho_sD)       :    31.163156
+ abs(Ly/rho_sD)       :    12.566371
+ => abs(dx/rho_sD)    :     5.193859
+ --------------------------------------------------
+ ------------ GYRO-OPERATOR BANDWIDTH -------------
+ => EXACT BESSEL.
+ --------------------------------------------------
+ PLEASE SEE: 
+  - units.out for normalizing parameters
+  - alloc.out for memory usage
+  - efficiency.out for parallelization efficiency
+  - phase_space.out for velocity-space nodes and weights
+ -----------------------------------------------
+ operational mode     : FIELD EIGENVALUE
+ boundary conditions  : PERIODIC
+ profiles             : FLAT
+ geometry             : MODEL SHAPE
+ electron_method      : ALL SPECIES GYROKINETIC
+ fluctuations         : ELECTROSTATIC
+ gyro_method          : ORIGINAL (INTEGRATED) POLARIZATION
+ fluctuation output   : PHI( ) N( ) E( ) V( )                   
+ radial grid          : UNIFORM
+ integrator_method    : RK2
+ field solve          : UMFPACK (SEQUENTIAL)
+ source_flag          : SOURCE OFF
+ pitch-angle coll.    : OFF
+ rotation parameters  : CANDY METHOD
+ nonlinear dynamics   : OFF
+ linear diffusivity   : RESPONSE FUNCTION
+ -----------------------------------------------
+----------------------------------------------------------
+INFO: Forcing up-down symmetry (UDSYMMETRY_FLAG=1).
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: You are using TOROIDAL_REFERENCE=-1
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: TOROIDAL_REFERENCE reset to lowest nonzero mode.
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: nu_ii rescaled by: 0.000
+----------------------------------------------------------
+ ----------- SPARSE MATRIX STATS ---------------
+ EXPLICIT POISSON:     n>0           
+         nonzeros:     2304
+           values:     6960
+          indices:     9313
+       iterations:        1
+ 
+ ----------- UTILITY PARAMETERS ----------------
+ Ion parallel motion     : ON
+ Ion curvature drift     : ON
+ Electron curvature drift: ON
+ ----------- GRID DIMENSIONS -------------------
+ n_n                  :    1
+ n_x                  :    6
+ n_stack              :   28
+ n_blend              :    8
+ n_pass               :    4
+ n_trap               :    4
+ n_energy             :    8
+ n_field              :    1
+ --
+ n_spec               :    2
+ n_ion                :    2
+ n_kinetic            :    2
+ n_gk                 :    2
+ indx_e               :    2
+ --
+ FIELD POINTS:        :        48
+ DIST. POINTS:        :     21504
+ --
+ energy_max           :   6.000000
+ dt                   :   0.200000
+ --------------- LOCAL PARAMETERS ---------------
+  NOTE: use abs(SAFETY_FACTOR) as input
+ # RADIUS [INPUT]     :   0.300000
+ .RADIUS              :   0.300000
+ .ASPECT_RATIO        :   2.839905
+ .SHIFT               :  -0.075863
+ .ZMAG                :   0.000000
+ .DZMAG               :   0.000000
+ .KAPPA               :   1.289229
+ .S_KAPPA             :   0.009996
+ .DELTA               :   0.060742
+ .S_DELTA             :   0.057358
+ .ZETA                :  -0.001150
+ .S_ZETA              :  -0.001915
+ .SAFETY_FACTOR       :   1.576771
+ .SHEAR               :   0.064178
+ .RHO_STAR            :   0.003805
+ .Z_EFF               :   1.264402
+ .MACH                :   0.000000
+ .PGAMMA              :   0.000000
+ .GAMMA_E             :   0.000000
+ .LAMBDA_DEBYE        :   0.000000
+ .NU_EI               :   0.000000
+ .NU_I_KROOK          :   0.000000
+ .IPCCW               :   1.000000
+ .BTCCW               :  -1.000000
+ # Ion  1
+ .NI_OVER_NE          :   1.000000
+ .TI_OVER_TE          :   0.731069
+ .DLNNDR              :   1.068566
+ .DLNTDR              :   2.000143
+ .Z                   :   1.000000
+ (NU_II)              :   0.000000
+ .MU                  :   1.000000
+ # Electrons
+ .DLNNDR_ELECTRON     :   1.068566
+ .DLNTDR_ELECTRON     :   2.082944
+ (Z_ELECTRON)         :  -1.000000
+ .BETAE_UNIT          :   0.003015
+ .MU_ELECTRON         :  60.599098
+ --------------- TGLF PARAMETERS ---------------
+ Q_PRIME              :   1.772896
+ P_PRIME              :   0.003402
+ -------- LOCAL PARAMETERS (diagnostic) ----------
+ n_i*z_i - n_e:       :   0.000000
+ r/R0                 :   0.105637
+ b_unit               :   1.000000
+ beta_unit_norm       :   0.005219
+ betai_unit           :   0.002204
+ betae_unit_norm      :   0.003015
+ beta_*               :   0.016265
+ alpha_MHD            :   0.114844
+ omega_00 (c_s/a)     :   0.000000
+ * Note that f = f_sim exp(i n omega0[r0] t)
+ -------- ALFVEN WAVE PARAMETERS (diagnostic) ----------
+ (v_A/c_s)            :  25.752328
+ Omega_TAE            :   2.875505
+ Omega_A              :   5.751009
+ ----------- UPWIND PARAMETERS -----------------
+ radial_upwind        :   2.000000
+ orbit_upwind         :   1.000000
+ orbit_upwind (elec)  :   0.000000
+ ----------- SOURCE PARAMETERS -----------------
+ nu_source            :   0.100000
+ n_source             :    1
+ ----------- RADIAL DOMAIN PARAMETERS ----------
+ s_grid               :   0.064178
+ box_multiplier       :   1.000000
+ L/a                  :   0.098820
+ --
+ explicit_damp(i)     :   0 (  1.0000)
+ explicit_damp(e)     :   0 (  1.0000)
+ --
+ offset               :   0 (  0.0000)
+ LEFT : r_a           :   0.250590
+ LEFT : r_a_physical  :   0.250590
+ NORM : r(ir_norm)    :   0.300000
+ RIGHT: r_b_physical  :   0.332940
+ RIGHT: r_b           :   0.332940
+ ----------- PARALLELIZATION PARAMETERS --------
+ (nek) per subgroup:  :        32
+ (ine) per subgroup:  :        24
+ ----------- TIME STEPPING PARAMETERS ----------
+ plot_filter          :   1.000000
+ time_skip            :     5
+ restart_data_skip    :    10
+ ----------- STABILITY PARAMETERS ----------------
+ d/dtau Courant       :  20.042832
+   d/dr Courant       :   0.186974
+ ----------- SETUP TIMING ----------------------
+ Grid Setup           :   0.055106
+ Build radial ops     :   0.008266
+ Build advection ops  :   0.000000
+ Build field matrices :   0.035927
+ 
+ TOTAL SETUP          :   0.109368
+ -------- CENTRAL WAVENUMBERS SIMULATED -----------
+     (k_y = nq/r, rho = rho_sD_unit)
+ n =    30   k_y rho =  0.600 [ 0.600][ 0.600]
+  
+ min resolved k_x*rho_sD :  0.241947
+ max resolved k_x*rho_sD :  0.362920
+ --------------- CENTRAL BOX SIZE -----------------
+ abs(Lx/rho_sD)       :    25.969297
+ abs(Ly/rho_sD)       :    10.471976
+ => abs(dx/rho_sD)    :     4.328216
+ --------------------------------------------------
+ ------------ GYRO-OPERATOR BANDWIDTH -------------
+ => EXACT BESSEL.
+ --------------------------------------------------
+ PLEASE SEE: 
+  - units.out for normalizing parameters
+  - alloc.out for memory usage
+  - efficiency.out for parallelization efficiency
+  - phase_space.out for velocity-space nodes and weights
+ -----------------------------------------------
+ operational mode     : FIELD EIGENVALUE
+ boundary conditions  : PERIODIC
+ profiles             : FLAT
+ geometry             : MODEL SHAPE
+ electron_method      : ALL SPECIES GYROKINETIC
+ fluctuations         : ELECTROSTATIC
+ gyro_method          : ORIGINAL (INTEGRATED) POLARIZATION
+ fluctuation output   : PHI( ) N( ) E( ) V( )                   
+ radial grid          : UNIFORM
+ integrator_method    : RK2
+ field solve          : UMFPACK (SEQUENTIAL)
+ source_flag          : SOURCE OFF
+ pitch-angle coll.    : OFF
+ rotation parameters  : CANDY METHOD
+ nonlinear dynamics   : OFF
+ linear diffusivity   : RESPONSE FUNCTION
+ -----------------------------------------------
+----------------------------------------------------------
+INFO: Forcing up-down symmetry (UDSYMMETRY_FLAG=1).
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: You are using TOROIDAL_REFERENCE=-1
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: TOROIDAL_REFERENCE reset to lowest nonzero mode.
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: nu_ii rescaled by: 0.000
+----------------------------------------------------------
+ ----------- SPARSE MATRIX STATS ---------------
+ EXPLICIT POISSON:     n>0           
+         nonzeros:     2304
+           values:     6960
+          indices:     9313
+       iterations:        1
+ 
+ ----------- UTILITY PARAMETERS ----------------
+ Ion parallel motion     : ON
+ Ion curvature drift     : ON
+ Electron curvature drift: ON
+ ----------- GRID DIMENSIONS -------------------
+ n_n                  :    1
+ n_x                  :    6
+ n_stack              :   28
+ n_blend              :    8
+ n_pass               :    4
+ n_trap               :    4
+ n_energy             :    8
+ n_field              :    1
+ --
+ n_spec               :    2
+ n_ion                :    2
+ n_kinetic            :    2
+ n_gk                 :    2
+ indx_e               :    2
+ --
+ FIELD POINTS:        :        48
+ DIST. POINTS:        :     21504
+ --
+ energy_max           :   6.000000
+ dt                   :   0.200000
+ --------------- LOCAL PARAMETERS ---------------
+  NOTE: use abs(SAFETY_FACTOR) as input
+ # RADIUS [INPUT]     :   0.300000
+ .RADIUS              :   0.300000
+ .ASPECT_RATIO        :   2.839905
+ .SHIFT               :  -0.075863
+ .ZMAG                :   0.000000
+ .DZMAG               :   0.000000
+ .KAPPA               :   1.289229
+ .S_KAPPA             :   0.009996
+ .DELTA               :   0.060742
+ .S_DELTA             :   0.057358
+ .ZETA                :  -0.001150
+ .S_ZETA              :  -0.001915
+ .SAFETY_FACTOR       :   1.576771
+ .SHEAR               :   0.064178
+ .RHO_STAR            :   0.004439
+ .Z_EFF               :   1.264402
+ .MACH                :   0.000000
+ .PGAMMA              :   0.000000
+ .GAMMA_E             :   0.000000
+ .LAMBDA_DEBYE        :   0.000000
+ .NU_EI               :   0.000000
+ .NU_I_KROOK          :   0.000000
+ .IPCCW               :   1.000000
+ .BTCCW               :  -1.000000
+ # Ion  1
+ .NI_OVER_NE          :   1.000000
+ .TI_OVER_TE          :   0.731069
+ .DLNNDR              :   1.068566
+ .DLNTDR              :   2.000143
+ .Z                   :   1.000000
+ (NU_II)              :   0.000000
+ .MU                  :   1.000000
+ # Electrons
+ .DLNNDR_ELECTRON     :   1.068566
+ .DLNTDR_ELECTRON     :   2.082944
+ (Z_ELECTRON)         :  -1.000000
+ .BETAE_UNIT          :   0.003015
+ .MU_ELECTRON         :  60.599098
+ --------------- TGLF PARAMETERS ---------------
+ Q_PRIME              :   1.772896
+ P_PRIME              :   0.003402
+ -------- LOCAL PARAMETERS (diagnostic) ----------
+ n_i*z_i - n_e:       :   0.000000
+ r/R0                 :   0.105637
+ b_unit               :   1.000000
+ beta_unit_norm       :   0.005219
+ betai_unit           :   0.002204
+ betae_unit_norm      :   0.003015
+ beta_*               :   0.016265
+ alpha_MHD            :   0.114844
+ omega_00 (c_s/a)     :   0.000000
+ * Note that f = f_sim exp(i n omega0[r0] t)
+ -------- ALFVEN WAVE PARAMETERS (diagnostic) ----------
+ (v_A/c_s)            :  25.752328
+ Omega_TAE            :   2.875505
+ Omega_A              :   5.751009
+ ----------- UPWIND PARAMETERS -----------------
+ radial_upwind        :   2.000000
+ orbit_upwind         :   1.000000
+ orbit_upwind (elec)  :   0.000000
+ ----------- SOURCE PARAMETERS -----------------
+ nu_source            :   0.100000
+ n_source             :    1
+ ----------- RADIAL DOMAIN PARAMETERS ----------
+ s_grid               :   0.064178
+ box_multiplier       :   1.000000
+ L/a                  :   0.098820
+ --
+ explicit_damp(i)     :   0 (  1.0000)
+ explicit_damp(e)     :   0 (  1.0000)
+ --
+ offset               :   0 (  0.0000)
+ LEFT : r_a           :   0.250590
+ LEFT : r_a_physical  :   0.250590
+ NORM : r(ir_norm)    :   0.300000
+ RIGHT: r_b_physical  :   0.332940
+ RIGHT: r_b           :   0.332940
+ ----------- PARALLELIZATION PARAMETERS --------
+ (nek) per subgroup:  :        32
+ (ine) per subgroup:  :        24
+ ----------- TIME STEPPING PARAMETERS ----------
+ plot_filter          :   1.000000
+ time_skip            :     5
+ restart_data_skip    :    10
+ ----------- STABILITY PARAMETERS ----------------
+ d/dtau Courant       :  20.042832
+   d/dr Courant       :   0.218137
+ ----------- SETUP TIMING ----------------------
+ Grid Setup           :   0.054358
+ Build radial ops     :   0.008471
+ Build advection ops  :   0.000000
+ Build field matrices :   0.035641
+ 
+ TOTAL SETUP          :   0.108208
+ -------- CENTRAL WAVENUMBERS SIMULATED -----------
+     (k_y = nq/r, rho = rho_sD_unit)
+ n =    30   k_y rho =  0.700 [ 0.700][ 0.700]
+  
+ min resolved k_x*rho_sD :  0.282271
+ max resolved k_x*rho_sD :  0.423407
+ --------------- CENTRAL BOX SIZE -----------------
+ abs(Lx/rho_sD)       :    22.259397
+ abs(Ly/rho_sD)       :     8.975979
+ => abs(dx/rho_sD)    :     3.709900
+ --------------------------------------------------
+ ------------ GYRO-OPERATOR BANDWIDTH -------------
+ => EXACT BESSEL.
+ --------------------------------------------------
+ PLEASE SEE: 
+  - units.out for normalizing parameters
+  - alloc.out for memory usage
+  - efficiency.out for parallelization efficiency
+  - phase_space.out for velocity-space nodes and weights
+ -----------------------------------------------
+ operational mode     : FIELD EIGENVALUE
+ boundary conditions  : PERIODIC
+ profiles             : FLAT
+ geometry             : MODEL SHAPE
+ electron_method      : ALL SPECIES GYROKINETIC
+ fluctuations         : ELECTROSTATIC
+ gyro_method          : ORIGINAL (INTEGRATED) POLARIZATION
+ fluctuation output   : PHI( ) N( ) E( ) V( )                   
+ radial grid          : UNIFORM
+ integrator_method    : RK2
+ field solve          : UMFPACK (SEQUENTIAL)
+ source_flag          : SOURCE OFF
+ pitch-angle coll.    : OFF
+ rotation parameters  : CANDY METHOD
+ nonlinear dynamics   : OFF
+ linear diffusivity   : RESPONSE FUNCTION
+ -----------------------------------------------
+----------------------------------------------------------
+INFO: Forcing up-down symmetry (UDSYMMETRY_FLAG=1).
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: You are using TOROIDAL_REFERENCE=-1
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: TOROIDAL_REFERENCE reset to lowest nonzero mode.
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: nu_ii rescaled by: 0.000
+----------------------------------------------------------
+ ----------- SPARSE MATRIX STATS ---------------
+ EXPLICIT POISSON:     n>0           
+         nonzeros:     2304
+           values:     6960
+          indices:     9313
+       iterations:        1
+ 
+ ----------- UTILITY PARAMETERS ----------------
+ Ion parallel motion     : ON
+ Ion curvature drift     : ON
+ Electron curvature drift: ON
+ ----------- GRID DIMENSIONS -------------------
+ n_n                  :    1
+ n_x                  :    6
+ n_stack              :   28
+ n_blend              :    8
+ n_pass               :    4
+ n_trap               :    4
+ n_energy             :    8
+ n_field              :    1
+ --
+ n_spec               :    2
+ n_ion                :    2
+ n_kinetic            :    2
+ n_gk                 :    2
+ indx_e               :    2
+ --
+ FIELD POINTS:        :        48
+ DIST. POINTS:        :     21504
+ --
+ energy_max           :   6.000000
+ dt                   :   0.200000
+ --------------- LOCAL PARAMETERS ---------------
+  NOTE: use abs(SAFETY_FACTOR) as input
+ # RADIUS [INPUT]     :   0.300000
+ .RADIUS              :   0.300000
+ .ASPECT_RATIO        :   2.839905
+ .SHIFT               :  -0.075863
+ .ZMAG                :   0.000000
+ .DZMAG               :   0.000000
+ .KAPPA               :   1.289229
+ .S_KAPPA             :   0.009996
+ .DELTA               :   0.060742
+ .S_DELTA             :   0.057358
+ .ZETA                :  -0.001150
+ .S_ZETA              :  -0.001915
+ .SAFETY_FACTOR       :   1.576771
+ .SHEAR               :   0.064178
+ .RHO_STAR            :   0.005074
+ .Z_EFF               :   1.264402
+ .MACH                :   0.000000
+ .PGAMMA              :   0.000000
+ .GAMMA_E             :   0.000000
+ .LAMBDA_DEBYE        :   0.000000
+ .NU_EI               :   0.000000
+ .NU_I_KROOK          :   0.000000
+ .IPCCW               :   1.000000
+ .BTCCW               :  -1.000000
+ # Ion  1
+ .NI_OVER_NE          :   1.000000
+ .TI_OVER_TE          :   0.731069
+ .DLNNDR              :   1.068566
+ .DLNTDR              :   2.000143
+ .Z                   :   1.000000
+ (NU_II)              :   0.000000
+ .MU                  :   1.000000
+ # Electrons
+ .DLNNDR_ELECTRON     :   1.068566
+ .DLNTDR_ELECTRON     :   2.082944
+ (Z_ELECTRON)         :  -1.000000
+ .BETAE_UNIT          :   0.003015
+ .MU_ELECTRON         :  60.599098
+ --------------- TGLF PARAMETERS ---------------
+ Q_PRIME              :   1.772896
+ P_PRIME              :   0.003402
+ -------- LOCAL PARAMETERS (diagnostic) ----------
+ n_i*z_i - n_e:       :   0.000000
+ r/R0                 :   0.105637
+ b_unit               :   1.000000
+ beta_unit_norm       :   0.005219
+ betai_unit           :   0.002204
+ betae_unit_norm      :   0.003015
+ beta_*               :   0.016265
+ alpha_MHD            :   0.114844
+ omega_00 (c_s/a)     :   0.000000
+ * Note that f = f_sim exp(i n omega0[r0] t)
+ -------- ALFVEN WAVE PARAMETERS (diagnostic) ----------
+ (v_A/c_s)            :  25.752328
+ Omega_TAE            :   2.875505
+ Omega_A              :   5.751009
+ ----------- UPWIND PARAMETERS -----------------
+ radial_upwind        :   2.000000
+ orbit_upwind         :   1.000000
+ orbit_upwind (elec)  :   0.000000
+ ----------- SOURCE PARAMETERS -----------------
+ nu_source            :   0.100000
+ n_source             :    1
+ ----------- RADIAL DOMAIN PARAMETERS ----------
+ s_grid               :   0.064178
+ box_multiplier       :   1.000000
+ L/a                  :   0.098820
+ --
+ explicit_damp(i)     :   0 (  1.0000)
+ explicit_damp(e)     :   0 (  1.0000)
+ --
+ offset               :   0 (  0.0000)
+ LEFT : r_a           :   0.250590
+ LEFT : r_a_physical  :   0.250590
+ NORM : r(ir_norm)    :   0.300000
+ RIGHT: r_b_physical  :   0.332940
+ RIGHT: r_b           :   0.332940
+ ----------- PARALLELIZATION PARAMETERS --------
+ (nek) per subgroup:  :        32
+ (ine) per subgroup:  :        24
+ ----------- TIME STEPPING PARAMETERS ----------
+ plot_filter          :   1.000000
+ time_skip            :     5
+ restart_data_skip    :    10
+ ----------- STABILITY PARAMETERS ----------------
+ d/dtau Courant       :  20.042832
+   d/dr Courant       :   0.249299
+ ----------- SETUP TIMING ----------------------
+ Grid Setup           :   0.056599
+ Build radial ops     :   0.008397
+ Build advection ops  :   0.000000
+ Build field matrices :   0.036061
+ 
+ TOTAL SETUP          :   0.111311
+ -------- CENTRAL WAVENUMBERS SIMULATED -----------
+     (k_y = nq/r, rho = rho_sD_unit)
+ n =    30   k_y rho =  0.800 [ 0.800][ 0.800]
+  
+ min resolved k_x*rho_sD :  0.322596
+ max resolved k_x*rho_sD :  0.483893
+ --------------- CENTRAL BOX SIZE -----------------
+ abs(Lx/rho_sD)       :    19.476973
+ abs(Ly/rho_sD)       :     7.853982
+ => abs(dx/rho_sD)    :     3.246162
+ --------------------------------------------------
+ ------------ GYRO-OPERATOR BANDWIDTH -------------
+ => EXACT BESSEL.
+ --------------------------------------------------
+ PLEASE SEE: 
+  - units.out for normalizing parameters
+  - alloc.out for memory usage
+  - efficiency.out for parallelization efficiency
+  - phase_space.out for velocity-space nodes and weights
+ -----------------------------------------------
+ operational mode     : FIELD EIGENVALUE
+ boundary conditions  : PERIODIC
+ profiles             : FLAT
+ geometry             : MODEL SHAPE
+ electron_method      : ALL SPECIES GYROKINETIC
+ fluctuations         : ELECTROSTATIC
+ gyro_method          : ORIGINAL (INTEGRATED) POLARIZATION
+ fluctuation output   : PHI( ) N( ) E( ) V( )                   
+ radial grid          : UNIFORM
+ integrator_method    : RK2
+ field solve          : UMFPACK (SEQUENTIAL)
+ source_flag          : SOURCE OFF
+ pitch-angle coll.    : OFF
+ rotation parameters  : CANDY METHOD
+ nonlinear dynamics   : OFF
+ linear diffusivity   : RESPONSE FUNCTION
+ -----------------------------------------------
+----------------------------------------------------------
+INFO: Forcing up-down symmetry (UDSYMMETRY_FLAG=1).
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: You are using TOROIDAL_REFERENCE=-1
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: TOROIDAL_REFERENCE reset to lowest nonzero mode.
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: nu_ii rescaled by: 0.000
+----------------------------------------------------------
+ ----------- SPARSE MATRIX STATS ---------------
+ EXPLICIT POISSON:     n>0           
+         nonzeros:     2304
+           values:     6960
+          indices:     9313
+       iterations:        1
+ 
+ ----------- UTILITY PARAMETERS ----------------
+ Ion parallel motion     : ON
+ Ion curvature drift     : ON
+ Electron curvature drift: ON
+ ----------- GRID DIMENSIONS -------------------
+ n_n                  :    1
+ n_x                  :    6
+ n_stack              :   28
+ n_blend              :    8
+ n_pass               :    4
+ n_trap               :    4
+ n_energy             :    8
+ n_field              :    1
+ --
+ n_spec               :    2
+ n_ion                :    2
+ n_kinetic            :    2
+ n_gk                 :    2
+ indx_e               :    2
+ --
+ FIELD POINTS:        :        48
+ DIST. POINTS:        :     21504
+ --
+ energy_max           :   6.000000
+ dt                   :   0.200000
+ --------------- LOCAL PARAMETERS ---------------
+  NOTE: use abs(SAFETY_FACTOR) as input
+ # RADIUS [INPUT]     :   0.300000
+ .RADIUS              :   0.300000
+ .ASPECT_RATIO        :   2.839905
+ .SHIFT               :  -0.075863
+ .ZMAG                :   0.000000
+ .DZMAG               :   0.000000
+ .KAPPA               :   1.289229
+ .S_KAPPA             :   0.009996
+ .DELTA               :   0.060742
+ .S_DELTA             :   0.057358
+ .ZETA                :  -0.001150
+ .S_ZETA              :  -0.001915
+ .SAFETY_FACTOR       :   1.576771
+ .SHEAR               :   0.064178
+ .RHO_STAR            :   0.005708
+ .Z_EFF               :   1.264402
+ .MACH                :   0.000000
+ .PGAMMA              :   0.000000
+ .GAMMA_E             :   0.000000
+ .LAMBDA_DEBYE        :   0.000000
+ .NU_EI               :   0.000000
+ .NU_I_KROOK          :   0.000000
+ .IPCCW               :   1.000000
+ .BTCCW               :  -1.000000
+ # Ion  1
+ .NI_OVER_NE          :   1.000000
+ .TI_OVER_TE          :   0.731069
+ .DLNNDR              :   1.068566
+ .DLNTDR              :   2.000143
+ .Z                   :   1.000000
+ (NU_II)              :   0.000000
+ .MU                  :   1.000000
+ # Electrons
+ .DLNNDR_ELECTRON     :   1.068566
+ .DLNTDR_ELECTRON     :   2.082944
+ (Z_ELECTRON)         :  -1.000000
+ .BETAE_UNIT          :   0.003015
+ .MU_ELECTRON         :  60.599098
+ --------------- TGLF PARAMETERS ---------------
+ Q_PRIME              :   1.772896
+ P_PRIME              :   0.003402
+ -------- LOCAL PARAMETERS (diagnostic) ----------
+ n_i*z_i - n_e:       :   0.000000
+ r/R0                 :   0.105637
+ b_unit               :   1.000000
+ beta_unit_norm       :   0.005219
+ betai_unit           :   0.002204
+ betae_unit_norm      :   0.003015
+ beta_*               :   0.016265
+ alpha_MHD            :   0.114844
+ omega_00 (c_s/a)     :   0.000000
+ * Note that f = f_sim exp(i n omega0[r0] t)
+ -------- ALFVEN WAVE PARAMETERS (diagnostic) ----------
+ (v_A/c_s)            :  25.752328
+ Omega_TAE            :   2.875505
+ Omega_A              :   5.751009
+ ----------- UPWIND PARAMETERS -----------------
+ radial_upwind        :   2.000000
+ orbit_upwind         :   1.000000
+ orbit_upwind (elec)  :   0.000000
+ ----------- SOURCE PARAMETERS -----------------
+ nu_source            :   0.100000
+ n_source             :    1
+ ----------- RADIAL DOMAIN PARAMETERS ----------
+ s_grid               :   0.064178
+ box_multiplier       :   1.000000
+ L/a                  :   0.098820
+ --
+ explicit_damp(i)     :   0 (  1.0000)
+ explicit_damp(e)     :   0 (  1.0000)
+ --
+ offset               :   0 (  0.0000)
+ LEFT : r_a           :   0.250590
+ LEFT : r_a_physical  :   0.250590
+ NORM : r(ir_norm)    :   0.300000
+ RIGHT: r_b_physical  :   0.332940
+ RIGHT: r_b           :   0.332940
+ ----------- PARALLELIZATION PARAMETERS --------
+ (nek) per subgroup:  :        32
+ (ine) per subgroup:  :        24
+ ----------- TIME STEPPING PARAMETERS ----------
+ plot_filter          :   1.000000
+ time_skip            :     5
+ restart_data_skip    :    10
+ ----------- STABILITY PARAMETERS ----------------
+ d/dtau Courant       :  20.042832
+   d/dr Courant       :   0.280461
+ ----------- SETUP TIMING ----------------------
+ Grid Setup           :   0.053673
+ Build radial ops     :   0.008651
+ Build advection ops  :   0.000000
+ Build field matrices :   0.035962
+ 
+ TOTAL SETUP          :   0.108299
+ -------- CENTRAL WAVENUMBERS SIMULATED -----------
+     (k_y = nq/r, rho = rho_sD_unit)
+ n =    30   k_y rho =  0.900 [ 0.900][ 0.900]
+  
+ min resolved k_x*rho_sD :  0.362920
+ max resolved k_x*rho_sD :  0.544380
+ --------------- CENTRAL BOX SIZE -----------------
+ abs(Lx/rho_sD)       :    17.312864
+ abs(Ly/rho_sD)       :     6.981317
+ => abs(dx/rho_sD)    :     2.885477
+ --------------------------------------------------
+ ------------ GYRO-OPERATOR BANDWIDTH -------------
+ => EXACT BESSEL.
+ --------------------------------------------------
+ PLEASE SEE: 
+  - units.out for normalizing parameters
+  - alloc.out for memory usage
+  - efficiency.out for parallelization efficiency
+  - phase_space.out for velocity-space nodes and weights

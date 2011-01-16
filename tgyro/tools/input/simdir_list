@@ -1,8 +1,14 @@
 Regression cases
 
+Transport mode:
+
 treg01: [t+ th+ne0+te1+ti1]
 treg02: [t+ th+ne1+te1+ti1]
 treg03: [g+ th+ne1+te1+ti1]
+
+Linear stabilty mode:
+
+sreg01: 
 
 ------------------------------------------------------
 
