@@ -18,12 +18,12 @@ then
   echo
   echo "         -p <path>"
   echo "         Set optional path to simulation directory."
-  echo "         The default path is \$GYRO_DIR/sim."
+  echo "         [The default path is the current directory]"
   echo
   echo "EXECUTE MODE"
   echo
   echo "         -e <simdir>" 
-  echo "         Run GYRO using INPUT data in <simdir>."
+  echo "         Run GYRO using input data in <simdir>."
   echo
   echo "         -n <nproc>" 
   echo "         Number of cores."

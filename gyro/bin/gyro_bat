@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 #------------------------------------------------------
 # SCRIPT:
@@ -9,72 +9,67 @@
 #  to queue if desired.
 #--------------------------------------------------------
 
-GYRO_DIR=$GACODE_ROOT/gyro
-
-code=gyro
-
+#=============================================================
+# Syntax validity check and help message 
+#
 n=$#
-
-# exit if no arguments
-
-HELP=$GYRO_DIR/bin/HELP_BAT
 
 if [ $n -eq 0 ]
 then
-   cat $HELP ;
-   exit 1
+   echo
+  echo "Usage:   gyro_bat [options]"
+  echo
+  echo "         -p <path>"
+  echo "         Set optional path to simulation directory."
+  echo "         [The default path is the current directory]"
+  echo
+  echo "         -e <simdir>" 
+  echo "         Run GYRO using input data in <simdir>."
+  echo
+  echo "         -n <nproc>" 
+  echo "         Number of cores."
+
+  exit 1
 fi
+#=============================================================
 
-# determine if optional path was provided
+#=============================================================
+# Define variables for flag capture
+#
+CODE=gyro
+# Default simulation root and gyro directory
+SIMROOT=$PWD
+GYRO_DIR=$GACODE_ROOT/gyro
+# Default number of cores
+NPROC=1
+#=============================================================
 
-if [ $n -eq 6 ]
+#=============================================================
+# Parse command line options
+#
+while [ $# -gt 0 ] ; do
+  case "$1" in
+
+  -p) shift ; SIMROOT=$1 ;;
+
+  -e) shift ; LOCDIR=$1 ; EXEC_FLAG=1 ;;
+
+  -n) shift ; NPROC=$1 ;;
+
+   *) echo "ERROR: incorrect gyro_bat syntax." ; exit 1 ;;
+ 
+  esac
+  shift
+done
+#=============================================================
+
+# "-e ." syntax handling 
+if [ "$LOCDIR" == "." ]
 then
-   # set simpath to specified path
-   simpath=${6}
+   SIMDIR=$PWD
+   cd .. ; LOCDIR=$PWD
 else
-   # if not specified on command line, set to default
-   simpath=$GYRO_DIR/sim
-fi
-simdir=$simpath/${2}
-
-# parse first argument:
-
-case "${1}" in
-
-   -h* | -H* | --h* | --H* )
-
-      # help
-
-      cat $HELP ;
-      exit 1 ;;
-
-   -e* | -E* )
-
-      # define executable directory and CONTINUE
-
-      if ! gyro_sim_warn $simdir
-      then
-         exit 1 ;
-      fi ;;
-
-   -* | * )
-
-      # error trap
-
-      cat $HELP ;
-      exit 1 ;;
-
-esac
-
-# We're continuing from '-e' above, so define
-# number of processors
-
-if [ $n -eq 2 ]
-then
-   # set nproc if not specified on command line
-   nproc=2
-else
-   nproc=${4}
+   SIMDIR=$SIMROOT/$LOCDIR
 fi
 
 # Determine queue
@@ -83,6 +78,6 @@ cat $GACODE_ROOT/shared/batch/queue_msg.${GACODE_PLATFORM}
 
 read queue_num
 
-$GACODE_ROOT/shared/batch/queue_go.${GACODE_PLATFORM} $nproc $queue_num ${2} $simpath $code
+$GACODE_ROOT/shared/batch/queue_go.${GACODE_PLATFORM} $NPROC $queue_num $LOCDIR $SIMROOT $CODE
 
-exit 1
+exit 0
