@@ -3,7 +3,9 @@
 !
 ! PURPOSE:
 !  Compute the RHS of the electron and ion GKEs for both 
-!  periodic and nonperiodic boundary conditions.  
+!  periodic and nonperiodic boundary conditions.  This is 
+!  a dramatically simplified version of the original code 
+!  to compute the righthand side.
 !-----------------------------------------------------------
 
 subroutine gyro_rhs_total
