@@ -118,8 +118,10 @@ subroutine tgyro_tglf_map
 
   !----------------------------------------------------------------
   ! Gamma_ExB (ExB shearing rate, units of a/cs)
-  tglf_vexb_shear_in = gamma_eb(i_r)*r_min/c_s(i_r)
-  tglf_vpar_shear_in = gamma_p(i_r)*r_min/c_s(i_r)
+  if (tgyro_rotation_flag == 1) then
+     tglf_vexb_shear_in = gamma_eb(i_r)*r_min/c_s(i_r)
+     tglf_vpar_shear_in = gamma_p(i_r)*r_min/c_s(i_r)
+  endif
   !----------------------------------------------------------------
 
   !-----------------------------------
@@ -174,14 +176,14 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
   ! CONTROL PARAMETERS
   !
-  ! Include B_perp
-  tglf_use_bper_in = .false.
+  ! Include B_parallal
+  tglf_use_bpar_in = .false.
   !
-  ! Include B_parallel
+  ! Include A_parallel (B_perp)
   if (loc_betae_scale > 0.0) then
-     tglf_use_bpar_in = .true.
+     tglf_use_bper_in = .true.
   else
-     tglf_use_bpar_in = .false.
+     tglf_use_bper_in = .false.
   endif
   !
   ! Use adiabatic electrons
