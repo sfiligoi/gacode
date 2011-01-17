@@ -559,6 +559,14 @@ subroutine gyro_profile_init
   !-------------------------------------------------------------
   ! Compute base collision rates
   !
+  !          4 pi ne e^4 ne ln(Lambda)
+  !  nu_ei = ------------------------- 
+  !            me^(1/2) (2 Te)^(3/2)
+  !
+  !            nu_ei
+  !  nu_e = ----------- { Zeff + H[sqrt(enhat_e)] } -> nu_s(indx_e,:)
+  !         enhat^(3/2)
+
   if (radial_profile_method == 3) then
 
      ! Numerical coefficient
