@@ -10,6 +10,10 @@ Linear stabilty mode:
 
 sreg01: 
 
+Multi-run mode:
+
+mreg01: 
+
 ------------------------------------------------------
 
 t = TGLF
