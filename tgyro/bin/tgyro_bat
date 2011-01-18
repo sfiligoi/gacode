@@ -63,11 +63,10 @@ done
 # "-e ." syntax handling 
 if [ "$LOCDIR" == "." ]
 then
-   SIMDIR=$PWD
-   cd .. ; LOCDIR=$PWD
-else
-   SIMDIR=$SIMROOT/$LOCDIR
+   LOCDIR=`basename $PWD`
+   cd .. ; SIMROOT=$PWD
 fi
+SIMDIR=$SIMROOT/$LOCDIR
 
 # Determine queue
 
