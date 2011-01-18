@@ -3,7 +3,7 @@
 #---------------------------------------------------
 
 # SLEPC_LIB and other environment variables are defined in:
-include ${SLEPC_DIR}/conf/slepc_common_variables
+#include ${SLEPC_DIR}/conf/slepc_common_variables
 
 # Compilers and flags
 
@@ -18,8 +18,8 @@ FPROF	= -fast -Mprof=func
 
 # System math libraries
 
-LMATH = -L${FFTW_DIR} -l drfftw -L${FFTW_DIR} -l dfftw \
-        ${SLEPC_LIB}
+LMATH = -L${FFTW_DIR} -l drfftw -L${FFTW_DIR} -l dfftw 
+#        ${SLEPC_LIB}
 # -L${SLEPC_DIR}/cray-xt4_g_complex/lib -l slepc
 
 # OPTIONAL: netCDF (for gyro2gkv)
