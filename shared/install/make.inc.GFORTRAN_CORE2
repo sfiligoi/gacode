@@ -1,8 +1,6 @@
 #---------------------------------------------------
-# Generic {Pentium M, gfortran}
+# gfortran + core2 laptop
 #---------------------------------------------------
-
-MAKE = make
 
 # Compilers
 
@@ -16,12 +14,11 @@ FPROF	= -march=nocona -mfpmath=sse -O3 -pg
 
 # System math libraries
 
-LMATH = /usr/local/lib/LAPACK/lapack.GFORTRAN_CORE2.a \
-        /usr/local/lib/BLAS/libgoto.GFORTRAN_CORE2.a
+LMATH = /home/SOFTWARE/GotoBLAS2/libgoto2.a
 
 # OPTIONAL: netCDF (for gyro2gkv)
 
-NETCDF = /usr/local/lib/libnetcdf.a
+NETCDF = -L/usr/local/lib -lnetcdf
 NETCDF_INC = /usr/local/include
 
 # Archive 
