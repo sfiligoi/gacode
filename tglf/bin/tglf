@@ -1,10 +1,10 @@
 #!/bin/sh
 #
 # SCRIPT:
-#  neo
+#  tglf
 #
 # PURPOSE:
-#  Toplevel script controlling execution of NEO
+#  Toplevel script controlling execution of TGLF
 #--------------------------------------------------------------
 
 n=$#
@@ -96,7 +96,7 @@ cd $simdir
 
 # Version stamp:
 
-cat $TGLF_DIR/VERSION > VERSION_tag ; date >> VERSION_tag
+#cat $TGLF_DIR/VERSION > VERSION_tag ; date >> VERSION_tag
 
 # Parse data in INPUT
 

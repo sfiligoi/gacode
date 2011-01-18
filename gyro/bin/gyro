@@ -228,18 +228,6 @@ fi
 #=============================================================
 
 #==========================================================
-# Version stamp on top of any pre-existing stamp(s):
-#
-touch VERSION_tag
-mv VERSION_tag VERSION_temp
-cat $GYRO_DIR/VERSION > VERSION_tag 
-echo $GACODE_PLATFORM >> VERSION_tag
-date >> VERSION_tag
-cat VERSION_temp >> VERSION_tag
-rm VERSION_temp
-#==========================================================
-
-#==========================================================
 # Check for "hard halt", otherwise initialize halt file:
 #
 if [ -f halt ] 
@@ -295,6 +283,14 @@ fi
 # Execute:
 if [ $EXEC_FLAG -eq 1 ]
 then
+
+   #==========================================================
+   # Version stamp:  
+   echo `gacode_getversion` > VERSION_tag 
+   echo $GACODE_PLATFORM >> VERSION_tag
+   date >> VERSION_tag
+   #==========================================================
+
    gyro_version_message 
    echo "0" > "$SIMDIR/gyrotest_flag"
 fi

@@ -1,0 +1,15 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  gacode_getversion
+#
+# FUNCTION:
+#  Get VERSION 
+#--------------------------------
+
+if [ -d $GACODE_ROOT/.git ] 
+then
+   echo `cd $GACODE_ROOT ; git describe --abbrev=4`
+else
+   echo `cat $GACODE_ROOT/.VERSION` 
+fi

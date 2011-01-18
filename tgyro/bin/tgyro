@@ -160,18 +160,6 @@ cd $SIMDIR
 #============================================================
 
 #==========================================================
-# Version stamp on top of any pre-existing stamp(s):
-#
-touch VERSION_tag
-mv VERSION_tag VERSION_temp
-cat $TGYRO_DIR/VERSION > VERSION_tag 
-echo $GACODE_PLATFORM >> VERSION_tag
-date >> VERSION_tag
-cat VERSION_temp >> VERSION_tag
-rm VERSION_temp
-#==========================================================
-
-#==========================================================
 # Check for "hard halt", otherwise initialize halt file:
 #
 if [ -f halt ] 
@@ -244,6 +232,13 @@ then
        echo "ERROR: processor count mismatch."
        exit 1
    else
+      #==========================================================
+      # Version stamp:
+      echo `gacode_getversion` > VERSION_tag 
+      echo $GACODE_PLATFORM >> VERSION_tag
+      date >> VERSION_tag
+      #==========================================================
+
       echo "0" > "$SIMDIR/gyrotest_flag"
       # Call platform-specific exec file:
       echo " Passing control to TGYRO executable ..." >> $RUN_FILE

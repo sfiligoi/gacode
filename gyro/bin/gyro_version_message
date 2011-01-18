@@ -7,12 +7,7 @@
 #  Echo version message.
 #------------------------------
 
-if [ -d $GACODE_ROOT/.git ] 
-then
-   VERSION=`cd $GACODE_ROOT ; git describe --abbrev=4`
-else
-   VERSION=`cat $GACODE_ROOT/.VERSION` 
-fi
+VERSION=`gacode_getversion`
 
 echo "=========================================================="
 echo "GYRO" `echo $VERSION` `echo $GACODE_PLATFORM` `uname -s` `uname -m`
