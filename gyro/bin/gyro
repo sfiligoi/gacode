@@ -140,11 +140,10 @@ done
 
 if [ "$LOCDIR" == "." ]
 then
-   SIMDIR=$PWD
-   cd .. ; LOCDIR=$PWD
-else
-   SIMDIR=$SIMROOT/$LOCDIR
+   LOCDIR=`basename $PWD`
+   cd .. ; SIMROOT=$PWD
 fi
+SIMDIR=$SIMROOT/$LOCDIR
 
 RUN_FILE=$SIMDIR/run.out
 

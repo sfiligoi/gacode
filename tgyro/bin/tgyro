@@ -108,11 +108,10 @@ done
 
 if [ "$LOCDIR" == "." ]
 then
-   SIMDIR=$PWD
-   cd .. ; LODCIR=$PWD
-else
-   SIMDIR=$SIMROOT/$LOCDIR
+   LOCDIR=`basename $PWD`
+   cd .. ; SIMROOT=$PWD
 fi
+SIMDIR=$SIMROOT/$LOCDIR
 
 RUN_FILE=$SIMDIR/run.out
 LOG_FILE=$SIMDIR/input.tgyro.log
