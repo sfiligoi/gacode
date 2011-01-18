@@ -7,6 +7,13 @@
 #  Echo version message.
 #------------------------------
 
-echo "====================================================="
-echo "NEO" `cat $GACODE_ROOT/neo/VERSION` `echo $GACODE_PLATFORM` 
-echo "====================================================="
+if [ -d $GACODE_ROOT/.git ] 
+then
+   VERSION=`cd $GACODE_ROOT ; git describe --abbrev=4`
+else
+   VERSION=`cat $GACODE_ROOT/.VERSION` 
+fi
+
+echo "=========================================================="
+echo "NEO" `echo $VERSION` `echo $GACODE_PLATFORM` `uname -s` `uname -m`
+echo "=========================================================="

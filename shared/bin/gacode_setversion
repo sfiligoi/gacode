@@ -1,0 +1,11 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  gacode_setversion
+#
+# FUNCTION:
+#  Set VERSION for non-git usage
+#--------------------------------
+
+VERSION=`git describe --abbrev=4`
+echo $VERSION > $GACODE_ROOT/.VERSION
