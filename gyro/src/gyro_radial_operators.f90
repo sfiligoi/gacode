@@ -23,6 +23,7 @@ subroutine gyro_radial_operators
   !
   real :: t0
   real :: denom
+  complex :: z0
   real, dimension(:), allocatable :: r_node
   real, dimension(-m_dx:m_dx-i_dx) :: w_temp
   real, dimension(-m_dx:m_dx) :: s_temp
@@ -162,6 +163,8 @@ subroutine gyro_radial_operators
   !
   if (i_dx == 0) then
 
+     ! Finite-difference derivative and dissipation
+
      call polydiff(2*m_dx,m_dx,w_temp,denom)
      w_d1 = w_temp/d_x
 
@@ -173,7 +176,30 @@ subroutine gyro_radial_operators
 
   else
 
-     call make_dharmonic
+     ! Pseudo-spectral derivative (FD dissipation)
+
+     w_d1(:) = (0.0,0.0)
+
+     do m=-m_dx,m_dx-1
+        do p=-m_dx,m_dx-1
+           z0 = exp(i_c*p*m*(pi_2/n_x))
+           w_d1(m) = w_d1(m)+p*z0
+        enddo
+     enddo
+
+     w_d1(:) = -(1.0/n_x)*(pi_2*i_c/x_length)*w_d1(:)
+
+     w_d2(:) = (0.0,0.0)
+
+     do m=-m_dx,m_dx-1
+        do p=-m_dx,m_dx-1
+           z0 = exp(i_c*p*m*(pi_2/n_x))
+           w_d2(m) = w_d2(m)+p*p*z0
+        enddo
+     enddo
+
+     ! Note the sign change
+     w_d2(:) = (1.0/n_x)*(pi_2*i_c/x_length)**2*w_d2(:)
 
      if (m_dx == 2) then
 

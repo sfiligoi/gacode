@@ -120,7 +120,6 @@ OBJECTS = gyro_globals.o \
           make_phase_space.o \
           make_pointers.o \
           make_pointer_dimensions.o \
-          make_dharmonic.o \
           make_initial_h.o \
           make_implicit_advect.o \
           make_electron_current.o \
