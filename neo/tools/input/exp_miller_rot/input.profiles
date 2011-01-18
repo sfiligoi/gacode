@@ -26,9 +26,6 @@
 #  PLASMA MINOR RADIUS : 5.99E-01 m
 #
 # * No data has been smoothed :)
-#
-VERSION=0
-OMEGA_FLAG=0
 # 
 N_EXP=51
 BT_EXP=+2.0657000E+00
