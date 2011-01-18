@@ -264,6 +264,11 @@ class ManagerInput:
         z.read_input(datafile+'.input')
         self.error = z.error
         self.error_msg = z.error_msg
+
+        # Something went wrong in SimpleInput (bogus parameter),
+        # so let's just return
+        if self.error == 1:
+            return
         
         # File generated above
         genfile = datafile+'.input'+z.extension 

@@ -218,7 +218,7 @@ then
    python $GACODE_ROOT/shared/bin/profile_parse.py input.profiles >> $LOG_FILE
 else
    # Halt if we are using TRANSPORT_METHOD<3
-   line=`grep TRANSPORT_METHOD input.tgyro.gen`
+   line=`grep TGYRO_MODE input.tgyro.gen`
    ntr=${line:0:1}
 
    if [ $ntr -lt 3 ]
