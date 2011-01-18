@@ -25,7 +25,7 @@ LMATH = -L${FFTW_DIR} -l drfftw -L${FFTW_DIR} -l dfftw \
 # OPTIONAL: netCDF (for gyro2gkv)
 
 NETCDF = ${NETCDF_DIR}/lib/libnetcdf.a
-NETCDF_INC = ${NETCDF_INCLUDE_OPTS}
+NETCDF_INC = ${NETCDF_DIR}/include
 
 # Archive 
 
