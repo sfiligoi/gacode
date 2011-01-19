@@ -151,8 +151,4 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
   ! Add final factor of i for case 3
   if (itype == 3) g = -(i_c/2.0)*g
 
-  if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[gyro_bessel_operator done]'
-  endif
-
 end subroutine gyro_bessel_operator
