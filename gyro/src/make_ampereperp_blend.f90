@@ -80,20 +80,20 @@ subroutine make_ampereperp_blend
               f_x2(is,:) = (0.0,0.0)
 
               ! G_perp^2
-              call gyro_ave_aperp(rho_gyro,&
+              call gyro_bessel_operator(rho_gyro,&
                    a_gyro,&
                    u_gyro,&
                    v_gyro,&
                    f_x1(is,:),&
-                   2)
+                   5)
 
               ! G_perp * G
-              call gyro_ave_aperp(rho_gyro,&
+              call gyro_bessel_operator(rho_gyro,&
                    a_gyro,&
                    u_gyro,&
                    v_gyro,&
                    f_x2(is,:),&
-                   3)
+                   6)
 
               ! Enforce EXACT reality 
               if (n_1(in_1) == 0) then 

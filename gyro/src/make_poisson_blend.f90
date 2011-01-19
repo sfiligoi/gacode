@@ -113,11 +113,13 @@ subroutine make_poisson_blend(i_elec)
 
                  f_x(is,:) = (0.0,0.0) 
 
-                 call gyro_bdoubleave(rho_gyro,&
+                 ! I_0
+                 call gyro_bessel_operator(rho_gyro,&
                       a_gyro,&
                       u_gyro,&
                       v_gyro,&
-                      f_x(is,:))
+                      f_x(is,:),&
+                      7)
 
               else 
 
@@ -139,8 +141,8 @@ subroutine make_poisson_blend(i_elec)
 
                  f_x(is,:) = (0.0,0.0) 
 
-                 ! Double gyroaverage
-                 call gyro_ave(rho_gyro,&
+                 ! J_0^2
+                 call gyro_bessel_operator(rho_gyro,&
                       a_gyro,&
                       u_gyro,&
                       v_gyro,&
@@ -292,11 +294,13 @@ subroutine make_poisson_blend(i_elec)
            u_gyro = v_gyro*captheta_t(i,k,m)
            !---------------------------------------------------------------
 
-           call gyro_bdoubleave(rho_gyro,&
+           ! I_0
+           call gyro_bessel_operator(rho_gyro,&
                 a_gyro,&
                 u_gyro,&
                 v_gyro,&
-                f_x(is,:))
+                f_x(is,:),&
+                7)
 
            if (n_1(in_1) == 0) then   
 

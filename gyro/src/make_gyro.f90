@@ -79,10 +79,11 @@ subroutine make_gyro
               !----------------------------------------------------------------
 
               !---------------------------
-              ! Standard gyroaverage: G
+              ! Standard gyroaverage:
               !---------------------------
 
-              call gyro_ave(rho_gyro,&
+              ! J_0
+              call gyro_bessel_operator(rho_gyro,&
                    a_gyro,&
                    u_gyro,&
                    v_gyro,&
@@ -108,28 +109,32 @@ subroutine make_gyro
               w_temp(m0,:) = g(:)
 
               !-------------------------------
-              ! Momentum gyroaverage: cos(a) G
+              ! Momentum gyroaverage: 
               !-------------------------------
 
-              call gyro_ave_rot(rho_gyro,&
+              ! -(i/2)*k_x*rho*[ J_0(z)+J_2(z) ]
+              call gyro_bessel_operator(rho_gyro,&
                    a_gyro,&
                    u_gyro,&
                    v_gyro,&
-                   g)
+                   g, &
+                   3)
 
               w_temp_rot(m0,:) = g(:)
 
               !-------------------------------
-              ! A_perp gyroaverage: (1/2)(J0+J2)
+              ! A_perp gyroaverage:
               !-------------------------------
 
               if (n_field == 3) then
 
-                 call gyro_ave_aperp(rho_gyro,&
+                 ! G_perp = (1/2)*[ J_0(z)+J_2(z) ] 
+                 call gyro_bessel_operator(rho_gyro,&
                       a_gyro,&
                       u_gyro,&
                       v_gyro,&
-                      g,1)
+                      g,&
+                      4)
 
                  if (n_1(in_1) == 0) then
 
@@ -157,8 +162,6 @@ subroutine make_gyro
   enddo ! is
   !
   !----------------------------------------------------------
-
-
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[make_gyro done]'

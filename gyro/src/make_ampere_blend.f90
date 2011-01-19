@@ -97,8 +97,8 @@ subroutine make_ampere_blend
 
                  f_x(is,:) = (0.0,0.0) 
 
-                 ! Double gyroaverage
-                 call gyro_ave(rho_gyro,&
+                 ! J_0^2
+                 call gyro_bessel_operator(rho_gyro,&
                       a_gyro,&
                       u_gyro,&
                       v_gyro,&

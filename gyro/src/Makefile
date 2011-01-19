@@ -31,9 +31,6 @@ OBJECTS = gyro_globals.o \
           gyro_alloc_velocity.o \
           gyro_alloc_distrib.o \
           gyro_alloc_nl.o \
-          gyro_ave.o \
-          gyro_ave_rot.o \
-	  gyro_ave_aperp.o \
           gyro_ballooning_mode.o \
           gyro_banana_init.o \
           gyro_banana_integrate_tau.o \
@@ -41,6 +38,7 @@ OBJECTS = gyro_globals.o \
           gyro_banana_operators.o \
           gyro_banana_uniform_taugrid.o \
           gyro_banana_s2lambda.o \
+          gyro_bessel_operator.o \
           gyro_build_sparse_ampere.o \
           gyro_build_sparse_poisson.o \
           gyro_build_sparse_poissonaperp.o \
@@ -74,7 +72,6 @@ OBJECTS = gyro_globals.o \
           gyro_profile_init.o \
           gyro_diffusivity.o \
           gyro_gbflux.o \
-          gyro_bdoubleave.o \
           gyro_initialize_arrays.o \
           gyro_radial_operators.o \
           gyro_map_experimental_profiles.o \
