@@ -164,7 +164,7 @@
                   If (i_proc_e == i_proc)                               &
      &                     h(m1,i1,p_nek_loc1,is1) = (1.0,0.0)
                   call get_field_explicit
-                  call get_RHS
+                  call gyro_rhs_total
                   jstate = jstate_start
                   Do is2 = 1, n_kinetic
                      p_nek_loc2 = 0
@@ -325,9 +325,9 @@
         If (i_proc == 0) Then
           print 20, iev+1, ev_omega, ev_gamma, residual
           write (1,30) ev_omega, ev_gamma, residual
-          call write_prec(10,abs(ev_omega))
+          call gyro_write_precision(10,abs(ev_omega))
           step = step + 1
-          call write_prec(10,abs(ev_gamma))
+          call gyro_write_precision(10,abs(ev_gamma))
         EndIf
       EndDo
       close(unit=1)

@@ -13,7 +13,7 @@ OBJECTS = EIGEN_globals.o \
           EIGEN_matrix_read.o \
           EIGEN_matrix_write.o
 
-.SUFFIXES : .o .f90 .f
+.SUFFIXES : .o .f90 .F
 
 lib: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
