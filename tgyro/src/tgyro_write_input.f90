@@ -391,7 +391,7 @@ subroutine tgyro_write_input
      write(1,*) 'Physics parameters'
      write(1,*) 
 
-     write(1,20) 'LOC_RMIN',r(n_r)/r_min
+     write(1,20) 'LOC_RMIN',r(2)/r_min
      write(1,20) 'LOC_RMAX',r(n_r)/r_min
      write(1,20) 'LOC_NU_SCALE',loc_nu_scale
      write(1,20) 'LOC_BETAE_SCALE',loc_betae_scale

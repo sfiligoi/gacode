@@ -14,7 +14,7 @@ subroutine tgyro_flux
   use qfm_interface
 
   implicit none
-  
+
   integer :: i_ion
   real :: dummy1
   real :: dummy2
@@ -48,7 +48,7 @@ subroutine tgyro_flux
   mflux_e_neo(:)   = 0.0
 
   ! Map TGYRO parameters to NEO
-  call tgyro_neo_map  
+   call tgyro_neo_map  
 
   ! NEO normalization to GB output conversions
   ! Gamma_norm = n0_norm vt_norm
@@ -164,7 +164,6 @@ subroutine tgyro_flux
           ni(1,i_r)/ne(i_r)*ti(1,i_r)/te(i_r)
 
   case (2)
-
      ! Map TGYRO parameters to TGLF
      call tgyro_tglf_map
 

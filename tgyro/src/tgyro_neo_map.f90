@@ -16,7 +16,7 @@ subroutine tgyro_neo_map
   call neo_init
 
   ! Simulation mode (dke solve vs. analytic)
-  if(loc_neo_method == 1) then
+  if (loc_neo_method == 1) then
      neo_sim_model_in = 0
   else
      neo_sim_model_in = 1

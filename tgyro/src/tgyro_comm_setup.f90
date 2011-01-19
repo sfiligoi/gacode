@@ -74,6 +74,10 @@ subroutine tgyro_comm_setup
            call tgyro_catch_error('ERROR: Bad core count')
         endif
 
+     else
+
+        n_worker = 1
+
      endif
 
   case (2) 

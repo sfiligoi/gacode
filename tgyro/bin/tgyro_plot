@@ -19,7 +19,7 @@ time="-1"
 
 n=$#
 
-TOOLDIR=$TGYRO_DIR/tools/asymptote/src
+TOOLDIR=$GACODE_ROOT/tgyro/tools/asymptote/src
 
 # Can overwrite this with commandline option
 SIMDIR=$PWD
@@ -34,9 +34,9 @@ then
    echo 
    echo " Examples:"
    echo
-   echo "       tgyro_plot -t -1 -d ~/tgyro/sim/mydir"
-   echo "       tgyro_plot -t 3"
-   echo "       tgyro_plot -t 3 -d ~/tgyro/sim/mydir"
+   echo "       tgyro_plot -g -1 -d ~/tgyro/sim/mydir"
+   echo "       tgyro_plot -g 3"
+   echo "       tgyro_plot -g 3 -d ~/tgyro/sim/mydir"
    echo "       tgyro_plot -h (prints list of plotfiles)"
    echo
 
