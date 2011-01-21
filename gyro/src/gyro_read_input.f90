@@ -235,6 +235,7 @@ subroutine gyro_read_input
   call readbc_int(z_eff_method)
 
   ! GK eigenvalue solver inputs
+  call readbc_int(gkeigen_proc_mult)
   call readbc_int(gkeigen_method)
   call readbc_int(gkeigen_matrixonly)
   call readbc_int(gkeigen_mwrite_flag)
