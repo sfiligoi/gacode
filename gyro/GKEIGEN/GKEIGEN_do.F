@@ -88,9 +88,9 @@
      &greater than or equal to gkeigen_n_values.')  
       Else If (gkeigen_kspace_dim > h_length) Then
         gkeigen_kspace_dim = h_length
-        If (i_proc==0) print *, 'Input gkeigen_kspace_dim must be ',    &
+        If (l_print) print *, 'Input gkeigen_kspace_dim must be ',      &
      &    'less than or equal to matrix dimension ', h_legnth, '.'
-        If (i_proc==0) print *, 'Reset gkeigen_kspace_dim = ', h_length
+        If (l_print) print *, 'Reset gkeigen_kspace_dim = ', h_length
         call send_line('Reset gkeigen_kspace_dim = ', h_length)
       EndIf
 
@@ -154,10 +154,10 @@
 
       If (eigensolve_restart_flag == 1) Then
         call GKEIGEN_matrix_read(n_last_col)
-        If (i_proc==0) print *, " Restarting from column ", n_last_col
+        If (l_print) print *, " Restarting from column ", n_last_col
       Else
         n_last_col = 0
-        If ( (i_proc==0) .AND. (gkeigen_mwrite_flag==1) ) Then
+        If ( (l_print) .AND. (gkeigen_mwrite_flag==1) ) Then
           open(unit=1,file=trim(path)//file_eigen_restart,              &
      &         status='replace')
           write (1,*) "!  Matrix elements for eigensolver."
@@ -379,25 +379,25 @@
       case (1)
 
         call send_line(' Seeking largest growth rates.')
-        If (i_proc==0) print *, ' Seeking largest growth rates.'
+        If (l_print) print *, ' Seeking largest growth rates.'
         call EPSSetWhichEigenpairs(epsolve,EPS_LARGEST_REAL,ierr)
 
       case (2)
 
         call send_line(' Seeking largest negative frequency.')
-        If (i_proc==0) print *, ' Seeking largest negative frequency.'
+        If (l_print) print *, ' Seeking largest negative frequency.'
         call EPSSetWhichEigenpairs(epsolve,EPS_LARGEST_IMAGINARY,ierr)
 
       case (3)
 
         call send_line(' Seeking largest positive frequency.')
-        If (i_proc==0) print *, ' Seeking largest positive frequency.'
+        If (l_print) print *, ' Seeking largest positive frequency.'
         call EPSSetWhichEigenpairs(epsolve,EPS_SMALLEST_IMAGINARY,ierr)
 
       case (4)
 
         call send_line(' Seeking smallest growth rates.')
-        If (i_proc==0) print *, ' Seeking smallest growth rates.'
+        If (l_print) print *, ' Seeking smallest growth rates.'
         call EPSSetWhichEigenpairs(epsolve,EPS_SMALLEST_REAL,ierr)
 
       case default

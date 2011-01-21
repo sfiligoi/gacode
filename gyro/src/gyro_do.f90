@@ -77,10 +77,10 @@ subroutine gyro_do(skipinit)
   !
   if (linsolve_method == 2) then
      if (nonlinear_flag == 1) then
-        print *, "Eigensolver unavailable in nonlinear mode."
+        if ((i_proc==0) .and. (gkeigen_j_set==0)) print *, "Eigensolver unavailable in nonlinear mode."
         stop
      else
-        if (i_proc == 0) print *, "GYRO is running in eigensolve mode."
+        if ((i_proc==0) .and. (gkeigen_j_set==0)) print *, "GYRO is running in eigensolve mode."
         eigensolve_restart_flag = restart_method
         restart_method = 0
         if (electron_method /= 1) then

@@ -3,7 +3,7 @@
 !
 ! PURPOSE:
 !  Module containing most shared variables
-!  for EIGEN routines.
+!  for GKEIGEN routines.
 !---------------------------------------
 
 module GKEIGEN_globals
