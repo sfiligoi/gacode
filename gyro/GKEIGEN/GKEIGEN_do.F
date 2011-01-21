@@ -295,32 +295,32 @@
 
          If (l_set) Then
 
-          print *, 'Setting on ', j_proc_tot
+!          print *, 'Setting on ', j_proc_tot
           call MatSetValues(time_derivative_matrix,h_length_block,irows,&
      &        h_width_loc,icols,M_seq,INSERT_VALUES,ierr)
 
          Else If (l_send) Then
 
-          print *, 'Sending from ', j_proc_tot, ' to', j_recv_proc,     &
-     &              size(M_seq)
+!          print *, 'Sending from ', j_proc_tot, ' to', j_recv_proc,     &
+!     &              size(M_seq)
           call MPI_SEND(M_seq,size(M_seq),MPIU_SCALAR,                  &
      &                  j_recv_proc,j_send_proc,MPI_COMM_WORLD,ierr)
-          print *, 'Send confirmed', j_proc_tot, ' to', j_recv_proc
+!          print *, 'Send confirmed', j_proc_tot, ' to', j_recv_proc
 
          Else If (l_recv) Then
 
-          print *, 'Receiving on ', j_proc_tot, ' from', j_send_proc,   &
-     &              size(M_seq)
+!          print *, 'Receiving on ', j_proc_tot, ' from', j_send_proc,   &
+!     &              size(M_seq)
           call MPI_RECV(M_seq,size(M_seq),MPIU_SCALAR,                  &
      &                  j_send_proc,j_send_proc,MPI_COMM_WORLD,ierr)
-          print *, 'Receipt confirmed', j_proc_tot, ' from', j_send_proc
+!          print *, 'Receipt confirmed', j_proc_tot, ' from', j_send_proc
           call MatSetValues(time_derivative_matrix,h_length_block,irows,&
      &        h_width_loc,icols,M_seq,INSERT_VALUES,ierr)
 
          EndIf
 
          call MPI_barrier(MPI_COMM_WORLD,ierr)
-         if (l_print) print *, '*************************************'
+!         if (l_print) print *, '*************************************'
         EndDo  ! gkeigen_j_set_e2
 
       EndDo  ! gkeigen_j_set_e1
