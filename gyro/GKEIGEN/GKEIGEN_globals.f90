@@ -1,27 +1,27 @@
 !---------------------------------------
-! EIGEN_globals.f90
+! GKEIGEN_globals.f90
 !
 ! PURPOSE:
 !  Module containing most shared variables
 !  for EIGEN routines.
 !---------------------------------------
 
-module EIGEN_globals
+module GKEIGEN_globals
 
   !------------------------------------
   ! Character variables
   !
-  ! in EIGEN_matrix_read:
+  ! in GKEIGEN_matrix_read:
   !
   character(len=12), parameter :: &
        file_eigen_restart = &
-       "EIGEN_matrix"
+       "GKEIGEN_matrix"
   !
-  ! in EIGEN_do:
+  ! in GKEIGEN_do:
   !
   character(len=14), parameter :: &
        file_eigen_freq = &
-       "EIGEN_freq.out"
+       "GKEIGEN_freq.out"
   !----------------------------------
 
   !------------------------------------------------------------
@@ -111,4 +111,4 @@ module EIGEN_globals
 
   integer, dimension(8) :: time_array
 
-end module EIGEN_globals
+end module GKEIGEN_globals

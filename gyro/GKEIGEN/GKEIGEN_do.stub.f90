@@ -1,5 +1,5 @@
 !---------------------------------
-! EIGEN_do.stub.f90
+! GKEIGEN_do.stub.f90
 !
 ! PURPOSE:
 !  Stub file for systems without
@@ -7,7 +7,7 @@
 !
 !---------------------------------
 
-subroutine EIGEN_do
+subroutine GKEIGEN_do
 
   use gyro_globals
 
@@ -28,4 +28,4 @@ subroutine EIGEN_do
 
   EndIf
 
-end subroutine EIGEN_do
+end subroutine GKEIGEN_do

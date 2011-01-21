@@ -1,5 +1,5 @@
 !-----------------------------------------------------
-! EIGEN_do.F
+! GKEIGEN_do.F
 !
 ! PURPOSE:
 !  Determine the linear time-derivative matrix 
@@ -9,11 +9,11 @@
 !  Only works in linear mode.
 !-----------------------------------------------------
 
-      subroutine EIGEN_do
+      subroutine GKEIGEN_do
 
       use gyro_globals
       use gyro_pointers
-      use EIGEN_globals
+      use GKEIGEN_globals
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #include "finclude/petsc.h"
@@ -153,7 +153,7 @@
       EndIf
 
       If (eigensolve_restart_flag == 1) Then
-        call EIGEN_matrix_read(n_last_col)
+        call GKEIGEN_matrix_read(n_last_col)
         If (i_proc==0) print *, " Restarting from column ", n_last_col
       Else
         n_last_col = 0
@@ -225,7 +225,7 @@
              If (irestart >= 1) restart_cols(irestart,:)=one_col(:)
              If (irestart == 500) Then
                If (gkeigen_mwrite_flag==1)                              &
-     &           call EIGEN_matrix_write(restart_cols,n_last_col)
+     &           call GKEIGEN_matrix_write(restart_cols,n_last_col)
                n_last_col = istate
                restart_cols(:,:) = (0.0,0.0)
              EndIf
@@ -243,7 +243,7 @@
 !---------------------------------------------
 
       If (gkeigen_mwrite_flag==1)                                       &
-     &       call EIGEN_matrix_write(restart_cols,n_last_col)
+     &       call GKEIGEN_matrix_write(restart_cols,n_last_col)
 
       If (gkeigen_matrixonly == 1) Then
         call date_and_time(values=time_array)

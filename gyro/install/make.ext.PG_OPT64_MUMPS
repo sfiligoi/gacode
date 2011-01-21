@@ -8,5 +8,5 @@ sparse_solve_mumps.o : sparse_solve_mumps.mumps.f90
 	$(FC) $(FMATH) $(FFLAGS) -I/opt/MUMPS_4.3/include -o sparse_solve_mumps.o -c sparse_solve_mumps.mumps.f90
 cleanup_mumps.o : cleanup_mumps.mumps.f90
 	$(FC) $(FMATH) $(FFLAGS) -I/opt/MUMPS_4.3/include -o cleanup_mumps.o -c cleanup_mumps.mumps.f90
-EIGEN_do.o : EIGEN_do.stub.f90
-	$(FC) $(FMATH) $(FFLAGS) -o EIGEN_do.o -c EIGEN_do.stub.f90
+GKEIGEN_do.o : GKEIGEN_do.stub.f90
+	$(FC) $(FMATH) $(FFLAGS) -o GKEIGEN_do.o -c GKEIGEN_do.stub.f90
