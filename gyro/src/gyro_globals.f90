@@ -131,6 +131,7 @@ module gyro_globals
   integer :: eparallel_plot_flag
   integer :: entropy_flag
   integer :: num_equil_flag
+  integer :: gkeigen_proc_mult
   integer :: gkeigen_method
   integer :: gkeigen_matrixonly
   integer :: gkeigen_mwrite_flag
@@ -157,14 +158,21 @@ module gyro_globals
   ! Maximum number of iterations of Rayleigh-Ritz algorithm
   integer :: gkeigen_iter   
   !
-  ! Total length of state vector
+  ! Total length of state vectors
   integer :: h_length     
   !
-  ! Local length of state vector
-  integer :: h_length_loc ! Local length of state vector
+  ! Local length and width of state vector
+  integer :: h_length_loc
+  integer :: h_width_loc 
+  integer :: h_length_block
+  integer :: seq_length  ! Number of elements in passed matrix block
   !
   ! Absolute tolerance in eigenvector solution
   real :: gkeigen_tol       
+  !
+  ! For added parallelization layer (gkeigen_proc_mult > 1)
+  integer :: gkeigen_j_set
+  integer :: j_proc_tot
   !-----------------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------------
@@ -970,6 +978,7 @@ module gyro_globals
   integer :: i_group_2
   !
   integer :: GYRO_COMM_WORLD
+  integer :: GKEIGEN_J_SUBSET
   integer :: NEW_COMM_1
   integer :: NEW_COMM_2
   integer :: MUMPS_COMM

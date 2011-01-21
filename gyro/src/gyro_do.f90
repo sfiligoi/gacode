@@ -361,6 +361,9 @@ subroutine gyro_do(skipinit)
      ! Length of total state vector
      h_length = n_kinetic * n_nek_1 * n_x * n_stack
      h_length_loc = n_kinetic * n_nek_loc_true * n_x * n_stack
+     h_width_loc = h_length / gkeigen_proc_mult
+     h_length_block = h_length_loc / gkeigen_proc_mult
+     seq_length = h_length_block * h_width_loc
 
      call EIGEN_do                                       
 
