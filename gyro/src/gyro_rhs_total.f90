@@ -17,11 +17,16 @@ subroutine gyro_rhs_total
   !-----------------------------------------------------------------------------
   implicit none
   !
-  complex, dimension(n_stack,n_nek_loc_1,n_kinetic) :: z_der
-  complex, dimension(n_stack,n_nek_loc_1,n_kinetic) :: z_dis
-  complex, dimension(n_stack,i1_buffer:i2_buffer,n_nek_loc_1,n_kinetic) :: cap_h
-  complex, dimension(n_stack,i1_buffer:i2_buffer,n_nek_loc_1,n_kinetic) :: lit_h
+  complex, dimension(:,:,:), allocatable :: z_der   
+  complex, dimension(:,:,:), allocatable :: z_dis
+  complex, dimension(:,:,:,:), allocatable :: cap_h
+  complex, dimension(:,:,:,:), allocatable :: lit_h
   !-----------------------------------------------------------------------------
+  
+  allocate(z_der(n_stack,n_nek_loc_1,n_kinetic))
+  allocate(z_dis(n_stack,n_nek_loc_1,n_kinetic))
+  allocate(cap_h(n_stack,i1_buffer:i2_buffer,n_nek_loc_1,n_kinetic))
+  allocate(lit_h(n_stack,i1_buffer:i2_buffer,n_nek_loc_1,n_kinetic))
 
   rhs(:,:,:,:)    = (0.0,0.0)
   rhs_dr(:,:,:,:) = 0.0
@@ -168,6 +173,11 @@ subroutine gyro_rhs_total
 
   call proc_time(CPU_rhs_out)
   CPU_RHS = CPU_RHS + (CPU_rhs_out - CPU_rhs_in)
+
+  deallocate(z_der)
+  deallocate(z_dis)
+  deallocate(cap_h)
+  deallocate(lit_h)
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'*[get_rhs_total done]'
