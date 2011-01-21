@@ -1,8 +1,16 @@
+#----------------------------------------------------------------------
+# Collection of classes for parsing of GACODE free-format input files.
+#
+# SimpleInput  : input.gyro, input.neo, input.tglf 
+# ProfileInput : input.profiles
+# ManagerInput : input.tgyro
+#----------------------------------------------------------------------
+
 import string
 import os
 
 class SimpleInput:
-    """Input manager for gacode"""
+    """Input parser for simple input.* files"""
     def __init__(self):
         self.data_dict = {}
         self.data_orderlist = []
@@ -59,7 +67,8 @@ class SimpleInput:
                 self.data_dict[x] = self.user_dict[x]
             elif self.dep_dict.has_key(x) == 1:
                 self.error=1
-                self.error_msg=self.error_msg+"ERROR: Deprecated parameter, "+self.dep_dict[x]+'\n'
+                self.error_msg=self.error_msg+'ERROR: Deprecated parameter '+x+'\n'
+                self.error_msg=self.error_msg+'       '+self.dep_dict[x]+'\n'
             else:
                 self.error=1
                 self.error_msg=self.error_msg+"ERROR: Bogus parameter "+x+'\n'
@@ -71,7 +80,7 @@ class SimpleInput:
         
 
 class ProfileInput:
-    """Profile Input manager for gacode"""
+    """Input parser for input.profiles"""
     def __init__(self):
         self.data_dict = {}
         self.data_orderlist = []
@@ -169,7 +178,7 @@ class ProfileInput:
         os.system('rm parse_temp')
 
 class ManagerInput:
-    """Code manager (tgyro) input for gacode"""
+    """Input parser for input.tgyro"""
     def __init__(self):
         self.data_dict = {}
         self.data_orderlist = []
@@ -238,10 +247,16 @@ class ManagerInput:
                 self.slaveproc.append(data[2]) 
                 self.overlayfile.append('overlay.'+str(n))
                 file_overlay = open('overlay.'+str(n),'w')
+
+                #----------------------------------------------------------
+                # This loop writes each overlay parameter list to overlay.*
                 for j in range(len(data)-3):
-                    file_overlay.write(data[j+3])
+                    file_overlay.write(data[j+3]+'\n')
                 file_overlay.close()
+                #----------------------------------------------------------
+ 
             else:
+
                 file_input.write(line)
 
         file_input.close()
