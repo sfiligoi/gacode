@@ -59,7 +59,8 @@ class SimpleInput:
                 self.data_dict[x] = self.user_dict[x]
             elif self.dep_dict.has_key(x) == 1:
                 self.error=1
-                self.error_msg=self.error_msg+"ERROR: Deprecated parameter, "+self.dep_dict[x]+'\n'
+                self.error_msg=self.error_msg+'ERROR: Deprecated parameter '+x+'\n'
+                self.error_msg=self.error_msg+'       '+self.dep_dict[x]+'\n'
             else:
                 self.error=1
                 self.error_msg=self.error_msg+"ERROR: Bogus parameter "+x+'\n'
