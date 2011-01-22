@@ -56,6 +56,7 @@
       integer :: irestart
       complex, dimension(500,h_length_loc) :: restart_cols
       complex, dimension(0:h_length_loc-1,0:h_width_loc-1) :: M_loc
+      character (len=80) :: gkeigen_exit_message
 
 10    Format(I2, ':', I2, ':', I2, ':' I3)
 20    Format('Mode: ', I3, '    Omega: ', es18.9, '    Gamma: ', es18.9,&
@@ -69,6 +70,8 @@
      &    ' Send to: ', I5)
 70    Format('Set: ', I2, ',', ' Proc: ', I2, ',',' Loc: ', I4, ',',    &
      &       ' Glob: ',I4,',',' Val: ',g12.5, ' + ', g12.5, ' i')
+80    Format(I, ' eigenvalues found')
+
 
       l_print = ( (gkeigen_j_set == 0) .AND. (i_proc == 0) )
 
@@ -423,7 +426,7 @@
 ! in eigensolve_lambda, vectors in eigensolve_vector.
 
       call EPSGetConverged(epsolve,n_converged,ierr)
-      If (i_proc ==0) Print *, n_converged, ' converged solution(s)'
+      If (l_print) Print *, n_converged, ' converged solution(s)'
       open(unit=1,file=trim(path)//file_eigen_freq,status='replace')
       step = 0
       Do iev = 0, n_converged-1
@@ -447,6 +450,10 @@
         call EPSGetIterationNumber(epsolve,n_iter,ierr)
         Print *, n_iter, ' iterations performed'
       EndIf
+
+      write(gkeigen_exit_message,80) n_converged
+      call set_exit_status(gkeigen_exit_message,2)
+
       call VecDestroy(dummy_vec,ierr)
       call MatDestroy(time_derivative_matrix,ierr)
       call EPSDestroy(epsolve,ierr)
