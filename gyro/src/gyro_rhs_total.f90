@@ -22,7 +22,7 @@ subroutine gyro_rhs_total
   complex, dimension(:,:,:,:), allocatable :: cap_h
   complex, dimension(:,:,:,:), allocatable :: lit_h
   !-----------------------------------------------------------------------------
-  
+
   allocate(z_der(n_stack,n_nek_loc_1,n_kinetic))
   allocate(z_dis(n_stack,n_nek_loc_1,n_kinetic))
   allocate(cap_h(n_stack,i1_buffer:i2_buffer,n_nek_loc_1,n_kinetic))
@@ -32,17 +32,19 @@ subroutine gyro_rhs_total
   rhs_dr(:,:,:,:) = 0.0
 
   !---------------------------------------------
-  if (n_substep == 0) call get_nonlinear_advance
+  if (n_substep == 0) then
+     call get_nonlinear_advance
+  endif
   !---------------------------------------------
 
   call proc_time(CPU_rhs_in)
 
-  !---------------------------------------------
-  ! Compute orbit-time derivative for ions ONLY,
-  ! because this term is explicit for ions.
+  !----------------------------------------------------------------------
+  ! Compute orbit-time derivative for ions ONLY, because this term is 
+  ! explicit for ions.
   !
   if (kill_i_parallel_flag == 0) call gyro_tau_derivative
-  !---------------------------------------------
+  !----------------------------------------------------------------------
 
   !----------------------------------------------------------------------
   ! Derivative-friendly functions which have array elements outside
@@ -126,7 +128,7 @@ subroutine gyro_rhs_total
   !----------------------------------------------------------------------
   ! Adaptive source
   !
-  if (n_1(in_1) == 0 .and. source_flag == 1) then
+  if (source_flag == 1) then
 
      call gyro_adaptive_source
 
@@ -142,6 +144,8 @@ subroutine gyro_rhs_total
 
            do i=1,n_x
 
+              ! In this expression, nu_source = 0 if n > 0.
+              ! (see gyro_radial_operators).
               rhs(:,i,p_nek_loc,is) = rhs(:,i,p_nek_loc,is) &
                    -nu_source*h0_eq(is,ie,i)
 

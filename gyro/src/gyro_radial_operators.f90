@@ -93,6 +93,9 @@ subroutine gyro_radial_operators
      deallocate(r_node)
 
   endif
+  !
+  ! Set source amplitude coefficient to zero if n > 0.
+  if (n_1(in_1) > 0) nu_source = 0.0
   !---------------------------------------------------
 
   !---------------------------------------------------

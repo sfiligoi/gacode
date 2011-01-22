@@ -68,4 +68,8 @@ subroutine get_nonlinear_advance
   call proc_time(CPU_NL_out)
   CPU_NL = CPU_NL + (CPU_NL_out - CPU_NL_in)
 
+  if (debug_flag == 1 .and. i_proc == 0) then
+     print *,'*[get_nonlinear_advance done]'
+  endif
+
 end subroutine get_nonlinear_advance
