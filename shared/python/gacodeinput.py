@@ -1,9 +1,16 @@
 #----------------------------------------------------------------------
-# Collection of classes for parsing of GACODE free-format input files.
+# gacodeinput.py
 #
-# SimpleInput  : input.gyro, input.neo, input.tglf 
-# ProfileInput : input.profiles
-# ManagerInput : input.tgyro
+# PURPOSE:
+#  Collection of classes for parsing of GACODE free-format input files.
+#
+# NOTES: 
+#  SimpleInput  : input.gyro, input.neo, input.tglf 
+#  ProfileInput : input.profiles
+#  ManagerInput : input.tgyro
+#
+# AUTHOR(S): 
+#  Jeff Candy
 #----------------------------------------------------------------------
 
 import string
