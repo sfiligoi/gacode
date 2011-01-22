@@ -70,7 +70,7 @@
      &    ' Send to: ', I5)
 70    Format('Set: ', I2, ',', ' Proc: ', I2, ',',' Loc: ', I4, ',',    &
      &       ' Glob: ',I4,',',' Val: ',g12.5, ' + ', g12.5, ' i')
-80    Format(I, ' eigenvalues found')
+80    Format(I5, ' eigenvalues found')
 
 
       l_print = ( (gkeigen_j_set == 0) .AND. (i_proc == 0) )
@@ -82,6 +82,12 @@
 ! Make flags and inputs self-consistant.
 !
       If (gkeigen_matrixonly == 1) gkeigen_mwrite_flag = 1
+
+!-- Temporarily disable the seldom used matrix reading/writing.
+!
+      If (gkeigen_mwrite_flag == 1) call catch_error('Matrix writing tem&
+     &porarily disabled in GKEIGEN')
+!---------------------------------------
 
       If (gkeigen_n_values > h_length) Then
         call catch_error('INCONSISTENT: gkeigen_n_values must be less ',&
