@@ -23,6 +23,6 @@ lib: $(OBJECTS)
 
 clean:
 	rm -rf *.o $(LLIB).a
-	rm -rf ${GACODE_ROOT}/modules/eigen_globals.mod	                
+	rm -rf ${GACODE_ROOT}/modules/gkeigen_globals.mod	                
 
 include ${GACODE_ROOT}/gyro/install/make.ext.${GACODE_PLATFORM}
