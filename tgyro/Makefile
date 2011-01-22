@@ -16,7 +16,7 @@ export EXTRA_LIBS = \
        ${GACODE_ROOT}/gyro/SSUB/SSUB_lib.a \
        ${GACODE_ROOT}/shared/GEO/GEO_lib.a \
        ${GACODE_ROOT}/shared/UMFPACK/UMFPACK_lib.a \
-       ${GACODE_ROOT}/gyro/EIGEN/EIGEN_lib.a \
+       ${GACODE_ROOT}/gyro/GKEIGEN/GKEIGEN_lib.a \
        ${GACODE_ROOT}/tgyro/math/math_lib.a \
        ${GACODE_ROOT}/tgyro/qfm/qfm_lib.a \
        ${LMATH}
