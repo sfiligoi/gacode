@@ -68,6 +68,7 @@ program gyro
   !
   !        n_nek = (n_proc)*M, where M is any integer.
   !
+  If (linsolve_method /= 2) gkeigen_proc_mult = 1
   gkeigen_j_set = Mod(i_proc,gkeigen_proc_mult)
   call MPI_COMM_SPLIT(GYRO_COMM_WORLD,&
        gkeigen_j_set,&

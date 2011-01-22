@@ -56,6 +56,7 @@
       integer :: irestart
       complex, dimension(500,h_length_loc) :: restart_cols
       complex, dimension(0:h_length_loc-1,0:h_width_loc-1) :: M_loc
+      character (len=80) :: gkeigen_exit_message
 
 10    Format(I2, ':', I2, ':', I2, ':' I3)
 20    Format('Mode: ', I3, '    Omega: ', es18.9, '    Gamma: ', es18.9,&
@@ -69,6 +70,8 @@
      &    ' Send to: ', I5)
 70    Format('Set: ', I2, ',', ' Proc: ', I2, ',',' Loc: ', I4, ',',    &
      &       ' Glob: ',I4,',',' Val: ',g12.5, ' + ', g12.5, ' i')
+80    Format(I, ' eigenvalues found')
+
 
       l_print = ( (gkeigen_j_set == 0) .AND. (i_proc == 0) )
 
@@ -88,9 +91,9 @@
      &greater than or equal to gkeigen_n_values.')  
       Else If (gkeigen_kspace_dim > h_length) Then
         gkeigen_kspace_dim = h_length
-        If (i_proc==0) print *, 'Input gkeigen_kspace_dim must be ',    &
+        If (l_print) print *, 'Input gkeigen_kspace_dim must be ',      &
      &    'less than or equal to matrix dimension ', h_legnth, '.'
-        If (i_proc==0) print *, 'Reset gkeigen_kspace_dim = ', h_length
+        If (l_print) print *, 'Reset gkeigen_kspace_dim = ', h_length
         call send_line('Reset gkeigen_kspace_dim = ', h_length)
       EndIf
 
@@ -154,10 +157,10 @@
 
       If (eigensolve_restart_flag == 1) Then
         call GKEIGEN_matrix_read(n_last_col)
-        If (i_proc==0) print *, " Restarting from column ", n_last_col
+        If (l_print) print *, " Restarting from column ", n_last_col
       Else
         n_last_col = 0
-        If ( (i_proc==0) .AND. (gkeigen_mwrite_flag==1) ) Then
+        If ( (l_print) .AND. (gkeigen_mwrite_flag==1) ) Then
           open(unit=1,file=trim(path)//file_eigen_restart,              &
      &         status='replace')
           write (1,*) "!  Matrix elements for eigensolver."
@@ -295,32 +298,32 @@
 
          If (l_set) Then
 
-          print *, 'Setting on ', j_proc_tot
+!          print *, 'Setting on ', j_proc_tot
           call MatSetValues(time_derivative_matrix,h_length_block,irows,&
      &        h_width_loc,icols,M_seq,INSERT_VALUES,ierr)
 
          Else If (l_send) Then
 
-          print *, 'Sending from ', j_proc_tot, ' to', j_recv_proc,     &
-     &              size(M_seq)
+!          print *, 'Sending from ', j_proc_tot, ' to', j_recv_proc,     &
+!     &              size(M_seq)
           call MPI_SEND(M_seq,size(M_seq),MPIU_SCALAR,                  &
      &                  j_recv_proc,j_send_proc,MPI_COMM_WORLD,ierr)
-          print *, 'Send confirmed', j_proc_tot, ' to', j_recv_proc
+!          print *, 'Send confirmed', j_proc_tot, ' to', j_recv_proc
 
          Else If (l_recv) Then
 
-          print *, 'Receiving on ', j_proc_tot, ' from', j_send_proc,   &
-     &              size(M_seq)
+!          print *, 'Receiving on ', j_proc_tot, ' from', j_send_proc,   &
+!     &              size(M_seq)
           call MPI_RECV(M_seq,size(M_seq),MPIU_SCALAR,                  &
      &                  j_send_proc,j_send_proc,MPI_COMM_WORLD,ierr)
-          print *, 'Receipt confirmed', j_proc_tot, ' from', j_send_proc
+!          print *, 'Receipt confirmed', j_proc_tot, ' from', j_send_proc
           call MatSetValues(time_derivative_matrix,h_length_block,irows,&
      &        h_width_loc,icols,M_seq,INSERT_VALUES,ierr)
 
          EndIf
 
          call MPI_barrier(MPI_COMM_WORLD,ierr)
-         if (l_print) print *, '*************************************'
+!         if (l_print) print *, '*************************************'
         EndDo  ! gkeigen_j_set_e2
 
       EndDo  ! gkeigen_j_set_e1
@@ -379,25 +382,25 @@
       case (1)
 
         call send_line(' Seeking largest growth rates.')
-        If (i_proc==0) print *, ' Seeking largest growth rates.'
+        If (l_print) print *, ' Seeking largest growth rates.'
         call EPSSetWhichEigenpairs(epsolve,EPS_LARGEST_REAL,ierr)
 
       case (2)
 
         call send_line(' Seeking largest negative frequency.')
-        If (i_proc==0) print *, ' Seeking largest negative frequency.'
+        If (l_print) print *, ' Seeking largest negative frequency.'
         call EPSSetWhichEigenpairs(epsolve,EPS_LARGEST_IMAGINARY,ierr)
 
       case (3)
 
         call send_line(' Seeking largest positive frequency.')
-        If (i_proc==0) print *, ' Seeking largest positive frequency.'
+        If (l_print) print *, ' Seeking largest positive frequency.'
         call EPSSetWhichEigenpairs(epsolve,EPS_SMALLEST_IMAGINARY,ierr)
 
       case (4)
 
         call send_line(' Seeking smallest growth rates.')
-        If (i_proc==0) print *, ' Seeking smallest growth rates.'
+        If (l_print) print *, ' Seeking smallest growth rates.'
         call EPSSetWhichEigenpairs(epsolve,EPS_SMALLEST_REAL,ierr)
 
       case default
@@ -423,7 +426,7 @@
 ! in eigensolve_lambda, vectors in eigensolve_vector.
 
       call EPSGetConverged(epsolve,n_converged,ierr)
-      If (i_proc ==0) Print *, n_converged, ' converged solution(s)'
+      If (l_print) Print *, n_converged, ' converged solution(s)'
       open(unit=1,file=trim(path)//file_eigen_freq,status='replace')
       step = 0
       Do iev = 0, n_converged-1
@@ -447,6 +450,10 @@
         call EPSGetIterationNumber(epsolve,n_iter,ierr)
         Print *, n_iter, ' iterations performed'
       EndIf
+
+      write(gkeigen_exit_message,80) n_converged
+      call set_exit_status(gkeigen_exit_message,2)
+
       call VecDestroy(dummy_vec,ierr)
       call MatDestroy(time_derivative_matrix,ierr)
       call EPSDestroy(epsolve,ierr)
