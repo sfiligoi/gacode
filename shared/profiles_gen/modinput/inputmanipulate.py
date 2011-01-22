@@ -1,86 +1,96 @@
 #!/usr/bin/env python
-""" 'iterdb2gyro -d' manipulates data in input.profiles
+""" 
+Description:
 
-The input manipulation mode replaces a profile 'a' in the file input.profiles file 'A' by the 
-profile s * 'b', where the profile 'b' is extracted from file 'B' and scaled by a factor s. The 
-result is written in a new file C.
-File 'A' can be the same file as 'B' but neither of them can be the same as C. Also, 'a' can be the 
-same profile as 'b'.
+   'profiles_gen -d' manipulates data in input.profiles
 
-The plasma composition mode genetartes ion density profiles based on the electron density profile 
-found in the the input file, given ion charges, Zeff and if three ions are considered the third to 
-first ion density ratio (ni_3/ni_1).
+   The input manipulation mode replaces a profile 'a' in the file 
+   input.profiles file 'A' by the profile s * 'b', where the profile 
+   'b' is extracted from file 'B' and scaled by a factor s. The result 
+   is written in a new file C.  File 'A' can be the same file as 'B',
+   but neither of them can be the same as C. Also, 'a' can be the same 
+   profile as 'b'.
+
+   The plasma composition mode genetartes ion density profiles based 
+   on the electron density profile found in the the input file, given 
+   ion charges, Zeff and if three ions are considered the third to 
+   first ion density ratio (ni_3/ni_1).
 
 Usage: 
 
-    input manipulation mode:  
+   MANIPULATION mode:  
          
-        iterdb2gyro -d <options>
+      profiles_gen -d <options>
 
-    plasma composition mode:
+   COMPOSITION mode:
     
-        iterdb2gyro -d -comp <options>
+      profiles_gen -d -comp <options>
 
-optional arguments for the input manipulaion mode:
+   Optional arguments for MANIPULATION mode:
 
-    -inf1        -- input.profiles file to be modified (file A)
-                        (Default: input.profiles)
-    -inf2        -- the input.profiles file to extract data from (file B)
-                        (Default: input.profiles) 
-    -outf        -- output file. (file C) 
-                        (Default: input.profiles_mod)
-    -scal        -- scaling factor (the scaling factor s)
-                        (Default: 1.0)
-    -pin         -- this data column will be read from the file 'inf2' (profile b) 
-                        (Default: ni_1)
-    -pout        -- this data column of 'inf1' will be replaced by the new data (profile a)
-                        (Default: ni_2)
+     -inf1   -- input.profiles file to be modified (file A)
+                    (Default: input.profiles)
+     -inf2   -- the input.profiles file to extract data from (file B)
+                    (Default: input.profiles) 
+     -outf   -- output file. (file C) 
+                    (Default: input.profiles_mod)
+     -scal   -- scaling factor (the scaling factor s)
+                    (Default: 1.0)
+     -pin    -- this data column will be read from the file 
+                    'inf2' (profile b) 
+                    (Default: ni_1)
+     -pout   -- this data column of 'inf1' will be replaced by the new 
+                    data (profile a)
+                    (Default: ni_2)
 
-optional arguments for the plasma composition mode:
+   Optional arguments for the COMPOSITION mode:
 
-    -inf1        -- the input input.profiles file 
-                        (Default: input.profiles)
-    -outf        -- the output input.profiles file
-                        (Default: input.profiles_mod)
-    -Z1          -- Charge of the first ion species (not necessarily integer)
-                        (Default: 1)
-    -Z2          -- Charge of the second ion species (not necessarily integer)
-                        (Default: 6)
-    -Z3          -- Charge of the third ion species (not necessarily integer)
-                        (Default: 2)
-    -Zeff        -- Effective ion charge
-                        (Default: 2.0)
-    -n3n1        -- ni_3 / ni_1 
-                        (Default: 0.  ; no third ion species)
+      -inf1   -- the input input.profiles file 
+                    (Default: input.profiles)
+      -outf   -- the output input.profiles file
+                    (Default: input.profiles_mod)
+      -Z1     -- Charge of the first ion species (not necessarily integer)
+                    (Default: 1)
+      -Z2     -- Charge of the second ion species (not necessarily integer)
+                    (Default: 6)
+      -Z3     -- Charge of the third ion species (not necessarily integer)
+                    (Default: 2)
+      -Zeff   -- Effective ion charge
+                    (Default: 2.0)
+      -n3n1   -- ni_3 / ni_1 
+                    (Default: 0.  ; no third ion species)
 
+   Examples:
 
-Examples:
+       profiles_gen -d -inf1 firstdir/input.profiles \\ 
+                       -inf2 seconddir/input.profiles \\
+                       -scal 0.85 -pin Te -pout Ti_2
 
-    iterdb2gyro -d -inf1 firstdir/input.profiles -inf2 seconddir/input.profiles -scal 0.85 -pin Te -pout Ti_2
+       The command above will generate the file 'input.profiles_mod' 
+       which contains the same data as 'firstdir/input.profiles' except 
+       that the Ti_2 profile is equal to 0.85*Te, where Te is from 
+       'seconddir/input.profiles'.
 
-    The command above will generate the file 'input.profiles_mod' which 
-    contains the same data as 'firstdir/input.profiles' except that the 
-    Ti_2 profile is equal to 0.85*Te, where Te is from 
-    'seconddir/input.profiles'.
+       profiles_gen -d -comp -Z2 8 -Zeff 2.2 -n3n1 0.1 -outf INPUT_o
 
-    iterdb2gyro -d -comp -Z2 8 -Zeff 2.2 -n3n1 0.1 -outf INPUT_o
+       Based on the electron density profile ni_1, ni_2 and ni_3 are "
+       generated for a plasma with Zeff=2.2, Z1=1, Z2=8, Z3=4 and"
+       ni_3 / ni_1 = 0.1. The new data is written in 'INPUT_ox'.
 
-    Based on the electron density profile ni_1, ni_2 and ni_3 are "
-    generated for a plasma with Zeff=2.2, Z1=1, Z2=8, Z3=4 and"
-    ni_3 / ni_1 = 0.1. The new data is written in 'INPUT_ox'.
+   NOTES: 
 
-NOTES: 
+      The the input file(s) and the output file cannot be the same! 
 
-    The the input file(s) and the output file cannot be the same! 
+      In COMPOSITION mode parameters consistency is not controlled 
+      (wrong input values can lead to negative densities).
 
-    In plasma composition mode it is not controlled that the parameters are consistent (wrong input values
-    can lead to negative densities).
+      It is assumed that an input.profiles file contains 8 data blocks 
+      with five data colums which are 16 characters wide. The number of 
+      blocks and the column width can be set in insertcol.sh and 
+      extractcol.sh. Furthermore it is assumed that the lines of scalar 
+      data are not started with space or "-".
 
-    It is assumed that an input.profiles file contains 8 data blocks with five data colums which are 
-    16 characters wide. The number of blocks and the column width can be set in insertcol.sh and 
-    extractcol.sh. Furthermore it is assumed that the lines of scalar data are not started with space or "-".
-
-(I. Pusztai ; 10/14/2010)
+   (I. Pusztai ; 10/14/2010)
 """
 import os
 import sys
@@ -89,9 +99,10 @@ import shlex
 import subprocess
 import math
 
+#------------------------------------------------------------------------------------------
 # Variables and default values
-#########################################################################
-path="${GYRO_DIR}/tools/modinput"
+#
+path="${GACODE_ROOT}/shared/profiles_gen/modinput"
 
 params = {
     'inputfile1': 'input.profiles',         # the input.profiles file to be modified
@@ -108,6 +119,7 @@ params = {
     'Z3': '2', 
     'Zeff': '2.0',
     'n3n1': '0.0'}              
+#------------------------------------------------------------------------------------------
 
 def usage():
     """Print the doc string."""
@@ -178,7 +190,7 @@ def print_variable_values_comp(pipe=sys.stdout):
 
     """
     print >> pipe
-    print >> pipe, "iterdb2gyro -d Plasma composition mode"
+    print >> pipe, "profiles_gen -d Plasma composition mode"
     print >> pipe, "Input file   = " + params['inputfile2']
     print >> pipe, "Output file  = " + params['outputfile']
     print >> pipe, "Zeff         = " + params['Zeff']
