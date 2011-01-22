@@ -1,5 +1,5 @@
 !-----------------------------------------------------
-! EIGEN_matrix_write.f90
+! GKEIGEN_matrix_write.f90
 !
 ! PURPOSE:
 !  Write up to 500 columns of the linear time-derivative
@@ -7,12 +7,11 @@
 !  Applicable only in eigensolve mode.
 !-----------------------------------------------------
 
-subroutine EIGEN_matrix_write(restart_cols,n_last_col)
+subroutine GKEIGEN_matrix_write(restart_cols,n_last_col)
 
   use gyro_globals
   use gyro_pointers
-  use EIGEN_globals
-  use math_constants
+  use GKEIGEN_globals
 
   !---------------------------------
   implicit none
@@ -75,8 +74,8 @@ subroutine EIGEN_matrix_write(restart_cols,n_last_col)
 
    If (i_proc == 0) Then
      close (unit=1)
-     Print *, 'Called EIGEN_matrix_write successfully.'
+     Print *, 'Called GKEIGEN_matrix_write successfully.'
    EndIf
 
-end subroutine EIGEN_matrix_write
+end subroutine GKEIGEN_matrix_write
 

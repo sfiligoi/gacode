@@ -1,5 +1,5 @@
 !-----------------------------------------------------
-! EIGEN_matrix_read.f90
+! GKEIGEN_matrix_read.f90
 !
 ! PURPOSE:
 !  Read all columns of the linear time-derivative
@@ -7,12 +7,11 @@
 !  Applicable only in eigensolve mode.
 !-----------------------------------------------------
 
-subroutine EIGEN_matrix_read(n_last_col)
+subroutine GKEIGEN_matrix_read(n_last_col)
 
   use gyro_globals
   use gyro_pointers
-  use EIGEN_globals
-  use math_constants
+  use GKEIGEN_globals
 
   !---------------------------------
   implicit none
@@ -68,5 +67,5 @@ subroutine EIGEN_matrix_read(n_last_col)
 
   100 close (unit=1)
 
-end subroutine EIGEN_matrix_read
+end subroutine GKEIGEN_matrix_read
 

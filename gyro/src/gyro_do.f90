@@ -365,7 +365,7 @@ subroutine gyro_do(skipinit)
      h_length_block = h_length_loc / gkeigen_proc_mult
      seq_length = h_length_block * h_width_loc
 
-     call EIGEN_do                                       
+     call GKEIGEN_do                                       
 
   case (3)
 

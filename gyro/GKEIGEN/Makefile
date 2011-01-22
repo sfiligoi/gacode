@@ -6,12 +6,12 @@ else
    FFLAGS=${FOPT}
 endif      
 
-LLIB=EIGEN_lib
+LLIB=GKEIGEN_lib
 
-OBJECTS = EIGEN_globals.o \
-          EIGEN_do.o \
-          EIGEN_matrix_read.o \
-          EIGEN_matrix_write.o
+OBJECTS = GKEIGEN_globals.o \
+          GKEIGEN_do.o \
+          GKEIGEN_matrix_read.o \
+          GKEIGEN_matrix_write.o
 
 .SUFFIXES : .o .f90 .F
 
