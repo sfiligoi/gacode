@@ -51,6 +51,7 @@ then
    echo "              *.nc     : ITERDB NetCDF file"
    echo "              *.cdf    : Plasma State NetCDF file"
    echo "              *.astra  : ASTRA text file"
+   echo "              *.peq    : PEQDSK/ELITE text file"
    echo " "
    echo "              input.profiles : velocity generation mode"
    echo " "

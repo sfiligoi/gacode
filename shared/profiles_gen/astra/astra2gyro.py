@@ -40,7 +40,7 @@ file_header="""#
 #
 """
 
-INPUT_profiles_scalar=['VERSION','BT_EXP','N_EXP','ARHO_EXP'] # scalars come first
+INPUT_profiles_scalar=['BT_EXP','N_EXP','ARHO_EXP'] # scalars come first
 INPUT_profiles_vector=[['rho','rmin','rmaj','q','kappa'],     # vector data block 1
                        ['delta','te','ne','z_eff','er'],
                        ['flow_mom','pow_e','pow_i','pow_ei','zeta'],
@@ -50,7 +50,7 @@ INPUT_profiles_vector=[['rho','rmin','rmaj','q','kappa'],     # vector data bloc
                        ['vtor_1','vtor_2','vtor_3','vtor_4','vtor_5'],
                        ['vpol_1','vpol_2','vpol_3','vpol_4','vpol_5']] # vector data block 8
 INPUT_profiles_delimiter='   '
-INPUT_profiles_defaults={'VERSION':0,'BT_EXP':1.0,'N_EXP':0,'ARHO_EXP':1.0, # scalars
+INPUT_profiles_defaults={'BT_EXP':1.0,'N_EXP':0,'ARHO_EXP':1.0, # scalars
                          'rho':0.0,'rmin':0.0,'rmaj':0.0,'q':0.0,'kappa':1.0,     # vector data block 1
                          'delta':0.0,'te':0.0,'ne':0.0,'z_eff':1.0,'er':0.0,
                          'flow_mom':0.0,'pow_e':0.0,'pow_i':0.0,'pow_ei':0.0,'zeta':0.0,

@@ -42,7 +42,6 @@ nonmap=[]                       # all variable names defined in this file that d
 
 
 # scalar data
-VERSION={'override':0}                   # if absent, 0 is assumed
 BT_EXP={'astra':'B'}                     # [Tesla], reference B field
 N_EXP={}                                 # number of experimental radial gridpoints
 ARHO_EXP={'astra':'rhoa','index':0}      # [m] rho(a) (ie. rho at separatrix); defines rho_hat; Astra 'ROC'

@@ -27,8 +27,11 @@ subroutine gyro_init(path_in, mpi_comm_in)
   call MPI_COMM_RANK(GYRO_COMM_WORLD, i_proc, i_err)
   call MPI_COMM_SIZE(GYRO_COMM_WORLD, n_proc, i_err)
 
-  ! Check if INPUT.gen file exists and set inputdat_flag accordingly
-  ! NOTE: TRUE if INPUT.gen does exist, FALSE if INPUT.gen does NOT exist
+  ! Check if input.gyro.gen file exists and set:
+  !
+  !   inputdat_flag=TRUE  if input.gyro.gen does exist, 
+  !                 FALSE if input.gyro.gen does NOT exist
+  !
   if (i_proc == 0) then
      inquire(file=trim(path)//'input.gyro.gen',exist=inputdat_flag)
   endif
@@ -54,7 +57,7 @@ subroutine gyro_init(path_in, mpi_comm_in)
 
   else
 
-     ! If INPUT.gen file does NOT exist then initialize arrays
+     ! If input.gyro.gen file does NOT exist then initialize arrays
      ! NOTE: Vector initialization is normally done by read_input subroutine
      mu_vec(0:10)           = 0.0
      dlnndr_vec(0:10)       = 0.0

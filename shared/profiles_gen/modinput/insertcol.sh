@@ -1,21 +1,21 @@
 #!/bin/bash
 #
-# inserts data into a given column of INPUT_profiles
+# inserts data into a given column of input.profiles
 # 1st rgument is the name of the input parameter which will be replaced 
 # 2nd argument is the name of a file containing the new data column  
 # Example:
 # ./insertcol.sh er extract_er
 # will insert the data in extract_er into the column of the er variable in 
-#   INPUT_profiles 
+#   input.profiles 
 
 
 param1="$1(" 
 param2="$1[[:space:]](" 
 inp="$2"
 filename="$3"
-: ${filename:="INPUT_profiles"}
+: ${filename:="input.profiles"}
 outputname="$4"
-: ${outputname:="INPUT_profiles_mod"}
+: ${outputname:="input.profiles_mod"}
 
 nblocks=8                # number of data blocks
 colwidth=16              # number of characters (including spaces) in a data column 

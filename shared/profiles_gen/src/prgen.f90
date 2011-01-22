@@ -1,14 +1,20 @@
-!---------------------------------------------------------
+!-------------------------------------------------------------------
 ! prgen.f90
 !
 ! PURPOSE:
-!  Generate input.profiles from prexisting data
+!  Generate input.profiles from prexisting data.  This executable is
+!  managed and called by gacode/shared/bin/profiles_gen.
 !
-!  - ONETWO iterdb (text)  
-!  - ONETWO iterdb (NetCDF)
-!  - PLASMA STATE (NetCDF)
-!  - PEQDSK (text)
-!----------------------------------------------------------
+!  Acceptable input formats:
+!
+!  1. ONETWO iterdb text (no extenstion)  
+!  2. ONETWO iterdb NetCDF (*.nc)
+!  3. PEQDSK text (*.peq)
+!  4. PLASMA STATE NetCDF (*.cdf)
+!
+! Note that ASTRA (*.astra) format is handled by a separate python 
+! routine.
+!--------------------------------------------------------------------
 
 program prgen
 

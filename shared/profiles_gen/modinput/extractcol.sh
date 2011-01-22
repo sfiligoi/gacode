@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# extracts a given column from INPUT_profiles
-# Argument is the name of the INPUT parameter 
+# Extracts a given column from input.profiles
+# Argument is the name of the input parameter. 
 # Example:
 # ./extractcol.sh er
 # will copy the er variable into the file extract_er 
@@ -10,7 +10,7 @@
 param1="$1(" 
 param2="$1[[:space:]](" 
 filename=$2
-: ${filename:="INPUT_profiles"}
+: ${filename:="input.profiles"}
          
 nblocks=8                # number of data blocks
 colwidth=16              # number of characters (including spaces) in a data column
