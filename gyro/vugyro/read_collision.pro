@@ -3,7 +3,7 @@ pro read_collision
   common GLOBAL
   common COLLISION_DATA
 
-  file = 'coll.out'  
+  file = 'gyro_collision_grid.out'  
   
   openr,1,file,error=i_err
   if (i_err eq 0) then begin

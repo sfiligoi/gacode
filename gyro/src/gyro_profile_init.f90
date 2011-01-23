@@ -416,8 +416,8 @@ subroutine gyro_profile_init
   do i=1,n_x
      call gyro_to_geo(i)
      volume_prime(i) = GEO_volume_prime
-     if (i_proc == 0 .and. output_flag == 1 .and. i == ir_norm) then
-        call GEO_write(trim(path)//'GEO.out',1)
+     if (i_proc == 0 .and. i == ir_norm .and. debug_flag == 1) then
+        call GEO_write(trim(path)//'gyro_geo_diagnostic.out',1)
      endif
   enddo
   !--------------------------------------------------

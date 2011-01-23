@@ -273,10 +273,10 @@ subroutine gyro_collision_setup
 
   deallocate(i_piv)
 
-  if (i_proc == 0) call gyro_collision_grid_write(trim(path)//'coll.out',1)
+  if (i_proc == 0) call gyro_collision_grid_write(trim(path)//'gyro_collision_grid.out',1)
 
   if (i_proc == 0 .and. debug_flag == 1) &
-       print *,'[make_collision_stencil called]'
+       print *,'[gyro_collision_setup]'
 
 end subroutine gyro_collision_setup
 

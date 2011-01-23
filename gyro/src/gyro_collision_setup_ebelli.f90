@@ -307,24 +307,7 @@ subroutine gyro_collision_setup_ebelli
                 * sqrt(energy(ie,1)) * nu_coll_d(i,ie,is,js) &
                 * rs_coll_const(i,is,js) * 0.5 * dt 
         enddo
-        
-        ! collisional R_s -- slow matrix multiply
-        !do js=1,n_kinetic
-        !   do p=1,n_rbf
-        !      do pp=1,n_rbf
-        !         d_rbf_rs(p,pp,is,js,p_ine_loc) = 0.0
-        !         do p3=1,n_rbf
-        !            d_rbf_rs(p,pp,is,js,p_ine_loc) = &
-        !                 d_rbf_rs(p,pp,is,js,p_ine_loc) &
-        !                 + d_rbf_lorentz(p,p3,is,p_ine_loc) &
-        !                 * xp(p3) * a_res(p3,pp) &
-        !                 * sqrt(energy(ie)) * nu_coll_d(i,ie,is,js) &
-        !                 * rs_coll_const(i,is,js) * 0.5 * dt 
-        !         enddo
-        !      enddo
-        !   enddo
-        !enddo
-        
+                
         ! Matrices for Rs int d^3 sqrt(ene)*nu*xi equation
         ! -- int d_xi xi (...)
 
@@ -398,7 +381,7 @@ subroutine gyro_collision_setup_ebelli
   deallocate(i_piv2)
   deallocate(work2)
 
-  if (i_proc == 0) call gyro_collision_grid_write(trim(path)//'coll.out',1)
+  if (i_proc == 0) call gyro_collision_grid_write(trim(path)//'gyro_collision_grid.out',1)
 
   if (i_proc == 0 .and. debug_flag == 1) &
        print *,'[make_collision_stencil called]'
