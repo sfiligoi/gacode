@@ -72,7 +72,7 @@ subroutine tgyro_tglf_map
   tglf_p_prime_loc_in = (q_abs/(r(i_r)/r_min))*(beta_unit(i_r)/(8*pi))*(-r_min*dlnpdr(i_r))
   tglf_shift_loc_in   = shift(i_r)
   tglf_kappa_loc_in   = kappa(i_r)
-  tglf_s_kappa_loc_in = dmax1(s_kappa(i_r),1.e-2)
+  tglf_s_kappa_loc_in = s_kappa(i_r)
   tglf_delta_loc_in   = delta(i_r)
   tglf_s_delta_loc_in = s_delta(i_r)/sqrt(1.0-tglf_delta_loc_in**2)
   !----------------------------------------------------------------
