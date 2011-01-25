@@ -1,8 +1,0 @@
-make_nl.o : make_nl.fftw.f90
-	$(FC) $(FMATH) $(FFLAGS) -o make_nl.o -c make_nl.fftw.f90
-do_nlfft_p.o : do_nlfft_p.fftw.f90 
-	$(FC) $(FMATH) $(FFLAGS) -o do_nlfft_p.o -c do_nlfft_p.fftw.f90
-do_nlfft_match.o : do_nlfft_match.fftw.f90
-	$(FC) $(FMATH) $(FFLAGS) -o do_nlfft_match.o -c do_nlfft_match.fftw.f90
-GKEIGEN_do.o : GKEIGEN_do.stub.f90
-	$(FC) $(FMATH) $(FFLAGS) -o GKEIGEN_do.o -c GKEIGEN_do.stub.f90
