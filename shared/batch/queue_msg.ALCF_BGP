@@ -1,0 +1,7 @@
+
+UBGL PSUB queue
+
+ALWAYS USE 32, 128 or a multiple of 512. 
+
+[1] pbatch
+
