@@ -506,6 +506,11 @@ echo $G_FLAG >> $CONFIG
 #
 if [ $G_FLAG -eq 1 ]
 then
+   if [ ! -f $GATO ]
+   then
+      echo "ERROR: You need to build the GATO executable: $ cd gato ; make"
+      exit 1
+   fi
    echo "* Running GATO to generate flux surfaces from $GFILE."
    echo "* Running fluxfit to compute shape parameters from GATO mapping."
    cp $GFILE eqgta
