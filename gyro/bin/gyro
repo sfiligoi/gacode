@@ -64,15 +64,15 @@ then
   echo
   echo "UTILITIES"
   echo 
+  echo "         -s <simdir>" 
+  echo "         Create small portable copy of <simdir>."
+  echo 
   echo "         -pk <simdir> -pw <window>"
   echo "         Summarize transport coefficients, with optional" 
   echo "         averaging window: 0 < <window> <= 1"
   echo
   echo "         -h" 
   echo "         Version and platform information."
-  echo
-  echo "         -l" 
-  echo "         Count number of lines of source code."
 
   exit 1
 fi
@@ -92,6 +92,7 @@ TEST_FLAG=0
 INIT_FLAG=0
 GENERATE_FLAG=0
 REGRESS_FLAG=0
+SCOPY_FLAG=0
 KILL_STATUS=2
 PEEK_FLAG=0
 PEEK_WINDOW=0.5
@@ -115,11 +116,11 @@ while [ $# -gt 0 ] ; do
 
   -r) shift ; NPROC=$1 ; REGRESS_FLAG=1 ;;
 
+  -s) shift ; LOCDIR=$1 ; SCOPY_FLAG=1 ;;
+
   -n) shift ; NPROC=$1 ;;
 
   -h) gyro_version_message ; exit 0 ;;
-
-  -l) gyro_code_lines ; exit 0 ;;
 
   -K) shift ; KILL_STATUS=1 ; LOCDIR=$1 ;;
 
@@ -149,11 +150,9 @@ RUN_FILE=$SIMDIR/run.out
 
 #=============================================================
 case "$KILL_STATUS" in
-
   -1) gyro_sim_kill $SIMDIR -1 ; exit 0 ;;
    0) gyro_sim_kill $SIMDIR 0  ; exit 0 ;;
-   1) gyro_sim_kill $SIMDIR 1  ; exit 0 ;;
-  
+   1) gyro_sim_kill $SIMDIR 1  ; exit 0 ;;  
 esac
 #=============================================================
  
@@ -214,6 +213,44 @@ fi
 
 cd $SIMDIR
 #============================================================
+
+#=============================================================
+# Do a small-copy (copy small files into new directory)
+if [ $SCOPY_FLAG -eq 1 ]
+then
+   list="
+    run.out
+    t.out
+    diff.out
+    diff_i.out
+    diff_n.out
+    error.out
+    gbflux.out
+    gbflux_i.out
+    gbflux_n.out
+    geometry_arrays.out
+    input.gyro
+    input.gyro.gen
+    input.profiles
+    input.profiles.gen
+    input.profiles.geo
+    kxkyspec.out
+    phase_space.out
+    profile_vugyro.out
+    timing.out
+    VERSION_tag
+    zerobar.out"
+
+   # Funny syntax below removes trailing /
+   target=${SIMDIR%/}"-s"
+   mkdir $target
+   for i in $list
+   do
+      cp -av $i $target
+   done
+   exit 0
+fi
+#=============================================================
 
 #=============================================================
 # Summarize transport coefficients
