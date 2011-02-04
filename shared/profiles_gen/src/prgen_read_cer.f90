@@ -16,7 +16,7 @@
 
 subroutine prgen_read_cer
 
- use prgen_read_globals
+  use prgen_read_globals
 
   implicit none
 
@@ -41,7 +41,7 @@ subroutine prgen_read_cer
   open(unit=1,file=cer_file,status='old')
   read(1,*) a
   do 
-     read(1,*,iostat=ierr) x(:)
+     read(1,*,iostat=ierr) x(0)
      if (ierr < 0) exit
      count = count+1
   enddo
@@ -59,7 +59,11 @@ subroutine prgen_read_cer
   open(unit=1,file=cer_file,status='old')
   read(1,*) a
   do i=1,n_in 
-     read(1,*) x(:)
+     read(1,*,iostat=ierr) x(:)
+     if (ierr < 0) then
+        print '(t2,a,a)','ERROR: CER format error.'
+        stop
+     endif
      rho_in(i) = x(1)
      f_in(i,1) = x(4) ! vpol (km/s)
      f_in(i,2) = x(5) ! vtor (km/s)
