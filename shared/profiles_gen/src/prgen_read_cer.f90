@@ -41,7 +41,7 @@ subroutine prgen_read_cer
   open(unit=1,file=cer_file,status='old')
   read(1,*) a
   do 
-     read(1,*,iostat=ierr) x(0)
+     read(1,*,iostat=ierr) x(1)
      if (ierr < 0) exit
      count = count+1
   enddo
@@ -69,7 +69,7 @@ subroutine prgen_read_cer
      f_in(i,2) = x(5) ! vtor (km/s)
      f_in(i,3) = x(7) ! omega0 (krad/s)
   enddo
-  print '(t2,a,a)',trim(cer_file),': Expecting data in Solomon CER format.'
+  print '(a,a)','INFO: Assuming 7-column Solomon CER format in ',trim(cer_file)
 
   close(1)
   !-------------------------------------------------------
