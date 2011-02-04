@@ -43,6 +43,7 @@ program prgen
   read(1,'(a)') raw_data_file
   read(1,'(a)') cer_file
   read(1,*) gato_flag
+  read(1,*) verbose_flag
   read(1,*) reorder_vec(:)
 
   close(1)
@@ -125,7 +126,7 @@ program prgen
   if (index(raw_data_file,'.nc',back) /= 0) then
 
      ! New NetCDF format
-     print *,'Assuming iterdb NetCDF format.'
+     print '(a)','Assuming iterdb NetCDF format.'
 
      format_type = 1
 
@@ -134,7 +135,7 @@ program prgen
   else if (index(raw_data_file,'.cdf',back) /= 0) then
 
      ! Plasmastate format
-     print *,'Assuming plasma_state format.'
+     print '(a)','INFO: Assuming plasma_state format.'
 
      format_type = 2
 
@@ -143,12 +144,12 @@ program prgen
   else if (index(raw_data_file,'.peq',back) /= 0) then
 
      ! peqdsk format
-     print *,'Assuming peqdsk format.'
+     print '(a)','INFO: Assuming peqdsk format.'
 
      format_type = 3
 
      if (gato_flag /= 1) then
-        print *,'Error: geqdsk must be provided for peqdsk format'
+        print '(a)','ERROR: geqdsk must be provided for peqdsk format'
         stop
      endif
 
@@ -157,7 +158,7 @@ program prgen
   else
 
      ! Old text format
-     print *,'Assuming old iterdb text format.'
+     print '(a)','INFO: Assuming old iterdb text format.'
 
      format_type = 1
 

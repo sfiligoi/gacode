@@ -11,6 +11,7 @@
 #  - ITERDB (NetCDF)
 #  - Plasma State (NetCDF)
 #  - ASTRA (also requires mapping file).
+#  - PEQDSK (ELITE pfile)
 #============================================================= 
 
 #=============================================================
@@ -389,7 +390,7 @@ fi
 #
 if [ $FILE_FLAG -eq 0 ]
 then
-  echo "ERROR: Please specify a file with -i <file>"
+  echo "ERROR: Please specify an input file with -i <file>"
   exit 0 
 fi
 
@@ -484,6 +485,9 @@ then
 fi
 #=============================================================
 
+#=============================================================
+# Construct prgen input file ($CONFIG)
+#
 date > $CONFIG
 
 # Required data file (ITERDB, PLASMASTATE, etc)
@@ -495,11 +499,15 @@ then
    echo "null" >> $CONFIG
 else
    echo $CER_FILE >> $CONFIG
-   echo " Will merge data from $CER_FILE"
+   echo "INFO: Will merge data from $CER_FILE"
 fi
 
 # EFIT G-file
 echo $G_FLAG >> $CONFIG
+
+# Verbosity
+echo $VERBOSE_FLAG >> $CONFIG
+#=============================================================
 
 #==============================================================
 # Run GATO here
@@ -511,8 +519,8 @@ then
       echo "ERROR: You need to build the GATO executable: $ cd gato ; make"
       exit 1
    fi
-   echo "* Running GATO to generate flux surfaces from $GFILE."
-   echo "* Running fluxfit to compute shape parameters from GATO mapping."
+   echo "INFO: Running GATO mapper to generate flux surfaces from $GFILE."
+   echo "INFO: Running fluxfit to compute shape parameters from GATO mapping."
    cp $GFILE eqgta
    cp $GATO_IN ingta
    $GATO >& gato.stdout
@@ -538,36 +546,22 @@ fi
 echo ${ord_vec[0]} ${ord_vec[1]} ${ord_vec[2]} ${ord_vec[3]} ${ord_vec[4]} >> $CONFIG
 #==============================================================
 
-# Run iterdb_read main
-$EXEC > input.profiles.log
-
-#Error check (n will be number of errors).
-grep 'cub_spline' input.profiles.log > fluxfit.exec_error
-n=`wc -l fluxfit.exec_error`
-n=`expr ${n%%"fluxfit.exec_error"}`
-
-
-if [ $n -gt 0 ]
-then
-   echo "ERROR: Errors encountered in flux fitting for input.profiles!"
-fi
+#==============================================================
+# MAIN: Run prgen here
+#
+$EXEC
 
 if [ -f "success" ]
 then
-   #cat input.profiles.log
    if [ $G_FLAG -eq 1 ]
    then
       echo "DONE: Successfully wrote: input.profiles, input.profiles.geo."
    else
       echo "DONE: Successfully wrote: input.profiles." 
    fi
-
-   if [ $VERBOSE_FLAG -eq 0 ]
-   then
-      rm -f input.profiles.log.fluxfit input.profiles.log.gato
-   fi  
 else
    echo "ERROR: Something went wrong in creation of input.profiles :("
+   echo "** Try running with -V option."
 fi
 
 #==============================================================
@@ -578,7 +572,7 @@ rm -f egta ingta nova.*
 
 if [ $VERBOSE_FLAG -eq 0 ]
 then
-   rm -f $CONFIG fluxfit.* grid.dat eqgta o1gta input.profiles.log gato.stdout success
+   rm -f $CONFIG fluxfit.* grid.dat eqgta o1gta gato.stdout success
 else
    mv o1gta gato.o1gta
    mv eqgta gato.eqgta

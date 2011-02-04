@@ -2,8 +2,9 @@
 ! ns (=number of Fouier harmonics)
 ! npsi (number of flux gridpoints)
 ! nd (number of arclength datapoints)
+! i_print (0=quiet,1=print)
 
-subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in)
+subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
 
   use prgen_fluxfit_globals
 
@@ -16,6 +17,7 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in)
   integer, intent(in) :: nd_in 
   real, dimension(nd_in,npsi_in) :: rd_in
   real, dimension(nd_in,npsi_in) :: zd_in
+  integer, intent(in) :: i_print
 
   ! Internal variables
   integer :: i,j,p
@@ -73,7 +75,7 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in)
 
   case default
 
-     print *,'model invalid.'
+     print '(a)','ERROR: model invalid in fluxfit.'
      stop
 
   end select
@@ -168,14 +170,15 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in)
         call fluxfit_error(err)
         write(4,40) rmin,err
 
-        print '(t3,a,i4,2x,3(a,1pe12.6,3x))',&
-             'Surface',p,'rmin = ',rmin,'error = ',err
-        print 20,tag(:)
-        do i=0,ns
-           print 30,i,ar(i),br(i),az(i),bz(i)
-        enddo
-        print *
-
+        if (i_print == 1) then
+           print '(t3,a,i4,2x,3(a,1pe12.6,3x))',&
+                'Surface',p,'rmin = ',rmin,'error = ',err
+           print 20,tag(:)
+           do i=0,ns
+              print 30,i,ar(i),br(i),az(i),bz(i)
+           enddo
+           print *
+        endif
      else
 
         !----------------------------
@@ -224,11 +227,13 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in)
         call fluxfit_error(err)
         write(4,40) rmin,err
 
-        print '(t3,a,i4,2x,3(a,1pe12.6,3x))',&
-             'Surface',p,'rmin = ',rmin,'error = ',err
-        print 20,tag(:)
-        print 10,c(:)
-        print *
+        if (i_print == 1) then
+           print '(t3,a,i4,2x,3(a,1pe12.6,3x))',&
+                'Surface',p,'rmin = ',rmin,'error = ',err
+           print 20,tag(:)
+           print 10,c(:)
+           print *
+        endif
 
      endif
 
