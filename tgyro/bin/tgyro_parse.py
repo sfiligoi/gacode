@@ -59,6 +59,7 @@ x.add('TGYRO_ROTATION_THEORY_METHOD','1')
 x.add('TGYRO_STAB_NSEARCH','7')
 x.add('TGYRO_STAB_NKY','2')
 x.add('TGYRO_STAB_KYMIN','0.2')
+x.add('TGYRO_STAB_DELTAKY','0.1')
 x.add('TGYRO_RMIN','-1.0')
 x.add('TGYRO_RMAX','0.9')
 

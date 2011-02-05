@@ -63,7 +63,7 @@ subroutine tgyro_stab_driver
      wr_ion_loc  = 0.0
      wr_elec_loc = 0.0
 
-     ky(iky) = tgyro_stab_kymin + iky*0.1
+     ky(iky) = tgyro_stab_kymin + iky*tgyro_stab_deltaky
 
      if (n_worker == 1) then
         wr = 0.0

@@ -95,6 +95,7 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(tgyro_stab_nsearch)
   call tgyro_readbc_int(tgyro_stab_nky)
   call tgyro_readbc_real(tgyro_stab_kymin)
+  call tgyro_readbc_real(tgyro_stab_deltaky)
   call tgyro_readbc_real(tgyro_rmin)
   call tgyro_readbc_real(tgyro_rmax)
   ! ** END add new parameters
