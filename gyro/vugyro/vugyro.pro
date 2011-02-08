@@ -27,7 +27,6 @@ pro vugyro, _EXTRA=extra
     diff, $
     diff_e, $
     diff_i, $
-    diff_i_ch, $
     diff_i_trapped, $
     diff_n, $
     diff_e_n, $
@@ -55,7 +54,6 @@ pro vugyro, _EXTRA=extra
     exists_coll, $
     exists_diff, $
     exists_diff_i, $
-    exists_diff_i_ch, $
     exists_diff_i_t, $
     exists_diff_n, $
     exists_diff_QL_n, $

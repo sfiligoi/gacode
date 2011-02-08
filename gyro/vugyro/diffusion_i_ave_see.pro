@@ -7,13 +7,11 @@ pro diffusion_i_ave_see, group=group
   ;;
   common PRIVATE_DIFFUSION_I_AVE,$
     i_div,$
-    neo_flag,$
     zoom,$
     widget
 
   i_div    = 0
   zoom     = 5.0
-  neo_flag = 0
   ;;-----------------------------------------------
 
   ;;-----------------------------------------------
@@ -82,10 +80,6 @@ pro diffusion_i_ave_see, group=group
   x = widget_button(row2, $
                     value='ss-', $
                     uvalue=11)
-
-  x = widget_button(row2, $
-                    value='add neo', $
-                    uvalue=12 )
 
   x = widget_button(row2, $
                     value='data', $

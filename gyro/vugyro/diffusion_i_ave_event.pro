@@ -70,11 +70,6 @@ pro diffusion_i_ave_event, diffusion_i_ave
         goto, plot_it 
      end
 
-     12: begin
-         neo_flag = 1-neo_flag
-         goto, plot_it
-     end
-
      13: begin
         plot_export = 1
         goto, plot_it
