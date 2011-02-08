@@ -37,8 +37,6 @@ pro vugyro, _EXTRA=extra
     Tr_np, $
     Eng_np, $ 
     diff_ne_exp, $
-    diff_neo, $
-    diff_neo_i, $
     diff_to_flow_e1, $
     diff_to_flow_e2, $
     diff_to_flow_heating, $
@@ -61,8 +59,6 @@ pro vugyro, _EXTRA=extra
     exists_diff_i_t, $
     exists_diff_n, $
     exists_diff_QL_n, $
-    exists_diff_neo, $
-    exists_diff_neo_i, $
     exists_diff_t, $
     exists_entropy,$
     exists_exp_profile, $
@@ -85,12 +81,6 @@ pro vugyro, _EXTRA=extra
     exists_omega, $
     exists_phi_squared_QL_n, $
     exists_profile, $
-    exists_sdiff, $
-    exists_sdiff_i, $
-    exists_sdiff_i_t, $
-    exists_sdiff_t, $
-    exists_spdiff, $
-    exists_spdiff_i, $
     exists_source, $
     exists_time, $
     exists_transport_ne_te_ti, $
@@ -209,12 +199,6 @@ pro vugyro, _EXTRA=extra
     rho_hat, $
     rho_s, $
     s_CTab, $
-    sdiff, $
-    sdiff_i, $
-    sdiff_i_trapped, $
-    sdiff_trapped, $
-    spdiff, $
-    spdiff_i, $
     simdir, $
     simroot, $
     skip_large, $
@@ -492,10 +476,6 @@ pro vugyro, _EXTRA=extra
                      uvalue='diffusion_ave_see')
 
   x1 = widget_button(x,$
-                     value='momentum/heating',$
-                     uvalue='sdiffusion_ave_see')
-
-  x1 = widget_button(x,$
                      value='n-dependence and QL test',$
                      uvalue='each_diffusion_see')
 
@@ -506,14 +486,6 @@ pro vugyro, _EXTRA=extra
   x1 = widget_button(x,$
                      value='particle/energy',$
                      uvalue='diffusion_i_ave_see')
-
-  x1 = widget_button(x,$
-                     value='momentum/heating',$
-                     uvalue='sdiffusion_i_ave_see')
-
-  x1 = widget_button(x,$
-                     value='flows',$
-                     uvalue='flow_i_ave_see')
 
   x1 = widget_button(x,$
                      value='effective energy',$
@@ -681,18 +653,6 @@ pro vugyro, _EXTRA=extra
                      value='transport_ne_te_ti flows_vs_grads',$
                      uvalue='transport_ne_te_ti_flows_vs_grads_see')
   
-  x = widget_button(top,$
-                    value='Legacy Diffusivity',$
-                    /menu)
-
-  x1 = widget_button(x,$
-                     value='    diffusion - radial profile',$
-                     uvalue='neodiffusion_i_ave_see')
-
-  x1 = widget_button(x,$
-                     value='neo diffusion - box average',$
-                     uvalue='neodiffusion_ave_see')
-
   ;;------------------------------------------------------------
 
   ;;------------------------------------------------------------
