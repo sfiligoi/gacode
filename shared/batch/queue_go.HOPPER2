@@ -71,7 +71,7 @@ echo "#PBS -e $simpath/$sim/batch.err" >> $bfile
 echo "#PBS -q $queue" >> $bfile
 echo "#PBS -l walltime=$limit" >> $bfile
 echo "#PBS -l mppwidth=$nodes" >> $bfile
-echo "#PBS -m ae" >> $bfile
+echo "#PBS -m abe" >> $bfile
 echo "#PBS -M ${USER}@nersc.gov" >> $bfile
 
 gyro_opts="-e $sim -n $nproc -p $simpath"
