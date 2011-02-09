@@ -9,9 +9,7 @@ F77	= mpif90
 
 FMATH	= -r8 
 FOPT	= -O3 -xSSE2,SSE3,SSSE3,SSE4.1,SSE4.2 -no-prec-div -funroll-loops -unroll-aggressive
-#FOPT	= -O2
 FDEBUG	= -check bounds -fpe0 -ftrapuv
-FPROF	= -O -pg
 
 # System math libraries
 
@@ -20,9 +18,6 @@ LMATH=/opt/GotoBLAS2/libgoto2.a /usr/local/lib/librfftw.a /usr/local/lib/libfftw
 # OPTIONAL NetCDF:
 NETCDF=-L/usr/local/lib -lnetcdf -lcurl
 NETCDF_INC=/usr/local/include
-
-# OPTIONAL: GATO FLAGS
-GATOFLAGS=-r8 -i8 -O1
 
 # Archive 
 

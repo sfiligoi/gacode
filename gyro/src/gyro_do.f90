@@ -109,7 +109,7 @@ subroutine gyro_do(skipinit)
   ! (4) Parallel setup 
   !
   if (gyrotest_flag == 0) then
-     call make_MPI_grid
+     call gyro_mpi_grid
   else
      n_n_1       = 1
      i_group_1   = 0

@@ -11,6 +11,7 @@
 #  - ITERDB (NetCDF)
 #  - Plasma State (NetCDF)
 #  - ASTRA (also requires mapping file).
+#  - PEQDSK (ELITE pfile)
 #============================================================= 
 
 #=============================================================
@@ -63,10 +64,6 @@ then
    echo "             -g <gfile>"
    echo "             Merge EFIT gfile for high-precision geometry data."
    echo " "
-   echo "             -e<n> <erfile>"
-   echo "             Merge data from Er datafile [rho,Er,*,*]."
-   echo "             (-e0: Er in V/m, -e3: Er in kV/m, -e6: Er in MV/m)"
-   echo
    echo "             -cer <vpol>"
    echo "             Merge data Er and velocity data from Solomon's cer datafile."
    echo " "
@@ -238,8 +235,6 @@ fi
 CONFIG=.config
 
 FILE_FLAG=0
-ERFILE_FLAG=0
-ERCONV=0
 CER_FLAG=0
 G_FLAG=0
 VERBOSE_FLAG=0
@@ -276,12 +271,6 @@ while [ $# -gt 0 ] ; do
   -m) shift ; ASTRA_ARG="$ASTRA_ARG -m $1" ;;
 
   -n) shift ; ASTRA_ARG="$ASTRA_ARG -n $1" ;;
-
-  -e0) shift ; ERFILE_FLAG=1 ; ERFILE="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-e0;$1" ;;
-
-  -e3) shift ; ERFILE_FLAG=1 ; ERFILE="$1"; ERCONV=3 ; ITERDB_ARGS="${ITERDB_ARGS};-e3;$1";;
-
-  -e6) shift ; ERFILE_FLAG=1 ; ERFILE="$1"; ERCONV=6 ; ITERDB_ARGS="${ITERDB_ARGS};-e6;$1";;
 
   -cer) shift ; CER_FLAG=1 ; CER_FILE="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-cer;$1" ;;
    
@@ -352,14 +341,6 @@ done
 #=============================================================
 
 #=============================================================
-# Sanity check for merge files
-if [ $ERFILE_FLAG -eq 1 ] && [ $CER_FLAG -eq 1 ]
-then
-   echo "ERROR: cannot use both -e<n> and -cer options". 
-fi
-#=============================================================
-
-#=============================================================
 # Call transp2gyro if specified and pass it the iterdb args
 # for later
 if [ $TRANSP_FLAG -eq 1 ] 
@@ -389,7 +370,7 @@ fi
 #
 if [ $FILE_FLAG -eq 0 ]
 then
-  echo "ERROR: Please specify a file with -i <file>"
+  echo "ERROR: Please specify an input file with -i <file>"
   exit 0 
 fi
 
@@ -484,6 +465,9 @@ then
 fi
 #=============================================================
 
+#=============================================================
+# Construct prgen input file ($CONFIG)
+#
 date > $CONFIG
 
 # Required data file (ITERDB, PLASMASTATE, etc)
@@ -495,19 +479,28 @@ then
    echo "null" >> $CONFIG
 else
    echo $CER_FILE >> $CONFIG
-   echo " Will merge data from $CER_FILE"
+   echo "INFO: Will merge data from $CER_FILE"
 fi
 
 # EFIT G-file
 echo $G_FLAG >> $CONFIG
+
+# Verbosity
+echo $VERBOSE_FLAG >> $CONFIG
+#=============================================================
 
 #==============================================================
 # Run GATO here
 #
 if [ $G_FLAG -eq 1 ]
 then
-   echo "* Running GATO to generate flux surfaces from $GFILE."
-   echo "* Running fluxfit to compute shape parameters from GATO mapping."
+   if [ ! -f $GATO ]
+   then
+      echo "ERROR: You need to build the GATO executable: $ cd gato ; make"
+      exit 1
+   fi
+   echo "INFO: Running GATO mapper to generate flux surfaces from $GFILE."
+   echo "INFO: Running fluxfit to compute shape parameters from GATO mapping."
    cp $GFILE eqgta
    cp $GATO_IN ingta
    $GATO >& gato.stdout
@@ -533,36 +526,22 @@ fi
 echo ${ord_vec[0]} ${ord_vec[1]} ${ord_vec[2]} ${ord_vec[3]} ${ord_vec[4]} >> $CONFIG
 #==============================================================
 
-# Run iterdb_read main
-$EXEC > input.profiles.log
-
-#Error check (n will be number of errors).
-grep 'cub_spline' input.profiles.log > fluxfit.exec_error
-n=`wc -l fluxfit.exec_error`
-n=`expr ${n%%"fluxfit.exec_error"}`
-
-
-if [ $n -gt 0 ]
-then
-   echo "ERROR: Errors encountered in flux fitting for input.profiles!"
-fi
+#==============================================================
+# MAIN: Run prgen here
+#
+$EXEC
 
 if [ -f "success" ]
 then
-   #cat input.profiles.log
    if [ $G_FLAG -eq 1 ]
    then
       echo "DONE: Successfully wrote: input.profiles, input.profiles.geo."
    else
       echo "DONE: Successfully wrote: input.profiles." 
    fi
-
-   if [ $VERBOSE_FLAG -eq 0 ]
-   then
-      rm -f input.profiles.log.fluxfit input.profiles.log.gato
-   fi  
 else
    echo "ERROR: Something went wrong in creation of input.profiles :("
+   echo "** Try running with -V option."
 fi
 
 #==============================================================
@@ -573,7 +552,7 @@ rm -f egta ingta nova.*
 
 if [ $VERBOSE_FLAG -eq 0 ]
 then
-   rm -f $CONFIG fluxfit.* grid.dat eqgta o1gta input.profiles.log gato.stdout success
+   rm -f $CONFIG fluxfit.* grid.dat eqgta o1gta gato.stdout success
 else
    mv o1gta gato.o1gta
    mv eqgta gato.eqgta

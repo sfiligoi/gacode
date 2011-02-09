@@ -1,3 +1,10 @@
+!--------------------------------------------------------------------
+! vgen.f90
+!
+! PURPOSE: 
+!  Driver for the vgen (velocity-generation) capability of NEO.
+!--------------------------------------------------------------------
+
 program vgen
 
   use vgen_globals
@@ -9,13 +16,22 @@ program vgen
 
   character(len=80) :: tag
 
-  integer :: i, j
+  integer :: i
+  integer :: j
   integer :: ia,ib
-  integer :: adiabatic_ele_model, num_ele, indx_ele, n_ions
-  real :: grad_p, vtor_er
-  real :: ya, yb
-  real :: vtor_diff, er0, omega, omega_deriv
+  integer :: adiabatic_ele_model
+  integer :: num_ele
+  integer :: indx_ele
+  integer :: n_ions
   integer :: rotation_model 
+  real :: grad_p
+  real :: vtor_er
+  real :: ya
+  real :: yb
+  real :: vtor_diff
+  real :: er0
+  real :: omega
+  real :: omega_deriv
 
   real, dimension(:), allocatable :: er_exp
   !---------------------------------------------------
@@ -48,23 +64,23 @@ program vgen
   select case(er_method)
   case(1)
      if(i_proc == 0) then
-        print *,'INFO: Computing omega0 (Er)  from force balance'
+        print '(a)','INFO: Computing omega0 (Er)  from force balance'
      endif
   case(2)
      if(i_proc == 0) then
-        print *, 'INFO: Computing omega0 (Er) from NEO (weak rotation limit)'
+        print '(a)', 'INFO: Computing omega0 (Er) from NEO (weak rotation limit)'
      endif
   case (3)
      if(i_proc == 0) then
-        print *, 'INFO: Computing omega0 (Er) from NEO (strong rotation limit)'
+        print '(a)', 'INFO: Computing omega0 (Er) from NEO (strong rotation limit)'
      endif
   case(4)
      if(i_proc == 0) then
-        print *,'INFO: Returning given omega0 (Er)'
+        print '(a)','INFO: Returning given omega0 (Er)'
      endif
   case default
      if(i_proc == 0) then
-        print *,'ERROR: Invalid er_method'
+        print '(a)','ERROR: Invalid er_method'
      endif
      call MPI_finalize(i_err)
      stop
@@ -73,19 +89,19 @@ program vgen
   select case(vel_method)
   case(1)
      if(i_proc == 0) then
-        print *,'INFO: Computing velocities from NEO (weak rotation limit)'
+        print '(a)','INFO: Computing velocities from NEO (weak rotation limit)'
      endif
   case(2)
      if(i_proc == 0) then
-        print *,'INFO: Computing velocities from NEO (strong rotation limit)'
+        print '(a)','INFO: Computing velocities from NEO (strong rotation limit)'
      endif
   case(3)
      if(i_proc == 0) then
-        print *,'INFO: Returning given velocities without NEO modificaiton.'
+        print '(a)','INFO: Returning given velocities without NEO modificaiton.'
      endif
   case default
      if(i_proc == 0) then
-        print *,'ERROR: Invalid vel_method'
+        print '(a)','ERROR: Invalid vel_method'
      endif
      call MPI_finalize(i_err)
      stop
@@ -130,14 +146,14 @@ program vgen
      n_ions = neo_n_species_in - 1
      if(indx_ele /= neo_n_species_in) then
         if(i_proc == 0) then
-           print *,'ERROR: For vgen, electron species must be n_species'
+           print '(a)','ERROR: For vgen, electron species must be n_species'
         endif
         call MPI_finalize(i_err)
         stop
      endif
   else
      if(i_proc == 0) then
-        print *, 'ERROR: Only one electron species allowed'
+        print '(a)', 'ERROR: Only one electron species allowed'
      endif
      call MPI_finalize(i_err)
      stop
@@ -145,7 +161,7 @@ program vgen
 
   if(n_ions < 1) then
      if(i_proc == 0) then
-        print *, 'ERROR: For vgen, there must be at least one ion species'
+        print '(a)', 'ERROR: For vgen, there must be at least one ion species'
      endif
      call MPI_finalize(i_err)
      stop
@@ -153,7 +169,7 @@ program vgen
 
   if(erspecies_indx > n_ions) then
      if(i_proc == 0) then
-        print *, 'ERROR: Invalid vgen species index'
+        print '(a)', 'ERROR: Invalid vgen species index'
      endif
      call MPI_finalize(i_err)
      stop
@@ -228,7 +244,7 @@ program vgen
   !    strong rotation
   ! 4. Return the given Er
 
-  print *, 'INFO: omega0 = (c*Er)/(R*Bp)'
+  print '(a)', 'INFO: omega0 = (c*Er)/(R*Bp)'
 
   select case (er_method) 
 
@@ -354,8 +370,8 @@ program vgen
 
      enddo
 
-     if(vel_method == 2) then
-        print *, 'Re-computing the flows usign NEO in the strong rotation limit'
+     if (vel_method == 2) then
+        print '(a)', 'INFO: vgen recomputing the flows using NEO in the strong rotation limit.'
         ! Re-compute the flows using strong rotation
         ! omega and omega_deriv 
         do i=2,EXPRO_n_exp-1

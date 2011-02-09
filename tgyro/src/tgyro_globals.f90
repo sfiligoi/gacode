@@ -260,6 +260,7 @@ module tgyro_globals
   integer :: tgyro_stab_nsearch
   integer :: tgyro_stab_nky
   real :: tgyro_stab_kymin
+  real :: tgyro_stab_deltaky
   real :: tgyro_rmin
   real :: tgyro_rmax
   !

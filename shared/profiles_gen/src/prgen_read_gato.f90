@@ -85,7 +85,8 @@ subroutine prgen_read_gato
   ! 5  delta
   ! 6  zeta
 
-  call fluxfit_driver(1,1,gato_npsi,gato_ntheta,gato_bigr,gato_bigz)
+  ! When verbose_flag=1, fluxfit will echo lots of data
+  call fluxfit_driver(1,1,gato_npsi,gato_ntheta,gato_bigr,gato_bigz,verbose_flag)
 
   allocate(gvec(6,0:gato_npsi))
 
@@ -126,7 +127,8 @@ subroutine prgen_read_gato
   !----------------------------------------------------
   ! Get general geometry coefficients
   !
-  call fluxfit_driver(2,nfourier,gato_npsi,gato_ntheta,gato_bigr,gato_bigz)
+  ! When verbose_flag=1, fluxfit will echo lots of data
+  call fluxfit_driver(2,nfourier,gato_npsi,gato_ntheta,gato_bigr,gato_bigz,verbose_flag)
 
   allocate(g3vec(4,0:nfourier,0:gato_npsi))
   allocate(g3rho(4,0:nfourier,nx))

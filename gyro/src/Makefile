@@ -76,6 +76,7 @@ OBJECTS = gyro_globals.o \
           gyro_radial_operators.o \
           gyro_map_experimental_profiles.o \
           gyro_moments_plot.o \
+          gyro_mpi_grid.o \
           gyro_select_methods.o \
           gyro_bounce_points.o \
           gyro_radial_simulation_box.o \
@@ -109,7 +110,6 @@ OBJECTS = gyro_globals.o \
           timestep_SSP_322.o \
           timestep_explicit.o \
           make_maxwell_matrix.o \
-          make_MPI_grid.o \
           make_blend_arrays.o \
           make_theta_grid.o \
           make_geometry_arrays.o \

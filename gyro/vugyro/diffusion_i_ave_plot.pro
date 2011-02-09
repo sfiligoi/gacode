@@ -36,7 +36,6 @@ pro diffusion_i_ave_plot
   ;; average.
   ;;
   y_i = fltarr(n_r,n_time)
-  y_i_neo = fltarr(n_r,n_time)
 
   if i_f ge 0 then begin
      y_i[*,*] = diff_i[i_spec,i_f,i_moment,*,*]
@@ -44,18 +43,9 @@ pro diffusion_i_ave_plot
      y_i[*,*] = diff_i[i_spec,0,i_moment,*,*]+$
        diff_i[i_spec,1,i_moment,*,*]
   endelse
-
-  y_i_neo[*,*] = 0.0
-  if (neo_flag*exists_diff_i_ch eq 1) then begin
-     if (i_spec eq 0 and i_moment eq 1) then begin
-        y_i[*,*]     = y_i[*,*]+diff_i_ch[*,*]
-        y_i_neo[*,*] = diff_i_ch[*,*]
-     endif
-  endif
-
+ 
   y       = fltarr(n_time)
   y_r     = fltarr(n_r)
-  y_r_neo = fltarr(n_r)
   y_exp   = fltarr(n_r)
 
   for i=0,n_r-1 do begin
@@ -63,10 +53,6 @@ pro diffusion_i_ave_plot
      y[*] = y_i[i,*]*plot_units
      diff_stat_fast,y,it1,it2,ave_y
      y_r[i] = ave_y
-
-     y[*] = y_i_neo[i,*]*plot_units
-     diff_stat_fast,y,it1,it2,ave_y
-     y_r_neo[i] = ave_y
      
   endfor
   ;;-------------------------------------------------------
@@ -163,9 +149,6 @@ pro diffusion_i_ave_plot
     color=line
 
   oplot,r,y_r,color=color_vec[0]
-  if (neo_flag eq 1) then begin
-   oplot,r,y_r_neo,color=color_vec[3]
-  endif
   oplot,r,y_exp,color=color_vec[1]
 
   ;; Plot singular surface(s)

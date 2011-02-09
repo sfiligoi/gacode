@@ -54,6 +54,9 @@ then
   echo
   echo "UTILITY COMMANDS"
   echo
+  echo "         -s <simdir>" 
+  echo "         Create small portable copy of <simdir>."
+  echo 
   echo "    tgyro_dir: Replicate TGYRO directories."
 
   exit 1
@@ -72,6 +75,7 @@ EXEC_FLAG=0
 TEST_FLAG=0
 INIT_FLAG=0
 GENERATE_FLAG=0
+SCOPY_FLAG=0
 KILL_STATUS=2
 #=============================================================
 
@@ -90,6 +94,8 @@ while [ $# -gt 0 ] ; do
   -i) shift ; LOCDIR=$1 ; INIT_FLAG=1 ;;
 
   -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
+
+  -s) shift ; LOCDIR=$1 ; SCOPY_FLAG=1 ;;
 
   -n) shift ; NPROC=$1 ;;
 
@@ -158,6 +164,38 @@ fi
 
 cd $SIMDIR
 #============================================================
+
+#=============================================================
+# Do a small-copy (copy small files into new directory)
+if [ $SCOPY_FLAG -eq 1 ]
+then
+   list="
+    description.txt
+    VERSION_tag
+    input.tgyro
+    input.tgyro.gen
+    run.out"
+
+   # Funny syntax below removes trailing /
+   target=${SIMDIR%/}"-s"
+   mkdir $target
+ 
+   for i in $list
+   do
+      cp -av $i $target
+   done
+
+   gyrodirs=`cat $SIMDIR/input.tgyro | awk '/DIR/ { print $2 }'`
+
+   for i in $gyrodirs
+   do
+      # Use gyro -s to copy GYRO dir contents.
+      gyro -s $i
+      mv ${i}-s $target/$i
+   done
+   exit 0
+fi
+#=============================================================
 
 #==========================================================
 # Check for "hard halt", otherwise initialize halt file:

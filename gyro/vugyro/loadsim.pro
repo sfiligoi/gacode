@@ -242,26 +242,6 @@ pro loadsim, input_dir
   diff_trapped = fltarr(n_kinetic,n_field,2,n_time)
   read_array,diff_trapped,'diff_trapped.out',exists_diff_t
 
-  diff_i_ch = fltarr(n_r,n_time)
-  read_array,diff_i_ch,'diff_i_ch.out',exists_diff_i_ch
-
-  sdiff = fltarr(n_kinetic,2,n_time)
-  read_array,sdiff,'sdiff.out',exists_sdiff
-  
-  spdiff = fltarr(n_kinetic,2,3,n_time)
-  read_array,spdiff,'spdiff.out',exists_spdiff
-
-  sdiff_i = fltarr(n_kinetic,2,n_r,n_time)
-  read_array,sdiff_i,'sdiff_i.out',exists_sdiff_i
-
-  spdiff_i = fltarr(n_kinetic,2,3,n_r,n_time)
-  read_array,spdiff_i,'spdiff_i.out',exists_spdiff_i
-  
-  sdiff_trapped = fltarr(n_kinetic,2,n_time)
-  read_array,sdiff_trapped,'sdiff_trapped.out',exists_sdiff_t
-
-  sdiff_i_trapped = fltarr(n_kinetic,2,n_r,n_time)
-  read_array,sdiff_i_trapped,'sdiff_i_trapped.out',exists_sdiff_i_t
   ;;------------------------------------------------
 
   ;;--------------------------------------------------------
@@ -284,12 +264,6 @@ pro loadsim, input_dir
   gbflux_n = fltarr(n_kinetic,n_field,p_moment,n_n,n_time)
   read_array,gbflux_n,'gbflux_n.out',exists_gbflux_n
   ;;--------------------------------------------------------
-
-  diff_neo = fltarr(n_kinetic,3,n_time)
-  read_array,diff_neo,'diff_neo.out',exists_diff_neo
-
-  diff_neo_i = fltarr(n_kinetic,3,n_r,n_time)
-  read_array,diff_neo_i,'diff_neo_i.out',exists_diff_neo_i
 
   diff_QL_n = fltarr(n_kinetic,n_field,2,n_n,n_time)
   read_array,diff_QL_n,'diff_QL_n.out',exists_diff_QL_n

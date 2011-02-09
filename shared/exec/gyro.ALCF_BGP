@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # SCRIPT:
-#  gyro.XT_FAST
+#  gyro.UBGL
 #
 # FUNCTION:
 #  Parallel execution script
@@ -12,6 +12,6 @@ exec=${3}
   
 cd $simdir
 
-aprun -n $nproc $exec
+mpirun -verbose 1 -exe $exec -cwd $simdir 
 
 
