@@ -466,11 +466,11 @@ pro vugyro, _EXTRA=extra
                     /menu)
 
   x1 = widget_button(x,$
-                     value='particle/energy (box-car ave)',$
+                     value='particle/energy + exp (box-car ave)',$
                      uvalue='diffusion_bca_see')
 
   x1 = widget_button(x,$
-                     value='particle/energy (stat ave)',$
+                     value='particle/energy + exp (stat ave)',$
                      uvalue='diffusion_ave_see')
 
   x1 = widget_button(x,$
