@@ -44,6 +44,7 @@ OBJECTS = gyro_globals.o \
           gyro_build_sparse_poissonaperp.o \
           gyro_build_sparse_maxwell.o \
           gyro_cleanup.o \
+          gyro_collect_routines.o \
           gyro_collision.o \
           gyro_collision_setup.o \
           gyro_collision_kernel.o \
@@ -102,9 +103,6 @@ OBJECTS = gyro_globals.o \
           send_line.o \
           catch_halt_signal.o \
           parallel_dim.o \
-          collect_complex.o \
-          collect_real.o \
-          collect_integer.o \
           alloc_add.o \
           allocate_profile_exp.o \
           timestep_SSP_322.o \
