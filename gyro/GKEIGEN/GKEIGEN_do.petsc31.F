@@ -187,13 +187,13 @@
 
            l_in_i_block = ((istate >= istate_start) .AND.               &
      &                   (istate <= istate_end))
-           If ((eigensolve_restart_flag == 1) .AND.                     &
-     &                 (istate < n_last_col)) Then
-
-                   one_col(1:h_length_loc) =                            &
-     &                       eigensolve_matrix(1:h_length_loc,istate+1)
-
-           Else If (l_in_i_block) Then
+!           If ((eigensolve_restart_flag == 1) .AND.                     &
+!     &                 (istate < n_last_col)) Then
+!
+!                   one_col(1:h_length_loc) =                            &
+!     &                       eigensolve_matrix(1:h_length_loc,istate+1)
+!
+           If (l_in_i_block) Then
 
              h(:,:,:,:) = (0.0,0.0)  
              If (i_proc_e == i_proc)                                    &
@@ -225,14 +225,14 @@
 !     &        call MatSetValues(time_derivative_matrix,h_length_loc,    &
 !     &                     irows,1,istate,one_col,INSERT_VALUES,ierr)
              istate = istate + 1
-             irestart = istate-n_last_col
-             If (irestart >= 1) restart_cols(irestart,:)=one_col(:)
-             If (irestart == 500) Then
-               If (gkeigen_mwrite_flag==1)                              &
-     &           call GKEIGEN_matrix_write(restart_cols,n_last_col)
-               n_last_col = istate
-               restart_cols(:,:) = (0.0,0.0)
-             EndIf
+!             irestart = istate-n_last_col
+!             If (irestart >= 1) restart_cols(irestart,:)=one_col(:)
+!             If (irestart == 500) Then
+!               If (gkeigen_mwrite_flag==1)                              &
+!     &           call GKEIGEN_matrix_write(restart_cols,n_last_col)
+!               n_last_col = istate
+!               restart_cols(:,:) = (0.0,0.0)
+!             EndIf
 
           EndDo ! m1
 
@@ -258,6 +258,13 @@
         EndIf
         Goto 1000
       EndIf
+
+      call date_and_time(values=time_array)
+      If (l_print) Then
+       Print 10, time_array(5),time_array(6),time_array(7),time_array(8)
+       Print *, 'Starting message passing phase.'
+      EndIf
+
 
 !--------------------------------------------------------------------
 ! Matrix elements are passed from the processor calculating GKEIGEN
