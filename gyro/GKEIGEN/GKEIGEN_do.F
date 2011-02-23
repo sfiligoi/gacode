@@ -23,7 +23,6 @@
 #include "finclude/petscsys.h"
 #include "finclude/slepc.h"
 #include "finclude/slepceps.h"
-
 !--------------------------------------------------
 ! PETSc, SLEPc, and other local variable declarations. These variables
 ! are called in PETSc/SLEPc functions so are declared this way to
@@ -55,7 +54,8 @@
 
       integer :: irestart
       complex, dimension(500,h_length_loc) :: restart_cols
-      complex, dimension(0:h_length_loc-1,0:h_width_loc-1) :: M_loc
+!      complex, dimension(0:h_length_loc-1,0:h_width_loc-1) :: M_loc
+      complex, dimension(:,:), allocatable :: M_loc
       character (len=80) :: gkeigen_exit_message
 
 10    Format(I2, ':', I2, ':', I2, ':' I3)
@@ -75,7 +75,7 @@
 
       l_print = ( (gkeigen_j_set == 0) .AND. (i_proc == 0) )
 
-!      allocate(M_loc(0:h_length_loc-1,0:h_width_loc-1))     
+      allocate(M_loc(0:h_length_loc-1,0:h_width_loc-1))     
 
 
 !------------------------------------------------
@@ -87,6 +87,7 @@
 !
       If (gkeigen_mwrite_flag == 1) call catch_error('Matrix writing tem&
      &porarily disabled in GKEIGEN')
+      eigensolve_restart_flag = 0
 !---------------------------------------
 
       If (gkeigen_n_values > h_length) Then
@@ -270,20 +271,34 @@
        Print *, 'Starting message passing phase.'
       EndIf
 
+
 !--------------------------------------------------------------------
 ! Matrix elements are passed from the processor calculating GKEIGEN
 ! processor to the processor that owns that element in PETSC, then
 ! assigned to the PETSc object time_derivative_matrix.
 
-      Do gkeigen_j_set_e1 = 0, gkeigen_proc_mult-1
+      Do j_sr = 0, gkeigen_proc_mult-1
 
-        j_send_proc = i_proc*gkeigen_proc_mult + gkeigen_j_set_e1
+        gkeigen_j_set_e0 = Mod(j_sr-gkeigen_j_set,gkeigen_proc_mult)
+        If (gkeigen_j_set_e0 < 0)                                       &
+     &         gkeigen_j_set_e0 = gkeigen_j_set_e0 + gkeigen_proc_mult 
 
-        Do ielem = 0, h_width_loc-1
-          icols(ielem+1) = gkeigen_j_set_e1*h_width_loc + ielem
-        EndDo
+        Do i_sr = 0, 1
 
-        Do gkeigen_j_set_e2 = 0, gkeigen_proc_mult-1
+          select case (i_sr)
+
+            case (0)
+              gkeigen_j_set_e1=Min(gkeigen_j_set_e0,gkeigen_j_set)
+              gkeigen_j_set_e2=Max(gkeigen_j_set_e0,gkeigen_j_set)
+            case (1)
+              gkeigen_j_set_e1=Max(gkeigen_j_set_e0,gkeigen_j_set)
+              gkeigen_j_set_e2=Min(gkeigen_j_set_e0,gkeigen_j_set)
+
+          end select
+
+          Do ielem = 0, h_width_loc-1
+            icols(ielem+1) = gkeigen_j_set_e1*h_width_loc + ielem
+          EndDo
 
           jelem_start = gkeigen_j_set_e2*h_length_block
           jelem_end = jelem_start + h_length_block - 1
@@ -292,10 +307,18 @@
             irows(i_index) = jstate_start + jelem
           EndDo
 
+          j_send_proc = i_proc*gkeigen_proc_mult + gkeigen_j_set_e1
           j_recv_proc = i_proc*gkeigen_proc_mult + gkeigen_j_set_e2
+
           l_send = (j_proc_tot==j_send_proc)
           l_recv = (j_proc_tot==j_recv_proc)
           l_set =  (l_send .AND. l_recv)
+
+          If ((l_set==.TRUE.).AND.(i_sr==1)) Then
+            l_set  = .FALSE.
+            l_send = .FALSE.
+            l_recv = .FALSE.
+          EndIf
 
          If (l_send) Then
           Do ielem = 0, h_width_loc-1
@@ -342,6 +365,7 @@
 !
 !------------------------------------------------------------------------
 
+      deallocate(M_loc)
 
       call date_and_time(values=time_array)
       If (l_print) Then

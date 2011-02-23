@@ -76,8 +76,11 @@ module GKEIGEN_globals
   integer :: i_proc_e
   !
   ! Parallel instances of GYRO_COMM_WORLD
+  integer :: gkeigen_j_set_e0
   integer :: gkeigen_j_set_e1
   integer :: gkeigen_j_set_e2
+  integer :: j_sr
+  integer :: i_sr
   !
   ! Rank of processor over MPI_COMM_WORLD
   integer :: j_proc_tot_e1
