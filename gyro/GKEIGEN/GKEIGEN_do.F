@@ -273,7 +273,7 @@
 
 
 !--------------------------------------------------------------------
-! Matrix elements are passed from the processor calculating GKEIGEN
+! Matrix elements are passed from the calculating GKEIGEN
 ! processor to the processor that owns that element in PETSC, then
 ! assigned to the PETSc object time_derivative_matrix.
 
@@ -359,9 +359,9 @@
 
          call MPI_barrier(MPI_COMM_WORLD,ierr)
 !         if (l_print) print *, '*************************************'
-        EndDo  ! gkeigen_j_set_e2
+        EndDo  ! i_sr
 
-      EndDo  ! gkeigen_j_set_e1
+      EndDo  ! j_sr
 !
 !------------------------------------------------------------------------
 
@@ -495,8 +495,6 @@
       call EPSDestroy(epsolve,ierr)
 
       call SlepcFinalize(ierr)
-
-!      deallocate(M_loc) 
 
 1000  end subroutine
 
