@@ -64,10 +64,6 @@ then
    echo "             -g <gfile>"
    echo "             Merge EFIT gfile for high-precision geometry data."
    echo " "
-   echo "             -e<n> <erfile>"
-   echo "             Merge data from Er datafile [rho,Er,*,*]."
-   echo "             (-e0: Er in V/m, -e3: Er in kV/m, -e6: Er in MV/m)"
-   echo
    echo "             -cer <vpol>"
    echo "             Merge data Er and velocity data from Solomon's cer datafile."
    echo " "
@@ -239,8 +235,6 @@ fi
 CONFIG=.config
 
 FILE_FLAG=0
-ERFILE_FLAG=0
-ERCONV=0
 CER_FLAG=0
 G_FLAG=0
 VERBOSE_FLAG=0
@@ -277,12 +271,6 @@ while [ $# -gt 0 ] ; do
   -m) shift ; ASTRA_ARG="$ASTRA_ARG -m $1" ;;
 
   -n) shift ; ASTRA_ARG="$ASTRA_ARG -n $1" ;;
-
-  -e0) shift ; ERFILE_FLAG=1 ; ERFILE="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-e0;$1" ;;
-
-  -e3) shift ; ERFILE_FLAG=1 ; ERFILE="$1"; ERCONV=3 ; ITERDB_ARGS="${ITERDB_ARGS};-e3;$1";;
-
-  -e6) shift ; ERFILE_FLAG=1 ; ERFILE="$1"; ERCONV=6 ; ITERDB_ARGS="${ITERDB_ARGS};-e6;$1";;
 
   -cer) shift ; CER_FLAG=1 ; CER_FILE="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-cer;$1" ;;
    
@@ -350,14 +338,6 @@ while [ $# -gt 0 ] ; do
   shift
 done
 
-#=============================================================
-
-#=============================================================
-# Sanity check for merge files
-if [ $ERFILE_FLAG -eq 1 ] && [ $CER_FLAG -eq 1 ]
-then
-   echo "ERROR: cannot use both -e<n> and -cer options". 
-fi
 #=============================================================
 
 #=============================================================

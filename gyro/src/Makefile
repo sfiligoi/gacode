@@ -44,6 +44,7 @@ OBJECTS = gyro_globals.o \
           gyro_build_sparse_poissonaperp.o \
           gyro_build_sparse_maxwell.o \
           gyro_cleanup.o \
+          gyro_collect_routines.o \
           gyro_collision.o \
           gyro_collision_setup.o \
           gyro_collision_kernel.o \
@@ -76,6 +77,7 @@ OBJECTS = gyro_globals.o \
           gyro_radial_operators.o \
           gyro_map_experimental_profiles.o \
           gyro_moments_plot.o \
+          gyro_mpi_grid.o \
           gyro_select_methods.o \
           gyro_bounce_points.o \
           gyro_radial_simulation_box.o \
@@ -101,15 +103,11 @@ OBJECTS = gyro_globals.o \
           send_line.o \
           catch_halt_signal.o \
           parallel_dim.o \
-          collect_complex.o \
-          collect_real.o \
-          collect_integer.o \
           alloc_add.o \
           allocate_profile_exp.o \
           timestep_SSP_322.o \
           timestep_explicit.o \
           make_maxwell_matrix.o \
-          make_MPI_grid.o \
           make_blend_arrays.o \
           make_theta_grid.o \
           make_geometry_arrays.o \

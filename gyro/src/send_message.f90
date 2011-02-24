@@ -22,7 +22,7 @@ subroutine send_message(message)
 
   case (1)
 
-    if (i_proc == 0) then 
+    if ((i_proc == 0) .and. (gkeigen_j_set == 0)) then 
         open(unit=1,file=trim(runfile),status='old',position='append')
         write(1,10) '----------------------------------------------------------'
         write(1,10) message

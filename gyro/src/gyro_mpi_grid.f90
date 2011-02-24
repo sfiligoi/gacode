@@ -1,20 +1,11 @@
-!------------------------------------------------------
+!------------------------------------------------------------
 ! make_MPI_grid.f90
 !
 ! PURPOSE:
-!  This routine manages most of the MPI initialization 
-!  chore.
-!
-! REVISIONS
-! 15 May 00: jc
-!  Facility for processor subgroups added. 
-! 19 May 00: jc
-!  Facility for processor subgroups modified.
-! 08 Aug 02: jc
-!  Updates for SSUB distribution library.
-!------------------------------------------------------
+!  This routine manages most of the MPI initialization chore.
+!------------------------------------------------------------
 
-subroutine make_MPI_grid
+subroutine gyro_mpi_grid
 
   use gyro_globals
   use gyro_pointers
@@ -109,4 +100,4 @@ subroutine make_MPI_grid
      print *,'[make_MPI_grid done]'
   endif
 
-end subroutine make_MPI_grid
+end subroutine gyro_mpi_grid

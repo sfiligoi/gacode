@@ -15,22 +15,22 @@ pro gbflux_i_plot
   
   case (i_units) of
 
-  0: begin
-     ;; flux in gyrobohm units
-     xnorm = 1.0
-     units = units1
+     0: begin
+        ;; flux in gyrobohm units
+        xnorm = 1.0
+        units = units1
      end
 
-  1: begin
-     ;; flux in W/m^2, etc.
-     xnorm = xunits[9+i_moment]
-     units = units2
+     1: begin
+        ;; flux in W/m^2, etc.
+        xnorm = xunits[9+i_moment]
+        units = units2
      end 
 
-  2: begin 
-     ;; flux in W, etc.
-     xnorm = xunits[9+i_moment]
-     units = units3
+     2: begin 
+        ;; flux in W, etc.
+        xnorm = xunits[9+i_moment]
+        units = units3
      end
 
   endcase
@@ -105,7 +105,7 @@ pro gbflux_i_plot
 
   endif
 
-   ;; ** At this point, y and y_exp are in gyroBohm units **
+  ;; ** At this point, y and y_exp are in gyroBohm units **
 
   if (i_units eq 2) then begin
      ;; Multiply by V'
@@ -131,6 +131,22 @@ pro gbflux_i_plot
   oplot,r,y_r*xnorm,color=color_vec[0]
   if (exists_exp_derived) then oplot,r_from_rho,y_exp*xnorm,color=color_vec[1]
 
+  ;; Ron's addition
+  if (i_moment eq 3) then begin
+     if (i_units eq 2) then begin
+        y_r2 = fltarr(n_r)
+        y_r2[*] = 0.0
+
+        ;; y_r2 is the radial integral over simulation  MW/m --->MW
+        for i=8,n_r-8 do begin
+           y_r2[i]= y_r2[i-1]+(y_r[i]+y_r[i-1])/2.*xunits[2]*(r[n_r-1]-r[0])/n_r
+        endfor
+        print, 'plot radially integrated exchange flow in MW over simulation'
+        oplot,r,y_r2*xnorm,color=color_vec[1]
+     endif
+  endif
+
+
   ;; Plot singular surface(s)
 
   get_singsurf_vec,n_ss,r_surf  
@@ -147,7 +163,7 @@ pro gbflux_i_plot
   ;; DATA EXPORT
   ;;
   if (plot_export eq 1) then begin
-      y_exp_fine = INTERPOL(y_exp*xnorm,r_from_rho,r)
+     y_exp_fine = INTERPOL(y_exp*xnorm,r_from_rho,r)
      openw,1,pname+'.idlout'
      for i=0,n_r-1 do begin
         printf,1,r[i],y_r[i]*xnorm,y_exp_fine[i]
