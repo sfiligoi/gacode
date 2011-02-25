@@ -74,34 +74,7 @@
       allocate(M_loc(0:h_length_loc-1,0:h_width_loc-1))     
 
 
-!------------------------------------------------
-! Make flags and inputs self-consistant.
-!
-      If (gkeigen_matrixonly == 1) gkeigen_mwrite_flag = 1
-
-!-- Temporarily disable the seldom used matrix reading/writing.
-!
-      If (gkeigen_mwrite_flag == 1) call catch_error('Matrix writing tem&
-     &porarily disabled in GKEIGEN')
-      eigensolve_restart_flag = 0
-!---------------------------------------
-
-      If (gkeigen_n_values > h_length) Then
-        call catch_error('INCONSISTENT: gkeigen_n_values must be less ',&
-     &'than or equal to matrix dimension ', h_length, '.')
-      Else If (gkeigen_kspace_dim < gkeigen_n_values) Then
-        call catch_error('INCONSISTENT: gkeigen_kspace_dim must be      &
-     &greater than or equal to gkeigen_n_values.')  
-      Else If (gkeigen_kspace_dim > h_length) Then
-        gkeigen_kspace_dim = h_length
-        If (l_print) print *, 'Input gkeigen_kspace_dim must be ',      &
-     &    'less than or equal to matrix dimension ', h_legnth, '.'
-        If (l_print) print *, 'Reset gkeigen_kspace_dim = ', h_length
-        call send_line('Reset gkeigen_kspace_dim = ', h_length)
-      EndIf
-
-!--------------------------------------------------
-
+      call GKEIGEN_catch_error
 
 !-------------------------------------------------
 ! Initialize the SLEPc operating environment,
