@@ -15,7 +15,7 @@ subroutine GKEIGEN_catch_error
 
   logical :: l_terminate = .false.
 
-  character (len=80) :: error_message
+  character (len=100) :: error_message
 
 10 format(A, I7, '.')
 20 format(A, I7, A, I7, A)
