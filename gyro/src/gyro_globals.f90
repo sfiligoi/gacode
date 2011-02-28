@@ -173,6 +173,7 @@ module gyro_globals
   ! For added parallelization layer (gkeigen_proc_mult > 1)
   integer :: gkeigen_j_set
   integer :: j_proc_tot
+  integer :: n_proc_tot
   !
   !-----------------------------------------------------------------------------------
 

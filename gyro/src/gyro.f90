@@ -80,7 +80,9 @@ program gyro
   !
   call MPI_COMM_RANK(GYRO_COMM_WORLD,i_proc,i_err)
   call MPI_COMM_SIZE(GYRO_COMM_WORLD,n_proc,i_err)
+
   call MPI_COMM_RANK(MPI_COMM_WORLD,j_proc_tot,i_err)
+  call MPI_COMM_SIZE(MPI_COMM_WORLD,n_proc_tot,i_err)
   !
   !---------------------------------------------------------------
 

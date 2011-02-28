@@ -138,7 +138,7 @@ subroutine gyro_write_input
      call send_line('Electron curvature drift: OFF')
   endif
 
-  if (i_proc == 0 .and. io_mode == 1) then
+  if (i_proc == 0 .and. io_mode == 1 .and. gkeigen_j_set == 0) then
      open(unit=1,file=trim(runfile),status='old',position='append')
 
      write(1,*) '----------- GRID DIMENSIONS -------------------'

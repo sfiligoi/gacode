@@ -57,7 +57,7 @@ subroutine write_matrix_stat(nelem,nval,nindx,niter,tag)
         lab4 = '  POISSON-AMPERE:     n>0'
      endif
 
-     if (i_proc == 0) then
+     if ((i_proc == 0) .and. (gkeigen_j_set == 0)) then
         open(unit=1,file=trim(runfile),status='old',position='append')
 
         select case (tag)
