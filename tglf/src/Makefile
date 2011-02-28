@@ -10,6 +10,10 @@ EXEC=tglf
 LLIB=tglf_lib
 
 OBJECTS = tglf_modules.o \
+          tglf_LS.o       \
+          tglf_geometry.o \
+          tglf_matrix.o   \
+          tglf_max.o      \
           tglf_pkg.o \
           tglf_interface.o \
           tglf_init.o \
@@ -29,5 +33,4 @@ tglf_lib.a: $(OBJECTS)
 
 clean:
 	rm -f *.o $(LLIB).a $(EXEC)
-	rm -f ${GACODE_ROOT}/modules/nuei_coeff.mod 
 	rm -f ${GACODE_ROOT}/modules/tglf*.mod 

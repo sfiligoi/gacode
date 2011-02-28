@@ -6,11 +6,12 @@
       SAVE
 !
       INTEGER, PARAMETER:: nb=24,nxm=47
-      INTEGER, PARAMETER:: nsm=6,nt0=20
+      INTEGER, PARAMETER:: nsm=6, nt0=40
       INTEGER, PARAMETER :: neq = 15*nsm,iar=neq*nb
       INTEGER, PARAMETER :: nkym=50
       INTEGER, PARAMETER :: maxmodes=4
       INTEGER, PARAMETER :: max_ELITE=700
+      INTEGER, PARAMETER :: max_fourier = 16
 ! dimensions determined by inputs
       INTEGER nx,nbasis,ns0,ns
 ! global constants
@@ -21,8 +22,8 @@
       COMPLEX :: xi=(0.0,1.0)
 !
       END MODULE tglf_dimensions
- !
-      MODULE tglf_internal_interface
+!
+      MODULE tglf_global
       USE tglf_dimensions
 !
 !  global controls for the tglf driver routine
@@ -38,6 +39,8 @@
       LOGICAL :: new_kyspectrum=.TRUE.
       LOGICAL :: eikonal_unsaved=.TRUE.
       INTEGER :: igeo=0
+      LOGICAL :: use_default_species=.TRUE.
+      INTEGER,DIMENSION(8) :: trace_path=0
 ! Input global variables
       LOGICAL :: find_width_in=.TRUE.
       INTEGER :: nwidth_in=21
@@ -48,17 +51,20 @@
       INTEGER :: nmodes_in=2
 ! Input species 
       INTEGER :: ns_in=2
-      REAL,DIMENSION(nsm) :: mass_in=(/2.723D-4,1.0,6.0,6.0,6.0,6.0/)
-      REAL,DIMENSION(nsm) :: zs_in=(/-1.0,1.0,6.0,6.0,6.0,6.0/)
+      REAL,DIMENSION(nsm) :: mass_in
+      REAL,DIMENSION(nsm) :: zs_in
 ! input switches
       LOGICAL :: iflux_in=.TRUE.
       LOGICAL :: use_bper_in=.FALSE.
       LOGICAL :: use_bpar_in=.FALSE.
+      LOGICAL :: use_mhd_rule_in=.FALSE.
       LOGICAL :: use_bisection_in=.TRUE.
       INTEGER :: ibranch_in=-1
       INTEGER :: nbasis_max_in=4
       INTEGER :: nbasis_min_in=1
       INTEGER :: nxgrid_in=16
+      REAL :: damp_psi_in = 0.0
+      REAL :: damp_sig_in = 0.0
 ! input rare switches
       REAL :: alpha_quench_in=0.0
       REAL :: park_in=1.0
@@ -68,33 +74,40 @@
       REAL :: Linsker_factor_in=0.0
       REAL :: gradB_factor_in=0.0
       REAL :: filter_in=2.0
-      REAL :: x_psi_in=0.0
-      INTEGER :: sat_rule_in=1
-      REAL :: alpha_kx0_in=1.0
+      INTEGER :: sat_rule_in=0
+      REAL :: alpha_kx0_in=0.13
+      REAL :: alpha_kx1_in= 3.14
 ! Input model paramaters
       LOGICAL :: adiabatic_elec_in=.FALSE.
       REAL :: alpha_p_in=1.0
-      REAL :: alpha_e_in=0.18
+      REAL :: alpha_e_in=0.12
       REAL :: theta_trapped_in=0.7
       REAL :: xnu_factor_in=1.0
       REAL :: debye_factor_in=1.0
       REAL :: etg_factor_in=1.25
       INTEGER :: kygrid_model_in=1
       INTEGER :: xnu_model_in=2
+      INTEGER :: vpar_model_in=0
+      INTEGER :: vpar_shear_model_in=0
+! Input signs
+      REAL :: sign_Bt_in = 1.0
+      REAL :: sign_It_in = 1.0
 ! Input field gradients
       REAL,DIMENSION(nsm) :: rlns_in=1.0
       REAL,DIMENSION(nsm) :: rlts_in=3.0
+      REAL,DIMENSION(nsm) :: vpar_shear_in=0.0
       REAL :: vexb_shear_in=0.0
-      REAL :: vpar_shear_in=0.0
+! Input profile shear
+      REAL,DIMENSION(nsm) :: shear_ns_in=0.0
+      REAL,DIMENSION(nsm) :: shear_ts_in=0.0
 ! Input field averages
-      REAL,DIMENSION(nsm) :: as_in=(/1.0,1.0,0.0,0.0,0.0,0.0/)
-      REAL,DIMENSION(nsm) :: taus_in=1.0
+      REAL,DIMENSION(nsm) :: as_in
+      REAL,DIMENSION(nsm) :: taus_in
+      REAL,DIMENSION(nsm) :: vpar_in=0.0
       REAL :: betae_in=0.0
-      REAL :: xnuei_in=0.0
+      REAL :: xnue_in=0.0
       REAL :: zeff_in=1.0
       REAL :: debye_in=0.0
-      REAL :: vexb_in=0.0
-      REAL :: vpar_in=0.0
 ! Shifted circle (s-alpha) inputs
       REAL :: rmin_sa=0.5
       REAL :: rmaj_sa=3.0
@@ -109,16 +122,27 @@
 ! Miller inputs
       REAL :: rmin_loc=0.5
       REAL :: rmaj_loc=3.0
+      REAL :: zmaj_loc=0.0
       REAL :: q_loc=2.0
-      REAL :: shat_loc=1.0
+!      REAL :: shat_loc=1.0
       REAL :: dlnpdr_loc=0.0
-      REAL :: shift_loc=0.0
+      REAL :: drmindx_loc=1.0
+      REAL :: drmajdx_loc=0.0
+      REAL :: dzmajdx_loc=0.0
       REAL :: kappa_loc=1.0
       REAL :: s_kappa_loc=0.0
       REAL :: delta_loc=0.0
       REAL :: s_delta_loc=0.0
+      REAL :: zeta_loc=0.0
+      REAL :: s_zeta_loc=0.0
       REAL :: p_prime_loc=0.0 
       REAL :: q_prime_loc=16.0
+! Fourier geometry inputs
+      INTEGER :: nfourier_in        = 16
+      REAL :: q_fourier_in          = 2.0
+      REAL :: q_prime_fourier_in    = 16.0
+      REAL :: p_prime_fourier_in    = 0.0
+      REAL :: fourier_in(8,0:max_fourier) = 0.0
 ! ELITE geometry inputs
       INTEGER :: n_ELITE
       REAL :: R_ELITE(0:max_ELITE)
@@ -128,37 +152,49 @@
       REAL :: q_prime_ELITE
       REAL :: p_prime_ELITE
 ! global variables
-      REAL :: ft
+      REAL :: ft=0.5
       REAL :: ft_min=0.01
-      REAL :: ky
-      REAL :: R_unit
-      REAL :: q_unit
-      REAL :: gamma_reference_GQ
+      REAL :: ky=0.3
+      REAL :: R_unit=3.0
+      REAL :: q_unit=2.0
+      REAL :: B_unit=1.0
+      REAL :: R_input = 3.0
+      REAL :: q_input = 3.0
+      REAL :: gamma_reference_GQ=0.0
+      REAL :: gamma_exb_GQ = 0.0
+      REAL :: pol=1.0
+      REAL :: U0=0.0
+      REAL :: kx0=0.0
+      REAL :: sign_kx0=1.0
 ! output
-      REAL :: gamma_out(maxmodes),freq_out(maxmodes)
-      REAL :: gamma_net_out(maxmodes)
-      REAL :: wd_bar_out(maxmodes),phi_QL_out(maxmodes)
-      REAl :: particle_QL_out(maxmodes,nsm,3)
-      REAL :: energy_QL_out(maxmodes,nsm,3)
-      REAL :: stress_par_QL_out(maxmodes,nsm,3)
-      REAL :: stress_tor_QL_out(maxmodes,nsm,3)
-      REAL :: exchange_QL_out(maxmodes,nsm,3)
-      REAL :: N_QL_out(maxmodes,nsm),T_QL_out(maxmodes,nsm)
-      REAL :: phi_bar_out(maxmodes),v_bar_out(maxmodes)
-      REAL :: n_bar_out(maxmodes,nsm),t_bar_out(maxmodes,nsm)
-      REAL :: particle_flux_out(nsm,3),energy_flux_out(nsm,3)
-      REAL :: exchange_out(nsm,3)
-      REAL :: stress_par_out(nsm,3),stress_tor_out(nsm,3)
+      REAL,DIMENSION(maxmodes,nsm,3) :: particle_QL_out=0.0
+      REAL,DIMENSION(maxmodes,nsm,3) :: energy_QL_out=0.0
+      REAL,DIMENSION(maxmodes,nsm,3) :: stress_par_QL_out=0.0
+      REAL,DIMENSION(maxmodes,nsm,3) :: stress_tor_QL_out=0.0
+      REAL,DIMENSION(maxmodes,nsm,3) :: exchange_QL_out=0.0
+      REAL,DIMENSION(maxmodes,nsm) :: N_QL_out=0.0,T_QL_out=0.0
+      REAL,DIMENSION(maxmodes,nsm) :: n_bar_out=0.0,t_bar_out=0.0
+      REAL,DIMENSION(nsm,3) :: particle_flux_out=0.0,energy_flux_out=0.0
+      REAL,DIMENSION(nsm,3) :: exchange_out=0.0
+      REAL,DIMENSION(nsm,3) :: stress_par_out=0.0,stress_tor_out=0.0
+      REAL,DIMENSION(maxmodes) :: gamma_out=0.0,freq_out=0.0
+      REAL,DIMENSION(maxmodes) :: wd_bar_out=0.0,phi_QL_out=0.0
+      REAL,DIMENSION(maxmodes) :: phi_bar_out=0.0,v_bar_out=0.0
+      REAL,DIMENSION(maxmodes) :: ne_te_phase_out=0.0
+      REAL,DIMENSION(nsm) :: n_bar_sum_out=0.0,t_bar_sum_out=0.0
+      REAL,DIMENSION(nsm) :: q_low_out=0.0
       REAL :: phi_bar_sum_out=0.0
       REAL :: v_bar_sum_out=0.0
-      REAL :: n_bar_sum_out(nsm),t_bar_sum_out(nsm)
-      REAL :: q_low_out(nsm)
       REAL :: gamma_nb_min_out=0.0
       REAL :: B2_ave_out=1.0
       REAL :: R2_ave_out=1.0
+      REAL :: a_pol_out=1.0
+      REAL :: a_tor_out=1.0
       REAL :: RBt_ave_out=1.0
+      REAL :: DM_out = 0.25
+      REAL :: DR_out = 0.0
 !
-      END MODULE tglf_internal_interface
+      END MODULE tglf_global
 !------------------------------------------------- 
       MODULE tglf_closure
 !
@@ -210,8 +246,10 @@
       SAVE
 !
       REAL :: ei_exch(nsm,nsm),resist(nsm,nsm)
-      REAL :: zs(nsm),mass(nsm),taus(nsm),vs(nsm)
-      REAL :: rlts(nsm),rlns(nsm),as(nsm)
+      REAL :: zs(nsm),mass(nsm),vs(nsm)
+      REAL :: rlts(nsm),rlns(nsm),vpar_shear_s(nsm)
+      REAL :: as(nsm),taus(nsm),vpar_s(nsm)
+      REAL :: vexb_shear_s
 ! 
       END MODULE tglf_species  
 !-------------------------------------------------
@@ -275,6 +313,10 @@
       REAL :: width_save(nkym),ft_save(nkym)
       REAL :: R_unit_save(nkym),q_unit_save(nkym)
       REAL :: wdx_save(nkym,nxm),b0x_save(nkym,nxm)
+      REAL :: cx_par_par_save(nkym,nxm)
+      REAL :: cx_tor_par_save(nkym,nxm)
+      REAL :: cx_tor_per_save(nkym,nxm)
+      REAL :: kxx_save(nkym,nxm)
 !
       END MODULE tglf_xgrid
 !
@@ -315,7 +357,7 @@
 ! INPUT
       REAL :: R(0:ms), Z(0:ms), Bp(0:ms)
       REAL :: ds, Ls
-      REAL :: Rmaj_s, rmin_s, q_s
+      REAL :: Rmaj_s, Zmaj_s,rmin_s, q_s
       REAL :: p_prime_s, q_prime_s
       REAL :: p_prime_zero_s
 ! OUTPUT
@@ -383,6 +425,13 @@
       REAL :: ave_hr33b0(nsm,nb,nb)
       REAL :: ave_hw113b0(nsm,nb,nb),ave_hw133b0(nsm,nb,nb)
       REAl :: ave_hw333b0(nsm,nb,nb)
+      REAL :: ave_hnbp(nsm,nb,nb)
+      REAL :: ave_hp1bp(nsm,nb,nb),ave_hp3bp(nsm,nb,nb)
+      REAL :: ave_hr11bp(nsm,nb,nb),ave_hr13bp(nsm,nb,nb)
+      REAL :: ave_hr33bp(nsm,nb,nb)
+      REAL :: ave_hw113bp(nsm,nb,nb),ave_hw133bp(nsm,nb,nb)
+      REAl :: ave_hw333bp(nsm,nb,nb)
+      REAL :: ave_hnp0b0(nsm,nb,nb)
       REAL :: ave_gradhp1p0(nsm,nb,nb),ave_gradhr11p0(nsm,nb,nb)
       REAL :: ave_gradhr13p0(nsm,nb,nb)
       REAL :: ave_wdhu3ht1(nsm,nb,nb),ave_wdhu3ht3(nsm,nb,nb)
@@ -390,6 +439,9 @@
       REAL :: ave_modwdhu3(nsm,nb,nb),ave_modwdhu33(nsm,nb,nb)
       REAL :: ave_modwdhu3ht1(nsm,nb,nb),ave_modwdhu3ht3(nsm,nb,nb)
       REAL :: ave_modwdhu33ht1(nsm,nb,nb),ave_modwdhu33ht3(nsm,nb,nb)
+      REAL :: ave_c_tor_par_hp1p0(nsm,nb,nb)
+      REAL :: ave_c_tor_par_hr11p0(nsm,nb,nb)
+      REAL :: ave_c_tor_par_hr13p0(nsm,nb,nb)
 ! ave_g
       REAL :: gn,gp1,gp3,gr11,gr13,gr33
       REAL :: gw113,gw133,gw333
@@ -437,6 +489,12 @@
       REAL :: ave_gr33b0(nsm,nb,nb)
       REAL :: ave_gw113b0(nsm,nb,nb),ave_gw133b0(nsm,nb,nb)
       REAL :: ave_gw333b0(nsm,nb,nb)
+      REAL :: ave_gnbp(nsm,nb,nb)
+      REAL :: ave_gp1bp(nsm,nb,nb),ave_gp3bp(nsm,nb,nb)
+      REAL :: ave_gr11bp(nsm,nb,nb),ave_gr13bp(nsm,nb,nb)
+      REAL :: ave_gr33bp(nsm,nb,nb)
+      REAL :: ave_gw113bp(nsm,nb,nb),ave_gw133bp(nsm,nb,nb)
+      REAL :: ave_gw333bp(nsm,nb,nb)
       REAL :: ave_gradgp1p0(nsm,nb,nb),ave_gradgr11p0(nsm,nb,nb)
       REAL :: ave_gradgr13p0(nsm,nb,nb)
       REAL :: ave_wdgu3gt1(nsm,nb,nb),ave_wdgu3gt3(nsm,nb,nb)
@@ -444,55 +502,82 @@
       REAL :: ave_modwdgu3(nsm,nb,nb),ave_modwdgu33(nsm,nb,nb)
       REAL :: ave_modwdgu3gt1(nsm,nb,nb),ave_modwdgu3gt3(nsm,nb,nb)
       REAL :: ave_modwdgu33gt1(nsm,nb,nb),ave_modwdgu33gt3(nsm,nb,nb)
+      REAL :: ave_c_tor_par_gp1p0(nsm,nb,nb)
+      REAL :: ave_c_tor_par_gr11p0(nsm,nb,nb)
+      REAL :: ave_c_tor_par_gr13p0(nsm,nb,nb)
 ! ave_wd_h
-      REAL :: wdhp1,wdhp3,wdhr11,wdhr13,wdhr33
+      REAL :: wdhp1p0,wdhr11p0,wdhr13p0
+      REAL :: wdhp1b0,wdhr11b0,wdhr13b0
+      REAL :: wdhp1bp,wdhr11bp,wdhr13bp
       REAL :: wdhu1,wdhu3,wdhu33,modwdhu1
       REAL :: wdht1,wdht3,modwdht1,modwdht3
-      REAL :: ave_wdhp1(nsm,nb,nb),ave_wdhp3(nsm,nb,nb)
-      REAL :: ave_wdhr11(nsm,nb,nb),ave_wdhr13(nsm,nb,nb)
-      REAL :: ave_wdhr33(nsm,nb,nb)
+      REAL :: ave_wdhp1p0(nsm,nb,nb)
+      REAL :: ave_wdhr11p0(nsm,nb,nb),ave_wdhr13p0(nsm,nb,nb)
+      REAL :: ave_wdhp1b0(nsm,nb,nb)
+      REAL :: ave_wdhr11b0(nsm,nb,nb),ave_wdhr13b0(nsm,nb,nb)
+      REAL :: ave_wdhp1bp(nsm,nb,nb)
+      REAL :: ave_wdhr11bp(nsm,nb,nb),ave_wdhr13bp(nsm,nb,nb)
       REAL :: ave_wdhu1(nsm,nb,nb),ave_wdhu3(nsm,nb,nb)
       REAL :: ave_wdhu33(nsm,nb,nb)
       REAL :: ave_modwdhu1(nsm,nb,nb)
       REAL :: ave_wdht1(nsm,nb,nb),ave_wdht3(nsm,nb,nb)
       REAL :: ave_modwdht1(nsm,nb,nb),ave_modwdht3(nsm,nb,nb)
 ! ave_wd_g
-      REAL :: wdgp1,wdgp3,wdgr11,wdgr13,wdgr33
+      REAL :: wdgp1p0,wdgr11p0,wdgr13p0
+      REAL :: wdgp1b0,wdgr11b0,wdgr13b0
+      REAL :: wdgp1bp,wdgr11bp,wdgr13bp
       REAL :: wdgu1,wdgu3,wdgu33,modwdgu1
       REAL :: wdgt1,wdgt3,modwdgt1,modwdgt3
-      REAL :: ave_wdgp1(nsm,nb,nb),ave_wdgp3(nsm,nb,nb)
-      REAL :: ave_wdgr11(nsm,nb,nb),ave_wdgr13(nsm,nb,nb)
-      REAL :: ave_wdgr33(nsm,nb,nb)
+      REAL :: ave_wdgp1p0(nsm,nb,nb)
+      REAL :: ave_wdgr11p0(nsm,nb,nb),ave_wdgr13p0(nsm,nb,nb)
+      REAL :: ave_wdgp1b0(nsm,nb,nb)
+      REAL :: ave_wdgr11b0(nsm,nb,nb),ave_wdgr13b0(nsm,nb,nb)
+      REAL :: ave_wdgp1bp(nsm,nb,nb)
+      REAL :: ave_wdgr11bp(nsm,nb,nb),ave_wdgr13bp(nsm,nb,nb)
       REAL :: ave_wdgu1(nsm,nb,nb),ave_wdgu3(nsm,nb,nb)
       REAL :: ave_wdgu33(nsm,nb,nb)
       REAL :: ave_modwdgu1(nsm,nb,nb)
       REAL :: ave_wdgt1(nsm,nb,nb),ave_wdgt3(nsm,nb,nb)
       REAL :: ave_modwdgt1(nsm,nb,nb),ave_modwdgt3(nsm,nb,nb)
 ! kpar_h
-      COMPLEX :: kpar_hn,kpar_hp1
-      COMPLEX :: kpar_hp3,kpar_hr11,kpar_hr13,kpar_hu1,kpar_hu3
+      COMPLEX :: kpar_hnp0,kpar_hp1p0,kpar_hp3p0
+      COMPLEX :: kpar_hp1b0,kpar_hr11b0,kpar_hr13b0
+      COMPLEX :: kpar_hnbp,kpar_hp1bp,kpar_hp3bp
+      COMPLEX :: kpar_hr11bp,kpar_hr13bp
+      COMPLEX :: kpar_hu1,kpar_hu3
       COMPLEX :: kpar_hb1,kpar_hb3,kpar_hb33
       COMPLEX :: kpar_hb1ht1,kpar_hb3ht3,kpar_hb33ht1
       COMPLEX :: modkpar_hd1,modkpar_hd3,modkpar_hd33
       COMPLEX :: modkpar_hd1hu1,modkpar_hd3hu3,modkpar_hd33hu1
       COMPLEX :: modkpar_hu1,modkpar_hu3
-      COMPLEX :: ave_kparhn(nsm,nb,nb),ave_kparhp1(nsm,nb,nb)
-      COMPLEX :: ave_kparhp3(nsm,nb,nb),ave_kparhr11(nsm,nb,nb)
-      COMPLEX :: ave_kparhr13(nsm,nb,nb)
+      COMPLEX :: ave_kparhnp0(nsm,nb,nb),ave_kparhp1p0(nsm,nb,nb)
+      COMPLEX :: ave_kparhp3p0(nsm,nb,nb)
+      COMPLEX :: ave_kparhp1b0(nsm,nb,nb),ave_kparhr11b0(nsm,nb,nb)
+      COMPLEX :: ave_kparhr13b0(nsm,nb,nb)
+      COMPLEX :: ave_kparhnbp(nsm,nb,nb),ave_kparhp3bp(nsm,nb,nb)
+      COMPLEX :: ave_kparhp1bp(nsm,nb,nb),ave_kparhr11bp(nsm,nb,nb)
+      COMPLEX :: ave_kparhr13bp(nsm,nb,nb)
       COMPLEX :: ave_kparhu1(nsm,nb,nb),ave_kparhu3(nsm,nb,nb)
       COMPLEX :: ave_kparht1(nsm,nb,nb),ave_kparht3(nsm,nb,nb)
       COMPLEX :: ave_modkparhu1(nsm,nb,nb),ave_modkparhu3(nsm,nb,nb)
 ! kpar_g
-      COMPLEX :: kpar_gn,kpar_gp1
-      COMPLEX :: kpar_gp3,kpar_gr11,kpar_gr13,kpar_gu1,kpar_gu3
+      COMPLEX :: kpar_gnp0,kpar_gp1p0,kpar_gp3p0
+      COMPLEX :: kpar_gp1b0,kpar_gr11b0,kpar_gr13b0
+      COMPLEX :: kpar_gnbp,kpar_gp3bp
+      COMPLEX :: kpar_gp1bp,kpar_gr11bp,kpar_gr13bp
+      COMPLEX :: kpar_gu1,kpar_gu3
       COMPLEX :: kpar_gb1,kpar_gb3,kpar_gb33
       COMPLEX :: kpar_gb1gt1,kpar_gb3gt3,kpar_gb33gt1
       COMPLEX :: modkpar_gd1,modkpar_gd3,modkpar_gd33
       COMPLEX :: modkpar_gd1gu1,modkpar_gd3gu3,modkpar_gd33gu1
       COMPLEX :: modkpar_gu1,modkpar_gu3
-      COMPLEX :: ave_kpargn(nsm,nb,nb),ave_kpargp1(nsm,nb,nb)
-      COMPLEX :: ave_kpargp3(nsm,nb,nb),ave_kpargr11(nsm,nb,nb)
-      COMPLEX :: ave_kpargr13(nsm,nb,nb)
+      COMPLEX :: ave_kpargnp0(nsm,nb,nb),ave_kpargp1p0(nsm,nb,nb)
+      COMPLEX :: ave_kpargp3p0(nsm,nb,nb)
+      COMPLEX :: ave_kpargp1b0(nsm,nb,nb),ave_kpargr11b0(nsm,nb,nb)
+      COMPLEX :: ave_kpargr13b0(nsm,nb,nb)
+      COMPLEX :: ave_kpargnbp(nsm,nb,nb),ave_kpargp3bp(nsm,nb,nb)
+      COMPLEX :: ave_kpargp1bp(nsm,nb,nb),ave_kpargr11bp(nsm,nb,nb)
+      COMPLEX :: ave_kpargr13bp(nsm,nb,nb)
       COMPLEX :: ave_kpargu1(nsm,nb,nb),ave_kpargu3(nsm,nb,nb)
       COMPLEX :: ave_kpargt1(nsm,nb,nb),ave_kpargt3(nsm,nb,nb)
       COMPLEX :: ave_modkpargu1(nsm,nb,nb),ave_modkpargu3(nsm,nb,nb)
@@ -517,20 +602,21 @@
 !  ave_theta
       REAL :: gradB
       REAL :: ave_kx(nb,nb)
-      REAL :: ave_tor_par(nb,nb),ave_tor_per(nb,nb)
-      REAL :: ave_par_par(nb,nb)
+      REAL :: ave_c_tor_par(nb,nb),ave_c_tor_per(nb,nb)
+      REAL :: ave_c_par_par(nb,nb)
       REAL :: ave_wd(nb,nb),ave_modwd(nb,nb)
       REAL :: ave_gradB(nb,nb),ave_lnB(nb,nb)
       REAL :: ave_b0(nb,nb),ave_b0inv(nb,nb)
       REAL :: ave_kpar(nb,nb),ave_modkpar(nb,nb)
       REAL :: ave_p0(nb,nb),ave_p0inv(nb,nb)
+      REAL :: ave_bp(nb,nb),ave_bpinv(nb,nb)
       COMPLEX :: ave_kpar_eff(nsm,nb,nb),ave_modkpar_eff(nsm,nb,nb)
 !
       END MODULE tglf_coeff
 !
 !-----------------------------------------------------
 !
-      MODULE nuei_coeff
+      MODULE tglf_nuei_coeff
 !
 !     electron ion collision closure coefficients
 !
@@ -549,5 +635,133 @@
 !       0.60125, 1.1284, 1.7952, 2.2568, 0.0, 0.0,         &
 !       0.0, 0.0, 0.0, 0.0/
 !
-      END MODULE nuei_coeff
+      END MODULE tglf_nuei_coeff
+!
+!______________________________________________________
       
+      MODULE tglf_tg
+!
+! input data for the tglf model
+!
+      IMPLICIT NONE
+      SAVE
+!
+      INTEGER,PARAMETER :: nsmax=3,elitemax=700,fouriermax=16
+      LOGICAL :: use_TM_tg=.TRUE.
+      LOGICAL :: iflux_tg=.TRUE.
+      LOGICAL :: use_bper_tg=.FALSE.
+      LOGICAL :: use_bpar_tg=.FALSE.
+      LOGICAL :: use_mhd_rule_tg=.FALSE.
+      LOGICAL :: use_bisection_tg=.FALSE.
+      LOGICAL :: find_width_tg=.TRUE.
+      LOGICAL :: adiabatic_elec_tg=.FALSE.
+      LOGICAL :: new_eikonal_tg=.TRUE.
+      INTEGER :: ibranch_tg=-1
+      INTEGER :: nmodes_tg=2
+      INTEGER :: nky_tg=15
+      INTEGER :: ns_tg=2
+      INTEGER :: igeo_tg=0
+      INTEGER :: nbasis_max_tg=4
+      INTEGER :: nbasis_min_tg=1
+      INTEGER :: nxgrid_tg=16
+      INTEGER :: nwidth_tg=21 
+      INTEGER :: b_model_tg=0
+      INTEGER :: ft_model_tg=1     
+      INTEGER :: kygrid_model_tg=1
+      INTEGER :: xnu_model_tg=1
+      INTEGER :: sat_rule_tg = 0
+      INTEGER :: vpar_model_tg=0
+      INTEGER :: vpar_shear_model_tg=0
+      REAL :: ky_tg=0.3
+      REAL :: width_max_tg=1.65
+      REAL :: width_min_tg=0.3
+      REAL :: park_tg=1.00
+      REAL :: ghat_tg=1.0
+      REAL :: gchat_tg=1.0
+      REAL :: betae_tg=0.0
+      REAL :: damp_psi_tg=0.0
+      REAL :: damp_sig_tg = 0.0
+      REAL :: taui_tg=1.0
+      REAL :: xnue_tg=0.0
+      REAL :: rmin_tg=0.5
+      REAL :: rmaj_tg=3.0
+      REAL :: zeff_tg=1.0
+      REAL :: debye_tg=0.0
+      REAL :: vexb_shear_tg=0.0
+      REAL :: cnorm_tg=1.0
+      REAL :: alpha_quench_tg=1.0
+      REAL :: alpha_p_tg=0.0
+      REAL :: alpha_e_tg=0.0
+      REAL :: wd_zero_tg=0.1
+      REAL :: Linsker_factor_tg=0.0
+      REAL :: gradB_factor_tg=0.0
+      REAL :: theta_trapped_tg=0.7
+      REAL :: xnu_factor_tg=1.0
+      REAL :: debye_factor_tg=1.0
+      REAL :: etg_factor_tg = 4.0
+      REAL :: filter_tg = 2.0
+      REAL :: alpha_kx0_tg=0.0
+      REAL :: alpha_kx1_tg=0.0
+      REAL :: sign_Bt_tg=1.0
+      REAL :: sign_It_tg=1.0
+      REAL,DIMENSION(nsmax) :: taus_tg=1.0
+      REAL,DIMENSION(nsmax) :: as_tg=1.0
+      REAL,DIMENSION(nsmax) :: vpar_tg=0.0
+      REAL,DIMENSION(nsmax) :: rlns_tg=1.0
+      REAL,DIMENSION(nsmax) :: rlts_tg=3.0
+      REAL,DIMENSION(nsmax) :: vpar_shear_tg=0.0
+      REAL,DIMENSION(nsmax) :: zs_tg
+      REAL,DIMENSION(nsmax) :: mass_tg
+      REAL,DIMENSION(nsmax) :: shear_ns_tg=0.0
+      REAL,DIMENSION(nsmax) :: shear_ts_tg=0.0
+! Shifted cicle inputs
+      REAL :: theta0_tg=0.0
+      REAL :: shat_tg=1.0
+      REAL :: alpha_tg=0.0
+      REAL :: xwell_tg=0.0
+      REAL :: q_tg=2.0
+! Miller inputs
+      REAL :: zmaj_tg=0.0
+      REAL :: delta_tg=0.0
+      REAL :: kappa_tg=1.0
+      REAL :: zeta_tg=0.0
+      REAL :: drmindx_tg=1.0
+      REAL :: drmajdx_tg=0.0
+      REAL :: dzmajdx_tg=0.0
+      REAL :: s_delta_tg=0.0
+      REAL :: s_kappa_tg=0.0
+      REAL :: s_zeta_tg=0.0
+      REAL :: q_prime_tg=0.0
+      REAL :: p_prime_tg=0.0
+! Fourier inputs
+      INTEGER :: nfourier_tg = 4
+      REAL :: fourier_tg(8,0:fouriermax)=0.0
+! ELITE inputs
+      INTEGER :: n_elite_tg,n_surface_tg,j_surface_tg
+      REAL :: R_elite_tg(0:elitemax)
+      REAL :: Z_elite_tg(0:elitemax)
+      REAL :: Bp_elite_tg(0:elitemax)
+!
+! namelist ....................................................
+
+      NAMELIST /tglfin/ adiabatic_elec_tg, find_width_tg, new_eikonal_tg, &
+        nbasis_max_tg, nbasis_min_tg, nxgrid_tg, ibranch_tg, ns_tg, &
+        nmodes_tg, iflux_tg, ky_tg, width_max_tg, width_min_tg, &
+        nwidth_tg, park_tg, ghat_tg, gchat_tg, alpha_e_tg, vexb_shear_tg, &
+        alpha_p_tg, vpar_shear_tg, alpha_quench_tg, igeo_tg, theta_trapped_tg, &
+        cnorm_tg, theta0_tg,taus_tg,as_tg,rlns_tg,rlts_tg,mass_tg,zs_tg, &
+        rmin_tg, rmaj_tg, zmaj_tg,use_bisection_tg,vpar_tg, &
+        q_tg, xnue_tg, wd_zero_tg, betae_tg, shat_tg, alpha_tg, &
+        xwell_tg,kappa_tg,s_kappa_tg,delta_tg,s_delta_tg,zeta_tg,s_zeta_tg, &
+        drmindx_tg,drmajdx_tg,dzmajdx_tg,zeff_tg, debye_tg, use_bper_tg, &
+        use_bpar_tg,use_mhd_rule_tg,q_prime_tg,damp_psi_tg,damp_sig_tg, &
+        p_prime_tg, filter_tg, Linsker_factor_tg, gradB_factor_tg,  &
+        b_model_tg, ft_model_tg, xnu_factor_tg, debye_factor_tg, &
+        nky_tg,etg_factor_tg,use_TM_tg,kygrid_model_tg,xnu_model_tg, &
+        sat_rule_tg,alpha_kx0_tg,alpha_kx1_tg,vpar_shear_model_tg, &
+        j_surface_tg,vpar_model_tg,sign_Bt_tg,sign_It_tg,shear_ns_tg, &
+        shear_ts_tg, nfourier_tg,fourier_tg
+!
+      END MODULE tglf_tg
+!______________________________________________________
+!

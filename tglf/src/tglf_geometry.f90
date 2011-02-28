@@ -1,8 +1,9 @@
+!
       SUBROUTINE get_xgrid_functions
 !***********************************************************
 !
 !***********************************************************
-      USE tglf_internal_interface
+      USE tglf_global
 !
         new_width=.FALSE.
 !      write(*,*)"get_xgrid_functions"
@@ -18,14 +19,14 @@
 !
 !***********************************************************
       USE tglf_dimensions
-      USE tglf_internal_interface
+      USE tglf_global
       USE tglf_species
       USE tglf_hermite
       USE tglf_xgrid
 !
       IMPLICIT NONE
       INTEGER :: i,is
-      REAL :: thx,dthx,sn,cn,eps,Rx,Rx1,Rx2,kx0,f_gam
+      REAL :: thx,dthx,sn,cn,eps,Rx,Rx1,Rx2,f_gam
 !
 ! debug
 !      write(*,*)"shat_sa=",shat_sa,"alpha_sa=",alpha_sa
@@ -37,14 +38,22 @@
 ! set the units used by the tglf equations
       R_unit=rmaj_sa
       q_unit=q_sa
+!
+!   set global input values
+!
+      R_input = rmaj_sa
+      q_input = q_sa
+!
 ! fill the x-grid eikonal function arrays wdx and b0x 
       eps = rmin_sa/rmaj_sa
+! generalized quench rule kx0 shift
       kx0=0.0
-      if(vexb_shear_in.ne.0.0)then
-!        f_gam=get_GAM_freq()
-!        kx0 = -alpha_kx0_in*(vexb_shear_in/ABS(vexb_shear_in))*(ABS(vexb_shear_in)/f_gam)**0.2
-!        gamma_reference_GQ=get_GAM_freq()
-        kx0 = alpha_kx0_in*TANH(vexb_shear_in/gamma_reference_GQ)
+      if(alpha_quench_in.eq.0.0)then
+        kx0 = alpha_kx0_in*(vexb_shear_s+alpha_kx1_in*shear_ns_in(2))*rmaj_sa/(ky*taus(2))
+        if(ABS(kx0).gt.alpha_kx1_in)kx0 = alpha_kx1_in*kx0/ABS(kx0)
+        kx0 = kx0*sign_Bt_in
+        sign_kx0=1.0
+        if(kx0.lt.0.0)sign_kx0=-1.0
       endif
 !
       do i=1,nx
@@ -54,6 +63,7 @@
         Rx = 1.0 + eps*cn
         Bx(i) = 1.0/Rx
         kxx(i) = -shat_sa*(thx-theta0_sa) + alpha_sa*sn + kx0
+        kxx(i) = sign_Bt_in*kxx(i)
 !        wdx(i) =  -xwell_sa*MIN(1.0,alpha_sa)+ &
 !         cn+sn*(shat_sa*(thx-theta0_sa) - alpha_sa*sn)
         wdx(i) =  -xwell_sa*MIN(1.0,alpha_sa)+ cn - sn*kxx(i)
@@ -74,9 +84,9 @@
 !
 ! momentum equation stress projection coefficients
 !
-       cx_tor_par(i) = rmaj_sa
+       cx_tor_par(i) = rmaj_sa*Rx*sign_Bt_in
        cx_tor_per(i) = -rmin_sa/q_sa
-       cx_par_par(i) = 1.0
+       cx_par_par(i) = 1.0/Bx(i)
       enddo
 !
 ! compute the effective trapped fraction
@@ -88,6 +98,8 @@
       B2_ave_out = 0.0
       R2_ave_out = 0.0
       RBt_ave_out = rmaj_sa
+      a_pol_out = 0.0
+      a_tor_out = 0.0
       dthx = pi_2/REAL(2*nx)
       thx = 0.0
       do i=1,2*nx
@@ -96,9 +108,13 @@
         Rx2 = 1.0 + eps*COS(thx)
         R2_ave_out  = R2_ave_out + dthx*(Rx1**2 + Rx2**2)/2.0
         B2_ave_out = B2_ave_out + dthx*(0.5/Rx1**2 + 0.5/Rx2**2)
+        a_pol_out = a_pol_out + dthx*(0.5/Rx1 +0.5/Rx2)
+        a_tor_out = a_tor_out + dthx*(0.5*Rx1 + 0.5*Rx2)
       enddo
       R2_ave_out = (R2_ave_out*rmaj_sa**2)/pi_2
       B2_ave_out = B2_ave_out/pi_2
+      a_pol_out = a_pol_out/pi_2
+      a_tor_out = a_tor_out/pi_2
 !
       END SUBROUTINE xgrid_functions_sa
 !
@@ -111,7 +127,7 @@
 !******************************************************************************!************************
 !
       USE tglf_dimensions
-      USE tglf_internal_interface
+      USE tglf_global
       USE tglf_species
       USE tglf_hermite
       USE tglf_xgrid
@@ -128,10 +144,12 @@
       REAL :: wd1,wd2
       REAL :: b1,b2
       REAL :: y1,y2
-      REAL :: kx0,f_gam
+      REAL :: f_gam,freq_GQ
       REAL :: kxx1,kxx2
+      REAL :: cxtorpar1,cxtorpar2
       REAL :: cxtorper1,cxtorper2
-      REAL :: B2x1,B2x2,R2x1,R2x2
+      REAL :: B2x1,B2x2,R2x1,R2x2,norm_ave,dlp
+      REAL :: c_tor_par_ave_out, c_tor_per_ave_out
 !
 !
 !  find length along magnetic field y
@@ -147,10 +165,11 @@
       enddo
 ! set the global units
       Ly=y(ms)
-      R_unit = Rmaj_s/((qrat_geo(0)/b_geo(0))*costheta_geo(0))
+!      R_unit = Rmaj_s*b_geo(0)/(qrat_geo(0)*(costheta_geo(0)+costheta_p_geo(0)))
+      R_unit = Rmaj_s*b_geo(0)/(qrat_geo(0)*costheta_geo(0))
       q_unit = Ly/(pi_2*R_unit)
 ! save f for output
-       RBt_ave_out = f
+       RBt_ave_out = f/B_unit
 !
 !      write(*,*)"qrat_geo(0)=",qrat_geo(0),"b_geo(0)=",b_geo(0)
 !      write(*,*)"costheta_geo(0)=",costheta_geo(0)
@@ -163,15 +182,19 @@
 !      enddo
 !      close(2)
 !
-! model for kx0 = kr/k_theta induced by vexb_shear
+! generalized quench rule kx0 shift
 !
         kx0 = 0.0
-        if(vexb_shear_in.ne.0.0)then
-!          f_gam = get_GAM_freq()
-!          kx0 = -alpha_kx0_in*(vexb_shear_in/ABS(vexb_shear_in))*(ABS(vexb_shear_in)/f_gam)**0.01
-          kx0 = alpha_kx0_in*TANH(vexb_shear_in/gamma_reference_GQ)
-!        write(*,*)"kx0=",kx0
+        if(alpha_quench_in.eq.0.0)then
+          kx0 = alpha_kx0_in*(vexb_shear_s+shear_ns_in(2))*Rmaj_s/(ky*taus(2))
+          if(ABS(kx0).gt.alpha_kx1_in)kx0 = alpha_kx1_in*kx0/ABS(kx0)
+          kx0 = kx0*sign_Bt_in
+          sign_kx0=1.0
+          if(kx0.lt.0.0)sign_kx0=-1.0
         endif
+!        kx0 = alpha_kx1_in
+!        write(*,*)"kx0=",kx0
+!        write(*,*)"1/qrat=",1.0/qrat_geo(0)
 !
 !*************************************************************
 !  begin calculation of wdx and b0x
@@ -224,8 +247,9 @@
 !
 ! intepolate kxx
         kxx1 = (kx_factor(m1)*(S_prime(m1)+dkxky1)+kx0*b_geo(m1)/qrat_geo(m1)**2)*qrat_geo(m1)/b_geo(m1)
-        kxx2 = (kx_factor(m2)*(S_prime(m2)+dkxky1)+kx0*b_geo(m2)/qrat_geo(m2)**2)*qrat_geo(m2)/b_geo(m2)
+        kxx2 = (kx_factor(m2)*(S_prime(m2)+dkxky2)+kx0*b_geo(m2)/qrat_geo(m2)**2)*qrat_geo(m2)/b_geo(m2)
         kxx(i) = kxx1 +(kxx2-kxx1)*(y_x-y1)/(y2-y1)
+        kxx(i) = sign_Bt_in*kxx(i)
 ! interpolate wdx        
 	wd1 = (qrat_geo(m1)/b_geo(m1))*(costheta_geo(m1) &
         +(kx_factor(m1)*(S_prime(m1)+dkxky1)+kx0*b_geo(m1)/qrat_geo(m1)**2)*sintheta_geo(m1))
@@ -252,6 +276,7 @@
        cxtorper1 = -R(m1)*Bp(m1)/b_geo(m1)
        cxtorper2 = -R(m2)*Bp(m2)/b_geo(m2)
        cx_tor_par(i) = f/b_geo(m1) + (f/b_geo(m2)-f/b_geo(m1))*(y_x-y1)/(y2-y1)
+       cx_tor_par(i) = sign_Bt_in*cx_tor_par(i)
        cx_tor_per(i) = cxtorper1 + (cxtorper2-cxtorper1)*(y_x-y1)/(y2-y1)
        cx_par_par(i) = b_geo(m1) + (b_geo(m2)-b_geo(m1))*(y_x-y1)/(y2-y1)
 !
@@ -261,19 +286,34 @@
 !        write(*,*)i," loops = ",loops
       enddo
 !
-!  compute flux surface averages
+!  compute flux surface averages  
 !
        B2_ave_out = 0.0
        R2_ave_out = 0.0
-       dy = 1.0/REAL(ms)
+       a_pol_out = 0.0
+       a_tor_out = 0.0
+       norm_ave=0.0
        do i=1,ms
+         dlp = s_p(i)*ds*(0.5/Bp(i)+0.5/Bp(i-1))
+         norm_ave = norm_ave + dlp
          B2x1 = b_geo(i-1)**2
          B2x2 = b_geo(i)**2
-         B2_ave_out = B2_ave_out + dy*(B2x1+B2x2)/2.0
+         B2_ave_out = B2_ave_out + dlp*(B2x1+B2x2)/2.0
          R2x1 = R(i-1)**2
          R2x2 = R(i)**2
-         R2_ave_out = R2_ave_out + dy*(R2x1+R2x2)/2.0
+         R2_ave_out = R2_ave_out + dlp*(R2x1+R2x2)/2.0
+         a_pol_out = a_pol_out + dlp*(b_geo(i-1)+b_geo(i))/2.0
+         a_tor_out = a_tor_out + dlp*(f/b_geo(i-1)+f/b_geo(i))/(2.0*Rmaj_s)
        enddo
+       R2_ave_out = R2_ave_out/norm_ave
+       B2_ave_out = B2_ave_out/norm_ave
+       B2_ave_out = B2_ave_out/B_unit**2
+       a_pol_out = a_pol_out/norm_ave
+       a_tor_out = a_tor_out/norm_ave
+!       write(*,*)"R2_ave_out=",R2_ave_out
+!       write(*,*)"B2_ave_out=",B2_ave_out
+!       write(*,*)"a_pol_out=",a_pol_out
+!       write(*,*)"a_tor_out=",a_tor_out
 !             
 !      do m=0,ms
 !        write(*,*)m,s_prime(ms-m),s_prime(ms)-s_prime(m)
@@ -284,6 +324,7 @@
 !
 ! compute the effective trapped fraction
       call get_ft_geo
+!      write(*,*)"ft_geo=",ft
 !
       END SUBROUTINE xgrid_functions_geo
 !
@@ -293,7 +334,7 @@
 !  shifted circle version of get_ft
 !
       USE tglf_dimensions
-      USE tglf_internal_interface
+      USE tglf_global
       USE tglf_hermite
 !
       IMPLICIT NONE
@@ -301,7 +342,7 @@
       REAL :: norm,ww
       REAL :: eps,theta_max,theta_eff,vshear_eff
       REAL :: sn,cn,thx,ftx,Bmax,Bmin
-      REAL :: Rx,Bx,pol
+      REAL :: Rx,Bx
 !
 !   compute pitch angle at bounce average boundary
 !
@@ -381,7 +422,7 @@
 ! general geometry version of get_ft
 !
       USE tglf_dimensions
-      USE tglf_internal_interface
+      USE tglf_global
       USE tglf_sgrid
 !
       IMPLICIT NONE
@@ -567,13 +608,15 @@
 !  Entire code has been rewritten for greater 
 !  efficiency and clarity.  Documentation greatly 
 !  improved as well.
+! 13 Jan 10: gms
+! added vprime and vpp and interchange stability calculation
 !---------------------------------------------------------------
 
 	SUBROUTINE mercier_luc
 
 !-------------------------------------------
 ! the following must be defined from a previous call to one of the
-! geometry routines miller_geo, ELITE_geo and stored in tglf_sgrid:
+! geometry routines miller_geo, fourier_geo,ELITE_geo and stored in tglf_sgrid:
 !      ms              ! the number of points in the s-grid (flux surface contour)
 !      ds              ! the arc length differential on a flux surface
 !      R(ms)           ! the major radius on the  s-grid
@@ -584,7 +627,7 @@
 !      p_prime_s = dp/dpsi 
 !
         USE tglf_dimensions
-        USE tglf_internal_interface
+        USE tglf_global
         USE tglf_sgrid
 !
 	IMPLICIT NONE
@@ -603,6 +646,9 @@
         REAL :: d0_s1,d0_s2
         REAL :: dp_s1,dp_s2
         REAL :: dffp_s1,dffp_s2
+        REAL :: vprime, vpp, dvpp1,dvpp2
+        REAL :: ave_M1,ave_M2,ave_M3,ave_M4
+        REAL :: p_prime_M,q_prime_M,H
 !
 !-----------------------
 !
@@ -675,7 +721,9 @@
         f = 0.0
 	do m=1,ms
 	  f = f &
-          +s_p(m)*ds*2.0/(R(m-1)*psi_x(m-1)+R(m)*psi_x(m))
+          +0.5*ds*(s_p(m-1)/(R(m-1)*psi_x(m-1)) + s_p(m)/(R(m)*psi_x(m)))
+! fixed error that changes results slightly for TGLF_1.93 compared to previous.
+!           +ds*s_p(m)*2.0/(R(m-1)*psi_x(m-1)+R(m)*psi_x(m))
 	enddo
 !
 	f = pi_2*q_s/f
@@ -814,8 +862,8 @@
 ! p_prime_zero forces grad-B-curvature to zero to compensates 
 ! for b_par =0
 !
-        p_prime_zero_s = 0.0
-        if(use_bpar_in)p_prime_zero_s = 1.0
+        p_prime_zero_s = 1.0
+        if(use_mhd_rule_in)p_prime_zero_s = 0.0
 !
 !        write(*,*)"debug p_prime_zero",p_prime_zero_s
 
@@ -860,6 +908,43 @@
 
 	enddo
 !
+! compute vprime and vpp 
+!
+        vprime = 0.0
+        vpp = 0.0
+        dvpp1 = (s_p(0)*R(0)/psi_x(0)**3)   &
+         *(4.0*pi*p_prime_s*R(0)**2 + ff_prime - 2.0*psi_x(0)/r_curv(0))
+        do m=1,ms
+          dvpp2 = (s_p(m)*R(m)/psi_x(m)**3) &
+          *(4.0*pi*p_prime_s*R(m)**2 + ff_prime - 2.0*psi_x(m)/r_curv(m))
+          vprime = vprime + 0.5*ds*(s_p(m-1)/Bp(m-1) + s_p(m)/Bp(m))
+          vpp = vpp + 0.5*ds*(dvpp1 + dvpp2)
+          dvpp1 = dvpp2
+        enddo
+        vprime = pi_2*vprime
+        vpp = pi_2*vpp
+!        write(*,*)"vprime = ",vprime,"vpp = ",vpp
+!
+        ave_M1 = 0.0
+        ave_M2 = 0.0
+        ave_M3 = 0.0
+        ave_M4 = 0.0
+        do m=1,ms
+          ave_M1 = ave_M1 + 0.5*ds*(s_p(m-1)/Bp(m-1)**3 + s_p(m)/Bp(m)**3)
+          ave_M2 = ave_M2 + 0.5*ds*(s_p(m-1)*R(m-1)/psi_x(m-1)**3 + s_p(m)*R(m)/psi_x(m)**3)
+          ave_M3 = ave_M3 + 0.5*ds*(s_p(m-1)*(B(m-1)/psi_x(m-1))**2/Bp(m-1) + s_p(m)*(B(m)/psi_x(m))**2/Bp(m))
+          ave_M4 = ave_M4 + 0.5*ds*(s_p(m-1)*B(m-1)**2/Bp(m-1) + s_p(m)*B(m)**2/Bp(m))
+        enddo
+!        write(*,*)"M1=",ave_M1,"M2=",ave_M2,"M3=",ave_M3,"M4=",ave_M4
+        p_prime_M = 4.0*pi*p_prime_s
+        q_prime_M = pi_2*q_prime_s
+        DM_out = 0.25 + (p_prime_M/MAX(q_prime_M**2,1.0D-12))*((vpp/pi_2 - p_prime_M*ave_M1)*ave_M3  &
+         + (f**2*p_prime_M*ave_M2 - q_prime_M*f)*ave_M2)
+        H = (f*p_prime_M*q_prime_M/MAX(q_prime_M**2,1.0D-12))*ave_M3*(ave_M2/ave_M3 - vprime/(pi_2*ave_M4))
+!        write(*,*)"H = ",H
+        DR_out = DM_out - (0.5 - H)**2
+!
+!
 !--------------------------------------------------------------------
 !--------------------------------------------------------------------
 !
@@ -872,7 +957,7 @@
 !        write(2,*)t_s(m)+pi_2,costheta_geo(m),sintheta_geo(m) &
 !          ,kx_factor(m)*(S_prime(m)-S_prime(ms))
 !        enddo
-!        close(2)
+        close(2)
 !
 	END SUBROUTINE mercier_luc
 !
@@ -892,7 +977,7 @@
 
       SUBROUTINE mercier_write
 !
-      USE tglf_internal_interface
+      USE tglf_global
       USE tglf_sgrid
 !
       IMPLICIT NONE
@@ -909,7 +994,8 @@
       write(3,10) 's_kappa',s_kappa_loc
       write(3,10) 'delta',delta_loc
       write(3,10) 's_delta',s_delta_loc
-      write(3,10) 'shift',shift_loc
+      write(3,10) 'drmindx',drmindx_loc
+      write(3,10) 'drmajdx',drmajdx_loc
       write(3,10) 'q',q_loc
       write(3,10) 'f',f
       write(3,10) 'ff_prime',ff_prime
@@ -1025,11 +1111,14 @@
 !  produced this version which only computes R,Z,Bp for input 
 !  into mercier_luc.f which completes the calculation of the Waltz-Miller
 !  functions [[sin]],[[cos]], etc.
+! 15 June 2010: updated to GYRO conventions with squarness (zeta_loc) and 
+! squarness shear s_zeta_loc = rmin*d(zeta)/dx. Included elevation Zmaj_loc.
+! Also changed definition of s_delta = rmin*d(delta)/dx from Waltz-Miller convention to GYRO's. 
 !---------------------------------------------------------------
 
       SUBROUTINE miller_geo
 !
-      USE tglf_internal_interface
+      USE tglf_global
       USE tglf_sgrid
 !
       IMPLICIT NONE
@@ -1042,7 +1131,7 @@
 !
       REAL :: theta, x_delta
       REAL :: dtheta
-      REAL :: arg,darg
+      REAL :: arg_r,darg_r,arg_z,darg_z
       REAL :: R_t,Z_t
       REAL :: R_r, Z_r
       REAL :: l_t, grad_r, det
@@ -1054,7 +1143,11 @@
       REAL :: arg1,arg2,save_theta2
 !
 !-------------------------------------------
+!   set global input values
 !
+      R_input = rmaj_loc
+      q_input = q_loc
+
 !      write(*,*)"miller_geo"
       x_delta = ASIN(delta_loc)
 !      write(*,*)"pi = ",pi," x_delta = ",x_delta
@@ -1062,6 +1155,7 @@
 ! set the flux surface constants needed for mercier-luc
 !
       Rmaj_s  = rmaj_loc
+      Zmaj_s = zmaj_loc
       q_s     = q_loc
       if(rmin_loc.lt.0.00001)rmin_loc=0.00001
       rmin_s = rmin_loc
@@ -1073,10 +1167,12 @@
 ! compute the arclength around the flux surface 
 !
       theta = 0.D0
-      arg   = theta+x_delta*sin(theta)
-      darg = 1.D0+x_delta*cos(theta)
-      r_t = -rmin_loc*sin(arg)*darg
-      z_t = kappa_loc*rmin_loc*cos(theta) 
+      arg_r   = theta+x_delta*sin(theta)
+      darg_r = 1.D0+x_delta*cos(theta)
+      arg_z = theta + zeta_loc*sin(2.0*theta)
+      darg_z = 1.0 + zeta_loc*2.0*cos(2.0*theta)
+      r_t = -rmin_loc*sin(arg_r)*darg_r
+      z_t = kappa_loc*rmin_loc*cos(arg_z)*darg_z
       l_t = SQRT(r_t**2+z_t**2)
 ! scale dtheta by l_t to keep mts points in each ds interval of size pi_2/ms
       dtheta = pi_2/(REAL(mts*ms)*l_t)
@@ -1092,13 +1188,17 @@
           theta = pi_2
         endif
 !        write(*,*)"theta = ",theta,"dtheta=",dtheta
-	arg   = theta+x_delta*sin(theta)
-! d(arg)/dtheta
-	darg = 1.D0+x_delta*cos(theta)
+	arg_r   = theta+x_delta*sin(theta)
+! d(arg_r)/dtheta
+	darg_r = 1.D0+x_delta*cos(theta)
 ! dR/dtheta
-	r_t = -rmin_loc*sin(arg)*darg
+	r_t = -rmin_loc*sin(arg_r)*darg_r
+! 
+        arg_z = theta + zeta_loc*sin(2.0*theta)
+! d(arg_z)/dtheta
+        darg_z = 1.0 + zeta_loc*2.0*cos(2.0*theta)
 ! dZ/dtheta
-	z_t = kappa_loc*rmin_loc*cos(theta) 
+	z_t = kappa_loc*rmin_loc*cos(arg_z)*darg_z
 ! dl/dtheta
 	l_t = SQRT(r_t**2+z_t**2)
 ! arclength along flux surface in poloidal direction
@@ -1113,7 +1213,8 @@
 !      write(*,*)"arclength = ", arclength
 !      write(*,*)"scale_max =",scale_max
 !
-! Find the theta points which map to an equally spaced s-grid of ms points along the arclength
+! Find the theta points which map to an equally spaced s-grid of ms points along the arclength 
+! going clockwise from the outboard midplane around the flux surface
 ! by searching for the theta where dR**2 + dZ**2 >= ds**2 for a centered difference df=f(m+1)-f(m-1).
 ! This keeps the finite difference error of dR/ds, dZ/ds on the s-grid small
 !
@@ -1123,20 +1224,24 @@
       t_s(ms)=-pi_2
 !  make a first guess based on theta=0.0
       theta=0.0
-      arg   = theta+x_delta*sin(theta)
-      darg = 1.D0+x_delta*cos(theta)
-      r_t = -rmin_loc*sin(arg)*darg
-      z_t = kappa_loc*rmin_loc*cos(theta) 
+      arg_r   = theta+x_delta*sin(theta)
+      darg_r = 1.D0+x_delta*cos(theta)
+      arg_z = theta + zeta_loc*sin(2.0*theta)
+      darg_z = 1.0 + zeta_loc*2.0*cos(2.0*theta)
+      r_t = -rmin_loc*sin(arg_r)*darg_r
+      z_t = kappa_loc*rmin_loc*cos(arg_z)*darg_z
       l_t = SQRT(r_t**2+z_t**2)
       dtheta = -ds/l_t
       theta=dtheta
       l_t1=l_t
 !
       do m=1,ms/2
-	arg   = theta+x_delta*sin(theta)
-	darg = 1.D0+x_delta*cos(theta)
-	r_t = -rmin_loc*sin(arg)*darg
-	z_t = kappa_loc*rmin_loc*cos(theta) 
+	arg_r   = theta+x_delta*sin(theta)
+	darg_r = 1.D0+x_delta*cos(theta)
+        arg_z = theta + zeta_loc*sin(2.0*theta)
+        darg_z = 1.0 + zeta_loc*2.0*cos(2.0*theta)
+	r_t = -rmin_loc*sin(arg_r)*darg_r
+	z_t = kappa_loc*rmin_loc*cos(arg_z)*darg_z 
 	l_t = SQRT(r_t**2+z_t**2)
         dtheta = -ds/(0.5*(l_t+l_t1))
         t_s(m)=t_s(m-1)+dtheta
@@ -1156,7 +1261,7 @@
 !
 !      open(2,file='t_s.dat',status='replace')
 !      do m=0,ms
-!        write(2,*)m,t_s(m) 
+!        write(2,*)m,t_s(m)
 !      enddo
 !      close(2)
 !
@@ -1179,40 +1284,49 @@
       do m=0,ms
 
         theta = t_s(m)
-        arg   = theta+x_delta*sin(theta)
-	darg = 1.D0+x_delta*cos(theta)
+        arg_r   = theta + x_delta*sin(theta)
+	darg_r = 1.0 + x_delta*cos(theta)
+        arg_z = theta + zeta_loc*sin(2.0*theta)
+        darg_z = 1.0 + zeta_loc*2.0*cos(2.0*theta)
 	
 ! R(theta)
 ! Z(theta)
 
-        R(m) = rmaj_loc+rmin_loc*cos(arg)
-        Z(m) = kappa_loc*rmin_loc*sin(theta)
+        R(m) = rmaj_loc + rmin_loc*cos(arg_r)
+        Z(m) = Zmaj_loc + kappa_loc*rmin_loc*sin(arg_z)
 		
 ! dR/dtheta
 ! dZ/dtheta
 
-        R_t = -rmin_loc*sin(arg)*darg
-        Z_t = kappa_loc*rmin_loc*cos(theta) 
+        R_t = -rmin_loc*sin(arg_r)*darg_r
+        Z_t = kappa_loc*rmin_loc*cos(arg_z)*darg_z
 
 ! dl/dtheta
 
         l_t = SQRT(R_t**2+Z_t**2)
 ! dR/dr
 ! dZ/dr
-        R_r = shift_loc + cos(arg) &
-              -sin(arg)*s_delta_loc*sin(theta)
-        Z_r = kappa_loc*sin(theta)*(1.D0 +s_kappa_loc)
+        R_r = drmajdx_loc + drmindx_loc*cos(arg_r) &
+              -sin(arg_r)*s_delta_loc*sin(theta)/sqrt(1.0 - delta_loc**2)
+        Z_r = dzmajdx_loc + kappa_loc*sin(arg_z)*(drmindx_loc +s_kappa_loc) &
+              +kappa_loc*cos(arg_z)*s_zeta_loc*sin(2.0*theta)
 ! Jacobian
         det = R_r*z_t - R_t*Z_r
 ! grad_r
         grad_r = ABS(l_t/det)
 
-
+        if(m.eq.0)then
+          B_unit = 1.0/grad_r           ! B_unit choosen to make bx(0)=ky**2 i.e. qrat_geo(0)/b_geo(0)=1.0
+          if(drmindx_loc.eq.1.0)B_unit=1.0  ! Waltz-Miller convention
+!          write(*,*)"B_unit = ",B_unit
+        endif
 ! Bp = (r/q) B_unit*Abs(grad_r)/R
 
-        Bp(m) = (rmin_loc/(q_loc*R(m)))*grad_r
+
+        Bp(m) = (rmin_s/(q_s*R(m)))*grad_r*B_unit
 !
       enddo
+!
 !
 !      write(*,*)"rmin=",rmin_loc,"rmaj=",rmaj_loc,"q_loc=",q_loc
 !      write(*,*)shift_loc,kappa_loc,delta_loc,s_kappa_loc,s_delta_loc
@@ -1239,41 +1353,299 @@
 ! q_prime = (q/r) s/b_unit
 ! p_prime = (q/r) (1/b_unit) dp/dr
 !         = (q/r) (1/b_unit) p * dlnpdr
-!
-!
+! rescale p_prime and q_prime to keep normalized eikonal invariant
+       p_prime_s = p_prime_s*B_unit   ! B_unit**2/B_unit 
+       q_prime_s = q_prime_s/B_unit   !
 !      write(*,*)"p_prime_s =",p_prime_s,"q_prime_s =",q_prime_s
 !
       END SUBROUTINE miller_geo
 !
 !---------------------------------------------------------------
 !
+      SUBROUTINE fourier_geo
+!  maps the fourier representation of R,Z onto the contour s-grid 
+!  and computes Bp,t_s, Ls used by mercier-luc
+!
+      USE tglf_global
+      USE tglf_sgrid
+!
+      IMPLICIT NONE
+!
+!-------------------------------------------
+!
+      INTEGER,PARAMETER :: nzmax = 148, mts=5
+      INTEGER :: i, j, k, n, m, l_theta
+!-----------------------------------------------
+!
+      REAL :: theta, nr
+      REAL :: dtheta
+      REAL :: arg
+      REAL :: R_t,Z_t
+      REAL :: R_r, Z_r
+      REAL :: l_t, grad_r, det
+      REAL :: scale_max, l_t1, arclength
+!
+!--------------------------------------------------------------
+!
+! set the flux surface constants needed for mercier-luc
+!
+      Rmaj_s = fourier_in(1,0)/2.0
+      Zmaj_s = fourier_in(3,0)/2.0
+      q_s     = q_fourier_in
+      rmin_s = fourier_in(1,1)
+!     write(*,*)"Rmaj_s=",Rmaj_s,"Zmaj_s=",Zmaj_s,"q_s=",q_s,"rmin_s=",rmin_s
+      rmin_s=MAX(rmin_s,0.00001)
+      p_prime_s = p_prime_fourier_in
+      q_prime_s = q_prime_fourier_in
+!
+!   set global input values
+!
+      R_input = Rmaj_s
+      q_input = q_s
+!
+! compute the arclength around the flux surface 
+!
+      theta = 0.0
+      R_t = 0.0
+      Z_t = 0.0
+!      write(*,*)"nfourier_in=",nfourier_in
+      do n=1,nfourier_in
+        nr = REAL(n)
+        arg = nr*theta
+        R_t = R_t -nr*fourier_in(1,n)*SIN(arg) + nr*fourier_in(2,n)*COS(arg)
+        Z_t = Z_t -nr*fourier_in(3,n)*SIN(arg) + nr*fourier_in(4,n)*COS(arg)
+      enddo
+      l_t = SQRT(r_t**2+z_t**2)
+! scale dtheta by l_t to keep mts points in each ds interval of size pi_2/ms
+      dtheta = pi_2/(REAL(mts*ms)*l_t)
+!
+      l_t1 = l_t
+      scale_max=l_t
+      arclength = 0.D0
+      do while(theta.lt.pi_2)
+	theta = theta + dtheta
+	if(theta.gt.pi_2)then
+          theta=theta-dtheta
+          dtheta=pi_2-theta
+          theta = pi_2
+        endif
+        R_t = 0.0
+        Z_t = 0.0
+        do n=1,nfourier_in
+          nr = REAL(n)
+          arg = nr*theta
+          R_t = R_t -nr*fourier_in(1,n)*SIN(arg) + nr*fourier_in(2,n)*COS(arg)
+          Z_t = Z_t -nr*fourier_in(3,n)*SIN(arg) + nr*fourier_in(4,n)*COS(arg)
+        enddo
+! dl/dtheta
+	l_t = SQRT(r_t**2+z_t**2)
+! arclength along flux surface in poloidal direction
+	arclength = arclength + 0.5D0*(l_t + l_t1)*dtheta
+! save maximum expansion scale for later
+	if(l_t.gt.scale_max) scale_max = l_t
+	l_t1 = l_t			
+      enddo
+      Ls = arclength
+!
+! debug
+!      write(*,*)"arclength = ", arclength
+!      write(*,*)"scale_max =",scale_max
+!
+! Find the theta points which map to an equally spaced s-grid of ms points along the arclength 
+! going clockwise from the outboard midplane around the flux surface
+! by searching for the theta where dR**2 + dZ**2 >= ds**2 for a centered difference df=f(m+1)-f(m-1).
+! This keeps the finite difference error of dR/ds, dZ/ds on the s-grid small
+!
+      ds = arclength/REAL(ms)
+!      write(*,*)"ds=",ds
+      t_s(0)=0.0
+      t_s(ms)=-pi_2
+!  make a first guess based on theta=0.0
+      theta=0.0
+      R_t = 0.0
+      Z_t = 0.0
+      do n=1,nfourier_in
+        nr = REAL(n)
+        arg = nr*theta
+        R_t = R_t -nr*fourier_in(1,n)*SIN(arg) + nr*fourier_in(2,n)*COS(arg)
+        Z_t = Z_t -nr*fourier_in(3,n)*SIN(arg) + nr*fourier_in(4,n)*COS(arg)
+      enddo
+      l_t = SQRT(r_t**2+z_t**2)
+      dtheta = -ds/l_t
+      theta=dtheta
+      l_t1=l_t
+!
+      do m=1,ms/2
+        R_t = 0.0
+        Z_t = 0.0
+        do n=1,nfourier_in
+          nr = REAL(n)
+          arg = nr*theta
+          R_t = R_t -nr*fourier_in(1,n)*SIN(arg) + nr*fourier_in(2,n)*COS(arg)
+          Z_t = Z_t -nr*fourier_in(3,n)*SIN(arg) + nr*fourier_in(4,n)*COS(arg)
+        enddo
+	l_t = SQRT(r_t**2+z_t**2)
+        dtheta = -ds/(0.5*(l_t+l_t1))
+        t_s(m)=t_s(m-1)+dtheta
+        theta = t_s(m) +dtheta
+        l_t1=l_t
+       enddo
+! distribute endpoint error over interior points
+      dtheta = (t_s(ms/2)-(-pi))/REAL(ms/2)
+!      write(*,*)"enpoint error =",dtheta
+!      dtheta=0.0
+!      t_s(ms/2)=-pi
+      do m=1,ms/2
+       t_s(m) = t_s(m)-REAL(m)*dtheta
+       t_s(ms-m)=-pi_2 - t_s(m)
+      enddo
+!      write(*,*)"t_s(ms/2)+pi=",t_s(ms/2)+pi
+!
+!      open(2,file='t_s.dat',status='replace')
+!      do m=0,ms
+!        write(2,*)m,t_s(m)
+!      enddo
+!      close(2)
+!
+!---------------------------------------------------------------
+! all equilibrium functions satisfy 
+!
+!                 f(0) = f(l_theta)
+!
+! Loop to compute most geometrical quantities needed for Mercie-Luc expansion
+! R, Z, R*Bp on flux surface s-grid
+!
+! NOTES:
+!  If grad_r_theta diverges because denominator goes 
+!  through zero, magnetic field lines are intersecting 
+!  and the magnetic surfaces are not nested.
+!
+!--------------------------------------------------------------
+!
+! compute R,Z,BP on the arc-length s-grid
+!
+      do m=0,ms
+       theta = t_s(m)
+       R(m) = fourier_in(1,0)/2.0
+       Z(m) = fourier_in(3,0)/2.0
+       R_t = 0.0
+       Z_t = 0.0
+       R_r = fourier_in(5,0)/2.0
+       Z_r = fourier_in(7,0)/2.0
+       do n=1,nfourier_in	
+! R(theta)
+! Z(theta)
+        nr=REAL(n)
+        arg = theta*nr
+        R(m) = R(m) + fourier_in(1,n)*COS(arg) + fourier_in(2,n)*SIN(arg)
+        Z(m) = Z(m) + fourier_in(3,n)*COS(arg) + fourier_in(4,n)*SIN(arg)
+		
+! dR/dtheta
+! dZ/dtheta
+! note these are derivatives wrt the fourier theta variable
+! the factors dtheta/ds needed to take s-derivatives drop out of the grad_r calculation
+
+        R_t = R_t -nr*fourier_in(1,n)*SIN(arg) + nr*fourier_in(2,n)*COS(arg)
+        Z_t = Z_t -nr*fourier_in(3,n)*SIN(arg) + nr*fourier_in(4,n)*COS(arg)
+
+! dR/dr
+! dZ/dr
+        R_r = R_r + fourier_in(5,n)*COS(arg) + fourier_in(6,n)*SIN(arg)
+        Z_r = Z_r + fourier_in(7,n)*COS(arg) + fourier_in(8,n)*SIN(arg)
+       enddo
+! dl/dtheta
+
+       l_t = SQRT(R_t**2+Z_t**2)
+! Jacobian
+       det = R_r*z_t - R_t*Z_r
+! grad_r
+       grad_r = ABS(l_t/det)
+!
+       B_unit = 1.0
+!       if(m.eq.0)then
+!          B_unit = 1.0/grad_r           ! B_unit choosen to make bx(0)=ky**2 i.e. qrat_geo(0)/b_geo(0)=1.0
+!          if(drmindx_loc.eq.1.0)B_unit=1.0  ! Waltz-Miller convention
+!          write(*,*)"B_unit = ",B_unit
+!        endif
+! Bp = (r/q) B_unit*Abs(grad_r)/R
+
+
+        Bp(m) = (rmin_s/(q_s*R(m)))*grad_r*B_unit
+!
+      enddo
+
+!
+!      open(3,file='Bp.dat',status='replace')
+!      open(2,file='RZ.dat',status='replace')
+!      do m=0,ms
+!        write(3,*)m,Bp(m)
+!        write(2,*)m,R(m),Z(m)
+!      enddo
+!      close(3)
+!      close(2)
+!
+! Note the definitions:
+!
+! q_prime -> dq/dpsi = dq/dr dr/dpsi
+! p_prime -> dp/dpsi = dp/dr dr/dpsi
+!
+!                R B_p
+! and dpsi/dr = -------- = b_unit (r/q)
+!               |grad r|
+!
+! So, we can write:
+!                2
+! q_prime = (q/r) s/b_unit
+! p_prime = (q/r) (1/b_unit) dp/dr
+!         = (q/r) (1/b_unit) p * dlnpdr
+! rescale p_prime and q_prime to keep normalized eikonal invariant
+       p_prime_s = p_prime_s*B_unit   ! B_unit**2/B_unit 
+       q_prime_s = q_prime_s/B_unit   !
+!      write(*,*)"p_prime_s =",p_prime_s,"q_prime_s =",q_prime_s
+!
+      END SUBROUTINE fourier_geo
+!
+!--------------------------------------------------------------------
+!
       SUBROUTINE ELITE_geo
 !
 ! interpolates the input R_ELITE,Z_ELITE,Bp_ELITE onto the s-grid
 ! used by mercier_luc and sets the arclength Ls and differential ds
 ! 
-     USE tglf_internal_interface
+     USE tglf_global
      USE tglf_sgrid
 !
      IMPLICIT NONE
 !   
      INTEGER ::  i,j,k,imax,im,ip
      REAL :: arclength,drde,dzde,de
-     REAL :: Rmax,Zmax,Bpmax,emax
-     REAL :: B_unit,sign
+     REAL :: Rmax,Zmax,Bpmax,emax,Zmin,Rmin
+     REAL :: sign
      REAL :: e_length,s_length
      REAL :: da
      REAL :: a,b,c
+     REAL :: area,R0,Z0,signdZ
 !
-! compute the arclength and find the maximum and average major radius
+! compute the arclength, area and centroid cooridinates of the flux surface
 !
-     Rmax = R_ELITE(0) 
+     Rmax = R_ELITE(0)
+     Rmin = R_ELITE(0)
+     Zmax = Z_ELITE(0)
+     Zmin = Z_ELITE(0) 
      imax=0
      drde = (R_ELITE(1)-R_ELITE(n_ELITE))/2.0
      dzde = (Z_ELITE(1)-Z_ELITE(n_ELITE))/2.0
      da = SQRT(drde**2 + dzde**2)
      arclength = da
+     area = ABS(drde)*ABS(Z_ELITE(0))    
+! integral from 0.0 to ABS(Z_ELITE(i)) at each R_ELITE assuming Z=0 is inside of the flux surface
+! this makes it unecessary to find the Z reflected across Z=0 a the same R
+     Z0 =  ABS(drde)*ABS(Z_ELITE(0))*Z_ELITE(0)/2.0
+     R0 =  ABS(drde)*ABS(Z_ELITE(0))*(R_ELITE(1)+R_ELITE(n_ELITE))/2.0
      do i=1,n_ELITE-1
+       if(Z_ELITE(i).gt.Zmax)Zmax = Z_ELITE(i)
+       if(Z_ELITE(i).lt.Zmin)Zmin = Z_ELITE(i)
+       if(R_ELITE(i).lt.Rmin)Rmin = R_ELITE(i)
        if(R_ELITE(i).gt.Rmax)then
          Rmax = R_ELITE(i)
          imax = i
@@ -1282,10 +1654,31 @@
        dzde = (Z_ELITE(i+1)-Z_ELITE(i-1))/2.0
        da =  SQRT(drde**2 + dzde**2)
        arclength = arclength + da
+     area = area + ABS(drde)*ABS(Z_ELITE(i))
+     Z0 = Z0 + ABS(drde)*ABS(Z_ELITE(i))*Z_ELITE(i)/2.0
+     R0 = R0 + ABS(drde)*ABS(Z_ELITE(i))*(R_ELITE(i+1)+R_ELITE(i-1))/2.0
      enddo 
-     write(*,*)"imax = ",imax
+     write(*,*)"imax = ",imax,"Rmax = ",Rmax,"Rmin = ",Rmin
+     write(*,*)"Zmax = ",Zmax,"Zmin = ",Zmin
      de = arclength/REAL(n_ELITE)
      ds = arclength/REAL(ms)
+     Z0 = Z0/area
+     R0 = R0/area
+     write(*,*)"area = ",area,"volume = ",pi_2*R0*area
+     write(*,*)"Z0 = ",Z0,"R0 = ",R0
+     write(*,*)"arclength = ",arclength
+
+!
+! find the major and minor radius at Z0
+!
+!     signdZ=1.0
+!     if(Z_ELITE(0).lt.Z)signZ=-1.0
+!     
+!     i1 = 0
+!     do i=0,n_ELITE  
+!       if(Z_ELITE 
+!      
+!     enddo
 !
 !  find maximum of quardratic fit through R(e):  R(e) = a + b e + c e^2
 !
@@ -1312,7 +1705,8 @@
 ! compute B_unit = d psi/dr *(q/r)
 !
      rmin_s = arclength/pi_2
-     B_unit = Rmax*Bpmax*q_ELITE/rmin_s
+     B_unit = Rmax*Bpmax*q_ELITE/rmin_s   ! this choice makes bx(0) = ky^2 i.e. qrat_geo(0)/b_geo(0)=1.0
+     B_unit = 1.0
 !
 ! interpolate R,Z,Bp onto the s-grid
 !
@@ -1354,6 +1748,12 @@
        p_prime_s = p_prime_ELITE
        q_s = q_ELITE
        q_prime_s = q_prime_ELITE
+!
+!   set global input values
+!
+      R_input = Rmaj_s
+      q_input = q_s
+
 ! debug
        write(*,*)"Rmax = ",Rmax
        write(*,*)"Zmax = ",Zmax
@@ -1376,4 +1776,9 @@
 !      close(2)
 !
        END SUBROUTINE ELITE_geo
+!
+
+
+
+
 

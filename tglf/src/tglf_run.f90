@@ -12,7 +12,7 @@ subroutine tglf_run()
 
   implicit none
 
-  integer :: i_ion
+  integer :: i_ion, n
 
   call put_species(tglf_ns_in, &
        tglf_zs_in, &
@@ -29,63 +29,80 @@ subroutine tglf_run()
 
   call put_gradients(tglf_rlns_in, &
        tglf_rlts_in, &
-       tglf_vexb_shear_in, &
-       tglf_vpar_shear_in)
+       tglf_vpar_shear_in, &
+       tglf_vexb_shear_in)
 
   call put_averages(tglf_taus_in, &
        tglf_as_in, &
+       tglf_vpar_in, &
        tglf_betae_in, &
-       tglf_xnuei_in, &
+       tglf_xnue_in, &
        tglf_zeff_in, &
-       tglf_debye_in, &
-       tglf_vexb_mach_in, &
-       tglf_vpar_mach_in)
+       tglf_debye_in)
 
   call put_switches(tglf_iflux_in, &
        tglf_use_bper_in, &
        tglf_use_bpar_in, &
+       tglf_use_mhd_rule_in, &
        tglf_use_bisection_in, &
        tglf_ibranch_in, &
        tglf_nmodes_in, &
        tglf_nbasis_max_in, &
        tglf_nbasis_min_in, &
        tglf_nxgrid_in, &
-       tglf_nky_in, &
-       tglf_kygrid_model_in, &
-       tglf_xnu_model_in)
+       tglf_nky_in)
 
-  call put_rare_switches(tglf_alpha_quench_in, &
+  call put_rare_switches(tglf_theta_trapped_in, &
        tglf_park_in, &
        tglf_ghat_in, &
        tglf_gchat_in, &
        tglf_wd_zero_in, &
        tglf_linsker_factor_in, &
        tglf_gradB_factor_in, &
-       tglf_x_psi_in, &
-       tglf_sat_rule_in, &
-       tglf_alpha_kx0_in)
+       tglf_filter_in, &
+       tglf_damp_psi_in, &
+       tglf_damp_sig_in)
 
   call put_model_parameters(tglf_adiabatic_elec_in, &
        tglf_alpha_p_in, &
        tglf_alpha_e_in, &
-       tglf_theta_trapped_in, &
+       tglf_alpha_kx0_in, &
+       tglf_alpha_kx1_in, &
+       tglf_alpha_quench_in, &
        tglf_xnu_factor_in, &
        tglf_debye_factor_in, &
        tglf_etg_factor_in, &
-       tglf_filter_in)
+       tglf_sat_rule_in, &
+       tglf_kygrid_model_in, &
+       tglf_xnu_model_in, &
+       tglf_vpar_model_in, &
+       tglf_vpar_shear_model_in)
 
   if (tglf_geometry_flag_in == 1 ) then
 
      call put_Miller_geometry(tglf_rmin_loc_in, &
           tglf_rmaj_loc_in, &
-          tglf_q_loc_in, &
-          tglf_q_prime_loc_in, &
-          tglf_p_prime_loc_in, &
-          tglf_shift_loc_in, &
+          tglf_zmaj_loc_in, &
+          tglf_drmindx_loc_in, &
+          tglf_drmajdx_loc_in, &
+          tglf_dzmajdx_loc_in, &
           tglf_kappa_loc_in, &
           tglf_s_kappa_loc_in, &
           tglf_delta_loc_in, &
-          tglf_s_delta_loc_in)
+          tglf_s_delta_loc_in, &
+          tglf_zeta_loc_in, &
+          tglf_s_zeta_loc_in, &
+          tglf_q_loc_in, &
+          tglf_q_prime_loc_in, &
+          tglf_p_prime_loc_in)
+
+  elseif (tglf_geometry_flag_in == 2)then
+
+    call put_Fourier_geometry(tglf_q_fourier_in,  &
+          tglf_q_prime_fourier_in, &
+          tglf_p_prime_fourier_in, &
+          tglf_nfourier_in, &
+          tglf_fourier_in)
 
   else
 
@@ -107,7 +124,8 @@ subroutine tglf_run()
      call tglf_dump_global
   endif
 
-  call tglf_TM
+  if(tglf_use_transport_model_in)then
+     call tglf_TM
 
   !---------------------------------------------
   ! Output (normalized to Q_GB)
@@ -115,18 +133,18 @@ subroutine tglf_run()
   ! Electrons
 
   ! Gammae/Gamma_GB
-  tglf_elec_pflux_out = get_particle_flux(1,1)
+    tglf_elec_pflux_out = get_particle_flux(1,1)
 
   ! Qe/Q_GB
-  tglf_elec_eflux_low_out = get_q_low(1)
-  tglf_elec_eflux_out     = get_energy_flux(1,1)
+    tglf_elec_eflux_low_out = get_q_low(1)
+    tglf_elec_eflux_out     = get_energy_flux(1,1)
 
   ! Pi_e/Pi_GB
-  tglf_elec_mflux_out = get_stress_tor(1,1)
+    tglf_elec_mflux_out = get_stress_tor(1,1)
 
   ! Ions
 
-  do i_ion=1,5
+    do i_ion=1,5
 
      ! Gammai/Gamma_GB
      tglf_ion_pflux_out(i_ion) = get_particle_flux(i_ion+1,1)
@@ -138,6 +156,16 @@ subroutine tglf_run()
      ! Pi_i/Pi_GB
      tglf_ion_mflux_out(i_ion) = get_stress_tor(i_ion+1,1)
 
-  enddo
+    enddo
+   else
+   ! run single ky linear stability
+     call tglf
+
+   !collect linear eigenvalues
+     do n=1,tglf_nmodes_in
+       tglf_eigenvalue_out(n) = get_frequency(n) + xi*get_growthrate(n)
+     enddo
+     
+   endif
 
 end subroutine tglf_run

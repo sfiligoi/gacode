@@ -1,4 +1,6 @@
- 
+!
+!--------------------------------------------------------------
+!
       SUBROUTINE tglf_LS
 
 ! version 1.4
@@ -51,7 +53,7 @@
 !***********************************************************************
 !
       USE tglf_dimensions
-      USE tglf_internal_interface
+      USE tglf_global
       USE tglf_species
       USE tglf_eigen
 !
@@ -71,7 +73,9 @@
       REAL :: stress_par_QL(nsm,3),stress_tor_QL(nsm,3)
       REAL :: exchange_QL(nsm,3)
       REAL :: phi_QL,N_QL(nsm),T_QL(nsm)
+      REAL :: Ne_Te_phase
       REAL :: wd_bar,v2_bar,kyi
+      REAL :: get_intensity, get_gamma_net
 !      COMPLEX ::  v(iar)
 !      COMPLEX :: xi
 !  ZGESV storage
@@ -83,9 +87,11 @@
 !
       if(new_start)then
 ! set up hermite basis and fill species arrays
+        trace_path(2)=1
         CALL tglf_start
       else
 ! fill the species arrays  
+        trace_path(3)=1
         CALL get_species
       endif
 !
@@ -112,7 +118,7 @@
 !      write(*,*)"new_eikonal_in=",new_eikonal_in
 !      write(*,*)"betae_in=",betae_in
 !      write(*,*)"debye_in=",debye_in
-!      write(*,*)"xnuei_in=",xnuei_in
+!      write(*,*)"xnue_in=",xnue_in
 !      write(*,*)"zeff_in=",zeff_in
 !      write(*,*)"filter_in=",filter_in
 !      write(*,*)"park_in=",park_in
@@ -120,7 +126,6 @@
 !      write(*,*)"wd_zero_in=",wd_zero_in
 !      write(*,*)"Linsker_factor_in=",Linsker_factor_in
 !      write(*,*)"gradB_factor_in=",gradB_factor_in
-!      write(*,*)"x_psi_in=",x_psi_in
 !      write(*,*)"xnu_factor_in=",xnu_factor_in
 !      write(*,*)"debye_factor_in=",debye_factor_in
 !      write(*,*)"theta_trapped_in=",theta_trapped_in
@@ -129,13 +134,17 @@
 !
       if(new_eikonal_in)then
         if(new_geometry)then
-!
           if(igeo.eq.1)then
 ! set up MILLER geometry
+            trace_path(4)=1
             call miller_geo
-          endif
-          if(igeo.eq.2)then
+          elseif(igeo.eq.2)then
+! set up FOURIER geometry
+            trace_path(5)=1
+            call fourier_geo
+          elseif(igeo.eq.3)then
 ! set up ELITE geometry
+            trace_path(8)=1
             call ELITE_geo
           endif
 !
@@ -148,11 +157,17 @@
 !
 !  load the x-grid eikonal functions wdx,b0x
 !
-        if(new_width)call get_xgrid_functions
+        if(new_width)then
+          trace_path(6)=1
+          call get_xgrid_functions
+        endif
 !       write(*,*)"ft=",ft
       endif  !new_eikonal_in
 !
-      if(new_matrix)call get_matrix
+      if(new_matrix)then
+        trace_path(7)=1
+        call get_matrix
+      endif
 !
 !  solver for linear eigenmodes of tglf equations
 !
@@ -163,7 +178,6 @@
       do j1=1,maxmodes
         jmax(j1) = 0
         gamma_out(j1) = 0.0
-        gamma_net_out(j1)=0.0
         freq_out(j1) = 0.0
         phi_QL_out(j1) = 0.0
         phi_bar_out(j1) = 0.0
@@ -181,6 +195,7 @@
           N_bar_out(j1,is) = 0.0
           T_bar_out(j1,is) = 0.0
         enddo
+        ne_te_phase_out(j1) = 0.0
       enddo
 !
       if(ibranch_in.ge.0)then
@@ -240,6 +255,13 @@
         enddo
 !      write(*,*)"debug jmax =",jmax(1),jmax(2)
       endif
+!
+      if(alpha_quench_in.ne.0.0)then
+! apply quench rule
+        do j1=1,nmodes_in
+          gamma_out(j1) = get_gamma_net(gamma_out(j1))
+        enddo
+      endif
 !      
 !  get the fluxes for the most unstable modes
       if(iflux_in)then
@@ -257,7 +279,7 @@
 !  alpha/beta=-xi*(frequency+xi*growthrate)
           eigenvalue = xi*alpha(jmax(imax))/beta(jmax(imax))  
           call get_QL_weights(particle_QL,energy_QL,stress_par_QL,stress_tor_QL, &
-               exchange_QL,phi_QL,N_QL,T_QL,wd_bar)
+               exchange_QL,phi_QL,N_QL,T_QL,wd_bar,NE_Te_phase)
           wd_bar_out(imax)=wd_bar
           phi_QL_out(imax)=phi_QL
           do is=ns0,ns
@@ -271,6 +293,7 @@
             N_QL_out(imax,is)=N_QL(is)
             T_QL_out(imax,is)=T_QL(is)
           enddo
+          ne_te_phase_out(imax) = Ne_Te_phase
           kyi=ky
           v2_bar =  &
             get_intensity(kyi,gamma_out(imax),imax)
@@ -287,20 +310,122 @@
 !
  999  continue
 !
- 100  format(i3,2x,0pf10.6,4x,0pf10.6)
-!
       END SUBROUTINE tglf_LS
+!
+!
+!--------------------------------------------------------------
+!
+      REAL FUNCTION get_intensity(kp,gp,imode)
+!
+      USE tglf_species
+      USE tglf_global
+      USE tglf_coeff
+      IMPLICIT NONE
+!
+      REAL,INTENT(IN) :: kp,gp
+      INTEGER :: imax,imode
+      REAL :: cnorm,exponent
+      REAL :: wd0,gnet
+      REAL :: c1,pols,ks
+      REAL :: get_GAM_freq
+!
+      pols = (ave_p0(1,1)/ABS(as(1)*zs(1)*zs(1)))**2 ! scale invariant pol
+      ks = kp*SQRT(taus(1)*mass(2))   ! scale invariant gyroradius * poloidal wavenumber
+      if(sat_rule_in.eq.0)then
+       if(igeo.eq.0)then
+        if(nmodes_in.ne.4)then
+! this fit is for nmodes_in=2
+          cnorm = 30.40*pols
+          exponent = 1.657
+        else
+! this fit is for nmodes_in=4
+          cnorm = 24.58*pols
+          exponent = 1.761
+        endif
+        if(ks.gt.1.0)cnorm=cnorm/(ks)**etg_factor_in
+        c1 = 0.0
+      elseif(igeo.ge.1)then
+        if(nmodes_in.ne.4)then
+! this fit is for nmodes_in=2
+          cnorm = 32.48*pols
+          exponent = 1.547
+          c1 = 0.534
+        else
+! this fit is for nmodes_in=4
+          cnorm = 30.03*pols
+          exponent = 1.66
+          c1 = 0.234
+        endif
+        if(ks.gt.1.0)cnorm=cnorm/(ks)**etg_factor_in
+       endif
+       wd0 =ks*SQRT(taus(1)/mass(2))/R_unit  ! renomalized for scale invariance
+       gnet = gp/wd0
+       get_intensity = cnorm*(wd0**2)*(gnet**exponent &
+        + c1*gnet)/(kp**4)
+      elseif(sat_rule_in.eq.1)then
+!
+!  GAM frequency version
+!
+!       wd0 = get_GAM_freq()
+       wd0 =  1.219*get_GAM_freq()
+!       exponent = 1.22
+       exponent = 1.208
+       gnet = gp
+!       get_intensity = 9.09*pols*(gnet**exponent)*(gnet**2+0.3935*wd0**2)**(1.0-exponent/2.0)
+       get_intensity = 8.347*pols*(gnet**exponent)*(gnet**2+wd0**2)**(1.0-exponent/2.0)
+!       exponent = 1.53
+!       get_intensity = 15.29*pols*(gnet**exponent)*get_GAM_freq()**(2.0-exponent)
+       get_intensity = get_intensity/(kp**4)
+      endif
+      get_intensity = get_intensity/B_unit**2
+!
+      END FUNCTION get_intensity
+!
+!--------------------------------------------------------------
+!
+      REAL FUNCTION get_gamma_net(gp)
+!
+      USE tglf_global
+      USE tglf_species
+!
+      REAL,INTENT(IN) :: gp
+      REAL :: alpha_exb
+!
+      alpha_exb = 0.3
+      if(igeo.eq.1)alpha_exb=0.3*SQRT(kappa_loc)
+      get_gamma_net =  MAX(gp - ABS(alpha_exb*alpha_quench_in*vexb_shear_s),0.0)
+!
+      END FUNCTION get_gamma_net
+!
+!--------------------------------------------------------------
+!
+      REAL FUNCTION get_GAM_freq()
+!
+      USE tglf_global
+      USE tglf_species
+!
+      REAL :: elong=1.0
+!
+      if(igeo.eq.1)elong = kappa_loc
+!      get_GAM_freq = SQRT(3.5*taus(2)+2.0*taus(1))/R_unit
+      get_GAM_freq = (2.0/(1.0+elong))*SQRT(taus(2)+taus(1))/R_unit
+!
+      END FUNCTION get_GAM_freq
+!
+!--------------------------------------------------------------
 !
       SUBROUTINE tglf_start
 !*********************************************
 !
 !*********************************************
       USE tglf_dimensions
-      USE tglf_internal_interface
+      USE tglf_global
 !
       IMPLICIT NONE
 !
       new_start = .FALSE.
+!
+      call get_species
 !
 ! set global constants
 !
@@ -326,8 +451,6 @@
       nbasis = nbasis_max_in
       call gauss_hermite
 !
-      call get_species
-!
       END SUBROUTINE tglf_start
 !
       SUBROUTINE get_species
@@ -335,7 +458,7 @@
 !
 !*********************************************
       USE tglf_dimensions
-      USE tglf_internal_interface
+      USE tglf_global
       USE tglf_species
 !
       IMPLICIT NONE
@@ -344,20 +467,47 @@
 !
 ! electrons=1, ions =2,...
 !
+      if(use_default_species)then
+       ns_in = 2
+       mass_in(1) = 0.0002723
+       mass_in(2) = 1.0
+       zs_in(1) = -1.0
+       zs_in(2) = 1.0
+       as_in(1) = 1.0
+       as_in(2) = 1.0
+       taus_in(1)=1.0
+       taus_in(2)=1.0
+      endif
+!
       ns=ns_in
+      pol = 0.0
+      U0 = 0.0
       do is=1,ns
         rlns(is) = rlns_in(is)
         rlts(is) = rlts_in(is)
+        vpar_shear_s(is) = alpha_p_in*vpar_shear_in(is)
         taus(is) = taus_in(is)
         as(is) = as_in(is)
+        vpar_s(is) = vpar_in(is)
+        if(vpar_model_in.ne.0)vpar_s(is)=0.0
+        if(nbasis_min_in.eq.1.and.(vpar_shear_s(is).ne.0.0.or.vpar_s(is).ne.0.0))then
+          nbasis_min_in = 2      
+        endif
         zs(is) = zs_in(is)
         mass(is) = mass_in(is)
         vs(is) = SQRT(taus(is)/mass(is))
+        pol = pol +  zs(is)*zs(is)*as(is)/taus(is)
+        U0 = U0 + as(is)*vpar_s(is)*zs(is)*zs(is)/taus(is)
 !        write(*,*)"species",is
 !        write(*,*)rlns(is),rlts(is)
 !        write(*,*)taus(is),as(is)
 !        write(*,*)zs(is),mass(is)
       enddo
+!
+      vexb_shear_s = vexb_shear_in
+      if(vpar_shear_model_in.eq.1)then
+        vexb_shear_s = sign_Bt_in*vexb_shear_in
+      endif
 !
       ns0 = 1
       if(adiabatic_elec_in) then
@@ -373,7 +523,7 @@
       ei_exch(2,1) = 3.0*xnu*taus(2)*mass(1)/mass(2)
       ei_exch(2,2) = -3.0*xnu*mass(1)/mass(2)
 ! resistivity
-!      xnu = xnuei_in*4.0*0.513/(3.0*sqrt_pi)
+!      xnu = xnue_in*4.0*0.513/(3.0*sqrt_pi)
       resist(1,1) = - xnu
       resist(1,2) = xnu*as(2)*vs(2)/vs(1)
       resist(2,1) = xnu*(vs(1)/vs(2))*(mass(1)/mass(2))*as(1)/as(2) 
@@ -387,12 +537,13 @@
 !
 !*********************************************
       USE tglf_dimensions
-      USE tglf_internal_interface
+      USE tglf_global
       USE tglf_closure
       USE tglf_species
       USE tglf_eigen
       USE tglf_coeff
-      USE nuei_coeff
+      USE tglf_nuei_coeff
+      USE tglf_sgrid
 !
       IMPLICIT NONE
 !
@@ -408,16 +559,24 @@
       REAL :: ft2,ft3,ft4,ft5
       REAL :: Linsker,am,bm
       REAL :: w_s, w_d, w_d1, modw_d1,w_d0, w_cd
-      REAl :: wd_psi,modwd_psi,M_ij
+      REAl :: wd_psi,modwd_psi
+      REAL :: E_i,M_i,N_j,J_j
       REAL :: k_par0,k_par1,modk_par0,modk_par1
       REAL :: h10n,h10p1,h10p3,h10r13,h10r33
       REAL :: hnb0,hp1b0,hp3b0,hr11b0,hr13b0,hr33b0
       REAL :: hw113b0,hw133b0,hw333b0
+      REAL :: hnbp,hp1bp,hp3bp,hr11bp,hr13bp,hr33bp
+      REAL :: hw113bp,hw133bp,hw333bp
+      REAL :: c_tor_par_hp1,c_tor_par_hr11
+      REAL :: c_tor_par_hr13
       REAL :: g10n,g10p1,g10p3,g10r13,g10r33
       REAL :: gnb0,gp1b0,gp3b0,gr11b0,gr13b0,gr33b0
       REAL :: gw113b0,gw133b0,gw333b0
+      REAL :: gnbp,gp1bp,gp3bp,gr11bp,gr13bp,gr33bp
+      REAL :: gw113bp,gw133bp,gw333bp
+      REAL :: c_tor_par_gp1,c_tor_par_gr11
+      REAL :: c_tor_par_gr13
       REAL :: betae_psi,betae_sig
-      REAL :: x_psi,psi_scale
       REAL :: max_freq,test
       REAL :: gradB1
       REAL :: c35
@@ -461,9 +620,10 @@
       REAL :: k1,k2,k3,k4,k5
       REAL :: ki,ks0,charge_tot,gradne,gradne_s
       REAL :: beta2,bs
-      REAL :: vpar_shear,vexb_shear
       REAL :: damp_psi,damp_sig
       REAL :: rwork(8*iar)
+      REAL :: freq_GQ
+      REAL :: R_s
 !      COMPLEX :: xi
       COMPLEX :: k_par,k_par_psi
 !      COMPLEX :: v(iar),amat(iar,iar),bmat(iar,iar)
@@ -472,10 +632,11 @@
       COMPLEX :: vleft(iar,iar),vright(iar,iar)
       COMPLEX :: work(33*iar)
       COMPLEX :: zomega(iar)
-      COMPLEX :: phi_A,phi_B
-      COMPLEX :: psi_A,psi_B,psi_UA,psi_UB   
+      COMPLEX :: phi_A,phi_B,phi_AU,phi_BU
+      COMPLEX :: psi_A,psi_B,psi_AN,psi_BN  
       COMPLEX :: sig_A,sig_B
-      COMPLEX :: egamma
+      REAL :: egamma,ngamma,tgamma
+      REAL :: shape_a,shape_b
 !
 !      xi=(0.0,1.0)
       c35 = 3.0/5.0
@@ -483,27 +644,109 @@
       ft3 = ft*ft2
       ft4 = ft*ft3
       ft5 = ft*ft4
+!      write(*,*)"R_unit = ",R_unit
+!      write(*,*)"B_unit = ",B_unit
+!      write(*,*)"q_unit = ",q_unit
 !
       nroot=15
       if(ft.lt.ft_min)nroot=6
       iur  = (ns-ns0+1)*nroot*nbasis
 !      write(*,*)"iur = ",iur,"nroot=",nroot,"ns0=",ns0,"ft=",ft
-!
        ky = ky_in
        k_par0 = park_in/(R_unit*q_unit*width_in)
-!       if(vpar_in.ne.0.0)k_par0 = vpar_in/ABS(vpar_in)*k_par0
        w_d0 = ky/R_unit
        w_cd = -gchat_in*w_d0
-       w_s = -ky
+       w_s = -ky/B_unit
        wd_psi = w_cd
        modwd_psi = ABS(wd_psi)
        betae_psi = 0.0
-       if(use_bper_in)betae_psi = 0.5*betae_in/(ky*ky)
+       damp_psi = 0.0
+       if(use_bper_in.eqv..FALSE.)then
+           hnb0 = 0.0
+           hp1b0 = 0.0
+           hp3b0 = 0.0
+           hr11b0 = 0.0
+           hr13b0 = 0.0
+           hr33b0 = 0.0
+           hw113b0 = 0.0
+           hw133b0 = 0.0
+           hw333b0 = 0.0
+           kpar_hp1b0 = 0.0
+           kpar_hr11b0 = 0.0
+           kpar_hr13b0 = 0.0
+           wdhp1b0 = 0.0
+           wdhr11b0 = 0.0
+           wdhr13b0 = 0.0
+           gnb0 = 0.0
+           gp1b0 = 0.0
+           gp3b0 = 0.0
+           gr11b0 = 0.0
+           gr13b0 = 0.0
+           gr33b0 = 0.0
+           gw113b0 = 0.0
+           gw133b0 = 0.0
+           gw333b0 = 0.0
+           kpar_gp1b0 = 0.0
+           kpar_gr11b0 = 0.0
+           kpar_gr13b0 = 0.0
+           wdgp1b0 = 0.0
+           wdgr11b0 = 0.0
+           wdgr13b0 = 0.0
+       endif
+       if(vpar_model_in.ne.0)then
+           hnbp = 0.0
+           hp1bp = 0.0
+           hp3bp = 0.0
+           hr11bp = 0.0
+           hr13bp = 0.0
+           hr33bp = 0.0
+           hw113bp = 0.0
+           hw133bp = 0.0
+           hw333bp = 0.0
+           wdhp1bp = 0.0
+           wdhr11bp = 0.0
+           wdhr13bp = 0.0
+           kpar_hnbp = 0.0
+           kpar_hp1bp = 0.0
+           kpar_hp3bp = 0.0
+           kpar_hr11bp = 0.0
+           kpar_hr13bp = 0.0
+           gnbp = 0.0
+           gp1bp = 0.0
+           gp3bp = 0.0
+           gr11bp = 0.0
+           gr13bp = 0.0
+           gr33bp = 0.0
+           gw113bp = 0.0
+           gw133bp = 0.0
+           gw333bp = 0.0
+           wdgp1bp = 0.0
+           wdgr11bp = 0.0
+           wdgr13bp = 0.0
+           kpar_gnbp = 0.0
+           kpar_gp1bp = 0.0
+           kpar_gp3bp = 0.0
+           kpar_gr11bp = 0.0
+           kpar_gr13bp = 0.0
+       endif
+       if(use_bpar_in.eqv..FALSE.)then
+           h10n = 0.0
+           h10p1 = 0.0
+           h10p3 = 0.0
+           h10r13 = 0.0
+           h10r33 = 0.0
+           g10n = 0.0
+           g10p1 = 0.0
+           g10p3 = 0.0
+           g10r13 = 0.0
+           g10r33 = 0.0
+       endif
+       if(use_bper_in)then
+         betae_psi = 0.5*betae_in/(ky*ky)
 !       write(*,*)"betae_psi = ",betae_psi
-       psi_scale =1.0
-       x_psi = 0.0
+         damp_psi = damp_psi_in/MAX(betae_psi*vs(1)*vs(1),0.001)
+       endif
        max_freq=2.0*ABS(ave_wd(1,1))/R_unit
-       damp_psi = filter_in*w_d0
 !       if(filter_in.gt.0.0)then
          do is=ns0,ns
            test = ABS(as(is)*zs(is)*(ave_hp3p0(is,1,1)*rlns(is)  &
@@ -514,24 +757,15 @@
          max_freq = 2.0*ABS(ky)*max_freq/ABS(as(1)*zs(1))
 !         write(*,*)"max_freq = ",max_freq,filter_in
 !       endif
-       if(betae_psi.ne.0.0)then
-         x_psi = x_psi_in
-         psi_scale = 0.0
-         do is=ns0,ns
-          psi_scale = psi_scale + ((zs(is)*vs(is))**2)*as(is)/taus(is)
-         enddo
-         psi_scale = 1.0 +x_psi*psi_scale 
-!         write(*,*)"psi_scale = ",psi_scale
-       endif
        betae_sig = 0.0
-       if(use_bpar_in)betae_sig = 0.5*betae_in/(ky*ky)
-       damp_sig = filter_in*w_d0
+       damp_sig = 0.0
+       if(use_bpar_in)then
+          betae_sig = 0.5*betae_in/(ky*ky)
+          damp_sig = damp_sig_in/MAX(betae_sig*vs(1)*vs(1),0.001)
+       endif
 !       write(*,*)"betae_psi=",betae_psi,"betae_sig=",betae_sig
+!       write(*,*)"damp_psi=",damp_psi,"damp_sig=",damp_sig
 !       write(*,*)"k_par0=",k_par0,"w_d0=",w_d0,"w_cd=",w_cd,"w_s=",w_s
-       vexb_shear = vexb_shear_in
-!       vexb_shear = -alpha_e_in*vexb_shear/(width_in*MAX(ABS(shat_sa),0.01))
-       vpar_shear = -alpha_p_in*vpar_shear_in
-!       write(*,*)"vexb_shear = ",vexb_shear," vpar_shear = ",vpar_shear
 !
        Linsker = 0.5*Linsker_factor_in
        if(nbasis.eq.1)Linsker=0.0
@@ -585,6 +819,12 @@
        b33 = (b1 - b3)/(3.0)
        d33 = (d1 - d3)/(3.0)
 !
+       if(vpar_shear_model_in.eq.1)then  ! convert from gyro convetions
+         do is=1,ns
+           vpar_shear_s(is)=alpha_p_in*vpar_shear_in(is)*ave_c_tor_par(1,1)/R_input
+         enddo
+       endif
+!
 !  compute electron-ion collsion model coefficients
 !
        xnu_model = xnu_model_in
@@ -629,9 +869,9 @@
        endif
        if(nroot.gt.6)then
 !         xnu_bndry=(1.0 -ft2)* &
-!          (1.96*ky/R_unit+0.60*xnuei_in)/ &
-!          (0.75*ky/R_unit + xnuei_in)
-         xnu_hat = xnuei_in/(ky*taus(1)/R_unit)
+!          (1.96*ky/R_unit+0.60*xnue_in)/ &
+!          (0.75*ky/R_unit + xnue_in)
+         xnu_hat = xnue_in/(ky*taus(1)/R_unit)
 !         xnu_bndry = (1.0 - ft2)*(((9.34*xnu_hat)**4)/(1+(9.34*xnu_hat)**4))* &
 !                      (3.21 + 1.64*xnu_hat)/(1.0 + 2.40*xnu_hat)
 !
@@ -689,7 +929,7 @@
 !      write(*,*)xnu_q3_b,xnu_q1_b
 !
       cnuei = 0.0
-      if(xnu_model.eq.2)cnuei = xnuei_in
+      if(xnu_model.eq.2)cnuei = xnue_in
 !      kparvthe = ABS(k_par0)*vs(1)*xnu_factor_in/sqrt_two
       kparvthe = ABS(k_par0)*vs(1)/sqrt_two
       kparvthe=MAX(kparvthe,1.0E-10)
@@ -712,11 +952,6 @@
       c08 = 0.0
       c09 = 0.0
       c010 = 0.0
-!      c06 = cnuei*(nuei_c1(7)+zeff_in*nuei_c1(8))/kparvthe
-!      c07 = cnuei*(nuei_c1(9)+zeff_in*nuei_c1(10))/kparvthe
-!      c08 = cnuei*(nuei_c1(11)+zeff_in*nuei_c1(12))/kparvthe
-!      c09 = cnuei*(nuei_c1(13)+zeff_in*nuei_c1(14))/kparvthe
-!      c010 = cnuei*(nuei_c1(15)+zeff_in*nuei_c1(16))/kparvthe
 
 !      write(*,*)"nuei_c1"
 !      do i=1,nc1
@@ -761,129 +996,14 @@
 !      write(*,*)nuei_q3_q3_t,nuei_q1_u_t+3.0*nuei_q3_q3_t
 !      write(*,*)nuei_q1_q3_t,nuei_q1_q1_t
 !
-      call get_nuei_cb(ft)
-!
-!      cnuei = xnu_factor_in*cnuei
-!      cb1 = cnuei*(nuei_cb(1)/(1.0+ABS(nuei_cb(3)*cnuei/kparvthe)**1.0)  &
-!            +zeff_in*nuei_cb(2)/(1.0+ABS(nuei_cb(4)*cnuei/kparvthe)**1.0))
-!      cb3 = cnuei*(nuei_cb(5)/(1.0+ABS(nuei_cb(7)*cnuei/kparvthe)**1.0)  &
-!            +zeff_in*nuei_cb(6)/(1.0+ABS(nuei_cb(8)*cnuei/kparvthe)**1.0))
-!      cb2 = cnuei*(nuei_cb(9)/(1.0+ABS(nuei_cb(11)*cnuei/kparvthe)**1.0)  &
-!            +zeff_in*nuei_cb(10)/(1.0+ABS(nuei_cb(12)*cnuei/kparvthe)**1.0))
-!      cb4 = cnuei*(nuei_cb(13)/(1.0+ABS(nuei_cb(15)*cnuei/kparvthe)**1.0)  &
-!            +zeff_in*nuei_cb(14)/(1.0+ABS(nuei_cb(16)*cnuei/kparvthe)**1.0))
-!      cb5 = 0.0
-!      cb6 = 0.0
-!      cb2 = cnuei*(nuei_cb(5)/(1.0+ABS(nuei_cb(7)*cnuei/kparvthe)**1.0)  &
-!            +zeff_in*nuei_cb(6)/(1.0+ABS(nuei_cb(8)*cnuei/kparvthe)**1.0))
-!      cn1 = nuei_cb(1)/(1.0 +nuei_cb(3)*cnuei/kparvthe)
-!      cn2 = nuei_cb(2)/(1.0 +nuei_cb(4)*cnuei/kparvthe)
-!      cp1 = nuei_cb(5)/(1.0 +(nuei_cb(6)*cnuei/kparvthe))
-!      cp2 = nuei_cb(7)/(1.0 +(nuei_cb(8)*cnuei/kparvthe))
-!      cu1 = nuei_cb(5) + cnuei*nuei_cb(11)/(kparvthe +nuei_cb(13)*cnuei)
-!      cu2 = nuei_cb(6) + cnuei*nuei_cb(12)/(kparvthe +nuei_cb(14)*cnuei)
-!      db1 = (cn1 + zeff_in*cn2)
-!      db2 = (cp1*cn1 + zeff_in*cp2*cn2)
-!      db3 = (cu1 + zeff_in*cu2)
-!      db3 = (0.90186+1.6925*zeff_in)/(0.10398+0.56418*zeff_in)
-!      db3=SQRT(1.5)
-!      cb1 = db1+db2
-!      cb2 = cb1
-!      cb3 = db1-db2
-!      write(*,*)"cb3=",cb3
-!      cb1 = db1*COS(db3)**2 + db2*SIN(db3)**2
-!      cb2 = (2.0/3.0)*(db1*SIN(db3)**2 + db2*SIN(db3)**2)
-!      cb3 = (db1-db2)*SIN(db3)*COS(db3)
-!      cb3 = SIN(cu1+zeff_in*cu2)*(1.5*cb1*cb2)**0.5
-!      cb3 = cnuei*(SIN(nuei_cb(9))*SQRT(cn1*cp1*1.5) &
-!            +zeff_in*SIN(nuei_cb(10))*SQRT(cn2*cp2*1.5))
-!      cb3=-xnu_factor_in*SQRT(1.5*cb1*cb2)
-!      damp1 = nuei_cb(1)
-!      damp2 = nuei_cb(2)
-!      cb1 = nuei_cb(3)
-!      cb2 = damp1 + damp2 - cb1
-!      cb4 = nuei_cb(4)
-!      cb3 = (cb1*cb2 - damp1*damp2)/cb4
-!      nuei_n_n = (1.0 -ft2)*cnuei*cb1
-!      nuei_p3_p3 =(1.0 -ft2)*cnuei*cb2
-!      nuei_n_p3 =(1.0 -ft2)*cnuei*cb3
-!      nuei_p3_n =(1.0 -ft2)*cnuei*cb4
-
-!      cb1 = 23.52/(1.0 + 1.95*(cnuei/kparvthe))
-!      cb2 = 29.76/(1.0 + (10.76*cnuei/kparvthe)**2)
-!      cb3 = (xnu_factor_in + (15.84*cnuei/kparvthe)**2)
-!      cb3 = -(cb3/(1.0 +cb3))*SQRT(1.5*cb1*cb2)
-
-!      cb1 = 21.9
-!      cb2 = 21.9
-!      cb3 = -0.96*SQRT(1.5*cb1*cb2)
-!9pt
        an = 0.75 
        ap3 = 1.25 
        ap1 = 2.25 
        bn = ft
        bp3 = ft
        bp1 = ft3
-       damp1 =xnu_factor_in*(6.23/(1.0 +(13.3*cnuei/kparvthe)**2)  &
-        + zeff_in*20.48/(1.0 +(144.3*cnuei/kparvthe)**2))
-       damp2 =xnu_factor_in*(1.163 + 1.34*zeff_in)
-       damp3 =xnu_factor_in*(0.032 + 0.23*zeff_in)
-       mix1 = SQRT(1.5)
-       angle1 = 0.54
-!       damp1 = 13.4 + zeff_in*29.3
-!       damp2 = 1.86 + zeff_in*1.87
-!       damp3 = 5.28 + zeff_in*7.99
-!       angle1 = 1.11
-       damp4 = 0.0
-       damp5 = 0.0
-       damp6 = 0.0
-       mix2 = SQRT(0.9)
-       angle2 = 1.007
-!9pt
-!      damp1 = 26.6
-!      damp2 = 4.41/(1.0 + 12.13*cnuei/kparvthe)
-!      damp3 = 19.69
-!      angle = 0.634
-!5pt
-!      damp1 = 35.7
-!      damp2 = 6.59/(1.0 + (15.4*cnuei/kparvthe))
-!      damp3 = 23.9
-!      angle = 0.764
-!3pt
-!      damp1 = 41.4
-!      damp2 = 7.69/(1.0 + (19.5*cnuei/kparvthe))
-!      damp3 = 30.2
-!      angle = 0.815
-!     
-!      damp2 = 2.54/(1.0 + (10.1*cnuei/kparvthe)**2)
-!      damp1 = filter_in
-!      damp2 = 0.63*(1.0+(xnu_factor_in*0.5/kparvthe)**2)/(1.0 + (xnu_factor_in*cnuei/kparvthe)**2)
-!      damp1 = 6.0
-!      damp2 = 1.3/(1.0 + 22.0*cnuei/kparvthe)
-!      damp1 = 21.9
-!      damp2 = 1.3/(1.0 + 16.0*cnuei/kparvthe)
-      cb1 = damp1*COS(angle1)**2 + damp2*SIN(angle1)**2
-      cb2 = damp1*SIN(angle1)**2 + damp2*COS(angle1)**2
-      cb3 = (damp2 - damp1)*COS(angle1)*SIN(angle1)*mix1
-      cb4 = damp3
-      cb5 = damp4*COS(angle2)**2 + damp5*SIN(angle2)**2
-      cb6 = damp4*SIN(angle2)**2 + damp5*COS(angle2)**2
-      cb7 = (damp5 - damp4)*COS(angle2)*SIN(angle2)*mix2
-      cb8 = damp6
-!      cb4 = cnuei*(nuei_cb(11)+zeff_in*nuei_cb(12))
-!      cb5 = cnuei*(nuei_cb(13)+zeff_in*nuei_cb(14))
-!      cb6 = cnuei*(nuei_cb(15)+zeff_in*nuei_cb(16))
-!       cb1 = 12.0
-!       cb2 = 12.0
-!       cb3 = -xnu_factor_in*SQRT(1.5*cb1*cb2)
-!      write(*,*)"cb=",cb1,cb2,cb3,cb4,cb5,cb6
-      angle1=0.0
-!      cb1=1.0/(1.147 + 7.128*cnuei/kparvthe)
-!      cb2=xnu_factor_in/(1.147 + 7.128*cnuei/kparvthe)
       cb3=0.0
-!      cb4 =1.0/(1.147 + 7.128*cnuei/kparvthe)
       cb5 =0.0
-!      cb1 = 1.0/(0.45 +7.39*cnuei/kparvthe) + zeff_in*xnu_factor_in
       cb1 = 0.114*SQRT(kparvthe*cnuei*(1.0 + 0.82*zeff_in))
       cb1 = cb1*xnu_factor_in
       cb2 = cb1
@@ -956,9 +1076,22 @@
 !
 ! done with electron-ion collision model
 !
+!   generalized quench rule doppler term 
+        egamma = 0.0
+        ngamma = 0.0
+        tgamma = 0.0
+        if(alpha_quench_in.eq.0.0)egamma = -alpha_e_in*vexb_shear_s*sign_kx0
+!
+!            write(*,*)alpha_kx0_in,alpha_e_in
+!
 ! start of loop over species is,js for amat
 !
       do is = ns0,ns
+!
+        if(alpha_quench_in.eq.0.0)then
+          ngamma = -alpha_e_in*shear_ns_in(is)*sign_kx0
+          tgamma = -alpha_e_in*shear_ts_in(is)*sign_kx0
+        endif
       do js = ns0,ns
 !
 ! start of loop over basis ib,jb for amat
@@ -972,8 +1105,7 @@
 !
         xnuei = 0.0
         if(is.eq.1)then
-         xnuei = xnuei_in
-!         xnuei = xnuei_in/2.0
+          xnuei = xnue_in
         endif
         xnuion = 0.0
         d_ab=0.0
@@ -990,7 +1122,7 @@
         d1 = dpar_HP
         b3 = bper_DH
         d3 = dper_DH
-!        bs = 20.0*SQRT(taus(is)*mass(is))*ky/ABS(zs(is))
+        bs = 20.0*SQRT(taus(is)*mass(is))*ky/ABS(zs(is))
 !        b3 = MIN(bs,1.0)*bper_DH
 !        d3 = MIN(bs,1.0)*dper_DH
         b33 = (b1 - b3)/(3.0)
@@ -1002,10 +1134,13 @@
          hr11 = ave_hr11p0(is,ib,jb)
          hr13 = ave_hr13p0(is,ib,jb)
          hr33 = ave_hr33p0(is,ib,jb)
+         c_tor_par_hp1 = ave_c_tor_par_hp1p0(is,ib,jb)
+         c_tor_par_hr11 = ave_c_tor_par_hr11p0(is,ib,jb)
+         c_tor_par_hr13 = ave_c_tor_par_hr13p0(is,ib,jb)
 !        write(*,*)is,ib,jb
 !        write(*,*)hn,hp1,hp3
 !        write(*,*)hr11,hr13,hr33
-         if(betae_in.gt.0.0)then
+         if(use_bper_in)then
            hnb0 = ave_hnb0(is,ib,jb)
            hp1b0 = ave_hp1b0(is,ib,jb)
            hp3b0 = ave_hp3b0(is,ib,jb)
@@ -1015,28 +1150,49 @@
            hw113b0 = ave_hw113b0(is,ib,jb)
            hw133b0 = ave_hw133b0(is,ib,jb)
            hw333b0 = ave_hw333b0(is,ib,jb)
+           if(vpar_model_in.eq.0)then
+            hnbp = ave_hnbp(is,ib,jb)
+            hp1bp = ave_hp1bp(is,ib,jb)
+            hp3bp = ave_hp3bp(is,ib,jb)
+            hr11bp = ave_hr11bp(is,ib,jb)
+            hr13bp = ave_hr13bp(is,ib,jb)
+            hr33bp = ave_hr33bp(is,ib,jb)
+            hw113bp = ave_hw113bp(is,ib,jb)
+            hw133bp = ave_hw133bp(is,ib,jb)
+            hw333bp = ave_hw333bp(is,ib,jb)
+           endif
+         endif
+         if(use_bpar_in)then
            h10n = 1.5*(hnb0-hp3b0)
            h10p1 = 2.5*hp1b0 - 1.5*hr13b0
            h10p3 = 2.5*hp3b0 - 1.5*hr33b0
            h10r13 = 3.5*hr13b0 - 1.5*hw133b0
            h10r33 = 3.5*hr33b0 - 1.5*hw333b0
+         endif
 !           write(*,*)"check hb0",is,js,ib,jb
 !           write(*,*)h10n,h10p1,h10p3
 !           write(*,*)h10r13,h10r33
 !           write(*,*)hnb0,hp1b0,hp3b0
 !           write(*,*)hr11b0,hr13b0,hr33b0
 !           write(*,*)hw113b0,hw133b0,hw333b0
-         endif
          hu1 = ave_hu1(is,ib,jb)
          hu3 = ave_hu3(is,ib,jb)
          ht1 = ave_ht1(is,ib,jb)
          ht3 = ave_ht3(is,ib,jb)
 !         write(*,*)hu1,hu3,ht1,ht3
-         wdhp1 = ave_wdhp1(is,ib,jb)
-         wdhp3 = ave_wdhp3(is,ib,jb)
-         wdhr11 = ave_wdhr11(is,ib,jb)
-         wdhr13 = ave_wdhr13(is,ib,jb)
-         wdhr33 = ave_wdhr33(is,ib,jb)
+         wdhp1p0 = ave_wdhp1p0(is,ib,jb)
+         wdhr11p0 = ave_wdhr11p0(is,ib,jb)
+         wdhr13p0 = ave_wdhr13p0(is,ib,jb)
+         if(use_bper_in)then
+           wdhp1b0 = ave_wdhp1b0(is,ib,jb)
+           wdhr11b0 = ave_wdhr11b0(is,ib,jb)
+           wdhr13b0 = ave_wdhr13b0(is,ib,jb)
+           if(vpar_model_in.eq.0)then
+             wdhp1bp = ave_wdhp1bp(is,ib,jb)
+             wdhr11bp = ave_wdhr11bp(is,ib,jb)
+             wdhr13bp = ave_wdhr13bp(is,ib,jb)
+           endif
+         endif
          wdhu1 = ave_wdhu1(is,ib,jb)
          wdhu3 = ave_wdhu3(is,ib,jb)
          wdhu3ht1 = ave_wdhu3ht1(is,ib,jb)
@@ -1123,11 +1279,21 @@
 !          write(*,*)"ave_kpar_eff =",ave_kpar_eff(is,ib,jb)
 !          write(*,*)"ave_modkpar_eff =",ave_modkpar_eff(is,ib,jb)
 !
-          kpar_hn = k_par0*ave_kparhn(is,ib,jb)
-          kpar_hp1 = k_par0*ave_kparhp1(is,ib,jb)
-          kpar_hp3 = k_par0*ave_kparhp3(is,ib,jb)
-!          kpar_hr11 = k_par0*ave_kparhr11(is,ib,jb)
-!          kpar_hr13 = k_par0*ave_kparhr13(is,ib,jb)
+          kpar_hnp0 = k_par0*ave_kparhnp0(is,ib,jb)
+          kpar_hp1p0 = k_par0*ave_kparhp1p0(is,ib,jb)
+          kpar_hp3p0 = k_par0*ave_kparhp3p0(is,ib,jb)
+          if(use_bper_in)then
+            kpar_hp1b0 = k_par0*ave_kparhp1b0(is,ib,jb)
+            kpar_hr11b0 = k_par0*ave_kparhr11b0(is,ib,jb)
+            kpar_hr13b0 = k_par0*ave_kparhr13b0(is,ib,jb)
+            if(vpar_model_in.eq.0)then
+              kpar_hnbp = k_par0*ave_kparhnbp(is,ib,jb)
+              kpar_hp1bp = k_par0*ave_kparhp1bp(is,ib,jb)
+              kpar_hp3bp = k_par0*ave_kparhp3bp(is,ib,jb)
+              kpar_hr11bp = k_par0*ave_kparhr11bp(is,ib,jb)
+              kpar_hr13bp = k_par0*ave_kparhr13bp(is,ib,jb)
+            endif
+          endif
           kpar_hu1 = ave_kparhu1(is,ib,jb)
           kpar_hu3 = ave_kparhu3(is,ib,jb)
           kpar_hb1 = b1*ave_kpar_eff(is,ib,jb)
@@ -1172,10 +1338,16 @@
          gr11 = ave_gr11p0(is,ib,jb)
          gr13 = ave_gr13p0(is,ib,jb)
          gr33 = ave_gr33p0(is,ib,jb)
+         c_tor_par_gp1 = ave_c_tor_par_gp1p0(is,ib,jb)
+         c_tor_par_gr11 = ave_c_tor_par_gr11p0(is,ib,jb)
+         c_tor_par_gr13 = ave_c_tor_par_gr13p0(is,ib,jb)
+!         c_tor_par_gp1 = B2_ave_out*gp1
+!         c_tor_par_gr11 = B2_ave_out*gr11
+!         c_tor_par_gr13 = B2_ave_out*gr13
 !        write(*,*)is,js,ib,jb
 !        write(*,*)gn,gp1,gp3
 !        write(*,*)gr11,gr13,gr33
-         if(betae_in.gt.0.0)then
+         if(use_bper_in)then
            gnb0 = ave_gnb0(is,ib,jb)
            gp1b0 = ave_gp1b0(is,ib,jb)
            gp3b0 = ave_gp3b0(is,ib,jb)
@@ -1185,18 +1357,31 @@
            gw113b0 = ave_gw113b0(is,ib,jb)
            gw133b0 = ave_gw133b0(is,ib,jb)
            gw333b0 = ave_gw333b0(is,ib,jb)
+           if(vpar_model_in.eq.0)then
+            gnbp = ave_gnbp(is,ib,jb)
+            gp1bp = ave_gp1bp(is,ib,jb)
+            gp3bp = ave_gp3bp(is,ib,jb)
+            gr11bp = ave_gr11bp(is,ib,jb)
+            gr13bp = ave_gr13bp(is,ib,jb)
+            gr33bp = ave_gr33bp(is,ib,jb)
+            gw113bp = ave_gw113bp(is,ib,jb)
+            gw133bp = ave_gw133bp(is,ib,jb)
+            gw333bp = ave_gw333bp(is,ib,jb)
+           endif
+         endif
+         if(use_bpar_in)then
            g10n = 1.5*(gnb0-gp3b0)
            g10p1 = 2.5*gp1b0 - 1.5*gr13b0
            g10p3 = 2.5*gp3b0 - 1.5*gr33b0
            g10r13 = 3.5*gr13b0 - 1.5*gw133b0
            g10r33 = 3.5*gr33b0 - 1.5*gw333b0
+         endif
 !           write(*,*)"check gb0",ft,is,js,ib,jb
 !           write(*,*)g10n,g10p1,g10p3
 !           write(*,*)g10r13,g10r33
 !           write(*,*)gnb0,gp1b0,gp3b0
 !           write(*,*)gr11b0,gr13b0,gr33b0
 !           write(*,*)gw113b0,gw133b0,gw333b0
-         endif
          gu1 = ave_gu1(is,ib,jb)
          gu3 = ave_gu3(is,ib,jb)
          gt1 = ave_gt1(is,ib,jb)
@@ -1206,11 +1391,19 @@
 !         gu3 = hu3
 !         gt1 = ht1*ft2
 !         gt3 = ht3
-         wdgp1 = ave_wdgp1(is,ib,jb)
-         wdgp3 = ave_wdgp3(is,ib,jb)
-         wdgr11 = ave_wdgr11(is,ib,jb)
-         wdgr13 = ave_wdgr13(is,ib,jb)
-         wdgr33 = ave_wdgr33(is,ib,jb)
+         wdgp1p0 = ave_wdgp1p0(is,ib,jb)
+         wdgr11p0 = ave_wdgr11p0(is,ib,jb)
+         wdgr13p0 = ave_wdgr13p0(is,ib,jb)
+         if(use_bper_in)then
+           wdgp1b0 = ave_wdgp1b0(is,ib,jb)
+           wdgr11b0 = ave_wdgr11b0(is,ib,jb)
+           wdgr13b0 = ave_wdgr13b0(is,ib,jb)
+           if(vpar_model_in.eq.0)then
+            wdgp1bp = ave_wdgp1bp(is,ib,jb)
+            wdgr11bp = ave_wdgr11bp(is,ib,jb)
+            wdgr13bp = ave_wdgr13bp(is,ib,jb)
+           endif
+         endif
          wdgu1 = ave_wdgu1(is,ib,jb)
          wdgu3 = ave_wdgu3(is,ib,jb)
          wdgu33 = ave_wdgu33(is,ib,jb)
@@ -1300,11 +1493,21 @@
 !         write(*,*)"gu9i = ",gu9i
 !         write(*,*)"gu10i = ",gu10i
 !
-          kpar_gn = ave_kpargn(is,ib,jb)
-          kpar_gp1 = ave_kpargp1(is,ib,jb)
-          kpar_gp3 = ave_kpargp3(is,ib,jb)
-!          kpar_gr11 = k_par0*ave_kpargr11(is,ib,jb)
-!          kpar_gr13 = k_par0*ave_kpargr13(is,ib,jb)
+          kpar_gnp0 = k_par0*ave_kpargnp0(is,ib,jb)
+          kpar_gp1p0 = k_par0*ave_kpargp1p0(is,ib,jb)
+          kpar_gp3p0 = k_par0*ave_kpargp3p0(is,ib,jb)
+          if(use_bper_in)then
+            kpar_gp1b0 = k_par0*ave_kpargp1p0(is,ib,jb)
+            kpar_gr11b0 = k_par0*ave_kpargr11b0(is,ib,jb)
+            kpar_gr13b0 = k_par0*ave_kpargr13b0(is,ib,jb)
+            if(vpar_model_in.eq.0)then
+              kpar_gnbp = k_par0*ave_kpargnbp(is,ib,jb)
+              kpar_gp1bp = k_par0*ave_kpargp1bp(is,ib,jb)
+              kpar_gp3bp = k_par0*ave_kpargp3bp(is,ib,jb)
+              kpar_gr11bp = k_par0*ave_kpargr11bp(is,ib,jb)
+              kpar_gr13bp = k_par0*ave_kpargr13bp(is,ib,jb)
+            endif
+          endif
           kpar_gu1 = ave_kpargu1(is,ib,jb)
           kpar_gu3 = ave_kpargu3(is,ib,jb)
           kpar_gb1 = ft2*b1*ave_kpar_eff(is,ib,jb)
@@ -1342,13 +1545,12 @@
           gradgr13p1 = Linsker*ave_gradgr13p1(is,ib,jb) 
          endif    
 !
-        endif
+        endif  ! nroot>6
 !        write(*,*)is,js,"dhr13 = ",dhr13
 !        write(*,*)is,js,"dgr13 = ",dgr13
 !
         w_d1 = -ghat_in*w_d0
         k_par1 = k_par0
-        egamma = -ABS(vexb_shear)*alpha_e_in
         if(js.ne.is)then
           w_d1 = 0.0
           k_par1 = 0.0
@@ -1439,7 +1641,10 @@
 !         write(*,*)ave_kparht3(is,ib,jb)
 !
 ! 
-           M_ij = (zs(is)*vs(is)/taus(is))*zs(js)*as(js)*vs(js)/psi_scale
+           M_i = zs(is)*vs(is)/taus(is)
+           J_j = zs(js)*as(js)*vs(js)
+           E_i = zs(is)/taus(is)
+           N_j = zs(js)*as(js)
 !
 !        xnu_therm=0.D0
 !        write(*,*)is,js,ib,jb,xnuei,d_ab
@@ -1461,32 +1666,43 @@
 !
       ja = jb + ja0
 !
-      phi_A = as(js)*zs(js)* &
-       (xi*w_s*(rlns(is)*hn + rlts(is)*1.5*(hp3-hn))) &
-       -egamma*hn*(zs(is)/taus(is))*as(js)*zs(js)
-      phi_B = -hn*(zs(is)/taus(is))*as(js)*zs(js)
-      if(betae_sig.gt.0.0)then
+      phi_A = N_j*(xi*w_s*(rlns(is)*hn + rlts(is)*1.5*(hp3-hn)) &
+       -egamma*hn*E_i -ngamma*hn -tgamma*1.5*(hp3-hn)  &
+       + E_i*kpar_hnp0*vpar_s(is))
+      phi_B = -hn*E_i*N_j
+      sig_A = 0.0
+      sig_B = 0.0
+      psi_A = 0.0
+      psi_B = 0.0
+      phi_AU = 0.0
+      phi_BU = 0.0
+      psi_AN = 0.0
+      psi_BN = 0.0
+      if(use_bpar_in)then
         sig_A = -betae_sig*(as(js)*taus(js)*zs(is)/mass(is))* &
         (xi*w_s*(rlns(is)*h10n + rlts(is)*1.5*(h10p3-h10n)))
         sig_B = betae_sig*h10n*as(js)*taus(js)*zs(is)*zs(is) &
          /(taus(is)*mass(is))
         sig_A = sig_A - damp_sig*sig_B
-      else
-        sig_A = 0.0
-        sig_B = 0.0
       endif
-      if(betae_psi.gt.0.0)then
-        psi_UA = x_psi*M_ij*k_par_psi*vs(is)
-      else
-        psi_UA = 0.0
+      if(use_bper_in)then
+       psi_A = -betae_psi*J_j*xi*(w_cd*vpar_s(is)*wdhp1b0+w_s*vpar_shear_s(is)*hp1b0)
+       psi_B = betae_psi*M_i*J_j*vpar_s(is)*hp1b0/vs(is)
+       if(vpar_model_in.eq.0)then
+         phi_AU = betae_psi*U0*J_j*(xi*w_s*(rlns(is)*hnbp + rlts(is)*1.5*(hp3bp-hnbp)) &
+         -egamma*hnbp*E_i  + E_i*kpar_hnbp*vpar_s(is)) 
+         phi_BU = -betae_psi*U0*E_i*J_j*vpar_s(is)*hp1bp
+         psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar_s(is)*wdhp1bp+w_s*vpar_shear_s(is)*hp1bp)
+         psi_BN = -betae_psi*U0*M_i*N_j*vpar_s(is)*hp1bp/vs(is)
+       endif
       endif
 !
-      amat(ia,ja) = phi_A + egamma*d_ab 
-      bmat(ia,ja) = d_ab + phi_B
+      amat(ia,ja) = phi_A + psi_AN + egamma*d_ab 
+      bmat(ia,ja) = d_ab + phi_B + psi_BN
 !
       ja = nbasis+jb + ja0
-      amat(ia,ja) = -k_par*vs(is) + psi_UA + am*gradB*vs(is)
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = psi_A + phi_AU -k_par*vs(is) + am*gradB*vs(is)
+      bmat(ia,ja) = psi_B + phi_BU
 !
       ja = 2*nbasis+jb + ja0
       amat(ia,ja) = -0.5*sig_A -0.5*xi*w_d*taus(is)/zs(is)
@@ -1509,12 +1725,12 @@
 !  n_u ghost terms
 !
       ja = 6*nbasis+jb + ja0
-      amat(ia,ja) = -1.0*phi_A
-      bmat(ia,ja) = -1.0*phi_B
+      amat(ia,ja) = -1.0*(phi_A + psi_AN)
+      bmat(ia,ja) = -1.0*(phi_B + psi_BN)
 !
       ja = 7*nbasis+jb + ja0
-      amat(ia,ja) = 0.0
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = -1.0*(psi_A + phi_AU)
+      bmat(ia,ja) = -1.0*(psi_B + phi_BU)
 !
       ja = 8*nbasis+jb + ja0
       amat(ia,ja) = -0.5*(-1.0*sig_A)
@@ -1535,8 +1751,8 @@
 !  n_u trapped particle terms
 !
       ja = 12*nbasis+jb + ja0
-      amat(ia,ja) = phi_A
-      bmat(ia,ja) = phi_B
+      amat(ia,ja) = phi_A + psi_AN
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = 13*nbasis+jb + ja0
       amat(ia,ja) = -0.5*sig_A
@@ -1552,35 +1768,43 @@
 !
       ia = nbasis+ib + ia0
 !
-      if(betae_psi.gt.0.0)then
-        psi_A = betae_psi*M_ij*(taus(is)/zs(is))* &
-         (-xi*w_s*(rlns(is)*hp1b0+1.5*rlts(is)*(hr13b0-hp1b0))) 
-!          +xi*x_psi*wd_psi*(0.5*wdhu1+1.5*wdhu3))
-        psi_B = hp1b0*betae_psi*M_ij
-        psi_A = psi_A - damp_psi*psi_B
-        psi_UA = -x_psi*M_ij*xnuei*(d_ab_psi*xnu_u_u_1 - hu3*xnu_u_q3_1)
-        psi_UB = -x_psi*M_ij*d_ab_psi
-      else
-        psi_A = 0.0
-        psi_B = 0.0
-        psi_UA = 0.0
-        psi_UB = 0.0
+      phi_A = N_j*xi*(w_s*vpar_shear_s(is)*hp1 +w_cd*wdhp1p0*vpar_s(is))/vs(is)
+      phi_B = -E_i*N_j*hp1*vpar_s(is)/vs(is)
+      sig_A = 0.0
+      sig_B = 0.0
+      psi_A = 0.0
+      psi_B = 0.0
+      phi_AU = 0.0
+      phi_BU = 0.0
+      psi_AN = 0.0
+      psi_BN = 0.0
+      if(use_bper_in)then
+       psi_A = -betae_psi*J_j*(vs(is)*xi*w_s*(rlns(is)*hp1b0+1.5*rlts(is)*(hr13b0-hp1b0))  &
+         + M_i*kpar_hp1b0*vpar_s(is))
+       psi_B = betae_psi*M_i*J_j*hp1b0
+       psi_A = psi_A - damp_psi*psi_B
+       if(vpar_model_in.eq.0)then
+        phi_AU = betae_psi*U0*J_j*xi*(w_s*vpar_shear_s(is)*hp1bp +w_cd*wdhp1bp*vpar_s(is))/vs(is)
+        phi_BU = -betae_psi*U0*E_i*J_j*hp1bp*vpar_s(is)/vs(is)
+        psi_AN = betae_psi*U0*N_j*(vs(is)*xi*w_s*(rlns(is)*hp1bp+1.5*rlts(is)*(hr13bp-hp1bp))  &
+          + M_i*kpar_hp1bp*vpar_s(is))
+        psi_BN = -betae_psi*U0*M_i*N_j*hp1bp
+       endif
       endif
-      phi_A = as(js)*zs(js)*xi*ky*vpar_shear*hp1/vs(is)
 !
 ! u_par_u  untrapped terms
 !
 !
       ja = jb + ja0
-      amat(ia,ja) = phi_A
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = phi_A + psi_AN
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = nbasis+jb + ja0
-      amat(ia,ja) =  psi_A +psi_UA + egamma*d_ab &
+      amat(ia,ja) =  psi_A +phi_AU + egamma*d_ab &
        -d_ee*nuei_u_u_1  &
        +xnuei*(d_ab*xnu_u_u_1 - d_ij*hu3*xnu_u_q3_1)
 !      +resist(is,js)
-      bmat(ia,ja) = d_ab + psi_B +psi_UB
+      bmat(ia,ja) = d_ab + psi_B +phi_BU
 !
       ja = 2*nbasis+jb + ja0
       amat(ia,ja) =  -(k_par - k_par1*gradhp1p1)*vs(is) &
@@ -1606,12 +1830,12 @@
 !  u_par_u ghost terms
 !
       ja = 6*nbasis+jb + ja0
-      amat(ia,ja) = -1.0*phi_A
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = -1.0*(phi_A + psi_AN)
+      bmat(ia,ja) = -1.0*(phi_B + psi_BN)
 !
       ja = 7*nbasis+jb + ja0
-      amat(ia,ja) = -1.0*psi_A
-      bmat(ia,ja) = -1.0*psi_B
+      amat(ia,ja) = -1.0*(psi_A + phi_AU)
+      bmat(ia,ja) = -1.0*(psi_B + phi_BU)
 !
       ja = 8*nbasis+jb + ja0
       amat(ia,ja) = 0.0
@@ -1632,8 +1856,8 @@
 ! u_par_u trapped particle terms
 !
       ja = 12*nbasis+jb + ja0
-      amat(ia,ja) = phi_A
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = phi_A + psi_AN
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = 13*nbasis+jb + ja0
       amat(ia,ja) = 0.0
@@ -1649,33 +1873,49 @@
 !
       ia = 2*nbasis+ib + ia0
 !
-      phi_A = as(js)*zs(js)* &
-       (xi*w_s*(rlns(is)*hp1 + rlts(is)*1.5*(hr13-hp1))) &
-       -egamma*hp1*(zs(is)/taus(is))*as(js)*zs(js)
-      phi_B = -hp1*(zs(is)/taus(is))*as(js)*zs(js)
-      if(betae_sig.gt.0.0)then
+      phi_A = N_j*(xi*w_s*(rlns(is)*hp1 + rlts(is)*1.5*(hr13-hp1)) &
+       -egamma*hp1*E_i -ngamma*hp1 - tgamma*1.5*(hr13-hp1)  &
+       +E_i*kpar_hp1p0*vpar_s(is))
+      phi_B = -hp1*E_i*N_j
+      sig_A = 0.0
+      sig_B = 0.0
+      psi_A = 0.0
+      psi_B = 0.0
+      phi_AU = 0.0
+      phi_BU = 0.0
+      psi_AN = 0.0
+      psi_BN = 0.0
+      if(use_bpar_in)then
         sig_A = -betae_sig*(as(js)*taus(js)*zs(is)/mass(is))* &
         (xi*w_s*(rlns(is)*h10p1 + rlts(is)*1.5*(h10r13-h10p1)))
         sig_B = betae_sig*h10p1*as(js)*taus(js)*zs(is)*zs(is) &
         /(taus(is)*mass(is))
         sig_A = sig_A - damp_sig*sig_B
-      else
-        sig_A = 0.0
-        sig_B = 0.0
+      endif
+      if(use_bper_in)then
+       psi_A = -betae_psi*J_j*xi*(w_cd*vpar_s(is)*wdhr11b0+w_s*vpar_shear_s(is)*hr11b0)
+       psi_B = betae_psi*M_i*J_j*vpar_s(is)*hr11b0/vs(is)
+       if(vpar_model_in.eq.0)then
+        phi_AU = betae_psi*U0*J_j*(xi*w_s*(rlns(is)*hp1bp + rlts(is)*1.5*(hr13bp-hp1bp)) &
+        -egamma*hp1bp*E_i +E_i*kpar_hp1bp*vpar_s(is))
+        phi_BU = -betae_psi*U0*hp1bp*E_i*J_j
+        psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar_s(is)*wdhr11bp+w_s*vpar_shear_s(is)*hr11bp)
+        psi_BN = -betae_psi*U0*M_i*N_j*vpar_s(is)*hr11bp/vs(is)
+       endif
       endif
 !
 !  p_par_u  untrapped terms
 !
       ja = jb + ja0
-      amat(ia,ja) = phi_A &
+      amat(ia,ja) = phi_A + psi_AN  &
        +2.0*taus(is)*(modw_d1*hv1rht1/ABS(zs(is)) +w_d1*xi*hv1iht1/zs(is)) &
        +2.0*taus(is)*(modw_d1*hv2rht3/ABS(zs(is)) +w_d1*xi*hv2iht3/zs(is)) &
       -xnuei*d_ij*xnu_p1_1*(ht1-ht3)
-      bmat(ia,ja) = phi_B
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = nbasis+jb + ja0
-      amat(ia,ja) = k_par1*grad_hu1*vs(is)
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = k_par1*grad_hu1*vs(is) + psi_A + phi_AU
+      bmat(ia,ja) = psi_B + phi_BU
 !
       ja = 2*nbasis+jb + ja0
       amat(ia,ja) =  -0.5*sig_A + egamma*d_ab  & 
@@ -1705,12 +1945,12 @@
 !   p_par_u ghost terms
 !
       ja = 6*nbasis+jb + ja0
-      amat(ia,ja) = -1.0*phi_A
-      bmat(ia,ja) = -1.0*phi_B
+      amat(ia,ja) = -1.0*(phi_A + psi_AN)
+      bmat(ia,ja) = -1.0*(phi_B + psi_BN)
 !
       ja = 7*nbasis+jb + ja0
-      amat(ia,ja) = 0.0
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = -1.0*(psi_A + phi_AU)
+      bmat(ia,ja) = -1.0*(psi_B + phi_BU)
 !
       ja = 8*nbasis+jb + ja0
       amat(ia,ja) = -0.5*(-1.0*sig_A)
@@ -1731,8 +1971,8 @@
 !  p_par_u trapped particle terms
 !
       ja = 12*nbasis+jb + ja0
-      amat(ia,ja) = phi_A
-      bmat(ia,ja) = phi_B
+      amat(ia,ja) = phi_A + psi_AN
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = 13*nbasis+jb + ja0
       amat(ia,ja) = -0.5*sig_A
@@ -1748,32 +1988,48 @@
 !
       ia = 3*nbasis+ib + ia0
 !
-      phi_A = as(js)*zs(js)* &
-       (xi*w_s*(rlns(is)*hp3+rlts(is)*1.5*(hr33-hp3)))  &
-       -egamma*hp3*(zs(is)/taus(is))*as(js)*zs(js)
-      phi_B = -hp3*(zs(is)/taus(is))*as(js)*zs(js)
-      if(betae_sig.gt.0.0)then
+      phi_A = N_j*(xi*w_s*(rlns(is)*hp3+rlts(is)*1.5*(hr33-hp3))    &
+       -egamma*hp3*E_i -ngamma*hp3 - tgamma*1.5*(hr33-hp3)   &
+       + E_i*kpar_hp3p0*vpar_s(is))
+      phi_B = -hp3*E_i*N_j
+      sig_A = 0.0
+      sig_B = 0.0
+      psi_A = 0.0
+      psi_B = 0.0
+      phi_AU = 0.0
+      phi_BU = 0.0
+      psi_AN = 0.0
+      psi_BN = 0.0
+      if(use_bpar_in)then
          sig_A = -betae_sig*(as(js)*taus(js)*zs(is)/mass(is))* &
         (xi*w_s*(rlns(is)*h10p3 + rlts(is)*1.5*(h10r33-h10p3)))
          sig_B = betae_sig*h10p3*as(js)*taus(js)*zs(is)*zs(is) &
          /(taus(is)*mass(is))
         sig_A = sig_A - damp_sig*sig_B
-      else
-         sig_A = 0.0
-         sig_B = 0.0
+      endif
+      if(use_bper_in)then
+       psi_A = -betae_psi*J_j*xi*(w_cd*vpar_s(is)*wdhr13b0+w_s*vpar_shear_s(is)*hr13b0)
+       psi_B = betae_psi*M_i*J_j*vpar_s(is)*hr13b0/vs(is)
+       if(vpar_model_in.eq.0)then
+         phi_AU = betae_psi*U0*J_j*(xi*w_s*(rlns(is)*hp3bp+rlts(is)*1.5*(hr33bp-hp3bp))    &
+         -egamma*hp3bp*E_i + E_i*kpar_hp3bp*vpar_s(is))
+         phi_BU = -betae_psi*U0*hp3bp*E_i*J_j
+         psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar_s(is)*wdhr13bp +w_s*vpar_shear_s(is)*hr13bp)
+         psi_BN = -betae_psi*U0*M_i*N_j*vpar_s(is)*hr13bp/vs(is)
+        endif
       endif
 !
 !   p_tot_u untrapped terms
 !
       ja = jb + ja0
-      amat(ia,ja) = phi_A &
+      amat(ia,ja) = phi_A + psi_AN  &
        +2.0*taus(is)*(modw_d1*hv3rht1/ABS(zs(is)) +w_d1*xi*hv3iht1/zs(is)) &
        +2.0*taus(is)*(modw_d1*hv4rht3/ABS(zs(is)) +w_d1*xi*hv4iht3/zs(is))
-      bmat(ia,ja) = phi_B
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = nbasis+jb + ja0
-      amat(ia,ja) = k_par1*grad_hu3*vs(is)
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = k_par1*grad_hu3*vs(is) + psi_A + phi_AU
+      bmat(ia,ja) = psi_B + phi_BU
 !
       ja = 2*nbasis+jb + ja0
       amat(ia,ja) = -0.5*sig_A  &
@@ -1800,12 +2056,12 @@
 !   p_tot_u ghost terms
 !
       ja = 6*nbasis+jb + ja0
-      amat(ia,ja) = -1.0*phi_A
-      bmat(ia,ja) = -1.0*phi_B
+      amat(ia,ja) = -1.0*(phi_A + psi_AN)
+      bmat(ia,ja) = -1.0*(phi_B + psi_BN)
 !
       ja = 7*nbasis+jb + ja0
-      amat(ia,ja) = 0.0
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = -1.0*(psi_A + phi_AU)
+      bmat(ia,ja) = -1.0*(psi_B + phi_BU)
 !
       ja = 8*nbasis+jb + ja0
       amat(ia,ja) = -0.5*(-1.0*sig_A)
@@ -1826,8 +2082,8 @@
 !   p_tot_u trapped terms
 !
       ja = 12*nbasis+jb + ja0
-      amat(ia,ja) = phi_A
-      bmat(ia,ja) = phi_B
+      amat(ia,ja) = phi_A + psi_AN
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = 13*nbasis+jb + ja0
       amat(ia,ja) = -0.5*sig_A
@@ -1843,40 +2099,43 @@
 !
       ia = 4*nbasis+ib + ia0
 !
-      if(betae_psi.gt.0.0)then
-        psi_A = betae_psi*M_ij* &
-         (-xi*w_s*(taus(is)/zs(is))* &
-          (rlns(is)*hr11b0+1.5*rlts(is)*(hw113b0-hr11b0))) 
-!          +x_psi*taus(is)*(modwd_psi*hv5r/ABS(zs(is)) + wd_psi*xi*hv5i/zs(is) &
-!          +modwd_psi*hv6rhu1/ABS(zs(is)) + wd_psi*xi*hv6ihu1/zs(is)  &
-!          +modwd_psi*hv7rhu3/ABS(zs(is)) + wd_psi*xi*hv7ihu3/zs(is)))
-        psi_B = hr11b0*betae_psi*M_ij
-        psi_A = psi_A - damp_psi*psi_B
-        psi_UA =-x_psi*M_ij*(modk_par0*modkpar_hd1hu1*vs(is) &
-          - taus(is)*(modwd_psi*hv5r/ABS(zs(is)) + wd_psi*xi*hv5i/zs(is)))
-!          +xnuei*(d_ab_psi*xnu_q1_u_1 - hu1*xnu_q1_q1_1 &
-!          - hu3*xnu_q1_q3_1)) 
-      else
-        psi_A = 0.0
-        psi_B = 0.0
-        psi_UA = 0.0
+      phi_A = N_j*xi*(w_s*hr11*vpar_shear_s(is) +w_cd*wdhr11p0*vpar_s(is))/vs(is)
+      phi_B = -E_i*N_j*hr11*vpar_s(is)/vs(is)
+      sig_A = 0.0
+      sig_B = 0.0
+      psi_A = 0.0
+      psi_B = 0.0
+      phi_AU = 0.0
+      phi_BU = 0.0
+      psi_AN = 0.0
+      psi_BN = 0.0
+      if(use_bper_in)then
+       psi_A = -betae_psi*J_j*(vs(is)*xi*w_s*(rlns(is)*hr11b0+1.5*rlts(is)*(hw113b0-hr11b0)) &
+         +M_i*kpar_hr11b0*vpar_s(is))
+       psi_B =betae_psi*M_i*J_j*hr11b0
+       psi_A = psi_A - damp_psi*psi_B
+       if(vpar_model_in.eq.0)then
+        phi_AU = betae_psi*U0*J_j*xi*(w_s*hr11bp*vpar_shear_s(is) +w_cd*wdhr11bp*vpar_s(is))/vs(is)
+        phi_BU = -betae_psi*U0*E_i*J_j*hr11bp*vpar_s(is)/vs(is)
+        psi_AN = betae_psi*U0*N_j*(vs(is)*xi*w_s*(rlns(is)*hr11bp+1.5*rlts(is)*(hw113bp-hr11bp)) &
+         +M_i*kpar_hr11bp*vpar_s(is))
+        psi_BN =-betae_psi*U0*M_i*N_j*hr11bp
+       endif
       endif
-      phi_A = as(js)*zs(js)*xi*ky*vpar_shear*hr11/vs(is)
-!      if(is.eq.1)phi_A = phi_A +(zs(is)/taus(is))*as(js)*zs(js)*vs(is)*kpar_hp3*c08
 !
 !  q_par_u untrapped terms
 !
       ja =          jb + ja0
-      amat(ia,ja) = k_par1*kpar_hb1ht1*vs(is) + phi_A 
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = k_par1*kpar_hb1ht1*vs(is) + phi_A + psi_AN
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja =   nbasis+jb + ja0
-      amat(ia,ja) = psi_A + psi_UA +modk_par1*modkpar_hd1hu1*vs(is) &
+      amat(ia,ja) = psi_A + phi_AU +modk_par1*modkpar_hd1hu1*vs(is) &
        - taus(is)*(modw_d1*hv5r/ABS(zs(is)) + w_d1*xi*hv5i/zs(is)) &
       -d_ee*nuei_q1_u_1  &
       +xnuei*(d_ab*xnu_q1_u_1 - d_ij*hu1*xnu_q1_q1_1 &
        - d_ij*hu3*xnu_q1_q3_1)
-      bmat(ia,ja) = psi_B
+      bmat(ia,ja) = psi_B + phi_BU
 !
       ja = 2*nbasis+jb + ja0
       amat(ia,ja) = -k_par1*(kpar_hu1 -grad_hu1 - gradhr11p1)*vs(is) &
@@ -1908,12 +2167,12 @@
 !  q_par_u ghost terms
 !
       ja = 6*nbasis+jb + ja0
-      amat(ia,ja) = -1.0*phi_A
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = -1.0*(phi_A + psi_AN)
+      bmat(ia,ja) = -1.0*(phi_B + psi_BN)
 !
       ja = 7*nbasis+jb + ja0
-      amat(ia,ja) = -1.0*psi_A
-      bmat(ia,ja) = -1.0*psi_B
+      amat(ia,ja) = -1.0*(psi_A + phi_AU)
+      bmat(ia,ja) = -1.0*(psi_B + phi_BU)
 !
       ja = 8*nbasis+jb + ja0
       amat(ia,ja) = 0.0
@@ -1934,8 +2193,8 @@
 !  q_par_u trapped terms
 !
       ja = 12*nbasis+jb + ja0
-      amat(ia,ja) = phi_A
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = phi_A + psi_AN
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = 13*nbasis+jb + ja0
       amat(ia,ja) = 0.0
@@ -1951,40 +2210,44 @@
 !
       ia = 5*nbasis+ib + ia0
 !
-      if(betae_psi.gt.0.0)then
-        psi_A = betae_psi*M_ij* &
-         (-xi*w_s*(taus(is)/zs(is))* &
-          (rlns(is)*hr13b0+1.5*rlts(is)*(hw133b0-hr13b0)) ) 
-!          +x_psi*taus(is)*(modwd_psi*hv8r/ABS(zs(is)) + wd_psi*xi*hv8i/zs(is) &
-!          +modwd_psi*hv9rhu1/ABS(zs(is)) + wd_psi*xi*hv9ihu1/zs(is)  &
-!          +modwd_psi*hv10rhu3/ABS(zs(is)) + wd_psi*xi*hv10ihu3/zs(is)))
-        psi_B = hr13b0*betae_psi*M_ij
-        psi_A = psi_A - damp_psi*psi_B
-        psi_UA = -x_psi*M_ij* &
-         (modk_par0*(modkpar_hd3hu3 + modkpar_hd33hu1)*vs(is) &
-         - taus(is)*(modwd_psi*hv8r/ABS(zs(is)) + wd_psi*xi*hv8i/zs(is)))
-!         +xnuei*(d_ab_psi*xnu_q3_u_1 - hu3*xnu_q3_q3_1))
-      else
-        psi_A = 0.0
-        psi_B = 0.0
-        psi_UA = 0.0
+      phi_A = N_j*xi*(w_s*vpar_shear_s(is)*hr13 +w_cd*wdhr13p0*vpar_s(is))/vs(is)
+      phi_B = -E_i*N_j*hr13*vpar_s(is)/vs(is)
+      sig_A = 0.0
+      sig_B = 0.0
+      psi_A = 0.0
+      psi_B = 0.0
+      phi_AU = 0.0
+      phi_BU = 0.0
+      psi_AN = 0.0
+      psi_BN = 0.0
+      if(use_bper_in)then
+       psi_A = -betae_psi*J_j*(vs(is)*xi*w_s*(rlns(is)*hr13b0+1.5*rlts(is)*(hw133b0-hr13b0)) &
+         + M_i*kpar_hr13b0*vpar_s(is))
+       psi_B = hr13b0*betae_psi*M_i*J_j
+       psi_A = psi_A - damp_psi*psi_B
+       if(vpar_model_in.eq.0)then
+        phi_AU = betae_psi*U0*J_j*xi*(w_s*vpar_shear_s(is)*hr13bp +w_cd*wdhr13bp*vpar_s(is))/vs(is)
+        phi_BU = -betae_psi*U0*E_i*J_j*hr13bp*vpar_s(is)/vs(is)
+        psi_AN = betae_psi*U0*N_j*(vs(is)*xi*w_s*(rlns(is)*hr13bp+1.5*rlts(is)*(hw133bp-hr13bp)) &
+         + M_i*kpar_hr13bp*vpar_s(is))
+        psi_BN = -betae_psi*U0*hr13bp*M_i*N_j
+       endif
       endif
-      phi_A = as(js)*zs(js)*xi*ky*vpar_shear*hr13/vs(is)
 !
 !  q_tot_u untrapped terms
 !
       ja = jb + ja0
-      amat(ia,ja) = phi_A  &
+      amat(ia,ja) = phi_A + psi_AN  &
        +k_par1*(kpar_hb3ht3 -dhr13+ kpar_hb33ht1)*vs(is)
-      bmat(ia,ja) = 0.0
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = nbasis+jb + ja0
-      amat(ia,ja) =  psi_A + psi_UA + &
+      amat(ia,ja) =  psi_A  + phi_AU + &
        modk_par1*(modkpar_hd3hu3 + modkpar_hd33hu1)*vs(is) &
         - taus(is)*(modw_d1*hv8r/ABS(zs(is)) + w_d1*xi*hv8i/zs(is)) &
        -d_ee*nuei_q3_u_1  &
        +xnuei*(d_ab*xnu_q3_u_1 - d_ij*hu3*xnu_q3_q3_1)
-      bmat(ia,ja) = psi_B
+      bmat(ia,ja) = psi_B + phi_BU
 !
       ja = 2*nbasis+jb + ja0
       amat(ia,ja) = - k_par1*(kpar_hu3 -grad_hu3 - gradhr13p1)*vs(is) & 
@@ -2015,12 +2278,12 @@
 !  q_tot_u ghost terms
 !
       ja = 6*nbasis+jb + ja0
-      amat(ia,ja) = -1.0*phi_A
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = -1.0*(phi_A + psi_AN)
+      bmat(ia,ja) = -1.0*(phi_B + psi_BN)
 !
       ja = 7*nbasis+jb + ja0
-      amat(ia,ja) = -1.0*psi_A
-      bmat(ia,ja) = -1.0*psi_B
+      amat(ia,ja) = -1.0*(psi_A + phi_AU)
+      bmat(ia,ja) = -1.0*(psi_B + phi_BU)
 !
       ja = 8*nbasis+jb + ja0
       amat(ia,ja) = 0.0
@@ -2041,8 +2304,8 @@
 !  q_tot_u trapped terms
 !
       ja = 12*nbasis+jb + ja0
-      amat(ia,ja) = phi_A
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = phi_A + psi_AN
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = 13*nbasis+jb + ja0
       amat(ia,ja) = 0.0
@@ -2060,36 +2323,47 @@
 !
       ia = 6*nbasis+ib + ia0
 !
-      phi_A = as(js)*zs(js)* &
-        (xi*w_s*(rlns(is)*gn + rlts(is)*1.5*(gp3-gn))) &
-        -egamma*gn*(zs(is)/taus(is))*as(js)*zs(js)
-      phi_B = -gn*(zs(is)/taus(is))*as(js)*zs(js)
+      phi_A = N_j*(xi*w_s*(rlns(is)*gn + rlts(is)*1.5*(gp3-gn))  &
+        -egamma*gn*E_i -ngamma*gn - tgamma*1.5*(gp3-gn)   &
+        + E_i*kpar_gnp0*vpar_s(is))
+      phi_B = -E_i*N_j*gn
       phi_A = phi_A +xnu_phi_b*xnuei*xnu_n_b*phi_B
-      if(betae_sig.gt.0.0)then
+      sig_A = 0.0
+      sig_B = 0.0
+      psi_A = 0.0
+      psi_B = 0.0
+      phi_AU = 0.0
+      phi_BU = 0.0
+      psi_AN = 0.0
+      psi_BN = 0.0
+      if(use_bpar_in)then
          sig_A = -betae_sig*(as(js)*taus(js)*zs(is)/mass(is))* &
         (xi*w_s*(rlns(is)*g10n + rlts(is)*1.5*(g10p3-g10n)))
          sig_B = betae_sig*g10n*as(js)*taus(js)*zs(is)*zs(is) &
          /(taus(is)*mass(is))
         sig_A = sig_A - damp_sig*sig_B
-      else
-         sig_A = 0.0
-         sig_B = 0.0
       endif
-      if(betae_psi.gt.0.0)then
-        psi_UA = x_psi*M_ij*k_par_psi*vs(is)
-      else
-        psi_UA = 0.0
+      if(use_bper_in)then
+       psi_A = -betae_psi*J_j*xi*(w_cd*vpar_s(is)*wdgp1b0+w_s*vpar_shear_s(is)*gp1b0)
+       psi_B = betae_psi*M_i*J_j*vpar_s(is)*gp1b0/vs(is)
+       if(vpar_model_in.eq.0)then
+        phi_AU = betae_psi*U0*J_j*(xi*w_s*(rlns(is)*gnbp + rlts(is)*1.5*(gp3bp-gnbp))  &
+         -egamma*gnbp*E_i + E_i*kpar_gnbp*vpar_s(is))
+        phi_BU = -betae_psi*U0*E_i*J_j*gnbp
+        psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar_s(is)*wdgp1bp+w_s*vpar_shear_s(is)*gp1bp)
+        psi_BN = -betae_psi*U0*M_i*N_j*vpar_s(is)*gp1bp/vs(is)
+       endif
       endif
 !
 !  n_g untrapped terms
 !
       ja = jb + ja0
-      amat(ia,ja) = phi_A +d_ee*nuei_n_n*bn
-      bmat(ia,ja) = phi_B
+      amat(ia,ja) = phi_A + psi_AN +d_ee*nuei_n_n*bn
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = nbasis+jb + ja0
-      amat(ia,ja) = 0.0
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = psi_A + phi_AU
+      bmat(ia,ja) = psi_B + phi_BU
 !
       ja = 2*nbasis+jb + ja0
       amat(ia,ja) = -0.5*sig_A +d_ee*nuei_n_p1*bp1  &
@@ -2112,14 +2386,14 @@
 !  n_g ghost terms
 !
       ja = 6*nbasis+jb + ja0
-      amat(ia,ja) = -1.0*phi_A + egamma*d_ab &
+      amat(ia,ja) = -1.0*(phi_A +psi_AN) + egamma*d_ab &
        -d_ee*nuei_n_n  &
        +xnuei*d_ab*xnu_n_b 
-      bmat(ia,ja) = d_ab - 1.0*phi_B
+      bmat(ia,ja) = d_ab - 1.0*(phi_B + psi_BN)
 !
       ja = 7*nbasis+jb + ja0
-      amat(ia,ja) = -k_par*vs(is) + psi_UA + am*gradB*vs(is)
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = -k_par*vs(is) + am*gradB*vs(is) -1.0*(psi_A + phi_AU)
+      bmat(ia,ja) = -1.0*(psi_B + phi_BU)
 !
       ja = 8*nbasis+jb + ja0
       amat(ia,ja) = -0.5*(-1.0*sig_A) &
@@ -2144,11 +2418,11 @@
 ! n_g trapped terms
 !
       ja = 12*nbasis+jb + ja0
-      amat(ia,ja) = phi_A 
-      bmat(ia,ja) = phi_B
+      amat(ia,ja) = phi_A + psi_AN
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = 13*nbasis+jb + ja0
-      amat(ia,ja) =  -0.5*sig_A 
+      amat(ia,ja) = -0.5*sig_A 
       bmat(ia,ja) = -0.5*sig_B
 !
       ja = 14*nbasis+jb + ja0
@@ -2159,33 +2433,39 @@
 !
       ia = 7*nbasis+ib + ia0
 !
-      if(betae_psi.gt.0.0)then
-        psi_A = betae_psi*M_ij*(taus(is)/zs(is))*  &
-         (-xi*w_s*(rlns(is)*gp1b0+1.5*rlts(is)*(gr13b0-gp1b0))) 
-!         + xnuei*xnu_u_b*gp1b0*betae_psi*M_ij
-!          +xi*x_psi*ft3*wd_psi*(0.5*wdgu1+1.5*wdgu3))
-        psi_B = gp1b0*betae_psi*M_ij
-        psi_A = psi_A - damp_psi*psi_B
-        psi_UA = -x_psi*M_ij*xnuei*(d_ab_psi*xnu_u_u_1 - gu3*xnu_u_q3_1  &
-         +d_ab_psi*xnu_u_b)
-        psi_UB = -x_psi*M_ij*d_ab_psi
-      else
-        psi_A = 0.0
-        psi_B = 0.0
-        psi_UA = 0.0
-        psi_UB = 0.0
+      phi_A = N_j*xi*(w_s*vpar_shear_s(is)*gp1 +w_cd*wdgp1p0*vpar_s(is))/vs(is)
+      phi_B = -E_i*N_j*gp1*vpar_s(is)/vs(is)
+      sig_A = 0.0
+      sig_B = 0.0
+      psi_A = 0.0
+      psi_B = 0.0
+      phi_AU = 0.0
+      phi_BU = 0.0
+      psi_AN = 0.0
+      psi_BN = 0.0
+      if(use_bper_in)then
+       psi_A = -betae_psi*J_j*(vs(is)*xi*w_s*(rlns(is)*gp1b0+1.5*rlts(is)*(gr13b0-gp1b0)) &
+         + M_i*kpar_gp1b0*vpar_s(is)) 
+       psi_B =betae_psi*M_i*J_j*gp1b0
+       psi_A = psi_A - damp_psi*psi_B
+       if(vpar_model_in.eq.0)then
+        phi_AU = betae_psi*U0*J_j*xi*(w_s*vpar_shear_s(is)*gp1bp +w_cd*wdgp1bp*vpar_s(is))/vs(is)
+        phi_BU = -betae_psi*U0*E_i*J_j*gp1bp*vpar_s(is)/vs(is)
+        psi_AN = betae_psi*U0*N_j*(vs(is)*xi*w_s*(rlns(is)*gp1bp+1.5*rlts(is)*(gr13bp-gp1bp)) &
+         + M_i*kpar_gp1bp*vpar_s(is)) 
+        psi_BN = -betae_psi*U0*M_i*N_j*gp1bp
+       endif
       endif
-      phi_A = as(js)*zs(js)*xi*ky*vpar_shear*gp1/vs(is)
 !
 ! u_par_g untrapped terms
 !
       ja = jb + ja0
-      amat(ia,ja) = phi_A
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = phi_A + psi_AN
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = nbasis+jb + ja0
-      amat(ia,ja) = psi_A + d_ee*ft3*nuei_u_u 
-      bmat(ia,ja) = psi_B
+      amat(ia,ja) = psi_A + phi_AU + d_ee*ft3*nuei_u_u 
+      bmat(ia,ja) = psi_B + phi_BU
 !
       ja = 2*nbasis+jb + ja0
       amat(ia,ja) = 0.0
@@ -2210,16 +2490,16 @@
 ! u_par_g ghost terms
 !
       ja = 6*nbasis+jb + ja0
-      amat(ia,ja) = -1.0*phi_A
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = -1.0*(phi_A + psi_AN)
+      bmat(ia,ja) = -1.0*(phi_B + psi_BN)
 !
       ja = 7*nbasis+jb + ja0
-      amat(ia,ja) = -1.0*psi_A + psi_UA + egamma*d_ab &
+      amat(ia,ja) = -1.0*(psi_A + phi_AU) + egamma*d_ab &
        -d_ee*nuei_u_u_t -d_ee*nuei_u_u  &
        +xnuei*(d_ab*xnu_u_u_1 - d_ij*gu3*xnu_u_q3_1) &
        +xnuei*d_ab*xnu_u_b 
 !    &   +resist(is,js)
-      bmat(ia,ja) = d_ab -1.0*psi_B +psi_UB
+      bmat(ia,ja) = d_ab -1.0*(psi_B + phi_BU)
 !
       ja = 8*nbasis+jb + ja0
       amat(ia,ja) = -(k_par - k_par1*gradgp1p1)*vs(is) &
@@ -2245,8 +2525,8 @@
 ! u_par_g trapped terms
 !
       ja = 12*nbasis+jb + ja0
-      amat(ia,ja) = phi_A
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = phi_A + psi_AN
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = 13*nbasis+jb + ja0
       amat(ia,ja) = 0.0
@@ -2260,31 +2540,47 @@
 !
       ia = 8*nbasis+ib + ia0
 !
-      phi_A = as(js)*zs(js)* &
-        (xi*w_s*(rlns(is)*gp1 + rlts(is)*1.5*(gr13-gp1))) &
-        -egamma*gp1*(zs(is)/taus(is))*as(js)*zs(js)
-      phi_B = -gp1*(zs(is)/taus(is))*as(js)*zs(js)
+      phi_A = N_j*(xi*w_s*(rlns(is)*gp1 + rlts(is)*1.5*(gr13-gp1)) &
+        -egamma*gp1*E_i -ngamma*gp1 - tgamma*1.5*(gr13-gp1)  &
+        + E_i*kpar_gp1p0*vpar_s(is))
+      phi_B = -E_i*N_j*gp1
       phi_A = phi_A +xnu_phi_b*xnuei*xnu_p1_b*phi_B
-      if(betae_sig.gt.0.0)then
+      sig_A = 0.0
+      sig_B = 0.0
+      psi_A = 0.0
+      psi_B = 0.0
+      phi_AU = 0.0
+      phi_BU = 0.0
+      psi_AN = 0.0
+      psi_BN = 0.0
+      if(use_bpar_in)then
         sig_A = -betae_sig*(as(js)*taus(js)*zs(is)/mass(is))* &
         (xi*w_s*(rlns(is)*g10p1 + rlts(is)*1.5*(g10r13-g10p1)))
         sig_B = betae_sig*g10p1*as(js)*taus(js)*zs(is)*zs(is) &
         /(taus(is)*mass(is))
         sig_A = sig_A - damp_sig*sig_B
-      else
-        sig_A = 0.0
-        sig_B = 0.0
+      endif
+      if(use_bper_in)then
+       psi_A = -betae_psi*J_j*xi*(w_cd*vpar_s(is)*wdgr11b0+w_s*vpar_shear_s(is)*gr11b0)
+       psi_B = betae_psi*M_i*J_j*vpar_s(is)*gr11b0/vs(is)
+       if(vpar_model_in.eq.0)then
+        phi_AU = betae_psi*U0*J_j*(xi*w_s*(rlns(is)*gp1bp + rlts(is)*1.5*(gr13bp-gp1bp)) &
+         -egamma*gp1bp*E_i + E_i*kpar_gp1bp*vpar_s(is))
+        phi_BU = -betae_psi*U0*E_i*J_j*gp1bp
+        psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar_s(is)*wdgr11bp+w_s*vpar_shear_s(is)*gr11bp)
+        psi_BN = -betae_psi*U0*M_i*N_j*vpar_s(is)*gr11bp/vs(is)
+       endif
       endif
 !
 ! p_par_g untrapped terms
 !
       ja = jb + ja0
-      amat(ia,ja) = phi_A +d_ee*nuei_p1_n*bn
-      bmat(ia,ja) = phi_B
+      amat(ia,ja) = phi_A + psi_AN +d_ee*nuei_p1_n*bn
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = nbasis+jb + ja0
-      amat(ia,ja) = 0.0
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = psi_A + phi_AU
+      bmat(ia,ja) = psi_B + phi_BU
 !
       ja = 2*nbasis+jb + ja0
       amat(ia,ja) = -0.5*sig_A +d_ee*nuei_p1_p1*bp1  &
@@ -2308,16 +2604,16 @@
 !
 !
       ja = 6*nbasis+jb + ja0
-      amat(ia,ja) = -1.0*phi_A &
+      amat(ia,ja) = -1.0*(phi_A + psi_AN) &
         +2.0*taus(is)*(modw_d1*gu1rgt1/ABS(zs(is)) +w_d1*xi*gu1igt1/zs(is)) &
         +2.0*taus(is)*(modw_d1*gu2rgt3/ABS(zs(is)) +w_d1*xi*gu2igt3/zs(is)) &
         -d_ee*nuei_p1_n  &
         -xnuei*d_ij*xnu_p1_1*(gt1-ft2*gt3) 
-      bmat(ia,ja) = -1.0*phi_B
+      bmat(ia,ja) = -1.0*(phi_B + psi_BN)
 !
       ja = 7*nbasis+jb + ja0
-      amat(ia,ja) = k_par1*grad_gu1*vs(is)
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = k_par1*grad_gu1*vs(is) -1.0*(psi_A + phi_AU)
+      bmat(ia,ja) = -1.0*(psi_B + phi_BU)
 !
       ja = 8*nbasis+jb + ja0
       amat(ia,ja) = -0.5*(-1.0*sig_A)  + egamma*d_ab &
@@ -2345,8 +2641,8 @@
 ! p_par_g trapped terms
 !
       ja = 12*nbasis+jb + ja0
-      amat(ia,ja) = phi_A 
-      bmat(ia,ja) = phi_B
+      amat(ia,ja) = phi_A + psi_AN
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = 13*nbasis+jb + ja0
       amat(ia,ja) = -0.5*sig_A 
@@ -2360,31 +2656,47 @@
 !
       ia = 9*nbasis+ib + ia0
 !
-      phi_A = as(js)*zs(js)* &
-       (xi*w_s*(rlns(is)*gp3+rlts(is)*1.5*(gr33-gp3))) &
-       -egamma*gp3*(zs(is)/taus(is))*as(js)*zs(js)
-      phi_B = -gp3*(zs(is)/taus(is))*as(js)*zs(js)
+      phi_A = N_j*(xi*w_s*(rlns(is)*gp3+rlts(is)*1.5*(gr33-gp3))  &
+       -egamma*gp3*E_i -ngamma*gp3 -tgamma*1.5*(gr33-gp3)  &
+       + E_i*kpar_gp3p0*vpar_s(is)) 
+      phi_B = -gp3*E_i*N_j
       phi_A = phi_A +xnu_phi_b*xnuei*xnu_p3_b*phi_B
-      if(betae_sig.gt.0.0)then
+      sig_A = 0.0
+      sig_B = 0.0
+      psi_A = 0.0
+      psi_B = 0.0
+      phi_AU = 0.0
+      phi_BU = 0.0
+      psi_AN = 0.0
+      psi_BN = 0.0
+      if(use_bpar_in)then
         sig_A = -betae_sig*(as(js)*taus(js)*zs(is)/mass(is))* &
         (xi*w_s*(rlns(is)*g10p3 + rlts(is)*1.5*(g10r33-g10p3)))
         sig_B = betae_sig*g10p3*as(js)*taus(js)*zs(is)*zs(is) &
         /(taus(is)*mass(is))
         sig_A = sig_A - damp_sig*sig_B
-      else
-        sig_A = 0.0
-        sig_B = 0.0
+      endif
+      if(use_bper_in)then
+       psi_A = -betae_psi*J_j*xi*(w_cd*vpar_s(is)*wdgr13b0+w_s*vpar_shear_s(is)*gr13b0)
+       psi_B = betae_psi*M_i*J_j*vpar_s(is)*gr13b0/vs(is)
+       if(vpar_model_in.eq.0)then
+        phi_AU = betae_psi*U0*J_j*(xi*w_s*(rlns(is)*gp3bp+rlts(is)*1.5*(gr33bp-gp3bp))  &
+        -egamma*gp3bp*E_i + E_i*kpar_gp3bp*vpar_s(is)) 
+        phi_BU = -betae_psi*U0*gp3bp*E_i*J_j
+        psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar_s(is)*wdgr13bp+w_s*vpar_shear_s(is)*gr13bp)
+        psi_BN = -betae_psi*U0*M_i*N_j*vpar_s(is)*gr13bp/vs(is)
+       endif
       endif
 !
 !  p_tot_g untrapped terms
 !
       ja = jb + ja0
-      amat(ia,ja) = phi_A +d_ee*nuei_p3_n*bn
-      bmat(ia,ja) = phi_B
+      amat(ia,ja) = phi_A + psi_AN +d_ee*nuei_p3_n*bn
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = nbasis+jb + ja0
-      amat(ia,ja) = 0.0
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = psi_A + phi_AU
+      bmat(ia,ja) = psi_B + phi_BU
 !
       ja = 2*nbasis+jb + ja0
       amat(ia,ja) = -0.5*sig_A +d_ee*nuei_p3_p1*bp1  &
@@ -2407,15 +2719,15 @@
 !  p_tot_g ghost terms
 !
       ja = 6*nbasis+jb + ja0
-      amat(ia,ja) = -1.0*phi_A &
+      amat(ia,ja) = -1.0*(phi_A + psi_AN) &
        +2.0*taus(is)*(modw_d1*gu3rgt1/ABS(zs(is)) +w_d1*xi*gu3igt1/zs(is)) &
        +2.0*taus(is)*(modw_d1*gu4rgt3/ABS(zs(is)) +w_d1*xi*gu4igt3/zs(is)) &
        -d_ee*nuei_p3_n
-      bmat(ia,ja) = -1.0*phi_B
+      bmat(ia,ja) = -1.0*(phi_B + psi_BN)
 !
       ja = 7*nbasis+jb + ja0
-      amat(ia,ja) = k_par1*grad_gu3*vs(is)
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = k_par1*grad_gu3*vs(is) -1.0*(psi_A + phi_AU)
+      bmat(ia,ja) = -1.0*(psi_B + phi_BU)
 !
       ja = 8*nbasis+jb + ja0
       amat(ia,ja) = -0.5*(-1.0*sig_A) &
@@ -2443,8 +2755,8 @@
 !  p_tot_g trapped terms
 !
       ja = 12*nbasis+jb + ja0
-      amat(ia,ja) = phi_A 
-      bmat(ia,ja) = phi_B
+      amat(ia,ja) = phi_A + psi_AN
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = 13*nbasis+jb + ja0
       amat(ia,ja) = -0.5*sig_A 
@@ -2458,37 +2770,39 @@
 !
       ia = 10*nbasis+ib + ia0
 !
-      if(betae_psi.gt.0.0)then
-        psi_A = betae_psi*M_ij* &
-         (-xi*w_s*(taus(is)/zs(is))* &
-          (rlns(is)*gr11b0+1.5*rlts(is)*(gw113b0-gr11b0))) 
-!         + xnuei*xnu_q1_b*gr11b0*betae_psi*M_ij
-!          +x_psi*ft3*taus(is)* &
-!          (modwd_psi*gu5r/ABS(zs(is)) + wd_psi*xi*gu5i/zs(is) &
-!          +modwd_psi*gu6rgu1/ABS(zs(is)) + wd_psi*xi*gu6igu1/zs(is)  &
-!          +modwd_psi*gu7rgu3/ABS(zs(is)) + wd_psi*xi*gu7igu3/zs(is)))
-        psi_B = gr11b0*betae_psi*M_ij
-        psi_A = psi_A - damp_psi*psi_B
-        psi_UA = -x_psi*M_ij*(modk_par0*modkpar_gd1gu1*vs(is)  &
-        - taus(is)*(modwd_psi*gu5r/ABS(zs(is)) + wd_psi*xi*gu5i/zs(is)))
-!        +xnuei*(d_ab_psi*xnu_q1_u_1*ft2 - gu1*xnu_q1_q1_1 &
-!        - gu3*xnu_q1_q3_1*ft2))
-      else
-        psi_A = 0.0
-        psi_B = 0.0
-        psi_UA = 0.0
+      phi_A = N_j*xi*(w_s*vpar_shear_s(is)*gr11 +w_cd*wdgr11p0*vpar_s(is))/vs(is)
+      phi_B = -E_i*N_j*gr11*vpar_s(is)/vs(is)
+      sig_A = 0.0
+      sig_B = 0.0
+      psi_A = 0.0
+      psi_B = 0.0
+      phi_AU = 0.0
+      phi_BU = 0.0
+      psi_AN = 0.0
+      psi_BN = 0.0
+      if(use_bper_in)then
+       psi_A = -betae_psi*J_j*(vs(is)*xi*w_s*(rlns(is)*gr11b0+1.5*rlts(is)*(gw113b0-gr11b0)) &
+         +M_i*kpar_gr11b0*vpar_s(is))
+       psi_B = gr11b0*betae_psi*M_i*J_j
+       psi_A = psi_A - damp_psi*psi_B
+       if(vpar_model_in.eq.0)then
+        phi_AU = betae_psi*U0*J_j*xi*(w_s*vpar_shear_s(is)*gr11bp +w_cd*wdgr11bp*vpar_s(is))/vs(is)
+        phi_BU = -betae_psi*U0*E_i*J_j*gr11bp*vpar_s(is)/vs(is)
+        psi_AN = -betae_psi*U0*N_j*(vs(is)*xi*w_s*(rlns(is)*gr11bp+1.5*rlts(is)*(gw113bp-gr11bp)) &
+         +M_i*kpar_gr11bp*vpar_s(is))
+        psi_BN = -gr11bp*betae_psi*U0*M_i*N_j
+       endif
       endif
-      phi_A = as(js)*zs(js)*xi*ky*vpar_shear*gr11/vs(is)
 !
 ! q_par_g untrapped terms
 !
       ja = jb + ja0
-      amat(ia,ja) = phi_A
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = phi_A + psi_AN
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = nbasis+jb + ja0
-      amat(ia,ja) = psi_A +d_ee*ft3*nuei_q1_u
-      bmat(ia,ja) = psi_B
+      amat(ia,ja) = psi_A + phi_AU +d_ee*ft3*nuei_q1_u
+      bmat(ia,ja) = psi_B + phi_BU
 !
       ja = 2*nbasis+jb + ja0
       amat(ia,ja) = 0.0
@@ -2511,16 +2825,16 @@
 ! q_par_g ghost terms
 !
       ja = 6*nbasis+jb + ja0
-      amat(ia,ja) = -1.0*phi_A + k_par1*kpar_gb1gt1*vs(is) 
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = -1.0*(phi_A + psi_AN) + k_par1*kpar_gb1gt1*vs(is) 
+      bmat(ia,ja) = -1.0*(phi_B + psi_BN)
 !
       ja = 7*nbasis+jb + ja0
-      amat(ia,ja) = -1.0*psi_A + psi_UA +modk_par1*modkpar_gd1gu1*vs(is)  &
+      amat(ia,ja) = -1.0*(psi_A + phi_AU) +modk_par1*modkpar_gd1gu1*vs(is)  &
         - taus(is)*(modw_d1*gu5r/ABS(zs(is)) + w_d1*xi*gu5i/zs(is)) &
         -d_ee*nuei_q1_u_t -d_ee*nuei_q1_u &
         +xnuei*(d_ab*xnu_q1_u_1*ft2 - d_ij*gu1*xnu_q1_q1_1 &
         - d_ij*gu3*xnu_q1_q3_1*ft2)
-      bmat(ia,ja) = -1.0*psi_B
+      bmat(ia,ja) = -1.0*(psi_B + phi_BU)
 !
       ja = 8*nbasis+jb + ja0
       amat(ia,ja) =  -k_par1*(kpar_gu1 -grad_gu1 - gradgr11p1)*vs(is) &
@@ -2548,8 +2862,8 @@
 ! q_par_g trapped terms
 !
       ja = 12*nbasis+jb + ja0
-      amat(ia,ja) = phi_A
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = phi_A + psi_AN
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = 13*nbasis+jb + ja0
       amat(ia,ja) = 0.0
@@ -2563,37 +2877,39 @@
 !
       ia = 11*nbasis+ib + ia0
 !
-      if(betae_psi.gt.0.0)then
-        psi_A = betae_psi*M_ij* &
-         (-xi*w_s*(taus(is)/zs(is))* &
-          (rlns(is)*gr13b0+1.5*rlts(is)*(gw133b0-gr13b0))) 
-!         + xnuei*xnu_q3_b*gr13b0*betae_psi*M_ij
-!          +x_psi*ft3*taus(is)* &
-!          (modwd_psi*gu8r/ABS(zs(is)) + wd_psi*xi*gu8i/zs(is) &
-!          +modwd_psi*gu9rgu1/ABS(zs(is)) + wd_psi*xi*gu9igu1/zs(is)  &
-!          +modwd_psi*gu10rgu3/ABS(zs(is)) + wd_psi*xi*gu10igu3/zs(is)))
-        psi_B = gr13b0*betae_psi*M_ij
-        psi_A = psi_A - damp_psi*psi_B
-        psi_UA = -x_psi*M_ij* &
-        (modk_par0*(modkpar_gd3gu3 + modkpar_gd33gu1)*vs(is) &
-        - taus(is)*(modwd_psi*gu8r/ABS(zs(is)) + wd_psi*xi*gu8i/zs(is))) 
-!        +xnuei*(d_ab_psi*xnu_q3_u_1 - gu3*xnu_q3_q3_1))
-      else
-        psi_A = 0.0
-        psi_B = 0.0
-        psi_UA = 0.0
+      phi_A = N_j*xi*(w_s*vpar_shear_s(is)*gr13 +w_cd*wdgr13p0*vpar_s(is))/vs(is)
+      phi_B = -E_i*N_j*gr13*vpar_s(is)/vs(is)
+      sig_A = 0.0
+      sig_B = 0.0
+      psi_A = 0.0
+      psi_B = 0.0
+      phi_AU = 0.0
+      phi_BU = 0.0
+      psi_AN = 0.0
+      psi_BN = 0.0
+      if(use_bper_in)then
+       psi_A = -betae_psi*J_j*(vs(is)*xi*w_s*(rlns(is)*gr13b0+1.5*rlts(is)*(gw133b0-gr13b0)) &
+         +M_i*kpar_gr13b0*vpar_s(is))
+       psi_B = gr13b0*betae_psi*M_i*J_j
+       psi_A = psi_A - damp_psi*psi_B
+       if(vpar_model_in.eq.0)then
+        phi_AU = betae_psi*U0*J_j*xi*(w_s*vpar_shear_s(is)*gr13bp +w_cd*wdgr13bp*vpar_s(is))/vs(is)
+        phi_BU = -betae_psi*U0*E_i*J_j*gr13bp*vpar_s(is)/vs(is)
+        psi_AN = betae_psi*U0*N_j*(vs(is)*xi*w_s*(rlns(is)*gr13bp+1.5*rlts(is)*(gw133bp-gr13bp)) &
+         +M_i*kpar_gr13bp*vpar_s(is)) 
+        psi_BN = -gr13bp*betae_psi*U0*M_i*N_j
+       endif
       endif
-      phi_A = as(js)*zs(js)*xi*ky*vpar_shear*gr13/vs(is)
 !
 ! q_tot_g untrapped terms
 !
       ja = jb + ja0
-      amat(ia,ja) = phi_A
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = phi_A + psi_AN
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = nbasis+jb + ja0
-      amat(ia,ja) = psi_A + d_ee*ft3*nuei_q3_u
-      bmat(ia,ja) = psi_B
+      amat(ia,ja) = psi_A + phi_AU + d_ee*ft3*nuei_q3_u
+      bmat(ia,ja) = psi_B + phi_BU
 !
       ja = 2*nbasis+jb + ja0
       amat(ia,ja) = 0.0
@@ -2616,16 +2932,16 @@
 ! q_tot_g ghost terms
 !
       ja = 6*nbasis+jb + ja0
-      amat(ia,ja) = -1.0*phi_A + k_par1*(kpar_gb3gt3 -dgr13 + kpar_gb33gt1)*vs(is)
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = -1.0*(phi_A + psi_AN) + k_par1*(kpar_gb3gt3 -dgr13 + kpar_gb33gt1)*vs(is)
+      bmat(ia,ja) = -1.0*(phi_B + psi_BN)
 !
       ja = 7*nbasis+jb + ja0
-      amat(ia,ja) = -1.0*psi_A + psi_UA +  &
+      amat(ia,ja) = -1.0*(psi_A + phi_AU) +  &
        modk_par1*(modkpar_gd3gu3 + modkpar_gd33gu1)*vs(is) &
         - taus(is)*(modw_d1*gu8r/ABS(zs(is)) + w_d1*xi*gu8i/zs(is)) &
        -d_ee*nuei_q3_u_t -d_ee*nuei_q3_u  &
        +xnuei*(d_ab*xnu_q3_u_1 - d_ij*gu3*xnu_q3_q3_1)
-      bmat(ia,ja) = -1.0*psi_B
+      bmat(ia,ja) = -1.0*(psi_B + phi_BU)
 !
       ja = 8*nbasis+jb + ja0
       amat(ia,ja) = - k_par1*(kpar_gu3 -grad_gu3 - gradgr13p1)*vs(is) &
@@ -2654,8 +2970,8 @@
 ! q_tot_g trapped terms
 !
       ja = 12*nbasis+jb + ja0
-      amat(ia,ja) = phi_A
-      bmat(ia,ja) = 0.0
+      amat(ia,ja) = phi_A + psi_AN
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = 13*nbasis+jb + ja0
       amat(ia,ja) = 0.0
@@ -2669,27 +2985,41 @@
 !
       ia = 12*nbasis+ib + ia0
 !
-      phi_A = as(js)*zs(js)* &
-        (xi*w_s*(rlns(is)*gn + rlts(is)*1.5*(gp3-gn))) &
-        -egamma*gn*(zs(is)/taus(is))*as(js)*zs(js)
-      phi_B = -gn*(zs(is)/taus(is))*as(js)*zs(js)
+      phi_A = N_j*(xi*w_s*(rlns(is)*gn + rlts(is)*1.5*(gp3-gn)) &
+       -egamma*gn*E_i -ngamma*gn - tgamma*1.5*(gp3-gn))        
+      phi_B = -gn*E_i*N_j
       phi_A = phi_A +xnu_phi_b*xnuei*xnu_n_b*phi_B
-      if(betae_sig.gt.0.0)then
+      sig_A = 0.0
+      sig_B = 0.0
+      psi_A = 0.0
+      psi_B = 0.0
+      phi_AU = 0.0
+      phi_BU = 0.0
+      psi_AN = 0.0
+      psi_BN = 0.0
+      if(use_bpar_in)then
         sig_A = -betae_sig*(as(js)*taus(js)*zs(is)/mass(is))* &
         (xi*w_s*(rlns(is)*g10n + rlts(is)*1.5*(g10p3-g10n)))
         sig_B = betae_sig*g10n*as(js)*taus(js)*zs(is)*zs(is) &
         /(taus(is)*mass(is))
         sig_A = sig_A - damp_sig*sig_B
-      else
-        sig_A = 0.0
-        sig_B = 0.0
+      endif
+      if(use_bper_in)then
+       psi_A = -betae_psi*J_j*xi*(w_cd*vpar_s(is)*wdgp1b0+w_s*vpar_shear_s(is)*gp1b0)
+       psi_B = betae_psi*M_i*J_j*vpar_s(is)*gp1b0/vs(is)
+       if(vpar_model_in.eq.0)then
+        phi_AU = betae_psi*U0*J_j*(xi*w_s*(rlns(is)*gnbp + rlts(is)*1.5*(gp3bp-gnbp)) -egamma*gnbp*E_i)
+        phi_BU = -betae_psi*U0*gnbp*E_i*J_j
+        psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar_s(is)*wdgp1bp+w_s*vpar_shear_s(is)*gp1bp)
+        psi_BN = -betae_psi*U0*M_i*N_j*vpar_s(is)*gp1bp/vs(is)
+       endif
       endif
 !
 ! n_t untrapped terms
 !
       ja = jb + ja0
-      amat(ia,ja) = phi_A +d_ee*nuei_n_n*bn
-      bmat(ia,ja) = phi_B
+      amat(ia,ja) = phi_A + psi_AN +d_ee*nuei_n_n*bn
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = nbasis+jb + ja0
       amat(ia,ja) = 0.0
@@ -2716,8 +3046,8 @@
 ! n_t ghost terms
 !
       ja = 6*nbasis+jb + ja0
-      amat(ia,ja) = -1.0*phi_A 
-      bmat(ia,ja) = -1.0*phi_B
+      amat(ia,ja) = -1.0*(phi_A + psi_AN)
+      bmat(ia,ja) = -1.0*(phi_B + psi_BN)
 !
       ja = 7*nbasis+jb + ja0
       amat(ia,ja) = 0.0
@@ -2742,10 +3072,10 @@
 ! n_t trapped terms
 !
       ja = 12*nbasis+jb + ja0
-      amat(ia,ja) = phi_A  + egamma*d_ab  &
+      amat(ia,ja) = phi_A + psi_AN  + egamma*d_ab  &
         -d_ee*nuei_n_n  &
         +xnuei*d_ab*xnu_n_b 
-      bmat(ia,ja) = d_ab + phi_B
+      bmat(ia,ja) = d_ab + phi_B + psi_BN
 !
       ja = 13*nbasis+jb + ja0
       amat(ia,ja) = -0.5*sig_A -0.5*xi*w_d*taus(is)/zs(is)  &
@@ -2761,27 +3091,41 @@
 !
       ia = 13*nbasis+ib + ia0
 !
-      phi_A = as(js)*zs(js)* &
-        (xi*w_s*(rlns(is)*gp1 + rlts(is)*1.5*(gr13-gp1))) &
-        -egamma*gp1*(zs(is)/taus(is))*as(js)*zs(js)
-      phi_B = -gp1*(zs(is)/taus(is))*as(js)*zs(js)
+      phi_A = N_j*(xi*w_s*(rlns(is)*gp1 + rlts(is)*1.5*(gr13-gp1)) &
+       -egamma*gp1*E_i -ngamma*gp1 -tgamma*1.5*(gr13-gp1))      
+      phi_B = -gp1*E_i*N_j
       phi_A = phi_A +xnu_phi_b*xnuei*xnu_p1_b*phi_B
-      if(betae_sig.gt.0.0)then
+      sig_A = 0.0
+      sig_B = 0.0
+      psi_A = 0.0
+      psi_B = 0.0
+      phi_AU = 0.0
+      phi_BU = 0.0
+      psi_AN = 0.0
+      psi_BN = 0.0
+      if(use_bpar_in)then
         sig_A = -betae_sig*(as(js)*taus(js)*zs(is)/mass(is))* &
         (xi*w_s*(rlns(is)*g10p1 + rlts(is)*1.5*(g10r13-g10p1)))
         sig_B = betae_sig*g10p1*as(js)*taus(js)*zs(is)*zs(is) &
         /(taus(is)*mass(is))
         sig_A = sig_A - damp_sig*sig_B
-      else
-        sig_A = 0.0
-        sig_B = 0.0
+      endif
+      if(use_bper_in)then
+       psi_A = -betae_psi*J_j*xi*(w_cd*vpar_s(is)*wdgr11b0+ w_s*vpar_shear_s(is)*gr11b0)
+       psi_B = betae_psi*M_i*J_j*vpar_s(is)*gr11b0/vs(is)
+       if(vpar_model_in.eq.0)then
+        phi_AU = betae_psi*U0*J_j*(xi*w_s*(rlns(is)*gp1bp + rlts(is)*1.5*(gr13bp-gp1bp)) -egamma*gp1bp*E_i)
+        phi_BU = -betae_psi*U0*gp1bp*E_i*J_j
+        psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar_s(is)*wdgr11bp+ w_s*vpar_shear_s(is)*gr11bp)
+        psi_BN = -betae_psi*U0*M_i*N_j*vpar_s(is)*gr11bp/vs(is) 
+       endif
       endif
 !
 ! p_par_t  untrapped terms
 !
       ja = jb + ja0
-      amat(ia,ja) = phi_A +d_ee*nuei_p1_n*bn
-      bmat(ia,ja) = phi_B
+      amat(ia,ja) = phi_A + psi_AN +d_ee*nuei_p1_n*bn
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = nbasis+jb + ja0
       amat(ia,ja) = 0.0
@@ -2808,8 +3152,8 @@
 ! p_par_t  ghost terms
 !
       ja = 6*nbasis+jb + ja0
-      amat(ia,ja) = -1.0*phi_A  
-      bmat(ia,ja) = -1.0*phi_B
+      amat(ia,ja) = -1.0*(phi_A + psi_AN) 
+      bmat(ia,ja) = -1.0*(phi_B + psi_BN)
 !
       ja = 7*nbasis+jb + ja0
       amat(ia,ja) = 0.0
@@ -2835,12 +3179,12 @@
 !
 !
       ja = 12*nbasis+jb + ja0
-      amat(ia,ja) = phi_A &
+      amat(ia,ja) = phi_A +psi_AN &
         +2.0*taus(is)*(modw_d1*gu1rgt1/ABS(zs(is)) +w_d1*xi*gu1igt1/zs(is)) &
         +2.0*taus(is)*(modw_d1*gu2rgt3/ABS(zs(is)) +w_d1*xi*gu2igt3/zs(is)) &
         -d_ee*nuei_p1_n  &
         -xnuei*d_ij*xnu_p1_1*(gt1-ft2*gt3) 
-      bmat(ia,ja) = phi_B
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = 13*nbasis+jb + ja0
       amat(ia,ja) =  -0.5*sig_A  + egamma*d_ab  &
@@ -2861,27 +3205,41 @@
 !
       ia = 14*nbasis+ib + ia0
 !
-      phi_A = as(js)*zs(js)* &
-        (xi*w_s*(rlns(is)*gp3+rlts(is)*1.5*(gr33-gp3))) &
-        -egamma*gp3*(zs(is)/taus(is))*as(js)*zs(js)
-      phi_B = -gp3*(zs(is)/taus(is))*as(js)*zs(js)
+      phi_A = N_j*(xi*w_s*(rlns(is)*gp3+rlts(is)*1.5*(gr33-gp3)) &
+       -egamma*gp3*E_i -ngamma*gp3 -tgamma*1.5*(gr33-gp3))   
+      phi_B = -gp3*E_i*N_j
       phi_A = phi_A +xnu_phi_b*xnuei*xnu_p3_b*phi_B
-      if(betae_sig.gt.0.0)then
+      sig_A = 0.0
+      sig_B = 0.0
+      psi_A = 0.0
+      psi_B = 0.0
+      phi_AU = 0.0
+      phi_BU = 0.0
+      psi_AN = 0.0
+      psi_BN = 0.0
+      if(use_bpar_in)then
         sig_A = -betae_sig*(as(js)*taus(js)*zs(is)/mass(is))* &
         (xi*w_s*(rlns(is)*g10p3 + rlts(is)*1.5*(g10r33-g10p3)))
         sig_B = betae_sig*g10p3*as(js)*taus(js)*zs(is)*zs(is) &
         /(taus(is)*mass(is))
         sig_A = sig_A - damp_sig*sig_B
-      else
-        sig_A = 0.0
-        sig_B = 0.0
+      endif
+      if(use_bper_in)then
+       psi_A = -betae_psi*J_j*xi*(w_cd*vpar_s(is)*wdgr13b0+w_s*vpar_shear_s(is)*gr13b0)
+       psi_B = betae_psi*M_i*J_j*vpar_s(is)*gr13b0/vs(is)
+       if(vpar_model_in.eq.0)then
+        phi_AU = betae_psi*U0*J_j*(xi*w_s*(rlns(is)*gp3bp+rlts(is)*1.5*(gr33bp-gp3bp)) -egamma*gp3bp*E_i)
+        phi_BU = -betae_psi*U0*gp3bp*E_i*J_j
+        psi_AN = betae_psi*U0*N_j*xi*(w_cd*vpar_s(is)*wdgr13bp+w_s*vpar_shear_s(is)*gr13bp) 
+        psi_BN = -betae_psi*U0*M_i*N_j*vpar_s(is)*gr13bp/vs(is)
+       endif
       endif
 !
 ! p_tot_t untrapped terms
 !
       ja = jb + ja0
-      amat(ia,ja) = phi_A +d_ee*nuei_p3_n*bn
-      bmat(ia,ja) = phi_B
+      amat(ia,ja) = phi_A + psi_AN +d_ee*nuei_p3_n*bn
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = nbasis+jb + ja0
       amat(ia,ja) = 0.0
@@ -2908,8 +3266,8 @@
 ! p_tot_t ghost terms
 !
       ja = 6*nbasis+jb + ja0
-      amat(ia,ja) = -1.0*phi_A 
-      bmat(ia,ja) = -1.0*phi_B
+      amat(ia,ja) = -1.0*(phi_A + psi_AN) 
+      bmat(ia,ja) = -1.0*(phi_B + psi_BN)
 !
       ja = 7*nbasis+jb + ja0
       amat(ia,ja) = 0.0
@@ -2934,11 +3292,11 @@
 ! p_tot_t trapped terms
 !
       ja = 12*nbasis+jb + ja0
-      amat(ia,ja) = phi_A &
+      amat(ia,ja) = phi_A + psi_AN &
        +2.0*taus(is)*(modw_d1*gu3rgt1/ABS(zs(is)) +w_d1*xi*gu3igt1/zs(is)) &
        +2.0*taus(is)*(modw_d1*gu4rgt3/ABS(zs(is)) +w_d1*xi*gu4igt3/zs(is)) &
        -d_ee*nuei_p3_n 
-      bmat(ia,ja) = phi_B
+      bmat(ia,ja) = phi_B + psi_BN
 !
       ja = 13*nbasis+jb + ja0
       amat(ia,ja) = -0.5*sig_A -xi*w_d1*(taus(is)/zs(is))*0.5*wdgu3   &
@@ -3104,7 +3462,7 @@
 !
       SUBROUTINE get_QL_weights(particle_weight,energy_weight, &
         stress_par_weight,stress_tor_weight,exchange_weight, &
-        phi_weight,N_weight,T_weight,wd_bar)
+        phi_weight,N_weight,T_weight,wd_bar,Ne_Te_phase)
 ! **************************************************************
 !
 ! compute the quasilinear weights for a single eigenmode
@@ -3113,7 +3471,7 @@
 !
 !***************************************************************
       USE tglf_dimensions
-      USE tglf_internal_interface
+      USE tglf_global
       USE tglf_species
 !      USE tglf_hermite
       USE tglf_eigen
@@ -3126,9 +3484,19 @@
       COMPLEX :: u_par(nsm,nb)
       COMPLEX :: p_par(nsm,nb)
       COMPLEX :: p_tot(nsm,nb)
+      COMPLEX :: q_par(nsm,nb)
       COMPLEX :: q_tot(nsm,nb)
+      COMPLEX :: ng(nsm,nb)
+      COMPLEX :: ug_par(nsm,nb)
+      COMPLEX :: pg_par(nsm,nb)
+      COMPLEX :: pg_tot(nsm,nb)
+      COMPLEX :: qg_par(nsm,nb)
+      COMPLEX :: qg_tot(nsm,nb)
+      COMPLEX :: nt(nsm,nb)
+      COMPLEX :: pt_par(nsm,nb)
+      COMPLEX :: pt_tot(nsm,nb)
       COMPLEX :: temp(nsm,nb)
-      COMPLEX :: stress_par(nsm,nb),stress_per(nsm,nb)
+      COMPLEX :: stress_par(nsm,nb,3),stress_per(nsm,nb,3)
       COMPLEX :: phi(nb),psi(nb),bsig(nb)
       COMPLEX :: phi_wd_phi,wd_phi
       COMPLEX :: dum,freq_QL
@@ -3141,29 +3509,36 @@
       REAL :: exchange_weight(nsm,3)
       REAL :: N_weight(nsm),T_weight(nsm)
       REAL :: wd_bar,phi_weight,epsilon
-      REAL :: k_par0,w_d0
+      REAL :: Ne_Te_phase,Ne_Te_cos,Ne_Te_sin
+      REAL :: ft2,cu,cq1,cq3
+      REAL :: stress_correction,wp
 !
 !      xi=(0.D0,1.D0)
       epsilon = 1.D-12
       freq_QL = eigenvalue
-      k_par0 = park_in/(R_unit*q_unit*width_in)
-      w_d0 = -ky/R_unit
+      ft2=ft*ft
+      cu = 1.0
+      cq1 = 1.0
+      cq3 = 1.0
 !
 !  fill the density and total pressure vectors
 !
+      vnorm = 0.0
       do is = ns0,ns
         j = (is-ns0)*nroot*nbasis
-        do i=1,nbasis
+        do i=1,nbasis          
           n(is,i) = v(j+i)
           u_par(is,i) = v(j+nbasis+i)
           p_par(is,i) = v(j+nbasis*2+i)
           p_tot(is,i) = v(j+nbasis*3+i)
+          q_par(is,i) = v(j+nbasis*4+1)
           q_tot(is,i) = v(j+nbasis*5+i)
           if(nroot.gt.6)then
             n(is,i) = n(is,i) -v(j+nbasis*6+i)+v(j+nbasis*12+i)
             u_par(is,i) = u_par(is,i) -v(j+nbasis*7+i)
             p_par(is,i) = p_par(is,i) -v(j+nbasis*8+i)+v(j+nbasis*13+i)
             p_tot(is,i) = p_tot(is,i) -v(j+nbasis*9+i)+v(j+nbasis*14+i)
+            q_par(is,i) = q_par(is,i) -v(j+nbasis*10+i)
             q_tot(is,i) = q_tot(is,i) -v(j+nbasis*11+i)
           endif
         enddo
@@ -3198,13 +3573,19 @@
         bsig(i)=0.0
         do is=ns0,ns
           do j=1,nbasis
-            phi(i) = phi(i) +ave_p0inv(i,j)*as(is)*zs(is)*n(is,j)
+            phi(i) = phi(i) +ave_p0inv(i,j)*as(is)*zs(is)*n(is,j)  
           enddo
           if(use_bper_in)then
             do j=1,nbasis
               psi(i) = psi(i) + &
               betae_psi*ave_b0inv(i,j)*as(is)*zs(is)*vs(is)*u_par(is,j)
             enddo
+            if(vpar_model_in.eq.0)then
+              do j=1,nbasis
+               phi(i) = phi(i) + U0*betae_psi*ave_bpinv(i,j)*as(is)*zs(is)*vs(is)*u_par(is,j)
+               psi(i) = psi(i) - U0*betae_psi*ave_bpinv(i,j)*as(is)*zs(is)*n(is,j)
+              enddo
+            endif
           endif
           if(use_bpar_in)then
               bsig(i) = bsig(i) - betae_sig*as(is)*taus(is)* &
@@ -3212,6 +3593,31 @@
           endif
         enddo
       enddo
+! 
+!  add the adiabatic terms to the total moments
+!    
+      do is=ns0,ns
+        do i=1,nbasis
+          n(is,i) = n(is,i) - zs(is)*phi(i)/taus(is)
+          p_par(is,i) = p_par(is,i) - zs(is)*phi(i)/taus(is)
+          p_tot(is,i) = p_tot(is,i) - zs(is)*phi(i)/taus(is)
+        enddo
+      enddo
+!
+!   add the vpar shifts to the total  moments
+!
+      if(vpar_model_in.eq.0)then
+        do is=ns0,ns
+        do j=1,nbasis
+          n(is,j) = n(is,j) + vpar_in(is)*(zs(is)/taus(is))*psi(j)
+          u_par(is,j) = u_par(is,j) - (vpar_in(is)/vs(is))*(zs(is)/taus(is))*phi(j)
+          p_par(is,j) = p_par(is,j) + vpar_in(is)*(zs(is)/taus(is))*psi(j)
+          p_tot(is,j) = p_tot(is,j) + vpar_in(is)*(zs(is)/taus(is))*psi(j)
+          q_par(is,j) = q_par(is,j) - 3.0*(vpar_in(is)/vs(is))*(zs(is)/taus(is))*phi(j)
+          q_tot(is,j) = q_tot(is,j) -(5.0/3.0)*(vpar_in(is)/vs(is))*(zs(is)/taus(is))*phi(j)
+        enddo
+        enddo
+      endif
 !
 !  compute phi_norm
 !
@@ -3236,13 +3642,26 @@
 !
 ! fill the stress moments
 !
+      wp = ky*ave_hp1(2,1,1)*ABS(vpar_shear_in(2))/vs(2)
+      stress_correction = (IMAG(freq_QL)+2.0*wp)/(IMAG(freq_QL)+wp)
+!      stress_correction = 1.0
+!
       do is=ns0,ns
         do i=1,nbasis
-          stress_par(is,i) = u_par(is,i)
-          stress_per(is,i) = 0.0
+!          if(i+1.eq.2*((i+1)/2))then
+            stress_par(is,i,1) = u_par(is,i)*stress_correction
+!            write(*,*)"stress_corr=",i,stress_correction
+!          else
+!            stress_par(is,i,1) = u_par(is,i)
+!          endif
+          stress_par(is,i,2) = p_par(is,i)
+          stress_per(is,i,1) = 0.0
+          stress_per(is,i,2) = 0.0
           do j=1,nbasis
-              stress_per(is,i) = stress_per(is,i)  &
-            + xi*ky*ave_kx(i,j)*(1.5*p_tot(is,j)-0.5*p_par(is,j))              
+              stress_per(is,i,1) = stress_per(is,i,1)  &
+            + xi*ky*ave_kx(i,j)*(1.5*p_tot(is,j)-0.5*p_par(is,j)) 
+              stress_per(is,i,2) = stress_per(is,i,2)  &
+            + xi*ky*ave_kx(i,j)*(1.5*q_tot(is,j)-0.5*q_par(is,j)) 
           enddo
         enddo
       enddo
@@ -3262,37 +3681,37 @@
           + REAL(xi*CONJG(phi(i))*n(is,i))
           energy_weight(is,1) = energy_weight(is,1) &
           + REAL(xi*CONJG(phi(i))*p_tot(is,i))
-          do j=1,nbasis
-              stress_par_weight(is,1) = stress_par_weight(is,1)  &
-            + REAL(xi*CONJG(phi(i))*ave_par_par(i,j)*stress_par(is,j))           
-              stress_tor_weight(is,1) = stress_tor_weight(is,1)  &
-            + REAL(xi*CONJG(phi(i))*(ave_tor_par(i,j)*stress_par(is,j)+ave_tor_per(i,j)*stress_per(is,j)))  
-          enddo
+!          do j=1,nbasis
+!              stress_par_weight(is,1) = stress_par_weight(is,1)  &
+!            + REAL(xi*CONJG(phi(i))*ave_c_par_par(i,j)*stress_par(is,j,1))           
+!              stress_tor_weight(is,1) = stress_tor_weight(is,1)  &
+!            + REAL(xi*CONJG(phi(i))*(ave_c_tor_par(i,j)*stress_par(is,j,1)+ave_c_tor_per(i,j)*stress_per(is,j,1)))
+!          enddo
+          stress_par_weight(is,1) = stress_par_weight(is,1)  &
+            + REAL(xi*CONJG(phi(i))*stress_par(is,i,1)*ave_c_par_par(1,1))           
+          stress_tor_weight(is,1) = stress_tor_weight(is,1)  &
+            + REAL(xi*CONJG(phi(i))*(ave_c_tor_par(1,1)*stress_par(is,i,1)+ave_c_tor_per(1,1)*stress_per(is,i,1)))
           exchange_weight(is,1) = exchange_weight(is,1) &
-          + zs(is)*REAL(xi*freq_QL*CONJG(phi(i))*(n(is,i)- zs(is)*phi(i)/taus(is)))
+          + zs(is)*REAL(xi*freq_QL*CONJG(phi(i))*(n(is,i)-zs(is)*phi(i)/taus(is)))
           if(use_bper_in)then
             particle_weight(is,2) = particle_weight(is,2) &
             - vs(is)*REAL(xi*CONJG(psi(i))*u_par(is,i))
             energy_weight(is,2) = energy_weight(is,2) &
             - vs(is)*REAL(xi*CONJG(psi(i))*q_tot(is,i))
             exchange_weight(is,2) = exchange_weight(is,2) &
-            - zs(is)*vs(is)*REAL(CONJG(-xi*freq_QL*psi(i))*u_par(is,i))
-!            dum = 0.0
-!            do j=1,nbasis
-!              dum = dum + zs(is)*vs(is)*k_par0*ave_kpar(i,j)*u_par(is,j)
-!            enddo
-!            exchange_weight(is,2) = exchange_weight(is,2) + REAL(CONJG(phi(i))*dum)
+            - zs(is)*vs(is)*REAL(xi*freq_QL*CONJG(psi(i))*u_par(is,i))
+            do j=1,nbasis
+              stress_par_weight(is,2) = stress_par_weight(is,2)  &
+              - REAL(xi*CONJG(psi(i))*ave_c_par_par(i,j)*stress_par(is,j,2))           
+              stress_tor_weight(is,2) = stress_tor_weight(is,2)  &
+              - REAL(xi*CONJG(psi(i))*(ave_c_tor_par(i,j)*stress_par(is,j,2)+ave_c_tor_per(i,j)*stress_per(is,j,2)))
+            enddo
           endif
           if(use_bpar_in)then
             particle_weight(is,3) = particle_weight(is,3) &
             + REAL(xi*CONJG(bsig(i))*(1.5*p_tot(is,i)-0.5*p_par(is,i)))*taus(is)/zs(is)
             exchange_weight(is,3) = exchange_weight(is,3) &
             + taus(is)*REAL(CONJG(-xi*freq_QL*bsig(i))*(1.5*p_tot(is,i)-0.5*p_par(is,i)))
-!            dum = 0.0
-!            do j=1,nbasis
-!              dum = dum + xi*w_d0*taus(is)*ave_wd(i,j)*(0.5*p_par(is,j)+1.5*p_tot(is,j))
-!            enddo
-!            exchange_weight(is,3) = exchange_weight(is,3) + REAL(CONJG(phi(i))*dum)
           endif
         enddo
 !
@@ -3304,16 +3723,13 @@
           exchange_weight(is,j) = as(is)*exchange_weight(is,j)/phi_norm
         enddo
       enddo
-
 ! 
-!  add the adiabatic terms to the total density and total pressure 
+!  compute the density and temperature amplitude weights 
 !    
       do is=ns0,ns
         N_weight(is)=0.0
         T_weight(is)=0.0
         do i=1,nbasis
-          n(is,i) = n(is,i) - zs(is)*phi(i)/taus(is)
-          p_tot(is,i) = p_tot(is,i) - zs(is)*phi(i)/taus(is)
           temp(is,i) = p_tot(is,i) - n(is,i)
           N_weight(is) = N_weight(is) + REAL(n(is,i)*CONJG(n(is,i)))
           T_weight(is) = T_weight(is) + REAL(temp(is,i)*CONJG(temp(is,i)))
@@ -3332,7 +3748,17 @@
 !      write(*,*) 'G_i/Q_i = ',particle_weight(2)/energy_weight(2)
 !      write(*,*)
 !
- 100  format(i3,2x,0pf10.6,4x,0pf10.6)
+! 
+! compute electron density-temperature phase 
+      Ne_Te_phase = 0.0
+      Ne_Te_cos = 0.0
+      Ne_Te_sin = 0.0
+      do i=1,nbasis
+         Ne_Te_cos = Ne_Te_cos + REAL(CONJG(n(1,i))*temp(1,i))
+         Ne_Te_sin = Ne_Te_sin + IMAG(CONJG(n(1,i))*temp(1,i))
+      enddo
+      Ne_Te_phase = ATAN2(Ne_Te_sin,Ne_Te_cos)
+!
 !
       END SUBROUTINE get_QL_weights
 !
@@ -4221,165 +4647,4 @@
 !
 !--------------------------------------------------------------
 !
-      REAL FUNCTION get_intensity(kp,gp,imode)
-!
-      USE tglf_species
-      USE tglf_internal_interface
-      USE tglf_coeff
-      IMPLICIT NONE
-!
-      REAL,INTENT(IN) :: kp,gp
-      INTEGER :: imax,imode
-      REAL :: cnorm,exponent
-      REAL :: wd0,gnet
-      REAl :: c1,pol,ks
-!
-      pol = (ave_p0(1,1)/ABS(as(1)*zs(1)*zs(1)))**2 ! scale invariant pol
-      ks = kp*SQRT(taus(1)*mass(2))   ! scale invariant gyroradius * poloidal wavenumber
-      if(sat_rule_in.eq.0)then
-       if(igeo.eq.0)then
-        if(nmodes_in.ne.4)then
-! this fit is for nmodes_in=2
-          cnorm = 30.40*pol
-          exponent = 1.657
-        else
-! this fit is for nmodes_in=4
-          cnorm = 24.58*pol
-          exponent = 1.761
-        endif
-        if(ks.gt.1.0)cnorm=cnorm/(ks)**etg_factor_in
-        c1 = 0.0
-      elseif(igeo.eq.1)then
-        if(nmodes_in.ne.4)then
-! this fit is for nmodes_in=2
-          cnorm = 32.48*pol
-          exponent = 1.547
-          c1 = 0.534
-        else
-! this fit is for nmodes_in=4
-          cnorm = 30.03*pol
-          exponent = 1.66
-          c1 = 0.234
-        endif
-        if(ks.gt.1.0)cnorm=cnorm/(ks)**etg_factor_in
-       endif
-       wd0 =ks/R_unit*SQRT(taus(1)/mass(2))  ! renomalized for scale invariance
-       gnet = get_gamma_net(gp)
-       gamma_net_out(imode) = gnet
-       gnet = gnet/wd0
-       get_intensity = cnorm*(wd0**2)*(gnet**exponent &
-        + c1*gnet)/(kp**4)
-      elseif(sat_rule_in.eq.1)then
-!
-!  GAM frequency version
-!
-!       wd0 = get_GAM_freq()
-       wd0 =  1.219*get_GAM_freq()
-!       exponent = 1.22
-       exponent = 1.208
-       gnet =get_gamma_net(gp) 
-       gamma_net_out(imode) = gnet
-!       get_intensity = 9.09*pol*(gnet**exponent)*(gnet**2+0.3935*wd0**2)**(1.0-exponent/2.0)
-       get_intensity = 8.347*pol*(gnet**exponent)*(gnet**2+wd0**2)**(1.0-exponent/2.0)
-       get_intensity = get_intensity/(kp**4)
-      endif
-!
-      END FUNCTION get_intensity
-!
-!--------------------------------------------------------------
-!
-      REAL FUNCTION get_gamma_net(gp)
-!
-      USE tglf_internal_interface
-!
-      REAL,INTENT(IN) :: gp
-      REAL :: alpha_exb
-!
-      alpha_exb = 0.3
-      if(igeo.eq.1)alpha_exb=0.3*SQRT(kappa_loc)
-      get_gamma_net =  MAX(gp - ABS(alpha_exb*alpha_quench_in*vexb_shear_in),0.0)
-!
-      END FUNCTION get_gamma_net
-!
-!--------------------------------------------------------------
-!
-      REAL FUNCTION get_GAM_freq()
-!
-      USE tglf_internal_interface
-      USE tglf_species
-!
-      REAL :: elong=1.0
-!
-      if(igeo.eq.1)elong = kappa_loc
-!      get_GAM_freq = SQRT(3.5*taus(2)+2.0*taus(1))/R_unit
-      get_GAM_freq = (2.0/(1.0+elong))*SQRT(taus(2)+taus(1))/R_unit
-!
-      END FUNCTION get_GAM_freq
-!
-!--------------------------------------------------------------
-!
-      SUBROUTINE get_nuei_cb(fx)
-!*********************************************************
-!     compute electron-ion collision coefficients for
-!     trapped fraction fx boundary terms
-!*********************************************************
-      USE nuei_coeff
-!
-      IMPLICIT NONE
-!
-      INTEGER,PARAMETER :: nf=6
-      INTEGER :: j1,j2,i
-      REAL :: fmin,fmax,fx,df,fm(nf)
-      REAL :: cbm(nf,ncb)
-!
-      DATA fm / &
-       0.3D0, 0.4D0, 0.5D0, 0.6D0, 0.7D0, 0.8D0 /
-!
-!    fm = 0.0  actually fit at ft=0.01
-!
-      data cbm(1,1:ncb)  / &
-       33.57, 2.0, 0.504, 0.0, 0.0, 0.0, &
-       0.0, 0.0, 0.0, 0.0, 0.0, &
-       0.0, 0.0, 0.0, 0.0, 0.0 /
-!      data cbm(1,1:ncb)  / &
-!       3.0924, 0.7384, 1.525, 4.2, 4.615, 302.16, &
-!       5.233, 49.645, 0.0, 0.0, 0.0, &
-!       0.0, 0.0, 0.0, 0.0, 0.0 /
-!
-!
-!    interpolate to fx
-!
-      fmin=0.3
-      fmax=0.7
-      df=0.1
-!      if(fx.le.fmin)then
-!        j1=1
-!        do i=1,ncb
-!         nuei_cb(i) = cbm(j1,i)
-!        enddo
-!      elseif(fx.ge.fmax)then
-!        j1=nf
-!        do i=1,ncb
-!         nuei_cb(i) = cbm(j1,i)
-!        enddo
-!      else
-!        j1=INT((fx-fmin)/df)+1
-!        if(j1.ge.nf)j1=nf-1
-!        j2=j1+1
-!        do i=1,ncb
-!         nuei_cb(i) = cbm(j1,i)+(cbm(j2,i)-cbm(j1,i))*(fx-fm(j1))/df
-!        enddo
-!      endif
-      do i=1,ncb
-         nuei_cb(i) = cbm(1,i)
-      enddo
-!      write(*,*)"fx = ",fx," j1 = ",j1,fm(j1),fm(j1+1)
-!
-! debug
-!      write(*,*)"debug get_u","ft = ",fx
-!      do i=1,ncb
-!       write(*,*)i,nuei_cb(i)
-!      enddo
-!
-      END SUBROUTINE get_nuei_cb
-!
+

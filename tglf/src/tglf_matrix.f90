@@ -2,7 +2,7 @@
       SUBROUTINE get_matrix
 !
       USE tglf_dimensions
-      USE tglf_internal_interface
+      USE tglf_global
       USE tglf_coeff
 !
       IMPLICIT NONE
@@ -16,29 +16,25 @@
 !
       call ave_theta
 !
-!       if(iflagin_gf(2).eq.0.and.ky.lt.xparam_gf(2))then
-!         p0 = ave_p0inv(1,1)
-!         do i=1,nbasis
-!         do j=1,nbasis
-!           ave_p0inv(i,j) = 0.D0
-!           if(i.eq.j)ave_p0inv(i,i) = p0
-!         enddo
-!         enddo
-!       endif
-!
-!       if(iflagin_gf(2).eq.1)then
-!         if(ky.lt.xparam_gf(2))then
-!           do i=1,nbasis
-!           do j=1,nbasis
-!             ave_p0inv(i,j) = 0.D0
-!             if(i.eq.j)ave_p0inv(i,i)=1.D0/ave_p0(1,1)
-!           enddo
-!           enddo
-!         else
-      call ave_inv0(ave_p0,ave_p0inv)
-!         endif
-!       endif
-      if(betae_in.gt.0.0)call ave_inv0(ave_b0,ave_b0inv)
+!      write(*,*)"ave_bp(1,1)=",ave_bp(1,1)
+      if(vpar_model_in.eq.0.and.use_bper_in)then
+        call ave_inv0(ave_bp,ave_bpinv)
+        do i=1,nbasis
+        do j=1,nbasis
+          ave_p0inv(i,j) = 0.0
+          ave_b0inv(i,j) = 0.0
+          do k=1,nbasis
+            ave_p0inv(i,j) = ave_p0inv(i,j)+ave_bpinv(i,k)*ave_b0(k,j)
+            ave_b0inv(i,j) = ave_b0inv(i,j)+ave_bpinv(i,k)*ave_p0(k,j)
+          enddo
+        enddo
+        enddo
+!          write(*,*)"ave_b0inv(i,j)=",ave_b0inv(1,1)
+      else
+        call ave_inv0(ave_p0,ave_p0inv)
+        if(use_bper_in)call ave_inv0(ave_b0,ave_b0inv)
+!          write(*,*)"ave_b0inv(i,j)=",ave_b0inv(1,1)
+      endif
 !
 ! debug
 !      do i=1,nbasis
@@ -97,7 +93,10 @@
 !       enddo
 !
        call ave_hp0
-       if(betae_in.gt.0.0)call ave_hb0
+       if(betae_in.gt.0.0)then
+         call ave_hb0
+         if(vpar_model_in.eq.0)call ave_hbp
+       endif
 !
        call wd_h
 !
@@ -130,7 +129,10 @@
          if(Linsker_factor_in.ne.0.0)call grad_ave_g
 !
          call ave_gp0
-         if(betae_in.gt.0.0)call ave_gb0
+         if(betae_in.gt.0.0)then
+           call ave_gb0
+           if(vpar_model_in.eq.0)call ave_gbp
+         endif
 !
          call wd_g
 !
@@ -399,6 +401,24 @@
        enddo
       enddo          
 !
+      do is = ns0,ns
+        do i=1,nbasis
+        do j=1,nbasis
+        hp1 = 0.0
+        hr11 = 0.0
+        hr13 = 0.0
+        do k=1,nbasis
+          hp1 = hp1 + ave_c_tor_par(i,k)*ave_hp1p0(is,k,j)
+          hr11 = hr11 + ave_c_tor_par(i,k)*ave_hr11p0(is,k,j)
+          hr13 = hr13 + ave_c_tor_par(i,k)*ave_hr13p0(is,k,j)
+        enddo
+        ave_c_tor_par_hp1p0(is,i,j) = hp1
+        ave_c_tor_par_hr11p0(is,i,j) = hr11        
+        ave_c_tor_par_hr13p0(is,i,j) = hr13        
+        enddo
+        enddo
+      enddo
+!
       END SUBROUTINE ave_hp0
 !
       SUBROUTINE ave_hb0
@@ -452,6 +472,58 @@
       enddo          
 !
       END SUBROUTINE ave_hb0
+!
+      SUBROUTINE ave_hbp
+!***************************************************************
+!
+!   compute the products ave_h*ave_bpinv
+!
+!***************************************************************
+      USE tglf_dimensions
+      USE tglf_coeff
+!
+      IMPLICIT NONE
+      INTEGER :: i,j,k,is
+!
+! compute matrix products
+!
+      do is=ns0,ns
+       do i=1,nbasis
+       do j=1,nbasis
+          hn    = 0.0
+          hp1   = 0.0
+          hp3   = 0.0
+          hr11  = 0.0
+          hr13  = 0.0
+          hr33  = 0.0
+          hw113 = 0.0
+          hw133 = 0.0
+          hw333 = 0.0
+          do k=1,nbasis
+            hn     = hn     + ave_hn(is,i,k)*ave_bpinv(k,j)
+            hp1    = hp1    + ave_hp1(is,i,k)*ave_bpinv(k,j)
+            hp3    = hp3    + ave_hp3(is,i,k)*ave_bpinv(k,j)
+            hr11   = hr11   + ave_hr11(is,i,k)*ave_bpinv(k,j)
+            hr13   = hr13   + ave_hr13(is,i,k)*ave_bpinv(k,j)
+            hr33   = hr33   + ave_hr33(is,i,k)*ave_bpinv(k,j)
+            hw113  = hw113  + ave_hw113(is,i,k)*ave_bpinv(k,j)
+            hw133  = hw133  + ave_hw133(is,i,k)*ave_bpinv(k,j)
+            hw333  = hw333  + ave_hw333(is,i,k)*ave_bpinv(k,j)
+          enddo
+          ave_hnbp(is,i,j)     = hn
+          ave_hp1bp(is,i,j)    = hp1
+          ave_hp3bp(is,i,j)    = hp3
+          ave_hr11bp(is,i,j)   = hr11
+          ave_hr13bp(is,i,j)   = hr13
+          ave_hr33bp(is,i,j)   = hr33
+          ave_hw113bp(is,i,j)  = hw113
+          ave_hw133bp(is,i,j)  = hw133
+          ave_hw333bp(is,i,j)  = hw333
+       enddo
+       enddo
+      enddo          
+!
+      END SUBROUTINE ave_hbp
 !
       SUBROUTINE gradB_h
 !***************************************************************
@@ -758,6 +830,24 @@
        enddo
       enddo
 !
+      do is = ns0,ns
+        do i=1,nbasis
+        do j=1,nbasis
+        gp1 = 0.0
+        gr11 = 0.0
+        gr13 = 0.0
+        do k=1,nbasis
+          gp1 = gp1 + ave_c_tor_par(i,k)*ave_gp1p0(is,k,j)
+          gr11 = gr11 + ave_c_tor_par(i,k)*ave_gr11p0(is,k,j)
+          gr13 = gr13 + ave_c_tor_par(i,k)*ave_gr13p0(is,k,j)
+        enddo
+        ave_c_tor_par_gp1p0(is,i,j) = gp1
+        ave_c_tor_par_gr11p0(is,i,j) = gr11        
+        ave_c_tor_par_gr13p0(is,i,j) = gr13        
+        enddo
+        enddo
+      enddo
+!
       END SUBROUTINE ave_gp0
 !
       SUBROUTINE ave_gb0
@@ -811,6 +901,58 @@
       enddo
 !
       END SUBROUTINE ave_gb0
+!!
+      SUBROUTINE ave_gbp
+!***************************************************************
+!
+!   compute the products ave_g*ave_bpinv
+!
+!***************************************************************
+      USE tglf_dimensions
+      USE tglf_coeff
+!
+      IMPLICIT NONE
+      INTEGER :: i,j,k,is
+!
+!   compute matrix products
+!
+      do is=ns0,ns
+       do i=1,nbasis
+       do j=1,nbasis
+          gn = 0.0
+          gp1 = 0.0
+          gp3 = 0.0
+          gr11 = 0.0
+          gr13 = 0.0
+          gr33 = 0.0
+          gw113 = 0.0
+          gw133 = 0.0
+          gw333 = 0.0
+          do k=1,nbasis
+            gn    = gn    + ave_gn(is,i,k)*ave_bpinv(k,j)
+            gp1   = gp1   + ave_gp1(is,i,k)*ave_bpinv(k,j)
+            gp3   = gp3   + ave_gp3(is,i,k)*ave_bpinv(k,j)
+            gr11  = gr11  + ave_gr11(is,i,k)*ave_bpinv(k,j)
+            gr13  = gr13  + ave_gr13(is,i,k)*ave_bpinv(k,j)
+            gr33  = gr33  + ave_gr33(is,i,k)*ave_bpinv(k,j)
+            gw113 = gw113 + ave_gw113(is,i,k)*ave_bpinv(k,j)
+            gw133 = gw133 + ave_gw133(is,i,k)*ave_bpinv(k,j)
+            gw333 = gw333 + ave_gw333(is,i,k)*ave_bpinv(k,j)
+          enddo
+          ave_gnbp(is,i,j)    = gn
+          ave_gp1bp(is,i,j)   = gp1
+          ave_gp3bp(is,i,j)   = gp3
+          ave_gr11bp(is,i,j)  = gr11
+          ave_gr13bp(is,i,j)  = gr13
+          ave_gr33bp(is,i,j)  = gr33
+          ave_gw113bp(is,i,j) = gw113
+          ave_gw133bp(is,i,j) = gw133
+          ave_gw333bp(is,i,j) = gw333
+       enddo
+       enddo
+      enddo
+!
+      END SUBROUTINE ave_gbp
 !
       SUBROUTINE gradB_g
 !***************************************************************
@@ -867,7 +1009,7 @@
 !  compute  k-independent hermite basis averages
 !***********************************************************
       USE tglf_dimensions
-      USE tglf_internal_interface
+      USE tglf_global
       USE tglf_species
       USE tglf_hermite
       USE tglf_xgrid
@@ -877,16 +1019,13 @@
       INTEGER :: i,j,k,is
       REAL :: b,bb,ww,thx,eps,p0
       REAL :: zero_cut
-      REAL :: pol,debye
+      REAL :: debye,betaU
 !
       zero_cut = 1.D-12
 !
 ! fill the Poisson equation phi multiplier px0 x-grid array
+! note that pol is set in get_species
 !
-      pol = 0.0
-      do is=1,ns
-        pol = pol + (zs(is)**2)*as(is)/taus(is)
-      enddo
       do i=1,nx
         debye = debye_factor_in*b0x(i)*(ky*debye_in)**2  ! (k_per*debye length unit)^2
         p0x(i) = debye + pol
@@ -919,9 +1058,9 @@
         ave_p0inv(i,j) = 0.0
         ave_p0(i,j) = 0.0
         ave_kx(i,j) = 0.0
-        ave_tor_par(i,j) = 0.0
-        ave_tor_per(i,j) = 0.0
-        ave_par_par(i,j) = 0.0
+        ave_c_tor_par(i,j) = 0.0
+        ave_c_tor_per(i,j) = 0.0
+        ave_c_par_par(i,j) = 0.0
 !
         do k=1,nx
          ww=wx(k)*h(i,k)*h(j,k)     
@@ -931,9 +1070,9 @@
          ave_p0inv(i,j) = ave_p0inv(i,j) + ww/p0x(k)
          ave_p0(i,j) = ave_p0(i,j) + ww*p0x(k)
          ave_kx(i,j) = ave_kx(i,j) + ww*kxx(k)
-         ave_tor_par(i,j) = ave_tor_par(i,j) + ww*cx_tor_par(k)
-         ave_tor_per(i,j) = ave_tor_per(i,j) + ww*cx_tor_per(k)
-         ave_par_par(i,j) = ave_par_par(i,j) + ww*cx_par_par(k)
+         ave_c_tor_par(i,j) = ave_c_tor_par(i,j) + ww*cx_tor_par(k)
+         ave_c_tor_per(i,j) = ave_c_tor_per(i,j) + ww*cx_tor_per(k)
+         ave_c_par_par(i,j) = ave_c_par_par(i,j) + ww*cx_par_par(k)
         enddo
         if(ABS(ave_wd(i,j)).lt.zero_cut)ave_wd(i,j) = 0.0
         if(ABS(ave_b0(i,j)).lt.zero_cut)ave_b0(i,j) = 0.0
@@ -941,9 +1080,9 @@
         if(ABS(ave_p0inv(i,j)).lt.zero_cut)ave_p0inv(i,j) = 0.0
         if(ABS(ave_p0(i,j)).lt.zero_cut)ave_p0(i,j) = 0.0
         if(ABS(ave_kx(i,j)).lt.zero_cut)ave_kx(i,j) = 0.0
-        if(ABS(ave_tor_par(i,j)).lt.zero_cut)ave_tor_par(i,j) = 0.0
-        if(ABS(ave_tor_per(i,j)).lt.zero_cut)ave_tor_per(i,j) = 0.0
-        if(ABS(ave_par_par(i,j)).lt.zero_cut)ave_par_par(i,j) = 0.0
+        if(ABS(ave_c_tor_par(i,j)).lt.zero_cut)ave_c_tor_par(i,j) = 0.0
+        if(ABS(ave_c_tor_per(i,j)).lt.zero_cut)ave_c_tor_per(i,j) = 0.0
+        if(ABS(ave_c_par_par(i,j)).lt.zero_cut)ave_c_par_par(i,j) = 0.0
 ! symmetrize
         ave_wd(j,i)    = ave_wd(i,j)
         ave_b0(j,i)    = ave_b0(i,j)
@@ -951,9 +1090,9 @@
         ave_p0inv(j,i) = ave_p0inv(i,j)
         ave_p0(j,i) = ave_p0(i,j)
         ave_kx(j,i) = ave_kx(i,j)
-        ave_tor_par(j,i) = ave_tor_par(i,j)
-        ave_tor_per(j,i) = ave_tor_per(i,j)
-        ave_par_par(j,i) = ave_par_par(i,j)
+        ave_c_tor_par(j,i) = ave_c_tor_par(i,j)
+        ave_c_tor_per(j,i) = ave_c_tor_per(i,j)
+        ave_c_par_par(j,i) = ave_c_par_par(i,j)
         enddo
        enddo
 !       write(*,*)"ave_wd(1,1)=",ave_wd(1,1)
@@ -961,9 +1100,9 @@
 !       write(*,*)"ave_p0(1,1) = ",ave_p0(1,1)
 !       write(*,*)"ave_b0(1,1) = ",ave_b0(1,1)
 !       write(*,*)"ave_kx(1,1) = ",ave_kx(1,1)
-!       write(*,*)"ave_tor_par(1,1) = ",ave_tor_par(1,1)
-!       write(*,*)"ave_tor_per(1,1) = ",ave_tor_per(1,1)
-!       write(*,*)"ave_par_par(1,1) = ",ave_par_par(1,1)
+!       write(*,*)"ave_tor_par(1,1) = ",ave_c_tor_par(1,1)
+!       write(*,*)"ave_tor_per(1,1) = ",ave_c_tor_per(1,1)
+!       write(*,*)"ave_par_par(1,1) = ",ave_c_par_par(1,1)
        do i=1,nbasis
        do j=1,nbasis
          gradB = 0.0
@@ -978,22 +1117,38 @@
 !
        do is=ns0,ns
          if(nbasis.eq.1)then
-           ave_kpar(1,1)=1.0/sqrt_two
-           ave_kpar_eff(is,1,1)=-xi*(ave_kpar(1,1)   &
-           -ABS(vpar_in)*ky*R_unit*q_unit*width_in*mass(is)/zs(is))
-!           -ky*q_unit*width_in*2.0*ABS(ave_wd(1,1)*vpar_in)*taus(is)/(zs(is)*vs(is)))
+           ave_kpar_eff(is,1,1) = -xi/sqrt_two
+           if(vpar_model_in.eq.1)then
+             ave_kpar_eff(is,1,1) = ave_kpar_eff(is,1,1)   &
+             +xi*ABS(vpar_in(is))*ky*R_unit*q_unit*width_in*mass(is)/zs(is)
+           endif
          else
            do i=1,nbasis
            do j=1,nbasis
-           ave_kpar_eff(is,i,j) = ave_kpar(i,j)     
-           if(i.eq.j)then
-             ave_kpar_eff(is,i,j) = ave_kpar_eff(is,i,j) +xi*vpar_in*ky*R_unit*q_unit*width_in*mass(is)/zs(is)
-           endif
-!           -ky*q_unit*width_in*2.0*xi*ave_wd(i,j)*vpar_in*taus(is)/(zs(is)*vs(is))
+             ave_kpar_eff(is,i,j) = ave_kpar(i,j)     
+             if(vpar_model_in.eq.1.and.i.eq.j)then
+               ave_kpar_eff(is,i,j) = ave_kpar_eff(is,i,j)  &
+               -xi*vpar_in(is)*ky*R_unit*q_unit*width_in*mass(is)/zs(is)
+             endif
            enddo
            enddo
          endif
        enddo
+!
+       if(vpar_model_in.eq.0.and.use_bper_in)then
+         betaU = 0.5*betae_in/(ky*ky)
+         betaU = betaU*U0*U0
+         do i=1,nbasis
+         do j=1,nbasis
+           ave_bp(i,j) = 0.0
+           do k=1,nbasis
+             ave_bp(i,j) = ave_bp(i,j) + ave_b0(i,k)*ave_p0(k,j)
+           enddo
+           if(i.eq.j)ave_bp(i,j) = ave_bp(i,j) + betaU
+!           write(*,*)i,j,"ave_bp(i,j)=",ave_bp(i,j),betaU
+         enddo
+         enddo
+       endif
 !
 !  debug
 !       write(*,*)"check ave_p0inv"
@@ -1037,6 +1192,7 @@
 !***************************************************************
       USE tglf_dimensions
       USE tglf_coeff
+      USE tglf_global
 !
       IMPLICIT NONE
       INTEGER :: is,ib,jb,k
@@ -1044,35 +1200,37 @@
       do is=ns0,ns
       do ib=1,nbasis
       do jb=1,nbasis
-       wdhp1 = 0.D0
-       wdhp3 = 0.D0
-       wdhr11 = 0.D0
-       wdhr13 = 0.D0
-       wdhr33 = 0.D0
-       wdht1 = 0.D0
-       wdht3 = 0.D0
-       wdhu1 = 0.D0
-       wdhu3 = 0.D0
-       wdhu3ht1 = 0.D0
-       wdhu3ht3 = 0.D0
-       wdhu33 = 0.D0
-       wdhu33ht1 = 0.D0
-       wdhu33ht3 = 0.D0
-       modwdhu1 = 0.D0
-       modwdhu3 = 0.D0
-       modwdhu33 = 0.D0
-       modwdht1 = 0.D0
-       modwdht3 = 0.D0
-       modwdhu3ht1 = 0.D0
-       modwdhu3ht3 = 0.D0
-       modwdhu33ht1 = 0.D0
-       modwdhu33ht3 = 0.D0
+       wdhp1p0 = 0.0
+       wdhr11p0 = 0.0
+       wdhr13p0 = 0.0
+       wdhp1b0 = 0.0
+       wdhr11b0 = 0.0
+       wdhr13b0 =0.0
+       wdhp1bp = 0.0
+       wdhr11bp = 0.0
+       wdhr13bp =0.0
+       wdht1 = 0.0
+       wdht3 = 0.0
+       wdhu1 = 0.0
+       wdhu3 = 0.0
+       wdhu3ht1 = 0.0
+       wdhu3ht3 = 0.0
+       wdhu33 = 0.0
+       wdhu33ht1 = 0.0
+       wdhu33ht3 = 0.0
+       modwdhu1 = 0.0
+       modwdhu3 = 0.0
+       modwdhu33 = 0.0
+       modwdht1 = 0.0
+       modwdht3 = 0.0
+       modwdhu3ht1 = 0.0
+       modwdhu3ht3 = 0.0
+       modwdhu33ht1 = 0.0
+       modwdhu33ht3 = 0.0
        do k=1,nbasis
-        wdhp1   = wdhp1   + ave_wd(ib,k)*ave_hp1p0(is,k,jb)
-        wdhp3   = wdhp3   + ave_wd(ib,k)*ave_hp3p0(is,k,jb)
-        wdhr11  = wdhr11  + ave_wd(ib,k)*ave_hr11p0(is,k,jb)
-        wdhr13  = wdhr13  + ave_wd(ib,k)*ave_hr13p0(is,k,jb)
-        wdhr33  = wdhr33  + ave_wd(ib,k)*ave_hr33p0(is,k,jb)
+        wdhp1p0   = wdhp1p0   + ave_wd(ib,k)*ave_hp1p0(is,k,jb)
+        wdhr11p0  = wdhr11p0  + ave_wd(ib,k)*ave_hr11p0(is,k,jb)
+        wdhr13p0  = wdhr13p0  + ave_wd(ib,k)*ave_hr13p0(is,k,jb)
         wdht1  = wdht1  + ave_wd(ib,k)*ave_ht1(is,k,jb)
         wdht3  = wdht3  + ave_wd(ib,k)*ave_ht3(is,k,jb)
         wdhu1   = wdhu1   + ave_wd(ib,k)*ave_hu1(is,k,jb)
@@ -1101,11 +1259,29 @@
         modwdhu33ht3  = modwdhu33ht3 & 
           + ave_modwd(ib,k)*ave_hu33ht3(is,k,jb)
        enddo
-       ave_wdhp1(is,ib,jb) = wdhp1
-       ave_wdhp3(is,ib,jb) = wdhp3
-       ave_wdhr11(is,ib,jb) = wdhr11
-       ave_wdhr13(is,ib,jb) = wdhr13
-       ave_wdhr33(is,ib,jb) = wdhr33
+       if(use_bper_in)then
+         do k=1,nbasis
+           wdhp1b0   = wdhp1b0   + ave_wd(ib,k)*ave_hp1b0(is,k,jb)
+           wdhr11b0  = wdhr11b0  + ave_wd(ib,k)*ave_hr11b0(is,k,jb)
+           wdhr13b0  = wdhr13b0  + ave_wd(ib,k)*ave_hr13b0(is,k,jb)
+         enddo
+         if(vpar_model_in.eq.0)then
+           do k=1,nbasis
+             wdhp1bp   = wdhp1bp   + ave_wd(ib,k)*ave_hp1bp(is,k,jb)
+             wdhr11bp  = wdhr11bp  + ave_wd(ib,k)*ave_hr11bp(is,k,jb)
+             wdhr13bp  = wdhr13bp  + ave_wd(ib,k)*ave_hr13bp(is,k,jb)
+           enddo
+         endif
+       endif
+       ave_wdhp1p0(is,ib,jb) = wdhp1p0
+       ave_wdhr11p0(is,ib,jb) = wdhr11p0
+       ave_wdhr13p0(is,ib,jb) = wdhr13p0
+       ave_wdhp1b0(is,ib,jb) = wdhp1b0
+       ave_wdhr11b0(is,ib,jb) = wdhr11b0
+       ave_wdhr13b0(is,ib,jb) = wdhr13bp
+       ave_wdhp1bp(is,ib,jb) = wdhp1bp
+       ave_wdhr11bp(is,ib,jb) = wdhr11bp
+       ave_wdhr13bp(is,ib,jb) = wdhr13bp
        ave_wdht1(is,ib,jb)= wdht1
        ave_wdht3(is,ib,jb)= wdht3
        ave_wdhu1(is,ib,jb) = wdhu1
@@ -1138,6 +1314,7 @@
 !***************************************************************
       USE tglf_dimensions
       USE tglf_coeff
+      USE tglf_global
 !
       IMPLICIT NONE
       INTEGER :: is,ib,jb,k
@@ -1145,35 +1322,37 @@
       do is=ns0,ns
       do ib=1,nbasis
       do jb=1,nbasis
-       wdgp1 = 0.D0
-       wdgp3 = 0.D0
-       wdgr11 = 0.D0
-       wdgr13 = 0.D0
-       wdgr33 = 0.D0
-       wdgu1 = 0.D0
-       wdgu3 = 0.D0
-       wdgu33 = 0.D0
-       wdgt1 = 0.D0
-       wdgt3 = 0.D0
-       wdgu3gt1 = 0.D0
-       wdgu3gt3 = 0.D0
-       wdgu33gt1 = 0.D0
-       wdgu33gt3 = 0.D0
-       modwdgu1 = 0.D0
-       modwdgu3 = 0.D0
-       modwdgu33 = 0.D0
-       modwdgt1 = 0.D0
-       modwdgt3 = 0.D0
-       modwdgu3gt1 = 0.D0
-       modwdgu3gt3 = 0.D0
-       modwdgu33gt1 = 0.D0
-       modwdgu33gt3 = 0.D0
+       wdgp1p0 = 0.0
+       wdgr11p0 = 0.0
+       wdgr13p0 = 0.0
+       wdgp1b0 = 0.0
+       wdgr11b0 = 0.0
+       wdgr13b0 = 0.0
+       wdgp1bp = 0.0
+       wdgr11bp = 0.0
+       wdgr13bp = 0.0
+       wdgu1 = 0.0
+       wdgu3 = 0.0
+       wdgu33 = 0.0
+       wdgt1 = 0.0
+       wdgt3 = 0.0
+       wdgu3gt1 = 0.0
+       wdgu3gt3 = 0.0
+       wdgu33gt1 = 0.0
+       wdgu33gt3 = 0.0
+       modwdgu1 = 0.0
+       modwdgu3 = 0.0
+       modwdgu33 = 0.0
+       modwdgt1 = 0.0
+       modwdgt3 = 0.0
+       modwdgu3gt1 = 0.0
+       modwdgu3gt3 = 0.0
+       modwdgu33gt1 = 0.0
+       modwdgu33gt3 = 0.0
        do k=1,nbasis
-         wdgp1   = wdgp1   + ave_wd(ib,k)*ave_gp1p0(is,k,jb)
-         wdgp3   = wdgp3   + ave_wd(ib,k)*ave_gp3p0(is,k,jb)
-         wdgr11  = wdgr11  + ave_wd(ib,k)*ave_gr11p0(is,k,jb)
-         wdgr13  = wdgr13  + ave_wd(ib,k)*ave_gr13p0(is,k,jb)
-         wdgr33  = wdgr33  + ave_wd(ib,k)*ave_gr33p0(is,k,jb)
+         wdgp1p0   = wdgp1p0   + ave_wd(ib,k)*ave_gp1p0(is,k,jb)
+         wdgr11p0  = wdgr11p0  + ave_wd(ib,k)*ave_gr11p0(is,k,jb)
+         wdgr13p0  = wdgr13p0  + ave_wd(ib,k)*ave_gr13p0(is,k,jb)
          wdgu1   = wdgu1   + ave_wd(ib,k)*ave_gu1(is,k,jb)
          wdgu3   = wdgu3   + ave_wd(ib,k)*ave_gu3(is,k,jb)
          wdgu33  = wdgu33  + ave_wd(ib,k)*ave_gu33(is,k,jb)
@@ -1206,11 +1385,29 @@
          modwdgu33gt3  = modwdgu33gt3 &  
           + ave_modwd(ib,k)*ave_gu33gt3(is,k,jb)
        enddo
-       ave_wdgp1(is,ib,jb) = wdgp1
-       ave_wdgp3(is,ib,jb) = wdgp3
-       ave_wdgr11(is,ib,jb) = wdgr11
-       ave_wdgr13(is,ib,jb) = wdgr13
-       ave_wdgr33(is,ib,jb) = wdgr33
+       if(use_bper_in)then
+         do k=1,nbasis
+           wdgp1b0   = wdgp1b0   + ave_wd(ib,k)*ave_gp1b0(is,k,jb)
+           wdgr11b0  = wdgr11b0  + ave_wd(ib,k)*ave_gr11b0(is,k,jb)
+           wdgr13b0  = wdgr13b0  + ave_wd(ib,k)*ave_gr13b0(is,k,jb)
+         enddo
+         if(vpar_model_in.eq.0)then
+           do k=1,nbasis
+             wdgp1bp   = wdgp1bp   + ave_wd(ib,k)*ave_gp1bp(is,k,jb)
+             wdgr11bp  = wdgr11bp  + ave_wd(ib,k)*ave_gr11bp(is,k,jb)
+             wdgr13bp  = wdgr13bp  + ave_wd(ib,k)*ave_gr13bp(is,k,jb)
+           enddo
+         endif
+       endif
+       ave_wdgp1p0(is,ib,jb) = wdgp1p0
+       ave_wdgr11p0(is,ib,jb) = wdgr11p0
+       ave_wdgr13p0(is,ib,jb) = wdgr13p0
+       ave_wdgp1b0(is,ib,jb) = wdgp1b0
+       ave_wdgr11b0(is,ib,jb) = wdgr11b0
+       ave_wdgr13b0(is,ib,jb) = wdgr13b0
+       ave_wdgp1bp(is,ib,jb) = wdgp1bp
+       ave_wdgr11bp(is,ib,jb) = wdgr11bp
+       ave_wdgr13bp(is,ib,jb) = wdgr13bp
        ave_wdgu1(is,ib,jb) = wdgu1
        ave_wdgu3(is,ib,jb) = wdgu3
        ave_wdgu33(is,ib,jb) = wdgu33
@@ -1243,21 +1440,31 @@
 !***************************************************************
       USE tglf_dimensions
       USE tglf_coeff
+      USE tglf_global
 !
       IMPLICIT NONE
       INTEGER :: is,ib,jb,k
-      COMPLEX :: kp_hn,kp_hp1
-      COMPLEX :: kp_hp3,kp_hr11,kp_hr13,kp_hu1,kp_hu3
+      COMPLEX :: kp_hnp0,kp_hp1p0,kp_hp3p0
+      COMPLEX :: kp_hp1b0,kp_hr11b0,kp_hr13b0
+      COMPLEX :: kp_hnbp,kp_hp3bp
+      COMPLEX :: kp_hp1bp,kp_hr11bp,kp_hr13bp
+      COMPLEX :: kp_hu1,kp_hu3
       COMPLEX :: kp_ht1,kp_ht3
 !
       do is=ns0,ns
        do ib=1,nbasis
        do jb=1,nbasis
-        kp_hn = 0.0
-        kp_hp1 = 0.0
-        kp_hp3 = 0.0
-!        kp_hr11 = 0.0
-!        kp_hr13 = 0.0
+        kp_hnp0 = 0.0
+        kp_hp1p0 = 0.0
+        kp_hp3p0 = 0.0
+        kp_hp1b0 = 0.0
+        kp_hr11b0 = 0.0
+        kp_hr13b0 = 0.0
+        kp_hnbp = 0.0
+        kp_hp3bp = 0.0
+        kp_hp1bp = 0.0
+        kp_hr11bp = 0.0
+        kp_hr13bp = 0.0
         kp_hu1 = 0.0
         kp_hu3 = 0.0
         kp_ht1 = 0.0
@@ -1265,16 +1472,12 @@
         modkpar_hu1 = 0.0
         modkpar_hu3 = 0.0
         do k=1,nbasis
-         kp_hn        = kp_hn &
-            +ave_kpar(ib,k)*ave_hnp0(is,k,jb)
-         kp_hp1        = kp_hp1 &
-            +ave_kpar(ib,k)*ave_hp1p0(is,k,jb)
-         kp_hp3        = kp_hp3 &
-            +ave_kpar(ib,k)*ave_hp3p0(is,k,jb)
-!         kp_hr11       = kp_hr11 &
-!            +ave_kpar(ib,k)*ave_hr11p0(is,k,jb)
-!         kp_hr13       = kp_hr13 &
-!            +ave_kpar(ib,k)*ave_hr13p0(is,k,jb)
+         kp_hnp0        = kp_hnp0 &
+            +ave_hnp0(is,ib,k)*ave_kpar(k,jb)
+         kp_hp1p0        = kp_hp1p0 &
+            +ave_hp1p0(is,ib,k)*ave_kpar(k,jb)
+         kp_hp3p0        = kp_hp3p0 &
+            +ave_hp3p0(is,ib,k)*ave_kpar(k,jb)
          kp_hu1     = kp_hu1  &
             +ave_hu1(is,ib,k)*ave_kpar_eff(is,k,jb)
          kp_hu3     = kp_hu3 &
@@ -1288,11 +1491,41 @@
          modkpar_hu3        = modkpar_hu3 &
             +ave_modkpar_eff(is,ib,k)*ave_hu3(is,k,jb)
         enddo
-        ave_kparhn(is,ib,jb) = kp_hn
-        ave_kparhp1(is,ib,jb) = kp_hp1
-        ave_kparhp3(is,ib,jb) = kp_hp3
-!        ave_kparhr11(is,ib,jb) = kp_hr11
-!        ave_kparhr13(is,ib,jb) = kp_hr13
+        if(use_bper_in)then
+          do k=1,nbasis
+            kp_hp1b0        = kp_hp1b0 &
+            +ave_hp1b0(is,ib,k)*ave_kpar(k,jb)
+            kp_hr11b0       = kp_hr11b0 &
+            +ave_hr11b0(is,ib,k)*ave_kpar(k,jb)
+            kp_hr13b0       = kp_hr13b0 &
+            +ave_hr13b0(is,ib,k)*ave_kpar(k,jb)
+          enddo
+          if(vpar_model_in.eq.0)then
+            do k=1,nbasis
+             kp_hnbp        = kp_hnbp &
+             +ave_hnbp(is,ib,k)*ave_kpar(k,jb)
+             kp_hp3bp        = kp_hp3bp &
+             +ave_hp3bp(is,ib,k)*ave_kpar(k,jb)
+             kp_hp1bp        = kp_hp1bp &
+             +ave_hp1bp(is,ib,k)*ave_kpar(k,jb)
+             kp_hr11bp       = kp_hr11bp &
+             +ave_hr11bp(is,ib,k)*ave_kpar(k,jb)
+             kp_hr13bp       = kp_hr13bp &
+             +ave_hr13bp(is,ib,k)*ave_kpar(k,jb)
+            enddo
+          endif
+        endif
+        ave_kparhnp0(is,ib,jb) = kp_hnp0
+        ave_kparhp1p0(is,ib,jb) = kp_hp1p0
+        ave_kparhp3p0(is,ib,jb) = kp_hp3p0
+        ave_kparhp1b0(is,ib,jb) = kp_hp1b0
+        ave_kparhr11b0(is,ib,jb) = kp_hr11b0
+        ave_kparhr13b0(is,ib,jb) = kp_hr13b0
+        ave_kparhnbp(is,ib,jb) = kp_hnbp
+        ave_kparhp3bp(is,ib,jb) = kp_hp3bp
+        ave_kparhp1bp(is,ib,jb) = kp_hp1bp
+        ave_kparhr11bp(is,ib,jb) = kp_hr11bp
+        ave_kparhr13bp(is,ib,jb) = kp_hr13b0
         ave_kparhu1(is,ib,jb) = kp_hu1
         ave_kparhu3(is,ib,jb) = kp_hu3
         ave_kparht1(is,ib,jb) = kp_ht1
@@ -1301,22 +1534,6 @@
         ave_modkparhu3(is,ib,jb) = modkpar_hu3
        enddo
        enddo
-!       do ib=1,nbasis
-!       do jb=1,nbasis
-!        kp_hr11 = 0.0
-!        kp_hr13 = 0.0
-!         do k=1,nbasis
-!         kp_hr11       = kp_hr11 &
-!            +ave_hu1(is,ib,k)*ave_kparhp1(is,k,jb)
-!!            + ave_kpar(ib,k)*ave_hr11p0(is,k,jb)
-!         kp_hr13       = kp_hr13 &
-!            +ave_hu3(is,ib,k)*ave_kparhp1(is,k,jb)
-!!             + ave_kpar(ib,k)*ave_hr13p0(is,k,jb)
-!         enddo
-!        ave_kparhr11(is,ib,jb) = kp_hr11
-!        ave_kparhr13(is,ib,jb) = kp_hr13
-!       enddo
-!       enddo
       enddo
 !
       END SUBROUTINE kpar_h
@@ -1329,21 +1546,31 @@
 !***************************************************************
       USE tglf_dimensions
       USE tglf_coeff
+      USE tglf_global
 !
       IMPLICIT NONE
       INTEGER :: is,ib,jb,k
-      COMPLEX :: kp_gn,kp_gp1,kp_gp3
-      COMPLEX :: kp_gr11,kp_gr13,kp_gu1,kp_gu3
+      COMPLEX :: kp_gnp0,kp_gp1p0,kp_gp3p0
+      COMPLEX :: kp_gp1b0,kp_gr11b0,kp_gr13b0
+      COMPLEX :: kp_gnbp,kp_gp3bp
+      COMPLEX :: kp_gp1bp,kp_gr11bp,kp_gr13bp
+      COMPLEX :: kp_gu1,kp_gu3
       COMPLEX :: kp_gt1,kp_gt3
 !
       do is=ns0,ns
        do ib=1,nbasis
        do jb=1,nbasis
-        kp_gn = 0.0
-        kp_gp1 = 0.0
-        kp_gp3 = 0.0
-!        kp_gr11 = 0.0
-!        kp_gr13 = 0.0
+        kp_gnp0 = 0.0
+        kp_gp1p0 = 0.0
+        kp_gp3p0 = 0.0
+        kp_gp1b0 = 0.0
+        kp_gr11b0 = 0.0
+        kp_gr13b0 = 0.0
+        kp_gnbp = 0.0
+        kp_gp3bp = 0.0
+        kp_gp1bp = 0.0
+        kp_gr11bp = 0.0
+        kp_gr13bp = 0.0
         kp_gu1 = 0.0
         kp_gu3 = 0.0
         kp_gt1 = 0.0
@@ -1351,16 +1578,12 @@
         modkpar_gu1 = 0.0
         modkpar_gu3 = 0.0
         do k=1,nbasis
-         kp_gn        = kp_gn & 
-            +ave_kpar(ib,k)*ave_gnp0(is,k,jb)
-         kp_gp1        = kp_gp1 & 
-            +ave_kpar(ib,k)*ave_gp1p0(is,k,jb)
-         kp_gp3        = kp_gp3 & 
-            +ave_kpar(ib,k)*ave_gp3p0(is,k,jb)
-!         kp_gr11       = kp_gr11 &
-!            +ave_kpar(ib,k)*ave_gr11p0(is,k,jb)
-!         kp_gr13       = kp_gr13 &
-!            +ave_kpar(ib,k)*ave_gr13p0(is,k,jb)
+         kp_gnp0        = kp_gnp0 & 
+            +ave_gnp0(is,ib,k)*ave_kpar(k,jb)
+         kp_gp1p0        = kp_gp1p0 & 
+            +ave_gp1p0(is,ib,k)*ave_kpar(k,jb)
+         kp_gp3p0        = kp_gp3p0 & 
+            +ave_gp3p0(is,ib,k)*ave_kpar(k,jb)
          kp_gu1        = kp_gu1 & 
             +ave_gu1(is,ib,k)*ave_kpar_eff(is,k,jb)
          kp_gu3        = kp_gu3 & 
@@ -1374,11 +1597,41 @@
          modkpar_gu3  = modkpar_gu3 &
          +ave_modkpar_eff(is,ib,k)*ave_gu3(is,k,jb)
         enddo
-        ave_kpargn(is,ib,jb) = kp_gn
-        ave_kpargp1(is,ib,jb) = kp_gp1
-        ave_kpargp3(is,ib,jb) = kp_gp3
-!        ave_kpargr11(is,ib,jb) = kp_gr11
-!        ave_kpargr13(is,ib,jb) = kp_gr13
+        if(use_bper_in)then
+          do k=1,nbasis
+            kp_gp1b0        = kp_gp1b0 & 
+            +ave_gp1b0(is,ib,k)*ave_kpar(k,jb)
+            kp_gr11b0       = kp_gr11b0 &
+            +ave_gr11b0(is,ib,k)*ave_kpar(k,jb)
+            kp_gr13b0       = kp_gr13b0 &
+            +ave_gr13b0(is,ib,k)*ave_kpar(k,jb)
+          enddo
+          if(vpar_model_in.eq.0)then
+           do k=1,nbasis
+            kp_gnbp        = kp_gnbp & 
+            +ave_gnbp(is,ib,k)*ave_kpar(k,jb)
+            kp_gp3bp        = kp_gp3bp & 
+            +ave_gp3bp(is,ib,k)*ave_kpar(k,jb)
+            kp_gp1bp        = kp_gp1bp & 
+            +ave_gp1bp(is,ib,k)*ave_kpar(k,jb)
+            kp_gr11bp       = kp_gr11bp &
+            +ave_gr11bp(is,ib,k)*ave_kpar(k,jb)
+            kp_gr13bp       = kp_gr13bp &
+            +ave_gr13bp(is,ib,k)*ave_kpar(k,jb)
+           enddo
+          endif
+        endif
+        ave_kpargnp0(is,ib,jb) = kp_gnp0
+        ave_kpargp1p0(is,ib,jb) = kp_gp1p0
+        ave_kpargp3p0(is,ib,jb) = kp_gp3p0
+        ave_kpargp1b0(is,ib,jb) = kp_gp1b0
+        ave_kpargr11b0(is,ib,jb) = kp_gr11b0
+        ave_kpargr13b0(is,ib,jb) = kp_gr13b0
+        ave_kpargnbp(is,ib,jb) = kp_gnbp
+        ave_kpargp3bp(is,ib,jb) = kp_gp3bp
+        ave_kpargp1bp(is,ib,jb) = kp_gp1bp
+        ave_kpargr11bp(is,ib,jb) = kp_gr11bp
+        ave_kpargr13bp(is,ib,jb) = kp_gr13bp
         ave_kpargu1(is,ib,jb) = kp_gu1
         ave_kpargu3(is,ib,jb) = kp_gu3
         ave_kpargt1(is,ib,jb) = kp_gt1
@@ -1387,20 +1640,6 @@
         ave_modkpargu3(is,ib,jb) = modkpar_gu3
        enddo
        enddo
-!       do ib=1,nbasis
-!       do jb=1,nbasis
-!        kp_gr11 = 0.D0
-!        kp_gr13 = 0.D0
-!         do k=1,nbasis
-!         kp_gr11       = kp_gr11 &
-!            +ave_gu1(is,ib,k)*ave_kpargp1(is,k,jb)
-!         kp_gr13       = kp_gr13 &
-!            +ave_gu3(is,ib,k)*ave_kpargp1(is,k,jb)
-!         enddo
-!        ave_kpargr11(is,ib,jb) = kp_gr11
-!        ave_kpargr13(is,ib,jb) = kp_gr13
-!       enddo
-!       enddo
       enddo
 !
       END SUBROUTINE kpar_g
@@ -1412,7 +1651,7 @@
 !
 !***************************************************************
       USE tglf_dimensions
-      USE tglf_internal_interface
+      USE tglf_global
       USE tglf_coeff
 !
       IMPLICIT NONE
@@ -1501,7 +1740,7 @@
 !
 !***************************************************************
       USE tglf_dimensions
-      USE tglf_internal_interface
+      USE tglf_global
       USE tglf_coeff
 !
       IMPLICIT NONE
@@ -1523,7 +1762,7 @@
 !
 ! find the eigenvalues and eigenvectors
 !
-      if(ABS(vpar_in).eq.0.0)then     
+      if(vpar_model_in.ne.1)then     
         do i=1,nm
         do j=i,nm
           a(i,j) = xi*ave_kpar(i,j)
@@ -1559,7 +1798,7 @@
            enddo
          enddo
          enddo
-       else ! vpar_in not zero
+       else ! vpar_model_in = 1
 !
          do is=ns0,ns
            do i=1,nm
@@ -1734,7 +1973,7 @@
 !
       if(nm.eq.2)then
         detm = ave_m(1,1)*ave_m(2,2)-ave_m(1,2)*ave_m(2,1)
-        if(detm.eq.0.D0)detm = zero
+        if(detm.eq.0.0)detm = zero
         ave_minv(1,1) = ave_m(2,2)/detm
         ave_minv(2,2) = ave_m(1,1)/detm
         ave_minv(1,2) = -ave_m(1,2)/detm
@@ -1812,7 +2051,7 @@
 !  compute the FLR integrals at the hermite nodes
 !
       USE tglf_dimensions
-      USE tglf_internal_interface
+      USE tglf_global
       USE tglf_species
       USE tglf_xgrid
 !
