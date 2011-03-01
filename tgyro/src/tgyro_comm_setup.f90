@@ -86,9 +86,19 @@ subroutine tgyro_comm_setup
      ! Linear stability 
      !-----------------------------
 
-     ! The number of workers is the number of search frequencies.
+     if (flux_method == 2) then
 
-     n_worker = tgyro_stab_nsearch
+        ! GYRO: number of workers is the number of search frequencies.
+
+        n_worker = tgyro_stab_nsearch
+
+     else
+
+        ! TGLF: number of workers is one
+
+        n_worker = 1
+
+     endif
 
   case (3)
 
