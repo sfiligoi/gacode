@@ -4,7 +4,7 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc, N_ion=N_ion
 ;
 ; v1.0: Oct. 29, 2008
 ;
-; Reads in INPUT_profiles and various local TGYRO output files,
+; Reads in input.profiles and various local TGYRO output files,
 ; returns everything in one large IDL structure.
 ;
 ; Usage: To load a simulation, e.g. 'wtest_1', enter:
@@ -22,7 +22,9 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc, N_ion=N_ion
 ; the same naming conventions as the TGYRO output files
 ;
 ; KEYWORDS
-; simdir: string containing name of valid directory in $TGYRO_DIR/sim
+; simdir: string containing name of valid directory in local directory
+; dirloc: string with pathname to directory containing simdir
+; N_ion: number of dynamic ion species to load.  Defaults to 1.
 ;
 ; v1.1: Apr. 15, 2009
 ; Added support for gamma_p in gradients.out, no_gammap_flag for
@@ -46,17 +48,28 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc, N_ion=N_ion
 ; v2.0: July 19, 2010
 ; added dirloc keyword to allow simulations located in other than $TGYRO_DIR/sim
 ;
+; v3.0: March 3, 2011
+; updated to be compatible with new gacode file structure
+;
   IF N_ELEMENTS(simdir) EQ 0 THEN BEGIN
       MESSAGE, 'Need to specify a directory!', /INFO
       RETURN, 0
   ENDIF
 
-  IF N_ELEMENTS(dirloc) EQ 0 THEN dirloc = GETENV('TGYRO_DIR') + '/sim/'
+
+;  IF N_ELEMENTS(dirloc) EQ 0 THEN dirpath = simdir + '/' $
+;  ELSE dirpath = dirloc + '/' + simdir + '/'
+  DEFAULT, dirloc, '.'
   dirpath = dirloc + '/' + simdir + '/'
 
-  ;first read INPUT_profiles to get inital info on fine grid
+  ;first read input.profiles to get inital info on fine grid
   s = STRING('#')
-  OPENR, 1, dirpath + 'INPUT_profiles'
+  OPENR, 1, dirpath + 'input.profiles', ERROR=err
+  IF (err NE 0) THEN BEGIN
+      PRINT, "Couldn't open " + dirpath + "input.profiles!  Returning 0"
+      RETURN, 0
+  ENDIF
+
   WHILE((STRPOS(s,'#') EQ 0) OR (STRPOS(s,'V') EQ 0) OR (STRPOS(s,'O') EQ 0)) DO BEGIN
       READF, 1, s
   ENDWHILE
@@ -78,11 +91,11 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc, N_ion=N_ion
   s = '#'
   WHILE (STRPOS(s, 'delta') EQ -1) DO READF, 1, s
   READF, 1, arr
-  exp_delta0 = REFORM(arr[0,*])
+  exp_delta = REFORM(arr[0,*])
   exp_Te = REFORM(arr[1,*])
   exp_ne = REFORM(arr[2,*])
   exp_Zeff = REFORM(arr[3,*])
-  exp_Er = REFORM(arr[4,*])
+  exp_omega0 = REFORM(arr[4,*])
 
   s = '#'
   WHILE (STRPOS(s, 'pow_e') EQ -1) DO READF, 1, s
@@ -91,7 +104,7 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc, N_ion=N_ion
   exp_Pe = REFORM(arr[1,*])        ;Mw
   exp_Pi = REFORM(arr[2,*])        ;Mw
   exp_Pexch = REFORM(arr[3,*])     ;Mw
-  exp_delta1 = REFORM(arr[4,*])
+  exp_zeta = REFORM(arr[4,*])
 
   READF, 1, s
   READF, 1, s
@@ -99,7 +112,9 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc, N_ion=N_ion
   exp_flow_beam = REFORM(arr[0,*])  ;units?? MW/keV?
   exp_flow_wall = REFORM(arr[1,*])
   exp_flow = exp_flow_beam + exp_flow_wall
-  ;columns 2-4 unused
+  exp_zmag = REFORM(arr[2,*])   ;m
+  exp_ptot = REFORM(arr[3,*])   ;Pa
+  ;column 4 unused
 
   READF, 1, s
   READF, 1, s
@@ -520,9 +535,10 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc, N_ion=N_ion
           exp_Rmaj: exp_Rmaj, $ ;Rmaj/a
           exp_q: exp_q, $       ;saftey factor
           exp_kappa: exp_kappa, $ ;elongation
-          exp_delta0: exp_delta0, $ ;avg. triangularity
-          exp_delta1: exp_delta1, $ ;up-down asymmetyr of triangularity
-          exp_Er: exp_Er, $     ; kV/m  
+          exp_delta: exp_delta, $ ;triangularity
+          exp_zeta: exp_zeta, $ ;squareness
+          exp_zmag: exp_zmag, $ ;Z0(r)  ;m
+          exp_omega0: exp_omega0, $     ; 1/s
           exp_Te: exp_Te, $     ; keV
           exp_ne: exp_ne, $     ; 10**19/m**3
           exp_Zeff: exp_Zeff, $ 

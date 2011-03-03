@@ -1,6 +1,5 @@
-PRO plot_tgyro_loc_summary, simdir, N_it = N_it, RHO=rho, MKS=mks,$
-  PS = ps, DATA2 = data2, Nit2=N_it2, SUMMARY=summary, $
-  OLD=old, _EXTRA=extra
+PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks,$
+  WCM2 = wcm2, DATA2 = data2, Nit2=N_it2, PS = ps, SUMMARY=summary, _EXTRA=extra
 ;
 ; C. Holland, UCSD
 ;
@@ -39,14 +38,22 @@ PRO plot_tgyro_loc_summary, simdir, N_it = N_it, RHO=rho, MKS=mks,$
 ;
 ;
 ; KEYWORDS
-; simdir: string containing name of valid directory in $TGYRO_DIR/sim
+; simdir: string containing name of valid directory in local directory
+; DIRLOC: path to directory which contains simdir (only needed if
+; simdir not in local directory)
 ; N_it: iteration # to plot, defaults to last iteration
 ; RHO: set=1 to plot quantities vs rho, 0 (default) vs rmin/a
 ; MKS: set=1 to plot fluxes in MW/m**2, 0 (default) in gB units
-; PS: set=1 to make characters slightly larger and lines thicker for
-;     sending to Postscript files.
+; WCM2: set =1 to plot fluxes in W/cm**2 and particle flux as a
+; convective energy flux 1.5*Te*Gamma_e (also in W/cm**2).  Only used if MKS=1.
 ; DATA2: data structure from get_tgyro_loc_data to overplot (at Nit2)
 ; in yellow
+; Nit2: iteration # to plot for data2.  Defaults to N_it value.
+; PS: set=1 to make characters slightly larger and lines thicker for
+;     sending to Postscript files.
+; SUMMARY: set=1 to generate an Encapsulated postscript version of
+; plot named summary.eps in simdir.  Best used with PS=1.  X11 plot
+; will still be generated.
 ;
 ; v1.0.1: Nov. 11, 2008
 ; Added SUMMARY flag.  Set equal to 1 to make a file called
@@ -65,7 +72,12 @@ PRO plot_tgyro_loc_summary, simdir, N_it = N_it, RHO=rho, MKS=mks,$
 ; Updated to plot rotation/momentum fluxes, compatibility with latest
 ; get_tgyro_loc_data
 ;
-
+; v2.1: August 23,2010
+; Add wcm2 flag to plot Qi, Qe and 3/2TeGe (instead of Ge) in W/cm^2
+;
+; v3.0: March 3, 2011
+; Updated for use with new gacode file structure.
+;
   IF KEYWORD_SET(ps) THEN BEGIN
      thick = 6
      cs = 2
@@ -73,10 +85,8 @@ PRO plot_tgyro_loc_summary, simdir, N_it = N_it, RHO=rho, MKS=mks,$
      thick = 1
      cs = 2
   ENDELSE
-  IF KEYWORD_SET(plot_n) THEN cs *= 2
 
-  IF KEYWORD_SET(old) THEN data = GET_TGYRO_LOC_DATA_OLD(simdir) $
-  ELSE data = GET_TGYRO_LOC_DATA(simdir)
+  data = GET_TGYRO_LOC_DATA(simdir, DIRLOC=dirloc)
   IF (N_ELEMENTS(data2) GT 0) THEN d2flag = 1 ELSE d2flag = 0
   DEFAULT, N_it, data.N_it-1
   DEFAULT, N_it2, N_it
@@ -138,6 +148,25 @@ PRO plot_tgyro_loc_summary, simdir, N_it = N_it, RHO=rho, MKS=mks,$
       IF (d2flag) THEN d2gnorm = data2.G_gB[*,N_it2]
       IF (d2flag) THEN d2mnorm = data2.Pi_gB[*,N_it2]
       x0 = 0.5
+
+      IF KEYWORD_SET(wcm2) THEN BEGIN
+          Qi_target *= 100.
+          Qi_tot *= 100.
+          Qi0 *= 100.
+          Qi_neo *= 100.
+          Qe_target *= 100.
+          Qe_tot *= 100.
+          Qe0 *= 100.
+          Qe_neo *= 100.
+          Ge_target *= 100*1.5*data.Te[*,N_it]*(1.6/1e3)
+          Ge_tot *= 100*1.5*data.Te[*,N_it]*(1.6/1e3)
+          Ge_neo *= 100*1.5*data.Te[*,N_it]*(1.6/1e3)
+          units = '(W/cm!U2!N)'
+          ge_units = ' (W/cm!U2!N)'
+          IF (d2flag) THEN d2norm = data2.Q_gB[*,N_it2]*100.
+          IF (d2flag) THEN d2gnorm = data2.G_gB[*,N_it2]*$
+            100*1.5*data2.Te[*,N_it2]*(1.6/1e3)
+      ENDIF
   ENDIF
 
   !P.MULTI = [0,2,4]
@@ -223,20 +252,22 @@ PRO plot_tgyro_loc_summary, simdir, N_it = N_it, RHO=rho, MKS=mks,$
   OPLOT, x, Ge_neo, COLOR=50, PSYM=-4, THICK=thick
   IF (d2flag) THEN OPLOT, x2, data2.ge_tot[*,N_it2]*d2gnorm, $
                           COLOR=150, PSYM=-4, THICK=thick
-  XYOUTS, 0.4, 0.7*ymax, '!4C!X!De!N ' + ge_units,$
-          CHARSIZE=2,CHARTHICK=thick
+  IF KEYWORD_SET(wcm2) THEN XYOUTS, 0.4, 0.7*ymax, '1.5T!De!N!4C!X!De!N ' + ge_units,$
+            CHARSIZE=2,CHARTHICK=thick $
+  ELSE XYOUTS, 0.4, 0.7*ymax, '!4C!X!De!N ' + ge_units, CHARSIZE=2,CHARTHICK=thick
 
-  rot0 = data.M[*,0]*data.c_s[*,0]/1e5
+  exp_rot = -data.exp_omega0*data.exp_Rmaj*data.a/1e5
   rot = data.M[*,N_it]*data.c_s[*,N_it]/1e5
-  ymin = MIN(rot0) < MIN(rot)
-  ymax = MAX(rot0) > MAX(rot)
-  PLOT, x, rot0, XRANGE = [0,1], $
+  ymin = MIN(exp_rot) < MIN(rot)
+  ymax = MAX(exp_rot) > MAX(rot)
+  PLOT, x_exp, exp_rot, XRANGE = [0,1], $
         THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
         CHARSIZE=cs, XTITLE=xtitle, YRANGE=[ymin,ymax]
   OPLOT, x, rot, COLOR=100, PSYM=-4, THICK=thick
   IF (d2flag) THEN OPLOT, x2, data2.M[*,N_it2]*data2.c_s[*,N_it2]/1e5, COLOR=150, $
                           PSYM=-2, THICK=thick
-  XYOUTS, 0.4, 0.8*ymax, 'R!4x!X (10!U5!N m/s)', CHARSIZE=2,CHARTHICK=thick
+  XYOUTS, 0.2, 0.8*ymax, 'V!Dtor!N = R!4x!X!D0!N (10!U5!N m/s)', CHARSIZE=2,$
+          CHARTHICK=thick
 
   ymax = MAX(Mflux_target) > MAX(Mflux_tot)
   IF KEYWORD_SET(mks) THEN ymin = 0 ELSE $
@@ -258,9 +289,9 @@ PRO plot_tgyro_loc_summary, simdir, N_it = N_it, RHO=rho, MKS=mks,$
   IF KEYWORD_SET(summary) THEN BEGIN
       SET_PLOT, 'PS'
       DEVICE, XS=30,YS=30, /ENCAPS, /COLOR, BITS=8, $
-              FILE = GETENV('TGYRO_DIR') + '/sim/' + simdir + '/summary.eps'
+              FILE = dirloc +'/' + simdir + '/summary.eps'
       PLOT_TGYRO_LOC_SUMMARY, simdir, N_it = N_it, RHO=rho, MKS=mks,$
-        PS = 1, DATA2 = data2, Nit2=N_it2, PLOT_N=plot_n, _EXTRA=extra
+        PS = 1, DATA2 = data2, Nit2=N_it2,  _EXTRA=extra
       DEVICE, /CLOSE
       SET_PLOT, 'X'
   ENDIF
