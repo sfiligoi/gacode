@@ -1,0 +1,35 @@
+#---------------------------------------------------
+# Cray XT5 (jaguarpf.ccs.ornl.gov)
+#---------------------------------------------------
+
+# Environment variables for PETSc/SLEPc
+include ${SLEPC_DIR}/conf/slepc_common_variables
+
+# Compilers and flags
+
+# Fortran 90/95 compiler
+FC  = ftn -module $(GACODE_ROOT)/modules ${FC_INCLUDES}
+
+# Fortran 77 compiler
+F77 = ftn
+
+# Compiler options/flags
+FMATH  = -r8
+FOPT   = -tp istanbul-64 -O3 -fast -Msmartalloc -fastsse
+FDEBUG = -g -Ktrap=fp -Mbounds -Minform=inform
+FPROF  = -tp istanbul-64 -O3 -fast -Msmartalloc -Mprof=func
+
+# Execute 'module load fftw/2.1.5'
+# Execute 'module load mumps/4.7.3_par' (parallel version) 
+#  which defines MUMPS_PATH environment variable
+LMATH = -ldrfftw -ldfftw ${MUMPS_PATH} -lzmumps -lpord \
+        -l${SLEPC_LIB}
+
+# OPTIONAL : Load netCDF
+# Execute 'module load netcdf/4.0.1.1'
+NETCDF     = /opt/cray/netcdf/4.0.1.1/netcdf-pgi/lib/libnetcdf.a
+NETCDF_INC = /opt/cray/netcdf/4.0.1.1/netcdf-pgi/include
+
+# Archive 
+ARCH = ar cr
+
