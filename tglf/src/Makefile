@@ -6,7 +6,7 @@ else
    FFLAGS=${FOPT}
 endif
 
-EXEC=tglf
+EXEC=xtglf
 LLIB=tglf_lib
 
 OBJECTS = tglf_modules.o \
@@ -22,8 +22,8 @@ OBJECTS = tglf_modules.o \
 
 .SUFFIXES : .o .f90
 
-all: $(LLIB).a $(EXEC).o
-	$(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o $(LLIB).a $(EXTRA_LIBS)
+all: $(LLIB).a tglf_driver.o
+	$(FC) $(FFLAGS) -o $(EXEC) tglf_driver.o $(LLIB).a $(EXTRA_LIBS)
 
 tglf_lib.a: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)

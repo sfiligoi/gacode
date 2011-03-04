@@ -57,6 +57,8 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
   ! Geometry parameters:
   !
+  tglf_geometry_flag_in = 1  ! Miller
+  if(loc_num_equil_flag ==1)tglf_geometry_flag_in = 2  ! Fourier 
   ! s-alpha
   tglf_rmin_sa_in     = r(i_r)/r_min
   tglf_rmaj_sa_in     = r_maj(i_r)/r_min

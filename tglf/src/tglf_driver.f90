@@ -8,7 +8,7 @@
 ! local variables
       INTEGER :: i,j,k,nfields
       REAL :: cmult,a_unit=100.0,B_unit=10000.0
-      REAL :: t,dt,pi
+      REAL :: t,dt
 ! timing test
       INTEGER :: time_array(8)
       REAL :: cpu1,cpu2 
@@ -71,7 +71,6 @@
            Bp_elite_tg(i) = Bp_elite_tg(i)/B_unit
          enddo
 !         n_elite_tg=300
-!         pi = atan2( 0.0, -1.0 )
 !         dt = 2.0*pi/REAL(n_elite_tg)
 !         do i=0,n_elite_tg
 !           t = REAL(i)*dt

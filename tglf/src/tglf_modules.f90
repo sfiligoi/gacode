@@ -643,10 +643,11 @@
 !
 ! input data for the tglf model
 !
+      USE tglf_dimensions
       IMPLICIT NONE
       SAVE
 !
-      INTEGER,PARAMETER :: nsmax=3,elitemax=700,fouriermax=16
+      INTEGER,PARAMETER :: nsmax=nsm,elitemax=max_ELITE,fouriermax=max_fourier
       LOGICAL :: use_TM_tg=.TRUE.
       LOGICAL :: iflux_tg=.TRUE.
       LOGICAL :: use_bper_tg=.FALSE.
