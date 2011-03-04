@@ -1,6 +1,9 @@
-!---------------------------------------------------------------------
-! Mapping from TGYRO internal variables to TGLF interface
-!---------------------------------------------------------------------
+!------------------------------------------------------------
+! tgyro_tglf_map.f90
+!
+! PURPOSE:
+!  Mapping from TGYRO internal variables to TGLF interface.
+!------------------------------------------------------------
 
 subroutine tgyro_tglf_map
 

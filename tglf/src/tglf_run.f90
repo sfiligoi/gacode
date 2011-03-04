@@ -98,7 +98,7 @@ subroutine tglf_run()
 
   elseif (tglf_geometry_flag_in == 2)then
 
-    call put_Fourier_geometry(tglf_q_fourier_in,  &
+     call put_Fourier_geometry(tglf_q_fourier_in,  &
           tglf_q_prime_fourier_in, &
           tglf_p_prime_fourier_in, &
           tglf_nfourier_in, &
@@ -124,48 +124,48 @@ subroutine tglf_run()
      call tglf_dump_global
   endif
 
-  if(tglf_use_transport_model_in)then
+  if (tglf_use_transport_model_in)then
      call tglf_TM
 
-  !---------------------------------------------
-  ! Output (normalized to Q_GB)
-  ! 
-  ! Electrons
+     !---------------------------------------------
+     ! Output (normalized to Q_GB)
+     ! 
+     ! Electrons
 
-  ! Gammae/Gamma_GB
-    tglf_elec_pflux_out = get_particle_flux(1,1)
+     ! Gammae/Gamma_GB
+     tglf_elec_pflux_out = get_particle_flux(1,1)
 
-  ! Qe/Q_GB
-    tglf_elec_eflux_low_out = get_q_low(1)
-    tglf_elec_eflux_out     = get_energy_flux(1,1)
+     ! Qe/Q_GB
+     tglf_elec_eflux_low_out = get_q_low(1)
+     tglf_elec_eflux_out     = get_energy_flux(1,1)
 
-  ! Pi_e/Pi_GB
-    tglf_elec_mflux_out = get_stress_tor(1,1)
+     ! Pi_e/Pi_GB
+     tglf_elec_mflux_out = get_stress_tor(1,1)
 
-  ! Ions
+     ! Ions
 
-    do i_ion=1,5
+     do i_ion=1,5
 
-     ! Gammai/Gamma_GB
-     tglf_ion_pflux_out(i_ion) = get_particle_flux(i_ion+1,1)
+        ! Gammai/Gamma_GB
+        tglf_ion_pflux_out(i_ion) = get_particle_flux(i_ion+1,1)
 
-     ! Qi/Q_GB
-     tglf_ion_eflux_low_out(i_ion) = get_q_low(i_ion+1)
-     tglf_ion_eflux_out(i_ion)     = get_energy_flux(i_ion+1,1)
+        ! Qi/Q_GB
+        tglf_ion_eflux_low_out(i_ion) = get_q_low(i_ion+1)
+        tglf_ion_eflux_out(i_ion)     = get_energy_flux(i_ion+1,1)
 
-     ! Pi_i/Pi_GB
-     tglf_ion_mflux_out(i_ion) = get_stress_tor(i_ion+1,1)
+        ! Pi_i/Pi_GB
+        tglf_ion_mflux_out(i_ion) = get_stress_tor(i_ion+1,1)
 
-    enddo
-   else
-   ! run single ky linear stability
-     call tglf
-
-   !collect linear eigenvalues
-     do n=1,tglf_nmodes_in
-       tglf_eigenvalue_out(n) = get_frequency(n) + xi*get_growthrate(n)
      enddo
-     
-   endif
+  else
+     ! run single ky linear stability
+     call tglf_LS
+
+     !collect linear eigenvalues
+     do n=1,tglf_nmodes_in
+        tglf_eigenvalue_out(n) = get_frequency(n) + xi*get_growthrate(n)
+     enddo
+
+  endif
 
 end subroutine tglf_run
