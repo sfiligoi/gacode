@@ -14,12 +14,6 @@
       INTEGER, PARAMETER :: max_fourier = 16
 ! dimensions determined by inputs
       INTEGER nx,nbasis,ns0,ns
-! global constants
-      REAL :: pi
-      REAL :: pi_2
-      REAL :: sqrt_pi
-      REAL :: sqrt_two
-      COMPLEX :: xi=(0.0,1.0)
 !
       END MODULE tglf_dimensions
 !
@@ -30,6 +24,12 @@
 !
       IMPLICIT NONE
       SAVE
+! global constants
+      REAL :: pi
+      REAL :: pi_2
+      REAL :: sqrt_pi
+      REAL :: sqrt_two
+      COMPLEX :: xi=(0.0,1.0)
 ! internal flow control switches
       LOGICAL :: new_eikonal_in=.TRUE.
       LOGICAL :: new_start=.TRUE.

@@ -3774,6 +3774,7 @@
 !     only the positive roots are found and stored
 !
       USE tglf_dimensions
+      USE tglf_global
       USE tglf_hermite
 !
       IMPLICIT NONE
@@ -3873,6 +3874,7 @@
 !     They are orthonormal with error of 1.0E-8.
 !
       USE tglf_dimensions
+      USE tglf_global
       USE tglf_hermite
 !
       IMPLICIT NONE
