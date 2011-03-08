@@ -6,14 +6,11 @@ else
    FFLAGS=${FOPT}
 endif
 
-LLIB=../libs/xptor_lib
+LLIB=../driver/xptor_lib
 
 OBJECTS = neucg.o \
           neuden.o \
           neut.o \
-          palpha.o \
-          pohmic.o \
-          prad.o \
 	  palpha_dv.o \
 	  prad_dv.o \
 	  pohmic_dv.o \

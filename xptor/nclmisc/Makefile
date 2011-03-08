@@ -6,7 +6,7 @@ else
    FFLAGS=${FOPT}
 endif
 
-LLIB = ../libs/xptor_lib
+LLIB = ../driver/xptor_lib
 
 OBJECTS = fluxav_efit.o \
           fluxav_vmec.o \

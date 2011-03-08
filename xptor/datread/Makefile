@@ -7,7 +7,7 @@ else
 endif
 
 EXEC=xptor
-LLIB=../libs/xptor_lib
+LLIB=../driver/xptor_lib
 
 OBJECTS = readtestprofiles.o \
           readiterdb.o \

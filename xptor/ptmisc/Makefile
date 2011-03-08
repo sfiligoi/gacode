@@ -6,7 +6,7 @@ else
    FFLAGS=${FOPT}
 endif
 
-LLIB=../libs/xptor_lib
+LLIB=../driver/xptor_lib
 
 OBJECTS = ave_fields.o \
 	  average7_2d.o \
@@ -14,7 +14,6 @@ OBJECTS = ave_fields.o \
           delay.o \
           derivedexpprofiles.o \
           derivedmodlocal.o \
-          derivedmodlocal_ptor.o \
           derivedmodprofiles.o \
           filter_dv.o \
           gridsmooth.o \
@@ -22,8 +21,6 @@ OBJECTS = ave_fields.o \
           ptorupdate.o \
           setup.o \
           timeprofiles_dv.o \
-          timeprofiles.o \
-          timeprofiles_replace.o \
 	  tpedscale.o \
           transfer_exp.o \
           update_src.o \

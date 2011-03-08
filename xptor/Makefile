@@ -1,7 +1,5 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
-export EXTRA_LIBS = ${LMATH}
-
 all:
 	cd datread ; make 
 	cd misc ; make
@@ -21,5 +19,4 @@ clean:
 	cd solver ; make clean
 	cd source ; make clean
 	cd driver ; make clean
-	rm libs/xptor_lib.a
 
