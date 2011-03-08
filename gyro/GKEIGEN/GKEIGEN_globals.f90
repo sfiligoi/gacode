@@ -13,13 +13,13 @@ module GKEIGEN_globals
   !
   ! in GKEIGEN_matrix_read:
   !
-  character(len=12), parameter :: &
+  character(len=14), parameter :: &
        file_eigen_restart = &
        "GKEIGEN_matrix"
   !
   ! in GKEIGEN_do:
   !
-  character(len=14), parameter :: &
+  character(len=16), parameter :: &
        file_eigen_freq = &
        "GKEIGEN_freq.out"
   !----------------------------------
