@@ -1,0 +1,17 @@
+      real*8 v1_r,v2_r,v3_r,v4_r,v5_r
+      real*8 v1_i,v2_i,v3_i,v4_i,v5_i
+      real*8 v6_r,v7_r,v8_r,v9_r,v10_r
+      real*8 v6_i,v7_i,v8_i,v9_i,v10_i
+      real*8 vb1_r,vb2_r,vb3_r,vb4_r,vb5_r
+      real*8 vb1_i,vb2_i,vb3_i,vb4_i,vb5_i
+      real*8 vb6_r,vb7_r,vb8_r,vb9_r,vb10_r
+      real*8 vb6_i,vb7_i,vb8_i,vb9_i,vb10_i
+      common /getv/
+     > v1_r,v2_r,v3_r,v4_r,v5_r,
+     > v1_i,v2_i,v3_i,v4_i,v5_i,
+     > v6_r,v7_r,v8_r,v9_r,v10_r,
+     > v6_i,v7_i,v8_i,v9_i,v10_i,
+     > vb1_r,vb2_r,vb3_r,vb4_r,vb5_r,
+     > vb1_i,vb2_i,vb3_i,vb4_i,vb5_i,
+     > vb6_r,vb7_r,vb8_r,vb9_r,vb10_r,
+     > vb6_i,vb7_i,vb8_i,vb9_i,vb10_i

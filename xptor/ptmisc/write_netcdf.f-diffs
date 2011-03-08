@@ -1,0 +1,469 @@
+4c4
+< c     file 'xptor_out.nc'
+---
+> c     file called 'xptor_out.nc'
+20c20
+<      &              field_units, cur_units, pow_units, mom_units
+---
+>      &              field_units, cur_units
+23,24c23,24
+<       parameter (den_units='1.e19 m^-3', mom_units='NT-M^2')
+<       parameter (field_units='T', cur_units='MA', pow_units='MW')
+---
+>       parameter (den_units='1.e19 m^-3')
+>       parameter (field_units='T', cur_units='MA')
+220a221,236
+>       scalval(j)=nf_def_var(ncid,'volavebetat_m',nf_double,0,0,rhid(j))
+>       scalval(j)=nf_put_att_text(ncid,rhid(j),'def',28,
+>      &           'vol avg predicted total beta')
+>       j=j+1
+>       scalval(j)=nf_def_var(ncid,'volavebetae_m',nf_double,0,0,rhid(j))
+>       scalval(j)=nf_put_att_text(ncid,rhid(j),'def',31,
+>      &           'vol avg predicted electron beta')
+>       j=j+1
+>       scalval(j)=nf_def_var(ncid,'volavebetai_m',nf_double,0,0,rhid(j))
+>       scalval(j)=nf_put_att_text(ncid,rhid(j),'def',34,
+>      &           'vol avg predicted thermal ion beta')
+>       j=j+1
+>       scalval(j)=nf_def_var(ncid,'volavebetaf_m',nf_double,0,0,rhid(j))
+>       scalval(j)=nf_put_att_text(ncid,rhid(j),'def',31,
+>      &           'vol avg predicted fast ion beta')
+>       j=j+1
+393,430c409
+<       oneval(j) = nf_def_var (ncid,'vdia_exp(1)'
+<      & ,nf_double,1,rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+<      & len('exp. electrondiamagnetic velocity 10^5 m/s'),
+<      & 'exp. electron diamagnetic velocity 10^5 m/s')
+<       j=j+1
+<       oneval(j) = nf_def_var (ncid,'vdia_exp(2)'
+<      & ,nf_double,1,rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+<      & len('exp. ion diamagnetic velocity 10^5 m/s'),
+<      & 'exp. ion diamagnetic velocity 10^5 m/s')
+<       j=j+1
+<       oneval(j) = nf_def_var (ncid,'vdia_exp(3)'
+<      & ,nf_double,1,rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+<      & len('exp. impurity diamagnetic velocity 10^5 m/s'),
+<      & 'exp. impurity diamagnetic velocity 10^5 m/s')
+<       j=j+1
+<       oneval(j) = nf_def_var (ncid,'vneo_exp(1)'
+<      & ,nf_double,1,rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+<      & len('exp. electron neo. pol. velocity 10^5 m/s'),
+<      & 'exp. electron neo. pol. velocity 10^5 m/s')
+<       j=j+1
+<       oneval(j) = nf_def_var (ncid,'vneo_exp(2)'
+<      & ,nf_double,1,rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+<      & len('exp. ion neo. pol. velocity 10^5 m/s'),
+<      & 'exp. ion neo. pol. velocity 10^5 m/s')
+<       j=j+1
+<       oneval(j) = nf_def_var (ncid,'vneo_exp(3)'
+<      & ,nf_double,1,rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+<      & len('exp. impurity neo. pol. velocity 10^5 m/s'),
+<      & 'exp. impurity neo. pol. velocity 10^5 m/s')
+<       j=j+1
+<       oneval(j) = nf_def_var (ncid,'mach_exp(1)'
+<      & ,nf_double,1,rdim,rhid1(j))
+---
+>       oneval(j) = nf_def_var (ncid,'vdia_exp',nf_double,1,rdim,rhid1(j))
+432,433c411,412
+<      & len('exp. electron parallel mach number'),
+<      & 'exp. electron parallel mach number')
+---
+>      & len('exp. diamagnetic velocity 10^5 m/s'),
+>      & 'exp. diamagnetic velocity 10^5 m/s')
+435,436c414
+<       oneval(j) = nf_def_var (ncid,'mach_exp(2)'
+<      & ,nf_double,1,rdim,rhid1(j))
+---
+>       oneval(j) = nf_def_var (ncid,'vneo_exp',nf_double,1,rdim,rhid1(j))
+438,445c416,417
+<      & len('exp. ion parallel mach number'),
+<      & 'exp. ion parallel mach number')
+<       j=j+1
+<       oneval(j) = nf_def_var (ncid,'mach_exp(3)'
+<      & ,nf_double,1,rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+<      & len('exp. impurity parallel mach number'),
+<      & 'exp. impurity parallel mach number')
+---
+>      & len('exp. neo. pol. velocity 10^5 m/s'),
+>      & 'exp. neo. pol. velocity 10^5 m/s')
+482,491d453
+<       oneval(j)=nf_def_var(ncid,'flow_exp',nf_double,1,rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+<      &           len('total exp particle flow KA'),
+<      &           'total exp particle flow KA')
+<       j=j+1
+<       oneval(j) = nf_def_var (ncid,'powe_exp',nf_double,1,rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+<      &           len('exp integrated elec power (MW)'),
+<      &           'exp integrated elec power (MW)')
+<       j=j+1
+497,498c459
+<       oneval(j) = nf_def_var (ncid,'stress_tor_exp',nf_double,1,
+<      &           rdim,rhid1(j))
+---
+>       oneval(j) = nf_def_var (ncid,'powe_exp',nf_double,1,rdim,rhid1(j))
+500,501c461,462
+<      &           len('integrated toroidal momentum flux NT-M'),
+<      &          'integrated toroidal momentum flux NT-M')
+---
+>      &           len('exp integrated elec power (MW)'),
+>      &           'exp integrated elec power (MW)')
+505,506c466,467
+<      &           len('exp exchange power MW'),
+<      &           'exp exchange power MW')
+---
+>      &           len('exp exchange power'),
+>      &           'exp exchange power')
+564a526,530
+>       oneval(j)=nf_def_var(ncid,'flow_exp',nf_double,1,rdim,rhid1(j))
+>       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+>      &           len('total exp particle flow'),
+>      &           'total exp particle flow')
+>       j=j+1
+568,569c534,535
+<      &           len('exp wall particle flow KA'),
+<      &           'exp wall particle flow KA')
+---
+>      &           len('exp wall particle flow'),
+>      &           'exp wall particle flow')
+574,575c540,541
+<      &           len('exp beam particle flow KA'),
+<      &           'exp beam particle flow KA')
+---
+>      &           len('exp beam particle flow'),
+>      &           'exp beam particle flow')
+744,751d709
+<       oneval(j)=nf_def_var(ncid,'a_pol',nf_double,1,rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+<      & len('a_pol'),'a_pol')
+<       j=j+1
+<       oneval(j)=nf_def_var(ncid,'a_tor',nf_double,1,rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+<      & len('a_tor'),'a_tor')
+<       j=j+1
+849c807
+<       oneval(j) = nf_def_var (ncid,'zpne_m',nf_double,1,rdim,rhid1(j))
+---
+>       oneval(j) = nf_def_var (ncid,'betat_m',nf_double,1,rdim,rhid1(j))
+851c809
+<      & len('a/Lne (dimensionless)'),'a/Lne (dimensionless)')
+---
+>      & len('total beta'),'total beta')
+853c811
+<       oneval(j) = nf_def_var (ncid,'zpni_m',nf_double,1,rdim,rhid1(j))
+---
+>       oneval(j) = nf_def_var (ncid,'zpti_m',nf_double,1,rdim,rhid1(j))
+855c813
+<      & len('a/Lni (dimensionless)'),'a/Lni (dimensionless)')
+---
+>      & len('a/LTi (dimensionless)'),'a/LTi (dimensionless)')
+861c819
+<       oneval(j) = nf_def_var (ncid,'zpti_m',nf_double,1,rdim,rhid1(j))
+---
+>       oneval(j) = nf_def_var (ncid,'zpni_m',nf_double,1,rdim,rhid1(j))
+863c821,825
+<      & len('a/LTi (dimensionless)'),'a/LTi (dimensionless)')
+---
+>      & len('a/Lni (dimensionless)'),'a/Lni (dimensionless)')
+>       j=j+1
+>       oneval(j) = nf_def_var (ncid,'zpne_m',nf_double,1,rdim,rhid1(j))
+>       oneval(j)=nf_put_att_text(ncid,rhid1(j),'def.',
+>      & len('a/Lne (dimensionless)'),'a/Lne (dimensionless)')
+891,898c853
+<       oneval(j) = nf_def_var (ncid,'vdia_m(1)'
+<      & ,nf_double,1,rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'def.',
+<      & len('v_dia, electron diamagnetic velocity 10^5 m/s'),
+<      & 'v_dia, electron diamagnetic velocity 10^5 m/s')
+<       j=j+1
+<       oneval(j) = nf_def_var (ncid,'vdia_m(2)'
+<      & ,nf_double,1,rdim,rhid1(j))
+---
+>       oneval(j) = nf_def_var (ncid,'vdia_m',nf_double,1,rdim,rhid1(j))
+903,916c858
+<       oneval(j) = nf_def_var (ncid,'vdia_m(3)'
+<      & ,nf_double,1,rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'def.',
+<      & len('v_dia, impurity diamagnetic velocity 10^5 m/s'),
+<      & 'v_dia, impurity diamagnetic velocity 10^5 m/s')
+<       j=j+1
+<       oneval(j) = nf_def_var (ncid,'vneo_m(1)'
+<      & ,nf_double,1,rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'def.',
+<      & len('v_neo, electron neo. pol. velocity 10^5 m/s'),
+<      & 'v_neo, electron neo. pol. velocity 10^5 m/s')
+<       j=j+1
+<       oneval(j) = nf_def_var (ncid,'vneo_m(2)'
+<      & ,nf_double,1,rdim,rhid1(j))
+---
+>       oneval(j) = nf_def_var (ncid,'vneo_m',nf_double,1,rdim,rhid1(j))
+921,944d862
+<       oneval(j) = nf_def_var (ncid,'vneo_m(3)'
+<      & ,nf_double,1,rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'def.',
+<      & len('v_neo, impurity neo. pol. velocity 10^5 m/s'),
+<      & 'v_neo, impurity neo. pol. velocity 10^5 m/s')
+<       j=j+1
+<       oneval(j) = nf_def_var (ncid,'mach_m(1)'
+<      & ,nf_double,1,rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'def.',
+<      & len('model electron parallel mach number'),
+<      & 'model electron parallel mach number')
+<       j=j+1
+<       oneval(j) = nf_def_var (ncid,'mach_m(2)'
+<      & ,nf_double,1,rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'def.',
+<      & len('model ion parallel mach number'),
+<      & 'model ion parallel mach number')
+<       j=j+1
+<       oneval(j) = nf_def_var (ncid,'mach_m(3)'
+<      & ,nf_double,1,rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'def.',
+<      & len('model impurity parallel mach number'),
+<      & 'model impurity parallel mach number')
+<       j=j+1
+993,1046d910
+<       oneval(j) = nf_def_var (ncid,'flow_glf',nf_double,1,rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+<      &           len('glf particle flux KA'),
+<      &          'glf particle flux KA')
+<       j=j+1
+<       oneval(j) = nf_def_var (ncid,'powi_glf',nf_double,1,rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+<      &           len('glf integrated ion power MW'),
+<      &          'glf integrated ion power MW')
+<       j=j+1
+<       oneval(j) = nf_def_var (ncid,'powe_glf',nf_double,1,rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+<      &           len('glf integrated elec power MW'),
+<      &          'glf integrated elec power MW')
+<       j=j+1
+<       oneval(j) = nf_def_var (ncid,'stress_tor_glf',nf_double,1,
+<      &           rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+<      &           len('glf toroidal momentum flux NT-M'),
+<      &          'glf toroidal momentum flux NT-M')
+<       j=j+1
+<       oneval(j) = nf_def_var (ncid,'stress_par_glf',nf_double,1,
+<      &           rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+<      &           len('glf parallel momentum flux NT-M'),
+<      &          'glf parallel momentum flux NT-M')
+<       j=j+1
+<       oneval(j) = nf_def_var (ncid,'flow_neo',nf_double,1,rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+<      &           len('neo particle flux KA'),
+<      &          'neo particle flux KA')
+<       j=j+1
+<       oneval(j) = nf_def_var (ncid,'powi_neo',nf_double,1,rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+<      &           len('neo integrated ion power MW'),
+<      &          'neo integrated ion power MW')
+<       j=j+1
+<       oneval(j) = nf_def_var (ncid,'powe_neo',nf_double,1,rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+<      &           len('neo integrated elec power MW'),
+<      &          'neo integrated elec power MW')
+<       j=j+1
+<       oneval(j) = nf_def_var (ncid,'stress_tor_neo',nf_double,1,
+<      &           rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+<      &           len('neo toroidal momentum flux NT-M'),
+<      &          'neo toroidal momentum flux NT-M')
+<       j=j+1
+<       oneval(j) = nf_def_var (ncid,'stress_par_neo',nf_double,1,
+<      &           rdim,rhid1(j))
+<       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+<      &           len('neo parallel momentum flux NT-M'),
+<      &          'neo parallel momentum flux NT-M')
+<       j=j+1
+1049,1050c913,914
+<      &           len('predicted particle flux KA'),
+<      &          'predicted particle flux KA')
+---
+>      &           len('predicted particle flux'),
+>      &          'predicted particle flux')
+1054,1055c918,919
+<      &           len('predicted integrated ion power MW'),
+<      &          'predicted integrated ion power MW')
+---
+>      &           len('predicted integrated ion power'),
+>      &          'predicted integrated ion power')
+1059,1060c923,924
+<      &           len('predicted integrated elec power MW'),
+<      &          'predicted integrated elec power MW')
+---
+>      &           len('predicted integrated elec power'),
+>      &          'predicted integrated elec power')
+1065,1066c929,930
+<      &           len('predicted toroidal momentum flux NT-M'),
+<      &          'predicted toroidal momentum flux NT-M')
+---
+>      &           len('predicted toroidal momentum flux'),
+>      &          'predicted toroidal momentum flux')
+1071,1072c935,936
+<      &           len('predicted parallel momentum flux NT-M'),
+<      &          'predicted parallel momentum flux NT-M')
+---
+>      &           len('predicted parallel momentum flux'),
+>      &          'predicted parallel momentum flux')
+1077,1078c941,942
+<      &           len('predicted parallel damping flux NT-M'),
+<      &          'predicted parallel damping flux NT-M')
+---
+>      &           len('predicted parallel damping flux'),
+>      &          'predicted parallel damping flux')
+1082,1083c946,947
+<      &           len('predicted ion alpha heating power MW'),
+<      &          'predicted ion alpha heating power MW')
+---
+>      &           len('predicted ion alpha heating power'),
+>      &          'predicted ion alpha heating power')
+1087,1088c951,952
+<      &           len('predicted elec alpha heating power MW'),
+<      &          'predicted elec alpha heating power MW')
+---
+>      &           len('predicted elec alpha heating power'),
+>      &          'predicted elec alpha heating power')
+1285a1150,1157
+>       scalval(j) = nf_put_var_double(ncid, rhid(j), volavebetat_m)
+>       j=j+1
+>       scalval(j) = nf_put_var_double(ncid, rhid(j), volavebetae_m)
+>       j=j+1
+>       scalval(j) = nf_put_var_double(ncid, rhid(j), volavebetai_m)
+>       j=j+1
+>       scalval(j) = nf_put_var_double(ncid, rhid(j), volavebetaf_m)
+>       j=j+1
+1358c1230
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j),1.D-2*vphi_exp)
+---
+>       oneval(j) = nf_put_var_double(ncid, rhid1(j), 1.D-2*vphi_exp)
+1365c1237
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j),1.D-2*vpar_exp)
+---
+>       oneval(j) = nf_put_var_double(ncid, rhid1(j), 1.D-2*vpar_exp)
+1369,1388c1241
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), 
+<      >   1.D-2*vdia_exp(1,0:mxgrid))
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), 
+<      >   1.D-2*vdia_exp(2,0:mxgrid))
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), 
+<      >   1.D-2*vdia_exp(3,0:mxgrid))
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j),
+<      >    1.D-2*vneo_exp(1,0:mxgrid))
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j),
+<      >    1.D-2*vneo_exp(2,0:mxgrid))
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j),
+<      >    1.D-2*vneo_exp(3,0:mxgrid))
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j),
+<      >    mach_exp(1,0:mxgrid))
+---
+>       oneval(j) = nf_put_var_double(ncid, rhid1(j), 1.D-2*vdia_exp)
+1390,1394c1243
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j),
+<      >    mach_exp(2,0:mxgrid))
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j),
+<      >    mach_exp(3,0:mxgrid))
+---
+>       oneval(j) = nf_put_var_double(ncid, rhid1(j), 1.D-2*vneo_exp)
+1410,1413d1258
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), flow_exp)
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), powe_exp)
+<       j=j+1
+1416c1261
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_tor_exp)
+---
+>       oneval(j) = nf_put_var_double(ncid, rhid1(j), powe_exp)
+1439a1285,1286
+>       oneval(j) = nf_put_var_double(ncid, rhid1(j), flow_exp)
+>       j=j+1
+1506,1509d1352
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), a_pol)
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), a_tor)
+<       j=j+1
+1547c1390
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j),1.D-2*vpol_m)
+---
+>       oneval(j) = nf_put_var_double(ncid, rhid1(j), 1.D-2*vpol_m)
+1559c1402
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), zpne_m)
+---
+>       oneval(j) = nf_put_var_double(ncid, rhid1(j), betat_m)
+1561c1404
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), zpni_m)
+---
+>       oneval(j) = nf_put_var_double(ncid, rhid1(j), zpti_m)
+1565c1408,1410
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), zpti_m)
+---
+>       oneval(j) = nf_put_var_double(ncid, rhid1(j), zpni_m)
+>       j=j+1
+>       oneval(j) = nf_put_var_double(ncid, rhid1(j), zpne_m)
+1579,1592c1424
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j),
+<      >   1.D-2*vdia_m(1,0:mxgrid))
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j),
+<      >   1.D-2*vdia_m(2,0:mxgrid))
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j),
+<      >   1.D-2*vdia_m(3,0:mxgrid))
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), 
+<      >  1.D-2*vneo_m(1,0:mxgrid))
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), 
+<      >  1.D-2*vneo_m(2,0:mxgrid))
+---
+>       oneval(j) = nf_put_var_double(ncid, rhid1(j), 1.D-2*vdia_m)
+1594,1604c1426
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), 
+<      >  1.D-2*vneo_m(3,0:mxgrid))
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), 
+<      >  mach_m(1,0:mxgrid))
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), 
+<      >  mach_m(2,0:mxgrid))
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), 
+<      >  mach_m(3,0:mxgrid))
+---
+>       oneval(j) = nf_put_var_double(ncid, rhid1(j), 1.D-2*vneo_m)
+1627,1646d1448
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), flow_glf)
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), powi_glf)
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), powe_glf)
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_tor_glf)
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_par_glf)
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), flow_neo)
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), powi_neo)
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), powe_neo)
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_tor_neo)
+<       j=j+1
+<       oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_par_neo)
