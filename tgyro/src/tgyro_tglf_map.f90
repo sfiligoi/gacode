@@ -15,7 +15,6 @@ subroutine tgyro_tglf_map
   ! Local variables
   integer :: i_ion
   real :: q_abs
-  real :: pi_map = 3.141592653589793
 
   ! Currently TGLF uses toroidal current as reference direction
   tglf_sign_Bt_in = tgyro_btccw_in*tgyro_ipccw_in
@@ -86,11 +85,11 @@ subroutine tgyro_tglf_map
   tglf_s_zeta_loc_in  = s_zeta(i_r)
   tglf_q_loc_in       = q_abs
   tglf_q_prime_loc_in = (q_abs/(r(i_r)/r_min))**2*s(i_r)
-  tglf_p_prime_loc_in = (q_abs/(r(i_r)/r_min))*(beta_unit(i_r)/(8*pi_map))*(-r_min*dlnpdr(i_r))
+  tglf_p_prime_loc_in = (q_abs/(r(i_r)/r_min))*(beta_unit(i_r)/(8*pi))*(-r_min*dlnpdr(i_r))
   ! Fourier
   tglf_q_fourier_in       = q_abs
   tglf_q_prime_fourier_in = (q_abs/(r(i_r)/r_min))**2*s(i_r)
-  tglf_p_prime_fourier_in = (q_abs/(r(i_r)/r_min))*(beta_unit(i_r)/(8*pi_map))*(-r_min*dlnpdr(i_r))
+  tglf_p_prime_fourier_in = (q_abs/(r(i_r)/r_min))*(beta_unit(i_r)/(8*pi))*(-r_min*dlnpdr(i_r))
   tglf_nfourier_in        = n_fourier_geo
   tglf_fourier_in(:,:)    = a_fourier_geo(:,:,i_r)
   !----------------------------------------------------------------
