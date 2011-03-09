@@ -13,6 +13,7 @@ program tglf
   tglf_dump_flag_in=.true.
 
   call tglf_read_input()
+  !call tglf_dump_local()
   call tglf_run() 
 
   print 10,'  Elec. particle flux :',tglf_elec_pflux_out

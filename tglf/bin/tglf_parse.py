@@ -51,14 +51,14 @@ x.add('VPAR_MODEL','0')
 x.add('VPAR_SHEAR_MODEL','1')
 
 x.add('NS','2')
-x.add('MASS_1','2.723e-4') # non default
-x.add('MASS_2','1.0')      # non default
+x.add('MASS_1','2.723e-4')
+x.add('MASS_2','1.0')
 x.add('MASS_3','0.0')
 x.add('MASS_4','0.0')
 x.add('MASS_5','0.0')
 x.add('MASS_6','0.0')
-x.add('ZS_1','-1.0')       # non default
-x.add('ZS_2','1.0')        # non default
+x.add('ZS_1','-1.0')      
+x.add('ZS_2','1.0') 
 x.add('ZS_3','0.0')
 x.add('ZS_4','0.0')
 x.add('ZS_5','0.0')
@@ -71,14 +71,14 @@ x.add('WIDTH_MIN','0.3')
 x.add('NWIDTH','21')
 x.add('FIND_WIDTH','.true.')
 
-x.add('RLNS_1','1.0') # non default
-x.add('RLNS_2','1.0') # non default 
+x.add('RLNS_1','1.0')
+x.add('RLNS_2','1.0') 
 x.add('RLNS_3','0.0')
 x.add('RLNS_4','0.0')
 x.add('RLNS_5','0.0')
 x.add('RLNS_6','0.0')
-x.add('RLTS_1','3.0') # non default
-x.add('RLTS_2','3.0') # non default
+x.add('RLTS_1','3.0')
+x.add('RLTS_2','3.0')
 x.add('RLTS_3','0.0')
 x.add('RLTS_4','0.0')
 x.add('RLTS_5','0.0')
@@ -104,14 +104,14 @@ x.add('SHEAR_TS_4','0.0')
 x.add('SHEAR_TS_5','0.0')
 x.add('SHEAR_TS_6','0.0')
 
-x.add('TAUS_1','1.0') # non default
-x.add('TAUS_2','1.0') # non default
+x.add('TAUS_1','1.0')
+x.add('TAUS_2','1.0')
 x.add('TAUS_3','0.0')
 x.add('TAUS_4','0.0')
 x.add('TAUS_5','0.0')
 x.add('TAUS_6','0.0')
-x.add('AS_1','1.0') # non default
-x.add('AS_2','1.0') # non default
+x.add('AS_1','1.0')
+x.add('AS_2','1.0')
 x.add('AS_3','0.0')
 x.add('AS_4','0.0')
 x.add('AS_5','0.0')
@@ -141,10 +141,10 @@ x.add('FT_MODEL_SA','1')
 
 x.add('RMIN_LOC','0.5')
 x.add('RMAJ_LOC','3.0')
-x.add('ZMAJ_LOC','3.0')
-x.add('DRMINDX_LOC','3.0')
-x.add('DRMAJDX_LOC','3.0')
-x.add('DZMAJDX_LOC','3.0')
+x.add('ZMAJ_LOC','0.0')
+x.add('DRMINDX_LOC','1.0')
+x.add('DRMAJDX_LOC','0.0')
+x.add('DZMAJDX_LOC','0.0')
 x.add('KAPPA_LOC','1.0')
 x.add('S_KAPPA_LOC','0.0')
 x.add('DELTA_LOC','0.0')

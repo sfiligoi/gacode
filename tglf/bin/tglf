@@ -123,7 +123,7 @@ fi
 #
 if [ $REGRESS_FLAG -eq 1 ] 
 then 
-   neo_reg_do
+   tglf_reg_do
    exit 0
 fi
 #============================================================
@@ -132,7 +132,7 @@ fi
 # Everything else must be done in $SIMDIR; so ensure existence 
 # of $SIMDIR (needed at this point) and go there: 
 #
-if ! neo_sim_warn $SIMDIR
+if ! tglf_sim_warn $SIMDIR
 then
    exit 1 
 fi 
