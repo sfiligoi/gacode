@@ -7,7 +7,7 @@
 #  Check for existence of sim directory
 #-------------------------------------------------------------
 
-if [ $1 = $TGLF_DIR/sim/ ]
+if [ $1 = $PWD ]
   then
   echo "Error: missing simdir"
   exit 1
@@ -20,15 +20,10 @@ if [ ! -d "$1" ]
   exit 1
 fi
 
-#if [ ! -f "$1/INPUT" ]
-#  then
-#  cp $NEO_DIR/tools/input/L1-ie/INPUT $1
-#  echo "********************************************************"
-#  echo "*                                                      *"
-#  echo "*  An INPUT file was not found.  One has been created  *"
-#  echo "*  for you using the template in L1-ie.               *"
-#  echo "*                                                      *"
-#  echo "********************************************************"
-#fi
+if [ ! -f "$1/input.tglf" ]
+  then
+  echo "input.tglf not found."
+  exit 1
+fi
 
 exit 0

@@ -306,14 +306,35 @@ class ManagerInput:
         print 'INFO: Number of code instances: '+str(n_path)
 
         # Add special entries (DIR) to output file, and overlay
-        # extra parameters onto GYRO INPUT files.
+        # extra parameters onto GYRO or TGLF input files.
         for p in range(len(self.slavepath)):
             self.sum_proc = self.sum_proc + int(self.slaveproc[p])
             basedir = self.slavepath[p]
-            file_outfile.write(basedir+' '+self.slaveproc[p]+'\n')
- 
+            file_outfile.write(basedir+' '+self.slaveproc[p]+'\n') 
+
             if basedir == 'TGLF':
                 print 'INFO: Detected '+basedir+'; CPU_max=1'
+            elif basedir[0:4] == 'TGLF':
+                basefile = basedir+'/input.tglf' 
+                tempfile = basedir+'/input.tglf.temp' 
+                file_base = open(basefile,'r')
+                file_temp = open(tempfile,'w')
+
+                for line in file_base.readlines():
+                    if line[0:18] <> "# -- Begin overlay":
+                        file_temp.write(line)
+                    else:
+                        break
+
+                file_base.close()
+                file_temp.close()
+
+                os.system('echo "# -- Begin overlay" >> '+tempfile)
+                os.system('cat '+self.overlayfile[p]+' >> '+tempfile)
+                os.system('mv '+tempfile+' '+basefile)
+
+                print 'INFO: Processed input.* in '+basedir+'; CPU_max=1'
+
             elif basedir == 'IFS':
                 print 'INFO: Detected '+basedir+'; CPU_max=1'
             elif basedir == 'QFM':

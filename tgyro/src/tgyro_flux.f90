@@ -164,6 +164,7 @@ subroutine tgyro_flux
           ni(1,i_r)/ne(i_r)*ti(1,i_r)/te(i_r)
 
   case (2)
+
      ! Map TGYRO parameters to TGLF
      call tgyro_tglf_map
 
