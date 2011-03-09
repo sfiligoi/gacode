@@ -189,6 +189,7 @@ AC_CONFIG_FILES([Makefile
     share/Makefile
     share/ga_transport.sh
     share/ga_transport.csh
+    shared/Makefile
     gyro/Makefile
     gyro/BLEND/Makefile
     gyro/math/Makefile
