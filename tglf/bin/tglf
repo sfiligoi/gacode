@@ -98,8 +98,6 @@ else
    SIMDIR=$SIMROOT/$LOCDIR
 fi
 
-RUN_FILE=$SIMDIR/$RUNBASE
-
 #============================================================
 # Check for inconsistent flags:
 FLAG_SUM=$[ $EXEC_FLAG + $GENERATE_FLAG + $REGRESS_FLAG]
@@ -150,12 +148,12 @@ cd $SIMDIR
 #==========================================================
 # echo number of tasks, then parse INPUT
 #
-echo "[Parsing data in input.tglf]" > $RUN_FILE
+echo "[Parsing data in input.tglf]" > $RUNBASE
 
-python $TGLF_DIR/bin/tglf_parse.py >> $RUN_FILE
+python $TGLF_DIR/bin/tglf_parse.py >> $RUNBASE
 if [ $? -eq 1 ] 
 then
-   cat $RUN_FILE
+   cat $RUNBASE
    exit 1
 fi
 #==========================================================
@@ -169,7 +167,7 @@ echo `gacode_getversion` > $VERBASE
 echo $GACODE_PLATFORM >> $VERBASE
 date >> $VERBASE
 
-$TGLF_DIR/src/tglf >> $VERBASE
+$TGLF_DIR/src/tglf >> $RUNBASE
  
-cat $RUN_FILE
+cat $RUNBASE
 #===========================================================
