@@ -17,12 +17,13 @@ subroutine tgyro_tglf_map
   real :: q_abs
 
   ! Currently TGLF uses toroidal current as reference direction
-  tglf_sign_Bt_in = tgyro_btccw_in*tgyro_ipccw_in
-  tglf_sign_It_in = 1.0
+  tglf_sign_bt_in = tgyro_btccw_in*tgyro_ipccw_in
+  tglf_sign_it_in = 1.0
+
   q_abs = abs(q(i_r))
 
   ! Initialize TGLF
-  call tglf_init()
+  call tglf_init(paths(i_r-1), gyro_comm)
 
   !----------------------------------------------------------------
   ! Number of species (max=6)
@@ -280,6 +281,5 @@ subroutine tgyro_tglf_map
      tglf_dump_flag_in = .true.
   endif
   tglf_dump_suffix_in = achar(i_proc_global+iachar("0"))
-  tglf_dump_path_in   = ''
 
 end subroutine tgyro_tglf_map
