@@ -1,0 +1,326 @@
+dnl ######################################################################
+dnl
+dnl File:	tx_transplibs.m4
+dnl
+dnl Purpose:	Find the various libraries that make up the broken up
+dnl         	TRANSP project:
+dnl         	 transpbase, pspline, transpgraphics,
+dnl         	 dummy mdsplus wrappers, plasma_state
+dnl         	Fciowrappers specific to nubeam is included for
+dnl         	convenience.
+dnl
+dnl Version: $Id$
+dnl
+dnl Tech-X configure system
+dnl
+dnl ######################################################################
+
+dnl-----------------------------------------------------------------------
+dnl The goal of this is to find many libraries and put them into a
+dnl single variable to make life easier for consumers of the large
+dnl project.  The outputs are:
+dnl    TRANSPLIBS_INC
+dnl    TRANSPLIBS_LIBS
+dnl    TRANSPLIBS_RPLIBS
+dnl By default, these libraries will *always* contain the transpbase
+dnl libraries (since otherwise you wouldn't be using this m4)
+dnl
+dnl Options:  Because m4 files don't take options one has to set
+dnl variables that control functionality.   The resultant
+dnl The options (inputs) are:
+dnl    USE_PSPLINE="true"
+dnl       Add PSPLINE_LIBS/PSPLINE_INC to TRANSPLIBS vars
+dnl
+dnl    USE_TRANSPGRAPHICS="true"
+dnl       Add TRANSPGRAPHICS_LIBS/TRANSPGRAPHICS_INC to TRANSPLIBS vars
+dnl
+dnl    USE_MDSPLUS="true"
+dnl       Add MDSPLUS_LIBS/MDSPLUS_INC to TRANSPLIBS vars
+dnl
+dnl    USE_FCIOWRAPPERS="true"
+dnl      FCIOWRAPPERS includes the options (which are useful for nubeam)
+dnl       USE_IO_INFO="true"
+dnl       USE_FCIO_ONLY="netcdf"
+dnl       Add FCIOWRAPPERS_LIBS/FCIOWRAPPERS_INC to TRANSPLIBS vars
+dnl
+dnl    USE_PLASMASTATE="true"
+dnl       Add PLASMASTATE_LIBS/PLASMASTATE_INC to TRANSPLIBS vars
+dnl
+dnl    USE_NUBEAM="true"
+dnl       Add NUBEAM_LIBS/NUBEAM_INC to TRANSPLIBS vars
+dnl-----------------------------------------------------------------------
+
+unset TRANSPLIBS_INC
+unset TRANSPLIBS_LIBS
+unset TRANSPLIBS_RPLIBS
+unset FOUND_TRANSPLIBS
+
+dnl-----------------------------------------------------------------------
+dnl Find transpbase which is need for all of transp -- always searched for
+dnl-----------------------------------------------------------------------
+
+AC_ARG_WITH(transpbase-dir, AC_HELP_STRING([--with-transpbase-dir],
+        [transpbase installation directory]),
+        TRANSPBASE_DIR="$withval")
+TRANSPBASE_PATH=$TRANSPBASE_DIR
+TRANSPBASE_SP=$SUPRA_SEARCH_PATH
+if test "$back_end_node" = yes -o "$parallel" = yes; then
+  for i in `echo $TRANSPBASE_SP | tr ':' ' '`; do
+    TRANSPBASE_PATH="$TRANSPBASE_PATH:$i/transpbase-ben"
+  done
+fi
+for i in `echo $TRANSPBASE_SP | tr ':' ' '`; do
+  TRANSPBASE_PATH="$TRANSPBASE_PATH:$i/transpbase"
+done
+TX_LOCATE_PKG(
+  [TRANSPBASE],
+  [$TRANSPBASE_PATH],
+  [transperror.h],
+  [transpbase])
+if test "$FOUND_TRANSPBASE" = "no"; then
+   AC_MSG_WARN(transpbase library not found. Use --with-transpbase-lib-transpbase=<lib> to set library or --with-transpbase-dir=<dir> to set search directory.)
+else
+  FOUND_TRANSPLIBS="yes"
+fi
+TRANSPLIBS_INC="$TRANSPBASE_INC"
+TRANSPLIBS_LIBS="$TRANSPBASE_LIBS"
+TRANSPLIBS_RPLIBS="$TRANSPBASE_RPLIBS"
+
+dnl-----------------------------------------------------------------------
+dnl Pspline
+dnl-----------------------------------------------------------------------
+
+if test -n "$USE_PSPLINE"; then
+  AC_ARG_WITH(pspline-dir, AC_HELP_STRING([--with-pspline-dir],
+        [pspline installation directory]),
+        PSPLINE_DIR="$withval")
+  PSPLINE_PATH=$PSPLINE_DIR
+  PSPLINE_SP=$SUPRA_SEARCH_PATH
+  if test "$back_end_node" = yes -o "$parallel" = yes; then
+    echo Searching for ben builds.
+    for i in `echo $PSPLINE_SP | tr ':' ' '`; do
+      PSPLINE_PATH="$PSPLINE_PATH:$i/pspline-ben"
+    done
+  fi
+  for i in `echo $PSPLINE_SP | tr ':' ' '`; do
+    PSPLINE_PATH="$PSPLINE_PATH:$i/pspline"
+  done
+  TX_LOCATE_PKG(
+    [PSPLINE],
+    [$PSPLINE_PATH],
+    [czspline_save.h],
+    [pspline])
+  if test "$FOUND_PSPLINE" = "no"; then
+     AC_MSG_WARN(pspline library not found. Use --with-pspline-lib-pspline=<lib> to set library or --with-pspline-dir=<dir> to set search directory.)
+  fi
+  FOUND_TRANSPLIBS="yes"
+  TRANSPLIBS_INC="$PSPLINE_INC $TRANSPLIBS_INC"
+  TRANSPLIBS_LIBS="$PSPLINE_LIBS $TRANSPLIBS_LIBS"
+  TRANSPLIBS_RPLIBS="$PSPLINE_LIBS $TRANSPLIBS_RPLIBS"
+else
+  AM_CONDITIONAL(HAVE_PSPLINE, test 1 == 0 )
+fi
+
+dnl-----------------------------------------------------------------------
+dnl MDS+
+dnl-----------------------------------------------------------------------
+
+# jrc 28mar10:
+# Cannot put -D defines in CPPFLAGS, as then they show up
+# on compile lines for Fortran using xlf90, causing failure.
+# Cannot put ${FC_DEFINE_FLAG} defines in CPPFLAGS, as then they
+# show up on compile lines for C during configure, causing failure.
+# Instead define FPPFLAGS and use in Makefile.am's as needed.
+# For pure Fortran directories, set AM_CPPFLAGS = @FPPFLAGS@ in Makefile.am.
+# For mixed Fortran/C, must define
+# PPF77COMPILE, LTPPF77COMPILE, PPFCCOMPILE, and LTPPFCCOMPILE
+
+if test -n "$USE_MDSPLUS"; then
+PPPL_MDS_PATH=/afs/ipp/home/c/cil/mdsplus:/usr/ads/diags/mdsplus
+MDS_PATH=/opt/mdsplus:/usr/local/mdsplus:$PPPL_MDS_PATH:$STD_PATH
+TX_LOCATE_PKG( [MDSPLUS], [$MDS_PATH], [mdsdescrip.h], [MdsLib])
+  if test "$FOUND_MDSPLUS" = "no"; then
+     # CPPFLAGS="-D__NOMDSPLUS $CPPFLAGS"
+     FPPFLAGS="${FC_DEFINE_FLAG}__NOMDSPLUS $FPPFLAGS"
+  fi
+  FOUND_TRANSPLIBS="yes"
+  TRANSPLIBS_INC="$MDSPLUS_INC $TRANSPLIBS_INC"
+  TRANSPLIBS_LIBS="$MDSPLUS_LIBS $TRANSPLIBS_LIBS"
+  TRANSPLIBS_RPLIBS="$MDSPLUS_LIBS $TRANSPLIBS_RPLIBS"
+else
+  # CPPFLAGS="-D__NOMDSPLUS $CPPFLAGS"
+  FPPFLAGS="${FC_DEFINE_FLAG}__NOMDSPLUS $FPPFLAGS"
+  AM_CONDITIONAL(HAVE_MDSPLUS, test 1 == 0 )
+  MDSPLUS_LIBS=""
+  MDSPLUS_LIBDIR=""
+  MDSPLUS_INC=""
+  MDSPLUS_INCDIR=""
+  AC_SUBST(MDSPLUS_LIBS)
+  AC_SUBST(MDSPLUS_LIBDIR)
+  AC_SUBST(MDSPLUS_INC)
+  AC_SUBST(MDSPLUS_INCDIR)
+fi
+
+dnl-----------------------------------------------------------------------
+dnl FCIOWRAPPERS now here to get order more easily
+dnl-----------------------------------------------------------------------
+
+if test -n "$USE_FCIOWRAPPERS"; then
+  builtin(include,config/tx_fciowrappers.m4)
+  FOUND_TRANSPLIBS="yes"
+  TRANSPLIBS_INC="$FCIOWRAPPERS_INC $TRANSPLIBS_INC"
+  TRANSPLIBS_LIBS="$FCIOWRAPPERS_LIBS $TRANSPLIBS_LIBS"
+  TRANSPLIBS_RPLIBS="$FCIOWRAPPERS_LIBS $TRANSPLIBS_RPLIBS"
+else
+  AM_CONDITIONAL(HAVE_FCIOWRAPPERS, test 1 == 0 )
+fi
+
+dnl-----------------------------------------------------------------------
+dnl TranspGraphics
+dnl-----------------------------------------------------------------------
+
+if test -n "$USE_TRANSPGRAPHICS"; then
+  AC_ARG_WITH(transpgraphics-dir, AC_HELP_STRING([--with-transpgraphics-dir],
+        [transpgraphics installation directory]),
+        TRANSPGRAPHICS_DIR="$withval")
+  TRANSPGRAPHICS_PATH=$TRANSPGRAPHICS_DIR
+  TRANSPGRAPHICS_SP=$SUPRA_SEARCH_PATH
+  if test "$back_end_node" = yes -o "$parallel" = yes; then
+    for i in `echo $TRANSPGRAPHICS_SP | tr ':' ' '`; do
+      TRANSPGRAPHICS_PATH="$TRANSPGRAPHICS_PATH:$i/transpgraphics-ben"
+    done
+  fi
+  for i in `echo $TRANSPGRAPHICS_SP | tr ':' ' '`; do
+    TRANSPGRAPHICS_PATH="$TRANSPGRAPHICS_PATH:$i/transpgraphics"
+  done
+  TX_LOCATE_PKG(
+    [TRANSPGRAPHICS],
+    [$TRANSPGRAPHICS_PATH],
+    [transperror.h],
+    [transpgraphics])
+  FOUND_TRANSPLIBS="yes"
+  TRANSPLIBS_INC="$TRANSPGRAPHICS_INC $TRANSPLIBS_INC"
+  TRANSPLIBS_LIBS="$TRANSPGRAPHICS_LIBS $TRANSPLIBS_LIBS"
+  TRANSPLIBS_RPLIBS="$TRANSPGRAPHICS_LIBS $TRANSPLIBS_RPLIBS"
+  if test "$FOUND_TRANSPGRAPHICS" = "no"; then
+     AC_MSG_WARN(transpgraphics library not found. Use --with-transpgraphics-lib-transpgraphics=<lib> to set library or --with-transpgraphics-dir=<dir> to set search directory.)
+  fi
+else
+  AM_CONDITIONAL(HAVE_TRANSPGRAPHICS, test 1 == 0 )
+fi
+
+dnl-----------------------------------------------------------------------
+dnl PlasmaState
+dnl-----------------------------------------------------------------------
+
+if test -n "$USE_PLASMASTATE"; then
+  PLASMASTATE_SP=$SUPRA_SEARCH_PATH
+  unset PLASMASTATE_PATH
+  if test "$back_end_node" = yes -o "$parallel" = yes; then
+    for i in `echo $PLASMASTATE_SP | tr ':' ' '`; do
+      PLASMASTATE_PATH="$PLASMASTATE_PATH:$i/plasma_state-ben"
+    done
+  fi
+  for i in `echo $PLASMASTATE_SP | tr ':' ' '`; do
+    PLASMASTATE_PATH="$PLASMASTATE_PATH:$i/plasma_state"
+  done
+  case $TX_FORTRAN_MODCAP in
+    lcname-*)
+      TX_LOCATE_PKG(
+        [PLASMASTATE],
+        [$PLASMASTATE_PATH],
+        [plasma_state_mod.mod],
+        [PlasmaState])
+    ;;
+    ucname-*)
+      TX_LOCATE_PKG(
+        [PLASMASTATE],
+        [$PLASMASTATE_PATH],
+        [PLASMA_STATE_MOD.mod],
+        [PlasmaState])
+    ;;
+  esac
+  FOUND_TRANSPLIBS="yes"
+  TRANSPLIBS_INC="$PLASMASTATE_INC $TRANSPLIBS_INC"
+  TRANSPLIBS_LIBS="$PLASMASTATE_LIBS $TRANSPLIBS_LIBS"
+  TRANSPLIBS_RPLIBS="$PLASMASTATE_LIBS $TRANSPLIBS_RPLIBS"
+  if test "$FOUND_PLASMASTATE" = "no"; then
+     AC_MSG_WARN(PLASMASTATE library not found. Use --with-plasmastate-lib-plasmastate=<lib> to set library or --with-plasmastate-dir=<dir> to set search directory.)
+  fi
+else
+    AM_CONDITIONAL(HAVE_PLASMASTATE, test 1 == 0 )
+fi
+
+dnl-----------------------------------------------------------------------
+dnl NUBEAM
+dnl-----------------------------------------------------------------------
+
+if test -n "$USE_NUBEAM"; then
+
+  LOOKFORNUBEAM="yes"
+dnl At this point, we better have found everything
+  if test "$FOUND_TRANSPBASE" = "no"; then
+    AC_MSG_WARN(transpbase library not found. Use --with-transpbase-lib-transpbase=<lib> to set library, or --with-transpbase-dir=<dir> to set search directory.)
+    LOOKFORNUBEAM="no"
+  fi
+  if test "$FOUND_PSPLINE" = "no"; then
+    AC_MSG_WARN(pspline library not found. Use --with-pspline-lib-pspline=<lib> to set library, or --with-pspline-dir=<dir> to set search directory.)
+    LOOKFORNUBEAM="no"
+  fi
+  if test "$FOUND_TRANSPGRAPHICS" = "no"; then
+    AC_MSG_WARN(transpgraphics library not found. Use --with-transpgraphics-lib-transpgraphic=<lib> to set library, or --with-transpgraphics-dir=<dir> to set search directory.)
+    LOOKFORNUBEAM="no"
+  fi
+  if test "$FOUND_PLASMASTATE" = "no"; then
+    AC_MSG_WARN(plasmastate library not found and nubeam cannot be used without it. Use --with-plasmastate-lib-plasmastate=<lib> to set library, or --with-plasmastate-dir=<dir> to set search directory.)
+    LOOKFORNUBEAM="no"
+  fi
+else
+  LOOKFORNUBEAM="no"
+fi
+if test x"$LOOKFORNUBEAM" = xyes; then
+  AC_ARG_WITH(nubeam-dir, AC_HELP_STRING([--with-nubeam-dir],
+    [nubeam installation directory]),
+    NUBEAM_DIR="$withval")
+  NUBEAM_PATH=$NUBEAM_DIR
+  NUBEAM_SP=$SUPRA_SEARCH_PATH
+  if test "$parallel" = yes; then
+    for i in `echo $NUBEAM_SP | tr ':' ' '`; do
+# Use of nubeammpi deprecates on May 1, 2010
+      NUBEAM_PATH="$NUBEAM_PATH:$i/nubeam-par:$i/nubeammpi"
+    done
+  else
+    for i in `echo $NUBEAM_SP | tr ':' ' '`; do
+      NUBEAM_PATH="$NUBEAM_PATH:$i/nubeam"
+    done
+  fi
+  TX_LOCATE_PKG(
+    [nubeam],
+    [$NUBEAM_PATH],
+    [nubeam.h],
+    [TranspPhage,TranspGraphic2])
+  if test x"$FOUND_NUBEAM" = xyes; then
+    AC_FC_FUNC([ccps_init],symbol)
+    LDFLAGS="-L$NUBEAM_LIBDIR $LDFLAGS"
+    AC_CHECK_LIB([ccps_init],[$symbol],,AC_MSG_NOTICE(Symbol $symbol not found in libTranspPhage.))
+    AC_DEFINE(HAVE_NUBEAM, [], [Defined if NUBEAM was found])
+  fi
+fi
+AM_CONDITIONAL(HAVE_NUBEAM, [test x"$FOUND_NUBEAM" = xyes])
+
+
+dnl-----------------------------------------------------------------------
+dnl Final results
+dnl-----------------------------------------------------------------------
+
+if test -n "$FOUND_TRANSPLIBS"; then
+  AC_DEFINE([HAVE_TRANSPLIBS], [], [Define if the transp libraries were found.])
+fi
+AM_CONDITIONAL(HAVE_TRANSPLIBS, test -n "$FOUND_TRANSPLIBS")
+AC_SUBST(TRANSPLIBS_INC)
+TX_CLEAN_LIBS([TRANSPLIBS_LIBS])
+AC_SUBST(TRANSPLIBS_LIBS)
+AC_SUBST(TRANSPLIBS_RPLIBS)
+AC_SUBST(TRANSPLIBS_LTLIBS)
+AC_SUBST(TRANSPLIBS_ALIBS)
+

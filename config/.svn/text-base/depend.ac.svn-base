@@ -1,0 +1,22 @@
+dnl ######################################################################
+dnl                                               -*- Autoconf -*-
+dnl File:    depend.ac
+dnl
+dnl Purpose: Set up .depend files for Tech-X dependency checking, which
+dnl          is within the project only.
+dnl
+dnl Copyright (&c) Tech-X Corporation, freely redistributable if copyright
+dnl is kept intact.
+dnl
+dnl Version:  $Id$
+dnl
+dnl ######################################################################
+
+AC_CONFIG_COMMANDS(depend,
+  [echo Touching .depend in the subdirs, $depdirs.;
+  for i in $depdirs; do
+  mkdir -p $i;
+  touch $i/.depend; done],
+  [depdirs="$DEPDIRS"]
+)
+

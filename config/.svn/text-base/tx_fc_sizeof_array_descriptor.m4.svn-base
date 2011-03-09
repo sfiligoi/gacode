@@ -1,0 +1,68 @@
+#
+# SYNOPSIS
+#
+#   TX_FC_SIZEOF_ARRAY_DESCRIPTOR
+#
+# DESCRIPTION
+#
+#  Determine size of a array descriptors. Note: this requires $TX_FC_MAIN_OBJS
+#  and so this function should be called after TX_FC_FIND_MAIN_OBJS and after 
+#  AC_FC_LIBRARY_LDFLAGS
+#
+#  $Id$
+#
+AC_DEFUN([TX_FC_SIZEOF_ARRAY_DESCRIPTOR],[
+AS_VAR_PUSHDEF([type_var], [ac_cv_sizeof_array_descriptor_rank_$1])
+AC_CACHE_CHECK([size of Fortran array descriptor of rank $1],
+ac_cv_sizeof_array_descriptor_rank_$1,[
+rank="(:"
+i=0
+while test $i -lt $1; do 
+    rank="${rank},:"
+   i=`expr $i + 1`
+done
+rank="${rank})"
+cat >conftestf.f90<<EOF
+!234567
+      module foo
+        type :: container
+            INTEGER, pointer :: ptr${rank}
+        end type
+      end module
+      program test
+        use foo
+        type(container) :: x(2)
+        integer sz
+        call getsize(x(1), x(2), sz)
+        print *, sz
+      end
+EOF
+cat > conftestc.c<<EOF
+#include <stdlib.h>
+void GetSize(void *e1, void *e2, int *sz) {
+    size_t i2, i1;
+    i1 = (size_t) e1;
+    i2 = (size_t) e2;
+    *sz = (int)(i2 - i1);
+}
+void getsize(void *e1, void *e2, int *sz) {
+    GetSize(e1, e2, sz);
+}
+void getsize_(void *e1, void *e2, int *sz) {
+    GetSize(e1, e2, sz);
+}
+void GETSIZE(void *e1, void *e2, int *sz) {
+    GetSize(e1, e2, sz);
+}
+EOF
+$FC $FCFLAGS -c conftestf.f90 -o conftestf.o  2>&1 > /dev/null
+$CC $CFLAGS conftestc.c conftestf.o -o conftest $TX_FC_MAIN_OBJS $FCLIBS 2>&1 > /dev/null
+rm -f size.txt
+./conftest > size.txt
+rm -f ./conftest
+size=`cat size.txt`
+ac_cv_sizeof_array_descriptor_rank_$1="$size"
+])
+TX_FORTRAN_SIZEOF_ARRAY_DESCRIPTOR_RANK_$1="$ac_cv_sizeof_array_descriptor_rank_$1"
+AC_SUBST(TX_FORTRAN_SIZEOF_ARRAY_DESCRIPTOR_RANK_$1)
+])

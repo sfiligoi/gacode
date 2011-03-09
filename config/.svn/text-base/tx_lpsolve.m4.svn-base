@@ -1,0 +1,22 @@
+dnl ######################################################################
+dnl
+dnl File:	tx_lpsolve.m4
+dnl
+dnl Purpose:	Looks for lp_solve LP & MILP solver
+dnl
+dnl Version:	$Id$
+dnl
+dnl Tech-X configure system
+dnl
+dnl ######################################################################
+
+unset LPSOLVE_PATH
+for i in `echo $SUPRA_SEARCH_PATH | tr ':' ' '`; do
+    LPSOLVE_PATH="$LPSOLVE_PATH:$i:$i/lp_solve"
+done
+
+TX_LOCATE_PKG(
+      [LPSOLVE],
+      [$LPSOLVE_PATH],
+      [lp_lib.h],
+      [lpsolve55])

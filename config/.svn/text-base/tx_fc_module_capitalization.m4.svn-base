@@ -1,0 +1,55 @@
+# SYNOPSIS
+#
+#   TX_FC_MODULE_CAPITALIZATION
+#
+# DESCRIPTION
+#
+#   Determine whether the file names for modules are capitalized.
+#
+# LAST MODIFICATION
+#
+#   $Id$
+#
+# COPYLEFT
+#
+#   Copyright (c) 2008 Alexander Pletzer <pletzer@txcorp.com>
+#   Copyright (c) 2008 John Cary <cary@txcorp.com>
+#
+#   Copying and distribution of this file, with or without modification, are
+#   permitted in any medium without royalty provided the copyright notice
+#   and this notice are preserved.
+
+AC_DEFUN([TX_FC_MODULE_CAPITALIZATION],[
+AC_CACHE_CHECK([fortran 90 modules capitalization],
+tx_cv_fc_modcap,
+[AC_LANG_PUSH(Fortran)
+rm -f conftest_module.mod conftest_module.MOD CONTEST_MODULE.mod CONTEST_MODULE.MOD
+AC_COMPILE_IFELSE([
+!234567
+      module conftest_module
+      contains
+      subroutine conftest_routine
+      write(*,'(a)') 'gotcha!'
+      end subroutine conftest_routine
+      end module conftest_module
+  ],
+  [tx_cv_fc_modcap=`\ls conftest_module.* 2>/dev/null`
+   if test x$tx_cv_fc_modcap = x ; then
+     tx_cv_fc_modcap=`\ls CONFTEST_MODULE.* 2>/dev/null`
+   fi
+   if test x$tx_cv_fc_modcap = x ; then
+     tx_cv_fc_modcap=""
+   else
+     case "$tx_cv_fc_modcap" in
+       conftest_module.mod) tx_cv_fc_modcap="lcname-lcext";;
+       conftest_module.MOD) tx_cv_fc_modcap="lcname-ucext";;
+       CONFTEST_MODULE.mod) tx_cv_fc_modcap="ucname-lcext";;
+       CONFTEST_MODULE.MOD) tx_cv_fc_modcap="ucname-ucext";;
+     esac
+   fi
+  ],
+  [tx_cv_fc_modcap=""])
+# rm -f conftest_module.mod conftest_module.MOD CONTEST_MODULE.mod CONTEST_MODULE.MOD
+AC_LANG_POP(Fortran)
+])])
+

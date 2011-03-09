@@ -1,0 +1,338 @@
+dnl ######################################################################
+dnl
+dnl $Id$
+dnl
+dnl Check for Python stuff
+dnl
+dnl ######################################################################
+
+dnl Allow disabling of Python
+AC_ARG_ENABLE([python],
+	AC_HELP_STRING([--disable-python],
+	[to not use python (default is use)]),
+	[ac_enable_python=${enableval}], [ac_enable_python=yes])
+# echo ac_enable_python = $ac_enable_python
+
+dnl ######################################################################
+dnl
+dnl Find python and its version.  This also determines whether we
+dnl can execute the found python
+dnl
+dnl ######################################################################
+
+dnl Allow specification of python installation prefix
+AC_ARG_WITH(python-prefix,
+  AC_HELP_STRING([--with-python-prefix],
+  [<python installation prefix>]),
+  PYTHON_PREFIX="$withval")
+
+dnl Allow specification of python installation prefix
+AC_ARG_WITH(python-version,
+  AC_HELP_STRING([--with-python-version],
+  [<python version, major.minor>]),
+  PYTHON_VERSION="$withval")
+
+ac_have_exec_python=false
+if test "$ac_enable_python" = yes; then
+
+# Find python
+  AC_ARG_WITH(python, [  --with-python=<python executable>],
+	PYTHON="$withval")
+  if test -z "$PYTHON"; then
+    if test -n "$PYTHON_PREFIX"; then
+      PY_PATH=$PYTHON_PREFIX/bin
+    elif test -n "$SUPRA_SEARCH_PATH"; then
+      for i in `echo $SUPRA_SEARCH_PATH | tr ':' ' '`; do
+        PY_PATH=$PY_PATH:$i/python/bin:$i/bin
+      done
+    fi
+    PY_PATH=$PY_PATH:$PATH
+    AC_PATH_PROGS(PYTHON, python, "", $PY_PATH)
+  fi
+  if test -n "$PYTHON"; then
+    PYTHON_BINDIR=`dirname $PYTHON`
+    PYTHON_PREFIX=`dirname $PYTHON_BINDIR`
+  else
+    AC_MSG_WARN(Unable to find python in your path.  May not have preprocessor.)
+dnl jrc23aug09: what is this for?
+    # unset PYTHON_MAKEFILES
+  fi
+  # echo PYTHON = $PYTHON
+
+# Find executable python
+  AC_MSG_CHECKING(executable python)
+  if test "$cross_compiling" != yes -a -n "$PYTHON"; then
+    if $PYTHON -c "import sys" 2>/dev/null; then
+      ac_have_exec_python=true
+    else
+      LD_LIBRARY_PATH0=$LD_LIBRARY_PATH
+      PYTHON0=$PYTHON
+      PYLIBCANDS="lib lib/python2.5/config lib/python2.4/config lib64 lib64/python2.5/config lib64/python2.4/config"
+      for i in $PYLIBCANDS; do
+        PYTHON="env LD_LIBRARY_PATH=$PYTHON_PREFIX/$i:$LD_LIBRARY_PATH0 $PYTHON0"
+        if $PYTHON -c "import sys" 2>/dev/null; then
+          ac_have_exec_python=true
+        else
+          PYTHON=$PYTHON0
+        fi
+      done
+    fi
+  fi
+  AC_MSG_RESULT($ac_have_exec_python)
+else
+  echo "Disabling python."
+fi
+
+# Try getting version from executable if not cross compiling
+if test "$ac_enable_python" = yes; then
+  AC_MSG_CHECKING($PYTHON version)
+  if test -z "$PYTHON_VERSION"; then
+    if $ac_have_exec_python; then
+      PYTHON_VERSION=`$PYTHON -c "import sys; print sys.version[[:3]]" 2>/dev/null`
+    else
+# If crosscompiling, version from presence of executable
+# Assume it is the highest found.
+# More accurate would be to check size or inode or to use executable
+# with version in name.
+      for i in 2.6 2.5 2.4; do
+        echo Looking at $PYTHON_BINDIR/python$i
+        if test -x $PYTHON_BINDIR/python$i; then
+          PYTHON_VERSION=$i
+          break
+        fi
+      done
+      if test -z "$PYTHON_VERSION"; then
+        PYTHON_VERSION=unknown
+      fi
+    fi
+  fi
+  AC_MSG_RESULT($PYTHON_VERSION)
+  if test "$PYTHON_VERSION" = unknown; then
+    unset PYTHON_VERSION
+  fi
+fi
+
+AC_SUBST(PYTHON)
+AC_SUBST(PYTHON_BINDIR)
+AC_SUBST(PYTHON_PREFIX)
+AC_SUBST(PYTHON_VERSION)
+
+dnl ######################################################################
+dnl
+dnl If python is executable, then determine as much as one can from sysconfig.
+dnl
+dnl ######################################################################
+
+if $ac_have_exec_python; then
+
+# Locate the directory where python libraries are kept
+  AC_MSG_CHECKING(for location of python libraries)
+  PYTHON_TOPLIBDIR=`$PYTHON -c "import distutils.sysconfig; \
+	dir = distutils.sysconfig.get_python_lib(1,1); \
+        print dir" 2>/dev/null`
+# For 2.4 compatibility
+  if test $? != 0; then
+    AC_MSG_WARN(Could not get python library directory.  Trying 2.4 method.)
+    PYTHON_TOPLIBDIR=`$PYTHON -c "import os, sys; \
+                  dir = os.path.join(sys.prefix, sys.lib, 'python'); \
+                  print dir;"`
+    PYTHON_TOPLIBDIR=${PYTHON_TOPLIBDIR}${PYTHON_VERSION}
+  fi
+  case "$host" in
+    *-pc-mingw*)
+# Replace '\' with '/' in path so gcc doesn't get confused
+      PYTHON_TOPLIBDIR=`echo $PYTHON_TOPLIBDIR | sed -e 's/\\\\/\//g'`
+      ;;
+  esac
+  AC_MSG_RESULT($PYTHON_TOPLIBDIR)
+
+# Determine the python link command
+  AC_MSG_CHECKING(how python links shared libraries)
+  case "$host" in
+    *-pc-mingw*)
+      PYTHON_LINKFORSHARED=unknown
+      ;;
+    *)
+dnl Patched for os x.
+      PYTHON_LINKFORSHARED=`$PYTHON -c 'import distutils.sysconfig; print distutils.sysconfig.get_config_var("LINKFORSHARED")' 2>/dev/null | sed -e 's/ Python.framework.*Python / /' -e 's/ Python.framework.*Python$//'`
+      if test $? != 0; then
+        AC_MSG_WARN(Could not get python shared link command. 2.4 method not implemented.)
+      fi
+      ;;
+  esac
+  AC_MSG_RESULT($PYTHON_LINKFORSHARED)
+  if test "$PYTHON_LINKFORSHARED" = unknown; then
+    unset PYTHON_LINKFORSHARED
+  fi
+
+  AC_MSG_CHECKING(for python include directory)
+  PYTHON_INCDIR=`$PYTHON -c "import distutils.sysconfig; \
+                      dir = distutils.sysconfig.get_python_inc(1); \
+                      print dir" 2>/dev/null`
+  # For 2.4 compatibility
+  if test $? != 0; then
+      AC_MSG_WARN(Could not get python include directory.  Trying 2.4 method.)
+      PYTHON_INCDIR=`$PYTHON -c "import os, sys; \
+                  dir = os.path.join(sys.prefix, 'include', 'python'); \
+                  print dir;"`
+      PYTHON_INCDIR=${PYTHON_INCDIR}${PYTHON_VERSION}
+  fi
+  case "$host" in
+    *-pc-mingw*)
+# Replace '\' with '/' in path so gcc doesn't get confused
+      PYTHON_INCDIR=`echo $PYTHON_INCDIR | sed -e 's/\\\\/\//g'`
+      ;;
+  esac
+  AC_MSG_RESULT($PYTHON_INCDIR)
+
+fi
+
+dnl ######################################################################
+dnl
+dnl Print what is so far known
+dnl
+dnl ######################################################################
+
+if test -n "$config_summary_file"; then
+  echo >> $config_summary_file
+  if test -n "$PYTHON" -o -n "$PYTHON_VERSION"; then
+    printf "Using Python with:\n"           >> $config_summary_file
+    TX_PRINT_VAR(PYTHON)
+    TX_PRINT_VAR(PYTHON_BINDIR)
+    TX_PRINT_VAR(PYTHON_PREFIX)
+    TX_PRINT_VAR(PYTHON_VERSION)
+    TX_PRINT_VAR(PYTHON_LINKFORSHARED)
+  else
+    if test "$ac_enable_python" = yes; then
+      printf "Python executable not found.\n"  >> $config_summary_file
+    else
+      echo >> $config_summary_file
+      echo "NOT using Python." >> $config_summary_file
+    fi
+  fi
+fi
+
+dnl ######################################################################
+dnl
+dnl Determine python library name which can be different on Windows
+dnl
+dnl ######################################################################
+
+if test -n "$PYTHON_VERSION"; then
+  AC_MSG_CHECKING(for name of python library)
+  tx_python_lib="python"$PYTHON_VERSION
+  case "$host" in
+    *-pc-mingw*)
+      tx_python_lib=`echo $tx_python_lib | sed -e 's/\\.//g'`
+      ;;
+  esac
+  AC_MSG_RESULT($tx_python_lib)
+fi
+
+dnl ######################################################################
+dnl
+dnl Use txsearch with previously found information to find library and
+dnl include directory.
+dnl
+dnl ######################################################################
+
+if test -n "$PYTHON_VERSION"; then
+
+# Determine possible locations of python
+  tx_py_sp=$PYTHON_PREFIX
+  if test -n "$SUPRA_SEARCH_PATH" -a -n "$PYTHON_VERSION"; then
+    for i in `echo $SUPRA_SEARCH_PATH | tr ':' ' '`; do
+      tx_py_sp=$tx_py_sp:$i/python:$i
+    done
+  fi
+
+dnl TX_LOCATE_PKG(
+dnl   [PYTHON],
+dnl   [$tx_py_sp],
+dnl   [Python.h],
+dnl   [$tx_python_lib],
+dnl   [include/python$PYTHON_VERSION],
+dnl   [lib64/python$PYTHON_VERSION/config:lib/python$PYTHON_VERSION/config:lib/python$PYTHON_VERSION/libs])
+
+dnl jrc 23ug09: cannot use tx_locate_pkg and library has to be a literal
+
+# Find the python include dir
+  AC_ARG_WITH(python-incdir, AC_HELP_STRING([--with-python-incdir],
+        [python include directory]),
+        PYTHON_INCPATH="$withval")
+  for i in `echo $tx_py_sp | tr ':' ' '`; do
+    PYTHON_INCPATH=$PYTHON_INCPATH:$PYTHON_INCDIR:$i/include/python$PYTHON_VERSION
+  done
+  TX_PATH_FILE(PYTHON_INC_PYTHON_H, Python.h, "", $PYTHON_INCPATH)
+  if test -n "$PYTHON_INC_PYTHON_H"; then
+    PYTHON_INCDIR=`dirname $PYTHON_INC_PYTHON_H`
+    PYTHON_INC=-I$PYTHON_INCDIR
+  fi
+
+# Find the python lib dir
+  AC_ARG_WITH(python-libdir, AC_HELP_STRING([--with-python-libdir],
+        [python library directory]),
+        PYTHON_LIBPATH="$withval")
+  PYTHON_LIBPATH=$PYTHON_LIBPATH:$PYTHON_TOPLIBDIR/config:$PYTHON_TOPLIBDIR/libs
+  for i in `echo $tx_py_sp | tr ':' ' '`; do
+    PYTHON_LIBPATH=$PYTHON_LIBPATH:$i/lib64/python$PYTHON_VERSION/config:$i/lib/python$PYTHON_VERSION/config:$i/lib/python$PYTHON_VERSION/libs
+  done
+  TX_PATH_FILES(PYTHON_LIB_LIB_PYTHON, lib${tx_python_lib}.so lib${tx_python_lib}.dylib lib${tx_python_lib}.a ${tx_python_lib}.lib, "", $PYTHON_LIBPATH)
+  AC_MSG_CHECKING(for python libs)
+  if test -n "$PYTHON_LIB_LIB_PYTHON"; then
+    PYTHON_LIBDIR=`dirname $PYTHON_LIB_LIB_PYTHON`
+    PYTHON_LIBS="-L$PYTHON_LIBDIR -l${tx_python_lib}"
+  fi
+  dnl AC_MSG_RESULT($PYTHON_LIBS)
+# Get any extra python libs defined in the makefile
+  if test -f $PYTHON_LIBDIR/Makefile; then
+    PYTHON_XLIBS=`grep ^LIBS= $PYTHON_LIBDIR/Makefile | sed 's/^LIBS= */ /'`
+  fi
+
+# Get extra link flags and clean them up
+# JRC: Convert -Xlinker to -Wl, which is present usage
+# JRC: Remove standalone -dynamic
+  PYTHON_LINK=`echo $PYTHON_LINKFORSHARED | sed -e 's/-Wl,-bE:Modules\/python.exp//' -e 's/-Xlinker  */-Wl,/' -e 's/ -dynamic//'`
+# Add to PYTHON_LIBS and clean again
+  dnl AC_MSG_CHECKING(for cleaned python libs)
+  PYTHON_LIBS="$PYTHON_LIBS $PYTHON_XLIBS $PYTHON_LINK"
+  TX_CLEAN_LIBS([PYTHON_LIBS])
+  AC_MSG_RESULT($PYTHON_LIBS)
+  AC_DEFINE([HAVE_PYTHON], , [Define if python libraries found])
+
+fi
+AC_SUBST(PYTHON_INCDIR)
+AC_SUBST(PYTHON_INC)
+AC_SUBST(PYTHON_LIBDIR)
+AC_SUBST(PYTHON_LIBS)
+AC_SUBST(PYTHON_RPLIBS)
+AC_SUBST(PYTHON_LTLIBS)
+AC_SUBST(PYTHON_ALIBS)
+AM_CONDITIONAL([HAVE_PYTHON], [test -n "$PYTHON_LIBS"])
+
+dnl ######################################################################
+dnl
+dnl Write to summary file if defined
+dnl SEK: Not sure what the most useful AC_SUBST variables a user
+dnl needs to know.  Printing out the standard stuff
+dnl
+dnl ######################################################################
+
+if test -n "$config_summary_file"; then
+  # printf "\n"        >> $config_summary_file
+  if test -n "$PYTHON_LIBS"; then
+    # printf "After cleaning:\n"        >> $config_summary_file
+    TX_PRINT_VAR(PYTHON_INCDIR)
+    TX_PRINT_VAR(PYTHON_INC)
+    TX_PRINT_VAR(PYTHON_LIBDIR)
+    TX_PRINT_VAR(PYTHON_LIBS)
+    TX_PRINT_VAR(PYTHON_RPLIBS)
+    TX_PRINT_VAR(PYTHON_LTLIBS)
+    TX_PRINT_VAR(PYTHON_ALIBS)
+  else
+    if test "$ac_enable_python" = yes; then
+      printf "Python libraries not found."         >> $config_summary_file
+    fi
+  fi
+fi
+

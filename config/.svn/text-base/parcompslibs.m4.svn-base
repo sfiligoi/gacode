@@ -1,0 +1,412 @@
+dnl ######################################################################
+dnl
+dnl Configure all compilers for parallel codes.
+dnl WARNING: THIS MUST BE DONE BEFORE LIBTOOL.
+dnl
+dnl $Id$
+dnl
+dnl ######################################################################
+
+dnl ######################################################################
+dnl
+dnl Set the compilers from the configure line.
+dnl
+dnl ######################################################################
+
+AC_ARG_WITH(CXX,
+        AC_HELP_STRING([--with-CXX=<compiler>],
+        [to use <compiler> (cxx, CC, pathCC) instead of g++]),
+        CXX="$withval")
+
+AC_ARG_WITH(CC,
+        AC_HELP_STRING([--with-CC=<compiler>],
+        [to use <compiler> (cc, pathcc) instead of gcc]),
+        CC="$withval")
+
+if test "$NO_FORTRAN" != true; then
+  AC_ARG_WITH(FC,
+        AC_HELP_STRING([--with-FC=<compiler>],
+        [to use <compiler> (lf90, pathf90) instead of gfortran]),
+        FC="$withval")
+
+  AC_ARG_WITH(F77,
+        AC_HELP_STRING([--with-F77=<compiler>],
+        [to use <compiler> (lf77, pathf77) instead of gfortran]),
+        F77="$withval")
+fi
+
+dnl ######################################################################
+dnl
+dnl Determine whether parallelism should be disabled.  If not specified,
+dnl parallel not set and looks to hdf5.
+dnl
+dnl ######################################################################
+
+if test "$NO_PARALLEL" != true; then
+  AC_ARG_ENABLE(parallel, AC_HELP_STRING([--enable-parallel],
+        [to build parallel version (default is follow hdf5)]),
+        [parallel=$enableval])
+else
+  parallel=no
+fi
+
+if test "$NO_BACKENDNODE" != true; then
+  AC_ARG_ENABLE(back-end-node, AC_HELP_STRING([--enable-back-end-node],
+        [to build back-end-node version (default is follow hdf5)]),
+        [back_end_node=$enableval])
+else
+  back_end_node=yes
+fi
+
+dnl ######################################################################
+dnl
+dnl Find hdf5i if not rejected.
+dnl The search order depends on the parallel flag.  If
+dnl not specified, looks for parallel first, then serial.
+dnl
+dnl ######################################################################
+
+if test -z "$NO_HDF5"; then
+
+  builtin(include, config/tx_hdf5.m4)
+  if test $ac_cv_have_hdf5 = no; then
+dnl Some codes like it but don't require it
+    echo $ac_require_hdf5
+    if test "$ac_require_hdf5" = "no"; then
+       AC_MSG_WARN(hdf5 not found.)
+    else
+       AC_MSG_ERROR(hdf5 not found.)
+    fi
+  fi
+
+else
+
+  if test "x$parallel" = xyes ; then
+    hdf5par=yes
+  fi
+# Since tx_hdf5.m4 not invoked, must take care of the AM_CONDITIONALS
+  AM_CONDITIONAL(HAVE_HDF5, false)
+  AM_CONDITIONAL(HAVE_HDF5_MOD, false)
+
+fi
+
+dnl ######################################################################
+dnl
+dnl Build (serial/parallel) must be consistent with HDF5 build,
+dnl otherwise an error.  If parallel was not specified, then use the
+dnl HDF5 findings to specify it.
+dnl
+dnl ######################################################################
+
+if test -z "$hdf5par"; then
+  if test "$parallel" = yes; then
+    AC_MSG_ERROR([HDF5 built serial, so cannot build a parallel $PACKAGE])
+  else
+    parallel=no
+    DISTCHECK_CONFIGURE_FLAGS="--disable-parallel"
+    AC_SUBST(DISTCHECK_CONFIGURE_FLAGS)
+  fi
+else
+  if test "$parallel" = no; then
+    AC_MSG_ERROR(HDF5 built parallel so cannot build a serial $PACKAGE)
+  else
+    parallel=yes
+    DISTCHECK_CONFIGURE_FLAGS="--enable-parallel"
+    AC_SUBST(DISTCHECK_CONFIGURE_FLAGS)
+  fi
+fi
+
+dnl ######################################################################
+dnl
+dnl Now know whether parallel
+dnl
+dnl ######################################################################
+
+AM_CONDITIONAL(HAVE_MPI, test x$parallel = xyes)
+echo  >> $config_summary_file
+if test "$parallel" = "yes"; then
+  echo "Building PARALLEL version (default)"      >> $config_summary_file
+  AC_DEFINE(HAVE_MPI, , Define if compiling for MPI)
+else
+  echo "Building SERIAL version"                  >> $config_summary_file
+fi
+
+dnl ######################################################################
+dnl
+dnl Any unset compilers get default values. C++ drives this.
+dnl
+dnl ######################################################################
+
+# echo Before defaultcomps, CXXFLAGS = $CXXFLAGS
+builtin(include, config/defaultcomps.m4)
+TX_DEFAULT_CXX
+TX_DEFAULT_CC
+TX_DEFAULT_FC
+TX_DEFAULT_F77
+
+export CXX
+export CC
+export FC
+export F77
+
+echo Using C++ compiler $CXX and C compiler $CC
+if test "$NO_FORTRAN" != true; then
+  echo Using Fortran compilers, $FC \(free form\) and $F77 \(fixed form\).
+fi
+
+dnl ######################################################################
+dnl
+dnl Determine the serial compilers (may be the same)
+dnl
+dnl ######################################################################
+
+builtin(include, config/serialcomps.m4)
+
+# Blue Gene MPI module fix.
+# On intrepid, /bgsys/drivers/ppcfloor/comm/default/include/mpi.mod was
+# compiled with gfortran, not xlf.  However,
+# /bgsys/drivers/ppcfloor/comm/fast/include/mpi.mod was compiled with xlf.
+# echo SERIALFC = $SERIALFC
+AC_MSG_CHECKING(XLF_MPI_MOD_INC)
+if test x$parallel = xyes; then
+  case $SERIALFC in
+    *xlf*)
+      XLF_MPI_MOD_INC=-I/bgsys/drivers/ppcfloor/comm/fast/include
+      ;;
+  esac
+fi
+AC_MSG_RESULT($XLF_MPI_MOD_INC)
+AC_SUBST(XLF_MPI_MOD_INC)
+
+dnl ######################################################################
+dnl
+dnl Auxiliary compilation flags.  These must key off of SERIALCC, SERIALCXX
+dnl
+dnl ######################################################################
+
+builtin(include, config/flags.m4)
+
+dnl ######################################################################
+dnl
+dnl Auxiliary Fortran compilation flags.  These key off SERIALFC
+dnl
+dnl ######################################################################
+
+if test "$NO_FORTRAN" != true; then
+  builtin(include, config/fcflags.m4)
+  dnl echo After fcflags, FCLIBS = $FCLIBS
+  AC_ARG_WITH(EXTRA_FCFLAGS,
+    AC_HELP_STRING([--with-EXTRA_FCFLAGS=<flags>],
+      [to add <flags> for Fortran compilation]),
+      EXTRA_FCFLAGS2="$withval")
+  if test -n "$EXTRA_FCFLAGS2"; then
+    AC_MSG_WARN(--with-EXTRA_FCFLAGS is deprecated.  Use --with-extra-fcflags)
+  fi
+# Above is deprecated.  Moving to below.
+  AC_ARG_WITH(extra-fcflags,
+    AC_HELP_STRING([--with-extra-fcflags=<flags>],
+      [to add <flags> for Fortran compilation]),
+      EXTRA_FCFLAGS="$withval")
+  FCFLAGS="$FCFLAGS $EXTRA_FCFLAGS $EXTRA_FCFLAGS2"
+# Trim
+  FCFLAGS=`echo $FCFLAGS | sed -e 's/^  *//' -e 's/  *$//' -e 's/  / /g'`
+# SEK: This is generally the right thing to do now
+# SEK: Automake uses FFLAGS for all fixed-format codes
+  # if test -z "$FFLAGS"; then
+    # FFLAGS="$FCFLAGS $FC_FIXED_FLAG"
+  # fi
+# JRC: Perhaps add in those flags that are not already there?
+  if test -n "$FCFLAGS"; then
+    for i in $FCFLAGS $FC_FIXED_FLAG; do
+      if ! echo $FFLAGS | egrep -q "(^| )$i($| )"; then
+        FFLAGS="$FFLAGS $i"
+      fi
+    done
+  else
+    FFLAGS="$FFLAGS $FC_FIXED_FLAG"
+  fi
+  AC_ARG_WITH(extra-fflags,
+    AC_HELP_STRING([--with-extra-fflags=<extra flags>],
+      [to provide extra flags for Fortran fixed-form compilation]),
+      EXTRA_FFLAGS=$withval)
+  FFLAGS="$FFLAGS $EXTRA_FFLAGS"
+# Trim
+  FFLAGS=`echo $FFLAGS | sed -e 's/^  *//' -e 's/  *$//' -e 's/  / /g'`
+  echo "After extra flags:"       >> $config_summary_file
+  TX_PRINT_VAR(FCFLAGS)
+  TX_PRINT_VAR(FFLAGS)
+fi
+
+dnl ######################################################################
+dnl
+dnl Check all the compilers
+dnl
+dnl ######################################################################
+
+dnl JRC: does not work on Intrepid/gnu where compilers are not in one's path
+REPLACE_COMPS=true
+if $REPLACE_COMPS; then
+CC_SAVE=$CC
+# jrc 31jul09: More complicated if serial CC not in one's path
+# if which $SERIALCC; then
+  CC=$ABS_SERIALCC
+# else
+#   ABSCC=`which $CC`
+#   CC_BINDIR=`dirname $ABSCC`
+#   if test -x $CC_BINDIR/$SERIALCC; then
+#     CC=$CC_BINDIR/$SERIALCC
+#   else
+#     AC_MSG_ERROR(Serial compiler $SERIALCC not in path or in $CC_BINDIR)
+#   fi
+# fi
+fi
+AC_PROG_CC
+AC_PROG_CPP
+if $REPLACE_COMPS; then
+CC=$CC_SAVE
+fi
+
+if $REPLACE_COMPS; then
+CXX_SAVE=$CXX
+# If not in path, then see if can find in directory of original compiler
+# if which $SERIALCXX; then
+  # CXX=$SERIALCXX
+  CXX=$ABS_SERIALCXX
+# else
+#   ABSCXX=`which $CXX`
+#   CXX_BINDIR=`dirname $ABSCXX`
+#   if test -x $CXX_BINDIR/$SERIALCXX; then
+#     CXX=$CXX_BINDIR/$SERIALCXX
+#   else
+#     AC_MSG_ERROR(Serial compiler $SERIALCXX not in path or in $CXX_BINDIR)
+#   fi
+# fi
+fi
+AC_PROG_CXX
+if $REPLACE_COMPS; then
+CXX=$CXX_SAVE
+fi
+
+if test "$NO_FORTRAN" != true; then
+if $REPLACE_COMPS; then
+  FC_SAVE=$FC
+  if which $SERIALFC; then
+    FC=$SERIALFC
+  else
+    ABSFC=`which $FC`
+    FC_BINDIR=`dirname $ABSFC`
+    if test -x $FC_BINDIR/$SERIALFC; then
+      FC=$FC_BINDIR/$SERIALFC
+    else
+      AC_MSG_ERROR(Serial compiler $SERIALFC not in path or in $FC_BINDIR)
+    fi
+  fi
+fi
+  AC_PROG_FC
+if $REPLACE_COMPS; then
+  FC=$FC_SAVE
+# jrc: must keep F77 or tags will be wrong for libtool
+  F77_SAVE=$F77
+  if which $SERIALF77; then
+    F77=$SERIALF77
+  else
+    ABSF77=`which $F77`
+    F77_BINDIR=`dirname $ABSF77`
+    if test -x $F77_BINDIR/$SERIALF77; then
+      F77=$F77_BINDIR/$SERIALF77
+    else
+      AC_MSG_ERROR(Serial compiler $SERIALF77 not in path or in $F77_BINDIR)
+    fi
+  fi
+fi
+  AC_PROG_F77(gfortran)
+if $REPLACE_COMPS; then
+  F77=$F77_SAVE
+fi
+fi
+
+dnl ######################################################################
+dnl
+dnl C++ Compiler capabilities
+dnl
+dnl ######################################################################
+
+dnl echo Before macros, CXXFLAGS = $CXXFLAGS
+builtin(include, config/macros.m4)
+builtin(include, config/cxx.m4)
+
+dnl ######################################################################
+dnl
+dnl Check for header files
+dnl Check for typedefs, structures, and compiler characteristics
+dnl
+dnl ######################################################################
+
+AC_TYPE_SIZE_T
+AC_STRUCT_TM
+AC_ISC_POSIX
+AC_HEADER_TIME
+AC_LANG_SAVE
+AC_LANG_CPLUSPLUS
+AC_CHECK_HEADERS(iostream fstream sstream strstream)
+AC_LANG_RESTORE
+
+dnl ######################################################################
+dnl
+dnl Find system libraries
+dnl
+dnl ######################################################################
+
+builtin(include, config/libs.m4)
+AC_ARG_WITH(EXTRA_LDFLAGS,
+	AC_HELP_STRING([--with-EXTRA_LDFLAGS=<flags>],
+	[to add <flags> for linking]),
+	EXTRA_LDFLAGS="$withval")
+LDFLAGS=`echo "$LDFLAGS $EXTRA_LDFLAGS" | sed -e 's/^  *//' -e 's/  *$//'`
+echo             >> $config_summary_file
+echo Load flags: >> $config_summary_file
+TX_PRINT_VAR(LDFLAGS)
+
+dnl ######################################################################
+dnl
+dnl Check for programs
+dnl
+dnl ######################################################################
+
+AC_PROG_MAKE_SET
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_RANLIB
+
+dnl ######################################################################
+dnl
+dnl Check for sz now that RPATH_FLAG is known.
+dnl
+dnl ######################################################################
+
+if test -z "$NO_HDF5"; then
+  builtin(include, config/tx_sz.m4)
+else
+  AM_CONDITIONAL(HAVE_SZ, false)
+fi
+
+dnl ######################################################################
+dnl
+dnl Determine where share information (config.summary) goes.
+dnl If not specified, set from parallelism
+dnl
+dnl ######################################################################
+
+AC_ARG_WITH(conf-share-dir,
+        AC_HELP_STRING([--with-conf-share-dir=<dirname>],
+        [to install configuration share files under prefix/<dirname>)]),
+        [CONFSHAREDIR="${withval}"])
+if test -z "${CONFSHAREDIR}"; then
+  if test "$parallel" = "yes"; then
+    CONFSHAREDIR=share-par
+  else
+    CONFSHAREDIR=share-ser
+  fi
+fi
+AC_SUBST(CONFSHAREDIR)
+

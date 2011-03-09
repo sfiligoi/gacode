@@ -1,0 +1,46 @@
+dnl ######################################################################
+dnl
+dnl File:	tx_transpphage.m4
+dnl
+dnl Purpose:	Determine where a sub-set of Transp library and include
+dnl             are
+dnl
+dnl Version:	$Id$
+dnl
+dnl Copyright 2001-2010, Tech-X Corporation.  Redistribution allowed provided
+dnl this copyright statement remains intact.
+dnl
+dnl ######################################################################
+
+dnl ######################################################################
+dnl
+dnl Determine the location of TranspPhage
+dnl
+dnl ######################################################################
+
+builtin(include, config/txsearch.m4)
+
+dnl Locate all the Transp related includes and libraries
+NUBEAM_SP=$SUPRA_SEARCH_PATH:$HOME:$HOME/$UNIXFLAVOR:$HOME/software
+unset NUBEAM_PATH
+if test "$parallel" = yes; then
+  for i in `echo $NUBEAM_SP | tr ':' ' '`; do
+    NUBEAM_PATH="$NUBEAM_PATH:$i/nubeammpi"
+  done
+else
+  for i in `echo $NUBEAM_SP | tr ':' ' '`; do
+    NUBEAM_PATH="$NUBEAM_PATH:$i/nubeam"
+  done
+fi
+TX_LOCATE_PKG(
+  [transpphage],
+  [$NUBEAM_PATH],
+  [f77name.h,ccps_base.h,ccps.h,cxxps.h,cnubeam_comp.h],
+  [TranspPhage])
+
+if test x"FOUND_TRANSPPHAGE" = xyes; then
+  AC_FC_FUNC([ccps_init],symbol)
+  LDFLAGS="-L$TRANSPPHAGE_LIBDIR $LDFLAGS"
+  AC_CHECK_LIB([ccps_init],[$symbol],,AC_MSG_NOTICE(Symbol $symbol not found in libTranspPhage.))
+fi
+
