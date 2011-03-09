@@ -11,9 +11,9 @@
 !  get tglf_*_out variables
 !
 ! NOTES:
+!  tglf_path:        working directory 
 !  tglf_dump_flag:   TRUE = call dump routines, FALSE = do NOT call dump routines 
 !  tglf_dump_suffix: appended to name of dump file 
-!  tglf_dump_path:   specifies directory where dump files should be 
 !
 !  tglf_dump_local and tglf_dump_global are called by tglf_run
 !
@@ -27,21 +27,29 @@
 !-------------------------------------------------------------------------
 
 module tglf_interface
+
   use tglf_dimensions
+
+  !  NOTE: tglf_dimensions defines 
+  !   nsm=6
+  !   maxmodes=4
+
   implicit none
 
   ! CONTROL PARAMETERS
-  logical              :: tglf_use_transport_model_in = .true.
-  integer              :: tglf_geometry_flag_in = 1
-  logical              :: tglf_dump_flag_in     = .false.
-  character (len=64)   :: tglf_dump_suffix_in   = ''
-  character (len=4096) :: tglf_dump_path_in     = ''
+  character (len=256)  :: tglf_path_in        = ''
+  logical              :: tglf_dump_flag_in   = .false.
+  character (len=64)   :: tglf_dump_suffix_in = ''
 
   ! INPUT PARAMETERS
 
+  logical :: tglf_use_transport_model_in = .true.
+  integer :: tglf_geometry_flag_in = 1
+
   ! Data passed to: put_signs
-  real    :: tglf_sign_Bt_in        = 1.0
-  real    :: tglf_sign_It_in        = 1.0
+  real    :: tglf_sign_bt_in        = 1.0
+  real    :: tglf_sign_it_in        = 1.0
+
   ! Data passed to: put_rare_switches
   real    :: tglf_theta_trapped_in  = 0.7
   real    :: tglf_park_in           = 1.0
@@ -49,7 +57,7 @@ module tglf_interface
   real    :: tglf_gchat_in          = 1.0
   real    :: tglf_wd_zero_in        = 0.1
   real    :: tglf_linsker_factor_in = 0.0
-  real    :: tglf_gradB_factor_in   = 0.0
+  real    :: tglf_gradb_factor_in   = 0.0
   real    :: tglf_filter_in         = 0.0
   real    :: tglf_damp_psi_in       = 0.0
   real    :: tglf_damp_sig_in       = 0.0
@@ -161,6 +169,7 @@ module tglf_interface
   real     :: tglf_R_elite_in(max_ELITE) 
   real     :: tglf_Z_elite_in(max_ELITE) 
   real     :: tglf_Bp_elite_in(max_ELITE) 
+
   ! TRANSPORT OUTPUT PARAMETERS
   real :: tglf_elec_pflux_out = 0.0
   real :: tglf_elec_eflux_out = 0.0
@@ -184,7 +193,7 @@ contains
 
     integer :: ioerr
 
-    open(unit=1,file=trim(tglf_dump_path_in)//'tglf_local.dump'//trim(tglf_dump_suffix_in),&
+    open(unit=1,file=trim(tglf_path_in)//'tglf_local.dump'//trim(tglf_dump_suffix_in),&
          status='replace',iostat=ioerr)
 
     write(1,*) 'new_eikonal = ', tglf_new_eikonal_in
@@ -300,7 +309,7 @@ contains
 
     integer :: ioerr
 
-    open(unit=1,file=trim(tglf_dump_path_in)//'tglf_global.dump'//trim(tglf_dump_suffix_in),&
+    open(unit=1,file=trim(tglf_path_in)//'tglf_global.dump'//trim(tglf_dump_suffix_in),&
          status='replace',iostat=ioerr)
 
     write(1,*) 'new_eikonal = ', new_eikonal_in
