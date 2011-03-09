@@ -209,10 +209,10 @@ c
      .                sfarea,fluxn(1),flxmod(1),dtt
          write (6, '("sfarea,fluxn(2),flxmod(2),dtt =",4(x,1pe12.4))')
      .                sfarea,fluxn(2),flxmod(2),dtt
-         write (6, '("sion11,scxw1 =",2(1x,1pe12.4)))')sion11,scxw1
-         write (6, '("sion12,scxw2 =",2(1x,1pe12.4)))')sion12,scxw2
-         write (6, '("sion21,scxw1 =",2(1x,1pe12.4)))')sion21,scxw1
-         write (6, '("sion22,scxw2 =",2(1x,1pe12.4)))')sion22,scxw2
+         write (6, '("sion11,scxw1 =",2(1x,1pe12.4))')sion11,scxw1
+         write (6, '("sion12,scxw2 =",2(1x,1pe12.4))')sion12,scxw2
+         write (6, '("sion21,scxw1 =",2(1x,1pe12.4))')sion21,scxw1
+         write (6, '("sion22,scxw2 =",2(1x,1pe12.4))')sion22,scxw2
          write (6, '(/// "neutral volume source normalization factor",
      .                   "  f1v,f2v =", 2(1x,1pe12.4))')f1v,f2v
          write (6, '("volume source of neutrals,species 1 and 2:",

@@ -1,13 +1,15 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
+export EXTRA_LIBS = ${LMATH}
+
 ifeq ($(OPT),debug)
    FFLAGS=${FDEBUG}
 else
    FFLAGS=${FOPT}
 endif
 
-EXEC=../bin/xptor
-LLIB=../libs/xptor_lib
+EXEC= xptor
+LLIB=xptor_lib
 
 .SUFFIXES : .o .f 
 
@@ -18,4 +20,4 @@ all:  ptor_driver.o
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:
-	rm -r *.o $(EXEC)
+	rm -r *.o $(EXEC) $(LLIB).a

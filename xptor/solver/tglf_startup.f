@@ -19,26 +19,6 @@
       real*8 qm,rmajm,rminm,rhom
       real*8 dr_loc,b_unit
 !
-      NAMELIST /tglfin/ 
-     >   adiabatic_elec_tg, find_width_tg, new_eikonal_tg, 
-     >   nbasis_max_tg, nbasis_min_tg, nxgrid_tg, ibranch_tg, ns_tg, 
-     >   nmodes_tg, iflux_tg, ky_tg, width_max_tg, width_min_tg, 
-     >   nwidth_tg, park_tg, ghat_tg, gchat_tg, alpha_e_tg, 
-     >   vexb_shear_tg,alpha_p_tg, vpar_shear_tg, alpha_quench_tg,
-     >   igeo_tg, theta_trapped_tg,cnorm_tg, theta0_tg,taus_tg,as_tg,
-     >   rlns_tg,rlts_tg,mass_tg,zs_tg,rmin_tg, rmaj_tg, zmaj_tg,
-     >   use_bisection_tg,vpar_tg,q_tg, xnue_tg, wd_zero_tg, 
-     >   betae_tg, shat_tg, alpha_tg,xwell_tg,kappa_tg,s_kappa_tg,
-     >   delta_tg,s_delta_tg,zeta_tg,s_zeta_tg,drmindx_tg,
-     >   drmajdx_tg,dzmajdx_tg,zeff_tg, debye_tg, use_bper_tg, 
-     >   use_bpar_tg,use_mhd_rule_tg,q_prime_tg,damp_psi_tg,
-     >   damp_sig_tg,p_prime_tg, filter_tg, Linsker_factor_tg, 
-     >   gradB_factor_tg,b_model_tg, ft_model_tg, xnu_factor_tg,
-     >   debye_factor_tg, nky_tg,etg_factor_tg,use_TM_tg,
-     >   kygrid_model_tg,xnu_model_tg, sat_rule_tg,alpha_kx0_tg,
-     >   alpha_kx1_tg,vpar_shear_model_tg,j_surface_tg,
-     >   vpar_model_tg,sign_Bt_tg,shear_ns_tg,shear_ts_tg
-!
 ! read the namelist 
 !
       OPEN (unit=3,file='tglfin',status='old')

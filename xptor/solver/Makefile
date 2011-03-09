@@ -6,7 +6,7 @@ else
    FFLAGS=${FOPT}
 endif
 
-LLIB=../libs/xptor_lib
+LLIB=../driver/xptor_lib
 
 OBJECTS = advancefields.o \
           norm_dv.o \
