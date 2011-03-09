@@ -42,6 +42,9 @@ then
   echo
   echo "         -h" 
   echo "         Version and platform information."
+  echo
+  echo "         -c" 
+  echo "         Clean out current directory."
 
   exit 1
 fi
@@ -50,6 +53,8 @@ fi
 #=============================================================
 # Define variables for flag capture
 #
+RUNBASE='out.tglf.run'
+VERBASE='out.tglf.version'
 SIMROOT=$PWD
 TGLF_DIR=$GACODE_ROOT/tglf
 # Default number of cores
@@ -74,6 +79,8 @@ while [ $# -gt 0 ] ; do
 
   -r) shift ; REGRESS_FLAG=1 ;;
 
+  -c) rm -f out.* ; exit 0 ;;
+
   -h) tglf_version_message ; exit 0 ;;
 
   *) echo "ERROR: incorrect tglf syntax." ; exit 1 ;;
@@ -91,7 +98,7 @@ else
    SIMDIR=$SIMROOT/$LOCDIR
 fi
 
-RUN_FILE=$SIMDIR/run.out
+RUN_FILE=$SIMDIR/$RUNBASE
 
 #============================================================
 # Check for inconsistent flags:
@@ -141,16 +148,9 @@ cd $SIMDIR
 #============================================================
 
 #==========================================================
-# Initialize halt file:
-#
-echo 0 > halt
-#==========================================================
-
-#==========================================================
 # echo number of tasks, then parse INPUT
 #
-echo "[TGLF MPI tasks: $NPROC]" > $RUN_FILE
-echo "[Parsing data in input.tglf]" >> $RUN_FILE
+echo "[Parsing data in input.tglf]" > $RUN_FILE
 
 python $TGLF_DIR/bin/tglf_parse.py >> $RUN_FILE
 if [ $? -eq 1 ] 
@@ -160,24 +160,16 @@ then
 fi
 #==========================================================
 
-#==========================================================
-# Halt here if neo_parse returned a halt.
-#
-if [ `cat halt` = "1" ] 
-then
-   cat $RUN_FILE
-   exit 1
-fi
-#===========================================================
-
 #===========================================================
 # RUN TGLF
 #
 
 # Version stamp:
-echo `gacode_getversion` > VERSION_tag 
-echo $GACODE_PLATFORM >> VERSION_tag
-date >> VERSION_tag
+echo `gacode_getversion` > $VERBASE
+echo $GACODE_PLATFORM >> $VERBASE
+date >> $VERBASE
 
-$TGLF_DIR/src/tglf
+$TGLF_DIR/src/tglf >> $VERBASE
+ 
+cat $RUN_FILE
 #===========================================================

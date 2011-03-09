@@ -4,28 +4,45 @@ program tglf
 
   implicit none
 
-  integer :: ierr
+  integer :: i
+  character (len=4) :: tag(5)=(/'ion1','ion2','ion3','ion4','ion5'/)
+  real :: prec
 
-  include 'mpif.h'
-
-  call MPI_INIT(ierr)
-
-  tglf_dump_flag_in=.true.
 
   call tglf_read_input()
-  !call tglf_dump_local()
   call tglf_run() 
 
-  print 10,'  Elec. particle flux :',tglf_elec_pflux_out
-  print 10,'    Elec. energy flux :',tglf_elec_eflux_out
-  print 10,'Elec. energy flux (L) :',tglf_elec_eflux_low_out
-  print *
-  print 10,'    Ion particle flux :',tglf_ion_pflux_out(1:tglf_ns_in-1)
-  print 10,'      Ion energy flux :',tglf_ion_eflux_out(1:tglf_ns_in-1)
-  print 10,'  Ion energy flux (L) :',tglf_ion_eflux_low_out(1:tglf_ns_in-1)
+  print 20,'Gam/Gam_GB','    Q/Q_GB','Q_low/Q_GB','  Pi/Pi_GB'
+  print 10,'elec',&
+       tglf_elec_pflux_out,&
+       tglf_elec_eflux_out,&
+       tglf_elec_eflux_low_out,&
+       tglf_elec_mflux_out
 
-  call MPI_FINALIZE(ierr)
+  prec = abs(tglf_elec_pflux_out)+&
+       abs(tglf_elec_eflux_out)+&
+       abs(tglf_elec_eflux_low_out)+&
+       abs(tglf_elec_mflux_out)
 
-10 format(a,5(1x,1pe13.6))
+  do i=1,tglf_ns_in-1
+     print 10,tag(i),&
+          tglf_ion_pflux_out(i),&
+          tglf_ion_eflux_out(i),&
+          tglf_ion_eflux_low_out(i),&
+          tglf_ion_mflux_out(i)
+
+     prec = prec+&
+          abs(tglf_ion_pflux_out(i))+&
+          abs(tglf_ion_eflux_out(i))+&
+          abs(tglf_ion_eflux_low_out(i))+&
+          abs(tglf_ion_mflux_out(i))
+  enddo
+
+  open(unit=1,file=trim(tglf_path_in)//'out.tglf.precision')
+  write(1,*) prec
+  close(1)
+
+20 format(t7,a,t19,a,t31,a,t43,a)
+10 format(a,5(1x,1pe11.4))
 
 end program tglf
