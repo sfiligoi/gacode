@@ -15,24 +15,22 @@ c
 c
       real*8 gb_unit
 c
-c... initialize fluxes
-c
-      nefluxm=0.D0
-      nifluxm=0.D0
-      nzfluxm=0.D0
-      tefluxm=0.D0
-      tifluxm=0.D0
-      tzfluxm=0.D0
-      vphifluxm=0.D0
-      vphizfluxm=0.D0
-      vparfluxm=0.D0
-      vparzfluxm=0.D0
-c
       call neoclassical
 c
       if(imodel.eq.81)call glf23_dv
 c
       if(imodel.eq.82)call tglf_dv
+c
+      nefluxm = neflux_neo + neflux_glf
+      nifluxm = niflux_neo + niflux_glf
+      nzfluxm = nzflux_neo + nzflux_glf
+      tefluxm = teflux_neo + teflux_glf
+      tifluxm = tiflux_neo + tiflux_glf
+      tzfluxm = tzflux_neo + tzflux_glf
+      vphifluxm = vphiflux_neo + vphiflux_glf
+      vphizfluxm = vphizflux_neo + vphizflux_glf
+      vparfluxm = vparflux_neo + vparflux_glf
+      vparzfluxm = vparzflux_neo + vparzflux_glf
 c
 c save glf flows
 c
@@ -45,6 +43,21 @@ c save fluxes in MKS units
         stress_par_glf(jm) = vprime(jm,2)*vparflux_glf    !NT-M
       endif
 c
+      if(imodel.eq.81.or.imodel.eq.82)then
+        call adhoc_dv
+c
+        nefluxm = nefluxm + neflux_adhoc
+        nifluxm = nifluxm + niflux_adhoc
+        nzfluxm = nzfluxm + nzflux_adhoc
+        tefluxm = tefluxm + teflux_adhoc
+        tifluxm = tifluxm + tiflux_adhoc
+        tzfluxm = tzfluxm + tzflux_adhoc
+        vphifluxm = vphifluxm + vphiflux_adhoc
+        vphizfluxm = vphizfluxm + vphizflux_adhoc
+        vparfluxm = vparfluxm + vparflux_adhoc
+        vparzfluxm = vparzfluxm + vparzflux_adhoc
+      endif
+c
       if(imodel.eq.2) call ifsppl_dv
 c
       if(imodel.eq.7) call mixshear_dv
@@ -52,33 +65,6 @@ c
       if(imodel.eq.99) call chi1_dv
 c
       if(imodel.eq.-1) call test_dv
-c
-      call adhoc_dv
-c
-      if(imodel.eq.81 .or. imodel.eq.82) then
-        nefluxm = neflux_neo + neflux_glf + neflux_adhoc
-        nifluxm = niflux_neo + niflux_glf + niflux_adhoc
-        nzfluxm = nzflux_neo + nzflux_glf + nzflux_adhoc
-        tefluxm = teflux_neo + teflux_glf + teflux_adhoc
-        tifluxm = tiflux_neo + tiflux_glf + tiflux_adhoc
-        tzfluxm = tzflux_neo + tzflux_glf + tzflux_adhoc
-        vphifluxm = vphiflux_neo + vphiflux_glf + vphiflux_adhoc
-        vphizfluxm = vphizflux_neo + vphizflux_glf + vphizflux_adhoc
-        vparfluxm = vparflux_neo + vparflux_glf + vparflux_adhoc
-        vparzfluxm = vparzflux_neo + vparzflux_glf + vparzflux_adhoc
-      endif
-      if(imodel.eq.2 .or. imodel.eq.7) then
-        nefluxm = nefluxm + neflux_neo + neflux_adhoc
-        nifluxm = nifluxm + niflux_neo + niflux_adhoc
-        nzfluxm = nzfluxm + nzflux_neo + nzflux_adhoc
-        tefluxm = tefluxm + teflux_neo + teflux_adhoc
-        tifluxm = tifluxm + tiflux_neo + tiflux_adhoc
-        tzfluxm = tzfluxm + tzflux_neo + tzflux_adhoc
-        vphifluxm = vphiflux_neo + vphiflux_adhoc
-        vphizfluxm = vphizflux_neo + vphizflux_adhoc
-        vparfluxm = vparflux_neo + vparflux_adhoc
-        vparzfluxm = vparzflux_neo + vparzflux_adhoc
-      endif
 c
       return
       END 
@@ -132,16 +118,16 @@ c
 c
 c... compute fluxes, power flows
 c
-      tefluxm = (1.6022D-3)*tem*nem*zpmte*chietem/arho_exp
-      tifluxm = (1.6022D-3)*tim*nim*zpmti*chiitim/arho_exp
-c      powem = kevdsecpmw*tem*nem*1.D19/arho_exp*gradrhosq_exp(jm)*
-c     &        sfactor(jm)*(chietem*zpmte)
-c     &        +xconv*1.5D0*tem*flow_exp(jm)
-c      powim = kevdsecpmw*tim*nim*1.D19/arho_exp*gradrhosq_exp(jm)*
-c     &        sfactor(jm)*(chiitim*zpmti)
-c     &        +xconv*1.5D0*tim*flow_exp(jm)
-c      powem = 1.6022D-3*vprime(jm,2)*tefluxm + pow_ei_cor_m(jm)
-c      powim = 1.6022D-3*vprime(jm,2)*tifluxm - pow_ei_cor_m(jm)
+      tefluxm = tem*nem*zpmte*chietem/arho_exp
+      tifluxm = tim*nim*zpmti*chiitim/arho_exp
+      powem = kevdsecpmw*tem*nem*1.D19/arho_exp*gradrhosq_exp(jm)*
+     &        sfactor(jm)*(chietem*zpmte)
+     &        +xconv*1.5D0*tem*flow_exp(jm)
+      powim = kevdsecpmw*tim*nim*1.D19/arho_exp*gradrhosq_exp(jm)*
+     &        sfactor(jm)*(chiitim*zpmti)
+     &        +xconv*1.5D0*tim*flow_exp(jm)
+      powem = 1.6022D-3*vprime(jm,2)*tefluxm + pow_ei_cor_m(jm)
+      powim = 1.6022D-3*vprime(jm,2)*tifluxm - pow_ei_cor_m(jm)
 c
       return
       END 
@@ -210,16 +196,16 @@ c
 c
 c... compute fluxes, power flows
 c
-      tefluxm = (1.6022D-3)*tem*nem*zpmte*chietem/arho_exp
-      tifluxm = (1.6022D-3)*tim*nim*zpmti*chiitim/arho_exp
-c      powem = kevdsecpmw*tem*nem*1.D19/arho_exp*gradrhosq_exp(jm)*
-c     &        sfactor(jm)*(chietem*zpmte)
-c     &        +xconv*1.5D0*tem*flow_exp(jm)
-c      powim = kevdsecpmw*tim*nim*1.D19/arho_exp*gradrhosq_exp(jm)*
-c     &        sfactor(jm)*(chiitim*zpmti)
-c     &        +xconv*1.5D0*tim*flow_exp(jm)
-c      powem = 1.6022D-3*vprime(jm,2)*tefluxm + pow_ei_cor_m(jm)
-c      powim = 1.6022D-3*vprime(jm,2)*tifluxm - pow_ei_cor_m(jm)
+      tefluxm = tem*nem*zpmte*chietem/arho_exp
+      tifluxm = tim*nim*zpmti*chiitim/arho_exp
+      powem = kevdsecpmw*tem*nem*1.D19/arho_exp*gradrhosq_exp(jm)*
+     &        sfactor(jm)*(chietem*zpmte)
+     &        +xconv*1.5D0*tem*flow_exp(jm)
+      powim = kevdsecpmw*tim*nim*1.D19/arho_exp*gradrhosq_exp(jm)*
+     &        sfactor(jm)*(chiitim*zpmti)
+     &        +xconv*1.5D0*tim*flow_exp(jm)
+      powem = 1.6022D-3*vprime(jm,2)*tefluxm + pow_ei_cor_m(jm)
+      powim = 1.6022D-3*vprime(jm,2)*tifluxm - pow_ei_cor_m(jm)
 c
       return
       END 
@@ -328,10 +314,6 @@ c   local gyrobohm unit of diffusion
       endif 
        betae_m(jm) = 400.D0*nem*tem/(1.D5*bt_exp**2)
        betai_m(jm) = 400.D0*nim*tim/(1.D5*bt_exp**2)
-       betat_m(jm) = 4.03D-3*(nem*tem + nim*tim +
-     >       (nfst_exp(jm+1)+nfst_exp(jm)/2)*tim/(bt_exp**2))
-       betaf_m(jm) = 4.03D-3*(
-     >       (nfst_exp(jm+1)+nfst_exp(jm)/2)*tim/(bt_exp**2))
 
 crew    gks collisionality (xnu/w_star_i)*(ky*rho_i)
        vnewk3x=
@@ -846,7 +828,7 @@ c use large ExB rotation form
       ctorm = (c_tor(jm+1)+c_tor(jm))/2.0
       grad_c_tor=(c_tor(jm+1)-c_tor(jm))/dr(jm,2)
       vphiflux_neo=(-1.6726D-8)*amassgas_exp*nim*etaphim
-     >     *(ctorm*gradvexbm+grad_c_tor*vexbm)
+     >     *cv*(ctorm*gradvexbm+grad_c_tor*vexbm)
       vparflux_neo = vphiflux_neo*c_per(jm)/c_tor(jm)
       niflux_neo = neflux_neo
       nzflux_neo = 0.0
@@ -1004,10 +986,6 @@ c   local gyrobohm unit of diffusion
 c   local beta
       betae_m(jm) = 4.03D-3*nem*tem/(b_unit**2)
       betai_m(jm) = 4.03D-3*nim*tim/(b_unit**2)
-      betat_m(jm) = 4.03D-3*(nem*tem + nim*tim +
-     >       (nfst_exp(jm+1)+nfst_exp(jm)/2)*tim/(bt_exp**2))
-      betaf_m(jm) = 4.03D-3*(
-     >       (nfst_exp(jm+1)+nfst_exp(jm)/2)*tim/(bt_exp**2))
       if(iparam_pt(12).eq.1)then
         betae_m(jm) = 4.03D-3*ne_exp(jm)*te_exp(jm)/(b_unit**2)
       endif
@@ -1210,8 +1188,8 @@ cgms      if(igeo_tg.ne.0)gb_unit = gb_unit*drhodr(jm)
      >  *nem*gb_unit*csdam*a_unit_exp*get_stress_tor(2,1)
      >  *amassgas_exp*a_unit_exp
       if(ns_tg.eq.3)then
-        nzflux_glf = nem*gb_unit*get_particle_flux(3,1)
-        tzflux_glf = nem*tem*gb_unit*get_energy_flux(3,1)
+        nzflux_glf = 1.6022D-3*nem*gb_unit*get_particle_flux(3,1)
+        tzflux_glf = 1.6022D-3*nem*tem*gb_unit*get_energy_flux(3,1)
         vphizflux_glf = (1.6726D-8)
      >  *nem*gb_unit*csdam*a_unit_exp*get_stress_tor(3,1)
      >  *amassgas_exp*a_unit_exp
@@ -1367,14 +1345,14 @@ c add in artificial diffusion terms
 c
       if(adiff_dv.gt.0.0)then
        art_diff=adiff_dv*cgyrobohm_m(jm)
-       diffnem = diffnem + 
-     > art_diff*(dr(jm,2)*DABS(zpmne)/arho_exp)**2
-       chietem = chietem +
-     > art_diff*DABS(dr(jm,2)*zpmte/arho_exp)**2
-       chiitim = chiitim +
-     > art_diff*DABS(dr(jm,2)*zpmti/arho_exp)**2
-       etaphim = etaphim +
-     > 1.D-2*art_diff*DABS(gamma_p_m(jm)/30.0)**2
+       diffnem = diffnem 
+     > + art_diff*(dr(jm,2)*DABS(zpmne)/arho_exp)**2
+       chietem = chietem 
+     > + art_diff*DABS(dr(jm,2)*zpmte/arho_exp)**2
+       chiitim = chiitim 
+     > + art_diff*DABS(dr(jm,2)*zpmti/arho_exp)**2
+       etaphim = etaphim 
+     > + 1.D-2*art_diff*DABS(gamma_p_m(jm)/30.0)**2
       endif
 c
 c sawtooth region enhanced neoclassical model
@@ -1398,7 +1376,7 @@ c
         tiflux_adhoc = -1.6022D-3*nim*chiitim*gradtim
         ctorm = (c_tor(jm+1)+c_tor(jm))/2.0
         grad_c_tor=(c_tor(jm+1)-c_tor(jm))/dr(jm,2)
-        gradvphim =ctorm*gradvexbm+grad_c_tor*vexbm
+        gradvphim =cv*(ctorm*gradvexbm+grad_c_tor*vexbm)
         vphiflux_adhoc = -1.6726D-8*amassgas_exp*nim*
      >                    rmajor_exp*etaphim*gradvphim
         vparflux_adhoc = vphiflux_adhoc*c_per(jm)/c_tor(jm)

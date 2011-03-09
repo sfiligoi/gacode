@@ -62,7 +62,7 @@ c
         if(itport_pt(i).ne.0)then
           j=j+1
           smult(j)=s0_pt(i)
-c          if (i_proc .eq. 0)write(unit,*)smult(j)
+          if (i_proc .eq. 0)write(unit,*)smult(j)
         endif
         do k=1,mxgrid
           s(i,k) = 0.D0
@@ -378,63 +378,6 @@ c advance time and save profiles
            norm_dt=normDT
            write(unit,*)"ntime = ",ntime_t,"time = ",time
          endif
-c
-c... test stiffness
-c
-        if(xparam_pt(29).gt.0 .or. xparam_pt(30).gt.0) then
-        ipert_gf=0
-        if(i_proc.eq.0) then
-          write(*,*) 'xnu_model = ',xnu_model_tg
-          write(*,*) 'igeo = ',igeo_tg
-          write(*,*) 'sat_rule = ',sat_rule_tg
-          write(*,*) 'new_eikonal = ',new_eikonal_tg
-          write(*,*) 'nky = ',nky_tg
-          write(*,*) 'ipert_gf = ',ipert_gf
-          write(*,*) 'ineo = ',ineo
-          write(*,*) 'perturbed gradte = ',xparam_pt(29)
-          write(*,*) 'perturbed gradti = ',xparam_pt(30)
-          write(*,'(a2,4x,a5,5x,a6,3x,a7,3x,a9,2x,a5,4x,a7,3x,a9)') 
-     >         'k','vprime','powim','tifluxm','powi-comp',
-     >         'powem','tefluxm','powe-comp'
-        endif
-        do k=1,ngrid-1
-          jm=k
-          nem = (ne_m(k+1)+ne_m(k))/2.D0
-c          nim = (ni_m(k+1)+ni_m(k))/2.D0
-c          nzm = (nz_m(k+1)+nz_m(k))/2.D0
-          tim = (ti_m(k+1)+ti_m(k))/2.D0
-          tem = (te_m(k+1)+te_m(k))/2.D0
-          fim = (fi_m(k+1)+fi_m(k))/2.D0
-          fzm = (fz_m(k+1)+fz_m(k))/2.D0
-          nim = fim*nem
-          nzm = fzm*nem
-          vexbm= (vexb_m(k+1)+vexb_m(k))/2.D0
-          vpolm= (vpol_m(k+1)+vpol_m(k))/2.D0
-          gradnem = (ne_m(k+1)-ne_m(k))/dr(k,2)
-c          gradnim = (ni_m(k+1)-ni_m(k))/dr(k,2)
-c          gradnzm = (nz_m(k+1)-nz_m(k))/dr(k,2)
-          gradtem = (te_m(k+1)-te_m(k))/dr(k,2)
-          gradtim = (ti_m(k+1)-ti_m(k))/dr(k,2)
-          gradtem = gradtem+xparam_pt(29)*gradtem
-          gradtim = gradtim+xparam_pt(30)*gradtim
-          gradvexbm = (vexb_m(k+1)-vexb_m(k))/dr(k,2)
-          gradvpolm = (vpol_m(k+1)-vpol_m(k))/dr(k,2)
-          gradfim = (fi_m(k+1)-fi_m(k))/dr(k,2)
-          gradfzm = (fz_m(k+1)-fz_m(k))/dr(k,2)
-          gradnim = fim*gradnem + nem*gradfim
-          gradnzm = fzm*gradnem + nem*gradfzm
-          call glf2d_dv
-          if (i_proc .eq. 0)then
-            write(*,'(i2,8f10.4)') k,vprime(k,2), powi_m(k), tifluxm,
-     >               vprime(k,2)*tifluxm*1.6022e-3-pow_ei_cor_m(k),
-     >               powe_m(k), tefluxm,
-     >               vprime(k,2)*tefluxm*1.6022e-3+pow_ei_cor_m(k)
-          endif
-        enddo
-        endif
-c
-c... end test stiffness
-c
 c         if(time.gt.endtime_pt)return
       istep=0
       iendstep=0

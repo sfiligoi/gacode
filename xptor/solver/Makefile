@@ -10,7 +10,6 @@ LLIB=../driver/xptor_lib
 
 OBJECTS = advancefields.o \
           norm_dv.o \
-          perturb_dv.o \
           ptor_dv.o \
           ptorinit_dv.o \
           trcoef_dv.o \

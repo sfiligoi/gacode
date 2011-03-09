@@ -27,8 +27,6 @@ c
       integer nsum
       integer MPI_status(MPI_STATUS_SIZE)
       real*8 dne,dte,dti,dvexb,dvpol,dx,dvmin
-      real*8 drr,dvoldr_p,dvoldr_m,voltot
-      real*8 avebeta_m,avebetae_m,avebetai_m,avebetaf_m
       real*8 thetam,qm,rmajm,rminm,rhom
       real*8 tia,nia,fia,tea,nea
       real*8 tiw,niw,tew,new,nzw,testeta
@@ -54,8 +52,6 @@ c
       real*8 chiegb_sum(0:mxgrd-1), chiigb_sum(0:mxgrd-1)
       real*8 chiegb_e_sum(0:mxgrd-1),cgb_sum(0:mxgrd-1)
       real*8 chiineo_sum(0:mxgrd-1),etagb_phi_sum(0:mxgrd-1)
-      real*8 betat_sum(0:mxgrd-1), betae_sum(0:mxgrd-1)
-      real*8 betai_sum(0:mxgrd-1), betaf_sum(0:mxgrd-1)
       real*8 kpol_m_sum(0:mxgrd-1),nu_pol_m_sum(0:mxgrd-1)
       real*8 flow_neo_sum(0:mxgrd-1)
       real*8 powe_neo_sum(0:mxgrd-1)
@@ -78,7 +74,7 @@ c
       real*8 glf_flux(0:10,mxflds,mxgrd),dflux(0:10,mxflds,mxgrd)
 c
       x13 = xparam_pt(13)
-      cv = 1000.D0
+      cv = 1000.0
       dvmin=delt_v
 c      ca = 2.D0/3.D0
       ca = 1.D0
@@ -145,13 +141,6 @@ c      ca = 2.D0/3.D0
        etagb_par_m(k)=0.D0
        etagb_per_m(k)=0.D0
        exchgb_m(k)=0.D0
-       betat_m(k)=0.D0
-       betae_m(k)=0.D0
-       betai_m(k)=0.D0
-       betat_sum(k)=0.D0
-       betai_sum(k)=0.D0
-       betae_sum(k)=0.D0
-       betaf_sum(k)=0.D0
        flow_neo(k)=0.0
        powe_neo(k)=0.0
        powi_neo(k)=0.0
@@ -1548,57 +1537,6 @@ c
         endif
        enddo 
       endif
-c
-c
-c... volume average beta's
-c
-      call MPI_REDUCE(betat_m,betat_sum,mxgrd,
-     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
-      call MPI_BCAST(betat_sum,mxgrd,MPI_DOUBLE_PRECISION
-     >  ,0, MPI_COMM_WORLD, i_err)
-      call MPI_REDUCE(betae_m,betae_sum,mxgrd,
-     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
-      call MPI_BCAST(betae_sum,mxgrd,MPI_DOUBLE_PRECISION
-     >  ,0, MPI_COMM_WORLD, i_err)
-      call MPI_REDUCE(betai_m,betai_sum,mxgrd,
-     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
-      call MPI_BCAST(betai_sum,mxgrd,MPI_DOUBLE_PRECISION
-     >  ,0, MPI_COMM_WORLD, i_err)
-      call MPI_REDUCE(betaf_m,betaf_sum,mxgrd,
-     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
-      call MPI_BCAST(betaf_sum,mxgrd,MPI_DOUBLE_PRECISION
-     >  ,0, MPI_COMM_WORLD, i_err)
-      voltot=0.D0
-      avebeta_m=0.D0
-      avebetae_m=0.D0
-      avebetai_m=0.D0
-      avebetaf_m=0.D0
-      do k=1,ngrid-1
-        betat_m(k)=betat_sum(k)
-        betae_m(k)=betae_sum(k)
-        betai_m(k)=betai_sum(k)
-        betaf_m(k)=betaf_sum(k)
-        drr=(rho(k)-rho(k-1))*arho_exp
-        dvoldr_p=sfactor(k)
-        dvoldr_m=sfactor(k-1)
-        voltot=voltot+0.5D0*(dvoldr_p+dvoldr_m)*drr
-        avebeta_m=avebeta_m+0.5D0*(dvoldr_p*betat_m(k)+
-     >          dvoldr_m*betat_m(k-1))*drr
-        avebetae_m=avebetae_m+0.5D0*(dvoldr_p*betae_m(k)+
-     >          dvoldr_m*betae_m(k-1))*drr
-        avebetai_m=avebetai_m+0.5D0*(dvoldr_p*betai_m(k)+
-     >          dvoldr_m*betai_m(k-1))*drr
-        avebetaf_m=avebetaf_m+0.5D0*(dvoldr_p*betaf_m(k)+
-     >          dvoldr_m*betaf_m(k-1))*drr
-c        write(*,*) k, rho(k), betat_m(k)
-c         write(*,*) k, rho(k), powi_m(k), 'powi_m'
-      enddo
-      volavebetat_m=avebeta_m/voltot
-      volavebetae_m=avebetae_m/voltot
-      volavebetai_m=avebetai_m/voltot
-      volavebetaf_m=avebetaf_m/voltot
-c      write(*,*) 'volavg-betat = ',volavebetat_m,
-c     >           volavebetae_m,volavebetai_m
 c
  155  format('trcoef',i2,2x,i2,2x,0p1f9.6,1p6e14.6)
 c

@@ -23,7 +23,7 @@ LMATH = /opt/fftw/2.1.5/cnos/lib/libdrfftw.a \
 
 # OPTIONAL: netCDF (for gyro2gkv)
 
-NETCDF = /usr/common/usg/netcdf/default/lib/libnetcdf.a
+#NETCDF = /usr/common/usg/netcdf/default/lib/libnetcdf.a
 NETCDF_INC = /usr/common/usg/netcdf/default/include
 
 # Archive 
