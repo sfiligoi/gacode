@@ -7,6 +7,7 @@
 
 subroutine catch_halt_signal
 
+  use mpi
   use gyro_globals
 
   !--------------------
@@ -15,8 +16,6 @@ subroutine catch_halt_signal
   integer :: signal
   logical :: lfe
   !--------------------
-
-  include 'mpif.h'
 
   !------------------------------------------------
   ! Halt signal
