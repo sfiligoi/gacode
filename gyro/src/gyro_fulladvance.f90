@@ -87,7 +87,7 @@ subroutine gyro_fulladvance
   call proc_time(CPU_diag_in)
   CPU_ts = CPU_ts + (CPU_diag_in - CPU_C_out)
 
-  call get_error
+  call gyro_timestep_error
 
   !------------------------------------------------------
   ! MANAGE diagnostics

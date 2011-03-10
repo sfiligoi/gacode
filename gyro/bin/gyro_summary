@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 #
-#-------------------------------------------------
+#-------------------------------------------------------------
 # SCRIPT:
 #  gyro_summary
 #
 # FUNCTION:
-#  Generate compact postscript summary of various
-#  vugyro plots.
-#--------------------------------------------------
+#  Generate compact postscript summary of various vugyro plots.
+#---------------------------------------------------------------
 
 import sys
 import os
@@ -33,7 +32,7 @@ if n == 1:
 # and list of included files to local directory:
 
 os.system("rm -f summary.ps summary.pdf")
-os.system("cp $GYRO_DIR/tools/summary/format.tex sum.tex")
+os.system("cp $GACODE_ROOT/gyro/tools/summary/format.tex sum.tex")
 
 # See if we need to include everything, or just what is defined 
 # in the include file
@@ -41,8 +40,8 @@ if sys.argv[1] == '-a':
    os.system("ls -1 *.ps > list")
    os.system("ls -1 *.eps >> list")
 else:
-   os.system("cp $GYRO_DIR/tools/summary/missing.ps .")
-   os.system("cat $GYRO_DIR/tools/summary/include > list")
+   os.system("cp $GACODE_ROOT/gyro/tools/summary/missing.ps .")
+   os.system("cat $GACODE_ROOT/gyro/tools/summary/include > list")
 
 # Generate customized header and footer
 
@@ -52,7 +51,7 @@ line = f.readlines()
 f.close()
 os.system("rm sim_label")
 
-f = open('VERSION_tag','r')
+f = open('out.gyro.version','r')
 tag = f.readlines()
 f.close()
 

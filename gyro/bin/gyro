@@ -81,6 +81,9 @@ fi
 #=============================================================
 # Define variables for flag capture
 #
+RUNBASE='out.gyro.run'
+VERBASE='out.gyro.version'
+#
 # Default simulation root and gyro directory
 SIMROOT=$PWD
 GYRO_DIR=$GACODE_ROOT/gyro
@@ -120,7 +123,7 @@ while [ $# -gt 0 ] ; do
 
   -n) shift ; NPROC=$1 ;;
 
-  -h) gyro_version_message ; exit 0 ;;
+  -h) gacode_printversion GYRO ; exit 0 ;;
 
   -K) shift ; KILL_STATUS=1 ; LOCDIR=$1 ;;
 
@@ -145,8 +148,6 @@ then
    cd .. ; SIMROOT=$PWD
 fi
 SIMDIR=$SIMROOT/$LOCDIR
-
-RUN_FILE=$SIMDIR/run.out
 
 #=============================================================
 case "$KILL_STATUS" in
@@ -219,7 +220,8 @@ cd $SIMDIR
 if [ $SCOPY_FLAG -eq 1 ]
 then
    list="
-    run.out
+    $RUNBASE
+    $VERBASE
     t.out
     diff.out
     diff_i.out
@@ -238,7 +240,6 @@ then
     phase_space.out
     profile_vugyro.out
     timing.out
-    VERSION_tag
     zerobar.out"
 
    # Funny syntax below removes trailing /
@@ -280,13 +281,13 @@ echo 0 > halt
 #==========================================================
 # echo number of tasks, then parse INPUT
 #
-echo "[GYRO MPI tasks: $NPROC]" > $RUN_FILE
-echo "[Parsing data in input.gyro]" >> $RUN_FILE
+echo "[GYRO MPI tasks: $NPROC]" > $RUNBASE
+echo "[Parsing data in input.gyro]" >> $RUNBASE
 
-python $GYRO_DIR/bin/gyro_parse.py >> $RUN_FILE
+python $GYRO_DIR/bin/gyro_parse.py >> $RUNBASE
 if [ $? -eq 1 ] 
 then
-   cat $RUN_FILE
+   cat $RUNBASE
    exit 1
 fi
 #==========================================================
@@ -304,10 +305,10 @@ then
       echo "NOTE: not parsing input.profiles on restart."
    else
       # We are not restarting; parse input.profiles
-      python $GACODE_ROOT/shared/bin/profile_parse.py input.profiles >> $RUN_FILE
+      python $GACODE_ROOT/shared/bin/profile_parse.py input.profiles >> $RUNBASE
       if [ $? -eq 1 ]
       then
-         cat $RUN_FILE
+         cat $RUNBASE
          exit 1
       fi
    fi
@@ -323,12 +324,12 @@ then
 
    #==========================================================
    # Version stamp:  
-   echo `gacode_getversion` > VERSION_tag 
-   echo $GACODE_PLATFORM >> VERSION_tag
-   date >> VERSION_tag
+   echo `gacode_getversion` > $VERBASE
+   echo $GACODE_PLATFORM >> $VERBASE
+   date >> $VERBASE
    #==========================================================
 
-   gyro_version_message 
+   gacode_printversion GYRO 
    echo "0" > "$SIMDIR/gyrotest_flag"
 fi
 
@@ -349,7 +350,7 @@ fi
 
 if [ $TEST_FLAG -eq 1 ] 
 then
-   cat $RUN_FILE
+   cat $RUNBASE
 fi
 #===========================================================
 

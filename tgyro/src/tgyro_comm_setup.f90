@@ -86,9 +86,21 @@ subroutine tgyro_comm_setup
      ! Linear stability 
      !-----------------------------
 
-     ! The number of workers is the number of search frequencies.
+     !! Currently this selection method is a kludge and should be fixed.
 
-     n_worker = tgyro_stab_nsearch
+     if (paths(1) == "TGLF/") then
+
+        ! TGLF: number of workers is one
+
+        n_worker = 1
+
+     else
+
+        ! GYRO: number of workers is the number of search frequencies.
+
+        n_worker = tgyro_stab_nsearch
+
+     endif
 
   case (3)
 

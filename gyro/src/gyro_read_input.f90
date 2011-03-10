@@ -278,12 +278,11 @@ end subroutine gyro_read_input
 !
 subroutine readbc_int(p)
 
+  use mpi
   use gyro_globals
 
   implicit none
   integer, intent(inout) :: p
-
-  include 'mpif.h'
 
   if (i_proc == 0) read(1,*) p
 
@@ -299,13 +298,12 @@ end subroutine readbc_int
 ! (2) read and broadcast a real:
 !
 subroutine readbc_real(x)
-
+  
+  use mpi
   use gyro_globals
 
   implicit none
   real, intent(inout) :: x
-
-  include 'mpif.h'
 
   if (i_proc == 0) read(1,*) x
 

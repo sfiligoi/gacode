@@ -11,6 +11,7 @@
 
 subroutine gyro_do(skipinit)
 
+  use mpi
   use gyro_globals
   use gyro_pointers
   use math_constants
@@ -20,8 +21,6 @@ subroutine gyro_do(skipinit)
   !
   integer, optional :: skipinit
   !--------------------------------------
-
-  include 'mpif.h'
 
   !-------------------------------------
   ! Handling of optional arguments
@@ -151,11 +150,11 @@ subroutine gyro_do(skipinit)
   !
   if (gyrotest_flag == 0) then
 
-     call make_pointer_dimensions
+     call gyro_set_pointer_dim
      call gyro_alloc_distrib(1)
 
      ! Make pointers for use with parallelization scheme.
-     call make_pointers
+     call gyro_set_pointers
 
      ! Compute drift and diamagnetic frequency coefficients
      ! for GKE solution.
@@ -173,7 +172,7 @@ subroutine gyro_do(skipinit)
      !
      ! Precomputation of arrays which depend on blending 
      ! coefficients.  These are used in the Maxwell solves.
-     call make_blend_arrays
+     call gyro_set_blend_arrays
 
      call proc_time(CPU_3)
      if (electron_method == 2) then
