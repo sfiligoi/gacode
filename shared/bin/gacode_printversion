@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # SCRIPT:
-#  tgyro_version_message
+#  gacode_printversion
 #
 # FUNCTION:
 #  Echo version message.
@@ -10,5 +10,5 @@
 VERSION=`gacode_getversion`
 
 echo "=========================================================="
-echo "TGYRO" `echo $VERSION` `echo $GACODE_PLATFORM` `uname -s` `uname -m`
+echo "$1" `echo $VERSION` `echo $GACODE_PLATFORM` `uname -s` `uname -m`
 echo "=========================================================="

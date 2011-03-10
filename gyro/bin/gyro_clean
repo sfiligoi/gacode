@@ -15,7 +15,7 @@ then
    rm -f *.out
    rm -f RE*
    rm -f halt
-   rm -f VERSION_tag
+   rm -f out.*
    rm -f *ps
    rm -f *.err
    rm -f *.src
