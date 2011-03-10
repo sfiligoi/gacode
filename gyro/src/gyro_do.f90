@@ -363,7 +363,9 @@ subroutine gyro_do(skipinit)
      h_length_loc = n_kinetic * n_nek_loc_true * n_x * n_stack
      h_width_loc = h_length / gkeigen_proc_mult
      h_length_block = h_length_loc / gkeigen_proc_mult
+     h_length_block_t = h_width_loc / n_proc
      seq_length = h_length_block * h_width_loc
+     seq_length_t = h_length_block_t * h_length_loc
 
      call GKEIGEN_do                                       
 

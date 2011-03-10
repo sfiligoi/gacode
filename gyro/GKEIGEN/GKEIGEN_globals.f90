@@ -13,13 +13,13 @@ module GKEIGEN_globals
   !
   ! in GKEIGEN_matrix_read:
   !
-  character(len=12), parameter :: &
+  character(len=14), parameter :: &
        file_eigen_restart = &
        "GKEIGEN_matrix"
   !
   ! in GKEIGEN_do:
   !
-  character(len=14), parameter :: &
+  character(len=16), parameter :: &
        file_eigen_freq = &
        "GKEIGEN_freq.out"
   !----------------------------------
@@ -74,6 +74,9 @@ module GKEIGEN_globals
   !
   ! Processors in GYRO_COMM_WORLD
   integer :: i_proc_e
+  integer :: i_proc_e0
+  integer :: i_proc_e1
+  integer :: i_proc_e2
   !
   ! Parallel instances of GYRO_COMM_WORLD
   integer :: gkeigen_j_set_e0

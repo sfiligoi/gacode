@@ -165,7 +165,9 @@ module gyro_globals
   integer :: h_length_loc
   integer :: h_width_loc 
   integer :: h_length_block
+  integer :: h_length_block_t
   integer :: seq_length  ! Number of elements in passed matrix block
+  integer :: seq_length_t
   !
   ! Absolute tolerance in eigenvector solution
   real :: gkeigen_tol       
@@ -174,6 +176,7 @@ module gyro_globals
   integer :: gkeigen_j_set
   integer :: j_proc_tot
   integer :: n_proc_tot
+  integer :: gkeigen_transpose_flag
   !
   !-----------------------------------------------------------------------------------
 
