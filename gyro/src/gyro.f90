@@ -7,13 +7,12 @@
 
 program gyro
 
+  use mpi
   use gyro_globals
 
   implicit none
 
   integer :: ierr
-
-  include 'mpif.h'
 
   interface
      subroutine gyro_do(skipinit)

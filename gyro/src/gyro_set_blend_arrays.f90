@@ -1,11 +1,11 @@
 !-----------------------------------------------------
-! make_blend_arrays.f90 [caller BigScience]
+! gyro_set_blend_arrays.f90 [caller BigScience]
 !
 ! PURPOSE:
 !  Precomputed arrays required for field-solve.
 !-----------------------------------------------------
 
-subroutine make_blend_arrays
+subroutine gyro_set_blend_arrays
 
   use gyro_globals
   use gyro_pointers
@@ -263,7 +263,7 @@ subroutine make_blend_arrays
   !---------------------------------------------------------------  
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[make_blend_arrays done]'
+     print *,'[gyro_set_blend_arrays done]'
   endif
 
-end subroutine make_blend_arrays
+end subroutine gyro_set_blend_arrays
