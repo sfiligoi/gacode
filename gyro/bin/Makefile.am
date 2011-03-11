@@ -27,7 +27,6 @@ dist_bin_SCRIPTS= \
   gyro_kill_do \
   gyro_reg \
   gyro_sim_warn \
-  gyro_version_message \
   gyro_bat \
   gyro_loc \
   gyro_reg_do \

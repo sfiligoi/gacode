@@ -8,21 +8,15 @@
 ## $Id: Makefile.am 88 2010-04-12 18:43:49Z srinath $
 
 ## ############################################################
-
-dist_bin_SCRIPTS = \
-   HELP \
-   tglf \
-   tglf_parse.py \
-   tglf_sim_warn \
-   tglf_version_message
-
+MAINTAINERCLEANFILES    = Makefile.in 
+dist_noinst_DATA= \
+   tglf_dict.py
 all-local:
-	for i in $(dist_bin_SCRIPTS) ; \
+	for i in $(dist_noinst_DATA) ; \
 	do \
-		cd $(top_builddir)/tglf/bin/ && if test ! -f $${i}; then ln -s $(top_srcdir)/tglf/bin/$${i} $${i} ;fi; \
+		cd $(top_builddir)/tglf/python/ && if test ! -f $${i}; then ln -s $(top_srcdir)/tglf/python/$${i} $${i} ;fi; \
 	done
 
 
-MAINTAINERCLEANFILES    = Makefile.in
-
+CLEANFILES = tglf*
 
