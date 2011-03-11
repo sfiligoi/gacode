@@ -18,6 +18,7 @@ noinst_LTLIBRARIES = libgacodegkeigen.la
 libgacodegkeigen_la_SOURCES = \
   GKEIGEN_globals.f90 \
   GKEIGEN_do.stub.f90 \
+  GKEIGEN_split_comm.f90 \
   GKEIGEN_matrix_read.f90 \
   GKEIGEN_matrix_write.f90 \
   GKEIGEN_catch_error.f90

@@ -226,6 +226,8 @@ AC_CONFIG_FILES([Makefile
     neo/bin/Makefile
     neo/nclass/Makefile
     neo/src/Makefile
+    tglf/Makefile
+    tglf/bin/Makefile
 ])
 
 #    neo/python/Makefile

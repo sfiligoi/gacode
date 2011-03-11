@@ -176,13 +176,10 @@ libgacodegyro_SRC_la_SOURCES = \
 	timestep_explicit.f90 \
   gyro_maxwell_private.f90 \
 	make_maxwell_matrix.f90 \
-	make_blend_arrays.f90 \
 	make_theta_grid.f90 \
 	make_geometry_arrays.f90 \
 	make_gyro.f90 \
 	make_phase_space.f90 \
-	make_pointers.f90 \
-	make_pointer_dimensions.f90 \
 	make_initial_h.f90 \
 	make_implicit_advect.f90 \
 	make_electron_current.f90 \
@@ -212,7 +209,6 @@ libgacodegyro_SRC_la_SOURCES = \
 	get_kinetic_advance.f90 \
 	get_delta_he.f90 \
 	get_he.f90 \
-	get_error.f90 \
 	get_phi_squared.f90 \
 	get_g_squared.f90 \
 	$(theDoNlfastP) \
@@ -250,11 +246,16 @@ libgacodegyro_SRC_la_SOURCES = \
   gyro_kxky_spectrum.f90 \
   gyro_lambda_grid.f90 \
   gyro_mpi_grid.f90 \
+  gyro_set_pointers.f90 \
+  gyro_timestep_error.f90 \
+  gyro_set_pointer_dim.f90 \
+  gyro_set_blend_arrays.f90 \
 	$(HDF5IO_FILES) \
 	$(theCleanupMumps) \
   gyro_gkeigen_do.stub.f90 \
   gyro_init.f90 \
 	gyro_run.f90 \
+  GKEIGEN_split_comm.f90 \
 	gyro_do.f90  
 
 
