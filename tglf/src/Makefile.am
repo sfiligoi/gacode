@@ -18,21 +18,17 @@ libdir = $(prefix)/lib/$(FC_LIBSUBDIR)
 lib_LTLIBRARIES = libgacodetglf.la
 libgacodetglf_la_SOURCES = \
   tglf_modules.f90 \
+  tglf_LS.f90 \
+  tglf_geometry.f90 \
+  tglf_matrix.f90 \
+  tglf_max.f90 \
+  tglf_pkg.f90 \
   tglf_interface.f90 \
   tglf_init.f90 \
-  tglf_pkg.f90 \
-  tglf_TM_driver.f90 \
-  tglf_geometry.f90 \
   tglf_run.f90 \
-  tglf_LS.f90 \
-  tglf_driver.f90 \
-  tglf_matrix.f90 \
-  tglf_setup_geometry.f90 \
-  tglf_TM.f90 \
-  tglf_dump_input.f90 \
-  tglf_inout.f90 \
-  tglf_max.f90 \
-  tglf_read_input.f90
+  tglf_read_input.f90 \
+  tglf_dump_input.f90
+
 
 if HAVE_MPI
 tglf_SOURCES 	= tglf.f90
