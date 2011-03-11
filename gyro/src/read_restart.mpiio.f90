@@ -8,6 +8,7 @@
 
 subroutine read_restart
 
+  use mpi
   use gyro_globals
   use gyro_pointers
 
@@ -19,8 +20,6 @@ subroutine read_restart
   integer :: n_proc_old
   integer :: io
   !---------------------------------------------------
-  !
-  include 'mpif.h'
   !
   ! Required for MPI-IO: 
   !

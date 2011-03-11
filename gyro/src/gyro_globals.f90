@@ -38,7 +38,21 @@ module gyro_globals
   !------------------------------------------------------
   ! Run file:
   !
-  character(len=80) :: runfile = 'run.out'
+  character(len=80), parameter :: baserunfile = 'out.gyro.run'
+  character(len=80) :: runfile = baserunfile
+  !---------------------------------------------------------
+
+  !---------------------------------------------------------
+  ! Precision file
+  !
+  character (len=80), parameter :: baseprecfile ='out.gyro.prec'
+  character (len=80) :: precfile = baseprecfile
+  !---------------------------------------------------------
+
+  !---------------------------------------------------------
+  ! Path to INPUT, read in the get_inputpath subroutine
+  !
+  character(len=80) :: path
   !---------------------------------------------------------
 
   !---------------------------------------------------------
@@ -1006,17 +1020,5 @@ module gyro_globals
   integer, dimension(40) :: uinfo
   integer, dimension(4,20) :: keep  
   !------------------------------------------------------
-
-  !------------------------------------------
-  ! Precision outut file
-  !
-  character (len=80) :: precfile='prec.out'
-  !------------------------------------------
-
-  !---------------------------------------------------------
-  ! Path to INPUT, read in the get_inputpath subroutine
-  !
-  character(len=80) :: path
-  !---------------------------------------------------------
 
 end module gyro_globals
