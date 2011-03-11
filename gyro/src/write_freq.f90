@@ -16,6 +16,7 @@
 
 subroutine write_freq(datafile,io,action)
 
+  use mpi
   use gyro_globals
   use math_constants
 
@@ -39,8 +40,6 @@ subroutine write_freq(datafile,io,action)
   integer, intent(in) :: io  
   character (len=*), intent(in) :: datafile
   !--------------------------------------------------
-
-  include 'mpif.h'
 
   !-------------------------------------
   ! action = 1 -> open file

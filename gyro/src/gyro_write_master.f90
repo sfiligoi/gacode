@@ -538,6 +538,7 @@ end subroutine gyro_write_master
 
 subroutine write_distributed_real(datafile,io,action,n_fn,fn)
 
+  use mpi
   use gyro_globals, only : &
        n_n,&
        n_n_1,&
@@ -564,8 +565,6 @@ subroutine write_distributed_real(datafile,io,action,n_fn,fn)
   !
   real :: fn_recv(n_fn)
   !------------------------------------------------------
-
-  include 'mpif.h'
 
   !-----------------------------
   ! action = 1 -> open file
@@ -680,6 +679,7 @@ end subroutine write_distributed_real
 
 subroutine write_distributed_complex(datafile,io,action,n_fn,fn)
 
+  use mpi
   use gyro_globals, only : &
        n_n,&
        n_n_1,&
@@ -706,8 +706,6 @@ subroutine write_distributed_complex(datafile,io,action,n_fn,fn)
   !
   complex :: fn_recv(n_fn)
   !------------------------------------------------------
-
-  include 'mpif.h'
 
   !-----------------------------
   ! action = 1 -> open file
