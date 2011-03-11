@@ -15,6 +15,7 @@
 
 subroutine collect_complex(v_distrib,v_collect,n_v)
 
+  use mpi
   use gyro_globals
 
   !-------------------------------------
@@ -30,8 +31,6 @@ subroutine collect_complex(v_distrib,v_collect,n_v)
   !
   complex, dimension(n_v) :: temp_n
   !-------------------------------------
-
-  include 'mpif.h'
 
   do in=1,n_n
 
@@ -97,6 +96,7 @@ end subroutine collect_complex
 
 subroutine collect_real(v_distrib,v_collect)
 
+  use mpi
   use gyro_globals
 
   !-------------------------------------
@@ -110,8 +110,6 @@ subroutine collect_real(v_distrib,v_collect)
   !
   real :: temp_n
   !-------------------------------------
-
-  include 'mpif.h'
 
   do in=1,n_n
 
@@ -177,6 +175,7 @@ end subroutine collect_real
 
 subroutine collect_integer(v_distrib,v_collect)
 
+  use mpi
   use gyro_globals
 
   !-------------------------------------
@@ -190,8 +189,6 @@ subroutine collect_integer(v_distrib,v_collect)
   !
   integer :: temp_n
   !-------------------------------------
-
-  include 'mpif.h'
 
   do in=1,n_n
 

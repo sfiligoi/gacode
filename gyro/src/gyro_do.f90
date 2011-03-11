@@ -45,13 +45,12 @@ subroutine gyro_do(skipinit)
      goto 100
   endif
 
-  ! Prepend path, but make sure to not prepend it more than once
-  if (runfile(1:7) == 'run.out')  then
-     runfile = trim(path)//runfile(1:7)
-  endif
-  if (precfile(1:8) == 'prec.out')  then
-     precfile = trim(path)//precfile(1:8)
-  endif
+  ! Prepend path:
+  runfile  = trim(path)//trim(baserunfile)
+  precfile = trim(path)//trim(baseprecfile)
+
+  print *,runfile
+
 
   CPU_0 = 0.0
   CPU_1 = 0.0

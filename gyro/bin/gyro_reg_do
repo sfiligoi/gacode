@@ -7,6 +7,8 @@
 #  Run through full suite of GYRO regression tests
 #----------------------------------------------------
 
+precfile='out.gyro.prec'
+
 n=$#
 
 if [ $n -eq 0 ] 
@@ -53,7 +55,7 @@ cd $testdir
 for sim in $list
 do 
    gyro -g $sim -p $testdir > out
-   rm -rf $sim/error.out $sim/prec.out $sim/CVS
+   rm -rf $sim/error.out $sim/$precfile $sim/CVS
    gyro -e $sim -n $n_proc -p $testdir > out
    gyro_reg $sim
 done
