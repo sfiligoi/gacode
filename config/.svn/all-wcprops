@@ -1,7 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 41
-/svnrepos/code/config/!svn/ver/3809/trunk
+/svnrepos/code/config/!svn/ver/3810/trunk
 END
 automake.sh
 K 25
@@ -93,11 +93,11 @@ svn:wc:ra_dav:version-url
 V 52
 /svnrepos/code/config/!svn/ver/1504/trunk/jmflibs.m4
 END
-nim_hdf5.m4
+ittidl.m4
 K 25
 svn:wc:ra_dav:version-url
-V 53
-/svnrepos/code/config/!svn/ver/2792/trunk/nim_hdf5.m4
+V 51
+/svnrepos/code/config/!svn/ver/3564/trunk/ittidl.m4
 END
 COPYING
 K 25
@@ -105,11 +105,11 @@ svn:wc:ra_dav:version-url
 V 48
 /svnrepos/code/config/!svn/ver/820/trunk/COPYING
 END
-ittidl.m4
+nim_hdf5.m4
 K 25
 svn:wc:ra_dav:version-url
-V 51
-/svnrepos/code/config/!svn/ver/3564/trunk/ittidl.m4
+V 53
+/svnrepos/code/config/!svn/ver/2792/trunk/nim_hdf5.m4
 END
 globus.m4
 K 25
@@ -123,17 +123,11 @@ svn:wc:ra_dav:version-url
 V 56
 /svnrepos/code/config/!svn/ver/3724/trunk/tx_sundials.m4
 END
-polyswift.m4
+tx_gsl.m4
 K 25
 svn:wc:ra_dav:version-url
-V 54
-/svnrepos/code/config/!svn/ver/3464/trunk/polyswift.m4
-END
-cfitsio.m4
-K 25
-svn:wc:ra_dav:version-url
-V 52
-/svnrepos/code/config/!svn/ver/3366/trunk/cfitsio.m4
+V 51
+/svnrepos/code/config/!svn/ver/3645/trunk/tx_gsl.m4
 END
 fdepend.pl
 K 25
@@ -141,11 +135,17 @@ svn:wc:ra_dav:version-url
 V 52
 /svnrepos/code/config/!svn/ver/1473/trunk/fdepend.pl
 END
-tx_gsl.m4
+cfitsio.m4
 K 25
 svn:wc:ra_dav:version-url
-V 51
-/svnrepos/code/config/!svn/ver/3645/trunk/tx_gsl.m4
+V 52
+/svnrepos/code/config/!svn/ver/3366/trunk/cfitsio.m4
+END
+polyswift.m4
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svnrepos/code/config/!svn/ver/3464/trunk/polyswift.m4
 END
 cxx.m4
 K 25
@@ -177,17 +177,17 @@ svn:wc:ra_dav:version-url
 V 54
 /svnrepos/code/config/!svn/ver/3596/trunk/tx_openmp.m4
 END
-tx_ac_summary.m4
-K 25
-svn:wc:ra_dav:version-url
-V 58
-/svnrepos/code/config/!svn/ver/3366/trunk/tx_ac_summary.m4
-END
 jchart.m4
 K 25
 svn:wc:ra_dav:version-url
 V 51
 /svnrepos/code/config/!svn/ver/3366/trunk/jchart.m4
+END
+tx_ac_summary.m4
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svnrepos/code/config/!svn/ver/3366/trunk/tx_ac_summary.m4
 END
 writedep.pl
 K 25
@@ -361,7 +361,7 @@ tx_visit.m4
 K 25
 svn:wc:ra_dav:version-url
 V 53
-/svnrepos/code/config/!svn/ver/3573/trunk/tx_visit.m4
+/svnrepos/code/config/!svn/ver/3810/trunk/tx_visit.m4
 END
 tx_superlu.m4
 K 25
@@ -387,11 +387,11 @@ svn:wc:ra_dav:version-url
 V 48
 /svnrepos/code/config/!svn/ver/3366/trunk/ant.m4
 END
-docutils.m4
+bundle.am
 K 25
 svn:wc:ra_dav:version-url
-V 53
-/svnrepos/code/config/!svn/ver/3464/trunk/docutils.m4
+V 51
+/svnrepos/code/config/!svn/ver/3606/trunk/bundle.am
 END
 defaultcomps.m4
 K 25
@@ -399,11 +399,11 @@ svn:wc:ra_dav:version-url
 V 57
 /svnrepos/code/config/!svn/ver/3647/trunk/defaultcomps.m4
 END
-bundle.am
+docutils.m4
 K 25
 svn:wc:ra_dav:version-url
-V 51
-/svnrepos/code/config/!svn/ver/3606/trunk/bundle.am
+V 53
+/svnrepos/code/config/!svn/ver/3464/trunk/docutils.m4
 END
 mdsplus.m4
 K 25
@@ -459,17 +459,17 @@ svn:wc:ra_dav:version-url
 V 53
 /svnrepos/code/config/!svn/ver/3366/trunk/tx_mysql.m4
 END
-tx_fftw.m4
-K 25
-svn:wc:ra_dav:version-url
-V 52
-/svnrepos/code/config/!svn/ver/3775/trunk/tx_fftw.m4
-END
 tcltk.m4
 K 25
 svn:wc:ra_dav:version-url
 V 50
 /svnrepos/code/config/!svn/ver/3366/trunk/tcltk.m4
+END
+tx_fftw.m4
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svnrepos/code/config/!svn/ver/3775/trunk/tx_fftw.m4
 END
 cleanconf.sh
 K 25
@@ -477,11 +477,11 @@ svn:wc:ra_dav:version-url
 V 54
 /svnrepos/code/config/!svn/ver/3366/trunk/cleanconf.sh
 END
-tx_fc_sizeof_pointer_container.m4
+macros.m4
 K 25
 svn:wc:ra_dav:version-url
-V 75
-/svnrepos/code/config/!svn/ver/3577/trunk/tx_fc_sizeof_pointer_container.m4
+V 51
+/svnrepos/code/config/!svn/ver/2731/trunk/macros.m4
 END
 ionpack.m4
 K 25
@@ -489,17 +489,11 @@ svn:wc:ra_dav:version-url
 V 52
 /svnrepos/code/config/!svn/ver/1577/trunk/ionpack.m4
 END
-macros.m4
+tx_fc_sizeof_pointer_container.m4
 K 25
 svn:wc:ra_dav:version-url
-V 51
-/svnrepos/code/config/!svn/ver/2731/trunk/macros.m4
-END
-corba.m4
-K 25
-svn:wc:ra_dav:version-url
-V 50
-/svnrepos/code/config/!svn/ver/3366/trunk/corba.m4
+V 75
+/svnrepos/code/config/!svn/ver/3577/trunk/tx_fc_sizeof_pointer_container.m4
 END
 boost.m4
 K 25
@@ -507,17 +501,17 @@ svn:wc:ra_dav:version-url
 V 50
 /svnrepos/code/config/!svn/ver/2792/trunk/boost.m4
 END
+corba.m4
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svnrepos/code/config/!svn/ver/3366/trunk/corba.m4
+END
 idldepend.m4
 K 25
 svn:wc:ra_dav:version-url
 V 54
 /svnrepos/code/config/!svn/ver/1402/trunk/idldepend.m4
-END
-depend.sed
-K 25
-svn:wc:ra_dav:version-url
-V 52
-/svnrepos/code/config/!svn/ver/3095/trunk/depend.sed
 END
 Makefile.am
 K 25
@@ -525,17 +519,23 @@ svn:wc:ra_dav:version-url
 V 53
 /svnrepos/code/config/!svn/ver/3778/trunk/Makefile.am
 END
+depend.sed
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svnrepos/code/config/!svn/ver/3095/trunk/depend.sed
+END
 lapack.m4
 K 25
 svn:wc:ra_dav:version-url
 V 51
 /svnrepos/code/config/!svn/ver/3619/trunk/lapack.m4
 END
-flags.m4
+tx_visit2.m4
 K 25
 svn:wc:ra_dav:version-url
-V 50
-/svnrepos/code/config/!svn/ver/3807/trunk/flags.m4
+V 54
+/svnrepos/code/config/!svn/ver/3810/trunk/tx_visit2.m4
 END
 tx_svn_info.m4
 K 25
@@ -543,17 +543,23 @@ svn:wc:ra_dav:version-url
 V 56
 /svnrepos/code/config/!svn/ver/3567/trunk/tx_svn_info.m4
 END
-parcompslibs.m4
+flags.m4
 K 25
 svn:wc:ra_dav:version-url
-V 57
-/svnrepos/code/config/!svn/ver/3760/trunk/parcompslibs.m4
+V 50
+/svnrepos/code/config/!svn/ver/3807/trunk/flags.m4
 END
 netcdf_fortran.m4
 K 25
 svn:wc:ra_dav:version-url
 V 59
 /svnrepos/code/config/!svn/ver/2792/trunk/netcdf_fortran.m4
+END
+parcompslibs.m4
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svnrepos/code/config/!svn/ver/3760/trunk/parcompslibs.m4
 END
 install-sh
 K 25
@@ -567,17 +573,17 @@ svn:wc:ra_dav:version-url
 V 59
 /svnrepos/code/config/!svn/ver/3539/trunk/tx_netlib_lite.m4
 END
-aztec.m4
-K 25
-svn:wc:ra_dav:version-url
-V 50
-/svnrepos/code/config/!svn/ver/1952/trunk/aztec.m4
-END
 fftw.m4
 K 25
 svn:wc:ra_dav:version-url
 V 49
 /svnrepos/code/config/!svn/ver/3280/trunk/fftw.m4
+END
+aztec.m4
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svnrepos/code/config/!svn/ver/1952/trunk/aztec.m4
 END
 sfmakedepend
 K 25
@@ -585,17 +591,17 @@ svn:wc:ra_dav:version-url
 V 54
 /svnrepos/code/config/!svn/ver/1548/trunk/sfmakedepend
 END
-pvwave.m4
-K 25
-svn:wc:ra_dav:version-url
-V 50
-/svnrepos/code/config/!svn/ver/356/trunk/pvwave.m4
-END
 depcomp
 K 25
 svn:wc:ra_dav:version-url
 V 49
 /svnrepos/code/config/!svn/ver/3154/trunk/depcomp
+END
+pvwave.m4
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svnrepos/code/config/!svn/ver/356/trunk/pvwave.m4
 END
 tx_netcdf.m4
 K 25
@@ -603,11 +609,11 @@ svn:wc:ra_dav:version-url
 V 54
 /svnrepos/code/config/!svn/ver/3808/trunk/tx_netcdf.m4
 END
-tx_fc_sizeof.m4
+updatemfs.sh
 K 25
 svn:wc:ra_dav:version-url
-V 57
-/svnrepos/code/config/!svn/ver/3577/trunk/tx_fc_sizeof.m4
+V 54
+/svnrepos/code/config/!svn/ver/2071/trunk/updatemfs.sh
 END
 tx_llnl_iso_c_binding.m4
 K 25
@@ -615,11 +621,11 @@ svn:wc:ra_dav:version-url
 V 66
 /svnrepos/code/config/!svn/ver/2792/trunk/tx_llnl_iso_c_binding.m4
 END
-updatemfs.sh
+tx_fc_sizeof.m4
 K 25
 svn:wc:ra_dav:version-url
-V 54
-/svnrepos/code/config/!svn/ver/2071/trunk/updatemfs.sh
+V 57
+/svnrepos/code/config/!svn/ver/3577/trunk/tx_fc_sizeof.m4
 END
 root.m4
 K 25
@@ -633,17 +639,17 @@ svn:wc:ra_dav:version-url
 V 51
 /svnrepos/code/config/!svn/ver/1251/trunk/cvs2cl.pl
 END
-tx_latex.m4
-K 25
-svn:wc:ra_dav:version-url
-V 53
-/svnrepos/code/config/!svn/ver/3184/trunk/tx_latex.m4
-END
 tx_licmgr.m4
 K 25
 svn:wc:ra_dav:version-url
 V 54
 /svnrepos/code/config/!svn/ver/3366/trunk/tx_licmgr.m4
+END
+tx_latex.m4
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svnrepos/code/config/!svn/ver/3184/trunk/tx_latex.m4
 END
 tx_gpulib.m4
 K 25
@@ -675,17 +681,17 @@ svn:wc:ra_dav:version-url
 V 65
 /svnrepos/code/config/!svn/ver/1687/trunk/removeTrailingBlanks.el
 END
-tx_fc_module_capitalization.m4
-K 25
-svn:wc:ra_dav:version-url
-V 72
-/svnrepos/code/config/!svn/ver/3435/trunk/tx_fc_module_capitalization.m4
-END
 f77.m4
 K 25
 svn:wc:ra_dav:version-url
 V 48
 /svnrepos/code/config/!svn/ver/3400/trunk/f77.m4
+END
+tx_fc_module_capitalization.m4
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svnrepos/code/config/!svn/ver/3435/trunk/tx_fc_module_capitalization.m4
 END
 tx_tau.m4
 K 25
@@ -693,23 +699,23 @@ svn:wc:ra_dav:version-url
 V 51
 /svnrepos/code/config/!svn/ver/3557/trunk/tx_tau.m4
 END
-rmcomms.sed
-K 25
-svn:wc:ra_dav:version-url
-V 53
-/svnrepos/code/config/!svn/ver/3520/trunk/rmcomms.sed
-END
 numpy.m4
 K 25
 svn:wc:ra_dav:version-url
 V 49
 /svnrepos/code/config/!svn/ver/273/trunk/numpy.m4
 END
-mpif77.m4
+rmcomms.sed
 K 25
 svn:wc:ra_dav:version-url
-V 51
-/svnrepos/code/config/!svn/ver/3366/trunk/mpif77.m4
+V 53
+/svnrepos/code/config/!svn/ver/3520/trunk/rmcomms.sed
+END
+x11.m4
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svnrepos/code/config/!svn/ver/1523/trunk/x11.m4
 END
 bindist.am
 K 25
@@ -717,11 +723,11 @@ svn:wc:ra_dav:version-url
 V 52
 /svnrepos/code/config/!svn/ver/3803/trunk/bindist.am
 END
-x11.m4
+mpif77.m4
 K 25
 svn:wc:ra_dav:version-url
-V 48
-/svnrepos/code/config/!svn/ver/1523/trunk/x11.m4
+V 51
+/svnrepos/code/config/!svn/ver/3366/trunk/mpif77.m4
 END
 nm.m4
 K 25
@@ -741,11 +747,11 @@ svn:wc:ra_dav:version-url
 V 52
 /svnrepos/code/config/!svn/ver/3372/trunk/txutils.m4
 END
-tx_gatransport.m4
+ntcbase.m4
 K 25
 svn:wc:ra_dav:version-url
-V 59
-/svnrepos/code/config/!svn/ver/3723/trunk/tx_gatransport.m4
+V 52
+/svnrepos/code/config/!svn/ver/3366/trunk/ntcbase.m4
 END
 tx_fciowrappers.m4
 K 25
@@ -753,11 +759,11 @@ svn:wc:ra_dav:version-url
 V 60
 /svnrepos/code/config/!svn/ver/3806/trunk/tx_fciowrappers.m4
 END
-ntcbase.m4
+tx_gatransport.m4
 K 25
 svn:wc:ra_dav:version-url
-V 52
-/svnrepos/code/config/!svn/ver/3366/trunk/ntcbase.m4
+V 59
+/svnrepos/code/config/!svn/ver/3723/trunk/tx_gatransport.m4
 END
 f77flags.m4
 K 25

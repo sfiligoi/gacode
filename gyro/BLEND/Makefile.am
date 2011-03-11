@@ -13,8 +13,8 @@
 
 libdir = $(prefix)/lib/$(FC_LIBSUBDIR)
 
-noinst_LTLIBRARIES = libBLEND.la
-libBLEND_la_SOURCES = \
+noinst_LTLIBRARIES = libgacodeblend.la
+libgacodeblend_la_SOURCES = \
 	BLEND_private.f90 \
 	BLEND_init.f90 \
 	BLEND_do.f90 \

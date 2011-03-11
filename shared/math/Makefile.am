@@ -12,8 +12,8 @@
 
 
 libdir = $(prefix)/lib/$(FC_LIBSUBDIR)
-noinst_LTLIBRARIES = libgacodesmath.la
-libgacodesmath_la_SOURCES = \
+noinst_LTLIBRARIES = libgacodemath.la
+libgacodemath_la_SOURCES = \
   math_constants.f90 \
   j0y0.f \
   i0.f \

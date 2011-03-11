@@ -2,7 +2,8 @@ dnl ######################################################################
 dnl
 dnl $Id$
 dnl
-dnl Find VisIt
+dnl Find VisIt 1.12.2 and earlier.
+dnl (For VisIt 2.0.0 and later, use tx_visit2.m4)
 dnl
 dnl ######################################################################
 

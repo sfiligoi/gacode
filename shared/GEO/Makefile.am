@@ -12,13 +12,13 @@
 
 
 libdir = $(prefix)/lib/$(FC_LIBSUBDIR)
-noinst_LTLIBRARIES = libGEO.la
-libGEO_la_SOURCES = \
-        GEO_interface.f90 \
-	GEO_alloc.f90 \
-	GEO_do.f90 \
-	GEO_interp.f90 \
-	GEO_write.f90
+noinst_LTLIBRARIES = libgacodegeo.la
+libgacodegeo_la_SOURCES = \
+  GEO_interface.f90 \
+  GEO_alloc.f90 \
+  GEO_do.f90 \
+  GEO_interp.f90 \
+  GEO_write.f90
 
 # To get to work with optimization reducing compiler wrappers
 AM_LIBTOOLFLAGS = --tag=FC

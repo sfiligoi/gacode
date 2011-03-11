@@ -12,22 +12,22 @@
 
 
 libdir = $(prefix)/lib/$(FC_LIBSUBDIR)
-noinst_LTLIBRARIES = libEXPRO.la
-libEXPRO_la_SOURCES = \
-      	  EXPRO_interface.f90 \
-          EXPRO_alloc.f90 \
-          EXPRO_alloc_control.f90 \
-          EXPRO_palloc.f90 \
-          EXPRO_read.f90 \
-	  			EXPRO_write_derived.f90 \
-					EXPRO_read_driver.f90 \
-					EXPRO_qn.f90 \
-					EXPRO_write_original.f90 \
-          EXPRO_pread.f90
+noinst_LTLIBRARIES = libgacodeexpro.la
+libgacodeexpro_la_SOURCES = \
+  EXPRO_interface.f90 \
+  EXPRO_alloc.f90 \
+  EXPRO_palloc.f90 \
+  EXPRO_alloc_control.f90 \
+  EXPRO_read.f90 \
+  EXPRO_pread.f90 \
+  EXPRO_read_driver.f90 \
+  EXPRO_compute_derived.f90 \
+  EXPRO_write_derived.f90 \
+  EXPRO_write_original.f90
 
 # To get to work with optimization reducing compiler wrappers
 AM_LIBTOOLFLAGS = --tag=FC
-geoInclude = -I$(top_builddir)/gyro/GEO
+geoInclude = -I$(top_builddir)/shared/GEO
 AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG)
 AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(geoInclude)
 CLEANFILES = *.mod *.o *.lo *.lst *.la

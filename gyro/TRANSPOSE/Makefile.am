@@ -12,8 +12,8 @@
 
 
 libdir = $(prefix)/lib/$(FC_LIBSUBDIR)
-noinst_LTLIBRARIES = libTRANSPOSE.la
-libTRANSPOSE_la_SOURCES = \
+noinst_LTLIBRARIES = libgacodetranspose.la
+libgacodetranspose_la_SOURCES = \
 	fTRANSP_GLOBALS.f90 \
 	fTRANSP_INIT.f90 \
 	fTRANSP_DO.f90 \

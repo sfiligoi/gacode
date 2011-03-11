@@ -12,14 +12,13 @@
 
 MAINTAINERCLEANFILES    = Makefile.in 
 dist_noinst_DATA= \
-  astra2gyro.py \
-  astra_map_gyro \
-  sampledata.astra
-
+  extractcol.sh \
+  inputmanipulate.py \
+  insertcol.sh
 all-local:
 	for i in $(dist_noinst_DATA) ; \
 	do \
-		cd $(top_builddir)/shared/profiles_gen/astra/ && if test ! -f $${i}; then ln -s $(top_srcdir)/shared/profiles_gen/astra/$${i} $${i} ;fi; \
+		cd $(top_builddir)/shared/profiles_gen/modinput/ && if test ! -f $${i}; then ln -s $(top_srcdir)/shared/profiles_gen/modinput/$${i} $${i} ;fi; \
 	done
 
 

@@ -2,37 +2,35 @@
 ##
 ## File:  Makefile.am
 ##
-## Purpose:  Run automake in top directory to make Makefile.in
-##           in all subdirectories
+## Purpose:  
 ##
-## $Id: Makefile.am 176 2010-07-27 15:25:25Z srinath $
-
+## $Id: Makefile.am 38 2010-01-11 21:51:29Z srinath $
 ## ############################################################
 
 
-MAINTAINERCLEANFILES    = Makefile.in 
-#
-#if HAVE_NETCDF
-#bin_PROGRAMS = main
-#
-#main_SOURCES = \
-#	extra.f90
-#	read_all.f90
-#	main.f90
-#
-#main_LDADD = $(NETCDF_LIBS)
-#endif
-## To get to work with optimization reducing compiler wrappers
-#AM_LIBTOOLFLAGS = --tag=FC
-#AM_FFLAGS = $(FC_FIXED_FLAG) $(INCLUDES)
-#AM_FCFLAGS = $(FC_FREE_FLAG) $(INCLUDES)
-
-EXTRA_DIST= \
-	extra.f90 \
-	read_all.f90 \
-	gyro2gkv_exec.f90 \
-	gyro2gkv_globals.f90
-	main.f90
+# To get to work with optimization reducing compiler wrappers
+#IOINC=@HDF5_INC@ @FCIOWRAPPERS_INC@ @NETCDF_INC@
+IOINC=@NETCDF_INC@
+#IOLIBS=@FCIOWRAPPERS_LIBS@ @HDF5_LIBS@ @NETCDF_LIBS@
+IOLIBS=@NETCDF_LIBS@
+AM_LIBTOOLFLAGS = --tag=FC
+AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) -I.
+AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) -I.
 
 
+bin_PROGRAMS = gyro2gkv_exec
+gyro2gkv_exec_SOURCES = \
+  gyro2gkv_globals.f90 \
+  read_all.f90 \
+  gyro2gkv_exec.f90    
 
+gyro2gkv_exec_LDADD = $(IOLIBS)
+
+
+EXTRA_DIST = \
+  README \
+  gread.pro
+
+MAINTAINERCLEANFILES    = Makefile.in  *.mod *.o
+
+   

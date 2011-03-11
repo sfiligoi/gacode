@@ -9,10 +9,10 @@
 
 bin_PROGRAMS = poincare
 poincare_SOURCES = \
-	input_data.f90 \
+	fieldline_input_data.f90 \
 	func.f90 \
 	read_input.f90 \
-	runge_kutta.f90 \
+	fieldline_runge_kutta.f90 \
 	setup.f90 \
 	poincare.f90 
 

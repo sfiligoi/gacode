@@ -1,8 +1,9 @@
 dnl ######################################################################
 dnl
-dnl $Id: tx_visit.m4 3573 2010-06-23 04:44:06Z mdurant $
+dnl $Id: tx_visit.m4 3810 2011-03-09 17:04:57Z mdurant $
 dnl
-dnl Find VisIt
+dnl Find VisIt 1.12.2 and earlier.
+dnl (For VisIt 2.0.0 and later, use tx_visit2.m4)
 dnl
 dnl ######################################################################
 

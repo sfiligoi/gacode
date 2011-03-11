@@ -12,7 +12,7 @@ dnl Version:  $Id: configure.ac 1267 2009-07-28 13:10:59Z srinath$
 dnl
 dnl------------------------------------------------------------------------
 
-AC_INIT(ga_transport, 8.3, srinath@txcorp.com)
+AC_INIT(gacodes, 8.3, srinath@txcorp.com)
 AC_PREREQ([2.65])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_MACRO_DIR([config])
@@ -20,7 +20,7 @@ dnl AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE
 AC_CONFIG_MACRO_DIR([config])
 
-AC_PREFIX_DEFAULT(/internal/ga_transport) dnl Install in "/usr/local"
+AC_PREFIX_DEFAULT(/internal/gacodes) dnl Install in "/usr/local"
 
 dnl ######################################################################
 dnl
@@ -29,8 +29,8 @@ dnl
 dnl ######################################################################
 
 builtin(include, config/tx_init.m4)
-AC_DEFINE_UNQUOTED([GA_TRANSPORT_URL], "$PROJECT_URL", "GA_TRANSPORT Project URL")
-AC_DEFINE_UNQUOTED([GA_TRANSPORT_REV], "$PROJECT_REV", "GA_TRANSPORT Revision")
+#AC_DEFINE_UNQUOTED([GACODES_URL], "$PROJECT_URL", "GA_TRANSPORT Project URL")
+#AC_DEFINE_UNQUOTED([GACODES_REV], "$PROJECT_REV", "GA_TRANSPORT Revision")
 
 dnl ######################################################################
 dnl
@@ -186,166 +186,181 @@ dnl-----------------------------------------------------------------------
 AC_CONFIG_FILES([Makefile
     config/Makefile
     config/contrib/Makefile
-    share/Makefile
-    share/ga_transport.sh
-    share/ga_transport.csh
+    envvars/Makefile
+    envvars/ga_transport.sh
+    envvars/ga_transport.csh
     shared/Makefile
+    shared/math/Makefile
+    shared/GEO/Makefile
+    shared/UMFPACK/Makefile
+    shared/EXPRO/Makefile
+    shared/profiles_gen/Makefile
+    shared/profiles_gen/astra/Makefile
+    shared/profiles_gen/modinput/Makefile
+    shared/profiles_gen/src/Makefile
+    shared/profiles_gen/transp/Makefile
+    shared/python/Makefile
+    shared/bin/Makefile
+    shared/exec/Makefile
+    shared/install/Makefile
+    gato/Makefile
+    gato/data/Makefile
+    gato/install/Makefile
     gyro/Makefile
     gyro/BLEND/Makefile
-    gyro/math/Makefile
-    gyro/EXPRO/Makefile
     gyro/TRANSPOSE/Makefile
     gyro/SSUB/Makefile
-    gyro/GEO/Makefile
-    gyro/UMFPACK/Makefile
     gyro/src/Makefile
+    gyro/install/Makefile
     gyro/peek/Makefile
-    gyro/EIGEN/Makefile
     gyro/tools/Makefile
-    gyro/tools/GEO/Makefile
+    gyro/tools/PostGYRO/Makefile
+    gyro/tools/fieldline/Makefile
     gyro/tools/gyro2gkv/Makefile
-    gyro/tools/gyro2gkv/src/Makefile
-    gyro/tools/input/Makefile
-    gyro/tools/input/eig01/Makefile
-    gyro/tools/input/eig02/Makefile
-    gyro/tools/input/nl01/Makefile
-    gyro/tools/input/reg01/Makefile
-    gyro/tools/input/reg02/Makefile
-    gyro/tools/input/reg03/Makefile
-    gyro/tools/input/reg04/Makefile
-    gyro/tools/input/reg05/Makefile
-    gyro/tools/input/reg06/Makefile
-    gyro/tools/input/reg07/Makefile
-    gyro/tools/input/reg08/Makefile
-    gyro/tools/input/reg09/Makefile
-    gyro/tools/input/reg10/Makefile
-    gyro/tools/input/reg11/Makefile
-    gyro/tools/input/reg12/Makefile
-    gyro/tools/input/reg13/Makefile
-    gyro/tools/input/reg14/Makefile
-    gyro/tools/input/reg15/Makefile
-    gyro/tools/input/reg16/Makefile
-    gyro/tools/input/reg17/Makefile
-    gyro/tools/input/reg18/Makefile
-    gyro/tools/input/reg19/Makefile
-    gyro/tools/iterdb_read/Makefile
-    gyro/tools/iterdb_read/astra/Makefile
-    gyro/tools/iterdb_read/transp/Makefile
-    gyro/tools/iterdb_read/gato/Makefile
-    gyro/tools/iterdb_read/src/Makefile
     gyro/tools/spectra/Makefile
     gyro/tools/spectra/src/Makefile
     gyro/tools/summary/Makefile
-    gyro/tools/vtkgyro/Makefile
-    gyro/tools/vtkgyro/common/Makefile
-    gyro/tools/vtkgyro/movie/Makefile
-    gyro/tools/vtkgyro/square/Makefile
-    gyro/tools/vtkgyro/square_2/Makefile
-    gyro/tools/vtkgyro/torus/Makefile
-    gyro/tools/vtkgyro/torus-old/Makefile
-    gyro/tools/vtkgyro/torus-old/sample-INPUT/Makefile
-    gyro/tools/vtkgyro/volume/Makefile
-    gyro/tools/fieldline/Makefile
-    gyro/batch/Makefile
     gyro/bin/Makefile
-    gyro/exec/Makefile
-    gyro/python/Makefile
     gyro/vugyro/Makefile
-    gyro/install/Makefile
-    gyro/sim/Makefile
-    gyro/sim/test/Makefile
-    gyro/sim/test/reg01/Makefile
-    gyro/sim/test/reg02/Makefile
-    gyro/sim/test/reg03/Makefile
-    gyro/sim/test/reg04/Makefile
-    gyro/sim/test/reg05/Makefile
-    gyro/sim/test/reg06/Makefile
-    gyro/sim/test/reg07/Makefile
-    gyro/sim/test/reg08/Makefile
-    gyro/sim/test/reg09/Makefile
-    gyro/sim/test/reg10/Makefile
-    gyro/sim/test/reg11/Makefile
-    gyro/sim/test/reg12/Makefile
-    gyro/sim/test/reg13/Makefile
-    gyro/sim/test/reg14/Makefile
-    gyro/sim/test/reg15/Makefile
-    gyro/sim/test/reg16/Makefile
-    gyro/sim/test/reg17/Makefile
     neo/Makefile
     neo/bin/Makefile
-    neo/python/Makefile
-    neo/sim/Makefile
+    neo/nclass/Makefile
     neo/src/Makefile
-    neo/tools/Makefile
-    neo/tools/vgen/Makefile
-    neo/tools/vgen/src/Makefile
-    neo/tools/squeeze/Makefile
-    neo/tools/squeeze/src/Makefile
-    neo/tools/input/Makefile
-    neo/tools/input/ade_c1/Makefile
-    neo/tools/input/ade_c2/Makefile
-    neo/tools/input/ade_c3/Makefile
-    neo/tools/input/ade_miller/Makefile
-    neo/tools/input/exp_geo_norot/Makefile
-    neo/tools/input/exp_geo_rot/Makefile
-    neo/tools/input/exp_geo_rot_multir/Makefile
-    neo/tools/input/exp_miller_norot/Makefile
-    neo/tools/input/exp_miller_rot/Makefile
-    neo/tools/input/fow_ade/Makefile
-    neo/tools/input/fow_exp_ade/Makefile
-    neo/tools/input/fow_exp_imp/Makefile
-    neo/tools/input/gke_c1/Makefile
-    neo/tools/input/gke_c2/Makefile
-    neo/tools/input/gke_c3/Makefile
-    neo/tools/input/imp_c1/Makefile
-    neo/tools/input/imp_c2/Makefile
-    neo/tools/input/imp_c3/Makefile
-    neo/tools/input/rot_ade/Makefile
-    neo/tools/input/rot_ade_shear/Makefile
-    neo/tools/input/vgen/Makefile
-    neo/tools/input/vgen1/Makefile
-    neo/tools/input/vgen_default/Makefile
-    tglf/Makefile
-    tglf/src/Makefile
-    tglf/bin/Makefile
-    tglf/python/Makefile
-    tglf/sim/Makefile
-    tglf/sim/ttest/Makefile
-    tgyro/Makefile
-    tgyro/bin/Makefile
-    tgyro/math/Makefile
-    tgyro/python/Makefile
-    tgyro/qfm/Makefile
-    tgyro/qfm/src/Makefile
-    tgyro/sim/Makefile
-    tgyro/src/Makefile
-    tgyro/tools/Makefile
-    tgyro/tools/asymptote/Makefile
-    tgyro/tools/asymptote/src/Makefile
-    tgyro/tools/idl/Makefile
-    tgyro/tools/input/Makefile
-    tgyro/tools/input/stest_1/Makefile
-    tgyro/tools/input/stest_2/Makefile
-    tgyro/tools/input/stest_3/Makefile
-    tgyro/tools/input/stest_4/Makefile
-    tgyro/tools/input/stest_5/Makefile
-    tgyro/tools/input/stest_5/GYRO1/Makefile
-    tgyro/tools/input/stest_5/GYRO2/Makefile
-    tgyro/tools/input/stest_5/GYRO3/Makefile
-    tgyro/tools/input/stest_5/GYRO4/Makefile
-    tgyro/tools/input/wtest_1/Makefile
-    tgyro/tools/input/wtest_2/Makefile
-    tgyro/tools/input/wtest_3/Makefile
-    tgyro/tools/input/astra_dz18_tglf/Makefile
-    tgyro/tools/input/d3_20_128913_tglf/Makefile
-    tgyro/tools/input/d3_4_gyro/Makefile
-    tgyro/tools/input/d3_4_gyro/GYRO1/Makefile
-    tgyro/tools/input/d3_4_gyro/GYRO2/Makefile
-    tgyro/tools/input/d3_4_gyro/GYRO3/Makefile
-    tgyro/tools/input/d3_4_gyro/GYRO4/Makefile
-    tgyro/tools/input/d3_4_tglf/Makefile
-    tgyro/tools/input/d3_8_128913_tglfneo/Makefile
-    ])
+])
+
+#    neo/python/Makefile
+#    neo/sim/Makefile
+#    neo/src/Makefile
+#    gyro/tools/input/Makefile
+#    gyro/tools/input/eig01/Makefile
+#    gyro/tools/input/eig02/Makefile
+#    gyro/tools/input/nl01/Makefile
+#    gyro/tools/input/reg01/Makefile
+#    gyro/tools/input/reg02/Makefile
+#    gyro/tools/input/reg03/Makefile
+#    gyro/tools/input/reg04/Makefile
+#    gyro/tools/input/reg05/Makefile
+#    gyro/tools/input/reg06/Makefile
+#    gyro/tools/input/reg07/Makefile
+#    gyro/tools/input/reg08/Makefile
+#    gyro/tools/input/reg09/Makefile
+#    gyro/tools/input/reg10/Makefile
+#    gyro/tools/input/reg11/Makefile
+#    gyro/tools/input/reg12/Makefile
+#    gyro/tools/input/reg13/Makefile
+#    gyro/tools/input/reg14/Makefile
+#    gyro/tools/input/reg15/Makefile
+#    gyro/tools/input/reg16/Makefile
+#    gyro/tools/input/reg17/Makefile
+#    gyro/tools/input/reg18/Makefile
+#    gyro/tools/input/reg19/Makefile
+#    gyro/tools/iterdb_read/Makefile
+#    gyro/tools/iterdb_read/astra/Makefile
+#    gyro/tools/iterdb_read/transp/Makefile
+#    gyro/tools/iterdb_read/gato/Makefile
+#    gyro/tools/iterdb_read/src/Makefile
+#    gyro/tools/vtkgyro/Makefile
+#    gyro/tools/vtkgyro/common/Makefile
+#    gyro/tools/vtkgyro/movie/Makefile
+#    gyro/tools/vtkgyro/square/Makefile
+#    gyro/tools/vtkgyro/square_2/Makefile
+#    gyro/tools/vtkgyro/torus/Makefile
+#    gyro/tools/vtkgyro/torus-old/Makefile
+#    gyro/tools/vtkgyro/torus-old/sample-INPUT/Makefile
+#    gyro/tools/vtkgyro/volume/Makefile
+#    gyro/batch/Makefile
+#    gyro/exec/Makefile
+#    gyro/python/Makefile
+#    gyro/install/Makefile
+#    gyro/sim/Makefile
+#    gyro/sim/test/Makefile
+#    gyro/sim/test/reg01/Makefile
+#    gyro/sim/test/reg02/Makefile
+#    gyro/sim/test/reg03/Makefile
+#    gyro/sim/test/reg04/Makefile
+#    gyro/sim/test/reg05/Makefile
+#    gyro/sim/test/reg06/Makefile
+#    gyro/sim/test/reg07/Makefile
+#    gyro/sim/test/reg08/Makefile
+#    gyro/sim/test/reg09/Makefile
+#    gyro/sim/test/reg10/Makefile
+#    gyro/sim/test/reg11/Makefile
+#    gyro/sim/test/reg12/Makefile
+#    gyro/sim/test/reg13/Makefile
+#    gyro/sim/test/reg14/Makefile
+#    gyro/sim/test/reg15/Makefile
+#    gyro/sim/test/reg16/Makefile
+#    gyro/sim/test/reg17/Makefile
+#    neo/tools/Makefile
+#    neo/tools/vgen/Makefile
+#    neo/tools/vgen/src/Makefile
+#    neo/tools/squeeze/Makefile
+#    neo/tools/squeeze/src/Makefile
+#    neo/tools/input/Makefile
+#    neo/tools/input/ade_c1/Makefile
+#    neo/tools/input/ade_c2/Makefile
+#    neo/tools/input/ade_c3/Makefile
+#    neo/tools/input/ade_miller/Makefile
+#    neo/tools/input/exp_geo_norot/Makefile
+#    neo/tools/input/exp_geo_rot/Makefile
+#    neo/tools/input/exp_geo_rot_multir/Makefile
+#    neo/tools/input/exp_miller_norot/Makefile
+#    neo/tools/input/exp_miller_rot/Makefile
+#    neo/tools/input/fow_ade/Makefile
+#    neo/tools/input/fow_exp_ade/Makefile
+#    neo/tools/input/fow_exp_imp/Makefile
+#    neo/tools/input/gke_c1/Makefile
+#    neo/tools/input/gke_c2/Makefile
+#    neo/tools/input/gke_c3/Makefile
+#    neo/tools/input/imp_c1/Makefile
+#    neo/tools/input/imp_c2/Makefile
+#    neo/tools/input/imp_c3/Makefile
+#    neo/tools/input/rot_ade/Makefile
+#    neo/tools/input/rot_ade_shear/Makefile
+#    neo/tools/input/vgen/Makefile
+#    neo/tools/input/vgen1/Makefile
+#    neo/tools/input/vgen_default/Makefile
+#    tglf/Makefile
+#    tglf/src/Makefile
+#    tglf/bin/Makefile
+#    tglf/python/Makefile
+#    tglf/sim/Makefile
+#    tglf/sim/ttest/Makefile
+#    tgyro/Makefile
+#    tgyro/bin/Makefile
+#    tgyro/math/Makefile
+#    tgyro/python/Makefile
+#    tgyro/qfm/Makefile
+#    tgyro/qfm/src/Makefile
+#    tgyro/sim/Makefile
+#    tgyro/src/Makefile
+#    tgyro/tools/Makefile
+#    tgyro/tools/asymptote/Makefile
+#    tgyro/tools/asymptote/src/Makefile
+#    tgyro/tools/idl/Makefile
+#    tgyro/tools/input/Makefile
+#    tgyro/tools/input/stest_1/Makefile
+#    tgyro/tools/input/stest_2/Makefile
+#    tgyro/tools/input/stest_3/Makefile
+#    tgyro/tools/input/stest_4/Makefile
+#    tgyro/tools/input/stest_5/Makefile
+#    tgyro/tools/input/stest_5/GYRO1/Makefile
+#    tgyro/tools/input/stest_5/GYRO2/Makefile
+#    tgyro/tools/input/stest_5/GYRO3/Makefile
+#    tgyro/tools/input/stest_5/GYRO4/Makefile
+#    tgyro/tools/input/wtest_1/Makefile
+#    tgyro/tools/input/wtest_2/Makefile
+#    tgyro/tools/input/wtest_3/Makefile
+#    tgyro/tools/input/astra_dz18_tglf/Makefile
+#    tgyro/tools/input/d3_20_128913_tglf/Makefile
+#    tgyro/tools/input/d3_4_gyro/Makefile
+#    tgyro/tools/input/d3_4_gyro/GYRO1/Makefile
+#    tgyro/tools/input/d3_4_gyro/GYRO2/Makefile
+#    tgyro/tools/input/d3_4_gyro/GYRO3/Makefile
+#    tgyro/tools/input/d3_4_gyro/GYRO4/Makefile
+#    tgyro/tools/input/d3_4_tglf/Makefile
+#    tgyro/tools/input/d3_8_128913_tglfneo/Makefile
+#    ])
 dnl ######################################################################
 dnl
 dnl  Remove interlibrary dependency checking

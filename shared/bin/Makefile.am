@@ -12,12 +12,18 @@
 
 MAINTAINERCLEANFILES    = Makefile.in 
 dist_noinst_DATA= \
- gacodeinput.py 
+  gacode_getversion \
+  gacode_lines \
+  gacode_setup \
+  gacode_setup.tcsh \
+  gacode_setversion \
+  profile_parse.py \
+  profiles_gen
 
 all-local:
 	for i in $(dist_noinst_DATA) ; \
 	do \
-		cd $(top_builddir)/shared/python/ && if test ! -f $${i}; then ln -s $(top_srcdir)/shared/python/$${i} $${i} ;fi; \
+		cd $(top_builddir)/shared/bin/ && if test ! -f $${i}; then ln -s $(top_srcdir)/shared/bin/$${i} $${i} ;fi; \
 	done
 
 

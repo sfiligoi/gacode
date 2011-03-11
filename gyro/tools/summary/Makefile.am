@@ -11,10 +11,10 @@
 
 
 dist_noinst_DATA= \
-		  format.tex \
-		  include \
-	      	  include.0 \
-		  missing.ps
+  format.tex \
+  include \
+  include.0 \
+  missing.ps
 
 MAINTAINERCLEANFILES    = Makefile.in 
 

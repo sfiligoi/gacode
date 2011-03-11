@@ -12,7 +12,7 @@
 
 
 libdir = $(prefix)/lib/$(FC_LIBSUBDIR)
-noinst_LTLIBRARIES = libUMFPACK.la
+noinst_LTLIBRARIES = libgacodeumfpack.la
 HARWELL	= mc21b.f mc13e.f
 UMFD = \
 	umd21i.f \
@@ -62,7 +62,7 @@ UMFD = \
 	umz2p1.f \
 	umz2rg.f
        
-libUMFPACK_la_SOURCES = $(HARWELL) $(UMFD)
+libgacodeumfpack_la_SOURCES = $(HARWELL) $(UMFD)
 
 # To get to work with optimization reducing compiler wrappers
 # or simply to get .f to work with new automake

@@ -17,8 +17,8 @@ IOINC=@HDF5_FC_INC@ @FCIOWRAPPERS_INC@ @NETCDF_INC@
 IOLIBS=@FCIOWRAPPERS_ALIBS@ @HDF5_ALIBS@ @NETCDF_ALIBS@
 
 AM_LIBTOOLFLAGS = --tag=FC
-AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) $(gyro_includes) $(CPPF90_FLAGS) -I.
-AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) $(gyro_includes) $(CPPF90_FLAGS) -I.
+AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) $(CPPF90_FLAGS) -I.
+AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) $(CPPF90_FLAGS) -I.
 
 
 
@@ -49,34 +49,12 @@ prgen_SOURCES = \
   fluxfit_f_model.f90 \
   prgen.f90
 
-prgen_LDADD  = $(top_builddir)/shared/math/libgacodesmath.la \
-	@FFTW_LIBS@  @LAPACK_LIBS@  @BLAS_LIBS@ $(IOLIBS) \
-	$(top_builddir)/gyro/EXPRO/libEXPRO.la
+prgen_LDADD  = $(top_builddir)/shared/math/libgacodemath.la \
+	@FFTW_LIBS@  @LAPACK_LIBS@  @BLAS_LIBS@ $(IOLIBS) 
 
-BigScience_INCLUDES = \
-	-I $(top_builddir)/gyro/src \
-	-I $(top_builddir)/gyro/BLEND \
-	-I $(top_builddir)/gyro/math \
-	-I $(top_builddir)/gyro/TRANSPOSE \
-	-I $(top_builddir)/gyro/SSUB \
-	-I $(top_builddir)/gyro/GEO \
-	-I $(top_builddir)/gyro/UMFPACK \
-	-I $(top_builddir)/gyro/EXPRO
-
-if TX_FORTRAN_MODNAMEISCAP
-include_HEADERS = GYRO_GLOBALS.$(TX_FORTRAN_MODEXT) GYRO_INTERFACE.$(TX_FORTRAN_MODEXT)
-GYRO_GLOBALS.$(TX_FORTRAN_MODEXT):   gyro_globals.f90
-GYRO_INTERFACE.$(TX_FORTRAN_MODEXT): gyro_interface.f90
-else
-include_HEADERS = gyro_globals.$(TX_FORTRAN_MODEXT) gyro_interface.$(TX_FORTRAN_MODEXT)
-gyro_globals.$(TX_FORTRAN_MODEXT):   gyro_globals.f90
-gyro_interface.$(TX_FORTRAN_MODEXT): gyro_interface.f90
-endif
-
+#prgen_INCLUDES = \
+ # $(IOINC)
 
 CLEANFILES = *.mod *.f90 *.lo *.lst *.la
 
-write_hdf5.o: hdf5_mod.o
-write_hdf5.lo: hdf5_mod.lo
-gyro_fieldeigen.o: gyro_fieldeigen_private.o
-gyro_fieldeigen.lo: gyro_fieldeigen_private.lo
+

@@ -158,14 +158,14 @@ dnl
 dnl ######################################################################
 
 builtin(include, config/txsearch.m4)
-builtin(include, config/tx_svn_info.m4)
-TX_SVN_INFO([PROJECT_URL], [PROJECT_REV], .)
-tx_pkg_name=translit($PACKAGE,'a-z./-','A-Z____')
+#builtin(include, config/tx_svn_info.m4)
+#TX_SVN_INFO([PROJECT_URL], [PROJECT_REV], .)
+#tx_pkg_name=translit($PACKAGE,'a-z./-','A-Z____')
 # eval "$tx_pkg_name"_URL=$PROJECT_URL
 # eval "$tx_pkg_name"_REV=$PROJECT_REV
 dnl AC_DEFINE_UNQUOTED(["$tx_pkg_name"_URL], "$PROJECT_URL", "SVN Project URL")
 dnl AC_DEFINE_UNQUOTED(["$tx_pkg_name"_URL], "$PROJECT_REV", "SVN Project Revision")
-TX_SVN_INFO([CONFIG_URL], [CONFIG_REV], config)
+#TX_SVN_INFO([CONFIG_URL], [CONFIG_REV], config)
 
 dnl ######################################################################
 dnl

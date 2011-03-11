@@ -9,21 +9,21 @@
 
 ## ############################################################
 
-SUBDIRS	= BLEND math GEO EXPRO TRANSPOSE SSUB UMFPACK EIGEN src peek tools sim python bin
+SUBDIRS	= astra modinput src transp
 
-datadir = $(prefix)/gyro
-dist_data_DATA = VERSION
-
-all-local: link-data-local
-
-link-data-local:
-	if test $(abs_top_srcdir) != $(abs_top_builddir); then \
-		for i in $(dist_data_DATA); do \
-			if test ! -f $$i; then \
-				ln -s $(srcdir)/$$i .; \
-			fi; \
-		done; \
-	fi
+#datadir = $(prefix)/gyro
+#dist_data_DATA = VERSION
+#
+#all-local: link-data-local
+#
+#link-data-local:
+#	if test $(abs_top_srcdir) != $(abs_top_builddir); then \
+#		for i in $(dist_data_DATA); do \
+#			if test ! -f $$i; then \
+#				ln -s $(srcdir)/$$i .; \
+#			fi; \
+#		done; \
+#	fi
 
 MAINTAINERCLEANFILES    = Makefile.in 
 

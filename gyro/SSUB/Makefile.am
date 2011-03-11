@@ -12,8 +12,8 @@
 
 
 libdir = $(prefix)/lib/$(FC_LIBSUBDIR)
-noinst_LTLIBRARIES = libSSUB.la
-libSSUB_la_SOURCES = \
+noinst_LTLIBRARIES = libgacodessub.la
+libgacodessub_la_SOURCES = \
 	SSUB_private.f90 \
 	fSSUB.f90 \
 	rSSUB.f90 \

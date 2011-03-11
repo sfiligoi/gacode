@@ -1,15 +1,15 @@
 10
 
 dir
-3809
+3810
 https://ice.txcorp.com/svnrepos/code/config/trunk
 https://ice.txcorp.com/svnrepos/code/config
 
 
 
-2011-03-09T03:18:48.736633Z
-3809
-kruger
+2011-03-09T17:04:57.317319Z
+3810
+mdurant
 has-props
 
 
@@ -536,17 +536,17 @@ has-props
 
 1440
 
-nim_hdf5.m4
+ittidl.m4
 file
 
 
 
 
 2011-03-09T03:43:46.000000Z
-8902a03de766ac04f1ad3f5196ae870c
-2008-11-02T13:39:32.687008Z
-2792
-cary
+1452c3a00747647cfc0825fc9ce2d80a
+2010-06-08T06:37:21.122628Z
+3564
+messmer
 has-props
 
 
@@ -568,7 +568,7 @@ has-props
 
 
 
-15747
+3838
 
 COPYING
 file
@@ -604,17 +604,17 @@ has-props
 
 203
 
-ittidl.m4
+nim_hdf5.m4
 file
 
 
 
 
 2011-03-09T03:43:46.000000Z
-1452c3a00747647cfc0825fc9ce2d80a
-2010-06-08T06:37:21.122628Z
-3564
-messmer
+8902a03de766ac04f1ad3f5196ae870c
+2008-11-02T13:39:32.687008Z
+2792
+cary
 has-props
 
 
@@ -636,7 +636,7 @@ has-props
 
 
 
-3838
+15747
 
 globus.m4
 file
@@ -706,17 +706,17 @@ has-props
 
 1468
 
-polyswift.m4
+tx_gsl.m4
 file
 
 
 
 
 2011-03-09T03:43:46.000000Z
-ead8876983c801b27d94a3ebd494488a
-2010-04-05T12:42:26.628927Z
-3464
-cary
+f209b0393aa06f24bff0c19bf8d77dcb
+2010-09-02T21:29:15.948871Z
+3645
+paulm
 has-props
 
 
@@ -738,41 +738,7 @@ has-props
 
 
 
-948
-
-cfitsio.m4
-file
-
-
-
-
-2011-03-09T03:43:46.000000Z
-3468f0380bc9cdc8337671cd3436b191
-2010-01-15T18:43:10.251938Z
-3366
-dws
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1055
+653
 
 fdepend.pl
 file
@@ -808,17 +774,17 @@ has-props
 
 3198
 
-tx_gsl.m4
+cfitsio.m4
 file
 
 
 
 
 2011-03-09T03:43:46.000000Z
-f209b0393aa06f24bff0c19bf8d77dcb
-2010-09-02T21:29:15.948871Z
-3645
-paulm
+3468f0380bc9cdc8337671cd3436b191
+2010-01-15T18:43:10.251938Z
+3366
+dws
 has-props
 
 
@@ -840,7 +806,41 @@ has-props
 
 
 
-653
+1055
+
+polyswift.m4
+file
+
+
+
+
+2011-03-09T03:43:46.000000Z
+ead8876983c801b27d94a3ebd494488a
+2010-04-05T12:42:26.628927Z
+3464
+cary
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+948
 
 cxx.m4
 file
@@ -1012,40 +1012,6 @@ has-props
 
 1895
 
-jchart.m4
-file
-
-
-
-
-2011-03-09T03:43:46.000000Z
-f302e5526326f6038a1d6ce4e5b878ed
-2010-01-15T18:43:10.251938Z
-3366
-dws
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1831
-
 tx_ac_summary.m4
 file
 
@@ -1079,6 +1045,40 @@ has-props
 
 
 2533
+
+jchart.m4
+file
+
+
+
+
+2011-03-09T03:43:46.000000Z
+f302e5526326f6038a1d6ce4e5b878ed
+2010-01-15T18:43:10.251938Z
+3366
+dws
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1831
 
 writedep.pl
 file
@@ -2038,10 +2038,10 @@ file
 
 
 
-2011-03-09T03:43:46.000000Z
-d52d8c42e6a42f6f900f1f05f9a5cecd
-2010-06-23T04:44:06.256505Z
-3573
+2011-03-10T03:58:10.000000Z
+0deb9e44327f5d576d116d36f8ab3ea2
+2011-03-09T17:04:57.317319Z
+3810
 mdurant
 has-props
 
@@ -2064,7 +2064,7 @@ has-props
 
 
 
-4357
+4427
 
 tx_superlu.m4
 file
@@ -2202,17 +2202,17 @@ has-props
 
 1088
 
-docutils.m4
+bundle.am
 file
 
 
 
 
 2011-03-09T03:43:46.000000Z
-ce3f86b9700a0c4145b029c9ccae5c46
-2010-04-05T12:42:26.628927Z
-3464
-cary
+c1e0f51a59e296e3e48b26358a8ce6bc
+2010-08-05T23:26:32.273308Z
+3606
+swsides
 has-props
 
 
@@ -2234,7 +2234,7 @@ has-props
 
 
 
-905
+2856
 
 defaultcomps.m4
 file
@@ -2270,17 +2270,17 @@ has-props
 
 2335
 
-bundle.am
+docutils.m4
 file
 
 
 
 
 2011-03-09T03:43:46.000000Z
-c1e0f51a59e296e3e48b26358a8ce6bc
-2010-08-05T23:26:32.273308Z
-3606
-swsides
+ce3f86b9700a0c4145b029c9ccae5c46
+2010-04-05T12:42:26.628927Z
+3464
+cary
 has-props
 
 
@@ -2302,7 +2302,7 @@ has-props
 
 
 
-2856
+905
 
 mdsplus.m4
 file
@@ -2610,40 +2610,6 @@ has-props
 
 729
 
-tx_fftw.m4
-file
-
-
-
-
-2011-03-09T03:43:46.000000Z
-3774418b4442692b0e0636d741866027
-2011-01-12T00:33:31.921519Z
-3775
-kruger
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-960
-
 tcltk.m4
 file
 
@@ -2677,6 +2643,40 @@ has-props
 
 
 7558
+
+tx_fftw.m4
+file
+
+
+
+
+2011-03-09T03:43:46.000000Z
+3774418b4442692b0e0636d741866027
+2011-01-12T00:33:31.921519Z
+3775
+kruger
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+960
 
 cleanconf.sh
 file
@@ -2712,17 +2712,17 @@ has-props
 
 2679
 
-tx_fc_sizeof_pointer_container.m4
+macros.m4
 file
 
 
 
 
 2011-03-09T03:43:46.000000Z
-7bb6a0bde9e198da39cd03bc3184f554
-2010-06-29T23:15:47.246962Z
-3577
-pletzer
+656d739a74aa5dd7260b4710fcb52ee6
+2008-09-29T02:10:12.617274Z
+2731
+cary
 has-props
 
 
@@ -2744,7 +2744,7 @@ has-props
 
 
 
-1744
+874
 
 ionpack.m4
 file
@@ -2780,17 +2780,17 @@ has-props
 
 3463
 
-macros.m4
+tx_fc_sizeof_pointer_container.m4
 file
 
 
 
 
 2011-03-09T03:43:46.000000Z
-656d739a74aa5dd7260b4710fcb52ee6
-2008-09-29T02:10:12.617274Z
-2731
-cary
+7bb6a0bde9e198da39cd03bc3184f554
+2010-06-29T23:15:47.246962Z
+3577
+pletzer
 has-props
 
 
@@ -2812,41 +2812,7 @@ has-props
 
 
 
-874
-
-corba.m4
-file
-
-
-
-
-2011-03-09T03:43:46.000000Z
-3993dfbbf80a9bd2cf136662812dc3e5
-2010-01-15T18:43:10.251938Z
-3366
-dws
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-15793
+1744
 
 boost.m4
 file
@@ -2882,6 +2848,40 @@ has-props
 
 1378
 
+corba.m4
+file
+
+
+
+
+2011-03-09T03:43:46.000000Z
+3993dfbbf80a9bd2cf136662812dc3e5
+2010-01-15T18:43:10.251938Z
+3366
+dws
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+15793
+
 idldepend.m4
 file
 
@@ -2915,40 +2915,6 @@ has-props
 
 
 1076
-
-depend.sed
-file
-
-
-
-
-2011-03-09T03:43:46.000000Z
-94da24cc3e3f49e553e34a3001a6cfb5
-2009-06-27T18:30:38.909113Z
-3095
-cary
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-414
 
 Makefile.am
 file
@@ -2984,6 +2950,40 @@ has-props
 
 2857
 
+depend.sed
+file
+
+
+
+
+2011-03-09T03:43:46.000000Z
+94da24cc3e3f49e553e34a3001a6cfb5
+2009-06-27T18:30:38.909113Z
+3095
+cary
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+414
+
 lapack.m4
 file
 
@@ -3018,18 +3018,17 @@ has-props
 
 3897
 
-flags.m4
+tx_visit2.m4
 file
 
 
 
 
-2011-03-09T03:43:46.000000Z
-52e0994a2e9401b2a046ebe492c41ce0
-2011-03-07T23:32:10.935518Z
-3807
-kruger
-has-props
+2011-03-10T03:58:10.000000Z
+e53f4edd8d883c157eb8fb95d6cd9b72
+2011-03-09T17:04:57.317319Z
+3810
+mdurant
 
 
 
@@ -3050,7 +3049,8 @@ has-props
 
 
 
-17378
+
+4660
 
 tx_svn_info.m4
 file
@@ -3086,17 +3086,17 @@ has-props
 
 3394
 
-parcompslibs.m4
+flags.m4
 file
 
 
 
 
 2011-03-09T03:43:46.000000Z
-36fafc3619b0f1cac1c2d394d14688b5
-2010-12-12T18:39:16.310501Z
-3760
-cary
+52e0994a2e9401b2a046ebe492c41ce0
+2011-03-07T23:32:10.935518Z
+3807
+kruger
 has-props
 
 
@@ -3118,7 +3118,7 @@ has-props
 
 
 
-11924
+17378
 
 netcdf_fortran.m4
 file
@@ -3153,6 +3153,40 @@ has-props
 
 
 1985
+
+parcompslibs.m4
+file
+
+
+
+
+2011-03-09T03:43:46.000000Z
+36fafc3619b0f1cac1c2d394d14688b5
+2010-12-12T18:39:16.310501Z
+3760
+cary
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+11924
 
 install-sh
 file
@@ -3222,40 +3256,6 @@ has-props
 
 2127
 
-aztec.m4
-file
-
-
-
-
-2011-03-09T03:43:46.000000Z
-014a0cb361bf2ff4ec8600b1b2e30d5c
-2006-07-28T15:09:45.000000Z
-1952
-cary
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-9968
-
 fftw.m4
 file
 
@@ -3289,6 +3289,40 @@ has-props
 
 
 7945
+
+aztec.m4
+file
+
+
+
+
+2011-03-09T03:43:46.000000Z
+014a0cb361bf2ff4ec8600b1b2e30d5c
+2006-07-28T15:09:45.000000Z
+1952
+cary
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+9968
 
 sfmakedepend
 file
@@ -3324,40 +3358,6 @@ has-props
 
 19253
 
-pvwave.m4
-file
-
-
-
-
-2011-03-09T03:43:46.000000Z
-ae85cf775433329c596ddc6507a41018
-2001-03-07T01:40:20.000000Z
-356
-dad
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-962
-
 depcomp
 file
 
@@ -3391,6 +3391,40 @@ cary
 
 
 18615
+
+pvwave.m4
+file
+
+
+
+
+2011-03-09T03:43:46.000000Z
+ae85cf775433329c596ddc6507a41018
+2001-03-07T01:40:20.000000Z
+356
+dad
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+962
 
 tx_netcdf.m4
 file
@@ -3426,17 +3460,17 @@ has-props
 
 1430
 
-tx_fc_sizeof.m4
+updatemfs.sh
 file
 
 
 
 
 2011-03-09T03:43:46.000000Z
-d577d5ac5aacc3fe6b35c2fc8814c2ce
-2010-06-29T23:15:47.246962Z
-3577
-pletzer
+18db652a5af7201579d7c03a1d265f8d
+2006-10-08T21:24:12.000000Z
+2071
+cary
 has-props
 
 
@@ -3458,7 +3492,7 @@ has-props
 
 
 
-1263
+2142
 
 tx_llnl_iso_c_binding.m4
 file
@@ -3494,17 +3528,17 @@ has-props
 
 1395
 
-updatemfs.sh
+tx_fc_sizeof.m4
 file
 
 
 
 
 2011-03-09T03:43:46.000000Z
-18db652a5af7201579d7c03a1d265f8d
-2006-10-08T21:24:12.000000Z
-2071
-cary
+d577d5ac5aacc3fe6b35c2fc8814c2ce
+2010-06-29T23:15:47.246962Z
+3577
+pletzer
 has-props
 
 
@@ -3526,7 +3560,7 @@ has-props
 
 
 
-2142
+1263
 
 root.m4
 file
@@ -3596,40 +3630,6 @@ has-props
 
 87565
 
-tx_latex.m4
-file
-
-
-
-
-2011-03-09T03:43:46.000000Z
-a948dc7eeea249d0ac20503dd3bdc1fd
-2009-08-09T17:02:35.565517Z
-3184
-cary
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1018
-
 tx_licmgr.m4
 file
 
@@ -3663,6 +3663,40 @@ has-props
 
 
 3151
+
+tx_latex.m4
+file
+
+
+
+
+2011-03-09T03:43:46.000000Z
+a948dc7eeea249d0ac20503dd3bdc1fd
+2009-08-09T17:02:35.565517Z
+3184
+cary
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1018
 
 tx_gpulib.m4
 file
@@ -3834,40 +3868,6 @@ has-props
 
 2257
 
-tx_fc_module_capitalization.m4
-file
-
-
-
-
-2011-03-09T03:43:46.000000Z
-13ed1ff57e9c31aa06d94e6ceeaddfa1
-2010-03-16T18:37:23.114736Z
-3435
-cary
-has-props
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1637
-
 f77.m4
 file
 
@@ -3901,6 +3901,40 @@ has-props
 
 
 3551
+
+tx_fc_module_capitalization.m4
+file
+
+
+
+
+2011-03-09T03:43:46.000000Z
+13ed1ff57e9c31aa06d94e6ceeaddfa1
+2010-03-16T18:37:23.114736Z
+3435
+cary
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1637
 
 tx_tau.m4
 file
@@ -3936,40 +3970,6 @@ has-props
 
 3621
 
-rmcomms.sed
-file
-
-
-
-
-2011-03-09T03:43:46.000000Z
-ea9f24158ac2982104a45d5e287eef79
-2010-05-07T00:23:20.662280Z
-3520
-cary
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-731
-
 numpy.m4
 file
 
@@ -4004,17 +4004,51 @@ has-props
 
 1840
 
-mpif77.m4
+rmcomms.sed
 file
 
 
 
 
 2011-03-09T03:43:46.000000Z
-337fabdb8af24dcf8d3b1ed56564a3dd
-2010-01-15T18:43:10.251938Z
-3366
-dws
+ea9f24158ac2982104a45d5e287eef79
+2010-05-07T00:23:20.662280Z
+3520
+cary
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+731
+
+x11.m4
+file
+
+
+
+
+2011-03-09T03:43:46.000000Z
+8655bece539ae58027cad137c7f67c5c
+2005-05-10T16:38:03.000000Z
+1523
+ijs
 has-props
 
 
@@ -4036,7 +4070,7 @@ has-props
 
 
 
-6272
+1945
 
 bindist.am
 file
@@ -4072,17 +4106,17 @@ has-props
 
 2974
 
-x11.m4
+mpif77.m4
 file
 
 
 
 
 2011-03-09T03:43:46.000000Z
-8655bece539ae58027cad137c7f67c5c
-2005-05-10T16:38:03.000000Z
-1523
-ijs
+337fabdb8af24dcf8d3b1ed56564a3dd
+2010-01-15T18:43:10.251938Z
+3366
+dws
 has-props
 
 
@@ -4104,7 +4138,7 @@ has-props
 
 
 
-1945
+6272
 
 nm.m4
 file
@@ -4208,17 +4242,17 @@ has-props
 
 1049
 
-tx_gatransport.m4
+ntcbase.m4
 file
 
 
 
 
 2011-03-09T03:43:46.000000Z
-141f2cfa4e051a1c05604b846348c16b
-2010-10-26T17:22:40.107875Z
-3723
-ammar
+96e40602004ab3d07c81d7f9b9fa659d
+2010-01-15T18:43:10.251938Z
+3366
+dws
 has-props
 
 
@@ -4240,7 +4274,7 @@ has-props
 
 
 
-3087
+8682
 
 tx_fciowrappers.m4
 file
@@ -4276,17 +4310,17 @@ has-props
 
 6675
 
-ntcbase.m4
+tx_gatransport.m4
 file
 
 
 
 
 2011-03-09T03:43:46.000000Z
-96e40602004ab3d07c81d7f9b9fa659d
-2010-01-15T18:43:10.251938Z
-3366
-dws
+141f2cfa4e051a1c05604b846348c16b
+2010-10-26T17:22:40.107875Z
+3723
+ammar
 has-props
 
 
@@ -4308,7 +4342,7 @@ has-props
 
 
 
-8682
+3087
 
 f77flags.m4
 file

@@ -11,7 +11,7 @@
 ## ############################################################################
 
 libdir = $(prefix)/lib/$(FC_LIBSUBDIR)
-
+#
 dist_noinst_DATA= \
   pamx_mi.inc \
   pamx_ms.inc \
@@ -27,7 +27,7 @@ libgacodenclass_la_SOURCES = \
   u_lu_backsub.f \
   u_lu_decomp.f \
   write_mod.f
-   
+#
 all-local:
 	for i in $(dist_noinst_DATA) ; \
 	  do \
@@ -36,8 +36,8 @@ all-local:
 
 # To get to work with optimization reducing compiler wrappers
 AM_LIBTOOLFLAGS = --tag=FC
-AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(FFTW_INC) 
-AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(FFTW_INC) 
+AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(FFTW_INC)
+AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(FFTW_INC)
 
 
 CLEANFILES = *.mod *.f90 *.lo *.lst *.la

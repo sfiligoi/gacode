@@ -8,10 +8,7 @@
 ## $Id: Makefile.am 36 2010-01-11 21:04:36Z srinath $
 ## ############################################################
 
-SUBDIRS= GEO gyro2gkv input iterdb_read fieldline spectra summary vtkgyro
-
-EXTRA_DIST = \
-	README.help
+SUBDIRS= PostGYRO fieldline gyro2gkv spectra summary #input  vtkgyro
 
 MAINTAINERCLEANFILES    = Makefile.in 
 

@@ -9,10 +9,10 @@
 
 ## ############################################################
 
-SUBDIRS	= BLEND math GEO EXPRO TRANSPOSE SSUB UMFPACK EIGEN src peek tools sim python bin
+SUBDIRS	= BLEND TRANSPOSE SSUB src install peek tools bin vugyro
 
 datadir = $(prefix)/gyro
-dist_data_DATA = VERSION
+dist_data_DATA = CHANGES
 
 all-local: link-data-local
 

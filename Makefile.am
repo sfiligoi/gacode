@@ -11,15 +11,17 @@
 
 ACLOCAL_AMFLAGS = -I config
 
-SUBDIRS = shared tglf neo
+#SUBDIRS = shared tglf neo
+SUBDIRS = envvars shared gato neo
 
 if HAVE_MPI
-SUBDIRS += gyro tgyro
+SUBDIRS += gyro 
 endif
+
+
 
 MAINTAINERCLEANFILES    = Makefile.in
 
-EXTRA_DIST = svninfo.txt
 packagedir = $(prefix)/share
 package_DATA = config.summary
 

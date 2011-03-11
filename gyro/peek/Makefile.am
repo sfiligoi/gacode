@@ -25,24 +25,18 @@ AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) $(gyro_include
 
 
 
-peek_SOURCES = peek.f90 \
+peek_SOURCES = \
 	       peek_globals.f90 \
 	       read_profile_vugyro.f90 \
-	       read_time.f90 
+	       read_time.f90 \
+         peek.f90 
 
-peek_LDADD  = $(top_builddir)/gyro/src/libGYRO.la 
+peek_LDADD  = $(top_builddir)/gyro/src/libgacodegyro.la 
 #	@FFTW_LIBS@  @LAPACK_LIBS@  @BLAS_LIBS@ $(IOLIBS) $(Z_LIBS) \
 #	$(top_builddir)/gyro/EXPRO/libEXPRO.la
 #
 peek_INCLUDES = \
 	-I $(top_builddir)/gyro/src 
-#	-I $(top_builddir)/gyro/BLEND \
-#	-I $(top_builddir)/gyro/math \
-#	-I $(top_builddir)/gyro/TRANSPOSE \
-#	-I $(top_builddir)/gyro/SSUB \
-#	-I $(top_builddir)/gyro/GEO \
-#	-I $(top_builddir)/gyro/UMFPACK \
-#	-I $(top_builddir)/gyro/EXPRO
 
 if TX_FORTRAN_MODNAMEISCAP
 include_HEADERS = PEEK_GLOBALS.$(TX_FORTRAN_MODEXT)  
