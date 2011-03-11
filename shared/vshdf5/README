@@ -1,0 +1,48 @@
+
+   Authors: S.E. Kruger, S. Vadlamani, and J.R. Cary
+   Purpose:
+     This is to enable the writing of VisSchema compliant
+     HDF5 data from GYRO.  
+
+   Background:
+     HDF5 has many features that make it a worthwhile data format:
+       - Cross-platform binary format
+       - Flexible data layout
+       - Parallel I/O if you go through the trouble of doing so
+       - Good tool support, including the very excellent Tables
+         python module
+       - A lot of work has been done on providing high performance
+         writing at the disk level, and this work continues on
+         supercomputing systems.
+      The bad things about HDF5 are:
+       - The build process can be a pain, although this has improved
+         significantly as of the 1.6 series.
+       - The calls are generally low-level which is inconvenient
+         and somewhat bewildering to use because of the terminology
+         used by the HDF5 team.
+       - It is so flexible that there is no guarantee that your HDF5
+         file can be read by a visualization package that "supports
+         HDF5".  
+
+      The last reason motivated the development of the VisSchema format
+      which is a way of marking up the HDF5 data using attributes that
+      tells the visualization reader how to interpret the data.  At the
+      simplest level, it tells the reader that this variable is
+      associated with that grid.  More details can be found at the
+      VizSchema website:
+
+    Implementation:
+      hdf5_fcapi.f: 
+        the layer that sits just on top of HDF5 and makes it easy to do
+        things like open files and dump arrays (which in itself requires
+        multiple calls to HDF5). 
+
+      write_hdf5.f / write_hdf5_dummy.f:
+        the file that actually writes out the gyro data.  Only a few
+        calls are needed so the dummy file is particularly simple.
+
+      hdf5_mod.f
+
+
+        
+
