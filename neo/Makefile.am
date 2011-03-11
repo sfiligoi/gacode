@@ -9,10 +9,10 @@
 
 ## ############################################################
 
-SUBDIRS	= bin python sim src tools
+SUBDIRS	= bin nclass src #sim src tools
 
 datadir = $(prefix)/neo
-dist_data_DATA = VERSION CHANGES
+dist_data_DATA = CHANGES
 
 all-local: link-data-local
 

@@ -12,15 +12,15 @@
 
 MAINTAINERCLEANFILES    = Makefile.in 
 
-dist_noinst_DATA= \
-HELP  
+dist_noinst_DATA= 
 
 dist_bin_SCRIPTS= \
- 	neo_parse  \
-	neo_sim_warn \
-	neo \
-	neo_sim_generate \
-     	neo_version_message
+  neo \
+  neo_parse.py \
+  neo_reg \
+  neo_reg_do \
+  neo_sim_warn \
+  neo_version_message 
 	
 
 all-local:
