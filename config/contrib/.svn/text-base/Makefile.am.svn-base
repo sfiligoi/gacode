@@ -1,0 +1,44 @@
+## ##########################################################################
+##
+## File:	Makefile.am
+##
+## Purpose:	Run automake at the top level to make Makefile.in in all
+##		subdirectories.
+##
+## Version:	$Id$
+##
+## Copyright &copy; 1999-2002, University of Colorado
+## Copyright &copy; 2002-2009, University of Colorado and Tech-X Corporation
+## See LICENSE file for conditions of use.
+##
+## ##########################################################################
+
+# Following is config.guess config.sub depcomp install-sh missing mkinstalldirs
+# along with Makefile.in *.am *.sh *.m4 *.pl
+
+# CONFIG_DIST	=
+
+DIST_FILES = COPYING
+DIST_SUFFIXES = .am .m4 .pl .sh
+# NODIST_FILES = Makefile.am
+EXTRA_DIST = \
+  acx_blas.m4 acx_lapack.m4 ax_f90_module_flag.m4 \
+  acx_f77_cmain_fflags.m4 ax_f90_module_extension.m4
+
+cleanautoconf:
+	rm -f Makefile.in
+	if test -n "$(SUBDIRS)"; then \
+	  for i in $(SUBDIRS); do cd $$i; $(MAKE) cleanautoconf; done \
+	fi
+	rm -f Makefile.bak
+	mv Makefile Makefile.bak
+
+.PHONY: cleanautoconf
+
+## #######
+##
+## Other targets
+##
+## #######
+
+include ../filelists.am

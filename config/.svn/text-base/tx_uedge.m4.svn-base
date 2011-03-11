@@ -1,0 +1,69 @@
+dnl ######################################################################
+dnl
+dnl File:	tx_uedge.m4
+dnl
+dnl Purpose:	Determine where the uedge files are.
+dnl
+dnl Version:	$Id$
+dnl
+dnl Copyright 2001-2010, Tech-X Corporation.  Redistribution allowed provided
+dnl this copyright statement remains intact.
+dnl
+dnl ######################################################################
+
+dnl ######################################################################
+dnl
+dnl Determine the location of uedge
+dnl
+dnl ######################################################################
+
+builtin(include, config/txsearch.m4)
+
+dnl Locate all the uedge related includes and libraries
+AC_ARG_WITH(uedge-subdir,
+  AC_HELP_STRING([--with-uedge-subdir=<uedge-subdir>],
+    [to look for installations under <uedge-subdir>]),
+    UEDGE_SUBDIR="$withval")
+if test -n "$UEDGE_SUBDIR"; then
+  UEDGE_SUBDIRS=$UEDGE_SUBDIR
+else
+  if test x$parallel = xyes; then
+    UEDGE_SUBDIRS="uedge-par uedgepmi" # Second deprecated as of 1May2010
+  else
+    UEDGE_SUBDIRS=uedge
+  fi
+fi
+unset UEDGE_PATH
+for i in `echo $SUPRA_SEARCH_PATH | tr ':' ' '`; do
+  for j in $UEDGE_SUBDIRS; do
+    UEDGE_PATH="$UEDGE_PATH:$i/$j"
+  done
+done
+
+# Find shared (cxxpy) includes and libraries.
+# REMEMBER: uebase not needed when run as a coponent.
+TX_LOCATE_PKG(
+  [uedge-shared],
+  [$UEDGE_PATH],
+  [UedgeIfc.h],
+  [uecxxpy, uecxxpycli],
+  [uebase],
+  [uecxxpy])
+
+# Find shared object
+
+if test -f $UEDGE_LIBDIR/uedgeC.so; then
+  UEDGEC_SO=$UEDGE_LIBDIR/uedgeC.so
+fi
+AC_SUBST(UEDGEC_SO)
+echo "    UEDGEC_SO                     : "$UEDGEC_SO >>$config_summary_file
+
+# Find static (cxxst) includes and libraries
+TX_LOCATE_PKG(
+        [uedge-static],
+        [$UEDGE_PATH],
+        [UedgeIfc.h],
+        [uecxxst, uestat],
+        [uebase],
+        [uecxxst, uestat])
+

@@ -1,0 +1,33 @@
+dnl###################################################################
+dnl
+dnl File:	txutils.m4
+dnl
+dnl Purpose:	For finding txutils and its executables
+dnl
+dnl Version:	$Id$
+dnl
+dnl###################################################################
+
+echo  >> $config_summary_file
+echo "txutils executables and directories:  " >> $config_summary_file
+
+AC_PATH_PROGS(TXPP_PY, txpp.py, "", $SERIAL_DIR/bin:$SERIAL_DIR/txutils:$PARALLEL_DIR/bin:$PARALLEL_DIR/txutils)
+if test -z "$TXPP_PY"; then
+  AC_MSG_ERROR(Unable to find txpp.py.  Quitting.)
+fi
+AC_SUBST(TXPP_PY)
+TX_PRINT_VAR(TXPP_PY)
+TXUTILS_DIR=`dirname $TXPP_PY`
+AC_SUBST(TXUTILS_DIR)
+TX_PRINT_VAR(TXUTILS_DIR)
+
+AC_PATH_PROGS(VSH5_PLOTFILE_PY, vsh5plotfile.py, "", $TXUTILS_DIR:$TXUTILS_DIR/vsh5plot)
+if test -z "$VSH5_PLOTFILE_PY"; then
+  AC_MSG_ERROR(Unable to find vsh5plotfile.py.  Quitting.)
+fi
+AC_SUBST(VSH5_PLOTFILE_PY)
+TX_PRINT_VAR(VSH5_PLOTFILE_PY)
+VSH5PLOT_DIR=`dirname $VSH5_PLOTFILE_PY`
+AC_SUBST(VSH5PLOT_DIR)
+TX_PRINT_VAR(VSH5PLOT_DIR)
+

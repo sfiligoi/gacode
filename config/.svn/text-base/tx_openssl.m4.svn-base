@@ -1,0 +1,48 @@
+dnl ######################################################################
+dnl
+dnl
+dnl File:	openssl.m4
+dnl
+dnl Purpose:	Find OpenSSL stuff for Makefiles
+dnl
+dnl Version:	$Id$
+dnl
+dnl Copyright 2009-2010, Tech-X Corporation.  This file may be freely
+dnl distributed provided copyright statement remains in place.
+dnl
+dnl ######################################################################
+
+# Find includes and libraries
+
+unset OPENSSL_PATH
+for i in `echo $SUPRA_SEARCH_PATH | tr ':' ' '`; do
+  OPENSSL_PATH="$OPENSSL_PATH:$i/openssl"
+done
+OPENSSL_PATH="$OPENSSL_PATH:/usr/local:/usr"
+
+# echo Looking for openssl libs in subdir lib/$FC_LIBSUBDIR
+TX_LOCATE_PKG(
+  [OPENSSL],
+  [$OPENSSL_PATH],
+  [ssl.h],
+  [crypto, ssl],
+  [include:include/openssl],
+  [lib64:lib],
+)
+if test -z "$OPENSSL_LIBDIR"; then
+  AC_MSG_ERROR("OpenSSL libraries not found.")
+fi
+
+# Find binary
+
+OPENSSL_ROOT=`dirname $OPENSSL_LIBDIR`
+AC_PATH_PROG(OPENSSL, openssl, "", $OPENSSL_ROOT/bin:$PATH)
+if test -z "$OPENSSL"; then
+  AC_MSG_ERROR("OpenSSL executable not found.")
+fi
+OPENSSL_BINDIR=`dirname $OPENSSL`
+TX_PRINT_VAR(OPENSSL_ROOT)
+TX_PRINT_VAR(OPENSSL_BINDIR)
+TX_PRINT_VAR(OPENSSL)
+
+

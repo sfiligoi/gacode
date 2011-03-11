@@ -1,0 +1,97 @@
+dnl ######################################################################
+dnl
+dnl File:	txphysics.m4
+dnl
+dnl Purpose:	Determine the locations of the txphysic component
+dnl		includes and libraries. Componenets are nsecc and
+dnl		txcrange.
+dnl
+dnl Version: $Id$
+dnl
+dnl Tech-X configure system
+dnl
+dnl ######################################################################
+
+builtin(include, config/txsearch.m4)
+
+dnl ######################################################################
+dnl
+dnl Construct path from anything in environment or on command line
+dnl followed by supra-search-path directories.  Then locate package.
+dnl
+dnl ######################################################################
+
+AC_ARG_WITH(txphysics-dir, AC_HELP_STRING([--with-txphysics-dir],
+        [txphysics installation directory]),
+        TXPHYSICS_DIR="$withval")
+TXPHYSICS_PATH=$TXPHYSICS_DIR
+TXPHYSICS_SP=$SUPRA_SEARCH_PATH
+if test "$parallel" = no; then
+  txphysics_dirs="txphysics"
+else
+  txphysics_dirs="txphysics-ben txphysics"
+fi
+for j in $txphysics_dirs; do
+  for i in `echo $TXPHYSICS_SP | tr ':' ' '`; do
+    TXPHYSICS_PATH="$TXPHYSICS_PATH:$i/$j"
+  done
+done
+TX_LOCATE_PKG(
+  [TXPHYSICS],
+  [$TXPHYSICS_PATH],
+  [txphysics_version.h],
+  [txphysics])
+
+dnl ######################################################################
+dnl
+dnl Verify that version is sufficiently new
+dnl
+dnl ######################################################################
+
+if test -n "$TXPHYSICS_VERSION_H"; then
+  AC_MSG_CHECKING(TxPhysics version)
+  TXPHYSICS_VERSION=`grep TXPHYSICS_VERSION $TXPHYSICS_VERSION_H | grep -v '/\*' | sed 's/^.* \"//' | sed 's/\"//g'`
+  if test -z "$TXPHYSICS_VERSION"; then
+    AC_MSG_RESULT(not found.)
+    AC_MSG_WARN(TXPHYSICS_VERSION not present in $TXPHYSICS_VERSION_H.  Please reinstall.)
+  else
+    AC_MSG_RESULT($TXPHYSICS_VERSION)
+    TXPHYSICS_MAJOR_VERSION=`echo $TXPHYSICS_VERSION | sed 's/\..*$//'`
+
+    if test -z "$TXPHYSICS_OK_MAJOR_VERSION"; then
+      TXPHYSICS_OK_MAJOR_VERSION=2
+    fi
+    if test -z "$TXPHYSICS_OK_MINOR_VERSION"; then
+      TXPHYSICS_OK_MINOR_VERSION=0
+    fi
+    if test -z "$TXPHYSICS_OK_RELEASE"; then
+      TXPHYSICS_OK_RELEASE=0
+    fi
+    if test -z "$TXPHYSICS_OK_VERSION"; then
+      TXPHYSICS_OK_VERSION=$TXPHYSICS_OK_MAJOR_VERSION.$TXPHYSICS_OK_MINOR_VERSION.$TXPHYSICS_OK_RELEASE
+    fi
+
+    if test $TXPHYSICS_MAJOR_VERSION -lt $TXPHYSICS_OK_MAJOR_VERSION; then
+      echo Major version must be at least $TXPHYSICS_OK_MAJOR_VERSION
+      exit
+    fi
+    if test $TXPHYSICS_MAJOR_VERSION -eq $TXPHYSICS_OK_MAJOR_VERSION; then
+      TXPHYSICS_MINOR_VERSION=`echo $TXPHYSICS_VERSION | sed "s/^$TXPHYSICS_MAJOR_VERSION\.//" | sed 's/\..*$//'`
+      # echo TXPHYSICS_MINOR_VERSION = $TXPHYSICS_MINOR_VERSION
+      if test $TXPHYSICS_MINOR_VERSION -lt $TXPHYSICS_OK_MINOR_VERSION; then
+        echo Minor version must be at least $TXPHYSICS_OK_MINOR_VERSION
+        exit
+      fi
+      if test $TXPHYSICS_MINOR_VERSION -eq $TXPHYSICS_OK_MINOR_VERSION; then
+        TXPHYSICS_RELEASE=`echo $TXPHYSICS_VERSION | sed 's/^.*\.//'`
+        # echo TXPHYSICS_RELEASE = $TXPHYSICS_RELEASE
+        if test $TXPHYSICS_RELEASE -lt $TXPHYSICS_OK_RELEASE; then
+          echo Minor version must be at least $TXPHYSICS_OK_RELEASE
+          exit
+        fi
+      fi
+    fi
+    echo TxPhysics of sufficiently high version
+  fi
+fi
+
