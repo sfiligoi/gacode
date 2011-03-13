@@ -220,6 +220,7 @@ AC_CONFIG_FILES([Makefile
     gyro/tools/spectra/Makefile
     gyro/tools/spectra/src/Makefile
     gyro/tools/summary/Makefile
+    gyro/tools/PlotGYROpy/Makefile
     gyro/bin/Makefile
     gyro/vugyro/Makefile
     neo/Makefile
