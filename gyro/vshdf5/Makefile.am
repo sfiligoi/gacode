@@ -22,7 +22,7 @@ AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) $(gyro_include
 
 if HAVE_FCIOWRAPPERS
 libgyro_vshdf5_la_SOURCES = \
-	gyro_hdf5_mod.f90 \
+	gyro_vshdf5_mod.f90 \
 	gyro_write_master_hdf5.f90 
 else
 libgyro_vshdf5_la_SOURCES = \

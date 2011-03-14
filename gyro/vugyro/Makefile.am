@@ -101,7 +101,6 @@ linear_freq_event.pro \
 linear_freq_see.pro \
 linear_spec_event.pro \
 linear_spec_see.pro \
-list.txt \
 loadsim.pro \
 logo-vugyro.jpg \
 make_fine_grid.pro \

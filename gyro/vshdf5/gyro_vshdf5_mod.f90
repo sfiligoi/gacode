@@ -1,9 +1,9 @@
 !--------------------------------------------------
 ! A module with common data to make communication 
-! with the distributed arrays from write_hdf5.F90
+! with the distributed arrays in some of the vshdf5
 ! easier.
 !------------------------------------------------
- module hdf5_mod
+ module gyro_vshdf5_mod
   real, dimension(:,:,:), allocatable :: alpha_phi
   real, dimension(:,:,:), allocatable :: alpha_phi_fine
 

@@ -10,8 +10,9 @@
 ## ############################################################
 
 bin_PROGRAMS=gyro
+lib_LTLIBRARIES = libgacodegyro.la
 
-SUBDIRS	= BLEND TRANSPOSE SSUB src install peek tools bin vugyro vshdf5
+SUBDIRS	= BLEND TRANSPOSE SSUB src install tools bin vugyro vshdf5 peek
 
 datadir = $(prefix)/gyro
 
@@ -21,6 +22,19 @@ GACODE_ROOT=$(abs_top_builddir)
 
 LMATH=@LAPACK_LIBS@ @BLAS_LIBS@ @Z_LIBS@
 IOLIBS=@FCIOWRAPPERS_ALIBS@ @HDF5_ALIBS@ @NETCDF_ALIBS@ @Z_LIBS@
+
+libgacodegyro_la_SOURCES =
+libgacodegyro_la_LIBADD = \
+	libgacodegyro_SRC.la \
+	$(top_builddir)/gyro/BLEND/libgacodeblend.la \
+	$(top_builddir)/shared/math/libgacodemath.la \
+	$(top_builddir)/gyro/TRANSPOSE/libgacodetranspose.la \
+	$(top_builddir)/gyro/SSUB/libgacodessub.la \
+	$(top_builddir)/shared/GEO/libgacodegeo.la \
+	$(top_builddir)/shared/EXPRO/libgacodeexpro.la \
+	$(top_builddir)/shared/UMFPACK/libgacodeumfpack.la \
+	$(top_builddir)/gyro/shared/libvshdf5_gyro.la
+
 
 gyro_SOURCES = gyro.f90
 gyro_LDADD  = $(top_builddir)/gyro/src/libgacodegyro.la \

@@ -12,7 +12,6 @@
 
 libdir = $(prefix)/lib
 noinst_LTLIBRARIES = libgacodegyro_SRC.la
-lib_LTLIBRARIES = libgacodegyro.la
 
 if HAVE_MUMPS
 theCleanupMumps=cleanup_mumps.mumps.f90
@@ -76,7 +75,7 @@ gyro_includes= -I $(top_builddir)/shared/math \
 	-I $(top_builddir)/shared/vshdf5
 
 # To get to work with optimization reducing compiler wrappers
-IOINC=@HDF5_FC_INC@ @FCIOWRAPPERS_INC@
+IOINC=@HDF5_FC_INC@ @FCIOWRAPPERS_INC@ @HDF5_INC@
 #IOINC=@HDF5_INC@ @FCIOWRAPPERS_INC@
 IOLIBS=@FCIOWRAPPERS_ALIBS@ @HDF5_ALIBS@ @NETCDF_ALIBS@
 AM_LIBTOOLFLAGS = --tag=FC
@@ -245,18 +244,6 @@ libgacodegyro_SRC_la_SOURCES = \
   gyro_init.f90 \
 	gyro_run.f90 \
 	gyro_do.f90  
-
-libgacodegyro_la_SOURCES =
-libgacodegyro_la_LIBADD = \
-	libgacodegyro_SRC.la \
-	$(top_builddir)/gyro/BLEND/libgacodeblend.la \
-	$(top_builddir)/shared/math/libgacodemath.la \
-	$(top_builddir)/gyro/TRANSPOSE/libgacodetranspose.la \
-	$(top_builddir)/gyro/SSUB/libgacodessub.la \
-	$(top_builddir)/shared/GEO/libgacodegeo.la \
-	$(top_builddir)/shared/EXPRO/libgacodeexpro.la \
-	$(top_builddir)/shared/UMFPACK/libgacodeumfpack.la \
-	$(top_builddir)/gyro/shared/libvshdf5_gyro.la
 
 if TX_FORTRAN_MODNAMEISCAP
 include_HEADERS = GYRO_GLOBALS.$(TX_FORTRAN_MODEXT) GYRO_INTERFACE.$(TX_FORTRAN_MODEXT)
