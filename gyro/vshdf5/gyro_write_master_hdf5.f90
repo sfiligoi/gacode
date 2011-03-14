@@ -11,9 +11,7 @@ subroutine write_hdf5_data(datafile,action)
   !    profile_vugyro.out
   !------------------------------------------
   use gyro_globals
-  use hdf5_mod
   use hdf5_api
-  use hdf5
   !------------------------------------------
   implicit none
   include 'mpif.h'

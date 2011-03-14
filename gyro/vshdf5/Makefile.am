@@ -15,7 +15,7 @@ noinst_LTLIBRARIES = libgyro_vshdf5.la
 gyro_includes= -I $(top_builddir)/gyro/src
 
 # To get to work with optimization reducing compiler wrappers
-IOINC=@HDF5_INC@ @FCIOWRAPPERS_INC@
+IOINC=@HDF5_INC@ @FCIOWRAPPERS_INC@ @HDF5_FC_INC@ -I$(abs_top_builddir)/shared/vshdf5
 AM_LIBTOOLFLAGS = --tag=FC
 AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) $(gyro_includes) $(CPPF90_FLAGS) -I.
 AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) $(gyro_includes) $(CPPF90_FLAGS) -I.
