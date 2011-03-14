@@ -9,7 +9,7 @@
 
 ## ############################################################
 
-SUBDIRS	= math GEO UMFPACK EXPRO profiles_gen python bin exec install
+SUBDIRS	= math GEO UMFPACK EXPRO profiles_gen vshdf5 python bin exec install
 
 #datadir = $(prefix)/gyro
 #dist_data_DATA = VERSION

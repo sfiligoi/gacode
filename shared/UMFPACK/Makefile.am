@@ -11,7 +11,7 @@
 ## ############################################################################
 
 
-libdir = $(prefix)/lib/$(FC_LIBSUBDIR)
+libdir = $(prefix)/lib
 noinst_LTLIBRARIES = libgacodeumfpack.la
 HARWELL	= mc21b.f mc13e.f
 UMFD = \

@@ -53,7 +53,25 @@ module gyro_globals
   ! Path to INPUT, read in the get_inputpath subroutine
   !
   character(len=80) :: path
+
   !---------------------------------------------------------
+  ! Files for vshdf5 i/o control
+  !
+  !-PRE integer :: iohdf5out = 1
+  integer :: iohdf5out = 0
+  ! time intervals for hdf5 write outs
+  integer :: fine_time_skip             ! Fine files for synthetic diagnostics
+  integer :: threed_time_skip           ! 3D files for plotting
+  integer :: n_alpha_fine = 1
+  integer :: n_alpha_threed
+  integer :: n_alpha_plot = 20
+  ! toroidal direction
+  real  :: theta_fine_start
+  real  :: theta_fine_end
+  ! 
+  !SEK - these are synthetic diagnostic vars.  Also should be read in
+  real :: omega_exp=-0.0722
+  real :: zeta_offset=0.
 
   !---------------------------------------------------------
   ! Newline characters:
@@ -367,7 +385,9 @@ module gyro_globals
   complex, dimension(:,:,:,:), allocatable :: cs_blend_prime
   !
   complex, dimension(:,:,:), allocatable :: blend_plot
+  complex, dimension(:,:,:), allocatable :: blend_fine
   complex, dimension(:,:,:), allocatable :: blend_prime_plot
+  complex, dimension(:,:,:), allocatable :: blend_prime_fine
   complex, dimension(:,:), allocatable :: blend_r0_plot
   !---------------------------------------------------------
 
@@ -1020,5 +1040,26 @@ module gyro_globals
   integer, dimension(40) :: uinfo
   integer, dimension(4,20) :: keep  
   !------------------------------------------------------
+
+  !---------------------------------------------------------
+  ! Files for i/o control
+  !
+  !-PRE integer :: iohdf5out = 1
+  integer :: iohdf5out = 0
+  ! time intervals for hdf5 write outs
+  integer :: fine_time_skip
+  integer :: threed_time_skip
+  ! pie-slice alpha ??
+  integer :: n_alpha_fine = 1
+  integer :: n_alpha_threed
+  integer :: n_alpha_plot = 20
+  ! toroidal direction
+  real  :: theta_fine_start
+  real  :: theta_fine_end
+  ! 
+  !SEK - these are synthetic diagnostic vars.  Also should be read in
+  real :: omega_exp=-0.0722
+  real :: zeta_offset=0.
+  !---------------------------------------------------------
 
 end module gyro_globals

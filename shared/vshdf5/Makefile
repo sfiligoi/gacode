@@ -6,36 +6,21 @@ else
    FFLAGS=${FOPT}
 endif
 
-LLIB=gyro_vshdf5
-DUMLLIB=gyro_vshdf5_dummy
-
-OBJECTS =  \
-	hdf5_fcapi.o \
-	hdf5_mod.o \
-	write_distributed_complex_h5.o \
-	write_distributed_real_h5.o \
-	write_hdf5.o
-
-DUM_OBJECTS =  \
-	write_hdf5_dummy.o
+OBJECTS =  hdf5_fcapi.o 
 
 .SUFFIXES : .o .f90  .F90 
 
-all: $(VSHDF_MAKE)
+all: $(VSHDF5_MAKECMD)
 
-gyro_vshdf5: $(OBJECTS)
-	$(ARCH) $(LLIB).a $(OBJECTS)
+vshdf5: $(OBJECTS)
+	$(ARCH) libvshdf5.a $(OBJECTS)
 
-gyro_vshdf5_dummy: $(DUM_OBJECTS)
-	$(ARCH) $(DUMLLIB).a $(DUM_OBJECTS)
+.f.o :
+	$(FC) $(FMATH) $(FFLAGS) $(HDF5_INC) -c $<
 
-.f90.o :
-	$(FC) $(FMATH) $(FFLAGS) -c $<
-
-.F90.o :
-	$(FC) $(FMATH) $(FFLAGS) -c $<
+.F.o :
+	$(FC) $(FMATH) $(FFLAGS) $(HDF5_INC) -c $<
 
 #SEK: Need to figure this out.
 clean:
 	rm -f *.o $(LLIB).a ${GACODE_ROOT}/modules/expro_interface.mod
-

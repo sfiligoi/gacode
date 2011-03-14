@@ -9,10 +9,22 @@
 
 ## ############################################################
 
-SUBDIRS	= BLEND TRANSPOSE SSUB src install peek tools bin vugyro
+bin_PROGRAMS=gyro
+
+SUBDIRS	= BLEND TRANSPOSE SSUB src install peek tools bin vugyro vshdf5
 
 datadir = $(prefix)/gyro
+
 dist_data_DATA = CHANGES
+#SEK: Exports a bash variable?  Seems odd.
+GACODE_ROOT=$(abs_top_builddir)
+
+LMATH=@LAPACK_LIBS@ @BLAS_LIBS@ @Z_LIBS@
+IOLIBS=@FCIOWRAPPERS_ALIBS@ @HDF5_ALIBS@ @NETCDF_ALIBS@ @Z_LIBS@
+
+gyro_SOURCES = gyro.f90
+gyro_LDADD  = $(top_builddir)/gyro/src/libgacodegyro.la \
+	@FFTW_LIBS@  $(LMATH) $(IOLIBS)
 
 all-local: link-data-local
 
@@ -26,7 +38,3 @@ link-data-local:
 	fi
 
 MAINTAINERCLEANFILES    = Makefile.in 
-
-
-
-

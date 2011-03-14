@@ -165,9 +165,6 @@ dnl-----------------------------------------------------------------------
 
 USE_IO_INFO="true"
 builtin(include, config/tx_fciowrappers.m4)
-if test "x$NETCDF_LIBS" = "x"; then
-   AC_MSG_ERROR([netcdf was not found. NOT SURE HOW TO SET NETCDF LOCATION! (TO FIX)])
-fi
 # CPPF90_FLAGS="$FPPFLAGS $CPPFLAGS"
 CPPF90_FLAGS="$CPP_HAVE_MPI $FLUSH_MACRO $FPPFLAGS"
 AC_SUBST(CPPF90_FLAGS)
@@ -194,6 +191,7 @@ AC_CONFIG_FILES([Makefile
     shared/GEO/Makefile
     shared/UMFPACK/Makefile
     shared/EXPRO/Makefile
+    shared/vshdf5/Makefile
     shared/profiles_gen/Makefile
     shared/profiles_gen/astra/Makefile
     shared/profiles_gen/modinput/Makefile
@@ -210,6 +208,7 @@ AC_CONFIG_FILES([Makefile
     gyro/BLEND/Makefile
     gyro/TRANSPOSE/Makefile
     gyro/SSUB/Makefile
+    gyro/vshdf5/Makefile
     gyro/src/Makefile
     gyro/install/Makefile
     gyro/peek/Makefile

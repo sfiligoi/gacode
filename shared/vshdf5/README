@@ -1,8 +1,9 @@
 
-   Authors: S.E. Kruger, S. Vadlamani, and J.R. Cary
+   Authors: S.E. Kruger and J.R. Cary
    Purpose:
      This is to enable the writing of VisSchema compliant
-     HDF5 data from GYRO.  
+     HDF5 data.  Here I am taking the relevant file from 
+     the Tech-X fciowrappers library.
 
    Background:
      HDF5 has many features that make it a worthwhile data format:
@@ -36,13 +37,3 @@
         the layer that sits just on top of HDF5 and makes it easy to do
         things like open files and dump arrays (which in itself requires
         multiple calls to HDF5). 
-
-      write_hdf5.f / write_hdf5_dummy.f:
-        the file that actually writes out the gyro data.  Only a few
-        calls are needed so the dummy file is particularly simple.
-
-      hdf5_mod.f
-
-
-        
-

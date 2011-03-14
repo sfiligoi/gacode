@@ -86,7 +86,14 @@ subroutine gyro_do(skipinit)
         endif
      endif
   endif
+  if (debug_flag == 1) then
   !----------------------------------------------------------
+  !sv dump the global variables that can be read
+  call gyro_dump_input
+  !sv dump the inteface variables for comparison
+  call gyro_dump_interface
+  endif
+
 
   !------------------------------------------------------------
   ! The order of these routines is critical:
@@ -278,6 +285,7 @@ subroutine gyro_do(skipinit)
   ! Large data dump for vugyro
   !
   call write_profile_vugyro(trim(path)//'profile_vugyro.out',1)
+  if (iohdf5out == 1) call write_hdf5_data(trim(path)//'gyro_data.h5',1)
   !------------------------------------------------
 
   !------------------------------------------------------------
@@ -300,7 +308,8 @@ subroutine gyro_do(skipinit)
   !
   if (restart_method /= 1) then
 
-     if (lskipinit == 0) call gyro_write_master(2)
+     if (lskipinit == 0) call write_big(2)
+     if (iohdf5out == 1 .and. lskipinit == 0) call write_hdf5_timedata(2)
 
   endif
   !--------------------------------------------

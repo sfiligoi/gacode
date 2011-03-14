@@ -11,7 +11,7 @@
 ## ############################################################################
 
 
-libdir = $(prefix)/lib/$(FC_LIBSUBDIR)
+libdir = $(prefix)/lib
 noinst_LTLIBRARIES = libgacodegeo.la
 libgacodegeo_la_SOURCES = \
   GEO_interface.f90 \

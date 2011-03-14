@@ -11,7 +11,7 @@
 ## ############################################################################
 
 
-libdir = $(prefix)/lib/$(FC_LIBSUBDIR)
+libdir = $(prefix)/lib
 noinst_LTLIBRARIES = libgacodeexpro.la
 libgacodeexpro_la_SOURCES = \
   EXPRO_interface.f90 \

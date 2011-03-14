@@ -12,7 +12,7 @@
 
 #gyroInc = -I ../src -I ../math @PETSC_INC@ @SLEPC_INC@
 #
-libdir = $(prefix)/lib/$(FC_LIBSUBDIR)
+libdir = $(prefix)/lib
 
 noinst_LTLIBRARIES = libgacodegkeigen.la
 libgacodegkeigen_la_SOURCES = \

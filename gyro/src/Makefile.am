@@ -10,11 +10,7 @@
 ##
 ## ############################################################################
 
-Z_LIBS	= @Z_LIBS@
-Z_ALIBS	= @Z_ALIBS@
-
-libdir = $(prefix)/lib/$(FC_LIBSUBDIR)
-bin_PROGRAMS     = gyro
+libdir = $(prefix)/lib
 noinst_LTLIBRARIES = libgacodegyro_SRC.la
 lib_LTLIBRARIES = libgacodegyro.la
 
@@ -70,20 +66,14 @@ theDoNlfftP=do_nlfft_p.stub.f90
 theMakeNl=make_nl.f90
 endif
 
-#if HAVE_HDF5
-#HDF5IO_FILES=hdf5_mod.f90 write_hdf5.F90 write_distributed_complex_h5.f90 write_distributed_real_h5.f90
-#else
-#HDF5IO_FILES=hdf5_mod.f90 write_hdf5.F90
-#endif
 gyro_includes= -I $(top_builddir)/shared/math \
 	-I $(top_builddir)/shared/GEO \
 	-I $(top_builddir)/gyro/BLEND \
 	-I $(top_builddir)/gyro/SSUB \
 	-I $(top_builddir)/gyro/TRANSPOSE \
 	-I $(top_builddir)/shared/UMFPACK \
-	-I $(top_builddir)/shared/EXPRO 
-
-
+	-I $(top_builddir)/shared/EXPRO  \
+	-I $(top_builddir)/shared/vshdf5
 
 # To get to work with optimization reducing compiler wrappers
 IOINC=@HDF5_FC_INC@ @FCIOWRAPPERS_INC@
@@ -258,7 +248,6 @@ libgacodegyro_SRC_la_SOURCES = \
   GKEIGEN_split_comm.f90 \
 	gyro_do.f90  
 
-
 libgacodegyro_la_SOURCES =
 libgacodegyro_la_LIBADD = \
 	libgacodegyro_SRC.la \
@@ -268,23 +257,8 @@ libgacodegyro_la_LIBADD = \
 	$(top_builddir)/gyro/SSUB/libgacodessub.la \
 	$(top_builddir)/shared/GEO/libgacodegeo.la \
 	$(top_builddir)/shared/EXPRO/libgacodeexpro.la \
-	$(top_builddir)/shared/UMFPACK/libgacodeumfpack.la
-
-
-gyro_SOURCES = gyro.f90
-gyro_LDADD  = $(top_builddir)/gyro/src/libgacodegyro.la \
-	@FFTW_LIBS@  @LAPACK_LIBS@  @BLAS_LIBS@ $(IOLIBS) $(Z_LIBS) \
-	$(top_builddir)/shared/EXPRO/libgacodeexpro.la
-
-gyro_INCLUDES = \
-	-I $(top_builddir)/gyro/src \
-	-I $(top_builddir)/gyro/BLEND \
-	-I $(top_builddir)/shared/math \
-	-I $(top_builddir)/gyro/TRANSPOSE \
-	-I $(top_builddir)/gyro/SSUB \
-	-I $(top_builddir)/shared/GEO \
-	-I $(top_builddir)/shared/UMFPACK \
-	-I $(top_builddir)/shared/EXPRO
+	$(top_builddir)/shared/UMFPACK/libgacodeumfpack.la \
+	$(top_builddir)/gyro/shared/libvshdf5_gyro.la
 
 if TX_FORTRAN_MODNAMEISCAP
 include_HEADERS = GYRO_GLOBALS.$(TX_FORTRAN_MODEXT) GYRO_INTERFACE.$(TX_FORTRAN_MODEXT)
@@ -299,7 +273,5 @@ endif
 
 CLEANFILES = *.mod *.f90 *.lo *.lst *.la
 
-write_hdf5.o: hdf5_mod.o
-write_hdf5.lo: hdf5_mod.lo
 gyro_fieldeigen.o: gyro_fieldeigen_private.o
 gyro_fieldeigen.lo: gyro_fieldeigen_private.lo
