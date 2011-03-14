@@ -10,7 +10,7 @@ export PATH=${PATH}:$gacode_dir/bin:$GYRO_DIR/bin:$NEO_DIR/bin:$TGLF_DIR/bin
 #export IDL_PATH=$IDL_DIR/lib:$GYRO_DIR/vugyro
 func() 
 {
-  local PYTHONADD="$gacode/shared/python $GYRO_DIR/python $NEO_DIR/python $TGLF_DIR/python"
+  local PYTHONADD="$gacode_DIR/shared/python $GYRO_DIR/python $NEO_DIR/python $TGLF_DIR/python"
   echo pythonadd = $PYTHONADD
 
   for i in $PYTHONADD; do
