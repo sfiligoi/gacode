@@ -242,10 +242,8 @@ libgacodegyro_SRC_la_SOURCES = \
   gyro_set_blend_arrays.f90 \
 	$(HDF5IO_FILES) \
 	$(theCleanupMumps) \
-  gyro_gkeigen_do.stub.f90 \
   gyro_init.f90 \
 	gyro_run.f90 \
-  GKEIGEN_split_comm.f90 \
 	gyro_do.f90  
 
 libgacodegyro_la_SOURCES =
