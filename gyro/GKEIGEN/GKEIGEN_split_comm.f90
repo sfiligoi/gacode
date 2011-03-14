@@ -33,7 +33,7 @@ subroutine GKEIGEN_split_comm
   !
   !        n_nek = (n_proc)*M, where M is any integer.
   !
-  if (linsolve_method /= 2) then
+  if ((linsolve_method/=2) .AND. (gkeigen_proc_mult/=1)) then
     gkeigen_proc_mult = 1
     call send_line('gkeigen_proc_mult reset to 1 (non-GKEIGEN run)')
   endif

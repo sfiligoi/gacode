@@ -9,6 +9,34 @@ pro extract_contour,tt
   ny = n_theta_plot*mUt
   a = fltarr(ny,n_r)
 
+  openw, 1, 'r_theta_nu.txt'
+  for irad=0,n_r-1 do begin
+     for ith=0,n_theta_plot-1 do begin
+       nu=geometry[0,ith,irad]
+       printf,1,'{',r[irad],',',th[ith],',',nu,'}'
+     endfor
+  endfor
+  close,1
+
+  for nn=0,n_n-1 do begin
+    nst = strtrim(string(fix(n_tor[nn])),2)
+    tst = strtrim(string(fix(t[tt])),2)
+    pname = 'phi_Apar_' + nst + '_' + tst + '.txt'
+    openw, 1, pname
+    for irad=0,n_r-1 do begin
+       for ith=0,n_theta_plot-1 do begin
+;         nu=geometry[0,ith,irad]
+         phir=U[0,ith,irad,0,nn,tt]
+         phii=U[1,ith,irad,0,nn,tt]
+         Apr =U[0,ith,irad,1,nn,tt]
+         Api =U[1,ith,irad,1,nn,tt]
+         printf,1,'{',phir,',',phii,',',Apr,',',Api,'}'
+       endfor
+    endfor
+    close,1
+  endfor
+
+
   if i_field le 4 then begin
 
     U_temp = complexarr(n_theta_plot+1,n_r)
