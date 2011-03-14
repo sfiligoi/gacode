@@ -195,7 +195,7 @@ x.add('FIELDEIGEN_TOL','1e-6')
 x.add('COLLISION_METHOD','2')
 #addition for hdf5 io
 x.add('IOHDF5OUT', '0')
-x.add('FINE_TIME_SKIP', '0')
+x.add('FINE_TIME_SKIP', '1')
 x.add('N_ALPHA_FINE', '1')
 x.add('N_ALPHA,PLOT', '20')
 x.add('THETA_FINE_START', '0.0')
