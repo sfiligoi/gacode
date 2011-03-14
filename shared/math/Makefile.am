@@ -36,7 +36,6 @@ libgacodemath_la_SOURCES = \
   cub_spline_deriv2.f90 \
   gamma.f \
   energy_integral.f90 \
-  bound_deriv.f90 \
   curtis_rad.f90
 	
 

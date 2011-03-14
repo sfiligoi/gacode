@@ -23,6 +23,8 @@ libgacodegkeigen_la_SOURCES = \
   GKEIGEN_matrix_write.f90 \
   GKEIGEN_catch_error.f90
 
+gyro_includes= -I $(top_builddir)/gyro/src
+
 #if HAVE_PETSC 
 #if HAVE_SLEPC
 ##libEIGEN_la_SOURCES += EIGEN_do.F
@@ -36,7 +38,7 @@ libgacodegkeigen_la_SOURCES = \
 ## To get to work with optimization reducing compiler wrappers
 ## or simply to get .f to work with new automake
 AM_LIBTOOLFLAGS = --tag=FC
-AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) 
-AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) 
+AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(gyro_includes)
+AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(gyro_includes)
 
 CLEANFILES = *.mod *.o *.lo *.lst *.la

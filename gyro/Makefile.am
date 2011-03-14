@@ -12,7 +12,12 @@
 bin_PROGRAMS=gyro
 lib_LTLIBRARIES = libgacodegyro.la
 
-SUBDIRS	= BLEND TRANSPOSE SSUB src install tools bin vugyro vshdf5 peek
+SUBDIRS	= BLEND TRANSPOSE SSUB src install tools bin vugyro gkeigen vshdf5 peek
+
+gyro_includes= -I $(top_builddir)/gyro/src
+AM_LIBTOOLFLAGS = --tag=FC
+AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) $(gyro_includes) $(CPPF90_FLAGS) -I.
+AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) $(gyro_includes) $(CPPF90_FLAGS) -I.
 
 datadir = $(prefix)/gyro
 
@@ -33,10 +38,11 @@ libgacodegyro_la_LIBADD = \
 	$(top_builddir)/shared/GEO/libgacodegeo.la \
 	$(top_builddir)/shared/EXPRO/libgacodeexpro.la \
 	$(top_builddir)/shared/UMFPACK/libgacodeumfpack.la \
+	$(top_builddir)/gyro/GKEIGEN/libgacodegkeigen.la \
 	$(top_builddir)/gyro/vshdf5/libgyro_vshdf5.la
 
 
-gyro_SOURCES = gyro.f90
+gyro_SOURCES = src/gyro.f90
 gyro_LDADD  = libgacodegyro.la @FFTW_LIBS@  $(LMATH) $(IOLIBS)
 
 all-local: link-data-local

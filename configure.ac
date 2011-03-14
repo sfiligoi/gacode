@@ -208,6 +208,7 @@ AC_CONFIG_FILES([Makefile
     gyro/BLEND/Makefile
     gyro/TRANSPOSE/Makefile
     gyro/SSUB/Makefile
+    gyro/GKEIGEN/Makefile
     gyro/vshdf5/Makefile
     gyro/src/Makefile
     gyro/install/Makefile
