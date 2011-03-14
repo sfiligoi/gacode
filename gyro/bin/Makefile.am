@@ -31,7 +31,9 @@ dist_bin_SCRIPTS= \
   gyro_loc \
   gyro_reg_do \
   gyro_single \
-  simdir_test
+  simdir_test \
+  gyro_genDumpInput.py \
+  gyro_genInterface2Global.py
 
 ##	gyro_kill_do \
 
