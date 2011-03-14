@@ -14,7 +14,8 @@ dist_bin_SCRIPTS = \
    tglf \
    tglf_parse.py \
    tglf_sim_warn \
-   tglf_version_message
+   tglf_version_message \
+   tglf_genDumpInput.py
 
 all-local:
 	for i in $(dist_bin_SCRIPTS) ; \

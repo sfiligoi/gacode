@@ -44,7 +44,7 @@ include_HEADERS= tglf_interface.$(TX_FORTRAN_MODEXT)
 tglf_interface.$(TX_FORTRAN_MODEXT): tglf_interface.f90
 endif
 
-EXTRA_DIST = tglf_genDumpInput.py
+EXTRA_DIST = 
 # To get to work with optimization reducing compiler wrappers
 # or simply for directories with mixed F77 and FC
 AM_LIBTOOLFLAGS = --tag=FC
