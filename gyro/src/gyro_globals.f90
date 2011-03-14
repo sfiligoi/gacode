@@ -1041,25 +1041,4 @@ module gyro_globals
   integer, dimension(4,20) :: keep  
   !------------------------------------------------------
 
-  !---------------------------------------------------------
-  ! Files for i/o control
-  !
-  !-PRE integer :: iohdf5out = 1
-  integer :: iohdf5out = 0
-  ! time intervals for hdf5 write outs
-  integer :: fine_time_skip
-  integer :: threed_time_skip
-  ! pie-slice alpha ??
-  integer :: n_alpha_fine = 1
-  integer :: n_alpha_threed
-  integer :: n_alpha_plot = 20
-  ! toroidal direction
-  real  :: theta_fine_start
-  real  :: theta_fine_end
-  ! 
-  !SEK - these are synthetic diagnostic vars.  Also should be read in
-  real :: omega_exp=-0.0722
-  real :: zeta_offset=0.
-  !---------------------------------------------------------
-
 end module gyro_globals
