@@ -7,6 +7,7 @@
 
 subroutine gyro_set_blend_arrays
 
+  use mpi
   use gyro_globals
   use gyro_pointers
   use math_constants
@@ -32,7 +33,6 @@ subroutine gyro_set_blend_arrays
   complex, external :: BLEND_Fp
   !---------------------------------------------------
 
-  include 'mpif.h'
 
   call BLEND_init(blend_fit_order,n_blend)
 

@@ -12,6 +12,7 @@
 
 subroutine get_phi_squared
 
+  use mpi
   use gyro_globals
   use gyro_pointers
   use math_constants
@@ -34,7 +35,6 @@ subroutine get_phi_squared
   real, dimension(n_field) :: ave_phi_n
   !--------------------------------------------------  
 
-  include 'mpif.h'
 
   moment(:,:) = 0.0
 

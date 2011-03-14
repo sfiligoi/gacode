@@ -40,9 +40,8 @@
 
 subroutine get_nonlinear_transfer
 
+  use mpi
   use gyro_globals
-  use gyro_pointers
-  use math_constants
   use gyro_pointers
 
   !---------------------------------------------------------------
@@ -60,12 +59,8 @@ subroutine get_nonlinear_transfer
   real, dimension(n_x) :: Eng_p_loc
 
 
-  !-----------------------------------------------------------------
-  include 'mpif.h'
-  !-----------------------------------------------------------------
-
-  Tr_p_loc(:) = 0.
-  Eng_p_loc(:) = 0.
+  Tr_p_loc(:)  = 0.0
+  Eng_p_loc(:) = 0.0
 
 
   do is = 1,n_kinetic

@@ -7,6 +7,7 @@
 
 subroutine make_poisson_blend(i_elec)
 
+  use mpi
   use gyro_globals
   use gyro_pointers
   use math_constants
@@ -38,8 +39,6 @@ subroutine make_poisson_blend(i_elec)
   !
   complex, external :: BLEND_F
   !---------------------------------------------------
-
-  include 'mpif.h'
 
 
   if (electron_method == 4) then 

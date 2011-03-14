@@ -24,6 +24,7 @@
 
 subroutine fSSUB(x_IN,xt)
 
+  use mpi
   use SSUB_private
 
   !-------------------------------------------------------
@@ -35,7 +36,6 @@ subroutine fSSUB(x_IN,xt)
   complex, intent(inout), dimension(nv1,jsplit,nn) :: xt
   !-------------------------------------------------------
 
-  include 'mpif.h'
 
   s = 0
   do j=1,nj

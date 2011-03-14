@@ -12,6 +12,7 @@
 
 subroutine gyro_conserve_number_ebelli(ks)
 
+  use mpi
   use gyro_globals
   use gyro_pointers
 
@@ -21,8 +22,6 @@ subroutine gyro_conserve_number_ebelli(ks)
   complex, dimension(n_blend,n_x) :: vel_sum_loc
   complex, dimension(n_blend,n_x) :: vel_sum
   !---------------------------------------------------
-
-  include 'mpif.h'
 
   !----------------------------------------------------
   ! Now, compute blending projections:
@@ -40,7 +39,6 @@ subroutine gyro_conserve_number_ebelli(ks)
 
      ck = class(k)
 
-!DIR$ PREFERVECTOR
      do i=1,n_x
 
         do m=1,n_stack
