@@ -14,7 +14,7 @@ if HAVE_MPI
 bin_PROGRAMS     = tglf
 endif
 
-libdir = $(prefix)/lib/$(FC_LIBSUBDIR)
+libdir = $(prefix)/lib
 lib_LTLIBRARIES = libgacodetglf.la
 libgacodetglf_la_SOURCES = \
   tglf_modules.f90 \
