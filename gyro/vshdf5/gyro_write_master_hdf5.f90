@@ -153,20 +153,19 @@ subroutine write_hdf5_timedata(action)
   character(60) :: description
   character(64) :: step_name, tempVarName
   character(128) :: dumpfile
-  integer(HID_T) :: dumpGid,dumpFid,gid3D,fid3D,gridGid,fidfine,gidfine,grdfine,grdcoarse
-  integer :: n_fine
+  integer(HID_T) :: dumpGid,dumpFid,gid3D,fid3D,gridGid,grdcoarse
   type(hdf5InOpts) :: h5in
   type(hdf5ErrorType) :: h5err
 
-  logical :: write_fine
+  logical :: write_threed
 
 
   !---------------------------------------------------
   ! Determine if the fine meshed files need to be written 
-  if (n_theta_mult == 1 ) then
-          write_fine = .false.
+  if (n_alpha_plot > 1 ) then
+          write_threed = .true.
   else
-          write_fine = .true.
+          write_threed = .false.
   endif
 
   !---------------------------------------------------
@@ -205,10 +204,7 @@ subroutine write_hdf5_timedata(action)
   if (output_flag == 0) mode = -mode
 
   !---------------------------------------------------
-  ! Grid
-  !
-  n_fine = n_theta_plot*n_theta_mult
-
+  ! Initialization
   !---------------------------------------------------
   if (i_proc == 0) then
     call vshdf5_inith5vars(h5in, h5err)
@@ -239,9 +235,11 @@ subroutine write_hdf5_timedata(action)
     description="GYRO dump file"
     call open_newh5file(dumpfile,dumpFid,description,dumpGid,h5in,h5err)
 
-    dumpfile=TRIM(path)//"gyro3D"//TRIM(step_name)//".h5"
-    description="GYRO 3D plot file"
-    call open_newh5file(dumpfile,fid3d,description,gid3D,h5in,h5err)
+    if (write_threed) then
+      dumpfile=TRIM(path)//"gyro3D"//TRIM(step_name)//".h5"
+      description="GYRO 3D plot file"
+      call open_newh5file(dumpfile,fid3d,description,gid3D,h5in,h5err)
+    endif
 
     call hdf5_write_coords
   endif
@@ -269,7 +267,7 @@ subroutine write_hdf5_timedata(action)
           n_theta_plot*n_x*n_field,&
           n_theta_plot,n_x,n_field,&
           phi_plot(:,:,1:n_field),&
-          .true.,&
+          write_threed,&
           h5in,h5err)
   endif
 
@@ -282,7 +280,7 @@ subroutine write_hdf5_timedata(action)
            n_theta_plot*n_x*n_kinetic,&
            n_theta_plot,n_x,n_kinetic,&
            moments_plot(:,:,:,1),&
-          .true.,&
+          write_threed,&
           h5in,h5err)
   endif
 
@@ -295,7 +293,7 @@ subroutine write_hdf5_timedata(action)
            n_theta_plot*n_x*n_kinetic,&
            n_theta_plot,n_x,n_kinetic,&
            moments_plot(:,:,:,2),&
-          .true.,&
+          write_threed,&
           h5in,h5err)
   endif
 
@@ -307,7 +305,7 @@ subroutine write_hdf5_timedata(action)
            n_theta_plot*n_x*n_kinetic,&
            n_theta_plot,n_x,n_kinetic,&
            moments_plot(:,:,:,3),&
-          .true.,&
+          write_threed,&
           h5in,h5err)
      
   endif
@@ -326,7 +324,7 @@ subroutine write_hdf5_timedata(action)
 !-PRE          size(field_r0_plot,2),&
 !-PRE          size(field_r0_plot,3),&
 !-PRE          field_r0_plot,&
-!-PRE          .true.,&
+!-PRE          write_threed,&
 !-PRE          h5in,h5err)
 !-PRE  endif
   !--------------------------------------------------
@@ -524,13 +522,10 @@ subroutine write_hdf5_timedata(action)
        real, dimension(:,:), allocatable :: Rc,Zc,Rf,Zf
        real, dimension(:,:,:,:), allocatable :: buffer
        real :: theta, rmajc, zmagc, kappac, deltac, zetac, r_c, dr,xdc
-       real :: zeta_fine
-       integer :: iphi, ix, iy, j, ncoarse, nfine
+       integer :: iphi, ix, iy, j, ncoarse
 
        ncoarse = n_theta_plot
-       nfine = n_theta_plot*n_theta_mult
        allocate(Rc(0:ncoarse,n_x), Zc(0:ncoarse,n_x))
-       allocate(Rf(0:nfine,n_x), Zf(0:nfine,n_x))
     
        !----------------------------------------
        ! Calculate the R,Z coordinates.  See write_geometry_arrays.f90
@@ -566,16 +561,6 @@ subroutine write_hdf5_timedata(action)
                 Zc(j,ix)=zmagc+kappac*r_c*sin(theta+zetac*sin(2.*theta))
              endif
          enddo
-         do j=0,nfine
-             theta = -pi+REAL(j)*pi*2./REAL(nfine)
-             if(radial_profile_method==1) then
-                Rf(j,ix)=rmajc+r_c*cos(theta)
-                Zf(j,ix)=zmagc+r_c*sin(theta)
-             else
-                Rf(j,ix)=rmajc+r_c*cos(theta+xdc*sin(theta))
-                Zf(j,ix)=zmagc+kappac*r_c*sin(theta+zetac*sin(2.*theta))
-             endif
-         enddo
        enddo
       
        !------------------------------------------------
@@ -596,14 +581,6 @@ subroutine write_hdf5_timedata(action)
            allocate(alpha_phi(0:ncoarse,n_x,n_alpha_plot))
            do iphi=1,n_alpha_plot
               alpha_phi(:,:,iphi)=zeta_phi(iphi)+nu_coarse(:,:)
-           end do
-       endif
-       if (.not. allocated(alpha_phi_fine) ) then
-           allocate(alpha_phi_fine(0:nfine,n_x,n_alpha_fine))
-           do iphi=1,n_alpha_fine
-              !Don't store zeta_fine b/c analysis is on a plane by plane basis
-              zeta_fine=REAL(iphi-1)/REAL(n_alpha_fine)*2.*pi
-              alpha_phi_fine(:,:,iphi)=zeta_offset+zeta_fine+nu_fine(:,:)
            end do
        endif
        !----------------------------------------
@@ -627,9 +604,6 @@ subroutine write_hdf5_timedata(action)
          deallocate(buffer)
          call close_group("grid",grdcoarse,h5err)
 
-
-
-
        !----------------------------------------
        ! Dump the coarse mesh(es) in 3D
        !---------------------------------------- 
@@ -639,22 +613,24 @@ subroutine write_hdf5_timedata(action)
 !       call make_mesh_group(fid3d, gridGid,h5in,"grid", "structured",&
 !              "R","Z","phi"," ","cylGrid",h5err)
 
-       call make_group(fid3d,"grid", gridGid,"All of the various grids",h5err)
-       call dump_h5(gridGid,'R',Rc,h5in,h5err)
-       call dump_h5(gridGid,'Z',Zc,h5in,h5err)
-       call dump_h5(gridGid,'phi',zeta_phi,h5in,h5err)
-       call dump_h5(gridGid,'alpha',alpha_phi,h5in,h5err)
+       if (write_threed) then
+         call make_group(fid3d,"grid", gridGid,"All of the various grids",h5err)
+         call dump_h5(gridGid,'R',Rc,h5in,h5err)
+         call dump_h5(gridGid,'Z',Zc,h5in,h5err)
+         call dump_h5(gridGid,'phi',zeta_phi,h5in,h5err)
+         call dump_h5(gridGid,'alpha',alpha_phi,h5in,h5err)
 
-       allocate(buffer(3,0:ncoarse,n_x,n_alpha_plot))
-       do iphi=1,n_alpha_plot
-         buffer(1,:,:,iphi)= Rc(:,:)*COS(zeta_phi(iphi))
-         buffer(2,:,:,iphi)=-Rc(:,:)*SIN(zeta_phi(iphi))
-         buffer(3,:,:,iphi)= Zc(:,:)
-       enddo
-       h5in%units="m"; h5in%mesh="mesh-structured"
-       call dump_h5(gridGid,'cartMesh',buffer,h5in,h5err)
-       call close_group("grid",gridGid,h5err)
-       deallocate(buffer)
+         allocate(buffer(3,0:ncoarse,n_x,n_alpha_plot))
+         do iphi=1,n_alpha_plot
+           buffer(1,:,:,iphi)= Rc(:,:)*COS(zeta_phi(iphi))
+           buffer(2,:,:,iphi)=-Rc(:,:)*SIN(zeta_phi(iphi))
+           buffer(3,:,:,iphi)= Zc(:,:)
+         enddo
+         h5in%units="m"; h5in%mesh="mesh-structured"
+         call dump_h5(gridGid,'cartMesh',buffer,h5in,h5err)
+         call close_group("grid",gridGid,h5err)
+         deallocate(buffer)
+      endif
 
        !----------------------------------------
        ! Dump the fine mesh(es)
@@ -706,7 +682,7 @@ subroutine write_hdf5_fine_timedata(action)
   character(60) :: description
   character(64) :: step_name, tempVarName
   character(128) :: dumpfile
-  integer(HID_T) :: dumpGid,dumpFid,gid3D,fid3D,gridGid,fidfine,gidfine,grdfine,grdcoarse
+  integer(HID_T) :: gridGid,fidfine,gidfine,grdfine,grdcoarse
   integer :: n_fine
   type(hdf5InOpts) :: h5in
   type(hdf5ErrorType) :: h5err
@@ -895,7 +871,10 @@ subroutine write_hdf5_fine_timedata(action)
 !            deltac = delta_s(ir_norm)+s_delta_s(ir_norm)/r(ir_norm)*dr
 !            zetac  = zeta_s(ir_norm) +s_zeta_s(ir_norm)/r(ir_norm)*dr
          do j=0,nfine
-             theta = -pi+REAL(j)*pi*2./REAL(nfine)
+             ! This needs to match up with what's in gyro_set_blend_arrays.f90
+             theta=theta_fine_start+real(j-1)*theta_fine_angle/       &
+                                   real(n_theta_plot*n_theta_mult)
+             !theta = -pi+REAL(j)*pi*2./REAL(nfine)
              if(radial_profile_method==1) then
                 Rf(j,ix)=rmajc+r_c*cos(theta)
                 Zf(j,ix)=zmagc+r_c*sin(theta)

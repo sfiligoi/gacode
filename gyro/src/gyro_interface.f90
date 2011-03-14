@@ -208,12 +208,10 @@ module gyro_interface
   real    :: gyro_omega_exp_in = -0.0722
   real    :: gyro_zeta_offset_in = 0.0
   integer :: gyro_fine_time_skip_in = 1
-  integer :: gyro_threed_time_skip_in = 1
   integer :: gyro_n_alpha_fine_in = 1
-  integer :: gyro_n_alpha_threed_in = 1
   integer :: gyro_n_alpha_plot_in = 20
-  real    :: gyro_theta_fine_start_in = 1
-  real    :: gyro_theta_fine_end_in =1
+  real    :: gyro_theta_fine_start_in = 0.
+  real    :: gyro_theta_fine_angle_in =0.
 
 
   ! Inputs available via interface but not by INPUT
@@ -436,7 +434,6 @@ contains
 
     gyro_fine_time_skip_in = fine_time_skip
     gyro_n_alpha_fine_in = n_alpha_fine
-    gyro_n_alpha_threed_in = n_alpha_threed
     gyro_n_alpha_plot_in  = n_alpha_plot 
     gyro_theta_fine_start_in  = theta_fine_start
     gyro_theta_fine_angle_in = theta_fine_angle 
@@ -650,12 +647,10 @@ contains
     zeta_offset = gyro_zeta_offset_in        
 
     fine_time_skip = gyro_fine_time_skip_in 
-    threed_time_skip = gyro_threed_time_skip_in 
     n_alpha_fine = gyro_n_alpha_fine_in 
-    n_alpha_threed = gyro_n_alpha_threed_in 
     n_alpha_plot = gyro_n_alpha_plot_in  
     theta_fine_start = gyro_theta_fine_start_in   
-    theta_fine_end = gyro_theta_fine_end_in  
+    theta_fine_angle = gyro_theta_fine_angle_in  
 
 
     n_fourier_geo = gyro_n_fourier_geo_in

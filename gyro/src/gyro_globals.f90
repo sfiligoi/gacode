@@ -62,7 +62,6 @@ module gyro_globals
   ! time intervals for hdf5 write outs
   integer :: fine_time_skip             ! Fine files for synthetic diagnostics
   integer :: n_alpha_fine = 1           ! Number of phi planes to use in fine plots
-  integer :: n_alpha_threed
   integer :: n_alpha_plot = 20
   ! This defines a wedge in the poloidal plane 
   ! To recover the normal global plot, set theta_fine_start=-pi and theta_fine_angle=2*pi
