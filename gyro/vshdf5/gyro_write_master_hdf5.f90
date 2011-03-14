@@ -1,5 +1,5 @@
 !------------------------------------------------
-! write_hdf5.f90 [caller write_big]
+! write_hdf5_master_hdf5.f90 
 !
 ! PURPOSE:
 !  Write a bunch of data to hdf5 file
@@ -117,7 +117,7 @@ subroutine write_hdf5_data(datafile,action)
 !------------------------------------------------------
 ! write_hdf5_timedata
 ! PURPOSE:
-!  This is an hdf5 version of write_big.f90
+!  This is an hdf5 version of gyro_write_master.f90
 !-----------------------------------------------------
 
 subroutine write_hdf5_timedata(action)
@@ -243,12 +243,6 @@ subroutine write_hdf5_timedata(action)
     description="GYRO 3D plot file"
     call open_newh5file(dumpfile,fid3d,description,gid3D,h5in,h5err)
 
-    if(write_fine) then
-      dumpfile=TRIM(path)//"gyrofine"//TRIM(step_name)//".h5"
-      description="GYRO real space file at single phi plane.  On fine mesh"
-      call open_newh5file(dumpfile,fidfine,description,gidfine,h5in,h5err)
-    endif
-
     call hdf5_write_coords
   endif
   !---------------------------------------------------
@@ -290,15 +284,6 @@ subroutine write_hdf5_timedata(action)
            moments_plot(:,:,:,1),&
           .true.,&
           h5in,h5err)
-     if(write_fine) then
-       call write_distributed_complex_h5("density",&
-          gidfine,gidfine,&
-           n_theta_mult*n_theta_plot*n_x*n_kinetic,&
-           n_theta_mult*n_theta_plot,n_x,n_kinetic,&
-           moments_plot_fine(:,:,:,1),&
-          .true.,&
-          h5in,h5err)
-     endif
   endif
 
   if (plot_e_flag == 1) then
@@ -312,16 +297,6 @@ subroutine write_hdf5_timedata(action)
            moments_plot(:,:,:,2),&
           .true.,&
           h5in,h5err)
-
-     if(write_fine) then
-       call write_distributed_complex_h5("energy",&
-           gidfine,gidfine,&
-           n_theta_mult*n_theta_plot*n_x*n_kinetic,&
-           n_theta_mult*n_theta_plot,n_x,n_kinetic,&
-           moments_plot_fine(:,:,:,2),&
-          .true.,&
-          h5in,h5err)
-     endif
   endif
 
   if (plot_v_flag == 1) then
@@ -335,15 +310,6 @@ subroutine write_hdf5_timedata(action)
           .true.,&
           h5in,h5err)
      
-     if(write_fine) then
-       call write_distributed_complex_h5("v_par",&
-          gidfine,gidfine,&
-           n_theta_mult*n_theta_plot*n_x*n_kinetic,&
-           n_theta_mult*n_theta_plot,n_x,n_kinetic,&
-           moments_plot_fine(:,:,:,3),&
-          .true.,&
-          h5in,h5err)
-     endif
   endif
 
   !--------------------------------------------------
@@ -366,8 +332,7 @@ subroutine write_hdf5_timedata(action)
   !--------------------------------------------------
 
   call proc_time(cp1)
-  !SEK Assume write_big.f90 has calculated this
-  !SEK call get_field_spectrum
+  !Assume gyro_write_master.f90 has calculated this: call get_field_spectrum
   h5in%units="m^-2?"
   call write_distributed_real_h5("kxkyspec",dumpGid,&
        size(kxkyspec),&
@@ -543,9 +508,6 @@ subroutine write_hdf5_timedata(action)
    if (i_proc == 0) then
          call close_h5file(dumpFid,dumpGid,h5err)
          call close_h5file(fid3d,gid3d,h5err)
-         if(write_fine) then
-           call close_h5file(fidfine,gidfine,h5err)
-         endif
    endif
 
    return
@@ -697,35 +659,296 @@ subroutine write_hdf5_timedata(action)
        !----------------------------------------
        ! Dump the fine mesh(es)
        !---------------------------------------- 
-
-       if(write_fine) then
-         call make_group(fidfine,"grid", grdfine,"RZ grid for fine mesh",h5err)
-         call dump_h5(grdfine,'R',Rf,h5in,h5err)
-         call dump_h5(grdfine,'Z',Zf,h5in,h5err)
-         call dump_h5(grdfine,'zeta_offset',zeta_offset,h5in,h5err)
-         call dump_h5(grdfine,'alpha',alpha_phi_fine,h5in,h5err)
-
-       ! For ease of use, have a single data set that has R,Z. 
-         allocate(buffer(2,0:nfine,n_x,1))
-         buffer(1,:,:,1)= Rf(:,:)
-         buffer(2,:,:,1)= Zf(:,:)
-         h5in%units="m"
-         h5in%mesh="mesh-structured"
-         call dump_h5(grdfine,'cartMesh',buffer(:,:,:,1),h5in,h5err)
-         h5in%mesh=""
-         deallocate(buffer)
-         call close_group("grid",grdfine,h5err)
-       endif
-
-       !----------------------------------------
-       ! 
-       !---------------------------------------- 
        deallocate(Rc, Zc)
        deallocate(zeta_phi)
       return
       end subroutine hdf5_write_coords
  
 end subroutine write_hdf5_timedata
+
+!------------------------------------------------------
+! write_hdf5_fine_timedata
+! PURPOSE:
+!  This is like the above, only it is for just the 
+!  fine data
+!-----------------------------------------------------
+
+subroutine write_hdf5_fine_timedata(action)
+  use gyro_globals
+  use hdf5
+  use hdf5_api
+  use gyro_vshdf5_mod
+
+  !---------------------------------------------------
+  implicit none
+  include 'mpif.h'
+  !
+  integer :: mode
+  integer, intent(in) :: action
+  integer, parameter :: hr4=SELECTED_REAL_KIND(6,37)
+  !
+  real :: cp0
+  real :: cp1
+  real :: cp2
+  real :: cp3
+  real :: cp4
+  real :: cp5
+  real :: cp6
+  real :: cp7
+  real :: cp8
+  real :: pi=3.141592653589793
+  !
+  real, dimension(:), allocatable, save :: zeta_phi
+  real, dimension(:,:), allocatable :: a2
+  real, dimension(:,:,:), allocatable :: a3
+  !
+  complex, dimension(:,:,:), allocatable :: n_plot, e_plot, v_plot
+  character(60) :: description
+  character(64) :: step_name, tempVarName
+  character(128) :: dumpfile
+  integer(HID_T) :: dumpGid,dumpFid,gid3D,fid3D,gridGid,fidfine,gidfine,grdfine,grdcoarse
+  integer :: n_fine
+  type(hdf5InOpts) :: h5in
+  type(hdf5ErrorType) :: h5err
+
+  logical :: write_fine
+
+
+  !---------------------------------------------------
+  ! Determine if the fine meshed files need to be written 
+  if (n_theta_mult == 1 ) then
+      print *,'n_theta_mult=1 so fine files are not being written'
+      return
+  else
+          write_fine = .true.
+  endif
+
+  !---------------------------------------------------
+  ! Determine file control mode:
+  ! mode = 1 -> file create 
+  !      = 2 -> file write 
+  !      = 3 -> file reposition 
+  !      = 4 -> file write on step = 0
+  ! action = 1 -> simulation still initializing
+  !        = 2 -> simulation running
+
+  if (action == 1) then
+     ! File creation or repositioning:
+     select case (restart_method)
+     case(-1) 
+        mode = 1 ! No use of restart facility
+        !SEK: This is confusing.  At the beginning, not everything 
+        !        ! is allocated and setup, so just return
+        return
+     case(0,2) 
+        mode = 1 ! Start of restartable simulation
+        !SEK: This is confusing.  At the beginning, not everything 
+        !        ! is allocated and setup, so just return
+        return
+     case(1)
+        mode = 3 ! Continuation of restartable simulation        
+     end select
+  else
+     ! File writing
+     if (step == 0) then
+        mode = 4
+     else
+        mode = 2
+     endif
+  endif
+  if (output_flag == 0) mode = -mode
+
+  !---------------------------------------------------
+  ! Grid
+  !
+  n_fine = n_theta_plot*n_theta_mult
+
+  !---------------------------------------------------
+  ! SEK: Should I do this every time?
+  !---------------------------------------------------
+  if (i_proc == 0) then
+    call vshdf5_inith5vars(h5in, h5err)
+    h5in%comm=MPI_COMM_SELF
+    h5in%info=MPI_INFO_NULL
+    h5in%wrd_type=H5T_NATIVE_REAL
+    h5in%typeConvert=.true.
+    !h5in%wrd_type=H5T_NATIVE_DOUBLE
+    h5in%doTranspose=.false.
+    h5in%verbose=.true.
+    h5in%debug=.false.
+    h5in%wrVsTime=.true.
+    h5in%vsTime=t_current
+    h5in%vsStep=step
+  
+    !---------------------------------------------------
+    ! Timestep data:
+    !
+    if (step>999999) THEN
+      write(step_name,fmt='(i7.7)') step
+    else if (step>99999) THEN
+      write(step_name,fmt='(i6.6)') step
+    else
+      write(step_name,fmt='(i5.5)') step
+    endif
+
+    dumpfile=TRIM(path)//"gyrofine"//TRIM(step_name)//".h5"
+    description="GYRO real space file at single phi plane.  On fine mesh"
+    call open_newh5file(dumpfile,fidfine,description,gidfine,h5in,h5err)
+
+    call hdf5_write_fine_coords
+  endif
+  !---------------------------------------------------
+
+  call proc_time(cp0)
+
+   !--------------------------------------------------
+  ! Output of field-like quantities:
+  !
+  !
+  if (plot_n_flag == 1) then
+     ! DENSITY
+     h5in%units=" "
+     h5in%mesh="/grid/cartMesh"
+     call write_distributed_complex_h5("density",&
+        gidfine,gidfine,&
+         n_fine*n_x*n_kinetic,&
+         n_fine,n_x,n_kinetic,&
+         moments_plot_fine(:,:,:,1),&
+        .true.,&
+        h5in,h5err)
+  endif
+
+  if (plot_e_flag == 1) then
+     ! ENERGY
+     h5in%units="energy units"
+     h5in%mesh="/grid/cartMesh"
+     call write_distributed_complex_h5("energy",&
+         gidfine,gidfine,&
+         n_fine*n_x*n_kinetic,&
+         n_fine,n_x,n_kinetic,&
+         moments_plot_fine(:,:,:,2),&
+        .true.,&
+        h5in,h5err)
+  endif
+
+  if (plot_v_flag == 1) then
+     ! PARALLEL VELOCITY
+     h5in%units="vpar units"
+     call write_distributed_complex_h5("v_par",&
+        gidfine,gidfine,&
+         n_fine*n_x*n_kinetic,&
+         n_fine,n_x,n_kinetic,&
+         moments_plot_fine(:,:,:,3),&
+        .true.,&
+        h5in,h5err)
+  endif
+
+  !--------------------------------------------------
+
+   if (i_proc == 0) then
+      call close_h5file(fidfine,gidfine,h5err)
+   endif
+
+   return
+
+  contains
+      subroutine hdf5_write_fine_coords
+      use GEO_interface
+      !------------------------------------------
+      !  Write the coordinates out
+      !  We want to have same coordinate system as:
+      !    allocate(phi_plot(n_theta_plot,n_x,n_field+eparallel_plot_flag))
+      !  This should be generalized to include the other GEO options
+      !------------------------------------------
+       real, dimension(:,:), allocatable :: Rc,Zc,Rf,Zf
+       real, dimension(:,:,:,:), allocatable :: buffer
+       real :: theta, rmajc, zmagc, kappac, deltac, zetac, r_c, dr,xdc
+       real :: zeta_fine
+       integer :: iphi, ix, iy, j, ncoarse, nfine
+
+       ncoarse = n_theta_plot
+       nfine = n_theta_plot*n_theta_mult
+       allocate(Rf(0:nfine,n_x), Zf(0:nfine,n_x))
+    
+       !----------------------------------------
+       ! Calculate the R,Z coordinates.  See write_geometry_arrays.f90
+       !---------------------------------------- 
+
+       do ix=1,n_x
+         if (flat_profile_flag == 0) then
+            r_c=r_s(ix)
+         else
+            r_c=r(ix)
+         endif
+         rmajc = rmaj_s(ix)
+         zmagc = zmag_s(ix)
+         kappac = kappa_s(ix)
+         deltac = delta_s(ix)
+         xdc    = asin(deltac)
+         zetac  = zeta_s(ix)
+!SEK: I am totally confused here.  This is in write_geometry arrays, but isn't used
+!SEK: by Chris
+!            dr = r(ix)-r(ir_norm)
+!            rmajc = rmaj_s(ir_norm)+drmaj_s(ir_norm)*dr
+!            zmagc = zmag_s(ir_norm)+dzmag_s(ir_norm)*dr
+!            kappac = kappa_s(ir_norm)+kappa_s(ir_norm)*s_kappa_s(ir_norm)/r(ir_norm)*dr
+!            deltac = delta_s(ir_norm)+s_delta_s(ir_norm)/r(ir_norm)*dr
+!            zetac  = zeta_s(ir_norm) +s_zeta_s(ir_norm)/r(ir_norm)*dr
+         do j=0,nfine
+             theta = -pi+REAL(j)*pi/2./REAL(nfine)
+             if(radial_profile_method==1) then
+                Rf(j,ix)=rmajc+r_c*cos(theta)
+                Zf(j,ix)=zmagc+r_c*sin(theta)
+             else
+                Rf(j,ix)=rmajc+r_c*cos(theta+xdc*sin(theta))
+                Zf(j,ix)=zmagc+kappac*r_c*sin(theta+zetac*sin(2.*theta))
+             endif
+         enddo
+       enddo
+      
+       !-------------------------------------------------------
+       ! Set up the alpha grid
+       ! These are saved in a module so no need to recalculate
+       !-------------------------------------------------------
+
+       if (.not. allocated(alpha_phi_fine) ) then
+           allocate(alpha_phi_fine(0:nfine,n_x,n_alpha_fine))
+           do iphi=1,n_alpha_fine
+              !Don't store zeta_fine b/c analysis is on a plane by plane basis
+              zeta_fine=REAL(iphi-1)/REAL(n_alpha_fine)*2.*pi
+              alpha_phi_fine(:,:,iphi)=zeta_offset+zeta_fine+nu_fine(:,:)
+           end do
+       endif
+
+       !----------------------------------------
+       ! Dump the fine meshes
+       !---------------------------------------- 
+
+       call make_group(fidfine,"grid", grdfine,"RZ grid for fine mesh",h5err)
+       call dump_h5(grdfine,'R',Rf,h5in,h5err)
+       call dump_h5(grdfine,'Z',Zf,h5in,h5err)
+       call dump_h5(grdfine,'zeta_offset',zeta_offset,h5in,h5err)
+       call dump_h5(grdfine,'alpha',alpha_phi_fine,h5in,h5err)
+
+       ! For ease of use, have a single data set that has R,Z. 
+       allocate(buffer(2,0:nfine,n_x,1))
+       buffer(1,:,:,1)= Rf(:,:)
+       buffer(2,:,:,1)= Zf(:,:)
+       h5in%units="m"
+       h5in%mesh="mesh-structured"
+       call dump_h5(grdfine,'cartMesh',buffer(:,:,:,1),h5in,h5err)
+       h5in%mesh=""
+       deallocate(buffer)
+       call close_group("grid",grdfine,h5err)
+
+       !----------------------------------------
+       ! 
+       !---------------------------------------- 
+       deallocate(Rf, Zf)
+      return
+      end subroutine hdf5_write_fine_coords
+ 
+end subroutine write_hdf5_fine_timedata
 
   !------------------------------------------------
   ! write_restart
