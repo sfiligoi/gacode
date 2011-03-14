@@ -1,15 +1,16 @@
 # This file should be sourced, not run.
 # $Id: uedgerc.sh.in 1187 2009-08-09 17:16:35Z cary $
 
+export gacode_DIR=@abs_top_builddir@
 export GYRO_DIR=@abs_top_builddir@/gyro
 export NEO_DIR=@abs_top_builddir@/neo
 export TGLF_DIR=@abs_top_builddir@/tglf
-echo Prepending $GYRO_DIR/bin:$NEO_DIR/bin:$TGLF_DIR/bin to your PATH.
-export PATH=${PATH}:$GYRO_DIR/bin:$NEO_DIR/bin:$TGLF_DIR/bin
+echo Prepending $gacode_dir/bin:$GYRO_DIR/bin:$NEO_DIR/bin:$TGLF_DIR/bin to your PATH.
+export PATH=${PATH}:$gacode_dir/bin:$GYRO_DIR/bin:$NEO_DIR/bin:$TGLF_DIR/bin
 #export IDL_PATH=$IDL_DIR/lib:$GYRO_DIR/vugyro
 func() 
 {
-  local PYTHONADD="$GYRO_DIR/python $NEO_DIR/python $TGLF_DIR/python"
+  local PYTHONADD="$gacode/shared/python $GYRO_DIR/python $NEO_DIR/python $TGLF_DIR/python"
   echo pythonadd = $PYTHONADD
 
   for i in $PYTHONADD; do
