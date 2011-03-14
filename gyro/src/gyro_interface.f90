@@ -435,12 +435,11 @@ contains
     gyro_zeta_offset_in        = zeta_offset
 
     gyro_fine_time_skip_in = fine_time_skip
-    gyro_threed_time_skip_in = threed_time_skip
     gyro_n_alpha_fine_in = n_alpha_fine
     gyro_n_alpha_threed_in = n_alpha_threed
     gyro_n_alpha_plot_in  = n_alpha_plot 
     gyro_theta_fine_start_in  = theta_fine_start
-    gyro_theta_fine_end_in = theta_fine_end 
+    gyro_theta_fine_angle_in = theta_fine_angle 
 
 
     gyro_n_fourier_geo_in = n_fourier_geo

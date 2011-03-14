@@ -310,6 +310,7 @@ subroutine gyro_do(skipinit)
 
      if (lskipinit == 0) call gyro_write_master(2)
      if (iohdf5out == 1 .and. lskipinit == 0) call write_hdf5_timedata(2)
+     if (iohdf5out == 1 .and. lskipinit == 0) call write_hdf5_fine_timedata(2)
 
   endif
   !--------------------------------------------

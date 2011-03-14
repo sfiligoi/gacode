@@ -61,13 +61,13 @@ module gyro_globals
   integer :: iohdf5out = 0
   ! time intervals for hdf5 write outs
   integer :: fine_time_skip             ! Fine files for synthetic diagnostics
-  integer :: threed_time_skip           ! 3D files for plotting
-  integer :: n_alpha_fine = 1
+  integer :: n_alpha_fine = 1           ! Number of phi planes to use in fine plots
   integer :: n_alpha_threed
   integer :: n_alpha_plot = 20
-  ! toroidal direction
+  ! This defines a wedge in the poloidal plane 
+  ! To recover the normal global plot, set theta_fine_start=-pi and theta_fine_angle=2*pi
   real  :: theta_fine_start
-  real  :: theta_fine_end
+  real  :: theta_fine_angle
   ! 
   !SEK - these are synthetic diagnostic vars.  Also should be read in
   real :: omega_exp=-0.0722

@@ -144,6 +144,9 @@ subroutine gyro_fulladvance
   !-------------------------------------------------------------------
   ! MANAGE data output: 
   !
+  if (modulo(step,fine_time_skip) == 0 .and. iohdf5out == 1) then
+     call write_hdf5_fine_timedata(2)
+  endif
   if (modulo(step,time_skip) == 0) then
 
      ! Counter for number of data output events.

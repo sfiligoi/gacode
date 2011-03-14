@@ -557,7 +557,7 @@ subroutine write_hdf5_timedata(action)
 !            deltac = delta_s(ir_norm)+s_delta_s(ir_norm)/r(ir_norm)*dr
 !            zetac  = zeta_s(ir_norm) +s_zeta_s(ir_norm)/r(ir_norm)*dr
          do j=0,ncoarse
-             theta = -pi+REAL(j)*pi/2./REAL(ncoarse)
+             theta = -pi+REAL(j)*pi*2./REAL(ncoarse)
              if(radial_profile_method==1) then
                 Rc(j,ix)=rmajc+r_c*cos(theta)
                 Zc(j,ix)=zmagc+r_c*sin(theta)
@@ -567,7 +567,7 @@ subroutine write_hdf5_timedata(action)
              endif
          enddo
          do j=0,nfine
-             theta = -pi+REAL(j)*pi/2./REAL(nfine)
+             theta = -pi+REAL(j)*pi*2./REAL(nfine)
              if(radial_profile_method==1) then
                 Rf(j,ix)=rmajc+r_c*cos(theta)
                 Zf(j,ix)=zmagc+r_c*sin(theta)
@@ -895,7 +895,7 @@ subroutine write_hdf5_fine_timedata(action)
 !            deltac = delta_s(ir_norm)+s_delta_s(ir_norm)/r(ir_norm)*dr
 !            zetac  = zeta_s(ir_norm) +s_zeta_s(ir_norm)/r(ir_norm)*dr
          do j=0,nfine
-             theta = -pi+REAL(j)*pi/2./REAL(nfine)
+             theta = -pi+REAL(j)*pi*2./REAL(nfine)
              if(radial_profile_method==1) then
                 Rf(j,ix)=rmajc+r_c*cos(theta)
                 Zf(j,ix)=zmagc+r_c*sin(theta)
