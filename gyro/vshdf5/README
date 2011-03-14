@@ -1,0 +1,22 @@
+
+   Authors: S.E. Kruger and S. Vadlamani
+   Purpose:
+     This is to enable the writing of VisSchema compliant
+     HDF5 data from GYRO.  
+
+     Background:
+      See the README in gacode/shared/vshdf5 for background on HDF5
+
+      The implementation here is oriented around simplifying the
+      workflow from Chris Holland.  Key to this is to allow for 
+      smaller datasets with the data in a form that requires less
+      processing.
+
+    Relevant control variables:
+
+    Implementation:
+    
+
+
+        
+
