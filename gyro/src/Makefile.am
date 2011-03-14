@@ -244,6 +244,8 @@ libgacodegyro_SRC_la_SOURCES = \
 	$(theCleanupMumps) \
   gyro_init.f90 \
 	gyro_run.f90 \
+  gyro_dump_input.f90 \
+  gyro_dump_interface.f90 \
 	gyro_do.f90  
 
 if TX_FORTRAN_MODNAMEISCAP

@@ -308,7 +308,8 @@ subroutine gyro_do(skipinit)
   !
   if (restart_method /= 1) then
 
-     if (lskipinit == 0) call write_big(2)
+     !if (lskipinit == 0) call write_big(2)
+     if (lskipinit == 0) call gyro_write_master(2)
      if (iohdf5out == 1 .and. lskipinit == 0) call write_hdf5_timedata(2)
 
   endif

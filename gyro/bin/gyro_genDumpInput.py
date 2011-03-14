@@ -71,21 +71,23 @@ print_header(fw)
 lines=fr.readlines()
 for line in lines:
   if "readbc" in line:
-    ttype = line.split("readbc_")[1].split("(")[0].strip()
-    if ";" not in line:
-      globalVar = line.split("(")[1].split(")")[0]
-#      print "no ; ", ttype, " ", globalVar
-#      print line
-    else:
-      globalVar = line.split(";")[1].split("=")[0]
-#      print "with ; ", ttype, " ", globalVar
-#      print line
-    if ttype  == "int":
-      subName="dumpIntVar"
-    elif ttype=="real":
-      subName="dumpRealVar"
-    else:
-      print "Error:  Type not recognized: "+ttype
-    wrline = "      call "+subName+ "(21,22,\""+globalVar+"\","+globalVar+")\n"
-    fw.write(wrline)
+    if "subroutine" not in line:
+      #print line
+      ttype = line.split("readbc_")[1].split("(")[0].strip()
+      if ";" not in line:
+        globalVar = line.split("(")[1].split(")")[0]
+#        print "no ; ", ttype, " ", globalVar
+#        print line
+      else:
+        globalVar = line.split(";")[1].split("=")[0]
+#        print "with ; ", ttype, " ", globalVar
+#        print line
+      if ttype  == "int":
+        subName="dumpIntVar"
+      elif ttype=="real":
+        subName="dumpRealVar"
+      else:
+        print "Error:  Type not recognized: "+ttype
+      wrline = "      call "+subName+ "(21,22,\""+globalVar+"\","+globalVar+")\n"
+      fw.write(wrline)
 print_footer(fw)

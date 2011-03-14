@@ -12,7 +12,7 @@
 bin_PROGRAMS=gyro
 lib_LTLIBRARIES = libgacodegyro.la
 
-SUBDIRS	= BLEND TRANSPOSE SSUB src install tools bin vugyro gkeigen vshdf5 peek
+SUBDIRS	= BLEND TRANSPOSE SSUB src install tools bin vugyro GKEIGEN vshdf5 peek
 
 gyro_includes= -I $(top_builddir)/gyro/src
 AM_LIBTOOLFLAGS = --tag=FC

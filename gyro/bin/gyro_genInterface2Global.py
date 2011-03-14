@@ -90,21 +90,22 @@ print_header(fw)
 lines=fr.readlines()
 for line in lines:
   if "readbc" in line:
-    ttype = line.split("readbc_")[1].split("(")[0].strip()
-    if ";" not in line:
-      globalVar = line.split("(")[1].split(")")[0].lstrip().strip()
-    else:
-      globalVar = line.split(";")[1].split("=")[0].lstrip().strip()
-    if ttype  == "int":
-      subName="dumpIntInterface"
-    elif ttype=="real":
-      subName="dumpRealInterface"
-    else:
-      print "Error:  Type not recognized: "+ttype
-    wrline1 = "      call "+subName+ "(21,\""+varPairs[globalVar]+"\","+varPairs[globalVar]+", &\n"
-    wrline2 = "            \""+globalVar+"\","+globalVar+")\n"
-    fw.write(wrline1)
-    fw.write(wrline2)
+    if "subroutine" not in line:
+      ttype = line.split("readbc_")[1].split("(")[0].strip()
+      if ";" not in line:
+        globalVar = line.split("(")[1].split(")")[0].lstrip().strip()
+      else:
+        globalVar = line.split(";")[1].split("=")[0].lstrip().strip()
+      if ttype  == "int":
+        subName="dumpIntInterface"
+      elif ttype=="real":
+        subName="dumpRealInterface"
+      else:
+        print "Error:  Type not recognized: "+ttype
+      wrline1 = "      call "+subName+ "(21,\""+varPairs[globalVar]+"\","+varPairs[globalVar]+", &\n"
+      wrline2 = "            \""+globalVar+"\","+globalVar+")\n"
+      fw.write(wrline1)
+      fw.write(wrline2)
 print_footer(fw)
 
 
