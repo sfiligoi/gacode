@@ -80,7 +80,6 @@ subroutine write_hdf5_data(datafile,action)
   call dump_h5(rootid,"dlnndr_s",dlnndr_s,h5in,h5err)
   call dump_h5(rootid,"tem_s",tem_s,h5in,h5err)
   call dump_h5(rootid,"den_s",den_s,h5in,h5err)
-  call dump_h5(rootid,"phi_dop_s",phi_dop_s,h5in,h5err)
   call dump_h5(rootid,"aspect_s",rmaj_s/r_s,h5in,h5err)
   call dump_h5(rootid,"delta_s",delta_s,h5in,h5err)
   call dump_h5(rootid,"zeta_s",zeta_s,h5in,h5err)
@@ -93,66 +92,15 @@ subroutine write_hdf5_data(datafile,action)
   call dump_h5(rootid,"zmag_s",zmag_s,h5in,h5err)
   call dump_h5(rootid,"dzmag_s",dzmag_s,h5in,h5err)
   call dump_h5(rootid,"beta_unit_s",beta_unit_s,h5in,h5err)
-  if (allocated(pgamma_s)) call dump_h5(rootid,"pgamma_s",pgamma_s,h5in,h5err)
-  if (allocated(b_unit_s)) call dump_h5(rootid,"b_unit_s",b_unit_s,h5in,h5err)
+  call dump_h5(rootid,"gamma_e_s",gamma_e_s,h5in,h5err)
+  call dump_h5(rootid,"gamma_p_s",gamma_p_s,h5in,h5err)
+  call dump_h5(rootid,"mach_s",mach_s,h5in,h5err)
+  call dump_h5(rootid,"b_unit_s",b_unit_s,h5in,h5err)
   call dump_h5(rootid,"dr_eodr",dr_eodr,h5in,h5err)
   call dump_h5(rootid,"z_eff_s",z_eff_s,h5in,h5err)
   call dump_h5(rootid,"nu_s",nu_s,h5in,h5err)
-  call dump_h5(rootid,"gamma_eb_s",gamma_eb_s,h5in,h5err)
   call dump_h5(rootid,"w0_s",w0_s,h5in,h5err)
   call dump_h5(rootid,"box_multiplier",box_multiplier,h5in,h5err)
-
-  !SEK: I was trying to get these from the website, but I'm confused
-  !SEK: Not sure at all about the names and how they correlate to calculated quantities
-
-  ! chi_i_exp in chi_gb_norm units (main ions)
-  if (diff_to_flow(2,1,ir_norm) > 0.0) then
-     call dump_h5(rootid,"chi_i_exp",pow_i_s(:)/diff_to_flow(2,1,:),h5in,h5err)
-  else 
-     call dump_h5(rootid,"chi_i_exp",0.*r(:),h5in,h5err)
-  endif
-
-  ! chi_e_exp in chi_gb_norm units (electrons)
-  if (diff_to_flow(2,n_spec,ir_norm) > 0.0) then
-     call dump_h5(rootid,"chi_e_exp",pow_e_s(:)/diff_to_flow(2,n_spec,:),h5in,h5err)
-  else 
-     call dump_h5(rootid,"chi_e_exp",0.*r(:),h5in,h5err)
-  endif
-
-  call dump_h5(rootid,"diff_to_flow_e1",diff_to_flow(2,1,:),h5in,h5err)
-  call dump_h5(rootid,"diff_to_flow_e2",diff_to_flow(2,n_spec,:),h5in,h5err)
-
-  ! Add toroidal viscosity and diff_to_flow for momentum flow
-  ! eta_i_exp in chi_gb_norm units plus diff_to_flow
-  ! includes convective toroidal velocity flow if mach not zero
-
-  if (abs(diff_to_flow(3,1,ir_norm)) > 0.0) then
-    call dump_h5(rootid,"eta_i_tot_exp",flow_mom_s(:)/diff_to_flow(3,1,:),h5in,h5err)
-  else
-    call dump_h5(rootid,"eta_i_tot_exp",0.*r(:),h5in,h5err)
-  endif
-  call dump_h5(rootid,"diff_to_flow_mi",0.*r(:),h5in,h5err)
-!?SEK  if (allocated(pgamma_s)) then
-!?SEK    if (abs(mach_s(1,1)) > 0.0) then 
-!?SEK      call dump_h5(rootid,"pgamma_s/mach_s",pgamma_s(1,:)/mach_s(1,:),h5in,h5err)
-!?SEK    else
-!?SEK      call dump_h5(rootid,"pgamma_s/mach_s",0.*r(:),h5in,h5err)
-!?SEK    endif
-!?SEK  endif
-
-  ! diff_e_exp in chi_gb_norm units  plus diff_to_flow
-
-  if (diff_to_flow(1,n_spec,ir_norm) > 0.0) then
-    call dump_h5(rootid,"diff_ne_exp",powp_s(:)/diff_to_flow(1,n_spec,:),h5in,h5err)
-  else 
-    call dump_h5(rootid,"diff_ne_exp",0.*r(:),h5in,h5err)
-  endif
-  call dump_h5(rootid,"diff_to_flow_ne",diff_to_flow(1,n_spec,:),h5in,h5err)
-
-  ! diff_to_flows_heating: 
-  !   diff_heating in chi_gb_norm to heating flow in MW
-  call dump_h5(rootid,"aolne_exp", &
-     diff_to_flow(2,1,:)/(tem_s(1,:)*den_s(1,:)*dlntdr_s(1,:)) ,h5in,h5err)
 
   call dump_h5(rootid,"lambda", lambda(ir_norm,:),h5in,h5err)
   call dump_h5(rootid,"energy", energy,h5in,h5err)
@@ -174,10 +122,9 @@ subroutine write_hdf5_data(datafile,action)
 
 subroutine write_hdf5_timedata(action)
   use gyro_globals
-  use math_constants
   use hdf5
   use hdf5_api
-  use hdf5_mod
+  use gyro_vshdf5_mod
 
   !---------------------------------------------------
   implicit none
@@ -196,6 +143,7 @@ subroutine write_hdf5_timedata(action)
   real :: cp6
   real :: cp7
   real :: cp8
+  real :: pi=3.141592653589793
   !
   real, dimension(:), allocatable, save :: zeta_phi
   real, dimension(:,:), allocatable :: a2
@@ -452,18 +400,11 @@ subroutine write_hdf5_timedata(action)
   ! Calculation of fundamental nonlinear fluxes and related 
   ! diffusivities
   !
-  if (rotation_method == 2) then 
-     call get_nonlinear_flux
-     call proc_time(cp5)
-     call get_diffusivity
-     call proc_time(cp6)
-  else
-     call gyro_nonlinear_flux
-     call proc_time(cp5)
-     call gyro_diffusivity
-     if (rotation_method == 3) call gyro_gbflux
-     call proc_time(cp6)
-  endif
+  call gyro_nonlinear_flux
+  call proc_time(cp5)
+  call gyro_diffusivity
+  call gyro_gbflux
+  call proc_time(cp6)
   !-------------------------------------------------------------------
 
   !-------------------------------------------------------------------
@@ -495,12 +436,10 @@ subroutine write_hdf5_timedata(action)
           diff_n,&
           h5in,h5err)
 
-     if (rotation_method == 3) then
-        call write_distributed_real_h5("gbflux_n",dumpGid,&
-             size(gbflux_n),&
-             gbflux_n,&
-             h5in,h5err)
-     endif
+     call write_distributed_real_h5("gbflux_n",dumpGid,&
+          size(gbflux_n),&
+          gbflux_n,&
+          h5in,h5err)
 
      if (lindiff_method >= 4) then
         call write_distributed_real_h5('phi_squared_QL_n',dumpGid,&
@@ -527,32 +466,20 @@ subroutine write_hdf5_timedata(action)
 
      call proc_time(cp8)
 
-     if (i_proc == 0) then
+     if (i_proc == 0 .and. lindiff_method > 1) then
 
         call dump_h5(dumpGid,'field_rms',ave_phi,h5in,h5err)
         call dump_h5(dumpGid,'diff',diff,h5in,h5err)
         call dump_h5(dumpGid,'diff_i',diff_i,h5in,h5err)
-
-        if (rotation_method == 3) then
-           call dump_h5(dumpGid,'gbflux',gbflux,h5in,h5err)
-           call dump_h5(dumpGid,'gbflux_i',gbflux_i,h5in,h5err)
-        endif
-
-        if (rotation_method == 2) then
-           call dump_h5(dumpGid,'diff_i_ch',diff_i_ch,h5in,h5err)
-           call dump_h5(dumpGid,'sp_diff',sp_diff,h5in,h5err)
-           call dump_h5(dumpGid,'s_diff',s_diff,h5in,h5err)
-           call dump_h5(dumpGid,'sp_diff_i',sp_diff_i,h5in,h5err)
-           call dump_h5(dumpGid,'s_diff_i',s_diff_i,h5in,h5err)
-        endif
+        call dump_h5(dumpGid,'gbflux',gbflux,h5in,h5err)
+        call dump_h5(dumpGid,'gbflux_mom',gbflux_mom,h5in,h5err)
+        call dump_h5(dumpGid,'gbflux_i',gbflux_i,h5in,h5err)
 
         if (trapdiff_flag == 1) then
            call dump_h5(dumpGid,'diff_trapped',diff_trapped,h5in,h5err)
            call dump_h5(dumpGid,'diff_i_trapped',diff_i_trapped,h5in,h5err)
-           if (rotation_method == 3) then
-              call dump_h5(dumpGid,'gbflux_trapped',gbflux_trapped,h5in,h5err)
-              call dump_h5(dumpGid,'gbflux_i_trapped',gbflux_i_trapped,h5in,h5err)
-           endif
+           call dump_h5(dumpGid,'gbflux_trapped',gbflux_trapped,h5in,h5err)
+           call dump_h5(dumpGid,'gbflux_i_trapped',gbflux_i_trapped,h5in,h5err)
         endif
 
         allocate(a2(3,n_x))
@@ -668,7 +595,7 @@ subroutine write_hdf5_timedata(action)
 !            deltac = delta_s(ir_norm)+s_delta_s(ir_norm)/r(ir_norm)*dr
 !            zetac  = zeta_s(ir_norm) +s_zeta_s(ir_norm)/r(ir_norm)*dr
          do j=0,ncoarse
-             theta = -pi+REAL(j)*pi_2/REAL(ncoarse)
+             theta = -pi+REAL(j)*pi/2./REAL(ncoarse)
              if(radial_profile_method==1) then
                 Rc(j,ix)=rmajc+r_c*cos(theta)
                 Zc(j,ix)=zmagc+r_c*sin(theta)
@@ -678,7 +605,7 @@ subroutine write_hdf5_timedata(action)
              endif
          enddo
          do j=0,nfine
-             theta = -pi+REAL(j)*pi_2/REAL(nfine)
+             theta = -pi+REAL(j)*pi/2./REAL(nfine)
              if(radial_profile_method==1) then
                 Rf(j,ix)=rmajc+r_c*cos(theta)
                 Zf(j,ix)=zmagc+r_c*sin(theta)
@@ -807,15 +734,15 @@ end subroutine write_hdf5_timedata
   !------------------------------------------------
 subroutine write_hdf5_restart
   use gyro_globals
-  use math_constants
   use hdf5
   use hdf5_api
-  use hdf5_mod
+  use gyro_vshdf5_mod
 
   !---------------------------------------------------
   implicit none
   include 'mpif.h'
   !
+  real :: pi=3.141592653589793
   character(60) :: description
   character(64) :: step_name, tempVarName
   character(128) :: dumpfile
@@ -899,10 +826,9 @@ subroutine write_hdf5_restart
 
 subroutine myhdf5_close
   use gyro_globals
-  use math_constants
   use hdf5
   use hdf5_api
-  use hdf5_mod
+  use gyro_vshdf5_mod
   integer ierr
   call h5close_f(ierr)
 end subroutine myhdf5_close
@@ -1008,8 +934,7 @@ end subroutine write_distributed_real_h5
 subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
                      n_fn,n1,n2,n3,fn,plot3d,h5in,h5err)
 
-  use math_constants
-  use hdf5_mod
+  use gyro_vshdf5_mod
   use hdf5_api
   use gyro_globals, only : &
        q, &
@@ -1037,6 +962,7 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
   !------------------------------------------------------
   implicit none
   !
+  real :: pi=3.141592653589793
   character*(*), intent(in) :: vname
   integer(HID_T), intent(in) :: rGid,r3Did
   integer, intent(in) :: n_fn,n1,n2,n3

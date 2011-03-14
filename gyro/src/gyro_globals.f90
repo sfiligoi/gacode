@@ -802,6 +802,9 @@ module gyro_globals
   real, dimension(:,:), allocatable :: ave_phi
   !
   complex, dimension(:,:,:,:), allocatable :: moments_plot
+  complex, dimension(:,:,:,:), allocatable :: moments_plot_fine
+  real, dimension(:,:), allocatable :: nu_coarse
+  real, dimension(:,:), allocatable :: nu_fine
   real, dimension(:,:,:), allocatable :: moments_zero_plot
   !
   real, dimension(:,:), allocatable :: b0_plot

@@ -25,7 +25,7 @@ IOLIBS=@FCIOWRAPPERS_ALIBS@ @HDF5_ALIBS@ @NETCDF_ALIBS@ @Z_LIBS@
 
 libgacodegyro_la_SOURCES =
 libgacodegyro_la_LIBADD = \
-	libgacodegyro_SRC.la \
+	$(top_builddir)/gyro/src/libgacodegyro_SRC.la \
 	$(top_builddir)/gyro/BLEND/libgacodeblend.la \
 	$(top_builddir)/shared/math/libgacodemath.la \
 	$(top_builddir)/gyro/TRANSPOSE/libgacodetranspose.la \
@@ -33,12 +33,11 @@ libgacodegyro_la_LIBADD = \
 	$(top_builddir)/shared/GEO/libgacodegeo.la \
 	$(top_builddir)/shared/EXPRO/libgacodeexpro.la \
 	$(top_builddir)/shared/UMFPACK/libgacodeumfpack.la \
-	$(top_builddir)/gyro/shared/libvshdf5_gyro.la
+	$(top_builddir)/gyro/vshdf5/libgyro_vshdf5.la
 
 
 gyro_SOURCES = gyro.f90
-gyro_LDADD  = $(top_builddir)/gyro/src/libgacodegyro.la \
-	@FFTW_LIBS@  $(LMATH) $(IOLIBS)
+gyro_LDADD  = libgacodegyro.la @FFTW_LIBS@  $(LMATH) $(IOLIBS)
 
 all-local: link-data-local
 

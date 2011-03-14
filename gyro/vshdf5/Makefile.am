@@ -12,7 +12,7 @@
 
 noinst_LTLIBRARIES = libgyro_vshdf5.la
 
-gyro_includes= -I $(top_builddir)/gyro/src
+gyro_includes= -I$(top_builddir)/gyro/src -I$(top_builddir)/shared/GEO
 
 # To get to work with optimization reducing compiler wrappers
 IOINC=@HDF5_INC@ @FCIOWRAPPERS_INC@ @HDF5_FC_INC@ -I$(abs_top_builddir)/shared/vshdf5
@@ -30,3 +30,5 @@ libgyro_vshdf5_la_SOURCES = \
 endif
 
 CLEANFILES = *.mod *.f90 *.lo *.lst *.la
+
+gyro_write_master_hdf5.o: gyro_vshdf5_mod.o

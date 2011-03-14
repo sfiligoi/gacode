@@ -22,21 +22,17 @@ AM_LIBTOOLFLAGS = --tag=FC
 AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) $(gyro_includes) $(CPPF90_FLAGS) -I.
 AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) $(gyro_includes) $(CPPF90_FLAGS) -I.
 
-
-
-
 peek_SOURCES = \
 	       peek_globals.f90 \
 	       read_profile_vugyro.f90 \
 	       read_time.f90 \
          peek.f90 
 
-peek_LDADD  = $(top_builddir)/gyro/src/libgacodegyro.la 
+peek_LDADD  = $(top_builddir)/gyro/src/libgacodegyro_SRC.la
 #	@FFTW_LIBS@  @LAPACK_LIBS@  @BLAS_LIBS@ $(IOLIBS) $(Z_LIBS) \
 #	$(top_builddir)/gyro/EXPRO/libEXPRO.la
 #
-peek_INCLUDES = \
-	-I $(top_builddir)/gyro/src 
+peek_INCLUDES = -I $(top_builddir)/gyro/src 
 
 if TX_FORTRAN_MODNAMEISCAP
 include_HEADERS = PEEK_GLOBALS.$(TX_FORTRAN_MODEXT)  
