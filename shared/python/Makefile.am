@@ -11,7 +11,9 @@
 
 
 MAINTAINERCLEANFILES    = Makefile.in 
-dist_noinst_DATA= \
+
+instdir=$(prefix)/share
+dist_inst_DATA= \
  gacodeinput.py 
 
 all-local:
