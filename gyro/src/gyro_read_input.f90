@@ -265,7 +265,7 @@ subroutine gyro_read_input
   call readbc_int(n_alpha_plot) 
   ! toroidal direction
   call readbc_real(theta_fine_start)
-  call readbc_real(theta_fine_anlge)
+  call readbc_real(theta_fine_angle)
 
 
   !synthetic diagnostics
