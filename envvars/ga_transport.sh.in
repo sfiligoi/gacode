@@ -7,6 +7,7 @@ export NEO_DIR=@abs_top_builddir@/neo
 export TGLF_DIR=@abs_top_builddir@/tglf
 echo Prepending $GACODE_DIR/bin:$GYRO_DIR/bin:$NEO_DIR/bin:$TGLF_DIR/bin to your PATH.
 export PATH=${PATH}:$GACODE_DIR/bin:$GYRO_DIR/bin:$NEO_DIR/bin:$TGLF_DIR/bin
+export GACODE_ROOT=@abs_top_builddir@
 #export IDL_PATH=$IDL_DIR/lib:$GYRO_DIR/vugyro
 func() 
 {
