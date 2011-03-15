@@ -13,12 +13,12 @@ OBJECTS =  hdf5_fcapi.o
 all: $(VSHDF5_MAKECMD)
 
 vshdf5: $(OBJECTS)
-	$(ARCH) libvshdf5.a $(OBJECTS)
+	$(ARCH) vshdf5_lib.a $(OBJECTS)
 
-.f.o :
+.f90.o :
 	$(FC) $(FMATH) $(FFLAGS) $(HDF5_INC) -c $<
 
-.F.o :
+.F90.o :
 	$(FC) $(FMATH) $(FFLAGS) $(HDF5_INC) -c $<
 
 #SEK: Need to figure this out.

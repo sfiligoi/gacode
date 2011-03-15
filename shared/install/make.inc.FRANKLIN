@@ -23,7 +23,7 @@ LMATH = /opt/fftw/2.1.5/cnos/lib/libdrfftw.a \
 
 # OPTIONAL: netCDF (for gyro2gkv)
 
-#NETCDF = /usr/common/usg/netcdf/default/lib/libnetcdf.a
+NETCDF = /usr/common/usg/netcdf/default/lib/libnetcdf.a
 NETCDF_INC = /usr/common/usg/netcdf/default/include
 
 # OPTIONAL: HDF5 (for vshdf5)
@@ -31,9 +31,9 @@ NETCDF_INC = /usr/common/usg/netcdf/default/include
 # version makes some things easier.
 # Set these to blanks to turn off:
 
-HDF5_LIBS = -L/opt/cray/hdf5-parallel/default/hdf5-parallel-pgi/lib -lhdf5_fortran -lhdf5
+HDF5_LIBS = -L/opt/cray/hdf5-parallel/default/hdf5-parallel-pgi/lib -lhdf5_fortran -lhdf5 -L/usr/common/usg/szip/2.1/lib -lsz -lz
 HDF5_INC = -I/opt/cray/hdf5-parallel/default/hdf5-parallel-pgi/include
-VHDF5_MAKECMD=vshdf5
+VSHDF5_MAKECMD=vshdf5
 VSHDF5_ALLLIBS= ../vshdf5/libgyro_vshdf5.a ../../shared/vshdf5/libvshdf5.a $(HDF5LIBS)
 
 # Archive 

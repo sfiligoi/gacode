@@ -18,7 +18,9 @@ export EXTRA_LIBS = \
        ${GACODE_ROOT}/gyro/TRANSPOSE/TRANSP_lib.a \
        ${GACODE_ROOT}/gyro/SSUB/SSUB_lib.a \
        ${GACODE_ROOT}/gyro/GKEIGEN/GKEIGEN_lib.a \
-       $(VSHDF5_ALLLIBS) ${LMATH}
+       ${GACODE_ROOT}/gyro/vshdf5/gyrovshdf5_lib.a \
+       ${GACODE_ROOT}/shared/vshdf5/vshdf5_lib.a \
+       $(HDF5_LIBS) ${LMATH}
 
 all:
 	cd ${GACODE_ROOT}/shared ; make
@@ -28,7 +30,7 @@ all:
 	cd src ; make
 	cd GKEIGEN ; make
 	cd peek ; make
-	cd vshdf5 ; make
+	cd vshdf5 ; make $(VSHDF5_MAKECMD)
 
 	cd src ; $(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o gyro_lib.a $(EXTRA_LIBS)
 
