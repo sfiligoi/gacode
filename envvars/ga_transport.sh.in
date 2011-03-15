@@ -1,7 +1,7 @@
 # This file should be sourced, not run.
 # $Id: uedgerc.sh.in 1187 2009-08-09 17:16:35Z cary $
 
-export GACODE_DIR=@abs_top_builddir@
+export GACODE_ROOT=@abs_top_builddir@
 export GYRO_DIR=@abs_top_builddir@/gyro
 export NEO_DIR=@abs_top_builddir@/neo
 export TGLF_DIR=@abs_top_builddir@/tglf
@@ -10,7 +10,7 @@ export PATH=${PATH}:$GACODE_DIR/bin:$GYRO_DIR/bin:$NEO_DIR/bin:$TGLF_DIR/bin
 #export IDL_PATH=$IDL_DIR/lib:$GYRO_DIR/vugyro
 func() 
 {
-  local PYTHONADD="$GACODE_DIR/shared/python $GYRO_DIR/python $NEO_DIR/python $TGLF_DIR/python"
+  local PYTHONADD="$GACODE_ROOT/shared/python $GYRO_DIR/python $NEO_DIR/python $TGLF_DIR/python"
   echo pythonadd = $PYTHONADD
 
   for i in $PYTHONADD; do

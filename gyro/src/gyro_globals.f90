@@ -11,7 +11,7 @@ module gyro_globals
   integer :: uflag
 
   integer :: gyrotest_flag
-  integer :: lskipinit
+  integer :: lskipinit = 1
 
   integer :: gyro_exit_status
   character(len=80) :: gyro_exit_message
@@ -60,7 +60,7 @@ module gyro_globals
   !-PRE integer :: iohdf5out = 1
   integer :: iohdf5out = 0
   ! time intervals for hdf5 write outs
-  integer :: fine_time_skip             ! Fine files for synthetic diagnostics
+  integer :: fine_time_skip = 1             ! Fine files for synthetic diagnostics
   integer :: n_alpha_fine = 1           ! Number of phi planes to use in fine plots
   integer :: n_alpha_plot = 20
   ! This defines a wedge in the poloidal plane 

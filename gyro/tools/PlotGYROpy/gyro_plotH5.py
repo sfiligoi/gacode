@@ -21,7 +21,7 @@ gf=tables.openFile("gyrofine"+gtime+".h5")
 alpha=gf.root.grid.alpha.read()
 R=gf.root.grid.R.read()
 Z=gf.root.grid.Z.read()
-fineion=gf.root.density_ion1_phi01.read()
+fineion=gf.root.density_electron_phi01.read()
 #gf.close()
 
 #gf=tables.openFile("gyro"+gtime+".h5")
