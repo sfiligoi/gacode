@@ -205,7 +205,6 @@ module gyro_interface
 
   ! io related to hdf5 and diagnostics  
   integer :: gyro_iohdf5out_in = 0
-  real    :: gyro_omega_exp_in = -0.0722
   real    :: gyro_zeta_offset_in = 0.0
   integer :: gyro_fine_time_skip_in = 1
   integer :: gyro_n_alpha_fine_in = 1
@@ -429,7 +428,6 @@ contains
     gyro_collision_method_in = collision_method
 
     gyro_iohdf5out_in        = iohdf5out
-    gyro_omega_exp_in        = omega_exp
     gyro_zeta_offset_in        = zeta_offset
 
     gyro_fine_time_skip_in = fine_time_skip
@@ -643,7 +641,6 @@ contains
     collision_method = gyro_collision_method_in
     
     iohdf5out      = gyro_iohdf5out_in       
-    omega_exp =  gyro_omega_exp_in     
     zeta_offset = gyro_zeta_offset_in        
 
     fine_time_skip = gyro_fine_time_skip_in 

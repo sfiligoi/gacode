@@ -156,6 +156,7 @@ subroutine write_hdf5_timedata(action)
   integer(HID_T) :: dumpGid,dumpFid,gid3D,fid3D,gridGid,grdcoarse
   type(hdf5InOpts) :: h5in
   type(hdf5ErrorType) :: h5err
+  integer :: number_label
 
   logical :: write_threed
 
@@ -167,41 +168,6 @@ subroutine write_hdf5_timedata(action)
   else
           write_threed = .false.
   endif
-
-  !---------------------------------------------------
-  ! Determine file control mode:
-  ! mode = 1 -> file create 
-  !      = 2 -> file write 
-  !      = 3 -> file reposition 
-  !      = 4 -> file write on step = 0
-  ! action = 1 -> simulation still initializing
-  !        = 2 -> simulation running
-
-  if (action == 1) then
-     ! File creation or repositioning:
-     select case (restart_method)
-     case(-1) 
-        mode = 1 ! No use of restart facility
-        !SEK: This is confusing.  At the beginning, not everything 
-        !        ! is allocated and setup, so just return
-        return
-     case(0,2) 
-        mode = 1 ! Start of restartable simulation
-        !SEK: This is confusing.  At the beginning, not everything 
-        !        ! is allocated and setup, so just return
-        return
-     case(1)
-        mode = 3 ! Continuation of restartable simulation        
-     end select
-  else
-     ! File writing
-     if (step == 0) then
-        mode = 4
-     else
-        mode = 2
-     endif
-  endif
-  if (output_flag == 0) mode = -mode
 
   !---------------------------------------------------
   ! Initialization
@@ -223,12 +189,13 @@ subroutine write_hdf5_timedata(action)
     !---------------------------------------------------
     ! Timestep data:
     !
-      if (step>999999) THEN
-        write(step_name,fmt='(i7.7)') step
-      else if (step>99999) THEN
-        write(step_name,fmt='(i6.6)') step
+      number_label=NINT(t_current/dt)
+      if (number_label>999999) THEN
+        write(step_name,fmt='(i7.7)') number_label
+      else if (number_label>99999) THEN
+        write(step_name,fmt='(i6.6)') number_label
       else
-        write(step_name,fmt='(i5.5)') step
+        write(step_name,fmt='(i5.5)') number_label
       endif
   
     dumpfile=TRIM(path)//"gyro"//TRIM(step_name)//".h5"
@@ -532,25 +499,14 @@ subroutine write_hdf5_timedata(action)
        !---------------------------------------- 
 
        do ix=1,n_x
-         if (flat_profile_flag == 0) then
-            r_c=r_s(ix)
-         else
-            r_c=r(ix)
-         endif
+         r_c=r(ix)
          rmajc = rmaj_s(ix)
          zmagc = zmag_s(ix)
          kappac = kappa_s(ix)
          deltac = delta_s(ix)
          xdc    = asin(deltac)
          zetac  = zeta_s(ix)
-!SEK: I am totally confused here.  This is in write_geometry arrays, but isn't used
-!SEK: by Chris
-!            dr = r(ix)-r(ir_norm)
-!            rmajc = rmaj_s(ir_norm)+drmaj_s(ir_norm)*dr
-!            zmagc = zmag_s(ir_norm)+dzmag_s(ir_norm)*dr
-!            kappac = kappa_s(ir_norm)+kappa_s(ir_norm)*s_kappa_s(ir_norm)/r(ir_norm)*dr
-!            deltac = delta_s(ir_norm)+s_delta_s(ir_norm)/r(ir_norm)*dr
-!            zetac  = zeta_s(ir_norm) +s_zeta_s(ir_norm)/r(ir_norm)*dr
+         ! Note:  This needs to be generalized for all geometries
          do j=0,ncoarse
              theta = -pi+REAL(j)*pi*2./REAL(ncoarse)
              if(radial_profile_method==1) then
@@ -686,6 +642,7 @@ subroutine write_hdf5_fine_timedata(action)
   integer :: n_fine
   type(hdf5InOpts) :: h5in
   type(hdf5ErrorType) :: h5err
+  integer :: number_label
 
   logical :: write_fine
 
@@ -698,41 +655,6 @@ subroutine write_hdf5_fine_timedata(action)
   else
           write_fine = .true.
   endif
-
-  !---------------------------------------------------
-  ! Determine file control mode:
-  ! mode = 1 -> file create 
-  !      = 2 -> file write 
-  !      = 3 -> file reposition 
-  !      = 4 -> file write on step = 0
-  ! action = 1 -> simulation still initializing
-  !        = 2 -> simulation running
-
-  if (action == 1) then
-     ! File creation or repositioning:
-     select case (restart_method)
-     case(-1) 
-        mode = 1 ! No use of restart facility
-        !SEK: This is confusing.  At the beginning, not everything 
-        !        ! is allocated and setup, so just return
-        return
-     case(0,2) 
-        mode = 1 ! Start of restartable simulation
-        !SEK: This is confusing.  At the beginning, not everything 
-        !        ! is allocated and setup, so just return
-        return
-     case(1)
-        mode = 3 ! Continuation of restartable simulation        
-     end select
-  else
-     ! File writing
-     if (step == 0) then
-        mode = 4
-     else
-        mode = 2
-     endif
-  endif
-  if (output_flag == 0) mode = -mode
 
   !---------------------------------------------------
   ! Grid
@@ -759,12 +681,13 @@ subroutine write_hdf5_fine_timedata(action)
     !---------------------------------------------------
     ! Timestep data:
     !
-    if (step>999999) THEN
-      write(step_name,fmt='(i7.7)') step
-    else if (step>99999) THEN
-      write(step_name,fmt='(i6.6)') step
+    number_label=NINT(t_current/dt)
+    if (number_label>999999) THEN
+      write(step_name,fmt='(i7.7)') number_label
+    else if (number_label>99999) THEN
+      write(step_name,fmt='(i6.6)') number_label
     else
-      write(step_name,fmt='(i5.5)') step
+      write(step_name,fmt='(i5.5)') number_label
     endif
 
     dumpfile=TRIM(path)//"gyrofine"//TRIM(step_name)//".h5"
@@ -953,6 +876,7 @@ subroutine write_hdf5_restart
   character(4) :: iname
   type(hdf5InOpts) :: h5in
   type(hdf5ErrorType) :: h5err
+  integer :: number_label
 
   !---------------------------------------------------
   if (i_proc == 0) then
@@ -968,12 +892,13 @@ subroutine write_hdf5_restart
     !---------------------------------------------------
     ! Timestep data:
     !
-      if (step>999999) THEN
-        write(step_name,fmt='(i7.7)') step
+      number_label=NINT(t_current/dt)
+      if (number_label>999999) THEN
+        write(step_name,fmt='(i7.7)') number_label
       else if (data_step>99999) THEN
-        write(step_name,fmt='(i6.6)') step
+        write(step_name,fmt='(i6.6)') number_label
       else
-        write(step_name,fmt='(i5.5)') step
+        write(step_name,fmt='(i5.5)') number_label
       endif
   
      dumpfile=TRIM(path)//"gyroRestart"//TRIM(step_name)//".h5"
@@ -1146,7 +1071,6 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
        n_n_1,&
        n_proc_1,&
        n_theta_plot,&
-       omega_exp,&
        t_current,&
        debug_flag,&
        recv_status,&
@@ -1177,18 +1101,21 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
   type(hdf5ErrorType), intent(inout) :: h5err
   !
   integer :: data_loop
-  integer :: i_group_send
+  integer :: i_group_send, ir_norm
   integer :: i_send, iphi, istart,nn,i,ikin,in, ix,nphi
   !
   complex :: fn_recv(n_fn), c_i
   complex, dimension(:,:,:,:), allocatable :: buffn
   real, dimension(:,:,:,:), allocatable:: real_buff
   real, dimension(:,:), allocatable:: alpha_loc
+  real :: omega_exp
   logical :: iscoarse
 
   !------------------------------------------------------
   include 'mpif.h'
   c_i=(0,1)
+
+  omega_exp=w0_s(ir_norm)
 
   if(n1==n_theta_plot) then
      iscoarse=.true.

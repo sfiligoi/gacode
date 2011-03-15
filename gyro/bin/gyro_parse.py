@@ -200,7 +200,6 @@ x.add('N_ALPHA_FINE', '1')
 x.add('N_ALPHA_PLOT', '20')
 x.add('THETA_FINE_START', '0.0')
 x.add('THETA_FINE_ANGLE', '0.0')
-x.add('OMEGA_EXP', '-0.0722')
 x.add('ZETA_OFFSET', '0.0')
 
 

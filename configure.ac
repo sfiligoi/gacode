@@ -55,26 +55,6 @@ dnl fi
 
 builtin(include, config/tx_fc_aux.m4)
 
-dnl-----------------------------------------------------------------------
-dnl Checks for typedefs, structures, and compiler characteristics.
-dnl-----------------------------------------------------------------------
-
-dnl jrc: is any of this needed?
-if false; then
-AC_C_CONST
-AC_TYPE_PID_T
-AC_TYPE_SIZE_T
-AC_C_VOLATILE
-AC_HEADER_STDC
-AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS([stdlib.h string.h])
-AM_CONFIG_HEADER(config.h)
-# Checks for library functions.
-AC_FUNC_ALLOCA
-CFLAGS="$CFLAGS $C_PIC_FLAG"
-CXXFLAGS="$CXXFLAGS $C_PIC_FLAG"
-fi
-
 dnl ######################################################################
 dnl
 dnl Libtool (may get additional flags)
