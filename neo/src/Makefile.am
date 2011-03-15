@@ -57,11 +57,11 @@ bin_PROGRAMS     = neo
 neo_SOURCES = neo.f90
 neo_LDADD  = \
   $(top_builddir)/neo/src/libgacodeneo.la \
-  $(top_builddir)/shared/math/libgacodemath.la \
+  $(top_builddir)/neo/nclass/libgacodenclass.la \
   $(top_builddir)/shared/EXPRO/libgacodeexpro.la  \
+  $(top_builddir)/shared/math/libgacodemath.la \
   $(top_builddir)/shared/GEO/libgacodegeo.la  \
   $(top_builddir)/shared/UMFPACK/libgacodeumfpack.la  \
-  $(top_builddir)/neo/nclass/libgacodenclass.la \
   @FFTW_LIBS@  @LAPACK_LIBS@  @BLAS_LIBS@
 #neo_INCLUDES = \
 #	-I $(top_builddir)/neo/src \
