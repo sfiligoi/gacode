@@ -12,11 +12,14 @@ OBJECTS = \
 	gyro_write_master_hdf5.o 
 
 DUM_OBJECTS = \
-	write_hdf5_dummy.o
+	gyro_dummy_master_hdf5.o
 
 .SUFFIXES : .o .f90 
 
-all: $(VSHDF5_MAKECMD) 
+# Always make the dummy.  If we really want the library it will be
+# overwritten
+all: gyro_vshdf5_dummy $(VSHDF5_MAKECMD) 
+
 
 VSHDF5_INC=-I../../shared/vshdf5
 

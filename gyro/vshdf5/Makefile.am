@@ -26,7 +26,7 @@ libgyro_vshdf5_la_SOURCES = \
 	gyro_write_master_hdf5.f90 
 else
 libgyro_vshdf5_la_SOURCES = \
-	write_hdf5_dummy.f90
+	gyro_dummy_master_hdf5.f90
 endif
 
 CLEANFILES = *.mod *.f90 *.lo *.lst *.la

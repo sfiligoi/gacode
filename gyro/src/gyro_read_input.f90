@@ -269,7 +269,6 @@ subroutine gyro_read_input
 
 
   !synthetic diagnostics
-  call readbc_real(omega_exp)
   call readbc_real(zeta_offset)
 
   !

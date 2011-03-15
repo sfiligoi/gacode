@@ -10,10 +10,14 @@ OBJECTS =  hdf5_fcapi.o
 
 .SUFFIXES : .o .f90  .F90 
 
-all: $(VSHDF5_MAKECMD)
+#Always create dummy and then overwite if needed
+all: vshdf5_dummy $(VSHDF5_MAKECMD)
 
 vshdf5: $(OBJECTS)
 	$(ARCH) vshdf5_lib.a $(OBJECTS)
+
+vshdf5_dummy: dummy.o
+	$(ARCH) vshdf5_lib.a dummy.o
 
 .f90.o :
 	$(FC) $(FMATH) $(FFLAGS) $(HDF5_INC) -c $<
