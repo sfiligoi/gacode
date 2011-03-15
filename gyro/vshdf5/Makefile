@@ -8,26 +8,28 @@ else
 endif
 
 OBJECTS = \
-	gyro_hdf5_mod.f90 \
-	gyro_write_master_hdf5.f90
+	gyro_vshdf5_mod.o \
+	gyro_write_master_hdf5.o 
 
 DUM_OBJECTS = \
-	write_hdf5_dummy.f90
+	write_hdf5_dummy.o
 
 .SUFFIXES : .o .f90 
 
-all: $(VSHDF5_MAKECMD) gyro_vshdf5_dummy
+all: $(VSHDF5_MAKECMD) 
 
 VSHDF5_INC=-I../../shared/vshdf5
 
 vshdf5: $(OBJECTS)
-	$(ARCH) libgyro_vshdf5.a $(OBJECTS)
+	$(ARCH) gyrovshdf5_lib.a $(OBJECTS)
 
-gyro_vshdf5_dummy: $(OBJECTS)
-	$(ARCH) libgyro_vshdf5_dummy.a $(OBJECTS)
+gyro_vshdf5_dummy: $(DUM_OBJECTS)
+	$(ARCH) gyrovshdf5_lib.a $(DUM_OBJECTS)
 
 .f90.o :
-	$(FC) $(FMATH) $(FFLAGS) $(VSHDF5_INC) -c $<
+	$(FC) $(FMATH) $(FFLAGS) $(VSHDF5_INC) $(HDF5_INC) $(VSHDF5_INC) -c $<
 
 clean:  
 	rm -f *.o $(LLIB).a
+
+include ${GACODE_ROOT}/gyro/install/make.ext.${GACODE_PLATFORM}
