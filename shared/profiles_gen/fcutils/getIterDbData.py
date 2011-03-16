@@ -18,10 +18,7 @@ fcutilsexecdir = os.path.dirname(sys.argv[0])
 import fcaddpaths
 fcaddpaths.fcaddpaths(fcutilsexecdir)
 
-print "sys.path =", sys.path
-
 import readIterDB
-import txppImport
 
 def writeNoInterp(myidb,fp,allFields,options):
     """
@@ -61,6 +58,7 @@ def writeWithInterp(myidb,fp,allFields,mapFile,options):
     """
     Interpolate and then write
     """
+    import txppImport
 
     # Check if we are to write an h5 output file
     h5fp = None

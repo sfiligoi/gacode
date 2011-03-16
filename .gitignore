@@ -6,6 +6,10 @@
 */*/*.o
 */*/*.mod
 */*/*/*.o
+*/*.pyc
+*/*/*.pyc
+*/*/*/*.pyc
+
 
 # Executables
 gato/gato
