@@ -32,7 +32,6 @@ subroutine gyro_profile_init
   real :: loglam
   real :: cc
   real, dimension(n_x) :: volume_prime
-  real, dimension(n_n) :: omega_e_norm
   !---------------------------------------------------
 
   !---------------------------------------------------
