@@ -279,7 +279,7 @@ c        enddo
           pfast_d(j)=pfast_new(j)
 c          er_d(j)=er_new(j)
           if(itorque.eq.0) torque_d(j)=0.D0
-          if(iptotr.eq.0) pfast_d(j)=0.D0
+c          if(iptotr.eq.0) pfast_d(j)=0.D0
         enddo
         if (ncl_flag .eq. 1) then
           do j=1,nex
@@ -996,6 +996,7 @@ c            z pts for plasma boundary, meters
 c
              read(niterdb,'(a)')stflg
              read(niterdb,9)nplasbdry_d
+          write(*,*)"nplasbdry_d = ",nplasbdry_d
 c
              read(niterdb,'(a)')stflg
 cx           read(niterdb,10)(rplasbdry_d(j), j=1,nplasbdry_d)
@@ -1023,18 +1024,24 @@ c                endif
              endif
 c
 c---total and fast ion pressure (keV/m^3)
-c   Pa = N/m**2, keV/m**3=Pa/1.602e-16
+c   Pa = N/m**2, keV/m**3=Pa/1.6022e-16
 c   If iptotr=0, then total thermal pressure computed in pressure.f
 c   Note: pfast_exp has 1.e19 factored out since alpha_exp,m
 c   has 1.e19 factored out of densities
 c
-       if(iptotr.eq.1) then
+       if(iptotr.eq.0)then
+         write(*,'(a32)')'computing ptot from thermal pressure'
+         do j=1,nj_d
+           ptot_d(j) = 1.6022D-16*ene_d(j)*(te_d(j)+ti_d(j))
+           pfast_d(j) = 0.0
+         enddo
+       elseif(iptotr.eq.1) then
          write(*,'(a32)') 'Reading ptot only' ! pfast constructed in pressure.f
          read(niterdb,'(a)')stflg
          read(niterdb,10)(ptot_d(j), j=1,nj_d)
          do j=1,nj_d
-           ptot_d(j)=ptot_d(j)/1.602D-16
-           pfast_d(j)=ptot_d(j)-ene_d(j)*te_d(j)-en_d(j,1)*ti_d(j)
+           pfast_d(j)=ptot_d(j)
+     >    -1.6022D-16*ene_d(j)*(te_d(j)+ti_d(j))
          enddo
        elseif(iptotr.eq.2) then
          write(*,'(a32)') 'Reading ptot and pfast'

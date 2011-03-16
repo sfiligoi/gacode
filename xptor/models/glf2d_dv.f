@@ -13,8 +13,6 @@ c
       include '../inc/ptor.m'
       include '../inc/glf.m'
 c
-      real*8 gb_unit
-c
       call neoclassical
 c
       if(imodel.eq.81)call glf23_dv
@@ -588,6 +586,22 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
       SUBROUTINE neoclassical
 c
+      include '../inc/model.m'
+c
+      if(use_xneo_m.le.2)then
+        CALL get_kapisn
+      else
+        CALL get_neo
+      endif
+c
+      RETURN
+      END SUBROUTINE neoclassical
+c
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c
+
+      SUBROUTINE get_kapisn
+c
 c... Calculate neoclassical chii from modelled profiles
 c... Use adapted version KAPISN_ONE that calculats chii at one position
 c... instead of the full profile
@@ -845,8 +859,83 @@ c
       endif
 c
       RETURN
-      END !SUBROUTINE neoclassical
+      END !SUBROUTINE get_kapisn
 c
+      SUBROUTINE get_neo
+      
+      USE neo_interface
+      IMPLICIT none
+      include 'mpif.h'
+      include '../inc/input.m'
+      include '../inc/tport.m'
+      include '../inc/model.m'
+      include '../inc/data.m'
+      include '../inc/share.m'
+      include '../inc/sharegk.m'
+      include '../inc/ptor.m'
+      include '../inc/glf.m'
+!
+      real :: n0,a0,T0,v0,cnc,thetam
+!
+      call xptor_neo_map
+      call neo_run
+!
+! neo normalizations
+!
+      n0 = nem
+      a0 = rmin_exp(mxgrid)
+      T0 = tim
+      v0 = 9.79D3*DSQRT(T0*1.D3)/DSQRT(amassgas_exp)
+!     
+      cnc = -1.0*alpha_dia/bt_exp
+      thetam=theta_exp(jm)
+      nu_pol_m(jm) = 0.0
+      kpol_m(jm) = 0.0
+!
+! neoclassical poloidal velocity (km/sec)
+!
+        vneo(1) = (cnc/thetam)*neo_vpol_dke_out(2)*v0/cv
+        vneo(2) = (cnc/thetam)*neo_vpol_dke_out(1)*v0/cv
+        vneo(3) = (cnc/thetam)*neo_vpol_dke_out(3)*v0/cv
+c
+c diamagnetic velocity (km/sec)
+c
+      vdia(1) = (-cnc/thetam)*(gradtem+tem*gradnem/nem)
+      vdia(2) = (cnc/thetam)
+     >   *(gradtim +tim*gradfim/fim+tim*gradnem/nem)
+      vdia(3) = (cnc/thetam)*(gradtim+tim*gradfzm/fzm
+     >   +tim*gradnem/nem)/zimp_exp
+c
+      if(jm.eq.1)then
+        nu_pol_m(0)=nu_pol_m(1)
+        kpol_m(0)=kpol_m(1)
+      endif
+c
+c compute neoclassical fluxes
+c
+       neflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*
+     >     (neo_pflux_dke_out(2)+neo_pflux_gv_out(2))
+       teflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*T0*
+     >     (neo_efluxtot_dke_out(2)+neo_efluxtot_gv_out(2))
+       tiflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*T0*
+     >     (neo_efluxtot_dke_out(1)+neo_efluxtot_gv_out(1))
+       tzflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*T0*
+     >     (neo_efluxtot_dke_out(3)+neo_efluxtot_gv_out(3))
+       vphiflux_neo = drhodr(jm)*(1.6726D-8)*n0*a0*T0*
+     >     (neo_mflux_dke_out(1)+neo_mflux_gv_out(1))
+       vphizflux_neo = drhodr(jm)*(1.6726D-8)*n0*a0*T0*
+     >     (neo_mflux_dke_out(3)+neo_mflux_gv_out(3))
+
+      if(ipert_gf.eq.0)then
+        flow_neo(jm) = vprime(jm,2)*neflux_neo
+        powe_neo(jm) = vprime(jm,2)*teflux_neo
+        powi_neo(jm) = vprime(jm,2)*tiflux_neo
+        stress_tor_neo(jm) = vprime(jm,2)*vphiflux_neo
+        stress_par_neo(jm) = vprime(jm,2)*vparflux_neo
+      endif
+      
+      RETURN
+      END ! SUBROUTINE get_neo
       SUBROUTINE  tglf_dv
 c
       USE tglf_tg
