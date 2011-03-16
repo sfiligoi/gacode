@@ -56,16 +56,10 @@ subroutine gyro_alloc_big(flag)
      allocate(aperp_fluxave(n_x))
      allocate(h_err(n_stack,n_x,n_nek_loc_1,n_kinetic))
 
-     field_blend=0.
-     field_blend_old=0.
-     field_blend_old2=0.
-     field_blend_dot=0.
-     phi_squared=0.
-     g_squared=0.
-     phi_fluxave=0.
-     ave_phi=0.
-     a_fluxave=0.
-     aperp_fluxave=0.
+     field_blend=0.; field_blend_old=0.
+     field_blend_old2=0.; field_blend_dot=0.
+     phi_squared=0.; g_squared=0.
+     phi_fluxave=0.; ave_phi=0.; a_fluxave=0.; aperp_fluxave=0.
      h_err=0.
 
 
@@ -83,19 +77,9 @@ subroutine gyro_alloc_big(flag)
      allocate(f_store(n_stack,n_x,n_nek_loc_1,n_kinetic))
      allocate(p_store(n_stack,n_x,n_nek_loc_1,n_kinetic))
 
-     h=0.
-     h_old=0.
-     h_0=0.
-     h_cap=0.
-     h_cap_old=0.
-     h_cap_old2=0.
-     h_cap_dot=0.
-     RHS=0.
-     RHS_dr=0.
-     RHS_dt=0.
-     entropy=0.
-     f_store=0.
-     p_store=0.
+     h=0.; h_old=0.; h_0=0.; h_cap=0.; h_cap_old=0.
+     h_cap_old2=0.; h_cap_dot=0.; RHS=0.; RHS_dr=0.; RHS_dt=0.
+     entropy=0.; f_store=0.; p_store=0.
 
 
 
@@ -120,8 +104,7 @@ subroutine gyro_alloc_big(flag)
 
      allocate(h_M(nv1_SSUB,msplit_SSUB,n_n,n_kinetic))
      allocate(gyro_h(n_stack,n_x,n_nek_loc_1,n_kinetic))
-     h_M=0.
-     gyro_h=0.
+     h_M=0.; gyro_h=0.
 
 
      if (n_field == 3) then
@@ -144,18 +127,8 @@ subroutine gyro_alloc_big(flag)
      allocate(vel_sum_aperp(n_blend,n_x))
      allocate(phi_plot(n_theta_plot,n_x,n_field+eparallel_plot_flag))
 
-     gyro_uv=0.
-     kyro_uv=0.
-     gyro_uv_old2=0.
-     gyro_uv_old=0.
-     gyro_uv_dot=0.
-     gyro_u=0.
-     gyro_u_M=0.
-     phi=0.
-     vel_sum_p=0.
-     vel_sum_a=0.
-     vel_sum_aperp=0.
-     phi_plot=0.
+     gyro_uv=0.; kyro_uv=0.; gyro_uv_old2=0.; gyro_uv_old=0.; gyro_uv_dot=0.
+     gyro_u=0.; gyro_u_M=0.; phi=0.; vel_sum_p=0.; vel_sum_a=0.; vel_sum_aperp=0.; phi_plot=0.
 
      if (field_r0_flag == 1) then
         allocate(field_r0_plot(field_r0_grid,n_field))
@@ -187,11 +160,7 @@ subroutine gyro_alloc_big(flag)
      allocate(diff(n_kinetic,n_field,n_moment))
      allocate(diff_trapped(n_kinetic,n_field,n_moment))
      allocate(diff_n(n_kinetic,n_field,n_moment))
-     diff_i=0.
-     diff_i_trapped=0.
-     diff=0.
-     diff_trapped=0.
-     diff_n=0.
+     diff_i=0.; diff_i_trapped=0.; diff=0.; diff_trapped=0.; diff_n=0.
 
      allocate(nonlinear_flux_passing(n_x,n_kinetic,n_field,p_moment))
      allocate(nonlinear_flux_trapped(n_x,n_kinetic,n_field,p_moment))
@@ -202,54 +171,39 @@ subroutine gyro_alloc_big(flag)
      allocate(gbflux_mom(n_kinetic,3))
      allocate(gbflux_trapped(n_kinetic,n_field,p_moment))
      allocate(gbflux_n(n_kinetic,n_field,p_moment))
-     nonlinear_flux_passing=0.
-     nonlinear_flux_trapped=0.
-     nonlinear_flux_momparts=0.
-     gbflux_i=0.
-     gbflux_i_trapped=0.
-     gbflux=0.
-     gbflux_mom=0.
-     gbflux_trapped=0.
-     gbflux_n=0.
+     nonlinear_flux_passing=0.; nonlinear_flux_trapped=0.; nonlinear_flux_momparts=0.
+     gbflux_i=0.; gbflux_i_trapped=0.; gbflux=0.; gbflux_mom=0.; gbflux_trapped=0.; gbflux_n=0.
 
 
      if (transport_method == 2) then
         allocate(diff_vec(n_kinetic,n_field,n_moment,(nstep/time_skip)+1))
         allocate(gbflux_vec(n_kinetic,n_field,p_moment,(nstep/time_skip)+1))
-        diff_vec=0.
-        gbflux_vec=0.
+        diff_vec=0.; gbflux_vec=0.
 
      endif
 
      allocate(Tr_p(n_x))
      allocate(Eng_p(n_x))
-     Tr_p=0.
-     Eng_p=0.
+     Tr_p=0.; Eng_p=0.
 
 
      allocate(time_error(n_kinetic))
      allocate(w_time(time_skip))
-     time_error=0.
-     w_time=0.
+     time_error=0.; w_time=0.
 
      !------------------------------------------------------------
      ! Source-related arrays
      !
      allocate(h0_eq(n_kinetic,n_energy,n_x))
      allocate(h0_mod(n_kinetic,n_energy,n_x))
-     h0_eq=0.
-     h0_mod=0.
+     h0_eq=0.; h0_mod=0.
 
      !
      allocate(h0_n(n_kinetic,n_x))
      allocate(h0_e(n_kinetic,n_x))
      allocate(source_n(n_kinetic,n_x))
      allocate(source_e(n_kinetic,n_x))
-
-     h0_n=0.
-     h0_e=0.
-     source_n=0.
-     source_e=0.
+     h0_n=0.; h0_e=0.; source_n=0.; source_e=0.
 
      !------------------------------------------------------------
 
