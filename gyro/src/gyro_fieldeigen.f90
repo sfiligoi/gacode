@@ -21,6 +21,7 @@
 
 subroutine gyro_fieldeigen
 
+  use mpi
   use gyro_globals
   use gyro_pointers
   use math_constants
@@ -52,8 +53,6 @@ subroutine gyro_fieldeigen
   integer :: ipiv(3)
   integer :: ierr
   !---------------------------------------------------
-
-  include 'mpif.h'
 
   !-------------------------------------------------------------------------
   ! Validity checks

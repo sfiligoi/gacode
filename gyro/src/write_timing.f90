@@ -7,6 +7,7 @@
  
 subroutine write_timing(datafile,io,action)
 
+  use mpi
   use gyro_globals
 
   !-----------------------------------------------
@@ -27,8 +28,6 @@ subroutine write_timing(datafile,io,action)
   !
   real :: z_out(n_col)
   !-------------------------------------------------
-
-  include 'mpif.h'
 
   tag1(1) = 'Nonlinear'
   tag2(1) = 'Eval.'

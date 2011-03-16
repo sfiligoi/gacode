@@ -1,12 +1,11 @@
-!------------------------------------------------
-! make_pointer_dimensions.f90
+!-------------------------------------------------------------
+! gyro_set_pointer_dim.f90
 !
 ! PURPOSE:
-!  Compute dimenions and pointers used for array
-!  distribution.
-!------------------------------------------------
+!  Compute dimenions and pointers used for array distribution.
+!-------------------------------------------------------------
 
-subroutine make_pointer_dimensions
+subroutine gyro_set_pointer_dim
 
   use gyro_globals
   use gyro_pointers
@@ -30,4 +29,4 @@ subroutine make_pointer_dimensions
   n_ki_1     = n_lambda*n_x
   n_ki_loc_1 = parallel_dim(n_ki_1,n_proc_1) 
 
-end subroutine make_pointer_dimensions
+end subroutine gyro_set_pointer_dim

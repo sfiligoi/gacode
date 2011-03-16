@@ -8,6 +8,7 @@
 
 subroutine gyro_write_input
 
+  use mpi
   use gyro_globals
   use gyro_profile_exp
   use gyro_pointers
@@ -47,7 +48,6 @@ subroutine gyro_write_input
   character (len=2), dimension(n_ion) :: e_tag
   !--------------------------------------------------
 
-  include 'mpif.h'
 
   rhos_abs = abs(rhos_norm)
 

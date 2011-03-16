@@ -696,6 +696,11 @@ c          if (stat .ne. nf_noerr) call handle_err(stat)
           oneval(k)=nf_put_att_text(ncid,rhid1(k),'units',
      >          len(den_units),den_units)
           k=k+1
+          oneval(k) = nf_def_var (ncid,'nfst_exp',
+     >    nf_double,1,rdim,rhid1(k))
+          oneval(k)=nf_put_att_text(ncid,rhid1(k),'units',
+     >          len(den_units),den_units)
+          k=k+1
           oneval(k) = nf_def_var (ncid,'te_exp',
      >    nf_double,1,rdim,rhid1(k))
           oneval(k)=nf_put_att_text(ncid,rhid1(k),'units',
@@ -705,6 +710,16 @@ c          if (stat .ne. nf_noerr) call handle_err(stat)
      >    nf_double,1,rdim,rhid1(k))
           oneval(k)=nf_put_att_text(ncid,rhid1(k),'units',
      >          len(temp_units),temp_units)
+          k=k+1
+          oneval(k) = nf_def_var (ncid,'ptot_exp',
+     >    nf_double,1,rdim,rhid1(k))
+          oneval(k)=nf_put_att_text(ncid,rhid1(k),'units',
+     >          len('total pressure'),'total pressure')
+          k=k+1
+          oneval(k) = nf_def_var (ncid,'pfast_exp',
+     >    nf_double,1,rdim,rhid1(k))
+          oneval(k)=nf_put_att_text(ncid,rhid1(k),'units',
+     >          len('fast ion pressure'),'fast ion pressure')
           k=k+1
           oneval(k) = nf_def_var (ncid,'vphi_exp',
      >    nf_double,1,rdim,rhid1(k))
@@ -1297,10 +1312,19 @@ c          if (stat .ne. nf_noerr) call handle_err(stat)
      >    nz_exp(0:jmaxm))
           k=k+1
           oneval(k) = nf_put_var_double(ncid, rhid1(k),
+     >    nfst_exp(0:jmaxm))
+          k=k+1
+          oneval(k) = nf_put_var_double(ncid, rhid1(k),
      >    te_exp(0:jmaxm))
           k=k+1
           oneval(k) = nf_put_var_double(ncid, rhid1(k),
      >    ti_exp(0:jmaxm))
+          k=k+1
+          oneval(k) = nf_put_var_double(ncid, rhid1(k),
+     >    ptot_exp(0:jmaxm))
+          k=k+1
+          oneval(k) = nf_put_var_double(ncid, rhid1(k),
+     >    pfast_exp(0:jmaxm))
           k=k+1
           oneval(k) = nf_put_var_double(ncid, rhid1(k),
      >    vphi_exp(0:jmaxm))

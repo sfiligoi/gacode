@@ -9,6 +9,7 @@
 
 subroutine make_implicit_advect(i_print)
 
+  use mpi
   use gyro_globals
   use gyro_pointers
   use math_constants
@@ -38,8 +39,6 @@ subroutine make_implicit_advect(i_print)
   complex, dimension(:,:), allocatable :: o_work
   complex, dimension(:), allocatable :: work
   !--------------------------------------------------
-
-  include 'mpif.h'
 
 
   deriv_4 = (0.0,0.0)

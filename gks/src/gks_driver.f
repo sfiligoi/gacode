@@ -235,7 +235,10 @@ c
 		  stop
         endif
 c
+<<<<<<< HEAD
 c        call pressure
+=======
+>>>>>>> 550f87abc0b107146334985cf44dc2755ddcc526
         call gridsetup(0,mxgrid)
         call datmap
 c

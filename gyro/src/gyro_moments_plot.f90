@@ -18,6 +18,7 @@
 
 subroutine gyro_moments_plot
 
+  use mpi
   use gyro_globals
   use gyro_pointers
   use math_constants
@@ -34,7 +35,6 @@ subroutine gyro_moments_plot
   complex, dimension(n_theta_plot,n_x,3) :: mom_tmp
   !---------------------------------------------------
 
-  include 'mpif.h'
 
   if (alltime_index == 0) then
      moments_plot(:,:,:,:) = (0.0,0.0)

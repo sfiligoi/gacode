@@ -7,12 +7,11 @@
 
 subroutine gyro_init(path_in, mpi_comm_in)
 
+  use mpi
   use gyro_globals
   use gyro_interface
 
   implicit none
-
-  include 'mpif.h'
 
   ! Input parameters (IN) - REQUIRED
   character(len=*), intent(in) :: path_in

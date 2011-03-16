@@ -12,8 +12,6 @@ F77	= mpif90 -woff801
 FMATH	= -r8
 FOPT	= -march=opteron -O2
 FDEBUG	= -C -ansi -g -flist -fullwarn -O0
-FBOUND	= 
-FPROF	= 
 
 # System math libraries
 #
@@ -33,9 +31,6 @@ LMATH = $(LAPACK) \
 
 NETCDF = ${NETCDFHOME}/lib/libnetcdff.a ${NETCDFHOME}/lib/libnetcdf.a
 NETCDF_INC = ${NETCDFHOME}/include
-
-# OPTIONAL: GATO FLAGS
-GATOFLAGS = -r8 -i8
 
 # Archive
 

@@ -7,15 +7,15 @@
 
 subroutine gyro_read_input_extra
 
+  use mpi
   use gyro_globals
 
   !-------------------------
   implicit none
+  !
+  logical lfe
   !-------------------------
 
-  logical lfe
-
-  include 'mpif.h'
 
   select case (output_flag)
 

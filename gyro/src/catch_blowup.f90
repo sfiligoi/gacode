@@ -8,6 +8,7 @@
 
 subroutine catch_blowup
 
+  use mpi
   use gyro_globals
 
   !---------------------------------------------------
@@ -17,8 +18,6 @@ subroutine catch_blowup
   real :: phi_local
   real :: phi_max
   !---------------------------------------------------
-
-  include 'mpif.h'
 
   !------------------------------------------------
   ! Halt on large field

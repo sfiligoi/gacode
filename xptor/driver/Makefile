@@ -17,7 +17,7 @@ else
    FFLAGS=${FOPT}
 endif
 
-EXEC= xptor
+EXEC=xptor
 LLIB=xptor_lib
 
 .SUFFIXES : .o .f 
@@ -29,4 +29,4 @@ all:  ptor_driver.o
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:
-	rm -r *.o $(EXEC) $(LLIB).a
+	rm -f *.o $(EXEC) $(LLIB).a

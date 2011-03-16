@@ -39,6 +39,7 @@ OBJECTS = gyro_globals.o \
           gyro_banana_uniform_taugrid.o \
           gyro_banana_s2lambda.o \
           gyro_bessel_operator.o \
+          gyro_bounce_points.o \
           gyro_build_sparse_ampere.o \
           gyro_build_sparse_poisson.o \
           gyro_build_sparse_poissonaperp.o \
@@ -57,6 +58,7 @@ OBJECTS = gyro_globals.o \
           gyro_collision_krook.o \
           gyro_conserve_number.o \
           gyro_conserve_all.o \
+          gyro_diffusivity.o \
           gyro_entropy.o \
           gyro_field_time_derivative.o \
           gyro_field_interpolation.o \
@@ -64,28 +66,30 @@ OBJECTS = gyro_globals.o \
 	  gyro_fieldeigen_kernel.o \
 	  gyro_fieldeigen_df.o \
           gyro_fulladvance.o \
-          gyro_kxky_spectrum.o \
-          gyro_lambda_grid.o \
-          gyro_memory_usage.o \
-          gyro_nonlinear_flux.o \
-          gyro_omegas.o \
-          gyro_to_geo.o \
-          gyro_profile_init.o \
-          gyro_diffusivity.o \
           gyro_gbflux.o \
           gyro_initialize_arrays.o \
-          gyro_radial_operators.o \
+          gyro_kxky_spectrum.o \
+          gyro_lambda_grid.o \
           gyro_map_experimental_profiles.o \
           gyro_moments_plot.o \
           gyro_mpi_grid.o \
-          gyro_select_methods.o \
-          gyro_bounce_points.o \
+          gyro_memory_usage.o \
+          gyro_nonlinear_flux.o \
+          gyro_omegas.o \
+          gyro_profile_init.o \
+          gyro_radial_operators.o \
           gyro_radial_simulation_box.o \
           gyro_read_input.o \
           gyro_read_input_extra.o \
           gyro_read_experimental_profiles.o \
           gyro_rhs_total.o \
+          gyro_select_methods.o \
+          gyro_set_blend_arrays.o \
+          gyro_set_pointers.o \
+          gyro_set_pointer_dim.o \
           gyro_tau_derivative.o \
+          gyro_timestep_error.o \
+          gyro_to_geo.o \
           gyro_write_input.o \
           gyro_write_precision.o \
           gyro_write_units.o \
@@ -108,13 +112,10 @@ OBJECTS = gyro_globals.o \
           timestep_SSP_322.o \
           timestep_explicit.o \
           make_maxwell_matrix.o \
-          make_blend_arrays.o \
           make_theta_grid.o \
           make_geometry_arrays.o \
           make_gyro.o \
           make_phase_space.o \
-          make_pointers.o \
-          make_pointer_dimensions.o \
           make_initial_h.o \
           make_implicit_advect.o \
           make_electron_current.o \
@@ -144,7 +145,6 @@ OBJECTS = gyro_globals.o \
           get_kinetic_advance.o \
           get_delta_he.o \
           get_he.o \
-          get_error.o \
           get_phi_squared.o \
           get_g_squared.o \
           do_nlfast_p.o \
