@@ -23,6 +23,7 @@ OBJECTS = callglf2d.o \
           nclass_mod.o \
           neoclass.o \
           neoclass_one.o \
+	  xptor_neo_map.o \
           weiland14.o
 
 .SUFFIXES : .o .f .F
