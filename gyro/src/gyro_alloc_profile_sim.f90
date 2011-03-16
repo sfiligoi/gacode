@@ -14,13 +14,13 @@
 
 subroutine gyro_alloc_profile_sim(flag)
   
+  use mpi
   use gyro_globals
 
   implicit none
 
   integer, intent(in) :: flag
 
-  include 'mpif.h'
 
   if (flag == 1 .and. allocated(r)) then
      if (i_proc == 0) then
