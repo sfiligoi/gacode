@@ -7,6 +7,7 @@
 
 subroutine gyro_write_precision(io,checksum)
 
+  use mpi
   use gyro_globals
   use gyro_pointers
 
@@ -18,7 +19,6 @@ subroutine gyro_write_precision(io,checksum)
   real, intent(in) :: checksum
   !---------------------------------------------------
 
-  include 'mpif.h'
 
   select case (output_flag)
 

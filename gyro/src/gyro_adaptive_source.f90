@@ -8,6 +8,7 @@
 
 subroutine gyro_adaptive_source
 
+  use mpi
   use gyro_globals
   use gyro_pointers
 
@@ -20,7 +21,6 @@ subroutine gyro_adaptive_source
   real :: src_p(n_kinetic,n_energy,n_lump)
   !----------------------------------------------------
 
-  include 'mpif.h'
 
   !------------------
   ! Total RHS source

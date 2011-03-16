@@ -1406,16 +1406,17 @@ c
           write(6,'(a32)') 'Computing total thermal pressure'
          endif
          do j=1,nj_d
-            ptot_d(j) = ene_d(j)*(te_d(j) + ti_d(j))
+            ptot_d(j) = ene_d(j)*(te_d(j) + ti_d(j))*1.6022D-16   ! Pascals
             pfast_d(j) = 0.0
 c            write(*,53) j, r_d(j)/r_d(nj_d),ptot_d(j)
          enddo
        else
          do j=1,nj_d
-            ptot_d(j)=u2d(j,44)/1.602D-16     !Kev/m**3
-            pfast_d(j)=ptot_d(j) - (ene_d(j)*te_d(j) +
-     >            (ene_d(j) - (zimp_exp-1.D0)*
-     >            en_d(j,nprim_d+1))*ti_d(j))
+            ptot_d(j)=u2d(j,44)    
+            pfast_d(j)=ptot_d(j) 
+     >       - ene_d(j)*(te_d(j)+ti_d(j))*1.6022D-16
+c     >            (ene_d(j) - (zimp_exp-1.D0)*
+c     >            en_d(j,nprim_d+1))*ti_d(j))
             if(ipfst.eq.1) pfast_d(j)=0.D0
 c           write(*,53) j, r_d(j)/r_d(nj_d),ptot_d(j),pfast_d(j)
          enddo

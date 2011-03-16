@@ -17,6 +17,7 @@
 
 subroutine rSSUB(xt,x_OUT)
 
+  use mpi
   use SSUB_private
 
   !-------------------------------------------------------
@@ -28,7 +29,6 @@ subroutine rSSUB(xt,x_OUT)
   complex, dimension(nv1,jsplit*nn) :: x
   !-------------------------------------------------------  
 
-  include 'mpif.h'
 
   call MPI_ALLTOALL(xt(:,:,:), &
        nv1*jsplit, &

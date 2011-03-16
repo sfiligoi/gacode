@@ -49,7 +49,7 @@ subroutine gyro_do(skipinit)
   runfile  = trim(path)//trim(baserunfile)
   precfile = trim(path)//trim(baseprecfile)
 
-  print *,runfile
+  if ((i_proc==0).AND.(gkeigen_j_set==0)) print *,runfile
 
 
   CPU_0 = 0.0

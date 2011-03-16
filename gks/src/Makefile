@@ -6,7 +6,7 @@ else
    FFLAGS=${FOPT}
 endif
 
-EXEC=xgks_analysis
+EXEC=gks_analysis
 LLIB=gks_analysis_lib
 
 OBJECTS = gks_var.o  \

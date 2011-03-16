@@ -8,6 +8,7 @@
 
 subroutine gyro_conserve_all
 
+  use mpi
   use gyro_globals
   use gyro_pointers
 
@@ -22,7 +23,6 @@ subroutine gyro_conserve_all
   complex, dimension(n_stack,n_x,n_nek_loc_1) :: cf_new
   !---------------------------------------------------
 
-  include 'mpif.h'
  
   !----------------------------------------------------
   ! Now, compute blending projections:

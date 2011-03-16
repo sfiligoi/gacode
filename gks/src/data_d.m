@@ -10,7 +10,7 @@ c 16-may-00 added ipptot to include fast ions in ptot
 c---------------------------------------------------------------------
 c
       integer nplasb,nj,nion
-      parameter (nplasb=4000, nj=201, nion=5)
+      parameter (nplasb=4000, nj=301, nion=5)
 c
       integer ishot_d, nj_d, nion_d, nprim_d, nimp_d,
      &   nneu_d, ibion_d, nplasbdry_d
@@ -22,6 +22,7 @@ c
      &   tocur_d, totohm_d, totboot_d, totbeam_d, totrf_d,
      &   betap_d, beta_d, ali_d, te0_d, ti0_d,
      &   pohm_d, vsurf_d, amin_d
+c 1d arrays
       real*8 blank_d(nj), rho_d(nj), r_d(nj), rbp_d(nj), bp0_d(nj),
      &   fcap_d(nj), gcap_d(nj), hcap_d(nj), psir_d(nj),
      &   xb2_d(nj), xbm2_d(nj), xngrth_d(nj), xgrbm2_d(nj),
@@ -41,39 +42,50 @@ c
      &   psivolp_d(nj), elongx_d(nj), deltax_d(nj),
      &   sfareanpsi_d(nj), cxareanpsi_d(nj),
      &   grho1npsi_d(nj), grho2npsi_d(nj),
-     &   er_d(nj)
-      real*8 en_nm1_d(nj), en_nm2_d(nj), en_nm3_d(nj),
+     &   er_d(nj), en_nm1_d(nj), en_nm2_d(nj), en_nm3_d(nj),
      &   torque_d(nj),ptot_d(nj),pfast_d(nj)
+c.. 2d elements
       real*8 sion_d(nj,nion), srecom_d(nj,nion), scx_d(nj,nion),
      &   sbcx_d(nj,nion), s_d(nj,nion), dudtsv_d(nj,nion), 
      &   enn_d(nj,nion), ennw_d(nj,nion), ennv_d(nj,nion),
-     &   volsn_d(nj,nion)
-c.. 400 elements
+     &   volsn_d(nj,nion),en_d(nj,nion)
+c.. 4000 elements
       real*8 bblank_d(nplasb)
-c.. 602 elements
-      real*8 en_d(nj,nion)
 c
-      common /data_d/ en_d, bblank_d,
-     &   sion_d, srecom_d, scx_d,
-     &   sbcx_d, s_d, dudtsv_d, enn_d, ennw_d, ennv_d,
-     &   blank_d, rho_d, r_d, hcap_d, xb2_d, xbm2_d,
-     &   xngrth_d, xgrbm2_d, fm1_d, fm2_d, fm3_d, fhat_d,
-     &   te_d, ti_d, q_d, ene_d, enbeam_d, sbion_d, sbeam_d, 
-     &   curden_d, curohm_d, zeff_d, angrot_d,
-     &   chieinv_d, chiinv_d, xkineo_d, dpedtc_d, dpidtc_d,
-     &   qconde_d, qcondi_d, qconve_d, qconvi_d, qbeame_d,
-     &   qdelt_d, qbeami_d, qrfe_d, qrfi_d, qlhe_d,
-     &   qione_d, qioni_d, qcx_d, qfuse_d, qfusi_d, qrad_d,
-     &   qohm_d, rmajavnpsi_d, rminavnpsi_d, psivolp_d,
-     &   elongx_d, deltax_d, sfareanpsi_d, grho1npsi_d,
-     &   grho2npsi_d, er_d
-      common /data_d/ en_nm1_d, en_nm2_d, en_nm3_d, 
-     &   torque_d, ptot_d, pfast_d,
-     &   time_d, rgeom_d, rmag_d, rmajor_d, amin_d,
-     &   kappa_d, deltao_d, pindento_d, volo_d, areao_d,
-     &   btor_d, tocur_d, totohm_d, totboot_d, totbeam_d, 
-     &   totrf_d, betap_d, beta_d, ali_d, te0_d, ti0_d,
-     &   pohm_d, vsurf_d,
+      common /data_d0/
      &   ishot_d, nj_d, nion_d, nprim_d, nimp_d,
      &   nneu_d, ibion_d, nplasbdry_d,
-     &   namep_d, namei_d, namen_d
+     &   time_d, rgeom_d, rmag_d, rmajor_d, kappa_d,
+     &   deltao_d, pindento_d, volo_d, areao_d, btor_d,
+     &   tocur_d, totohm_d, totboot_d, totbeam_d, totrf_d,
+     &   betap_d, beta_d, ali_d, te0_d, ti0_d,
+     &   pohm_d, vsurf_d, amin_d
+      common /data_d1/
+     &   blank_d, rho_d, r_d, rbp_d, bp0_d,
+     &   fcap_d, gcap_d, hcap_d, psir_d,
+     &   xb2_d, xbm2_d, xngrth_d, xgrbm2_d,
+     &   fm1_d, fm2_d, fm3_d, fhat_d,
+     &   te_d, ti_d, q_d, ene_d, enbeam_d,
+     &   sbion_d, sbeam_d, zeff_d, angrot_d,
+     &   curden_d, curohm_d, curboot_d, curbeam_d,
+     &   currf_d,
+     &   chieinv_d, chiinv_d, xkineo_d,
+     &   dpedtc_d, dpidtc_d, qconde_d, 
+     &   qcondi_d, qconve_d, qconvi_d, 
+     &   qbeame_d, qdelt_d, qbeami_d,
+     &   qrfe_d, qrfi_d, qlhe_d,
+     &   qione_d, qioni_d,
+     &   qcx_d, qfuse_d, qfusi_d, qrad_d,
+     &   qohm_d, rmajavnpsi_d, rminavnpsi_d,
+     &   psivolp_d, elongx_d, deltax_d,
+     &   sfareanpsi_d, cxareanpsi_d,
+     &   grho1npsi_d, grho2npsi_d,
+     &   er_d, en_nm1_d, en_nm2_d, en_nm3_d,
+     &   torque_d,ptot_d,pfast_d
+      common /data_d2/
+     &   sion_d, srecom_d, scx_d,
+     &   sbcx_d, s_d, dudtsv_d, 
+     &   enn_d, ennw_d, ennv_d,
+     &   volsn_d, en_d
+      common /data_d3/bblank_d
+

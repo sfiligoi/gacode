@@ -8,6 +8,7 @@
 
 subroutine make_electron_current(i_print)
 
+  use mpi
   use gyro_globals
   use gyro_pointers
   use math_constants
@@ -21,7 +22,6 @@ subroutine make_electron_current(i_print)
   complex, dimension(n_blend,n_x) :: vel_sum_glob
   !---------------------------------------------------
 
-  include 'mpif.h'
 
   if (electron_method > 2) then     
      ! Separate treatment of GK electrons not required

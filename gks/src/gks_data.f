@@ -1007,7 +1007,7 @@ cx           read(niterdb,10)(zplasbdry_d(j), j=1,nplasbdry_d)
 c
 c---torque density  Nt-m/m^3 (old iterdb files were in dyne-cm/cm^3 = 10 Nt-m/m^3)
 c
-             if(itorque.ne.0 .or. iptotr.eq.2)then
+             if(itorque.ne.0)then
                read(niterdb,'(a)')stflg
                read(niterdb,10)(torque_d(j), j=1,nj_d)
 c               write(*,10) (torque_d(j),j=1,nj_d)
@@ -1028,13 +1028,20 @@ c   If iptotr=0, then total thermal pressure computed in pressure.f
 c   Note: pfast_exp has 1.e19 factored out since alpha_exp,m
 c   has 1.e19 factored out of densities
 c
-       if(iptotr.eq.1) then
-         write(*,'(a32)') 'Reading ptot only' ! pfast constructed in pressure.f
+       if(iptotr.eq.0)then
+         write(*,'(a32)')
+     >   'computing total pressure from thermal pressure'
+         do j=1,nj_d
+           ptot_d(j) = 1.6022D-16*ene_d(j)*(te_d(j)+ti_d(j))   ! Pascals
+           pfast_d(j) = 0.0
+         enddo
+       elseif(iptotr.eq.1) then
+         write(*,'(a32)') 'Reading ptot only' 
          read(niterdb,'(a)')stflg
          read(niterdb,10)(ptot_d(j), j=1,nj_d)
          do j=1,nj_d
-           ptot_d(j)=ptot_d(j)/1.602D-16
-           pfast_d(j)=ptot_d(j)-ene_d(j)*te_d(j)-en_d(j,1)*ti_d(j)
+           pfast_d(j)=ptot_d(j)
+     >     -1.6022D-16*ene_d(j)*(te_d(j)+ti_d(j))  !Pascals
          enddo
        elseif(iptotr.eq.2) then
          write(*,'(a32)') 'Reading ptot and pfast'
@@ -2499,16 +2506,17 @@ c
           write(6,'(a32)') 'Computing total thermal pressure'
          endif
          do j=1,nj_d
-            ptot_d(j) = ene_d(j)*(te_d(j) + ti_d(j))
+            ptot_d(j) = ene_d(j)*(te_d(j) + ti_d(j))*1.6022D-16   ! Pascals
             pfast_d(j) = 0.0
 c            write(*,53) j, r_d(j)/r_d(nj_d),ptot_d(j)
          enddo
        else
          do j=1,nj_d
-            ptot_d(j)=u2d(j,44)/1.602D-16     !Kev/m**3
-            pfast_d(j)=ptot_d(j) - (ene_d(j)*te_d(j) +
-     >            (ene_d(j) - (zimp_exp-1.D0)*
-     >            en_d(j,nprim_d+1))*ti_d(j))
+            ptot_d(j)=u2d(j,44)    
+            pfast_d(j)=ptot_d(j) 
+     >       - ene_d(j)*(te_d(j)+ti_d(j))*1.6022D-16
+c     >            (ene_d(j) - (zimp_exp-1.D0)*
+c     >            en_d(j,nprim_d+1))*ti_d(j))
             if(ipfst.eq.1) pfast_d(j)=0.D0
 c           write(*,53) j, r_d(j)/r_d(nj_d),ptot_d(j),pfast_d(j)
          enddo
@@ -5148,44 +5156,6 @@ c*****  successful exit
       endif
 c
       return
-      end
-c@pressure.f
-c jek 20-Jan-11
-c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
-c
-c... Compute pressures using _d data
-c
-c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
-c  
-      subroutine pressure
-c
-      implicit none
-c      include 'mpif.h'
-      include 'data_d.m'
-      include 'input.m'
-      include 'glf.m'
-c
-      integer j
-c
-c... If total pressure ptot read, then construct pfast
-c
-      if(iptotr.eq.1) then
-        do j=1,nj_d
-           pfast_d(j)=ptot_d(j)-ene_d(j)*te_d(j)-en_d(j,1)*ti_d(j)
-           if(ipfst.eq.0) pfast_d(j)=0.D0
-        enddo
-c
-c... If not, then compute total thermal pressure instead
-c
-      elseif(iptotr.eq.0) then
-         write(*,'(a32)') 'Computing total thermal pressure'
-         do j=1,nj_d
-            ptot_d(j) = ene_d(j)*(te_d(j) + ti_d(j))
-            pfast_d(j) = 0.D0
-         enddo
-         if(ismooth_data.ne.0)call average7_1d(ptot_d,nj_d)
-      endif
-c
       end
 !
       SUBROUTINE W_LIN_INTERP(n1,x1,y1,n2,x2,y2,iflag,message)

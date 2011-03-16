@@ -424,7 +424,6 @@ c
      >                xp_time,endtime_pt,time_series,iexp_exch,
      >                iexp_q,p_glob_exp,gtauth_exp,gtautot_exp,i_proc)
 c        if(ismooth_all.ne.0) call datavg ! smoothing in readufiles for now
-c        call pressure
       elseif (idata .eq. 1) then
         if (i_proc.eq.0) then
           write(*,105)
@@ -432,7 +431,6 @@ c        call pressure
         call readiterdb
         if(ismooth_all.ne.0) call datavg
         call datexch
-        call pressure
         if(ineutp.eq.1) call neutxp
       elseif (idata .eq. 2) then
         if (i_proc.eq.0) then

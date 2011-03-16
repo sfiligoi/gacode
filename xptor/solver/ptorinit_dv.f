@@ -65,7 +65,6 @@ c
           iflagin_gf(5)=6        ! rms_theta w/ tau**0.25
           park_gf=0.8
           adamp_gf=0.7
-          alpha_p_gf=0.35
           bt_flag=1
         endif
 c
@@ -172,7 +171,7 @@ c
          nz_exp(k)=ne_exp(k)*(zeff_exp(k)-1.0D0)/
      >    (zimp_gf**2-zimp_gf)
          if(dilution_model.eq.0)then
-c full imputity and fast ion dilution
+c full impurity and fast ion dilution
            ni_exp(k)=ne_exp(k)-nfst_exp(k)-zimp_gf*nz_exp(k) 
          elseif(dilution_model.eq.1)then
 c just fast ion dilution

@@ -649,7 +649,7 @@ cx           read(niterdb,10)(zplasbdry_d(j), j=1,nplasbdry_d)
 c
 c---torque density  Nt-m/m^3 (old iterdb files were in dyne-cm/cm^3 = 10 Nt-m/m^3)
 c
-             if(itorque.ne.0 .or. iptotr.eq.2)then
+             if(itorque.ne.0 )then
                read(niterdb,'(a)')stflg
                read(niterdb,10)(torque_d(j), j=1,nj_d)
 c               write(*,10) (torque_d(j),j=1,nj_d)
@@ -670,17 +670,23 @@ c   If iptotr=0, then total thermal pressure computed in pressure.f
 c   Note: pfast_exp has 1.e19 factored out since alpha_exp,m
 c   has 1.e19 factored out of densities
 c
-       if(iptotr.eq.1) then
-         if(i_proc.eq.0)
-     >      write(*,'(a32)') 'Reading ptot only' ! pfast constructed in pressure.f
+       if(iptotr.eq.0)then
+         write(*,'(a32)')
+     >   'computing total pressure from thermal pressure'
+         do j=1,nj_d
+           ptot_d(j) = 1.6022D-16*ene_d(j)*(te_d(j)+ti_d(j))   ! Pascals
+           pfast_d(j) = 0.0
+         enddo
+       elseif(iptotr.eq.1) then
+         write(*,'(a32)') 'Reading ptot only' 
          read(niterdb,'(a)')stflg
          read(niterdb,10)(ptot_d(j), j=1,nj_d)
          do j=1,nj_d
-           ptot_d(j)=ptot_d(j)/1.602D-16
+           pfast_d(j)=ptot_d(j)
+     >     -1.6022D-16*ene_d(j)*(te_d(j)+ti_d(j))  !Pascals
          enddo
        elseif(iptotr.eq.2) then
-         if(i_proc.eq.0)
-     >      write(*,'(a32)') 'Reading ptot and pfast'
+         write(*,'(a32)') 'Reading ptot and pfast'
          read(niterdb,'(a)')stflg
          read(niterdb,10)(pfast_d(j), j=1,nj_d)
          read(niterdb,'(a)')stflg

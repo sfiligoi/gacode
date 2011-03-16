@@ -8,6 +8,7 @@
 
 subroutine write_restart
 
+  use mpi
   use gyro_globals
   use gyro_pointers
 
@@ -22,9 +23,6 @@ subroutine write_restart
   !
   real :: t_current_old
   !----------------------------------------------
-
-  include 'mpif.h'
-
 
   !---------------------------------------------
   ! Restarting without writing new restart files

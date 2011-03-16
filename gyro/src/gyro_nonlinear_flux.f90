@@ -16,6 +16,7 @@
 
 subroutine gyro_nonlinear_flux
 
+  use mpi
   use gyro_globals
   use gyro_pointers
   use math_constants
@@ -31,7 +32,6 @@ subroutine gyro_nonlinear_flux
   complex, dimension(n_x) :: ikrho
   !--------------------------------------------------  
 
-  include 'mpif.h'
 
   moment(:,:,:,:,:) = 0.0
   momparts(:,:)     = 0.0
