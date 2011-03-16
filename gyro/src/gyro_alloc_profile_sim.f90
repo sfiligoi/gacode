@@ -13,11 +13,12 @@
 !----------------------------------------------------------
 
 subroutine gyro_alloc_profile_sim(flag)
-
+  
   use mpi
   use gyro_globals
 
   implicit none
+
   integer, intent(in) :: flag
 
 
@@ -120,6 +121,12 @@ subroutine gyro_alloc_profile_sim(flag)
         allocate(src_piv(n_lump))
      endif
 
+     if (iohdf5out == 1) then
+        allocate(nu_coarse(0:n_theta_plot,n_x))
+        allocate(nu_fine(0:n_theta_plot*n_theta_mult,n_x))
+        nu_coarse=0.; nu_fine=0.
+     endif
+
      ! Required in MPI_RECV
      allocate(recv_status(MPI_STATUS_SIZE))
 
@@ -202,6 +209,11 @@ subroutine gyro_alloc_profile_sim(flag)
      if (allocated(b_src)) deallocate(b_src)
      if (allocated(m_src)) deallocate(m_src)
      if (allocated(src_piv)) deallocate(src_piv)
+
+     if (iohdf5out == 1) then
+        deallocate(nu_coarse)
+        deallocate(nu_fine)
+     endif
 
      deallocate(recv_status)
 
