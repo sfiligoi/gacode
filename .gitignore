@@ -1,3 +1,26 @@
+
+# Gyro build stuff
+*/*.o
+*/*.mod
+*/*/*.a
+*/*/*.o
+*/*/*.mod
+*/*/*/*.o
+
+# Executables
+gato/gato
+gyro/peek/peek
+gyro/src/gyro
+neo/src/neo
+neo/tools/squeeze/squeeze
+neo/tools/vgen/vgen
+shared/profiles_gen/src/prgen
+tglf/src/tglf
+tglf/src/xtglf
+
+# SEK: I like to my configuration on a per directory basis
+config.csh
+
 # http://www.gnu.org/software/automake
 
 Makefile.in
