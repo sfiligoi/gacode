@@ -11,6 +11,7 @@
 
 subroutine gyro_do(skipinit)
 
+  use mpi
   use gyro_globals
   use gyro_pointers
   use math_constants
@@ -20,8 +21,6 @@ subroutine gyro_do(skipinit)
   !
   integer, optional :: skipinit
   !--------------------------------------
-
-  include 'mpif.h'
 
   !-------------------------------------
   ! Handling of optional arguments
@@ -46,13 +45,12 @@ subroutine gyro_do(skipinit)
      goto 100
   endif
 
-  ! Prepend path, but make sure to not prepend it more than once
-  if (runfile(1:7) == 'run.out')  then
-     runfile = trim(path)//runfile(1:7)
-  endif
-  if (precfile(1:8) == 'prec.out')  then
-     precfile = trim(path)//precfile(1:8)
-  endif
+  ! Prepend path:
+  runfile  = trim(path)//trim(baserunfile)
+  precfile = trim(path)//trim(baseprecfile)
+
+  if ((i_proc==0).AND.(gkeigen_j_set==0)) print *,runfile
+
 
   CPU_0 = 0.0
   CPU_1 = 0.0
@@ -151,11 +149,11 @@ subroutine gyro_do(skipinit)
   !
   if (gyrotest_flag == 0) then
 
-     call make_pointer_dimensions
+     call gyro_set_pointer_dim
      call gyro_alloc_distrib(1)
 
      ! Make pointers for use with parallelization scheme.
-     call make_pointers
+     call gyro_set_pointers
 
      ! Compute drift and diamagnetic frequency coefficients
      ! for GKE solution.
@@ -173,7 +171,7 @@ subroutine gyro_do(skipinit)
      !
      ! Precomputation of arrays which depend on blending 
      ! coefficients.  These are used in the Maxwell solves.
-     call make_blend_arrays
+     call gyro_set_blend_arrays
 
      call proc_time(CPU_3)
      if (electron_method == 2) then
@@ -363,7 +361,9 @@ subroutine gyro_do(skipinit)
      h_length_loc = n_kinetic * n_nek_loc_true * n_x * n_stack
      h_width_loc = h_length / gkeigen_proc_mult
      h_length_block = h_length_loc / gkeigen_proc_mult
+     h_length_block_t = h_width_loc / n_proc
      seq_length = h_length_block * h_width_loc
+     seq_length_t = h_length_block_t * h_length_loc
 
      call GKEIGEN_do                                       
 

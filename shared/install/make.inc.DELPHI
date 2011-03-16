@@ -17,16 +17,12 @@ FPROF	= -fastsse -Mprof=func
 
 ROOT=/u/candy/local_software
 
-LMATH = $(ROOT)/LAPACK/liblapack.a \
-        $(ROOT)/GotoBLAS/libgoto.a 
+LMATH = $(ROOT)/GotoBLAS2/libgoto2.a 
 
 # OPTIONAL: netCDF (for gyro2gkv)
 
 NETCDF = $(ROOT)/netcdf/lib/libnetcdf.a
 NETCDF_INC = $(ROOT)/netcdf/include
-
-#GATOFLAGS = -r8 -i8 
-GATOFLAGS = -r8 
 
 # Archive 
 

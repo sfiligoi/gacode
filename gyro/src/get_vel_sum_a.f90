@@ -8,6 +8,7 @@
 
 subroutine get_vel_sum_a
 
+  use mpi
   use gyro_globals
   use gyro_pointers
 
@@ -18,7 +19,6 @@ subroutine get_vel_sum_a
   complex, dimension(n_stack,n_x) :: gz
   !---------------------------------------------------
 
-  include 'mpif.h'
 
   !----------------------------------------------------
   ! Now, compute blending projections:

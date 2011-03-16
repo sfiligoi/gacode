@@ -17,6 +17,7 @@
 
 subroutine get_ampere_coll
 
+  use mpi
   use gyro_globals
   use gyro_collision_private
   use gyro_pointers
@@ -33,8 +34,6 @@ subroutine get_ampere_coll
   !
   complex, external :: BLEND_F
   !---------------------------------------------------
-
-  include 'mpif.h'
 
   ix = 2
 

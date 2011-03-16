@@ -7,6 +7,7 @@
 
 subroutine gyro_fieldeigen_df
 
+  use mpi
   use gyro_globals
   use gyro_pointers
   use math_constants
@@ -21,8 +22,6 @@ subroutine gyro_fieldeigen_df
   complex, dimension(:), allocatable :: h_vec
 
   integer, dimension(n_energy/n_proc,n_lambda) :: p_nek_vec
-
-  include 'mpif.h'
 
   a_eigen_loc(:,:) = (0.0,0.0)
 

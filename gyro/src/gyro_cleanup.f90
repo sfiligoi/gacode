@@ -7,11 +7,10 @@
 
 subroutine gyro_cleanup
 
+  use mpi
   use gyro_globals
 
   implicit none
-
-  include 'mpif.h'
 
   ! No need for cleanup in test mode
   if (gyrotest_flag == 1) return

@@ -7,6 +7,7 @@
 
 subroutine gyro_mpi_grid
 
+  use mpi
   use gyro_globals
   use gyro_pointers
 
@@ -16,8 +17,6 @@ subroutine gyro_mpi_grid
   integer, external :: parallel_dim
   integer :: i_group_mumps
   !----------------------------------------
-
-  include 'mpif.h'
 
   !------------------------------------------------
   ! Check for grid validity

@@ -7,6 +7,7 @@
 
 subroutine gyro_collision_krook
 
+  use mpi
   use gyro_globals
   use gyro_pointers
 
@@ -20,7 +21,6 @@ subroutine gyro_collision_krook
   complex, dimension(n_stack,n_x) :: h_tmp
   !---------------------------------------------------
 
-  include 'mpif.h'
 
   !----------------------------------------------------
   ! Now, compute blending projections:

@@ -1,11 +1,11 @@
 !---------------------------------------------------
-! make_pointers.f90
+! gyro_set_pointers.f90
 !
 ! PURPOSE:
 !  Make pointers for domain decomposition.
 !---------------------------------------------------
 
-subroutine make_pointers
+subroutine gyro_set_pointers
 
   use gyro_globals
   use gyro_pointers
@@ -88,4 +88,4 @@ subroutine make_pointers
      print *,'[make_pointers done]'
   endif
 
-end subroutine make_pointers
+end subroutine gyro_set_pointers

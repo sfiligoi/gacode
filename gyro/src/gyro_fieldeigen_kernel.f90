@@ -8,6 +8,7 @@
 
 subroutine gyro_fieldeigen_kernel
 
+  use mpi
   use gyro_globals
   use gyro_pointers
   use math_constants
@@ -17,8 +18,6 @@ subroutine gyro_fieldeigen_kernel
   !---------------------------------------------------------------
   implicit none
   !---------------------------------------------------
-
-  include 'mpif.h'
 
   a_eigen_loc(:,:) = (0.0,0.0)
 

@@ -27,7 +27,9 @@
       Integer        n_converged,                                       &
      &               n_iter,                                            &
      &               irows(h_length_block),                             &
+     &               irows_t(h_length_block_t),                         &
      &               icols(h_width_loc),                                &
+     &               icols_t(h_length_loc),                             &
      &               mrow,                                              &
      &               ncol
 
@@ -35,7 +37,8 @@
 
       PetscScalar    dummy_scalar,                                      &
      &               one_col(h_length_loc),                             &
-     &               M_seq(seq_length)
+     &               M_seq(seq_length),                                 &
+     &               M_seq_t(seq_length_t)
 
       PetscReal      residual
 
@@ -246,7 +249,9 @@
 ! processor to the processor that owns that element in PETSC, then
 ! assigned to the PETSc object time_derivative_matrix.
 
-      Do j_sr = 0, gkeigen_proc_mult-1
+      If (gkeigen_transpose_flag==0) Then  ! Solve the normal eigenvalue
+                                           ! problem.
+       Do j_sr = 0, gkeigen_proc_mult-1
 
         gkeigen_j_set_e0 = Mod(j_sr-gkeigen_j_set,gkeigen_proc_mult)
         If (gkeigen_j_set_e0 < 0)                                       &
@@ -330,7 +335,96 @@
 !         if (l_print) print *, '*************************************'
         EndDo  ! i_sr
 
-      EndDo  ! j_sr
+       EndDo  ! j_sr
+
+      Else   ! Solve the transpose eigenvalue problem (same answer)
+             ! optimized for large processor counts.
+       Do j_sr = 0, n_proc-1
+
+        i_proc_e0 = Mod(j_sr-i_proc,n_proc)
+        If (i_proc_e0 < 0) i_proc_e0 = i_proc_e0 + n_proc
+
+        Do i_sr = 0, 1
+
+          select case (i_sr)
+
+            case (0)
+              i_proc_e1=Min(i_proc_e0,i_proc)
+              i_proc_e2=Max(i_proc_e0,i_proc)
+            case (1)
+              i_proc_e1=Max(i_proc_e0,i_proc)
+              i_proc_e2=Min(i_proc_e0,i_proc)
+
+          end select
+
+          Do ielem = 0, h_length_loc-1
+            icols_t(ielem+1) = i_proc_e1*h_length_loc + ielem
+          EndDo
+
+          jelem_start = i_proc_e2*h_length_block_t
+          jelem_end = jelem_start + h_length_block_t - 1
+          jstate_start = gkeigen_j_set * h_width_loc
+          Do jelem = jelem_start, jelem_end
+            i_index = jelem - jelem_start + 1
+            irows_t(i_index) = jstate_start + jelem
+          EndDo
+
+          j_send_proc = gkeigen_j_set*n_proc + i_proc_e1
+          j_recv_proc = gkeigen_j_set*n_proc + i_proc_e2
+
+          l_send = (j_proc_tot==j_send_proc)
+          l_recv = (j_proc_tot==j_recv_proc)
+          l_set =  (l_send .AND. l_recv)
+
+          If ((l_set==.TRUE.).AND.(i_sr==1)) Then
+            l_set  = .FALSE.
+            l_send = .FALSE.
+            l_recv = .FALSE.
+          EndIf
+
+         If (l_send) Then
+          Do ielem = 0, h_length_loc-1
+            Do jelem = jelem_start, jelem_end
+              iseq = (jelem-jelem_start)*h_length_loc + ielem + 1
+              M_seq_t(iseq) = M_loc(ielem,jelem)
+            EndDo
+          EndDo
+         EndIf
+
+
+         If (l_set) Then
+
+!          print *, 'Setting on ', j_proc_tot
+          call MatSetValues(time_derivative_matrix,h_length_block_t,    &
+     &        irows_t,h_length_loc,icols_t,M_seq_t,INSERT_VALUES,ierr)
+
+         Else If (l_send) Then
+
+!          print *, 'Sending from ', j_proc_tot, ' to', j_recv_proc,     &
+!     &              size(M_seq_t)
+          call MPI_SEND(M_seq_t,size(M_seq_t),MPIU_SCALAR,              &
+     &                  j_recv_proc,j_send_proc,MPI_COMM_WORLD,ierr)
+!          print *, 'Send confirmed', j_proc_tot, ' to', j_recv_proc
+
+         Else If (l_recv) Then
+
+!          print *, 'Receiving on ', j_proc_tot, ' from', j_send_proc,   &
+!     &              size(M_seq_t)
+          call MPI_RECV(M_seq_t,size(M_seq_t),MPIU_SCALAR,              &
+     &                  j_send_proc,j_send_proc,MPI_COMM_WORLD,ierr)
+!          print *, 'Receipt confirmed', j_proc_tot, ' from', j_send_proc
+          call MatSetValues(time_derivative_matrix,h_length_block_t,    &
+     &        irows_t,h_length_loc,icols_t,M_seq_t,INSERT_VALUES,ierr)
+
+         EndIf
+
+         call MPI_barrier(MPI_COMM_WORLD,ierr)
+!         if (l_print) print *, '*************************************'
+        EndDo  ! i_sr
+
+       EndDo  ! j_sr
+
+      EndIf ! Standard versus transpose.
 !
 !------------------------------------------------------------------------
 

@@ -1,13 +1,13 @@
-!-----------------------------------------------------
-! get_error.f90
+!----------------------------------------------------------
+! gyro_timestep_error.f90
 !
 ! PURPOSE:
-!  This routine calculates the instantaeous timestep 
-!  error.
-!-----------------------------------------------------
+!  This routine calculates the instantaeous timestep error.
+!----------------------------------------------------------
 
-subroutine get_error
+subroutine gyro_timestep_error
 
+  use mpi
   use gyro_globals
   use gyro_pointers
 
@@ -18,8 +18,6 @@ subroutine get_error
   real :: rk_error(n_kinetic,2)
   real :: tol = 1e-20
   !---------------------------------------------------
-
-  include 'mpif.h'
 
   rk_error_loc(:,:) = 0.0
 
@@ -52,7 +50,7 @@ subroutine get_error
   time_error(:) = rk_error(:,1)/rk_error(:,2)
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[get_error done]'
+     print *,'[gyro_timestep_error done]'
   endif
 
-end subroutine get_error
+end subroutine gyro_timestep_error

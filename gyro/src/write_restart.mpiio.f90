@@ -8,6 +8,7 @@
 
 subroutine write_restart
 
+  use mpi
   use gyro_globals
   use gyro_pointers
 
@@ -22,8 +23,6 @@ subroutine write_restart
   integer :: i_restart_old
   !
   !----------------------------------------------
-  !
-  include 'mpif.h'
   !
   ! Required for MPI-IO: 
   !

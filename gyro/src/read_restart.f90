@@ -7,6 +7,7 @@
 
 subroutine read_restart
 
+  use mpi
   use gyro_globals
   use gyro_pointers
 
@@ -20,8 +21,6 @@ subroutine read_restart
   !
   complex, dimension(n_stack,n_x,n_nek_loc_1,n_kinetic) :: h_in
   !------------------------------------------------------------
-
-  include 'mpif.h'
 
   io = io_restart
 

@@ -1,20 +1,16 @@
-!---------------------------------------------
+!---------------------------------------------------------------
 ! SSUB_init.f90
 !
 ! PURPOSE:
 !  Initialize SSUB library.
 !
 ! NOTES:
-!  This scheme is most efficient when n_j 
-!  is a multiple of n_n.  
-!
-! REVISIONS
-! 08 Aug 02: jc
-!  Created.
-!---------------------------------------------
+!  This scheme is most efficient when n_j is a multiple of n_n.  
+!---------------------------------------------------------------
 
 subroutine SSUB_init(nn_i,nj_i,nv1_i,nv2_i,COMM)
 
+  use mpi
   use SSUB_private
 
   !-------------------------------------------
@@ -27,7 +23,6 @@ subroutine SSUB_init(nn_i,nj_i,nv1_i,nv2_i,COMM)
   integer, intent(in) :: COMM
   !-------------------------------------------
 
-  include 'mpif.h'
 
   SSUB_COMM = COMM
 

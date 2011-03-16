@@ -1,4 +1,4 @@
-!---------------------------------------------
+!-------------------------------------------------------
 ! fTRANSP_DO.f90
 !
 ! PURPOSE:
@@ -14,19 +14,12 @@
 !  the notation.
 !
 ! NOTES:
-!  Communication routine originally used 
-!  in old GYRO.
-!
-! REVISIONS
-! 03 June 02: jc
-!  Documented.
-! 12 Nov 03: jc
-!  Use new array i_rc in p_ij loop.
-!  Simplify/correct test in i_from loop. 
-!---------------------------------------------
+!  Communication routine originally used in old GYRO.
+!-------------------------------------------------------
 
 subroutine fTRANSP_DO(g,gT)
 
+  use mpi
   use fTRANSP_GLOBALS
 
   implicit none
@@ -34,7 +27,6 @@ subroutine fTRANSP_DO(g,gT)
   complex, intent(in), dimension(n_k,n_ij_loc) :: g
   complex, intent(inout), dimension(n_i,n_jk_loc) :: gT
 
-  include 'mpif.h'
 
   ! Sort g into packages to be sent to each
   ! processor: q_send(:,i_recv)

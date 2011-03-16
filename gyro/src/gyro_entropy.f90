@@ -19,6 +19,7 @@
 
 subroutine gyro_entropy
 
+  use mpi
   use gyro_globals
   use gyro_pointers
 
@@ -30,7 +31,6 @@ subroutine gyro_entropy
   real, dimension(n_kinetic,n_entro) :: entropy_loc
   !-------------------------------------------------------------
 
-  include 'mpif.h'
 
   entropy_loc(:,:) = 0.0
 

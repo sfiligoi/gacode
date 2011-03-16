@@ -7,6 +7,7 @@
 
 subroutine make_ampereperp_blend
 
+  use mpi
   use gyro_globals
   use gyro_pointers
   use math_constants
@@ -32,7 +33,6 @@ subroutine make_ampereperp_blend
 
   !---------------------------------------------------
 
-  include 'mpif.h'
 
   betae_eff = betae_unit_norm*ampere_scale
 

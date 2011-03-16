@@ -32,7 +32,7 @@ if n <> 2:
 testdir=sys.argv[1]+'/'
 checkdir=os.environ.get('GACODE_ROOT')+'/gyro/tools/input/'+testdir
 
-check1='prec.out'
+check1='out.gyro.prec'
 regress='regress'
 
 #--------------------------------------------------

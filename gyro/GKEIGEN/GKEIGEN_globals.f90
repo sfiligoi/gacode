@@ -74,6 +74,9 @@ module GKEIGEN_globals
   !
   ! Processors in GYRO_COMM_WORLD
   integer :: i_proc_e
+  integer :: i_proc_e0
+  integer :: i_proc_e1
+  integer :: i_proc_e2
   !
   ! Parallel instances of GYRO_COMM_WORLD
   integer :: gkeigen_j_set_e0

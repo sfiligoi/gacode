@@ -15,13 +15,13 @@ pro loadsim, input_dir
   
   version_tag  = '(version not found)'
   version_date = '(time not found)' 
-  openr,1,simdir+'/VERSION_tag',error=i_err
+  openr,1,simdir+'/out.gyro.version',error=i_err
 
   if (i_err eq 0) then begin
      readf,1,version_tag
      readf,1,version_date
   endif else begin
-     print,'No VERSION_tag found.  Setting to 1.0.0'
+     print,'No out.gyro.version found.  Setting to 1.0.0'
      version_tag = '1.0.0'
   endelse 
   close,1
