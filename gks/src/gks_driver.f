@@ -235,7 +235,6 @@ c
 		  stop
         endif
 c
-        call pressure
         call gridsetup(0,mxgrid)
         call datmap
 c
