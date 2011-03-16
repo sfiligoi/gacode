@@ -92,31 +92,15 @@ subroutine gyro_alloc_profile_sim(flag)
      allocate(mu(n_spec)) 
      allocate(krho_collect(n_n))
      allocate(c_map(n_spec))
-     !Initialize to zero:
-     r=0.; q=0.; q_s=0.; r_s=0.; rmaj_s=0.; shat_s=0.; rhogrid_s=0.
-     kappa_s=0.; s_kappa_s=0.; delta_s=0.; zeta_s=0.; s_delta_s=0.; s_zeta_s=0.
-     z_eff_s=0.; rhosda_s=0.; csda_s=0.; drmaj_s=0.; dzmag_s=0.; beta_unit_s=0.
-     nu_s=0.; zmag_s=0.; w0_s=0.; w0p_s=0.; gamma_e_s=0.; gamma_p_s=0.; mach_s=0.
-     dlnpdr_s=0.; beta_star_s=0.; omega_eb_s=0.
-     den_s=0.; tem_s=0.; b_unit_s=0.
-     krho_i=0.
-     a_fourier_geo_s=0.
-     alpha_s=0.; dlnndr_s=0.; dlntdr_s=0.; pr_s=0.
-     phase=0.; angp=0.
-     r_e=0.; dr_eodr=0.
-     n=0.; n_1=0;  z=0.; mu=0.; krho_collect=0.; c_map=0.
-
 
      ! Energy grid
      allocate(energy_max(n_kinetic))
      allocate(energy(n_energy,n_kinetic))
      allocate(w_energy(n_energy,n_kinetic))
-     energy_max=0.; energy=0.; w_energy=0.
 
      ! Fourier coefficients
      allocate(cr(n_x,n_x))
      allocate(cri(n_x,n_x))
-     cr=0.; cri=0.
 
      ! Nondistributed radial operators
      allocate(gyro_trace(n_gk,-m_gyro:m_gyro-i_gyro))
@@ -129,19 +113,14 @@ subroutine gyro_alloc_profile_sim(flag)
      allocate(i_cyc(1-n_x:2*n_x))
      allocate(i_loop(1-n_x:2*n_x))
      allocate(explicit_damp_vec(n_kinetic,n_x))
-     gyro_trace=0.; w_g0=0.; w_gd0=0.; w_d0=0.; w_d1=0.; w_d2=0.
-     s_d1=0.; i_cyc=0.; i_loop=0.; explicit_damp_vec=0.
 
      if (source_flag == 1) then
         ! Source arrays
         allocate(b_src(n_x,n_lump))
         allocate(m_src(n_lump,n_lump))
         allocate(src_piv(n_lump))
-        b_src=0.; m_src=0.; src_piv=0.
-
      endif
 
-     !SEK: There might be a better method here
      if (iohdf5out == 1) then
         allocate(nu_coarse(0:n_theta_plot,n_x))
         allocate(nu_fine(0:n_theta_plot*n_theta_mult,n_x))
