@@ -95,7 +95,7 @@ c
      *  aky1,corot,igeo_print,
      *  cnewk2,cnewk3,ncspec2,nbasis_min,nbasis_max,amass2,amass3,
      *  alpha_mach, alpha_cur, lprint_pflow, iexb, ipfst, idatzero,
-     *  itest_ntcc, ialpha, itorque
+     *  itest_ntcc, ialpha
 c
       version = "TGLF_1.93"
 c
@@ -235,10 +235,6 @@ c
 		  stop
         endif
 c
-<<<<<<< HEAD
-c        call pressure
-=======
->>>>>>> 550f87abc0b107146334985cf44dc2755ddcc526
         call gridsetup(0,mxgrid)
         call datmap
 c
