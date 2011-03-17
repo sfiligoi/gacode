@@ -58,7 +58,13 @@ for i in \
     autoheader \
     "autoconf --force"; do
   echo $i
+  if test "$i" == autoheader; then
+    if test -e config.h; then
+      $i
+    fi
+  else
   $i
+  fi
   res=$?
   if test $res != 0; then
     echo Failure of $i.
