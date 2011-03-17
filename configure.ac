@@ -180,7 +180,6 @@ AC_CONFIG_FILES([Makefile
     shared/python/Makefile
     shared/bin/Makefile
     shared/exec/Makefile
-    shared/install/Makefile
     gato/Makefile
     gato/data/Makefile
     gato/install/Makefile
