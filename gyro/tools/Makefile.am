@@ -8,7 +8,7 @@
 ## $Id: Makefile.am 36 2010-01-11 21:04:36Z srinath $
 ## ############################################################
 
-SUBDIRS= PostGYRO fieldline gyro2gkv spectra summary #input  vtkgyro
+SUBDIRS= PostGYRO fieldline gyro2gkv spectra summary PlotGYROpy #input  vtkgyro
 
 MAINTAINERCLEANFILES    = Makefile.in 
 

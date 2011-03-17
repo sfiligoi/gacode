@@ -9,7 +9,7 @@
 ## Version:	$Id: Makefile.am 180 2010-09-06 20:50:31Z kruger $
 ##
 ## ############################################################################
-SUBDIRS = data install
+SUBDIRS = data 
 
 libdir = $(prefix)/lib/$(FC_LIBSUBDIR)
 bin_PROGRAMS     = gato

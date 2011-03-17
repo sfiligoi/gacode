@@ -10,13 +10,8 @@
 ##
 ## ############################################################################
 
-Z_LIBS	= @Z_LIBS@
-Z_ALIBS	= @Z_ALIBS@
-
-libdir = $(prefix)/lib/$(FC_LIBSUBDIR)
-bin_PROGRAMS     = gyro
+libdir = $(prefix)/lib
 noinst_LTLIBRARIES = libgacodegyro_SRC.la
-lib_LTLIBRARIES = libgacodegyro.la
 
 if HAVE_MUMPS
 theCleanupMumps=cleanup_mumps.mumps.f90
@@ -70,23 +65,17 @@ theDoNlfftP=do_nlfft_p.stub.f90
 theMakeNl=make_nl.f90
 endif
 
-#if HAVE_HDF5
-#HDF5IO_FILES=hdf5_mod.f90 write_hdf5.F90 write_distributed_complex_h5.f90 write_distributed_real_h5.f90
-#else
-#HDF5IO_FILES=hdf5_mod.f90 write_hdf5.F90
-#endif
 gyro_includes= -I $(top_builddir)/shared/math \
 	-I $(top_builddir)/shared/GEO \
 	-I $(top_builddir)/gyro/BLEND \
 	-I $(top_builddir)/gyro/SSUB \
 	-I $(top_builddir)/gyro/TRANSPOSE \
 	-I $(top_builddir)/shared/UMFPACK \
-	-I $(top_builddir)/shared/EXPRO 
-
-
+	-I $(top_builddir)/shared/EXPRO  \
+	-I $(top_builddir)/shared/vshdf5
 
 # To get to work with optimization reducing compiler wrappers
-IOINC=@HDF5_FC_INC@ @FCIOWRAPPERS_INC@
+IOINC=@HDF5_FC_INC@ @FCIOWRAPPERS_INC@ @HDF5_INC@
 #IOINC=@HDF5_INC@ @FCIOWRAPPERS_INC@
 IOLIBS=@FCIOWRAPPERS_ALIBS@ @HDF5_ALIBS@ @NETCDF_ALIBS@
 AM_LIBTOOLFLAGS = --tag=FC
@@ -152,6 +141,7 @@ libgacodegyro_SRC_la_SOURCES = \
 	gyro_initialize_arrays.f90 \
 	gyro_radial_operators.f90 \
 	gyro_moments_plot.f90 \
+  gyro_moments_plot_fine.f90 \
 	gyro_select_methods.f90 \
 	gyro_bounce_points.f90 \
 	gyro_radial_simulation_box.f90 \
@@ -176,13 +166,10 @@ libgacodegyro_SRC_la_SOURCES = \
 	timestep_explicit.f90 \
   gyro_maxwell_private.f90 \
 	make_maxwell_matrix.f90 \
-	make_blend_arrays.f90 \
 	make_theta_grid.f90 \
 	make_geometry_arrays.f90 \
 	make_gyro.f90 \
 	make_phase_space.f90 \
-	make_pointers.f90 \
-	make_pointer_dimensions.f90 \
 	make_initial_h.f90 \
 	make_implicit_advect.f90 \
 	make_electron_current.f90 \
@@ -212,7 +199,6 @@ libgacodegyro_SRC_la_SOURCES = \
 	get_kinetic_advance.f90 \
 	get_delta_he.f90 \
 	get_he.f90 \
-	get_error.f90 \
 	get_phi_squared.f90 \
 	get_g_squared.f90 \
 	$(theDoNlfastP) \
@@ -250,40 +236,17 @@ libgacodegyro_SRC_la_SOURCES = \
   gyro_kxky_spectrum.f90 \
   gyro_lambda_grid.f90 \
   gyro_mpi_grid.f90 \
+  gyro_set_pointers.f90 \
+  gyro_timestep_error.f90 \
+  gyro_set_pointer_dim.f90 \
+  gyro_set_blend_arrays.f90 \
 	$(HDF5IO_FILES) \
 	$(theCleanupMumps) \
-  gyro_gkeigen_do.stub.f90 \
   gyro_init.f90 \
 	gyro_run.f90 \
+  gyro_dump_input.f90 \
+  gyro_dump_interface.f90 \
 	gyro_do.f90  
-
-
-libgacodegyro_la_SOURCES =
-libgacodegyro_la_LIBADD = \
-	libgacodegyro_SRC.la \
-	$(top_builddir)/gyro/BLEND/libgacodeblend.la \
-	$(top_builddir)/shared/math/libgacodemath.la \
-	$(top_builddir)/gyro/TRANSPOSE/libgacodetranspose.la \
-	$(top_builddir)/gyro/SSUB/libgacodessub.la \
-	$(top_builddir)/shared/GEO/libgacodegeo.la \
-	$(top_builddir)/shared/EXPRO/libgacodeexpro.la \
-	$(top_builddir)/shared/UMFPACK/libgacodeumfpack.la
-
-
-gyro_SOURCES = gyro.f90
-gyro_LDADD  = $(top_builddir)/gyro/src/libgacodegyro.la \
-	@FFTW_LIBS@  @LAPACK_LIBS@  @BLAS_LIBS@ $(IOLIBS) $(Z_LIBS) \
-	$(top_builddir)/shared/EXPRO/libgacodeexpro.la
-
-gyro_INCLUDES = \
-	-I $(top_builddir)/gyro/src \
-	-I $(top_builddir)/gyro/BLEND \
-	-I $(top_builddir)/shared/math \
-	-I $(top_builddir)/gyro/TRANSPOSE \
-	-I $(top_builddir)/gyro/SSUB \
-	-I $(top_builddir)/shared/GEO \
-	-I $(top_builddir)/shared/UMFPACK \
-	-I $(top_builddir)/shared/EXPRO
 
 if TX_FORTRAN_MODNAMEISCAP
 include_HEADERS = GYRO_GLOBALS.$(TX_FORTRAN_MODEXT) GYRO_INTERFACE.$(TX_FORTRAN_MODEXT)
@@ -298,7 +261,5 @@ endif
 
 CLEANFILES = *.mod *.f90 *.lo *.lst *.la
 
-write_hdf5.o: hdf5_mod.o
-write_hdf5.lo: hdf5_mod.lo
 gyro_fieldeigen.o: gyro_fieldeigen_private.o
 gyro_fieldeigen.lo: gyro_fieldeigen_private.lo

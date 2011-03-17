@@ -12,7 +12,7 @@
 ACLOCAL_AMFLAGS = -I config
 
 #SUBDIRS = shared tglf neo
-SUBDIRS = envvars shared gato neo
+SUBDIRS = envvars shared gato neo tglf
 
 if HAVE_MPI
 SUBDIRS += gyro 

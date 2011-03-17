@@ -11,7 +11,7 @@
 ## ############################################################################
 
 
-libdir = $(prefix)/lib/$(FC_LIBSUBDIR)
+libdir = $(prefix)/lib
 noinst_LTLIBRARIES = libgacodessub.la
 libgacodessub_la_SOURCES = \
 	SSUB_private.f90 \

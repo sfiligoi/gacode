@@ -11,7 +11,7 @@
 ## ############################################################################
 
 
-libdir = $(prefix)/lib/$(FC_LIBSUBDIR)
+libdir = $(prefix)/lib
 noinst_LTLIBRARIES = libgacodemath.la
 libgacodemath_la_SOURCES = \
   math_constants.f90 \
@@ -36,7 +36,6 @@ libgacodemath_la_SOURCES = \
   cub_spline_deriv2.f90 \
   gamma.f \
   energy_integral.f90 \
-  bound_deriv.f90 \
   curtis_rad.f90
 	
 

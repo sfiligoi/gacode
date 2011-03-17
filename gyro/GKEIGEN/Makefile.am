@@ -12,15 +12,18 @@
 
 #gyroInc = -I ../src -I ../math @PETSC_INC@ @SLEPC_INC@
 #
-libdir = $(prefix)/lib/$(FC_LIBSUBDIR)
+libdir = $(prefix)/lib
 
 noinst_LTLIBRARIES = libgacodegkeigen.la
 libgacodegkeigen_la_SOURCES = \
   GKEIGEN_globals.f90 \
   GKEIGEN_do.stub.f90 \
+  GKEIGEN_split_comm.f90 \
   GKEIGEN_matrix_read.f90 \
   GKEIGEN_matrix_write.f90 \
   GKEIGEN_catch_error.f90
+
+gyro_includes= -I $(top_builddir)/gyro/src
 
 #if HAVE_PETSC 
 #if HAVE_SLEPC
@@ -35,7 +38,7 @@ libgacodegkeigen_la_SOURCES = \
 ## To get to work with optimization reducing compiler wrappers
 ## or simply to get .f to work with new automake
 AM_LIBTOOLFLAGS = --tag=FC
-AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) 
-AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) 
+AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(gyro_includes)
+AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(gyro_includes)
 
 CLEANFILES = *.mod *.o *.lo *.lst *.la

@@ -55,26 +55,6 @@ dnl fi
 
 builtin(include, config/tx_fc_aux.m4)
 
-dnl-----------------------------------------------------------------------
-dnl Checks for typedefs, structures, and compiler characteristics.
-dnl-----------------------------------------------------------------------
-
-dnl jrc: is any of this needed?
-if false; then
-AC_C_CONST
-AC_TYPE_PID_T
-AC_TYPE_SIZE_T
-AC_C_VOLATILE
-AC_HEADER_STDC
-AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS([stdlib.h string.h])
-AM_CONFIG_HEADER(config.h)
-# Checks for library functions.
-AC_FUNC_ALLOCA
-CFLAGS="$CFLAGS $C_PIC_FLAG"
-CXXFLAGS="$CXXFLAGS $C_PIC_FLAG"
-fi
-
 dnl ######################################################################
 dnl
 dnl Libtool (may get additional flags)
@@ -165,9 +145,6 @@ dnl-----------------------------------------------------------------------
 
 USE_IO_INFO="true"
 builtin(include, config/tx_fciowrappers.m4)
-if test "x$NETCDF_LIBS" = "x"; then
-   AC_MSG_ERROR([netcdf was not found. NOT SURE HOW TO SET NETCDF LOCATION! (TO FIX)])
-fi
 # CPPF90_FLAGS="$FPPFLAGS $CPPFLAGS"
 CPPF90_FLAGS="$CPP_HAVE_MPI $FLUSH_MACRO $FPPFLAGS"
 AC_SUBST(CPPF90_FLAGS)
@@ -194,6 +171,7 @@ AC_CONFIG_FILES([Makefile
     shared/GEO/Makefile
     shared/UMFPACK/Makefile
     shared/EXPRO/Makefile
+    shared/vshdf5/Makefile
     shared/profiles_gen/Makefile
     shared/profiles_gen/astra/Makefile
     shared/profiles_gen/modinput/Makefile
@@ -202,16 +180,15 @@ AC_CONFIG_FILES([Makefile
     shared/python/Makefile
     shared/bin/Makefile
     shared/exec/Makefile
-    shared/install/Makefile
     gato/Makefile
     gato/data/Makefile
-    gato/install/Makefile
     gyro/Makefile
     gyro/BLEND/Makefile
     gyro/TRANSPOSE/Makefile
     gyro/SSUB/Makefile
+    gyro/GKEIGEN/Makefile
+    gyro/vshdf5/Makefile
     gyro/src/Makefile
-    gyro/install/Makefile
     gyro/peek/Makefile
     gyro/tools/Makefile
     gyro/tools/PostGYRO/Makefile
@@ -220,12 +197,17 @@ AC_CONFIG_FILES([Makefile
     gyro/tools/spectra/Makefile
     gyro/tools/spectra/src/Makefile
     gyro/tools/summary/Makefile
+    gyro/tools/PlotGYROpy/Makefile
     gyro/bin/Makefile
     gyro/vugyro/Makefile
     neo/Makefile
     neo/bin/Makefile
     neo/nclass/Makefile
     neo/src/Makefile
+    tglf/Makefile
+    tglf/bin/Makefile
+    tglf/python/Makefile
+    tglf/src/Makefile
 ])
 
 #    neo/python/Makefile
