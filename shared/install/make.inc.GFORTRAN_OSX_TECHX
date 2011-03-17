@@ -36,7 +36,6 @@ NETCDF_INC = $(SCRATCH)/volatile-gnu/netcdf/include
 HDF5_LIBS = -L$(SCRATCH)/volatile-gnu/hdf5/lib -lhdf5_fortran -lhdf5
 HDF5_INC =  -I$(SCRATCH)/volatile-gnu/hdf5/include
 VHDF5_MAKECMD=vshdf5
-VSHDF5_ALLLIBS= ../vshdf5/libgyro_vshdf5.a ../../shared/vshdf5/libvshdf5.a $(HDF5LIBS)
 
 # Archive
 

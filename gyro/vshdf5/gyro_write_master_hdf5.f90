@@ -1075,6 +1075,8 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
        debug_flag,&
        recv_status,&
        data_step,&
+       w0_s,&
+       ir_norm,&
        GYRO_COMM_WORLD,&
        i_proc,&
        i_err, &
@@ -1101,7 +1103,7 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
   type(hdf5ErrorType), intent(inout) :: h5err
   !
   integer :: data_loop
-  integer :: i_group_send, ir_norm
+  integer :: i_group_send
   integer :: i_send, iphi, istart,nn,i,ikin,in, ix,nphi
   !
   complex :: fn_recv(n_fn), c_i
