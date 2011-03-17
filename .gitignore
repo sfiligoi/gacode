@@ -1,10 +1,9 @@
 
 # Gyro build stuff
+modules/*.mod
 */*.o
-*/*.mod
 */*/*.a
 */*/*.o
-*/*/*.mod
 */*/*/*.o
 */*.pyc
 */*/*.pyc
@@ -21,6 +20,7 @@ neo/tools/vgen/vgen
 shared/profiles_gen/src/prgen
 tglf/src/tglf
 tglf/src/xtglf
+tgyro/src/tgyro_main
 
 # SEK: I like to my configuration on a per directory basis
 config.csh
