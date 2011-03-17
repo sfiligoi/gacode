@@ -2,36 +2,24 @@
 # IBM iDataPlex (carver.nersc.gov) 
 #---------------------------------------------------
 
-# SLEPC_LIB and other environment variables are defined in:
-include ${SLEPC_DIR}/conf/slepc_common_variables
-
 # Compilers and flags
 
-FC	= mpif90 ${FC_LINKER_FLAGS} -module $(GACODE_ROOT)/modules ${FC_INCLUDES}
-F77	= mpif90
+FC  = mpif90 ${FC_LINKER_FLAGS} -module $(GACODE_ROOT)/modules ${FC_INCLUDES}
+F77 = mpif90
 
-FMATH	= -r8 
-FOPT	= -fast  
-FDEBUG	= -g -Ktrap=fp -Mbounds -Minform,inform
-FBOUND	= -Minform,inform -Mbounds
-FPROF	= -fast -Mprof=func
+FMATH  = -r8 
+FOPT   = -fast  
+FDEBUG = -g -Ktrap=fp -Mbounds -Minform,inform
 
 # System math libraries
+LMATH = /usr/common/usg/fftw/2.1.5/lib/libdrfftw.a \
+        /usr/common/usg/fftw/2.1.5/lib/libdfftw.a \
+        ${LAPACK}
 
-LMATH = -L${FFTW_LIBDIR} -l drfftw -L${FFTW_LIBDIR} -l dfftw \
-        ${SLEPC_LIB}
-# -L${SLEPC_DIR}/cray-xt4_g_complex/lib -l slepc
-
-# OPTIONAL: netCDF (for gyro2gkv)
-
-
-# Carver:  NETCDF=-L/usr/common/usg/netcdf/4.0.1/lib -lnetcdf_c++ -lnetcdf -I/usr/common/usg/netcdf/4.0.1/include
-
-NETCDF = -L/usr/common/usg/netcdf/4.0.1/lib -lnetcdf_c++ -lnetcdf
-
-NETCDF_INC =  -I/usr/common/usg/netcdf/4.0.1/include
+# Netcdf
+NETCDF = /usr/common/usg/netcdf/4.0.1/lib/libnetcdf.a
+NETCDF_INC = /usr/common/usg/netcdf/4.0.1/include
 
 # Archive 
-
 ARCH = ar cr
 
