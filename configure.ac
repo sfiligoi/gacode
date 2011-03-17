@@ -182,7 +182,6 @@ AC_CONFIG_FILES([Makefile
     shared/exec/Makefile
     gato/Makefile
     gato/data/Makefile
-    gato/install/Makefile
     gyro/Makefile
     gyro/BLEND/Makefile
     gyro/TRANSPOSE/Makefile
@@ -190,7 +189,6 @@ AC_CONFIG_FILES([Makefile
     gyro/GKEIGEN/Makefile
     gyro/vshdf5/Makefile
     gyro/src/Makefile
-    gyro/install/Makefile
     gyro/peek/Makefile
     gyro/tools/Makefile
     gyro/tools/PostGYRO/Makefile
