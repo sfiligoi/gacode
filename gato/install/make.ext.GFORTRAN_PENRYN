@@ -1,1 +1,1 @@
-GATOFLAGS = --default-real-8 --default-integer-8 -fno-align-commons
+GATOFLAGS = --default-real-8 -fno-align-commons -O0
