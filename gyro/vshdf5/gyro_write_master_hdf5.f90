@@ -598,6 +598,16 @@ subroutine write_hdf5_timedata(action)
     
        !----------------------------------------
        ! Calculate the R,Z coordinates.  See write_geometry_arrays.f90
+       ! The theta grid needs to correspond to the the theta_plot
+       ! array which sets the interpolation arrays in 
+       ! gyro_set_blend_arrays.  The theta_plot array is defined as:
+       !  do j=1,n_theta_plot
+       !          theta_plot(j) = -pi+(j-1)*pi_2/n_theta_plot
+       !  enddo
+       ! such that theta E [0,2 pi) in gyro_banana_operators.f90
+       ! For the 3D arrays, we want the periodic point repeated for
+       ! nice plots; i.e., theta E [0,2 pi], but we plot the raw
+       ! mode data on theta E [0, 2 pi).  Can be a bit confusing.
        !---------------------------------------- 
 
        do ix=1,n_x
@@ -642,25 +652,26 @@ subroutine write_hdf5_timedata(action)
            end do
        endif
        !----------------------------------------
-       ! Dump the course mesh(es)
+       ! Dump the coarse meshes
        !---------------------------------------- 
 
-         call make_group(dumpFid,"grid", grdcoarse,"RZ grid for course mesh",h5err)
-         call dump_h5(grdcoarse,'R',Rc,h5in,h5err)
-         call dump_h5(grdcoarse,'Z',Zc,h5in,h5err)
-         call dump_h5(grdcoarse,'zeta_offset',zeta_offset,h5in,h5err)
-         call dump_h5(grdcoarse,'alpha',alpha_phi,h5in,h5err)
+       call make_group(dumpFid,"grid", grdcoarse,"RZ grid for course mesh",h5err)
+       call dump_h5(grdcoarse,'R',Rc,h5in,h5err)
+       call dump_h5(grdcoarse,'Z',Zc,h5in,h5err)
+       call dump_h5(grdcoarse,'zeta_offset',zeta_offset,h5in,h5err)
+       call dump_h5(grdcoarse,'alpha',alpha_phi,h5in,h5err)
 
-       ! For ease of use, have a single data set that has R,Z. 
-         allocate(buffer(2,0:ncoarse,n_x,1))
-         buffer(1,:,:,1)= Rc(:,:)
-         buffer(2,:,:,1)= Zc(:,:)
-         h5in%units="m"
-         h5in%mesh="mesh-structured"
-         call dump_h5(grdcoarse,'cartMesh',buffer(:,:,:,1),h5in,h5err)
-         h5in%mesh=""
-         deallocate(buffer)
-         call close_group("grid",grdcoarse,h5err)
+       ! Here we do not repeat the points since this is the grid
+       ! that will be used for the mode plots on thete E [0,2 pi)
+       allocate(buffer(2,ncoarse,n_x,1))
+       buffer(1,:,:,1)= Rc(0:ncoarse-1,:)
+       buffer(2,:,:,1)= Zc(0:ncoarse-1,:)
+       h5in%units="m"
+       h5in%mesh="mesh-structured"
+       call dump_h5(grdcoarse,'cartMesh',buffer(:,:,:,1),h5in,h5err)
+       h5in%mesh=""
+       deallocate(buffer)
+       call close_group("grid",grdcoarse,h5err)
 
        !----------------------------------------
        ! Dump the coarse mesh(es) in 3D
@@ -869,7 +880,7 @@ subroutine write_hdf5_fine_timedata(action)
 
        ncoarse = n_theta_plot
        nfine = n_theta_plot*n_theta_mult
-       allocate(Rf(0:nfine,n_x), Zf(0:nfine,n_x))
+       allocate(Rf(1:nfine,n_x), Zf(1:nfine,n_x))
     
        !----------------------------------------
        ! Calculate the R,Z coordinates.  See write_geometry_arrays.f90
@@ -887,18 +898,10 @@ subroutine write_hdf5_fine_timedata(action)
          deltac = delta_s(ix)
          xdc    = asin(deltac)
          zetac  = zeta_s(ix)
-!SEK: I am totally confused here.  This is in write_geometry arrays, but isn't used
-!SEK: by Chris
-!            dr = r(ix)-r(ir_norm)
-!            rmajc = rmaj_s(ir_norm)+drmaj_s(ir_norm)*dr
-!            zmagc = zmag_s(ir_norm)+dzmag_s(ir_norm)*dr
-!            kappac = kappa_s(ir_norm)+kappa_s(ir_norm)*s_kappa_s(ir_norm)/r(ir_norm)*dr
-!            deltac = delta_s(ir_norm)+s_delta_s(ir_norm)/r(ir_norm)*dr
-!            zetac  = zeta_s(ir_norm) +s_zeta_s(ir_norm)/r(ir_norm)*dr
-         do j=0,nfine
+         do j=1,nfine
              ! This needs to match up with what's in gyro_set_blend_arrays.f90
              theta=theta_fine_start+real(j-1)*theta_fine_angle/       &
-                                   real(n_theta_plot*n_theta_mult)
+                                   real(n_theta_plot*n_theta_mult-1)
              !theta = -pi+REAL(j)*pi*2./REAL(nfine)
              if(radial_profile_method==1) then
                 Rf(j,ix)=rmajc+r_c*cos(theta)
