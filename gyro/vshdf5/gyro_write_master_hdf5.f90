@@ -1205,7 +1205,7 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
   type(hdf5ErrorType), intent(inout) :: h5err
   !
   integer :: data_loop
-  integer :: i_group_send
+  integer :: i_group_send, ispcs
   integer :: i_send, iphi, istart,nn,i,ikin,in, ix,nphi
   !
   complex :: fn_recv(n_fn), c_i
@@ -1260,24 +1260,24 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
      if (i_proc /= 0) return
      !-----------------------------------------
      !-----------------------------------------
-     ! Dump each mode in the same format that gyro does
+     ! Dump each species independently
      !-----------------------------------------
      if (iscoarse) then
-       do in=1,n_n
-         WRITE(n_name,fmt='(i3.3)') in
-         tempVarName=trim(vname)//"_real"//n_name
-         call dump_h5(rGid,trim(tempVarName),real(buffn(0:n1-1,:,:,in)),h5in,h5err)
-         tempVarName=trim(vname)//"_imag"//n_name
-         call dump_h5(rGid,trim(tempVarName),aimag(buffn(0:n1-1,:,:,in)),h5in,h5err)
+       do ispcs=1,n1
+         WRITE(n_name,fmt='(i3.3)') ispcs
+         tempVarName=trim(vname)//"_real_species"//n_name
+         call dump_h5(rGid,trim(tempVarName),real(buffn(ispcs,:,:,:)),h5in,h5err)
+         tempVarName=trim(vname)//"_imag_species"//n_name
+         call dump_h5(rGid,trim(tempVarName),aimag(buffn(ispcs,:,:,:)),h5in,h5err)
        enddo ! in
      else
 !      if (debug_flag == 1) then
-        do in=1,n_n
-         WRITE(n_name,fmt='(i3.3)') in
-         tempVarName=trim(vname)//"fine_real"//n_name
-         call dump_h5(rGid,trim(tempVarName),real(buffn(0:n1-1,:,:,in)),h5in,h5err)
-         tempVarName=trim(vname)//"fine_imag"//n_name
-         call dump_h5(rGid,trim(tempVarName),aimag(buffn(0:n1-1,:,:,in)),h5in,h5err)
+       do ispcs=1,n1
+         WRITE(n_name,fmt='(i3.3)') ispcs
+         tempVarName=trim(vname)//"_real_species"//n_name
+         call dump_h5(rGid,trim(tempVarName),real(buffn(ispcs,:,:,:)),h5in,h5err)
+         tempVarName=trim(vname)//"_imag_species"//n_name
+         call dump_h5(rGid,trim(tempVarName),aimag(buffn(ispcs,:,:,:)),h5in,h5err)
        enddo ! in
 !      endif
      endif
@@ -1384,7 +1384,7 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
              if(ikin==3) tempVarName="B_par"
            endif
            write(n_name,fmt='(i2.2)') iphi
-           tempVarName=trim(tempVarName)//"_phi"//TRIM(n_name)
+           tempVarName=trim(tempVarName)//"_torangle"//TRIM(n_name)
            call dump_h5(r3Did,trim(tempVarName),real_buff(:,:,ikin,iphi),h5in,h5err)
          enddo
        enddo
