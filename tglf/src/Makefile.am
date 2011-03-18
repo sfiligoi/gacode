@@ -29,6 +29,13 @@ libgacodetglf_la_SOURCES = \
   tglf_read_input.f90 \
   tglf_dump_input.f90
 
+EXTRA_DIST = \
+  tglf_inout.f90 \
+  tglf_setup_geometry.f90 \
+  tglf_TM.f90
+
+
+
 
 if HAVE_MPI
 tglf_SOURCES 	= tglf.f90
@@ -44,7 +51,6 @@ nodist_include_HEADERS= tglf_interface.$(TX_FORTRAN_MODEXT)
 tglf_interface.$(TX_FORTRAN_MODEXT): tglf_interface.f90
 endif
 
-EXTRA_DIST = 
 # To get to work with optimization reducing compiler wrappers
 # or simply for directories with mixed F77 and FC
 AM_LIBTOOLFLAGS = --tag=FC

@@ -25,7 +25,6 @@ DIST_FILES = COPYING
 DIST_SUFFIXES = .am .m4 .pl .sh
 NODIST_FILES = Makefile.am
 EXTRA_DIST = \
-   svninfo.txt \
    COPYING \
    depend.ac rminterlibdeps.ac \
    bindist.am bundle.am clean-ac.am clean-cxx.am depend.am \
