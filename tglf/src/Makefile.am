@@ -37,10 +37,10 @@ tglf_LDADD  	= $(top_builddir)/tglf/src/libgacodetglf.la \
 endif
 		 
 if TX_FORTRAN_MODNAMEISCAP
-include_HEADERS= TGLF_INTERFACE.$(TX_FORTRAN_MODEXT)
+nodist_include_HEADERS= TGLF_INTERFACE.$(TX_FORTRAN_MODEXT)
 TGLF_INTERFACE.$(TX_FORTRAN_MODEXT): tglf_interface.f90
 else
-include_HEADERS= tglf_interface.$(TX_FORTRAN_MODEXT)
+nodist_include_HEADERS= tglf_interface.$(TX_FORTRAN_MODEXT)
 tglf_interface.$(TX_FORTRAN_MODEXT): tglf_interface.f90
 endif
 

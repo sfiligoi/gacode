@@ -69,11 +69,14 @@ AM_LIBTOOLFLAGS = --tag=FC
 AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(FFTW_INC) $(shared_includes) 
 AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(FFTW_INC) $(shared_includes) 
 
+#nodistdir = $(top_builddir) 
 if TX_FORTRAN_MODNAMEISCAP
-include_HEADERS = NEO_INTERFACE.$(TX_FORTRAN_MODEXT)
+#include_HEADERS = NEO_INTERFACE.$(TX_FORTRAN_MODEXT)
+nodist_include_HEADERS = NEO_INTERFACE.$(TX_FORTRAN_MODEXT)
 NEO_INTERFACE.$(TX_FORTRAN_MODEXT): neo_interface.f90
 else
-include_HEADERS = neo_interface.$(TX_FORTRAN_MODEXT)
+#include_HEADERS = neo_interface.$(TX_FORTRAN_MODEXT)
+nodist_include_HEADERS = neo_interface.$(TX_FORTRAN_MODEXT)
 neo_interface.$(TX_FORTRAN_MODEXT): neo_interface.f90
 endif
 

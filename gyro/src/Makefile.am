@@ -230,7 +230,6 @@ libgacodegyro_SRC_la_SOURCES = \
 	gyro_field_interpolation.f90 \
 	gyro_build_sparse_maxwell.f90 \
 	gyro_entropy.f90 \
-	write_geometry_arrays.f90.ps \
 	gyro_build_sparse_poisson.f90 \
   gyro_fulladvance.f90 \
   gyro_kxky_spectrum.f90 \
@@ -249,11 +248,11 @@ libgacodegyro_SRC_la_SOURCES = \
 	gyro_do.f90  
 
 if TX_FORTRAN_MODNAMEISCAP
-include_HEADERS = GYRO_GLOBALS.$(TX_FORTRAN_MODEXT) GYRO_INTERFACE.$(TX_FORTRAN_MODEXT)
+nodist_include_HEADERS = GYRO_GLOBALS.$(TX_FORTRAN_MODEXT) GYRO_INTERFACE.$(TX_FORTRAN_MODEXT)
 GYRO_GLOBALS.$(TX_FORTRAN_MODEXT):   gyro_globals.f90
 GYRO_INTERFACE.$(TX_FORTRAN_MODEXT): gyro_interface.f90
 else
-include_HEADERS = gyro_globals.$(TX_FORTRAN_MODEXT) gyro_interface.$(TX_FORTRAN_MODEXT)
+nodist_include_HEADERS = gyro_globals.$(TX_FORTRAN_MODEXT) gyro_interface.$(TX_FORTRAN_MODEXT)
 gyro_globals.$(TX_FORTRAN_MODEXT):   gyro_globals.f90
 gyro_interface.$(TX_FORTRAN_MODEXT): gyro_interface.f90
 endif
