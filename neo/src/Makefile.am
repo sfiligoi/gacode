@@ -63,9 +63,6 @@ neo_LDADD  = \
   $(top_builddir)/shared/GEO/libgacodegeo.la  \
   $(top_builddir)/shared/UMFPACK/libgacodeumfpack.la  \
   @FFTW_LIBS@  @LAPACK_LIBS@  @BLAS_LIBS@
-#neo_INCLUDES = \
-#	-I $(top_builddir)/neo/src \
-#	-I $(top_builddir)/gyro/GEO 
 
 # To get to work with optimization reducing compiler wrappers
 AM_LIBTOOLFLAGS = --tag=FC
