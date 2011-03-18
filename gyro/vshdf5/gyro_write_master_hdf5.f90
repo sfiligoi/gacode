@@ -12,6 +12,8 @@ subroutine write_hdf5_data(datafile,action)
   !------------------------------------------
   use gyro_globals
   use hdf5_api
+  use math_constants
+  use GEO_interface
   !------------------------------------------
   implicit none
   include 'mpif.h'
@@ -26,6 +28,11 @@ subroutine write_hdf5_data(datafile,action)
   character(90) :: description, filename
   type(hdf5InOpts) :: h5in
   type(hdf5ErrorType) :: h5err
+  integer :: n_fine
+  integer :: io_mode
+  real :: theta
+  real :: dr
+  real, allocatable :: buffer(:,:,:)
   !------------------------------------------
   ! Do the initialization here.  Might need
   ! better logic here based on action.
@@ -47,6 +54,7 @@ subroutine write_hdf5_data(datafile,action)
 
   !---------------------------------------------------------------------
   ! Write the variables to an hdf5 file
+  ! These variables are essentially the write_profile_vugyro.f90 
   !---------------------------------------------------------------------
   description=" "
   !write(*,*) "write_hdf5: opening ", filename, " with h5in%comm = ", h5in%comm
@@ -110,7 +118,101 @@ subroutine write_hdf5_data(datafile,action)
   call dump_h5(rootid,"zcharge", z(:),h5in,h5err)
   call dump_h5(rootid,"n_moment", n_moment ,h5in,h5err)
 
+  !---------------------------------------------------------------------
+  ! These variables are essentially the write_profile_vugyro.f90 
+  !---------------------------------------------------------------------
+
+  n_fine = n_theta_plot*n_theta_mult
+
+  allocate(buffer(14,1:n_x,n_fine))
+  do i=1,n_x
+
+     if (flat_profile_flag == 0) then
+
+        ! All profiles are global and radial variation is consistent
+
+        GEO_rmin_in      = r_s(i)
+        GEO_rmaj_in      = rmaj_s(i)
+        GEO_drmaj_in     = drmaj_s(i)
+        GEO_zmag_in      = zmag_s(i)
+        GEO_dzmag_in     = dzmag_s(i)
+        GEO_q_in         = q_s(i)
+        GEO_s_in         = shat_s(i)
+        GEO_kappa_in     = kappa_s(i)
+        GEO_s_kappa_in   = s_kappa_s(i)
+        GEO_delta_in     = delta_s(i)
+        GEO_s_delta_in   = s_delta_s(i)
+        GEO_zeta_in      = zeta_s(i)
+        GEO_s_zeta_in    = s_zeta_s(i)
+        GEO_beta_star_in = beta_star_s(i)
+
+     else
+
+        ! Profiles are flat and so some parameters need to be linearly extrapolated.
+
+        dr = r(i)-r(ir_norm)
+
+        GEO_rmin_in  = r(i)
+        GEO_rmaj_in  = rmaj_s(ir_norm)+drmaj_s(ir_norm)*dr
+        GEO_drmaj_in = drmaj_s(ir_norm)
+        GEO_zmag_in  = zmag_s(ir_norm)+dzmag_s(ir_norm)*dr
+        GEO_dzmag_in = dzmag_s(ir_norm)
+        GEO_q_in     = q(i)
+        GEO_s_in     = shat_s(ir_norm)
+        GEO_kappa_in = kappa_s(ir_norm)+&
+                   kappa_s(ir_norm)*s_kappa_s(ir_norm)/r(ir_norm)*dr
+        GEO_s_kappa_in = s_kappa_s(ir_norm)
+        GEO_delta_in   = delta_s(ir_norm)+s_delta_s(ir_norm)/r(ir_norm)*dr
+        GEO_s_delta_in = s_delta_s(ir_norm)
+        GEO_zeta_in    = zeta_s(ir_norm)+s_zeta_s(ir_norm)/r(ir_norm)*dr
+        GEO_s_zeta_in  = s_zeta_s(ir_norm)
+        GEO_beta_star_in = beta_star_s(ir_norm)
+
+     endif
+
+     GEO_fourier_in(:,:) = a_fourier_geo_s(:,0:n_fourier_geo,i)
+     call GEO_do()
+
+     do j=1,n_fine
+
+        theta = -pi+(j-1)*pi_2/n_fine
+
+        ! Test for special case
+        if (n_fine == 1) theta = 0.0
+
+        call GEO_interp(theta)
+
+        buffer(1 ,i,j)=GEO_nu
+        buffer(2 ,i,j)=GEO_gsin
+        buffer(3 ,i,j)=GEO_gcos1
+        buffer(4 ,i,j)=GEO_gcos2
+        buffer(5 ,i,j)=GEO_usin
+        buffer(6 ,i,j)=GEO_ucos
+        buffer(7 ,i,j)=GEO_b
+        buffer(8 ,i,j)=GEO_g_theta
+        buffer(9 ,i,j)=GEO_grad_r
+        buffer(10,i,j)=GEO_gq
+        buffer(11,i,j)=GEO_captheta
+
+     enddo ! j
+
+  enddo ! i
+
+  call dump_h5(rootid,"nu",      buffer(1,:,:),h5in,h5err)
+  call dump_h5(rootid,"gsin",    buffer(2,:,:),h5in,h5err)
+  call dump_h5(rootid,"gcos1",   buffer(3,:,:),h5in,h5err)
+  call dump_h5(rootid,"gcos2",   buffer(4,:,:),h5in,h5err)
+  call dump_h5(rootid,"usin",    buffer(5,:,:),h5in,h5err)
+  call dump_h5(rootid,"ucos",    buffer(6,:,:),h5in,h5err)
+  call dump_h5(rootid,"b",       buffer(7,:,:),h5in,h5err)
+  call dump_h5(rootid,"g_theta", buffer(8,:,:),h5in,h5err)
+  call dump_h5(rootid,"grad_r",  buffer(9,:,:),h5in,h5err)
+  call dump_h5(rootid,"gq",      buffer(10,:,:),h5in,h5err)
+  call dump_h5(rootid,"captheta",buffer(11,:,:),h5in,h5err)
+  deallocate(buffer)
+
   call close_h5file(fid,rootid,h5err)
+
  return
  end subroutine write_hdf5_data
 
