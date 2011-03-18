@@ -12,6 +12,8 @@ subroutine write_hdf5_data(datafile,action)
   !------------------------------------------
   use gyro_globals
   use hdf5_api
+  use math_constants
+  use GEO_interface
   !------------------------------------------
   implicit none
   include 'mpif.h'
@@ -26,6 +28,11 @@ subroutine write_hdf5_data(datafile,action)
   character(90) :: description, filename
   type(hdf5InOpts) :: h5in
   type(hdf5ErrorType) :: h5err
+  integer :: n_fine
+  integer :: io_mode
+  real :: theta
+  real :: dr
+  real, allocatable :: buffer(:,:,:)
   !------------------------------------------
   ! Do the initialization here.  Might need
   ! better logic here based on action.
@@ -47,6 +54,7 @@ subroutine write_hdf5_data(datafile,action)
 
   !---------------------------------------------------------------------
   ! Write the variables to an hdf5 file
+  ! These variables are essentially the write_profile_vugyro.f90 
   !---------------------------------------------------------------------
   description=" "
   !write(*,*) "write_hdf5: opening ", filename, " with h5in%comm = ", h5in%comm
@@ -110,7 +118,101 @@ subroutine write_hdf5_data(datafile,action)
   call dump_h5(rootid,"zcharge", z(:),h5in,h5err)
   call dump_h5(rootid,"n_moment", n_moment ,h5in,h5err)
 
+  !---------------------------------------------------------------------
+  ! These variables are essentially the write_profile_vugyro.f90 
+  !---------------------------------------------------------------------
+
+  n_fine = n_theta_plot*n_theta_mult
+
+  allocate(buffer(14,1:n_x,n_fine))
+  do i=1,n_x
+
+     if (flat_profile_flag == 0) then
+
+        ! All profiles are global and radial variation is consistent
+
+        GEO_rmin_in      = r_s(i)
+        GEO_rmaj_in      = rmaj_s(i)
+        GEO_drmaj_in     = drmaj_s(i)
+        GEO_zmag_in      = zmag_s(i)
+        GEO_dzmag_in     = dzmag_s(i)
+        GEO_q_in         = q_s(i)
+        GEO_s_in         = shat_s(i)
+        GEO_kappa_in     = kappa_s(i)
+        GEO_s_kappa_in   = s_kappa_s(i)
+        GEO_delta_in     = delta_s(i)
+        GEO_s_delta_in   = s_delta_s(i)
+        GEO_zeta_in      = zeta_s(i)
+        GEO_s_zeta_in    = s_zeta_s(i)
+        GEO_beta_star_in = beta_star_s(i)
+
+     else
+
+        ! Profiles are flat and so some parameters need to be linearly extrapolated.
+
+        dr = r(i)-r(ir_norm)
+
+        GEO_rmin_in  = r(i)
+        GEO_rmaj_in  = rmaj_s(ir_norm)+drmaj_s(ir_norm)*dr
+        GEO_drmaj_in = drmaj_s(ir_norm)
+        GEO_zmag_in  = zmag_s(ir_norm)+dzmag_s(ir_norm)*dr
+        GEO_dzmag_in = dzmag_s(ir_norm)
+        GEO_q_in     = q(i)
+        GEO_s_in     = shat_s(ir_norm)
+        GEO_kappa_in = kappa_s(ir_norm)+&
+                   kappa_s(ir_norm)*s_kappa_s(ir_norm)/r(ir_norm)*dr
+        GEO_s_kappa_in = s_kappa_s(ir_norm)
+        GEO_delta_in   = delta_s(ir_norm)+s_delta_s(ir_norm)/r(ir_norm)*dr
+        GEO_s_delta_in = s_delta_s(ir_norm)
+        GEO_zeta_in    = zeta_s(ir_norm)+s_zeta_s(ir_norm)/r(ir_norm)*dr
+        GEO_s_zeta_in  = s_zeta_s(ir_norm)
+        GEO_beta_star_in = beta_star_s(ir_norm)
+
+     endif
+
+     GEO_fourier_in(:,:) = a_fourier_geo_s(:,0:n_fourier_geo,i)
+     call GEO_do()
+
+     do j=1,n_fine
+
+        theta = -pi+(j-1)*pi_2/n_fine
+
+        ! Test for special case
+        if (n_fine == 1) theta = 0.0
+
+        call GEO_interp(theta)
+
+        buffer(1 ,i,j)=GEO_nu
+        buffer(2 ,i,j)=GEO_gsin
+        buffer(3 ,i,j)=GEO_gcos1
+        buffer(4 ,i,j)=GEO_gcos2
+        buffer(5 ,i,j)=GEO_usin
+        buffer(6 ,i,j)=GEO_ucos
+        buffer(7 ,i,j)=GEO_b
+        buffer(8 ,i,j)=GEO_g_theta
+        buffer(9 ,i,j)=GEO_grad_r
+        buffer(10,i,j)=GEO_gq
+        buffer(11,i,j)=GEO_captheta
+
+     enddo ! j
+
+  enddo ! i
+
+  call dump_h5(rootid,"nu",      buffer(1,:,:),h5in,h5err)
+  call dump_h5(rootid,"gsin",    buffer(2,:,:),h5in,h5err)
+  call dump_h5(rootid,"gcos1",   buffer(3,:,:),h5in,h5err)
+  call dump_h5(rootid,"gcos2",   buffer(4,:,:),h5in,h5err)
+  call dump_h5(rootid,"usin",    buffer(5,:,:),h5in,h5err)
+  call dump_h5(rootid,"ucos",    buffer(6,:,:),h5in,h5err)
+  call dump_h5(rootid,"b",       buffer(7,:,:),h5in,h5err)
+  call dump_h5(rootid,"g_theta", buffer(8,:,:),h5in,h5err)
+  call dump_h5(rootid,"grad_r",  buffer(9,:,:),h5in,h5err)
+  call dump_h5(rootid,"gq",      buffer(10,:,:),h5in,h5err)
+  call dump_h5(rootid,"captheta",buffer(11,:,:),h5in,h5err)
+  deallocate(buffer)
+
   call close_h5file(fid,rootid,h5err)
+
  return
  end subroutine write_hdf5_data
 
@@ -496,6 +598,16 @@ subroutine write_hdf5_timedata(action)
     
        !----------------------------------------
        ! Calculate the R,Z coordinates.  See write_geometry_arrays.f90
+       ! The theta grid needs to correspond to the the theta_plot
+       ! array which sets the interpolation arrays in 
+       ! gyro_set_blend_arrays.  The theta_plot array is defined as:
+       !  do j=1,n_theta_plot
+       !          theta_plot(j) = -pi+(j-1)*pi_2/n_theta_plot
+       !  enddo
+       ! such that theta E [0,2 pi) in gyro_banana_operators.f90
+       ! For the 3D arrays, we want the periodic point repeated for
+       ! nice plots; i.e., theta E [0,2 pi], but we plot the raw
+       ! mode data on theta E [0, 2 pi).  Can be a bit confusing.
        !---------------------------------------- 
 
        do ix=1,n_x
@@ -540,25 +652,26 @@ subroutine write_hdf5_timedata(action)
            end do
        endif
        !----------------------------------------
-       ! Dump the course mesh(es)
+       ! Dump the coarse meshes
        !---------------------------------------- 
 
-         call make_group(dumpFid,"grid", grdcoarse,"RZ grid for course mesh",h5err)
-         call dump_h5(grdcoarse,'R',Rc,h5in,h5err)
-         call dump_h5(grdcoarse,'Z',Zc,h5in,h5err)
-         call dump_h5(grdcoarse,'zeta_offset',zeta_offset,h5in,h5err)
-         call dump_h5(grdcoarse,'alpha',alpha_phi,h5in,h5err)
+       call make_group(dumpFid,"grid", grdcoarse,"RZ grid for course mesh",h5err)
+       call dump_h5(grdcoarse,'R',Rc,h5in,h5err)
+       call dump_h5(grdcoarse,'Z',Zc,h5in,h5err)
+       call dump_h5(grdcoarse,'zeta_offset',zeta_offset,h5in,h5err)
+       call dump_h5(grdcoarse,'alpha',alpha_phi,h5in,h5err)
 
-       ! For ease of use, have a single data set that has R,Z. 
-         allocate(buffer(2,0:ncoarse,n_x,1))
-         buffer(1,:,:,1)= Rc(:,:)
-         buffer(2,:,:,1)= Zc(:,:)
-         h5in%units="m"
-         h5in%mesh="mesh-structured"
-         call dump_h5(grdcoarse,'cartMesh',buffer(:,:,:,1),h5in,h5err)
-         h5in%mesh=""
-         deallocate(buffer)
-         call close_group("grid",grdcoarse,h5err)
+       ! Here we do not repeat the points since this is the grid
+       ! that will be used for the mode plots on thete E [0,2 pi)
+       allocate(buffer(2,ncoarse,n_x,1))
+       buffer(1,:,:,1)= Rc(0:ncoarse-1,:)
+       buffer(2,:,:,1)= Zc(0:ncoarse-1,:)
+       h5in%units="m"
+       h5in%mesh="mesh-structured"
+       call dump_h5(grdcoarse,'cartMesh',buffer(:,:,:,1),h5in,h5err)
+       h5in%mesh=""
+       deallocate(buffer)
+       call close_group("grid",grdcoarse,h5err)
 
        !----------------------------------------
        ! Dump the coarse mesh(es) in 3D
@@ -767,7 +880,7 @@ subroutine write_hdf5_fine_timedata(action)
 
        ncoarse = n_theta_plot
        nfine = n_theta_plot*n_theta_mult
-       allocate(Rf(0:nfine,n_x), Zf(0:nfine,n_x))
+       allocate(Rf(1:nfine,n_x), Zf(1:nfine,n_x))
     
        !----------------------------------------
        ! Calculate the R,Z coordinates.  See write_geometry_arrays.f90
@@ -785,18 +898,10 @@ subroutine write_hdf5_fine_timedata(action)
          deltac = delta_s(ix)
          xdc    = asin(deltac)
          zetac  = zeta_s(ix)
-!SEK: I am totally confused here.  This is in write_geometry arrays, but isn't used
-!SEK: by Chris
-!            dr = r(ix)-r(ir_norm)
-!            rmajc = rmaj_s(ir_norm)+drmaj_s(ir_norm)*dr
-!            zmagc = zmag_s(ir_norm)+dzmag_s(ir_norm)*dr
-!            kappac = kappa_s(ir_norm)+kappa_s(ir_norm)*s_kappa_s(ir_norm)/r(ir_norm)*dr
-!            deltac = delta_s(ir_norm)+s_delta_s(ir_norm)/r(ir_norm)*dr
-!            zetac  = zeta_s(ir_norm) +s_zeta_s(ir_norm)/r(ir_norm)*dr
-         do j=0,nfine
+         do j=1,nfine
              ! This needs to match up with what's in gyro_set_blend_arrays.f90
              theta=theta_fine_start+real(j-1)*theta_fine_angle/       &
-                                   real(n_theta_plot*n_theta_mult)
+                                   real(n_theta_plot*n_theta_mult-1)
              !theta = -pi+REAL(j)*pi*2./REAL(nfine)
              if(radial_profile_method==1) then
                 Rf(j,ix)=rmajc+r_c*cos(theta)
@@ -1103,7 +1208,7 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
   type(hdf5ErrorType), intent(inout) :: h5err
   !
   integer :: data_loop
-  integer :: i_group_send
+  integer :: i_group_send, ispcs
   integer :: i_send, iphi, istart,nn,i,ikin,in, ix,nphi
   !
   complex :: fn_recv(n_fn), c_i
@@ -1158,24 +1263,24 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
      if (i_proc /= 0) return
      !-----------------------------------------
      !-----------------------------------------
-     ! Dump each mode in the same format that gyro does
+     ! Dump each species independently
      !-----------------------------------------
      if (iscoarse) then
-       do in=1,n_n
-         WRITE(n_name,fmt='(i3.3)') in
-         tempVarName=trim(vname)//"_real"//n_name
-         call dump_h5(rGid,trim(tempVarName),real(buffn(0:n1-1,:,:,in)),h5in,h5err)
-         tempVarName=trim(vname)//"_imag"//n_name
-         call dump_h5(rGid,trim(tempVarName),aimag(buffn(0:n1-1,:,:,in)),h5in,h5err)
+       do ispcs=1,n1
+         WRITE(n_name,fmt='(i3.3)') ispcs
+         tempVarName=trim(vname)//"_real_species"//n_name
+         call dump_h5(rGid,trim(tempVarName),real(buffn(ispcs,:,:,:)),h5in,h5err)
+         tempVarName=trim(vname)//"_imag_species"//n_name
+         call dump_h5(rGid,trim(tempVarName),aimag(buffn(ispcs,:,:,:)),h5in,h5err)
        enddo ! in
      else
 !      if (debug_flag == 1) then
-        do in=1,n_n
-         WRITE(n_name,fmt='(i3.3)') in
-         tempVarName=trim(vname)//"fine_real"//n_name
-         call dump_h5(rGid,trim(tempVarName),real(buffn(0:n1-1,:,:,in)),h5in,h5err)
-         tempVarName=trim(vname)//"fine_imag"//n_name
-         call dump_h5(rGid,trim(tempVarName),aimag(buffn(0:n1-1,:,:,in)),h5in,h5err)
+       do ispcs=1,n1
+         WRITE(n_name,fmt='(i3.3)') ispcs
+         tempVarName=trim(vname)//"_real_species"//n_name
+         call dump_h5(rGid,trim(tempVarName),real(buffn(ispcs,:,:,:)),h5in,h5err)
+         tempVarName=trim(vname)//"_imag_species"//n_name
+         call dump_h5(rGid,trim(tempVarName),aimag(buffn(ispcs,:,:,:)),h5in,h5err)
        enddo ! in
 !      endif
      endif
@@ -1282,7 +1387,7 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
              if(ikin==3) tempVarName="B_par"
            endif
            write(n_name,fmt='(i2.2)') iphi
-           tempVarName=trim(tempVarName)//"_phi"//TRIM(n_name)
+           tempVarName=trim(tempVarName)//"_torangle"//TRIM(n_name)
            call dump_h5(r3Did,trim(tempVarName),real_buff(:,:,ikin,iphi),h5in,h5err)
          enddo
        enddo
