@@ -35,10 +35,10 @@ peek_LDADD  = $(top_builddir)/gyro/src/libgacodegyro_SRC.la
 peek_INCLUDES = -I $(top_builddir)/gyro/src 
 
 if TX_FORTRAN_MODNAMEISCAP
-include_HEADERS = PEEK_GLOBALS.$(TX_FORTRAN_MODEXT)  
+nodist_include_HEADERS = PEEK_GLOBALS.$(TX_FORTRAN_MODEXT)  
 PEEK_GLOBALS.$(TX_FORTRAN_MODEXT):   peek_globals.f90
 else
-include_HEADERS = peek_globals.$(TX_FORTRAN_MODEXT) 
+nodist_include_HEADERS = peek_globals.$(TX_FORTRAN_MODEXT) 
 peek_globals.$(TX_FORTRAN_MODEXT):   peek_globals.f90
 endif
 
