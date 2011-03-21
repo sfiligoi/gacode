@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # SCRIPT:
-#  gyro.IFORT_P4
+#  gyro.GFORTRAN_PENRYN
 #
 # FUNCTION:
 #  Parallel execution script
@@ -12,6 +12,6 @@ exec=${3}
 
 cd $simdir
   
-mpirun -np $nproc $exec
+mpiexec -n $nproc $exec
 
 
