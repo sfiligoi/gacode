@@ -67,8 +67,8 @@ module gyro_globals
   real :: zeta_offset=0.
   ! This defines a wedge in the poloidal plane 
   ! To recover the normal global plot, set theta_fine_start=-pi and theta_fine_angle=2*pi
-  real  :: theta_fine_start
-  real  :: theta_fine_angle
+  real  :: theta_fine_start = 0.0
+  real  :: theta_fine_angle = 0.0
 
   !---------------------------------------------------------
   ! Newline characters:
