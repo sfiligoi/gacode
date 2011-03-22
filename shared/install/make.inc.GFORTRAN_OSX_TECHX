@@ -12,29 +12,35 @@ MAKE = make
 
 # Compilers and flags
 
-FC	= mpif90 -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules
-F77	= mpif90
+FC	= mpif90 -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -g 
+F77	= mpif90 -g 
 
 FMATH	= -fdefault-real-8
 FOPT	= -O3
-FDEBUG	= -Wall -ftrace=full
+FDEBUG	= -Wall -fbacktrace -fbounds-check -O -Wextra
 FBOUND	= -Wall -fbounds-check
 FPROF	= 
 
 # System math libraries
 
-LMATH = /System/Library/Frameworks/vecLib.framework/Versions/A/vecLib \
+#LMATH = /System/Library/Frameworks/vecLib.framework/Versions/A/vecLib \
        -lSystemStubs -lSystem
+
+LMATH = -framework Accelerate
 
 # OPTIONAL: netCDF (for gyro2gkv)
 
-NETCDF = $(SCRATCH)/volatile-gnu/netcdf/lib/libnetcdf.a
-NETCDF_INC = $(SCRATCH)/volatile-gnu/netcdf/include
+#NETCDF = $(SCRATCH)/volatile-gnu/netcdf/lib/libnetcdf.a
+NETCDF = $(HOME)/software/netcdf/lib/libnetcdf.a
+#NETCDF_INC = $(SCRATCH)/volatile-gnu/netcdf/include
+NETCDF_INC =$(HOME)/software/netcdf/include
 
 # OPTIONAL: HDF5 (for vshdf5)
 
-HDF5_LIBS = -L$(SCRATCH)/volatile-gnu/hdf5/lib -lhdf5_fortran -lhdf5
-HDF5_INC =  -I$(SCRATCH)/volatile-gnu/hdf5/include
+HDF5_LIBS = -L$(HOME)/software/hdf5-par/lib -lhdf5_hl_f90cstub -lhdf5_hl_fortran -lhdf5_hl -lhdf5_f90cstub -lhdf5_fortran -lhdf5
+#HDF5_LIBS = -L$(SCRATCH)/volatile-gnu/hdf5/lib -lhdf5_fortran -lhdf5
+#HDF5_INC =  -I$(SCRATCH)/volatile-gnu/hdf5/include
+HDF5_INC =  -I$(HOME)/software/hdf5-par/include -I$(HOME)/software/hdf5-par/include/fortran
 VHDF5_MAKECMD=vshdf5
 
 # Archive
