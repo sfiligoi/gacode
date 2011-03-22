@@ -75,9 +75,8 @@ gyro_includes= -I $(top_builddir)/shared/math \
 	-I $(top_builddir)/shared/vshdf5
 
 # To get to work with optimization reducing compiler wrappers
-IOINC=@HDF5_FC_INC@ @FCIOWRAPPERS_INC@ @HDF5_INC@
-#IOINC=@HDF5_INC@ @FCIOWRAPPERS_INC@
-IOLIBS=@FCIOWRAPPERS_ALIBS@ @HDF5_ALIBS@ @NETCDF_ALIBS@
+IOINC=@HDF5_FC_INC@ @HDF5_INC@
+IOLIBS=@HDF5_ALIBS@ @NETCDF_ALIBS@
 AM_LIBTOOLFLAGS = --tag=FC
 AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) $(gyro_includes) $(CPPF90_FLAGS) -I.
 AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) $(gyro_includes) $(CPPF90_FLAGS) -I.

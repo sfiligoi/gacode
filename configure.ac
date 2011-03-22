@@ -144,8 +144,9 @@ dnl NETCDF_SP=$HOME:$HOME/$UNIXFLAVOR:$HOME/software:$SUPRA_SEARCH_PATH
 dnl-----------------------------------------------------------------------
 
 USE_IO_INFO="true"
-builtin(include, config/tx_fciowrappers.m4)
-# CPPF90_FLAGS="$FPPFLAGS $CPPFLAGS"
+ac_use_fortran_hdf5="yes"
+builtin(include, config/tx_hdf5.m4)
+builtin(include, config/tx_netcdf.m4)
 CPPF90_FLAGS="$CPP_HAVE_MPI $FLUSH_MACRO $FPPFLAGS"
 AC_SUBST(CPPF90_FLAGS)
 dnl ######################################################################
