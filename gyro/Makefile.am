@@ -26,7 +26,7 @@ dist_data_DATA = CHANGES
 GACODE_ROOT=$(abs_top_builddir)
 
 LMATH=@LAPACK_LIBS@ @BLAS_LIBS@ @Z_LIBS@
-IOLIBS=@FCIOWRAPPERS_ALIBS@ @HDF5_ALIBS@ @NETCDF_ALIBS@ @Z_LIBS@
+IOLIBS=@HDF5_ALIBS@ @NETCDF_ALIBS@ @Z_LIBS@
 
 libgacodegyro_la_SOURCES =
 libgacodegyro_la_LIBADD = \
@@ -39,6 +39,7 @@ libgacodegyro_la_LIBADD = \
 	$(top_builddir)/shared/EXPRO/libgacodeexpro.la \
 	$(top_builddir)/shared/UMFPACK/libgacodeumfpack.la \
 	$(top_builddir)/gyro/GKEIGEN/libgacodegkeigen.la \
+	$(top_builddir)/shared/vshdf5/libvshdf5.la \
 	$(top_builddir)/gyro/vshdf5/libgyro_vshdf5.la
 
 
@@ -57,3 +58,4 @@ link-data-local:
 	fi
 
 MAINTAINERCLEANFILES    = Makefile.in 
+CLEANFILES = gyro *.la *.o
