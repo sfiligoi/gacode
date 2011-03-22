@@ -12,12 +12,12 @@ MAKE = make
 
 # Compilers and flags
 
-FC	= mpif90 -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -g 
+FC	= mpif90 -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -g -Wp,-D__MPI
 F77	= mpif90 -g 
 
 FMATH	= -fdefault-real-8
 FOPT	= -O3
-FDEBUG	= -Wall -fbacktrace -fbounds-check -O -Wextra
+FDEBUG	= -Wall -fbacktrace -fbounds-check -O0 -Wextra -finit-real=nan -Wunderflow -ffpe-trap=invalid,zero,overflow
 FBOUND	= -Wall -fbounds-check
 FPROF	= 
 
@@ -41,7 +41,7 @@ HDF5_LIBS = -L$(HOME)/software/hdf5-par/lib -lhdf5_hl_f90cstub -lhdf5_hl_fortran
 #HDF5_LIBS = -L$(SCRATCH)/volatile-gnu/hdf5/lib -lhdf5_fortran -lhdf5
 #HDF5_INC =  -I$(SCRATCH)/volatile-gnu/hdf5/include
 HDF5_INC =  -I$(HOME)/software/hdf5-par/include -I$(HOME)/software/hdf5-par/include/fortran
-VHDF5_MAKECMD=vshdf5
+VSHDF5_MAKECMD=vshdf5
 
 # Archive
 
