@@ -33,6 +33,6 @@ gyro_vshdf5_dummy: $(DUM_OBJECTS)
 	$(FC) $(FMATH) $(FFLAGS) $(VSHDF5_INC) $(HDF5_INC) $(VSHDF5_INC) -c $<
 
 clean:  
-	rm -f *.o $(LLIB).a
+	rm -f *.o *.a
 
 include ${GACODE_ROOT}/gyro/install/make.ext.${GACODE_PLATFORM}
