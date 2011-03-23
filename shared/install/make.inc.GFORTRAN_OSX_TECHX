@@ -12,7 +12,7 @@ MAKE = make
 
 # Compilers and flags
 
-FC	= mpif90 -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -g -Wp,-D__MPI
+FC	= mpif90 -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -g 
 F77	= mpif90 -g 
 
 FMATH	= -fdefault-real-8
@@ -37,12 +37,18 @@ NETCDF_INC =$(HOME)/software/netcdf/include
 
 # OPTIONAL: HDF5 (for vshdf5)
 
-HDF5_LIBS = -L$(HOME)/software/hdf5-par/lib -lhdf5_hl_f90cstub -lhdf5_hl_fortran -lhdf5_hl -lhdf5_f90cstub -lhdf5_fortran -lhdf5
+#HDF5_LIBS = -L$(HOME)/software/hdf5-par/lib -lhdf5_hl_f90cstub -lhdf5_hl_fortran -lhdf5_hl -lhdf5_f90cstub -lhdf5_fortran -lhdf5
+HDF5_LIBS = $(HOME)/software/hdf5-par/lib/libhdf5_hl_f90cstub.a \
+  $(HOME)/software/hdf5-par/lib/libhdf5_hl_fortran.a \
+  $(HOME)/software/hdf5-par/lib/libhdf5_hl.a \
+  $(HOME)/software/hdf5-par/lib/libhdf5_f90cstub.a \
+  $(HOME)/software/hdf5-par/lib/libhdf5_fortran.a \
+  $(HOME)/software/hdf5-par/lib/libhdf5.a
 #HDF5_LIBS = -L$(SCRATCH)/volatile-gnu/hdf5/lib -lhdf5_fortran -lhdf5
 #HDF5_INC =  -I$(SCRATCH)/volatile-gnu/hdf5/include
 HDF5_INC =  -I$(HOME)/software/hdf5-par/include -I$(HOME)/software/hdf5-par/include/fortran
 VSHDF5_MAKECMD=vshdf5
-
+MPI_FLAG=-Wp,-D__MPI
 # Archive
 
 ARCH = ar cr

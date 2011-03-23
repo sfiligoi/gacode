@@ -23,7 +23,7 @@ vshdf5_dummy: dummy.o
 	$(FC) $(FMATH) $(FFLAGS) $(HDF5_INC) -c $<
 
 .F90.o :
-	$(FC) $(FMATH) $(FFLAGS) $(HDF5_INC) -c $<
+	$(FC) $(FMATH) $(FFLAGS) $(MPI_FLAG) $(HDF5_INC) -c $<
 
 clean:
-	rm -f *.o $(LLIB).a
+	rm -f *.o *.a

@@ -37,5 +37,6 @@ HDF5_LIBS = -L/contrib/hdf5-par/lib -lhdf5_fortran -lhdf5_f90cstub -lhdf5 -lz
 HDF5_INC = -I/contrib/hdf5-par/include/fortran
 VSHDF5_MAKECMD=vshdf5
 VSHDF5_ALLLIBS= ../vshdf5/libgyro_vshdf5.a ../../shared/vshdf5/libvshdf5.a $(HDF5LIBS)
+MPI_FLAG=-Wp,-D__MPI
 
 
