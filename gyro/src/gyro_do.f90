@@ -147,6 +147,7 @@ subroutine gyro_do(skipinit)
   ! Generate geometry-dependent factors using model or
   ! Miller equilibrium:
   call make_geometry_arrays
+  if (iohdf5out == 1) call write_hdf5_data(trim(path)//'gyro_data.h5',1)
   !
   ! Write simulation-grid profiles:
   call write_profile_sim(trim(path)//'profile_sim.out',1)
@@ -285,7 +286,6 @@ subroutine gyro_do(skipinit)
   ! Large data dump for vugyro
   !
   call write_profile_vugyro(trim(path)//'profile_vugyro.out',1)
-  if (iohdf5out == 1) call write_hdf5_data(trim(path)//'gyro_data.h5',1)
   !------------------------------------------------
 
   !------------------------------------------------------------
