@@ -939,8 +939,6 @@ subroutine write_hdf5_fine_timedata(action)
 
        ! For ease of use, have a single data set that has R,Z. 
        allocate(buffer(2,0:nfine,n_x,1))
-       WRITE(*,*) shape(buffer)
-       WRITE(*,*) shape(Rf)
        buffer(1,0:nfine-1,:,1) = Rf(:,:)
        buffer(2,0:nfine-1,:,1) = Zf(:,:)
        buffer(1,nfine,:,1) = buffer(1,0,:,1)
