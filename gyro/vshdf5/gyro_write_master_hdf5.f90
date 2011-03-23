@@ -939,8 +939,12 @@ subroutine write_hdf5_fine_timedata(action)
 
        ! For ease of use, have a single data set that has R,Z. 
        allocate(buffer(2,0:nfine,n_x,1))
-       buffer(1,:,:,1)= Rf(:,:)
-       buffer(2,:,:,1)= Zf(:,:)
+       WRITE(*,*) shape(buffer)
+       WRITE(*,*) shape(Rf)
+       buffer(1,0:nfine-1,:,1) = Rf(:,:)
+       buffer(2,0:nfine-1,:,1) = Zf(:,:)
+       buffer(1,nfine,:,1) = buffer(1,0,:,1)
+       buffer(2,nfine,:,1) = buffer(2,0,:,1)
        h5in%units="m"
        h5in%mesh="mesh-structured"
        call dump_h5(grdfine,'cartMesh',buffer(:,:,:,1),h5in,h5err)
