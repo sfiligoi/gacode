@@ -76,6 +76,7 @@ OBJECTS = gyro_globals.o \
           gyro_mpi_grid.o \
           gyro_memory_usage.o \
           gyro_nonlinear_flux.o \
+          gyro_nonlinear_transfer.o \
           gyro_omegas.o \
           gyro_profile_init.o \
           gyro_radial_operators.o \
@@ -129,7 +130,6 @@ OBJECTS = gyro_globals.o \
 	  make_poissonaperp_matrix.o \
           make_nl.o \
           get_nonlinear_advance.o \
-          get_nonlinear_transfer.o \
           get_ampere_coll.o \
           get_gyro_h.o \
 	  get_gyro_h_aperp.o \

@@ -963,8 +963,9 @@ module gyro_globals
   real, dimension(1) :: phi_squared_QL_n
   real, dimension(3) :: g_squared_QL_n
   !
-  real, dimension(:), allocatable :: Tr_p
-  real, dimension(:), allocatable :: Eng_p
+  ! Nonlinear transfer and turbulent energy spectra
+  !
+  real, dimension(:,:), allocatable :: nl_transfer
   !
   real, dimension(:,:,:,:), allocatable :: diff_vec
   real, dimension(:,:,:,:), allocatable :: gbflux_vec
