@@ -1,5 +1,5 @@
 !-----------------------------------------------------
-! make_phase_space.f90
+! gyro_set_phase_space.f90
 !
 ! PURPOSE:
 !  Combine the results of make_energy_grid and 
@@ -9,7 +9,7 @@
 !  Also, print various weights if verbose = 1.
 !-------------------------------------------------------
 
-subroutine make_phase_space(datafile,io)
+subroutine gyro_set_phase_space(datafile,io)
 
   use gyro_globals
   use math_constants
@@ -79,4 +79,4 @@ subroutine make_phase_space(datafile,io)
 
   endif
 
-end subroutine make_phase_space
+end subroutine gyro_set_phase_space

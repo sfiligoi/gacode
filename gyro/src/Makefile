@@ -86,6 +86,7 @@ OBJECTS = gyro_globals.o \
           gyro_rhs_total.o \
           gyro_select_methods.o \
           gyro_set_blend_arrays.o \
+          gyro_set_phase_space.o \
           gyro_set_pointers.o \
           gyro_set_pointer_dim.o \
           gyro_tau_derivative.o \
@@ -116,7 +117,6 @@ OBJECTS = gyro_globals.o \
           make_theta_grid.o \
           make_geometry_arrays.o \
           make_gyro.o \
-          make_phase_space.o \
           make_initial_h.o \
           make_implicit_advect.o \
           make_electron_current.o \
@@ -160,7 +160,6 @@ OBJECTS = gyro_globals.o \
           write_freq.o \
           write_h.o \
           write_efficiency.o \
-          write_profile_sim.o \
           write_profile_vugyro.o \
           write_timing.o \
           write_restart.o \

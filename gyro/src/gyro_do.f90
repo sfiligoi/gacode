@@ -142,15 +142,12 @@ subroutine gyro_do(skipinit)
   call gyro_banana_operators
   !
   ! Total velocity-space-tau weights.
-  call make_phase_space(trim(path)//'phase_space.out',1)
+  call gyro_set_phase_space(trim(path)//'out.gyro.phase_space',1)
   !
   ! Generate geometry-dependent factors using model or
   ! Miller equilibrium:
   call make_geometry_arrays
   if (iohdf5out == 1) call write_hdf5_data(trim(path)//'gyro_data.h5',1)
-  !
-  ! Write simulation-grid profiles:
-  call write_profile_sim(trim(path)//'profile_sim.out',1)
   !
   ! Deallocate GEO
   call GEO_alloc(0)

@@ -51,21 +51,6 @@
 !            energy(n_energy) = energy_max.
 !
 !   The weight is just 1-s0.
-! 
-!  Method 2:
-!
-!   The integral is done by making a linear extrapolation
-!   of f out to infinity:
-!
-!                   infty
-!             2      /          -t
-!         --------   | sqrt(t) e   (a + b t) dt
-!         sqrt(pi)   /
-!                  e_max 
-!    
-!  where a     = (e_n*f_(n-1)-e_(n-1)*f_n)/(e_n-e_(n-1))
-!        b     = (f_n-f_(n-1))/(e_n-e_(n-1))
-!        e_max = e_n.
 !---------------------------------------------------------
 
 subroutine energy_integral(n_energy,energy_max,n_kinetic,energy,w_energy)
