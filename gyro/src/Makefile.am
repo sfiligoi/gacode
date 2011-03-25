@@ -45,16 +45,6 @@ theDoNlfftP=do_nlfft_p.stub.f90
 theMakeNl=make_nl.f90
 endif
 
-if HAVE_LIBSCI
-theDoNlfftMatch=do_nlfft_match.libsci.f90
-theDoNlfftP=do_nlfft_p.libsci.f90
-theMakeNl=make_nl.libsci.f90
-else
-theDoNlfftMatch=do_nlfft_match.stub.f90
-theDoNlfftP=do_nlfft_p.stub.f90
-theMakeNl=make_nl.f90
-endif
-
 if HAVE_ESSL
 theDoNlfftMatch=do_nlfft_match.essl.f90
 theDoNlfftP=do_nlfft_p.essl.f90
@@ -168,7 +158,6 @@ libgacodegyro_SRC_la_SOURCES = \
 	make_theta_grid.f90 \
 	make_geometry_arrays.f90 \
 	make_gyro.f90 \
-	make_phase_space.f90 \
 	make_initial_h.f90 \
 	make_implicit_advect.f90 \
 	make_electron_current.f90 \
@@ -212,7 +201,6 @@ libgacodegyro_SRC_la_SOURCES = \
   write_banana_operators.f90 \
 	write_h.f90 \
 	write_efficiency.f90 \
-	write_profile_sim.f90 \
 	write_profile_vugyro.f90 \
 	write_timing.f90 \
 	$(theWriteRestart) \
@@ -236,6 +224,7 @@ libgacodegyro_SRC_la_SOURCES = \
   gyro_mpi_grid.f90 \
   gyro_set_pointers.f90 \
   gyro_timestep_error.f90 \
+  gyro_set_phase_space.f90 \
   gyro_set_pointer_dim.f90 \
   gyro_set_blend_arrays.f90 \
 	$(HDF5IO_FILES) \
