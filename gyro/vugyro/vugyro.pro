@@ -33,8 +33,6 @@ pro vugyro, _EXTRA=extra
     diff_QL_n, $
     phi_squared_QL_n, $
     g_squared_QL_n, $
-    Tr_np, $
-    Eng_np, $ 
     diff_ne_exp, $
     diff_to_flow_e1, $
     diff_to_flow_e2, $
@@ -75,14 +73,13 @@ pro vugyro, _EXTRA=extra
     exists_mom_e, $
     exists_mom_n, $
     exists_mom_v, $
-    exists_nonlinear_transfer_n, $
+    exists_nl_transfer, $
     exists_omega, $
     exists_phi_squared_QL_n, $
     exists_profile, $
     exists_source, $
     exists_time, $
     exists_transport_ne_te_ti, $
-    exists_turbulent_energy_n, $
     exists_u, $
     exists_units, $
     exists_velocity, $
@@ -158,6 +155,7 @@ pro vugyro, _EXTRA=extra
     n_nLevels, $
     nonlinear_flag, $
     nonlinear_transfer_wid, $
+    nl_transfer, $
     n_pass, $
     n_profile_label, $
     n_r, $
