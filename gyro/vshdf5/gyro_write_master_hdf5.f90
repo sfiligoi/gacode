@@ -488,13 +488,9 @@ subroutine write_hdf5_timedata(action)
      endif
 
      if (nonlinear_transfer_flag == 1) then
-        call write_distributed_real_h5('nonlinear_transfer_n',dumpGid,&
-             size(Tr_p),&
-             Tr_p,&
-             h5in,h5err)
-        call write_distributed_real_h5('turbulent_energy_n',dumpGid,&
-             size(Eng_p),&
-             Eng_p,&
+        call write_distributed_real_h5('out.gyro.nl_transfer',dumpGid,&
+             size(nl_transfer),&
+             nl_transfer,&
              h5in,h5err)
      endif
 

@@ -159,10 +159,10 @@ subroutine gyro_fulladvance
 
      if (n_substep == 0 .and. nonlinear_transfer_flag == 1) then
 
-        RHS(:,:,:,:) = (0.0,0.0)
+        rhs(:,:,:,:) = (0.0,0.0)
 
         call get_nonlinear_advance
-        call get_nonlinear_transfer
+        call gyro_nonlinear_transfer
 
      endif
 

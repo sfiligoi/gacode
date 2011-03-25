@@ -144,8 +144,7 @@ subroutine gyro_alloc_big(flag)
         allocate(gbflux_vec(n_kinetic,n_field,p_moment,(nstep/time_skip)+1))
      endif
 
-     allocate(Tr_p(n_x))
-     allocate(Eng_p(n_x))
+     allocate(nl_transfer(n_x,2))
 
      allocate(time_error(n_kinetic))
      allocate(w_time(time_skip))
@@ -243,8 +242,7 @@ subroutine gyro_alloc_big(flag)
      if (allocated(gbflux_trapped)) deallocate(gbflux_trapped)
      if (allocated(gbflux_n)) deallocate(gbflux_n)
 
-     deallocate(Tr_p)
-     deallocate(Eng_p)
+     deallocate(nl_transfer)
 
      if (allocated(diff_vec)) deallocate(diff_vec)
      if (allocated(gbflux_vec)) deallocate(gbflux_vec)
