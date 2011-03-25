@@ -255,7 +255,7 @@ subroutine write_hdf5_timedata(action)
   character(60) :: description
   character(64) :: step_name, tempVarName
   character(128) :: dumpfile
-  integer(HID_T) :: dumpGid,dumpFid,gid3D,fid3D,gridGid,grdcoarse
+  integer(HID_T) :: dumpGid,dumpFid,gid3D,fid3D
   type(hdf5InOpts) :: h5in
   type(hdf5ErrorType) :: h5err
   integer :: number_label
@@ -329,7 +329,7 @@ subroutine write_hdf5_timedata(action)
      !SriV:  This needs to be a dump of phi PLUS both parallel
      ! and perp vector potential
      h5in%units="phi units"
-     h5in%mesh="/grid/cartMesh"
+     h5in%mesh="/cartMesh"
      write(*,*) "writing phi"
      call write_distributed_complex_h5("phi",&
           dumpGid,gid3D,&
@@ -343,7 +343,7 @@ subroutine write_hdf5_timedata(action)
     if (plot_n_flag == 1) then
      ! DENSITY
      h5in%units=" "
-     h5in%mesh="/grid/cartMesh"
+     h5in%mesh="/cartMesh"
      call write_distributed_complex_h5("density",&
           dumpGid,gid3D,&
            n_theta_plot*n_x*n_kinetic,&
@@ -356,7 +356,7 @@ subroutine write_hdf5_timedata(action)
   if (plot_e_flag == 1) then
      ! ENERGY
      h5in%units="energy units"
-     h5in%mesh="/grid/cartMesh"
+     h5in%mesh="/cartMesh"
      call write_distributed_complex_h5("energy",&
           dumpGid,gid3D,&
            n_theta_plot*n_x*n_kinetic,&
@@ -401,6 +401,7 @@ subroutine write_hdf5_timedata(action)
   call proc_time(cp1)
   !Assume gyro_write_master.f90 has calculated this: call get_field_spectrum
   h5in%units="m^-2?"
+  h5in%mesh=' '
   call write_distributed_real_h5("kxkyspec",dumpGid,&
        size(kxkyspec),&
        kxkyspec,&
@@ -409,6 +410,7 @@ subroutine write_hdf5_timedata(action)
 
   if (i_proc == 0) then
      h5in%units="m^-2?"
+     h5in%mesh=" "
      call dump_h5(dumpGid,'k_perp_squared',k_perp_squared,h5in,h5err)
   endif
 
@@ -567,6 +569,7 @@ subroutine write_hdf5_timedata(action)
   ! Dump restart parameters
   !
   if (i_proc == 0) then
+     h5in%mesh=' '
      call dump_h5(dumpGid,'data_step',data_step,h5in,h5err)
      call dump_h5(dumpGid,'t_current',t_current,h5in,h5err)
      call dump_h5(dumpGid,'n_proc',n_proc,h5in,h5err)
@@ -655,11 +658,10 @@ subroutine write_hdf5_timedata(action)
        ! Dump the coarse meshes
        !---------------------------------------- 
 
-       call make_group(dumpFid,"grid", grdcoarse,"RZ grid for course mesh",h5err)
-       call dump_h5(grdcoarse,'R',Rc,h5in,h5err)
-       call dump_h5(grdcoarse,'Z',Zc,h5in,h5err)
-       call dump_h5(grdcoarse,'zeta_offset',zeta_offset,h5in,h5err)
-       call dump_h5(grdcoarse,'alpha',alpha_phi,h5in,h5err)
+       call dump_h5(dumpGid,'R',Rc,h5in,h5err)
+       call dump_h5(dumpGid,'Z',Zc,h5in,h5err)
+       call dump_h5(dumpGid,'zeta_offset',zeta_offset,h5in,h5err)
+       call dump_h5(dumpGid,'alpha',alpha_phi,h5in,h5err)
 
        ! Here we do not repeat the points since this is the grid
        ! that will be used for the mode plots on thete E [0,2 pi)
@@ -668,36 +670,28 @@ subroutine write_hdf5_timedata(action)
        buffer(2,:,:,1)= Zc(0:ncoarse-1,:)
        h5in%units="m"
        h5in%mesh="mesh-structured"
-       call dump_h5(grdcoarse,'cartMesh',buffer(:,:,:,1),h5in,h5err)
-       h5in%mesh=""
+       call dump_h5(dumpGid,'cartMesh',buffer(:,:,:,1),h5in,h5err)
+       h5in%mesh=" "
        deallocate(buffer)
-       call close_group("grid",grdcoarse,h5err)
 
        !----------------------------------------
        ! Dump the coarse mesh(es) in 3D
        !---------------------------------------- 
-!SEK - still defining
-!       call make_mesh_group(fid3d, gridGid,h5in,"grid", "structured",&
-!              "R","Z","phi","cylindrical","cylGrid",h5err)
-!       call make_mesh_group(fid3d, gridGid,h5in,"grid", "structured",&
-!              "R","Z","phi"," ","cylGrid",h5err)
-
        if (write_threed) then
-         call make_group(fid3d,"grid", gridGid,"All of the various grids",h5err)
-         call dump_h5(gridGid,'R',Rc,h5in,h5err)
-         call dump_h5(gridGid,'Z',Zc,h5in,h5err)
-         call dump_h5(gridGid,'phi',zeta_phi,h5in,h5err)
-         call dump_h5(gridGid,'alpha',alpha_phi,h5in,h5err)
+         call dump_h5(gid3d,'R',Rc,h5in,h5err)
+         call dump_h5(gid3d,'Z',Zc,h5in,h5err)
+         call dump_h5(gid3d,'torAngle',zeta_phi,h5in,h5err)
+         call dump_h5(gid3d,'alpha',alpha_phi,h5in,h5err)
 
-         allocate(buffer(3,0:ncoarse,n_x,n_alpha_plot))
+         allocate(buffer(3,ncoarse+1,n_x,n_alpha_plot))
          do iphi=1,n_alpha_plot
            buffer(1,:,:,iphi)= Rc(:,:)*COS(zeta_phi(iphi))
            buffer(2,:,:,iphi)=-Rc(:,:)*SIN(zeta_phi(iphi))
            buffer(3,:,:,iphi)= Zc(:,:)
          enddo
+
          h5in%units="m"; h5in%mesh="mesh-structured"
-         call dump_h5(gridGid,'cartMesh',buffer,h5in,h5err)
-         call close_group("grid",gridGid,h5err)
+         call dump_h5(gid3d,'cartMesh',buffer,h5in,h5err)
          deallocate(buffer)
       endif
 
@@ -751,7 +745,7 @@ subroutine write_hdf5_fine_timedata(action)
   character(60) :: description
   character(64) :: step_name, tempVarName
   character(128) :: dumpfile
-  integer(HID_T) :: gridGid,fidfine,gidfine,grdfine,grdcoarse
+  integer(HID_T) :: fidfine,gidfine
   integer :: n_fine
   type(hdf5InOpts) :: h5in
   type(hdf5ErrorType) :: h5err
@@ -820,7 +814,7 @@ subroutine write_hdf5_fine_timedata(action)
   if (plot_n_flag == 1) then
      ! DENSITY
      h5in%units=" "
-     h5in%mesh="/grid/cartMesh"
+     h5in%mesh="cartMesh"
      call write_distributed_complex_h5("density",&
         gidfine,gidfine,&
          n_fine*n_x*n_kinetic,&
@@ -833,7 +827,7 @@ subroutine write_hdf5_fine_timedata(action)
   if (plot_e_flag == 1) then
      ! ENERGY
      h5in%units="energy units"
-     h5in%mesh="/grid/cartMesh"
+     h5in%mesh="cartMesh"
      call write_distributed_complex_h5("energy",&
          gidfine,gidfine,&
          n_fine*n_x*n_kinetic,&
@@ -931,11 +925,10 @@ subroutine write_hdf5_fine_timedata(action)
        ! Dump the fine meshes
        !---------------------------------------- 
 
-       call make_group(fidfine,"grid", grdfine,"RZ grid for fine mesh",h5err)
-       call dump_h5(grdfine,'R',Rf,h5in,h5err)
-       call dump_h5(grdfine,'Z',Zf,h5in,h5err)
-       call dump_h5(grdfine,'zeta_offset',zeta_offset,h5in,h5err)
-       call dump_h5(grdfine,'alpha',alpha_phi_fine,h5in,h5err)
+       call dump_h5(gidfine,'R',Rf,h5in,h5err)
+       call dump_h5(gidfine,'Z',Zf,h5in,h5err)
+       call dump_h5(gidfine,'zeta_offset',zeta_offset,h5in,h5err)
+       call dump_h5(gidfine,'alpha',alpha_phi_fine,h5in,h5err)
 
        ! For ease of use, have a single data set that has R,Z. 
        allocate(buffer(2,1:nfine,n_x,1))
@@ -943,10 +936,9 @@ subroutine write_hdf5_fine_timedata(action)
        buffer(2,:,:,1) = Zf(:,:)
        h5in%units="m"
        h5in%mesh="mesh-structured"
-       call dump_h5(grdfine,'cartMesh',buffer(:,:,:,1),h5in,h5err)
+       call dump_h5(gidfine,'cartMesh',buffer(:,:,:,1),h5in,h5err)
        h5in%mesh=""
        deallocate(buffer)
-       call close_group("grid",grdfine,h5err)
 
        !----------------------------------------
        ! 
@@ -976,7 +968,7 @@ subroutine write_hdf5_restart
   character(60) :: description
   character(64) :: step_name, tempVarName
   character(128) :: dumpfile
-  integer(HID_T) :: dumpGid,dumpFid,fid3D,gridGid
+  integer(HID_T) :: dumpGid,dumpFid,fid3D
   type(hdf5ErrorType) :: errval
   character(4) :: iname
   type(hdf5InOpts) :: h5in
@@ -1010,6 +1002,7 @@ subroutine write_hdf5_restart
      description="GYRO restart file"
      call open_newh5file(dumpfile,dumpFid,description,dumpGid,h5in,h5err)
 
+     h5in%mesh=' '
      call write_attribute(dumpGid,"data_step",data_step,errval)
      call write_attribute(dumpGid,"n_proc",n_proc,errval)
      call write_attribute(dumpGid,"i_restart",i_restart,errval)
