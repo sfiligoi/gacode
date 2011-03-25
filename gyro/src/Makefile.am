@@ -170,7 +170,7 @@ libgacodegyro_SRC_la_SOURCES = \
 	make_poissonaperp_matrix.f90 \
 	$(theMakeNl) \
 	get_nonlinear_advance.f90 \
-	get_nonlinear_transfer.f90 \
+	gyro_nonlinear_transfer.f90 \
 	get_ampere_coll.f90 \
 	get_gyro_h.f90 \
 	get_gyro_h_aperp.f90 \
