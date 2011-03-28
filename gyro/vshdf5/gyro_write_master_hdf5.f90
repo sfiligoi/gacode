@@ -680,11 +680,11 @@ subroutine write_hdf5_timedata(action)
          call dump_h5(gid3d,'torAngle',zeta_phi,h5in,h5err)
          call dump_h5(gid3d,'alpha',alpha_phi,h5in,h5err)
 
-         allocate(buffer(3,ncoarse+1,n_x,n_alpha_plot))
+         allocate(buffer(ncoarse+1,n_x,n_alpha_plot,3))
          do iphi=1,n_alpha_plot
-           buffer(1,:,:,iphi)= Rc(:,:)*COS(zeta_phi(iphi))
-           buffer(2,:,:,iphi)=-Rc(:,:)*SIN(zeta_phi(iphi))
-           buffer(3,:,:,iphi)= Zc(:,:)
+           buffer(:,:,iphi,1)= Rc(:,:)*COS(zeta_phi(iphi))
+           buffer(:,:,iphi,2)=-Rc(:,:)*SIN(zeta_phi(iphi))
+           buffer(:,:,iphi,3)= Zc(:,:)
          enddo
 
          h5in%units="m"; h5in%mesh="mesh-structured"
@@ -929,7 +929,7 @@ subroutine write_hdf5_fine_timedata(action)
        call dump_h5(gidfine,'alpha',alpha_phi_fine,h5in,h5err)
 
        ! For ease of use, have a single data set that has R,Z. 
-       allocate(bufferFineMesh(1:nfine,n_x,2))
+       allocate(bufferFineMesh(nfine,n_x,2))
        bufferFineMesh(:,:,1) = Rf(:,:)
        bufferFineMesh(:,:,2) = Zf(:,:)
        h5in%units="m"
