@@ -45,7 +45,7 @@ subroutine write_hdf5_data(datafile,action)
   h5in%typeConvert=.true.
   h5in%wrd_type=H5T_NATIVE_REAL
   !h5in%wrd_type=H5T_NATIVE_DOUBLE
-  h5in%doTranspose=.false.
+  h5in%doTranspose=.true.
   !h5in%vsTime=intime
   h5in%wrVsTime=.false.
   h5in%verbose=.true.
@@ -281,7 +281,7 @@ subroutine write_hdf5_timedata(action)
     h5in%wrd_type=H5T_NATIVE_REAL
     h5in%typeConvert=.true.
     !h5in%wrd_type=H5T_NATIVE_DOUBLE
-    h5in%doTranspose=.false.
+    h5in%doTranspose=.true.
     h5in%verbose=.true.
     h5in%debug=.false.
     h5in%wrVsTime=.true.
@@ -589,6 +589,7 @@ subroutine write_hdf5_timedata(action)
       !------------------------------------------
        real, dimension(:,:), allocatable :: Rc,Zc,Rf,Zf
        real, dimension(:,:,:,:), allocatable :: buffer
+       real, dimension(:,:,:), allocatable :: bufferMesh
        real :: theta, rmajc, zmagc, kappac, deltac, zetac, r_c, dr,xdc
        integer :: iphi, ix, iy, j, ncoarse
 
@@ -661,14 +662,14 @@ subroutine write_hdf5_timedata(action)
 
        ! Here we do not repeat the points since this is the grid
        ! that will be used for the mode plots on thete E [0,2 pi)
-       allocate(buffer(2,ncoarse,n_x,1))
-       buffer(1,:,:,1)= Rc(0:ncoarse-1,:)
-       buffer(2,:,:,1)= Zc(0:ncoarse-1,:)
+       allocate(bufferMesh(0:ncoarse,n_x,2))
+       bufferMesh(:,:,1)= Rc
+       bufferMesh(:,:,2)= Zc
        h5in%units="m"
        h5in%mesh="mesh-structured"
-       call dump_h5(dumpGid,'cartMesh',buffer(:,:,:,1),h5in,h5err)
+       call dump_h5(dumpGid,'cartMesh',bufferMesh(:,:,:),h5in,h5err)
        h5in%mesh=" "
-       deallocate(buffer)
+       deallocate(bufferMesh)
 
        !----------------------------------------
        ! Dump the coarse mesh(es) in 3D
@@ -774,7 +775,7 @@ subroutine write_hdf5_fine_timedata(action)
     h5in%wrd_type=H5T_NATIVE_REAL
     h5in%typeConvert=.true.
     !h5in%wrd_type=H5T_NATIVE_DOUBLE
-    h5in%doTranspose=.false.
+    h5in%doTranspose=.true.
     h5in%verbose=.true.
     h5in%debug=.false.
     h5in%wrVsTime=.true.
@@ -810,7 +811,7 @@ subroutine write_hdf5_fine_timedata(action)
   if (plot_n_flag == 1) then
      ! DENSITY
      h5in%units=" "
-     h5in%mesh="cartMesh"
+     h5in%mesh="/cartMesh"
      call write_distributed_complex_h5("density",&
         gidfine,gidfine,&
          n_fine*n_x*n_kinetic,&
@@ -823,7 +824,7 @@ subroutine write_hdf5_fine_timedata(action)
   if (plot_e_flag == 1) then
      ! ENERGY
      h5in%units="energy units"
-     h5in%mesh="cartMesh"
+     h5in%mesh="/cartMesh"
      call write_distributed_complex_h5("energy",&
          gidfine,gidfine,&
          n_fine*n_x*n_kinetic,&
@@ -836,6 +837,7 @@ subroutine write_hdf5_fine_timedata(action)
   if (plot_v_flag == 1) then
      ! PARALLEL VELOCITY
      h5in%units="vpar units"
+     h5in%mesh="/cartMesh"
      call write_distributed_complex_h5("v_par",&
         gidfine,gidfine,&
          n_fine*n_x*n_kinetic,&
@@ -863,7 +865,7 @@ subroutine write_hdf5_fine_timedata(action)
       !  This should be generalized to include the other GEO options
       !------------------------------------------
        real, dimension(:,:), allocatable :: Rc,Zc,Rf,Zf
-       real, dimension(:,:,:,:), allocatable :: buffer
+       real, dimension(:,:,:), allocatable :: bufferFineMesh
        real :: theta, rmajc, zmagc, kappac, deltac, zetac, r_c, dr,xdc
        real :: zeta_fine
        integer :: iphi, ix, iy, j, ncoarse, nfine
@@ -927,14 +929,14 @@ subroutine write_hdf5_fine_timedata(action)
        call dump_h5(gidfine,'alpha',alpha_phi_fine,h5in,h5err)
 
        ! For ease of use, have a single data set that has R,Z. 
-       allocate(buffer(2,1:nfine,n_x,1))
-       buffer(1,:,:,1) = Rf(:,:)
-       buffer(2,:,:,1) = Zf(:,:)
+       allocate(bufferFineMesh(1:nfine,n_x,2))
+       bufferFineMesh(:,:,1) = Rf(:,:)
+       bufferFineMesh(:,:,2) = Zf(:,:)
        h5in%units="m"
        h5in%mesh="mesh-structured"
-       call dump_h5(gidfine,'cartMesh',buffer(:,:,:,1),h5in,h5err)
+       call dump_h5(gidfine,'cartMesh',bufferFineMesh(:,:,:),h5in,h5err)
        h5in%mesh=""
-       deallocate(buffer)
+       deallocate(bufferFineMesh)
 
        !----------------------------------------
        ! 
@@ -977,7 +979,7 @@ subroutine write_hdf5_restart
     h5in%comm=MPI_COMM_SELF
     h5in%info=MPI_INFO_NULL
     h5in%wrd_type=H5T_NATIVE_DOUBLE
-    h5in%doTranspose=.false.
+    h5in%doTranspose=.true.
     h5in%vsTime=t_current
     h5in%wrVsTime=.true.
     h5in%verbose=.true.
@@ -1248,6 +1250,11 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
             
 
      enddo ! in
+
+      if (i_proc == 0) then
+        write(*,*) shape(buffn)
+        write(*,*) n_n
+      endif
      !-----------------------------------------
      if (i_proc /= 0) return
      !-----------------------------------------
@@ -1255,21 +1262,21 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
      ! Dump each species independently
      !-----------------------------------------
      if (iscoarse) then
-       do ispcs=1,n1
+       do ispcs=1,n3
          WRITE(n_name,fmt='(i3.3)') ispcs
          tempVarName=trim(vname)//"_real_species"//n_name
-         call dump_h5(rGid,trim(tempVarName),real(buffn(ispcs,:,:,:)),h5in,h5err)
+         call dump_h5(rGid,trim(tempVarName),real(buffn(:,:,ispcs,:)),h5in,h5err)
          tempVarName=trim(vname)//"_imag_species"//n_name
-         call dump_h5(rGid,trim(tempVarName),aimag(buffn(ispcs,:,:,:)),h5in,h5err)
+         call dump_h5(rGid,trim(tempVarName),aimag(buffn(:,:,ispcs,:)),h5in,h5err)
        enddo ! in
      else
 !      if (debug_flag == 1) then
-       do ispcs=1,n1
+       do ispcs=1,n3
          WRITE(n_name,fmt='(i3.3)') ispcs
          tempVarName=trim(vname)//"_real_species"//n_name
-         call dump_h5(rGid,trim(tempVarName),real(buffn(ispcs,:,:,:)),h5in,h5err)
+         call dump_h5(rGid,trim(tempVarName),real(buffn(:,:,ispcs,:)),h5in,h5err)
          tempVarName=trim(vname)//"_imag_species"//n_name
-         call dump_h5(rGid,trim(tempVarName),aimag(buffn(ispcs,:,:,:)),h5in,h5err)
+         call dump_h5(rGid,trim(tempVarName),aimag(buffn(:,:,ispcs,:)),h5in,h5err)
        enddo ! in
 !      endif
      endif
