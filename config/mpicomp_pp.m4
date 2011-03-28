@@ -1,0 +1,254 @@
+dnl ######################################################################
+dnl
+dnl File:	mpicomp_pp.m4
+dnl
+dnl Purpose:	Determine where the MPI compilers are.  This can be used
+dnl		for setting the default compiler when one has some
+dnl		reason for believing it should be parallel.
+dnl
+dnl Version:	$Id: mpicomp_pp.m4 3464 2010-04-05 12:42:26Z cary $
+dnl
+dnl Copyright 2001-2010, Tech-X Corporation.  Redistribution allowed provided
+dnl this copyright statement remains intact.
+dnl
+dnl ######################################################################
+
+dnl ######################################################################
+dnl
+dnl Determine the parallel C++ compiler
+dnl
+dnl ######################################################################
+
+if test "$HAS_CXX" != NO; then
+
+  AC_ARG_WITH(MPICXX,
+  	AC_HELP_STRING([--with-MPICXX=<mpi C++ compiler>],
+  	[set the parallel C++ compiler]),
+  	MPICXX="$withval")
+  MPIPATH=/contrib/mpi/bin:/usr/local/mpi/bin
+  if test -n "$MPICXX"; then
+    MPICXXTMP=`echo $MPICXX | sed 's/ .*$//'`
+    MPICXXBASE=`basename $MPICXXTMP`
+    MPICXXDIR=`dirname $MPICXXTMP`
+    MPIPATH="$MPICXXDIR:$PATH:$MPIPATH"
+    AC_PATH_PROGS(ABSMPICXX, $MPICXXBASE, "", $MPIPATH)
+  else
+    MPIPATH="$PATH:$MPIPATH"
+    AC_PATH_PROGS(ABSMPICXX, mpicxx mpic++ mpiCC mpCC_r, "", $MPIPATH)
+    if test -n "$ABSMPICXX"; then
+      MPICXXBASE=`basename $ABSMPICXX`
+      MPICXX=$MPICXXBASE
+    fi
+  fi
+  if test -z "$ABSMPICXX"; then
+    AC_MSG_ERROR(No mpi cxx compiler in $MPIPATH.)
+  fi
+  CXX=$ABSMPICXX
+
+dnl
+dnl Determine the underlying serial C++ compiler
+dnl
+
+  case $MPICXXBASE in
+    mpiCC | mpicxx | mpic++)
+      # echo "Looking for compiler in" $ABSCXX
+      # SERIALCXX=`grep CCCBASE= $ABSCXX | sed 's/^.*=//' | sed 's/\"//g'`
+      MPI_OPTS=`$ABSMPICXX -show`
+      SERIALCXX=`echo $MPI_OPTS | sed 's/ .*$//'`
+      dnl echo SERIALCXX = $SERIALCXX
+      if test -z "$SERIALCXX"; then
+        AC_MSG_ERROR(Unable to determine the real compiler inside of $ABSCXX)
+      fi
+      MPI_LIBDIR=`echo $MPI_OPTS | sed 's/^.*-L//' | sed 's/ .*$//'`
+      dnl MPI_LIBDIR = $MPI_LIBDIR
+      if test "$MPICHG2" = yes; then
+        SERIALCXX=`grep TEST_GC= $SERIALCXX | sed 's/^.*=//' | sed 's/\"//g'`
+      fi
+      ;;
+    mpCC)
+      SERIALCXX=xlC
+      ;;
+    mpCC_r | mpixlcxx_r)
+      SERIALCXX=xlC_r
+      ;;
+    mpiicpc)
+      SERIALCXX=icpc
+      ;;
+    mpipathCC)
+      SERIALCXX=pathCC
+      ;;
+    CC)
+      SERIALCXX=CC
+      ;;
+    *)
+      AC_MSG_ERROR(Unable to determine the serial compiler for $ABSCXX)
+      ;;
+  esac
+
+fi
+
+AC_SUBST(MPICXX)
+AC_SUBST(ABSMPICXX)
+AC_SUBST(MPICXXBASE)
+AC_SUBST(SERIALCXX)
+echo Serial C++ compiler is \`$SERIALCXX\'
+
+
+dnl ######################################################################
+dnl
+dnl Determine the parallel C compiler
+dnl
+dnl ######################################################################
+
+dnl No conditional, as we always determine the C compiler
+
+AC_ARG_WITH(MPICC,
+	AC_HELP_STRING([--with-MPICC=<mpi C++ compiler>],
+	[set the parallel C++ compiler]),
+	MPICC="$withval")
+MPIPATH=/contrib/mpi/bin:/usr/local/mpi/bin
+if test -n "$MPICC"; then
+  MPICCTMP=`echo $MPICC | sed 's/ .*$//'`
+  MPICCBASE=`basename $MPICCTMP`
+  MPICCDIR=`dirname $MPICCTMP`
+  MPIPATH="$MPICCDIR:$PATH:$MPIPATH"
+  AC_PATH_PROGS(ABSMPICC, $MPICCBASE, "", $MPIPATH)
+else
+  MPIPATH="$PATH:$MPIPATH"
+  AC_PATH_PROGS(ABSMPICC, mpicc mpicc mpcc_r, "", $MPIPATH)
+  if test -n "$ABSMPICC"; then
+    MPICCBASE=`basename $ABSMPICC`
+    MPICC=$MPICCBASE
+  fi
+fi
+if test -z "$ABSMPICC"; then
+  AC_MSG_ERROR(No mpi C compiler in $MPIPATH.)
+fi
+CC=$ABSMPICC
+
+dnl
+dnl Determine the underlying serial C compiler
+dnl
+
+case $MPICCBASE in
+  mpicc )
+    # echo "Looking for compiler in" $ABSCC
+    # SERIALCC=`grep CCCBASE= $ABSCC | sed 's/^.*=//' | sed 's/\"//g'`
+    MPI_OPTS=`$ABSMPICC -show`
+    SERIALCC=`echo $MPI_OPTS | sed 's/ .*$//'`
+    dnl echo SERIALCC = $SERIALCC
+    if test -z "$SERIALCC"; then
+      AC_MSG_ERROR(Unable to determine the real compiler inside of $ABSCC)
+    fi
+    MPI_LIBDIR=`echo $MPI_OPTS | sed 's/^.*-L//' | sed 's/ .*$//'`
+    dnl MPI_LIBDIR = $MPI_LIBDIR
+    if test "$MPICHG2" = yes; then
+      SERIALCC=`grep TEST_GC= $SERIALCC | sed 's/^.*=//' | sed 's/\"//g'`
+    fi
+    ;;
+  mpcc)
+    SERIALCC=xlc
+    ;;
+  mpcc_r | mpixlc_r)
+    SERIALCC=xlc_r
+    ;;
+  mpiicc)
+    SERIALCC=icc
+    ;;
+  mpipathcc)
+    SERIALCC=pathcc
+    ;;
+  cc)
+    SERIALCC=cc
+    ;;
+  *)
+    AC_MSG_ERROR(Unable to determine the serial compiler for $ABSCC)
+    ;;
+esac
+
+AC_SUBST(MPICC)
+AC_SUBST(ABSMPICC)
+AC_SUBST(MPICCBASE)
+AC_SUBST(SERIALCC)
+echo Serial C compiler is \`$SERIALCC\'
+
+dnl ######################################################################
+dnl
+dnl f90 mpi compiler
+dnl
+dnl ######################################################################
+
+if test "$HAS_F90" != "NO"; then
+
+  AC_ARG_WITH(MPIF90,
+  	AC_HELP_STRING([--with-MPIF90=<mpi F90 compiler>],
+  	[set the parallel F90 compiler]),
+  	MPIF90="$withval")
+  MPIPATH=/contrib/mpi/bin:/usr/local/mpi/bin:/opt/bin
+  if test -n "$MPIF90"; then
+    MPIF90TMP=`echo $MPIF90 | sed 's/ .*$//'`
+    MPIF90BASE=`basename $MPIF90TMP`
+    MPIF90DIR=`dirname $MPIF90TMP`
+    MPIPATH="$MPIF90DIR:$PATH:$MPIPATH"
+    AC_PATH_PROGS(ABSMPIF90, $MPIF90BASE, "", $MPIPATH)
+  else
+    MPIPATH="$PATH:$MPIPATH"
+    AC_PATH_PROGS(ABSMPIF90, mpif90 mpxlf90 mpif95 mpxlf95, "", $MPIPATH)
+    if test -n "$ABSMPIF90"; then
+      MPIF90BASE=`basename $ABSMPIF90`
+      MPIF90=$MPIF90BASE
+    fi
+  fi
+  if test -z "$ABSMPIF90"; then
+    AC_MSG_ERROR(No mpi f90 compiler in $MPIPATH.)
+  fi
+
+dnl
+dnl Determine the underlying serial F90 compiler
+dnl
+
+  case $MPIF90BASE in
+    mpif90| mpif95)
+      # SERIALF90=`grep FCBASE= $ABSF90 | sed 's/^.*=//' | sed 's/\"//g'`
+      MPI_OPTS=`$ABSMPIF90 -show`
+      SERIALF90=`echo $MPI_OPTS | sed 's/ .*$//'`
+      dnl echo SERIALF90 = $SERIALF90
+      if test -z "$SERIALF90"; then
+        AC_MSG_ERROR(Unable to determine the real compiler inside of $ABSF90)
+      fi
+      MPI_LIBDIR=`echo $MPI_OPTS | sed 's/^.*-L//' | sed 's/ .*$//'`
+      ;;
+    mpxlf90)
+      SERIALF90=xlf90
+      ;;
+    mpxlf90_r)
+      SERIALF90=xlf90_r
+      ;;
+    ftn)
+      SERIALF90=pgf90
+      ;;
+    *)
+      AC_MSG_ERROR(Unable to determine the serial compiler for $ABSF90)
+      ;;
+  esac
+dnl ----------------------------------------------------------------------
+dnl    Write to summary file if defined
+dnl ----------------------------------------------------------------------
+  if test -n "$config_summary_file"; then
+	  if test "$use_mpi" = "true"; then
+	    echo " MPIF90 =$MPIF90 "                    >> $config_summary_file
+	    echo " MPI_DIR=$MPI_DIR"                    >> $config_summary_file
+	    echo " MPI_LIBS=$MPI_LIBS"                  >> $config_summary_file
+	    echo " MPI_INC=$MPI_INC"                    >> $config_summary_file
+	  else
+	    echo " Do not use MPI (default)"            >> $config_summary_file
+	  fi
+	  echo                                          >> $config_summary_file
+  fi
+fi
+
+AC_SUBST(MPIF90)
+AC_SUBST(ABSMPIF90)
+AC_SUBST(MPIF90BASE)
+AC_SUBST(SERIALF90)
+

@@ -53,12 +53,11 @@ subroutine get_nonlinear_advance
   endif
   !--------------------------
 
-
   call proc_time(CPU_NLt_out)
   CPU_NLt = CPU_NLt + (CPU_NLt_out - CPU_NLt_in)
 
   do is=1,n_kinetic
-     call rSSUB(h_M(:,:,:,is),RHS(:,:,:,is))
+     call rSSUB(h_M(:,:,:,is),rhs(:,:,:,is))
   enddo
 
   !-----------------

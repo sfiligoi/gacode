@@ -1,0 +1,48 @@
+
+
+Background
+----------
+
+These are profile format parsers from the FACETS project.
+Contributors include:
+   Scott Kruger 
+   Ammar Hakim
+   Alex Pletzer
+   John Cary
+   Mahmood Miah
+
+Testing
+----------
+To see how they work, execute the relevant shell scripts.
+You can just view the files to see the usage.
+
+Files
+----------
+IterDB Parser:
+      getIterDbData.py
+          front end to the files in fileconvertors.  For ipython
+          use, you might want to import readIterDB
+          Note: This file has the capability of interpolating onto
+            grids from facets pre files.  We did not add the
+            dependencies to enable this type of example, but the
+            code is left in to show how it can be done for other folks.
+      readIterDB.py
+          Main parser
+      iterDBsemanticMap.py
+      iterDBsemanticMap.pyc
+          This maps the iterDB fields into variable names for
+          convenience.
+      iterdb.125730
+          Testing files
+
+EQDSK files:
+      geqdsk.py
+      aeqdsk.py
+          Parsers
+      a118898.03400
+      g118898.03400
+          Testing files
+
+
+Fit files (from Rich Groebner):
+      readPsiFit.py

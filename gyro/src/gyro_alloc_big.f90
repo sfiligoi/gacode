@@ -110,6 +110,11 @@ subroutine gyro_alloc_big(flag)
      endif
 
      allocate(moments_plot(n_theta_plot,n_x,n_kinetic,3))
+     
+     !For synthetic diagnostic
+     if (iohdf5out == 1) then
+        allocate(moments_plot_fine(n_theta_plot*n_theta_mult,n_x,n_kinetic,3))
+     endif
      allocate(moments_zero_plot(n_x,n_kinetic,n_moment))
 
      allocate(kxkyspec(n_x))
@@ -139,8 +144,7 @@ subroutine gyro_alloc_big(flag)
         allocate(gbflux_vec(n_kinetic,n_field,p_moment,(nstep/time_skip)+1))
      endif
 
-     allocate(Tr_p(n_x))
-     allocate(Eng_p(n_x))
+     allocate(nl_transfer(n_x,2))
 
      allocate(time_error(n_kinetic))
      allocate(w_time(time_skip))
@@ -213,6 +217,9 @@ subroutine gyro_alloc_big(flag)
 
      deallocate(moments_plot)
      deallocate(moments_zero_plot)
+     if (iohdf5out == 1) then
+        deallocate(moments_plot_fine)
+     endif
 
      deallocate(kxkyspec)
      deallocate(k_perp_squared)
@@ -235,8 +242,7 @@ subroutine gyro_alloc_big(flag)
      if (allocated(gbflux_trapped)) deallocate(gbflux_trapped)
      if (allocated(gbflux_n)) deallocate(gbflux_n)
 
-     deallocate(Tr_p)
-     deallocate(Eng_p)
+     deallocate(nl_transfer)
 
      if (allocated(diff_vec)) deallocate(diff_vec)
      if (allocated(gbflux_vec)) deallocate(gbflux_vec)

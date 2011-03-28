@@ -72,9 +72,11 @@ OBJECTS = gyro_globals.o \
           gyro_lambda_grid.o \
           gyro_map_experimental_profiles.o \
           gyro_moments_plot.o \
+          gyro_moments_plot_fine.o \
           gyro_mpi_grid.o \
           gyro_memory_usage.o \
           gyro_nonlinear_flux.o \
+          gyro_nonlinear_transfer.o \
           gyro_omegas.o \
           gyro_profile_init.o \
           gyro_radial_operators.o \
@@ -85,6 +87,7 @@ OBJECTS = gyro_globals.o \
           gyro_rhs_total.o \
           gyro_select_methods.o \
           gyro_set_blend_arrays.o \
+          gyro_set_phase_space.o \
           gyro_set_pointers.o \
           gyro_set_pointer_dim.o \
           gyro_tau_derivative.o \
@@ -115,7 +118,6 @@ OBJECTS = gyro_globals.o \
           make_theta_grid.o \
           make_geometry_arrays.o \
           make_gyro.o \
-          make_phase_space.o \
           make_initial_h.o \
           make_implicit_advect.o \
           make_electron_current.o \
@@ -128,7 +130,6 @@ OBJECTS = gyro_globals.o \
 	  make_poissonaperp_matrix.o \
           make_nl.o \
           get_nonlinear_advance.o \
-          get_nonlinear_transfer.o \
           get_ampere_coll.o \
           get_gyro_h.o \
 	  get_gyro_h_aperp.o \
@@ -159,13 +160,14 @@ OBJECTS = gyro_globals.o \
           write_freq.o \
           write_h.o \
           write_efficiency.o \
-          write_profile_sim.o \
           write_profile_vugyro.o \
           write_timing.o \
           write_restart.o \
           write_error.o \
           write_geometry_arrays.o \
           write_matrix_stat.o \
+          gyro_dump_input.o \
+          gyro_dump_interface.o \
           cleanup_mumps.o 
 
 .SUFFIXES : .o .f90 

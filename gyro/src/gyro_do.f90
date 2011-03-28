@@ -86,7 +86,14 @@ subroutine gyro_do(skipinit)
         endif
      endif
   endif
+  if (debug_flag == 1) then
   !----------------------------------------------------------
+  !sv dump the global variables that can be read
+  call gyro_dump_input
+  !sv dump the inteface variables for comparison
+  call gyro_dump_interface
+  endif
+
 
   !------------------------------------------------------------
   ! The order of these routines is critical:
@@ -135,14 +142,12 @@ subroutine gyro_do(skipinit)
   call gyro_banana_operators
   !
   ! Total velocity-space-tau weights.
-  call make_phase_space(trim(path)//'phase_space.out',1)
+  call gyro_set_phase_space(trim(path)//'out.gyro.phase_space',1)
   !
   ! Generate geometry-dependent factors using model or
   ! Miller equilibrium:
   call make_geometry_arrays
-  !
-  ! Write simulation-grid profiles:
-  call write_profile_sim(trim(path)//'profile_sim.out',1)
+  if (iohdf5out == 1) call write_hdf5_data(trim(path)//'gyro_data.h5',1)
   !
   ! Deallocate GEO
   call GEO_alloc(0)
@@ -301,6 +306,8 @@ subroutine gyro_do(skipinit)
   if (restart_method /= 1) then
 
      if (lskipinit == 0) call gyro_write_master(2)
+     if (iohdf5out == 1 .and. lskipinit == 0) call write_hdf5_timedata(2)
+     if (iohdf5out == 1 .and. lskipinit == 0) call write_hdf5_fine_timedata(2)
 
   endif
   !--------------------------------------------
