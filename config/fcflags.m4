@@ -316,7 +316,7 @@ dnl JRC: Not understood.  xlf_r on Intrepid does not this form in uestat?
       *)     FC_OPT_FLAG="-O2 -g" ;;
     esac
     FC_NOOPT_FLAG="-O0"
-    FC_DEBUG_FLAG="-g -fbounds-check -DDEBUG"
+    FC_DEBUG_FLAG="-g -fbounds-check -DDEBUG -finit-real=nan"
     dnl FC_ALWAY_FLAG="-fno-second-underscore"
     dnl FC_ALWAY_FLAG="-ffixed-line-length-132 -fimplicit-none -Wno-tabs"
 dnl no-tabs breaks on Intrepid

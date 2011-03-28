@@ -45,7 +45,7 @@ subroutine write_hdf5_data(datafile,action)
   h5in%typeConvert=.true.
   h5in%wrd_type=H5T_NATIVE_REAL
   !h5in%wrd_type=H5T_NATIVE_DOUBLE
-  h5in%doTranspose=.false.
+  h5in%doTranspose=.true.
   !h5in%vsTime=intime
   h5in%wrVsTime=.false.
   h5in%verbose=.true.
@@ -195,8 +195,23 @@ subroutine write_hdf5_data(datafile,action)
         buffer(11,i,j)=GEO_captheta
 
      enddo ! j
-
+       ! Set up nu for plotting and synthetic diagnostic.
+       ! Note we need theta=-pi and pi so include 0 index
+       do j=0,n_theta_plot
+          theta = -pi+real(j)*pi_2/n_theta_plot
+          if (n_theta_plot == 1) theta = 0.0 ! Test for special case
+          call GEO_interp(theta)
+          nu_coarse(j,i)=GEO_nu
+       enddo
+       do j=1,n_fine
+          theta=theta_fine_start+real(j-1)*theta_fine_angle/       &
+                      real(n_theta_plot*n_theta_mult-1)
+          if (n_fine == 1) theta = 0.0 ! Test for special case
+          call GEO_interp(theta)
+          nu_fine(j,i)=GEO_nu
+       enddo
   enddo ! i
+
 
   call dump_h5(rootid,"nu",      buffer(1,:,:),h5in,h5err)
   call dump_h5(rootid,"gsin",    buffer(2,:,:),h5in,h5err)
@@ -255,7 +270,7 @@ subroutine write_hdf5_timedata(action)
   character(60) :: description
   character(64) :: step_name, tempVarName
   character(128) :: dumpfile
-  integer(HID_T) :: dumpGid,dumpFid,gid3D,fid3D,gridGid,grdcoarse
+  integer(HID_T) :: dumpGid,dumpFid,gid3D,fid3D
   type(hdf5InOpts) :: h5in
   type(hdf5ErrorType) :: h5err
   integer :: number_label
@@ -281,7 +296,7 @@ subroutine write_hdf5_timedata(action)
     h5in%wrd_type=H5T_NATIVE_REAL
     h5in%typeConvert=.true.
     !h5in%wrd_type=H5T_NATIVE_DOUBLE
-    h5in%doTranspose=.false.
+    h5in%doTranspose=.true.
     h5in%verbose=.true.
     h5in%debug=.false.
     h5in%wrVsTime=.true.
@@ -329,7 +344,7 @@ subroutine write_hdf5_timedata(action)
      !SriV:  This needs to be a dump of phi PLUS both parallel
      ! and perp vector potential
      h5in%units="phi units"
-     h5in%mesh="/grid/cartMesh"
+     h5in%mesh="/cartMesh"
      write(*,*) "writing phi"
      call write_distributed_complex_h5("phi",&
           dumpGid,gid3D,&
@@ -343,7 +358,7 @@ subroutine write_hdf5_timedata(action)
     if (plot_n_flag == 1) then
      ! DENSITY
      h5in%units=" "
-     h5in%mesh="/grid/cartMesh"
+     h5in%mesh="/cartMesh"
      call write_distributed_complex_h5("density",&
           dumpGid,gid3D,&
            n_theta_plot*n_x*n_kinetic,&
@@ -356,7 +371,7 @@ subroutine write_hdf5_timedata(action)
   if (plot_e_flag == 1) then
      ! ENERGY
      h5in%units="energy units"
-     h5in%mesh="/grid/cartMesh"
+     h5in%mesh="/cartMesh"
      call write_distributed_complex_h5("energy",&
           dumpGid,gid3D,&
            n_theta_plot*n_x*n_kinetic,&
@@ -401,6 +416,7 @@ subroutine write_hdf5_timedata(action)
   call proc_time(cp1)
   !Assume gyro_write_master.f90 has calculated this: call get_field_spectrum
   h5in%units="m^-2?"
+  h5in%mesh=' '
   call write_distributed_real_h5("kxkyspec",dumpGid,&
        size(kxkyspec),&
        kxkyspec,&
@@ -409,6 +425,7 @@ subroutine write_hdf5_timedata(action)
 
   if (i_proc == 0) then
      h5in%units="m^-2?"
+     h5in%mesh=" "
      call dump_h5(dumpGid,'k_perp_squared',k_perp_squared,h5in,h5err)
   endif
 
@@ -563,6 +580,7 @@ subroutine write_hdf5_timedata(action)
   ! Dump restart parameters
   !
   if (i_proc == 0) then
+     h5in%mesh=' '
      call dump_h5(dumpGid,'data_step',data_step,h5in,h5err)
      call dump_h5(dumpGid,'t_current',t_current,h5in,h5err)
      call dump_h5(dumpGid,'n_proc',n_proc,h5in,h5err)
@@ -586,6 +604,7 @@ subroutine write_hdf5_timedata(action)
       !------------------------------------------
        real, dimension(:,:), allocatable :: Rc,Zc,Rf,Zf
        real, dimension(:,:,:,:), allocatable :: buffer
+       real, dimension(:,:,:), allocatable :: bufferMesh
        real :: theta, rmajc, zmagc, kappac, deltac, zetac, r_c, dr,xdc
        integer :: iphi, ix, iy, j, ncoarse
 
@@ -651,49 +670,40 @@ subroutine write_hdf5_timedata(action)
        ! Dump the coarse meshes
        !---------------------------------------- 
 
-       call make_group(dumpFid,"grid", grdcoarse,"RZ grid for course mesh",h5err)
-       call dump_h5(grdcoarse,'R',Rc,h5in,h5err)
-       call dump_h5(grdcoarse,'Z',Zc,h5in,h5err)
-       call dump_h5(grdcoarse,'zeta_offset',zeta_offset,h5in,h5err)
-       call dump_h5(grdcoarse,'alpha',alpha_phi,h5in,h5err)
+       call dump_h5(dumpGid,'R',Rc,h5in,h5err)
+       call dump_h5(dumpGid,'Z',Zc,h5in,h5err)
+       call dump_h5(dumpGid,'zeta_offset',zeta_offset,h5in,h5err)
+       call dump_h5(dumpGid,'alpha',alpha_phi,h5in,h5err)
 
        ! Here we do not repeat the points since this is the grid
        ! that will be used for the mode plots on thete E [0,2 pi)
-       allocate(buffer(2,ncoarse,n_x,1))
-       buffer(1,:,:,1)= Rc(0:ncoarse-1,:)
-       buffer(2,:,:,1)= Zc(0:ncoarse-1,:)
+       allocate(bufferMesh(0:ncoarse,n_x,2))
+       bufferMesh(:,:,1)= Rc
+       bufferMesh(:,:,2)= Zc
        h5in%units="m"
        h5in%mesh="mesh-structured"
-       call dump_h5(grdcoarse,'cartMesh',buffer(:,:,:,1),h5in,h5err)
-       h5in%mesh=""
-       deallocate(buffer)
-       call close_group("grid",grdcoarse,h5err)
+       call dump_h5(dumpGid,'cartMesh',bufferMesh(:,:,:),h5in,h5err)
+       h5in%mesh=" "
+       deallocate(bufferMesh)
 
        !----------------------------------------
        ! Dump the coarse mesh(es) in 3D
        !---------------------------------------- 
-!SEK - still defining
-!       call make_mesh_group(fid3d, gridGid,h5in,"grid", "structured",&
-!              "R","Z","phi","cylindrical","cylGrid",h5err)
-!       call make_mesh_group(fid3d, gridGid,h5in,"grid", "structured",&
-!              "R","Z","phi"," ","cylGrid",h5err)
-
        if (write_threed) then
-         call make_group(fid3d,"grid", gridGid,"All of the various grids",h5err)
-         call dump_h5(gridGid,'R',Rc,h5in,h5err)
-         call dump_h5(gridGid,'Z',Zc,h5in,h5err)
-         call dump_h5(gridGid,'phi',zeta_phi,h5in,h5err)
-         call dump_h5(gridGid,'alpha',alpha_phi,h5in,h5err)
+         call dump_h5(gid3d,'R',Rc,h5in,h5err)
+         call dump_h5(gid3d,'Z',Zc,h5in,h5err)
+         call dump_h5(gid3d,'torAngle',zeta_phi,h5in,h5err)
+         call dump_h5(gid3d,'alpha',alpha_phi,h5in,h5err)
 
-         allocate(buffer(3,0:ncoarse,n_x,n_alpha_plot))
+         allocate(buffer(ncoarse+1,n_x,n_alpha_plot,3))
          do iphi=1,n_alpha_plot
-           buffer(1,:,:,iphi)= Rc(:,:)*COS(zeta_phi(iphi))
-           buffer(2,:,:,iphi)=-Rc(:,:)*SIN(zeta_phi(iphi))
-           buffer(3,:,:,iphi)= Zc(:,:)
+           buffer(:,:,iphi,1)= Rc(:,:)*COS(zeta_phi(iphi))
+           buffer(:,:,iphi,2)=-Rc(:,:)*SIN(zeta_phi(iphi))
+           buffer(:,:,iphi,3)= Zc(:,:)
          enddo
+
          h5in%units="m"; h5in%mesh="mesh-structured"
-         call dump_h5(gridGid,'cartMesh',buffer,h5in,h5err)
-         call close_group("grid",gridGid,h5err)
+         call dump_h5(gid3d,'cartMesh',buffer,h5in,h5err)
          deallocate(buffer)
       endif
 
@@ -747,7 +757,7 @@ subroutine write_hdf5_fine_timedata(action)
   character(60) :: description
   character(64) :: step_name, tempVarName
   character(128) :: dumpfile
-  integer(HID_T) :: gridGid,fidfine,gidfine,grdfine,grdcoarse
+  integer(HID_T) :: fidfine,gidfine
   integer :: n_fine
   type(hdf5InOpts) :: h5in
   type(hdf5ErrorType) :: h5err
@@ -780,7 +790,7 @@ subroutine write_hdf5_fine_timedata(action)
     h5in%wrd_type=H5T_NATIVE_REAL
     h5in%typeConvert=.true.
     !h5in%wrd_type=H5T_NATIVE_DOUBLE
-    h5in%doTranspose=.false.
+    h5in%doTranspose=.true.
     h5in%verbose=.true.
     h5in%debug=.false.
     h5in%wrVsTime=.true.
@@ -816,7 +826,7 @@ subroutine write_hdf5_fine_timedata(action)
   if (plot_n_flag == 1) then
      ! DENSITY
      h5in%units=" "
-     h5in%mesh="/grid/cartMesh"
+     h5in%mesh="/cartMesh"
      call write_distributed_complex_h5("density",&
         gidfine,gidfine,&
          n_fine*n_x*n_kinetic,&
@@ -829,7 +839,7 @@ subroutine write_hdf5_fine_timedata(action)
   if (plot_e_flag == 1) then
      ! ENERGY
      h5in%units="energy units"
-     h5in%mesh="/grid/cartMesh"
+     h5in%mesh="/cartMesh"
      call write_distributed_complex_h5("energy",&
          gidfine,gidfine,&
          n_fine*n_x*n_kinetic,&
@@ -842,6 +852,7 @@ subroutine write_hdf5_fine_timedata(action)
   if (plot_v_flag == 1) then
      ! PARALLEL VELOCITY
      h5in%units="vpar units"
+     h5in%mesh="/cartMesh"
      call write_distributed_complex_h5("v_par",&
         gidfine,gidfine,&
          n_fine*n_x*n_kinetic,&
@@ -869,7 +880,7 @@ subroutine write_hdf5_fine_timedata(action)
       !  This should be generalized to include the other GEO options
       !------------------------------------------
        real, dimension(:,:), allocatable :: Rc,Zc,Rf,Zf
-       real, dimension(:,:,:,:), allocatable :: buffer
+       real, dimension(:,:,:), allocatable :: bufferFineMesh
        real :: theta, rmajc, zmagc, kappac, deltac, zetac, r_c, dr,xdc
        real :: zeta_fine
        integer :: iphi, ix, iy, j, ncoarse, nfine
@@ -915,7 +926,7 @@ subroutine write_hdf5_fine_timedata(action)
        !-------------------------------------------------------
 
        if (.not. allocated(alpha_phi_fine) ) then
-           allocate(alpha_phi_fine(0:nfine,n_x,n_alpha_fine))
+           allocate(alpha_phi_fine(nfine,n_x,n_alpha_fine))
            do iphi=1,n_alpha_fine
               !Don't store zeta_fine b/c analysis is on a plane by plane basis
               zeta_fine=REAL(iphi-1)/REAL(n_alpha_fine)*2.*pi
@@ -927,24 +938,20 @@ subroutine write_hdf5_fine_timedata(action)
        ! Dump the fine meshes
        !---------------------------------------- 
 
-       call make_group(fidfine,"grid", grdfine,"RZ grid for fine mesh",h5err)
-       call dump_h5(grdfine,'R',Rf,h5in,h5err)
-       call dump_h5(grdfine,'Z',Zf,h5in,h5err)
-       call dump_h5(grdfine,'zeta_offset',zeta_offset,h5in,h5err)
-       call dump_h5(grdfine,'alpha',alpha_phi_fine,h5in,h5err)
+       call dump_h5(gidfine,'R',Rf,h5in,h5err)
+       call dump_h5(gidfine,'Z',Zf,h5in,h5err)
+       call dump_h5(gidfine,'zeta_offset',zeta_offset,h5in,h5err)
+       call dump_h5(gidfine,'alpha',alpha_phi_fine,h5in,h5err)
 
        ! For ease of use, have a single data set that has R,Z. 
-       allocate(buffer(2,0:nfine,n_x,1))
-       buffer(1,0:nfine-1,:,1) = Rf(:,:)
-       buffer(2,0:nfine-1,:,1) = Zf(:,:)
-       buffer(1,nfine,:,1) = buffer(1,0,:,1)
-       buffer(2,nfine,:,1) = buffer(2,0,:,1)
+       allocate(bufferFineMesh(nfine,n_x,2))
+       bufferFineMesh(:,:,1) = Rf(:,:)
+       bufferFineMesh(:,:,2) = Zf(:,:)
        h5in%units="m"
        h5in%mesh="mesh-structured"
-       call dump_h5(grdfine,'cartMesh',buffer(:,:,:,1),h5in,h5err)
+       call dump_h5(gidfine,'cartMesh',bufferFineMesh(:,:,:),h5in,h5err)
        h5in%mesh=""
-       deallocate(buffer)
-       call close_group("grid",grdfine,h5err)
+       deallocate(bufferFineMesh)
 
        !----------------------------------------
        ! 
@@ -974,7 +981,7 @@ subroutine write_hdf5_restart
   character(60) :: description
   character(64) :: step_name, tempVarName
   character(128) :: dumpfile
-  integer(HID_T) :: dumpGid,dumpFid,fid3D,gridGid
+  integer(HID_T) :: dumpGid,dumpFid,fid3D
   type(hdf5ErrorType) :: errval
   character(4) :: iname
   type(hdf5InOpts) :: h5in
@@ -987,7 +994,7 @@ subroutine write_hdf5_restart
     h5in%comm=MPI_COMM_SELF
     h5in%info=MPI_INFO_NULL
     h5in%wrd_type=H5T_NATIVE_DOUBLE
-    h5in%doTranspose=.false.
+    h5in%doTranspose=.true.
     h5in%vsTime=t_current
     h5in%wrVsTime=.true.
     h5in%verbose=.true.
@@ -1008,6 +1015,7 @@ subroutine write_hdf5_restart
      description="GYRO restart file"
      call open_newh5file(dumpfile,dumpFid,description,dumpGid,h5in,h5err)
 
+     h5in%mesh=' '
      call write_attribute(dumpGid,"data_step",data_step,errval)
      call write_attribute(dumpGid,"n_proc",n_proc,errval)
      call write_attribute(dumpGid,"i_restart",i_restart,errval)
@@ -1224,11 +1232,12 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
 
   if(n1==n_theta_plot) then
      iscoarse=.true.
+     allocate(buffn(0:n1,n2,n3,n_n)); buffn=0.
   else
      iscoarse=.false.
+     allocate(buffn(0:n1-1,n2,n3,n_n)); buffn=0.
   endif
 
-  allocate(buffn(0:n1,n2,n3,n_n)); buffn=0.
 
      do in=1,n_n
   !WRITE(*,*) "in ", in, i_proc
@@ -1257,28 +1266,49 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
             
 
      enddo ! in
+
+!      if (i_proc == 0) then
+!        write(*,*) shape(buffn)
+!        write(*,*) n_n
+!      endif
      !-----------------------------------------
      if (i_proc /= 0) return
      !-----------------------------------------
      !-----------------------------------------
+     ! Apply boundary conditions
+     !-----------------------------------------
+     if (iscoarse) then
+       do in=1,n_n
+         nn=n0+(in-1)*d_n
+         !apply theta BC: z_n(r,,2*pi) = z_n(r,0)exp(I*n*(nu(r,2*pi)-nu(r,0)))
+         !with nu(r,2*pi) - nu(r,0) = -2*pi*q by definition
+         ! phase[*] = EXP(-2*!PI*C_I*n[i_n]*profile_data.q[*])
+         do ix=1,n2
+           buffn(n1,ix,:,in)=buffn(0,ix,:,in)*exp(-2.*pi*c_i*nn*q(ix))
+         enddo
+       enddo ! in
+     endif
+
+
+     !-----------------------------------------
      ! Dump each species independently
      !-----------------------------------------
      if (iscoarse) then
-       do ispcs=1,n1
+       do ispcs=1,n3
          WRITE(n_name,fmt='(i3.3)') ispcs
          tempVarName=trim(vname)//"_real_species"//n_name
-         call dump_h5(rGid,trim(tempVarName),real(buffn(ispcs,:,:,:)),h5in,h5err)
+         call dump_h5(rGid,trim(tempVarName),real(buffn(:,:,ispcs,:)),h5in,h5err)
          tempVarName=trim(vname)//"_imag_species"//n_name
-         call dump_h5(rGid,trim(tempVarName),aimag(buffn(ispcs,:,:,:)),h5in,h5err)
+         call dump_h5(rGid,trim(tempVarName),aimag(buffn(:,:,ispcs,:)),h5in,h5err)
        enddo ! in
      else
 !      if (debug_flag == 1) then
-       do ispcs=1,n1
+       do ispcs=1,n3
          WRITE(n_name,fmt='(i3.3)') ispcs
          tempVarName=trim(vname)//"_real_species"//n_name
-         call dump_h5(rGid,trim(tempVarName),real(buffn(ispcs,:,:,:)),h5in,h5err)
+         call dump_h5(rGid,trim(tempVarName),real(buffn(:,:,ispcs,:)),h5in,h5err)
          tempVarName=trim(vname)//"_imag_species"//n_name
-         call dump_h5(rGid,trim(tempVarName),aimag(buffn(ispcs,:,:,:)),h5in,h5err)
+         call dump_h5(rGid,trim(tempVarName),aimag(buffn(:,:,ispcs,:)),h5in,h5err)
        enddo ! in
 !      endif
      endif
@@ -1286,18 +1316,6 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
        deallocate(buffn)
        return
      endif
-     !-----------------------------------------
-     ! Apply boundary conditions
-     !-----------------------------------------
-     do in=1,n_n
-       nn=n0+(in-1)*d_n
-       !apply theta BC: z_n(r,,2*pi) = z_n(r,0)exp(I*n*(nu(r,2*pi)-nu(r,0)))
-       !with nu(r,2*pi) - nu(r,0) = -2*pi*q by definition
-       ! phase[*] = EXP(-2*!PI*C_I*n[i_n]*profile_data.q[*])
-       do ix=1,n2
-         buffn(n1,ix,:,in)=buffn(0,ix,:,in)*exp(-2.*pi*c_i*nn*q(ix))
-       enddo
-     enddo ! in
 
      !-----------------------------------------
      ! Tranform into real space
@@ -1306,11 +1324,13 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
      !-----------------------------------------
      if (iscoarse) then
        nphi=n_alpha_plot
+       allocate(real_buff(0:n1,n2,n3,nphi))
+       allocate(alpha_loc(0:n1,n2))
      else
+       allocate(real_buff(0:n1-1,n2,n3,nphi))
+       allocate(alpha_loc(0:n1-1,n2))
        nphi=n_alpha_fine
      endif
-     allocate(real_buff(0:n1,n2,n3,nphi))
-     allocate(alpha_loc(0:n1,n2))
 !sv     Default for n0=30, because of k_rho_s scaling.
 !       I think we always want to count over all toroidal modes calculated
 !       which means below, going from istart=1 to n_n (toroidal grid).
