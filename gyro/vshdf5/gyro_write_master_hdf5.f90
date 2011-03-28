@@ -195,8 +195,23 @@ subroutine write_hdf5_data(datafile,action)
         buffer(11,i,j)=GEO_captheta
 
      enddo ! j
-
+       ! Set up nu for plotting and synthetic diagnostic.
+       ! Note we need theta=-pi and pi so include 0 index
+       do j=0,n_theta_plot
+          theta = -pi+real(j)*pi_2/n_theta_plot
+          if (n_theta_plot == 1) theta = 0.0 ! Test for special case
+          call GEO_interp(theta)
+          nu_coarse(j,i)=GEO_nu
+       enddo
+       do j=1,n_fine
+          theta=theta_fine_start+real(j-1)*theta_fine_angle/       &
+                      real(n_theta_plot*n_theta_mult-1)
+          if (n_fine == 1) theta = 0.0 ! Test for special case
+          call GEO_interp(theta)
+          nu_fine(j,i)=GEO_nu
+       enddo
   enddo ! i
+
 
   call dump_h5(rootid,"nu",      buffer(1,:,:),h5in,h5err)
   call dump_h5(rootid,"gsin",    buffer(2,:,:),h5in,h5err)
@@ -911,7 +926,7 @@ subroutine write_hdf5_fine_timedata(action)
        !-------------------------------------------------------
 
        if (.not. allocated(alpha_phi_fine) ) then
-           allocate(alpha_phi_fine(0:nfine,n_x,n_alpha_fine))
+           allocate(alpha_phi_fine(nfine,n_x,n_alpha_fine))
            do iphi=1,n_alpha_fine
               !Don't store zeta_fine b/c analysis is on a plane by plane basis
               zeta_fine=REAL(iphi-1)/REAL(n_alpha_fine)*2.*pi
@@ -1217,11 +1232,12 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
 
   if(n1==n_theta_plot) then
      iscoarse=.true.
+     allocate(buffn(0:n1,n2,n3,n_n)); buffn=0.
   else
      iscoarse=.false.
+     allocate(buffn(0:n1-1,n2,n3,n_n)); buffn=0.
   endif
 
-  allocate(buffn(0:n1,n2,n3,n_n)); buffn=0.
 
      do in=1,n_n
   !WRITE(*,*) "in ", in, i_proc
@@ -1251,13 +1267,29 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
 
      enddo ! in
 
-      if (i_proc == 0) then
-        write(*,*) shape(buffn)
-        write(*,*) n_n
-      endif
+!      if (i_proc == 0) then
+!        write(*,*) shape(buffn)
+!        write(*,*) n_n
+!      endif
      !-----------------------------------------
      if (i_proc /= 0) return
      !-----------------------------------------
+     !-----------------------------------------
+     ! Apply boundary conditions
+     !-----------------------------------------
+     if (iscoarse) then
+       do in=1,n_n
+         nn=n0+(in-1)*d_n
+         !apply theta BC: z_n(r,,2*pi) = z_n(r,0)exp(I*n*(nu(r,2*pi)-nu(r,0)))
+         !with nu(r,2*pi) - nu(r,0) = -2*pi*q by definition
+         ! phase[*] = EXP(-2*!PI*C_I*n[i_n]*profile_data.q[*])
+         do ix=1,n2
+           buffn(n1,ix,:,in)=buffn(0,ix,:,in)*exp(-2.*pi*c_i*nn*q(ix))
+         enddo
+       enddo ! in
+     endif
+
+
      !-----------------------------------------
      ! Dump each species independently
      !-----------------------------------------
@@ -1284,18 +1316,6 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
        deallocate(buffn)
        return
      endif
-     !-----------------------------------------
-     ! Apply boundary conditions
-     !-----------------------------------------
-     do in=1,n_n
-       nn=n0+(in-1)*d_n
-       !apply theta BC: z_n(r,,2*pi) = z_n(r,0)exp(I*n*(nu(r,2*pi)-nu(r,0)))
-       !with nu(r,2*pi) - nu(r,0) = -2*pi*q by definition
-       ! phase[*] = EXP(-2*!PI*C_I*n[i_n]*profile_data.q[*])
-       do ix=1,n2
-         buffn(n1,ix,:,in)=buffn(0,ix,:,in)*exp(-2.*pi*c_i*nn*q(ix))
-       enddo
-     enddo ! in
 
      !-----------------------------------------
      ! Tranform into real space
@@ -1304,11 +1324,13 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
      !-----------------------------------------
      if (iscoarse) then
        nphi=n_alpha_plot
+       allocate(real_buff(0:n1,n2,n3,nphi))
+       allocate(alpha_loc(0:n1,n2))
      else
+       allocate(real_buff(0:n1-1,n2,n3,nphi))
+       allocate(alpha_loc(0:n1-1,n2))
        nphi=n_alpha_fine
      endif
-     allocate(real_buff(0:n1,n2,n3,nphi))
-     allocate(alpha_loc(0:n1,n2))
 !sv     Default for n0=30, because of k_rho_s scaling.
 !       I think we always want to count over all toroidal modes calculated
 !       which means below, going from istart=1 to n_n (toroidal grid).
