@@ -67,7 +67,7 @@ module tglf_interface
   logical :: tglf_use_bper_in       = .false.
   logical :: tglf_use_bpar_in       = .false.
   logical :: tglf_use_mhd_rule_in   = .true.
-  logical :: tglf_use_bisection_in  = .false.
+  logical :: tglf_use_bisection_in  = .true.
   integer :: tglf_ibranch_in        = -1
   integer :: tglf_nmodes_in         = 2
   integer :: tglf_nbasis_max_in     = 4
@@ -77,10 +77,10 @@ module tglf_interface
 
   ! Data passed to: put_model_parameters
   logical :: tglf_adiabatic_elec_in = .false.
-  real    :: tglf_alpha_p_in        = 0.0
+  real    :: tglf_alpha_p_in        = 1.0
   real    :: tglf_alpha_e_in        = 0.18
-  real    :: tglf_alpha_kx0_in      = 1.0
-  real    :: tglf_alpha_kx1_in      = 0.0
+  real    :: tglf_alpha_kx0_in      = 0.13
+  real    :: tglf_alpha_kx1_in      = 3.14
   real    :: tglf_alpha_quench_in   = 0.0
   real    :: tglf_xnu_factor_in     = 1.0
   real    :: tglf_debye_factor_in   = 1.0
