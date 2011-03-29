@@ -1,0 +1,40 @@
+      subroutine data_run(idata,shot,tok,cudir,xp_time,endtime,
+     >  time_series,itorque,iptot,ncl_flag,
+     >  mxgrid,ismooth,idatzero,iproc_d)
+c
+      use data_interface
+c
+      implicit none
+cc      include 'data_d.m'
+c
+      integer idata,itorque,iptot,mxgrid,ismooth
+      integer iproc_d, time_series, ncl_flag
+      integer idatzero
+      character(50) cudir
+      character(40) shot
+      character(6) phase
+      character(10) tok
+      real*8 xp_time, endtime  
+c
+      if (idata .eq. 0) then
+c            write(11,100)
+          call readufiles(tok,shot,phase,cudir,
+     >     xp_time,endtime,time_series, itorque,iptot,
+     >     mxgrid,ismooth,idatzero,iproc_d)
+      elseif (idata .eq. 1) then
+c            write(11,105)
+         call readiterdb(tok,shot,cudir,iptot,itorque,ncl_flag)
+         call gridsetup(mxgrid)
+c      elseif (idata .eq. -1) then
+c            write(11,109)
+      else
+          write(*,*) 'Error: idata out of range',idata
+		  stop
+      endif
+c
+      if(ismooth.ne.0)call datavg(ismooth,ncl_flag)
+c
+      return
+c
+      end subroutine data_run
+c
