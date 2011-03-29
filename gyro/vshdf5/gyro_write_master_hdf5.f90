@@ -763,17 +763,6 @@ subroutine write_hdf5_fine_timedata(action)
   type(hdf5ErrorType) :: h5err
   integer :: number_label
 
-  logical :: write_fine
-
-
-  !---------------------------------------------------
-  ! Determine if the fine meshed files need to be written 
-  if (n_theta_mult == 1 ) then
-      print *,'n_theta_mult=1 so fine files are not being written'
-      return
-  else
-          write_fine = .true.
-  endif
 
   !---------------------------------------------------
   ! Grid
