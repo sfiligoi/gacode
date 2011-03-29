@@ -19,9 +19,9 @@ c
       integer jmaxm,jin_m,jout_m
       integer idata,nprimd,nneud,niond
       integer nplasbdryd,ntime_d,ntimemax,islice_d
-      integer bt_flag,ncl_flag,igks
-      integer itorque, iptotr, ipfst, lprint_pflow, idatzero
-      integer itest_ntcc
+      integer bt_flag,ncl_flag,igks, lprint_cdf
+      integer itorque, iptotr, ipfst, lprint_pflow
+      integer idatzero,itest_ntcc
       integer iscan_exb, iscan_alpha
       integer ivar,jvar,irunmax,jrunmax,igraph
       integer ipptot
@@ -44,7 +44,7 @@ c
      & , jin_m, jout_m, ibranch, iexb, ialpha
      & , idata, nprimd, nneud, niond
      & , nplasbdryd, ntime_d, ntimemax,islice_d
-     & , bt_flag, ncl_flag, igks
+     & , bt_flag, ncl_flag, igks, lprint_cdf
      & , itorque, iptotr, ipfst, lprint_pflow, idatzero, itest_ntcc
      & , iscan_exb, iscan_alpha, ivar, jvar, igraph
      & , irunmax, jrunmax, ipptot

@@ -39,22 +39,22 @@ c
       program gks_driver
 c
       use gks_var
+      use data_interface
 c
 c
       implicit none
 c
       include 'input.m'
-      include 'data_d.m'
+cc      include 'data_d.m'
       include 'data_exp.m'
       include 'data_t.m'
       include 'glf.m'
       include 'gks_out.m'
 c
       character line*132
-      integer j, jj, k, nsave 
-      integer lprint_cdf
+      integer j, jj, k, nsave
       integer njj,njjr,j1,j2,iproc,time_series,mxgrid
-      real*8 dx, norm_bar, endtime_pt, btscale
+      real*8 dx, norm_bar, endtime, btscale
       real cputime, time_cp
       character*12 ZDATE
       character*10 UDATE
@@ -85,17 +85,17 @@ c
        namelist /in1/ igks_model,idata, bt_flag, tok, shot, delt,
      *  xp_time, cudir,i_solve,i_bpar,igeo,igeot,icontinue,
      *  cdebye,cbetae,xalpha,alpha_mhd_loc,ibranch,
-     *  y_bpar,x_bpar,xy_bpar,y_mhd,signomega,save_tglf,overwrite_tglf,
+     *  y_bpar,x_bpar,xy_bpar,y_mhd,signomega,
      *  igyro_fix,igyro_e,kys0,tol_f,xkymin_gf,xkymax_gf,iptot,
      *  ivar,jvar,irunmax,jrunmax,xvarmin,xvarmax,zvarmin,zvarmax,
-     *  igraph,mprint,alpha_e,alpha_p,alpha_p_cur,
-     *  irot1,irot2,igeo_m,i_dengrad,
-     *  jout_m,jin_m,ipptot,echconv,igks,nstep,amassgas_exp,lprint_cdf,
-     *  z2,z3,ismooth_data,tglf_defaults,gks_defaults,
-     *  aky1,corot,igeo_print,
+     *  igraph,mprint,irot1,irot2,igeo_m,i_dengrad,
+     *  jout_m,jin_m,echconv,igks,nstep,amassgas_exp,lprint_cdf,
+     *  z2,z3,aky1,corot,igeo_print, itorque,
      *  cnewk2,cnewk3,ncspec2,nbasis_min,nbasis_max,amass2,amass3,
-     *  alpha_mach, alpha_cur, lprint_pflow, iexb, ipfst, idatzero,
-     *  itest_ntcc, ialpha
+     *  alpha_mach, alpha_cur,alpha_e,alpha_p,alpha_p_cur,
+     *  lprint_pflow, iexb, ipfst, idatzero,
+     *  itest_ntcc, ialpha,save_tglf,overwrite_tglf,
+     *  ismooth_data,tglf_defaults,gks_defaults
 c
       version = "TGLF_1.93"
 c
@@ -124,15 +124,10 @@ c
 c set defaults
 c
       call set_gks_defaults
-      tglf_defaults = 1
-      lprint_cdf=1
       iproc=0
       idatzero=0
-      ialpha=0
-      iexb=0
-      ipfst=0
       time_series=0
-      endtime_pt=1000.
+      endtime=1000.
 
 c namelists ....................................................
 c
@@ -218,24 +213,26 @@ c
          xp_time=99.D0
         endif 
         write(11,50) zdate, tok, shot
-        if (idata .eq. 0) then
-            write(11,100)
-          call readufiles(tok,shot,phase,cudir,mxgrid,ismooth,
-     &             btscale,xp_time,endtime_pt,time_series,
-     &             iexp_exch,iexp_q,
-     &             p_glob_exp,gtauth_exp,gtautot_exp,iproc)
-        elseif (idata .eq. 1) then
-            write(11,105)
-          call readiterdb(mxgrid)
-          if(ismooth_data.ne.0) call datavg
-        elseif (idata .eq. -1) then
-            write(11,109)
-        else
-          write(11,*) 'Error: idata out of range',idata
-		  stop
-        endif
+        call data_run(idata,shot,tok,cudir,xp_time,endtime,
+     >  time_series,itorque,iptot,ncl_flag,mxgrid,ismooth,
+     >  idatzero,iproc)        
+cc        if (idata .eq. 0) then
+cc            write(11,100)
+cc          call readufiles(tok,shot,phase,cudir,mxgrid,ismooth,
+cc     &             btscale,xp_time,endtime_pt,time_series,
+cc     &             iexp_exch,iexp_q,
+cc     &             p_glob_exp,gtauth_exp,gtautot_exp,iproc)
+cc        elseif (idata .eq. 1) then
+cc            write(11,105)
+cc          call readiterdb(mxgrid)
+cc          if(ismooth_data.ne.0) call datavg
+cc        elseif (idata .eq. -1) then
+cc            write(11,109)
+cc        else
+cc          write(11,*) 'Error: idata out of range',idata
+cc		  stop
+cc        endif
 c
-        call gridsetup(0,mxgrid)
         call datmap
 c
 c fix ni_exp and nz_exp to insure charge balance
@@ -245,7 +242,7 @@ c
         ni_exp(j)=ne_exp(j)-z2*nz_exp(j)-nfst_exp(j)
        enddo      
 c
-        call expprofiles(1,nj_d,amin_d)
+        call expprofiles(1,mxgrid,arho_exp)
 c
       endif
 c
@@ -441,7 +438,7 @@ c*******************************
       implicit none
 c
       include 'input.m'
-      include 'data_d.m'
+cc      include 'data_d.m'
       include 'data_exp.m'
       include 'glf.m'
 c
@@ -502,6 +499,11 @@ c****  gksin
       uprim3=0.0
       uprim4=0.0
       uprim5=0.0
+      mach1 = 0.0
+      mach2 = 0.0
+      mach3 = 0.0
+      mach4 = 0.0
+      mach5 = 0.0
 c
 cc**** gks0in
 c
@@ -573,13 +575,14 @@ c      ecut=2.5
 c
 c**** gksin1
 c
+      igks_model=1
       idata = 1
       bt_flag=0
       tok='d3d'
       shot='84736'
+      delt = 0.1
       xp_time=1.5
       cudir="/u/staebler/GKS"
-      ismooth_data=1
       i_solve=0
       i_bpar=1
       igeo=1
@@ -589,6 +592,7 @@ c
       cbetae=1.0
       xalpha=1.0
       alpha_mhd_loc=0.0
+      ibranch=0
       y_bpar=1.0
       x_bpar=1.
       xy_bpar=1.
@@ -611,39 +615,43 @@ c
       zvarmax=0.0
       igraph=0
       mprint=0
-      alpha_p=1.0
-      alpha_p_cur=0.0
-      alpha_mach=0.0
-      alpha_cur=0.0
-      alpha_e = 0.0
-      corot=1.0
       irot1=1
       irot2=1
       igeo_m=3      
       i_dengrad=2
       jout_m=50
       jin_m=0
-      ipptot=0
       echconv=0.0
       igks=2
       nstep=301
       amassgas_exp=2.0
+      lprint_cdf=1
+      z2=6
       z3=-1
       aky1=0.42426
+      corot=1.0
       igeo_print=0
+      itorque=0
       cnewk2=0.0
       cnewk3=1.0
-      igks_model=1
       nbasis_min=1
       nbasis_max=4
+      alpha_mach=0.0
+      alpha_cur=0.0
+      alpha_e = 0.0
+      alpha_p=1.0
+      alpha_p_cur=0.0
+      lprint_pflow=0
+      iexb=0
+      ipfst=0
+      idatzero=0
+      itest_ntcc=0
+      ialpha=0
       save_tglf=.FALSE.
       overwrite_tglf=.FALSE.
+      ismooth_data=0
+      tglf_defaults=1
       gks_defaults=1
-      mach1 = 0.0
-      mach2 = 0.0
-      mach3 = 0.0
-      mach4 = 0.0
-      mach5 = 0.0
 c
       return
       end

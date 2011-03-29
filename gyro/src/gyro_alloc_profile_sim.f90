@@ -123,7 +123,7 @@ subroutine gyro_alloc_profile_sim(flag)
 
      if (iohdf5out == 1) then
         allocate(nu_coarse(0:n_theta_plot,n_x))
-        allocate(nu_fine(0:n_theta_plot*n_theta_mult,n_x))
+        allocate(nu_fine(n_theta_plot*n_theta_mult,n_x))
         nu_coarse=0.; nu_fine=0.
      endif
 

@@ -1,1110 +1,6 @@
-c@gridsetup.f
-c jek 18-Jan-11
-c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
-c... setup transport grid
-c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
-      subroutine gridsetup(igrid,mxgrid)
 c
-      implicit none
-c      include 'mpif.h'
-c      include '../inc/tport.m'
-      include 'data_d.m'
-      include 'data_exp.m'
-c      include '../inc/model.m'
-      include 'input.m'
-      include 'glf.m'
-c      include '../inc/ptor.m'
-c
-      integer j, aj, igrid, nex, ngg, mxgrid
-      real*8 rhox(0:nj-1)
-      real, allocatable, dimension(:) :: r_new,
-     &   fcap_new, gcap_new, hcap_new, rbp_new, bp0_new,
-     &   te_new, ti_new, q_new, ene_new,
-     &   en1_new, en2_new, sion_new, 
-     &   srecom_new, scx_new, sbcx_new,
-     &   s_new, dudtsv_new, enbeam_new,
-     &   enn1_new, ennw1_new, ennv1_new,
-     &   sbion_new, sbeam_new, 
-     &   curden_new, zeff_new, 
-     &   angrot_new, chieinv_new, chiinv_new, 
-     &   dpedtc_new, dpidtc_new, 
-     &   qconde_new, qcondi_new,
-     &   qconve_new, qconvi_new, qbeame_new,
-     &   qbeami_new, qdelt_new, qrad_new,
-     &   qohm_new, qrfe_new, qrfi_new, 
-     &   qione_new, qioni_new, qcx_new, 
-     &   qfuse_new, qfusi_new, 
-     &   rmaj_new, rmin_new, 
-     &   psivolp_new, elongx_new, deltax_new, 
-     &   sfareanpsi_new, grho1_new,
-     &   grho2_new, xkineo_new,
-     &   xb2_new, xbm2_new, xngrth_new,
-     &   xgrbm2_new, fm1_new, fm2_new,
-     &   fm3_new, fhat_new, torque_new,
-     &   ptot_new, pfast_new, er_new
-      allocate (r_new(nj),
-     &   fcap_new(nj), gcap_new(nj), hcap_new(nj), rbp_new(nj),
-     &   bp0_new(nj), te_new(nj), ti_new(nj), q_new(nj), ene_new(nj),
-     &   en1_new(nj), en2_new(nj), sion_new(nj), 
-     &   srecom_new(nj), scx_new(nj), sbcx_new(nj),
-     &   s_new(nj), dudtsv_new(nj), enbeam_new(nj),
-     &   enn1_new(nj), ennw1_new(nj), ennv1_new(nj),
-     &   sbion_new(nj), sbeam_new(nj), 
-     &   curden_new(nj), zeff_new(nj), 
-     &   angrot_new(nj), chieinv_new(nj), chiinv_new(nj), 
-     &   dpedtc_new(nj), dpidtc_new(nj), 
-     &   qconde_new(nj), qcondi_new(nj),
-     &   qconve_new(nj), qconvi_new(nj), qbeame_new(nj),
-     &   qbeami_new(nj), qdelt_new(nj), qrad_new(nj),
-     &   qohm_new(nj), qrfe_new(nj), qrfi_new(nj), 
-     &   qione_new(nj), qioni_new(nj), qcx_new(nj), 
-     &   qfuse_new(nj), qfusi_new(nj), 
-     &   rmaj_new(nj), rmin_new(nj), 
-     &   psivolp_new(nj), elongx_new(nj), deltax_new(nj), 
-     &   sfareanpsi_new(nj), grho1_new(nj),
-     &   grho2_new(nj), xkineo_new(nj),
-     &   xb2_new(nj), xbm2_new(nj), xngrth_new(nj),
-     &   xgrbm2_new(nj), fm1_new(nj), fm2_new(nj),
-     &   fm3_new(nj), fhat_new(nj), torque_new(nj),
-     &   ptot_new(nj), pfast_new(nj), er_new(nj) )
-c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
-c      if(i_proc.eq.0) then
-         write(*,10) ' nj_d = ',nj_d
-        if(nj_d.gt.nj) write(*,*) 'Warning: nj_d > nj'
-c      endif
-      jmaxm=mxgrid
-c
-c... experimental rho_hat grid
-c
-      do j=0,nj
-        rhox(j)=0.D0
-      enddo
-c
-      do j=0,nj_d-1
-        aj=j
-        rhox(j)=REAL(aj)/REAL(nj_d-1)
-      enddo
-      rhox(0)=1.D-6
-      rhox(nj_d-1)=rhox(nj_d-1)-1.D-6
-c
-c... setup transport grid
-c     igrid = 0 for uniform grid
-c     igrid > 0 for nonuniform grid
-      if(igrid.eq.0) then
-        do j=0,nj_d-1
-c          aj=j
-          rho(j)=REAL(j)/REAL(nj_d-1)
-        enddo
-        rho(0)=1.D-6
-        rho(jmaxm)=rho(jmaxm)-1.D-6
-      else
-      write(*,*) ' Using non-unform grid'
-        do j=0,40
-          aj=j
-          rho(j)=0.9D0*aj/40
-        enddo
-        do j=41,50
-          aj=j-40
-          rho(j)=0.1D0*aj/(50-40)+0.9D0
-        enddo
-      endif
-c
-      do j=1,nj_d
-       rho_d(j)=rho(j-1)
-      enddo
-c
-c... Interpolate profiles to new grid if 
-c    jmaxm > nj_d-1 OR nonuniform grid
-c
-      if (jmaxm.gt.(nj_d-1) .or. igrid.gt.0) then
-        write(*,25)
-        nex=jmaxm+1
-        if(igrid.eq.0) then
-          do j=1,nex
-            aj=REAL(j-1)
-            rho_d(j)=aj/REAL(jmaxm)
-          enddo
-        else
-          do j=1,40
-            aj=j-1
-            rho_d(j)=0.9D0*aj/40
-          enddo
-          do j=41,51
-            aj=j-41
-            rho_d(j)=0.1D0*aj/10+0.9D0
-          enddo
-        endif
-        rho_d(1)=1.0D-12
-c        do j=0,51
-c          write(*,'(i3,3f8.4)') j, rho_d(j), rhox(j), r_d(j)
-c        enddo
-c
-        ngg=nj_d
-c       call w_lin_interp_r8(ngg,rhox,r_d,nex,rho_d,r_new,iflag,msg)
-        call inter_cspl(ngg,rhox,r_d,nex,rho_d,r_new)
-        call inter_cspl(ngg,rho,fcap_d,nex,rho_d,fcap_new)
-        call inter_cspl(ngg,rho,gcap_d,nex,rho_d,gcap_new)
-        call inter_cspl(ngg,rho,hcap_d,nex,rho_d,hcap_new)
-        call inter_cspl(ngg,rho,rbp_d,nex,rho_d,rbp_new)
-        call inter_cspl(ngg,rho,bp0_d,nex,rho_d,bp0_new)
-        call inter_cspl(ngg,rhox,te_d,nex,rho_d,te_new)
-        call inter_cspl(ngg,rhox,ti_d,nex,rho_d,ti_new)
-        call inter_cspl(ngg,rhox,q_d,nex,rho_d,q_new)
-        call inter_cspl(ngg,rhox,ene_d,nex,rho_d,ene_new)
-        call inter_cspl(ngg,rhox,en_d(1:j,1),nex,rho_d,en1_new)
-        call inter_cspl(ngg,rhox,en_d(1:j,2),nex,rho_d,en2_new)
-        call inter_cspl(ngg,rhox,sion_d(1:j,1),nex,rho_d,sion_new)
-        call inter_cspl(ngg,rhox,srecom_d(1:j,1),nex,rho_d,srecom_new)
-        call inter_cspl(ngg,rhox,sbcx_d(1:j,1),nex,rho_d,sbcx_new)
-        call inter_cspl(ngg,rhox,scx_d(1:j,1),nex,rho_d,scx_new)
-        call inter_cspl(ngg,rhox,s_d(1:j,1),nex,rho_d,s_new)
-        call inter_cspl(ngg,rhox,dudtsv_d(1:j,1),nex,rho_d,dudtsv_new)
-        call inter_cspl(ngg,rhox,enbeam_d,nex,rho_d,enbeam_new)
-        call inter_cspl(ngg,rhox,enn_d(1:j,1),nex,rho_d,enn1_new)
-        call inter_cspl(ngg,rhox,ennw_d(1:j,1),nex,rho_d,ennw1_new)
-        call inter_cspl(ngg,rhox,ennv_d(1:j,1),nex,rho_d,ennv1_new)
-        call inter_cspl(ngg,rhox,sbion_d,nex,rho_d,sbion_new)
-        call inter_cspl(ngg,rhox,sbeam_d,nex,rho_d,sbeam_new)
-        call inter_cspl(ngg,rhox,curden_d,nex,rho_d,curden_new)
-        call inter_cspl(ngg,rhox,zeff_d,nex,rho_d,zeff_new)
-        call inter_cspl(ngg,rhox,angrot_d,nex,rho_d,angrot_new)
-        call inter_cspl(ngg,rhox,chieinv_d,nex,rho_d,chieinv_new)
-        call inter_cspl(ngg,rhox,chiinv_d,nex,rho_d,chiinv_new)
-        call inter_cspl(ngg,rhox,dpedtc_d,nex,rho_d,dpedtc_new)
-        call inter_cspl(ngg,rhox,dpidtc_d,nex,rho_d,dpidtc_new)
-        call inter_cspl(ngg,rhox,qconde_d,nex,rho_d,qconde_new)
-        call inter_cspl(ngg,rhox,qcondi_d,nex,rho_d,qcondi_new)
-        call inter_cspl(ngg,rhox,qconve_d,nex,rho_d,qconve_new)
-        call inter_cspl(ngg,rhox,qconvi_d,nex,rho_d,qconvi_new)
-        call inter_cspl(ngg,rhox,qbeame_d,nex,rho_d,qbeame_new)
-        call inter_cspl(ngg,rhox,qbeami_d,nex,rho_d,qbeami_new)
-        call inter_cspl(ngg,rhox,qdelt_d,nex,rho_d,qdelt_new)
-        call inter_cspl(ngg,rhox,qrfe_d,nex,rho_d,qrfe_new)
-        call inter_cspl(ngg,rhox,qrfi_d,nex,rho_d,qrfi_new)
-        call inter_cspl(ngg,rhox,qione_d,nex,rho_d,qione_new)
-        call inter_cspl(ngg,rhox,qioni_d,nex,rho_d,qioni_new)
-        call inter_cspl(ngg,rhox,qcx_d,nex,rho_d,qcx_new)
-        call inter_cspl(ngg,rhox,qfuse_d,nex,rho_d,qfuse_new)
-        call inter_cspl(ngg,rhox,qfusi_d,nex,rho_d,qfusi_new)
-        call inter_cspl(ngg,rhox,qrad_d,nex,rho_d,qrad_new)
-        call inter_cspl(ngg,rhox,qohm_d,nex,rho_d,qohm_new)
-        call inter_cspl(ngg,rhox,rmajavnpsi_d,nex,rho_d,rmaj_new)
-        call inter_cspl(ngg,rhox,rminavnpsi_d,nex,rho_d,rmin_new)
-        call inter_cspl(ngg,rhox,psivolp_d,nex,rho_d,psivolp_new)
-        call inter_cspl(ngg,rhox,elongx_d,nex,rho_d,elongx_new)
-        call inter_cspl(ngg,rhox,deltax_d,nex,rho_d,deltax_new)
-        call inter_cspl(ngg,rhox,sfareanpsi_d,nex,rho_d,sfareanpsi_new)
-        call inter_cspl(ngg,rhox,grho1npsi_d,nex,rho_d,grho1_new)
-        call inter_cspl(ngg,rhox,grho2npsi_d,nex,rho_d,grho2_new)
-        call inter_cspl(ngg,rhox,ptot_d,nex,rho_d,ptot_new)
-        call inter_cspl(ngg,rhox,pfast_d,nex,rho_d,pfast_new)
-        if (ncl_flag .eq. 1) then
-          call inter_cspl(ngg,rhox,xb2_d,nex,rho_d,xb2_new)
-          call inter_cspl(ngg,rhox,xbm2_d,nex,rho_d,xbm2_new)
-          call inter_cspl(ngg,rhox,xngrth_d,nex,rho_d,xngrth_new)
-          call inter_cspl(ngg,rhox,xgrbm2_d,nex,rho_d,xgrbm2_new)
-          call inter_cspl(ngg,rhox,fm1_d,nex,rho_d,fm1_new)
-          call inter_cspl(ngg,rhox,fm2_d,nex,rho_d,fm2_new)
-          call inter_cspl(ngg,rhox,fm3_d,nex,rho_d,fm3_new)
-          call inter_cspl(ngg,rhox,fhat_d,nex,rho_d,fhat_new)
-        endif
-        if(itorque.ne.0) then
-          call inter_cspl(ngg,rhox,torque_d,nex,rho_d,torque_new)
-        endif
-c
-c... map interpolated variables back to data (_d) variables
-c
-c        do j=1,jmaxm+1
-c          write(*,50) j, rhox(j-1), r_d(j), ti_d(j), 
-c     &                rho_d(j), r_new(j), ti_new(j)
-c        enddo
-        do j=1,nex
-          r_d(j)=r_new(j)
-          fcap_d(j)=fcap_new(j)
-          gcap_d(j)=gcap_new(j)
-          hcap_d(j)=hcap_new(j)
-          rbp_d(j)=rbp_new(j)
-          bp0_d(j)=bp0_new(j)
-          te_d(j)=te_new(j)
-          ti_d(j)=ti_new(j)
-          q_d(j)=q_new(j)
-          ene_d(j)=ene_new(j)
-          en_d(j,1)=en1_new(j)
-          en_d(j,2)=en2_new(j)
-          sion_d(j,1)=sion_new(j)
-          srecom_d(j,1)=srecom_new(j)
-          sbcx_d(j,1)=sbcx_new(j)
-          scx_d(j,1)=scx_new(j)
-          s_d(j,1)=s_new(j)
-          dudtsv_d(j,1)=dudtsv_new(j)
-          enbeam_d(j)=enbeam_new(j)
-          enn_d(j,1)=enn1_new(j)
-          ennw_d(j,1)=ennw1_new(j)
-          ennv_d(j,1)=ennv1_new(j)
-          sbion_d(j)=sbion_new(j)
-          sbeam_d(j)=sbeam_new(j)
-          curden_d(j)=curden_new(j)
-          zeff_d(j)=zeff_new(j)
-          angrot_d(j)=angrot_new(j)
-          chieinv_d(j)=chieinv_new(j)
-          chiinv_d(j)=chiinv_new(j)
-          dpedtc_d(j)=dpedtc_new(j)
-          dpidtc_d(j)=dpidtc_new(j)
-          qconde_d(j)=qconde_new(j)
-          qcondi_d(j)=qcondi_new(j)
-          qconve_d(j)=qconve_new(j)
-          qconvi_d(j)=qconvi_new(j)
-          qbeame_d(j)=qbeame_new(j)
-          qbeami_d(j)=qbeami_new(j)
-          qdelt_d(j)=qdelt_new(j)
-          qrfe_d(j)=qrfe_new(j)
-          qrfi_d(j)=qrfi_new(j)
-          qione_d(j)=qione_new(j)
-          qioni_d(j)=qioni_new(j)
-          qcx_d(j)=qcx_new(j)
-          qfuse_d(j)=qfuse_new(j)
-          qfusi_d(j)=qfusi_new(j)
-          qrad_d(j)=qrad_new(j)
-          qohm_d(j)=qohm_new(j)
-          rmajavnpsi_d(j)=rmaj_new(j)
-          rminavnpsi_d(j)=rmin_new(j)
-          psivolp_d(j)=psivolp_new(j)
-          elongx_d(j)=elongx_new(j)
-          deltax_d(j)=deltax_new(j)
-          sfareanpsi_d(j)=sfareanpsi_new(j)
-          grho1npsi_d(j)=grho1_new(j)
-          grho2npsi_d(j)=grho2_new(j)
-          torque_d(j)=torque_new(j)
-          ptot_d(j)=ptot_new(j)
-          pfast_d(j)=pfast_new(j)
-c          er_d(j)=er_new(j)
-          if(itorque.eq.0) torque_d(j)=0.D0
-          if(iptotr.eq.0) pfast_d(j)=0.D0
-        enddo
-        if (ncl_flag .eq. 1) then
-          do j=1,nex
-            xb2_d(j)=xb2_new(j)
-            xbm2_d(j)=xbm2_new(j)
-            xngrth_d(j)=xngrth_new(j)
-            xgrbm2_d(j)=xgrbm2_new(j)
-            fm1_d(j)=fm1_new(j)
-            fm2_d(j)=fm2_new(j)
-            fm3_d(j)=fm3_new(j)
-            fhat_d(j)=fhat_new(j)
-          enddo
-        endif
-c
-c deallocate temp arrays
-c
-      deallocate( r_new, 
-     &   fcap_new, gcap_new, hcap_new, rbp_new, bp0_new,
-     &   te_new, ti_new, q_new, ene_new,
-     &   en1_new, en2_new, sion_new, 
-     &   srecom_new, scx_new, sbcx_new,
-     &   s_new, dudtsv_new, enbeam_new,
-     &   enn1_new, ennw1_new, ennv1_new,
-     &   sbion_new, sbeam_new, 
-     &   curden_new, zeff_new, 
-     &   angrot_new, chieinv_new, chiinv_new, 
-     &   dpedtc_new, dpidtc_new, 
-     &   qconde_new, qcondi_new,
-     &   qconve_new, qconvi_new, qbeame_new,
-     &   qbeami_new, qdelt_new, qrad_new,
-     &   qohm_new, qrfe_new, qrfi_new, 
-     &   qione_new, qioni_new, qcx_new, 
-     &   qfuse_new, qfusi_new, 
-     &   rmaj_new, rmin_new, 
-     &   psivolp_new, elongx_new, deltax_new, 
-     &   sfareanpsi_new, grho1_new,
-     &   grho2_new, xkineo_new,
-     &   xb2_new, xbm2_new, xngrth_new,
-     &   xgrbm2_new, fm1_new, fm2_new,
-     &   fm3_new, fhat_new, torque_new,
-     &   ptot_new, pfast_new, er_new)
-c
-c... reset rho grid after interpolation
-c
-      if(igrid.eq.0) then
-        do j=0,jmaxm
-          aj=DFLOAT(j)
-          rho(j)=aj/DFLOAT(jmaxm)
-        enddo
-      else
-        do j=0,40
-          aj=j
-          rho(j)=0.9D0*aj/40
-        enddo
-        do j=41,50
-          aj=j-40
-          rho(j)=0.1D0*aj/(50-40)+0.9D0
-        enddo
-      endif
-      rho(0)=1.D-6
-      rho(jmaxm)=rho(jmaxm)-1.D-6
-c
-cjek nj_d -> mxgrid+1 for arbitrary grid size
-c
-      nj_d=mxgrid+1
-c
-      endif
-c
-c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
- 10   format(a9,i3)             ! common write/read  format
- 25   format(' Interpolating ONETWO iterdb grid to new grid ...')
- 50   format(i2,2x,0p1f4.2,0p6f10.5)
-c
-      end
-c@u2tread.f   derived from u2read.f by G. M. Staebler 6/28/2000
-c reads full 2d time series from u-file.c@readiterdb.f
-c jek 19-Jan-11 version 2.0
-c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
-c
-c... Reads in data from Onetwo ascii iterdb file
-c
-c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
-c  
-      subroutine readiterdb(mxgrid)
-c
-      implicit none
-      include 'input.m'
-      include 'data_d.m'
-      include 'data_exp.m'
-      include 'glf.m'
-c
-      integer iflag
-      character*15 extension
-      character*50 iterdbfile
-      character cdfile*130
-c
-      integer niterdb, i, j, jj, jn, mxgrid
-      integer idchar, ifchar, ichar, ichmax
-      character*132 headerline
-      character*2 stflg
-c
-      real*8 pi_m, pgasa, pgasz, bgasa, bgasz
-     & , rhostar, drm, dvoldr_p, dvoldr_m, dummy1, aomega
-c
-      parameter(niterdb=11)
-      namelist/datafiles/nstk,xp_time,cudir,tok,shot,phase,ismooth
-c      real, allocatable, dimension(:) :: blank_d, bblank_d
-c      allocate (blank_d(nj), bblank_d(1000))
-c
-c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
-      pi_m=3.1415926D0
-c      xi=(0.D0,1.D0)
-      kevdsecpmw=1.6022D-19*1.D3*1.D-6
-      jmaxm=mxgrid
-c
-c     Assume the worki and beam ions are same and the impurity
-c     is carbon for the moment.
-c
-      pgasa=amassgas_exp
-      pgasz=1
-      bgasa=pgasa
-      bgasz=1
-c     pimpa=12
-c     pimpz=6
-c
-c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
-c... read ONETWO iterdb file from external directory
-c    JEK 3/19/07
-c
-      extension = shot
-      iterdbfile = 'iterdb.'//extension
-c      write(*,*) 'iterdbfile = ',iterdbfile
-c
-c... count characters in directory name -> idchar
-c
-      ichmax = 60
-      idchar = 0
-      do j=1,ichmax
-        if ( cudir(j:j)  .ne. ' ' ) then
-          idchar = idchar + 1
-        else
-          go to 5
-        endif
-      enddo
- 5    continue
-c
-c... count characters in iterdb filename -> ifchar
-c
-      ifchar = 0
-      do j=1,ichmax
-        if ( iterdbfile(j:j)  .ne. ' ' ) then
-          ifchar = ifchar + 1
-        else
-          go to 6
-        endif
-      enddo
-  6   continue
-c
-c       write (*,*) 'idchar = ',idchar
-c       write (*,*) 'ifchar = ',ifchar
-       if (    cudir(idchar:idchar) .ne. '/') then
-          ichar = idchar + 1 + ifchar
-          cdfile = cudir(1:idchar) // '/' // iterdbfile(1:ifchar)
-       else
-          ichar  = idchar + ifchar
-          cdfile = cudir(1:idchar) // iterdbfile(1:ifchar)
-       endif
-       write (*,*) ' iterdb = ',cdfile(1:ichar)
-c
-       open(unit=niterdb,status='old',access='sequential',
-     &      file=cdfile(1:ichar))
-c old coding to read in same dir as xptor
-c     &      file='iterdb.'//extension)
-c
-c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
-c
-         read(niterdb,'(a)')headerline  
-
-c ishot : shot number
-         read(niterdb,'(a)') stflg
-         read(niterdb,9) ishot_d
-
-c nj : the size of the vectors printed in this file
-         read(niterdb,'(a)') stflg
-         read(niterdb,9) nj_d
-         if(nj_d.gt.nj+1)then
-           write(*,900) nj_d,nj+1
-           stop
-         else
-           jmaxm=nj_d-1
-           mxgrid=jmaxm
-         endif
-
-c nion : the number of ion species
-         read(niterdb,'(a)')stflg
-         read(niterdb,9)nion_d
-
-c nprim : the number of primary ion species
-         read(niterdb,'(a)')stflg
-         read(niterdb,9)nprim_d
-
-c nimp : the number of impurity ion species
-         read(niterdb,'(a)')stflg
-         read(niterdb,9)nimp_d
-
-c nneu : the number of neutral ion species
-         read(niterdb,'(a)')stflg
-         read(niterdb,9)nneu_d
-
-c ibion : index of beam species
-         read(niterdb,'(a)')stflg
-         read(niterdb,9)ibion_d
-
-c namep : name(s) of primary ion species
-         read(niterdb,'(a)')stflg
-         read(niterdb,8)(namep_d(i),i=1,nprim_d)
-
-c namei : name(s) of impurity ion species
-         read(niterdb,'(a)')stflg
-         read(niterdb,8)(namei_d(i),i=1,nimp_d)
-
-c namen : name(s) of neutral ion species
-         read(niterdb,'(a)')stflg
-         read(niterdb,8)(namen_d(i),i=1,nneu_d)
-
-c time :  time at which data is printed
-         read(niterdb,'(a)')stflg
-         read(niterdb,10)time_d
-
-c Rgeom : major radius of geometric
-         read(niterdb,'(a)')stflg
-         read(niterdb,10)rgeom_d                   !meters
-
-c Rmag :  major radius of mag axis, meters
-         read(niterdb,'(a)')stflg
-         read(niterdb,10)rmag_d                    !meters
-
-c R0 : major radius of vaccuum btor ref
-         read(niterdb,'(a)')stflg
-         read(niterdb,10)rmajor_d                  !meters
-
-c kappa : plasma elongation
-         read(niterdb,'(a)')stflg
-         read(niterdb,10)kappa_d
-
-c delta : plasma triangularity
-         read(niterdb,'(a)')stflg
-         read(niterdb,10)deltao_d
-
-c pindent : plasma indentation
-         read(niterdb,'(a)')stflg
-         read(niterdb,10)pindento_d
-
-c volo : plasma volume,meters**3
-         read(niterdb,'(a)')stflg
-         read(niterdb,10)volo_d                    !meters**3
-
-c cxareao :plasma cross sectional area, meters**2
-         read(niterdb,'(a)')stflg
-         read(niterdb,10)areao_d                   !meters**2
-
-c Btor : vaccuum toroidal field at rmajor, tesla
-         read(niterdb,'(a)')stflg
-         read(niterdb,10)btor_d                    !tesla
-
-c total,ohmic,bootstrap,beam,and rf currents, amps
-         read(niterdb,'(a)')stflg
-         read(niterdb,10)tocur_d,totohm_d,totboot_d,totbeam_d,totrf_d !amps
-
-c betap : poloidal beta
-         read(niterdb,'(a)')stflg
-         read(niterdb,10)betap_d
-
-c beta : toroidal beta
-         read(niterdb,'(a)')stflg
-         read(niterdb,10)beta_d
-
-c ali : plasma inductance
-         read(niterdb,'(a)')stflg
-         read(niterdb,10)ali_d
-
-c te0 : central electron temperature
-         read(niterdb,'(a)')stflg
-         read(niterdb,10)te0_d                        !kev
-
-c ti0 : central ion temperature
-         read(niterdb,'(a)')stflg
-         read(niterdb,10)ti0_d                        !kev
-
-c---psi on rho grid,volt*sec/rad
-
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(psir_d(j),j=1,nj_d)      !volt*se/rad
-cx          read(niterdb,10)(blank_d(j),j=1,nj_d)
-
-c---rho grid, meters
-
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(r_d(j),j=1,nj_d)          !meters
-
-c---fcap, (ie f(psilim)/f(psi) )
-
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(fcap_d(j),j=1,nj_d)
-cx          read(niterdb,10)(blank_d(j),j=1,nj_d)
-
-c---gcap, (ie <(grad rho)**2*(R0/R)**2> )
-
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(gcap_d(j),j=1,nj_d)
-cx          read(niterdb,10)(blank_d(j),j=1,nj_d)
-
-c---hcap, (ie (dvolume/drho)/(4*pi*pi*R0*rho))
-
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(hcap_d(j),j=1,nj_d)
-
-c*** read in NCLASS quantities if ncl_flag=1 ***
-          if(ncl_flag.eq.1) then
-            write(*,25)
-
-c--xb2, <B^2>
-
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(xb2_d(j),j=1,nj_d)
-
-c--xbm2, <1/B^2>
-
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(xbm2_d(j),j=1,nj_d)
-
-c--xngrth, <n.grad theta>
-
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(xngrth_d(j),j=1,nj_d)
-
-c--xgrbm2, <grad-rho^2/B^2>
-
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(xgrbm2_d(j),j=1,nj_d)
-
-c--fm1, 1st poloidal moment
-
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(fm1_d(j),j=1,nj_d)
-
-c--fm2, 2nd poloidal moment
-
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(fm2_d(j),j=1,nj_d)
-
-c--fm3, 3rd poloidal moment
-
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(fm3_d(j),j=1,nj_d)
-
-c--fhat, muo*F/dpsidr
-
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(fhat_d(j),j=1,nj_d)
-c
-          endif
-c
-c---electron temperature, kev
-
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(te_d(j),j=1,nj_d)           !kev
-
-c---ion temperature, kev
-
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(ti_d(j),j=1,nj_d)           !kev
-c
-c---q (ie safety factor) profile
-
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(q_d(j),j=1,nj_d)
-c
-c---electron density,#/m**3 
-
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(ene_d(j),j=1,nj_d)           !#/meter**3
-
-c---primary ion density,#/m**3,species
-c---impurity ion density,#/m**3,species
-
-       do jj=1,nion_d
-         do j=1,nj_d
-           en_d(j,jj)=0.D0
-         enddo
-       enddo
-c      jp=0
-c      ji=0
-       do jj=1,nion_d
-c          if(jj .le. nprim_d)jp=jp+1
-c          if(jj .gt. nprim_d)ji=ji+1
-               read(niterdb,'(a)')stflg
-               read(niterdb,10)(en_d(j,jj),j=1,nj_d)    !#/meter**3
-       enddo
-
-c---sion   : source due to ionization,        #/(m**3*sec),species
-c---srecom : source due to recombination,     #/(m**3*sec),species
-c---scx    : source due to cx thermal neut.,  #/(m**3*sec),species
-c---sbcx   : sink due to cx with beam neut.   #/(m**3*sec),species
-c---s      : total source rate,               #/(m**3*sec),species
-c---dudt   : s dot,                           #/(m**3*sec),species
- 
-       do jj=1,nprim_d
-               read(niterdb,'(a)')stflg
-               read(niterdb,10)(sion_d(j,jj),j=1,nj_d)    !#/meter**3/sec
-               read(niterdb,'(a)')stflg
-               read(niterdb,10)(srecom_d(j,jj),j=1,nj_d)  !#/meter**3/sec
-               read(niterdb,'(a)')stflg
-               read(niterdb,10)(scx_d(j,jj),j=1,nj_d)     !#/meter**3/sec
-               read(niterdb,'(a)')stflg
-               read(niterdb,10)(sbcx_d(j,jj),j=1,nj_d)    !#/meter**3/sec
-               read(niterdb,'(a)')stflg
-               read(niterdb,10)(s_d(j,jj),j=1,nj_d)       !#/meter**3/sec
-               read(niterdb,'(a)')stflg
-               read(niterdb,10)(dudtsv_d(j,jj),j=1,nj_d)  !#/meter**3/sec
-          enddo
-
-c---fast ion density, #/m**3, species
-       
-          read(niterdb,'(a)')stflg  
-          read(niterdb,10)(enbeam_d(j),j=1,nj_d)          !#/meter**3
-       
-c---neutral density,  #/m**3,species
-
-       do jn=1,nneu_d
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(enn_d(j,jn),j=1,nj_d)     !#/meter**3
-       enddo
-
-c---neutral density from wall source, #/m**3, species
-
-       do jn=1,nneu_d
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(ennw_d(j,jn),j=1,nj_d)     !#/meter**3
-       enddo
-
-c---neutral density from volume source, #/m**3,species (recomb and beam cx)
-
-       do jn=1,nneu_d
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(ennv_d(j,jn),j=1,nj_d)     !#/meter**3
-       enddo
-
-c---volume source of neutrals, #/(m**3*sec),species
-
-       do jn=1,nneu_d
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(volsn_d(j,jn),j=1,nj_d)!#/(m**3*sec)  
-       enddo
-
-c---sbion : beam electron source,  #/(m**3*sec
-           
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(sbion_d(j),j=1,nj_d)    !#/(m**3*sec)
-
-c---sbeam : beam thermal ion source,  #/(m**3*sec)
-           
-          read(niterdb,'(a)')stflg   
-          read(niterdb,10)(sbeam_d(j),j=1,nj_d)      !#/(m**3*sec)
-
-c---total current density, amps/m**2
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(curden_d(j),j=1,nj_d)        !amps/meter**2
-      
-c---ohmic current density, amps/m**2
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(curohm_d(j),j=1,nj_d)        !amps/meter**2
-
-c---bootstrap current density, amps/m**2
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(curboot_d(j),j=1,nj_d)       !amps/meter**2
-       
-c--- beam driven current density, amps/m**2
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(curbeam_d(j),j=1,nj_d)      !amps/meter**2
-c          read(niterdb,10)(blank_d(j),j=1,nj_d)
-                
-c---rf current density, amps/m**2
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(currf_d(j),j=1,nj_d)         !amps/meter**2
-
-c---rho*bp0*fcap*gcap*hcap, tesla*meters
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(rbp_d(j),j=1,nj_d)
-c          read(niterdb,10)(blank_d(j),j=1,nj_d)         !tesla*meters      
-
-c---zeff profile:
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(zeff_d(j),j=1,nj_d)
-
-c---angular rotation speed profile, rad/sec
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(angrot_d(j),j=1,nj_d)       !rad/sec
-
-c---electron thermal diffusivity, meters*2*/sec on half grid
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(chieinv_d(j),j=1,nj_d)       !meters**2/sec
-          
-c---ion thermal diffusivity,meters*2*/sec  on half grid 
-      
-          read(niterdb,'(a)')stflg 
-          read(niterdb,10)(chiinv_d(j),j=1,nj_d)        !meters**2/sec
-
-c---ion neocl.  thermal conductivity, 1/(m*sec) on half grid
-          
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(xkineo_d(j),j=1,nj_d)          !1/(m*sec)
-
-c---wdot,electrons, watts/m**3 d(electron energy)/dt profile:
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(dpedtc_d(j),j=1,nj_d)        !watts/meter**3
-     
-c---wdot,ions,watts/m**3 d(ion energy)/dt profile:
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(dpidtc_d(j),j=1,nj_d)        !watts/meter**3
-
-c---electron conduction, watts/m**3
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(qconde_d(j),j=1,nj_d)        !watts/meter**3
-      
-c---ion conduction, watts/m**3
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(qcondi_d(j),j=1,nj_d)        !watts/meter**3
-
-c---electron convection,watts/m**3
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(qconve_d(j),j=1,nj_d)        !watts/meter**3
-
-c---ion convection, watts/m**3
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(qconvi_d(j),j=1,nj_d)        !watts/meter**3
-
-c---power to elec.from beam, watts/m**3
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(qbeame_d(j),j=1,nj_d)        !watts/meter**3
-
-c---qdelt : electron-ion equilibration, watts/m**3
-      
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(qdelt_d(j),j=1,nj_d)         !watts/meter**3
-c
-c---power to ions from beam, watts/m**3:
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(qbeami_d(j),j=1,nj_d)        !watts/meter**3
-     
-c---qrfe, rf electron heating, watts/m**3
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(qrfe_d(j),j=1,nj_d)          !watts/meter**3
-      
-c---qrfi, rf ion heating, watts/m**3
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(qrfi_d(j),j=1,nj_d)          !watts/meter**3
-
-c---qione, recombination and impact ionization, watts/m**3
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(qione_d(j),j=1,nj_d)         !watts/meter**3
-       
-c---qioni, recombination and impact ionization, watts/m**3
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(qioni_d(j),j=1,nj_d)         !watts/meter**3
-       
-c---qcx,  neutral-ion charge exchange, watts/m**3
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(qcx_d(j),j=1,nj_d)           !watts/meter**3
-
-c---2d MHD equil. electron heating, watts/m**3
-       
-          read(niterdb,'(a)')stflg
-cx          read(niterdb,10)(qe2d_d(j),j=1,nj_d)        !watts/meter**3
-          read(niterdb,10)(blank_d(j),j=1,nj_d)
-          
-c---2d MHD equil.ion heating, watts/m**3
-       
-          read(niterdb,'(a)')stflg
-cx          read(niterdb,10)(qi2d_d(j),j=1,nj_d)         !watts/meter**3
-          read(niterdb,10)(blank_d(j),j=1,nj_d)
-          
-c---fusion electron heating, watts/m**3
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(qfuse_d(j),j=1,nj_d)        !watts/meter**3
-                
-c---fusion ion heating, watts/m**3
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(qfusi_d(j),j=1,nj_d)        !watts/meter**3
-
-c---beam fusion electron heating,watts/m**3
-    
-          read(niterdb,'(a)')stflg
-cx          read(niterdb,10)(qbfuse_d(j),j=1,nj_d)       !watts/meter**3
-          read(niterdb,10)(blank_d(j),j=1,nj_d)
-                 
-c---beam fusion ion heating profile
-       
-          read(niterdb,'(a)')stflg
-cx          read(niterdb,10)(qbfusi_d(j),j=1,nj_d)       !watts/meter**3
-          read(niterdb,10)(blank_d(j),j=1,nj_d)
-                 
-c---qmag electron heating, watts/m**3
-       
-          read(niterdb,'(a)')stflg
-cx          read(niterdb,10)(qmag_d(j),j=1,nj_d)         !watts/meter**3
-          read(niterdb,10)(blank_d(j),j=1,nj_d)
-                
-c---sawtooth electron heating, watts/m**3
-       
-          read(niterdb,'(a)')stflg
-cx          read(niterdb,10)(qsawe_d(j),j=1,nj_d)        !watts/meter**3
-          read(niterdb,10)(blank_d(j),j=1,nj_d)
-                
-c---sawtooth ion  heating, watts/m**3
-       
-          read(niterdb,'(a)')stflg
-cx          read(niterdb,10)(qsawi_d(j),j=1,nj_d)        !watts/meter**3
-          read(niterdb,10)(blank_d(j),j=1,nj_d)
-
-c---radiated power density, watts/m**3
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(qrad_d(j),j=1,nj_d)           !watts/meter**3
-
-c---(electron) ohmic power density,watts/m**3
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(qohm_d(j),j=1,nj_d)           !watts/meter**3
-
-c---avg major radius of each flux surface, meters, at elevation of mag. axis
-       
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(rmajavnpsi_d(j),j=1,nj_d)   !meters
-
-c---avg minor radius of each flux surface,meters, at elevation of mag. axis
-
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(rminavnpsi_d(j),j=1,nj_d)   !meters
-c make gradient smooth near axis so that drhodr will be smooth
-          amin_d=rminavnpsi_d(nj_d)   !meters
-          
-c---volume of each flux surface,  meters**3
-                 
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(psivolp_d(j),j=1,nj_d)      !meters**3
-c
-c--- elongation of each flux surface
-c
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(elongx_d(j),j=1,nj_d)
-c
-c---triangularity of each flux surface
-c
-          read(niterdb,'(a)')stflg
-cx          read(niterdb,10)(triangnpsi_d(j),j=1,nj_d)
-          read(niterdb,10)(deltax_d(j),j=1,nj_d)
-c
-c---indentation of each flux surface
-c 
-          read(niterdb,'(a)')stflg
-cx          read(niterdb,10)(pindentnpsi(j),j=1,nj_d)
-          read(niterdb,10)(blank_d(j),j=1,nj_d)
-c
-c--- flux surface area,  meters**2 4.*pi*pi*R0*hcap*rho*<abs(grad rho)>
-c
-          read(niterdb,'(a)')stflg
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(sfareanpsi_d(j),j=1,nj_d)  !meters**2
-c
-c---cross sectional area of each flux surface, meters**2
-c    
-          read(niterdb,'(a)')stflg
-          read(niterdb,10)(cxareanpsi_d(j),j=1,nj_d)  !meters**2
-c      
-c---flux surface average absolute grad rho
-c     
-         read(niterdb,'(a)')stflg
-         read(niterdb,10)(grho1npsi_d(j),j=1,nj_d)
-c
-c---flux surface average ( grad rho)**2
-c 
-         read(niterdb,'(a)')stflg
-         read(niterdb,10)(grho2npsi_d(j),j=1,nj_d)
-c
-c---plasma boundary:
-c            nplasbdry : no. pts on plasma bdry
-c            r pts for plasma boundary, meters
-c            z pts for plasma boundary, meters
-c
-             read(niterdb,'(a)')stflg
-             read(niterdb,9)nplasbdry_d
-c
-             read(niterdb,'(a)')stflg
-cx           read(niterdb,10)(rplasbdry_d(j), j=1,nplasbdry_d)
-             read(niterdb,10)(bblank_d(j),j=1,nplasbdry_d)
-c
-             read(niterdb,'(a)')stflg
-cx           read(niterdb,10)(zplasbdry_d(j), j=1,nplasbdry_d)
-             read(niterdb,10)(bblank_d(j),j=1,nplasbdry_d)
-c
-c---torque density  Nt-m/m^3 (old iterdb files were in dyne-cm/cm^3 = 10 Nt-m/m^3)
-c
-             if(itorque.ne.0)then
-               read(niterdb,'(a)')stflg
-               read(niterdb,10)(torque_d(j), j=1,nj_d)
-c               write(*,10) (torque_d(j),j=1,nj_d)
-c this rescaling is not needed anymore. 
-c For old iterdb files in cgs units set s0(4)=0.1, s0(5)=0.1, s1(4)=0.1, s1(5)=0.1 
-c to rescale the torque. 
-c                if(idata.eq.1) then
-c                 write(*,*) 'Rescaling torque density ...'
-c                 do j=1,nj_d
-c                  torque_d(j) = torque_d(j) / 10.D0  ! convert to N-M/M**3
-c                 enddo
-c                endif
-             endif
-c
-c---total and fast ion pressure (keV/m^3)
-c   Pa = N/m**2, keV/m**3=Pa/1.602e-16
-c   If iptotr=0, then total thermal pressure computed in pressure.f
-c   Note: pfast_exp has 1.e19 factored out since alpha_exp,m
-c   has 1.e19 factored out of densities
-c
-       if(iptotr.eq.0)then
-         write(*,'(a32)')
-     >   'computing total pressure from thermal pressure'
-         do j=1,nj_d
-           ptot_d(j) = 1.6022D-16*ene_d(j)*(te_d(j)+ti_d(j))   ! Pascals
-           pfast_d(j) = 0.0
-         enddo
-       elseif(iptotr.eq.1) then
-         write(*,'(a32)') 'Reading ptot only' 
-         read(niterdb,'(a)')stflg
-         read(niterdb,10)(ptot_d(j), j=1,nj_d)
-         do j=1,nj_d
-           pfast_d(j)=ptot_d(j)
-     >     -1.6022D-16*ene_d(j)*(te_d(j)+ti_d(j))  !Pascals
-         enddo
-       elseif(iptotr.eq.2) then
-         write(*,'(a32)') 'Reading ptot and pfast'
-         read(niterdb,'(a)')stflg
-         read(niterdb,10)(pfast_d(j), j=1,nj_d)
-         read(niterdb,'(a)')stflg
-         read(niterdb,10)(ptot_d(j), j=1,nj_d)
-       endif
-c
-       close(unit=niterdb,status='keep')
-c      close(unit=niterdb)
-c
-      do j=1,nj_d
-       bp0_d(j)=rbp_d(j)/( max(r_d(j),1.d-6)*fcap_d(j)*
-     >          gcap_d(j)*hcap_d(j) )
-c       write(*,50) j,rho_d(j), r_d(j), fcap_d(j),gcap_d(j),
-c     >            hcap_d(j), bp0_d(j)
-      enddo
-c
-c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
-  8   format(5(2x,a))      !common character variable write/read format
-  9   format(5(2x,i6))     ! common integer write/read format
- 10   format(5(2x,1pe14.4))! common write/read  format
- 12   format(a9,i3)! common write/read  format
- 25   format(' Reading geometric variables for NCLASS ...')
- 50   format(i2,2x,0p1f4.2,0p6f10.5)
- 51   format(i3,2x,0p1f6.4,1p6e12.4)
- 52   format(i2,2x,i2,2x,0p1f4.2,0p6f10.5)
- 53   format(i2,2x,0p1f4.2,0p6e13.5)
- 54   format(i2,2x,0p6e13.5)
- 85   format(' Smoothing electron density profile ...',0p1f4.2)
- 86   format(' Smoothing ion density profile ...',0p1f4.2)
- 87   format(' Smoothing Zeff profile ...',0p1f4.2)
- 88   format(' Smoothing q-profile ...',0p1f4.2)
- 89   format(' Smoothing angrot profile ...',0p1f4.2)
- 90   format(' Smoothing fast ion density profile ...',0p1f4.2)
- 91   format(' Smoothing triangularity profile ...',0p1f4.2)
- 95   format(' Smoothing Qnb profile ...',0p1f4.2)
- 100  format(' Error opening iterdb file')
- 900  format(' Warning: nj_d larger than maximum pts, nj_d = ',i3,
-     > 'max=',i3)
-c
-       end
-c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
-      subroutine trapl (r, y, nj, xint)
-c
-      implicit integer (i-n), real*8 (a-h, o-z)
-c
-c this subroutine integrates y(r) with respect to r from zero to rminor
-c the trapezoidal rule is used
-c
-      dimension  r(*), y(*)
-c
-      xint = 0.0
-      do 10 j=2,nj
- 10   xint = xint + 0.5 * (y(j)+y(j-1)) * (r(j)-r(j-1))
-      return
-c
-      end
-      subroutine readufiles(tok,shot,phase,cudir,mxgrid,ismooth,
-     &                    btscale,xp_time,endtime_pt,time_series,
-     &                    iexp_exch,iexp_q,
-     &                    p_glob_exp,gtauth_exp,gtautot_exp,iproc)
+      subroutine readufiles(tok,shot,phase,cudir,xp_time,endtime,
+     >  time_series,itorque,iptot,mxgrid,nsmooth,idatzero,iproc_d)
 c************************************************************************
 c Reads experimental profiles and splines from ITER PDB 
 c 1D and 2D Ufiles.   
@@ -1191,13 +87,16 @@ c u3dy = values of measured quantities like TEXP, TEXBR, etc.
 c nx3  = number of points in u3dx and u3dy.
 c
 c************************************************************************
+      use data_interface
+c
       implicit none
 c
-      include 'input.m'
-      include 'data_d.m'
+cc      include 'input.m'
+cc      include 'data_d.m'
 c      include 'data_exp.m'
 c
-      integer iproc, mxgrid, idat, nrmax, ntmax, n1d, n2d, n3d, nur
+      integer nrmax, ntmax 
+      integer n1d, n2d, n3d, nur
 c
       parameter(nrmax=301) !max number of radial points in experimental grid
       parameter(ntmax=3800) !max number of time points in experimental grid
@@ -1218,6 +117,8 @@ c
       character*(6) phase
       character*50 cudir
 c
+      integer iproc_d, mxgrid, idat, idatzero, islice_d
+      integer itorque, iptot, time_series
       integer i, ig, is, i2d, ierr, time_channel
      &  , j, i1d, id, ifchar, ichar, ifail, k, jstart, jend
      &  , nnexp_d, ntexp_d, ntixp_d, jj, jn, niterdb, linblnk, ier
@@ -1226,17 +127,17 @@ c
       integer nx3(n3d)
       parameter(mxnr_r=300)
 c
+      real*8 xp_time,endtime
       real*8 rfix, sfix, q01_exp, qa1_exp, zeff_t, zbrac, alamda
      &  , tau_e, ds, z2, alfj1_exp, xxq, alpha, sum, cur0, cursum
      &  , rhostar, shift_shaf, dummy1, aomega
      &  , zhalf, zthird, z2thrd, z4thrd, z3qtr
-      real*8 xp_time, endtime_pt, btscale, gtauth_exp,gtautot_exp
 c
       real*8 rgeo_0d, rmin_0d, bt_0d, ip_0d, nebar_0d, pnbi_0d
      &  , ti0_0d, te0_0d, pich_0d, pech_0d, q0_0d, q95_0d
      &  , kap_0d, delt_0d, wth_0d, wtot_0d
      &  , rho_norm_loc, aj
-      real*8 pi_m, kevdsecpmw, p_glob_exp
+      real*8 pi_m, kevdsecpmw
       real*8 lnlam,eta,pohsum,pradsum,drm,dvoldr_p,dvoldr_m
      &  , prfesum, prfisum, conv_torq
       real*8 apgasa,apgasz,abgasa,abgasz,apimpa,apimpz
@@ -1248,10 +149,10 @@ c
      &  , xtixp_d(nrmax), ytixp_d(nrmax)
      &  , xtixpeb_d(nrmax), ytixpeb_d(nrmax)
 c
-      integer nr, nut, time_series, ismooth, iexp_exch, iexp_q
+      integer nr, nut, ntime_d
       real*8 rho_xp(nrmax+1), ut(ntmax)
       real*8 u1d_t(ntmax,n1d), u2d_t(nrmax,ntmax,n2d)
-      real*8 rhox(0:nrmax-1)
+c      real*8 rhox(0:nrmax-1)
 c
       real*8 xtime_d(ntmax), ytime_d(nrmax,ntmax)
       real*8 rho_er_d(nrmax), er_raw_d(nrmax)
@@ -1290,8 +191,7 @@ c
       idat=0
       rho_norm_loc=1.D0
       conv_torq=1.0
-      nsmooth = ismooth
-      jmaxm=mxgrid
+cc      jmaxm=mxgrid
       pi_m=3.1415926D0
       kevdsecpmw=1.6022D-19*1.D3*1.D-6
       zhalf = 1.D0/2.D0
@@ -1303,15 +203,11 @@ c
 c... Setup grids and constants
 c
       nr=mxgrid+1
-      do j=0,jmaxm
-        aj=dfloat(j)
-        rhox(j)=aj/dfloat(jmaxm)
-        rho_d(j+1)=rhox(j)
+      do j=1,nr
+        rho_d(j)=REAL(j-1)/REAL(mxgrid)
       enddo
-      rhox(0)=1.D-6
-      rhox(jmaxm)=rhox(jmaxm)-1.D-6
-      rho_d(1)=rhox(0)
-      rho_d(jmaxm+1)=rhox(jmaxm)
+c      rho_d(1)=1.0D-6
+c      rho_d(nr)=1.0 - 1.0D-6
 c
 c... Special shots needing different format reads
 c
@@ -1355,17 +251,17 @@ c
          time_flag=0
          if (i.eq.time_channel) then
            time_flag=1
-           if(iproc.eq.0) write(6,*) 'Reading timedata for channel=',i
+           if(iproc_d.eq.0) write(6,*) 'Reading timedata for channel=',i
          endif
          if(time_series.eq.0)then
 c          write(*,*) 'ufile = ',ufile
 c          write(*,*) 'u2d = ',u2d(1,i)
           call u2read(idat,cudir,ufile,88,rho_xp,nr,xp_time,u2d(1,i),
      &               ierr,ntmax,xtime_d, ytime_d, ntime_d, time_flag,
-     &               itime_shift,nsmooth,islice_d,i,iproc)
+     &               itime_shift,nsmooth,islice_d,i,iproc_d)
          else
-          if(i.eq.1 .and. iproc.eq.0) write(6,60)
-          do k=1,mxgrid+1
+          if(i.eq.1 .and. iproc_d.eq.0) write(6,60)
+          do k=1,nr
             pxp(k) = 0.D0
             do j=1,ntmax
               u2d_t(k,j,i) = 0.D0
@@ -1374,12 +270,12 @@ c          write(*,*) 'u2d = ',u2d(1,i)
           call u2tread(cudir,ufile,88,nur,nut,ur,ut,par,nsmooth,i,ierr)
           if(ierr.eq.0)then
            if(nut.lt.2)then
-             if(iproc.eq.0)write(*,*)"error nut < 2 ",nut
+             if(iproc_d.eq.0)write(*,*)"error nut < 2 ",nut
              return
            endif
-           if(ut(1).gt.endtime_pt.or.ut(nut).lt.xp_time
-     >      .or.ut(nut).lt.endtime_pt.or.ut(1).gt.xp_time)then
-             if(iproc.eq.0)
+           if(ut(1).gt.endtime.or.ut(nut).lt.xp_time
+     >      .or.ut(nut).lt.endtime.or.ut(1).gt.xp_time)then
+             if(iproc_d.eq.0)
      >       write(*,*)"error: data time range is ",ut(1),ut(nut)
              stop
            endif
@@ -1392,9 +288,9 @@ c          rho_u(nur) = 1.D0-1.D-10
            jend = 0
 c
            do j=1,nut
-c select times in the range xp_time to endtime_pt
+c select times in the range xp_time to endtime
              if(j.lt.nut.and.ut(j+1).lt.xp_time)go to 9
-             if(j.gt.1.and.ut(j-1).gt.endtime_pt)go to 9
+             if(j.gt.1.and.ut(j-1).gt.endtime)go to 9
                if(jstart.gt.j)jstart=j
                if(jend.lt.j)jend=j
 c fix the boundaries to 0,1
@@ -1430,11 +326,11 @@ c                u2d(k,i) = u2d_t(k,jj,i)
          endif
         endif
         if(ierr.eq.1) then
-           do k=1,mxgrid+1
+           do k=1,nr
               u2d(k,i)=0.D0
            enddo
         else if(ierr.eq.2) then
-           if(iproc.eq.0) write(*,*) 'array dimensions 
+           if(iproc_d.eq.0) write(*,*) 'array dimensions
      &                     incompatible, i = ',i
            stop
         endif
@@ -1442,7 +338,7 @@ c                u2d(k,i) = u2d_t(k,jj,i)
 c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
 c... Smooth data
 c
-      if(ismooth_data.ne.0)call average7_1d(u2d(1,i),nr)
+      if(nsmooth.ne.0)call average7_1d(u2d(1,i),nr)
 c
 c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
 c... Read expdata files
@@ -1468,14 +364,14 @@ c
 c...Reset nx3(i) to zero if an error
 c
          if(ierr.eq.1) then
-            if (iproc.eq.0) write(*,57) ierr,ufile
+            if (iproc_d.eq.0) write(*,57) ierr,ufile
             nx3(i)=0
-            do j=1,mxgrid+1
+            do j=1,nr
                   u3dx(j,i)=0.D0
                   u3dy(j,i)=0.D0
             enddo
          else if(ierr.eq.2) then
-            if(iproc.eq.0) write(*,*) 'array dimensions 
+            if(iproc_d.eq.0) write(*,*) 'array dimensions
      &                      incompatible, i = ',i
             stop
          endif
@@ -1515,7 +411,7 @@ c interpolate to the time of interest
             enddo 
           endif
          else
-           if(i.eq.1 .and. iproc.eq.0) write(6,65)
+           if(i.eq.1 .and. iproc_d.eq.0) write(6,65)
            do j=1,ntmax
              u1d_t(j,i) = 0.D0
            enddo
@@ -1536,10 +432,10 @@ c                 u1d(i) = u1d_t(j,i)
          endif
          if(ierr.eq.1) then
 	    continue
-            if (iproc.eq.0) write(6,57) ierr,ufile
+            if (iproc_d.eq.0) write(6,57) ierr,ufile
             u1d(i)=0.D0
          else if(ierr.eq.2) then
-            if(iproc.eq.0) write(*,*) 'array dimensions 
+            if(iproc_d.eq.0) write(*,*) 'array dimensions
      &                      incompatible, i = ',i
             stop
          endif
@@ -1584,7 +480,7 @@ c
 c..protect against names too long
 c
       if ( ichar .gt. 130 ) then
-       if (iproc .eq. 0 ) then
+       if (iproc_d .eq. 0 ) then
          write (*,*)
          write (*,*) 'directory and file names too long'
          write (*,*) ichar
@@ -1606,20 +502,20 @@ c                       HGELM, HGELMH, VH, PEP
       ifail=0
       call u0read(idatzero,udfile,u0names,u0values,ifail)
 c     open(unit=51,file=ufile(1:ichar), err=90)
-      if (ifail.ne.0 .and. iproc .eq. 0) then
+      if (ifail.ne.0 .and. iproc_d .eq. 0) then
          write(*,*) 'Failure opening 0D ufile'
       else
-         if(iproc.eq.0) then
+         if(iproc_d.eq.0) then
            write(*,*) ' 0D file read successful, ifail=',ifail
          endif
       endif
-      if(iproc.eq.0) write(*,*) ' idatzero = ',idatzero
+      if(iproc_d.eq.0) write(*,*) ' idatzero = ',idatzero
 c
 c      do j=1,165
 c        write(*,*) j, u0values(j)
 c      enddo
 c
-      p_glob_exp=0.D0
+      p_glob_d=0.D0
       phase=' '
       if (ifail.eq.0) then
         if(idatzero.eq.0) then
@@ -1633,10 +529,10 @@ c
           read(u0values(62),1010) ip_0d
           read(u0values(64),1010) q95_0d
 c Estimated thermal power loss (not corrected for cx and orbit losses)
-          read(u0values(133),1010,err=1011) p_glob_exp
-          read(u0values(135),1010,err=1011) gtauth_exp
-          read(u0values(134),1010,err=1011) gtautot_exp
-          p_glob_exp = p_glob_exp*1.D-6  ! [MW]
+          read(u0values(133),1010,err=1011) p_glob_d
+          read(u0values(135),1010,err=1011) gtauth_d
+          read(u0values(134),1010,err=1011) gtautot_d
+          p_glob_d = p_glob_d*1.D-6  ! [MW]
           u0phase = u0values(7)
 c        write(*,*) 'q95_0d = ',q95_0d
         endif
@@ -1662,8 +558,8 @@ c        write(*,*) 'q95_0d = ',q95_0d
           read(u0values(134),*) te0_0d
           read(u0values(111),*) q0_0d
           read(u0values(110),*) q95_0d
-          read(u0values(131),*) gtauth_exp
-          read(u0values(133),*) gtautot_exp
+          read(u0values(131),*) gtauth_d
+          read(u0values(133),*) gtautot_d
           read(u0values(159),*) wth_0d
           read(u0values(160),*) wtot_0d
         endif
@@ -1689,8 +585,8 @@ c        write(*,*) 'q95_0d = ',q95_0d
           read(u0values(53),*) te0_0d
           read(u0values(59),*) q0_0d
           read(u0values(60),*) q95_0d
-          read(u0values(20),*) gtauth_exp
-          read(u0values(21),*) gtautot_exp
+          read(u0values(20),*) gtauth_d
+          read(u0values(21),*) gtautot_d
           read(u0values(14),*) wth_0d
           read(u0values(15),*) wtot_0d
         endif
@@ -1716,8 +612,8 @@ c        write(*,*) 'q95_0d = ',q95_0d
           read(u0values(132),*) te0_0d
           read(u0values(109),*) q0_0d
           read(u0values(108),*) q95_0d
-          read(u0values(129),*) gtauth_exp
-          read(u0values(131),*) gtautot_exp
+          read(u0values(129),*) gtauth_d
+          read(u0values(131),*) gtautot_d
           read(u0values(157),*) wth_0d
           read(u0values(158),*) wtot_0d
         endif
@@ -1746,14 +642,14 @@ c       pimpa=12.0           pimpz=6.0
 c     All five variables may also be set in the input file 
 c     if the 0D file information is not present or desired.
 c
-      if (apgasa.lt.1.D-3) apgasa=amassgas_exp
-      if (apgasz.lt.1.D-3) apgasz=zgas_exp
-      if (abgasa.lt.1.D-2) abgasa=amassgas_exp
-      if (abgasz.lt.1.D-2) abgasz=1.D0
-      if (apimpa.lt.1.D-2) apimpa=amassimp_exp
-      if (apimpz.lt.1.D-2) apimpz=zimp_exp
+cc      if (apgasa.lt.1.D-3) apgasa=amassgas_exp
+cc      if (apgasz.lt.1.D-3) apgasz=zgas_exp
+cc      if (abgasa.lt.1.D-2) abgasa=amassgas_exp
+cc      if (abgasz.lt.1.D-2) abgasz=1.D0
+cc      if (apimpa.lt.1.D-2) apimpa=amassimp_exp
+cc      if (apimpz.lt.1.D-2) apimpz=zimp_exp
 c
-      if (iproc.eq.0) then
+      if (iproc_d.eq.0) then
         write(*,11)
         if(idatzero.ge.1)then
           write(*,13) rgeo_0d,rmin_0d,bt_0d,ip_0d,nebar_0d,pnbi_0d,
@@ -1771,10 +667,10 @@ c...  Note that here p_glob_exp can still be .le.0
 c...  In that case it is assigned a value (according
 c...  to 1D data) just before ITER89P is calculated.
 c
-      if (p_glob_exp.le.0.0 .and. idatzero.eq.0) then
+      if (p_glob_d.le.0.0 .and. idatzero.eq.0) then
         if (ifail.eq.0) then
-          read(u0values(76),1010,err=1012) p_glob_exp
-          p_glob_exp = p_glob_exp*1.D-6                  ![MW]
+          read(u0values(76),1010,err=1012) p_glob_d
+          p_glob_d = p_glob_d*1.D-6                  ![MW]
         endif
       endif
 c
@@ -1847,7 +743,7 @@ c volo : plasma volume,meters**3
 c
 c Btor : vaccuum toroidal field at rmajor, tesla         
          btor_d=u1d(2)                    !tesla
-         if(btscale.gt.1.) btor_d=btor_d*btscale
+cc         if(btscale.gt.1.) btor_d=btor_d*btscale
 c
 c total, ohmic, bootstrap, beam, and rf currents, amps       
 c        tocur_d
@@ -1857,7 +753,7 @@ c        totbeam_d
 c        totrf_d
 c
          tocur_d=u1d(5)
-         curtot=tocur_d/1.D6
+cc         curtot=tocur_d/1.D6
 c
 c betap : poloidal beta         
 c         betap_d
@@ -1895,7 +791,7 @@ c
              r_d(j)=rho_d(j)*u1d(1)*sqrt(u1d(6))    !meters
              r_d(j)=r_d(j)*rho_norm_loc
           enddo
-          if (r_d(nj_d).eq.0.0 .and. iproc.eq.0) then
+          if (r_d(nj_d).eq.0.0 .and. iproc_d.eq.0) then
             write(6,*) 'Warning rep_iter: r_d zero'
           endif
 c        stop
@@ -1926,10 +822,10 @@ c         with surface area = vprime*<abs(gradrho)> and
 c         vprime = dV/drho
 c
            rfix=1.D0
-           if(istk.eq.88) rfix=4.46
-           sfix=1.D0
-           if(istk.eq.88) sfix=22.825
-           if(istk.eq.88) write(6,*) 'sfix=22.825'
+cc           if(istk.eq.88) rfix=4.46
+cc           sfix=1.D0
+cc           if(istk.eq.88) sfix=22.825
+cc           if(istk.eq.88) write(6,*) 'sfix=22.825'
 c
           do j=2,nj_d
             hcap_d(j)=sfix*u2d(j,19)/(u2d(j,5)*
@@ -1948,7 +844,7 @@ c--- flux surface area,  meters**2 4.*pi*pi*R0*hcap*rho*<abs(grad rho)>
 c
 c        u2d(2,19)=0.D0
         if ( u2d(2,19).eq.0 ) then
-          if(iproc.eq.0)
+          if(iproc_d.eq.0)
      >     write(6,'(a33)') 'Computing flux surface area, hcap'
           do j=2,nj_d-1
            sfareanpsi_d(j)=
@@ -2032,11 +928,11 @@ c
            ti_d(j)=u2d(j,22)/1.D3          !kev
           enddo
   
-       if( iexp_exch.eq.2) then
-        do j=1,nj_d
-         ti_d(j)=te_d(j)-.001
-        enddo
-       endif    
+cc       if( iexp_exch.eq.2) then
+cc        do j=1,nj_d
+cc         ti_d(j)=te_d(j)-.001
+cc        enddo
+cc       endif    
 c
 c---q (ie safety factor) profile
 c
@@ -2072,10 +968,10 @@ c               write(*,100) j, rho_d(j),u2d(j,20)
                if (zeff_t.eq.0.) zeff_t=u1d(11)
                if (zeff_t.eq.0.) then
                  zeff_t=1.
-                 if(iproc.eq.0) write(6,*) 'zeff_t=1.'
+                 if(iproc_d.eq.0) write(6,*) 'zeff_t=1.'
                endif
 c
-               if(iproc.eq.0 .and. apimpz.lt.2.D0)
+               if(iproc_d.eq.0 .and. apimpz.lt.2.D0)
      >           write(6,*) '*** WARNING: apimpz looks fishy ***'
                if(en_d(j,1).eq.0.) 
      >          en_d(j,1)=(apimpz-zeff_t)/(apimpz-apgasz)/apgasz
@@ -2084,7 +980,7 @@ c
      >          en_d(j,2)=(zeff_t-apgasz)/(apimpz-apgasz)/apimpz
      >		              *u2d(j,7)
                if(en_d(j,1).lt.0..or.en_d(j,2).lt.0.) then
-                 if(iproc.eq.0) write(6,*) 'negative density fixed'
+                 if(iproc_d.eq.0) write(6,*) 'negative density fixed'
                  en_d(j,1)=dabs(en_d(j,1))
                  en_d(j,2)=dabs(en_d(j,2))
                endif
@@ -2340,7 +1236,8 @@ c
 c
 c NRL formulary :
 c
-       if(qdelt_d(nj_d).eq.0.or.iexp_exch.ge.1) then       
+cc       if(qdelt_d(nj_d).eq.0.or.iexp_exch.ge.1) then 
+       if(qdelt_d(nj_d).eq.0)then      
          do j=1,nj_d
            zbrac=en_d(j,1)/ene_d(j)+apgasa/
      >         apimpa*en_d(j,2)/ene_d(j)*apimpz**2
@@ -2352,11 +1249,11 @@ c
      >         tau_e*ene_d(j)*1.D-6*(te_d(j)-ti_d(j))*1.D3
          enddo                    
        endif     !watts/meter**3
-       if(iexp_exch.eq.-1) then
-        do j=1,nj_d
-         qdelt_d(j)=0.D0
-        enddo
-       endif
+cc       if(iexp_exch.eq.-1) then
+cc        do j=1,nj_d
+cc         qdelt_d(j)=0.D0
+cc        enddo
+cc       endif
 c
 c---power to ions from beam, watts/m**3
 c   
@@ -2368,7 +1265,8 @@ c---qrfe, rf electron heating, watts/m**3 (QECHE + QICRHE)
 c          read(niterdb,'(a)')stflg
 c          read(niterdb,10)(qrfe_d(j),j=1,nj_d)          !watts/meter**3 
            do j=1,nj_d
-            qrfe_d(j)=u2d(j,33)*echconv + u2d(j,34)
+cc            qrfe_d(j)=u2d(j,33)*echconv + u2d(j,34)
+            qrfe_d(j)=u2d(j,33) + u2d(j,34)
            enddo
 c    
 c---qrfi, rf ion heating, watts/m**3 (QECHI + QICRHI)
@@ -2393,7 +1291,7 @@ c
          prfisum=prfisum+
      >     zhalf*(dvoldr_p*qrfi_d(j)+dvoldr_m*qrfi_d(j-1))*drm
        enddo
-c      if(iproc.eq.0) then
+c      if(iproc_d.eq.0) then
 c        write(6,'(a27,2F10.3)') 'Total integrated Prfe,Prfi [MW]:',
 c    >        prfesum*1.D-6,prfisum*1.D-6
 c      endif
@@ -2501,7 +1399,7 @@ c    PTOTR has units of Pascals
 c    Use thermal pressure if total pressure not provided
 c
        if(u2d(1,44) .eq. 0.0) then
-         if(iproc.eq.0) then
+         if(iproc_d.eq.0) then
           write(6,'(a31)') 'Error: total pressure not found'
           write(6,'(a32)') 'Computing total thermal pressure'
          endif
@@ -2517,7 +1415,7 @@ c            write(*,53) j, r_d(j)/r_d(nj_d),ptot_d(j)
      >       - ene_d(j)*(te_d(j)+ti_d(j))*1.6022D-16
 c     >            (ene_d(j) - (zimp_exp-1.D0)*
 c     >            en_d(j,nprim_d+1))*ti_d(j))
-            if(ipfst.eq.1) pfast_d(j)=0.D0
+cc            if(ipfst.eq.1) pfast_d(j)=0.D0
 c           write(*,53) j, r_d(j)/r_d(nj_d),ptot_d(j),pfast_d(j)
          enddo
        endif
@@ -2536,7 +1434,7 @@ c
          pradsum=pradsum+
      >     zhalf*(dvoldr_p*qrad_d(j)+dvoldr_m*qrad_d(j-1))*drm
        enddo
-c      if(iproc.eq.0) write(6,'(a27,F10.3)') 
+c      if(iproc_d.eq.0) write(6,'(a27,F10.3)')
 c    >   'Total integrated Prad [MW]:', pradsum*1.D-6
 c
 c... calculate integrated ohmic heating power
@@ -2552,10 +1450,10 @@ c
            pohsum=pohsum+
      >      zhalf*(dvoldr_p*qohm_d(j)+dvoldr_m*qohm_d(j-1))*drm
          enddo
-       if(iproc.eq.0) write(6,'(a27,F10.3)') 
+       if(iproc_d.eq.0) write(6,'(a27,F10.3)')
      >   'Total integrated Pohm [MW]:', pohsum*1.D-6
        else
-       if(iproc.eq.0) write(6,'(a30,F7.3)') 
+       if(iproc_d.eq.0) write(6,'(a30,F7.3)')
      >   'Total Pohm [MW] from 1D ufile:',pohm_d*1.D-6
        endif
 c
@@ -2564,34 +1462,35 @@ c...Calculate q-profile if not available
 c   using qa1_exp and q01_exp values
 c   alfj_exp=(qa1_exp/q01_exp-1.) corresponds to ja=0 and shata_exp=2.
 c
-       qa1_exp=u1d(8)
-       q01_exp=q0_exp
-       alfj1_exp=(qa1_exp/q01_exp-1.D0)
-      if(q_d(nj_d).eq.0.or.iexp_q.eq.-1) then
-        if(iproc.eq.0) write(6,*) 'Calculating q(r) ...'
+cc       qa1_exp=u1d(8)
+cc       q01_exp=q0_exp
+cc       q01_exp = 1.0
+cc       alfj1_exp=(qa1_exp/q01_exp-1.D0)
+cc      if(q_d(nj_d).eq.0.or.iexp_q.eq.-1) then
+cc        if(iproc_d.eq.0) write(6,*) 'Calculating q(r) ...'
 c
-      do j=2,nj_d
-       xxq=rho_xp(j)**2
-       q_d(j)=1.D0/(1.D0/(q01_exp*xxq*(alfj1_exp+1.D0))*
-     >               (1.D0-(1.D0+1.D-10-xxq)**(alfj1_exp+1)))
-      enddo
+cc      do j=2,nj_d
+cc       xxq=rho_xp(j)**2
+cc       q_d(j)=1.D0/(1.D0/(q01_exp*xxq*(alfj1_exp+1.D0))*
+cc     >               (1.D0-(1.D0+1.D-10-xxq)**(alfj1_exp+1)))
+cc      enddo
 c
-      if(qmin_exp.ne.0.) then
-      do j=2,nj_d
-       xxq=rho_xp(j)**2
-       q_d(j)=(rho_xp(j)-rho_qm_exp)**2/(1.D0-rho_qm_exp)**2
-     >   *(qa_exp-qmin_exp)+qmin_exp
-      enddo 
-      endif
-         q_d(1)=q_d(2)
-      endif
+cc      if(qmin_exp.ne.0.) then
+cc      do j=2,nj_d
+cc       xxq=rho_xp(j)**2
+cc       q_d(j)=(rho_xp(j)-rho_qm_exp)**2/(1.D0-rho_qm_exp)**2
+cc     >   *(qa_exp-qmin_exp)+qmin_exp
+cc      enddo 
+cc      endif
+cc         q_d(1)=q_d(2)
+cc      endif
 c
 c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
 c...Calculate J(r) from q-profile if not available
 c
            if (curden_d(1).EQ.0) then 
 c
-             if(iproc.eq.0) 
+             if(iproc_d.eq.0)
      &          write(6,*) 'Calculating j(r) from q-profile'
 c
 c...         Check if total current is given
@@ -2603,7 +1502,7 @@ c...         to within 5-10%):
 c...         1.e6 convert totohm_d from MA to A,
 c
              if (tocur_d.EQ.0) then
-               if(iproc.eq.0) write(6,*) 'Total 
+               if(iproc_d.eq.0) write(6,*) 'Total
      &            current calculated from q(r)'
                tocur_d=(5.D0*r_d(nj_d)**2*btor_d/rmajor_d/q_d(nj_d))
      &         *(1.D0+1.5D0*(r_d(nj_d)/rmajor_d)**2)
@@ -2638,7 +1537,7 @@ c
 c
          if (qohm_d(1).EQ.0) then
 c
-           if(iproc.eq.0) write(6,*)
+           if(iproc_d.eq.0) write(6,*)
      >       'Warning rep_iter: no ohmic power profile; making one up'
 c
 c...       calculate qohm_d from j(r) and loop voltage
@@ -2673,10 +1572,10 @@ crew and assume dE/dr=0 ie steady state current profile
             enddo
            endif
 crew why calc?           pohm_d = pohsum
-         if(iproc.eq.0) write(6,'(a27,F10.3,a10,F7.3)') 
+         if(iproc_d.eq.0) write(6,'(a27,F10.3,a10,F7.3)')
      >     'Total calculated Pohm [MW]:', pohsum*1.D-6,
      >     'Vloop = ',vsurf_d
-         if(iproc.eq.0) write(6,'(a27,F10.3)') 
+         if(iproc_d.eq.0) write(6,'(a27,F10.3)')
      >     'Total integrated Ip  [MA]:', cursum*1.D-6
 c
          end if  !end making up ohmic profile
@@ -2703,18 +1602,18 @@ c
 c
 c use 1D value for NTCC benchmarking if itest_ntcc.gt.0
 c
-         if( elongx_d(nj_d).lt.1.e-3) then
-          if(itest_ntcc.gt.0) then
-            write(*,32)
-            do j=1,nj_d
-              elongx_d(j)=u1d(6)
-            enddo
-          else
-            do j=1,nj_d
-              elongx_d(j)= (r_d(j)/rminavnpsi_d(j))**2
-            enddo
-          endif
-         endif
+cc         if( elongx_d(nj_d).lt.1.e-3) then
+cc          if(itest_ntcc.gt.0) then
+cc            write(*,32)
+cc            do j=1,nj_d
+cc              elongx_d(j)=u1d(6)
+cc            enddo
+cc          else
+cc            do j=1,nj_d
+cc              elongx_d(j)= (r_d(j)/rminavnpsi_d(j))**2
+cc            enddo
+cc          endif
+cc         endif
 c
 c--- triangularity at each flux surface
           do j=1,nj_d
@@ -2725,13 +1624,13 @@ c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
  999  return
 c
  89   continue
-      if(iproc.eq.0) 
+      if(iproc_d.eq.0)
      >   write(*,*) 'Error reading iter namelist'
       close(50)
       goto 999
 c     
  90   continue
-      if(iproc.eq.0) 
+      if(iproc_d.eq.0)
      >   write(*,*) 'Error reading the 0d file'
       stop
 c
@@ -3540,7 +2439,7 @@ c--------1---------2---------3---------4---------5---------6---------7-c
 c
       subroutine u2read ( idat, cdir, cfile, kufile,
      & ppxu, kkxu, ppyu, pdata, kerr, mxtime,
-     & xtime, ytime, nty, time_flag, ishift, nsmooth, islice,it,iproc)
+     & xtime, ytime, nty, time_flag, ishift, nsmooth, islice,it,iproc_d)
 c
 c   This routine reads 2-D ASCII U-files.
 c
@@ -3588,7 +2487,7 @@ c--------1---------2---------3---------4---------5---------6---------7-c
 c
       implicit none
 c
-      integer it, jmaxm, idat, iproc
+      integer it, jmaxm, idat, iproc_d
       integer mxtime, kkxu
       parameter (jmaxm=301)
       real*8 parray(jmaxm,mxtime), pxu(jmaxm), pyu(mxtime), zu(6)
@@ -4003,7 +2902,7 @@ c     enddo
 c
         nty=kyu  
 c
-        if(iproc.eq.0) write(6,*) 'Number of timesamples:', kyu
+        if(iproc_d.eq.0) write(6,*) 'Number of timesamples:', kyu
 c
         do i=1,kyu           !start time loop
 c
@@ -4824,7 +3723,7 @@ c
 c     data mxshot/50/,mxrow/7/
       data mxshot/1/,mxrow/16/,mxcol/12/,nnames/200/
 c      include 'mpif.h'
-      include 'glf.m'
+cc      include 'glf.m'
 c
 c     open(unit=nun,file='readnames_0d.dat',status='old',err=888)
 c     read(nun,'(i5)') nnames
@@ -4885,342 +3784,3 @@ c
       goto 888
  500  format('0D file =',a50)
       end
-      subroutine inter_cspl(n,r,data,m,x,ds)
-c
-c... INTERPOLATE DATA TO NEW GRID
-c
-      implicit none
-c
-      integer j, n, m, ifail
-      real*8 r(n), data(n), x(m), ds(m), br(n)
-      logical sk
-c
-      sk = .TRUE.
-c 
-      ifail=0
-c     call e01bee(n,r,data,br,ifail)
-c     call e01bfe(n,r,data,br,m,x,ds,ifail)
-c
-      call dpchim(n,r,data,br,1,ifail)
-      call dpchfe(n,r,data,br,1,sk,m,x,ds,ifail)
-c
-      return
-      end
-c@datavg.f
-c jek 19-Jan-11 version 2.0
-c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
-c
-c... Smoothes data via 7-pt averaging if(ismooth_data.ne.0)
-c
-c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
-c  
-      subroutine datavg
-c
-      implicit none
-      include 'data_d.m'
-      include 'input.m'
-c
-      integer j, jj, jn
-c
-       call average7_1d(fcap_d,nj_d)
-       call average7_1d(fcap_d,nj_d)
-       call average7_1d(gcap_d,nj_d)
-       call average7_1d(gcap_d,nj_d)
-       call average7_1d(hcap_d,nj_d)
-       call average7_1d(hcap_d,nj_d)
-c
-       call average7_1d(te_d,nj_d)
-       call average7_1d(ti_d,nj_d)
-c
-       call average7_1d(q_d,nj_d)
-       call average7_1d(q_d,nj_d)
-c
-       call average7_1d(ene_d,nj_d)
-       do jj=1,nion_d
-         call average7_1d(en_d(1,jj),nj_d)
-       enddo
-       do jj=1,nprim_d
-          call average7_1d(sion_d(1,jj),nj_d)
-          call average7_1d(srecom_d(1,jj),nj_d)
-          call average7_1d(scx_d(1,jj),nj_d)
-          call average7_1d(sbcx_d(1,jj),nj_d)
-          call average7_1d(s_d(1,jj),nj_d)
-          call average7_1d(dudtsv_d(1,jj),nj_d)
-       enddo
-       do jn=1,nneu_d
-          call average7_1d(enn_d(1,jn),nj_d)
-          call average7_1d(ennw_d(1,jn),nj_d)
-          call average7_1d(ennv_d(1,jn),nj_d)
-c          call average7_1d(volsn_d(1,jn),nj_d)
-       enddo
-       call average7_1d(enbeam_d,nj_d)
-       call average7_1d(enbeam_d,nj_d)
-c
-       call average7_1d(sbion_d,nj_d)
-       call average7_1d(sbeam_d,nj_d)
-c
-       call average7_1d(curden_d,nj_d)
-       call average7_1d(curohm_d,nj_d)
-       call average7_1d(curboot_d,nj_d)
-       call average7_1d(curbeam_d,nj_d)
-       call average7_1d(currf_d,nj_d)
-c
-       call average7_1d(rbp_d,nj_d)
-c
-       call average7_1d(zeff_d,nj_d)
-       call average7_1d(zeff_d,nj_d)
-c
-       call average7_1d(angrot_d,nj_d)
-c
-       if(ismooth_data.ge.2) call average7_1d(dpedtc_d,nj_d)
-       if(ismooth_data.ge.2) call average7_1d(dpidtc_d,nj_d)
-c
-       call average7_1d(qdelt_d,nj_d)
-       call average7_1d(qbeame_d,nj_d)
-       call average7_1d(qbeami_d,nj_d)
-       call average7_1d(qrfe_d,nj_d)
-       call average7_1d(qrfi_d,nj_d)
-       call average7_1d(qfuse_d,nj_d)
-       call average7_1d(qfusi_d,nj_d)
-       if(ismooth_data.ge.2) call average7_1d(qrad_d,nj_d)
-       if(ismooth_data.ge.2) call average7_1d(qohm_d,nj_d)
-       if(ismooth_data.ge.2) call average7_1d(qione_d,nj_d)
-       if(ismooth_data.ge.2) call average7_1d(qioni_d,nj_d)
-       if(ismooth_data.ge.2) call average7_1d(qcx_d,nj_d)
-c
-       call average7_1d(rmajavnpsi_d,nj_d)
-       call average7_1d(rmajavnpsi_d,nj_d)
-c
-       call average7_1d(rminavnpsi_d,nj_d)
-       call average7_1d(rminavnpsi_d,nj_d)
-c
-       call average7_1d(psivolp_d,nj_d)
-       call average7_1d(psivolp_d,nj_d)
-c
-       call average7_1d(elongx_d,nj_d)
-       call average7_1d(elongx_d,nj_d)
-c
-       call average7_1d(deltax_d,nj_d)
-       call average7_1d(deltax_d,nj_d)
-c
-       call average7_1d(sfareanpsi_d,nj_d)
-       call average7_1d(sfareanpsi_d,nj_d)
-c
-       call average7_1d(cxareanpsi_d,nj_d)
-       call average7_1d(cxareanpsi_d,nj_d)
-c      
-       call average7_1d(grho1npsi_d,nj_d)
-       call average7_1d(grho1npsi_d,nj_d)
-c
-       call average7_1d(grho2npsi_d,nj_d)
-       call average7_1d(grho2npsi_d,nj_d)
-c
-       if(itorque.ne.0 .or. iptotr.eq.2)then
-         call average7_1d(torque_d,nj_d)
-       endif
-c
-       call average7_1d(ptot_d,nj_d)
-       if(iptotr.eq.2) then
-         call average7_1d(pfast_d,nj_d)
-       endif
-c
-       if(ncl_flag.eq.1) then
-         call average7_1d(xb2_d,nj_d)
-         call average7_1d(xbm2_d,nj_d)
-         call average7_1d(xb2_d,nj_d)
-         call average7_1d(xbm2_d,nj_d)
-         call average7_1d(xngrth_d,nj_d)
-         call average7_1d(xgrbm2_d,nj_d)
-         call average7_1d(fm1_d,nj_d)
-         call average7_1d(fm2_d,nj_d)
-         call average7_1d(fm3_d,nj_d)
-         call average7_1d(fhat_d,nj_d)
-       endif
-c
-      end
-      subroutine average7_1d(f,nk)
-c*****************************************************
-c
-c performs a two pass seven point average 
-c
-c*****************************************************
-      implicit none
-c
-      integer nk,k,i,m
-      real*8 f(nk),g(nk)
-c
-c check if grid is too small
-      if(nk.lt.7)return
-c
-        g(1)=f(1)
-        g(nk)=f(nk)
-        k=2
-        g(k)=(f(k)+f(k+1)+f(k-1))/3.D0
-        k=3
-        g(k)=(f(k)+f(k+1)+f(k-1)+f(k+2)+f(k-2))/5.D0
-        k=nk-1
-        g(k)=(f(k)+f(k+1)+f(k-1))/3.D0
-        k=nk-2
-        g(k)=(f(k)+f(k+1)+f(k-1)+f(k+2)+f(k-2))/5.D0
-        do k=4,nk-3
-          g(k)=(f(k)+f(k-1)+f(k+1)+f(k-2)+f(k+2)
-     >          + f(k+3)+f(k-3))/7.D0
-        enddo
-        k=2
-        f(k)=(g(k)+g(k+1)+g(k-1))/3.D0
-        k=3
-        f(k)= (g(k)+g(k+1)+g(k-1)+g(k+2)+g(k-2))/5.D0
-        k=nk-1
-        f(k)=(g(k)+g(k+1)+g(k-1))/3.D0
-        k=nk-2
-        f(k)= (g(k)+g(k+1)+g(k-1)+g(k+2)+g(k-2))/5.D0
-        do k=4,nk-3
-          f(k)= (g(k)+g(k+1)+g(k-1)+g(k+2)+g(k-2)
-     >            + g(k+3)+g(k-3))/7.D0
-        enddo
-      return
-      end
-c******************************************************
-      subroutine part(work,largs,strnxt)
-c******************************************************
-c*****part finds the next item in the string.
-c*****Input:
-c*****work-a character variable.
-c*****largs-the number of characters to be parsed
-c*****Output:
-c*****strnxt-the next item in the list,
-c*****       delimited by matched blanks, "", or {}
-c*****Note: On return, work and largs have been modified to reflect
-c*****      the removal of the first item.
-c*****last revision: 12/94 s.e.attenberger, w.a.houlberg, ornl
-c*******************************************************
-      implicit none
-c
-      integer largs, ltst, lenst, ntst
-      character*(*) work,  strnxt
-      character*1 find,    tab,    wtst
-      character*1 space,      quote,      lbr,     rbr
-      data        space/' '/, quote/'"'/, lbr/'{'/, rbr/'}'/
-      tab=char(9)
-c
-      strnxt=' '
-      if(largs.eq.0) return
-c*****look for start of item (non-blank character)
-      ltst=0
-100   ltst=ltst+1
-      if    ((work(ltst:ltst).eq.space.or.work(ltst:ltst).eq.tab)
-     >        .and. ltst.lt.largs) then
-        go to 100
-      elseif((work(ltst:ltst).eq.space.or.work(ltst:ltst).eq.tab)
-     >        .and. ltst.eq.largs) then
-c*****  no items in this list
-        strnxt=' '
-        work=' '
-        largs=0
-        return
-      elseif(work(ltst:ltst).eq.quote) then
-        find=quote
-        ltst=ltst+1
-      elseif(work(ltst:ltst).eq.lbr) then
-        find=rbr
-        ltst=ltst+1
-      else
-        find=space
-      endif
-      lenst=1
-      strnxt(lenst:lenst)=work(ltst:ltst)
-c*****Start of item is character ltst.  Now search for end of item.
-      ntst=ltst
-200   ntst=ntst+1
-c*****Treat tab like space for testing, but dont replace tab in work.
-      wtst=work(ntst:ntst)
-      if(wtst.eq.tab) wtst=space
-      if(ntst.gt.largs.and.find.ne.space) then
-        write(*,*)' fatal error, missing ///', find,'/// near'
-        write(*,*)work(1:largs)
-        stop
-      elseif(ntst.le.largs.and.wtst.ne.find) then
-        lenst=lenst+1
-        strnxt(lenst:lenst)=work(ntst:ntst)
-        go to 200
-      elseif(ntst.gt.largs.and.find.eq.space) then
-c*****  successful exit, end of string.
-c*****  (no space delimiter is required at the end of a string)
-        work(1:largs)=' '
-        largs=0
-      elseif(wtst.eq.find)then
-c*****  successful exit
-        work(1:largs-ntst)=work(ntst+1:largs)
-        work(largs-ntst+1:largs)=' '
-        largs=largs-ntst
-      endif
-c
-      return
-      end
-!
-      SUBROUTINE W_LIN_INTERP(n1,x1,y1,n2,x2,y2,iflag,message)
-!***********************************************************************
-!W_LIN_INTERP does a linear interpolation to obtain n2 values for the
-!  target array y2 on the grid x2 from the n1 values of y1 on the grid
-!  x1
-!References:
-!  W.A.Houlberg 3/2000
-!Input:
-!  n1-number of abscissas and values in the source arrays
-!  x1-array of source abscissas
-!  y1-array of source values
-!  n2-number of target values to be found
-!  x2-array of target abscissas
-!Output:
-!  y2-array of target values
-!  iflag-error and warning flag
-!       =-1 warning
-!       =0 no warnings or errors
-!       =1 error
-!  message-warning or error message (character)
-!***********************************************************************
-      IMPLICIT NONE
-!Declaration of input variables
-      INTEGER        n1,                      n2
-      REAL           x1(*),                   y1(*),
-     &               x2(*)
-!Declaration of output variables
-      CHARACTER*(*)  message
-      INTEGER        iflag
-      REAL           y2(*)
-!Declaration of local variables
-      INTEGER        i,                       il
-      IF(n1.lt.2) THEN
-        iflag=1
-        message='W_LIN_INTERP/ERROR:less than 2 points in source array'
-      ELSE
-        il=1
-        DO i=1,n2
-   10     IF(x2(i).lt.x1(1)) THEN
-!           Use innermost data value
-            y2(i)=y1(1)
-            iflag=-1
-            message='W_LIN_INTERP(1)/WARNING:x<x(1), use end point'
-          ELSEIF(x2(i).eq.x1(1)) THEN
-            y2(i)=y1(1)
-          ELSEIF(x2(i).gt.x1(il+1)) THEN
-            IF(il.lt.n1-1) THEN
-!             Step x1 grid forward and loop
-              il=il+1
-              GOTO 10
-            ELSE
-!             Set to last value
-              y2(i)=y1(n1)
-              iflag=-1
-              message='W_LIN_INTERP(2)/WARNING:x>x(n1), use end point'
-            ENDIF
-          ELSE
-!           Interpolate
-            y2(i)=y1(il)
-     &            +(y1(il+1)-y1(il))*(x2(i)-x1(il))/(x1(il+1)-x1(il))
-          ENDIF
-        ENDDO
-      ENDIF
-      RETURN
-      END
-   

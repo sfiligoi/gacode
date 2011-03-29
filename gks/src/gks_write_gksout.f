@@ -1321,7 +1321,7 @@ c          if (stat .ne. nf_noerr) call handle_err(stat)
      >    ti_exp(0:jmaxm))
           k=k+1
           oneval(k) = nf_put_var_double(ncid, rhid1(k),
-     >    ptot_exp(0:jmaxm))
+     >    ptot_exp(0:jmaxm)*1.6022D+3)
           k=k+1
           oneval(k) = nf_put_var_double(ncid, rhid1(k),
      >    pfast_exp(0:jmaxm))

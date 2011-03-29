@@ -1,3 +1,187 @@
+c******************************************************
+      subroutine part(work,largs,strnxt)
+c******************************************************
+c*****part finds the next item in the string.
+c*****Input:
+c*****work-a character variable.
+c*****largs-the number of characters to be parsed
+c*****Output:
+c*****strnxt-the next item in the list,
+c*****       delimited by matched blanks, "", or {}
+c*****Note: On return, work and largs have been modified to reflect
+c*****      the removal of the first item.
+c*****last revision: 12/94 s.e.attenberger, w.a.houlberg, ornl
+c*******************************************************
+      implicit none
+c
+      integer largs, ltst, lenst, ntst
+      character*(*) work,  strnxt
+      character*1 find,    tab,    wtst
+      character*1 space,      quote,      lbr,     rbr
+      data        space/' '/, quote/'"'/, lbr/'{'/, rbr/'}'/
+      tab=char(9)
+c
+      strnxt=' '
+      if(largs.eq.0) return
+c*****look for start of item (non-blank character)
+      ltst=0
+100   ltst=ltst+1
+      if    ((work(ltst:ltst).eq.space.or.work(ltst:ltst).eq.tab)
+     >        .and. ltst.lt.largs) then
+        go to 100
+      elseif((work(ltst:ltst).eq.space.or.work(ltst:ltst).eq.tab)
+     >        .and. ltst.eq.largs) then
+c*****  no items in this list
+        strnxt=' '
+        work=' '
+        largs=0
+        return
+      elseif(work(ltst:ltst).eq.quote) then
+        find=quote
+        ltst=ltst+1
+      elseif(work(ltst:ltst).eq.lbr) then
+        find=rbr
+        ltst=ltst+1
+      else
+        find=space
+      endif
+      lenst=1
+      strnxt(lenst:lenst)=work(ltst:ltst)
+c*****Start of item is character ltst.  Now search for end of item.
+      ntst=ltst
+200   ntst=ntst+1
+c*****Treat tab like space for testing, but dont replace tab in work.
+      wtst=work(ntst:ntst)
+      if(wtst.eq.tab) wtst=space
+      if(ntst.gt.largs.and.find.ne.space) then
+        write(*,*)' fatal error, missing ///', find,'/// near'
+        write(*,*)work(1:largs)
+        stop
+      elseif(ntst.le.largs.and.wtst.ne.find) then
+        lenst=lenst+1
+        strnxt(lenst:lenst)=work(ntst:ntst)
+        go to 200
+      elseif(ntst.gt.largs.and.find.eq.space) then
+c*****  successful exit, end of string.
+c*****  (no space delimiter is required at the end of a string)
+        work(1:largs)=' '
+        largs=0
+      elseif(wtst.eq.find)then
+c*****  successful exit
+        work(1:largs-ntst)=work(ntst+1:largs)
+        work(largs-ntst+1:largs)=' '
+        largs=largs-ntst
+      endif
+c
+      return
+      end
+!
+      SUBROUTINE W_LIN_INTERP(n1,x1,y1,n2,x2,y2,iflag,message)
+!***********************************************************************
+!W_LIN_INTERP does a linear interpolation to obtain n2 values for the
+!  target array y2 on the grid x2 from the n1 values of y1 on the grid
+!  x1
+!References:
+!  W.A.Houlberg 3/2000
+!Input:
+!  n1-number of abscissas and values in the source arrays
+!  x1-array of source abscissas
+!  y1-array of source values
+!  n2-number of target values to be found
+!  x2-array of target abscissas
+!Output:
+!  y2-array of target values
+!  iflag-error and warning flag
+!       =-1 warning
+!       =0 no warnings or errors
+!       =1 error
+!  message-warning or error message (character)
+!***********************************************************************
+      IMPLICIT NONE
+!Declaration of input variables
+      INTEGER        n1,                      n2
+      REAL           x1(*),                   y1(*),
+     &               x2(*)
+!Declaration of output variables
+      CHARACTER*(*)  message
+      INTEGER        iflag
+      REAL           y2(*)
+!Declaration of local variables
+      INTEGER        i,                       il
+      IF(n1.lt.2) THEN
+        iflag=1
+        message='W_LIN_INTERP/ERROR:less than 2 points in source array'
+      ELSE
+        il=1
+        DO i=1,n2
+   10     IF(x2(i).lt.x1(1)) THEN
+!           Use innermost data value
+            y2(i)=y1(1)
+            iflag=-1
+            message='W_LIN_INTERP(1)/WARNING:x<x(1), use end point'
+          ELSEIF(x2(i).eq.x1(1)) THEN
+            y2(i)=y1(1)
+          ELSEIF(x2(i).gt.x1(il+1)) THEN
+            IF(il.lt.n1-1) THEN
+!             Step x1 grid forward and loop
+              il=il+1
+              GOTO 10
+            ELSE
+!             Set to last value
+              y2(i)=y1(n1)
+              iflag=-1
+              message='W_LIN_INTERP(2)/WARNING:x>x(n1), use end point'
+            ENDIF
+          ELSE
+!           Interpolate
+            y2(i)=y1(il)
+     &            +(y1(il+1)-y1(il))*(x2(i)-x1(il))/(x1(il+1)-x1(il))
+          ENDIF
+        ENDDO
+      ENDIF
+      RETURN
+      END
+      subroutine inter_cspl(n,r,datad,m,x,ds)
+c
+c... INTERPOLATE DATA TO NEW GRID
+c
+      implicit none
+c
+      integer j, k, n, m, ifail
+      real*8 r(n), datad(1,n), x(m), ds(m), br(1,n)
+      logical sk
+c
+      parameter (sk = .TRUE.)
+c 
+      do j=1,n
+       br(1,j)=0.D0
+      enddo
+c
+c      write(*,*) 'inside inter_cspl ...'
+c      write(*,*) 'n,m = ',n,m
+      ifail=0
+c     call e01bee(n,r,data,br,ifail)
+c     call e01bfe(n,r,data,br,m,x,ds,ifail)
+c
+c      do j=1,n
+c       write(*,100)j,r(j),datad(1,j),br(1,j)
+c      enddo
+c
+c      do j=1,m
+c       write(*,100) j, x(j), ds(j)
+c      enddo
+c
+      call dpchim(n,r,datad,br,1,ifail)
+c      write(*,*) 'after call to dpchim ...',ifail,sk
+c      do j=1,n
+c       write(*,100) j,r(j),datad(1,j),br(1,j)
+c      enddo
+      call dpchfe(n,r,datad,br,1,sk,m,x,ds,ifail)
+c      write(*,*) 'after call to dpchfe ...',ifail
+c
+ 100  format(i2,2x,1p3e14.6)
+      return
+      end
 * ======================================================================
 * NIST Guide to Available Math Software.
 * Source for module DPCHIM from package SLATEC.

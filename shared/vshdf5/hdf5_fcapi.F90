@@ -1682,8 +1682,9 @@
       IF(h5in%verbose) WRITE(*,*) 'Writing ', aname
       rank = 4
       IF(h5in%doTranspose) THEN
-       dims(4)=SIZE(array,1);  dims(3)=SIZE(array,2)
+       dims(4)=SIZE(array,1);  dims(2)=SIZE(array,3)
        dims(3)=SIZE(array,2);  dims(1)=SIZE(array,4)
+       write(*,*) dims
        ALLOCATE(tmparray(dims(1),dims(2),dims(3),dims(4)))
        DO i=1,dims(1); DO j=1,dims(2); DO k=1,dims(3)
           tmparray(i,j,k,:)=array(:,k,j,i)

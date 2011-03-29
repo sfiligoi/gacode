@@ -260,6 +260,7 @@
 !
       if(save_tglf)then
         CALL write_tglf_overwrite
+        call write_tglf_input
         save_tglf = .FALSE.
       endif
 !
@@ -461,7 +462,10 @@
          alpha_quench_tg=0.0
          use_bpar_tg=.FALSE.
          use_mhd_rule_tg=.TRUE.
-         filter_tg=2.0
+         filter_tg=1.0
+         alpha_e_tg=0.0
+         alpha_kx0_tg=0.0
+         alpha_kx1_tg=0.0
        endif
 !
 ! 1.82 version (TGLF09)
@@ -469,9 +473,12 @@
        if(tglf_defaults.eq.2)then
          xnu_model_tg=2
          alpha_quench_tg=0.0
-         use_bpar_tg=.FALSE.
-         use_mhd_rule_tg=.TRUE.
-         filter_tg=2.0
+         use_bpar_tg=.TRUE.
+         use_mhd_rule_tg=.FALSE.
+         filter_tg=1.0
+         alpha_e_tg=0.0
+         alpha_kx0_tg=0.0
+         alpha_kx1_tg=0.0
        endif
 !
 ! 1.93 version (TGLF10)
@@ -482,6 +489,9 @@
          use_bpar_tg=.FALSE.
          use_mhd_rule_tg=.TRUE.
          filter_tg=2.0
+         alpha_e_tg=0.0
+         alpha_kx0_tg=0.0
+         alpha_kx1_tg=0.0         
        endif
 !
       if(tglf_defaults.eq.0)then

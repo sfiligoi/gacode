@@ -10,10 +10,12 @@ c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
 c  
       subroutine datmap
 c
+      use data_interface
+c
       implicit none
 c
       include 'input.m'
-      include 'data_d.m'
+cc      include 'data_d.m'
       include 'data_exp.m'
       include 'glf.m'
 c
@@ -39,6 +41,7 @@ c
 c... 2d profile transfers
 c
       do j=1,nj_d
+        rho(j-1) = rho_d(j)
         te_exp(j-1)=te_d(j)
         ti_exp(j-1)=ti_d(j)
         ne_exp(j-1)=nscale*1.D-19*ene_d(j)
@@ -514,4 +517,21 @@ c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
  100  format(i2,2x,0p1f4.2,1p8e13.5)
 c
       end
+c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
+      subroutine trapl (r, y, nj, xint)
+c
+      implicit integer (i-n), real*8 (a-h, o-z)
+c
+c this subroutine integrates y(r) with respect to r from zero to rminor
+c the trapezoidal rule is used
+c
+      dimension  r(*), y(*)
+c
+      xint = 0.0
+      do 10 j=2,nj
+ 10   xint = xint + 0.5 * (y(j)+y(j-1)) * (r(j)-r(j-1))
+      return
+c
+      end
+c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
 
