@@ -850,6 +850,7 @@ c
       a_unit_exp=rmin_exp(jmaxm)
       bt_mag_center=bt_exp/b_div
       rmaj_mag_center=rmaj_exp(jmaxm)*a_mult/a_unit_exp
+      write(*,*)'bt_exp=',bt_exp,'arho_exp=',arho_exp
 c
       do j=1,jmaxm-1
 cgms        b_unit_loc_s(j)=bt_mag_center*
@@ -860,6 +861,8 @@ cgms     &    (rmin_exp(j+1)-rmin_exp(j-1))
          rminm=0.5*(rmin_exp(j+1)+rmin_exp(j))
          b_unit_loc_s(j) = bt_mag_center*(rhom/rminm)*
      >   arho_exp*(rho(j+1)-rho(j))/(rmin_exp(j+1)-rmin_exp(j))
+         if(j.eq.45)
+     >   write(*,*)'setunits',b_unit_loc_s(j),rminm,rhom
       enddo
 c
       b_unit_loc_s(0)=b_unit_loc_s(1) 
@@ -1021,6 +1024,10 @@ cgms      if(iptot.gt.0) then
         beta_loc_0=0.0
         beta_loc=(1.6022D-4)*(8.0*pi)*ptotm/
      &     (b_unit_loc_s(j)**2*b_div**2)/ab_div 
+        write(*,*)"beta_loc =",beta_loc," ptotm =",ptotm
+        write(*,*)"rho(j)=",rho(j),"arho_exp=",arho_exp
+        write(*,*)'pi =',pi,'b_unit_loc=',b_unit_loc_s(j)
+        write(*,*)'b_div=',b_div,'ab_div=',ab_div
 cgms      endif
 c      write(*,*) 'beta_loc = ',beta_loc
 c
