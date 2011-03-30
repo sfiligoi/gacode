@@ -1316,23 +1316,22 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
        allocate(real_buff(0:n1,n2,n3,nphi))
        allocate(alpha_loc(0:n1,n2))
      else
+       nphi=n_alpha_fine
        allocate(real_buff(0:n1-1,n2,n3,nphi))
        allocate(alpha_loc(0:n1-1,n2))
-       nphi=n_alpha_fine
      endif
 !sv     Default for n0=30, because of k_rho_s scaling.
 !       I think we always want to count over all toroidal modes calculated
 !       which means below, going from istart=1 to n_n (toroidal grid).
-!     if (n0==0) then
-         istart=1
+     if (n0==0) then
+         istart=2
          do iphi=1,nphi
            real_buff(:,:,:,iphi)=real(buffn(:,:,:,1))
          enddo
-!     else
-!         istart=2
-!         real_buff(:,:,:,:)=0.
-!         !where does real_buff come from in thise case??/
-!     endif
+     else
+         istart=1
+         real_buff(:,:,:,:)=0.
+     endif
      do iphi=1,nphi
        !Get alpha coordinate on either the coarse or fine mesh.
        ! Include doppler shift here
