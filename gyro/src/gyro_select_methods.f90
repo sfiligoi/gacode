@@ -184,7 +184,10 @@ subroutine gyro_select_methods
   end select
 
   if (linsolve_method == 2) then
+!     orbit_upwind_vec(n_ion) = 0.0
      orbit_upwind_vec(:) = 0.0
+!     orbit_upwind_vec(n_ion) = 1.0
+!     radial_upwind = 0.0
   endif
   !---------------------------------------------------
 
