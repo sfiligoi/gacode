@@ -38,7 +38,7 @@
       LOGICAL :: new_width=.TRUE.
       LOGICAL :: new_kyspectrum=.TRUE.
       LOGICAL :: eikonal_unsaved=.TRUE.
-      INTEGER :: igeo=0
+      INTEGER :: igeo=1
       LOGICAL :: use_default_species=.TRUE.
       INTEGER,DIMENSION(8) :: trace_path=0
 ! Input global variables
@@ -57,7 +57,7 @@
       LOGICAL :: iflux_in=.TRUE.
       LOGICAL :: use_bper_in=.FALSE.
       LOGICAL :: use_bpar_in=.FALSE.
-      LOGICAL :: use_mhd_rule_in=.FALSE.
+      LOGICAL :: use_mhd_rule_in=.TRUE.
       LOGICAL :: use_bisection_in=.TRUE.
       INTEGER :: ibranch_in=-1
       INTEGER :: nbasis_max_in=4
@@ -652,16 +652,16 @@
       LOGICAL :: iflux_tg=.TRUE.
       LOGICAL :: use_bper_tg=.FALSE.
       LOGICAL :: use_bpar_tg=.FALSE.
-      LOGICAL :: use_mhd_rule_tg=.FALSE.
-      LOGICAL :: use_bisection_tg=.FALSE.
+      LOGICAL :: use_mhd_rule_tg=.TRUE.
+      LOGICAL :: use_bisection_tg=.TRUE.
       LOGICAL :: find_width_tg=.TRUE.
       LOGICAL :: adiabatic_elec_tg=.FALSE.
       LOGICAL :: new_eikonal_tg=.TRUE.
       INTEGER :: ibranch_tg=-1
       INTEGER :: nmodes_tg=2
-      INTEGER :: nky_tg=15
+      INTEGER :: nky_tg=12
       INTEGER :: ns_tg=2
-      INTEGER :: igeo_tg=0
+      INTEGER :: igeo_tg=1
       INTEGER :: nbasis_max_tg=4
       INTEGER :: nbasis_min_tg=1
       INTEGER :: nxgrid_tg=16
@@ -676,7 +676,7 @@
       REAL :: ky_tg=0.3
       REAL :: width_max_tg=1.65
       REAL :: width_min_tg=0.3
-      REAL :: park_tg=1.00
+      REAL :: park_tg=1.0
       REAL :: ghat_tg=1.0
       REAL :: gchat_tg=1.0
       REAL :: betae_tg=0.0
@@ -689,8 +689,7 @@
       REAL :: zeff_tg=1.0
       REAL :: debye_tg=0.0
       REAL :: vexb_shear_tg=0.0
-      REAL :: cnorm_tg=1.0
-      REAL :: alpha_quench_tg=1.0
+      REAL :: alpha_quench_tg=0.0
       REAL :: alpha_p_tg=0.0
       REAL :: alpha_e_tg=0.0
       REAL :: wd_zero_tg=0.1
@@ -699,7 +698,7 @@
       REAL :: theta_trapped_tg=0.7
       REAL :: xnu_factor_tg=1.0
       REAL :: debye_factor_tg=1.0
-      REAL :: etg_factor_tg = 4.0
+      REAL :: etg_factor_tg = 1.25
       REAL :: filter_tg = 2.0
       REAL :: alpha_kx0_tg=0.0
       REAL :: alpha_kx1_tg=0.0
@@ -750,7 +749,7 @@
         nmodes_tg, iflux_tg, ky_tg, width_max_tg, width_min_tg, &
         nwidth_tg, park_tg, ghat_tg, gchat_tg, alpha_e_tg, vexb_shear_tg, &
         alpha_p_tg, vpar_shear_tg, alpha_quench_tg, igeo_tg, theta_trapped_tg, &
-        cnorm_tg, theta0_tg,taus_tg,as_tg,rlns_tg,rlts_tg,mass_tg,zs_tg, &
+        theta0_tg,taus_tg,as_tg,rlns_tg,rlts_tg,mass_tg,zs_tg, &
         rmin_tg, rmaj_tg, zmaj_tg,use_bisection_tg,vpar_tg, &
         q_tg, xnue_tg, wd_zero_tg, betae_tg, shat_tg, alpha_tg, &
         xwell_tg,kappa_tg,s_kappa_tg,delta_tg,s_delta_tg,zeta_tg,s_zeta_tg, &

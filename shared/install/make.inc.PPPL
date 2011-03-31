@@ -36,9 +36,6 @@ LMATH = $(LAPACK) \
 NETCDF = ${NETCDFHOME}/lib/libnetcdff.a ${NETCDFHOME}/lib/libnetcdf.a
 NETCDF_INC = ${NETCDFHOME}/include
 
-# OPTIONAL: GATO FLAGS
-GATOFLAGS = -r8 -i8
-
 # Archive
 
 ARCH = ar cr

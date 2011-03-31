@@ -20,7 +20,6 @@ OBJECTS = readtestprofiles.o \
           datnclass.o \
           datmap.o \
           datavg.o \
-          pressure.o \
           neutxp.o \
 	  cdfread.o \
           u0read.o \

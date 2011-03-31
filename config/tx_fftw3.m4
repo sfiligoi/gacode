@@ -1,0 +1,43 @@
+dnl ######################################################################
+dnl
+dnl File:	fftw.m4
+dnl
+dnl Purpose:	Looks for single and double precision versions of
+dnl		FFTW3 libraries
+dnl	FFTW3 is not backwards compatible with older versions.  It seems
+dnl	 that the convention is to denote fftw3 as separate from fftw in
+dnl	 a similar way that HDF5 is different HDF.
+dnl
+dnl Version:	$Id: tx_fftw3.m4 3809 2011-03-09 03:18:48Z kruger $
+dnl
+dnl Tech-X configure system
+dnl
+dnl ######################################################################
+
+FFTW3_SP=$SUPRA_SEARCH_PATH
+unset FFTW3_PATH
+if test -n "$parallel"; then
+  for i in `echo $FFTW3_SP | tr ':' ' '`; do
+    FFTW3_PATH="$FFTW3_PATH:$i/fftw3-par"
+  done
+fi
+for i in `echo $FFTW3_SP | tr ':' ' '`; do
+  FFTW3_PATH="$FFTW3_PATH:$i/fftw3"
+done
+
+if test -n "$parallel"; then
+    TX_LOCATE_PKG(
+      [FFTW3],
+      [$FFTW3_PATH],
+      [fftw3.h, rfftw.h, fftw3_mpi.h, rfftw3_mpi.h],
+      [fftw3,rfftw3,fftw3_mpi,rfftw3_mpi])
+else
+    TX_LOCATE_PKG(
+      [FFTW3],
+      [$FFTW3_PATH],
+      [fftw3.h, rfftw3.h],
+      [fftw3,rfftw3])
+fi
+
+# Find any libraries is good
+AM_CONDITIONAL(HAVE_FFTW3, test -n "$FFTW3_LIBS")

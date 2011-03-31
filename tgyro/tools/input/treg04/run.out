@@ -1,0 +1,64 @@
+ -----------------------------------------------------------------
+ CPU Partition list
+
+ ----------   ----------------  --------
+  Instance     Directory Name     CPUs  
+ ----------   ----------------  --------
+   1              TGLF/            1
+   2              TGLF/            1
+   3              TGLF/            1
+   4              TGLF/            1
+   5              TGLF/            1
+   6              TGLF/            1
+   7              TGLF/            1
+   8              TGLF/            1
+ ----------   ----------------  --------
+                     Total:        8
+
+ INFO: TGYRO passing input.profiles.geo information to components
+
+ Job control
+
+ LOC_RESTART_FLAG               : New simulation
+
+ Iteration control
+
+ TGYRO_ITERATION_METHOD         : Local Residual Minimization (original scheme)
+ TGYRO_GLOBAL_NEWTON_FLAG       : Block-diagonal flux Jacobian
+ LOC_RESIDUAL_METHOD            : abs(f-g)
+ LOC_DX (Jacobian dx)           :   0.0200
+ LOC_DX_GYRO (GYRO Jacobian dx) :   0.2000
+ LOC_DX_MAX (maximum dx)        :   4.0000
+ LOC_RELAX (conv. relaxation)   :   2.0000
+
+ Scenario control
+
+ LOC_TI_FEEDBACK_FLAG           : Ti evolution ON
+ LOC_TE_FEEDBACK_FLAG           : Te evolution ON
+ LOC_NE_FEEDBACK_FLAG           : ne evolution ON
+ LOC_PFLUX_METHOD               : gamma=beam
+ LOC_ER_FEEDBACK_FLAG           : Er evolution OFF
+ LOC_SCENARIO                   : Experimental, dynamic exchange
+ LOC_SAWTOOTH_MODEL             : No corrections for sawteeth
+ LOC_NEO_METHOD                 : Hinton-Hazeltine theory
+ NEO_GV_FLAG                    : OFF (no gyroviscosity)
+ TGYRO_TGLF_REVISION            : Current
+ Pivot radius                   :   0.8400
+
+ Physics parameters
+
+ LOC_RMIN                       :   0.1050
+ LOC_RMAX                       :   0.8400
+ LOC_NU_SCALE                   :   1.0000
+ LOC_BETAE_SCALE                :   1.0000
+ LOC_ZEFF_FLAG                  : Z_eff from data
+ LOC_CIRC_FLAG                  : Use standard Miller expressions
+ TGYRO_ROTATION_THEORY_METHOD   : Candy method
+ Fluctuations                   : Electromagnetic
+ LOC_QUASINEUTRAL_FLAG          : Forced quasineutrality
+ LOC_LOCK_PROFILE_FLAG          : Initial profiles from data
+ ion  mass                      :   2.0000
+ ion  charge                    :   1.0000
+ -----------------------------------------------------------------
+ INFO: TGYRO starting iterations
+ INFO: clean exit from TGYRO                                                     

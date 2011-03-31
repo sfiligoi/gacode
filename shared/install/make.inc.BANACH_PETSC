@@ -25,9 +25,6 @@ LMATH = /opt/LAPACK/liblapack.a \
 NETCDF=-L/usr/local/lib -lnetcdf -lnetcdff
 NETCDF_INC=/usr/local/include
 
-# OPTIONAL: GATO FLAGS
-GATOFLAGS=-fdefault-real-8 -fdefault-integer-8 -O0
-
 # Archive 
 
 ARCH = ar cr

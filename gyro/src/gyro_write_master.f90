@@ -400,17 +400,11 @@ subroutine gyro_write_master(action)
 
      if (nonlinear_transfer_flag == 1) then
         call write_distributed_real(&
-             trim(path)//'nonlinear_transfer_n.out',&
+             trim(path)//'out.gyro.nl_transfer',&
              10,&
              mode,&
-             size(Tr_p),&
-             Tr_p)
-        call write_distributed_real(&
-             trim(path)//'turbulent_energy_n.out',&
-             10,&
-             mode,&
-             size(Eng_p),&
-             Eng_p)
+             size(nl_transfer),&
+             nl_transfer)
      endif
 
      call proc_time(cp8)

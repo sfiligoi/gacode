@@ -1,0 +1,68 @@
+dnl ######################################################################
+dnl
+dnl File:	tx_netlib_lite.m4
+dnl
+dnl Purpose:	Find the various libraries that are installed by the
+dnl               netlib_lite package.
+dnl
+dnl Version: $Id: tx_netlib_lite.m4 3539 2010-05-19 21:30:24Z cary $
+dnl
+dnl Tech-X configure system.  Copyright 2007-2010.  Freely redistributable
+dnl provided this copyright remains intact.
+dnl
+dnl ######################################################################
+
+dnl ######################################################################
+dnl
+dnl Find all at once.  Add code later to find with this fails
+dnl
+dnl ######################################################################
+
+NETLIB_LITE_SP=$SUPRA_SEARCH_PATH
+unset NETLIB_LITE_PATH
+if test -n "$back_end_node" -o "$parallel" = yes; then
+  for i in `echo $NETLIB_LITE_SP | tr ':' ' '`; do
+    NETLIB_LITE_PATH="$NETLIB_LITE_PATH:$i/netlib_lite-ben"
+  done
+fi
+for i in `echo $NETLIB_LITE_SP | tr ':' ' '`; do
+  NETLIB_LITE_PATH="$NETLIB_LITE_PATH:$i/netlib_lite"
+done
+
+case "$TX_FORTRAN_MODCAP" in
+  ucname-*)
+    TX_LOCATE_PKG(
+      [NETLIB_LITE],
+      [$NETLIB_LITE_PATH],
+      [LSODE_MOD.mod],
+      [lsode, nlother, r8slatec])
+    ;;
+  lcname-*)
+    TX_LOCATE_PKG(
+      [NETLIB_LITE],
+      [$NETLIB_LITE_PATH],
+      [lsode_mod.mod],
+      [lsode, nlother, r8slatec])
+    ;;
+esac
+
+# Reverse default definition, as part is good here
+AM_CONDITIONAL(HAVE_NETLIB_LITE, test -n "$NETLIB_LITE_LIBS")
+if test -n "$NETLIB_LITE_LIBS"; then
+  AC_DEFINE(HAVE_NETLIB_LITE, [], [Defined if NETLIB_LITE found])
+fi
+
+# Define for subpackages
+AM_CONDITIONAL(HAVE_LSODE, test -n "$NETLIB_LITE_LIB_LSODE")
+if test -n "$NETLIB_LITE_LIB_LSODE"; then
+  AC_DEFINE(HAVE_LSODE, [], [Defined if LSODE found])
+fi
+AM_CONDITIONAL(HAVE_NLOTHER, test -n "$NETLIB_LITE_LIB_NLOTHER")
+if test -n "$NETLIB_LITE_LIB_NLOTHER"; then
+  AC_DEFINE(HAVE_NLOTHER, [], [Defined if NLOTHER found])
+fi
+AM_CONDITIONAL(HAVE_R8SLATEC, test -n "$NETLIB_LITE_LIB_R8SLATEC")
+if test -n "$NETLIB_LITE_LIB_R8SLATEC"; then
+  AC_DEFINE(HAVE_R8SLATEC, [], [Defined if R8SLATEC found])
+fi
+

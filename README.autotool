@@ -1,0 +1,8 @@
+This branch will be where Tech-X autotools gacodes.  
+
+First step:
+run: config/cleanconf.sh at the top level dir.
+This will generate an executable configure script.
+
+./configure --help
+will display many configurable options.
