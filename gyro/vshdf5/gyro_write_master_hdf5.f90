@@ -1197,8 +1197,10 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
   complex, intent(in) :: fn(n_fn)
   logical, intent(in) :: plot3d
   character(128) :: tempVarName
+  character(128), dimension(3) :: vnameArray=''
   character(3) :: n_name
   character(1) :: ikin_name
+  integer(HID_T) :: grGid
   type(hdf5InOpts), intent(inout) :: h5in
   type(hdf5ErrorType), intent(inout) :: h5err
   !
@@ -1227,6 +1229,22 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
      allocate(buffn(0:n1-1,n2,n3,n_n)); buffn=0.
   endif
 
+  do ikin=1,n3
+    if (trim(vname) /= "phi") then 
+      if(electron_method==2 .and. ikin==n3) THEN
+         tempVarName=trim(vname)//"_electron"
+      elseif(electron_method==3) THEN
+         tempVarName=trim(vname)//"_electron"
+      else
+         write(ikin_name,fmt='(i1.1)') ikin-1
+         vnameArray(ikin)=trim(vname)//"_ion"//ikin_name
+      endif
+    else
+      if(ikin==1) vnameArray(1)="phi"
+      if(ikin==2) vnameArray(2)="A_par"
+      if(ikin==3) vnameArray(3)="B_par"
+    endif
+  enddo
 
      do in=1,n_n
   !WRITE(*,*) "in ", in, i_proc
@@ -1278,29 +1296,18 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
        enddo ! in
      endif
 
-
      !-----------------------------------------
      ! Dump each species independently
      !-----------------------------------------
-     if (iscoarse) then
-       do ispcs=1,n3
-         WRITE(n_name,fmt='(i3.3)') ispcs
-         tempVarName=trim(vname)//"_real_species"//n_name
-         call dump_h5(rGid,trim(tempVarName),real(buffn(:,:,ispcs,:)),h5in,h5err)
-         tempVarName=trim(vname)//"_imag_species"//n_name
-         call dump_h5(rGid,trim(tempVarName),aimag(buffn(:,:,ispcs,:)),h5in,h5err)
-       enddo ! in
-     else
-!      if (debug_flag == 1) then
-       do ispcs=1,n3
-         WRITE(n_name,fmt='(i3.3)') ispcs
-         tempVarName=trim(vname)//"_real_species"//n_name
-         call dump_h5(rGid,trim(tempVarName),real(buffn(:,:,ispcs,:)),h5in,h5err)
-         tempVarName=trim(vname)//"_imag_species"//n_name
-         call dump_h5(rGid,trim(tempVarName),aimag(buffn(:,:,ispcs,:)),h5in,h5err)
-       enddo ! in
-!      endif
-     endif
+     do ispcs=1,n3
+        tempVarName=vnameArray(ikin)//"_modes"
+       call make_group(rGid,trim(tempVarName),grGid,"",h5err)
+       tempVarName=trim(vnameArray(ispcs))//"_real"
+       call dump_h5(grGid,trim(tempVarName),real(buffn(:,:,ispcs,:)),h5in,h5err)
+       tempVarName=trim(vnameArray(ispcs))//"imag"
+       call dump_h5(grGid,trim(tempVarName),aimag(buffn(:,:,ispcs,:)),h5in,h5err)
+       CALL close_group(trim(tempVarName),grGid,h5err)
+     enddo ! in
      if(.not.plot3d) then
        deallocate(buffn)
        return
@@ -1320,9 +1327,6 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
        allocate(real_buff(0:n1-1,n2,n3,nphi))
        allocate(alpha_loc(0:n1-1,n2))
      endif
-!sv     Default for n0=30, because of k_rho_s scaling.
-!       I think we always want to count over all toroidal modes calculated
-!       which means below, going from istart=1 to n_n (toroidal grid).
      if (n0==0) then
          istart=2
          do iphi=1,nphi
@@ -1349,53 +1353,21 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
        enddo
      enddo
         
-     
-
      deallocate(buffn,alpha_loc)
 
-
      ! Mapping of the variable names to array indices depends on input types
-      if (iscoarse) then
+     if (iscoarse) then
        do ikin=1,n3
-         if (trim(vname) /= "phi") then 
-           ! See gyro_select_methods for understanding this logic
-           if(electron_method==2 .and. ikin==n3) THEN
-              tempVarName=trim(vname)//"_electron"
-           elseif(electron_method==3) THEN
-              tempVarName=trim(vname)//"_electron"
-           else
-              write(ikin_name,fmt='(i1.1)') ikin
-              tempVarName=trim(vname)//"_ion"//ikin_name
-           endif
-         else
-           if(ikin==1) tempVarName="phi"
-           if(ikin==2) tempVarName="A_par"
-           if(ikin==3) tempVarName="B_par"
-         endif
+         tempVarName=trim(vnameArray(ikin))
          call dump_h5(r3Did,trim(tempVarName),real_buff(:,:,ikin,:),h5in,h5err)
        enddo
      else
        ! Dump each phi slice as a separate variable
-       do iphi=1,nphi
-         do ikin=1,n3
-           if (trim(vname) /= "phi") then 
-             if(electron_method==2 .and. ikin==n3) THEN
-                tempVarName=trim(vname)//"_electron"
-             elseif(electron_method==3) THEN
-                tempVarName=trim(vname)//"_electron"
-             else
-                write(ikin_name,fmt='(i1.1)') ikin-1
-                tempVarName=trim(vname)//"_ion"//ikin_name
-             endif
-           else
-             if(ikin==1) tempVarName="phi"
-             if(ikin==2) tempVarName="A_par"
-             if(ikin==3) tempVarName="B_par"
-           endif
-           write(n_name,fmt='(i2.2)') iphi
-           tempVarName=trim(tempVarName)//"_torangle"//TRIM(n_name)
-           call dump_h5(r3Did,trim(tempVarName),real_buff(:,:,ikin,iphi),h5in,h5err)
-         enddo
+       do ikin=1,n3
+        tempVarName=vnameArray(ikin)//"_toroidal"
+         call make_group(r3Did,trim(tempVarName),grGid,"",h5err)
+         call dump_h5(grGid,trim(vnameArray(ikin)),real_buff(:,:,ikin,:),h5in,h5err)
+         call close_group(trim(tempVarName),grGid,h5err)
        enddo
      endif
 
