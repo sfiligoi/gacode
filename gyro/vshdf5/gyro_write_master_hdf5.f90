@@ -57,7 +57,6 @@ subroutine write_hdf5_data(datafile,action)
   ! These variables are essentially the write_profile_vugyro.f90 
   !---------------------------------------------------------------------
   description=" "
-  !write(*,*) "write_hdf5: opening ", filename, " with h5in%comm = ", h5in%comm
   call open_newh5file(filename,fid,description,rootid,h5in,h5err)
 
   h5in%mesh=" "; h5in%units=" "
@@ -1196,7 +1195,7 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
   integer, intent(in) :: n_fn,n1,n2,n3
   complex, intent(in) :: fn(n_fn)
   logical, intent(in) :: plot3d
-  character(128) :: tempVarName
+  character(128) :: tempVarName , tempVarNameGr
   character(128), dimension(:),allocatable :: vnameArray
   character(3) :: n_name
   character(1) :: ikin_name
@@ -1207,6 +1206,7 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
   integer :: data_loop
   integer :: i_group_send, ispcs
   integer :: i_send, iphi, istart,nn,i,ikin,in, ix,nphi
+  integer :: iloop
   !
   complex :: fn_recv(n_fn), c_i
   complex, dimension(:,:,:,:), allocatable :: buffn
@@ -1235,7 +1235,6 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
 !electron_method =3 => n3=1 (gk electrons and addiabtic ions)
 !electron_method =4 => n3=n_ion (gk electrons and gk ions)
 
-  write(*,*) "vname = ", trim(vname)
   if (trim(vname) /= "phi") then 
     ALLOCATE(vnameArray(n3))
     vnameArray=""
@@ -1244,8 +1243,6 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
         tempVarName=trim(vname)//"_drift_electron"
       elseif(electron_method==3 .or. (electron_method==4.and.ikin==n3)) THEN
         tempVarName=trim(vname)//"_gk_electron"
-!      elseif(electron_method==4.and.ikin==n3) THEN
-!        tempVarName=trim(vname)//"_gk_electron"
       else
         write(ikin_name,fmt='(i1.1)') ikin-1
         tempVarName=trim(vname)//"_ion"//ikin_name
@@ -1254,13 +1251,11 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
     enddo
   else
     ALLOCATE(vnameArray(3))
-    vnameArray=""
+      vnameArray=""
       vnameArray(1)="phi"
       vnameArray(2)="A_par"
       vnameArray(3)="B_par"
   endif
-
-  write(*,*) "vnameArray  = ", vnameArray(:)
 
      do in=1,n_n
         !-----------------------------------------
@@ -1311,13 +1306,13 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
      ! Dump each species independently
      !-----------------------------------------
      do ispcs=1,n3
-       tempVarName=vnameArray(ispcs)//"_modes"
-       call make_group(rGid,trim(tempVarName),grGid,"",h5err)
+       tempVarNameGr=trim(vnameArray(ispcs))//"_modes"
+       call make_group(rGid,trim(tempVarNameGr),grGid,"",h5err)
        tempVarName=trim(vnameArray(ispcs))//"_real"
        call dump_h5(grGid,trim(tempVarName),real(buffn(:,:,ispcs,:)),h5in,h5err)
        tempVarName=trim(vnameArray(ispcs))//"_imag"
        call dump_h5(grGid,trim(tempVarName),aimag(buffn(:,:,ispcs,:)),h5in,h5err)
-       CALL close_group(trim(tempVarName),grGid,h5err)
+       CALL close_group(trim(tempVarNameGr),grGid,h5err)
      enddo ! in
      if(.not.plot3d) then
        deallocate(buffn)
@@ -1375,10 +1370,10 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
      else
        ! Dump each phi slice as a separate variable
        do ikin=1,n3
-        tempVarName=vnameArray(ikin)//"_toroidal"
-         call make_group(r3Did,trim(tempVarName),grGid,"",h5err)
+         tempVarNameGr=trim(vnameArray(ikin))//"_toroidal"
+         call make_group(r3Did,trim(tempVarNameGr),grGid,"",h5err)
          call dump_h5(grGid,trim(vnameArray(ikin)),real_buff(:,:,ikin,:),h5in,h5err)
-         call close_group(trim(tempVarName),grGid,h5err)
+         call close_group(trim(tempVarNameGr),grGid,h5err)
        enddo
      endif
 
