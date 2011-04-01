@@ -1196,7 +1196,7 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
   complex, intent(in) :: fn(n_fn)
   logical, intent(in) :: plot3d
   character(128) :: tempVarName , tempVarNameGr
-  character(128), dimension(:),allocatable :: vnameArray
+  character(128), dimension(:),allocatable :: vnameArray,  pType
   character(3) :: n_name
   character(1) :: ikin_name
   integer(HID_T) :: grGid
@@ -1237,21 +1237,26 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
 
   if (trim(vname) /= "phi") then 
     ALLOCATE(vnameArray(n3))
-    vnameArray=""
+    !ALLOCATE(pType(n3))
+    vnameArray=" "
+   ! pType=" "
     do ikin=1,n3
       if(electron_method==2 .and. ikin==n3 ) THEN
-        tempVarName=trim(vname)//"_drift_electron"
+        tempVarName=trim(vname)//"_electron"
+        !pType(ikin)="drift"
       elseif(electron_method==3 .or. (electron_method==4.and.ikin==n3)) THEN
-        tempVarName=trim(vname)//"_gk_electron"
+        tempVarName=trim(vname)//"_electron"
+        !pType(ikin)="gyro_kinetic"
       else
         write(ikin_name,fmt='(i1.1)') ikin-1
         tempVarName=trim(vname)//"_ion"//ikin_name
+        !if(electron_method /= 3) pType(ikin)="gyro_kinetic"
       endif
       vnameArray(ikin)=tempVarName
     enddo
   else
     ALLOCATE(vnameArray(3))
-      vnameArray=""
+      vnameArray=" "
       vnameArray(1)="phi"
       vnameArray(2)="A_par"
       vnameArray(3)="B_par"
