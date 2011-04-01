@@ -1197,7 +1197,7 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
   complex, intent(in) :: fn(n_fn)
   logical, intent(in) :: plot3d
   character(128) :: tempVarName
-  character(128), dimension(3) :: vnameArray=''
+  character(128), dimension(:),allocatable :: vnameArray
   character(3) :: n_name
   character(1) :: ikin_name
   integer(HID_T) :: grGid
@@ -1229,25 +1229,40 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
      allocate(buffn(0:n1-1,n2,n3,n_n)); buffn=0.
   endif
 
-  do ikin=1,n3
-    if (trim(vname) /= "phi") then 
-      if(electron_method==2 .and. ikin==n3) THEN
-         tempVarName=trim(vname)//"_electron"
-      elseif(electron_method==3) THEN
-         tempVarName=trim(vname)//"_electron"
+!when n3=n_kinetic
+!electron_method =1 => n3=n_ion (gk ions and addiabtic electrons )
+!electron_method =2 => n3=n_spec (gk ions and drift electrons)
+!electron_method =3 => n3=1 (gk electrons and addiabtic ions)
+!electron_method =4 => n3=n_ion (gk electrons and gk ions)
+
+  write(*,*) "vname = ", trim(vname)
+  if (trim(vname) /= "phi") then 
+    ALLOCATE(vnameArray(n3))
+    vnameArray=""
+    do ikin=1,n3
+      if(electron_method==2 .and. ikin==n3 ) THEN
+        tempVarName=trim(vname)//"_drift_electron"
+      elseif(electron_method==3 .or. (electron_method==4.and.ikin==n3)) THEN
+        tempVarName=trim(vname)//"_gk_electron"
+!      elseif(electron_method==4.and.ikin==n3) THEN
+!        tempVarName=trim(vname)//"_gk_electron"
       else
-         write(ikin_name,fmt='(i1.1)') ikin-1
-         vnameArray(ikin)=trim(vname)//"_ion"//ikin_name
+        write(ikin_name,fmt='(i1.1)') ikin-1
+        tempVarName=trim(vname)//"_ion"//ikin_name
       endif
-    else
-      if(ikin==1) vnameArray(1)="phi"
-      if(ikin==2) vnameArray(2)="A_par"
-      if(ikin==3) vnameArray(3)="B_par"
-    endif
-  enddo
+      vnameArray(ikin)=tempVarName
+    enddo
+  else
+    ALLOCATE(vnameArray(3))
+    vnameArray=""
+      vnameArray(1)="phi"
+      vnameArray(2)="A_par"
+      vnameArray(3)="B_par"
+  endif
+
+  write(*,*) "vnameArray  = ", vnameArray(:)
 
      do in=1,n_n
-  !WRITE(*,*) "in ", in, i_proc
         !-----------------------------------------
         ! Subgroup collector:
         !
@@ -1274,10 +1289,6 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
 
      enddo ! in
 
-!      if (i_proc == 0) then
-!        write(*,*) shape(buffn)
-!        write(*,*) n_n
-!      endif
      !-----------------------------------------
      if (i_proc /= 0) return
      !-----------------------------------------
@@ -1300,11 +1311,11 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
      ! Dump each species independently
      !-----------------------------------------
      do ispcs=1,n3
-        tempVarName=vnameArray(ikin)//"_modes"
+       tempVarName=vnameArray(ispcs)//"_modes"
        call make_group(rGid,trim(tempVarName),grGid,"",h5err)
        tempVarName=trim(vnameArray(ispcs))//"_real"
        call dump_h5(grGid,trim(tempVarName),real(buffn(:,:,ispcs,:)),h5in,h5err)
-       tempVarName=trim(vnameArray(ispcs))//"imag"
+       tempVarName=trim(vnameArray(ispcs))//"_imag"
        call dump_h5(grGid,trim(tempVarName),aimag(buffn(:,:,ispcs,:)),h5in,h5err)
        CALL close_group(trim(tempVarName),grGid,h5err)
      enddo ! in
@@ -1372,6 +1383,7 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
      endif
 
      deallocate(real_buff)
+     deallocate(vnameArray)
 
 return
 end subroutine write_distributed_complex_h5
