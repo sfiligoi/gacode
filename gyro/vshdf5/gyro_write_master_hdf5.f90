@@ -503,7 +503,11 @@ subroutine write_hdf5_timedata(action)
      !=============
 
      !SEK Worry about this later.
-     
+         call write_distributed_real_h5("freq_n",dumpGid,&
+          size(freq_n),&
+          freq_n,&
+          h5in,h5err)
+ 
      !=============
      ! END LINEAR 
      !=============
@@ -526,6 +530,12 @@ subroutine write_hdf5_timedata(action)
           size(gbflux_n),&
           gbflux_n,&
           h5in,h5err)
+
+     call write_distributed_real_h5("freq_n",dumpGid,&
+          size(freq_n),&
+          freq_n,&
+          h5in,h5err)
+     
 
      if (lindiff_method >= 4) then
         call write_distributed_real_h5('phi_squared_QL_n',dumpGid,&
