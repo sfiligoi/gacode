@@ -1,3 +1,4 @@
+#!/bin/env python
 from gacodeinput import *
 import sys
 

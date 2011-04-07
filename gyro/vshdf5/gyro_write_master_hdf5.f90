@@ -31,8 +31,10 @@ subroutine write_hdf5_data(datafile,action)
   integer :: n_fine
   integer :: io_mode
   real :: theta
-  real :: dr
+  real :: dr, buff
+  real :: kt
   real, allocatable :: buffer(:,:,:)
+  !double precision :: buff
   !------------------------------------------
   ! Do the initialization here.  Might need
   ! better logic here based on action.
@@ -116,6 +118,42 @@ subroutine write_hdf5_data(datafile,action)
   call dump_h5(rootid,"rhos_norm", rhos_norm,h5in,h5err)
   call dump_h5(rootid,"zcharge", z(:),h5in,h5err)
   call dump_h5(rootid,"n_moment", n_moment ,h5in,h5err)
+
+  !---------------------------------------------------------------------
+  ! These variables are essentially gyro_write_units.f90
+  !---------------------------------------------------------------------
+     ! kT in MJ (note the conversion 1.6022e-22 MJ/keV)
+     kt = 1.6022e-22*tem_norm
+  h5in%units="kg"
+  call dump_h5(rootid,'m_ref', 2.*kg_proton ,h5in,h5err)
+  h5in%units="Tesla"
+  call dump_h5(rootid,'b_unit',b_unit_norm,h5in,h5err)
+  h5in%units="m"
+  call dump_h5(rootid,'a',a_meters,h5in,h5err)
+  h5in%units="1/s"
+  call dump_h5(rootid,'csD/a',csda_norm,h5in,h5err)
+  h5in%units="m/s"
+  call dump_h5(rootid,'csD',csda_norm*a_meters,h5in,h5err)
+  h5in%units="keV"
+  call dump_h5(rootid,'Te',tem_norm,h5in,h5err)
+  h5in%units="10^19/m^3"
+  call dump_h5(rootid,'ne',den_norm,h5in,h5err)
+  h5in%units="m"
+  call dump_h5(rootid,'rho_sD',rhos_norm*a_meters,h5in,h5err)
+  h5in%units="m^2/s"
+  call dump_h5(rootid,'chi_gBD',csda_norm*(rhos_norm*a_meters)**2,h5in,h5err)
+  buff=1.e19*den_norm*(csda_norm*a_meters)*rhos_norm**2/0.624e22
+  h5in%units="MW/keV/m^2"
+  call dump_h5(rootid,'Gamma_gBD',buff,h5in,h5err)
+  h5in%units="MW/m^2"
+  buff=1.e19*den_norm*(csda_norm*a_meters)*kt*rhos_norm**2
+  call dump_h5(rootid,'Q_gBD',buff,h5in,h5err)
+  h5in%units="Nm/m^2"
+  buff=1.e19*den_norm*a_meters*kt*rhos_norm**2*1e6
+  call dump_h5(rootid,'Pi_gBD',buff,h5in,h5err)
+  h5in%units="MW/m^3"
+  buff=1.e19*den_norm*csda_norm*kt*rhos_norm**2
+  call dump_h5(rootid,'S_gBD',buff,h5in,h5err)
 
   !---------------------------------------------------------------------
   ! These variables are essentially the write_profile_vugyro.f90 
@@ -669,16 +707,20 @@ subroutine write_hdf5_timedata(action)
        ! Dump the coarse meshes
        !---------------------------------------- 
 
-       call dump_h5(dumpGid,'R',Rc,h5in,h5err)
-       call dump_h5(dumpGid,'Z',Zc,h5in,h5err)
+       h5in%units=""
+       call dump_h5(dumpGid,'Rgyro',Rc,h5in,h5err)
+       call dump_h5(dumpGid,'Zgyro',Zc,h5in,h5err)
        call dump_h5(dumpGid,'zeta_offset',zeta_offset,h5in,h5err)
        call dump_h5(dumpGid,'alpha',alpha_phi,h5in,h5err)
+       h5in%units="m"
+       call dump_h5(dumpGid,'R',Rc*a_meters,h5in,h5err)
+       call dump_h5(dumpGid,'Z',Zc*a_meters,h5in,h5err)
 
        ! Here we do not repeat the points since this is the grid
        ! that will be used for the mode plots on thete E [0,2 pi)
        allocate(bufferMesh(0:ncoarse,n_x,2))
-       bufferMesh(:,:,1)= Rc
-       bufferMesh(:,:,2)= Zc
+       bufferMesh(:,:,1)= Rc*a_meters
+       bufferMesh(:,:,2)= Zc*a_meters
        h5in%units="m"
        h5in%mesh="mesh-structured"
        call dump_h5(dumpGid,'cartMesh',bufferMesh(:,:,:),h5in,h5err)
@@ -926,15 +968,19 @@ subroutine write_hdf5_fine_timedata(action)
        ! Dump the fine meshes
        !---------------------------------------- 
 
-       call dump_h5(gidfine,'R',Rf,h5in,h5err)
-       call dump_h5(gidfine,'Z',Zf,h5in,h5err)
+       h5in%units=""
+       call dump_h5(gidfine,'Rgyro',Rf,h5in,h5err)
+       call dump_h5(gidfine,'Zgyro',Zf,h5in,h5err)
        call dump_h5(gidfine,'zeta_offset',zeta_offset,h5in,h5err)
        call dump_h5(gidfine,'alpha',alpha_phi_fine,h5in,h5err)
+       h5in%units="m"
+       call dump_h5(gidfine,'R',Rf*a_meters,h5in,h5err)
+       call dump_h5(gidfine,'Z',Zf*a_meters,h5in,h5err)
 
        ! For ease of use, have a single data set that has R,Z. 
        allocate(bufferFineMesh(nfine,n_x,2))
-       bufferFineMesh(:,:,1) = Rf(:,:)
-       bufferFineMesh(:,:,2) = Zf(:,:)
+       bufferFineMesh(:,:,1) = Rf(:,:)*a_meters
+       bufferFineMesh(:,:,2) = Zf(:,:)*a_meters
        h5in%units="m"
        h5in%mesh="mesh-structured"
        call dump_h5(gidfine,'cartMesh',bufferFineMesh(:,:,:),h5in,h5err)
