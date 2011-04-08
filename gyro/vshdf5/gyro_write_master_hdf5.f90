@@ -131,9 +131,9 @@ subroutine write_hdf5_data(datafile,action)
   h5in%units="m"
   call dump_h5(rootid,'a',a_meters,h5in,h5err)
   h5in%units="1/s"
-  call dump_h5(rootid,'csD/a',csda_norm,h5in,h5err)
+  call dump_h5(rootid,'csda_norm',csda_norm,h5in,h5err)
   h5in%units="m/s"
-  call dump_h5(rootid,'csD',csda_norm*a_meters,h5in,h5err)
+  call dump_h5(rootid,'csda_norm_D',csda_norm*a_meters,h5in,h5err)
   h5in%units="keV"
   call dump_h5(rootid,'Te',tem_norm,h5in,h5err)
   h5in%units="10^19/m^3"
