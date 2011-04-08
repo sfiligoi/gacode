@@ -50,7 +50,7 @@ subroutine gyro_do(skipinit)
   runfile  = trim(path)//trim(baserunfile)
   precfile = trim(path)//trim(baseprecfile)
 
-  if (runfile == 'out.gyro.run')  then
+  if (baserunfile == 'out.gyro.run')  then
      IF(i_proc==0 .AND. output_flag==1) THEN
         inquire(file=trim(runfile),exist=rfe)
         if (.not.rfe) then
