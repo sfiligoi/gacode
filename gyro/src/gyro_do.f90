@@ -20,6 +20,7 @@ subroutine gyro_do(skipinit)
   implicit none
   !
   integer, optional :: skipinit
+  logical :: rfe
   !--------------------------------------
 
   !-------------------------------------
@@ -48,6 +49,18 @@ subroutine gyro_do(skipinit)
   ! Prepend path:
   runfile  = trim(path)//trim(baserunfile)
   precfile = trim(path)//trim(baseprecfile)
+
+  if (runfile == 'out.gyro.run')  then
+     IF(i_proc==0 .AND. output_flag==1) THEN
+        inquire(file=trim(runfile),exist=rfe)
+        if (.not.rfe) then
+            open(unit=99,file=trim(runfile),status='unknown')
+            close(99)
+         endif
+     ENDIF
+  endif
+
+
 
   if ((i_proc==0).AND.(gkeigen_j_set==0)) print *,runfile
 
