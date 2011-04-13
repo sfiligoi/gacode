@@ -116,7 +116,7 @@ subroutine gyro_alloc_orbit(flag)
      
      
      !SEK: There might be a better method here
-     if (iohdf5out == 1) then
+     if (io_method > 0) then
        allocate(blend_fine(n_blend,n_theta_mult*n_theta_plot,n_x))
        allocate(blend_prime_fine(n_blend,n_theta_mult*n_theta_plot,n_x))
        blend_fine=0.
@@ -190,7 +190,7 @@ subroutine gyro_alloc_orbit(flag)
      deallocate(ff2_mm_piv)
      deallocate(blend_plot)
      deallocate(blend_prime_plot)
-     if (iohdf5out == 1) then
+     if (io_method > 0) then
        deallocate(blend_fine)
        deallocate(blend_prime_fine)
      endif
