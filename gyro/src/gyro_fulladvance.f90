@@ -144,8 +144,10 @@ subroutine gyro_fulladvance
   !-------------------------------------------------------------------
   ! MANAGE data output: 
   !
-  if (modulo(step,time_skip_wedge) == 0 .and. io_method > 0) then
+  if(time_skip_wedge > 0) then
+    if (modulo(step,time_skip_wedge) == 0 .and. io_method > 0) then
      call write_hdf5_fine_timedata(2)
+    endif
   endif
   if (modulo(step,time_skip) == 0) then
 
