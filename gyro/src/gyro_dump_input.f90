@@ -215,6 +215,13 @@
       call dumpRealVar(21,22,"fieldeigen_wi",fieldeigen_wi)
       call dumpRealVar(21,22,"fieldeigen_tol",fieldeigen_tol)
       call dumpIntVar(21,22,"collision_method",collision_method)
+      call dumpIntVar(21,22,"io_method",io_method)
+      call dumpIntVar(21,22,"time_skip_wedge",time_skip_wedge)
+      call dumpIntVar(21,22,"n_torangle_wedge",n_torangle_wedge)
+      call dumpIntVar(21,22,"n_torangle_3d",n_torangle_3d)
+      call dumpRealVar(21,22,"theta_wedge_offset",theta_wedge_offset)
+      call dumpRealVar(21,22,"theta_wedge_angle",theta_wedge_angle)
+      call dumpRealVar(21,22,"torangle_offset",torangle_offset)
   close(funit)
  end if
 !

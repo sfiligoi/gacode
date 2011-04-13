@@ -197,13 +197,13 @@ x.add('FIELDEIGEN_WI','0.2')
 x.add('FIELDEIGEN_TOL','1e-6')
 x.add('COLLISION_METHOD','2')
 #addition for hdf5 io
-x.add('IOHDF5OUT', '0')
-x.add('FINE_TIME_SKIP', '1')
-x.add('N_ALPHA_FINE', '1')
-x.add('N_ALPHA_PLOT', '20')
-x.add('THETA_FINE_START', '0.0')
-x.add('THETA_FINE_ANGLE', '0.0')
-x.add('ZETA_OFFSET', '0.0')
+x.add('IO_METHOD', '0')
+x.add('TIME_SKIP_WEDGE', '1')
+x.add('N_TORANGLE_WEDGE', '1')
+x.add('N_TORANGLE_3D', '20')
+x.add('THETA_WEDGE_OFFSET', '0.0')
+x.add('THETA_WEDGE_ANGLE', '0.0')
+x.add('TORANGLE_OFFSET', '0.0')
 
 
 # Deprecated parameters

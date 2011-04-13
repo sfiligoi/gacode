@@ -206,13 +206,13 @@ module gyro_interface
   integer :: gyro_collision_method_in = 1
 
   ! io related to hdf5 and diagnostics  
-  integer :: gyro_iohdf5out_in = 0
-  real    :: gyro_zeta_offset_in = 0.0
-  integer :: gyro_fine_time_skip_in = 1
-  integer :: gyro_n_alpha_fine_in = 1
-  integer :: gyro_n_alpha_plot_in = 20
-  real    :: gyro_theta_fine_start_in = 0.
-  real    :: gyro_theta_fine_angle_in =0.
+  integer :: gyro_io_method_in = 0
+  real    :: gyro_torangle_offset_in = 0.0
+  integer :: gyro_time_skip_wedge_in = 1
+  integer :: gyro_n_torangle_wedge_in = 1
+  integer :: gyro_n_torangle_3d_in = 20
+  real    :: gyro_theta_wedge_offset_in = 0.
+  real    :: gyro_theta_wedge_angle_in =0.
 
 
   ! Inputs available via interface but not by INPUT
@@ -431,14 +431,14 @@ contains
     gyro_fieldeigen_tol_in = fieldeigen_tol
     gyro_collision_method_in = collision_method
 
-    gyro_iohdf5out_in        = iohdf5out
-    gyro_zeta_offset_in        = zeta_offset
+    gyro_io_method_in        = io_method
+    gyro_torangle_offset_in        = torangle_offset
 
-    gyro_fine_time_skip_in = fine_time_skip
-    gyro_n_alpha_fine_in = n_alpha_fine
-    gyro_n_alpha_plot_in  = n_alpha_plot 
-    gyro_theta_fine_start_in  = theta_fine_start
-    gyro_theta_fine_angle_in = theta_fine_angle 
+    gyro_time_skip_wedge_in = time_skip_wedge
+    gyro_n_torangle_wedge_in = n_torangle_wedge
+    gyro_n_torangle_3d_in  = n_torangle_3d 
+    gyro_theta_wedge_offset_in  = theta_wedge_offset
+    gyro_theta_wedge_angle_in = theta_wedge_angle 
 
 
     gyro_n_fourier_geo_in = n_fourier_geo
@@ -646,14 +646,14 @@ contains
     fieldeigen_tol = gyro_fieldeigen_tol_in
     collision_method = gyro_collision_method_in
     
-    iohdf5out      = gyro_iohdf5out_in       
-    zeta_offset = gyro_zeta_offset_in        
+    io_method      = gyro_io_method_in       
+    torangle_offset = gyro_torangle_offset_in        
 
-    fine_time_skip = gyro_fine_time_skip_in 
-    n_alpha_fine = gyro_n_alpha_fine_in 
-    n_alpha_plot = gyro_n_alpha_plot_in  
-    theta_fine_start = gyro_theta_fine_start_in   
-    theta_fine_angle = gyro_theta_fine_angle_in  
+    time_skip_wedge = gyro_time_skip_wedge_in 
+    n_torangle_wedge = gyro_n_torangle_wedge_in 
+    n_torangle_3d = gyro_n_torangle_3d_in  
+    theta_wedge_offset = gyro_theta_wedge_offset_in   
+    theta_wedge_angle = gyro_theta_wedge_angle_in  
 
 
     n_fourier_geo = gyro_n_fourier_geo_in

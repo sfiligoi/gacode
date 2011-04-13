@@ -241,7 +241,7 @@ subroutine write_hdf5_data(datafile,action)
           nu_coarse(j,i)=GEO_nu
        enddo
        do j=1,n_fine
-          theta=theta_fine_start+real(j-1)*theta_fine_angle/       &
+          theta=theta_wedge_offset+real(j-1)*theta_wedge_angle/       &
                       real(n_theta_plot*n_theta_mult-1)
           if (n_fine == 1) theta = 0.0 ! Test for special case
           call GEO_interp(theta)
@@ -317,7 +317,7 @@ subroutine write_hdf5_timedata(action)
 
   !---------------------------------------------------
   ! Determine if the fine meshed files need to be written 
-  if (n_alpha_plot > 1 ) then
+  if (n_torangle_3d > 1 ) then
           write_threed = .true.
   else
           write_threed = .false.
@@ -697,9 +697,9 @@ subroutine write_hdf5_timedata(action)
        ! Set up the phi grid.  Only used for coarse grid
        !-------------------------------------------------
 
-       allocate(zeta_phi(n_alpha_plot))
-       do iphi=1,n_alpha_plot
-          zeta_phi(iphi)=REAL(iphi-1)/REAL(n_alpha_plot-1)*2.*pi
+       allocate(zeta_phi(n_torangle_3d))
+       do iphi=1,n_torangle_3d
+          zeta_phi(iphi)=REAL(iphi-1)/REAL(n_torangle_3d-1)*2.*pi
        end do
 
        !-------------------------------------------------------
@@ -708,8 +708,8 @@ subroutine write_hdf5_timedata(action)
        !-------------------------------------------------------
 
        if (.not. allocated(alpha_phi) ) then 
-           allocate(alpha_phi(0:ncoarse,n_x,n_alpha_plot))
-           do iphi=1,n_alpha_plot
+           allocate(alpha_phi(0:ncoarse,n_x,n_torangle_3d))
+           do iphi=1,n_torangle_3d
               alpha_phi(:,:,iphi)=zeta_phi(iphi)+nu_coarse(:,:)
            end do
        endif
@@ -720,7 +720,7 @@ subroutine write_hdf5_timedata(action)
        h5in%units=""
        call dump_h5(dumpGid,'Rgyro',Rc,h5in,h5err)
        call dump_h5(dumpGid,'Zgyro',Zc,h5in,h5err)
-       call dump_h5(dumpGid,'zeta_offset',zeta_offset,h5in,h5err)
+       call dump_h5(dumpGid,'torangle_offset',torangle_offset,h5in,h5err)
        call dump_h5(dumpGid,'alpha',alpha_phi,h5in,h5err)
        h5in%units="m"
        call dump_h5(dumpGid,'R',Rc*a_meters,h5in,h5err)
@@ -746,8 +746,8 @@ subroutine write_hdf5_timedata(action)
          call dump_h5(gid3d,'torAngle',zeta_phi,h5in,h5err)
          call dump_h5(gid3d,'alpha',alpha_phi,h5in,h5err)
 
-         allocate(buffer(ncoarse+1,n_x,n_alpha_plot,3))
-         do iphi=1,n_alpha_plot
+         allocate(buffer(ncoarse+1,n_x,n_torangle_3d,3))
+         do iphi=1,n_torangle_3d
            buffer(:,:,iphi,1)= Rc(:,:)*COS(zeta_phi(iphi))
            buffer(:,:,iphi,2)=-Rc(:,:)*SIN(zeta_phi(iphi))
            buffer(:,:,iphi,3)= Zc(:,:)
@@ -947,7 +947,7 @@ subroutine write_hdf5_fine_timedata(action)
          zetac  = zeta_s(ix)
          do j=1,nfine
              ! This needs to match up with what's in gyro_set_blend_arrays.f90
-             theta=theta_fine_start+real(j-1)*theta_fine_angle/       &
+             theta=theta_wedge_offset+real(j-1)*theta_wedge_angle/       &
                                    real(n_theta_plot*n_theta_mult-1)
              !theta = -pi+REAL(j)*pi*2./REAL(nfine)
              if(radial_profile_method==1) then
@@ -966,11 +966,11 @@ subroutine write_hdf5_fine_timedata(action)
        !-------------------------------------------------------
 
        if (.not. allocated(alpha_phi_fine) ) then
-           allocate(alpha_phi_fine(nfine,n_x,n_alpha_fine))
-           do iphi=1,n_alpha_fine
+           allocate(alpha_phi_fine(nfine,n_x,n_torangle_wedge))
+           do iphi=1,n_torangle_wedge
               !Don't store zeta_fine b/c analysis is on a plane by plane basis
-              zeta_fine=REAL(iphi-1)/REAL(n_alpha_fine)*2.*pi
-              alpha_phi_fine(:,:,iphi)=zeta_offset+zeta_fine+nu_fine(:,:)
+              zeta_fine=REAL(iphi-1)/REAL(n_torangle_wedge)*2.*pi
+              alpha_phi_fine(:,:,iphi)=torangle_offset+zeta_fine+nu_fine(:,:)
            end do
        endif
 
@@ -981,7 +981,7 @@ subroutine write_hdf5_fine_timedata(action)
        h5in%units=""
        call dump_h5(gidfine,'Rgyro',Rf,h5in,h5err)
        call dump_h5(gidfine,'Zgyro',Zf,h5in,h5err)
-       call dump_h5(gidfine,'zeta_offset',zeta_offset,h5in,h5err)
+       call dump_h5(gidfine,'torangle_offset',torangle_offset,h5in,h5err)
        call dump_h5(gidfine,'alpha',alpha_phi_fine,h5in,h5err)
        h5in%units="m"
        call dump_h5(gidfine,'R',Rf*a_meters,h5in,h5err)
@@ -1236,8 +1236,8 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
        i_proc,&
        i_err, &
        electron_method,&
-       n_alpha_fine,&
-       n_alpha_plot
+       n_torangle_wedge,&
+       n_torangle_3d
 
   !------------------------------------------------------
   !   mom: n1,n2,n3=n_theta_plot,n_x,n_kinetic
@@ -1386,11 +1386,11 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
      !   phi: n1,n2,n3=n_theta_plot,n_x,n_field
      !-----------------------------------------
      if (iscoarse) then
-       nphi=n_alpha_plot
+       nphi=n_torangle_3d
        allocate(real_buff(0:n1,n2,n3,nphi))
        allocate(alpha_loc(0:n1,n2))
      else
-       nphi=n_alpha_fine
+       nphi=n_torangle_wedge
        allocate(real_buff(0:n1-1,n2,n3,nphi))
        allocate(alpha_loc(0:n1-1,n2))
      endif

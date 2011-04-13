@@ -57,18 +57,15 @@ module gyro_globals
   !---------------------------------------------------------
   ! Files for vshdf5 i/o control
   !
-  !-PRE integer :: iohdf5out = 1
-  integer :: iohdf5out = 0
-  ! time intervals for hdf5 write outs
-  integer :: fine_time_skip = 1             ! Fine files for synthetic diagnostics
-  ! SEK: These names to need to be consistentified.  I prefer zeta over phi or alpha
-  integer :: n_alpha_fine = 1           ! Number of phi planes to use in fine plots
-  integer :: n_alpha_plot = 20
-  real :: zeta_offset=0.
+  integer :: io_method = 0
+  integer :: time_skip_wedge = 0             ! Wedge files for synthetic diagnostics
+  integer :: n_torangle_wedge= 0           ! Number of toroidal planes to use in wedge plots
+  integer :: n_torangle_3d = 0
+  real :: torangle_offset=0.
   ! This defines a wedge in the poloidal plane 
-  ! To recover the normal global plot, set theta_fine_start=-pi and theta_fine_angle=2*pi
-  real  :: theta_fine_start = 0.0
-  real  :: theta_fine_angle = 0.0
+  ! To recover the normal global plot, set theta_wedge_offset=-pi and theta_wedge_angle=2*pi
+  real  :: theta_wedge_offset = 0.0
+  real  :: theta_wedge_angle = 0.0
 
   !---------------------------------------------------------
   ! Newline characters:

@@ -160,7 +160,7 @@ subroutine gyro_do(skipinit)
   ! Generate geometry-dependent factors using model or
   ! Miller equilibrium:
   call make_geometry_arrays
-  if (iohdf5out == 1) call write_hdf5_data(trim(path)//'gyro_data.h5',1)
+  if (io_method > 0) call write_hdf5_data(trim(path)//'gyro_data.h5',1)
   !
   ! Deallocate GEO
   call GEO_alloc(0)
@@ -319,8 +319,8 @@ subroutine gyro_do(skipinit)
   if (restart_method /= 1) then
 
      if (lskipinit == 0) call gyro_write_master(2)
-     if (iohdf5out == 1 .and. lskipinit == 0) call write_hdf5_timedata(2)
-     if (iohdf5out == 1 .and. lskipinit == 0) call write_hdf5_fine_timedata(2)
+     if (io_method > 0 .and. lskipinit == 0) call write_hdf5_timedata(2)
+     if (io_method > 0 .and. lskipinit == 0) call write_hdf5_fine_timedata(2)
 
   endif
   !--------------------------------------------
