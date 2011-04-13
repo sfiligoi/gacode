@@ -15,11 +15,6 @@ datadir = $(prefix)/neo
 dist_data_DATA = CHANGES
 
 libdir = $(prefix)/lib
-#shared_includes= -I $(top_builddir)/shared/math \
-#	-I $(top_builddir)/shared/EXPRO \
-#	-I $(top_builddir)/shared/GEO
-
-
 lib_LTLIBRARIES = libgacodeneo.la
 
 
