@@ -243,6 +243,8 @@ subroutine gyro_read_input
   call readbc_int(gkeigen_n_values)
   call readbc_int(gkeigen_iter)
   call readbc_real(gkeigen_tol)
+  call readbc_real(gkeigen_omega_target)
+  call readbc_real(gkeigen_gamma_target)
 
   call readbc_int(linsolve_method)
 

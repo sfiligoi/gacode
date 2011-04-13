@@ -196,6 +196,8 @@ module gyro_interface
   integer :: gyro_gkeigen_n_values_in = 10
   integer :: gyro_gkeigen_iter_in = 100
   real    :: gyro_gkeigen_tol_in = 0.0000001
+  real    :: gyro_gkeigen_omega_target_in = -0.3
+  real    :: gyro_gkeigen_gamma_target_in = 0.12
   integer :: gyro_linsolve_method_in = 1
   integer :: gyro_fieldeigen_root_method_in = 1
   real    :: gyro_fieldeigen_wr_in = -0.3
@@ -420,6 +422,8 @@ contains
     gyro_gkeigen_n_values_in = gkeigen_n_values
     gyro_gkeigen_iter_in = gkeigen_iter
     gyro_gkeigen_tol_in = gkeigen_tol
+    gyro_gkeigen_omega_target_in = gkeigen_omega_target
+    gyro_gkeigen_gamma_target_in = gkeigen_gamma_target
     gyro_linsolve_method_in = linsolve_method
     gyro_fieldeigen_root_method_in = fieldeigen_root_method
     gyro_fieldeigen_wr_in = fieldeigen_wr
@@ -633,6 +637,8 @@ contains
     gkeigen_n_values = gyro_gkeigen_n_values_in
     gkeigen_iter = gyro_gkeigen_iter_in
     gkeigen_tol = gyro_gkeigen_tol_in
+    gkeigen_omega_target = gyro_gkeigen_omega_target_in
+    gkeigen_gamma_target = gyro_gkeigen_gamma_target_in
     linsolve_method = gyro_linsolve_method_in
     fieldeigen_root_method = gyro_fieldeigen_root_method_in
     fieldeigen_wr = gyro_fieldeigen_wr_in
