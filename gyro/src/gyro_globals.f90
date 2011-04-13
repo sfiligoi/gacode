@@ -135,6 +135,7 @@ module gyro_globals
   integer :: linsolve_method 
   integer :: collision_method
   integer :: fieldeigen_root_method
+  integer :: gkeigen_method
   !
   ! (b) flags (0 or 1)
   !
@@ -160,8 +161,6 @@ module gyro_globals
   integer :: eparallel_plot_flag
   integer :: entropy_flag
   integer :: num_equil_flag
-  integer :: gkeigen_proc_mult
-  integer :: gkeigen_method
   integer :: gkeigen_matrixonly
   integer :: gkeigen_mwrite_flag
   integer :: plot_u_flag
@@ -177,6 +176,13 @@ module gyro_globals
 
   !-----------------------------------------------------------------------------------
   ! Gyrokinetic eigensolver (GKEIGEN) parameters: 
+  !
+  ! Degree of secondary parallelization.
+  integer :: gkeigen_proc_mult
+  !
+  ! Target eigenvalues for GKEIGEN_METHOD = 5 or 6
+  real :: gkeigen_omega_target
+  real :: gkeigen_gamma_target
   !
   ! Number of eigenvalues to find
   integer :: gkeigen_n_values

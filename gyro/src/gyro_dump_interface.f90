@@ -384,6 +384,10 @@
             "gkeigen_iter",gkeigen_iter)
       call dumpRealInterface(21,"    gyro_gkeigen_tol_in ",    gyro_gkeigen_tol_in , &
             "gkeigen_tol",gkeigen_tol)
+      call dumpRealInterface(21,"    gyro_gkeigen_omega_target_in ",    gyro_gkeigen_omega_target_in , &
+            "gkeigen_tol",gkeigen_omega_target)
+      call dumpRealInterface(21,"    gyro_gkeigen_gamma_target_in ",    gyro_gkeigen_gamma_target_in , &
+            "gkeigen_tol",gkeigen_gamma_target)
       call dumpIntInterface(21,"    gyro_linsolve_method_in ",    gyro_linsolve_method_in , &
             "linsolve_method",linsolve_method)
       call dumpIntInterface(21,"    gyro_fieldeigen_root_method_in ",    gyro_fieldeigen_root_method_in , &

@@ -207,6 +207,8 @@
       call dumpIntVar(21,22,"gkeigen_n_values",gkeigen_n_values)
       call dumpIntVar(21,22,"gkeigen_iter",gkeigen_iter)
       call dumpRealVar(21,22,"gkeigen_tol",gkeigen_tol)
+      call dumpRealVar(21,22,"gkeigen_omega_target",gkeigen_omega_target)
+      call dumpRealVar(21,22,"gkeigen_gamma_target",gkeigen_gamma_target)
       call dumpIntVar(21,22,"linsolve_method",linsolve_method)
       call dumpIntVar(21,22,"fieldeigen_root_method",fieldeigen_root_method)
       call dumpRealVar(21,22,"fieldeigen_wr",fieldeigen_wr)
