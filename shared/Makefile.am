@@ -11,21 +11,20 @@
 
 SUBDIRS	= math GEO UMFPACK EXPRO profiles_gen vshdf5 python bin exec 
 
-#datadir = $(prefix)/gyro
-#dist_data_DATA = VERSION
+lib_LTLIBRARIES = libgacodeshared.la
 
-#all-local: link-data-local
-#
-#link-data-local:
-#	if test $(abs_top_srcdir) != $(abs_top_builddir); then \
-#		for i in $(dist_data_DATA); do \
-#			if test ! -f $$i; then \
-#				ln -s $(srcdir)/$$i .; \
-#			fi; \
-#		done; \
-#	fi
 
-MAINTAINERCLEANFILES    = Makefile.in 
+libgacodeshared_la_SOURCES =
+libgacodeshared_la_LIBADD = \
+	$(top_builddir)/shared/math/libgacodemath.la \
+	$(top_builddir)/shared/GEO/libgacodegeo.la \
+	$(top_builddir)/shared/EXPRO/libgacodeexpro.la \
+	$(top_builddir)/shared/UMFPACK/libgacodeumfpack.la \
+	$(top_builddir)/shared/vshdf5/libvshdf5.la 
+
+
+MAINTAINERCLEANFILES  = Makefile.in 
+CLEANFILES = *.la *.o
 
 
 

@@ -210,6 +210,7 @@ AC_CONFIG_FILES([Makefile
     tglf/python/Makefile
     tglf/src/Makefile
 ])
+#])
 
 #    neo/python/Makefile
 #    neo/sim/Makefile
