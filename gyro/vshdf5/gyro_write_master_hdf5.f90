@@ -31,8 +31,10 @@ subroutine write_hdf5_data(datafile,action)
   integer :: n_fine
   integer :: io_mode
   real :: theta
-  real :: dr
+  real :: dr, buff
+  real :: kt
   real, allocatable :: buffer(:,:,:)
+  !double precision :: buff
   !------------------------------------------
   ! Do the initialization here.  Might need
   ! better logic here based on action.
@@ -57,7 +59,6 @@ subroutine write_hdf5_data(datafile,action)
   ! These variables are essentially the write_profile_vugyro.f90 
   !---------------------------------------------------------------------
   description=" "
-  !write(*,*) "write_hdf5: opening ", filename, " with h5in%comm = ", h5in%comm
   call open_newh5file(filename,fid,description,rootid,h5in,h5err)
 
   h5in%mesh=" "; h5in%units=" "
@@ -117,6 +118,42 @@ subroutine write_hdf5_data(datafile,action)
   call dump_h5(rootid,"rhos_norm", rhos_norm,h5in,h5err)
   call dump_h5(rootid,"zcharge", z(:),h5in,h5err)
   call dump_h5(rootid,"n_moment", n_moment ,h5in,h5err)
+
+  !---------------------------------------------------------------------
+  ! These variables are essentially gyro_write_units.f90
+  !---------------------------------------------------------------------
+     ! kT in MJ (note the conversion 1.6022e-22 MJ/keV)
+     kt = 1.6022e-22*tem_norm
+  h5in%units="kg"
+  call dump_h5(rootid,'m_ref', 2.*kg_proton ,h5in,h5err)
+  h5in%units="Tesla"
+  call dump_h5(rootid,'b_unit',b_unit_norm,h5in,h5err)
+  h5in%units="m"
+  call dump_h5(rootid,'a',a_meters,h5in,h5err)
+  h5in%units="1/s"
+  call dump_h5(rootid,'csda_norm',csda_norm,h5in,h5err)
+  h5in%units="m/s"
+  call dump_h5(rootid,'csda_norm_D',csda_norm*a_meters,h5in,h5err)
+  h5in%units="keV"
+  call dump_h5(rootid,'Te',tem_norm,h5in,h5err)
+  h5in%units="10^19/m^3"
+  call dump_h5(rootid,'ne',den_norm,h5in,h5err)
+  h5in%units="m"
+  call dump_h5(rootid,'rho_sD',rhos_norm*a_meters,h5in,h5err)
+  h5in%units="m^2/s"
+  call dump_h5(rootid,'chi_gBD',csda_norm*(rhos_norm*a_meters)**2,h5in,h5err)
+  buff=1.e19*den_norm*(csda_norm*a_meters)*rhos_norm**2/0.624e22
+  h5in%units="MW/keV/m^2"
+  call dump_h5(rootid,'Gamma_gBD',buff,h5in,h5err)
+  h5in%units="MW/m^2"
+  buff=1.e19*den_norm*(csda_norm*a_meters)*kt*rhos_norm**2
+  call dump_h5(rootid,'Q_gBD',buff,h5in,h5err)
+  h5in%units="Nm/m^2"
+  buff=1.e19*den_norm*a_meters*kt*rhos_norm**2*1e6
+  call dump_h5(rootid,'Pi_gBD',buff,h5in,h5err)
+  h5in%units="MW/m^3"
+  buff=1.e19*den_norm*csda_norm*kt*rhos_norm**2
+  call dump_h5(rootid,'S_gBD',buff,h5in,h5err)
 
   !---------------------------------------------------------------------
   ! These variables are essentially the write_profile_vugyro.f90 
@@ -466,7 +503,11 @@ subroutine write_hdf5_timedata(action)
      !=============
 
      !SEK Worry about this later.
-     
+         call write_distributed_real_h5("freq_n",dumpGid,&
+          size(freq_n),&
+          freq_n,&
+          h5in,h5err)
+ 
      !=============
      ! END LINEAR 
      !=============
@@ -489,6 +530,12 @@ subroutine write_hdf5_timedata(action)
           size(gbflux_n),&
           gbflux_n,&
           h5in,h5err)
+
+     call write_distributed_real_h5("freq_n",dumpGid,&
+          size(freq_n),&
+          freq_n,&
+          h5in,h5err)
+     
 
      if (lindiff_method >= 4) then
         call write_distributed_real_h5('phi_squared_QL_n',dumpGid,&
@@ -670,16 +717,20 @@ subroutine write_hdf5_timedata(action)
        ! Dump the coarse meshes
        !---------------------------------------- 
 
-       call dump_h5(dumpGid,'R',Rc,h5in,h5err)
-       call dump_h5(dumpGid,'Z',Zc,h5in,h5err)
+       h5in%units=""
+       call dump_h5(dumpGid,'Rgyro',Rc,h5in,h5err)
+       call dump_h5(dumpGid,'Zgyro',Zc,h5in,h5err)
        call dump_h5(dumpGid,'zeta_offset',zeta_offset,h5in,h5err)
        call dump_h5(dumpGid,'alpha',alpha_phi,h5in,h5err)
+       h5in%units="m"
+       call dump_h5(dumpGid,'R',Rc*a_meters,h5in,h5err)
+       call dump_h5(dumpGid,'Z',Zc*a_meters,h5in,h5err)
 
        ! Here we do not repeat the points since this is the grid
        ! that will be used for the mode plots on thete E [0,2 pi)
        allocate(bufferMesh(0:ncoarse,n_x,2))
-       bufferMesh(:,:,1)= Rc
-       bufferMesh(:,:,2)= Zc
+       bufferMesh(:,:,1)= Rc*a_meters
+       bufferMesh(:,:,2)= Zc*a_meters
        h5in%units="m"
        h5in%mesh="mesh-structured"
        call dump_h5(dumpGid,'cartMesh',bufferMesh(:,:,:),h5in,h5err)
@@ -927,15 +978,19 @@ subroutine write_hdf5_fine_timedata(action)
        ! Dump the fine meshes
        !---------------------------------------- 
 
-       call dump_h5(gidfine,'R',Rf,h5in,h5err)
-       call dump_h5(gidfine,'Z',Zf,h5in,h5err)
+       h5in%units=""
+       call dump_h5(gidfine,'Rgyro',Rf,h5in,h5err)
+       call dump_h5(gidfine,'Zgyro',Zf,h5in,h5err)
        call dump_h5(gidfine,'zeta_offset',zeta_offset,h5in,h5err)
        call dump_h5(gidfine,'alpha',alpha_phi_fine,h5in,h5err)
+       h5in%units="m"
+       call dump_h5(gidfine,'R',Rf*a_meters,h5in,h5err)
+       call dump_h5(gidfine,'Z',Zf*a_meters,h5in,h5err)
 
        ! For ease of use, have a single data set that has R,Z. 
        allocate(bufferFineMesh(nfine,n_x,2))
-       bufferFineMesh(:,:,1) = Rf(:,:)
-       bufferFineMesh(:,:,2) = Zf(:,:)
+       bufferFineMesh(:,:,1) = Rf(:,:)*a_meters
+       bufferFineMesh(:,:,2) = Zf(:,:)*a_meters
        h5in%units="m"
        h5in%mesh="mesh-structured"
        call dump_h5(gidfine,'cartMesh',bufferFineMesh(:,:,:),h5in,h5err)
@@ -1196,8 +1251,8 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
   integer, intent(in) :: n_fn,n1,n2,n3
   complex, intent(in) :: fn(n_fn)
   logical, intent(in) :: plot3d
-  character(128) :: tempVarName
-  character(128), dimension(3) :: vnameArray=''
+  character(128) :: tempVarName , tempVarNameGr
+  character(128), dimension(:),allocatable :: vnameArray,  pType
   character(3) :: n_name
   character(1) :: ikin_name
   integer(HID_T) :: grGid
@@ -1207,6 +1262,7 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
   integer :: data_loop
   integer :: i_group_send, ispcs
   integer :: i_send, iphi, istart,nn,i,ikin,in, ix,nphi
+  integer :: iloop
   !
   complex :: fn_recv(n_fn), c_i
   complex, dimension(:,:,:,:), allocatable :: buffn
@@ -1229,25 +1285,40 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
      allocate(buffn(0:n1-1,n2,n3,n_n)); buffn=0.
   endif
 
-  do ikin=1,n3
-    if (trim(vname) /= "phi") then 
-      if(electron_method==2 .and. ikin==n3) THEN
-         tempVarName=trim(vname)//"_electron"
-      elseif(electron_method==3) THEN
-         tempVarName=trim(vname)//"_electron"
+!when n3=n_kinetic
+!electron_method =1 => n3=n_ion (gk ions and addiabtic electrons )
+!electron_method =2 => n3=n_spec (gk ions and drift electrons)
+!electron_method =3 => n3=1 (gk electrons and addiabtic ions)
+!electron_method =4 => n3=n_ion (gk electrons and gk ions)
+
+  if (trim(vname) /= "phi") then 
+    ALLOCATE(vnameArray(n3))
+    !ALLOCATE(pType(n3))
+    vnameArray=" "
+   ! pType=" "
+    do ikin=1,n3
+      if(electron_method==2 .and. ikin==n3 ) THEN
+        tempVarName=trim(vname)//"_electron"
+        !pType(ikin)="drift"
+      elseif(electron_method==3 .or. (electron_method==4.and.ikin==n3)) THEN
+        tempVarName=trim(vname)//"_electron"
+        !pType(ikin)="gyro_kinetic"
       else
-         write(ikin_name,fmt='(i1.1)') ikin-1
-         vnameArray(ikin)=trim(vname)//"_ion"//ikin_name
+        write(ikin_name,fmt='(i1.1)') ikin-1
+        tempVarName=trim(vname)//"_ion"//ikin_name
+        !if(electron_method /= 3) pType(ikin)="gyro_kinetic"
       endif
-    else
-      if(ikin==1) vnameArray(1)="phi"
-      if(ikin==2) vnameArray(2)="A_par"
-      if(ikin==3) vnameArray(3)="B_par"
-    endif
-  enddo
+      vnameArray(ikin)=tempVarName
+    enddo
+  else
+    ALLOCATE(vnameArray(3))
+      vnameArray=" "
+      vnameArray(1)="phi"
+      vnameArray(2)="A_par"
+      vnameArray(3)="B_par"
+  endif
 
      do in=1,n_n
-  !WRITE(*,*) "in ", in, i_proc
         !-----------------------------------------
         ! Subgroup collector:
         !
@@ -1274,10 +1345,6 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
 
      enddo ! in
 
-!      if (i_proc == 0) then
-!        write(*,*) shape(buffn)
-!        write(*,*) n_n
-!      endif
      !-----------------------------------------
      if (i_proc /= 0) return
      !-----------------------------------------
@@ -1300,13 +1367,13 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
      ! Dump each species independently
      !-----------------------------------------
      do ispcs=1,n3
-        tempVarName=vnameArray(ikin)//"_modes"
-       call make_group(rGid,trim(tempVarName),grGid,"",h5err)
+       tempVarNameGr=trim(vnameArray(ispcs))//"_modes"
+       call make_group(rGid,trim(tempVarNameGr),grGid,"",h5err)
        tempVarName=trim(vnameArray(ispcs))//"_real"
        call dump_h5(grGid,trim(tempVarName),real(buffn(:,:,ispcs,:)),h5in,h5err)
-       tempVarName=trim(vnameArray(ispcs))//"imag"
+       tempVarName=trim(vnameArray(ispcs))//"_imag"
        call dump_h5(grGid,trim(tempVarName),aimag(buffn(:,:,ispcs,:)),h5in,h5err)
-       CALL close_group(trim(tempVarName),grGid,h5err)
+       CALL close_group(trim(tempVarNameGr),grGid,h5err)
      enddo ! in
      if(.not.plot3d) then
        deallocate(buffn)
@@ -1364,14 +1431,15 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
      else
        ! Dump each phi slice as a separate variable
        do ikin=1,n3
-        tempVarName=vnameArray(ikin)//"_toroidal"
-         call make_group(r3Did,trim(tempVarName),grGid,"",h5err)
+         tempVarNameGr=trim(vnameArray(ikin))//"_toroidal"
+         call make_group(r3Did,trim(tempVarNameGr),grGid,"",h5err)
          call dump_h5(grGid,trim(vnameArray(ikin)),real_buff(:,:,ikin,:),h5in,h5err)
-         call close_group(trim(tempVarName),grGid,h5err)
+         call close_group(trim(tempVarNameGr),grGid,h5err)
        enddo
      endif
 
      deallocate(real_buff)
+     deallocate(vnameArray)
 
 return
 end subroutine write_distributed_complex_h5
