@@ -31,7 +31,7 @@ LMATH = -framework Accelerate
 # OPTIONAL: netCDF (for gyro2gkv)
 
 #NETCDF = $(SCRATCH)/volatile-gnu/netcdf/lib/libnetcdf.a
-NETCDF = $(HOME)/software/netcdf/lib/libnetcdf.a
+NETCDF = $(HOME)/software/netcdf/lib/libnetcdf.a $(HOME)/software/netcdf/lib/libnetcdff.a
 #NETCDF_INC = $(SCRATCH)/volatile-gnu/netcdf/include
 NETCDF_INC =$(HOME)/software/netcdf/include
 
