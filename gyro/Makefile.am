@@ -32,30 +32,14 @@ libgacodegyro_la_SOURCES =
 libgacodegyro_la_LIBADD = \
 	$(top_builddir)/gyro/src/libgacodegyro_SRC.la \
 	$(top_builddir)/gyro/BLEND/libgacodeblend.la \
-	$(top_builddir)/shared/math/libgacodemath.la \
 	$(top_builddir)/gyro/TRANSPOSE/libgacodetranspose.la \
 	$(top_builddir)/gyro/SSUB/libgacodessub.la \
-	$(top_builddir)/shared/GEO/libgacodegeo.la \
-	$(top_builddir)/shared/EXPRO/libgacodeexpro.la \
-	$(top_builddir)/shared/UMFPACK/libgacodeumfpack.la \
 	$(top_builddir)/gyro/GKEIGEN/libgacodegkeigen.la \
-	$(top_builddir)/shared/vshdf5/libvshdf5.la \
 	$(top_builddir)/gyro/vshdf5/libgyro_vshdf5.la
 
 
 gyro_SOURCES = src/gyro.f90
-gyro_LDADD  = libgacodegyro.la @FFTW_LIBS@  $(LMATH) $(IOLIBS)
-
-all-local: link-data-local
-
-link-data-local:
-	if test $(abs_top_srcdir) != $(abs_top_builddir); then \
-		for i in $(dist_data_DATA); do \
-			if test ! -f $$i; then \
-				ln -s $(srcdir)/$$i .; \
-			fi; \
-		done; \
-	fi
+gyro_LDADD  = libgacodegyro.la $(top_builddir)/shared/libgacodeshared.la @FFTW_LIBS@ $(LMATH) $(IOLIBS)
 
 MAINTAINERCLEANFILES    = Makefile.in 
 CLEANFILES = gyro *.la *.o
