@@ -57,7 +57,7 @@ module gyro_globals
   !---------------------------------------------------------
   ! Files for vshdf5 i/o control
   !
-  integer :: io_method = 0
+  integer :: io_method = 1
   integer :: time_skip_wedge = 0             ! Wedge files for synthetic diagnostics
   integer :: n_torangle_wedge= 0           ! Number of toroidal planes to use in wedge plots
   integer :: n_torangle_3d = 0

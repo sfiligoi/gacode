@@ -25,7 +25,7 @@ subroutine write_hdf5_data(datafile,action)
   integer :: i_dummy
   real :: dummy
   integer(HID_T) :: fid, rootid
-  character(90) :: description, filename
+  character(90) :: description
   type(hdf5InOpts) :: h5in
   type(hdf5ErrorType) :: h5err
   integer :: n_fine
@@ -52,14 +52,12 @@ subroutine write_hdf5_data(datafile,action)
   h5in%wrVsTime=.false.
   h5in%verbose=.true.
 
-  filename=trim(path)//'gyro_profile.h5'
-
   !---------------------------------------------------------------------
   ! Write the variables to an hdf5 file
   ! These variables are essentially the write_profile_vugyro.f90 
   !---------------------------------------------------------------------
   description=" "
-  call open_newh5file(filename,fid,description,rootid,h5in,h5err)
+  call open_newh5file(datafile,fid,description,rootid,h5in,h5err)
 
   h5in%mesh=" "; h5in%units=" "
   call dump_h5(rootid,"n_x",n_x,h5in,h5err)
@@ -316,7 +314,7 @@ subroutine write_hdf5_timedata(action)
 
 
   !---------------------------------------------------
-  ! Determine if the fine meshed files need to be written 
+  ! Determine if the 3D files need to be written 
   if (n_torangle_3d > 1 ) then
           write_threed = .true.
   else
@@ -635,7 +633,7 @@ subroutine write_hdf5_timedata(action)
 
    if (i_proc == 0) then
          call close_h5file(dumpFid,dumpGid,h5err)
-         call close_h5file(fid3d,gid3d,h5err)
+         if (write_threed) call close_h5file(fid3d,gid3d,h5err)
    endif
 
    return
@@ -694,25 +692,16 @@ subroutine write_hdf5_timedata(action)
        enddo
       
        !------------------------------------------------
-       ! Set up the phi grid.  Only used for coarse grid
+       ! Set up the toroidal grid.  Only used for a coarse grid
        !-------------------------------------------------
-
-       allocate(zeta_phi(n_torangle_3d))
-       do iphi=1,n_torangle_3d
-          zeta_phi(iphi)=REAL(iphi-1)/REAL(n_torangle_3d-1)*2.*pi
-       end do
-
-       !-------------------------------------------------------
-       ! Set up the alpha grid
-       ! These are set up in a module so no need to recalculate
-       !-------------------------------------------------------
-
-       if (.not. allocated(alpha_phi) ) then 
-           allocate(alpha_phi(0:ncoarse,n_x,n_torangle_3d))
-           do iphi=1,n_torangle_3d
-              alpha_phi(:,:,iphi)=zeta_phi(iphi)+nu_coarse(:,:)
-           end do
+    
+       if (n_torangle_3d > 0) then
+         allocate(zeta_phi(n_torangle_3d))
+         do iphi=1,n_torangle_3d
+            zeta_phi(iphi)=REAL(iphi-1)/REAL(n_torangle_3d-1)*2.*pi
+         end do
        endif
+
        !----------------------------------------
        ! Dump the coarse meshes
        !---------------------------------------- 
@@ -720,8 +709,6 @@ subroutine write_hdf5_timedata(action)
        h5in%units=""
        call dump_h5(dumpGid,'Rgyro',Rc,h5in,h5err)
        call dump_h5(dumpGid,'Zgyro',Zc,h5in,h5err)
-       call dump_h5(dumpGid,'torangle_offset',torangle_offset,h5in,h5err)
-       call dump_h5(dumpGid,'alpha',alpha_phi,h5in,h5err)
        h5in%units="m"
        call dump_h5(dumpGid,'R',Rc*a_meters,h5in,h5err)
        call dump_h5(dumpGid,'Z',Zc*a_meters,h5in,h5err)
@@ -741,9 +728,24 @@ subroutine write_hdf5_timedata(action)
        ! Dump the coarse mesh(es) in 3D
        !---------------------------------------- 
        if (write_threed) then
-         call dump_h5(gid3d,'R',Rc,h5in,h5err)
-         call dump_h5(gid3d,'Z',Zc,h5in,h5err)
+         !-------------------------------------------------------
+         ! Set up the alpha grid
+         ! These are set up in a module so no need to recalculate
+         !-------------------------------------------------------
+
+         if (.not. allocated(alpha_phi) ) then 
+             allocate(alpha_phi(0:ncoarse,n_x,n_torangle_3d))
+             do iphi=1,n_torangle_3d
+                alpha_phi(:,:,iphi)=zeta_phi(iphi)+nu_coarse(:,:)
+             end do
+         endif
+    
+         h5in%units="m"
+         call dump_h5(gid3d,'R',Rc*a_meters,h5in,h5err)
+         call dump_h5(gid3d,'Z',Zc*a_meters,h5in,h5err)
+         h5in%units="radians"
          call dump_h5(gid3d,'torAngle',zeta_phi,h5in,h5err)
+         call dump_h5(gid3d,'torangle_offset',torangle_offset,h5in,h5err)
          call dump_h5(gid3d,'alpha',alpha_phi,h5in,h5err)
 
          allocate(buffer(ncoarse+1,n_x,n_torangle_3d,3))
@@ -754,7 +756,7 @@ subroutine write_hdf5_timedata(action)
          enddo
 
          h5in%units="m"; h5in%mesh="mesh-structured"
-         call dump_h5(gid3d,'cartMesh',buffer,h5in,h5err)
+         call dump_h5(gid3d,'cartMesh',buffer*a_meters,h5in,h5err)
          deallocate(buffer)
       endif
 
@@ -1276,7 +1278,9 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
   c_i=(0,1)
 
   omega_exp=w0_s(ir_norm)
-
+  
+  
+  
   if(n1==n_theta_plot) then
      iscoarse=.true.
      allocate(buffn(0:n1,n2,n3,n_n)); buffn=0.
@@ -1386,7 +1390,8 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
      !   phi: n1,n2,n3=n_theta_plot,n_x,n_field
      !-----------------------------------------
      if (iscoarse) then
-       nphi=n_torangle_3d
+       nphi = 1 
+       if (n_torangle_3d > 0) nphi=n_torangle_3d
        allocate(real_buff(0:n1,n2,n3,nphi))
        allocate(alpha_loc(0:n1,n2))
      else
@@ -1406,6 +1411,10 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
      do iphi=1,nphi
        !Get alpha coordinate on either the coarse or fine mesh.
        ! Include doppler shift here
+
+       write(*,*) "iscoarse = ", iscoarse
+       write(*,*) " shape of alpha_loc = ", shape(alpha_loc)
+       write(*,*) " shape of alpha_phi= ", shape(alpha_phi)
        if (iscoarse) then
          alpha_loc=alpha_phi(:,:,iphi)+omega_exp*t_current
        else
