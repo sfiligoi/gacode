@@ -21,7 +21,7 @@ subroutine write_geometry_arrays(datafile,io)
   integer, intent(in) :: io
   character (len=*), intent(in) :: datafile
   !
-  integer :: n_fine
+  integer :: n_wedge
   integer :: io_mode
   real :: theta
   real :: dr
@@ -52,7 +52,7 @@ subroutine write_geometry_arrays(datafile,io)
         open(unit=io,file=datafile,status='replace')
      endif
 
-     n_fine = n_theta_plot*n_theta_mult
+     n_wedge = n_theta_plot*n_theta_mult
 
      do i=1,n_x
 
@@ -104,12 +104,12 @@ subroutine write_geometry_arrays(datafile,io)
         GEO_fourier_in(:,:) = a_fourier_geo_s(:,0:n_fourier_geo,i)
         call GEO_do()
 
-        do j=1,n_fine
+        do j=1,n_wedge
 
-           theta = -pi+(j-1)*pi_2/n_fine
+           theta = -pi+(j-1)*pi_2/n_wedge
 
            ! Test for special case
-           if (n_fine == 1) theta = 0.0
+           if (n_wedge == 1) theta = 0.0
 
            call GEO_interp(theta)
 

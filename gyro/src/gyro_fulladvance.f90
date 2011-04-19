@@ -115,7 +115,7 @@ subroutine gyro_fulladvance
   !    selected OUTPUT_METHOD > 1.
   !
   call gyro_moments_plot 
-  if (io_method > 1 .and. time_skip_wedge > 0) call gyro_moments_plot_fine
+  if (io_method > 1 .and. time_skip_wedge > 0) call gyro_moments_plot_wedge
   !
   ! 4. Compute (phi,a) at r=r0 for plotting (if user 
   !    has selected FIELD_RO_FLAG=1).
@@ -146,7 +146,7 @@ subroutine gyro_fulladvance
   !
   if(time_skip_wedge > 0) then
     if (modulo(step,time_skip_wedge) == 0 .and. io_method > 1) then
-     call write_hdf5_fine_timedata(2)
+     call write_hdf5_wedge_timedata(2)
     endif
   endif
   if (modulo(step,time_skip) == 0) then

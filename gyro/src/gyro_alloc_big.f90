@@ -113,7 +113,7 @@ subroutine gyro_alloc_big(flag)
      
      !For synthetic diagnostic
      if (io_method > 1 .and. time_skip_wedge > 0) then
-        allocate(moments_plot_fine(n_theta_plot*n_theta_mult,n_x,n_kinetic,3))
+        allocate(moments_plot_wedge(n_theta_plot*n_theta_mult,n_x,n_kinetic,3))
      endif
      allocate(moments_zero_plot(n_x,n_kinetic,n_moment))
 
@@ -218,7 +218,7 @@ subroutine gyro_alloc_big(flag)
      deallocate(moments_plot)
      deallocate(moments_zero_plot)
      if (io_method > 1 .and. time_skip_wedge > 0) then
-        deallocate(moments_plot_fine)
+        deallocate(moments_plot_wedge)
      endif
 
      deallocate(kxkyspec)

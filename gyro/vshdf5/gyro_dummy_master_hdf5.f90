@@ -39,13 +39,13 @@ subroutine write_hdf5_timedata(action)
 end subroutine write_hdf5_timedata
 
 !------------------------------------------------------
-! write_hdf5_fine_timedata
+! write_hdf5_wedge_timedata
 ! PURPOSE:
 !  This is like the above, only it is for just the 
 !  fine data
 !-----------------------------------------------------
 
-subroutine write_hdf5_fine_timedata(action)
+subroutine write_hdf5_wedge_timedata(action)
   use gyro_globals
 
   !---------------------------------------------------
@@ -56,7 +56,7 @@ subroutine write_hdf5_fine_timedata(action)
   integer, intent(in) :: action
   return
 
-end subroutine write_hdf5_fine_timedata
+end subroutine write_hdf5_wedge_timedata
 
   !------------------------------------------------
   ! write_restart

@@ -117,10 +117,10 @@ subroutine gyro_alloc_orbit(flag)
      
      !SEK: There might be a better method here
      if (io_method > 1 .and. time_skip_wedge > 0) then
-       allocate(blend_fine(n_blend,n_theta_mult*n_theta_plot,n_x))
-       allocate(blend_prime_fine(n_blend,n_theta_mult*n_theta_plot,n_x))
-       blend_fine=0.
-       blend_prime_fine=0.
+       allocate(blend_wedge(n_blend,n_theta_mult*n_theta_plot,n_x))
+       allocate(blend_prime_wedge(n_blend,n_theta_mult*n_theta_plot,n_x))
+       blend_wedge=0.
+       blend_prime_wedge=0.
      endif
      allocate(blend_r0_plot(n_blend,field_r0_grid))
      blend_r0_plot=0.
@@ -191,8 +191,8 @@ subroutine gyro_alloc_orbit(flag)
      deallocate(blend_plot)
      deallocate(blend_prime_plot)
      if (io_method > 1 .and. time_skip_wedge > 0) then
-       deallocate(blend_fine)
-       deallocate(blend_prime_fine)
+       deallocate(blend_wedge)
+       deallocate(blend_prime_wedge)
      endif
      deallocate(blend_r0_plot)
 

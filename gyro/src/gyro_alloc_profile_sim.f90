@@ -123,8 +123,8 @@ subroutine gyro_alloc_profile_sim(flag)
 
      if (io_method > 1) then
         allocate(nu_coarse(0:n_theta_plot,n_x))
-        allocate(nu_fine(n_theta_plot*n_theta_mult,n_x))
-        nu_coarse=0.; nu_fine=0.
+        allocate(nu_wedge(n_theta_plot*n_theta_mult,n_x))
+        nu_coarse=0.; nu_wedge=0.
      endif
 
      ! Required in MPI_RECV
@@ -212,7 +212,7 @@ subroutine gyro_alloc_profile_sim(flag)
 
      if (io_method > 1) then
         deallocate(nu_coarse)
-        deallocate(nu_fine)
+        deallocate(nu_wedge)
      endif
 
      deallocate(recv_status)
