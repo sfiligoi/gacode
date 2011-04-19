@@ -1,3 +1,4 @@
+#!/bin/env python
 from gacodeinput import *
 import sys
 
@@ -187,6 +188,8 @@ x.add('GKEIGEN_KSPACE_DIM','300')
 x.add('GKEIGEN_N_VALUES','10')
 x.add('GKEIGEN_ITER','100')
 x.add('GKEIGEN_TOL','0.0000001')
+x.add('GKEIGEN_OMEGA_TARGET','-0.3')
+x.add('GKEIGEN_GAMMA_TARGET','0.12')
 x.add('LINSOLVE_METHOD','1')
 x.add('FIELDEIGEN_ROOT_METHOD','1')
 x.add('FIELDEIGEN_WR','-0.3')
@@ -194,13 +197,13 @@ x.add('FIELDEIGEN_WI','0.2')
 x.add('FIELDEIGEN_TOL','1e-6')
 x.add('COLLISION_METHOD','2')
 #addition for hdf5 io
-x.add('IOHDF5OUT', '0')
-x.add('FINE_TIME_SKIP', '1')
-x.add('N_ALPHA_FINE', '1')
-x.add('N_ALPHA_PLOT', '20')
-x.add('THETA_FINE_START', '0.0')
-x.add('THETA_FINE_ANGLE', '0.0')
-x.add('ZETA_OFFSET', '0.0')
+x.add('IO_METHOD', '0')
+x.add('TIME_SKIP_WEDGE', '0')
+x.add('N_TORANGLE_WEDGE', '0')
+x.add('N_TORANGLE_3D', '0')
+x.add('THETA_WEDGE_OFFSET', '0.0')
+x.add('THETA_WEDGE_ANGLE', '0.0')
+x.add('TORANGLE_OFFSET', '0.0')
 
 
 # Deprecated parameters

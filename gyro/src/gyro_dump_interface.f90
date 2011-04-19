@@ -384,6 +384,10 @@
             "gkeigen_iter",gkeigen_iter)
       call dumpRealInterface(21,"    gyro_gkeigen_tol_in ",    gyro_gkeigen_tol_in , &
             "gkeigen_tol",gkeigen_tol)
+      call dumpRealInterface(21,"    gyro_gkeigen_omega_target_in ",    gyro_gkeigen_omega_target_in , &
+            "gkeigen_omega_target",gkeigen_omega_target)
+      call dumpRealInterface(21,"    gyro_gkeigen_gamma_target_in ",    gyro_gkeigen_gamma_target_in , &
+            "gkeigen_gamma_target",gkeigen_gamma_target)
       call dumpIntInterface(21,"    gyro_linsolve_method_in ",    gyro_linsolve_method_in , &
             "linsolve_method",linsolve_method)
       call dumpIntInterface(21,"    gyro_fieldeigen_root_method_in ",    gyro_fieldeigen_root_method_in , &
@@ -396,6 +400,20 @@
             "fieldeigen_tol",fieldeigen_tol)
       call dumpIntInterface(21,"    gyro_collision_method_in ",    gyro_collision_method_in , &
             "collision_method",collision_method)
+      call dumpIntInterface(21,"    gyro_io_method_in        ",    gyro_io_method_in        , &
+            "io_method",io_method)
+      call dumpIntInterface(21,"    gyro_time_skip_wedge_in ",    gyro_time_skip_wedge_in , &
+            "time_skip_wedge",time_skip_wedge)
+      call dumpIntInterface(21,"    gyro_n_torangle_wedge_in ",    gyro_n_torangle_wedge_in , &
+            "n_torangle_wedge",n_torangle_wedge)
+      call dumpIntInterface(21,"    gyro_n_torangle_3d_in  ",    gyro_n_torangle_3d_in  , &
+            "n_torangle_3d",n_torangle_3d)
+      call dumpRealInterface(21,"    gyro_theta_wedge_offset_in  ",    gyro_theta_wedge_offset_in  , &
+            "theta_wedge_offset",theta_wedge_offset)
+      call dumpRealInterface(21,"    gyro_theta_wedge_angle_in ",    gyro_theta_wedge_angle_in , &
+            "theta_wedge_angle",theta_wedge_angle)
+      call dumpRealInterface(21,"    gyro_torangle_offset_in        ",    gyro_torangle_offset_in        , &
+            "torangle_offset",torangle_offset)
   close(funit)
  end if
 !

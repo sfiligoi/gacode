@@ -195,7 +195,13 @@ subroutine gyro_moments_plot_fine
      ! Compute moments_plot with averaging:
      !
      moments_plot_fine(:,:,is,:) = moments_plot_fine(:,:,is,:)+&
-          w_time(alltime_index+1)*mom_tmp(:,:,:)
+          mom_tmp(:,:,:)
+     ! w_time seems to be a filter that is 1 at the beginning of
+     ! time_step=mod(time_step,time_skip), but drops to a very small number
+     ! that exponentially grows until it gets back to 
+     ! time_step=mod(time_step,time_skip) again. 
+     ! This may be killing refined temporal data writes.
+          !w_time(alltime_index+1)*mom_tmp(:,:,:)
      !----------------------------------------------------------------
 
   enddo ! is

@@ -10,13 +10,10 @@
 ##
 ## ############################################################################
 
-if HAVE_MPI
-bin_PROGRAMS     = tglf
-endif
 
 libdir = $(prefix)/lib
-lib_LTLIBRARIES = libgacodetglf.la
-libgacodetglf_la_SOURCES = \
+noinst_LTLIBRARIES = libgacodetglf_src.la
+libgacodetglf_src_la_SOURCES = \
   tglf_modules.f90 \
   tglf_LS.f90 \
   tglf_geometry.f90 \
@@ -36,13 +33,6 @@ EXTRA_DIST = \
 
 
 
-
-if HAVE_MPI
-tglf_SOURCES 	= tglf.f90
-tglf_LDADD  	= $(top_builddir)/tglf/src/libgacodetglf.la \
-		  @LAPACK_LIBS@ @BLAS_LIBS@
-endif
-		 
 if TX_FORTRAN_MODNAMEISCAP
 nodist_include_HEADERS= TGLF_INTERFACE.$(TX_FORTRAN_MODEXT)
 TGLF_INTERFACE.$(TX_FORTRAN_MODEXT): tglf_interface.f90

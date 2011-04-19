@@ -115,7 +115,7 @@ subroutine gyro_fulladvance
   !    selected OUTPUT_METHOD > 1.
   !
   call gyro_moments_plot 
-  if (iohdf5out == 1) call gyro_moments_plot_fine
+  if (io_method > 0) call gyro_moments_plot_fine
   !
   ! 4. Compute (phi,a) at r=r0 for plotting (if user 
   !    has selected FIELD_RO_FLAG=1).
@@ -144,8 +144,10 @@ subroutine gyro_fulladvance
   !-------------------------------------------------------------------
   ! MANAGE data output: 
   !
-  if (modulo(step,fine_time_skip) == 0 .and. iohdf5out == 1) then
+  if(time_skip_wedge > 0) then
+    if (modulo(step,time_skip_wedge) == 0 .and. io_method > 0) then
      call write_hdf5_fine_timedata(2)
+    endif
   endif
   if (modulo(step,time_skip) == 0) then
 
@@ -173,7 +175,7 @@ subroutine gyro_fulladvance
      ! Main data I/O handler
 
      call gyro_write_master(2)
-     if (iohdf5out == 1) call write_hdf5_timedata(2)
+     if (io_method > 0) call write_hdf5_timedata(2)
 
      !--------------------------------------------------
      ! Update diffusivity and flux time-record for TGYRO 

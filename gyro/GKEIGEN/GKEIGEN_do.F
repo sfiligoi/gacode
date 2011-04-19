@@ -40,7 +40,8 @@
 
       Vec            dummy_vec
 
-      PetscScalar    dummy_scalar,                                      &
+      PetscScalar    dummy_scalar,
+     &               gkeigen_target,                                    &
      &               one_col(h_length_loc),                             &
      &               M_seq(seq_length),                                 &
      &               M_seq_t(seq_length_t)
@@ -53,6 +54,12 @@
       PetscErrorCode ierr
 
       EPS            epsolve
+
+      ST             trans
+
+      KSP            ksub
+
+      PC             precon
 !
 !-------------------------------------------------
 
@@ -60,7 +67,7 @@
       complex, dimension(500,h_length_loc) :: restart_cols
 !      complex, dimension(0:h_length_loc-1,0:h_width_loc-1) :: M_loc
       complex, dimension(:,:), allocatable :: M_loc
-      character (len=80) :: gkeigen_exit_message
+      character (len=80) :: gkeigen_message
 
 10    Format(I2, ':', I2, ':', I2, ':' I3)
 20    Format('Mode: ', I3, '    Omega: ', es18.9, '    Gamma: ', es18.9,&
@@ -463,11 +470,34 @@
        Print *, "Using Krylov subspace of dimension ",gkeigen_kspace_dim
       EndIf
       call EPSCreate(MPI_COMM_WORLD,epsolve,ierr)
+!      call EPSSetType(epsolve,EPSARPACK,ierr)
       call EPSSetOperators(epsolve,time_derivative_matrix,              &
      &                     PETSC_NULL_OBJECT,ierr)
 
+!      call EPSSetDimensions(epsolve,gkeigen_n_values,                   &
+!     &                      gkeigen_kspace_dim,h_length,ierr)
       call EPSSetDimensions(epsolve,gkeigen_n_values,                   &
-     &                      gkeigen_kspace_dim,h_length,ierr)
+     &                      gkeigen_kspace_dim,PETSC_DECIDE,ierr)
+!      call EPSSetTrueResidual(epsolve,PETSC_TRUE,ierr)
+!      call EPSSetBalance(epsolve,EPS_BALANCE_TWOSIDE,200,PETSC_DECIDE,  &
+!     &                   ierr)
+
+!      call EPSGetST(epsolve,trans,ierr)
+!      call STSetType(trans,STSHIFT,ierr)
+
+!      call STGetKSP(trans,ksub,ierr)
+!      call KSPSetType(ksub,KSPGMRES,ierr)
+      
+!      call KSPGetPC(ksub,precon,ierr)
+!      call PCSetType(precon,PCASM,ierr)
+
+!      call STSetType(trans,STPRECOND,ierr)
+!      call KSPSetType(ksub,KSPCG,ierr)
+!      call PCSetType(precon,PCJACOBI,ierr)
+
+!      call KSPSetPC(ksub,precon,ierr)
+!      call STSetKSP(trans,ksub,ierr)
+!      call EPSSetST(epsolve,trans,ierr)
 
 !--------------------------------------------------------------
 ! Search for eigenvalues in the region of the complex plane
@@ -481,6 +511,10 @@
 ! (4) Smallest real part / Most stable modes
 !
 !
+      gkeigen_target = (1.0,0.0)*gkeigen_gamma_target -                 &
+     &                                 (0.0,1.0)*gkeigen_omega_target
+      call EPSSetTarget(epsolve,gkeigen_target,ierr)
+
       select case (gkeigen_method)
 
       case (1)
@@ -506,6 +540,23 @@
         call send_line(' Seeking smallest growth rates.')
         If (l_print) print *, ' Seeking smallest growth rates.'
         call EPSSetWhichEigenpairs(epsolve,EPS_SMALLEST_REAL,ierr)
+
+      case (5)
+
+        write(gkeigen_message,*)                                        &
+     & ' Seeking eigenvalues with frequency near ', gkeigen_omega_target
+        call send_line(gkeigen_message)
+        If (l_print) print *, gkeigen_message
+        call EPSSetWhichEigenpairs(epsolve,EPS_TARGET_IMAGINARY,ierr)
+
+      case (6)
+
+        write(gkeigen_message,*)                                        &
+     & ' Seeking eigenvalues with growth rate near ',                   &
+     &        gkeigen_gamma_target
+        call send_line(gkeigen_message)
+        If (l_print) print *, gkeigen_message
+        call EPSSetWhichEigenpairs(epsolve,EPS_TARGET_REAL,ierr)
 
       case default
 
@@ -555,8 +606,8 @@
         Print *, n_iter, ' iterations performed'
       EndIf
 
-      write(gkeigen_exit_message,80) n_converged
-      call set_exit_status(gkeigen_exit_message,2)
+      write(gkeigen_message,80) n_converged
+      call set_exit_status(gkeigen_message,2)
 
       call VecDestroy(dummy_vec,ierr)
       call MatDestroy(time_derivative_matrix,ierr)

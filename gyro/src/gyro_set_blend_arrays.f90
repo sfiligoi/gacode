@@ -244,11 +244,11 @@ subroutine gyro_set_blend_arrays
 
      enddo ! j_plot
   enddo ! i
-  if (iohdf5out == 1) then
+  if (io_method > 0) then
     do i=1,n_x
        do j_plot=1,n_theta_plot*n_theta_mult
           !x = -pi+REAL(j-1)*pi_2/REAL(n_theta_plot*n_theta_mult)
-          x=theta_fine_start+real(j_plot-1)*theta_fine_angle/real(n_theta_plot*n_theta_mult-1)
+          x=theta_wedge_offset+real(j_plot-1)*theta_wedge_angle/real(n_theta_plot*n_theta_mult-1)
           x=x/pi
           do j=1,n_blend
              blend_fine(j,j_plot,i) = BLEND_F(j,x,phase(in_1,i))

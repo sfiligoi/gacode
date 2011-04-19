@@ -5,7 +5,7 @@ pro user_control, SKIP_LARGE = do_skip_large, REMOTE_DIR=use_remote_dir
   ;;----------------------------------------------------
   ;; REMOTE SIMULATION DIRECTORY (0=off,1=on)
   ;;
-  DEFAULT, use_remote_dir, 0
+  DEFAULT, use_remote_dir, 1
   remotedir_flag = use_remote_dir
   remotedir = '/global/scratch/sd/bassem/VZ_runs_142111/newruns/n3_725/E0nEP1_b2_qscan'
   ;;----------------------------------------------------
