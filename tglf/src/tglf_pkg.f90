@@ -43,12 +43,15 @@
       PUBLIC :: get_q_low
       PUBLIC :: get_a_pol
       PUBLIC :: get_a_tor
+      PUBLIC :: get_Bp0
       PUBLIC :: get_R2_ave
       PUBLIC :: get_B2_ave
       PUBLIC :: get_RBt_ave
       PUBLIC :: get_DM
       PUBLIC :: get_DR
+      PUBLIC :: get_wavefunction_out
       PUBLIC :: write_tglf_input
+      PUBLIC :: write_wavefunction_out
 !
       CONTAINS
 !

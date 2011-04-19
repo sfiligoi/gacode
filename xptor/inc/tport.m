@@ -255,7 +255,7 @@ c 301 elements (was 51)
       real*8 h_exp(0:jmaxmt), f_exp(0:jmaxmt), g_exp(0:jmaxmt)
       real*8 bp_exp(0:jmaxmt)
       real*8 c_par(0:jmaxmt), c_per(0:jmaxmt), c_tor(0:jmaxmt)
-      real*8 a_pol(0:jmaxmt), a_tor(0:jmaxmt)
+      real*8 a_pol(0:jmaxmt), a_tor(0:jmaxmt), Bp0(0:jmaxmt)
       real*8 xb2_exp(0:jmaxmt), xbm2_exp(0:jmaxmt), xngrth_exp(0:jmaxmt)
      & ,     xgrbm2_exp(0:jmaxmt), fm1_exp(0:jmaxmt), fm2_exp(0:jmaxmt)
      & ,     fm3_exp(0:jmaxmt), fhat_exp(0:jmaxmt), xr2_exp(0:jmaxmt)
@@ -484,7 +484,7 @@ c
      & , rmin_exp, rmaj_exp, sfactor, geofac, drhodr, drhodrrrho
      & , georotrate, geoalpha
      & , h_exp, f_exp, g_exp,  psir_exp
-     & , bp_exp, c_par, c_per, c_tor, a_pol, a_tor
+     & , bp_exp, c_par, c_per, c_tor, a_pol, a_tor, Bp0
      & , xb2_exp, xr2_exp, xbm2_exp
      & , xngrth_exp, xgrbm2_exp,fm1_exp, fm2_exp, fm3_exp
      & , fhat_exp, gradrhosq_exp, gradrho_exp

@@ -35,7 +35,7 @@ c
       real*8 deltaa_exp,rmajor_exp,zimp_exp,amassimp_exp
       real*8 bt_exp,sign_bt_exp,bp0_exp,amassgas_exp,zgas_exp,te0_exp
       real*8 ti0_exp,alfte_exp,ftea_exp,alfti_exp,ftia_exp,ne0_exp
-      real*8 alfne_exp,xpnq_exp,fnea_exp,frad_exp
+      real*8 alfne_exp,xpnq_exp,fnea_exp,frad_exp,sign_it_exp
       real*8 alfrad_exp,powe0_exp,alfpowe_exp,powi0_exp
       real*8 alfpowi_exp,flow0_exp,alfflow_exp
       real*8 arfe_exp,brfe_exp,wrfe_exp,arfi_exp
@@ -61,7 +61,7 @@ c
      & , rsigma, zeff_sc,zeff_e, zpmte_hold, zpmti_hold
      & , zpmne_hold, zpmni_hold, betae_hold, xnu_hold
      & , rhos_hold, q_hold, shat_hold, eps_hold, rmaj_hold
-     & , tiote_hold, zeff_hold, elong_hold
+     & , tiote_hold, zeff_hold, elong_hold, sign_it_exp
      & , wallneut, wallneutp, corot, sign_bt_exp
      & , xwdot, xsdot, arho_exp, elonga_exp, deltaa_exp
      & , rmajor_exp, zimp_exp,amassimp_exp, bt_exp, bp0_exp

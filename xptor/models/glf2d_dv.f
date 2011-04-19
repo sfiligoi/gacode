@@ -875,17 +875,18 @@ c
       include '../inc/ptor.m'
       include '../inc/glf.m'
 !
-      real :: n0,a0,T0,v0,cnc,thetam
+      real :: n0,a0,T0,v0,m0,cnc,thetam,cvpol
 !
       call xptor_neo_map
       call neo_run
 !
 ! neo normalizations
 !
-      n0 = nem
-      a0 = rmin_exp(mxgrid)
-      T0 = tim
-      v0 = 9.79D3*DSQRT(T0*1.D3)/DSQRT(amassgas_exp)
+      m0 = amassgas_exp                                !proton mass
+      n0 = nem                                         !10^19/m^3
+      a0 = rmin_exp(mxgrid)                            !m
+      T0 = tim                                         !kev
+      v0 = 9.79D3*DSQRT(T0*1.D3)/DSQRT(m0)   !m/sec
 !     
       cnc = -1.0*alpha_dia/bt_exp
       thetam=theta_exp(jm)
@@ -894,9 +895,10 @@ c
 !
 ! neoclassical poloidal velocity (km/sec)
 !
-        vneo(1) = (cnc/thetam)*neo_vpol_dke_out(2)*v0/cv
-        vneo(2) = (cnc/thetam)*neo_vpol_dke_out(1)*v0/cv
-        vneo(3) = (cnc/thetam)*neo_vpol_dke_out(3)*v0/cv
+        cvpol= -alpha_dia*(v0/cv)*(bt_exp/Bp0(jm))
+        vneo(1) = cvpol*alpha_dia*neo_vpol_dke_out(1)
+        vneo(2) = cvpol*alpha_dia*neo_vpol_dke_out(2)
+        vneo(3) = cvpol*neo_vpol_dke_out(3)
 c
 c diamagnetic velocity (km/sec)
 c
@@ -914,18 +916,22 @@ c
 c compute neoclassical fluxes
 c
        neflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*
-     >     (neo_pflux_dke_out(2)+neo_pflux_gv_out(2))
+     >     (neo_pflux_dke_out(1)+neo_pflux_gv_out(1))
        teflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*T0*
-     >     (neo_efluxtot_dke_out(2)+neo_efluxtot_gv_out(2))
-       tiflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*T0*
      >     (neo_efluxtot_dke_out(1)+neo_efluxtot_gv_out(1))
+       tiflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*T0*
+     >     (neo_efluxtot_dke_out(2)+neo_efluxtot_gv_out(2))
        tzflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*T0*
      >     (neo_efluxtot_dke_out(3)+neo_efluxtot_gv_out(3))
-       vphiflux_neo = drhodr(jm)*(1.6726D-8)*n0*a0*T0*
-     >     (neo_mflux_dke_out(1)+neo_mflux_gv_out(1))
-       vphizflux_neo = drhodr(jm)*(1.6726D-8)*n0*a0*T0*
+       vphiflux_neo = drhodr(jm)*(1.6726D-8)*m0*n0*a0*v0*v0*
+     >     (neo_mflux_dke_out(2)+neo_mflux_gv_out(2))
+       vphizflux_neo = drhodr(jm)*(1.6726D-8)*m0*n0*a0*v0*v0*
      >     (neo_mflux_dke_out(3)+neo_mflux_gv_out(3))
-
+c
+c sum up ion contributions
+       tiflux_neo = tiflux_neo + tzflux_neo
+       vphiflux_neo = vphiflux_neo + vphizflux_neo
+c
       if(ipert_gf.eq.0)then
         flow_neo(jm) = vprime(jm,2)*neflux_neo
         powe_neo(jm) = vprime(jm,2)*teflux_neo
