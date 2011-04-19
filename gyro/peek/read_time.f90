@@ -52,7 +52,7 @@ subroutine read_time(dir)
   do i_field=1,n_field
      print *,tag(i_field)
      print 20,'density','energy','momentum','exchange'
-     do i_spec=1,n_spec
+     do i_spec=1,n_kinetic
         print 10,'species: ',i_spec,gbflux(i_spec,i_field,:)
      enddo
      print *
@@ -60,7 +60,7 @@ subroutine read_time(dir)
 
   print *,'Total'
   print 20,'density','energy','momentum','exchange'
-  do i_spec=1,n_spec
+  do i_spec=1,n_kinetic
      print 10,'species: ',i_spec,(sum(gbflux(i_spec,:,i)),i=1,4)
   enddo
   print *
