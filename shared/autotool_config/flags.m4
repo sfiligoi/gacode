@@ -1,0 +1,606 @@
+dnl ######################################################################
+dnl
+dnl File:	flags.m4
+dnl
+dnl Purpose: To determine the flags for C and C++ compilation.  In the
+dnl 	     case where the C or C++ compiler is mpiCC, one must
+dnl	     first parse the name of the real compiler out of the
+dnl		     mpiCC script.
+dnl
+dnl Version:	$Id: flags.m4 3807 2011-03-07 23:32:10Z kruger $
+dnl
+dnl Copyright 2001-2010, Tech-X Corporation.  Redistribution allowed provided
+dnl this copyright statement remains intact.
+dnl
+dnl ######################################################################
+
+dnl jrc 7apr09: Removed all definitions of AR, AR_FLAGS, ARFLAGS
+dnl as this is covered by autotools.
+
+# Optimization is now specified using --with-optimization=<opt level>
+#
+# <opt level> can be one of:
+#
+# default (what one gets if the optimization is not specified):
+# The highest level of broadly applicable optimization such that
+# the code remains valid for the entire processor family.
+# Often "-O2 -g".
+#
+# debug: No optimization, but with symbols.  Typically "-g -DDEBUG"
+#
+# minimal: Lowest, non zero level of optimization.  Typically "-O -g"
+#
+# full: The highest level of stable optimization for the
+# specific processor, possibly rendering the code unusable on
+# other processors in its family.
+#
+# ultra: Perform ALL optimizations, even ones which are not
+# recommended and may possibly produce broken code.
+#
+# Symbols (-g) are dropped at some level of optimization
+
+AC_ARG_WITH(optimization,
+  AC_HELP_STRING([--with-optimization=<opt level>],
+    [Optimization level: one of debug, minimal, default, full, ultra]),
+  OPTIMIZATION=${withval}, OPTIMIZATION=default)
+
+# Check for other options
+AC_ARG_ENABLE(profiling,
+  AC_HELP_STRING([--enable-profiling], [turn on profiling]),
+  PROFILING=true, PROFILING=false)
+AC_ARG_ENABLE(assert,
+  AC_HELP_STRING([--enable-assert], [turn on assertion checking]),
+  ASSERT=true, ASSERT=false)
+if $ASSERT; then
+  C_OTHER_FLAGS="-DASSERT"
+fi
+
+# Check for other flags
+AC_ARG_WITH(EXTRA_CFLAGS,
+  AC_HELP_STRING([--with-EXTRA_CFLAGS=<flags>],
+    [to add <flags> for C compilation.  Deprecated.]),
+    EXTRA_CFLAGS2="$withval")
+if test -n "$EXTRA_CFLAGS2"; then
+  AC_MSG_WARN(--with-EXTRA_CFLAGS is deprecated.  Use --with-extra-cxxflags)
+fi
+AC_ARG_WITH(extra-cflags,
+  AC_HELP_STRING([--with-extra-cxxflags=<flags>],
+    [to add <flags> for C compilation]),
+    EXTRA_CFLAGS="$withval")
+C_OTHER_FLAGS="$C_OTHER_FLAGS $EXTRA_CFLAGS $EXTRA_CFLAGS2"
+
+##########
+#
+# Determine the processor and its sse capabilities
+#
+##########
+case `uname` in
+  Linux)
+    processor=`cat /proc/cpuinfo | grep "model name" | head -1 | sed 's/^.*: //'`
+    if test -z "$processor"; then # for bgp
+      processor=`cat /proc/cpuinfo | grep "^cpu" | head -1 | sed 's/^.*: //'`
+    fi
+    ssecap=`cat /proc/cpuinfo | grep flags | head -1 | sed -e 's/^.*: //' -e 's/ /\n/g' | grep ^sse | sort | tail -1`
+    ;;
+  Darwin)
+    processor=`sysctl -a machdep.cpu.brand_string | sed 's/^.*: //'`
+    cat >sse$$.sed <<EOF
+s/^.*: //
+s/  */\\
+/g
+EOF
+    ssecap=`sysctl -a machdep.cpu.features | tr '[A-Z]' '[a-z]' | head -1 | sed -f sse$$.sed | grep ^sse | sort | tail -1`
+    rm sse$$.sed
+    ;;
+esac
+
+##########
+#
+# Find the flags for the C compiler
+#
+##########
+
+if test -z "$SERIALCC"; then
+  AC_MSG_ERROR(Include serialcomps.m4 to determine canonical C compiler name.)
+fi
+
+echo "Setting the flags per system and C compiler:" $SERIALCC
+
+#
+# Determine compiler ID first, like CMake does
+#
+AC_MSG_CHECKING(C_COMPILER_ID)
+# These are the cmake conventions
+case "$SERIALCC" in
+  acc)
+    C_COMPILER_ID=HP;;
+  gcc | gcc3 | gcc4 | gcc-3* | gcc-4* | gcc-mp-4*)
+    C_COMPILER_ID=GNU;;
+  icc)
+    C_COMPILER_ID=Intel;;
+  pathcc*)
+    C_COMPILER_ID=PathScale;;
+  pgcc | *-pgcc)
+    C_COMPILER_ID=PGI;;
+  suncc)
+    C_COMPILER_ID=SunPro;; # Guessing for now
+  xlc* | */xlc* | bgxlc* | */bgxlc*)
+    C_COMPILER_ID=XL;;
+  cc) # Could be many things depending on os
+    case `uname` in
+      HPUX)
+        C_COMPILER_ID=HP;;
+      Darwin | Linux)
+        C_COMPILER_ID=GNU;;
+      Solaris)
+        C_COMPILER_ID=SunPro;;
+    esac
+    ;;
+esac
+if test -z "$C_COMPILER_ID"; then
+  AC_MSG_ERROR(C_COMPILER_ID not known for compiler $SERIALCC for system $host. Update flags.m4.)
+fi
+AC_MSG_RESULT($C_COMPILER_ID)
+
+#
+# Switch on complier ID, with special cases for systems
+# Each stanza needs to set
+# C_ALLOCA_FLAG
+# C_OTHER_FLAGS
+# C_PIC_FLAG
+# C_VERSION
+# C_OPTIFLAGS
+#
+AC_MSG_CHECKING(CFLAGS)
+case $C_COMPILER_ID in
+
+  GNU)
+    unset C_ALLOCA_FLAG
+    C_OTHER_FLAGS="$C_OTHER_FLAGS -pipe -Wall -Wno-unused"
+    if $PROFILING; then
+      C_OTHER_FLAGS="$C_OTHER_FLAGS -pg"
+    fi
+    C_PIC_FLAG=-fPIC
+    C_VERSION=`$SERIALCC -v 2>&1 1>/dev/null | grep "gcc version" | sed -e 's/^.*version //' -e 's/ .*$//'`
+    case $OPTIMIZATION in
+      debug)
+        C_OPTIFLAGS="-g -DDEBUG -fno-inline-functions"
+        ;;
+      minimal)
+        C_OPTIFLAGS="-O"
+        ;;
+      full | ultra)
+# Determine processor and sse capabilities
+        AC_MSG_WARN(May generate code that is not IEEE math compliant.)
+        C_OPTIFLAGS="-O3 -ffast-math"
+        if test -n "$ssecap"; then
+          C_OPTIFLAGS="$C_OPTIFLAGS -m$ssecap"
+        fi
+        case $processor in
+          *Athlon*MP*)
+            C_OPTIFLAGS="$C_OPTIFLAGS -march=athlon-mp"
+            ;;
+          *Athlon*XP*)
+            C_OPTIFLAGS="$C_OPTIFLAGS -march=athlon-xp"
+            ;;
+          *Athlon*)
+            C_OPTIFLAGS="$C_OPTIFLAGS -march=athlon"
+            ;;
+          *Opteron*)
+            C_OPTIFLAGS="$C_OPTIFLAGS -mtune=amdfam10"
+            ;;
+          ppc7450)
+            C_OPTIFLAGS="$CXX_OPTIFLAGS -mcpu=7450"
+            ;;
+          ppc970)
+            C_OPTIFLAGS="$CXX_OPTIFLAGS -mcpu=970"
+            ;;
+        esac
+        ;;
+      *)
+        C_OPTIFLAGS="-g -O2"
+        ;;
+    esac
+    ;;
+
+  Intel)
+    unset C_ALLOCA_FLAG
+    C_OTHER_FLAGS="$C_OTHER_FLAGS -Wall"
+    if $PROFILING; then
+      C_OTHER_FLAGS="$C_OTHER_FLAGS -pg"
+    fi
+    C_PIC_FLAG=-fPIC
+    C_VERSION=`$SERIALCC -v 2>&1 1>/dev/null | sed -e 's/Version //'`
+    case $OPTIMIZATION in
+      debug)
+        C_OPTIFLAGS="-g -DDEBUG -inline-max-per-routine=0"
+        ;;
+      minimal)
+        C_OPTIFLAGS="-O"
+        ;;
+      full | ultra)
+# Determine processor and sse capabilities
+        AC_MSG_WARN(May generate code that is not IEEE math compliant.)
+        C_OPTIFLAGS="-O3 -fast"
+        if test -n "$ssecap"; then
+          C_OPTIFLAGS="$C_OPTIFLAGS -m$ssecap"
+        fi
+        ;;
+      *)
+        C_OPTIFLAGS="-g -O2"
+        ;;
+    esac
+    ;;
+
+  PathScale)
+    unset C_ALLOCA_FLAG
+    if $PROFILING; then
+      C_OTHER_FLAGS="$C_OTHER_FLAGS -pg"
+    fi
+    unset C_PIC_FLAG
+    C_VERSION=`$SERIALCC -v 2>&1 1>/dev/null | grep ^PathScale | sed -e 's/^.* //'`
+    case $OPTIMIZATION in
+      debug)   C_OPTIFLAGS="-g -DDEBUG";;
+      minimal) C_OPTIFLAGS="-O";;
+      full)    C_OPTIFLAGS="-O3";;
+      ultra)   C_OPTIFLAGS="-O3";;
+#      *)       C_OPTIFLAGS="-O -fast -Mcache_align -Munroll -Mdalign -Minline -Mvect=prefetch";;
+# All of the flags on the previous line, except -O, cause the C compiler to fail at NERSC.
+      *)       C_OPTIFLAGS="-O ";;
+    esac
+    ;;
+
+  PGI)
+# Get flags with "pgcc -flags"
+    unset C_ALLOCA_FLAG
+    if $PROFILING; then
+      C_OTHER_FLAGS="$C_OTHER_FLAGS -pg"
+    fi
+    C_PIC_FLAG=-fPIC
+    C_VERSION=`$SERIALCC -V | grep ^pgcc | sed -e 's/^pgcc //' -e 's/ .*$//'`
+    case $OPTIMIZATION in
+      debug)   C_OPTIFLAGS="-g -DDEBUG";;
+      minimal) C_OPTIFLAGS="-O";;
+      full)    C_OPTIFLAGS="-O3 -fast -Munroll -Minline=levels:5";;
+      ultra) # ipa must be at both compile and link
+        C_OPTIFLAGS="-fast -Munroll -O3 -Minline=levels:5 -Mipa=fast,inline -Mmovnt"
+        LDFLAGS="$LDFLAGS -Mipa=fast,inline"
+        ;;
+      *)
+        C_OPTIFLAGS="-O -fast -Mcache_align -Munroll -Mdalign -Minline -Mvect=prefetch";;
+    esac
+    ;;
+
+  SunPro)
+    unset C_ALLOCA_FLAG
+    C_OTHER_FLAGS="-D__EXTENSIONS__ -D_POSIX_SOURCE $C_OTHER_FLAGS"
+    if $PROFILING; then
+      C_OTHER_FLAGS="$C_OTHER_FLAGS -pg"
+    fi
+    C_PIC_FLAG=-KPIC
+    C_VERSION=`$SERIALCXX -qversion | grep Version | sed 's/Version: //'`
+    case "$OPTIMIZATION" in
+      debug) C_OPTIFLAGS="-g -DDEBUG";;
+      full)  C_OPTIFLAGS="-O3";;	# not sure about this
+      ultra) C_OPTIFLAGS="-O5";;	# ditto
+      *)     C_OPTIFLAGS="-O1";;	# ditto
+    esac
+    ;;
+
+  XL)
+    unset C_ALLOCA_FLAG
+    if $PROFILING; then
+      C_OTHER_FLAGS="$C_OTHER_FLAGS -pg"
+    fi
+    C_PIC_FLAG=-qpic
+    C_VERSION=`$SERIALCXX -qversion | grep Version | sed 's/Version: //'`
+    case $OPTIMIZATION in
+      debug)
+        CXX_OPTIFLAGS="-g -DDEBUG -qflttrap"
+        ;;
+      minimal)
+        CXX_OPTIFLAGS="-O"
+        ;;
+      full)
+        CXX_OPTIFLAGS="-O3 -qarch=auto -qtune=auto -qcache=auto"
+        ;;
+      ultra)
+        CXX_OPTIFLAGS="-O5"
+        ;;
+      *)
+        CXX_OPTIFLAGS="-O2 -qarch=auto -qtune=auto"
+        ;;
+    esac
+    case $OPTIMIZATION in
+      full | ultra)
+        case "$host" in
+          powerpc*-darwin* | powerpc*-linux*)
+          CXX_OPTIFLAGS="$CXX_OPTIFLAGS -qaltivec"
+          ;;
+        esac
+        ;;
+    esac
+    ;;
+
+  *)
+    AC_MSG_ERROR(Flags not known for ${C_COMPILER_ID} compilers.)
+    ;;
+
+esac
+
+dnl
+dnl Combine C flags
+dnl
+dnl JRC, 3oct08: CFLAGS should be additive
+CFLAGS="$CFLAGS $C_ALLOCA_FLAG $C_OTHER_FLAGS $C_OPTIFLAGS"
+AC_MSG_RESULT($CFLAGS)
+
+# Clean various flags
+C_OTHER_FLAGS=`echo $C_OTHER_FLAGS | sed -e 's/^  *//' -e 's/  *$//' -e 's/  / /g'`
+CFLAGS=`echo $CFLAGS | sed -e 's/^  *//' -e 's/  *$//' -e 's/  / /g'`
+
+# Substitutions
+AC_SUBST(SERIALCC)
+AC_SUBST(C_COMPILER_ID)
+AC_SUBST(C_ALLOCA_FLAG)
+AC_SUBST(C_OTHER_FLAGS)
+AC_SUBST(C_PIC_FLAG)
+AC_SUBST(C_VERSION)
+AC_SUBST(C_OPTIFLAGS)
+AC_SUBST(CFLAGS)
+# Summary
+echo >>$config_summary_file
+echo "C flags" >>$config_summary_file
+TX_PRINT_VAR(SERIALCC)
+TX_PRINT_VAR(C_COMPILER_ID)
+TX_PRINT_VAR(C_ALLOCA_FLAG)
+TX_PRINT_VAR(C_OTHER_FLAGS)
+TX_PRINT_VAR(C_PIC_FLAG)
+TX_PRINT_VAR(C_VERSION)
+TX_PRINT_VAR(C_OPTIFLAGS)
+TX_PRINT_VAR(CFLAGS)
+echo "C flags set."
+
+dnl ######################################################################
+dnl
+dnl Set flags according to C++ compiler
+dnl
+dnl ######################################################################
+
+# echo "CXX = $CXX."
+if test -n "$CXX"; then
+
+  echo "Setting C++ flags."
+  if test -z "$SERIALCXX"; then
+    AC_MSG_ERROR(Include serialcomps.m4 before including flags.m4 to get canonical compiler name)
+  fi
+
+# Determine compiler ID first, like CMake does
+  AC_MSG_CHECKING(CXX_COMPILER_ID)
+  case "$SERIALCXX" in
+    aCC)
+      CXX_COMPILER_ID=HP;;
+    g++ | g++3 | g++4 | g++-3* | g++-4*)
+      CXX_COMPILER_ID=GNU;;
+    icpc)
+      CXX_COMPILER_ID=Intel;;
+    pathCC*)
+      CXX_COMPILER_ID=PathScale;;
+    pgCC | *-pgCC)
+      CXX_COMPILER_ID=PGI;;
+    sunCC)
+      CXX_COMPILER_ID=SunPro;;
+    xlC* | */xlC* | bgxlC* | */bgxlC*)
+      CXX_COMPILER_ID=XL;;
+    c++) # Could be many things depending on os
+      case `uname` in
+        HPUX)
+          CXX_COMPILER_ID=HP;;
+        Darwin | Linux)
+          CXX_COMPILER_ID=GNU;;
+        Solaris)
+          CXX_COMPILER_ID=SunPro;;
+      esac
+      ;;
+    CC)
+      case $host in
+        *-*-solaris*)
+          CXX_COMPILER_ID=SunPro;;
+      esac
+      ;;
+  esac
+  if test -z "$CXX_COMPILER_ID"; then
+    AC_MSG_ERROR(CXX_COMPILER_ID not known for compiler $SERIALCXX for system $host. Update flags.m4.)
+  fi
+  AC_MSG_RESULT($CXX_COMPILER_ID)
+  echo "CXX_COMPILER_ID = $CXX_COMPILER_ID."
+  if test $CXX_COMPILER_ID != $C_COMPILER_ID; then
+    AC_MSG_ERROR(CXX_COMPILER_ID does not match C_COMPILER_ID.  Unsupported.)
+  fi
+
+# Other C++ flags
+  AC_ARG_WITH(EXTRA_CXXFLAGS,
+    AC_HELP_STRING([--with-EXTRA_CXXFLAGS=<flags>],
+      [to add <flags> for C++ compilation.  Deprecated.]),
+      EXTRA_CXXFLAGS2="$withval")
+  if test -n "$EXTRA_CXXFLAGS2"; then
+    AC_MSG_WARN(--with-EXTRA_CXXFLAGS is deprecated.  Use --with-extra-cxxflags)
+  fi
+  AC_ARG_WITH(extra-cxxflags,
+    AC_HELP_STRING([--with-extra-cxxflags=<flags>],
+      [to add <flags> for C++ compilation]),
+      EXTRA_CXXFLAGS="$withval")
+  CXX_OTHER_FLAGS="$CXX_OTHER_FLAGS $EXTRA_CXXFLAGS $EXTRA_CXXFLAGS2"
+
+# The following is used to make sure that e.g. pathscale is found.
+# Still needed?
+  # CRAY=""
+  # CRAY_INSTANTIATE=""
+  # export CRAY
+
+#
+# Determine the CXX flags.  Need to determine
+# CXXAR
+# CXXDEPFLAGS
+# CXXDEP
+# CXXFLAGS
+# CXX_VERSION
+# COMPDIR
+  AC_MSG_CHECKING(CXXFLAGS)
+  case $CXX_COMPILER_ID in
+
+    GNU)
+      CXXAR="ar cr"
+      CXXDEPFLAGS="-M"
+      CXXDEP="$CXX -M >depend.u"
+      CXXFLAGS="$CFLAGS"
+      CXX_VERSION=`$SERIALCXX -v 2>&1 1>/dev/null | grep 'gcc version' | sed -e 's/^.*version //' -e 's/ .*$//'`
+# Use double brackets to prevent m4 substitution
+      CXX_MAJMIN_VERSION=`echo $CXX_VERSION | sed 's/\.[[0-9]]*$//'`
+      CXX_MAJOR_VERSION=`echo $CXX_MAJMIN_VERSION | sed 's/\.[[0-9]]*$//'`
+      case $CXX_MAJMIN_VERSION in
+# JRC: All from version 4 has the same ABI.
+        4.*)
+          CXX_COMP_LIB_SUBDIR=gcc4
+          ;;
+        3.*)
+          CXX_COMP_LIB_SUBDIR=gcc${CXX_MAJMIN_VERSION}
+          ;;
+      esac
+      ;;
+
+    Intel)
+      ABSSERIALCXX=`which $SERIALCXX`
+      icpcbindir=`dirname $ABSSERIALCXX`
+      if test -f $icpcbindir/xiar; then
+        CXXAR="$icpcbindir/xiar cr"
+      else
+        CXXAR="/usr/local/intel/bin/xiar cr"
+      fi
+      CXXDEPFLAGS="-M"
+      CXXDEP="$CXX -M >depend.u"
+      CXXFLAGS="$CFLAGS"
+      CXX_VERSION=`$SERIALCXX -v 2>/dev/null | `
+      CXX_MAJOR_VERSION=`echo $CXX_VERSION | sed 's/\.[[0-9]]*$//'`
+      CXX_COMP_LIB_SUBDIR=icpc${CXX_MAJOR_VERSION}
+      ;;
+
+    PathScale)
+      CXXAR="ar cr"
+      CXXDEPFLAGS="-M"
+      CXXDEP="$CXX -M >depend.u"
+      CXXFLAGS="$CFLAGS"
+      CXX_VERSION=`$SERIALCXX -v 2>&1 1>/dev/null | grep ^PathScale | sed -e 's/^.* //'`
+      CXX_MAJMIN_VERSION=`echo $CXX_VERSION | sed 's/\.[[0-9]]*$//'`
+      CXX_MAJOR_VERSION=`echo $CXX_MAJMIN_VERSION | sed 's/\.[[0-9]]*$//'`
+      CXX_COMP_LIB_SUBDIR=path${CXX_MAJOR_VERSION}
+      ;;
+
+    PGI)
+      CXXAR="ar cr"
+      CXXDEPFLAGS="-M"
+      CXXDEP="$CXX -M >depend.u"
+      CXXFLAGS="$CFLAGS --no_using_std"
+      CXX_VERSION=`$SERIALCXX -V | grep ^pgCC | sed -e 's/^pgCC //' -e 's/ .*$//'`
+      CXX_MAJMIN_VERSION=`echo $CXX_VERSION | sed 's/-[[0-9]]*$//'`
+      CXX_MAJOR_VERSION=`echo $CXX_MAJMIN_VERSION | sed 's/\.[[0-9]]*$//'`
+      CXX_COMP_LIB_SUBDIR=pgi${CXX_MAJOR_VERSION}
+      ;;
+
+    SunPro)
+      AC_DEFINE(SUN_STUDIO_CERES, 1, Define if using Solaris compiler)
+      CXXAR="$CXX -xar -o"
+      CXXDEPFLAGS="-xM1"
+      CXXDEP="$CXX -xM1 >depend.u"
+      # CXXFLAGS="$CFLAGS --no_using_std"
+      CXX_VERSION=`$CXX -V 2>&1 | head -1 | sed -e 's/CC: Sun Ceres C++ //' -e 's/ .*$//'`
+      CXX_COMP_LIB_SUBDIR=sunCC
+      ;;
+
+    XL)
+      AC_DEFINE_UNQUOTED([SEPARATE_INSTANTIATIONS], "", "Must separate instantiations to correct compilation on xl")
+      CXXAR="ar cr"
+      CXXDEPFLAGS="-M"
+      CXXDEP="$CXX -M -E >/dev/null"
+      CXXFLAGS="$CFLAGS -qrtti"
+      CXX_VERSION=`$SERIALCXX -qversion | grep Version | sed 's/Version: //'`
+      CXX_MAJOR_VERSION=`echo $CXX_VERSION | sed -e 's/\..*$//' -e 's/^0//'`
+      case "$SERIALCXX" in
+        *_r)
+          CXX_COMP_LIB_SUBDIR=xlC_r
+          ;;
+        *)
+          CXX_COMP_LIB_SUBDIR=xlC
+          ;;
+      esac
+      CXX_COMP_LIB_SUBDIR=${CXX_COMP_LIB_SUBDIR}${CXX_MAJOR_VERSION}
+      ;;
+
+    *)
+      AC_MSG_ERROR(C++ flags not known for ${CXX_COMPILER_ID} compilers.)
+      ;;
+
+  esac
+  CXX_OPTIFLAGS="$C_OPTIFLAGS"
+  CXX_PIC_FLAG="$C_PIC_FLAG"
+  CXXFLAGS="$CXXFLAGS $CXX_OTHER_FLAGS"
+  COMPDIR=${CXX_COMP_LIB_SUBDIR}  # For backward compatibility
+
+# Clean various flags
+  CXXFLAGS=`echo $CXXFLAGS | sed -e 's/^  *//' -e 's/  *$//' -e 's/  / /g'`
+
+dnl
+dnl  CXX related defines
+dnl
+  AC_DEFINE_UNQUOTED([CXX], "$SERIALCXX", "C++ Compiler to use")
+  AC_DEFINE_UNQUOTED([CXX_VERSION], "$CXX_VERSION", "C++ Compiler version")
+  AC_DEFINE_UNQUOTED([CXX_OPTIFLAGS], "$CXX_OPTIFLAGS", "C++ Optimization flags")
+  AC_DEFINE_UNQUOTED([CXXFLAGS], "$CXXFLAGS", "C++ flags")
+
+dnl
+dnl  CXX related flags
+dnl
+  AC_SUBST(CXX_COMPILER_ID)
+  AC_SUBST(CXXDEPFLAGS)
+  AC_SUBST(CXXDEP)
+  AC_SUBST(CXX_COMP_LIB_SUBDIR)
+  AC_SUBST(CXX_OPTIFLAGS)
+  AC_SUBST(CXX_OTHER_FLAGS)
+  AC_SUBST(CXX_PIC_FLAG)
+  AC_SUBST(CXX_VERSION)
+  AC_SUBST(CXXFLAGS)
+  AC_SUBST(COMPDIR)
+  echo >>$config_summary_file
+  echo "C++ flags" >>$config_summary_file
+  TX_PRINT_VAR(CXX_COMPILER_ID)
+  TX_PRINT_VAR(CXXDEPFLAGS)
+  TX_PRINT_VAR(CXXDEP)
+  TX_PRINT_VAR(CXX_COMP_LIB_SUBDIR)
+  TX_PRINT_VAR(CXX_OPTIFLAGS)
+  TX_PRINT_VAR(CXX_OTHER_FLAGS)
+  TX_PRINT_VAR(CXX_PIC_FLAG)
+  TX_PRINT_VAR(CXX_VERSION)
+  TX_PRINT_VAR(CXXFLAGS)
+  TX_PRINT_VAR(COMPDIR)
+
+# For backwards compatibility
+  AC_SUBST(CXX_REPOSITORY)
+
+dnl ######################################################################
+dnl
+dnl Find archiver from command line, to override choices above.
+dnl
+dnl ######################################################################
+
+  AC_ARG_WITH(CXXAR,
+    AC_HELP_STRING([--with-CXXAR=<compiler>],
+    [to use <archiver> (e.g., xiar) for making C++ libraries]),
+    CXXAR="$withval")
+# Defaults if not found
+  if test -z "$CXXAR"; then
+    CXXAR="ar cr"
+  fi
+  AC_SUBST(CXXAR)
+  TX_PRINT_VAR(CXXAR)
+fi
+

@@ -1,0 +1,34 @@
+dnl ######################################################################
+dnl
+dnl File:	tx_blaslapack.m4
+dnl
+dnl Purpose:	Find the BLAS and LAPACK libraries.
+dnl
+dnl Version: $Id: tx_blaslapack.m4 3781 2011-01-21 23:03:34Z srinath $
+dnl
+dnl Tech-X configure system.  Copyright 2007-2010.  Freely redistributable
+dnl provided this copyright remains intact.
+dnl
+dnl ######################################################################
+
+builtin(include, config/txsearch.m4)
+
+dnl Look for Blas
+echo  >> $config_summary_file
+echo  "Linear algebra libraries:" >> $config_summary_file
+builtin(include, config/contrib/acx_blas.m4)
+ACX_BLAS(
+  [AC_MSG_NOTICE(BLAS was found)],
+  [AC_MSG_ERROR(BLAS not found.  Use --with-blas=<lib> to set library or --with-blas-dir=<dir> to set search directory.)])
+
+dnl Look for LAPACK
+builtin(include, config/contrib/acx_lapack.m4)
+ACX_LAPACK(
+  [AC_MSG_NOTICE(LAPACK was found)],
+  [AC_MSG_ERROR(LAPACK not found.  Use --with-lapack=<lib> to set library or --with-lapack-dir=<lapackdir> to set search directory.)])
+
+dnl Add the to library sets together for user ease.
+BLASLAPACK_LIBS="$LAPACK_LIBS $BLAS_LIBS"
+AC_SUBST(BLASLAPACK_LIBS)
+TX_PRINT_VAR(BLASLAPACK_LIBS)
+
