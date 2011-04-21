@@ -206,7 +206,7 @@ module gyro_interface
   integer :: gyro_collision_method_in = 1
 
   ! io related to hdf5 and diagnostics  
-  integer :: gyro_io_method_in = 0
+  integer :: gyro_io_method_in = 1
   real    :: gyro_torangle_offset_in = 0.0
   integer :: gyro_time_skip_wedge_in = 1
   integer :: gyro_n_torangle_wedge_in = 1
