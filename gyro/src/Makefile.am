@@ -130,7 +130,7 @@ libgacodegyro_SRC_la_SOURCES = \
 	gyro_initialize_arrays.f90 \
 	gyro_radial_operators.f90 \
 	gyro_moments_plot.f90 \
-  gyro_moments_plot_fine.f90 \
+  gyro_moments_plot_wedge.f90 \
 	gyro_select_methods.f90 \
 	gyro_bounce_points.f90 \
 	gyro_radial_simulation_box.f90 \

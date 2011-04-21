@@ -116,6 +116,10 @@
       a_pol_out = a_pol_out/pi_2
       a_tor_out = a_tor_out/pi_2
 !
+! poloidal magnetic field at outboard midplane
+!
+      Bp0_out = rmin_sa/(q_sa*(rmaj_sa+rmin_sa))
+!
       END SUBROUTINE xgrid_functions_sa
 !
       SUBROUTINE xgrid_functions_geo
@@ -310,6 +314,11 @@
        B2_ave_out = B2_ave_out/B_unit**2
        a_pol_out = a_pol_out/norm_ave
        a_tor_out = a_tor_out/norm_ave
+!
+!  poloidal magnetic field on outboard midplane
+!
+       Bp0_out = Bp(0)/B_unit
+!
 !       write(*,*)"R2_ave_out=",R2_ave_out
 !       write(*,*)"B2_ave_out=",B2_ave_out
 !       write(*,*)"a_pol_out=",a_pol_out

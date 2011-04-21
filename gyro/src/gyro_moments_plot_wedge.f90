@@ -16,7 +16,7 @@
 !  definitions.
 !--------------------------------------------------------------------
 
-subroutine gyro_moments_plot_fine
+subroutine gyro_moments_plot_wedge
 
   use gyro_globals
   use gyro_pointers
@@ -37,7 +37,7 @@ subroutine gyro_moments_plot_fine
   include 'mpif.h'
 
   if (alltime_index == 0) then
-     moments_plot_fine(:,:,:,:) = (0.0,0.0)
+     moments_plot_wedge(:,:,:,:) = (0.0,0.0)
   endif
   moments_zero_plot(:,:,:) = 0.0
 
@@ -172,7 +172,7 @@ subroutine gyro_moments_plot_fine
      do ix=1,3
         do i=1,n_x
            do j_plot=1,n_theta_plot*n_theta_mult
-              mom_tmp(j_plot,i,ix) = sum(vel_sum(:,i,ix)*blend_fine(:,j_plot,i))
+              mom_tmp(j_plot,i,ix) = sum(vel_sum(:,i,ix)*blend_wedge(:,j_plot,i))
            enddo ! j_plot
         enddo ! i
      enddo ! ix
@@ -194,7 +194,7 @@ subroutine gyro_moments_plot_fine
      !----------------------------------------------------------------
      ! Compute moments_plot with averaging:
      !
-     moments_plot_fine(:,:,is,:) = moments_plot_fine(:,:,is,:)+&
+     moments_plot_wedge(:,:,is,:) = moments_plot_wedge(:,:,is,:)+&
           mom_tmp(:,:,:)
      ! w_time seems to be a filter that is 1 at the beginning of
      ! time_step=mod(time_step,time_skip), but drops to a very small number
@@ -206,4 +206,4 @@ subroutine gyro_moments_plot_fine
 
   enddo ! is
  
-end subroutine gyro_moments_plot_fine
+end subroutine gyro_moments_plot_wedge

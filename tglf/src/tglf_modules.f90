@@ -5,13 +5,15 @@
       IMPLICIT NONE
       SAVE
 !
-      INTEGER, PARAMETER:: nb=24,nxm=47
+      INTEGER, PARAMETER:: nb=32,nxm=47
       INTEGER, PARAMETER:: nsm=6, nt0=40
       INTEGER, PARAMETER :: neq = 15*nsm,iar=neq*nb
       INTEGER, PARAMETER :: nkym=50
       INTEGER, PARAMETER :: maxmodes=4
       INTEGER, PARAMETER :: max_ELITE=700
       INTEGER, PARAMETER :: max_fourier = 16
+      INTEGER, PARAMETER :: ms = 128  ! ms needs to be divisible by 8
+      INTEGER, PARAMETER :: max_plot =6*ms/8+1
 ! dimensions determined by inputs
       INTEGER nx,nbasis,ns0,ns
 !
@@ -167,6 +169,9 @@
       REAL :: kx0=0.0
       REAL :: sign_kx0=1.0
 ! output
+      COMPLEX,DIMENSION(maxmodes,3,nb) :: field_weight_out=0.0
+      COMPLEX,DIMENSION(maxmodes,3,max_plot) :: plot_field_out=0.0
+      REAL,DIMENSION(max_plot) :: plot_angle_out=0.0
       REAL,DIMENSION(maxmodes,nsm,3) :: particle_QL_out=0.0
       REAL,DIMENSION(maxmodes,nsm,3) :: energy_QL_out=0.0
       REAL,DIMENSION(maxmodes,nsm,3) :: stress_par_QL_out=0.0
@@ -190,9 +195,12 @@
       REAL :: R2_ave_out=1.0
       REAL :: a_pol_out=1.0
       REAL :: a_tor_out=1.0
+      REAL :: Bp0_out = 1.0
       REAL :: RBt_ave_out=1.0
       REAL :: DM_out = 0.25
       REAL :: DR_out = 0.0
+      INTEGER :: nmodes_out
+      INTEGER :: nfields_out
 !
       END MODULE tglf_global
 !------------------------------------------------- 
@@ -353,7 +361,6 @@
 !  this version for TGLF separated miller and mercier-luc components
 !  in GKS and GYRO versions
 !---------------------------------------------------------------
-      INTEGER, PARAMETER :: ms = 128  ! ms needs to be even
 ! INPUT
       REAL :: R(0:ms), Z(0:ms), Bp(0:ms)
       REAL :: ds, Ls

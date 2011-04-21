@@ -72,7 +72,7 @@ OBJECTS = gyro_globals.o \
           gyro_lambda_grid.o \
           gyro_map_experimental_profiles.o \
           gyro_moments_plot.o \
-          gyro_moments_plot_fine.o \
+          gyro_moments_plot_wedge.o \
           gyro_mpi_grid.o \
           gyro_memory_usage.o \
           gyro_nonlinear_flux.o \

@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svnrepos/code/config/!svn/ver/3781/trunk/contrib
+END
+ax_f90_module_flag.m4
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svnrepos/code/config/!svn/ver/2864/trunk/contrib/ax_f90_module_flag.m4
+END
+acx_lapack.m4
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svnrepos/code/config/!svn/ver/3781/trunk/contrib/acx_lapack.m4
+END
+acx_f77_cmain_fflags.m4
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svnrepos/code/config/!svn/ver/3524/trunk/contrib/acx_f77_cmain_fflags.m4
+END
+ax_f90_module_extension.m4
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svnrepos/code/config/!svn/ver/2864/trunk/contrib/ax_f90_module_extension.m4
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svnrepos/code/config/!svn/ver/3524/trunk/contrib/Makefile.am
+END
+acx_blas.m4
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svnrepos/code/config/!svn/ver/3617/trunk/contrib/acx_blas.m4
+END

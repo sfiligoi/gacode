@@ -197,7 +197,7 @@ x.add('FIELDEIGEN_WI','0.2')
 x.add('FIELDEIGEN_TOL','1e-6')
 x.add('COLLISION_METHOD','2')
 #addition for hdf5 io
-x.add('IO_METHOD', '0')
+x.add('IO_METHOD', '1')
 x.add('TIME_SKIP_WEDGE', '0')
 x.add('N_TORANGLE_WEDGE', '0')
 x.add('N_TORANGLE_3D', '0')

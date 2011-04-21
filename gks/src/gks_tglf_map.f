@@ -62,11 +62,13 @@
       INCLUDE 'gks_out.m'
       LOGICAL :: firstcall=.TRUE.
       LOGICAL :: new_gridpoint=.FALSE.
-      INTEGER :: n
+      INTEGER :: n,i
       REAL :: aky1_save=0.0
       REAL :: rmin_save=-1.0
-!
       REAL :: particle_flux_tg(2,2),energy_flux_tg(2,2)
+      INTEGER :: nmodes,nfields,nplot,jmode
+      REAL :: angle(max_plot)
+      COMPLEX :: wavefunction(maxmodes,3,max_plot)
 !
       if(firstcall)then
         call tglf_startup
@@ -97,6 +99,7 @@
         nbasis_min_tg=nbasis_min 
         nbasis_max_tg=nbasis_max 
         ibranch_tg = ibranch
+        if(igks.eq.0)ibranch_tg=-1
         if(ibranch.eq.-1)nmodes_tg=4
 !        write(*,*)"switches",iflux_tg,use_bper_tg,use_bpar_tg,
 !     >   ibranch_tg,nmodes_tg,nb_max_tg,nb_min_tg,nxgrid_tg,nky_tg
@@ -175,7 +178,7 @@
         as_tg(2) = an1
         as_tg(3) = an2
         vpar_tg(1)=sign_Bt_tg*mach3
-        vpar_tg(2)=sign_Bt_tg*mach3
+        vpar_tg(2)=sign_Bt_tg*mach1
         vpar_tg(3)=sign_Bt_tg*mach2
         if(ncspec2.eq.0)as_tg(3)=0.0  ! treat impurity as dilution only
         betae_tg = beta*temp3   
@@ -268,6 +271,27 @@
 !
       CALL tglf
 !
+      if(igks.eq.0)then
+        call get_wavefunction_out(nmodes,nfields,nplot,angle,
+     >   wavefunction)
+!        write(*,*)"wavefunction_out"
+!        write(*,*)nmodes,nfields,nplot,angle(1),wavefunction(1,1,1)
+        ntgrid = ntheta/2 + (nperiod-1)*ntheta
+        ntgridl = ntgrid
+        if(nmodes.gt.0.and.ntgrid.eq.(nplot-1)/2)then
+         do i=-ntgridl,ntgrid
+          theta(i) = angle(i+ntgrid+1)
+          phinorm(i,1) = wavefunction(1,1,i+ntgrid+1)
+          aparnorm(i,1) = wavefunction(1,2,i+ntgrid+1)
+          bparnorm(i,1) = wavefunction(1,3,i+ntgrid+1)
+         enddo
+        else
+          write(*,*)
+     >"error: must have ntheta=32,nperiod=2 for tglf wavefunctions"
+          write(*,*)"ntheta = ",ntheta,"nperiod = ",nperiod
+          write(*,*)"ntgrid = ",ntgrid,"max_plot= ",nplot
+        endif
+      endif
 !      write(*,*)"quench",alpha_quench_tg,vexb_shear_tg
       kys(1)=ky_tg
       agammas(2)=get_growthrate(2)
@@ -503,6 +527,7 @@
         CLOSE(3)
       endif
 !
+      if(igks.eq.0)bt_exp=1.0
       sign_It_tg=1.0
       sign_Bt_tg=bt_exp/ABS(bt_exp)
       CALL put_signs(sign_Bt_tg,sign_It_tg)
