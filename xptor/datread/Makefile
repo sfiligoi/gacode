@@ -38,9 +38,9 @@ lib : $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS) 
 
 .f.o :
-	$(FC) $(FMATH) $(FFLAGS)  -c $<
+	$(FC) $(FMATH) $(FFLAGS) -I $(NETCDF_INC)  -c $<
 .f90.o :
-	$(FC) $(FMATH) $(FFLAGS)  -c $<
+	$(FC) $(FMATH) $(FFLAGS) -I $(NETCDF_INC)  -c $<
 
 
 clean:
