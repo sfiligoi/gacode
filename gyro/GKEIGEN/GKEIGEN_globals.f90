@@ -62,7 +62,7 @@ module GKEIGEN_globals
   integer :: jstate          !--------------
   integer :: jstate_start    !
   integer :: jstate_end      ! row indices
-  integer :: jset_jstart     !
+  integer :: jset_start     !
   integer :: jset_end        !
   integer :: jelem           !
   integer :: jelem0          !
