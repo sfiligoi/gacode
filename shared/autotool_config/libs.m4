@@ -35,7 +35,7 @@ else
   Z_LIBPATH=/usr/lib:/usr/local/lib:/usr/common/usg/gnu/lib:/usr/lib64
 fi
 
-builtin(include, config/txsearch.m4)
+builtin(include, shared/autotool_config//txsearch.m4)
 TX_PATH_FILES(LIBZ, libz.a libz.so libz.dylib, "", $Z_LIBPATH)
 if false; then
 if test -z "$LIBZ"; then

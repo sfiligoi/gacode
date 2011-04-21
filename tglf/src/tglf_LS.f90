@@ -82,6 +82,7 @@
       REAL :: small = 1.0D-13
       INTEGER :: info,ipiv(iar)
       COMPLEX :: zmat(iar,iar),xv(iar,1)
+      COMPLEX :: field_weight(3,nb)
 ! 
 !      cputime0=MPI_WTIME()
 !
@@ -216,6 +217,7 @@
 !          write(*,*)"debug sort",j1,rr(j1),ri(j1),me,mi
         endif
       enddo
+      nmodes_out = mi+me
 ! find the most unstable mode for each branch
       if(me.gt.0)then
         zgamax = 0.0
@@ -247,8 +249,10 @@
 !
 !  find the top nmodes most unstable modes
         CALL sort_eigenvalues(nmodes_in,jmax)
+        nmodes_out = 0
         do j1=1,nmodes_in 
           if(jmax(j1).ne.0)then
+            nmodes_out = nmodes_out + 1
             gamma_out(j1)=rr(jmax(j1))
             freq_out(j1)=-ri(jmax(j1))
           endif
@@ -265,7 +269,7 @@
 !      
 !  get the fluxes for the most unstable modes
       if(iflux_in)then
-        do imax=1,nmodes_in
+        do imax=1,nmodes_out
          if(jmax(imax).gt.0)then
           do i=1,iur
             v(i) = small
@@ -279,9 +283,15 @@
 !  alpha/beta=-xi*(frequency+xi*growthrate)
           eigenvalue = xi*alpha(jmax(imax))/beta(jmax(imax))  
           call get_QL_weights(particle_QL,energy_QL,stress_par_QL,stress_tor_QL, &
-               exchange_QL,phi_QL,N_QL,T_QL,wd_bar,NE_Te_phase)
+               exchange_QL,phi_QL,N_QL,T_QL,wd_bar,NE_Te_phase,field_weight)
           wd_bar_out(imax)=wd_bar
           phi_QL_out(imax)=phi_QL
+          do i=1,nbasis
+            do j=1,3
+             field_weight_out(imax,j,i)=field_weight(j,i)
+            enddo
+          enddo
+!
           do is=ns0,ns
             do j=1,3
               particle_QL_out(imax,is,j)=particle_QL(is,j)
@@ -478,6 +488,10 @@
        taus_in(1)=1.0
        taus_in(2)=1.0
       endif
+!
+      nfields_out = 1
+      if(use_bper_in)nfields_out = nfields_out + 1
+      if(use_bpar_in)nfields_out = nfields_out + 1
 !
       ns=ns_in
       pol = 0.0
@@ -3351,7 +3365,7 @@
         endif
 !        write(*,*)j1,"zomega=",zomega(j1)
         rr(j1) = REAL(zomega(j1))
-        ri(j1) = IMAG(zomega(j1))
+        ri(j1) = AIMAG(zomega(j1))
 ! filter out numerical instabilities that sometimes occur 
 ! with high mode frequency
         if(filter_in.gt.0.0)then
@@ -3365,7 +3379,7 @@
         do j2=1,iur
           if(iflux_in)then
             vr(j1,j2) = REAL(vright(j1,j2))
-            vi(j1,j2) = IMAG(vright(j1,j2))
+            vi(j1,j2) = AIMAG(vright(j1,j2))
           else
             vr(j1,j2) = 0.0
             vi(j1,j2) = 0.0
@@ -3462,7 +3476,7 @@
 !
       SUBROUTINE get_QL_weights(particle_weight,energy_weight, &
         stress_par_weight,stress_tor_weight,exchange_weight, &
-        phi_weight,N_weight,T_weight,wd_bar,Ne_Te_phase)
+        phi_weight,N_weight,T_weight,wd_bar,Ne_Te_phase,field_weight)
 ! **************************************************************
 !
 ! compute the quasilinear weights for a single eigenmode
@@ -3498,6 +3512,7 @@
       COMPLEX :: temp(nsm,nb)
       COMPLEX :: stress_par(nsm,nb,3),stress_per(nsm,nb,3)
       COMPLEX :: phi(nb),psi(nb),bsig(nb)
+      COMPLEX :: field_weight(3,nb)
       COMPLEX :: phi_wd_phi,wd_phi
       COMPLEX :: dum,freq_QL
       REAL :: betae_psi,betae_sig
@@ -3592,6 +3607,11 @@
                    (1.5*p_tot(is,i)-0.5*p_par(is,i))
           endif
         enddo
+! save the field weights
+        field_weight(1,i) = xi*phi(i)/SQRT(vnorm)
+        field_weight(2,i) = xi*psi(i)/SQRT(vnorm)
+        field_weight(3,i) = xi*bsig(i)/SQRT(vnorm)
+!        write(*,*)i,"field_weight=",field_weight(1,i),field_weight(2,i),field_weight(3,i)
       enddo
 ! 
 !  add the adiabatic terms to the total moments
@@ -3643,7 +3663,7 @@
 ! fill the stress moments
 !
       wp = ky*ave_hp1(2,1,1)*ABS(vpar_shear_in(2))/vs(2)
-      stress_correction = (IMAG(freq_QL)+2.0*wp)/(IMAG(freq_QL)+wp)
+      stress_correction = (AIMAG(freq_QL)+2.0*wp)/(AIMAG(freq_QL)+wp)
 !      stress_correction = 1.0
 !
       do is=ns0,ns
@@ -3755,7 +3775,7 @@
       Ne_Te_sin = 0.0
       do i=1,nbasis
          Ne_Te_cos = Ne_Te_cos + REAL(CONJG(n(1,i))*temp(1,i))
-         Ne_Te_sin = Ne_Te_sin + IMAG(CONJG(n(1,i))*temp(1,i))
+         Ne_Te_sin = Ne_Te_sin + AIMAG(CONJG(n(1,i))*temp(1,i))
       enddo
       Ne_Te_phase = ATAN2(Ne_Te_sin,Ne_Te_cos)
 !
@@ -3922,6 +3942,90 @@
 !      enddo
 !
       END SUBROUTINE gauss_hermite
+!
+!    
+!***********************
+! start of get_wavefunction
+      SUBROUTINE get_wavefunction
+!
+      USE tglf_dimensions
+      USE tglf_global
+      USE tglf_sgrid
+!
+      IMPLICIT NONE
+!
+      INTEGER :: n,i,j,k,np
+      REAL :: dx,hp0
+      REAL :: hp(nb,max_plot)
+      REAL :: xp(max_plot)
+!
+! set up the theta-grid 
+     if(igeo.eq.0)then
+       dx = 6.0*pi/REAL(max_plot-1)
+       do i=1,max_plot
+         xp(i) = -3*pi + REAL(i-1)*dx
+         plot_angle_out(i) = xp(i)        
+       enddo
+     else
+! general geometry case 0<y<Ly one loop counterclockwise 
+! y is the the straight field line coordiant of the Hermite basis
+! t_s is the mapping of the original theta coordinate that will be
+! used for plotting, Note that t_s has the opposite sign to y.
+       dx = 2.0*pi/(y(ms)*width_in)
+       np = ms/8   ! number of points per 1/2 period = 16 for ms=128
+       xp(3*np+1)=0.0
+       plot_angle_out(3*np+1)=0.0
+       do i=1,np
+         j=4*(i-1)
+         xp(i) = -(y(ms) +y(ms/2-j))*dx
+         xp(i+np) = -y(ms-j)*dx
+         xp(i+2*np) = -y(ms/2-j)*dx
+         j=4*i
+         xp(i+3*np+1) = y(j)*dx 
+         xp(i+4*np+1) = y(ms/2+j)*dx
+         xp(i+5*np+1) = (y(ms)+y(j))*dx
+         j=4*(i-1)
+         plot_angle_out(i) = t_s(ms) +t_s(ms/2-j)
+         plot_angle_out(i+np) = t_s(ms-j)
+         plot_angle_out(i+2*np) = t_s(ms/2-j)
+         j=4*i
+         plot_angle_out(i+3*np+1) = -t_s(j)
+         plot_angle_out(i+4*np+1) = -t_s(ms/2+j)
+         plot_angle_out(i+5*np+1) = -(t_s(ms)+t_s(j))
+       enddo
+     endif
+!     do i=1,max_plot
+!       write(*,*)i,"xp=",xp(i),"tp=",plot_angle_out(i)
+!     enddo
+! compute the hermite polynomials on the theta-grid
+      hp0 = sqrt_two/pi**0.25
+      do i=1,max_plot
+       hp(1,i) = hp0*EXP(-xp(i)*xp(i)/2.0)
+       hp(2,i) = xp(i)*sqrt_two*hp0*EXP(-xp(i)*xp(i)/2.0)
+       if(nbasis.gt.2)then
+         do j=3,nbasis
+          hp(j,i) = xp(i)*SQRT(2.D0/REAL(j-1))*hp(j-1,i) &
+           - SQRT(REAL(j-2)/REAL(j-1))*hp(j-2,i)
+         enddo
+       endif
+      enddo
+!      compute the fields on the theta-grid
+      do n=1,nmodes_out
+       do k=1,3
+!        write(*,*)"field_weight_out=",(field_weight_out(n,k,j),j=1,nbasis)
+        do i=1,max_plot
+         plot_field_out(n,k,i) = 0.0
+         if((k.eq.1).or.(k.eq.2.and.use_bper_in).or.(k.eq.3.and.use_bpar_in))then
+          do j=1,nbasis
+           plot_field_out(n,k,i) = plot_field_out(n,k,i) &
+           + field_weight_out(n,k,j)*hp(j,i)
+          enddo
+         endif
+        enddo
+       enddo
+      enddo
+!
+      END SUBROUTINE get_wavefunction
 !
 !
       SUBROUTINE get_v

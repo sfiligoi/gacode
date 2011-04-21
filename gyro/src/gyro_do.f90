@@ -20,6 +20,7 @@ subroutine gyro_do(skipinit)
   implicit none
   !
   integer, optional :: skipinit
+  logical :: rfe
   !--------------------------------------
 
   !-------------------------------------
@@ -48,6 +49,18 @@ subroutine gyro_do(skipinit)
   ! Prepend path:
   runfile  = trim(path)//trim(baserunfile)
   precfile = trim(path)//trim(baseprecfile)
+
+  if (baserunfile == 'out.gyro.run')  then
+     IF(i_proc==0 .AND. output_flag==1) THEN
+        inquire(file=trim(runfile),exist=rfe)
+        if (.not.rfe) then
+            open(unit=99,file=trim(runfile),status='unknown')
+            close(99)
+         endif
+     ENDIF
+  endif
+
+
 
   if ((i_proc==0).AND.(gkeigen_j_set==0)) print *,runfile
 
@@ -147,7 +160,7 @@ subroutine gyro_do(skipinit)
   ! Generate geometry-dependent factors using model or
   ! Miller equilibrium:
   call make_geometry_arrays
-  if (iohdf5out == 1) call write_hdf5_data(trim(path)//'gyro_data.h5',1)
+  if (io_method > 1) call write_hdf5_data(trim(path)//'gyro_data.h5',1)
   !
   ! Deallocate GEO
   call GEO_alloc(0)
@@ -305,11 +318,12 @@ subroutine gyro_do(skipinit)
   !
   if (restart_method /= 1) then
 
-     if (lskipinit == 0) call gyro_write_master(2)
-     if (iohdf5out == 1 .and. lskipinit == 0) call write_hdf5_timedata(2)
-     if (iohdf5out == 1 .and. lskipinit == 0) call write_hdf5_fine_timedata(2)
-
-  endif
+     if (lskipinit == 0) then
+      call gyro_write_master(2)
+      if (io_method > 1 ) call write_hdf5_timedata(2)
+      if (io_method > 1 .and. time_skip_wedge > 0) call write_hdf5_wedge_timedata(2)
+     endif
+   endif
   !--------------------------------------------
 
   !--------------------------------------------

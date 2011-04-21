@@ -53,7 +53,7 @@ fi
 for i in \
     "rm -rf aclocal.m4 autom4te.cache autom4te-*.cache configure" \
     "$ltcmd" \
-    "env AUTOMAKE=config/automake.sh autoreconf" \
+    "env AUTOMAKE=shared/autotool_config/automake.sh autoreconf" \
     aclocal \
     autoheader \
     "autoconf --force"; do
@@ -73,12 +73,12 @@ for i in \
 done
 
 # Do automake
-cmd="config/automake.sh"
+cmd="shared/autotool_config/automake.sh"
 echo $cmd
 $cmd
 res=$?
 if test $res != 0; then
-  echo config/automake.sh failed.
+  echo shared/autotool_config/automake.sh failed.
   exit $res
 fi
 

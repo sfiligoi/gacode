@@ -75,7 +75,7 @@ if test $? != 0; then
   echo automake not present in your path.
   echo Modifications to Makefile.am\'s will not propagate.
 else
-  AUTOMAKE=$abs_top_srcdir/config/automake.sh
+  AUTOMAKE=$abs_top_srcdir/shared/autotool_config/automake.sh
 fi
 # For backware compatibility
 EXEEXT=""
@@ -98,7 +98,7 @@ dnl Start configuration summary
 dnl
 dnl ######################################################################
 
-builtin(include, config/tx_ac_summary.m4)
+builtin(include, shared/autotool_config/tx_ac_summary.m4)
 TX_AC_SUMMARY_INIT(config.summary, $0)
 
 dnl ######################################################################
@@ -157,15 +157,7 @@ dnl Get search tools and version information
 dnl
 dnl ######################################################################
 
-builtin(include, config/txsearch.m4)
-#builtin(include, config/tx_svn_info.m4)
-#TX_SVN_INFO([PROJECT_URL], [PROJECT_REV], .)
-#tx_pkg_name=translit($PACKAGE,'a-z./-','A-Z____')
-# eval "$tx_pkg_name"_URL=$PROJECT_URL
-# eval "$tx_pkg_name"_REV=$PROJECT_REV
-dnl AC_DEFINE_UNQUOTED(["$tx_pkg_name"_URL], "$PROJECT_URL", "SVN Project URL")
-dnl AC_DEFINE_UNQUOTED(["$tx_pkg_name"_URL], "$PROJECT_REV", "SVN Project Revision")
-#TX_SVN_INFO([CONFIG_URL], [CONFIG_REV], config)
+builtin(include, shared/autotool_config/txsearch.m4)
 
 dnl ######################################################################
 dnl

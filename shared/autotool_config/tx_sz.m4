@@ -19,7 +19,7 @@ dnl
 dnl ######################################################################
 
 dnl Includes functions from txsearch.m4
-builtin(include, config/txsearch.m4)
+builtin(include, shared/autotool_config/txsearch.m4)
 
 dnl ######################################################################
 dnl

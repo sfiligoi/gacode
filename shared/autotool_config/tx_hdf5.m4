@@ -28,7 +28,7 @@ dnl    Added hdf5 enable option for codes that do not require hdf5
 dnl ######################################################################
 
 dnl Includes functions from txsearch.m4
-builtin(include, config/txsearch.m4)
+builtin(include, shared/autotool_config/txsearch.m4)
 
 dnl ######################################################################
 dnl

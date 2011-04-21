@@ -63,7 +63,7 @@ dnl #####################################################################
 dnl  Check if compiler supports allocatable components
 dnl #####################################################################
 
-builtin(include,config/tx_fc_allocatable_component.m4)
+builtin(include,shared/autotool_config/tx_fc_allocatable_component.m4)
 TX_FC_ALLOCATABLE_COMPONENT
 if test "x$TX_FORTRAN_ALLOCATABLE_COMPONENT" = "xno"; then
   AC_MSG_WARN(Fortran compiler does not support allocatable components.)
@@ -73,7 +73,7 @@ dnl #####################################################################
 dnl  Find fortran module extension
 dnl #####################################################################
 
-builtin(include, config/contrib/ax_f90_module_extension.m4)
+builtin(include, shared/autotool_config/contrib/ax_f90_module_extension.m4)
 AX_F90_MODULE_EXTENSION
 TX_FORTRAN_MODEXT="$ax_cv_f90_modext"
 if test -z "$TX_FORTRAN_MODEXT"; then
@@ -85,7 +85,7 @@ dnl #####################################################################
 dnl  Find fortran module capitalization
 dnl #####################################################################
 
-builtin(include, config/tx_fc_module_capitalization.m4)
+builtin(include, shared/autotool_config/tx_fc_module_capitalization.m4)
 TX_FC_MODULE_CAPITALIZATION
 TX_FORTRAN_MODCAP="$tx_cv_fc_modcap"
 if test -z "$TX_FORTRAN_MODCAP"; then
@@ -98,7 +98,7 @@ dnl #####################################################################
 dnl Check whether compiler has FLUSH subroutine
 dnl #####################################################################
 
-builtin(include,config/tx_fc_has_intrinsic.m4)
+builtin(include,shared/autotool_config/tx_fc_has_intrinsic.m4)
 TX_FC_HAS_INTRINSIC(FLUSH_)
 if test "x$TX_FORTRAN_HAS_INTRINSIC_FLUSH_" = "xno"; then
   AC_MSG_WARN(Fortran compiler does not support FLUSH_ subroutine.)
@@ -116,7 +116,7 @@ dnl  Find fortran module include flag
 dnl  because -I is not standard :(
 dnl #####################################################################
 
-builtin(include, config/contrib/ax_f90_module_flag.m4)
+builtin(include, shared/autotool_config/contrib/ax_f90_module_flag.m4)
 AX_F90_MODULE_FLAG
 FC_INCLUDE_FLAG="$ax_cv_f90_modflag"
 AC_SUBST([FC_INCLUDE_FLAG])
@@ -128,7 +128,7 @@ dnl #####################################################################
 dnl Find the object that defines Fortran main.
 dnl #####################################################################
 
-builtin(include, config/tx_fc_find_main.m4)
+builtin(include, shared/autotool_config/tx_fc_find_main.m4)
 TX_FC_FIND_MAIN_OBJS
 
 dnl #####################################################################

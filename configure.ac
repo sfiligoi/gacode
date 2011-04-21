@@ -14,11 +14,11 @@ dnl------------------------------------------------------------------------
 
 AC_INIT(gacodes, 8.3, srinath@txcorp.com)
 AC_PREREQ([2.65])
-AC_CONFIG_AUX_DIR(config)
-AC_CONFIG_MACRO_DIR([config])
+AC_CONFIG_AUX_DIR(shared/autotool_config)
+AC_CONFIG_MACRO_DIR([shared/autotool_config])
 dnl AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE
-AC_CONFIG_MACRO_DIR([config])
+AC_CONFIG_MACRO_DIR([shared/autotool_config])
 
 AC_PREFIX_DEFAULT(/internal/gacodes) dnl Install in "/usr/local"
 
@@ -28,7 +28,7 @@ dnl Basic initializations
 dnl
 dnl ######################################################################
 
-builtin(include, config/tx_init.m4)
+builtin(include, shared/autotool_config/tx_init.m4)
 #AC_DEFINE_UNQUOTED([GACODES_URL], "$PROJECT_URL", "GA_TRANSPORT Project URL")
 #AC_DEFINE_UNQUOTED([GACODES_REV], "$PROJECT_REV", "GA_TRANSPORT Revision")
 
@@ -40,7 +40,7 @@ dnl ######################################################################
 
 NO_HDF5=true; parallel="yes"
 DOUBLE="yes"
-builtin(include, config/parcompslibs.m4)
+builtin(include, shared/autotool_config/parcompslibs.m4)
 # jrc: why the below is specific to fmcfm?
 FCFLAGS="$FCFLAGS $FC_DBL_FLAG"
 dnl if test x"$parallel" != "xyes"; then
@@ -53,7 +53,7 @@ dnl fi
 #
 ######################################################################
 
-builtin(include, config/tx_fc_aux.m4)
+builtin(include, shared/autotool_config/tx_fc_aux.m4)
 
 dnl ######################################################################
 dnl
@@ -81,11 +81,11 @@ dnl-----------------------------------------------------------------------
 echo  >> $config_summary_file
 
 echo  "Linear algebra libraries used by GYRO:" >> $config_summary_file
-builtin(include, config/contrib/acx_blas.m4)
+builtin(include, shared/autotool_config/contrib/acx_blas.m4)
 ACX_BLAS(AC_MSG_NOTICE(BLAS was found),AC_MSG_ERROR(BLAS not found.  Use --with-blas=<lib> to set library or --with-blas-dir=<dir> to set search directory.))
 
 dnl Look for LAPACK
-builtin(include, config/contrib/acx_lapack.m4)
+builtin(include, shared/autotool_config/contrib/acx_lapack.m4)
 ACX_LAPACK(AC_MSG_NOTICE(LAPACK was found),
 AC_MSG_ERROR(LAPACK not found.  Use --with-lapack=<lib> to set library or --with-lapack-dir=<lapackdir> to set search directory.))
 
@@ -132,7 +132,7 @@ dnl Python
 dnl
 dnl ######################################################################
 
-builtin(include,config/python.m4)
+builtin(include,shared/autotool_config/python.m4)
 AM_CONDITIONAL(CONDPYTHON, test x$python = xtrue)
 
 dnl-----------------------------------------------------------------------
@@ -145,8 +145,8 @@ dnl-----------------------------------------------------------------------
 
 USE_IO_INFO="true"
 ac_use_fortran_hdf5="yes"
-builtin(include, config/tx_hdf5.m4)
-builtin(include, config/tx_netcdf.m4)
+builtin(include, shared/autotool_config/tx_hdf5.m4)
+builtin(include, shared/autotool_config/tx_netcdf.m4)
 CPPF90_FLAGS="$CPP_HAVE_MPI $FLUSH_MACRO $FPPFLAGS"
 AC_SUBST(CPPF90_FLAGS)
 dnl ######################################################################
@@ -155,18 +155,18 @@ dnl Find documentation executables
 dnl
 dnl ######################################################################
 
-builtin(include, config/tx_doxygen.m4)
-builtin(include, config/tx_latex.m4)
+builtin(include, shared/autotool_config/tx_doxygen.m4)
+builtin(include, shared/autotool_config/tx_latex.m4)
 
 dnl-----------------------------------------------------------------------
 dnl Each subdirectory has its own Makefile and dependency
 dnl-----------------------------------------------------------------------
 AC_CONFIG_FILES([Makefile
-    config/Makefile
-    config/contrib/Makefile
-    envvars/Makefile
-    envvars/ga_transport.sh
-    envvars/ga_transport.csh
+    shared/autotool_config/Makefile
+    shared/autotool_config/contrib/Makefile
+    shared/envvars/Makefile
+    shared/envvars/ga_transport.sh
+    shared/envvars/ga_transport.csh
     shared/Makefile
     shared/math/Makefile
     shared/GEO/Makefile
@@ -210,6 +210,7 @@ AC_CONFIG_FILES([Makefile
     tglf/python/Makefile
     tglf/src/Makefile
 ])
+#])
 
 #    neo/python/Makefile
 #    neo/sim/Makefile
@@ -350,7 +351,7 @@ dnl  Remove interlibrary dependency checking
 dnl
 dnl ######################################################################
 
-builtin(include, config/rminterlibdeps.ac)
+builtin(include, shared/autotool_config/rminterlibdeps.ac)
 
 dnl-----------------------------------------------------------------------
 dnl  Print out config summary file.

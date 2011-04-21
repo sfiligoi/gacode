@@ -57,7 +57,7 @@ if ! $regenconf; then
   echo
   echo You should now make files specific to local versions of
   echo automake/autoconf by doing the following:
-  echo "  config/regenconf.sh"
+  echo "  shared/config/regenconf.sh"
   echo or
   echo "  $0 (i.e., run this without the -n option)"
 else

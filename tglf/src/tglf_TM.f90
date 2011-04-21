@@ -160,7 +160,7 @@
         phi_bar1 = 0.0
         v_bar1 = 0.0
         if(unstable)then
-         do imax=1,nmodes_in
+         do imax=1,nmodes_out
            phi_bar = reduce*phi_bar_out(imax)
            v_bar = reduce*v_bar_out(imax)
            phi_bar1 = phi_bar1 + phi_bar
@@ -190,7 +190,7 @@
           nsum1(is) = 0.0
           tsum1(is) = 0.0
           if(unstable)then
-            do imax=1,nmodes_in
+            do imax=1,nmodes_out
               phi_bar = reduce*phi_bar_out(imax)
               do j=1,3
                 pflux1(is,j) = pflux1(is,j)+phi_bar*particle_QL_out(imax,is,j)

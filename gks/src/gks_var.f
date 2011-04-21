@@ -92,7 +92,7 @@
        complex  phim(-ntml:ntm)                                  !complex
        complex  aparm(-ntml:ntm)                                 !complex
        complex  bparm(-ntml:ntm)                                 !complex
-       complex   phinorm(-ntml:ntm,0:nkgrid)                      !complex
+       complex  phinorm(-ntml:ntm,0:nkgrid)                      !complex
        complex  aparnorm(-ntml:ntm,0:nkgrid)                     !complex
        complex  bparnorm(-ntml:ntm,0:nkgrid)                     !complex
        complex  weightchkt(-ntml:ntm)                            !complex

@@ -134,6 +134,7 @@ c
         c_per(k) = 1.0/f_exp(k)
         a_pol(k) = get_a_pol()*B_unit/bt_exp
         a_tor(k) = get_a_tor()*rmaj_tg*a_unit_exp/rmajor_exp
+        Bp0(k) = get_Bp0()*B_unit
         interchange_DR_m(k) = get_DR()
       enddo
       k=mxgrid
@@ -145,6 +146,7 @@ c
       c_per(k) = c_per(k-1)
       a_pol(k) = a_pol(k-1)
       a_tor(k) = a_tor(k-1)
+      Bp0(k) = Bp0(k-1)
       interchange_DR_m(k) = 0.0
       k=0
       xr2_exp(k) = xr2_exp(k+1)
@@ -155,6 +157,7 @@ c
       c_per(k) = c_per(k+1)
       a_pol(k) = a_pol(k+1)
       a_tor(k) = a_tor(k+1)
+      Bp0(k) = 0.5*Bp0(k+1)
 !
       return
       end

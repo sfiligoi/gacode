@@ -17,7 +17,12 @@
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #include "finclude/petsc.h"
+#include "finclude/petscvec.h"
+#include "finclude/petscmat.h"
+#include "finclude/petscis.h"
+#include "finclude/petscsys.h"
 #include "finclude/slepc.h"
+#include "finclude/slepceps.h"
 
 !--------------------------------------------------
 ! PETSc, SLEPc, and other local variable declarations. These variables
@@ -506,8 +511,8 @@
 ! (4) Smallest real part / Most stable modes
 !
 !
-      gkeigen_target = (1.,0)*gkeigen_gamma_target -                    &
-     &                                 (0,1)*gkeigen_omega_target
+      gkeigen_target = (1.0,0.0)*gkeigen_gamma_target -                 &
+     &                                 (0.0,1.0)*gkeigen_omega_target
       call EPSSetTarget(epsolve,gkeigen_target,ierr)
 
       select case (gkeigen_method)

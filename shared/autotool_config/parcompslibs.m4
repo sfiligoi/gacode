@@ -68,7 +68,7 @@ dnl ######################################################################
 
 if test -z "$NO_HDF5"; then
 
-  builtin(include, config/tx_hdf5.m4)
+  builtin(include, shared/autotool_config/tx_hdf5.m4)
   if test $ac_cv_have_hdf5 = no; then
 dnl Some codes like it but don't require it
     echo $ac_require_hdf5
@@ -138,7 +138,7 @@ dnl
 dnl ######################################################################
 
 # echo Before defaultcomps, CXXFLAGS = $CXXFLAGS
-builtin(include, config/defaultcomps.m4)
+builtin(include, shared/autotool_config/defaultcomps.m4)
 TX_DEFAULT_CXX
 TX_DEFAULT_CC
 TX_DEFAULT_FC
@@ -160,7 +160,7 @@ dnl Determine the serial compilers (may be the same)
 dnl
 dnl ######################################################################
 
-builtin(include, config/serialcomps.m4)
+builtin(include, shared/autotool_config/serialcomps.m4)
 
 # Blue Gene MPI module fix.
 # On intrepid, /bgsys/drivers/ppcfloor/comm/default/include/mpi.mod was
@@ -184,7 +184,7 @@ dnl Auxiliary compilation flags.  These must key off of SERIALCC, SERIALCXX
 dnl
 dnl ######################################################################
 
-builtin(include, config/flags.m4)
+builtin(include, shared/autotool_config/flags.m4)
 
 dnl ######################################################################
 dnl
@@ -193,7 +193,7 @@ dnl
 dnl ######################################################################
 
 if test "$NO_FORTRAN" != true; then
-  builtin(include, config/fcflags.m4)
+  builtin(include, shared/autotool_config/fcflags.m4)
   dnl echo After fcflags, FCLIBS = $FCLIBS
   AC_ARG_WITH(EXTRA_FCFLAGS,
     AC_HELP_STRING([--with-EXTRA_FCFLAGS=<flags>],
@@ -332,8 +332,8 @@ dnl
 dnl ######################################################################
 
 dnl echo Before macros, CXXFLAGS = $CXXFLAGS
-builtin(include, config/macros.m4)
-builtin(include, config/cxx.m4)
+builtin(include, shared/autotool_config/macros.m4)
+builtin(include, shared/autotool_config/cxx.m4)
 
 dnl ######################################################################
 dnl
@@ -357,7 +357,7 @@ dnl Find system libraries
 dnl
 dnl ######################################################################
 
-builtin(include, config/libs.m4)
+builtin(include, shared/autotool_config/libs.m4)
 AC_ARG_WITH(EXTRA_LDFLAGS,
 	AC_HELP_STRING([--with-EXTRA_LDFLAGS=<flags>],
 	[to add <flags> for linking]),
@@ -385,7 +385,7 @@ dnl
 dnl ######################################################################
 
 if test -z "$NO_HDF5"; then
-  builtin(include, config/tx_sz.m4)
+  builtin(include, shared/autotool_config/tx_sz.m4)
 else
   AM_CONDITIONAL(HAVE_SZ, false)
 fi

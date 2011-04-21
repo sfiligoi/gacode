@@ -29,7 +29,9 @@ subroutine read_time(dir)
   allocate(gbflux_t(n_kinetic,n_field,4,0:n_time))
 
   open(unit=1,file=trim(dir)//'gbflux.out')
-  read(1,'(100(1pe15.8,1x))') gbflux_t(:,:,:,:)
+  do i=0,n_time
+     read(1,'(100(1pe15.8,1x))') gbflux_t(:,:,:,i)
+  enddo
   close(1)
 
   ! Compute average
@@ -40,7 +42,7 @@ subroutine read_time(dir)
         gbflux = gbflux + 0.5*(gbflux_t(:,:,:,i)+gbflux_t(:,:,:,i+1)) &
              *(t(i+1)-t(i))
         t_window = t_window+(t(i+1)-t(i))
-    endif
+     endif
   enddo
   gbflux = gbflux/t_window
   close(1)
@@ -50,7 +52,7 @@ subroutine read_time(dir)
   do i_field=1,n_field
      print *,tag(i_field)
      print 20,'density','energy','momentum','exchange'
-     do i_spec=1,n_spec
+     do i_spec=1,n_kinetic
         print 10,'species: ',i_spec,gbflux(i_spec,i_field,:)
      enddo
      print *
@@ -58,11 +60,11 @@ subroutine read_time(dir)
 
   print *,'Total'
   print 20,'density','energy','momentum','exchange'
-  do i_spec=1,n_spec
+  do i_spec=1,n_kinetic
      print 10,'species: ',i_spec,(sum(gbflux(i_spec,:,i)),i=1,4)
   enddo
   print *
-  
+
 10 format(t2,a,i1,2x,4(1pe12.5,1x))
 20 format(t15,a,t28,a,t41,a,t54,a)
 30 format(t2,a,2x,a,f6.1,2x,a,f6.1)
