@@ -21,7 +21,7 @@ FPROF	= -pg
 # module load openmpi/1.4.1
 # module load acml
 # module load fftw/2.1.5
-# module load hdf5-parallel
+# module load hdf5-serial/1.8.5
 
 # System math libraries
 
@@ -39,7 +39,7 @@ NETCDF_INC = ${NETCDFHOME}/include
 
 # HDF5
 HDF5_LIBS = -L$(HDF5_HOME)/lib -lhdf5_fortran -lhdf5 -lz
-HDF5_INC = -I $(HDF5_HOME)/include/
+HDF5_INC = -I$(HDF5_HOME)/include/
 VSHDF5_MAKECMD=vshdf5
 
 # Archive
