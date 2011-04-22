@@ -14,6 +14,7 @@ subroutine prgen_read_plasmastate
 
   ! NetCDF variables
   integer :: i
+  integer :: ip
   integer :: ncid
   integer :: varid
   integer :: err
@@ -26,28 +27,28 @@ subroutine prgen_read_plasmastate
   plst_tag = 'shot_number'
   err = nf90_inq_varid(ncid,trim(plst_tag),varid)
   err = nf90_get_var(ncid,varid,plst_shot_number)
-  print *,err,plst_tag,plst_shot_number
+  if (verbose_flag == 1) print *,err,plst_tag,plst_shot_number
 
   ! Tokamak
   plst_tag = 'tokamak_id'
   err = nf90_inq_varid(ncid,trim(plst_tag),varid)
   err = nf90_get_var(ncid,varid,plst_tokamak_id)
-  print *,err,plst_tag,plst_tokamak_id
+  if (verbose_flag == 1) print *,err,plst_tag,plst_tokamak_id
 
   ! Number of thermal species
   plst_tag = 'dp1_nspec_th'
   err = nf90_inq_dimid(ncid,trim(plst_tag),varid)
   err = nf90_Inquire_Dimension(ncid,varid,len=plst_dp1_nspec_th)
-  print *,err,plst_tag,plst_dp1_nspec_th
+  if (verbose_flag == 1)  print *,err,plst_tag,plst_dp1_nspec_th
 
   ! Number of thermal species 
   plst_tag = 'dp1_nspec_tha'
   err = nf90_inq_dimid(ncid,trim(plst_tag),varid)
   err = nf90_Inquire_Dimension(ncid,varid,len=plst_dp1_nspec_tha)
-  print *,err,plst_tag,plst_dp1_nspec_tha
+  if (verbose_flag == 1) print *,err,plst_tag,plst_dp1_nspec_tha
 
   if (plst_dp1_nspec_th /= plst_dp1_nspec_tha) then
-     print *,'plst_dp1_nspec_th /= plst_dp1_nspec_tha'
+     print *,'ERROR: plst_dp1_nspec_th /= plst_dp1_nspec_tha'
      stop
   endif
 
@@ -55,21 +56,21 @@ subroutine prgen_read_plasmastate
   plst_tag = 'dp1_nspec_alla'
   err = nf90_inq_dimid(ncid,trim(plst_tag),varid)
   err = nf90_Inquire_Dimension(ncid,varid,len=plst_dp1_nspec_alla)
-  print *,err,plst_tag,plst_dp1_nspec_alla
+  if (verbose_flag == 1) print *,err,plst_tag,plst_dp1_nspec_alla
 
   ! Gridpoints
   plst_tag = 'dim_nrho'
   err = nf90_inq_dimid(ncid,trim(plst_tag),varid)
   err = nf90_Inquire_Dimension(ncid,varid,len=plst_dim_nrho)
-  print *,err,plst_tag,plst_dim_nrho
+  if (verbose_flag == 1) print *,err,plst_tag,plst_dim_nrho
 
   ! Gridpoints (geometry)
   plst_tag = 'dim_nrho_eq_geo'
   err = nf90_inq_dimid(ncid,trim(plst_tag),varid)
   err = nf90_Inquire_Dimension(ncid,varid,len=plst_dim_nrho_eq_geo)
-  print *,err,plst_tag,plst_dim_nrho_eq_geo
+  if (verbose_flag == 1) print *,err,plst_tag,plst_dim_nrho_eq_geo
   if (plst_dim_nrho_eq_geo /= plst_dim_nrho) then
-     print *,'plst_dim_nrho_eq_geo /= plst_dim_nrho'
+     print *,'ERROR: plst_dim_nrho_eq_geo /= plst_dim_nrho'
      stop
   endif
 
@@ -82,7 +83,17 @@ subroutine prgen_read_plasmastate
   plst_tag = 'ALLA_name'
   err = nf90_inq_varid(ncid,trim(plst_tag),varid)
   err = nf90_get_var(ncid,varid,plst_alla_name(1:plst_dp1_nspec_alla))
-  print *,err,plst_tag,(trim(plst_alla_name(i)),i=1,plst_dp1_nspec_alla)
+  print '(a)','INFO: Found these ion species'
+  do i=2,plst_dp1_nspec_alla
+     ip = reorder_vec(i-1)+1
+     if (i <= 6) then
+        print '(t6,i2,1x,3(a))',&
+             i-1,trim(plst_alla_name(i)),' -> ',trim(plst_alla_name(ip))
+     else
+        print '(t6,i2,1x,3(a))',&
+             i-1,trim(plst_alla_name(i)),' [unmapped]'
+     endif
+  enddo
 
   ! Flux-surface volume
   err = nf90_inq_varid(ncid,trim('vol'),varid)
@@ -143,7 +154,8 @@ subroutine prgen_read_plasmastate
 
   ! Temperatures
   err = nf90_inq_varid(ncid,trim('Ts'),varid)
-  err = nf90_get_var(ncid,varid,plst_ts(1:nx-1,1:plst_dp1_nspec_th)) ! WG added species index
+  ! WG added species index
+  err = nf90_get_var(ncid,varid,plst_ts(1:nx-1,1:plst_dp1_nspec_th)) 
 
   ! Temperature (Te at r/a=1)
   err = nf90_inq_varid(ncid,trim('Te_bdy'),varid)
@@ -159,12 +171,14 @@ subroutine prgen_read_plasmastate
 
   ! Densities
   err = nf90_inq_varid(ncid,trim('ns'),varid)
-  err = nf90_get_var(ncid,varid,plst_ns(1:nx-1,1:plst_dp1_nspec_th)) ! WG added species index
+  ! WG added species index
+  err = nf90_get_var(ncid,varid,plst_ns(1:nx-1,1:plst_dp1_nspec_th)) 
 
   ! Densities (n at r/a=1)
   err = nf90_inq_varid(ncid,trim('ns_bdy'),varid)
-  err = nf90_get_var(ncid,varid,plst_ns(nx,1:plst_dp1_nspec_th)) ! WG added species index
+  ! WG added species index
 
+  err = nf90_get_var(ncid,varid,plst_ns(nx,1:plst_dp1_nspec_th)) 
   ! WG WG WG - following lines
   err = nf90_inq_varid(ncid,trim('nbeami'),varid)
   err = nf90_get_var(ncid,varid,plst_nb(1:nx-1))
