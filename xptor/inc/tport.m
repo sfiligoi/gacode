@@ -180,16 +180,25 @@ c 301 elements (was 51)
       real*8 sbeame_exp(0:jmaxmt), sbeam_exp(0:jmaxmt)
       real*8 powineo_m(0:jmaxmt), flow_exch_exp(0:jmaxmt)
       real*8 powe_exp(0:jmaxmt), powi_exp(0:jmaxmt),flow_exp(0:jmaxmt)
-      real*8 powe_m(0:jmaxmt), powi_m(0:jmaxmt), flow_m(0:jmaxmt)
-      real*8 stress_tor_m(0:jmaxmt),stress_par_m(0:jmaxmt)
+      real*8 powe_m(0:jmaxmt), powi_m(0:jmaxmt), powz_m(0:jmaxmt)
+      real*8 flowe_m(0:jmaxmt),flowi_m(0:jmaxmt),flowz_m(0:jmaxmt)
+      real*8 stress_tor_i_m(0:jmaxmt),stress_tor_z_m(0:jmaxmt)
+      real*8 stress_par_i_m(0:jmaxmt),stress_par_z_m(0:jmaxmt)
       real*8 stress_par_cor_m(0:jmaxmt)
-      real*8 powe_glf(0:jmaxmt), powi_glf(0:jmaxmt), flow_glf(0:jmaxmt)
-      real*8 stress_tor_glf(0:jmaxmt), stress_par_glf(0:jmaxmt)
-      real*8 powe_neo(0:jmaxmt), powi_neo(0:jmaxmt), flow_neo(0:jmaxmt)
-      real*8 stress_tor_neo(0:jmaxmt), stress_par_neo(0:jmaxmt)
+      real*8 powe_glf(0:jmaxmt),powi_glf(0:jmaxmt),powz_glf(0:jmaxmt)
+      real*8 flowe_glf(0:jmaxmt),flowi_glf(0:jmaxmt),flowz_glf(0:jmaxmt)
+      real*8 stress_tor_i_glf(0:jmaxmt),stress_tor_z_glf(0:jmaxmt)
+      real*8 stress_par_i_glf(0:jmaxmt),stress_par_z_glf(0:jmaxmt)
+      real*8 powe_neo(0:jmaxmt), powi_neo(0:jmaxmt), powz_neo(0:jmaxmt)
+      real*8 flowe_neo(0:jmaxmt),flowi_neo(0:jmaxmt),flowz_neo(0:jmaxmt)
+      real*8 stress_tor_i_neo(0:jmaxmt),stress_tor_z_neo(0:jmaxmt)
+      real*8 stress_par_i_neo(0:jmaxmt),stress_par_z_neo(0:jmaxmt)
       real*8 powe_adhoc(0:jmaxmt), powi_adhoc(0:jmaxmt)
-      real*8 flow_adhoc(0:jmaxmt)
-      real*8 stress_tor_adhoc(0:jmaxmt), stress_par_adhoc(0:jmaxmt)
+      real*8 powz_adhoc(0:jmaxmt)
+      real*8 flowe_adhoc(0:jmaxmt),flowi_adhoc(0:jmaxmt)
+      real*8 flowz_adhoc(0:jmaxmt)
+      real*8 stress_tor_i_adhoc(0:jmaxmt),stress_tor_z_adhoc(0:jmaxmt)
+      real*8 stress_par_i_adhoc(0:jmaxmt),stress_par_z_adhoc(0:jmaxmt)
       real*8 diff_exp(0:jmaxmt),chii_exp(0:jmaxmt)
       real*8 chie_exp(0:jmaxmt),eta_tor_exp(0:jmaxmt)
       real*8 egamma_g(0:jmaxmt)
@@ -423,12 +432,18 @@ c
      & , te_exp_sav, ti_exp_sav, angrotp_exp_sav
      & , ptot_exp, pfast_exp, torque_exp
      & , stress_tor_exp, stress_par_exp, stress_par_cor_m
-     & , flow_glf, powe_glf, powi_glf
-     & , stress_tor_glf, stress_par_glf
-     & , flow_neo, powe_neo, powi_neo
-     & , stress_tor_neo, stress_par_neo
-     & , flow_adhoc, powe_adhoc, powi_adhoc
-     & , stress_tor_adhoc, stress_par_adhoc
+     & , flowe_glf, flowi_glf, flowz_glf
+     & , powe_glf, powi_glf, powz_glf
+     & , stress_tor_i_glf, stress_tor_z_glf
+     & , stress_par_i_glf, stress_par_z_glf
+     & , flowe_neo, flowi_neo, flowz_neo
+     & , powe_neo, powi_neo, powz_neo
+     & , stress_tor_i_neo, stress_tor_z_neo
+     & , stress_par_i_neo, stress_par_z_neo
+     & , flowe_adhoc, flowi_adhoc, flowz_adhoc
+     & , powe_adhoc, powi_adhoc, powz_adhoc
+     & , stress_tor_i_adhoc, stress_tor_z_adhoc
+     & , stress_par_i_adhoc, stress_par_z_adhoc
      & , vpar_exp, vexb_exp, vper_exp
      & , vpol_exp, vdia_exp, vneo_exp, mach_exp
      & , vphi_exp, vphi_ncl_exp, vpol_ncl_exp
@@ -450,7 +465,10 @@ c
      & , powineo_m, flow_exch_exp, powe_exp, powi_exp, flow_exp
      & , qbeame_exp, qbeami_exp, qrfe_exp, qrfi_exp, qohm_exp
      & , qrad_exp, qione_exp, qioni_exp, sbeame_exp, sbeam_exp
-     & , powe_m, powi_m, flow_m, stress_tor_m, stress_par_m
+     & , powe_m, powi_m, powz_m
+     & , flowe_m, flowi_m, flowz_m
+     & , stress_tor_i_m, stress_tor_z_m
+     & , stress_par_i_m, stress_par_z_m
      & , diff_exp, chie_exp, chii_exp, eta_tor_exp, egamma_g
      & , rhosda_m, csda_m, vexb_m, vpar_m, vphi_m, vper_m
      & , vdia_m, vneo_m, vpol_m, nu_pol_m, kpol_m, nuei_m

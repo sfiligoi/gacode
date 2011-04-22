@@ -184,6 +184,11 @@ c no dilution
          endif
          fi_m(k) = ni_exp(k)/ne_exp(k)
          fz_m(k) = nz_exp(k)/ne_exp(k)
+         ne_m(k)=ne_exp(k)
+         ni_m(k)=ni_exp(k)
+         nz_m(k)=nz_exp(k)
+         ti_m(k)=ti_exp(k)
+         te_m(k)=te_exp(k)
          mask_r(k) = 1
          theta_exp(k)= arho_exp*rho(k)/(q_exp(k)*rmajor_exp)
 c         if(theta_exp(k).lt.thetamin)theta_exp(k)=thetamin
@@ -212,28 +217,6 @@ c
          vphi_exp(k)=c_tor(k)*rmajor_exp*angrot_exp(k)/cv
 c  
          nuei_m(k) = 0.0
-         flow_m(k) = 0.0
-         powe_m(k) = 0.0
-         powi_m(k) = 0.0
-         stress_tor_m(k) = 0.0
-         stress_par_m(k) = 0.0
-         pow_ei_cor_m(k) = 0.0
-         stress_par_cor_m(k) = 0.0
-         flow_glf(k) = 0.0
-         powe_glf(k) = 0.0
-         powi_glf(k) = 0.0
-         stress_tor_glf(k) = 0.0
-         stress_par_glf(k) = 0.0
-         flow_neo(k) = 0.0
-         powe_neo(k) = 0.0
-         powi_neo(k) = 0.0
-         stress_tor_neo(k) = 0.0
-         stress_par_neo(k) = 0.0
-         flow_adhoc(k) = 0.0
-         powe_adhoc(k) = 0.0
-         powi_adhoc(k) = 0.0
-         stress_tor_adhoc(k) = 0.0
-         stress_par_adhoc(k) = 0.0
          vpol_exp(k) = 0.0
          Pradb(k) = 0.0
          Prads(k) = 0.0
@@ -247,30 +230,15 @@ c
       ne_exp(0)=ne_exp(1)
       ni_exp(0)=ni_exp(1)
       nz_exp(0)=nz_exp(1)
+      ne_m(0)=ne_m(1)
+      ni_m(0)=ni_m(1)
+      nz_m(0)=nz_m(1)
+      ti_m(0)=ti_m(1)
+      te_m(0)=te_m(1)
       vphi_exp(0)=vphi_exp(1)
       fi_m(0)=fi_m(1)
       fz_m(0)=fz_m(1)
       nuei_m(0) = nuei_m(1)
-      flow_m(0) = 0.0
-      powe_m(0) = 0.0
-      powi_m(0) = 0.0
-      stress_tor_m(0) = 0.0
-      stress_par_m(0) = 0.0
-      flow_glf(0) = 0.0
-      powe_glf(0) = 0.0
-      powi_glf(0) = 0.0
-      stress_tor_glf(0) = 0.0
-      stress_par_glf(0) = 0.0
-      flow_neo(0) = 0.0
-      powe_neo(0) = 0.0
-      powi_neo(0) = 0.0
-      stress_par_neo(0) = 0.0
-      stress_tor_neo(0) = 0.0
-      flow_adhoc(0) = 0.0
-      powe_adhoc(0) = 0.0
-      powi_adhoc(0) = 0.0
-      stress_par_adhoc(0) = 0.0
-      stress_tor_adhoc(0) = 0.0
       pow_ei_cor_m(0) = 0.0
       stress_par_cor_m(0) = 0.0
       vpol_exp(0) = 0.0
@@ -284,6 +252,8 @@ c compute vexb_exp, vpar_exp and zptheta_exp
 c
       a_unit_exp = rmin_exp(mxgrid)
 c      if(igeo_tg.eq.0)a_unit_exp=arho_exp
+c
+      call neo_flows(mxgrid,vneo_exp,vdia_exp)
 c
       pow_ei_exp(0) = 0.0
       do k=1,mxgrid-1
@@ -313,11 +283,11 @@ c
         zpte_exp(k) = -a_unit_exp*(gradtem/tem)
         zpti_exp(k) = -a_unit_exp*(gradtim/tim)
         jm=k
-        call neoclassical
-        do i=1,nspecies
-          vneo_exp(i,k+1) = vneo(i)
-          vdia_exp(i,k+1) = vdia(i)
-        enddo
+c        call neoclassical
+c        do i=1,nspecies
+c          vneo_exp(i,k+1) = vneo(i)
+c          vdia_exp(i,k+1) = vdia(i)
+c        enddo
 c compute energy exchange
         tew = te_exp(k)
         new = ne_exp(k)
@@ -349,12 +319,12 @@ c compute power balance chi's
       diff_exp(mxgrid) = diff_exp(mxgrid-1)
       chie_exp(mxgrid) = chie_exp(mxgrid-1)
       chii_exp(mxgrid) = chii_exp(mxgrid-1)
-      do i=1,nspecies
-        vdia_exp(i,1) = vdia_exp(i,2)
-        vneo_exp(i,1) = vneo_exp(i,2)
-        vdia_exp(i,0) = vdia_exp(i,1)
-        vneo_exp(i,0) = vneo_exp(i,1)
-      enddo
+c      do i=1,nspecies
+c        vdia_exp(i,1) = vdia_exp(i,2)
+c        vneo_exp(i,1) = vneo_exp(i,2)
+c        vdia_exp(i,0) = vdia_exp(i,1)
+c        vneo_exp(i,0) = vneo_exp(i,1)
+c      enddo
       k=mxgrid
         tew = te_exp(k)
         new = ne_exp(k)
