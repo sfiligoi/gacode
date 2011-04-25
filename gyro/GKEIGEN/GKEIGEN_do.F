@@ -54,7 +54,8 @@
       PetscReal      residual
 
       Mat                                                               &
-     &               time_derivative_matrix
+     &               time_derivative_matrix,                            &
+     &               tdm_transpose
 
       PetscErrorCode ierr, ierr0
 
@@ -476,8 +477,8 @@
         print 10,time_array(5),time_array(6),time_array(7),time_array(8)
         print *, 'Transposing matrix.'
        endif
-       call MatTranspose(time_derivative_matrix,MAT_REUSE_MATRIX,       &
-     &                   time_derivative_matrix,ierr)
+       call MatCreateTranspose(time_derivative_matrix,tdm_transpose,    &
+     &                         ierr)
       endif
 
 !      call MatView(time_derivative_matrix,PETSC_VIEWER_STDOUT_WORLD,    &
@@ -492,8 +493,13 @@
 
       call EPSCreate(MPI_COMM_WORLD,epsolve,ierr)
 !      call EPSSetType(epsolve,EPSARPACK,ierr)
-      call EPSSetOperators(epsolve,time_derivative_matrix,              &
+      if (gkeigen_transpose_flag==0) then
+        call EPSSetOperators(epsolve,time_derivative_matrix,            &
      &                       PETSC_NULL_OBJECT,ierr)
+      else
+        call EPSSetOperators(epsolve,tdm_transpose,                     &
+     &                       PETSC_NULL_OBJECT,ierr)
+      endif
 
 !      call EPSSetDimensions(epsolve,gkeigen_n_values,                   &
 !     &                      gkeigen_kspace_dim,h_length,ierr)
