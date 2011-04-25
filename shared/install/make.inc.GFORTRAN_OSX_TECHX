@@ -31,22 +31,22 @@ LMATH = -framework Accelerate
 # OPTIONAL: netCDF (for gyro2gkv)
 
 #NETCDF = $(SCRATCH)/volatile-gnu/netcdf/lib/libnetcdf.a
-NETCDF = $(HOME)/software/netcdf/lib/libnetcdf.a $(HOME)/software/netcdf/lib/libnetcdff.a
+NETCDF = ${HOME}/software/netcdf/lib/libnetcdf.a ${HOME}/software/netcdf/lib/libnetcdff.a
 #NETCDF_INC = $(SCRATCH)/volatile-gnu/netcdf/include
-NETCDF_INC =$(HOME)/software/netcdf/include
+NETCDF_INC =${HOME}/software/netcdf/include
 
 # OPTIONAL: HDF5 (for vshdf5)
 
-#HDF5_LIBS = -L$(HOME)/software/hdf5-par/lib -lhdf5_hl_f90cstub -lhdf5_hl_fortran -lhdf5_hl -lhdf5_f90cstub -lhdf5_fortran -lhdf5
-HDF5_LIBS = $(HOME)/software/hdf5-par/lib/libhdf5_hl_f90cstub.a \
-  $(HOME)/software/hdf5-par/lib/libhdf5_hl_fortran.a \
-  $(HOME)/software/hdf5-par/lib/libhdf5_hl.a \
-  $(HOME)/software/hdf5-par/lib/libhdf5_f90cstub.a \
-  $(HOME)/software/hdf5-par/lib/libhdf5_fortran.a \
-  $(HOME)/software/hdf5-par/lib/libhdf5.a
+#HDF5_LIBS = -L${HOME}/software/hdf5-par/lib -lhdf5_hl_f90cstub -lhdf5_hl_fortran -lhdf5_hl -lhdf5_f90cstub -lhdf5_fortran -lhdf5
+HDF5_LIBS = ${HOME}/software/hdf5-par/lib/libhdf5_hl_f90cstub.a \
+  ${HOME}/software/hdf5-par/lib/libhdf5_hl_fortran.a \
+  ${HOME}/software/hdf5-par/lib/libhdf5_hl.a \
+  ${HOME}/software/hdf5-par/lib/libhdf5_f90cstub.a \
+  ${HOME}/software/hdf5-par/lib/libhdf5_fortran.a \
+  ${HOME}/software/hdf5-par/lib/libhdf5.a
 #HDF5_LIBS = -L$(SCRATCH)/volatile-gnu/hdf5/lib -lhdf5_fortran -lhdf5
 #HDF5_INC =  -I$(SCRATCH)/volatile-gnu/hdf5/include
-HDF5_INC =  -I$(HOME)/software/hdf5-par/include -I$(HOME)/software/hdf5-par/include/fortran
+HDF5_INC =  -I${HOME}/software/hdf5-par/include -I${HOME}/software/hdf5-par/include/fortran
 VSHDF5_MAKECMD=vshdf5
 MPI_FLAG=-Wp,-D__MPI
 # Archive

@@ -14,7 +14,8 @@ OBJECTS = advancefields.o \
           ptorinit_dv.o \
           trcoef_dv.o \
           vtrans_dv.o \
-          tglf_startup.o
+          tglf_startup.o \
+	  neo_flows.o
 
 .SUFFIXES : .o .f 
 

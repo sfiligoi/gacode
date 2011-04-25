@@ -990,116 +990,227 @@ c
      &          len('gb diffusivity m^2/s'),
      &          'gb diffusivity m^2/s')
       j=j+1
-      oneval(j) = nf_def_var (ncid,'flow_glf',nf_double,1,rdim,rhid1(j))
+      oneval(j) = nf_def_var(ncid,'flowe_glf',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     &           len('glf particle flux KA'),
-     &          'glf particle flux KA')
+     &           len('glf electron particle flux KA'),
+     &          'glf electron particle flux KA')
+      j=j+1
+      oneval(j) = nf_def_var(ncid,'flowi_glf',nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &           len('glf ion particle flux KA'),
+     &          'glf ion particle flux KA')
+      j=j+1
+      oneval(j) = nf_def_var(ncid,'flowz_glf',nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &           len('glf impurity particle flux KA'),
+     &          'glf impurity particle flux KA')
       j=j+1
       oneval(j) = nf_def_var (ncid,'powe_glf',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     &           len('glf integrated electron power MW'),
-     &          'glf integrated electron power MW')
+     &           len('glf electron power flux MW'),
+     &          'glf electron power flux MW')
       j=j+1
       oneval(j) = nf_def_var (ncid,'powi_glf',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     &           len('glf integrated ion power MW'),
-     &          'glf integrated ion power MW')
+     &           len('glf ion power flux MW'),
+     &          'glf ion power flux MW')
       j=j+1
-      oneval(j) = nf_def_var (ncid,'stress_tor_glf',nf_double,1,
+      oneval(j) = nf_def_var (ncid,'powz_glf',nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &           len('glf impurity power flux MW'),
+     &          'glf impurity power flux MW')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'stress_tor_i_glf',nf_double,1,
      &           rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     &           len('glf toroidal momentum flux NT-M'),
-     &          'glf toroidal momentum flux NT-M')
+     &           len('glf toroidal ion momentum flux NT-M'),
+     &          'glf toroidal ion momentum flux NT-M')
       j=j+1
-      oneval(j) = nf_def_var (ncid,'stress_par_glf',nf_double,1,
+      oneval(j) = nf_def_var (ncid,'stress_tor_z_glf',nf_double,1,
      &           rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     &           len('glf parallel momentum flux NT-M'),
-     &          'glf parallel momentum flux NT-M')
+     &           len('glf toroidal impurity momentum flux NT-M'),
+     &          'glf toroidal impurity momentum flux NT-M')
       j=j+1
-      oneval(j) = nf_def_var (ncid,'flow_neo',nf_double,1,rdim,rhid1(j))
+      oneval(j) = nf_def_var (ncid,'stress_par_i_glf',nf_double,1,
+     &           rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     &           len('neo particle flux KA'),
-     &          'neo particle flux KA')
+     &           len('glf parallel ion momentum flux NT-M'),
+     &          'glf parallel ion momentum flux NT-M')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'stress_par_z_glf',nf_double,1,
+     &           rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &           len('glf parallel impurity momentum flux NT-M'),
+     &          'glf parallel impurity momentum flux NT-M')
+      j=j+1
+      oneval(j) = nf_def_var(ncid,'flowe_neo',nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &           len('neo electron particle flux KA'),
+     &          'neo electron particle flux KA')
+      j=j+1
+      oneval(j) = nf_def_var(ncid,'flowi_neo',nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &           len('neo ion particle flux KA'),
+     &          'neo ion particle flux KA')
+      j=j+1
+      oneval(j) = nf_def_var(ncid,'flowz_neo',nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &           len('neo impurity particle flux KA'),
+     &          'neo impurity particle flux KA')
       j=j+1
       oneval(j) = nf_def_var (ncid,'powe_neo',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     &           len('neo integrated electron power MW'),
-     &          'neo integrated electron power MW')
+     &           len('neo electron power flux MW'),
+     &          'neo electron power flux MW')
       j=j+1
       oneval(j) = nf_def_var (ncid,'powi_neo',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     &           len('neo integrated ion power MW'),
-     &          'neo integrated ion power MW')
+     &           len('neo ion power flux MW'),
+     &          'neo ion power flux MW')
       j=j+1
-      oneval(j) = nf_def_var (ncid,'stress_tor_neo',nf_double,1,
+      oneval(j) = nf_def_var (ncid,'powz_neo',nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &           len('neo impurity power flux MW'),
+     &          'neo impurity power flux MW')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'stress_tor_i_neo',nf_double,1,
      &           rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     &           len('neo toroidal momentum flux NT-M'),
-     &          'neo toroidal momentum flux NT-M')
+     &           len('neo ion toroidal momentum flux NT-M'),
+     &          'neo ion toroidal momentum flux NT-M')
       j=j+1
-      oneval(j) = nf_def_var (ncid,'stress_par_neo',nf_double,1,
+      oneval(j) = nf_def_var (ncid,'stress_tor_z_neo',nf_double,1,
      &           rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     &           len('neo parallel momentum flux NT-M'),
-     &          'neo parallel momentum flux NT-M')
+     &           len('neo impurity toroidal momentum flux NT-M'),
+     &          'neo impurity toroidal momentum flux NT-M')
       j=j+1
-      oneval(j) = nf_def_var (ncid,'flow_adhoc',nf_double
+      oneval(j) = nf_def_var (ncid,'stress_par_i_neo',nf_double,1,
+     &           rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &           len('neo ion parallel momentum flux NT-M'),
+     &          'neo ion parallel momentum flux NT-M')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'stress_par_z_neo',nf_double,1,
+     &           rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &           len('neo impurity parallel momentum flux NT-M'),
+     &          'neo impurity parallel momentum flux NT-M')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'flowe_adhoc',nf_double
      &  ,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     &           len('adhoc particle flux KA'),
-     &          'adhoc particle flux KA')
+     &           len('adhoc electron particle flux KA'),
+     &          'adhoc electron particle flux KA')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'flowi_adhoc',nf_double
+     &  ,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &           len('adhoc ion particle flux KA'),
+     &          'adhoc ion particle flux KA')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'flowz_adhoc',nf_double
+     &  ,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &           len('adhoc impurity particle flux KA'),
+     &          'adhoc impurity particle flux KA')
       j=j+1
       oneval(j) = nf_def_var (ncid,'powe_adhoc',nf_double
      &  ,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     &           len('adhoc integrated electron power MW'),
-     &          'adhoc integrated electron power MW')
+     &           len('adhoc electron power flux MW'),
+     &          'adhoc electron power flux MW')
       j=j+1
       oneval(j) = nf_def_var (ncid,'powi_adhoc',nf_double
      &  ,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     &           len('adhoc integrated ion power MW'),
-     &          'adhoc integrated ion power MW')
+     &           len('adhoc ion power flux MW'),
+     &          'adhoc ion power flux MW')
       j=j+1
-      oneval(j) = nf_def_var (ncid,'stress_tor_adhoc',nf_double
+      oneval(j) = nf_def_var (ncid,'powz_adhoc',nf_double
      &  ,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     &           len('adhoc toroidal momentum flux NT-M'),
-     &          'adhoc toroidal momentum flux NT-M')
+     &           len('adhoc impurity power flux MW'),
+     &          'adhoc impurity power flux MW')
       j=j+1
-      oneval(j) = nf_def_var (ncid,'stress_par_adhoc',nf_double
+      oneval(j) = nf_def_var (ncid,'stress_tor_i_adhoc',nf_double
      &  ,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     &           len('adhoc parallel momentum flux NT-M'),
-     &          'adhoc parallel momentum flux NT-M')
+     &           len('adhoc ion toroidal momentum flux NT-M'),
+     &          'adhoc ion toroidal momentum flux NT-M')
       j=j+1
-      oneval(j) = nf_def_var (ncid,'flow_m',nf_double,1,rdim,rhid1(j))
+      oneval(j) = nf_def_var (ncid,'stress_tor_z_adhoc',nf_double
+     &  ,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     &           len('predicted particle flux KA'),
-     &          'predicted particle flux KA')
+     &           len('adhoc impurity toroidal momentum flux NT-M'),
+     &          'adhoc impurity toroidal momentum flux NT-M')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'stress_par_i_adhoc',nf_double
+     &  ,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &           len('adhoc ion parallel momentum flux NT-M'),
+     &          'adhoc ion parallel momentum flux NT-M')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'stress_par_z_adhoc',nf_double
+     &  ,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &           len('adhoc impurity parallel momentum flux NT-M'),
+     &          'adhoc impurity parallel momentum flux NT-M')
+      j=j+1
+      oneval(j) = nf_def_var(ncid,'flowe_m',nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &           len('predicted electron particle flux KA'),
+     &          'predictedelectron  particle flux KA')
+      j=j+1
+      oneval(j) = nf_def_var(ncid,'flowi_m',nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &           len('predicted ion particle flux KA'),
+     &          'predicted ion particle flux KA')
+      j=j+1
+      oneval(j) = nf_def_var(ncid,'flowz_m',nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &           len('predicted impurity particle flux KA'),
+     &          'predicted impurity particle flux KA')
       j=j+1
       oneval(j) = nf_def_var (ncid,'powe_m',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     &           len('predicted integrated electron power MW'),
-     &          'predicted integrated electron power MW')
+     &           len('predicted electron power flux MW'),
+     &          'predicted electron power flux MW')
       j=j+1
       oneval(j) = nf_def_var (ncid,'powi_m',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     &           len('predicted integrated ion power MW'),
-     &          'predicted integrated ion power MW')
+     &           len('predicted ion power flux MW'),
+     &          'predicted ion power flux MW')
       j=j+1
-      oneval(j) = nf_def_var (ncid,'stress_tor_m',nf_double,1,
+      oneval(j) = nf_def_var (ncid,'powz_m',nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &           len('predicted impurity power flux MW'),
+     &          'predicted impurity power flux MW')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'stress_tor_i_m',nf_double,1,
      &           rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     &           len('predicted toroidal momentum flux NT-M'),
-     &          'predicted toroidal momentum flux NT-M')
+     &           len('predicted ion toroidal momentum flux NT-M'),
+     &          'predicted ion toroidal momentum flux NT-M')
       j=j+1
-      oneval(j) = nf_def_var (ncid,'stress_par_m',nf_double,1,
+      oneval(j) = nf_def_var (ncid,'stress_tor_z_m',nf_double,1,
      &           rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     &           len('predicted parallel momentum flux NT-M'),
-     &          'predicted parallel momentum flux NT-M')
+     &           len('predicted impurity toroidal momentum flux NT-M'),
+     &          'predicted impurity toroidal momentum flux NT-M')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'stress_par_i_m',nf_double,1,
+     &           rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &           len('predicted ion parallel momentum flux NT-M'),
+     &          'predicted ion parallel momentum flux NT-M')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'stress_par_z_m',nf_double,1,
+     &           rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &           len('predicted impurity parallel momentum flux NT-M'),
+     &          'predicted impurity parallel momentum flux NT-M')
       j=j+1
       oneval(j) = nf_def_var (ncid,'stress_par_cor_m',nf_double,1,
      &           rdim,rhid1(j))
@@ -1680,45 +1791,85 @@ c
       j=j+1
       oneval(j) = nf_put_var_double(ncid,rhid1(j),cgyrobohm_m)
       j=j+1
-      oneval(j) = nf_put_var_double(ncid, rhid1(j), flow_glf)
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), flowe_glf)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), flowi_glf)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), flowz_glf)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), powe_glf)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), powi_glf)
       j=j+1
-      oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_tor_glf)
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), powz_glf)
       j=j+1
-      oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_par_glf)
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_tor_i_glf)
       j=j+1
-      oneval(j) = nf_put_var_double(ncid, rhid1(j), flow_neo)
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_tor_z_glf)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_par_i_glf)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_par_z_glf)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), flowe_neo)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), flowi_neo)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), flowz_neo)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), powe_neo)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), powi_neo)
       j=j+1
-      oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_tor_neo)
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), powz_neo)
       j=j+1
-      oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_par_neo)
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_tor_i_neo)
       j=j+1
-      oneval(j) = nf_put_var_double(ncid, rhid1(j), flow_adhoc)
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_tor_z_neo)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_par_i_neo)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_par_z_neo)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), flowe_adhoc)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), flowi_adhoc)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), flowz_adhoc)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), powe_adhoc)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), powi_adhoc)
       j=j+1
-      oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_tor_adhoc)
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), powz_adhoc)
       j=j+1
-      oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_par_adhoc)
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_tor_i_adhoc)
       j=j+1
-      oneval(j) = nf_put_var_double(ncid, rhid1(j), flow_m)
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_tor_z_adhoc)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_par_i_adhoc)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_par_z_adhoc)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), flowe_m)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), flowi_m)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), flowz_m)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), powe_m)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), powi_m)
       j=j+1
-      oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_tor_m)
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), powz_m)
       j=j+1
-      oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_par_m)
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_tor_i_m)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_tor_z_m)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_par_i_m)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_par_z_m)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), stress_par_cor_m)
       j=j+1
