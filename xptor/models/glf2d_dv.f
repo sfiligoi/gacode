@@ -1186,14 +1186,26 @@ c use GYRO conventions
         vpar_shear_tg(2) = vpar_shear_tg(1)
         vpar_shear_tg(3) = vpar_shear_tg(3)
       endif
+c initialized fluxes
+      neflux_glf = 0.0
+      niflux_glf = 0.0
+      nzflux_glf = 0.0
+      teflux_glf = 0.0
+      tiflux_glf = 0.0
+      tzflux_glf = 0.0
+      vphiflux_glf = 0.0
+      vphizflux_glf = 0.0
+      vparflux_glf = 0.0
+      vparzflux_glf = 0.0
+c
       if(ineo.eq.-2.and.q_exp(jm).lt.1.0)go to 86 !skip TGLF
       if(ineo.eq.-3.and.interchange_DR_m(jm).lt.0.0)go to 86 ! skip TGLF
 c
 c  do not call TGLF to compute variations if the first call has no flux
 c       if(ipert_gf.eq.0)write(*,*)"glf2d_dv",jm
-       if(ipert_gf.ne.0)then
-        if(v2_bar.eq.0.0)go to 86  !skip TGLF fluxes
-       endif
+cc       if(ipert_gf.ne.0)then
+cc        if(v2_bar(jm).eq.0.0)go to 86  !skip TGLF fluxes
+cc       endif
 
 c  transfer inputs to TGLF
 c
@@ -1307,12 +1319,12 @@ c use eikonal from last call to tglf_TM
       CALL tglf_TM
       new_eikonal_tg=.TRUE.
 c
-      if(ipert_gf.eq.0.and.jm.eq.20)then
+      if(ipert_gf.eq.0.and.jm.eq.-1)then
         call write_tglf_input      
       endif
       if(ipert_gf.eq.0)then
-        v2_bar = get_v_bar_sum()
-c        write(*,*)jm,"v2_bar=",v2_bar
+        v2_bar(jm) = get_v_bar_sum()
+c        write(*,*)jm,"v2_bar=",v2_bar(jm)
         anrate_m(jm)= get_growthrate(1)
         anfreq_m(jm)= get_frequency(1)
 c      write(*,*)"debug gamma",anrate_m(jm)
@@ -1375,7 +1387,7 @@ c model for impurity contributions to viscous stress
          tzfluxm = 0.0
        endif
 c
-c      write(*,*)jm,"ipert = ",ipert_gf,"v2_bar =",v2_bar
+c      write(*,*)jm,"ipert = ",ipert_gf,"v2_bar =",v2_bar(jm)
 c      write(*,*)"debug Qion",get_energy_flux(2)
 c      write(*,*)"debug teflux_glf=",teflux_glf
 c
@@ -1386,10 +1398,15 @@ c multiply fluxes by drhdr factor from volume derivative dV/dr=dV/drho*drhodr
 c to map from r-grid fluxes to rho-grid fluxes
 c
       neflux_glf = neflux_glf*drhodr(jm)
+      niflux_glf = niflux_glf*drhodr(jm)
+      nzflux_glf = nzflux_glf*drhodr(jm)
       teflux_glf = teflux_glf*drhodr(jm)
       tiflux_glf = tiflux_glf*drhodr(jm)
+      tzflux_glf = tzflux_glf*drhodr(jm)
       vphiflux_glf = vphiflux_glf*drhodr(jm)
+      vphizflux_glf = vphizflux_glf*drhodr(jm)
       vparflux_glf = vparflux_glf*drhodr(jm)
+      vparzflux_glf = vparzflux_glf*drhodr(jm)
 c
       if(ipert_gf.eq.0.and.jm.eq.20)then
        open(unit=11,file="gyro_input",status="unknown")
