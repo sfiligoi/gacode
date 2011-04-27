@@ -22,7 +22,6 @@ subroutine gyro_profile_init
 
   use gyro_globals
   use gyro_profile_exp
-  use GEO_interface
   use math_constants
 
   !---------------------------------------------------
@@ -31,7 +30,6 @@ subroutine gyro_profile_init
   integer :: ic 
   real :: loglam
   real :: cc
-  real, dimension(n_x) :: volume_prime
   !---------------------------------------------------
 
   !---------------------------------------------------
@@ -403,24 +401,6 @@ subroutine gyro_profile_init
   enddo
   !----------------------------------------------------------
 
-  !--------------------------------------------------
-  ! Some Miller-related profile quantities
-  !
-  ! Allocate GEO
-  GEO_ntheta_in   = nint_GEO
-  GEO_nfourier_in = n_fourier_geo 
-  GEO_model_in    = geometry_method
-  GEO_signb_in    = 1.0
-  call GEO_alloc(1)
-  do i=1,n_x
-     call gyro_to_geo(i)
-     volume_prime(i) = GEO_volume_prime
-     if (i_proc == 0 .and. i == ir_norm .and. debug_flag == 1) then
-        call GEO_write(trim(path)//'gyro_geo_diagnostic.out',1)
-     endif
-  enddo
-  !--------------------------------------------------
-
   !---------------------------------------------------------
   ! Rotation parameter scaling and definition of omega_eb_s
   ! 
@@ -641,7 +621,7 @@ subroutine gyro_profile_init
   !-------------------------------------------------------------
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,"[make_profiles done]"
+     print *,"[gyro_profile_init done]"
   endif
 
 end subroutine gyro_profile_init
