@@ -94,7 +94,7 @@ subroutine gyro_select_methods
   endif
   !
   if (nonlinear_transfer_flag == 1 .and. integrator_method > 1) then
-     call catch_error('ERROR: Need INTEGRATOR_METHOD > 1 for nonlinear transfer diag.')
+     call catch_error('ERROR: Need INTEGRATOR_METHOD=1 for nonlinear transfer diag.')
   endif
   !---------------------------------------------------
 

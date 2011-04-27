@@ -255,7 +255,7 @@ pro vugyro, _EXTRA=extra
   usersym,0.8*cos(a),0.8*sin(a),/fill
   ;;---------------------------------------;
 
-  spawn,getenv("GACODE_ROOT")+'/gyro/bin/'+'gyro_version_message'
+  spawn,getenv("GACODE_ROOT")+'/shared/bin/'+'gacode_getversion'
 
   ;;---------------------------------------;
   ;; Some control parameters; 
@@ -264,7 +264,6 @@ pro vugyro, _EXTRA=extra
   ;;
   home = getenv('GACODE_ROOT')+'/gyro/vugyro/'
 
-  openr,1,getenv("GACODE_ROOT")+'/gyro/VERSION',error=i_err
   if (remotedir_flag eq 0) then begin
      simroot = getenv('PWD')
   endif else begin
@@ -274,6 +273,7 @@ pro vugyro, _EXTRA=extra
   dirtext = simroot
   ;;
   version = 'null'
+  openr,1,getenv("GACODE_ROOT")+'/.VERSION',error=i_err
   if (i_err eq 0) then begin
      readf,1,version
   endif else begin
