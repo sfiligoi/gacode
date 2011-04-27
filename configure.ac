@@ -214,15 +214,19 @@ AC_CONFIG_FILES([Makefile
     tgyro/math/Makefile
     tgyro/qfm/Makefile
     tgyro/src/Makefile
+    xptor/Makefile
+    xptor/datread/Makefile
+    xptor/misc/Makefile
+    xptor/inc/Makefile
+    xptor/models/Makefile
+    xptor/nclmisc/Makefile
+    xptor/ptmisc/Makefile
+    xptor/solver/Makefile
+    xptor/source/Makefile
+    xptor/driver/Makefile
 ])
-#    tgyro/Makefile
-#    tgyro/bin/Makefile
-#    tgyro/math/Makefile
-#    tgyro/python/Makefile
-#    tgyro/qfm/Makefile
-#    tgyro/qfm/src/Makefile
-#    tgyro/sim/Makefile
-#    tgyro/src/Makefile
+#    xptor/idl/Makefile
+#
 #    tgyro/tools/Makefile
 #    tgyro/tools/asymptote/Makefile
 #    tgyro/tools/asymptote/src/Makefile

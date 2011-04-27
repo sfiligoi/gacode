@@ -36,8 +36,8 @@ libgacodexptordatread_la_SOURCES = \
   u2tread.f \
   u3read.f
 
-IOINC=@HDF5_FC_INC@ @HDF5_INC@ @NETCDF_INC@
-IOLIBS=@HDF5_ALIBS@ @NETCDF_ALIBS@
+IOINC= @NETCDF_INC@
+IOLIBS=@NETCDF_ALIBS@
 
 datread_includes= -I $(top_builddir)/xptor/datread
 

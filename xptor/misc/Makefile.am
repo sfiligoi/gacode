@@ -53,8 +53,8 @@ noinst_HEADERS = \
   f77_dcomplx.h
 
 
-IOINC=@HDF5_FC_INC@ @HDF5_INC@ @NETCDF_INC@
-IOLIBS=@HDF5_ALIBS@ @NETCDF_ALIBS@
+IOINC= @NETCDF_INC@
+IOLIBS=@NETCDF_ALIBS@
 
 misc_includes= -I $(top_builddir)/xptor/misc
 

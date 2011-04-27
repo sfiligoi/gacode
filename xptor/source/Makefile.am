@@ -22,8 +22,8 @@ libgacodexptor_SRC_la_SOURCES = \
   prad_dv.f \
   sigvth.f
 
-IOINC=@HDF5_FC_INC@ @HDF5_INC@ @NETCDF_INC@
-IOLIBS=@HDF5_ALIBS@ @NETCDF_ALIBS@
+IOINC=@NETCDF_INC@
+IOLIBS=@NETCDF_ALIBS@
 
 source_includes= \
   -I $(top_builddir)/xptor/src \

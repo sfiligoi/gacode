@@ -32,8 +32,8 @@ libgacodexptormodels_la_SOURCES = \
   weiland14.f \
   xptor_neo_map.f 
 
-IOINC=@HDF5_FC_INC@ @HDF5_INC@ @NETCDF_INC@
-IOLIBS=@HDF5_ALIBS@ @NETCDF_ALIBS@
+IOINC=@NETCDF_INC@
+IOLIBS=@NETCDF_ALIBS@
 
 models_includes= -I $(top_builddir)/xptor/models \
   -I $(top_builddir)/tglf/src \

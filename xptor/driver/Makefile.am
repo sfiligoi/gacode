@@ -23,7 +23,33 @@ all-local:
                 fi; \
         done;
 	
+libdir = $(prefix)/lib
+lib_LTLIBRARIES = libgacodexptor.la
+
+libgacodexptor_la_SOURCES =
+libgacodexptor_la_LIBADD = \
+  $(top_builddir)/xptor/datread/libgacodexptordatread.la \
+  $(top_builddir)/xptor/misc/libgacodexptormisc.la \
+  $(top_builddir)/xptor/models/libgacodexptormodels.la \
+  $(top_builddir)/xptor/nclmisc/libgacodexptornclmisc.la \
+  $(top_builddir)/xptor/ptmisc/libgacodexptorptmisc.la \
+  $(top_builddir)/xptor/solver/libgacodexptorsolver.la \
+  $(top_builddir)/xptor/source/libgacodexptor_SRC.la
+
+bin_PROGRAMS     = xptor
+xptor_SOURCES 	= ptor_driver.f
+xptor_LDADD  	= libgacodexptor.la \
+  $(top_builddir)/tglf/libgacodetglf.la \
+  $(top_builddir)/neo/libgacodeneo.la \
+  $(top_builddir)/shared/libgacodeshared.la \
+  @NETCDF_ALIBS@ \
+  @LAPACK_LIBS@ @BLAS_LIBS@ 
+
+AM_LIBTOOLFLAGS = --tag=FC
+AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG)
+AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG)
 
 MAINTAINERCLEANFILES    = Makefile.in 
+CLEANFILES = *.mod *.o *.lo *.lst *.la xptor
 
    

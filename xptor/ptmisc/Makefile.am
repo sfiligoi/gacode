@@ -35,8 +35,8 @@ libgacodexptorptmisc_la_SOURCES = \
   write_netcdf.f \
   write_ufile.f
 
-IOINC=@HDF5_FC_INC@ @HDF5_INC@ @NETCDF_INC@
-IOLIBS=@HDF5_ALIBS@ @NETCDF_ALIBS@
+IOINC=@NETCDF_INC@
+IOLIBS=@NETCDF_ALIBS@
 
 ptmisc_includes= 
 #-I $(top_builddir)/xptor/models \

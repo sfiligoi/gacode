@@ -24,8 +24,8 @@ libgacodexptorsolver_la_SOURCES = \
   trcoef_dv.f \
   vtrans_dv.f
 
-IOINC=@HDF5_FC_INC@ @HDF5_INC@ @NETCDF_INC@
-IOLIBS=@HDF5_ALIBS@ @NETCDF_ALIBS@
+IOINC=@NETCDF_INC@
+IOLIBS=@NETCDF_ALIBS@
 
 solver_includes= \
   -I $(top_builddir)/tglf/src \
