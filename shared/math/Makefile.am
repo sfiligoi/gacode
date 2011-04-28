@@ -36,7 +36,7 @@ libgacodemath_la_SOURCES = \
   gamma.f \
   energy_integral.f90 \
   curtis_rad.f90 \
-  proc_time.f90
+  proc_time.f
 
 	
 

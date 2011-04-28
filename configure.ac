@@ -41,11 +41,12 @@ dnl ######################################################################
 NO_HDF5=true; parallel="yes"
 DOUBLE="yes"
 builtin(include, shared/autotool_config/parcompslibs.m4)
-# jrc: why the below is specific to fmcfm?
-FCFLAGS="$FCFLAGS $FC_DBL_FLAG"
-dnl if test x"$parallel" != "xyes"; then
-dnl AC_MSG_ERROR([You cannot build the GA transport codes with out MPI.  First try "--enable-parallel".])
-dnl fi
+
+
+if test x"$parallel" = "xyes"; then
+  FCPREFLAG='-D__MPI'
+fi
+FCFLAGS="$FCFLAGS $FC_DBL_FLAG $FCPREFLAG"
 
 ######################################################################
 #
@@ -214,15 +215,19 @@ AC_CONFIG_FILES([Makefile
     tgyro/math/Makefile
     tgyro/qfm/Makefile
     tgyro/src/Makefile
+    xptor/Makefile
+    xptor/datread/Makefile
+    xptor/misc/Makefile
+    xptor/inc/Makefile
+    xptor/models/Makefile
+    xptor/nclmisc/Makefile
+    xptor/ptmisc/Makefile
+    xptor/solver/Makefile
+    xptor/source/Makefile
+    xptor/driver/Makefile
 ])
-#    tgyro/Makefile
-#    tgyro/bin/Makefile
-#    tgyro/math/Makefile
-#    tgyro/python/Makefile
-#    tgyro/qfm/Makefile
-#    tgyro/qfm/src/Makefile
-#    tgyro/sim/Makefile
-#    tgyro/src/Makefile
+#    xptor/idl/Makefile
+#
 #    tgyro/tools/Makefile
 #    tgyro/tools/asymptote/Makefile
 #    tgyro/tools/asymptote/src/Makefile
