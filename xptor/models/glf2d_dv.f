@@ -362,9 +362,7 @@ c   local gyrobohm unit of diffusion
      >  9.79D5*DSQRT(tem*1.D3)/(arho_exp*100.D0)
      >  *(1.02D2*DSQRT(tem*1.D3)/bt_exp/1.D4)**2*DSQRT(amassgas_exp)
       endif 
-       betae_m(jm) = 400.D0*nem*tem/(1.D5*bt_exp**2)
-       betai_m(jm) = 400.D0*nim*tim/(1.D5*bt_exp**2)
-
+       betae_m(jm) = 4.03D-3*nem*tem/(bt_exp**2)
 crew    gks collisionality (xnu/w_star_i)*(ky*rho_i)
        vnewk3x=
      >   0.117D0*nem/DSQRT(tem)**3/DSQRT(tim)*(arho_exp)*
@@ -1117,7 +1115,6 @@ c   local gyrobohm unit of diffusion
       cgyrobohm_m(jm)= csdam*(rhosdam*a_unit_exp)**2
 c   local beta
       betae_m(jm) = 4.03D-3*nem*tem/(b_unit**2)
-      betai_m(jm) = 4.03D-3*nim*tim/(b_unit**2)
       if(iparam_pt(12).eq.1)then
         betae_m(jm) = 4.03D-3*ne_exp(jm)*te_exp(jm)/(b_unit**2)
       endif
@@ -1408,7 +1405,7 @@ c
       vparflux_glf = vparflux_glf*drhodr(jm)
       vparzflux_glf = vparzflux_glf*drhodr(jm)
 c
-      if(ipert_gf.eq.0.and.jm.eq.20)then
+      if(i_proc.eq.0.and.jm.eq.-1)then
        open(unit=11,file="gyro_input",status="unknown")
        write(11,*)"gyro input for shot ",shot
        write(11,*)"RADIUS = ",rmin_tg

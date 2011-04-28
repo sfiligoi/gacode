@@ -96,6 +96,7 @@ c
       real*8 stress_par_z_m_sum(0:mxgrd-1)
       real*8 xnu_m_sum(0:mxgrd-1)
       real*8 alpha_m_sum(0:mxgrd-1)
+      real*8 betae_m_sum(0:mxgrd-1)
       real*8 S_ext(mxflds,mxgrd)
       real*8 glf_flux(0:10,mxflds,mxgrd),dflux(0:10,mxflds,mxgrd)
 c
@@ -177,6 +178,7 @@ c      ca = 2.D0/3.D0
        stress_par_z_m_sum(k)=0.0
        xnu_m_sum(k)=0.0
        alpha_m_sum(k)=0.0
+       betae_m_sum(k)=0.0
        egamma_m(k)=0.D0
        anrate_m(k)=0.D0
        anfreq_m(k)=0.D0
@@ -234,6 +236,7 @@ c      ca = 2.D0/3.D0
        stress_par_z_m(k)=0.0
        xnu_m(k)=0.0
        alpha_m(k)=0.0
+       betae_m(k)=0.0
       enddo
 c
       dne = 1.D0
@@ -252,7 +255,8 @@ c      do k=1+i_proc,ngrid-1,n_proc
       ncalls = 2*nfields+1
       if(iparam_pt(1).eq.2)ncalls = nfields+1
       nloops = ncalls*(ngrid-1)/n_proc
-c      if(i_proc.eq.0)write(*,*)"ncalls= ",ncalls," nloops = ",nloops
+c      write(*,*)"n_proc=",n_proc,"i_proc=",i_proc
+c      write(*,*)"ncalls= ",ncalls," nloops = ",nloops
       if(ncalls*(ngrid-1)/nloops.ne.n_proc)then
        if(i_proc.eq.0)then
         write(*,*)"warning: number of processors is not optimum"
@@ -290,7 +294,7 @@ c        gradnzm = (nz_m(k+1)-nz_m(k))/dr(k,2)
        j_ret=0
        ipert_gf=0
        if(i_proc.eq.m_proc)then
-c        write(*,*)"trcoef_dv",i_proc,k,j_ret
+c        write(*,*)k,"unperturbed",i_proc,j_ret
         call glf2d_dv
         glf_flux(j_ret,1,k) = nefluxm
         glf_flux(j_ret,2,k) = tefluxm
@@ -301,12 +305,13 @@ c        write(*,*)"trcoef_dv",i_proc,k,j_ret
 c
       if(iparam_pt(1).lt.1 .or. mask_r(k).eq.0)go to 21
 c gradient variations
-      ipert_gf=1
-      j=0
+cc      ipert_gf=1
+c      j=0
       if(itport_pt(1).ne.0)then
        j_ret = 1
-       j=j+1
+c       j=j+1
        m_proc = m_proc+1
+       m_proc = m_proc - n_proc*(m_proc/n_proc)
        if(i_proc.eq.m_proc)then
         delt_v=dvmin*dne/dx
         gradnem = gradnem - delt_v
@@ -326,12 +331,13 @@ c        write(*,*)"trcoef_dv",i_proc,k,j_ret
       endif
       if(itport_pt(2).ne.0)then       
        j_ret = 2
-       j=j+1
+c       j=j+1
        m_proc = m_proc+1
+       m_proc = m_proc - n_proc*(m_proc/n_proc)
        if(i_proc.eq.m_proc)then
         delt_v=dvmin*dte/dx
         gradtem = gradtem - delt_v
-c        write(*,*)"trcoef_dv",i_proc,k,j_ret
+c        write(*,*)k,"gradtem",i_proc,j_ret
         call glf2d_dv
         gradtem = gradtem + delt_v
         glf_flux(j_ret,1,k) = nefluxm
@@ -343,12 +349,13 @@ c        write(*,*)"trcoef_dv",i_proc,k,j_ret
       endif
       if(itport_pt(3).ne.0)then       
        j_ret = 3
-       j=j+1
+c       j=j+1
        m_proc = m_proc+1
+       m_proc = m_proc - n_proc*(m_proc/n_proc)
        if(i_proc.eq.m_proc)then
         delt_v=dvmin*dti/dx
         gradtim = gradtim - delt_v
-c        write(*,*)"trcoef_dv",i_proc,k,j_ret
+c        write(*,*)k,"gradtim",i_proc,j_ret
         call glf2d_dv
         gradtim = gradtim + delt_v
         glf_flux(j_ret,1,k) = nefluxm
@@ -360,8 +367,9 @@ c        write(*,*)"trcoef_dv",i_proc,k,j_ret
       endif
       if(itport_pt(4).ne.0)then       
        j_ret = 4
-       j=j+1
+c       j=j+1
        m_proc = m_proc+1
+       m_proc = m_proc - n_proc*(m_proc/n_proc)
        if(i_proc.eq.m_proc)then
         delt_v=dvmin*dvexb/dx
         gradvexbm = gradvexbm - delt_v
@@ -377,8 +385,9 @@ c        write(*,*)"trcoef_dv",i_proc,k,j_ret
       endif
       if(itport_pt(5).ne.0)then       
        j_ret = 5
-       j=j+1
+c       j=j+1
        m_proc = m_proc+1
+       m_proc = m_proc - n_proc*(m_proc/n_proc)
        if(i_proc.eq.m_proc)then
         delt_v=dvmin*dvpol/dx
         gradvpolm = gradvpolm - delt_v
@@ -394,11 +403,12 @@ c        write(*,*)"trcoef_dv",i_proc,k,j_ret
       endif
 c convection variations
       if(iparam_pt(1).eq.2)go to 21
-      j=0
+c      j=0
       if(itport_pt(1).ne.0)then       
        j_ret = 6
-       j=j+1
+c       j=j+1
        m_proc = m_proc+1
+       m_proc = m_proc - n_proc*(m_proc/n_proc)
        if(i_proc.eq.m_proc)then
         delt_v=dvmin*dne
         gradnem = gradnem*(nem+delt_v)/nem
@@ -424,13 +434,14 @@ c        write(*,*)"trcoef_dv",i_proc,k,j_ret
       endif
       if(itport_pt(2).ne.0)then       
        j_ret = 7
-       j=j+1
+c       j=j+1
        m_proc = m_proc+1
+       m_proc = m_proc - n_proc*(m_proc/n_proc)
        if(i_proc.eq.m_proc)then
         delt_v=dvmin*dte
         gradtem = gradtem*(tem+delt_v)/tem
         tem = tem + delt_v
-c        write(*,*)"trcoef_dv",i_proc,k,j_ret
+c        write(*,*)k,"tem",i_proc,j_ret
         call glf2d_dv
         tem = tem - delt_v
         gradtem = gradtem*tem/(tem+delt_v)
@@ -443,13 +454,14 @@ c        write(*,*)"trcoef_dv",i_proc,k,j_ret
       endif
       if(itport_pt(3).ne.0)then       
        j_ret = 8
-       j=j+1
+c       j=j+1
        m_proc = m_proc+1
+       m_proc = m_proc - n_proc*(m_proc/n_proc)
        if(i_proc.eq.m_proc)then
         delt_v=dvmin*dti
         gradtim = gradtim*(tim+delt_v)/tim
         tim = tim + delt_v
-c        write(*,*)"trcoef_dv",i_proc,k,j_ret
+c        write(*,*)k,"tim",i_proc,j_ret
         call glf2d_dv
         tim = tim - delt_v
         gradtim = gradtim*tim/(tim+delt_v)
@@ -462,8 +474,9 @@ c        write(*,*)"trcoef_dv",i_proc,k,j_ret
       endif
       if(itport_pt(4).ne.0)then       
        j_ret = 9
-       j=j+1
+c       j=j+1
        m_proc = m_proc+1
+       m_proc = m_proc - n_proc*(m_proc/n_proc)
        if(i_proc.eq.m_proc)then
         delt_v=dvmin*dvexb
         vexbm = vexbm + delt_v
@@ -479,8 +492,9 @@ c        write(*,*)"trcoef_dv",i_proc,k,j_ret
       endif
       if(itport_pt(5).ne.0)then       
        j_ret = 10
-       j=j+1
+c       j=j+1
        m_proc = m_proc+1
+       m_proc = m_proc - n_proc*(m_proc/n_proc)
        if(i_proc.eq.m_proc)then
         delt_v=dvmin*dvpol
         vpolm = vpolm + delt_v
@@ -722,6 +736,11 @@ c
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
       call MPI_BCAST(alpha_m_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(betae_m,betae_m_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(betae_m_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+c
       do k=1,ngrid-1
         egamma_m(k)=egamma_sum(k)
         gamma_p_m(k)=gamma_p_sum(k)
@@ -738,6 +757,7 @@ c
         nu_pol_m(k)=nu_pol_m_sum(k)
         xnu_m(k)=xnu_m_sum(k)
         alpha_m(k)=alpha_m_sum(k)
+        betae_m(k)=betae_m_sum(k)
         flowe_neo(k) = flowe_neo_sum(k)
         flowi_neo(k) = flowi_neo_sum(k)
         flowz_neo(k) = flowz_neo_sum(k)
@@ -907,6 +927,7 @@ c
 c
 c  transfer fluxes
 c
+c       write(*,*)k,"dflux",dflux(0,2,k),dflux(2,2,k)
        nefluxm = dflux(0,1,k)
        tefluxm = dflux(0,2,k)
        tifluxm = dflux(0,3,k)
@@ -1036,12 +1057,18 @@ c
            conv3(i,j,k) = diff(i,j,k)*gradtem/tem
            nu(i,j,k)= nuei_m(k)*1.6022D-3
            vrho3(i,j,k) = 1.5D0*ne_m(k)*1.6022D-3
+           if(ABS(teflux(k)).gt.1.0D-12)then
+             stiff(1,1,k) = -gradtem*diff(i,j,k)/teflux(k)
+           endif
          endif
          if(itport_pt(3).ne.0)then
            i=i+1
            diff(i,j,k)=(tifluxm - tiflux(k))/(delt_v)
            conv3(i,j,k) = diff(i,j,k)*gradtem/tem
            nu(i,j,k)= - nuei_m(k)*1.6022D-3
+           if(ABS(tiflux(k)).gt.1.0D-12)then
+             stiff(2,1,k) = -gradtem*diff(i,j,k)/tiflux(k)
+           endif
          endif
          if(itport_pt(4).ne.0)then
            i=i+1
@@ -1076,6 +1103,9 @@ c
            diff(i,j,k)=(tefluxm - teflux(k))/(delt_v)
            conv3(i,j,k)=diff(i,j,k)*gradtim/tim
            nu(i,j,k)=-nuei_m(k)*1.6022D-3
+           if(ABS(teflux(k)).gt.1.0D-12)then
+             stiff(1,2,k) = -gradtim*diff(i,j,k)/teflux(k)
+           endif
          endif
          if(itport_pt(3).ne.0)then
            i=i+1
@@ -1083,6 +1113,9 @@ c
            conv3(i,j,k) = diff(i,j,k)*gradtim/tim
            nu(i,j,k)=nuei_m(k)*1.6022D-3
            vrho3(i,j,k)=1.5D0*(fi_m(k)+fz_m(k))*ne_m(k)*1.6022D-3
+           if(ABS(tiflux(k)).gt.1.0D-12)then
+             stiff(2,2,k) = -gradtim*diff(i,j,k)/tiflux(k)
+           endif
          endif
          if(itport_pt(4).ne.0)then
            i=i+1
