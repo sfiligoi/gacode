@@ -1,0 +1,13 @@
+
+Cray XT5 (JAGUARPF) queue (PBS):
+
+[0] 30 min   
+[1] 1 hour  
+[2] 2 hours 
+[3] 6 hours
+[4] 12 hours
+[5] 24 hours  < 36384 cores
+
+Will request [n_proc]GB memory.
+
+

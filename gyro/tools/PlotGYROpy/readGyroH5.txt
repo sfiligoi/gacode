@@ -1,0 +1,54 @@
+
+> ipython
+
+In [1]: import readGyroH5
+
+#To see the methods:
+
+In [2]: readGyroH5.<TAB>
+
+#To see what each method does:
+
+In [2]: help readGyroH5.readModes
+
+readModes(h5file, nodeName='')
+    given an hdf5 file, see if any mode data is in there 
+    If so, return a dictionary containing the data.
+    The mode data is in a group with the real and imaginary data 
+    specified independently -- this returns the data as
+    numpy complex arrays
+    Can specify a single variable to save memory.
+
+
+# Start collecting the data from the files
+# Note that when you can do tab completion for the files
+
+In [3]: modeData=readGyroH5.readModes('gyro00100.h5')
+
+
+# See which variables are available::
+
+In [4]: print modeData.keys()
+------> print(modeData.keys())
+['v_par_ion0_modes', 'energy_electron_modes', 'phi_modes', 'density_ion0_modes', 'energy_ion0_modes', 'v_par_electron_modes', 'density_electron_modes']
+
+# Get the profile data
+In [5]: profileData=readGyroH5.readProfile('gyro_profile.h5')
+
+# Show the size of the electron density modes
+In [6]: print modeData['density_electron_modes'].shape
+------> print(modeData['density_electron_modes'].shape)
+(9, 64, 8)
+
+# Print the first mode
+In [7]: print modeData['density_electron_modes'][:,:,0]
+------> print(modeData['density_electron_modes'][:,:,0])
+[[  9.50772794e-09 -2.90671849e-25j   9.24795671e-08 +1.24620289e-25j
+    1.35163070e-09 +6.41208947e-26j   3.86260353e-07 +9.87650525e-26j
+
+
+Manipulation of the other data (such as 3D data) is similar.
+
+See also other scripts for how to use the readGyroH5 routines.
+
+

@@ -16,14 +16,14 @@ noinst_LTLIBRARIES = libgacodeexpro.la
 libgacodeexpro_la_SOURCES = \
   EXPRO_interface.f90 \
   EXPRO_alloc.f90 \
-  EXPRO_palloc.f90 \
   EXPRO_alloc_control.f90 \
   EXPRO_read.f90 \
-  EXPRO_pread.f90 \
   EXPRO_read_driver.f90 \
   EXPRO_compute_derived.f90 \
   EXPRO_write_derived.f90 \
-  EXPRO_write_original.f90
+  EXPRO_write_original.f90 \
+  EXPRO_palloc.f90 \
+  EXPRO_pread.f90
 
 # To get to work with optimization reducing compiler wrappers
 AM_LIBTOOLFLAGS = --tag=FC

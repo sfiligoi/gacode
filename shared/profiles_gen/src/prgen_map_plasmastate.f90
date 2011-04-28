@@ -109,13 +109,13 @@ subroutine prgen_map_plasmastate
   vec(20,:) = 0.0 ! [-]
 
   ! ni
-  do i=2,plst_dp1_nspec_th+1 ! WG added +1 for beams
+  do i=2,min(plst_dp1_nspec_th+1,6) ! WG added +1 for beams
      ip = reorder_vec(i-1)+1
      vec(21+i-2,:) = plst_ns(:,ip)*1e-19
   enddo
 
   ! ti
-  do i=2,plst_dp1_nspec_th+1 ! WG added +1 for beams
+  do i=2,min(plst_dp1_nspec_th+1,6) ! WG added +1 for beams
      ip = reorder_vec(i-1)+1
      vec(26+i-2,:) = plst_ts(:,ip)
   enddo

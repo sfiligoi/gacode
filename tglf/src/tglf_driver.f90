@@ -179,6 +179,7 @@
 !
       CALL tglf
 !
+      CALL write_wavefunction_out
 !
       nfields=1
       if(use_bper_tg)nfields=2

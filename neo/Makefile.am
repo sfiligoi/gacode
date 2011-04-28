@@ -14,20 +14,25 @@ SUBDIRS	= bin nclass src #sim src tools
 datadir = $(prefix)/neo
 dist_data_DATA = CHANGES
 
-all-local: link-data-local
+libdir = $(prefix)/lib
+lib_LTLIBRARIES = libgacodeneo.la
 
-link-data-local:
-	if test $(abs_top_srcdir) != $(abs_top_builddir); then \
-		for i in $(dist_data_DATA); do \
-			if test ! -f $$i; then \
-				ln -s $(srcdir)/$$i .; \
-			fi; \
-		done; \
-	fi
 
+libgacodeneo_la_SOURCES =
+libgacodeneo_la_LIBADD = src/libgacodeneo_src.la
+
+bin_PROGRAMS     = neo
+neo_SOURCES = src/neo.f90
+
+neo_LDADD  = libgacodeneo.la \
+  $(top_builddir)/neo/nclass/libgacodenclass.la \
+  $(top_builddir)/shared/libgacodeshared.la \
+ @FFTW_LIBS@  @LAPACK_LIBS@  @BLAS_LIBS@
+
+AM_LIBTOOLFLAGS = --tag=FC
+AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(FFTW_INC) $(shared_includes) -I. 
+AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(FFTW_INC) $(shared_includes) -I.
 
 MAINTAINERCLEANFILES    = Makefile.in 
-
-
-
+CLEANFILES = neo *.la *.o
 

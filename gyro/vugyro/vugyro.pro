@@ -33,8 +33,6 @@ pro vugyro, _EXTRA=extra
     diff_QL_n, $
     phi_squared_QL_n, $
     g_squared_QL_n, $
-    Tr_np, $
-    Eng_np, $ 
     diff_ne_exp, $
     diff_to_flow_e1, $
     diff_to_flow_e2, $
@@ -75,14 +73,13 @@ pro vugyro, _EXTRA=extra
     exists_mom_e, $
     exists_mom_n, $
     exists_mom_v, $
-    exists_nonlinear_transfer_n, $
+    exists_nl_transfer, $
     exists_omega, $
     exists_phi_squared_QL_n, $
     exists_profile, $
     exists_source, $
     exists_time, $
     exists_transport_ne_te_ti, $
-    exists_turbulent_energy_n, $
     exists_u, $
     exists_units, $
     exists_velocity, $
@@ -158,6 +155,7 @@ pro vugyro, _EXTRA=extra
     n_nLevels, $
     nonlinear_flag, $
     nonlinear_transfer_wid, $
+    nl_transfer, $
     n_pass, $
     n_profile_label, $
     n_r, $
@@ -257,7 +255,7 @@ pro vugyro, _EXTRA=extra
   usersym,0.8*cos(a),0.8*sin(a),/fill
   ;;---------------------------------------;
 
-  spawn,getenv("GACODE_ROOT")+'/gyro/bin/'+'gyro_version_message'
+  spawn,getenv("GACODE_ROOT")+'/shared/bin/'+'gacode_getversion'
 
   ;;---------------------------------------;
   ;; Some control parameters; 
@@ -266,7 +264,6 @@ pro vugyro, _EXTRA=extra
   ;;
   home = getenv('GACODE_ROOT')+'/gyro/vugyro/'
 
-  openr,1,getenv("GACODE_ROOT")+'/gyro/VERSION',error=i_err
   if (remotedir_flag eq 0) then begin
      simroot = getenv('PWD')
   endif else begin
@@ -276,6 +273,7 @@ pro vugyro, _EXTRA=extra
   dirtext = simroot
   ;;
   version = 'null'
+  openr,1,getenv("GACODE_ROOT")+'/.VERSION',error=i_err
   if (i_err eq 0) then begin
      readf,1,version
   endif else begin

@@ -1,0 +1,29 @@
+# Compilation flags
+
+FC	= mpif90 -mod $(GACODE_ROOT)/modules -I $(GACODE_ROOT)/modules
+F77	= mpif90
+
+FMATH	= -r8 
+FOPT	= -O3 -xSSE2,SSE3,SSSE3,SSE4.1 -no-prec-div -funroll-loops -unroll-aggressive
+#FDEBUG	= -check all -warn all -fpe0 -ftrapuv
+FDEBUG	= -check bounds -fpe0 -ftrapuv
+FPROF	= -O -pg 
+
+# System math libraries
+
+LMATH = $(HOME)/SOFTWARE/GotoBLAS2/libgoto2.a  
+
+# OPTIONAL: netCDF (for gyro2gkv)
+
+NETCDF=-L/usr/local/lib -lnetcdf -lcurl
+NETCDF_INC=/usr/local/include
+
+# Archive 
+
+ARCH = xiar cr
+
+# HDF5
+HROOT=$(HOME)/SOFTWARE/hdf5-1.8.6/hdf5
+HDF5_LIBS = -L$(HROOT)/lib -lhdf5_fortran -lhdf5 -lz
+HDF5_INC = -I $(HROOT)/include/
+VSHDF5_MAKECMD=vshdf5

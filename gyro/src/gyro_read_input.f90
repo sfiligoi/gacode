@@ -243,6 +243,8 @@ subroutine gyro_read_input
   call readbc_int(gkeigen_n_values)
   call readbc_int(gkeigen_iter)
   call readbc_real(gkeigen_tol)
+  call readbc_real(gkeigen_omega_target)
+  call readbc_real(gkeigen_gamma_target)
 
   call readbc_int(linsolve_method)
 
@@ -256,20 +258,20 @@ subroutine gyro_read_input
 
 
   !hdf5 output
-  call readbc_int(iohdf5out)
+  call readbc_int(io_method)
 
   ! time intervals for hdf5 write outs
-  call readbc_int(fine_time_skip)
+  call readbc_int(time_skip_wedge)
   ! pie-slice alpha ??
-  call readbc_int(n_alpha_fine) 
-  call readbc_int(n_alpha_plot) 
+  call readbc_int(n_torangle_wedge) 
+  call readbc_int(n_torangle_3d) 
   ! toroidal direction
-  call readbc_real(theta_fine_start)
-  call readbc_real(theta_fine_angle)
+  call readbc_real(theta_wedge_offset)
+  call readbc_real(theta_wedge_angle)
 
 
   !synthetic diagnostics
-  call readbc_real(zeta_offset)
+  call readbc_real(torangle_offset)
 
   !
   ! DONE reading data.

@@ -1,0 +1,286 @@
+dnl ######################################################################
+dnl
+dnl File:   tx_fc_aux.m4
+dnl
+dnl Purpose:
+dnl         Given FC (f90) compiler, determine useful properties especially
+dnl         for interoperability.  This is generally a collection of
+dnl         other calls - both AC_* and contributed m4's
+dnl
+dnl Copyright 2001-2010, Tech-X Corporation.  Redistribution allowed provided
+dnl this copyright statement remains intact.
+dnl
+dnl $Id: tx_fc_aux.m4 3752 2010-11-30 15:26:49Z cary $
+dnl
+dnl ######################################################################
+
+dnl #####################################################################
+dnl
+dnl Swap out possible wrappers to prevent getting all of the additional
+dnl flags that they bring, and which then cause conflicts on Cray with pgi.
+dnl However, doing this ends up leading to the wrong symbols being
+dnl added when compiling fmcfm-par, which uses libtool.  Modified fmcfm
+dnl linking to not use libtool during final link of C++ apps that bring
+dnl in Fortran.  Now returning to swapping libs again.
+dnl
+dnl #####################################################################
+
+FC_SWAP_WRAPPERS=true
+if $FC_SWAP_WRAPPERS; then
+CC_SAVE=$CC
+if test -n $SERIALCC; then
+  CC=$SERIALCC
+fi
+FC_SAVE=$FC
+if test -n $SERIALFC; then
+  FC=$SERIALFC
+fi
+F77_SAVE=$F77
+if test -n $SERIALF77; then
+  F77=$SERIALF77
+fi
+fi
+
+AC_LANG_SAVE
+AC_LANG(Fortran)
+
+dnl #####################################################################
+dnl Guess Fortran name mangling scheme
+dnl #####################################################################
+
+dnl jrc 31may09: needed?
+dnl _AC_FC_NAME_MANGLING
+AC_FC_WRAPPERS
+
+dnl #####################################################################
+dnl  Useful
+dnl #####################################################################
+
+AC_FC_DUMMY_MAIN
+AC_FC_LIBRARY_LDFLAGS
+
+dnl #####################################################################
+dnl  Check if compiler supports allocatable components
+dnl #####################################################################
+
+builtin(include,shared/autotool_config/tx_fc_allocatable_component.m4)
+TX_FC_ALLOCATABLE_COMPONENT
+if test "x$TX_FORTRAN_ALLOCATABLE_COMPONENT" = "xno"; then
+  AC_MSG_WARN(Fortran compiler does not support allocatable components.)
+fi
+
+dnl #####################################################################
+dnl  Find fortran module extension
+dnl #####################################################################
+
+builtin(include, shared/autotool_config/contrib/ax_f90_module_extension.m4)
+AX_F90_MODULE_EXTENSION
+TX_FORTRAN_MODEXT="$ax_cv_f90_modext"
+if test -z "$TX_FORTRAN_MODEXT"; then
+   AC_MSG_ERROR(Could not determine fortran 90 module extension.)
+fi
+AC_SUBST([TX_FORTRAN_MODEXT])
+
+dnl #####################################################################
+dnl  Find fortran module capitalization
+dnl #####################################################################
+
+builtin(include, shared/autotool_config/tx_fc_module_capitalization.m4)
+TX_FC_MODULE_CAPITALIZATION
+TX_FORTRAN_MODCAP="$tx_cv_fc_modcap"
+if test -z "$TX_FORTRAN_MODCAP"; then
+   AC_MSG_ERROR(Could not determine fortran 90 module capitalization.)
+fi
+AC_SUBST([TX_FORTRAN_MODCAP])
+AM_CONDITIONAL(TX_FORTRAN_MODNAMEISCAP, test "$TX_FORTRAN_MODCAP" = ucname-lcext -o "$TX_FORTRAN_MODCAP" = ucname-ucext)
+
+dnl #####################################################################
+dnl Check whether compiler has FLUSH subroutine
+dnl #####################################################################
+
+builtin(include,shared/autotool_config/tx_fc_has_intrinsic.m4)
+TX_FC_HAS_INTRINSIC(FLUSH_)
+if test "x$TX_FORTRAN_HAS_INTRINSIC_FLUSH_" = "xno"; then
+  AC_MSG_WARN(Fortran compiler does not support FLUSH_ subroutine.)
+  TX_FC_HAS_INTRINSIC(FLUSH)
+  if test "x$TX_FORTRAN_HAS_INTRINSIC_FLUSH" = "xno"; then
+    AC_MSG_ERROR(Fortran compiler has neiher subroutine FLUSH_ or FLUSH.)
+  fi
+else
+  FPPFLAGS="${FC_DEFINE_FLAG}__IBM ${FC_DEFINE_FLAG}__RS6000 $FPPFLAGS"
+  CPPFLAGS="-D__IBM -D__RS6000 $CPPFLAGS"
+fi
+
+dnl #####################################################################
+dnl  Find fortran module include flag
+dnl  because -I is not standard :(
+dnl #####################################################################
+
+builtin(include, shared/autotool_config/contrib/ax_f90_module_flag.m4)
+AX_F90_MODULE_FLAG
+FC_INCLUDE_FLAG="$ax_cv_f90_modflag"
+AC_SUBST([FC_INCLUDE_FLAG])
+dnl Backwards compatibility.
+TX_FORTRAN_MODINC="$ax_cv_f90_modflag"
+AC_SUBST([TX_FORTRAN_MODINC])
+
+dnl #####################################################################
+dnl Find the object that defines Fortran main.
+dnl #####################################################################
+
+builtin(include, shared/autotool_config/tx_fc_find_main.m4)
+TX_FC_FIND_MAIN_OBJS
+
+dnl #####################################################################
+dnl
+dnl Clean up libraries for cross compile
+dnl
+dnl #####################################################################
+
+case $FC in
+  mpixlf* | */mpixlf* | bgxlf* | */bgxlf*)
+    echo Cleaning up FLIBS and FCLIBS for xlf
+    OLDLIBS=$FCLIBS
+    unset FCLIBS
+    for i in $OLDLIBS; do
+      case $i in
+        -R*) ;;
+        *) FCLIBS="$FCLIBS $i";;
+      esac
+    done
+    OLDLIBS=$FLIBS
+    unset FLIBS
+    for i in $OLDLIBS; do
+      case $i in
+        -R*) ;;
+        *) FLIBS="$FLIBS $i";;
+      esac
+    done
+    ;;
+
+  pathf9* | */pathf9*)
+    echo Cleaning up FLIBS and FCLIBS for PathScale
+    OLDLIBS=$FCLIBS
+    unset FCLIBS
+    for i in $OLDLIBS; do
+      case $i in
+        -lgcc*) ;;
+        *) FCLIBS="$FCLIBS $i";;
+      esac
+    done
+    OLDLIBS=$FLIBS
+    unset FLIBS
+    for i in $OLDLIBS; do
+      case $i in
+        -lgcc*) ;;
+        *) FLIBS="$FLIBS $i";;
+      esac
+    done
+    ;;
+
+  pgf* | */pgf*)
+    echo Cleaning up FLIBS and FCLIBS for pgf
+    OLDLIBS=$FCLIBS
+    unset FCLIBS
+    for i in $OLDLIBS; do
+      case $i in
+        -lnspgc | -lpgc | -lpthread | -lm);;
+        *) FCLIBS="$FCLIBS $i";;
+      esac
+    done
+    OLDLIBS=$FLIBS
+    unset FLIBS
+    for i in $OLDLIBS; do
+      case $i in
+        -lnspgc | -lpgc | -lpthread | -lm);;
+        *) FLIBS="$FLIBS $i";;
+      esac
+    done
+    ;;
+
+  *)
+    echo No cleaning needed for FLIBS or FCLIBS
+    ;;
+esac
+
+dnl #####################################################################
+dnl
+dnl Remove other troublesome library directives
+dnl
+dnl #####################################################################
+
+unset newlibs
+for i in $FCLIBS; do
+  case $i in
+    -L/usr/lpp/xlf/lib)
+      ;;
+    *)
+      newflibs="$newflibs $i"
+      ;;
+  esac
+done
+FCLIBS="$newflibs"
+
+dnl #####################################################################
+dnl Provide full set of clean fortran libs
+dnl #####################################################################
+
+TX_CLEAN_LIBS([FCLIBS])
+AC_SUBST([FCRPLIBS])
+AC_SUBST([FCLTLIBS])
+AC_SUBST([FCALIBS])
+if test -f $config_summary_file; then
+  echo >>$config_summary_file
+  echo FCLIBS and derivatives >>$config_summary_file
+  TX_PRINT_VAR(FCLIBS)
+  TX_PRINT_VAR(FCRPLIBS)
+  TX_PRINT_VAR(FCLTLIBS)
+  TX_PRINT_VAR(FCALIBS)
+fi
+
+dnl #####################################################################
+dnl If parallel, find fortran mpi libraries.  Works for openmpi.  May
+dnl need to generalize.
+dnl #####################################################################
+
+echo parallel = $parallel
+unset FC_MPILIBS
+if test "$parallel" = yes; then
+  cands=`$FC_SAVE -show 2>/dev/null`
+  if test $? = 0; then
+    for i in $cands; do
+      case $i in
+        -L*mpi* | -lmpi_f*)
+          FC_MPILIBS="$FC_MPILIBS $i"
+          ;;
+      esac
+    done
+  fi
+  TX_CLEAN_LIBS([FC_MPILIBS])
+fi
+# Extra substitution does not hurt
+AC_SUBST([FC_MPILIBS])
+AC_SUBST([FC_MPIRPLIBS])
+AC_SUBST([FC_MPILTLIBS])
+AC_SUBST([FC_MPIALIBS])
+if test -f $config_summary_file; then
+  echo >>$config_summary_file
+  echo FC_MPILIBS and derivatives >>$config_summary_file
+  TX_PRINT_VAR(FC_MPILIBS)
+  TX_PRINT_VAR(FC_MPIRPLIBS)
+  TX_PRINT_VAR(FC_MPILTLIBS)
+  TX_PRINT_VAR(FC_MPIALIBS)
+fi
+
+dnl #####################################################################
+dnl Restore compilers
+dnl #####################################################################
+
+AC_LANG_RESTORE
+
+if $FC_SWAP_WRAPPERS; then
+CC=$CC_SAVE
+FC=$FC_SAVE
+F77=$F77_SAVE
+fi
+

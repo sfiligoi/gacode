@@ -4,17 +4,17 @@
 
 # Compilers
 
-FC	= mpif90 -I $(GACODE_ROOT)/modules
+FC	= mpif90 -I$(GACODE_ROOT)/modules -Wp,-D__MPI
 F77	= mpif90
 
-FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules 
+FMATH	= -fdefault-real-8 -J$(GACODE_ROOT)/modules 
 FOPT	= -march=nocona -mfpmath=sse -fomit-frame-pointer -O3
-FDEBUG	= -O -Wall -Wunderflow -W -Wuninitialized -fbounds-check
+FDEBUG = -O0 -Wall -Wunderflow -W -Wuninitialized -fbounds-check -g
 FPROF	= -march=nocona -mfpmath=sse -O3 -pg
 
 # System math libraries
 
-LMATH = /usr/local/contrib/clapack-cmake-3.2.1-ser/lib/liblapack.a /usr/local/contrib/clapack-cmake-3.2.1-ser/lib/libblas.a /usr/local/contrib/clapack-cmake-3.2.1-ser/lib/libf2c.a 
+LMATH = /contrib/clapack-cmake-3.2.1-ser/lib/liblapack.a /contrib/clapack-cmake-3.2.1-ser/lib/libblas.a /contrib/clapack-cmake-3.2.1-ser/lib/libf2c.a 
 #LMATH = /home/SOFTWARE/GotoBLAS2/libgoto2.a
 
 # OPTIONAL: netCDF (for gyro2gkv)
@@ -33,9 +33,20 @@ ARCH = ar cr
 # version makes some things easier.
 # Set these to blanks to turn off:
 
-HDF5_LIBS = -L/contrib/hdf5-par/lib -lhdf5_fortran -lhdf5_f90cstub -lhdf5 -lz
+#HDF5_LIBS = -L/contrib/hdf5-par/lib -lhdf5_fortran -lhdf5_f90cstub -lhdf5 -lz
+#
+#
+HDF5_LIBS = \
+  /contrib/hdf5-par/lib/libhdf5_hl_fortran.a \
+  /contrib/hdf5-par/lib/libhdf5_hl_f90cstub.a \
+  /contrib/hdf5-par/lib/libhdf5_hl.a \
+  /contrib/hdf5-par/lib/libhdf5_fortran.a \
+  /contrib/hdf5-par/lib/libhdf5_f90cstub.a \
+  /contrib/hdf5-par/lib/libhdf5.a
+
 HDF5_INC = -I/contrib/hdf5-par/include/fortran
 VSHDF5_MAKECMD=vshdf5
 VSHDF5_ALLLIBS= ../vshdf5/libgyro_vshdf5.a ../../shared/vshdf5/libvshdf5.a $(HDF5LIBS)
+MPI_FLAG=-Wp,-D__MPI
 
 

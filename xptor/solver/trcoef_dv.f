@@ -25,6 +25,7 @@ c
 c
       integer i,j,k,jj,sendto,nsent,k_ret,j_ret,ndone
       integer nsum
+      integer m_proc,ncalls,nloops
       integer MPI_status(MPI_STATUS_SIZE)
       real*8 dne,dte,dti,dvexb,dvpol,dx,dvmin
       real*8 thetam,qm,rmajm,rminm,rhom
@@ -53,21 +54,46 @@ c
       real*8 chiegb_e_sum(0:mxgrd-1),cgb_sum(0:mxgrd-1)
       real*8 chiineo_sum(0:mxgrd-1),etagb_phi_sum(0:mxgrd-1)
       real*8 kpol_m_sum(0:mxgrd-1),nu_pol_m_sum(0:mxgrd-1)
-      real*8 flow_neo_sum(0:mxgrd-1)
+      real*8 flowe_neo_sum(0:mxgrd-1)
+      real*8 flowi_neo_sum(0:mxgrd-1)
+      real*8 flowz_neo_sum(0:mxgrd-1)
       real*8 powe_neo_sum(0:mxgrd-1)
       real*8 powi_neo_sum(0:mxgrd-1)
-      real*8 stress_tor_neo_sum(0:mxgrd-1)
-      real*8 stress_par_neo_sum(0:mxgrd-1)
-      real*8 flow_adhoc_sum(0:mxgrd-1)
+      real*8 powz_neo_sum(0:mxgrd-1)
+      real*8 stress_tor_i_neo_sum(0:mxgrd-1)
+      real*8 stress_tor_z_neo_sum(0:mxgrd-1)
+      real*8 stress_par_i_neo_sum(0:mxgrd-1)
+      real*8 stress_par_z_neo_sum(0:mxgrd-1)
+      real*8 flowe_adhoc_sum(0:mxgrd-1)
+      real*8 flowi_adhoc_sum(0:mxgrd-1)
+      real*8 flowz_adhoc_sum(0:mxgrd-1)
       real*8 powe_adhoc_sum(0:mxgrd-1)
       real*8 powi_adhoc_sum(0:mxgrd-1)
-      real*8 stress_tor_adhoc_sum(0:mxgrd-1)
-      real*8 stress_par_adhoc_sum(0:mxgrd-1)
-      real*8 flow_glf_sum(0:mxgrd-1)
+      real*8 powz_adhoc_sum(0:mxgrd-1)
+      real*8 stress_tor_i_adhoc_sum(0:mxgrd-1)
+      real*8 stress_tor_z_adhoc_sum(0:mxgrd-1)
+      real*8 stress_par_i_adhoc_sum(0:mxgrd-1)
+      real*8 stress_par_z_adhoc_sum(0:mxgrd-1)
+      real*8 flowe_glf_sum(0:mxgrd-1)
+      real*8 flowi_glf_sum(0:mxgrd-1)
+      real*8 flowz_glf_sum(0:mxgrd-1)
       real*8 powe_glf_sum(0:mxgrd-1)
       real*8 powi_glf_sum(0:mxgrd-1)
-      real*8 stress_tor_glf_sum(0:mxgrd-1)
-      real*8 stress_par_glf_sum(0:mxgrd-1)
+      real*8 powz_glf_sum(0:mxgrd-1)
+      real*8 stress_tor_i_glf_sum(0:mxgrd-1)
+      real*8 stress_tor_z_glf_sum(0:mxgrd-1)
+      real*8 stress_par_i_glf_sum(0:mxgrd-1)
+      real*8 stress_par_z_glf_sum(0:mxgrd-1)
+      real*8 flowe_m_sum(0:mxgrd-1)
+      real*8 flowi_m_sum(0:mxgrd-1)
+      real*8 flowz_m_sum(0:mxgrd-1)
+      real*8 powe_m_sum(0:mxgrd-1)
+      real*8 powi_m_sum(0:mxgrd-1)
+      real*8 powz_m_sum(0:mxgrd-1)
+      real*8 stress_tor_i_m_sum(0:mxgrd-1)
+      real*8 stress_tor_z_m_sum(0:mxgrd-1)
+      real*8 stress_par_i_m_sum(0:mxgrd-1)
+      real*8 stress_par_z_m_sum(0:mxgrd-1)
       real*8 xnu_m_sum(0:mxgrd-1)
       real*8 alpha_m_sum(0:mxgrd-1)
       real*8 S_ext(mxflds,mxgrd)
@@ -109,21 +135,46 @@ c      ca = 2.D0/3.D0
        chiineogb_m(k)=0.D0
        cgb_sum(k)=0.D0
        etagb_phi_sum(k)=0.D0
-       flow_neo_sum(k)=0.0
+       flowe_neo_sum(k)=0.0
+       flowi_neo_sum(k)=0.0
+       flowz_neo_sum(k)=0.0
        powe_neo_sum(k)=0.0
        powi_neo_sum(k)=0.0
-       stress_tor_neo_sum(k)=0.0
-       stress_par_neo_sum(k)=0.0
-       flow_adhoc_sum(k)=0.0
+       powz_neo_sum(k)=0.0
+       stress_tor_i_neo_sum(k)=0.0
+       stress_tor_z_neo_sum(k)=0.0
+       stress_par_i_neo_sum(k)=0.0
+       stress_par_i_neo_sum(k)=0.0
+       flowe_adhoc_sum(k)=0.0
+       flowi_adhoc_sum(k)=0.0
+       flowz_adhoc_sum(k)=0.0
        powe_adhoc_sum(k)=0.0
        powi_adhoc_sum(k)=0.0
-       stress_tor_adhoc_sum(k)=0.0
-       stress_par_adhoc_sum(k)=0.0
-       flow_glf_sum(k)=0.0
+       powz_adhoc_sum(k)=0.0
+       stress_tor_i_adhoc_sum(k)=0.0
+       stress_tor_z_adhoc_sum(k)=0.0
+       stress_par_i_adhoc_sum(k)=0.0
+       stress_par_z_adhoc_sum(k)=0.0
+       flowe_glf_sum(k)=0.0
+       flowi_glf_sum(k)=0.0
+       flowz_glf_sum(k)=0.0
        powe_glf_sum(k)=0.0
        powi_glf_sum(k)=0.0
-       stress_tor_glf_sum(k)=0.0
-       stress_par_glf_sum(k)=0.0
+       powz_glf_sum(k)=0.0
+       stress_tor_i_glf_sum(k)=0.0
+       stress_tor_z_glf_sum(k)=0.0
+       stress_par_i_glf_sum(k)=0.0
+       stress_par_z_glf_sum(k)=0.0
+       flowe_m_sum(k)=0.0
+       flowi_m_sum(k)=0.0
+       flowz_m_sum(k)=0.0
+       powe_m_sum(k)=0.0
+       powi_m_sum(k)=0.0
+       powz_m_sum(k)=0.0
+       stress_tor_i_m_sum(k)=0.0
+       stress_tor_z_m_sum(k)=0.0
+       stress_par_i_m_sum(k)=0.0
+       stress_par_z_m_sum(k)=0.0
        xnu_m_sum(k)=0.0
        alpha_m_sum(k)=0.0
        egamma_m(k)=0.D0
@@ -141,21 +192,46 @@ c      ca = 2.D0/3.D0
        etagb_par_m(k)=0.D0
        etagb_per_m(k)=0.D0
        exchgb_m(k)=0.D0
-       flow_neo(k)=0.0
+       flowe_neo(k)=0.0
+       flowi_neo(k)=0.0
+       flowz_neo(k)=0.0
        powe_neo(k)=0.0
        powi_neo(k)=0.0
-       stress_tor_neo(k)=0.0
-       stress_par_neo(k)=0.0
-       flow_adhoc(k)=0.0
+       powz_neo(k)=0.0
+       stress_tor_i_neo(k)=0.0
+       stress_tor_z_neo(k)=0.0
+       stress_par_i_neo(k)=0.0
+       stress_par_z_neo(k)=0.0
+       flowe_adhoc(k)=0.0
+       flowi_adhoc(k)=0.0
+       flowz_adhoc(k)=0.0
        powe_adhoc(k)=0.0
        powi_adhoc(k)=0.0
-       stress_tor_adhoc(k)=0.0
-       stress_par_adhoc(k)=0.0
-       flow_glf(k)=0.0
+       powz_adhoc(k)=0.0
+       stress_tor_i_adhoc(k)=0.0
+       stress_tor_z_adhoc(k)=0.0
+       stress_par_i_adhoc(k)=0.0
+       stress_par_z_adhoc(k)=0.0
+       flowe_glf(k)=0.0
+       flowi_glf(k)=0.0
+       flowz_glf(k)=0.0
        powe_glf(k)=0.0
        powi_glf(k)=0.0
-       stress_tor_glf(k)=0.0
-       stress_par_glf(k)=0.0
+       powz_glf(k)=0.0
+       stress_tor_i_glf(k)=0.0
+       stress_tor_z_glf(k)=0.0
+       stress_par_i_glf(k)=0.0
+       stress_par_z_glf(k)=0.0
+       flowe_m(k)=0.0
+       flowi_m(k)=0.0
+       flowz_m(k)=0.0
+       powe_m(k)=0.0
+       powi_m(k)=0.0
+       powz_m(k)=0.0
+       stress_tor_i_m(k)=0.0
+       stress_tor_z_m(k)=0.0
+       stress_par_i_m(k)=0.0
+       stress_par_z_m(k)=0.0
        xnu_m(k)=0.0
        alpha_m(k)=0.0
       enddo
@@ -172,7 +248,21 @@ c      dx = arho_exp/4.D0
 c
 c start of main dv-method loop
 c
-      do k=1+i_proc,ngrid-1,n_proc
+c      do k=1+i_proc,ngrid-1,n_proc
+      ncalls = 2*nfields+1
+      if(iparam_pt(1).eq.2)ncalls = nfields+1
+      nloops = ncalls*(ngrid-1)/n_proc
+c      if(i_proc.eq.0)write(*,*)"ncalls= ",ncalls," nloops = ",nloops
+      if(ncalls*(ngrid-1)/nloops.ne.n_proc)then
+       if(i_proc.eq.0)then
+        write(*,*)"warning: number of processors is not optimum"
+        write(*,*)"nearest optimum number is ",ncalls*(ngrid-1)/nloops
+       endif
+      endif
+c
+      do k=1,ngrid-1
+        m_proc = (k-1)*ncalls 
+        m_proc = m_proc - n_proc*(m_proc/n_proc)
         if(iparam_pt(1).eq.-2.and.mask_r(k).eq.0)go to 21
         jm = k
         nem = (ne_m(k+1)+ne_m(k))/2.D0
@@ -199,12 +289,15 @@ c        gradnzm = (nz_m(k+1)-nz_m(k))/dr(k,2)
         gradnzm = fzm*gradnem + nem*gradfzm
        j_ret=0
        ipert_gf=0
-       call glf2d_dv
-       glf_flux(j_ret,1,k) = nefluxm
-       glf_flux(j_ret,2,k) = tefluxm
-       glf_flux(j_ret,3,k) = tifluxm
-       glf_flux(j_ret,4,k) = vphifluxm
-       glf_flux(j_ret,5,k) = vparfluxm
+       if(i_proc.eq.m_proc)then
+c        write(*,*)"trcoef_dv",i_proc,k,j_ret
+        call glf2d_dv
+        glf_flux(j_ret,1,k) = nefluxm
+        glf_flux(j_ret,2,k) = tefluxm
+        glf_flux(j_ret,3,k) = tifluxm
+        glf_flux(j_ret,4,k) = vphifluxm
+        glf_flux(j_ret,5,k) = vparfluxm
+       endif
 c
       if(iparam_pt(1).lt.1 .or. mask_r(k).eq.0)go to 21
 c gradient variations
@@ -213,71 +306,91 @@ c gradient variations
       if(itport_pt(1).ne.0)then
        j_ret = 1
        j=j+1
-       delt_v=dvmin*dne/dx
-       gradnem = gradnem - delt_v
-       gradnim = gradnim - fim*delt_v
-       gradnzm = gradnzm - fzm*delt_v
-       call glf2d_dv
-       gradnem = gradnem + delt_v
-       gradnim = gradnim + fim*delt_v
-       gradnzm = gradnzm + fzm*delt_v
-       glf_flux(j_ret,1,k) = nefluxm
-       glf_flux(j_ret,2,k) = tefluxm
-       glf_flux(j_ret,3,k) = tifluxm
-       glf_flux(j_ret,4,k) = vphifluxm
-       glf_flux(j_ret,5,k) = vparfluxm
+       m_proc = m_proc+1
+       if(i_proc.eq.m_proc)then
+        delt_v=dvmin*dne/dx
+        gradnem = gradnem - delt_v
+        gradnim = gradnim - fim*delt_v
+        gradnzm = gradnzm - fzm*delt_v
+c        write(*,*)"trcoef_dv",i_proc,k,j_ret
+        call glf2d_dv
+        gradnem = gradnem + delt_v
+        gradnim = gradnim + fim*delt_v
+        gradnzm = gradnzm + fzm*delt_v
+        glf_flux(j_ret,1,k) = nefluxm
+        glf_flux(j_ret,2,k) = tefluxm
+        glf_flux(j_ret,3,k) = tifluxm
+        glf_flux(j_ret,4,k) = vphifluxm
+        glf_flux(j_ret,5,k) = vparfluxm
+       endif
       endif
       if(itport_pt(2).ne.0)then       
        j_ret = 2
        j=j+1
-       delt_v=dvmin*dte/dx
-       gradtem = gradtem - delt_v
-       call glf2d_dv
-       gradtem = gradtem + delt_v
-       glf_flux(j_ret,1,k) = nefluxm
-       glf_flux(j_ret,2,k) = tefluxm
-       glf_flux(j_ret,3,k) = tifluxm
-       glf_flux(j_ret,4,k) = vphifluxm
-       glf_flux(j_ret,5,k) = vparfluxm
+       m_proc = m_proc+1
+       if(i_proc.eq.m_proc)then
+        delt_v=dvmin*dte/dx
+        gradtem = gradtem - delt_v
+c        write(*,*)"trcoef_dv",i_proc,k,j_ret
+        call glf2d_dv
+        gradtem = gradtem + delt_v
+        glf_flux(j_ret,1,k) = nefluxm
+        glf_flux(j_ret,2,k) = tefluxm
+        glf_flux(j_ret,3,k) = tifluxm
+        glf_flux(j_ret,4,k) = vphifluxm
+        glf_flux(j_ret,5,k) = vparfluxm
+       endif
       endif
       if(itport_pt(3).ne.0)then       
        j_ret = 3
        j=j+1
-       delt_v=dvmin*dti/dx
-       gradtim = gradtim - delt_v
-       call glf2d_dv
-       gradtim = gradtim + delt_v
-       glf_flux(j_ret,1,k) = nefluxm
-       glf_flux(j_ret,2,k) = tefluxm
-       glf_flux(j_ret,3,k) = tifluxm
-       glf_flux(j_ret,4,k) = vphifluxm
-       glf_flux(j_ret,5,k) = vparfluxm
+       m_proc = m_proc+1
+       if(i_proc.eq.m_proc)then
+        delt_v=dvmin*dti/dx
+        gradtim = gradtim - delt_v
+c        write(*,*)"trcoef_dv",i_proc,k,j_ret
+        call glf2d_dv
+        gradtim = gradtim + delt_v
+        glf_flux(j_ret,1,k) = nefluxm
+        glf_flux(j_ret,2,k) = tefluxm
+        glf_flux(j_ret,3,k) = tifluxm
+        glf_flux(j_ret,4,k) = vphifluxm
+        glf_flux(j_ret,5,k) = vparfluxm
+       endif
       endif
       if(itport_pt(4).ne.0)then       
        j_ret = 4
        j=j+1
-       delt_v=dvmin*dvexb/dx
-       gradvexbm = gradvexbm - delt_v
-       call glf2d_dv
-       gradvexbm = gradvexbm + delt_v
-       glf_flux(j_ret,1,k) = nefluxm
-       glf_flux(j_ret,2,k) = tefluxm
-       glf_flux(j_ret,3,k) = tifluxm
-       glf_flux(j_ret,4,k) = vphifluxm
-       glf_flux(j_ret,5,k) = vparfluxm
+       m_proc = m_proc+1
+       if(i_proc.eq.m_proc)then
+        delt_v=dvmin*dvexb/dx
+        gradvexbm = gradvexbm - delt_v
+c        write(*,*)"trcoef_dv",i_proc,k,j_ret
+        call glf2d_dv
+        gradvexbm = gradvexbm + delt_v
+        glf_flux(j_ret,1,k) = nefluxm
+        glf_flux(j_ret,2,k) = tefluxm
+        glf_flux(j_ret,3,k) = tifluxm
+        glf_flux(j_ret,4,k) = vphifluxm
+        glf_flux(j_ret,5,k) = vparfluxm
+       endif
       endif
       if(itport_pt(5).ne.0)then       
        j_ret = 5
        j=j+1
-       delt_v=dvmin*dvpol/dx
-       gradvpolm = gradvpolm - delt_v
-       call glf2d_dv
-       gradvpolm = gradvpolm + delt_v
-       glf_flux(j_ret,1,k) = nefluxm
-       glf_flux(j_ret,2,k) = tefluxm
-       glf_flux(j_ret,3,k) = tifluxm
-       glf_flux(j_ret,4,k) = vphifluxm
-       glf_flux(j_ret,5,k) = vparfluxm
+       m_proc = m_proc+1
+       if(i_proc.eq.m_proc)then
+        delt_v=dvmin*dvpol/dx
+        gradvpolm = gradvpolm - delt_v
+c        write(*,*)"trcoef_dv",i_proc,k,j_ret
+        call glf2d_dv
+        gradvpolm = gradvpolm + delt_v
+        glf_flux(j_ret,1,k) = nefluxm
+        glf_flux(j_ret,2,k) = tefluxm
+        glf_flux(j_ret,3,k) = tifluxm
+        glf_flux(j_ret,4,k) = vphifluxm
+        glf_flux(j_ret,5,k) = vparfluxm
+       endif
       endif
 c convection variations
       if(iparam_pt(1).eq.2)go to 21
@@ -285,81 +398,101 @@ c convection variations
       if(itport_pt(1).ne.0)then       
        j_ret = 6
        j=j+1
-       delt_v=dvmin*dne
-       gradnem = gradnem*(nem+delt_v)/nem
-       gradnim = gradnim*(nim+fim*delt_v)/nim
-       gradnzm = gradnzm*(nzm+fzm*delt_v)/nzm
-       nem = nem + delt_v
-       nim = nim + fim*delt_v
-       nzm = nzm + fzm*delt_v
-       call glf2d_dv
-       nem = nem - delt_v
-       nim = nim - fim*delt_v
-       nzm = nzm - fzm*delt_v
-       gradnem = gradnem*nem/(nem+delt_v)
-       gradnim = gradnim*nim/(nim+fim*delt_v)
-       gradnzm = gradnzm*nzm/(nzm+fzm*delt_v)
-       glf_flux(j_ret,1,k) = nefluxm
-       glf_flux(j_ret,2,k) = tefluxm
-       glf_flux(j_ret,3,k) = tifluxm
-       glf_flux(j_ret,4,k) = vphifluxm
-       glf_flux(j_ret,5,k) = vparfluxm
+       m_proc = m_proc+1
+       if(i_proc.eq.m_proc)then
+        delt_v=dvmin*dne
+        gradnem = gradnem*(nem+delt_v)/nem
+        gradnim = gradnim*(nim+fim*delt_v)/nim
+        gradnzm = gradnzm*(nzm+fzm*delt_v)/nzm
+        nem = nem + delt_v
+        nim = nim + fim*delt_v
+        nzm = nzm + fzm*delt_v
+c        write(*,*)"trcoef_dv",i_proc,k,j_ret
+        call glf2d_dv
+        nem = nem - delt_v
+        nim = nim - fim*delt_v
+        nzm = nzm - fzm*delt_v
+        gradnem = gradnem*nem/(nem+delt_v)
+        gradnim = gradnim*nim/(nim+fim*delt_v)
+        gradnzm = gradnzm*nzm/(nzm+fzm*delt_v)
+        glf_flux(j_ret,1,k) = nefluxm
+        glf_flux(j_ret,2,k) = tefluxm
+        glf_flux(j_ret,3,k) = tifluxm
+        glf_flux(j_ret,4,k) = vphifluxm
+        glf_flux(j_ret,5,k) = vparfluxm
+       endif
       endif
       if(itport_pt(2).ne.0)then       
        j_ret = 7
        j=j+1
-       delt_v=dvmin*dte
-       gradtem = gradtem*(tem+delt_v)/tem
-       tem = tem + delt_v
-       call glf2d_dv
-       tem = tem - delt_v
-       gradtem = gradtem*tem/(tem+delt_v)
-       glf_flux(j_ret,1,k) = nefluxm
-       glf_flux(j_ret,2,k) = tefluxm
-       glf_flux(j_ret,3,k) = tifluxm
-       glf_flux(j_ret,4,k) = vphifluxm
-       glf_flux(j_ret,5,k) = vparfluxm
+       m_proc = m_proc+1
+       if(i_proc.eq.m_proc)then
+        delt_v=dvmin*dte
+        gradtem = gradtem*(tem+delt_v)/tem
+        tem = tem + delt_v
+c        write(*,*)"trcoef_dv",i_proc,k,j_ret
+        call glf2d_dv
+        tem = tem - delt_v
+        gradtem = gradtem*tem/(tem+delt_v)
+        glf_flux(j_ret,1,k) = nefluxm
+        glf_flux(j_ret,2,k) = tefluxm
+        glf_flux(j_ret,3,k) = tifluxm
+        glf_flux(j_ret,4,k) = vphifluxm
+        glf_flux(j_ret,5,k) = vparfluxm
+       endif
       endif
       if(itport_pt(3).ne.0)then       
        j_ret = 8
        j=j+1
-       delt_v=dvmin*dti
-       gradtim = gradtim*(tim+delt_v)/tim
-       tim = tim + delt_v
-       call glf2d_dv
-       tim = tim - delt_v
-       gradtim = gradtim*tim/(tim+delt_v)
-       glf_flux(j_ret,1,k) = nefluxm
-       glf_flux(j_ret,2,k) = tefluxm
-       glf_flux(j_ret,3,k) = tifluxm
-       glf_flux(j_ret,4,k) = vphifluxm
-       glf_flux(j_ret,5,k) = vparfluxm
+       m_proc = m_proc+1
+       if(i_proc.eq.m_proc)then
+        delt_v=dvmin*dti
+        gradtim = gradtim*(tim+delt_v)/tim
+        tim = tim + delt_v
+c        write(*,*)"trcoef_dv",i_proc,k,j_ret
+        call glf2d_dv
+        tim = tim - delt_v
+        gradtim = gradtim*tim/(tim+delt_v)
+        glf_flux(j_ret,1,k) = nefluxm
+        glf_flux(j_ret,2,k) = tefluxm
+        glf_flux(j_ret,3,k) = tifluxm
+        glf_flux(j_ret,4,k) = vphifluxm
+        glf_flux(j_ret,5,k) = vparfluxm
+       endif
       endif
       if(itport_pt(4).ne.0)then       
        j_ret = 9
        j=j+1
-       delt_v=dvmin*dvexb
-       vexbm = vexbm + delt_v
-       call glf2d_dv
-       vexbm = vexbm - delt_v
-       glf_flux(j_ret,1,k) = nefluxm
-       glf_flux(j_ret,2,k) = tefluxm
-       glf_flux(j_ret,3,k) = tifluxm
-       glf_flux(j_ret,4,k) = vphifluxm
-       glf_flux(j_ret,5,k) = vparfluxm
+       m_proc = m_proc+1
+       if(i_proc.eq.m_proc)then
+        delt_v=dvmin*dvexb
+        vexbm = vexbm + delt_v
+c        write(*,*)"trcoef_dv",i_proc,k,j_ret
+        call glf2d_dv
+        vexbm = vexbm - delt_v
+        glf_flux(j_ret,1,k) = nefluxm
+        glf_flux(j_ret,2,k) = tefluxm
+        glf_flux(j_ret,3,k) = tifluxm
+        glf_flux(j_ret,4,k) = vphifluxm
+        glf_flux(j_ret,5,k) = vparfluxm
+       endif
       endif
       if(itport_pt(5).ne.0)then       
        j_ret = 10
        j=j+1
-       delt_v=dvmin*dvpol
-       vpolm = vpolm + delt_v
-       call glf2d_dv
-       vpolm = vpolm - delt_v
-       glf_flux(j_ret,1,k) = nefluxm
-       glf_flux(j_ret,2,k) = tefluxm
-       glf_flux(j_ret,3,k) = tifluxm
-       glf_flux(j_ret,4,k) = vphifluxm
-       glf_flux(j_ret,5,k) = vparfluxm
+       m_proc = m_proc+1
+       if(i_proc.eq.m_proc)then
+        delt_v=dvmin*dvpol
+        vpolm = vpolm + delt_v
+c        write(*,*)"trcoef_dv",i_proc,k,j_ret
+        call glf2d_dv
+        vpolm = vpolm - delt_v
+        glf_flux(j_ret,1,k) = nefluxm
+        glf_flux(j_ret,2,k) = tefluxm
+        glf_flux(j_ret,3,k) = tifluxm
+        glf_flux(j_ret,4,k) = vphifluxm
+        glf_flux(j_ret,5,k) = vparfluxm
+       endif
       endif
  21    continue
       enddo
@@ -421,9 +554,17 @@ c
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
       call MPI_BCAST(nu_pol_m_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
-      call MPI_REDUCE(flow_neo,flow_neo_sum,mxgrd,
+      call MPI_REDUCE(flowe_neo,flowe_neo_sum,mxgrd,
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
-      call MPI_BCAST(flow_neo_sum,mxgrd,MPI_DOUBLE_PRECISION
+      call MPI_BCAST(flowe_neo_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(flowi_neo,flowi_neo_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(flowi_neo_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(flowz_neo,flowz_neo_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(flowz_neo_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
       call MPI_REDUCE(powe_neo,powe_neo_sum,mxgrd,
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
@@ -433,17 +574,37 @@ c
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
       call MPI_BCAST(powi_neo_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
-      call MPI_REDUCE(stress_tor_neo,stress_tor_neo_sum,mxgrd,
+      call MPI_REDUCE(powz_neo,powz_neo_sum,mxgrd,
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
-      call MPI_BCAST(stress_tor_neo_sum,mxgrd,MPI_DOUBLE_PRECISION
+      call MPI_BCAST(powz_neo_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
-      call MPI_REDUCE(stress_par_neo,stress_par_neo_sum,mxgrd,
+      call MPI_REDUCE(stress_tor_i_neo,stress_tor_i_neo_sum,mxgrd,
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
-      call MPI_BCAST(stress_par_neo_sum,mxgrd,MPI_DOUBLE_PRECISION
+      call MPI_BCAST(stress_tor_i_neo_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
-      call MPI_REDUCE(flow_adhoc,flow_adhoc_sum,mxgrd,
+      call MPI_REDUCE(stress_tor_z_neo,stress_tor_z_neo_sum,mxgrd,
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
-      call MPI_BCAST(flow_adhoc_sum,mxgrd,MPI_DOUBLE_PRECISION
+      call MPI_BCAST(stress_tor_z_neo_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(stress_par_i_neo,stress_par_i_neo_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(stress_par_i_neo_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(stress_par_z_neo,stress_par_z_neo_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(stress_par_z_neo_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(flowe_adhoc,flowe_adhoc_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(flowe_adhoc_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(flowi_adhoc,flowi_adhoc_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(flowi_adhoc_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(flowz_adhoc,flowz_adhoc_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(flowz_adhoc_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
       call MPI_REDUCE(powe_adhoc,powe_adhoc_sum,mxgrd,
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
@@ -453,17 +614,37 @@ c
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
       call MPI_BCAST(powi_adhoc_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
-      call MPI_REDUCE(stress_tor_adhoc,stress_tor_adhoc_sum,mxgrd,
+      call MPI_REDUCE(powz_adhoc,powz_adhoc_sum,mxgrd,
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
-      call MPI_BCAST(stress_tor_adhoc_sum,mxgrd,MPI_DOUBLE_PRECISION
+      call MPI_BCAST(powz_adhoc_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
-      call MPI_REDUCE(stress_par_adhoc,stress_par_adhoc_sum,mxgrd,
+      call MPI_REDUCE(stress_tor_i_adhoc,stress_tor_i_adhoc_sum,mxgrd,
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
-      call MPI_BCAST(stress_par_adhoc_sum,mxgrd,MPI_DOUBLE_PRECISION
+      call MPI_BCAST(stress_tor_i_adhoc_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
-      call MPI_REDUCE(flow_glf,flow_glf_sum,mxgrd,
+      call MPI_REDUCE(stress_tor_z_adhoc,stress_tor_z_adhoc_sum,mxgrd,
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
-      call MPI_BCAST(flow_glf_sum,mxgrd,MPI_DOUBLE_PRECISION
+      call MPI_BCAST(stress_tor_z_adhoc_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(stress_par_i_adhoc,stress_par_i_adhoc_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(stress_par_i_adhoc_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(stress_par_z_adhoc,stress_par_z_adhoc_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(stress_par_z_adhoc_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(flowe_glf,flowe_glf_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(flowe_glf_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(flowi_glf,flowi_glf_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(flowi_glf_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(flowz_glf,flowz_glf_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(flowz_glf_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
       call MPI_REDUCE(powe_glf,powe_glf_sum,mxgrd,
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
@@ -473,13 +654,65 @@ c
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
       call MPI_BCAST(powi_glf_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
-      call MPI_REDUCE(stress_tor_glf,stress_tor_glf_sum,mxgrd,
+      call MPI_REDUCE(powz_glf,powz_glf_sum,mxgrd,
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
-      call MPI_BCAST(stress_tor_glf_sum,mxgrd,MPI_DOUBLE_PRECISION
+      call MPI_BCAST(powz_glf_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
-      call MPI_REDUCE(stress_par_glf,stress_par_glf_sum,mxgrd,
+      call MPI_REDUCE(stress_tor_i_glf,stress_tor_i_glf_sum,mxgrd,
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
-      call MPI_BCAST(stress_par_glf_sum,mxgrd,MPI_DOUBLE_PRECISION
+      call MPI_BCAST(stress_tor_i_glf_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(stress_tor_z_glf,stress_tor_z_glf_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(stress_tor_z_glf_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(stress_par_i_glf,stress_par_i_glf_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(stress_par_i_glf_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(stress_par_z_glf,stress_par_z_glf_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(stress_par_z_glf_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(flowe_m,flowe_m_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(flowe_m_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(flowi_m,flowi_m_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(flowi_m_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(flowz_m,flowz_m_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(flowz_m_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(powe_m,powe_m_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(powe_m_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(powi_m,powi_m_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(powi_m_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(powz_m,powz_m_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(powz_m_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(stress_tor_i_m,stress_tor_i_m_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(stress_tor_i_m_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(stress_tor_z_m,stress_tor_z_m_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(stress_tor_z_m_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(stress_par_i_m,stress_par_i_m_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(stress_par_i_m_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(stress_par_z_m,stress_par_z_m_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(stress_par_z_m_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
       call MPI_REDUCE(xnu_m,xnu_m_sum,mxgrd,
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
@@ -505,21 +738,46 @@ c
         nu_pol_m(k)=nu_pol_m_sum(k)
         xnu_m(k)=xnu_m_sum(k)
         alpha_m(k)=alpha_m_sum(k)
-        flow_neo(k) = flow_neo_sum(k)
+        flowe_neo(k) = flowe_neo_sum(k)
+        flowi_neo(k) = flowi_neo_sum(k)
+        flowz_neo(k) = flowz_neo_sum(k)
         powe_neo(k) = powe_neo_sum(k)
         powi_neo(k) = powi_neo_sum(k)
-        stress_tor_neo(k) = stress_tor_neo_sum(k)
-        stress_par_neo(k) = stress_par_neo_sum(k)
-        flow_adhoc(k) = flow_adhoc_sum(k)
+        powz_neo(k) = powz_neo_sum(k)
+        stress_tor_i_neo(k) = stress_tor_i_neo_sum(k)
+        stress_tor_z_neo(k) = stress_tor_z_neo_sum(k)
+        stress_par_i_neo(k) = stress_par_i_neo_sum(k)
+        stress_par_z_neo(k) = stress_par_z_neo_sum(k)
+        flowe_adhoc(k) = flowe_adhoc_sum(k)
+        flowi_adhoc(k) = flowi_adhoc_sum(k)
+        flowz_adhoc(k) = flowz_adhoc_sum(k)
         powe_adhoc(k) = powe_adhoc_sum(k)
         powi_adhoc(k) = powi_adhoc_sum(k)
-        stress_tor_adhoc(k) = stress_tor_adhoc_sum(k)
-        stress_par_adhoc(k) = stress_par_adhoc_sum(k)
-        flow_glf(k) = flow_glf_sum(k)
+        powz_adhoc(k) = powz_adhoc_sum(k)
+        stress_tor_i_adhoc(k) = stress_tor_i_adhoc_sum(k)
+        stress_tor_z_adhoc(k) = stress_tor_z_adhoc_sum(k)
+        stress_par_i_adhoc(k) = stress_par_i_adhoc_sum(k)
+        stress_par_z_adhoc(k) = stress_par_z_adhoc_sum(k)
+        flowe_glf(k) = flowe_glf_sum(k)
+        flowi_glf(k) = flowi_glf_sum(k)
+        flowz_glf(k) = flowz_glf_sum(k)
         powe_glf(k) = powe_glf_sum(k)
         powi_glf(k) = powi_glf_sum(k)
-        stress_tor_glf(k) = stress_tor_glf_sum(k)
-        stress_par_glf(k) = stress_par_glf_sum(k)
+        powz_glf(k) = powz_glf_sum(k)
+        stress_tor_i_glf(k) = stress_tor_i_glf_sum(k)
+        stress_tor_z_glf(k) = stress_tor_z_glf_sum(k)
+        stress_par_i_glf(k) = stress_par_i_glf_sum(k)
+        stress_par_z_glf(k) = stress_par_z_glf_sum(k)
+        flowe_m(k) = flowe_m_sum(k)
+        flowi_m(k) = flowi_m_sum(k)
+        flowz_m(k) = flowz_m_sum(k)
+        powe_m(k) = powe_m_sum(k)
+        powi_m(k) = powi_m_sum(k)
+        powz_m(k) = powz_m_sum(k)
+        stress_tor_i_m(k) = stress_tor_i_m_sum(k)
+        stress_tor_z_m(k) = stress_tor_z_m_sum(k)
+        stress_par_i_m(k) = stress_par_i_m_sum(k)
+        stress_par_z_m(k) = stress_par_z_m_sum(k)
       enddo
       egamma_m(0)=egamma_m(1)
       gamma_p_m(0)=gamma_p_m(1)
@@ -528,6 +786,7 @@ c
       nu_pol_m(0)=nu_pol_m(1)
       xnu_m(0)=xnu_m(1)
       alpha_m(0)=0.0
+      cgyrobohm_m(0) = cgyrobohm_m(1)
       egamma_m(ngrid)=egamma_m(ngrid-1)
       gamma_p_m(ngrid)=gamma_p_m(ngrid-1)
       anrate_m(ngrid)=anrate_m(ngrid-1)
@@ -658,11 +917,6 @@ c
        tiflux(k) = tifluxm
        vphiflux(k) = vphifluxm
        vparflux(k) = vparfluxm
-       flow_m(k) = vprime(k,2)*nefluxm
-       powe_m(k) = vprime(k,2)*tefluxm
-       powi_m(k) = vprime(k,2)*tifluxm
-       stress_tor_m(k) = vprime(k,2)*vphifluxm
-       stress_par_m(k) = vprime(k,2)*vparfluxm
        diffgb_m(k) = -gradnem*nefluxm
      >  /(cgyrobohm_m(k)*1.6022D-3*MAX(1.0D-10,gradnem*gradnem))
        chiegb_m(k) = -gradtem*tefluxm
@@ -1305,14 +1559,14 @@ c
         S_ext(j,k) = wall_mult*Psour_wall(k) + smult(j)*Psour(k)
         s(j,k) = S_ext(j,k) - 
      >  (vprime(k,2)*flux(j,k))/(vprime(k,1)*dr(k,1))
-         flow_m(k) = vprime(k,2)*flux(j,k)
+c         flow_m(k) = vprime(k,2)*flux(j,k)
         INTEGRAL_RHS(j,k)= vprime(k,1)*dr(k,1)*S_ext(j,k)
         do k=2,ngrid-1
         S_ext(j,k) = wall_mult*Psour_wall(k) + smult(j)*Psour(k)
         s(j,k) = S_ext(j,k) - 
      >  (vprime(k,2)*flux(j,k)-vprime(k-1,2)*flux(j,k-1))/
      >  (vprime(k,1)*dr(k,1))
-         flow_m(k) = vprime(k,2)*flux(j,k)
+c         flow_m(k) = vprime(k,2)*flux(j,k)
          INTEGRAL_RHS(j,k) = INTEGRAL_RHS(j,k-1) + 
      >   vprime(k,1)*dr(k,1)*S_ext(j,k)
         enddo
@@ -1326,8 +1580,8 @@ c
      >    (vprime(k,2)*flux(j,k))/
      >    (vprime(k,1)*dr(k,1)) 
      >    + S_ei(k)
-        powe_m(k)=vprime(k,2)*flux(j,k)
-     >   + pow_ei_cor_m(k)
+c        powe_m(k)=vprime(k,2)*flux(j,k)
+c     >   + pow_ei_cor_m(k)
         INTEGRAL_RHS(j,k) = vprime(k,1)*dr(k,1)*S_ext(j,k)
         do k=2,ngrid-1
         S_ext(j,k) =  smult(j)*Peaux(k)+Pe_alpha(k)+Pohpro(k)
@@ -1336,8 +1590,8 @@ c
      >    (vprime(k,2)*flux(j,k)-vprime(k-1,2)*flux(j,k-1))/
      >    (vprime(k,1)*dr(k,1)) 
      >    + S_ei(k)
-        powe_m(k)=vprime(k,2)*flux(j,k)
-     >   + pow_ei_cor_m(k)
+c        powe_m(k)=vprime(k,2)*flux(j,k)
+c     >   + pow_ei_cor_m(k)
         INTEGRAL_RHS(j,k) = INTEGRAL_RHS(j,k-1) 
      >   + vprime(k,1)*dr(k,1)*S_ext(j,k)
         enddo
@@ -1416,7 +1670,7 @@ c     >     - (vprime(k+1,2)*flux(j,k+1)-vprime(k,2)*flux(j,k))/
 c     >       (vprime(k,1)*dr(k,1))
 c            endif
 c          endif
-          stress_par_m(k) = stress_par_m(k) +stress_par_cor_m(k)
+c          stress_par_m(k) = stress_par_m(k) +stress_par_cor_m(k)
           INTEGRAL_RHS(j,k) = INTEGRAL_RHS(j,k-1) + 
      >    vprime(k,1)*dr(k,1)*S_ext(j,k)
         enddo

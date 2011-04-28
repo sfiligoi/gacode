@@ -32,7 +32,8 @@ c
       arho_exp = r_d(jmaxm+1)
       rmajor_exp = rmajor_d
       bt_exp = dabs(btor_d)
-      sign_bt_exp = btor_d/bt_exp
+      sign_Bt_exp = btor_d/bt_exp
+      sign_It_exp = tocur_d/ABS(tocur_d)
       bp0_exp = dabs(bp0_d(1))
       elonga_exp=elongx_d(jmaxm+1)
       deltaa_exp=deltax_d(jmaxm+1)

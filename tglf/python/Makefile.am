@@ -10,7 +10,9 @@
 ## ############################################################
 MAINTAINERCLEANFILES    = Makefile.in 
 dist_noinst_DATA= \
-   tglf_dict.py
+   tglf_dict.py \
+    tglf_genDumpInput.py
+
 all-local:
 	for i in $(dist_noinst_DATA) ; \
 	do \

@@ -855,6 +855,17 @@
       END FUNCTION get_a_tor
 !-----------------------------------------------------------------
 !
+      REAL FUNCTION get_Bp0()
+!
+      USE tglf_global
+!
+      IMPLICIT NONE
+!
+      get_Bp0 = Bp0_out
+!
+      END FUNCTION get_Bp0
+!-----------------------------------------------------------------
+!
       REAL FUNCTION get_RBt_ave()
 !
       USE tglf_global
@@ -1215,4 +1226,74 @@
       END SUBROUTINE write_tglf_input
 !-----------------------------------------------------------------
 !
+      SUBROUTINE write_wavefunction_out
+!
+      USE tglf_global
+!
+      IMPLICIT NONE
+      INTEGER :: i,n,k,noff
+      REAL :: wave(maxmodes*6)
+      CHARACTER(len=80) :: header
+      CHARACTER(len=10) :: theta="    theta  "
+      CHARACTER(len=22) :: phi="  RE(phi)    IM(phi)  "
+      CHARACTER(len=24) :: Bper="  RE(Bper)    IM(Bper)  "
+      CHARACTER(len=24) :: Bpar="  RE(Bpar)    IM(Bpar)  "
+!
+      if(new_start)then
+        write(*,*)"error: tglf must be called before write_wavefunction_out"
+      else
+        call get_wavefunction
+!
+        open(unit=33,file='wavefunction_out.txt',status='replace')
+        header = theta//phi
+        if(use_bper_in)header = theta//phi//Bper
+        if(use_bpar_in)header = theta//phi//Bpar
+        if(use_bper_in.and.use_bpar_in)header = theta//phi//Bper//Bpar
+!
+        write(33,*)nmodes_out,nfields_out,max_plot
+        write(33,*)header
+        do i = 1,max_plot
+          do n=1,nmodes_out
+            noff=2*nfields_out*(n-1)
+            wave(noff+1) = REAL(plot_field_out(n,1,i))
+            wave(noff+2) = AIMAG(plot_field_out(n,1,i))
+            if(use_bper_in)then
+              wave(noff+3) = REAL(plot_field_out(n,2,i))
+              wave(noff+4) = AIMAG(plot_field_out(n,2,i))
+            endif
+            if(use_bpar_in)then
+              wave(noff+5) = REAL(plot_field_out(n,3,i))
+              wave(noff+6) = AIMAG(plot_field_out(n,3,i))
+            endif
+          enddo
+          write(33,*)plot_angle_out(i),(wave(k),k=1,nmodes_out*nfields_out*2)
+        enddo
+        close(33)
+      endif
+!
+      END SUBROUTINE write_wavefunction_out
+!-----------------------------------------------------------------
+!
+      SUBROUTINE get_wavefunction_out(nmodes,nfields,nplot,angle,wavefunction)
+!
+      USE tglf_global
+!
+      IMPLICIT NONE
+      INTEGER,INTENT(OUT) :: nmodes,nfields,nplot
+      REAL,INTENT(OUT) :: angle(max_plot)
+      COMPLEX,INTENT(OUT) :: wavefunction(maxmodes,3,max_plot)
+      INTEGER :: i,n,k
+!
+      if(new_start)then
+        write(*,*)"error: tglf must be called before get_wavefunction_out"
+      else
+        call get_wavefunction
+        nmodes = nmodes_out
+        nfields = nfields_out
+        nplot = max_plot
+        angle(:) = plot_angle_out(:)
+        wavefunction(:,:,:) = plot_field_out(:,:,:)
+     endif
+!
+     END SUBROUTINE get_wavefunction_out
 

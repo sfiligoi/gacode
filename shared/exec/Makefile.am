@@ -19,12 +19,10 @@ gyro.KESTREL \
 gyro.PG_OPT64_FFTW \
 gyro.XT5_SLEPC \
 gyro.BANACH_PETSC \
-gyro.G95 \
 gyro.GFORTRAN_TAU \
 gyro.KITE \
 gyro.PG_OPT64_MUMPS \
 gyro.XT_FAST \
-gyro.BASSI \
 gyro.G95_OSX \
 gyro.HOPPER \
 gyro.LOHAN \
@@ -37,11 +35,9 @@ gyro.REGATTA \
 gyro.DELLA \
 gyro.GFORTRAN_OSX \
 gyro.IFORT_CORE2 \
-gyro.PATH_OPT64 \
 gyro.UBGL \
 gyro.DELPHI \
 gyro.GFORTRAN_OSX_BELLI \
-gyro.IFORT_P4 \
 gyro.PETREL \
 gyro.XT3 \
 gyro.DROP \

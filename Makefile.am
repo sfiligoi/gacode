@@ -9,13 +9,12 @@
 
 ## ############################################################
 
-ACLOCAL_AMFLAGS = -I config
+ACLOCAL_AMFLAGS = -I shared/autotool_config
 
-#SUBDIRS = shared tglf neo
-SUBDIRS = envvars shared gato neo tglf
+SUBDIRS = shared gato neo tglf
 
 if HAVE_MPI
-SUBDIRS += gyro 
+SUBDIRS += gyro tgyro xptor
 endif
 
 

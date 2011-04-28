@@ -15,11 +15,13 @@ subroutine gyro_do(skipinit)
   use gyro_globals
   use gyro_pointers
   use math_constants
+  use GEO_interface
 
   !--------------------------------------
   implicit none
   !
   integer, optional :: skipinit
+  logical :: rfe
   !--------------------------------------
 
   !-------------------------------------
@@ -49,8 +51,17 @@ subroutine gyro_do(skipinit)
   runfile  = trim(path)//trim(baserunfile)
   precfile = trim(path)//trim(baseprecfile)
 
-  if ((i_proc==0).AND.(gkeigen_j_set==0)) print *,runfile
+  if (baserunfile == 'out.gyro.run')  then
+     if (i_proc==0 .AND. output_flag==1) THEN
+        inquire(file=trim(runfile),exist=rfe)
+        if (.not.rfe) then
+           open(unit=99,file=trim(runfile),status='unknown')
+           close(99)
+        endif
+     ENDIF
+  endif
 
+  if (i_proc==0 .and. gkeigen_j_set==0) print *,runfile
 
   CPU_0 = 0.0
   CPU_1 = 0.0
@@ -70,15 +81,15 @@ subroutine gyro_do(skipinit)
   alltime_index = 0
   !-------------------------
 
-  !-----------------------------------------------------------
+  !----------------------------------------------------------------
   ! If running in eigensolve mode.
   !
   if (linsolve_method == 2) then
      if (nonlinear_flag == 1) then
-        if ((i_proc==0) .and. (gkeigen_j_set==0)) print *, "Eigensolver unavailable in nonlinear mode."
-        stop
+        if (i_proc==0 .and. gkeigen_j_set==0) print *, "Eigensolver unavailable in nonlinear mode."
+        stop 
      else
-        if ((i_proc==0) .and. (gkeigen_j_set==0)) print *, "GYRO is running in eigensolve mode."
+        if (i_proc==0 .and. gkeigen_j_set==0) print *, "GYRO is running in eigensolve mode."
         eigensolve_restart_flag = restart_method
         restart_method = 0
         if (electron_method /= 1) then
@@ -86,32 +97,33 @@ subroutine gyro_do(skipinit)
         endif
      endif
   endif
-  if (debug_flag == 1) then
-  !----------------------------------------------------------
-  !sv dump the global variables that can be read
-  call gyro_dump_input
-  !sv dump the inteface variables for comparison
-  call gyro_dump_interface
-  endif
+  !----------------------------------------------------------------
 
+  !----------------------------------------------------------------
+  if (debug_flag == 1) then
+     !  Dump the global variables that can be read
+     call gyro_dump_input
+     !  Dump the interface variables for comparison
+     call gyro_dump_interface
+  endif
+  !----------------------------------------------------------------
 
   !------------------------------------------------------------
   ! The order of these routines is critical:
   !
-  ! (1) Sort through and check all combinations of 
-  !     operational modes
+  ! Sort through and check all combinations of operational modes
   !
   call gyro_select_methods
   !
-  ! (2) Set parameters connected with timestepping.
+  ! Set parameters connected with timestepping.
   !
   call initialize_timestep
   !
-  ! (3) Generate theta grid dimensions (no operators yet).
+  ! Generate theta grid dimensions (no operators yet).
   !
   call make_theta_grid
   !
-  ! (4) Parallel setup 
+  ! Parallel setup 
   !
   if (gyrotest_flag == 0) then
      call gyro_mpi_grid
@@ -120,39 +132,53 @@ subroutine gyro_do(skipinit)
      i_group_1   = 0
   endif
   !
-  ! (5) Read, generate or otherwise construct equilibrium
-  !     profiles
+  ! Save geometry (GEO) library settings
+  !
+  GEO_ntheta_in   = nint_GEO
+  GEO_nfourier_in = n_fourier_geo 
+  GEO_model_in    = geometry_method
+  GEO_signb_in    = 1.0
+  !
+  ! Read, generate or otherwise construct equilibrium profiles.  If experimental 
+  ! profiles are used, GEO will be allocate/deallocated.
   !
   call gyro_alloc_profile_sim(1)
   call gyro_profile_init
   !
   ! Construct pitch-angle (lambda) and energy grids
   ! and integration weights using Gauss-Legendre rules:
+  !
   call gyro_alloc_velocity(1)
   call gyro_alloc_orbit(1)
   !
-  ! Lambda (pitch-angle) weights 
+  ! Lambda (pitch-angle) weights (GEO needed again, so just reallocate)
+  !
+  call GEO_alloc(1)
   call gyro_lambda_grid
   !
   ! Energy weights
+  !
   call energy_integral(n_energy,energy_max,n_kinetic,energy,w_energy)
   !
   ! Compute myriad arrays (for example, map between poloidal
   ! angle and orbit time) for poloidal discretization.
+  !
   call gyro_banana_operators
   !
   ! Total velocity-space-tau weights.
-  call make_phase_space(trim(path)//'phase_space.out',1)
   !
-  ! Generate geometry-dependent factors using model or
-  ! Miller equilibrium:
+  call gyro_set_phase_space(trim(path)//'out.gyro.phase_space',1)
+  !
+  do i=1,n_x
+     call gyro_to_geo(i)
+     if (i_proc == 0 .and. i == ir_norm .and. debug_flag == 1) then
+        call GEO_write(trim(path)//'gyro_geo_diagnostic.out',1)
+     endif
+  enddo
+  !
+  ! Generate geometry-dependent factors using model or Miller equilibrium:
+  !
   call make_geometry_arrays
-  !
-  ! Write simulation-grid profiles:
-  call write_profile_sim(trim(path)//'profile_sim.out',1)
-  !
-  ! Deallocate GEO
-  call GEO_alloc(0)
   !
   if (gyrotest_flag == 0) then
 
@@ -274,19 +300,28 @@ subroutine gyro_do(skipinit)
      !---------------------------------------
 
   endif
- 
+
   !---------------------------------------
   ! Dump input parameters runfile
   !
   call gyro_write_input
   !---------------------------------------
 
-  !------------------------------------------------
-  ! Large data dump for vugyro
+  !---------------------------------------------------------------
+  ! I/O control for time-independent initial data
   !
-  call write_profile_vugyro(trim(path)//'profile_vugyro.out',1)
-  if (iohdf5out == 1) call write_hdf5_data(trim(path)//'gyro_data.h5',1)
-  !------------------------------------------------
+  if (io_method == 1) then
+     call write_profile_vugyro(trim(path)//'profile_vugyro.out',1)
+     call gyro_write_units(trim(path)//'units.out',10)
+     call write_geometry_arrays(trim(path)//'geometry_arrays.out',4)
+  else
+     ! This encapsulates all the required initial data
+     call write_hdf5_data(trim(path)//'out.gyro.initdata.h5',1)
+  endif
+  !
+  ! Close geometry (GEO) library
+  call GEO_alloc(0)
+  !---------------------------------------------------------------
 
   !------------------------------------------------------------
   ! By this point, we are finished with running the
@@ -299,7 +334,7 @@ subroutine gyro_do(skipinit)
   endif
   !------------------------------------------------------------
 
-  if (lskipinit == 0) call gyro_write_master(1)
+  if (lskipinit == 0 .and. gkeigen_j_set==0) call gyro_write_master(1)
 
   !-------------------------------------------------
   ! NEW SIMULATION ONLY:
@@ -307,11 +342,11 @@ subroutine gyro_do(skipinit)
   ! Write the initial conditions:
   !
   if (restart_method /= 1) then
-
-     if (lskipinit == 0) call gyro_write_master(2)
-     if (iohdf5out == 1 .and. lskipinit == 0) call write_hdf5_timedata(2)
-     if (iohdf5out == 1 .and. lskipinit == 0) call write_hdf5_fine_timedata(2)
-
+     if (lskipinit == 0) then
+        if (gkeigen_j_set==0) call gyro_write_master(2)
+        if (io_method > 1) call write_hdf5_timedata(2)
+        if (io_method > 1 .and. time_skip_wedge > 0) call write_hdf5_wedge_timedata(2)
+     endif
   endif
   !--------------------------------------------
 

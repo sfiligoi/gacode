@@ -45,16 +45,6 @@ theDoNlfftP=do_nlfft_p.stub.f90
 theMakeNl=make_nl.f90
 endif
 
-if HAVE_LIBSCI
-theDoNlfftMatch=do_nlfft_match.libsci.f90
-theDoNlfftP=do_nlfft_p.libsci.f90
-theMakeNl=make_nl.libsci.f90
-else
-theDoNlfftMatch=do_nlfft_match.stub.f90
-theDoNlfftP=do_nlfft_p.stub.f90
-theMakeNl=make_nl.f90
-endif
-
 if HAVE_ESSL
 theDoNlfftMatch=do_nlfft_match.essl.f90
 theDoNlfftP=do_nlfft_p.essl.f90
@@ -75,9 +65,8 @@ gyro_includes= -I $(top_builddir)/shared/math \
 	-I $(top_builddir)/shared/vshdf5
 
 # To get to work with optimization reducing compiler wrappers
-IOINC=@HDF5_FC_INC@ @FCIOWRAPPERS_INC@ @HDF5_INC@
-#IOINC=@HDF5_INC@ @FCIOWRAPPERS_INC@
-IOLIBS=@FCIOWRAPPERS_ALIBS@ @HDF5_ALIBS@ @NETCDF_ALIBS@
+IOINC=@HDF5_FC_INC@ @HDF5_INC@
+IOLIBS=@HDF5_ALIBS@ @NETCDF_ALIBS@
 AM_LIBTOOLFLAGS = --tag=FC
 AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) $(gyro_includes) $(CPPF90_FLAGS) -I.
 AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) $(gyro_includes) $(CPPF90_FLAGS) -I.
@@ -141,7 +130,7 @@ libgacodegyro_SRC_la_SOURCES = \
 	gyro_initialize_arrays.f90 \
 	gyro_radial_operators.f90 \
 	gyro_moments_plot.f90 \
-  gyro_moments_plot_fine.f90 \
+  gyro_moments_plot_wedge.f90 \
 	gyro_select_methods.f90 \
 	gyro_bounce_points.f90 \
 	gyro_radial_simulation_box.f90 \
@@ -169,7 +158,6 @@ libgacodegyro_SRC_la_SOURCES = \
 	make_theta_grid.f90 \
 	make_geometry_arrays.f90 \
 	make_gyro.f90 \
-	make_phase_space.f90 \
 	make_initial_h.f90 \
 	make_implicit_advect.f90 \
 	make_electron_current.f90 \
@@ -182,7 +170,7 @@ libgacodegyro_SRC_la_SOURCES = \
 	make_poissonaperp_matrix.f90 \
 	$(theMakeNl) \
 	get_nonlinear_advance.f90 \
-	get_nonlinear_transfer.f90 \
+	gyro_nonlinear_transfer.f90 \
 	get_ampere_coll.f90 \
 	get_gyro_h.f90 \
 	get_gyro_h_aperp.f90 \
@@ -213,7 +201,6 @@ libgacodegyro_SRC_la_SOURCES = \
   write_banana_operators.f90 \
 	write_h.f90 \
 	write_efficiency.f90 \
-	write_profile_sim.f90 \
 	write_profile_vugyro.f90 \
 	write_timing.f90 \
 	$(theWriteRestart) \
@@ -230,7 +217,6 @@ libgacodegyro_SRC_la_SOURCES = \
 	gyro_field_interpolation.f90 \
 	gyro_build_sparse_maxwell.f90 \
 	gyro_entropy.f90 \
-	write_geometry_arrays.f90.ps \
 	gyro_build_sparse_poisson.f90 \
   gyro_fulladvance.f90 \
   gyro_kxky_spectrum.f90 \
@@ -238,6 +224,7 @@ libgacodegyro_SRC_la_SOURCES = \
   gyro_mpi_grid.f90 \
   gyro_set_pointers.f90 \
   gyro_timestep_error.f90 \
+  gyro_set_phase_space.f90 \
   gyro_set_pointer_dim.f90 \
   gyro_set_blend_arrays.f90 \
 	$(HDF5IO_FILES) \
@@ -249,11 +236,11 @@ libgacodegyro_SRC_la_SOURCES = \
 	gyro_do.f90  
 
 if TX_FORTRAN_MODNAMEISCAP
-include_HEADERS = GYRO_GLOBALS.$(TX_FORTRAN_MODEXT) GYRO_INTERFACE.$(TX_FORTRAN_MODEXT)
+nodist_include_HEADERS = GYRO_GLOBALS.$(TX_FORTRAN_MODEXT) GYRO_INTERFACE.$(TX_FORTRAN_MODEXT)
 GYRO_GLOBALS.$(TX_FORTRAN_MODEXT):   gyro_globals.f90
 GYRO_INTERFACE.$(TX_FORTRAN_MODEXT): gyro_interface.f90
 else
-include_HEADERS = gyro_globals.$(TX_FORTRAN_MODEXT) gyro_interface.$(TX_FORTRAN_MODEXT)
+nodist_include_HEADERS = gyro_globals.$(TX_FORTRAN_MODEXT) gyro_interface.$(TX_FORTRAN_MODEXT)
 gyro_globals.$(TX_FORTRAN_MODEXT):   gyro_globals.f90
 gyro_interface.$(TX_FORTRAN_MODEXT): gyro_interface.f90
 endif

@@ -15,6 +15,19 @@ c
 c
       call neoclassical
 c
+      if(ipert_gf.eq.0)then
+        flowe_neo(jm) = vprime(jm,2)*neflux_neo
+        flowi_neo(jm) = vprime(jm,2)*niflux_neo
+        flowz_neo(jm) = vprime(jm,2)*nzflux_neo
+        powe_neo(jm) = vprime(jm,2)*teflux_neo
+        powi_neo(jm) = vprime(jm,2)*tiflux_neo
+        powz_neo(jm) = vprime(jm,2)*tzflux_neo
+        stress_tor_i_neo(jm) = vprime(jm,2)*vphiflux_neo
+        stress_tor_z_neo(jm) = vprime(jm,2)*vphizflux_neo
+        stress_par_i_neo(jm) = vprime(jm,2)*vparflux_neo
+        stress_par_z_neo(jm) = vprime(jm,2)*vparzflux_neo
+      endif
+c
       if(imodel.eq.81)call glf23_dv
 c
       if(imodel.eq.82)call tglf_dv
@@ -34,15 +47,34 @@ c save glf flows
 c
       if(ipert_gf.eq.0)then
 c save fluxes in MKS units
-        flow_glf(jm) = vprime(jm,2)*neflux_glf            !KA
+        flowe_glf(jm) = vprime(jm,2)*neflux_glf           !KA
+        flowi_glf(jm) = vprime(jm,2)*niflux_glf           !KA
+        flowz_glf(jm) = vprime(jm,2)*nzflux_glf           !KA
         powe_glf(jm) = vprime(jm,2)*teflux_glf            !MW
         powi_glf(jm) = vprime(jm,2)*tiflux_glf            !MW
-        stress_tor_glf(jm) = vprime(jm,2)*vphiflux_glf    !NT-M
-        stress_par_glf(jm) = vprime(jm,2)*vparflux_glf    !NT-M
+        powz_glf(jm) = vprime(jm,2)*tzflux_glf            !MW
+        stress_tor_i_glf(jm) = vprime(jm,2)*vphiflux_glf  !NT-M
+        stress_tor_z_glf(jm) = vprime(jm,2)*vphizflux_glf !NT-M
+        stress_par_i_glf(jm) = vprime(jm,2)*vparflux_glf  !NT-M
+        stress_par_z_glf(jm) = vprime(jm,2)*vparzflux_glf !NT-M
       endif
 c
       if(imodel.eq.81.or.imodel.eq.82)then
         call adhoc_dv
+c
+        if(ipert_gf.eq.0)then
+        flowe_adhoc(jm) = vprime(jm,2)*neflux_adhoc
+        flowi_adhoc(jm) = vprime(jm,2)*niflux_adhoc
+        flowz_adhoc(jm) = vprime(jm,2)*nzflux_adhoc
+        powe_adhoc(jm) = vprime(jm,2)*teflux_adhoc
+        powi_adhoc(jm) = vprime(jm,2)*tiflux_adhoc
+        powz_adhoc(jm) = vprime(jm,2)*tzflux_adhoc
+        stress_tor_i_adhoc(jm) = vprime(jm,2)*vphiflux_adhoc
+        stress_tor_z_adhoc(jm) = vprime(jm,2)*vphizflux_adhoc
+        stress_par_i_adhoc(jm) = vprime(jm,2)*vparflux_adhoc
+        stress_par_z_adhoc(jm) = vprime(jm,2)*vparzflux_adhoc
+        endif
+
 c
         nefluxm = nefluxm + neflux_adhoc
         nifluxm = nifluxm + niflux_adhoc
@@ -63,6 +95,26 @@ c
       if(imodel.eq.99) call chi1_dv
 c
       if(imodel.eq.-1) call test_dv
+c
+      if(ipert_gf.eq.0)then
+c save fluxes in MKS units
+        flowe_m(jm) = vprime(jm,2)*nefluxm           !KA
+        flowi_m(jm) = vprime(jm,2)*nifluxm           !KA
+        flowz_m(jm) = vprime(jm,2)*nzfluxm           !KA
+        powe_m(jm) = vprime(jm,2)*tefluxm            !MW
+        powi_m(jm) = vprime(jm,2)*tifluxm            !MW
+        powz_m(jm) = vprime(jm,2)*tzfluxm            !MW
+        stress_tor_i_m(jm) = vprime(jm,2)*vphifluxm  !NT-M
+        stress_tor_z_m(jm) = vprime(jm,2)*vphizfluxm !NT-M
+        stress_par_i_m(jm) = vprime(jm,2)*vparfluxm  !NT-M
+        stress_par_z_m(jm) = vprime(jm,2)*vparzfluxm !NT-M
+      endif
+c
+c      summ the ions
+c
+      tifluxm = tifluxm + tzfluxm
+      vphifluxm = vphifluxm + vphizfluxm
+      vparfluxm = vparfluxm + vparzfluxm
 c
       return
       END 
@@ -850,13 +902,6 @@ c use large ExB rotation form
       vparzflux_neo = 0.0
       vphizflux_neo = 0.0
 c
-      if(ipert_gf.eq.0)then
-        flow_neo(jm) = vprime(jm,2)*neflux_neo
-        powe_neo(jm) = vprime(jm,2)*teflux_neo
-        powi_neo(jm) = vprime(jm,2)*tiflux_neo
-        stress_tor_neo(jm) = vprime(jm,2)*vphiflux_neo
-        stress_par_neo(jm) = vprime(jm,2)*vparflux_neo
-      endif
 c
       RETURN
       END !SUBROUTINE get_kapisn
@@ -875,17 +920,18 @@ c
       include '../inc/ptor.m'
       include '../inc/glf.m'
 !
-      real :: n0,a0,T0,v0,cnc,thetam
+      real :: n0,a0,T0,v0,m0,cnc,thetam,cvpol
 !
       call xptor_neo_map
       call neo_run
 !
 ! neo normalizations
 !
-      n0 = nem
-      a0 = rmin_exp(mxgrid)
-      T0 = tim
-      v0 = 9.79D3*DSQRT(T0*1.D3)/DSQRT(amassgas_exp)
+      m0 = amassgas_exp                                !proton mass
+      n0 = nem                                         !10^19/m^3
+      a0 = rmin_exp(mxgrid)                            !m
+      T0 = tim                                         !kev
+      v0 = 9.79D3*DSQRT(T0*1.D3)/DSQRT(m0)   !m/sec
 !     
       cnc = -1.0*alpha_dia/bt_exp
       thetam=theta_exp(jm)
@@ -894,9 +940,10 @@ c
 !
 ! neoclassical poloidal velocity (km/sec)
 !
-        vneo(1) = (cnc/thetam)*neo_vpol_dke_out(2)*v0/cv
-        vneo(2) = (cnc/thetam)*neo_vpol_dke_out(1)*v0/cv
-        vneo(3) = (cnc/thetam)*neo_vpol_dke_out(3)*v0/cv
+        cvpol= -alpha_dia*(v0/cv)*(bt_exp/Bp0(jm))
+        vneo(1) = cvpol*alpha_dia*neo_vpol_dke_out(1)
+        vneo(2) = cvpol*alpha_dia*neo_vpol_dke_out(2)
+        vneo(3) = cvpol*neo_vpol_dke_out(3)
 c
 c diamagnetic velocity (km/sec)
 c
@@ -914,26 +961,22 @@ c
 c compute neoclassical fluxes
 c
        neflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*
+     >     (neo_pflux_dke_out(1)+neo_pflux_gv_out(1))
+       niflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*
      >     (neo_pflux_dke_out(2)+neo_pflux_gv_out(2))
+       nzflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*
+     >     (neo_pflux_dke_out(3)+neo_pflux_gv_out(3))
        teflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*T0*
-     >     (neo_efluxtot_dke_out(2)+neo_efluxtot_gv_out(2))
-       tiflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*T0*
      >     (neo_efluxtot_dke_out(1)+neo_efluxtot_gv_out(1))
+       tiflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*T0*
+     >     (neo_efluxtot_dke_out(2)+neo_efluxtot_gv_out(2))
        tzflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*T0*
      >     (neo_efluxtot_dke_out(3)+neo_efluxtot_gv_out(3))
-       vphiflux_neo = drhodr(jm)*(1.6726D-8)*n0*a0*T0*
-     >     (neo_mflux_dke_out(1)+neo_mflux_gv_out(1))
-       vphizflux_neo = drhodr(jm)*(1.6726D-8)*n0*a0*T0*
+       vphiflux_neo = drhodr(jm)*(1.6726D-8)*m0*n0*a0*v0*v0*
+     >     (neo_mflux_dke_out(2)+neo_mflux_gv_out(2))
+       vphizflux_neo = drhodr(jm)*(1.6726D-8)*m0*n0*a0*v0*v0*
      >     (neo_mflux_dke_out(3)+neo_mflux_gv_out(3))
-
-      if(ipert_gf.eq.0)then
-        flow_neo(jm) = vprime(jm,2)*neflux_neo
-        powe_neo(jm) = vprime(jm,2)*teflux_neo
-        powi_neo(jm) = vprime(jm,2)*tiflux_neo
-        stress_tor_neo(jm) = vprime(jm,2)*vphiflux_neo
-        stress_par_neo(jm) = vprime(jm,2)*vparflux_neo
-      endif
-      
+c      
       RETURN
       END ! SUBROUTINE get_neo
       SUBROUTINE  tglf_dv
@@ -1135,14 +1178,34 @@ c set TGLF gradients
         vpar_shear_tg(2)=0.0
         vpar_shear_tg(3)=0.0
       endif
+      if(vpar_shear_model_tg.eq.1)then
+c use GYRO conventions
+        gamma_p_m(jm) = (cv/csdam)*drhodr(jm)*
+     >  (atorm*gradvexbm + grad_a_tor*vexbm)
+        vpar_shear_tg(1) = -sign_Bt_exp*gamma_p_m(jm)
+        vpar_shear_tg(2) = vpar_shear_tg(1)
+        vpar_shear_tg(3) = vpar_shear_tg(3)
+      endif
+c initialized fluxes
+      neflux_glf = 0.0
+      niflux_glf = 0.0
+      nzflux_glf = 0.0
+      teflux_glf = 0.0
+      tiflux_glf = 0.0
+      tzflux_glf = 0.0
+      vphiflux_glf = 0.0
+      vphizflux_glf = 0.0
+      vparflux_glf = 0.0
+      vparzflux_glf = 0.0
+c
       if(ineo.eq.-2.and.q_exp(jm).lt.1.0)go to 86 !skip TGLF
       if(ineo.eq.-3.and.interchange_DR_m(jm).lt.0.0)go to 86 ! skip TGLF
 c
 c  do not call TGLF to compute variations if the first call has no flux
 c       if(ipert_gf.eq.0)write(*,*)"glf2d_dv",jm
-       if(ipert_gf.ne.0)then
-        if(v2_bar.eq.0.0)go to 86  !skip TGLF fluxes
-       endif
+cc       if(ipert_gf.ne.0)then
+cc        if(v2_bar(jm).eq.0.0)go to 86  !skip TGLF fluxes
+cc       endif
 
 c  transfer inputs to TGLF
 c
@@ -1181,6 +1244,12 @@ c
         vpar_tg(1)=0.0
         vpar_tg(2)=0.0
         vpar_tg(3)=0.0
+      endif
+      if(vpar_shear_model_tg.eq.1)then
+c use GYRO conventions
+        vpar_tg(1) = sign_Bt_exp*cv*a_tor(jm)*vexbm/(a_unit_exp*csdam)
+        vpar_tg(2) = vpar_tg(1)
+        vpar_tg(3) = vpar_tg(1)
       endif
 c      debye_tg = debyelorhos**2
        debye_tg = debyelorhos
@@ -1250,12 +1319,12 @@ c use eikonal from last call to tglf_TM
       CALL tglf_TM
       new_eikonal_tg=.TRUE.
 c
-      if(ipert_gf.eq.0.and.jm.eq.20)then
+      if(ipert_gf.eq.0.and.jm.eq.-1)then
         call write_tglf_input      
       endif
       if(ipert_gf.eq.0)then
-        v2_bar = get_v_bar_sum()
-c        write(*,*)jm,"v2_bar=",v2_bar
+        v2_bar(jm) = get_v_bar_sum()
+c        write(*,*)jm,"v2_bar=",v2_bar(jm)
         anrate_m(jm)= get_growthrate(1)
         anfreq_m(jm)= get_frequency(1)
 c      write(*,*)"debug gamma",anrate_m(jm)
@@ -1307,19 +1376,18 @@ c      endif
         chie_e_gb_m(jm) = -gradtem*tefluxm_etg
      >   /(cgyrobohm_m(jm)*nem*MAX(1.0D-10,gradtem*gradtem))
        endif
-       if(ns_tg.eq.3)then
-c sum up the ions
-         tiflux_glf = tiflux_glf + tzflux_glf
-         vphiflux_glf = vphiflux_glf + vphizflux_glf
-         vparflux_glf = vparflux_glf + vparzflux_glf
-       endif 
        if(ns_tg.eq.2)then
 c model for impurity contributions to viscous stress
          vphiflux_glf = mass_factor*vphiflux_glf
          vparflux_glf = mass_factor*vparflux_glf
+         vphizflux_glf = 0.0
+         vparzflux_glf = 0.0
+         nifluxm = nefluxm
+         nzfluxm = 0.0
+         tzfluxm = 0.0
        endif
 c
-c      write(*,*)jm,"ipert = ",ipert_gf,"v2_bar =",v2_bar
+c      write(*,*)jm,"ipert = ",ipert_gf,"v2_bar =",v2_bar(jm)
 c      write(*,*)"debug Qion",get_energy_flux(2)
 c      write(*,*)"debug teflux_glf=",teflux_glf
 c
@@ -1330,10 +1398,15 @@ c multiply fluxes by drhdr factor from volume derivative dV/dr=dV/drho*drhodr
 c to map from r-grid fluxes to rho-grid fluxes
 c
       neflux_glf = neflux_glf*drhodr(jm)
+      niflux_glf = niflux_glf*drhodr(jm)
+      nzflux_glf = nzflux_glf*drhodr(jm)
       teflux_glf = teflux_glf*drhodr(jm)
       tiflux_glf = tiflux_glf*drhodr(jm)
+      tzflux_glf = tzflux_glf*drhodr(jm)
       vphiflux_glf = vphiflux_glf*drhodr(jm)
+      vphizflux_glf = vphizflux_glf*drhodr(jm)
       vparflux_glf = vparflux_glf*drhodr(jm)
+      vparzflux_glf = vparzflux_glf*drhodr(jm)
 c
       if(ipert_gf.eq.0.and.jm.eq.20)then
        open(unit=11,file="gyro_input",status="unknown")
@@ -1475,13 +1548,6 @@ c
         vparzflux_adhoc = 0.0
         vphizflux_adhoc = 0.0
 c
-      if(ipert_gf.eq.0)then
-        flow_adhoc(jm) = vprime(jm,2)*neflux_adhoc
-        powe_adhoc(jm) = vprime(jm,2)*teflux_adhoc
-        powi_adhoc(jm) = vprime(jm,2)*tiflux_adhoc
-        stress_tor_adhoc(jm) = vprime(jm,2)*vphiflux_adhoc
-        stress_par_adhoc(jm) = vprime(jm,2)*vparflux_adhoc
-      endif
 c
       RETURN
       END  !ADHOC_DV

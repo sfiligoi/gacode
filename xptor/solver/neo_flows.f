@@ -1,0 +1,76 @@
+      SUBROUTINE neo_flows(kmax,upol_neo,udia_neo)
+c
+      IMPLICIT NONE
+c
+      include 'mpif.h'
+      INCLUDE '../inc/tport.m'
+      INCLUDE '../inc/glf.m'
+      INCLUDE '../inc/ptor.m'
+c
+      INTEGER kgrid
+      REAL*8 upol_neo(3,0:jmaxmt),udia_neo(3,0:jmaxmt)
+c
+      REAl*8 upol_sum(3,0:jmaxmt),udia_sum(3,0:jmaxmt)
+      INTEGER  i,k,kmax
+      INTEGER MPI_status(MPI_STATUS_SIZE)
+c
+      do i=1,nspecies
+        do k=0,jmaxmt
+          upol_neo(i,k)=0.0
+          udia_neo(i,k)=0.0
+          upol_sum(i,k)=0.0
+          udia_sum(i,k)=0.0
+        enddo
+      enddo
+      do k=1+i_proc,kmax-1,n_proc
+        nem = (ne_m(k+1)+ne_m(k))/2.D0
+        tim = (ti_m(k+1)+ti_m(k))/2.D0
+        tem = (te_m(k+1)+te_m(k))/2.D0
+        fim = (fi_m(k+1)+fi_m(k))/2.D0
+        fzm = (fz_m(k+1)+fz_m(k))/2.D0
+        nim = fim*nem
+        nzm = fzm*nem
+        vexbm= 0.0
+        vpolm= 0.0
+        gradnem = (ne_m(k+1)-ne_m(k))/dr(k,2)
+        gradtim = (ti_m(k+1)-ti_m(k))/dr(k,2)
+        gradtem = (te_m(k+1)-te_m(k))/dr(k,2)
+        gradvexbm = 0.0
+        gradvpolm = 0.0
+        gradfim = (fi_m(k+1)-fi_m(k))/dr(k,2)
+        gradfzm = (fz_m(k+1)-fz_m(k))/dr(k,2)
+        gradnim = fim*gradnem + nem*gradfim
+        gradnzm = fzm*gradnem + nem*gradfzm
+        jm=k
+        call neoclassical
+        do i=1,nspecies
+          upol_neo(i,k+1) = vneo(i)
+          udia_neo(i,k+1) = vdia(i)
+        enddo
+      enddo
+      do i=1,nspecies
+        upol_neo(i,1) = upol_neo(i,2)
+        udia_neo(i,1) = udia_neo(i,2)
+        upol_neo(i,0) = upol_neo(i,1)
+        udia_neo(i,0) = udia_neo(i,1)
+      enddo
+c
+      call MPI_BARRIER(MPI_COMM_WORLD,i_err)
+      call MPI_REDUCE(upol_neo,upol_sum,3*(jmaxmt+1)
+     >  ,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,i_err)
+      call MPI_BCAST(upol_sum,3*(jmaxmt+1)
+     >  ,MPI_DOUBLE_PRECISION,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(udia_neo,udia_sum,3*(jmaxmt+1)
+     >  ,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,i_err)
+      call MPI_BCAST(udia_sum,3*(jmaxmt+1)
+     >  ,MPI_DOUBLE_PRECISION,0, MPI_COMM_WORLD, i_err)
+c
+      do i=1,nspecies
+        do k=1,kmax-1
+          upol_neo(i,k) = upol_sum(i,k)
+          udia_neo(i,k) = udia_sum(i,k)
+        enddo      
+      enddo
+c
+      RETURN
+      END ! subroutine neo_flows

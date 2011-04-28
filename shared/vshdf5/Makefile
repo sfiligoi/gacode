@@ -23,8 +23,7 @@ vshdf5_dummy: dummy.o
 	$(FC) $(FMATH) $(FFLAGS) $(HDF5_INC) -c $<
 
 .F90.o :
-	$(FC) $(FMATH) $(FFLAGS) $(HDF5_INC) -c $<
+	$(FC) $(FMATH) $(FFLAGS) $(MPI_FLAG) $(HDF5_INC) -c $<
 
-#SEK: Need to figure this out.
 clean:
-	rm -f *.o $(LLIB).a ${GACODE_ROOT}/modules/expro_interface.mod
+	rm -f *.o *.a

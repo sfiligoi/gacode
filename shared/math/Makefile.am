@@ -18,7 +18,6 @@ libgacodemath_la_SOURCES = \
   j0y0.f \
   i0.f \
   erf.f \
-  proc_time.f \
   p32.f90 \
   invert_p32.f90 \
   gauss_legendre.f90 \
@@ -36,7 +35,9 @@ libgacodemath_la_SOURCES = \
   cub_spline_deriv2.f90 \
   gamma.f \
   energy_integral.f90 \
-  curtis_rad.f90
+  curtis_rad.f90 \
+  proc_time.f
+
 	
 
 # To get to work with optimization reducing compiler wrappers
