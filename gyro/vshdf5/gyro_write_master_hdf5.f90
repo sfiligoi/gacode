@@ -120,8 +120,9 @@ subroutine write_hdf5_data(datafile,action)
   !---------------------------------------------------------------------
   ! These variables are essentially gyro_write_units.f90
   !---------------------------------------------------------------------
-     ! kT in MJ (note the conversion 1.6022e-22 MJ/keV)
-     kt = 1.6022e-22*tem_norm
+  ! kT in MJ (note the conversion 1.6022e-22 MJ/keV)
+  kt = 1.6022e-22*tem_norm
+
   h5in%units="kg"
   call dump_h5(rootid,'m_ref', 2.*kg_proton ,h5in,h5err)
   h5in%units="Tesla"
@@ -154,7 +155,7 @@ subroutine write_hdf5_data(datafile,action)
   call dump_h5(rootid,'S_gBD',buff,h5in,h5err)
 
   !---------------------------------------------------------------------
-  ! These variables are essentially the write_profile_vugyro.f90 
+  ! Data from geometry_arrays.out
   !---------------------------------------------------------------------
 
   n_wedge = n_theta_plot*n_theta_mult
@@ -195,7 +196,7 @@ subroutine write_hdf5_data(datafile,action)
         GEO_q_in     = q(i)
         GEO_s_in     = shat_s(ir_norm)
         GEO_kappa_in = kappa_s(ir_norm)+&
-                   kappa_s(ir_norm)*s_kappa_s(ir_norm)/r(ir_norm)*dr
+             kappa_s(ir_norm)*s_kappa_s(ir_norm)/r(ir_norm)*dr
         GEO_s_kappa_in = s_kappa_s(ir_norm)
         GEO_delta_in   = delta_s(ir_norm)+s_delta_s(ir_norm)/r(ir_norm)*dr
         GEO_s_delta_in = s_delta_s(ir_norm)
@@ -230,21 +231,23 @@ subroutine write_hdf5_data(datafile,action)
         buffer(11,i,j)=GEO_captheta
 
      enddo ! j
-       ! Set up nu for plotting and synthetic diagnostic.
-       ! Note we need theta=-pi and pi so include 0 index
-       do j=0,n_theta_plot
-          theta = -pi+real(j)*pi_2/n_theta_plot
-          if (n_theta_plot == 1) theta = 0.0 ! Test for special case
-          call GEO_interp(theta)
-          nu_coarse(j,i)=GEO_nu
-       enddo
-       do j=1,n_wedge
-          theta=theta_wedge_offset+real(j-1)*theta_wedge_angle/       &
-                      real(n_theta_plot*n_theta_mult-1)
-          if (n_wedge == 1) theta = 0.0 ! Test for special case
-          call GEO_interp(theta)
-          nu_wedge(j,i)=GEO_nu
-       enddo
+
+     ! Set up nu for plotting and synthetic diagnostic.
+     ! Note we need theta=-pi and pi so include 0 index
+     do j=0,n_theta_plot
+        theta = -pi+real(j)*pi_2/n_theta_plot
+        if (n_theta_plot == 1) theta = 0.0 ! Test for special case
+        call GEO_interp(theta)
+        nu_coarse(j,i)=GEO_nu
+     enddo
+     do j=1,n_wedge
+        theta=theta_wedge_offset+real(j-1)*theta_wedge_angle/       &
+             real(n_theta_plot*n_theta_mult-1)
+        if (n_wedge == 1) theta = 0.0 ! Test for special case
+        call GEO_interp(theta)
+        nu_wedge(j,i)=GEO_nu
+     enddo
+
   enddo ! i
 
 
@@ -263,8 +266,7 @@ subroutine write_hdf5_data(datafile,action)
 
   call close_h5file(fid,rootid,h5err)
 
- return
- end subroutine write_hdf5_data
+end subroutine write_hdf5_data
 
 !------------------------------------------------------
 ! write_hdf5_timedata
@@ -316,57 +318,57 @@ subroutine write_hdf5_timedata(action)
   !---------------------------------------------------
   ! Determine if the 3D files need to be written 
   if (n_torangle_3d > 1 ) then
-          write_threed = .true.
+     write_threed = .true.
   else
-          write_threed = .false.
+     write_threed = .false.
   endif
 
   !---------------------------------------------------
   ! Initialization
   !---------------------------------------------------
   if (i_proc == 0) then
-    call vshdf5_inith5vars(h5in, h5err)
-    h5in%comm=MPI_COMM_SELF
-    h5in%info=MPI_INFO_NULL
-    h5in%wrd_type=H5T_NATIVE_REAL
-    h5in%typeConvert=.true.
-    !h5in%wrd_type=H5T_NATIVE_DOUBLE
-    h5in%doTranspose=.true.
-    h5in%verbose=.true.
-    h5in%debug=.false.
-    h5in%wrVsTime=.true.
-    h5in%vsTime=t_current
-    h5in%vsStep=step
-  
-    !---------------------------------------------------
-    ! Timestep data:
-    !
-      number_label=NINT(t_current/dt)
-      if (number_label>999999) THEN
+     call vshdf5_inith5vars(h5in, h5err)
+     h5in%comm=MPI_COMM_SELF
+     h5in%info=MPI_INFO_NULL
+     h5in%wrd_type=H5T_NATIVE_REAL
+     h5in%typeConvert=.true.
+     !h5in%wrd_type=H5T_NATIVE_DOUBLE
+     h5in%doTranspose=.true.
+     h5in%verbose=.true.
+     h5in%debug=.false.
+     h5in%wrVsTime=.true.
+     h5in%vsTime=t_current
+     h5in%vsStep=step
+
+     !---------------------------------------------------
+     ! Timestep data:
+     !
+     number_label=NINT(t_current/dt)
+     if (number_label>999999) THEN
         write(step_name,fmt='(i7.7)') number_label
-      else if (number_label>99999) THEN
+     else if (number_label>99999) THEN
         write(step_name,fmt='(i6.6)') number_label
-      else
+     else
         write(step_name,fmt='(i5.5)') number_label
-      endif
-  
-    dumpfile=TRIM(path)//"gyro"//TRIM(step_name)//".h5"
-    description="GYRO dump file"
-    call open_newh5file(dumpfile,dumpFid,description,dumpGid,h5in,h5err)
+     endif
 
-    if (write_threed) then
-      dumpfile=TRIM(path)//"gyro3D"//TRIM(step_name)//".h5"
-      description="GYRO 3D plot file"
-      call open_newh5file(dumpfile,fid3d,description,gid3D,h5in,h5err)
-    endif
+     dumpfile=TRIM(path)//"gyro"//TRIM(step_name)//".h5"
+     description="GYRO dump file"
+     call open_newh5file(dumpfile,dumpFid,description,dumpGid,h5in,h5err)
 
-    call hdf5_write_coords
+     if (write_threed) then
+        dumpfile=TRIM(path)//"gyro3D"//TRIM(step_name)//".h5"
+        description="GYRO 3D plot file"
+        call open_newh5file(dumpfile,fid3d,description,gid3D,h5in,h5err)
+     endif
+
+     call hdf5_write_coords
   endif
   !---------------------------------------------------
 
   call proc_time(cp0)
 
-   !--------------------------------------------------
+  !--------------------------------------------------
   ! Output of field-like quantities:
   !
   !
@@ -390,15 +392,15 @@ subroutine write_hdf5_timedata(action)
           h5in,h5err)
   endif
 
-    if (plot_n_flag == 1) then
+  if (plot_n_flag == 1) then
      ! DENSITY
      h5in%units=" "
      h5in%mesh="/cartMesh"
      call write_distributed_complex_h5("density",&
           dumpGid,gid3D,&
-           n_theta_plot*n_x*n_kinetic,&
-           n_theta_plot,n_x,n_kinetic,&
-           moments_plot(:,:,:,1),&
+          n_theta_plot*n_x*n_kinetic,&
+          n_theta_plot,n_x,n_kinetic,&
+          moments_plot(:,:,:,1),&
           write_threed,&
           .false., &
           h5in,h5err)
@@ -410,9 +412,9 @@ subroutine write_hdf5_timedata(action)
      h5in%mesh="/cartMesh"
      call write_distributed_complex_h5("energy",&
           dumpGid,gid3D,&
-           n_theta_plot*n_x*n_kinetic,&
-           n_theta_plot,n_x,n_kinetic,&
-           moments_plot(:,:,:,2),&
+          n_theta_plot*n_x*n_kinetic,&
+          n_theta_plot,n_x,n_kinetic,&
+          moments_plot(:,:,:,2),&
           write_threed,&
           .false., &
           h5in,h5err)
@@ -423,13 +425,13 @@ subroutine write_hdf5_timedata(action)
      h5in%units="vpar units"
      call write_distributed_complex_h5("v_par",&
           dumpGid,gid3D,&
-           n_theta_plot*n_x*n_kinetic,&
-           n_theta_plot,n_x,n_kinetic,&
-           moments_plot(:,:,:,3),&
+          n_theta_plot*n_x*n_kinetic,&
+          n_theta_plot,n_x,n_kinetic,&
+          moments_plot(:,:,:,3),&
           write_threed,&
           .false., &
           h5in,h5err)
-     
+
   endif
 
   !--------------------------------------------------
@@ -437,18 +439,18 @@ subroutine write_hdf5_timedata(action)
   !--------------------------------------------------
   ! Output of field at r=r0:
   !
-!-PRE  if (field_r0_flag == 1) then
-!-PRE     h5in%units="?"
-!-PRE     call write_distributed_complex_h5("field_r0",&
-!-PRE          dumpGid,gid3D,&
-!-PRE          size(field_r0_plot),&
-!-PRE          size(field_r0_plot,1),&
-!-PRE          size(field_r0_plot,2),&
-!-PRE          size(field_r0_plot,3),&
-!-PRE          field_r0_plot,&
-!-PRE          write_threed,&
-!-PRE          h5in,h5err)
-!-PRE  endif
+  !-PRE  if (field_r0_flag == 1) then
+  !-PRE     h5in%units="?"
+  !-PRE     call write_distributed_complex_h5("field_r0",&
+  !-PRE          dumpGid,gid3D,&
+  !-PRE          size(field_r0_plot),&
+  !-PRE          size(field_r0_plot,1),&
+  !-PRE          size(field_r0_plot,2),&
+  !-PRE          size(field_r0_plot,3),&
+  !-PRE          field_r0_plot,&
+  !-PRE          write_threed,&
+  !-PRE          h5in,h5err)
+  !-PRE  endif
   !--------------------------------------------------
 
   call proc_time(cp1)
@@ -504,11 +506,11 @@ subroutine write_hdf5_timedata(action)
      !=============
 
      !SEK Worry about this later.
-         call write_distributed_real_h5("freq_n",dumpGid,&
+     call write_distributed_real_h5("freq_n",dumpGid,&
           size(freq_n),&
           freq_n,&
           h5in,h5err)
- 
+
      !=============
      ! END LINEAR 
      !=============
@@ -536,7 +538,7 @@ subroutine write_hdf5_timedata(action)
           size(freq_n),&
           freq_n,&
           h5in,h5err)
-     
+
 
      if (lindiff_method >= 4) then
         call write_distributed_real_h5('phi_squared_QL_n',dumpGid,&
@@ -618,9 +620,9 @@ subroutine write_hdf5_timedata(action)
      !SEK already assumed calculated
      !SEK call get_nonlinear_flux_velocity
      call write_distributed_real_h5('flux_velocity',dumpGid,&
-             size(nonlinear_flux_velocity),&
-             nonlinear_flux_velocity,&
-             h5in,h5err)
+          size(nonlinear_flux_velocity),&
+          nonlinear_flux_velocity,&
+          h5in,h5err)
   endif
   !------------------------------------------------------------
 
@@ -634,143 +636,143 @@ subroutine write_hdf5_timedata(action)
      call dump_h5(dumpGid,'n_proc',n_proc,h5in,h5err)
   endif
 
-   if (i_proc == 0) then
-         call close_h5file(dumpFid,dumpGid,h5err)
-         if (write_threed) call close_h5file(fid3d,gid3d,h5err)
-   endif
+  if (i_proc == 0) then
+     call close_h5file(dumpFid,dumpGid,h5err)
+     if (write_threed) call close_h5file(fid3d,gid3d,h5err)
+  endif
 
-   return
+  return
 
-  contains
-      subroutine hdf5_write_coords
-      use GEO_interface
-      !------------------------------------------
-      !  Write the coordinates out
-      !  We want to have same coordinate system as:
-      !    allocate(phi_plot(n_theta_plot,n_x,n_field+eparallel_plot_flag))
-      !  This should be generalized to include the other GEO options
-      !------------------------------------------
-       real, dimension(:,:), allocatable :: Rc,Zc,Rf,Zf
-       real, dimension(:,:,:,:), allocatable :: buffer
-       real, dimension(:,:,:), allocatable :: bufferMesh
-       real :: theta, rmajc, zmagc, kappac, deltac, zetac, r_c, dr,xdc
-       integer :: iphi, ix, iy, j, ncoarse,nphi
+contains
+  subroutine hdf5_write_coords
+    use GEO_interface
+    !------------------------------------------
+    !  Write the coordinates out
+    !  We want to have same coordinate system as:
+    !    allocate(phi_plot(n_theta_plot,n_x,n_field+eparallel_plot_flag))
+    !  This should be generalized to include the other GEO options
+    !------------------------------------------
+    real, dimension(:,:), allocatable :: Rc,Zc,Rf,Zf
+    real, dimension(:,:,:,:), allocatable :: buffer
+    real, dimension(:,:,:), allocatable :: bufferMesh
+    real :: theta, rmajc, zmagc, kappac, deltac, zetac, r_c, dr,xdc
+    integer :: iphi, ix, iy, j, ncoarse,nphi
 
-       ncoarse = n_theta_plot
-       allocate(Rc(0:ncoarse,n_x), Zc(0:ncoarse,n_x))
-    
-       !----------------------------------------
-       ! Calculate the R,Z coordinates.  See write_geometry_arrays.f90
-       ! The theta grid needs to correspond to the the theta_plot
-       ! array which sets the interpolation arrays in 
-       ! gyro_set_blend_arrays.  The theta_plot array is defined as:
-       !  do j=1,n_theta_plot
-       !          theta_plot(j) = -pi+(j-1)*pi_2/n_theta_plot
-       !  enddo
-       ! such that theta E [0,2 pi) in gyro_banana_operators.f90
-       ! For the 3D arrays, we want the periodic point repeated for
-       ! nice plots; i.e., theta E [0,2 pi], but we plot the raw
-       ! mode data on theta E [0, 2 pi).  Can be a bit confusing.
-       !---------------------------------------- 
+    ncoarse = n_theta_plot
+    allocate(Rc(0:ncoarse,n_x), Zc(0:ncoarse,n_x))
 
-       do ix=1,n_x
-         r_c=r(ix)
-         rmajc = rmaj_s(ix)
-         zmagc = zmag_s(ix)
-         kappac = kappa_s(ix)
-         deltac = delta_s(ix)
-         xdc    = asin(deltac)
-         zetac  = zeta_s(ix)
-         ! Note:  This needs to be generalized for all geometries
-         do j=0,ncoarse
-             theta = -pi+REAL(j)*pi*2./REAL(ncoarse)
-             if(radial_profile_method==1) then
-                Rc(j,ix)=rmajc+r_c*cos(theta)
-                Zc(j,ix)=zmagc+r_c*sin(theta)
-             else
-                Rc(j,ix)=rmajc+r_c*cos(theta+xdc*sin(theta))
-                Zc(j,ix)=zmagc+kappac*r_c*sin(theta+zetac*sin(2.*theta))
-             endif
-         enddo
+    !----------------------------------------
+    ! Calculate the R,Z coordinates.  See write_geometry_arrays.f90
+    ! The theta grid needs to correspond to the the theta_plot
+    ! array which sets the interpolation arrays in 
+    ! gyro_set_blend_arrays.  The theta_plot array is defined as:
+    !  do j=1,n_theta_plot
+    !          theta_plot(j) = -pi+(j-1)*pi_2/n_theta_plot
+    !  enddo
+    ! such that theta E [0,2 pi) in gyro_banana_operators.f90
+    ! For the 3D arrays, we want the periodic point repeated for
+    ! nice plots; i.e., theta E [0,2 pi], but we plot the raw
+    ! mode data on theta E [0, 2 pi).  Can be a bit confusing.
+    !---------------------------------------- 
+
+    do ix=1,n_x
+       r_c=r(ix)
+       rmajc = rmaj_s(ix)
+       zmagc = zmag_s(ix)
+       kappac = kappa_s(ix)
+       deltac = delta_s(ix)
+       xdc    = asin(deltac)
+       zetac  = zeta_s(ix)
+       ! Note:  This needs to be generalized for all geometries
+       do j=0,ncoarse
+          theta = -pi+REAL(j)*pi*2./REAL(ncoarse)
+          if(radial_profile_method==1) then
+             Rc(j,ix)=rmajc+r_c*cos(theta)
+             Zc(j,ix)=zmagc+r_c*sin(theta)
+          else
+             Rc(j,ix)=rmajc+r_c*cos(theta+xdc*sin(theta))
+             Zc(j,ix)=zmagc+kappac*r_c*sin(theta+zetac*sin(2.*theta))
+          endif
        enddo
-      
-       !------------------------------------------------
-       ! Set up the toroidal grid.  Only used for coarse grid
-       !-------------------------------------------------
-    
-         allocate(zeta_phi(n_torangle_3d))
-         do iphi=1,n_torangle_3d
-            zeta_phi(iphi)=REAL(iphi-1)/REAL(n_torangle_3d-1)*2.*pi
-         end do
+    enddo
 
-       !----------------------------------------
-       ! Dump the coarse meshes
-       !---------------------------------------- 
+    !------------------------------------------------
+    ! Set up the toroidal grid.  Only used for coarse grid
+    !-------------------------------------------------
 
-       h5in%units=""
-       call dump_h5(dumpGid,'Rgyro',Rc,h5in,h5err)
-       call dump_h5(dumpGid,'Zgyro',Zc,h5in,h5err)
+    allocate(zeta_phi(n_torangle_3d))
+    do iphi=1,n_torangle_3d
+       zeta_phi(iphi)=REAL(iphi-1)/REAL(n_torangle_3d-1)*2.*pi
+    end do
+
+    !----------------------------------------
+    ! Dump the coarse meshes
+    !---------------------------------------- 
+
+    h5in%units=""
+    call dump_h5(dumpGid,'Rgyro',Rc,h5in,h5err)
+    call dump_h5(dumpGid,'Zgyro',Zc,h5in,h5err)
+    h5in%units="m"
+    call dump_h5(dumpGid,'R',Rc*a_meters,h5in,h5err)
+    call dump_h5(dumpGid,'Z',Zc*a_meters,h5in,h5err)
+
+    ! Here we do not repeat the points since this is the grid
+    ! that will be used for the mode plots on thete E [0,2 pi)
+    allocate(bufferMesh(0:ncoarse,n_x,2))
+    bufferMesh(:,:,1)= Rc*a_meters
+    bufferMesh(:,:,2)= Zc*a_meters
+    h5in%units="m"
+    h5in%mesh="mesh-structured"
+    call dump_h5(dumpGid,'cartMesh',bufferMesh(:,:,:),h5in,h5err)
+    h5in%mesh=" "
+    deallocate(bufferMesh)
+
+    !----------------------------------------
+    ! Dump the coarse mesh(es) in 3D
+    !---------------------------------------- 
+    if (write_threed) then
+       !-------------------------------------------------------
+       ! Set up the alpha grid
+       ! These are set up in a module so no need to recalculate
+       !-------------------------------------------------------
+
+       if (.not. allocated(alpha_phi) ) then 
+          nphi=1
+          if (n_torangle_3d > 0 ) nphi=n_torangle_3d 
+          allocate(alpha_phi(0:ncoarse,n_x,nphi))
+          do iphi=1,n_torangle_3d
+             alpha_phi(:,:,iphi)=zeta_phi(iphi)+nu_coarse(:,:)
+          end do
+       endif
+
        h5in%units="m"
-       call dump_h5(dumpGid,'R',Rc*a_meters,h5in,h5err)
-       call dump_h5(dumpGid,'Z',Zc*a_meters,h5in,h5err)
+       call dump_h5(gid3d,'R',Rc*a_meters,h5in,h5err)
+       call dump_h5(gid3d,'Z',Zc*a_meters,h5in,h5err)
+       h5in%units="radians"
+       call dump_h5(gid3d,'torAngle',zeta_phi,h5in,h5err)
+       call dump_h5(gid3d,'torangle_offset',torangle_offset,h5in,h5err)
+       call dump_h5(gid3d,'alpha',alpha_phi,h5in,h5err)
 
-       ! Here we do not repeat the points since this is the grid
-       ! that will be used for the mode plots on thete E [0,2 pi)
-       allocate(bufferMesh(0:ncoarse,n_x,2))
-       bufferMesh(:,:,1)= Rc*a_meters
-       bufferMesh(:,:,2)= Zc*a_meters
-       h5in%units="m"
-       h5in%mesh="mesh-structured"
-       call dump_h5(dumpGid,'cartMesh',bufferMesh(:,:,:),h5in,h5err)
-       h5in%mesh=" "
-       deallocate(bufferMesh)
+       allocate(buffer(ncoarse+1,n_x,n_torangle_3d,3))
+       do iphi=1,n_torangle_3d
+          buffer(:,:,iphi,1)= Rc(:,:)*COS(zeta_phi(iphi))
+          buffer(:,:,iphi,2)=-Rc(:,:)*SIN(zeta_phi(iphi))
+          buffer(:,:,iphi,3)= Zc(:,:)
+       enddo
 
-       !----------------------------------------
-       ! Dump the coarse mesh(es) in 3D
-       !---------------------------------------- 
-       if (write_threed) then
-         !-------------------------------------------------------
-         ! Set up the alpha grid
-         ! These are set up in a module so no need to recalculate
-         !-------------------------------------------------------
+       h5in%units="m"; h5in%mesh="mesh-structured"
+       call dump_h5(gid3d,'cartMesh',buffer*a_meters,h5in,h5err)
+       deallocate(buffer)
+    endif
 
-         if (.not. allocated(alpha_phi) ) then 
-              nphi=1
-             if (n_torangle_3d > 0 ) nphi=n_torangle_3d 
-             allocate(alpha_phi(0:ncoarse,n_x,nphi))
-             do iphi=1,n_torangle_3d
-                alpha_phi(:,:,iphi)=zeta_phi(iphi)+nu_coarse(:,:)
-             end do
-         endif
-    
-         h5in%units="m"
-         call dump_h5(gid3d,'R',Rc*a_meters,h5in,h5err)
-         call dump_h5(gid3d,'Z',Zc*a_meters,h5in,h5err)
-         h5in%units="radians"
-         call dump_h5(gid3d,'torAngle',zeta_phi,h5in,h5err)
-         call dump_h5(gid3d,'torangle_offset',torangle_offset,h5in,h5err)
-         call dump_h5(gid3d,'alpha',alpha_phi,h5in,h5err)
+    !----------------------------------------
+    ! Dump the wedge mesh(es)
+    !---------------------------------------- 
+    deallocate(Rc, Zc)
+    deallocate(zeta_phi)
+    return
+  end subroutine hdf5_write_coords
 
-         allocate(buffer(ncoarse+1,n_x,n_torangle_3d,3))
-         do iphi=1,n_torangle_3d
-           buffer(:,:,iphi,1)= Rc(:,:)*COS(zeta_phi(iphi))
-           buffer(:,:,iphi,2)=-Rc(:,:)*SIN(zeta_phi(iphi))
-           buffer(:,:,iphi,3)= Zc(:,:)
-         enddo
-
-         h5in%units="m"; h5in%mesh="mesh-structured"
-         call dump_h5(gid3d,'cartMesh',buffer*a_meters,h5in,h5err)
-         deallocate(buffer)
-      endif
-
-       !----------------------------------------
-       ! Dump the wedge mesh(es)
-       !---------------------------------------- 
-       deallocate(Rc, Zc)
-       deallocate(zeta_phi)
-      return
-      end subroutine hdf5_write_coords
- 
 end subroutine write_hdf5_timedata
 
 !------------------------------------------------------
@@ -829,36 +831,36 @@ subroutine write_hdf5_wedge_timedata(action)
   ! SEK: Should I do this every time?
   !---------------------------------------------------
   if (i_proc == 0) then
-    call vshdf5_inith5vars(h5in, h5err)
-    h5in%comm=MPI_COMM_SELF
-    h5in%info=MPI_INFO_NULL
-    h5in%wrd_type=H5T_NATIVE_REAL
-    h5in%typeConvert=.true.
-    !h5in%wrd_type=H5T_NATIVE_DOUBLE
-    h5in%doTranspose=.true.
-    h5in%verbose=.true.
-    h5in%debug=.false.
-    h5in%wrVsTime=.true.
-    h5in%vsTime=t_current
-    h5in%vsStep=step
-  
-    !---------------------------------------------------
-    ! Timestep data:
-    !
-    number_label=NINT(t_current/dt)
-    if (number_label>999999) THEN
-      write(step_name,fmt='(i7.7)') number_label
-    else if (number_label>99999) THEN
-      write(step_name,fmt='(i6.6)') number_label
-    else
-      write(step_name,fmt='(i5.5)') number_label
-    endif
+     call vshdf5_inith5vars(h5in, h5err)
+     h5in%comm=MPI_COMM_SELF
+     h5in%info=MPI_INFO_NULL
+     h5in%wrd_type=H5T_NATIVE_REAL
+     h5in%typeConvert=.true.
+     !h5in%wrd_type=H5T_NATIVE_DOUBLE
+     h5in%doTranspose=.true.
+     h5in%verbose=.true.
+     h5in%debug=.false.
+     h5in%wrVsTime=.true.
+     h5in%vsTime=t_current
+     h5in%vsStep=step
 
-    dumpfile=TRIM(path)//"gyrowedge"//TRIM(step_name)//".h5"
-    description="GYRO real space file at single phi plane.  On wedge mesh"
-    call open_newh5file(dumpfile,fidwedge,description,gidwedge,h5in,h5err)
+     !---------------------------------------------------
+     ! Timestep data:
+     !
+     number_label=NINT(t_current/dt)
+     if (number_label>999999) THEN
+        write(step_name,fmt='(i7.7)') number_label
+     else if (number_label>99999) THEN
+        write(step_name,fmt='(i6.6)') number_label
+     else
+        write(step_name,fmt='(i5.5)') number_label
+     endif
 
-    call hdf5_write_wedge_coords
+     dumpfile=TRIM(path)//"gyrowedge"//TRIM(step_name)//".h5"
+     description="GYRO real space file at single phi plane.  On wedge mesh"
+     call open_newh5file(dumpfile,fidwedge,description,gidwedge,h5in,h5err)
+
+     call hdf5_write_wedge_coords
   endif
   !---------------------------------------------------
 
@@ -875,13 +877,13 @@ subroutine write_hdf5_wedge_timedata(action)
      h5in%units=" "
      h5in%mesh="/cartMesh"
      call write_distributed_complex_h5("density",&
-        gidwedge,gidwedge,&
-         n_wedge*n_x*n_kinetic,&
-         n_wedge,n_x,n_kinetic,&
-         moments_plot_wedge(:,:,:,1),&
-        .true.,&
-        .true.,&
-        h5in,h5err)
+          gidwedge,gidwedge,&
+          n_wedge*n_x*n_kinetic,&
+          n_wedge,n_x,n_kinetic,&
+          moments_plot_wedge(:,:,:,1),&
+          .true.,&
+          .true.,&
+          h5in,h5err)
   endif
 
   if (plot_e_flag == 1) then
@@ -889,13 +891,13 @@ subroutine write_hdf5_wedge_timedata(action)
      h5in%units="energy units"
      h5in%mesh="/cartMesh"
      call write_distributed_complex_h5("energy",&
-         gidwedge,gidwedge,&
-         n_wedge*n_x*n_kinetic,&
-         n_wedge,n_x,n_kinetic,&
-         moments_plot_wedge(:,:,:,2),&
-        .true.,&
-        .true.,&
-        h5in,h5err)
+          gidwedge,gidwedge,&
+          n_wedge*n_x*n_kinetic,&
+          n_wedge,n_x,n_kinetic,&
+          moments_plot_wedge(:,:,:,2),&
+          .true.,&
+          .true.,&
+          h5in,h5err)
   endif
 
   if (plot_v_flag == 1) then
@@ -903,124 +905,125 @@ subroutine write_hdf5_wedge_timedata(action)
      h5in%units="vpar units"
      h5in%mesh="/cartMesh"
      call write_distributed_complex_h5("v_par",&
-        gidwedge,gidwedge,&
-         n_wedge*n_x*n_kinetic,&
-         n_wedge,n_x,n_kinetic,&
-         moments_plot_wedge(:,:,:,3),&
-        .true.,&
-        .true.,&
-        h5in,h5err)
+          gidwedge,gidwedge,&
+          n_wedge*n_x*n_kinetic,&
+          n_wedge,n_x,n_kinetic,&
+          moments_plot_wedge(:,:,:,3),&
+          .true.,&
+          .true.,&
+          h5in,h5err)
   endif
 
   !--------------------------------------------------
 
-   if (i_proc == 0) then
-      call close_h5file(fidwedge,gidwedge,h5err)
-   endif
+  if (i_proc == 0) then
+     call close_h5file(fidwedge,gidwedge,h5err)
+  endif
 
-   return
+  return
 
-  contains
-      subroutine hdf5_write_wedge_coords
-      use GEO_interface
-      !------------------------------------------
-      !  Write the coordinates out
-      !  We want to have same coordinate system as:
-      !    allocate(phi_plot(n_theta_plot,n_x,n_field+eparallel_plot_flag))
-      !  This should be generalized to include the other GEO options
-      !------------------------------------------
-       real, dimension(:,:), allocatable :: Rc,Zc,Rf,Zf
-       real, dimension(:,:,:), allocatable :: bufferwedgeMesh
-       real :: theta, rmajc, zmagc, kappac, deltac, zetac, r_c, dr,xdc
-       real :: zeta_wedge
-       integer :: iphi, ix, iy, j, ncoarse, nwedge
+contains
+  subroutine hdf5_write_wedge_coords
+    use GEO_interface
+    !------------------------------------------
+    !  Write the coordinates out
+    !  We want to have same coordinate system as:
+    !    allocate(phi_plot(n_theta_plot,n_x,n_field+eparallel_plot_flag))
+    !  This should be generalized to include the other GEO options
+    !------------------------------------------
+    real, dimension(:,:), allocatable :: Rc,Zc,Rf,Zf
+    real, dimension(:,:,:), allocatable :: bufferwedgeMesh
+    real :: theta, rmajc, zmagc, kappac, deltac, zetac, r_c, dr,xdc
+    real :: zeta_wedge
+    integer :: iphi, ix, iy, j, ncoarse, nwedge
 
-       ncoarse = n_theta_plot
-       nwedge = n_theta_plot*n_theta_mult
-       allocate(Rf(1:nwedge,n_x), Zf(1:nwedge,n_x))
-    
-       !----------------------------------------
-       ! Calculate the R,Z coordinates.  See write_geometry_arrays.f90
-       !---------------------------------------- 
+    ncoarse = n_theta_plot
+    nwedge = n_theta_plot*n_theta_mult
+    allocate(Rf(1:nwedge,n_x), Zf(1:nwedge,n_x))
 
-       do ix=1,n_x
-         if (flat_profile_flag == 0) then
-            r_c=r_s(ix)
-         else
-            r_c=r(ix)
-         endif
-         rmajc = rmaj_s(ix)
-         zmagc = zmag_s(ix)
-         kappac = kappa_s(ix)
-         deltac = delta_s(ix)
-         xdc    = asin(deltac)
-         zetac  = zeta_s(ix)
-         do j=1,nwedge
-             ! This needs to match up with what's in gyro_set_blend_arrays.f90
-             theta=theta_wedge_offset+real(j-1)*theta_wedge_angle/       &
-                                   real(n_theta_plot*n_theta_mult-1)
-             !theta = -pi+REAL(j)*pi*2./REAL(nwedge)
-             if(radial_profile_method==1) then
-                Rf(j,ix)=rmajc+r_c*cos(theta)
-                Zf(j,ix)=zmagc+r_c*sin(theta)
-             else
-                Rf(j,ix)=rmajc+r_c*cos(theta+xdc*sin(theta))
-                Zf(j,ix)=zmagc+kappac*r_c*sin(theta+zetac*sin(2.*theta))
-             endif
-         enddo
-       enddo
-      
-       !-------------------------------------------------------
-       ! Set up the alpha grid
-       ! These are saved in a module so no need to recalculate
-       !-------------------------------------------------------
+    !----------------------------------------
+    ! Calculate the R,Z coordinates.  See write_geometry_arrays.f90
+    !---------------------------------------- 
 
-       if (.not. allocated(alpha_phi_wedge) ) then
-           allocate(alpha_phi_wedge(nwedge,n_x,n_torangle_wedge))
-           do iphi=1,n_torangle_wedge
-              !Don't store zeta_wedge b/c analysis is on a plane by plane basis
-              zeta_wedge=REAL(iphi-1)/REAL(n_torangle_wedge)*2.*pi
-              alpha_phi_wedge(:,:,iphi)=torangle_offset+zeta_wedge+nu_wedge(:,:)
-           end do
+    do ix=1,n_x
+       if (flat_profile_flag == 0) then
+          r_c=r_s(ix)
+       else
+          r_c=r(ix)
        endif
+       rmajc = rmaj_s(ix)
+       zmagc = zmag_s(ix)
+       kappac = kappa_s(ix)
+       deltac = delta_s(ix)
+       xdc    = asin(deltac)
+       zetac  = zeta_s(ix)
+       do j=1,nwedge
+          ! This needs to match up with what's in gyro_set_blend_arrays.f90
+          theta=theta_wedge_offset+real(j-1)*theta_wedge_angle/       &
+               real(n_theta_plot*n_theta_mult-1)
+          !theta = -pi+REAL(j)*pi*2./REAL(nwedge)
+          if(radial_profile_method==1) then
+             Rf(j,ix)=rmajc+r_c*cos(theta)
+             Zf(j,ix)=zmagc+r_c*sin(theta)
+          else
+             Rf(j,ix)=rmajc+r_c*cos(theta+xdc*sin(theta))
+             Zf(j,ix)=zmagc+kappac*r_c*sin(theta+zetac*sin(2.*theta))
+          endif
+       enddo
+    enddo
 
-       !----------------------------------------
-       ! Dump the wedge meshes
-       !---------------------------------------- 
+    !-------------------------------------------------------
+    ! Set up the alpha grid
+    ! These are saved in a module so no need to recalculate
+    !-------------------------------------------------------
 
-       h5in%units=""
-       call dump_h5(gidwedge,'Rgyro',Rf,h5in,h5err)
-       call dump_h5(gidwedge,'Zgyro',Zf,h5in,h5err)
-       call dump_h5(gidwedge,'torangle_offset',torangle_offset,h5in,h5err)
-       call dump_h5(gidwedge,'alpha',alpha_phi_wedge,h5in,h5err)
-       h5in%units="m"
-       call dump_h5(gidwedge,'R',Rf*a_meters,h5in,h5err)
-       call dump_h5(gidwedge,'Z',Zf*a_meters,h5in,h5err)
+    if (.not. allocated(alpha_phi_wedge) ) then
+       allocate(alpha_phi_wedge(nwedge,n_x,n_torangle_wedge))
+       do iphi=1,n_torangle_wedge
+          !Don't store zeta_wedge b/c analysis is on a plane by plane basis
+          zeta_wedge=REAL(iphi-1)/REAL(n_torangle_wedge)*2.*pi
+          alpha_phi_wedge(:,:,iphi)=torangle_offset+zeta_wedge+nu_wedge(:,:)
+       end do
+    endif
 
-       ! For ease of use, have a single data set that has R,Z. 
-       allocate(bufferwedgeMesh(nwedge,n_x,2))
-       bufferwedgeMesh(:,:,1) = Rf(:,:)*a_meters
-       bufferwedgeMesh(:,:,2) = Zf(:,:)*a_meters
-       h5in%units="m"
-       h5in%mesh="mesh-structured"
-       call dump_h5(gidwedge,'cartMesh',bufferwedgeMesh(:,:,:),h5in,h5err)
-       h5in%mesh=""
-       deallocate(bufferwedgeMesh)
+    !----------------------------------------
+    ! Dump the wedge meshes
+    !---------------------------------------- 
 
-       !----------------------------------------
-       ! 
-       !---------------------------------------- 
-       deallocate(Rf, Zf)
-      return
-      end subroutine hdf5_write_wedge_coords
- 
+    h5in%units=""
+    call dump_h5(gidwedge,'Rgyro',Rf,h5in,h5err)
+    call dump_h5(gidwedge,'Zgyro',Zf,h5in,h5err)
+    call dump_h5(gidwedge,'torangle_offset',torangle_offset,h5in,h5err)
+    call dump_h5(gidwedge,'alpha',alpha_phi_wedge,h5in,h5err)
+    h5in%units="m"
+    call dump_h5(gidwedge,'R',Rf*a_meters,h5in,h5err)
+    call dump_h5(gidwedge,'Z',Zf*a_meters,h5in,h5err)
+
+    ! For ease of use, have a single data set that has R,Z. 
+    allocate(bufferwedgeMesh(nwedge,n_x,2))
+    bufferwedgeMesh(:,:,1) = Rf(:,:)*a_meters
+    bufferwedgeMesh(:,:,2) = Zf(:,:)*a_meters
+    h5in%units="m"
+    h5in%mesh="mesh-structured"
+    call dump_h5(gidwedge,'cartMesh',bufferwedgeMesh(:,:,:),h5in,h5err)
+    h5in%mesh=""
+    deallocate(bufferwedgeMesh)
+
+    !----------------------------------------
+    ! 
+    !---------------------------------------- 
+    deallocate(Rf, Zf)
+    return
+  end subroutine hdf5_write_wedge_coords
+
 end subroutine write_hdf5_wedge_timedata
 
-  !------------------------------------------------
-  ! write_restart
-  ! PURPOSE:
-  !  File that can be used 
-  !------------------------------------------------
+!------------------------------------------------
+! write_restart
+! PURPOSE:
+!  File that can be used 
+!------------------------------------------------
+
 subroutine write_hdf5_restart
   use gyro_globals
   use hdf5
@@ -1044,27 +1047,27 @@ subroutine write_hdf5_restart
 
   !---------------------------------------------------
   if (i_proc == 0) then
-    call vshdf5_inith5vars(h5in, h5err)
-    h5in%comm=MPI_COMM_SELF
-    h5in%info=MPI_INFO_NULL
-    h5in%wrd_type=H5T_NATIVE_DOUBLE
-    h5in%doTranspose=.true.
-    h5in%vsTime=t_current
-    h5in%wrVsTime=.true.
-    h5in%verbose=.true.
-  
-    !---------------------------------------------------
-    ! Timestep data:
-    !
-      number_label=NINT(t_current/dt)
-      if (number_label>999999) THEN
+     call vshdf5_inith5vars(h5in, h5err)
+     h5in%comm=MPI_COMM_SELF
+     h5in%info=MPI_INFO_NULL
+     h5in%wrd_type=H5T_NATIVE_DOUBLE
+     h5in%doTranspose=.true.
+     h5in%vsTime=t_current
+     h5in%wrVsTime=.true.
+     h5in%verbose=.true.
+
+     !---------------------------------------------------
+     ! Timestep data:
+     !
+     number_label=NINT(t_current/dt)
+     if (number_label>999999) THEN
         write(step_name,fmt='(i7.7)') number_label
-      else if (data_step>99999) THEN
+     else if (data_step>99999) THEN
         write(step_name,fmt='(i6.6)') number_label
-      else
+     else
         write(step_name,fmt='(i5.5)') number_label
-      endif
-  
+     endif
+
      dumpfile=TRIM(path)//"gyroRestart"//TRIM(step_name)//".h5"
      description="GYRO restart file"
      call open_newh5file(dumpfile,dumpFid,description,dumpGid,h5in,h5err)
@@ -1073,16 +1076,16 @@ subroutine write_hdf5_restart
      call write_attribute(dumpGid,"data_step",data_step,errval)
      call write_attribute(dumpGid,"n_proc",n_proc,errval)
      call write_attribute(dumpGid,"i_restart",i_restart,errval)
-   endif
- 
-   if (n_proc-1 == 0) then
-      call dump_h5(dumpGid,'h_0_real',REAL(h_0),h5in,h5err)
-      call dump_h5(dumpGid,'h_0_imag',AIMAG(h_0),h5in,h5err)
-      call close_h5file(dumpFid,dumpGid,h5err)
-      return
-   endif
+  endif
 
-   do i_proc_w=1,n_proc-1
+  if (n_proc-1 == 0) then
+     call dump_h5(dumpGid,'h_0_real',REAL(h_0),h5in,h5err)
+     call dump_h5(dumpGid,'h_0_imag',AIMAG(h_0),h5in,h5err)
+     call close_h5file(dumpFid,dumpGid,h5err)
+     return
+  endif
+
+  do i_proc_w=1,n_proc-1
 
      if (i_proc == 0) then
         call MPI_RECV(h_0,&
@@ -1112,8 +1115,8 @@ subroutine write_hdf5_restart
   enddo
 
   if (i_proc == 0) call close_h5file(dumpFid,dumpGid,h5err)
- return
- end subroutine write_hdf5_restart
+  return
+end subroutine write_hdf5_restart
 
 
 subroutine myhdf5_close
@@ -1124,6 +1127,7 @@ subroutine myhdf5_close
   integer ierr
   call h5close_f(ierr)
 end subroutine myhdf5_close
+
 !------------------------------------------------------
 ! write_distributed_real.f90
 !
@@ -1167,53 +1171,53 @@ subroutine write_distributed_real_h5(varName,rGid,n_fn,fn,h5in,h5err)
 
   include 'mpif.h'
 
-     do in=1,n_n
+  do in=1,n_n
 
-        !-----------------------------------------
-        ! Subgroup collector:
-        !
-        i_group_send = (in-1)/n_n_1
+     !-----------------------------------------
+     ! Subgroup collector:
+     !
+     i_group_send = (in-1)/n_n_1
 
-        if (i_group_send /= 0) then
+     if (i_group_send /= 0) then
 
-           i_send = i_group_send*n_proc_1
+        i_send = i_group_send*n_proc_1
 
-           if (i_proc == 0) then
+        if (i_proc == 0) then
 
-              call MPI_RECV(fn_recv,&
-                   n_fn,&
-                   MPI_DOUBLE_PRECISION,&
-                   i_send,&
-                   in,&
-                   GYRO_COMM_WORLD,&
-                   recv_status,&
-                   i_err)
+           call MPI_RECV(fn_recv,&
+                n_fn,&
+                MPI_DOUBLE_PRECISION,&
+                i_send,&
+                in,&
+                GYRO_COMM_WORLD,&
+                recv_status,&
+                i_err)
 
-           else if (i_proc == i_send) then
+        else if (i_proc == i_send) then
 
-              call MPI_SEND(fn,&
-                   n_fn,&
-                   MPI_DOUBLE_PRECISION,&
-                   0,&
-                   in,&
-                   GYRO_COMM_WORLD,&
-                   i_err)
-
-           endif
-
-        else
-
-           fn_recv(:) = fn(:)
+           call MPI_SEND(fn,&
+                n_fn,&
+                MPI_DOUBLE_PRECISION,&
+                0,&
+                in,&
+                GYRO_COMM_WORLD,&
+                i_err)
 
         endif
-        !
-        !-----------------------------------------
 
-        WRITE(n_name,fmt='(i3.3)') in
-        n_varName=trim(varName)//"_"//n_name
-        if (i_proc == 0) call dump_h5(rGid,n_varName,fn_recv,h5in,h5err)
+     else
 
-     enddo ! in
+        fn_recv(:) = fn(:)
+
+     endif
+     !
+     !-----------------------------------------
+
+     WRITE(n_name,fmt='(i3.3)') in
+     n_varName=trim(varName)//"_"//n_name
+     if (i_proc == 0) call dump_h5(rGid,n_varName,fn_recv,h5in,h5err)
+
+  enddo ! in
 
 end subroutine write_distributed_real_h5
 !------------------------------------------------------
@@ -1224,7 +1228,7 @@ end subroutine write_distributed_real_h5
 !------------------------------------------------------
 
 subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
-                     n_fn,n1,n2,n3,fn,plot3d,plotwedge,h5in,h5err)
+     n_fn,n1,n2,n3,fn,plot3d,plotwedge,h5in,h5err)
 
   use gyro_vshdf5_mod
   use hdf5_api
@@ -1286,9 +1290,9 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
   c_i=(0,1)
 
   omega_exp=w0_s(ir_norm)
-  
-  
- 
+
+
+
   if(.not. plotwedge) then
      iswedge=.false.
      allocate(buffn(0:n1,n2,n3,n_n)); buffn=0.
@@ -1297,158 +1301,157 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
      allocate(buffn(0:n1-1,n2,n3,n_n)); buffn=0.
   endif
 
-!when n3=n_kinetic
-!electron_method =1 => n3=n_ion (gk ions and addiabtic electrons )
-!electron_method =2 => n3=n_spec (gk ions and drift electrons)
-!electron_method =3 => n3=1 (gk electrons and addiabtic ions)
-!electron_method =4 => n3=n_ion (gk electrons and gk ions)
+  !when n3=n_kinetic
+  !electron_method =1 => n3=n_ion (gk ions and addiabtic electrons )
+  !electron_method =2 => n3=n_spec (gk ions and drift electrons)
+  !electron_method =3 => n3=1 (gk electrons and addiabtic ions)
+  !electron_method =4 => n3=n_ion (gk electrons and gk ions)
 
   if (trim(vname) /= "phi") then 
-    ALLOCATE(vnameArray(n3))
-    vnameArray=" "
-    do ikin=1,n3
-      if(electron_method==2 .and. ikin==n3 ) THEN
-        tempVarName=trim(vname)//"_electron"
-      elseif(electron_method==3 .or. (electron_method==4.and.ikin==n3)) THEN
-        tempVarName=trim(vname)//"_electron"
-      else
-        write(ikin_name,fmt='(i1.1)') ikin-1
-        tempVarName=trim(vname)//"_ion"//ikin_name
-      endif
-      vnameArray(ikin)=tempVarName
-    enddo
+     ALLOCATE(vnameArray(n3))
+     vnameArray=" "
+     do ikin=1,n3
+        if(electron_method==2 .and. ikin==n3 ) THEN
+           tempVarName=trim(vname)//"_electron"
+        elseif(electron_method==3 .or. (electron_method==4.and.ikin==n3)) THEN
+           tempVarName=trim(vname)//"_electron"
+        else
+           write(ikin_name,fmt='(i1.1)') ikin-1
+           tempVarName=trim(vname)//"_ion"//ikin_name
+        endif
+        vnameArray(ikin)=tempVarName
+     enddo
   else
-    ALLOCATE(vnameArray(3))
-      vnameArray=" "
-      vnameArray(1)="phi"
-      vnameArray(2)="A_par"
-      vnameArray(3)="B_par"
+     ALLOCATE(vnameArray(3))
+     vnameArray=" "
+     vnameArray(1)="phi"
+     vnameArray(2)="A_par"
+     vnameArray(3)="B_par"
   endif
 
-     do in=1,n_n
-        !-----------------------------------------
-        ! Subgroup collector:
-        !
-        i_group_send = (in-1)/n_n_1
-        if (i_group_send /= 0) then
-           i_send = i_group_send*n_proc_1
-           if (i_proc == 0) then
-              call MPI_RECV(fn_recv,&
-                   n_fn, MPI_DOUBLE_COMPLEX, i_send, in,&
-                   GYRO_COMM_WORLD, recv_status, i_err)
-           else if (i_proc == i_send) then
-              call MPI_SEND(fn,&
-                   n_fn, MPI_DOUBLE_COMPLEX, 0, in,&
-                   GYRO_COMM_WORLD, i_err)
-           endif
-        else
-           fn_recv(:) = fn(:)
-        endif
-        
+  do in=1,n_n
+     !-----------------------------------------
+     ! Subgroup collector:
+     !
+     i_group_send = (in-1)/n_n_1
+     if (i_group_send /= 0) then
+        i_send = i_group_send*n_proc_1
         if (i_proc == 0) then
-           buffn(0:n1-1,:,:,in)=reshape(fn_recv,(/n1,n2,n3/))
+           call MPI_RECV(fn_recv,&
+                n_fn, MPI_DOUBLE_COMPLEX, i_send, in,&
+                GYRO_COMM_WORLD, recv_status, i_err)
+        else if (i_proc == i_send) then
+           call MPI_SEND(fn,&
+                n_fn, MPI_DOUBLE_COMPLEX, 0, in,&
+                GYRO_COMM_WORLD, i_err)
         endif
-            
+     else
+        fn_recv(:) = fn(:)
+     endif
 
-     enddo ! in
+     if (i_proc == 0) then
+        buffn(0:n1-1,:,:,in)=reshape(fn_recv,(/n1,n2,n3/))
+     endif
 
-     !-----------------------------------------
-     if (i_proc /= 0) return
-     !-----------------------------------------
-     !-----------------------------------------
-     ! Apply boundary conditions
-     !-----------------------------------------
-     if (.not.iswedge) then
-       do in=1,n_n
-         nn=n0+(in-1)*d_n
-         !apply theta BC: z_n(r,,2*pi) = z_n(r,0)exp(I*n*(nu(r,2*pi)-nu(r,0)))
-         !with nu(r,2*pi) - nu(r,0) = -2*pi*q by definition
-         ! phase[*] = EXP(-2*!PI*C_I*n[i_n]*profile_data.q[*])
-         do ix=1,n2
+
+  enddo ! in
+
+  !-----------------------------------------
+  if (i_proc /= 0) return
+  !-----------------------------------------
+  !-----------------------------------------
+  ! Apply boundary conditions
+  !-----------------------------------------
+  if (.not.iswedge) then
+     do in=1,n_n
+        nn=n0+(in-1)*d_n
+        !apply theta BC: z_n(r,,2*pi) = z_n(r,0)exp(I*n*(nu(r,2*pi)-nu(r,0)))
+        !with nu(r,2*pi) - nu(r,0) = -2*pi*q by definition
+        ! phase[*] = EXP(-2*!PI*C_I*n[i_n]*profile_data.q[*])
+        do ix=1,n2
            buffn(n1,ix,:,in)=buffn(0,ix,:,in)*exp(-2.*pi*c_i*nn*q(ix))
-         enddo
-       enddo ! in
-     endif
-
-     !-----------------------------------------
-     ! Dump each species independently
-     !-----------------------------------------
-     do ispcs=1,n3
-       tempVarNameGr=trim(vnameArray(ispcs))//"_modes"
-       call make_group(rGid,trim(tempVarNameGr),grGid,"",h5err)
-       tempVarName=trim(vnameArray(ispcs))//"_real"
-       call dump_h5(grGid,trim(tempVarName),real(buffn(:,:,ispcs,:)),h5in,h5err)
-       tempVarName=trim(vnameArray(ispcs))//"_imag"
-       call dump_h5(grGid,trim(tempVarName),aimag(buffn(:,:,ispcs,:)),h5in,h5err)
-       CALL close_group(trim(tempVarNameGr),grGid,h5err)
+        enddo
      enddo ! in
-     if(.not.plot3d) then
-       deallocate(buffn)
-       return
-     endif
+  endif
 
-     !-----------------------------------------
-     ! Tranform into real space
-     !   mom: n1,n2,n3=n_theta_plot,n_x,n_kinetic
-     !   phi: n1,n2,n3=n_theta_plot,n_x,n_field
-     !-----------------------------------------
-       nphi = 1 
-     if (.not. iswedge) then
-       if (n_torangle_3d > 0) nphi=n_torangle_3d
-       allocate(real_buff(0:n1,n2,n3,nphi))
-       allocate(alpha_loc(0:n1,n2))
-     else
-       if (n_torangle_wedge > 0) nphi=n_torangle_wedge
-       allocate(real_buff(0:n1-1,n2,n3,nphi))
-       allocate(alpha_loc(0:n1-1,n2))
-     endif
-     if (n0==0) then
-         istart=2
-         do iphi=1,nphi
-           real_buff(:,:,:,iphi)=real(buffn(:,:,:,1))
-         enddo
-     else
-         istart=1
-         real_buff(:,:,:,:)=0.
-     endif
+  !-----------------------------------------
+  ! Dump each species independently
+  !-----------------------------------------
+  do ispcs=1,n3
+     tempVarNameGr=trim(vnameArray(ispcs))//"_modes"
+     call make_group(rGid,trim(tempVarNameGr),grGid,"",h5err)
+     tempVarName=trim(vnameArray(ispcs))//"_real"
+     call dump_h5(grGid,trim(tempVarName),real(buffn(:,:,ispcs,:)),h5in,h5err)
+     tempVarName=trim(vnameArray(ispcs))//"_imag"
+     call dump_h5(grGid,trim(tempVarName),aimag(buffn(:,:,ispcs,:)),h5in,h5err)
+     CALL close_group(trim(tempVarNameGr),grGid,h5err)
+  enddo ! in
+  if(.not.plot3d) then
+     deallocate(buffn)
+     return
+  endif
+
+  !-----------------------------------------
+  ! Tranform into real space
+  !   mom: n1,n2,n3=n_theta_plot,n_x,n_kinetic
+  !   phi: n1,n2,n3=n_theta_plot,n_x,n_field
+  !-----------------------------------------
+  nphi = 1 
+  if (.not. iswedge) then
+     if (n_torangle_3d > 0) nphi=n_torangle_3d
+     allocate(real_buff(0:n1,n2,n3,nphi))
+     allocate(alpha_loc(0:n1,n2))
+  else
+     if (n_torangle_wedge > 0) nphi=n_torangle_wedge
+     allocate(real_buff(0:n1-1,n2,n3,nphi))
+     allocate(alpha_loc(0:n1-1,n2))
+  endif
+  if (n0==0) then
+     istart=2
      do iphi=1,nphi
-       !Get alpha coordinate on either the coarse or wedge mesh.
-       ! Include doppler shift here
-
-       if (.not. iswedge) then
-         alpha_loc=alpha_phi(:,:,iphi)+omega_exp*t_current
-       else
-         alpha_loc=alpha_phi_wedge(:,:,iphi)+omega_exp*t_current
-       endif
-       do in=istart,n_n
-          nn=n0+(in-1)*d_n
-          do ikin=1,n3
-            real_buff(:,:,ikin,iphi)=real_buff(:,:,ikin,iphi)&
-                  +2.*real(buffn(:,:,ikin,in)*exp(-c_i*nn*alpha_loc(:,:)))
-          enddo
-       enddo
+        real_buff(:,:,:,iphi)=real(buffn(:,:,:,1))
      enddo
-        
-     deallocate(buffn,alpha_loc)
+  else
+     istart=1
+     real_buff(:,:,:,:)=0.
+  endif
+  do iphi=1,nphi
+     !Get alpha coordinate on either the coarse or wedge mesh.
+     ! Include doppler shift here
 
-     ! Mapping of the variable names to array indices depends on input types
      if (.not. iswedge) then
-       do ikin=1,n3
-         tempVarName=trim(vnameArray(ikin))
-         call dump_h5(r3Did,trim(tempVarName),real_buff(:,:,ikin,:),h5in,h5err)
-       enddo
+        alpha_loc=alpha_phi(:,:,iphi)+omega_exp*t_current
      else
-       ! Dump each phi slice as a separate variable
-       do ikin=1,n3
-         tempVarNameGr=trim(vnameArray(ikin))//"_toroidal"
-         call make_group(r3Did,trim(tempVarNameGr),grGid,"",h5err)
-         call dump_h5(grGid,trim(vnameArray(ikin)),real_buff(:,:,ikin,:),h5in,h5err)
-         call close_group(trim(tempVarNameGr),grGid,h5err)
-       enddo
+        alpha_loc=alpha_phi_wedge(:,:,iphi)+omega_exp*t_current
      endif
+     do in=istart,n_n
+        nn=n0+(in-1)*d_n
+        do ikin=1,n3
+           real_buff(:,:,ikin,iphi)=real_buff(:,:,ikin,iphi)&
+                +2.*real(buffn(:,:,ikin,in)*exp(-c_i*nn*alpha_loc(:,:)))
+        enddo
+     enddo
+  enddo
 
-     deallocate(real_buff)
-     deallocate(vnameArray)
+  deallocate(buffn,alpha_loc)
 
-return
+  ! Mapping of the variable names to array indices depends on input types
+  if (.not. iswedge) then
+     do ikin=1,n3
+        tempVarName=trim(vnameArray(ikin))
+        call dump_h5(r3Did,trim(tempVarName),real_buff(:,:,ikin,:),h5in,h5err)
+     enddo
+  else
+     ! Dump each phi slice as a separate variable
+     do ikin=1,n3
+        tempVarNameGr=trim(vnameArray(ikin))//"_toroidal"
+        call make_group(r3Did,trim(tempVarNameGr),grGid,"",h5err)
+        call dump_h5(grGid,trim(vnameArray(ikin)),real_buff(:,:,ikin,:),h5in,h5err)
+        call close_group(trim(tempVarNameGr),grGid,h5err)
+     enddo
+  endif
+
+  deallocate(real_buff)
+  deallocate(vnameArray)
+
 end subroutine write_distributed_complex_h5
