@@ -41,11 +41,12 @@ dnl ######################################################################
 NO_HDF5=true; parallel="yes"
 DOUBLE="yes"
 builtin(include, shared/autotool_config/parcompslibs.m4)
-# jrc: why the below is specific to fmcfm?
-FCFLAGS="$FCFLAGS $FC_DBL_FLAG"
-dnl if test x"$parallel" != "xyes"; then
-dnl AC_MSG_ERROR([You cannot build the GA transport codes with out MPI.  First try "--enable-parallel".])
-dnl fi
+
+
+if test x"$parallel" = "xyes"; then
+  FCPREFLAG='-D__MPI'
+fi
+FCFLAGS="$FCFLAGS $FC_DBL_FLAG $FCPREFLAG"
 
 ######################################################################
 #
