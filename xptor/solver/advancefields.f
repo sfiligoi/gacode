@@ -12,7 +12,6 @@ c
       include '../inc/glf.m'
 c
       real*8 T(mxflds,mxgrd),dT(mxflds,mxgrd)
-      real*8 vneo_new(3,0:mxgrd),vdia_new(3,0:mxgrd)
       real*8 scale,test,rescale
       real*8 normT, normDT
       real*8 x13
@@ -129,7 +128,7 @@ c so only the electron and main ion densities are changed
 c
       if(alpha_dia.ne.0.0)then
 c        call advance_neo_flows(xparam_pt(13))
-        call neo_flows(ngrid,vneo_new,vdia_new)
+c        call neo_flows(ngrid,vneo_new,vdia_new)
         x13 = xparam_pt(13)
         do i=1,nspecies
           do k=1,ngrid-1

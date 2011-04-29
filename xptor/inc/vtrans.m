@@ -9,6 +9,7 @@ c
       real*8 dt_implicit
       real*8 work(6*mxfds-2,mxfds,mxgd)
       real*8 DIFF(mxfds,mxfds,mxgd)
+      real*8 stiff(mxfds,mxfds,mxgd)
       real*8 nu(mxfds,mxfds,mxgd)
       real*8 nu_p(mxfds,mxfds,mxgd)
       real*8 nu_2(mxfds,mxfds,mxgd)
@@ -30,7 +31,7 @@ c
       integer nwork(mxgd*mxfds)
       integer nfields
 c
-      common /vtranscm/ work, DIFF, nu, nu_p, nu_2 
+      common /vtranscm/ work, DIFF, stiff, nu, nu_p, nu_2 
      & , nu_pt, nu_2t,CONV3
      & , vrho3, Told, Tstart, vrho, S, St
      & , INTEGRAL_RHS, INTEGRAL_LHS, grow, CONV

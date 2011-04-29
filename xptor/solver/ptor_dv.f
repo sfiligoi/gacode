@@ -73,14 +73,15 @@ c
           INTEGRAL_LHS(i,k)=0.0
           INTEGRAL_RHS(i,j)=0.0
           do m=1,mxfields
-            conv3(i,m,k) = 0.D0
-            diff(i,m,k)=0.D0
-            nu(i,m,k)=0.D0
-            nu_p(i,m,k)=0.D0
-            nu_2(i,m,k)=0.D0
-            nu_pt(i,m,k)=0.D0
-            nu_2t(i,m,k)=0.D0
-            vrho3(i,m,k)=0.D0
+            conv3(i,m,k) = 0.0
+            diff(i,m,k) = 0.0
+            stiff(i,m,k) = 0.0
+            nu(i,m,k) = 0.0
+            nu_p(i,m,k) = 0.0
+            nu_2(i,m,k) = 0.0
+            nu_pt(i,m,k) = 0.0
+            nu_2t(i,m,k) = 0.0
+            vrho3(i,m,k) = 0.0
           enddo
         enddo
       enddo

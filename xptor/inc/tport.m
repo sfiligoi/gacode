@@ -206,6 +206,7 @@ c 301 elements (was 51)
       real*8 vexb_m(0:jmaxmt), vpol_m(0:jmaxmt)
       real*8 vphi_m(0:jmaxmt), vpar_m(0:jmaxmt), vper_m(0:jmaxmt)
       real*8 vdia_m(nspecies,0:jmaxmt), vneo_m(nspecies,0:jmaxmt)
+      real*8 vdia_new(nspecies,0:jmaxmt),vneo_new(nspecies,0:jmaxmt)
       real*8 mach_m(nspecies,0:jmaxmt)
       real*8 vmode_m(0:jmaxmt), vstar_m(0:jmaxmt), vstarp_m(0:jmaxmt)
       real*8 vetor_m(0:jmaxmt), vepol_m(0:jmaxmt), egamma_m(0:jmaxmt)
@@ -471,7 +472,8 @@ c
      & , stress_par_i_m, stress_par_z_m
      & , diff_exp, chie_exp, chii_exp, eta_tor_exp, egamma_g
      & , rhosda_m, csda_m, vexb_m, vpar_m, vphi_m, vper_m
-     & , vdia_m, vneo_m, vpol_m, nu_pol_m, kpol_m, nuei_m
+     & , vdia_m, vneo_m, vdia_new, vneo_new
+     & , vpol_m, nu_pol_m, kpol_m, nuei_m
      & , vmode_m, vstar_m, vstarp_m, vetor_m, vepol_m, egamma_m
      & , mach_m, egamma_vphi, egamma_vpol, egamma_vstar
      & , gamma_mode_m, gamma_p_m, cgyrobohm_m
