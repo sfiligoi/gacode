@@ -9,7 +9,7 @@
 
 ## ############################################################
 
-SUBDIRS	= autotool_config envvars math GEO UMFPACK EXPRO profiles_gen vshdf5 python bin exec 
+SUBDIRS	= autotool_config envvars math GEO UMFPACK EXPRO profiles_gen python bin exec 
 
 lib_LTLIBRARIES = libgacodeshared.la
 
@@ -19,8 +19,12 @@ libgacodeshared_la_LIBADD = \
 	$(top_builddir)/shared/math/libgacodemath.la \
 	$(top_builddir)/shared/GEO/libgacodegeo.la \
 	$(top_builddir)/shared/EXPRO/libgacodeexpro.la \
-	$(top_builddir)/shared/UMFPACK/libgacodeumfpack.la \
-	$(top_builddir)/shared/vshdf5/libvshdf5.la 
+	$(top_builddir)/shared/UMFPACK/libgacodeumfpack.la 
+if HAVE_FCIOWRAPPERS
+else
+SUBDIRS += vshdf5
+libgacodeshared_la_LIBADD += $(top_builddir)/shared/vshdf5/libvshdf5.la 
+endif
 
 
 MAINTAINERCLEANFILES  = Makefile.in 
