@@ -42,7 +42,6 @@ c
       real*8 T_ave,D_ave,x13
       real*8 mass_density,kpol1,kpol2
       real*8 last_lhs
-      real*8 vneo_new(nspecies)
       real*8 d_vdia,d_vneo,d_vexb,d_vpar
       real*8 gradvphim
       real*8 unc(0:mxgrd)
@@ -99,6 +98,7 @@ c
       real*8 betae_m_sum(0:mxgrd-1)
       real*8 S_ext(mxflds,mxgrd)
       real*8 glf_flux(0:10,mxflds,mxgrd),dflux(0:10,mxflds,mxgrd)
+      real*8 vdia_new_sum(3,0:mxgrd),vneo_new_sum(3,0:mxgrd)
 c
       x13 = xparam_pt(13)
       cv = 1000.0
@@ -237,6 +237,12 @@ c      ca = 2.D0/3.D0
        xnu_m(k)=0.0
        alpha_m(k)=0.0
        betae_m(k)=0.0
+       do i=1,nspecies
+        vdia_new(i,k) = 0.0
+        vneo_new(i,k) = 0.0
+        vdia_new_sum(i,k) = 0.0
+        vneo_new_sum(i,k) = 0.0
+       enddo
       enddo
 c
       dne = 1.D0
@@ -254,18 +260,19 @@ c
 c      do k=1+i_proc,ngrid-1,n_proc
       ncalls = 2*nfields+1
       if(iparam_pt(1).eq.2)ncalls = nfields+1
+      if(iparam_pt(1).le.0)ncalls = 1
       nloops = ncalls*(ngrid-1)/n_proc
 c      write(*,*)"n_proc=",n_proc,"i_proc=",i_proc
 c      write(*,*)"ncalls= ",ncalls," nloops = ",nloops
-      if(ncalls*(ngrid-1)/nloops.ne.n_proc)then
-       if(i_proc.eq.0)then
-        write(*,*)"warning: number of processors is not optimum"
-        write(*,*)"nearest optimum number is ",ncalls*(ngrid-1)/nloops
-       endif
-      endif
+c      if(ncalls*(ngrid-1)/nloops.ne.n_proc)then
+c       if(i_proc.eq.0)then
+c        write(*,*)"warning: number of processors is not optimum"
+c        write(*,*)"nearest optimum number is ",ncalls*(ngrid-1)/nloops
+c       endif
+c      endif
 c
       do k=1,ngrid-1
-        m_proc = (k-1)*ncalls 
+        m_proc = (k-1)*ncalls
         m_proc = m_proc - n_proc*(m_proc/n_proc)
         if(iparam_pt(1).eq.-2.and.mask_r(k).eq.0)go to 21
         jm = k
@@ -301,6 +308,10 @@ c        write(*,*)k,"unperturbed",i_proc,j_ret
         glf_flux(j_ret,3,k) = tifluxm
         glf_flux(j_ret,4,k) = vphifluxm
         glf_flux(j_ret,5,k) = vparfluxm
+        do i=1,nspecies
+          vdia_new(i,k) = vdia(i)
+          vneo_new(i,k) = vneo(i)
+        enddo
        endif
 c
       if(iparam_pt(1).lt.1 .or. mask_r(k).eq.0)go to 21
@@ -740,6 +751,14 @@ c
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
       call MPI_BCAST(betae_m_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(vdia_new,vdia_new_sum,3*mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(vdia_new_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(vneo_new,vneo_new_sum,3*mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(vneo_new_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
 c
       do k=1,ngrid-1
         egamma_m(k)=egamma_sum(k)
@@ -798,6 +817,10 @@ c
         stress_tor_z_m(k) = stress_tor_z_m_sum(k)
         stress_par_i_m(k) = stress_par_i_m_sum(k)
         stress_par_z_m(k) = stress_par_z_m_sum(k)
+        do i=1,nspecies
+         vdia_new(i,k) = vdia_new_sum(i,k)
+         vneo_new(i,k) = vneo_new_sum(i,k)
+        enddo
       enddo
       egamma_m(0)=egamma_m(1)
       gamma_p_m(0)=gamma_p_m(1)
@@ -807,6 +830,12 @@ c
       xnu_m(0)=xnu_m(1)
       alpha_m(0)=0.0
       cgyrobohm_m(0) = cgyrobohm_m(1)
+      do i=1,nspecies
+       vdia_new(i,0) = vdia_new(i,1)
+       vneo_new(i,0) = vneo_new(i,1)
+       vdia_new(i,ngrid) = vdia_new(i,ngrid-1)
+       vneo_new(i,ngrid) = vneo_new(i,ngrid-1)
+      enddo
       egamma_m(ngrid)=egamma_m(ngrid-1)
       gamma_p_m(ngrid)=gamma_p_m(ngrid-1)
       anrate_m(ngrid)=anrate_m(ngrid-1)
