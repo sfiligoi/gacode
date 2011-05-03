@@ -9,7 +9,7 @@
 
 ## ############################################################
 
-SUBDIRS	= autotool_config envvars math GEO UMFPACK EXPRO profiles_gen python bin exec 
+SUBDIRS	= autotool_config envvars math GEO UMFPACK EXPRO profiles_gen python bin exec
 
 lib_LTLIBRARIES = libgacodeshared.la
 
