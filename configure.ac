@@ -147,10 +147,9 @@ dnl-----------------------------------------------------------------------
 USE_IO_INFO="true"
 ac_use_fortran_hdf5="yes"
 builtin(include, shared/autotool_config/tx_fciowrappers.m4)
-if test "$FOUND_FCIOWRAPPERS" = "no"; then
 builtin(include, shared/autotool_config/tx_hdf5.m4)
 builtin(include, shared/autotool_config/tx_netcdf.m4)
-fi
+
 CPPF90_FLAGS="$CPP_HAVE_MPI $FLUSH_MACRO $FPPFLAGS"
 AC_SUBST(CPPF90_FLAGS)
 dnl ######################################################################
