@@ -1177,9 +1177,9 @@ c set TGLF gradients
       endif
       if(vpar_shear_model_tg.eq.1)then
 c use GYRO conventions
-        gamma_p_m(jm) = (cv/csdam)*drhodr(jm)*
+        gamma_p_m(jm) = -(cv/csdam)*drhodr(jm)*
      >  (atorm*gradvexbm + grad_a_tor*vexbm)
-        vpar_shear_tg(1) = -sign_Bt_exp*gamma_p_m(jm)
+        vpar_shear_tg(1) = sign_Bt_exp*gamma_p_m(jm)
         vpar_shear_tg(2) = vpar_shear_tg(1)
         vpar_shear_tg(3) = vpar_shear_tg(3)
       endif
@@ -1339,13 +1339,13 @@ cgms      if(igeo_tg.ne.0)gb_unit = gb_unit*drhodr(jm)
       vparflux_glf = (1.6726D-8)  
      >   *nem*gb_unit*csdam*a_unit_exp*get_stress_par(2,1)
      >   *amassgas_exp/(ABS(bt_exp/B_unit))
-      vphiflux_glf = (1.6726D-8) 
+      vphiflux_glf = (1.6726D-8)*sign_Bt_exp
      >  *nem*gb_unit*csdam*a_unit_exp*get_stress_tor(2,1)
      >  *amassgas_exp*a_unit_exp
       if(ns_tg.eq.3)then
         nzflux_glf = 1.6022D-3*nem*gb_unit*get_particle_flux(3,1)
         tzflux_glf = 1.6022D-3*nem*tem*gb_unit*get_energy_flux(3,1)
-        vphizflux_glf = (1.6726D-8)
+        vphizflux_glf = (1.6726D-8)*sign_Bt_exp
      >  *nem*gb_unit*csdam*a_unit_exp*get_stress_tor(3,1)
      >  *amassgas_exp*a_unit_exp
         vparzflux_glf = (1.6726D-8) 

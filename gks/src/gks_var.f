@@ -442,6 +442,7 @@
        real  eflxm(-ntml:ntm,nspecmax)                           !real
        real  eflxte(-ntml:ntm,nspecmax)                          !real
        real  eflxtm(-ntml:ntm,nspecmax)                          !real
+       real  mflxe(-ntml:ntm,nspecmax)                          !real
        real  pflxea(nspecmax)                                !real
        real  pflxma(nspecmax)                                !real
        real  pflxtea(nspecmax)                               !real
@@ -450,6 +451,7 @@
        real  eflxma(nspecmax)                                !real
        real  eflxtea(nspecmax)                               !real
        real  eflxtma(nspecmax)                               !real
+       real  mflxea(nspecmax)                                !real
        real  peflx(-ntml:ntm)                                 !real
        real  eeflx(-ntml:ntm)                                 !real
        real  piflx(-ntml:ntm)                                 !real
