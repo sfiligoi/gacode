@@ -44,7 +44,8 @@
 ! 39. dump_rl_4d(inid,aname,array,h5in,errval)
 !
 ! 40. add_h5_int(inid,aname,value,h5in,errval)
-! 41. add_h5_rldbl(inid,aname,value,h5in,errval)
+! 42. add_h5_dbl(inid,aname,array,h5in,errval)
+! 42. add_h5_int_1d(inid,aname,array,h5in,errval)
 ! 42. add_h5_1d(inid,aname,array,h5in,errval)
 ! 43. add_h5_2d(inid,aname,array,h5in,errval)
 !
@@ -140,7 +141,7 @@
   ! This is like dump but does an append
   interface add_h5
     module procedure  add_h5_int, add_h5_dbl, &
-       add_h5_int_1d, add_h5_rldbl, add_h5_1d, add_h5_2d
+       add_h5_int_1d, add_h5_1d, add_h5_2d
   end interface
   ! dump components into separate groups
   interface read_h5
@@ -2764,94 +2765,6 @@
   errval%errBool = .false.
   return
   end subroutine add_h5_2d
-!-----------------------------------------------------------------------
-! subprogram 20. add_h5
-! Write an hdf5 array + references to independent vars
-!-----------------------------------------------------------------------
-  subroutine add_h5_rldbl(inid,aname,value,h5in,errval)
-  integer(HID_T), intent(in) :: inid
-  character*(*), intent(in) :: aname
-  real, intent(in) :: value
-  TYPE(hdf5ErrorType) :: errval
-  TYPE(hdf5InOpts), intent(in) :: h5in
-  integer,parameter :: FAIL=-1
-  integer :: error
-  integer(HID_T) :: dspace_id, dset_id
-  integer(HID_T) :: plist_id       ! Property list identifier
-  integer(HSIZE_T), dimension(1) :: dims=0
-!-----------------------------------------------------------------------
-  if(h5in%verbose) WRITE(*,*) 'Writing ', aname
-!-----------------------------------------------------------------------
-! Create the data space.
-!-----------------------------------------------------------------------
-  call h5screate_f(H5S_SCALAR_F, dspace_id, error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Create data space failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-----------------------------------------------------------------------
-! Create the data set.
-! Note: wrd_type is data type being written into file (r4 or r8)
-!-----------------------------------------------------------------------
-  call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Create data set failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-----------------------------------------------------------------------
-!Create property list for collective dataset write
-!-----------------------------------------------------------------------
-#if 0
-#ifdef __MPI
-  call h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
-  call h5pset_dxpl_mpio_f(plist_id,H5FD_MPIO_COLLECTIVE_F,error)
-   if (error==FAIL) then
-      errval%errorMsg = 'ERROR: Creating plist failed for '//aname
-      errval%errBool = .true.
-      return
-   endif
-#endif
-#endif
-!-----------------------------------------------------------------------
-! Write stored data to "name" data set.
-!-----------------------------------------------------------------------
-  if(h5in%typeConvert) then
-    call h5dwrite_f(dset_id,h5in%wrd_type,real(value,r4),dims,error)
-  else
-    call h5dwrite_f(dset_id,h5in%wrd_type,value,dims,error)
-  endif
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Data set write failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-----------------------------------------------------------------------
-! Add the VisSchema attributes
-!-----------------------------------------------------------------------
-  !call add_h5in_attributes(dset_id,h5in,errval)
-!-----------------------------------------------------------------------
-! Terminate access to the dataset and dataspace
-!-----------------------------------------------------------------------
-  call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Close data set failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-  call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Close data space failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-----------------------------------------------------------------------
-  errval%errBool = .false.
-  return
-  end subroutine add_h5_rldbl
-
-
 !-----------------------------------------------------------------------
 ! subprogram 40. read_dims
 ! Read the dimensions of dataset associated with aname: 1d array
