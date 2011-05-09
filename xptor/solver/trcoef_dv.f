@@ -760,6 +760,14 @@ c
       call MPI_BCAST(vneo_new_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
 c
+      do i=1,nspecies
+c set boundary conditions on 1/2 grid
+        vdia_new_sum(i,0)=vdia_new_sum(i,1)
+        vneo_new_sum(i,0)=vneo_new_sum(i,1)
+        vdia_new_sum(i,ngrid) = vdia_new_sum(i,ngrid-1)
+        vneo_new_sum(i,ngrid) = vneo_new_sum(i,ngrid-1)
+      enddo
+c
       do k=1,ngrid-1
         egamma_m(k)=egamma_sum(k)
         gamma_p_m(k)=gamma_p_sum(k)
@@ -818,8 +826,9 @@ c
         stress_par_i_m(k) = stress_par_i_m_sum(k)
         stress_par_z_m(k) = stress_par_z_m_sum(k)
         do i=1,nspecies
-         vdia_new(i,k) = vdia_new_sum(i,k)
-         vneo_new(i,k) = vneo_new_sum(i,k)
+c interpolate onto the full grid
+         vdia_new(i,k) = 0.5*(vdia_new_sum(i,k)+vdia_new_sum(i,k-1))
+         vneo_new(i,k) = 0.5*(vneo_new_sum(i,k)+vneo_new_sum(i,k-1))
         enddo
       enddo
       egamma_m(0)=egamma_m(1)
@@ -849,6 +858,13 @@ c
       etagb_phi_m(ngrid)=etagb_phi_m(ngrid-1)
       kpol_m(ngrid)=kpol_m(ngrid-1)
       nu_pol_m(ngrid)=nu_pol_m(ngrid-1)
+      do i=1,nspecies
+c set boundary conditions on full grid
+        vdia_new(i,0)=vdia_new(i,1)
+        vneo_new(i,0)=vneo_new(i,1)
+        vdia_new(i,ngrid) = vdia_new(i,ngrid-1)
+        vneo_new(i,ngrid) = vneo_new(i,ngrid-1)
+      enddo
 c
 c        do k=0,jmaxm
 c         write(*,155) i_proc,k,rho(k),chiineo_m(k),chiineo_sum(k)

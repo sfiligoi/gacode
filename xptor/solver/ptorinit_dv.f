@@ -282,12 +282,6 @@ c
         zpnz_exp(k) = -a_unit_exp*(gradnzm/nzm)
         zpte_exp(k) = -a_unit_exp*(gradtem/tem)
         zpti_exp(k) = -a_unit_exp*(gradtim/tim)
-        jm=k
-c        call neoclassical
-c        do i=1,nspecies
-c          vneo_exp(i,k+1) = vneo(i)
-c          vdia_exp(i,k+1) = vdia(i)
-c        enddo
 c compute energy exchange
         tew = te_exp(k)
         new = ne_exp(k)
@@ -319,12 +313,6 @@ c compute power balance chi's
       diff_exp(mxgrid) = diff_exp(mxgrid-1)
       chie_exp(mxgrid) = chie_exp(mxgrid-1)
       chii_exp(mxgrid) = chii_exp(mxgrid-1)
-c      do i=1,nspecies
-c        vdia_exp(i,1) = vdia_exp(i,2)
-c        vneo_exp(i,1) = vneo_exp(i,2)
-c        vdia_exp(i,0) = vdia_exp(i,1)
-c        vneo_exp(i,0) = vneo_exp(i,1)
-c      enddo
       k=mxgrid
         tew = te_exp(k)
         new = ne_exp(k)
@@ -465,38 +453,7 @@ c cgms       write(6,*)"restart_pt = ", restart_pt
 c
 c compute vdia_m and vneo_m
 c
-       do k=1,ngrid-1
-        nem = (ne_m(k+1)+ne_m(k))/2.D0
-        tim = (ti_m(k+1)+ti_m(k))/2.D0
-        tem = (te_m(k+1)+te_m(k))/2.D0
-        fim = (fi_m(k+1)+fi_m(k))/2.D0
-        fzm = (fz_m(k+1)+fz_m(k))/2.D0
-        nim = fim*nem
-        nzm = fzm*nem
-        vexbm = 0.0
-        vpolm = 0.0
-        gradnem = (ne_m(k+1)-ne_m(k))/dr(k,2)
-        gradtim = (ti_m(k+1)-ti_m(k))/dr(k,2)
-        gradtem = (te_m(k+1)-te_m(k))/dr(k,2)
-        gradvexbm = 0.0
-        gradvpolm = 0.0
-        gradfim = (fi_m(k+1)-fi_m(k))/dr(k,2)
-        gradfzm = (fz_m(k+1)-fz_m(k))/dr(k,2)
-        gradnim = fim*gradnem + nem*gradfim
-        gradnzm = fzm*gradnem + nem*gradfzm
-        zpne_m(k) = -a_unit_exp*gradnem/nem
-        zpni_m(k) = -a_unit_exp*gradnim/nim
-        zpnz_m(k) = -a_unit_exp*gradnzm/nzm
-        zpte_m(k) = -a_unit_exp*gradtem/tem
-        zpti_m(k) = -a_unit_exp*gradtim/tim
-        jm = k
-        call neoclassical
-c
-        do i=1,nspecies
-          vneo_m(i,k+1) = vneo(i)
-          vdia_m(i,k+1) = vdia(i)
-        enddo
-      enddo
+      call neo_flows(ngrid,vneo_m,vdia_m)
 c
       do k=1,ngrid
 c compute the parallel flows for each species
@@ -522,14 +479,6 @@ c set central derivatives to zero
       vexb_m(0)=vexb_m(1)
       vphi_m(0)=vphi_m(1)
       vpar_m(0)=vpar_m(1)
-      do i=1,nspecies
-        vneo_m(i,1) = vneo_m(i,2)
-        vdia_m(i,1) = vdia_m(i,2)
-c        vphi_m(i,0)=vphi_m(i,1)
-c        vpar_m(i,0)=vpar_m(i,1)
-        vneo_m(i,0)=vneo_m(i,1)
-        vdia_m(i,0)=vdia_m(i,1)
-      enddo
       ni_m(0)=ni_m(1)
       nz_m(0)=nz_m(1)
 c 

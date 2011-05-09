@@ -3663,8 +3663,10 @@
 ! fill the stress moments
 !
       wp = ky*ave_hp1(2,1,1)*ABS(vpar_shear_in(2))/vs(2)
-      stress_correction = (AIMAG(freq_QL)+2.0*wp)/(AIMAG(freq_QL)+wp)
+!      stress_correction = (AIMAG(freq_QL)+2.0*wp)/(AIMAG(freq_QL)+wp)
 !      stress_correction = 1.0
+      wp = ABS(vpar_shear_in(2)*R_unit/vs(2))
+      stress_correction = 1.0 + ((0.149*wp)**1.5)/(1.0+(0.098*wp)**5.5)
 !
       do is=ns0,ns
         do i=1,nbasis

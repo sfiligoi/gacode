@@ -135,6 +135,10 @@ c        call neo_flows(ngrid,vneo_new,vdia_new)
             vneo_m(i,k) = x13*vneo_m(i,k)+(1.0-x13)*vneo_new(i,k)
             vdia_m(i,k) = x13*vdia_m(i,k)+(1.0-x13)*vdia_new(i,k)
           enddo
+          vneo_m(i,0) = vneo_m(i,1)
+          vdia_m(i,0) = vdia_m(i,1)
+          vneo_m(i,ngrid) = vneo_m(i,ngrid-1)
+          vdia_m(i,ngrid) = vdia_m(i,ngrid-1)
         enddo
       endif
 c
