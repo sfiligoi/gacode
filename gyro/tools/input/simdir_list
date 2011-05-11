@@ -1,4 +1,4 @@
-Regression cases
+Regression cases (ASCII I/O)
 
 reg01: [ l+gki+ ae+ es+pure+ sa+ sym+ncol+nrot+ p+inp]
 reg02: [ l+gki+dke+ es+pure+ sa+ sym+ncol+nrot+ p+inp]
@@ -20,6 +20,11 @@ reg17: [ l+gki+dke+tem+pure+ sa+ sym+ncol+nrot+np+inp]
 reg18: [nl+gki+ ae+ es+pure+ sa+ sym+ncol+nrot+ p+inp]
 reg19: [ l+gki+gke+cem+pure+mod+ sym+ col+nrot+ p+inp]
 reg20: [nl+gki+dke+cem+pure+mod+ sym+ncol+ rot+np+inp]
+
+HDF5 test cases (HDF5 I/O)
+
+h5reg01: [ l+gki+ ae+ es+pure+ sa+ sym+ncol+nrot+ p+inp]
+h5reg20: [nl+gki+dke+cem+pure+mod+ sym+ncol+ rot+np+inp]
 
 Full nonlinear cases
 
