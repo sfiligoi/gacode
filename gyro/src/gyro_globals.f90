@@ -208,7 +208,6 @@ module gyro_globals
   integer :: gkeigen_j_set
   integer :: j_proc_tot
   integer :: n_proc_tot
-  integer :: gkeigen_transpose_flag
   !
   !-----------------------------------------------------------------------------------
 

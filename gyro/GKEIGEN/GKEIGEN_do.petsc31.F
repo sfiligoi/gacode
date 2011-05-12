@@ -49,8 +49,7 @@
       PetscReal      residual
 
       Mat                                                               &
-     &               time_derivative_matrix,                            &
-     &               tdm_transpose
+     &               time_derivative_matrix
 
       PetscErrorCode ierr, ierr0
 
@@ -348,13 +347,8 @@
 
       call EPSCreate(MPI_COMM_WORLD,epsolve,ierr)
 !      call EPSSetType(epsolve,EPSARPACK,ierr)
-      if (gkeigen_transpose_flag==0) then
-        call EPSSetOperators(epsolve,time_derivative_matrix,            &
-     &                       PETSC_NULL_OBJECT,ierr)
-      else
-        call EPSSetOperators(epsolve,tdm_transpose,                     &
-     &                       PETSC_NULL_OBJECT,ierr)
-      endif
+      call EPSSetOperators(epsolve,time_derivative_matrix,            &
+     &                     PETSC_NULL_OBJECT,ierr)
 
 !      call EPSSetDimensions(epsolve,gkeigen_n_values,                   &
 !     &                      gkeigen_kspace_dim,h_length,ierr)
@@ -502,84 +496,42 @@
 !          call MPI_BARRIER(MPI_COMM_WORLD,ierr)
 !        enddo
 
-        if (gkeigen_transpose_flag==0) then ! Not transposed time_derivative_matrix
+        if (gkeigen_j_set==0) then
+          do jelem = 0, h_length_block-1
+            ev_vec(jelem) = ev_vec_loc(jelem)
+          enddo
+        endif
 
+        do gkeigen_j_set_e1 = 1, gkeigen_proc_mult-1
+          j_proc_tot_e1 = i_proc*gkeigen_proc_mult + gkeigen_j_set_e1
+          j_proc_tot_0  = i_proc*gkeigen_proc_mult
           if (gkeigen_j_set==0) then
-            do jelem = 0, h_length_block-1
-              ev_vec(jelem) = ev_vec_loc(jelem)
+            call MPI_RECV(ev_vec_loc,                                   &
+     &                    size(ev_vec_loc),                             &
+     &                    MPIU_SCALAR,                                  &
+     &                    j_proc_tot_e1,                                &
+     &                    j_proc_tot_e1,                                &
+     &                    MPI_COMM_WORLD,                               &
+     &                    recv_status,                                  &
+     &                    ierr)
+            jelem_start = gkeigen_j_set_e1*h_length_block
+            jelem_end = jelem_start + h_length_block - 1
+            do jelem = jelem_start, jelem_end
+              jelem0 = jelem-jelem_start
+              ev_vec(jelem) = ev_vec_loc(jelem0)
             enddo
           endif
 
-          do gkeigen_j_set_e1 = 1, gkeigen_proc_mult-1
-            j_proc_tot_e1 = i_proc*gkeigen_proc_mult + gkeigen_j_set_e1
-            j_proc_tot_0  = i_proc*gkeigen_proc_mult
-            if (gkeigen_j_set==0) then
-              call MPI_RECV(ev_vec_loc,                                 &
-     &                      size(ev_vec_loc),                           &
-     &                      MPIU_SCALAR,                                &
-     &                      j_proc_tot_e1,                              &
-     &                      j_proc_tot_e1,                              &
-     &                      MPI_COMM_WORLD,                             &
-     &                      recv_status,                                &
-     &                      ierr)
-              jelem_start = gkeigen_j_set_e1*h_length_block
-              jelem_end = jelem_start + h_length_block - 1
-              do jelem = jelem_start, jelem_end
-                jelem0 = jelem-jelem_start
-                ev_vec(jelem) = ev_vec_loc(jelem0)
-              enddo
-            endif
-
-            if (gkeigen_j_set==gkeigen_j_set_e1)                        &
-     &        call MPI_SEND(ev_vec_loc,                                 &
-     &                      size(ev_vec_loc),                           &
-     &                      MPIU_SCALAR,                                &
-     &                      j_proc_tot_0,                               &
-     &                      j_proc_tot_e1,                              &
-     &                      MPI_COMM_WORLD,                             &
-     &                      ierr)
-             call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-           enddo
-
-        else ! Transposed time_derivative_matrix
-
-          do j_proc_tot_e1 = 0, n_proc_tot-1
-            gkeigen_j_set_e1 = mod(j_proc_tot_e1,gkeigen_proc_mult)
-            j_send_proc = j_proc_tot_e1
-            j_recv_proc = int(j_proc_tot_e1/gkeigen_proc_mult)
-            l_set = (j_send_proc==j_recv_proc)
-
-            if ((j_proc_tot==j_recv_proc).AND.(.NOT.l_set))             &
-     &        call MPI_RECV(ev_vec_loc,                                 &
-     &                      size(ev_vec_loc),                           &
-     &                      MPIU_SCALAR,                                &
-     &                      j_send_proc,                                &
-     &                      j_send_proc,                                &
-     &                      MPI_COMM_WORLD,                             &
-     &                      recv_status,                                &
-     &                      ierr)
-            if (j_proc_tot==j_recv_proc) then
-              jelem_start = gkeigen_j_set_e1*h_length_block
-              jelem_end = jelem_start + h_length_block - 1
-              do jelem = jelem_start, jelem_end
-                jelem0 = jelem-jelem_start
-                ev_vec(jelem) = ev_vec_loc(jelem0)
-              enddo
-            endif
-
-            if ((j_proc_tot==j_send_proc).AND.(.NOT.l_set))             &
-     &        call MPI_SEND(ev_vec_loc,                                 &
-     &                      size(ev_vec_loc),                           &
-     &                      MPIU_SCALAR,                                &
-     &                      j_recv_proc,                                &
-     &                      j_send_proc,                                &
-     &                      MPI_COMM_WORLD,                             &
-     &                      ierr)
-
-            call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-          enddo
-
-        endif ! Transpose vs. not
+          if (gkeigen_j_set==gkeigen_j_set_e1)                          &
+     &      call MPI_SEND(ev_vec_loc,                                   &
+     &                    size(ev_vec_loc),                             &
+     &                    MPIU_SCALAR,                                  &
+     &                    j_proc_tot_0,                                 &
+     &                    j_proc_tot_e1,                                &
+     &                    MPI_COMM_WORLD,                               &
+     &                    ierr)
+           call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+         enddo
 
         call PetscViewerBinaryOpen(MPI_COMM_WORLD,'vector.out',         &
      &                             FILE_MODE_WRITE,vecfile,ierr)
@@ -617,8 +569,6 @@
           EndDo ! is2
 
           call get_field_explicit
-!          call gyro_rhs_total
-!          h_old = h - dt*RHS
 
           call gyro_field_interpolation
 !          call get_field_fluxave
