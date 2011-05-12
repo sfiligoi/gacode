@@ -171,6 +171,45 @@
 !        EndIf
 !      EndIf
 
+!      do step = 1, nstep
+!        call get_field_explicit
+!        call gyro_rhs_total
+!        h = h + dt*RHS
+!      enddo
+!      jset_start = (i_proc*gkeigen_proc_mult+gkeigen_j_set) *           &
+!     &                                             h_length_block
+      jset_start = j_proc_tot*h_length_block
+      jset_end = jset_start + h_length_block - 1
+      do jelem = jset_start, jset_end
+        jelem0 = jelem - jset_start
+        irows_vec(jelem0) = jelem
+      enddo
+      print *, j_proc_tot, i_proc, gkeigen_j_set, jset_start, jset_end, &
+     &         jstate_start, '*****************'
+      jstate = jstate_start
+      jelem0 = 0
+      Do is2 = 1, n_kinetic
+       p_nek_loc2 = 0
+       Do p_nek2 = 1+i_proc, n_nek_1, n_proc_1
+        p_nek_loc2 = p_nek_loc2 + 1
+        Do i2 = 1, n_x
+         Do m2 = 1, n_stack
+           if ((jstate>=jset_start).AND.(jstate<=jset_end)) then
+             ev_vec_loc(jelem0) = h(m2,i2,p_nek_loc2,is2)
+             jelem0 = jelem0 + 1
+           endif
+           jstate = jstate + 1
+         EndDo ! m2
+        EndDo ! i2
+       EndDo ! p_nek2
+      EndDo ! is2
+      call VecSetValues(dummy_vec,h_length_block,irows_vec,             &
+     &                  ev_vec_loc,INSERT_VALUES,ierr)
+      call VecAssemblyBegin(dummy_vec,ierr)
+      call VecAssemblyEnd(dummy_vec,ierr)
+
+!      call VecView(dummy_vec,PETSC_VIEWER_STDOUT_WORLD,ierr)
+
       restart_cols(:,:) = (0.0,0.0)
       istate = 0
 
@@ -352,7 +391,7 @@
 
       call EPSCreate(MPI_COMM_WORLD,epsolve,ierr)
 !      call EPSSetType(epsolve,EPSARPACK,ierr)
-      call EPSSetOperators(epsolve,time_derivative_matrix,            &
+      call EPSSetOperators(epsolve,time_derivative_matrix,              &
      &                     PETSC_NULL_OBJECT,ierr)
 
 !      call EPSSetDimensions(epsolve,gkeigen_n_values,                   &
@@ -450,7 +489,7 @@
 !     &                           FILE_MODE_READ,vecfile,ierr)
 !      call VecLoad(vecfile,PETSC_NULL,dummy_vec,ierr)
 
-!      call EPSSetInitialSpace(epsolve,1,dummy_vec,ierr)
+      call EPSSetInitialSpace(epsolve,1,dummy_vec,ierr)
 
       call EPSSetTolerances(epsolve,gkeigen_tol,gkeigen_iter,ierr)
       call EPSSetFromOptions(epsolve,ierr)

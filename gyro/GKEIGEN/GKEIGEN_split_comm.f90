@@ -65,7 +65,4 @@ subroutine GKEIGEN_split_comm
                       GYRO_COMM_UNIPROC,&
                       ierr)
 
-  call MPI_COMM_RANK(MPI_COMM_WORLD,j_proc_tot,i_err)
-  call MPI_COMM_SIZE(MPI_COMM_WORLD,n_proc_tot,i_err)
-
 end subroutine GKEIGEN_split_comm
