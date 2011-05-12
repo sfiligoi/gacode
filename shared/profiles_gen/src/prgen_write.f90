@@ -51,7 +51,7 @@ subroutine prgen_write
      write(1,30) '#    RADIAL GRIDPOINTS : ',nx
      write(1,'(a,1pe9.2,a)') '#               Q_EDGE : ',q(nx)
      write(1,20) '#'
-     write(1,20) '#                 IONS : ?'
+     write(1,20) '#                 IONS : D [assumed]'
 
   end select
 

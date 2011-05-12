@@ -25,8 +25,9 @@ subroutine prgen_read_peqdsk
   peqdsk_nj = i
   nx = peqdsk_nj
   call allocate_peqdsk_vars
-  allocate(xv(ncol,i))
+
   ! psi_norm and ne(10^20/m^3)
+  allocate(xv(ncol,i))
   read(1,*) xv
   peqdsk_psi(:) = xv(1,:)
   peqdsk_ne(:)  = xv(2,:)
@@ -45,7 +46,6 @@ subroutine prgen_read_peqdsk
   read(1,*) xv
   call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_ni,peqdsk_nj)
   deallocate(xv)
-
 
   ! ti(KeV)
   read(1,*) i, t

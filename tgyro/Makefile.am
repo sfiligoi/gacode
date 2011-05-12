@@ -20,7 +20,12 @@ lib_LTLIBRARIES = libgacodetgyro.la
 
 
 LMATH=@LAPACK_LIBS@ @BLAS_LIBS@ @Z_LIBS@
+if HAVE_FCIOWRAPPERS
+IOLIBS=$(FCIOWRAPPERS_ALIBS) @HDF5_ALIBS@ @NETCDF_ALIBS@ @Z_LIBS@
+else
 IOLIBS=@HDF5_ALIBS@ @NETCDF_ALIBS@ @Z_LIBS@
+endif
+
 
 libgacodetgyro_la_SOURCES =
 libgacodetgyro_la_LIBADD = \

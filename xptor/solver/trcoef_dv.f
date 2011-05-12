@@ -25,6 +25,7 @@ c
 c
       integer i,j,k,jj,sendto,nsent,k_ret,j_ret,ndone
       integer nsum
+      integer m_proc,ncalls,nloops
       integer MPI_status(MPI_STATUS_SIZE)
       real*8 dne,dte,dti,dvexb,dvpol,dx,dvmin
       real*8 thetam,qm,rmajm,rminm,rhom
@@ -41,7 +42,6 @@ c
       real*8 T_ave,D_ave,x13
       real*8 mass_density,kpol1,kpol2
       real*8 last_lhs
-      real*8 vneo_new(nspecies)
       real*8 d_vdia,d_vneo,d_vexb,d_vpar
       real*8 gradvphim
       real*8 unc(0:mxgrd)
@@ -95,8 +95,10 @@ c
       real*8 stress_par_z_m_sum(0:mxgrd-1)
       real*8 xnu_m_sum(0:mxgrd-1)
       real*8 alpha_m_sum(0:mxgrd-1)
+      real*8 betae_m_sum(0:mxgrd-1)
       real*8 S_ext(mxflds,mxgrd)
       real*8 glf_flux(0:10,mxflds,mxgrd),dflux(0:10,mxflds,mxgrd)
+      real*8 vdia_new_sum(3,0:mxgrd),vneo_new_sum(3,0:mxgrd)
 c
       x13 = xparam_pt(13)
       cv = 1000.0
@@ -176,6 +178,7 @@ c      ca = 2.D0/3.D0
        stress_par_z_m_sum(k)=0.0
        xnu_m_sum(k)=0.0
        alpha_m_sum(k)=0.0
+       betae_m_sum(k)=0.0
        egamma_m(k)=0.D0
        anrate_m(k)=0.D0
        anfreq_m(k)=0.D0
@@ -233,6 +236,13 @@ c      ca = 2.D0/3.D0
        stress_par_z_m(k)=0.0
        xnu_m(k)=0.0
        alpha_m(k)=0.0
+       betae_m(k)=0.0
+       do i=1,nspecies
+        vdia_new(i,k) = 0.0
+        vneo_new(i,k) = 0.0
+        vdia_new_sum(i,k) = 0.0
+        vneo_new_sum(i,k) = 0.0
+       enddo
       enddo
 c
       dne = 1.D0
@@ -247,7 +257,23 @@ c      dx = arho_exp/4.D0
 c
 c start of main dv-method loop
 c
-      do k=1+i_proc,ngrid-1,n_proc
+c      do k=1+i_proc,ngrid-1,n_proc
+      ncalls = 2*nfields+1
+      if(iparam_pt(1).eq.2)ncalls = nfields+1
+      if(iparam_pt(1).le.0)ncalls = 1
+      nloops = ncalls*(ngrid-1)/n_proc
+c      write(*,*)"n_proc=",n_proc,"i_proc=",i_proc
+c      write(*,*)"ncalls= ",ncalls," nloops = ",nloops
+c      if(ncalls*(ngrid-1)/nloops.ne.n_proc)then
+c       if(i_proc.eq.0)then
+c        write(*,*)"warning: number of processors is not optimum"
+c        write(*,*)"nearest optimum number is ",ncalls*(ngrid-1)/nloops
+c       endif
+c      endif
+c
+      do k=1,ngrid-1
+        m_proc = (k-1)*ncalls
+        m_proc = m_proc - n_proc*(m_proc/n_proc)
         if(iparam_pt(1).eq.-2.and.mask_r(k).eq.0)go to 21
         jm = k
         nem = (ne_m(k+1)+ne_m(k))/2.D0
@@ -274,167 +300,224 @@ c        gradnzm = (nz_m(k+1)-nz_m(k))/dr(k,2)
         gradnzm = fzm*gradnem + nem*gradfzm
        j_ret=0
        ipert_gf=0
-       call glf2d_dv
-       glf_flux(j_ret,1,k) = nefluxm
-       glf_flux(j_ret,2,k) = tefluxm
-       glf_flux(j_ret,3,k) = tifluxm
-       glf_flux(j_ret,4,k) = vphifluxm
-       glf_flux(j_ret,5,k) = vparfluxm
+       if(i_proc.eq.m_proc)then
+c        write(*,*)k,"unperturbed",i_proc,j_ret
+        call glf2d_dv
+        glf_flux(j_ret,1,k) = nefluxm
+        glf_flux(j_ret,2,k) = tefluxm
+        glf_flux(j_ret,3,k) = tifluxm
+        glf_flux(j_ret,4,k) = vphifluxm
+        glf_flux(j_ret,5,k) = vparfluxm
+        do i=1,nspecies
+          vdia_new(i,k) = vdia(i)
+          vneo_new(i,k) = vneo(i)
+        enddo
+       endif
 c
       if(iparam_pt(1).lt.1 .or. mask_r(k).eq.0)go to 21
 c gradient variations
-      ipert_gf=1
-      j=0
+cc      ipert_gf=1
+c      j=0
       if(itport_pt(1).ne.0)then
        j_ret = 1
-       j=j+1
-       delt_v=dvmin*dne/dx
-       gradnem = gradnem - delt_v
-       gradnim = gradnim - fim*delt_v
-       gradnzm = gradnzm - fzm*delt_v
-       call glf2d_dv
-       gradnem = gradnem + delt_v
-       gradnim = gradnim + fim*delt_v
-       gradnzm = gradnzm + fzm*delt_v
-       glf_flux(j_ret,1,k) = nefluxm
-       glf_flux(j_ret,2,k) = tefluxm
-       glf_flux(j_ret,3,k) = tifluxm
-       glf_flux(j_ret,4,k) = vphifluxm
-       glf_flux(j_ret,5,k) = vparfluxm
+c       j=j+1
+       m_proc = m_proc+1
+       m_proc = m_proc - n_proc*(m_proc/n_proc)
+       if(i_proc.eq.m_proc)then
+        delt_v=dvmin*dne/dx
+        gradnem = gradnem - delt_v
+        gradnim = gradnim - fim*delt_v
+        gradnzm = gradnzm - fzm*delt_v
+c        write(*,*)"trcoef_dv",i_proc,k,j_ret
+        call glf2d_dv
+        gradnem = gradnem + delt_v
+        gradnim = gradnim + fim*delt_v
+        gradnzm = gradnzm + fzm*delt_v
+        glf_flux(j_ret,1,k) = nefluxm
+        glf_flux(j_ret,2,k) = tefluxm
+        glf_flux(j_ret,3,k) = tifluxm
+        glf_flux(j_ret,4,k) = vphifluxm
+        glf_flux(j_ret,5,k) = vparfluxm
+       endif
       endif
       if(itport_pt(2).ne.0)then       
        j_ret = 2
-       j=j+1
-       delt_v=dvmin*dte/dx
-       gradtem = gradtem - delt_v
-       call glf2d_dv
-       gradtem = gradtem + delt_v
-       glf_flux(j_ret,1,k) = nefluxm
-       glf_flux(j_ret,2,k) = tefluxm
-       glf_flux(j_ret,3,k) = tifluxm
-       glf_flux(j_ret,4,k) = vphifluxm
-       glf_flux(j_ret,5,k) = vparfluxm
+c       j=j+1
+       m_proc = m_proc+1
+       m_proc = m_proc - n_proc*(m_proc/n_proc)
+       if(i_proc.eq.m_proc)then
+        delt_v=dvmin*dte/dx
+        gradtem = gradtem - delt_v
+c        write(*,*)k,"gradtem",i_proc,j_ret
+        call glf2d_dv
+        gradtem = gradtem + delt_v
+        glf_flux(j_ret,1,k) = nefluxm
+        glf_flux(j_ret,2,k) = tefluxm
+        glf_flux(j_ret,3,k) = tifluxm
+        glf_flux(j_ret,4,k) = vphifluxm
+        glf_flux(j_ret,5,k) = vparfluxm
+       endif
       endif
       if(itport_pt(3).ne.0)then       
        j_ret = 3
-       j=j+1
-       delt_v=dvmin*dti/dx
-       gradtim = gradtim - delt_v
-       call glf2d_dv
-       gradtim = gradtim + delt_v
-       glf_flux(j_ret,1,k) = nefluxm
-       glf_flux(j_ret,2,k) = tefluxm
-       glf_flux(j_ret,3,k) = tifluxm
-       glf_flux(j_ret,4,k) = vphifluxm
-       glf_flux(j_ret,5,k) = vparfluxm
+c       j=j+1
+       m_proc = m_proc+1
+       m_proc = m_proc - n_proc*(m_proc/n_proc)
+       if(i_proc.eq.m_proc)then
+        delt_v=dvmin*dti/dx
+        gradtim = gradtim - delt_v
+c        write(*,*)k,"gradtim",i_proc,j_ret
+        call glf2d_dv
+        gradtim = gradtim + delt_v
+        glf_flux(j_ret,1,k) = nefluxm
+        glf_flux(j_ret,2,k) = tefluxm
+        glf_flux(j_ret,3,k) = tifluxm
+        glf_flux(j_ret,4,k) = vphifluxm
+        glf_flux(j_ret,5,k) = vparfluxm
+       endif
       endif
       if(itport_pt(4).ne.0)then       
        j_ret = 4
-       j=j+1
-       delt_v=dvmin*dvexb/dx
-       gradvexbm = gradvexbm - delt_v
-       call glf2d_dv
-       gradvexbm = gradvexbm + delt_v
-       glf_flux(j_ret,1,k) = nefluxm
-       glf_flux(j_ret,2,k) = tefluxm
-       glf_flux(j_ret,3,k) = tifluxm
-       glf_flux(j_ret,4,k) = vphifluxm
-       glf_flux(j_ret,5,k) = vparfluxm
+c       j=j+1
+       m_proc = m_proc+1
+       m_proc = m_proc - n_proc*(m_proc/n_proc)
+       if(i_proc.eq.m_proc)then
+        delt_v=dvmin*dvexb/dx
+        gradvexbm = gradvexbm - delt_v
+c        write(*,*)"trcoef_dv",i_proc,k,j_ret
+        call glf2d_dv
+        gradvexbm = gradvexbm + delt_v
+        glf_flux(j_ret,1,k) = nefluxm
+        glf_flux(j_ret,2,k) = tefluxm
+        glf_flux(j_ret,3,k) = tifluxm
+        glf_flux(j_ret,4,k) = vphifluxm
+        glf_flux(j_ret,5,k) = vparfluxm
+       endif
       endif
       if(itport_pt(5).ne.0)then       
        j_ret = 5
-       j=j+1
-       delt_v=dvmin*dvpol/dx
-       gradvpolm = gradvpolm - delt_v
-       call glf2d_dv
-       gradvpolm = gradvpolm + delt_v
-       glf_flux(j_ret,1,k) = nefluxm
-       glf_flux(j_ret,2,k) = tefluxm
-       glf_flux(j_ret,3,k) = tifluxm
-       glf_flux(j_ret,4,k) = vphifluxm
-       glf_flux(j_ret,5,k) = vparfluxm
+c       j=j+1
+       m_proc = m_proc+1
+       m_proc = m_proc - n_proc*(m_proc/n_proc)
+       if(i_proc.eq.m_proc)then
+        delt_v=dvmin*dvpol/dx
+        gradvpolm = gradvpolm - delt_v
+c        write(*,*)"trcoef_dv",i_proc,k,j_ret
+        call glf2d_dv
+        gradvpolm = gradvpolm + delt_v
+        glf_flux(j_ret,1,k) = nefluxm
+        glf_flux(j_ret,2,k) = tefluxm
+        glf_flux(j_ret,3,k) = tifluxm
+        glf_flux(j_ret,4,k) = vphifluxm
+        glf_flux(j_ret,5,k) = vparfluxm
+       endif
       endif
 c convection variations
       if(iparam_pt(1).eq.2)go to 21
-      j=0
+c      j=0
       if(itport_pt(1).ne.0)then       
        j_ret = 6
-       j=j+1
-       delt_v=dvmin*dne
-       gradnem = gradnem*(nem+delt_v)/nem
-       gradnim = gradnim*(nim+fim*delt_v)/nim
-       gradnzm = gradnzm*(nzm+fzm*delt_v)/nzm
-       nem = nem + delt_v
-       nim = nim + fim*delt_v
-       nzm = nzm + fzm*delt_v
-       call glf2d_dv
-       nem = nem - delt_v
-       nim = nim - fim*delt_v
-       nzm = nzm - fzm*delt_v
-       gradnem = gradnem*nem/(nem+delt_v)
-       gradnim = gradnim*nim/(nim+fim*delt_v)
-       gradnzm = gradnzm*nzm/(nzm+fzm*delt_v)
-       glf_flux(j_ret,1,k) = nefluxm
-       glf_flux(j_ret,2,k) = tefluxm
-       glf_flux(j_ret,3,k) = tifluxm
-       glf_flux(j_ret,4,k) = vphifluxm
-       glf_flux(j_ret,5,k) = vparfluxm
+c       j=j+1
+       m_proc = m_proc+1
+       m_proc = m_proc - n_proc*(m_proc/n_proc)
+       if(i_proc.eq.m_proc)then
+        delt_v=dvmin*dne
+        gradnem = gradnem*(nem+delt_v)/nem
+        gradnim = gradnim*(nim+fim*delt_v)/nim
+        gradnzm = gradnzm*(nzm+fzm*delt_v)/nzm
+        nem = nem + delt_v
+        nim = nim + fim*delt_v
+        nzm = nzm + fzm*delt_v
+c        write(*,*)"trcoef_dv",i_proc,k,j_ret
+        call glf2d_dv
+        nem = nem - delt_v
+        nim = nim - fim*delt_v
+        nzm = nzm - fzm*delt_v
+        gradnem = gradnem*nem/(nem+delt_v)
+        gradnim = gradnim*nim/(nim+fim*delt_v)
+        gradnzm = gradnzm*nzm/(nzm+fzm*delt_v)
+        glf_flux(j_ret,1,k) = nefluxm
+        glf_flux(j_ret,2,k) = tefluxm
+        glf_flux(j_ret,3,k) = tifluxm
+        glf_flux(j_ret,4,k) = vphifluxm
+        glf_flux(j_ret,5,k) = vparfluxm
+       endif
       endif
       if(itport_pt(2).ne.0)then       
        j_ret = 7
-       j=j+1
-       delt_v=dvmin*dte
-       gradtem = gradtem*(tem+delt_v)/tem
-       tem = tem + delt_v
-       call glf2d_dv
-       tem = tem - delt_v
-       gradtem = gradtem*tem/(tem+delt_v)
-       glf_flux(j_ret,1,k) = nefluxm
-       glf_flux(j_ret,2,k) = tefluxm
-       glf_flux(j_ret,3,k) = tifluxm
-       glf_flux(j_ret,4,k) = vphifluxm
-       glf_flux(j_ret,5,k) = vparfluxm
+c       j=j+1
+       m_proc = m_proc+1
+       m_proc = m_proc - n_proc*(m_proc/n_proc)
+       if(i_proc.eq.m_proc)then
+        delt_v=dvmin*dte
+        gradtem = gradtem*(tem+delt_v)/tem
+        tem = tem + delt_v
+c        write(*,*)k,"tem",i_proc,j_ret
+        call glf2d_dv
+        tem = tem - delt_v
+        gradtem = gradtem*tem/(tem+delt_v)
+        glf_flux(j_ret,1,k) = nefluxm
+        glf_flux(j_ret,2,k) = tefluxm
+        glf_flux(j_ret,3,k) = tifluxm
+        glf_flux(j_ret,4,k) = vphifluxm
+        glf_flux(j_ret,5,k) = vparfluxm
+       endif
       endif
       if(itport_pt(3).ne.0)then       
        j_ret = 8
-       j=j+1
-       delt_v=dvmin*dti
-       gradtim = gradtim*(tim+delt_v)/tim
-       tim = tim + delt_v
-       call glf2d_dv
-       tim = tim - delt_v
-       gradtim = gradtim*tim/(tim+delt_v)
-       glf_flux(j_ret,1,k) = nefluxm
-       glf_flux(j_ret,2,k) = tefluxm
-       glf_flux(j_ret,3,k) = tifluxm
-       glf_flux(j_ret,4,k) = vphifluxm
-       glf_flux(j_ret,5,k) = vparfluxm
+c       j=j+1
+       m_proc = m_proc+1
+       m_proc = m_proc - n_proc*(m_proc/n_proc)
+       if(i_proc.eq.m_proc)then
+        delt_v=dvmin*dti
+        gradtim = gradtim*(tim+delt_v)/tim
+        tim = tim + delt_v
+c        write(*,*)k,"tim",i_proc,j_ret
+        call glf2d_dv
+        tim = tim - delt_v
+        gradtim = gradtim*tim/(tim+delt_v)
+        glf_flux(j_ret,1,k) = nefluxm
+        glf_flux(j_ret,2,k) = tefluxm
+        glf_flux(j_ret,3,k) = tifluxm
+        glf_flux(j_ret,4,k) = vphifluxm
+        glf_flux(j_ret,5,k) = vparfluxm
+       endif
       endif
       if(itport_pt(4).ne.0)then       
        j_ret = 9
-       j=j+1
-       delt_v=dvmin*dvexb
-       vexbm = vexbm + delt_v
-       call glf2d_dv
-       vexbm = vexbm - delt_v
-       glf_flux(j_ret,1,k) = nefluxm
-       glf_flux(j_ret,2,k) = tefluxm
-       glf_flux(j_ret,3,k) = tifluxm
-       glf_flux(j_ret,4,k) = vphifluxm
-       glf_flux(j_ret,5,k) = vparfluxm
+c       j=j+1
+       m_proc = m_proc+1
+       m_proc = m_proc - n_proc*(m_proc/n_proc)
+       if(i_proc.eq.m_proc)then
+        delt_v=dvmin*dvexb
+        vexbm = vexbm + delt_v
+c        write(*,*)"trcoef_dv",i_proc,k,j_ret
+        call glf2d_dv
+        vexbm = vexbm - delt_v
+        glf_flux(j_ret,1,k) = nefluxm
+        glf_flux(j_ret,2,k) = tefluxm
+        glf_flux(j_ret,3,k) = tifluxm
+        glf_flux(j_ret,4,k) = vphifluxm
+        glf_flux(j_ret,5,k) = vparfluxm
+       endif
       endif
       if(itport_pt(5).ne.0)then       
        j_ret = 10
-       j=j+1
-       delt_v=dvmin*dvpol
-       vpolm = vpolm + delt_v
-       call glf2d_dv
-       vpolm = vpolm - delt_v
-       glf_flux(j_ret,1,k) = nefluxm
-       glf_flux(j_ret,2,k) = tefluxm
-       glf_flux(j_ret,3,k) = tifluxm
-       glf_flux(j_ret,4,k) = vphifluxm
-       glf_flux(j_ret,5,k) = vparfluxm
+c       j=j+1
+       m_proc = m_proc+1
+       m_proc = m_proc - n_proc*(m_proc/n_proc)
+       if(i_proc.eq.m_proc)then
+        delt_v=dvmin*dvpol
+        vpolm = vpolm + delt_v
+c        write(*,*)"trcoef_dv",i_proc,k,j_ret
+        call glf2d_dv
+        vpolm = vpolm - delt_v
+        glf_flux(j_ret,1,k) = nefluxm
+        glf_flux(j_ret,2,k) = tefluxm
+        glf_flux(j_ret,3,k) = tifluxm
+        glf_flux(j_ret,4,k) = vphifluxm
+        glf_flux(j_ret,5,k) = vparfluxm
+       endif
       endif
  21    continue
       enddo
@@ -664,6 +747,27 @@ c
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
       call MPI_BCAST(alpha_m_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(betae_m,betae_m_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(betae_m_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(vdia_new,vdia_new_sum,3*mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(vdia_new_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(vneo_new,vneo_new_sum,3*mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(vneo_new_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+c
+      do i=1,nspecies
+c set boundary conditions on 1/2 grid
+        vdia_new_sum(i,0)=vdia_new_sum(i,1)
+        vneo_new_sum(i,0)=vneo_new_sum(i,1)
+        vdia_new_sum(i,ngrid) = vdia_new_sum(i,ngrid-1)
+        vneo_new_sum(i,ngrid) = vneo_new_sum(i,ngrid-1)
+      enddo
+c
       do k=1,ngrid-1
         egamma_m(k)=egamma_sum(k)
         gamma_p_m(k)=gamma_p_sum(k)
@@ -680,6 +784,7 @@ c
         nu_pol_m(k)=nu_pol_m_sum(k)
         xnu_m(k)=xnu_m_sum(k)
         alpha_m(k)=alpha_m_sum(k)
+        betae_m(k)=betae_m_sum(k)
         flowe_neo(k) = flowe_neo_sum(k)
         flowi_neo(k) = flowi_neo_sum(k)
         flowz_neo(k) = flowz_neo_sum(k)
@@ -720,6 +825,11 @@ c
         stress_tor_z_m(k) = stress_tor_z_m_sum(k)
         stress_par_i_m(k) = stress_par_i_m_sum(k)
         stress_par_z_m(k) = stress_par_z_m_sum(k)
+        do i=1,nspecies
+c interpolate onto the full grid
+         vdia_new(i,k) = 0.5*(vdia_new_sum(i,k)+vdia_new_sum(i,k-1))
+         vneo_new(i,k) = 0.5*(vneo_new_sum(i,k)+vneo_new_sum(i,k-1))
+        enddo
       enddo
       egamma_m(0)=egamma_m(1)
       gamma_p_m(0)=gamma_p_m(1)
@@ -728,6 +838,13 @@ c
       nu_pol_m(0)=nu_pol_m(1)
       xnu_m(0)=xnu_m(1)
       alpha_m(0)=0.0
+      cgyrobohm_m(0) = cgyrobohm_m(1)
+      do i=1,nspecies
+       vdia_new(i,0) = vdia_new(i,1)
+       vneo_new(i,0) = vneo_new(i,1)
+       vdia_new(i,ngrid) = vdia_new(i,ngrid-1)
+       vneo_new(i,ngrid) = vneo_new(i,ngrid-1)
+      enddo
       egamma_m(ngrid)=egamma_m(ngrid-1)
       gamma_p_m(ngrid)=gamma_p_m(ngrid-1)
       anrate_m(ngrid)=anrate_m(ngrid-1)
@@ -741,6 +858,13 @@ c
       etagb_phi_m(ngrid)=etagb_phi_m(ngrid-1)
       kpol_m(ngrid)=kpol_m(ngrid-1)
       nu_pol_m(ngrid)=nu_pol_m(ngrid-1)
+      do i=1,nspecies
+c set boundary conditions on full grid
+        vdia_new(i,0)=vdia_new(i,1)
+        vneo_new(i,0)=vneo_new(i,1)
+        vdia_new(i,ngrid) = vdia_new(i,ngrid-1)
+        vneo_new(i,ngrid) = vneo_new(i,ngrid-1)
+      enddo
 c
 c        do k=0,jmaxm
 c         write(*,155) i_proc,k,rho(k),chiineo_m(k),chiineo_sum(k)
@@ -848,6 +972,7 @@ c
 c
 c  transfer fluxes
 c
+c       write(*,*)k,"dflux",dflux(0,2,k),dflux(2,2,k)
        nefluxm = dflux(0,1,k)
        tefluxm = dflux(0,2,k)
        tifluxm = dflux(0,3,k)
@@ -977,12 +1102,18 @@ c
            conv3(i,j,k) = diff(i,j,k)*gradtem/tem
            nu(i,j,k)= nuei_m(k)*1.6022D-3
            vrho3(i,j,k) = 1.5D0*ne_m(k)*1.6022D-3
+           if(ABS(teflux(k)).gt.1.0D-12)then
+             stiff(1,1,k) = -gradtem*diff(i,j,k)/teflux(k)
+           endif
          endif
          if(itport_pt(3).ne.0)then
            i=i+1
            diff(i,j,k)=(tifluxm - tiflux(k))/(delt_v)
            conv3(i,j,k) = diff(i,j,k)*gradtem/tem
            nu(i,j,k)= - nuei_m(k)*1.6022D-3
+           if(ABS(tiflux(k)).gt.1.0D-12)then
+             stiff(2,1,k) = -gradtem*diff(i,j,k)/tiflux(k)
+           endif
          endif
          if(itport_pt(4).ne.0)then
            i=i+1
@@ -1017,6 +1148,9 @@ c
            diff(i,j,k)=(tefluxm - teflux(k))/(delt_v)
            conv3(i,j,k)=diff(i,j,k)*gradtim/tim
            nu(i,j,k)=-nuei_m(k)*1.6022D-3
+           if(ABS(teflux(k)).gt.1.0D-12)then
+             stiff(1,2,k) = -gradtim*diff(i,j,k)/teflux(k)
+           endif
          endif
          if(itport_pt(3).ne.0)then
            i=i+1
@@ -1024,6 +1158,9 @@ c
            conv3(i,j,k) = diff(i,j,k)*gradtim/tim
            nu(i,j,k)=nuei_m(k)*1.6022D-3
            vrho3(i,j,k)=1.5D0*(fi_m(k)+fz_m(k))*ne_m(k)*1.6022D-3
+           if(ABS(tiflux(k)).gt.1.0D-12)then
+             stiff(2,2,k) = -gradtim*diff(i,j,k)/tiflux(k)
+           endif
          endif
          if(itport_pt(4).ne.0)then
            i=i+1

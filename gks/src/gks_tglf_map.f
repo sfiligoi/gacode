@@ -324,6 +324,7 @@
         peflxa=particle_flux_tg(n,1)*SQRT(2.0/temp3)/temp3
         eeflxa=energy_flux_tg(n,1)*SQRT(2.0/temp3)/temp3
         eiflxa=energy_flux_tg(n,2)*SQRT(2.0/temp3)/temp3
+        mflxea(1)=get_QL_stress_par(1,2,1)*SQRT(2.0/temp3)/temp3
         if(ncspec2.ne.0)then
           eiflxa=eiflxa+get_QL_energy_flux(n,3,1)*SQRT(2.0/temp3)/temp3
         endif

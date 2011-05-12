@@ -512,8 +512,6 @@ subroutine gyro_write_input
      write(1,*) ' - phase_space.out for velocity-space nodes and weights'
      close(1)
 
-     call gyro_write_units(trim(path)//'units.out',10)
-
   endif
 
   if (debug_flag == 1 .and. i_proc == 0) then

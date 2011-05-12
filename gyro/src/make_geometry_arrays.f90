@@ -74,8 +74,6 @@ subroutine make_geometry_arrays
 
   enddo !i
 
-  call write_geometry_arrays(trim(path)//'geometry_arrays.out',4)
-
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[make_geometry_arrays done]'
   endif

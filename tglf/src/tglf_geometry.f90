@@ -189,11 +189,11 @@
 ! generalized quench rule kx0 shift
 !
         kx0 = 0.0
+        sign_kx0=1.0
         if(alpha_quench_in.eq.0.0)then
-          kx0 = alpha_kx0_in*(vexb_shear_s+shear_ns_in(2))*Rmaj_s/(ky*taus(2))
-          if(ABS(kx0).gt.alpha_kx1_in)kx0 = alpha_kx1_in*kx0/ABS(kx0)
-          kx0 = kx0*sign_Bt_in
-          sign_kx0=1.0
+          kx0 = sign_Bt_in*alpha_kx0_in*TANH(vexb_shear_s*Rmaj_s/vs(2))/ky
+          kx0 = kx0 -alpha_kx1_in*0.4*TANH(0.091*vpar_shear_in(2)*Rmaj_s/vs(2))
+!
           if(kx0.lt.0.0)sign_kx0=-1.0
         endif
 !        kx0 = alpha_kx1_in

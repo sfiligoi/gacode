@@ -21,9 +21,12 @@ libgacodeexpro_la_SOURCES = \
   EXPRO_read_driver.f90 \
   EXPRO_compute_derived.f90 \
   EXPRO_write_derived.f90 \
-  EXPRO_write_original.f90 \
-  EXPRO_palloc.f90 \
-  EXPRO_pread.f90
+  EXPRO_write_original.f90 
+
+if HAVE_MPI
+  libgacodeexpro_la_SOURCES += EXPRO_palloc.f90 \
+                               EXPRO_pread.f90
+endif
 
 # To get to work with optimization reducing compiler wrappers
 AM_LIBTOOLFLAGS = --tag=FC

@@ -35,8 +35,11 @@ libgacodemath_la_SOURCES = \
   cub_spline_deriv2.f90 \
   gamma.f \
   energy_integral.f90 \
-  curtis_rad.f90 \
-  proc_time.f90
+  curtis_rad.f90 
+
+if HAVE_MPI 
+  libgacodemath_la_SOURCES +=  proc_time.f
+endif
 
 	
 

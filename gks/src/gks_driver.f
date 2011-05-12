@@ -176,6 +176,7 @@ c run the test case for real geometry
            write(*,*)" peflux     = ",peflxa
            write(*,*)" qeflux     = ",eeflxa
            write(*,*)" qiflux     = ",eiflxa
+           write(*,*)" miflux  = ",mflxea(1)
 c           write(*,*)"igeo = ",igeo
 c           write(*,*)"cbetae = ",cbetae
 c           write(*,*)"cdebye = ",cdebye

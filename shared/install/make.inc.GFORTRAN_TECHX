@@ -19,7 +19,7 @@ LMATH = /contrib/clapack-cmake-3.2.1-ser/lib/liblapack.a /contrib/clapack-cmake-
 
 # OPTIONAL: netCDF (for gyro2gkv)
 
-NETCDF = /contrib/netcdf/lib/libnetcdf.a
+NETCDF = /contrib/netcdf/lib/libnetcdff.a /contrib/netcdf/lib/libnetcdf_c++.a /contrib/netcdf/lib/libnetcdf.a
 NETCDF_INC = /contrib/netcdf/include
 #NETCDF = -L/usr/local/lib -lnetcdf
 #NETCDF_INC = /usr/local/include

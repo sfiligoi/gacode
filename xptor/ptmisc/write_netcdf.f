@@ -23,7 +23,7 @@ c
       parameter (den_units='1.e19 m^-3', mom_units='NT-M^2')
       parameter (field_units='T', cur_units='MA', pow_units='MW')
       parameter (txlen=15)
-      integer j, val, lenid, ncid, rcode
+      integer i,j,k,val, lenid, ncid, rcode
       integer rhidd, rhid (500), rhid1 (500)
       integer scalval(500), oneval(500)
       integer stat, rdim
@@ -846,6 +846,10 @@ c
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'def.',
      & len('MHD alpha'),'MHD alpha')
       j=j+1
+      oneval(j) = nf_def_var (ncid,'betae_m',nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'def.',
+     & len('electron beta'),'electron beta')
+      j=j+1
       oneval(j) = nf_def_var (ncid,'zpne_m',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'def.',
      & len('a/Lne (dimensionless)'),'a/Lne (dimensionless)')
@@ -1335,21 +1339,40 @@ c
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'def',
      &           len('INTEGL_RHS5'), 'INTEGRAL_RHS5')
       j=j+1
-      oneval(j) = nf_def_var (ncid,'DIFF11',nf_double,1,
+      oneval(j) = nf_def_var (ncid,'DIFF',nf_double,1,
      &            rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'def',
-     &           len('DIFF11'), 'DIFF11')
+     &           len('DIFF'), 'DIFF')
       j=j+1
-      oneval(j) = nf_def_var (ncid,'CONV11',nf_double,1,
+      oneval(j) = nf_def_var (ncid,'CONV',nf_double,1,
      &            rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'def',
-     &           len('CONV11'), 'CONV11')
+     &           len('CONV'), 'CONV')
       j=j+1
-      oneval(j) = nf_def_var (ncid,'NU11',nf_double,1,
+      oneval(j) = nf_def_var (ncid,'NU',nf_double,1,
      &            rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'def',
-     &           len('NU11'), 'NU11')
-
+     &           len('NU'), 'NU')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'STIFFee',nf_double,1,
+     &            rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'def',
+     &           len('STIFFee'), 'STIFFee')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'STIFFie',nf_double,1,
+     &            rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'def',
+     &           len('STIFFie'), 'STIFFie')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'STIFFei',nf_double,1,
+     &            rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'def',
+     &           len('STIFFei'), 'STIFFei')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'STIFFii',nf_double,1,
+     &            rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'def',
+     &           len('STIFFii'), 'STIFFii')
 c
 c End definitions
 c
@@ -1722,6 +1745,8 @@ c
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), alpha_m)
       j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), betae_m)
+      j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), zpne_m)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), zpni_m)
@@ -1934,7 +1959,14 @@ c
       oneval(j)=nf_put_var_double(ncid, rhid1(j),conv3(1,1,1:mxgrid+1))
       j=j+1
       oneval(j)=nf_put_var_double(ncid, rhid1(j),nu(1,1,1:mxgrid+1))
-
+      j=j+1
+      oneval(j)=nf_put_var_double(ncid, rhid1(j),stiff(1,1,1:mxgrid+1))
+      j=j+1
+      oneval(j)=nf_put_var_double(ncid, rhid1(j),stiff(2,1,1:mxgrid+1))
+      j=j+1
+      oneval(j)=nf_put_var_double(ncid, rhid1(j),stiff(1,2,1:mxgrid+1))
+      j=j+1
+      oneval(j)=nf_put_var_double(ncid, rhid1(j),stiff(2,2,1:mxgrid+1))
 c
 c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
 

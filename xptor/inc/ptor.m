@@ -41,6 +41,7 @@ c..301 elements
       real*8 eta_par(mxgrd), eta_per(mxgrd), eta_phi(mxgrd)
       real*8 conv_phi(mxgrd), nu_ie(mxgrd), nu_ei(mxgrd)
       real*8 chie_ptor(mxgrd), chii_ptor(mxgrd)
+      real*8 v2_bar(mxgrd)
 c..20 elements
       real*8 xparam_pt(1:30)
 c..5 elements
@@ -63,7 +64,6 @@ c..1 element
       real*8 chiep_a, chiep_b, chiep_c
       real*8 endtime_pt, restart_pt, sigma, vexb_bc
       real*8 fuscale, radref, taupin, time_neut, norm_s, norm_dt
-      real*8 v2_bar
 c
       integer iparam_pt(1:20),upsrc(8),itport_pt(5)
       integer mxgrid,mxfields,ngin,ngrid,nsteps_v,dvflag,time_series

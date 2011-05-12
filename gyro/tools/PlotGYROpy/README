@@ -3,6 +3,8 @@ This is a directory for python scripts for analyzing GYRO data based on
 the python tools of numpy (numeric data structures), tables (HDF5
 read/write), and matplotlib (plotting library and matlab like tools).
 
+See also GA_ROOT/shared/vshdf5/README for general HDF5 information
+as well.
 
 The main scripts are:
 

@@ -5115,6 +5115,44 @@ c*****
        endif
       enddo
      
+c***********************************************************************      
+c   compute total electrostatic momentum flux mflxe (parallel stress) 
+c   in units of mi0*ne0*vth(1)*vth(1)*(cabs(phi00))**2
+c*****
+      do  is=1,nspec
+       if(ncspec(is).ne.0) then
+       stm=sqrt(temp(is)/amass(is))
+
+       do  isign=1,2
+        do  ie=1,negrid
+         do  il=1,nlambda
+          do j=-ntgridl,ntgrid
+           g1(j,il,ie,isign,is)=g(j,il,ie,isign,is)*aj0(j,il,ie,is)
+     >       *stm*vpa(j,il,ie,isign)
+           enddo
+          enddo
+        enddo
+       enddo
+      
+       endif
+      enddo
+
+      call integrate
+
+
+      do is=1,nspec
+       
+       do j=-ntgridl,ntgrid
+        mflxe(j,is)=0.
+       enddo
+       if(ncspec(is).ne.0) then
+       do j=-ntgridl,ntgrid
+          mflxe(j,is)=
+     >     +amass(is)*an(is)*real(conjg(geint(j,is))*(-zi*aky*phi(j)))
+     >     /(cabs(phi00))**2
+       enddo
+       endif
+      enddo
 c______________________________________________________________________
 c  compute the flux surface average flow ie integrate over all theta
 c*****
@@ -5137,6 +5175,8 @@ c*****
         eflxma(is)=0.
         eflxtea(is)=0.
         eflxtma(is)=0.
+ 
+        mflxea(is) = 0.0
 	
       enddo
       
@@ -5158,6 +5198,9 @@ c*****
         eflxtea(is)=eflxtea(is)+delthet(j)*eflxte(j,is)/(anormpi*pi)
      >   /phisqrnorm
         eflxtma(is)=eflxtma(is)+delthet(j)*eflxtm(j,is)/(anormpi*pi)
+     >   /phisqrnorm
+
+        mflxea(is)=mflxea(is)+delthet(j)*mflxe(j,is)/(anormpi*pi)
      >   /phisqrnorm
        enddo
       enddo

@@ -10,17 +10,20 @@
 ## ############################################################
 
 dist_noinst_DATA= \
-  gyro_plotH5.py \
-  plot-gyro3D.py
- 
+  README \
+  gyroMode2Real.py \
+  plotGyro.py \
+  readGyroH5.py \
+  readGyroH5.txt
+
 all-local:
 	for i in $(dist_noinst_DATA) ; \
 	do \
-		cd $(top_builddir)/gyro/tools/PlotGYROpy&& if test ! -f $${i}; then ln -s $(top_srcdir)/gyro/tools/PlotGYROpy/$${i} $${i} ;fi; \
+		cd $(top_builddir)/gyro/tools/PlotGYROpy && if test ! -f $${i}; then ln -s $(top_srcdir)/gyro/tools/PlotGYROpy/$${i} $${i} ;fi; \
 	done
 
 
-CLEANFILES = make.inc*
+CLEANFILES = *.py *.txt
 
 MAINTAINERCLEANFILES    = Makefile.in 
 

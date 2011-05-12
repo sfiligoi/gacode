@@ -362,9 +362,7 @@ c   local gyrobohm unit of diffusion
      >  9.79D5*DSQRT(tem*1.D3)/(arho_exp*100.D0)
      >  *(1.02D2*DSQRT(tem*1.D3)/bt_exp/1.D4)**2*DSQRT(amassgas_exp)
       endif 
-       betae_m(jm) = 400.D0*nem*tem/(1.D5*bt_exp**2)
-       betai_m(jm) = 400.D0*nim*tim/(1.D5*bt_exp**2)
-
+       betae_m(jm) = 4.03D-3*nem*tem/(bt_exp**2)
 crew    gks collisionality (xnu/w_star_i)*(ky*rho_i)
        vnewk3x=
      >   0.117D0*nem/DSQRT(tem)**3/DSQRT(tim)*(arho_exp)*
@@ -1117,7 +1115,6 @@ c   local gyrobohm unit of diffusion
       cgyrobohm_m(jm)= csdam*(rhosdam*a_unit_exp)**2
 c   local beta
       betae_m(jm) = 4.03D-3*nem*tem/(b_unit**2)
-      betai_m(jm) = 4.03D-3*nim*tim/(b_unit**2)
       if(iparam_pt(12).eq.1)then
         betae_m(jm) = 4.03D-3*ne_exp(jm)*te_exp(jm)/(b_unit**2)
       endif
@@ -1180,20 +1177,32 @@ c set TGLF gradients
       endif
       if(vpar_shear_model_tg.eq.1)then
 c use GYRO conventions
-        gamma_p_m(jm) = (cv/csdam)*drhodr(jm)*
+        gamma_p_m(jm) = -(cv/csdam)*drhodr(jm)*
      >  (atorm*gradvexbm + grad_a_tor*vexbm)
-        vpar_shear_tg(1) = -sign_Bt_exp*gamma_p_m(jm)
+        vpar_shear_tg(1) = sign_Bt_exp*gamma_p_m(jm)
         vpar_shear_tg(2) = vpar_shear_tg(1)
         vpar_shear_tg(3) = vpar_shear_tg(3)
       endif
+c initialized fluxes
+      neflux_glf = 0.0
+      niflux_glf = 0.0
+      nzflux_glf = 0.0
+      teflux_glf = 0.0
+      tiflux_glf = 0.0
+      tzflux_glf = 0.0
+      vphiflux_glf = 0.0
+      vphizflux_glf = 0.0
+      vparflux_glf = 0.0
+      vparzflux_glf = 0.0
+c
       if(ineo.eq.-2.and.q_exp(jm).lt.1.0)go to 86 !skip TGLF
       if(ineo.eq.-3.and.interchange_DR_m(jm).lt.0.0)go to 86 ! skip TGLF
 c
 c  do not call TGLF to compute variations if the first call has no flux
 c       if(ipert_gf.eq.0)write(*,*)"glf2d_dv",jm
-       if(ipert_gf.ne.0)then
-        if(v2_bar.eq.0.0)go to 86  !skip TGLF fluxes
-       endif
+cc       if(ipert_gf.ne.0)then
+cc        if(v2_bar(jm).eq.0.0)go to 86  !skip TGLF fluxes
+cc       endif
 
 c  transfer inputs to TGLF
 c
@@ -1307,12 +1316,12 @@ c use eikonal from last call to tglf_TM
       CALL tglf_TM
       new_eikonal_tg=.TRUE.
 c
-      if(ipert_gf.eq.0.and.jm.eq.20)then
+      if(ipert_gf.eq.0.and.jm.eq.-1)then
         call write_tglf_input      
       endif
       if(ipert_gf.eq.0)then
-        v2_bar = get_v_bar_sum()
-c        write(*,*)jm,"v2_bar=",v2_bar
+        v2_bar(jm) = get_v_bar_sum()
+c        write(*,*)jm,"v2_bar=",v2_bar(jm)
         anrate_m(jm)= get_growthrate(1)
         anfreq_m(jm)= get_frequency(1)
 c      write(*,*)"debug gamma",anrate_m(jm)
@@ -1330,13 +1339,13 @@ cgms      if(igeo_tg.ne.0)gb_unit = gb_unit*drhodr(jm)
       vparflux_glf = (1.6726D-8)  
      >   *nem*gb_unit*csdam*a_unit_exp*get_stress_par(2,1)
      >   *amassgas_exp/(ABS(bt_exp/B_unit))
-      vphiflux_glf = (1.6726D-8) 
+      vphiflux_glf = (1.6726D-8)*sign_Bt_exp
      >  *nem*gb_unit*csdam*a_unit_exp*get_stress_tor(2,1)
      >  *amassgas_exp*a_unit_exp
       if(ns_tg.eq.3)then
         nzflux_glf = 1.6022D-3*nem*gb_unit*get_particle_flux(3,1)
         tzflux_glf = 1.6022D-3*nem*tem*gb_unit*get_energy_flux(3,1)
-        vphizflux_glf = (1.6726D-8)
+        vphizflux_glf = (1.6726D-8)*sign_Bt_exp
      >  *nem*gb_unit*csdam*a_unit_exp*get_stress_tor(3,1)
      >  *amassgas_exp*a_unit_exp
         vparzflux_glf = (1.6726D-8) 
@@ -1375,7 +1384,7 @@ c model for impurity contributions to viscous stress
          tzfluxm = 0.0
        endif
 c
-c      write(*,*)jm,"ipert = ",ipert_gf,"v2_bar =",v2_bar
+c      write(*,*)jm,"ipert = ",ipert_gf,"v2_bar =",v2_bar(jm)
 c      write(*,*)"debug Qion",get_energy_flux(2)
 c      write(*,*)"debug teflux_glf=",teflux_glf
 c
@@ -1386,12 +1395,17 @@ c multiply fluxes by drhdr factor from volume derivative dV/dr=dV/drho*drhodr
 c to map from r-grid fluxes to rho-grid fluxes
 c
       neflux_glf = neflux_glf*drhodr(jm)
+      niflux_glf = niflux_glf*drhodr(jm)
+      nzflux_glf = nzflux_glf*drhodr(jm)
       teflux_glf = teflux_glf*drhodr(jm)
       tiflux_glf = tiflux_glf*drhodr(jm)
+      tzflux_glf = tzflux_glf*drhodr(jm)
       vphiflux_glf = vphiflux_glf*drhodr(jm)
+      vphizflux_glf = vphizflux_glf*drhodr(jm)
       vparflux_glf = vparflux_glf*drhodr(jm)
+      vparzflux_glf = vparzflux_glf*drhodr(jm)
 c
-      if(ipert_gf.eq.0.and.jm.eq.20)then
+      if(i_proc.eq.0.and.jm.eq.-1)then
        open(unit=11,file="gyro_input",status="unknown")
        write(11,*)"gyro input for shot ",shot
        write(11,*)"RADIUS = ",rmin_tg

@@ -44,15 +44,10 @@ c
         jm=k
         call neoclassical
         do i=1,nspecies
-          upol_neo(i,k+1) = vneo(i)
-          udia_neo(i,k+1) = vdia(i)
+c these are on the 1/2 grid
+          upol_neo(i,k) = vneo(i)
+          udia_neo(i,k) = vdia(i)
         enddo
-      enddo
-      do i=1,nspecies
-        upol_neo(i,1) = upol_neo(i,2)
-        udia_neo(i,1) = udia_neo(i,2)
-        upol_neo(i,0) = upol_neo(i,1)
-        udia_neo(i,0) = udia_neo(i,1)
       enddo
 c
       call MPI_BARRIER(MPI_COMM_WORLD,i_err)
@@ -66,10 +61,23 @@ c
      >  ,MPI_DOUBLE_PRECISION,0, MPI_COMM_WORLD, i_err)
 c
       do i=1,nspecies
+c use zero gradient condition at boundaries
+        upol_sum(i,kmax) = upol_sum(i,kmax-1)
+        udia_sum(i,kmax) = udia_sum(i,kmax-1)
+        upol_sum(i,0) = upol_sum(i,1)
+        udia_sum(i,0) = udia_sum(i,1)
+      enddo
+c
+      do i=1,nspecies
         do k=1,kmax-1
-          upol_neo(i,k) = upol_sum(i,k)
-          udia_neo(i,k) = udia_sum(i,k)
+c interpolate onto the full grid
+          upol_neo(i,k) = 0.5*(upol_sum(i,k)+upol_sum(i,k-1))
+          udia_neo(i,k) = 0.5*(udia_sum(i,k)+udia_sum(i,k-1))
         enddo      
+        upol_neo(i,kmax) = upol_neo(i,kmax-1)
+        udia_neo(i,kmax) = udia_neo(i,kmax-1)
+        upol_neo(i,0) = upol_neo(i,1)
+        udia_neo(i,0) = udia_neo(i,1)
       enddo
 c
       RETURN
