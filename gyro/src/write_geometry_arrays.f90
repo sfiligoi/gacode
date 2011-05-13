@@ -27,6 +27,8 @@ subroutine write_geometry_arrays(datafile,io)
   real :: dr
   !---------------------------------------------------
 
+  if (output_flag == 0) return
+
   if (i_proc == 0) then
 
      select case (output_flag)
@@ -91,7 +93,7 @@ subroutine write_geometry_arrays(datafile,io)
            GEO_q_in     = q(i)
            GEO_s_in     = shat_s(ir_norm)
            GEO_kappa_in = kappa_s(ir_norm)+&
-                      kappa_s(ir_norm)*s_kappa_s(ir_norm)/r(ir_norm)*dr
+                kappa_s(ir_norm)*s_kappa_s(ir_norm)/r(ir_norm)*dr
            GEO_s_kappa_in = s_kappa_s(ir_norm)
            GEO_delta_in   = delta_s(ir_norm)+s_delta_s(ir_norm)/r(ir_norm)*dr
            GEO_s_delta_in = s_delta_s(ir_norm)
