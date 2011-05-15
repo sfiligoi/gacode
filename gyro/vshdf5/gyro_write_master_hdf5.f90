@@ -308,6 +308,7 @@ subroutine write_hdf5_timedata(action)
   character(64) :: step_name, tempVarName
   character(128) :: dumpfile
   integer(HID_T) :: dumpGid,dumpFid,gid3D,fid3D
+  integer(HID_T) :: dumpTGid,dumpTFid
   type(hdf5InOpts) :: h5in
   type(hdf5ErrorType) :: h5err
   integer :: number_label
@@ -352,13 +353,20 @@ subroutine write_hdf5_timedata(action)
         write(step_name,fmt='(i5.5)') number_label
      endif
 
+    ! open the timedata file (incremental)
+    dumpfile=TRIM(path)//"out.gyro.timedata.h5" 
+    description="GYRO scalar time data file"
+    call open_newh5file(dumpfile,dumpTFid,description,dumpTGid,h5in,h5err)
+
+    
+
      dumpfile=TRIM(path)//"gyro"//TRIM(step_name)//".h5"
-     description="GYRO dump file"
+     description="GYRO field file"
      call open_newh5file(dumpfile,dumpFid,description,dumpGid,h5in,h5err)
 
      if (write_threed) then
         dumpfile=TRIM(path)//"gyro3D"//TRIM(step_name)//".h5"
-        description="GYRO 3D plot file"
+        description="GYRO 3D field file"
         call open_newh5file(dumpfile,fid3d,description,gid3D,h5in,h5err)
      endif
 
