@@ -70,7 +70,9 @@ module GKEIGEN_globals
   integer :: jelem_start     !
   integer :: jelem_end       !--------------
   integer :: iseq         ! Merged row and
-  !                    ---! column index   
+  integer :: iseq0        ! column index   
+  integer :: iseq_start   !
+  integer :: iseq_end     !--------------
   !
   ! Processors in GYRO_COMM_WORLD
   integer :: i_proc_e
@@ -84,6 +86,8 @@ module GKEIGEN_globals
   integer :: gkeigen_j_set_e2
   integer :: j_sr
   integer :: i_sr
+  integer :: i_brake
+  integer :: n_brake
   !
   ! Rank of processor over MPI_COMM_WORLD
   integer :: j_proc_tot_e1

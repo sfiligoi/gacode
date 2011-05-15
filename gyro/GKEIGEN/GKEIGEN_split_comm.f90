@@ -38,13 +38,7 @@ subroutine GKEIGEN_split_comm
     call send_line('gkeigen_proc_mult reset to 1 (non-GKEIGEN run)')
   endif
 
-  if (n_proc < gkeigen_proc_mult**2) then
-    gkeigen_transpose_flag = 1
-    gkeigen_j_set = Int(i_proc*gkeigen_proc_mult/n_proc)
-  else
-    gkeigen_transpose_flag = 0
-    gkeigen_j_set = Mod(i_proc,gkeigen_proc_mult)
-  endIf
+  gkeigen_j_set = Mod(i_proc,gkeigen_proc_mult)
 
   call MPI_COMM_SPLIT(GYRO_COMM_WORLD,&
        gkeigen_j_set,&
@@ -54,7 +48,21 @@ subroutine GKEIGEN_split_comm
   !
   GYRO_COMM_WORLD = GKEIGEN_J_SUBSET
 
+  !---------------------------------------------------------------
+  ! Reset process ranks if MPI_COMM_WORLD was split.
+  call MPI_COMM_RANK(GYRO_COMM_WORLD,i_proc,i_err)
+  call MPI_COMM_SIZE(GYRO_COMM_WORLD,n_proc,i_err)
+  !---------------------------------------------------------------
+
   call MPI_COMM_RANK(MPI_COMM_WORLD,j_proc_tot,i_err)
   call MPI_COMM_SIZE(MPI_COMM_WORLD,n_proc_tot,i_err)
+
+  ! Generate a separate communicator for all process sharing
+  ! the same value of i_proc for use in MPI_ALLTOALL.
+  call MPI_COMM_SPLIT(MPI_COMM_WORLD,&
+                      i_proc,&
+                      j_proc_tot,&
+                      GYRO_COMM_UNIPROC,&
+                      ierr)
 
 end subroutine GKEIGEN_split_comm

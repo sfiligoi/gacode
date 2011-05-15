@@ -49,8 +49,7 @@
       PetscReal      residual
 
       Mat                                                               &
-     &               time_derivative_matrix,                            &
-     &               tdm_transpose
+     &               time_derivative_matrix
 
       PetscErrorCode ierr, ierr0
 
@@ -61,14 +60,18 @@
       KSP            ksub
 
       PC             precon
+
+      PetscViewer    vecfile
 !
 !-------------------------------------------------
 
       integer :: irestart
       integer :: istrln
+      integer :: i_init
       complex, dimension(500,h_length_loc) :: restart_cols
-!      complex, dimension(0:h_length_loc-1,0:h_width_loc-1) :: M_loc
       complex, dimension(:,:), allocatable :: M_loc
+      complex, dimension(:), allocatable :: M_pass_1
+      complex, dimension(:), allocatable :: M_pass_2
       complex, dimension(0:h_length_loc-1) :: ev_vec
       character (len=80) :: gkeigen_message
 
@@ -90,7 +93,7 @@
       l_print = ( (gkeigen_j_set == 0) .AND. (i_proc == 0) )
 
       allocate(M_loc(0:h_length_loc-1,0:h_width_loc-1))     
-
+      allocate(M_pass_1(h_length_loc*h_width_loc))
 
       call GKEIGEN_catch_error
 
@@ -110,6 +113,7 @@
       call MatSetSizes(time_derivative_matrix,PETSC_DECIDE,             &
      &                 PETSC_DECIDE,h_length,h_length,ierr)
       call MatSetType(time_derivative_matrix,MATDENSE,ierr)
+
 !-------------------------------------------------
 
 
@@ -124,7 +128,7 @@
      &                          jstate_end,ierr)
       call MatGetSize(time_derivative_matrix,mrow,ncol,ierr) 
 
-!      Print *, i_proc, 'PETSc owns ', jstate_start, jstate_end,         &
+!      Print *, j_proc_tot, 'PETSc owns ', jstate_start, jstate_end
 !     &         'size: ', mrow, ' x ', ncol
 
       istate_start = gkeigen_j_set * h_width_loc
@@ -162,6 +166,44 @@
 !        EndIf
 !      EndIf
 
+!      do step = 1, nstep
+!        call get_field_explicit
+!        call gyro_rhs_total
+!        h = h + dt*RHS
+!      enddo
+!      jset_start = (i_proc*gkeigen_proc_mult+gkeigen_j_set) *           &
+!     &                                             h_length_block
+      jset_start = j_proc_tot*h_length_block
+      jset_end = jset_start + h_length_block - 1
+      do jelem = jset_start, jset_end
+        jelem0 = jelem - jset_start
+        irows_vec(jelem0) = jelem
+      enddo
+      print *, j_proc_tot, i_proc, gkeigen_j_set, jset_start, jset_end, &
+     &         jstate_start, '*****************'
+      jstate = jstate_start
+      jelem0 = 0
+      Do is2 = 1, n_kinetic
+       p_nek_loc2 = 0
+       Do p_nek2 = 1+i_proc, n_nek_1, n_proc_1
+        p_nek_loc2 = p_nek_loc2 + 1
+        Do i2 = 1, n_x
+         Do m2 = 1, n_stack
+           if ((jstate>=jset_start).AND.(jstate<=jset_end)) then
+             ev_vec_loc(jelem0) = h(m2,i2,p_nek_loc2,is2)
+             jelem0 = jelem0 + 1
+           endif
+           jstate = jstate + 1
+         EndDo ! m2
+        EndDo ! i2
+       EndDo ! p_nek2
+      EndDo ! is2
+      call VecSetValues(dummy_vec,h_length_block,irows_vec,             &
+     &                  ev_vec_loc,INSERT_VALUES,ierr)
+      call VecAssemblyBegin(dummy_vec,ierr)
+      call VecAssemblyEnd(dummy_vec,ierr)
+
+!      call VecView(dummy_vec,PETSC_VIEWER_STDOUT_WORLD,ierr)
 
       restart_cols(:,:) = (0.0,0.0)
       istate = 0
@@ -260,190 +302,59 @@
 
 
 !--------------------------------------------------------------------
-! Matrix elements are passed from the calculating GKEIGEN
-! processor to the processor that owns that element in PETSC, then
-! assigned to the PETSc object time_derivative_matrix.
-
-      If (gkeigen_transpose_flag==0) Then  ! Solve the normal eigenvalue
-                                           ! problem.
-       Do j_sr = 0, gkeigen_proc_mult-1
-
-        gkeigen_j_set_e0 = Mod(j_sr-gkeigen_j_set,gkeigen_proc_mult)
-        If (gkeigen_j_set_e0 < 0)                                       &
-     &         gkeigen_j_set_e0 = gkeigen_j_set_e0 + gkeigen_proc_mult 
-
-        Do i_sr = 0, 1
-
-          select case (i_sr)
-
-            case (0)
-              gkeigen_j_set_e1=Min(gkeigen_j_set_e0,gkeigen_j_set)
-              gkeigen_j_set_e2=Max(gkeigen_j_set_e0,gkeigen_j_set)
-            case (1)
-              gkeigen_j_set_e1=Max(gkeigen_j_set_e0,gkeigen_j_set)
-              gkeigen_j_set_e2=Min(gkeigen_j_set_e0,gkeigen_j_set)
-
-          end select
-
-          Do ielem = 0, h_width_loc-1
-            icols(ielem+1) = gkeigen_j_set_e1*h_width_loc + ielem
-          EndDo
-
-          jelem_start = gkeigen_j_set_e2*h_length_block
-          jelem_end = jelem_start + h_length_block - 1
-          Do jelem = jelem_start, jelem_end
-            i_index = jelem - jelem_start + 1
-            irows(i_index) = jstate_start + jelem
-          EndDo
-
-          j_send_proc = i_proc*gkeigen_proc_mult + gkeigen_j_set_e1
-          j_recv_proc = i_proc*gkeigen_proc_mult + gkeigen_j_set_e2
-
-          l_send = (j_proc_tot==j_send_proc)
-          l_recv = (j_proc_tot==j_recv_proc)
-          l_set =  (l_send .AND. l_recv)
-
-          If ((l_set==.TRUE.).AND.(i_sr==1)) Then
-            l_set  = .FALSE.
-            l_send = .FALSE.
-            l_recv = .FALSE.
-          EndIf
-
-         If (l_send) Then
-          Do ielem = 0, h_width_loc-1
-            Do jelem = jelem_start, jelem_end
-              iseq = (jelem-jelem_start)*h_width_loc + ielem + 1
-              M_seq(iseq) = M_loc(jelem,ielem)
-!              if (l_print) print *, iseq, ielem, M_loc(jelem,ielem)
-            EndDo
-          EndDo
-         EndIf
-
-
-         If (l_set) Then
-
-!          print *, 'Setting on ', j_proc_tot
-          call MatSetValues(time_derivative_matrix,h_length_block,irows,&
-     &        h_width_loc,icols,M_seq,INSERT_VALUES,ierr)
-
-         Else If (l_send) Then
-
-!          print *, 'Sending from ', j_proc_tot, ' to', j_recv_proc,     &
-!     &              size(M_seq)
-          call MPI_SEND(M_seq,size(M_seq),MPIU_SCALAR,                  &
-     &                  j_recv_proc,j_send_proc,MPI_COMM_WORLD,ierr)
-!          print *, 'Send confirmed', j_proc_tot, ' to', j_recv_proc
-
-         Else If (l_recv) Then
-
-!          print *, 'Receiving on ', j_proc_tot, ' from', j_send_proc,   &
-!     &              size(M_seq)
-          call MPI_RECV(M_seq,size(M_seq),MPIU_SCALAR,j_send_proc,      &
-     &                  j_send_proc,MPI_COMM_WORLD,recv_status,ierr)
-!          print *, 'Receipt confirmed', j_proc_tot, ' from', j_send_proc
-          call MatSetValues(time_derivative_matrix,h_length_block,irows,&
-     &        h_width_loc,icols,M_seq,INSERT_VALUES,ierr)
-
-         EndIf
-
-         call MPI_barrier(MPI_COMM_WORLD,ierr)
-!         if (l_print) print *, '*************************************'
-        EndDo  ! i_sr
-
-       EndDo  ! j_sr
-
-      Else   ! Solve the transpose eigenvalue problem (same answer)
-             ! optimized for large processor counts.
-       Do j_sr = 0, n_proc-1
-
-        i_proc_e0 = Mod(j_sr-i_proc,n_proc)
-        If (i_proc_e0 < 0) i_proc_e0 = i_proc_e0 + n_proc
-
-        Do i_sr = 0, 1
-
-          select case (i_sr)
-
-            case (0)
-              i_proc_e1=Min(i_proc_e0,i_proc)
-              i_proc_e2=Max(i_proc_e0,i_proc)
-            case (1)
-              i_proc_e1=Max(i_proc_e0,i_proc)
-              i_proc_e2=Min(i_proc_e0,i_proc)
-
-          end select
-
-          Do ielem = 0, h_length_loc-1
-            icols_t(ielem+1) = i_proc_e1*h_length_loc + ielem
-          EndDo
-
-          jelem_start = i_proc_e2*h_length_block_t
-          jelem_end = jelem_start + h_length_block_t - 1
-          jstate_start = gkeigen_j_set * h_width_loc
-          Do jelem = jelem_start, jelem_end
-            i_index = jelem - jelem_start + 1
-            irows_t(i_index) = jstate_start + jelem
-          EndDo
-
-          j_send_proc = gkeigen_j_set*n_proc + i_proc_e1
-          j_recv_proc = gkeigen_j_set*n_proc + i_proc_e2
-
-          l_send = (j_proc_tot==j_send_proc)
-          l_recv = (j_proc_tot==j_recv_proc)
-          l_set =  (l_send .AND. l_recv)
-
-          If ((l_set==.TRUE.).AND.(i_sr==1)) Then
-            l_set  = .FALSE.
-            l_send = .FALSE.
-            l_recv = .FALSE.
-          EndIf
-
-         If (l_send) Then
-          Do ielem = 0, h_length_loc-1
-            Do jelem = jelem_start, jelem_end
-              iseq = (jelem-jelem_start)*h_length_loc + ielem + 1
-              M_seq_t(iseq) = M_loc(ielem,jelem)
-            EndDo
-          EndDo
-         EndIf
-
-
-         If (l_set) Then
-
-!          print *, 'Setting on ', j_proc_tot
-          call MatSetValues(time_derivative_matrix,h_length_block_t,    &
-     &        irows_t,h_length_loc,icols_t,M_seq_t,INSERT_VALUES,ierr)
-
-         Else If (l_send) Then
-
-!          print *, 'Sending from ', j_proc_tot, ' to', j_recv_proc,     &
-!     &              size(M_seq_t)
-          call MPI_SEND(M_seq_t,size(M_seq_t),MPIU_SCALAR,              &
-     &                  j_recv_proc,j_send_proc,MPI_COMM_WORLD,ierr)
-!          print *, 'Send confirmed', j_proc_tot, ' to', j_recv_proc
-
-         Else If (l_recv) Then
-
-!          print *, 'Receiving on ', j_proc_tot, ' from', j_send_proc,   &
-!     &              size(M_seq_t)
-          call MPI_RECV(M_seq_t,size(M_seq_t),MPIU_SCALAR,j_send_proc,  &
-     &                  j_send_proc,MPI_COMM_WORLD,recv_status,ierr)
-!          print *, 'Receipt confirmed', j_proc_tot, ' from', j_send_proc
-          call MatSetValues(time_derivative_matrix,h_length_block_t,    &
-     &        irows_t,h_length_loc,icols_t,M_seq_t,INSERT_VALUES,ierr)
-
-         EndIf
-
-         call MPI_barrier(MPI_COMM_WORLD,ierr)
-!         if (l_print) print *, '*************************************'
-        EndDo  ! i_sr
-
-       EndDo  ! j_sr
-
-      EndIf ! Standard versus transpose.
+! Use MPI_ALLTOALL to pass matrix elements to the process that owns
+! the matrix elements in PETSc. Then assign values in PETSc.
+! Memory allocation and deallocation here is necessary to keep memory 
+! in bounds for large cases.
 !
-!------------------------------------------------------------------------
-
+      Do jelem = 0, h_length_loc-1
+        Do ielem = 0, h_width_loc-1
+           iseq = jelem*h_width_loc + ielem + 1
+           M_pass_1(iseq) = M_loc(jelem,ielem)
+        EndDo
+      EndDo
+!
       deallocate(M_loc)
+      allocate(M_pass_2(h_length_loc*h_width_loc))
+!
+       call MPI_ALLTOALL(M_pass_1,                                      &
+     &                   seq_length,                                    &
+     &                   MPI_DOUBLE_COMPLEX,                            &
+     &                   M_pass_2,                                      &
+     &                   seq_length,                                    &
+     &                   MPI_DOUBLE_COMPLEX,                            &
+     &                   GYRO_COMM_UNIPROC,                             &
+     &                   ierr)
+!
+      deallocate(M_pass_1)
+!
+! Assign the values in M_pass_2 to the appropriate
+! PETSc matrix elements
+!
+      Do gkeigen_j_set_e0 = 0, gkeigen_proc_mult-1
+        iseq_start = gkeigen_j_set_e0*h_width_loc*h_length_block + 1
+        iseq_end = iseq_start + h_width_loc*h_length_block
+        Do iseq =  iseq_start, iseq_end
+          iseq0 = iseq - iseq_start + 1
+          M_seq(iseq0) = M_pass_2(iseq)
+        EndDo
+        Do ielem = 0, h_width_loc-1
+          icols(ielem+1) = gkeigen_j_set_e0*h_width_loc + ielem
+        EndDo
+        jelem_start = gkeigen_j_set*h_length_block
+        jelem_end = jelem_start + h_length_block - 1
+        Do jelem = jelem_start, jelem_end
+          i_index = jelem - jelem_start + 1
+          irows(i_index) = jstate_start + jelem
+        EndDo
+        call MatSetValues(time_derivative_matrix,h_length_block,irows,  &
+     &       h_width_loc,icols,M_seq,INSERT_VALUES,ierr)
+
+      EndDo  ! gkeigen_j_set_e0
+!
+      deallocate(M_pass_2)
+!
+!-----------------------------------------------------------------------
 
       call date_and_time(values=time_array)
       If (l_print) Then
@@ -455,9 +366,6 @@
       call MatAssemblyEnd(time_derivative_matrix,MAT_FINAL_ASSEMBLY,    &
      &                    ierr)
 
-!      call MatView(time_derivative_matrix,PETSC_VIEWER_STDOUT_WORLD,    &
-!     &             ierr)
-
 !--------------------------------------------------------------------
 ! This creates the EigenProbelmSolver (EPS) framework and solves for the 
 ! gkeigen_n_values eigenvalues and vectors with the largest real part using a 
@@ -465,16 +373,6 @@
 
 !      gkeigen_kspace_dim = Max ( gkeigen_n_values+1,gkeigen_kspace_dim )
 !      gkeigen_kspace_dim = Min ( gkeigen_kspace_dim,Int(h_length)   )
-
-      if (gkeigen_transpose_flag==1) then
-       call date_and_time(values=time_array)
-       if (l_print) Then
-        print 10,time_array(5),time_array(6),time_array(7),time_array(8)
-        print *, 'Transposing matrix.'
-       endif
-       call MatCreateTranspose(time_derivative_matrix,tdm_transpose,    &
-     &                         ierr)
-      endif
 
 !      call MatView(time_derivative_matrix,PETSC_VIEWER_STDOUT_WORLD,    &
 !     &             ierr)
@@ -488,13 +386,8 @@
 
       call EPSCreate(MPI_COMM_WORLD,epsolve,ierr)
 !      call EPSSetType(epsolve,EPSARPACK,ierr)
-      if (gkeigen_transpose_flag==0) then
-        call EPSSetOperators(epsolve,time_derivative_matrix,            &
-     &                       PETSC_NULL_OBJECT,ierr)
-      else
-        call EPSSetOperators(epsolve,tdm_transpose,                     &
-     &                       PETSC_NULL_OBJECT,ierr)
-      endif
+      call EPSSetOperators(epsolve,time_derivative_matrix,              &
+     &                     PETSC_NULL_OBJECT,ierr)
 
 !      call EPSSetDimensions(epsolve,gkeigen_n_values,                   &
 !     &                      gkeigen_kspace_dim,h_length,ierr)
@@ -587,6 +480,12 @@
       end select
 !--------------------------------------------------------------------
 
+!      call PetscViewerBinaryOpen(MPI_COMM_WORLD,'vector.out',           &
+!     &                           FILE_MODE_READ,vecfile,ierr)
+!      call VecLoad(vecfile,PETSC_NULL,dummy_vec,ierr)
+
+      call EPSSetInitialSpace(epsolve,1,dummy_vec,ierr)
+
       call EPSSetTolerances(epsolve,gkeigen_tol,gkeigen_iter,ierr)
       call EPSSetFromOptions(epsolve,ierr)
       call EPSSolve(epsolve,ierr)
@@ -636,84 +535,46 @@
 !          call MPI_BARRIER(MPI_COMM_WORLD,ierr)
 !        enddo
 
-        if (gkeigen_transpose_flag==0) then ! Not transposed time_derivative_matrix
+        if (gkeigen_j_set==0) then
+          do jelem = 0, h_length_block-1
+            ev_vec(jelem) = ev_vec_loc(jelem)
+          enddo
+        endif
 
+        do gkeigen_j_set_e1 = 1, gkeigen_proc_mult-1
+          j_proc_tot_e1 = i_proc*gkeigen_proc_mult + gkeigen_j_set_e1
+          j_proc_tot_0  = i_proc*gkeigen_proc_mult
           if (gkeigen_j_set==0) then
-            do jelem = 0, h_length_block-1
-              ev_vec(jelem) = ev_vec_loc(jelem)
+            call MPI_RECV(ev_vec_loc,                                   &
+     &                    size(ev_vec_loc),                             &
+     &                    MPIU_SCALAR,                                  &
+     &                    j_proc_tot_e1,                                &
+     &                    j_proc_tot_e1,                                &
+     &                    MPI_COMM_WORLD,                               &
+     &                    recv_status,                                  &
+     &                    ierr)
+            jelem_start = gkeigen_j_set_e1*h_length_block
+            jelem_end = jelem_start + h_length_block - 1
+            do jelem = jelem_start, jelem_end
+              jelem0 = jelem-jelem_start
+              ev_vec(jelem) = ev_vec_loc(jelem0)
             enddo
           endif
 
-          do gkeigen_j_set_e1 = 1, gkeigen_proc_mult-1
-            j_proc_tot_e1 = i_proc*gkeigen_proc_mult + gkeigen_j_set_e1
-            j_proc_tot_0  = i_proc*gkeigen_proc_mult
-            if (gkeigen_j_set==0) then
-              call MPI_RECV(ev_vec_loc,                                 &
-     &                      size(ev_vec_loc),                           &
-     &                      MPIU_SCALAR,                                &
-     &                      j_proc_tot_e1,                              &
-     &                      j_proc_tot_e1,                              &
-     &                      MPI_COMM_WORLD,                             &
-     &                      recv_status,                                &
-     &                      ierr)
-              jelem_start = gkeigen_j_set_e1*h_length_block
-              jelem_end = jelem_start + h_length_block - 1
-              do jelem = jelem_start, jelem_end
-                jelem0 = jelem-jelem_start
-                ev_vec(jelem) = ev_vec_loc(jelem0)
-              enddo
-            endif
+          if (gkeigen_j_set==gkeigen_j_set_e1)                          &
+     &      call MPI_SEND(ev_vec_loc,                                   &
+     &                    size(ev_vec_loc),                             &
+     &                    MPIU_SCALAR,                                  &
+     &                    j_proc_tot_0,                                 &
+     &                    j_proc_tot_e1,                                &
+     &                    MPI_COMM_WORLD,                               &
+     &                    ierr)
+           call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+         enddo
 
-            if (gkeigen_j_set==gkeigen_j_set_e1)                        &
-     &        call MPI_SEND(ev_vec_loc,                                 &
-     &                      size(ev_vec_loc),                           &
-     &                      MPIU_SCALAR,                                &
-     &                      j_proc_tot_0,                               &
-     &                      j_proc_tot_e1,                              &
-     &                      MPI_COMM_WORLD,                             &
-     &                      ierr)
-             call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-           enddo
-
-        else ! Transposed time_derivative_matrix
-
-          do j_proc_tot_e1 = 0, n_proc_tot-1
-            gkeigen_j_set_e1 = mod(j_proc_tot_e1,gkeigen_proc_mult)
-            j_send_proc = j_proc_tot_e1
-            j_recv_proc = int(j_proc_tot_e1/gkeigen_proc_mult)
-            l_set = (j_send_proc==j_recv_proc)
-
-            if ((j_proc_tot==j_recv_proc).AND.(.NOT.l_set))             &
-     &        call MPI_RECV(ev_vec_loc,                                 &
-     &                      size(ev_vec_loc),                           &
-     &                      MPIU_SCALAR,                                &
-     &                      j_send_proc,                                &
-     &                      j_send_proc,                                &
-     &                      MPI_COMM_WORLD,                             &
-     &                      recv_status,                                &
-     &                      ierr)
-            if (j_proc_tot==j_recv_proc) then
-              jelem_start = gkeigen_j_set_e1*h_length_block
-              jelem_end = jelem_start + h_length_block - 1
-              do jelem = jelem_start, jelem_end
-                jelem0 = jelem-jelem_start
-                ev_vec(jelem) = ev_vec_loc(jelem0)
-              enddo
-            endif
-
-            if ((j_proc_tot==j_send_proc).AND.(.NOT.l_set))             &
-     &        call MPI_SEND(ev_vec_loc,                                 &
-     &                      size(ev_vec_loc),                           &
-     &                      MPIU_SCALAR,                                &
-     &                      j_recv_proc,                                &
-     &                      j_send_proc,                                &
-     &                      MPI_COMM_WORLD,                             &
-     &                      ierr)
-
-            call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-          enddo
-
-        endif ! Transpose vs. not
+        call PetscViewerBinaryOpen(MPI_COMM_WORLD,'vector.out',         &
+     &                             FILE_MODE_WRITE,vecfile,ierr)
+        call VecView(dummy_vec,vecfile,ierr)
 
 !        call VecView(dummy_vec,PETSC_VIEWER_STDOUT_WORLD,ierr)
 !        do i_proc_e1 = 0, n_proc-1
@@ -747,8 +608,6 @@
           EndDo ! is2
 
           call get_field_explicit
-!          call gyro_rhs_total
-!          h_old = h - dt*RHS
 
           call gyro_field_interpolation
 !          call get_field_fluxave
@@ -774,6 +633,7 @@
       call VecDestroy(dummy_vec,ierr)
       call MatDestroy(time_derivative_matrix,ierr)
       call EPSDestroy(epsolve,ierr)
+      call PetscViewerDestroy(vecfile,ierr)
 
       call SlepcFinalize(ierr)
 

@@ -208,7 +208,6 @@ module gyro_globals
   integer :: gkeigen_j_set
   integer :: j_proc_tot
   integer :: n_proc_tot
-  integer :: gkeigen_transpose_flag
   !
   !-----------------------------------------------------------------------------------
 
@@ -1022,6 +1021,7 @@ module gyro_globals
   !
   integer :: GYRO_COMM_WORLD
   integer :: GKEIGEN_J_SUBSET
+  integer :: GYRO_COMM_UNIPROC
   integer :: NEW_COMM_1
   integer :: NEW_COMM_2
   integer :: MUMPS_COMM

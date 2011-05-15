@@ -52,12 +52,6 @@ program gyro
   call GKEIGEN_split_comm
   !---------------------------------------------------------------
 
-  !---------------------------------------------------------------
-  ! Reset process ranks if MPI_COMM_WORLD was split.
-  call MPI_COMM_RANK(GYRO_COMM_WORLD,i_proc,i_err)
-  call MPI_COMM_SIZE(GYRO_COMM_WORLD,n_proc,i_err)
-  !---------------------------------------------------------------
-
   ! Run gyro.
   call gyro_do
   call send_line('STATUS: '//gyro_exit_message)
