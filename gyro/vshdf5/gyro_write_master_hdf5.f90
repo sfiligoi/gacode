@@ -465,7 +465,7 @@ subroutine write_hdf5_timedata(action)
   !Assume gyro_write_master.f90 has calculated this: call get_field_spectrum
   h5in%units="m^-2?"
   h5in%mesh=' '
-  call write_distributed_real_h5("kxkyspec",dumpGid,&
+  call write_distributed_real_h5("kxkyspec",dumpTGid,&
        size(kxkyspec),&
        kxkyspec,&
        h5in,h5err)
@@ -514,7 +514,7 @@ subroutine write_hdf5_timedata(action)
      !=============
 
      !SEK Worry about this later.
-     call write_distributed_real_h5("freq_n",dumpGid,&
+     call write_distributed_real_h5("freq_n",dumpTGid,&
           size(freq_n),&
           freq_n,&
           h5in,h5err)
@@ -532,36 +532,36 @@ subroutine write_hdf5_timedata(action)
      call proc_time(cp7)
 
      h5in%units="diff units"
-     call write_distributed_real_h5("diff_n",dumpGid,&
+     call write_distributed_real_h5("diff_n",dumpTGid,&
           size(diff_n),&
           diff_n,&
           h5in,h5err)
 
-     call write_distributed_real_h5("gbflux_n",dumpGid,&
+     call write_distributed_real_h5("gbflux_n",dumpTGid,&
           size(gbflux_n),&
           gbflux_n,&
           h5in,h5err)
 
-     call write_distributed_real_h5("freq_n",dumpGid,&
+     call write_distributed_real_h5("freq_n",dumpTGid,&
           size(freq_n),&
           freq_n,&
           h5in,h5err)
 
 
      if (lindiff_method >= 4) then
-        call write_distributed_real_h5('phi_squared_QL_n',dumpGid,&
+        call write_distributed_real_h5('phi_squared_QL_n',dumpTGid,&
              size(phi_squared_QL_n),&
              phi_squared_QL_n,&
              h5in,h5err)
 
-        call write_distributed_real_h5('g_squared_QL_n',dumpGid,&
+        call write_distributed_real_h5('g_squared_QL_n',dumpTGid,&
              size(g_squared_QL_n),&
              g_squared_QL_n,&
              h5in,h5err)
      endif
 
      if (nonlinear_transfer_flag == 1) then
-        call write_distributed_real_h5('out.gyro.nl_transfer',dumpGid,&
+        call write_distributed_real_h5('out.gyro.nl_transfer',dumpTGid,&
              size(nl_transfer),&
              nl_transfer,&
              h5in,h5err)
@@ -571,25 +571,25 @@ subroutine write_hdf5_timedata(action)
 
      if (i_proc == 0 .and. lindiff_method > 1) then
 
-        call dump_h5(dumpGid,'field_rms',ave_phi,h5in,h5err)
-        call dump_h5(dumpGid,'diff',diff,h5in,h5err)
-        call dump_h5(dumpGid,'diff_i',diff_i,h5in,h5err)
-        call dump_h5(dumpGid,'gbflux',gbflux,h5in,h5err)
-        call dump_h5(dumpGid,'gbflux_mom',gbflux_mom,h5in,h5err)
-        call dump_h5(dumpGid,'gbflux_i',gbflux_i,h5in,h5err)
+        call add_h5(dumpTGid,'field_rms',ave_phi,h5in,h5err)
+        call add_h5(dumpTGid,'diff',diff,h5in,h5err)
+        call add_h5(dumpTGid,'diff_i',diff_i,h5in,h5err)
+        call add_h5(dumpTGid,'gbflux',gbflux,h5in,h5err)
+        call add_h5(dumpTGid,'gbflux_mom',gbflux_mom,h5in,h5err)
+        call add_h5(dumpTGid,'gbflux_i',gbflux_i,h5in,h5err)
 
         if (trapdiff_flag == 1) then
-           call dump_h5(dumpGid,'diff_trapped',diff_trapped,h5in,h5err)
-           call dump_h5(dumpGid,'diff_i_trapped',diff_i_trapped,h5in,h5err)
-           call dump_h5(dumpGid,'gbflux_trapped',gbflux_trapped,h5in,h5err)
-           call dump_h5(dumpGid,'gbflux_i_trapped',gbflux_i_trapped,h5in,h5err)
+           call add_h5(dumpTGid,'diff_trapped',diff_trapped,h5in,h5err)
+           call add_h5(dumpTGid,'diff_i_trapped',diff_i_trapped,h5in,h5err)
+           call add_h5(dumpTGid,'gbflux_trapped',gbflux_trapped,h5in,h5err)
+           call add_h5(dumpTGid,'gbflux_i_trapped',gbflux_i_trapped,h5in,h5err)
         endif
 
         allocate(a2(3,n_x))
         a2(1,:) = phi_fluxave(:) 
         a2(2,:) = a_fluxave(:)
         a2(3,:) = aperp_fluxave(:)
-        call dump_h5(dumpGid,'zerobar',a2,h5in,h5err)
+        call add_h5(dumpTGid,'zerobar',a2,h5in,h5err)
         deallocate(a2)
 
         allocate(a3(n_kinetic,4,n_x))
@@ -599,10 +599,10 @@ subroutine write_hdf5_timedata(action)
            a3(:,3,i) = source_n(:,i)
            a3(:,4,i) = source_e(:,i)
         enddo
-        call dump_h5(dumpGid,'source',a3,h5in,h5err)
+        call add_h5(dumpTGid,'source',a3,h5in,h5err)
         deallocate(a3)
 
-        call dump_h5(dumpGid,'moments_zero',moments_zero_plot,h5in,h5err)
+        call add_h5(dumpTGid,'moments_zero',moments_zero_plot,h5in,h5err)
      endif
 
      !================
@@ -616,7 +616,7 @@ subroutine write_hdf5_timedata(action)
   if (entropy_flag == 1) then
      call gyro_entropy 
      if (i_proc == 0) then 
-        call dump_h5(dumpGid,'entropy',entropy,h5in,h5err)
+        call add_h5(dumpTGid,'entropy',entropy,h5in,h5err)
      endif
   endif
   !------------------------------------------------------------
@@ -639,12 +639,18 @@ subroutine write_hdf5_timedata(action)
   !
   if (i_proc == 0) then
      h5in%mesh=' '
+     ! add to time dependent file
+     call add_h5(dumpTGid,'data_step',data_step,h5in,h5err)
+     call add_h5(dumpTGid,'t_current',t_current,h5in,h5err)
+     call add_h5(dumpTGid,'n_proc',n_proc,h5in,h5err)
+     ! dump in the field and 3d files
      call dump_h5(dumpGid,'data_step',data_step,h5in,h5err)
      call dump_h5(dumpGid,'t_current',t_current,h5in,h5err)
      call dump_h5(dumpGid,'n_proc',n_proc,h5in,h5err)
   endif
 
   if (i_proc == 0) then
+     call close_h5file(dumpTFid,dumpTGid,h5err)
      call close_h5file(dumpFid,dumpGid,h5err)
      if (write_threed) call close_h5file(fid3d,gid3d,h5err)
   endif
@@ -1223,7 +1229,7 @@ subroutine write_distributed_real_h5(varName,rGid,n_fn,fn,h5in,h5err)
 
      WRITE(n_name,fmt='(i3.3)') in
      n_varName=trim(varName)//"_"//n_name
-     if (i_proc == 0) call dump_h5(rGid,n_varName,fn_recv,h5in,h5err)
+     if (i_proc == 0) call add_h5(rGid,n_varName,fn_recv,h5in,h5err)
 
   enddo ! in
 
