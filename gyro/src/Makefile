@@ -68,6 +68,7 @@ OBJECTS = gyro_globals.o \
           gyro_fulladvance.o \
           gyro_gbflux.o \
           gyro_initialize_arrays.o \
+          gyro_initialize_timestep.o \
           gyro_kxky_spectrum.o \
           gyro_lambda_grid.o \
           gyro_map_experimental_profiles.o \
@@ -102,7 +103,6 @@ OBJECTS = gyro_globals.o \
           get_vel_sum_p.o \
           get_vel_sum_a.o \
 	  get_vel_sum_aperp.o \
-          initialize_timestep.o \
           catch_error.o \
           catch_blowup.o \
           send_message_real.o \
