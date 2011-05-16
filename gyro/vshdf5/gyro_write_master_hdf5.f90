@@ -466,6 +466,7 @@ subroutine write_hdf5_timedata(action)
   h5in%units="m^-2?"
   h5in%mesh=' '
   call write_distributed_real_h5("kxkyspec",dumpTGid,&
+       n_x,1,1,&
        size(kxkyspec),&
        kxkyspec,&
        h5in,h5err)
@@ -512,13 +513,6 @@ subroutine write_hdf5_timedata(action)
      !=============
      ! BEGIN LINEAR 
      !=============
-
-     !SEK Worry about this later.
-     call write_distributed_real_h5("freq_n",dumpTGid,&
-          size(freq_n),&
-          freq_n,&
-          h5in,h5err)
-
      !=============
      ! END LINEAR 
      !=============
@@ -530,38 +524,38 @@ subroutine write_hdf5_timedata(action)
      !================
 
      call proc_time(cp7)
-
+     
+     WRITE(*,*) "before diff_n"
      h5in%units="diff units"
      call write_distributed_real_h5("diff_n",dumpTGid,&
+          n_kinetic,n_field,2,&
           size(diff_n),&
           diff_n,&
           h5in,h5err)
 
      call write_distributed_real_h5("gbflux_n",dumpTGid,&
+          n_kinetic,n_field,4,&
           size(gbflux_n),&
           gbflux_n,&
           h5in,h5err)
 
-     call write_distributed_real_h5("freq_n",dumpTGid,&
-          size(freq_n),&
-          freq_n,&
-          h5in,h5err)
-
-
      if (lindiff_method >= 4) then
         call write_distributed_real_h5('phi_squared_QL_n',dumpTGid,&
+             1,1,1,&
              size(phi_squared_QL_n),&
              phi_squared_QL_n,&
              h5in,h5err)
 
         call write_distributed_real_h5('g_squared_QL_n',dumpTGid,&
              size(g_squared_QL_n),&
+             3,1,1,&
              g_squared_QL_n,&
              h5in,h5err)
      endif
 
      if (nonlinear_transfer_flag == 1) then
         call write_distributed_real_h5('out.gyro.nl_transfer',dumpTGid,&
+             n_x,2,1,&
              size(nl_transfer),&
              nl_transfer,&
              h5in,h5err)
@@ -1148,7 +1142,7 @@ end subroutine myhdf5_close
 !  Control merged output of distributed real array.
 !------------------------------------------------------
 
-subroutine write_distributed_real_h5(varName,rGid,n_fn,fn,h5in,h5err)
+subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
 
   use hdf5_api
   use gyro_globals, only : &
@@ -1159,31 +1153,78 @@ subroutine write_distributed_real_h5(varName,rGid,n_fn,fn,h5in,h5err)
        data_step,&
        GYRO_COMM_WORLD,&
        i_proc,&
-       i_err
+       i_err,&
+       electron_method
 
   !------------------------------------------------------
   implicit none
   !
   character (len=*), intent(in) :: varName
   integer(HID_T), intent(in) :: rGid
-  integer, intent(in) :: n_fn
-  complex, intent(in) :: fn(n_fn)
+  integer, intent(in) :: n_fn,n1,n2,n3
+  real, intent(in) :: fn(n_fn)
   type(hdf5InOpts), intent(inout) :: h5in
   type(hdf5ErrorType), intent(inout) :: h5err
   !
   integer :: data_loop
   integer :: i_group_send
   integer :: i_send
+  integer :: ifld,ikin,imom,i
   integer :: in
+
+  real, dimension(:,:,:,:), allocatable :: buffn
+  real, dimension(:,:,:,:), allocatable:: real_buff
+  character(128) :: tempVarName 
+  character(128), dimension(:,:,:),allocatable :: vnameArray
+  character(3) :: n_name
+  character(1) :: ikin_name
+
   !
   real :: fn_recv(n_fn)
-  character(128) :: n_varName
-  character(3) :: n_name
   !------------------------------------------------------
 
 
   include 'mpif.h'
+  !------------------------------------------------------
+  !  set up the names for setting species and "field" name
+ ALLOCATE(vnameArray(n3,3,4))
+  vnameArray=" "
+  do ikin=1,n3
+     if(electron_method==2 .and. ikin==n3 ) THEN
+        tempVarName=trim(varName)//"_electron"
+     elseif(electron_method==3 .or. (electron_method==4.and.ikin==n3)) THEN
+        tempVarName=trim(varName)//"_electron"
+     else
+        write(ikin_name,fmt='(i1.1)') ikin-1
+        tempVarName=trim(varName)//"_ion"//ikin_name
+     endif
+     do i=1,4
+       vnameArray(ikin,1,i)=tempVarName//"_phi"
+       vnameArray(ikin,2,i)=tempVarName//"_Apar"
+       vnameArray(ikin,3,i)=tempVarName//"_Bpar"
+     enddo
+     do i=1,3
+       vnameArray(ikin,i,1)=vnameArray(ikin,i,1)//"_density"
+       vnameArray(ikin,i,2)=vnameArray(ikin,i,1)//"_energy"
+       vnameArray(ikin,i,3)=vnameArray(ikin,i,1)//"_momentum"
+       vnameArray(ikin,i,4)=vnameArray(ikin,i,1)//"_energyExchange"
+     enddo
+  enddo
 
+!Rectangular array (n_kinetic,n_field,2=i,n_x,n_time)
+  !  allocate(kxkyspec(n_x))
+  !  allocate(gbflux_n(n_kinetic,n_field,p_moment))
+  !  allocate(diff_n(n_kinetic,n_field,n_moment))
+  !  real, dimension(1) :: phi_squared_QL_n
+  !  real, dimension(3) :: g_squared_QL_n
+
+    ! n1 = n_kinetic; n2 = n_field, n3=n_moment, n4=n_n
+    allocate(buffn(n1,n2,n3,n_n)); buffn=0.
+ !-----------------------------------------
+ if (i_proc /= 0) return
+
+
+  !------------------------------------------------------
   do in=1,n_n
 
      !-----------------------------------------
@@ -1226,11 +1267,47 @@ subroutine write_distributed_real_h5(varName,rGid,n_fn,fn,h5in,h5err)
      !
      !-----------------------------------------
 
-     WRITE(n_name,fmt='(i3.3)') in
-     n_varName=trim(varName)//"_"//n_name
-     if (i_proc == 0) call add_h5(rGid,n_varName,fn_recv,h5in,h5err)
+   
 
+   if (i_proc == 0) then
+         WRITE(*,*) "varName=",varName 
+         WRITE(*,*) " n_fn=",n_fn," and size of fn_recv=",size(fn_recv)
+         WRITE(*,*) "shape of buffn =", shape(buffn)        
+         WRITE(*,*) "n1=",n1," n2=",n2," n3=",n3
+         buffn(:,:,:,in)=reshape(fn_recv,(/n1,n2,n3/))
+   endif
   enddo ! in
+
+
+!-----------------------------------------
+ if (i_proc /= 0) return
+
+
+ if (n3==1) then
+     if(n2==1) then
+     call add_h5(rGid,trim(varName),buffn(:,1,1,:),h5in,h5err)
+     else  
+     call add_h5(rGid,trim(varName),buffn(:,:,1,:),h5in,h5err)
+     endif
+ else
+    ! n1 = n_kinetic; n2 = n_field, n3=n_moment, n4=n_n
+    do ikin=1,n1
+      do ifld=1,n2
+       do imom=1,n3
+        tempVarName=trim(vnameArray(ikin,ifld,imom))
+        call add_h5(rGid,trim(tempVarName),real_buff(ikin,ifld,imom,:),h5in,h5err)
+       enddo
+      enddo
+    enddo
+ endif
+
+
+ deallocate(buffn)
+ deallocate(real_buff)
+ deallocate(vnameArray)
+
+
+
 
 end subroutine write_distributed_real_h5
 !------------------------------------------------------
@@ -1273,7 +1350,7 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
   implicit none
   !
   real :: pi=3.141592653589793
-  character*(*), intent(in) :: vname
+  character(*), intent(in) :: vname
   integer(HID_T), intent(in) :: rGid,r3Did
   integer, intent(in) :: n_fn,n1,n2,n3
   complex, intent(in) :: fn(n_fn)
