@@ -475,10 +475,10 @@ subroutine write_hdf5_timedata(action)
   if (i_proc == 0) then
      h5in%units="m^-2?"
      h5in%mesh=" "
-     call dump_h5(dumpGid,'k_perp_squared',k_perp_squared,h5in,h5err)
+     call add_h5(dumpGid,'k_perp_squared',k_perp_squared,h5in,h5err)
   endif
 
-
+    WRITE(*,*) "passed k_perp squared"
   !-----------------------------
   ! Set remaining timers to zero
   cp3 = 0.0
@@ -563,7 +563,7 @@ subroutine write_hdf5_timedata(action)
 
      call proc_time(cp8)
 
-     if (i_proc == 0 .and. lindiff_method > 1) then
+     if (i_proc == 0 ) then
 
         call add_h5(dumpTGid,'field_rms',ave_phi,h5in,h5err)
         call add_h5(dumpTGid,'diff',diff,h5in,h5err)
@@ -1173,7 +1173,6 @@ subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
   integer :: in
 
   real, dimension(:,:,:,:), allocatable :: buffn
-  real, dimension(:,:,:,:), allocatable:: real_buff
   character(128) :: tempVarName 
   character(128), dimension(:,:,:),allocatable :: vnameArray
   character(3) :: n_name
@@ -1219,9 +1218,10 @@ subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
   !  real, dimension(3) :: g_squared_QL_n
 
     ! n1 = n_kinetic; n2 = n_field, n3=n_moment, n4=n_n
-    allocate(buffn(n1,n2,n3,n_n)); buffn=0.
+    if (i_proc==0) then
+      allocate(buffn(n1,n2,n3,n_n)); buffn=0.
+    endif
  !-----------------------------------------
- if (i_proc /= 0) return
 
 
   !------------------------------------------------------
@@ -1270,10 +1270,10 @@ subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
    
 
    if (i_proc == 0) then
-         WRITE(*,*) "varName=",varName 
-         WRITE(*,*) " n_fn=",n_fn," and size of fn_recv=",size(fn_recv)
-         WRITE(*,*) "shape of buffn =", shape(buffn)        
-         WRITE(*,*) "n1=",n1," n2=",n2," n3=",n3
+!         WRITE(*,*) "varName=",varName 
+!         WRITE(*,*) " n_fn=",n_fn," and size of fn_recv=",size(fn_recv)
+!         WRITE(*,*) "shape of buffn =", shape(buffn)        
+!         WRITE(*,*) "n1=",n1," n2=",n2," n3=",n3
          buffn(:,:,:,in)=reshape(fn_recv,(/n1,n2,n3/))
    endif
   enddo ! in
@@ -1295,7 +1295,8 @@ subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
       do ifld=1,n2
        do imom=1,n3
         tempVarName=trim(vnameArray(ikin,ifld,imom))
-        call add_h5(rGid,trim(tempVarName),real_buff(ikin,ifld,imom,:),h5in,h5err)
+        write(*,*) tempVarName
+        call add_h5(rGid,trim(tempVarName),buffn(ikin,ifld,imom,:),h5in,h5err)
        enddo
       enddo
     enddo
@@ -1303,7 +1304,6 @@ subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
 
 
  deallocate(buffn)
- deallocate(real_buff)
  deallocate(vnameArray)
 
 
