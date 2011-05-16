@@ -639,10 +639,9 @@ subroutine write_hdf5_timedata(action)
   !
   if (i_proc == 0) then
      h5in%mesh=' '
-     ! add to time dependent file
-     call add_h5(dumpTGid,'data_step',data_step,h5in,h5err)
-     call add_h5(dumpTGid,'t_current',t_current,h5in,h5err)
-     call add_h5(dumpTGid,'n_proc',n_proc,h5in,h5err)
+     call dump_h5(dumpTGid,'data_step',data_step,h5in,h5err)
+     call dump_h5(dumpTGid,'t_current',t_current,h5in,h5err)
+
      ! dump in the field and 3d files
      call dump_h5(dumpGid,'data_step',data_step,h5in,h5err)
      call dump_h5(dumpGid,'t_current',t_current,h5in,h5err)
