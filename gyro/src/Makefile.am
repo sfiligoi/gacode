@@ -141,7 +141,7 @@ libgacodegyro_SRC_la_SOURCES = \
 	get_vel_sum_p.f90 \
 	get_vel_sum_a.f90 \
 	get_vel_sum_aperp.f90 \
-	initialize_timestep.f90 \
+	gyro_initialize_timestep.f90 \
 	catch_error.f90 \
 	catch_blowup.f90 \
 	send_message_real.f90 \
