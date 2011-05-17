@@ -117,7 +117,7 @@ subroutine gyro_do(skipinit)
   !
   ! Set parameters connected with timestepping.
   !
-  call initialize_timestep
+  call gyro_initialize_timestep
   !
   ! Generate theta grid dimensions (no operators yet).
   !
