@@ -307,6 +307,7 @@ subroutine write_hdf5_timedata(action)
   character(60) :: description
   character(64) :: step_name, tempVarName
   character(128) :: dumpfile
+  character(20)   :: openmethod
   integer(HID_T) :: dumpGid,dumpFid,gid3D,fid3D
   integer(HID_T) :: dumpTGid,dumpTFid
   type(hdf5InOpts) :: h5in
@@ -315,7 +316,7 @@ subroutine write_hdf5_timedata(action)
 
   logical :: write_threed
 
-
+ 
   !---------------------------------------------------
   ! Determine if the 3D files need to be written 
   if (n_torangle_3d > 1 ) then
@@ -356,7 +357,19 @@ subroutine write_hdf5_timedata(action)
     ! open the timedata file (incremental)
     dumpfile=TRIM(path)//"out.gyro.timedata.h5" 
     description="GYRO scalar time data file"
-    call open_newh5file(dumpfile,dumpTFid,description,dumpTGid,h5in,h5err)
+    
+    if (action == 1) then ! initialziation
+      if( restart_method /= 1 ) then 
+          openmethod='overwr'
+      else
+          openmethod='append'
+      endif
+    else ! sim running
+      openmethod='append'
+    endif
+
+    call open_h5file(trim(openmethod),dumpfile,dumpTFid,description,dumpTGid,h5in,h5err)
+    if(h5err%errBool) call catch_error(h5err%errorMsg)
 
     
 
