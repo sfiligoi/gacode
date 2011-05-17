@@ -1307,7 +1307,6 @@ subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
       do ifld=1,n2
        do imom=1,n3
         tempVarName=trim(vnameArray(ikin,ifld,imom))
-        write(*,*) "tempVarName=",tempVarName
         call add_h5(rGid,trim(tempVarName),buffn(ikin,ifld,imom,:),h5in,h5err)
        enddo
       enddo
