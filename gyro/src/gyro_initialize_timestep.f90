@@ -1,5 +1,5 @@
 !-------------------------------------------------------------
-! initialize_timestep.f90
+! gyro_initialize_timestep.f90
 !
 ! PURPOSE:
 !  Set number of steps based on maximum simulation time
@@ -10,7 +10,7 @@
 !  Also, set integrator parameters and initialize timers.
 !-------------------------------------------------------------
 
-subroutine initialize_timestep
+subroutine gyro_initialize_timestep
 
   use gyro_globals
 
@@ -132,7 +132,7 @@ subroutine initialize_timestep
   !----------------------------------------------------
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[initialize_timestep done]'
+     print *,'[gyro_initialize_timestep done]'
   endif
 
-end subroutine initialize_timestep
+end subroutine gyro_initialize_timestep

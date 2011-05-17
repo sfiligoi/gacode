@@ -73,7 +73,7 @@ program prgen
   tag(17) = 'flow_wall(kW/eV)'
   tag(18) = 'zmag(m)'
   tag(19) = 'ptot(Pa)' ! WG
-  tag(20) = '[-]'
+  tag(20) = 'polflux(Wb/rad)'
   tag(21) = 'ni_1(10^19/m^3)'
   tag(22) = 'ni_2(10^19/m^3)'
   tag(23) = 'ni_3(10^19/m^3)'
