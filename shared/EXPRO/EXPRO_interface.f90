@@ -100,7 +100,7 @@
 !  EXPRO_grad_r0(:)     |grad r| at theta=0 
 !  EXPRO_bp0(:)         B_pol at theta=0 (T)
 !  EXPRO_bt0(:)         B_tor at theta=0 (T)
-!  EXPRO_poloidalfluxover2pi(:) psi_p (T*m^2)
+!  EXPRO_poloidalfluxover2pi(:) psi_p (T*m^2/rad=Wb/rad)
 !  EXPRO_gamma_e(:)     r/q d(w0)/dr (1/s)
 !  EXPRO_gamma_p(:)     R_0 d(w0)/dr (1/s)
 !  EXPRO_mach(:)        R_0 w0/cs

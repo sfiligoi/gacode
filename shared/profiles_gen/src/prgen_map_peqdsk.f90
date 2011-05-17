@@ -61,7 +61,7 @@ subroutine prgen_map_peqdsk
   vec(17,:) = 0.0      ! flow_wall_exp
   vec(18,:) = zmag(:)  
   vec(19,:) = 0.0      
-  vec(20,:) = 0.0
+  vec(20,:) = dpsi(:)
 
   ! ni
   i=1
