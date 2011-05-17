@@ -525,7 +525,6 @@ subroutine write_hdf5_timedata(action)
 
      call proc_time(cp7)
      
-     WRITE(*,*) "before diff_n"
      h5in%units="diff units"
      call write_distributed_real_h5("diff_n",dumpTGid,&
           n_kinetic,n_field,2,&
@@ -633,8 +632,8 @@ subroutine write_hdf5_timedata(action)
   !
   if (i_proc == 0) then
      h5in%mesh=' '
-     call dump_h5(dumpTGid,'data_step',data_step,h5in,h5err)
-     call dump_h5(dumpTGid,'t_current',t_current,h5in,h5err)
+     call add_h5(dumpTGid,'data_step',data_step,h5in,h5err)
+     call add_h5(dumpTGid,'t_current',t_current,h5in,h5err)
 
      ! dump in the field and 3d files
      call dump_h5(dumpGid,'data_step',data_step,h5in,h5err)
@@ -1198,15 +1197,15 @@ subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
         tempVarName=trim(varName)//"_ion"//ikin_name
      endif
      do i=1,4
-       vnameArray(ikin,1,i)=tempVarName//"_phi"
-       vnameArray(ikin,2,i)=tempVarName//"_Apar"
-       vnameArray(ikin,3,i)=tempVarName//"_Bpar"
+       vnameArray(ikin,1,i)=trim(tempVarName)//"_phi"
+       vnameArray(ikin,2,i)=trim(tempVarName)//"_Apar"
+       vnameArray(ikin,3,i)=trim(tempVarName)//"_Bpar"
      enddo
      do i=1,3
-       vnameArray(ikin,i,1)=vnameArray(ikin,i,1)//"_density"
-       vnameArray(ikin,i,2)=vnameArray(ikin,i,1)//"_energy"
-       vnameArray(ikin,i,3)=vnameArray(ikin,i,1)//"_momentum"
-       vnameArray(ikin,i,4)=vnameArray(ikin,i,1)//"_energyExchange"
+       vnameArray(ikin,i,1)=trim(vnameArray(ikin,i,1))//"_density"
+       vnameArray(ikin,i,2)=trim(vnameArray(ikin,i,1))//"_energy"
+       vnameArray(ikin,i,3)=trim(vnameArray(ikin,i,1))//"_momentum"
+       vnameArray(ikin,i,4)=trim(vnameArray(ikin,i,1))//"_energyExchange"
      enddo
   enddo
 
@@ -1295,7 +1294,7 @@ subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
       do ifld=1,n2
        do imom=1,n3
         tempVarName=trim(vnameArray(ikin,ifld,imom))
-        write(*,*) tempVarName
+        write(*,*) "tempVarName=",tempVarName
         call add_h5(rGid,trim(tempVarName),buffn(ikin,ifld,imom,:),h5in,h5err)
        enddo
       enddo
