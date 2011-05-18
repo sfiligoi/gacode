@@ -179,8 +179,8 @@
         jelem0 = jelem - jset_start
         irows_vec(jelem0) = jelem
       enddo
-      print *, j_proc_tot, i_proc, gkeigen_j_set, jset_start, jset_end, &
-     &         jstate_start, '*****************'
+!      print *, j_proc_tot, i_proc, gkeigen_j_set, jset_start, jset_end, &
+!     &         jstate_start, '*****************'
       jstate = jstate_start
       jelem0 = 0
       Do is2 = 1, n_kinetic
@@ -353,6 +353,8 @@
       EndDo  ! gkeigen_j_set_e0
 !
       deallocate(M_pass_2)
+!
+      call MPI_BARRIER(MPI_COMM_WORLD,ierr)
 !
 !-----------------------------------------------------------------------
 
@@ -572,9 +574,9 @@
            call MPI_BARRIER(MPI_COMM_WORLD,ierr)
          enddo
 
-        call PetscViewerBinaryOpen(MPI_COMM_WORLD,'vector.out',         &
-     &                             FILE_MODE_WRITE,vecfile,ierr)
-        call VecView(dummy_vec,vecfile,ierr)
+!        call PetscViewerBinaryOpen(MPI_COMM_WORLD,'vector.out',         &
+!     &                             FILE_MODE_WRITE,vecfile,ierr)
+!        call VecView(dummy_vec,vecfile,ierr)
 
 !        call VecView(dummy_vec,PETSC_VIEWER_STDOUT_WORLD,ierr)
 !        do i_proc_e1 = 0, n_proc-1
@@ -633,7 +635,7 @@
       call VecDestroy(dummy_vec,ierr)
       call MatDestroy(time_derivative_matrix,ierr)
       call EPSDestroy(epsolve,ierr)
-      call PetscViewerDestroy(vecfile,ierr)
+!      call PetscViewerDestroy(vecfile,ierr)
 
       call SlepcFinalize(ierr)
 

@@ -34,6 +34,7 @@ subroutine allocate_profile_exp
      allocate(mach_exp(n_grid_exp))
      allocate(z_eff_exp(n_grid_exp))
      allocate(zmag_exp(n_grid_exp))
+     allocate(ptot_exp(n_grid_exp))
 
      allocate(r_p(n_grid_exp))
      allocate(b_unit_p(n_grid_exp))
@@ -49,8 +50,10 @@ subroutine allocate_profile_exp
 
      allocate(dlnndr_p(n_spec,n_grid_exp))
      allocate(dlntdr_p(n_spec,n_grid_exp))
+     allocate(dlnptotdr_p(n_grid_exp))
 
      allocate(beta_unit_p(n_grid_exp))
+     allocate(beta_unit_ptot_p(n_grid_exp))
   
      if (num_equil_flag == 1) allocate(geo_p(8,0:n_fourier_geo,n_grid_exp))
 

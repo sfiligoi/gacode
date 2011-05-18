@@ -44,7 +44,7 @@ subroutine prgen_write
      write(1,20) '#'
      write(1,'(10(a,1x))') '#                 IONS :',&
           (trim(plst_alla_name(reorder_vec(i-1)+1)),&
-          i=2,min(plst_dp1_nspec_th+1,6)) ! WG added +1 for beam ion
+          i=2,min(plst_dp1_nspec_th+1,6))
 
   case (3)
      write(1,40) '#          SHOT NUMBER : '

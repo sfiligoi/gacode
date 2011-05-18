@@ -104,18 +104,17 @@ subroutine prgen_map_plasmastate
   vec(16,:) = flow_beam(:)
   vec(17,:) = 0.0 ! flow_wall
   vec(18,:) = zmag(:)
-  !  vec(19,:) = plst_ptowb ! total pressure, thermal + fast ion ! WG
-  vec(19,:) = 0.0
+  vec(19,:) = plst_ptowb ! total pressure, thermal + fast ion
   vec(20,:) = dpsi(:)
 
   ! ni
-  do i=2,min(plst_dp1_nspec_th+1,6) ! WG added +1 for beams
+  do i=2,min(plst_dp1_nspec_th+1,6)
      ip = reorder_vec(i-1)+1
      vec(21+i-2,:) = plst_ns(:,ip)*1e-19
   enddo
 
   ! ti
-  do i=2,min(plst_dp1_nspec_th+1,6) ! WG added +1 for beams
+  do i=2,min(plst_dp1_nspec_th+1,6)
      ip = reorder_vec(i-1)+1
      vec(26+i-2,:) = plst_ts(:,ip)
   enddo
