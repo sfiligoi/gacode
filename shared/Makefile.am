@@ -20,7 +20,9 @@ libgacodeshared_la_LIBADD = \
 	$(top_builddir)/shared/GEO/libgacodegeo.la \
 	$(top_builddir)/shared/EXPRO/libgacodeexpro.la \
 	$(top_builddir)/shared/UMFPACK/libgacodeumfpack.la 
+if USE_FCIOWRAPPERS
 if HAVE_FCIOWRAPPERS
+endif
 else
 SUBDIRS += vshdf5
 libgacodeshared_la_LIBADD += $(top_builddir)/shared/vshdf5/libvshdf5.la 

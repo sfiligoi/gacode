@@ -344,7 +344,7 @@ subroutine gyro_do(skipinit)
   if (restart_method /= 1) then
      if (lskipinit == 0) then
         if (gkeigen_j_set==0) call gyro_write_master(2)
-        if (io_method > 1) call write_hdf5_timedata(2)
+        if (io_method > 1) call write_hdf5_timedata(1)
         if (io_method > 1 .and. time_skip_wedge > 0) call write_hdf5_wedge_timedata(2)
      endif
   endif

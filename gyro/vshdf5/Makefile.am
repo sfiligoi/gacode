@@ -18,8 +18,10 @@ gyro_includes= -I $(top_builddir)/shared/math \
 	
 # To get to work with optimization reducing compiler wrappers
 IOINC=@HDF5_INC@ @HDF5_FC_INC@ 
+if USE_FCIOWRAPPERS
 if HAVE_FCIOWRAPPERS
 IOINC += $(FCIOWRAPPERS_INC)
+endif
 else
 IOINC += -I $(top_builddir)/shared/vshdf5
 endif
