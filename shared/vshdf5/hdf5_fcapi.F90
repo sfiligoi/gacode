@@ -1610,6 +1610,7 @@
   endif
 !-----------------------------------------------------------------------
   errval%errBool = .false.
+  if(allocated(tmparray)) deallocate(tmparray)
   return
   end subroutine dump_h5_3d
 !-----------------------------------------------------------------------
@@ -1635,7 +1636,6 @@
   if(h5in%doTranspose) then
    dims(4)=SIZE(array,1);  dims(2)=SIZE(array,3)
    dims(3)=SIZE(array,2);  dims(1)=SIZE(array,4)
-   write(*,*) dims
    allocate(tmparray(dims(1),dims(2),dims(3),dims(4)))
    do i=1,dims(1); do j=1,dims(2); do k=1,dims(3)
       tmparray(i,j,k,:)=array(:,k,j,i)
@@ -1732,6 +1732,7 @@
   endif
 !-----------------------------------------------------------------------
   errval%errBool = .false.
+  if(allocated(tmparray)) deallocate(tmparray)
   return
   end subroutine dump_h5_4d
 !-----------------------------------------------------------------------
@@ -2670,6 +2671,13 @@
   call h5lexists_f(inid, aname, dset_exists, error)
   asize(1)=SIZE(array,1)
   asize(2)=SIZE(array,2)
+  if(h5in%verbose) WRITE(*,*) 'Writing ', aname
+
+  if(h5in%doTranspose) then
+    dims = (/1, asize(2), asize(1)/)
+  else
+    dims = (/1, asize(1), asize(2)/)
+  endif
 
 !-----------------------------------------------------------------------
 ! Do the case of creating the data
@@ -2679,7 +2687,6 @@
     ! Create the data space with unlimited dimensions.
     maxdims = (/H5S_UNLIMITED_f, H5S_UNLIMITED_f, H5S_UNLIMITED_f/)
     ! For convenience, put the time step (extendible set, as the first index
-    dims = (/1, asize(1), asize(2)/)
     call h5screate_simple_f(rank, dims, dspace_id, error, maxdims)
      if (error==FAIL) then
        errval%errorMsg = 'ERROR: Create data space failed for '//aname
@@ -2699,7 +2706,12 @@
        return
     endif
     ! Write stored data to "name" data set.
-    call h5dwrite_f(dset_id,H5T_NATIVE_DOUBLE,array,dims,error)
+    if(h5in%doTranspose) then
+      call h5dwrite_f(dset_id,H5T_NATIVE_DOUBLE,TRANSPOSE(array),dims,error)
+    else
+      call h5dwrite_f(dset_id,H5T_NATIVE_DOUBLE,array,dims,error)
+    endif
+
     if (error==FAIL) then
        errval%errorMsg = 'ERROR: Data set write failed for '//aname
        errval%errBool = .true.
@@ -2725,11 +2737,13 @@
     call H5Sget_simple_extent_dims_f(filespace, olddims, oldmaxdims,error)
     
     ! Extend the dataset. This call assures that dataset has the space
-    dims = (/1, asize(1), asize(2)/)
     extdims=dims
     extdims(1)=olddims(1)+dims(1)
-    extdims(2)=asize(1)
-    extdims(3)=asize(2)
+    !extdims(2)=asize(1)
+    extdims(2)=dims(2)
+    !extdims(3)=asize(2)
+    extdims(3)=dims(3)
+
     call h5dextend_f(dset_id, extdims, error)
 
     ! Define memory space
@@ -2743,8 +2757,14 @@
     call h5sselect_hyperslab_f(filespace, H5S_SELECT_SET_F, offset, dims, error) 
     
     ! Write the data to the hyperslab.
-    call H5Dwrite_f(dset_id,H5T_NATIVE_DOUBLE,array,dims,error,  &
+    if(h5in%doTranspose) then
+      call H5Dwrite_f(dset_id,H5T_NATIVE_DOUBLE,TRANSPOSE(array),dims,error,  &
                     file_space_id=filespace,mem_space_id=dspace_id)
+    else
+      call H5Dwrite_f(dset_id,H5T_NATIVE_DOUBLE,array,dims,error,  &
+                    file_space_id=filespace,mem_space_id=dspace_id)
+    endif
+
     call h5sclose_f(filespace, error)
   endif
 !-----------------------------------------------------------------------
@@ -2789,6 +2809,8 @@
   integer(HSIZE_T), dimension(4) :: olddims,oldmaxdims
   integer(HID_T) :: cparms        !dataset creatation property identifier 
   LOGICAL :: dset_exists
+  integer ::i,j
+  real(r8), dimension(:,:,:), allocatable :: tmparray
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) 'Writing ', aname
 !-----------------------------------------------------------------------
@@ -2799,6 +2821,17 @@
   asize(1)=SIZE(array,1)
   asize(2)=SIZE(array,2)
   asize(3)=SIZE(array,3)
+  ! For convenience, put the time step (extendible set, as the first index
+  if(h5in%verbose) WRITE(*,*) 'Writing ', aname
+  if(h5in%doTranspose) then
+    dims = (/1, asize(3), asize(2),asize(1)/)
+    allocate(tmparray(dims(2),dims(3),dims(4)))
+    do i=1,dims(2); do j=1,dims(3)
+      tmparray(i,j,:)=array(:,j,i)
+    enddo; enddo
+  else
+    dims = (/1, asize(1), asize(2),asize(3)/)
+  endif
 
 !-----------------------------------------------------------------------
 ! Do the case of creating the data
@@ -2807,8 +2840,7 @@
     !
     ! Create the data space with unlimited dimensions.
     maxdims = (/H5S_UNLIMITED_f, H5S_UNLIMITED_f, H5S_UNLIMITED_f, H5S_UNLIMITED_f/)
-    ! For convenience, put the time step (extendible set, as the first index
-    dims = (/1, asize(1), asize(2),asize(3)/)
+
     call h5screate_simple_f(rank, dims, dspace_id, error, maxdims)
      if (error==FAIL) then
        errval%errorMsg = 'ERROR: Create data space failed for '//aname
@@ -2828,7 +2860,12 @@
        return
     endif
     ! Write stored data to "name" data set.
-    call h5dwrite_f(dset_id,H5T_NATIVE_DOUBLE,array,dims,error)
+    if(h5in%doTranspose) then
+      call h5dwrite_f(dset_id,H5T_NATIVE_DOUBLE,tmparray,dims,error)
+    else 
+      call h5dwrite_f(dset_id,H5T_NATIVE_DOUBLE,array,dims,error)
+    endif
+
     if (error==FAIL) then
        errval%errorMsg = 'ERROR: Data set write failed for '//aname
        errval%errBool = .true.
@@ -2854,12 +2891,15 @@
     call H5Sget_simple_extent_dims_f(filespace, olddims, oldmaxdims,error)
     
     ! Extend the dataset. This call assures that dataset has the space
-    dims = (/1, asize(1), asize(2), asize(3)/)
     extdims=dims
     extdims(1)=olddims(1)+dims(1)
-    extdims(2)=asize(1)
-    extdims(3)=asize(2)
-    extdims(4)=asize(3)
+!    extdims(2)=asize(1)
+!    extdims(3)=asize(2)
+!    extdims(4)=asize(3)
+    extdims(2)=dims(2)
+    extdims(3)=dims(3)
+    extdims(4)=dims(4)
+
     call h5dextend_f(dset_id, extdims, error)
 
     ! Define memory space
@@ -2873,8 +2913,13 @@
     call h5sselect_hyperslab_f(filespace, H5S_SELECT_SET_F, offset, dims, error) 
     
     ! Write the data to the hyperslab.
-    call H5Dwrite_f(dset_id,H5T_NATIVE_DOUBLE,array,dims,error,  &
+    if(h5in%doTranspose) then
+      call H5Dwrite_f(dset_id,H5T_NATIVE_DOUBLE,tmparray,dims,error,  &
                     file_space_id=filespace,mem_space_id=dspace_id)
+    else 
+      call H5Dwrite_f(dset_id,H5T_NATIVE_DOUBLE,array,dims,error,  &
+                    file_space_id=filespace,mem_space_id=dspace_id)
+    endif
     call h5sclose_f(filespace, error)
   endif
 !-----------------------------------------------------------------------
@@ -2894,6 +2939,7 @@
   endif
 !-----------------------------------------------------------------------
   errval%errBool = .false.
+  if(allocated(tmparray)) deallocate(tmparray)
   return
   end subroutine add_h5_3d
 !-----------------------------------------------------------------------
@@ -2918,6 +2964,8 @@
   integer(HSIZE_T), dimension(5) :: olddims,oldmaxdims
   integer(HID_T) :: cparms        !dataset creatation property identifier 
   LOGICAL :: dset_exists
+  integer :: i,j,k
+  real(r8), dimension(:,:,:,:), allocatable :: tmparray
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) 'Writing ', aname
 !-----------------------------------------------------------------------
@@ -2930,6 +2978,18 @@
   asize(3)=SIZE(array,3)
   asize(4)=SIZE(array,4)
 
+  if(h5in%verbose) WRITE(*,*) 'Writing ', aname
+  if(h5in%doTranspose) then
+   dims = (/1, asize(4), asize(3),asize(2),asize(1)/)
+   allocate(tmparray(dims(2),dims(3),dims(4),dims(5)))
+   do i=1,dims(2); do j=1,dims(3); do k=1,dims(4)
+      tmparray(i,j,k,:)=array(:,k,j,i)
+  enddo; enddo; enddo
+  else
+   dims = (/1, asize(1), asize(2),asize(3),asize(4)/)
+  endif
+
+
 !-----------------------------------------------------------------------
 ! Do the case of creating the data
 !-----------------------------------------------------------------------
@@ -2938,7 +2998,6 @@
     ! Create the data space with unlimited dimensions.
     maxdims = (/H5S_UNLIMITED_f, H5S_UNLIMITED_f, H5S_UNLIMITED_f, H5S_UNLIMITED_f, H5S_UNLIMITED_f/)
     ! For convenience, put the time step (extendible set, as the first index
-    dims = (/1, asize(1), asize(2),asize(3),asize(4)/)
     call h5screate_simple_f(rank, dims, dspace_id, error, maxdims)
      if (error==FAIL) then
        errval%errorMsg = 'ERROR: Create data space failed for '//aname
@@ -2958,7 +3017,11 @@
        return
     endif
     ! Write stored data to "name" data set.
-    call h5dwrite_f(dset_id,H5T_NATIVE_DOUBLE,array,dims,error)
+    if(h5in%doTranspose) then
+      call h5dwrite_f(dset_id,H5T_NATIVE_DOUBLE,tmparray,dims,error)
+    else
+      call h5dwrite_f(dset_id,H5T_NATIVE_DOUBLE,array,dims,error)
+    endif
     if (error==FAIL) then
        errval%errorMsg = 'ERROR: Data set write failed for '//aname
        errval%errBool = .true.
@@ -2984,13 +3047,16 @@
     call H5Sget_simple_extent_dims_f(filespace, olddims, oldmaxdims,error)
     
     ! Extend the dataset. This call assures that dataset has the space
-    dims = (/1, asize(1), asize(2), asize(3), asize(4)/)
     extdims=dims
     extdims(1)=olddims(1)+dims(1)
-    extdims(2)=asize(1)
-    extdims(3)=asize(2)
-    extdims(4)=asize(3)
-    extdims(5)=asize(4)
+!     extdims(2)=asize(1)
+!    extdims(3)=asize(2)
+!    extdims(4)=asize(3)
+!    extdims(5)=asize(4)
+    extdims(2)=dims(2)
+    extdims(3)=dims(3)
+    extdims(4)=dims(4)
+    extdims(5)=dims(5)
     call h5dextend_f(dset_id, extdims, error)
 
     ! Define memory space
@@ -3004,8 +3070,13 @@
     call h5sselect_hyperslab_f(filespace, H5S_SELECT_SET_F, offset, dims, error) 
     
     ! Write the data to the hyperslab.
-    call H5Dwrite_f(dset_id,H5T_NATIVE_DOUBLE,array,dims,error,  &
+    if(h5in%doTranspose) then
+      call H5Dwrite_f(dset_id,H5T_NATIVE_DOUBLE,tmparray,dims,error,  &
                     file_space_id=filespace,mem_space_id=dspace_id)
+    else
+      call H5Dwrite_f(dset_id,H5T_NATIVE_DOUBLE,array,dims,error,  &
+                    file_space_id=filespace,mem_space_id=dspace_id)
+    endif
     call h5sclose_f(filespace, error)
   endif
 !-----------------------------------------------------------------------
@@ -3025,6 +3096,7 @@
   endif
 !-----------------------------------------------------------------------
   errval%errBool = .false.
+  if(allocated(tmparray)) deallocate(tmparray)
   return
   end subroutine add_h5_4d
 !-----------------------------------------------------------------------
