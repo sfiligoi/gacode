@@ -5,12 +5,12 @@ subroutine allocate_plasmastate_vars
   implicit none
 
   allocate(plst_alla_name(plst_dp1_nspec_alla))
-  allocate(plst_ts(nx,plst_dp1_nspec_th+1)) ! WG - added +1 for beam ions
-  allocate(plst_ns(nx,plst_dp1_nspec_th+1)) ! WG - added +1 for beam ions
-  allocate(plst_ptowb(nx))  ! WG
-  allocate(plst_nb(nx))     ! WG
-  allocate(plst_eparb(nx))  ! WG
-  allocate(plst_eperpb(nx)) ! WG
+  allocate(plst_ts(nx,plst_dp1_nspec_th+1))
+  allocate(plst_ns(nx,plst_dp1_nspec_th+1))
+  allocate(plst_ptowb(nx))
+  allocate(plst_nb(nx))
+  allocate(plst_eparb(nx))
+  allocate(plst_eperpb(nx))
   allocate(plst_vol(nx))
   allocate(plst_rho(nx))
   allocate(plst_grho1(nx))

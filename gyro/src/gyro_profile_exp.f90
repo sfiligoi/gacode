@@ -35,7 +35,7 @@ module gyro_profile_exp
   real, dimension(:), allocatable :: mach_exp
   real, dimension(:), allocatable :: z_eff_exp
   real, dimension(:), allocatable :: zmag_exp
-  real, dimension(:), allocatable :: ptot_exp ! WG
+  real, dimension(:), allocatable :: ptot_exp
 
   real, dimension(:), allocatable :: r_p
   real, dimension(:), allocatable :: b_unit_p
@@ -51,10 +51,10 @@ module gyro_profile_exp
 
   real, dimension(:,:), allocatable :: dlnndr_p
   real, dimension(:,:), allocatable :: dlntdr_p
-  real, dimension(:), allocatable :: dlnptotdr_p ! WG
+  real, dimension(:), allocatable :: dlnptotdr_p
 
   real, dimension(:), allocatable :: beta_unit_p
-  real, dimension(:), allocatable :: beta_unit_ptot_p ! WG
+  real, dimension(:), allocatable :: beta_unit_ptot_p
 
   real, dimension(:,:,:), allocatable :: geo_p
 

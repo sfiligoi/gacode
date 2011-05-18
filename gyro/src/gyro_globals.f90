@@ -161,6 +161,7 @@ module gyro_globals
   integer :: gkeigen_matrixonly
   integer :: gkeigen_mwrite_flag
   integer :: plot_u_flag
+  integer :: plot_epar_flag
   integer :: plot_n_flag
   integer :: plot_e_flag
   integer :: plot_v_flag
@@ -168,7 +169,7 @@ module gyro_globals
   integer :: z_eff_method
   integer :: variable_egrid_flag
   integer :: geo_gradbcurv_flag
-  integer :: geo_fastionbeta_flag ! WG
+  integer :: geo_fastionbeta_flag
   integer :: fakefield_flag
   !---------------------------------------------------------
 
@@ -756,7 +757,7 @@ module gyro_globals
   real, dimension(:), allocatable :: dzmag_s 
   real, dimension(:), allocatable :: shat_s 
   real, dimension(:), allocatable :: beta_unit_s 
-  real, dimension(:), allocatable :: beta_unit_ptot_s ! WG
+  real, dimension(:), allocatable :: beta_unit_ptot_s
   real, dimension(:), allocatable :: w0_s
   real, dimension(:), allocatable :: w0p_s
   real, dimension(:), allocatable :: gamma_e_s
@@ -765,7 +766,7 @@ module gyro_globals
   !
   real, dimension(:), allocatable :: omega_eb_s
   real, dimension(:), allocatable :: dlnpdr_s
-  real, dimension(:), allocatable :: dlnptotdr_s ! WG
+  real, dimension(:), allocatable :: dlnptotdr_s
   real, dimension(:), allocatable :: beta_star_s
   !
   real, dimension(:,:), allocatable :: den_s 
@@ -775,7 +776,7 @@ module gyro_globals
   real, dimension(:,:), allocatable :: alpha_s
   real, dimension(:,:), allocatable :: nu_s   
   real, dimension(:,:), allocatable :: pr_s
-  real, dimension(:), allocatable :: ptot_s ! WG
+  real, dimension(:), allocatable :: ptot_s
   !
   complex, dimension(:,:), allocatable :: phase
   real, dimension(:), allocatable :: angp

@@ -121,8 +121,8 @@ subroutine EXPRO_compute_derived
      endif
   enddo
 
-  ! 1/L_Ptot = -dln(Ptot)/dr (1/m) ! WG
-  call bound_deriv(EXPRO_dlnptotdr,-log(EXPRO_ptot),EXPRO_rmin,EXPRO_n_exp) ! WG
+  ! 1/L_Ptot = -dln(Ptot)/dr (1/m)
+  call bound_deriv(EXPRO_dlnptotdr,-log(EXPRO_ptot),EXPRO_rmin,EXPRO_n_exp)
 
   !--------------------------------------------------------------------
 

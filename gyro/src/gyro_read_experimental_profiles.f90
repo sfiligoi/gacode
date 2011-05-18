@@ -65,7 +65,7 @@ subroutine gyro_read_experimental_profiles
   rmin_exp(:)       = EXPRO_rmin(:)
   rmaj_exp(:)       = EXPRO_rmaj(:)
   zmag_exp(:)       = EXPRO_zmag(:)
-  ptot_exp(:)       = EXPRO_ptot(:) ! WG
+  ptot_exp(:)       = EXPRO_ptot(:)
   q_exp(:)          = EXPRO_q(:)
   kappa_exp(:)      = EXPRO_kappa(:)
   delta_exp(:)      = EXPRO_delta(:)
@@ -113,11 +113,11 @@ subroutine gyro_read_experimental_profiles
   enddo
   dlntdr_p(n_spec,:) = a_meters*EXPRO_dlntedr(:)
   dlnndr_p(n_spec,:) = a_meters*EXPRO_dlnnedr(:)
-  dlnptotdr_p(:)     = a_meters*EXPRO_dlnptotdr(:) ! WG
+  dlnptotdr_p(:)     = a_meters*EXPRO_dlnptotdr(:)
   !
   dlnndr_p(:,1)  = 0.0
   dlntdr_p(:,1)  = 0.0
-  dlnptotdr_p(1) = 0.0 ! WG
+  dlnptotdr_p(1) = 0.0
   !----------------------------------------------------------------------------
 
   ! Do we want to retain up-down asymmetry from elevation
@@ -198,7 +198,7 @@ subroutine gyro_read_experimental_profiles
      p_total = sum(den_exp(:,i_exp)*tem_exp(:,i_exp))
 
      beta_unit_p(i_exp) = 400.0*p_total/(1e5*b_unit_p(i_exp)**2)
-     beta_unit_ptot_p(i_exp) = 400.0*ptot_exp(i_exp)/(1.6022*1e3)/(1.e5*b_unit_p(i_exp)**2) ! WG
+     beta_unit_ptot_p(i_exp) = 400.0*ptot_exp(i_exp)/(1.6022*1e3)/(1.e5*b_unit_p(i_exp)**2)
      !-------------------------------------------------------------
 
   enddo

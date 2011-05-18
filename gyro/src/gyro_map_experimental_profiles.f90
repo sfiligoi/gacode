@@ -128,7 +128,7 @@ subroutine gyro_map_experimental_profiles
      call cub_spline(r_p,den_exp(is,:),n_grid_exp,r_s,den_s(is,:),n_x)
      call cub_spline(r_p,tem_exp(is,:),n_grid_exp,r_s,tem_s(is,:),n_x)
   enddo
-  call cub_spline(r_p,ptot_exp,n_grid_exp,r_s,ptot_s,n_x) ! WG
+  call cub_spline(r_p,ptot_exp,n_grid_exp,r_s,ptot_s,n_x)
 
   call cub_spline(r_p,z_eff_exp,n_grid_exp,r_s,z_eff_s,n_x)
   call cub_spline(r_p,b_unit_p,n_grid_exp,r_s,b_unit_s,n_x)
@@ -139,7 +139,7 @@ subroutine gyro_map_experimental_profiles
      call cub_spline(r_p,dlntdr_p(is,:),n_grid_exp,r_s,dlntdr_s(is,:),n_x)
      call cub_spline(r_p,dlnndr_p(is,:),n_grid_exp,r_s,dlnndr_s(is,:),n_x)
   enddo
-  call cub_spline(r_p,dlnptotdr_p,n_grid_exp,r_s,dlnptotdr_s,n_x) ! WG
+  call cub_spline(r_p,dlnptotdr_p,n_grid_exp,r_s,dlnptotdr_s,n_x)
 
   call cub_spline(r_p,gamma_e_exp,n_grid_exp,r_s,gamma_e_s,n_x)
   call cub_spline(r_p,gamma_p_exp,n_grid_exp,r_s,gamma_p_s,n_x)
@@ -148,7 +148,7 @@ subroutine gyro_map_experimental_profiles
   call cub_spline(r_p,w0p_exp,n_grid_exp,r_s,w0p_s,n_x)
 
   call cub_spline(r_p,beta_unit_p,n_grid_exp,r_s,beta_unit_s,n_x)
-  call cub_spline(r_p,beta_unit_ptot_p,n_grid_exp,r_s,beta_unit_ptot_s,n_x) ! WG
+  call cub_spline(r_p,beta_unit_ptot_p,n_grid_exp,r_s,beta_unit_ptot_s,n_x)
 
   if (num_equil_flag == 1) then
      do j1=1,8

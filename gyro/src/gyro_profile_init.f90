@@ -375,18 +375,18 @@ subroutine gyro_profile_init
   !
   ! beta_star = -(8 pi)/(B_unit**2) dp/dr
   !
-  if (geo_fastionbeta_flag == 0.0) then ! WG
+  if (geo_fastionbeta_flag == 0.0) then
      beta_star_s(:) = beta_unit_s(:)*dlnpdr_s(:)*geo_betaprime_scale
   !        
      if (geo_betaprime_scale /= 1.0) then
          call send_message_real(&
               'INFO: Scaling dp/dr in GEO by: ',geo_betaprime_scale)
      endif
-  else ! WG
-  !  beta_star using total pressure from TRANSP, including fast ions ! WG
-     beta_star_s(:) = beta_unit_ptot_s(:)*dlnptotdr_s(:) ! WG
+  else
+  !  beta_star using total pressure from TRANSP, including fast ions
+     beta_star_s(:) = beta_unit_ptot_s(:)*dlnptotdr_s(:)
      call send_message('INFO: Using total dp/dr (+ fast ions) in GEO.')
-  endif ! WG
+  endif
   !------------------------------------------------------
 
   !----------------------------------------------------------

@@ -60,7 +60,7 @@ subroutine EXPRO_read_driver(path)
   read(io,*) EXPRO_flow_beam(:)
   read(io,*) EXPRO_flow_wall(:)
   read(io,*) EXPRO_zmag(:)
-  read(io,*) EXPRO_ptot(:) ! WG
+  read(io,*) EXPRO_ptot(:)
   read(io,*) EXPRO_poloidalfluxover2pi(:)
 
   ! 21-25

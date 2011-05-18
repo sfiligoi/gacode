@@ -70,6 +70,7 @@
       call dumpIntVar(21,22,"electron_method",electron_method)
       call dumpIntVar(21,22,"radial_profile_method",radial_profile_method)
       call dumpIntVar(21,22,"plot_u_flag",plot_u_flag)
+      call dumpIntVar(21,22,"plot_epar_flag",plot_epar_flag)
       call dumpIntVar(21,22,"plot_n_flag",plot_n_flag)
       call dumpIntVar(21,22,"plot_e_flag",plot_e_flag)
       call dumpIntVar(21,22,"plot_v_flag",plot_v_flag)
@@ -196,7 +197,7 @@
       call dumpRealVar(21,22,"ipccw",ipccw)
       call dumpRealVar(21,22,"btccw",btccw)
       call dumpIntVar(21,22,"geo_gradbcurv_flag",geo_gradbcurv_flag)
-      call dumpIntVar(21,22,"geo_fastionbeta_flag",geo_fastionbeta_flag) ! WG
+      call dumpIntVar(21,22,"geo_fastionbeta_flag",geo_fastionbeta_flag)
       call dumpRealVar(21,22,"geo_betaprime_scale",geo_betaprime_scale)
       call dumpIntVar(21,22,"poisson_z_eff_flag",poisson_z_eff_flag)
       call dumpIntVar(21,22,"z_eff_method",z_eff_method)

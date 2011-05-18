@@ -77,8 +77,8 @@ subroutine EXPRO_alloc_control(i_proc,path,flag)
      allocate(EXPRO_flow_beam(EXPRO_n_exp))
      allocate(EXPRO_flow_wall(EXPRO_n_exp))
      allocate(EXPRO_zmag(EXPRO_n_exp))
-     allocate(EXPRO_ptot(EXPRO_n_exp)) ! WG
-     allocate(EXPRO_dlnptotdr(EXPRO_n_exp)) ! WG
+     allocate(EXPRO_ptot(EXPRO_n_exp))
+     allocate(EXPRO_dlnptotdr(EXPRO_n_exp))
 
      allocate(EXPRO_ni(nion_max,EXPRO_n_exp))
      allocate(EXPRO_ti(nion_max,EXPRO_n_exp))
@@ -144,8 +144,8 @@ subroutine EXPRO_alloc_control(i_proc,path,flag)
      deallocate(EXPRO_flow_beam)
      deallocate(EXPRO_flow_wall)
      deallocate(EXPRO_zmag)
-     deallocate(EXPRO_ptot) ! WG
-     deallocate(EXPRO_dlnptotdr) ! WG
+     deallocate(EXPRO_ptot)
+     deallocate(EXPRO_dlnptotdr)
 
      deallocate(EXPRO_ni)
      deallocate(EXPRO_ti)

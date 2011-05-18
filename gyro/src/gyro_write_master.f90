@@ -122,6 +122,19 @@ subroutine gyro_write_master(action)
 
   endif
 
+  if (plot_epar_flag == 1) then
+
+     ! PARALLEL ELECTRIC FIELD
+
+     call write_distributed_complex(&
+          trim(path)//'epar.out',&
+          10,&
+          mode,&
+          size(phi_plot(:,:,n_field+1)),&
+          phi_plot(:,:,n_field+1))
+
+  endif
+
   if (plot_n_flag == 1) then
 
      ! DENSITY
