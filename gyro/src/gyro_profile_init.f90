@@ -213,9 +213,9 @@ subroutine gyro_profile_init
         call gyro_read_experimental_profiles
      endif
      !---------------------------------------------------------------
-     
+
      call gyro_map_experimental_profiles
-     
+
      !----------------------------------------------------------
      ! Recompute box length and gridpoints to get periodic case 
      ! right when using experimental profiles:
@@ -375,17 +375,23 @@ subroutine gyro_profile_init
   !
   ! beta_star = -(8 pi)/(B_unit**2) dp/dr
   !
-  if (geo_fastionbeta_flag == 0.0) then
-     beta_star_s(:) = beta_unit_s(:)*dlnpdr_s(:)*geo_betaprime_scale
-  !        
+  if (geo_fastionbeta_flag == 0) then
+
+     ! Pressure from species sum
+
+     beta_star_s(:) = beta_unit_s(:)*dlnpdr_s(:)*geo_betaprime_scale         
      if (geo_betaprime_scale /= 1.0) then
-         call send_message_real(&
-              'INFO: Scaling dp/dr in GEO by: ',geo_betaprime_scale)
+        call send_message_real(&
+             'INFO: Scaling dp/dr in GEO by: ',geo_betaprime_scale)
      endif
+
   else
-  !  beta_star using total pressure from TRANSP, including fast ions
+
+     ! Pressure from total pressure including fast ions
+
      beta_star_s(:) = beta_unit_ptot_s(:)*dlnptotdr_s(:)
      call send_message('INFO: Using total dp/dr (+ fast ions) in GEO.')
+
   endif
   !------------------------------------------------------
 

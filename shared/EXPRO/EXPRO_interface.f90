@@ -149,6 +149,7 @@ module EXPRO_interface
   real, dimension(:),allocatable :: EXPRO_flow_wall
   real, dimension(:),allocatable :: EXPRO_zmag
   real, dimension(:),allocatable :: EXPRO_ptot
+  real, dimension(:),allocatable :: EXPRO_poloidalfluxover2pi
 
   real, dimension(:,:),allocatable :: EXPRO_ni
   real, dimension(:,:),allocatable :: EXPRO_ti
@@ -184,7 +185,6 @@ module EXPRO_interface
 
   real, dimension(:),allocatable :: EXPRO_bp0
   real, dimension(:),allocatable :: EXPRO_bt0
-  real, dimension(:),allocatable :: EXPRO_poloidalfluxover2pi
 
   ! input.profiles.geo dimension and arrays
 

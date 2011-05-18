@@ -120,8 +120,7 @@ subroutine gyro_read_experimental_profiles
   dlnptotdr_p(1) = 0.0
   !----------------------------------------------------------------------------
 
-  ! Do we want to retain up-down asymmetry from elevation
-  ! in the case of Miller shape?
+  ! Retain up-down asymmetry from elevation in the case of Miller shape
   if (num_equil_flag == 0 .and. udsymmetry_flag == 1) then
      zmag_exp(:) = 0.0
      dzmag_p(:)  = 0.0
