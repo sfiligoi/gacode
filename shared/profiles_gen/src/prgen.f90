@@ -43,6 +43,7 @@ program prgen
   read(1,'(a)') raw_data_file
   read(1,'(a)') cer_file
   read(1,*) gato_flag
+  read(1,*) nogatoq_flag
   read(1,*) verbose_flag
   read(1,*) reorder_vec(:)
 

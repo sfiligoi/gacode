@@ -19,6 +19,7 @@ module prgen_read_globals
   integer :: extra_powers_flag = 0
   integer :: format_type
   integer :: gato_flag
+  integer :: nogatoq_flag
   integer :: verbose_flag
   character (len=16), dimension(:), allocatable :: tag
   character (len=16), dimension(:), allocatable :: tag2

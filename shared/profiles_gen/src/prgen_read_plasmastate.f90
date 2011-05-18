@@ -134,6 +134,7 @@ subroutine prgen_read_plasmastate
   ! 1/q
   err = nf90_inq_varid(ncid,trim('iota'),varid)
   err = nf90_get_var(ncid,varid,plst_iota(:))
+  q(:) = 1.0/plst_iota(:)
 
   ! R_major (-pi)
   err = nf90_inq_varid(ncid,trim('R_midp_in'),varid)
@@ -274,9 +275,6 @@ subroutine prgen_read_plasmastate
 
   ! No squareness 
   zeta(:) = 0.0
-
-  ! Define q based on iota
-  q(:)  = 1.0/plst_iota(:)
 
 end subroutine prgen_read_plasmastate
 
