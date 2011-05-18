@@ -230,6 +230,7 @@ subroutine gyro_read_input
   call readbc_real(ipccw)
   call readbc_real(btccw)
   call readbc_int(geo_gradbcurv_flag)
+  call readbc_int(geo_fastionbeta_flag) ! WG
   call readbc_real(geo_betaprime_scale)
   call readbc_int(poisson_z_eff_flag)
   call readbc_int(z_eff_method)

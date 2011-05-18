@@ -104,8 +104,7 @@ subroutine prgen_map_plasmastate
   vec(16,:) = flow_beam(:)
   vec(17,:) = 0.0 ! flow_wall
   vec(18,:) = zmag(:)
-  !  vec(19,:) = plst_ptowb ! total pressure, thermal + fast ion ! WG
-  vec(19,:) = 0.0
+  vec(19,:) = plst_ptowb ! total pressure, thermal + fast ion ! WG
   vec(20,:) = dpsi(:)
 
   ! ni

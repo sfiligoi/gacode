@@ -185,6 +185,7 @@ module gyro_interface
   real    :: gyro_ipccw_in = -1.0
   real    :: gyro_btccw_in = -1.0
   integer :: gyro_geo_gradbcurv_flag_in = 0
+  integer :: gyro_geo_fastionbeta_flag_in = 0 ! WG
   real    :: gyro_geo_betaprime_scale_in = 1.0
   integer :: gyro_poisson_z_eff_flag_in = 1
   integer :: gyro_z_eff_method_in = 1
@@ -411,6 +412,7 @@ contains
     gyro_ipccw_in = ipccw
     gyro_btccw_in = btccw
     gyro_geo_gradbcurv_flag_in = geo_gradbcurv_flag
+    gyro_geo_fastionbeta_flag_in = geo_fastionbeta_flag ! WG
     gyro_geo_betaprime_scale_in = geo_betaprime_scale
     gyro_poisson_z_eff_flag_in = poisson_z_eff_flag
     gyro_z_eff_method_in = z_eff_method
@@ -626,6 +628,7 @@ contains
     ipccw = gyro_ipccw_in
     btccw = gyro_btccw_in
     geo_gradbcurv_flag = gyro_geo_gradbcurv_flag_in
+    geo_fastionbeta_flag = gyro_geo_fastionbeta_flag_in ! WG
     geo_betaprime_scale = gyro_geo_betaprime_scale_in
     poisson_z_eff_flag = gyro_poisson_z_eff_flag_in
     z_eff_method = gyro_z_eff_method_in

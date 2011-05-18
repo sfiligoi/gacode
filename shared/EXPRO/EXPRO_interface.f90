@@ -40,7 +40,7 @@
 !  EXPRO_flow_beam(:)
 !  EXPRO_flow_wall(:)
 !  EXPRO_zmag(:)
-!  [EMPTY]
+!  EXPRO_ptot(:) ! WG
 !  [EMPTY]
 !
 !  EXPRO_ni(1,:)
@@ -89,6 +89,7 @@
 !  EXPRO_dlntedr(:)     -dln(Te)/dr (1/m)
 !  EXPRO_dlnnidr(1:5,:) -dln(ni)/dr (1/m)
 !  EXPRO_dlntidr(1:5,:) -dln(ti)/dr (1/m)
+!  EXPR0_dlnptotdr(:)   -dln(ptot)/dr (1/m) ! WG
 !  EXPRO_w0(:)          w0 (1/s)
 !  EXPRO_w0p(:)         d(w0)/dr (1/s/m)
 !  EXPRO_vol(:)         V (m^3)
@@ -147,6 +148,7 @@ module EXPRO_interface
   real, dimension(:),allocatable :: EXPRO_flow_beam
   real, dimension(:),allocatable :: EXPRO_flow_wall
   real, dimension(:),allocatable :: EXPRO_zmag
+  real, dimension(:),allocatable :: EXPRO_ptot ! WG
 
   real, dimension(:,:),allocatable :: EXPRO_ni
   real, dimension(:,:),allocatable :: EXPRO_ti
@@ -166,6 +168,7 @@ module EXPRO_interface
   real, dimension(:),allocatable :: EXPRO_dlntedr
   real, dimension(:,:),allocatable :: EXPRO_dlnnidr
   real, dimension(:,:),allocatable :: EXPRO_dlntidr
+  real, dimension(:),allocatable :: EXPRO_dlnptotdr ! WG
 
   real, dimension(:),allocatable :: EXPRO_w0p
 

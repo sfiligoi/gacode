@@ -362,6 +362,8 @@
             "btccw",btccw)
       call dumpIntInterface(21,"    gyro_geo_gradbcurv_flag_in ",    gyro_geo_gradbcurv_flag_in , &
             "geo_gradbcurv_flag",geo_gradbcurv_flag)
+      call dumpIntInterface(21,"    gyro_geo_fastionbeta_flag_in ",    gyro_geo_fastionbeta_flag_in , & ! WG
+            "geo_fastionbeta_flag",geo_fastionbeta_flag) ! WG
       call dumpRealInterface(21,"    gyro_geo_betaprime_scale_in ",    gyro_geo_betaprime_scale_in , &
             "geo_betaprime_scale",geo_betaprime_scale)
       call dumpIntInterface(21,"    gyro_poisson_z_eff_flag_in ",    gyro_poisson_z_eff_flag_in , &

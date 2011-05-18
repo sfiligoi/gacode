@@ -177,6 +177,7 @@ x.add('OUTPUT_FLAG','1')
 x.add('IPCCW','-1.0')
 x.add('BTCCW','-1.0')
 x.add('GEO_GRADBCURV_FLAG','0')
+x.add('GEO_FASTIONBETA_FLAG','0') # WG
 x.add('GEO_BETAPRIME_SCALE','1.0')
 x.add('POISSON_Z_EFF_FLAG','1')
 x.add('Z_EFF_METHOD','1')

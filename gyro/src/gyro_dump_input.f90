@@ -196,6 +196,7 @@
       call dumpRealVar(21,22,"ipccw",ipccw)
       call dumpRealVar(21,22,"btccw",btccw)
       call dumpIntVar(21,22,"geo_gradbcurv_flag",geo_gradbcurv_flag)
+      call dumpIntVar(21,22,"geo_fastionbeta_flag",geo_fastionbeta_flag) ! WG
       call dumpRealVar(21,22,"geo_betaprime_scale",geo_betaprime_scale)
       call dumpIntVar(21,22,"poisson_z_eff_flag",poisson_z_eff_flag)
       call dumpIntVar(21,22,"z_eff_method",z_eff_method)
