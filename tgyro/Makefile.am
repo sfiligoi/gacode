@@ -64,11 +64,11 @@ tgyro_includes = \
 
 tgyro_SOURCES = src/tgyro_main.f90
 tgyro_LDADD = libgacodetgyro.la \
-              $(top_builddir)/shared/libgacodeshared.la \
               $(top_builddir)/gyro/libgacodegyro.la \
               $(top_builddir)/neo/libgacodeneo.la \
               $(top_builddir)/neo/nclass/libgacodenclass.la \
               $(top_builddir)/tglf/libgacodetglf.la \
+              $(top_builddir)/shared/libgacodeshared.la \
               @FFTW_LIBS@ @FFTW_LIBS@ $(LMATH) $(IOLIBS)
 
 
