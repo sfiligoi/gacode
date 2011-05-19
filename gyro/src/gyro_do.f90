@@ -310,11 +310,11 @@ subroutine gyro_do(skipinit)
   ! I/O control for time-independent initial data
   !
   if (io_method == 1) then
-     call write_profile_vugyro(trim(path)//'profile_vugyro.out',1)
-     call gyro_write_units(trim(path)//'units.out',10)
-     call write_geometry_arrays(trim(path)//'geometry_arrays.out',4)
+     call gyro_write_initdata(&
+          trim(path)//'profile_vugyro.out',&
+          trim(path)//'units.out',&
+          trim(path)//'geometry_arrays.out',1)
   else
-     ! This encapsulates all the required initial data
      call write_hdf5_data(trim(path)//'out.gyro.initdata.h5',1)
   endif
   !
