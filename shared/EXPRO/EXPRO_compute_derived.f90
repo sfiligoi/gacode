@@ -123,7 +123,7 @@ subroutine EXPRO_compute_derived
 
   ! 1/L_Ptot = -dln(Ptot)/dr (1/m)
   if (minval(EXPRO_ptot) > 0.0) then
-     !call bound_deriv(EXPRO_dlnptotdr,-log(EXPRO_ptot),EXPRO_rmin,EXPRO_n_exp)
+     call bound_deriv(EXPRO_dlnptotdr,-log(EXPRO_ptot),EXPRO_rmin,EXPRO_n_exp)
   else
      EXPRO_dlnptotdr = 0.0
   endif
