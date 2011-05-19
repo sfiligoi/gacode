@@ -128,15 +128,14 @@ subroutine gyro_do(skipinit)
   if (gyrotest_flag == 0) then
      call gyro_mpi_grid
   else
-     n_n_1       = 1
-     i_group_1   = 0
+     n_n_1     = 1
+     i_group_1 = 0
   endif
   !
   ! Read, generate or otherwise construct equilibrium profiles.  If experimental 
   ! profiles are used, GEO will be allocate/deallocated with all settings 
   ! determined in EXPRO.
   !
-  GEO_ntheta_in = nint_GEO
   call gyro_alloc_profile_sim(1)
   call gyro_profile_init
   !
@@ -146,11 +145,10 @@ subroutine gyro_do(skipinit)
   call gyro_alloc_velocity(1)
   call gyro_alloc_orbit(1)
   !
-  ! Save geometry (GEO) library settings
+  ! Set geometry (GEO) library control variables
   !
   GEO_nfourier_in = n_fourier_geo 
   GEO_model_in    = geometry_method
-  ! **JC** why was this factor of -btccw missing?
   GEO_signb_in    = -btccw
   call GEO_alloc(1)
   !

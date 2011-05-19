@@ -316,8 +316,6 @@
             "nint_ORB_s",nint_ORB_s)
       call dumpIntInterface(21,"    gyro_nint_orb_do_in ",    gyro_nint_orb_do_in , &
             "nint_ORB_do",nint_ORB_do)
-      call dumpIntInterface(21,"    gyro_nint_geo_in ",    gyro_nint_geo_in , &
-            "nint_GEO",nint_GEO)
       call dumpIntInterface(21,"    gyro_udsymmetry_flag_in ",    gyro_udsymmetry_flag_in , &
             "udsymmetry_flag",udsymmetry_flag)
       call dumpIntInterface(21,"    gyro_gyro_method_in ",    gyro_gyro_method_in , &

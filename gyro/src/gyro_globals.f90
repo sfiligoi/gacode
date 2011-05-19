@@ -237,7 +237,6 @@ module gyro_globals
   integer :: n_field
   integer :: nint_ORB_s
   integer :: nint_ORB_do
-  integer :: nint_GEO
   integer :: n_mumps_max
   integer :: n_study
   !

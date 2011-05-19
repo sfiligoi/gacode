@@ -173,7 +173,6 @@
       call dumpIntVar(21,22,"dist_print",dist_print)
       call dumpIntVar(21,22,"nint_ORB_s",nint_ORB_s)
       call dumpIntVar(21,22,"nint_ORB_do",nint_ORB_do)
-      call dumpIntVar(21,22,"nint_GEO",nint_GEO)
       call dumpIntVar(21,22,"udsymmetry_flag",udsymmetry_flag)
       call dumpIntVar(21,22,"gyro_method",gyro_method)
       call dumpIntVar(21,22,"sparse_method",sparse_method)

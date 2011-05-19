@@ -162,7 +162,6 @@ module gyro_interface
   integer :: gyro_dist_print_flag_in = 0
   integer :: gyro_nint_orb_s_in = 64
   integer :: gyro_nint_orb_do_in = 10
-  integer :: gyro_nint_geo_in = 101
   integer :: gyro_udsymmetry_flag_in = 1
   integer :: gyro_gyro_method_in = 1
   integer :: gyro_sparse_method_in = 1
@@ -390,7 +389,6 @@ contains
     gyro_dist_print_flag_in = dist_print
     gyro_nint_orb_s_in = nint_ORB_s
     gyro_nint_orb_do_in = nint_ORB_do
-    gyro_nint_geo_in = nint_GEO
     gyro_udsymmetry_flag_in = udsymmetry_flag
     gyro_gyro_method_in = gyro_method
     gyro_sparse_method_in = sparse_method
@@ -607,7 +605,6 @@ contains
     dist_print = gyro_dist_print_flag_in
     nint_ORB_s = gyro_nint_orb_s_in
     nint_ORB_do = gyro_nint_orb_do_in
-    nint_GEO = gyro_nint_geo_in
     udsymmetry_flag = gyro_udsymmetry_flag_in
     gyro_method = gyro_gyro_method_in
     sparse_method = gyro_sparse_method_in

@@ -207,7 +207,6 @@ subroutine gyro_read_input
   call readbc_int(dist_print)
   call readbc_int(nint_ORB_s)
   call readbc_int(nint_ORB_do)
-  call readbc_int(nint_GEO)
   call readbc_int(udsymmetry_flag)
   call readbc_int(gyro_method)
   call readbc_int(sparse_method)
