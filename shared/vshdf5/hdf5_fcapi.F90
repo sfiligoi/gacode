@@ -58,7 +58,7 @@
 ! module hdf_api
 !-----------------------------------------------------------------------
   module hdf5_api
-  use hdF5
+  use hdf5
   implicit none
   character(5), parameter, private :: h5fortranapiversion="1.0"
   integer, parameter, private :: i4=selected_int_kind(9)
