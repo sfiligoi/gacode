@@ -315,7 +315,7 @@ subroutine gyro_do(skipinit)
           trim(path)//'units.out',&
           trim(path)//'geometry_arrays.out',1)
   else
-     call write_hdf5_data(trim(path)//'out.gyro.initdata.h5',1)
+     call gyro_write_initdata_hdf5(trim(path)//'out.gyro.initdata.h5',1)
   endif
   !
   ! Close geometry (GEO) library
