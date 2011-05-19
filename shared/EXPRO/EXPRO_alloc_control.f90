@@ -145,7 +145,7 @@ subroutine EXPRO_alloc_control(i_proc,path,flag)
      deallocate(EXPRO_flow_wall)
      deallocate(EXPRO_zmag)
      deallocate(EXPRO_ptot)
-     deallocate(EXPRO_dlnptotdr)
+     deallocate(EXPRO_poloidalfluxover2pi)
 
      deallocate(EXPRO_ni)
      deallocate(EXPRO_ti)
@@ -184,7 +184,7 @@ subroutine EXPRO_alloc_control(i_proc,path,flag)
      deallocate(EXPRO_grad_r0)
      deallocate(EXPRO_bp0)
      deallocate(EXPRO_bt0)
-     deallocate(EXPRO_poloidalfluxover2pi)
+     deallocate(EXPRO_dlnptotdr)
 
   endif
 
