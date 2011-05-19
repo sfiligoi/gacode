@@ -132,16 +132,11 @@ subroutine gyro_do(skipinit)
      i_group_1   = 0
   endif
   !
-  ! Save geometry (GEO) library settings
-  !
-  GEO_ntheta_in   = nint_GEO
-  GEO_nfourier_in = n_fourier_geo 
-  GEO_model_in    = geometry_method
-  GEO_signb_in    = 1.0
-  !
   ! Read, generate or otherwise construct equilibrium profiles.  If experimental 
-  ! profiles are used, GEO will be allocate/deallocated.
+  ! profiles are used, GEO will be allocate/deallocated with all settings 
+  ! determined in EXPRO.
   !
+  GEO_ntheta_in = nint_GEO
   call gyro_alloc_profile_sim(1)
   call gyro_profile_init
   !
@@ -151,9 +146,14 @@ subroutine gyro_do(skipinit)
   call gyro_alloc_velocity(1)
   call gyro_alloc_orbit(1)
   !
-  ! Lambda (pitch-angle) weights (GEO needed again, so just reallocate)
+  ! Save geometry (GEO) library settings
   !
+  GEO_nfourier_in = n_fourier_geo 
+  GEO_model_in    = geometry_method
+  GEO_signb_in    = 1.0
   call GEO_alloc(1)
+  !
+  ! Lambda (pitch-angle) weights (GEO needed again, so just reallocate)
   call gyro_lambda_grid
   !
   ! Energy weights

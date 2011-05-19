@@ -27,9 +27,10 @@
 !
 !  (1) Dimensions and control:
 !
-!  GEO_ntheta_in   : number of theta interpolation nodes 
+!  GEO_ntheta_in   : number of theta interpolation nodes. 
 !  GEO_nfourier_in : number of gen. geo. expansion coeffs.
-!  GEO_model_in   : geometry method (-1=s-alpha, 0=model, 1=general)
+!  GEO_model_in    : geometry method (-1=s-alpha, 0=model, 1=general).
+!  GEO_signb_in    : magnetic field orientation.
 !
 !  (2) Shape parameters
 !
