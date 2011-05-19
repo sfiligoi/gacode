@@ -150,7 +150,8 @@ subroutine gyro_do(skipinit)
   !
   GEO_nfourier_in = n_fourier_geo 
   GEO_model_in    = geometry_method
-  GEO_signb_in    = 1.0
+  ! **JC** why was this factor of -btccw missing?
+  GEO_signb_in    = -btccw
   call GEO_alloc(1)
   !
   ! Lambda (pitch-angle) weights (GEO needed again, so just reallocate)
