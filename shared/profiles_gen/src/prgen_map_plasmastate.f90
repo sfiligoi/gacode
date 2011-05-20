@@ -77,7 +77,7 @@ subroutine prgen_map_plasmastate
   endif
   !
   ! Get true sign of approximate omega (plst_omegat)
-  if (plst_omega(1) < 0.0) then
+  if (plst_omegat(1) < 0.0) then
      sign_plst_omega = -1.0
   else
      sign_plst_omega = 1.0
