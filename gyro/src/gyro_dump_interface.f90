@@ -110,6 +110,8 @@
             "radial_profile_method",radial_profile_method)
       call dumpIntInterface(21,"    gyro_plot_u_flag_in ",    gyro_plot_u_flag_in , &
             "plot_u_flag",plot_u_flag)
+      call dumpIntInterface(21,"    gyro_plot_epar_flag_in ",    gyro_plot_epar_flag_in , &
+            "plot_epar_flag",plot_epar_flag)
       call dumpIntInterface(21,"    gyro_plot_n_flag_in ",    gyro_plot_n_flag_in , &
             "plot_n_flag",plot_n_flag)
       call dumpIntInterface(21,"    gyro_plot_e_flag_in ",    gyro_plot_e_flag_in , &
@@ -314,8 +316,6 @@
             "nint_ORB_s",nint_ORB_s)
       call dumpIntInterface(21,"    gyro_nint_orb_do_in ",    gyro_nint_orb_do_in , &
             "nint_ORB_do",nint_ORB_do)
-      call dumpIntInterface(21,"    gyro_nint_geo_in ",    gyro_nint_geo_in , &
-            "nint_GEO",nint_GEO)
       call dumpIntInterface(21,"    gyro_udsymmetry_flag_in ",    gyro_udsymmetry_flag_in , &
             "udsymmetry_flag",udsymmetry_flag)
       call dumpIntInterface(21,"    gyro_gyro_method_in ",    gyro_gyro_method_in , &
@@ -362,6 +362,8 @@
             "btccw",btccw)
       call dumpIntInterface(21,"    gyro_geo_gradbcurv_flag_in ",    gyro_geo_gradbcurv_flag_in , &
             "geo_gradbcurv_flag",geo_gradbcurv_flag)
+      call dumpIntInterface(21,"    gyro_geo_fastionbeta_flag_in ",    gyro_geo_fastionbeta_flag_in , &
+            "geo_fastionbeta_flag",geo_fastionbeta_flag)
       call dumpRealInterface(21,"    gyro_geo_betaprime_scale_in ",    gyro_geo_betaprime_scale_in , &
             "geo_betaprime_scale",geo_betaprime_scale)
       call dumpIntInterface(21,"    gyro_poisson_z_eff_flag_in ",    gyro_poisson_z_eff_flag_in , &

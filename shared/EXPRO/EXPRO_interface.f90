@@ -40,8 +40,8 @@
 !  EXPRO_flow_beam(:)
 !  EXPRO_flow_wall(:)
 !  EXPRO_zmag(:)
-!  [EMPTY]
-!  [EMPTY]
+!  EXPRO_ptot(:)
+!  EXPRO_poloidalfluxover2pi(:)
 !
 !  EXPRO_ni(1,:)
 !  EXPRO_ni(2,:)
@@ -89,6 +89,7 @@
 !  EXPRO_dlntedr(:)     -dln(Te)/dr (1/m)
 !  EXPRO_dlnnidr(1:5,:) -dln(ni)/dr (1/m)
 !  EXPRO_dlntidr(1:5,:) -dln(ti)/dr (1/m)
+!  EXPR0_dlnptotdr(:)   -dln(ptot)/dr (1/m)
 !  EXPRO_w0(:)          w0 (1/s)
 !  EXPRO_w0p(:)         d(w0)/dr (1/s/m)
 !  EXPRO_vol(:)         V (m^3)
@@ -100,7 +101,6 @@
 !  EXPRO_grad_r0(:)     |grad r| at theta=0 
 !  EXPRO_bp0(:)         B_pol at theta=0 (T)
 !  EXPRO_bt0(:)         B_tor at theta=0 (T)
-!  EXPRO_poloidalfluxover2pi(:) psi_p (T*m^2/rad=Wb/rad)
 !  EXPRO_gamma_e(:)     r/q d(w0)/dr (1/s)
 !  EXPRO_gamma_p(:)     R_0 d(w0)/dr (1/s)
 !  EXPRO_mach(:)        R_0 w0/cs
@@ -147,6 +147,8 @@ module EXPRO_interface
   real, dimension(:),allocatable :: EXPRO_flow_beam
   real, dimension(:),allocatable :: EXPRO_flow_wall
   real, dimension(:),allocatable :: EXPRO_zmag
+  real, dimension(:),allocatable :: EXPRO_ptot
+  real, dimension(:),allocatable :: EXPRO_poloidalfluxover2pi
 
   real, dimension(:,:),allocatable :: EXPRO_ni
   real, dimension(:,:),allocatable :: EXPRO_ti
@@ -166,6 +168,7 @@ module EXPRO_interface
   real, dimension(:),allocatable :: EXPRO_dlntedr
   real, dimension(:,:),allocatable :: EXPRO_dlnnidr
   real, dimension(:,:),allocatable :: EXPRO_dlntidr
+  real, dimension(:),allocatable :: EXPRO_dlnptotdr
 
   real, dimension(:),allocatable :: EXPRO_w0p
 
@@ -181,7 +184,6 @@ module EXPRO_interface
 
   real, dimension(:),allocatable :: EXPRO_bp0
   real, dimension(:),allocatable :: EXPRO_bt0
-  real, dimension(:),allocatable :: EXPRO_poloidalfluxover2pi
 
   ! input.profiles.geo dimension and arrays
 

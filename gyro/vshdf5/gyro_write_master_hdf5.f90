@@ -4,269 +4,6 @@
 ! PURPOSE:
 !  Write a bunch of data to hdf5 file
 !------------------------------------------------
-subroutine write_hdf5_data(datafile,action)
-  !------------------------------------------
-  !  Data that does not change with time.  
-  !  It is equivalent to:
-  !    profile_vugyro.out
-  !------------------------------------------
-  use gyro_globals
-  use hdf5_api
-  use math_constants
-  use GEO_interface
-  !------------------------------------------
-  implicit none
-  include 'mpif.h'
-  !
-  integer, intent(in) :: action
-  character (len=*), intent(in) :: datafile
-  !
-  integer :: data_loop
-  integer :: i_dummy
-  real :: dummy
-  integer(HID_T) :: fid, rootid
-  character(90) :: description
-  type(hdf5InOpts) :: h5in
-  type(hdf5ErrorType) :: h5err
-  integer :: n_wedge
-  integer :: io_mode
-  real :: theta
-  real :: dr, buff
-  real :: kt
-  real, allocatable :: buffer(:,:,:)
-  !double precision :: buff
-  !------------------------------------------
-  ! Do the initialization here.  Might need
-  ! better logic here based on action.
-  !------------------------------------------
-  call vshdf5_fcinit()
-  if(i_proc/=0) return
-  call vshdf5_inith5vars(h5in, h5err)
-  h5in%comm=MPI_COMM_SELF
-  h5in%info=MPI_INFO_NULL
-  h5in%typeConvert=.true.
-  h5in%wrd_type=H5T_NATIVE_REAL
-  !h5in%wrd_type=H5T_NATIVE_DOUBLE
-  h5in%doTranspose=.true.
-  !h5in%vsTime=intime
-  h5in%wrVsTime=.false.
-  h5in%verbose=.true.
-
-  !---------------------------------------------------------------------
-  ! Write the variables to an hdf5 file
-  ! These variables are essentially the write_profile_vugyro.f90 
-  !---------------------------------------------------------------------
-  description=" "
-  call open_newh5file(datafile,fid,description,rootid,h5in,h5err)
-
-  h5in%mesh=" "; h5in%units=" "
-  call dump_h5(rootid,"n_x",n_x,h5in,h5err)
-  call dump_h5(rootid,"n_theta_section",n_theta_section,h5in,h5err)
-  call dump_h5(rootid,"n_pass",n_pass,h5in,h5err)
-  call dump_h5(rootid,"n_trap",n_trap,h5in,h5err)
-  call dump_h5(rootid,"n_energy",n_energy,h5in,h5err)
-  call dump_h5(rootid,"n_theta_plot",n_theta_plot,h5in,h5err)
-  call dump_h5(rootid,"n0",n0,h5in,h5err)
-  call dump_h5(rootid,"n_n",n_n,h5in,h5err)
-  call dump_h5(rootid,"d_n",d_n,h5in,h5err)
-  call dump_h5(rootid,"nonlinear_flag",nonlinear_flag,h5in,h5err)
-  call dump_h5(rootid,"electron_method",electron_method,h5in,h5err)
-  call dump_h5(rootid,"n_field",n_field,h5in,h5err)
-  call dump_h5(rootid,"n_ion",n_ion,h5in,h5err)
-  call dump_h5(rootid,"n_kinetic",n_kinetic,h5in,h5err)
-  call dump_h5(rootid,"n_spec",n_spec,h5in,h5err)
-  call dump_h5(rootid,"field_r0_flag",field_r0_flag,h5in,h5err)
-  call dump_h5(rootid,"field_r0_grid",field_r0_grid,h5in,h5err)
-  call dump_h5(rootid,"boundary_method",boundary_method,h5in,h5err)
-  call dump_h5(rootid,"r",r,h5in,h5err)
-  call dump_h5(rootid,"q",q,h5in,h5err)
-  call dump_h5(rootid,"Rmaj_s",rmaj_s,h5in,h5err)
-  call dump_h5(rootid,"r_s",r_s,h5in,h5err)
-  call dump_h5(rootid,"q_s",q_s,h5in,h5err)
-  call dump_h5(rootid,"dlntdr_s",dlntdr_s,h5in,h5err)
-  call dump_h5(rootid,"dlnndr_s",dlnndr_s,h5in,h5err)
-  call dump_h5(rootid,"tem_s",tem_s,h5in,h5err)
-  call dump_h5(rootid,"den_s",den_s,h5in,h5err)
-  call dump_h5(rootid,"aspect_s",rmaj_s/r_s,h5in,h5err)
-  call dump_h5(rootid,"delta_s",delta_s,h5in,h5err)
-  call dump_h5(rootid,"zeta_s",zeta_s,h5in,h5err)
-  call dump_h5(rootid,"kappa_s",kappa_s,h5in,h5err)
-  call dump_h5(rootid,"drmaj_s",drmaj_s,h5in,h5err)
-  call dump_h5(rootid,"shat_s",shat_s,h5in,h5err)
-  call dump_h5(rootid,"s_delta_s",s_delta_s,h5in,h5err)
-  call dump_h5(rootid,"s_zeta_s",s_zeta_s,h5in,h5err)
-  call dump_h5(rootid,"s_kappa_s",s_kappa_s,h5in,h5err)
-  call dump_h5(rootid,"zmag_s",zmag_s,h5in,h5err)
-  call dump_h5(rootid,"dzmag_s",dzmag_s,h5in,h5err)
-  call dump_h5(rootid,"beta_unit_s",beta_unit_s,h5in,h5err)
-  call dump_h5(rootid,"gamma_e_s",gamma_e_s,h5in,h5err)
-  call dump_h5(rootid,"gamma_p_s",gamma_p_s,h5in,h5err)
-  call dump_h5(rootid,"mach_s",mach_s,h5in,h5err)
-  call dump_h5(rootid,"b_unit_s",b_unit_s,h5in,h5err)
-  call dump_h5(rootid,"dr_eodr",dr_eodr,h5in,h5err)
-  call dump_h5(rootid,"z_eff_s",z_eff_s,h5in,h5err)
-  call dump_h5(rootid,"nu_s",nu_s,h5in,h5err)
-  call dump_h5(rootid,"w0_s",w0_s,h5in,h5err)
-  call dump_h5(rootid,"box_multiplier",box_multiplier,h5in,h5err)
-
-  call dump_h5(rootid,"lambda", lambda(ir_norm,:),h5in,h5err)
-  call dump_h5(rootid,"energy", energy,h5in,h5err)
-  call dump_h5(rootid,"lambda_tp", lambda_tp(ir_norm),h5in,h5err)
-  call dump_h5(rootid,"krho_collect", krho_collect(:),h5in,h5err)
-  call dump_h5(rootid,"rhos_norm", rhos_norm,h5in,h5err)
-  call dump_h5(rootid,"zcharge", z(:),h5in,h5err)
-  call dump_h5(rootid,"n_moment", n_moment ,h5in,h5err)
-
-  !---------------------------------------------------------------------
-  ! These variables are essentially gyro_write_units.f90
-  !---------------------------------------------------------------------
-  ! kT in MJ (note the conversion 1.6022e-22 MJ/keV)
-  kt = 1.6022e-22*tem_norm
-
-  h5in%units="kg"
-  call dump_h5(rootid,'m_ref', 2.*kg_proton ,h5in,h5err)
-  h5in%units="Tesla"
-  call dump_h5(rootid,'b_unit',b_unit_norm,h5in,h5err)
-  h5in%units="m"
-  call dump_h5(rootid,'a',a_meters,h5in,h5err)
-  h5in%units="1/s"
-  call dump_h5(rootid,'csda_norm',csda_norm,h5in,h5err)
-  h5in%units="m/s"
-  call dump_h5(rootid,'csda_norm_D',csda_norm*a_meters,h5in,h5err)
-  h5in%units="keV"
-  call dump_h5(rootid,'Te',tem_norm,h5in,h5err)
-  h5in%units="10^19/m^3"
-  call dump_h5(rootid,'ne',den_norm,h5in,h5err)
-  h5in%units="m"
-  call dump_h5(rootid,'rho_sD',rhos_norm*a_meters,h5in,h5err)
-  h5in%units="m^2/s"
-  call dump_h5(rootid,'chi_gBD',csda_norm*(rhos_norm*a_meters)**2,h5in,h5err)
-  buff=1.e19*den_norm*(csda_norm*a_meters)*rhos_norm**2/0.624e22
-  h5in%units="MW/keV/m^2"
-  call dump_h5(rootid,'Gamma_gBD',buff,h5in,h5err)
-  h5in%units="MW/m^2"
-  buff=1.e19*den_norm*(csda_norm*a_meters)*kt*rhos_norm**2
-  call dump_h5(rootid,'Q_gBD',buff,h5in,h5err)
-  h5in%units="Nm/m^2"
-  buff=1.e19*den_norm*a_meters*kt*rhos_norm**2*1e6
-  call dump_h5(rootid,'Pi_gBD',buff,h5in,h5err)
-  h5in%units="MW/m^3"
-  buff=1.e19*den_norm*csda_norm*kt*rhos_norm**2
-  call dump_h5(rootid,'S_gBD',buff,h5in,h5err)
-
-  !---------------------------------------------------------------------
-  ! Data from geometry_arrays.out
-  !---------------------------------------------------------------------
-
-  n_wedge = n_theta_plot*n_theta_mult
-
-  allocate(buffer(14,1:n_x,n_wedge))
-  do i=1,n_x
-
-     if (flat_profile_flag == 0) then
-
-        ! All profiles are global and radial variation is consistent
-
-        GEO_rmin_in      = r_s(i)
-        GEO_rmaj_in      = rmaj_s(i)
-        GEO_drmaj_in     = drmaj_s(i)
-        GEO_zmag_in      = zmag_s(i)
-        GEO_dzmag_in     = dzmag_s(i)
-        GEO_q_in         = q_s(i)
-        GEO_s_in         = shat_s(i)
-        GEO_kappa_in     = kappa_s(i)
-        GEO_s_kappa_in   = s_kappa_s(i)
-        GEO_delta_in     = delta_s(i)
-        GEO_s_delta_in   = s_delta_s(i)
-        GEO_zeta_in      = zeta_s(i)
-        GEO_s_zeta_in    = s_zeta_s(i)
-        GEO_beta_star_in = beta_star_s(i)
-
-     else
-
-        ! Profiles are flat and so some parameters need to be linearly extrapolated.
-
-        dr = r(i)-r(ir_norm)
-
-        GEO_rmin_in  = r(i)
-        GEO_rmaj_in  = rmaj_s(ir_norm)+drmaj_s(ir_norm)*dr
-        GEO_drmaj_in = drmaj_s(ir_norm)
-        GEO_zmag_in  = zmag_s(ir_norm)+dzmag_s(ir_norm)*dr
-        GEO_dzmag_in = dzmag_s(ir_norm)
-        GEO_q_in     = q(i)
-        GEO_s_in     = shat_s(ir_norm)
-        GEO_kappa_in = kappa_s(ir_norm)+&
-             kappa_s(ir_norm)*s_kappa_s(ir_norm)/r(ir_norm)*dr
-        GEO_s_kappa_in = s_kappa_s(ir_norm)
-        GEO_delta_in   = delta_s(ir_norm)+s_delta_s(ir_norm)/r(ir_norm)*dr
-        GEO_s_delta_in = s_delta_s(ir_norm)
-        GEO_zeta_in    = zeta_s(ir_norm)+s_zeta_s(ir_norm)/r(ir_norm)*dr
-        GEO_s_zeta_in  = s_zeta_s(ir_norm)
-        GEO_beta_star_in = beta_star_s(ir_norm)
-
-     endif
-
-     GEO_fourier_in(:,:) = a_fourier_geo_s(:,0:n_fourier_geo,i)
-     call GEO_do()
-
-     do j=1,n_wedge
-
-        theta = -pi+(j-1)*pi_2/n_wedge
-
-        ! Test for special case
-        if (n_wedge == 1) theta = 0.0
-
-        call GEO_interp(theta)
-
-        buffer(1 ,i,j)=GEO_nu
-        buffer(2 ,i,j)=GEO_gsin
-        buffer(3 ,i,j)=GEO_gcos1
-        buffer(4 ,i,j)=GEO_gcos2
-        buffer(5 ,i,j)=GEO_usin
-        buffer(6 ,i,j)=GEO_ucos
-        buffer(7 ,i,j)=GEO_b
-        buffer(8 ,i,j)=GEO_g_theta
-        buffer(9 ,i,j)=GEO_grad_r
-        buffer(10,i,j)=GEO_gq
-        buffer(11,i,j)=GEO_captheta
-
-     enddo ! j
-
-     ! Set up nu for plotting and synthetic diagnostic.
-     ! Note we need theta=-pi and pi so include 0 index
-     do j=0,n_theta_plot
-        theta = -pi+real(j)*pi_2/n_theta_plot
-        if (n_theta_plot == 1) theta = 0.0 ! Test for special case
-        call GEO_interp(theta)
-        nu_coarse(j,i)=GEO_nu
-     enddo
-     do j=1,n_wedge
-        theta=theta_wedge_offset+real(j-1)*theta_wedge_angle/       &
-             real(n_theta_plot*n_theta_mult-1)
-        if (n_wedge == 1) theta = 0.0 ! Test for special case
-        call GEO_interp(theta)
-        nu_wedge(j,i)=GEO_nu
-     enddo
-
-  enddo ! i
-
-
-  call dump_h5(rootid,"nu",      buffer(1,:,:),h5in,h5err)
-  call dump_h5(rootid,"gsin",    buffer(2,:,:),h5in,h5err)
-  call dump_h5(rootid,"gcos1",   buffer(3,:,:),h5in,h5err)
-  call dump_h5(rootid,"gcos2",   buffer(4,:,:),h5in,h5err)
-  call dump_h5(rootid,"usin",    buffer(5,:,:),h5in,h5err)
-  call dump_h5(rootid,"ucos",    buffer(6,:,:),h5in,h5err)
-  call dump_h5(rootid,"b",       buffer(7,:,:),h5in,h5err)
-  call dump_h5(rootid,"g_theta", buffer(8,:,:),h5in,h5err)
-  call dump_h5(rootid,"grad_r",  buffer(9,:,:),h5in,h5err)
-  call dump_h5(rootid,"gq",      buffer(10,:,:),h5in,h5err)
-  call dump_h5(rootid,"captheta",buffer(11,:,:),h5in,h5err)
-  deallocate(buffer)
-
-  call close_h5file(fid,rootid,h5err)
-
-end subroutine write_hdf5_data
 
 !------------------------------------------------------
 ! write_hdf5_timedata
@@ -307,14 +44,16 @@ subroutine write_hdf5_timedata(action)
   character(60) :: description
   character(64) :: step_name, tempVarName
   character(128) :: dumpfile
+  character(20)   :: openmethod
   integer(HID_T) :: dumpGid,dumpFid,gid3D,fid3D
+  integer(HID_T) :: dumpTGid,dumpTFid
   type(hdf5InOpts) :: h5in
   type(hdf5ErrorType) :: h5err
   integer :: number_label
 
   logical :: write_threed
 
-
+ 
   !---------------------------------------------------
   ! Determine if the 3D files need to be written 
   if (n_torangle_3d > 1 ) then
@@ -352,13 +91,32 @@ subroutine write_hdf5_timedata(action)
         write(step_name,fmt='(i5.5)') number_label
      endif
 
+    ! open the timedata file (incremental)
+    dumpfile=TRIM(path)//"out.gyro.timedata.h5" 
+    description="GYRO scalar time data file"
+    
+    if (action == 1) then ! initialziation
+      if( restart_method /= 1 ) then 
+          openmethod='overwr'
+      else
+          openmethod='append'
+      endif
+    else ! sim running
+      openmethod='append'
+    endif
+
+    call open_h5file(trim(openmethod),dumpfile,dumpTFid,description,dumpTGid,h5in,h5err)
+    if(h5err%errBool) call catch_error(h5err%errorMsg)
+
+    
+
      dumpfile=TRIM(path)//"gyro"//TRIM(step_name)//".h5"
-     description="GYRO dump file"
+     description="GYRO field file"
      call open_newh5file(dumpfile,dumpFid,description,dumpGid,h5in,h5err)
 
      if (write_threed) then
         dumpfile=TRIM(path)//"gyro3D"//TRIM(step_name)//".h5"
-        description="GYRO 3D plot file"
+        description="GYRO 3D field file"
         call open_newh5file(dumpfile,fid3d,description,gid3D,h5in,h5err)
      endif
 
@@ -457,7 +215,8 @@ subroutine write_hdf5_timedata(action)
   !Assume gyro_write_master.f90 has calculated this: call get_field_spectrum
   h5in%units="m^-2?"
   h5in%mesh=' '
-  call write_distributed_real_h5("kxkyspec",dumpGid,&
+  call write_distributed_real_h5("kxkyspec",dumpTGid,&
+       n_x,1,1,&
        size(kxkyspec),&
        kxkyspec,&
        h5in,h5err)
@@ -466,10 +225,10 @@ subroutine write_hdf5_timedata(action)
   if (i_proc == 0) then
      h5in%units="m^-2?"
      h5in%mesh=" "
-     call dump_h5(dumpGid,'k_perp_squared',k_perp_squared,h5in,h5err)
+     call add_h5(dumpGid,'k_perp_squared',k_perp_squared,h5in,h5err)
   endif
 
-
+    WRITE(*,*) "passed k_perp squared"
   !-----------------------------
   ! Set remaining timers to zero
   cp3 = 0.0
@@ -504,13 +263,6 @@ subroutine write_hdf5_timedata(action)
      !=============
      ! BEGIN LINEAR 
      !=============
-
-     !SEK Worry about this later.
-     call write_distributed_real_h5("freq_n",dumpGid,&
-          size(freq_n),&
-          freq_n,&
-          h5in,h5err)
-
      !=============
      ! END LINEAR 
      !=============
@@ -522,38 +274,37 @@ subroutine write_hdf5_timedata(action)
      !================
 
      call proc_time(cp7)
-
+     
      h5in%units="diff units"
-     call write_distributed_real_h5("diff_n",dumpGid,&
+     call write_distributed_real_h5("diff_n",dumpTGid,&
+          n_kinetic,n_field,2,&
           size(diff_n),&
           diff_n,&
           h5in,h5err)
 
-     call write_distributed_real_h5("gbflux_n",dumpGid,&
+     call write_distributed_real_h5("gbflux_n",dumpTGid,&
+          n_kinetic,n_field,4,&
           size(gbflux_n),&
           gbflux_n,&
           h5in,h5err)
 
-     call write_distributed_real_h5("freq_n",dumpGid,&
-          size(freq_n),&
-          freq_n,&
-          h5in,h5err)
-
-
      if (lindiff_method >= 4) then
-        call write_distributed_real_h5('phi_squared_QL_n',dumpGid,&
+        call write_distributed_real_h5('phi_squared_QL_n',dumpTGid,&
+             1,1,1,&
              size(phi_squared_QL_n),&
              phi_squared_QL_n,&
              h5in,h5err)
 
-        call write_distributed_real_h5('g_squared_QL_n',dumpGid,&
+        call write_distributed_real_h5('g_squared_QL_n',dumpTGid,&
              size(g_squared_QL_n),&
+             3,1,1,&
              g_squared_QL_n,&
              h5in,h5err)
      endif
 
      if (nonlinear_transfer_flag == 1) then
-        call write_distributed_real_h5('out.gyro.nl_transfer',dumpGid,&
+        call write_distributed_real_h5('out.gyro.nl_transfer',dumpTGid,&
+             n_x,2,1,&
              size(nl_transfer),&
              nl_transfer,&
              h5in,h5err)
@@ -561,27 +312,27 @@ subroutine write_hdf5_timedata(action)
 
      call proc_time(cp8)
 
-     if (i_proc == 0 .and. lindiff_method > 1) then
+     if (i_proc == 0 ) then
 
-        call dump_h5(dumpGid,'field_rms',ave_phi,h5in,h5err)
-        call dump_h5(dumpGid,'diff',diff,h5in,h5err)
-        call dump_h5(dumpGid,'diff_i',diff_i,h5in,h5err)
-        call dump_h5(dumpGid,'gbflux',gbflux,h5in,h5err)
-        call dump_h5(dumpGid,'gbflux_mom',gbflux_mom,h5in,h5err)
-        call dump_h5(dumpGid,'gbflux_i',gbflux_i,h5in,h5err)
+        call add_h5(dumpTGid,'field_rms',ave_phi,h5in,h5err)
+        call add_h5(dumpTGid,'diff',diff,h5in,h5err)
+        call add_h5(dumpTGid,'diff_i',diff_i,h5in,h5err)
+        call add_h5(dumpTGid,'gbflux',gbflux,h5in,h5err)
+        call add_h5(dumpTGid,'gbflux_mom',gbflux_mom,h5in,h5err)
+        call add_h5(dumpTGid,'gbflux_i',gbflux_i,h5in,h5err)
 
         if (trapdiff_flag == 1) then
-           call dump_h5(dumpGid,'diff_trapped',diff_trapped,h5in,h5err)
-           call dump_h5(dumpGid,'diff_i_trapped',diff_i_trapped,h5in,h5err)
-           call dump_h5(dumpGid,'gbflux_trapped',gbflux_trapped,h5in,h5err)
-           call dump_h5(dumpGid,'gbflux_i_trapped',gbflux_i_trapped,h5in,h5err)
+           call add_h5(dumpTGid,'diff_trapped',diff_trapped,h5in,h5err)
+           call add_h5(dumpTGid,'diff_i_trapped',diff_i_trapped,h5in,h5err)
+           call add_h5(dumpTGid,'gbflux_trapped',gbflux_trapped,h5in,h5err)
+           call add_h5(dumpTGid,'gbflux_i_trapped',gbflux_i_trapped,h5in,h5err)
         endif
 
         allocate(a2(3,n_x))
         a2(1,:) = phi_fluxave(:) 
         a2(2,:) = a_fluxave(:)
         a2(3,:) = aperp_fluxave(:)
-        call dump_h5(dumpGid,'zerobar',a2,h5in,h5err)
+        call add_h5(dumpTGid,'zerobar',a2,h5in,h5err)
         deallocate(a2)
 
         allocate(a3(n_kinetic,4,n_x))
@@ -591,10 +342,10 @@ subroutine write_hdf5_timedata(action)
            a3(:,3,i) = source_n(:,i)
            a3(:,4,i) = source_e(:,i)
         enddo
-        call dump_h5(dumpGid,'source',a3,h5in,h5err)
+        call add_h5(dumpTGid,'source',a3,h5in,h5err)
         deallocate(a3)
 
-        call dump_h5(dumpGid,'moments_zero',moments_zero_plot,h5in,h5err)
+        call add_h5(dumpTGid,'moments_zero',moments_zero_plot,h5in,h5err)
      endif
 
      !================
@@ -608,7 +359,7 @@ subroutine write_hdf5_timedata(action)
   if (entropy_flag == 1) then
      call gyro_entropy 
      if (i_proc == 0) then 
-        call dump_h5(dumpGid,'entropy',entropy,h5in,h5err)
+        call add_h5(dumpTGid,'entropy',entropy,h5in,h5err)
      endif
   endif
   !------------------------------------------------------------
@@ -631,12 +382,17 @@ subroutine write_hdf5_timedata(action)
   !
   if (i_proc == 0) then
      h5in%mesh=' '
+     call add_h5(dumpTGid,'data_step',data_step,h5in,h5err)
+     call add_h5(dumpTGid,'t_current',t_current,h5in,h5err)
+
+     ! dump in the field and 3d files
      call dump_h5(dumpGid,'data_step',data_step,h5in,h5err)
      call dump_h5(dumpGid,'t_current',t_current,h5in,h5err)
      call dump_h5(dumpGid,'n_proc',n_proc,h5in,h5err)
   endif
 
   if (i_proc == 0) then
+     call close_h5file(dumpTFid,dumpTGid,h5err)
      call close_h5file(dumpFid,dumpGid,h5err)
      if (write_threed) call close_h5file(fid3d,gid3d,h5err)
   endif
@@ -1135,7 +891,7 @@ end subroutine myhdf5_close
 !  Control merged output of distributed real array.
 !------------------------------------------------------
 
-subroutine write_distributed_real_h5(varName,rGid,n_fn,fn,h5in,h5err)
+subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
 
   use hdf5_api
   use gyro_globals, only : &
@@ -1146,31 +902,78 @@ subroutine write_distributed_real_h5(varName,rGid,n_fn,fn,h5in,h5err)
        data_step,&
        GYRO_COMM_WORLD,&
        i_proc,&
-       i_err
+       i_err,&
+       electron_method
 
   !------------------------------------------------------
   implicit none
   !
   character (len=*), intent(in) :: varName
   integer(HID_T), intent(in) :: rGid
-  integer, intent(in) :: n_fn
-  complex, intent(in) :: fn(n_fn)
+  integer, intent(in) :: n_fn,n1,n2,n3
+  real, intent(in) :: fn(n_fn)
   type(hdf5InOpts), intent(inout) :: h5in
   type(hdf5ErrorType), intent(inout) :: h5err
   !
   integer :: data_loop
   integer :: i_group_send
   integer :: i_send
+  integer :: ifld,ikin,imom,i
   integer :: in
+
+  real, dimension(:,:,:,:), allocatable :: buffn
+  character(128) :: tempVarName 
+  character(128), dimension(:,:,:),allocatable :: vnameArray
+  character(3) :: n_name
+  character(1) :: ikin_name
+
   !
   real :: fn_recv(n_fn)
-  character(128) :: n_varName
-  character(3) :: n_name
   !------------------------------------------------------
 
 
   include 'mpif.h'
+  !------------------------------------------------------
+  !  set up the names for setting species and "field" name
+ ALLOCATE(vnameArray(n3,3,4))
+  vnameArray=" "
+  do ikin=1,n3
+     if(electron_method==2 .and. ikin==n3 ) THEN
+        tempVarName=trim(varName)//"_electron"
+     elseif(electron_method==3 .or. (electron_method==4.and.ikin==n3)) THEN
+        tempVarName=trim(varName)//"_electron"
+     else
+        write(ikin_name,fmt='(i1.1)') ikin-1
+        tempVarName=trim(varName)//"_ion"//ikin_name
+     endif
+     do i=1,4
+       vnameArray(ikin,1,i)=trim(tempVarName)//"_phi"
+       vnameArray(ikin,2,i)=trim(tempVarName)//"_Apar"
+       vnameArray(ikin,3,i)=trim(tempVarName)//"_Bpar"
+     enddo
+     do i=1,3
+       vnameArray(ikin,i,1)=trim(vnameArray(ikin,i,1))//"_density"
+       vnameArray(ikin,i,2)=trim(vnameArray(ikin,i,1))//"_energy"
+       vnameArray(ikin,i,3)=trim(vnameArray(ikin,i,1))//"_momentum"
+       vnameArray(ikin,i,4)=trim(vnameArray(ikin,i,1))//"_energyExchange"
+     enddo
+  enddo
 
+!Rectangular array (n_kinetic,n_field,2=i,n_x,n_time)
+  !  allocate(kxkyspec(n_x))
+  !  allocate(gbflux_n(n_kinetic,n_field,p_moment))
+  !  allocate(diff_n(n_kinetic,n_field,n_moment))
+  !  real, dimension(1) :: phi_squared_QL_n
+  !  real, dimension(3) :: g_squared_QL_n
+
+    ! n1 = n_kinetic; n2 = n_field, n3=n_moment, n4=n_n
+    if (i_proc==0) then
+      allocate(buffn(n1,n2,n3,n_n)); buffn=0.
+    endif
+ !-----------------------------------------
+
+
+  !------------------------------------------------------
   do in=1,n_n
 
      !-----------------------------------------
@@ -1213,11 +1016,46 @@ subroutine write_distributed_real_h5(varName,rGid,n_fn,fn,h5in,h5err)
      !
      !-----------------------------------------
 
-     WRITE(n_name,fmt='(i3.3)') in
-     n_varName=trim(varName)//"_"//n_name
-     if (i_proc == 0) call dump_h5(rGid,n_varName,fn_recv,h5in,h5err)
+   
 
+   if (i_proc == 0) then
+!         WRITE(*,*) "varName=",varName 
+!         WRITE(*,*) " n_fn=",n_fn," and size of fn_recv=",size(fn_recv)
+!         WRITE(*,*) "shape of buffn =", shape(buffn)        
+!         WRITE(*,*) "n1=",n1," n2=",n2," n3=",n3
+         buffn(:,:,:,in)=reshape(fn_recv,(/n1,n2,n3/))
+   endif
   enddo ! in
+
+
+!-----------------------------------------
+ if (i_proc /= 0) return
+
+
+ if (n3==1) then
+     if(n2==1) then
+     call add_h5(rGid,trim(varName),buffn(:,1,1,:),h5in,h5err)
+     else  
+     call add_h5(rGid,trim(varName),buffn(:,:,1,:),h5in,h5err)
+     endif
+ else
+    ! n1 = n_kinetic; n2 = n_field, n3=n_moment, n4=n_n
+    do ikin=1,n1
+      do ifld=1,n2
+       do imom=1,n3
+        tempVarName=trim(vnameArray(ikin,ifld,imom))
+        call add_h5(rGid,trim(tempVarName),buffn(ikin,ifld,imom,:),h5in,h5err)
+       enddo
+      enddo
+    enddo
+ endif
+
+
+ deallocate(buffn)
+ deallocate(vnameArray)
+
+
+
 
 end subroutine write_distributed_real_h5
 !------------------------------------------------------
@@ -1260,7 +1098,7 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
   implicit none
   !
   real :: pi=3.141592653589793
-  character*(*), intent(in) :: vname
+  character(*), intent(in) :: vname
   integer(HID_T), intent(in) :: rGid,r3Did
   integer, intent(in) :: n_fn,n1,n2,n3
   complex, intent(in) :: fn(n_fn)

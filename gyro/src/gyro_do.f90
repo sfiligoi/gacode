@@ -128,19 +128,13 @@ subroutine gyro_do(skipinit)
   if (gyrotest_flag == 0) then
      call gyro_mpi_grid
   else
-     n_n_1       = 1
-     i_group_1   = 0
+     n_n_1     = 1
+     i_group_1 = 0
   endif
   !
-  ! Save geometry (GEO) library settings
-  !
-  GEO_ntheta_in   = nint_GEO
-  GEO_nfourier_in = n_fourier_geo 
-  GEO_model_in    = geometry_method
-  GEO_signb_in    = 1.0
-  !
   ! Read, generate or otherwise construct equilibrium profiles.  If experimental 
-  ! profiles are used, GEO will be allocate/deallocated.
+  ! profiles are used, GEO will be allocate/deallocated with all settings 
+  ! determined in EXPRO.
   !
   call gyro_alloc_profile_sim(1)
   call gyro_profile_init
@@ -151,9 +145,14 @@ subroutine gyro_do(skipinit)
   call gyro_alloc_velocity(1)
   call gyro_alloc_orbit(1)
   !
-  ! Lambda (pitch-angle) weights (GEO needed again, so just reallocate)
+  ! Set geometry (GEO) library control variables
   !
+  GEO_nfourier_in = n_fourier_geo 
+  GEO_model_in    = geometry_method
+  GEO_signb_in    = -btccw
   call GEO_alloc(1)
+  !
+  ! Lambda (pitch-angle) weights (GEO needed again, so just reallocate)
   call gyro_lambda_grid
   !
   ! Energy weights
@@ -311,12 +310,12 @@ subroutine gyro_do(skipinit)
   ! I/O control for time-independent initial data
   !
   if (io_method == 1) then
-     call write_profile_vugyro(trim(path)//'profile_vugyro.out',1)
-     call gyro_write_units(trim(path)//'units.out',10)
-     call write_geometry_arrays(trim(path)//'geometry_arrays.out',4)
+     call gyro_write_initdata(&
+          trim(path)//'profile_vugyro.out',&
+          trim(path)//'units.out',&
+          trim(path)//'geometry_arrays.out',1)
   else
-     ! This encapsulates all the required initial data
-     call write_hdf5_data(trim(path)//'out.gyro.initdata.h5',1)
+     call gyro_write_initdata_hdf5(trim(path)//'out.gyro.initdata.h5',1)
   endif
   !
   ! Close geometry (GEO) library
@@ -344,7 +343,7 @@ subroutine gyro_do(skipinit)
   if (restart_method /= 1) then
      if (lskipinit == 0) then
         if (gkeigen_j_set==0) call gyro_write_master(2)
-        if (io_method > 1) call write_hdf5_timedata(2)
+        if (io_method > 1) call write_hdf5_timedata(1)
         if (io_method > 1 .and. time_skip_wedge > 0) call write_hdf5_wedge_timedata(2)
      endif
   endif

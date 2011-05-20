@@ -94,9 +94,10 @@ OBJECTS = gyro_globals.o \
           gyro_tau_derivative.o \
           gyro_timestep_error.o \
           gyro_to_geo.o \
+          gyro_write_initdata.o \
+          gyro_write_initdata_hdf5.o \
           gyro_write_input.o \
           gyro_write_precision.o \
-          gyro_write_units.o \
           gyro_write_master.o \
           sparse_solve_umfpack.o \
           sparse_solve_mumps.o \
@@ -160,11 +161,9 @@ OBJECTS = gyro_globals.o \
           write_freq.o \
           write_h.o \
           write_efficiency.o \
-          write_profile_vugyro.o \
           write_timing.o \
           write_restart.o \
           write_error.o \
-          write_geometry_arrays.o \
           write_matrix_stat.o \
           gyro_dump_input.o \
           gyro_dump_interface.o \

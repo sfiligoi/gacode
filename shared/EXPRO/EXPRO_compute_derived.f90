@@ -120,6 +120,14 @@ subroutine EXPRO_compute_derived
              EXPRO_rmin,EXPRO_n_exp)
      endif
   enddo
+
+  ! 1/L_Ptot = -dln(Ptot)/dr (1/m)
+  if (minval(EXPRO_ptot) > 0.0) then
+     call bound_deriv(EXPRO_dlnptotdr,-log(EXPRO_ptot),EXPRO_rmin,EXPRO_n_exp)
+  else
+     EXPRO_dlnptotdr = 0.0
+  endif
+
   !--------------------------------------------------------------------
 
   !-------------------------------------------------------------------
@@ -244,18 +252,18 @@ subroutine EXPRO_compute_derived
 
   if (EXPRO_ctrl_rotation_method == 1) then 
 
-    ! Candy convention
+     ! Candy convention
 
      EXPRO_gamma_p(:) = -EXPRO_rmaj(:)*EXPRO_w0p(:)
      EXPRO_mach(:)    = EXPRO_rmaj(:)*EXPRO_w0(:)/EXPRO_cs(:)
 
   else
 
-    ! Waltz convention
+     ! Waltz convention
 
      u_par(:) = (EXPRO_bp0(:)*EXPRO_vpol(1,:)+EXPRO_bt0(:)*EXPRO_vtor(1,:))/&
           sqrt(EXPRO_bt0(:)**2+EXPRO_bp0(:)**2)
-  
+
      call bound_deriv(dummy,u_par/EXPRO_rmaj(:),EXPRO_rmin,EXPRO_n_exp)
 
      EXPRO_gamma_p(:) = -EXPRO_rmaj(:)*dummy(:)
@@ -295,7 +303,7 @@ subroutine EXPRO_compute_derived
      endif
 
   endif
- 
+
   deallocate(dummy)
 
   if (minval(EXPRO_ni(:,:)) <= 0.0) EXPRO_error=1

@@ -1,4 +1,4 @@
-#!/us/bin/env python
+#!/usr/bin/env python
 from gacodeinput import *
 import sys
 
@@ -51,6 +51,7 @@ x.add('RADIAL_UPWIND','1.0')
 x.add('ELECTRON_METHOD','1')
 x.add('RADIAL_PROFILE_METHOD','1')
 x.add('PLOT_U_FLAG','1')
+x.add('PLOT_EPAR_FLAG','0')
 x.add('PLOT_N_FLAG','0')
 x.add('PLOT_E_FLAG','0')
 x.add('PLOT_V_FLAG','0')
@@ -153,7 +154,6 @@ x.add('Q_SCALE','1.0')
 x.add('DIST_PRINT_FLAG','0')
 x.add('NINT_ORB_S','64')
 x.add('NINT_ORB_DO','10')
-x.add('NINT_GEO','101')
 x.add('UDSYMMETRY_FLAG','1')
 x.add('GYRO_METHOD','1')
 x.add('SPARSE_METHOD','1')
@@ -177,6 +177,7 @@ x.add('OUTPUT_FLAG','1')
 x.add('IPCCW','-1.0')
 x.add('BTCCW','-1.0')
 x.add('GEO_GRADBCURV_FLAG','0')
+x.add('GEO_FASTIONBETA_FLAG','0')
 x.add('GEO_BETAPRIME_SCALE','1.0')
 x.add('POISSON_Z_EFF_FLAG','1')
 x.add('Z_EFF_METHOD','1')

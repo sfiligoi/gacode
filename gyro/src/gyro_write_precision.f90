@@ -15,37 +15,20 @@ subroutine gyro_write_precision(io,checksum)
   implicit none
   !
   integer, intent(in) :: io
-  integer :: io_mode
   real, intent(in) :: checksum
   !---------------------------------------------------
 
 
-  select case (output_flag)
+  if (output_flag == 0) return
 
-  case (0)
+  if (i_proc == 0) then
 
-     io_mode = 0
-
-  case (1)
-
-     io_mode = 1
-
-  end select
-
-  if (step == 0) then
-
-     if (i_proc == 0 .and. io_mode == 1) then
+     if (step == 0) then
         open(unit=io,file=trim(precfile),status='replace')
-     endif
-
-  else
-
-     if (i_proc == 0 .and. io_mode == 1) then
-
+     else
         open(unit=io,file=trim(precfile),status='old',position='append')
         write(io,10) checksum
         close(io)
-
      endif
 
   endif
