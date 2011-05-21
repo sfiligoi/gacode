@@ -4,7 +4,7 @@
 ! PURPOSE:
 !  Write a bunch of data to hdf5 file
 !------------------------------------------------
-subroutine write_hdf5_data(datafile,action)
+subroutine gyro_write_initdata_hdf5(datafile,action)
   !------------------------------------------
   !  Data that does not change with time.  
   !  It is equivalent to:
@@ -17,7 +17,7 @@ subroutine write_hdf5_data(datafile,action)
   character (len=*), intent(in) :: datafile
   !
  return
- end subroutine write_hdf5_data
+ end subroutine gyro_write_initdata_hdf5
 
 !------------------------------------------------------
 ! write_hdf5_timedata
