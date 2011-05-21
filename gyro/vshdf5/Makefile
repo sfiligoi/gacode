@@ -9,7 +9,8 @@ endif
 
 OBJECTS = \
 	gyro_vshdf5_mod.o \
-	gyro_write_master_hdf5.o 
+	gyro_write_master_hdf5.o \
+	gyro_write_initdata_hdf5.o 
 
 DUM_OBJECTS = \
 	gyro_dummy_master_hdf5.o
@@ -24,7 +25,6 @@ all: gyro_vshdf5_dummy $(VSHDF5_MAKECMD)
 VSHDF5_INC=-I../../shared/vshdf5
 
 vshdf5: $(OBJECTS)
-	rm gyrovshdf5_lib.a
 	$(ARCH) gyrovshdf5_lib.a $(OBJECTS)
 
 gyro_vshdf5_dummy: $(DUM_OBJECTS)

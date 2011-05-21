@@ -95,7 +95,6 @@ OBJECTS = gyro_globals.o \
           gyro_timestep_error.o \
           gyro_to_geo.o \
           gyro_write_initdata.o \
-          gyro_write_initdata_hdf5.o \
           gyro_write_input.o \
           gyro_write_precision.o \
           gyro_write_master.o \
