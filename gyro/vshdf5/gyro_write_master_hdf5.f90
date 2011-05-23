@@ -225,7 +225,7 @@ subroutine write_hdf5_timedata(action)
   if (i_proc == 0) then
      h5in%units="m^-2?"
      h5in%mesh=" "
-     call add_h5(dumpGid,'k_perp_squared',k_perp_squared,h5in,h5err)
+     call add_h5(dumpTGid,'k_perp_squared',k_perp_squared,h5in,h5err)
   endif
 
     WRITE(*,*) "passed k_perp squared"
