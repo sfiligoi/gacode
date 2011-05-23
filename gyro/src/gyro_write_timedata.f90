@@ -1,5 +1,5 @@
 !------------------------------------------------------
-! gyro_write_master.f90
+! gyro_write_timedata.f90
 !
 ! PURPOSE:
 !  This is the master file controlling output of
@@ -11,7 +11,7 @@
 !  - write_local_real
 !-----------------------------------------------------
 
-subroutine gyro_write_master(action)
+subroutine gyro_write_timedata(action)
 
   use gyro_globals
 
@@ -532,7 +532,7 @@ subroutine gyro_write_master(action)
 
 10 format(t2,a,t24,es9.3)
 
-end subroutine gyro_write_master
+end subroutine gyro_write_timedata
 
 !===========================================================================
 

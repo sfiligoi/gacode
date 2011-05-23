@@ -530,7 +530,7 @@ subroutine gyro_fieldeigen
   call gyro_field_time_derivative
   call get_field_plot
   call gyro_moments_plot 
-  call gyro_write_master(2)
+  call gyro_write_timedata(2)
   step = 1
   call gyro_write_precision(10,abs(omega_eigen))
   !-------------------------------------------------------------------

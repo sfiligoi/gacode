@@ -333,7 +333,7 @@ subroutine gyro_do(skipinit)
   endif
   !------------------------------------------------------------
 
-  if (lskipinit == 0 .and. gkeigen_j_set==0) call gyro_write_master(1)
+  if (lskipinit == 0 .and. gkeigen_j_set==0) call gyro_write_timedata(1)
 
   !-------------------------------------------------
   ! NEW SIMULATION ONLY:
@@ -342,9 +342,11 @@ subroutine gyro_do(skipinit)
   !
   if (restart_method /= 1) then
      if (lskipinit == 0) then
-        if (gkeigen_j_set==0) call gyro_write_master(2)
-        if (io_method > 1) call write_hdf5_timedata(1)
-        if (io_method > 1 .and. time_skip_wedge > 0) call write_hdf5_wedge_timedata(2)
+        if (gkeigen_j_set==0) call gyro_write_timedata(2)
+        if (io_method == 2) then
+           call gyro_write_timedata_hdf5(1)
+           if (time_skip_wedge > 0) call gyro_write_timedata_wedge_hdf5(2)
+        endif
      endif
   endif
   !--------------------------------------------

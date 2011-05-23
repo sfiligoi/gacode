@@ -97,7 +97,7 @@ OBJECTS = gyro_globals.o \
           gyro_write_initdata.o \
           gyro_write_input.o \
           gyro_write_precision.o \
-          gyro_write_master.o \
+          gyro_write_timedata.o \
           sparse_solve_umfpack.o \
           sparse_solve_mumps.o \
           get_vel_sum_p.o \
