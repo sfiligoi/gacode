@@ -101,10 +101,10 @@ libgacodegyro_SRC_la_SOURCES = \
   gyro_rhs_total.f90 \
   gyro_tau_derivative.f90 \
   gyro_to_geo.f90 \
+  gyro_write_initdata.f90 \
   gyro_write_input.f90 \
   gyro_write_master.f90 \
   gyro_write_precision.f90 \
-  gyro_write_units.f90 \
   gyro_poisson_private.f90 \
   gyro_poissonaperp_private.f90 \
   gyro_profile_init.f90 \
@@ -201,11 +201,9 @@ libgacodegyro_SRC_la_SOURCES = \
   write_banana_operators.f90 \
 	write_h.f90 \
 	write_efficiency.f90 \
-	write_profile_vugyro.f90 \
 	write_timing.f90 \
 	$(theWriteRestart) \
 	write_error.f90 \
-	write_geometry_arrays.f90 \
 	write_matrix_stat.f90 \
   gyro_adaptive_source.f90 \
 	gyro_fieldeigen_kernel.f90 \
