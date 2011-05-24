@@ -34,8 +34,8 @@ if HAVE_HDF5
 libgyro_vshdf5_la_SOURCES = \
 	gyro_vshdf5_mod.f90 \
 	gyro_write_initdata_hdf5.f90 \
-        gyro_write_timedata_hdf5.f90 \
-        gyro_write_timedata_wedge_hdf5.f90
+  gyro_write_timedata_hdf5.f90 \
+  gyro_write_timedata_wedge_hdf5.f90
 else
 libgyro_vshdf5_la_SOURCES = \
 	gyro_write_dummy_hdf5.f90
