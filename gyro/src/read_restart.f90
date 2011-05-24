@@ -84,7 +84,6 @@ subroutine read_restart
 
   case (1,2)
 
-
      !-------------------------------------------
      ! Restart block
      !

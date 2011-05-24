@@ -44,12 +44,12 @@ subroutine gyro_initialize_arrays
   diff         = 0.0
   elapsed_time = 0.0
 
-  !  field_blend     = 0.0
+  ! NO field_blend
   field_blend_dot  = 0.0
   field_blend_old  = 0.0
   field_blend_old2 = 0.0
 
-  !  cap_h     = 0.0
+  ! NO cap_h 
   h_cap_dot  = 0.0
   h_cap_old  = 0.0
   h_cap_old2 = 0.0

@@ -8,8 +8,6 @@
 
 module gyro_globals
 
-  integer :: uflag
-
   integer :: gyrotest_flag
   integer :: lskipinit = 1
 
@@ -50,22 +48,37 @@ module gyro_globals
   !---------------------------------------------------------
 
   !---------------------------------------------------------
+  ! IO control variable:
+  ! 
+  ! 0=no IO
+  ! 1=Open/replace
+  ! 2=Append
+  ! 3=Rewind
+  !
+  integer :: io_control
+  !---------------------------------------------------------
+
+  !---------------------------------------------------------
   ! Path to INPUT, read in the get_inputpath subroutine
   !
   character(len=80) :: path
+  !---------------------------------------------------------
 
   !---------------------------------------------------------
   ! Files for vshdf5 i/o control
   !
   integer :: io_method = 1
-  integer :: time_skip_wedge = 0             ! Wedge files for synthetic diagnostics
-  integer :: n_torangle_wedge= 0           ! Number of toroidal planes to use in wedge plots
+  integer :: time_skip_wedge = 0    ! Wedge files for synthetic diagnostics
+  integer :: n_torangle_wedge= 0    ! Number of toroidal planes to use in wedge plots
   integer :: n_torangle_3d = 0
-  real :: torangle_offset=0.
+  real :: torangle_offset=0.0
+  !
   ! This defines a wedge in the poloidal plane 
-  ! To recover the normal global plot, set theta_wedge_offset=-pi and theta_wedge_angle=2*pi
+  ! To recover the normal global plot, set 
+  ! theta_wedge_offset=-pi and theta_wedge_angle=2*pi
   real  :: theta_wedge_offset = 0.0
   real  :: theta_wedge_angle = 0.0
+  !---------------------------------------------------------
 
   !---------------------------------------------------------
   ! Newline characters:

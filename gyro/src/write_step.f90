@@ -5,14 +5,13 @@
 !  Output of timestep data.
 !------------------------------------------------
  
-subroutine write_step(datafile,io,action)
+subroutine write_step(datafile,io)
 
   use gyro_globals
 
   !------------------------------------------
   implicit none
   !
-  integer, intent(in) :: action
   integer, intent(in) :: io
   character (len=*), intent(in) :: datafile
   !
@@ -21,18 +20,22 @@ subroutine write_step(datafile,io,action)
   real :: dummy
   !------------------------------------------
 
-  select case (action)
+  select case (io_control)
+
+  case(0)
+
+    return
 
   case(1)
 
-     ! Initial open
+     ! Open
 
      open(unit=io,file=datafile,status='replace')
      close(io)
 
-  case(-4,-2,2,4)
+  case(2)
 
-     ! Output
+     ! Append
 
      if (silent_flag == 0 .and. linsolve_method == 1) then
         print *
@@ -40,19 +43,13 @@ subroutine write_step(datafile,io,action)
              nstep,'----------|   t = ',t_current
      endif
 
-     if (output_flag == 1) then
-
-        open(unit=io,file=datafile,status='old',position='append')
-        write(io,20) data_step,t_current
-        close(io)
-
-     endif
-
-     ! Timing information
+     open(unit=io,file=datafile,status='old',position='append')
+     write(io,20) data_step,t_current
+     close(io)
 
   case(3)
 
-     ! Reposition after restart
+     ! Rewind
 
      open(unit=io,file=datafile,status='old')
 
@@ -64,7 +61,6 @@ subroutine write_step(datafile,io,action)
      close(io)
 
   end select
-
 
 10 format(t2,a,1x,i6,a,i6,a,f8.3)
 20 format(i6,1x,es12.5)

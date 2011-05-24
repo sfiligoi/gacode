@@ -6,18 +6,18 @@
 !-----------------------------------------------------
 
 subroutine gyro_write_timedata_hdf5(action)
+
   use gyro_globals
   use hdf5
   use hdf5_api
   use gyro_vshdf5_mod
+  use mpi
 
   !---------------------------------------------------
   implicit none
-  include 'mpif.h'
   !
   integer :: mode
   integer, intent(in) :: action
-  integer, parameter :: hr4=SELECTED_REAL_KIND(6,37)
   !
   real :: cp0
   real :: cp1
@@ -35,6 +35,10 @@ subroutine gyro_write_timedata_hdf5(action)
   real, dimension(:,:,:), allocatable :: a3
   !
   complex, dimension(:,:,:), allocatable :: n_plot, e_plot, v_plot
+  !
+  ! HDF5 variables
+  !
+  integer, parameter :: hr4=SELECTED_REAL_KIND(6,37)
   character(60) :: description
   character(64) :: step_name, tempVarName
   character(128) :: dumpfile
@@ -44,9 +48,8 @@ subroutine gyro_write_timedata_hdf5(action)
   type(hdf5InOpts) :: h5in
   type(hdf5ErrorType) :: h5err
   integer :: number_label
-
   logical :: write_threed
-
+  !---------------------------------------------------
 
   !---------------------------------------------------
   ! Determine if the 3D files need to be written 
@@ -100,9 +103,7 @@ subroutine gyro_write_timedata_hdf5(action)
      endif
 
      call open_h5file(trim(openmethod),dumpfile,dumpTFid,description,dumpTGid,h5in,h5err)
-     if(h5err%errBool) call catch_error(h5err%errorMsg)
-
-
+     if (h5err%errBool) call catch_error(h5err%errorMsg)
 
      dumpfile=TRIM(path)//"gyro"//TRIM(step_name)//".h5"
      description="GYRO field file"
@@ -185,7 +186,6 @@ subroutine gyro_write_timedata_hdf5(action)
           h5in,h5err)
 
   endif
-
   !--------------------------------------------------
 
   !--------------------------------------------------
@@ -391,10 +391,10 @@ subroutine gyro_write_timedata_hdf5(action)
      if (write_threed) call close_h5file(fid3d,gid3d,h5err)
   endif
 
-  return
-
 contains
+
   subroutine hdf5_write_coords
+
     use GEO_interface
     !------------------------------------------
     !  Write the coordinates out
@@ -520,7 +520,7 @@ contains
     !---------------------------------------- 
     deallocate(Rc, Zc)
     deallocate(zeta_phi)
-    return
+
   end subroutine hdf5_write_coords
 
 end subroutine gyro_write_timedata_hdf5
@@ -616,7 +616,7 @@ subroutine write_hdf5_restart
   enddo
 
   if (i_proc == 0) call close_h5file(dumpFid,dumpGid,h5err)
-  return
+
 end subroutine write_hdf5_restart
 
 

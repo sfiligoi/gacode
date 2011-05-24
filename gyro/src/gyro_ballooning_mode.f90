@@ -8,7 +8,7 @@
 !  these p-harmonics, and then writes to disk.
 !------------------------------------------------------
 
-subroutine gyro_ballooning_mode(datafile,io,action,index,is_in)
+subroutine gyro_ballooning_mode(datafile,io,index,is_in)
 
   use gyro_globals
   use math_constants
@@ -18,7 +18,6 @@ subroutine gyro_ballooning_mode(datafile,io,action,index,is_in)
   !
   character (len=*), intent(in) :: datafile
   !
-  integer, intent(in) :: action
   integer, intent(in) :: io
   integer, intent(in) :: index
   integer, intent(in) :: is_in
@@ -57,16 +56,22 @@ subroutine gyro_ballooning_mode(datafile,io,action,index,is_in)
   !
   !----------------------------------------------------
 
-  select case (action)
+  select case (io_control)
+
+  case(0)
+  
+  return
 
   case(1)
 
-     ! Initial open
+     ! Open
 
      open(unit=io,file=datafile,status='replace')
      close(io)
 
-  case(2,4)
+  case(2)
+
+     ! Append
 
      open(unit=io,file=datafile,status='old',position='append')
 
@@ -142,9 +147,9 @@ subroutine gyro_ballooning_mode(datafile,io,action,index,is_in)
      enddo
      !-------------------------------------------------------
 
-  case (3)
+  case(3)
 
-     ! Reposition after restart
+     ! Rewind
 
      open(unit=io,file=datafile,status='old')
 
@@ -163,8 +168,7 @@ subroutine gyro_ballooning_mode(datafile,io,action,index,is_in)
      endfile(io)
      close(io)
 
-  endselect
-
+  end select
 
   if (i_proc == 0 .and. debug_flag == 1) then
      print *,'[gyro_balloning_mode done]' 
