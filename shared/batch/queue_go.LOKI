@@ -26,19 +26,26 @@ nodes=$[${nproc}/8]
 #nodes=`expr ${nproc} / 8`
 theory=`groups | grep -c theory`
 
-if [ ${theory} -eq 1 ]; then
+if [ $theory -eq 1 ]; then
    echo " Job will be submitted to THEORY queue"
    queue="theory"
-else if [ ${2} -le 12 && ${nodes} -le 48 ]; then
+else 
+  if [ ${2} -le 12 ] && [ $nodes -le 48 ]; then
   echo " Job will be submitted on DEFAULT queue (max 48 nodes, 12 hours)"
   queue="default"
-else if [ ${2} -gt 12 && ${nodes} -le 32 ]; then
-  echo " Job will be submitted on LONG queue (max 32 nodes, 24 hours)"
-  queue="long"
-else if [ ${2} -le 15 && ${nodes} -le 75 ]; then
-  echo " Job will be submitted to BIG queue (max 75 nodes, 15 hours)"
+  else 
+   if [ ${2} -gt 12 ] && [ $nodes -le 32 ]; then
+    echo " Job will be submitted on LONG queue (max 32 nodes, 24 hours)"
+    queue="long"
+   else 
+     if [ ${2} -le 15 ] && [ $nodes -le 75 ]; then
+       echo " Job will be submitted to BIG queue (max 75 nodes, 15 hours)"
+     fi
+   fi
+  fi
+fi
 
-if [ ${2} -gt 24 && ${theory} -eq 0 ] ; then
+if [ ${2} -gt 24 ] && [ $theory -eq 0 ]; then
   echo " Shortening wall time to 24 hours"
   wtime=24:00:00
 fi
