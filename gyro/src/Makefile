@@ -66,6 +66,7 @@ OBJECTS = gyro_globals.o \
 	  gyro_fieldeigen_kernel.o \
 	  gyro_fieldeigen_df.o \
           gyro_fulladvance.o \
+          gyro_get_he_implicit.o \
           gyro_gbflux.o \
           gyro_initialize_arrays.o \
           gyro_initialize_timestep.o \
@@ -147,7 +148,6 @@ OBJECTS = gyro_globals.o \
           get_field_explicit.o \
           get_kinetic_advance.o \
           get_delta_he.o \
-          get_he.o \
           get_phi_squared.o \
           get_g_squared.o \
           do_nlfast_p.o \

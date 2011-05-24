@@ -32,7 +32,7 @@ subroutine get_kinetic_advance
 
   call gyro_field_interpolation
 
-  call get_he
+  call gyro_get_he_implicit
 
   call proc_time(CPU_field_out)
   CPU_field = CPU_field + (CPU_field_out - CPU_field_in)
