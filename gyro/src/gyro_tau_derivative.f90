@@ -46,7 +46,9 @@ subroutine gyro_tau_derivative
 
   do is=1,n_gk
 
-     upwind = orbit_upwind_vec(is)*abs(q0)/q0
+     ! q has sign ipccw*btccw, but upwind dissipation must have 
+     ! fixed sign independent of q:
+     upwind = orbit_upwind_vec(is)*abs(q_norm)/q_norm
 
      p_nek_loc = 0
      do p_nek=1+i_proc_1,n_nek_1,n_proc_1
