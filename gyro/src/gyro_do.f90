@@ -3,13 +3,9 @@
 !
 ! PURPOSE:
 !  Subroutinized main gyro program. 
-!
-! NOTES:
-!  << BigScience >> was the legacy name for main dating back to 
-!  1999.  The executable name is also BigScience.
 !-----------------------------------------------------------------
 
-subroutine gyro_do(skipinit)
+subroutine gyro_do
 
   use mpi
   use gyro_globals
@@ -20,19 +16,8 @@ subroutine gyro_do(skipinit)
   !--------------------------------------
   implicit none
   !
-  integer, optional :: skipinit
   logical :: rfe
   !--------------------------------------
-
-  !-------------------------------------
-  ! Handling of optional arguments
-  !
-  if (present(skipinit)) then
-     lskipinit = skipinit
-  else
-     lskipinit = 0
-  endif
-  !-------------------------------------
 
   ! Begin with clean exit status
   !
@@ -42,10 +27,6 @@ subroutine gyro_do(skipinit)
   !
   gyro_exit_status  = 0
   gyro_exit_message = 'unset'
-
-  if (lskipinit == 1) then
-     goto 100
-  endif
 
   ! Prepend path:
   runfile  = trim(path)//trim(baserunfile)
@@ -86,10 +67,14 @@ subroutine gyro_do(skipinit)
   !
   if (linsolve_method == 2) then
      if (nonlinear_flag == 1) then
-        if (i_proc==0 .and. gkeigen_j_set==0) print *, "Eigensolver unavailable in nonlinear mode."
+        if (i_proc==0 .and. gkeigen_j_set==0) then
+           print *, "Eigensolver unavailable in nonlinear mode."
+        endif
         stop 
      else
-        if (i_proc==0 .and. gkeigen_j_set==0) print *, "GYRO is running in eigensolve mode."
+        if (i_proc==0 .and. gkeigen_j_set==0) then
+           print *, "GYRO is running in eigensolve mode."
+        endif
         eigensolve_restart_flag = restart_method
         restart_method = 0
         if (electron_method /= 1) then
@@ -276,18 +261,7 @@ subroutine gyro_do(skipinit)
      !------------------------------------------------------------
      ! Open files and write values for t=0:
      !
-     if (lskipinit == 0) then
-
-        call read_restart
-
-     else
-
-        ! We will retain the value of h in this case.
-
-        step = 0
-        call get_field_explicit
-
-     endif
+     call gyro_read_restart
      !------------------------------------------------------------
 
      call proc_time(CPU_7)
@@ -333,7 +307,14 @@ subroutine gyro_do(skipinit)
   endif
   !------------------------------------------------------------
 
-  if (lskipinit == 0 .and. gkeigen_j_set==0) call gyro_write_master(1)
+  if (restart_method < 1) then
+     ! Open
+     io_control = output_flag*1
+  else
+     ! Rewind
+     io_control = output_flag*3
+  endif
+  if (gkeigen_j_set == 0) call gyro_write_timedata
 
   !-------------------------------------------------
   ! NEW SIMULATION ONLY:
@@ -341,10 +322,11 @@ subroutine gyro_do(skipinit)
   ! Write the initial conditions:
   !
   if (restart_method /= 1) then
-     if (lskipinit == 0) then
-        if (gkeigen_j_set==0) call gyro_write_master(2)
-        if (io_method > 1) call write_hdf5_timedata(1)
-        if (io_method > 1 .and. time_skip_wedge > 0) call write_hdf5_wedge_timedata(2)
+     io_control = output_flag*2
+     if (gkeigen_j_set == 0) call gyro_write_timedata
+     if (io_method == 2) then
+        call gyro_write_timedata_hdf5(1)
+        if (time_skip_wedge > 0) call gyro_write_timedata_wedge_hdf5(2)
      endif
   endif
   !--------------------------------------------
@@ -357,8 +339,6 @@ subroutine gyro_do(skipinit)
      elapsed_time = clock_count*1.0/clock_rate
   endif
   !--------------------------------------------------
-
-100 continue
 
   select case (linsolve_method)
 

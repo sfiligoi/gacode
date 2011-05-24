@@ -70,10 +70,18 @@ subroutine prgen_map_plasmastate
   omega0 = -2.9979e10*dphidpsi*(10.0/3.0)/1e8
   !
   ! Get sign of desired omega computed above
-  sign_omega0 = omega0(1)/abs(omega0(1))
+  if (omega0(1) < 0.0) then
+     sign_omega0 = -1.0
+  else
+     sign_omega0 = 1.0
+  endif
   !
   ! Get true sign of approximate omega (plst_omegat)
-  sign_plst_omega = plst_omegat(1)/abs(plst_omegat(1))
+  if (plst_omegat(1) < 0.0) then
+     sign_plst_omega = -1.0
+  else
+     sign_plst_omega = 1.0
+  endif
   !
   ! Ensure sign of omega is opposite plst_omegat (since plst 
   ! definition of toroidal angle is opposite GYRO/NEO):

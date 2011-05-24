@@ -5,7 +5,7 @@
 !  Distribution function output for all kinetic species.
 !-----------------------------------------------------
 
-subroutine write_h(datafile1,datafile2,io1,io2,action)
+subroutine write_h(datafile1,datafile2,io1,io2)
 
   use gyro_globals
   use gyro_pointers
@@ -13,14 +13,17 @@ subroutine write_h(datafile1,datafile2,io1,io2,action)
   !---------------------------------------------------
   implicit none
   !
-  integer, intent(in) :: action
   integer, intent(in) :: io1
   character (len=*), intent(in) :: datafile1
   integer, intent(in) :: io2
   character (len=*), intent(in) :: datafile2
   !---------------------------------------------------
 
-  select case (action)
+  select case (io_control)
+
+  case(0)
+
+     return
 
   case(1)
 
@@ -48,7 +51,7 @@ subroutine write_h(datafile1,datafile2,io1,io2,action)
      print *,'Opened ',datafile2
      close(io2)
 
-  case(2,4)
+  case(2)
 
      open(unit=io1,file=datafile1,status='old',position='append')
      open(unit=io2,file=datafile2,status='old',position='append')
@@ -93,12 +96,11 @@ subroutine write_h(datafile1,datafile2,io1,io2,action)
 
   case(3)
 
-     print *,'not supported in write_h'
+     call catch_error('ERROR: Restart not supported in write_h')
 
   end select
 
   if (debug_flag == 1) print *,'[write_h called]'
-
 
 10 format(t2,2(es11.4,1x))
 

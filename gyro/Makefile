@@ -30,7 +30,7 @@ all:
 	cd src ; make
 	cd GKEIGEN ; make
 	cd peek ; make
-	cd vshdf5 ; make $(VSHDF5_MAKECMD)
+	cd vshdf5 ; make
 
 	cd src ; $(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o gyro_lib.a $(EXTRA_LIBS)
 

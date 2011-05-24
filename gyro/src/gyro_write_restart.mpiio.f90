@@ -1,12 +1,12 @@
 !------------------------------------------------
-! write_restart.mpiio.f90 [caller: BigScience]
+! gyro_write_restart.mpiio.f90
 !
 ! PURPOSE:
 !  This is the master file controlling output of
 !  restart data.
 !------------------------------------------------
 
-subroutine write_restart
+subroutine gyro_write_restart
 
   use mpi
   use gyro_globals
@@ -128,8 +128,8 @@ subroutine write_restart
 
   end select
 
-  ! ** Keep this consistent with read_restart.f90
+  ! ** Keep this consistent with gyro_read_restart.f90
 
 10 format(2(es11.4,1x))
 
-end subroutine write_restart
+end subroutine gyro_write_restart

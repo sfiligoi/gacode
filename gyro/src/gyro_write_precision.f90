@@ -18,7 +18,6 @@ subroutine gyro_write_precision(io,checksum)
   real, intent(in) :: checksum
   !---------------------------------------------------
 
-
   if (output_flag == 0) return
 
   if (i_proc == 0) then

@@ -1,26 +1,35 @@
-!--------------------------------------------------------
-! read_restart.f90 [caller: BigScience]
+!------------------------------------------------------
+! gyro_read_restart.mpiio.f90
 !
 ! PURPOSE:
-!  This is the master file controlling the restart.
-!--------------------------------------------------------
+!  This is the master file controlling the restart
+!  for systems with MPI-IO.
+!------------------------------------------------------
 
-subroutine read_restart
+subroutine gyro_read_restart
 
   use mpi
   use gyro_globals
   use gyro_pointers
 
-  !------------------------------------------------------------
+  !---------------------------------------------------
   ! Local variables:
   !
   implicit none
   !
   integer :: n_proc_old
   integer :: io
+  !---------------------------------------------------
   !
-  complex, dimension(n_stack,n_x,n_nek_loc_1,n_kinetic) :: h_in
-  !------------------------------------------------------------
+  ! Required for MPI-IO: 
+  !
+  integer :: filemode
+  integer :: finfo
+  integer :: fhv
+  integer :: fstatus(MPI_STATUS_SIZE)
+  integer(kind=MPI_OFFSET_KIND) :: disp
+  integer(kind=MPI_OFFSET_KIND) :: offset1
+  !---------------------------------------------------
 
   io = io_restart
 
@@ -80,10 +89,9 @@ subroutine read_restart
      data_step = 0
 
      ! i_restart is always tagged to most recent output 
-     ! files.  If restart_new_flag = 0, then we want 1-i_restart
+     ! files.  If late_restart = 0, then we want 1-i_restart
 
   case (1,2)
-
 
      !-------------------------------------------
      ! Restart block
@@ -104,9 +112,10 @@ subroutine read_restart
         read(io,10) t_current
         read(io,*) n_proc_old
         read(io,*) i_restart
-        close(io)
 
      endif
+
+     if (i_proc == 0) close(io)
 
      call MPI_BCAST(data_step,&
           1,MPI_INTEGER,0,GYRO_COMM_WORLD,i_err)
@@ -126,60 +135,45 @@ subroutine read_restart
         data_step = 0
      endif
 
+
      ! Trap error for incorrect number of processors
      if (n_proc_old /= n_proc) then 
         call catch_error('Processor number changed.')
      endif
 
-     if (i_proc == 0) then
-        open(unit=io,file=trim(path)//file_restart(i_restart),status='old')
-        print '(t2,a)','Restarting: '
-        read(io,10) h
-        print '(a,i1,a,$)','[',0,']'
-     endif
+     ! Determine which file to read
 
-     do i_proc_w=1,n_proc-1
+     filemode = IOR(MPI_MODE_RDWR,MPI_MODE_CREATE)
+     disp     = 0
 
-        if (i_proc == 0) then
+     call MPI_INFO_CREATE(finfo,i_err)
 
-           if (i_proc_w < 10) then
-              print '(a,i1,a,$)','[',i_proc_w,']'
-           else if (i_proc_w < 100) then
-              print '(a,i2,a,$)','[',i_proc_w,']'
-           else
-              print '(a,i3,a,$)','[',i_proc_w,']'
-           endif
-           if (modulo(i_proc_w,8) == 0) print *
+     call MPI_FILE_OPEN(GYRO_COMM_WORLD,&
+          trim(path)//file_restart(i_restart),&
+          filemode,&
+          finfo,&
+          fhv,&
+          i_err)
 
-           read(io,10) h_in
+     call MPI_FILE_SET_VIEW(fhv,&
+          disp,&
+          MPI_COMPLEX16,&
+          MPI_COMPLEX16,&
+          'native',&
+          finfo,&
+          i_err)
 
-           call MPI_SEND(h_in,&
-                size(h_in),&
-                MPI_DOUBLE_COMPLEX,&
-                i_proc_w,&
-                i_proc_w,&
-                GYRO_COMM_WORLD,&
-                i_err)
+     offset1 = size(h)*i_proc
 
-        else if (i_proc == i_proc_w) then
+     call MPI_FILE_READ_AT(fhv,&
+          offset1,&
+          h,&
+          size(h),&
+          MPI_COMPLEX16,&
+          fstatus,&
+          i_err)
 
-           call MPI_RECV(h,&
-                size(h),&
-                MPI_DOUBLE_COMPLEX,&
-                0,&
-                i_proc_w,&
-                GYRO_COMM_WORLD,&
-                recv_status,&
-                i_err)
-
-        endif
-
-     enddo
-
-     if (i_proc == 0) then
-        print *
-        close(io)
-     endif
+     call MPI_FILE_CLOSE(fhv,i_err)
 
   case default
 
@@ -195,8 +189,8 @@ subroutine read_restart
      print *,'[read_restart done]'
   endif
 
-  ! ** Keep this consistent with write_restart.f90
+  ! ** Keep this consistent with gyro_write_restart.f90
 
 10 format(2(es11.4,1x))
 
-end subroutine read_restart
+end subroutine gyro_read_restart

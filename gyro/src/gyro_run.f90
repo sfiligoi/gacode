@@ -36,12 +36,6 @@ subroutine gyro_run(&
   integer :: err
   real, parameter :: f_ave = 0.9
 
-  interface
-     subroutine gyro_do(skipinit)
-       integer, optional :: skipinit
-     end subroutine gyro_do
-  end interface
-
   ! Set corresponding global variables
   gyrotest_flag    = test_flag_in
   restart_method   = restart_method_in

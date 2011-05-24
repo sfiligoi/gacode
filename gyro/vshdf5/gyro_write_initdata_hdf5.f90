@@ -7,6 +7,7 @@
 subroutine gyro_write_initdata_hdf5(datafile,action)
 
   use gyro_globals
+  use hdf5
   use hdf5_api
   use math_constants
   use GEO_interface

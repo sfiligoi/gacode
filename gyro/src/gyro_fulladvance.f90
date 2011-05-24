@@ -144,11 +144,12 @@ subroutine gyro_fulladvance
   !-------------------------------------------------------------------
   ! MANAGE data output: 
   !
-  if(time_skip_wedge > 0) then
+  if (time_skip_wedge > 0) then
     if (modulo(step,time_skip_wedge) == 0 .and. io_method > 1) then
-     call write_hdf5_wedge_timedata(2)
+     call gyro_write_timedata_wedge_hdf5(2)
     endif
   endif
+
   if (modulo(step,time_skip) == 0) then
 
      ! Counter for number of data output events.
@@ -174,8 +175,10 @@ subroutine gyro_fulladvance
 
      ! Main data I/O handler
 
-     call gyro_write_master(2)
-     if (io_method > 1) call write_hdf5_timedata(2)
+     io_control = 2*output_flag
+     call gyro_write_timedata
+
+     if (io_method > 1) call gyro_write_timedata_hdf5(2)
 
      !--------------------------------------------------
      ! Update diffusivity and flux time-record for TGYRO 
@@ -191,7 +194,7 @@ subroutine gyro_fulladvance
      if (modulo(data_step,restart_data_skip) == 0 &
           .and. restart_method >= 0) then
 
-        call write_restart
+        call gyro_write_restart
 
      endif
 

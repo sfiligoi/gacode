@@ -16,8 +16,7 @@ OBJECTS = GEO_interface.o \
 
 .SUFFIXES : .o .f90 
 
-
-libvshdf5: $(OBJECTS)
+lib: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
 
 .f90.o :

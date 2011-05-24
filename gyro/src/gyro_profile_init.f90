@@ -209,9 +209,7 @@ subroutine gyro_profile_init
      !
      ! At this point r = r_e and dr_eodr = 1.0.
      !
-     if (lskipinit == 0) then
-        call gyro_read_experimental_profiles
-     endif
+     call gyro_read_experimental_profiles
      !---------------------------------------------------------------
 
      call gyro_map_experimental_profiles
