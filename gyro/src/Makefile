@@ -156,7 +156,6 @@ OBJECTS = gyro_globals.o \
           do_nlfft_match.o \
           set_exit_status.o \
           write_step.o \
-          write_banana_operators.o \
           write_radial_operators.o \
           write_freq.o \
           write_h.o \
