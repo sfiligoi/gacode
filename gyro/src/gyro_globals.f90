@@ -7,12 +7,34 @@
 !-----------------------------------------------------
 
 module gyro_globals
-
+ 
+  !----------------------------------------------------
+  ! Variables passed in via gyro_run routine:
+  !
+  ! Signal trivial test run (rather than full simulation)
   integer :: gyrotest_flag
-  integer :: lskipinit = 1
+  ! (0=new,1=restart,2=restart-but-don't-write-restart-data)
+  integer :: restart_method
+  ! (1=standard, 2=time reset for transport analysis)
+  integer :: transport_method
+  !----------------------------------------------------
 
   integer :: gyro_exit_status
   character(len=80) :: gyro_exit_message
+
+  !---------------------------------------------------------
+  ! Restart parameters:
+  !
+  ! (input)
+  !
+  integer :: restart_new_flag
+  integer :: restart_data_skip
+  integer :: eigensolve_restart_flag
+  !
+  ! (working)
+  !
+  integer :: i_restart
+  !---------------------------------------------------------
 
   !---------------------------------------------------------
   ! Set this flag to unity if subgrouping
@@ -141,7 +163,6 @@ module gyro_globals
   integer :: lindiff_method
   integer :: gyro_method
   integer :: sparse_method
-  integer :: transport_method
   integer :: linsolve_method 
   integer :: collision_method
   integer :: fieldeigen_root_method
@@ -426,21 +447,6 @@ module gyro_globals
   complex, dimension(2) :: freq_n
   ! 
   real, dimension(:), allocatable :: time_error
-  !---------------------------------------------------------
-
-  !---------------------------------------------------------
-  ! Restart parameters:
-  !
-  ! (input)
-  !
-  integer :: restart_method
-  integer :: restart_new_flag
-  integer :: restart_data_skip
-  integer :: eigensolve_restart_flag
-  !
-  ! (working)
-  !
-  integer :: i_restart
   !---------------------------------------------------------
 
   !---------------------------------------------------------

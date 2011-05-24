@@ -14,11 +14,7 @@ subroutine gyro_initialize_arrays
   !---------------------------------------------------
 
   !---------------------------------------------------
-  ! Do not reset distribution if we are
-  ! making a "warm restart".
-  !
-  if (lskipinit == 0) h = 0.0
-  !
+  h     = 0.0
   h_old = 0.0
   h_0   = 0.0
   h_err = 0.0

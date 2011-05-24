@@ -170,8 +170,7 @@ subroutine gyro_alloc_big(flag)
      deallocate(aperp_fluxave)
      deallocate(h_err)
 
-     ! Need to save h after profile adjustment:
-     if (lskipinit == 0) deallocate(h)
+     deallocate(h)
      deallocate(h_old)
      deallocate(h_0)
      deallocate(h_cap)
