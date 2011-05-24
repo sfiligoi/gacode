@@ -1,12 +1,12 @@
 !------------------------------------------------------
-! read_restart.mpiio.f90 [caller: BigScience]
+! gyro_read_restart.mpiio.f90
 !
 ! PURPOSE:
 !  This is the master file controlling the restart
 !  for systems with MPI-IO.
 !------------------------------------------------------
 
-subroutine read_restart
+subroutine gyro_read_restart
 
   use mpi
   use gyro_globals
@@ -189,8 +189,8 @@ subroutine read_restart
      print *,'[read_restart done]'
   endif
 
-  ! ** Keep this consistent with write_restart.f90
+  ! ** Keep this consistent with gyro_write_restart.f90
 
 10 format(2(es11.4,1x))
 
-end subroutine read_restart
+end subroutine gyro_read_restart

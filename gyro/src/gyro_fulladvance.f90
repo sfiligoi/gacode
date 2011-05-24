@@ -194,7 +194,7 @@ subroutine gyro_fulladvance
      if (modulo(data_step,restart_data_skip) == 0 &
           .and. restart_method >= 0) then
 
-        call write_restart
+        call gyro_write_restart
 
      endif
 

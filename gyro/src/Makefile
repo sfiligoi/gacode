@@ -85,6 +85,8 @@ OBJECTS = gyro_globals.o \
           gyro_read_input.o \
           gyro_read_input_extra.o \
           gyro_read_experimental_profiles.o \
+          gyro_read_restart.o \
+          gyro_write_restart.o \
           gyro_rhs_total.o \
           gyro_select_methods.o \
           gyro_set_blend_arrays.o \
@@ -152,7 +154,6 @@ OBJECTS = gyro_globals.o \
           do_nlfast_match.o \
           do_nlfft_p.o \
           do_nlfft_match.o \
-          read_restart.o \
           set_exit_status.o \
           write_step.o \
           write_banana_operators.o \
@@ -161,7 +162,6 @@ OBJECTS = gyro_globals.o \
           write_h.o \
           write_efficiency.o \
           write_timing.o \
-          write_restart.o \
           write_error.o \
           write_matrix_stat.o \
           gyro_dump_input.o \

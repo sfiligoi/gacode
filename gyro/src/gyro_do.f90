@@ -278,7 +278,7 @@ subroutine gyro_do(skipinit)
      !
      if (lskipinit == 0) then
 
-        call read_restart
+        call gyro_read_restart
 
      else
 
