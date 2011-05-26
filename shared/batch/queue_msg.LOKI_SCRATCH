@@ -1,0 +1,11 @@
+
+LOKI cluster at PSFC 
+
+maximum CPU number and wall time determines queue for submission automatically:
+
+theory:    must be in theory group
+default:   max. 12 hours, 384 cores, 48 nodes
+long:      max. 24 hours, 256 cores, 32 nodes
+big:       max. 15 hours, 600 cores, 75 nodes 
+
+Enter wall time limit in hours:
