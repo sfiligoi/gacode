@@ -56,6 +56,7 @@ copy_data(){
 
 mkdir -p $workdir
 cp -a $simdir/* $workdir 
+echo "$master:$workdir" >$simdir/scratch_area
 
 cd $workdir
 
