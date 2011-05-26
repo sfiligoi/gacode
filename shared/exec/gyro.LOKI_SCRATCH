@@ -51,7 +51,7 @@ copy_data(){
    echo "rsh $master rm -rf $workdir"  >> $cleanup_script 
    echo "echo 'done.'" >> $cleanup_script
    chmod u+x $cleanup_script 
-   rcp -rp $workdir/* $simdir
+   cp -a $workdir/* $simdir
 }
 
 mkdir -p $workdir
