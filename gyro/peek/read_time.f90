@@ -6,6 +6,7 @@ subroutine read_time(dir)
   implicit none
 
   real :: t_window
+  real :: tmin,tmax,tmid
   character (len=*) :: dir
 
   open(unit=1,file=trim(dir)//'t.out',iostat=i_err)
@@ -26,6 +27,8 @@ subroutine read_time(dir)
   close(1)
 
   allocate(gbflux(n_kinetic,n_field,4))
+  allocate(gbflux_1(n_kinetic,n_field,4))
+  allocate(gbflux_2(n_kinetic,n_field,4))
   allocate(gbflux_t(n_kinetic,n_field,4,0:n_time))
 
   open(unit=1,file=trim(dir)//'gbflux.out')
@@ -34,18 +37,54 @@ subroutine read_time(dir)
   enddo
   close(1)
 
+  tmin = (1.0-window)*t(n_time)
+  tmax = t(n_time)
+  tmid = tmin+0.5*(tmax-tmin)
+
+  !-------------------------------------------------------------------------
   ! Compute average
   t_window = 0.0
   gbflux   = 0.0
   do i=0,n_time-1
-     if (t(i) > (1.0-window)*t(n_time)) then
+     if (t(i) > tmin) then
         gbflux = gbflux + 0.5*(gbflux_t(:,:,:,i)+gbflux_t(:,:,:,i+1)) &
              *(t(i+1)-t(i))
         t_window = t_window+(t(i+1)-t(i))
      endif
   enddo
   gbflux = gbflux/t_window
-  close(1)
+  !-------------------------------------------------------------------------
+
+  !-------------------------------------------------------------------------
+  ! Compute error
+  ! 
+  ! interval 1: tmid,tmax
+  t_window = 0.0
+  gbflux_1 = 0.0
+  do i=0,n_time-1
+     if (t(i) > tmid) then
+        gbflux_1 = gbflux_1 + 0.5*(gbflux_t(:,:,:,i)+gbflux_t(:,:,:,i+1)) &
+             *(t(i+1)-t(i))
+        t_window = t_window+(t(i+1)-t(i))
+     endif
+  enddo
+  gbflux_1 = gbflux_1/t_window
+  !
+  ! interval 2: tmin,tmid
+  t_window = 0.0
+  gbflux_2 = 0.0
+  do i=0,n_time-1
+     if (t(i) > tmin .and. t(i) < tmid) then
+        gbflux_2 = gbflux_2 + 0.5*(gbflux_t(:,:,:,i)+gbflux_t(:,:,:,i+1)) &
+             *(t(i+1)-t(i))
+        t_window = t_window+(t(i+1)-t(i))
+     endif
+  enddo
+  gbflux_2 = gbflux_2/t_window
+  !
+  ! Error stored in gbflux_1:
+  gbflux_1 = 0.5*abs(gbflux_2-gbflux_1)
+  !-------------------------------------------------------------------------
 
   print 30,'GyroBohm fluxes','t_min=',(1.0-window)*t(n_time),'t_max=',t(n_time)
   print *
@@ -54,6 +93,7 @@ subroutine read_time(dir)
      print 20,'density','energy','momentum','exchange'
      do i_spec=1,n_kinetic
         print 10,'species: ',i_spec,gbflux(i_spec,i_field,:)
+        print 10,'(error): ',i_spec,gbflux_1(i_spec,i_field,:)
      enddo
      print *
   enddo
@@ -62,6 +102,7 @@ subroutine read_time(dir)
   print 20,'density','energy','momentum','exchange'
   do i_spec=1,n_kinetic
      print 10,'species: ',i_spec,(sum(gbflux(i_spec,:,i)),i=1,4)
+     print 10,'(error): ',i_spec,(sum(gbflux_1(i_spec,:,i)),i=1,4)
   enddo
   print *
 
