@@ -5,7 +5,7 @@
 !  HDF5 output of wedge data.
 !-----------------------------------------------------
 
-subroutine gyro_write_timedata_wedge_hdf5(action)
+subroutine gyro_write_timedata_wedge_hdf5
 
   use gyro_globals
   use hdf5
@@ -16,8 +16,6 @@ subroutine gyro_write_timedata_wedge_hdf5(action)
   implicit none
   include 'mpif.h'
   !
-  integer :: mode
-  integer, intent(in) :: action
   integer, parameter :: hr4=SELECTED_REAL_KIND(6,37)
   !
   real :: cp0

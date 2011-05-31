@@ -4,7 +4,7 @@
  !    profile_vugyro.out
  !------------------------------------------
 
-subroutine gyro_write_initdata_hdf5(datafile,action)
+subroutine gyro_write_initdata_hdf5(datafile)
 
   use gyro_globals
   use hdf5
@@ -15,7 +15,6 @@ subroutine gyro_write_initdata_hdf5(datafile,action)
   implicit none
   include 'mpif.h'
   !
-  integer, intent(in) :: action
   character (len=*), intent(in) :: datafile
   !
   integer :: data_loop
@@ -26,15 +25,13 @@ subroutine gyro_write_initdata_hdf5(datafile,action)
   type(hdf5InOpts) :: h5in
   type(hdf5ErrorType) :: h5err
   integer :: n_wedge
-  integer :: io_mode
   real :: theta
   real :: dr, buff
   real :: kt
   real, allocatable :: buffer(:,:,:)
-  !double precision :: buff
+
   !------------------------------------------
-  ! Do the initialization here.  Might need
-  ! better logic here based on action.
+  ! Do the initialization here.  
   !------------------------------------------
   call vshdf5_fcinit()
   if(i_proc/=0) return
