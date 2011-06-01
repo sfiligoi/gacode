@@ -804,7 +804,7 @@ subroutine write_local_real(datafile,io,n_fn,fn)
 
   end select
 
-10 format(es11.4,1x)
+10 format(100(es11.4,1x))
 
 end subroutine write_local_real
 
