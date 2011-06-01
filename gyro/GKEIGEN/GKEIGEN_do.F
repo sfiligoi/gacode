@@ -20,7 +20,13 @@
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #include "finclude/petsc.h"
+#include "finclude/petscvec.h"
+#include "finclude/petscmat.h"
+#include "finclude/petscis.h"
+#include "finclude/petscsys.h"
+#include "finclude/petscviewer.h"
 #include "finclude/slepc.h"
+#include "finclude/slepceps.h"
 
 !--------------------------------------------------
 ! PETSc, SLEPc, and other local variable declarations. These variables

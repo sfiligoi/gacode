@@ -2,10 +2,10 @@
 ! gyro_write_timedata_hdf5.f90 
 !
 ! PURPOSE:
-!  This is an hdf5 version of gyro_write_master.f90
+!  This is an hdf5 version of gyro_write_timedata.f90
 !-----------------------------------------------------
 
-subroutine gyro_write_timedata_hdf5(action)
+subroutine gyro_write_timedata_hdf5
 
   use gyro_globals
   use hdf5
@@ -15,9 +15,6 @@ subroutine gyro_write_timedata_hdf5(action)
 
   !---------------------------------------------------
   implicit none
-  !
-  integer :: mode
-  integer, intent(in) :: action
   !
   real :: cp0
   real :: cp1
@@ -59,10 +56,23 @@ subroutine gyro_write_timedata_hdf5(action)
      write_threed = .false.
   endif
 
+  ! io_control: 0=no I/O, 1=open, 2=append, 3=rewind
+  select case (io_control)
+  case(0)
+     return
+  case(1)
+     openmethod='overwr'
+  case(2)
+     openmethod='append'
+  case(3)
+     openmethod='append'
+  end select
+
   !---------------------------------------------------
   ! Initialization
   !---------------------------------------------------
   if (i_proc == 0) then
+
      call vshdf5_inith5vars(h5in, h5err)
      h5in%comm=MPI_COMM_SELF
      h5in%info=MPI_INFO_NULL
@@ -92,16 +102,6 @@ subroutine gyro_write_timedata_hdf5(action)
      dumpfile=TRIM(path)//"out.gyro.timedata.h5" 
      description="GYRO scalar time data file"
 
-     if (action == 1) then ! initialziation
-        if( restart_method /= 1 ) then 
-           openmethod='overwr'
-        else
-           openmethod='append'
-        endif
-     else ! sim running
-        openmethod='append'
-     endif
-
      call open_h5file(trim(openmethod),dumpfile,dumpTFid,description,dumpTGid,h5in,h5err)
      if (h5err%errBool) call catch_error(h5err%errorMsg)
 
@@ -118,6 +118,8 @@ subroutine gyro_write_timedata_hdf5(action)
      call hdf5_write_coords
   endif
   !---------------------------------------------------
+
+  if (io_control == 1 .or. io_control == 3) return
 
   call proc_time(cp0)
 

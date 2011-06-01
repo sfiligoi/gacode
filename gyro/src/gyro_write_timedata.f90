@@ -786,7 +786,7 @@ subroutine write_local_real(datafile,io,n_fn,fn)
      ! Append
 
      open(unit=io,file=datafile,status='old',position='append')
-     write(io,'(20(1pe15.8,1x))')  fn(:)
+     write(io,10)  fn(:)
      close(io)
 
   case(3)
@@ -796,13 +796,15 @@ subroutine write_local_real(datafile,io,n_fn,fn)
      open(unit=io,file=datafile,status='old')
 
      do data_loop=0,data_step
-        read(io,*) dummy(:)
+        read(io,10) dummy(:)
      enddo
 
      endfile(io)
      close(io)
 
   end select
+
+10 format(100(es11.4,1x))
 
 end subroutine write_local_real
 
