@@ -289,7 +289,7 @@ subroutine gyro_do
           trim(path)//'units.out',&
           trim(path)//'geometry_arrays.out',1)
   else
-     call gyro_write_initdata_hdf5(trim(path)//'out.gyro.initdata.h5',1)
+     call gyro_write_initdata_hdf5(trim(path)//'out.gyro.initdata.h5')
   endif
   !
   ! Close geometry (GEO) library
@@ -314,19 +314,20 @@ subroutine gyro_do
      ! Rewind
      io_control = output_flag*3
   endif
-  if (gkeigen_j_set == 0) call gyro_write_timedata
+  if (gkeigen_j_set == 0) then
+     call gyro_write_timedata
+     if (io_method == 2) call gyro_write_timedata_hdf5
+  endif
 
   !-------------------------------------------------
-  ! NEW SIMULATION ONLY:
-  !
-  ! Write the initial conditions:
+  ! NEW SIMULATION ONLY: write *initial conditions*
   !
   if (restart_method /= 1) then
      io_control = output_flag*2
      if (gkeigen_j_set == 0) call gyro_write_timedata
      if (io_method == 2) then
-        call gyro_write_timedata_hdf5(1)
-        if (time_skip_wedge > 0) call gyro_write_timedata_wedge_hdf5(2)
+        call gyro_write_timedata_hdf5
+        if (time_skip_wedge > 0) call gyro_write_timedata_wedge_hdf5
      endif
   endif
   !--------------------------------------------
