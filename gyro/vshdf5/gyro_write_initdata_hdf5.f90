@@ -244,7 +244,6 @@ subroutine gyro_write_initdata_hdf5(datafile)
 
   enddo ! i
 
-
   call dump_h5(rootid,"nu",      buffer(1,:,:),h5in,h5err)
   call dump_h5(rootid,"gsin",    buffer(2,:,:),h5in,h5err)
   call dump_h5(rootid,"gcos1",   buffer(3,:,:),h5in,h5err)

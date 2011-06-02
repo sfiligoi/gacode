@@ -176,9 +176,11 @@ subroutine gyro_fulladvance
      ! Main data I/O handler
 
      io_control = 2*output_flag
-     call gyro_write_timedata
-
-     if (io_method > 1) call gyro_write_timedata_hdf5
+     if (io_method == 1) then  
+        call gyro_write_timedata
+     else
+        call gyro_write_timedata_hdf5
+     endif
 
      !--------------------------------------------------
      ! Update diffusivity and flux time-record for TGYRO 

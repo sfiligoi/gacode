@@ -315,8 +315,11 @@ subroutine gyro_do
      io_control = output_flag*3
   endif
   if (gkeigen_j_set == 0) then
-     call gyro_write_timedata
-     if (io_method == 2) call gyro_write_timedata_hdf5
+     if (io_method == 1) then
+        call gyro_write_timedata
+     else
+        call gyro_write_timedata_hdf5
+     endif
   endif
 
   !-------------------------------------------------
@@ -324,10 +327,13 @@ subroutine gyro_do
   !
   if (restart_method /= 1) then
      io_control = output_flag*2
-     if (gkeigen_j_set == 0) call gyro_write_timedata
-     if (io_method == 2) then
-        call gyro_write_timedata_hdf5
-        if (time_skip_wedge > 0) call gyro_write_timedata_wedge_hdf5
+     if (gkeigen_j_set == 0) then
+        if (io_method == 1) then
+           call gyro_write_timedata
+        else
+           call gyro_write_timedata_hdf5
+           if (time_skip_wedge > 0) call gyro_write_timedata_wedge_hdf5
+        endif
      endif
   endif
   !--------------------------------------------
