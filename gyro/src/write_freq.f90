@@ -129,7 +129,7 @@ subroutine write_freq(datafile,io)
 
         if (i_proc == 0) then
 
-           if (silent_flag == 0) print 10,'n =',n(in),&
+           if (silent_flag == 0 .and. linsolve_method == 1) print 10,'n =',n(in),&
                 'freq =',freq_n(1), &
                 'df =',freq_n(2)  
 
