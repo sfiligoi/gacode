@@ -1515,7 +1515,7 @@ c
       endif
 c
 c sawtooth region enhanced neoclassical model
-      if(ineo.eq.-2.and.q_exp(jm).lt.1.0)then
+      if((ineo.eq.-1.or.ineo.le.-2).and.q_exp(jm).lt.1.0)then
           diffnem = diffnem + chiineo_m(jm)
           if(imodel.ne.81)chietem = chietem + chiineo_m(jm)
 c          chiitim = chiitim + chiineo_m(jm)
