@@ -505,7 +505,6 @@
 
       call EPSGetConverged(epsolve,n_converged,ierr)
       If (l_print) Print *, n_converged, ' converged solution(s)'
-      open(unit=1,file=trim(path)//file_eigen_freq,status='replace')
       step = 0
       Do iev = 0, n_converged-1
         call EPSGetEigenpair(epsolve,iev,dummy_scalar,PETSC_NULL,       &
@@ -515,7 +514,15 @@
         ev_gamma = real(dummy_scalar)
         If (l_print) Then
           print 20, iev+1, ev_omega, ev_gamma, residual
+          if (iev==0) then
+           open(unit=1,file=trim(path)//file_eigen_freq,                &
+     &          status='replace')
+          else
+           open(unit=1,file=trim(path)//file_eigen_freq,                &
+     &          status='old',position='append')
+          endif
           write (1,30) ev_omega, ev_gamma, residual
+          close (unit=1)
           call gyro_write_precision(10,abs(ev_omega))
           step = step + 1
           call gyro_write_precision(10,abs(ev_gamma))
@@ -621,7 +628,7 @@
         endif
 
       EndDo
-      close(unit=1)
+
 !---------------------------------------------------------------------
 
       If (l_print) Then
