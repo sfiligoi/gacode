@@ -17,8 +17,7 @@ FPROF	= -fastsse -Mprof=func
 
 # System math libraries
 
-LMATH = /opt/fftw/2.1.5/cnos/lib/libdrfftw.a \
-        /opt/fftw/2.1.5/cnos/lib/libdfftw.a 
+LMATH = ${FFTW_DIR}/libdrfftw.a ${FFTW_DIR}/libdfftw.a 
 #        ${SLEPC_LIB}
 
 # OPTIONAL: netCDF (for gyro2gkv)
