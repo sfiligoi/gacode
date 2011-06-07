@@ -198,7 +198,7 @@ subroutine make_poisson_blend(i_elec)
                     case (3)
                        ! is=1 are electrons, is>1 are ions.
                        vel_sum_loc(i_diff,j,jp) = vel_sum_loc(i_diff,j,jp)+&
-                            alpha_s(1,i)*z(1)**2* &
+                            (alpha_s(1,i)*z(1)**2* &
                             (w_g0(i_diff)-fakefield_flag*f_x(1,i_diff)) + &
                             sum(alpha_s(2:n_spec,i)*z(2:n_spec)**2)*w_g0(i_diff))*cprod
                     case (4)
