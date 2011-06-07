@@ -13,12 +13,14 @@
 !----------------------------------------------------------
 
 subroutine gyro_alloc_profile_sim(flag)
-
+  
+  use mpi
   use gyro_globals
+
+  implicit none
 
   integer, intent(in) :: flag
 
-  include 'mpif.h'
 
   if (flag == 1 .and. allocated(r)) then
      if (i_proc == 0) then
@@ -54,14 +56,17 @@ subroutine gyro_alloc_profile_sim(flag)
      allocate(drmaj_s(n_x))
      allocate(dzmag_s(n_x))
      allocate(beta_unit_s(n_x))
+     allocate(beta_unit_ptot_s(n_x))
      allocate(nu_s(n_spec,n_x))
      allocate(zmag_s(n_x))
+     allocate(ptot_s(n_x))
      allocate(w0_s(n_x))
      allocate(w0p_s(n_x))
      allocate(gamma_e_s(n_x))
      allocate(gamma_p_s(n_x))
      allocate(mach_s(n_x))
      allocate(dlnpdr_s(n_x))
+     allocate(dlnptotdr_s(n_x))
      allocate(beta_star_s(n_x))
      allocate(omega_eb_s(n_x))
 
@@ -119,6 +124,12 @@ subroutine gyro_alloc_profile_sim(flag)
         allocate(src_piv(n_lump))
      endif
 
+     if (io_method > 1) then
+        allocate(nu_coarse(0:n_theta_plot,n_x))
+        allocate(nu_wedge(n_theta_plot*n_theta_mult,n_x))
+        nu_coarse=0.; nu_wedge=0.
+     endif
+
      ! Required in MPI_RECV
      allocate(recv_status(MPI_STATUS_SIZE))
 
@@ -143,14 +154,17 @@ subroutine gyro_alloc_profile_sim(flag)
      deallocate(drmaj_s)
      deallocate(dzmag_s)
      deallocate(beta_unit_s)
+     deallocate(beta_unit_ptot_s)
      deallocate(nu_s)
      deallocate(zmag_s)
+     deallocate(ptot_s)
      deallocate(w0_s)
      deallocate(w0p_s)
      deallocate(gamma_e_s)
      deallocate(gamma_p_s)
      deallocate(mach_s)
      deallocate(dlnpdr_s)
+     deallocate(dlnptotdr_s)
      deallocate(beta_star_s)
      deallocate(omega_eb_s)
 
@@ -201,6 +215,11 @@ subroutine gyro_alloc_profile_sim(flag)
      if (allocated(b_src)) deallocate(b_src)
      if (allocated(m_src)) deallocate(m_src)
      if (allocated(src_piv)) deallocate(src_piv)
+
+     if (io_method > 1) then
+        deallocate(nu_coarse)
+        deallocate(nu_wedge)
+     endif
 
      deallocate(recv_status)
 

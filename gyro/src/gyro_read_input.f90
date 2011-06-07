@@ -77,6 +77,7 @@ subroutine gyro_read_input
   call readbc_int(electron_method)
   call readbc_int(radial_profile_method)
   call readbc_int(plot_u_flag)
+  call readbc_int(plot_epar_flag)
   call readbc_int(plot_n_flag)
   call readbc_int(plot_e_flag)
   call readbc_int(plot_v_flag)
@@ -206,7 +207,6 @@ subroutine gyro_read_input
   call readbc_int(dist_print)
   call readbc_int(nint_ORB_s)
   call readbc_int(nint_ORB_do)
-  call readbc_int(nint_GEO)
   call readbc_int(udsymmetry_flag)
   call readbc_int(gyro_method)
   call readbc_int(sparse_method)
@@ -230,6 +230,7 @@ subroutine gyro_read_input
   call readbc_real(ipccw)
   call readbc_real(btccw)
   call readbc_int(geo_gradbcurv_flag)
+  call readbc_int(geo_fastionbeta_flag)
   call readbc_real(geo_betaprime_scale)
   call readbc_int(poisson_z_eff_flag)
   call readbc_int(z_eff_method)
@@ -243,6 +244,8 @@ subroutine gyro_read_input
   call readbc_int(gkeigen_n_values)
   call readbc_int(gkeigen_iter)
   call readbc_real(gkeigen_tol)
+  call readbc_real(gkeigen_omega_target)
+  call readbc_real(gkeigen_gamma_target)
 
   call readbc_int(linsolve_method)
 
@@ -253,6 +256,24 @@ subroutine gyro_read_input
   call readbc_real(fieldeigen_tol)
 
   call readbc_int(collision_method)
+
+
+  !hdf5 output
+  call readbc_int(io_method)
+
+  ! time intervals for hdf5 write outs
+  call readbc_int(time_skip_wedge)
+  ! pie-slice alpha ??
+  call readbc_int(n_torangle_wedge) 
+  call readbc_int(n_torangle_3d) 
+  ! toroidal direction
+  call readbc_real(theta_wedge_offset)
+  call readbc_real(theta_wedge_angle)
+
+
+  !synthetic diagnostics
+  call readbc_real(torangle_offset)
+
   !
   ! DONE reading data.
   !--------------------------------------------------------
@@ -278,12 +299,11 @@ end subroutine gyro_read_input
 !
 subroutine readbc_int(p)
 
+  use mpi
   use gyro_globals
 
   implicit none
   integer, intent(inout) :: p
-
-  include 'mpif.h'
 
   if (i_proc == 0) read(1,*) p
 
@@ -299,13 +319,12 @@ end subroutine readbc_int
 ! (2) read and broadcast a real:
 !
 subroutine readbc_real(x)
-
+  
+  use mpi
   use gyro_globals
 
   implicit none
   real, intent(inout) :: x
-
-  include 'mpif.h'
 
   if (i_proc == 0) read(1,*) x
 

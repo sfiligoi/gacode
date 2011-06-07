@@ -7,14 +7,34 @@
 !-----------------------------------------------------
 
 module gyro_globals
-
-  integer :: uflag
-
+ 
+  !----------------------------------------------------
+  ! Variables passed in via gyro_run routine:
+  !
+  ! Signal trivial test run (rather than full simulation)
   integer :: gyrotest_flag
-  integer :: lskipinit
+  ! (0=new,1=restart,2=restart-but-don't-write-restart-data)
+  integer :: restart_method
+  ! (1=standard, 2=time reset for transport analysis)
+  integer :: transport_method
+  !----------------------------------------------------
 
   integer :: gyro_exit_status
   character(len=80) :: gyro_exit_message
+
+  !---------------------------------------------------------
+  ! Restart parameters:
+  !
+  ! (input)
+  !
+  integer :: restart_new_flag
+  integer :: restart_data_skip
+  integer :: eigensolve_restart_flag
+  !
+  ! (working)
+  !
+  integer :: i_restart
+  !---------------------------------------------------------
 
   !---------------------------------------------------------
   ! Set this flag to unity if subgrouping
@@ -38,7 +58,48 @@ module gyro_globals
   !------------------------------------------------------
   ! Run file:
   !
-  character(len=80) :: runfile = 'run.out'
+  character(len=80), parameter :: baserunfile = 'out.gyro.run'
+  character(len=80) :: runfile = baserunfile
+  !---------------------------------------------------------
+
+  !---------------------------------------------------------
+  ! Precision file
+  !
+  character (len=80), parameter :: baseprecfile ='out.gyro.prec'
+  character (len=80) :: precfile = baseprecfile
+  !---------------------------------------------------------
+
+  !---------------------------------------------------------
+  ! IO control variable:
+  ! 
+  ! 0=no IO
+  ! 1=Open/replace
+  ! 2=Append
+  ! 3=Rewind
+  !
+  integer :: io_control
+  !---------------------------------------------------------
+
+  !---------------------------------------------------------
+  ! Path to INPUT, read in the get_inputpath subroutine
+  !
+  character(len=80) :: path
+  !---------------------------------------------------------
+
+  !---------------------------------------------------------
+  ! Files for vshdf5 i/o control
+  !
+  integer :: io_method = 1
+  integer :: time_skip_wedge = 0    ! Wedge files for synthetic diagnostics
+  integer :: n_torangle_wedge= 0    ! Number of toroidal planes to use in wedge plots
+  integer :: n_torangle_3d = 0
+  real :: torangle_offset=0.0
+  !
+  ! This defines a wedge in the poloidal plane 
+  ! To recover the normal global plot, set 
+  ! theta_wedge_offset=-pi and theta_wedge_angle=2*pi
+  real  :: theta_wedge_offset = 0.0
+  real  :: theta_wedge_angle = 0.0
   !---------------------------------------------------------
 
   !---------------------------------------------------------
@@ -102,10 +163,10 @@ module gyro_globals
   integer :: lindiff_method
   integer :: gyro_method
   integer :: sparse_method
-  integer :: transport_method
   integer :: linsolve_method 
   integer :: collision_method
   integer :: fieldeigen_root_method
+  integer :: gkeigen_method
   !
   ! (b) flags (0 or 1)
   !
@@ -131,11 +192,10 @@ module gyro_globals
   integer :: eparallel_plot_flag
   integer :: entropy_flag
   integer :: num_equil_flag
-  integer :: gkeigen_proc_mult
-  integer :: gkeigen_method
   integer :: gkeigen_matrixonly
   integer :: gkeigen_mwrite_flag
   integer :: plot_u_flag
+  integer :: plot_epar_flag
   integer :: plot_n_flag
   integer :: plot_e_flag
   integer :: plot_v_flag
@@ -143,11 +203,19 @@ module gyro_globals
   integer :: z_eff_method
   integer :: variable_egrid_flag
   integer :: geo_gradbcurv_flag
+  integer :: geo_fastionbeta_flag
   integer :: fakefield_flag
   !---------------------------------------------------------
 
   !-----------------------------------------------------------------------------------
   ! Gyrokinetic eigensolver (GKEIGEN) parameters: 
+  !
+  ! Degree of secondary parallelization.
+  integer :: gkeigen_proc_mult
+  !
+  ! Target eigenvalues for GKEIGEN_METHOD = 5 or 6
+  real :: gkeigen_omega_target
+  real :: gkeigen_gamma_target
   !
   ! Number of eigenvalues to find
   integer :: gkeigen_n_values
@@ -165,7 +233,9 @@ module gyro_globals
   integer :: h_length_loc
   integer :: h_width_loc 
   integer :: h_length_block
+  integer :: h_length_block_t
   integer :: seq_length  ! Number of elements in passed matrix block
+  integer :: seq_length_t
   !
   ! Absolute tolerance in eigenvector solution
   real :: gkeigen_tol       
@@ -173,6 +243,7 @@ module gyro_globals
   ! For added parallelization layer (gkeigen_proc_mult > 1)
   integer :: gkeigen_j_set
   integer :: j_proc_tot
+  integer :: n_proc_tot
   !
   !-----------------------------------------------------------------------------------
 
@@ -200,7 +271,6 @@ module gyro_globals
   integer :: n_field
   integer :: nint_ORB_s
   integer :: nint_ORB_do
-  integer :: nint_GEO
   integer :: n_mumps_max
   integer :: n_study
   !
@@ -349,7 +419,9 @@ module gyro_globals
   complex, dimension(:,:,:,:), allocatable :: cs_blend_prime
   !
   complex, dimension(:,:,:), allocatable :: blend_plot
+  complex, dimension(:,:,:), allocatable :: blend_wedge
   complex, dimension(:,:,:), allocatable :: blend_prime_plot
+  complex, dimension(:,:,:), allocatable :: blend_prime_wedge
   complex, dimension(:,:), allocatable :: blend_r0_plot
   !---------------------------------------------------------
 
@@ -375,21 +447,6 @@ module gyro_globals
   complex, dimension(2) :: freq_n
   ! 
   real, dimension(:), allocatable :: time_error
-  !---------------------------------------------------------
-
-  !---------------------------------------------------------
-  ! Restart parameters:
-  !
-  ! (input)
-  !
-  integer :: restart_method
-  integer :: restart_new_flag
-  integer :: restart_data_skip
-  integer :: eigensolve_restart_flag
-  !
-  ! (working)
-  !
-  integer :: i_restart
   !---------------------------------------------------------
 
   !---------------------------------------------------------
@@ -718,6 +775,7 @@ module gyro_globals
   real, dimension(:), allocatable :: dzmag_s 
   real, dimension(:), allocatable :: shat_s 
   real, dimension(:), allocatable :: beta_unit_s 
+  real, dimension(:), allocatable :: beta_unit_ptot_s
   real, dimension(:), allocatable :: w0_s
   real, dimension(:), allocatable :: w0p_s
   real, dimension(:), allocatable :: gamma_e_s
@@ -726,6 +784,7 @@ module gyro_globals
   !
   real, dimension(:), allocatable :: omega_eb_s
   real, dimension(:), allocatable :: dlnpdr_s
+  real, dimension(:), allocatable :: dlnptotdr_s
   real, dimension(:), allocatable :: beta_star_s
   !
   real, dimension(:,:), allocatable :: den_s 
@@ -735,6 +794,7 @@ module gyro_globals
   real, dimension(:,:), allocatable :: alpha_s
   real, dimension(:,:), allocatable :: nu_s   
   real, dimension(:,:), allocatable :: pr_s
+  real, dimension(:), allocatable :: ptot_s
   !
   complex, dimension(:,:), allocatable :: phase
   real, dimension(:), allocatable :: angp
@@ -764,6 +824,9 @@ module gyro_globals
   real, dimension(:,:), allocatable :: ave_phi
   !
   complex, dimension(:,:,:,:), allocatable :: moments_plot
+  complex, dimension(:,:,:,:), allocatable :: moments_plot_wedge
+  real, dimension(:,:), allocatable :: nu_coarse
+  real, dimension(:,:), allocatable :: nu_wedge
   real, dimension(:,:,:), allocatable :: moments_zero_plot
   !
   real, dimension(:,:), allocatable :: b0_plot
@@ -925,8 +988,9 @@ module gyro_globals
   real, dimension(1) :: phi_squared_QL_n
   real, dimension(3) :: g_squared_QL_n
   !
-  real, dimension(:), allocatable :: Tr_p
-  real, dimension(:), allocatable :: Eng_p
+  ! Nonlinear transfer and turbulent energy spectra
+  !
+  real, dimension(:,:), allocatable :: nl_transfer
   !
   real, dimension(:,:,:,:), allocatable :: diff_vec
   real, dimension(:,:,:,:), allocatable :: gbflux_vec
@@ -980,6 +1044,7 @@ module gyro_globals
   !
   integer :: GYRO_COMM_WORLD
   integer :: GKEIGEN_J_SUBSET
+  integer :: GYRO_COMM_UNIPROC
   integer :: NEW_COMM_1
   integer :: NEW_COMM_2
   integer :: MUMPS_COMM
@@ -1002,17 +1067,5 @@ module gyro_globals
   integer, dimension(40) :: uinfo
   integer, dimension(4,20) :: keep  
   !------------------------------------------------------
-
-  !------------------------------------------
-  ! Precision outut file
-  !
-  character (len=80) :: precfile='prec.out'
-  !------------------------------------------
-
-  !---------------------------------------------------------
-  ! Path to INPUT, read in the get_inputpath subroutine
-  !
-  character(len=80) :: path
-  !---------------------------------------------------------
 
 end module gyro_globals

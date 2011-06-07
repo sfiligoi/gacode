@@ -25,9 +25,17 @@ LMATH = ${FFTW_DIR}/libdrfftw.a ${FFTW_DIR}/libdfftw.a
 NETCDF = /usr/common/usg/netcdf/default/lib/libnetcdf.a
 NETCDF_INC = /usr/common/usg/netcdf/default/include
 
+# OPTIONAL: HDF5 (for vshdf5)
+# Even though our use of HDF5 is essentially serial, using the parallel
+# version makes some things easier.
+# Set these to blanks to turn off:
+
+HDF5_LIBS = -L/opt/cray/hdf5-parallel/default/hdf5-parallel-pgi/lib -lhdf5_fortran -lhdf5 -L/usr/common/usg/szip/2.1/lib -lsz -lz
+HDF5_INC = -I/opt/cray/hdf5-parallel/default/hdf5-parallel-pgi/include
+VSHDF5_MAKECMD=vshdf5
+
 # Archive 
 
 GATOFLAGS = -r8 -i8
 
 ARCH = ar cr
-

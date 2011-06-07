@@ -14,6 +14,7 @@
 
 subroutine gyro_gbflux
 
+  use mpi
   use gyro_globals
   use math_constants
 
@@ -27,8 +28,6 @@ subroutine gyro_gbflux
   real, dimension(n_kinetic,n_field,p_moment) :: gbflux_loc_trapped
   real :: gbflux_norm
   !-------------------------------------------------------------
-
-  include 'mpif.h'
 
   !-----------------------------------------------------
   ! Coefficients for spectral sum over non-negative n

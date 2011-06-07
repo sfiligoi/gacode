@@ -21,6 +21,7 @@ FPROF	= -pg
 # module load openmpi/1.4.1
 # module load acml
 # module load fftw/2.1.5
+# module load hdf5-serial/1.8.5
 
 # System math libraries
 
@@ -36,8 +37,10 @@ LMATH = $(LAPACK) \
 NETCDF = ${NETCDFHOME}/lib/libnetcdff.a ${NETCDFHOME}/lib/libnetcdf.a
 NETCDF_INC = ${NETCDFHOME}/include
 
-# OPTIONAL: GATO FLAGS
-GATOFLAGS = -r8 -i8
+# HDF5
+HDF5_LIBS = -L$(HDF5_HOME)/lib -lhdf5_fortran -lhdf5 -lz
+HDF5_INC = -I$(HDF5_HOME)/include/
+VSHDF5_MAKECMD=vshdf5
 
 # Archive
 

@@ -39,11 +39,6 @@ subroutine gyro_alloc_big(flag)
 
   if (flag == 1) then
 
-     if (uflag == 1) then
-        call MPI_finalize(i_err)
-        stop
-     endif
-
      allocate(field_blend(n_blend,n_x,n_field))
      allocate(field_blend_old(n_blend,n_x,n_field))
      allocate(field_blend_old2(n_blend,n_x,n_field))
@@ -110,6 +105,11 @@ subroutine gyro_alloc_big(flag)
      endif
 
      allocate(moments_plot(n_theta_plot,n_x,n_kinetic,3))
+     
+     !For synthetic diagnostic
+     if (io_method > 1 .and. time_skip_wedge > 0) then
+        allocate(moments_plot_wedge(n_theta_plot*n_theta_mult,n_x,n_kinetic,3))
+     endif
      allocate(moments_zero_plot(n_x,n_kinetic,n_moment))
 
      allocate(kxkyspec(n_x))
@@ -139,8 +139,7 @@ subroutine gyro_alloc_big(flag)
         allocate(gbflux_vec(n_kinetic,n_field,p_moment,(nstep/time_skip)+1))
      endif
 
-     allocate(Tr_p(n_x))
-     allocate(Eng_p(n_x))
+     allocate(nl_transfer(n_x,2))
 
      allocate(time_error(n_kinetic))
      allocate(w_time(time_skip))
@@ -171,8 +170,7 @@ subroutine gyro_alloc_big(flag)
      deallocate(aperp_fluxave)
      deallocate(h_err)
 
-     ! Need to save h after profile adjustment:
-     if (lskipinit == 0) deallocate(h)
+     deallocate(h)
      deallocate(h_old)
      deallocate(h_0)
      deallocate(h_cap)
@@ -213,6 +211,9 @@ subroutine gyro_alloc_big(flag)
 
      deallocate(moments_plot)
      deallocate(moments_zero_plot)
+     if (io_method > 1 .and. time_skip_wedge > 0) then
+        deallocate(moments_plot_wedge)
+     endif
 
      deallocate(kxkyspec)
      deallocate(k_perp_squared)
@@ -235,8 +236,7 @@ subroutine gyro_alloc_big(flag)
      if (allocated(gbflux_trapped)) deallocate(gbflux_trapped)
      if (allocated(gbflux_n)) deallocate(gbflux_n)
 
-     deallocate(Tr_p)
-     deallocate(Eng_p)
+     deallocate(nl_transfer)
 
      if (allocated(diff_vec)) deallocate(diff_vec)
      if (allocated(gbflux_vec)) deallocate(gbflux_vec)

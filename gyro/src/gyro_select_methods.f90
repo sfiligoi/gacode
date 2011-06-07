@@ -92,6 +92,10 @@ subroutine gyro_select_methods
   if (radial_upwind < 0.0) then
      call catch_error('ERROR: RADIAL_UPWIND must be > 0.')
   endif
+  !
+  if (nonlinear_transfer_flag == 1 .and. integrator_method > 1) then
+     call catch_error('ERROR: Need INTEGRATOR_METHOD=1 for nonlinear transfer diag.')
+  endif
   !---------------------------------------------------
 
   !---------------------------------------------------
@@ -184,7 +188,10 @@ subroutine gyro_select_methods
   end select
 
   if (linsolve_method == 2) then
+!     orbit_upwind_vec(n_ion) = 0.0
      orbit_upwind_vec(:) = 0.0
+!     orbit_upwind_vec(n_ion) = 1.0
+!     radial_upwind = 0.0
   endif
   !---------------------------------------------------
 

@@ -1,6 +1,7 @@
       SUBROUTINE tglf_max
 !
-      USE tglf_internal_interface
+      USE tglf_global
+      USE tglf_species
 !
       IMPLICIT NONE
       INTEGER,PARAMETER :: nbmax=4
@@ -16,20 +17,35 @@
       REAL :: save_width,dtmin
       REAL :: dg1,dg2,dgmin
       REAL :: gamma_n(nt0),freq_n(nt0),width_n(nt0)
-      REAL :: save_gamma_max
-      REAL :: save_vexb_shear,save_vpar_shear
+      REAL :: save_alpha_e,save_gamma_max
+      REAL :: save_vexb_shear,save_park
+      REAL :: wkp_max,wgp_max,width_p_max 
 !
       if(new_start)CALL tglf_start
 !
+      gamma_reference_GQ=0.0
       save_iflux = iflux_in
       save_nbasis = nbasis_max_in
       save_width = width_in
+      save_alpha_e = alpha_e_in
       save_vexb_shear = vexb_shear_in
-      save_vpar_shear = vpar_shear_in
-      vexb_shear_in = 0.0
-      vpar_shear_in = 0.0
+!      save_park = park_in
+!      if(alpha_quench_in.eq.0.0)vexb_shear_in = 0.0
+      wgp_max = ABS(vpar_shear_in(2)/vs(2)**2)*ky/(1+ky**2)
+      width_p_max = 3.6/(sqrt_two*R_unit*q_unit*MAX(wgp_max,0.001))
+      width_p_max=MAX(width_p_max,0.01)
       width_min = width_min_in
       width_max = ABS(width_in)
+!      if(width_p_max.gt.width_in)then
+!        width_in = width_p_max
+!        width_min = width_p_max/5.0
+!      endif
+      if(width_p_max.lt.width_min_in)then
+!         park_in = save_park*width_min_in/width_p_max
+        width_min = 0.75*width_p_max
+        width_in = 4.0*width_min
+      endif
+!      write(*,*)ky," width_p_max = ", width_p_max,park_in
 !
 ! for ibranch_in > 0 the most unstable positive frequency mode is stored 
 ! in gamma_out(1) and the most unstable negative frequency mode 
@@ -63,7 +79,7 @@
         branch = 1
         if(gamma_out(2).gt.gamma_out(1))branch = 2
        endif
-!       write(*,*)i,width_in,gamma_out(branch),freq_out(branch)
+!       write(*,*)i,width_in,gamma_out(branch),freq_out(branch),ft
        width_n(i)=width_in
        gamma_n(i) = gamma_out(branch)
        freq_n(i) = freq_out(branch)
@@ -257,26 +273,35 @@
          gamma_max = gmax
          width_in = 10.0**tp        
       endif ! done with bisection search
-!      write(*,*)"gamma_max=",gamma_max
+!      write(*,*)"gamma_max=",gamma_max,"width_in=",width_in
        gamma_reference_GQ = gamma_max
-       gamma_nb_min_out = get_gamma_net(gamma_max)
-       if(gamma_nb_min_out.eq.0.0)gamma_max=0.0
+       gamma_nb_min_out = gamma_max
 !
        if(gamma_max.ne.0.0)then
 ! refine eigenvalue with more basis functions
-         vexb_shear_in = save_vexb_shear
-         vpar_shear_in = save_vpar_shear
+!         alpha_e_in = save_alpha_e
+!         vexb_shear_in = save_vexb_shear
          nbasis_max_in=save_nbasis
 !         write(*,*)"nbasis=",nbasis_max_in
          iflux_in=save_iflux
          new_width=.TRUE.
          call tglf_LS
+!         if(save_vexb_shear.ne.0.0)then
+!           gamma_reference_GQ = gamma_out(1)
+!           alpha_e_in = save_alpha_e
+!           vexb_shear_in = save_vexb_shear
+!           iflux_in=save_iflux
+!           new_width=.TRUE.
+!           call tglf_LS
+!         endif
          if(ibranch_in.le.0)then
             branch = 1
             if(gamma_out(2).gt.gamma_out(1))branch = 2
          endif
          gamma_max = gamma_out(branch)
 !
+!        write(*,*)"width_p_max = ", width_p_max,width_in
+!        write(*,*)ky,width_in,gamma_out(1),freq_out(1)
 !        write(*,*)" maximum gamma for nbasis = ",nbasis_max_in
 !        write(*,*)"gamma_out(1) = ",gamma_out(1)
 !        write(*,*)"freq_out(1) = ",freq_out(1)
@@ -290,12 +315,14 @@
          width_in=save_width
          do i=1,nmodes_in
           gamma_out(i)=0.0
+          freq_out(i)=0.0
          enddo
        endif
 !
        nbasis_max_in=save_nbasis
        iflux_in=save_iflux
+       alpha_e_in = save_alpha_e
        vexb_shear_in = save_vexb_shear
-       vpar_shear_in = save_vpar_shear
+!       park_in = save_park
 !
       END SUBROUTINE tglf_max   

@@ -96,7 +96,7 @@ subroutine gyro_memory_usage(data_file,io)
         call alloc_add(io,size(h),16,'h')
         call alloc_add(io,size(h_old),16,'h_old')
         call alloc_add(io,size(h_0),16,'h_0')
-        call alloc_add(io,size(RHS),16,'RHS')
+        call alloc_add(io,size(rhs),16,'rhs')
         call alloc_add(io,size(RHS_dr),16,'RHS_dr')
         call alloc_add(io,size(RHS_dt),16,'RHS_dt')
         call alloc_add(io,size(f_store),16,'f_store')
@@ -163,8 +163,7 @@ subroutine gyro_memory_usage(data_file,io)
            call alloc_add(io,size(gbflux_vec),8,'gbflux_vec')
         endif
 
-        call alloc_add(io,size(Tr_p),8,'Tr_p')
-        call alloc_add(io,size(Eng_p),8,'Eng_p')
+        call alloc_add(io,size(nl_transfer),8,'nl_transfer')
 
         call alloc_add(io,size(time_error),8,'time_error')
         call alloc_add(io,size(entropy),8,'entropy')

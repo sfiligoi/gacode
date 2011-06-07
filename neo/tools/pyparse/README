@@ -1,0 +1,10 @@
+
+These were written by Scott Kruger and Eric Held as part of
+the NEO benchmark.  They could probably be cleaned up a bit,
+but they work well enough and should be easy to understand.
+
+Dependencies: matplotlib, numpy, mpmath 
+
+mpmath provides the polynomials required to reconstruct the
+distribution function from neo.  It is easily googleable and
+built.

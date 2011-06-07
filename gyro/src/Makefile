@@ -39,11 +39,13 @@ OBJECTS = gyro_globals.o \
           gyro_banana_uniform_taugrid.o \
           gyro_banana_s2lambda.o \
           gyro_bessel_operator.o \
+          gyro_bounce_points.o \
           gyro_build_sparse_ampere.o \
           gyro_build_sparse_poisson.o \
           gyro_build_sparse_poissonaperp.o \
           gyro_build_sparse_maxwell.o \
           gyro_cleanup.o \
+          gyro_collect_routines.o \
           gyro_collision.o \
           gyro_collision_setup.o \
           gyro_collision_kernel.o \
@@ -56,6 +58,7 @@ OBJECTS = gyro_globals.o \
           gyro_collision_krook.o \
           gyro_conserve_number.o \
           gyro_conserve_all.o \
+          gyro_diffusivity.o \
           gyro_entropy.o \
           gyro_field_time_derivative.o \
           gyro_field_interpolation.o \
@@ -63,38 +66,46 @@ OBJECTS = gyro_globals.o \
 	  gyro_fieldeigen_kernel.o \
 	  gyro_fieldeigen_df.o \
           gyro_fulladvance.o \
-          gyro_kxky_spectrum.o \
-          gyro_lambda_grid.o \
-          gyro_memory_usage.o \
-          gyro_nonlinear_flux.o \
-          gyro_omegas.o \
-          gyro_to_geo.o \
-          gyro_profile_init.o \
-          gyro_diffusivity.o \
+          gyro_get_he_implicit.o \
           gyro_gbflux.o \
           gyro_initialize_arrays.o \
-          gyro_radial_operators.o \
+          gyro_initialize_timestep.o \
+          gyro_kxky_spectrum.o \
+          gyro_lambda_grid.o \
           gyro_map_experimental_profiles.o \
           gyro_moments_plot.o \
+          gyro_moments_plot_wedge.o \
           gyro_mpi_grid.o \
-          gyro_select_methods.o \
-          gyro_bounce_points.o \
+          gyro_memory_usage.o \
+          gyro_nonlinear_flux.o \
+          gyro_nonlinear_transfer.o \
+          gyro_omegas.o \
+          gyro_profile_init.o \
+          gyro_radial_operators.o \
           gyro_radial_simulation_box.o \
           gyro_read_input.o \
           gyro_read_input_extra.o \
           gyro_read_experimental_profiles.o \
+          gyro_read_restart.o \
+          gyro_write_restart.o \
           gyro_rhs_total.o \
+          gyro_select_methods.o \
+          gyro_set_blend_arrays.o \
+          gyro_set_phase_space.o \
+          gyro_set_pointers.o \
+          gyro_set_pointer_dim.o \
           gyro_tau_derivative.o \
+          gyro_timestep_error.o \
+          gyro_to_geo.o \
+          gyro_write_initdata.o \
           gyro_write_input.o \
           gyro_write_precision.o \
-          gyro_write_units.o \
-          gyro_write_master.o \
+          gyro_write_timedata.o \
           sparse_solve_umfpack.o \
           sparse_solve_mumps.o \
           get_vel_sum_p.o \
           get_vel_sum_a.o \
 	  get_vel_sum_aperp.o \
-          initialize_timestep.o \
           catch_error.o \
           catch_blowup.o \
           send_message_real.o \
@@ -102,21 +113,14 @@ OBJECTS = gyro_globals.o \
           send_line.o \
           catch_halt_signal.o \
           parallel_dim.o \
-          collect_complex.o \
-          collect_real.o \
-          collect_integer.o \
           alloc_add.o \
           allocate_profile_exp.o \
           timestep_SSP_322.o \
           timestep_explicit.o \
           make_maxwell_matrix.o \
-          make_blend_arrays.o \
           make_theta_grid.o \
           make_geometry_arrays.o \
           make_gyro.o \
-          make_phase_space.o \
-          make_pointers.o \
-          make_pointer_dimensions.o \
           make_initial_h.o \
           make_implicit_advect.o \
           make_electron_current.o \
@@ -129,7 +133,6 @@ OBJECTS = gyro_globals.o \
 	  make_poissonaperp_matrix.o \
           make_nl.o \
           get_nonlinear_advance.o \
-          get_nonlinear_transfer.o \
           get_ampere_coll.o \
           get_gyro_h.o \
 	  get_gyro_h_aperp.o \
@@ -145,29 +148,23 @@ OBJECTS = gyro_globals.o \
           get_field_explicit.o \
           get_kinetic_advance.o \
           get_delta_he.o \
-          get_he.o \
-          get_error.o \
           get_phi_squared.o \
           get_g_squared.o \
           do_nlfast_p.o \
           do_nlfast_match.o \
           do_nlfft_p.o \
           do_nlfft_match.o \
-          read_restart.o \
           set_exit_status.o \
           write_step.o \
-          write_banana_operators.o \
           write_radial_operators.o \
           write_freq.o \
           write_h.o \
           write_efficiency.o \
-          write_profile_sim.o \
-          write_profile_vugyro.o \
           write_timing.o \
-          write_restart.o \
           write_error.o \
-          write_geometry_arrays.o \
           write_matrix_stat.o \
+          gyro_dump_input.o \
+          gyro_dump_interface.o \
           cleanup_mumps.o 
 
 .SUFFIXES : .o .f90 

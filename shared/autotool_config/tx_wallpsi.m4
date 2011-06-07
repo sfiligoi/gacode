@@ -1,0 +1,39 @@
+dnl ######################################################################
+dnl
+dnl File:	tx_wallpsi.m4
+dnl
+dnl Purpose:	Determine where the wallpsi files are.
+dnl
+dnl Version:	$Id: tx_wallpsi.m4 3615 2010-08-17 21:15:32Z cary $
+dnl
+dnl Copyright 2001-2010, Tech-X Corporation.  Redistribution allowed provided
+dnl this copyright statement remains intact.
+dnl
+dnl ######################################################################
+
+dnl ######################################################################
+dnl
+dnl Determine the location of wallpsi
+dnl
+dnl ######################################################################
+
+builtin(include, config/txsearch.m4)
+
+dnl Locate all the wallpsi related includes and libraries
+unset wallpsipath
+if test "$back_end_node" = yes -o "$parallel" = yes; then
+  echo Searching for ben builds.
+  for i in `echo $SUPRA_SEARCH_PATH | tr ':' ' '`; do
+    wallpsipath="$wallpsipath:$i/wallpsi-ben"
+  done
+fi
+for i in `echo $SUPRA_SEARCH_PATH | tr ':' ' '`; do
+  wallpsipath="$wallpsipath:$i/wallpsi"
+done
+TX_LOCATE_PKG(
+        [wallpsi],
+        [$wallpsipath],
+        [FcWallPsi.h],
+        [fcwps, wgb, wall, psi, idf, fc],
+        [],
+        [])

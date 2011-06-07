@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from gacodeinput import *
 import sys
 
@@ -50,6 +51,7 @@ x.add('RADIAL_UPWIND','1.0')
 x.add('ELECTRON_METHOD','1')
 x.add('RADIAL_PROFILE_METHOD','1')
 x.add('PLOT_U_FLAG','1')
+x.add('PLOT_EPAR_FLAG','0')
 x.add('PLOT_N_FLAG','0')
 x.add('PLOT_E_FLAG','0')
 x.add('PLOT_V_FLAG','0')
@@ -152,7 +154,6 @@ x.add('Q_SCALE','1.0')
 x.add('DIST_PRINT_FLAG','0')
 x.add('NINT_ORB_S','64')
 x.add('NINT_ORB_DO','10')
-x.add('NINT_GEO','101')
 x.add('UDSYMMETRY_FLAG','1')
 x.add('GYRO_METHOD','1')
 x.add('SPARSE_METHOD','1')
@@ -176,6 +177,7 @@ x.add('OUTPUT_FLAG','1')
 x.add('IPCCW','-1.0')
 x.add('BTCCW','-1.0')
 x.add('GEO_GRADBCURV_FLAG','0')
+x.add('GEO_FASTIONBETA_FLAG','0')
 x.add('GEO_BETAPRIME_SCALE','1.0')
 x.add('POISSON_Z_EFF_FLAG','1')
 x.add('Z_EFF_METHOD','1')
@@ -187,12 +189,23 @@ x.add('GKEIGEN_KSPACE_DIM','300')
 x.add('GKEIGEN_N_VALUES','10')
 x.add('GKEIGEN_ITER','100')
 x.add('GKEIGEN_TOL','0.0000001')
+x.add('GKEIGEN_OMEGA_TARGET','-0.3')
+x.add('GKEIGEN_GAMMA_TARGET','0.12')
 x.add('LINSOLVE_METHOD','1')
 x.add('FIELDEIGEN_ROOT_METHOD','1')
 x.add('FIELDEIGEN_WR','-0.3')
 x.add('FIELDEIGEN_WI','0.2')
 x.add('FIELDEIGEN_TOL','1e-6')
 x.add('COLLISION_METHOD','2')
+#addition for hdf5 io
+x.add('IO_METHOD', '1')
+x.add('TIME_SKIP_WEDGE', '0')
+x.add('N_TORANGLE_WEDGE', '0')
+x.add('N_TORANGLE_3D', '0')
+x.add('THETA_WEDGE_OFFSET', '0.0')
+x.add('THETA_WEDGE_ANGLE', '0.0')
+x.add('TORANGLE_OFFSET', '0.0')
+
 
 # Deprecated parameters
 

@@ -5,10 +5,12 @@ Transport mode:
 treg01: [t+ th+ne0+te1+ti1]
 treg02: [t+ th+ne1+te1+ti1]
 treg03: [g+ th+ne1+te1+ti1]
+treg04: [t+ th+ne1+te1+ti1] * DIII-D 128913 Benchmark case
 
-Linear stabilty mode:
+Linear stability mode:
 
-sreg01: 
+sreg01: GYRO stability analysis (needs 128 cores)
+sreg02: TGLF stability analysis (needs 8 cores)
 
 Multi-run mode:
 

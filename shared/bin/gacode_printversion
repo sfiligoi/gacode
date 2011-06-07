@@ -1,0 +1,14 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  gacode_printversion
+#
+# FUNCTION:
+#  Echo version message.
+#------------------------------
+
+VERSION=`gacode_getversion`
+
+echo "=========================================================="
+echo "$1" `echo $VERSION` `echo $GACODE_PLATFORM` `uname -s` `uname -m`
+echo "=========================================================="

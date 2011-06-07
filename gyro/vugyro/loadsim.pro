@@ -15,13 +15,13 @@ pro loadsim, input_dir
   
   version_tag  = '(version not found)'
   version_date = '(time not found)' 
-  openr,1,simdir+'/VERSION_tag',error=i_err
+  openr,1,simdir+'/out.gyro.version',error=i_err
 
   if (i_err eq 0) then begin
      readf,1,version_tag
      readf,1,version_date
   endif else begin
-     print,'No VERSION_tag found.  Setting to 1.0.0'
+     print,'No out.gyro.version found.  Setting to 1.0.0'
      version_tag = '1.0.0'
   endelse 
   close,1
@@ -274,11 +274,8 @@ pro loadsim, input_dir
   g_squared_QL_n = fltarr(3,n_n,n_time)
   read_array,g_squared_QL_n,'g_squared_QL_n.out',exists_g_squared_QL_n
 
-  Tr_np = fltarr(n_r,n_n,n_time)
-  read_array,Tr_np,'nonlinear_transfer_n.out',exists_nonlinear_trasnfer_n
-
-  Eng_np = fltarr(n_r,n_n,n_time)
-  read_array,Eng_np,'turbulent_energy_n.out',exists_turbulent_energy_n
+  nl_transfer = fltarr(n_r,2,n_n,n_time)
+  read_array,nl_transfer,'out.gyro.nl_transfer',exists_nl_transfer
 
   ;;--------------------------------------------
   ;; 0 -> phi_fluxave

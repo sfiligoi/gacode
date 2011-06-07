@@ -11,6 +11,7 @@
 
 subroutine gyro_field_time_derivative
 
+  use mpi
   use gyro_globals
   use math_constants
 
@@ -20,7 +21,6 @@ subroutine gyro_field_time_derivative
   real :: minus_n_omega
   !---------------------------------------------------
 
-  include 'mpif.h'
 
   do is=1,n_kinetic
      do i=1,n_x

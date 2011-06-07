@@ -13,9 +13,10 @@ if [ "$1" == "-a" ]
 then
    rm -f *.gz
    rm -f *.out
+   rm -f *.h5
    rm -f RE*
    rm -f halt
-   rm -f VERSION_tag
+   rm -f out.*
    rm -f *ps
    rm -f *.err
    rm -f *.src

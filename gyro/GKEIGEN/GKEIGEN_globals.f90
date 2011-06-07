@@ -13,13 +13,13 @@ module GKEIGEN_globals
   !
   ! in GKEIGEN_matrix_read:
   !
-  character(len=12), parameter :: &
+  character(len=14), parameter :: &
        file_eigen_restart = &
        "GKEIGEN_matrix"
   !
   ! in GKEIGEN_do:
   !
-  character(len=14), parameter :: &
+  character(len=16), parameter :: &
        file_eigen_freq = &
        "GKEIGEN_freq.out"
   !----------------------------------
@@ -62,7 +62,7 @@ module GKEIGEN_globals
   integer :: jstate          !--------------
   integer :: jstate_start    !
   integer :: jstate_end      ! row indices
-  integer :: jset_jstart     !
+  integer :: jset_start     !
   integer :: jset_end        !
   integer :: jelem           !
   integer :: jelem0          !
@@ -70,14 +70,24 @@ module GKEIGEN_globals
   integer :: jelem_start     !
   integer :: jelem_end       !--------------
   integer :: iseq         ! Merged row and
-  !                    ---! column index   
+  integer :: iseq0        ! column index   
+  integer :: iseq_start   !
+  integer :: iseq_end     !--------------
   !
   ! Processors in GYRO_COMM_WORLD
   integer :: i_proc_e
+  integer :: i_proc_e0
+  integer :: i_proc_e1
+  integer :: i_proc_e2
   !
   ! Parallel instances of GYRO_COMM_WORLD
+  integer :: gkeigen_j_set_e0
   integer :: gkeigen_j_set_e1
   integer :: gkeigen_j_set_e2
+  integer :: j_sr
+  integer :: i_sr
+  integer :: i_brake
+  integer :: n_brake
   !
   ! Rank of processor over MPI_COMM_WORLD
   integer :: j_proc_tot_e1

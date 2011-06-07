@@ -22,7 +22,6 @@ subroutine gyro_profile_init
 
   use gyro_globals
   use gyro_profile_exp
-  use GEO_interface
   use math_constants
 
   !---------------------------------------------------
@@ -31,8 +30,6 @@ subroutine gyro_profile_init
   integer :: ic 
   real :: loglam
   real :: cc
-  real, dimension(n_x) :: volume_prime
-  real, dimension(n_n) :: omega_e_norm
   !---------------------------------------------------
 
   !---------------------------------------------------
@@ -212,9 +209,7 @@ subroutine gyro_profile_init
      !
      ! At this point r = r_e and dr_eodr = 1.0.
      !
-     if (lskipinit == 0) then
-        call gyro_read_experimental_profiles
-     endif
+     call gyro_read_experimental_profiles
      !---------------------------------------------------------------
 
      call gyro_map_experimental_profiles
@@ -378,11 +373,23 @@ subroutine gyro_profile_init
   !
   ! beta_star = -(8 pi)/(B_unit**2) dp/dr
   !
-  beta_star_s(:) = beta_unit_s(:)*dlnpdr_s(:)*geo_betaprime_scale
-  !        
-  if (geo_betaprime_scale /= 1.0) then
-     call send_message_real(&
-          'INFO: Scaling dp/dr in GEO by: ',geo_betaprime_scale)
+  if (geo_fastionbeta_flag == 0) then
+
+     ! Pressure from species sum
+
+     beta_star_s(:) = beta_unit_s(:)*dlnpdr_s(:)*geo_betaprime_scale         
+     if (geo_betaprime_scale /= 1.0) then
+        call send_message_real(&
+             'INFO: Scaling dp/dr in GEO by: ',geo_betaprime_scale)
+     endif
+
+  else
+
+     ! Pressure from total pressure including fast ions
+
+     beta_star_s(:) = beta_unit_ptot_s(:)*dlnptotdr_s(:)
+     call send_message('INFO: Using total dp/dr (+ fast ions) in GEO.')
+
   endif
   !------------------------------------------------------
 
@@ -403,24 +410,6 @@ subroutine gyro_profile_init
      krho_i(:,i) = n_1(:)*q_s(i)/r_s(i)*rhos_norm/b_unit_s(i)
   enddo
   !----------------------------------------------------------
-
-  !--------------------------------------------------
-  ! Some Miller-related profile quantities
-  !
-  ! Allocate GEO
-  GEO_ntheta_in   = nint_GEO
-  GEO_nfourier_in = n_fourier_geo 
-  GEO_model_in    = geometry_method
-  GEO_signb_in    = 1.0
-  call GEO_alloc(1)
-  do i=1,n_x
-     call gyro_to_geo(i)
-     volume_prime(i) = GEO_volume_prime
-     if (i_proc == 0 .and. i == ir_norm .and. debug_flag == 1) then
-        call GEO_write(trim(path)//'gyro_geo_diagnostic.out',1)
-     endif
-  enddo
-  !--------------------------------------------------
 
   !---------------------------------------------------------
   ! Rotation parameter scaling and definition of omega_eb_s
@@ -642,7 +631,7 @@ subroutine gyro_profile_init
   !-------------------------------------------------------------
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,"[make_profiles done]"
+     print *,"[gyro_profile_init done]"
   endif
 
 end subroutine gyro_profile_init

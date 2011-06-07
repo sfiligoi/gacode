@@ -13,6 +13,7 @@
 
 subroutine get_g_squared
 
+  use mpi
   use gyro_globals
   use gyro_pointers
   use math_constants
@@ -27,8 +28,6 @@ subroutine get_g_squared
   complex, dimension(n_x,n_kinetic) :: ave_g
   !
   !--------------------------------------------------  
-
-  include 'mpif.h'
 
   !--------------------------------------------------------
   moment(:,:) = 0.0

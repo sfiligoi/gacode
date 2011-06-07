@@ -5,13 +5,12 @@
 
 subroutine sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
 
+  use mpi
   use gyro_globals
   use gyro_mumps_private
 
   !---------------------------------------------------
   implicit none
-  !
-  include 'mpif.h'
   !
   integer, intent(in) :: n_elem
   integer, intent(in) :: n_row
@@ -20,7 +19,6 @@ subroutine sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
   !
   integer :: iter
   integer :: ij
-  !
   !---------------------------------------------------
 
   call proc_time(CPU_field2_in)

@@ -1,21 +1,18 @@
-!---------------------------------------------
+!------------------------------------------------------
 ! rTRANSP_INIT.f90
 !
 ! PURPOSE:
 !  Initialization stage for calls rTRANSP.
 !
 ! NOTES:
-!  Communication routine originally used 
-!  in old GYRO.
-!
-! REVISIONS
-! 03 June 02: jc
-!  Documented.
-!---------------------------------------------
+!  Communication routine originally used in old GYRO.
+!------------------------------------------------------
 
 subroutine rTRANSP_INIT(n0_i,n0_j,n0_k,COMM)
 
+  use mpi
   use rTRANSP_GLOBALS
+
   implicit none
 
   integer, intent(in) :: n0_i
@@ -25,7 +22,6 @@ subroutine rTRANSP_INIT(n0_i,n0_j,n0_k,COMM)
 
   integer, external :: parallel_dim
 
-  include 'mpif.h'
 
   TRANSP_COMM = COMM
 

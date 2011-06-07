@@ -12,15 +12,13 @@ subroutine gyro_run(&
      status_out,&
      message_out)
 
+  use mpi
   use gyro_globals
   use gyro_interface
   use gyro_fieldeigen_private
 
   implicit none
 
-  integer :: i_ion
-
-  include 'mpif.h'
 
   ! Input parameters (IN) - REQUIRED
   integer, intent(in)             :: test_flag_in
@@ -32,16 +30,11 @@ subroutine gyro_run(&
   character(len=*), intent(inout) :: message_out
 
   ! Local variables
-  integer                         :: n_start
-  integer                         :: n_ave
-  integer                         :: err
-  real, parameter                 :: f_ave = 0.9
-
-  interface
-     subroutine gyro_do(skipinit)
-       integer, optional :: skipinit
-     end subroutine gyro_do
-  end interface
+  integer :: i_ion
+  integer :: n_start
+  integer :: n_ave
+  integer :: err
+  real, parameter :: f_ave = 0.9
 
   ! Set corresponding global variables
   gyrotest_flag    = test_flag_in

@@ -6,6 +6,7 @@ all:
 	cd UMFPACK ; make "OPT=${OPT}"
 	cd EXPRO ; make "OPT=${OPT}"
 	cd profiles_gen/src ; make "OPT=${OPT}"
+	cd vshdf5 ; make "OPT=${OPT}"
 
 clean:
 	cd math ; make clean
@@ -14,3 +15,4 @@ clean:
 	cd EXPRO ; make clean
 	cd profiles_gen/src ; make clean
 	cd python ; rm -f *.pyc	
+	cd vshdf5 ; make clean

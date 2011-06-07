@@ -2,7 +2,7 @@
 !
       SUBROUTINE tglf_TM
       USE tglf_dimensions
-      USE tglf_internal_interface
+      USE tglf_global
       USE tglf_species
       USE tglf_kyspectrum
       USE tglf_xgrid
@@ -10,6 +10,7 @@
 !
       LOGICAL :: unstable
       INTEGER :: i,j,k,is,imax
+      INTEGER :: save_nbasis_max
       REAL :: dky
       REAL :: width_max
       REAL :: gmax,fmax
@@ -17,6 +18,7 @@
       REAl :: v_bar,v_bar0,v_bar1
       REAL :: gamma_cutoff,reduce,rexp
       REAL :: gamma_net_1
+      REAL :: save_vexb_shear
       REAL :: dky0,dky1,ky0,ky1
       REAL :: pflux0(nsm,3),eflux0(nsm,3)
       REAL :: stress_par0(nsm,3),stress_tor0(nsm,3)
@@ -48,11 +50,11 @@
         tsum0(is) = 0.0
       enddo
       phi_bar_sum_out = 0.0
-      phi_bar0 = 0.0
       v_bar_sum_out = 0.0
-      v_bar0 = 0.0
       gmax = 0.0
       fmax = 0.0
+      v_bar0 = 0.0
+      phi_bar0 = 0.0     
 !
 ! save maximum width
       width_max = width_in
@@ -64,8 +66,8 @@
 ! sum over ky spectrum
       iflux_in=.TRUE. 
       dky0=0.0
-      ky0=0.0      
-     do i=1,nky
+      ky0=0.0 
+      do i=1,nky
         ky_in = ky_spectrum(i)
         dky = dky_spectrum(i)
         ky1=ky_in
@@ -88,7 +90,7 @@
             CALL tglf_max
           else
             CALL tglf_LS
-            gamma_nb_min_out = gamma_net_out(1)
+            gamma_nb_min_out = gamma_out(1)
           endif
           mask_save(i) = 1
           if(gamma_out(1).eq.0.D0)mask_save(i)=0
@@ -101,6 +103,10 @@
           do j=1,nx
             wdx_save(i,j) = wdx(j)
             b0x_save(i,j) = b0x(j)
+            cx_par_par_save(i,j) = cx_par_par(j)
+            cx_tor_par_save(i,j) = cx_tor_par(j)
+            cx_tor_per_save(i,j) = cx_tor_per(j)
+            kxx_save(i,j) = kxx(j)
           enddo
         else
           gamma_nb_min_out = gamma_nb_min_save(i)
@@ -111,11 +117,25 @@
           do j=1,nx
              wdx(j) = wdx_save(i,j)
              b0x(j) = b0x_save(i,j)
+             cx_par_par(j) = cx_par_par_save(i,j)
+             cx_tor_par(j) = cx_tor_par_save(i,j)
+             cx_tor_per(j) = cx_tor_per_save(i,j)
+             kxx(j) = kxx_save(i,j)
           enddo
           if(mask_save(i).eq.1)then
+!            if(alpha_kx0_in.ne.0.0)then
+!              save_nbasis_max = nbasis_max_in
+!              save_vexb_shear = vexb_shear_in
+!              nbasis_max_in = nbasis_min_in
+!              vexb_shear_in = 0.0
+!              CALL tglf_LS
+!              gamma_reference_GQ = gamma_out(1) 
+!              nbasis_max_in = save_nbasis_max
+!              vexb_shear_in = save_vexb_shear
+!            endif
             CALL tglf_LS
           else
-            gamma_net_out(1)=0.0
+            gamma_out(1)=0.0
           endif
         endif
 !        write(*,*)i,"ky=",ky_in,"width=",width_in,"dky=",dky
@@ -124,24 +144,23 @@
 !        write(*,*)"wdx=",wdx(1),"b0x=",b0x(1)
 !
         unstable=.TRUE.
-        if(gamma_net_out(1).eq.0.0.or.gamma_nb_min_out.eq.0.0)unstable=.FALSE.      
+        if(gamma_out(1).eq.0.0.or.gamma_nb_min_out.eq.0.0)unstable=.FALSE.      
         gamma_net_1 = gamma_nb_min_out 
         gamma_cutoff = (0.1*ky_in/R_unit)*SQRT(taus(1)*mass(2))  ! scaled like gamma
-!        gamma_cutoff = 0.15*gamma_net_out(1)
         rexp = 1.0
         reduce = 1.0
         if(nbasis_max_in.ne.nbasis_min_in)then
-          if(gamma_net_1.lt.gamma_net_out(1) &
+          if(gamma_net_1.lt.gamma_out(1) &
              .and.gamma_net_1.lt.gamma_cutoff)then
           reduce = (gamma_net_1/gamma_cutoff)**rexp
-!            write(*,*)"phi reduced",ky_in,gamma_nb_min_out,gamma_net_out(1)
+!            write(*,*)"phi reduced",ky_in,gamma_nb_min_out,gamma_out(1)
           endif
         endif
 !
         phi_bar1 = 0.0
         v_bar1 = 0.0
         if(unstable)then
-         do imax=1,nmodes_in
+         do imax=1,nmodes_out
            phi_bar = reduce*phi_bar_out(imax)
            v_bar = reduce*v_bar_out(imax)
            phi_bar1 = phi_bar1 + phi_bar
@@ -171,7 +190,7 @@
           nsum1(is) = 0.0
           tsum1(is) = 0.0
           if(unstable)then
-            do imax=1,nmodes_in
+            do imax=1,nmodes_out
               phi_bar = reduce*phi_bar_out(imax)
               do j=1,3
                 pflux1(is,j) = pflux1(is,j)+phi_bar*particle_QL_out(imax,is,j)
@@ -185,6 +204,7 @@
              enddo
            endif
 !           if(is.eq.2)write(*,*)ky_in,(dky0*eflux0(is,1)+dky1*eflux1(is,1))/rlts_in(is)
+!           if(is.eq.2)write(*,*)"stress_tor",ky,stress_tor1(2,1)
            do j=1,3
              particle_flux_out(is,j) = particle_flux_out(is,j) &
               + dky0*pflux0(is,j) + dky1*pflux1(is,j)
@@ -202,13 +222,14 @@
            t_bar_sum_out(is) = t_bar_sum_out(is) &
               + dky0*tsum0(is) + dky1*tsum1(is)
 !            write(*,*)"ky0=",ky0,"ky1=",ky1
-!            write(*,*)"gamma=",gamma_net_out(1),gamma_nb_min_out
+!            write(*,*)"gamma=",gamma_out(1),gamma_nb_min_out
 !            write(*,*)"reduce=",reduce
 !            write(*,*)"is=",is,"unstable=",unstable
 !            write(*,*)"pflux0=",pflux0(is),"pflux1=",pflux1(is)
 !            write(*,*)"eflux0=",eflux0(is),"eflux1=",eflux1(is)
-!            write(*,*)dky0*pflux0(is)+dky1*pflux1(is)
-!            write(*,*)dky0*eflux0(is)+dky1*eflux1(is)
+!            write(*,*)dky0*pflux0(is,1)+dky1*pflux1(is,1)
+!            write(*,*)dky0*eflux0(is,1)+dky1*eflux1(is,1)
+!            write(*,*)"stress_tor_out=",stress_tor_out(is,1)
            do j=1,3
              pflux0(is,j) = pflux1(is,j)
              eflux0(is,j) = eflux1(is,j)
@@ -243,7 +264,7 @@
       SUBROUTINE get_ky_spectrum
 !
       USE tglf_dimensions
-      USE tglf_internal_interface
+      USE tglf_global
       USE tglf_species
       USE tglf_kyspectrum
       IMPLICIT NONE
@@ -254,13 +275,13 @@
       REAL :: ky_min=0.05
       REAL :: ky_max=0.7
       REAL :: ky0,ky1,lnky,dky0
-      REAL :: debye_cut
+      REAL :: debye_cut,ky_cut
 
 !
 !  spectrum_type = 0 for linear GYRO spectrum
 !  spectrum_type = 1 for APS07 spectrum
 !  spectrum_type = 2 for IAEA08 spectrum
-!  spectrum_type = 3 for spectrum with ky_min = MIN(0.1,0.25/q)
+!  spectrum_type = 3 for spectrum with ky_min = ky_cut
 !
       new_kyspectrum=.FALSE.
 !
@@ -306,11 +327,13 @@
         ky1 = 0.4/SQRT(taus_in(1)*mass_in(1))  !k_theta*rho_e = 0.4    
         dky0 = LOG(ky1/ky0)/REAL(nky_in-1)
         lnky = LOG(ky0)
-        do i=nky+1,nky+nky_in     
-          ky_spectrum(i) = EXP(lnky)
-          dky_spectrum(i) = ky_spectrum(i)*dky0
-          lnky = lnky + dky0
-        enddo
+        if(nky_in.gt.0)then
+          do i=nky+1,nky+nky_in     
+            ky_spectrum(i) = EXP(lnky)
+            dky_spectrum(i) = ky_spectrum(i)*dky0
+            lnky = lnky + dky0
+          enddo
+        endif
         nky = nky + nky_in
       endif
       if(spectrum_type.eq.2)then  ! IAEA08 spectrum
@@ -346,8 +369,10 @@
       endif
       if(spectrum_type.eq.3)then   ! ky_min spectrum similar to APS07
         nky=9
-        write(*,*)"q_unit = ",q_unit
-        ky_min = MIN(0.1,0.25/q_unit)
+        ky_cut = 1.0/(sqrt_two*R_unit*q_unit*width_in)
+!        write(*,*)"ky_cut = ",ky_cut
+!        ky_min = MIN(0.1,0.25/q_unit)
+        ky_min = ky_cut
         ky_min = ky_min/SQRT(taus_in(2)*mass_in(2))
         ky_max = 0.9/SQRT(taus_in(2)*mass_in(2))  !k_theta*rho_ion = 0.9
         dky0 = (ky_max-ky_min)/REAL(nky-1)

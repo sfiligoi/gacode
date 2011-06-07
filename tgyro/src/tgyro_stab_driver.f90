@@ -2,13 +2,14 @@
 ! tgyro_stab_driver.f90
 !
 ! PURPOSE:
-!  Manage linear stability calculation
+!  Manage linear stability calculation for GYRO/TGLF.
 !------------------------------------------------------------
 
 subroutine tgyro_stab_driver
 
   use tgyro_globals
   use gyro_interface
+  use tglf_interface
 
   implicit none
 
@@ -34,94 +35,166 @@ subroutine tgyro_stab_driver
   real :: wi_elec_vec(n_worker) 
   real :: wr_elec_vec(n_worker) 
 
-  character (len=7) :: ktag
   real, dimension(0:tgyro_stab_nky-1) :: ky
+ 
+  integer, parameter :: i_print = 0
+
 
   include 'mpif.h'
-
-  ! Map TGYRO parameters to GYRO
-  call tgyro_gyro_map
-
-  ! Use FIELDEIGEN
-  gyro_linsolve_method_in = 3
-
-  ! Use GK electron (only possibility with FIELDEIGEN)
-  gyro_electron_method_in = 4
-
-  ! Set this so was can specify L_Y=ky*rhos exactly.
-  gyro_box_multiplier_in = -1.0
 
   wi_elec(:,:) = 0.0
   wr_elec(:,:) = 0.0
   wi_ion(:,:)  = 0.0
   wr_ion(:,:)  = 0.0
 
-  do iky=0,tgyro_stab_nky-1
+  select case (flux_method)
 
-     wi_ion_loc  = 0.0
-     wi_elec_loc = 0.0
-     wr_ion_loc  = 0.0
-     wr_elec_loc = 0.0
+  case (2)
 
-     ky(iky) = tgyro_stab_kymin + iky*tgyro_stab_deltaky
+     ! Map TGYRO parameters to TGLF
+     call tgyro_tglf_map
 
-     if (n_worker == 1) then
-        wr = 0.0
-     else
-        wr = ky(iky)*(-1.0+worker*(2.0/(n_worker-1)))
-     endif
+     ! Set use to linear stability, not transport
+     tglf_use_transport_model_in = .false.
+     tglf_nmodes_in = 2
 
-     gyro_l_y_in = ky(iky)
-     gyro_fieldeigen_wr_in = wr
-     
-     ! NOTE: gyro_fieldeigen_wi_in taken from input.gyro (should be about 0.1)
+     do iky=0,tgyro_stab_nky-1
 
-     call gyro_run(gyrotest_flag, gyro_restart_method, &
-          transport_method, gyro_exit_status(i_r), gyro_exit_message(i_r))
+        wi_ion_loc  = 0.0
+        wi_elec_loc = 0.0
+        wr_ion_loc  = 0.0
+        wr_elec_loc = 0.0
 
-    ! wr and wi are now the COMPUTED eigenvalues
+        ky(iky) = tgyro_stab_kymin + iky*tgyro_stab_deltaky
 
-     wr  = real(gyro_fieldeigen_omega_out)
-     wi  = aimag(gyro_fieldeigen_omega_out)
-     err = gyro_fieldeigen_error_out
+        tglf_ky_in = ky(iky)
 
-     ! electron mode
-     if (wr > 0.0 .and. wi > 0.0 .and. err < 0.9) then
-        wi_elec_loc = wi
-        wr_elec_loc = wr
-     endif
+        ! NOTE: gyro_fieldeigen_wi_in taken from input.gyro (should be about 0.1)
 
-     ! ion mode
-     if (wr < 0.0 .and. wi > 0.0 .and. err < 0.9) then
-        wi_ion_loc = wi
-        wr_ion_loc = wr
-     endif
+        call tglf_run()
 
-     call MPI_ALLGATHER(wi_elec_loc,1,MPI_DOUBLE_PRECISION,&
-          wi_elec_vec,1,MPI_DOUBLE_PRECISION,gyro_rad,i_err)
-     call MPI_ALLGATHER(wr_elec_loc,1,MPI_DOUBLE_PRECISION,&
-          wr_elec_vec,1,MPI_DOUBLE_PRECISION,gyro_rad,i_err)
-     call MPI_ALLGATHER(wi_ion_loc,1,MPI_DOUBLE_PRECISION,&
-          wi_ion_vec,1,MPI_DOUBLE_PRECISION,gyro_rad,i_err)
-     call MPI_ALLGATHER(wr_ion_loc,1,MPI_DOUBLE_PRECISION,&
-          wr_ion_vec,1,MPI_DOUBLE_PRECISION,gyro_rad,i_err)
+        ! wr and wi are now the COMPUTED eigenvalues
 
-     imax = maxloc(wi_elec_vec)
-     wi_elec(iky,i_r-1) = wi_elec_vec(imax(1))     
-     wr_elec(iky,i_r-1) = wr_elec_vec(imax(1))     
+        do i=1,tglf_nmodes_in
 
-     imax = maxloc(wi_ion_vec)
-     wi_ion(iky,i_r-1) = wi_ion_vec(imax(1))     
-     wr_ion(iky,i_r-1) = wr_ion_vec(imax(1))     
+           wr = real(tglf_eigenvalue_out(i))
+           wi = aimag(tglf_eigenvalue_out(i))
 
-     if (worker == 0) then
-        print '(2(f4.2,1x),2(1pe13.5,1x))', &
-             r(i_r)/r_min,ky(iky),wr_elec(iky,i_r-1),wi_elec(iky,i_r-1)
-        print '(2(f4.2,1x),2(1pe13.5,1x))', &
-             r(i_r)/r_min,ky(iky),wr_ion(iky,i_r-1),wi_ion(iky,i_r-1)
-     endif
+           ! electron mode
+           if (wr > 0.0 .and. wi > wi_elec_loc) then
+              wi_elec_loc = wi
+              wr_elec_loc = wr
+           endif
 
-  enddo
+           ! ion mode
+           if (wr < 0.0 .and. wi > wi_ion_loc) then
+              wi_ion_loc = wi
+              wr_ion_loc = wr
+           endif
+
+        enddo
+
+        wi_elec(iky,i_r-1) = wi_elec_loc
+        wr_elec(iky,i_r-1) = wr_elec_loc
+
+        wi_ion(iky,i_r-1) = wi_ion_loc     
+        wr_ion(iky,i_r-1) = wr_ion_loc
+
+        if (worker == 0 .and. i_print == 1) then
+           print '(2(f4.2,1x),2(1pe13.5,1x))', &
+                r(i_r)/r_min,ky(iky),wr_elec(iky,i_r-1),wi_elec(iky,i_r-1)
+           print '(2(f4.2,1x),2(1pe13.5,1x))', &
+                r(i_r)/r_min,ky(iky),wr_ion(iky,i_r-1),wi_ion(iky,i_r-1)
+        endif
+
+     enddo
+
+  case (3)
+
+     ! Map TGYRO parameters to GYRO
+     call tgyro_gyro_map
+
+     ! Use FIELDEIGEN
+     gyro_linsolve_method_in = 3
+
+     ! Use GK electron (only possibility with FIELDEIGEN)
+     gyro_electron_method_in = 4
+
+     ! Set this so was can specify L_Y=ky*rhos exactly.
+     gyro_box_multiplier_in = -1.0
+
+     do iky=0,tgyro_stab_nky-1
+
+        wi_ion_loc  = 0.0
+        wi_elec_loc = 0.0
+        wr_ion_loc  = 0.0
+        wr_elec_loc = 0.0
+
+        ky(iky) = tgyro_stab_kymin + iky*tgyro_stab_deltaky
+
+        if (n_worker == 1) then
+           wr = 0.0
+        else
+           wr = ky(iky)*(-1.0+worker*(2.0/(n_worker-1)))
+        endif
+
+        gyro_l_y_in = ky(iky)
+        gyro_fieldeigen_wr_in = wr
+
+        ! NOTE: gyro_fieldeigen_wi_in taken from input.gyro (should be about 0.1)
+
+        call gyro_run(gyrotest_flag, gyro_restart_method, &
+             transport_method, gyro_exit_status(i_r), gyro_exit_message(i_r))
+
+        ! wr and wi are now the COMPUTED eigenvalues
+
+        wr  = real(gyro_fieldeigen_omega_out)
+        wi  = aimag(gyro_fieldeigen_omega_out)
+        err = gyro_fieldeigen_error_out
+
+        ! electron mode
+        if (wr > 0.0 .and. wi > 0.0 .and. err < 0.9) then
+           wi_elec_loc = wi
+           wr_elec_loc = wr
+        endif
+
+        ! ion mode
+        if (wr < 0.0 .and. wi > 0.0 .and. err < 0.9) then
+           wi_ion_loc = wi
+           wr_ion_loc = wr
+        endif
+
+        call MPI_ALLGATHER(wi_elec_loc,1,MPI_DOUBLE_PRECISION,&
+             wi_elec_vec,1,MPI_DOUBLE_PRECISION,gyro_rad,i_err)
+        call MPI_ALLGATHER(wr_elec_loc,1,MPI_DOUBLE_PRECISION,&
+             wr_elec_vec,1,MPI_DOUBLE_PRECISION,gyro_rad,i_err)
+        call MPI_ALLGATHER(wi_ion_loc,1,MPI_DOUBLE_PRECISION,&
+             wi_ion_vec,1,MPI_DOUBLE_PRECISION,gyro_rad,i_err)
+        call MPI_ALLGATHER(wr_ion_loc,1,MPI_DOUBLE_PRECISION,&
+             wr_ion_vec,1,MPI_DOUBLE_PRECISION,gyro_rad,i_err)
+
+        imax = maxloc(wi_elec_vec)
+        wi_elec(iky,i_r-1) = wi_elec_vec(imax(1))     
+        wr_elec(iky,i_r-1) = wr_elec_vec(imax(1))     
+
+        imax = maxloc(wi_ion_vec)
+        wi_ion(iky,i_r-1) = wi_ion_vec(imax(1))     
+        wr_ion(iky,i_r-1) = wr_ion_vec(imax(1))     
+
+        if (worker == 0 .and. i_print == 1) then
+           print '(2(f4.2,1x),2(1pe13.5,1x))', &
+                r(i_r)/r_min,ky(iky),wr_elec(iky,i_r-1),wi_elec(iky,i_r-1)
+           print '(2(f4.2,1x),2(1pe13.5,1x))', &
+                r(i_r)/r_min,ky(iky),wr_ion(iky,i_r-1),wi_ion(iky,i_r-1)
+        endif
+
+     enddo
+
+  case default
+
+     call tgyro_catch_error('ERROR: Bad value in tgyro_stab_driver.')
+
+  end select
 
   call MPI_ALLGATHER(wi_elec(:,i_r-1),&
        tgyro_stab_nky,&
@@ -160,8 +233,6 @@ subroutine tgyro_stab_driver
        ierr)
 
   print *
-
-  ktag = 'ky='
 
   if (i_proc_global == 0) then
 
@@ -208,6 +279,6 @@ subroutine tgyro_stab_driver
   endif
 
 10 format(f5.3,3x,10(1pe12.5,1x))
-20 format(t2,a,5x,10(f5.3,8x))
+20 format(t2,a,5x,10(f7.3,6x))
 
 end subroutine tgyro_stab_driver

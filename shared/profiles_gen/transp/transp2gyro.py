@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-"""transp2gyro.py: Create INPUT_profiles from TRANSP server.
+"""transp2gyro.py: Create input.profiles from TRANSP server.
 
 transp2gyro.py writes a trxpl script (.ind) from user input, which
 it uses to connect to a TRANSP server and write a plasma 
 state file (.cdf) and an efit G-EQDSK file (.geq). transp2gyro then
-calls iterdb2gyro to produce INPUT_profiles (and, optionally, 
-INPUT_profiles.geo), for use with GYRO.
+calls profiles_gen to produce input.profiles (and, optionally, 
+input.profiles.geo), for use with gacode (GYRO, etc.).
 
 Usage: transp2gyro.py <options>
 
@@ -19,21 +19,21 @@ Optional Arguments:
     -o (--trout) output_name -- name of output folder
                                    (default: "machine_transp_id_time")
     --res                    -- don't use default resolution parameters
-    -g (--geo)               -- also create INPUT_profiles.geo for
+    -g (--geo)               -- also create input.profiles.geo for
                                    numeric equilibrium
-    --iterdb arguments       -- pass arguments to iterdb2gyro formatted as:
+    --prgen arguments        -- pass arguments to profiles_gen formatted as:
                                    arg1;arg2;arg3;arg4
     -h (--trhelp)            -- display this message
 
 File flow:
     TRANSP -> trxpl -> plasma state and efit files ->
-    iterdb2gyro -> INPUT_profiles
+    prgen -> input.profiles
 
 Output:
     output_name/                  -- directory with shot files
-        INPUT_profiles            -- GYRO-format INPUT_profiles
-        INPUT_profiles.geo        -- numeric equilibrium file (optional)
-        INPUT_profiles.log        -- log file from iterdb2gyro
+        input.profiles            -- gacode-format input.profiles
+        input.profiles.geo        -- numeric equilibrium file (optional)
+        input.profiles.log        -- log file from profiles_gen
         output_name.log           -- log file from transp2gyro.py
         trxpl.log                 -- log file from trxpl
         transp2gyro_files/        -- directory with helper files
@@ -49,7 +49,7 @@ Examples:
     transp2gyro.py --tokamak ITER --year 06 --shot 20100P07
 
 Common Errors:
-    - trxpl and/or iterdb2gyro are not executible in user's $PATH
+    - trxpl and/or profiles_gen are not executible in user's $PATH
         - Make sure user has access to MDS+ server defined by 
           $MDS_TRANSP_SERVER
         - At GA see:
@@ -60,8 +60,8 @@ Common Errors:
     - Specified same output_name for different shots
         - transp2gyro.py will not overwrite a pre-existing directory, but
           will create top-level output_name.log before quitting.
-    - Cannot create INPUT_profiles.geo (option -g errors)
-        - make sure gato.f is compiled correctly and 'iterdb2gyro -g' works
+    - Cannot create input.profiles.geo (option -g errors)
+        - make sure gato.f is compiled correctly and 'profiles_gen -g' works
     - Python errors
         - you need to be running at least python version 2.5
 
@@ -75,6 +75,7 @@ Version History:
     0.4  --  August 20, 2009 : Added INPUT_profiles.geo option
     0.5  --  August 26, 2009 : Added trxpl.log and changed for MDS+ access
     0.6  --  October 8, 2009 : Executible from iterdb2gyro
+    0.7  --  April 22, 2011  : Use gacode name conventions (profiles_gen)
 
 """
 import os
@@ -108,10 +109,10 @@ params = {
                                      #    profile
     'use_default_resolutions': True, # Whether to use default 
                                      #    resolutions
-    'create_numeric_equil': False,   # Whether to make INPUT_profiles.geo
+    'create_numeric_equil': False,   # Whether to make input.profiles.geo
     'I_name': 'from TRANSP',         # Name of I_pol flag
     'B_name': 'from TRANSP',         # Name of B_tor flag
-    'iterdbargs': ''}                # Arguments passed to iterdb2gyro
+    'prgenargs': ''}                 # Arguments passed to profiles_gen
          
 ##########################################################################
 
@@ -131,7 +132,7 @@ def print_welcome_message(pipe=sys.stdout):
     """
     print >> pipe, "-----------------------------------------------------"
     print >> pipe, "transp2gyro.py  : J. Luc Peterson (jpeterso@pppl.gov)"
-    print >> pipe, "Version 0.6"
+    print >> pipe, "Version 0.7"
     print >> pipe, "-----------------------------------------------------"
 
 def print_variable_values(pipe=sys.stdout):
@@ -155,7 +156,7 @@ def print_variable_values(pipe=sys.stdout):
     print >> pipe, "I_poloidal orientation    = " + params['I_name']
     print >> pipe, "Number of radial zones    = " + \
                    params['number_of_radial_zones']
-    print >> pipe, "Create INPUT_profiles.geo = " + \
+    print >> pipe, "Create input.profiles.geo = " + \
                    str(params['create_numeric_equil'])
     print >> pipe
 
@@ -204,7 +205,7 @@ def get_parameters():
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hk:y:i:o:t:a:g:", \
                      ["trhelp", "tokamak=", "year=", "shot=", "trout=", \
-                      "time=", "aveg=", "res", "geo=", "iterdb="])
+                      "time=", "aveg=", "res", "geo=", "prgen="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -228,8 +229,8 @@ def get_parameters():
             params['use_default_resolutions'] = False
         elif opt in ("-g", "--geo"):
             params['create_numeric_equil'] = True
-        elif opt in ("--iterdb"):
-            params['iterdbargs'] = params['iterdbargs'] + arg
+        elif opt in ("--prgen"):
+            params['prgenargs'] = params['prgenargs'] + arg
 
     # Prompt user for data if not given as arguments
 
@@ -320,7 +321,7 @@ def get_parameters():
     if not params['create_numeric_equil']:
         success = False
         while not success:
-            entry = raw_input("Shall I make INPUT_profiles.geo for " + \
+            entry = raw_input("Shall I make input.profiles.geo for " + \
                               "numeric equilibria? (y/n) ")
             if entry == 'y' or entry == 'Y' or entry == 'yes':
                 params['create_numeric_equil'] = True
@@ -332,11 +333,11 @@ def get_parameters():
                 print 'Invalid entry! Options: [y, n]'
 
 
-def run_iterdb2gyro(log):
-    """Call iterdb2gyro to create INPUT_profiles from plasma state.
+def run_profiles_gen(log):
+    """Call profiles_gen to create input.profiles from plasma state.
 
     Keyword Arguments:
-    log  --  file handle to print the output of iterdb2gyro
+    log  --  file handle to print the output of profiles_gen
 
     """
     # Files we're working with
@@ -344,34 +345,34 @@ def run_iterdb2gyro(log):
     plasma_state_file = directory + ".cdf"
     g_file = directory + ".geq"
 
-    # Create list of arguments to pass to iterdb2gyro
-    iterdb_command = "iterdb2gyro;-i;" + plasma_state_file + params['iterdbargs']
+    # Create list of arguments to pass to profiles_gen
+    prgen_command = "profiles_gen;-i;" + plasma_state_file + params['prgenargs']
     if params['create_numeric_equil']:
-        iterdb_command = iterdb_command + ";-g;" + g_file
+        prgen_command = prgen_command + ";-g;" + g_file
 
-    # Run iterdb2gyro and write output to log
+    # Run profiles_gen and write output to log
     try:
-        iterdb = subprocess.Popen(iterdb_command.split(";"), \
+        prgen = subprocess.Popen(prgen_command.split(";"), \
                                   stdout = subprocess.PIPE, \
                                   stderr = subprocess.STDOUT, \
                                   cwd = directory)
-        iterdb.wait()
-        output = iterdb.communicate()[0]
+        prgen.wait()
+        output = prgen.communicate()[0]
         log.write(output)
     except OSError, e:
-        msg = "iterdb2gyro execution failed: " + e
+        msg = "profiles_gen execution failed: " + e
         print_pipe_and_screen(msg, log)
 
-    # Check for success by looking for INPUT_profiles
-    if not os.access(directory + "/INPUT_profiles", os.F_OK):
-        msg = "Unable to generate INPUT_profiles.\n" + "Quitting..."
+    # Check for success by looking for input.profiles
+    if not os.access(directory + "/input.profiles", os.F_OK):
+        msg = "Unable to generate input.profiles.\n" + "Quitting..."
         print_pipe_and_screen(msg, log)
         sys.exit(1)
 
-    # Check for success by looking for INPUT_profiles.geo
+    # Check for success by looking for input.profiles.geo
     if params["create_numeric_equil"]:
-        if not os.access(directory + "/INPUT_profiles.geo", os.F_OK):
-            msg = "Unable to generate INPUT_profiles.geo.\n" + "Quitting..."
+        if not os.access(directory + "/input.profiles.geo", os.F_OK):
+            msg = "Unable to generate input.profiles.geo.\n" + "Quitting..."
             print_pipe_and_screen(msg, log)
             sys.exit(1)
 
@@ -432,12 +433,12 @@ def print_pipe_and_screen(message, pipe):
     print >> pipe, message
 
 def main():
-    """Create INPUT_profiles from TRANSP server."""
+    """Create input.profiles from TRANSP server."""
     print_welcome_message()
 
-    # Test to see if we can run iterdb2gyro and trxpl
-    if not does_program_exist('iterdb2gyro'):
-        print "Unable to execute iterdb2gyro! Check $PATH..."
+    # Test to see if we can run profiles_gen and trxpl
+    if not does_program_exist('profiles_gen'):
+        print "Unable to execute profiles_gen! Check $PATH..."
         print "Quitting..."
         sys.exit(1)
     if not does_program_exist('trxpl'):
@@ -479,9 +480,9 @@ def main():
     print_pipe_and_screen(msg, log)
     run_trxpl_script(log)
 
-    # Run iterdb2gyro to create INPUT_profiles
-    print_pipe_and_screen("Running iterdb2gyro...", log)
-    run_iterdb2gyro(log)
+    # Run profiles_gen to create input.profiles
+    print_pipe_and_screen("Running profiles_gen...", log)
+    run_profiles_gen(log)
 
     # Cleanup files
     print_pipe_and_screen("Cleaning files...", log)

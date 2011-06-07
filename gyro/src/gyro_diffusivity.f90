@@ -8,6 +8,7 @@
 
 subroutine gyro_diffusivity
 
+  use mpi
   use gyro_globals
   use math_constants
 
@@ -21,7 +22,6 @@ subroutine gyro_diffusivity
   real :: diff_norm
   !-------------------------------------------------------------
 
-  include 'mpif.h'
 
   !-----------------------------------------------------------------
   ! Define factors useful for quasilinear normalizations

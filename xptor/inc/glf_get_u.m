@@ -1,0 +1,17 @@
+      real*8 u1_r,u2_r,u3_r,u4_r,u5_r
+      real*8 u1_i,u2_i,u3_i,u4_i,u5_i
+      real*8 u6_r,u7_r,u8_r,u9_r,u10_r
+      real*8 u6_i,u7_i,u8_i,u9_i,u10_i
+      real*8 ub1_r,ub2_r,ub3_r,ub4_r,ub5_r
+      real*8 ub1_i,ub2_i,ub3_i,ub4_i,ub5_i
+      real*8 ub6_r,ub7_r,ub8_r,ub9_r,ub10_r
+      real*8 ub6_i,ub7_i,ub8_i,ub9_i,ub10_i
+      common /getu/
+     > u1_r,u2_r,u3_r,u4_r,u5_r,
+     > u1_i,u2_i,u3_i,u4_i,u5_i,
+     > u6_r,u7_r,u8_r,u9_r,u10_r,
+     > u6_i,u7_i,u8_i,u9_i,u10_i,
+     > ub1_r,ub2_r,ub3_r,ub4_r,ub5_r,
+     > ub1_i,ub2_i,ub3_i,ub4_i,ub5_i,
+     > ub6_r,ub7_r,ub8_r,ub9_r,ub10_r,
+     > ub6_i,ub7_i,ub8_i,ub9_i,ub10_i

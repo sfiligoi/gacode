@@ -194,7 +194,6 @@ subroutine sparse_solve_umfpack(n_elem,n_row,matnum,i_solve)
      select case(matnum)
 
      case(1)
-!DIR$ PREFERVECTOR
         do i=1,n_x
            do j=1,n_blend
               ij  = i+(j-1)*n_x
@@ -203,7 +202,6 @@ subroutine sparse_solve_umfpack(n_elem,n_row,matnum,i_solve)
         enddo ! i
 
      case(2) 
-!DIR$ PREFERVECTOR
         do i=1,n_x
            do j=1,n_blend
               ij = i+(j-1)*n_x
@@ -212,7 +210,6 @@ subroutine sparse_solve_umfpack(n_elem,n_row,matnum,i_solve)
         enddo ! i
 
      case(3) 
-!DIR$ PREFERVECTOR
         do i=1,n_x
            do j=1,n_blend
               ij = i+(j-1)*n_x
@@ -222,7 +219,6 @@ subroutine sparse_solve_umfpack(n_elem,n_row,matnum,i_solve)
 
         if (n_field > 1) then
 
-!DIR$ PREFERVECTOR
            do i=1,n_x
               do j=1,n_blend
                  ij = i+(j-1)*n_x + n_x*n_blend
@@ -234,7 +230,6 @@ subroutine sparse_solve_umfpack(n_elem,n_row,matnum,i_solve)
 
         if (n_field > 2) then
 
-!DIR$ PREFERVECTOR
            do i=1,n_x
               do j=1,n_blend
                  ij = i+(j-1)*n_x + 2*n_x*n_blend
@@ -245,7 +240,6 @@ subroutine sparse_solve_umfpack(n_elem,n_row,matnum,i_solve)
         endif
 
      case(4)
-!DIR$ PREFERVECTOR
         do i=1,n_x
            do j=1,n_blend
               ij = i+(j-1)*n_x
@@ -253,7 +247,6 @@ subroutine sparse_solve_umfpack(n_elem,n_row,matnum,i_solve)
            enddo ! j
         enddo ! i        
 
-!DIR$ PREFERVECTOR
         do i=1,n_x
            do j=1,n_blend
               ij = i+(j-1)*n_x + n_x*n_blend

@@ -21,6 +21,7 @@
 
 subroutine gyro_fieldeigen
 
+  use mpi
   use gyro_globals
   use gyro_pointers
   use math_constants
@@ -52,8 +53,6 @@ subroutine gyro_fieldeigen
   integer :: ipiv(3)
   integer :: ierr
   !---------------------------------------------------
-
-  include 'mpif.h'
 
   !-------------------------------------------------------------------------
   ! Validity checks
@@ -451,12 +450,12 @@ subroutine gyro_fieldeigen
 
   end select
 
-!  if (i_proc == 0 .and. output_flag == 1) then
-!     open(unit=1,file='fieldeigen_INPUT.out',status='replace')
-!     write(1,'(a,1pe12.4)') 'FIELDEIGEN_WR=',real(omega_eigen)
-!     write(1,'(a,1pe12.4)') 'FIELDEIGEN_WI=',aimag(omega_eigen)
-!     close(1)
-!  endif
+  !  if (i_proc == 0 .and. output_flag == 1) then
+  !     open(unit=1,file='fieldeigen_INPUT.out',status='replace')
+  !     write(1,'(a,1pe12.4)') 'FIELDEIGEN_WR=',real(omega_eigen)
+  !     write(1,'(a,1pe12.4)') 'FIELDEIGEN_WI=',aimag(omega_eigen)
+  !     close(1)
+  !  endif
 
   !----------------------------------------------------------------------------
   ! Compute the eigenfunction
@@ -530,8 +529,12 @@ subroutine gyro_fieldeigen
   call get_field_fluxave
   call gyro_field_time_derivative
   call get_field_plot
-  call gyro_moments_plot 
-  call gyro_write_master(2)
+  call gyro_moments_plot
+  if (io_method == 1) then 
+     call gyro_write_timedata
+  else
+     call gyro_write_timedata_hdf5
+  endif
   step = 1
   call gyro_write_precision(10,abs(omega_eigen))
   !-------------------------------------------------------------------

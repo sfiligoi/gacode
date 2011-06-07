@@ -1,113 +1,174 @@
-#!/bin/sh
-#
-# SCRIPT:
-#  tglf
+#!/bin/bash
+#=============================================================
+# tglf
 #
 # PURPOSE:
-#  Toplevel script controlling execution of TGLF
-#--------------------------------------------------------------
+#  Top-level script controlling execution of TGLF.
+#=============================================================
 
+#=============================================================
+# Syntax validity check and help message
+#
 n=$#
 
-# exit if no arguments
-
-if [ $n -eq 0 ] 
+if [ $n -eq 0 ]
 then
-   cat $TGLF_DIR/bin/HELP
+  echo
+  echo "Usage:   tglf [options]"
+  echo
+  echo "         -p <path>"
+  echo "         Set optional path to simulation directory."
+  echo "         [The default path is the current directory]" 
+  echo
+  echo "EXECUTE MODE (single core)"
+  echo
+  echo "         -e <simdir>" 
+  echo "         Run NEO using input.tglf data in <simdir>."
+  echo
+  echo "REGRESSION TESTING"
+  echo
+  echo "         -r"
+  echo "         Run full regression suite."
+  echo 
+  echo "TEMPLATE GENERATION"
+  echo
+  echo "         -g"
+  echo "         List available simulation templates."
+  echo
+  echo "         -g <template>"
+  echo "         Copy <template> into simulation path."
+  echo
+  echo "UTILITIES"
+  echo
+  echo "         -h" 
+  echo "         Version and platform information."
+  echo
+  echo "         -c" 
+  echo "         Clean out current directory."
+
+  exit 1
+fi
+#=============================================================
+ 
+#=============================================================
+# Define variables for flag capture
+#
+RUNBASE='out.tglf.run'
+VERBASE='out.tglf.version'
+#
+SIMROOT=$PWD
+TGLF_DIR=$GACODE_ROOT/tglf
+# Default number of cores
+NPROC=1
+# Execute/test mode flags
+EXEC_FLAG=0
+GENERATE_FLAG=0
+REGRESS_FLAG=0
+#=============================================================
+
+#=============================================================
+# Parse command line options
+#
+while [ $# -gt 0 ] ; do
+  case "$1" in
+
+  -p) shift ; SIMROOT=$1 ;;
+
+  -e) shift ; LOCDIR=$1 ; EXEC_FLAG=1 ;;
+
+  -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
+
+  -r) shift ; REGRESS_FLAG=1 ;;
+
+  -c) rm -f out.* ; exit 0 ;;
+
+  -h) tglf_version_message ; exit 0 ;;
+
+  *) echo "ERROR: incorrect tglf syntax." ; exit 1 ;;
+ 
+  esac
+  shift
+done
+#=============================================================
+
+if [ "$LOCDIR" == "." ]
+then
+   SIMDIR=$PWD
+   cd .. ; LOCDIR=$PWD
+else
+   SIMDIR=$SIMROOT/$LOCDIR
+fi
+
+#============================================================
+# Check for inconsistent flags:
+FLAG_SUM=$[ $EXEC_FLAG + $GENERATE_FLAG + $REGRESS_FLAG]
+if [ "$FLAG_SUM" -gt 1 ]
+then
+   echo "ERROR: Can only specify one of -e, -t, -g, -r"
    exit 1
 fi
+#============================================================
 
-# determine if optional path was provided
-
-if [ $n -eq 6 ] 
+#============================================================
+# Generate simdir if -g set, then exit.
+#
+if [ $GENERATE_FLAG -eq 1 ]
 then
-   # set simdir to specified path
-   simdir=${6}/${2}
-else 
-   # if not specified on command line, set to default
-      simdir=$TGLF_DIR/sim/${2}
-fi
-if [[ ${1} = "-g" ]] 
-then
-   # special case of only 4 args because -g was specified
-   if [ $n -eq 4 ] 
+   if [ ! -f "${TGLF_DIR}/tools/input/$LOCDIR/input.tglf" ]
    then
-      simdir=${4}
+      cat ${TGLF_DIR}/tools/input/simdir_list
+   else
+      cp -ai ${TGLF_DIR}/tools/input/$LOCDIR $SIMDIR
    fi
+   exit 0
 fi
+#============================================================
 
-RUN_FILE=$simdir/run.out
+#============================================================
+# Do the regression test if -r set, then exit.
+#
+if [ $REGRESS_FLAG -eq 1 ] 
+then 
+   tglf_reg_do
+   exit 0
+fi
+#============================================================
 
-case "${1}" in 
+#============================================================
+# Everything else must be done in $SIMDIR; so ensure existence 
+# of $SIMDIR (needed at this point) and go there: 
+#
+if ! tglf_sim_warn $SIMDIR
+then
+   exit 1 
+fi 
 
-   ##############
-   # Utility Mode
-   ##############
+cd $SIMDIR
+#============================================================
 
-   -h* | -H* | --h* | --H* )
+#==========================================================
+# echo number of tasks, then parse INPUT
+#
+echo "[Parsing data in input.tglf]" > $RUNBASE
 
-      # help
-   
-      cat $TGLF_DIR/bin/HELP ;
-      exit 1 ;;
+python $TGLF_DIR/bin/tglf_parse.py >> $RUNBASE
+if [ $? -eq 1 ] 
+then
+   cat $RUNBASE
+   exit 1
+fi
+#==========================================================
 
-    -v* | -V* | --v* | --V* ) 
-
-      # version info.
-
-      tglf_version_message ;
-      exit 1 ;;
-
-  ##############
-   # Execute Mode
-   ##############
-
-   -e* | -E* | -i* )
-
-      # define executable directory and CONTINUE
-      
-      tglf_version_message ;
-      tglf_version_message > $RUN_FILE ;
-      if ! tglf_sim_warn $simdir 
-      then
-         exit 1 ;
-      fi ;
-      srcdir=$TGLF_DIR/src ;;
-
-   -g )
-
-      # Generate INPUT file
-  
-      tglf_sim_generate ${2} $simdir;
-      exit 1 ;;
-
-   -* | * )
-
-      # error trap
-
-      cat $TGLF_DIR/bin/HELP ;
-      exit 1 ;;
-
-esac
-
-# Work in simdir
-
-cd $simdir
+#===========================================================
+# RUN TGLF
+#
 
 # Version stamp:
+echo `gacode_getversion` > $VERBASE
+echo $GACODE_PLATFORM >> $VERBASE
+date >> $VERBASE
 
-#cat $TGLF_DIR/VERSION > VERSION_tag ; date >> VERSION_tag
-
-# Parse data in INPUT
-
-echo "[Parsing data in INPUT]" >> $RUN_FILE
-tglf_parse INPUT >> $RUN_FILE
-
-# Call platform-specific exec file
-
-nproc=1
-$GYRO_DIR/exec/gyro.$GYRO_PLAT $simdir $nproc $srcdir/tglf
-
-exit 1
-
-
+$TGLF_DIR/src/tglf >> $RUNBASE
+ 
+cat $RUNBASE
+#===========================================================

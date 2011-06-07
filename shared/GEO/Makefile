@@ -16,8 +16,6 @@ OBJECTS = GEO_interface.o \
 
 .SUFFIXES : .o .f90 
 
-all: lib
-
 lib: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
 

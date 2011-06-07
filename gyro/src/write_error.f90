@@ -1,23 +1,17 @@
-!-----------------------------------------------------
+!--------------------------------------------------------
 ! write_error.f90
 !
 ! PURPOSE:
-!  This routine prints the instantaneous timestep 
-!  error.
-!
-! REVISIONS
-! 09 Feb 00: jc
-!  Corrections for egyro.
-!-----------------------------------------------------
+!  This routine prints the instantaneous timestep error.
+!--------------------------------------------------------
 
-subroutine write_error(datafile,io,action)
+subroutine write_error(datafile,io)
 
   use gyro_globals
 
   !---------------------------------------------------
   implicit none
   !
-  integer, intent(in) :: action
   integer, intent(in) :: io
   character (len=*), intent(in) :: datafile
   !
@@ -25,8 +19,11 @@ subroutine write_error(datafile,io,action)
   real :: dummy(n_kinetic)
   !---------------------------------------------------
 
+  select case (io_control)
 
-  select case (action)
+  case(0)
+
+     return
 
   case(1)
 
@@ -35,7 +32,7 @@ subroutine write_error(datafile,io,action)
         close(io)
      endif
 
-  case(-4,-2,2,4)
+  case(2)
 
      if (i_proc == 0) then
 
@@ -62,15 +59,11 @@ subroutine write_error(datafile,io,action)
            end select
         endif
 
-        if (output_flag == 1) then
+        ! output to file
 
-           ! output to file
-
-           open(unit=io,file=datafile,status='old',position='append')
-           write(io,20) time_error(:)
-           close(io)
-
-        endif
+        open(unit=io,file=datafile,status='old',position='append')
+        write(io,20) time_error(:)
+        close(io)
 
      endif
 

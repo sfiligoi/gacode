@@ -65,6 +65,8 @@ fi
 #=============================================================
 # Define variables for flag capture
 #
+RUNBASE='out.tgyro.run'
+VERBASE='out.tgyro.version'
 # Default simulation root directory
 SIMROOT=$PWD
 TGYRO_DIR=$GACODE_ROOT/tgyro
@@ -99,7 +101,7 @@ while [ $# -gt 0 ] ; do
 
   -n) shift ; NPROC=$1 ;;
 
-  -h) tgyro_version_message ; exit 0 ;;
+  -h) gacode_printversion TGYRO ; exit 0 ;;
 
   -l) tgyro_code_lines ; exit 0 ;;
 
@@ -119,7 +121,6 @@ then
 fi
 SIMDIR=$SIMROOT/$LOCDIR
 
-RUN_FILE=$SIMDIR/run.out
 LOG_FILE=$SIMDIR/input.tgyro.log
 
 case "$KILL_STATUS" in
@@ -171,10 +172,10 @@ if [ $SCOPY_FLAG -eq 1 ]
 then
    list="
     description.txt
-    VERSION_tag
+    $RUNBASE
+    $VERBASE
     input.tgyro
-    input.tgyro.gen
-    run.out"
+    input.tgyro.gen"
 
    # Funny syntax below removes trailing /
    target=${SIMDIR%/}"-s"
@@ -214,8 +215,8 @@ echo 0 > halt
 # echo number of tasks, then parse INPUT
 #
 # Machine information
-echo " -----------------------------------------------------------------" > $RUN_FILE
-echo " TGYRO simdir : $simdir" >> $RUN_FILE
+echo " -----------------------------------------------------------------" > $RUNBASE
+echo " TGYRO simdir : $simdir" >> $RUNBASE
 
 rm -f $LOG_FILE
 python $TGYRO_DIR/bin/tgyro_parse.py >> $LOG_FILE
@@ -260,7 +261,7 @@ fi
 
 # Execute:
 
-tgyro_version_message 
+gacode_printversion TGYRO 
 
 if [ $EXEC_FLAG -eq 1 ]
 then
@@ -272,14 +273,14 @@ then
    else
       #==========================================================
       # Version stamp:
-      echo `gacode_getversion` > VERSION_tag 
-      echo $GACODE_PLATFORM >> VERSION_tag
-      date >> VERSION_tag
+      echo `gacode_getversion` > $VERBASE 
+      echo $GACODE_PLATFORM >> $VERBASE
+      date >> $VERBASE
       #==========================================================
 
       echo "0" > "$SIMDIR/gyrotest_flag"
       # Call platform-specific exec file:
-      echo " Passing control to TGYRO executable ..." >> $RUN_FILE
+      echo " Passing control to TGYRO executable ..." >> $RUNBASE
       $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM $SIMDIR $NPROC $TGYRO_DIR/src/tgyro_main
       exit 0
    fi
@@ -295,7 +296,7 @@ then
       exit 1
    else
       echo "1" > "$SIMDIR/gyrotest_flag"
-      echo " Passing control to TGYRO executable (test mode) ..." >> $RUN_FILE
+      echo " Passing control to TGYRO executable (test mode) ..." >> $RUNBASE
       $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM $SIMDIR $NPROC $TGYRO_DIR/src/tgyro_main
       exit 0
    fi

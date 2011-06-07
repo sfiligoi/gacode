@@ -7,7 +7,7 @@ pro user_control, SKIP_LARGE = do_skip_large, REMOTE_DIR=use_remote_dir
   ;;
   DEFAULT, use_remote_dir, 0
   remotedir_flag = use_remote_dir
-  remotedir = '~/simtest'
+  remotedir = ''
   ;;----------------------------------------------------
 
   ;;----------------------------------------------------

@@ -1,14 +1,14 @@
-!------------------------------------------------
+!------------------------------------------------------------
 ! make_ampere_blend.f90
 !
 ! PURPOSE:
-!  Generate matrix L_A of paper by pushing the 
-!  factor [-nabla_perp A] into a velocity 
-!  integral. 
-!------------------------------------------------
+!  Generate matrix L_A of paper by pushing the factor 
+!  [-nabla_perp A] into a velocity integral. 
+!------------------------------------------------------------
 
 subroutine make_ampere_blend
 
+  use mpi
   use gyro_globals
   use gyro_pointers
   use math_constants
@@ -34,7 +34,6 @@ subroutine make_ampere_blend
   complex, dimension(n_gk,-mg_dx:mg_dx-ig_dx) :: ion_current
   !---------------------------------------------------
 
-  include 'mpif.h'
 
   betae_eff = betae_unit_norm*ampere_scale
 

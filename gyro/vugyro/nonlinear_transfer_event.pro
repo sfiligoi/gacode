@@ -100,20 +100,12 @@ pro nonlinear_transfer_event, nonlinear_transfer
 
   if (TrEngGam_flag eq 0) then begin
      TrEngGamstr = '_entropy_nonlinear_transfer'
-     ZZ[*,*,*] = Tr_np[*,*,*]
-     ;; correction for rho_star^2 norm if needed
-     ;;  ZZ[*,*,*] = Tr_np[*,*,*]/rho_s^2
-     ;; correction for double count on n>0 if needed
-     ;;  ZZ[*,1:n_n-1,*] = ZZ[*,1:n_n-1,*]*2.0
+     ZZ[*,*,*] = nl_transfer[*,0,*,*]
   endif 
 
   if (TrEngGam_flag eq 1) then begin
      TrEngGamstr = '_turbulent_entropy'
-     ZZ[*,*,*] = Eng_np[*,*,*]
-     ;; correction for rho_star^2 norm if needed
-     ;;  ZZ[*,*,*] = Eng_np[*,*,*]/rho_s^2
-     ;; correction for double count on n>0 if needed
-     ;;  ZZ[*,1:n_n-1,*] = ZZ[*,1:n_n-1,*]*2.0
+     ZZ[*,*,*] = nl_transfer[*,1,*,*]
   endif 
 
   if (TrEngGam_flag eq 2) then begin

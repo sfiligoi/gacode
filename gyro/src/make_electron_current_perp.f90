@@ -1,13 +1,14 @@
-!-----------------------------------------------------
+!------------------------------------------------------------------
 ! make_electron_current_perp.f90 [caller make_poissonaperp_matrix]
 !
 ! PURPOSE:
-!  Generate matrix of velocity-space averaged 
-!  blending projection integrals.
-!---------------------------------------------
+!  Generate matrix of velocity-space averaged blending projection 
+!  integrals.
+!------------------------------------------------------------------
 
 subroutine make_electron_current_perp
 
+  use mpi
   use gyro_globals
   use gyro_pointers
   use math_constants
@@ -20,7 +21,6 @@ subroutine make_electron_current_perp
   complex, dimension(n_blend,n_x) :: vel_sum_glob
   !---------------------------------------------------
 
-  include 'mpif.h'
 
   if (electron_method > 2) then     
      ! Separate treatment of GK electrons not required

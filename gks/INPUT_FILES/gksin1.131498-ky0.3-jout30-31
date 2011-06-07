@@ -1,0 +1,35 @@
+ &in1
+      idata = 0
+      idatzero = 2
+      tok='d3d'
+      shot='131498'
+      xp_time=3.65
+      cudir='/home/kinsey/iterpdb/d3d/131498'
+      ismooth_data=0
+      irot1=1
+      irot2=1
+      igks_model=0
+      igks=3
+      i_bpar=0
+      igeo=1
+      cdebye=0.0
+      cbetae=1.e-6
+      xalpha=0.0
+      igyro_fix=0
+      kys0=0.3
+      tol_f=0.2
+      delt=0.20
+      iptot=0    ! 0=don't look for total pressure data
+      alpha_p=0.0
+      jin_m=30
+      jout_m=31
+      nstep=501
+      amassgas_exp=2.0
+      z2 = 6.0
+      amass2=12.0
+      cnewk3=1.0
+      cnewk2=0.0
+      ncspec2=0
+      nbasis_min=1
+      nbasis_max=4
+/

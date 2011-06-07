@@ -11,7 +11,9 @@ LLIB=GKEIGEN_lib
 OBJECTS = GKEIGEN_globals.o \
           GKEIGEN_do.o \
           GKEIGEN_matrix_read.o \
-          GKEIGEN_matrix_write.o
+          GKEIGEN_matrix_write.o \
+          GKEIGEN_catch_error.o \
+          GKEIGEN_split_comm.o
 
 .SUFFIXES : .o .f90 .F
 

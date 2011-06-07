@@ -59,6 +59,7 @@ module gyro_interface
   integer :: gyro_electron_method_in = 1
   integer :: gyro_radial_profile_method_in = 1
   integer :: gyro_plot_u_flag_in = 1
+  integer :: gyro_plot_epar_flag_in = 1
   integer :: gyro_plot_n_flag_in = 0
   integer :: gyro_plot_e_flag_in = 0
   integer :: gyro_plot_v_flag_in = 0
@@ -161,7 +162,6 @@ module gyro_interface
   integer :: gyro_dist_print_flag_in = 0
   integer :: gyro_nint_orb_s_in = 64
   integer :: gyro_nint_orb_do_in = 10
-  integer :: gyro_nint_geo_in = 101
   integer :: gyro_udsymmetry_flag_in = 1
   integer :: gyro_gyro_method_in = 1
   integer :: gyro_sparse_method_in = 1
@@ -185,6 +185,7 @@ module gyro_interface
   real    :: gyro_ipccw_in = -1.0
   real    :: gyro_btccw_in = -1.0
   integer :: gyro_geo_gradbcurv_flag_in = 0
+  integer :: gyro_geo_fastionbeta_flag_in = 0
   real    :: gyro_geo_betaprime_scale_in = 1.0
   integer :: gyro_poisson_z_eff_flag_in = 1
   integer :: gyro_z_eff_method_in = 1
@@ -196,12 +197,24 @@ module gyro_interface
   integer :: gyro_gkeigen_n_values_in = 10
   integer :: gyro_gkeigen_iter_in = 100
   real    :: gyro_gkeigen_tol_in = 0.0000001
+  real    :: gyro_gkeigen_omega_target_in = -0.3
+  real    :: gyro_gkeigen_gamma_target_in = 0.12
   integer :: gyro_linsolve_method_in = 1
   integer :: gyro_fieldeigen_root_method_in = 1
   real    :: gyro_fieldeigen_wr_in = -0.3
   real    :: gyro_fieldeigen_wi_in = 0.2
   real    :: gyro_fieldeigen_tol_in = 1e-6
   integer :: gyro_collision_method_in = 1
+
+  ! io related to hdf5 and diagnostics  
+  integer :: gyro_io_method_in = 1
+  real    :: gyro_torangle_offset_in = 0.0
+  integer :: gyro_time_skip_wedge_in = 1
+  integer :: gyro_n_torangle_wedge_in = 1
+  integer :: gyro_n_torangle_3d_in = 20
+  real    :: gyro_theta_wedge_offset_in = 0.
+  real    :: gyro_theta_wedge_angle_in =0.
+
 
   ! Inputs available via interface but not by INPUT
   integer :: gyro_n_fourier_geo_in = 0
@@ -273,6 +286,7 @@ contains
     gyro_electron_method_in = electron_method
     gyro_radial_profile_method_in = radial_profile_method
     gyro_plot_u_flag_in = plot_u_flag
+    gyro_plot_epar_flag_in = plot_epar_flag
     gyro_plot_n_flag_in = plot_n_flag
     gyro_plot_e_flag_in = plot_e_flag
     gyro_plot_v_flag_in = plot_v_flag
@@ -375,7 +389,6 @@ contains
     gyro_dist_print_flag_in = dist_print
     gyro_nint_orb_s_in = nint_ORB_s
     gyro_nint_orb_do_in = nint_ORB_do
-    gyro_nint_geo_in = nint_GEO
     gyro_udsymmetry_flag_in = udsymmetry_flag
     gyro_gyro_method_in = gyro_method
     gyro_sparse_method_in = sparse_method
@@ -399,6 +412,7 @@ contains
     gyro_ipccw_in = ipccw
     gyro_btccw_in = btccw
     gyro_geo_gradbcurv_flag_in = geo_gradbcurv_flag
+    gyro_geo_fastionbeta_flag_in = geo_fastionbeta_flag
     gyro_geo_betaprime_scale_in = geo_betaprime_scale
     gyro_poisson_z_eff_flag_in = poisson_z_eff_flag
     gyro_z_eff_method_in = z_eff_method
@@ -410,12 +424,24 @@ contains
     gyro_gkeigen_n_values_in = gkeigen_n_values
     gyro_gkeigen_iter_in = gkeigen_iter
     gyro_gkeigen_tol_in = gkeigen_tol
+    gyro_gkeigen_omega_target_in = gkeigen_omega_target
+    gyro_gkeigen_gamma_target_in = gkeigen_gamma_target
     gyro_linsolve_method_in = linsolve_method
     gyro_fieldeigen_root_method_in = fieldeigen_root_method
     gyro_fieldeigen_wr_in = fieldeigen_wr
     gyro_fieldeigen_wi_in = fieldeigen_wi
     gyro_fieldeigen_tol_in = fieldeigen_tol
     gyro_collision_method_in = collision_method
+
+    gyro_io_method_in        = io_method
+    gyro_torangle_offset_in        = torangle_offset
+
+    gyro_time_skip_wedge_in = time_skip_wedge
+    gyro_n_torangle_wedge_in = n_torangle_wedge
+    gyro_n_torangle_3d_in  = n_torangle_3d 
+    gyro_theta_wedge_offset_in  = theta_wedge_offset
+    gyro_theta_wedge_angle_in = theta_wedge_angle 
+
 
     gyro_n_fourier_geo_in = n_fourier_geo
     gyro_a_fourier_geo_in(:,:) = a_fourier_geo(:,:)
@@ -476,6 +502,7 @@ contains
     electron_method = gyro_electron_method_in
     radial_profile_method = gyro_radial_profile_method_in
     plot_u_flag = gyro_plot_u_flag_in
+    plot_epar_flag = gyro_plot_epar_flag_in
     plot_n_flag = gyro_plot_n_flag_in
     plot_e_flag = gyro_plot_e_flag_in
     plot_v_flag = gyro_plot_v_flag_in
@@ -578,7 +605,6 @@ contains
     dist_print = gyro_dist_print_flag_in
     nint_ORB_s = gyro_nint_orb_s_in
     nint_ORB_do = gyro_nint_orb_do_in
-    nint_GEO = gyro_nint_geo_in
     udsymmetry_flag = gyro_udsymmetry_flag_in
     gyro_method = gyro_gyro_method_in
     sparse_method = gyro_sparse_method_in
@@ -602,6 +628,7 @@ contains
     ipccw = gyro_ipccw_in
     btccw = gyro_btccw_in
     geo_gradbcurv_flag = gyro_geo_gradbcurv_flag_in
+    geo_fastionbeta_flag = gyro_geo_fastionbeta_flag_in
     geo_betaprime_scale = gyro_geo_betaprime_scale_in
     poisson_z_eff_flag = gyro_poisson_z_eff_flag_in
     z_eff_method = gyro_z_eff_method_in
@@ -613,12 +640,24 @@ contains
     gkeigen_n_values = gyro_gkeigen_n_values_in
     gkeigen_iter = gyro_gkeigen_iter_in
     gkeigen_tol = gyro_gkeigen_tol_in
+    gkeigen_omega_target = gyro_gkeigen_omega_target_in
+    gkeigen_gamma_target = gyro_gkeigen_gamma_target_in
     linsolve_method = gyro_linsolve_method_in
     fieldeigen_root_method = gyro_fieldeigen_root_method_in
     fieldeigen_wr = gyro_fieldeigen_wr_in
     fieldeigen_wi = gyro_fieldeigen_wi_in
     fieldeigen_tol = gyro_fieldeigen_tol_in
     collision_method = gyro_collision_method_in
+    
+    io_method      = gyro_io_method_in       
+    torangle_offset = gyro_torangle_offset_in        
+
+    time_skip_wedge = gyro_time_skip_wedge_in 
+    n_torangle_wedge = gyro_n_torangle_wedge_in 
+    n_torangle_3d = gyro_n_torangle_3d_in  
+    theta_wedge_offset = gyro_theta_wedge_offset_in   
+    theta_wedge_angle = gyro_theta_wedge_angle_in  
+
 
     n_fourier_geo = gyro_n_fourier_geo_in
     a_fourier_geo(:,:) = gyro_a_fourier_geo_in(:,:)

@@ -8,6 +8,7 @@
 
 subroutine gyro_write_input
 
+  use mpi
   use gyro_globals
   use gyro_profile_exp
   use gyro_pointers
@@ -16,7 +17,6 @@ subroutine gyro_write_input
   !--------------------------------------------------
   implicit none
   !
-  integer :: io_mode
   integer :: i_ion
   !
   real :: co_r_loc,co_r
@@ -47,21 +47,7 @@ subroutine gyro_write_input
   character (len=2), dimension(n_ion) :: e_tag
   !--------------------------------------------------
 
-  include 'mpif.h'
-
   rhos_abs = abs(rhos_norm)
-
-  select case (output_flag)
-
-  case (0)
-
-     io_mode = 0
-
-  case (1)
-
-     io_mode = 1
-
-  end select
 
   !--------------------------------------------------
   ! Define some character tags for printing of local 
@@ -138,7 +124,7 @@ subroutine gyro_write_input
      call send_line('Electron curvature drift: OFF')
   endif
 
-  if (i_proc == 0 .and. io_mode == 1) then
+  if (i_proc == 0 .and. output_flag == 1 .and. gkeigen_j_set == 0) then
      open(unit=1,file=trim(runfile),status='old',position='append')
 
      write(1,*) '----------- GRID DIMENSIONS -------------------'
@@ -232,31 +218,6 @@ subroutine gyro_write_input
      enddo
      !--------------------------------------------
 
-     if (0 == 1) then
-
-        ! JC: fix this code (is grad_total = dlnpdr?)
-
-        !--------------------------------------------
-        ! Calculate critical beta and Alfven speed.
-        ! Critical beta based on beta_crit = 0.0071
-        ! for the L2-std case.
-        !
-        grad_total = 0.0
-        den_total  = 0.0
-        i = ir_norm
-        do is=1,n_spec
-           grad_total = grad_total + &
-                (pr_s(is,i)/pr_s(n_spec,i)) * (dlnndr_s(is,i)+dlntdr_s(is,i))
-        enddo
-        beta_crit = 0.6816 * 1./(rmaj_s(i)/r(i)*r_norm*grad_total) * &
-             (shat_norm/q_norm**2)
-        !
-        !--------------------------------------------
-
-        write(1,20) 'beta_e_crit', beta_crit
-
-     endif
-
      write(1,*) '--------------- TGLF PARAMETERS ---------------'
      write(1,20) 'Q_PRIME',(q_norm/r_norm)**2*shat_norm
      write(1,20) 'P_PRIME',(q_norm/r_norm)*beta_unit_s(ir_norm)/(8*pi)*dlnpdr_s(ir_norm)
@@ -320,7 +281,7 @@ subroutine gyro_write_input
 
   endif
 
-  if (gyrotest_flag == 0 .and. io_mode == 1) then
+  if (gyrotest_flag == 0 .and. output_flag == 1) then
 
      co_tau = maxval(abs(v_theta(:,:,:,:)))*dt/d_tau(1)*&
           maxval(mu(1:n_kinetic))
@@ -369,7 +330,7 @@ subroutine gyro_write_input
 
   endif
 
-  if (i_proc == 0 .and. io_mode == 1) then
+  if (i_proc == 0 .and. output_flag == 1) then
      write(1,*) '-------- CENTRAL WAVENUMBERS SIMULATED -----------'
      write(1,*) '    (k_y = nq/r, rho = rho_sD_unit)'
   endif
@@ -384,7 +345,7 @@ subroutine gyro_write_input
 
      call collect_real(krho_i(in_1,ir_norm),krho_collect)
 
-     if (io_mode == 1) then
+     if (output_flag == 1) then
 
         do in=1,n_n
 
@@ -416,7 +377,7 @@ subroutine gyro_write_input
      i = ir_norm
      krho_collect(:) = n(:)*q_s(i)/r_s(i)*rhos_norm/b_unit_s(i)
 
-     if (io_mode == 1) then
+     if (output_flag == 1) then
 
         do in=1,n_n
            if (krho_collect(in)*c_min >= 10.0 .or. &
@@ -440,7 +401,7 @@ subroutine gyro_write_input
   endif
 
 
-  if (i_proc == 0 .and. io_mode == 1) then
+  if (i_proc == 0 .and. output_flag == 1) then
      write(1,*) ' '
      write(1,'(t2,a,t27,f10.6)') 'min resolved k_x*rho_sD : ', &
           2*pi/(x_length/rhos_abs)
@@ -511,8 +472,6 @@ subroutine gyro_write_input
      write(1,*) ' - efficiency.out for parallelization efficiency'
      write(1,*) ' - phase_space.out for velocity-space nodes and weights'
      close(1)
-
-     call gyro_write_units(trim(path)//'units.out',10)
 
   endif
 

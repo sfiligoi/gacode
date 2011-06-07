@@ -1,0 +1,25 @@
+dnl ######################################################################
+dnl
+dnl File:	polyswift.m4
+dnl
+dnl Purpose:	Check for POLYSWIFT defines
+dnl
+dnl Version: $Id: polyswift.m4 3464 2010-04-05 12:42:26Z cary $
+dnl
+dnl Tech-X configure system
+dnl
+dnl Set specifc paths
+dnl ######################################################################
+
+dnl ######################################################################
+dnl
+dnl Append HDF5 paths for Eugene
+dnl
+dnl ######################################################################
+
+HDF5_SERPATH="$HDF5_SERPATH:/usr/common/usg/hdf5/64/default/serial/:/usr/local/hdf5:/usr:/sw/bgp/hdf5/1.8.0/sles10.1_xlc9.0xlf11.1"
+HDF5_PARPATH="$HDF5_PARPATH:/usr/common/usg/hdf5/64/default/parallel:/usr/local/hdf5mpi:/sw/bgp/hdf5/1.8.0/cnk1.2_mpixlc9.0mpixlf11.1"
+
+echo "polyswift.m4 ----> Append Eugene paths for HDF5"
+echo "serial   HDF5 path = $HDF5_SERPATH"
+echo "parallel HDF5 path = $HDF5_PARPATH"

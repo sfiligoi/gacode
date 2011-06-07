@@ -14,18 +14,14 @@ subroutine gyro_initialize_arrays
   !---------------------------------------------------
 
   !---------------------------------------------------
-  ! Do not reset distribution if we are
-  ! making a "warm restart".
-  !
-  if (lskipinit == 0) h = 0.0
-  !
+  h     = 0.0
   h_old = 0.0
   h_0   = 0.0
   h_err = 0.0
   !
-  RHS    = 0.0
-  RHS_dr = 0.0
-  RHS_dt = 0.0
+  rhs    = 0.0
+  rhs_dr = 0.0
+  rhs_dt = 0.0
   !---------------------------------------------------
 
   !---------------------------------------------------
@@ -44,12 +40,12 @@ subroutine gyro_initialize_arrays
   diff         = 0.0
   elapsed_time = 0.0
 
-  !  field_blend     = 0.0
+  ! NO field_blend
   field_blend_dot  = 0.0
   field_blend_old  = 0.0
   field_blend_old2 = 0.0
 
-  !  cap_h     = 0.0
+  ! NO cap_h 
   h_cap_dot  = 0.0
   h_cap_old  = 0.0
   h_cap_old2 = 0.0
@@ -64,7 +60,8 @@ subroutine gyro_initialize_arrays
      gbflux_vec = 0.0
   endif
 
-  entropy(:,:) = 0.0
+  entropy(:,:)     = 0.0
+  nl_transfer(:,:) = 0.0
   !---------------------------------------------------
 
   !---------------------------------------------------

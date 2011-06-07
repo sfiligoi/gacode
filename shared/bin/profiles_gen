@@ -64,6 +64,9 @@ then
    echo "             -g <gfile>"
    echo "             Merge EFIT gfile for high-precision geometry data."
    echo " "
+   echo "             -nogq"
+   echo "             Do not use q from GATO (by default, if gfile is specified q is from GATO)."
+   echo " "
    echo "             -cer <vpol>"
    echo "             Merge data Er and velocity data from Solomon's cer datafile."
    echo " "
@@ -75,6 +78,9 @@ then
    echo "             -g <gfile>"
    echo "             Merge EFIT gfile for high-precision geometry data."
    echo " "
+   echo "             -nogq"
+   echo "             Do not use q from GATO (by default, if gfile is specified q is from GATO)."
+    echo " "
    echo "             -r <reorder sequence>"
    echo "             Reorder ions."
    echo
@@ -237,6 +243,7 @@ CONFIG=.config
 FILE_FLAG=0
 CER_FLAG=0
 G_FLAG=0
+NOGQ_FLAG=0
 VERBOSE_FLAG=0
 ORDER_FLAG=0
 TRANSP_FLAG=0
@@ -277,6 +284,8 @@ while [ $# -gt 0 ] ; do
   -g) shift ; G_FLAG=1 ; GFILE="$1" ;;
 
   -V) shift ; VERBOSE_FLAG=1 ; ITERDB_ARGS="${ITERDB_ARGS};-V";;
+
+  -nogq) shift ; NOGQ_FLAG=1 ; ITERDB_ARGS="${ITERDB_ARGS};-nogq";;
 
   -r) shift ; ORDER="$1" ; ORDER_FLAG=1 ; ITERDB_ARGS="${ITERDB_ARGS};-r;$1";;
 
@@ -484,6 +493,9 @@ fi
 
 # EFIT G-file
 echo $G_FLAG >> $CONFIG
+
+# Don't use gato q (-nogq) flag
+echo $NOGQ_FLAG >> $CONFIG
 
 # Verbosity
 echo $VERBOSE_FLAG >> $CONFIG

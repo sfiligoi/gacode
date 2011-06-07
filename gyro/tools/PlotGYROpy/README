@@ -1,0 +1,33 @@
+
+This is a directory for python scripts for analyzing GYRO data based on
+the python tools of numpy (numeric data structures), tables (HDF5
+read/write), and matplotlib (plotting library and matlab like tools).
+
+See also GA_ROOT/shared/vshdf5/README for general HDF5 information
+as well.
+
+The main scripts are:
+
+readGyroH5.py
+=============
+This is for reading the gyro HDF5 files.  
+The primary data structures are dictionaries where the
+keys are the variable names.
+readGyroH5.txt gives an example of using it via ipython
+
+
+gyroMode2Real.py
+================
+This transform the gyro modes into real space
+
+plotGyro.py
+===========
+Plot gyro data using HDF5
+
+Older files that are deprecated
+===============================
+These files are geared towards the older
+HDF5 layout, but kept because it shows the
+types of plots we were playing around with.
+  gyro_plotH5.py
+  plot-gyro3D.py

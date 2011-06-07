@@ -7,6 +7,7 @@
 
 subroutine get_nonlinear_flux_velocity
 
+  use mpi
   use gyro_globals
   use gyro_pointers
   use math_constants
@@ -23,7 +24,6 @@ subroutine get_nonlinear_flux_velocity
   complex, dimension(n_x) :: ikrho
   !--------------------------------------------------  
 
-  include 'mpif.h'
 
   if (n_field == 3) then
      call catch_error(&
