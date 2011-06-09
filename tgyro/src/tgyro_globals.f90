@@ -61,7 +61,7 @@ module tgyro_globals
   !===============================================================
   ! Variables for LOCAL transport mode
   !
-  character(len=7) :: runfile='run.out'
+  character(len=14) :: runfile='out.tgyro.run'
   character(len=1), dimension(5) :: ion_tag=(/' ','2','3','4','5'/)
   !
   ! Component fluxes

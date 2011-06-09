@@ -8,6 +8,7 @@ x.set_extension('.gen')
 # TGLF input parameters
 x.add('USE_TRANSPORT_MODEL','.true.')
 x.add('GEOMETRY_FLAG','1')
+x.add('WRITE_WAVEFUNCTION_FLAG','1')
 
 x.add('SIGN_BT','1.0')
 x.add('SIGN_IT','1.0')

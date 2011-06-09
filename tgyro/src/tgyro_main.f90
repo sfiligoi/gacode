@@ -16,7 +16,7 @@ program tgyro_main
   !-----------------------------------------------------------------
 
   !-----------------------------------------------------------------
-  ! Get INPUT paths and broadcast them
+  ! Get input paths and broadcast them
   !
   call tgyro_read_input   
   !

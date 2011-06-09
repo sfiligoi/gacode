@@ -86,9 +86,11 @@ subroutine tgyro_comm_setup
      ! Linear stability 
      !-----------------------------
 
-     !! Currently this selection method is a kludge and should be fixed.
-
-     if (paths(1) == "TGLF/") then
+     ! Linear stability mode requires that only TGLF or GYRO is used 
+     ! at all radii.
+   
+     lpath = paths(1)
+     if (lpath(1:4) == "TGLF") then
 
         ! TGLF: number of workers is one
 

@@ -1244,7 +1244,7 @@
       else
         call get_wavefunction
 !
-        open(unit=33,file='wavefunction_out.txt',status='replace')
+        open(unit=33,file='out.tglf.wavefunction',status='replace')
         header = theta//phi
         if(use_bper_in)header = theta//phi//Bper
         if(use_bpar_in)header = theta//phi//Bpar

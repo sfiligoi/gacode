@@ -18,6 +18,7 @@ subroutine tglf_read_input
 
   read(1,*) tglf_use_transport_model_in
   read(1,*) tglf_geometry_flag_in
+  read(1,*) tglf_write_wavefunction_flag_in
 
   ! Data passed to: put_signs
   read(1,*) tglf_sign_bt_in

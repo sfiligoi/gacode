@@ -45,6 +45,7 @@ module tglf_interface
 
   logical :: tglf_use_transport_model_in = .true.
   integer :: tglf_geometry_flag_in = 1
+  integer :: tglf_write_wavefunction_flag_in=0
 
   ! Data passed to: put_signs
   real    :: tglf_sign_bt_in        = 1.0
@@ -240,8 +241,8 @@ contains
     write(1,*) 'xnu_model = ', tglf_xnu_model_in
     write(1,*) 'vpar_model = ', tglf_vpar_model_in
     write(1,*) 'vpar_shear_model = ', tglf_vpar_shear_model_in 
-    write(1,*) 'sign_Bt = ', tglf_sign_Bt_in
-    write(1,*) 'sign_It = ', tglf_sign_It_in
+    write(1,*) 'sign_Bt = ', tglf_sign_bt_in
+    write(1,*) 'sign_It = ', tglf_sign_it_in
     write(1,*) 'rlns = ', tglf_rlns_in(:)
     write(1,*) 'rlts = ', tglf_rlts_in(:)
     write(1,*) 'vpar_shear = ', tglf_vpar_shear_in(:)
@@ -295,6 +296,8 @@ contains
        write(1,*) 'ft_model_sa = ', tglf_ft_model_sa_in
 
     endif
+
+    write(1,*) 'write_wavefunction_flag = ', tglf_write_wavefunction_flag_in
 
     close(1)
 
