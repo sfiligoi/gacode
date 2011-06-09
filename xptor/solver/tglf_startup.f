@@ -25,6 +25,7 @@
       READ(3,nml=tglfin)
       CLOSE(3)
 !
+      if(i_proc.eq.0)write(*,*)"sign_bt=",sign_Bt_exp
 !
       CALL put_rare_switches(theta_trapped_tg,park_tg,ghat_tg,
      > gchat_tg, wd_zero_tg,Linsker_factor_tg,

@@ -367,23 +367,38 @@ c
       j=j+1
       oneval(j) = nf_def_var (ncid,'vphi_exp',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     & len('exp. toroidal velocity 10^5 m/s'),
-     & 'exp. toroidal velocity 10^5 m/s')
+     & len('exp. ion toroidal velocity 10^5 m/s'),
+     & 'exp. ion toroidal velocity 10^5 m/s')
       j=j+1
-      oneval(j) = nf_def_var(ncid,'vphip_exp',nf_double,1,rdim,rhid1(j))
+      oneval(j) = nf_def_var(ncid,'vphie_exp',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     & len('exp. plasma toroidal velocity 10^5 m/s'),
-     & 'exp. plasma toroidal velocity 10^5 m/s')
+     & len('exp. electron plasma toroidal velocity 10^5 m/s'),
+     & 'exp. electron plasma toroidal velocity 10^5 m/s')
+      j=j+1
+      oneval(j) = nf_def_var(ncid,'vphiz_exp',nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     & len('exp. impurity plasma toroidal velocity 10^5 m/s'),
+     & 'exp. impurity plasma toroidal velocity 10^5 m/s')
       j=j+1
       oneval(j)=nf_def_var (ncid,'angrot_exp',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     &          len('exp. angular rotation velocity 10^5 rad/s'),
-     &          'exp. angular rotation velocity 10^5 rad/s')
+     &      len('exp. impurity angular rotation velocity 10^5 rad/s'),
+     &      'exp. impurity angular rotation velocity 10^5 rad/s')
       j=j+1
       oneval(j) = nf_def_var (ncid,'vpar_exp',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
      & len('exp. parallel velocity 10^5 m/s'),
      & 'exp. parallel velocity 10^5 m/s')
+      j=j+1
+      oneval(j) = nf_def_var(ncid,'vpare_exp',nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     & len('exp. electron parallel velocity 10^5 m/s'),
+     & 'exp. electron parallel velocity 10^5 m/s')
+      j=j+1
+      oneval(j) = nf_def_var(ncid,'vparz_exp',nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     & len('exp.impurity  parallel velocity 10^5 m/s'),
+     & 'exp. impurity parallel velocity 10^5 m/s')
       j=j+1
       oneval(j) = nf_def_var (ncid,'vexb_exp',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
@@ -814,11 +829,33 @@ c
       j=j+1
       oneval(j) = nf_def_var (ncid,'vphi_m',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     & len('toroidal velocity 10^5 m/s'),'toroidal velocity 10^5 m/s')
+     & len('ion toroidal velocity 10^5 m/s'),
+     & 'ion toroidal velocity 10^5 m/s')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'vphie_m',nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     & len('electron toroidal velocity 10^5 m/s'),
+     & 'electron toroidal velocity 10^5 m/s')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'vphiz_m',nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     & len('impurity toroidal velocity 10^5 m/s'),
+     & 'impurity toroidal velocity 10^5 m/s')
       j=j+1
       oneval(j) = nf_def_var (ncid,'vpar_m',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     & len('parallel velocity 10^5 m/s'),'parallel velocity 10^5 m/s')
+     & len('ion parallel velocity 10^5 m/s'),
+     & 'ion parallel velocity 10^5 m/s')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'vpare_m',nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     & len('electron parallel velocity 10^5 m/s'),
+     & 'electron parallel velocity 10^5 m/s')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'vparz_m',nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     & len('impurity parallel velocity 10^5 m/s'),
+     & 'impurity parallel velocity 10^5 m/s')
       j=j+1
       oneval(j) = nf_def_var (ncid,'vpol_m',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
@@ -1312,7 +1349,7 @@ c
       oneval(j) = nf_def_var (ncid,'INTEGRAL_LHS5',nf_double,1,
      &            rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'def',
-     &           len('INTEGL_LHS5'), 'INTEGRAL_LHS5')
+     &           len('INTEGRAL_LHS5'), 'INTEGRAL_LHS5')
       j=j+1
       oneval(j) = nf_def_var (ncid,'INTEGRAL_RHS1',nf_double,1,
      &            rdim,rhid1(j))
@@ -1337,7 +1374,7 @@ c
       oneval(j) = nf_def_var (ncid,'INTEGRAL_RHS5',nf_double,1,
      &            rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'def',
-     &           len('INTEGL_RHS5'), 'INTEGRAL_RHS5')
+     &           len('INTEGRAL_RHS5'), 'INTEGRAL_RHS5')
       j=j+1
       oneval(j) = nf_def_var (ncid,'DIFF',nf_double,1,
      &            rdim,rhid1(j))
@@ -1546,12 +1583,17 @@ c
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j),1.D-2*vphi_exp)
       j=j+1
-      oneval(j) = nf_put_var_double(ncid, rhid1(j), 
-     &            1.D-2*angrotp_exp*rmajor_exp)
+      oneval(j) = nf_put_var_double(ncid, rhid1(j),1.D-2*vphie_exp)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j),1.D-2*vphiz_exp)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), 1.D-5*angrot_exp)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j),1.D-2*vpar_exp)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j),1.D-2*vpare_exp)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j),1.D-2*vparz_exp)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), 1.D-2*vexb_exp)
       j=j+1
@@ -1731,7 +1773,15 @@ c
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), 1.D-2*vphi_m)
       j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), 1.D-2*vphie_m)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), 1.D-2*vphiz_m)
+      j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), 1.D-2*vpar_m)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), 1.D-2*vpare_m)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), 1.D-2*vparz_m)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j),1.D-2*vpol_m)
       j=j+1
@@ -1925,34 +1975,34 @@ c
       oneval(j) = nf_put_var_double(ncid, rhid1(j), S(5,1:mxgrid+1))
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j),
-     >  INTEGRAL_LHS(1,1:mxgrid+1))
+     >  INTEGRAL_LHS(1,0:mxgrid))
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j),
-     >  INTEGRAL_LHS(2,1:mxgrid+1))
+     >  INTEGRAL_LHS(2,0:mxgrid))
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j),
-     >  INTEGRAL_LHS(3,1:mxgrid+1))
+     >  INTEGRAL_LHS(3,0:mxgrid))
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j),
-     >  INTEGRAL_LHS(4,1:mxgrid+1))
+     >  INTEGRAL_LHS(4,0:mxgrid))
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j),
-     >  INTEGRAL_LHS(5,1:mxgrid+1))
+     >  INTEGRAL_LHS(5,0:mxgrid))
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j),
-     >  INTEGRAL_RHS(1,1:mxgrid+1))
+     >  INTEGRAL_RHS(1,0:mxgrid))
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j),
-     >  INTEGRAL_RHS(2,1:mxgrid+1))
+     >  INTEGRAL_RHS(2,0:mxgrid))
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j),
-     >  INTEGRAL_RHS(3,1:mxgrid+1))
+     >  INTEGRAL_RHS(3,0:mxgrid))
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j),
-     >  INTEGRAL_RHS(4,1:mxgrid+1))
+     >  INTEGRAL_RHS(4,0:mxgrid))
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j),
-     >  INTEGRAL_RHS(5,1:mxgrid+1))
+     >  INTEGRAL_RHS(5,0:mxgrid))
       j=j+1
       oneval(j)=nf_put_var_double(ncid, rhid1(j),diff(1,1,1:mxgrid+1))
       j=j+1

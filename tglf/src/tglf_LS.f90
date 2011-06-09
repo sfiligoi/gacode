@@ -1094,7 +1094,7 @@
         egamma = 0.0
         ngamma = 0.0
         tgamma = 0.0
-        if(alpha_quench_in.eq.0.0)egamma = -alpha_e_in*vexb_shear_s*sign_kx0
+        if(alpha_quench_in.eq.0.0)egamma = -alpha_e_in*0.11*vexb_shear_s*sign_kx0
 !
 !            write(*,*)alpha_kx0_in,alpha_e_in
 !
@@ -1102,10 +1102,10 @@
 !
       do is = ns0,ns
 !
-        if(alpha_quench_in.eq.0.0)then
-          ngamma = -alpha_e_in*shear_ns_in(is)*sign_kx0
-          tgamma = -alpha_e_in*shear_ts_in(is)*sign_kx0
-        endif
+!        if(alpha_quench_in.eq.0.0)then
+!          ngamma = -alpha_n_in*shear_ns_in(is)*sign_kx0
+!          tgamma = -alpha_t_in*shear_ts_in(is)*sign_kx0
+!        endif
       do js = ns0,ns
 !
 ! start of loop over basis ib,jb for amat
@@ -3662,11 +3662,11 @@
 !
 ! fill the stress moments
 !
-      wp = ky*ave_hp1(2,1,1)*ABS(vpar_shear_in(2))/vs(2)
+!      wp = ky*ave_hp1(2,1,1)*ABS(vpar_shear_in(2))/vs(2)
 !      stress_correction = (AIMAG(freq_QL)+2.0*wp)/(AIMAG(freq_QL)+wp)
 !      stress_correction = 1.0
       wp = ABS(vpar_shear_in(2)*R_unit/vs(2))
-      stress_correction = 1.0 + ((0.149*wp)**1.5)/(1.0+(0.098*wp)**5.5)
+      stress_correction = 1.0 + ((0.11*wp)**1.5)/(1.0+(0.075*wp)**7)
 !
       do is=ns0,ns
         do i=1,nbasis

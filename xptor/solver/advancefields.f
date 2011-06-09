@@ -53,10 +53,14 @@ c
         do i=1,ngrid-1
           normT = normT + vexb_m(i)*vexb_m(i)*ne_m(i)*ne_m(i)
           normDT = normDT + dT(j,i)*dT(j,i)
+c          test = DMAX1(test,scale*ABS(dT(j,i))
+c     >          /DMAX1(1.0,ABS(ne_m(i)*vexb_m(i))))
         enddo
         normT = DSQRT(DMAX1(DFLOAT(ngrid-1),normT))
         normDT = DSQRT(normDT)
         test = DMAX1(test,scale*normDT/normT)
+        if(i_proc.eq.0)
+     >  write(*,*)"test",test
         if(test.gt.xparam_pt(2))scale=xparam_pt(2)*scale/test
         test=0.D0
       endif  
@@ -128,7 +132,7 @@ c so only the electron and main ion densities are changed
 c
       if(alpha_dia.ne.0.0)then
 c        call advance_neo_flows(xparam_pt(13))
-c        call neo_flows(ngrid,vneo_new,vdia_new)
+        call neo_flows(ngrid,vneo_new,vdia_new)
         x13 = xparam_pt(13)
         do i=1,nspecies
           do k=1,ngrid-1
@@ -137,17 +141,15 @@ c        call neo_flows(ngrid,vneo_new,vdia_new)
           enddo
           vneo_m(i,0) = vneo_m(i,1)
           vdia_m(i,0) = vdia_m(i,1)
-          vneo_m(i,ngrid) = vneo_m(i,ngrid-1)
-          vdia_m(i,ngrid) = vdia_m(i,ngrid-1)
         enddo
       endif
 c
       do k=1,ngrid-1
         if(itport_pt(4).eq.0)then
           if(irotstab.eq.1)then
-c keep vphi_m fixed and update vexb_m
+c keep vphiz_m fixed and update vexb_m
            vexb_m(k) = (-c_per(k)*(vpol_m(k)+vneo_m(3,k))
-     >     +vphi_m(k))/c_tor(k) -vdia_m(3,k)
+     >     +vphiz_m(k))/c_tor(k) -vdia_m(3,k)
           endif
           if(irotstab.eq.2)then
 c keep vpar_m fixed and update vexb_m
@@ -156,16 +158,27 @@ c keep vpar_m fixed and update vexb_m
           endif
          endif
 c carry the toroidal and parallel velocities along for the ride
+          vpare_m(k)=a_pol(k)*(vpol_m(k)+vneo_m(1,k))
+     >      +a_tor(k)*(vdia_m(1,k)+vexb_m(k))
           vpar_m(k)=a_pol(k)*(vpol_m(k)+vneo_m(2,k))
      >      +a_tor(k)*(vdia_m(2,k)+vexb_m(k))
-          vphi_m(k)=c_per(k)*(vpol_m(k)+vneo_m(3,k))
+          vparz_m(k)=a_pol(k)*(vpol_m(k)+vneo_m(3,k))
+     >      +a_tor(k)*(vdia_m(3,k)+vexb_m(k))
+          vphie_m(k)=c_per(k)*(vpol_m(k)+vneo_m(1,k))
+     >      +c_tor(k)*(vexb_m(k)+vdia_m(1,k))
+          vphi_m(k)=c_per(k)*(vpol_m(k)+vneo_m(2,k))
+     >      +c_tor(k)*(vexb_m(k)+vdia_m(2,k))
+          vphiz_m(k)=c_per(k)*(vpol_m(k)+vneo_m(3,k))
      >      +c_tor(k)*(vexb_m(k)+vdia_m(3,k))
-c
       enddo
 c
       vexb_m(0)=vexb_m(1)
       vphi_m(0)=vphi_m(1)
+      vphiz_m(0)=vphiz_m(1)
+      vphie_m(0)=vphie_m(1)
       vpar_m(0)=vpar_m(1)
+      vparz_m(0)=vparz_m(1)
+      vpare_m(0)=vpare_m(1)
 c
       return
       end

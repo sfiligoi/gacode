@@ -247,18 +247,18 @@ c power in MW
      >   1.D-6*0.5D0*(dvoldr_p*qfusi_d(j)+dvoldr_m*qfusi_d(j-1))*drm
         pow_ei_exp(j-1)=pow_ei_exp(j-2)-
      >   1.D-6*0.5D0*(dvoldr_p*qdelt_d(j)+dvoldr_m*qdelt_d(j-1))*drm
-c flows in KA
+c flows in KA = 1.0E-3*e*flow=1.6022E-22*flow
         flow_wall_exp(j-1)=flow_wall_exp(j-2)+wallneut*
-     >       1.6022D-21*0.5D0*(dvoldr_p*(sion_d(j,1))+
+     >       1.6022D-22*0.5D0*(dvoldr_p*(sion_d(j,1))+
      >       dvoldr_m*(sion_d(j-1,1)))*drm
         flow_recom_exp(j-1)=flow_recom_exp(j-2)+
-     >       1.6022D-21*0.5D0*(dvoldr_p*(srecom_d(j,1))+
+     >       1.6022D-22*0.5D0*(dvoldr_p*(srecom_d(j,1))+
      >       dvoldr_m*(srecom_d(j-1,1)))*drm 
-        flow_beam_exp(j-1)=flow_beam_exp(j-2)+1.6022D-21*0.5D0*
+        flow_beam_exp(j-1)=flow_beam_exp(j-2)+1.6022D-22*0.5D0*
      >       (dvoldr_p*(snbscale*sbeam_d(j)+sbcx_d(j,1))+
      >       dvoldr_m*(snbscale*sbeam_d(j-1)+sbcx_d(j-1,1)))*drm
         flow_sdot_exp(j-1)=flow_sdot_exp(j-2)+
-     >       1.6022D-21*0.5D0*(dvoldr_p*dudtsv_d(j,1)+
+     >       1.6022D-22*0.5D0*(dvoldr_p*dudtsv_d(j,1)+
      >       dvoldr_m*dudtsv_d(j-1,1))*drm
       enddo
 c

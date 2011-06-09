@@ -154,6 +154,7 @@
       REAL :: cxtorper1,cxtorper2
       REAL :: B2x1,B2x2,R2x1,R2x2,norm_ave,dlp
       REAL :: c_tor_par_ave_out, c_tor_per_ave_out
+      REAL :: kyi
 !
 !
 !  find length along magnetic field y
@@ -191,10 +192,13 @@
         kx0 = 0.0
         sign_kx0=1.0
         if(alpha_quench_in.eq.0.0)then
-          kx0 = sign_Bt_in*alpha_kx0_in*TANH(vexb_shear_s*Rmaj_s/vs(2))/ky
-          kx0 = kx0 -alpha_kx1_in*0.4*TANH(0.091*vpar_shear_in(2)*Rmaj_s/vs(2))
+          kyi = ky*vs(2)*mass(2)/ABS(zs(2))
+          kx0 = alpha_kx0_in*0.19*TANH(vexb_shear_s*Rmaj_s/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
+          kx0 = kx0 -alpha_kx1_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*Rmaj_s/vs(2)) &
+           *(0.06*kyi*kyi/(kyi*kyi+0.001)+0.25*TANH((1.9*kyi)**3))/ky
 !
           if(kx0.lt.0.0)sign_kx0=-1.0
+          kx0 = sign_Bt_in*kx0           ! this is here to cancel the sign_Bt_in factor in kxx below
         endif
 !        kx0 = alpha_kx1_in
 !        write(*,*)"kx0=",kx0

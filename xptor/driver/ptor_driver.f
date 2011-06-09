@@ -763,7 +763,7 @@ c run PTOR or PTOR_DV
 c
       if (dvflag .gt. 0) then
         call ptor_dv
-        call derivedmodprofiles
+c        call derivedmodprofiles
       endif
 c
       if(dvflag.eq.0)then

@@ -143,6 +143,8 @@ c 301 elements (was 51)
       real*8 vdia_exp(nspecies,0:jmaxmt), vneo_exp(nspecies,0:jmaxmt)
       real*8 mach_exp(nspecies,0:jmaxmt)
       real*8 vphi_exp(0:jmaxmt),vpar_exp(0:jmaxmt),vper_exp(0:jmaxmt)
+      real*8 vphie_exp(0:jmaxmt),vpare_exp(0:jmaxmt)
+      real*8 vphiz_exp(0:jmaxmt),vparz_exp(0:jmaxmt)
       real*8 pzmn_sol(0:jmaxmt), ne_p(0:jmaxmt)
       real*8 vphi_ncl_exp(0:jmaxmt), vpol_ncl_exp(0:jmaxmt)
       real*8 omexb_ncl_exp(0:jmaxmt)
@@ -205,6 +207,8 @@ c 301 elements (was 51)
       real*8 rhosda_m(0:jmaxmt), csda_m(0:jmaxmt)
       real*8 vexb_m(0:jmaxmt), vpol_m(0:jmaxmt)
       real*8 vphi_m(0:jmaxmt), vpar_m(0:jmaxmt), vper_m(0:jmaxmt)
+      real*8 vphie_m(0:jmaxmt), vpare_m(0:jmaxmt)
+      real*8 vphiz_m(0:jmaxmt), vparz_m(0:jmaxmt)
       real*8 vdia_m(nspecies,0:jmaxmt), vneo_m(nspecies,0:jmaxmt)
       real*8 vdia_new(nspecies,0:jmaxmt),vneo_new(nspecies,0:jmaxmt)
       real*8 mach_m(nspecies,0:jmaxmt)
@@ -446,6 +450,7 @@ c
      & , stress_tor_i_adhoc, stress_tor_z_adhoc
      & , stress_par_i_adhoc, stress_par_z_adhoc
      & , vpar_exp, vexb_exp, vper_exp
+     & , vphie_exp, vpare_exp, vphiz_exp, vparz_exp
      & , vpol_exp, vdia_exp, vneo_exp, mach_exp
      & , vphi_exp, vphi_ncl_exp, vpol_ncl_exp
      & , omexb_ncl_exp, pzmn_sol, ne_p
@@ -472,6 +477,7 @@ c
      & , stress_par_i_m, stress_par_z_m
      & , diff_exp, chie_exp, chii_exp, eta_tor_exp, egamma_g
      & , rhosda_m, csda_m, vexb_m, vpar_m, vphi_m, vper_m
+     & , vphie_m, vpare_m, vphiz_m, vparz_m
      & , vdia_m, vneo_m, vdia_new, vneo_new
      & , vpol_m, nu_pol_m, kpol_m, nuei_m
      & , vmode_m, vstar_m, vstarp_m, vetor_m, vepol_m, egamma_m

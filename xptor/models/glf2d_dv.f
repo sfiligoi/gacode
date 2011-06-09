@@ -330,8 +330,8 @@ c
 c      if(jm.eq.ngrid-1.and.itport_pt(5).eq.0)egamma_m(jm)=0.0
 c       gradvphim = -gamma_p_m(jm)*csdam/cv
        gradvphim =
-     >  cperm*(gradvpolm+gradvneom(3))+ctorm*(gradvexbm+gradvdiam(3))
-     > +grad_c_per*(vpolm+vneom(3))+grad_c_tor*(vexbm+vdiam(3))
+     >  cperm*(gradvpolm+gradvneom(2))+ctorm*(gradvexbm+gradvdiam(2))
+     > +grad_c_per*(vpolm+vneom(2))+grad_c_tor*(vexbm+vdiam(2))
 c      if(iexb.eq.2) then
 c        egamma_m(jm)=egamma_exp(jm)
 c      else
@@ -918,7 +918,7 @@ c
       include '../inc/ptor.m'
       include '../inc/glf.m'
 !
-      real :: n0,a0,T0,v0,m0,cnc,thetam,cvpol
+      real :: n0,a0,T0,v0,m0,cnc,thetam,cvpol      
 !
       call xptor_neo_map
       call neo_run
@@ -937,11 +937,17 @@ c
       kpol_m(jm) = 0.0
 !
 ! neoclassical poloidal velocity (km/sec)
+! note that neo uses a coordinate system with theta and phi reversed from XPTOR
+! here vneo is the toroidal rotation part <R*U_phi>/R0 = vphi = c_per*(vpol+vneo)+c_tor*(vexb+vdia)
+! so vneo = sign_bt_exp*bt_exp*K and 
+! neo_vpol = -ABS(Bp0)*sign_It_exp*K where the - sign comes fromt the reversed theta direction
+! because vneo_pol = voloidal velocity at the outboard midplane in the direction of the neo theta.
 !
-        cvpol= -alpha_dia*(v0/cv)*(bt_exp/Bp0(jm))
-        vneo(1) = cvpol*alpha_dia*neo_vpol_dke_out(1)
-        vneo(2) = cvpol*alpha_dia*neo_vpol_dke_out(2)
-        vneo(3) = cvpol*neo_vpol_dke_out(3)
+      cvpol=-sign_It_exp*sign_Bt_exp*alpha_dia*(v0/cv)
+     >       *ABS(bt_exp/Bp0(jm))
+      vneo(1) = cvpol*neo_vpol_dke_out(1)
+      vneo(2) = cvpol*neo_vpol_dke_out(2)
+      vneo(3) = cvpol*neo_vpol_dke_out(3)
 c
 c diamagnetic velocity (km/sec)
 c
@@ -1047,18 +1053,18 @@ c
       csdam=9.79D5*DSQRT(tem*1.D3)/
      > (a_unit_exp*100.D0)/DSQRT(amassgas_exp)
       csda_m(jm) = csdam
-      vdiam(1) = (vdia(1)+vdia_m(1,jm))/2.0
-      vdiam(2) = (vdia(2)+vdia_m(2,jm))/2.0
-      vdiam(3) = (vdia(3)+vdia_m(3,jm))/2.0
-      vneom(1) = (vneo(1)+vneo_m(1,jm))/2.0
-      vneom(2) = (vneo(2)+vneo_m(2,jm))/2.0
-      vneom(3) = (vneo(3)+vneo_m(3,jm))/2.0
-      gradvdiam(1) =(vdia(1)-vdia_m(1,jm))/dr(jm,2)
-      gradvdiam(2) =(vdia(2)-vdia_m(2,jm))/dr(jm,2)
-      gradvdiam(3) =(vdia(3)-vdia_m(3,jm))/dr(jm,2)
-      gradvneom(1) =(vneo(1)-vneo_m(1,jm))/dr(jm,2)
-      gradvneom(2) =(vneo(2)-vneo_m(2,jm))/dr(jm,2)
-      gradvneom(3) =(vneo(3)-vneo_m(3,jm))/dr(jm,2)
+c      vdiam(1) = (vdia(1)+vdia_m(1,jm))/2.0
+c      vdiam(2) = (vdia(2)+vdia_m(2,jm))/2.0
+c      vdiam(3) = (vdia(3)+vdia_m(3,jm))/2.0
+c      vneom(1) = (vneo(1)+vneo_m(1,jm))/2.0
+c      vneom(2) = (vneo(2)+vneo_m(2,jm))/2.0
+c      vneom(3) = (vneo(3)+vneo_m(3,jm))/2.0
+c      gradvdiam(1) =(vdia(1)-vdia_m(1,jm))/dr(jm,2)
+c      gradvdiam(2) =(vdia(2)-vdia_m(2,jm))/dr(jm,2)
+c      gradvdiam(3) =(vdia(3)-vdia_m(3,jm))/dr(jm,2)
+c      gradvneom(1) =(vneo(1)-vneo_m(1,jm))/dr(jm,2)
+c      gradvneom(2) =(vneo(2)-vneo_m(2,jm))/dr(jm,2)
+c      gradvneom(3) =(vneo(3)-vneo_m(3,jm))/dr(jm,2)
       vdiam(1) = (vdia_m(1,jm+1)+vdia_m(1,jm))/2.0
       vdiam(2) = (vdia_m(2,jm+1)+vdia_m(2,jm))/2.0
       vdiam(3) = (vdia_m(3,jm+1)+vdia_m(3,jm))/2.0
@@ -1096,9 +1102,9 @@ c        egamma_m(jm)=0.0
 c      endif
 c       gradvphim = -gamma_p_m(jm)*csdam/cv
 c       gradvphim = (cv/csdam)*drhodr(jm)*gradvexbm
-       gradvphim =
-     >  cperm*(gradvpolm+gradvneom(3))+ctorm*(gradvexbm+gradvdiam(3))
-     > +grad_c_per*(vpolm+vneom(3))+grad_c_tor*(vexbm+vdiam(3))
+c       gradvphim =
+c     >  cperm*(gradvpolm+gradvneom(2))+ctorm*(gradvexbm+gradvdiam(2))
+c     > +grad_c_per*(vpolm+vneom(2))+grad_c_tor*(vexbm+vdiam(2))
 c
 c   local magnetic field unit 
       if(igeo_tg.eq.0)then
@@ -1170,18 +1176,25 @@ c set TGLF gradients
       vpar_shear_tg(3) = -sign_Bt_exp*(cv/(csdam))*drhodr(jm)*
      >  (apolm*(gradvpolm+gradvneom(3))+atorm*(gradvexbm+gradvdiam(3)) 
      >  +(vpolm+vneom(3))*grad_a_pol+(vexbm+vdiam(3))*grad_a_tor)
+      if(jm.eq.ngrid-1)then
+c set diamagnetic and neoclassical flow gradeints to zero at boundary
+        vpar_shear_tg(1) = -sign_Bt_exp*(cv/(csdam))*drhodr(jm)*
+     >  (apolm*(gradvpolm)+atorm*(gradvexbm) 
+     >  +(vpolm)*grad_a_pol+(vexbm)*grad_a_tor)
+        vpar_shear_tg(2)=vpar_shear_tg(1)
+        vpar_shear_tg(3)=vpar_shear_tg(1)
+      endif
+      if(vpar_shear_model_tg.eq.1)then
+c use GYRO conventions
+        gamma_p_m(jm) = -(cv/csdam)*drhodr(jm)*gradvexbm
+        vpar_shear_tg(1) = sign_Bt_exp*gamma_p_m(jm)
+        vpar_shear_tg(2) = vpar_shear_tg(1)
+        vpar_shear_tg(3) = vpar_shear_tg(3)
+      endif
       if(alpha_p_tg.eq.0.0)then
         vpar_shear_tg(1)=0.0
         vpar_shear_tg(2)=0.0
         vpar_shear_tg(3)=0.0
-      endif
-      if(vpar_shear_model_tg.eq.1)then
-c use GYRO conventions
-        gamma_p_m(jm) = -(cv/csdam)*drhodr(jm)*
-     >  (atorm*gradvexbm + grad_a_tor*vexbm)
-        vpar_shear_tg(1) = sign_Bt_exp*gamma_p_m(jm)
-        vpar_shear_tg(2) = vpar_shear_tg(1)
-        vpar_shear_tg(3) = vpar_shear_tg(3)
       endif
 c initialized fluxes
       neflux_glf = 0.0
@@ -1197,6 +1210,7 @@ c initialized fluxes
 c
       if(ineo.eq.-2.and.q_exp(jm).lt.1.0)go to 86 !skip TGLF
       if(ineo.eq.-3.and.interchange_DR_m(jm).lt.0.0)go to 86 ! skip TGLF
+      if(ineo.eq.-4.and.jm.le.jin_m)go to 86
 c
 c  do not call TGLF to compute variations if the first call has no flux
 c       if(ipert_gf.eq.0)write(*,*)"glf2d_dv",jm
@@ -1231,22 +1245,22 @@ c
      >     +a_tor(jm)*(vexbm+vdiam(2)))/(a_unit_exp*csdam)
       vpar_tg(3) = sign_Bt_exp*cv*(a_pol(jm)*(vpolm+vneom(3))
      >     +a_tor(jm)*(vexbm+vdiam(3)))/(a_unit_exp*csdam)
-      vpar_tg(1) = sign_Bt_exp*cv*(a_pol(jm)*(vpol_m(jm)+vneo_m(1,jm))
-     >     +a_tor(jm)*(vexb_m(jm)+vdia_m(1,jm)))/(a_unit_exp*csdam)
-      vpar_tg(2) = sign_Bt_exp*cv*(a_pol(jm)*(vpol_m(jm)+vneo_m(2,jm))
-     >     +a_tor(jm)*(vexb_m(jm)+vdia_m(2,jm)))/(a_unit_exp*csdam)
-      vpar_tg(3) = sign_Bt_exp*cv*(a_pol(jm)*(vpol_m(jm)+vneo_m(3,jm))
-     >     +a_tor(jm)*(vexb_m(jm)+vdia_m(3,jm)))/(a_unit_exp*csdam)
-      if(alpha_p_tg.eq.0.0)then
-        vpar_tg(1)=0.0
-        vpar_tg(2)=0.0
-        vpar_tg(3)=0.0
-      endif
+c      vpar_tg(1) = sign_Bt_exp*cv*(a_pol(jm)*(vpol_m(jm)+vneo_m(1,jm))
+c     >     +a_tor(jm)*(vexb_m(jm)+vdia_m(1,jm)))/(a_unit_exp*csdam)
+c      vpar_tg(2) = sign_Bt_exp*cv*(a_pol(jm)*(vpol_m(jm)+vneo_m(2,jm))
+c     >     +a_tor(jm)*(vexb_m(jm)+vdia_m(2,jm)))/(a_unit_exp*csdam)
+c      vpar_tg(3) = sign_Bt_exp*cv*(a_pol(jm)*(vpol_m(jm)+vneo_m(3,jm))
+c     >     +a_tor(jm)*(vexb_m(jm)+vdia_m(3,jm)))/(a_unit_exp*csdam)
       if(vpar_shear_model_tg.eq.1)then
 c use GYRO conventions
         vpar_tg(1) = sign_Bt_exp*cv*a_tor(jm)*vexbm/(a_unit_exp*csdam)
         vpar_tg(2) = vpar_tg(1)
         vpar_tg(3) = vpar_tg(1)
+      endif
+      if(alpha_p_tg.eq.0.0)then
+        vpar_tg(1)=0.0
+        vpar_tg(2)=0.0
+        vpar_tg(3)=0.0
       endif
 c      debye_tg = debyelorhos**2
        debye_tg = debyelorhos
@@ -1258,7 +1272,7 @@ c
       CALL put_averages(taus_tg,as_tg,vpar_tg,betae_tg,xnue_tg,
      > zeff_tg,debye_tg)
 c
-      if(ipert_gf.eq.0)then
+c      if(ipert_gf.eq.0)then
        if(igeo_tg.eq.0)then
 c s-alpha geometry
         rmin_tg = rminm/a_unit_exp
@@ -1306,15 +1320,15 @@ c
         write(*,*)"igeo_tg invalid",igeo_tg
         stop
        endif
-      endif
+c      endif
 c
 c
 c      write(*,*)"glf2d_dv",jm,"ipert_gf=",ipert_gf
 c      if(ipert_gf.ne.0)new_eikonal_tg=.FALSE.
 c use eikonal from last call to tglf_TM 
-      CALL put_eikonal(new_eikonal_tg)
+c      CALL put_eikonal(new_eikonal_tg)
       CALL tglf_TM
-      new_eikonal_tg=.TRUE.
+c      new_eikonal_tg=.TRUE.
 c
       if(ipert_gf.eq.0.and.jm.eq.-1)then
         call write_tglf_input      
@@ -1339,15 +1353,13 @@ cgms      if(igeo_tg.ne.0)gb_unit = gb_unit*drhodr(jm)
       vparflux_glf = (1.6726D-8)  
      >   *nem*gb_unit*csdam*a_unit_exp*get_stress_par(2,1)
      >   *amassgas_exp/(ABS(bt_exp/B_unit))
-      vphiflux_glf = (1.6726D-8)*sign_Bt_exp
+      vphiflux_glf = (1.6726D-8)*amassgas_exp*a_unit_exp
      >  *nem*gb_unit*csdam*a_unit_exp*get_stress_tor(2,1)
-     >  *amassgas_exp*a_unit_exp
       if(ns_tg.eq.3)then
         nzflux_glf = 1.6022D-3*nem*gb_unit*get_particle_flux(3,1)
         tzflux_glf = 1.6022D-3*nem*tem*gb_unit*get_energy_flux(3,1)
-        vphizflux_glf = (1.6726D-8)*sign_Bt_exp
-     >  *nem*gb_unit*csdam*a_unit_exp*get_stress_tor(3,1)
-     >  *amassgas_exp*a_unit_exp
+        vphizflux_glf = (1.6726D-8)*amassgas_exp*a_unit_exp
+     >  *nem*gb_unit*csdam*a_unit_exp*get_stress_tor(3,1)  
         vparzflux_glf = (1.6726D-8) 
      >   *nem*gb_unit*csdam*a_unit_exp*get_stress_par(3,1)
      >   *amassgas_exp/(ABS(bt_exp/B_unit))
@@ -1524,6 +1536,14 @@ c          chiitim = chiitim + chiineo_m(jm)
 c
       if(ineo.eq.-3.and.interchange_DR_m(jm).lt.0.0)then
 c use simple model for interchange mode fluxes
+        diffnem = diffnem + diff_exp(jm)*drhodr(jm)*drhodr(jm)
+        chietem = chietem + chie_exp(jm)*drhodr(jm)*drhodr(jm)
+        chiitim = chiitim + chii_exp(jm)*drhodr(jm)*drhodr(jm)
+        etaphim = etaphim + eta_tor_exp(jm)*drhodr(jm)*drhodr(jm)
+      endif
+c
+      if(ineo.eq.-4.and.jm.le.jin_m)then
+c use experimental diffusivities near the magnetic axis
         diffnem = diffnem + diff_exp(jm)*drhodr(jm)*drhodr(jm)
         chietem = chietem + chie_exp(jm)*drhodr(jm)*drhodr(jm)
         chiitim = chiitim + chii_exp(jm)*drhodr(jm)*drhodr(jm)
