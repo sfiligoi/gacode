@@ -1226,11 +1226,14 @@
       END SUBROUTINE write_tglf_input
 !-----------------------------------------------------------------
 !
-      SUBROUTINE write_wavefunction_out
+      SUBROUTINE write_wavefunction_out(datafile)
 !
       USE tglf_global
 !
       IMPLICIT NONE
+
+      character (len=*), intent(in) :: datafile
+
       INTEGER :: i,n,k,noff
       REAL :: wave(maxmodes*6)
       CHARACTER(len=80) :: header
@@ -1244,7 +1247,7 @@
       else
         call get_wavefunction
 !
-        open(unit=33,file='out.tglf.wavefunction',status='replace')
+        open(unit=33,file=datafile,status='replace')
         header = theta//phi
         if(use_bper_in)header = theta//phi//Bper
         if(use_bpar_in)header = theta//phi//Bpar

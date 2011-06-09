@@ -173,7 +173,7 @@ subroutine tglf_run()
 
      ! Print eigenfunction if flag set
      if (tglf_write_wavefunction_flag_in == 1) then
-        call write_wavefunction_out
+        call write_wavefunction_out(trim(tglf_path_in)//'out.tglf.wavefunction')
      endif
 
   endif
