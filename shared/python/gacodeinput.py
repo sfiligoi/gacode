@@ -333,6 +333,7 @@ class ManagerInput:
                 os.system('cat '+self.overlayfile[p]+' >> '+tempfile)
                 os.system('mv '+tempfile+' '+basefile)
 
+                os.system('tglf -i '+basedir+' -p $PWD')
                 print 'INFO: Processed input.* in '+basedir+'; CPU_max=1'
 
             elif basedir == 'IFS':
