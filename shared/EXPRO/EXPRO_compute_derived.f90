@@ -24,7 +24,6 @@ subroutine EXPRO_compute_derived
   real, parameter :: c  = 2.9979e10  ! cm/s
 
   real, dimension(:), allocatable :: rho
-  real, dimension(:), allocatable :: chi_t
   real, dimension(:), allocatable :: dummy
   real, dimension(:), allocatable :: u_par
 
@@ -121,6 +120,14 @@ subroutine EXPRO_compute_derived
              EXPRO_rmin,EXPRO_n_exp)
      endif
   enddo
+
+  ! 1/L_Ptot = -dln(Ptot)/dr (1/m)
+  if (minval(EXPRO_ptot) > 0.0) then
+     call bound_deriv(EXPRO_dlnptotdr,-log(EXPRO_ptot),EXPRO_rmin,EXPRO_n_exp)
+  else
+     EXPRO_dlnptotdr = 0.0
+  endif
+
   !--------------------------------------------------------------------
 
   !-------------------------------------------------------------------
@@ -220,20 +227,6 @@ subroutine EXPRO_compute_derived
   EXPRO_vol(1)  = 0.0
   EXPRO_volp(1) = 0.0  
   !--------------------------------------------------------------
-  !--------------------------------------------------------------
-
-  !--------------------------------------------------------------
-  ! Compute poloidal flux over 2*pi
-  !  
-  allocate(chi_t(EXPRO_n_exp))
-
-  chi_t(:) = 0.5*EXPRO_b_ref*rho(:)**2
-  EXPRO_poloidalfluxover2pi(1) = 0.0
-  do i=2,EXPRO_n_exp
-     EXPRO_poloidalfluxover2pi(i) = EXPRO_poloidalfluxover2pi(i-1) &
-          + 0.5*(1/EXPRO_q(i)+1/EXPRO_q(i-1))*(chi_t(i)-chi_t(i-1))
-  enddo
-  !--------------------------------------------------------------
 
   !-----------------------------------------------------------------
   ! CGS calculation of deuterium sound speed (cm/s) and 
@@ -259,18 +252,18 @@ subroutine EXPRO_compute_derived
 
   if (EXPRO_ctrl_rotation_method == 1) then 
 
-    ! Candy convention
+     ! Candy convention
 
      EXPRO_gamma_p(:) = -EXPRO_rmaj(:)*EXPRO_w0p(:)
      EXPRO_mach(:)    = EXPRO_rmaj(:)*EXPRO_w0(:)/EXPRO_cs(:)
 
   else
 
-    ! Waltz convention
+     ! Waltz convention
 
      u_par(:) = (EXPRO_bp0(:)*EXPRO_vpol(1,:)+EXPRO_bt0(:)*EXPRO_vtor(1,:))/&
           sqrt(EXPRO_bt0(:)**2+EXPRO_bp0(:)**2)
-  
+
      call bound_deriv(dummy,u_par/EXPRO_rmaj(:),EXPRO_rmin,EXPRO_n_exp)
 
      EXPRO_gamma_p(:) = -EXPRO_rmaj(:)*dummy(:)
@@ -284,7 +277,6 @@ subroutine EXPRO_compute_derived
   ! Clean up
   call GEO_alloc(0)
   deallocate(rho)
-  deallocate(chi_t)
 
   ! Density profile control
 
@@ -311,7 +303,7 @@ subroutine EXPRO_compute_derived
      endif
 
   endif
- 
+
   deallocate(dummy)
 
   if (minval(EXPRO_ni(:,:)) <= 0.0) EXPRO_error=1

@@ -39,11 +39,6 @@ subroutine gyro_alloc_big(flag)
 
   if (flag == 1) then
 
-     if (uflag == 1) then
-        call MPI_finalize(i_err)
-        stop
-     endif
-
      allocate(field_blend(n_blend,n_x,n_field))
      allocate(field_blend_old(n_blend,n_x,n_field))
      allocate(field_blend_old2(n_blend,n_x,n_field))
@@ -175,8 +170,7 @@ subroutine gyro_alloc_big(flag)
      deallocate(aperp_fluxave)
      deallocate(h_err)
 
-     ! Need to save h after profile adjustment:
-     if (lskipinit == 0) deallocate(h)
+     deallocate(h)
      deallocate(h_old)
      deallocate(h_0)
      deallocate(h_cap)

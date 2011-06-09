@@ -134,6 +134,7 @@ subroutine prgen_read_plasmastate
   ! 1/q
   err = nf90_inq_varid(ncid,trim('iota'),varid)
   err = nf90_get_var(ncid,varid,plst_iota(:))
+  q(:) = 1.0/plst_iota(:)
 
   ! R_major (-pi)
   err = nf90_inq_varid(ncid,trim('R_midp_in'),varid)
@@ -154,7 +155,6 @@ subroutine prgen_read_plasmastate
 
   ! Temperatures
   err = nf90_inq_varid(ncid,trim('Ts'),varid)
-  ! WG added species index
   err = nf90_get_var(ncid,varid,plst_ts(1:nx-1,1:plst_dp1_nspec_th)) 
 
   ! Temperature (Te at r/a=1)
@@ -171,15 +171,13 @@ subroutine prgen_read_plasmastate
 
   ! Densities
   err = nf90_inq_varid(ncid,trim('ns'),varid)
-  ! WG added species index
   err = nf90_get_var(ncid,varid,plst_ns(1:nx-1,1:plst_dp1_nspec_th)) 
 
   ! Densities (n at r/a=1)
   err = nf90_inq_varid(ncid,trim('ns_bdy'),varid)
-  ! WG added species index
-
   err = nf90_get_var(ncid,varid,plst_ns(nx,1:plst_dp1_nspec_th)) 
-  ! WG WG WG - following lines
+  
+  ! Bean density
   err = nf90_inq_varid(ncid,trim('nbeami'),varid)
   err = nf90_get_var(ncid,varid,plst_nb(1:nx-1))
 
@@ -200,7 +198,6 @@ subroutine prgen_read_plasmastate
   ! Total plasma pressure, thermal + fast ions
   err = nf90_inq_varid(ncid,trim('P_eq'),varid)
   err = nf90_get_var(ncid,varid,plst_ptowb(:))
-  ! WG WG WG - previous lines
 
   ! Radial electrostatic (equilibrium) potential (kV not keV!) 
   err = nf90_inq_varid(ncid,trim('Epot'),varid)
@@ -278,9 +275,6 @@ subroutine prgen_read_plasmastate
 
   ! No squareness 
   zeta(:) = 0.0
-
-  ! Define q based on iota
-  q(:)  = 1.0/plst_iota(:)
 
 end subroutine prgen_read_plasmastate
 

@@ -150,6 +150,16 @@ builtin(include, shared/autotool_config/tx_fciowrappers.m4)
 builtin(include, shared/autotool_config/tx_hdf5.m4)
 builtin(include, shared/autotool_config/tx_netcdf.m4)
 
+AC_ARG_WITH(fciowrappers,
+ AC_HELP_STRING([--with-fciowrappers], [to build with fciowrappers]),
+        usefciowrappers=$withval, usefciowrappers=no)
+AM_CONDITIONAL(USE_FCIOWRAPPERS, test x$usefciowrappers = xyes )
+
+if test x$usefciowrappers = xyes;then
+  AC_DEFINE(USE_FCIOWRAPPERS, [], [Defined if fciowrappers to be used.])
+fi
+
+
 CPPF90_FLAGS="$CPP_HAVE_MPI $FLUSH_MACRO $FPPFLAGS"
 AC_SUBST(CPPF90_FLAGS)
 dnl ######################################################################

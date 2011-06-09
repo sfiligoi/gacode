@@ -59,6 +59,7 @@ module gyro_interface
   integer :: gyro_electron_method_in = 1
   integer :: gyro_radial_profile_method_in = 1
   integer :: gyro_plot_u_flag_in = 1
+  integer :: gyro_plot_epar_flag_in = 1
   integer :: gyro_plot_n_flag_in = 0
   integer :: gyro_plot_e_flag_in = 0
   integer :: gyro_plot_v_flag_in = 0
@@ -161,7 +162,6 @@ module gyro_interface
   integer :: gyro_dist_print_flag_in = 0
   integer :: gyro_nint_orb_s_in = 64
   integer :: gyro_nint_orb_do_in = 10
-  integer :: gyro_nint_geo_in = 101
   integer :: gyro_udsymmetry_flag_in = 1
   integer :: gyro_gyro_method_in = 1
   integer :: gyro_sparse_method_in = 1
@@ -185,6 +185,7 @@ module gyro_interface
   real    :: gyro_ipccw_in = -1.0
   real    :: gyro_btccw_in = -1.0
   integer :: gyro_geo_gradbcurv_flag_in = 0
+  integer :: gyro_geo_fastionbeta_flag_in = 0
   real    :: gyro_geo_betaprime_scale_in = 1.0
   integer :: gyro_poisson_z_eff_flag_in = 1
   integer :: gyro_z_eff_method_in = 1
@@ -285,6 +286,7 @@ contains
     gyro_electron_method_in = electron_method
     gyro_radial_profile_method_in = radial_profile_method
     gyro_plot_u_flag_in = plot_u_flag
+    gyro_plot_epar_flag_in = plot_epar_flag
     gyro_plot_n_flag_in = plot_n_flag
     gyro_plot_e_flag_in = plot_e_flag
     gyro_plot_v_flag_in = plot_v_flag
@@ -387,7 +389,6 @@ contains
     gyro_dist_print_flag_in = dist_print
     gyro_nint_orb_s_in = nint_ORB_s
     gyro_nint_orb_do_in = nint_ORB_do
-    gyro_nint_geo_in = nint_GEO
     gyro_udsymmetry_flag_in = udsymmetry_flag
     gyro_gyro_method_in = gyro_method
     gyro_sparse_method_in = sparse_method
@@ -411,6 +412,7 @@ contains
     gyro_ipccw_in = ipccw
     gyro_btccw_in = btccw
     gyro_geo_gradbcurv_flag_in = geo_gradbcurv_flag
+    gyro_geo_fastionbeta_flag_in = geo_fastionbeta_flag
     gyro_geo_betaprime_scale_in = geo_betaprime_scale
     gyro_poisson_z_eff_flag_in = poisson_z_eff_flag
     gyro_z_eff_method_in = z_eff_method
@@ -500,6 +502,7 @@ contains
     electron_method = gyro_electron_method_in
     radial_profile_method = gyro_radial_profile_method_in
     plot_u_flag = gyro_plot_u_flag_in
+    plot_epar_flag = gyro_plot_epar_flag_in
     plot_n_flag = gyro_plot_n_flag_in
     plot_e_flag = gyro_plot_e_flag_in
     plot_v_flag = gyro_plot_v_flag_in
@@ -602,7 +605,6 @@ contains
     dist_print = gyro_dist_print_flag_in
     nint_ORB_s = gyro_nint_orb_s_in
     nint_ORB_do = gyro_nint_orb_do_in
-    nint_GEO = gyro_nint_geo_in
     udsymmetry_flag = gyro_udsymmetry_flag_in
     gyro_method = gyro_gyro_method_in
     sparse_method = gyro_sparse_method_in
@@ -626,6 +628,7 @@ contains
     ipccw = gyro_ipccw_in
     btccw = gyro_btccw_in
     geo_gradbcurv_flag = gyro_geo_gradbcurv_flag_in
+    geo_fastionbeta_flag = gyro_geo_fastionbeta_flag_in
     geo_betaprime_scale = gyro_geo_betaprime_scale_in
     poisson_z_eff_flag = gyro_poisson_z_eff_flag_in
     z_eff_method = gyro_z_eff_method_in

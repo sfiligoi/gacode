@@ -42,7 +42,7 @@ tgyro_includes = \
   $(neo_includes) \
   $(tglf_includes) 
 
-lib_LTLIBRARIES = libgacodetgyro_SRC.la
+noinst_LTLIBRARIES = libgacodetgyro_SRC.la
 libgacodetgyro_SRC_la_SOURCES = \
   tgyro_globals.f90 \
   tgyro_allocate_globals.f90 \

@@ -279,6 +279,6 @@ subroutine tgyro_stab_driver
   endif
 
 10 format(f5.3,3x,10(1pe12.5,1x))
-20 format(t2,a,5x,10(f5.3,8x))
+20 format(t2,a,5x,10(f7.3,6x))
 
 end subroutine tgyro_stab_driver

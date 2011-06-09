@@ -70,10 +70,18 @@ subroutine prgen_map_plasmastate
   omega0 = -2.9979e10*dphidpsi*(10.0/3.0)/1e8
   !
   ! Get sign of desired omega computed above
-  sign_omega0 = omega0(1)/abs(omega0(1))
+  if (omega0(1) < 0.0) then
+     sign_omega0 = -1.0
+  else
+     sign_omega0 = 1.0
+  endif
   !
   ! Get true sign of approximate omega (plst_omegat)
-  sign_plst_omega = plst_omegat(1)/abs(plst_omegat(1))
+  if (plst_omegat(1) < 0.0) then
+     sign_plst_omega = -1.0
+  else
+     sign_plst_omega = 1.0
+  endif
   !
   ! Ensure sign of omega is opposite plst_omegat (since plst 
   ! definition of toroidal angle is opposite GYRO/NEO):
@@ -104,18 +112,17 @@ subroutine prgen_map_plasmastate
   vec(16,:) = flow_beam(:)
   vec(17,:) = 0.0 ! flow_wall
   vec(18,:) = zmag(:)
-  !  vec(19,:) = plst_ptowb ! total pressure, thermal + fast ion ! WG
-  vec(19,:) = 0.0
-  vec(20,:) = 0.0 ! [-]
+  vec(19,:) = plst_ptowb ! total pressure, thermal + fast ion
+  vec(20,:) = dpsi(:)
 
   ! ni
-  do i=2,min(plst_dp1_nspec_th+1,6) ! WG added +1 for beams
+  do i=2,min(plst_dp1_nspec_th+1,6)
      ip = reorder_vec(i-1)+1
      vec(21+i-2,:) = plst_ns(:,ip)*1e-19
   enddo
 
   ! ti
-  do i=2,min(plst_dp1_nspec_th+1,6) ! WG added +1 for beams
+  do i=2,min(plst_dp1_nspec_th+1,6)
      ip = reorder_vec(i-1)+1
      vec(26+i-2,:) = plst_ts(:,ip)
   enddo

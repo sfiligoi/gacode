@@ -7,33 +7,30 @@ else
    FFLAGS=${FOPT}
 endif
 
-OBJECTS = \
-	gyro_vshdf5_mod.o \
-	gyro_write_master_hdf5.o 
+LLIB=gyrovshdf5_lib
 
-DUM_OBJECTS = \
-	gyro_dummy_master_hdf5.o
+ifeq ($(VSHDF5_MAKECMD),vshdf5)
+   OBJECTS = \
+	gyro_vshdf5_mod.o \
+	gyro_write_initdata_hdf5.o \
+	gyro_write_timedata_hdf5.o \
+	gyro_write_timedata_wedge_hdf5.o
+else
+   OBJECTS = \
+	gyro_write_dummy_hdf5.o
+endif
 
 .SUFFIXES : .o .f90 
 
-# Always make the dummy.  If we really want the library it will be
-# overwritten
-all: gyro_vshdf5_dummy $(VSHDF5_MAKECMD) 
-
-
 VSHDF5_INC=-I../../shared/vshdf5
 
-vshdf5: $(OBJECTS)
-	rm gyrovshdf5_lib.a
-	$(ARCH) gyrovshdf5_lib.a $(OBJECTS)
-
-gyro_vshdf5_dummy: $(DUM_OBJECTS)
-	$(ARCH) gyrovshdf5_lib.a $(DUM_OBJECTS)
+lib: $(OBJECTS)
+	$(ARCH) $(LLIB).a $(OBJECTS)
 
 .f90.o :
 	$(FC) $(FMATH) $(FFLAGS) $(VSHDF5_INC) $(HDF5_INC) $(VSHDF5_INC) -c $<
 
 clean:  
-	rm -f *.o *.a
+	rm -f *.o *.a ${GACODE_ROOT}/modules/gyro_vshdf5_mod.mod
 
 include ${GACODE_ROOT}/gyro/install/make.ext.${GACODE_PLATFORM}

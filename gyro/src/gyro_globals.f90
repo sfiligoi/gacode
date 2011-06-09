@@ -7,14 +7,34 @@
 !-----------------------------------------------------
 
 module gyro_globals
-
-  integer :: uflag
-
+ 
+  !----------------------------------------------------
+  ! Variables passed in via gyro_run routine:
+  !
+  ! Signal trivial test run (rather than full simulation)
   integer :: gyrotest_flag
-  integer :: lskipinit = 1
+  ! (0=new,1=restart,2=restart-but-don't-write-restart-data)
+  integer :: restart_method
+  ! (1=standard, 2=time reset for transport analysis)
+  integer :: transport_method
+  !----------------------------------------------------
 
   integer :: gyro_exit_status
   character(len=80) :: gyro_exit_message
+
+  !---------------------------------------------------------
+  ! Restart parameters:
+  !
+  ! (input)
+  !
+  integer :: restart_new_flag
+  integer :: restart_data_skip
+  integer :: eigensolve_restart_flag
+  !
+  ! (working)
+  !
+  integer :: i_restart
+  !---------------------------------------------------------
 
   !---------------------------------------------------------
   ! Set this flag to unity if subgrouping
@@ -50,22 +70,37 @@ module gyro_globals
   !---------------------------------------------------------
 
   !---------------------------------------------------------
+  ! IO control variable:
+  ! 
+  ! 0=no IO
+  ! 1=Open/replace
+  ! 2=Append
+  ! 3=Rewind
+  !
+  integer :: io_control
+  !---------------------------------------------------------
+
+  !---------------------------------------------------------
   ! Path to INPUT, read in the get_inputpath subroutine
   !
   character(len=80) :: path
+  !---------------------------------------------------------
 
   !---------------------------------------------------------
   ! Files for vshdf5 i/o control
   !
   integer :: io_method = 1
-  integer :: time_skip_wedge = 0             ! Wedge files for synthetic diagnostics
-  integer :: n_torangle_wedge= 0           ! Number of toroidal planes to use in wedge plots
+  integer :: time_skip_wedge = 0    ! Wedge files for synthetic diagnostics
+  integer :: n_torangle_wedge= 0    ! Number of toroidal planes to use in wedge plots
   integer :: n_torangle_3d = 0
-  real :: torangle_offset=0.
+  real :: torangle_offset=0.0
+  !
   ! This defines a wedge in the poloidal plane 
-  ! To recover the normal global plot, set theta_wedge_offset=-pi and theta_wedge_angle=2*pi
+  ! To recover the normal global plot, set 
+  ! theta_wedge_offset=-pi and theta_wedge_angle=2*pi
   real  :: theta_wedge_offset = 0.0
   real  :: theta_wedge_angle = 0.0
+  !---------------------------------------------------------
 
   !---------------------------------------------------------
   ! Newline characters:
@@ -128,7 +163,6 @@ module gyro_globals
   integer :: lindiff_method
   integer :: gyro_method
   integer :: sparse_method
-  integer :: transport_method
   integer :: linsolve_method 
   integer :: collision_method
   integer :: fieldeigen_root_method
@@ -161,6 +195,7 @@ module gyro_globals
   integer :: gkeigen_matrixonly
   integer :: gkeigen_mwrite_flag
   integer :: plot_u_flag
+  integer :: plot_epar_flag
   integer :: plot_n_flag
   integer :: plot_e_flag
   integer :: plot_v_flag
@@ -168,6 +203,7 @@ module gyro_globals
   integer :: z_eff_method
   integer :: variable_egrid_flag
   integer :: geo_gradbcurv_flag
+  integer :: geo_fastionbeta_flag
   integer :: fakefield_flag
   !---------------------------------------------------------
 
@@ -208,7 +244,6 @@ module gyro_globals
   integer :: gkeigen_j_set
   integer :: j_proc_tot
   integer :: n_proc_tot
-  integer :: gkeigen_transpose_flag
   !
   !-----------------------------------------------------------------------------------
 
@@ -236,7 +271,6 @@ module gyro_globals
   integer :: n_field
   integer :: nint_ORB_s
   integer :: nint_ORB_do
-  integer :: nint_GEO
   integer :: n_mumps_max
   integer :: n_study
   !
@@ -413,21 +447,6 @@ module gyro_globals
   complex, dimension(2) :: freq_n
   ! 
   real, dimension(:), allocatable :: time_error
-  !---------------------------------------------------------
-
-  !---------------------------------------------------------
-  ! Restart parameters:
-  !
-  ! (input)
-  !
-  integer :: restart_method
-  integer :: restart_new_flag
-  integer :: restart_data_skip
-  integer :: eigensolve_restart_flag
-  !
-  ! (working)
-  !
-  integer :: i_restart
   !---------------------------------------------------------
 
   !---------------------------------------------------------
@@ -756,6 +775,7 @@ module gyro_globals
   real, dimension(:), allocatable :: dzmag_s 
   real, dimension(:), allocatable :: shat_s 
   real, dimension(:), allocatable :: beta_unit_s 
+  real, dimension(:), allocatable :: beta_unit_ptot_s
   real, dimension(:), allocatable :: w0_s
   real, dimension(:), allocatable :: w0p_s
   real, dimension(:), allocatable :: gamma_e_s
@@ -764,6 +784,7 @@ module gyro_globals
   !
   real, dimension(:), allocatable :: omega_eb_s
   real, dimension(:), allocatable :: dlnpdr_s
+  real, dimension(:), allocatable :: dlnptotdr_s
   real, dimension(:), allocatable :: beta_star_s
   !
   real, dimension(:,:), allocatable :: den_s 
@@ -773,6 +794,7 @@ module gyro_globals
   real, dimension(:,:), allocatable :: alpha_s
   real, dimension(:,:), allocatable :: nu_s   
   real, dimension(:,:), allocatable :: pr_s
+  real, dimension(:), allocatable :: ptot_s
   !
   complex, dimension(:,:), allocatable :: phase
   real, dimension(:), allocatable :: angp
@@ -1022,6 +1044,7 @@ module gyro_globals
   !
   integer :: GYRO_COMM_WORLD
   integer :: GKEIGEN_J_SUBSET
+  integer :: GYRO_COMM_UNIPROC
   integer :: NEW_COMM_1
   integer :: NEW_COMM_2
   integer :: MUMPS_COMM

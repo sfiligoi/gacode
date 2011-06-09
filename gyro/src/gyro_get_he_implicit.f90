@@ -1,12 +1,12 @@
 !-------------------------------------------------------
-! get_he.f90
+! gyro_get_he_implicit.f90
 !
 ! PURPOSE:
 !  After the ion distribution and fields are advanced,
 !  we can compute the electron distribution.  
 !--------------------------------------------------------
 
-subroutine get_he
+subroutine gyro_get_he_implicit
 
   use gyro_globals
   use gyro_pointers
@@ -50,7 +50,7 @@ subroutine get_he
            
         enddo ! i
         
-     else if(n_field == 2) then
+     else if (n_field == 2) then
         
         ! ELECTROMAGNETIC -- A_parallel only
         
@@ -108,7 +108,7 @@ subroutine get_he
   enddo ! p_nek_loc
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[get_he done]'
+     print *,'[gyro_get_he_implicit done]'
   endif
 
-end subroutine get_he
+end subroutine gyro_get_he_implicit

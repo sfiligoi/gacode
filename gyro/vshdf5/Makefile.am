@@ -18,8 +18,10 @@ gyro_includes= -I $(top_builddir)/shared/math \
 	
 # To get to work with optimization reducing compiler wrappers
 IOINC=@HDF5_INC@ @HDF5_FC_INC@ 
+if USE_FCIOWRAPPERS
 if HAVE_FCIOWRAPPERS
 IOINC += $(FCIOWRAPPERS_INC)
+endif
 else
 IOINC += -I $(top_builddir)/shared/vshdf5
 endif
@@ -31,12 +33,14 @@ AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) $(gyro_include
 if HAVE_HDF5
 libgyro_vshdf5_la_SOURCES = \
 	gyro_vshdf5_mod.f90 \
-	gyro_write_master_hdf5.f90 
+	gyro_write_initdata_hdf5.f90 \
+  gyro_write_timedata_hdf5.f90 \
+  gyro_write_timedata_wedge_hdf5.f90
 else
 libgyro_vshdf5_la_SOURCES = \
-	gyro_dummy_master_hdf5.f90
+	gyro_write_dummy_hdf5.f90
 endif
 
 CLEANFILES = *.mod *.f90 *.lo *.lst *.la
 
-gyro_write_master_hdf5.o: gyro_vshdf5_mod.o
+gyro_write_timedata_hdf5.o: gyro_vshdf5_mod.o

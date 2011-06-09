@@ -5,7 +5,7 @@
 !  Control final calculation and output of code timing data.
 !------------------------------------------------------------
  
-subroutine write_timing(datafile,io,action)
+subroutine write_timing(datafile,io)
 
   use mpi
   use gyro_globals
@@ -13,7 +13,6 @@ subroutine write_timing(datafile,io,action)
   !-----------------------------------------------
   implicit none
   !
-  integer, intent(in) :: action
   integer, intent(in) :: io
   !
   integer, parameter :: n_col=11
@@ -65,7 +64,11 @@ subroutine write_timing(datafile,io,action)
   sep(1) = '--------- '
   sep(:) = sep(1)
 
-  select case (action)
+  select case (io_control)
+
+  case(0)
+
+     return
 
   case(1)
 
@@ -81,7 +84,7 @@ subroutine write_timing(datafile,io,action)
 
      endif
 
-  case(2,4)
+  case(2)
 
      ! Nonlinear  (NL)
      z_out(1) = CPU_NLt

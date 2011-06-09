@@ -125,7 +125,7 @@ subroutine prgen_map_iterdb
   vec(17,:) = flow_wall_exp(:)
   vec(18,:) = zmag(:)
   vec(19,:) = 0.0
-  vec(20,:) = 0.0
+  vec(20,:) = dpsi(:)
 
   !-----------------------------------------------------------------
   ! Construct ion densities and temperatures with reordering

@@ -25,6 +25,11 @@ class TGYROData:
      gradient = []
      local_res = []
      global_res = []
+     wr_ion = []
+     wi_ion = []
+     wr_elec = []
+     wi_elec = []
+     r
 
      Example Usage:
          >>>from matplotlib import pyplot
@@ -44,6 +49,7 @@ class TGYROData:
 
     def init_data(self):
         """Initialize object data."""
+        self.tgyro_mode = 0
         self.n_iterations = 0
         self.n_fields = 0
         self.n_radial = 0
@@ -60,7 +66,11 @@ class TGYROData:
         self.local_res = []
         self.global_res = []
         self.flux_count = []
-
+        self.wr_ion = []
+        self.wi_ion = []
+        self.wr_elec = []
+        self.wi_elec = []
+        self.r = 0
 
     def set_directory(self, sim_directory):
         """Set the simulation directory."""
@@ -68,17 +78,43 @@ class TGYROData:
         path = sim_directory
         self.directory_name = expanduser(expandvars(path))
 
+    def tgyro_get_input(self, input_name):
+        """Return the specified variable from input.tgyro.gen.
+
+        input_name  -  requested input
+
+        Ex:    tgyro_get_input("TGYRO_MODE")
+        """
+
+        input_file = file(self.directory_name + '/input.tgyro.gen', 'r')
+        for line in input_file:
+            try:
+                if line.split()[1] == input_name:
+                    return float(line.split()[0])
+            except IndexError:
+                print "Cannot find specified input parameter: ", input_name
+                return 0
+
+    def read_tgyro_mode(self):
+        """Read TGYRO_MODE and store as self.tgyro_mode."""
+        
+        self.tgyro_mode = self.tgyro_get_input("TGYRO_MODE")
+
     def read_data(self):
         """Read in object data."""
-        self.read_control()
-        self.read_chi_e()
-        self.read_chi_i()
-        self.read_gyrobohm()
-        self.read_profile()
-        self.read_geometry()
-        self.read_flux()
-        self.read_gradient()
-        self.read_residual()
+        self.read_tgyro_mode()
+        if self.tgyro_mode == 2:
+            self.read_stabilities()
+        else:
+            self.read_control()
+            self.read_chi_e()
+            self.read_chi_i()
+            self.read_gyrobohm()
+            self.read_profile()
+            self.read_geometry()
+            self.read_flux()
+            self.read_gradient()
+            self.read_residual()
 
     def read_control(self):
         """Read control.out to set resolutions."""
@@ -144,6 +180,47 @@ class TGYROData:
             count = count + 1
         self.local_res.append(array(data))    
 
+    def read_stab_file(self, file_name):
+        """Read files generated with stability analysis mode.
+
+        file_name - stability file, eg "wi_elec.out" (Default)
+
+        Call with read_stab_file("wr_elec.out").
+
+        Returns [r, ks, freq]
+
+        """
+
+        from numpy import loadtxt
+
+        full_path = self.directory_name + '/' + file_name
+        raw_data = loadtxt(file(full_path), skiprows=2, unpack=True)
+        r = raw_data[0,:]
+        freqs = raw_data[1:,:]
+        num_ks = freqs.shape[1]
+        ks = loadtxt(file(full_path), skiprows=1, usecols=range(1,num_ks+1))[0]
+
+        return [r, ks, freqs]
+
+    def read_stabilities(self):
+        """Read output files from TGYRO_METHOD=2, store into variables.
+
+        Files read:
+            wr_ion.out   ->    self.wr_ion
+            wi_ion.out   ->    self.wi_ion
+            wr_elec.out  ->    self.wr_elec
+            wi_elec.out  ->    self.wi_elec
+
+        """
+
+        self.wr_ion = self.read_stab_file("wr_ion.out")
+        self.wi_ion = self.read_stab_file("wi_ion.out")
+        self.wr_elec = self.read_stab_file("wr_elec.out")
+        self.wi_elec = self.read_stab_file("wi_elec.out")
+
+        self.r = self.wr_ion[0]
+        self.n_radial = len(self.r)
+
     def read_flux(self):
         """Read flux_e.out, flux_i.out, flux_target.out."""
         self.flux_e = self.read_file(self.directory_name + '/flux_e.out')
@@ -169,6 +246,7 @@ class TGYROData:
     def read_geometry(self):
         """Read and store geometry.out in self.geometry."""
         self.geometry = self.read_file(self.directory_name + '/geometry.out')
+        self.r = self.geometry['r/a'][-1]
 
     def read_gradient(self):
         """Read and store gradient.out in self.gradient."""
@@ -178,13 +256,9 @@ class TGYROData:
     
     # ----------------------------------------- #
     # Get data back
-    def get_r(self, iteration=-1):
-        """Return r/a for specified iteration.
-           Keywords:
-               iteration           TGYRO iteration to return, default is last
-        """
-        # NB This should be constant, but taking no chances
-        return self.profile['r/a'][iteration]
+    def get_r(self):
+        """Return r/a."""
+        return self.r
 
     def get_Te(self, iteration=-1):
         """Return Te for specified iteration.
@@ -366,6 +440,105 @@ class TGYROData:
     def get_flux_count(self, iteration=-1):
         """Get the total number of calls to flux driver up to given iteration."""
         return self.flux_count[iteration]
+
+    def get_stability_at_radius(self, radius=0, frequency='r', direction='ion'):
+        """Get frequency vs. ky at specified radius from stability analysis.
+
+        Parameters:
+
+            radius        -       index of requested radius (Default: 0)
+                                  integer ranging from 0 : n_r-1
+
+            frequency     -       real or imaginary spectrum
+                                  'r'     : real (Default)
+                                  'i'     : imaginary
+
+            direction     -       direction of spectrum
+                                  'ion'   : ion direction (Default)
+                                  'elec'  : electron direction
+
+        Usage:
+
+            [ky, wi_ion] = get_stability_at_radius(0, 'i', 'ion')
+
+        """
+
+        # Check for valid inputs
+
+
+        if radius < 0 or radius > self.n_radial-1:
+            print "Error in get_stability_at_radius. Invalid radial point: ", radius
+            print "Valid range: 0 - ", self.n_radial-1
+            return
+
+        if frequency is not 'r' and frequency is not 'i':
+            print "Error in get_stability_at_radius. Invalid frequency: ", frequency
+            print "Valid options are 'r' and 'i'"
+            return
+
+        if direction is not 'ion' and direction is not 'elec':
+            print "Error in get_stability_at_radius. Invalid frequency: ", frequency
+            print "Valid options are 'ion' and 'elec'"
+            return
+
+        # Return requested data
+        if direction is 'ion':
+            if frequency is 'r':
+                k = self.wr_ion[1]
+                f = self.wr_ion[2][:, radius]
+            else:
+                k = self.wi_ion[1]
+                f = self.wi_ion[2][:, radius]
+        else:
+            if frequency is 'r':
+                k = self.wr_elec[1]
+                f = self.wr_elec[2][:, radius]
+            else:
+                k = self.wi_elec[1]
+                f = self.wi_elec[2][:, radius]
+
+        return [k, f]
+
+    def get_most_unstable_at_radius(self, radius=0, direction='ion'):
+        """Return the most unstable mode at specified radius in the specified direction.
+
+        Parameters:
+
+           radius     -   requested radial index (Default: 0)
+                          integer between 0 and n_r-1
+
+           direction  -   'ion'  most unstable ion mode
+                          'elec' most unstable electron mode
+
+        Usage:
+
+           [k_e, omega_e, gamma_e] = get_most_unstable_at_radius(0, 'elec')
+
+        """
+
+        # Check input sanity
+
+        if radius < 0 or radius > self.n_radial-1:
+            print "Error in get_most_unstable_at_radius. Invalid radial point: ", radius
+            print "Valid range: 0 - ", self.n_radial-1
+            return
+
+        if direction is not 'ion' and direction is not 'elec':
+            print "Error in get_most_unstable_at_radius. Invalid frequency: ", frequency
+            print "Valid options are 'ion' and 'elec'"
+            return
+
+        # Get ion and electron data at requested radius
+
+        ks, gammas = self.get_stability_at_radius(radius, 'i', direction)
+        k2, omegas = self.get_stability_at_radius(radius, 'r', direction)
+
+        gamma_max = max(gammas)
+        max_index = gammas.argmax()
+        k_max = ks[max_index]
+        omega_max = omegas[max_index]
+        
+        return k_max, omega_max, gamma_max
 
 # Analysis Tools
     def make_gradient_vs_field_space(self, r=1, evolve_field=1, grad='a/LTi', profile='ti'):

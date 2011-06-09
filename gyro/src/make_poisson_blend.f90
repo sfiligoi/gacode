@@ -1,9 +1,12 @@
-!------------------------------------------------
+!----------------------------------------------------------
 ! make_poisson_blend.f90
 !
 ! PURPOSE:
 !  Generate matrix L_P of paper.
-!------------------------------------------------
+!
+!  i_elec = 0: 
+!         = 1:
+!----------------------------------------------------------
 
 subroutine make_poisson_blend(i_elec)
 
@@ -22,7 +25,6 @@ subroutine make_poisson_blend(i_elec)
   real :: a_gyro
   real :: u_gyro
   real :: v_gyro
-  real, dimension(n_x) :: x_elec
   !
   complex :: inqr
   complex :: temp
@@ -38,24 +40,9 @@ subroutine make_poisson_blend(i_elec)
   real, dimension(n_gk,-m_gyro:m_gyro-i_gyro) :: trace_2_glob
   !
   complex, external :: BLEND_F
+  complex :: cprod 
   !---------------------------------------------------
 
-
-  if (electron_method == 4) then 
-     ! Explicit electrons
-     x_elec(:) = 0.0
-  else
-     if (electron_method == 3) then
-        if (poisson_z_eff_flag == 1) then
-           x_elec(:) = z_eff_s(:)/tem_s(2,:)
-        else
-           x_elec(:) = 1.0/tem_s(2,:)
-        endif
-     else
-        ! Adiabatic or implicit electrons:
-        x_elec = 1.0
-     endif
-  endif
 
   !------------------------------------------------------------------
   ! Now, compute matrix of blending projections:
@@ -198,18 +185,27 @@ subroutine make_poisson_blend(i_elec)
                     ip = i_cyc(i+i_diff)
                     !----------------------------
 
+                    cprod = cs_blend(j,m0,i,p_nek_loc)*c_blend(jp,m0,ip,p_nek_loc)
 
-                    !
                     ! FV[ (F*_j) (alpha_i (1-R) + alpha_e) (F_jp) ]
-                    !
-                    !  = L_P 
 
-                    vel_sum_loc(i_diff,j,jp) = vel_sum_loc(i_diff,j,jp)+&
-                         (sum(alpha_s(1:n_gk,i)*z(1:n_gk)**2* &
-                         (w_g0(i_diff)-fakefield_flag*f_x(1:n_gk,i_diff))) + &
-                         x_elec(i)*i_elec*alpha_s(indx_e,i)*w_g0(i_diff))* &
-                         cs_blend(j,m0,i,p_nek_loc)* &
-                         c_blend(jp,m0,ip,p_nek_loc)
+                    select case (electron_method) 
+                    case (1,2)
+                       vel_sum_loc(i_diff,j,jp) = vel_sum_loc(i_diff,j,jp)+&
+                            (sum(alpha_s(1:n_gk,i)*z(1:n_gk)**2* &
+                            (w_g0(i_diff)-fakefield_flag*f_x(1:n_gk,i_diff))) + &
+                            i_elec*alpha_s(indx_e,i)*w_g0(i_diff))*cprod
+                    case (3)
+                       ! is=1 are electrons, is>1 are ions.
+                       vel_sum_loc(i_diff,j,jp) = vel_sum_loc(i_diff,j,jp)+&
+                            (alpha_s(1,i)*z(1)**2* &
+                            (w_g0(i_diff)-fakefield_flag*f_x(1,i_diff)) + &
+                            sum(alpha_s(2:n_spec,i)*z(2:n_spec)**2)*w_g0(i_diff))*cprod
+                    case (4)
+                       vel_sum_loc(i_diff,j,jp) = vel_sum_loc(i_diff,j,jp)+&
+                            sum(alpha_s(1:n_gk,i)*z(1:n_gk)**2* &
+                            (w_g0(i_diff)-fakefield_flag*f_x(1:n_gk,i_diff)))*cprod
+                    end select
 
                  enddo ! i_diff
 

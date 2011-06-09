@@ -19,6 +19,7 @@ module prgen_read_globals
   integer :: extra_powers_flag = 0
   integer :: format_type
   integer :: gato_flag
+  integer :: nogatoq_flag
   integer :: verbose_flag
   character (len=16), dimension(:), allocatable :: tag
   character (len=16), dimension(:), allocatable :: tag2
@@ -159,10 +160,10 @@ module prgen_read_globals
   integer :: plst_kccw_bphi
   real, dimension(:,:), allocatable :: plst_ts
   real, dimension(:,:), allocatable :: plst_ns
-  real, dimension(:), allocatable :: plst_ptowb  ! WG
-  real, dimension(:), allocatable :: plst_nb     ! WG
-  real, dimension(:), allocatable :: plst_eperpb ! WG
-  real, dimension(:), allocatable :: plst_eparb  ! WG
+  real, dimension(:), allocatable :: plst_ptowb
+  real, dimension(:), allocatable :: plst_nb
+  real, dimension(:), allocatable :: plst_eperpb
+  real, dimension(:), allocatable :: plst_eparb
   real, dimension(:), allocatable :: plst_vol
   real, dimension(:), allocatable :: plst_rho
   real, dimension(:), allocatable :: plst_grho1

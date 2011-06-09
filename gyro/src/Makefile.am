@@ -25,11 +25,11 @@ endif
 
 
 if HAVE_MPIIO
-theReadRestart=read_restart.mpiio.f90
-theWriteRestart=write_restart.mpiio.f90
+theReadRestart=gyro_read_restart.mpiio.f90
+theWriteRestart=gyro_write_restart.mpiio.f90
 else
-theReadRestart=read_restart.f90
-theWriteRestart=write_restart.f90
+theReadRestart=gyro_read_restart.f90
+theWriteRestart=gyro_write_restart.f90
 endif
 
 theDoNlfastMatch=do_nlfast_match.f90
@@ -101,10 +101,10 @@ libgacodegyro_SRC_la_SOURCES = \
   gyro_rhs_total.f90 \
   gyro_tau_derivative.f90 \
   gyro_to_geo.f90 \
+  gyro_write_initdata.f90 \
   gyro_write_input.f90 \
-  gyro_write_master.f90 \
+  gyro_write_timedata.f90 \
   gyro_write_precision.f90 \
-  gyro_write_units.f90 \
   gyro_poisson_private.f90 \
   gyro_poissonaperp_private.f90 \
   gyro_profile_init.f90 \
@@ -141,7 +141,7 @@ libgacodegyro_SRC_la_SOURCES = \
 	get_vel_sum_p.f90 \
 	get_vel_sum_a.f90 \
 	get_vel_sum_aperp.f90 \
-	initialize_timestep.f90 \
+	gyro_initialize_timestep.f90 \
 	catch_error.f90 \
 	catch_blowup.f90 \
 	send_message_real.f90 \
@@ -186,7 +186,6 @@ libgacodegyro_SRC_la_SOURCES = \
 	get_field_explicit.f90 \
 	get_kinetic_advance.f90 \
 	get_delta_he.f90 \
-	get_he.f90 \
 	get_phi_squared.f90 \
 	get_g_squared.f90 \
 	$(theDoNlfastP) \
@@ -198,14 +197,11 @@ libgacodegyro_SRC_la_SOURCES = \
 	write_step.f90 \
 	write_radial_operators.f90 \
 	write_freq.f90 \
-  write_banana_operators.f90 \
 	write_h.f90 \
 	write_efficiency.f90 \
-	write_profile_vugyro.f90 \
 	write_timing.f90 \
 	$(theWriteRestart) \
 	write_error.f90 \
-	write_geometry_arrays.f90 \
 	write_matrix_stat.f90 \
   gyro_adaptive_source.f90 \
 	gyro_fieldeigen_kernel.f90 \
@@ -219,6 +215,7 @@ libgacodegyro_SRC_la_SOURCES = \
 	gyro_entropy.f90 \
 	gyro_build_sparse_poisson.f90 \
   gyro_fulladvance.f90 \
+  gyro_get_he_implicit.f90 \
   gyro_kxky_spectrum.f90 \
   gyro_lambda_grid.f90 \
   gyro_mpi_grid.f90 \

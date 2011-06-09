@@ -20,8 +20,10 @@ lib_LTLIBRARIES = libgacodetgyro.la
 
 
 LMATH=@LAPACK_LIBS@ @BLAS_LIBS@ @Z_LIBS@
+if USE_FCIOWRAPPERS
 if HAVE_FCIOWRAPPERS
 IOLIBS=$(FCIOWRAPPERS_ALIBS) @HDF5_ALIBS@ @NETCDF_ALIBS@ @Z_LIBS@
+endif
 else
 IOLIBS=@HDF5_ALIBS@ @NETCDF_ALIBS@ @Z_LIBS@
 endif
@@ -64,11 +66,11 @@ tgyro_includes = \
 
 tgyro_SOURCES = src/tgyro_main.f90
 tgyro_LDADD = libgacodetgyro.la \
-              $(top_builddir)/shared/libgacodeshared.la \
               $(top_builddir)/gyro/libgacodegyro.la \
               $(top_builddir)/neo/libgacodeneo.la \
               $(top_builddir)/neo/nclass/libgacodenclass.la \
               $(top_builddir)/tglf/libgacodetglf.la \
+              $(top_builddir)/shared/libgacodeshared.la \
               @FFTW_LIBS@ @FFTW_LIBS@ $(LMATH) $(IOLIBS)
 
 

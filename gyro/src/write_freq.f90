@@ -1,5 +1,5 @@
 !------------------------------------------------------
-! write_freq.f90 [caller gyro_write_master]
+! write_freq.f90 [caller gyro_write_timedata]
 !
 ! PURPOSE:
 !  This subroutine computes and prints the instantaeous 
@@ -14,7 +14,7 @@
 !  - Unstable modes have w_i > 0
 !------------------------------------------------------
 
-subroutine write_freq(datafile,io,action)
+subroutine write_freq(datafile,io)
 
   use mpi
   use gyro_globals
@@ -36,31 +36,26 @@ subroutine write_freq(datafile,io,action)
   !
   integer :: data_loop
   !  
-  integer, intent(in) :: action
   integer, intent(in) :: io  
   character (len=*), intent(in) :: datafile
   !--------------------------------------------------
 
-  !-------------------------------------
-  ! action = 1 -> open file
-  !        = 2 -> write to file
-  !        = 3 -> reposition
-  !        = 4 -> write before computed
-  !-------------------------------------
+  select case (io_control)
 
+  case(0)
 
-  select case (action)
+     return
 
   case(1)
 
-     ! Initial open
+     ! Open
 
      if (i_proc == 0) then
         open(unit=io,file=datafile,status='replace')
         close(io)
      endif
 
-  case(-2,2)
+  case(2)
 
      !-------------------------------------------------------
      ! First, calculate freq(1) (frequencies) and freq(2) 
@@ -76,32 +71,41 @@ subroutine write_freq(datafile,io,action)
 
         total_weight = 0.0
 
-        do i=1,n_x
-           do j=1,n_blend
-              mode_weight(i,j) = abs(field_blend(j,i,1)) 
-              total_weight = total_weight+mode_weight(i,j)
-              freq_loc(i,j) = &
-                   (i_c/dt)*log(field_blend(j,i,1)/field_blend_old(j,i,1))
-              freq(1) = freq(1)+freq_loc(i,j)*mode_weight(i,j)
+        if (minval(abs(field_blend_old)) == 0.0) then
+ 
+           freq(1) = 0.0
+           freq(2) = 1.0
+
+        else
+
+           do i=1,n_x
+              do j=1,n_blend
+                 mode_weight(i,j) = abs(field_blend(j,i,1)) 
+                 total_weight = total_weight+mode_weight(i,j)
+                 freq_loc(i,j) = &
+                      (i_c/dt)*log(field_blend(j,i,1)/field_blend_old(j,i,1))
+                 freq(1) = freq(1)+freq_loc(i,j)*mode_weight(i,j)
+              enddo
            enddo
-        enddo
 
-        freq(1) = freq(1)/total_weight
+           freq(1) = freq(1)/total_weight
 
-        df_r = 0.0
-        df_i = 0.0
+           df_r = 0.0
+           df_i = 0.0
 
-        do i=1,n_x
-           do j=1,n_blend
-              df_r = df_r+ &
-                   abs(real(freq_loc(i,j)-freq(1)))*mode_weight(i,j)
-              df_i = df_i+ &
-                   abs(aimag(freq_loc(i,j)-freq(1)))*mode_weight(i,j)
+           do i=1,n_x
+              do j=1,n_blend
+                 df_r = df_r+ &
+                      abs(real(freq_loc(i,j)-freq(1)))*mode_weight(i,j)
+                 df_i = df_i+ &
+                      abs(aimag(freq_loc(i,j)-freq(1)))*mode_weight(i,j)
+              enddo
            enddo
-        enddo
 
-        ! Want a fractional, not absolute, error
-        freq(2) = (df_r+i_c*df_i)/total_weight/abs(freq(1)) 
+           ! Want a fractional, not absolute, error
+           freq(2) = (df_r+i_c*df_i)/total_weight/abs(freq(1)) 
+
+        endif
 
      else
 
@@ -111,8 +115,7 @@ subroutine write_freq(datafile,io,action)
      !
      !---------------------------------------------------------------
 
-
-     if (i_proc == 0 .and. output_flag == 1) then
+     if (i_proc == 0) then
         open(unit=io,file=datafile,status='old',position='append')
      endif
 
@@ -126,7 +129,7 @@ subroutine write_freq(datafile,io,action)
 
         if (i_proc == 0) then
 
-           if (silent_flag == 0) print 10,'n =',n(in),&
+           if (silent_flag == 0 .and. linsolve_method == 1) print 10,'n =',n(in),&
                 'freq =',freq_n(1), &
                 'df =',freq_n(2)  
 
@@ -175,19 +178,6 @@ subroutine write_freq(datafile,io,action)
         enddo
 
         endfile(io)
-        close(io)
-
-     endif
-
-  case(4)
-
-     ! Output in case where freq. cannot be computed.
-
-     if (i_proc == 0) then
-
-        dummy = 0.0
-        open(unit=io,file=datafile,status='old',position='append')
-        write(io,20) dummy
         close(io)
 
      endif
