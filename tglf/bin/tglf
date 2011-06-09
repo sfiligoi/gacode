@@ -25,6 +25,11 @@ then
   echo "         -e <simdir>" 
   echo "         Run NEO using input.tglf data in <simdir>."
   echo
+  echo "INITIALIZE ONLY"
+  echo
+  echo "         -i <simdir>" 
+  echo "         Process input.tglf only."
+  echo
   echo "REGRESSION TESTING"
   echo
   echo "         -r"
@@ -62,6 +67,7 @@ TGLF_DIR=$GACODE_ROOT/tglf
 NPROC=1
 # Execute/test mode flags
 EXEC_FLAG=0
+INIT_FLAG=0
 GENERATE_FLAG=0
 REGRESS_FLAG=0
 #=============================================================
@@ -77,6 +83,8 @@ while [ $# -gt 0 ] ; do
   -e) shift ; LOCDIR=$1 ; EXEC_FLAG=1 ;;
 
   -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
+
+  -i) shift ; LOCDIR=$1 ; INIT_FLAG=1 ;;
 
   -r) shift ; REGRESS_FLAG=1 ;;
 
@@ -101,10 +109,10 @@ fi
 
 #============================================================
 # Check for inconsistent flags:
-FLAG_SUM=$[ $EXEC_FLAG + $GENERATE_FLAG + $REGRESS_FLAG]
+FLAG_SUM=$[ $EXEC_FLAG + $GENERATE_FLAG + $REGRESS_FLAG + $INIT_FLAG]
 if [ "$FLAG_SUM" -gt 1 ]
 then
-   echo "ERROR: Can only specify one of -e, -t, -g, -r"
+   echo "ERROR: Can only specify one of -e, -t, -g, -r, -i"
    exit 1
 fi
 #============================================================
@@ -163,12 +171,20 @@ fi
 # RUN TGLF
 #
 
-# Version stamp:
-echo `gacode_getversion` > $VERBASE
-echo $GACODE_PLATFORM >> $VERBASE
-date >> $VERBASE
+# Execute:
+if [ $EXEC_FLAG -eq 1 ]
+then
 
-$TGLF_DIR/src/tglf >> $RUNBASE
+   # Version stamp:
+   echo `gacode_getversion` > $VERBASE
+   echo $GACODE_PLATFORM >> $VERBASE
+   date >> $VERBASE
+
+   $TGLF_DIR/src/tglf >> $RUNBASE
  
-cat $RUNBASE
+   #gacode_printversion TGLF
+
+   cat $RUNBASE
+
+fi
 #===========================================================
