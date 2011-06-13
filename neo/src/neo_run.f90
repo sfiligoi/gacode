@@ -69,4 +69,7 @@ subroutine neo_run()
       neo_efluxncv_gv_out(is)  = neo_gv_out(is,4)     ! Q_is/Q_norm non-convective
    enddo
    
+   neo_error_status_out  = error_status
+   neo_error_message_out = error_message
+
  end subroutine neo_run

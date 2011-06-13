@@ -1,884 +1,730 @@
 module neo_energy_grid
-  
+
   implicit none
 
   public :: ENERGY_basis_ints_alloc, ENERGY_basis_ints, &
-       ENERGY_coll_ints_alloc, ENERGY_coll_ints, get_coll_freqs
+       ENERGY_coll_ints_alloc,ENERGY_coll_ints
 
-  ! private variables for integration
-  integer, private :: iebasis, jebasis, ietype  ! global params for integration
-  integer, private :: ir, is, js                ! for collision ints
-  integer, parameter :: integ_order = 64
-  integer, parameter, private :: Nx_start=5, Nx_max=200000
+  ! energy matrices
+  ! (energy, xi, left/right diagonal in xi)
+  real, dimension(:,:,:,:), allocatable :: emat_e05, emat_en05, emat_e05de
+
+  ! energy vectors
+  real, dimension(:,:), allocatable :: evec_e0, evec_e1, evec_e2, evec_e05, evec_e105
+
+  ! xi vectors -- order of associated Laguerre basis
+  integer, dimension(:), allocatable  :: e_lag 
+  integer, dimension(:), allocatable  :: xi_beta_l
+  integer, parameter  :: e_alpha=2  ! should be 1 or 2
+
+  ! collision matrices
+  ! (species,species,energy,xi)
+  real, dimension(:,:,:,:,:), allocatable :: emat_coll_test, emat_coll_field
+
+  ! private variables
   logical, private :: initialized_basis = .false.
   logical, private :: initialized_coll  = .false.
-  real, private :: itol                         ! integ convergence tol (input)
-  real, private :: energy_min                   ! min ene for integration
+  real, dimension(:), allocatable :: mygamma2
 
-  ! energy integral values
-  !
-  ! matrix index
-  !
-  integer, dimension(:,:), allocatable :: eindx !indx for matrices (symmetric)
-  !
-  ! Kinetic vars
-  !
-  ! vectors (ie)
-  real, dimension(:), allocatable :: evec_e05,evec_e105 ! ene^0.5; ene^1.5
-  real, dimension(:), allocatable :: evec_e0, evec_e1, evec_e2, evec_e3
-  real, dimension(:), allocatable :: evec_e1de, evec_e2de, evec_e3de
-  ! matrices (ie/je)
-  real, dimension(:), allocatable :: emat_e05,emat_e1, emat_e2, emat_en05, &
-       emat_e0
-  ! non-symmetric matrices
-  real, dimension(:,:), allocatable :: ematij_e2de, ematij_e05de, ematij_e1de
-                                       ! ene^2*dBn/dene, ene^0.5*dBn/dene 
-  !
-  ! Collision vars
-  !
-  ! matrices (is,js,ie/je)
-  real, dimension(:,:,:), allocatable :: emat_coll_lorentz, emat_coll_ru, &
-       emat_coll_rpi, emat_coll_rn
-  ! vector (is,js,ie)
-  real, dimension(:,:,:), allocatable :: evec_coll_rs,evec_coll_rh, &
-       evec_coll_rk, evec_coll_rp, evec_coll_rq,evec_coll_rqd, &
-       evec_coll_rn_krook
-  ! constant (is,js)
-  real, dimension(:,:), allocatable :: econ_coll_rs, econ_coll_rh, &
-       econ_coll_rk, econ_coll_rp, econ_coll_rq, econ_coll_rn_krook
-  
 contains
-  
+
   subroutine ENERGY_basis_ints_alloc(flag)
-    use neo_globals, only : n_energy, energy_max, &
-         energy_tol, energy_min_connor, collision_model
+    use neo_globals, only : n_energy, n_xi
     implicit none
-    integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
-    integer :: ie, je, ke
+    integer, intent (in) :: flag
+    integer :: ie, ix
+    integer :: xarg
     
     if(flag == 1) then
        if(initialized_basis) return
        
-       allocate(eindx(n_energy,n_energy))
-       ke=1
-       do ie=1, n_energy
-          do je=ie, n_energy
-             eindx(ie,je) = ke
-             if(je .ne. ie) then
-                eindx(je,ie) = ke
-             endif
-             ke = ke + 1
-          enddo
+       allocate(emat_e05(0:n_energy,0:n_energy,0:n_xi,2))
+       allocate(emat_en05(0:n_energy,0:n_energy,0:n_xi,2)) 
+       allocate(emat_e05de(0:n_energy,0:n_energy,0:n_xi,2))
+
+       allocate(evec_e0(0:n_energy,0:n_xi))
+       allocate(evec_e1(0:n_energy,0:n_xi))
+       allocate(evec_e2(0:n_energy,0:n_xi))
+       allocate(evec_e05(0:n_energy,0:n_xi))
+       allocate(evec_e105(0:n_energy,0:n_xi))
+
+       allocate(e_lag(0:n_xi))
+       allocate(xi_beta_l(0:n_xi))
+       ! lag 1/2 + 3/2
+       e_lag(:) = 3
+       e_lag(0) = 1
+       xi_beta_l(:) = 1
+       xi_beta_l(0) = 0
+       ! sonine
+       !do ix=0,n_xi
+       !   e_lag(ix) = 2*ix + 1
+       !   xi_beta_l(ix) = ix
+       !enddo
+       ! lag 1/2
+       !e_lag(:) = 1
+       !xi_beta_l(:) = 0
+       ! lag 3/2
+       !e_lag(:) = 3
+       !xi_beta_l(:) = 1
+
+       xarg = 4*e_alpha * n_energy + 4*n_xi + 12
+       allocate(mygamma2(1:xarg))
+       do ie=1,xarg
+          mygamma2(ie) = gamma2(ie)
        enddo
-       
-       allocate(evec_e05(n_energy));   allocate(evec_e105(n_energy))
-       allocate(evec_e0(n_energy));    allocate(evec_e2(n_energy))
-       allocate(evec_e1(n_energy));    allocate(evec_e3(n_energy))
-       allocate(evec_e2de(n_energy));  allocate(evec_e3de(n_energy))
-       allocate(evec_e1de(n_energy))
-
-       ! matrices are symmetric: (n^2+n)/2 elements
-       ke = (n_energy**2 + n_energy)/2
-       
-       allocate(emat_en05(ke))
-       allocate(emat_e05(ke))
-       allocate(emat_e0(ke))
-       allocate(emat_e1(ke))
-       allocate(emat_e2(ke))
-       ! non-symmetric matrix
-       allocate(ematij_e2de(n_energy, n_energy))
-       allocate(ematij_e05de(n_energy, n_energy))
-       allocate(ematij_e1de(n_energy, n_energy))
-
-       itol = energy_tol
-       if(collision_model == 1) then
-          energy_min = energy_min_connor
-       else
-          energy_min = 0.0
-       endif
 
        initialized_basis = .true.
-       
+
     else
        if(.NOT. initialized_basis) return
        
-       deallocate(eindx)
-
-       deallocate(evec_e05);   deallocate(evec_e105)
-       deallocate(evec_e0);    deallocate(evec_e2)
-       deallocate(evec_e1);    deallocate(evec_e3)
-       deallocate(evec_e2de);  deallocate(evec_e3de)
-       deallocate(evec_e1de)
-
-       deallocate(emat_e05);   deallocate(emat_e1)
-       deallocate(emat_e2);    deallocate(emat_e0)
-       deallocate(ematij_e2de)
-       deallocate(emat_en05);  deallocate(ematij_e05de)
-       deallocate(ematij_e1de)
-
+       deallocate(emat_e05)
+       deallocate(emat_en05) 
+       deallocate(emat_e05de)
+       deallocate(evec_e0)
+       deallocate(evec_e1)
+       deallocate(evec_e2)
+       deallocate(evec_e05)
+       deallocate(evec_e105)
+       deallocate(e_lag)
+       deallocate(mygamma2)
+       
        initialized_basis = .false.
-
+       
     endif
     
   end subroutine ENERGY_basis_ints_alloc
+  
+  subroutine ENERGY_basis_ints
+    use neo_globals, only : n_energy, n_xi
+    implicit none
+    integer :: xarg
+    integer :: ie, je, ke, me, ix, jx, kx
+    real :: zarg0, zarg1, zarg2
+
+    ! vectors
+    do ie=0, n_energy
+       do ix=0, n_xi
+
+          evec_e0(ie,ix)   = 0.0
+          evec_e1(ie,ix)   = 0.0
+          evec_e2(ie,ix)   = 0.0
+          evec_e05(ie,ix)  = 0.0
+          evec_e105(ie,ix) = 0.0
+
+          do ke=0, ie
+
+             zarg0 = (-1.0)**ke
+             zarg1 = mygamma2(2 + 2*ie + e_lag(ix)) &
+                  / mygamma2(2 + 2*(ie-ke)) &
+                  / mygamma2(2 + 2*ke + e_lag(ix))
+             zarg2 = mygamma2(2 + 2*ke)
+
+             evec_e0(ie,ix) = evec_e0(ie,ix) +  0.5 * zarg0 * zarg1 &
+                  * (mygamma2(e_alpha*ke + xi_beta_l(ix) + 3) / zarg2)
+
+             evec_e1(ie,ix) = evec_e1(ie,ix) +  0.5 * zarg0 * zarg1 &
+                  * (mygamma2(e_alpha*ke + xi_beta_l(ix) + 5) / zarg2)
+
+             evec_e2(ie,ix) = evec_e2(ie,ix) +  0.5 * zarg0 * zarg1 &
+                  * (mygamma2(e_alpha*ke + xi_beta_l(ix) + 7) / zarg2)
+             
+             evec_e05(ie,ix) = evec_e05(ie,ix) + 0.5 * zarg0 * zarg1 &
+                  * (mygamma2(e_alpha*ke + xi_beta_l(ix) + 4) / zarg2)
+
+             evec_e105(ie,ix) = evec_e105(ie,ix) + 0.5 * zarg0 * zarg1 &
+                  * (mygamma2(e_alpha*ke + xi_beta_l(ix) + 6) / zarg2)
+             
+          enddo
+       enddo
+    enddo
+
+    do ie=0, n_energy
+       do je=0,n_energy
+          do ix=0, n_xi
+ 
+             emat_e05(ie,je,ix,:)   = 0.0
+             emat_en05(ie,je,ix,:)  = 0.0
+             emat_e05de(ie,je,ix,:) = 0.0
+
+             do ke=0,ie
+                do me=0,je
+                   
+                   do kx=1,2
+                      if(kx == 1) then 
+                         jx = ix-1
+                      else
+                         jx = ix+1
+                      endif
+
+                      if (jx >= 0 .and. jx <= n_xi) then
+
+                         zarg0 = (-1.0)**(ke+me)
+                         zarg1 = (mygamma2(2 + 2*ie + e_lag(ix)) &
+                              / mygamma2(2 + 2*(ie-ke)) &
+                              / mygamma2(2 + 2*ke + e_lag(ix))) &
+                              * (mygamma2(2 + 2*je + e_lag(jx)) &
+                              / mygamma2(2 + 2*(je-me)) &
+                              / mygamma2(2 + 2*me + e_lag(jx)))
+                         zarg2 = mygamma2(2 + 2*ke) * mygamma2(2 + 2*me)
+
+                         xarg = e_alpha*(ke+me) + xi_beta_l(ix) &
+                              + xi_beta_l(jx) + 4
+                         emat_e05(ie,je,ix,kx) = emat_e05(ie,je,ix,kx) &
+                              + 0.5*zarg0 * zarg1 * (mygamma2(xarg) / zarg2)
+
+                         xarg = e_alpha*(ke+me) + xi_beta_l(ix) &
+                              + xi_beta_l(jx) + 2
+                         emat_en05(ie,je,ix,kx) = emat_en05(ie,je,ix,kx) &
+                              + 0.5*zarg0 * zarg1 * (mygamma2(xarg) / zarg2)
+                         emat_e05de(ie,je,ix,kx) = emat_e05de(ie,je,ix,kx) &
+                              + 0.5*zarg0 * zarg1 * (mygamma2(xarg) / zarg2) &
+                              * (e_alpha*me + xi_beta_l(jx))
+
+
+                      endif
+
+                   enddo
+                enddo
+             enddo
+          enddo
+       enddo
+    enddo
+    
+  end subroutine ENERGY_basis_ints
 
   subroutine ENERGY_coll_ints_alloc(flag)
-    use neo_globals, only : n_energy, n_species
+    use neo_globals, only : n_species, n_energy,n_xi
     implicit none
-    integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
+    integer, intent (in) :: flag
     integer :: ke
-    
+
     if(flag == 1) then
        if(initialized_coll) return
-       
-       ! matrices are symmetric: (n^2+n)/2 elements
-       ke = (n_energy**2 + n_energy)/2
-       
-       allocate(emat_coll_lorentz(n_species,n_species,ke))
-       allocate(emat_coll_ru(n_species,n_species,ke))
-       allocate(emat_coll_rpi(n_species,n_species,ke))
-       allocate(emat_coll_rn(n_species,n_species,ke))
-       allocate(evec_coll_rs(n_species,n_species,n_energy))
-       allocate(econ_coll_rs(n_species,n_species))
-       allocate(evec_coll_rh(n_species,n_species,n_energy))
-       allocate(econ_coll_rh(n_species,n_species))
-       allocate(evec_coll_rk(n_species,n_species,n_energy))
-       allocate(econ_coll_rk(n_species,n_species))
-       allocate(evec_coll_rp(n_species,n_species,n_energy))
-       allocate(econ_coll_rp(n_species,n_species))
-       allocate(evec_coll_rq(n_species,n_species,n_energy))
-       allocate(econ_coll_rq(n_species,n_species))
-       allocate(evec_coll_rqd(n_species,n_species,n_energy))
-       allocate(econ_coll_rn_krook(n_species,n_species))
-       allocate(evec_coll_rn_krook(n_species,n_species,n_energy))
+
+       allocate(emat_coll_test(n_species,n_species,0:n_energy,0:n_energy,0:n_xi))
+       allocate(emat_coll_field(n_species,n_species,0:n_energy,0:n_energy,0:n_xi))
 
        initialized_coll = .true.
-       
+
     else
        if(.NOT. initialized_coll) return
 
-       deallocate(emat_coll_lorentz); deallocate(emat_coll_ru)
-       deallocate(emat_coll_rpi);     deallocate(emat_coll_rn)
-       deallocate(evec_coll_rs);      deallocate(econ_coll_rs)
-       deallocate(evec_coll_rh);      deallocate(econ_coll_rh)
-       deallocate(evec_coll_rk);      deallocate(econ_coll_rk)
-       deallocate(evec_coll_rp);      deallocate(econ_coll_rp)
-       deallocate(evec_coll_rq);      deallocate(econ_coll_rq)
-       deallocate(evec_coll_rqd)
-       deallocate(evec_coll_rn_krook)
-       deallocate(econ_coll_rn_krook)
+       deallocate(emat_coll_test)
+       deallocate(emat_coll_field)
 
        initialized_coll = .false.
 
     endif
-    
+
   end subroutine ENERGY_coll_ints_alloc
 
-  ! Compute the basis function value for B_ie(x_arg) -> x_val
-  subroutine  get_basis_val(ie,x_arg,x_val,dtype)
-    use neo_globals, only : pi
+  subroutine ENERGY_coll_ints(ir)
+    use neo_globals
     implicit none
-    integer, intent(in) :: ie
-    real, intent(in) ::  x_arg
-    real, intent(out) :: x_val
-    integer, intent(in) :: dtype ! type of deriv (0->B; 1->B_prime)
-    real :: b_arg
-    
-    ! Chebyshev polynomials for z
-    ! T_n(x) = cos(n*arcos(x))
-    ! T_n(x)_prime = n / sqrt(1-x^2) * sin(n*arcos(x))
-    
-    if(x_arg <= -1.0) then
-       b_arg = pi  ! use x = -1
-    else if(x_arg >= 1.0) then
-       b_arg = 0.0 ! use x = 1
-    else
-       b_arg = acos(x_arg)
-    endif
+    integer, intent(in) :: ir
+    real :: tauinv_ab, tauinv_ba, lambda
+    integer :: xarg, yarg
+    real :: rs, ru, rd, rh, rk, rp, rpi, rv, r1, r2, r3, r4, r5, r6, r7
+    real, dimension(:,:), allocatable :: fcoll, fcoll_bar, &
+         fcollinv, fcollinv_bar
+    integer :: fmarg
+    integer :: is, js, ie, je, ix, jx, ke, me
+    real :: zarg0, zarg1, zarg2
+    integer :: m
 
-    if(dtype == 0) then
-       x_val = cos((ie-1) * b_arg)
-    else if(dtype == 1) then
-       if(x_arg >= 1.0) then
-          x_val = 1.0 * (ie-1) * (ie-1)
-       else if(x_arg <= -1.0) then
-          if(modulo(ie-1,2) == 0) then
-             x_val = -1.0 * (ie-1) * (ie-1)
-          else
-             x_val = 1.0 * (ie-1) * (ie-1)
-          endif
-       else
-          x_val = ( (ie-1) * 1.0 / sqrt(1-x_arg**2)) * sin((ie-1) * b_arg)
-       endif
-    else
-       print *, 'Invalid dtype in get_basis_val'
-       stop
-    endif
+    emat_coll_test(:,:,:,:,:)  = 0.0
+    emat_coll_field(:,:,:,:,:) = 0.0
 
-  end subroutine get_basis_val
-
-  real*8 function myenefunc(x)
-    ! Uses global iebasis, jebasis, ietype 
-    use neo_globals, only : energy_max
-    implicit none
-    real :: x, xa, xb
-    real :: ene, de, bi, bj, val
-    real :: nu_d, nu_s, nu_par, nu_e, nu_h, nu_k, nu_p
-    
-    ! x grid: -1 -> 1 (equally spaced) for int 0..emax
-    ! x = 2 (v/vth)/sqrt(2*emax)-1
-
-    xa = 2.0 / (1.0 - sqrt(energy_min / energy_max))
-    xb = - (1.0 + sqrt(energy_min / energy_max)) &
-         / (1.0 - sqrt(energy_min / energy_max))
-    ene = energy_max * ( (x-xb) / xa )**2 
-    de = 2.0 * sqrt(energy_max) / xa
-
-    if(iebasis <= 0) then
-       bi = 1.0                                ! no B_i
-    else
-       if(ietype == 31) then
-          call get_basis_val(iebasis,x,bi,1)   ! deriv of B_i
-          bi = bi / (de * sqrt(ene))
-       else
-          call get_basis_val(iebasis,x,bi,0)   ! B_i
-       endif
-    endif
-    
-    if(jebasis <= 0) then
-       bj = 1.0                                ! no B_j
-    else
-       if(ietype == 31 .or. ietype == 7 .or. ietype == 8 .or. ietype == 9 &
-            .or. ietype == 10) then
-          call get_basis_val(jebasis,x,bj,1)   ! deriv of B_j
-          bj = bj / (de * sqrt(ene))
-       else
-          call get_basis_val(jebasis,x,bj,0)   ! B_j
-       endif
-    endif
-    
-    val = de * exp(-ene) * bi * bj  ! weight w/o ene factor
-    
-    ! Integral types
-    if(ietype == 0) then
-       val = val * ene                   ! ene^0
-    else if(ietype == 1) then
-       val = val * ene * ene             ! ene
-    else if(ietype == 2) then
-       val = val * ene * ene**2          ! ene^2
-    else if(ietype == 3) then
-       val = val * ene * ene**3          ! ene^3
-    else if(ietype == 4) then
-       val = val * ene * sqrt(ene)       ! sqrt(ene)
-    else if(ietype == 5) then 
-       val = val * ene * ene**1.5        ! ene^(3/2)
-    else if(ietype == 6) then
-       val = val * sqrt(ene)             ! 1.0/sqrt(ene)   
-    else if(ietype == 7) then 
-       val = val * ene * ene**2          ! ene^2 (*de)
-    else if(ietype == 8) then 
-       val = val * ene * ene**3          ! ene^3 (*de)
-    else if(ietype == 9) then 
-       val = val * ene * sqrt(ene)       ! sqrt(ene) (*de)   
-    else if(ietype == 10) then 
-       val = val * ene * ene             ! ene (*de)
-
-    ! Collision Integral types
-    else
-       call get_coll_freqs(1,ir,is,js,ene,&
-            nu_d, nu_s, nu_par, nu_e, nu_h, nu_k, nu_p)
-       if(ietype == 20) then
-          val = val * nu_d
-       else if(ietype == 21) then
-          val = val * nu_s
-       else if(ietype == 22) then
-          val = val * nu_s * sqrt(ene) 
-       else if(ietype == 23) then
-          val = val * nu_s * ene
-       else if(ietype == 24) then
-          val = val * nu_h * ene**1.5
-       else if(ietype == 25) then
-          val = val * nu_h * ene**3
-       else if(ietype == 26) then
-          val = val * nu_k * ene**1.5
-       else if(ietype == 27) then
-          val = val * nu_k * ene**3 
-       else if(ietype == 28) then
-          val = val * nu_p * ene
-       else if(ietype == 29) then
-          val = val * nu_p * ene**2
-       else if(ietype == 30) then
-          val = val * nu_e
-       else if(ietype == 31) then
-          val = val * nu_par * ene**2
-       else if(ietype == 32) then
-          val = val * (2.0*nu_d + nu_par) * ene
-       else if(ietype == 33) then
-          val = val * (2.0*nu_d + nu_par) * ene**2   
-       else if(ietype == 34) then
-          val = val * nu_s * ene**2 
-       else
-          print *, 'invalid itype in energy_grid module'
-          stop
-       end if
-    end if
-    
-    myenefunc = val 
-
-  end function myenefunc
-
-  subroutine ENERGY_basis_ints
-
-    use neo_globals, only : n_energy, write_out_mode
-
-    implicit none
-    integer :: ie, je, ke, Nx
-    logical :: first
-    real :: eii_val, peii_val
-
-    if(write_out_mode > 1) then
-       print *, 'start basis_ints'
-    endif
-    
-    ! symmetric matrices
-    do ietype = 0,6
-       ke = 1
-       do ie=1,n_energy
-          do je=ie,n_energy
-
-             ! Get the num int points from the B_ie * B_je integral convergence
-             
-             if(ie == je) then
-                
-                iebasis = ie
-                jebasis = je
-                Nx = Nx_start
-                first  = .true.          
-                int_basis_loop: do 
-                   ! do the integral (uses iebasis, jebasis, ietype)
-                   call gauss_integ(-1.0,1.0,myenefunc,&
-                        integ_order,Nx,eii_val)
-                   
-                   if (first) then
-                      peii_val  = eii_val
-                      first = .false.
-                      
-                   else
-                      ! check if converged
-                      if(abs((eii_val-peii_val)/peii_val) < itol) then
-                         exit int_basis_loop
-                      endif
-                   endif
-                   
-                   ! if not connverged, refine the grid and repeat
-                   peii_val = eii_val
-                   Nx = Nx * 2
-                   if(Nx > Nx_max) then
-                      print *, 'Energy int not converging for ietype', &
-                           ietype
-                      print *, 'ie = ', ie
-                      stop
-                   endif
-                   
-                end do int_basis_loop
-                
-             endif ! end if ie==je
-             
-             ! use the converged Nx to compute the vectors and matrics
-             
-             ! Matrices
-             if (ietype==0 .or. ietype == 1 .or. ietype == 2 .or. &
-                  ietype == 4 .or. ietype == 6) then
-                iebasis = ie; jebasis = je
-                call gauss_integ(-1.0,1.0,myenefunc,integ_order,Nx,eii_val)
-                if(ietype == 0) then
-                   emat_e0(ke)   = eii_val
-                else if(ietype == 1) then
-                   emat_e1(ke)   = eii_val
-                else if(ietype == 2) then
-                   emat_e2(ke)   = eii_val
-                else if(ietype == 4) then
-                   emat_e05(ke)  = eii_val
-                else if(ietype == 6) then
-                   emat_en05(ke)  = eii_val
-                endif
-             endif
-             
-             ! Vectors 
-             if (ie == je) then
-                iebasis = ie; jebasis = -1
-                call gauss_integ(-1.0,1.0,myenefunc,integ_order,Nx,eii_val)
-                if(ietype == 0) then
-                   evec_e0(ie)   = eii_val
-                else if(ietype == 1) then
-                   evec_e1(ie)   = eii_val
-                else if(ietype == 2) then
-                   evec_e2(ie)   = eii_val
-                else if(ietype == 3) then
-                   evec_e3(ie)   = eii_val
-                else if(ietype == 4) then
-                   evec_e05(ie)  = eii_val
-                else if(ietype == 5) then
-                   evec_e105(ie) = eii_val
-                endif
-             endif
-             
-             ke = ke + 1
-          enddo 
-       enddo  
-    enddo
-    
-    ! non-symmetric
-    ! base convergence on ie=je and then loop over ie
-    do ietype = 7,10
-       do je=1,n_energy
-          do ie=1,n_energy
-             
-             if(je .ne. 1) then
-                iebasis = ie
-                jebasis = je
-                Nx = Nx_start
-                first  = .true.          
-                int_basis_loop2: do 
-                   ! do the integral (uses iebasis, jebasis, ietype)
-                   call gauss_integ(-1.0,1.0,myenefunc,&
-                        integ_order,Nx,eii_val)
-                   
-                   if (first) then
-                      peii_val  = eii_val
-                      first = .false.
-                      
-                   else
-                      ! check if converged
-                      if(abs((eii_val-peii_val)/peii_val) < itol) then
-                         exit int_basis_loop2
-                      endif
-                   endif
-                   
-                   ! if not connverged, refine the grid and repeat
-                   peii_val = eii_val
-                   Nx = Nx * 2
-                   if(Nx > Nx_max) then
-                      print *, 'Energy int not converging for ietype', &
-                           ietype
-                      print *, 'ie = ', ie
-                      stop
-                   endif
-                   
-                end do int_basis_loop2
-                
-             endif
-
-             if(ietype == 7) then
-                ! Matrix
-                if(je == 1) then
-                   ematij_e2de(ie,je) = 0.0
-                else 
-                   iebasis = ie; jebasis = je
-                   call gauss_integ(-1.0,1.0,myenefunc,integ_order,&
-                        Nx,eii_val)
-                   ematij_e2de(ie,je) = eii_val
-                endif
-                ! Vector
-                if(ie == je) then
-                   if(je == 1) then
-                      evec_e2de(je) = 0.0
-                   else
-                      iebasis = -1; jebasis = je
-                      call gauss_integ(-1.0,1.0,myenefunc,integ_order,&
-                           Nx,eii_val)
-                      evec_e2de(je) = eii_val
-                   endif
-                endif
-                
-             else if(ietype == 8) then
-                ! Vector
-                if (ie == je) then
-                   if(je == 1) then
-                      evec_e3de(je) = 0.0
-                   else
-                      iebasis = -1; jebasis = je
-                      call gauss_integ(-1.0,1.0,myenefunc,integ_order,&
-                           Nx,eii_val)
-                      evec_e3de(je) = eii_val
-                   endif
-                endif
-                
-             else if(ietype == 9) then
-                ! Matrix
-                if(je == 1) then
-                   ematij_e05de(ie,je) = 0.0
-                else
-                   iebasis = ie; jebasis = je
-                   call gauss_integ(-1.0,1.0,myenefunc,integ_order,&
-                        Nx,eii_val)
-                   ematij_e05de(ie,je) = eii_val
-                endif
-
-             else if(ietype == 10) then
-                ! Matrix
-                if(je == 1) then
-                   ematij_e1de(ie,je) = 0.0
-                else
-                   iebasis = ie; jebasis = je
-                   call gauss_integ(-1.0,1.0,myenefunc,integ_order,&
-                        Nx,eii_val)
-                   ematij_e1de(ie,je) = eii_val
-                endif
-                ! Vector
-                if(ie == je) then
-                   if(je == 1) then
-                      evec_e1de(je) = 0.0
-                   else
-                      iebasis = -1; jebasis = je
-                      call gauss_integ(-1.0,1.0,myenefunc,integ_order,&
-                           Nx,eii_val)
-                      evec_e1de(je) = eii_val
-                   endif
-                endif
-                
-             endif
-             
-          enddo
-       enddo
-    enddo
-    
-    if(write_out_mode > 1) then
-       print *, 'done basis_ints'
-    endif
-
-  end subroutine ENERGY_basis_ints
-
-
-  ! basis integrals for collision terms
-  subroutine ENERGY_coll_ints(ir_in)
-
-    use neo_globals, only : n_energy, n_species, case_spitzer, &
-         collision_model, write_out_mode
-    implicit none
-    integer, intent(in) :: ir_in
-    integer :: ie, je, ke, Nx, ietype_end, case_nofullhs
-    logical :: first
-    real :: eii_val, peii_val
-    
-    if(write_out_mode > 1) then
-       print *, 'start coll_ints'
-    end if
-
-    ir = ir_in
+    fmarg = 2*e_alpha*n_energy + (2*n_xi)+4
+    allocate(fcoll(-fmarg:fmarg,-fmarg:fmarg))
+    allocate(fcoll_bar(-fmarg:fmarg,-fmarg:fmarg))
+    allocate(fcollinv(-fmarg:fmarg,-fmarg:fmarg))
+    allocate(fcollinv_bar(-fmarg:fmarg,-fmarg:fmarg))
 
     do is=1, n_species
        do js=1, n_species
-          
-          if (collision_model == 1 .or. collision_model == 2 &
-               .or. ( (case_spitzer) .and. js .ne. is)) then
-             ietype_end = 23
-             emat_coll_rpi(is,js,:) = 0.0
-             emat_coll_rn(is,js,:) = 0.0
-             evec_coll_rh(is,js,:)  = 0.0
-             econ_coll_rh(is,js)     = 0.0
-             evec_coll_rk(is,js,:)  = 0.0
-             econ_coll_rk(is,js)     = 0.0
-             evec_coll_rp(is,js,:)  = 0.0
-             econ_coll_rp(is,js)     = 0.0
-             evec_coll_rq(is,js,:)  = 0.0
-             econ_coll_rq(is,js)     = 0.0
-             evec_coll_rqd(is,js,:) = 0.0
-             evec_coll_rn_krook(is,js,:) = 0.0
-             econ_coll_rn_krook(is,js) = 0.0
-             case_nofullhs = 1
-          else
-             ietype_end = 34
-             case_nofullhs = 0
-          end if
 
-          do ietype = 20, ietype_end
+          ! (Note: pol part of dens from rotation will be added 
+          !  in coll term in kinetic equation)
+          tauinv_ab = nu(is,ir) * (1.0*Z(js))**2 / (1.0*Z(is))**2 & 
+               * dens(js,ir)/dens(is,ir)
+          tauinv_ba = nu(js,ir) * (1.0*Z(is))**2 / (1.0*Z(js))**2 & 
+               * dens(is,ir)/dens(js,ir)
 
-             ke = 1
-             do ie=1, n_energy
-                do je=ie, n_energy
-                   
-                   ! Get the num int points from the 
-                   ! B_ie * B_je integral convergence
-                   
-                   ! Special cases: ietype=31
-                   ! B_prime(ie=1) = 0 so all ints are zero
-                   ! do not do convergence test and manually set
-                   ! matrices and vectors to zero below
-                   
-                   if(ie == je .and. (.not.(ietype==31 .and. ie==1)) ) then
-                      iebasis = ie
-                      jebasis = je
-                      
-                      Nx = Nx_start
-                      first  = .true.
-                      int_coll_loop: do 
-                         ! do the integral (uses iebasis, jebasis, ietype)
-                         ! also uses (ir,is,js) for coll freqs
-                         call gauss_integ(-1.0,1.0,myenefunc,&
-                              integ_order,Nx,eii_val)
+          lambda = (vth(is,ir) / vth(js,ir))**2
+          call neo_compute_fcoll(fmarg,lambda,fcoll,fcoll_bar)
+          call neo_compute_fcoll(fmarg,1.0/lambda,fcollinv,fcollinv_bar)
+
+          do ie=0, n_energy
+             do je=0,n_energy
+                do ix=0, n_xi
+
+                   do ke=0,ie
+                      do me=0,je
                          
-                         if(first) then
-                            if(abs(eii_val) < epsilon(0.)) then
-                               print *, 'Coll convergence test failing'
-                               print *, ietype, ir, is, js, ie, eii_val
-                               stop
-                            endif
-                            peii_val  = eii_val
-                            first = .false.
+                         jx = ix
+
+                         
+                         zarg0 = (-1.0)**(ke+me)
+                         zarg1 = (mygamma2(2 + 2*ie + e_lag(ix)) &
+                              / mygamma2(2 + 2*(ie-ke)) &
+                              / mygamma2(2 + 2*ke + e_lag(ix))) &
+                              * (mygamma2(2 + 2*je + e_lag(jx)) &
+                              / mygamma2(2 + 2*(je-me)) &
+                              / mygamma2(2 + 2*me + e_lag(jx)))
+                         zarg2 = mygamma2(2 + 2*ke) * mygamma2(2 + 2*me)
+
+                         if(collision_model == 1 .or. &
+                              (spitzer_model==1 .and. js .ne. is)) then
+                            ! Connor model
                             
-                         else
-                            ! check if converged
-                            if(abs((eii_val-peii_val)/peii_val) < itol) then
-                               exit int_coll_loop
-                            endif
-                         endif
-                         ! if not converged, refine the grid and repeat
-                         peii_val = eii_val
-                         Nx = Nx * 2
-                         if(Nx > Nx_max) then
-                            print *, 'Energy int not converging'
-                            print *, ietype, ir, is, js
-                            stop
-                         endif
-                      end do int_coll_loop
-                      
-                   endif ! end if ie==je
-                   
-                   ! use the converged Nx to compute the vectors and matrics
-                   
-                   ! Matrices
-                   if(ietype == 20 .or. ietype == 21 .or. &
-                        ietype == 30 .or. ietype == 31) then
-                      iebasis = ie; jebasis = je
-                      call gauss_integ(-1.0,1.0,myenefunc,&
-                           integ_order,Nx,eii_val)
-                      if(ietype == 20) then
-                         emat_coll_lorentz(is,js,ke) = eii_val
-                      else if(ietype == 21) then
-                         ! nud - nus
-                         emat_coll_ru(is,js,ke) = &
-                              emat_coll_lorentz(is,js,ke) - eii_val
-                      else if(ietype == 30) then
-                         ! -nue
-                         emat_coll_rpi(is,js,ke) = -eii_val
-                      else if(ietype == 31) then
-                         if(ie == 1) then
-                            ! EAB: B_prime(ie=1) = 0 (exactly)
-                            emat_coll_rn(is,js,ke) = 0.0
-                         else
-                            emat_coll_rn(is,js,ke) = eii_val
-                         endif
-                      endif
-                   endif
- 
-                   ! Vectors and constants
-                   if(ie == je) then
-                      
-                      ! Vectors
-                      if(ietype == 22 .or. ietype == 24 .or. &
-                           ietype == 26 .or. ietype == 28 .or. &
-                           ietype == 31 .or. ietype == 32 .or. &
-                           ietype == 23 .or. ietype == 30) then
-                         iebasis = ie; jebasis = -1
-                         call gauss_integ(-1.0,1.0,myenefunc,&
-                              integ_order,Nx,eii_val)
-                         if(ietype == 22) then
-                            evec_coll_rs(is,js,ie) = eii_val
-                         else if(ietype == 24) then
-                            evec_coll_rh(is,js,ie) = eii_val
-                         else if(ietype == 26) then
-                            evec_coll_rk(is,js,ie) = eii_val
-                         else if(ietype == 28) then
-                            evec_coll_rp(is,js,ie) = eii_val
-                         else if(ietype == 31) then
-                            if(ie == 1) then
-                               ! EAB: B_prime(ie=1) = 0 (exactly)
-                               evec_coll_rqd(is,js,ie) = 0.0
-                            else
-                               evec_coll_rqd(is,js,ie) = eii_val
-                            endif
-                         else if(ietype == 23) then
-                            if(ie == 1 .or. case_nofullhs == 1) then
-                               evec_coll_rq(is,js,ie) = 0.0
+                            if(is == js .or. &
+                                 (abs(mass(is)-mass(js)) < epsilon(0.))) then
+                               ! case 1: ma = mb
+                               xarg = e_alpha*(ke+me) &
+                                    + xi_beta_l(ix) + xi_beta_l(jx)
+                               emat_coll_test(is,js,ie,je,ix) = &
+                                    emat_coll_test(is,js,ie,je,ix) &
+                                    -tauinv_ab &
+                                    * sqrt(lambda/pi) *ix*(ix+1) &
+                                    * zarg0 * zarg1 &
+                                    * (fcoll(xarg-1,0) - fcoll(xarg-3,2)) &
+                                    / zarg2
+
+                               if(ix == 1) then
+                                  xarg = e_alpha*ke + xi_beta_l(ix)
+                                  yarg = e_alpha*me + xi_beta_l(jx)
+                                  emat_coll_field(is,js,ie,je,ix) = &
+                                       emat_coll_field(is,js,ie,je,ix) &
+                                       + (mass(js)*dens(js,ir)*vth(js,ir)) &
+                                       / (mass(is)*dens(is,ir)*vth(is,ir)) &
+                                       * 2.0*tauinv_ba &
+                                       / sqrt(lambda*pi) &
+                                       * zarg0 * zarg1 &
+                                       * (fcoll(xarg,0) - fcoll(xarg-2,2)) &
+                                       / zarg2 &
+                                       / (fcoll(1,0) - fcoll(-1,2)) &
+                                       * (fcollinv(yarg,0) - fcollinv(yarg-2,2))
+                                  
+                               endif
+
+                            else if(mass(is) < mass(js)) then
+                               ! case 2: ma < mb
+                               ! e-i, i-z
+                               xarg = e_alpha*(ke+me) &
+                                    + xi_beta_l(ix) + xi_beta_l(jx)
+                               if(xarg > 0) then
+                                  emat_coll_test(is,js,ie,je,ix) = &
+                                       emat_coll_test(is,js,ie,je,ix) &
+                                       -tauinv_ab &
+                                       * 0.25 *ix*(ix+1) &
+                                       * zarg0 * zarg1 &
+                                       * mygamma2(xarg) &
+                                       / zarg2
+                               endif
+                                if(ix == 1) then
+                                  xarg = e_alpha*ke + xi_beta_l(ix)
+                                  yarg = e_alpha*me + xi_beta_l(jx)
+                                  emat_coll_field(is,js,ie,je,ix) = &
+                                       emat_coll_field(is,js,ie,je,ix) &
+                                       + (mass(js)*dens(js,ir)*vth(js,ir)) &
+                                       / (mass(is)*dens(is,ir)*vth(is,ir)) &
+                                       * (2.0/3.0)*tauinv_ba &
+                                       * temp(js,ir) / temp(is,ir) &
+                                       / sqrt(lambda*pi) &
+                                       * zarg0 * zarg1 &
+                                       * mygamma2(xarg+1) / mygamma2(2) &
+                                       / zarg2 &
+                                       * mygamma2(yarg+4)
+                               endif
+
                             else 
-                               evec_coll_rq(is,js,ie) = 2.0 * eii_val
+                               ! case 3: ma > mb
+                               ! i-e, z-i
+                               xarg = e_alpha*(ke+me) &
+                                    + xi_beta_l(ix) + xi_beta_l(jx)
+                               emat_coll_test(is,js,ie,je,ix) = &
+                                    emat_coll_test(is,js,ie,je,ix) &
+                                    -tauinv_ab &
+                                    * sqrt(lambda/pi) &
+                                    * temp(is,ir)/temp(js,ir) &
+                                    * (1.0/3.0) *ix*(ix+1) &
+                                    * zarg0 * zarg1 &
+                                    * mygamma2(xarg+3) &
+                                    / zarg2
+                                if(ix == 1) then
+                                  xarg = e_alpha*ke + xi_beta_l(ix)
+                                  yarg = e_alpha*me + xi_beta_l(jx)
+                                  emat_coll_field(is,js,ie,je,ix) = &
+                                       emat_coll_field(is,js,ie,je,ix) &
+                                       + (mass(js)*dens(js,ir)*vth(js,ir)) &
+                                       / (mass(is)*dens(is,ir)*vth(is,ir)) &
+                                       * 0.5 * tauinv_ba &
+                                       * temp(js,ir) / temp(is,ir) &
+                                       * zarg0 * zarg1 &
+                                       * mygamma2(xarg+4) / mygamma2(5) &
+                                       / zarg2 &
+                                       * mygamma2(yarg+1)
+                               endif
+                               
                             endif
-                         else if(ietype == 32) then
-                            if(ie == 1 .or. case_nofullhs == 1) then
-                               evec_coll_rq(is,js,ie) = 0.0
-                            else 
-                               evec_coll_rq(is,js,ie) = &
-                                    evec_coll_rq(is,js,ie) - eii_val
+                            
+                         else if(collision_model == 2) then
+                            ! HS0
+                            xarg = e_alpha*(ke+me) &
+                                 + xi_beta_l(ix) + xi_beta_l(jx)
+                            emat_coll_test(is,js,ie,je,ix) = &
+                                 emat_coll_test(is,js,ie,je,ix) &
+                                 -tauinv_ab &
+                                 * sqrt(lambda/pi) *ix*(ix+1) &
+                                 * zarg0 * zarg1 &
+                                 * (fcoll(xarg-1,0) - fcoll(xarg-3,2)) &
+                                 / zarg2
+                            
+                            if(ix == 1) then
+                               xarg = e_alpha*ke + xi_beta_l(ix)
+                               yarg = e_alpha*me + xi_beta_l(jx)
+                               rs = (mass(js)*dens(js,ir)*vth(js,ir)) &
+                                    / (mass(is)*dens(is,ir)*vth(is,ir)) &
+                                    * 4.0*tauinv_ba &
+                                    * temp(js,ir)/temp(is,ir) &
+                                    * (1.0 + mass(is)/mass(js)) &
+                                    / sqrt(lambda*pi) &
+                                    * zarg0 * zarg1 * fcoll(xarg,2) / zarg2 &
+                                    / fcoll(1,2) * fcollinv(yarg,2)
+                               xarg = e_alpha*(ke+me) &
+                                    + xi_beta_l(ix) + xi_beta_l(jx)
+                               ru = 2.0*tauinv_ab * sqrt(lambda/pi) &
+                                    * zarg0 * zarg1 &
+                                    * (fcoll(xarg-1,0)-fcoll(xarg-3,2) &
+                                       - 2.0*temp(is,ir)/temp(js,ir) &
+                                       * (1.0 + mass(js)/mass(is)) &
+                                       * fcoll(xarg-1,2)) &
+                                       / zarg2 
+                               emat_coll_field(is,js,ie,je,ix) = &
+                                    emat_coll_field(is,js,ie,je,ix) + rs
+                               emat_coll_test(is,js,ie,je,ix) = &
+                                    emat_coll_test(is,js,ie,je,ix) + ru
                             endif
-                         else if(ietype == 30) then
-                            evec_coll_rn_krook(is,js,ie) = eii_val
+                            
+                         else if(collision_model == 3) then
+                            ! Full HS
+                            xarg = e_alpha*(ke+me) &
+                                 + xi_beta_l(ix) + xi_beta_l(jx)
+                            emat_coll_test(is,js,ie,je,ix) = &
+                                 emat_coll_test(is,js,ie,je,ix) &
+                                 -tauinv_ab &
+                                 * sqrt(lambda/pi) *ix*(ix+1) &
+                                 * zarg0 * zarg1 &
+                                 * (fcoll(xarg-1,0) - fcoll(xarg-3,2)) &
+                                 / zarg2
+                            
+                            if(ix == 1) then
+                               ! slowing-down
+                               xarg = e_alpha*ke + xi_beta_l(ix)
+                               yarg = e_alpha*me + xi_beta_l(jx)
+                               rs = (mass(js)*dens(js,ir)*vth(js,ir)) &
+                                    / (mass(is)*dens(is,ir)*vth(is,ir)) &
+                                    * 4.0*tauinv_ba &
+                                    * temp(js,ir)/temp(is,ir) &
+                                    * (1.0 + mass(is)/mass(js)) &
+                                    / sqrt(lambda*pi) &
+                                    * zarg0 * zarg1 * fcoll(xarg,2) / zarg2 &
+                                    / fcoll(1,2) * fcollinv(yarg,2)
+                               ! u-restoring
+                               xarg = e_alpha*(ke+me) &
+                                    + xi_beta_l(ix) + xi_beta_l(jx)
+                               ru = 2.0*tauinv_ab * sqrt(lambda/pi) &
+                                    * zarg0 * zarg1 &
+                                    * (fcoll(xarg-1,0)-fcoll(xarg-3,2) &
+                                       - 2.0*temp(is,ir)/temp(js,ir) &
+                                       * (1.0 + mass(js)/mass(is)) &
+                                       * fcoll(xarg-1,2)) &
+                                       / zarg2
+                               ! h-heating friction
+                               xarg = e_alpha*ke + xi_beta_l(ix)
+                               r1 = 4.0*(2.0*mass(is)/mass(js)-1.0) &
+                                    * fcoll(xarg,2) &
+                                    + 8.0*temp(is,ir)/temp(js,ir) &
+                                    * (1.0 + mass(js)/mass(is)) &
+                                    * fcoll(xarg+2,2) &
+                                    - 4.0*(1.0 + mass(is)/mass(js)) &
+                                    * (fcoll(xarg+2,0)-fcoll(xarg,2))
+                               xarg = 3
+                               r2 = 4.0*(2.0*mass(is)/mass(js)-1.0) &
+                                    * fcoll(xarg,2) &
+                                    + 8.0*temp(is,ir)/temp(js,ir) &
+                                    * (1.0 + mass(js)/mass(is)) &
+                                    * fcoll(xarg+2,2) &
+                                    - 4.0*(1.0 + mass(is)/mass(js)) &
+                                    * (fcoll(xarg+2,0)-fcoll(xarg,2))
+                               xarg = e_alpha*me + xi_beta_l(jx)
+                               r3 = 4.0*(2.0*mass(js)/mass(is)-1.0) &
+                                    * fcollinv(xarg,2) &
+                                    + 8.0*temp(js,ir)/temp(is,ir) &
+                                    * (1.0 + mass(is)/mass(js)) &
+                                    * fcollinv(xarg+2,2) &
+                                    - 4.0*(1.0 + mass(js)/mass(is)) &
+                                    * (fcollinv(xarg+2,0)-fcollinv(xarg,2))
+                               rh = (mass(js)*dens(js,ir)*vth(js,ir)**3) &
+                                    / (mass(is)*dens(is,ir)*vth(is,ir)**3) &
+                                    * 1.5*tauinv_ba / sqrt(lambda*pi) &
+                                    * zarg0 * zarg1 * r1 / zarg2 &
+                                    / r2 * r3
+                               ! k-heating friction
+                               xarg = e_alpha*ke + xi_beta_l(ix)
+                               r1 = 12.0 * fcoll(xarg,2) &
+                                    - 8.0*temp(is,ir)/temp(js,ir) &
+                                    * (1.0 + mass(js)/mass(is)) &
+                                    * fcoll(xarg+2,2) &
+                                    + 4.0*(fcoll(xarg+2,0)-fcoll(xarg,2))
+                               xarg = 3
+                               r2 = 12.0 * fcoll(xarg,2) &
+                                    - 8.0*temp(is,ir)/temp(js,ir) &
+                                    * (1.0 + mass(js)/mass(is)) &
+                                    * fcoll(xarg+2,2) &
+                                    + 4.0*(fcoll(xarg+2,0)-fcoll(xarg,2))
+                               xarg = e_alpha*me + xi_beta_l(jx)
+                               r3 = 12.0 * fcoll(xarg,2) &
+                                    - 8.0*temp(is,ir)/temp(js,ir) &
+                                    * (1.0 + mass(js)/mass(is)) &
+                                    * fcoll(xarg+2,2) &
+                                    + 4.0*(fcoll(xarg+2,0)-fcoll(xarg,2))
+                               rk = tauinv_ab * sqrt(lambda/pi) &
+                                    * zarg0 * zarg1 * r1 / zarg2 &
+                                    / r2 * r3
+                               emat_coll_field(is,js,ie,je,ix) = &
+                                    emat_coll_field(is,js,ie,je,ix) + rs + rh
+                               emat_coll_test(is,js,ie,je,ix) = &
+                                    emat_coll_test(is,js,ie,je,ix) + ru + rk
+                            endif
+                            
+                            if(ix == 2) then
+                               ! nup-energy restoring
+                               xarg = e_alpha*ke + xi_beta_l(ix)
+                               r1 = 8.0 * (1.0 + 1.5*mass(is)/mass(js)) &
+                                    * fcoll(xarg-1,2) &
+                                    + 8.0*temp(is,ir)/temp(js,ir) &
+                                    * (1.0 + mass(js)/mass(is)) &
+                                    * fcoll(xarg+1,2) &
+                                    - 4.0 * (1.0 + 1.5*mass(is)/mass(js)) &
+                                    * (fcoll(xarg+1,0)-fcoll(xarg-1,2))
+                               xarg = 2
+                               r2 = 8.0 * (1.0 + 1.5*mass(is)/mass(js)) &
+                                    * fcoll(xarg-1,2) &
+                                    + 8.0*temp(is,ir)/temp(js,ir) &
+                                    * (1.0 + mass(js)/mass(is)) &
+                                    * fcoll(xarg+1,2) &
+                                    - 4.0 * (1.0 + 1.5*mass(is)/mass(js)) &
+                                    * (fcoll(xarg+1,0)-fcoll(xarg-1,2))
+                               xarg = e_alpha*me + xi_beta_l(jx)
+                               r3 = 8.0 * (1.0 + 1.5*mass(js)/mass(is)) &
+                                    * fcollinv(xarg-1,2) &
+                                    + 8.0*temp(js,ir)/temp(is,ir) &
+                                    * (1.0 + mass(is)/mass(js)) &
+                                    * fcollinv(xarg+1,2) &
+                                    - 4.0 * (1.0 + 1.5*mass(js)/mass(is)) &
+                                    * (fcollinv(xarg+1,0)-fcollinv(xarg-1,2))
+                               rp = (temp(js,ir)*dens(js,ir)) &
+                                    / (temp(is,ir)*dens(is,ir)) &
+                                    * tauinv_ba / sqrt(lambda*pi) &
+                                    * zarg0 * zarg1 * r1 / zarg2 &
+                                    / r2 * r3
+                               emat_coll_field(is,js,ie,je,ix) = &
+                                    emat_coll_field(is,js,ie,je,ix) + rp
+                               
+                               ! pi-energy restoring
+                               xarg = e_alpha*ke + xi_beta_l(ix)
+                               yarg = e_alpha*me + xi_beta_l(jx)
+                               r1 = -8.0*temp(is,ir)/temp(js,ir) &
+                                    * (1.0 + mass(js)/mass(is)) &
+                                    * fcoll(xarg+yarg-1,2) &
+                                    + 4.0 * fcoll(xarg+yarg-1,0)
+                               rpi = tauinv_ab * sqrt(lambda/pi) &
+                                    * zarg0 * zarg1 * r1 / zarg2
+                               emat_coll_test(is,js,ie,je,ix) = &
+                                    emat_coll_test(is,js,ie,je,ix) + rpi
+                            endif
+                            
+                            if(ix == 0) then
+                               ! energy diffusion
+                               xarg = e_alpha*me + xi_beta_l(jx) 
+                               r2 = 8.0*temp(js,ir)/temp(is,ir) &
+                                    * (1.0 + mass(is)/mass(js)) &
+                                    * fcollinv(xarg+1,2) &
+                                    - 4.0 * fcollinv(xarg+1,0)
+                               xarg = 2
+                               r3 = 8.0*temp(is,ir)/temp(js,ir) &
+                                    * (1.0 + mass(js)/mass(is)) &
+                                    * fcoll(xarg+1,2) &
+                                    - 4.0 * fcoll(xarg+1,0)
+                               r1 = (temp(js,ir)*dens(js,ir)) &
+                                    / (temp(is,ir)*dens(is,ir)) &
+                                    * tauinv_ba / tauinv_ab / lambda * r2 / r3
+                               xarg = e_alpha*ke + xi_beta_l(ix) 
+                               yarg = e_alpha*me + xi_beta_l(jx)
+                               rd =  -4.0*tauinv_ab * sqrt(lambda/pi) &
+                                 * xarg * zarg0 * zarg1 &
+                                 * 0.5 * yarg &
+                                 * fcoll(xarg+yarg-3,2) / zarg2
+                                rv =  4.0*tauinv_ab * sqrt(lambda/pi) &
+                                 * xarg * zarg0 * zarg1 &
+                                 * r1 * fcoll(xarg-1,2) / zarg2
+                               emat_coll_test(is,js,ie,je,ix) = &
+                                    emat_coll_test(is,js,ie,je,ix) + rd
+                               emat_coll_field(is,js,ie,je,ix) = &
+                                    emat_coll_field(is,js,ie,je,ix) + rv
+                            endif
+
+                         else 
+                            ! Full linearized FP op
+                            xarg = e_alpha*(ke+me) &
+                                 + xi_beta_l(ix) + xi_beta_l(jx)
+                            emat_coll_test(is,js,ie,je,ix) = &
+                                 emat_coll_test(is,js,ie,je,ix) &
+                                 -tauinv_ab &
+                                 * sqrt(lambda/pi) *ix*(ix+1) &
+                                 * zarg0 * zarg1 &
+                                 * (fcoll(xarg-1,0) - fcoll(xarg-3,2)) &
+                                 / zarg2
+
+                            rd = 4.0*tauinv_ab * sqrt(lambda/pi) &
+                                 * (e_alpha*ke + xi_beta_l(ix)) &
+                                 * zarg0 * zarg1 &
+                                 * ( (1.0 - temp(is,ir)/temp(js,ir)) &
+                                 * fcoll(xarg-1,2) &
+                                 - 0.5 * (e_alpha*me + xi_beta_l(jx)) &
+                                 * fcoll(xarg-3,2) ) &
+                                 / zarg2
+
+                            emat_coll_test(is,js,ie,je,ix) = &
+                                 emat_coll_test(is,js,ie,je,ix) + rd
+                            
+                            ! Real full field-particle operator
+                            
+                            r1 = mass(is)/mass(js) &
+                                 * (1.0 + lambda)**(-0.5*(xarg+3)) &
+                                 * mygamma2(xarg + 3)
+                            
+                            xarg = e_alpha*ke + xi_beta_l(ix)
+                            yarg = e_alpha*me + xi_beta_l(jx)
+                            
+                            r2 = -2.0/(ix+0.5) &
+                                 * (mass(is)/mass(js) &
+                                 - ix*(1.0-mass(is)/mass(js))) &
+                                 * fcoll(xarg-ix+1,yarg+jx+2)
+                            
+                            r3 = -2.0/(ix+0.5) &
+                                 * (1.0 + ix*(1.0-mass(is)/mass(js))) &
+                                 * fcoll_bar(xarg+ix+2,yarg-jx+1)
+                            
+                            r4 = -ix*(ix-1.0)/(ix*ix - 0.25) &
+                                 * fcoll(xarg-ix+3,yarg+jx+2)
+                            
+                            r5 = -ix*(ix-1.0)/(ix*ix - 0.25) &
+                                 * fcoll_bar(xarg+ix+2,yarg-jx+3)
+                            
+                            r6 = (ix+1.0)*(ix+2.0)/(ix+1.5)/(ix+0.5) &
+                                 * fcoll(xarg-ix+1,yarg+jx+4)
+                            
+                            r7 = (ix+1.0)*(ix+2.0)/(ix+1.5)/(ix+0.5) &
+                                 * fcoll_bar(xarg+ix+4,yarg-jx+1)
+                            
+                            emat_coll_field(is,js,ie,je,ix) = &
+                                 emat_coll_field(is,js,ie,je,ix) &
+                                 + tauinv_ab * 2.0/sqrt(pi) * lambda**1.5 &
+                                 * lambda**(0.5*(e_alpha*me &
+                                 + xi_beta_l(ix))) &
+                                 * zarg0 * zarg1 &
+                                 * (r1 + r2 + r3 + r4 + r5 + r6 + r7) &
+                                 / zarg2
                          endif
-                      endif
-                      
-                      ! Constants
-                      if(ie== 1 .and. (ietype == 23 .or. ietype == 25 &
-                           .or. ietype == 27 .or. ietype == 29 &
-                           .or. ietype == 33 .or. ietype == 34 &
-                           .or. ietype == 30)) then
-                         iebasis = -1; jebasis = -1
-                         call gauss_integ(-1.0,1.0,myenefunc,&
-                              integ_order,Nx,eii_val)
-                         if(ietype == 23) then
-                            econ_coll_rs(is,js) = eii_val
-                         else if(ietype == 25) then
-                            econ_coll_rh(is,js) = eii_val
-                         else if(ietype == 27) then
-                            econ_coll_rk(is,js) = eii_val
-                         else if(ietype == 29) then
-                            econ_coll_rp(is,js) = eii_val 
-                         else if(ietype == 33) then
-                            econ_coll_rq(is,js) = -eii_val
-                         else if(ietype == 34) then
-                            econ_coll_rq(is,js) = &
-                                 econ_coll_rq(is,js) + 2.0*eii_val   
-                         else if(ietype == 30) then
-                            econ_coll_rn_krook(is,js) = eii_val
-                         endif
-                      endif
-                         
-                   endif
-                   
-                   ke = ke + 1
+                      enddo
+                   enddo
                 enddo
-             enddo 
-          enddo    
-          
-       enddo       ! js
-    enddo          ! is
-    
-    if(write_out_mode > 1) then
-       print *, 'done coll_ints'
-    end if
+             enddo
+          enddo
+       enddo
+    enddo
+
+    if(collision_model==5) then
+       ! Replace actual field-particle op with ad-hoc op
+       emat_coll_field(:,:,:,:,:) = 0.0
+       do is=1, n_species
+          do js=1, n_species
+             do ie=0, n_energy
+                do je=0,n_energy
+
+                   ix = 1
+                   if(abs(emat_coll_test(is,js,(1-xi_beta_l(ix))/e_alpha,&
+                           (1-xi_beta_l(ix))/e_alpha,ix)) &
+                        > epsilon(0.)) then
+                      rs = -(mass(js)*dens(js,ir)*vth(js,ir)) &
+                           / (mass(is)*dens(is,ir)*vth(is,ir)) &
+                           * emat_coll_test(is,js,ie,&
+                           (1-xi_beta_l(ix))/e_alpha,ix) &
+                           * emat_coll_test(js,is,&
+                           (1-xi_beta_l(ix))/e_alpha,je,ix) &
+                           / emat_coll_test(is,js,(1-xi_beta_l(ix))/e_alpha,&
+                           (1-xi_beta_l(ix))/e_alpha,ix)
+                   else
+                      rs = 0.0
+                   endif
+                   emat_coll_field(is,js,ie,je,ix) = rs
+
+                   ix = 0
+                   if(abs(emat_coll_test(is,js,(2-xi_beta_l(ix))/e_alpha,&
+                           (2-xi_beta_l(ix))/e_alpha,ix)) &
+                        > epsilon(0.)) then
+                      ru = -(dens(js,ir)*temp(js,ir)) &
+                           / (dens(is,ir)*temp(is,ir)) &
+                           * emat_coll_test(is,js,ie,&
+                           (2-xi_beta_l(ix))/e_alpha,ix) &
+                           * emat_coll_test(js,is,&
+                           (2-xi_beta_l(ix))/e_alpha,je,ix) &
+                           / emat_coll_test(is,js,(2-xi_beta_l(ix))/e_alpha,&
+                           (2-xi_beta_l(ix))/e_alpha,ix)
+                   else
+                      ru = 0.0
+                   endif
+                   emat_coll_field(is,js,ie,je,ix) = ru
+                      
+                enddo
+             enddo
+          enddo
+       enddo
+    endif
+
+    deallocate(fcoll)
+    deallocate(fcoll_bar)
+    deallocate(fcollinv)
+    deallocate(fcollinv_bar)
     
   end subroutine ENERGY_coll_ints
-  
-  
-  ! Compute the energy-dependent coll freqs for a given ir, is, js
-  ! returns nu -> (nu * ene)
-  subroutine get_coll_freqs(flag, ir_loc,is_loc,js_loc,ene, &
-       nu_d, nu_s, nu_par, nu_e, nu_h, nu_k, nu_p)
-    use neo_globals
+
+
+  ! returns Gamma(n/2)
+  real function gamma2(n)
+    use neo_globals, only : pi
     implicit none
-    real, external :: derf
-    integer, intent(in)  :: flag
-    ! 0->use HS0 model; else->use collision_model
-    integer, intent(in) :: ir_loc, is_loc, js_loc
-    real, intent(in)    :: ene
-    real, intent(inout) :: nu_d, nu_s, nu_par, nu_e, nu_h, nu_k, nu_p
-    real :: xa, xb, Hd_coll, Xd_coll, Hs_coll, Xs_coll, fac
-
-    ! (Note: nu(is,ir) and pol part of dens from rotation will be added 
-    !  in coll term in kinetic equation)
-    fac = (1.0*Z(js_loc))**2 / (1.0*Z(is_loc))**2 & 
-         * dens(js_loc,ir_loc)/dens(is_loc,ir_loc)
-    xa = sqrt(ene)
-    xb = xa * (vth(is_loc,ir_loc)/vth(js_loc,ir_loc))
-
-    if (flag .ne. 0 .and. &
-         (collision_model == 1 .or. &
-         (case_spitzer .and. js_loc .ne. is_loc)) ) then
-       ! Connor model: nu_d = nu_s, form dependent on (is,js)
-       if ((is_loc == js_loc) .or. &  
-            (abs(mass(is_loc) - mass(js_loc)) < epsilon(0.))) then
-          ! case 1: like-species/same mass collisions
-          if(xb < 1e-4) then
-             ! special case limit ene->0 
-             Hd_coll = (1.0/sqrt(pi)) * &
-                  (4.0/3.0    *  (vth(is_loc,ir_loc)/vth(js_loc,ir_loc)) &
-                  - 4.0/15.0  *  (vth(is_loc,ir_loc)/vth(js_loc,ir_loc))**3 &
-                  * ene & 
-                  + 2.0/35.0  *  (vth(is_loc,ir_loc)/vth(js_loc,ir_loc))**5 &
-                  * ene**2 &
-                  - 2.0/189.0 *  (vth(is_loc,ir_loc)/vth(js_loc,ir_loc))**7 &
-                  * ene**3)
-             Xd_coll = 1.0
-          else
-             Hd_coll = exp(-xb*xb) / (xb*sqrt(pi)) &
-                  + (1.0-1.0/(2.0*xb*xb)) * DERF(xb)
-             Xd_coll = 1.0 / (xa)
-          endif
-       else if(mass(is_loc) < mass(js_loc)) then
-          ! case 2: ele-ion and ion-imp(heavy) collisions
-          Hd_coll = 1.0
-          Xd_coll = 1.0 / (xa)
-       else
-          ! case 3: ion-ele and imp(heavy)-ion collisions
-          Hd_coll = 1.0
-          Xd_coll = 1.0 * (xa**2)
-          fac = fac * 4.0/(3.0*sqrt(pi)) &
-               * sqrt(mass(js_loc) / mass(is_loc)) &
-               * (temp(is_loc,ir_loc) / temp(js_loc,ir_loc))**1.5
-       endif
-       nu_d = fac * Hd_coll * Xd_coll
-       nu_s = nu_d
-       
-    else if(xb < 1e-4) then
-       ! Hirshman-Sigmar model: nu_d != nu_s
-       ! special case limit ene->0 
-       ! return nu_d * ene (finite); nu_s * ene (zero)
-
-       nu_d = fac * (1.0/sqrt(pi)) * &
-            (4.0/3.0    * (vth(is_loc,ir_loc)/vth(js_loc,ir_loc)) &
-            - 4.0/15.0  * (vth(is_loc,ir_loc)/vth(js_loc,ir_loc))**3 * ene & 
-            + 2.0/35.0  * (vth(is_loc,ir_loc)/vth(js_loc,ir_loc))**5 * ene**2 &
-            - 2.0/189.0 * (vth(is_loc,ir_loc)/vth(js_loc,ir_loc))**7 * ene**3)
-
-       nu_par = fac * 2.0 * (1.0/sqrt(pi)) * &
-            (2.0/3.0   *  (vth(is_loc,ir_loc)/vth(js_loc,ir_loc)) & 
-            - 2.0/5.0  *  (vth(is_loc,ir_loc)/vth(js_loc,ir_loc))**3 * ene &
-            + 1.0/7.0  *  (vth(is_loc,ir_loc)/vth(js_loc,ir_loc))**5 * ene**2 &
-            - 1.0/27.0 *  (vth(is_loc,ir_loc)/vth(js_loc,ir_loc))**7 * ene**3)
-
-       nu_s =  (2.0*temp(is_loc,ir_loc)/temp(js_loc,ir_loc)) &
-            * (1.0 + mass(js_loc) / mass(is_loc)) &
-            * fac * (1.0/sqrt(pi)) * &
-            (2.0/3.0   *  (vth(is_loc,ir_loc)/vth(js_loc,ir_loc)) * ene & 
-            - 2.0/5.0  *  (vth(is_loc,ir_loc)/vth(js_loc,ir_loc))**3 * ene**2 &
-            + 1.0/7.0  *  (vth(is_loc,ir_loc)/vth(js_loc,ir_loc))**5 * ene**3)
-       
-    else
-       ! Hirshman-Sigmar model: nu_d != nu_s
-       Hd_coll = exp(-xb*xb) / (xb*sqrt(pi)) & 
-            + (1.0-1.0/(2.0*xb*xb)) * DERF(xb)
-       Xd_coll = 1.0 / (xa)
-       Hs_coll = -exp(-xb*xb) / (xb*sqrt(pi)) & 
-            + (1.0/(2.0*xb*xb)) * DERF(xb)
-       Xs_coll = (xa) * (2.0 * temp(is_loc,ir_loc)/temp(js_loc,ir_loc)) &
-            * (1.0 + mass(js_loc) / mass(is_loc))
-       nu_d = fac * Hd_coll * Xd_coll
-       nu_s = fac * Hs_coll * Xs_coll
-       nu_par = fac * Hs_coll * Xd_coll * 2.0
-
-    endif
-
-    ! heating friction/energy diffusion frequencies
-    ! (only for the full Hirshman-Sigmar model)
-    if (flag == 0 &
-         .or. collision_model == 1 .or. collision_model == 2 &
-         .or. ( (case_spitzer) .and. js_loc .ne. is_loc)) then
-       nu_par = 0.0
-       nu_e   = 0.0
-       nu_h   = 0.0
-       nu_k   = 0.0
-       nu_p   = 0.0
-       
-    else
-       nu_e   = 2.0 * nu_s - 2.0 * nu_d - nu_par
-       nu_h   = 1.5 * (nu_par &
-            * (2.0*mass(is_loc)/mass(js_loc)-1) + 2.0 * nu_s &
-            - 2.0 * (1.0+mass(is_loc)/mass(js_loc)) * nu_d )
-       nu_k   = 2.0 * nu_par - nu_e
-       nu_p   = 2.0 * nu_s &
-            - 2.0 * (1.0+1.5*mass(is_loc)/mass(js_loc)) &
-            * (nu_d - nu_par)
-    endif
+    integer, intent (in) :: n
+    integer :: i, i1
     
-  end subroutine get_coll_freqs
-  
+    if(mod(n,2) == 0) then
+       ! Gamma of integer
+       gamma2 = 1.0
+       i1=4
+    else 
+       ! Gamma of half integer
+       gamma2 = sqrt(pi)
+       i1=3
+    endif
+
+    do i=i1,n,2
+       gamma2 = gamma2 * (i/2.0-1.0)
+    enddo
+
+  end function gamma2
+
 end module neo_energy_grid

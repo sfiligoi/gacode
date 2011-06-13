@@ -22,9 +22,6 @@ subroutine tgyro_neo_map
      neo_sim_model_in = 1
   end if
 
-  ! Resolution
-  neo_energy_max_in = 16.0
-
   ! Geometry
   neo_write_out_mode_in    = 0
   neo_equilibrium_model_in = 2

@@ -11,6 +11,7 @@ module neo_nclass_dr
   integer, parameter, private :: mx_mz = 18
   
   integer, parameter, private :: io_nc = 41
+  character(len=80),private :: runfile = 'theory_nclass.out'
   logical, private :: initialized = .false.
   real, dimension(:), allocatable :: pflux_nc, eflux_nc
   real, dimension(:), allocatable :: uparB_nc, vpol_nc, vtor_nc
@@ -41,7 +42,8 @@ contains
        allocate(vpol_nc(n_species))
        allocate(vtor_nc(n_species))
        if(write_out_mode > 0) then
-          open(io_nc,file='theory_nclass.out',status='replace')
+          open(io_nc,file=runfile,status='replace')
+          close(io_nc)
        end if
        initialized = .true.
        
@@ -52,9 +54,6 @@ contains
        deallocate(uparB_nc)
        deallocate(vpol_nc)
        deallocate(vtor_nc)
-       if(write_out_mode > 0) then
-          close(io_nc)
-       end if
        initialized = .false.
     end if
     
@@ -320,18 +319,17 @@ contains
     ! check error flags
     if(iflag > 0) then
        if(iflag == 1) then
-          print *, 'ERROR: NCLASS - k_order must be 2 or 3'
+          call neo_error('ERROR: NCLASS - k_order must be 2 or 3')
        elseif(iflag == 2) then
-          print *, 'ERROR: NCLASS - require 1<m_i<mx_mi'
-          print *, m_i
+          call neo_error('ERROR: NCLASS - require 1<m_i<mx_mi')
        else if(iflag == 3) then
-          print *, 'ERROR: NCLASS - require 0<m_z<mx_mz'
+          call neo_error('ERROR: NCLASS - require 0<m_z<mx_mz')
        else if(iflag == 4) then
-          print *, 'ERROR: NCLASS - require 0<m_s<mx_ms'
+          call neo_error('ERROR: NCLASS - require 0<m_s<mx_ms')
        else if(iflag == 5) then
-          print *, 'ERROR: NCLASS - inversion of flow matrix failed'
+          call neo_error('ERROR: NCLASS - inversion of flow matrix failed')
        endif
-       stop
+       return
     endif
 
     !  Parallel flows: upar_ij (T*m/s) for each species
@@ -433,6 +431,7 @@ contains
     enddo
     
     if(write_out_mode > 0) then
+       open(io_nc,file=runfile,status='old',position='append')
        write (io_nc,'(e16.8,$)') r(ir)
        write(io_nc,'(e16.8,$)') jbs_nc 
        do is=1,n_species
@@ -443,6 +442,7 @@ contains
           write(io_nc,'(e16.8,$)') vtor_nc(is)
        enddo
        write(io_nc,*)
+       close(io_nc)
     end if
 
   end subroutine NCLASS_DR_do

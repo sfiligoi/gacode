@@ -48,9 +48,8 @@ subroutine neo_experimental_profiles
      n_species_exp = n_species + 1
   else
      if (Z(n_species) /= -1) then
-        print *,&
-             'For exp. profiles, electron species must be n_species'
-        stop
+        call neo_error('ERROR: For exp. profiles, electron species must be n_species')
+        return
      endif
      n_species_exp = n_species
   endif
@@ -113,8 +112,8 @@ subroutine neo_experimental_profiles
 
   if (profile_equilibrium_model == 2) then
      if(EXPRO_nfourier <= 0) then
-        print *, 'ERROR: Geometry coefficients missing.'
-        stop
+        call neo_error('ERROR: Geometry coefficients missing')
+        return
      endif
      geo_numeq_flag = 1
      deallocate(geo_yin_exp)
@@ -159,8 +158,8 @@ subroutine neo_experimental_profiles
   ! Sanity check for temperatures
   do i=1,n_species_exp
      if (minval(den_exp(i,:)) <= 0.0) then
-        print *, 'ERROR: Nonpositive in exp. density profile'
-        stop
+        call neo_error('ERROR: Nonpositive in exp. density profile')
+        return
      endif
   enddo
 

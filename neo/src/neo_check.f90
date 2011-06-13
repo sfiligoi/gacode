@@ -9,24 +9,19 @@ subroutine neo_check
   !-----------------------------------------------------------
   ! Grid parameter checks
   !
-  if (n_radial == 1 .and. n_order > 1) then
-     print *, 'n_radial=1 must be run with n_order = 1'
-     stop
-  endif
-  !
   if (modulo(n_theta,2) == 0) then 
-     print *,'n_theta must be odd.'
-     stop
+     call neo_error('ERROR: n_theta must be odd.')
+     return
   endif
   !
   if(n_species > 6) then
-     print *, 'max n_species is 6'
-     stop
+     call neo_error('ERROR: max n_species is 6')
+     return
   endif
   
   if(rho_in < 0) then
-     print *, 'rho_unit must be positive'
-     stop
+     call neo_error('ERROR: rho_unit must be positive')
+     return
   endif
 
   !-----------------------------------------------------------
@@ -45,8 +40,8 @@ subroutine neo_check
      case(2)
         ! Do write files, do print stdout
      case default
-        print *,'INVALID: write_out_mode'
-        stop
+        call neo_error('INVALID: write_out_mode')
+        return
   end select
 
   ! Simulation model
@@ -60,8 +55,8 @@ subroutine neo_check
         print *,'sim_model    : NUMERICAL'
      endif
   case default   
-     print *,'INVALID: sim_model'
-     stop
+     call neo_error('INVALID: sim_model')
+     return
   end select
 
   ! Collision model
@@ -89,28 +84,21 @@ subroutine neo_check
   case (4) 
      
      if(write_out_mode > 1) then
-        print *,'collision_model    : FULL HIRSHMAN-SIGMAR WITH KROOK-LIKE ENERGY DIFFUSION' 
+        print *,'collision_model    : FULL LINEARIZED FOKKER-PLANCK' 
+     end if
+
+  case (5) 
+     
+     if(write_out_mode > 1) then
+        print *,'collision_model    : FULL LINEARIZED FOKKER-PLANCK WITH AD-HOC FIELD PARTICLE TERMS' 
      end if
      
   case default
      
-     print *,'INVALID: collision_model'
-     stop
+     call neo_error('INVALID: collision_model')
+     return
      
   end select
-
-  if(collision_model == 3 .or. collision_model == 4) then
-     do ir=1, n_radial
-        do is=2, n_species
-           if(abs(temp(is,ir)-temp(1,ir)) > 1e-3) then
-              if(write_out_mode > 1) then
-                 print *, 'WARNING: USE OF FULL HIRSHMAN-SIGMAR OPERATOR WITH UNEQUAL TEMPS'
-              endif
-              exit
-           endif
-        enddo
-     enddo
-  endif
 
   !------------------------------------------------------------
   
@@ -145,14 +133,14 @@ subroutine neo_check
      end if   
 
      if(geo_ny <= 0) then
-        print *, 'Geometry coefficients missing'
-        stop
+        call neo_error('ERROR: Geometry coefficients missing')
+        return
      endif
 
   case default
      
-     print *,'INVALID: equilibrium_model'
-     stop
+     call neo_error('INVALID: equilibrium_model')
+     return
      
   end select
   !------------------------------------------------------------
@@ -165,26 +153,26 @@ subroutine neo_check
   case (1) 
      
      if(n_radial > 1) then
-        print *, 'profile_model=1 must be run with n_radial = 1'
-        stop
+        call neo_error('ERROR: profile_model=1 must be run with n_radial = 1')
+        return
      endif
      ir=1
      do is=1,n_species
         if(dens(is,ir) <= 0.0) then
-           print *, 'density must be positive'
-           stop
+           call neo_error('ERROR: Density must be positive')
+           return
         end if
         if(temp(is,ir) <= 0.0) then
-           print *, 'temperature must be positive'
-           stop
+           call neo_error('ERROR: Temperature must be positive')
+           return
         end if
         if(nu(is,ir) <= 0.0) then
-           print *, 'collision frequency must be positive'
-           stop
+           call neo_error('ERROR: Collision frequency must be positive')
+           return
         end if
         if(z(is) == 0.0) then
-           print *, 'charge must be non-zero'
-           stop
+           call neo_error('Charge must be non-zero')
+           return
         end if
      enddo
 
@@ -208,8 +196,8 @@ subroutine neo_check
            print *, 'GLOBAL PROFILE profile_erad0_model: ERAD0 INCLUDED'
         end if
      case default
-        print *,'INVALID: profile_erad0_model'
-        stop
+        call neo_error('INVALID: profile_erad0_model')
+        return
      end select
      
      select case (profile_temprescale_model)
@@ -222,8 +210,8 @@ subroutine neo_check
            print *, 'GLOBAL PROFILE profile_temprescale_model: PROFILE TEMPERATURES ARE RE-SCALED TO THE ELECTRON TEMP'
         end if
      case default
-        print *,'INVALID: profile_temprescale_model'
-        stop
+        call neo_error('INVALID: profile_temprescale_model')
+        return
      end select
      
      select case (profile_equilibrium_model)
@@ -249,8 +237,8 @@ subroutine neo_check
            print *, 'GLOBAL PROFILE profile_equilibrium_model: WITH GENERAL GEOMETRY'
         endif
      case default
-        print *,'INVALID: profile_equilibrium_model'
-        stop
+        call neo_error('INVALID: profile_equilibrium_model')
+        return
      end select
      
   case(3)
@@ -260,8 +248,8 @@ subroutine neo_check
      
   case default
      
-     print *,'INVALID: profile_model'
-     stop
+     call neo_error('INVALID: profile_model')
+     return
      
   end select
 
@@ -300,36 +288,23 @@ subroutine neo_check
      if(write_out_mode > 1) then
         print *,'rotation model: ROTATION EFFECTS INCLUDED'
      end if
-     if (n_order > 1) then
-        print *, 'rotation_model=2 must be run with n_order = 1'
-        stop
-     endif
-     
   case default
-     print *,'INVALID: rotation_model'
-     stop
+     call neo_error('INVALID: rotation_model')
+     return
   end select
   
-  select case (zf_model)
+  select case (spitzer_model)
   case(0)
      if(write_out_mode > 1) then
-        print *, 'zf_model: NEOCLASSICAL TRANSPORT TEST CASE'
+        print *, 'spitzer_model: NEOCLASSICAL TRANSPORT TEST CASE'
      end if
   case (1)
      if(write_out_mode > 1) then
-        print *, 'ZF_model: ZF DAMPING TEST CASE'
+        print *, 'spitzer_model: SPITZER TEST CASE'
      end if
-     if(rotation_model == 2) then
-        print *, 'zf_model = 1 must be run without rotation effects'
-        stop
-     endif
-     if (n_order > 1) then
-        print *, 'zf_model = 1 must be run with n_order = 1'
-        stop
-     endif
   case default
-     print *,'INVALID: zf_model'
-     stop
+     call neo_error('INVALID: spitzer_model')
+     return
   end select
      
   !------------------------------------------------------------

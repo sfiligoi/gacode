@@ -11,13 +11,9 @@ subroutine neo_read_input
   read(1,*) n_xi
   read(1,*) n_theta
   read(1,*) n_radial
-  read(1,*) energy_max
-  read(1,*) energy_min_connor
-  read(1,*) energy_tol
   read(1,*) rmin_1_in
   read(1,*) rmin_2_in
   read(1,*) rmaj_in
-  read(1,*) n_order
   read(1,*) write_out_mode
   read(1,*) sim_model
   read(1,*) equilibrium_model
@@ -35,8 +31,7 @@ subroutine neo_read_input
   read(1,*) omega_rot_in
   read(1,*) omega_rot_deriv_in
 
-  read(1,*) zf_model
-  read(1,*) zf_time
+  read(1,*) spitzer_model
 
   read(1,*) n_species
 

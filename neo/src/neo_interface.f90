@@ -16,21 +16,17 @@ module neo_interface
   implicit none
 
   ! Input parameters (set to default values from python/neo_dict.py)
-  integer :: neo_n_energy_in = 10
-  integer :: neo_n_xi_in = 17
-  integer :: neo_n_theta_in = 17
+  integer :: neo_n_energy_in = 15
+  integer :: neo_n_xi_in = 15
+  integer :: neo_n_theta_in = 15
   integer :: neo_n_radial_in = 1
-  real    :: neo_energy_max_in = 12.0
-  real    :: neo_energy_min_connor_in = 1.0e-4
-  real    :: neo_energy_tol_in = 1.0e-8
   real    :: neo_rmin_over_a_in = 0.5
   real    :: neo_rmin_over_a_2_in = 0.6
   real    :: neo_rmaj_over_a_in = 3.0
-  integer :: neo_n_order_in = 1
   integer :: neo_write_out_mode_in = 2
   integer :: neo_sim_model_in = 1
   integer :: neo_equilibrium_model_in = 0
-  integer :: neo_collision_model_in = 2
+  integer :: neo_collision_model_in = 4
   integer :: neo_profile_model_in = 1
   integer :: neo_profile_erad0_model_in = 1
   integer :: neo_profile_temprescale_model_in = 0
@@ -42,8 +38,7 @@ module neo_interface
   integer :: neo_rotation_model_in = 1
   real    :: neo_omega_rot_in = 0.0
   real    :: neo_omega_rot_deriv_in = 0.0
-  integer :: neo_zf_model_in = 0
-  real    :: neo_zf_time_in = 1.0
+  integer :: neo_spitzer_model_in = 0
   integer :: neo_n_species_in = 1
   integer :: neo_z_1_in = 1
   real    :: neo_mass_1_in = 1.0
@@ -130,6 +125,9 @@ module neo_interface
   real, dimension(6) :: neo_efluxtot_gv_out  = 0.0
   real, dimension(6) :: neo_efluxncv_gv_out  = 0.0
   real, dimension(6) :: neo_mflux_gv_out  = 0.0
+  ! error checking
+  integer :: neo_error_status_out=0
+  character(len=80) :: neo_error_message_out=''
 
 contains
 
@@ -144,13 +142,10 @@ contains
     neo_n_xi_in = n_xi
     neo_n_theta_in = n_theta
     neo_n_radial_in = n_radial
-    neo_energy_max_in = energy_max
-    neo_energy_min_connor_in = energy_min_connor
-    neo_energy_tol_in = energy_tol
+    neo_rmin_over_a_in = rmin_1_in
     neo_rmin_over_a_in = rmin_1_in
     neo_rmin_over_a_2_in = rmin_2_in
     neo_rmaj_over_a_in = rmaj_in
-    neo_n_order_in = n_order
     neo_write_out_mode_in = write_out_mode
     neo_sim_model_in = sim_model
     neo_equilibrium_model_in = equilibrium_model
@@ -166,8 +161,7 @@ contains
     neo_rotation_model_in = rotation_model
     neo_omega_rot_in = omega_rot_in
     neo_omega_rot_deriv_in = omega_rot_deriv_in
-    neo_zf_model_in = zf_model
-    neo_zf_time_in = zf_time
+    neo_spitzer_model_in = spitzer_model
     neo_n_species_in = n_species
     neo_z_1_in = z_in(1)
     neo_mass_1_in = mass_in(1)
@@ -244,13 +238,9 @@ contains
     n_xi = neo_n_xi_in
     n_theta = neo_n_theta_in
     n_radial = neo_n_radial_in
-    energy_max = neo_energy_max_in
-    energy_min_connor = neo_energy_min_connor_in
-    energy_tol = neo_energy_tol_in
     rmin_1_in = neo_rmin_over_a_in
     rmin_2_in = neo_rmin_over_a_2_in
     rmaj_in = neo_rmaj_over_a_in
-    n_order = neo_n_order_in
     write_out_mode = neo_write_out_mode_in
     sim_model = neo_sim_model_in
     equilibrium_model = neo_equilibrium_model_in
@@ -266,8 +256,7 @@ contains
     rotation_model = neo_rotation_model_in
     omega_rot_in = neo_omega_rot_in
     omega_rot_deriv_in = neo_omega_rot_deriv_in
-    zf_model = neo_zf_model_in
-    zf_time = neo_zf_time_in
+    spitzer_model = neo_spitzer_model_in
     n_species = neo_n_species_in
     z_in(1) = neo_z_1_in
     mass_in(1) = neo_mass_1_in

@@ -25,19 +25,13 @@ subroutine neo_make_profiles
 
   call PROFILE_SIM_alloc(1)
 
-  if(n_order < 2) then
-     ! equally-spaced radial grid if only first-order (local) problem
-     if(n_radial == 1) then
-        r(1) = rmin_1_in
-     else
-        do ir=1,n_radial
-           r(ir) = rmin_1_in+(rmin_2_in-rmin_1_in)*(ir-1.0)/(n_radial-1)
-        enddo
-     endif
-     wd_rad(:,:) = 0.0
-  else 
-     ! Curtis-Clenshaw radial grid if higher-order problem
-     call curtis_rad(n_radial,rmin_1_in,rmin_2_in,r,wd_rad)
+  ! equally-spaced radial grid if only first-order (local) problem
+  if(n_radial == 1) then
+     r(1) = rmin_1_in
+  else
+     do ir=1,n_radial
+        r(ir) = rmin_1_in+(rmin_2_in-rmin_1_in)*(ir-1.0)/(n_radial-1)
+     enddo
   endif
 
   num_ele = 0
@@ -51,8 +45,8 @@ subroutine neo_make_profiles
   else if(num_ele == 1) then
      adiabatic_ele_model = 0
   else
-     print *, 'only one electron species allowed'
-     stop
+     call neo_error('ERROR: Only one electron species allowed')
+     return
   end if
   
   if(btccw_in > 0) then
@@ -170,6 +164,7 @@ subroutine neo_make_profiles
      enddo
 
      call neo_experimental_profiles
+     if(error_status > 0) return
      call neo_map_experimental_profiles
            
      ! ** Normalizing quantities **

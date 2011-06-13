@@ -50,8 +50,8 @@ contains
          rinfo)
 
     if(uinfo(1) < 0) then
-       print *, 'Matrix factorization failed'
-       stop
+       call neo_error('ERROR: Matrix factorization failed')
+       return
     endif
 
 

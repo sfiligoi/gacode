@@ -13,6 +13,7 @@ module neo_rotation
 
   logical, private :: initialized = .false.
   integer, private :: io_rot=50
+  character(len=80),private :: runfile = 'rotation.out'
 
   contains
 
@@ -30,7 +31,8 @@ module neo_rotation
          allocate(dens_avg_cos(n_species))
          if(write_out_mode > 0) then
             if(rotation_model == 2) then
-               open(unit=io_rot,file='rotation.out',status='replace')
+               open(unit=io_rot,file=runfile,status='replace')
+               close(io_rot)
             endif
          end if
          initialized = .true.
@@ -42,11 +44,6 @@ module neo_rotation
          deallocate(dens_fac)
          deallocate(dens_avg)
          deallocate(dens_avg_cos)
-         if(write_out_mode > 0) then
-            if(rotation_model == 2) then
-               close(io_rot)
-            endif
-         endif
          initialized = .false.
 
       endif
@@ -63,7 +60,7 @@ module neo_rotation
       integer :: it, is, jt, id, n
       real :: x, x0, sum_zn, dsum_zn, fac
       
-      if(rotation_model == 1 .or. case_spitzer .or. zf_model == 1) then
+      if(rotation_model == 1 .or. spitzer_model==1) then
          do it=1, n_theta
             phi_rot(it) = 0.0
             phi_rot_deriv(it) = 0.0
@@ -119,8 +116,8 @@ module neo_rotation
             enddo
             
             if(n > nmax) then
-               print *, 'Rotation density computation failed to converge'
-               stop
+               call neo_error('ERROR: Rotation density computation failed to converge')
+               return
             endif
 
             ! phi_rot is total phi(r) - total phi(r,theta0)
@@ -141,11 +138,6 @@ module neo_rotation
             enddo
             
          enddo
-
-         !do is=1, n_species
-         !   print *, dens_avg(is), dens_avg_cos(is)
-         !enddo
-         !stop
 
          do it=1,n_theta
             phi_rot_deriv(it) = 0.0
@@ -177,6 +169,7 @@ module neo_rotation
 
       if(write_out_mode == 0 .or. rotation_model == 1) return
 
+      open(io_rot,file=runfile,status='old',position='append')
       write (io_rot,'(e16.8,$)') r(ir)
       write (io_rot,'(e16.8,$)') phi_rot_avg
       do is=1, n_species
@@ -186,6 +179,7 @@ module neo_rotation
          write (io_rot,'(e16.8,$)') phi_rot(it)
       enddo
       write(io_rot,*)
+      close(io_rot)
 
     end subroutine ROT_write
 
