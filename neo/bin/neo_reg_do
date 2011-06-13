@@ -13,12 +13,15 @@ list="
 ade_c1 
 ade_c2 
 ade_c3 
+ade_c4
 gke_c1 
 gke_c2 
 gke_c3 
+gke_c4
 imp_c1 
 imp_c2 
 imp_c3 
+imp_c4
 ade_miller 
 rot_ade 
 rot_ade_shear 
@@ -26,10 +29,7 @@ exp_miller_norot
 exp_miller_rot 
 exp_geo_norot 
 exp_geo_rot 
-exp_geo_rot_multir 
-fow_ade 
-fow_exp_ade 
-fow_exp_imp"
+exp_geo_rot_multir"
 
 echo "REGRESSION TESTING:"
 
