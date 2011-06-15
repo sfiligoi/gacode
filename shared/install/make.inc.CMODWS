@@ -14,11 +14,11 @@ FPROF	= -march=nocona -mfpmath=sse -O3 -pg
 
 # System math libraries
 
-LMATH = /home/jdorris/code/GotoBLAS2/libgoto2.so
+LMATH = /usr/lib64/libblas.so /usr/lib64/liblapack.so
 
 # OPTIONAL: netCDF (for gyro2gkv)
-NETCDF = /home/jas/netcdf/lib/libnetcdf.a
-NETCDF_INC = /home/jas/netcdf/include
+NETCDF = /usr/local/cmod/codes/netcdf64/lib/libnetcdf.a
+NETCDF_INC = /usr/local/cmod/codes/netcdf64/include
 
 # Archive 
 
