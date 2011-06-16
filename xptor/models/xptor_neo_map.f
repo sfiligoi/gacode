@@ -40,7 +40,7 @@ c
        xnue = 1.329/taue
 
 ! neo resolution
-      neo_energy_max_in = 16.0
+      neo_n_energy_in = 16.0
 
 ! Geometry
       rhom = arho_exp*(rho(jm+1)+rho(jm))/2.0
