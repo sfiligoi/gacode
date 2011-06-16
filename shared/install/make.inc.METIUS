@@ -25,7 +25,7 @@ NETCDF_INC=/usr/local/include
 ARCH = ar cr
 
 # HDF5
-#HROOT=/home/SOFTWARE/hdf5-1.8.6/hdf5
+#HROOT=/home/buuck/Summer11/SOFTWARE/hdf5-1.8.6/hdf5
 #HDF5_LIBS = -L$(HROOT)/lib -lhdf5_fortran -lhdf5 -lz
 #HDF5_INC = -I $(HROOT)/include/
 #VSHDF5_MAKECMD=vshdf5
