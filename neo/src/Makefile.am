@@ -19,16 +19,18 @@ shared_includes= -I $(top_builddir)/shared/math \
 noinst_LTLIBRARIES = libgacodeneo_src.la
 libgacodeneo_src_la_SOURCES = \
   neo_globals.f90 \
+  neo_error.f90 \
   neo_profile_exp.f90 \
   neo_allocate_profile.f90 \
   neo_make_profiles.f90 \
   neo_experimental_profiles.f90 \
   neo_map_experimental_profiles.f90 \
   neo_sparse_solve.f90 \
+  neo_compute_fcoll.f90 \
   neo_equilibrium.f90 \
-  neo_g_velocitygrids.f90 \
   neo_nclass_dr.f90 \
   neo_energy_grid.f90 \
+  neo_g_velocitygrids.f90 \
   neo_theory.f90 \
   neo_check.f90 \
   neo_rotation.f90 \
@@ -37,6 +39,7 @@ libgacodeneo_src_la_SOURCES = \
   neo_init.f90 \
   neo_read_input.f90 \
   neo_run.f90 \
+  neo_spitzer.f90 \
   neo_do.f90
 
 
