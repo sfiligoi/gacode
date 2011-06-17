@@ -78,7 +78,9 @@ TEST_FLAG=0
 INIT_FLAG=0
 GENERATE_FLAG=0
 SCOPY_FLAG=0
+PLOT_FLAG=0
 KILL_STATUS=2
+LOCFILE="0"
 #=============================================================
 
 #=============================================================
@@ -106,6 +108,8 @@ while [ $# -gt 0 ] ; do
   -l) tgyro_code_lines ; exit 0 ;;
 
   -K) shift ; KILL_STATUS=1 ; LOCDIR=$1 ;;
+
+  -plot) shift ; LOCFILE=$1 ; PLOT_FLAG=1 ;;
 
   *) echo "ERROR: incorrect gyro syntax." ; exit 1 ;;
  
@@ -312,3 +316,18 @@ then
 fi
 #===========================================================
 
+#==============================================================================
+# Plot results using matplotlib
+
+if [ $PLOT_FLAG -eq 1 ]
+then
+   if [ $LOCFILE != "0" ]
+   then
+      echo "Displaying summary data"
+      cd ~/treg01
+      ipython -pylab ~/Summer11/PythonScripts/DataDriver.py $LOCFILE
+   else
+      echo "ERROR: Please specify data to be plotted"
+   fi
+fi
+#==============================================================================
