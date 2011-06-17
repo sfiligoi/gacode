@@ -167,7 +167,9 @@ c 301 elements (was 51)
       real*8 powi_wdot_exp(0:jmaxmt), powi_fus_exp(0:jmaxmt)
       real*8 pow_ei_exp(0:jmaxmt), pow_ei_cor_m(0:jmaxmt)
       real*8 pow_ei_m(0:jmaxmt), pow_ei_mexp(0:jmaxmt)
+      real*8 pow_ei_glf(0:jmaxmt)
       real*8 exch_m(0:jmaxmt), exch_exp(0:jmaxmt)
+      real*8 exch_glf(0:jmaxmt)
       real*8 powe_fus_m(0:jmaxmt), powi_fus_m(0:jmaxmt)
       real*8 powe_fus_cor_m(0:jmaxmt), powi_fus_cor_m(0:jmaxmt)
       real*8 pow_br_m(0:jmaxmt), pow_br_cor_m(0:jmaxmt)
@@ -463,7 +465,8 @@ c
      & , powe_rad_exp, powe_ion_exp, powe_wdot_exp, powe_fus_exp
      & , powi_beam_exp, powi_rf_exp, powi_ion_exp, powi_cx_exp
      & , powi_wdot_exp, powi_fus_exp, pow_ei_exp, pow_ei_cor_m
-     & , pow_ei_m, pow_ei_mexp, exch_m, exch_exp
+     & , pow_ei_m, pow_ei_glf, pow_ei_mexp
+     & , exch_m, exch_exp, exch_glf
      & , powe_fus_m, powi_fus_m, powe_fus_cor_m, powi_fus_cor_m
      & , pow_br_m, pow_br_cor_m, pow_cycl_m, pow_cycl_cor_m
      & , flow_wall_exp, flow_recom_exp, flow_beam_exp

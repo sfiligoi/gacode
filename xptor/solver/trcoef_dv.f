@@ -93,6 +93,7 @@ c
       real*8 stress_tor_z_m_sum(0:mxgrd-1)
       real*8 stress_par_i_m_sum(0:mxgrd-1)
       real*8 stress_par_z_m_sum(0:mxgrd-1)
+      real*8 exch_glf_sum(0:mxgrd-1)
       real*8 xnu_m_sum(0:mxgrd-1)
       real*8 alpha_m_sum(0:mxgrd-1)
       real*8 betae_m_sum(0:mxgrd-1)
@@ -166,6 +167,7 @@ c      ca = 2.D0/3.D0
        stress_tor_z_glf_sum(k)=0.0
        stress_par_i_glf_sum(k)=0.0
        stress_par_z_glf_sum(k)=0.0
+       exch_glf_sum(k)=0.0
        flowe_m_sum(k)=0.0
        flowi_m_sum(k)=0.0
        flowz_m_sum(k)=0.0
@@ -224,6 +226,7 @@ c      ca = 2.D0/3.D0
        stress_tor_z_glf(k)=0.0
        stress_par_i_glf(k)=0.0
        stress_par_z_glf(k)=0.0
+       exch_glf(k)=0.0
        flowe_m(k)=0.0
        flowi_m(k)=0.0
        flowz_m(k)=0.0
@@ -699,6 +702,10 @@ c
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
       call MPI_BCAST(stress_par_z_glf_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(exch_glf,exch_glf_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(exch_glf_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
       call MPI_REDUCE(flowe_m,flowe_m_sum,mxgrd,
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
       call MPI_BCAST(flowe_m_sum,mxgrd,MPI_DOUBLE_PRECISION
@@ -815,6 +822,7 @@ c
         stress_tor_z_glf(k) = stress_tor_z_glf_sum(k)
         stress_par_i_glf(k) = stress_par_i_glf_sum(k)
         stress_par_z_glf(k) = stress_par_z_glf_sum(k)
+        exch_glf(k) = exch_glf_sum(k)
         flowe_m(k) = flowe_m_sum(k)
         flowi_m(k) = flowi_m_sum(k)
         flowz_m(k) = flowz_m_sum(k)
@@ -1579,13 +1587,16 @@ c
 c        S_pol(k) = -nu_pol_m(k)*vpolm + wp(1)*nu_pol_m(k)*unc(k)
 c     >   + wp(3)*nu_pol_m(k)*unc(k)
 c
-      pow_ei_cor_m(0)=0.D0
+      pow_ei_cor_m(0)=0.0
       stress_par_cor_m(0)=0.0
+      pow_ei_glf(0)=0.0
       do k=1,ngrid-1
         pow_ei_cor_m(k)= pow_ei_cor_m(k-1)
      >   - vprime(k,1)*dr(k,1)*S_ei(k)
         stress_par_cor_m(k) = stress_par_cor_m(k-1)
      >   - vprime(k,1)*dr(k,1)*S_pol(k)*cv*1.6726D-8
+        pow_ei_glf(k) = pow_ei_glf(k-1)
+     >   +vprime(k,1)*dr(k,1)*exch_glf(k)
       enddo
 c
 c feedback adjustments

@@ -756,6 +756,16 @@ c
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
      & len('exp drho/dr'),'exp drho/dr')
       j=j+1
+      oneval(j) = nf_def_var (ncid,'theta_exp',nf_double,1,
+     &            rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'def',
+     &           len('exp theta'), 'exp theta')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'zptheta_exp',nf_double,1,
+     &            rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'def',
+     &           len('exp zptheta'), 'exp zptheta')
+      j=j+1
       oneval(j)=nf_def_var(ncid,'a_pol',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
      & len('a_pol'),'a_pol')
@@ -1289,17 +1299,18 @@ c
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
      &           len('predicted exchange power'),
      &          'predicted exchange power')
-c
       j=j+1
-      oneval(j) = nf_def_var (ncid,'theta_exp',nf_double,1,
+      oneval(j) = nf_def_var (ncid,'pow_ei_glf',nf_double,1,
      &            rdim,rhid1(j))
-      oneval(j)=nf_put_att_text(ncid,rhid1(j),'def',
-     &           len('exp theta'), 'exp theta')
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &           len('glf exchange power MW'),
+     &          'glf exchange power MW')
       j=j+1
-      oneval(j) = nf_def_var (ncid,'zptheta_exp',nf_double,1,
+      oneval(j) = nf_def_var (ncid,'exch_glf',nf_double,1,
      &            rdim,rhid1(j))
-      oneval(j)=nf_put_att_text(ncid,rhid1(j),'def',
-     &           len('exp zptheta'), 'exp zptheta')
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &           len('glf exchange heating MW/m^2'),
+     &          'glf exchang heating (MW/m^2')
       j=j+1
       oneval(j) = nf_def_var (ncid,'S1',nf_double,1,
      &            rdim,rhid1(j))
@@ -1734,6 +1745,10 @@ c
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), drhodr)
       j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), theta_exp)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), zptheta_exp)
+      j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), a_pol)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), a_tor)
@@ -1960,9 +1975,9 @@ c
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), pow_ei_cor_m)
       j=j+1
-      oneval(j) = nf_put_var_double(ncid, rhid1(j), theta_exp)
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), pow_ei_glf)
       j=j+1
-      oneval(j) = nf_put_var_double(ncid, rhid1(j), zptheta_exp)
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), exch_glf)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), S(1,1:mxgrid+1))
       j=j+1

@@ -3714,7 +3714,7 @@
           stress_tor_weight(is,1) = stress_tor_weight(is,1)  &
             + REAL(xi*CONJG(phi(i))*(ave_c_tor_par(1,1)*stress_par(is,i,1)+ave_c_tor_per(1,1)*stress_per(is,i,1)))
           exchange_weight(is,1) = exchange_weight(is,1) &
-          + zs(is)*REAL(xi*freq_QL*CONJG(phi(i))*(n(is,i)-zs(is)*phi(i)/taus(is)))
+          + zs(is)*REAL(xi*freq_QL*CONJG(phi(i))*n(is,i))
           if(use_bper_in)then
             particle_weight(is,2) = particle_weight(is,2) &
             - vs(is)*REAL(xi*CONJG(psi(i))*u_par(is,i))
