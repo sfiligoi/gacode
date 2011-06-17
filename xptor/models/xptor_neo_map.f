@@ -39,9 +39,6 @@ c
 !  xnue = 3/4 (Pi**0.5)/taue
        xnue = 1.329/taue
 
-! neo resolution
-      neo_n_energy_in = 16.0
-
 ! Geometry
       rhom = arho_exp*(rho(jm+1)+rho(jm))/2.0
       rminm=(rmin_exp(jm+1)+rmin_exp(jm))/2.0
