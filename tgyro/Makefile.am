@@ -80,7 +80,7 @@ AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) -I. $(tgyro_includes)
 AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) -I. $(tgyro_includes)
 
 all-local:
-	cd $(top_builddir)/tgyro/src  && if test ! -f tgyro_main ; then ln -s  $(top_builddir)/tgyro/tgyro tgyro_main ; fi;
+	cd $(top_srcdir)/tgyro/src  && if test ! -f tgyro_main ; then ln -s  $(top_builddir)/tgyro/tgyro tgyro_main ; fi;
 
 MAINTAINERCLEANFILES    = Makefile.in
 CLEANFILES = tgyro *.la *.o
