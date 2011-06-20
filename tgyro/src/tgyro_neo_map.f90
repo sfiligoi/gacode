@@ -22,6 +22,13 @@ subroutine tgyro_neo_map
      neo_sim_model_in = 1
   end if
 
+  ! Resolution
+  if (loc_n_ion < 4) then
+     neo_n_energy_in = 10
+  else
+     neo_n_energy_in = 6
+  endif
+
   ! Geometry
   neo_write_out_mode_in    = 0
   neo_equilibrium_model_in = 2

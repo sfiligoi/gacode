@@ -332,6 +332,9 @@ subroutine tgyro_write_input
      case (2)
 
         write(1,10) 'LOC_NEO_METHOD','NEO code'
+        if (loc_n_ion >= 4) then
+           write(1,10) '        * INFO','Using reduced energy resolution to cope with so many ions.'
+        endif
 
      case default
 
