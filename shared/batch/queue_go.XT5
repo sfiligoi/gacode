@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # SCRIPT:
 #  queue_go.XT5
@@ -16,14 +16,26 @@ queue_num=${2}
 sim=${3}
 simpath=${4}
 code=${5}
-# raise nodes to a multiple of 12 cores; use $nproc in execute line
-nodes=$[12*(($nproc+11)/12)]
+
+# DO NOT raise nodes to a multiple of 12 cores or TGYRO can fail.  
+nodes=$(($nproc/12))
+cores=$((12*$nodes))
+resid=$(($nproc-$cores))
+
+if [ $resid -ne 0 ]
+then
+   echo "ERROR: Total core count must be a multiple of 12"
+   exit 1
+fi
+
+queue="batch"
 
 case "$queue_num" in
 
    0 )
 
-      limit="0:30:00" ;;
+      limit="0:30:00" ;
+      queue="debug" ;;
 
    1 )
 
@@ -70,9 +82,9 @@ echo "#PBS -o $simpath/$sim/batch.out" >> $bfile
 # STDERR
 echo "#PBS -e $simpath/$sim/batch.err" >> $bfile
 # Queue name
-#echo "#PBS -q $queue" >> $bfile
+echo "#PBS -q $queue" >> $bfile
 # Max wall-clock time and number of compute cores
-echo "#PBS -l walltime=$limit,size=$nodes" >> $bfile
+echo "#PBS -l walltime=$limit,size=$cores" >> $bfile
 echo "cd \${PBS_O_WORKDIR}" >> $bfile
 if [ "$SHELL" = "/bin/bash" ] ; then
    echo "export MPICH_RANK_REORDER_METHOD=0" >> $bfile
