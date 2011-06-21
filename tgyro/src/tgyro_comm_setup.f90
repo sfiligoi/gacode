@@ -132,7 +132,7 @@ subroutine tgyro_comm_setup
      do j=1,n_worker
         i_color = i_color+1
         high = low+procs(i)/n_worker-1
-        if (i_proc_global >= low .AND. i_proc_global <= high) then
+        if (i_proc_global >= low .and. i_proc_global <= high) then
            color   = i_color-1
            worker  = j-1
            adjoint = i_proc_global-low+worker*procs(i)/n_worker
@@ -155,7 +155,7 @@ subroutine tgyro_comm_setup
        workeradjvec,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
 
   if (i_proc_global == 0) then
-     open(unit=1,file='taskmapping.out',status='replace')
+     open(unit=1,file='out.tgyro.taskmapping',status='replace')
      write(1,'(t2,a,t10,a,t18,a,t26,a,t34,a)') &
           'core','gcomm','worker','adjoint','workeradj'
      do i=1,n_proc_global
