@@ -39,10 +39,6 @@ c
        taue = 1.088D-3*(tem**1.5)/(nem*lnlamda)
 !  xnue = 3/4 (Pi**0.5)/taue
        xnue = 1.329/taue
-<<<<<<< HEAD
-=======
-
->>>>>>> 70b3954f94d6eff8c180e8344eb0690e7f912fba
 ! Geometry
       rhom = arho_exp*(rho(jm+1)+rho(jm))/2.0
       rminm=(rmin_exp(jm+1)+rmin_exp(jm))/2.0
