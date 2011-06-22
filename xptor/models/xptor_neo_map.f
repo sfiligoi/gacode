@@ -37,7 +37,11 @@ c
        lnlamda=15.94D0-0.5*LOG(nem)+LOG(tem)
        taue = 1.088D-3*(tem**1.5)/(nem*lnlamda)
 !  xnue = 3/4 (Pi**0.5)/taue
+<<<<<<< HEAD
        xnue = 1.329/taue
+=======
+       xnue = 1.329/taue
+>>>>>>> origin/master
 
 ! Geometry
       rhom = arho_exp*(rho(jm+1)+rho(jm))/2.0

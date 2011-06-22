@@ -27,7 +27,7 @@ contains
     icntl(2) = 6
     !
     ! Use icntl(3) = 2 for more verbosity.
-    icntl(3) = 2
+    icntl(3) = 0
     !
     ! Use icntl(8)=n for n levels of iterative 
     ! refinement (set job=1).

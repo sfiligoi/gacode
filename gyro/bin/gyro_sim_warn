@@ -7,12 +7,6 @@
 #  Check for existence of sim directory
 #-------------------------------------------------------------
 
-if [ $1 = $PWD ]
-  then
-  echo "ERROR: missing simdir"
-  exit 1
-fi
-
 if [ ! -d "$1" ]
   then
   echo "ERROR: $1 is not a valid simulation directory."
@@ -22,13 +16,8 @@ fi
 
 if [ ! -f "$1/input.gyro" ]
   then
-  cp $GACODE_ROOT/gyro/tools/input/reg01/input.gyro $1
-  echo "********************************************************"
-  echo "*                                                      *"
-  echo "*  input.gyro was not found.  One has been created     *"
-  echo "*  for you using the template in reg01.                *"
-  echo "*                                                      *"
-  echo "********************************************************"
+  echo "ERROR: input.gyro not found in $1"
+  exit 1
 fi
 
 if [ ! -f "$1/restart.dat" ]

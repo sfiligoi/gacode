@@ -281,8 +281,7 @@ echo 0 > halt
 #==========================================================
 # echo number of tasks, then parse INPUT
 #
-echo "[GYRO MPI tasks: $NPROC]" > $RUNBASE
-echo "[Parsing data in input.gyro]" >> $RUNBASE
+echo "[Parsing data in input.gyro]" > $RUNBASE
 
 python $GYRO_DIR/bin/gyro_parse.py >> $RUNBASE
 if [ $? -eq 1 ] 
