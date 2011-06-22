@@ -16,7 +16,8 @@ c
       real :: taue,rminm,rhom,rmajm,qm,lnlamda
       real :: b_unit
       real :: m0,n0,a0,T0,v0,w0
-
+      real :: nbm,gradnbm,tbm,gradtbm
+   
       mu2 = sqrt(amassgas_exp)*42.851
       mu3 = sqrt(amassimp_exp)*42.851
 
@@ -38,10 +39,6 @@ c
        taue = 1.088D-3*(tem**1.5)/(nem*lnlamda)
 !  xnue = 3/4 (Pi**0.5)/taue
        xnue = 1.329/taue
-
-! neo resolution
-      neo_n_energy_in = 16.0
-
 ! Geometry
       rhom = arho_exp*(rho(jm+1)+rho(jm))/2.0
       rminm=(rmin_exp(jm+1)+rmin_exp(jm))/2.0
@@ -66,6 +63,10 @@ c
       neo_btccw_in = sign_Bt_exp  !magnetic field direction "
 
       neo_n_species_in = 3
+!      neo_n_species_in = 4
+      neo_n_theta_in = 15
+      neo_n_xi_in = 15
+      neo_n_energy_in = 9
       b_unit = ABS(bt_exp)*(rhom/rminm)*drhodr(jm)
       neo_rho_star_in  = (1.02D2*DSQRT(m0*T0*1.D3)/
      >  (b_unit*1.D4))/(a0*100.D0)
@@ -92,10 +93,24 @@ c
       neo_z_3_in      = zimp_exp
       neo_mass_3_in   = amassimp_exp/amassgas_exp
       neo_dens_3_in   = nzm/n0
+      neo_temp_3_in   = 1.0
       neo_dlnndr_3_in = -drhodr_loc*a0*gradnzm/nzm
       neo_dlntdr_3_in = -drhodr_loc*a0*gradtim/tim
       neo_nu_3_in = (xnue/w0)*(nzm/nem)*(zimp_exp**4)
      >  /(mu3*(tim/tem)**1.5)
+
+  ! fast ions
+      nbm = 0.5*(nfast_exp(jm+1)+nfast_exp(jm))
+      tbm = 0.5*(tfast_exp(jm+1)+tfast_exp(jm))
+      gradnbm = (nfast_exp(jm+1)-nfast_exp(jm))/dr_loc
+      gradtbm = (tfast_exp(jm+1)-tfast_exp(jm))/dr_loc
+      neo_z_4_in      = 1.0
+      neo_mass_4_in   = 1.0
+      neo_dens_4_in   = nfast_exp(jm)/n0
+      neo_temp_4_in   = tbm/t0
+      neo_dlnndr_4_in = -a0*gradnbm/nbm
+      neo_dlntdr_4_in = -a0*gradtbm/tbm
+      neo_nu_4_in = (xnue/w0)*(nbm/nem)/(mu2*(tbm/tem)**1.5)
 
   ! Rotation is always active
       neo_rotation_model_in = 2

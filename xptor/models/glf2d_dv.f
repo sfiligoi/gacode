@@ -413,10 +413,10 @@ c       write(*,*) jm, rho(jm), xnu_gf, 'xnu'
 cgms not hooked up right
         apwt_gf=nim/nem
         aiwt_jp1=(zeffm*nem-ni_exp(jm+1)
-     >    -nfst_exp(jm+1))/(zimp_gf**2*ne_exp(jm+1))
+     >    -nfast_exp(jm+1))/(zimp_gf**2*ne_exp(jm+1))
         xnimp_jp1=aiwt_jp1*ne_exp(jm+1)
         aiwt_gf=(zeffm*nem-nim
-     >    -nfst_exp(jm))/(zimp_gf**2*ne_exp(jm))
+     >    -nfast_exp(jm))/(zimp_gf**2*ne_exp(jm))
         xnimp=aiwt_gf*ne_exp(jm)
         
         zpmnimp=-(xnimp_jp1-xnimp)/(rho(jm+1)-rho(jm))/

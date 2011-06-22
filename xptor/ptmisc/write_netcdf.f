@@ -277,11 +277,15 @@ c
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
      &          len('dimensionless'),'dimensionless')
       j=j+1
+      oneval(j) = nf_def_var (ncid,'te_exp',nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',len(temp_units),
+     &           temp_units)
+      j=j+1
       oneval(j) = nf_def_var (ncid,'ti_exp',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',len(temp_units),
      &           temp_units)
       j=j+1
-      oneval(j) = nf_def_var (ncid,'te_exp',nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_def_var(ncid,'tfast_exp',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',len(temp_units),
      &           temp_units)
       j=j+1
@@ -300,7 +304,7 @@ c
      & len('exp. impurity density 10^19 m^-3'),
      & 'exp. impurity density 10^19 m^-3')
       j=j+1
-      oneval(j) = nf_def_var (ncid,'nfst_exp',nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_def_var(ncid,'nfast_exp',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
      & len('exp. fast ion density 10^19 m^-3'),
      & 'exp. fast ion density 10^19 m^-3')
@@ -1556,9 +1560,11 @@ c
       j=1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), rho)
       j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), te_exp)
+      j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), ti_exp)
       j=j+1
-      oneval(j) = nf_put_var_double(ncid, rhid1(j), te_exp)
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), tfast_exp)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), ne_exp)
       j=j+1
@@ -1566,7 +1572,7 @@ c
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), nz_exp)
       j=j+1
-      oneval(j) = nf_put_var_double(ncid, rhid1(j), nfst_exp)
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), nfast_exp)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), zeff_exp)
       j=j+1

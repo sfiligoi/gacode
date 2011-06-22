@@ -1381,7 +1381,7 @@ c
        ni_exp(j-1)=1.D-19*en_d(j,1)*bscale**(z4thrd)/ascale**(zthird)
        nz_exp(j-1)=1.D-19*en_d(j,2)*
      >      bscale**(z4thrd)/ascale**(zthird)
-       nfst_exp(j-1)=1.D-19*enbeam_d(j)*bscale**(z4thrd)/
+       nfast_exp(j-1)=1.D-19*enbeam_d(j)*bscale**(z4thrd)/
      >      ascale**(zthird)
        nitot_exp(j-1)=ni_exp(j-1)+nz_exp(j-1)
        fi_m(j-1)=ni_exp(j-1)/ne_exp(j-1)
@@ -1396,7 +1396,7 @@ c
        ne_exp(j-1)=dabs(ne_exp(j-1))
        ni_exp(j-1)=dabs(ni_exp(j-1))
        nz_exp(j-1)=dabs(nz_exp(j-1))
-       nfst_exp(j-1)=dabs(nfst_exp(j-1))
+       nfast_exp(j-1)=dabs(nfast_exp(j-1))
        nitot_exp(j-1)=dabs(nitot_exp(j-1))
        ptot_exp(j-1)=dabs(ptot_exp(j-1))
 c   we are assuming dln(ni)/dr=dln(ne)/dr

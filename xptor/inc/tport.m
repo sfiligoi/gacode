@@ -130,10 +130,11 @@ c 301 elements (was 51)
       real*8 zpnz_m(0:jmaxmt), zpnitot_m(0:jmaxmt)
       real*8 zpti2_m(0:jmaxmt)
       real*8 te_exp(0:jmaxmt), ti_exp(0:jmaxmt), ne_exp(0:jmaxmt)
+      real*8 tfast_exp(0:jmaxmt)
       real*8 te_exp_sav(0:jmaxmt), ti_exp_sav(0:jmaxmt)
       real*8 angrotp_exp_sav(0:jmaxmt)
       real*8 vphip_exp_sav(0:jmaxmt)
-      real*8 ni_exp(0:jmaxmt), nz_exp(0:jmaxmt), nfst_exp(0:jmaxmt)
+      real*8 ni_exp(0:jmaxmt), nz_exp(0:jmaxmt), nfast_exp(0:jmaxmt)
       real*8 ptot_exp(0:jmaxmt), pfast_exp(0:jmaxmt)
       real*8 torque_exp(0:jmaxmt)
       real*8 stress_tor_exp(0:jmaxmt),stress_par_exp(0:jmaxmt)
@@ -434,7 +435,8 @@ c
      & , tiflux, vphiflux, vparflux, vexbflux
      & , zpte_m, zpti_m
      & , zpne_m, zpni_m, zpnz_m, zpnitot_m, zpti2_m
-     & , te_exp, ti_exp, ne_exp, ni_exp, nz_exp, nfst_exp, nitot_exp
+     & , te_exp, ti_exp, tfast_exp
+     & , ne_exp, ni_exp, nz_exp, nfast_exp, nitot_exp
      & , nm1_exp, nm2_exp, nm3_exp
      & , te_exp_sav, ti_exp_sav, angrotp_exp_sav
      & , ptot_exp, pfast_exp, torque_exp

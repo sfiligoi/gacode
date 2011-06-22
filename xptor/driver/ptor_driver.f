@@ -732,7 +732,7 @@ c
         ne_m(j)=ne_exp(j)
         ni_m(j)=ni_exp(j)
         nz_m(j)=nz_exp(j)
-        ns_m(j)=nfst_exp(j)
+        ns_m(j)=nfast_exp(j)
        enddo
       endif
 c

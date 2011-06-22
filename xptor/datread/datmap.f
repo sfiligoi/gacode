@@ -66,9 +66,10 @@ c... only 2 max impurity ions
         endif
         nitot_exp(j-1)=nscale*ni_exp(j-1)+nz_exp(j-1)
         if(ipure.eq.1) nitot_exp(j-1)=ne_exp(j-1)
-        nfst_exp(j-1)=nscale*1.D-19*enbeam_d(j)
+        nfast_exp(j-1)=nscale*1.D-19*enbeam_d(j)
         ptot_exp(j-1)=nscale*ptot_d(j)/1.6022D+3
         pfast_exp(j-1)=nscale*pfast_d(j)/1.6022D+3
+        tfast_exp(j-1) = pfast_exp(j-1)/MAX(nfast_exp(j-1),1.0D-10)
         torque_exp(j-1)=torque_d(j)
         psir_exp(j-1)=psir_d(j)
         q_exp(j-1)=q_d(j)
