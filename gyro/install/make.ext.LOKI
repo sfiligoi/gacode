@@ -1,5 +1,5 @@
-make_nl.o : make_nl.fftw.f90
-	$(FC) $(FMATH) $(FFLAGS) -c make_nl.fftw.f90 -o make_nl.o
+gyro_nl_setup.o : gyro_nl_setup.fftw.f90
+	$(FC) $(FMATH) $(FFLAGS) -c gyro_nl_setup.fftw.f90 -o gyro_nl_setup.o
 do_nlfft_p.o : do_nlfft_p.fftw.f90
 	$(FC) $(FMATH) $(FFLAGS) -c do_nlfft_p.fftw.f90 -o do_nlfft_p.o
 do_nlfft_match.o : do_nlfft_match.fftw.f90

@@ -240,7 +240,7 @@ subroutine gyro_do
      !
      if (nonlinear_flag == 1) then
         call gyro_alloc_nl(1)
-        call make_nl
+        call gyro_nl_setup
      endif
      !
      ! Write information about radial stencils:
