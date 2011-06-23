@@ -14,7 +14,6 @@ MAINTAINERCLEANFILES    = Makefile.in
 
 #sharedir=$(prefix)/share
 dist_noinst_DATA= \
-HELP_SINGLE HELP_BAT 
 
 dist_bin_SCRIPTS= \
   gyro \

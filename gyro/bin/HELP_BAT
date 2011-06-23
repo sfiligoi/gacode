@@ -1,9 +1,0 @@
-BATCH MODE:
-
-      gyro_bat -e <dir> -n <n_proc> [-p <path>]
-
-      <dir>     Simulation directory.
- 
-      <n_proc>  Number of processors.
-
-      <path>    Optional path to simdir of the form <path>/<dir>.

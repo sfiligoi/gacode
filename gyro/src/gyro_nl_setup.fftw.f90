@@ -1,5 +1,5 @@
 !-----------------------------------------------------
-! make_nl.fftw.f90
+! gyro_nl_setup.fftw.f90
 !
 ! PURPOSE:
 !  Allocate (and define) selected arrays for 
@@ -9,7 +9,7 @@
 ! ** FFTW-specific routine!  
 !-------------------------------------------------------
 
-subroutine make_nl
+subroutine gyro_nl_setup
 
   use gyro_globals
   use gyro_nl_private
@@ -56,4 +56,4 @@ subroutine make_nl
        FFTW_MEASURE)
   !----------------------------------------------------
 
-end subroutine make_nl
+end subroutine gyro_nl_setup

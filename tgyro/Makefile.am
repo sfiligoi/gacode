@@ -45,13 +45,13 @@ gyro_includes = \
 	-I $(top_builddir)/gyro/BLEND \
 	-I $(top_builddir)/gyro/SSUB \
 	-I $(top_builddir)/gyro/TRANSPOSE \
-	-I $(top_builddir)/gyro/src 
+	-I $(top_builddir)/gyro/src
 
 neo_includes = \
-	-I $(top_builddir)/neo/src 
+	-I $(top_builddir)/neo/src
 
 tglf_includes = \
-	-I $(top_builddir)/tglf/src 
+	-I $(top_builddir)/tglf/src
 
 tgyro_includes = \
   -I $(top_builddir)/tgyro/math \
@@ -60,7 +60,7 @@ tgyro_includes = \
   $(shared_includes) \
   $(gyro_includes) \
   $(neo_includes) \
-  $(tglf_includes) 
+  $(tglf_includes)
 
 
 
@@ -79,6 +79,8 @@ AM_LIBTOOLFLAGS = --tag=FC
 AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) -I. $(tgyro_includes)
 AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) -I. $(tgyro_includes)
 
+all-local:
+	cd $(top_srcdir)/tgyro/src  && if test ! -h tgyro_main ; then ln -s  $(top_builddir)/tgyro/tgyro tgyro_main ; fi;
 
 MAINTAINERCLEANFILES    = Makefile.in
 CLEANFILES = tgyro *.la *.o

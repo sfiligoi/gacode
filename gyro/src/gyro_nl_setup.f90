@@ -1,12 +1,12 @@
 !-----------------------------------------------------
-! make_nl.f90
+! gyro_nl_setup.f90
 !
 ! PURPOSE:
-!  Allocate (and define) selected arrays for 
-!  use with direct nonlinear method only.
+!  Allocate (and define) selected arrays for use with 
+!  direct nonlinear method only.
 !-------------------------------------------------------
 
-subroutine make_nl
+subroutine gyro_nl_setup
 
   use gyro_globals
   use gyro_nl_private
@@ -34,4 +34,4 @@ subroutine make_nl
   c_nl_i(:) = dr_eodr(:)*c_nl_i(:)
   !----------------------------------------------------
 
-end subroutine make_nl
+end subroutine gyro_nl_setup

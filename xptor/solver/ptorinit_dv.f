@@ -172,10 +172,10 @@ c
      >    (zimp_gf**2-zimp_gf)
          if(dilution_model.eq.0)then
 c full impurity and fast ion dilution
-           ni_exp(k)=ne_exp(k)-nfst_exp(k)-zimp_gf*nz_exp(k) 
+           ni_exp(k)=ne_exp(k)-nfast_exp(k)-zimp_gf*nz_exp(k) 
          elseif(dilution_model.eq.1)then
 c just fast ion dilution
-           ni_exp(k) = ne_exp(k)-nfst_exp(k)
+           ni_exp(k) = ne_exp(k)-nfast_exp(k)
            nz_exp(k) = 0.0
          elseif(dilution_model.eq.2)then
 c no dilution
@@ -253,7 +253,7 @@ c
       a_unit_exp = rmin_exp(mxgrid)
 c      if(igeo_tg.eq.0)a_unit_exp=arho_exp
 c
-      call neo_flows(mxgrid-1,vneo_exp,vdia_exp)
+      call neo_flows(ngrid,vneo_exp,vdia_exp)
 c
       pow_ei_exp(0) = 0.0
       do k=1,mxgrid-1

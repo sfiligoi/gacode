@@ -59,8 +59,6 @@ c     >          /DMAX1(1.0,ABS(ne_m(i)*vexb_m(i))))
         normT = DSQRT(DMAX1(DFLOAT(ngrid-1),normT))
         normDT = DSQRT(normDT)
         test = DMAX1(test,scale*normDT/normT)
-        if(i_proc.eq.0)
-     >  write(*,*)"test",test
         if(test.gt.xparam_pt(2))scale=xparam_pt(2)*scale/test
         test=0.D0
       endif  

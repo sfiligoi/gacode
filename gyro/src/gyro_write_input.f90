@@ -128,6 +128,8 @@ subroutine gyro_write_input
      open(unit=1,file=trim(runfile),status='old',position='append')
 
      write(1,*) '----------- GRID DIMENSIONS -------------------'
+     write(1,10) 'n_cores',n_proc
+     write(1,*) '--'
      write(1,10) 'n_n',n_n
      write(1,10) 'n_x',n_x
      write(1,10) 'n_stack',n_stack

@@ -1,17 +1,16 @@
-!-----------------------------------------------------------
-! do_nlfft_match.essl.f90 [caller: gyro_rhs_total]
+!-------------------------------------------------------------------
+! gyro_nl_fft.essl.f90
 !
 ! PURPOSE:
-!  This routine evaluates the ExB nonlinearity with 
-!  nonperiodic boundary conditions using the 
-!  (F,G)-conservative difference scheme with FFT in 
-!  the toroidal direction.
+!  This routine evaluates the ExB nonlinearity with either periodic 
+!  or nonperiodic boundary conditions using the (F,G)-conservative 
+!  difference scheme using FFT in the toroidal direction.
 !
 ! NOTES:
 !  ESSL-specific version.
-!-----------------------------------------------------------
+!-------------------------------------------------------------------
 
-subroutine do_nlfft_match
+subroutine gyro_nl_fft
 
   use gyro_globals
   use gyro_pointers
@@ -88,11 +87,11 @@ subroutine do_nlfft_match
         fn_r = (0.0,0.0)
         gn_r = (0.0,0.0)
         !
-        do i_diff=-m_dx,m_dx
+        do i_diff=-m_dx,m_dx-i_dx
            do i=1,n_x
               do nn=0,n_max
-                 fn_r(nn,i) = fn_r(nn,i)+w_d1(i_diff)*fn(nn,i+i_diff)
-                 gn_r(nn,i) = gn_r(nn,i)+w_d1(i_diff)*gn(nn,i+i_diff)
+                 fn_r(nn,i) = fn_r(nn,i)+w_d1(i_diff)*fn(nn,i_loop(i+i_diff))
+                 gn_r(nn,i) = gn_r(nn,i)+w_d1(i_diff)*gn(nn,i_Loop(i+i_diff))
               enddo ! nn
            enddo ! i
         enddo ! i_diff
@@ -218,10 +217,10 @@ subroutine do_nlfft_match
         ! d/dr (g df/dp - f dg/dp)
         !
         fgp_r = (0.0,0.0)
-        do i_diff=-m_dx,m_dx
+        do i_diff=-m_dx,m_dx-i_dx
            do i=1,n_x
               do nn=0,n_max
-                 fgp_r(nn,i) = fgp_r(nn,i)+w_d1(i_diff)*fgp(nn,i+i_diff)
+                 fgp_r(nn,i) = fgp_r(nn,i)+w_d1(i_diff)*fgp(nn,i_loop(i+i_diff))
               enddo ! nn 
            enddo ! i_diff
         enddo ! i
@@ -263,5 +262,5 @@ subroutine do_nlfft_match
      enddo ! i_split 
   enddo ! is
 
-end subroutine do_nlfft_match
+end subroutine gyro_nl_fft
 

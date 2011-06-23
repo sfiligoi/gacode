@@ -77,6 +77,9 @@ OBJECTS = gyro_globals.o \
           gyro_moments_plot_wedge.o \
           gyro_mpi_grid.o \
           gyro_memory_usage.o \
+          gyro_nl_setup.o \
+          gyro_nl_direct.o \
+          gyro_nl_fft.o \
           gyro_nonlinear_flux.o \
           gyro_nonlinear_transfer.o \
           gyro_omegas.o \
@@ -131,7 +134,6 @@ OBJECTS = gyro_globals.o \
           make_poisson_blend.o \
 	  make_ampereperp_blend.o \
 	  make_poissonaperp_matrix.o \
-          make_nl.o \
           get_nonlinear_advance.o \
           get_ampere_coll.o \
           get_gyro_h.o \
@@ -150,10 +152,6 @@ OBJECTS = gyro_globals.o \
           get_delta_he.o \
           get_phi_squared.o \
           get_g_squared.o \
-          do_nlfast_p.o \
-          do_nlfast_match.o \
-          do_nlfft_p.o \
-          do_nlfft_match.o \
           set_exit_status.o \
           write_step.o \
           write_radial_operators.o \

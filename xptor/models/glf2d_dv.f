@@ -413,10 +413,10 @@ c       write(*,*) jm, rho(jm), xnu_gf, 'xnu'
 cgms not hooked up right
         apwt_gf=nim/nem
         aiwt_jp1=(zeffm*nem-ni_exp(jm+1)
-     >    -nfst_exp(jm+1))/(zimp_gf**2*ne_exp(jm+1))
+     >    -nfast_exp(jm+1))/(zimp_gf**2*ne_exp(jm+1))
         xnimp_jp1=aiwt_jp1*ne_exp(jm+1)
         aiwt_gf=(zeffm*nem-nim
-     >    -nfst_exp(jm))/(zimp_gf**2*ne_exp(jm))
+     >    -nfast_exp(jm))/(zimp_gf**2*ne_exp(jm))
         xnimp=aiwt_gf*ne_exp(jm)
         
         zpmnimp=-(xnimp_jp1-xnimp)/(rho(jm+1)-rho(jm))/
@@ -1355,6 +1355,8 @@ cgms      if(igeo_tg.ne.0)gb_unit = gb_unit*drhodr(jm)
      >   *amassgas_exp/(ABS(bt_exp/B_unit))
       vphiflux_glf = (1.6726D-8)*amassgas_exp*a_unit_exp
      >  *nem*gb_unit*csdam*a_unit_exp*get_stress_tor(2,1)
+      exch_glf(jm)=1.6022D-3*nem*tem*gb_unit*get_exchange(1,1)
+     >             /a_unit_exp
       if(ns_tg.eq.3)then
         nzflux_glf = 1.6022D-3*nem*gb_unit*get_particle_flux(3,1)
         tzflux_glf = 1.6022D-3*nem*tem*gb_unit*get_energy_flux(3,1)

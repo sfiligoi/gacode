@@ -1,5 +1,5 @@
 !-----------------------------------------------------
-! make_nl.essl.f90
+! gyro_nl_setup.essl.f90
 !
 ! PURPOSE:
 !  Allocate (and define) selected arrays for 
@@ -9,7 +9,7 @@
 ! ** ESSL-specific routine!  
 !-------------------------------------------------------
 
-subroutine make_nl
+subroutine gyro_nl_setup
 
   use gyro_globals
   use gyro_nl_private
@@ -86,4 +86,4 @@ subroutine make_nl
   deallocate(y_fft)
   !----------------------------------------------------
 
-end subroutine make_nl
+end subroutine gyro_nl_setup

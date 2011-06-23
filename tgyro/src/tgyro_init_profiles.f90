@@ -131,9 +131,13 @@ subroutine tgyro_init_profiles
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnnidr(i_ion,:)/100.0,n_exp,r,dlnnidr(i_ion,:),n_r)
   enddo
 
-  ! Overwrite ni1 with corrected density (done in EXPRO):
+  ! QUASINEUTRALITY:
+  !
+  ! Overwrite main ion density and gradient with corrected density and gradient 
+  ! (done in EXPRO):
   if (loc_quasineutral_flag == 1) then
      call cub_spline(EXPRO_rmin(:)/r_min,1e13*EXPRO_ni_new(:),n_exp,r,ni(1,:),n_r)
+     call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnnidr_new(:)/100.0,n_exp,r,dlnnidr(1,:),n_r)
   endif
 
   ! Enforce quasineutrality (set ni based on ne,nz)

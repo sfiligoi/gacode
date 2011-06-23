@@ -279,7 +279,7 @@
             enddo
           enddo
           call zgesv(iur,1,zmat,iar,ipiv,v,iar,info)
-          if(info.ne.0)write(*,*)"error in zgesv",info
+          if(info.ne.0)write(*,*)"ERROR: zgesv failed in tglf_ls.f90.",info
 !  alpha/beta=-xi*(frequency+xi*growthrate)
           eigenvalue = xi*alpha(jmax(imax))/beta(jmax(imax))  
           call get_QL_weights(particle_QL,energy_QL,stress_par_QL,stress_tor_QL, &
@@ -3354,7 +3354,7 @@
 !      write(*,*)"cputime for zggev =",REAL(cpucount2-cpucount1)/REAL(cpurate)
 !      write(*,*)"jmax = ",jmax,alpha(jmax)/beta(jmax)
 !      write(*,*)"work(1)",work(1)
-      if(info.ne.0)write(*,*)"error in zggev",info
+      if(info.ne.0)write(*,*)"ERROR: zggev failed in tglf_ls.f90.",info
 !      cputime2=MPI_WTIME()
       do j1=1,iur
         beta2=REAL(CONJG(beta(j1))*beta(j1))
@@ -3714,7 +3714,7 @@
           stress_tor_weight(is,1) = stress_tor_weight(is,1)  &
             + REAL(xi*CONJG(phi(i))*(ave_c_tor_par(1,1)*stress_par(is,i,1)+ave_c_tor_per(1,1)*stress_per(is,i,1)))
           exchange_weight(is,1) = exchange_weight(is,1) &
-          + zs(is)*REAL(xi*freq_QL*CONJG(phi(i))*(n(is,i)-zs(is)*phi(i)/taus(is)))
+          + zs(is)*REAL(xi*freq_QL*CONJG(phi(i))*n(is,i))
           if(use_bper_in)then
             particle_weight(is,2) = particle_weight(is,2) &
             - vs(is)*REAL(xi*CONJG(psi(i))*u_par(is,i))
