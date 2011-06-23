@@ -22,6 +22,9 @@ class TGYROData:
      flux_e = []
      flux_i = []
      flux_target = []
+     mflux_e = []
+     mflux_i = []
+     mflux_target = []
      gradient = []
      local_res = []
      global_res = []
@@ -30,6 +33,19 @@ class TGYROData:
      wr_elec = []
      wi_elec = []
      r
+     (Optional)
+     chi_i2 = []
+     chi_i3 = []
+     chi_i4 = []
+     chi_i5 = []
+     flux_i2 = []
+     flux_i3 = []
+     flux_i4 = []
+     flux_i5 = []
+     mflux_i2 = []
+     mflux_i3 = []
+     mflux_i4 = []
+     mflux_i5 = []
 
      Example Usage:
          >>>from matplotlib import pyplot
@@ -43,17 +59,19 @@ class TGYROData:
     # Methods
     def __init__(self, sim_directory):
         """Constructor reads in data from sim_directory and creates new object."""
-        self.init_data()
         self.set_directory(sim_directory)
+        self.init_data()
         self.read_data()
 
     def init_data(self):
         """Initialize object data."""
+
+        self.loc_n_ion = 0
+        self.read_num_ions()
         self.tgyro_mode = 0
         self.n_iterations = 0
         self.n_fields = 0
         self.n_radial = 0
-        self.directory_name = ""
         self.chi_e = []
         self.chi_i = []
         self.gyro_bohm_unit = []
@@ -62,6 +80,9 @@ class TGYROData:
         self.flux_e = []
         self.flux_i = []
         self.flux_target = []
+        self.mflux_e = []
+        self.mflux_i = []
+        self.mflux_target = []
         self.gradient = []
         self.local_res = []
         self.global_res = []
@@ -71,9 +92,26 @@ class TGYROData:
         self.wr_elec = []
         self.wi_elec = []
         self.r = 0
+        if self.loc_n_ion > 1:
+            self.chi_i2 = []
+            self.flux_i2 = []
+            self.mflux_i2 = []
+        if self.loc_n_ion > 2:
+            self.chi_i3 = []
+            self.flux_i3 = []
+            self.mflux_i3 = []
+        if self.loc_n_ion > 3:
+            self.chi_i4 = []
+            self.flux_i4 = []
+            self.mflux_i4 = []
+        if self.loc_n_ion > 4:
+            self.chi_i5 = []
+            self.flux_i5 = []
+            self.mflux_i5 = []
 
     def set_directory(self, sim_directory):
         """Set the simulation directory."""
+
         from os.path import expanduser, expandvars
         path = sim_directory
         self.directory_name = expanduser(expandvars(path))
@@ -100,6 +138,11 @@ class TGYROData:
         
         self.tgyro_mode = self.tgyro_get_input("TGYRO_MODE")
 
+    def read_num_ions(self):
+        """Read LOC_N_ION and store as self.loc_n_ion."""
+
+        self.loc_n_ion = self.tgyro_get_input("LOC_N_ION")
+
     def read_data(self):
         """Read in object data."""
         self.read_tgyro_mode()
@@ -108,13 +151,22 @@ class TGYROData:
         else:
             self.read_control()
             self.read_chi_e()
-            self.read_chi_i()
+            self.read_chi_i(self.loc_n_ion)
             self.read_gyrobohm()
             self.read_profile()
             self.read_geometry()
-            self.read_flux()
+            self.read_flux(self.loc_n_ion)
+            self.read_mflux(self.loc_n_ion)
             self.read_gradient()
             self.read_residual()
+            if self.loc_n_ion > 1:
+                self.read_profile2()
+            if self.loc_n_ion > 2:
+                self.read_profile3()
+            if self.loc_n_ion > 3:
+                self.read_profile4()
+            if self.loc_n_ion > 4:
+                self.read_profile5()
 
     def read_control(self):
         """Read control.out to set resolutions."""
@@ -221,19 +273,58 @@ class TGYROData:
         self.r = self.wr_ion[0]
         self.n_radial = len(self.r)
 
-    def read_flux(self):
-        """Read flux_e.out, flux_i.out, flux_target.out."""
+    def read_flux(self, num_ions = 1):
+        """Read flux_e.out, flux_i(2-5).out, flux_target.out."""
         self.flux_e = self.read_file(self.directory_name + '/flux_e.out')
         self.flux_i = self.read_file(self.directory_name + '/flux_i.out')
+        if num_ions > 1:
+           self.flux_i2 = self.read_file(self.directory_name + '/flux_i2.out')
+        if num_ions > 2:
+           self.flux_i3 = self.read_file(self.directory_name + '/flux_i3.out')
+        if num_ions > 3:
+           self.flux_i4 = self.read_file(self.directory_name + '/flux_i4.out')
+        if num_ions > 4:
+           self.flux_i5 = self.read_file(self.directory_name + '/flux_i5.out')
+        if num_ions > 5:
+            print "Too many ions: ", num_ions
+            print "Only the first 5 will be read."
+        self.flux_target = self.read_file(self.directory_name + '/flux_target.out')
+
+    def read_mflux(self, num_ions = 1):
+        """Read mflux_e.out, mflux_i(2-5).out, mflux_target.out."""
+        self.mflux_e = self.read_file(self.directory_name + '/mflux_e.out')
+        self.mflux_i = self.read_file(self.directory_name + '/mflux_i.out')
+        if num_ions > 1:
+           self.mflux_i2 = self.read_file(self.directory_name + '/mflux_i2.out')
+        if num_ions > 2:
+           self.mflux_i3 = self.read_file(self.directory_name + '/mflux_i3.out')
+        if num_ions > 3:
+           self.mflux_i4 = self.read_file(self.directory_name + '/mflux_i4.out')
+        if num_ions > 4:
+           self.mflux_i5 = self.read_file(self.directory_name + '/mflux_i5.out')
+        if num_ions > 5:
+            print "Too many ions: ", num_ions
+            print "Only the first 5 will be read."
         self.flux_target = self.read_file(self.directory_name + '/flux_target.out')
 
     def read_chi_e(self):
         """Read in chi_e.out and store in self.chi_e."""
         self.chi_e = self.read_file(self.directory_name + '/chi_e.out')
 
-    def read_chi_i(self):
+    def read_chi_i(self, num_ions = 1):
         """Read in chi_i.out and store in self.chi_i."""
         self.chi_i = self.read_file(self.directory_name + '/chi_i.out')
+        if num_ions > 1:
+            self.chi_i2 = self.read_file(self.directory_name + '/chi_i2.out')
+        if num_ions > 2:
+            self.chi_i3 = self.read_file(self.directory_name + '/chi_i3.out')
+        if num_ions > 3:
+            self.chi_i4 = self.read_file(self.directory_name + '/chi_i4.out')
+        if num_ions > 4:
+            self.chi_i5 = self.read_file(self.directory_name + '/chi_i5.out')
+        if num_ions > 5:
+            print "Strange number of ions: ", num_ions
+            print "Only the first 5 will be read."
 
     def read_gyrobohm(self):
         """Read and store gyrobohm.out in self.gyro_bohm_unit."""
@@ -242,6 +333,22 @@ class TGYROData:
     def read_profile(self):
         """Read and store profile.out in self.profile."""
         self.profile = self.read_file(self.directory_name + '/profile.out')
+
+    def read_profile2(self):
+        """Read and store profile2.out in self.profile2."""
+        self.profile2 = self.read_file(self.directory_name + '/profile2.out')
+
+    def read_profile3(self):
+        """Read and store profile3.out in self.profile3."""
+        self.profile3 = self.read_file(self.directory_name + '/profile3.out')
+
+    def read_profile4(self):
+        """Read and store profile4.out in self.profile4."""
+        self.profile4 = self.read_file(self.directory_name + '/profile4.out')
+
+    def read_profile5(self):
+        """Read and store profile5.out in self.profile5."""
+        self.profile5 = self.read_file(self.directory_name + '/profile.out5')
 
     def read_geometry(self):
         """Read and store geometry.out in self.geometry."""
@@ -274,6 +381,34 @@ class TGYROData:
         """
         return self.profile['ti'][iteration]
 
+    def get_Ti2(self, iteration=-1):
+        """Return Ti2 for specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+        """
+        return self.profile2['Ti'][iteration]
+
+    def get_Ti3(self, iteration=-1):
+        """Return Ti3 for specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+        """
+        return self.profile3['Ti'][iteration]
+
+    def get_Ti4(self, iteration=-1):
+        """Return Ti4 for specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+        """
+        return self.profile4['Ti'][iteration]
+
+    def get_Ti5(self, iteration=-1):
+        """Return Ti5 for specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+        """
+        return self.profile5['Ti'][iteration]
+
     def get_ne(self, iteration=-1):
         """Return ne for specified iteration.
            Keywords:
@@ -287,6 +422,34 @@ class TGYROData:
                iteration           TGYRO iteration to return, default is last
         """
         return self.profile['ni'][iteration]
+
+    def get_ni2(self, iteration=-1):
+        """Return ni2 for specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+        """
+        return self.profile2['ni'][iteration]
+
+    def get_ni3(self, iteration=-1):
+        """Return ni3 for specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+        """
+        return self.profile3['ni'][iteration]
+
+    def get_ni4(self, iteration=-1):
+        """Return ni4 for specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+        """
+        return self.profile4['ni'][iteration]
+
+    def get_ni5(self, iteration=-1):
+        """Return ni5 for specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+        """
+        return self.profile5['ni'][iteration]
 
     def get_chi_e_turb(self, iteration=-1, mks=False):
         """Return turbulent chi_e from specified iteration.
@@ -308,7 +471,63 @@ class TGYROData:
                iteration           TGYRO iteration to return, default is last
                mks                 whether to return in mks units, default is False
         """
-        chis = self.chi_i['chie_tur'][iteration]
+        chis = self.chi_i['chii_tur'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Chi_GB'][iteration]
+            chis = chis * GB_factors
+
+        return chis
+
+    def get_chi_i2_turb(self, iteration=-1, mks=False):
+        """Return turbulent chi_i2 from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        chis = self.chi_i2['chii_tur'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Chi_GB'][iteration]
+            chis = chis * GB_factors
+
+        return chis
+
+    def get_chi_i3_turb(self, iteration=-1, mks=False):
+        """Return turbulent chi_i3 from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        chis = self.chi_i3['chii_tur'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Chi_GB'][iteration]
+            chis = chis * GB_factors
+
+        return chis
+
+    def get_chi_i4_turb(self, iteration=-1, mks=False):
+        """Return turbulent chi_i4 from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        chis = self.chi_i4['chii_tur'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Chi_GB'][iteration]
+            chis = chis * GB_factors
+
+        return chis
+
+    def get_chi_i5_turb(self, iteration=-1, mks=False):
+        """Return turbulent chi_i5 from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        chis = self.chi_i5['chii_tur'][iteration]
 
         if mks:
             GB_factors = self.gyro_bohm_unit['Chi_GB'][iteration]
@@ -323,6 +542,76 @@ class TGYROData:
                mks                 whether to return in mks units, default is False
         """
         chis = self.chi_e['chie_neo'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Chi_GB'][iteration]
+            chis = chis * GB_factors
+
+        return chis
+
+    def get_chi_i_neo(self, iteration=-1, mks=False):
+        """Return neoclassical chi_i from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        chis = self.chi_i['chii_neo'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Chi_GB'][iteration]
+            chis = chis * GB_factors
+
+        return chis
+
+    def get_chi_i2_neo(self, iteration=-1, mks=False):
+        """Return neoclassical chi_i2 from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        chis = self.chi_i2['chii_neo'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Chi_GB'][iteration]
+            chis = chis * GB_factors
+
+        return chis
+
+    def get_chi_i3_neo(self, iteration=-1, mks=False):
+        """Return neoclassical chi_i3 from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        chis = self.chi_i3['chii_neo'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Chi_GB'][iteration]
+            chis = chis * GB_factors
+
+        return chis
+
+    def get_chi_i4_neo(self, iteration=-1, mks=False):
+        """Return neoclassical chi_i4 from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        chis = self.chi_i4['chii_neo'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Chi_GB'][iteration]
+            chis = chis * GB_factors
+
+        return chis
+
+    def get_chi_i5_neo(self, iteration=-1, mks=False):
+        """Return neoclassical chi_i5 from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        chis = self.chi_i['chii_neo'][iteration]
 
         if mks:
             GB_factors = self.gyro_bohm_unit['Chi_GB'][iteration]
@@ -345,6 +634,21 @@ class TGYROData:
 
         return flux
 
+    def get_flux_i_target(self, iteration=-1, mks=False):
+        """Return target ion heat flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+
+        flux = self.flux_target['eflux_i_target'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
     def get_flux_e_turb(self, iteration=-1, mks=False):
         """Return turbulent electron heat flux from specified iteration.
            Keywords:
@@ -359,6 +663,76 @@ class TGYROData:
 
         return flux
 
+    def get_flux_i_turb(self, iteration=-1, mks=False):
+        """Return turbulent ion heat flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.flux_i['eflux_i_tur'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_flux_i2_turb(self, iteration=-1, mks=False):
+        """Return turbulent ion2 heat flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.flux_i2['eflux_i_tur'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_flux_i3_turb(self, iteration=-1, mks=False):
+        """Return turbulent ion3 heat flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.flux_i3['eflux_i_tur'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_flux_i4_turb(self, iteration=-1, mks=False):
+        """Return turbulent ion4 heat flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.flux_i4['eflux_i_tur'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_flux_i5_turb(self, iteration=-1, mks=False):
+        """Return turbulent ion5 heat flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.flux_i5['eflux_i_tur'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
     def get_flux_e_neo(self, iteration=-1, mks=False):
         """Return neoclassical electron heat flux from specified iteration.
            Keywords:
@@ -366,6 +740,259 @@ class TGYROData:
                mks                 whether to return in mks units, default is False
         """
         flux = self.flux_e['eflux_e_neo'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_flux_i_neo(self, iteration=-1, mks=False):
+        """Return neoclassical ion heat flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.flux_i['eflux_i_neo'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_flux_i2_neo(self, iteration=-1, mks=False):
+        """Return neoclassical ion2 heat flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.flux_i2['eflux_i_neo'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_flux_i3_neo(self, iteration=-1, mks=False):
+        """Return neoclassical ion3 heat flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.flux_i3['eflux_i_neo'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_flux_i4_neo(self, iteration=-1, mks=False):
+        """Return neoclassical ion4 heat flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.flux_i4['eflux_i_neo'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_flux_i5_neo(self, iteration=-1, mks=False):
+        """Return neoclassical ion5 heat flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.flux_i5['eflux_i_neo'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_mflux_target(self, iteration=-1, mks=False):
+        """Return target momentum flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+
+        flux = self.mflux_target['mflux_target'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_mflux_e_turb(self, iteration=-1, mks=False):
+        """Return turbulent electron momentum flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.mflux_e['mflux_e_tur'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_mflux_i_turb(self, iteration=-1, mks=False):
+        """Return turbulent ion momentum flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.mflux_i['mflux_i_tur'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_mflux_i2_turb(self, iteration=-1, mks=False):
+        """Return turbulent ion2 momentum flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.mflux_i2['mflux_i_tur'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_mflux_i3_turb(self, iteration=-1, mks=False):
+        """Return turbulent ion3 momentum flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.mflux_i3['mflux_i_tur'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_mflux_i4_turb(self, iteration=-1, mks=False):
+        """Return turbulent ion4 momentum flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.mflux_i4['mflux_i_tur'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_mflux_i5_turb(self, iteration=-1, mks=False):
+        """Return turbulent ion5 momentum flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.mflux_i5['mflux_i_tur'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_mflux_e_neo(self, iteration=-1, mks=False):
+        """Return neoclassical electron momentum flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.mflux_e['mflux_e_neo'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_mflux_i_neo(self, iteration=-1, mks=False):
+        """Return neoclassical ion momentum flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.mflux_i['mflux_i_neo'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_mflux_i2_neo(self, iteration=-1, mks=False):
+        """Return neoclassical ion2 momentum flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.mflux_i2['mflux_i_neo'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_mflux_i3_neo(self, iteration=-1, mks=False):
+        """Return neoclassical ion3 momentum flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.mflux_i3['mflux_i_neo'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_mflux_i4_neo(self, iteration=-1, mks=False):
+        """Return neoclassical ion4 momentum flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.mflux_i4['mflux_i_neo'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_mflux_i5_neo(self, iteration=-1, mks=False):
+        """Return neoclassical ion5 momentum flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.mflux_i5['mflux_i_neo'][iteration]
 
         if mks:
             GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
@@ -412,18 +1039,78 @@ class TGYROData:
     def get_profile_factor(self, factor, iteration=-1):
         """Return the specified profile factor for the given iteration.
            Keywords:
-               factor              Gradient Factor, options:
+               factor              Profile Factor, options:
                                        'r/a' 'ni' 'ne' 'ti' 'te' 'ti/te'
                                        'betae_unit' 'M=wR/cs'
 
                iteration           TGYRO iteration to return, default is last
         """
         if factor not in self.profile.keys():
-            print "ERROR: invalid gradient choice. Valid options:"
+            print "ERROR: invalid profile choice. Valid options:"
             print self.profile.keys()
             return
 
         return self.profile[factor][iteration]
+
+    def get_profile2_factor(self, factor, iteration=-1):
+        """Return the specified profile2 factor for the given iteration.
+           Keywords:
+               factor              Profile2 Factor, options:
+                                       'r/a' 'ni' 'a/Lni' 'Ti' 'a/LTi'
+
+               iteration           TGYRO iteration to return, default is last
+        """
+        if factor not in self.profile2.keys():
+            print "ERROR: invalid profile2 choice. Valid options:"
+            print self.profile2.keys()
+            return
+
+        return self.profile2[factor][iteration]
+
+    def get_profile3_factor(self, factor, iteration=-1):
+        """Return the specified profile3 factor for the given iteration.
+           Keywords:
+               factor              Profile3 Factor, options:
+                                       'r/a' 'ni' 'a/Lni' 'Ti' 'a/LTi'
+
+               iteration           TGYRO iteration to return, default is last
+        """
+        if factor not in self.profile3.keys():
+            print "ERROR: invalid profile3 choice. Valid options:"
+            print self.profile3.keys()
+            return
+
+        return self.profile3[factor][iteration]
+
+    def get_profile4_factor(self, factor, iteration=-1):
+        """Return the specified profile4 factor for the given iteration.
+           Keywords:
+               factor              Profile4 Factor, options:
+                                       'r/a' 'ni' 'a/Lni' 'Ti' 'a/LTi'
+
+               iteration           TGYRO iteration to return, default is last
+        """
+        if factor not in self.profile4.keys():
+            print "ERROR: invalid profile4 choice. Valid options:"
+            print self.profile4.keys()
+            return
+
+        return self.profile4[factor][iteration]
+
+    def get_profile5_factor(self, factor, iteration=-1):
+        """Return the specified profile5 factor for the given iteration.
+           Keywords:
+               factor              Profile5 Factor, options:
+                                       'r/a' 'ni' 'a/Lni' 'Ti' 'a/LTi'
+
+               iteration           TGYRO iteration to return, default is last
+        """
+        if factor not in self.profile5.keys():
+            print "ERROR: invalid profile5 choice. Valid options:"
+            print self.profile5.keys()
+            return
+
+        return self.profile5[factor][iteration]
 
     def get_global_res(self, iteration=-1):
         """Return the global residual from the given iteration."""
@@ -548,7 +1235,7 @@ class TGYROData:
             and local residual went from 2.5 -> 0.1
 
         """
-        import numpy.array
+        import numpy
         space=[]
         for iteration in range(self.n_iterations + 1):
             #print "iteration", iteration, "r", r

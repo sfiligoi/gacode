@@ -189,8 +189,18 @@ then
    echo " "
    echo "              -n3n1 <ni_3/ni_1>"
    echo "              Default: 0.0 (No third ion species)"
-   echo " "
    echo
+   echo " "
+   echo "Plotting Options"
+   echo
+   echo "              -plot <directory> <par1> <par2> ... <parN>"
+   echo "              Specify directory containing file input.profiles.  Then specify"
+   echo "              parameters to be plotted.  Type -options after <directory> to"
+   echo "              see available parameters."
+   echo "              WARNING: This command must be given by itself.  No other commands"
+   echo "              may currently be used."
+   echo
+   echo " "
    echo "EXAMPLES:"
    echo " "
    echo "    profiles_gen -i myfile" 
@@ -253,6 +263,7 @@ VGEN_V=2
 VGEN_X=2
 VGEN_FLAG=0
 MODINP_FLAG=0
+PLOT_FLAG=0
 #=============================================================
 
 #=============================================================
@@ -343,11 +354,39 @@ while [ $# -gt 0 ] ; do
 
   -modhelp) shift ; MODINP_ARGS="$MODINP_ARGS --modhelp";;
 
+  -plot) shift ; PLOT_FLAG=1 ; PLOT_DIR=$1 ; shift ; break ;;
+
   esac
   shift
 done
 
 #=============================================================
+
+#==============================================================================
+# Create requested plots:
+#
+if [ $PLOT_FLAG -eq 1 ]
+then
+  if [ $# -gt 0 ]
+  then
+    PLOT_STRING="$1"
+    shift
+  fi
+  if [[ $PLOT_STRING == "-options" ]]
+  then
+    python ~/gacode/shared/python/profiles_gen_plot.py $PLOT_DIR $PLOT_STRING &
+    exit 0
+  else
+    while [ $# -gt 0 ]
+    do
+      PLOT_STRING="$PLOT_STRING $1"
+      shift
+    done
+    python ~/gacode/shared/python/profiles_gen_plot.py $PLOT_DIR $PLOT_STRING &
+    exit 0
+  fi
+fi
+#==============================================================================
 
 #=============================================================
 # Call transp2gyro if specified and pass it the iterdb args
