@@ -34,22 +34,10 @@ subroutine get_nonlinear_advance
   !--------------------------
   ! Stage 2: nonlinear step
   ! 
-  if (boundary_method == 1) then
-
-     if (nl_method == 1) then
-        call do_nlfast_p
-     else 
-        call do_nlfft_p
-     endif
-
-  else
-
-     if (nl_method == 1) then
-        call do_nlfast_match
-     else 
-        call do_nlfft_match
-     endif
-
+  if (nl_method == 1) then
+     call gyro_nl_direct
+  else 
+     call gyro_nl_fft
   endif
   !--------------------------
 

@@ -1,17 +1,16 @@
-!-----------------------------------------------------------
-! do_nlfft_match.fftw.f90 [caller: gyro_rhs_total]
+!----------------------------------------------------------------
+! gyro_nl_fft.fftw.f90
 !
 ! PURPOSE:
-!  This routine evaluates the ExB nonlinearity with 
-!  nonperiodic boundary conditions using the 
-!  (F,G)-conservative difference scheme with FFT in 
-!  the toroidal direction.
+!  This routine evaluates the ExB nonlinearity with periodic or
+!  nonperiodic boundary conditions using the (F,G)-conservative 
+!  difference scheme with FFT in the toroidal direction.
 !
 ! NOTES:
 !  FFTW_specific version.
-!-----------------------------------------------------------
+!----------------------------------------------------------------
 
-subroutine do_nlfft_match
+subroutine gyro_nl_fft
 
   use gyro_globals
   use gyro_pointers
@@ -87,9 +86,9 @@ subroutine do_nlfft_match
               !---------------------------------------------------------------
               ! df/dr, dg/dr
               !
-              do i_diff=-m_dx,m_dx
-                 fn_r = fn_r+w_d1(i_diff)*fn(nn,i+i_diff)
-                 gn_r = gn_r+w_d1(i_diff)*gn(nn,i+i_diff)
+              do i_diff=-m_dx,m_dx-i_dx
+                 fn_r = fn_r+w_d1(i_diff)*fn(nn,i_loop(i+i_diff))
+                 gn_r = gn_r+w_d1(i_diff)*gn(nn,i_loop(i+i_diff))
               enddo ! i_diff
               !------------------------------------------------
               ! df/dp, dg/dp
@@ -202,8 +201,8 @@ subroutine do_nlfft_match
               ! d/dr (g df/dp - f dg/dp)
               !
               fgp_r = (0.0,0.0)
-              do i_diff=-m_dx,m_dx
-                 fgp_r = fgp_r+w_d1(i_diff)*fgp(nn,i+i_diff)
+              do i_diff=-m_dx,m_dx-i_dx
+                 fgp_r = fgp_r+w_d1(i_diff)*fgp(nn,i_loop(i+i_diff))
               enddo ! i_diff
 
               if (nn == 0) then
@@ -257,5 +256,5 @@ subroutine do_nlfft_match
      enddo ! i_split 
   enddo ! is
 
-end subroutine do_nlfft_match
+end subroutine gyro_nl_fft
 

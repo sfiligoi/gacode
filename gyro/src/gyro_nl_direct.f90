@@ -1,13 +1,13 @@
-!-----------------------------------------------------------
-! do_nlfast_match.X1E.f90 [caller: gyro_rhs_total]
+!-------------------------------------------------------------------
+! gyro_nl_direct.f90 
 !
 ! PURPOSE:
-!  This routine evaluates the ExB nonlinearity with 
-!  nonperiodic boundary conditions using the 
-!  (F,G)-conservative difference scheme.
-!-----------------------------------------------------------
+!  This routine evaluates the ExB nonlinearity with both periodic
+!  and nonperiodic boundary conditions using the (F,G)-conservative 
+!  difference scheme.
+!-------------------------------------------------------------------
 
-subroutine do_nlfast_match
+subroutine gyro_nl_direct
 
   use gyro_globals
   use gyro_pointers
@@ -17,20 +17,20 @@ subroutine do_nlfast_match
   !--------------------------------------------
   implicit none
   !
-  complex, dimension(i1_buffer:i2_buffer,-n_max:n_max) :: fn
-  complex, dimension(i1_buffer:i2_buffer,-n_max:n_max) :: gn
+  complex, dimension(-n_max:n_max,i1_buffer:i2_buffer) :: fn
+  complex, dimension(-n_max:n_max,i1_buffer:i2_buffer) :: gn
+  complex, dimension(0:n_max,n_x) :: nl
   !
-  complex, dimension(n_x,-n_max:n_max) :: fn_p
-  complex, dimension(n_x,-n_max:n_max) :: gn_p
-  complex, dimension(n_x,-n_max:n_max) :: fn_r
-  complex, dimension(n_x,-n_max:n_max) :: gn_r
+  complex, dimension(-n_max:n_max,n_x) :: fn_p
+  complex, dimension(-n_max:n_max,n_x) :: gn_p
+  complex, dimension(-n_max:n_max,n_x) :: fn_r
+  complex, dimension(-n_max:n_max,n_x) :: gn_r
   !
-  complex, dimension(n_x,0:n_max) :: fgr
-  complex, dimension(n_x,0:n_max) :: fgr_p
-  complex, dimension(i1_buffer:i2_buffer,0:n_max) :: fgp
-  complex, dimension(n_x,0:n_max) :: fgp_r
-  complex, dimension(n_x,0:n_max) :: fg2
-  complex, dimension(n_x,0:n_max) :: nl
+  complex, dimension(0:n_max,n_x) :: fgr
+  complex, dimension(0:n_max,n_x) :: fgr_p
+  complex, dimension(0:n_max,i1_buffer:i2_buffer) :: fgp
+  complex, dimension(0:n_max,n_x) :: fgp_r
+  complex, dimension(0:n_max,n_x) :: fg2
   !
   complex :: add1
   complex :: add2
@@ -45,27 +45,27 @@ subroutine do_nlfast_match
         ! must be zeroed.
 
         do i=i1_buffer,0
-           fn(i,:) = (0.0,0.0)
-           gn(i,:) = (0.0,0.0)
-           fgp(i,:) = (0.0,0.0)
+           fn(:,i)  = (0.0,0.0)
+           gn(:,i)  = (0.0,0.0)
+           fgp(:,i) = (0.0,0.0)
         enddo
         do i=n_x+1,i2_buffer
-           fn(i,:) = (0.0,0.0)
-           gn(i,:) = (0.0,0.0)
-           fgp(i,:) = (0.0,0.0)
+           fn(:,i)  = (0.0,0.0)
+           gn(:,i)  = (0.0,0.0)
+           fgp(:,i) = (0.0,0.0)
         enddo
 
         do i=1,n_x
            do nn=0,n_max
-              gn(i,nn) = h_M(i,i_split,i_p(nn),is)
-              fn(i,nn) = gyro_u_M(i,i_split,i_p(nn),is)
+              gn(nn,i) = h_M(i,i_split,i_p(nn),is)
+              fn(nn,i) = gyro_u_M(i,i_split,i_p(nn),is)
            enddo ! nn
         enddo ! i
 
         do i=1,n_x
            do nn=1,n_max
-              gn(i,-nn) = conjg(gn(i,nn))
-              fn(i,-nn) = conjg(fn(i,nn))
+              gn(-nn,i) = conjg(gn(nn,i))
+              fn(-nn,i) = conjg(fn(nn,i))
            enddo ! nn
         enddo ! i
 
@@ -74,8 +74,8 @@ subroutine do_nlfast_match
         !
         do i=1,n_x
            do nn=-n_max,n_max
-              fn_p(i,nn) = -i_c*n_p(nn)*fn(i,nn)
-              gn_p(i,nn) = -i_c*n_p(nn)*gn(i,nn)
+              fn_p(nn,i) = -i_c*n_p(nn)*fn(nn,i)
+              gn_p(nn,i) = -i_c*n_p(nn)*gn(nn,i)
            enddo
         enddo
         !------------------------------------------------
@@ -88,19 +88,20 @@ subroutine do_nlfast_match
         !
         ! THIS IS EXPENSIVE LOOP #1
         !
-        do i_diff=-m_dx,m_dx
+        do i_diff=-m_dx,m_dx-i_dx
            do i=1,n_x
+              ip = i+i_diff
               do nn=0,n_max
-                 fn_r(i,nn) = fn_r(i,nn)+w_d1(i_diff)*fn(i+i_diff,nn)
-                 gn_r(i,nn) = gn_r(i,nn)+w_d1(i_diff)*gn(i+i_diff,nn)
+                 fn_r(nn,i) = fn_r(nn,i)+w_d1(i_diff)*fn(nn,i_loop(ip))
+                 gn_r(nn,i) = gn_r(nn,i)+w_d1(i_diff)*gn(nn,i_loop(ip))
               enddo ! nn
            enddo ! i
         enddo ! i_diff
 
         do i=1,n_x
            do nn=1,n_max
-              fn_r(i,-nn) = conjg(fn_r(i,nn))
-              gn_r(i,-nn) = conjg(gn_r(i,nn))
+              fn_r(-nn,i) = conjg(fn_r(nn,i))
+              gn_r(-nn,i) = conjg(gn_r(nn,i))
            enddo ! nn
         enddo ! i
         !---------------------------------------------------------------
@@ -108,8 +109,11 @@ subroutine do_nlfast_match
         !---------------------------------------------------------------
         ! Nonlinear convolution
         !
-        do nn=0,n_max
-           do i=1,n_x
+        ! ** (i,nn) order here fixes cache problem on 
+        !    Opteron and Power4
+        ! 
+        do i=1,n_x
+           do nn=0,n_max
               add1 = (0.0,0.0)
               add2 = (0.0,0.0)
               add3 = (0.0,0.0)
@@ -118,24 +122,24 @@ subroutine do_nlfast_match
                  ! f dg/dr - g df/dr
 
                  add1 = add1+&
-                      fn(i,n1)*gn_r(i,nn-n1)-gn(i,n1)*fn_r(i,nn-n1)
+                      fn(n1,i)*gn_r(nn-n1,i)-gn(n1,i)*fn_r(nn-n1,i)
 
                  ! g df/dp - f dg/dp
 
                  add2 = add2+&
-                      gn(i,n1)*fn_p(i,nn-n1)-fn(i,n1)*gn_p(i,nn-n1)
+                      gn(n1,i)*fn_p(nn-n1,i)-fn(n1,i)*gn_p(nn-n1,i)
 
                  ! df/dp dg/dr - df/dr dg/dp
 
                  add3 = add3+&
-                      fn_p(i,n1)*gn_r(i,nn-n1)-fn_r(i,n1)*gn_p(i,nn-n1)
+                      fn_p(n1,i)*gn_r(nn-n1,i)-fn_r(n1,i)*gn_p(nn-n1,i)
 
               enddo ! n1
-              fgr(i,nn) = add1
-              fgp(i,nn) = add2
-              fg2(i,nn) = add3
-           enddo ! i 
-        enddo ! nn
+              fgr(nn,i) = add1
+              fgp(nn,i) = add2
+              fg2(nn,i) = add3
+           enddo ! nn
+        enddo ! i 
         !---------------------------------------------------------------
 
         !---------------------------------------------------------------
@@ -145,22 +149,22 @@ subroutine do_nlfast_match
         !
         fgp_r = (0.0,0.0)
         !
-        do i_diff=-m_dx,m_dx
+        do i_diff=-m_dx,m_dx-i_dx
            do i=1,n_x
+              ip = i+i_diff
               do nn=0,n_max
-                 fgp_r(i,nn) = fgp_r(i,nn)+w_d1(i_diff)*fgp(i+i_diff,nn)
+                 fgp_r(nn,i) = fgp_r(nn,i)+w_d1(i_diff)*fgp(nn,i_loop(ip))
               enddo ! nn 
-           enddo ! i
-        enddo ! i_diff
+           enddo ! i_diff
+        enddo ! i
         !---------------------------------------------------------------
-
 
         !------------------------------------------------
         ! d/dp (f dg/dr - g df/dr)
         !
         do i=1,n_x
            do nn=0,n_max
-              fgr_p(i,nn) = -i_c*n_p(nn)*fgr(i,nn)
+              fgr_p(nn,i) = -i_c*n_p(nn)*fgr(nn,i)
            enddo ! nn
         enddo ! i
         !------------------------------------------------
@@ -174,7 +178,7 @@ subroutine do_nlfast_match
         !
         do i=1,n_x
            do nn=0,n_max
-              nl(i,nn) = c_NL_i(i)*(fgr_p(i,nn)+fgp_r(i,nn)+fg2(i,nn))
+              nl(nn,i) = c_nl_i(i)*(fgr_p(nn,i)+fgp_r(nn,i)+fg2(nn,i))
            enddo ! nn
         enddo ! i
         !------------------------------------------------
@@ -182,15 +186,13 @@ subroutine do_nlfast_match
         !-----------------------------------------------------
         ! Finally, update global RHS (use h_M for efficiency):
         !
-        do i=1,n_x
-           do nn=0,n_max
-              h_M(i,i_split,i_p(nn),is) = (1.0/3.0)*nl(i,nn)
-           enddo ! nn
-        enddo ! i
+        do nn=0,n_max
+           h_M(:,i_split,i_p(nn),is) = nl(nn,:)/3.0
+        enddo ! nn
         !
         !-----------------------------------------------------   
 
      enddo ! i_split
   enddo ! is
 
-end subroutine do_nlfast_match
+end subroutine gyro_nl_direct
