@@ -18,6 +18,10 @@ class profiles_genData:
         """Initialize object data."""
 
         self.data = []
+        self.ar = []
+        self.br = []
+        self.az = []
+        self.bz = []
 
     def set_directory(self, directory):
         """Set the directory which contains input.profiles."""
@@ -27,9 +31,9 @@ class profiles_genData:
         self.directory_name = expanduser(expandvars(path))
 
     def read_data(self):
-        """Read in object data."""
+        """Read in object data from input.profiles."""
 
-        from numpy import array
+        import numpy as np
 
         elements = {}
         temp = []
@@ -38,7 +42,7 @@ class profiles_genData:
             if len(line.strip()) > 0:
                 if line.strip()[0].isdigit():
                     temp.append(line.split())
-        data = array(temp)
+        data = np.array(temp)
 
         keywords = []
         for count in range(5):
@@ -59,6 +63,30 @@ class profiles_genData:
                 column = column + 1
             data = data[51:, :]
         return elements
+
+    def read_fourier(self):
+        """Read in data from input.profiles.geo."""
+
+        temp = []
+        raw_data = open(self.directory_name + '/input.profiles.geo', 'r').readlines()
+        for line in raw_data:
+            temp.append(line.split()[0])
+        count = int(temp[0]) + 1
+        x = 1
+        for x in range(51):
+            arn = []
+            brn = []
+            azn = []
+            bzn = []
+            for y in range(count):
+                arn.append(temp[4*(count*x + y) + 1])
+                brn.append(temp[4*(count*x + y) + 2])
+                azn.append(temp[4*(count*x + y) + 3])
+                bzn.append(temp[4*(count*x + y) + 4])
+            self.ar.append(arn)
+            self.br.append(brn)
+            self.az.append(azn)
+            self.bz.append(bzn)
 
     def store_data(self):
         """Reads data and renames it appropriately."""
@@ -157,6 +185,54 @@ class profiles_genData:
         self.data['vpol_3 (m/s)'] = self.data['vpol_3']
         self.data['vpol_4 (m/s)'] = self.data['vpol_4']
         self.data['vpol_5 (m/s)'] = self.data['vpol_5']
+
+    def compute_mtypeeq(self, r):
+
+        """Uses input data to compute the Miller-type equilibrium."""
+        
+        import math
+
+        R = []
+        Z = []
+        tot = []
+        theta = 0
+        dtheta = 0.01
+        while theta < 2 * math.pi:
+            x = float(self.data['rmaj'][r]) + float(self.data['rmin'][r]) * math.cos(theta + math.asin(float(self.data['delta'][r])) * math.sin(theta))
+            R.append(x)
+            y = float(self.data['zmag'][r]) + float(self.data['kappa'][r]) * float(self.data['rmin'][r]) * math.sin(theta + float(self.data['zeta'][r]) * math.sin(2 * theta))
+            Z.append(y)
+            theta = theta + dtheta
+        tot.append(R)
+        tot.append(Z)
+        return tot
+
+    def compute_fouriereq(self, r):
+
+        """Uses input data to compute the general Fourier-series equilibrium."""
+
+        import math
+        
+        self.read_fourier()
+        R = []
+        Z = []
+        tot = []
+        theta = 0
+        dtheta = 0.01
+        while theta < 2 * math.pi:
+            tempr = []
+            tempz = []
+            for n in range(1, len(self.ar[0])):
+                tempr.append(float(self.ar[r][n])*math.cos(n*theta) + float(self.br[r][n])*math.sin(n*theta))
+                tempz.append(float(self.az[r][n])*math.cos(n*theta) + float(self.bz[r][n])*math.sin(n*theta))
+            x = float(self.ar[r][0])/2 + sum(tempr)
+            y = float(self.az[r][0])/2 + sum(tempz)
+            R.append(x)
+            Z.append(y)
+            theta = theta + dtheta
+        tot.append(R)
+        tot.append(Z)
+        return tot
 
     #-------------------------------------------- #
     # Get data back

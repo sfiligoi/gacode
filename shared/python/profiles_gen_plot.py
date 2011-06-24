@@ -1,5 +1,4 @@
 import sys
-import os
 import matplotlib.pyplot as plt
 from profiles_genData import profiles_genData
 
@@ -40,3 +39,5 @@ if len(sys.argv) > 2:
 if len(sys.argv) <= 2:
     print "ERROR: Please specify data to be plotted, or ask for"
     print "options."
+from profiles_genData import profiles_genData
+prof1 = profiles_genData()
