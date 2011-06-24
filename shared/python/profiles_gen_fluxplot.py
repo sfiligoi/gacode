@@ -5,8 +5,19 @@ import matplotlib.pyplot as plt
 from profiles_genData import profiles_genData
 from math import *
 
-prof1 = profiles_genData(sys.argv[1])
-m1 = float(sys.argv[3])
+if len(sys.argv) < 4:
+    print "ERROR: Too few arguments.  Type profiles_gen for help."
+    sys.exit()
+if len(sys.argv) > 6:
+    print "ERROR: Too many arguments.  Type profiles_gen for help."
+try:
+    prof1 = profiles_genData(sys.argv[1])
+except IOError:
+    print sys.argv[1]
+    print "does not contain file input.profiles and/or file input.profiles.geo."
+    print "Type profiles_gen for help."
+    sys.exit()
+
 mteq = []
 feq = []
 
@@ -15,11 +26,15 @@ fig = plt.figure(1)
 ax = fig.add_subplot(111)
 ax.set_ylabel('Z (m)')
 ax.set_xlabel('R (m)')
-ax.set_title('Flux Surfaces')
 
 #Checks to see which type of plot is desired: Miller-type, Fourier, or a
-#comparison.
+#comparison of the two.
 if sys.argv[2] == '-m':
+    try:
+        m1 = float(sys.argv[3])
+    except ValueError:
+        print sys.argv[3] + " is not a vaild number."
+        sys.exit()
 #   Checks to see if only one radius is desired to be plotted, or more.
     if len(sys.argv) == 4:
 #       Bounds checking
@@ -38,10 +53,18 @@ if sys.argv[2] == '-m':
         ax.set_ylim(-1.0, 1.2)
         plt.show()
     elif len(sys.argv) == 6:
-        m2 = float(sys.argv[4])
+        try:
+            m2 = float(sys.argv[4])
+        except ValueError:
+            print sys.argv[4] + " is not a vaild number."
+            sys.exit()
+        try:
+            step = float(sys.argv[5])
+        except ValueError:
+            print sys.argv[5] + " is not a vaild number."
+            sys.exit()
         min1 = min(m1, m2)
         max1 = max(m1, m2)
-        step = float(sys.argv[5])
         if min1 >= 1:
             print "ERROR: Min must be less than 1."
             sys.exit()
@@ -54,10 +77,10 @@ if sys.argv[2] == '-m':
         if max1 <= 0:
             print "ERROR: Max must be greater than 0."
             sys.exit()
-        if step < 0.02:
-            step = 0.02
-            print "WARNING: 0.02 is smallest step size available."
-            print "Changing step to 0.02"
+        if step < prof1.step:
+            step = prof1.step
+            print "WARNING: " + str(prof1.step) + " is smallest step size available."
+            print "Changing step size to " + str(prof1.step) + "."
         min1 = int(floor(min1 * 50))
         max1 = int(ceil(max1 * 50))
         step = int(floor(step * 50))
@@ -66,11 +89,16 @@ if sys.argv[2] == '-m':
             ax.plot(mteq[(r - min1) / step][0], mteq[(r - min1) / step][1], 'b')
         ax.set_xlim(0.55, 2.75)
         ax.set_ylim(-1.0, 1.2)
+        ax.set_title('Flux Surfaces with Min = ' + str(min1/50.0) + ', Max = ' + str(max1/50.0) + ', and Step Size = ' + str(step/50.0))
         plt.show()
     else:
         print "Strange number of parameters.  Type profiles_gen for help."
-
-if sys.argv[2] == '-f':
+elif sys.argv[2] == '-f':
+    try:
+        m1 = float(sys.argv[3])
+    except ValueError:
+        print sys.argv[3] + " is not a vaild number."
+        sys.exit()
     if len(sys.argv) == 4:
         if m1 > 1:
             print "ERROR: Rho cannot be more than 1."
@@ -85,8 +113,16 @@ if sys.argv[2] == '-f':
         ax.set_ylim(-1.0, 1.2)
         plt.show()
     elif len(sys.argv) == 6:
-        m2 = float(sys.argv[4])
-        step = float(sys.argv[5])
+        try:
+            m2 = float(sys.argv[4])
+        except ValueError:
+            print sys.argv[4] + " is not a vaild number."
+            sys.exit()
+        try:
+            step = float(sys.argv[5])
+        except ValueError:
+            print sys.argv[5] + " is not a vaild number."
+            sys.exit()
         min1 = min(m1, m2)
         max1 = max(m1, m2)
         if min1 >= 1:
@@ -116,8 +152,11 @@ if sys.argv[2] == '-f':
         plt.show()
     else:
         print "Strange number of parameters.  Type profiles_gen for help."
-
-if sys.argv[2] == '-c':
+elif sys.argv[2] == '-c':
+    try:
+        m1 = float(sys.argv[3])
+    except ValueError:
+        print sys.argv[3] + " is not a vaild number."
     if len(sys.argv) == 4:
         if m1 > 1:
             print "ERROR: Rho cannot be more than 1."
@@ -134,8 +173,14 @@ if sys.argv[2] == '-c':
         ax.set_ylim(-1.0, 1.2)
         plt.show()
     elif len(sys.argv) == 6:
-        m2 = float(sys.argv[4])
-        step = float(sys.argv[5])
+        try:
+            m2 = float(sys.argv[4])
+        except ValueError:
+            print sys.argv[4] + " is not a vaild number."
+        try:
+            step = float(sys.argv[5])
+        except ValueError:
+            print sys.argv[5] + " is not a vaild number."
         min1 = min(m1, m2)
         max1 = max(m1, m2)
         if min1 >= 1:
@@ -167,3 +212,5 @@ if sys.argv[2] == '-c':
         plt.show()
     else:
         print "Strange number of parameters.  Type profiles_gen for help."
+else:
+    print "ERROR: Incorrect plot type.  Type profiles_gen for help."

@@ -18,6 +18,9 @@ class profiles_genData:
         """Initialize object data."""
 
         self.data = []
+        self.n_exp = 0
+        self.step = 0
+        self.hlen = 0
         self.ar = []
         self.br = []
         self.az = []
@@ -38,30 +41,35 @@ class profiles_genData:
         elements = {}
         temp = []
         raw_data = open(self.directory_name + '/input.profiles', 'r').readlines()
-        for line in raw_data:
-            if len(line.strip()) > 0:
-                if line.strip()[0].isdigit():
-                    temp.append(line.split())
+        while raw_data[self.hlen].strip()[0].isdigit() == False:
+            self.hlen = self.hlen + 1
+            if raw_data[self.hlen].strip()[0:6] == 'N_EXP=':
+                self.n_exp = int(raw_data[self.hlen].strip()[6:])
+                self.step = 1.0/(self.n_exp - 1)
+        for line in range(self.hlen, len(raw_data)):
+            if raw_data[line].strip()[0].isdigit():
+                temp.append(raw_data[line].split())
+        self.hlen = self.hlen - 1
         data = np.array(temp)
 
         keywords = []
         for count in range(5):
-            keywords = raw_data[53 * count + 33].replace('(kW/eV)', '(kW/eV) ').split()
+            keywords = raw_data[(self.n_exp + 2)*count + self.hlen].replace('(kW/eV)', '(kW/eV) ').split()
             column = 0
             for key in keywords:
-                elements[key] = data[0:51, column]
+                elements[key] = data[0:self.n_exp, column]
                 column = column + 1
-            data = data[51:, :]
+            data = data[self.n_exp:, :]
         for count in range(3):
-            keys = raw_data[53 * count + 298].split()
+            keys = raw_data[(self.n_exp + 2) * count + 5*(self.n_exp + 2) + self.hlen].split()
             keywords = []
             for x in range(5):
                 keywords.append(keys[2 * x])
             column = 0
             for key in keywords:
-                elements[key] = data[0:51, column]
+                elements[key] = data[0:self.n_exp, column]
                 column = column + 1
-            data = data[51:, :]
+            data = data[self.n_exp:, :]
         return elements
 
     def read_fourier(self):
@@ -73,7 +81,7 @@ class profiles_genData:
             temp.append(line.split()[0])
         count = int(temp[0]) + 1
         x = 1
-        for x in range(51):
+        for x in range(self.n_exp):
             arn = []
             brn = []
             azn = []

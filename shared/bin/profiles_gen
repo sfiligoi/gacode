@@ -219,7 +219,7 @@ then
    echo "    profiles_gen -i input.profiles -vgen_e 2 -vgen_v 1 -vgen_in DC -vgen_x 2"
    echo "    profiles_gen -i input.profiles -vgen_e 2 -vgen_v 1 -vgen_in HDC -vgen_x 3"
    echo "    profiles_gen -plot ~/treg01 ne ni_1 ni_2"
-   echo "    profiles_gen -fluxplot -c 0 1 .02"
+   echo "    profiles_gen -fluxplot . -c 0 1 .02"
    echo 
    echo " (1) Typical usage for DIII-D plasmas with iterdbfile only (2 steps)"
    echo "     NEO will generate Er and all velocities:"

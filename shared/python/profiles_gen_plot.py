@@ -3,7 +3,12 @@ import matplotlib.pyplot as plt
 from profiles_genData import profiles_genData
 
 fignum = 1
-prof1 = profiles_genData(sys.argv[1])
+try:
+    prof1 = profiles_genData(sys.argv[1])
+except IOError:
+    print sys.argv[1]
+    print "does not contain file input.profiles.  Type profiles_gen for help."
+    sys.exit()
 if len(sys.argv) > 2:
     if sys.argv[2] == '-options':
         keys = []
@@ -26,6 +31,9 @@ if len(sys.argv) > 2:
     else:
         args = sys.argv[2:]
         for arg in args:
+            if !(arg in prof1.data.iterkeys()):
+                print "ERROR: ", arg, " is not a valid parameter.  Type -options after -plot for help."
+                sys.exit()
             fig = plt.figure(fignum)
             fignum = fignum + 1
             ax = fig.add_subplot(111)
@@ -39,5 +47,3 @@ if len(sys.argv) > 2:
 if len(sys.argv) <= 2:
     print "ERROR: Please specify data to be plotted, or ask for"
     print "options."
-from profiles_genData import profiles_genData
-prof1 = profiles_genData()
