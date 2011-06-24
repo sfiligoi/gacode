@@ -414,7 +414,7 @@ subroutine gyro_write_timedata
   endif
   !-------------------------------------------------------------------
 
-  call write_error(trim(path)//'error.out',10)
+  call write_error(trim(path)//'out.gyro.error',10)
 
   !------------------------------------------------------------
   ! Entropy diagnostics
@@ -452,7 +452,7 @@ subroutine gyro_write_timedata
   !
   call proc_time(CPU_diag_outp)
   CPU_diag_b = CPU_diag_b + (CPU_diag_outp - CPU_diag_mid)
-  call write_timing(trim(path)//'timing.out',10)
+  call write_timing(trim(path)//'out.gyro.timing',10)
   CPU_diag_mid = CPU_diag_outp
   !--------------------------------------
 

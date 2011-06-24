@@ -70,6 +70,7 @@ OBJECTS = gyro_globals.o \
           gyro_gbflux.o \
           gyro_initialize_arrays.o \
           gyro_initialize_timestep.o \
+          gyro_input_check.o \
           gyro_kxky_spectrum.o \
           gyro_lambda_grid.o \
           gyro_map_experimental_profiles.o \

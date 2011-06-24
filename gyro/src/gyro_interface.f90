@@ -433,15 +433,13 @@ contains
     gyro_fieldeigen_tol_in = fieldeigen_tol
     gyro_collision_method_in = collision_method
 
-    gyro_io_method_in        = io_method
-    gyro_torangle_offset_in        = torangle_offset
-
+    gyro_io_method_in = io_method
+    gyro_torangle_offset_in = torangle_offset
     gyro_time_skip_wedge_in = time_skip_wedge
     gyro_n_torangle_wedge_in = n_torangle_wedge
     gyro_n_torangle_3d_in  = n_torangle_3d 
     gyro_theta_wedge_offset_in  = theta_wedge_offset
     gyro_theta_wedge_angle_in = theta_wedge_angle 
-
 
     gyro_n_fourier_geo_in = n_fourier_geo
     gyro_a_fourier_geo_in(:,:) = a_fourier_geo(:,:)
@@ -649,15 +647,13 @@ contains
     fieldeigen_tol = gyro_fieldeigen_tol_in
     collision_method = gyro_collision_method_in
     
-    io_method      = gyro_io_method_in       
+    io_method = gyro_io_method_in       
     torangle_offset = gyro_torangle_offset_in        
-
     time_skip_wedge = gyro_time_skip_wedge_in 
     n_torangle_wedge = gyro_n_torangle_wedge_in 
     n_torangle_3d = gyro_n_torangle_3d_in  
     theta_wedge_offset = gyro_theta_wedge_offset_in   
     theta_wedge_angle = gyro_theta_wedge_angle_in  
-
 
     n_fourier_geo = gyro_n_fourier_geo_in
     a_fourier_geo(:,:) = gyro_a_fourier_geo_in(:,:)

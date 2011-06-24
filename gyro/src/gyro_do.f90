@@ -33,16 +33,17 @@ subroutine gyro_do
   precfile = trim(path)//trim(baseprecfile)
 
   if (baserunfile == 'out.gyro.run')  then
-     if (i_proc==0 .AND. output_flag==1) THEN
+     if (i_proc==0 .and. output_flag==1) THEN
         inquire(file=trim(runfile),exist=rfe)
         if (.not.rfe) then
            open(unit=99,file=trim(runfile),status='unknown')
            close(99)
         endif
-     ENDIF
+     endif
   endif
 
-  if (i_proc==0 .and. gkeigen_j_set==0) print *,runfile
+  ! Note sure what purpose this serves
+  !if (i_proc==0 .and. gkeigen_j_set == 0) print *,runfile
 
   CPU_0 = 0.0
   CPU_1 = 0.0
@@ -86,10 +87,12 @@ subroutine gyro_do
 
   !----------------------------------------------------------------
   if (debug_flag == 1) then
-     !  Dump the global variables that can be read
+     ! Dump the global variables that can be read
      call gyro_dump_input
-     !  Dump the interface variables for comparison
+     ! Dump the interface variables for comparison
      call gyro_dump_interface
+     ! Sanity check the interface variables
+     call gyro_input_check
   endif
   !----------------------------------------------------------------
 
