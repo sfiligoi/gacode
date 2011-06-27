@@ -56,6 +56,11 @@ subroutine gyro_mpi_grid
        i_proc,&
        NEW_COMM_1, &
        i_err)
+  if (i_err /= 0) then
+     print *,'NEW_COMM_1 creation status',i_err
+     call MPI_FINALIZE(i_err)
+     stop
+  endif
 
   ! Local adjoint Group number
 
@@ -64,6 +69,11 @@ subroutine gyro_mpi_grid
        i_proc,&
        NEW_COMM_2, &
        i_err)
+  if (i_err /= 0) then
+     print *,'NEW_COMM_2 creation status',i_err
+     call MPI_FINALIZE(i_err)
+     stop
+  endif
   !
   call MPI_COMM_RANK(NEW_COMM_1,i_proc_1,i_err)
   call MPI_COMM_RANK(NEW_COMM_2,i_proc_2,i_err)
@@ -87,16 +97,23 @@ subroutine gyro_mpi_grid
 
   !--------------------------------------------------------------
   ! MUMPS
-  i_group_mumps = i_group_2/(min(n_proc_1,n_mumps_max))
-  call MPI_COMM_SPLIT(NEW_COMM_1,&
-       i_group_mumps,& 
-       i_proc_1,&
-       MUMPS_COMM, &
-       i_err)
+  if (sparse_method == 2) then
+     i_group_mumps = i_group_2/(min(n_proc_1,n_mumps_max))
+     call MPI_COMM_SPLIT(NEW_COMM_1,&
+          i_group_mumps,& 
+          i_proc_1,&
+          MUMPS_COMM, &
+          i_err)
+     if (i_err /= 0) then
+        print *,'MUMPS_COMM creation status',i_err
+        call MPI_FINALIZE(i_err)
+        stop
+     endif
+  endif
   !--------------------------------------------------------------  
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[make_MPI_grid done]'
+     print *,'[gyro_mpi_grid done]'
   endif
 
 end subroutine gyro_mpi_grid

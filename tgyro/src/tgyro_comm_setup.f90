@@ -88,7 +88,7 @@ subroutine tgyro_comm_setup
 
      ! Linear stability mode requires that only TGLF or GYRO is used 
      ! at all radii.
-   
+
      lpath = paths(1)
      if (lpath(1:4) == "TGLF") then
 
@@ -171,18 +171,33 @@ subroutine tgyro_comm_setup
        i_proc_global,&
        gyro_comm,&
        ierr)
+  if (ierr /= 0) then
+     print *,'GYRO_COMM creation status',ierr
+     call MPI_FINALIZE(ierr)
+     stop
+  endif
 
   call MPI_COMM_SPLIT(MPI_COMM_WORLD,&
        adjoint,&
        i_proc_global,&
        gyro_adj,&
        ierr)
+  if (ierr /= 0) then
+     print *,'GYRO_ADJ creation status',ierr
+     call MPI_FINALIZE(ierr)
+     stop
+  endif
 
   call MPI_COMM_SPLIT(MPI_COMM_WORLD,&
        workeradj,&
        i_proc_global,&
        gyro_rad,&
        ierr)
+  if (ierr /= 0) then
+     print *,'GYRO_RAD creation status',ierr
+     call MPI_FINALIZE(ierr)
+     stop
+  endif
 
   call MPI_COMM_RANK(gyro_comm,gyro_comm_rank,ierr)
   call MPI_COMM_RANK(gyro_adj,gyro_adj_rank,ierr)
