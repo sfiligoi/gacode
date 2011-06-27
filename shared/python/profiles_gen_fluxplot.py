@@ -56,7 +56,7 @@ if sys.argv[2] == '-m':
         aspect = max((max(z) - min(z) + .5), (max(r) - min(r) + .5))
         ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
         ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
-        ax.set_title('Flux Surface at Rho= ' + str(prof1.get('rho')[prof1.match(m1, prof1.get('rho'))]))
+        ax.set_title(r'Flux Surface at $\rho=$' + str(prof1.get('rho')[prof1.match(m1, prof1.get('rho'))]))
         plt.show()
 
     elif len(sys.argv) == 6:
