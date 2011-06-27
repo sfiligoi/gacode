@@ -31,7 +31,7 @@ if len(sys.argv) > 2:
     else:
         args = sys.argv[2:]
         for arg in args:
-            if !(arg in prof1.data.iterkeys()):
+            if not(arg in prof1.data.iterkeys()):
                 print "ERROR: ", arg, " is not a valid parameter.  Type -options after -plot for help."
                 sys.exit()
             fig = plt.figure(fignum)
