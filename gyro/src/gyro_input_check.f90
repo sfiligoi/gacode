@@ -220,14 +220,15 @@ subroutine gyro_input_check
   call checkrealvar(funit,"theta_wedge_offset",theta_wedge_offset)
   call checkrealvar(funit,"theta_wedge_angle",theta_wedge_angle)
   call checkrealvar(funit,"torangle_offset",torangle_offset)
-  close(funit)
+
+  if (i_proc == 0) close(funit)
 
 end subroutine gyro_input_check
 
 subroutine checkintvar(unit,invarname,i)
 
   use mpi
-  use gyro_globals, only : gyro_comm_world, i_err
+  use gyro_globals, only : gyro_comm_world, i_err, i_proc
 
   implicit none
 
@@ -238,14 +239,14 @@ subroutine checkintvar(unit,invarname,i)
   call MPI_REDUCE(i,imax,1,MPI_INTEGER,MPI_MAX,0,gyro_comm_world,i_err)
   call MPI_REDUCE(i,imin,1,MPI_INTEGER,MPI_MIN,0,gyro_comm_world,i_err)
 
-  write(unit,*) imax-imin
+  if (i_proc == 0) write(unit,*) imax-imin
 
 end subroutine checkintvar
 
 subroutine checkrealvar(unit,invarname,x)
 
   use mpi
-  use gyro_globals, only : gyro_comm_world, i_err
+  use gyro_globals, only : gyro_comm_world, i_err, i_proc
 
   implicit none
 
@@ -257,7 +258,7 @@ subroutine checkrealvar(unit,invarname,x)
   call MPI_REDUCE(x,xmax,1,MPI_DOUBLE_PRECISION,MPI_MAX,0,gyro_comm_world,i_err)
   call MPI_REDUCE(x,xmin,1,MPI_DOUBLE_PRECISION,MPI_MIN,0,gyro_comm_world,i_err)
 
-  write(unit,*) xmax-xmin
+  if (i_proc == 0) write(unit,*) xmax-xmin
 
 end subroutine checkrealvar
 
