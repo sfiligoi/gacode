@@ -19,7 +19,6 @@ class profiles_genData:
 
         self.data = []
         self.n_exp = 0
-        self.step = 0
         self.hlen = 0
         self.ar = []
         self.br = []
@@ -45,7 +44,6 @@ class profiles_genData:
             self.hlen = self.hlen + 1
             if raw_data[self.hlen].strip()[0:6] == 'N_EXP=':
                 self.n_exp = int(raw_data[self.hlen].strip()[6:])
-                self.step = 1.0/(self.n_exp - 1)
         for line in range(self.hlen, len(raw_data)):
             if raw_data[line].strip()[0].isdigit():
                 temp.append(raw_data[line].split())
@@ -205,14 +203,17 @@ class profiles_genData:
         tot = []
         theta = 0
         dtheta = 0.01
+        x = self.match(r, self.data['rho'])
         while theta < 2 * math.pi:
-            x = float(self.data['rmaj'][r]) + float(self.data['rmin'][r]) * math.cos(theta + math.asin(float(self.data['delta'][r])) * math.sin(theta))
-            R.append(x)
-            y = float(self.data['zmag'][r]) + float(self.data['kappa'][r]) * float(self.data['rmin'][r]) * math.sin(theta + float(self.data['zeta'][r]) * math.sin(2 * theta))
-            Z.append(y)
+            a = float(self.data['rmaj'][x]) + float(self.data['rmin'][x]) * math.cos(theta + math.asin(float(self.data['delta'][x])) * math.sin(theta))
+            R.append(a)
+            b = float(self.data['zmag'][x]) + float(self.data['kappa'][x]) * float(self.data['rmin'][x]) * math.sin(theta + float(self.data['zeta'][x]) * math.sin(2 * theta))
+            Z.append(b)
             theta = theta + dtheta
         tot.append(R)
         tot.append(Z)
+        tot.append(self.data['rmaj'][x])
+        tot.append(self.data['zmag'][x])
         return tot
 
     def compute_fouriereq(self, r):
@@ -224,22 +225,25 @@ class profiles_genData:
         self.read_fourier()
         R = []
         Z = []
-        tot = []
+        tot = []      
         theta = 0
         dtheta = 0.01
+        x = self.match(r, self.data['rho'])
         while theta < 2 * math.pi:
             tempr = []
             tempz = []
             for n in range(1, len(self.ar[0])):
-                tempr.append(float(self.ar[r][n])*math.cos(n*theta) + float(self.br[r][n])*math.sin(n*theta))
-                tempz.append(float(self.az[r][n])*math.cos(n*theta) + float(self.bz[r][n])*math.sin(n*theta))
-            x = float(self.ar[r][0])/2 + sum(tempr)
-            y = float(self.az[r][0])/2 + sum(tempz)
-            R.append(x)
-            Z.append(y)
+                tempr.append(float(self.ar[x][n])*math.cos(n*theta) + float(self.br[x][n])*math.sin(n*theta))
+                tempz.append(float(self.az[x][n])*math.cos(n*theta) + float(self.bz[x][n])*math.sin(n*theta))
+            a = float(self.ar[x][0])/2 + sum(tempr)
+            b = float(self.az[x][0])/2 + sum(tempz)
+            R.append(a)
+            Z.append(b)
             theta = theta + dtheta
         tot.append(R)
         tot.append(Z)
+        tot.append(self.data['rmaj'][x])
+        tot.append(self.data['zmag'][x])
         return tot
 
     #-------------------------------------------- #
@@ -248,3 +252,15 @@ class profiles_genData:
         """Return requested variable."""
 
         return self.data[var]
+
+    #-------------------------------------------- #
+    # Useful Functions
+    def match(self, val, vec):
+        """Return closest match to input in a list of values."""
+        import math
+
+        temp = []
+        for n in range(len(vec)):
+            t = math.fabs(val - float(vec[n])), n
+            temp.append(t)
+        return sorted(temp)[0][1]
