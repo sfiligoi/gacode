@@ -1,9 +1,16 @@
-!-----------------------------------------------------------
+!---------------------------------------------------------------
 ! gyro_run.f90
 !
 ! PURPOSE:
-!  Manage call to local GYRO simulation.
-!---------------------------------------------------------
+!  This is the actual system call to run GYRO via subroutine 
+!  interface (i.e, from TGYRO).
+!
+! NOTES:
+!  In TGYRO, we do this:
+!
+!    call tgyro_gyro_map
+!    call gyro_run(...)
+!-------------------------------------------------------------
 
 subroutine gyro_run(&
      test_flag_in,&
