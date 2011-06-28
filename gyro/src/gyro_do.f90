@@ -86,13 +86,19 @@ subroutine gyro_do
   !----------------------------------------------------------------
 
   !----------------------------------------------------------------
+  ! Checking of input and interface data:
+  !
   if (debug_flag == 1) then
-     ! Dump the global variables that can be read
+
+     ! Dump the global input variables (read from input.gyro)
      call gyro_dump_input
+
      ! Dump the interface variables for comparison
      call gyro_dump_interface
+
      ! Sanity check the interface variables
      call gyro_input_check
+
   endif
   !----------------------------------------------------------------
 

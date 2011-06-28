@@ -38,12 +38,9 @@ subroutine gyro_cleanup
      ! Blending coefficients
      call BLEND_cleanup
 
-     ! MUMPS arrays
-     if (sparse_method == 2) call cleanup_mumps
-
      call MPI_COMM_FREE(NEW_COMM_1,i_err)
      call MPI_COMM_FREE(NEW_COMM_2,i_err)
-     call MPI_COMM_FREE(MUMPS_COMM,i_err)
+     if (sparse_method == 2) call MPI_COMM_FREE(MUMPS_COMM,i_err)
 
   endif
 

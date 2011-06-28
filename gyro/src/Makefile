@@ -163,8 +163,7 @@ OBJECTS = gyro_globals.o \
           write_error.o \
           write_matrix_stat.o \
           gyro_dump_input.o \
-          gyro_dump_interface.o \
-          cleanup_mumps.o 
+          gyro_dump_interface.o
 
 .SUFFIXES : .o .f90 
 
