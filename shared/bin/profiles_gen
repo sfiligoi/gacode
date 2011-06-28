@@ -384,7 +384,7 @@ then
     PLOT_STRING="$PLOT_STRING $1"
     shift
   done
-  python ~/gacode/shared/python/profiles_gen_plot.py $PLOT_DIR $PLOT_STRING &
+  python ~/gacode/shared/python/profiles_gen/plot.py $PLOT_DIR $PLOT_STRING &
   exit 0
 fi
 
@@ -394,10 +394,10 @@ then
   then
     FMAX=$1
     FNUM=$2
-    python ~/gacode/shared/python/profiles_gen_fluxplot.py $FLUX_DIR $FTYPE $FMIN $FMAX $FNUM &
+    python ~/gacode/shared/python/profiles_gen/fluxplot.py $FLUX_DIR $FTYPE $FMIN $FMAX $FNUM &
     exit 0
   else
-    python ~/gacode/shared/python/profiles_gen_fluxplot.py $FLUX_DIR $FTYPE $FMIN &
+    python ~/gacode/shared/python/profiles_gen/fluxplot.py $FLUX_DIR $FTYPE $FMIN &
     exit 0
   fi
 fi
