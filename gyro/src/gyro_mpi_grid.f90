@@ -41,7 +41,7 @@ subroutine gyro_mpi_grid
   !------------------------------------------------
   ! Local group indices:
   !
-  i_group_1  = i_proc/n_proc_1
+  i_group_1 = i_proc/n_proc_1
   i_group_2 = modulo(i_proc,n_proc_1)
   !
   !------------------------------------------------
@@ -96,7 +96,8 @@ subroutine gyro_mpi_grid
   endif
 
   !--------------------------------------------------------------
-  ! MUMPS
+  ! Create MUMPS_COMM if using MUMPS:
+  !
   if (sparse_method == 2) then
      i_group_mumps = i_group_2/(min(n_proc_1,n_mumps_max))
      call MPI_COMM_SPLIT(NEW_COMM_1,&
