@@ -198,7 +198,7 @@ class TGYROData:
         for iteration in range(self.n_iterations + 1):
             column = 0
             for key in keywords:
-                elements[key][iteration] = data[1:self.n_radial, column]
+                elements[key][iteration] = data[0:self.n_radial, column]
                 column = column + 1
             data = data[self.n_radial:, :]
         return elements
