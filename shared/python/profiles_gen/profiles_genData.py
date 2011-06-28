@@ -234,10 +234,19 @@ class profiles_genData:
         for k in self.data.iterkeys():
             if (var + ' ') == k[:len(var) + 1]:
                 toplot = k
+                ylab = k
                 ax.set_xlabel(k)
-        ax.set_xlabel('rho (-)')
-        ax.set_ylabel(toplot)
-        ax.set_title(var + ' vs. rho')
+        ax.set_xlabel(u'\u03c1 (-)')
+        if var == 'kappa':
+            ylab = u'\u03ba (-)'
+        if var == 'delta':
+            ylab = u'\u03b4 (-)'
+        if var == 'zeta':
+            ylab = u'\u03b6 (-)'
+        if var == 'omega0':
+            ylab = u'\u03c90 (1/s)'
+        ax.set_ylabel(ylab)
+        ax.set_title(ylab + u' vs. \u03c1')
         ax.plot(self.data['rho (-)'], self.data[toplot], 'k')
         self.plotcounter = self.plotcounter + 1
 
@@ -291,7 +300,7 @@ class profiles_genData:
                 aspect = max((max(z) - min(z)), (max(r) - min(r))) + .5
                 ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
                 ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
-                ax.set_title('Flux Surface at Rho= ' + str(self.data['rho (-)'][self.match(min1, self.data['rho (-)'])]))
+                ax.set_title(u'Flux Surface at \u03c1 = ' + str(self.data['rho (-)'][self.match(min1, self.data['rho (-)'])]))
             elif l == 6:
                 #Increments through from min to max and creates plots at each
                 #radius.
@@ -315,7 +324,7 @@ class profiles_genData:
                 aspect = max((max(z) - min(z)), (max(r) - min(r))) + .5
                 ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
                 ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
-                ax.set_title(str(int(n)) + ' Flux Surfaces between ' + str(min1) + ' and ' + str(max1) + '.')
+                ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(min1) + ' and \u03c1 = ' + str(max1) + '.')
 
 #SECTION 2: Fourier-type
         elif typ == '-f':
@@ -331,7 +340,7 @@ class profiles_genData:
                 aspect = max((max(z) - min(z)), (max(r) - min(r))) + .5
                 ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
                 ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
-                ax.set_title('Flux Surface at Rho= ' + str(self.data['rho (-)'][self.match(min1, self.data['rho (-)'])]))
+                ax.set_title(u'Flux Surface at \u03c1 = ' + str(self.data['rho (-)'][self.match(min1, self.data['rho (-)'])]))
             elif l == 6:
                 inc = self.match(min1, self.data['rho (-)'])
                 step = (self.match(max1, self.data['rho (-)']) - inc)/n
@@ -352,7 +361,7 @@ class profiles_genData:
                 aspect = max((max(z) - min(z)), (max(r) - min(r))) + .5
                 ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
                 ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
-                ax.set_title(str(int(n)) + ' Flux Surfaces between ' + str(min1) + ' and ' + str(max1) + '.')
+                ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(min1) + ' and \u03c1 = ' + str(max1) + '.')
 
 #SECTION 3: Comparison
         elif typ == '-c':
@@ -372,7 +381,7 @@ class profiles_genData:
                 aspect = max((max(fz) - min(fz)), (max(fr) - min(fr)), (max(mz) - min(mz)), (max(mr) - min(mr))) + .5
                 ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
                 ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
-                ax.set_title('Flux Surface at Rho= ' + str(self.data['rho (-)'][self.match(min1, self.data['rho (-)'])]))
+                ax.set_title(u'Flux Surface at \u03c1 = ' + str(self.data['rho (-)'][self.match(min1, self.data['rho (-)'])]))
             elif l == 6:
                 inc = self.match(min1, self.data['rho (-)'])
                 step = (self.match(max1, self.data['rho (-)']) - inc)/n
@@ -397,7 +406,7 @@ class profiles_genData:
                 aspect = max((max(fz) - min(fz)), (max(fr) - min(fr)), (max(mz) - min(mz)), (max(mr) - min(mr))) + .5
                 ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
                 ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
-                ax.set_title(str(int(n)) + ' Flux Surfaces between ' + str(min1) + ' and ' + str(max1) + '.')
+                ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(min1) + ' and \u03c1 = ' + str(max1) + '.')
 
         else:
             print "ERROR: Incorrect plot type.  Type profiles_gen for help."
