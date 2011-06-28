@@ -254,7 +254,7 @@ subroutine gyro_do
      !
      ! Write information about radial stencils:
      !
-     call write_radial_operators(trim(path)//'r_operators.out',1)
+     call write_radial_operators(trim(path)//'out.gyro.radial_op',1)
      !
      ! Allocate most large arrays:
      !
