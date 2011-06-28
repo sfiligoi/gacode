@@ -80,7 +80,7 @@ then
    echo " "
    echo "             -nogq"
    echo "             Do not use q from GATO (by default, if gfile is specified q is from GATO)."
-    echo " "
+   echo " "
    echo "             -r <reorder sequence>"
    echo "             Reorder ions."
    echo
@@ -193,10 +193,11 @@ then
    echo " "
    echo "Plotting Options"
    echo
-   echo "              -plot <directory> <par1> <par2> ... <parN>"
+   echo "              -plot <directory> <dim1> <dim2> <par1> <par2> ... <parN>"
    echo "              Specify directory containing file input.profiles.  Then specify"
-   echo "              parameters to be plotted.  Type -options after <directory> to"
-   echo "              see available parameters."
+   echo "              number of plots in x and y direction respectively in each window."
+   echo "              Then specify parameters to be plotted.  Type -options after"
+   echo "              <directory> to see available parameters."
    echo
    echo "              -fluxplot <directory> <type> <r1> <r2> <N>"
    echo "              Specify directory containing file input.profiles.geo and"
@@ -204,7 +205,7 @@ then
    echo "              -type equilibrium, -f for Fourier series equilibrium, and -c to"
    echo "              compare the two fits.  Then specify desired radius from 0 to 1."
    echo "              Optionally, specify another radius from 0 to 1 and an integer"
-   echo "              to see fits  of N radii between the two given radii."
+   echo "              to see fits of N radii between the two given radii."
    echo
    echo " "
    echo "EXAMPLES:"
