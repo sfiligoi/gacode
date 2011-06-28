@@ -8,12 +8,11 @@
 
 subroutine tgyro_iteration_parallel
 
+  use mpi
   use tgyro_globals
   use tgyro_iteration_variables
 
   implicit none
-
-  include 'mpif.h'
 
   allocate(res1(p_max))
   allocate(x_vec1(p_max)) 

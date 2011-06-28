@@ -1,12 +1,12 @@
 subroutine tgyro_write_input
 
+  use mpi
   use tgyro_globals
 
   implicit none
 
   integer :: i_ion
 
-  include 'mpif.h'
 
   !----------------------------------------------------------------
   ! Trap miscellaneous errors

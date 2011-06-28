@@ -13,6 +13,7 @@
 
 subroutine tgyro_comm_setup
 
+  use mpi
   use tgyro_globals
 
   implicit none
@@ -29,8 +30,6 @@ subroutine tgyro_comm_setup
   integer, dimension(n_proc_global) :: workervec
   integer, dimension(n_proc_global) :: adjointvec
   integer, dimension(n_proc_global) :: workeradjvec
-
-  include 'mpif.h'
 
   call MPI_BCAST(paths,&
        n_inst*80,&
@@ -172,9 +171,7 @@ subroutine tgyro_comm_setup
        gyro_comm,&
        ierr)
   if (ierr /= 0) then
-     print *,'GYRO_COMM creation status',ierr
-     call MPI_FINALIZE(ierr)
-     stop
+     call tgyro_catch_error('ERROR: GYRO_COMM not created') 
   endif
 
   call MPI_COMM_SPLIT(MPI_COMM_WORLD,&
@@ -183,9 +180,7 @@ subroutine tgyro_comm_setup
        gyro_adj,&
        ierr)
   if (ierr /= 0) then
-     print *,'GYRO_ADJ creation status',ierr
-     call MPI_FINALIZE(ierr)
-     stop
+     call tgyro_catch_error('ERROR: GYRO_ADJ not created') 
   endif
 
   call MPI_COMM_SPLIT(MPI_COMM_WORLD,&
@@ -194,9 +189,7 @@ subroutine tgyro_comm_setup
        gyro_rad,&
        ierr)
   if (ierr /= 0) then
-     print *,'GYRO_RAD creation status',ierr
-     call MPI_FINALIZE(ierr)
-     stop
+     call tgyro_catch_error('ERROR: GYRO_RAD not created') 
   endif
 
   call MPI_COMM_RANK(gyro_comm,gyro_comm_rank,ierr)

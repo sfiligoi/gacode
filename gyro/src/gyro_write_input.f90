@@ -469,16 +469,16 @@ subroutine gyro_write_input
 
      ! File list
      write(1,*) 'PLEASE SEE: '
-     write(1,*) ' - units.out for normalizing parameters'
-     write(1,*) ' - alloc.out for memory usage'
-     write(1,*) ' - efficiency.out for parallelization efficiency'
-     write(1,*) ' - phase_space.out for velocity-space nodes and weights'
+     write(1,*) ' - out.gyro.units for normalizing parameters'
+     write(1,*) ' - out.gyro.memory for memory usage'
+     write(1,*) ' - out.gyro.efficiency for parallelization efficiency'
+     write(1,*) ' - out.gyro.phase_space for velocity-space nodes and weights'
      close(1)
 
   endif
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[gyro_write_stdout done]'
+     print *,'[gyro_write_input done]'
   endif
 
 10 format(t2,a,t23,': ',i4) 

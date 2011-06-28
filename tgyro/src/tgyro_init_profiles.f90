@@ -7,6 +7,7 @@
 
 subroutine tgyro_init_profiles
 
+  use mpi
   use tgyro_globals
   use EXPRO_interface
 
@@ -18,8 +19,6 @@ subroutine tgyro_init_profiles
   integer :: n_exp
   real :: xh
   real :: arho
-
-  include 'mpif.h'
 
   !------------------------------------------------------
   ! PHYSICAL CONSTANTS

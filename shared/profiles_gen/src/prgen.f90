@@ -23,8 +23,6 @@ program prgen
   !--------------------------------------------------
   implicit none
   !
-  integer :: indx
-  integer :: info
   logical :: back
   !--------------------------------------------------
 

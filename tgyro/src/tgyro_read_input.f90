@@ -12,6 +12,7 @@
 
 subroutine tgyro_read_input
 
+  use mpi
   use tgyro_globals
 
   !-----------------------------------------------
@@ -25,7 +26,6 @@ subroutine tgyro_read_input
   character(len=80) :: ipath
   !-----------------------------------------------
 
-  include 'mpif.h'
 
   if (i_proc_global == 0) then
 

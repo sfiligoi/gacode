@@ -80,7 +80,7 @@ subroutine tgyro_write_data(i_print)
      close(1)
 
      ! Special case: iteration status file (see loc_write_intermediate)
-     open(unit=1,file='iterate.out',status='replace')
+     open(unit=1,file='out.tgyro.iterate',status='replace')
      close(1)
 
      return
@@ -424,8 +424,8 @@ subroutine tgyro_write_data(i_print)
         write(1,10) r(i)/r_min,&
              ni(i_ion,i),&
              r_min*dlnnidr(i_ion,i),&
-	     ti(i_ion,i)/1e3,&
-	     r_min*dlntidr(i_ion,i)
+             ti(i_ion,i)/1e3,&
+             r_min*dlntidr(i_ion,i)
      enddo
 
      close(1)

@@ -7,6 +7,7 @@
 
 subroutine tgyro_flux
 
+  use mpi
   use tgyro_globals
   use gyro_interface
   use neo_interface
@@ -28,8 +29,6 @@ subroutine tgyro_flux
   real :: Q_neo_GB
   real :: Pi_neo_GB
   real, dimension(8) :: x_out
-
-  include 'mpif.h'
 
   !-----------------------------
   ! Counter
