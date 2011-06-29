@@ -254,7 +254,7 @@ subroutine gyro_do
      !
      ! Write information about radial stencils:
      !
-     call write_radial_operators(trim(path)//'r_operators.out',1)
+     call write_radial_operators(trim(path)//'out.gyro.radial_op',1)
      !
      ! Allocate most large arrays:
      !
@@ -263,7 +263,7 @@ subroutine gyro_do
      !
      ! Make attempt to estimate storage:
      !
-     call gyro_memory_usage(trim(path)//'alloc.out',30)
+     call gyro_memory_usage(trim(path)//'out.gyro.memory',30)
      !
      !------------------------------------------------------------
 
@@ -295,7 +295,7 @@ subroutine gyro_do
   if (io_method == 1) then
      call gyro_write_initdata(&
           trim(path)//'profile_vugyro.out',&
-          trim(path)//'units.out',&
+          trim(path)//'out.gyro.units',&
           trim(path)//'geometry_arrays.out',1)
   else
      call gyro_write_initdata_hdf5(trim(path)//'out.gyro.initdata.h5')
@@ -310,7 +310,7 @@ subroutine gyro_do
   ! 'gyro -t' (test) mode.
   !
   if (gyrotest_flag == 1) then
-     call write_efficiency(trim(path)//'efficiency.out',1)
+     call write_efficiency(trim(path)//'out.gyro.efficiency',1)
      call set_exit_status('test complete',2)
      return
   endif

@@ -13,6 +13,7 @@
 
 subroutine EXPRO_pread(comm,path)
 
+  use mpi
   use EXPRO_interface
 
   implicit none
@@ -22,7 +23,6 @@ subroutine EXPRO_pread(comm,path)
   integer :: ierr
   integer :: i_proc
 
-  include 'mpif.h'
 
   call MPI_COMM_RANK(comm,i_proc,ierr)
 

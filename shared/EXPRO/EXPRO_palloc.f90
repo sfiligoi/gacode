@@ -1,5 +1,6 @@
 subroutine EXPRO_palloc(comm,path,flag)
 
+  use mpi
   use EXPRO_interface
 
   implicit none
@@ -10,7 +11,6 @@ subroutine EXPRO_palloc(comm,path,flag)
   integer :: i_proc
   integer :: ierr
 
-  include 'mpif.h'
 
   call MPI_COMM_RANK(comm,i_proc,ierr)
   

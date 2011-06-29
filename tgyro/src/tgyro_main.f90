@@ -1,11 +1,10 @@
 program tgyro_main
 
+  use mpi
   use tgyro_globals
   use gyro_globals, only : path, GYRO_COMM_WORLD
 
   implicit none
-
-  include 'mpif.h'
 
   !-----------------------------------------------------------------
   ! Initialize MPI_COMM_WORLD communicator.
@@ -20,7 +19,7 @@ program tgyro_main
   !
   call tgyro_read_input   
   !
-  ! At this stage, information is only on process 0.
+  ! At this stage, paths/procs information is only on process 0.
   !
   call tgyro_comm_setup
   !-----------------------------------------------------------------
@@ -33,7 +32,7 @@ program tgyro_main
   GYRO_COMM_WORLD = gyro_comm
   !-----------------------------------------------------------------
 
-  call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+  !call MPI_BARRIER(MPI_COMM_WORLD,ierr)
 
   select case (tgyro_mode)
 
@@ -47,8 +46,7 @@ program tgyro_main
         open(unit=1,file=trim(runfile),position='append')
         write(1,*) error_msg
         close(1)
-        call system(&
-             '[ -f tgyro_osx_exec ] && chmod +x tgyro_osg_exec && tgyro_osg_exec')  
+        !call system('[ -f tgyro_osx_exec ] && chmod +x tgyro_osg_exec && tgyro_osg_exec')  
      endif
 
   case (3)
@@ -56,6 +54,10 @@ program tgyro_main
      ! Multi-job utility
 
      call tgyro_multi_driver
+
+  case default
+
+     call tgyro_catch_error('ERROR: bad tgyro_mode')
 
   end select
 

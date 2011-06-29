@@ -8,6 +8,7 @@
 
 subroutine tgyro_comm_sync
 
+  use mpi
   use tgyro_globals
 
   implicit none
@@ -16,8 +17,6 @@ subroutine tgyro_comm_sync
   integer, dimension(n_r-1) :: icollect
   character(len=80), dimension(n_r-1) :: ccollect
   integer :: i_ion
-
-  include 'mpif.h'
 
   ! Only a single flux and root (gradient) was computed 
   ! on a given processor.  Do an allgather to make these 

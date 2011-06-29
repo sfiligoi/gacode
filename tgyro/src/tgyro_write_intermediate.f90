@@ -1,5 +1,6 @@
 subroutine tgyro_write_intermediate(index,res_in)
 
+  use mpi
   use tgyro_globals
 
   implicit none
@@ -8,10 +9,9 @@ subroutine tgyro_write_intermediate(index,res_in)
   real, intent(in) :: res_in(p_max)
   integer :: ip
 
-  include 'mpif.h'
 
   if (i_proc_global == 0) then
-     open(unit=1,file='iterate.out',status='old',position='append')
+     open(unit=1,file='out.tgyro.iterate',status='old',position='append')
 
      if (index == 0) write(1,'(t2,a,i3,(2x,1pe12.5))') 'ITERATION: ',i_tran
 

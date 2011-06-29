@@ -1,5 +1,6 @@
 subroutine tgyro_readbc_real(xr)
 
+  use mpi
   use tgyro_globals
 
   implicit none
@@ -7,7 +8,6 @@ subroutine tgyro_readbc_real(xr)
   real, intent(inout) :: xr
   integer :: i_err
 
-  include 'mpif.h'
 
   if (i_proc_global == 0) read(1,*) xr
 
