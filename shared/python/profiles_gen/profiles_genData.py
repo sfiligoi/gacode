@@ -55,8 +55,7 @@ class profiles_genData:
         """Set the directory which contains input.profiles."""
 
         from os.path import expanduser, expandvars
-        path = directory
-        self.directory_name = expanduser(expandvars(path))
+        self.directory_name = expanduser(expandvars(directory))
 
     def read_data(self):
         """Read in object data from input.profiles."""
@@ -215,7 +214,7 @@ class profiles_genData:
 
     #-------------------------------------------- #
     # Plotting functions
-    def plot(self, var, n1=1, n2=1):
+    def plot(self, var, n1=1, n2=1, col='k'):
         """Plots requested data using matplotlib.
 
         var is the requested variable to be plotted,
@@ -246,8 +245,9 @@ class profiles_genData:
         if var == 'omega0':
             ylab = u'\u03c90 (1/s)'
         ax.set_ylabel(ylab)
-        ax.set_title(ylab + u' vs. \u03c1')
-        ax.plot(self.data['rho (-)'], self.data[toplot], 'k')
+        ax.set_title(ylab.split()[0] + u' vs. \u03c1')
+        ax.plot(self.data['rho (-)'], self.data[toplot], col, label=self.directory_name)
+        ax.legend()
         self.plotcounter = self.plotcounter + 1
 
 
@@ -324,7 +324,7 @@ class profiles_genData:
                 aspect = max((max(z) - min(z)), (max(r) - min(r))) + .5
                 ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
                 ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
-                ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(min1) + ' and \u03c1 = ' + str(max1) + '.')
+                ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(min1) + u' and \u03c1 = ' + str(max1) + '.')
 
 #SECTION 2: Fourier-type
         elif typ == '-f':
@@ -361,7 +361,7 @@ class profiles_genData:
                 aspect = max((max(z) - min(z)), (max(r) - min(r))) + .5
                 ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
                 ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
-                ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(min1) + ' and \u03c1 = ' + str(max1) + '.')
+                ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(min1) + u' and \u03c1 = ' + str(max1) + '.')
 
 #SECTION 3: Comparison
         elif typ == '-c':
@@ -382,6 +382,7 @@ class profiles_genData:
                 ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
                 ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
                 ax.set_title(u'Flux Surface at \u03c1 = ' + str(self.data['rho (-)'][self.match(min1, self.data['rho (-)'])]))
+                ax.legend( ('Fourier-type', 'Miller-type') )
             elif l == 6:
                 inc = self.match(min1, self.data['rho (-)'])
                 step = (self.match(max1, self.data['rho (-)']) - inc)/n
@@ -406,7 +407,8 @@ class profiles_genData:
                 aspect = max((max(fz) - min(fz)), (max(fr) - min(fr)), (max(mz) - min(mz)), (max(mr) - min(mr))) + .5
                 ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
                 ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
-                ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(min1) + ' and \u03c1 = ' + str(max1) + '.')
+                ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(min1) + u' and \u03c1 = ' + str(max1) + '.')
+                ax.legend( ('Fourier-type', 'Miller-type') )
 
         else:
             print "ERROR: Incorrect plot type.  Type profiles_gen for help."

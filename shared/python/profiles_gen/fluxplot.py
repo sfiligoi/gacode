@@ -14,28 +14,34 @@ import sys
 import matplotlib.pyplot as plt
 from profiles_genData import profiles_genData
 from math import *
+from os.path import expanduser, expandvars
+
+#Default values
+direc = '.'
+typ = '-c'
+min1 = 1
+max1 = 0
+n = 1
+l = 4
+prof1 = 0
 
 #Error catching
-if len(sys.argv) < 4:
-    print "ERROR: Too few arguments.  Type profiles_gen for help."
-    sys.exit()
-try:
-    prof1 = profiles_genData(sys.argv[1])
-except IOError:
-    print "ERROR: " + sys.argv[1]
-    print "does not contain file input.profiles and/or file input.profiles.geo.  Type profiles_gen for help."
-    sys.exit()
-try:
-    m1 = float(sys.argv[3])
-except ValueError:
-    print "ERROR: " + sys.argv[3] + " is not a valid number."
-    sys.exit()
-if m1 > 1:
-    print "ERROR: Rho1 cannot be more than 1."
-    sys.exit()
-if m1 < 0:
-    print "ERROR: Rho1 cannot be less than 0."
-    sys.exit()
+if len(sys.argv) > 1:
+    direc = sys.argv[1]
+if len(sys.argv) > 2:
+    typ = sys.argv[2]
+if len(sys.argv) > 3:
+    try:
+        m1 = float(sys.argv[3])
+    except ValueError:
+        print "ERROR: " + sys.argv[3] + " is not a valid number."
+        sys.exit()
+    if m1 > 1:
+        print u'ERROR: \u03c11 cannot be more than 1.'
+        sys.exit()
+    if m1 < 0:
+        print u'ERROR: \u03c11 cannot be less than 0.'
+        sys.exit()
 
 #If there are 6 arguments, then the user is looking for a range of radii to be
 #plotted.
@@ -47,10 +53,10 @@ if len(sys.argv) == 6:
         print "ERROR: " + m2 + " is not a vaild number."
         sys.exit()
     if m2 > 1:
-        print "ERROR: Rho2 cannot be more than 1."
+        print u'ERROR: \u03c12 cannot be more than 1.'
         sys.exit()
     if m2 < 0:
-        print "ERROR: Rho2 cannot be less than 0."
+        print u'ERROR: \u03c12 cannot be less than 0.'
         sys.exit()
     try:
         n = float(sys.argv[5])
@@ -70,6 +76,12 @@ if len(sys.argv) == 6:
         sys.exit()
     #Checks to see if requested number of surfaces is greater than total
     #number available.
+    try:
+        prof1 = profiles_genData(direc)
+    except IOError:
+        print "ERROR: " + expanduser(expandvars(direc))
+        print "does not contain file input.profiles and/or file input.profiles.geo.  Type profiles_gen for help."
+        sys.exit()
     maxn = prof1.match(max1, prof1.get('rho (-)')) - prof1.match(min1, prof1.get('rho (-)'))
     if maxn == 0:
         print "ERROR: No flux surfaces in given interval.  Please specify a larger interval."
@@ -78,14 +90,23 @@ if len(sys.argv) == 6:
         print "Warning: Maximum number of flux surfaces for this interval"
         print "is " + str(maxn) + ".  Changing n to " + str(maxn) + "."
         n = maxn
-    prof1.fplot(sys.argv[2], len(sys.argv), min1, max1, n)
+    l = 6
 
 #If there are only 4 arguments, then the user is only looking for one radius.
-elif len(sys.argv) == 4:
-    prof1.fplot(sys.argv[2], len(sys.argv), m1)
+if len(sys.argv) == 4:
+    min1 = m1
 
 #Any other number of arguments is an error.
-else:
+if len(sys.argv) == 5 or len(sys.argv) > 6:
     print "ERROR: Wrong number of arguments.  Type profiles_gen for help."
     sys.exit()
+
+if not prof1:
+    try:
+        prof1 = profiles_genData(direc)
+    except IOError:
+        print "ERROR: " + expanduser(expandvars(direc))
+        print "does not contain file input.profiles and/or file input.profiles.geo.  Type profiles_gen for help."
+        sys.exit()
+prof1.fplot(typ, l, min1, max1, n)
 plt.show()
