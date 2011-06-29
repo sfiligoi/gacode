@@ -10,10 +10,10 @@
 ## ############################################################
 
 
-MAINTAINERCLEANFILES    = Makefile.in 
+MAINTAINERCLEANFILES    = Makefile.in
 
 #sharedir=$(prefix)/share
-dist_noinst_DATA= \
+dist_noinst_DATA= 
 
 dist_bin_SCRIPTS= \
   gyro \
