@@ -12,15 +12,15 @@
 SUBDIRS= bin python src #tools 
 
 libdir = $(prefix)/lib
-lib_LTLIBRARIES = libgacodetglf.la
+lib_LTLIBRARIES = libgacodestglf.la
 
-libgacodetglf_la_SOURCES =
-libgacodetglf_la_LIBADD = src/libgacodetglf_src.la
+libgacodestglf_la_SOURCES =
+libgacodestglf_la_LIBADD = src/libgacodetglf_src.la
 
 if HAVE_MPI
 bin_PROGRAMS     = tglf
 tglf_SOURCES 	= src/tglf.f90
-tglf_LDADD  	= libgacodetglf.la \
+tglf_LDADD  	= libgacodestglf.la \
 		  @LAPACK_LIBS@ @BLAS_LIBS@
 endif
 

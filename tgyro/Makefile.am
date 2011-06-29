@@ -16,7 +16,7 @@ EXTRA_DIST = CHANGES
 GACODE_ROOT=$(abs_top_builddir)
 
 bin_PROGRAMS     = tgyro
-lib_LTLIBRARIES = libgacodetgyro.la
+lib_LTLIBRARIES = libgacodestgyro.la
 
 
 LMATH=@LAPACK_LIBS@ @BLAS_LIBS@ @Z_LIBS@
@@ -29,8 +29,8 @@ IOLIBS=@HDF5_ALIBS@ @NETCDF_ALIBS@ @Z_LIBS@
 endif
 
 
-libgacodetgyro_la_SOURCES =
-libgacodetgyro_la_LIBADD = \
+libgacodestgyro_la_SOURCES =
+libgacodestgyro_la_LIBADD = \
     $(top_builddir)/tgyro/math/libgacodetgyromath.la \
     $(top_builddir)/tgyro/qfm/libgacodetgyroqfm.la \
     $(top_builddir)/tgyro/src/libgacodetgyro_SRC.la
@@ -65,12 +65,12 @@ tgyro_includes = \
 
 
 tgyro_SOURCES = src/tgyro_main.f90
-tgyro_LDADD = libgacodetgyro.la \
-              $(top_builddir)/gyro/libgacodegyro.la \
-              $(top_builddir)/neo/libgacodeneo.la \
+tgyro_LDADD = libgacodestgyro.la \
+              $(top_builddir)/gyro/libgacodesgyro.la \
+              $(top_builddir)/neo/libgacodesneo.la \
               $(top_builddir)/neo/nclass/libgacodenclass.la \
-              $(top_builddir)/tglf/libgacodetglf.la \
-              $(top_builddir)/shared/libgacodeshared.la \
+              $(top_builddir)/tglf/libgacodestglf.la \
+              $(top_builddir)/shared/libgacodesshared.la \
               @FFTW_LIBS@ @FFTW_LIBS@ $(LMATH) $(IOLIBS)
 
 
@@ -80,7 +80,7 @@ AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) -I. $(tgyro_includes)
 AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) -I. $(tgyro_includes)
 
 all-local:
-	cd $(top_srcdir)/tgyro/src  && if test ! -h tgyro_main ; then ln -s  $(top_builddir)/tgyro/tgyro tgyro_main ; fi;
+	cd $(top_srcdir)/tgyro/src  && if test ! -e tgyro_main ; then ln -s  $(top_builddir)/tgyro/tgyro tgyro_main ; fi;
 
 MAINTAINERCLEANFILES    = Makefile.in
 CLEANFILES = tgyro *.la *.o

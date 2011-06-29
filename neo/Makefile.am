@@ -15,18 +15,18 @@ datadir = $(prefix)/neo
 dist_data_DATA = CHANGES
 
 libdir = $(prefix)/lib
-lib_LTLIBRARIES = libgacodeneo.la
+lib_LTLIBRARIES = libgacodesneo.la
 
 
-libgacodeneo_la_SOURCES =
-libgacodeneo_la_LIBADD = src/libgacodeneo_src.la
+libgacodesneo_la_SOURCES =
+libgacodesneo_la_LIBADD = src/libgacodeneo_src.la
 
 bin_PROGRAMS     = neo
 neo_SOURCES = src/neo.f90
 
-neo_LDADD  = libgacodeneo.la \
+neo_LDADD  = libgacodesneo.la \
   $(top_builddir)/neo/nclass/libgacodenclass.la \
-  $(top_builddir)/shared/libgacodeshared.la \
+  $(top_builddir)/shared/libgacodesshared.la \
  @FFTW_LIBS@  @LAPACK_LIBS@  @BLAS_LIBS@
 
 AM_LIBTOOLFLAGS = --tag=FC
