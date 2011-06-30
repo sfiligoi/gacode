@@ -29,7 +29,6 @@ dist_bin_SCRIPTS= \
   gyro_bat \
   gyro_loc \
   gyro_reg_do \
-  gyro_single \
   simdir_test \
   gyro_genDumpInput.py \
   gyro_genInterface2Global.py

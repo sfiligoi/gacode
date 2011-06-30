@@ -18,7 +18,7 @@ theCleanupMumps=cleanup_mumps.mumps.f90
 theMumpsPrivate=gyro_mumps_private.mumps.f90
 theSparseSolveMumps=sparse_solve_mumps.mumps.f90
 else
-theCleanupMumps=cleanup_mumps.f90
+theCleanupMumps=
 theMumpsPrivate=gyro_mumps_private.f90
 theSparseSolveMumps=sparse_solve_mumps.f90
 endif
@@ -32,27 +32,23 @@ theReadRestart=gyro_read_restart.f90
 theWriteRestart=gyro_write_restart.f90
 endif
 
-theDoNlfastMatch=do_nlfast_match.f90
-theDoNlfastP=do_nlfast_p.f90
+#theDoNlfastMatch=#do_nlfast_match.f90
+#theDoNlfastP=#do_nlfast_p.f90
 
 if HAVE_FFTW
-theDoNlfftMatch=do_nlfft_match.fftw.f90
-theDoNlfftP=do_nlfft_p.fftw.f90
-theMakeNl=make_nl.fftw.f90
+theDoNlfftP=gyro_nl_fft.fftw.f90
+theNlSetup=gyro_nl_setup.fftw.f90
 else
-theDoNlfftMatch=do_nlfft_match.stub.f90
-theDoNlfftP=do_nlfft_p.stub.f90
-theMakeNl=make_nl.f90
+theDoNlfftP=gyro_nl_fft.stub.f90
+theNlSetup=gyro_nl_setup.f90
 endif
 
 if HAVE_ESSL
-theDoNlfftMatch=do_nlfft_match.essl.f90
-theDoNlfftP=do_nlfft_p.essl.f90
-theMakeNl=make_nl.essl.f90
+theDoNlfftP=gyro_nl_fft.essl.f90
+theNlSetup=gyro_nl_setup.essl.f90
 else
-theDoNlfftMatch=do_nlfft_match.stub.f90
-theDoNlfftP=do_nlfft_p.stub.f90
-theMakeNl=make_nl.f90
+theDoNlfftP=gyro_nl_fft.stub.f90
+theNlSetup=gyro_nl_setup.f90
 endif
 
 gyro_includes= -I $(top_builddir)/shared/math \
@@ -80,6 +76,7 @@ libgacodegyro_SRC_la_SOURCES = \
 	gyro_collision_private.f90 \
 	$(theMumpsPrivate) \
 	gyro_interface.f90 \
+  gyro_input_check.f90 \
 	gyro_alloc_profile_sim.f90 \
 	gyro_alloc_big.f90 \
 	gyro_alloc_orbit.f90 \
@@ -168,7 +165,6 @@ libgacodegyro_SRC_la_SOURCES = \
 	make_poisson_blend.f90 \
 	make_ampereperp_blend.f90 \
 	make_poissonaperp_matrix.f90 \
-	$(theMakeNl) \
 	get_nonlinear_advance.f90 \
 	gyro_nonlinear_transfer.f90 \
 	get_ampere_coll.f90 \
@@ -188,10 +184,9 @@ libgacodegyro_SRC_la_SOURCES = \
 	get_delta_he.f90 \
 	get_phi_squared.f90 \
 	get_g_squared.f90 \
-	$(theDoNlfastP) \
-	$(theDoNlfastMatch) \
+  gyro_nl_direct.f90 \
+  $(theNlSetup) \
 	$(theDoNlfftP) \
-	$(theDoNlfftMatch) \
 	$(theReadRestart) \
 	set_exit_status.f90 \
 	write_step.f90 \
