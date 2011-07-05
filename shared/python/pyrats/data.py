@@ -1228,6 +1228,7 @@ class TGYROData:
         return k_max, omega_max, gamma_max
 
 # Analysis Tools
+
     def make_gradient_vs_field_space(self, r=1, evolve_field=1, grad='a/LTi', profile='ti'):
         """Return matrix of Space[iteration][gradient,profile,residual] at given radial point.
 
@@ -1296,3 +1297,412 @@ class TGYROData:
                       textcoords='data', size=15, arrowprops=dict(width=3, headwidth=5, shrink=0.05, facecolor="black"))
 
         return fig
+
+#==============================================================================
+#==============================================================================
+
+class NEOData:
+    """A class of NEO output data.
+
+    Data:
+
+    directory_name = ""
+    n_species = {}
+    n_energy = {}
+    n_xi = {}
+    n_theta = {}
+    theta_gpoints = {}
+    n_radial = {}
+    radial_gpoints = {}
+    r = {}
+    dphi0dr = {}
+    q = {}
+    rho_star = {}
+    rmaj_over_a = {}
+    omega_rot = {}
+    omega_rot_deriv = {}
+    nnorm = {}
+    tnorm = {}
+    n0_over_nnorm = {}
+    t0_over_tnorm = {}
+    a_over_Ln = {}
+    a_over_Lt = {}
+    inv_tau_self = {}
+    f = {}
+    SIM_1PHI_by_theta = {}
+    HH_2GAMMA = {}
+    HH_2Qi = {}
+    HH_2Qe = {}
+    HH_1jboot = {}
+    HH_1uipar = {}
+    HH_1vipol0 = {}
+    CH_2Qi = {}
+    TG_2Qi = {}
+    S_1jboot = {}
+    S_1ki = {}
+    S_1uipar = {}
+    S_1vipol0 = {}
+    HR_1PHI = {}
+    HS_2GAMMA = {}
+    HS_2Q = {}
+    SIM_1PHI = {}
+    SIM_1jboot = {}
+    SIM_0vtor0 = {}
+    SIM_0upar = {}
+    SIM_2GAMMA = {}
+    SIM_2Q = {}
+    SIM_2PI = {}
+    SIM_1upar = {}
+    SIM_1k = {}
+    SIM_1K = {}
+    SIM_1vpol0 = {}
+    SIM_1vtor0 = {}
+    SIM_1upar_by_theta = {}
+
+    Example Usage:
+        >>> import matplotlib.pyplot as plt
+        >>> from pyrats.data import NEOData
+        >>> sim1 = NEOData('ade_c1')
+        >>> plt.plot(sim1.get_r()['ade_c1'], sim1.get_SIM_1jboot()['ade_c1])
+        >>> plt.show()
+"""
+    # Methods
+    def __init__(self, sim_directory):
+        """Constructor reads in data from sim_directory and creates new object."""
+
+        import numpy
+        import os
+        import sys
+
+        self.init_data()
+        self.master = sim_directory
+        self.dirtree = os.walk(sim_directory)
+        for root, dirs, files in self.dirtree:
+            if len(files) > 0:
+                self.set_directory(root)
+                self.read_data()
+        self.store_data()
+
+    def init_data(self):
+        """Initialize object data."""
+
+        self.master = ""
+        self.directory_name = ""
+        self.fignum = 1
+        self.plotcounter = 1
+        self.data = {}
+        self.n_species = {}
+        self.n_energy = {}
+        self.n_xi = {}
+        self.n_theta = {}
+        self.theta_gpoints = {}
+        self.n_radial = {}
+        self.radial_gpoints = {}
+        self.r = {}
+        self.dphi0dr = {}
+        self.q = {}
+        self.rho_star = {}
+        self.rmaj_over_a = {}
+        self.omega_rot = {}
+        self.omega_rot_deriv = {}
+        self.nnorm = {}
+        self.tnorm = {}
+        self.n0_over_nnorm = {}
+        self.t0_over_tnorm = {}
+        self.a_over_Ln = {}
+        self.a_over_Lt = {}
+        self.inv_tau_self = {}
+        self.f = {}
+        self.SIM_1PHI_by_theta = {}
+        self.HH_2GAMMA = {}
+        self.HH_2Qi = {}
+        self.HH_2Qe = {}
+        self.HH_1jboot = {}
+        self.HH_1ki = {}
+        self.HH_1uipar = {}
+        self.HH_1vipol0 = {}
+        self.CH_2Qi = {}
+        self.TG_2Qi = {}
+        self.S_1jboot = {}
+        self.S_1ki = {}
+        self.S_1uipar = {}
+        self.S_1vipol0 = {}
+        self.HR_1PHI = {}
+        self.HS_2GAMMA = {}
+        self.HS_2Q = {}
+        self.SIM_1PHI = {}
+        self.SIM_1jboot = {}
+        self.SIM_0vtor0 = {}
+        self.SIM_0upar = {}
+        self.SIM_2GAMMA = {}
+        self.SIM_2Q = {}
+        self.SIM_2PI = {}
+        self.SIM_1upar = {}
+        self.SIM_1k = {}
+        self.SIM_1K = {}
+        self.SIM_1vpol0 = {}
+        self.SIM_1vtor0 = {}
+        self.SIM_1upar_by_theta = {}
+        self.SIM_2GAMMA_gv = {}
+        self.SIM_2Q_gv = {}
+        self.SIM_2PI_gv = {}
+
+    def set_directory(self, path):
+        """Set the simulation directory."""
+
+        from os.path import expanduser, expandvars
+        self.directory_name = expanduser(expandvars(path))
+    
+    def neo_get_input(self, input_name):
+        """Return the specified variable from input.neo.gen.
+
+        input_name  -  requested input
+
+        Ex: neo_get_input("NEO_MODE")
+        """
+
+        input_file = file(self.directory_name + 'input.neo.gen', 'r')
+        for line in input_file:
+            try:
+                if line.split()[1] == input_name:
+                    return float(line.split()[0])
+            except IndexError:
+                print "Cannot find specified input parameter: ", input_name
+                return 0
+
+    def read_data(self):
+        """Read in object data."""
+        self.read_grid()        
+        self.read_equil()
+        self.read_f()
+        self.read_phi()
+        self.read_theory()
+        self.read_transport()
+        self.read_transport_gv()
+        self.read_vel()
+
+    def store_data(self):
+        """Stores data into data dictionary by variable name and directory."""
+
+        self.data['SIM_1PHI'] = self.SIM_1PHI
+        self.data['SIM_1jboot'] = self.SIM_1jboot
+        self.data['SIM_0vtor0'] = self.SIM_0vtor0
+        self.data['SIM_0upar'] = self.SIM_0upar
+        self.data['SIM_2GAMMA'] = self.SIM_2GAMMA
+        self.data['SIM_2Q'] = self.SIM_2Q
+        self.data['SIM_2PI'] = self.SIM_2PI
+        self.data['SIM_1upar'] = self.SIM_1upar
+        self.data['SIM_1k'] = self.SIM_1k
+        self.data['SIM_1K'] = self.SIM_1K
+        self.data['SIM_1vpol0'] = self.SIM_1vpol0
+        self.data['SIM_1vtor0'] = self.SIM_1vtor0
+        self.data['n_species'] = self.n_species
+        self.data['n_energy'] = self.n_energy
+        self.data['n_xi'] = self.n_xi
+        self.data['n_theta'] = self.n_theta
+        self.data['theta_gpoints'] = self.theta_gpoints
+        self.data['n_radial'] = self.n_radial
+        self.data['radial_gpoints'] = self.radial_gpoints  
+        self.data['r'] = self.r
+        self.data['dphi0dr'] = self.dphi0dr
+        self.data['q'] = self.q
+        self.data['rho_star'] = self.rho_star
+        self.data['rmaj_over_a'] = self.rmaj_over_a
+        self.data['omega_rot'] = self.omega_rot
+        self.data['omega_rot_deriv'] = self.omega_rot_deriv
+        self.data['nnorm'] = self.nnorm
+        self.data['tnorm'] = self.tnorm
+        self.data['n0_over_nnorm'] = self.n0_over_nnorm
+        self.data['t0_over_tnorm'] = self.t0_over_tnorm
+        self.data['a_over_Ln'] = self.a_over_Ln
+        self.data['a_over_Lt'] = self.a_over_Lt
+        self.data['inv_tau_self'] = self.inv_tau_self
+        self.data['HH_2GAMMA'] = self.HH_2GAMMA
+        self.data['HH_2Qi'] = self.HH_2Qi
+        self.data['HH_2Qe'] = self.HH_2Qe
+        self.data['HH_1jboot'] = self.HH_1jboot
+        self.data['HH_1ki'] = self.HH_1ki
+        self.data['HH_1uipar'] = self.HH_1uipar
+        self.data['HH_1vipol0'] = self.HH_1vipol0
+        self.data['CH_2Qi'] = self.CH_2Qi
+        self.data['TG_2Qi'] = self.TG_2Qi
+        self.data['S_1jboot'] = self.S_1jboot
+        self.data['S_1ki'] = self.S_1ki
+        self.data['S_1uipar'] = self.S_1uipar
+        self.data['S_1vipol0'] = self.S_1vipol0
+        self.data['HR_1PHI'] = self.HR_1PHI
+        self.data['HS_2GAMMA'] = self.HS_2GAMMA
+        self.data['HS_2Q'] = self.HS_2Q
+        self.data['SIM_2GAMMA_gv'] = self.SIM_2GAMMA_gv
+        self.data['SIM_2Q_gv'] = self.SIM_2Q_gv
+        self.data['SIM_2PI_gv'] = self.SIM_2PI_gv
+
+    def read_file(self, fname):
+        """Reads NEO data file."""
+
+        import numpy as np
+
+        filename = self.directory_name + '/' + fname + '.out'
+        f = np.atleast_2d(np.loadtxt(file(filename)))
+        return f
+
+    def read_equil(self):
+        """Read equil.out."""
+
+        equil = self.read_file('equil')
+        self.r[self.directory_name] = equil[0:self.n_radial[self.directory_name], 0]
+        self.dphi0dr[self.directory_name] = equil[0:self.n_radial[self.directory_name], 1]
+        self.q[self.directory_name] = equil[0:self.n_radial[self.directory_name], 2]
+        self.rho_star[self.directory_name] = equil[0:self.n_radial[self.directory_name], 3]
+        self.rmaj_over_a[self.directory_name] = equil[0:self.n_radial[self.directory_name], 4]
+        self.omega_rot[self.directory_name] = equil[0:self.n_radial[self.directory_name], 5]
+        self.omega_rot_deriv[self.directory_name] = equil[0:self.n_radial[self.directory_name], 6]
+        self.nnorm[self.directory_name] = equil[0:self.n_radial[self.directory_name], 7]
+        self.tnorm[self.directory_name] = equil[0:self.n_radial[self.directory_name], 8]
+        self.n0_over_nnorm[self.directory_name] = range(int(self.n_species[self.directory_name]))
+        self.t0_over_tnorm[self.directory_name] = range(int(self.n_species[self.directory_name]))
+        self.a_over_Ln[self.directory_name] = range(int(self.n_species[self.directory_name]))
+        self.a_over_Lt[self.directory_name] = range(int(self.n_species[self.directory_name]))
+        self.inv_tau_self[self.directory_name] = range(int(self.n_species[self.directory_name]))
+        for a in range(int(self.n_species[self.directory_name])):
+            self.n0_over_nnorm[self.directory_name][a] = equil[0:self.n_radial[self.directory_name], 9+5*a]
+            self.t0_over_tnorm[self.directory_name][a] = equil[0:self.n_radial[self.directory_name], 10+5*a]
+            self.a_over_Ln[self.directory_name][a] = equil[0:self.n_radial[self.directory_name], 11+5*a]
+            self.a_over_Lt[self.directory_name][a] = equil[0:self.n_radial[self.directory_name], 12+5*a]
+            self.inv_tau_self[self.directory_name][a] = equil[0:self.n_radial[self.directory_name], 13+5*a]
+
+    def read_f(self):
+        """Reads distribution function f."""
+
+        self.f[self.directory_name] = self.read_file('f')
+
+    def read_grid(self):
+        """Reads grid.out."""
+
+        import numpy as np
+
+        filename = self.directory_name + '/grid.out'
+        grid = np.atleast_1d(np.loadtxt(file(filename)))
+        self.n_species[self.directory_name] = grid[0]
+        self.n_energy[self.directory_name] = grid[1]
+        self.n_xi[self.directory_name] = grid[2]
+        self.n_theta[self.directory_name] = grid[3]
+        self.theta_gpoints[self.directory_name] = grid[4:4+self.n_theta[self.directory_name]]
+        self.n_radial[self.directory_name] = grid[4+self.n_theta[self.directory_name]]
+        self.radial_gpoints[self.directory_name] = grid[5+self.n_theta[self.directory_name]:6+self.n_theta[self.directory_name]+self.n_radial[self.directory_name]]
+
+    def read_phi(self):
+        """Reads phi.out."""
+
+        self.SIM_1PHI_by_theta[self.directory_name] = self.read_file('phi')
+        #This will be useful for something
+
+    def read_theory(self):
+        """Reads theory.out."""
+
+        theory = self.read_file('theory')
+        self.HH_2GAMMA[self.directory_name] = theory[0:self.n_radial[self.directory_name], 1]
+        self.HH_2Qi[self.directory_name] = theory[0:self.n_radial[self.directory_name], 2]
+        self.HH_2Qe[self.directory_name] = theory[0:self.n_radial[self.directory_name], 3]
+        self.HH_1jboot[self.directory_name] = theory[0:self.n_radial[self.directory_name], 4]
+        self.HH_1ki[self.directory_name] = theory[0:self.n_radial[self.directory_name], 5]
+        self.HH_1uipar[self.directory_name] = theory[0:self.n_radial[self.directory_name], 6]
+        self.HH_1vipol0[self.directory_name] = theory[0:self.n_radial[self.directory_name], 7]
+        self.CH_2Qi[self.directory_name] = theory[0:self.n_radial[self.directory_name], 8]
+        self.TG_2Qi[self.directory_name] = theory[0:self.n_radial[self.directory_name], 9]
+        self.S_1jboot[self.directory_name] = theory[0:self.n_radial[self.directory_name], 10]
+        self.S_1ki[self.directory_name] = theory[0:self.n_radial[self.directory_name], 11]
+        self.S_1uipar[self.directory_name] = theory[0:self.n_radial[self.directory_name], 12]
+        self.S_1vipol0[self.directory_name] = theory[0:self.n_radial[self.directory_name], 13]
+        self.HR_1PHI[self.directory_name] = theory[0:self.n_radial[self.directory_name], 14]
+        self.HS_2GAMMA[self.directory_name] = range(int(self.n_species[self.directory_name]))
+        self.HS_2Q[self.directory_name] = range(int(self.n_species[self.directory_name]))
+        for a in range(int(self.n_species[self.directory_name])):
+            self.HS_2GAMMA[self.directory_name][a] = theory[0:self.n_radial[self.directory_name], 15+2*a]
+            self.HS_2Q[self.directory_name][a] = theory[0:self.n_radial[self.directory_name], 16+2*a]
+
+    def read_transport(self):
+        """Reads transport.out."""
+
+        transport = self.read_file('transport')
+        self.SIM_1PHI[self.directory_name] = transport[0:self.n_radial[self.directory_name], 1]
+        self.SIM_1jboot[self.directory_name] = transport[0:self.n_radial[self.directory_name], 2]
+        self.SIM_0vtor0[self.directory_name] = transport[0:self.n_radial[self.directory_name], 3]
+        self.SIM_0upar[self.directory_name] = transport[0:self.n_radial[self.directory_name], 4]
+        self.SIM_2GAMMA[self.directory_name] = range(int(self.n_species[self.directory_name]))
+        self.SIM_2Q[self.directory_name] = range(int(self.n_species[self.directory_name]))
+        self.SIM_2PI[self.directory_name] = range(int(self.n_species[self.directory_name]))
+        self.SIM_1upar[self.directory_name] = range(int(self.n_species[self.directory_name]))
+        self.SIM_1k[self.directory_name] = range(int(self.n_species[self.directory_name]))
+        self.SIM_1K[self.directory_name] = range(int(self.n_species[self.directory_name]))
+        self.SIM_1vpol0[self.directory_name] = range(int(self.n_species[self.directory_name]))
+        self.SIM_1vtor0[self.directory_name] = range(int(self.n_species[self.directory_name]))
+        for a in range(int(self.n_species[self.directory_name])):
+            self.SIM_2GAMMA[self.directory_name][a] = transport[0:self.n_radial[self.directory_name], 5+8*a]
+            self.SIM_2Q[self.directory_name][a] = transport[0:self.n_radial[self.directory_name], 6+8*a]
+            self.SIM_2PI[self.directory_name][a] = transport[0:self.n_radial[self.directory_name], 7+8*a]
+            self.SIM_1upar[self.directory_name][a] = transport[0:self.n_radial[self.directory_name], 8+8*a]
+            self.SIM_1k[self.directory_name][a] = transport[0:self.n_radial[self.directory_name], 9+8*a]
+            self.SIM_1K[self.directory_name][a] = transport[0:self.n_radial[self.directory_name], 10+8*a]
+            self.SIM_1vpol0[self.directory_name][a] = transport[0:self.n_radial[self.directory_name], 11+8*a]
+            self.SIM_1vtor0[self.directory_name][a] = transport[0:self.n_radial[self.directory_name], 12+8*a]
+
+    def read_vel(self):
+        """Reads vel.out."""
+
+        self.SIM_1upar_by_theta[self.directory_name] = self.read_file('vel')
+    
+    def read_transport_gv(self):
+        """Reads transport_gv.out."""
+        
+        transport_gv = self.read_file('transport_gv')
+        self.SIM_2GAMMA_gv[self.directory_name] = range(int(self.n_species[self.directory_name]))
+        self.SIM_2Q_gv[self.directory_name] = range(int(self.n_species[self.directory_name]))
+        self.SIM_2PI_gv[self.directory_name] = range(int(self.n_species[self.directory_name]))
+        for a in range(int(self.n_species[self.directory_name])):
+            self.SIM_2GAMMA_gv[self.directory_name][a] = transport_gv[0:self.n_radial[self.directory_name], 1+3*a]
+            self.SIM_2Q_gv[self.directory_name][a] = transport_gv[0:self.n_radial[self.directory_name], 2+3*a]
+            self.SIM_2PI_gv[self.directory_name][a] = transport_gv[0:self.n_radial[self.directory_name], 3+3*a]
+
+    #-----------------------------------------------#
+    # Get data back
+
+    def get(self, arg):
+        """Get requested variable.  Remember that var must be a string."""
+
+        return self.data[arg]
+
+    def print_vars(self):
+        """Prints all available variables."""
+
+        for key in sorted(self.data.keys()):
+            print key
+
+    #-----------------------------------------#
+    # Plotting routines
+
+    def scatter(self, var, cols='bgrcmykw', n1=2, n2=2):
+        import matplotlib.pyplot as plt
+        import os
+
+        toplot = []
+        for root, dirs, files in os.walk(self.master):
+            if len(files) > 0:
+                toplot.append(root)
+        inc = 0
+        if self.plotcounter > (n1 * n2):
+            self.plotcounter = 1
+            self.fignum = self.fignum + 1
+        fig = plt.figure(self.fignum)
+        ax = fig.add_subplot(n1, n2, self.plotcounter)
+        ax.set_title('r vs. ' + var)
+        for key in toplot:
+            try:
+                self.get(var)[key].ndim
+                ax.scatter(self.get('r')[key], self.get(var)[key], c=cols[inc], label=key)
+            except AttributeError:
+                ax.scatter(self.get('r')[key], self.get(var)[key][0], c=cols[inc], label=key)
+            inc = (inc + 1) % len(cols)
+        ax.legend(loc=2)
+        self.plotcounter = self.plotcounter + 1
+        #plt.show()

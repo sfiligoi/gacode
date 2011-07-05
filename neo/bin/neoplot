@@ -1,0 +1,56 @@
+#!/bin/bash
+#==============================================================================
+# neoplot
+#
+# PURPOSE
+#  Handles plotting of neo output
+#==============================================================================
+
+#==============================================================================
+# Syntax validity check and help message
+#
+n=$#
+
+if [ $n -eq 0 ]
+then
+   echo
+   echo "Usage:    neoplot [options]"
+fi
+
+#==============================================================================
+# Define variables for flag capture
+#
+# Default output directory
+PLOT_DIR=$PWD
+LOAD_FLAG=0
+# Plot mode flags
+LINE_FLAG=0
+#==============================================================================
+
+#==============================================================================
+# Parse command line options
+#
+while [ $# -gt 0 ] ; do
+  case "$1" in
+
+  -l) shift ; PLOT_DIR=$1 ; shift ;;
+
+  -pl) shift ; LINE_FLAG=1 ; PLOT_STRING="$1" ; shift ; break ;;
+
+  *) echo "ERROR: incorrect syntax." ; exit 1 ;;
+
+  esac
+done
+#==============================================================================
+# Plot data
+
+if [ $LINE_FLAG -eq 1 ]
+then
+  while [ $# -gt 0 ]
+  do
+    PLOT_STRING="$PLOT_STRING $1"
+    shift
+  done
+  python ~/gacode/shared/python/pyrats/NEOinterpreter.py $PLOT_DIR $PLOT_STRING
+  exit 0
+fi
