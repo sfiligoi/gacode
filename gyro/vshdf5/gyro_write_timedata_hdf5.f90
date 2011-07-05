@@ -249,8 +249,19 @@ subroutine gyro_write_timedata_hdf5
   if (nonlinear_flag == 0) then
 
      !=============
-     ! BEGIN LINEAR 
+     ! BEGIN LINEAR
      !=============
+     if (i_proc == 0 ) then
+
+        call add_h5(dumpTGid,'field_rms',ave_phi,h5in,h5err)
+        call add_h5(dumpTGid,'diff',diff,h5in,h5err)
+        call add_h5(dumpTGid,'diff_i',diff_i,h5in,h5err)
+        call add_h5(dumpTGid,'gbflux',gbflux,h5in,h5err)
+        call add_h5(dumpTGid,'gbflux_mom',gbflux_mom,h5in,h5err)
+        call add_h5(dumpTGid,'gbflux_i',gbflux_i,h5in,h5err)
+
+     endif
+
 
      !=============
      ! END LINEAR 
