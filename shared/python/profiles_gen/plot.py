@@ -14,6 +14,7 @@ interface."""
 
 import sys
 from profiles_genData import profiles_genData
+from errorcheck import *
 import matplotlib.pyplot as plt
 import math
 
@@ -23,15 +24,9 @@ n2 = 1
 
 #Error catching: no arguments mean that the default directory is used.
 if len(sys.argv) == 1:
-    try:
-        prof1 = profiles_genData('.')
-    except IOError:
-        print ". does not contain file input.profiles.  Type profiles_gen for help."
-        sys.exit()
-    except IndexError:
-        print "ERROR: Too few arguments.  Type profiles_gen for help."
-        sys.exit()
+    prof1 = opendir('.')
     for arg in args:
+        checkarg(prof1, arg)
         prof1.plot(arg, 2, 2)
     plt.show()
 
@@ -40,24 +35,8 @@ if len(sys.argv) == 1:
 else:
     if sys.argv[1] == '-c':
         #And of course runs error checks when trying to open them
-        try:
-            prof1 = profiles_genData(sys.argv[2])
-        except IOError:
-            print sys.argv[2]
-            print "does not contain file input.profiles.  Type profiles_gen for help."
-            sys.exit()
-        except IndexError:
-            print "ERROR: Too few arguments.  Type profiles_gen for help."
-            sys.exit()
-        try:
-            prof2 = profiles_genData(sys.argv[3])
-        except IOError:
-            print sys.argv[3]
-            print "does not contain file input.profiles.  Type profiles_gen for help."
-            sys.exit()
-        except IndexError:
-            print "ERROR: Too few arguments.  Type profiles_gen for help."
-            sys.exit()
+        prof1 = opendir(sys.argv[2])
+        prof2 = opendir(sys.argv[3])
         #If there are more than 4 args, then the user is asking for more than
         #just the default behavior.
         if len(sys.argv) > 4:
@@ -85,28 +64,12 @@ else:
                 if len(sys.argv) > 6:
                     #So everything after must be parameters to plot
                     args = sys.argv[6:]
-                try:
-                    n1 = int(sys.argv[4])
-                except ValueError:
-                    print "ERROR: " + sys.argv[4] + " is not a valid dimension.  Type profiles_gen for help."
-                    sys.exit()
-                try:
-                    n2 = int(sys.argv[5])
-                except ValueError:
-                    print "ERROR: " + sys.argv[5] + " is not a valid dimension.  Type profiles_gen for help."
-                    sys.exit()
-                except IndexError:
-                    print "ERROR: Please give second dimension.  Type profiles_gen for help."
-                    sys.exit()
+                n1 = setdim(sys.argv[4])
+                n2 = setdim(sys.argv[5])
                 #Check to make sure that the requested plots actually exist
                 for arg in args:
-                    flag = 0
-                    for k in prof1.data.iterkeys():
-                        if arg == k.split()[0]:
-                            flag = 1
-                    if not flag:
-                        print "ERROR: ", arg, " is not a valid parameter.  Type -options after -plot for help."
-                        sys.exit()
+                    checkarg(prof1, arg)
+                    checkarg(prof2, arg)
                     #And finally we create the plots
                     prof1.plot(arg, n1, n2, 'orange')
                     prof2.plot(arg, n1, n2, 'b')
@@ -115,13 +78,8 @@ else:
             elif sys.argv[4].isdigit() == False:
                 args = sys.argv[4:]
                 for arg in args:
-                    flag = 0
-                    for k in prof1.data.iterkeys():
-                        if arg == k.split()[0]:
-                            flag = 1
-                    if not flag:
-                        print "ERROR: ", arg, " is not a valid parameter.  Type -options after -plot for help."
-                        sys.exit()
+                    checkarg(prof1, arg)
+                    checkarg(prof2, arg)
                     prof1.plot(arg, n1, n2, 'orange')
                     prof2.plot(arg, n1, n2, 'b')
                 plt.show()
@@ -131,96 +89,42 @@ else:
         #The default behavior is to plot whatever is in 'args' on a 2x2 plot.
         else:
             for arg in args:
+                checkarg(prof1, arg)
+                checkarg(prof2, arg)
                 prof1.plot(arg, 2, 2, 'orange')
                 prof2.plot(arg, 2, 2, 'b')
             plt.show()
-#If the second argument is anything else, then it must be a directory location.
+#If the second argument is anything besides '-c', then it must be a directory location.
     else:
+        #Unless its '-options'
         if sys.argv[1] == '-options':
-        #This code segment prints all of the variables with nonzero entries 
-        #when '-options' is called.
-            try:
-                prof1 = profiles_genData('.')
-            except IOError:
-                print ". does not contain file input.profiles.  Type profiles_gen for help."
-                sys.exit()
-            except IndexError:
-                print "ERROR: Too few arguments.  Type profiles_gen for help."
-                sys.exit()
-            keys = []
-            for k, v in prof1.data.iteritems():
-                s = 0
-                for item in v:
-                    s = s + float(item)
-                if s != 0:
-                #Unless every entry in v is zero, it gets added to the list.
-                    keys.append(k.split()[0])
-            keys.sort()
-            for k in keys:
-                print k
+            prof1 = opendir('.')
+            getoptions(prof1)
         else:
-            try:
-                prof1 = profiles_genData(sys.argv[1])
-            except IOError:
-                print sys.argv[1]
-                print "does not contain file input.profiles.  Type profiles_gen for help."
-                sys.exit()
-            except IndexError:
-                print "ERROR: Too few arguments.  Type profiles_gen for help."
-                sys.exit()
-
+            prof1 = opendir(sys.argv[1])
             if len(sys.argv) > 2:
                 #This code segment prints all of the variables with nonzero entries 
                 #when '-options' is called.
                 if sys.argv[2] == '-options':
-                    keys = []
-                    for k, v in prof1.data.iteritems():
-                        s = 0
-                        for item in v:
-                            s = s + float(item)
-                        if s != 0:
-                       #Unless every entry in v is zero, it gets added to the list.
-                            keys.append(k.split()[0])
-                    keys.sort()
-                    for k in keys:
-                        print k
-                #More error catching, the rest of this is pretty similar to the
+                    getoptions(prof1)
+                #More error catching; the rest of this is pretty similar to the
                 #previous part.
                 elif sys.argv[2].isdigit():
                     args = sys.argv[4:]
-                    try:
-                        n1 = int(sys.argv[2])
-                    except ValueError:
-                        print "ERROR: " + sys.argv[2] + " is not a valid dimension.  Type profiles_gen for help."
-                        sys.exit()
-                    try:
-                        n2 = int(sys.argv[3])
-                    except ValueError:
-                        print "ERROR: " + sys.argv[3] + " is not a valid dimension.  Type profiles_gen for help."
-                        sys.exit()
+                    n1 = setdim(sys.argv[2])
+                    n2 = setdim(sys.argv[3])
                     for arg in args:
-                        flag = 0
-                        for k in prof1.data.iterkeys():
-                            if arg == k.split()[0]:
-                                flag = 1
-                        if not flag:
-                            print "ERROR: ", arg, " is not a valid parameter.  Type -options after -plot for help."
-                            sys.exit()
+                        checkarg(prof1, arg)
                         prof1.plot(arg, n1, n2)
                     plt.show()
                 elif sys.argv[2].isdigit() == False:
                     args = sys.argv[2:]
                     for arg in args:
-                        flag = 0
-                        for k in prof1.data.iterkeys():
-                            if arg == k.split()[0]:
-                                flag = 1
-                        if not flag:
-                            print "ERROR: ", arg, " is not a valid parameter.  Type -options after -plot for help."
-                            sys.exit()
+                        checkarg(prof1, arg)
                         prof1.plot(arg)
                     plt.show()
             else:
                 for arg in args:
+                    checkarg(prof1, arg)
                     prof1.plot(arg, 2, 2)
                 plt.show()
