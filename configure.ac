@@ -12,7 +12,7 @@ dnl Version:  $Id: configure.ac 1267 2009-07-28 13:10:59Z srinath$
 dnl
 dnl------------------------------------------------------------------------
 
-AC_INIT(gacodes, 8.3, srinath@txcorp.com)
+AC_INIT(gacodes, 8.3.5, srinath@txcorp.com)
 AC_PREREQ([2.65])
 AC_CONFIG_AUX_DIR(shared/autotool_config)
 AC_CONFIG_MACRO_DIR([shared/autotool_config])
@@ -194,8 +194,6 @@ AC_CONFIG_FILES([Makefile
     shared/python/Makefile
     shared/bin/Makefile
     shared/exec/Makefile
-    gato/Makefile
-    gato/data/Makefile
     gyro/Makefile
     gyro/BLEND/Makefile
     gyro/TRANSPOSE/Makefile
@@ -227,17 +225,23 @@ AC_CONFIG_FILES([Makefile
     tgyro/math/Makefile
     tgyro/qfm/Makefile
     tgyro/src/Makefile
-    xptor/Makefile
-    xptor/datread/Makefile
-    xptor/misc/Makefile
-    xptor/inc/Makefile
-    xptor/models/Makefile
-    xptor/nclmisc/Makefile
-    xptor/ptmisc/Makefile
-    xptor/solver/Makefile
-    xptor/source/Makefile
-    xptor/driver/Makefile
 ])
+
+#removed from build system
+#    gato/Makefile
+#    gato/data/Makefile
+#    xptor/Makefile
+#    xptor/datread/Makefile
+#    xptor/misc/Makefile
+#    xptor/inc/Makefile
+#    xptor/models/Makefile
+#    xptor/nclmisc/Makefile
+#    xptor/ptmisc/Makefile
+#    xptor/solver/Makefile
+#    xptor/source/Makefile
+#    xptor/driver/Makefile
+
+
 #    xptor/idl/Makefile
 #
 #    tgyro/tools/Makefile
