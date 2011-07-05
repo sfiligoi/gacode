@@ -714,9 +714,9 @@ subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
      enddo
      do i=1,3
         vnameArray(ikin,i,1)=trim(vnameArray(ikin,i,1))//"_density"
-        vnameArray(ikin,i,2)=trim(vnameArray(ikin,i,1))//"_energy"
-        vnameArray(ikin,i,3)=trim(vnameArray(ikin,i,1))//"_momentum"
-        vnameArray(ikin,i,4)=trim(vnameArray(ikin,i,1))//"_energyExchange"
+        vnameArray(ikin,i,2)=trim(vnameArray(ikin,i,2))//"_energy"
+        vnameArray(ikin,i,3)=trim(vnameArray(ikin,i,3))//"_momentum"
+        vnameArray(ikin,i,4)=trim(vnameArray(ikin,i,4))//"_energyExchange"
      enddo
   enddo
 
