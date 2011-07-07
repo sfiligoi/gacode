@@ -124,7 +124,7 @@ subroutine prgen_map_iterdb
   vec(16,:) = flow_beam(:)
   vec(17,:) = flow_wall_exp(:)
   vec(18,:) = zmag(:)
-  vec(19,:) = 0.0
+  vec(19,:) = onetwo_press(:) ! Total pressure
   vec(20,:) = dpsi(:)
 
   !-----------------------------------------------------------------
@@ -136,7 +136,8 @@ subroutine prgen_map_iterdb
      vec(31+i-1,:) = onetwo_enion(:,i)*1e-19
      ! Ti
      vec(36+i-1,:) = onetwo_ti(:)
-  enddo
+  enddo 
+  ! Beam ions
   do i=1,onetwo_nbion
      ! ni
      vec(31+i+onetwo_nion-1,:) = onetwo_enbeam(:,i)*1e-19
