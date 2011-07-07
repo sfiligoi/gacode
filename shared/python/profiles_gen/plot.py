@@ -14,8 +14,13 @@ interface."""
 
 import sys
 from profiles_genData import profiles_genData
-from errorcheck import *
-import matplotlib.pyplot as plt
+from profiles_generrorcheck import *
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    print "This command requires matplotlib.  Please install matplotlib:"
+    print "http://matplotlib.sourceforge.net/"
+    sys.exit()
 import math
 
 args = ['ne', 'ni_1', 'Te', 'Ti_1']
@@ -103,8 +108,8 @@ else:
         else:
             prof1 = opendir(sys.argv[1])
             if len(sys.argv) > 2:
-                #This code segment prints all of the variables with nonzero entries 
-                #when '-options' is called.
+                #This code segment prints all of the variables with nonzero
+                #entries when '-options' is called.
                 if sys.argv[2] == '-options':
                     getoptions(prof1)
                 #More error catching; the rest of this is pretty similar to the
