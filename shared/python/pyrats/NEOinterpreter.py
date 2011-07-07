@@ -1,10 +1,30 @@
 from pyrats.data import NEOData
 import sys
 import matplotlib.pyplot as plt
+import math
+
+args = ['GAMMA', 'Q', '1upar', 'jboot']
 
 sim1 = NEOData(sys.argv[1])
-sim1.scatter('SIM_2GAMMA')
-sim1.scatter('SIM_2Q')
-sim1.scatter('SIM_1upar')
-sim1.scatter('SIM_1jboot')
-plt.show()
+legend = bool(int(sys.argv[4]))
+
+try:
+    n1 = int(sys.argv[2])
+except ValueError:
+    print sys.argv[2] + " is not a vaild dimension."
+    sys.exit()
+try:
+    n2 = int(sys.argv[3])
+except ValueError:
+    print sys.argv[3] + " is not a vaild dimension."
+    sys.exit()
+
+if len(sys.argv) < 6:
+    for arg in args:
+        sim1.plot(arg, n1, n2, legend)
+    plt.show()
+else:
+    args = sys.argv[5:]
+    for arg in args:
+        sim1.plot(arg, n1, n2, legend)
+    plt.show()
