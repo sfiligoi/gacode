@@ -112,7 +112,7 @@ subroutine neo_do
 
   ! Matrix solve allocations
   n_row = n_species*(n_energy+1)*(n_xi+1)*n_theta
-  n_max = n_species*(n_energy+1)*(n_energy+1)*(n_xi+1)*n_theta*550
+  n_max = n_species*(n_energy+1)*(n_energy+1)*(n_xi+1)*n_theta*450
   allocate(a(n_max),stat=ierr)
   if(ierr /= 0) then
      call neo_error('ERROR: NEO allocation failed')
