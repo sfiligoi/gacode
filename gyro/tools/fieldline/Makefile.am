@@ -23,6 +23,6 @@ EXTRA_DIST = \
 	surface.asy \
 	xi.asy
 
-MAINTAINERCLEANFILES    = Makefile.in  *.mod *.o
+MAINTAINERCLEANFILES = Makefile.in *.mod *.o fieldline*.mod
 
    

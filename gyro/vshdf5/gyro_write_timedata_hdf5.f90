@@ -249,7 +249,7 @@ subroutine gyro_write_timedata_hdf5
   if (nonlinear_flag == 0) then
 
      !=============
-     ! BEGIN LINEAR 
+     ! BEGIN LINEAR
      !=============
 
      !=============

@@ -204,14 +204,14 @@ module gyro_interface
   real    :: gyro_fieldeigen_wr_in = -0.3
   real    :: gyro_fieldeigen_wi_in = 0.2
   real    :: gyro_fieldeigen_tol_in = 1e-6
-  integer :: gyro_collision_method_in = 1
+  integer :: gyro_collision_method_in = 2
 
   ! io related to hdf5 and diagnostics  
   integer :: gyro_io_method_in = 1
   real    :: gyro_torangle_offset_in = 0.0
-  integer :: gyro_time_skip_wedge_in = 1
-  integer :: gyro_n_torangle_wedge_in = 1
-  integer :: gyro_n_torangle_3d_in = 20
+  integer :: gyro_time_skip_wedge_in = 0
+  integer :: gyro_n_torangle_wedge_in = 0
+  integer :: gyro_n_torangle_3d_in = 0
   real    :: gyro_theta_wedge_offset_in = 0.
   real    :: gyro_theta_wedge_angle_in =0.
 
