@@ -18,7 +18,7 @@ module neo_rotation
   contains
 
     subroutine ROT_alloc(flag)
-      use neo_globals, only : n_species, n_theta, write_out_mode, rotation_model
+      use neo_globals, only : n_species, n_theta, write_out_mode, rotation_model, path
       implicit none
       integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
       
@@ -31,7 +31,7 @@ module neo_rotation
          allocate(dens_avg_cos(n_species))
          if(write_out_mode > 0) then
             if(rotation_model == 2) then
-               open(unit=io_rot,file=runfile,status='replace')
+               open(unit=io_rot,file=trim(path)//runfile,status='replace')
                close(io_rot)
             endif
          end if
@@ -169,7 +169,7 @@ module neo_rotation
 
       if(write_out_mode == 0 .or. rotation_model == 1) return
 
-      open(io_rot,file=runfile,status='old',position='append')
+      open(io_rot,file=trim(path)//runfile,status='old',position='append')
       write (io_rot,'(e16.8,$)') r(ir)
       write (io_rot,'(e16.8,$)') phi_rot_avg
       do is=1, n_species

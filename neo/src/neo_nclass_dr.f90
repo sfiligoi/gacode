@@ -20,7 +20,7 @@ module neo_nclass_dr
 contains
   
   subroutine NCLASS_DR_alloc(flag)
-    use neo_globals, only : n_species, write_out_mode, profile_model
+    use neo_globals, only : n_species, write_out_mode, profile_model, path
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
     
@@ -42,7 +42,7 @@ contains
        allocate(vpol_nc(n_species))
        allocate(vtor_nc(n_species))
        if(write_out_mode > 0) then
-          open(io_nc,file=runfile,status='replace')
+          open(io_nc,file=trim(path)//runfile,status='replace')
           close(io_nc)
        end if
        initialized = .true.
@@ -431,7 +431,7 @@ contains
     enddo
     
     if(write_out_mode > 0) then
-       open(io_nc,file=runfile,status='old',position='append')
+       open(io_nc,file=trim(path)//runfile,status='old',position='append')
        write (io_nc,'(e16.8,$)') r(ir)
        write(io_nc,'(e16.8,$)') jbs_nc 
        do is=1,n_species
