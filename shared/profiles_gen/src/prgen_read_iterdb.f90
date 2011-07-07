@@ -176,5 +176,9 @@ subroutine prgen_read_iterdb
 
   ! No beam ions
   onetwo_nbion = 0
+  onetwo_pressb = 0.0
+  
+  ! No total pressure data
+  onetwo_press = 0.0
 
 end subroutine prgen_read_iterdb
