@@ -116,12 +116,12 @@ class TGYROData:
         path = sim_directory
         self.directory_name = expanduser(expandvars(path))
 
-    def tgyro_get_input(self, input_name):
+    def get_input(self, input_name):
         """Return the specified variable from input.tgyro.gen.
 
         input_name  -  requested input
 
-        Ex:    tgyro_get_input("TGYRO_MODE")
+        Ex:    get_input("TGYRO_MODE")
         """
 
         input_file = file(self.directory_name + '/input.tgyro.gen', 'r')
@@ -136,12 +136,12 @@ class TGYROData:
     def read_tgyro_mode(self):
         """Read TGYRO_MODE and store as self.tgyro_mode."""
         
-        self.tgyro_mode = self.tgyro_get_input("TGYRO_MODE")
+        self.tgyro_mode = self.get_input("TGYRO_MODE")
 
     def read_num_ions(self):
         """Read LOC_N_ION and store as self.loc_n_ion."""
 
-        self.loc_n_ion = self.tgyro_get_input("LOC_N_ION")
+        self.loc_n_ion = self.get_input("LOC_N_ION")
 
     def read_data(self):
         """Read in object data."""
@@ -1453,12 +1453,12 @@ class NEOData:
         from os.path import expanduser, expandvars
         self.directory_name = expanduser(expandvars(path))
     
-    def neo_get_input(self, input_name):
+    def get_input(self, input_name):
         """Return the specified variable from input.neo.gen.
 
         input_name  -  requested input
 
-        Ex: neo_get_input("NEO_MODE")
+        Ex: get_input("NEO_MODE")
         """
 
         input_file = file(self.directory_name + 'input.neo.gen', 'r')
