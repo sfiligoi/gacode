@@ -4,7 +4,7 @@
 #  queue_go.PPPL
 #
 # FUNCTION:
-#  Batch script generator; PPPL Linux PBS for kestrel, kite, kruskal
+#  Batch script generator; PPPL Linux PBS for dawson, kite, kruskal
 #
 # AUTHORS:
 #  David Mikkelsen <mikk@pppl.gov>
@@ -12,6 +12,7 @@
 #
 # REVISIONS:
 #  23 April 2010
+#  7 July 2011 - change to dawson
 
 #------------------------------------
 # Functions:
@@ -37,7 +38,7 @@ sim_path=${4}
 code=${5}
 
 case "$queue_num" in
-   1 ) queue_sub="default: kestrel/sque/mque"
+   1 ) queue_sub="dawson"
        proc_max=192 ;; 
 
    2 ) queue_sub="kite"
@@ -91,13 +92,9 @@ echo "#PBS -o $sim_path/$sim/batch.out" >> $bfile
 echo "#PBS -m aeb" >> $bfile
 echo "#PBS -M $USER@pppl.gov" >> $bfile
 echo "#PBS -r n" >> $bfile
-# Don't specify queue name for default queue
-if [ ${queue_num} -ne 1 ] ; then
-    echo "#PBS -q $queue_sub" >> $bfile
-fi
+echo "#PBS -q $queue_sub" >> $bfile
 echo "# Batch execution commands start here" >> $bfile
 
-echo "cd $sim_path/$sim" >> $bfile
 
 echo 'echo The master node of this job is `hostname`' >> $bfile
 echo 'echo The working directory is `echo $PBS_O_WORKDIR`' >> $bfile
