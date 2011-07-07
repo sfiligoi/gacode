@@ -412,6 +412,7 @@ class profiles_genData:
 
         else:
             print "ERROR: Incorrect plot type.  Type profiles_gen for help."
+            sys.exit()
 
     #-------------------------------------------- #
     # Misc Functions

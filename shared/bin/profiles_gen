@@ -194,6 +194,7 @@ then
    echo "Plotting Options"
    echo
    echo "              -plot <directory=.> <dim1=1> <dim2=1> <par1> <par2> ... <parN>"
+   echo "              WARNING: This command requires Python 2.7 and matplotlib."
    echo "              Specify the directory containing file 'input.profiles'.  Then,"
    echo "              optionally, specify the number of plots in the x and y direction"
    echo "              respectively in each window.  Then specify the parameters to be"
@@ -205,6 +206,7 @@ then
    echo "              Te, and Ti_1 from the current directory."
    echo
    echo "              -fluxplot <directory=.> <type=-c> <r1=1> <r2> <N>"
+   echo "              WARNING: This command requires Python 2.7 and matplotlib."
    echo "              Specify directory containing file 'input.profiles.geo' and"
    echo "              'input.profiles'.  Then specify type of flux plot: -m for Miller-"
    echo "              type equilibrium, -f for Fourier series equilibrium, and -c to"

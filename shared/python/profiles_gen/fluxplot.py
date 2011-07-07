@@ -11,7 +11,12 @@ the two given radii.  See ~/gacode/shared/bin/profiles_gen for more
 information on the command line interface."""
 
 import sys
-import matplotlib.pyplot as plt
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    print "This command requires matplotlib.  Please install matplotlib:"
+    print "http://matplotlib.sourceforge.net/"
+    sys.exit()
 from profiles_genData import profiles_genData
 from math import *
 from os.path import expanduser, expandvars
