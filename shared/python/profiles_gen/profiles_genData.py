@@ -71,7 +71,7 @@ class profiles_genData:
             if raw_data[self.hlen].strip()[0:6] == 'N_EXP=':
                 self.n_exp = int(raw_data[self.hlen].strip()[6:])
         for line in range(self.hlen, len(raw_data)):
-            if raw_data[line].strip()[0].isdigit():
+            if raw_data[line].strip()[0].isdigit() or raw_data[line].strip()[0] == '-':
                 temp.append(raw_data[line].split())
         self.hlen = self.hlen - 1
         data = np.array(temp)
@@ -162,8 +162,6 @@ class profiles_genData:
         theta = 0
         dtheta = 0.01
         x = self.match(r, self.data['rho (-)'])
-        print self.data['zmag (m)'][x]
-        print self.data['zeta (-)'][x]
         while theta < 2 * math.pi:
             a = float(self.data['rmaj (m)'][x]) + float(self.data['rmin (m)'][x]) * math.cos(theta + math.asin(float(self.data['delta (-)'][x])) * math.sin(theta))
             R.append(a)
