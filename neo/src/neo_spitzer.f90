@@ -154,7 +154,7 @@ subroutine neo_spitzer
   L12 = sp_pflux(2) / src2(2) / L0
   L22 = sp_eflux(2) / src2(2) / L0
   
-  open(unit=io_sp,file='spitzer.out',status='replace')
+  open(unit=io_sp,file=trim(path)//'spitzer.out',status='replace')
   write (io_sp,'(e16.8,$)') L11
   write (io_sp,'(e16.8,$)') L12
   write (io_sp,'(e16.8,$)') L21

@@ -25,7 +25,7 @@ subroutine EXPRO_alloc_control(i_proc,path,flag)
              iostat=ierr)
 
         if (ierr /= 0) then
-           print '(a)','ERROR: input.profiles.gen does not exist'
+           print '(a)','ERROR: (EXPRO) input.profiles.gen does not exist'
            stop
         endif
 
@@ -47,7 +47,7 @@ subroutine EXPRO_alloc_control(i_proc,path,flag)
         if (ierr /= 0) then
            EXPRO_nfourier = -1
         else
-           print '(a)','INFO: input.profiles.geo found'
+           print '(a)','INFO: (EXPRO) input.profiles.geo found'
            read(io,*) EXPRO_nfourier
         endif
 

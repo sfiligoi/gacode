@@ -1,26 +1,26 @@
 subroutine neo_check
-  
+
   use neo_globals
-  
+
   implicit none
-  
+
   integer :: ir, is
-  
+
   !-----------------------------------------------------------
   ! Grid parameter checks
   !
   if (modulo(n_theta,2) == 0) then 
-     call neo_error('ERROR: n_theta must be odd.')
+     call neo_error('ERROR: (NEO) n_theta must be odd')
      return
   endif
   !
   if(n_species > 6) then
-     call neo_error('ERROR: max n_species is 6')
+     call neo_error('ERROR: (NEO) max n_species is 6')
      return
   endif
-  
+
   if(rho_in < 0) then
-     call neo_error('ERROR: rho_unit must be positive')
+     call neo_error('ERROR: (NEO) rho_unit must be positive')
      return
   endif
 
@@ -33,15 +33,15 @@ subroutine neo_check
 
   ! Write mode
   select case(write_out_mode)
-     case(0)
-        ! Do not write files, do not print stdout
-     case(1)
-        ! Do write files, do not print stdout
-     case(2)
-        ! Do write files, do print stdout
-     case default
-        call neo_error('INVALID: write_out_mode')
-        return
+  case(0)
+     ! Do not write files, do not print stdout
+  case(1)
+     ! Do write files, do not print stdout
+  case(2)
+     ! Do write files, do print stdout
+  case default
+     call neo_error('INVALID: write_out_mode')
+     return
   end select
 
   ! Simulation model
@@ -55,103 +55,103 @@ subroutine neo_check
         print *,'sim_model    : NUMERICAL'
      endif
   case default   
-     call neo_error('INVALID: sim_model')
+     call neo_error('ERROR: (NEO) invalid sim_model')
      return
   end select
 
   ! Collision model
   !
   select case (collision_model)  
-     
+
   case (1) 
-     
+
      if(write_out_mode > 1) then
         print *,'collision_model    : CONNOR'
      endif
-     
+
   case (2) 
-     
+
      if(write_out_mode > 1) then
         print *,'collision_model    : REDUCED HIRSHMAN-SIGMAR'
      end if
-     
+
   case (3) 
-     
+
      if(write_out_mode > 1) then
         print *,'collision_model    : FULL HIRSHMAN-SIGMAR'
      endif
-     
+
   case (4) 
-     
+
      if(write_out_mode > 1) then
         print *,'collision_model    : FULL LINEARIZED FOKKER-PLANCK' 
      end if
 
   case (5) 
-     
+
      if(write_out_mode > 1) then
         print *,'collision_model    : FULL LINEARIZED FOKKER-PLANCK WITH AD-HOC FIELD PARTICLE TERMS' 
      end if
-     
+
   case default
-     
-     call neo_error('INVALID: collision_model')
+
+     call neo_error('ERROR: (NEO) invalid collision_model')
      return
-     
+
   end select
 
   !------------------------------------------------------------
-  
+
   !------------------------------------------------------------
   ! Equilibrium model
   !
   select case (equilibrium_model)  
-     
+
 
   case (0) 
-     
+
      if(write_out_mode > 1) then
         print *,'equilibrium_model  : S-ALPHA'
      end if
 
   case (1) 
-     
+
      if(write_out_mode > 1) then
         print *,'equilibrium_model  : LARGE-ASPECT-RATIO'
      end if
-     
+
   case (2) 
-     
+
      if(write_out_mode > 1) then
         print *,'equilibrium_model  : MILLER'
      end if
 
   case (3) 
-     
+
      if(write_out_mode > 1) then
         print *,'equilibrium_model  : GENERAL'
-     end if   
+     end if
 
      if(geo_ny <= 0) then
-        call neo_error('ERROR: Geometry coefficients missing')
+        call neo_error('ERROR: (NEO) Geometry coefficients missing')
         return
      endif
 
   case default
-     
-     call neo_error('INVALID: equilibrium_model')
+
+     call neo_error('ERROR: (NEO) equilibrium_model invalid')
      return
-     
+
   end select
   !------------------------------------------------------------
-  
+
   !------------------------------------------------------------
   ! Profile model
   !
   select case (profile_model)  
-     
+
   case (1) 
-     
+
      if(n_radial > 1) then
         call neo_error('ERROR: profile_model=1 must be run with n_radial = 1')
         return
@@ -159,15 +159,15 @@ subroutine neo_check
      ir=1
      do is=1,n_species
         if(dens(is,ir) <= 0.0) then
-           call neo_error('ERROR: Density must be positive')
+           call neo_error('ERROR: (NEO) Density must be positive')
            return
         end if
         if(temp(is,ir) <= 0.0) then
-           call neo_error('ERROR: Temperature must be positive')
+           call neo_error('ERROR: (NEO) Temperature must be positive')
            return
         end if
         if(nu(is,ir) <= 0.0) then
-           call neo_error('ERROR: Collision frequency must be positive')
+           call neo_error('ERROR: (NEO) Collision frequency must be positive')
            return
         end if
         if(z(is) == 0.0) then
@@ -179,13 +179,13 @@ subroutine neo_check
      if(write_out_mode > 1) then
         print *,'profile_model      : LOCAL'
      end if
-     
+
   case (2) 
-     
+
      if(write_out_mode > 1) then
         print *,'profile_model      : GLOBAL PROFILE'
      end if
-     
+
      select case (profile_erad0_model)
      case(0)
         if(write_out_mode > 1) then
@@ -196,10 +196,10 @@ subroutine neo_check
            print *, 'GLOBAL PROFILE profile_erad0_model: ERAD0 INCLUDED'
         end if
      case default
-        call neo_error('INVALID: profile_erad0_model')
+        call neo_error('ERROR: (NEO) invalid profile_erad0_model')
         return
      end select
-     
+
      select case (profile_temprescale_model)
      case(0)
         if(write_out_mode > 1) then
@@ -210,10 +210,10 @@ subroutine neo_check
            print *, 'GLOBAL PROFILE profile_temprescale_model: PROFILE TEMPERATURES ARE RE-SCALED TO THE ELECTRON TEMP'
         end if
      case default
-        call neo_error('INVALID: profile_temprescale_model')
+        call neo_error('ERROR: (NEO) invalid profile_temprescale_model')
         return
      end select
-     
+
      select case (profile_equilibrium_model)
      case(0)
         if(write_out_mode > 1) then
@@ -237,20 +237,20 @@ subroutine neo_check
            print *, 'GLOBAL PROFILE profile_equilibrium_model: WITH GENERAL GEOMETRY'
         endif
      case default
-        call neo_error('INVALID: profile_equilibrium_model')
+        call neo_error('ERROR: (NEO) invalid profile_equilibrium_model')
         return
      end select
-     
+
   case(3)
      if(write_out_mode > 1) then
         print *,'profile_model      : GLOBAL PROFILE TEST'
      end if
-     
+
   case default
-     
-     call neo_error('INVALID: profile_model')
+
+     call neo_error('ERROR: (NEO) invalid profile_model')
      return
-     
+
   end select
 
   !-----------------------------------------------------------
@@ -264,7 +264,7 @@ subroutine neo_check
         print *, 'sign_q: NEGATIVE'
      end if
   end if
-  
+
   if(sign_bunit > 0.0) then
      if(write_out_mode > 1) then
         print *,'sign_bunit: POSITIVE (BT CW)'
@@ -274,7 +274,7 @@ subroutine neo_check
         print *, 'sign_bunit: NEGATIVE (BT CCW)'
      end if
   end if
-  
+
 
   !-----------------------------------------------------------
   ! Rotation parameter checks
@@ -289,10 +289,10 @@ subroutine neo_check
         print *,'rotation model: ROTATION EFFECTS INCLUDED'
      end if
   case default
-     call neo_error('INVALID: rotation_model')
+     call neo_error('ERROR: (NEO) invalid rotation_model')
      return
   end select
-  
+
   select case (spitzer_model)
   case(0)
      if(write_out_mode > 1) then
@@ -303,12 +303,12 @@ subroutine neo_check
         print *, 'spitzer_model: SPITZER TEST CASE'
      end if
   case default
-     call neo_error('INVALID: spitzer_model')
+     call neo_error('ERROR: (NEO) invalid spitzer_model')
      return
   end select
-     
+
   !------------------------------------------------------------
-  
+
   if(write_out_mode > 1) then
      print *
      print *,'GRID DIMENSIONS'
@@ -317,7 +317,7 @@ subroutine neo_check
      print 10,'n_energy',n_energy
      print 10,'n_xi',n_xi
      print 10,'n_theta',n_theta
-     
+
      do ir=1,n_radial
         print *
         print *,'PHYSICS PARAMETERS'
@@ -352,12 +352,12 @@ subroutine neo_check
            print 20,'nu',nu(is,ir)
         enddo
      enddo
- 
+
      print *
 
   endif
-  
+
 10 format(t2,a,':',t14,i2) 
 20 format(t2,a,':',t13,1pe12.4) 
-  
+
 end subroutine neo_check

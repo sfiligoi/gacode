@@ -416,7 +416,7 @@ subroutine neo_make_profiles
 
   ! Print the re-mapped equilibrium data
   if(write_out_mode > 0) then
-     open(unit=io,file='equil.out',status='replace')
+     open(unit=io,file=trim(path)//'equil.out',status='replace')
      do ir=1,n_radial
         write (io,'(e16.8,$)') r(ir)
         write (io,'(e16.8,$)') dphi0dr(ir)

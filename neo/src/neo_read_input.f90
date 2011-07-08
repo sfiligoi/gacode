@@ -6,7 +6,7 @@ subroutine neo_read_input
 
   integer :: is
 
-  open(unit=1,file='input.neo.gen',status='old')
+  open(unit=1,file=trim(path)//'input.neo.gen',status='old')
   read(1,*) n_energy
   read(1,*) n_xi
   read(1,*) n_theta

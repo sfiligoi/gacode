@@ -6,9 +6,9 @@ x = SimpleInput()
 x.set_extension('.gen')
 
 # NEO input parameters
-x.add('N_ENERGY','15')
-x.add('N_XI','15')
-x.add('N_THETA','15')
+x.add('N_ENERGY','6')
+x.add('N_XI','17')
+x.add('N_THETA','17')
 x.add('N_RADIAL','1')
 x.add('RMIN_OVER_A','0.5')
 x.add('RMIN_OVER_A_2','0.6')

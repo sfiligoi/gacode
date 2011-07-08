@@ -75,8 +75,8 @@ subroutine EXPRO_write_original(path,tag)
                 EXPRO_flow_beam(i),&
                 EXPRO_flow_wall(i),&
                 EXPRO_zmag(i),&
-                0.0,&
-                0.0
+                EXPRO_ptot(i),&
+                EXPRO_poloidalfluxover2pi(i)
         enddo
      endif
 

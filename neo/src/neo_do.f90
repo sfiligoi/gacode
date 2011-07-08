@@ -28,7 +28,7 @@ subroutine neo_do
   integer :: n_elem
   integer :: i, j, k, id
   integer :: ierr
-  
+
   real, dimension(:,:), allocatable :: mat, mat_VT, mat_U
   integer :: mat_sz
   integer :: info
@@ -38,7 +38,7 @@ subroutine neo_do
 
   ! kinetic equation terms: 
   real :: stream, trap, rotkin
-  
+
   integer, parameter :: io_neo=10, io_f=11
   character(len=80)  :: runfile_f = 'f.out'
 
@@ -65,7 +65,7 @@ subroutine neo_do
   cderiv(0)  =  0
   cderiv(1)  =  8
   cderiv(2)  = -1
-  
+
   if(sim_model == 0) then
      ! Theory calculation only -- no numerical kinetic calculation
      call EQUIL_alloc(1)
@@ -112,15 +112,15 @@ subroutine neo_do
 
   ! Matrix solve allocations
   n_row = n_species*(n_energy+1)*(n_xi+1)*n_theta
-  n_max = n_species*(n_energy+1)*(n_energy+1)*(n_xi+1)*n_theta*550
+  n_max = n_species*(n_energy+1)*(n_energy+1)*(n_xi+1)*n_theta*1000
   allocate(a(n_max),stat=ierr)
   if(ierr /= 0) then
-     call neo_error('ERROR: NEO allocation failed')
+     call neo_error('ERROR: (NEO) Array allocation failed')
      goto 100
   end if
   allocate(a_indx(2*n_max),stat=ierr)
   if(ierr /= 0) then
-     call neo_error('ERROR: NEO allocation failed')
+     call neo_error('ERROR: (NEO) Array allocation failed')
      goto 100
   end if
   allocate(g(n_row))
@@ -157,9 +157,9 @@ subroutine neo_do
   call TRANSP_alloc(1)
 
   ! Set-up the matrix equation: LHS radially local matrix
-  
+
   if(write_out_mode > 0) then
-     open(unit=io_neo,file='grid.out',status='replace')
+     open(unit=io_neo,file=trim(path)//'grid.out',status='replace')
      write(io_neo,*) n_species
      write(io_neo,*) n_energy
      write(io_neo,*) n_xi
@@ -172,27 +172,27 @@ subroutine neo_do
         write(io_neo,*) r(ir)
      enddo
      close(io_neo)
-     
-     open(unit=io_f,file=runfile_f,status='replace')
+
+     open(unit=io_f,file=trim(path)//runfile_f,status='replace')
      close(io_f)
   end if
 
   do ir=1, n_radial
-     
+
      if(write_out_mode > 1) print *, 'ir = ', ir
      if(write_out_mode > 1) print *, 'Begin matrix set-up'
-     
+
      if(collision_model == 3) then
         do is=2, n_species
            if(abs(temp(is,ir)-temp(1,ir)) > 1e-3) then
-              print *, 'Warning: Full HS collisions with unequal temps'
+              print *, 'WARNING: (NEO) Full HS collisions with unequal temps'
            endif
         enddo
      endif
-     
+
      ! Get the equilibrium parameters (th)
      call EQUIL_do(ir)
-     
+
      ! Get the rotation phi
      call ROT_solve_phi(ir)
      if(error_status > 0) goto 100
@@ -201,7 +201,7 @@ subroutine neo_do
      call ENERGY_coll_ints(ir)
 
      ! Set the LHS
-     
+
      a_indx(:) = 0.0
      a(:) = 0.0
      k = 0
@@ -210,7 +210,7 @@ subroutine neo_do
         do ie=0,n_energy
            do ix=0,n_xi
               do it=1,n_theta
-                 
+
                  ! vpar bhat dot grad 
                  ! -> stream * xi * sqrt(ene)
                  stream = sqrt(2.0) * vth(is,ir) * k_par(it) &
@@ -246,12 +246,12 @@ subroutine neo_do
                       * Btor(it)/(Bmag(it)* I_div_psip) &
                       * (2.0*k_par(it) * gradr(it) * gradr_tderiv(it) &
                       - gradpar_Bmag(it) / Bmag(it) * gradr(it)**2)
-                 
+
                  i = mindx(is,ie,ix,it)
-                 
+
                  ! Impose constant for g0
                  ! local  -> at each species and ene 
-                 
+
                  if (ix==0 .and. it == 1 &
                       .and. (collision_model==1 .or. collision_model==2))&
                       then
@@ -264,7 +264,7 @@ subroutine neo_do
                        a_indx(k) = i
                        a_indx(k+n_max) = j
                     enddo
-                    
+
                  else if(ix==0 .and. it == 1 &
                       .and. (ie==0 .or. ie==1) &
                       .and. (collision_model==3 .or. &
@@ -278,13 +278,13 @@ subroutine neo_do
                        a_indx(k) = i
                        a_indx(k+n_max) = j
                     enddo
-                    
-                    
+
+
                  else
-                    
+
                     ! Collisions 
                     jt = it; jx = ix
-                    
+
                     ! test particle
                     js = is
                     do je=0, n_energy
@@ -299,7 +299,7 @@ subroutine neo_do
                        a_indx(k) = i
                        a_indx(k+n_max) = j
                     enddo
-                    
+
                     ! field particle                     
                     do je=0, n_energy
                        do js=1,n_species
@@ -311,8 +311,8 @@ subroutine neo_do
                           a_indx(k+n_max) = j
                        enddo
                     enddo
-                             
-                    
+
+
                     ! Streaming
                     js = is
                     do je=0, n_energy
@@ -342,7 +342,7 @@ subroutine neo_do
                           endif
                        enddo
                     enddo
-                    
+
                     ! Trapping and Rotation
                     js = is; jt = it
                     do je=0, n_energy
@@ -378,18 +378,18 @@ subroutine neo_do
                           a_indx(k+n_max) = j
                        endif
                     enddo
-                    
+
                  endif ! bc if/else
               enddo ! it
            enddo ! ix
         enddo ! ie
      enddo ! is
-     
+
      n_elem = k
      do k=1,n_elem
         a_indx(n_elem+k) = a_indx(n_max+k)
      enddo
-     
+
      !mat_sz = n_species*(n_xi+1)*(n_energy+1)*n_theta
      !allocate(mat(mat_sz,mat_sz))
      !allocate(i_piv(mat_sz))
@@ -404,7 +404,7 @@ subroutine neo_do
      !   j = a_indx(n_elem+k)
      !   mat(i,j) = mat(i,j) + a(k)
      !enddo
-     
+
      !call DGESVD('A','A',mat_sz, mat_sz,mat,mat_sz, mat_S, mat_U,mat_sz, &
      !     mat_VT, mat_sz,work,5*mat_sz,info)
      !do i=1,mat_sz
@@ -416,7 +416,7 @@ subroutine neo_do
      call SOLVE_factor(n_elem)
      if(error_status > 0) goto 100
      if(write_out_mode > 1) print *, 'Done matrix factor'
-        
+
      ! Set the RHS source 
      call set_RHS_source
 
@@ -424,17 +424,17 @@ subroutine neo_do
      if(write_out_mode > 1) print *, 'Begin matrix solve'
      call SOLVE_do
      if(write_out_mode > 1) print *, 'Done matrix solve'
-     
+
      ! Compute the neo transport coefficients
      call TRANSP_do(ir)
      call TRANSP_write(ir)
-     
+
      ! re-construct the energy dependence
      call g_energy(ir)
 
      ! Write the rotation parameters
      call ROT_write(ir)
-     
+
      ! Compute the theory transport coefficients
      if(ir == 1) then
         call THEORY_alloc(1)
@@ -479,13 +479,13 @@ subroutine neo_do
            neo_thHS_out(is,2) = eflux_multi_HS(is) 
         enddo
      end if
-     
+
      if(ir == n_radial) then
         call THEORY_alloc(0)
      end if
 
      if(write_out_mode > 0) then
-        open(io_f,file=runfile_f,status='old',position='append')
+        open(io_f,file=trim(path)//runfile_f,status='old',position='append')
         write(io_f,*) g(:)
         close(io_f)
      endif
@@ -523,18 +523,18 @@ contains
     ! First-Order Source Term
     g(:) = 0.0
     do is=1,n_species
-       
+
        ! src = (1/F0) * dF0/dr + Ze/T dPhi0/dr
        src_F0_Ln = -(dlnndr(is,ir) - 1.5*dlntdr(is,ir))  ! ene^0 part
        src_F0_Lt = -dlntdr(is,ir)                        ! ene^1 part
        src_P0    = (1.0*Z(is))/temp(is,ir) * dphi0dr(ir) ! ene^0 Er part
-       
+
        do ie=0,n_energy
           do ix=0,n_xi
              do it=1,n_theta
-                
+
                 i = mindx(is,ie,ix,it) 
-                
+
                 src_Rot1   = -omega_rot(ir) * bigR_th0**2 &
                      / vth(is,ir)**2 * omega_rot_deriv(ir) &
                      - dlntdr(is,ir) * Z(is) / temp(is,ir) * phi_rot(it) &
@@ -542,26 +542,26 @@ contains
                      * (bigR(it)**2 - bigR_th0**2) &
                      - omega_rot(ir)**2 * bigR_th0 &
                      / vth(is,ir)**2 * bigR_th0_rderiv
-                
+
                 src_Rot2 = omega_rot_deriv(ir) * bigR(it) / vth(is,ir)
-                
+
                 ! Impose constant for g0
-                
+
                 if(ix==0 .and. it==1 .and. &
                      (collision_model==1 .or. collision_model==2)) then
                    g(i) = 0.0
-                   
+
                 else if(ix==0 .and. it==1 &
                      .and. (ie==0 .or. ie==1) &
                      .and. (collision_model==3 .or. &
                      collision_model==4 .or. collision_model==5)) then
                    g(i) = 0.0
-                   
+
                 else 
-                   
+
                    ! Equilibrium source:
                    ! -(vdrift dot grad (F0 + Ze/T Phi0))
-                   
+
                    if (ix == 0) then
                       g(i) = -(4.0/3.0) * driftx(is,it) &
                            * ( (src_F0_Ln + src_P0 + src_Rot1) &
@@ -611,24 +611,24 @@ contains
                            - src_Rot2 * 2.0/3.0 * driftx(is,it) &
                            * omega_rot(ir) * bigR(it)/vth(is,ir) &
                            * evec_e1(ie,ix)
-                      
+
                    else if(ix == 3) then
                       g(i) = -src_Rot2 * 2.0/5.0 * driftx(is,it) &
                            * sqrt(2.0) * Btor(it)/Bmag(it) &
                            * evec_e105(ie,ix) &
                            + src_Rot2 * 2.0/5.0* driftxrot3(is,it) &
                            * evec_e105(ie,ix)
-                      
+
                    endif
-                   
-                   
+
+
                 endif
-                
+
              enddo
           enddo
        enddo
     enddo
-    
+
   end subroutine set_RHS_source
 
 end subroutine neo_do

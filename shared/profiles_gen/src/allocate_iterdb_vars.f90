@@ -15,6 +15,7 @@ subroutine allocate_iterdb_vars
   allocate(onetwo_enion(onetwo_nj,onetwo_nion))
   allocate(onetwo_enbeam(onetwo_nj,onetwo_nbion))
   allocate(onetwo_pressb(onetwo_nj,onetwo_nbion))
+  allocate(onetwo_press(onetwo_nj))
 
   allocate(onetwo_sion(onetwo_nj,onetwo_nion))
   allocate(onetwo_srecom(onetwo_nj,onetwo_nion))
