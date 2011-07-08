@@ -441,7 +441,7 @@ fi
 #
 if [ $FILE_FLAG -eq 0 ]
 then
-  echo "ERROR: Please specify an input file with -i <file>"
+  echo "ERROR: (profiles_gen) Please specify an input file with -i <file>"
   exit 0 
 fi
 
@@ -478,7 +478,7 @@ then
       then
          cp ../INPUT.v input.neo
       else
-         echo "ERROR: Specify ion string with -vgen_in, or create INPUT.v"
+         echo "ERROR: (profiles_gen) Specify ion string with -vgen_in, or create INPUT.v"
          exit 1
       fi
    fi
@@ -570,11 +570,11 @@ if [ $G_FLAG -eq 1 ]
 then
    if [ ! -f $GATO ]
    then
-      echo "ERROR: You need to build the GATO executable: $ cd gato ; make"
+      echo "ERROR: (profiles_gen) You need to build the GATO executable: $ cd gato ; make"
       exit 1
    fi
-   echo "INFO: Running GATO mapper to generate flux surfaces from $GFILE."
-   echo "INFO: Running fluxfit to compute shape parameters from GATO mapping."
+   echo "INFO: (profiles_gen) Spawning GATO mapper to generate flux surfaces from $GFILE."
+   echo "INFO: (profiles_gen) Running fluxfit to compute shape parameters from GATO mapping."
    cp $GFILE eqgta
    cp $GATO_IN ingta
    $GATO >& gato.stdout
@@ -609,9 +609,9 @@ if [ -f "success" ]
 then
    if [ $G_FLAG -eq 1 ]
    then
-      echo "DONE: Successfully wrote: input.profiles, input.profiles.geo."
+      echo "DONE: (profiles_gen) Successfully wrote: input.profiles, input.profiles.geo."
    else
-      echo "DONE: Successfully wrote: input.profiles." 
+      echo "DONE: (profiles_gen) Successfully wrote: input.profiles." 
    fi
 else
    echo "ERROR: Something went wrong in creation of input.profiles :("
