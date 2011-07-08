@@ -271,17 +271,24 @@ class profiles_genData:
     
 #PRELIMINARIES
         import matplotlib.pyplot as plt
+        import matplotlib as mpl
         import sys
         import math
 
+        mpl.rcParams['font.size'] = 10.0
+        mpl.rcParams['figure.subplot.right'] = .7
         mteq = []
         feq = []
-        
+        lines = []
+        bigcoords = [-100, 100]
+        midplane = [0, 0]
+
         #Produces a matplotlib figure object and creates the labels.
         fig = plt.figure(1)
         ax = fig.add_subplot(111, aspect='equal')
         ax.set_ylabel('Z (m)')
         ax.set_xlabel('R (m)')
+        ax.plot(bigcoords, midplane, 'k--')
 
 #SECTION 1: Miller-type
         #Checks to see which type of plot is desired: Miller-type, Fourier,
@@ -295,12 +302,16 @@ class profiles_genData:
                 z = mteq[0][1]
                 rmaj = float(mteq[0][2])
                 zmag = float(mteq[0][3])
-                ax.plot(r, z, 'b')
-                #Figures out whether the r or z direction is wider, and creates limits accordingly.
+                ax.plot(r, z, 'b', label='Miller-type')
+                ax.plot(bigcoords,[self.get('zmag (m)')[self.match(min1,self.get('rho (-)'))], self.get('zmag (m)')[self.match(min1, self.get('rho (-)'))]], 'm', label='Flux surface center')
+                ax.plot([self.get('rmaj (m)')[self.match(min1, self.get('rho (-)'))], self.get('rmaj (m)')[self.match(min1, self.get('rho (-)'))]], bigcoords, 'm')
+                #Figures out whether the r or z direction is wider, and creates
+                #limits accordingly.
                 aspect = max((max(z) - min(z)), (max(r) - min(r))) + .5
                 ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
                 ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
                 ax.set_title(u'Flux Surface at \u03c1 = ' + str(self.data['rho (-)'][self.match(min1, self.data['rho (-)'])]))
+                ax.legend( ('Outboard Midplane', 'Miller-type', 'Flux surface center'), loc=2,bbox_to_anchor=(1,1))
             elif l == 6:
                 #Increments through from min to max and creates plots at each
                 #radius.
@@ -313,7 +324,7 @@ class profiles_genData:
                     z = mteq[0][1]
                     rmaj = float(mteq[0][2])
                     zmag = float(mteq.pop()[3])
-                    ax.plot(r, z, 'b')
+                    lines.append(ax.plot(r, z, 'b'))
                     count = count + math.modf(step)[0]
                     if count > 1:
                         count = math.modf(count)[0]
@@ -325,6 +336,8 @@ class profiles_genData:
                 ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
                 ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
                 ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(min1) + u' and \u03c1 = ' + str(max1) + '.')
+                print lines[0][0]
+                ax.legend( ('Outboard Midplane', 'Miller-type'), loc=2,bbox_to_anchor=(1,1))
 
 #SECTION 2: Fourier-type
         elif typ == '-f':
@@ -336,11 +349,14 @@ class profiles_genData:
                 z = feq[0][1]
                 rmaj = float(feq[0][2])
                 zmag = float(feq[0][3])
-                ax.plot(r, z, 'r')
+                ax.plot(r, z, 'r', label='Fourier-type')
+                ax.plot(bigcoords,[self.get('zmag (m)')[self.match(min1,self.get('rho (-)'))], self.get('zmag (m)')[self.match(min1, self.get('rho (-)'))]], 'm', label='Flux surface center')
+                ax.plot([self.get('rmaj (m)')[self.match(min1, self.get('rho (-)'))], self.get('rmaj (m)')[self.match(min1, self.get('rho (-)'))]], bigcoords, 'm')
                 aspect = max((max(z) - min(z)), (max(r) - min(r))) + .5
                 ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
                 ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
                 ax.set_title(u'Flux Surface at \u03c1 = ' + str(self.data['rho (-)'][self.match(min1, self.data['rho (-)'])]))
+                ax.legend( ('Outboard Midplane', 'Fourier-type', 'Flux surface center'), loc=2,bbox_to_anchor=(1,1))
             elif l == 6:
                 inc = self.match(min1, self.data['rho (-)'])
                 step = (self.match(max1, self.data['rho (-)']) - inc)/n
@@ -351,7 +367,7 @@ class profiles_genData:
                     z = feq[0][1]
                     rmaj = float(feq[0][2])
                     zmag = float(feq.pop()[3])
-                    ax.plot(r, z, 'r')
+                    lines.append(ax.plot(r, z, 'r', label='Fourier-type'))
                     count = count + math.modf(step)[0]
                     if count > 1:
                         count = math.modf(count)[0]
@@ -362,6 +378,7 @@ class profiles_genData:
                 ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
                 ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
                 ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(min1) + u' and \u03c1 = ' + str(max1) + '.')
+                ax.legend( ('Outboard Midplane', 'Fourier-type'), loc=2,bbox_to_anchor=(1,1))
 
 #SECTION 3: Comparison
         elif typ == '-c':
@@ -371,18 +388,20 @@ class profiles_genData:
                 feq.append(self.compute_fouriereq(min1))
                 fr = feq[0][0]
                 fz = feq[0][1]
-                ax.plot(fr, fz, 'r')
+                ax.plot(fr, fz, 'r', label='Fourier-type')
                 mteq.append(self.compute_mtypeeq(min1))
                 mr = mteq[0][0]
                 mz = mteq[0][1]
                 rmaj = float(mteq[0][2])
                 zmag = float(mteq[0][3])
-                ax.plot(mr, mz, 'b')
+                ax.plot(mr, mz, 'b', label='Miller-type')
+                ax.plot(bigcoords,[self.get('zmag (m)')[self.match(min1,self.get('rho (-)'))], self.get('zmag (m)')[self.match(min1, self.get('rho (-)'))]], 'm', label='Flux surface center')
+                ax.plot([self.get('rmaj (m)')[self.match(min1, self.get('rho (-)'))], self.get('rmaj (m)')[self.match(min1, self.get('rho (-)'))]], bigcoords, 'm')
                 aspect = max((max(fz) - min(fz)), (max(fr) - min(fr)), (max(mz) - min(mz)), (max(mr) - min(mr))) + .5
                 ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
                 ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
                 ax.set_title(u'Flux Surface at \u03c1 = ' + str(self.data['rho (-)'][self.match(min1, self.data['rho (-)'])]))
-                ax.legend( ('Fourier-type', 'Miller-type') )
+                ax.legend( ('Outboard Midplane', 'Fourier-type', 'Miller-type', 'Flux surface center'), loc=2,bbox_to_anchor=(1,1))
             elif l == 6:
                 inc = self.match(min1, self.data['rho (-)'])
                 step = (self.match(max1, self.data['rho (-)']) - inc)/n
@@ -391,13 +410,13 @@ class profiles_genData:
                     feq.append(self.compute_fouriereq(float(self.data['rho (-)'][inc])))
                     fr = feq[0][0]
                     fz = feq.pop()[1]
-                    ax.plot(fr, fz, 'r')
+                    ax.plot(fr, fz, 'r', label='Fourier-type')
                     mteq.append(self.compute_mtypeeq(float(self.data['rho (-)'][inc])))
                     mr = mteq[0][0]
                     mz = mteq[0][1]
                     rmaj = float(mteq[0][2])
                     zmag = float(mteq.pop()[3])
-                    ax.plot(mr, mz, 'b')
+                    ax.plot(mr, mz, 'b', label='Miller-type')
                     count = count + math.modf(step)[0]
                     if count > 1:
                         count = math.modf(count)[0]
@@ -408,7 +427,7 @@ class profiles_genData:
                 ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
                 ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
                 ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(min1) + u' and \u03c1 = ' + str(max1) + '.')
-                ax.legend( ('Fourier-type', 'Miller-type') )
+                ax.legend( ('Outboard Midplane', 'Fourier-type', 'Miller-type'), loc=2,bbox_to_anchor=(1,1))
 
         else:
             print "ERROR: Incorrect plot type.  Type profiles_gen for help."

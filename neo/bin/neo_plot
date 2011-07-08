@@ -32,6 +32,9 @@ then
    echo
    echo "             -s"
    echo "             Suppress legends on requested plots."
+   echo
+   echo "             -v"
+   echo "             Display verbose descriptors of variables."
    echo " "
    echo "             -pl <var1> <var2> ... <varN>"
    echo "             Produce plots of N parameters given.  Default is GAMMA, Q,"
@@ -62,6 +65,7 @@ PLOT_FLAG=0
 OPTIONS_FLAG=0
 DIM_FLAG=0
 LEGEND_FLAG=1
+VERBOSE_FLAG=0
 PLOT_STRING=""
 #==============================================================================
 
@@ -80,6 +84,8 @@ while [ $# -gt 0 ] ; do
   -pl) shift ; PLOT_FLAG=1 ; PLOT_STRING="$1" ; shift ; break ;;
 
   -s) shift ; LEGEND_FLAG=0 ;;
+
+  -v) shift ; VERBOSE_FLAG=1 ;;
 
   *) echo "ERROR: incorrect syntax." ; exit 1 ;;
 
@@ -100,7 +106,7 @@ then
     N1=2
     N2=2
   fi
-  python ~/gacode/shared/python/pyrats/NEOinterpreter.py $PLOT_DIR $N1 $N2 $LEGEND_FLAG $PLOT_STRING &
+  python ~/gacode/shared/python/pyrats/NEOinterpreter.py $PLOT_DIR $N1 $N2 $LEGEND_FLAG $VERBOSE_FLAG $PLOT_STRING &
   exit 0
 fi
 

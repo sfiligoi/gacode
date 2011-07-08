@@ -7,6 +7,7 @@ args = ['GAMMA', 'Q', '1upar', 'jboot']
 
 sim1 = NEOData(sys.argv[1])
 legend = bool(int(sys.argv[4]))
+verbose = bool(int(sys.argv[5]))
 
 try:
     n1 = int(sys.argv[2])
@@ -19,12 +20,12 @@ except ValueError:
     print sys.argv[3] + " is not a vaild dimension."
     sys.exit()
 
-if len(sys.argv) < 6:
+if len(sys.argv) < 7:
     for arg in args:
-        sim1.plot(arg, n1, n2, legend)
+        sim1.plot(arg, n1, n2, legend, verbose)
     plt.show()
 else:
-    args = sys.argv[5:]
+    args = sys.argv[6:]
     for arg in args:
-        sim1.plot(arg, n1, n2, legend)
+        sim1.plot(arg, n1, n2, legend, verbose)
     plt.show()

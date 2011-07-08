@@ -1312,6 +1312,18 @@ class TGYROData:
 #==============================================================================
 
 class NEOOutput:
+    """A class which holds individual pieces of NEO output data.
+
+    This class is just a simple holder that can attach the units and a
+    description to a piece of data.  It's only purpose is to be used by NEOData.
+
+    Data:
+    
+    data = {}
+    units = ''
+    descriptor = ''
+"""
+
     def __init__(self, data, units, descriptor):
         self.data=data
         self.units=units
@@ -1320,13 +1332,24 @@ class NEOOutput:
 class NEOData:
     """A class of NEO output data.
 
-    Data:
+    Data (things that actually get used):
 
     master = ""
     directory_name = ""
     fignum = 1
     plotcounter = 1
-    data = {{}}
+    toplot = []
+    transport = {}
+    HH_theory = {}
+    CH_theory = {}
+    TG_theory = {}
+    S_theory = {}
+    HR_theory = {}
+    HS_theory = {}
+    control = {}
+
+    Temporary data (data which is stored in one of the above objects):
+
     n_species = {}
     n_energy = {}
     n_xi = {}
@@ -1886,7 +1909,7 @@ class NEOData:
     #-----------------------------------------------#
     # Plotting routines
 
-    def plot(self, var, n1=2, n2=2, legend=True, cols='bgkcmyrw', styles=['-','--','-.',':']):
+    def plot(self, var, n1=2, n2=2, legend=True, verbose=False, cols='bgkcmyrw', styles=['-','--','-.',':']):
         """Plots var as a scatter plot with data from different directories
         coming in different colors."""
 
@@ -1924,22 +1947,17 @@ class NEOData:
             self.fignum = self.fignum + 1
         fig = plt.figure(self.fignum)
         ax = fig.add_subplot(n1, n2, self.plotcounter)
-        ax.set_xlabel('r')
+        ax.set_xlabel('r/a')
         ax.set_ylabel(self.get_transport(var).units)
-        ax.set_title(var + ' vs. r')
+        if verbose:
+            ax.set_title(self.get_transport(var).descriptor+' vs. r/a')
+        else:
+            ax.set_title(var + ' vs. r/a')
         for var in varlist:
             tempr = []
             for key in self.toplot:
                 tempr.append(self.get_control('r').data[key])
-            t = []
-            for s in tempr:
-                if len(s) > 1:
-                    for a in s:
-                        t.append(np.array([a]))
-                else:
-                    t.append(s)
-            tempr = t
-            tempr = np.array(tempr).flatten()
+            tempr = np.array(self.split(tempr)).flatten()
             ind = tempr.argsort()
             tempr = tempr[ind]
 
@@ -1953,101 +1971,45 @@ class NEOData:
                         plot = []
                         for x in range(len(transport)):
                             plot.append(transport[x][y])
-                        t = []
-                        for s in plot:
-                            if len(s) > 1:
-                                for a in s:
-                                    t.append(np.array([a]))
-                            else:
-                                t.append(s)
-                        plot = t
-                        plot = np.array(plot).flatten()[ind]
+                        plot = np.array(self.split(plot)).flatten()[ind]
                         ax.plot(tempr,plot,c=cols[0],ls=styles[y],label='Sim spe '+str(y))
                 except IndexError:
-                    t = []
-                    for s in transport:
-                        if len(s) > 1:
-                            for a in s:
-                                t.append(np.array([a]))
-                        else:
-                            t.append(s)
-                    transport = t
-                    transport = np.array(transport).flatten()[ind]
+                    transport = np.array(self.split(transport)).flatten()[ind]
                     ax.plot(tempr, transport, c=cols[0], label='Sim')
 
             if self.get_HH_theory(var) != None:
                 HH = []
                 for key in self.toplot:
                     HH.append(self.get_HH_theory(var).data[key])
-                t = []
-                for s in HH:
-                    if len(s) > 1:
-                        for a in s:
-                            t.append(np.array([a]))
-                    else:
-                        t.append(s)
-                HH = t
-                HH = np.array(HH).flatten()[ind]
+                HH = np.array(self.split(HH)).flatten()[ind]
                 ax.plot(tempr, HH, c=cols[1], label='HH ' + var)
 
             if self.get_CH_theory(var) != None:
                 CH = []
                 for key in self.toplot:
                     CH.append(self.get_CH_theory(var).data[key])
-                t = []
-                for s in CH:
-                    if len(s) > 1:
-                        for a in s:
-                            t.append(np.array([a]))
-                    else:
-                        t.append(s)
-                CH = t
-                CH = np.array(CH).flatten()[ind]
+                CH = np.array(self.split(CH)).flatten()[ind]
                 ax.plot(tempr, CH, c=cols[2], label='CH ' + var)
 
             if self.get_TG_theory(var) != None:
                 TG = []
                 for key in self.toplot:
                     TG.append(self.get_TG_theory(var).data[key])
-                t = []
-                for s in TG:
-                    if len(s) > 1:
-                        for a in s:
-                            t.append(np.array([a]))
-                    else:
-                        t.append(s)
-                TG = t
-                TG = np.array(TG).flatten()[ind]
+                TG = np.array(self.split(TG)).flatten()[ind]
                 ax.plot(tempr, TG, c=cols[3], label='TG ' + var)
 
             if self.get_S_theory(var) != None:
                 S = []
                 for key in self.toplot:
                     S.append(self.get_S_theory(var).data[key])
-                t = []
-                for s in S:
-                    if len(s) > 1:
-                        for a in s:
-                            t.append(np.array([a]))
-                    else:
-                        t.append(s)
-                S = t
-                S = np.array(S).flatten()[ind]
+                S = np.array(self.split(S)).flatten()[ind]
                 ax.plot(tempr, S, c=cols[4], label='S ' + var)
 
             if self.get_HR_theory(var) != None:
                 HR = []
                 for key in self.toplot:
                     HR.append(self.get_HR_theory(var).data[key])
-                t = []
-                for s in HR:
-                    if len(s) > 1:
-                        for a in s:
-                            t.append(np.array([a]))
-                    else:
-                        t.append(s)
-                HR = t
-                HR = np.array(HR).flatten()[ind]
+                HR = np.array(self.split(HR)).flatten()[ind]
                 ax.plot(tempr, HR, c=cols[5], label='HR ' + var)
 
             if self.get_HS_theory(var) != None:
@@ -2058,16 +2020,24 @@ class NEOData:
                     plot = []
                     for x in range(len(HS)):
                         plot.append(HS[x][y])
-                    t = []
-                    for s in plot:
-                        if len(s) > 1:
-                            for a in s:
-                                t.append(np.array([a]))
-                        else:
-                            t.append(s)
-                    plot = t
-                    plot = np.array(plot).flatten()[ind]
+                    plot = np.array(self.split(plot)).flatten()[ind]
                     ax.plot(tempr,plot,c=cols[6],ls=styles[y],label='HS '+var+' spe '+str(y))
         if legend == True:
             ax.legend(loc=2,bbox_to_anchor=(1,1))
         self.plotcounter = self.plotcounter + 1
+
+    #----------------------------------------------------------#
+    # Misc methods
+
+    def split(self, array):
+        """split splits an array which may be made up of elements with
+        multiple entries into an array with one entry per element."""
+
+        t = []
+        for s in array:
+            if len(s) > 1:
+                for a in s:
+                    t.append(np.array([a]))
+            else:
+                t.append(s)
+        return t
