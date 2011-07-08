@@ -34,27 +34,27 @@ subroutine EXPRO_compute_derived
   ! Sanity checks
   !
   if (EXPRO_ctrl_numeq_flag == 1 .and. EXPRO_nfourier == -1) then
-     print *,'ERROR in EXPRO: input.profiles.geo missing'
+     print *,'ERROR: (EXPRO) input.profiles.geo missing'
      stop
   endif
   if (EXPRO_ctrl_density_method == -1) then
-     print *,'ERROR in EXPRO: EXPRO_ctrl_density_method not set.'
+     print *,'ERROR: (EXPRO) EXPRO_ctrl_density_method not set.'
      stop
   endif
   if (EXPRO_ctrl_numeq_flag == -1) then
-     print *,'ERROR in EXPRO: EXPRO_ctrl_numeq_flag not set.'
+     print *,'ERROR: (EXPRO) EXPRO_ctrl_numeq_flag not set.'
      stop
   endif
   if (EXPRO_ctrl_signb < -1.0) then
-     print *,'ERROR in EXPRO: EXPRO_ctrl_signb not set.'
+     print *,'ERROR: (EXPRO) EXPRO_ctrl_signb not set.'
      stop
   endif
   if (EXPRO_ctrl_signq < -1.0) then
-     print *,'ERROR in EXPRO: EXPRO_ctrl_signq not set.'
+     print *,'ERROR: (EXPRO) EXPRO_ctrl_signq not set.'
      stop
   endif
   if (EXPRO_ctrl_rotation_method == -1) then
-     print *,'ERROR in EXPRO: EXPRO_ctrl_rotation_method not set.'
+     print *,'ERROR: (EXPRO) EXPRO_ctrl_rotation_method not set.'
      stop
   endif
   !---------------------------------------------------------------------

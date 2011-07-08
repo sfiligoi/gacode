@@ -50,7 +50,7 @@ contains
          rinfo)
 
     if(uinfo(1) < 0) then
-       call neo_error('ERROR: Matrix factorization failed')
+       call neo_error('ERROR: (NEO) Matrix factorization failed in neo_sparse_solve')
        return
     endif
 

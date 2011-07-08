@@ -162,6 +162,8 @@ class profiles_genData:
         theta = 0
         dtheta = 0.01
         x = self.match(r, self.data['rho (-)'])
+        print self.data['zmag (m)'][x]
+        print self.data['zeta (-)'][x]
         while theta < 2 * math.pi:
             a = float(self.data['rmaj (m)'][x]) + float(self.data['rmin (m)'][x]) * math.cos(theta + math.asin(float(self.data['delta (-)'][x])) * math.sin(theta))
             R.append(a)
