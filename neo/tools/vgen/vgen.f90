@@ -109,6 +109,7 @@ program vgen
 
   !---------------------------------------------------------------------
 
+  call neo_init(path)
   call neo_read_input()
   call map_global2interface()
 
@@ -202,7 +203,7 @@ program vgen
   endif
 
   ! set sign of b and q for EXPRO
-   if(neo_btccw_in > 0) then
+  if(neo_btccw_in > 0) then
      EXPRO_ctrl_signb = -1.0
   else
      EXPRO_ctrl_signb =  1.0
@@ -316,6 +317,11 @@ program vgen
            call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
                 omega_deriv)
 
+           if (neo_error_status_out > 0) then
+              print *,neo_error_message_out
+              stop
+           endif
+
            do j=1,n_ions
               EXPRO_vpol(j,i) = neo_vpol_dke_out(j) &
                    * vth_norm * EXPRO_rmin(EXPRO_n_exp)
@@ -341,6 +347,11 @@ program vgen
         omega_deriv = 0.0
         call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
              omega_deriv)
+
+        if (neo_error_status_out > 0) then
+           print *,neo_error_message_out
+           stop
+        endif
 
         ! omega = (vtor_measured - vtor_neo_ater0) / R
 
@@ -387,6 +398,10 @@ program vgen
            omega_deriv = EXPRO_w0p(i) 
            call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
                 omega_deriv)
+           if (neo_error_status_out > 0) then
+              print *,neo_error_message_out
+              stop
+           endif
            do j=1,n_ions
               EXPRO_vpol(j,i) = neo_vpol_dke_out(j) &
                    * vth_norm * EXPRO_rmin(EXPRO_n_exp)
@@ -430,6 +445,11 @@ program vgen
            omega_deriv = EXPRO_w0p(i)
            call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
                 omega_deriv)
+
+           if (neo_error_status_out > 0) then
+              print *,neo_error_message_out
+              stop
+           endif
 
            do j=1,n_ions
               EXPRO_vpol(j,i) = neo_vpol_dke_out(j) &
@@ -509,7 +529,7 @@ program vgen
 
   call MPI_finalize(i_err)
 
-! 10 format('r/a=',f6.4,3x,'omega0(krad/s)=',f9.4,3x,'vtor_1(km/s)=',f9.4,3x,'vpol_1(km/s)=',f9.4)
+  ! 10 format('r/a=',f6.4,3x,'omega0(krad/s)=',f9.4,3x,'vtor_1(km/s)=',f9.4,3x,'vpol_1(km/s)=',f9.4)
 
 10 format('r/a=',f6.4,3x,'Er_0(kV/m)=',f9.4,3x,'vtor_1(km/s)=',f9.4,3x,'vpol_1(km/s)=',f9.4)
 
