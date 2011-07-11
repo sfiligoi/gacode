@@ -95,8 +95,13 @@ subroutine tgyro_iteration_driver
   call tgyro_write_input
 
   if (tgyro_mode == 2) then
+     ! Branch off to stability calculation
+     transport_method = 1
      call tgyro_stab_driver
      return
+  else
+     ! Standard transport calculation
+     transport_method = 2
   endif
 
   if (loc_restart_flag == 0) then

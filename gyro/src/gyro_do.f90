@@ -310,8 +310,8 @@ subroutine gyro_do
   ! 'gyro -t' (test) mode.
   !
   if (gyrotest_flag == 1) then
-     call write_efficiency(trim(path)//'out.gyro.efficiency',1)
-     call set_exit_status('test complete',2)
+     call gyro_write_efficiency(trim(path)//'out.gyro.efficiency',1)
+     call gyro_set_exit_status('test complete',2)
      return
   endif
   !------------------------------------------------------------

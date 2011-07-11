@@ -16,6 +16,7 @@ subroutine gyro_mpi_grid
   !
   integer, external :: parallel_dim
   integer :: i_group_mumps
+  integer :: splitkey
   !----------------------------------------
 
   !------------------------------------------------
@@ -51,9 +52,11 @@ subroutine gyro_mpi_grid
   !
   !             NEW_COMM_1  and  NEW_COMM_2
   !
+  splitkey = i_proc
+
   call MPI_COMM_SPLIT(GYRO_COMM_WORLD,&
        i_group_1,& 
-       i_proc,&
+       splitkey,&
        NEW_COMM_1, &
        i_err)
   if (i_err /= 0) then
@@ -66,7 +69,7 @@ subroutine gyro_mpi_grid
 
   call MPI_COMM_SPLIT(GYRO_COMM_WORLD,&
        i_group_2,& 
-       i_proc,&
+       splitkey,&
        NEW_COMM_2, &
        i_err)
   if (i_err /= 0) then

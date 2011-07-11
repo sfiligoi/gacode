@@ -91,6 +91,7 @@ OBJECTS = gyro_globals.o \
           gyro_read_input_extra.o \
           gyro_read_experimental_profiles.o \
           gyro_read_restart.o \
+          gyro_set_exit_status.o \
           gyro_write_restart.o \
           gyro_rhs_total.o \
           gyro_select_methods.o \
@@ -101,6 +102,7 @@ OBJECTS = gyro_globals.o \
           gyro_tau_derivative.o \
           gyro_timestep_error.o \
           gyro_to_geo.o \
+          gyro_write_efficiency.o \
           gyro_write_initdata.o \
           gyro_write_input.o \
           gyro_write_precision.o \
@@ -153,12 +155,10 @@ OBJECTS = gyro_globals.o \
           get_delta_he.o \
           get_phi_squared.o \
           get_g_squared.o \
-          set_exit_status.o \
           write_step.o \
           write_radial_operators.o \
           write_freq.o \
           write_h.o \
-          write_efficiency.o \
           write_timing.o \
           write_error.o \
           write_matrix_stat.o \
