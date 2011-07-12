@@ -40,7 +40,7 @@ subroutine neo_check
   case(2)
      ! Do write files, do print stdout
   case default
-     call neo_error('INVALID: write_out_mode')
+     call neo_error('ERROR: (NEO) invalid write_out_mode')
      return
   end select
 
@@ -133,7 +133,7 @@ subroutine neo_check
      end if
 
      if(geo_ny <= 0) then
-        call neo_error('ERROR: (NEO) Geometry coefficients missing')
+        call neo_error('ERROR: (NEO) geometry coefficients missing')
         return
      endif
 
@@ -153,25 +153,25 @@ subroutine neo_check
   case (1) 
 
      if(n_radial > 1) then
-        call neo_error('ERROR: profile_model=1 must be run with n_radial = 1')
+        call neo_error('ERROR: (NEO) profile_model=1 must be run with n_radial = 1')
         return
      endif
      ir=1
      do is=1,n_species
         if(dens(is,ir) <= 0.0) then
-           call neo_error('ERROR: (NEO) Density must be positive')
+           call neo_error('ERROR: (NEO) density must be positive')
            return
         end if
         if(temp(is,ir) <= 0.0) then
-           call neo_error('ERROR: (NEO) Temperature must be positive')
+           call neo_error('ERROR: (NEO) temperature must be positive')
            return
         end if
         if(nu(is,ir) <= 0.0) then
-           call neo_error('ERROR: (NEO) Collision frequency must be positive')
+           call neo_error('ERROR: (NEO) collision frequency must be positive')
            return
         end if
         if(z(is) == 0.0) then
-           call neo_error('Charge must be non-zero')
+           call neo_error('ERROR: (NEO) charge must be non-zero')
            return
         end if
      enddo

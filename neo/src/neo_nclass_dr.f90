@@ -11,7 +11,7 @@ module neo_nclass_dr
   integer, parameter, private :: mx_mz = 18
   
   integer, parameter, private :: io_nc = 41
-  character(len=80),private :: runfile = 'theory_nclass.out'
+  character(len=80),private :: runfile = 'out.neo.theory_nclass'
   logical, private :: initialized = .false.
   real, dimension(:), allocatable :: pflux_nc, eflux_nc
   real, dimension(:), allocatable :: uparB_nc, vpol_nc, vtor_nc
@@ -319,15 +319,15 @@ contains
     ! check error flags
     if(iflag > 0) then
        if(iflag == 1) then
-          call neo_error('ERROR: NCLASS - k_order must be 2 or 3')
+          call neo_error('ERROR: (NEO) NCLASS - k_order must be 2 or 3')
        elseif(iflag == 2) then
-          call neo_error('ERROR: NCLASS - require 1<m_i<mx_mi')
+          call neo_error('ERROR: (NEO) NCLASS - require 1<m_i<mx_mi')
        else if(iflag == 3) then
-          call neo_error('ERROR: NCLASS - require 0<m_z<mx_mz')
+          call neo_error('ERROR: (NEO) NCLASS - require 0<m_z<mx_mz')
        else if(iflag == 4) then
-          call neo_error('ERROR: NCLASS - require 0<m_s<mx_ms')
+          call neo_error('ERROR: (NEO) NCLASS - require 0<m_s<mx_ms')
        else if(iflag == 5) then
-          call neo_error('ERROR: NCLASS - inversion of flow matrix failed')
+          call neo_error('ERROR: (NEO) NCLASS - inversion of flow matrix failed')
        endif
        return
     endif

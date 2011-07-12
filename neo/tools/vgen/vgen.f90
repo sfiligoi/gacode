@@ -263,7 +263,8 @@ program vgen
 
         ! Er calculation first
 
-        open(unit=1,file='ercomp.out',status='replace')
+        open(unit=1,file='out.vgen.ercomp',status='replace')
+        close(1)
         do i=2,EXPRO_n_exp-1
            if(erspecies_indx == 1) then
               grad_p = -(EXPRO_dlnnidr_new(i) + EXPRO_dlntidr(1,i))
@@ -276,6 +277,7 @@ program vgen
                 + EXPRO_vtor(erspecies_indx,i) * EXPRO_bp0(i) &
                 - EXPRO_vpol(erspecies_indx,i) * EXPRO_bt0(i)) &
                 / 1000
+           open(unit=1,file='out.vgen.ercomp',status='old',position='append')
            write(1,'(e16.8,$)') EXPRO_rho(i)
            write(1,'(e16.8,$)') grad_p * EXPRO_grad_r0(i) &
                 * EXPRO_ti(1,i)*temp_norm_fac &
@@ -283,9 +285,8 @@ program vgen
            write(1,'(e16.8,$)') EXPRO_vtor(erspecies_indx,i) * EXPRO_bp0(i)/1000
            write(1,'(e16.8,$)') -EXPRO_vpol(erspecies_indx,i) * EXPRO_bt0(i)/1000
            write(1,*) 
-
+           close(1)
         enddo
-        close(1)
 
         ! Compute omega and omega_deriv from newly-generated Er:
 
@@ -507,7 +508,7 @@ program vgen
   call bound_extrap(ya,yb,EXPRO_w0p,EXPRO_rmin,EXPRO_n_exp)
   EXPRO_w0p(1) = ya
   EXPRO_w0p(EXPRO_n_exp) = yb
-  open(unit=1,file='vgen.out',status='replace')
+  open(unit=1,file='out.vgen.out',status='replace')
   do i=1,EXPRO_n_exp
      write(1,'(e16.8,$)') EXPRO_rho(i)
      write(1,'(e16.8,$)') er_exp(i)

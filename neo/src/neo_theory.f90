@@ -19,7 +19,7 @@ module neo_theory
   real, private :: dens_ele, temp_ele, zeff
   integer, private :: ir_global, is_global, ietype
   integer, parameter, private :: io=40
-  character(len=80),private :: runfile = 'theory.out'
+  character(len=80),private :: runfile = 'out.neo.theory'
   logical, private :: initialized = .false.
 
 contains
