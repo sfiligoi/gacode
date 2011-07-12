@@ -51,14 +51,14 @@ contains
 
     if(write_out_mode > 0) then
        if(ir == 1) then
-          open(unit=io,file=trim(path)//'g_ene_x.out',status='replace')
+          open(unit=io,file=trim(path)//'out.neo.g_ene_x',status='replace')
           do je=1,ne
              write (io,'(e16.8,$)') ene(je)
           enddo
           close(io)
-          open(unit=io,file=trim(path)//'g_ene_y.out',status='replace')
+          open(unit=io,file=trim(path)//'out.neo.g_ene_y',status='replace')
        else
-          open(unit=io,file=trim(path)//'g_ene_y.out',status='old',position='append')
+          open(unit=io,file=trim(path)//'out.neo.g_ene_y',status='old',position='append')
        endif
        do is=1, n_species
           do ix=0, n_xi
@@ -129,7 +129,7 @@ contains
     enddo
 
     if(write_out_mode > 0) then
-       open(unit=io,file=trim(path)//'g_xi.out',status='replace')
+       open(unit=io,file=trim(path)//'out.neo.g_xi',status='replace')
        do is=1, n_species
           do it=1, n_theta
              do jx=1, nxi

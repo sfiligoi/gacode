@@ -37,7 +37,8 @@ subroutine vgen_newton(ia,ib,w0_newton)
   allocate(b(n))
   allocate(jac(n,n))
 
-  open(unit=1,file='vgenerror.out',status='replace')
+  open(unit=1,file='out.vgen.error',status='replace')
+  close(1)
   
   ! Get the initial guess x0 -- use the weak rotation limit (rotation_model=1)
   do i=1,n
@@ -89,7 +90,7 @@ subroutine vgen_newton(ia,ib,w0_newton)
      x0(:) = x0(:)+b(:)
      print *, 'iteration=',i_newt, 'error=', maxval(abs(b))
      !print *, x0(:)
-     open(unit=1,file='vgenerror.out',status='old',position='append')
+     open(unit=1,file='out.vgen.error',status='old',position='append')
      write(1,10) i_newt,maxval(abs(b)), x0(:)
      close(1)
      if(maxval(abs(b)) < tol_newt) exit

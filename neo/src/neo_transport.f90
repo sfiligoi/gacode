@@ -41,12 +41,12 @@ module neo_transport
 
   integer, parameter, private :: io_transp=1, io_phi=2, io_vel=3, &
        io_exp=4, io_gv=8, io_check=9
-  character(len=80),private :: runfile_transp = 'transport.out'
-  character(len=80),private :: runfile_phi    = 'phi.out'
-  character(len=80),private :: runfile_vel    = 'vel.out'
-  character(len=80),private :: runfile_exp    = 'transport_exp.out'
-  character(len=80),private :: runfile_gv     = 'transport_gv.out'
-  character(len=80),private :: runfile_check  = 'check.out'
+  character(len=80),private :: runfile_transp = 'out.neo.transport'
+  character(len=80),private :: runfile_phi    = 'out.neo.phi'
+  character(len=80),private :: runfile_vel    = 'out.neo.vel'
+  character(len=80),private :: runfile_exp    = 'out.neo.transport_exp'
+  character(len=80),private :: runfile_gv     = 'out.neo.transport_gv'
+  character(len=80),private :: runfile_check  = 'out.neo.check'
   logical, private :: initialized = .false.
   real, private :: check_sum
 
@@ -132,7 +132,7 @@ contains
        deallocate(vtor_th0)
 
        if(write_out_mode > 0) then
-          open(unit=io_check,file=trim(path)//'check.out',status='replace')
+          open(unit=io_check,file=trim(path)//runfile_check,status='replace')
           write (io_check,'(e16.8,$)') check_sum
           close(io_check)
        endif
