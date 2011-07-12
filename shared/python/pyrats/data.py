@@ -1425,7 +1425,7 @@ class NEOData:
         self.dirtree = os.walk(sim_directory)
         flag = 0
         for root, dirs, files in self.dirtree:
-            if ('grid.out' in files) and ('equil.out' in files) and ('theory.out' in files) and ('transport.out' in files) and ('transport_gv.out' in files):
+            if ('out.neo.grid' in files) and ('out.neo.equil' in files) and ('out.neo.theory' in files) and ('out.neo.transport' in files) and ('out.neo.transport_gv' in files):
                 flag = 1
                 self.toplot.append(root)
                 self.set_directory(root)
@@ -1674,7 +1674,7 @@ class NEOData:
 
         import numpy as np
 
-        filename = self.directory_name + '/' + fname + '.out'
+        filename = self.directory_name + '/out.neo.' + fname
         f = np.atleast_2d(np.loadtxt(file(filename)))
         return f
 
@@ -1708,7 +1708,7 @@ class NEOData:
 
         import numpy as np
 
-        filename = self.directory_name + '/grid.out'
+        filename = self.directory_name + '/out.neo.grid'
         grid = np.atleast_1d(np.loadtxt(file(filename)))
         self.n_species[self.directory_name] = grid[0]
         self.n_energy[self.directory_name] = grid[1]

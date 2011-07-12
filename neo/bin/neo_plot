@@ -36,7 +36,7 @@ then
    echo "             -v"
    echo "             Display verbose descriptors of variables."
    echo " "
-   echo "             -pl <var1> <var2> ... <varN>"
+   echo "             -p <var1> <var2> ... <varN>"
    echo "             Produce plots of N parameters given.  Default is GAMMA, Q,"
    echo "             1upar, and jboot.  This will create plots of all the"
    echo "             simulated data overlaid with the relevant theoretical"
@@ -46,9 +46,9 @@ then
    echo "EXAMPLES:"
    echo
    echo "             neo_plot -options"
-   echo "             neo_plot -pl"
-   echo "             neo_plot -l example_directory -pl"
-   echo "             neo_plot -dim 2 3 -pl"
+   echo "             neo_plot -p"
+   echo "             neo_plot -l example_directory -p"
+   echo "             neo_plot -dim 2 3 -p"
    echo
 fi
 
@@ -80,7 +80,7 @@ while [ $# -gt 0 ] ; do
 
   -dim) shift ; DIM_FLAG=1 ; N1=$1 ; shift ; N2=$1 ; shift ;;
 
-  -pl) shift ; PLOT_FLAG=1 ; PLOT_STRING="$1" ; shift ; break ;;
+  -p) shift ; PLOT_FLAG=1 ; PLOT_STRING="$1" ; shift ; break ;;
 
   -s) shift ; LEGEND_FLAG=0 ;;
 
