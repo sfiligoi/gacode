@@ -60,7 +60,7 @@ subroutine gyro_write_timedata
      ! POTENTIALS
 
      call write_distributed_complex(&
-          trim(path)//'u.out',&
+          trim(path)//'out.gyro.moment_u',&
           10,&
           size(phi_plot(:,:,1:n_field)),&
           phi_plot(:,:,1:n_field))
@@ -84,7 +84,7 @@ subroutine gyro_write_timedata
      ! DENSITY
 
      call write_distributed_complex(&
-          trim(path)//'moment_n.out',&
+          trim(path)//'out.gyro.moment_n',&
           10,&
           size(n_plot),&
           n_plot)
@@ -96,7 +96,7 @@ subroutine gyro_write_timedata
      ! ENERGY
 
      call write_distributed_complex(&
-          trim(path)//'moment_e.out',&
+          trim(path)//'out.gyro.moment_e',&
           10,&
           size(e_plot),&
           e_plot)
@@ -108,7 +108,7 @@ subroutine gyro_write_timedata
      ! PARALLEL VELOCITY
 
      call write_distributed_complex(&
-          trim(path)//'moment_v.out',&
+          trim(path)//'out.gyro.moment_v',&
           10,&
           size(v_plot),&
           v_plot)
@@ -122,7 +122,7 @@ subroutine gyro_write_timedata
   !
   if (field_r0_flag == 1) then
      call write_distributed_complex(&
-          trim(path)//'field_r0.out',&
+          trim(path)//'out.gyro.field_r0',&
           10,&
           size(field_r0_plot),&
           field_r0_plot)
@@ -132,7 +132,7 @@ subroutine gyro_write_timedata
   call proc_time(cp1)
   call gyro_kxky_spectrum
   call write_distributed_real(&
-       trim(path)//'kxkyspec.out',&
+       trim(path)//'out.gyro.kxkyspec',&
        10,&
        size(kxkyspec),&
        kxkyspec)
@@ -140,7 +140,7 @@ subroutine gyro_write_timedata
 
   if (i_proc == 0) then
      call write_local_real(&
-          trim(path)//'k_perp_squared.out',&
+          trim(path)//'out.gyro.k_perp_squared',&
           10,&
           size(k_perp_squared),&
           k_perp_squared)
@@ -249,28 +249,28 @@ subroutine gyro_write_timedata
      if (i_proc == 0 .and. lindiff_method > 1) then
 
         call write_local_real( &
-             trim(path)//'diff.out',10,size(diff),diff) 
+             trim(path)//'out.gyro.diff',10,size(diff),diff) 
         call write_local_real( &
-             trim(path)//'diff_i.out',10,size(diff_i),diff_i)
+             trim(path)//'out.gyro.diff_i',10,size(diff_i),diff_i)
         call write_local_real( &
-             trim(path)//'gbflux.out',10,size(gbflux),gbflux)
+             trim(path)//'out.gyro.gbflux',10,size(gbflux),gbflux)
         call write_local_real( &
-             trim(path)//'gbflux_mom.out',10,size(gbflux_mom),gbflux_mom)
+             trim(path)//'out.gyro.gbflux_mom',10,size(gbflux_mom),gbflux_mom)
         call write_local_real( &
-             trim(path)//'gbflux_i.out',10,size(gbflux_i),gbflux_i)
+             trim(path)//'out.gyro.gbflux_i',10,size(gbflux_i),gbflux_i)
 
         if (trapdiff_flag == 1) then
            call write_local_real( &
-                trim(path)//'diff_trapped.out',&
+                trim(path)//'out.gyro.diff_trapped',&
                 10,size(diff_trapped),diff_trapped)
            call write_local_real( &
-                trim(path)//'diff_i_trapped.out',&
+                trim(path)//'out.gyro.diff_i_trapped',&
                 10,size(diff_i_trapped),diff_i_trapped)
            call write_local_real( &
-                trim(path)//'gbflux_trapped.out',&
+                trim(path)//'out.gyro.gbflux_trapped',&
                 10,size(gbflux_trapped),gbflux_trapped)
            call write_local_real( &
-                trim(path)//'gbflux_i_trapped.out',&
+                trim(path)//'out.gyro.gbflux_i_trapped',&
                 10,size(gbflux_i_trapped),gbflux_i_trapped)
         endif
 
@@ -279,7 +279,7 @@ subroutine gyro_write_timedata
      if (lindiff_method >= 4) then
 
         call write_distributed_real(&
-             trim(path)//'diff_n.out',&
+             trim(path)//'out.gyro.diff_n',&
              10,&
              size(diff_n),&
              diff_n)
@@ -297,7 +297,7 @@ subroutine gyro_write_timedata
              g_squared_QL_n)
 
         call write_distributed_real(&
-             trim(path)//'gbflux_n.out',&
+             trim(path)//'out.gyro.gbflux_n',&
              10,&
              size(gbflux_n),&
              gbflux_n)
@@ -317,13 +317,13 @@ subroutine gyro_write_timedata
      call proc_time(cp7)
 
      call write_distributed_real(&
-          trim(path)//'diff_n.out',&
+          trim(path)//'out.gyro.diff_n',&
           10,&
           size(diff_n),&
           diff_n)
 
      call write_distributed_real(&
-          trim(path)//'gbflux_n.out',&
+          trim(path)//'out.gyro.gbflux_n',&
           10,&
           size(gbflux_n),&
           gbflux_n)
@@ -353,32 +353,32 @@ subroutine gyro_write_timedata
 
      if (i_proc == 0) then
 
-        call write_local_real(trim(path)//'field_rms.out',10,size(ave_phi),ave_phi)
+        call write_local_real(trim(path)//'out.gyro.field_rms',10,size(ave_phi),ave_phi)
 
         call write_local_real( &
-             trim(path)//'diff.out',10,size(diff),diff)
+             trim(path)//'out.gyro.diff',10,size(diff),diff)
         call write_local_real( &
-             trim(path)//'diff_i.out',10,size(diff_i),diff_i)
+             trim(path)//'out.gyro.diff_i',10,size(diff_i),diff_i)
 
         call write_local_real( &
-             trim(path)//'gbflux.out',10,size(gbflux),gbflux)
+             trim(path)//'out.gyro.gbflux',10,size(gbflux),gbflux)
         call write_local_real( &
-             trim(path)//'gbflux_mom.out',10,size(gbflux_mom),gbflux_mom)
+             trim(path)//'out.gyro.gbflux_mom',10,size(gbflux_mom),gbflux_mom)
         call write_local_real( &
-             trim(path)//'gbflux_i.out',10,size(gbflux_i),gbflux_i)
+             trim(path)//'out.gyro.gbflux_i',10,size(gbflux_i),gbflux_i)
 
         if (trapdiff_flag == 1) then
            call write_local_real( &
-                trim(path)//'diff_trapped.out',&
+                trim(path)//'out.gyro.diff_trapped',&
                 10,size(diff_trapped),diff_trapped)
            call write_local_real( &
-                trim(path)//'diff_i_trapped.out',&
+                trim(path)//'out.gyro.diff_i_trapped',&
                 10,size(diff_i_trapped),diff_i_trapped)
            call write_local_real( &
-                trim(path)//'gbflux_trapped.out',10,&
+                trim(path)//'out.gyro.gbflux_trapped',10,&
                 size(gbflux_trapped),gbflux_trapped)
            call write_local_real( &
-                trim(path)//'gbflux_i_trapped.out',10,&
+                trim(path)//'out.gyro.gbflux_i_trapped',10,&
                 size(gbflux_i_trapped),gbflux_i_trapped)
         endif
 
@@ -387,7 +387,7 @@ subroutine gyro_write_timedata
         a2(2,:) = a_fluxave(:)
         a2(3,:) = aperp_fluxave(:)
         call write_local_real( &
-             trim(path)//'zerobar.out',10,size(a2),a2)
+             trim(path)//'out.gyro.zerobar',10,size(a2),a2)
         deallocate(a2)
 
         allocate(a3(n_kinetic,4,n_x))
@@ -398,11 +398,11 @@ subroutine gyro_write_timedata
            a3(:,4,i) = source_e(:,i)
         enddo
         call write_local_real( &
-             trim(path)//'source.out',10,size(a3),a3)
+             trim(path)//'out.gyro.source',10,size(a3),a3)
         deallocate(a3)
 
         call write_local_real( &
-             trim(path)//'moment_zero.out',10,&
+             trim(path)//'out.gyro.moment_zero',10,&
              size(moments_zero_plot),moments_zero_plot)
 
      endif
@@ -423,7 +423,7 @@ subroutine gyro_write_timedata
      call gyro_entropy 
      if (i_proc == 0) then 
         call write_local_real(&
-             trim(path)//'entropy.out',10,size(entropy),entropy)
+             trim(path)//'out.gyro.entropy.out',10,size(entropy),entropy)
      endif
   endif
   !------------------------------------------------------------
@@ -434,7 +434,7 @@ subroutine gyro_write_timedata
   if (velocity_output_flag == 1) then
      call get_nonlinear_flux_velocity
      call write_distributed_real(&
-          trim(path)//'flux_velocity.out',&
+          trim(path)//'out.gyro.flux_velocity',&
           10,&
           size(nonlinear_flux_velocity),&
           nonlinear_flux_velocity)

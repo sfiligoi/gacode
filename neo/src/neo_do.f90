@@ -40,7 +40,7 @@ subroutine neo_do
   real :: stream, trap, rotkin
 
   integer, parameter :: io_neo=10, io_f=11
-  character(len=80)  :: runfile_f = 'f.out'
+  character(len=80)  :: runfile_f = 'out.neo.f'
 
   call neo_make_profiles
   if(error_status > 0) goto 100
@@ -159,7 +159,7 @@ subroutine neo_do
   ! Set-up the matrix equation: LHS radially local matrix
 
   if(write_out_mode > 0) then
-     open(unit=io_neo,file=trim(path)//'grid.out',status='replace')
+     open(unit=io_neo,file=trim(path)//'out.neo.grid',status='replace')
      write(io_neo,*) n_species
      write(io_neo,*) n_energy
      write(io_neo,*) n_xi

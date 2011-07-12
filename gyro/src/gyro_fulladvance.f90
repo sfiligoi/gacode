@@ -208,7 +208,7 @@ subroutine gyro_fulladvance
   ! Convergence check for single-n simulation:
   ! freq_err calculated in write_freq
   !  
-  if (freq_err < freq_tol) call set_exit_status('converged',2)
+  if (freq_err < freq_tol) call gyro_set_exit_status('converged',2)
   !----------------------------------------------------
 
   !--------------------------------------

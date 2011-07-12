@@ -6,14 +6,6 @@
 !
 ! NOTES:
 !  Use "gyro2gkv -h" to see summary of output.
-!   
-! REVISIONS
-! 17 Mar 04: jc
-!  Documented.
-! 10 May 06: jc
-!  Rewritten to read profiles_vugyro.out.
-! 13 Feb 07: ew
-!  Added flag -f to output full potentials
 !---------------------------------------------------------------
 
 program main

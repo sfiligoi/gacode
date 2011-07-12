@@ -32,7 +32,7 @@ if n <> 2:
 testdir=sys.argv[1]+'/'
 checkdir=os.environ.get('GACODE_ROOT')+'/neo/tools/input/'+testdir
 
-check1='check.out'
+check1='out.neo.check'
 #regress=sys.argv[1]+'/regress'
 regtext=''
 

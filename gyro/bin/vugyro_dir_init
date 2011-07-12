@@ -24,11 +24,11 @@ then
 fi
 
 # Generate list of valid simulation directories
-# (i.e., ones that contain profile_vugyro.out) 
+# (i.e., ones that contain out.gyro.profile) 
 touch ~/.vugyrorc
 for i in `cat ~/.tmp`
 do
-   if test -f $i/profile_vugyro.out
+   if test -f $i/out.gyro.profile
    then
       echo $i >> ~/.vugyrorc
    fi

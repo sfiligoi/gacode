@@ -11,7 +11,7 @@ pro read_profile_vugyro
   common GLOBAL
   common PROFILE_SIM_DATA
 
-  file = 'profile_vugyro.out'  
+  file = 'out.gyro.profile'  
 
   ;;------------------------------------------------
   ;; Want these set explicitly to integers

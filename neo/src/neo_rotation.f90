@@ -13,7 +13,7 @@ module neo_rotation
 
   logical, private :: initialized = .false.
   integer, private :: io_rot=50
-  character(len=80),private :: runfile = 'rotation.out'
+  character(len=80),private :: runfile = 'out.neo.rotation'
 
   contains
 
@@ -116,7 +116,7 @@ module neo_rotation
             enddo
             
             if(n > nmax) then
-               call neo_error('ERROR: Rotation density computation failed to converge')
+               call neo_error('ERROR: (NEO) Rotation density computation failed to converge')
                return
             endif
 

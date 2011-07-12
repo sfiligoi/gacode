@@ -113,9 +113,9 @@ subroutine gyro_do
   !
   call gyro_initialize_timestep
   !
-  ! Generate theta grid dimensions (no operators yet).
+  ! Generate poloidal (theta) grid dimensions (no operators yet).
   !
-  call make_theta_grid
+  call gyro_theta_grid
   !
   ! Parallel setup 
   !
@@ -165,7 +165,7 @@ subroutine gyro_do
   do i=1,n_x
      call gyro_to_geo(i)
      if (i_proc == 0 .and. i == ir_norm .and. debug_flag == 1) then
-        call GEO_write(trim(path)//'gyro_geo_diagnostic.out',1)
+        call GEO_write(trim(path)//'out.gyro.geo_diagnostic',1)
      endif
   enddo
   !
@@ -254,7 +254,7 @@ subroutine gyro_do
      !
      ! Write information about radial stencils:
      !
-     call write_radial_operators(trim(path)//'out.gyro.radial_op',1)
+     call gyro_write_radial_op(trim(path)//'out.gyro.radial_op',1)
      !
      ! Allocate most large arrays:
      !
@@ -294,9 +294,9 @@ subroutine gyro_do
   !
   if (io_method == 1) then
      call gyro_write_initdata(&
-          trim(path)//'profile_vugyro.out',&
+          trim(path)//'out.gyro.profile',&
           trim(path)//'out.gyro.units',&
-          trim(path)//'geometry_arrays.out',1)
+          trim(path)//'out.gyro.geometry_arrays',1)
   else
      call gyro_write_initdata_hdf5(trim(path)//'out.gyro.initdata.h5')
   endif
@@ -310,8 +310,8 @@ subroutine gyro_do
   ! 'gyro -t' (test) mode.
   !
   if (gyrotest_flag == 1) then
-     call write_efficiency(trim(path)//'out.gyro.efficiency',1)
-     call set_exit_status('test complete',2)
+     call gyro_write_efficiency(trim(path)//'out.gyro.efficiency',1)
+     call gyro_set_exit_status('test complete',2)
      return
   endif
   !------------------------------------------------------------
