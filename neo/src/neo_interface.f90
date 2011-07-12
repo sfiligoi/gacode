@@ -16,9 +16,9 @@ module neo_interface
   implicit none
 
   ! Input parameters (set to default values from python/neo_dict.py)
-  integer :: neo_n_energy_in = 15
-  integer :: neo_n_xi_in = 15
-  integer :: neo_n_theta_in = 15
+  integer :: neo_n_energy_in = 6
+  integer :: neo_n_xi_in = 17
+  integer :: neo_n_theta_in = 17
   integer :: neo_n_radial_in = 1
   real    :: neo_rmin_over_a_in = 0.5
   real    :: neo_rmin_over_a_2_in = 0.6

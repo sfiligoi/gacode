@@ -1,20 +1,24 @@
-N_SPECIES=4
-
-# Hydrogen
-Z_1=1
-MASS_1=0.5
+N_SPECIES=5
 
 # Deuterium
+Z_1=1
+MASS_1=1.0
+
+# Hydrogen
 Z_2=1
-MASS_2=1.0
+MASS_2=0.5
 
 # Carbon
 Z_3=6
 MASS_3=6.0
 
+# Deuterium
+Z_4=1
+MASS_4=1.0
+
 # Electrons
-Z_4=-1
-MASS_4=0.0002724486
+Z_5=-1
+MASS_5=0.0002724486
 #-----------------------------------------
 
 # NEO resolution 

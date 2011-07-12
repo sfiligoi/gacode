@@ -53,7 +53,7 @@ module neo_transport
 contains
 
   subroutine TRANSP_alloc(flag)
-    use neo_globals, only : n_species, n_theta, write_out_mode, profile_model, n_xi
+    use neo_globals, only : n_species, n_theta, write_out_mode, profile_model, n_xi, path
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
     integer :: is, ie 
@@ -89,16 +89,16 @@ contains
        check_sum=0.0
        
        if(write_out_mode > 0) then
-          open(unit=io_transp,file=runfile_transp,status='replace')
+          open(unit=io_transp,file=trim(path)//runfile_transp,status='replace')
           close(io_transp)
-          open(unit=io_phi,file=runfile_phi,status='replace')
+          open(unit=io_phi,file=trim(path)//runfile_phi,status='replace')
           close(io_phi)
-          open(unit=io_vel,file=runfile_vel,status='replace')
+          open(unit=io_vel,file=trim(path)//runfile_vel,status='replace')
           close(io_vel)
-          open(unit=io_gv,file=runfile_gv,status='replace')
+          open(unit=io_gv,file=trim(path)//runfile_gv,status='replace')
           close(io_gv)
           if(profile_model >= 2) then
-             open(unit=io_exp,file=runfile_exp,status='replace')
+             open(unit=io_exp,file=trim(path)//runfile_exp,status='replace')
              close(io_exp)
           endif
        endif
@@ -132,7 +132,7 @@ contains
        deallocate(vtor_th0)
 
        if(write_out_mode > 0) then
-          open(unit=io_check,file='check.out',status='replace')
+          open(unit=io_check,file=trim(path)//'check.out',status='replace')
           write (io_check,'(e16.8,$)') check_sum
           close(io_check)
        endif
@@ -521,7 +521,7 @@ contains
     if(write_out_mode == 0) return
 
     ! transport coefficients (normalized)
-    open(io_transp,file=runfile_transp,status='old',position='append')
+    open(io_transp,file=trim(path)//runfile_transp,status='old',position='append')
     write (io_transp,'(e16.8,$)') r(ir)
     write (io_transp,'(e16.8,$)') d_phi_sqavg
     write (io_transp,'(e16.8,$)') jpar
@@ -542,7 +542,7 @@ contains
     
     ! transport coefficients (units)
     if(profile_model >= 2) then
-       open(io_exp,file=runfile_exp,status='old',position='append')
+       open(io_exp,file=trim(path)//runfile_exp,status='old',position='append')
        write (io_exp,'(e16.8,$)') r(ir) * a_meters
        ! m
        write (io_exp,'(e16.8,$)') &
@@ -587,16 +587,16 @@ contains
     end if
     
     ! delta phi(theta)
-    open(io_phi,file=runfile_phi,status='old',position='append')
+    open(io_phi,file=trim(path)//runfile_phi,status='old',position='append')
     write(io_phi,*) d_phi(:)
     close(io_phi)
 
-    open(io_vel,file=runfile_vel,status='old',position='append')    
+    open(io_vel,file=trim(path)//runfile_vel,status='old',position='append')    
     write(io_vel,*) upar(:,:)
     close(io_vel)
 
     ! gyroviscosity transport coefficients
-    open(io_gv,file=runfile_gv,status='old',position='append')
+    open(io_gv,file=trim(path)//runfile_gv,status='old',position='append')
     write (io_gv,'(e16.8,$)') r(ir)
     do is=1, n_species
        write (io_gv,'(e16.8,$)') pflux_gv(is)

@@ -25,6 +25,7 @@ subroutine tgyro_comm_setup
 
   integer :: low
   integer :: high
+  integer :: splitkey
 
   integer, dimension(n_proc_global) :: colorvec
   integer, dimension(n_proc_global) :: workervec
@@ -165,9 +166,12 @@ subroutine tgyro_comm_setup
 
   ! Split MPI_COMM_WORLD into n_inst*n_worker different communicators.
 
+  ! Choose key for task ordering
+  splitkey = i_proc_global
+
   call MPI_COMM_SPLIT(MPI_COMM_WORLD,&
        color,&
-       i_proc_global,&
+       splitkey,&
        gyro_comm,&
        ierr)
   if (ierr /= 0) then
@@ -176,7 +180,7 @@ subroutine tgyro_comm_setup
 
   call MPI_COMM_SPLIT(MPI_COMM_WORLD,&
        adjoint,&
-       i_proc_global,&
+       splitkey,&
        gyro_adj,&
        ierr)
   if (ierr /= 0) then
@@ -185,7 +189,7 @@ subroutine tgyro_comm_setup
 
   call MPI_COMM_SPLIT(MPI_COMM_WORLD,&
        workeradj,&
-       i_proc_global,&
+       splitkey,&
        gyro_rad,&
        ierr)
   if (ierr /= 0) then

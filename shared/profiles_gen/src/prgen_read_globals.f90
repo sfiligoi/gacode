@@ -123,6 +123,7 @@ module prgen_read_globals
   real, dimension(:), allocatable :: onetwo_ene
   real, dimension(:), allocatable :: onetwo_psi
   real, dimension(:), allocatable :: onetwo_storqueb
+  real, dimension(:), allocatable :: onetwo_press
   real, dimension(:,:), allocatable :: onetwo_enion
   real, dimension(:,:), allocatable :: onetwo_enbeam
   real, dimension(:,:), allocatable :: onetwo_pressb

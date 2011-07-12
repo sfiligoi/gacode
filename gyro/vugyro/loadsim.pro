@@ -109,7 +109,7 @@ pro loadsim, input_dir
   n_geometry = n_elements(geometry_label)
 
   geometry = fltarr(n_geometry,n_fine,n_r)
-  read_array,geometry,'geometry_arrays.out',exists_geometry
+  read_array,geometry,'out.gyro.geometry_arrays',exists_geometry
   ;;-------------------------------------------------------;
 
   ;;-------------------------------------------------------
@@ -151,28 +151,28 @@ pro loadsim, input_dir
   ;; Read entropy
   ;;
   entropy = fltarr(n_kinetic,5,n_time)
-  read_array,entropy,'entropy.out',exists_entropy
+  read_array,entropy,'out.gyro.entropy',exists_entropy
   ;;-------------------------------------------------------
 
   ;;-------------------------------------------------------
   ;; Read velocity-space 
   
   f_nek = fltarr(n_energy,n_lambda,n_kinetic,n_field,2,n_n,n_time)
-  read_array,f_nek,'flux_velocity.out',exists_velocity
+  read_array,f_nek,'out.gyro.flux_velocity',exists_velocity
   ;;-------------------------------------------------------
 
   ;;-------------------------------------------------------
   ;; Read (kx,ky)=(kr,n) spectral data
   
   kxkyspec = fltarr(n_r,n_n,n_time)
-  read_array,kxkyspec,'kxkyspec.out',exists_kxkyspec
+  read_array,kxkyspec,'out.gyro.kxkyspec',exists_kxkyspec
   ;;-------------------------------------------------------
 
   ;;-------------------------------------------------------
   ;; Read fields at r=r0:
   ;;
   field_r0 = fltarr(2,field_r0_grid,n_field,n_n,n_time)
-  read_array,field_r0,'field_r0.out',exists_field_r0 
+  read_array,field_r0,'out.gyro.field_r0',exists_field_r0 
   ;;-------------------------------------------------------
 
   ;;-------------------------------------------------------
@@ -181,21 +181,21 @@ pro loadsim, input_dir
   if skip_large eq 0 then begin
 
      u = fltarr(2,n_theta_plot,n_r,n_field,n_n,n_time)
-     read_array,u,'u.out',exists_u
+     read_array,u,'out.gyro.moment_u',exists_u
      
      mom_n = fltarr(2,n_theta_plot,n_r,n_kinetic,n_n,n_time)
-     read_array,mom_n,'moment_n.out',exists_mom_n
+     read_array,mom_n,'out.gyro.moment_n',exists_mom_n
 
      mom_e = fltarr(2,n_theta_plot,n_r,n_kinetic,n_n,n_time)
-     read_array,mom_e,'moment_e.out',exists_mom_e
+     read_array,mom_e,'out.gyro.moment_e',exists_mom_e
 
      mom_v = fltarr(2,n_theta_plot,n_r,n_kinetic,n_n,n_time)
-     read_array,mom_v,'moment_v.out',exists_mom_v
+     read_array,mom_v,'out.gyro.moment_v.out',exists_mom_v
 
   endif else if skip_large eq 2 then begin
 
      u = fltarr(2,n_theta_plot,n_r,n_field,n_n,n_time)
-     read_array,u,'u.out',exists_u
+     read_array,u,'out.gyro.moment_u',exists_u
      exists_mom_n = 0
      exists_mom_e = 0
      exists_mom_v = 0
@@ -228,19 +228,19 @@ pro loadsim, input_dir
   n_moment = 2
 
   diff = fltarr(n_kinetic,n_field,n_moment,n_time)
-  read_array,diff,'diff.out',exists_diff
+  read_array,diff,'out.gyro.diff',exists_diff
 
   diff_i = fltarr(n_kinetic,n_field,n_moment,n_r,n_time)
-  read_array,diff_i,'diff_i.out',exists_diff_i
+  read_array,diff_i,'out.gyro.diff_i',exists_diff_i
 
   diff_i_trapped = fltarr(n_kinetic,n_field,2,n_r,n_time)
-  read_array,diff_i_trapped,'diff_i_trapped.out',exists_diff_i_t
+  read_array,diff_i_trapped,'out.gyro.diff_i_trapped',exists_diff_i_t
 
   diff_n = fltarr(n_kinetic,n_field,n_moment,n_n,n_time)
-  read_array,diff_n,'diff_n.out',exists_diff_n
+  read_array,diff_n,'out.gyro.diff_n',exists_diff_n
 
   diff_trapped = fltarr(n_kinetic,n_field,2,n_time)
-  read_array,diff_trapped,'diff_trapped.out',exists_diff_t
+  read_array,diff_trapped,'out.gyro.diff_trapped',exists_diff_t
 
   ;;------------------------------------------------
 
@@ -250,19 +250,19 @@ pro loadsim, input_dir
   p_moment=4
 
   gbflux = fltarr(n_kinetic,n_field,p_moment,n_time)
-  read_array,gbflux,'gbflux.out',exists_gbflux
+  read_array,gbflux,'out.gyro.gbflux',exists_gbflux
 
   gbflux_trapped = fltarr(n_kinetic,n_field,p_moment,n_time)
-  read_array,gbflux_trapped,'gbflux_trapped.out',exists_gbflux_trapped
+  read_array,gbflux_trapped,'out.gyro.gbflux_trapped',exists_gbflux_trapped
 
   gbflux_i = fltarr(n_kinetic,n_field,p_moment,n_r,n_time)
-  read_array,gbflux_i,'gbflux_i.out',exists_gbflux_i
+  read_array,gbflux_i,'out.gyro.gbflux_i',exists_gbflux_i
 
   gbflux_i_trapped = fltarr(n_kinetic,n_field,p_moment,n_r,n_time)
-  read_array,gbflux_i_trapped,'gbflux_i_trapped.out',exists_gbflux_i_trapped
+  read_array,gbflux_i_trapped,'out.gyro.gbflux_i_trapped',exists_gbflux_i_trapped
 
   gbflux_n = fltarr(n_kinetic,n_field,p_moment,n_n,n_time)
-  read_array,gbflux_n,'gbflux_n.out',exists_gbflux_n
+  read_array,gbflux_n,'out.gyro.gbflux_n',exists_gbflux_n
   ;;--------------------------------------------------------
 
   diff_QL_n = fltarr(n_kinetic,n_field,2,n_n,n_time)
@@ -286,14 +286,14 @@ pro loadsim, input_dir
   ;;--------------------------------------------
 
   source = fltarr(n_kinetic,4,n_r,n_time)
-  read_array,source,'source.out',exists_source
+  read_array,source,'out.gyro.source',exists_source
   
   ;; Need to DEPRECATE read of zm.out eventually
   zmoment = fltarr(n_r,n_kinetic,2,n_time)
-  read_array,zmoment,'zm.out',exists_zmoment
+  read_array,zmoment,'out.gyro.zm',exists_zmoment
   if (exists_zmoment eq 0) then begin
      zmoment = fltarr(n_r,n_kinetic,2,n_time)
-     read_array,zmoment,'moment_zero.out',exists_zmoment 
+     read_array,zmoment,'out.gyro.moment_zero',exists_zmoment 
   endif
 
   ;; Read various ballooning eigenmode files

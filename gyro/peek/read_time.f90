@@ -31,7 +31,7 @@ subroutine read_time(dir)
   allocate(gbflux_2(n_kinetic,n_field,4))
   allocate(gbflux_t(n_kinetic,n_field,4,0:n_time))
 
-  open(unit=1,file=trim(dir)//'gbflux.out')
+  open(unit=1,file=trim(dir)//'out.gyro.gbflux')
   do i=0,n_time
      read(1,'(100(1pe15.8,1x))') gbflux_t(:,:,:,i)
   enddo

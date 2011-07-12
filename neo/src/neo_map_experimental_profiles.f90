@@ -78,7 +78,7 @@ subroutine neo_map_experimental_profiles
   ! EAB diagnostic
   if(prof_check_flag) then
      if(write_out_mode > 0) then
-        open(unit=30,file='profcheckp.out',status='replace')
+        open(unit=30,file=trim(path)//'profcheckp.out',status='replace')
         do ir=1,n_grid_exp
            write (30,'(e16.8,$)') r_p(ir)
            write (30,'(e16.8,$)') b_unit_p(ir)
@@ -104,7 +104,7 @@ subroutine neo_map_experimental_profiles
         enddo
         close(30)
         
-        open(unit=30,file='profchecks.out',status='replace')
+        open(unit=30,file=trim(path)//'profchecks.out',status='replace')
         do ir=1,n_radial
            write (30,'(e16.8,$)') r(ir)
            write (30,'(e16.8,$)') b_unit(ir)
@@ -130,7 +130,7 @@ subroutine neo_map_experimental_profiles
         enddo
         close(30)
         
-        open(unit=30,file='profchecks_rhoN.out',status='replace')
+        open(unit=30,file=trim(path)//'profchecks_rhoN.out',status='replace')
         do ir=1,n_radial
            write (30,'(e16.8,$)') r(ir)
            write (30,'(e16.8,$)') rhoN_torflux(ir)

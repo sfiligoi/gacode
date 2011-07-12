@@ -1,9 +1,7 @@
 
  PPPL Linux PBS queue choices:
 
-[1] default  ( up to 192 cores )
-               1 - 2 cores   : sque or mque
-               3 - 192 cores : kestrel, 2-8 cores/nodes (heterogeneous)
+[1] dawson   ( up to 192 cores ) 8 cores/node
 [2] kite     ( up to 48 cores )  2 cores/node
 [3] kruskal  ( small partition: to 80 cores; large: 512 ) 8 cores/node
 

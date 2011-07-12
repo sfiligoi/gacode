@@ -124,7 +124,7 @@ subroutine prgen_map_iterdb
   vec(16,:) = flow_beam(:)
   vec(17,:) = flow_wall_exp(:)
   vec(18,:) = zmag(:)
-  vec(19,:) = 0.0
+  vec(19,:) = onetwo_press(:) ! Total pressure
   vec(20,:) = dpsi(:)
 
   !-----------------------------------------------------------------
@@ -137,6 +137,7 @@ subroutine prgen_map_iterdb
      ! Ti
      vec(36+i-1,:) = onetwo_ti(:)
   enddo
+  ! Beam ions
   do i=1,onetwo_nbion
      ! ni
      vec(31+i+onetwo_nion-1,:) = onetwo_enbeam(:,i)*1e-19
@@ -157,7 +158,7 @@ subroutine prgen_map_iterdb
   ! Carbon velocity at theta=0 ONLY in typical case
   ! of one main ion with Carbon impurity
 
-   allocate(vphi_carbon(nx))
+  allocate(vphi_carbon(nx))
 
   if (trim(onetwo_namei(1)) == 'c') then
      ! Negative sign to account for DIII-D convention
@@ -234,6 +235,20 @@ subroutine prgen_map_iterdb
 
   signpsi = abs(onetwo_psi(nx)-onetwo_psi(1))/&
        (onetwo_psi(nx)-onetwo_psi(1))
+
+  ! Ion reordering diagnostics
+
+  print '(a)','INFO: (prgen) Found these ion species'
+  do i=1,onetwo_nion+onetwo_nbion
+     ip = reorder_vec(i)
+     if (i <= 6) then
+        print '(t6,i2,1x,3(a))',&
+             i-1,trim(ion_name(i)),' -> ',trim(ion_name(ip))
+     else
+        print '(t6,i2,1x,3(a))',&
+             i-1,trim(ion_name(i)),' [unmapped]'
+     endif
+  enddo
 
 end subroutine prgen_map_iterdb
 

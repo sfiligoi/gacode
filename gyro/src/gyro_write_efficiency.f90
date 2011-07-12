@@ -1,16 +1,12 @@
 !------------------------------------------------------
-! write_efficiency.f90 [caller BigScience]
+! gyro_write_efficiency.f90 [caller BigScience]
 !
 ! PURPOSE:
 !  This subroutine computes and prints the parallel
 !  distribution efficiency.
-!
-! REVISIONS
-! 14 Jan 06: jc
-!  Created
 !------------------------------------------------------
 
-subroutine write_efficiency(datafile,io)
+subroutine gyro_write_efficiency(datafile,io)
 
   use gyro_globals
 
@@ -42,13 +38,13 @@ subroutine write_efficiency(datafile,io)
            msplit = 1+(n_stack*nv2-1)/n_n
            x_s = (n_stack*n_energy*n_lambda*n_n/real(i))/(msplit*n_n)
            if (x_s >= 0.99999) then
-              write(io,60) i,x_s*100,'***'
+              write(io,10) i,x_s*100,'***'
            else if (x_s >= 0.9) then
-              write(io,60) i,x_s*100,'**'
+              write(io,10) i,x_s*100,'**'
            else if (x_s >= 0.8) then
-              write(io,60) i,x_s*100,'*'
+              write(io,10) i,x_s*100,'*'
            else 
-              write(io,60) i,x_s*100
+              write(io,10) i,x_s*100
            endif
         enddo ! i
 
@@ -58,6 +54,6 @@ subroutine write_efficiency(datafile,io)
 
   end select
 
-60 format(t3,i6,t11,f6.2,1x,a)
+10 format(t3,i6,t11,f6.2,1x,a)
 
-end subroutine write_efficiency
+end subroutine gyro_write_efficiency
