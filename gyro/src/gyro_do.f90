@@ -113,9 +113,9 @@ subroutine gyro_do
   !
   call gyro_initialize_timestep
   !
-  ! Generate theta grid dimensions (no operators yet).
+  ! Generate poloidal (theta) grid dimensions (no operators yet).
   !
-  call make_theta_grid
+  call gyro_theta_grid
   !
   ! Parallel setup 
   !
@@ -254,7 +254,7 @@ subroutine gyro_do
      !
      ! Write information about radial stencils:
      !
-     call write_radial_operators(trim(path)//'out.gyro.radial_op',1)
+     call gyro_write_radial_op(trim(path)//'out.gyro.radial_op',1)
      !
      ! Allocate most large arrays:
      !
