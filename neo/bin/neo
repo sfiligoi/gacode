@@ -99,7 +99,7 @@ else
    SIMDIR=$SIMROOT/$LOCDIR
 fi
 
-RUN_FILE=$SIMDIR/run.out
+RUN_FILE=$SIMDIR/out.neo.run
 
 #============================================================
 # Check for inconsistent flags:
@@ -215,9 +215,9 @@ then
 
   #==========================================================
   # Version stamp:
-  echo `gacode_getversion` > VERSION_tag 
-  echo $GACODE_PLATFORM >> VERSION_tag
-  date >> VERSION_tag
+  echo `gacode_getversion` > out.neo.version 
+  echo $GACODE_PLATFORM >> out.neo.version
+  date >> out.neo.version
   #==========================================================
 
   $NEO_DIR/src/neo

@@ -23,11 +23,11 @@ subroutine gyro_mpi_grid
   ! Check for grid validity
   !
   if (modulo(n_proc,n_n) /= 0) then
-     call catch_error('ERROR: bad processor count.')
+     call catch_error('ERROR: (GYRO) bad processor count.')
   endif
   !
   if (linsolve_method == 3 .and. modulo(n_energy,n_proc) /= 0) then
-     call catch_error('ERROR: bad processor count for LINSOLVE_METHOD=3.')
+     call catch_error('ERROR: (GYRO) bad processor count for LINSOLVE_METHOD=3.')
   endif
   !------------------------------------------------
 
@@ -60,9 +60,7 @@ subroutine gyro_mpi_grid
        NEW_COMM_1, &
        i_err)
   if (i_err /= 0) then
-     print *,'NEW_COMM_1 creation status',i_err
-     call MPI_FINALIZE(i_err)
-     stop
+     call CATCH_ERROR('ERROR: (GYRO) NEW_COMM_1 not created')
   endif
 
   ! Local adjoint Group number
@@ -73,9 +71,7 @@ subroutine gyro_mpi_grid
        NEW_COMM_2, &
        i_err)
   if (i_err /= 0) then
-     print *,'NEW_COMM_2 creation status',i_err
-     call MPI_FINALIZE(i_err)
-     stop
+     call CATCH_ERROR('ERROR: (GYRO) NEW_COMM_2 not created')
   endif
   !
   call MPI_COMM_RANK(NEW_COMM_1,i_proc_1,i_err)
@@ -109,9 +105,7 @@ subroutine gyro_mpi_grid
           MUMPS_COMM, &
           i_err)
      if (i_err /= 0) then
-        print *,'MUMPS_COMM creation status',i_err
-        call MPI_FINALIZE(i_err)
-        stop
+        call CATCH_ERROR('ERROR: (GYRO) MUMPS_COMM not created')
      endif
   endif
   !--------------------------------------------------------------  

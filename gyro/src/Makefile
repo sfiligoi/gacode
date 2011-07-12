@@ -39,6 +39,7 @@ OBJECTS = gyro_globals.o \
           gyro_banana_uniform_taugrid.o \
           gyro_banana_s2lambda.o \
           gyro_bessel_operator.o \
+          gyro_bessel_stencils.o \
           gyro_bounce_points.o \
           gyro_build_sparse_ampere.o \
           gyro_build_sparse_poisson.o \
@@ -103,6 +104,8 @@ OBJECTS = gyro_globals.o \
           gyro_tau_derivative.o \
           gyro_theta_grid.o \
           gyro_timestep_error.o \
+          gyro_timestep_explicit.o \
+          gyro_timestep_implicit.o \
           gyro_to_geo.o \
           gyro_write_efficiency.o \
           gyro_write_initdata.o \
@@ -121,11 +124,8 @@ OBJECTS = gyro_globals.o \
           parallel_dim.o \
           alloc_add.o \
           allocate_profile_exp.o \
-          timestep_SSP_322.o \
-          timestep_explicit.o \
           make_maxwell_matrix.o \
           make_geometry_arrays.o \
-          make_gyro.o \
           make_initial_h.o \
           make_implicit_advect.o \
           make_electron_current.o \

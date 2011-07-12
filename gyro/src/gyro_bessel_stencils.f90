@@ -1,12 +1,12 @@
 !-----------------------------------------------------
-! make_gyro.f90 [caller: make_radial_operators]
+! gyro_bessel_stencils.f90 
 !
 ! PURPOSE:
 !  Driver for creation of (tau-space) gyroaverage 
 !  stencils w_gyro and w_rot_gyro (optionally).
 !---------------------------------------------
 
-subroutine make_gyro
+subroutine gyro_bessel_stencils
 
   use gyro_globals
   use gyro_pointers
@@ -164,7 +164,7 @@ subroutine make_gyro
   !----------------------------------------------------------
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[make_gyro done]'
+     print *,'[gyro_bessel_stencils done]'
   endif
 
-end subroutine make_gyro
+end subroutine gyro_bessel_stencils

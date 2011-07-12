@@ -74,13 +74,13 @@ subroutine gyro_fulladvance
 
      ! All species explicit
 
-     call timestep_explicit
+     call gyro_timestep_explicit
 
   case (2)
 
      ! Drift-kinetic electrons
 
-     call timestep_SSP_322
+     call gyro_timestep_implicit
 
   end select
   !------------------------------------------------------

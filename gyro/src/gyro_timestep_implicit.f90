@@ -1,5 +1,5 @@
 !-----------------------------------------------------------
-! timestep_SSP_322.f90 
+! gyro_timestep_implicit.f90 
 !
 ! PURPOSE:
 !  High level control of an IMEX RK step.
@@ -8,7 +8,7 @@
 !  This is the SSP2(3,2,2) IMEX Runge Kutta scheme.
 !-----------------------------------------------------------
 
-subroutine timestep_SSP_322
+subroutine gyro_timestep_implicit
 
   use gyro_globals
   use gyro_pointers
@@ -106,4 +106,4 @@ subroutine timestep_SSP_322
   deallocate(RHSI_2)
   deallocate(RHSI_3)
 
-end subroutine timestep_SSP_322
+end subroutine gyro_timestep_implicit

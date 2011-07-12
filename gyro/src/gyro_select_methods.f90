@@ -24,77 +24,77 @@ subroutine gyro_select_methods
   ! Grid offset checks:
   !
   if (n_x_offset /= 0 .and. boundary_method == 1) then
-     call catch_error('ERROR: RADIAL_GRID_OFFSET must be zero.')
+     call catch_error('ERROR: (GYRO) RADIAL_GRID_OFFSET must be zero.')
   endif
   if (abs(n_x_offset) > n_x/2-1) then
-     call catch_error('ERROR: RADIAL_GRID_OFFSET too large.')
+     call catch_error('ERROR: (GYRO) RADIAL_GRID_OFFSET too large.')
   endif
   !
   ! Study mode check:
   !
   if (n_study < 0 .or. n_study > n_n) then
-     call catch_error('ERROR: N_STUDY out of bounds.')
+     call catch_error('ERROR: (GYRO) N_STUDY out of bounds.')
   endif
   !
   ! Toroidal grid check:
   !
   if (nonlinear_flag == 1 .and. n_n < 2) then
-     call catch_error('ERROR: Nonlinear runs require TOROIDAL_GRID > 1.')
+     call catch_error('ERROR: (GYRO) Nonlinear runs require TOROIDAL_GRID > 1.')
   endif
   !
   ! Distribution function print check: 
   !
   if (dist_print == 1) then
      if  (n_n > 1) then
-        call catch_error('ERROR: DIST_PRINT_FLAG=1 requires TOROIDAL_GRID=1.')
+        call catch_error('ERROR: (GYRO) DIST_PRINT_FLAG=1 requires TOROIDAL_GRID=1.')
      endif
      if  (n_proc > 1) then
-        call catch_error('ERROR: DIST_PRINT_FLAG=1 on one processor only.')
+        call catch_error('ERROR: (GYRO) DIST_PRINT_FLAG=1 on one processor only.')
      endif
   endif
   !
   ! Radial grid check:
   !
   if (n_x < 4) then
-     call catch_error('ERROR: You must have RADIAL_GRID >= 4.')
+     call catch_error('ERROR: (GYRO) You must have RADIAL_GRID >= 4.')
   endif
   !
   ! Radial gyroaverage check:
   !
   if (m_gyro > n_x/2) then
-     call catch_error('ERROR: RADIAL_GYRO_BAND cannot exceed half RADIAL_GRID. ')
+     call catch_error('ERROR: (GYRO) RADIAL_GYRO_BAND cannot exceed half RADIAL_GRID. ')
   endif
   !
   ! Buffer check:
   !
   if (boundary_method == 2 .and. n_x-2*n_explicit_damp <= 0) then
-     call catch_error('ERROR: Buffers are too large (see EXPLICIT_DAMP_GRID).')
+     call catch_error('ERROR: (GYRO) Buffers are too large (see EXPLICIT_DAMP_GRID).')
   endif
   !
   ! Source check:
   !
   if (n_source <= 0) then
-     call catch_error('ERROR: require N_SOURCE > 0.')
+     call catch_error('ERROR: (GYRO) require N_SOURCE > 0.')
   endif
   !
   ! Check for validity of transfer diagnostic
   !
   if (boundary_method == 2 .and. nonlinear_transfer_flag == 1) then
-     call catch_error('ERROR: Need BOUNDARY_METHOD=1 for NONLINEAR_TRANSFER_FLAG=1.')
+     call catch_error('ERROR: (GYRO) Need BOUNDARY_METHOD=1 for NONLINEAR_TRANSFER_FLAG=1.')
   endif
   !
   ! Check for solver consistency
   !
   if (linsolve_method > 1 .and. nonlinear_flag == 1) then
-     call catch_error('ERROR: Can only have NONLINEAR_FLAG=1 with LINSOLVE_METHOD=1.')
+     call catch_error('ERROR: (GYRO) Can only have NONLINEAR_FLAG=1 with LINSOLVE_METHOD=1.')
   endif
   !
   if (radial_upwind < 0.0) then
-     call catch_error('ERROR: RADIAL_UPWIND must be > 0.')
+     call catch_error('ERROR: (GYRO) RADIAL_UPWIND must be > 0.')
   endif
   !
   if (nonlinear_transfer_flag == 1 .and. integrator_method > 1) then
-     call catch_error('ERROR: Need INTEGRATOR_METHOD=1 for nonlinear transfer diag.')
+     call catch_error('ERROR: (GYRO) Need INTEGRATOR_METHOD=1 for nonlinear transfer diag.')
   endif
   !---------------------------------------------------
 
@@ -246,17 +246,17 @@ subroutine gyro_select_methods
 
      if (n_field == 3 .and. collision_method /= 2) then
         call catch_error(&
-             'ERROR: This collision model incompatible with delta B_parallel')
+             'ERROR: (GYRO) This collision model incompatible with delta B_parallel')
      endif
 
      if (n_pass < 4) then
         call catch_error(&
-             'ERROR: N_PASS >= 4 required for collisions.')
+             'ERROR: (GYRO) N_PASS >= 4 required for collisions.')
      endif
 
      if (variable_egrid_flag == 1) then
         call catch_error(&
-             'ERROR: Collisions not supported with variable energy grid')
+             'ERROR: (GYRO) Collisions not supported with variable energy grid')
      endif
 
   endif

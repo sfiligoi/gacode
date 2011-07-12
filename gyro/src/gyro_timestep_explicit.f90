@@ -1,11 +1,11 @@
 !-----------------------------------------------------------
-! timestep_explicit.f90 
+! gyro_timestep_explicit.f90 
 !
 ! PURPOSE:
 !  Explicit integrators.
 !-----------------------------------------------------------
 
-subroutine timestep_explicit
+subroutine gyro_timestep_explicit
 
   use gyro_globals
   use gyro_pointers
@@ -101,4 +101,4 @@ subroutine timestep_explicit
   deallocate(RHSE_2)
   deallocate(RHSE_3)
 
-end subroutine timestep_explicit
+end subroutine gyro_timestep_explicit

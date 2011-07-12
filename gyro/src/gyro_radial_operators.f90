@@ -232,7 +232,7 @@ subroutine gyro_radial_operators
   !-----------------------------------
   ! Find tau-space gyroaverage:
   !
-  call make_gyro
+  call gyro_bessel_stencils
   !-----------------------------------
 
   if (debug_flag == 1 .and. i_proc == 0) then
