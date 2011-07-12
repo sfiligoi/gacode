@@ -191,30 +191,6 @@ then
    echo "              Default: 0.0 (No third ion species)"
    echo
    echo " "
-   echo "Plotting Options"
-   echo
-   echo "              -plot <directory=.> <dim1=1> <dim2=1> <par1> <par2> ... <parN>"
-   echo "              WARNING: This command requires Python 2.7 and matplotlib."
-   echo "              Specify the directory containing file 'input.profiles'.  Then,"
-   echo "              optionally, specify the number of plots in the x and y direction"
-   echo "              respectively in each window.  Then specify the parameters to be"
-   echo "              plotted.  Type -options after <directory> to see available"
-   echo "              parameters.  If you type '-c' right after '-plot' and then"
-   echo "              specify two directories, you can see a comparison of the"
-   echo "              requested parameters on the same plot.  If no arguments are given"
-   echo "              after '-plot', the default is to create a 2x2 plot of ne, ni_1,"
-   echo "              Te, and Ti_1 from the current directory."
-   echo
-   echo "              -fluxplot <directory=.> <type=-c> <r1=1> <r2> <N>"
-   echo "              WARNING: This command requires Python 2.7 and matplotlib."
-   echo "              Specify directory containing file 'input.profiles.geo' and"
-   echo "              'input.profiles'.  Then specify type of flux plot: -m for Miller-"
-   echo "              type equilibrium, -f for Fourier series equilibrium, and -c to"
-   echo "              compare the two fits.  Then specify desired radius from 0 to 1."
-   echo "              Optionally, specify another radius from 0 to 1 and an integer"
-   echo "              to see fits of N radii between the two given radii."
-   echo
-   echo " "
    echo "EXAMPLES:"
    echo " "
    echo "    profiles_gen -i myfile" 
@@ -226,8 +202,6 @@ then
    echo "    profiles_gen -tok NSTX -year 07 -shot 124948A01 -time 250 -avg 2"
    echo "    profiles_gen -i input.profiles -vgen_e 2 -vgen_v 1 -vgen_in DC -vgen_x 2"
    echo "    profiles_gen -i input.profiles -vgen_e 2 -vgen_v 1 -vgen_in HDC -vgen_x 3"
-   echo "    profiles_gen -plot -c ~/treg01 ~/ped69-f1v5r4n"
-   echo "    profiles_gen -fluxplot . -c 0 1 40"
    echo 
    echo " (1) Typical usage for DIII-D plasmas with iterdbfile only (2 steps)"
    echo "     NEO will generate Er and all velocities:"
@@ -279,8 +253,6 @@ VGEN_V=2
 VGEN_X=2
 VGEN_FLAG=0
 MODINP_FLAG=0
-PLOT_FLAG=0
-FLUX_FLAG=0
 #=============================================================
 
 #=============================================================
@@ -371,45 +343,11 @@ while [ $# -gt 0 ] ; do
 
   -modhelp) shift ; MODINP_ARGS="$MODINP_ARGS --modhelp";;
 
-  -plot) shift ; PLOT_FLAG=1 ; PLOT_STRING="$1" ; shift ; break ;;
-
-  -fluxplot) shift ; FLUX_FLAG=1 ; FLUX_DIR=$1 ; shift ; FTYPE="$1" ; shift ; FMIN=$1 ; shift ; break ;;
-
   esac
   shift
 done
 
 #=============================================================
-
-#==============================================================================
-# Create requested plots:
-#
-if [ $PLOT_FLAG -eq 1 ]
-then
-  while [ $# -gt 0 ]
-  do
-    PLOT_STRING="$PLOT_STRING $1"
-    shift
-  done
-  python ~/gacode/shared/python/profiles_gen/plot.py $PLOT_STRING &
-  exit 0
-fi
-
-if [ $FLUX_FLAG -eq 1 ]
-then
-  if [ $# -gt 0 ]
-  then
-    FMAX=$1
-    FNUM=$2
-    python ~/gacode/shared/python/profiles_gen/fluxplot.py $FLUX_DIR $FTYPE $FMIN $FMAX $FNUM &
-    exit 0
-  else
-    python ~/gacode/shared/python/profiles_gen/fluxplot.py $FLUX_DIR $FTYPE $FMIN &
-    exit 0
-  fi
-fi
-
-#==============================================================================
 
 #=============================================================
 # Call transp2gyro if specified and pass it the iterdb args
