@@ -65,7 +65,7 @@ then
 fi
 
 # What if $DIR is not a simdir?
-if [ ! -f "$DIR/profile_vugyro.out" ] # What dir really a directory
+if [ ! -f "$DIR/out.gyro.profile" ] # What dir really a directory
 then
    echo "Not an acceptable directory; type 'gyro2gkv' for help."
    exit 1
@@ -82,28 +82,28 @@ echo "* Output : $OUTFILE"
 
 echo "$FULL" > f_flag
 
-if [ -f "$DIR/u.out" ] 
+if [ -f "$DIR/out.gyro.moment_u" ] 
 then
    echo "1" > exists_u
 else
    echo "0" > exists_u
 fi
 
-if [ -f "$DIR/moment_n.out" ] 
+if [ -f "$DIR/out.gyro.moment_n" ] 
 then
    echo "1" > exists_n
 else
    echo "0" > exists_n
 fi
 
-if [ -f "$DIR/moment_e.out" ] 
+if [ -f "$DIR/out.gyro.moment_e" ] 
 then
    echo "1" > exists_e
 else
    echo "0" > exists_e
 fi
 
-if [ -f "$DIR/diff_i.out" ] 
+if [ -f "$DIR/out.gyro.diff_i" ] 
 then
    echo "1" > exists_diff_i
 else
@@ -114,7 +114,7 @@ cat $GYRO_DIR/VERSION > temp
 echo $DIR >> temp
 echo $OUTFILE >> temp
 
-cp $DIR/run.out `basename $DIR`.run.out
+cp $DIR/out.gyro.run `basename $DIR`.out.gyro.run
 
 $EXEC
 
