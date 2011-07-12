@@ -5,10 +5,10 @@ except ImportError:
     print "This command requires matplotlib.  Please install matplotlib:"
     print "http://matplotlib.sourceforge.net/"
     sys.exit()
-sys.path.append('~/gacode/shared/python/profiles_gen')
-from profiles_genData import profiles_genData
 from math import *
 from os.path import expanduser, expandvars
+sys.path.append(expanduser(expandvars('~/gacode/shared/python/profiles_gen')))
+from profiles_genData import profiles_genData
 
 verbose = False
 if int(sys.argv[5]) != 0:
