@@ -30,6 +30,8 @@ subroutine tgyro_neo_map
 !     neo_n_energy_in = 6
      neo_n_energy_in = 5
   endif
+  neo_n_xi_in = 11
+  neo_n_theta_in = 11
 
   ! Geometry
   neo_write_out_mode_in    = 1
