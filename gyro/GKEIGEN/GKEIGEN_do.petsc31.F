@@ -637,7 +637,7 @@
       EndIf
 
       write(gkeigen_message,80) n_converged
-      call set_exit_status(gkeigen_message,2)
+      call gyro_set_exit_status(gkeigen_message,2)
 
       call VecDestroy(dummy_vec,ierr)
       call MatDestroy(time_derivative_matrix,ierr)
