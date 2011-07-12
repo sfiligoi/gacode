@@ -1,4 +1,4 @@
-subroutine make_theta_grid
+subroutine gyro_theta_grid
 
   use gyro_globals
   use math_constants
@@ -63,7 +63,7 @@ subroutine make_theta_grid
   n_rbf = n_stack*n_lambda
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[make_theta_grid done]'
+     print *,'[gyro_theta_grid done]'
   endif
 
-end subroutine make_theta_grid
+end subroutine gyro_theta_grid

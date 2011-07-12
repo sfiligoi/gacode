@@ -74,6 +74,7 @@ OBJECTS = gyro_globals.o \
           gyro_kxky_spectrum.o \
           gyro_lambda_grid.o \
           gyro_map_experimental_profiles.o \
+          gyro_message_routines.o \
           gyro_moments_plot.o \
           gyro_moments_plot_wedge.o \
           gyro_mpi_grid.o \
@@ -100,12 +101,14 @@ OBJECTS = gyro_globals.o \
           gyro_set_pointers.o \
           gyro_set_pointer_dim.o \
           gyro_tau_derivative.o \
+          gyro_theta_grid.o \
           gyro_timestep_error.o \
           gyro_to_geo.o \
           gyro_write_efficiency.o \
           gyro_write_initdata.o \
           gyro_write_input.o \
           gyro_write_precision.o \
+          gyro_write_radial_op.o \
           gyro_write_timedata.o \
           sparse_solve_umfpack.o \
           sparse_solve_mumps.o \
@@ -114,9 +117,6 @@ OBJECTS = gyro_globals.o \
 	  get_vel_sum_aperp.o \
           catch_error.o \
           catch_blowup.o \
-          send_message_real.o \
-          send_message.o \
-          send_line.o \
           catch_halt_signal.o \
           parallel_dim.o \
           alloc_add.o \
@@ -124,7 +124,6 @@ OBJECTS = gyro_globals.o \
           timestep_SSP_322.o \
           timestep_explicit.o \
           make_maxwell_matrix.o \
-          make_theta_grid.o \
           make_geometry_arrays.o \
           make_gyro.o \
           make_initial_h.o \
@@ -156,7 +155,6 @@ OBJECTS = gyro_globals.o \
           get_phi_squared.o \
           get_g_squared.o \
           write_step.o \
-          write_radial_operators.o \
           write_freq.o \
           write_h.o \
           write_timing.o \

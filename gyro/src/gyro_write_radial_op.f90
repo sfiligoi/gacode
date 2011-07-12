@@ -1,11 +1,11 @@
 !------------------------------------------------------
-! write_radial_operators.f90 [caller gyro_write_master]
+! gyro_write_radial_op.f90
 !
 ! PURPOSE:
 !  Manage output for selected radial operators.
 !------------------------------------------------------
 
-subroutine write_radial_operators(datafile,io)
+subroutine gyro_write_radial_op(datafile,io)
 
   use gyro_globals
 
@@ -55,7 +55,7 @@ subroutine write_radial_operators(datafile,io)
   end select
 
   if (i_proc == 0 .and. debug_flag == 1) then
-     print *,'[write_radial_operators called]'
+     print *,'[gyro_write_radial_op called]'
   endif
 
-end subroutine write_radial_operators
+end subroutine gyro_write_radial_op
