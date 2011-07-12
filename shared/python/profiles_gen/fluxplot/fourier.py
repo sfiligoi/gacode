@@ -5,7 +5,7 @@ except ImportError:
     print "This command requires matplotlib.  Please install matplotlib:"
     print "http://matplotlib.sourceforge.net/"
     sys.exit()
-sys.path.append('/home/buuck/gacode/shared/python/profiles_gen')
+sys.path.append('~/gacode/shared/python/profiles_gen')
 from profiles_genData import profiles_genData
 from math import *
 from os.path import expanduser, expandvars
