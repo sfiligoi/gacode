@@ -31,6 +31,18 @@ EXTRA_DIST = \
   tglf_setup_geometry.f90 \
   tglf_TM.f90
 
+lib_LTLIBRARIES = libgacodestglf.la
+
+libgacodestglf_la_SOURCES =
+libgacodestglf_la_LIBADD = libgacodetglf_src.la
+
+if HAVE_MPI
+bin_PROGRAMS     = tglf
+tglf_SOURCES 	= tglf.f90
+tglf_LDADD  	= libgacodestglf.la \
+		  @LAPACK_LIBS@ @BLAS_LIBS@
+endif
+
 
 
 if TX_FORTRAN_MODNAMEISCAP
@@ -46,4 +58,4 @@ endif
 AM_LIBTOOLFLAGS = --tag=FC
 AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG)
 AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG)
-CLEANFILES = *.mod *.o *.lo *.lst *.la
+CLEANFILES = *.mod *.o *.lo *.lst *.la tglf

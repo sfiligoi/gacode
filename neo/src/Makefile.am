@@ -44,14 +44,27 @@ libgacodeneo_src_la_SOURCES = \
 
 
 
+lib_LTLIBRARIES = libgacodesneo.la
+
+
+libgacodesneo_la_SOURCES =
+libgacodesneo_la_LIBADD = libgacodeneo_src.la
+
+bin_PROGRAMS     = neo
+neo_SOURCES = neo.f90
+
+neo_LDADD  = libgacodesneo.la \
+  $(top_builddir)/neo/nclass/libgacodenclass.la \
+  $(top_builddir)/shared/libgacodesshared.la \
+ @FFTW_LIBS@  @LAPACK_LIBS@  @BLAS_LIBS@
 
  
 
 # To get to work with optimization reducing compiler wrappers
 #
 AM_LIBTOOLFLAGS = --tag=FC
-AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(FFTW_INC) $(shared_includes) 
-AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(FFTW_INC) $(shared_includes) 
+AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(FFTW_INC) $(shared_includes) -I.
+AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(FFTW_INC) $(shared_includes) -I.
 
 
 if TX_FORTRAN_MODNAMEISCAP
@@ -64,6 +77,6 @@ nodist_include_HEADERS = neo_interface.$(TX_FORTRAN_MODEXT)
 neo_interface.$(TX_FORTRAN_MODEXT): neo_interface.f90
 endif
 
-CLEANFILES = *.mod *.f90 *.lo *.lst *.la
+CLEANFILES = *.mod *.f90 *.lo *.lst *.la neo
 
 

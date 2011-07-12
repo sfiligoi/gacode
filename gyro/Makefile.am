@@ -12,7 +12,7 @@
 bin_PROGRAMS=gyro
 lib_LTLIBRARIES = libgacodesgyro.la
 
-SUBDIRS	= BLEND TRANSPOSE SSUB src tools bin vugyro GKEIGEN vshdf5 peek
+SUBDIRS	= BLEND TRANSPOSE SSUB tools bin vugyro src GKEIGEN vshdf5 peek 
 IOINC =@HDF5_INC@ @NETCDF_INC@
 
 if USE_FCIOWRAPPERS

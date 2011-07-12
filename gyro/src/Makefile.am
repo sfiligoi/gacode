@@ -126,6 +126,7 @@ libgacodegyro_SRC_la_SOURCES = \
 	gyro_gbflux.f90 \
 	gyro_initialize_arrays.f90 \
 	gyro_radial_operators.f90 \
+  gyro_write_radial_op.f90 \
 	gyro_moments_plot.f90 \
   gyro_moments_plot_wedge.f90 \
 	gyro_select_methods.f90 \
@@ -141,9 +142,7 @@ libgacodegyro_SRC_la_SOURCES = \
 	gyro_initialize_timestep.f90 \
 	catch_error.f90 \
 	catch_blowup.f90 \
-	send_message_real.f90 \
-	send_message.f90 \
-	send_line.f90 \
+	gyro_message_routines.f90 \
 	catch_halt_signal.f90 \
 	parallel_dim.f90 \
 	alloc_add.f90 \
@@ -152,7 +151,7 @@ libgacodegyro_SRC_la_SOURCES = \
 	timestep_explicit.f90 \
   gyro_maxwell_private.f90 \
 	make_maxwell_matrix.f90 \
-	make_theta_grid.f90 \
+	gyro_theta_grid.f90 \
 	make_geometry_arrays.f90 \
 	make_gyro.f90 \
 	make_initial_h.f90 \
@@ -188,12 +187,12 @@ libgacodegyro_SRC_la_SOURCES = \
   $(theNlSetup) \
 	$(theDoNlfftP) \
 	$(theReadRestart) \
-	set_exit_status.f90 \
+	gyro_set_exit_status.f90 \
 	write_step.f90 \
-	write_radial_operators.f90 \
+	gyro_radial_operators.f90 \
 	write_freq.f90 \
 	write_h.f90 \
-	write_efficiency.f90 \
+	gyro_write_efficiency.f90 \
 	write_timing.f90 \
 	$(theWriteRestart) \
 	write_error.f90 \
