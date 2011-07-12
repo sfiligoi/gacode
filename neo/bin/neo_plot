@@ -25,7 +25,7 @@ then
    echo " "
    echo "             -options"
    echo "             Display all possible simulated parameters to plot in"
-   echo "             in current directory."
+   echo "             current directory."
    echo " "
    echo "             -dim <integer> <integer>"
    echo "             Set x and y dimensions for plotting windows, respectively."
@@ -59,7 +59,6 @@ fi
 PLOT_DIR=$PWD
 N1=1
 N2=1
-LOAD_FLAG=0
 # Plot mode flags
 PLOT_FLAG=0
 OPTIONS_FLAG=0

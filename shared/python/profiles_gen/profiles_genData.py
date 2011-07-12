@@ -137,18 +137,22 @@ class profiles_genData:
 
         self.data = self.read_data()
         for k in self.data.keys():
+            flag = False
             temp = list(k)
             for i in range(len(temp)):
                 if temp[i] == '#':
                     del temp[i]
+                    flag = True
                     break
             for i in range(len(temp)):
                 if temp[i] == '(':
                     if temp[i-1] != ' ':
                         temp.insert(i, ' ')
+                        flag = True
                         break
-            self.data[''.join(temp)] = self.data[k]
-            self.data.pop(k)
+            if flag:
+                self.data[''.join(temp)] = self.data[k]
+                self.data.pop(k)
 
     def compute_mtypeeq(self, r):
 
@@ -214,7 +218,7 @@ class profiles_genData:
 
     #-------------------------------------------- #
     # Plotting functions
-    def plot(self, var, n1=1, n2=1, col='k'):
+    def plot(self, var, n1, n2):
         """Plots requested data using matplotlib.
 
         var is the requested variable to be plotted,
@@ -224,6 +228,10 @@ class profiles_genData:
         Examples: self.plot(rmaj, 2, 2)"""
 
         import matplotlib.pyplot as plt
+        import matplotlib as mpl
+
+        mpl.rcParams['figure.subplot.wspace'] = .3
+        mpl.rcParams['figure.subplot.hspace'] = .4
 
         if self.plotcounter > (n1 * n2):
             self.plotcounter = 1
@@ -246,30 +254,17 @@ class profiles_genData:
             ylab = u'\u03c90 (1/s)'
         ax.set_ylabel(ylab)
         ax.set_title(ylab.split()[0] + u' vs. \u03c1')
-        ax.plot(self.data['rho (-)'], self.data[toplot], col, label=self.directory_name)
-        ax.legend()
+        ax.plot(self.data['rho (-)'], self.data[toplot])
         self.plotcounter = self.plotcounter + 1
 
 
-    def fplot(self, typ, l, min1, max1=0, n=1):
-        """Creates plots of flux surfaces of requested type at requested intervals.
+    def millerplot(self, inner, outer, n, verbose):
+        """Creates plots of Miller-type equilibrium flux surfaces.
 
-        typ is the type of plot: -m for Miller type, -f for Fourier, or -c for
-        a comparison of the two.
-        
-        l is the number of arguments from the command line, which determines
-        whether the user wants only one line plotted or many.
-        
-        min1 is the minimum radius to plot if there are multiple radii being
-        plotted, and is the sole plotted radius if there is just one desired.
-        
-        max1 gives the maximum radius for a plot of multiple radii.
-        
-        n gives the number of radii to be plotted between min1 and max1.
-
-        Examples: self.fplot(-m, 0, 1, 15)"""
-    
-#PRELIMINARIES
+        This method will plot n flux surfaces between inner and outer.  If
+        verbose is set to true, and n > 1, then the legend will display the
+        locations of each flux surface.
+        """
         import matplotlib.pyplot as plt
         import matplotlib as mpl
         import sys
@@ -278,160 +273,171 @@ class profiles_genData:
         mpl.rcParams['font.size'] = 10.0
         mpl.rcParams['figure.subplot.right'] = .7
         mteq = []
+        bigcoords = [-100, 100]
+        midplane = [0, 0]
+
+        #Produces a matplotlib figure object and creates the labels.
+        fig = plt.figure(self.fignum)
+        self.fignum = self.fignum + 1
+        ax = fig.add_subplot(111, aspect='equal')
+        ax.set_ylabel('Z (m)')
+        ax.set_xlabel('R (m)')
+        ax.axhline(c='k', ls='--')
+        #Increments through from min to max and creates plots at each
+        #radius.
+        inc = self.match(inner, self.data['rho (-)'])
+        step = (self.match(outer, self.data['rho (-)']) - inc)/n
+        count = 0
+        while inc < self.match(outer, self.data['rho (-)']):
+            mteq.append(self.compute_mtypeeq(float(self.data['rho (-)'][inc])))
+            r = mteq[0][0]
+            z = mteq[0][1]
+            rmaj = float(mteq[0][2])
+            zmag = float(mteq.pop()[3])
+            ax.plot(r, z, 'b', label='Miller surface at '+str(self.data['rho (-)'][inc]))
+            count = count + math.modf(step)[0]
+            if count > 1:
+                count = math.modf(count)[0]
+                inc = inc + math.modf(step)[1] + 1
+            else:
+                inc = inc + math.modf(step)[1]
+        #Sets limits, just as above.
+        if n == 1:
+            ax.set_title(u'Flux Surface at \u03c1 = ' + str(self.data['rho (-)'][self.match(inner, self.data['rho (-)'])]))
+            ax.axhline(y=self.get('zmag (m)')[self.match(inner,self.get('rho (-)'))], c='m')
+            ax.axvline(x=self.get('rmaj (m)')[self.match(inner, self.get('rho (-)'))], c='m')
+            ax.legend( ('Outboard Midplane', 'Miller-type', 'Flux surface center'), loc=2,bbox_to_anchor=(1,1))
+        elif verbose:
+            ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(inner) + u' and \u03c1 = ' + str(outer) + '.')
+            ax.legend(loc=2,bbox_to_anchor=(1,1))
+        else:
+            ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(inner) + u' and \u03c1 = ' + str(outer) + '.')
+            ax.legend( ('Outboard Midplane', 'Miller-type'), loc=2,bbox_to_anchor=(1,1))
+        aspect = max((max(z) - min(z)), (max(r) - min(r))) + .5
+        ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
+        ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
+
+    def fourierplot(self, inner, outer, n, verbose):
+        """Creates plots of Fourier-type equilibrium flux surfaces.
+
+        This method will plot n flux surfaces between inner and outer.  If
+        verbose is set to true, and n > 1, then the legend will display the
+        locations of each flux surface.
+        """
+
+        import matplotlib.pyplot as plt
+        import matplotlib as mpl
+        import sys
+        import math
+
+        mpl.rcParams['font.size'] = 10.0
+        mpl.rcParams['figure.subplot.right'] = .7
         feq = []
         lines = []
         bigcoords = [-100, 100]
         midplane = [0, 0]
 
         #Produces a matplotlib figure object and creates the labels.
-        fig = plt.figure(1)
+        fig = plt.figure(self.fignum)
+        self.fignum = self.fignum + 1
         ax = fig.add_subplot(111, aspect='equal')
         ax.set_ylabel('Z (m)')
         ax.set_xlabel('R (m)')
-        ax.plot(bigcoords, midplane, 'k--')
-
-#SECTION 1: Miller-type
-        #Checks to see which type of plot is desired: Miller-type, Fourier,
-        #or acomparison of the two.
-        if typ == '-m':
-            #Checks to see if only one radius is desired to be plotted, or more.
-            if l == 4:
-                #Computes fits and stores them in mteq.
-                mteq.append(self.compute_mtypeeq(min1))
-                r = mteq[0][0]
-                z = mteq[0][1]
-                rmaj = float(mteq[0][2])
-                zmag = float(mteq[0][3])
-                ax.plot(r, z, 'b', label='Miller-type')
-                ax.plot(bigcoords,[self.get('zmag (m)')[self.match(min1,self.get('rho (-)'))], self.get('zmag (m)')[self.match(min1, self.get('rho (-)'))]], 'm', label='Flux surface center')
-                ax.plot([self.get('rmaj (m)')[self.match(min1, self.get('rho (-)'))], self.get('rmaj (m)')[self.match(min1, self.get('rho (-)'))]], bigcoords, 'm')
-                #Figures out whether the r or z direction is wider, and creates
-                #limits accordingly.
-                aspect = max((max(z) - min(z)), (max(r) - min(r))) + .5
-                ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
-                ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
-                ax.set_title(u'Flux Surface at \u03c1 = ' + str(self.data['rho (-)'][self.match(min1, self.data['rho (-)'])]))
-                ax.legend( ('Outboard Midplane', 'Miller-type', 'Flux surface center'), loc=2,bbox_to_anchor=(1,1))
-            elif l == 6:
-                #Increments through from min to max and creates plots at each
-                #radius.
-                inc = self.match(min1, self.data['rho (-)'])
-                step = (self.match(max1, self.data['rho (-)']) - inc)/n
-                count = 0
-                while inc < self.match(max1, self.data['rho (-)']):
-                    mteq.append(self.compute_mtypeeq(float(self.data['rho (-)'][inc])))
-                    r = mteq[0][0]
-                    z = mteq[0][1]
-                    rmaj = float(mteq[0][2])
-                    zmag = float(mteq.pop()[3])
-                    lines.append(ax.plot(r, z, 'b'))
-                    count = count + math.modf(step)[0]
-                    if count > 1:
-                        count = math.modf(count)[0]
-                        inc = inc + math.modf(step)[1] + 1
-                    else:
-                        inc = inc + math.modf(step)[1]
-                #Sets limits, just as above.
-                aspect = max((max(z) - min(z)), (max(r) - min(r))) + .5
-                ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
-                ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
-                ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(min1) + u' and \u03c1 = ' + str(max1) + '.')
-                print lines[0][0]
-                ax.legend( ('Outboard Midplane', 'Miller-type'), loc=2,bbox_to_anchor=(1,1))
-
-#SECTION 2: Fourier-type
-        elif typ == '-f':
-            #This section functions much like the first.  See notes in that
-            #section.
-            if l == 4:
-                feq.append(self.compute_fouriereq(min1))
-                r = feq[0][0]
-                z = feq[0][1]
-                rmaj = float(feq[0][2])
-                zmag = float(feq[0][3])
-                ax.plot(r, z, 'r', label='Fourier-type')
-                ax.plot(bigcoords,[self.get('zmag (m)')[self.match(min1,self.get('rho (-)'))], self.get('zmag (m)')[self.match(min1, self.get('rho (-)'))]], 'm', label='Flux surface center')
-                ax.plot([self.get('rmaj (m)')[self.match(min1, self.get('rho (-)'))], self.get('rmaj (m)')[self.match(min1, self.get('rho (-)'))]], bigcoords, 'm')
-                aspect = max((max(z) - min(z)), (max(r) - min(r))) + .5
-                ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
-                ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
-                ax.set_title(u'Flux Surface at \u03c1 = ' + str(self.data['rho (-)'][self.match(min1, self.data['rho (-)'])]))
-                ax.legend( ('Outboard Midplane', 'Fourier-type', 'Flux surface center'), loc=2,bbox_to_anchor=(1,1))
-            elif l == 6:
-                inc = self.match(min1, self.data['rho (-)'])
-                step = (self.match(max1, self.data['rho (-)']) - inc)/n
-                count = 0
-                while inc < self.match(max1, self.data['rho (-)']):
-                    feq.append(self.compute_fouriereq(float(self.data['rho (-)'][inc])))
-                    r = feq[0][0]
-                    z = feq[0][1]
-                    rmaj = float(feq[0][2])
-                    zmag = float(feq.pop()[3])
-                    lines.append(ax.plot(r, z, 'r', label='Fourier-type'))
-                    count = count + math.modf(step)[0]
-                    if count > 1:
-                        count = math.modf(count)[0]
-                        inc = inc + math.modf(step)[1] + 1
-                    else:
-                        inc = inc + math.modf(step)[1]
-                aspect = max((max(z) - min(z)), (max(r) - min(r))) + .5
-                ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
-                ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
-                ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(min1) + u' and \u03c1 = ' + str(max1) + '.')
-                ax.legend( ('Outboard Midplane', 'Fourier-type'), loc=2,bbox_to_anchor=(1,1))
-
-#SECTION 3: Comparison
-        elif typ == '-c':
-            #This section combines the first two, and can be understood by
-            #reading the annotations of the preceeding sections
-            if l == 4:
-                feq.append(self.compute_fouriereq(min1))
-                fr = feq[0][0]
-                fz = feq[0][1]
-                ax.plot(fr, fz, 'r', label='Fourier-type')
-                mteq.append(self.compute_mtypeeq(min1))
-                mr = mteq[0][0]
-                mz = mteq[0][1]
-                rmaj = float(mteq[0][2])
-                zmag = float(mteq[0][3])
-                ax.plot(mr, mz, 'b', label='Miller-type')
-                ax.plot(bigcoords,[self.get('zmag (m)')[self.match(min1,self.get('rho (-)'))], self.get('zmag (m)')[self.match(min1, self.get('rho (-)'))]], 'm', label='Flux surface center')
-                ax.plot([self.get('rmaj (m)')[self.match(min1, self.get('rho (-)'))], self.get('rmaj (m)')[self.match(min1, self.get('rho (-)'))]], bigcoords, 'm')
-                aspect = max((max(fz) - min(fz)), (max(fr) - min(fr)), (max(mz) - min(mz)), (max(mr) - min(mr))) + .5
-                ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
-                ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
-                ax.set_title(u'Flux Surface at \u03c1 = ' + str(self.data['rho (-)'][self.match(min1, self.data['rho (-)'])]))
-                ax.legend( ('Outboard Midplane', 'Fourier-type', 'Miller-type', 'Flux surface center'), loc=2,bbox_to_anchor=(1,1))
-            elif l == 6:
-                inc = self.match(min1, self.data['rho (-)'])
-                step = (self.match(max1, self.data['rho (-)']) - inc)/n
-                count = 0
-                while inc <= self.match(max1, self.data['rho (-)']):
-                    feq.append(self.compute_fouriereq(float(self.data['rho (-)'][inc])))
-                    fr = feq[0][0]
-                    fz = feq.pop()[1]
-                    ax.plot(fr, fz, 'r', label='Fourier-type')
-                    mteq.append(self.compute_mtypeeq(float(self.data['rho (-)'][inc])))
-                    mr = mteq[0][0]
-                    mz = mteq[0][1]
-                    rmaj = float(mteq[0][2])
-                    zmag = float(mteq.pop()[3])
-                    ax.plot(mr, mz, 'b', label='Miller-type')
-                    count = count + math.modf(step)[0]
-                    if count > 1:
-                        count = math.modf(count)[0]
-                        inc = inc + math.modf(step)[1] + 1
-                    else:
-                        inc = inc + math.modf(step)[1]
-                aspect = max((max(fz) - min(fz)), (max(fr) - min(fr)), (max(mz) - min(mz)), (max(mr) - min(mr))) + .5
-                ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
-                ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
-                ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(min1) + u' and \u03c1 = ' + str(max1) + '.')
-                ax.legend( ('Outboard Midplane', 'Fourier-type', 'Miller-type'), loc=2,bbox_to_anchor=(1,1))
-
+        ax.axhline(c='k', ls='--')
+        inc = self.match(inner, self.data['rho (-)'])
+        step = (self.match(outer, self.data['rho (-)']) - inc)/n
+        count = 0
+        while inc < self.match(outer, self.data['rho (-)']):
+            feq.append(self.compute_fouriereq(float(self.data['rho (-)'][inc])))
+            r = feq[0][0]
+            z = feq[0][1]
+            rmaj = float(feq[0][2])
+            zmag = float(feq.pop()[3])
+            lines.append(ax.plot(r, z, 'r', label='Fourier surface at '+str(self.data['rho (-)'][inc])))
+            count = count + math.modf(step)[0]
+            if count > 1:
+                count = math.modf(count)[0]
+                inc = inc + math.modf(step)[1] + 1
+            else:
+                inc = inc + math.modf(step)[1]
+        if n == 1:
+            ax.set_title(u'Flux Surface at \u03c1 = ' + str(self.data['rho (-)'][self.match(inner, self.data['rho (-)'])]))
+            ax.axhline(y=self.get('zmag (m)')[self.match(inner,self.get('rho (-)'))], c='m')
+            ax.axvline(x=self.get('rmaj (m)')[self.match(inner, self.get('rho (-)'))], c='m')
+            ax.legend( ('Outboard Midplane', 'Fourier-type', 'Flux surface center'), loc=2,bbox_to_anchor=(1,1))
+        elif verbose:
+            ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(inner) + u' and \u03c1 = ' + str(outer) + '.')
+            ax.legend(loc=2,bbox_to_anchor=(1,1))
         else:
-            print "ERROR: Incorrect plot type.  Type profiles_gen for help."
-            sys.exit()
+            ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(inner) + u' and \u03c1 = ' + str(outer) + '.')
+            ax.legend( ('Outboard Midplane', 'Fourier-type'), loc=2,bbox_to_anchor=(1,1))
+        aspect = max((max(z) - min(z)), (max(r) - min(r))) + .5
+        ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
+        ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
+
+    def compplot(self, inner, outer, n, verbose):
+        """Creates plots of both Miller-type and Fourier-type equilibrium flux
+        surfaces.
+
+        This method will plot n flux surfaces between inner and outer.  If
+        verbose is set to true, and n > 1, then the legend will display the
+        locations of each flux surface.
+        """
+
+        import matplotlib.pyplot as plt
+        import matplotlib as mpl
+        import sys
+        import math
+
+        mpl.rcParams['font.size'] = 10.0
+        mpl.rcParams['figure.subplot.right'] = .7
+        mteq = []
+        lines = []
+        feq = []
+        bigcoords = [-100, 100]
+        midplane = [0, 0]
+
+        #Produces a matplotlib figure object and creates the labels.
+        fig = plt.figure(self.fignum)
+        self.fignum = self.fignum + 1
+        ax = fig.add_subplot(111, aspect='equal')
+        ax.set_ylabel('Z (m)')
+        ax.set_xlabel('R (m)')
+        ax.axhline(c='k', ls='--')
+        inc = self.match(inner, self.data['rho (-)'])
+        step = (self.match(outer, self.data['rho (-)']) - inc)/n
+        count = 0
+        while inc < self.match(outer, self.data['rho (-)']):
+            feq.append(self.compute_fouriereq(float(self.data['rho (-)'][inc])))
+            fr = feq[0][0]
+            fz = feq.pop()[1]
+            ax.plot(fr, fz, 'r', label='Fourier surface at '+str(self.data['rho (-)'][inc]))
+            mteq.append(self.compute_mtypeeq(float(self.data['rho (-)'][inc])))
+            mr = mteq[0][0]
+            mz = mteq[0][1]
+            rmaj = float(mteq[0][2])
+            zmag = float(mteq.pop()[3])
+            ax.plot(mr, mz, 'b', label='Miller surface at '+str(self.data['rho (-)'][inc]))
+            count = count + math.modf(step)[0]
+            if count > 1:
+                count = math.modf(count)[0]
+                inc = inc + math.modf(step)[1] + 1
+            else:
+                inc = inc + math.modf(step)[1]
+        if n == 1:
+            ax.set_title(u'Flux Surface at \u03c1 = ' + str(self.data['rho (-)'][self.match(inner, self.data['rho (-)'])]))
+            ax.axhline(y=self.get('zmag (m)')[self.match(inner,self.get('rho (-)'))], c='m')
+            ax.axvline(x=self.get('rmaj (m)')[self.match(inner, self.get('rho (-)'))], c='m')
+            ax.legend( ('Outboard Midplane', 'Miller-type', 'Fourier-type', 'Flux surface center'), loc=2,bbox_to_anchor=(1,1))
+        elif verbose:
+            ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(inner) + u' and \u03c1 = ' + str(outer) + '.')
+            ax.legend(loc=2,bbox_to_anchor=(1,1))
+        else:
+            ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(inner) + u' and \u03c1 = ' + str(outer) + '.')
+            ax.legend( ('Outboard Midplane', 'Miller-type', 'Fourier-type'), loc=2,bbox_to_anchor=(1,1))
+        aspect = max((max(fz) - min(fz)), (max(fr) - min(fr)), (max(mz) - min(mz)), (max(mr) - min(mr))) + .5
+        ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
+        ax.set_ylim(zmag - aspect/2, zmag + aspect/2)
 
     #-------------------------------------------- #
     # Misc Functions

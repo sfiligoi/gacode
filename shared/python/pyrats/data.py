@@ -2033,6 +2033,8 @@ class NEOData:
         """split splits an array which may be made up of elements with
         multiple entries into an array with one entry per element."""
 
+        import numpy as np
+
         t = []
         for s in array:
             if len(s) > 1:
