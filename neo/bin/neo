@@ -61,7 +61,6 @@ NEO_DIR=$GACODE_ROOT/neo
 NPROC=1
 # Execute/test mode flags
 EXEC_FLAG=0
-TEST_FLAG=0
 GENERATE_FLAG=0
 REGRESS_FLAG=0
 #=============================================================
@@ -75,8 +74,6 @@ while [ $# -gt 0 ] ; do
   -p) shift ; SIMROOT=$1 ;;
 
   -e) shift ; LOCDIR=$1 ; EXEC_FLAG=1 ;;
-
-  -t) shift ; LOCDIR=$1 ; TEST_FLAG=1 ;;
 
   -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
 
@@ -150,12 +147,6 @@ cd $SIMDIR
 #============================================================
 
 #==========================================================
-# Initialize halt file:
-#
-echo 0 > halt
-#==========================================================
-
-#==========================================================
 # echo number of tasks, then parse INPUT
 #
 echo "[NEO MPI tasks: $NPROC]" > $RUN_FILE
@@ -178,33 +169,6 @@ then
 fi
 #==========================================================
 
-#==========================================================
-# Halt here if neo_parse or gyro_proparse returned a halt.
-#
-if [ `cat halt` = "1" ] 
-then
-   cat $RUN_FILE
-   exit 1
-fi
-#===========================================================
-
-#===========================================================
-# Set flags for execute or test:
-
-# Execute:
-if [ $EXEC_FLAG -eq 1 ] 
-then
-   neo_version_message 
-   echo "0" > "$SIMDIR/neotest_flag"
-fi
-
-# Test:
-if [ $TEST_FLAG -eq 1 ]
-then
-   echo "1" > "$SIMDIR/neotest_flag"
-fi
-#===========================================================
-
 #===========================================================
 # RUN NEO
 #
@@ -212,6 +176,8 @@ fi
 # Standalone mode
 if [ $EXEC_FLAG -eq 1 ] 
 then
+
+   neo_version_message 
 
   #==========================================================
   # Version stamp:
@@ -222,11 +188,5 @@ then
 
   $NEO_DIR/src/neo
 
-fi
-
-# Test mode
-if [ $TEST_FLAG -eq 1 ] 
-then
-   cat $RUN_FILE
 fi
 #===========================================================
