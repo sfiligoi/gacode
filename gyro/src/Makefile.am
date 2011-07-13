@@ -92,6 +92,7 @@ libgacodegyro_SRC_la_SOURCES = \
   gyro_banana_s2lambda.f90 \
   gyro_banana_uniform_taugrid.f90 \
   gyro_bessel_operator.f90 \
+  gyro_bessel_stencils.f90 \
   gyro_collect_routines.f90 \
 	gyro_cleanup.f90 \
   gyro_omegas.f90 \
@@ -122,6 +123,7 @@ libgacodegyro_SRC_la_SOURCES = \
 	gyro_fieldeigen.f90 \
 	gyro_memory_usage.f90 \
 	gyro_nonlinear_flux.f90 \
+  gyro_rhs_nonlinear.f90 \
 	gyro_diffusivity.f90 \
 	gyro_gbflux.f90 \
 	gyro_initialize_arrays.f90 \
@@ -147,13 +149,12 @@ libgacodegyro_SRC_la_SOURCES = \
 	parallel_dim.f90 \
 	alloc_add.f90 \
 	allocate_profile_exp.f90 \
-	timestep_SSP_322.f90 \
-	timestep_explicit.f90 \
+	gyro_timestep_explicit.f90 \
+	gyro_timestep_implicit.f90 \
   gyro_maxwell_private.f90 \
 	make_maxwell_matrix.f90 \
 	gyro_theta_grid.f90 \
 	make_geometry_arrays.f90 \
-	make_gyro.f90 \
 	make_initial_h.f90 \
 	make_implicit_advect.f90 \
 	make_electron_current.f90 \
@@ -164,7 +165,6 @@ libgacodegyro_SRC_la_SOURCES = \
 	make_poisson_blend.f90 \
 	make_ampereperp_blend.f90 \
 	make_poissonaperp_matrix.f90 \
-	get_nonlinear_advance.f90 \
 	gyro_nonlinear_transfer.f90 \
 	get_ampere_coll.f90 \
 	get_gyro_h.f90 \
