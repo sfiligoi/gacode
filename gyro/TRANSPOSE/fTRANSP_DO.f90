@@ -63,7 +63,6 @@ subroutine fTRANSP_DO(g,gT)
   ! Build "transposed" g (gT) from packages sent by 
   ! all other processors.
 
-!DIR$ CONCURRENT, SAFE_ADDRESS
   do i_from=0,n_proc-1
      do s0=1,s_dim
         i = i_map(s0,i_from)

@@ -1,5 +1,5 @@
 !-----------------------------------------------------
-! make_initial_h.f90
+! gyro_initial_condition.f90
 !
 ! PURPOSE:
 !  Set initial value of h.
@@ -11,7 +11,7 @@
 !  AMP_PHI_STUDY -> amp_study (and n_study) 
 !-------------------------------------------------------
 
-subroutine make_initial_h
+subroutine gyro_initial_condition
 
   use gyro_globals
   use gyro_pointers
@@ -182,7 +182,7 @@ subroutine make_initial_h
   if (field_r0_flag == 1) call get_field_r0_plot 
 
   if (i_proc == 0 .and. debug_flag == 1) then
-     print *,'[make_initial_h done]' 
+     print *,'[gyro_initial_condition done]' 
   endif
  
-end subroutine make_initial_h
+end subroutine gyro_initial_condition

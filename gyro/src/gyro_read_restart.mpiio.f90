@@ -70,7 +70,7 @@ subroutine gyro_read_restart
      ! Ignore restart facility
      !------------------------
 
-     call make_initial_h
+     call gyro_initial_condition
 
      t_current = 0.0
      i_restart = 0
@@ -82,7 +82,7 @@ subroutine gyro_read_restart
      ! New simulation block
      !---------------------
 
-     call make_initial_h
+     call gyro_initial_condition
 
      t_current = 0.0
      i_restart = 0

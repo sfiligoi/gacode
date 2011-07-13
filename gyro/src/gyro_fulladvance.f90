@@ -94,7 +94,7 @@ subroutine gyro_fulladvance
   ! MANAGE diagnostics
   !
   ! * Note that (2,3,4) are called once after making 
-  !   initial conditions (make_initial_h).
+  !   initial conditions (gyro_initial_condition).
   !
   ! 1. Compute flux-surface average of (phi,a)
   ! 

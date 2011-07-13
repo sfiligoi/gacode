@@ -842,7 +842,7 @@ module gyro_globals
   !
   complex :: balloon_renorm
   !
-  ! Initial amplitudes (see make_initial_h)
+  ! Initial amplitudes (see gyro_initial_condition)
   !
   real :: amp_n
   real :: amp_0
