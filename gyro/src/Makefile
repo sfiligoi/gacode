@@ -95,6 +95,7 @@ OBJECTS = gyro_globals.o \
           gyro_read_restart.o \
           gyro_set_exit_status.o \
           gyro_write_restart.o \
+          gyro_rhs_nonlinear.o \
           gyro_rhs_total.o \
           gyro_select_methods.o \
           gyro_set_blend_arrays.o \
@@ -136,7 +137,6 @@ OBJECTS = gyro_globals.o \
           make_poisson_blend.o \
 	  make_ampereperp_blend.o \
 	  make_poissonaperp_matrix.o \
-          get_nonlinear_advance.o \
           get_ampere_coll.o \
           get_gyro_h.o \
 	  get_gyro_h_aperp.o \

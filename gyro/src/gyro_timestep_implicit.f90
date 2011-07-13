@@ -73,22 +73,22 @@ subroutine gyro_timestep_implicit
      do i_substep=1,n_substep
 
         h_0 = h
-        call get_nonlinear_advance
+        call gyro_rhs_nonlinear
         RHSI_1 = RHS
 
         h = h_0+0.5*dts*RHSI_1
         call get_field_explicit
-        call get_nonlinear_advance
+        call gyro_rhs_nonlinear
         RHSI_2 = RHS
 
         h = h_0+0.5*dts*RHSI_2
         call get_field_explicit
-        call get_nonlinear_advance
+        call gyro_rhs_nonlinear
         RHSI_3 = RHS
 
         h = h_0+dts*RHSI_3
         call get_field_explicit
-        call get_nonlinear_advance
+        call gyro_rhs_nonlinear
 
         h = h_0+dts*(RHSI_1+2.0*(RHSI_2+RHSI_3)+RHS)/6.0
         call get_field_explicit

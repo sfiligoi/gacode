@@ -877,7 +877,7 @@ module gyro_globals
   complex, dimension(:,:,:,:), allocatable :: f_store
   complex, dimension(:,:,:,:), allocatable :: p_store
   !
-  complex, dimension(:,:,:,:), allocatable :: h_M
+  complex, dimension(:,:,:,:), allocatable :: h_tran
   complex, dimension(:,:,:), allocatable :: h_C
   complex, dimension(:,:,:), allocatable :: f_coll
   complex, dimension(:,:,:), allocatable :: fb_coll
@@ -890,7 +890,7 @@ module gyro_globals
   complex, dimension(:,:,:,:,:), allocatable :: gyro_uv_old
   complex, dimension(:,:,:,:,:), allocatable :: gyro_uv_dot
   complex, dimension(:,:,:,:), allocatable :: gyro_u
-  complex, dimension(:,:,:,:), allocatable :: gyro_u_M
+  complex, dimension(:,:,:,:), allocatable :: gyro_u_tran
   !
   complex, dimension(:,:,:), allocatable :: RHS_krook
   !

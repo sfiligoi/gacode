@@ -57,8 +57,8 @@ subroutine gyro_nl_direct
 
         do i=1,n_x
            do nn=0,n_max
-              gn(nn,i) = h_M(i,i_split,i_p(nn),is)
-              fn(nn,i) = gyro_u_M(i,i_split,i_p(nn),is)
+              gn(nn,i) = h_tran(i,i_split,i_p(nn),is)
+              fn(nn,i) = gyro_u_tran(i,i_split,i_p(nn),is)
            enddo ! nn
         enddo ! i
 
@@ -184,10 +184,10 @@ subroutine gyro_nl_direct
         !------------------------------------------------
 
         !-----------------------------------------------------
-        ! Finally, update global RHS (use h_M for efficiency):
+        ! Finally, update global RHS (use h_tran for efficiency):
         !
         do nn=0,n_max
-           h_M(:,i_split,i_p(nn),is) = nl(nn,:)/3.0
+           h_tran(:,i_split,i_p(nn),is) = nl(nn,:)/3.0
         enddo ! nn
         !
         !-----------------------------------------------------   

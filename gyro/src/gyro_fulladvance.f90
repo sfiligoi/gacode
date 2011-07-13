@@ -165,7 +165,7 @@ subroutine gyro_fulladvance
 
         rhs(:,:,:,:) = (0.0,0.0)
 
-        call get_nonlinear_advance
+        call gyro_rhs_nonlinear
         call gyro_nonlinear_transfer
 
      endif

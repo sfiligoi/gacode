@@ -112,7 +112,7 @@ subroutine gyro_memory_usage(data_file,io)
            call alloc_add(io,size(h_C),16,'h_C') 
         endif
 
-        call alloc_add(io,size(h_M),16,'h_M') 
+        call alloc_add(io,size(h_tran),16,'h_tran') 
         call alloc_add(io,size(gyro_h),16,'gyro_h')
         if (n_field == 3) then
            call alloc_add(io,size(gyro_h_aperp),16,'gyro_h_aperp')
@@ -124,7 +124,7 @@ subroutine gyro_memory_usage(data_file,io)
         call alloc_add(io,size(gyro_uv_old),16,'gyro_uv_old')
         call alloc_add(io,size(gyro_uv_dot),16,'gyro_uv_dot')
         call alloc_add(io,size(gyro_u),16,'gyro_u')
-        call alloc_add(io,size(gyro_u_M),16,'gyro_u_M')
+        call alloc_add(io,size(gyro_u_tran),16,'gyro_u_tran')
         call alloc_add(io,size(phi),16,'phi')
         call alloc_add(io,size(vel_sum_p),16,'vel_sum_p')
         call alloc_add(io,size(vel_sum_a),16,'vel_sum_a')

@@ -33,7 +33,7 @@ subroutine gyro_rhs_total
 
   !---------------------------------------------
   if (n_substep == 0) then
-     call get_nonlinear_advance
+     call gyro_rhs_nonlinear
   endif
   !---------------------------------------------
 
