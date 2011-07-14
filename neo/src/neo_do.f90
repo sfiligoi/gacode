@@ -29,13 +29,6 @@ subroutine neo_do
   integer :: i, j, k, id
   integer :: ierr
 
-  real, dimension(:,:), allocatable :: mat, mat_VT, mat_U
-  integer :: mat_sz
-  integer :: info
-  integer, dimension(:), allocatable :: i_piv
-  real, dimension(:), allocatable :: work, mat_S
-  real :: det, sgn
-
   ! kinetic equation terms: 
   real :: stream, trap, rotkin
 
@@ -112,7 +105,7 @@ subroutine neo_do
 
   ! Matrix solve allocations
   n_row = n_species*(n_energy+1)*(n_xi+1)*n_theta
-  n_max = n_species*(n_energy+1)*(n_energy+1)*(n_xi+1)*n_theta*1000
+  n_max = n_species*(n_energy+1)*(n_energy+1)*(n_xi+1)*n_theta*matsz_scalefac
   allocate(a(n_max),stat=ierr)
   if(ierr /= 0) then
      call neo_error('ERROR: (NEO) Array allocation failed')
@@ -389,27 +382,6 @@ subroutine neo_do
      do k=1,n_elem
         a_indx(n_elem+k) = a_indx(n_max+k)
      enddo
-
-     !mat_sz = n_species*(n_xi+1)*(n_energy+1)*n_theta
-     !allocate(mat(mat_sz,mat_sz))
-     !allocate(i_piv(mat_sz))
-     !allocate(work(mat_sz))
-     !allocate(work(5*mat_sz))
-     !allocate(mat_S(mat_sz))
-     !allocate(mat_U(mat_sz,mat_sz))
-     !allocate(mat_VT(mat_sz,mat_sz))
-     !mat(:,:) = 0.0
-     !do k=1,n_elem
-     !   i = a_indx(k)
-     !   j = a_indx(n_elem+k)
-     !   mat(i,j) = mat(i,j) + a(k)
-     !enddo
-
-     !call DGESVD('A','A',mat_sz, mat_sz,mat,mat_sz, mat_S, mat_U,mat_sz, &
-     !     mat_VT, mat_sz,work,5*mat_sz,info)
-     !do i=1,mat_sz
-     !   print *, i, mat_S(i)
-     !enddo
 
      ! Factor the Matrix -- uses a(:) and a_indx(:)
      if(write_out_mode > 1) print *, 'Begin matrix factor'
