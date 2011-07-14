@@ -20,6 +20,7 @@ module neo_interface
   integer :: neo_n_xi_in = 17
   integer :: neo_n_theta_in = 17
   integer :: neo_n_radial_in = 1
+  integer :: neo_matsz_scalefac_in = 500
   real    :: neo_rmin_over_a_in = 0.5
   real    :: neo_rmin_over_a_2_in = 0.6
   real    :: neo_rmaj_over_a_in = 3.0
@@ -142,6 +143,7 @@ contains
     neo_n_xi_in = n_xi
     neo_n_theta_in = n_theta
     neo_n_radial_in = n_radial
+    neo_matsz_scalefac_in = matsz_scalefac
     neo_rmin_over_a_in = rmin_1_in
     neo_rmin_over_a_in = rmin_1_in
     neo_rmin_over_a_2_in = rmin_2_in
@@ -238,6 +240,7 @@ contains
     n_xi = neo_n_xi_in
     n_theta = neo_n_theta_in
     n_radial = neo_n_radial_in
+    matsz_scalefac = neo_matsz_scalefac_in
     rmin_1_in = neo_rmin_over_a_in
     rmin_2_in = neo_rmin_over_a_2_in
     rmaj_in = neo_rmaj_over_a_in

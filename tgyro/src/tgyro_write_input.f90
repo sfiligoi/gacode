@@ -7,18 +7,17 @@ subroutine tgyro_write_input
 
   integer :: i_ion
 
-
   !----------------------------------------------------------------
   ! Trap miscellaneous errors
   !
   if (i_bc < 0) then
-     call tgyro_catch_error('ERROR: Problem with matching radius.')
+     call tgyro_catch_error('ERROR: (TGYRO) Problem with matching radius.')
   endif
   !
   ! Advanced iteration methods cannot do zero iterations:
   !
   if (tgyro_iteration_method >= 4 .and. tgyro_relax_iterations == 0) then
-     call tgyro_catch_error('ERROR: TGYRO_ITERATION_METHOD > 4 requires TGYRO_RELAX_ITERATIONS > 0.')
+     call tgyro_catch_error('ERROR: (TGYRO) TGYRO_ITERATION_METHOD > 4 requires TGYRO_RELAX_ITERATIONS > 0.')
   endif
   !----------------------------------------------------------------
 

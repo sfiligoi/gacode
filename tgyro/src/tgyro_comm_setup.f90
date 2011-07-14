@@ -162,6 +162,7 @@ subroutine tgyro_comm_setup
         write(1,'(5(i5,3x),a)') &
              i-1,colorvec(i),workervec(i),adjointvec(i),workeradjvec(i)
      enddo
+     close(1)
   endif
 
   ! Split MPI_COMM_WORLD into n_inst*n_worker different communicators.
@@ -229,6 +230,13 @@ subroutine tgyro_comm_setup
         if (worker == ip) worker_index=4
      endif
 
+  endif
+
+  call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+  if (i_proc_global == 0) then
+     open(unit=1,file=trim(runfile),position='append')
+     write(1,'(t2,a)') 'INFO: (TGYRO) MPI communicators split in TGYRO'
+     close(1)
   endif
 
 end subroutine tgyro_comm_setup

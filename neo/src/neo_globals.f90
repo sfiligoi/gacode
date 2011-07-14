@@ -55,6 +55,9 @@ module neo_globals
   integer :: n_xi
   integer :: n_theta
   integer :: n_radial
+
+  integer :: matsz_scalefac
+
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
