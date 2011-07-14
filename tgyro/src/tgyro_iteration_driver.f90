@@ -7,6 +7,7 @@
 
 subroutine tgyro_iteration_driver
 
+  use mpi
   use tgyro_globals
   use tgyro_iteration_variables
 
@@ -110,6 +111,13 @@ subroutine tgyro_iteration_driver
      ! Initialize relaxation parameters to starting value.
      relax(:) = 1.0
   endif
+  call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+  if (i_proc_global == 0) then
+     open(unit=1,file=trim(runfile),position='append')
+     write(1,'(t2,a)') 'INFO: (TGYRO) Survived initialization and starting iterations'
+     close(1)
+  endif
+
   correct_flag = 0
 
   p = 0
@@ -131,12 +139,6 @@ subroutine tgyro_iteration_driver
         x_vec(p) = w0p(i)
      endif
   enddo
-
-  if (i_proc_global == 0) then
-     open(unit=1,file=trim(runfile),position='append')
-     write(1,*) 'INFO: TGYRO starting iterations'
-     close(1)
-  endif
 
 
   select case (tgyro_iteration_method) 
