@@ -1918,10 +1918,13 @@ class NEOData:
         import os
         import numpy as np
         import sys
-
+        #Adjust subplot display parameters
         mpl.rcParams['font.size'] = 10.0
         mpl.rcParams['figure.subplot.wspace'] = .99
+        mpl.rcParams['figure.subplot.hspace'] = .3
         mpl.rcParams['figure.subplot.right'] = .8
+
+        #Check to see if requested variable is actually available
         flag = 0
         for k in self.transport.iterkeys():
             if var == k:
@@ -1930,6 +1933,7 @@ class NEOData:
             print "ERROR: ", var, " is not a valid parameter.  Type -options for help."
             sys.exit()
 
+        #Add related variables to todo list
         varlist = []
         varlist.append(var)
         if var == 'Q':
@@ -1941,7 +1945,9 @@ class NEOData:
             varlist.append('uipar')
         if var == 'vpol0':
             varlist.append('vipol0')
-        inc = 0
+
+        #Plotcounter keeps track of where on the current figure the current plot
+        #is
         if self.plotcounter > (n1 * n2):
             self.plotcounter = 1
             self.fignum = self.fignum + 1
@@ -1949,35 +1955,49 @@ class NEOData:
         ax = fig.add_subplot(n1, n2, self.plotcounter)
         ax.set_xlabel('r/a')
         ax.set_ylabel(self.get_transport(var).units)
+        #verbose sets title to be more descriptive
         if verbose:
             ax.set_title(self.get_transport(var).descriptor+' vs. r/a')
         else:
             ax.set_title(var + ' vs. r/a')
         for var in varlist:
             tempr = []
+            #Obtain all radius values
             for key in self.toplot:
                 tempr.append(self.get_control('r').data[key])
+            #Store all values in a 1-D numpy array
             tempr = np.array(self.split(tempr)).flatten()
+            #Sort them by increasing radius
             ind = tempr.argsort()
             tempr = tempr[ind]
 
+            #If the requested variable is available
             if self.get_transport(var) != None:
                 transport = []
+                #find it
                 for key in self.toplot:
                     transport.append(self.get_transport(var).data[key])
+                #Check to see if it has one or two dimensions
                 try:
                     transport[0][0][0]
+                    #If we reach this point, that means it has two dimensions,
+                    #so we have to sort that out properly
                     for y in range(len(transport[0])):
                         plot = []
                         for x in range(len(transport)):
                             plot.append(transport[x][y])
                         plot = np.array(self.split(plot)).flatten()[ind]
+                        #Create plot of sorted data
                         ax.plot(tempr,plot,c=cols[0],ls=styles[y],label='Sim spe '+str(y))
                 except IndexError:
+                    #If we reach this point, that means that there is only one
+                    #dimension.  All we have to do is create the array, sort it,
+                    #and plot it.
                     transport = np.array(self.split(transport)).flatten()[ind]
                     ax.plot(tempr, transport, c=cols[0], label='Sim')
 
             if self.get_HH_theory(var) != None:
+                #HH_theory always has only one dimension
                 HH = []
                 for key in self.toplot:
                     HH.append(self.get_HH_theory(var).data[key])
@@ -1985,6 +2005,7 @@ class NEOData:
                 ax.plot(tempr, HH, c=cols[1], label='HH ' + var)
 
             if self.get_CH_theory(var) != None:
+                #So does CH_theory
                 CH = []
                 for key in self.toplot:
                     CH.append(self.get_CH_theory(var).data[key])
@@ -1992,6 +2013,7 @@ class NEOData:
                 ax.plot(tempr, CH, c=cols[2], label='CH ' + var)
 
             if self.get_TG_theory(var) != None:
+                #And TG_theory
                 TG = []
                 for key in self.toplot:
                     TG.append(self.get_TG_theory(var).data[key])
@@ -1999,6 +2021,7 @@ class NEOData:
                 ax.plot(tempr, TG, c=cols[3], label='TG ' + var)
 
             if self.get_S_theory(var) != None:
+                #etc
                 S = []
                 for key in self.toplot:
                     S.append(self.get_S_theory(var).data[key])
@@ -2013,6 +2036,8 @@ class NEOData:
                 ax.plot(tempr, HR, c=cols[5], label='HR ' + var)
 
             if self.get_HS_theory(var) != None:
+                #HS_theory always has two dimensions, so we have to sort that
+                #out the same way we sorted out transport
                 HS = []
                 for key in self.toplot:
                     HS.append(self.get_HS_theory(var).data[key])
@@ -2022,8 +2047,10 @@ class NEOData:
                         plot.append(HS[x][y])
                     plot = np.array(self.split(plot)).flatten()[ind]
                     ax.plot(tempr,plot,c=cols[6],ls=styles[y],label='HS '+var+' spe '+str(y))
+        #If the legend has been requested, then we create it
         if legend == True:
             ax.legend(loc=2,bbox_to_anchor=(1,1))
+        #Move on to the next plot
         self.plotcounter = self.plotcounter + 1
 
     #----------------------------------------------------------#
@@ -2043,3 +2070,4 @@ class NEOData:
             else:
                 t.append(s)
         return t
+

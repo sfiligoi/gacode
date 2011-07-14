@@ -16,7 +16,7 @@ then
    echo
    echo "Usage:       neo_plot [options]"
    echo " "
-   echo "Options (in any order with -pl being last) include: "
+   echo "Options (in any order with -p being last) include: "
    echo " "
    echo "             -l <directory>"
    echo "             Set location of directory containing NEO output files"

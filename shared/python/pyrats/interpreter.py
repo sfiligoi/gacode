@@ -12,7 +12,10 @@ from pyrats.data import TGYROData
 
 fignum = 1
 sim1 = TGYROData(sys.argv[1])
-
+n1=sys.argv[2]
+n2=sys.argv[3]
+verbose=bool(int(sys.argv[4]))
+legend=bool(int(sys.argv[5]))
 
 for arg in sys.argv:
     if arg == 'ps':
@@ -112,7 +115,6 @@ for arg in sys.argv:
         ax4.plot(sim1.get_r(), sim1.get_flux_i_neo())
         plt.show() 
     elif arg == 'ms':
-        print "Made it!"
         fig = plt.figure(fignum)
         fignum = fignum + 1
         ax1 = fig.add_subplot(221)
