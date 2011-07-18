@@ -181,7 +181,7 @@ subroutine tgyro_init_profiles
 
      if (i_proc_global == 0) then
         open(unit=1,file=trim(runfile),position='append')
-        write(1,*) 'INFO: TGYRO passing input.profiles.geo information to components'
+        write(1,*) 'INFO: (TGYRO) Passing input.profiles.geo information to components'
         write(1,*)
         close(1)
      endif
