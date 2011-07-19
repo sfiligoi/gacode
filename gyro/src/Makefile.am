@@ -155,7 +155,7 @@ libgacodegyro_SRC_la_SOURCES = \
 	make_maxwell_matrix.f90 \
 	gyro_theta_grid.f90 \
 	make_geometry_arrays.f90 \
-	make_initial_h.f90 \
+  gyro_initial_condition.f90 \
 	make_implicit_advect.f90 \
 	make_electron_current.f90 \
 	make_electron_current_perp.f90 \
