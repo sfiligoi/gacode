@@ -28,6 +28,7 @@ OBJECTS = neo_globals.o \
 	  neo_g_velocitygrids.o \
           neo_interface.o \
           neo_init.o \
+          neo_init_serial.o \
           neo_run.o \
           neo_spitzer.o \
           neo_do.o
