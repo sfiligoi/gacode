@@ -2,12 +2,11 @@
 ! neo_init.f90
 !
 ! PURPOSE:
-!  Initialize external NEO interface for parallel use.
+!  Initialize external NEO interface for serial use.
 !---------------------------------------------------------------
 
-subroutine neo_init(path_in,mpi_comm_in)
+subroutine neo_init_serial(path_in)
 
-  use mpi
   use neo_globals
   use neo_interface
 
@@ -17,12 +16,13 @@ subroutine neo_init(path_in,mpi_comm_in)
 
   ! Input parameters (IN) - REQUIRED
   character(len=*), intent(in) :: path_in
-  integer, intent(in) :: mpi_comm_in
 
   ! Set appropriate global variables
   path = path_in
-  NEO_COMM_WORLD = mpi_comm_in
-  call MPI_COMM_RANK(NEO_COMM_WORLD,i_proc,ierr)
-  call MPI_COMM_SIZE(NEO_COMM_WORLD,n_proc,ierr)
+  i_proc = 0
+  n_proc = 1 
 
-end subroutine neo_init
+  ! This is not a real communicator.
+  NEO_COMM_WORLD = -1
+
+end subroutine neo_init_serial
