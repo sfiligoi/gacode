@@ -18,10 +18,11 @@ module neo_rotation
   contains
 
     subroutine ROT_alloc(flag)
-      use neo_globals, only : n_species, n_theta, write_out_mode, rotation_model, path
+      use neo_globals, only : n_species, &
+           n_theta, write_out_mode, rotation_model, path, i_proc
       implicit none
       integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
-      
+
       if(flag == 1) then
          if(initialized) return
          allocate(phi_rot(n_theta))
@@ -29,14 +30,14 @@ module neo_rotation
          allocate(dens_fac(n_species,n_theta))
          allocate(dens_avg(n_species))
          allocate(dens_avg_cos(n_species))
-         if(write_out_mode > 0) then
+         if(write_out_mode > 0 .and. i_proc == 0) then
             if(rotation_model == 2) then
                open(unit=io_rot,file=trim(path)//runfile,status='replace')
                close(io_rot)
             endif
          end if
          initialized = .true.
-         
+
       else
          if(.NOT. initialized) return
          deallocate(phi_rot)
@@ -169,17 +170,19 @@ module neo_rotation
 
       if(write_out_mode == 0 .or. rotation_model == 1) return
 
-      open(io_rot,file=trim(path)//runfile,status='old',position='append')
-      write (io_rot,'(e16.8,$)') r(ir)
-      write (io_rot,'(e16.8,$)') phi_rot_avg
-      do is=1, n_species
-         write (io_rot,'(e16.8,$)') dens_avg(is)
-      enddo
-      do it=1, n_theta
-         write (io_rot,'(e16.8,$)') phi_rot(it)
-      enddo
-      write(io_rot,*)
-      close(io_rot)
+      if (i_proc == 0) then
+         open(io_rot,file=trim(path)//runfile,status='old',position='append')
+         write (io_rot,'(e16.8,$)') r(ir)
+         write (io_rot,'(e16.8,$)') phi_rot_avg
+         do is=1, n_species
+            write (io_rot,'(e16.8,$)') dens_avg(is)
+         enddo
+         do it=1, n_theta
+            write (io_rot,'(e16.8,$)') phi_rot(it)
+         enddo
+         write(io_rot,*)
+         close(io_rot)
+      endif
 
     end subroutine ROT_write
 

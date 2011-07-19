@@ -53,7 +53,8 @@ module neo_transport
 contains
 
   subroutine TRANSP_alloc(flag)
-    use neo_globals, only : n_species, n_theta, write_out_mode, profile_model, n_xi, path
+    use neo_globals, only : n_species, &
+         n_theta, write_out_mode, profile_model, n_xi, path, i_proc
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
     integer :: is, ie 
@@ -87,8 +88,8 @@ contains
        allocate(vtor_th0(n_species))
 
        check_sum=0.0
-       
-       if(write_out_mode > 0) then
+
+       if(write_out_mode > 0 .and. i_proc == 0) then
           open(unit=io_transp,file=trim(path)//runfile_transp,status='replace')
           close(io_transp)
           open(unit=io_phi,file=trim(path)//runfile_phi,status='replace')
@@ -131,12 +132,12 @@ contains
        deallocate(vpol_th0)
        deallocate(vtor_th0)
 
-       if(write_out_mode > 0) then
+       if(write_out_mode > 0 .and. i_proc == 0) then
           open(unit=io_check,file=trim(path)//runfile_check,status='replace')
           write (io_check,'(e16.8,$)') check_sum
           close(io_check)
        endif
-       
+
        initialized = .false.
 
     endif
@@ -442,7 +443,7 @@ contains
                + omega_rot_deriv(ir) * omega_rot(ir)/vth(is,ir)**2 &
                * (bigR_th0**2 - bigR(it)**2))
        end do
-       
+
        vpol_th0(is) = 0.0
        vtor_th0(is) = 0.0
        do jt=0, m_theta
@@ -478,7 +479,7 @@ contains
           vpol_th0(is) = vpol_th0(is) + vpol_fourier(is,jt,1)
           vtor_th0(is) = vtor_th0(is) + vtor_fourier(is,jt,1)
        enddo
-       
+
     enddo
 
     do jt=0, m_theta
@@ -518,7 +519,7 @@ contains
     integer, intent (in) :: ir
     integer :: is, it, jt
 
-    if(write_out_mode == 0) return
+    if(write_out_mode == 0 .or. i_proc > 0) return
 
     ! transport coefficients (normalized)
     open(io_transp,file=trim(path)//runfile_transp,status='old',position='append')
@@ -539,7 +540,7 @@ contains
     enddo
     write (io_transp,*)
     close(io_transp)
-    
+
     ! transport coefficients (units)
     if(profile_model >= 2) then
        open(io_exp,file=trim(path)//runfile_exp,status='old',position='append')
@@ -585,7 +586,7 @@ contains
        write (io_exp,*)
        close(io_exp)
     end if
-    
+
     ! delta phi(theta)
     open(io_phi,file=trim(path)//runfile_phi,status='old',position='append')
     write(io_phi,*) d_phi(:)

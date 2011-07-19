@@ -4,16 +4,6 @@
 ! PURPOSE:
 !  Generate radial profile functions on the simulation 
 !  (slice) r-grid.
-!
-! NOTES:
-! "_p" -> experimental (coarse) grid.
-! "_s" -> simulation (fine) grid.
-!
-!  Nonuniform grid technique:
-!  -------------------------
-!
-!  r_e -> equally spaced grid.
-!  r   -> physical grid (may be nonuniform).    
 !-----------------------------------------------------------
 
 subroutine neo_map_experimental_profiles
@@ -77,7 +67,7 @@ subroutine neo_map_experimental_profiles
 
   ! EAB diagnostic
   if(prof_check_flag) then
-     if(write_out_mode > 0) then
+     if(write_out_mode > 0 .and. i_proc == 0) then
         open(unit=30,file=trim(path)//'out.neo.profcheckp',status='replace')
         do ir=1,n_grid_exp
            write (30,'(e16.8,$)') r_p(ir)

@@ -20,10 +20,11 @@ module neo_nclass_dr
 contains
   
   subroutine NCLASS_DR_alloc(flag)
-    use neo_globals, only : n_species, write_out_mode, profile_model, path
+    use neo_globals, only : n_species, &
+         write_out_mode, profile_model, path, i_proc
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
-    
+
     if (profile_model /= 2) then
        !print *, 'NCLASS driver not implemented for local mode'
        return
@@ -41,12 +42,12 @@ contains
        allocate(uparB_nc(n_species))
        allocate(vpol_nc(n_species))
        allocate(vtor_nc(n_species))
-       if(write_out_mode > 0) then
+       if(write_out_mode > 0 .and. i_proc == 0) then
           open(io_nc,file=trim(path)//runfile,status='replace')
           close(io_nc)
        end if
        initialized = .true.
-       
+
     else
        if(.NOT. initialized) return
        deallocate(pflux_nc)
@@ -56,8 +57,8 @@ contains
        deallocate(vtor_nc)
        initialized = .false.
     end if
-    
-    
+
+
   end subroutine NCLASS_DR_alloc
 
   subroutine NCLASS_DR_do(ir)
@@ -430,7 +431,7 @@ contains
        eflux_nc(i) = (rdum(1) + rdum(2)) / eflux_nc_norm
     enddo
     
-    if(write_out_mode > 0) then
+    if(write_out_mode > 0 .and. i_proc == 0) then
        open(io_nc,file=trim(path)//runfile,status='old',position='append')
        write (io_nc,'(e16.8,$)') r(ir)
        write(io_nc,'(e16.8,$)') jbs_nc 

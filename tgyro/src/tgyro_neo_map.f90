@@ -13,7 +13,7 @@ subroutine tgyro_neo_map
   mu1 = sqrt(mi(1)/(me*loc_me_multiplier))
 
   ! Initialize NEO
-  call neo_init(paths(i_r-1))
+  call neo_init(paths(i_r-1),gyro_comm)
 
   ! Simulation mode (dke solve vs. analytic)
   if (loc_neo_method == 1) then

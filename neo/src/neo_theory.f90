@@ -45,7 +45,7 @@ contains
        allocate(pflux_multi_HS(n_species))
        allocate(eflux_multi_HS(n_species))
 
-       if(write_out_mode > 0) then
+       if(write_out_mode > 0 .and. i_proc == 0) then
           open(io,file=trim(path)//runfile,status='replace')
           close(io)
        end if
@@ -145,7 +145,7 @@ contains
     call compute_HR(ir,phi_HR)
     call compute_HS(ir,pflux_multi_HS, eflux_multi_HS)
 
-    if(write_out_mode > 0) then
+    if(write_out_mode > 0 .and. i_proc == 0) then
        open(io,file=trim(path)//runfile,status='old',position='append')
        write(io,'(e16.8,$)') r(ir)
        write(io,'(e16.8,$)') pflux_HH
@@ -168,7 +168,6 @@ contains
        enddo
        write (io,*)
        close(io)
-
     end if
 
     call NCLASS_DR_do(ir)

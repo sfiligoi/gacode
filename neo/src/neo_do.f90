@@ -151,7 +151,7 @@ subroutine neo_do
 
   ! Set-up the matrix equation: LHS radially local matrix
 
-  if(write_out_mode > 0) then
+  if (write_out_mode > 0 .and. i_proc == 0) then
      open(unit=io_neo,file=trim(path)//'out.neo.grid',status='replace')
      write(io_neo,*) n_species
      write(io_neo,*) n_energy
@@ -456,7 +456,7 @@ subroutine neo_do
         call THEORY_alloc(0)
      end if
 
-     if(write_out_mode > 0) then
+     if(write_out_mode > 0 .and. i_proc == 0) then
         open(io_f,file=trim(path)//runfile_f,status='old',position='append')
         write(io_f,*) g(:)
         close(io_f)
