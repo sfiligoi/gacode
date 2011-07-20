@@ -1679,7 +1679,7 @@ class NEOData:
         return f
 
     def read_equil(self):
-        """Read equil.out."""
+        """Read out.neo.equil."""
 
         equil = self.read_file('equil')
         self.r[self.directory_name] = equil[0:self.n_radial[self.directory_name], 0]
@@ -1704,7 +1704,7 @@ class NEOData:
             self.inv_tau_self[self.directory_name][a] = equil[0:self.n_radial[self.directory_name], 13+5*a]
 
     def read_grid(self):
-        """Reads grid.out."""
+        """Reads out.neo.grid"""
 
         import numpy as np
 
@@ -1719,7 +1719,7 @@ class NEOData:
         self.radial_gpoints[self.directory_name] = grid[5+self.n_theta[self.directory_name]:6+self.n_theta[self.directory_name]+self.n_radial[self.directory_name]]
 
     def read_theory(self):
-        """Reads theory.out."""
+        """Reads out.neo.theory."""
 
         theory = self.read_file('theory')
         self.HH_GAMMA[self.directory_name] = theory[0:self.n_radial[self.directory_name], 1]
@@ -1743,7 +1743,7 @@ class NEOData:
             self.HS_Q[self.directory_name][a] = theory[0:self.n_radial[self.directory_name], 16+2*a]
 
     def read_transport(self):
-        """Reads transport.out."""
+        """Reads out.neo.transport."""
 
         transport = self.read_file('transport')
         self.SIM_PHI[self.directory_name] = transport[0:self.n_radial[self.directory_name], 1]
@@ -1770,7 +1770,7 @@ class NEOData:
 
     
     def read_transport_gv(self):
-        """Reads transport_gv.out."""
+        """Reads out.neo.transport_gv."""
         
         transport_gv = self.read_file('transport_gv')
         self.SIM_GAMMA_gv[self.directory_name] = range(int(self.n_species[self.directory_name]))
@@ -2071,3 +2071,365 @@ class NEOData:
                 t.append(s)
         return t
 
+#==============================================================================
+#==============================================================================
+
+class GYROData:
+
+    # Methods
+    def __init__(self, sim_directory):
+        """Constructor reads in data from sin_directory and creates new object.
+        """
+
+        self.init_data()
+        self.directory_name = sim_directory
+        self.read_data()
+
+    def init_data(self):
+        """Initialize object data."""
+
+        self.directory_name = ""
+        self.profile = {}
+        self.geometry = {}
+        self.t = {}
+        self.freq = {}
+        self.diff = {}
+        self.diff_i = {}
+        self.diff_n = {}
+        self.gbflux = []
+        self.gbflux_i = []
+        self.gbflux_n = {}
+        self.moment_u = []
+        self.moment_n = []
+        self.moment_e = []
+        self.moment_v = []
+        self.moment_zero = []
+        self.flux_velocity = {}
+        self.k_perp_squared = []
+
+    def set_directory(self, path):
+        """Set the simulation directory."""
+
+        from os.path import expanduser, expandvars
+        self.directory_name = expanduser(expandvars(path))
+
+    def get_input(self, input_name):
+        """Return the specified variable from input.gyro.gen.
+
+        input_name  -  requested input
+
+        Ex: get_input("TIME_STEP")
+        """
+
+        input_file = file(self.directory_name + 'input.gyro.gen', 'r')
+        for line in input_file:
+            try:
+                if line.split()[1] == input_name:
+                    return float(line.split()[0])
+            except IndexError:
+                print "Cannot find specified input parameter: ", input_name
+                return 0
+
+    def read_data(self):
+        """Read in object data."""
+        
+        self.read_profile()
+        self.read_geometry()
+        self.read_t()
+        #self.read_freq()
+        #self.read_diff()
+        #self.read_diff_i()
+        #self.read_diff_n()
+        #self.read_gbflux()
+        self.read_gbflux_i()
+        #self.read_gbflux_n()
+        #self.read_moment_u()
+        #self.read_moment_n()
+        #self.read_moment_e()
+        #self.read_moment_v()
+        #self.read_moment_zero()
+        #self.read_flux_velocity()
+        #self.read_k_perp_squared()
+
+    def read_file(self, fname):
+        """Reads GYRO data file."""
+
+        import numpy as np
+
+        filename = self.directory_name + '/out.gyro.' + fname
+        f = np.loadtxt(file(filename))
+        return f
+
+    def read_t(self):
+        """Read t.out."""
+
+        import numpy as np
+
+        t = np.loadtxt(file(self.directory_name + '/t.out'))
+        self.t['t/deltat'] = t[:, 0]
+        self.t['(cbar_s/a)t'] = t[:, 1]
+        self.t['n_time'] = len(t[:, 0])
+
+    def read_profile(self):
+        """Read out.gyro."""
+
+        import numpy as np
+
+        profile = self.read_file('profile')
+        #profile = np.loadtxt(file(self.directory_name + '/profile_vugyro.out'))
+        self.profile['n_x'] = profile[0]
+        self.profile['n_theta_section'] = profile[1]
+        self.profile['n_pass'] = profile[2]
+        self.profile['n_trap'] = profile[3]
+        self.profile['n_lambda'] = self.profile['n_pass'] + self.profile['n_trap']
+        self.profile['n_energy'] = profile[4]
+        self.profile['n_theta_plot'] = profile[5]
+        self.profile['n0'] = profile[6]
+        self.profile['n_n'] = profile[7]
+        self.profile['d_n'] = profile[8]
+        self.profile['n_explicit_damp'] = profile[9]
+        self.profile['nonlinear_flag'] = profile[10]
+        self.profile['electron_method'] = profile[11]
+        self.profile['n_field'] = profile[12]
+        self.profile['n_ion'] = profile[13]
+        self.profile['n_kinetic'] = profile[14]
+        self.profile['n_spec'] = profile[15]
+        self.profile['field_r0_flag'] = profile[16]
+        self.profile['field_r0_grid'] = profile[17]
+        self.profile['n_grid_exp'] = profile[18]
+        self.profile['boundary_method'] = profile[19]
+        self.profile['r'] = profile[20:(20 + self.profile['n_x'])]
+        self.profile['q'] = profile[(20 + self.profile['n_x']):(20 + 2*self.profile['n_x'])]
+        self.profile['r_s'] = profile[(20 + 2*self.profile['n_x']):(20 + 3*self.profile['n_x'])]
+        self.profile['q_s'] = profile[(20 + 3*self.profile['n_x']):(20 + 4*self.profile['n_x'])]
+        mark = 20 + 4*self.profile['n_x']
+        temp = profile[mark:(mark + self.profile['n_spec']*self.profile['n_x'])]
+        self.profile['dlntdr_s'] = temp.reshape( (self.profile['n_spec'], self.profile['n_x']), order='F')
+        mark = mark + self.profile['n_spec']*self.profile['n_x']
+        temp = profile[mark:(mark + self.profile['n_spec']*self.profile['n_x'])]
+        self.profile['dlnndr_s'] = temp.reshape( (self.profile['n_spec'], self.profile['n_x']), order='F')
+        mark = mark + self.profile['n_spec']*self.profile['n_x']
+        temp = profile[mark:(mark + self.profile['n_spec']*self.profile['n_x'])]
+        self.profile['tem_s'] = temp.reshape( (self.profile['n_spec'], self.profile['n_x']), order='F')
+        mark = mark + self.profile['n_spec']*self.profile['n_x']
+        temp = profile[mark:(mark + self.profile['n_spec']*self.profile['n_x'])]
+        self.profile['den_s'] = temp.reshape( (self.profile['n_spec'], self.profile['n_x']), order='F')
+        mark = mark + self.profile['n_spec']*self.profile['n_x']
+        self.profile['rmaj_s/r_s'] = profile[mark:(mark + self.profile['n_x'])]
+        self.profile['delta_s'] = profile[(mark + self.profile['n_x']):(mark + 2*self.profile['n_x'])]
+        self.profile['zeta_s'] = profile[(mark + 2*self.profile['n_x']):(mark + 3*self.profile['n_x'])]
+        self.profile['kappa_s'] = profile[(mark + 3*self.profile['n_x']):(mark + 4*self.profile['n_x'])]
+        self.profile['drmaj_s'] = profile[(mark + 4*self.profile['n_x']):(mark + 5*self.profile['n_x'])]
+        self.profile['shat_s'] = profile[(mark + 5*self.profile['n_x']):(mark + 6*self.profile['n_x'])]
+        self.profile['s_delta_s'] = profile[(mark + 6*self.profile['n_x']):(mark + 7*self.profile['n_x'])]
+        self.profile['s_zeta_z'] = profile[(mark + 7*self.profile['n_x']):(mark + 8*self.profile['n_x'])]
+        self.profile['s_kappa_s'] = profile[(mark + 8*self.profile['n_x']):(mark + 9*self.profile['n_x'])]
+        self.profile['zmag_s'] = profile[(mark + 9*self.profile['n_x']):(mark + 10*self.profile['n_x'])]
+        self.profile['dzmag_s'] = profile[(mark + 10*self.profile['n_x']):(mark + 11*self.profile['n_x'])]
+        self.profile['beta_unit_s'] = profile[(mark + 11*self.profile['n_x']):(mark + 12*self.profile['n_x'])]
+        self.profile['gamma_e_s'] = profile[(mark + 12*self.profile['n_x']):(mark + 13*self.profile['n_x'])]
+        self.profile['gamma_p_s'] = profile[(mark + 13*self.profile['n_x']):(mark + 14*self.profile['n_x'])]
+        self.profile['mach_s'] = profile[(mark + 14*self.profile['n_x']):(mark + 15*self.profile['n_x'])]
+        self.profile['b_unit_s'] = profile[(mark + 15*self.profile['n_x']):(mark + 16*self.profile['n_x'])]
+        self.profile['dr_eodr'] = profile[(mark + 16*self.profile['n_x']):(mark + 17*self.profile['n_x'])]
+        self.profile['z_eff_s'] = profile[(mark + 17*self.profile['n_x']):(mark + 18*self.profile['n_x'])]
+        self.profile['nu_s'] = profile[(mark + 18*self.profile['n_x']):(mark + 19*self.profile['n_x'])]
+        self.profile['w0_s'] = profile[(mark + 19*self.profile['n_x']):(mark + 20*self.profile['n_x'])]
+        mark = mark + 20*self.profile['n_x']
+        self.profile['box_multiplier'] = profile[mark]
+        self.profile['lambda'] = profile[(mark + 1):(mark + 1 + self.profile['n_lambda'])]
+        mark = mark + 1 + self.profile['n_lambda']
+        self.profile['energy'] = profile[mark:(mark + self.profile['n_energy'])]
+        self.profile['lambda_tp'] = profile[mark + self.profile['n_energy']]
+        mark = mark + self.profile['n_energy'] + 1
+        self.profile['kt_rho'] = profile[mark:(mark + self.profile['n_n'])]
+        self.profile['rho_s'] = profile[mark + self.profile['n_n']]
+        mark = mark + self.profile['n_n'] + 1
+        self.profile['z'] = profile[mark:(mark + self.profile['n_spec'])]
+        self.profile['n_fine'] = profile[mark + self.profile['n_spec']]
+        self.profile['n_moment'] = profile[mark + self.profile['n_spec'] + 1]
+
+    def read_geometry(self):
+        """Reads in geometry_array data."""
+
+        import numpy as np
+        
+        geometry = self.read_file('geometry_arrays')
+        temp = geometry.reshape( (11, self.profile['n_fine'], self.profile['n_x']), order='F')
+        self.geometry['v'] = temp[0, :, :]
+        self.geometry['gsin'] = temp[1, :, :]
+        self.geometry['gcos1'] = temp[2, :, :]
+        self.geometry['gcos2'] = temp[3, :, :]
+        self.geometry['usin'] = temp[4, :, :]
+        self.geometry['ucos'] = temp[5, :, :]
+        self.geometry['B'] = temp[6, :, :]
+        self.geometry['G_theta'] = temp[7, :, :]
+        self.geometry['grad_r'] = temp[8, :, :]
+        self.geometry['G_q'] = temp[9, :, :]
+        self.geometry['THETA'] = temp[10, :, :]
+
+    def read_freq(self):
+        """Reads in frequency data."""
+
+        import numpy as np
+
+        freq = np.loadtxt(file(self.directory_name + '/freq.out'))
+        temp = freq.reshape( (4, self.profile['n_n'], self.t['n_time']), order='F')
+        self.freq['(a/c_x)w_{R,n}'] = temp[0, :, :]
+        self.freq['(a/c_x)gamma_n'] = temp[1, :, :]
+        self.freq['errorin(a/c_x)w_{R,n}'] = temp[2, :, :]
+        self.freq['errorin(a/c_x)gamma_n'] = temp[3, :, :]
+
+    def read_diff(self):
+        """Reads in diff data."""
+
+        import numpy as np
+    
+        diff = self.read_file('diff')
+        temp = diff.reshape( (self.t['n_time'], self.profile['n_kinetic'], self.profile['n_field'], 2), order='F')
+        self.diff['D_sigma/chi_{GB}'] = temp[:, :, :, 0]
+        self.diff['chi_sigma/chi_{GB}'] = temp[:, :, :, 1]
+
+    def read_diff_i(self):
+        "Reads in diff_i."""
+
+        import numpy as np
+
+        diff_i = self.read_file('diff_i')
+        temp = diff_i.reshape( (self.t['n_time'], self.profile['n_x'], 2, self.profile['n_field'], self.profile['n_kinetic']), order='F')
+        self.diff_i['D_sigma(r)/chi_{GB}'] = temp[:, :, 0, :, :]
+        self.diff_i['chi_sigma(r)/chi_{GB}'] = temp[:, :, 1, :, :]
+
+    def read_diff_n(self):
+        "Reads in diff_n."""
+
+        import numpy as np
+
+        diff_n = self.read_file('diff_n')
+        temp = diff_n.reshape( (self.t['n_time'], self.profile['n_n'], 2, self.profile['n_field'], self.profile['n_kinetic']), order='F')
+        self.diff_n['D_{sigma,n}/chi_{GB}'] = temp[:, :, 0, :, :]
+        self.diff_n['chi_{sigma,n}/chi_{GB}'] = temp[:, :, 1, :, :]
+
+    def read_gbflux(self):
+        "Reads in gbflux data."""
+
+        import numpy as np
+
+        gbflux = self.read_file('gbflux')
+        self.gbflux = gbflux.reshape( (self.t['n_time'], self.profile['n_kinetic'], self.profile['n_field'], 4), order='F')      
+
+    def read_gbflux_i(self):
+        """Reads in gbflux_i data."""
+
+        import numpy as np
+
+        gbflux_i = self.read_file('gbflux_i.conv')
+        self.gbflux_i = gbflux_i.reshape( (self.profile['n_kinetic'], self.profile['n_field'], 4, self.profile['n_x'], self.t['n_time']), order='F')
+
+    def read_gbflux_n(self):
+        """Reads gbflux_n data."""
+
+        import numpy as np
+
+        gbflux_n = self.read_file('gbflux_n')
+        temp = gbflux_n.reshape( (self.profile['n_kinetic'], self.profile['n_field'], 4, self.profile['n_n'], self.t['n_time']), order='F')
+        self.gbflux_n['GAMMA_sigma(r)/GAMMA_{GB}'] = temp[:, :, 0, :, :]
+        self.gbflux_n['Q_{0,sigma}(r)/Q_{GB}'] = temp[:, :, 1, :, :]
+        self.gbflux_n['PI_sigma(r)/PI_{GB}'] = temp[:, :, 2, :, :]
+        self.gbflux_n['S^tur_{W,sigma}(r)/S_{GB}'] = temp[:, :, 3, :, :]
+
+    def read_moment_u(self):
+        """Reads in moment_u data."""
+
+        import numpy as np
+
+        moment_u = self.read_file('moment_u')
+        self.moment_u = moment_u.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_field'], self.profile['n_n'], self.t['n_time']), order='F')
+
+    def read_moment_n(self):
+        """Reads in moment_n data."""
+
+        import numpy as np
+
+        moment_n = self.read_file('moment_n')
+        self.moment_n = moment_n.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], self.t['n_time']), order='F')
+
+    def read_moment_e(self):
+        """Reads in moment_e data."""
+
+        import numpy as np
+
+        moment_e = self.read_file('moment_e')
+        self.moment_e = moment_e.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], self.t['n_time']), order='F')
+
+    def read_moment_v(self):
+        """Reads in moment_v data."""
+
+        import numpy as np
+
+        moment_v = self.read_file('moment_v')
+        self.moment_v = moment_v.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], self.t['n_time']), order='F')
+
+    def read_moment_zero(self):
+        """Reads in moment_zero data."""
+
+        import numpy as np
+
+        moment_zero = self.read_file('moment_zero')
+        self.moment_zero = moment_zero.reshape( (self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_moment'], self.t['n_time']), order='F')
+
+    def read_flux_velocity(self):
+        """Reads in flux_velocity data."""
+
+        import numpy as np
+
+        flux_velocity = self.read_file('flux_velocity')
+        temp = flux_velocity.reshape( (self.t['n_time'], self.profile['n_n'], 2, self.profile['n_field'], self.profile['n_kinetic'], self.profile['n_lambda'], self.profile['n_energy']), order='F')
+        self.flux_velocity['GAMMA_{sigma, n}(epsilon, lambda)'] = temp[:, :, 0, :, :, :, :]
+        self.flux_velocity['Q_{sigma, n}(epsilon, lambda)'] = temp[:, :, 1, :, :, :, :]
+
+    def read_k_perp_squared(self):
+        """Reads in k_perp_squared data."""
+
+        import numpy as np
+
+        k_perp_squared = self.read_file('k_perp_squared')
+        #k_perp_squared = np.loadtxt(file(self.directory_name + '/k_perp_squared.out'))
+        self.k_perp_squared = k_perp_squared.reshape( (self.t['n_time'], self.profile['n_n']), order='F')
+
+    def make_gbflux(self):
+        """Makes gbflux."""
+
+        import numpy as np
+
+        self.gbflux = np.mean(self.gbflux_i, axis=3)
+
+    def make_diff(self):
+        """Makes diff."""
+
+        import numpy as np
+
+        if self.gbflux == []:
+            self.make_gbflux()
+        temp1 = []
+        temp2 = []
+        for i in range(int(self.profile['n_spec'])):
+            temp1.append(self.gbflux[i, :, 0, :]*np.mean(self.profile['dlnndr_s'], axis=1)[i]/np.mean(self.profile['den_s'], axis=1)[i])
+            temp2.append(self.gbflux[i, :, 1, :]*np.mean(self.profile['dlntdr_s'], axis=1)[i]/np.mean(self.profile['tem_s'], axis=1)[i])
+        self.diff['D_sigma/chi_{GB}'] = np.array(temp1)
+        self.diff['chi_sigma/chi_{GB}'] = np.array(temp2)
+
+    def make_diff_i(self):
+        """Makes diff_i."""
+
+        import numpy as np
+
+        if self.gbflux_i == []:
+            self.read_gbflux_i()
+        temp1 = []
+        temp2 = []
+        for i in range(int(self.profile['n_spec'])):
+            temp1.append(self.gbflux_i[i, :, 0, :, :]*np.mean(self.profile['dlnndr_s'], axis=1)[i]/np.mean(self.profile['den_s'], axis=1)[i])
+            temp2.append(self.gbflux[i, :, 1, :, :]*np.mean(self.profile['dlntdr_s'], axis=1)[i]/np.mean(self.profile['tem_s'], axis=1)[i])
+        self.diff_i['D_sigma(r)/chi_{GB}'] = np.array(temp1)
+        self.diff_i['chi_sigma(r)/chi_{GB}'] = np.array(temp2)

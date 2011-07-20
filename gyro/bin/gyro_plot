@@ -1,0 +1,86 @@
+#!/bin/bash
+#==============================================================================
+# gyro_plot
+#
+# PURPOSE:
+#  Plotting routines for GYRO output.
+#==============================================================================
+
+#==============================================================================
+# Syntax validity check and help message
+#
+n=$#
+
+if [ $n -eq 0 ]
+then
+  echo
+  echo "Usage:    gyro_plot [options]"
+  echo
+  echo "          -ldiff"
+  echo "          Display diffusion coefficients."
+  echo 
+  echo "          -lflux"
+  echo "          Display gyro-bohm flux coefficients."
+  echo 
+  echo "          -l <location>"
+  echo "          Change location of simulation directory.  Default is current"
+  echo "          directory."
+  echo
+  echo "          -v"
+  echo "          Print verbose output."
+  echo
+  echo
+
+  exit 1
+fi
+#==============================================================================
+
+#==============================================================================
+# Define variables for flag capture
+#
+# Default simulation directory
+LOCDIR=$PWD
+DIFF_FLAG=0
+FLUX_FLAG=0
+VERBOSE_FLAG=0
+#==============================================================================
+
+#==============================================================================
+# Parse command line options
+#
+while [ $# -gt 0 ] ; do
+  case "$1" in
+
+  -ldiff) shift ; DIFF_FLAG=1 ;;
+
+  -lflux) shift ; FLUX_FLAG=1 ;;
+
+  -l) shift ; LOCDIR=$1 ; shift ;;
+
+  -v) shift ; VERBOSE_FLAG=1 ;;
+
+  *) echo "ERROR: incorrect gyro syntax." ; exit 1 ;;
+
+  esac
+done
+#==============================================================================
+
+#==============================================================================
+# Display diff if -ldiff set, then exit.
+#
+if [ $DIFF_FLAG -eq 1 ]
+then
+   python ~/gacode/shared/python/pyrats/GYROldiff.py $LOCDIR $VERBOSE_FLAG &
+   exit 0
+fi
+#==============================================================================
+
+#==============================================================================
+# Display flux if -lflux set, then exit.
+#
+if [ $FLUX_FLAG -eq 1 ]
+then
+   python ~/gacode/shared/python/pyrats/GYROlflux.py $LOCDIR $VERBOSE_FLAG &
+   exit 0
+fi
+#==============================================================================
