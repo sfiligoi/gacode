@@ -71,7 +71,7 @@ subroutine tgyro_comm_setup
         n_worker = n_evolve+1
 
         if (n_proc_global < n_worker*n_inst) then
-           call tgyro_catch_error('ERROR: Bad core count')
+           call tgyro_catch_error('ERROR: (TGYRO) Bad core count')
         endif
 
      else
@@ -176,7 +176,7 @@ subroutine tgyro_comm_setup
        gyro_comm,&
        ierr)
   if (ierr /= 0) then
-     call tgyro_catch_error('ERROR: GYRO_COMM not created') 
+     call tgyro_catch_error('ERROR: (TGYRO) GYRO_COMM not created') 
   endif
 
   call MPI_COMM_SPLIT(MPI_COMM_WORLD,&
@@ -185,7 +185,7 @@ subroutine tgyro_comm_setup
        gyro_adj,&
        ierr)
   if (ierr /= 0) then
-     call tgyro_catch_error('ERROR: GYRO_ADJ not created') 
+     call tgyro_catch_error('ERROR: (TGYRO) GYRO_ADJ not created') 
   endif
 
   call MPI_COMM_SPLIT(MPI_COMM_WORLD,&
@@ -194,7 +194,7 @@ subroutine tgyro_comm_setup
        gyro_rad,&
        ierr)
   if (ierr /= 0) then
-     call tgyro_catch_error('ERROR: GYRO_RAD not created') 
+     call tgyro_catch_error('ERROR: (TGYRO) GYRO_RAD not created') 
   endif
 
   call MPI_COMM_RANK(gyro_comm,gyro_comm_rank,ierr)
