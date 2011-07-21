@@ -40,6 +40,7 @@ fi
 #
 # Default simulation directory
 LOCDIR=$PWD
+N=1
 DIFF_FLAG=0
 FLUX_FLAG=0
 VERBOSE_FLAG=0
@@ -57,7 +58,7 @@ while [ $# -gt 0 ] ; do
 
   -l) shift ; LOCDIR=$1 ; shift ;;
 
-  -v) shift ; VERBOSE_FLAG=1 ;;
+  -v) shift ; VERBOSE_FLAG=1 ; N=$1 ; shift ;;
 
   *) echo "ERROR: incorrect gyro syntax." ; exit 1 ;;
 
@@ -70,7 +71,7 @@ done
 #
 if [ $DIFF_FLAG -eq 1 ]
 then
-   python ~/gacode/shared/python/pyrats/GYROldiff.py $LOCDIR $VERBOSE_FLAG &
+   python ~/gacode/shared/python/pyrats/GYROldiff.py $LOCDIR $VERBOSE_FLAG $N &
    exit 0
 fi
 #==============================================================================
@@ -80,7 +81,7 @@ fi
 #
 if [ $FLUX_FLAG -eq 1 ]
 then
-   python ~/gacode/shared/python/pyrats/GYROlflux.py $LOCDIR $VERBOSE_FLAG &
+   python ~/gacode/shared/python/pyrats/GYROlflux.py $LOCDIR $VERBOSE_FLAG $N &
    exit 0
 fi
 #==============================================================================

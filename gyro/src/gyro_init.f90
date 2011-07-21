@@ -15,10 +15,10 @@ subroutine gyro_init(path_in, mpi_comm_in)
 
   ! Input parameters (IN) - REQUIRED
   character(len=*), intent(in) :: path_in
-  integer,          intent(in) :: mpi_comm_in
+  integer, intent(in) :: mpi_comm_in
 
   ! Local variable
-  logical                      :: inputdat_flag
+  logical :: inputdat_flag
 
   ! Set appropriate global variables
   path = path_in
@@ -38,11 +38,13 @@ subroutine gyro_init(path_in, mpi_comm_in)
   call MPI_BCAST(inputdat_flag, 1, MPI_LOGICAL, 0, GYRO_COMM_WORLD, i_err)
 
   if (i_proc == 0) then
+     open(unit=1,file=trim(path)//trim(baserunfile),position='append')
      if (inputdat_flag .eqv. .true.) then
-        print '(a,a,a)', '[gyro_init reading ',trim(path),'input.gyro.gen]'
+        write(1,'(a,a,a)') 'INFO: (GYRO) gyro_init reading ',trim(path),'input.gyro.gen'
      else
-        print '(a,a,a)', '[gyro_init NOT reading ',trim(path),'input.gyro.gen]'
+        write(1,'(a,a,a)') 'INFO: (GYRO) gyro_init NOT reading ',trim(path),'input.gyro.gen'
      endif
+     close(1)
   endif
 
   if (inputdat_flag .eqv. .true.) then

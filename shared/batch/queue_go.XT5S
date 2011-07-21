@@ -86,6 +86,11 @@ echo "#PBS -q $queue" >> $bfile
 # Max wall-clock time and number of compute cores
 echo "#PBS -l walltime=$limit,size=$cores" >> $bfile
 echo "cd \${PBS_O_WORKDIR}" >> $bfile
+
+echo "export MPICH_ABORT_ON_ERROR=1" >> $bfile
+echo "export MPICH_COLL_SYNC=1" >> $bfile
+echo "export MPICH_FAST_MEMCPY=1" >> $bfile
+
 echo "date" >> $bfile
 ## Node information
 ## Try running 'checkjob <jobid>' command
