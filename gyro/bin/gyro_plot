@@ -29,6 +29,17 @@ then
   echo "          -v"
   echo "          Print verbose output."
   echo
+  echo "          -gbflux"
+  echo "          Display plots of gbflux data."
+  echo
+  echo "          -n_field <value>"
+  echo "          Specify field to be plotted.  s returns a sum of all fields."
+  echo
+  echo "          -n_kinetic <value>"
+  echo "          Specify species to be plotted."
+  echo
+  echo "          -n_moment <value>"
+  echo "          Specify moment to be plotted."
   echo
 
   exit 1
@@ -41,9 +52,13 @@ fi
 # Default simulation directory
 LOCDIR=$PWD
 N=1
-DIFF_FLAG=0
-FLUX_FLAG=0
+LDIFF_FLAG=0
+LFLUX_FLAG=0
 VERBOSE_FLAG=0
+GBFLUX_FLAG=0
+N_KINETIC=1
+N_FIELD="s"
+N_MOMENT=2
 #==============================================================================
 
 #==============================================================================
@@ -52,13 +67,21 @@ VERBOSE_FLAG=0
 while [ $# -gt 0 ] ; do
   case "$1" in
 
-  -ldiff) shift ; DIFF_FLAG=1 ;;
+  -ldiff) shift ; LDIFF_FLAG=1 ;;
 
-  -lflux) shift ; FLUX_FLAG=1 ;;
+  -lflux) shift ; LFLUX_FLAG=1 ;;
 
   -l) shift ; LOCDIR=$1 ; shift ;;
 
   -v) shift ; VERBOSE_FLAG=1 ; N=$1 ; shift ;;
+
+  -gbflux) shift ; GBFLUX_FLAG=1 ;;
+
+  -n_kinetic) shift ; N_KINETIC=$1 ; shift ;;
+
+  -n_field) shift ; N_FIELD=$1 ; shift ;;
+
+  -n_moment) shift ; N_MOMENT=$1 ; shift ;;
 
   *) echo "ERROR: incorrect gyro syntax." ; exit 1 ;;
 
@@ -69,9 +92,9 @@ done
 #==============================================================================
 # Display diff if -ldiff set, then exit.
 #
-if [ $DIFF_FLAG -eq 1 ]
+if [ $LDIFF_FLAG -eq 1 ]
 then
-   python ~/gacode/shared/python/pyrats/GYROldiff.py $LOCDIR $VERBOSE_FLAG $N
+   python ~/gacode/shared/python/pyrats/gyro/ldiff.py $LOCDIR $VERBOSE_FLAG $N
    exit 0
 fi
 #==============================================================================
@@ -79,9 +102,18 @@ fi
 #==============================================================================
 # Display flux if -lflux set, then exit.
 #
-if [ $FLUX_FLAG -eq 1 ]
+if [ $LFLUX_FLAG -eq 1 ]
 then
-   python ~/gacode/shared/python/pyrats/GYROlflux.py $LOCDIR $VERBOSE_FLAG $N
+   python ~/gacode/shared/python/pyrats/gyro/lflux.py $LOCDIR $VERBOSE_FLAG $N
    exit 0
 fi
 #==============================================================================
+
+#==============================================================================
+# Display gbflux data if -gbflux set, then exit.
+#
+if [ $GBFLUX_FLAG -eq 1 ]
+then
+   python ~/gacode/shared/python/pyrats/gyro/gbflux.py $LOCDIR $N_KINETIC $N_FIELD $N_MOMENT &
+   exit 0
+fi

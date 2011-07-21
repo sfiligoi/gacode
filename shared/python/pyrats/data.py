@@ -2165,6 +2165,7 @@ class GYROData:
         f = np.loadtxt(file(filename))
         return f
 
+
     def read_t(self):
         """Read t.out."""
 
