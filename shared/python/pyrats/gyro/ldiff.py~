@@ -1,0 +1,11 @@
+from pyrats.data import GYROData
+import sys
+
+verbose = bool(int(sys.argv[2]))
+sim1 = GYROData(sys.argv[1])
+
+sim1.make_diff()
+if verbose:
+    print sim1.diff['chi_sigma/chi_{GB}']
+else:
+    print sim1.diff['chi_sigma/chi_{GB}'][0, 0, :]
