@@ -105,7 +105,7 @@ then
     N1=2
     N2=2
   fi
-  python ~/gacode/shared/python/pyrats/NEOinterpreter.py $PLOT_DIR $N1 $N2 $LEGEND_FLAG $VERBOSE_FLAG $PLOT_STRING &
+  python ~/gacode/shared/python/pyrats/neo/interpreter.py $PLOT_DIR $N1 $N2 $LEGEND_FLAG $VERBOSE_FLAG $PLOT_STRING &
   exit 0
 fi
 
@@ -116,7 +116,7 @@ fi
 
 if [ $OPTIONS_FLAG -eq 1 ]
 then
-  python ~/gacode/shared/python/pyrats/NEOoptions.py $PLOT_DIR &
+  python ~/gacode/shared/python/pyrats/neo/options.py $PLOT_DIR &
 fi
 
 #==============================================================================

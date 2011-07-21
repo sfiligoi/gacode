@@ -1970,6 +1970,7 @@ class NEOData:
             #Sort them by increasing radius
             ind = tempr.argsort()
             tempr = tempr[ind]
+            print tempr
 
             #If the requested variable is available
             if self.get_transport(var) != None:
@@ -1994,6 +1995,7 @@ class NEOData:
                     #dimension.  All we have to do is create the array, sort it,
                     #and plot it.
                     transport = np.array(self.split(transport)).flatten()[ind]
+                    print transport
                     ax.plot(tempr, transport, c=cols[0], label='Sim')
 
             if self.get_HH_theory(var) != None:
@@ -2001,6 +2003,9 @@ class NEOData:
                 HH = []
                 for key in self.toplot:
                     HH.append(self.get_HH_theory(var).data[key])
+                print var
+                print np.array(self.split(HH)).flatten()
+                print ind
                 HH = np.array(self.split(HH)).flatten()[ind]
                 ax.plot(tempr, HH, c=cols[1], label='HH ' + var)
 
@@ -2174,6 +2179,7 @@ class GYROData:
         """Read out.gyro."""
 
         import numpy as np
+        import math
 
         profile = self.read_file('profile')
         #profile = np.loadtxt(file(self.directory_name + '/profile_vugyro.out'))
@@ -2248,6 +2254,14 @@ class GYROData:
         self.profile['z'] = profile[mark:(mark + self.profile['n_spec'])]
         self.profile['n_fine'] = profile[mark + self.profile['n_spec']]
         self.profile['n_moment'] = profile[mark + self.profile['n_spec'] + 1]
+        if int(self.profile['n_theta_plot']) == 1:
+            self.profile['theta_plot'] = 0
+        else:
+            temp = []
+            for k in range(int(self.profile['n_theta_plot'])):
+                temp.append(-math.pi + 2*math.pi*k/float(self.profile['n_theta_plot']))
+            self.profile['theta_plot'] = temp
+                
 
     def read_geometry(self):
         """Reads in geometry_array data."""
@@ -2342,9 +2356,13 @@ class GYROData:
         """Reads in moment_u data."""
 
         import numpy as np
+        import time
 
+        starttime = time.time()
         moment_u = self.read_file('moment_u')
         self.moment_u = moment_u.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_field'], self.profile['n_n'], self.t['n_time']), order='F')
+        endtime = time.time()
+        print endtime - starttime
 
     def read_moment_n(self):
         """Reads in moment_n data."""
@@ -2433,3 +2451,14 @@ class GYROData:
             temp2.append(self.gbflux[i, :, 1, :, :]*np.mean(self.profile['dlntdr_s'], axis=1)[i]/np.mean(self.profile['tem_s'], axis=1)[i])
         self.diff_i['D_sigma(r)/chi_{GB}'] = np.array(temp1)
         self.diff_i['chi_sigma(r)/chi_{GB}'] = np.array(temp2)
+
+    def plot(self, x, y, dim=(1,1)):
+        """Creates matplotlib plot of requested data."""
+
+        import matplotlib.pyplot as plt
+        import numpy as np
+
+        fig = plt.figure(self.fignum)
+        ax = fig.add_subplot(dim[0], dim[1], self.plotcounter)
+        ax.plot(x, y)
+        plt.show()

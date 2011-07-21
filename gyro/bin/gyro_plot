@@ -71,7 +71,7 @@ done
 #
 if [ $DIFF_FLAG -eq 1 ]
 then
-   python ~/gacode/shared/python/pyrats/GYROldiff.py $LOCDIR $VERBOSE_FLAG $N &
+   python ~/gacode/shared/python/pyrats/GYROldiff.py $LOCDIR $VERBOSE_FLAG $N
    exit 0
 fi
 #==============================================================================
@@ -81,7 +81,7 @@ fi
 #
 if [ $FLUX_FLAG -eq 1 ]
 then
-   python ~/gacode/shared/python/pyrats/GYROlflux.py $LOCDIR $VERBOSE_FLAG $N &
+   python ~/gacode/shared/python/pyrats/GYROlflux.py $LOCDIR $VERBOSE_FLAG $N
    exit 0
 fi
 #==============================================================================
