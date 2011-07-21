@@ -2362,39 +2362,58 @@ class GYROData:
         moment_u = self.read_file('moment_u')
         self.moment_u = moment_u.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_field'], self.profile['n_n'], self.t['n_time']), order='F')
         endtime = time.time()
-        print endtime - starttime
+        print "Time: " + str(endtime - starttime)
 
     def read_moment_n(self):
         """Reads in moment_n data."""
 
         import numpy as np
+        import time
 
+        starttime = time.time()
         moment_n = self.read_file('moment_n')
         self.moment_n = moment_n.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], self.t['n_time']), order='F')
+        endtime = time.time()
+        print "Time: " + str(endtime - starttime)
 
     def read_moment_e(self):
         """Reads in moment_e data."""
 
         import numpy as np
+        import time
 
+        starttime = time.time()
         moment_e = self.read_file('moment_e')
         self.moment_e = moment_e.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], self.t['n_time']), order='F')
+        endtime = time.time()
+        print "Time: " + str(endtime - starttime)
 
     def read_moment_v(self):
         """Reads in moment_v data."""
 
         import numpy as np
+        import time
 
+        starttime = time.time()
         moment_v = self.read_file('moment_v')
+        midtime = time.time()
         self.moment_v = moment_v.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], self.t['n_time']), order='F')
+        endtime = time.time()
+        print "Time to load data: " + str(midtime - starttime)
+        print "Time to reshape data: " + str(endtime - midtime)
+        print "Total time: " + str(endtime - starttime)
 
     def read_moment_zero(self):
         """Reads in moment_zero data."""
 
         import numpy as np
+        import time
 
+        starttime = time.time()
         moment_zero = self.read_file('moment_zero')
         self.moment_zero = moment_zero.reshape( (self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_moment'], self.t['n_time']), order='F')
+        endtime = time.time()
+        print "Time: " + str(endtime - starttime)
 
     def read_flux_velocity(self):
         """Reads in flux_velocity data."""
