@@ -9,6 +9,7 @@ endif
 LLIB=EXPRO_lib
 
 OBJECTS = EXPRO_interface.o \
+          EXPRO_globals.o \
           EXPRO_alloc.o \
           EXPRO_palloc.o \
           EXPRO_alloc_control.o \

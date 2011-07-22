@@ -5,11 +5,11 @@
 !  Write all derived quantities to input.profiles.extra
 !--------------------------------------------------------
 
-subroutine EXPRO_write_derived(path)
+subroutine EXPRO_write_derived
 
+  use EXPRO_globals
   use EXPRO_interface
 
-  character(len=*) :: path
   integer, parameter :: io=1
 
   open(unit=io,file=trim(path)//'input.profiles.extra',status='replace')

@@ -11,23 +11,21 @@
 !    http://fusion.gat.com/theory/input.profiles
 !--------------------------------------------------------------
 
-subroutine EXPRO_pread(comm,path)
+subroutine EXPRO_pread
 
   use mpi
+  use EXPRO_globals
   use EXPRO_interface
 
   implicit none
 
-  character(len=*) :: path
-  integer, intent(in) :: comm
   integer :: ierr
   integer :: i_proc
-
 
   call MPI_COMM_RANK(comm,i_proc,ierr)
 
   if (i_proc == 0) then
-     call EXPRO_read_driver(path)
+     call EXPRO_read_driver
   endif
 
   call MPI_BCAST(EXPRO_ncol,1,MPI_INTEGER,0,comm,ierr)

@@ -220,8 +220,8 @@ program vgen
      EXPRO_ctrl_signq =  EXPRO_ctrl_signb
   endif
 
-  call EXPRO_pread(MPI_COMM_WORLD,path)
-  if (i_proc == 0) call EXPRO_write_derived(path)
+  call EXPRO_pread
+  if (i_proc == 0) call EXPRO_write_derived
   !---------------------------------------------------------------------
 
   ! Storage for electric field at theta=0 (er0) 
@@ -527,7 +527,7 @@ program vgen
   ! Write the new input.profiles
 
   tag = '.new'
-  call EXPRO_write_original(path,tag)
+  call EXPRO_write_original(tag)
 
   call vgen_getgeo()
 

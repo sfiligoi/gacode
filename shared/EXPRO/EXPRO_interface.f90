@@ -205,5 +205,6 @@ module EXPRO_interface
   real :: EXPRO_ctrl_signb = -10.0
   real :: EXPRO_ctrl_signq = -10.0
   integer :: EXPRO_ctrl_rotation_method = -1
-  
+  integer :: EXPRO_ctrl_silent_flag = 0
+
 end module EXPRO_interface

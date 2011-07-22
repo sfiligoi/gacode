@@ -9,8 +9,9 @@
 !   about sign of q is retained in IPCCW and BTCCW.  
 !--------------------------------------------------------
 
-subroutine EXPRO_write_original(path,tag)
+subroutine EXPRO_write_original(tag)
 
+  use EXPRO_globals
   use EXPRO_interface
 
   implicit none
@@ -19,7 +20,6 @@ subroutine EXPRO_write_original(path,tag)
   integer :: ierr
 
   character(len=*), intent(in) :: tag
-  character(len=*) :: path
   character (len=80) :: line
 
   open(unit=1,file=trim(path)//'input.profiles',status='old')

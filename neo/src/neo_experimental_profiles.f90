@@ -66,7 +66,7 @@ subroutine neo_experimental_profiles
      enddo
   endif
 
-  call EXPRO_read('./')
+  call EXPRO_read
 
   n_grid_exp = EXPRO_n_exp
   call PROFILE_EXP_alloc(1)
