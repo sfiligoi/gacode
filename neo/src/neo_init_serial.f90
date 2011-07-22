@@ -1,5 +1,5 @@
 !--------------------------------------------------------------
-! neo_init.f90
+! neo_init_serial.f90
 !
 ! PURPOSE:
 !  Initialize external NEO interface for serial use.

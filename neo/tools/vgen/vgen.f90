@@ -109,7 +109,7 @@ program vgen
 
   !---------------------------------------------------------------------
 
-  call neo_init(path,0)
+  call neo_init_serial(path)
   call neo_read_input()
   call map_global2interface()
 
