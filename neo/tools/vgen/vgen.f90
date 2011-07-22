@@ -115,7 +115,6 @@ program vgen
 
   neo_n_radial_in = 1
   neo_profile_model_in = 1
-  !neo_write_out_mode_in = 0
 
   ! Species checks
 

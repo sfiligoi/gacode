@@ -20,18 +20,17 @@ module neo_nclass_dr
 contains
   
   subroutine NCLASS_DR_alloc(flag)
-    use neo_globals, only : n_species, &
-         write_out_mode, profile_model, path, i_proc
+    use neo_globals
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
 
     if (profile_model /= 2) then
-       !print *, 'NCLASS driver not implemented for local mode'
+       ! NCLASS driver not implemented for local mode
        return
     endif
 
     if (n_species < 2) then
-       !print *, 'NCLASS driver requires at least 2 species'
+       ! NCLASS driver requires at least 2 species
        return
     endif
 
@@ -42,7 +41,7 @@ contains
        allocate(uparB_nc(n_species))
        allocate(vpol_nc(n_species))
        allocate(vtor_nc(n_species))
-       if(write_out_mode > 0 .and. i_proc == 0) then
+       if(silent_flag == 0 .and. i_proc == 0) then
           open(io_nc,file=trim(path)//runfile,status='replace')
           close(io_nc)
        end if
@@ -105,12 +104,12 @@ contains
     real  RARRAY_SUM
 
     if (profile_model /= 2) then
-       !print *, 'NCLASS driver not implemented for local mode'
+       ! NCLASS driver not implemented for local mode
        return
     endif
 
     if (n_species < 2) then
-       !print *, 'NCLASS driver requires at least 2 species'
+       ! NCLASS driver requires at least 2 species
        return
     endif
     
@@ -305,16 +304,19 @@ contains
          dp_ss,dt_ss,iflag)
 
     ! check warning flags
-    if(write_out_mode > 1) then
+    if(silent_flag == 0 .and. i_proc == 0) then
+       open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+            status='old',position='append')
        if(iflag == -1) then
-          ! print *, 'WARNING: NCLASS - no potato orbit viscosity'
+          ! write(io_neoout,*)  'WARNING: NCLASS - no potato orbit viscosity'
        else if(iflag == -2) then
-          print *, 'WARNING: NCLASS - no Pfirsch-Schluter viscosity'
+          write(io_neoout,*) 'WARNING: NCLASS - no Pfirsch-Schluter viscosity'
        else if(iflag == -3) then
-          print *, 'WARNING: NCLASS - no banana viscosity'
+          write(io_neoout,*)  'WARNING: NCLASS - no banana viscosity'
        else if(iflag == -4) then
-          print *, 'WARNING: NCLASS - no viscosity'
+          write(io_neoout,*)  'WARNING: NCLASS - no viscosity'
        end if
+       close(io_neoout)
     end if
     
     ! check error flags
@@ -395,9 +397,6 @@ contains
     do k=1,6
        rdum(k)=edum(k)+dum(k)
     enddo
-    !if(write_out_mode > 1) then
-    !   print *, 'NCLASS ambipolarity check: ', rdum(:)
-    !endif
 
     !  Radial conduction fluxes (W/m**2)
     ! BP, PS, CL, <E.B>, src, total
@@ -431,7 +430,7 @@ contains
        eflux_nc(i) = (rdum(1) + rdum(2)) / eflux_nc_norm
     enddo
     
-    if(write_out_mode > 0 .and. i_proc == 0) then
+    if(silent_flag == 0 .and. i_proc == 0) then
        open(io_nc,file=trim(path)//runfile,status='old',position='append')
        write (io_nc,'(e16.8,$)') r(ir)
        write(io_nc,'(e16.8,$)') jbs_nc 

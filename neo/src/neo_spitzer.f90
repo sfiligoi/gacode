@@ -87,10 +87,20 @@ subroutine neo_spitzer
      a_indx(n_elem+k) = a_indx(n_max+k)
   enddo
 
-  if(write_out_mode > 1) print *, 'Begin matrix factor'
+  if(silent_flag == 0 .and. i_proc == 0) then
+     open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+          status='old',position='append')
+     write(io_neoout,*) 'Begin matrix factor'
+     close(io_neoout)
+  endif
   call SOLVE_factor(n_elem)
   if(error_status > 0) return
-  if(write_out_mode > 1) print *, 'Done matrix factor'
+  if(silent_flag == 0 .and. i_proc == 0) then
+     open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+          status='old',position='append')
+     write(io_neoout,*) 'Done matrix factor'
+     close(io_neoout)
+  endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Matrix solve
@@ -115,13 +125,23 @@ subroutine neo_spitzer
              + src2(j) * evec_e105(ie,ix) )
      enddo
 
-     if(write_out_mode > 1) print *, 'Begin matrix solve'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+             status='old',position='append')
+        write(io_neoout,*) 'Begin matrix solve'
+        close(io_neoout)
+     endif
      call SOLVE_do
-     if(write_out_mode > 1) print *, 'Done matrix solve'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+             status='old',position='append')
+        write(io_neoout,*) 'Done matrix solve'
+        close(io_neoout)
+     endif
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
      ! Transport coefficients
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
      sp_pflux(j) = 0.0
      sp_eflux(j) = 0.0
@@ -141,9 +161,9 @@ subroutine neo_spitzer
      enddo
   enddo
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Resistivity Parameters
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   nu_ei = nu(is,ir) * (1.0*Z(is_ion))**2 / (1.0*Z(is))**2 & 
        * dens(is_ion,ir)/dens(is,ir) * (4.0/3.0) / sqrt(pi)
@@ -154,7 +174,7 @@ subroutine neo_spitzer
   L12 = sp_pflux(2) / src2(2) / L0
   L22 = sp_eflux(2) / src2(2) / L0
 
-  if (i_proc == 0) then
+  if (silent_flag == 0 .and. i_proc == 0) then
      open(unit=io_sp,file=trim(path)//'out.neo.spitzer',status='replace')
      write (io_sp,'(e16.8,$)') L11
      write (io_sp,'(e16.8,$)') L12
