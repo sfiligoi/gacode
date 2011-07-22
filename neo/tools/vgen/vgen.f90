@@ -109,7 +109,7 @@ program vgen
 
   !---------------------------------------------------------------------
 
-  call neo_init(path)
+  call neo_init(path,0)
   call neo_read_input()
   call map_global2interface()
 
@@ -239,7 +239,6 @@ program vgen
         endif
      enddo
   endif
-
   !======================================================================
   ! Four alternatives for Er calculation:
   !
@@ -321,6 +320,7 @@ program vgen
            er0 = er_exp(i)
            omega = EXPRO_w0(i) 
            omega_deriv = EXPRO_w0p(i) 
+
            call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
                 omega_deriv)
 
