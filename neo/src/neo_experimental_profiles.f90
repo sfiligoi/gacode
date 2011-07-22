@@ -27,7 +27,7 @@ subroutine neo_experimental_profiles
   !--------------------------------------------------------------
   ! use EXPRO routines to read data:
   !
-  call EXPRO_alloc('./',1)
+  call EXPRO_alloc(path,1)
   EXPRO_ctrl_density_method = 2  ! quasi-neutrality density flag
   EXPRO_ctrl_signb = sign_bunit
   EXPRO_ctrl_signq = sign_q
@@ -188,6 +188,6 @@ subroutine neo_experimental_profiles
   omega_rot_deriv_p(:) = EXPRO_w0p(:) 
   dphi0dr_p(:) = -omega_rot_p(:) * rmin_exp(:) * b_unit_p(:) / q_exp(:)
 
-  call EXPRO_alloc('./',0)
+  call EXPRO_alloc(path,0)
 
 end subroutine neo_experimental_profiles

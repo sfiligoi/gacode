@@ -7,6 +7,7 @@
 
 program vgen
 
+  use mpi
   use vgen_globals
   use neo_interface
   use EXPRO_interface
@@ -35,8 +36,6 @@ program vgen
 
   real, dimension(:), allocatable :: er_exp
   !---------------------------------------------------
-
-  include 'mpif.h'
 
   !-----------------------------------------------------------------
   ! Initialize MPI_COMM_WORLD communicator.
