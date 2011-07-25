@@ -34,7 +34,6 @@ subroutine tgyro_neo_map
   neo_n_theta_in = 11
 
   ! Geometry
-  neo_write_out_mode_in    = 1
   neo_equilibrium_model_in = 2
   neo_rmin_over_a_in       = r(i_r)/r_min
   neo_rmaj_over_a_in       = r_maj(i_r)/r_min

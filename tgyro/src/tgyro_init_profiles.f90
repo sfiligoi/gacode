@@ -85,7 +85,7 @@ subroutine tgyro_init_profiles
   EXPRO_ctrl_rotation_method = 1
 
   call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
-  call EXPRO_pread(MPI_COMM_WORLD,'./')
+  call EXPRO_pread
 
   n_exp = EXPRO_n_exp
 

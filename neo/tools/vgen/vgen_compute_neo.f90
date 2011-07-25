@@ -19,7 +19,7 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, omega_deriv
 
   ! Set the local NEO input parameters
   
-  neo_write_out_mode_in    = 0
+  neo_silent_flag_in    = 1
 
   ! Normalizations
   

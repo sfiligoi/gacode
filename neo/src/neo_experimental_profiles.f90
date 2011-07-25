@@ -27,7 +27,7 @@ subroutine neo_experimental_profiles
   !--------------------------------------------------------------
   ! use EXPRO routines to read data:
   !
-  call EXPRO_alloc('./',1)
+  call EXPRO_alloc(path,1)
   EXPRO_ctrl_density_method = 2  ! quasi-neutrality density flag
   EXPRO_ctrl_signb = sign_bunit
   EXPRO_ctrl_signq = sign_q
@@ -66,7 +66,7 @@ subroutine neo_experimental_profiles
      enddo
   endif
 
-  call EXPRO_read('./')
+  call EXPRO_read
 
   n_grid_exp = EXPRO_n_exp
   call PROFILE_EXP_alloc(1)
@@ -100,14 +100,26 @@ subroutine neo_experimental_profiles
   ! Minor radius, a, in meters:
   a_meters = rmin_exp(n_grid_exp)
 
-  if(write_out_mode > 1 .and. abs(profile_delta_scale-1.0) > epsilon(0.) ) then
-     print *, 'Delta and S_Delta are re-scaled'
+  if(silent_flag == 0 .and. i_proc == 0 .and. &
+       abs(profile_delta_scale-1.0) > epsilon(0.) ) then
+     open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+          status='old',position='append')
+     write(io_neoout,*) 'Delta and S_Delta are re-scaled'
+     close(io_neoout)
   end if
-  if(write_out_mode > 1 .and. abs(profile_zeta_scale-1.0) > epsilon(0.)) then
-     print *, 'Zeta and S_Zeta are re-scaled'
+  if(silent_flag == 0 .and. i_proc == 0 .and. &
+       abs(profile_zeta_scale-1.0) > epsilon(0.)) then
+     open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+          status='old',position='append')
+     write(io_neoout,*) 'Zeta and S_Zeta are re-scaled'
+     close(io_neoout)
   end if
-  if(write_out_mode > 1 .and. abs(profile_zmag_scale-1.0) > epsilon(0.)) then
-     print *, 'Zmag and S_Zmag are re-scaled'
+  if(silent_flag == 0 .and. i_proc == 0 .and. &
+       abs(profile_zmag_scale-1.0) > epsilon(0.)) then
+     open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+          status='old',position='append')
+     write(io_neoout,*) 'Zmag and S_Zmag are re-scaled'
+     close(io_neoout)
   end if
 
   if (profile_equilibrium_model == 2) then
@@ -136,8 +148,11 @@ subroutine neo_experimental_profiles
   do i_ion=1,n_species_exp-1
      ! ion temps must be equal 
      if(profile_temprescale_model == 1) then
-        if(write_out_mode > 1) then
-           print *, 'Re-scaling ion temperatures for equal temps Ti=Te'
+        if(silent_flag == 0 .and. i_proc == 0) then
+           open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+                status='old',position='append')
+           write(io_neoout,*) 'Re-scaling ion temperatures for equal temps Ti=Te'
+           close(io_neoout)
         end if
         tem_exp(i_ion,:)  = EXPRO_te(:)
         dlntdr_p(i_ion,:) = EXPRO_dlntedr(:) * a_meters
@@ -173,6 +188,6 @@ subroutine neo_experimental_profiles
   omega_rot_deriv_p(:) = EXPRO_w0p(:) 
   dphi0dr_p(:) = -omega_rot_p(:) * rmin_exp(:) * b_unit_p(:) / q_exp(:)
 
-  call EXPRO_alloc('./',0)
+  call EXPRO_alloc(path,0)
 
 end subroutine neo_experimental_profiles

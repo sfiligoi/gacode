@@ -86,7 +86,7 @@ module neo_globals
   !---------------------------------------------------------------
   ! Output mode:
   !
-  integer :: write_out_mode
+  integer :: silent_flag
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -176,6 +176,10 @@ module neo_globals
   integer :: error_status = 0
   character(len=80) :: error_message
 	
+  ! output file
+  character(len=80)  :: runfile_neoout = 'out.neo.run'
+  integer :: io_neoout = 12
+
   ! output vectors
 
   ! (n_species_max, transport coeff)

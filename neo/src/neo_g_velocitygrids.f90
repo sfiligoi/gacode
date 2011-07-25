@@ -49,7 +49,7 @@ contains
        enddo
     enddo
 
-    if(write_out_mode > 0 .and. i_proc == 0) then
+    if(silent_flag == 0 .and. i_proc == 0) then
        if(ir == 1) then
           open(unit=io,file=trim(path)//'out.neo.g_ene_x',status='replace')
           do je=1,ne
@@ -128,7 +128,7 @@ contains
        enddo
     enddo
 
-    if(write_out_mode > 0 .and. i_proc == 0) then
+    if(silent_flag == 0 .and. i_proc == 0) then
        open(unit=io,file=trim(path)//'out.neo.g_xi',status='replace')
        do is=1, n_species
           do it=1, n_theta

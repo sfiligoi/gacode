@@ -24,7 +24,7 @@ module neo_interface
   real    :: neo_rmin_over_a_in = 0.5
   real    :: neo_rmin_over_a_2_in = 0.6
   real    :: neo_rmaj_over_a_in = 3.0
-  integer :: neo_write_out_mode_in = 2
+  integer :: neo_silent_flag_in = 0
   integer :: neo_sim_model_in = 1
   integer :: neo_equilibrium_model_in = 0
   integer :: neo_collision_model_in = 4
@@ -148,7 +148,7 @@ contains
     neo_rmin_over_a_in = rmin_1_in
     neo_rmin_over_a_2_in = rmin_2_in
     neo_rmaj_over_a_in = rmaj_in
-    neo_write_out_mode_in = write_out_mode
+    neo_silent_flag_in = silent_flag
     neo_sim_model_in = sim_model
     neo_equilibrium_model_in = equilibrium_model
     neo_collision_model_in = collision_model
@@ -244,7 +244,7 @@ contains
     rmin_1_in = neo_rmin_over_a_in
     rmin_2_in = neo_rmin_over_a_2_in
     rmaj_in = neo_rmaj_over_a_in
-    write_out_mode = neo_write_out_mode_in
+    silent_flag = neo_silent_flag_in
     sim_model = neo_sim_model_in
     equilibrium_model = neo_equilibrium_model_in
     collision_model = neo_collision_model_in

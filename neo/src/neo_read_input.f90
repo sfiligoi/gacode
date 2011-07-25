@@ -15,7 +15,7 @@ subroutine neo_read_input
   read(1,*) rmin_1_in
   read(1,*) rmin_2_in
   read(1,*) rmaj_in
-  read(1,*) write_out_mode
+  read(1,*) silent_flag
   read(1,*) sim_model
   read(1,*) equilibrium_model
   read(1,*) collision_model

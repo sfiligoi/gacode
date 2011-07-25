@@ -35,6 +35,11 @@ subroutine neo_do
   integer, parameter :: io_neo=10, io_f=11
   character(len=80)  :: runfile_f = 'out.neo.f'
 
+  if (silent_flag == 0 .and. i_proc == 0) then
+     open(unit=io_neoout,file=trim(path)//runfile_neoout,status='replace')
+     close(io_neoout)
+  endif
+
   call neo_make_profiles
   if(error_status > 0) goto 100
   call neo_check
@@ -151,7 +156,7 @@ subroutine neo_do
 
   ! Set-up the matrix equation: LHS radially local matrix
 
-  if (write_out_mode > 0 .and. i_proc == 0) then
+  if (silent_flag == 0 .and. i_proc == 0) then
      open(unit=io_neo,file=trim(path)//'out.neo.grid',status='replace')
      write(io_neo,*) n_species
      write(io_neo,*) n_energy
@@ -172,13 +177,21 @@ subroutine neo_do
 
   do ir=1, n_radial
 
-     if(write_out_mode > 1) print *, 'ir = ', ir
-     if(write_out_mode > 1) print *, 'Begin matrix set-up'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        open(unit=io_neoout,file=trim(path)//runfile_neoout,status='old',position='append')
+        write(io_neoout,*) 'ir = ', ir
+        write(io_neoout,*) 'Begin matrix set-up'
+        close(io_neoout)
+     endif
 
      if(collision_model == 3) then
         do is=2, n_species
            if(abs(temp(is,ir)-temp(1,ir)) > 1e-3) then
-              print *, 'WARNING: (NEO) Full HS collisions with unequal temps'
+              if(silent_flag == 0 .and. i_proc == 0) then
+                 open(unit=io_neoout,file=trim(path)//runfile_neoout,status='old',position='append')
+                 write(io_neoout,*) 'WARNING: (NEO) Full HS collisions with unequal temps'
+                 close(io_neoout)
+              endif
            endif
         enddo
      endif
@@ -384,18 +397,38 @@ subroutine neo_do
      enddo
 
      ! Factor the Matrix -- uses a(:) and a_indx(:)
-     if(write_out_mode > 1) print *, 'Begin matrix factor'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+             status='old',position='append')
+        write(io_neoout,*) 'Begin matrix factor'
+        close(io_neoout)
+     endif
      call SOLVE_factor(n_elem)
      if(error_status > 0) goto 100
-     if(write_out_mode > 1) print *, 'Done matrix factor'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+             status='old',position='append')
+        write(io_neoout,*) 'Done matrix factor'
+        close(io_neoout)
+     endif
 
      ! Set the RHS source 
      call set_RHS_source
 
      ! Matrix solve -- uses g(:), a(:), and a_indx(:)
-     if(write_out_mode > 1) print *, 'Begin matrix solve'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+             status='old',position='append')
+        write(io_neoout,*) 'Begin matrix solve'
+        close(io_neoout)
+     endif
      call SOLVE_do
-     if(write_out_mode > 1) print *, 'Done matrix solve'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+             status='old',position='append')
+        write(io_neoout,*) 'Done matrix solve'
+        close(io_neoout)
+     endif
 
      ! Compute the neo transport coefficients
      call TRANSP_do(ir)
@@ -456,7 +489,7 @@ subroutine neo_do
         call THEORY_alloc(0)
      end if
 
-     if(write_out_mode > 0 .and. i_proc == 0) then
+     if(silent_flag == 0 .and. i_proc == 0) then
         open(io_f,file=trim(path)//runfile_f,status='old',position='append')
         write(io_f,*) g(:)
         close(io_f)

@@ -53,8 +53,7 @@ module neo_transport
 contains
 
   subroutine TRANSP_alloc(flag)
-    use neo_globals, only : n_species, &
-         n_theta, write_out_mode, profile_model, n_xi, path, i_proc
+    use neo_globals
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
     integer :: is, ie 
@@ -89,7 +88,7 @@ contains
 
        check_sum=0.0
 
-       if(write_out_mode > 0 .and. i_proc == 0) then
+       if(silent_flag == 0 .and. i_proc == 0) then
           open(unit=io_transp,file=trim(path)//runfile_transp,status='replace')
           close(io_transp)
           open(unit=io_phi,file=trim(path)//runfile_phi,status='replace')
@@ -132,7 +131,7 @@ contains
        deallocate(vpol_th0)
        deallocate(vtor_th0)
 
-       if(write_out_mode > 0 .and. i_proc == 0) then
+       if(silent_flag == 0 .and. i_proc == 0) then
           open(unit=io_check,file=trim(path)//runfile_check,status='replace')
           write (io_check,'(e16.8,$)') check_sum
           close(io_check)
@@ -348,17 +347,20 @@ contains
     call compute_velocity(ir)
     
 
-    if(write_out_mode > 1) then
-       print *, '****************************************'
-       print '(a,i4)', 'ir = ', ir
+    if(silent_flag == 0 .and. i_proc == 0) then
+       open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+            status='old',position='append')
+       write(io_neoout,*)  '****************************************'
+       write(io_neoout,'(a,i4)') 'ir = ', ir
        fac=0.0
        do is=1, n_species
           fac = fac + Z(is) * pflux(is)
-          print '(a,e16.8)', 'pflux = ', pflux(is)
-          print '(a,e16.8)', 'eflux = ', eflux(is)
+          write(io_neoout,'(a,e16.8)') 'pflux = ', pflux(is)
+          write(io_neoout,'(a,e16.8)') 'eflux = ', eflux(is)
        enddo
-       print '(a,e16.8)', ' sum Z_s * Gamma_s = ', fac
-       print *, '****************************************'
+       write(io_neoout,'(a,e16.8)') ' sum Z_s * Gamma_s = ', fac
+       write(io_neoout,*) '****************************************'
+       close(io_neoout)
     endif
 
     ! Sugama gyro-viscosity "H" fluxes
@@ -519,7 +521,7 @@ contains
     integer, intent (in) :: ir
     integer :: is, it, jt
 
-    if(write_out_mode == 0 .or. i_proc > 0) return
+    if(silent_flag > 0 .or. i_proc > 0) return
 
     ! transport coefficients (normalized)
     open(io_transp,file=trim(path)//runfile_transp,status='old',position='append')
