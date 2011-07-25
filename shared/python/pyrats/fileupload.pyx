@@ -138,7 +138,6 @@ def loadtxt(char* f, int dSize):
     cdef char * buffer
     cdef size_t result
     cdef int i
-    cdef float num
     i=0
 
     pFile = fopen(f, "rb")

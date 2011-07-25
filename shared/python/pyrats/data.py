@@ -2318,7 +2318,8 @@ class GYROData:
         self.geometry['gcos1'] = temp[2, :, :]
         self.geometry['gcos2'] = temp[3, :, :]
         self.geometry['usin'] = temp[4, :, :]
-        self.geometry['ucos'] = temp[5, :, :        self.geometry['B'] = temp[6, :, :]
+        self.geometry['ucos'] = temp[5, :, :]
+        self.geometry['B'] = temp[6, :, :]
         self.geometry['G_theta'] = temp[7, :, :]
         self.geometry['grad_r'] = temp[8, :, :]
         self.geometry['G_q'] = temp[9, :, :]
@@ -2410,7 +2411,7 @@ class GYROData:
         import fileupload
 
         starttime = time.time()
-        moment_u = fileupload.loadtxt(self.directory_name + '/out.gyro.moment_u', 12)
+        moment_u = self.read_file('moment_u', 12)
         self.moment_u = moment_u.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_field'], self.profile['n_n'], self.t['n_time']), order='F')
         endtime = time.time()
         print "Time: " + str(endtime - starttime)
@@ -2424,7 +2425,7 @@ class GYROData:
         import fileupload
 
         starttime = time.time()
-        moment_n = fileupload.loadtxt(self.directory_name + '/out.gyro.moment_n', 12)
+        moment_n = self.read_file('moment_n', 12)
         self.moment_n = moment_n.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], self.t['n_time']), order='F')
         endtime = time.time()
         print "Time: " + str(endtime - starttime)
@@ -2438,7 +2439,7 @@ class GYROData:
         import fileupload
 
         starttime = time.time()
-        moment_e = fileupload.loadtxt(self.directory_name + '/out.gyro.moment_e', 12)
+        moment_e = self.read_file('moment_e', 12)
         self.moment_e = moment_e.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], self.t['n_time']), order='F')
         endtime = time.time()
         print "Time: " + str(endtime - starttime)
@@ -2452,7 +2453,7 @@ class GYROData:
         import fileupload
 
         starttime = time.time()
-        moment_v = fileupload.loadtxt(self.directory_name + '/out.gyro.moment_v', 12)
+        moment_v = self.read_file('moment_v', 12)
         midtime = time.time()
         self.moment_v = moment_v.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], self.t['n_time']), order='F')
         endtime = time.time()
