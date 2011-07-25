@@ -2,6 +2,8 @@
 
     Contents:
         TGYROData
+        NEOData
+        GYROData
 
 """
 
@@ -1406,7 +1408,7 @@ class NEOData:
         >>> import matplotlib.pyplot as plt
         >>> from pyrats.data import NEOData
         >>> sim1 = NEOData('example_directory')
-        >>> sim1.scatter('SIM_1jboot')
+        >>> sim1.plot('jboot')
         >>> plt.show()
 """
     # Methods
@@ -2080,15 +2082,50 @@ class NEOData:
 #==============================================================================
 
 class GYROData:
+    """A class of GYRO output data.
+
+    Data:
+
+    directory_name = ""
+    profile = {}
+    geometry = {}
+    t = {}
+    freq = {}
+    diff = {}
+    diff_i = {}
+    diff_n = {}
+    gbflux = []
+    gbflux_i = []
+    gbflux_n = {}
+    moment_u = []
+    moment_n = []
+    moment_e = []
+    moment_v = []
+    moment_zero = []
+    flux_velocity = {}
+    k_perp_squared = []
+
+    Example Usage:
+        >>> from pyrats.data import GYROData
+        >>> import matplotlib.pyplot as plt
+        >>> sim1 = GYROData('example_directory')
+        >>> sim1.make_gbflux()
+        >>> plt.plot(sim1.gbflux()[0][0][1])
+        >>> plt.show()
+    """
 
     # Methods
     def __init__(self, sim_directory):
-        """Constructor reads in data from sin_directory and creates new object.
+        """Constructor reads in data from sim_directory and creates new object.
         """
 
         self.init_data()
         self.directory_name = sim_directory
         self.read_data()
+        import sys
+        from os.path import expanduser, expandvars
+        path = '~/gacode/shared/python/pyrats'
+        sys.path.append(expanduser(expandvars(path)))
 
     def init_data(self):
         """Initialize object data."""
@@ -2136,7 +2173,8 @@ class GYROData:
                 return 0
 
     def read_data(self):
-        """Read in object data."""
+        """Read in object data.  Executes read_profile, read_geometry, read_t,
+        and read_gbflux_i by default."""
         
         self.read_profile()
         self.read_geometry()
@@ -2145,8 +2183,8 @@ class GYROData:
         #self.read_diff()
         #self.read_diff_i()
         #self.read_diff_n()
-        #self.read_gbflux()
-        self.read_gbflux_i()
+        self.read_gbflux()
+        #self.read_gbflux_i()
         #self.read_gbflux_n()
         #self.read_moment_u()
         #self.read_moment_n()
@@ -2156,18 +2194,20 @@ class GYROData:
         #self.read_flux_velocity()
         #self.read_k_perp_squared()
 
-    def read_file(self, fname):
-        """Reads GYRO data file."""
+    def read_file(self, fname, dSize):
+        """Reads GYRO data file.  Returns a numpy array with dimensions
+        matching input data."""
 
         import numpy as np
+        import fileupload
 
         filename = self.directory_name + '/out.gyro.' + fname
-        f = np.loadtxt(file(filename))
+        f = fileupload.loadtxt(filename, dSize)
         return f
 
 
     def read_t(self):
-        """Read t.out."""
+        """Read t.out to get time data."""
 
         import numpy as np
 
@@ -2177,12 +2217,13 @@ class GYROData:
         self.t['n_time'] = len(t[:, 0])
 
     def read_profile(self):
-        """Read out.gyro."""
+        """Read out.gyro.profile to get control data.  Output is dictionary
+        containing necessary information."""
 
         import numpy as np
         import math
 
-        profile = self.read_file('profile')
+        profile = np.loadtxt(self.directory_name + '/out.gyro.profile')
         #profile = np.loadtxt(file(self.directory_name + '/profile_vugyro.out'))
         self.profile['n_x'] = profile[0]
         self.profile['n_theta_section'] = profile[1]
@@ -2265,26 +2306,27 @@ class GYROData:
                 
 
     def read_geometry(self):
-        """Reads in geometry_array data."""
+        """Reads in geometry_array data.  Output is dictionary of numpy arrays
+        with dimensions: n_fine x n_x."""
 
         import numpy as np
         
-        geometry = self.read_file('geometry_arrays')
+        geometry = self.read_file('geometry_arrays', 16)
         temp = geometry.reshape( (11, self.profile['n_fine'], self.profile['n_x']), order='F')
         self.geometry['v'] = temp[0, :, :]
         self.geometry['gsin'] = temp[1, :, :]
         self.geometry['gcos1'] = temp[2, :, :]
         self.geometry['gcos2'] = temp[3, :, :]
         self.geometry['usin'] = temp[4, :, :]
-        self.geometry['ucos'] = temp[5, :, :]
-        self.geometry['B'] = temp[6, :, :]
+        self.geometry['ucos'] = temp[5, :, :        self.geometry['B'] = temp[6, :, :]
         self.geometry['G_theta'] = temp[7, :, :]
         self.geometry['grad_r'] = temp[8, :, :]
         self.geometry['G_q'] = temp[9, :, :]
         self.geometry['THETA'] = temp[10, :, :]
 
     def read_freq(self):
-        """Reads in frequency data."""
+        """Reads in frequency data.  Output is dictionary of numpy arrays with
+        dimensions: n_n x n_time"""
 
         import numpy as np
 
@@ -2296,57 +2338,63 @@ class GYROData:
         self.freq['errorin(a/c_x)gamma_n'] = temp[3, :, :]
 
     def read_diff(self):
-        """Reads in diff data."""
+        """Reads in diff data.  Output is dictionary of numpy arrays with
+        dimensions: n_kinetic x n_field x n_time"""
 
         import numpy as np
     
-        diff = self.read_file('diff')
+        diff = self.read_file('diff', 12)
         temp = diff.reshape( (self.t['n_time'], self.profile['n_kinetic'], self.profile['n_field'], 2), order='F')
         self.diff['D_sigma/chi_{GB}'] = temp[:, :, :, 0]
         self.diff['chi_sigma/chi_{GB}'] = temp[:, :, :, 1]
 
     def read_diff_i(self):
-        "Reads in diff_i."""
+        """Reads in diff_i.  Output is dictionary of numpy arrays with
+        dimensions: n_kinetic x n_field x n_x x n_time"""
 
         import numpy as np
 
-        diff_i = self.read_file('diff_i')
+        diff_i = self.read_file('diff_i', 12)
         temp = diff_i.reshape( (self.t['n_time'], self.profile['n_x'], 2, self.profile['n_field'], self.profile['n_kinetic']), order='F')
         self.diff_i['D_sigma(r)/chi_{GB}'] = temp[:, :, 0, :, :]
         self.diff_i['chi_sigma(r)/chi_{GB}'] = temp[:, :, 1, :, :]
 
     def read_diff_n(self):
-        "Reads in diff_n."""
+        """Reads in diff_n.  Output is dictionary of numpy arrays with
+        dimensions: n_kinetic x n_field x n_n x n_time"""
 
         import numpy as np
 
-        diff_n = self.read_file('diff_n')
+        diff_n = self.read_file('diff_n', 12)
         temp = diff_n.reshape( (self.t['n_time'], self.profile['n_n'], 2, self.profile['n_field'], self.profile['n_kinetic']), order='F')
         self.diff_n['D_{sigma,n}/chi_{GB}'] = temp[:, :, 0, :, :]
         self.diff_n['chi_{sigma,n}/chi_{GB}'] = temp[:, :, 1, :, :]
 
     def read_gbflux(self):
-        "Reads in gbflux data."""
+        """Reads in gbflux data.  Output is numpy array with dimensions:
+        n_kinetic x n_field x 4 x n_time"""
 
         import numpy as np
 
-        gbflux = self.read_file('gbflux')
+        gbflux = self.read_file('gbflux', 12)
         self.gbflux = gbflux.reshape( (self.t['n_time'], self.profile['n_kinetic'], self.profile['n_field'], 4), order='F')      
 
     def read_gbflux_i(self):
-        """Reads in gbflux_i data."""
+        """Reads in gbflux_i data.  Output is numpy array with dimensions:
+        n_kinetic x n_field x 4 x n_x x n_time"""
 
         import numpy as np
 
-        gbflux_i = self.read_file('gbflux_i.conv')
+        gbflux_i = self.read_file('gbflux_i.conv', 12)
         self.gbflux_i = gbflux_i.reshape( (self.profile['n_kinetic'], self.profile['n_field'], 4, self.profile['n_x'], self.t['n_time']), order='F')
 
     def read_gbflux_n(self):
-        """Reads gbflux_n data."""
+        """Reads gbflux_n data.  Output is numpy array with dimensions:
+        n_kinetic x n_field x 4 x n_n x n_time"""
 
         import numpy as np
 
-        gbflux_n = self.read_file('gbflux_n')
+        gbflux_n = self.read_file('gbflux_n', 12)
         temp = gbflux_n.reshape( (self.profile['n_kinetic'], self.profile['n_field'], 4, self.profile['n_n'], self.t['n_time']), order='F')
         self.gbflux_n['GAMMA_sigma(r)/GAMMA_{GB}'] = temp[:, :, 0, :, :]
         self.gbflux_n['Q_{0,sigma}(r)/Q_{GB}'] = temp[:, :, 1, :, :]
@@ -2354,49 +2402,57 @@ class GYROData:
         self.gbflux_n['S^tur_{W,sigma}(r)/S_{GB}'] = temp[:, :, 3, :, :]
 
     def read_moment_u(self):
-        """Reads in moment_u data."""
+        """Reads in moment_u data.  Output is numpy array with dimensions:
+        2 x n_theta_plot x n_x x n_field x n_n x n_time"""
 
         import numpy as np
         import time
+        import fileupload
 
         starttime = time.time()
-        moment_u = self.read_file('moment_u')
+        moment_u = fileupload.loadtxt(self.directory_name + '/out.gyro.moment_u', 12)
         self.moment_u = moment_u.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_field'], self.profile['n_n'], self.t['n_time']), order='F')
         endtime = time.time()
         print "Time: " + str(endtime - starttime)
 
     def read_moment_n(self):
-        """Reads in moment_n data."""
+        """Reads in moment_n data.  Output is numpy array with dimensions:
+        2 x n_theta_plot x n_x x n_kinetic x n_n x n_time"""
 
         import numpy as np
         import time
+        import fileupload
 
         starttime = time.time()
-        moment_n = self.read_file('moment_n')
+        moment_n = fileupload.loadtxt(self.directory_name + '/out.gyro.moment_n', 12)
         self.moment_n = moment_n.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], self.t['n_time']), order='F')
         endtime = time.time()
         print "Time: " + str(endtime - starttime)
 
     def read_moment_e(self):
-        """Reads in moment_e data."""
+        """Reads in moment_e data.  Output is numpy array with dimensions:
+        2 x n_theta_plot x n_x x n_kinetic x n_n x n_time"""
 
         import numpy as np
         import time
+        import fileupload
 
         starttime = time.time()
-        moment_e = self.read_file('moment_e')
+        moment_e = fileupload.loadtxt(self.directory_name + '/out.gyro.moment_e', 12)
         self.moment_e = moment_e.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], self.t['n_time']), order='F')
         endtime = time.time()
         print "Time: " + str(endtime - starttime)
 
     def read_moment_v(self):
-        """Reads in moment_v data."""
+        """Reads in moment_v data.  Output is numpy array with dimensions:
+        2 x n_theta_plot x n_x x n_kinetic x n_n x n_time"""
 
         import numpy as np
         import time
+        import fileupload
 
         starttime = time.time()
-        moment_v = self.read_file('moment_v')
+        moment_v = fileupload.loadtxt(self.directory_name + '/out.gyro.moment_v', 12)
         midtime = time.time()
         self.moment_v = moment_v.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], self.t['n_time']), order='F')
         endtime = time.time()
@@ -2405,45 +2461,50 @@ class GYROData:
         print "Total time: " + str(endtime - starttime)
 
     def read_moment_zero(self):
-        """Reads in moment_zero data."""
+        """Reads in moment_zero data.  Output is numpy array with dimensions:
+        n_x x n_kinetic x n_moment x n_time"""
 
         import numpy as np
         import time
 
         starttime = time.time()
-        moment_zero = self.read_file('moment_zero')
+        moment_zero = self.read_file('moment_zero', 12)
         self.moment_zero = moment_zero.reshape( (self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_moment'], self.t['n_time']), order='F')
         endtime = time.time()
         print "Time: " + str(endtime - starttime)
 
     def read_flux_velocity(self):
-        """Reads in flux_velocity data."""
+        """Reads in flux_velocity data.  Output is numpy array with dimensions:
+        n_energy x n_lambda x n_kinetic x n_field x 2 x n_n x n_time"""
 
         import numpy as np
 
-        flux_velocity = self.read_file('flux_velocity')
+        flux_velocity = self.read_file('flux_velocity', 12)
         temp = flux_velocity.reshape( (self.t['n_time'], self.profile['n_n'], 2, self.profile['n_field'], self.profile['n_kinetic'], self.profile['n_lambda'], self.profile['n_energy']), order='F')
         self.flux_velocity['GAMMA_{sigma, n}(epsilon, lambda)'] = temp[:, :, 0, :, :, :, :]
         self.flux_velocity['Q_{sigma, n}(epsilon, lambda)'] = temp[:, :, 1, :, :, :, :]
 
     def read_k_perp_squared(self):
-        """Reads in k_perp_squared data."""
+        """Reads in k_perp_squared data.  Output is numpy array with dimensions:
+        n_n x n_time"""
 
         import numpy as np
 
-        k_perp_squared = self.read_file('k_perp_squared')
+        k_perp_squared = self.read_file('k_perp_squared', 12)
         #k_perp_squared = np.loadtxt(file(self.directory_name + '/k_perp_squared.out'))
         self.k_perp_squared = k_perp_squared.reshape( (self.t['n_time'], self.profile['n_n']), order='F')
 
     def make_gbflux(self):
-        """Makes gbflux."""
+        """Makes gbflux.  Output is numpy array with dimensions:
+        n_kinetic x n_field x 4 x n_time"""
 
         import numpy as np
 
         self.gbflux = np.mean(self.gbflux_i, axis=3)
 
     def make_diff(self):
-        """Makes diff."""
+        """Makes diff.  Output is dictionary of numpy arrays with
+        dimensions: n_kinetic x n_field x n_time"""
 
         import numpy as np
 
@@ -2458,7 +2519,8 @@ class GYROData:
         self.diff['chi_sigma/chi_{GB}'] = np.array(temp2)
 
     def make_diff_i(self):
-        """Makes diff_i."""
+        """Makes diff_i.  Output is dictionary of numpy arrays with
+        dimensions: n_kinetic x n_field x n_x x n_time"""
 
         import numpy as np
 
@@ -2479,6 +2541,7 @@ class GYROData:
         import numpy as np
 
         fig = plt.figure(self.fignum)
+        self.fignum = self.fignum + 1
         ax = fig.add_subplot(dim[0], dim[1], self.plotcounter)
         ax.plot(x, y)
         plt.show()
