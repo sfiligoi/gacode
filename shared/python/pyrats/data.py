@@ -2545,4 +2545,3 @@ class GYROData:
         self.fignum = self.fignum + 1
         ax = fig.add_subplot(dim[0], dim[1], self.plotcounter)
         ax.plot(x, y)
-        plt.show()
