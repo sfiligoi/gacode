@@ -200,7 +200,7 @@ x.add('COLLISION_METHOD','2')
 #addition for hdf5 io
 x.add('IO_METHOD', '1')
 x.add('TIME_SKIP_WEDGE', '0')
-x.add('N_TORANGLE_WEDGE', '0')
+x.add('N_TORANGLE_WEDGE', '1')
 x.add('N_TORANGLE_3D', '0')
 x.add('THETA_WEDGE_OFFSET', '0.0')
 x.add('THETA_WEDGE_ANGLE', '0.0')
