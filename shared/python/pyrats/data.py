@@ -2399,7 +2399,7 @@ class GYROData:
 
         import numpy as np
 
-        gbflux_i = self.read_file('gbflux_i.conv', 12)
+        gbflux_i = self.read_file('gbflux_i', 12)
         if gbflux_i != 0:
             self.gbflux_i = gbflux_i.reshape( (self.profile['n_kinetic'], self.profile['n_field'], 4, self.profile['n_x'], self.t['n_time']), order='F')
 
