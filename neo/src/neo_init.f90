@@ -2,7 +2,7 @@
 ! neo_init.f90
 !
 ! PURPOSE:
-!  Initialize external NEO interface.
+!  Initialize external NEO interface for parallel use.
 !---------------------------------------------------------------
 
 subroutine neo_init(path_in,mpi_comm_in)

@@ -12,7 +12,7 @@ F77 = ftn
 
 # Compiler options/flags
 FMATH  = -r8
-FOPT   = -tp istanbul-64 -fast
+FOPT   = -Msmartalloc
 FDEBUG = -g -Ktrap=fp -Mbounds -Minform=inform
 FPROF  = -tp istanbul-64 -O3 -fast -Msmartalloc -Mprof=func
 

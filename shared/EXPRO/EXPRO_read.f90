@@ -11,16 +11,13 @@
 !    http://fusion.gat.com/theory/input.profiles
 !--------------------------------------------------------------
 
-subroutine EXPRO_read(path)
+subroutine EXPRO_read
 
   use EXPRO_interface
 
   implicit none
 
-  character(len=*) :: path
-
-  call EXPRO_read_driver(path)
-
+  call EXPRO_read_driver
   call EXPRO_compute_derived
 
 end subroutine EXPRO_read

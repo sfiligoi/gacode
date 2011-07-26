@@ -6,6 +6,11 @@ subroutine neo_check
 
   integer :: ir, is
 
+  if(silent_flag == 0 .and. i_proc == 0) then
+     open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+          status='old',position='append')
+  endif
+
   !-----------------------------------------------------------
   ! Grid parameter checks
   !
@@ -25,34 +30,21 @@ subroutine neo_check
   endif
 
   !-----------------------------------------------------------
-  if(write_out_mode > 1) then
-     print *,'SWITCHES'
-     print *,'---------------'
+  if(silent_flag == 0 .and. i_proc == 0) then
+     write(io_neoout,*) 'SWITCHES'
+     write(io_neoout,*) '---------------'
   end if
   !------------------------------------------------------------
-
-  ! Write mode
-  select case(write_out_mode)
-  case(0)
-     ! Do not write files, do not print stdout
-  case(1)
-     ! Do write files, do not print stdout
-  case(2)
-     ! Do write files, do print stdout
-  case default
-     call neo_error('ERROR: (NEO) invalid write_out_mode')
-     return
-  end select
 
   ! Simulation model
   select case (sim_model)
   case(0)
-     if(write_out_mode > 1) then
-        print *,'sim_model    : THEORY'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'sim_model    : THEORY'
      endif
   case(1)
-     if(write_out_mode > 1) then
-        print *,'sim_model    : NUMERICAL'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'sim_model    : NUMERICAL'
      endif
   case default   
      call neo_error('ERROR: (NEO) invalid sim_model')
@@ -65,32 +57,32 @@ subroutine neo_check
 
   case (1) 
 
-     if(write_out_mode > 1) then
-        print *,'collision_model    : CONNOR'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'collision_model    : CONNOR'
      endif
 
   case (2) 
 
-     if(write_out_mode > 1) then
-        print *,'collision_model    : REDUCED HIRSHMAN-SIGMAR'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'collision_model    : REDUCED HIRSHMAN-SIGMAR'
      end if
 
   case (3) 
 
-     if(write_out_mode > 1) then
-        print *,'collision_model    : FULL HIRSHMAN-SIGMAR'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'collision_model    : FULL HIRSHMAN-SIGMAR'
      endif
 
   case (4) 
 
-     if(write_out_mode > 1) then
-        print *,'collision_model    : FULL LINEARIZED FOKKER-PLANCK' 
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'collision_model    : FULL LINEARIZED FOKKER-PLANCK'
      end if
 
   case (5) 
 
-     if(write_out_mode > 1) then
-        print *,'collision_model    : FULL LINEARIZED FOKKER-PLANCK WITH AD-HOC FIELD PARTICLE TERMS' 
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'collision_model    : FULL LINEARIZED FOKKER-PLANCK WITH AD-HOC FIELD PARTICLE TERMS' 
      end if
 
   case default
@@ -110,26 +102,26 @@ subroutine neo_check
 
   case (0) 
 
-     if(write_out_mode > 1) then
-        print *,'equilibrium_model  : S-ALPHA'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'equilibrium_model  : S-ALPHA'
      end if
 
   case (1) 
 
-     if(write_out_mode > 1) then
-        print *,'equilibrium_model  : LARGE-ASPECT-RATIO'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'equilibrium_model  : LARGE-ASPECT-RATIO'
      end if
 
   case (2) 
 
-     if(write_out_mode > 1) then
-        print *,'equilibrium_model  : MILLER'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'equilibrium_model  : MILLER'
      end if
 
   case (3) 
 
-     if(write_out_mode > 1) then
-        print *,'equilibrium_model  : GENERAL'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'equilibrium_model  : GENERAL'
      end if
 
      if(geo_ny <= 0) then
@@ -176,24 +168,24 @@ subroutine neo_check
         end if
      enddo
 
-     if(write_out_mode > 1) then
-        print *,'profile_model      : LOCAL'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'profile_model      : LOCAL'
      end if
 
   case (2) 
 
-     if(write_out_mode > 1) then
-        print *,'profile_model      : GLOBAL PROFILE'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'profile_model      : GLOBAL PROFILE'
      end if
 
      select case (profile_erad0_model)
      case(0)
-        if(write_out_mode > 1) then
-           print *, 'GLOBAL PROFILE profile_erad0_model: ERAD0 NOT INCLUDED'
+        if(silent_flag == 0 .and. i_proc == 0) then
+           write(io_neoout,*) 'GLOBAL PROFILE profile_erad0_model: ERAD0 NOT INCLUDED'
         end if
      case (1)
-        if(write_out_mode > 1) then
-           print *, 'GLOBAL PROFILE profile_erad0_model: ERAD0 INCLUDED'
+        if(silent_flag == 0 .and. i_proc == 0) then
+           write(io_neoout,*) 'GLOBAL PROFILE profile_erad0_model: ERAD0 INCLUDED'
         end if
      case default
         call neo_error('ERROR: (NEO) invalid profile_erad0_model')
@@ -202,12 +194,12 @@ subroutine neo_check
 
      select case (profile_temprescale_model)
      case(0)
-        if(write_out_mode > 1) then
-           print *, 'GLOBAL PROFILE profile_temprescale_model:  PROFILE TEMPERATURES ARE NOT RE-SCALED'
+        if(silent_flag == 0 .and. i_proc == 0) then
+           write(io_neoout,*)  'GLOBAL PROFILE profile_temprescale_model:  PROFILE TEMPERATURES ARE NOT RE-SCALED'
         end if
      case (1)
-        if(write_out_mode > 1) then
-           print *, 'GLOBAL PROFILE profile_temprescale_model: PROFILE TEMPERATURES ARE RE-SCALED TO THE ELECTRON TEMP'
+        if(silent_flag == 0 .and. i_proc == 0) then
+           write(io_neoout,*) 'GLOBAL PROFILE profile_temprescale_model: PROFILE TEMPERATURES ARE RE-SCALED TO THE ELECTRON TEMP'
         end if
      case default
         call neo_error('ERROR: (NEO) invalid profile_temprescale_model')
@@ -216,25 +208,25 @@ subroutine neo_check
 
      select case (profile_equilibrium_model)
      case(0)
-        if(write_out_mode > 1) then
-           print *, 'GLOBAL PROFILE profile_equilibrium_model: WITH S-ALPHA GEOMETRY'
+        if(silent_flag == 0 .and. i_proc == 0) then
+           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: WITH S-ALPHA GEOMETRY'
         end if
      case (1)
-        if(write_out_mode > 1) then
-           print *, 'GLOBAL PROFILE profile_equilibrium_model: WITH MILLER GEOMETRY'
+        if(silent_flag == 0 .and. i_proc == 0) then
+           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: WITH MILLER GEOMETRY'
            if(abs(profile_delta_scale-1.0) > epsilon(0.) ) then
-              print *, 'GLOBAL PROFILE profile_equilibrium_model: DELTA AND S_DELTA ARE RE-SCALED'
+              write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DELTA AND S_DELTA ARE RE-SCALED'
            endif
            if(abs(profile_zeta_scale-1.0) > epsilon(0.) ) then
-              print *, 'GLOBAL PROFILE profile_equilibrium_model: ZETA AND S_ZETA ARE RE-SCALED'
+              write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: ZETA AND S_ZETA ARE RE-SCALED'
            endif
            if(abs(profile_zmag_scale-1.0) > epsilon(0.) ) then
-              print *, 'GLOBAL PROFILE profile_equilibrium_model: ZMAG AND S_MAG ARE RE-SCALED'
+              write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: ZMAG AND S_MAG ARE RE-SCALED'
            endif
         end if
      case (2)
-        if(write_out_mode > 1) then
-           print *, 'GLOBAL PROFILE profile_equilibrium_model: WITH GENERAL GEOMETRY'
+        if(silent_flag == 0 .and. i_proc == 0) then
+           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: WITH GENERAL GEOMETRY'
         endif
      case default
         call neo_error('ERROR: (NEO) invalid profile_equilibrium_model')
@@ -242,8 +234,8 @@ subroutine neo_check
      end select
 
   case(3)
-     if(write_out_mode > 1) then
-        print *,'profile_model      : GLOBAL PROFILE TEST'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'profile_model      : GLOBAL PROFILE TEST'
      end if
 
   case default
@@ -256,22 +248,22 @@ subroutine neo_check
   !-----------------------------------------------------------
   ! Sign of B checks
   if(sign_q > 0.0) then
-     if(write_out_mode > 1) then
-        print *,'sign_q: POSITIVE'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'sign_q: POSITIVE'
      end if
   else
-     if(write_out_mode > 1) then
-        print *, 'sign_q: NEGATIVE'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'sign_q: NEGATIVE'
      end if
   end if
 
   if(sign_bunit > 0.0) then
-     if(write_out_mode > 1) then
-        print *,'sign_bunit: POSITIVE (BT CW)'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'sign_bunit: POSITIVE (BT CW)'
      end if
   else
-     if(write_out_mode > 1) then
-        print *, 'sign_bunit: NEGATIVE (BT CCW)'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'sign_bunit: NEGATIVE (BT CCW)'
      end if
   end if
 
@@ -281,12 +273,12 @@ subroutine neo_check
   !
   select case (rotation_model)     
   case (1)
-     if(write_out_mode > 1) then
-        print *,'rotation model: ROTATION EFFECTS NOT INCLUDED'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'rotation model: ROTATION EFFECTS NOT INCLUDED'
      end if
   case (2)
-     if(write_out_mode > 1) then
-        print *,'rotation model: ROTATION EFFECTS INCLUDED'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'rotation model: ROTATION EFFECTS INCLUDED'
      end if
   case default
      call neo_error('ERROR: (NEO) invalid rotation_model')
@@ -295,12 +287,12 @@ subroutine neo_check
 
   select case (spitzer_model)
   case(0)
-     if(write_out_mode > 1) then
-        print *, 'spitzer_model: NEOCLASSICAL TRANSPORT TEST CASE'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'spitzer_model: NEOCLASSICAL TRANSPORT TEST CASE'
      end if
   case (1)
-     if(write_out_mode > 1) then
-        print *, 'spitzer_model: SPITZER TEST CASE'
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'spitzer_model: SPITZER TEST CASE'
      end if
   case default
      call neo_error('ERROR: (NEO) invalid spitzer_model')
@@ -309,55 +301,58 @@ subroutine neo_check
 
   !------------------------------------------------------------
 
-  if(write_out_mode > 1) then
-     print *
-     print *,'GRID DIMENSIONS'
-     print *,'---------------'
-     print 10,'n_radial',n_radial
-     print 10,'n_energy',n_energy
-     print 10,'n_xi',n_xi
-     print 10,'n_theta',n_theta
+  if(silent_flag == 0 .and. i_proc == 0) then
+     write(io_neoout,*)
+     write(io_neoout,*) 'GRID DIMENSIONS'
+     write(io_neoout,*) '---------------'
+     write(io_neoout,10) 'n_radial',n_radial
+     write(io_neoout,10) 'n_energy',n_energy
+     write(io_neoout,10) 'n_xi',n_xi
+     write(io_neoout,10) 'n_theta',n_theta
 
      do ir=1,n_radial
-        print *
-        print *,'PHYSICS PARAMETERS'
-        print *,'------------------'
-        print 20,'r/R',r(ir)
-        print 20,'dphi0/dr',dphi0dr(ir)
-        print 20,'omega_rot',omega_rot(ir)
-        print 20,'omega_rot_deriv',omega_rot_deriv(ir)
-        print 20,'q',q(ir)
-        print 20,'s',shat(ir)
-        print 20,'shift',shift(ir)
-        print 20,'kappa',kappa(ir)
-        print 20,'s_kappa',s_kappa(ir)
-        print 20,'delta',delta(ir)
-        print 20,'s_delta',s_delta(ir)
-        print 20,'zeta',zeta(ir)
-        print 20,'s_zeta',s_zeta(ir)
-        print 20,'zmag',zmag(ir)
-        print 20,'s_zmag',s_zmag(ir)
+        write(io_neoout,*) 
+        write(io_neoout,*) 'PHYSICS PARAMETERS'
+        write(io_neoout,*) '------------------'
+        write(io_neoout,20) 'r/R',r(ir)
+        write(io_neoout,20) 'dphi0/dr',dphi0dr(ir)
+        write(io_neoout,20) 'omega_rot',omega_rot(ir)
+        write(io_neoout,20) 'omega_rot_deriv',omega_rot_deriv(ir)
+        write(io_neoout,20) 'q',q(ir)
+        write(io_neoout,20) 's',shat(ir)
+        write(io_neoout,20) 'shift',shift(ir)
+        write(io_neoout,20) 'kappa',kappa(ir)
+        write(io_neoout,20) 's_kappa',s_kappa(ir)
+        write(io_neoout,20) 'delta',delta(ir)
+        write(io_neoout,20) 's_delta',s_delta(ir)
+        write(io_neoout,20) 'zeta',zeta(ir)
+        write(io_neoout,20) 's_zeta',s_zeta(ir)
+        write(io_neoout,20) 'zmag',zmag(ir)
+        write(io_neoout,20) 's_zmag',s_zmag(ir)
 
         do is=1,n_species
-           print *
-           print '(t2,a,i1)','Species ',is
-           print *, '----------'
-           print 10,'Z',z(is)
-           print 20,'dens',dens(is,ir)
-           print 20,'temp',temp(is,ir)
-           print 20,'mass',mass(is)
-           print 20,'rho',rho(ir)*sqrt(temp(is,ir)*mass(is)/temp(1,ir)/mass(1))
-           print 20,'a/Ln',dlnndr(is,ir)
-           print 20,'a/LT',dlntdr(is,ir)
-           print 20,'nu',nu(is,ir)
+           write(io_neoout,*) 
+           write(io_neoout,'(t2,a,i1)') 'Species ',is
+           write(io_neoout,*) '----------'
+           write(io_neoout,10) 'Z',z(is)
+           write(io_neoout,20) 'dens',dens(is,ir)
+           write(io_neoout,20) 'temp',temp(is,ir)
+           write(io_neoout,20) 'mass',mass(is)
+           write(io_neoout,20) 'a/Ln',dlnndr(is,ir)
+           write(io_neoout,20) 'a/LT',dlntdr(is,ir)
+           write(io_neoout,20) 'nu',nu(is,ir)
         enddo
      enddo
 
-     print *
+     write(io_neoout,*)
 
   endif
 
-10 format(t2,a,':',t14,i2) 
+  if(silent_flag == 0 .and. i_proc == 0) then
+     close(io_neoout)
+  endif
+
+10 format(t2,a,':',t14,i2)
 20 format(t2,a,':',t13,1pe12.4) 
 
 end subroutine neo_check

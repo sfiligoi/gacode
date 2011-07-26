@@ -1,13 +1,13 @@
-subroutine EXPRO_alloc_control(i_proc,path,flag)
+subroutine EXPRO_alloc_control(i_proc,flag)
 
+  use EXPRO_globals
   use EXPRO_interface
 
   implicit none
 
-  character(len=*) :: path
-
   integer, intent(in) :: i_proc
   integer, intent(in) :: flag
+
   integer :: ierr
   integer, parameter :: io=1
 
@@ -24,16 +24,18 @@ subroutine EXPRO_alloc_control(i_proc,path,flag)
              status='old',&
              iostat=ierr)
 
-        if (ierr /= 0) then
-           print '(a)','ERROR: (EXPRO) input.profiles.gen does not exist'
+        if (ierr == 0) then
+           read(io,*) EXPRO_ncol
+           read(io,*) EXPRO_nblock
+           read(io,*) EXPRO_n_exp
+           close(io)
+        else
+           close(io)
+           open(unit=io,file=trim(path)//trim(runfile),status='replace')
+           write(io,'(a)') 'ERROR: (EXPRO) input.profiles.gen does not exist'
+           close(io)
            stop
         endif
-
-        read(io,*) EXPRO_ncol
-        read(io,*) EXPRO_nblock
-        read(io,*) EXPRO_n_exp
-
-        close(io)
         !--------------------------------------------------------------
 
         !--------------------------------------------------------------
@@ -46,12 +48,15 @@ subroutine EXPRO_alloc_control(i_proc,path,flag)
 
         if (ierr /= 0) then
            EXPRO_nfourier = -1
+           close(io)
         else
-           print '(a)','INFO: (EXPRO) input.profiles.geo found'
            read(io,*) EXPRO_nfourier
+           close(io)
+           open(unit=io,file=trim(path)//trim(runfile),status='replace')
+           write(io,'(a)') 'INFO: (EXPRO) input.profiles.geo found'
+           close(io)
         endif
 
-        close(io)
         !--------------------------------------------------------------
 
      endif

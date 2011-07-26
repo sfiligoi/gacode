@@ -98,7 +98,7 @@ then
    echo
    echo "             -vgen_in <ion string> " 
    echo "             Choices: DC, HDC"
-   echo "             If this is blank, INPUT.v must exist."
+   echo "             If this is blank, input.vgen must exist."
    echo
    echo "             -vgen_e <flag>" 
    echo "             Method to compute Er."
@@ -406,17 +406,17 @@ then
    mkdir vgen
    cd vgen
 
-   # Check for INPUT.v file
+   # Check for input.vgen file
 
-   if [ -f $NEO_DIR/tools/input/vgen/INPUT.v.$VGEN_IN ]
+   if [ -f $NEO_DIR/tools/input/vgen/input.vgen.$VGEN_IN ]
    then
-     cp $NEO_DIR/tools/input/vgen/INPUT.v.$VGEN_IN input.neo
+     cp $NEO_DIR/tools/input/vgen/input.vgen.$VGEN_IN input.neo
    else 
-      if [ -f ../INPUT.v ]
+      if [ -f ../input.vgen ]
       then
-         cp ../INPUT.v input.neo
+         cp ../input.vgen input.neo
       else
-         echo "ERROR: (profiles_gen) Specify ion string with -vgen_in, or create INPUT.v"
+         echo "ERROR: (profiles_gen) Specify ion string with -vgen_in, or create input.vgen"
          exit 1
       fi
    fi

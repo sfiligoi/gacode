@@ -7,6 +7,7 @@
 
 program vgen
 
+  use mpi
   use vgen_globals
   use neo_interface
   use EXPRO_interface
@@ -35,8 +36,6 @@ program vgen
 
   real, dimension(:), allocatable :: er_exp
   !---------------------------------------------------
-
-  include 'mpif.h'
 
   !-----------------------------------------------------------------
   ! Initialize MPI_COMM_WORLD communicator.
@@ -109,13 +108,12 @@ program vgen
 
   !---------------------------------------------------------------------
 
-  call neo_init(path)
+  call neo_init_serial(path)
   call neo_read_input()
   call map_global2interface()
 
   neo_n_radial_in = 1
   neo_profile_model_in = 1
-  !neo_write_out_mode_in = 0
 
   ! Species checks
 
@@ -222,8 +220,8 @@ program vgen
      EXPRO_ctrl_signq =  EXPRO_ctrl_signb
   endif
 
-  call EXPRO_pread(MPI_COMM_WORLD,path)
-  if (i_proc == 0) call EXPRO_write_derived(path)
+  call EXPRO_pread
+  if (i_proc == 0) call EXPRO_write_derived
   !---------------------------------------------------------------------
 
   ! Storage for electric field at theta=0 (er0) 
@@ -240,7 +238,6 @@ program vgen
         endif
      enddo
   endif
-
   !======================================================================
   ! Four alternatives for Er calculation:
   !
@@ -322,6 +319,7 @@ program vgen
            er0 = er_exp(i)
            omega = EXPRO_w0(i) 
            omega_deriv = EXPRO_w0p(i) 
+
            call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
                 omega_deriv)
 
@@ -529,7 +527,7 @@ program vgen
   ! Write the new input.profiles
 
   tag = '.new'
-  call EXPRO_write_original(path,tag)
+  call EXPRO_write_original(tag)
 
   call vgen_getgeo()
 

@@ -13,7 +13,7 @@ F77 = ftn
 # Compiler options/flags
 FMATH  = -r8
 FOPT   = -tp istanbul-64 -O3 -fast -Msmartalloc -fastsse
-FDEBUG = -g -Ktrap=fp -Mbounds -Minform=inform
+FDEBUG = -g -Ktrap=fp -Mbounds -Minform=inform -Msmartalloc
 FPROF  = -tp istanbul-64 -O3 -fast -Msmartalloc -Mprof=func
 
 # Execute 'module load fftw/2.1.5'

@@ -5,13 +5,12 @@
 !  Low-level read control for EXPRO.
 !--------------------------------------------------------------
 
-subroutine EXPRO_read_driver(path)
+subroutine EXPRO_read_driver
 
+  use EXPRO_globals
   use EXPRO_interface
 
   implicit none
-
-  character(len=*), intent(in) :: path
 
   integer, parameter :: io=1
   integer :: i

@@ -71,6 +71,7 @@ subroutine gyro_run(&
 
   ! Run GYRO
   call gyro_do
+  call send_line('STATUS: '//gyro_exit_message)
 
   ! Get output information
 
