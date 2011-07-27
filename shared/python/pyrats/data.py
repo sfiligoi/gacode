@@ -2183,8 +2183,8 @@ class GYROData:
         #self.read_diff()
         #self.read_diff_i()
         #self.read_diff_n()
-        self.read_gbflux()
-        #self.read_gbflux_i()
+        #self.read_gbflux()
+        self.read_gbflux_i()
         #self.read_gbflux_n()
         #self.read_moment_u()
         #self.read_moment_n()
@@ -2205,12 +2205,13 @@ class GYROData:
 
         fname = 'out.gyro.' + fname
         filename = self.directory_name + '/' + fname
+        f = np.array([])
         if fname in os.listdir(self.directory_name):
             f = fileupload.loadtxt(filename, dSize)
             return f
         else:
             print "ERROR: File " + fname + " does not exist."
-            return 0
+            return f
 
 
     def read_t(self):
@@ -2320,7 +2321,7 @@ class GYROData:
         import numpy as np
         
         geometry = self.read_file('geometry_arrays', 16)
-        if geometry != 0:
+        if len(geometry) > 0:
             temp = geometry.reshape( (11, self.profile['n_fine'], self.profile['n_x']), order='F')
             self.geometry['v'] = temp[0, :, :]
             self.geometry['gsin'] = temp[1, :, :]
@@ -2354,7 +2355,7 @@ class GYROData:
         import numpy as np
     
         diff = self.read_file('diff', 12)
-        if diff != 0:
+        if len(diff) > 0:
             temp = diff.reshape( (self.t['n_time'], self.profile['n_kinetic'], self.profile['n_field'], 2), order='F')
             self.diff['D_sigma/chi_{GB}'] = temp[:, :, :, 0]
             self.diff['chi_sigma/chi_{GB}'] = temp[:, :, :, 1]
@@ -2400,7 +2401,7 @@ class GYROData:
         import numpy as np
 
         gbflux_i = self.read_file('gbflux_i', 12)
-        if gbflux_i != 0:
+        if len(gbflux_i) > 0:
             self.gbflux_i = gbflux_i.reshape( (self.profile['n_kinetic'], self.profile['n_field'], 4, self.profile['n_x'], self.t['n_time']), order='F')
 
     def read_gbflux_n(self):
