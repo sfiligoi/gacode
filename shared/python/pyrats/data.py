@@ -2138,7 +2138,7 @@ class GYROData:
         self.diff = {}
         self.diff_i = {}
         self.diff_n = {}
-        self.gbflux = []
+        self.gbflux = {}
         self.gbflux_i = {}
         self.gbflux_n = {}
         self.moment_u = []
