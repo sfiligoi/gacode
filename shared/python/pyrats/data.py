@@ -2095,7 +2095,7 @@ class GYROData:
     diff_i = {}
     diff_n = {}
     gbflux = []
-    gbflux_i = []
+    gbflux_i = {}
     gbflux_n = {}
     moment_u = []
     moment_n = []
@@ -2139,7 +2139,7 @@ class GYROData:
         self.diff_i = {}
         self.diff_n = {}
         self.gbflux = []
-        self.gbflux_i = []
+        self.gbflux_i = {}
         self.gbflux_n = {}
         self.moment_u = []
         self.moment_n = []
@@ -2401,7 +2401,11 @@ class GYROData:
 
         gbflux_i = self.read_file('gbflux_i', 12)
         if gbflux_i != 0:
-            self.gbflux_i = gbflux_i.reshape( (self.profile['n_kinetic'], self.profile['n_field'], 4, self.profile['n_x'], self.t['n_time']), order='F')
+            temp = gbflux_i.reshape( (self.profile['n_kinetic'], self.profile['n_field'], 4, self.profile['n_x'], self.t['n_time']), order='F')
+            self.gbflux_i['GAMMA_sigma(r)/GAMMA_{GB}'] = temp[:, :, 0, :, :]
+            self.gbflux_i['Q_sigma(r)/Q_{GB}'] = temp[:, :, 0, :, :]
+            self.gbflux_i['PI_sigma(r)/PI_{GB}'] = temp[:, :, 0, :, :]
+            self.gbflux_i['S^tur_{W,sigma}(r)/S_{GB}'] = temp[:, :, 0, :, :]
 
     def read_gbflux_n(self):
         """Reads gbflux_n data.  Output is numpy array with dimensions:
@@ -2525,7 +2529,10 @@ class GYROData:
 
         import numpy as np
 
-        self.gbflux = np.mean(self.gbflux_i, axis=3)
+        self.gbflux['GAMMA_sigma/GAMMA_{GB}'] = np.mean(self.gbflux_i['GAMMA_sigma(r)/GAMMA_{GB}'], axis=2)
+        self.gbflux['Q_sigma/Q_{GB}'] = np.mean(self.gbflux_i['Q_sigma(r)/Q_{GB}'], axis=2)
+        self.gbflux['PI_sigma/PI_{GB}'] = np.mean(self.gbflux_i['PI_sigma(r)/PI_{GB}'], axis=2)
+        self.gbflux['S^tur_{W,sigma}/S_{GB}'] = np.mean(self.gbflux_i['S^tur_{W,sigma}(r)/S_{GB}'], axis=2)
 
     def make_diff(self):
         """Makes diff.  Output is dictionary of numpy arrays with
@@ -2538,8 +2545,8 @@ class GYROData:
         temp1 = []
         temp2 = []
         for i in range(int(self.profile['n_spec'])):
-            temp1.append(self.gbflux[i, :, 0, :]*np.mean(self.profile['dlnndr_s'], axis=1)[i]/np.mean(self.profile['den_s'], axis=1)[i])
-            temp2.append(self.gbflux[i, :, 1, :]*np.mean(self.profile['dlntdr_s'], axis=1)[i]/np.mean(self.profile['tem_s'], axis=1)[i])
+            temp1.append(self.gbflux['GAMMA_sigma/GAMMA_{GB}'][i, :, :]*np.mean(self.profile['dlnndr_s'], axis=1)[i]/np.mean(self.profile['den_s'], axis=1)[i])
+            temp2.append(self.gbflux['Q_sigma/Q_{GB}'][i, :, :]*np.mean(self.profile['dlntdr_s'], axis=1)[i]/np.mean(self.profile['tem_s'], axis=1)[i])
         self.diff['D_sigma/chi_{GB}'] = np.array(temp1)
         self.diff['chi_sigma/chi_{GB}'] = np.array(temp2)
 
@@ -2554,8 +2561,8 @@ class GYROData:
         temp1 = []
         temp2 = []
         for i in range(int(self.profile['n_spec'])):
-            temp1.append(self.gbflux_i[i, :, 0, :, :]*np.mean(self.profile['dlnndr_s'], axis=1)[i]/np.mean(self.profile['den_s'], axis=1)[i])
-            temp2.append(self.gbflux[i, :, 1, :, :]*np.mean(self.profile['dlntdr_s'], axis=1)[i]/np.mean(self.profile['tem_s'], axis=1)[i])
+            temp1.append(self.gbflux_i['GAMMA_sigma(r)/GAMMA_{GB}'][i, :, :, :]*np.mean(self.profile['dlnndr_s'], axis=1)[i]/np.mean(self.profile['den_s'], axis=1)[i])
+            temp2.append(self.gbflux_i['Q_sigma(r)/Q_{GB}'][i, :, :, :]*np.mean(self.profile['dlntdr_s'], axis=1)[i]/np.mean(self.profile['tem_s'], axis=1)[i])
         self.diff_i['D_sigma(r)/chi_{GB}'] = np.array(temp1)
         self.diff_i['chi_sigma(r)/chi_{GB}'] = np.array(temp2)
 
