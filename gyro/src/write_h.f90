@@ -74,13 +74,13 @@ subroutine write_h(datafile1,datafile2,io1,io2)
               if (k <= n_pass) then
 
                  do j=1,n_theta(ck)
-                    write(io1,10) real(h(m_map(ck,j,:),ir_norm,p_nek_loc,is))
+                    write(io1,fmtstr) real(h(m_map(ck,j,:),ir_norm,p_nek_loc,is))
                  enddo
 
               else
 
                  do j=1,n_theta(ck)
-                    write(io2,10) real(h(m_map(ck,j,:),ir_norm,p_nek_loc,is))
+                    write(io2,fmtstr) real(h(m_map(ck,j,:),ir_norm,p_nek_loc,is))
                  enddo
 
               endif
@@ -101,7 +101,5 @@ subroutine write_h(datafile1,datafile2,io1,io2)
   end select
 
   if (debug_flag == 1) print *,'[write_h called]'
-
-10 format(t2,2(es11.4,1x))
 
 end subroutine write_h

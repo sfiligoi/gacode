@@ -109,7 +109,7 @@ subroutine gyro_read_restart
              status='old')
 
         read(io,*) data_step
-        read(io,10) t_current
+        read(io,fmtstr) t_current
         read(io,*) n_proc_old
         read(io,*) i_restart
 
@@ -186,11 +186,7 @@ subroutine gyro_read_restart
   call get_field_explicit
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[read_restart done]'
+     print *,'[gyro_read_restart done]'
   endif
-
-  ! ** Keep this consistent with gyro_write_restart.f90
-
-10 format(2(es11.4,1x))
 
 end subroutine gyro_read_restart

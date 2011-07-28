@@ -483,7 +483,8 @@ subroutine write_distributed_real(datafile,io,n_fn,fn)
        GYRO_COMM_WORLD,&
        i_proc,&
        i_err,&
-       io_control
+       io_control, &
+       fmtstr
 
   !------------------------------------------------------
   implicit none
@@ -567,7 +568,7 @@ subroutine write_distributed_real(datafile,io,n_fn,fn)
 
         if (i_proc == 0) then
 
-           write(io,10) fn_recv(:)
+           write(io,fmtstr) fn_recv(:)
 
         endif
 
@@ -585,7 +586,7 @@ subroutine write_distributed_real(datafile,io,n_fn,fn)
         do data_loop=0,data_step
 
            do in=1,n_n
-              read(io,10) fn_recv(:)
+              read(io,fmtstr) fn_recv(:)
            enddo
 
         enddo ! data_loop
@@ -596,8 +597,6 @@ subroutine write_distributed_real(datafile,io,n_fn,fn)
      endif
 
   end select
-
-10 format(es11.4,1x)
 
 end subroutine write_distributed_real
 
@@ -622,7 +621,8 @@ subroutine write_distributed_complex(datafile,io,n_fn,fn)
        GYRO_COMM_WORLD,&
        i_proc,&
        i_err, &
-       io_control
+       io_control, &
+       fmtstr
 
   !------------------------------------------------------
   implicit none
@@ -707,7 +707,7 @@ subroutine write_distributed_complex(datafile,io,n_fn,fn)
 
         if (i_proc == 0) then
 
-           write(io,10) fn_recv(:)
+           write(io,fmtstr) fn_recv(:)
 
         endif
 
@@ -725,7 +725,7 @@ subroutine write_distributed_complex(datafile,io,n_fn,fn)
         do data_loop=0,data_step
 
            do in=1,n_n
-              read(io,10) fn_recv(:)
+              read(io,fmtstr) fn_recv(:)
            enddo
 
         enddo ! data_loop
@@ -736,8 +736,6 @@ subroutine write_distributed_complex(datafile,io,n_fn,fn)
      endif
 
   end select
-
-10 format(2(es11.4,1x))
 
 end subroutine write_distributed_complex
 
@@ -754,7 +752,8 @@ subroutine write_local_real(datafile,io,n_fn,fn)
 
   use gyro_globals, only : &
        data_step, &
-       io_control
+       io_control, &
+       fmtstr
 
   !---------------------------------------------------
   implicit none
@@ -786,7 +785,7 @@ subroutine write_local_real(datafile,io,n_fn,fn)
      ! Append
 
      open(unit=io,file=datafile,status='old',position='append')
-     write(io,10)  fn(:)
+     write(io,fmtstr)  fn(:)
      close(io)
 
   case(3)
@@ -796,15 +795,13 @@ subroutine write_local_real(datafile,io,n_fn,fn)
      open(unit=io,file=datafile,status='old')
 
      do data_loop=0,data_step
-        read(io,10) dummy(:)
+        read(io,fmtstr) dummy(:)
      enddo
 
      endfile(io)
      close(io)
 
   end select
-
-10 format(100(es11.4,1x))
 
 end subroutine write_local_real
 
