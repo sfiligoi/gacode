@@ -192,7 +192,7 @@ class TGYROData:
             if len(line.strip()) > 0:
                 if line.strip()[0].isdigit():
                     temp.append(line.split())
-        data = array(temp)
+        data = array(temp, dtype=float)
 
         # This catches error from columns running into each other
         keywords = raw_data[0].replace('target', 'target ').split()
