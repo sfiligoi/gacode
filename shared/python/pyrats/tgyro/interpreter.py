@@ -8,7 +8,7 @@
 import sys
 import os
 import matplotlib.pyplot as plt
-from pyrats.data import TGYROData
+from pyrats.tgyro.data import TGYROData
 
 fignum = 1
 sim1 = TGYROData(sys.argv[1])

@@ -7,7 +7,7 @@
     Usage:
 
     >>>from pyrats.examples import test_tgyro
-    >>>test_tgyro
+    >>>test_tgyro()
 
     Contents:
 
@@ -24,7 +24,7 @@ def test_tgyro(sim='$GACODE_ROOT/tgyro/tools/input/treg01'):
     """
         
 
-    from pyrats.data import TGYROData
+    from pyrats.tgyro.data import TGYROData
 
     treg01 = TGYROData(sim)
 
@@ -55,7 +55,7 @@ def tgyro_stab(sim='$GACODE_ROOT/tgyro/tools/input/sreg02', radius=0):
     """
 
     from numpy import array_str
-    from pyrats.data import TGYROData
+    from pyrats.tgyro.data import TGYROData
 
     tgyro_data = TGYROData(sim)
 

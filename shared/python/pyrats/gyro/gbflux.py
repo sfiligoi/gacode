@@ -1,7 +1,7 @@
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-from pyrats.data import GYROData
+from pyrats.gyro.data import GYROData
 
 directory=sys.argv[1]
 n_field=sys.argv[3]

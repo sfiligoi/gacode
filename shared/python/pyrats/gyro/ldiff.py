@@ -1,4 +1,4 @@
-from pyrats.data import GYROData
+from pyrats.gyro.data import GYROData
 import sys
 import numpy as np
 
@@ -22,8 +22,7 @@ if verbose:
         print "|PARTICLE DIFFUSIVITY SPE " + str(a) + "|ENERGY DIFFUSIVITY SPE " + str(a),
     print "|PARTICLE DIFFUSIVITY SPE " + str(n) + "|ENERGY DIFFUSIVITY SPE " + str(n)
     temp = []
-    for k,v in sim1.diff.iteritems():
-        temp.append(np.sum(v, axis=1))
+    temp = np.sum(sim1.diff, axis=1)
     for i in range(len(temp[0][0])):
         print repr(i).rjust(16), '|',
         for a in range(n):
@@ -35,7 +34,6 @@ else:
     print
     print "      TIME       |   ENERGY DIFFUSIVITY"
     temp = []
-    for k,v in sim1.diff.iteritems():
-        temp.append(np.sum(v, axis=1))
+    temp = np.sum(sim1.diff, axis=1)
     for i in range(len(temp[0][0])):
-        print repr(i).rjust(16), '|', repr(temp[1][0][i]).ljust(23)
+        print repr(i).rjust(16), '|', repr(temp[0][1][i]).ljust(23)
