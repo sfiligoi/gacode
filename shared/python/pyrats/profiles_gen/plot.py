@@ -13,7 +13,7 @@ the user can specify two directories for comparison.  See
 interface."""
 
 import sys
-from profiles_genData import profiles_genData
+from pyrats.profiles_gen.data import profiles_genData
 from errorcheck import *
 try:
     import matplotlib.pyplot as plt

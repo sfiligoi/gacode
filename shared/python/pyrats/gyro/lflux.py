@@ -1,4 +1,4 @@
-from pyrats.data import GYROData
+from pyrats.gyro.data import GYROData
 import sys
 import numpy as np
 
@@ -33,4 +33,4 @@ else:
     print
     print "      TIME      |       ENERGY FLUX"
     for i in range(len(temp[0, 0, :])):
-        print repr(i).rjust(15), '|', repr(temp[0, 0, i]).ljust(23)
+        print repr(i).rjust(15), '|', repr(temp[0, 1, i]).ljust(23)

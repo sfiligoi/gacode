@@ -17,6 +17,7 @@
     Author(s):
 
     Luc Peterson (jdpeters@princeton.edu)
+    Micah Buuck (buuck@stolaf.edu)
 
     -------------------
     Version History:
@@ -26,8 +27,31 @@
     -------------------
     Contents:
 
-    data
-        TGYROData      TGYRO Data Object
+    tgyro
+        data
+            TGYROData        TGYRO Data Object
+        intepreter           Handles command line execution of tgyro_plot
+    neo
+        data
+            NEOData          NEO Data Object
+        interpreter          Handles command line execution of neo_plot
+        options              Handles command line execution of neo_plot -options
+    gyro
+        data
+            GYROData         GYRO Data Object
+        gbflux               Handles command line execution of gyro_plot -gbflux
+        ldiff                Handles command line execution of gyro_plot -ldiff
+        lflux                Handles command line execution of gyro_plot -lflux
+    profiles_gen
+        data
+            profiles_genData profiles_gen Data Object
+        errorcheck           Contains error handling for profiles_gen_plot
+        fluxplot
+            comparision      Handles execution of profiles_gen_plot -fp -c
+            fourier          Handles execution of profiles_gen_plot -fp -f
+            miller           Handles execution of profiles_gen_plot -fp -m
+        options              Handles execution of profiles_gen_plot -options
+        plot                 Handles execution of profiles_gen_plot -p
     examples
         tgyro_test.py  test for treg01
 
@@ -37,27 +61,27 @@
     Basic Test:
 
     python
-    >>>from pyrats.examples import test_tgyro
-    >>>tgyro_test()
+    >>> from pyrats.examples import test_tgyro
+    >>> tgyro_test()
 
     Plotting Test:
     python
-    >>>from matplotlib import pyplot
-    >>>from pyrats.data import TGYROData
-    >>>sim1 = TGYROData('$GACODE_ROOT/tgyro/tools/input/treg01')
-    >>>pyplot.plot(sim1.get_r(), sim1.get_Te())
-    >>>pyplot.show()
+    >>> from matplotlib import pyplot
+    >>> from pyrats.data import TGYROData
+    >>> sim1 = TGYROData('$GACODE_ROOT/tgyro/tools/input/treg01')
+    >>> pyplot.plot(sim1.get_r(), sim1.get_Te())
+    >>> pyplot.show()
 
     For Help:
     python
-    >>>from pyrats import *
-    >>>help(data)
-    >>>help(examples)
+    >>> from pyrats import *
+    >>> help(data)
+    >>> help(examples)
 
 """
 
 # Package Contents
-__all__ = ["data", "examples"]
+__all__ = ["examples", "gyro", "neo", "tgyro", "profiles_gen"]
 
 # Test for required modules
 modules = ["numpy", "matplotlib"]

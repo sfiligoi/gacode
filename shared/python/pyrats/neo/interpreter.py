@@ -1,4 +1,4 @@
-from pyrats.data import NEOData
+from pyrats.neo.data import NEOData
 import sys
 import matplotlib.pyplot as plt
 import math

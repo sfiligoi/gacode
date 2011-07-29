@@ -1,4 +1,4 @@
-"""profiles_genData.py contains data classes for input.profiles.
+"""This data.py contains data classes for input.profiles.
 
     Contents:
         profiles_genData

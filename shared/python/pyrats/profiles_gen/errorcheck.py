@@ -2,7 +2,7 @@
 errors in input.""" 
 
 import sys
-from profiles_genData import profiles_genData
+from pyrats.profiles_gen.data import profiles_genData
 import matplotlib.pyplot as plt
 import math
 

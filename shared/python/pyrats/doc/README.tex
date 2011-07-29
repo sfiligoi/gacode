@@ -1,0 +1,29 @@
+\documentclass{article}
+\addtolength{\parskip}{\baselineskip}
+
+\begin{document}
+\begin{center}
+\Large
+Documentation for PYRATS:
+Python Routines for Analyzing Transport Simulations
+\end{center}
+\normalsize
+
+\noindent \textbf{Introduction: }PYRATS is a data processing tool designed to make creating plots of output data from GYRO, TGYRO, or NEO easy.  It makes use of the python programming language, and the associated packages numpy and matplotlib.  With minimal knowledge of the python language and matplotlib, the typical user should be able to create plots quickly and efficiently from the python command line interpreter.
+
+\noindent To begin, type the following command into the terminal:
+\fontfamily{\ttdefault}\selectfont
+
+\$ python
+
+\fontfamily{\rmdefault}\selectfont
+\noindent This will bring up the python interpreter, which is the interface you will use to interact with PYRATS.  As a first example, we will look at the layout of TGYROData.  Now execute the following commands:
+\fontfamily{\ttdefault}\selectfont
+
+>>> from pyrats.tgyro.data import TGYROData
+
+>>> help(TGYROData)
+
+\fontfamily{\rmdefault}\selectfont
+\noindent This will bring up the built-in documentation for the class TGYROData.  It lists all of the methods and attributes of the class, and the function of each one.  This information is also contained on page x of this manual.  
+\end{document}
