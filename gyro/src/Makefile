@@ -67,6 +67,7 @@ OBJECTS = gyro_globals.o \
 	  gyro_fieldeigen_kernel.o \
 	  gyro_fieldeigen_df.o \
           gyro_fulladvance.o \
+          gyro_geometry_arrays.o \
           gyro_get_he_implicit.o \
           gyro_gbflux.o \
           gyro_initial_condition.o \
@@ -127,7 +128,6 @@ OBJECTS = gyro_globals.o \
           alloc_add.o \
           allocate_profile_exp.o \
           make_maxwell_matrix.o \
-          make_geometry_arrays.o \
           make_implicit_advect.o \
           make_electron_current.o \
 	  make_electron_current_perp.o \

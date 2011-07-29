@@ -1,12 +1,12 @@
 !-----------------------------------------------------
-! make_geometry_arrays.f90 [caller BigScience]
+! gyro_geometry_arrays.f90 [caller BigScience]
 !
 ! PURPOSE:
 !  Definition of arrays which require calls to 
 !  general geometry library.
 !-----------------------------------------------------
 
-subroutine make_geometry_arrays
+subroutine gyro_geometry_arrays
 
   use gyro_globals
   use GEO_interface
@@ -75,7 +75,7 @@ subroutine make_geometry_arrays
   enddo !i
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[make_geometry_arrays done]'
+     print *,'[gyro_geometry_arrays done]'
   endif
 
-end subroutine make_geometry_arrays
+end subroutine gyro_geometry_arrays

@@ -8,11 +8,14 @@
 
 module gyro_globals
  
+  !----------------------------------------------------
   ! Standard precision for IO 
+  !
   ! Real
   character(len=8) :: fmtstr='(es11.4)'
   ! Complex
   character(len=14) :: fmtstr2='(2(es11.4,1x))'
+  !----------------------------------------------------
  
   !----------------------------------------------------
   ! Variables passed in via gyro_run routine:
