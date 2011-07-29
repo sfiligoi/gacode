@@ -140,7 +140,7 @@ subroutine gyro_ballooning_mode(datafile,io,index,is_in)
               !
               !   theta_extended = theta_plot(j_int)+2*pi*pp
 
-              write(io,10) f_bar(p,j_int)*phase(in_1,ir_norm)**(real(p)/real(m0))
+              write(io,fmtstr2) f_bar(p,j_int)*phase(in_1,ir_norm)**(real(p)/real(m0))
 
            enddo
         enddo
@@ -159,7 +159,7 @@ subroutine gyro_ballooning_mode(datafile,io,index,is_in)
         do l0=0,m0-1
            do pp=-np/2,np/2-1
               do j_int=1,n_theta_plot
-                 read(io,10) dummy 
+                 read(io,fmtstr2) dummy 
               enddo
            enddo
         enddo
@@ -173,7 +173,5 @@ subroutine gyro_ballooning_mode(datafile,io,index,is_in)
   if (i_proc == 0 .and. debug_flag == 1) then
      print *,'[gyro_balloning_mode done]' 
   endif
-
-10 format(2(es10.3,1x))
 
 end subroutine gyro_ballooning_mode
