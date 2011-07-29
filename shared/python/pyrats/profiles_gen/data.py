@@ -218,7 +218,7 @@ class profiles_genData:
 
     #-------------------------------------------- #
     # Plotting functions
-    def plot(self, var, n1, n2):
+    def plot(self, var, n1=2, n2=2, plotcounter=0, fignum=0):
         """Plots requested data using matplotlib.
 
         var is the requested variable to be plotted,
@@ -233,11 +233,16 @@ class profiles_genData:
         mpl.rcParams['figure.subplot.wspace'] = .3
         mpl.rcParams['figure.subplot.hspace'] = .4
 
-        if self.plotcounter > (n1 * n2):
-            self.plotcounter = 1
-            self.fignum = self.fignum + 1
-        fig = plt.figure(self.fignum)
-        ax = fig.add_subplot(n2, n1, self.plotcounter)
+        if plotcounter == 0:
+            plotcounter = self.plotcounter
+        if fignum == 0:
+            fignum = self.fignum
+
+        if plotcounter > (n1 * n2):
+            plotcounter = 1
+            fignum = fignum + 1
+        fig = plt.figure(fignum)
+        ax = fig.add_subplot(n2, n1, plotcounter)
         for k in self.data.iterkeys():
             if (var + ' ') == k[:len(var) + 1]:
                 toplot = k
@@ -255,7 +260,9 @@ class profiles_genData:
         ax.set_ylabel(ylab)
         ax.set_title(ylab.split()[0] + u' vs. \u03c1')
         ax.plot(self.data['rho (-)'], self.data[toplot])
-        self.plotcounter = self.plotcounter + 1
+        plotcounter = plotcounter + 1
+        self.plotcounter = plotcounter
+        self.fignum = fignum
 
 
     def millerplot(self, inner, outer, n, verbose):

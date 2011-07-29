@@ -597,7 +597,7 @@ class NEOData:
     #-----------------------------------------------#
     # Plotting routines
 
-    def plot(self, var, n1=2, n2=2, legend=True, verbose=False, cols='bgkcmyrw', styles=['-','--','-.',':']):
+    def plot(self, var, n1=2, n2=2, plotcounter=0, fignum=0, legend=True, verbose=False, cols='bgkcmyrw', styles=['-','--','-.',':']):
         """Plots var as a scatter plot with data from different directories
         coming in different colors."""
 
@@ -611,6 +611,11 @@ class NEOData:
         mpl.rcParams['figure.subplot.wspace'] = .99
         mpl.rcParams['figure.subplot.hspace'] = .3
         mpl.rcParams['figure.subplot.right'] = .8
+
+        if plotcounter == 0:
+            plotcounter = self.plotcounter
+        if fignum == 0:
+            fignum = self.fignum
 
         #Check to see if requested variable is actually available
         flag = 0
@@ -636,11 +641,11 @@ class NEOData:
 
         #Plotcounter keeps track of where on the current figure the current plot
         #is
-        if self.plotcounter > (n1 * n2):
-            self.plotcounter = 1
-            self.fignum = self.fignum + 1
-        fig = plt.figure(self.fignum)
-        ax = fig.add_subplot(n1, n2, self.plotcounter)
+        if plotcounter > (n1 * n2):
+            plotcounter = 1
+            fignum = fignum + 1
+        fig = plt.figure(fignum)
+        ax = fig.add_subplot(n1, n2, plotcounter)
         ax.set_xlabel('r/a')
         ax.set_ylabel(self.get_transport(var).units)
         #verbose sets title to be more descriptive
@@ -658,7 +663,6 @@ class NEOData:
             #Sort them by increasing radius
             ind = tempr.argsort()
             tempr = tempr[ind]
-            print tempr
 
             #If the requested variable is available
             if self.get_transport(var) != None:
@@ -683,7 +687,6 @@ class NEOData:
                     #dimension.  All we have to do is create the array, sort it,
                     #and plot it.
                     transport = np.array(self.split(transport)).flatten()[ind]
-                    print transport
                     ax.plot(tempr, transport, c=cols[0], label='Sim')
 
             if self.get_HH_theory(var) != None:
@@ -691,9 +694,6 @@ class NEOData:
                 HH = []
                 for key in self.toplot:
                     HH.append(self.get_HH_theory(var).data[key])
-                print var
-                print np.array(self.split(HH)).flatten()
-                print ind
                 HH = np.array(self.split(HH)).flatten()[ind]
                 ax.plot(tempr, HH, c=cols[1], label='HH ' + var)
 
@@ -744,7 +744,9 @@ class NEOData:
         if legend == True:
             ax.legend(loc=2,bbox_to_anchor=(1,1))
         #Move on to the next plot
-        self.plotcounter = self.plotcounter + 1
+        plotcounter = plotcounter + 1
+        self.plotcounter = plotcounter
+        self.fignum = fignum
 
     #----------------------------------------------------------#
     # Misc methods

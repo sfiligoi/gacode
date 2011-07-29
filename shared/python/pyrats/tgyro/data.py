@@ -178,7 +178,8 @@ class TGYROData:
         current_line_number = 0
         elements = {}
         temp = []
-        raw_data = open(file_name, 'r').readlines()
+        fname = self.directory_name + '/' + file_name + '.out'
+        raw_data = open(fname, 'r').readlines()
         for line in raw_data:
             if len(line.strip()) > 0:
                 if line.strip()[0].isdigit():
@@ -269,96 +270,89 @@ class TGYROData:
 
     def read_flux(self, num_ions = 1):
         """Read flux_e.out, flux_i(2-5).out, flux_target.out."""
-        self.flux_e = self.read_file(self.directory_name + '/flux_e.out')
-        self.flux_i = self.read_file(self.directory_name + '/flux_i.out')
+        self.flux_e = self.read_file('flux_e')
+        self.flux_i = self.read_file('flux_i')
         if num_ions > 1:
-           self.flux_i2 = self.read_file(self.directory_name + '/flux_i2.out')
+           self.flux_i2 = self.read_file('flux_i2')
         if num_ions > 2:
-           self.flux_i3 = self.read_file(self.directory_name + '/flux_i3.out')
+           self.flux_i3 = self.read_file('flux_i3')
         if num_ions > 3:
-           self.flux_i4 = self.read_file(self.directory_name + '/flux_i4.out')
+           self.flux_i4 = self.read_file('flux_i4')
         if num_ions > 4:
-           self.flux_i5 = self.read_file(self.directory_name + '/flux_i5.out')
+           self.flux_i5 = self.read_file('flux_i5')
         if num_ions > 5:
             print "Too many ions: ", num_ions
             print "Only the first 5 will be read."
-        self.flux_target = self.read_file(self.directory_name +
-                                          '/flux_target.out')
+        self.flux_target = self.read_file('flux_target')
 
     def read_mflux(self, num_ions = 1):
         """Read mflux_e.out, mflux_i(2-5).out, mflux_target.out."""
-        self.mflux_e = self.read_file(self.directory_name + '/mflux_e.out')
-        self.mflux_i = self.read_file(self.directory_name + '/mflux_i.out')
+        self.mflux_e = self.read_file('mflux_e')
+        self.mflux_i = self.read_file('mflux_i')
         if num_ions > 1:
-           self.mflux_i2 = self.read_file(self.directory_name +
-                                          '/mflux_i2.out')
+           self.mflux_i2 = self.read_file('mflux_i2')
         if num_ions > 2:
-           self.mflux_i3 = self.read_file(self.directory_name +
-                                          '/mflux_i3.out')
+           self.mflux_i3 = self.read_file('mflux_i3')
         if num_ions > 3:
-           self.mflux_i4 = self.read_file(self.directory_name +
-                                          '/mflux_i4.out')
+           self.mflux_i4 = self.read_file('mflux_i4')
         if num_ions > 4:
-           self.mflux_i5 = self.read_file(self.directory_name +
-                                          '/mflux_i5.out')
+           self.mflux_i5 = self.read_file('mflux_i5')
         if num_ions > 5:
             print "Too many ions: ", num_ions
             print "Only the first 5 will be read."
-        self.flux_target = self.read_file(self.directory_name +
-                                          '/flux_target.out')
+        self.flux_target = self.read_file('flux_target')
 
     def read_chi_e(self):
         """Read in chi_e.out and store in self.chi_e."""
-        self.chi_e = self.read_file(self.directory_name + '/chi_e.out')
+        self.chi_e = self.read_file('chi_e')
 
     def read_chi_i(self, num_ions = 1):
         """Read in chi_i.out and store in self.chi_i."""
-        self.chi_i = self.read_file(self.directory_name + '/chi_i.out')
+        self.chi_i = self.read_file('chi_i')
         if num_ions > 1:
-            self.chi_i2 = self.read_file(self.directory_name + '/chi_i2.out')
+            self.chi_i2 = self.read_file('chi_i2')
         if num_ions > 2:
-            self.chi_i3 = self.read_file(self.directory_name + '/chi_i3.out')
+            self.chi_i3 = self.read_file('chi_i3')
         if num_ions > 3:
-            self.chi_i4 = self.read_file(self.directory_name + '/chi_i4.out')
+            self.chi_i4 = self.read_file('chi_i4')
         if num_ions > 4:
-            self.chi_i5 = self.read_file(self.directory_name + '/chi_i5.out')
+            self.chi_i5 = self.read_file('chi_i5')
         if num_ions > 5:
             print "Strange number of ions: ", num_ions
             print "Only the first 5 will be read."
 
     def read_gyrobohm(self):
         """Read and store gyrobohm.out in self.gyro_bohm_unit."""
-        self.gyro_bohm_unit = self.read_file(self.directory_name +
-                                             '/gyrobohm.out')
+        self.gyro_bohm_unit = self.read_file('gyrobohm')
 
     def read_profile(self):
         """Read and store profile.out in self.profile."""
-        self.profile = self.read_file(self.directory_name + '/profile.out')
+        self.profile = self.read_file('profile')
 
     def read_profile2(self):
         """Read and store profile2.out in self.profile2."""
-        self.profile2 = self.read_file(self.directory_name + '/profile2.out')
+        self.profile2 = self.read_file('profile2')
 
     def read_profile3(self):
         """Read and store profile3.out in self.profile3."""
-        self.profile3 = self.read_file(self.directory_name + '/profile3.out')
+        self.profile3 = self.read_file('profile3')
 
     def read_profile4(self):
         """Read and store profile4.out in self.profile4."""
-        self.profile4 = self.read_file(self.directory_name + '/profile4.out')
+        self.profile4 = self.read_file('profile4')
 
     def read_profile5(self):
         """Read and store profile5.out in self.profile5."""
-        self.profile5 = self.read_file(self.directory_name + '/profile5.out')
+        self.profile5 = self.read_file('profile5')
 
     def read_geometry(self):
         """Read and store geometry.out in self.geometry."""
-        self.geometry = self.read_file(self.directory_name + '/geometry.out')
+        self.geometry = self.read_file('geometry')
         self.r = self.geometry['r/a'][-1]
 
     def read_gradient(self):
         """Read and store gradient.out in self.gradient."""
-        self.gradient = self.read_file(self.directory_name + '/gradient.out')
+        self.gradient = self.read_file('gradient')
 
 
     
