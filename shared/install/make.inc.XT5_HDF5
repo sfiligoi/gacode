@@ -42,5 +42,8 @@ HDF5_LIBS = \
   ${CRAY_HDF5_DIR}/hdf5-parallel-pgi/lib/libhdf5_fortran.a \
   ${CRAY_HDF5_DIR}/hdf5-parallel-pgi/lib/libhdf5.a
 # Archive 
+
+VSHDF5_MAKECMD=vshdf5
+
 ARCH = ar cr
 
