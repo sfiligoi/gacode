@@ -291,14 +291,16 @@ class NEOData:
         self.control['omega_rot_deriv'] = NEOOutput(self.omega_rot_deriv,
                                                     '(dw0/dr)(a^2/vnorm)',
                                           'normalized toroidal rotation shear')
-        self.control['nnorm'] = NEOOutput(self.nnorm, 'nnorm',
+        self.control['nnorm'] = NEOOutput(self.nnorm, '(e19/m^3)',
                              'normalizing equilibrium-scale density (e19/m^3)')
-        self.control['Tnorm'] = NEOOutput(self.Tnorm, 'Tnorm',
+        self.control['Tnorm'] = NEOOutput(self.Tnorm, 'keV',
                              'normalizing equilibrium-scale temperature (keV)')
+        self.control['vnorm_over_a'] = NEOOutput(self.vnorm_over_a, '1/s',
+                                                 'ratio of the normalizing equilibrium-scale thermal speed to the normalizing length scale (1/s) ')
         self.control['n0_over_nnorm'] = NEOOutput(self.n0_over_nnorm,
-                            'n0/nnorm', 'normalized equilibrium-scale density')
+                            'unitless', 'normalized equilibrium-scale density')
         self.control['T0_over_Tnorm'] = NEOOutput(self.T0_over_Tnorm,
-                        'T0/Tnorm', 'normalized equilibrium-scale temperature')
+                        'unitless', 'normalized equilibrium-scale temperature')
         self.control['a_over_Ln'] = NEOOutput(self.a_over_Ln,
                                                    'a/Ln=a(-dln(n0)/dr)',
                                         'normalized equilibrium-scale density')
