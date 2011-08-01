@@ -261,7 +261,7 @@ class GYROData:
         self.freq['(a/c_x)gamma_n'] = temp[1, :, :]
         self.freq['errorin(a/c_x)w_{R,n}'] = temp[2, :, :]
         self.freq['errorin(a/c_x)gamma_n'] = temp[3, :, :]
-        #self.loaded.append('freq')
+        self.loaded.append('freq')
 
     def read_gbflux_i(self):
         """Reads in gbflux_i data.  Output is numpy array with dimensions:
@@ -501,7 +501,10 @@ class GYROData:
                                                   axis=-1)
                 self.t['n_time'] = cutoff
             elif item == 'freq':
-                pass
+                self.freq['(a/c_x)w_{R,n}'] = np.delete(self.freq['(a/c_x)w_{R,n}'], np.s_[cutoff:len(self.freq['(a/c_x)w_{R,n}'].T):1], axis=-1)
+                self.freq['(a/c_x)gamma_n'] = temp[1, :, :]
+                self.freq['errorin(a/c_x)w_{R,n}'] = temp[2, :, :]
+                self.freq['errorin(a/c_x)gamma_n'] = temp[3, :, :]
             elif item == 'gbflux_i':
                 self.gbflux_i = np.delete(self.gbflux_i,
                                           np.s_[cutoff:len(self.gbflux_i.T):1],
