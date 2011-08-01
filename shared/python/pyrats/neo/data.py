@@ -379,17 +379,18 @@ class NEOData:
         self.omega_rot_deriv[self.directory_name] = equil[0:self.n_radial[self.directory_name], 6]
         self.nnorm[self.directory_name] = equil[0:self.n_radial[self.directory_name], 7]
         self.Tnorm[self.directory_name] = equil[0:self.n_radial[self.directory_name], 8]
+        self.vnorm_over_a[self.directory_name] = equil[0:self.n_radial[self.directory_name], 9]
         self.n0_over_nnorm[self.directory_name] = range(int(self.n_species[self.directory_name]))
         self.T0_over_Tnorm[self.directory_name] = range(int(self.n_species[self.directory_name]))
         self.a_over_Ln[self.directory_name] = range(int(self.n_species[self.directory_name]))
         self.a_over_LT[self.directory_name] = range(int(self.n_species[self.directory_name]))
         self.inv_tau_self[self.directory_name] = range(int(self.n_species[self.directory_name]))
         for a in range(int(self.n_species[self.directory_name])):
-            self.n0_over_nnorm[self.directory_name][a] = equil[0:self.n_radial[self.directory_name], 9+5*a]
-            self.T0_over_Tnorm[self.directory_name][a] = equil[0:self.n_radial[self.directory_name], 10+5*a]
-            self.a_over_Ln[self.directory_name][a] = equil[0:self.n_radial[self.directory_name], 11+5*a]
-            self.a_over_LT[self.directory_name][a] = equil[0:self.n_radial[self.directory_name], 12+5*a]
-            self.inv_tau_self[self.directory_name][a] = equil[0:self.n_radial[self.directory_name], 13+5*a]
+            self.n0_over_nnorm[self.directory_name][a] = equil[0:self.n_radial[self.directory_name], 10+5*a]
+            self.T0_over_Tnorm[self.directory_name][a] = equil[0:self.n_radial[self.directory_name], 11+5*a]
+            self.a_over_Ln[self.directory_name][a] = equil[0:self.n_radial[self.directory_name], 12+5*a]
+            self.a_over_LT[self.directory_name][a] = equil[0:self.n_radial[self.directory_name], 13+5*a]
+            self.inv_tau_self[self.directory_name][a] = equil[0:self.n_radial[self.directory_name], 14+5*a]
 
     def read_grid(self):
         """Reads out.neo.grid"""
