@@ -48,7 +48,6 @@ class GYROData:
         """Initialize object data."""
 
         self.directory_name = ""
-        self.loaded = []
         self.profile = {}
         self.geometry = {}
         self.t = {}
@@ -66,6 +65,7 @@ class GYROData:
         self.moment_zero = []
         self.flux_velocity = []
         self.k_perp_squared = []
+        self.loaded = []
 
     def set_directory(self, path):
         """Set the simulation directory."""
@@ -261,7 +261,7 @@ class GYROData:
         self.freq['(a/c_x)gamma_n'] = temp[1, :, :]
         self.freq['errorin(a/c_x)w_{R,n}'] = temp[2, :, :]
         self.freq['errorin(a/c_x)gamma_n'] = temp[3, :, :]
-        #self.loaded.append(self.freq)
+        #self.loaded.append('freq')
 
     def read_gbflux_i(self):
         """Reads in gbflux_i data.  Output is numpy array with dimensions:
@@ -273,7 +273,7 @@ class GYROData:
         if len(gbflux_i) > 0:
             t = len(gbflux_i)/(self.profile['n_kinetic']*self.profile['n_field']*4*self.profile['n_x'])
             self.gbflux_i = gbflux_i.reshape( (self.profile['n_kinetic'], self.profile['n_field'], 4, self.profile['n_x'], t), order='F')
-            self.loaded.append(self.gbflux_i)
+            self.loaded.append('gbflux_i')
 
     def read_gbflux_n(self):
         """Reads gbflux_n data.  Output is numpy array with dimensions:
@@ -285,7 +285,7 @@ class GYROData:
         if len(gbflux_n) > 0:
             t = len(gbflux_n)/(self.profile['n_kinetic']*self.profile['n_field']*4*self.profile['n_n'])
             self.gbflux_n = gbflux_n.reshape( (self.profile['n_kinetic'], self.profile['n_field'], 4, self.profile['n_n'], t), order='F')
-            self.loaded.append(self.gbflux_n)
+            self.loaded.append('gbflux_n')
 
     def read_moment_u(self):
         """Reads in moment_u data.  Output is numpy array with dimensions:
@@ -302,7 +302,7 @@ class GYROData:
             self.moment_u = moment_u.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_field'], self.profile['n_n'], t), order='F')
             endtime = time.time()
             print "Time: " + str(endtime - starttime)
-            self.loaded.append(self.moment_u)
+            self.loaded.append('moment_u')
 
     def read_moment_n(self):
         """Reads in moment_n data.  Output is numpy array with dimensions:
@@ -319,7 +319,7 @@ class GYROData:
             self.moment_n = moment_n.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], t), order='F')
             endtime = time.time()
             print "Time: " + str(endtime - starttime)
-            self.loaded.append(self.moment_n)
+            self.loaded.append('moment_n')
 
     def read_moment_e(self):
         """Reads in moment_e data.  Output is numpy array with dimensions:
@@ -336,7 +336,7 @@ class GYROData:
             self.moment_e = moment_e.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], t), order='F')
             endtime = time.time()
             print "Time: " + str(endtime - starttime)
-            self.loaded.append(self.moment_e)
+            self.loaded.append('moment_e')
 
     def read_moment_v(self):
         """Reads in moment_v data.  Output is numpy array with dimensions:
@@ -356,7 +356,7 @@ class GYROData:
             print "Time to load data: " + str(midtime - starttime)
             print "Time to reshape data: " + str(endtime - midtime)
             print "Total time: " + str(endtime - starttime)
-            self.loaded.append(self.moment_v)
+            self.loaded.append('moment_v')
 
     def read_moment_zero(self):
         """Reads in moment_zero data.  Output is numpy array with dimensions:
@@ -372,7 +372,7 @@ class GYROData:
             self.moment_zero = moment_zero.reshape( (self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_moment'], t), order='F')
             endtime = time.time()
             print "Time: " + str(endtime - starttime)
-            self.loaded.append(self.moment_zero)
+            self.loaded.append('moment_zero')
 
     def read_flux_velocity(self):
         """Reads in flux_velocity data.  Output is numpy array with dimensions:
@@ -384,7 +384,7 @@ class GYROData:
         if len(flux_velocity) > 0:
             t = len(flux_velocity)/(self.profile['n_energy']*self.profile['n_lambda']*self.profile['n_kinetic']*self.profile['n_field']*2*self.profile['n_n'])
             self.flux_velocity = flux_velocity.reshape( (self.profile['n_energy'], self.profile['n_lambda'], self.profile['n_kinetic'], self.profile['n_field'], 2, self.profile['n_n'], t), order='F')
-            self.loaded.append(self.flux_velocity)
+            self.loaded.append('flux_velocity')
 
     def read_k_perp_squared(self):
         """Reads in k_perp_squared data.  Output is numpy array with dimensions:
@@ -460,7 +460,7 @@ class GYROData:
 
     #----------------------------------------------------------------------#
 
-    def equil_len(self):
+    def equil_time(self):
         """Equilizes the lengths of the different data arrays, in the case that
         the time axis is longer in some than in others."""
 
@@ -468,7 +468,73 @@ class GYROData:
 
         temp = []
         for item in self.loaded:
-            temp.append(len(item.T))
+            if item == 't':
+                temp.append(self.t['n_time'])
+            elif item == 'freq':
+                temp.append(len(self.freq.T))
+            elif item == 'gbflux_i':
+                temp.append(len(self.gbflux_i.T))
+            elif item == 'gbflux_n':
+                temp.append(len(self.gbflux_n.T))
+            elif item == 'moment_u':
+                temp.append(len(self.moment_u.T))
+            elif item == 'moment_n':
+                temp.append(len(self.moment_n.T))
+            elif item == 'moment_e':
+                temp.append(len(self.moment_e.T))
+            elif item == 'moment_v':
+                temp.append(len(self.moment_v.T))
+            elif item == 'moment_zero':
+                temp.append(len(self.moment_zero.T))
+            elif item == 'flux_velocity':
+                temp.append(len(self.flux_velocity.T))
+            elif item == 'k_perp_squared':
+                temp.append(len(self.k_perp_squared.T))
         cutoff = min(temp)
         for item in self.loaded:
-            item = np.delete(item, len(item.T)-cutoff, axis=-1)
+            if item == 't':
+                self.t['t/deltat'] = np.delete(self.t['t/deltat'],
+                                               np.s_[cutoff:self.t['n_time']:1],
+                                               axis=-1)
+                self.t['(cbar_s/a)t'] = np.delete(self.t['(cbar_s/a)t'],
+                                                  self.t['n_time']-cutoff,
+                                                  axis=-1)
+                self.t['n_time'] = cutoff
+            elif item == 'freq':
+                pass
+            elif item == 'gbflux_i':
+                self.gbflux_i = np.delete(self.gbflux_i,
+                                          np.s_[cutoff:len(self.gbflux_i.T):1],
+                                          axis=-1)
+            elif item == 'gbflux_n':
+                self.gbflux_n = np.delete(self.gbflux_n,
+                                          np.s_[cutoff:len(self.gbflux_n.T):1],
+                                          axis=-1)
+            elif item == 'moment_u':
+                self.moment_u = np.delete(self.moment_u,
+                                          np.s_[cutoff:len(self.moment_u.T):1],
+                                          axis=-1)
+            elif item == 'moment_n':
+                self.moment_n = np.delete(self.moment_n,
+                                          np.s_[cutoff:len(self.moment_n.T):1],
+                                          axis=-1)
+            elif item == 'moment_e':
+                self.moment_e = np.delete(self.moment_e,
+                                          np.s_[cutoff:len(self.moment_e.T):1],
+                                                axis=-1)
+            elif item == 'moment_v':
+                self.moment_v = np.delete(self.moment_v,
+                                          np.s_[cutoff:len(self.moment_v.T):1],
+                                                axis=-1)
+            elif item == 'moment_zero':
+                self.moment_zero = np.delete(self.moment_zero,
+                                       np.s_[cutoff:len(self.moment_zero.T):1],
+                                             axis=-1)
+            elif item == 'flux_velocity':
+                self.flux_velocity = np.delete(self.flux_velocity,
+                                     np.s_[cutoff:len(self.flux_velocity.T):1],
+                                               axis=-1)
+            elif item == 'k_perp_squared':
+                self.k_perp_squared = np.delete(self.k_perp_squared,
+                                    np.s_[cutoff:len(self.k_perp_squared.T):1],
+                                                axis=-1)
