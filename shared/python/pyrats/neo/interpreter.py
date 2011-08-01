@@ -22,10 +22,10 @@ except ValueError:
 
 if len(sys.argv) < 7:
     for arg in args:
-        sim1.plot(arg, n1, n2, legend, verbose)
+        sim1.plot(arg, n1=n1, n2=n2, legend=legend, verbose=verbose)
     plt.show()
 else:
     args = sys.argv[6:]
     for arg in args:
-        sim1.plot(arg, n1, n2, legend, verbose)
+        sim1.plot(arg, n1=n1, n2=n2, legend=legend, verbose=verbose)
     plt.show()

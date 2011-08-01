@@ -282,7 +282,7 @@ class GYROData:
         import numpy as np
 
         diff_i = self.read_file('diff_i', 12)
-        if diff_i != 0:
+        if len(diff_i) > 0:
             self.diff_i = diff_i.reshape( (self.t['n_time'], self.profile['n_x'], 2, self.profile['n_field'], self.profile['n_kinetic']), order='F')
 
     def read_diff_n(self):
@@ -292,7 +292,7 @@ class GYROData:
         import numpy as np
 
         diff_n = self.read_file('diff_n', 12)
-        if diff_n != 0:
+        if len(diff_n) > 0:
             self.diff_n = diff_n.reshape( (self.t['n_time'], self.profile['n_n'], 2, self.profile['n_field'], self.profile['n_kinetic']), order='F')
 
     def read_gbflux(self):
@@ -302,7 +302,7 @@ class GYROData:
         import numpy as np
 
         gbflux = self.read_file('gbflux', 12)
-        if gbflux != 0:
+        if len(gbflux) > 0:
             self.gbflux = gbflux.reshape( (self.t['n_time'], self.profile['n_kinetic'], self.profile['n_field'], 4), order='F')      
 
     def read_gbflux_i(self):
@@ -322,7 +322,7 @@ class GYROData:
         import numpy as np
 
         gbflux_n = self.read_file('gbflux_n', 12)
-        if gbflux_n != 0:
+        if len(gbflux_n) > 0:
             self.gbflux_n = gbflux_n.reshape( (self.profile['n_kinetic'], self.profile['n_field'], 4, self.profile['n_n'], self.t['n_time']), order='F')
 
     def read_moment_u(self):
@@ -335,7 +335,7 @@ class GYROData:
 
         starttime = time.time()
         moment_u = self.read_file('moment_u', 12)
-        if moment_u != 0:
+        if len(moment_u) > 0:
             self.moment_u = moment_u.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_field'], self.profile['n_n'], self.t['n_time']), order='F')
             endtime = time.time()
             print "Time: " + str(endtime - starttime)
@@ -350,7 +350,7 @@ class GYROData:
 
         starttime = time.time()
         moment_n = self.read_file('moment_n', 12)
-        if moment_n != 0:
+        if len(moment_n) > 0:
             self.moment_n = moment_n.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], self.t['n_time']), order='F')
             endtime = time.time()
             print "Time: " + str(endtime - starttime)
@@ -365,7 +365,7 @@ class GYROData:
 
         starttime = time.time()
         moment_e = self.read_file('moment_e', 12)
-        if moment_e != 0:
+        if len(moment_e) > 0:
             self.moment_e = moment_e.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], self.t['n_time']), order='F')
             endtime = time.time()
             print "Time: " + str(endtime - starttime)
@@ -380,7 +380,7 @@ class GYROData:
 
         starttime = time.time()
         moment_v = self.read_file('moment_v', 12)
-        if moment_v != 0:
+        if len(moment_v) > 0:
             midtime = time.time()
             self.moment_v = moment_v.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], self.t['n_time']), order='F')
             endtime = time.time()
@@ -397,7 +397,7 @@ class GYROData:
 
         starttime = time.time()
         moment_zero = self.read_file('moment_zero', 12)
-        if moment_zero != 0:
+        if len(moment_zero) > 0:
             self.moment_zero = moment_zero.reshape( (self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_moment'], self.t['n_time']), order='F')
             endtime = time.time()
             print "Time: " + str(endtime - starttime)
@@ -409,7 +409,7 @@ class GYROData:
         import numpy as np
 
         flux_velocity = self.read_file('flux_velocity', 12)
-        if flux_velocity != 0:
+        if len(flux_velocity) > 0:
             self.flux_velocity = flux_velocity.reshape( (self.t['n_time'], self.profile['n_n'], 2, self.profile['n_field'], self.profile['n_kinetic'], self.profile['n_lambda'], self.profile['n_energy']), order='F')
 
     def read_k_perp_squared(self):
@@ -419,7 +419,7 @@ class GYROData:
         import numpy as np
 
         k_perp_squared = self.read_file('k_perp_squared', 12)
-        if k_perp_squared != 0:
+        if len(k_perp_squared) > 0:
             self.k_perp_squared = k_perp_squared.reshape( (self.t['n_time'], self.profile['n_n']), order='F')
 
     #-----------------------------------#

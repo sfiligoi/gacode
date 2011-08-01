@@ -93,6 +93,6 @@ then
     PLOT_STRING="$PLOT_STRING $1"
     shift
   done
-  python -i ~/gacode/shared/python/pyrats/tgyro/interpreter.py $PLOT_DIR $N1 $N2 $VERBOSE_FLAG $LEGEND_FLAG $PLOT_STRING
+  python ~/gacode/shared/python/pyrats/tgyro/interpreter.py $PLOT_DIR $N1 $N2 $VERBOSE_FLAG $LEGEND_FLAG $PLOT_STRING
   exit 0
 fi

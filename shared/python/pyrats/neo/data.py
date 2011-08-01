@@ -91,7 +91,7 @@ class NEOData:
 
     Example Usage:
         >>> import matplotlib.pyplot as plt
-        >>> from pyrats.data import NEOData
+        >>> from pyrats.neo.data import NEOData
         >>> sim1 = NEOData('example_directory')
         >>> sim1.plot('jboot')
         >>> plt.show()
@@ -227,10 +227,10 @@ class NEOData:
         self.read_transport_gv()
 
     def store_data(self):
-        """Stores data into data dictionary by variable name and directory.
+        """Stores data into data dictionaries by variable name and directory.
 
         data can be accessed with two dictionary keys, like so:
-        self.data[parameter][directory]."""
+        self.transport[parameter][directory]."""
 
         self.transport['PHI'] = NEOOutput(self.SIM_PHI, '(e*PHI1/Tnorm)^2',
                                          'first-order electrostatic potential')
@@ -589,9 +589,9 @@ class NEOData:
             return self.control[var]
 
     def print_vars(self):
-        """Prints all available variables."""
+        """Prints all available simulated variables."""
 
-        for key in sorted(self.data.keys()):
+        for key in sorted(self.transport.keys()):
             print key
 
     #-----------------------------------------------#
@@ -752,7 +752,7 @@ class NEOData:
     # Misc methods
 
     def split(self, array):
-        """split splits an array which may be made up of elements with
+        """split splits a 2-D array which may be made up of elements with
         multiple entries into an array with one entry per element."""
 
         import numpy as np

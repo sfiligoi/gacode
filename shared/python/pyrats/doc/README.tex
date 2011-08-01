@@ -25,5 +25,155 @@ Python Routines for Analyzing Transport Simulations
 >>> help(TGYROData)
 
 \fontfamily{\rmdefault}\selectfont
-\noindent This will bring up the built-in documentation for the class TGYROData.  It lists all of the methods and attributes of the class, and the function of each one.  This information is also contained on page x of this manual.  
+\noindent This will bring up the built-in documentation for the class TGYROData.  It lists all of the methods and attributes of the class, and the function of each one.  This information is also contained on page x of this manual.
+
+\noindent TGYROData can be used to load TGYRO data with the command:
+\fontfamily{\ttdefault}\selectfont
+
+>>> sim1 = TGYROData('example\_directory')
+
+\fontfamily{\rmdefault}\selectfont
+\noindent where 'example\_directory' is a directory containing TGYRO output files.  The data is loaded into objects corresponding to the output file which the data came from.  
+
+\newpage
+profiles\_genData contents:
+\begin{itemize}
+\item Data:
+\begin{itemize}
+\item \textbf{data} \emph{dictionary of numpy arrays} - Contains all of the data read in by profiles\_genData.  It is organized in a dictionary with the keys being the different column headers in the input.profiles file that is read.  The keys for the dictionary can be requested with the following commands:
+\fontfamily{\ttdefault}\selectfont
+
+\$ python
+
+>>> from pyrats.profiles\_gen.data import profiles\_genData
+
+>>> sim1 = profiles\_genData('example\_directory')
+
+>>> sim1.data.keys()
+
+\fontfamily{\rmdefault}\selectfont
+\noindent where, again, 'example\_directory' is a directory containing the file input.profiles.
+\item \textbf{n\_exp} \emph{int} - The number of timesteps in the simulation.  It is also the length of each array in data.
+\item \textbf{hlen} \emph{int} - The length of the header of file input.profiles in rows.
+\item \textbf{fignum} \emph{int} - The number of the current active matplotlib figure.
+\item \textbf{plotcounter} \emph{int} - The number of the current active axes on the current active matplotlib figure.
+\item \textbf{ar} \emph{nested list of floats} - The sine coefficients for the r-component of the fourier series representation of the flux surfaces.  Read from input.profiles.geo.
+\item \textbf{br} \emph{nested list of floats} - The cosine coefficients for the r-component of the fourier series representation of the flux surfaces.  Read from input.profiles.geo.
+\item \textbf{az} \emph{nested list of floats} - The sine coefficients for the z-component of the fourier series representation of the flux surfaces.  Read from input.profiles.geo.
+\item \textbf{bz} \emph{nested list of floats} - The cosine coefficients for the z-component of the fourier series representation of the flux surfaces.  Read from input.profiles.geo.
+\item \textbf{directory\_name} \emph{str} - The name of the directory containing file input.profiles and possibly input.profiles.geo.
+\end{itemize}
+\item Methods:
+\begin{itemize}
+\item \textbf{\_\_init\_\_(\emph{str} directory='.')} - This is the constructor for the class.  When a new instance of the class is created, the constructor is called and executed.  The only argument is the name of the directory from which to build the class, and it defaults to the current directory.  It calls these methods in the following order:
+\begin{enumerate}
+\item set\_directory(directory)
+\item init\_data()
+\item store\_data()
+\end{enumerate}
+\item \textbf{compplot(\emph{float} inner, \emph{float} outer, \emph{int} n, \emph{bool} verbose)} - This method creates overlaid flux surface plots using both the fourier series decomposition method and the shaped Grad-Shafranov Miller-type equilibrium for the flux surfaces.
+\begin{itemize}
+\item Inner specifies the innermost flux surface to be plotted
+\item outer specifies the outermost flux surface to be plotted
+\item n specifies the number of flux surfaces to plot in between inner and outer
+\item if verbose is true, the legend will display the location of each flux surface
+\end{itemize}
+\item \textbf{compute\_fouriereq(\emph{float} r)} - This method calculates the flux surface at radius r according to the general Grad-Shafranov Fourier-series equilibrium.
+\item \textbf{compute\_mtypeeq(\emph{float} r)} - This method calculates the flux surface at radius r according to the shaped Grad-Shafranov Miller-type equilibrium.
+\item \textbf{fourierplot(\emph{float} inner, \emph{float} outer, \emph{int} n, \emph{bool} verbose)} - This method creates flux surface plots using only the fourier series decomposition method for the flux surfaces.
+\begin{itemize}
+\item inner specifies the innermost flux surface to be plotted
+\item outer specifies the outermost flux surface to be plotted
+\item n specifies the number of flux surfaces to plot in between inner and outer
+\item if verbose is true, the legend will display the location of each flux surface
+\end{itemize}
+\item \textbf{get(\emph{str} var)} - This method returns the numpy array corresponding to var.
+\item \textbf{init\_data()} - This method initializes all of the data objects.
+\item \textbf{match(\emph{float} val, \emph{list} vec)} - This method finds the closest match to val in a \emph{list} of values (vec) and returns the index of that value.
+\item \textbf{millerplot(\emph{float} inner, \emph{float} outer, \emph{int} n, \emph{bool} verbose)} - This method creates flux surface plots using only the shaped Grad-Shafranov Miller-type equilibrium for the flux surfaces.
+\begin{itemize}
+\item inner specifies the innermost flux surface to be plotted
+\item outer specifies the outermost flux surface to be plotted
+\item n specifies the number of flux surfaces to plot in between inner and outer
+\item if verbose is true, the legend will display the location of each flux surface.
+\end{itemize}
+\item \textbf{plot(\emph{str} var, \emph{int} n1=2, \emph{int} n2=2, \emph{int} plotcounter=0, \emph{int} fignum=0)} - This method creates plots of the requested data (var) using matplotlib.
+\begin{itemize}
+\item n1 is the horizontal number of plots in one window
+\item n2 is the vertical number of plots in one window
+\item plotcounter is the position on which the new graph is to be placed
+\item fignum is the number of the matplotlib figure on which to place the new graph
+\end{itemize}
+\item \textbf{read\_data()} - This method reads in data from input.profiles.  It returns a dictionary containing the data that was read in.
+\item \textbf{read\_fourier()} - This method reads in data from input.profiles.geo, and stores that data in the class objects ar, br, az, and bz.
+\item \textbf{set\_directory(\emph{str} directory)} - This method sets the class attribute directory\_name to directory.
+\item \textbf{store\_data()} - This method reads data and renames it appropriately.  It is necessary because the names of the differetn parameters are not uniformly formatted.  store\_data cleans them up by inserting spaces where necessary, and by deleting \#-signs when necessary.
+\end{itemize}
+\end{itemize}
+
+\newpage
+
+NEOData contents:
+\begin{itemize}
+\item Data:
+\begin{itemize}
+\item \textbf{master} \emph{str} - Holds the name of the master directory containing NEO output files.
+\item \textbf{directory\_name} \emph{str} - Holds the name of the currently open directory.
+\item \textbf{fignum} \emph{int} - The number of the current active matplotlib figure.
+\item \textbf{plotcounter} \emph{int} - The number of the current active axes on the current active matplotlib figure.
+\item \textbf{toplot} \emph{list} - The list of variables to plot when a plot command is called.
+\item \textbf{transport} \emph{dictionary of dictionaries of NEOObjects} - Contains data read in from out.neo.transport.  The keys are the transport variables, each of which correspond to a NEOObject.
+\item \textbf{HH\_theory} \emph{dictionary of dictionaries of NEOObjects} - Contains data read in from out.neo.theory.  The keys are the flows and fluxes predicted by the Hinton-Hazeltine model, each of which correspond to a NEOObject.
+\item \textbf{CH\_theory} \emph{dictionary of dictionaries of NEOObjects} - Contains data read in from out.neo.theory.  The keys are the ion heat fluxes predicted by the Chang-Hinton model, each of which correspond to a NEOObject.
+\item \textbf{TG\_theory} \emph{dictionary of dictionaries of NEOObjects} - Contains data read in from out.neo.theory.  The keys are the ion heat fluxes predicted by the Taguchi model, each of which correspond to a NEOObject.
+\item \textbf{S\_theory} \emph{dictionary of dictionaries of NEOObjects} - Contains data read in from out.neo.theory. The keys are the bootstrap currents predicted by the Sauter model, each of which correspond to a NEOObject.
+\item \textbf{HS\_theory} \emph{dictionary of dictionaries of NEOObjects} - Contains data read in from out.neo.theory.  The keys are the fluxes predicted by the Hirshman-Sigmar model, each of which  correspond to a NEOObject.
+\item \textbf{control} \emph{dictionary of dictionaries of NEOObjects} - Contains data read in from out.neo.control.
+\end{itemize}
+\item Methods:
+\begin{itemize}
+\item \textbf{\_\_init\_\_(}\emph{str} \textbf{sim\_directory)} - Constructor that is executed when a new NEOData object is created.  It takes a directory name as its argument, and then executes a top down walk down that directory.  It then calls read\_data() whenever it is in a subdirectory with NEO output files.  Finally, it executes store\_data()
+\item \textbf{get\_CH\_theory(}\emph{str} \textbf{var)} - Returns a NEOObject object that corresponds to the Chang-Hinton theory prediction of var.  If requested variable does not exist or is zero everywhere, returns None.
+\item \textbf{get\_HH\_theory(}\emph{str} \textbf{var)} - Returns a NEOObject object that corresponds to the Hinton-Hazeltine theory prediction of var.  If requested variable does not exist or is zero everywhere, returns None.
+\item \textbf{get\_HR\_theory(}\emph{str} \textbf{var)} - Returns a NEOObject object that corresponds to the Hinton-Rosenbluth theory prediction of var.  If requested variable does not exist or is zero everywhere, returns None.
+\item \textbf{get\_HS\_theory(}\emph{str} \textbf{var)} - Returns a NEOObject object that corresponds to the Hirshman-Sigmar theory prediction of var.  If requested variable does not exist or is zero everywhere, returns None.
+\item \textbf{get\_S\_theory(}\emph{str} \textbf{var)} - Returns a NEOObject object that corresponds to the Sauter theory prediction of var.  If requested variable does not exist or is zero everywhere, returns None.
+\item \textbf{get\_TG\_theory(}\emph{str} \textbf{var)} - Returns a NEOObject object that corresponds to the Taguchi theory prediction of var.  If requested variable does not exist or is zero everywhere, returns None.
+\item \textbf{get\_control(}\emph{str} \textbf{var)} - Returns a NEOObject object that corresponds to the control parameter associated with var.  If requested variable does not exist or is zero everywhere, returns None.
+\item \textbf{get\_input(}\emph{str} \textbf{input\_name)} - Returns requested variable from input.neo.gen.
+\item \textbf{init\_data()} - Initializes object data.
+\item \textbf{plot(}\emph{str} \textbf{var, }\emph{int} \textbf{n1=2, }\emph{int} \textbf{n2=2,} \emph{int} \textbf{plotcounter=0,} \emph{int} \textbf{fignum=0,} \emph{bool} \textbf{legend=True,} \emph{bool} \textbf{verbose=False,} \emph{str} \textbf{cols='bgkcmyrw',} \emph{list of strs} \textbf{styles=['-', '--', '-.', ':'])} - Plots var as a matplotlib scatter plot with data from different directories coming in different colors, and different species coming in different line styles.  Automatically searches for both theoretical and simulated values, and plots everything that is available.
+\item \textbf{print\_vars()} - Prints all available simulated variables.
+\item \textbf{read\_data()} - Read in object data.  Calls read\_grid(), read\_equil(), read\_theory(), read\_transport(), read\_transport\_gv().
+\item \textbf{read\_equil()} - Reads out.neo.equil.  The data is eventually stored by store\_data() in control.
+\item \textbf{read\_file()} - Loads data from NEO output file into buffer for manipulation and storage.
+\item \textbf{read\_grid()} - Reads out.neo.grid.  The data is eventually stored by store\_data() in control.
+\item \textbf{read\_theory()} - Reads out.neo.theory.  The data is eventually stored by store\_data() in HH\_theory, TG\_theory, CH\_theory, S\_theory, HR\_theory, and HS\_theory.
+\item \textbf{read\_transport()} - Reads out.neo.transport.  The data is eventually stored by store\_data() in transport.
+\item \textbf{read\_transport\_gv()} - Reads out.neo.transport\_gv.  The data is eventually stored by store\_data() in transport.
+\item \textbf{set\_directory(}\emph{str} \textbf{path)} - Sets the current directory to path.
+\item \textbf{split(}\emph{list} \textbf{array)} - Takes a 2-D list which has entries with multiple elements and converts it to a 2-D list with only one element per entry.
+\item \textbf{store\_data()} - Stores data into data dictionaries by variable name and directory.  Data can be accessed with two dictionary keys, like so:
+
+sim1.transport[parameter][directory].
+\end{itemize}
+\end{itemize}
+
+\newpage
+TGYROData contents:
+\begin{itemize}
+\item Data:
+\begin{itemize}
+\item \textbf{n\_iterations} \emph{int} - Number of TGYRO iterations in simulation.
+\item \textbf{n\_fields} \emph{int} - Number of fields in simulation.
+\item \textbf{n\_radial} \emph{int} - Number of radial gridpoints in simulation.
+\item \textbf{directory\_name} \emph{str} - Name of loaded directory.
+\item \textbf{chi\_e} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file chi\_e.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{chi\_i} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file chi\_i.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{gyro\_bohm\_unit} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file gyrobohm.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{profile} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file profile.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{geometry} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file chi\_i.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{flux\_e} \emph{dictionary of list
+\end{itemize}
+\end{itemize}
 \end{document}

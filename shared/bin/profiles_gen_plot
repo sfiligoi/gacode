@@ -142,15 +142,15 @@ if [ $FLUX_FLAG -eq 1 ]
 then
   if [ $MILLER_FLAG -eq 1 ]
   then
-    python ~/gacode/shared/python/profiles_gen/fluxplot/miller.py $PLOT_DIR $IN_SURFACE $OUT_SURFACE $N_LINES $VERBOSE_FLAG &
+    python ~/gacode/shared/python/pyrats/profiles_gen/fluxplot/miller.py $PLOT_DIR $IN_SURFACE $OUT_SURFACE $N_LINES $VERBOSE_FLAG &
   fi
   if [ $FOURIER_FLAG -eq 1 ]
   then
-    python ~/gacode/shared/python/profiles_gen/fluxplot/fourier.py $PLOT_DIR $IN_SURFACE $OUT_SURFACE $N_LINES $VERBOSE_FLAG &
+    python ~/gacode/shared/python/pyrats/profiles_gen/fluxplot/fourier.py $PLOT_DIR $IN_SURFACE $OUT_SURFACE $N_LINES $VERBOSE_FLAG &
   fi
   if [ $COMP_FLAG -eq 1 ]
   then
-    python ~/gacode/shared/python/profiles_gen/fluxplot/comparison.py $PLOT_DIR $IN_SURFACE $OUT_SURFACE $N_LINES $VERBOSE_FLAG &
+    python ~/gacode/shared/python/pyrats/profiles_gen/fluxplot/comparison.py $PLOT_DIR $IN_SURFACE $OUT_SURFACE $N_LINES $VERBOSE_FLAG &
   fi
 fi
 
@@ -171,7 +171,7 @@ then
     N1=2
     N2=2
   fi
-  python ~/gacode/shared/python/profiles_gen/plot.py $PLOT_DIR $N1 $N2 $PLOT_STRING &
+  python ~/gacode/shared/python/pyrats/profiles_gen/plot.py $PLOT_DIR $N1 $N2 $PLOT_STRING &
   exit 0
 fi
 
@@ -182,7 +182,7 @@ fi
 
 if [ $OPTIONS_FLAG -eq 1 ]
 then
-  python ~/gacode/shared/python/profiles_gen/options.py $PLOT_DIR &
+  python ~/gacode/shared/python/pyrats/profiles_gen/options.py $PLOT_DIR &
 fi
 
 #==============================================================================

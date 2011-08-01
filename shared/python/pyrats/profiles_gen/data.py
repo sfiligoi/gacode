@@ -41,7 +41,7 @@ class profiles_genData:
     def init_data(self):
         """Initialize object data."""
 
-        self.data = []
+        self.data = {}
         self.n_exp = 0
         self.hlen = 0
         self.fignum = 1
