@@ -471,4 +471,4 @@ class GYROData:
             temp.append(len(item.T))
         cutoff = min(temp)
         for item in self.loaded:
-            item = np.delete(item, item.T-cutoff, axis=-1)
+            item = np.delete(item, len(item.T)-cutoff, axis=-1)
