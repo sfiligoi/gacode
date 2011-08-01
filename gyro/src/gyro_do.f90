@@ -171,7 +171,7 @@ subroutine gyro_do
   !
   ! Generate geometry-dependent factors using model or Miller equilibrium:
   !
-  call make_geometry_arrays
+  call gyro_geometry_arrays
   !
   if (gyrotest_flag == 0) then
 

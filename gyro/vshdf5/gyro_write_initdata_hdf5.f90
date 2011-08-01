@@ -234,7 +234,7 @@ subroutine gyro_write_initdata_hdf5(datafile)
         call GEO_interp(theta)
         nu_coarse(j,i)=GEO_nu
      enddo
-#     if (n_wedge>1) then
+!     if (n_wedge>1) then
        do j=1,n_wedge
           if (n_wedge == 1) then
             theta = 0.0 ! Test for special case
@@ -245,7 +245,7 @@ subroutine gyro_write_initdata_hdf5(datafile)
           call GEO_interp(theta)
           nu_wedge(j,i)=GEO_nu
        enddo
-#     endif
+!     endif
 
   enddo ! i
 
