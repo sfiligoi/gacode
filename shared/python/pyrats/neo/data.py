@@ -155,6 +155,7 @@ class NEOData:
         self.omega_rot_deriv = {}
         self.nnorm = {}
         self.Tnorm = {}
+        self.vnorm_over_a = {}
         self.n0_over_nnorm = {}
         self.T0_over_Tnorm = {}
         self.a_over_Ln = {}
