@@ -48,6 +48,7 @@ class GYROData:
         """Initialize object data."""
 
         self.directory_name = ""
+        self.loaded = []
         self.profile = {}
         self.geometry = {}
         self.t = {}
@@ -97,12 +98,8 @@ class GYROData:
         self.read_geometry()
         self.read_t()
         #self.read_freq()
-        #self.read_diff()
-        #self.read_diff_i()
-        #self.read_diff_n()
-        #self.read_gbflux()
         self.read_gbflux_i()
-        #self.read_gbflux_n()
+        self.read_gbflux_n()
         #self.read_moment_u()
         #self.read_moment_n()
         #self.read_moment_e()
@@ -264,46 +261,7 @@ class GYROData:
         self.freq['(a/c_x)gamma_n'] = temp[1, :, :]
         self.freq['errorin(a/c_x)w_{R,n}'] = temp[2, :, :]
         self.freq['errorin(a/c_x)gamma_n'] = temp[3, :, :]
-
-    def read_diff(self):
-        """Reads in diff data.  Output is dictionary of numpy arrays with
-        dimensions: n_kinetic x n_field x n_time"""
-
-        import numpy as np
-    
-        diff = self.read_file('diff', 12)
-        if len(diff) > 0:
-            self.diff = diff.reshape( (self.t['n_time'], self.profile['n_kinetic'], self.profile['n_field'], 2), order='F')
-
-    def read_diff_i(self):
-        """Reads in diff_i.  Output is dictionary of numpy arrays with
-        dimensions: n_kinetic x n_field x n_x x n_time"""
-
-        import numpy as np
-
-        diff_i = self.read_file('diff_i', 12)
-        if len(diff_i) > 0:
-            self.diff_i = diff_i.reshape( (self.t['n_time'], self.profile['n_x'], 2, self.profile['n_field'], self.profile['n_kinetic']), order='F')
-
-    def read_diff_n(self):
-        """Reads in diff_n.  Output is dictionary of numpy arrays with
-        dimensions: n_kinetic x n_field x n_n x n_time"""
-
-        import numpy as np
-
-        diff_n = self.read_file('diff_n', 12)
-        if len(diff_n) > 0:
-            self.diff_n = diff_n.reshape( (self.t['n_time'], self.profile['n_n'], 2, self.profile['n_field'], self.profile['n_kinetic']), order='F')
-
-    def read_gbflux(self):
-        """Reads in gbflux data.  Output is numpy array with dimensions:
-        n_kinetic x n_field x 4 x n_time"""
-
-        import numpy as np
-
-        gbflux = self.read_file('gbflux', 12)
-        if len(gbflux) > 0:
-            self.gbflux = gbflux.reshape( (self.t['n_time'], self.profile['n_kinetic'], self.profile['n_field'], 4), order='F')      
+        #self.loaded.append(self.freq)
 
     def read_gbflux_i(self):
         """Reads in gbflux_i data.  Output is numpy array with dimensions:
@@ -313,7 +271,9 @@ class GYROData:
 
         gbflux_i = self.read_file('gbflux_i', 12)
         if len(gbflux_i) > 0:
-            self.gbflux_i = gbflux_i.reshape( (self.profile['n_kinetic'], self.profile['n_field'], 4, self.profile['n_x'], self.t['n_time']), order='F')
+            t = len(gbflux_i)/(self.profile['n_kinetic']*self.profile['n_field']*4*self.profile['n_x'])
+            self.gbflux_i = gbflux_i.reshape( (self.profile['n_kinetic'], self.profile['n_field'], 4, self.profile['n_x'], t), order='F')
+            self.loaded.append(self.gbflux_i)
 
     def read_gbflux_n(self):
         """Reads gbflux_n data.  Output is numpy array with dimensions:
@@ -323,7 +283,9 @@ class GYROData:
 
         gbflux_n = self.read_file('gbflux_n', 12)
         if len(gbflux_n) > 0:
-            self.gbflux_n = gbflux_n.reshape( (self.profile['n_kinetic'], self.profile['n_field'], 4, self.profile['n_n'], self.t['n_time']), order='F')
+            t = len(gbflux_n)/(self.profile['n_kinetic']*self.profile['n_field']*4*self.profile['n_n'])
+            self.gbflux_n = gbflux_n.reshape( (self.profile['n_kinetic'], self.profile['n_field'], 4, self.profile['n_n'], t), order='F')
+            self.loaded.append(self.gbflux_n)
 
     def read_moment_u(self):
         """Reads in moment_u data.  Output is numpy array with dimensions:
@@ -336,9 +298,11 @@ class GYROData:
         starttime = time.time()
         moment_u = self.read_file('moment_u', 12)
         if len(moment_u) > 0:
-            self.moment_u = moment_u.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_field'], self.profile['n_n'], self.t['n_time']), order='F')
+            t = len(moment_u)/(2*self.profile['n_theta_plot']*self.profile['n_x']*self.profile['n_field']*self.profile['n_n'])
+            self.moment_u = moment_u.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_field'], self.profile['n_n'], t), order='F')
             endtime = time.time()
             print "Time: " + str(endtime - starttime)
+            self.loaded.append(self.moment_u)
 
     def read_moment_n(self):
         """Reads in moment_n data.  Output is numpy array with dimensions:
@@ -351,9 +315,11 @@ class GYROData:
         starttime = time.time()
         moment_n = self.read_file('moment_n', 12)
         if len(moment_n) > 0:
-            self.moment_n = moment_n.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], self.t['n_time']), order='F')
+            t = len(moment_n)/(2*self.profile['n_theta_plot']*self.profile['n_x']*self.profile['n_kinetic']*self.profile['n_n'])
+            self.moment_n = moment_n.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], t), order='F')
             endtime = time.time()
             print "Time: " + str(endtime - starttime)
+            self.loaded.append(self.moment_n)
 
     def read_moment_e(self):
         """Reads in moment_e data.  Output is numpy array with dimensions:
@@ -366,9 +332,11 @@ class GYROData:
         starttime = time.time()
         moment_e = self.read_file('moment_e', 12)
         if len(moment_e) > 0:
-            self.moment_e = moment_e.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], self.t['n_time']), order='F')
+            t = len(moment_e)/(2*self.profile['n_theta_plot']*self.profile['n_x']*self.profile['n_kinetic']*self.profile['n_n'])
+            self.moment_e = moment_e.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], t), order='F')
             endtime = time.time()
             print "Time: " + str(endtime - starttime)
+            self.loaded.append(self.moment_e)
 
     def read_moment_v(self):
         """Reads in moment_v data.  Output is numpy array with dimensions:
@@ -382,11 +350,13 @@ class GYROData:
         moment_v = self.read_file('moment_v', 12)
         if len(moment_v) > 0:
             midtime = time.time()
-            self.moment_v = moment_v.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], self.t['n_time']), order='F')
+            t = len(moment_v)/(2*self.profile['n_theta_plot']*self.profile['n_x']*self.profile['n_kinetic']*self.profile['n_n'])
+            self.moment_v = moment_v.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], t), order='F')
             endtime = time.time()
             print "Time to load data: " + str(midtime - starttime)
             print "Time to reshape data: " + str(endtime - midtime)
             print "Total time: " + str(endtime - starttime)
+            self.loaded.append(self.moment_v)
 
     def read_moment_zero(self):
         """Reads in moment_zero data.  Output is numpy array with dimensions:
@@ -398,9 +368,11 @@ class GYROData:
         starttime = time.time()
         moment_zero = self.read_file('moment_zero', 12)
         if len(moment_zero) > 0:
-            self.moment_zero = moment_zero.reshape( (self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_moment'], self.t['n_time']), order='F')
+            t = len(moment_zero)/(self.profile['n_x']*self.profile['n_kinetic']*self.profile['n_moment'])
+            self.moment_zero = moment_zero.reshape( (self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_moment'], t), order='F')
             endtime = time.time()
             print "Time: " + str(endtime - starttime)
+            self.loaded.append(self.moment_zero)
 
     def read_flux_velocity(self):
         """Reads in flux_velocity data.  Output is numpy array with dimensions:
@@ -410,7 +382,9 @@ class GYROData:
 
         flux_velocity = self.read_file('flux_velocity', 12)
         if len(flux_velocity) > 0:
-            self.flux_velocity = flux_velocity.reshape( (self.t['n_time'], self.profile['n_n'], 2, self.profile['n_field'], self.profile['n_kinetic'], self.profile['n_lambda'], self.profile['n_energy']), order='F')
+            t = len(flux_velocity)/(self.profile['n_energy']*self.profile['n_lambda']*self.profile['n_kinetic']*self.profile['n_field']*2*self.profile['n_n'])
+            self.flux_velocity = flux_velocity.reshape( (self.profile['n_energy'], self.profile['n_lambda'], self.profile['n_kinetic'], self.profile['n_field'], 2, self.profile['n_n'], t), order='F')
+            self.loaded.append(self.flux_velocity)
 
     def read_k_perp_squared(self):
         """Reads in k_perp_squared data.  Output is numpy array with dimensions:
@@ -420,7 +394,9 @@ class GYROData:
 
         k_perp_squared = self.read_file('k_perp_squared', 12)
         if len(k_perp_squared) > 0:
-            self.k_perp_squared = k_perp_squared.reshape( (self.t['n_time'], self.profile['n_n']), order='F')
+            t = len(k_perp_squared)/self.profile['n_n']
+            self.k_perp_squared = k_perp_squared.reshape( (self.profile['n_n'], t), order='F')
+            self.loaded.append(self.k_perp_squared)
 
     #-----------------------------------#
     # Create data from other previously imported data
@@ -481,3 +457,18 @@ class GYROData:
         self.fignum = self.fignum + 1
         ax = fig.add_subplot(dim[0], dim[1], self.plotcounter)
         ax.plot(x, y)
+
+    #----------------------------------------------------------------------#
+
+    def equil_len(self):
+        """Equilizes the lengths of the different data arrays, in the case that
+        the time axis is longer in some than in others."""
+
+        import numpy as np
+
+        temp = []
+        for item in self.loaded:
+            temp.append(len(item.T))
+        cutoff = min(temp)
+        for item in self.loaded:
+            item = np.delete(item, item.T-cutoff, axis=-1)
