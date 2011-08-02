@@ -644,6 +644,36 @@ class TGYROData:
 
         return flux
 
+    def get_pflux_e_target(self, iteration=-1, mks=False):
+        """Return target electron particle flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+
+        flux = self.flux_target['pflux_e_target'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Gamma_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_pflux_e_target(self, iteration=-1, mks=False):
+        """Return target ion particle flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+
+        flux = self.flux_target['pflux_i_target'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Gamma_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
     def get_flux_e_turb(self, iteration=-1, mks=False):
         """Return turbulent electron heat flux from specified iteration.
            Keywords:
@@ -822,7 +852,7 @@ class TGYROData:
         flux = self.mflux_target['mflux_target'][iteration]
 
         if mks:
-            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            GB_factors = self.gyro_bohm_unit['Pi_GB'][iteration]
             flux = flux * GB_factors
 
         return flux
@@ -836,7 +866,7 @@ class TGYROData:
         flux = self.mflux_e['mflux_e_tur'][iteration]
 
         if mks:
-            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            GB_factors = self.gyro_bohm_unit['Pi_GB'][iteration]
             flux = flux * GB_factors
 
         return flux
@@ -850,7 +880,7 @@ class TGYROData:
         flux = self.mflux_i['mflux_i_tur'][iteration]
 
         if mks:
-            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            GB_factors = self.gyro_bohm_unit['Pi_GB'][iteration]
             flux = flux * GB_factors
 
         return flux
@@ -864,7 +894,7 @@ class TGYROData:
         flux = self.mflux_i2['mflux_i_tur'][iteration]
 
         if mks:
-            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            GB_factors = self.gyro_bohm_unit['Pi_GB'][iteration]
             flux = flux * GB_factors
 
         return flux
@@ -878,7 +908,7 @@ class TGYROData:
         flux = self.mflux_i3['mflux_i_tur'][iteration]
 
         if mks:
-            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            GB_factors = self.gyro_bohm_unit['Pi_GB'][iteration]
             flux = flux * GB_factors
 
         return flux
@@ -892,7 +922,7 @@ class TGYROData:
         flux = self.mflux_i4['mflux_i_tur'][iteration]
 
         if mks:
-            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            GB_factors = self.gyro_bohm_unit['Pi_GB'][iteration]
             flux = flux * GB_factors
 
         return flux
@@ -906,7 +936,7 @@ class TGYROData:
         flux = self.mflux_i5['mflux_i_tur'][iteration]
 
         if mks:
-            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            GB_factors = self.gyro_bohm_unit['Pi_GB'][iteration]
             flux = flux * GB_factors
 
         return flux
@@ -920,7 +950,7 @@ class TGYROData:
         flux = self.mflux_e['mflux_e_neo'][iteration]
 
         if mks:
-            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            GB_factors = self.gyro_bohm_unit['Pi_GB'][iteration]
             flux = flux * GB_factors
 
         return flux
@@ -934,7 +964,7 @@ class TGYROData:
         flux = self.mflux_i['mflux_i_neo'][iteration]
 
         if mks:
-            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            GB_factors = self.gyro_bohm_unit['Pi_GB'][iteration]
             flux = flux * GB_factors
 
         return flux
@@ -948,7 +978,7 @@ class TGYROData:
         flux = self.mflux_i2['mflux_i_neo'][iteration]
 
         if mks:
-            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            GB_factors = self.gyro_bohm_unit['Pi_GB'][iteration]
             flux = flux * GB_factors
 
         return flux
@@ -962,7 +992,7 @@ class TGYROData:
         flux = self.mflux_i3['mflux_i_neo'][iteration]
 
         if mks:
-            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            GB_factors = self.gyro_bohm_unit['Pi_GB'][iteration]
             flux = flux * GB_factors
 
         return flux
@@ -976,7 +1006,7 @@ class TGYROData:
         flux = self.mflux_i4['mflux_i_neo'][iteration]
 
         if mks:
-            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            GB_factors = self.gyro_bohm_unit['Pi_GB'][iteration]
             flux = flux * GB_factors
 
         return flux
@@ -990,7 +1020,175 @@ class TGYROData:
         flux = self.mflux_i5['mflux_i_neo'][iteration]
 
         if mks:
-            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            GB_factors = self.gyro_bohm_unit['Pi_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_pflux_e_turb(self, iteration=-1, mks=False):
+        """Return turbulent electron particle flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.flux_e['pflux_e_tur'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Gamma_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_pflux_i_turb(self, iteration=-1, mks=False):
+        """Return turbulent ion particle flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.flux_i['pflux_i_tur'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Gamma_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_pflux_i2_turb(self, iteration=-1, mks=False):
+        """Return turbulent ion2 particle flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.flux_i2['pflux_i_tur'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Gamma_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_pflux_i3_turb(self, iteration=-1, mks=False):
+        """Return turbulent ion3 particle flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.flux_i3['pflux_i_tur'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Gamma_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_pflux_i4_turb(self, iteration=-1, mks=False):
+        """Return turbulent ion4 particle flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.flux_i4['pflux_i_tur'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Gamma_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_pflux_i5_turb(self, iteration=-1, mks=False):
+        """Return turbulent ion5 particle flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.flux_i5['pflux_i_tur'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Gamma_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_pflux_e_neo(self, iteration=-1, mks=False):
+        """Return neoclassical electron particle flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.flux_e['pflux_e_neo'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Gamma_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_pflux_i_neo(self, iteration=-1, mks=False):
+        """Return neoclassical ion particle flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.flux_i['pflux_i_neo'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Gamma_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_pflux_i2_neo(self, iteration=-1, mks=False):
+        """Return neoclassical ion5 particle flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.flux_i2['pflux_i_neo'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Gamma_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_pflux_i3_neo(self, iteration=-1, mks=False):
+        """Return neoclassical ion5 particle flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.flux_i3['pflux_i_neo'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Gamma_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_pflux_i4_neo(self, iteration=-1, mks=False):
+        """Return neoclassical ion5 particle flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.flux_i4['pflux_i_neo'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Gamma_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_pflux_i5_neo(self, iteration=-1, mks=False):
+        """Return neoclassical ion5 particle flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+        flux = self.flux_i5['pflux_i_neo'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Gamma_GB'][iteration]
             flux = flux * GB_factors
 
         return flux
