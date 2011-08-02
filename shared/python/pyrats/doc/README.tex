@@ -1,4 +1,5 @@
 \documentclass{article}
+\usepackage{fullpage}
 \addtolength{\parskip}{\baselineskip}
 
 \begin{document}
@@ -65,39 +66,39 @@ profiles\_genData contents:
 \end{itemize}
 \item Methods:
 \begin{itemize}
-\item \textbf{\_\_init\_\_(\emph{str} directory='.')} - This is the constructor for the class.  When a new instance of the class is created, the constructor is called and executed.  The only argument is the name of the directory from which to build the class, and it defaults to the current directory.  It calls these methods in the following order:
+\item \textbf{\_\_init\_\_(}\emph{str}\textbf{ directory='.')} - This is the constructor for the class.  When a new instance of the class is created, the constructor is called and executed.  The only argument is the name of the directory from which to build the class, and it defaults to the current directory.  It calls these methods in the following order:
 \begin{enumerate}
-\item set\_directory(directory)
+\item set\_directory(\emph{str} directory)
 \item init\_data()
 \item store\_data()
 \end{enumerate}
-\item \textbf{compplot(\emph{float} inner, \emph{float} outer, \emph{int} n, \emph{bool} verbose)} - This method creates overlaid flux surface plots using both the fourier series decomposition method and the shaped Grad-Shafranov Miller-type equilibrium for the flux surfaces.
+\item \textbf{compplot(}\emph{float}\textbf{ inner, }\emph{float}\textbf{ outer, }\emph{int}\textbf{ n, }\emph{bool}\textbf{ verbose)} - This method creates overlaid flux surface plots using both the fourier series decomposition method and the shaped Grad-Shafranov Miller-type equilibrium for the flux surfaces.
 \begin{itemize}
 \item Inner specifies the innermost flux surface to be plotted
 \item outer specifies the outermost flux surface to be plotted
 \item n specifies the number of flux surfaces to plot in between inner and outer
-\item if verbose is true, the legend will display the location of each flux surface
+\item if verbose is True, the legend will display the location of each flux surface
 \end{itemize}
-\item \textbf{compute\_fouriereq(\emph{float} r)} - This method calculates the flux surface at radius r according to the general Grad-Shafranov Fourier-series equilibrium.
-\item \textbf{compute\_mtypeeq(\emph{float} r)} - This method calculates the flux surface at radius r according to the shaped Grad-Shafranov Miller-type equilibrium.
-\item \textbf{fourierplot(\emph{float} inner, \emph{float} outer, \emph{int} n, \emph{bool} verbose)} - This method creates flux surface plots using only the fourier series decomposition method for the flux surfaces.
+\item \textbf{compute\_fouriereq(}\emph{float}\textbf{ r)} - This method calculates the flux surface at radius r according to the general Grad-Shafranov Fourier-series equilibrium.
+\item \textbf{compute\_mtypeeq(}\emph{float}\textbf{ r)} - This method calculates the flux surface at radius r according to the shaped Grad-Shafranov Miller-type equilibrium.
+\item \textbf{fourierplot(}\emph{float}\textbf{ inner, }\emph{float}\textbf{ outer, }\emph{int}\textbf{ n, }\emph{bool}\textbf{ verbose)} - This method creates flux surface plots using only the fourier series decomposition method for the flux surfaces.
 \begin{itemize}
 \item inner specifies the innermost flux surface to be plotted
 \item outer specifies the outermost flux surface to be plotted
 \item n specifies the number of flux surfaces to plot in between inner and outer
-\item if verbose is true, the legend will display the location of each flux surface
+\item if verbose is True, the legend will display the location of each flux surface
 \end{itemize}
-\item \textbf{get(\emph{str} var)} - This method returns the numpy array corresponding to var.
+\item \textbf{get(}\emph{str}\textbf{ var)} - This method returns the numpy array corresponding to var.
 \item \textbf{init\_data()} - This method initializes all of the data objects.
-\item \textbf{match(\emph{float} val, \emph{list} vec)} - This method finds the closest match to val in a \emph{list} of values (vec) and returns the index of that value.
-\item \textbf{millerplot(\emph{float} inner, \emph{float} outer, \emph{int} n, \emph{bool} verbose)} - This method creates flux surface plots using only the shaped Grad-Shafranov Miller-type equilibrium for the flux surfaces.
+\item \textbf{match(}\emph{float}\textbf{ val, }\emph{list}\textbf{ vec)} - This method finds the closest match to val in a \emph{list} of values (vec) and returns the index of that value.
+\item \textbf{millerplot(}\emph{float}\textbf{ inner, }\emph{float}\textbf{ outer, }\emph{int}\textbf{ n, }\emph{bool}\textbf{ verbose)} - This method creates flux surface plots using only the shaped Grad-Shafranov Miller-type equilibrium for the flux surfaces.
 \begin{itemize}
 \item inner specifies the innermost flux surface to be plotted
 \item outer specifies the outermost flux surface to be plotted
 \item n specifies the number of flux surfaces to plot in between inner and outer
-\item if verbose is true, the legend will display the location of each flux surface.
+\item if verbose is True, the legend will display the location of each flux surface.
 \end{itemize}
-\item \textbf{plot(\emph{str} var, \emph{int} n1=2, \emph{int} n2=2, \emph{int} plotcounter=0, \emph{int} fignum=0)} - This method creates plots of the requested data (var) using matplotlib.
+\item \textbf{plot(}\emph{str}\textbf{ var, }\emph{int}\textbf{ n1=2, }\emph{int}\textbf{ n2=2, }\emph{int}\textbf{ plotcounter=0, }\emph{int}\textbf{ fignum=0)} - This method creates plots of the requested data (var) using matplotlib.
 \begin{itemize}
 \item n1 is the horizontal number of plots in one window
 \item n2 is the vertical number of plots in one window
@@ -106,7 +107,7 @@ profiles\_genData contents:
 \end{itemize}
 \item \textbf{read\_data()} - This method reads in data from input.profiles.  It returns a dictionary containing the data that was read in.
 \item \textbf{read\_fourier()} - This method reads in data from input.profiles.geo, and stores that data in the class objects ar, br, az, and bz.
-\item \textbf{set\_directory(\emph{str} directory)} - This method sets the class attribute directory\_name to directory.
+\item \textbf{set\_directory(}\emph{str}\textbf{ directory)} - This method sets the class attribute directory\_name to directory.
 \item \textbf{store\_data()} - This method reads data and renames it appropriately.  It is necessary because the names of the differetn parameters are not uniformly formatted.  store\_data cleans them up by inserting spaces where necessary, and by deleting \#-signs when necessary.
 \end{itemize}
 \end{itemize}
@@ -170,10 +171,188 @@ TGYROData contents:
 \item \textbf{directory\_name} \emph{str} - Name of loaded directory.
 \item \textbf{chi\_e} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file chi\_e.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
 \item \textbf{chi\_i} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file chi\_i.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{chi\_i2} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file chi\_i2.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{chi\_i3} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file chi\_i3.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{chi\_i4} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file chi\_i4.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{chi\_i5} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file chi\_i5.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
 \item \textbf{gyro\_bohm\_unit} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file gyrobohm.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
 \item \textbf{profile} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file profile.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{geometry} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file chi\_i.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{flux\_e} \emph{dictionary of list
+\item \textbf{geometry} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file geometry.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{flux\_e} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file flux\_e.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{flux\_i} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file flux\_i.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{flux\_i2} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file flux\_i2.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{flux\_i3} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file flux\_i3.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{flux\_i4} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file flux\_i4.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{flux\_i5} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file flux\_i5.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{flux\_target} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file flux\_target.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{mflux\_e} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file mflux\_e.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{mflux\_i} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file mflux\_i.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{mflux\_i2} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file mflux\_i2.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{mflux\_i3} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file mflux\_i3.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{mflux\_i4} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file mflux\_i4.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{mflux\_i5} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file mflux\_i5.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{mflux\_target} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file mflux\_target.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{gradient} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file gradient.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{local\_res} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file local\_res.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{global\_res} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file global\_res.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{wr\_ion} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file wr\_ion.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{wi\_ion} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file wi\_ion.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{wr\_elec} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file wr\_elec.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{wr\_ion} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file wr\_ion.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
+\item \textbf{r} \emph{numpy array} - Contains the normalized radial gridpoints in a 1-D numpy array.
+\end{itemize}
+\item Methods:
+\begin{itemize}
+\item \textbf{\_\_init\_\_(}\emph{str} \textbf{ sim\_directory)} - Constructor which is called when a new TRYGOData object is created.  It calls the following methods:
+\begin{enumerate}
+\item set\_directory(\emph{str} sim\_directory)
+\item init\_data()
+\item read\_data()
+\end{enumerate}
+\item \textbf{get\_Te(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of the electron temperature for the specified TGYRO iteration.  The default is the last iteration.
+\item \textbf{get\_Ti(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of the species 1 ion temperature for the specified TGYRO iteration.  The default is the last iteration.
+\item \textbf{get\_Ti2(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of the species 2 ion temperature for the specified TGYRO iteration.  The default is the last iteration.
+\item \textbf{get\_Ti3(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of the species 3 ion temperature for the specified TGYRO iteration.  The default is the last iteration.
+\item \textbf{get\_Ti4(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of the species 4 ion temperature for the specified TGYRO iteration.  The default is the last iteration.
+\item \textbf{get\_Ti5(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of the species 5 ion temperature for the specified TGYRO iteration.  The default is the last iteration.
+\item \textbf{get\_chi\_e\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical chi\_e from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_chi\_e\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent chi\_e from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_chi\_i\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical chi\_i from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_chi\_i\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent chi\_i from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_chi\_i2\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical chi\_i2 from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_chi\_i2\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent chi\_i2 from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_chi\_i3\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical chi\_i3 from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_chi\_i3\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent chi\_i3 from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_chi\_i4\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical chi\_i4 from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_chi\_i4\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent chi\_i4 from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_chi\_i5\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical chi\_i5 from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_chi\_i5\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent chi\_i5 from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_flux\_count(}\emph{int}\textbf{ iteration=-1)} - Returns the total number of calls to the flux driver up to the given iteration.
+\item \textbf{get\_flux\_e\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical electron heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_flux\_e\_target(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the target electron heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_flux\_e\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent electron heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_flux\_i\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical ion heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_flux\_i\_target(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the target ion heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_flux\_i\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent ion heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_flux\_i2\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical ion species 2 heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_flux\_i2\_target(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the target ion species 2 heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_flux\_i2\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent ion species 2 heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_flux\_i3\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical ion species 3 heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_flux\_i3\_target(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the target ion species 4 heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_flux\_i3\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent ion species 3 heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_flux\_i4\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical ion species 4 heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_flux\_i4\_target(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the target ion species 4 heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_flux\_i4\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent ion species 4 heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_flux\_i5\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical ion species 5 heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_flux\_i5\_target(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the target ion species 5 heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_flux\_i5\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent ion species 5 heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
+\item \textbf{get\_geometry\_factor(}\emph{str}\textbf{ factor,}\emph{ int}\textbf{ iteration=-1)} - Returns a numpy array of the specified geometric factor for the specified iteration.  The default is the last iteration.  Possible factors are:
+\begin{itemize}
+\item 'rho'
+\item 'q'
+\item 's'
+\item 'kappa'
+\item 's\_kappa'
+\item 'delta'
+\item 's\_delta'
+\item 'shift'
+\item 'rmaj/a'
+\item 'b\_unit'
+\end{itemize}
+\item \textbf{get\_global\_res(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of the global residual from the specified iteration.  The default is the last iteration.
+\item \textbf{get\_gradient\_factor(}\emph{str}\textbf{ factor,}\emph{ int}\textbf{ iteration=-1)} - Returns a numpy array of the specified gradient factor for the given iteration.  The default iteration is the last.  Possible factors are:
+\begin{itemize}
+\item 'r/a'
+\item 'a/Lni'
+\item 'a/Lne'
+\item 'a/LTi'
+\item 'a/LTe'
+\item 'a/Lp'
+\item 'a*gamma\_e/cs'
+\item 'a*gamma\_p/cs'
+\end{itemize}
+\item \textbf{get\_input(}\emph{str}\textbf{ input\_name)} - Returns the specified variable from input.tgyro.gen.
+
+Ex: get\_input("TGYRO\_MODE")
+\item \textbf{get\_local\_res(}\emph{int}\textbf{ field=1,}\emph{ int}\textbf{ iteration=-1)} - Returns a numpy array of the local field residual for the given field and iteration.  The default is the last iteration, and field 1.
+\item \textbf{get\_mflux\_e\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical electron momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
+\item \textbf{get\_mflux\_e\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent electron momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
+\item \textbf{get\_mflux\_i\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical ion momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
+\item \textbf{get\_mflux\_i\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent ion momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
+\item \textbf{get\_mflux\_i2\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical ion species 2 momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
+\item \textbf{get\_mflux\_i2\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent ion species 2 momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
+\item \textbf{get\_mflux\_i3\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical ion species 3 momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
+\item \textbf{get\_mflux\_i3\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent ion species 3 momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
+\item \textbf{get\_mflux\_i4\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical ion species 4 momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
+\item \textbf{get\_mflux\_i4\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent ion species 4 momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
+\item \textbf{get\_mflux\_i5\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical ion species 5 momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
+\item \textbf{get\_mflux\_i5\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent ion species 5 momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
+\item \textbf{get\_mflux\_target(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the target momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
+\item \textbf{get\_most\_unstable\_at\_radius(}\emph{int}\textbf{ radius=0,}\emph{ str}\textbf{ direction='ion')} - Returns the most unstable mode at specified radius in the specified direction.  The parameter radius is the requested radial index; it is an integer between 0 and n\_r-1.  The parameter direction can be either 'ion' for the most unstable ion mode, or 'electron' for the most unstable electron mode.
+\item \textbf{get\_ne(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of ne for the specified iteration.  The default iteration is the last.
+\item \textbf{get\_ni(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of ni for the specified iteration.  The default iteration is the last.
+\item \textbf{get\_ni2(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of ni2 for the specified iteration.  The default iteration is the last.
+\item \textbf{get\_ni3(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of ni3 for the specified iteration.  The default iteration is the last.
+\item \textbf{get\_ni4(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of ni4 for the specified iteration.  The default iteration is the last.
+\item \textbf{get\_ni5(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of ni5 for the specified iteration.  The default iteration is the last.
+\item \textbf{get\_profile\_factor(}\emph{str}\textbf{ factor,}\emph{ int}\textbf{ iteration=-1)} - Returns a numpy array of the specified profile factor for the given iteration.  The default iteration is the last.  The possible factors are:
+\begin{itemize}
+\item 'r/a'
+\item 'ni'
+\item 'a/Lni'
+\item 'Ti'
+\item 'a/LTi'
+\end{itemize}
+\item \textbf{get\_profile2\_factor(}\emph{str}\textbf{ factor,}\emph{ int}\textbf{ iteration=-1)} - Returns a numpy array of the specified profile2 factor for the given iteration.  The default iteration is the last.  The possible factors are the same as get\_profile\_factor.
+\item \textbf{get\_profile3\_factor(}\emph{str}\textbf{ factor,}\emph{ int}\textbf{ iteration=-1)} - Returns a numpy array of the specified profile3 factor for the given iteration.  The default iteration is the last.  The possible factors are the same as get\_profile\_factor.
+\item \textbf{get\_profile4\_factor(}\emph{str}\textbf{ factor,}\emph{ int}\textbf{ iteration=-1)} - Returns a numpy array of the specified profile4 factor for the given iteration.  The default iteration is the last.  The possible factors are the same as get\_profile\_factor.
+\item \textbf{get\_profile5\_factor(}\emph{str}\textbf{ factor,}\emph{ int}\textbf{ iteration=-1)} - Returns a numpy array of the specified profile5 factor for the given iteration.  The default iteration is the last.  The possible factors are the same as get\_profile\_factor.
+\item \textbf{get\_r()} - Returns a numpy array containing the normalized radial gridpoints, r/a.
+\item \textbf{get\_stability\_at\_radius(}\emph{int}\textbf{ radius=0,}\emph{ str}\textbf{ frequency='r',}\emph{ str}\textbf{ direction='ion')} - Returns a list of frequency vs. ky at specified radius from stability analysis.  The parameter radius is the requested radial index; it is an integer between 0 and n\_r-1.  The parameter frequency can be either the real ('r') or the imaginary ('i') spectrum.  The parameter direction specifies the direction of the spectrum.  It can be either the ion direction ('ion') or the electron direction ('elec').
+\item \textbf{init\_data()} - Initializes object data.
+\item \textbf{make\_gradient\_vs\_field\_plot(}\emph{int}\textbf{ r=1,}\emph{ int}\textbf{ evolve\_field=1,}\emph{ str}\textbf{ grad='a/LTi',}\emph{ str}\textbf{ profile='ti',}\emph{ bool}\textbf{ arrows=False)} - Return a matplotlib.pyplot figure of gradient\_vs\_field\_space.  The parameter r is the radial index; it is an integer between 0 and n\_r-1.  The parameters are passed to make\_gradient\_vs\_field\_space, and are described there.
+\item \textbf{make\_gradient\_vs\_field\_space(}\emph{int}\textbf{ r=1,}\emph{ int}\textbf{ evolve\_field=1,}\emph{ str}\textbf{ grad='a/LTi',}\emph{ str}\textbf{ profile='ti')} - Returns a matrix of Space[iteration][gradient,profile,residual] at givel radial point.  eeg: Space[[4.0, 1.7, 2.5], [3.6, 1.5, 0.1]] if grad 4.0 $\rightarrow$ 3.6 while Ti $\rightarrow$ 1.5 and local residual went from 2.5 $\rightarrow$ 0.1.  The parameter evolve\_field specifies the field type to pass to get\_local\_res.  The parameter grad is the gradient factor to pass to get\_gradient\_factor.  The parameter profile is the profile factor to pass to get\_profile\_factor.
+\item \textbf{read\_chi\_e()} - Internal method.  This method reads in chi\_e.out and stores it in self.chi\_e.
+\item \textbf{read\_chi\_i()} - Internal method.  This method reads in chi\_i.out and stores it in self.chi\_i.
+\item \textbf{read\_control()} - Internal method.  This method reads in control.out to set resolutions.
+\item \textbf{read\_data()} - Internal method.  This method reads in object data and calls the following other methods:
+\begin{enumerate}
+\item read\_control()
+\item read\_chi\_e()
+\item read\_chi\_i(loc\_n\_ion)
+\item read\_gyrobohm()
+\item read\_profile()
+\item read\_geometry()
+\item read\_flux(loc\_n\_ion)
+\item read\_mflux(loc\_n\_ion)
+\item read\_gradient()
+\item read\_residual()
+\end{enumerate}
+\item \textbf{read\_file(}\emph{str}\textbf{ file\_name)} - Reads TGYRO output file.  Output is data['column\_header'][iteration]
+\item \textbf{read\_flux(}\emph{int}\textbf{ num\_ions=1)} - Reads flux\_e.out, flux\_i(2-5).out, and flux\_target.out.  Num\_ions determines how many ion files to read.
+\item \textbf{read\_geometry()} - Reads and stores geometry.out in self.geometry.
+\item \textbf{read\_gradient()} - Reads and stores gradient.out in self.gradient.
+\item \textbf{read\_gyrobohm()} - Reads and stores gyrobohm.out in self.gyro\_bohm\_unit.
+\item \textbf{read\_mflux()} - Reads and stores mflux\_e.out, mflux\_i(2-5).out, and mflux\_target.out.
+\item \textbf{read\_num\_ions()} - Reads LOC\_N\_ION and stores it as self.loc\_n\_ion.
+\item \textbf{read\_profile()} - Reads and stores profile.out in self.profile.
+\item \textbf{read\_profile2()} - Reads and stores profile2.out in self.profile2.
+\item \textbf{read\_profile3()} - Reads and stores profile3.out in self.profile3.
+\item \textbf{read\_profile4()} - Reads and stores profile4.out in self.profile4.
+\item \textbf{read\_profile5()} - Reads and stores profile5.out in self.profile5.
+\item \textbf{read\_residual()} - Reads residual.out.
+\item \textbf{read\_stab\_file(}\emph{str}\textbf{ file\_name)} - Reads files generated with stability analysis mode.  The parameter file\_name is the name of the requested stability file, sich as "wi\_elec.out".  It returns a list of [r, ks, freq].
+\item \textbf{read\_stabilities()} - Reads output files from TGYRO\_METHOD=2, and stores them into variables, as follows:
+\begin{itemize}
+\item wr\_ion.out $\rightarrow$ self.wr\_ion
+\item wi\_ion.out $\rightarrow$ self.wi\_ion
+\item wr\_elec.out $\rightarrow$ self.wr\_elec
+\item wi\_elec.out $\rightarrow$ self.wi\_elec
+\end{itemize}
+\item \textbf{read\_tgyro\_mode()} - Reads the TGYRO\_MODE and stores it as self.tgyro\_mode.
+\item \textbf{set\_directory(}\emph{str}\textbf{ sim\_directory)} - Sets the simulation directory.  Stores sim\_directory in 
+
+self.directory\_name.
 \end{itemize}
 \end{itemize}
 \end{document}

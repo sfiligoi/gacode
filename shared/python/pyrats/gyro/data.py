@@ -464,32 +464,13 @@ class GYROData:
         """Equilizes the lengths of the different data arrays, in the case that
         the time axis is longer in some than in others."""
 
-        import numpy as np
-
+        import numpy as n
         temp = []
         for item in self.loaded:
             if item == 't':
                 temp.append(self.t['n_time'])
-            elif item == 'freq':
-                temp.append(len(self.freq.T))
-            elif item == 'gbflux_i':
-                temp.append(len(self.gbflux_i.T))
-            elif item == 'gbflux_n':
-                temp.append(len(self.gbflux_n.T))
-            elif item == 'moment_u':
-                temp.append(len(self.moment_u.T))
-            elif item == 'moment_n':
-                temp.append(len(self.moment_n.T))
-            elif item == 'moment_e':
-                temp.append(len(self.moment_e.T))
-            elif item == 'moment_v':
-                temp.append(len(self.moment_v.T))
-            elif item == 'moment_zero':
-                temp.append(len(self.moment_zero.T))
-            elif item == 'flux_velocity':
-                temp.append(len(self.flux_velocity.T))
-            elif item == 'k_perp_squared':
-                temp.append(len(self.k_perp_squared.T))
+            else:
+                temp.append(len(eval('self.' + item).T))
         cutoff = min(temp)
         for item in self.loaded:
             if item == 't':

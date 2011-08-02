@@ -644,6 +644,66 @@ class TGYROData:
 
         return flux
 
+    def get_flux_i2_target(self, iteration=-1, mks=False):
+        """Return target species 2 ion heat flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+
+        flux = self.flux_target['eflux_i2_target'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_flux_i3_target(self, iteration=-1, mks=False):
+        """Return target species 3 ion heat flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+
+        flux = self.flux_target['eflux_i3_target'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_flux_i4_target(self, iteration=-1, mks=False):
+        """Return target species 4 ion heat flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+
+        flux = self.flux_target['eflux_i4_target'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
+    def get_flux_i5_target(self, iteration=-1, mks=False):
+        """Return target species 5 ion heat flux from specified iteration.
+           Keywords:
+               iteration           TGYRO iteration to return, default is last
+               mks                 whether to return in mks units, default is False
+        """
+
+        flux = self.flux_target['eflux_i5_target'][iteration]
+
+        if mks:
+            GB_factors = self.gyro_bohm_unit['Q_GB'][iteration]
+            flux = flux * GB_factors
+
+        return flux
+
     def get_flux_e_turb(self, iteration=-1, mks=False):
         """Return turbulent electron heat flux from specified iteration.
            Keywords:
@@ -1001,7 +1061,7 @@ class TGYROData:
                factor              Geometric Factor, options:
                                        'rho', 'q', 's', 'kappa', 's_kappa', 'delta', 
                                        's_delta', 'shift', 'rmaj/a', 'b_unit'
-               iteration           TGYRO iteration to return, default is first
+               iteration           TGYRO iteration to return, default is last
         """
         if factor not in self.geometry.keys():
             print "ERROR: invalid geometric choice. Valid options:"
