@@ -183,8 +183,8 @@ class TGYROData:
         for line in raw_data:
             if len(line.strip()) > 0:
                 if line.strip()[0].isdigit():
-                    temp.append(line.split())
-        data = array(temp, dtype=float)
+                    temp.append(map(float, line.split()))
+        data = array(temp)
 
         # This catches error from columns running into each other
         keywords = raw_data[0].replace('target', 'target ').split()
@@ -652,21 +652,6 @@ class TGYROData:
         """
 
         flux = self.flux_target['pflux_e_target'][iteration]
-
-        if mks:
-            GB_factors = self.gyro_bohm_unit['Gamma_GB'][iteration]
-            flux = flux * GB_factors
-
-        return flux
-
-    def get_pflux_e_target(self, iteration=-1, mks=False):
-        """Return target ion particle flux from specified iteration.
-           Keywords:
-               iteration           TGYRO iteration to return, default is last
-               mks                 whether to return in mks units, default is False
-        """
-
-        flux = self.flux_target['pflux_i_target'][iteration]
 
         if mks:
             GB_factors = self.gyro_bohm_unit['Gamma_GB'][iteration]
