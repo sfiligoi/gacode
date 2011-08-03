@@ -300,6 +300,7 @@ class GYROData:
         if len(moment_u) > 0:
             t = len(moment_u)/(2*self.profile['n_theta_plot']*self.profile['n_x']*self.profile['n_field']*self.profile['n_n'])
             self.moment_u = moment_u.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_field'], self.profile['n_n'], t), order='F')
+            self.moment_u = self.moment_u[0] + 1j*self.moment_u[1]
             endtime = time.time()
             print "Time: " + str(endtime - starttime)
             self.loaded.append('moment_u')
@@ -317,6 +318,7 @@ class GYROData:
         if len(moment_n) > 0:
             t = len(moment_n)/(2*self.profile['n_theta_plot']*self.profile['n_x']*self.profile['n_kinetic']*self.profile['n_n'])
             self.moment_n = moment_n.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], t), order='F')
+            self.moment_n = self.moment_n[0] + 1j*self.moment_n[1]
             endtime = time.time()
             print "Time: " + str(endtime - starttime)
             self.loaded.append('moment_n')
@@ -334,6 +336,7 @@ class GYROData:
         if len(moment_e) > 0:
             t = len(moment_e)/(2*self.profile['n_theta_plot']*self.profile['n_x']*self.profile['n_kinetic']*self.profile['n_n'])
             self.moment_e = moment_e.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], t), order='F')
+            self.moment_e = self.moment_e[0] + 1j*self.moment_e[1]
             endtime = time.time()
             print "Time: " + str(endtime - starttime)
             self.loaded.append('moment_e')
@@ -352,6 +355,7 @@ class GYROData:
             midtime = time.time()
             t = len(moment_v)/(2*self.profile['n_theta_plot']*self.profile['n_x']*self.profile['n_kinetic']*self.profile['n_n'])
             self.moment_v = moment_v.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], t), order='F')
+            self.moment_v = self.moment_v[0] + 1j*self.moment_v[1]
             endtime = time.time()
             print "Time to load data: " + str(midtime - starttime)
             print "Time to reshape data: " + str(endtime - midtime)
