@@ -1,5 +1,6 @@
 \documentclass{article}
 \usepackage{fullpage}
+\usepackage{commath}
 \addtolength{\parskip}{\baselineskip}
 
 \begin{document}
@@ -10,7 +11,7 @@ Python Routines for Analyzing Transport Simulations
 \end{center}
 \normalsize
 
-\noindent \textbf{Introduction: }PYRATS is a data processing tool designed to make creating plots of output data from GYRO, TGYRO, or NEO easy.  It makes use of the python programming language, and the associated packages numpy and matplotlib.  With minimal knowledge of the python language and matplotlib, the typical user should be able to create plots quickly and efficiently from the python command line interpreter.
+\noindent \textbf{Introduction: }PYRATS is a data processing tool designed to make creating plots of output data from GYRO, TGYRO, or NEO easy.  It makes use of the python programming language, and the associated packages numpy and matplotlib.  With some knowledge of the python language and matplotlib, the typical user should be able to create plots quickly and efficiently from the python command line interpreter.
 
 \noindent To begin, type the following command into the terminal:
 \fontfamily{\ttdefault}\selectfont
@@ -22,9 +23,11 @@ Python Routines for Analyzing Transport Simulations
 \fontfamily{\ttdefault}\selectfont
 
 >>> from pyrats.tgyro.data import TGYROData
+\addtolength{\parskip}{-\baselineskip}
 
 >>> help(TGYROData)
 
+\addtolength{\parskip}{\baselineskip}
 \fontfamily{\rmdefault}\selectfont
 \noindent This will bring up the built-in documentation for the class TGYROData.  It lists all of the methods and attributes of the class, and the function of each one.  This information is also contained on page x of this manual.
 
@@ -34,8 +37,50 @@ Python Routines for Analyzing Transport Simulations
 >>> sim1 = TGYROData('example\_directory')
 
 \fontfamily{\rmdefault}\selectfont
-\noindent where 'example\_directory' is a directory containing TGYRO output files.  The data is loaded into objects corresponding to the output file which the data came from.  
+\noindent where 'example\_directory' is a directory containing TGYRO output files.  The data is loaded into objects corresponding to the output file which the data came from.  To create a basic plot of the particle densities and temperatures as a function of radius, type the following commands:
+\fontfamily{\ttdefault}\selectfont
 
+>>> import matplotlib.pyplot as plt
+\addtolength{\parskip}{-\baselineskip}
+
+>>> fig = plt.figure(1)
+
+>>> ax1 = fig.add\_subplot(221)
+
+>>> ax2 = fig.add\_subplot(222)
+
+>>> ax3 = fig.add\_subplot(223)
+
+>>> ax4 = fig.add\_subplot(224)
+
+>>> ax1.plot(sim1.get\_r(), sim1.get\_Te)
+
+>>> ax2.plot(sim1.get\_r(), sim1.get\_Ti)
+
+>>> ax3.plot(sim1.get\_r(), sim1.get\_ne)
+
+>>> ax4.plot(sim1.get\_r(), sim1.get\_ni)
+
+>>> ax1.set\_xlabel('r/a')
+
+>>> ax1.set\_ylabel('Electron Temperature (keV)')
+
+>>> ax2.set\_xlabel('r/a')
+
+>>> ax2.set\_ylabel('Ion Temperature (keV)')
+
+>>> ax3.set\_xlabel('r/a')
+
+>>> ax3.set\_ylabel('Electron Particle Density (e\^19/m\^3)')
+
+>>> ax4.set\_xlabel('r/a')
+
+>>> ax4.set\_ylabel('Ion Particle Density (e\^19/m\^3)')
+
+>>> plt.show()
+
+\addtolength{\parskip}{\baselineskip}
+\fontfamily{\rmdefault}\selectfont
 \newpage
 profiles\_genData contents:
 \begin{itemize}
@@ -350,9 +395,123 @@ Ex: get\_input("TGYRO\_MODE")
 \item wi\_elec.out $\rightarrow$ self.wi\_elec
 \end{itemize}
 \item \textbf{read\_tgyro\_mode()} - Reads the TGYRO\_MODE and stores it as self.tgyro\_mode.
-\item \textbf{set\_directory(}\emph{str}\textbf{ sim\_directory)} - Sets the simulation directory.  Stores sim\_directory in 
+\item \textbf{set\_directory(}\emph{str}\textbf{ sim\_directory)} - Sets the simulation directory.  Stores sim\_directory in
 
 self.directory\_name.
+\end{itemize}
+\end{itemize}
+
+\newpage
+GYROData Contents:
+\begin{itemize}
+\item Data
+\begin{itemize}
+\item \textbf{directory\_name}\emph{ str} - The name of the simulation directory.
+\item \textbf{profile}\emph{ dictionary of numpy arrays} - Dictionary where control information from out.gyro.profile is stored.  The keys can be obtained by typing: sim1.profile.keys()
+\item \textbf{geometry}\emph{ dictionary of numpy arrays} - Dictionary where geometry data from out.gyro.geometry is stored.  The keys can be obtained by typing: sim1.geometry.keys()
+\item \textbf{t}\emph{ dictionary of numpy arrays} - Dictionary where time data from t.out is stored.  The keys are: 't/deltat', '(cbar\_s/a)t', and 'n\_time' which is an int, not a numpy array.
+\item \textbf{diff}\emph{ numpy array} - Numpy array with dimensions of (n\_kinetic, n\_field, moments=2, n\_time).  It contains the Gyrobohm-normalized diffusivities averaged over radius and summer over mode number.  The moments are:
+\begin{enumerate}
+\item $D_\sigma/\chi_{GB}$ (particle diffusivity)
+\item $\chi_\sigma/\chi_{GB}$ (energy diffusivity)
+\end{enumerate}
+\item \textbf{diff\_i}\emph{ numpy array} - Numpy array with dimensions of (n\_kinetic, n\_field, moments=2, n\_x, n\_time).  It contains the Gyrobohm-normalized diffusivities as a function of radius, summed over mode number.  The moments are:
+\begin{enumerate}
+\item $D_\sigma(r)/\chi_{GB}$ (particle diffusivity)
+\item $\chi_\sigma(r)/\chi_{GB}$ (energy diffusivity)
+\end{enumerate}
+\item \textbf{diff\_n}\emph{ numpy array} - Numpy array with dimensions of (n\_kinetic, n\_field, moments=2, n\_n, n\_time).  It contains the Gyrobohm-normalized diffusivities averaged over radius for each mode number.  The moments are:
+\begin{enumerate}
+\item $D_{\sigma,n}/\chi_{GB}$ (particle diffusivity)
+\item $\chi_{\sigma,n}/\chi_{GB}$ (energy diffusivity)
+\end{enumerate}
+\item \textbf{gbflux}\emph{ numpy array} - Numpy array with dimensions of (n\_kinetic, n\_field, moments=4, n\_time).  It contains the Gyrobohm-normalized fluxes averaged over radius and summed over mode number.  The moments are:
+\begin{enumerate}
+\item $\Gamma_\sigma/\Gamma_{GB}$ (particle flux)
+\item $Q_\sigma/Q_{GB}$ (energy flux)
+\item $\Pi_\sigma/\Pi_{GB}$ (momentum flux)
+\item $S^{tur}_{W,\sigma}/S_{GB}$ (exchange power density)
+\end{enumerate}
+\item \textbf{gbflux\_i}\emph{ numpy array} - Numpy array with dimensions of (n\_kinetic, n\_field, moments=4, n\_x, n\_time).  It contains the Gyrobohm-normalized fluxes as a function of mode number and averaged over radius.  The moments are:
+\begin{enumerate}
+\item $\Gamma_\sigma(r)/\Gamma_{GB}$ (particle flux)
+\item $Q_\sigma(r)/Q_{GB}$ (energy flux)
+\item $\Pi_\sigma(r)/\Pi_{GB}$ (momentum flux)
+\item $S^{tur}_{W,\sigma}(r)/S_{GB}$ (exchange power density)
+\end{enumerate}
+\item \textbf{gbflux\_n}\emph{ numpy array} - Numpy array with dimensions of (n\_kinetic, n\_field, moments=4, n\_n, n\_time).  It contains the Gyrobohm-normalized fluxes as a function of mode number and averaged over radius.  The moments are:
+\begin{enumerate}
+\item $\Gamma_\sigma/\Gamma_{GB}$ (particle flux)
+\item $Q_\sigma/Q_{GB}$ (energy flux)
+\item $\Pi_\sigma/\Pi_{GB}$ (momentum flux)
+\item $S^{tur}_{W,\sigma}/S_{GB}$ (exchange power density)
+\end{enumerate}
+\item \textbf{moment\_u}\emph{ numpy array} - Complex numpy array with dimensions of (n\_theta\_plot, n\_x, i\_field=n\_field, n\_n, n\_time).  It contains the potential expansion coefficients.  More information is available online at https://fusion.gat.com/theory/Gyrousermanual\#Computed\_Quantities.  The fields are described below.  There can be up to three different fields:
+\begin{enumerate}
+\item $\frac{e\delta\phi_n}{\bar{T}_e}$ (electrostatic potential)
+\item $\frac{\bar{c}_s}{c}\frac{e\delta A_{\parallel n}}{\bar{T}_e}$ (electromagnetic potential)
+\item $\frac{\delta B_\parallel}{B_{\mathrm{unit}}(r)}$ (compressional perturbation)
+\end{enumerate}
+\item \textbf{moment\_n}\emph{ numpy array} - Complex numpy array with dimensions of (n\_theta\_plot, n\_x, n\_kinetic, n\_n, n\_time).  It contains the density moment expansion coefficients: $\frac{\delta n_{\sigma,n}}{\bar{n}_e}$.  More information is available online at https://fusion.gat.com/theory/Gyrousermanual\#Computed\_Quantities.
+\item \textbf{moment\_e}\emph{ numpy array} - Complex numpy array with dimensions of (n\_theta\_plot, n\_x, n\_kinetic, n\_n, n\_time).  It contains the energy moment expansion coefficients: $\frac{\delta E_{\sigma,n}}{\bar{n}_e\bar{T}_e}$.  More information is available online at https://fusion.gat.com/theory/Gyrousermanual\#Computed\_Quantities.
+\item \textbf{moment\_v}\emph{ numpy array} - Complex numpy array with dimensions of (n\_theta\_plot, n\_x, n\_kinetic, n\_n, n\_time).  It contains the parallel velocity moment expansion coefficients: $\frac{\delta V_{\sigma,n}}{\bar{n}_e\bar{c}_s}$.  More information is available online at https://fusion.gat.com/theory/Gyrousermanual\#Computed\_Quantities.
+\item \textbf{moment\_zero}\emph{ numpy array} - Numpy array with dimensions of (n\_x, n\_kinetic, moments=n\_moment, n\_time).  It contains the flux-surface average of the $n=0$ component of the density and energy moments.  The moments are described below.  There can be up to two different moments:
+\begin{enumerate}
+\item $\langle\frac{\delta n_{\sigma,0}}{\bar{n}_e}\rangle$
+\item $\langle\frac{\delta E_{\sigma,0}}{\bar{n}_e\bar{T}_e}\rangle$
+\end{enumerate}
+\item \textbf{flux\_velocity}\emph{ numpy array} - Numpy array with dimensions of (n\_energy, n\_lambda, n\_kinetic, i\_field=n\_field, moments=2, n\_n, n\_time).  It contains the velocity-space flux densities: $$\Gamma=\int \! \dif \varepsilon \int \! \dif \lambda \, \Gamma(\varepsilon, \lambda), \, \, \, \, Q=\int \! \dif \varepsilon \int \! \dif \lambda \, Q(\varepsilon, \lambda)$$
+The moments are:
+\begin{enumerate}
+\item $\Gamma{\sigma,n}(\varepsilon,\lambda)$ (particle flux)
+\item $Q_{\sigma,n}(\varepsilon,\lambda)$ (energy flux)
+\end{enumerate}
+The possible fields are:
+\begin{enumerate}
+\item electrostatic component
+\item electromagnetic component
+\end{enumerate}
+\item \textbf{k\_perp\_squared}\emph{ numpy array} - Numpy array with dimensions of (n\_n, n\_time).  It contains the flux-surface and radial average of $k^2_\perp$:
+$$\frac{\langle\langle(k_\perp\bar{\rho}_{s,\mathrm{unit}})^2|\delta\phi_n|^2\rangle\rangle_r}{\langle\langle|\delta\phi_n|^2\rangle\rangle_r}$$
+\end{itemize}
+\item Methods:
+\begin{itemize}
+\item \textbf{\_\_init\_\_(}\emph{str}\textbf{ sim\_directory)} - This is the class constructor.  It is called when a new object of that class is created, and it reads in data from sim\_directory to create that object.  It sets the variable directory\_name to sim\_directory, and appends the pyrats folder to the python search path.  It also calls the following methods:
+\begin{enumerate}
+\item init\_data()
+\item read\_data()
+\item equil\_time()
+\end{enumerate}
+\item \textbf{equil\_time()} - This method counts the number of time steps present in the currently loaded arrays, and sets them all equal (to the length of the array with the fewest number of time steps).
+\item \textbf{get\_input(}\emph{str}\textbf{ input\_name)} - This method returns the specified variable from input.gyro.gen.  Ex: get\_input("TIME\_STEP")
+\item \textbf{init\_data()} - This method initializes object data.
+\item \textbf{make\_diff()} - This method creates self.diff by computing it from self.gbflux.
+\item \textbf{make\_diff\_i()} - This method creates self.diff\_i by computing it from self.gbflux\_i.
+\item \textbf{make\_gbflux()} - This method creates self.gbflux by averaging over the radial component of self.gbflux\_i.
+\item \textbf{plot(}\emph{list}\textbf{ x,}\emph{ list}\textbf{ y,}\emph{ tuple}\textbf{ dim=(1, 1))} - This method creates a matplotlib plot of the requested data.
+\item \textbf{read\_data()} - This method reads in object data.  It executes:
+\begin{enumerate}
+\item read\_profile()
+\item read\_geometry()
+\item read\_t()
+\item read\_gbflux\_i()
+\item read\_gbflux\_n()
+\end{enumerate}
+\item \textbf{read\_file(}\emph{str}\textbf{ fname,}\emph{ int}\textbf{ dSize)} - This method reads the GYRO data file named out.gyro.fname.  It must be given the length in number of characters of the data elements in the file as a second argument.
+\item \textbf{read\_flux\_velocity()} - This method reads in flux\_velocity data, and stores it in self.flux\_velocity.
+\item \textbf{read\_freq()} - This method reads in frequency data and stores it in self.freq.
+\item \textbf{read\_gbflux\_i()} - This method reads in gbflux\_i data and stores it in self.gbflux\_i.
+\item \textbf{read\_gbflux\_n()} - This method reads in gbflux\_n data and stores it in self.gbflux\_n.
+\item \textbf{read\_geometry()} - This method reads in geometry\_array data and stores it in self.geometry.
+\item \textbf{read\_k\_perp\_squared()} - This method reads in k\_perp\_squared data and stores it in self.k\_perp\_squared.
+\item \textbf{read\_moment\_e()} - This method reads in moment\_e data and stores it in self.moment\_e.
+\item \textbf{read\_moment\_n()} - This method reads in moment\_n data and stores it in self.moment\_n.
+\item \textbf{read\_moment\_u()} - This method reads in moment\_u data and stores it in self.moment\_u.
+\item \textbf{read\_moment\_v()} - This method reads in moment\_v data and stores it in self.moment\_v.
+\item \textbf{read\_moment\_zero()} - This method reads in moment\_zero data and stores it in self.moment\_zero.
+\item \textbf{read\_profile()} - This method reads out.gyro.profile to get control data and stores it in self.profile.
+\item \textbf{read\_t()} - This method reads t.out to get time data and stores it in self.t.
+\item \textbf{set\_directory(}\emph{str}\textbf{ path)} - This method sets the variable self.directory\_name to path.
 \end{itemize}
 \end{itemize}
 \end{document}

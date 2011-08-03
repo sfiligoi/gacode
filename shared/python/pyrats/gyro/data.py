@@ -39,6 +39,9 @@ class GYROData:
         self.init_data()
         self.directory_name = sim_directory
         self.read_data()
+        self.equil_time()
+        self.make_gbflux()
+        self.make_diff()
         import sys
         from os.path import expanduser, expandvars
         path = '$GACODE_ROOT/shared/python/pyrats'
