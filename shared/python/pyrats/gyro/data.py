@@ -471,7 +471,8 @@ class GYROData:
         """Equilizes the lengths of the different data arrays, in the case that
         the time axis is longer in some than in others."""
 
-        import numpy as n
+        import numpy as np
+
         temp = []
         for item in self.loaded:
             if item == 't':
