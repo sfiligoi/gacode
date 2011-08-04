@@ -122,6 +122,7 @@ class NEOData:
             print "ERROR: NEO files not in directory: " + self.master
             sys.exit()
         self.store_data()
+        self.sort_data()
 
     def init_data(self):
         """Initialize object data."""
@@ -139,62 +140,62 @@ class NEOData:
         self.HR_theory = {}
         self.HS_theory = {}
         self.control = {}
-        self.n_species = {}
-        self.n_energy = {}
-        self.n_xi = {}
-        self.n_theta = {}
-        self.theta_gpoints = {}
-        self.n_radial = {}
-        self.radial_gpoints = {}
-        self.r = {}
-        self.dPHI0dr = {}
-        self.q = {}
-        self.rho_star = {}
-        self.rmaj_over_a = {}
-        self.omega_rot = {}
-        self.omega_rot_deriv = {}
-        self.nnorm = {}
-        self.Tnorm = {}
-        self.vnorm_over_a = {}
-        self.n0_over_nnorm = {}
-        self.T0_over_Tnorm = {}
-        self.a_over_Ln = {}
-        self.a_over_LT = {}
-        self.inv_tau_self = {}
-        self.f = {}
-        self.SIM_PHI_by_theta = {}
-        self.HH_GAMMA = {}
-        self.HH_Qi = {}
-        self.HH_Qe = {}
-        self.HH_jboot = {}
-        self.HH_ki = {}
-        self.HH_uipar = {}
-        self.HH_vipol0 = {}
-        self.CH_Qi = {}
-        self.TG_Qi = {}
-        self.S_jboot = {}
-        self.S_ki = {}
-        self.S_uipar = {}
-        self.S_vipol0 = {}
-        self.HR_PHI = {}
-        self.HS_GAMMA = {}
-        self.HS_Q = {}
-        self.SIM_PHI = {}
-        self.SIM_jboot = {}
-        self.SIM_0vtor0 = {}
-        self.SIM_0upar = {}
-        self.SIM_GAMMA = {}
-        self.SIM_Q = {}
-        self.SIM_PI = {}
-        self.SIM_1upar = {}
-        self.SIM_k = {}
-        self.SIM_K = {}
-        self.SIM_vpol0 = {}
-        self.SIM_1vtor0 = {}
-        self.SIM_upar_by_theta = {}
-        self.SIM_GAMMA_gv = {}
-        self.SIM_Q_gv = {}
-        self.SIM_PI_gv = {}
+        self.n_species = []
+        self.n_energy = []
+        self.n_xi = []
+        self.n_theta = []
+        self.theta_gpoints = []
+        self.n_radial = []
+        self.radial_gpoints = []
+        self.r = []
+        self.dPHI0dr = []
+        self.q = []
+        self.rho_star = []
+        self.rmaj_over_a = []
+        self.omega_rot = []
+        self.omega_rot_deriv = []
+        self.n_norm = []
+        self.T_norm = []
+        self.v_norm_over_a = []
+        self.n0_over_n_norm = []
+        self.T0_over_T_norm = []
+        self.a_over_Ln = []
+        self.a_over_LT = []
+        self.inv_tau_self = []
+        self.f = []
+        self.SIM_PHI_by_theta = []
+        self.HH_GAMMA = []
+        self.HH_Qi = []
+        self.HH_Qe = []
+        self.HH_jboot = []
+        self.HH_ki = []
+        self.HH_uipar = []
+        self.HH_vipol0 = []
+        self.CH_Qi = []
+        self.TG_Qi = []
+        self.S_jboot = []
+        self.S_ki = []
+        self.S_uipar = []
+        self.S_vipol0 = []
+        self.HR_PHI = []
+        self.HS_GAMMA = []
+        self.HS_Q = []
+        self.SIM_PHI = []
+        self.SIM_jboot = []
+        self.SIM_0vtor0 = []
+        self.SIM_0upar = []
+        self.SIM_GAMMA = []
+        self.SIM_Q = []
+        self.SIM_PI = []
+        self.SIM_1upar = []
+        self.SIM_k = []
+        self.SIM_K = []
+        self.SIM_vpol0 = []
+        self.SIM_1vtor0 = []
+        self.SIM_upar_by_theta = []
+        self.SIM_GAMMA_gv = []
+        self.SIM_Q_gv = []
+        self.SIM_PI_gv = []
 
     def set_directory(self, path):
         """Set the simulation directory."""
@@ -233,33 +234,35 @@ class NEOData:
         data can be accessed with two dictionary keys, like so:
         self.transport[parameter][directory]."""
 
-        self.transport['PHI'] = NEOOutput(self.SIM_PHI, '(e*PHI1/Tnorm)^2',
+        import numpy as np
+
+        self.transport['PHI'] = NEOOutput(np.array(self.SIM_PHI), '(e*PHI1/T_norm)^2',
                                          'first-order electrostatic potential')
-        self.transport['jboot'] = NEOOutput(self.SIM_jboot,
-               'jpar*B/(e*nnorm*vnorm*Bunit)', 'first-order bootstrap current')
-        self.transport['0vtor0'] = NEOOutput(self.SIM_0vtor0,
-                                          '(v_sup_0_sub_phi at theta=0)/vnorm',
-      'zeroth-order toroidal flow at the outboard midplane (v_sub_phi = w0*R)')
-        self.transport['0upar'] = NEOOutput(self.SIM_0upar,
-                                            'upar_sup_0*B/(vnorm*Bunit)',
-                              'zeroth-order parallel flow (upar_sup_0=w0*I/B)')
-        self.transport['GAMMA'] = NEOOutput(self.SIM_GAMMA,
-                    'GAMMA/(nnorm*vnorm)', 'second-order radial particle flux')
-        self.transport['Q'] = NEOOutput(self.SIM_Q, 'Q/(nnorm*vnorm*Tnorm)',
+        self.transport['jboot'] = NEOOutput(np.array(self.SIM_jboot),
+               'j_par*B/(e*n_norm*v_norm*B_unit)', 'first-order bootstrap current')
+        self.transport['0vtor0'] = NEOOutput(np.array(self.SIM_0vtor0),
+                                          '(v^{(0)}_phi (theta=0)/v_norm',
+      'zeroth-order toroidal flow at the outboard midplane (v^(0)_phi = w0*R)')
+        self.transport['0upar'] = NEOOutput(np.array(self.SIM_0upar),
+                                            'upar^(0)*B/(v_norm*B_unit)',
+                              'zeroth-order parallel flow (upar^(0)_parallel=w0*I/B)')
+        self.transport['GAMMA'] = NEOOutput(np.array(self.SIM_GAMMA),
+                    'GAMMA/(n_norm*v_norm)', 'second-order radial particle flux')
+        self.transport['Q'] = NEOOutput(np.array(self.SIM_Q), 'Q/(n_norm*v_norm*T_norm)',
                                         'second-order radial energy flux')
-        self.transport['PI'] = NEOOutput(self.SIM_PI, 'PI/(nnorm*a*Tnorm)',
+        self.transport['PI'] = NEOOutput(np.array(self.SIM_PI), 'PI/(n_norm*a*T_norm)',
                                          'second-order radial momentum flux')
-        self.transport['1upar'] = NEOOutput(self.SIM_1upar,
-                           'upar*B/(vnorm*Bunit)', 'first-order parallel flow')
-        self.transport['k'] = NEOOutput(self.SIM_k, 'k',
+        self.transport['1upar'] = NEOOutput(np.array(self.SIM_1upar),
+                           'upar*B/(v_norm*Bunit)', 'first-order parallel flow')
+        self.transport['k'] = NEOOutput(np.array(self.SIM_k), 'k',
                                   'first-order dimensionless flow coefficient')
-        self.transport['K'] = NEOOutput(self.SIM_K, 'K/(nnorm*vnorm/Bunit)',
+        self.transport['K'] = NEOOutput(np.array(self.SIM_K), 'K/(n_norm*v_norm/Bunit)',
                                     'first-order dimensional flow coefficient')
-        self.transport['vpol0'] = NEOOutput(self.SIM_vpol0,
-                                            '(v_sub_theta at theta=0)/vnorm',
+        self.transport['vpol0'] = NEOOutput(np.array(self.SIM_vpol0),
+                                            '(v_sub_theta at theta=0)/v_norm',
                           'first-order poloidal flow at the outboard midplane')
-        self.transport['1vtor0'] = NEOOutput(self.SIM_1vtor0,
-                                             '(v_sub_phi at theta=0)/vnorm',
+        self.transport['1vtor0'] = NEOOutput(np.array(self.SIM_1vtor0),
+                                             '(v_sub_phi at theta=0)/v_norm',
                           'first-order toroidal flow at the outboard midplane')
         self.control['n_species'] = NEOOutput(self.n_species, 'N_SPECIES',
                                               'number of kinetic species')
@@ -276,89 +279,139 @@ class NEOData:
         self.control['radial_gpoints'] = NEOOutput(self.radial_gpoints,
                                                    'r_sub_j/a',
         'radial gridpoints (normalized midplane minor radius) (j=1..N_RADIAL)')
-        self.control['r'] = NEOOutput(self.r, 'r/a',
+        self.control['r'] = NEOOutput(np.array(self.r), 'r/a',
                                       'normalized midplane minor radius')
-        self.control['dPHI0dr'] = NEOOutput(self.dPHI0dr,
-                                            '(dPHI0dr)(a*e/Tnorm)',
+        self.control['dPHI0dr'] = NEOOutput(np.array(self.dPHI0dr),
+                                            '(dPHI0dr)(a*e/T_norm)',
                           'normalized equilibrium-scale radial electric field')
-        self.control['q'] = NEOOutput(self.q, 'q', 'safety factor')
-        self.control['rho_star'] = NEOOutput(self.rho_star,
-                          'rho_star=(c*sqrt(mnorm*Tnorm))*(e*Bunit*a)', 'ratio of the Larmor radius of the normalizing species to the normalizing length scale')
-        self.control['rmaj_over_a'] = NEOOutput(self.rmaj_over_a, 'R0/a',
+        self.control['q'] = NEOOutput(np.array(self.q), 'q', 'safety factor')
+        self.control['rho_star'] = NEOOutput(np.array(self.rho_star),
+                          'rho_star=(c*sqrt(m_norm*T_norm))*(e*Bunit*a)', 'ratio of the Larmor radius of the normalizing species to the normalizing length scale')
+        self.control['rmaj_over_a'] = NEOOutput(np.array(self.rmaj_over_a), 'R0/a',
                                  'normailzed flux-surface-center major radius')
-        self.control['omega_rot'] = NEOOutput(self.omega_rot, 'w0/(vnorm/a)',
+        self.control['omega_rot'] = NEOOutput(np.array(self.omega_rot), 'w0/(v_norm/a)',
                                        'normailzed toroidal angular frequency')
-        self.control['omega_rot_deriv'] = NEOOutput(self.omega_rot_deriv,
-                                                    '(dw0/dr)(a^2/vnorm)',
+        self.control['omega_rot_deriv'] = NEOOutput(np.array(self.omega_rot_deriv),
+                                                    '(dw0/dr)(a^2/v_norm)',
                                           'normalized toroidal rotation shear')
-        self.control['nnorm'] = NEOOutput(self.nnorm, '(e19/m^3)',
+        self.control['n_norm'] = NEOOutput(np.array(self.n_norm), '(e19/m^3)',
                              'normalizing equilibrium-scale density (e19/m^3)')
-        self.control['Tnorm'] = NEOOutput(self.Tnorm, 'keV',
+        self.control['T_norm'] = NEOOutput(np.array(self.T_norm), 'keV',
                              'normalizing equilibrium-scale temperature (keV)')
-        self.control['vnorm_over_a'] = NEOOutput(self.vnorm_over_a, '1/s',
+        self.control['v_norm_over_a'] = NEOOutput(np.array(self.v_norm_over_a), '1/s',
                                                  'ratio of the normalizing equilibrium-scale thermal speed to the normalizing length scale (1/s) ')
-        self.control['n0_over_nnorm'] = NEOOutput(self.n0_over_nnorm,
+        self.control['n0_over_n_norm'] = NEOOutput(np.array(self.n0_over_n_norm),
                             'unitless', 'normalized equilibrium-scale density')
-        self.control['T0_over_Tnorm'] = NEOOutput(self.T0_over_Tnorm,
+        self.control['T0_over_T_norm'] = NEOOutput(np.array(self.T0_over_T_norm),
                         'unitless', 'normalized equilibrium-scale temperature')
-        self.control['a_over_Ln'] = NEOOutput(self.a_over_Ln,
+        self.control['a_over_Ln'] = NEOOutput(np.array(self.a_over_Ln),
                                                    'a/Ln=a(-dln(n0)/dr)',
                                         'normalized equilibrium-scale density')
-        self.control['a_over_LT'] = NEOOutput(self.a_over_LT,
+        self.control['a_over_LT'] = NEOOutput(np.array(self.a_over_LT),
                                                    'a/LT=a(-dln(T0)/dr)',
                                     'normalized equilibrium-scale temperature')
-        self.control['inv_tau_self'] = NEOOutput(self.inv_tau_self,
-                                                 'tau_self^-1/(vnorm/a)',
+        self.control['inv_tau_self'] = NEOOutput(np.array(self.inv_tau_self),
+                                                 'tau_self^-1/(v_norm/a)',
                                          'normalized self-collision frequency')
-        self.HH_theory['GAMMA'] = NEOOutput(self.HH_GAMMA,
-                                            'GAMMA/(nnorm*vnorm)',
+        self.HH_theory['GAMMA'] = NEOOutput(np.array(self.HH_GAMMA),
+                                            'GAMMA/(n_norm*v_norm)',
               'Hinton-Hazeltine second-order radial particle flux (ambipolar)')
-        self.HH_theory['Qi'] = NEOOutput(self.HH_Qi, 'Qi/(nnorm*vnorm*Tnorm)',
+        self.HH_theory['Qi'] = NEOOutput(np.array(self.HH_Qi), 'Qi/(n_norm*v_norm*T_norm)',
                       'Hinton-Hazeltine second-order radial energy flux (ion)')
-        self.HH_theory['Qe'] = NEOOutput(self.HH_Qe, 'Qe/(nnorm*vnorm*Tnorm)',
+        self.HH_theory['Qe'] = NEOOutput(np.array(self.HH_Qe), 'Qe/(n_norm*v_norm*T_norm)',
                  'Hinton-Hazeltine second-order radial energy flux (electron)')
-        self.HH_theory['jboot'] = NEOOutput(self.HH_jboot,
-                                            'jpar*B/(e*nnorm*vnorm*Bunit)',
+        self.HH_theory['jboot'] = NEOOutput(np.array(self.HH_jboot),
+                                            'jpar*B/(e*n_norm*v_norm*Bunit)',
                               'Hinton-Hazeltine first-order bootstrap current')
-        self.HH_theory['ki'] = NEOOutput(self.HH_ki, 'ki',
+        self.HH_theory['ki'] = NEOOutput(np.array(self.HH_ki), 'ki',
            'Hinton-Hazeltine first-order dimensionless flow coefficient (ion)')
-        self.HH_theory['uipar'] = NEOOutput(self.HH_uipar,
-                                            'uipar*B/(vnorm*Bunit)',
+        self.HH_theory['uipar'] = NEOOutput(np.array(self.HH_uipar),
+                                            'uipar*B/(v_norm*Bunit)',
                             'Hinton-Hazeltine first-order parallel flow (ion)')
-        self.HH_theory['vipol0'] = NEOOutput(self.HH_vipol0,
-                                             '(vitheta at theta=0)/vnorm',
+        self.HH_theory['vipol0'] = NEOOutput(np.array(self.HH_vipol0),
+                                             '(vitheta at theta=0)/v_norm',
    'Hinton-Hazeltine first-order poloidal flow at the outboard midplane (ion)')
-        self.CH_theory['Qi'] = NEOOutput(self.CH_Qi, 'Qi/(nnorm*vnorm*Tnorm)',
+        self.CH_theory['Qi'] = NEOOutput(np.array(self.CH_Qi), 'Qi/(n_norm*v_norm*T_norm)',
                           'Chang-Hinton second-order radial energy flux (ion)')
-        self.TG_theory['Qi'] = NEOOutput(self.TG_Qi, 'Qi/(nnorm*vnorm*Tnorm)',
+        self.TG_theory['Qi'] = NEOOutput(np.array(self.TG_Qi), 'Qi/(n_norm*v_norm*T_norm)',
                                'Taguchi second-order radial energy flux (ion)')
-        self.S_theory['jboot'] = NEOOutput(self.S_jboot,
-                                           'jpar*B/(e*nnorm*vnorm*Bunit)',
+        self.S_theory['jboot'] = NEOOutput(np.array(self.S_jboot),
+                                           'jpar*B/(e*n_norm*v_norm*Bunit)',
                                         'Sauter first-order bootstrap current')
-        self.S_theory['ki'] = NEOOutput(self.S_ki, 'ki',
+        self.S_theory['ki'] = NEOOutput(np.array(self.S_ki), 'ki',
                      'Sauter first-order dimensionless flow coefficient (ion)')
-        self.S_theory['uipar'] = NEOOutput(self.S_uipar,
-                                           'uipar*B/(vnorm*Bunit)',
+        self.S_theory['uipar'] = NEOOutput(np.array(self.S_uipar),
+                                           'uipar*B/(v_norm*Bunit)',
                                       'Sauter first-order parallel flow (ion)')
-        self.S_theory['vipol0'] = NEOOutput(self.S_vipol0,
-                                            '(vitheta at theta=0)/vnorm',
+        self.S_theory['vipol0'] = NEOOutput(np.array(self.S_vipol0),
+                                            '(vitheta at theta=0)/v_norm',
              'Sauter first-order poloidal flow at the outboard midplane (ion)')
-        self.HR_theory['PHI'] = NEOOutput(self.HR_PHI, '(e*PHI1/Tnorm)^2',
+        self.HR_theory['PHI'] = NEOOutput(np.array(self.HR_PHI), '(e*PHI1/T_norm)^2',
                        'Hinton-Rosenbluth first-order electrostatic potential')
-        self.HS_theory['GAMMA'] = NEOOutput(self.HS_GAMMA,
-                                            'GAMMA/(nnorm*vnorm)',
+        self.HS_theory['GAMMA'] = NEOOutput(np.array(self.HS_GAMMA),
+                                            'GAMMA/(n_norm*v_norm)',
                            'Hirshman-Sigmar second-order radial particle flux')
-        self.HS_theory['Q'] = NEOOutput(self.HS_Q, 'Q/(nnorm*vnorm*Tnorm)',
+        self.HS_theory['Q'] = NEOOutput(np.array(self.HS_Q), 'Q/(n_norm*v_norm*T_norm)',
                              'Hirshman-Sigmar second-order radial energy flux')
-        self.transport['GAMMA_gv'] = NEOOutput(self.SIM_GAMMA_gv,
-                                               'GAMMA_gv/(nnorm*vnorm)',
+        self.transport['GAMMA_gv'] = NEOOutput(np.array(self.SIM_GAMMA_gv),
+                                               'GAMMA_gv/(n_norm*v_norm)',
                               'Gyro-viscous second-order radial particle flux')
-        self.transport['Q_gv'] = NEOOutput(self.SIM_Q_gv,
-                                           'Q_gv/(nnorm*vnorm*Tnorm)',
+        self.transport['Q_gv'] = NEOOutput(np.array(self.SIM_Q_gv),
+                                           'Q_gv/(n_norm*v_norm*T_norm)',
                                 'Gyro-viscous second-order radial energy flux')
-        self.transport['PI_gv'] = NEOOutput(self.SIM_PI_gv,
-                                            'PI_gv/(nnorm*a*Tnorm)',
+        self.transport['PI_gv'] = NEOOutput(np.array(self.SIM_PI_gv),
+                                            'PI_gv/(n_norm*a*T_norm)',
                               'Gyro-viscous second-order radial momentum flux')
+
+    def sort_data(self):
+        """Sorts data according to radius."""
+
+        import numpy as np
+
+        ind = self.control['r'].data.argsort()
+        self.control['r'].data = self.control['r'].data[ind]
+        for k, v in self.transport.iteritems():
+            if v.data.ndim == 1:
+                self.transport[k].data = v.data[ind]
+            elif v.data.ndim == 2:
+                for i in range(len(self.transport[k].data[0])):
+                    self.transport[k].data[:, i] = v.data[:, i][ind]
+        for k, v in self.HH_theory.iteritems():
+            if v.data.ndim == 1:
+                self.HH_theory[k].data = v.data[ind]
+            elif v.data.ndim == 2:
+                for i in range(len(self.HH_theory[k].data[0])):
+                    self.HH_theory[k].data[:, i] = v.data[:, i][ind]
+        for k, v in self.CH_theory.iteritems():
+            if v.data.ndim == 1:
+                self.CH_theory[k].data = v.data[ind]
+            elif v.data.ndim == 2:
+                for i in range(len(self.CH_theory[k].data[0])):
+                    self.CH_theory[k].data[:, i] = v.data[:, i][ind]
+        for k, v in self.TG_theory.iteritems():
+            if v.data.ndim == 1:
+                self.TG_theory[k].data = v.data[ind]
+            elif v.data.ndim == 2:
+                for i in range(len(self.TG_theory[k].data[0])):
+                    self.TG_theory[k].data[:, i] = v.data[:, i][ind]
+        for k, v in self.S_theory.iteritems():
+            if v.data.ndim == 1:
+                self.S_theory[k].data = v.data[ind]
+            elif v.data.ndim == 2:
+                for i in range(len(self.S_theory[k].data[0])):
+                    self.S_theory[k].data[:, i] = v.data[:, i][ind]
+        for k, v in self.HR_theory.iteritems():
+            if v.data.ndim == 1:
+                self.HR_theory[k].data = v.data[ind]
+            elif v.data.ndim == 2:
+                for i in range(len(self.HR_theory[k].data[0])):
+                    self.HR_theory[k].data[:, i] = v.data[:, i][ind]
+        for k, v in self.HS_theory.iteritems():
+            if v.data.ndim == 1:
+                self.HS_theory[k].data = v.data[ind]
+            elif v.data.ndim == 2:
+                for i in range(len(self.HS_theory[k].data[0])):
+                    self.HS_theory[k].data[:, i] = v.data[:, i][ind]
 
     def read_file(self, fname):
         """Reads NEO data file."""
@@ -373,224 +426,135 @@ class NEOData:
         """Read out.neo.equil."""
 
         equil = self.read_file('equil')
-        self.r[self.directory_name] = equil[0:self.n_radial[self.directory_name], 0]
-        self.dPHI0dr[self.directory_name] = equil[0:self.n_radial[self.directory_name], 1]
-        self.q[self.directory_name] = equil[0:self.n_radial[self.directory_name], 2]
-        self.rho_star[self.directory_name] = equil[0:self.n_radial[self.directory_name], 3]
-        self.rmaj_over_a[self.directory_name] = equil[0:self.n_radial[self.directory_name], 4]
-        self.omega_rot[self.directory_name] = equil[0:self.n_radial[self.directory_name], 5]
-        self.omega_rot_deriv[self.directory_name] = equil[0:self.n_radial[self.directory_name], 6]
-        self.nnorm[self.directory_name] = equil[0:self.n_radial[self.directory_name], 7]
-        self.Tnorm[self.directory_name] = equil[0:self.n_radial[self.directory_name], 8]
-        self.vnorm_over_a[self.directory_name] = equil[0:self.n_radial[self.directory_name], 9]
-        self.n0_over_nnorm[self.directory_name] = range(int(self.n_species[self.directory_name]))
-        self.T0_over_Tnorm[self.directory_name] = range(int(self.n_species[self.directory_name]))
-        self.a_over_Ln[self.directory_name] = range(int(self.n_species[self.directory_name]))
-        self.a_over_LT[self.directory_name] = range(int(self.n_species[self.directory_name]))
-        self.inv_tau_self[self.directory_name] = range(int(self.n_species[self.directory_name]))
-        for a in range(int(self.n_species[self.directory_name])):
-            self.n0_over_nnorm[self.directory_name][a] = equil[0:self.n_radial[self.directory_name], 10+5*a]
-            self.T0_over_Tnorm[self.directory_name][a] = equil[0:self.n_radial[self.directory_name], 11+5*a]
-            self.a_over_Ln[self.directory_name][a] = equil[0:self.n_radial[self.directory_name], 12+5*a]
-            self.a_over_LT[self.directory_name][a] = equil[0:self.n_radial[self.directory_name], 13+5*a]
-            self.inv_tau_self[self.directory_name][a] = equil[0:self.n_radial[self.directory_name], 14+5*a]
+        for i in range(int(self.n_radial[-1])):
+            self.r.append(equil[i, 0])
+            self.dPHI0dr.append(equil[i, 1])
+            self.q.append(equil[i, 2])
+            self.rho_star.append(equil[i, 3])
+            self.rmaj_over_a.append(equil[i, 4])
+            self.omega_rot.append(equil[i, 5])
+            self.omega_rot_deriv.append(equil[i, 6])
+            self.n_norm.append(equil[i, 7])
+            self.T_norm.append(equil[i, 8])
+            self.v_norm_over_a.append(equil[i, 9])
+            temp1 = []
+            temp2 = []
+            temp3 = []
+            temp4 = []
+            temp5 = []
+            for a in range(int(self.n_species[-1])):
+                temp1.append(equil[i, 10+5*a])
+                temp2.append(equil[i, 11+5*a])
+                temp3.append(equil[i, 12+5*a])
+                temp4.append(equil[i, 13+5*a])
+                temp5.append(equil[i, 14+5*a])
+            self.n0_over_n_norm.append(temp1)
+            self.T0_over_T_norm.append(temp2)
+            self.a_over_Ln.append(temp3)
+            self.a_over_LT.append(temp4)
+            self.inv_tau_self.append(temp5)
 
     def read_grid(self):
         """Reads out.neo.grid"""
 
         import numpy as np
+        import sys
 
         filename = self.directory_name + '/out.neo.grid'
         grid = np.atleast_1d(np.loadtxt(file(filename)))
-        self.n_species[self.directory_name] = grid[0]
-        self.n_energy[self.directory_name] = grid[1]
-        self.n_xi[self.directory_name] = grid[2]
-        self.n_theta[self.directory_name] = grid[3]
-        self.theta_gpoints[self.directory_name] = grid[4:4+self.n_theta[self.directory_name]]
-        self.n_radial[self.directory_name] = grid[4+self.n_theta[self.directory_name]]
-        self.radial_gpoints[self.directory_name] = grid[5+self.n_theta[self.directory_name]:6+self.n_theta[self.directory_name]+self.n_radial[self.directory_name]]
+        self.n_species.append(grid[0])
+        if self.n_species[-1] != self.n_species[0]:
+            print "ERROR: Number of species must be the same for all simulations."
+            print "Simulation " + self.directory_name + " has the wrong number of species."
+            sys.exit()
+        self.n_energy.append(grid[1])
+        self.n_xi.append(grid[2])
+        self.n_theta.append(grid[3])
+        self.theta_gpoints.append(grid[4:4+self.n_theta[-1]])
+        self.n_radial.append(grid[4+self.n_theta[-1]])
+        self.radial_gpoints.append(grid[5+self.n_theta[-1]:6+self.n_theta[-1]+self.n_radial[-1]])
 
     def read_theory(self):
         """Reads out.neo.theory."""
 
         theory = self.read_file('theory')
-        self.HH_GAMMA[self.directory_name] = theory[0:self.n_radial[self.directory_name], 1]
-        self.HH_Qi[self.directory_name] = theory[0:self.n_radial[self.directory_name], 2]
-        self.HH_Qe[self.directory_name] = theory[0:self.n_radial[self.directory_name], 3]
-        self.HH_jboot[self.directory_name] = theory[0:self.n_radial[self.directory_name], 4]
-        self.HH_ki[self.directory_name] = theory[0:self.n_radial[self.directory_name], 5]
-        self.HH_uipar[self.directory_name] = theory[0:self.n_radial[self.directory_name], 6]
-        self.HH_vipol0[self.directory_name] = theory[0:self.n_radial[self.directory_name], 7]
-        self.CH_Qi[self.directory_name] = theory[0:self.n_radial[self.directory_name], 8]
-        self.TG_Qi[self.directory_name] = theory[0:self.n_radial[self.directory_name], 9]
-        self.S_jboot[self.directory_name] = theory[0:self.n_radial[self.directory_name], 10]
-        self.S_ki[self.directory_name] = theory[0:self.n_radial[self.directory_name], 11]
-        self.S_uipar[self.directory_name] = theory[0:self.n_radial[self.directory_name], 12]
-        self.S_vipol0[self.directory_name] = theory[0:self.n_radial[self.directory_name], 13]
-        self.HR_PHI[self.directory_name] = theory[0:self.n_radial[self.directory_name], 14]
-        self.HS_GAMMA[self.directory_name] = range(int(self.n_species[self.directory_name]))
-        self.HS_Q[self.directory_name] = range(int(self.n_species[self.directory_name]))
-        for a in range(int(self.n_species[self.directory_name])):
-            self.HS_GAMMA[self.directory_name][a] = theory[0:self.n_radial[self.directory_name], 15+2*a]
-            self.HS_Q[self.directory_name][a] = theory[0:self.n_radial[self.directory_name], 16+2*a]
+        for i in range(int(self.n_radial[-1])):
+            self.HH_GAMMA.append(theory[i, 1])
+            self.HH_Qi.append(theory[i, 2])
+            self.HH_Qe.append(theory[i, 3])
+            self.HH_jboot.append(theory[i, 4])
+            self.HH_ki.append(theory[i, 5])
+            self.HH_uipar.append(theory[i, 6])
+            self.HH_vipol0.append(theory[i, 7])
+            self.CH_Qi.append(theory[i, 8])
+            self.TG_Qi.append(theory[i, 9])
+            self.S_jboot.append(theory[i, 10])
+            self.S_ki.append(theory[i, 11])
+            self.S_uipar.append(theory[i, 12])
+            self.S_vipol0.append(theory[i, 13])
+            self.HR_PHI.append(theory[i, 14])
+            temp1 = []
+            temp2 = []
+            for a in range(int(self.n_species[-1])):
+                temp1.append(theory[i, 15+2*a])
+                temp2.append(theory[i, 16+2*a])
+            self.HS_GAMMA.append(temp1)
+            self.HS_Q.append(temp2)
 
     def read_transport(self):
         """Reads out.neo.transport."""
 
         transport = self.read_file('transport')
-        self.SIM_PHI[self.directory_name] = transport[0:self.n_radial[self.directory_name], 1]
-        self.SIM_jboot[self.directory_name] = transport[0:self.n_radial[self.directory_name], 2]
-        self.SIM_0vtor0[self.directory_name] = transport[0:self.n_radial[self.directory_name], 3]
-        self.SIM_0upar[self.directory_name] = transport[0:self.n_radial[self.directory_name], 4]
-        self.SIM_GAMMA[self.directory_name] = range(int(self.n_species[self.directory_name]))
-        self.SIM_Q[self.directory_name] = range(int(self.n_species[self.directory_name]))
-        self.SIM_PI[self.directory_name] = range(int(self.n_species[self.directory_name]))
-        self.SIM_1upar[self.directory_name] = range(int(self.n_species[self.directory_name]))
-        self.SIM_k[self.directory_name] = range(int(self.n_species[self.directory_name]))
-        self.SIM_K[self.directory_name] = range(int(self.n_species[self.directory_name]))
-        self.SIM_vpol0[self.directory_name] = range(int(self.n_species[self.directory_name]))
-        self.SIM_1vtor0[self.directory_name] = range(int(self.n_species[self.directory_name]))
-        for a in range(int(self.n_species[self.directory_name])):
-            self.SIM_GAMMA[self.directory_name][a] = transport[0:self.n_radial[self.directory_name], 5+8*a]
-            self.SIM_Q[self.directory_name][a] = transport[0:self.n_radial[self.directory_name], 6+8*a]
-            self.SIM_PI[self.directory_name][a] = transport[0:self.n_radial[self.directory_name], 7+8*a]
-            self.SIM_1upar[self.directory_name][a] = transport[0:self.n_radial[self.directory_name], 8+8*a]
-            self.SIM_k[self.directory_name][a] = transport[0:self.n_radial[self.directory_name], 9+8*a]
-            self.SIM_K[self.directory_name][a] = transport[0:self.n_radial[self.directory_name], 10+8*a]
-            self.SIM_vpol0[self.directory_name][a] = transport[0:self.n_radial[self.directory_name], 11+8*a]
-            self.SIM_1vtor0[self.directory_name][a] = transport[0:self.n_radial[self.directory_name], 12+8*a]
+        for i in range(int(self.n_radial[-1])):
+            self.SIM_PHI.append(transport[i, 1])
+            self.SIM_jboot.append(transport[i, 2])
+            self.SIM_0vtor0.append(transport[i, 3])
+            self.SIM_0upar.append(transport[i, 4])
+            temp1 = []
+            temp2 = []
+            temp3 = []
+            temp4 = []
+            temp5 = []
+            temp6 = []
+            temp7 = []
+            temp8 = []
+            for a in range(int(self.n_species[-1])):
+                temp1.append(transport[i, 5+8*a])
+                temp2.append(transport[i, 6+8*a])
+                temp3.append(transport[i, 7+8*a])
+                temp4.append(transport[i, 8+8*a])
+                temp5.append(transport[i, 9+8*a])
+                temp6.append(transport[i, 10+8*a])
+                temp7.append(transport[i, 11+8*a])
+                temp8.append(transport[i, 12+8*a])
+            self.SIM_GAMMA.append(temp1)
+            self.SIM_Q.append(temp2)
+            self.SIM_PI.append(temp3)
+            self.SIM_1upar.append(temp4)
+            self.SIM_k.append(temp5)
+            self.SIM_K.append(temp6)
+            self.SIM_vpol0.append(temp7)
+            self.SIM_1vtor0.append(temp8)
 
     
     def read_transport_gv(self):
         """Reads out.neo.transport_gv."""
         
         transport_gv = self.read_file('transport_gv')
-        self.SIM_GAMMA_gv[self.directory_name] = range(int(self.n_species[self.directory_name]))
-        self.SIM_Q_gv[self.directory_name] = range(int(self.n_species[self.directory_name]))
-        self.SIM_PI_gv[self.directory_name] = range(int(self.n_species[self.directory_name]))
-        for a in range(int(self.n_species[self.directory_name])):
-            self.SIM_GAMMA_gv[self.directory_name][a] = transport_gv[0:self.n_radial[self.directory_name], 1+3*a]
-            self.SIM_Q_gv[self.directory_name][a] = transport_gv[0:self.n_radial[self.directory_name], 2+3*a]
-            self.SIM_PI_gv[self.directory_name][a] = transport_gv[0:self.n_radial[self.directory_name], 3+3*a]
+        for i in range(int(self.n_radial[-1])):
+            temp1 = []
+            temp2 = []
+            temp3 = []
+            for a in range(int(self.n_species[-1])):
+                temp1.append(transport_gv[i, 1+3*a])
+                temp2.append(transport_gv[i, 2+3*a])
+                temp3.append(transport_gv[i, 3+3*a])
+            self.SIM_GAMMA_gv.append(temp1)
+            self.SIM_Q_gv.append(temp2)
+            self.SIM_PI_gv.append(temp3)
 
     #-----------------------------------------------#
     # Get data back
-
-    def get_transport(self, var):
-        """Get requested transport variable.  Remember that var must be a string.
-
-        Returns a dictionary containing numpy arrays of the requested
-        variable paired with their containing directories."""
-        import numpy as np
-        s = 0
-        for k, v in self.transport.iteritems():
-            if var == k:
-                for k2, v2 in v.data.iteritems():
-                    for item in v2:
-                        s = s + np.sum(item)
-        if s == 0:
-            return None
-        else:
-            return self.transport[var]
-
-    def get_HH_theory(self, var):
-        """Get requested Hinton-Hazeltine theory variable."""
- 
-        s = 0       
-        for k, v in self.HH_theory.iteritems():
-            if var == k:
-                for k2, v2 in v.data.iteritems():
-                    for item in v2:
-                        s = s + float(item)
-        if s == 0:
-            return None
-        else:
-            return self.HH_theory[var]
-
-    def get_CH_theory(self, var):
-        """Get requested Chang-Hinton theory variable."""
-
-        s = 0
-        for k, v in self.CH_theory.iteritems():
-            if var == k:
-                for k2, v2 in v.data.iteritems():
-                    for item in v2:
-                        s = s + float(item)
-        if s == 0:
-            return None
-        else:
-            return self.CH_theory[var]
-
-    def get_TG_theory(self, var):
-        """Get requested Taguchi theory variable."""
-
-        s = 0
-        for k, v in self.TG_theory.iteritems():
-            if var == k:
-                for k2, v2 in v.data.iteritems():
-                    for item in v2:
-                        s = s + float(item)
-        if s == 0:
-            return None
-        else:
-            return self.TG_theory[var]
-
-    def get_S_theory(self, var):
-        """Get requested Sauter theory variable."""
-
-        s = 0
-        for k, v in self.S_theory.iteritems():
-            if var == k:
-                for k2, v2 in v.data.iteritems():
-                    for item in v2:
-                        s = s + float(item)
-        if s == 0:
-            return None
-        else:
-            return self.S_theory[var]
-
-    def get_HR_theory(self, var):
-        """Get requested Hinton-Rosenbluth theory variable."""
-
-        s = 0
-        for k, v in self.HR_theory.iteritems():
-            if var == k:
-                for k2, v2 in v.data.iteritems():
-                    for item in v2:
-                        s = s + float(item)
-        if s == 0:
-            return None
-        else:
-            return self.HR_theory[var]
-
-    def get_HS_theory(self, var):
-        """Get requested Hirshman-Sigmar theory variable."""
-
-        import numpy as np
-        s = 0
-        for k, v in self.HS_theory.iteritems():
-            if var == k:
-                for k2, v2 in v.data.iteritems():
-                    for item in v2:
-                        s = s + np.sum(item)
-        if s == 0:
-            return None
-        else:
-            return self.HS_theory[var]
-
-    def get_control(self, var):
-        """Get requested control variable."""
-
-        s = 0
-        for k, v in self.control.iteritems():
-            if var == k:
-                for k2, v2 in v.data.iteritems():
-                    for item in v2:
-                        s = s + float(item)
-        if s == 0:
-            return None
-        else:
-            return self.control[var]
 
     def print_vars(self):
         """Prints all available simulated variables."""
@@ -651,29 +615,18 @@ class NEOData:
         fig = plt.figure(fignum)
         ax = fig.add_subplot(n1, n2, plotcounter)
         ax.set_xlabel('r/a')
-        ax.set_ylabel(self.get_transport(var).units)
+        ax.set_ylabel(self.transport.get(var).units)
         #verbose sets title to be more descriptive
         if verbose:
             ax.set_title(self.get_transport(var).descriptor+' vs. r/a')
         else:
             ax.set_title(var + ' vs. r/a')
+        tempr = self.control['r'].data
         for var in varlist:
-            tempr = []
-            #Obtain all radius values
-            for key in self.toplot:
-                tempr.append(self.get_control('r').data[key])
-            #Store all values in a 1-D numpy array
-            tempr = np.array(self.split(tempr)).flatten()
-            #Sort them by increasing radius
-            ind = tempr.argsort()
-            tempr = tempr[ind]
 
             #If the requested variable is available
-            if self.get_transport(var) != None:
-                transport = []
-                #find it
-                for key in self.toplot:
-                    transport.append(self.get_transport(var).data[key])
+            if self.transport.get(var) != None:
+                transport = self.transport.get(var).data
                 #Check to see if it has one or two dimensions
                 try:
                     transport[0][0][0]
@@ -683,66 +636,49 @@ class NEOData:
                         plot = []
                         for x in range(len(transport)):
                             plot.append(transport[x][y])
-                        plot = np.array(self.split(plot)).flatten()[ind]
+                        plot = np.array(plot)
                         #Create plot of sorted data
                         ax.plot(tempr,plot,c=cols[0],ls=styles[y],label='Sim spe '+str(y))
                 except IndexError:
                     #If we reach this point, that means that there is only one
                     #dimension.  All we have to do is create the array, sort it,
                     #and plot it.
-                    transport = np.array(self.split(transport)).flatten()[ind]
+                    transport = np.array(transport)
                     ax.plot(tempr, transport, c=cols[0], label='Sim')
 
-            if self.get_HH_theory(var) != None:
+            if self.HH_theory.get(var) != None:
                 #HH_theory always has only one dimension
-                HH = []
-                for key in self.toplot:
-                    HH.append(self.get_HH_theory(var).data[key])
-                HH = np.array(self.split(HH)).flatten()[ind]
+                HH = self.HH_theory.get(var).data
                 ax.plot(tempr, HH, c=cols[1], label='HH ' + var)
 
-            if self.get_CH_theory(var) != None:
+            if self.CH_theory.get(var) != None:
                 #So does CH_theory
-                CH = []
-                for key in self.toplot:
-                    CH.append(self.get_CH_theory(var).data[key])
-                CH = np.array(self.split(CH)).flatten()[ind]
+                CH = self.CH_theory.get(var).data
                 ax.plot(tempr, CH, c=cols[2], label='CH ' + var)
 
-            if self.get_TG_theory(var) != None:
+            if self.TG_theory.get(var) != None:
                 #And TG_theory
-                TG = []
-                for key in self.toplot:
-                    TG.append(self.get_TG_theory(var).data[key])
-                TG = np.array(self.split(TG)).flatten()[ind]
+                TG = self.TG_theory.get(var).data
                 ax.plot(tempr, TG, c=cols[3], label='TG ' + var)
 
-            if self.get_S_theory(var) != None:
+            if self.S_theory.get(var) != None:
                 #etc
-                S = []
-                for key in self.toplot:
-                    S.append(self.get_S_theory(var).data[key])
-                S = np.array(self.split(S)).flatten()[ind]
+                S = self.S_theory.get(var).data
                 ax.plot(tempr, S, c=cols[4], label='S ' + var)
 
-            if self.get_HR_theory(var) != None:
-                HR = []
-                for key in self.toplot:
-                    HR.append(self.get_HR_theory(var).data[key])
-                HR = np.array(self.split(HR)).flatten()[ind]
+            if self.HR_theory.get(var) != None:
+                HR = self.HR_theory.get(var).data
                 ax.plot(tempr, HR, c=cols[5], label='HR ' + var)
 
-            if self.get_HS_theory(var) != None:
+            if self.HS_theory.get(var) != None:
                 #HS_theory always has two dimensions, so we have to sort that
                 #out the same way we sorted out transport
-                HS = []
-                for key in self.toplot:
-                    HS.append(self.get_HS_theory(var).data[key])
+                HS = self.HS_theory.get(var).data
                 for y in range(len(HS[0])):
                     plot = []
                     for x in range(len(HS)):
                         plot.append(HS[x][y])
-                    plot = np.array(self.split(plot)).flatten()[ind]
+                    plot = np.array(plot)
                     ax.plot(tempr,plot,c=cols[6],ls=styles[y],label='HS '+var+' spe '+str(y))
         #If the legend has been requested, then we create it
         if legend == True:
@@ -755,14 +691,16 @@ class NEOData:
     #----------------------------------------------------------#
     # Misc methods
 
-    def split(self, array):
+    def split(self, array, axis=None):
         """split splits a 2-D array which may be made up of elements with
         multiple entries into an array with one entry per element."""
 
         import numpy as np
 
+
         t = []
         for s in array:
+            print s
             if len(s) > 1:
                 for a in s:
                     t.append(np.array([a]))
