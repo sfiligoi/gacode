@@ -3,42 +3,13 @@ class TGYROData:
 
      Data:
 
+     loc_n_ion
+     tgyro_mode
      n_iterations
      n_fields
      n_radial
      directory_name = ""
-     chi_e = []
-     chi_i = []
-     gyro_bohm_unit = []
-     profile = []
-     geometry = []
-     flux_e = []
-     flux_i = []
-     flux_target = []
-     mflux_e = []
-     mflux_i = []
-     mflux_target = []
-     gradient = []
-     local_res = []
-     global_res = []
-     wr_ion = []
-     wi_ion = []
-     wr_elec = []
-     wi_elec = []
-     r
-     (Optional)
-     chi_i2 = []
-     chi_i3 = []
-     chi_i4 = []
-     chi_i5 = []
-     flux_i2 = []
-     flux_i3 = []
-     flux_i4 = []
-     flux_i5 = []
-     mflux_i2 = []
-     mflux_i3 = []
-     mflux_i4 = []
-     mflux_i5 = []
+     data
 
      Example Usage:
          >>>from matplotlib import pyplot
@@ -61,47 +32,11 @@ class TGYROData:
         """Initialize object data."""
 
         self.loc_n_ion = 0
-        self.read_num_ions()
         self.tgyro_mode = 0
         self.n_iterations = 0
         self.n_fields = 0
         self.n_radial = 0
-        self.chi_e = []
-        self.chi_i = []
-        self.gyro_bohm_unit = []
-        self.profile = []
-        self.geometry = []
-        self.flux_e = []
-        self.flux_i = []
-        self.flux_target = []
-        self.mflux_e = []
-        self.mflux_i = []
-        self.mflux_target = []
-        self.gradient = []
-        self.local_res = []
-        self.global_res = []
-        self.flux_count = []
-        self.wr_ion = []
-        self.wi_ion = []
-        self.wr_elec = []
-        self.wi_elec = []
-        self.r = 0
-        if self.loc_n_ion > 1:
-            self.chi_i2 = []
-            self.flux_i2 = []
-            self.mflux_i2 = []
-        if self.loc_n_ion > 2:
-            self.chi_i3 = []
-            self.flux_i3 = []
-            self.mflux_i3 = []
-        if self.loc_n_ion > 3:
-            self.chi_i4 = []
-            self.flux_i4 = []
-            self.mflux_i4 = []
-        if self.loc_n_ion > 4:
-            self.chi_i5 = []
-            self.flux_i5 = []
-            self.mflux_i5 = []
+        self.data = {}
 
     def set_directory(self, sim_directory):
         """Set the simulation directory."""
@@ -143,6 +78,7 @@ class TGYROData:
         if self.tgyro_mode == 2:
             self.read_stabilities()
         else:
+            self.read_num_ions()
             self.read_control()
             self.read_chi_e()
             self.read_chi_i(self.loc_n_ion)
@@ -208,15 +144,18 @@ class TGYROData:
         iteration = -1
         data = []
         num_fields = len(lines[-1].split())
+        local_res = []
+        global_res = []
+        flux_count = []
 
         for line in lines:
             line = line.replace(']',' ').replace('[',' ')
             if count % self.n_radial == 0:
-                self.global_res.append(eval(line.split()[3]))
-                self.flux_count.append(eval(line.split()[4]))
+                global_res.append(eval(line.split()[3]))
+                flux_count.append(eval(line.split()[4]))
                 iteration = iteration + 1
                 if data:
-                    self.local_res.append(array(data))
+                    local_res.append(array(data))
                 data = [zeros(num_fields)]
 
             else:
@@ -225,7 +164,10 @@ class TGYROData:
                     b.append(eval(i))
                 data.append(b)
             count = count + 1
-        self.local_res.append(array(data))    
+        local_res.append(array(data))
+        self.data['local_res'] = local_res
+        self.data['global_res'] = global_res
+        self.data['flux_count'] = flux_count
 
     def read_stab_file(self, file_name):
         """Read files generated with stability analysis mode.
@@ -260,99 +202,98 @@ class TGYROData:
 
         """
 
-        self.wr_ion = self.read_stab_file("wr_ion.out")
-        self.wi_ion = self.read_stab_file("wi_ion.out")
-        self.wr_elec = self.read_stab_file("wr_elec.out")
-        self.wi_elec = self.read_stab_file("wi_elec.out")
+        self.data.update(self.read_stab_file("wr_ion.out"))
+        self.data.update(self.read_stab_file("wi_ion.out"))
+        self.data.update(self.read_stab_file("wr_elec.out"))
+        self.data.update(self.read_stab_file("wi_elec.out"))
 
-        self.r = self.wr_ion[0]
+        self.data['r/a'] = self.wr_ion[0]
         self.n_radial = len(self.r)
 
     def read_flux(self, num_ions = 1):
         """Read flux_e.out, flux_i(2-5).out, flux_target.out."""
-        self.flux_e = self.read_file('flux_e')
-        self.flux_i = self.read_file('flux_i')
+        self.data.update(self.read_file('flux_e'))
+        self.data.update(self.read_file('flux_i'))
         if num_ions > 1:
-           self.flux_i2 = self.read_file('flux_i2')
+           self.data.update(self.read_file('flux_i2'))
         if num_ions > 2:
-           self.flux_i3 = self.read_file('flux_i3')
+           self.data.update(self.read_file('flux_i3'))
         if num_ions > 3:
-           self.flux_i4 = self.read_file('flux_i4')
+           self.data.update(self.read_file('flux_i4'))
         if num_ions > 4:
-           self.flux_i5 = self.read_file('flux_i5')
+           self.data.update(self.read_file('flux_i5'))
         if num_ions > 5:
             print "Too many ions: ", num_ions
             print "Only the first 5 will be read."
-        self.flux_target = self.read_file('flux_target')
+        self.data.update(self.read_file('flux_target'))
 
     def read_mflux(self, num_ions = 1):
         """Read mflux_e.out, mflux_i(2-5).out, mflux_target.out."""
-        self.mflux_e = self.read_file('mflux_e')
-        self.mflux_i = self.read_file('mflux_i')
+        self.data.update(self.read_file('mflux_e'))
+        self.data.update(self.read_file('mflux_i'))
         if num_ions > 1:
-           self.mflux_i2 = self.read_file('mflux_i2')
+           self.data.update(self.read_file('mflux_i2'))
         if num_ions > 2:
-           self.mflux_i3 = self.read_file('mflux_i3')
+           self.data.update(self.read_file('mflux_i3'))
         if num_ions > 3:
-           self.mflux_i4 = self.read_file('mflux_i4')
+           self.data.update(self.read_file('mflux_i4'))
         if num_ions > 4:
-           self.mflux_i5 = self.read_file('mflux_i5')
+           self.data.update(self.read_file('mflux_i5'))
         if num_ions > 5:
             print "Too many ions: ", num_ions
             print "Only the first 5 will be read."
-        self.flux_target = self.read_file('flux_target')
+        self.data.update(self.read_file('flux_target'))
 
     def read_chi_e(self):
         """Read in chi_e.out and store in self.chi_e."""
-        self.chi_e = self.read_file('chi_e')
+        self.data.update(self.read_file('chi_e'))
 
     def read_chi_i(self, num_ions = 1):
         """Read in chi_i.out and store in self.chi_i."""
-        self.chi_i = self.read_file('chi_i')
+        self.data.update(self.read_file('chi_i'))
         if num_ions > 1:
-            self.chi_i2 = self.read_file('chi_i2')
+            self.data.update(self.read_file('chi_i2'))
         if num_ions > 2:
-            self.chi_i3 = self.read_file('chi_i3')
+            self.data.update(self.read_file('chi_i3'))
         if num_ions > 3:
-            self.chi_i4 = self.read_file('chi_i4')
+            self.data.update(self.read_file('chi_i4'))
         if num_ions > 4:
-            self.chi_i5 = self.read_file('chi_i5')
+            self.data.update(self.read_file('chi_i5'))
         if num_ions > 5:
             print "Strange number of ions: ", num_ions
             print "Only the first 5 will be read."
 
     def read_gyrobohm(self):
         """Read and store gyrobohm.out in self.gyro_bohm_unit."""
-        self.gyro_bohm_unit = self.read_file('gyrobohm')
+        self.data.update(self.read_file('gyrobohm'))
 
     def read_profile(self):
         """Read and store profile.out in self.profile."""
-        self.profile = self.read_file('profile')
+        self.data.update(self.read_file('profile'))
 
     def read_profile2(self):
         """Read and store profile2.out in self.profile2."""
-        self.profile2 = self.read_file('profile2')
+        self.data.update(self.read_file('profile2'))
 
     def read_profile3(self):
         """Read and store profile3.out in self.profile3."""
-        self.profile3 = self.read_file('profile3')
+        self.data.update(self.read_file('profile3'))
 
     def read_profile4(self):
         """Read and store profile4.out in self.profile4."""
-        self.profile4 = self.read_file('profile4')
+        self.data.update(self.read_file('profile4'))
 
     def read_profile5(self):
         """Read and store profile5.out in self.profile5."""
-        self.profile5 = self.read_file('profile5')
+        self.data.update(self.read_file('profile5'))
 
     def read_geometry(self):
         """Read and store geometry.out in self.geometry."""
-        self.geometry = self.read_file('geometry')
-        self.r = self.geometry['r/a'][-1]
+        self.data.update(self.read_file('geometry'))
 
     def read_gradient(self):
         """Read and store gradient.out in self.gradient."""
-        self.gradient = self.read_file('gradient')
+        self.data.update(self.read_file('gradient'))
 
 
     
