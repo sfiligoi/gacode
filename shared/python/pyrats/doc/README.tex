@@ -40,44 +40,29 @@ Python Routines for Analyzing Transport Simulations
 \noindent where 'example\_directory' is a directory containing TGYRO output files.  The data is loaded into objects corresponding to the output file which the data came from.  To create a basic plot of the particle densities and temperatures as a function of radius, type the following commands:
 \fontfamily{\ttdefault}\selectfont
 
->>> import matplotlib.pyplot as plt
 \addtolength{\parskip}{-\baselineskip}
 
+\begin{verbatim}
+>>> import matplotlib.pyplot as plt
 >>> fig = plt.figure(1)
-
->>> ax1 = fig.add\_subplot(221)
-
->>> ax2 = fig.add\_subplot(222)
-
->>> ax3 = fig.add\_subplot(223)
-
->>> ax4 = fig.add\_subplot(224)
-
->>> ax1.plot(sim1.get\_r(), sim1.get\_Te)
-
->>> ax2.plot(sim1.get\_r(), sim1.get\_Ti)
-
->>> ax3.plot(sim1.get\_r(), sim1.get\_ne)
-
->>> ax4.plot(sim1.get\_r(), sim1.get\_ni)
-
->>> ax1.set\_xlabel('r/a')
-
->>> ax1.set\_ylabel('Electron Temperature (keV)')
-
->>> ax2.set\_xlabel('r/a')
-
->>> ax2.set\_ylabel('Ion Temperature (keV)')
-
->>> ax3.set\_xlabel('r/a')
-
->>> ax3.set\_ylabel('Electron Particle Density (e\^19/m\^3)')
-
->>> ax4.set\_xlabel('r/a')
-
->>> ax4.set\_ylabel('Ion Particle Density (e\^19/m\^3)')
-
+>>> ax1 = fig.add_subplot(221)
+>>> ax2 = fig.add_subplot(222)
+>>> ax3 = fig.add_subplot(223)
+>>> ax4 = fig.add_subplot(224)
+>>> ax1.plot(sim1.get_r(), sim1.get_Te)
+>>> ax2.plot(sim1.get_r(), sim1.get_Ti)
+>>> ax3.plot(sim1.get_r(), sim1.get_ne)
+>>> ax4.plot(sim1.get_r(), sim1.get_ni)
+>>> ax1.set_xlabel('r/a')
+>>> ax1.set_ylabel('Electron Temperature (keV)')
+>>> ax2.set_xlabel('r/a')
+>>> ax2.set_ylabel('Ion Temperature (keV)')
+>>> ax3.set_xlabel('r/a')
+>>> ax3.set_ylabel('Electron Particle Density (e^19/m^3)')
+>>> ax4.set_xlabel('r/a')
+>>> ax4.set_ylabel('Ion Particle Density (e^19/m^3)')
 >>> plt.show()
+\end{verbatim}
 
 \addtolength{\parskip}{\baselineskip}
 \fontfamily{\rmdefault}\selectfont
