@@ -144,6 +144,22 @@ profiles\_genData contents:
 
 \newpage
 
+NEOObject contents:
+\begin{itemize}
+\item Data:
+\begin{itemize}
+\item \textbf{data} \emph{dictionary} - Holds the data associated with the object.
+\item \textbf{units} \emph{str} - Describes the units of the data.
+\item \textbf{descriptor} \emph{str} - Provides a description of the data.
+\end{itemize}
+\item Methods:
+\begin{itemize}
+\item \textbf{\_\_init\_\_(}\emph{dict}\textbf{ data,}\emph{ str}\textbf{ units,}\emph{ str}\textbf{ descriptor)} - This method stores the appropriate arguments in the appropriate containers.
+\end{itemize}
+\end{itemize}
+
+\newpage
+
 NEOData contents:
 \begin{itemize}
 \item Data:
@@ -164,13 +180,6 @@ NEOData contents:
 \item Methods:
 \begin{itemize}
 \item \textbf{\_\_init\_\_(}\emph{str} \textbf{sim\_directory)} - Constructor that is executed when a new NEOData object is created.  It takes a directory name as its argument, and then executes a top down walk down that directory.  It then calls read\_data() whenever it is in a subdirectory with NEO output files.  Finally, it executes store\_data()
-\item \textbf{get\_CH\_theory(}\emph{str} \textbf{var)} - Returns a NEOObject object that corresponds to the Chang-Hinton theory prediction of var.  If requested variable does not exist or is zero everywhere, returns None.
-\item \textbf{get\_HH\_theory(}\emph{str} \textbf{var)} - Returns a NEOObject object that corresponds to the Hinton-Hazeltine theory prediction of var.  If requested variable does not exist or is zero everywhere, returns None.
-\item \textbf{get\_HR\_theory(}\emph{str} \textbf{var)} - Returns a NEOObject object that corresponds to the Hinton-Rosenbluth theory prediction of var.  If requested variable does not exist or is zero everywhere, returns None.
-\item \textbf{get\_HS\_theory(}\emph{str} \textbf{var)} - Returns a NEOObject object that corresponds to the Hirshman-Sigmar theory prediction of var.  If requested variable does not exist or is zero everywhere, returns None.
-\item \textbf{get\_S\_theory(}\emph{str} \textbf{var)} - Returns a NEOObject object that corresponds to the Sauter theory prediction of var.  If requested variable does not exist or is zero everywhere, returns None.
-\item \textbf{get\_TG\_theory(}\emph{str} \textbf{var)} - Returns a NEOObject object that corresponds to the Taguchi theory prediction of var.  If requested variable does not exist or is zero everywhere, returns None.
-\item \textbf{get\_control(}\emph{str} \textbf{var)} - Returns a NEOObject object that corresponds to the control parameter associated with var.  If requested variable does not exist or is zero everywhere, returns None.
 \item \textbf{get\_input(}\emph{str} \textbf{input\_name)} - Returns requested variable from input.neo.gen.
 \item \textbf{init\_data()} - Initializes object data.
 \item \textbf{plot(}\emph{str} \textbf{var, }\emph{int} \textbf{n1=2, }\emph{int} \textbf{n2=2,} \emph{int} \textbf{plotcounter=0,} \emph{int} \textbf{fignum=0,} \emph{bool} \textbf{legend=True,} \emph{bool} \textbf{verbose=False,} \emph{str} \textbf{cols='bgkcmyrw',} \emph{list of strs} \textbf{styles=['-', '--', '-.', ':'])} - Plots var as a matplotlib scatter plot with data from different directories coming in different colors, and different species coming in different line styles.  Automatically searches for both theoretical and simulated values, and plots everything that is available.
