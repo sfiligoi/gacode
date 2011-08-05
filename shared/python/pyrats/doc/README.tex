@@ -239,105 +239,10 @@ TGYROData contents:
 \item init\_data()
 \item read\_data()
 \end{enumerate}
-\item \textbf{get\_Te(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of the electron temperature for the specified TGYRO iteration.  The default is the last iteration.
-\item \textbf{get\_Ti(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of the species 1 ion temperature for the specified TGYRO iteration.  The default is the last iteration.
-\item \textbf{get\_Ti2(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of the species 2 ion temperature for the specified TGYRO iteration.  The default is the last iteration.
-\item \textbf{get\_Ti3(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of the species 3 ion temperature for the specified TGYRO iteration.  The default is the last iteration.
-\item \textbf{get\_Ti4(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of the species 4 ion temperature for the specified TGYRO iteration.  The default is the last iteration.
-\item \textbf{get\_Ti5(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of the species 5 ion temperature for the specified TGYRO iteration.  The default is the last iteration.
-\item \textbf{get\_chi\_e\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical chi\_e from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_chi\_e\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent chi\_e from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_chi\_i\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical chi\_i from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_chi\_i\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent chi\_i from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_chi\_i2\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical chi\_i2 from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_chi\_i2\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent chi\_i2 from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_chi\_i3\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical chi\_i3 from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_chi\_i3\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent chi\_i3 from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_chi\_i4\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical chi\_i4 from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_chi\_i4\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent chi\_i4 from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_chi\_i5\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical chi\_i5 from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_chi\_i5\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent chi\_i5 from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_flux\_count(}\emph{int}\textbf{ iteration=-1)} - Returns the total number of calls to the flux driver up to the given iteration.
-\item \textbf{get\_flux\_e\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical electron heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_flux\_e\_target(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the target electron heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_flux\_e\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent electron heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_flux\_i\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical ion heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_flux\_i\_target(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the target ion heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_flux\_i\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent ion heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_flux\_i2\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical ion species 2 heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_flux\_i2\_target(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the target ion species 2 heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_flux\_i2\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent ion species 2 heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_flux\_i3\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical ion species 3 heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_flux\_i3\_target(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the target ion species 4 heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_flux\_i3\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent ion species 3 heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_flux\_i4\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical ion species 4 heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_flux\_i4\_target(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the target ion species 4 heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_flux\_i4\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent ion species 4 heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_flux\_i5\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical ion species 5 heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_flux\_i5\_target(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the target ion species 5 heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_flux\_i5\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent ion species 5 heat flux from the specified iteration.  The default is the last iteration.  If mks is set to True, the results will be given in mks units.
-\item \textbf{get\_geometry\_factor(}\emph{str}\textbf{ factor,}\emph{ int}\textbf{ iteration=-1)} - Returns a numpy array of the specified geometric factor for the specified iteration.  The default is the last iteration.  Possible factors are:
-\begin{itemize}
-\item 'rho'
-\item 'q'
-\item 's'
-\item 'kappa'
-\item 's\_kappa'
-\item 'delta'
-\item 's\_delta'
-\item 'shift'
-\item 'rmaj/a'
-\item 'b\_unit'
-\end{itemize}
-\item \textbf{get\_global\_res(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of the global residual from the specified iteration.  The default is the last iteration.
-\item \textbf{get\_gradient\_factor(}\emph{str}\textbf{ factor,}\emph{ int}\textbf{ iteration=-1)} - Returns a numpy array of the specified gradient factor for the given iteration.  The default iteration is the last.  Possible factors are:
-\begin{itemize}
-\item 'r/a'
-\item 'a/Lni'
-\item 'a/Lne'
-\item 'a/LTi'
-\item 'a/LTe'
-\item 'a/Lp'
-\item 'a*gamma\_e/cs'
-\item 'a*gamma\_p/cs'
-\end{itemize}
 \item \textbf{get\_input(}\emph{str}\textbf{ input\_name)} - Returns the specified variable from input.tgyro.gen.
 
 Ex: get\_input("TGYRO\_MODE")
 \item \textbf{get\_local\_res(}\emph{int}\textbf{ field=1,}\emph{ int}\textbf{ iteration=-1)} - Returns a numpy array of the local field residual for the given field and iteration.  The default is the last iteration, and field 1.
-\item \textbf{get\_mflux\_e\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical electron momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
-\item \textbf{get\_mflux\_e\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent electron momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
-\item \textbf{get\_mflux\_i\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical ion momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
-\item \textbf{get\_mflux\_i\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent ion momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
-\item \textbf{get\_mflux\_i2\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical ion species 2 momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
-\item \textbf{get\_mflux\_i2\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent ion species 2 momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
-\item \textbf{get\_mflux\_i3\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical ion species 3 momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
-\item \textbf{get\_mflux\_i3\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent ion species 3 momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
-\item \textbf{get\_mflux\_i4\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical ion species 4 momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
-\item \textbf{get\_mflux\_i4\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent ion species 4 momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
-\item \textbf{get\_mflux\_i5\_neo(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the neoclassical ion species 5 momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
-\item \textbf{get\_mflux\_i5\_turb(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the turbulent ion species 5 momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
-\item \textbf{get\_mflux\_target(}\emph{int}\textbf{ iteration=-1,}\emph{ bool}\textbf{ mks=False)} - Returns a numpy array of the target momentum flux from the specified iteration.  The default iteration is the last.  If mks is set to True, the data will be returned in mks units.
-\item \textbf{get\_most\_unstable\_at\_radius(}\emph{int}\textbf{ radius=0,}\emph{ str}\textbf{ direction='ion')} - Returns the most unstable mode at specified radius in the specified direction.  The parameter radius is the requested radial index; it is an integer between 0 and n\_r-1.  The parameter direction can be either 'ion' for the most unstable ion mode, or 'electron' for the most unstable electron mode.
-\item \textbf{get\_ne(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of ne for the specified iteration.  The default iteration is the last.
-\item \textbf{get\_ni(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of ni for the specified iteration.  The default iteration is the last.
-\item \textbf{get\_ni2(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of ni2 for the specified iteration.  The default iteration is the last.
-\item \textbf{get\_ni3(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of ni3 for the specified iteration.  The default iteration is the last.
-\item \textbf{get\_ni4(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of ni4 for the specified iteration.  The default iteration is the last.
-\item \textbf{get\_ni5(}\emph{int}\textbf{ iteration=-1)} - Returns a numpy array of ni5 for the specified iteration.  The default iteration is the last.
-\item \textbf{get\_profile\_factor(}\emph{str}\textbf{ factor,}\emph{ int}\textbf{ iteration=-1)} - Returns a numpy array of the specified profile factor for the given iteration.  The default iteration is the last.  The possible factors are:
-\begin{itemize}
-\item 'r/a'
-\item 'ni'
-\item 'a/Lni'
-\item 'Ti'
-\item 'a/LTi'
-\end{itemize}
-\item \textbf{get\_profile2\_factor(}\emph{str}\textbf{ factor,}\emph{ int}\textbf{ iteration=-1)} - Returns a numpy array of the specified profile2 factor for the given iteration.  The default iteration is the last.  The possible factors are the same as get\_profile\_factor.
-\item \textbf{get\_profile3\_factor(}\emph{str}\textbf{ factor,}\emph{ int}\textbf{ iteration=-1)} - Returns a numpy array of the specified profile3 factor for the given iteration.  The default iteration is the last.  The possible factors are the same as get\_profile\_factor.
-\item \textbf{get\_profile4\_factor(}\emph{str}\textbf{ factor,}\emph{ int}\textbf{ iteration=-1)} - Returns a numpy array of the specified profile4 factor for the given iteration.  The default iteration is the last.  The possible factors are the same as get\_profile\_factor.
-\item \textbf{get\_profile5\_factor(}\emph{str}\textbf{ factor,}\emph{ int}\textbf{ iteration=-1)} - Returns a numpy array of the specified profile5 factor for the given iteration.  The default iteration is the last.  The possible factors are the same as get\_profile\_factor.
-\item \textbf{get\_r()} - Returns a numpy array containing the normalized radial gridpoints, r/a.
 \item \textbf{get\_stability\_at\_radius(}\emph{int}\textbf{ radius=0,}\emph{ str}\textbf{ frequency='r',}\emph{ str}\textbf{ direction='ion')} - Returns a list of frequency vs. ky at specified radius from stability analysis.  The parameter radius is the requested radial index; it is an integer between 0 and n\_r-1.  The parameter frequency can be either the real ('r') or the imaginary ('i') spectrum.  The parameter direction specifies the direction of the spectrum.  It can be either the ion direction ('ion') or the electron direction ('elec').
 \item \textbf{init\_data()} - Initializes object data.
 \item \textbf{make\_gradient\_vs\_field\_plot(}\emph{int}\textbf{ r=1,}\emph{ int}\textbf{ evolve\_field=1,}\emph{ str}\textbf{ grad='a/LTi',}\emph{ str}\textbf{ profile='ti',}\emph{ bool}\textbf{ arrows=False)} - Return a matplotlib.pyplot figure of gradient\_vs\_field\_space.  The parameter r is the radial index; it is an integer between 0 and n\_r-1.  The parameters are passed to make\_gradient\_vs\_field\_space, and are described there.

@@ -37,7 +37,7 @@ class GYROData:
         """
 
         self.init_data()
-        self.directory_name = sim_directory
+        self.set_directory(sim_directory)
         self.read_data()
         self.equil_time()
         self.make_gbflux()
@@ -149,27 +149,27 @@ class GYROData:
         import math
 
         profile = np.loadtxt(self.directory_name + '/out.gyro.profile')
-        self.profile['n_x'] = profile[0]
-        self.profile['n_theta_section'] = profile[1]
-        self.profile['n_pass'] = profile[2]
-        self.profile['n_trap'] = profile[3]
+        self.profile['n_x'] = int(profile[0])
+        self.profile['n_theta_section'] = int(profile[1])
+        self.profile['n_pass'] = int(profile[2])
+        self.profile['n_trap'] = int(profile[3])
         self.profile['n_lambda'] = self.profile['n_pass'] + self.profile['n_trap']
-        self.profile['n_energy'] = profile[4]
-        self.profile['n_theta_plot'] = profile[5]
+        self.profile['n_energy'] = int(profile[4])
+        self.profile['n_theta_plot'] = int(profile[5])
         self.profile['n0'] = profile[6]
-        self.profile['n_n'] = profile[7]
+        self.profile['n_n'] = int(profile[7])
         self.profile['d_n'] = profile[8]
-        self.profile['n_explicit_damp'] = profile[9]
-        self.profile['nonlinear_flag'] = profile[10]
-        self.profile['electron_method'] = profile[11]
-        self.profile['n_field'] = profile[12]
-        self.profile['n_ion'] = profile[13]
-        self.profile['n_kinetic'] = profile[14]
-        self.profile['n_spec'] = profile[15]
-        self.profile['field_r0_flag'] = profile[16]
-        self.profile['field_r0_grid'] = profile[17]
-        self.profile['n_grid_exp'] = profile[18]
-        self.profile['boundary_method'] = profile[19]
+        self.profile['n_explicit_damp'] = int(profile[9])
+        self.profile['nonlinear_flag'] = int(profile[10])
+        self.profile['electron_method'] = int(profile[11])
+        self.profile['n_field'] = int(profile[12])
+        self.profile['n_ion'] = int(profile[13])
+        self.profile['n_kinetic'] = int(profile[14])
+        self.profile['n_spec'] = int(profile[15])
+        self.profile['field_r0_flag'] = int(profile[16])
+        self.profile['field_r0_grid'] = int(profile[17])
+        self.profile['n_grid_exp'] = int(profile[18])
+        self.profile['boundary_method'] = int(profile[19])
         self.profile['r'] = profile[20:(20 + self.profile['n_x'])]
         self.profile['q'] = profile[(20 + self.profile['n_x']):(20 + 2*self.profile['n_x'])]
         self.profile['r_s'] = profile[(20 + 2*self.profile['n_x']):(20 + 3*self.profile['n_x'])]
@@ -220,13 +220,13 @@ class GYROData:
         self.profile['rho_s'] = profile[mark + self.profile['n_n']]
         mark = mark + self.profile['n_n'] + 1
         self.profile['z'] = profile[mark:(mark + self.profile['n_spec'])]
-        self.profile['n_fine'] = profile[mark + self.profile['n_spec']]
-        self.profile['n_moment'] = profile[mark + self.profile['n_spec'] + 1]
-        if int(self.profile['n_theta_plot']) == 1:
+        self.profile['n_fine'] = int(profile[mark + self.profile['n_spec']])
+        self.profile['n_moment'] = int(profile[mark + self.profile['n_spec'] + 1])
+        if self.profile['n_theta_plot'] == 1:
             self.profile['theta_plot'] = 0
         else:
             temp = []
-            for k in range(int(self.profile['n_theta_plot'])):
+            for k in range(self.profile['n_theta_plot']):
                 temp.append(-math.pi + 2*math.pi*k/float(self.profile['n_theta_plot']))
             self.profile['theta_plot'] = temp
                 
@@ -295,17 +295,12 @@ class GYROData:
         2 x n_theta_plot x n_x x n_field x n_n x n_time"""
 
         import numpy as np
-        import time
-        import fileupload
 
-        starttime = time.time()
         moment_u = self.read_file('moment_u', 12)
         if len(moment_u) > 0:
             t = len(moment_u)/(2*self.profile['n_theta_plot']*self.profile['n_x']*self.profile['n_field']*self.profile['n_n'])
             self.moment_u = moment_u.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_field'], self.profile['n_n'], t), order='F')
             self.moment_u = self.moment_u[0] + 1j*self.moment_u[1]
-            endtime = time.time()
-            print "Time: " + str(endtime - starttime)
             self.loaded.append('moment_u')
 
     def read_moment_n(self):
@@ -313,17 +308,12 @@ class GYROData:
         2 x n_theta_plot x n_x x n_kinetic x n_n x n_time"""
 
         import numpy as np
-        import time
-        import fileupload
 
-        starttime = time.time()
         moment_n = self.read_file('moment_n', 12)
         if len(moment_n) > 0:
             t = len(moment_n)/(2*self.profile['n_theta_plot']*self.profile['n_x']*self.profile['n_kinetic']*self.profile['n_n'])
             self.moment_n = moment_n.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], t), order='F')
             self.moment_n = self.moment_n[0] + 1j*self.moment_n[1]
-            endtime = time.time()
-            print "Time: " + str(endtime - starttime)
             self.loaded.append('moment_n')
 
     def read_moment_e(self):
@@ -331,17 +321,12 @@ class GYROData:
         2 x n_theta_plot x n_x x n_kinetic x n_n x n_time"""
 
         import numpy as np
-        import time
-        import fileupload
 
-        starttime = time.time()
         moment_e = self.read_file('moment_e', 12)
         if len(moment_e) > 0:
             t = len(moment_e)/(2*self.profile['n_theta_plot']*self.profile['n_x']*self.profile['n_kinetic']*self.profile['n_n'])
             self.moment_e = moment_e.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], t), order='F')
             self.moment_e = self.moment_e[0] + 1j*self.moment_e[1]
-            endtime = time.time()
-            print "Time: " + str(endtime - starttime)
             self.loaded.append('moment_e')
 
     def read_moment_v(self):
@@ -349,20 +334,12 @@ class GYROData:
         2 x n_theta_plot x n_x x n_kinetic x n_n x n_time"""
 
         import numpy as np
-        import time
-        import fileupload
 
-        starttime = time.time()
         moment_v = self.read_file('moment_v', 12)
         if len(moment_v) > 0:
-            midtime = time.time()
             t = len(moment_v)/(2*self.profile['n_theta_plot']*self.profile['n_x']*self.profile['n_kinetic']*self.profile['n_n'])
             self.moment_v = moment_v.reshape( (2, self.profile['n_theta_plot'], self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_n'], t), order='F')
             self.moment_v = self.moment_v[0] + 1j*self.moment_v[1]
-            endtime = time.time()
-            print "Time to load data: " + str(midtime - starttime)
-            print "Time to reshape data: " + str(endtime - midtime)
-            print "Total time: " + str(endtime - starttime)
             self.loaded.append('moment_v')
 
     def read_moment_zero(self):
@@ -370,15 +347,11 @@ class GYROData:
         n_x x n_kinetic x n_moment x n_time"""
 
         import numpy as np
-        import time
 
-        starttime = time.time()
         moment_zero = self.read_file('moment_zero', 12)
         if len(moment_zero) > 0:
             t = len(moment_zero)/(self.profile['n_x']*self.profile['n_kinetic']*self.profile['n_moment'])
             self.moment_zero = moment_zero.reshape( (self.profile['n_x'], self.profile['n_kinetic'], self.profile['n_moment'], t), order='F')
-            endtime = time.time()
-            print "Time: " + str(endtime - starttime)
             self.loaded.append('moment_zero')
 
     def read_flux_velocity(self):
@@ -427,7 +400,7 @@ class GYROData:
         temp1 = []
         temp2 = []
         temp = []
-        for i in range(int(self.profile['n_kinetic'])):
+        for i in range(self.profile['n_kinetic']):
             temp1.append(self.gbflux[i, :, 0, :]/(np.mean(self.profile['dlnndr_s'], axis=1)[i]*np.mean(self.profile['den_s'], axis=1)[i]))
             temp2.append(self.gbflux[i, :, 1, :]/(np.mean(self.profile['dlntdr_s'], axis=1)[i]*np.mean(self.profile['tem_s'], axis=1)[i]*np.mean(self.profile['den_s'], axis=1)[i]))
         temp.append(temp1)
@@ -446,7 +419,7 @@ class GYROData:
         temp1 = []
         temp2 = []
         temp = []
-        for i in range(int(self.profile['n_kinetic'])):
+        for i in range(self.profile['n_kinetic']):
             temp1.append(self.gbflux_i[i, :, 0, :, :]/(np.mean(self.profile['dlnndr_s'], axis=1)[i]*np.mean(self.profile['den_s'], axis=1)[i]))
             temp2.append(self.gbflux_i[i, :, 0, :, :]/(np.mean(self.profile['dlntdr_s'], axis=1)[i]*np.mean(self.profile['tem_s'], axis=1)[i]))
         temp.append(temp1)

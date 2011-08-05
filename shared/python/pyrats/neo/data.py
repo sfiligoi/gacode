@@ -566,7 +566,7 @@ class NEOData:
     # Plotting routines
 
     def plot(self, var, n1=2, n2=2, plotcounter=0, fignum=0, legend=True, verbose=False, cols='bgkcmyrw', styles=['-','--','-.',':']):
-        """Plots var as a scatter plot with data from different directories
+        """Plots var as a line plot with data from different directories
         coming in different colors."""
 
         import matplotlib.pyplot as plt
