@@ -1,21 +1,19 @@
 \documentclass{article}
 \usepackage{fullpage}
 \usepackage{commath}
-\usepackage{graphicx}
 \usepackage{float}
+\usepackage[pdftex]{graphicx}
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 \addtolength{\parskip}{\baselineskip}
 
 \begin{document}
-\begin{center}
-\Large
-PYRATS:
-Python Routines for Analyzing Transport Simulations
+\input{./titlepage.tex}
 
-A suite of python classes for accessing and plotting data from GYRO/NEO/TGYRO
-\end{center}
-\normalsize
+\tableofcontents
 
-\noindent \textbf{Introduction: }PYRATS (Python Routines for Analyzing Transport Simulations) is a data processing tool designed to make creating plots of output data from GYRO, TGYRO, or NEO easy.  It makes use of the python programming language, and the associated packages numpy and matplotlib.  With some knowledge of the python language and matplotlib, the typical user should be able to create plots quickly and efficiently from the python command line interpreter.  First is a presentation of some of the more basic features of PYRATS.  Code documentation is given on the subsequent pages.  
+\newpage
+
+\section{Introduction}PYRATS (Python Routines for Analyzing Transport Simulations) is a data processing tool designed to make creating plots of output data from GYRO, TGYRO, or NEO easy.  It makes use of the python programming language, and the associated packages numpy and matplotlib.  With some knowledge of the python language and matplotlib, the typical user should be able to create plots quickly and efficiently from the python command line interpreter.  First is a presentation of some of the more basic features of PYRATS.  Code documentation is given on the subsequent pages.  
 
 \noindent To begin, type the following command into the terminal:
 \fontfamily{\ttdefault}\selectfont
@@ -35,6 +33,7 @@ A suite of python classes for accessing and plotting data from GYRO/NEO/TGYRO
 \fontfamily{\rmdefault}\selectfont
 \noindent This will bring up the built-in documentation for the class TGYROData.  It lists all of the methods and attributes of the class, and the function of each one.  This information is also contained on page x of this manual.
 
+\subsection{A Simple Example}
 \noindent TGYROData can be used to load TGYRO data with the command:
 \fontfamily{\ttdefault}\selectfont
 
@@ -72,12 +71,13 @@ A suite of python classes for accessing and plotting data from GYRO/NEO/TGYRO
 
 \noindent For the TGYRO example simulation treg01, the above code produces the following plots:
 
-\begin{figure}[h!]
+\begin{figure}[H]
   \centering
     \includegraphics[scale=.5]{pssht1.png}
   \caption{Summary plots for an example TGYRO simulation.}
 \end{figure}
 
+\subsection{Command Line Use}
 \noindent This functionality is also available from the terminal command line (as opposed to the python interpreter) with the simple command:
 
 \fontfamily{\ttdefault}\selectfont
@@ -90,10 +90,11 @@ A suite of python classes for accessing and plotting data from GYRO/NEO/TGYRO
 
 \begin{figure}[H]
   \centering
-    \includegraphics[scale=.4]{pssht2.png}
+    \includegraphics[scale=.35]{pssht2.png}
   \caption{Summary plots for an example TGYRO simulation produced with command line tools.}
 \end{figure}
 
+\subsection{Help Files}
 \noindent The rest of this document is documentation for the classes that make up PYRATS.  Each class also has an associated help file that describes the contents of the different data containers in more detail.  The help for each code (GYRO, NEO, and TGYRO) can be accessed from the corresponding PYRATS subfolder in the gacode structure, like so:
 \begin{verbatim}
 ~$ cd gacode/shared/python/pyrats
@@ -111,9 +112,8 @@ data.py  data.pyc  help.py  __init__.py  __init__.pyc  interpreter.py
 
 \newpage
 
-profiles\_genData contents:
-\begin{itemize}
-\item Data:
+\section{profiles\_genData Contents}
+\subsection{Data}
 \begin{itemize}
 \item \textbf{data} \emph{dictionary of numpy arrays} - Contains all of the data read in by profiles\_genData.  It is organized in a dictionary with the keys being the different column headers in the input.profiles file that is read.  The keys for the dictionary can be requested with the following commands:
 \fontfamily{\ttdefault}\selectfont
@@ -138,7 +138,7 @@ profiles\_genData contents:
 \item \textbf{bz} \emph{nested list of floats} - The cosine coefficients for the z-component of the fourier series representation of the flux surfaces.  Read from input.profiles.geo.
 \item \textbf{directory\_name} \emph{str} - The name of the directory containing file input.profiles and possibly input.profiles.geo.
 \end{itemize}
-\item Methods:
+\subsection{Methods}
 \begin{itemize}
 \item \textbf{\_\_init\_\_(}\emph{str}\textbf{ directory='.')} - This is the constructor for the class.  When a new instance of the class is created, the constructor is called and executed.  The only argument is the name of the directory from which to build the class, and it defaults to the current directory.  It calls these methods in the following order:
 \begin{enumerate}
@@ -184,29 +184,25 @@ profiles\_genData contents:
 \item \textbf{set\_directory(}\emph{str}\textbf{ directory)} - This method sets the class attribute directory\_name to directory.
 \item \textbf{store\_data()} - This method reads data and renames it appropriately.  It is necessary because the names of the differetn parameters are not uniformly formatted.  store\_data cleans them up by inserting spaces where necessary, and by deleting \#-signs when necessary.
 \end{itemize}
-\end{itemize}
 
 \newpage
 
-\noindent NEO related classes:
+\section{NEO Related Classes}
 
-NEOObject contents:
-\begin{itemize}
-\item Data:
+\subsection{NEOObject Contents}
+\subsubsection{Data}
 \begin{itemize}
 \item \textbf{data} \emph{dictionary} - Holds the data associated with the object.
 \item \textbf{units} \emph{str} - Describes the units of the data.
 \item \textbf{descriptor} \emph{str} - Provides a description of the data.
 \end{itemize}
-\item Methods:
+\subsubsection{Methods}
 \begin{itemize}
 \item \textbf{\_\_init\_\_(}\emph{dict}\textbf{ data,}\emph{ str}\textbf{ units,}\emph{ str}\textbf{ descriptor)} - This method stores the appropriate arguments in the appropriate containers.
 \end{itemize}
-\end{itemize}
 
-NEOData contents:
-\begin{itemize}
-\item Data:
+\subsection{NEOData Contents}
+\subsubsection{Data}
 \begin{itemize}
 \item \textbf{master} \emph{str} - Holds the name of the master directory containing NEO output files.
 \item \textbf{directory\_name} \emph{str} - Holds the name of the currently open directory.
@@ -221,7 +217,7 @@ NEOData contents:
 \item \textbf{HS\_theory} \emph{dictionary of dictionaries of NEOObjects} - Contains data read in from out.neo.theory.  The keys are the fluxes predicted by the Hirshman-Sigmar model, each of which  correspond to a NEOObject.
 \item \textbf{control} \emph{dictionary of dictionaries of NEOObjects} - Contains data read in from out.neo.control.
 \end{itemize}
-\item Methods:
+\subsubsection{Methods}
 \begin{itemize}
 \item \textbf{\_\_init\_\_(}\emph{str} \textbf{sim\_directory)} - Constructor that is executed when a new NEOData object is created.  It takes a directory name as its argument, and then executes a top down walk down that directory.  It then calls read\_data() whenever it is in a subdirectory with NEO output files.  Finally, it executes store\_data()
 \item \textbf{get\_input(}\emph{str} \textbf{input\_name)} - Returns requested variable from input.neo.gen.
@@ -241,12 +237,10 @@ NEOData contents:
 
 sim1.transport[parameter][directory].
 \end{itemize}
-\end{itemize}
 
 \newpage
-TGYROData contents:
-\begin{itemize}
-\item Data:
+\section{TGYROData Contents}
+\subsection{Data}
 \begin{itemize}
 \item \textbf{loc\_n\_ion} \emph{int} - Number of ions in simulation.
 \item \textbf{tgyro\_mode} \emph{int} - Mode number of TGYRO operation.
@@ -256,7 +250,7 @@ TGYROData contents:
 \item \textbf{directory\_name} \emph{str} - Name of loaded directory.
 \item \textbf{data} \emph{dictionary of lists of numpy arrays} - Large dictionary containing all loaded data by variable name and then by iteration number.
 \end{itemize}
-\item Methods:
+\subsection{Methods}
 \begin{itemize}
 \item \textbf{\_\_init\_\_(}\emph{str} \textbf{ sim\_directory)} - Constructor which is called when a new TRYGOData object is created.  It calls the following methods:
 \begin{enumerate}
@@ -314,12 +308,10 @@ Ex: get\_input("TGYRO\_MODE")
 
 self.directory\_name.
 \end{itemize}
-\end{itemize}
 
 \newpage
-GYROData Contents:
-\begin{itemize}
-\item Data
+\section{GYROData Contents}
+\subsection{Data}
 \begin{itemize}
 \item \textbf{directory\_name}\emph{ str} - The name of the simulation directory.
 \item \textbf{profile}\emph{ dictionary of numpy arrays} - Dictionary where control information from out.gyro.profile is stored.  The keys can be obtained by typing: sim1.profile.keys()
@@ -389,7 +381,7 @@ The possible fields are:
 \item \textbf{k\_perp\_squared}\emph{ numpy array} - Numpy array with dimensions of (n\_n, n\_time).  It contains the flux-surface and radial average of $k^2_\perp$:
 $$\frac{\langle\langle(k_\perp\bar{\rho}_{s,\mathrm{unit}})^2|\delta\phi_n|^2\rangle\rangle_r}{\langle\langle|\delta\phi_n|^2\rangle\rangle_r}$$
 \end{itemize}
-\item Methods:
+\subsection{Methods}
 \begin{itemize}
 \item \textbf{\_\_init\_\_(}\emph{str}\textbf{ sim\_directory)} - This is the class constructor.  It is called when a new object of that class is created, and it reads in data from sim\_directory to create that object.  It sets the variable directory\_name to sim\_directory, and appends the pyrats folder to the python search path.  It also calls the following methods:
 \begin{enumerate}
@@ -427,6 +419,5 @@ $$\frac{\langle\langle(k_\perp\bar{\rho}_{s,\mathrm{unit}})^2|\delta\phi_n|^2\ra
 \item \textbf{read\_profile()} - This method reads out.gyro.profile to get control data and stores it in self.profile.
 \item \textbf{read\_t()} - This method reads t.out to get time data and stores it in self.t.
 \item \textbf{set\_directory(}\emph{str}\textbf{ path)} - This method sets the variable self.directory\_name to path.
-\end{itemize}
 \end{itemize}
 \end{document}
