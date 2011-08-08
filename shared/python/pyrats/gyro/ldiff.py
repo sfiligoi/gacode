@@ -1,3 +1,6 @@
+"""This file is executed by the bash script gyro_plot when a listing of the
+diffusivities is requested."""
+
 from pyrats.gyro.data import GYROData
 import sys
 import numpy as np

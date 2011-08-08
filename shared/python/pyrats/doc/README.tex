@@ -1,17 +1,21 @@
 \documentclass{article}
 \usepackage{fullpage}
 \usepackage{commath}
+\usepackage{graphicx}
+\usepackage{float}
 \addtolength{\parskip}{\baselineskip}
 
 \begin{document}
 \begin{center}
 \Large
-Documentation for PYRATS:
+PYRATS:
 Python Routines for Analyzing Transport Simulations
+
+A suite of python classes for accessing and plotting data from GYRO/NEO/TGYRO
 \end{center}
 \normalsize
 
-\noindent \textbf{Introduction: }PYRATS is a data processing tool designed to make creating plots of output data from GYRO, TGYRO, or NEO easy.  It makes use of the python programming language, and the associated packages numpy and matplotlib.  With some knowledge of the python language and matplotlib, the typical user should be able to create plots quickly and efficiently from the python command line interpreter.
+\noindent \textbf{Introduction: }PYRATS (Python Routines for Analyzing Transport Simulations) is a data processing tool designed to make creating plots of output data from GYRO, TGYRO, or NEO easy.  It makes use of the python programming language, and the associated packages numpy and matplotlib.  With some knowledge of the python language and matplotlib, the typical user should be able to create plots quickly and efficiently from the python command line interpreter.  First is a presentation of some of the more basic features of PYRATS.  Code documentation is given on the subsequent pages.  
 
 \noindent To begin, type the following command into the terminal:
 \fontfamily{\ttdefault}\selectfont
@@ -49,24 +53,64 @@ Python Routines for Analyzing Transport Simulations
 >>> ax2 = fig.add_subplot(222)
 >>> ax3 = fig.add_subplot(223)
 >>> ax4 = fig.add_subplot(224)
->>> ax1.plot(sim1.get_r(), sim1.get_Te)
->>> ax2.plot(sim1.get_r(), sim1.get_Ti)
->>> ax3.plot(sim1.get_r(), sim1.get_ne)
->>> ax4.plot(sim1.get_r(), sim1.get_ni)
+>>> ax1.plot(sim1.data['r/a'][-1], sim1.data['te'][-1])
+>>> ax2.plot(sim1.data['r/a'][-1], sim1.data['ti'][-1])
+>>> ax3.plot(sim1.data['r/a'][-1], sim1.data['ne'][-1])
+>>> ax4.plot(sim1.data['r/a'][-1], sim1.data['ni'][-1])
 >>> ax1.set_xlabel('r/a')
 >>> ax1.set_ylabel('Electron Temperature (keV)')
 >>> ax2.set_xlabel('r/a')
 >>> ax2.set_ylabel('Ion Temperature (keV)')
 >>> ax3.set_xlabel('r/a')
->>> ax3.set_ylabel('Electron Particle Density (e^19/m^3)')
+>>> ax3.set_ylabel('Electron Particle Density (1/cm^3)')
 >>> ax4.set_xlabel('r/a')
->>> ax4.set_ylabel('Ion Particle Density (e^19/m^3)')
+>>> ax4.set_ylabel('Ion Particle Density (1/cm^3)')
 >>> plt.show()
 \end{verbatim}
-
 \addtolength{\parskip}{\baselineskip}
 \fontfamily{\rmdefault}\selectfont
+
+\noindent For the TGYRO example simulation treg01, the above code produces the following plots:
+
+\begin{figure}[h!]
+  \centering
+    \includegraphics[scale=.5]{pssht1.png}
+  \caption{Summary plots for an example TGYRO simulation.}
+\end{figure}
+
+\noindent This functionality is also available from the terminal command line (as opposed to the python interpreter) with the simple command:
+
+\fontfamily{\ttdefault}\selectfont
+
+\$ tgyro\_plot -p ps
+
+\fontfamily{\rmdefault}\selectfont
+
+\noindent When executed from the treg01 directory, the above command produces almost the same plot:
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[scale=.4]{pssht2.png}
+  \caption{Summary plots for an example TGYRO simulation produced with command line tools.}
+\end{figure}
+
+\noindent The rest of this document is documentation for the classes that make up PYRATS.  Each class also has an associated help file that describes the contents of the different data containers in more detail.  The help for each code (GYRO, NEO, and TGYRO) can be accessed from the corresponding PYRATS subfolder in the gacode structure, like so:
+\begin{verbatim}
+~$ cd gacode/shared/python/pyrats
+~gacode/shared/python/pyrats$ ls
+build  examples.py   fileupload.pyx  gyro         __init__.pyc  profiles_gen  tgyro
+doc    fileupload.c  fileupload.so   __init__.py  neo           setup.py
+~gacode/shared/python/pyrats$ cd tgyro
+~gacode/shared/python/pyrats/tgyro$ ls
+data.py  data.pyc  help.py  __init__.py  __init__.pyc  interpreter.py
+~gacode/shared/python/pyrats/tgyro$ python help.py ~/treg01 data
+\end{verbatim}
+\noindent If there is a folder named treg01 in the home directory, this command will print out all of the variables stored in the "data" container.
+
+
+
 \newpage
+
 profiles\_genData contents:
 \begin{itemize}
 \item Data:
@@ -144,6 +188,8 @@ profiles\_genData contents:
 
 \newpage
 
+\noindent NEO related classes:
+
 NEOObject contents:
 \begin{itemize}
 \item Data:
@@ -157,8 +203,6 @@ NEOObject contents:
 \item \textbf{\_\_init\_\_(}\emph{dict}\textbf{ data,}\emph{ str}\textbf{ units,}\emph{ str}\textbf{ descriptor)} - This method stores the appropriate arguments in the appropriate containers.
 \end{itemize}
 \end{itemize}
-
-\newpage
 
 NEOData contents:
 \begin{itemize}
@@ -204,41 +248,13 @@ TGYROData contents:
 \begin{itemize}
 \item Data:
 \begin{itemize}
+\item \textbf{loc\_n\_ion} \emph{int} - Number of ions in simulation.
+\item \textbf{tgyro\_mode} \emph{int} - Mode number of TGYRO operation.
 \item \textbf{n\_iterations} \emph{int} - Number of TGYRO iterations in simulation.
 \item \textbf{n\_fields} \emph{int} - Number of fields in simulation.
 \item \textbf{n\_radial} \emph{int} - Number of radial gridpoints in simulation.
 \item \textbf{directory\_name} \emph{str} - Name of loaded directory.
-\item \textbf{chi\_e} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file chi\_e.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{chi\_i} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file chi\_i.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{chi\_i2} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file chi\_i2.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{chi\_i3} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file chi\_i3.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{chi\_i4} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file chi\_i4.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{chi\_i5} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file chi\_i5.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{gyro\_bohm\_unit} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file gyrobohm.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{profile} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file profile.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{geometry} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file geometry.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{flux\_e} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file flux\_e.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{flux\_i} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file flux\_i.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{flux\_i2} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file flux\_i2.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{flux\_i3} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file flux\_i3.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{flux\_i4} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file flux\_i4.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{flux\_i5} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file flux\_i5.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{flux\_target} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file flux\_target.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{mflux\_e} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file mflux\_e.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{mflux\_i} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file mflux\_i.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{mflux\_i2} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file mflux\_i2.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{mflux\_i3} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file mflux\_i3.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{mflux\_i4} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file mflux\_i4.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{mflux\_i5} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file mflux\_i5.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{mflux\_target} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file mflux\_target.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{gradient} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file gradient.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{local\_res} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file local\_res.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{global\_res} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file global\_res.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{wr\_ion} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file wr\_ion.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{wi\_ion} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file wi\_ion.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{wr\_elec} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file wr\_elec.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{wr\_ion} \emph{dictionary of lists of numpy arrays} - Contains the data contained in the file wr\_ion.out.  The column headers form the keys of the dictionary, with the iterations corresponding to the indicies of the lists.  The entries of each list are numpy arrays containing the data.
-\item \textbf{r} \emph{numpy array} - Contains the normalized radial gridpoints in a 1-D numpy array.
+\item \textbf{data} \emph{dictionary of lists of numpy arrays} - Large dictionary containing all loaded data by variable name and then by iteration number.
 \end{itemize}
 \item Methods:
 \begin{itemize}
