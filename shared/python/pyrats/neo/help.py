@@ -16,6 +16,7 @@ else:
         print "S_theory"
         print "HR_theory"
         print "HS_theory"
+        print "control"
         print "docstrings (not a method, instead prints the docstrings for NEOData)"
     else:
         if sys.argv[2] == 'transport':
@@ -38,6 +39,9 @@ else:
                 print key
         elif sys.argv[2] == 'HS_theory':
             for key in sorted(sim1.HS_theory.keys()):
+                print key
+        elif sys.argv[2] == 'control':
+            for key in sorted(sim1.control.keys()):
                 print key
         elif sys.argv[2] == 'docstrings':
             help(NEOData)
