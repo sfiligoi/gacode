@@ -1,0 +1,87 @@
+#!/bin/bash
+#==============================================================================
+# pyrats_help
+#
+# PURPOSE:
+#  Handles execution of pyrats help files
+#==============================================================================
+
+#==============================================================================
+# Syntax validity check and help message
+#
+n=$#
+
+if [ $n -eq 0 ]
+then
+   echo
+   echo "Usage:   pyrats_help [options]"
+   echo
+   echo "         pyrats_help provides routing of command line queries to the"
+   echo "         appropriate pyrats help file."
+   echo
+   echo "         -l <path>"
+   echo "         Loads all output files in specified directory.  If no"
+   echo "         directory is given, then the current working directory is"
+   echo "         used."
+   echo
+   echo "         -c <codename>"
+   echo "         Specify a code to load help for (either gyro, neo, tgyro, or"
+   echo "         profiles_gen).  If none is specified, pyrats_help will look"
+   echo "         in the specified directory and try to determine what kind of"
+   echo "         output files are located there."
+   echo
+   echo "         -m <method>"
+   echo "         Specify a method to ask for help about.  The available"
+   echo "         methods are obtainable by leaving this element blank."
+   echo
+
+exit 1
+fi
+
+#==============================================================================
+
+#==============================================================================
+# Define variables for flag capture
+#
+# Default output directory
+LOC_DIR=$PWD
+# Default variable values
+CODENAME=0
+METHOD=""
+#==============================================================================
+
+#==============================================================================
+# Parse command line options
+#
+while [ $# -gt 0 ] ; do
+  case "$1" in
+
+  -l) shift ; LOC_DIR=$1 ;;
+
+  -c) shift ; CODENAME=$1 ;;
+
+  -m) shift ; METHOD=$1 ;;
+
+  *) echo "ERROR: incorrect syntax." ; exit 1 ;;
+
+  esac
+  shift
+done
+#==============================================================================
+# Execute proper scripts
+#
+if [ "$CODENAME" == "gyro" ]
+then
+  python ~/gacode/shared/python/pyrats/doc/gyro_help.py $LOC_DIR $METHOD
+elif [ "$CODENAME" == "tgyro" ]
+then
+  python ~/gacode/shared/python/pyrats/doc/tgyro_help.py $LOC_DIR $METHOD
+elif [ "$CODENAME" == "neo" ]
+then
+  python ~/gacode/shared/python/pyrats/doc/neo_help.py $LOC_DIR $METHOD
+elif [ "$CODENAME" == "profiles_gen" ]
+then
+  python ~/gacode/shared/python/pyrats/doc/profiles_gen_help.py $LOC_DIR $METHOD
+else
+  python ~/gacode/shared/python/pyrats/doc/determine.py $LOC_DIR
+fi

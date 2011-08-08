@@ -23,8 +23,9 @@ then
    echo "         run."
    echo
    echo "         -l <path>"
-   echo "         Loads all output files in specified directory."
-   echo "         If no directory is given, then current is used."
+   echo "         Loads all output files in specified directory.  If no"
+   echo "         directory is given, then the current working directory is"
+   echo "         used."
    echo
    echo "         -p <options>"
    echo "         Opens python for editing with specified directory loaded, and"
@@ -34,15 +35,15 @@ then
    echo "             cs creates a chi-value summary plot"
    echo "             fs creates an energy flux summary plot"
    echo "             ms creates a momentum flux summary plot"
-   echo "         If no options are specified, then python shell opens with no"
-   echo "         plots created by default.  There is no limit to the number of"
-   echo "         summary plots that may be specified after -p.  After the shell"
-   echo "         has loaded, type 'help(TGYROData)' for information on how to"
-   echo "         create plots with python."
-   echo "         Typing 'help(pylab)' is also useful, but can be a little"
+   echo "         If no options are specified, then the python shell opens with"
+   echo "         no plots created by default.  There is no limit to the number"
+   echo "         of summary plots that may be specified after -p.  After the"
+   echo "         shell has loaded, type 'help(TGYROData)' for information on"
+   echo "         how to create plots with python."
+   echo "         Typing 'help(plt)' is also useful, but can be a little"
    echo "         overwhelming.  The online help for matplotlib is much better"
-   echo "         organized, and searchable as well.  At time of creation of this"
-   echo "         file, the website for matplotlib was:"
+   echo "         organized, and searchable as well.  At time of creation of"
+   echo "         this file, the website for matplotlib was:"
    echo "         http://matplotlib.sourceforge.net/"
    echo ""
 
@@ -61,6 +62,7 @@ LOAD_FLAG=0
 LINE_FLAG=0
 VERBOSE_FLAG=0
 LEGEND_FLAG=0
+PLOT_STRING=""
 #==============================================================================
 
 #==============================================================================
@@ -93,6 +95,12 @@ then
     PLOT_STRING="$PLOT_STRING $1"
     shift
   done
-  python ~/gacode/shared/python/pyrats/tgyro/interpreter.py $PLOT_DIR $N1 $N2 $VERBOSE_FLAG $LEGEND_FLAG $PLOT_STRING
-  exit 0
+  if [ "$PLOT_STRING" != "" ]
+  then
+    python ~/gacode/shared/python/pyrats/tgyro/interpreter.py $PLOT_DIR $N1 $N2 $VERBOSE_FLAG $LEGEND_FLAG $PLOT_STRING &
+    exit 0
+  else
+    python -i ~/gacode/shared/python/pyrats/tgyro/interpreter.py $PLOT_DIR $N1 $N2 $VERBOSE_FLAG $LEGEND_FLAG $PLOT_STRING
+    exit 0
+  fi
 fi
