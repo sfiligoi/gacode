@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /usr/bin/env bash
 #
 # SCRIPT:
 #  gyro.XT5_MT
@@ -6,13 +6,14 @@
 # FUNCTION:
 #  Parallel execution script
 #
-# SYSTEM INFO:
+# JAGUAR SYSTEM INFO:
+# - Cray XT5
 # - 224,256 processor cores
-# - 18,688 computer nodes
-# - (2x) AMD Opteron 2435 Istanbul-based 6-core CPUs per compute node running at 2.6GHz
+# - 18,688 compute nodes
+# - (2x) AMD Opteron 2435 (Istanbul) 6-core CPUs per compute node running at 2.6GHz
 # - (2x) ccNUMA nodes per compute node (each CPU referred to as NUMA node)
-# - each compute node has 16GiB RAM
-# - (1x) SeaStar 2+ ASIC per copute node arranged in 3D torus network topology
+# - each compute node has 16GiB RAM (1.3GiB per core)
+# - (1x) SeaStar2+ ASIC per copute node arranged in 3D torus network topology
 
 simdir=${1}
 nproc=${2}
@@ -25,5 +26,7 @@ cd $simdir
 #   -sn make certain job allocated both compute blade NUMA nodes
 #   -S 1 means we want to allocated only 1 MPI task per NUMA node
 #   -d 6 spawns 5 additional threads per MPI process for total of 6 threads
+#   -cc processes constrained to CPU within assigned NUMA node but can migrate between cores
 export OMP_NUM_THREADS=6
-aprun -n $nproc -ss -sn 2 -S 1 -d 6 $exec
+nproc=$((nproc*6))
+aprun -n $nproc -ss -sn 2 -S 1 -d 6 -cc numa_node $exec

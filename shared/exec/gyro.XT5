@@ -5,6 +5,15 @@
 #
 # FUNCTION:
 #  Parallel execution script
+#
+# JAGUAR SYSTEM INFO:
+# - Cray XT5
+# - 224,256 processor cores
+# - 18,688 compute nodes
+# - (2x) AMD Opteron 2435 (Istanbul) 6-core CPUs per compute node running at 2.6GHz
+# - (2x) ccNUMA nodes per compute node (each CPU referred to as NUMA node)
+# - each compute node has 16GiB RAM (1.3GiB per core)
+# - (1x) SeaStar2+ ASIC per compute node arranged in 3D torus network topology
 
 simdir=${1}
 nproc=${2}
@@ -15,4 +24,5 @@ cd $simdir
 # NOTE:
 #   -ss restricts processes to allocating local NUMA node memory only (reduces access latency)
 #   -sn makes certain you are allocated both compute blade NUMA nodes (recall that each CPU is referred to as a NUMA node)
-aprun -n $nproc -ss -sn 2 $exec
+#   -cc bind processes to CPU cores
+aprun -n $nproc -ss -sn 2 -cc cpu $exec

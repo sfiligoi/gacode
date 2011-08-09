@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /usr/bin/env bash
 #
 # SCRIPT:
 #  gyro.HOPPER2 
@@ -24,7 +24,10 @@ cd $simdir
 # NOTE:
 #   -ss restrict processes to allocating local NUMA node memory only in order to reduce access latency
 #   -sn make certain job allocated all 4 compute blade NUMA nodes
-#   -cc bind processes to CPU cores
-aprun -n $nproc -ss -sn 4 -cc cpu $exec
+#   -S 1 means we want to spawn only 1 MPI task per NUMA node (meaning 2 MPI tasks per CPU)
+#   -d 6 spawns 5 additional threads per MPI process for total of 6 threads per NUMA node
+#   -cc processes constrained to CPU within assigned NUMA node but can migrate between cores
+nproc=$((nproc*6))
+aprun -n $nproc -ss -sn 4 -S 1 -d 6 -cc numa_node $exec
 
 
