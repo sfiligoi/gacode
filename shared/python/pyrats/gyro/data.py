@@ -23,7 +23,7 @@ class GYROData:
     k_perp_squared = []
 
     Example Usage:
-        >>> from pyrats.data import GYROData
+        >>> from pyrats.gyro.data import GYROData
         >>> import matplotlib.pyplot as plt
         >>> sim1 = GYROData('example_directory')
         >>> sim1.make_gbflux()
@@ -127,7 +127,7 @@ class GYROData:
             f = fileupload.loadtxt(filename, dSize)
             return f
         else:
-            print "ERROR: File " + fname + " does not exist."
+            print "Warning: File " + fname + " does not exist."
             return f
 
 

@@ -7,9 +7,7 @@ keys = []
 
 for k1, v1 in sim1.transport.iteritems():
     s = 0
-    for k2, v2 in v1.data.iteritems():
-        for item in v2:
-            s = s + np.sum(item)
+    s = np.sum(v1.data)
     if s != 0:
 #Unless every entry in v2 is zero, it gets added to the list.
         keys.append(k1)

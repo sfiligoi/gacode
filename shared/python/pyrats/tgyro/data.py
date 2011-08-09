@@ -12,11 +12,11 @@ class TGYROData:
      data
 
      Example Usage:
-         >>>from matplotlib import pyplot
-         >>>from pyrats.data import TGYROData
-         >>>sim1 = TGYROData('$GACODE_ROOT/tgyro/tools/input/treg01')
-         >>>pyplot.plot(sim1.get_r(), sim1.get_Te())
-         >>>pyplot.show()
+         >>> from matplotlib import pyplot
+         >>> from pyrats.tgyro.data import TGYROData
+         >>> sim1 = TGYROData('$GACODE_ROOT/tgyro/tools/input/treg01')
+         >>> pyplot.plot(sim1.get_r(), sim1.get_Te())
+         >>> pyplot.show()
 
 """
 

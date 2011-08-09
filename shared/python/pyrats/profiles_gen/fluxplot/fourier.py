@@ -8,7 +8,7 @@ except ImportError:
 from math import *
 from os.path import expanduser, expandvars
 sys.path.append(expanduser(expandvars('~/gacode/shared/python/profiles_gen')))
-from profiles_genData import profiles_genData
+from pyrats.profiles_gen.data import profiles_genData
 
 direc = sys.argv[1]
 try:

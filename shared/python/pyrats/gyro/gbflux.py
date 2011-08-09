@@ -5,6 +5,7 @@ from pyrats.gyro.data import GYROData
 
 directory=sys.argv[1]
 n_field=sys.argv[3]
+
 try:
     n_kinetic=int(sys.argv[2])
     n_moment=int(sys.argv[4])
@@ -24,8 +25,8 @@ sim1.make_gbflux()
 fig = plt.figure(1)
 ax = fig.add_subplot(111)
 if n_field == 's':
-    ax.plot(np.sum(sim1.gbflux, axis=1)[n_kinetic, n_moment, :])
-    ax.set_title("Species " + str(n_kinetic) + ", field " + str(n_field) + ", moment " + str(n_moment))
+    ax.plot(sim1.t['(cbar_s/a)t'], np.sum(sim1.gbflux, axis=1)[n_kinetic, n_moment, :])
+    ax.set_title("Species " + str(n_kinetic) + ", field sum, moment " + str(n_moment))
 else:
      try:
         n_field = int(n_field)
@@ -35,13 +36,13 @@ else:
      except ValueError:
         print "ERROR: Invalid parameter.  Try again."
         sys.exit()
-     ax.plot(sim1.gbflux[n_kinetic, n_field, n_moment, :])
+     ax.plot(sim1.t['(cbar_s/a)t'], sim1.gbflux[n_kinetic, n_field, n_moment, :])
      ax.set_title("Species " + str(n_kinetic) + ", field " + str(n_field) + ", moment " + str(n_moment))
-ax.set_xlabel("Time")
+ax.set_xlabel("Time (s)")
 if n_moment == 0:
     ax.set_ylabel("GAMMA_" + str(n_kinetic) + "/GAMMA_{GB}")
 elif n_moment == 1:
-    ax.set_ylabel("Q_{0," + str(n_kinetic) + "}/Q_{GB}")
+    ax.set_ylabel("Q_" + str(n_kinetic) + "/Q_{GB}")
 elif n_moment == 2:
     ax.set_ylabel("PI_" + str(n_kinetic) + "/PI_{GB}")
 elif n_moment == 3:

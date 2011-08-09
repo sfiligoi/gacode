@@ -1,4 +1,4 @@
-"""This file looks in the specified directory and determines which types of
+"""This code looks in the specified directory and determines which types of
 files are located there."""
 
 import sys

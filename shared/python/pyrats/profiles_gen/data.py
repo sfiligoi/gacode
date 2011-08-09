@@ -21,11 +21,11 @@ class profiles_genData:
      bz
 
      Example Usage:
-     >>>import matplotlib.pyplot as plt
-     >>>from profiles_genData import profiles_genData
-     >>>prof1 = profiles_genData('$GACODE_ROOT/tgyro/tools/input/treg01')
-     >>>prof1.plot('ne')
-     >>>plt.show()
+     >>> import matplotlib.pyplot as plt
+     >>> from pyrats.profiles_gen.data import profiles_genData
+     >>> prof1 = profiles_genData('$GACODE_ROOT/tgyro/tools/input/treg01')
+     >>> prof1.plot('ne')
+     >>> plt.show()
 
 """
 

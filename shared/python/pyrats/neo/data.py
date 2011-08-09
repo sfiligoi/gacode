@@ -574,6 +574,7 @@ class NEOData:
         import os
         import numpy as np
         import sys
+
         #Adjust subplot display parameters
         mpl.rcParams['font.size'] = 10.0
         mpl.rcParams['figure.subplot.wspace'] = .99
@@ -618,7 +619,7 @@ class NEOData:
         ax.set_ylabel(self.transport.get(var).units)
         #verbose sets title to be more descriptive
         if verbose:
-            ax.set_title(self.get_transport(var).descriptor+' vs. r/a')
+            ax.set_title(self.transport.get(var).descriptor+' vs. r/a')
         else:
             ax.set_title(var + ' vs. r/a')
         tempr = self.control['r'].data
@@ -629,7 +630,7 @@ class NEOData:
                 transport = self.transport.get(var).data
                 #Check to see if it has one or two dimensions
                 try:
-                    transport[0][0][0]
+                    transport[0][0]
                     #If we reach this point, that means it has two dimensions,
                     #so we have to sort that out properly
                     for y in range(len(transport[0])):

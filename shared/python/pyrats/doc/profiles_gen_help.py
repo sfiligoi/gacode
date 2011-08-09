@@ -13,7 +13,8 @@ else:
         print "docstrings (not a method, instead prints the docstrings for profiles_genData)"
     else:
         if sys.argv[2] == 'data':
-            print sorted(sim1.data.keys())
+            for key in sorted(sim1.data.keys()):
+                print key
         elif sys.argv[2] == 'docstrings':
             help(profiles_genData)
         else:
