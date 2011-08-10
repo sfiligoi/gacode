@@ -29,14 +29,14 @@ ax.set_xlabel(rtext,size=16)
 ax.set_ylabel(r'$Q_{\rm GB}$',size=16)
 
 # For this case: 0=D, 1=C, 2=e:
-ne = neo1.control['n0_over_nnorm'].data[path+'neo1'][2]
-te = neo1.control['T0_over_Tnorm'].data[path+'neo1'][2]
-rhostar = neo1.control['rho_star'].data[path+'neo1']
+ne = neo1.control['n0_over_nnorm'].data[2]
+te = neo1.control['T0_over_Tnorm'].data[2]
+rhostar = neo1.control['rho_star'].data
 
 qgb = ne*te**2.5*rhostar**2
 
-q = neo1.transport['Q'].data[path+'neo1']
-r = neo1.control['r'].data[path+'neo1']
+q = neo1.transport['Q'].data
+r = neo1.control['r'].data
 
 # (0=D,1=e,2=C)
 a=ax.plot(r,q[0]/qgb,'b')
@@ -54,8 +54,8 @@ ax = fig.add_subplot(132)
 ax.set_xlabel(rtext,size=16)
 ax.set_ylabel(r'${\rm km/s}$',size=16)
 
-v0   = neo1.control['vnorm_over_a'].data[path+'neo1']/1000
-vtor = neo1.transport['1vtor0'].data[path+'neo1']
+v0   = neo1.control['vnorm_over_a'].data/1000
+vtor = neo1.transport['1vtor0'].data
 
 # (0=D,1=e,2=c)
 a=ax.plot(r,vtor[0]*v0,'b')
@@ -73,8 +73,8 @@ ax = fig.add_subplot(133)
 ax.set_xlabel(rtext,size=16)
 ax.set_ylabel(r'$\langle j_\parallel B \rangle/(e n_e v_D B_{\rm unit})$',size=16)
 
-nd = neo1.control['n0_over_nnorm'].data[path+'neo1'][0]
-jb = neo1.transport['jboot'].data[path+'neo1']*nd/ne
+nd = neo1.control['n0_over_nnorm'].data[0]
+jb = neo1.transport['jboot'].data*nd/ne
 
 a=ax.plot(r,jb,'b')
 #-----------------------------------------------------------

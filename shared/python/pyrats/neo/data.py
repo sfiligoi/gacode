@@ -54,7 +54,7 @@ class NEOData:
     nnorm = {}
     tnorm = {}
     n0_over_nnorm = {}
-    t0_over_tnorm = {}
+    T0_over_Tnorm = {}
     a_over_Ln = {}
     a_over_Lt = {}
     inv_tau_self = {}
@@ -154,11 +154,11 @@ class NEOData:
         self.rmaj_over_a = []
         self.omega_rot = []
         self.omega_rot_deriv = []
-        self.n_norm = []
-        self.T_norm = []
-        self.v_norm_over_a = []
-        self.n0_over_n_norm = []
-        self.T0_over_T_norm = []
+        self.nnorm = []
+        self.Tnorm = []
+        self.vnorm_over_a = []
+        self.n0_over_nnorm = []
+        self.T0_over_Tnorm = []
         self.a_over_Ln = []
         self.a_over_LT = []
         self.inv_tau_self = []
@@ -236,33 +236,33 @@ class NEOData:
 
         import numpy as np
 
-        self.transport['PHI'] = NEOOutput(np.array(self.SIM_PHI), '(e*PHI1/T_norm)^2',
+        self.transport['PHI'] = NEOOutput(np.array(self.SIM_PHI), '(e*PHI1/Tnorm)^2',
                                          'first-order electrostatic potential')
         self.transport['jboot'] = NEOOutput(np.array(self.SIM_jboot),
-               'j_par*B/(e*n_norm*v_norm*B_unit)', 'first-order bootstrap current')
+               'j_par*B/(e*nnorm*vnorm*B_unit)', 'first-order bootstrap current')
         self.transport['0vtor0'] = NEOOutput(np.array(self.SIM_0vtor0),
-                                          '(v^{(0)}_phi (theta=0)/v_norm',
+                                          '(v^{(0)}_phi (theta=0)/vnorm',
       'zeroth-order toroidal flow at the outboard midplane (v^(0)_phi = w0*R)')
         self.transport['0upar'] = NEOOutput(np.array(self.SIM_0upar),
-                                            'upar^(0)*B/(v_norm*B_unit)',
+                                            'upar^(0)*B/(vnorm*B_unit)',
                               'zeroth-order parallel flow (upar^(0)_parallel=w0*I/B)')
         self.transport['GAMMA'] = NEOOutput(np.array(self.SIM_GAMMA),
-                    'GAMMA/(n_norm*v_norm)', 'second-order radial particle flux')
-        self.transport['Q'] = NEOOutput(np.array(self.SIM_Q), 'Q/(n_norm*v_norm*T_norm)',
+                    'GAMMA/(nnorm*vnorm)', 'second-order radial particle flux')
+        self.transport['Q'] = NEOOutput(np.array(self.SIM_Q), 'Q/(nnorm*vnorm*Tnorm)',
                                         'second-order radial energy flux')
-        self.transport['PI'] = NEOOutput(np.array(self.SIM_PI), 'PI/(n_norm*a*T_norm)',
+        self.transport['PI'] = NEOOutput(np.array(self.SIM_PI), 'PI/(nnorm*a*Tnorm)',
                                          'second-order radial momentum flux')
         self.transport['1upar'] = NEOOutput(np.array(self.SIM_1upar),
-                           'upar*B/(v_norm*Bunit)', 'first-order parallel flow')
+                           'upar*B/(vnorm*Bunit)', 'first-order parallel flow')
         self.transport['k'] = NEOOutput(np.array(self.SIM_k), 'k',
                                   'first-order dimensionless flow coefficient')
-        self.transport['K'] = NEOOutput(np.array(self.SIM_K), 'K/(n_norm*v_norm/Bunit)',
+        self.transport['K'] = NEOOutput(np.array(self.SIM_K), 'K/(nnorm*vnorm/Bunit)',
                                     'first-order dimensional flow coefficient')
         self.transport['vpol0'] = NEOOutput(np.array(self.SIM_vpol0),
-                                            '(v_sub_theta at theta=0)/v_norm',
+                                            '(v_sub_theta at theta=0)/vnorm',
                           'first-order poloidal flow at the outboard midplane')
         self.transport['1vtor0'] = NEOOutput(np.array(self.SIM_1vtor0),
-                                             '(v_sub_phi at theta=0)/v_norm',
+                                             '(v_sub_phi at theta=0)/vnorm',
                           'first-order toroidal flow at the outboard midplane')
         self.control['n_species'] = NEOOutput(self.n_species, 'N_SPECIES',
                                               'number of kinetic species')
@@ -282,27 +282,27 @@ class NEOData:
         self.control['r'] = NEOOutput(np.array(self.r), 'r/a',
                                       'normalized midplane minor radius')
         self.control['dPHI0dr'] = NEOOutput(np.array(self.dPHI0dr),
-                                            '(dPHI0dr)(a*e/T_norm)',
+                                            '(dPHI0dr)(a*e/Tnorm)',
                           'normalized equilibrium-scale radial electric field')
         self.control['q'] = NEOOutput(np.array(self.q), 'q', 'safety factor')
         self.control['rho_star'] = NEOOutput(np.array(self.rho_star),
-                          'rho_star=(c*sqrt(m_norm*T_norm))*(e*Bunit*a)', 'ratio of the Larmor radius of the normalizing species to the normalizing length scale')
+                          'rho_star=(c*sqrt(mnorm*Tnorm))*(e*Bunit*a)', 'ratio of the Larmor radius of the normalizing species to the normalizing length scale')
         self.control['rmaj_over_a'] = NEOOutput(np.array(self.rmaj_over_a), 'R0/a',
                                  'normailzed flux-surface-center major radius')
-        self.control['omega_rot'] = NEOOutput(np.array(self.omega_rot), 'w0/(v_norm/a)',
+        self.control['omega_rot'] = NEOOutput(np.array(self.omega_rot), 'w0/(vnorm/a)',
                                        'normailzed toroidal angular frequency')
         self.control['omega_rot_deriv'] = NEOOutput(np.array(self.omega_rot_deriv),
-                                                    '(dw0/dr)(a^2/v_norm)',
+                                                    '(dw0/dr)(a^2/vnorm)',
                                           'normalized toroidal rotation shear')
-        self.control['n_norm'] = NEOOutput(np.array(self.n_norm), '(e19/m^3)',
+        self.control['nnorm'] = NEOOutput(np.array(self.nnorm), '(e19/m^3)',
                              'normalizing equilibrium-scale density (e19/m^3)')
-        self.control['T_norm'] = NEOOutput(np.array(self.T_norm), 'keV',
+        self.control['Tnorm'] = NEOOutput(np.array(self.Tnorm), 'keV',
                              'normalizing equilibrium-scale temperature (keV)')
-        self.control['v_norm_over_a'] = NEOOutput(np.array(self.v_norm_over_a), '1/s',
+        self.control['vnorm_over_a'] = NEOOutput(np.array(self.vnorm_over_a), '1/s',
                                                  'ratio of the normalizing equilibrium-scale thermal speed to the normalizing length scale (1/s) ')
-        self.control['n0_over_n_norm'] = NEOOutput(np.array(self.n0_over_n_norm),
+        self.control['n0_over_nnorm'] = NEOOutput(np.array(self.n0_over_nnorm),
                             'unitless', 'normalized equilibrium-scale density')
-        self.control['T0_over_T_norm'] = NEOOutput(np.array(self.T0_over_T_norm),
+        self.control['T0_over_Tnorm'] = NEOOutput(np.array(self.T0_over_Tnorm),
                         'unitless', 'normalized equilibrium-scale temperature')
         self.control['a_over_Ln'] = NEOOutput(np.array(self.a_over_Ln),
                                                    'a/Ln=a(-dln(n0)/dr)',
@@ -311,56 +311,56 @@ class NEOData:
                                                    'a/LT=a(-dln(T0)/dr)',
                                     'normalized equilibrium-scale temperature')
         self.control['inv_tau_self'] = NEOOutput(np.array(self.inv_tau_self),
-                                                 'tau_self^-1/(v_norm/a)',
+                                                 'tau_self^-1/(vnorm/a)',
                                          'normalized self-collision frequency')
         self.HH_theory['GAMMA'] = NEOOutput(np.array(self.HH_GAMMA),
-                                            'GAMMA/(n_norm*v_norm)',
+                                            'GAMMA/(nnorm*vnorm)',
               'Hinton-Hazeltine second-order radial particle flux (ambipolar)')
-        self.HH_theory['Qi'] = NEOOutput(np.array(self.HH_Qi), 'Qi/(n_norm*v_norm*T_norm)',
+        self.HH_theory['Qi'] = NEOOutput(np.array(self.HH_Qi), 'Qi/(nnorm*vnorm*Tnorm)',
                       'Hinton-Hazeltine second-order radial energy flux (ion)')
-        self.HH_theory['Qe'] = NEOOutput(np.array(self.HH_Qe), 'Qe/(n_norm*v_norm*T_norm)',
+        self.HH_theory['Qe'] = NEOOutput(np.array(self.HH_Qe), 'Qe/(nnorm*vnorm*Tnorm)',
                  'Hinton-Hazeltine second-order radial energy flux (electron)')
         self.HH_theory['jboot'] = NEOOutput(np.array(self.HH_jboot),
-                                            'jpar*B/(e*n_norm*v_norm*Bunit)',
+                                            'jpar*B/(e*nnorm*vnorm*Bunit)',
                               'Hinton-Hazeltine first-order bootstrap current')
         self.HH_theory['ki'] = NEOOutput(np.array(self.HH_ki), 'ki',
            'Hinton-Hazeltine first-order dimensionless flow coefficient (ion)')
         self.HH_theory['uipar'] = NEOOutput(np.array(self.HH_uipar),
-                                            'uipar*B/(v_norm*Bunit)',
+                                            'uipar*B/(vnorm*Bunit)',
                             'Hinton-Hazeltine first-order parallel flow (ion)')
         self.HH_theory['vipol0'] = NEOOutput(np.array(self.HH_vipol0),
-                                             '(vitheta at theta=0)/v_norm',
+                                             '(vitheta at theta=0)/vnorm',
    'Hinton-Hazeltine first-order poloidal flow at the outboard midplane (ion)')
-        self.CH_theory['Qi'] = NEOOutput(np.array(self.CH_Qi), 'Qi/(n_norm*v_norm*T_norm)',
+        self.CH_theory['Qi'] = NEOOutput(np.array(self.CH_Qi), 'Qi/(nnorm*vnorm*Tnorm)',
                           'Chang-Hinton second-order radial energy flux (ion)')
-        self.TG_theory['Qi'] = NEOOutput(np.array(self.TG_Qi), 'Qi/(n_norm*v_norm*T_norm)',
+        self.TG_theory['Qi'] = NEOOutput(np.array(self.TG_Qi), 'Qi/(nnorm*vnorm*Tnorm)',
                                'Taguchi second-order radial energy flux (ion)')
         self.S_theory['jboot'] = NEOOutput(np.array(self.S_jboot),
-                                           'jpar*B/(e*n_norm*v_norm*Bunit)',
+                                           'jpar*B/(e*nnorm*vnorm*Bunit)',
                                         'Sauter first-order bootstrap current')
         self.S_theory['ki'] = NEOOutput(np.array(self.S_ki), 'ki',
                      'Sauter first-order dimensionless flow coefficient (ion)')
         self.S_theory['uipar'] = NEOOutput(np.array(self.S_uipar),
-                                           'uipar*B/(v_norm*Bunit)',
+                                           'uipar*B/(vnorm*Bunit)',
                                       'Sauter first-order parallel flow (ion)')
         self.S_theory['vipol0'] = NEOOutput(np.array(self.S_vipol0),
-                                            '(vitheta at theta=0)/v_norm',
+                                            '(vitheta at theta=0)/vnorm',
              'Sauter first-order poloidal flow at the outboard midplane (ion)')
-        self.HR_theory['PHI'] = NEOOutput(np.array(self.HR_PHI), '(e*PHI1/T_norm)^2',
+        self.HR_theory['PHI'] = NEOOutput(np.array(self.HR_PHI), '(e*PHI1/Tnorm)^2',
                        'Hinton-Rosenbluth first-order electrostatic potential')
         self.HS_theory['GAMMA'] = NEOOutput(np.array(self.HS_GAMMA),
-                                            'GAMMA/(n_norm*v_norm)',
+                                            'GAMMA/(nnorm*vnorm)',
                            'Hirshman-Sigmar second-order radial particle flux')
-        self.HS_theory['Q'] = NEOOutput(np.array(self.HS_Q), 'Q/(n_norm*v_norm*T_norm)',
+        self.HS_theory['Q'] = NEOOutput(np.array(self.HS_Q), 'Q/(nnorm*vnorm*Tnorm)',
                              'Hirshman-Sigmar second-order radial energy flux')
         self.transport['GAMMA_gv'] = NEOOutput(np.array(self.SIM_GAMMA_gv),
-                                               'GAMMA_gv/(n_norm*v_norm)',
+                                               'GAMMA_gv/(nnorm*vnorm)',
                               'Gyro-viscous second-order radial particle flux')
         self.transport['Q_gv'] = NEOOutput(np.array(self.SIM_Q_gv),
-                                           'Q_gv/(n_norm*v_norm*T_norm)',
+                                           'Q_gv/(nnorm*vnorm*Tnorm)',
                                 'Gyro-viscous second-order radial energy flux')
         self.transport['PI_gv'] = NEOOutput(np.array(self.SIM_PI_gv),
-                                            'PI_gv/(n_norm*a*T_norm)',
+                                            'PI_gv/(nnorm*a*Tnorm)',
                               'Gyro-viscous second-order radial momentum flux')
 
     def sort_data(self):
@@ -434,9 +434,9 @@ class NEOData:
             self.rmaj_over_a.append(equil[i, 4])
             self.omega_rot.append(equil[i, 5])
             self.omega_rot_deriv.append(equil[i, 6])
-            self.n_norm.append(equil[i, 7])
-            self.T_norm.append(equil[i, 8])
-            self.v_norm_over_a.append(equil[i, 9])
+            self.nnorm.append(equil[i, 7])
+            self.Tnorm.append(equil[i, 8])
+            self.vnorm_over_a.append(equil[i, 9])
             temp1 = []
             temp2 = []
             temp3 = []
@@ -448,8 +448,8 @@ class NEOData:
                 temp3.append(equil[i, 12+5*a])
                 temp4.append(equil[i, 13+5*a])
                 temp5.append(equil[i, 14+5*a])
-            self.n0_over_n_norm.append(temp1)
-            self.T0_over_T_norm.append(temp2)
+            self.n0_over_nnorm.append(temp1)
+            self.T0_over_Tnorm.append(temp2)
             self.a_over_Ln.append(temp3)
             self.a_over_LT.append(temp4)
             self.inv_tau_self.append(temp5)
