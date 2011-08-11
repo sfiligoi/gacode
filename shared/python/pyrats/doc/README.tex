@@ -66,6 +66,7 @@
 >>> ax4.set_ylabel('Ion Particle Density (1/cm^3)')
 >>> plt.show()
 \end{verbatim}
+
 \addtolength{\parskip}{\baselineskip}
 \fontfamily{\rmdefault}\selectfont
 
@@ -95,20 +96,45 @@
 \end{figure}
 
 \subsection{Help Files}
-\noindent The rest of this document is documentation for the classes that make up PYRATS.  Each class also has an associated help file that describes the contents of the different data containers in more detail.  The help for each code (GYRO, NEO, and TGYRO) can be accessed from the corresponding PYRATS subfolder in the gacode structure, like so:
+\noindent There is also a built in help function for PYRATS called pyrats\_help.  It provieds a description of the contents of each class, and where the data is stored.  It is accessed from the command line, like so:
 \begin{verbatim}
-~$ cd gacode/shared/python/pyrats
-~gacode/shared/python/pyrats$ ls
-build  examples.py   fileupload.pyx  gyro         __init__.pyc  profiles_gen  tgyro
-doc    fileupload.c  fileupload.so   __init__.py  neo           setup.py
-~gacode/shared/python/pyrats$ cd tgyro
-~gacode/shared/python/pyrats/tgyro$ ls
-data.py  data.pyc  help.py  __init__.py  __init__.pyc  interpreter.py
-~gacode/shared/python/pyrats/tgyro$ python help.py ~/treg01 data
+~$ cd treg01
+~/treg01$ pyrats_help -c
+It looks like this directory contains the following file types:
+neo
+tgyro
+profiles_gen
+Try executing pyrats_help with one of these codes as the codename.
+~/treg01$ pyrats_help -c neo
+Please specify a NEOData method.  The options are:
+transport
+HH_theory
+CH_theory
+TG_theory
+S_theory
+HR_theory
+HS_theory
+control
+docstrings (not a method, instead prints the docstrings for NEOData)
+~/treg01$ pyrats_help -c neo -m transport
+0upar
+0vtor0
+1upar
+1vtor0
+GAMMA
+GAMMA_gv
+K
+PHI
+PI
+PI_gv
+Q
+Q_gv
+jboot
+k
+vpol0
 \end{verbatim}
-\noindent If there is a folder named treg01 in the home directory, this command will print out all of the variables stored in the "data" container.
 
-
+\noindent In this case, the directory treg01 contains neo, tgyro, and profiles\_gen files.  Specifying one of those codes with the -c argument then brings up the possible data containers associated with that class.  More information can be gathered about a specific data container by using the -m argument.
 
 \newpage
 

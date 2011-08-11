@@ -47,6 +47,9 @@ class GYROData:
         path = '$GACODE_ROOT/shared/python/pyrats'
         sys.path.append(expanduser(expandvars(path)))
 
+    def __dir__(self):
+        return self.loaded
+
     def init_data(self):
         """Initialize object data."""
 
