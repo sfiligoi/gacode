@@ -12,6 +12,7 @@ repo=${GYRO_REPO:-FUS023JC}
 #---------------------------
 
 nproc=${1}
+nproc=$((nproc*6))
 queue_num=${2}
 sim=${3}
 simpath=${4}
@@ -87,10 +88,16 @@ echo "#PBS -q $queue" >> $bfile
 # Max wall-clock time and number of compute cores
 echo "#PBS -l walltime=$limit,size=$cores" >> $bfile
 echo "cd \${PBS_O_WORKDIR}" >> $bfile
+#if [ "$SHELL" = "/usr/bin/env bash" ] ; then
+#   echo "export OMP_NUM_THREADS=6" >> $bfile
+#else
+#   echo "setenv OMP_NUM_THREADS 6" >> $bfile
+#fi
 echo "date" >> $bfile
 ## Node information
 ## Try running 'checkjob <jobid>' command
 #echo "/sw/xt5/bin/nodeinfo" >> $bfile
+nproc=$(($nproc/6))
 echo "$code -e $sim -n $nproc -p $simpath" >> $bfile
 
 echo "Submit your job [y,n]?"

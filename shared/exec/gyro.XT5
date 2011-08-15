@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /usr/bin/env bash
 #
 # SCRIPT:
 #  gyro.XT5
@@ -18,7 +18,7 @@
 simdir=${1}
 nproc=${2}
 exec=${3}
-  
+
 cd $simdir
 
 # NOTE:

@@ -14,6 +14,7 @@
 repo=${GYRO_REPO:-gc3}
 
 nproc=${1}
+nproc=$((nproc*6))
 queue_num=${2}
 sim=${3}
 simpath=${4}
@@ -81,7 +82,12 @@ echo "#PBS -l walltime=$limit" >> $bfile
 echo "#PBS -l mppwidth=$cores" >> $bfile
 echo "#PBS -m abe" >> $bfile
 echo "#PBS -M ${USER}@nersc.gov" >> $bfile
-
+#if [ "$SHELL" == "/bin/bash" ]; then
+#   echo "export OMP_NUM_THREADS=6" >> $bfile
+#else
+#   echo "setenv OMP_NUM_THREADS 6" >> $bfile
+#fi
+nproc=$(($nproc/6))
 gyro_opts="-e $sim -n $nproc -p $simpath"
 
 echo "$code $gyro_opts" >> $bfile 

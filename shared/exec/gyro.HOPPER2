@@ -1,7 +1,7 @@
-#!/bin/sh
+#! /usr/bin/env bash
 #
 # SCRIPT:
-#  gyro.HOPPER2 
+#  gyro.HOPPER2
 #
 # FUNCTION:
 #  Parallel execution script
@@ -26,5 +26,3 @@ cd $simdir
 #   -sn make certain job allocated all 4 compute blade NUMA nodes
 #   -cc bind processes to CPU cores
 aprun -n $nproc -ss -sn 4 -cc cpu $exec
-
-
