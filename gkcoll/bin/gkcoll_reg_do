@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  gkcoll_reg_do
+#
+# PURPOSE:
+#  Run through full suite of GKCOLL regression tests
+#----------------------------------------------------
+
+echo "Regression Testing Not Implemented"

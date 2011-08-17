@@ -1,0 +1,34 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  gkcoll_sim_warn
+#
+# FUNCTION:
+#  Check for existence of sim directory
+#-------------------------------------------------------------
+
+if [ $1 = $PWD ]
+  then
+  echo "ERROR: missing simdir"
+  exit 1
+fi
+
+if [ ! -d "$1" ]
+  then
+  echo "$1 is not a valid simulation directory."
+  echo "Please create the directory first, or use [gkcoll -g]."
+  exit 1
+fi
+
+if [ ! -f "$1/input.gkcoll" ]
+  then
+  cp $GACODE_ROOT/gkcoll/tools/input/ade_c1/input.gkcoll $1
+  echo "********************************************************"
+  echo "*                                                      *"
+  echo "*  An input.gkcoll file was not found.  One has been   *"
+  echo "*  created for you using the template in ade_c1.       *"
+  echo "*                                                      *"
+  echo "********************************************************"
+  exit 0
+fi
+
