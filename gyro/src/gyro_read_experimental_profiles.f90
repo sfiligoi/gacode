@@ -210,7 +210,7 @@ subroutine gyro_read_experimental_profiles
   call EXPRO_palloc(GYRO_COMM_WORLD,path,0)
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[read_experimental_profiles done]'
+     print *,'[gyro_read_experimental_profiles done]'
   endif
   !---------------------------------------------------------------------
 
