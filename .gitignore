@@ -42,6 +42,7 @@ Makefile.in
 .config.opts
 .config.with
 builds/
+build-par/
 config.h.in
 config/config.guess
 config/config.sub
