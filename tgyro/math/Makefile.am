@@ -15,8 +15,6 @@ libdir = $(prefix)/lib/
 noinst_LTLIBRARIES = libgacodetgyromath.la
  libgacodetgyromath_la_SOURCES = \
   ifs_pppl.f90 \
-  linint.f90 \
-  logint.f90 \
   sigv.f90 
 
 # To get to work with optimization reducing compiler wrappers
