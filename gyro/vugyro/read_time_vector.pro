@@ -2,7 +2,7 @@ pro read_time_vector
 
   common GLOBAL
 
-  file = 't.out'
+  file = 'out.gyro.t'
 
   openr,1,file,error=i_err
   if (i_err eq 0) then begin

@@ -134,11 +134,11 @@ class GYROData:
             return f
 
     def read_t(self):
-        """Read t.out to get time data."""
+        """Read out.gyro.t to get time data."""
 
         import numpy as np
 
-        t = np.loadtxt(file(self.directory_name + '/t.out'))
+        t = np.loadtxt(file(self.directory_name + '/out.gyro.t'))
         self.t['t/deltat']    = t[:, 0]
         self.t['(cbar_s/a)t'] = t[:, 1]
         self.t['n_time']      = len(t[:, 0])
@@ -242,17 +242,17 @@ class GYROData:
         geometry = self.read_file('geometry_arrays', 16)
         if len(geometry) > 0:
             temp = geometry.reshape( (11, self.profile['n_fine'], self.profile['n_x']), order='F')
-            self.geometry['v'] = temp[0, :, :]
-            self.geometry['gsin'] = temp[1, :, :]
-            self.geometry['gcos1'] = temp[2, :, :]
-            self.geometry['gcos2'] = temp[3, :, :]
-            self.geometry['usin'] = temp[4, :, :]
-            self.geometry['ucos'] = temp[5, :, :]
-            self.geometry['B'] = temp[6, :, :]
+            self.geometry['v']       = temp[0, :, :]
+            self.geometry['gsin']    = temp[1, :, :]
+            self.geometry['gcos1']   = temp[2, :, :]
+            self.geometry['gcos2']   = temp[3, :, :]
+            self.geometry['usin']    = temp[4, :, :]
+            self.geometry['ucos']    = temp[5, :, :]
+            self.geometry['B']       = temp[6, :, :]
             self.geometry['G_theta'] = temp[7, :, :]
-            self.geometry['grad_r'] = temp[8, :, :]
-            self.geometry['G_q'] = temp[9, :, :]
-            self.geometry['THETA'] = temp[10, :, :]
+            self.geometry['grad_r']  = temp[8, :, :]
+            self.geometry['G_q']     = temp[9, :, :]
+            self.geometry['THETA']   = temp[10, :, :]
 
     def read_freq(self):
         """Reads in frequency data.  Output is dictionary of numpy arrays with
@@ -260,7 +260,7 @@ class GYROData:
 
         import numpy as np
 
-        freq = np.loadtxt(file(self.directory_name + '/freq.out'))
+        freq = np.loadtxt(file(self.directory_name + '/out.gyro.freq'))
         temp = freq.reshape( (4, self.profile['n_n'], self.t['n_time']), order='F')
         self.freq['(a/c_x)w_{R,n}'] = temp[0, :, :]
         self.freq['(a/c_x)gamma_n'] = temp[1, :, :]
