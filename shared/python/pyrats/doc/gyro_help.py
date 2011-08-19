@@ -36,6 +36,9 @@ else:
         elif sys.argv[2] == 'profile':
             for key in sorted(sim.profile.keys()):
                 print key.rjust(18),type(sim.profile[key])
+        elif sys.argv[2] == 'geometry':
+            for key in sorted(sim.geometry.keys()):
+                print key.rjust(18),type(sim.geometry[key])
         elif sys.argv[2] == 'diff':
             print msg_str+n_kinetic_str+n_field_str+'2, '+n_time_str+')'
         elif sys.argv[2] == 'diff_i':
@@ -66,21 +69,6 @@ else:
             help(GYROData)
         else:
             print "Incorrect GYROData method.  The options are:"
-            print "t"
-            print "freq"
-            print "profile"
-            print "geometry"
-            print "diff"
-            print "diff_i"
-            print "diff_n"
-            print "gbflux"
-            print "gbflux_i"
-            print "gbflux_n"
-            print "moment_u"
-            print "moment_n"
-            print "moment_e"
-            print "moment_v"
-            print "moment_zero"
-            print "flux_velocity"
-            print "k_perp_squared"
-            print "docstrings (not a method, instead prints the docstrings for GYROData)"          
+            print
+            pprint.pprint(sorted(sim.__dict__.keys()))
+ 

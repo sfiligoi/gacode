@@ -75,11 +75,18 @@ tag = []
 
 # Manage species
 for i in range(n_kinetic):
+
     b[:,i+1] = flux0[i,i_moment,:]
-    if i == n_kinetic-1:
-        stag = 'elec  '
-    else:
+
+    if sim.profile['electron_method'] == 2 or  sim.profile['electron_method'] == 4:
+        if i == n_kinetic-1:
+            stag = 'elec  '
+        else:
+            stag = 'ion-'+str(i+1)+' '
+    if sim.profile['electron_method'] == 1:
         stag = 'ion-'+str(i+1)+' '
+    if sim.profile['electron_method'] == 3:
+        stag = 'elec  '
 
     line1 = line1+mtag
     line2 = line2+stag+ftag

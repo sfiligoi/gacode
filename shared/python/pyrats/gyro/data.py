@@ -42,6 +42,7 @@ class GYROData:
         self.equil_time()
         self.make_gbflux()
         self.make_diff()
+
         import sys
         from os.path import expanduser, expandvars
         path = '$GACODE_ROOT/shared/python/pyrats'
@@ -139,9 +140,9 @@ class GYROData:
         import numpy as np
 
         t = np.loadtxt(self.directory_name + '/out.gyro.t')
+        self.t['n_time']   = len(t[:,0])
         self.t['i_time']   = t[:,0]
         self.t['(c_s/a)t'] = t[:,1]
-        self.t['n_time']   = len(t[:,0])
         self.loaded.append('t')
 
     def read_freq(self):
@@ -167,7 +168,6 @@ class GYROData:
         containing necessary information."""
 
         import numpy as np
-        import math
 
         profile = np.loadtxt(self.directory_name + '/out.gyro.profile')
         self.profile['n_x'] = int(profile[0])
@@ -243,14 +243,13 @@ class GYROData:
         self.profile['z'] = profile[mark:(mark + self.profile['n_spec'])]
         self.profile['n_fine'] = int(profile[mark + self.profile['n_spec']])
         self.profile['n_moment'] = int(profile[mark + self.profile['n_spec'] + 1])
+
         if self.profile['n_theta_plot'] == 1:
-            self.profile['theta_plot'] = 0
+            self.profile['theta_plot'] = 0.0
         else:
-            temp = []
-            for k in range(self.profile['n_theta_plot']):
-                temp.append(-math.pi + 2*math.pi*k/float(self.profile['n_theta_plot']))
-            self.profile['theta_plot'] = temp
-                
+            n_theta = self.profile['n_theta_plot']
+            self.profile['theta_plot'] = -np.pi+2*np.pi*np.arange(n_theta)/float(n_theta)
+
 
     def read_geometry(self):
         """Reads in geometry_array data.  Output is dictionary of numpy arrays
@@ -459,7 +458,7 @@ class GYROData:
             if item == 't':
                 temp.append(self.t['n_time'])
             elif item == 'freq':
-                temp.append(len(self.freq['(a/c_s)w'][...,:]))
+                temp.append(len(self.freq['(a/c_s)w'][-1]))
             else:
                 temp.append(len(eval('self.' + item).T))
 
