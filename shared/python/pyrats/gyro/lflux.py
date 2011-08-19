@@ -1,36 +1,73 @@
+"""This file is executed by the bash script gyro_plot when a listing of the
+fluxes is requested."""
+
 from pyrats.gyro.data import GYROData
 import sys
 import numpy as np
 
-verbose = bool(int(sys.argv[2]))
-sim1 = GYROData(sys.argv[1])
-n = int(sys.argv[3])-1
+sim       = GYROData(sys.argv[1])
+field     = sys.argv[2]
+i_moment  = int(sys.argv[3])
 
-sim1.make_gbflux()
-temp = np.sum(sim1.gbflux, axis=1)
+n_field   = int(sim.profile['n_field'])
+n_kinetic = int(sim.profile['n_kinetic'])
 
-if n > int(sim1.profile['n_spec']):
-    print "Warning: Max number of species is " + str(int(sim1.profile['n_spec'])) + ".",
-    print " Changing number of species to " + str(int(sim1.profile['n_spec']))
-    n = int(sim1.profile['n_spec']) - 1
+sim.make_gbflux()
 
-if verbose:
-    print
-    print "Gyrobohm-normalized particle and energy flux:"
-    print
-    print "      TIME  ",
-    for a in range(n):
-        print "   |   PARTICLE FLUX SPE " + str(a) + "   |    ENERGY FLUX SPE " + str(a),
-    print "   |   PARTICLE FLUX SPE " + str(n) + "   |    ENERGY FLUX SPE " + str(n)    
-    for i in range(len(temp[0, 0, :])):
-        print repr(i).rjust(15), '|',
-        for a in range(n):
-            print repr(temp[a, 0, i]).ljust(23), '|', repr(temp[a, 1, i]).ljust(23), '|',
-        print repr(temp[n, 0, i]).ljust(23), '|', repr(temp[n, 1, i]).ljust(23)
+t    = sim.t['(cbar_s/a)t']
+flux = sim.gbflux
+
+# b is collection of all arrays to be plotted
+b = np.zeros((len(t),n_kinetic+1))
+
+b[:,0] = t
+
+# Manage field
+if field == 's':
+    flux0 = np.sum(flux,axis=1)
+    ftag = 'TOT   '
 else:
-    print
-    print "Gyrobohm-normalized energy flux for species zero:"
-    print
-    print "      TIME      |       ENERGY FLUX"
-    for i in range(len(temp[0, 0, :])):
-        print repr(i).rjust(15), '|', repr(temp[0, 1, i]).ljust(23)
+    i_field = int(field)
+    flux0 = flux[:,i_field,:,:]
+    if i_field == 0: 
+        ftag = 'ES    '
+    if i_field == 1: 
+        ftag = 'EM    '
+    if i_field == 2: 
+        ftag = 'COM   '
+
+# Manage moment
+if i_moment == 0: 
+    mtag = 'GAMMA [GB]  '
+if i_moment == 1: 
+    mtag = 'Q [GB]      '
+if i_moment == 2: 
+    mtag = 'PI [GB]     '
+if i_moment == 3: 
+    mtag = 'S [GB]      '
+
+ul = '----------  '
+
+line1 = '                '
+line2 = '    (cs/a)t     '
+line3 = '    '+ul
+
+# Manage species
+for i in range(n_kinetic):
+    b[:,i+1] = flux0[i,i_moment,:]
+    if i == n_kinetic-1:
+        stag = 'elec  '
+    else:
+        stag = 'ion-'+str(i)+' '
+
+    line1 = line1+mtag
+    line2 = line2+stag+ftag
+    line3 = line3+ul
+
+np.set_printoptions(precision=3,suppress=False,threshold=100000)
+
+print line1
+print line2
+print line3
+print b
+

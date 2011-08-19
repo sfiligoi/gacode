@@ -133,16 +133,15 @@ class GYROData:
             print "Warning: File " + fname + " does not exist."
             return f
 
-
     def read_t(self):
         """Read t.out to get time data."""
 
         import numpy as np
 
         t = np.loadtxt(file(self.directory_name + '/t.out'))
-        self.t['t/deltat'] = t[:, 0]
+        self.t['t/deltat']    = t[:, 0]
         self.t['(cbar_s/a)t'] = t[:, 1]
-        self.t['n_time'] = len(t[:, 0])
+        self.t['n_time']      = len(t[:, 0])
 
     def read_profile(self):
         """Read out.gyro.profile to get control data.  Output is dictionary
