@@ -100,6 +100,6 @@ if imin == len(t)-1:
 else:
     print 'Average Window:',str(t[imin])+' < (c_s/a) t < '+str(t[-1])
     print
-    print tag[0],average(b[:,1],t,window)
-    print tag[1],average(b[:,2],t,window)
+    for i in range(n_kinetic):
+        print tag[i],average(b[:,i+1],t,window)
 
