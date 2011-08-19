@@ -33,15 +33,11 @@ window    = float(sys.argv[4])
 n_field   = int(sim.profile['n_field'])
 n_kinetic = int(sim.profile['n_kinetic'])
 
-sim.make_gbflux()
-
 t    = sim.t['(cbar_s/a)t']
 flux = sim.gbflux
 
-n  = len(t)
-
 # b is collection of all arrays to be plotted
-b = np.zeros((n,n_kinetic+1))
+b = np.zeros((len(t),n_kinetic+1))
 
 b[:,0] = t
 
@@ -97,9 +93,19 @@ print line2
 print line3
 print b
 
+# Determine tmin
+imin=0
+for i in range(len(t)):
+    if t[i] < (1.0-window)*t[len(t)-1]:
+        imin = i+1
+
 print
-print 'Average Window:',str((1.0-window)*t[n-1])+' < (c_s/a) t < '+str(t[n-1])
-print
-print tag[0],average(b[:,1],t,window)
-print tag[1],average(b[:,2],t,window)
+
+if imin == len(t)-1:
+    print "Averaging Window too small." 
+else:
+    print 'Average Window:',str(t[imin])+' < (c_s/a) t < '+str(t[-1])
+    print
+    print tag[0],average(b[:,1],t,window)
+    print tag[1],average(b[:,2],t,window)
 

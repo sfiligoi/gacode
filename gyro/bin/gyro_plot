@@ -23,9 +23,9 @@ then
   echo "          -e <simdir>"
   echo "          Use data in <simdir>."
   echo 
-  echo "          -plot"
-  echo "          Generate plot of flux (or diffusivity)."
-  echo "          By default, data will be listed to the screen."
+  echo "          -f <filetype>"
+  echo "          Output file type."
+  echo "           <filetype>=emf, eps, pdf, png, ps, raw, rgba, svg, svgz"
   echo 
   echo "          -diff"
   echo "          List gyroBohm diffusivity rather than flux coefficients."
@@ -43,6 +43,11 @@ then
   echo "          -w <fraction>"
   echo "          Fraction of time record to use for average (default=0.8)."
   echo
+  echo "          -plot <type>"
+  echo "          Generate plot of given type."
+  echo "          If this keyword is omitted, data will be listed to the screen."
+  echo "            type> = gbflux,gbflux_n"
+  echo
   echo "Example:"
   echo
   echo "   gyro_plot -e ."
@@ -58,11 +63,13 @@ fi
 # Default simulation directory
 SIMROOT=$PWD
 PLOT_FLAG=0
+PLOT_TYPE=gbflux
 DIFF_FLAG=0
 I_KINETIC=0
 I_FIELD="s"
 I_MOMENT=1
 WINDOW=0.8
+FTYPE=screen
 #==============================================================================
 
 #==============================================================================
@@ -71,7 +78,7 @@ WINDOW=0.8
 while [ $# -gt 0 ] ; do
   case "$1" in
 
-  -plot) PLOT_FLAG=1 ;;
+  -plot) shift ; PLOT_FLAG=1 ; PLOT_TYPE=$1 ;;
 
   -diff) DIFF_FLAG=1 ;;
   
@@ -87,6 +94,8 @@ while [ $# -gt 0 ] ; do
 
   -w) shift ; WINDOW=$1 ;;
 
+  -f) shift ; FTYPE=$1 ;;
+
   *) echo "ERROR: incorrect gyro syntax." ; exit 1 ;;
 
   esac
@@ -100,25 +109,37 @@ then
    cd .. ; SIMROOT=$PWD
 fi
 SIMDIR=$SIMROOT/$LOCDIR
+cd $SIMDIR
 
 #==============================================================================
 # Display diff if -ldiff set, then exit.
 #
+PYROOT=$GACODE_ROOT/shared/python/pyrats/gyro
+
 if [ $PLOT_FLAG -eq 0 ]
 then
 
    if [ $DIFF_FLAG -eq 1 ]
    then
-      python ~/gacode/shared/python/pyrats/gyro/ldiff.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW
+      python $PYROOT/ldiff.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW
       exit 0
    else
-      python ~/gacode/shared/python/pyrats/gyro/lflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW
+      python $PYROOT/lflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW
       exit 0
    fi
 
 else
 
-   python ~/gacode/shared/python/pyrats/gyro/gbflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW &
+   case "$PLOT_TYPE" in
+
+      gbflux)  
+	   python $PYROOT/gbflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE & ;;
+
+      gbflux_n) 
+	   python $PYROOT/gbflux_n.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE & ;;
+   
+   esac 
+
    exit 0
 
 fi
