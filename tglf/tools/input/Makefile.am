@@ -9,9 +9,12 @@
 
 ## ############################################################
 
-SUBDIRS= bin python src tools 
+SUBDIRS= \
+  tglf01 \
+  tglf02
 
-libdir = $(prefix)/lib
+EXTRA_DIST = simdir_list
+
 
 MAINTAINERCLEANFILES    = Makefile.in 
 

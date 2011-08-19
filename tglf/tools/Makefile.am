@@ -9,9 +9,8 @@
 
 ## ############################################################
 
-SUBDIRS= bin python src tools 
+SUBDIRS= input
 
-libdir = $(prefix)/lib
 
 MAINTAINERCLEANFILES    = Makefile.in 
 

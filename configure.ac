@@ -220,6 +220,10 @@ AC_CONFIG_FILES([Makefile
     tglf/bin/Makefile
     tglf/python/Makefile
     tglf/src/Makefile
+    tglf/tools/Makefile
+    tglf/tools/input/Makefile
+    tglf/tools/input/tglf01/Makefile
+    tglf/tools/input/tglf02/Makefile
     tgyro/Makefile
     tgyro/bin/Makefile
     tgyro/math/Makefile
