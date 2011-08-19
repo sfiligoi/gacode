@@ -3,11 +3,32 @@ fluxes is requested."""
 
 from pyrats.gyro.data import GYROData
 import sys
+import string
 import numpy as np
 
+#---------------------------------------------------------------
+def average(f,t,window):
+ 
+    n_time = len(t)
+    tmin = (1.0-window)*t[n_time-1]
+    tmax = t[n_time-1]
+
+    t_window = 0.0
+    ave      = 0.0
+    for i in range(n_time-1):
+        if t[i] > tmin: 
+            ave = ave+0.5*(f[i]+f[i+1])*(t[i+1]-t[i])
+            t_window = t_window+t[i+1]-t[i]
+
+    ave = ave/t_window
+
+    return ave
+#---------------------------------------------------------------
+ 
 sim       = GYROData(sys.argv[1])
 field     = sys.argv[2]
 i_moment  = int(sys.argv[3])
+window    = float(sys.argv[4])
 
 n_field   = int(sim.profile['n_field'])
 n_kinetic = int(sim.profile['n_kinetic'])
@@ -17,8 +38,10 @@ sim.make_gbflux()
 t    = sim.t['(cbar_s/a)t']
 flux = sim.gbflux
 
+n  = len(t)
+
 # b is collection of all arrays to be plotted
-b = np.zeros((len(t),n_kinetic+1))
+b = np.zeros((n,n_kinetic+1))
 
 b[:,0] = t
 
@@ -52,17 +75,20 @@ line1 = '                '
 line2 = '    (cs/a)t     '
 line3 = '    '+ul
 
+tag = []
+
 # Manage species
 for i in range(n_kinetic):
     b[:,i+1] = flux0[i,i_moment,:]
     if i == n_kinetic-1:
         stag = 'elec  '
     else:
-        stag = 'ion-'+str(i)+' '
+        stag = 'ion-'+str(i+1)+' '
 
     line1 = line1+mtag
     line2 = line2+stag+ftag
     line3 = line3+ul
+    tag.append(string.strip(mtag)+' '+stag+string.strip(ftag)+': ')
 
 np.set_printoptions(precision=3,suppress=False,threshold=100000)
 
@@ -70,4 +96,10 @@ print line1
 print line2
 print line3
 print b
+
+print
+print 'Average Window:',str((1.0-window)*t[n-1])+' < (c_s/a) t < '+str(t[n-1])
+print
+print tag[0],average(b[:,1],t,window)
+print tag[1],average(b[:,2],t,window)
 
