@@ -25,9 +25,9 @@ class GYROData:
     Example Usage:
         >>> from pyrats.gyro.data import GYROData
         >>> import matplotlib.pyplot as plt
-        >>> sim1 = GYROData('example_directory')
-        >>> sim1.make_gbflux()
-        >>> plt.plot(sim1.gbflux()[0][0][1])
+        >>> sim = GYROData('example_directory')
+        >>> sim.make_gbflux()
+        >>> plt.plot(sim.gbflux()[0][0][1])
         >>> plt.show()
     """
 
@@ -103,7 +103,7 @@ class GYROData:
         self.read_profile()
         self.read_geometry()
         self.read_t()
-        #self.read_freq()
+        self.read_freq()
         self.read_gbflux_i()
         self.read_gbflux_n()
         #self.read_moment_u()
@@ -138,10 +138,29 @@ class GYROData:
 
         import numpy as np
 
-        t = np.loadtxt(file(self.directory_name + '/out.gyro.t'))
-        self.t['t/deltat']    = t[:, 0]
-        self.t['(cbar_s/a)t'] = t[:, 1]
-        self.t['n_time']      = len(t[:, 0])
+        t = np.loadtxt(self.directory_name + '/out.gyro.t')
+        self.t['i_time']   = t[:,0]
+        self.t['(c_s/a)t'] = t[:,1]
+        self.t['n_time']   = len(t[:,0])
+        self.loaded.append('t')
+
+    def read_freq(self):
+        """Reads in frequency data.  Output is dictionary of numpy arrays with
+        dimensions: n_n x n_time"""
+
+        import numpy as np
+        import os.path
+
+        ifile = self.directory_name+'/out.gyro.freq'
+
+        if os.path.isfile(ifile):
+            freq = np.loadtxt(ifile)
+            temp = freq.reshape( (4, self.profile['n_n'], self.t['n_time']), order='F')
+            self.freq['(a/c_s)w']        = temp[0,:,:]
+            self.freq['(a/c_s)gamma']    = temp[1,:,:]
+            self.freq['err(a/c_s)w']     = temp[2,:,:]
+            self.freq['err(a/c_s)gamma'] = temp[3,:,:]
+            self.loaded.append('freq')
 
     def read_profile(self):
         """Read out.gyro.profile to get control data.  Output is dictionary
@@ -253,20 +272,6 @@ class GYROData:
             self.geometry['grad_r']  = temp[8, :, :]
             self.geometry['G_q']     = temp[9, :, :]
             self.geometry['THETA']   = temp[10, :, :]
-
-    def read_freq(self):
-        """Reads in frequency data.  Output is dictionary of numpy arrays with
-        dimensions: n_n x n_time"""
-
-        import numpy as np
-
-        freq = np.loadtxt(file(self.directory_name + '/out.gyro.freq'))
-        temp = freq.reshape( (4, self.profile['n_n'], self.t['n_time']), order='F')
-        self.freq['(a/c_x)w_{R,n}'] = temp[0, :, :]
-        self.freq['(a/c_x)gamma_n'] = temp[1, :, :]
-        self.freq['errorin(a/c_x)w_{R,n}'] = temp[2, :, :]
-        self.freq['errorin(a/c_x)gamma_n'] = temp[3, :, :]
-        self.loaded.append('freq')
 
     def read_gbflux_i(self):
         """Reads in gbflux_i data.  Output is numpy array with dimensions:
@@ -449,59 +454,44 @@ class GYROData:
         import numpy as np
 
         temp = []
+
         for item in self.loaded:
             if item == 't':
                 temp.append(self.t['n_time'])
+            elif item == 'freq':
+                temp.append(len(self.freq['(a/c_s)w'][...,:]))
             else:
                 temp.append(len(eval('self.' + item).T))
+
         cutoff = min(temp)
+
         for item in self.loaded:
+
             if item == 't':
-                self.t['t/deltat'] = np.delete(self.t['t/deltat'],
-                                               np.s_[cutoff:self.t['n_time']:1],
-                                               axis=-1)
-                self.t['(cbar_s/a)t'] = np.delete(self.t['(cbar_s/a)t'],
-                                                  self.t['n_time']-cutoff,
-                                                  axis=-1)
-                self.t['n_time'] = cutoff
+                n = self.t['n_time']
+                self.t['i_time']   = self.t['i_time'][...,0:cutoff]
+                self.t['(c_s/a)t'] = self.t['(c_s/a)t'][...,0:cutoff]
+                self.t['n_time']   = cutoff
             elif item == 'freq':
-                self.freq['(a/c_x)w_{R,n}'] = np.delete(self.freq['(a/c_x)w_{R,n}'], np.s_[cutoff:len(self.freq['(a/c_x)w_{R,n}'].T):1], axis=-1)
-                self.freq['(a/c_x)gamma_n'] = temp[1, :, :]
-                self.freq['errorin(a/c_x)w_{R,n}'] = temp[2, :, :]
-                self.freq['errorin(a/c_x)gamma_n'] = temp[3, :, :]
+                self.freq['(a/c_s)w']        = self.freq['(a/c_s)w'][...,0:cutoff]
+                self.freq['(a/c_s)gamma']    = self.freq['(a/c_s)gamma'][...,0:cutoff]
+                self.freq['err(a/c_s)w']     = self.freq['err(a/c_s)w'][...,0:cutoff]
+                self.freq['err(a/c_s)gamma'] = self.freq['err(a/c_s)gamma'][...,0:cutoff]
             elif item == 'gbflux_i':
-                self.gbflux_i = np.delete(self.gbflux_i,
-                                          np.s_[cutoff:len(self.gbflux_i.T):1],
-                                          axis=-1)
+                self.gbflux_i = self.gbflux_i[...,0:cutoff] 
             elif item == 'gbflux_n':
-                self.gbflux_n = np.delete(self.gbflux_n,
-                                          np.s_[cutoff:len(self.gbflux_n.T):1],
-                                          axis=-1)
+                self.gbflux_n = self.gbflux_n[...,0:cutoff]
             elif item == 'moment_u':
-                self.moment_u = np.delete(self.moment_u,
-                                          np.s_[cutoff:len(self.moment_u.T):1],
-                                          axis=-1)
+                self.moment_u = self.moment_u[...,0:cutoff]
             elif item == 'moment_n':
-                self.moment_n = np.delete(self.moment_n,
-                                          np.s_[cutoff:len(self.moment_n.T):1],
-                                          axis=-1)
+                self.moment_n = self.moment_n[...,0:cutoff]
             elif item == 'moment_e':
-                self.moment_e = np.delete(self.moment_e,
-                                          np.s_[cutoff:len(self.moment_e.T):1],
-                                                axis=-1)
+                self.moment_e = self.moment_e[...,0:cutoff]
             elif item == 'moment_v':
-                self.moment_v = np.delete(self.moment_v,
-                                          np.s_[cutoff:len(self.moment_v.T):1],
-                                                axis=-1)
+                self.moment_v = self.moment_v[...,0:cutoff]
             elif item == 'moment_zero':
-                self.moment_zero = np.delete(self.moment_zero,
-                                       np.s_[cutoff:len(self.moment_zero.T):1],
-                                             axis=-1)
+                self.moment_zero = self.moment_zero[...,0:cutoff]
             elif item == 'flux_velocity':
-                self.flux_velocity = np.delete(self.flux_velocity,
-                                     np.s_[cutoff:len(self.flux_velocity.T):1],
-                                               axis=-1)
+                self.flux_velocity = self.flux_velocity[...,0:cutoff]
             elif item == 'k_perp_squared':
-                self.k_perp_squared = np.delete(self.k_perp_squared,
-                                    np.s_[cutoff:len(self.k_perp_squared.T):1],
-                                                axis=-1)
+                self.k_perp_squared = self.k_perp_squared[...,0:cutoff]

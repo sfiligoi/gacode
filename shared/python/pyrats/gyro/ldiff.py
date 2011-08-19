@@ -33,7 +33,7 @@ window    = float(sys.argv[4])
 n_field   = int(sim.profile['n_field'])
 n_kinetic = int(sim.profile['n_kinetic'])
 
-t    = sim.t['(cbar_s/a)t']
+t    = sim.t['(c_s/a)t']
 flux = sim.diff
 
 # b is collection of all arrays to be plotted

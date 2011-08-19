@@ -17,11 +17,11 @@ ax = fig.add_subplot(121)
 #gbflux: n_kinetic x n_field x 4 x n_time
  
 # ions
-a=ax.plot(sim1.t['(cbar_s/a)t'],sim1.gbflux[0, 0, 1, :], 'k')
-b=ax.plot(sim2.t['(cbar_s/a)t'],sim2.gbflux[0, 0, 1, :], 'k--')
+a=ax.plot(sim1.t['(c_s/a)t'],sim1.gbflux[0, 0, 1, :], 'k')
+b=ax.plot(sim2.t['(c_s/a)t'],sim2.gbflux[0, 0, 1, :], 'k--')
 # electrons
-c=ax.plot(sim1.t['(cbar_s/a)t'],sim1.gbflux[1, 0, 1, :], 'b')
-d=ax.plot(sim2.t['(cbar_s/a)t'],sim2.gbflux[1, 0, 1, :], 'b--')
+c=ax.plot(sim1.t['(c_s/a)t'],sim1.gbflux[1, 0, 1, :], 'b')
+d=ax.plot(sim2.t['(c_s/a)t'],sim2.gbflux[1, 0, 1, :], 'b--')
 ax.set_xlabel(r'$(c_s/a)t$',size=16)
 ax.legend((a,b,c,d),(r'$Q_i^{(1)}$',
                      r'$Q_i^{(2)}$',

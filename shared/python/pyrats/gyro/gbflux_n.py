@@ -36,7 +36,7 @@ n_field   = int(sim.profile['n_field'])
 n_kinetic = int(sim.profile['n_kinetic'])
 n_n       = int(sim.profile['n_n'])
 
-t    = sim.t['(cbar_s/a)t']
+t    = sim.t['(c_s/a)t']
 flux = sim.gbflux_n
 
 # Manage field
