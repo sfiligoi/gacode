@@ -39,6 +39,8 @@ else:
         elif sys.argv[2] == 'geometry':
             for key in sorted(sim.geometry.keys()):
                 print key.rjust(18),type(sim.geometry[key])
+        elif sys.argv[2] == 'loaded':
+                print sim.loaded
         elif sys.argv[2] == 'diff':
             print msg_str+n_kinetic_str+n_field_str+'2, '+n_time_str+')'
         elif sys.argv[2] == 'diff_i':
