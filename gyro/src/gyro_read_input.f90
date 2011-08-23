@@ -234,6 +234,7 @@ subroutine gyro_read_input
   call readbc_real(geo_betaprime_scale)
   call readbc_int(poisson_z_eff_flag)
   call readbc_int(z_eff_method)
+  call readbc_int(reintegrate_flag)
 
   ! GK eigenvalue solver inputs
   call readbc_int(gkeigen_proc_mult)

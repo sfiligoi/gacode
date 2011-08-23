@@ -117,6 +117,7 @@ module gyro_interface
   real    :: gyro_ti_over_te_3_in = 1.0
   real    :: gyro_ti_over_te_4_in = 1.0
   real    :: gyro_ti_over_te_5_in = 1.0
+  integer :: gyro_reintegrate_flag_in = 0
   real    :: gyro_eps_dlnndr_in = 0.0
   real    :: gyro_eps_dlnndr_2_in = 0.0
   real    :: gyro_eps_dlnndr_3_in = 0.0
@@ -344,6 +345,7 @@ contains
     gyro_ti_over_te_3_in = t_vec(3)
     gyro_ti_over_te_4_in = t_vec(4)
     gyro_ti_over_te_5_in = t_vec(5)
+    gyro_reintegrate_flag_in = reintegrate_flag
     gyro_eps_dlnndr_in = eps_dlnndr_vec(1)
     gyro_eps_dlnndr_2_in = eps_dlnndr_vec(2)
     gyro_eps_dlnndr_3_in = eps_dlnndr_vec(3)
@@ -558,6 +560,7 @@ contains
     t_vec(3) = gyro_ti_over_te_3_in
     t_vec(4) = gyro_ti_over_te_4_in
     t_vec(5) = gyro_ti_over_te_5_in
+    reintegrate_flag = gyro_reintegrate_flag_in
     eps_dlnndr_vec(1) = gyro_eps_dlnndr_in
     eps_dlnndr_vec(2) = gyro_eps_dlnndr_2_in
     eps_dlnndr_vec(3) = gyro_eps_dlnndr_3_in

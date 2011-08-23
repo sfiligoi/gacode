@@ -130,6 +130,7 @@ subroutine gyro_dump_input
      call dumpRealVar(funit,gunit," t_vec(3) ", t_vec(3) )
      call dumpRealVar(funit,gunit," t_vec(4) ", t_vec(4) )
      call dumpRealVar(funit,gunit," t_vec(5) ", t_vec(5) )
+     call dumpIntVar(funit,gunit,"reintegrate_flag",reintegrate_flag)
      call dumpRealVar(funit,gunit," eps_dlnndr_vec(1) ", eps_dlnndr_vec(1) )
      call dumpRealVar(funit,gunit," eps_dlnndr_vec(2) ", eps_dlnndr_vec(2) )
      call dumpRealVar(funit,gunit," eps_dlnndr_vec(3) ", eps_dlnndr_vec(3) )

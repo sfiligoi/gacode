@@ -125,6 +125,7 @@ subroutine gyro_input_check
   call checkrealvar(funit," t_vec(3) ", t_vec(3) )
   call checkrealvar(funit," t_vec(4) ", t_vec(4) )
   call checkrealvar(funit," t_vec(5) ", t_vec(5) )
+  call checkintvar(funit,"reintegrate_flag",reintegrate_flag)
   call checkrealvar(funit," eps_dlnndr_vec(1) ", eps_dlnndr_vec(1) )
   call checkrealvar(funit," eps_dlnndr_vec(2) ", eps_dlnndr_vec(2) )
   call checkrealvar(funit," eps_dlnndr_vec(3) ", eps_dlnndr_vec(3) )
