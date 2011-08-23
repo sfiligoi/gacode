@@ -40,7 +40,7 @@ subroutine gyro_write_timedata
   ! Timestep data:
   !
   if (i_proc == 0) then
-     call write_step(trim(path)//'t.out',1)
+     call write_step(trim(path)//'out.gyro.t',1)
   endif
   !---------------------------------------------------
 
@@ -72,7 +72,7 @@ subroutine gyro_write_timedata
      ! PARALLEL ELECTRIC FIELD
 
      call write_distributed_complex(&
-          trim(path)//'epar.out',&
+          trim(path)//'out.gyro.moment_epar',&
           10,&
           size(phi_plot(:,:,n_field+1)),&
           phi_plot(:,:,n_field+1))
@@ -181,26 +181,26 @@ subroutine gyro_write_timedata
      ! BEGIN LINEAR 
      !=============
 
-     call write_freq(trim(path)//'freq.out',10)
+     call write_freq(trim(path)//'out.gyro.freq',10)
 
      if (plot_u_flag == 1) then        
 
         ! PHI
-        call gyro_ballooning_mode(trim(path)//'balloon_phi.out',10,1,0)
+        call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_phi',10,1,0)
 
         if (n_field > 1) then
            ! A_PARALLEL 
-           call gyro_ballooning_mode(trim(path)//'balloon_a.out',10,2,0)
+           call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_a',10,2,0)
         endif
 
         if (n_field > 2) then
            ! B_PARALLEL 
-           call gyro_ballooning_mode(trim(path)//'balloon_aperp.out',10,3,0)
+           call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_aperp',10,3,0)
         endif
 
         ! E_PARALLEL
         if (eparallel_plot_flag == 1) then
-           call gyro_ballooning_mode(trim(path)//'balloon_epar.out',10,n_field+1,0)
+           call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_epar',10,n_field+1,0)
         endif
 
      endif
@@ -209,10 +209,10 @@ subroutine gyro_write_timedata
 
         ! DENSITY
         if (electron_method /= 3) then
-           call gyro_ballooning_mode(trim(path)//'balloon_n_ion.out',10,5,1)
+           call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_n_ion',10,5,1)
         endif
         if (electron_method > 1) then 
-           call gyro_ballooning_mode(trim(path)//'balloon_n_elec.out',10,5,indx_e)
+           call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_n_elec',10,5,indx_e)
         endif
      endif
 
@@ -220,10 +220,10 @@ subroutine gyro_write_timedata
 
         ! ENERGY
         if (electron_method /= 3) then
-           call gyro_ballooning_mode(trim(path)//'balloon_e_ion.out',10,6,1)
+           call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_e_ion',10,6,1)
         endif
         if (electron_method > 1) then 
-           call gyro_ballooning_mode(trim(path)//'balloon_e_elec.out',10,6,indx_e)
+           call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_e_elec',10,6,indx_e)
         endif
      endif
 
@@ -231,10 +231,10 @@ subroutine gyro_write_timedata
 
         ! ENERGY
         if (electron_method /= 3) then
-           call gyro_ballooning_mode(trim(path)//'balloon_v_ion.out',10,7,1)
+           call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_v_ion',10,7,1)
         endif
         if (electron_method > 1) then 
-           call gyro_ballooning_mode(trim(path)//'balloon_v_elec.out',10,7,indx_e)
+           call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_v_elec',10,7,indx_e)
         endif
      endif
 
@@ -242,7 +242,7 @@ subroutine gyro_write_timedata
      ! Distribution function data:
      !
      if (n_proc == 1 .and. n_n == 1 .and. dist_print == 1) then
-        call write_h(trim(path)//'hp.out',trim(path)//'ht.out',10,11)
+        call write_h(trim(path)//'out.gyro.hp',trim(path)//'out.gyro.ht',10,11)
      endif
      !-----------------------------------------------------------------
 
@@ -285,13 +285,13 @@ subroutine gyro_write_timedata
              diff_n)
 
         call write_distributed_real(&
-             trim(path)//'phi_squared_QL_n.out',&
+             trim(path)//'out.gyro.phi_squared_QL_n',&
              10,&
              size(phi_squared_QL_n),&
              phi_squared_QL_n)
 
         call write_distributed_real(&
-             trim(path)//'g_squared_QL_n.out',&
+             trim(path)//'out.gyro.g_squared_QL_n',&
              10,&
              size(g_squared_QL_n),&
              g_squared_QL_n)
@@ -330,12 +330,12 @@ subroutine gyro_write_timedata
 
      if (lindiff_method >= 4) then
         call write_distributed_real(&
-             trim(path)//'phi_squared_QL_n.out',&
+             trim(path)//'out.gyro.phi_squared_QL_n',&
              10,&
              size(phi_squared_QL_n),&
              phi_squared_QL_n)
         call write_distributed_real(&
-             trim(path)//'g_squared_QL_n.out',&
+             trim(path)//'out.gyro.g_squared_QL_n',&
              10,&
              size(g_squared_QL_n),&
              g_squared_QL_n)

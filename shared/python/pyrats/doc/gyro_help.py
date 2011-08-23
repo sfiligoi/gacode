@@ -1,80 +1,76 @@
 """This script gives help for the requested GYROData data object."""
 
 import sys
+import pprint
 from pyrats.gyro.data import GYROData
 
 if len(sys.argv) == 1:
     print "Please specify a directory containing GYRO files."
 else:
-    sim1 = GYROData(sys.argv[1])
+    sim = GYROData(sys.argv[1])
     if len(sys.argv) == 2:
         print "Please specify a GYROData method.  The options are:"
-        print "t"
-        print "freq"
-        print "diff"
-        print "diff_i"
-        print "diff_n"
-        print "gbflux"
-        print "gbflux_i"
-        print "gbflux_n"
-        print "moment_u"
-        print "moment_n"
-        print "moment_e"
-        print "moment_v"
-        print "moment_zero"
-        print "flux_velocity"
-        print "k_perp_squared"
-        print "docstrings (not a method, instead prints the docstrings for GYROData)"
+        print
+        pprint.pprint(sorted(sim.__dict__.keys()))
+
     else:
+
+        msg_str       = 'Array has dimensions: '
+        n_kinetic_str = 'n_kinetic='    + str(sim.profile['n_kinetic'])    +', '
+        n_field_str   = 'n_field='      + str(sim.profile['n_field'])      +', '
+        n_x_str       = 'n_x='          + str(sim.profile['n_x'])          +', '
+        n_n_str       = 'n_n='          + str(sim.profile['n_n'])          +', '
+        n_theta_str   = 'n_theta_plot=' + str(sim.profile['n_theta_plot']) +', '
+        n_kinetic_str = 'n_kinetic='    + str(sim.profile['n_kinetic'])    +', '
+        n_energy_str  = 'n_energy='     + str(sim.profile['n_energy'])     +', '
+        n_lambda_str  = 'n_lambda='     + str(sim.profile['n_lambda'])     +', '
+
+        n_time_str    = 'n_time='    + str(sim.t['n_time'])
+
         if sys.argv[2] == 't':
-            for key in sorted(sim1.t.keys()):
-                print key
+            for key in sorted(sim.t.keys()):
+                print key.rjust(16),type(sim.t[key])
         elif sys.argv[2] == 'freq':
-            for key in sorted(sim1.freq.keys()):
-                print key
+            for key in sorted(sim.freq.keys()):
+                print key.rjust(16),type(sim.freq[key])
+        elif sys.argv[2] == 'profile':
+            for key in sorted(sim.profile.keys()):
+                print key.rjust(18),type(sim.profile[key])
+        elif sys.argv[2] == 'geometry':
+            for key in sorted(sim.geometry.keys()):
+                print key.rjust(18),type(sim.geometry[key])
+        elif sys.argv[2] == 'loaded':
+                print sim.loaded
         elif sys.argv[2] == 'diff':
-            print "Array has dimensions of: (n_kinetic=" + str(sim1.profile['n_kinetic']) + ", n_field=" + str(sim1.profile['n_field']) + ", 2, n_time=" + str(sim1.t['n_time']) + ")"
+            print msg_str+n_kinetic_str+n_field_str+'2, '+n_time_str+')'
         elif sys.argv[2] == 'diff_i':
-            print "Array has dimensions of: (n_kinetic=" + str(sim1.profile['n_kinetic']) + ", n_field=" + str(sim1.profile['n_field']) + ", 2, n_x=" + str(sim1.profile['n_x']) + ", n_time=" + str(sim1.t['n_time']) + ")"
+            print msg_str+n_kinetic_str+n_field_str+'2, '+n_x_str+n_time_str+')'
         elif sys.argv[2] == 'diff_n':
-            print "Array has dimensions of: (n_kinetic=" + str(sim1.profile['n_kinetic']) + ", n_field=" + str(sim1.profile['n_field']) + ", 2, n_n=" + str(sim1.profile['n_n']) + ", n_time=" + str(sim1.t['n_time']) + ")"
+            print msg_str+n_kinetic_str+n_field_str+'2, '+n_n_str+n_time_str+')'
         elif sys.argv[2] == 'gbflux':
-            print "Array has dimensions of: (n_kinetic=" + str(sim1.profile['n_kinetic']) + ", n_field=" + str(sim1.profile['n_field']) + ", 4, n_time=" + str(sim1.t['n_time']) + ")"
+            print msg_str+n_kinetic_str+n_field_str+'4, '+n_time_str+')'
         elif sys.argv[2] == 'gbflux_i':
-            print "Array has dimensions of: (n_kinetic=" + str(sim1.profile['n_kinetic']) + ", n_field=" + str(sim1.profile['n_field']) + ", 4, n_x=" + str(sim1.profile['n_x']) + ", n_time=" + str(sim1.t['n_time']) + ")"
+            print msg_str+n_kinetic_str+n_field_str+'4, '+n_x_str+n_time_str+')'           
         elif sys.argv[2] == 'gbflux_n':
-            print "Array has dimensions of: (n_kinetic=" + str(sim1.profile['n_kinetic']) + ", n_field=" + str(sim1.profile['n_field']) + ", 4, n_n=" + str(sim1.profile['n_n']) + ", n_time=" + str(sim1.t['n_time']) + ")"
+            print msg_str+n_kinetic_str+n_field_str+'4, '+n_n_str+n_time_str+')'         
         elif sys.argv[2] == 'moment_u':
-            print "Array has dimensions of: (n_theta_plot=" + str(sim1.profile['n_theta_plot']) + ", n_x=" + str(sim1.profile['n_x']) + ", n_field=" + str(sim1.profile['n_field']) + ", n_n=" + str(sim1.profile['n_n']) + ", n_time=" + str(sim1.t['n_time']) + ")"
+            print msg_str+n_theta_str+n_x_str+n_field_str+n_n_str+n_time_str+')'
         elif sys.argv[2] == 'moment_n':
-            print "Array has dimensions of: (n_theta_plot=" + str(sim1.profile['n_theta_plot']) + ", n_x=" + str(sim1.profile['n_x']) + ", n_kinetic=" + str(sim1.profile['n_kinetic']) + ", n_n=" + str(sim1.profile['n_n']) + ", n_time=" + str(sim1.t['n_time']) + ")"
+            print msg_str+n_theta_str+n_x_str+n_kinetic_str+n_n_str+n_time_str+')'
         elif sys.argv[2] == 'moment_e':
-            print "Array has dimensions of: (n_theta_plot=" + str(sim1.profile['n_theta_plot']) + ", n_x=" + str(sim1.profile['n_x']) + ", n_kinetic=" + str(sim1.profile['n_kinetic']) + ", n_n=" + str(sim1.profile['n_n']) + ", n_time=" + str(sim1.t['n_time']) + ")"
+            print msg_str+n_theta_str+n_x_str+n_kinetic_str+n_n_str+n_time_str+')'
         elif sys.argv[2] == 'moment_v':
-            print "Array has dimensions of: (n_theta_plot=" + str(sim1.profile['n_theta_plot']) + ", n_x=" + str(sim1.profile['n_x']) + ", n_kinetic=" + str(sim1.profile['n_kinetic']) + ", n_n=" + str(sim1.profile['n_n']) + ", n_time=" + str(sim1.t['n_time']) + ")"
+            print msg_str+n_theta_str+n_x_str+n_kinetic_str+n_n_str+n_time_str+')'
         elif sys.argv[2] == 'moment_zero':
-            print "Array has dimensions of: (n_x=" + str(sim1.profile['n_x']) + ", n_kinetic=" + str(sim1.profile['n_kinetic']) + ", n_moment=" + str(sim1.profile['n_moment']) + ", n_time=" + str(sim1.t['n_time']) + ")"
+            print msg_str+n_x_str+n_kinetic_str+'2, '+n_time_str+')'
         elif sys.argv[2] == 'flux_velocity':
-            print "Array has dimensions of: (n_energy=" + str(sim1.profile['n_energy']) + ", n_lambda=" + str(sim1.profile['n_lambda']) + ", n_kinetic=" + str(sim1.profile['n_kinetic']) + ", n_field=" + str(sim1.profile['n_field']) + ", 2, n_n=" + str(sim1.profile['n_n']) + ", n_time=" + str(sim1.t['n_time']) + ")"
+            print msg_str+n_energy_str+n_lambda_str+n_kinetic_str+n_field_str+'2, '+n_n_str+n_time_str
         elif sys.argv[2] == 'k_perp_squared':
-            print "Array has dimensions of: (n_n=" + str(sim1.profile['n_n']) + ", n_time=" + str(sim1.t['n_time']) + ")"
+            print msg_str+n_n_str+n_time_str
         elif sys.argv[2] == 'docstrings':
             help(GYROData)
         else:
             print "Incorrect GYROData method.  The options are:"
-            print "t"
-            print "freq"
-            print "diff"
-            print "diff_i"
-            print "diff_n"
-            print "gbflux"
-            print "gbflux_i"
-            print "gbflux_n"
-            print "moment_u"
-            print "moment_n"
-            print "moment_e"
-            print "moment_v"
-            print "moment_zero"
-            print "flux_velocity"
-            print "k_perp_squared"
-            print "docstrings (not a method, instead prints the docstrings for GYROData)"          
+            print
+            pprint.pprint(sorted(sim.__dict__.keys()))
+ 

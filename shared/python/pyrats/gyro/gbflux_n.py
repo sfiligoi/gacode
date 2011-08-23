@@ -31,13 +31,16 @@ sim       = GYROData(sys.argv[1])
 field     = sys.argv[2]
 i_moment  = int(sys.argv[3])
 window    = float(sys.argv[4])
-ftype     = sys.argv[5]
 
 n_field   = int(sim.profile['n_field'])
 n_kinetic = int(sim.profile['n_kinetic'])
+n_n       = int(sim.profile['n_n'])
+
+# Need to read gbflux_n data
+sim.read_gbflux_n()
 
 t    = sim.t['(c_s/a)t']
-flux = sim.gbflux
+flux = sim.gbflux_n
 
 # Manage field
 if field == 's':
@@ -45,7 +48,7 @@ if field == 's':
     ftag = '\mathrm{total}'
 else:
     i_field = int(field)
-    flux0 = flux[:,i_field,:,:]
+    flux0 = flux[:,i_field,:,:,:]
     if i_field == 0: 
         ftag = '\mathrm{electrostatic}'
     if i_field == 1: 
@@ -64,42 +67,35 @@ if i_moment == 3:
     mtag = 'S/S_\mathrm{GB}'
 
 #======================================
-fig = plt.figure(figsize=(12,8))
-ax = fig.add_subplot(111)
-ax.grid(which="majorminor",ls=":")
-ax.grid(which="major",ls="-")
-ax.set_xlabel('$(c_s/a) t$',fontsize=GFONTSIZE)
-ax.set_ylabel('$'+mtag+' \;('+ftag+')$',color='k',fontsize=GFONTSIZE)
+fig = plt.figure(figsize=(6*n_kinetic,6))
 #=====================================
 
+color = ['k','m','b','c']
+k = sim.profile['kt_rho']
+dk = k[1]-k[0]
+
 # Determine tmin
+imin=0
 for i in range(len(t)):
     if t[i] < (1.0-window)*t[len(t)-1]:
-        imin = i
-
-color = ['k','m','b','c']
+        imin = i+1
 
 # Loop over species
 for i in range(n_kinetic):
-    if sim.profile['electron_method'] == 2 or  sim.profile['electron_method'] == 4:
-        if i == n_kinetic-1:
-            stag = 'elec  '
-        else:
-            stag = 'ion-'+str(i+1)+' '
-    if sim.profile['electron_method'] == 1:
-        stag = 'ion-'+str(i+1)+' '
-    if sim.profile['electron_method'] == 3:
-        stag = 'elec  '
+    ax = fig.add_subplot(1,n_kinetic,i+1)
+    ax.set_xlabel(r'$k_\theta \rho_s$',fontsize=GFONTSIZE)
+    ax.set_ylabel(r'$'+mtag+' \;('+ftag+')$',color='k',fontsize=GFONTSIZE)
+    if i == n_kinetic-1:
+        stag = 'elec'
+    else:
+        stag = 'ion-'+str(i+1)
 
-    ave = average(flux0[i,i_moment,:],t,window)
-    y = ave*np.ones(len(t))
-    ax.plot(t[imin:],y[imin:],'--',color=color[i])
-    label = stag+': '+str(round(ave,3))
-    ax.plot(t,flux0[i,i_moment,:],label=label,color=color[i])
+    ave = np.zeros((n_n))
+    for j in range(n_n):
+        ave[j] = average(flux0[i,i_moment,j,:],t,window)
 
-ax.legend()
-if ftype == 'screen':
-    plt.show()
-else:
-    outfile = 'gbflux.'+ftype
-    plt.savefig(outfile)
+    ax.set_title(stag+':  '+str(t[imin])+' < (c_s/a) t < '+str(t[-1]))
+    ax.bar(k-dk/2.0,ave,width=dk/1.1,color=color[i],alpha=0.4,edgecolor='black')
+
+
+plt.show()

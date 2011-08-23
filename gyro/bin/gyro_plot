@@ -3,7 +3,7 @@
 # gyro_plot
 #
 # PURPOSE:
-#  Plotting routines for GYRO output.
+#  Plotting/listing routines for GYRO output.
 #==============================================================================
 
 #==============================================================================
@@ -16,31 +16,45 @@ then
   echo
   echo "Usage:    gyro_plot [options]"
   echo
-  echo "          -ldiff"
-  echo "          Display diffusion coefficients."
+  echo "          -p <path>"
+  echo "          Set optional path to simulation directory."
+  echo "          [The default path is the current directory]"
+  echo
+  echo "          -e <simdir>"
+  echo "          Use data in <simdir>."
   echo 
-  echo "          -lflux"
-  echo "          Display gyro-bohm flux coefficients."
+  echo "          -f <filetype>"
+  echo "          Output file type."
+  echo "           <filetype>=emf, eps, pdf, png, ps, raw, rgba, svg, svgz"
   echo 
-  echo "          -l <location>"
-  echo "          Change location of simulation directory.  Default is current"
-  echo "          directory."
+  echo "          -diff"
+  echo "          List gyroBohm diffusivity rather than flux coefficients."
   echo
-  echo "          -v"
-  echo "          Print verbose output."
+  echo "          -field <value>"
+  echo "          Specify field to be plotted: [0,n_field-1]."
+  echo "          Alternatively, specifying 's' returns a sum of all fields (default=s)."
   echo
-  echo "          -gbflux"
-  echo "          Display plots of gbflux data."
+  echo "          -kinetic <value>"
+  echo "          Specify species to be plotted: [0,n_kinetic-1]."
   echo
-  echo "          -n_field <value>"
-  echo "          Specify field to be plotted.  s returns a sum of all fields."
+  echo "          -moment <value>"
+  echo "          Specify moment to be plotted: [0,3] (default=1)"
   echo
-  echo "          -n_kinetic <value>"
-  echo "          Specify species to be plotted."
+  echo "          -w <fraction>"
+  echo "          Fraction of time record to use for average (default=0.8)."
   echo
-  echo "          -n_moment <value>"
-  echo "          Specify moment to be plotted."
+  echo "          -plot <type>"
+  echo "          Generate plot of given type."
+  echo "          If this keyword is omitted, data will be listed to the screen."
+  echo "           <type> = gbflux,"
+  echo "                    gbflux_i,"
+  echo "                    gbflux_n,"
+  echo "                    balloon,  [use -moment for indexing]"
   echo
+  echo "Example:"
+  echo
+  echo "   gyro_plot -e ."
+  echo "   gyro_plot -e . -plot"
 
   exit 1
 fi
@@ -50,15 +64,16 @@ fi
 # Define variables for flag capture
 #
 # Default simulation directory
-LOCDIR=$PWD
-N=1
-LDIFF_FLAG=0
-LFLUX_FLAG=0
-VERBOSE_FLAG=0
-GBFLUX_FLAG=0
-N_KINETIC=0
-N_FIELD="s"
-N_MOMENT=1
+LOCDIR=.
+SIMROOT=$PWD
+PLOT_FLAG=0
+PLOT_TYPE=gbflux
+DIFF_FLAG=0
+I_KINETIC=0
+I_FIELD="s"
+I_MOMENT=1
+WINDOW=0.8
+FTYPE=screen
 #==============================================================================
 
 #==============================================================================
@@ -67,53 +82,71 @@ N_MOMENT=1
 while [ $# -gt 0 ] ; do
   case "$1" in
 
-  -ldiff) shift ; LDIFF_FLAG=1 ;;
+  -plot) shift ; PLOT_FLAG=1 ; PLOT_TYPE=$1 ;;
 
-  -lflux) shift ; LFLUX_FLAG=1 ;;
+  -diff) DIFF_FLAG=1 ;;
+  
+  -e) shift ; LOCDIR=$1 ;;
 
-  -l) shift ; LOCDIR=$1 ; shift ;;
+  -p) shift ; SIMROOT=$1 ;;
 
-  -v) shift ; VERBOSE_FLAG=1 ; N=$1 ; shift ;;
+  -kinetic) shift ; I_KINETIC=$1 ;;
 
-  -gbflux) shift ; GBFLUX_FLAG=1 ;;
+  -field) shift ; I_FIELD=$1 ;;
 
-  -n_kinetic) shift ; N_KINETIC=$1 ; shift ;;
+  -moment) shift ; I_MOMENT=$1 ;;
 
-  -n_field) shift ; N_FIELD=$1 ; shift ;;
+  -w) shift ; WINDOW=$1 ;;
 
-  -n_moment) shift ; N_MOMENT=$1 ; shift ;;
+  -f) shift ; FTYPE=$1 ;;
 
   *) echo "ERROR: incorrect gyro syntax." ; exit 1 ;;
 
   esac
+  shift
 done
 #==============================================================================
+
+if [ "$LOCDIR" == "." ]
+then
+   LOCDIR=`basename $PWD`
+   cd .. ; SIMROOT=$PWD
+fi
+SIMDIR=$SIMROOT/$LOCDIR
+cd $SIMDIR
+
+PYROOT=$GACODE_ROOT/shared/python/pyrats/gyro
 
 #==============================================================================
 # Display diff if -ldiff set, then exit.
 #
-if [ $LDIFF_FLAG -eq 1 ]
+if [ $PLOT_FLAG -eq 0 ]
 then
-   python ~/gacode/shared/python/pyrats/gyro/ldiff.py $LOCDIR $VERBOSE_FLAG $N
-   exit 0
-fi
-#==============================================================================
 
-#==============================================================================
-# Display flux if -lflux set, then exit.
-#
-if [ $LFLUX_FLAG -eq 1 ]
-then
-   python ~/gacode/shared/python/pyrats/gyro/lflux.py $LOCDIR $VERBOSE_FLAG $N
+   if [ $DIFF_FLAG -eq 1 ]
+   then
+      python $PYROOT/ldiff.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW
+   else
+      python $PYROOT/lflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW
+   fi
    exit 0
-fi
-#==============================================================================
 
-#==============================================================================
-# Display gbflux data if -gbflux set, then exit.
-#
-if [ $GBFLUX_FLAG -eq 1 ]
-then
-   python ~/gacode/shared/python/pyrats/gyro/gbflux.py $LOCDIR $N_KINETIC $N_FIELD $N_MOMENT &
-   exit 0
 fi
+
+case "$PLOT_TYPE" in
+
+   gbflux)  
+	python $PYROOT/gbflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE & ;;
+
+   gbflux_n) 
+        python $PYROOT/gbflux_n.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE & ;;
+
+   gbflux_i) 
+        python $PYROOT/gbflux_i.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE & ;;
+
+   balloon) 
+        python $PYROOT/balloon.py $SIMDIR $I_MOMENT $FTYPE ;;
+   
+esac 
+
+exit 0

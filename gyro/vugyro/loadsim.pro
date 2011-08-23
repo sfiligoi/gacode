@@ -144,7 +144,7 @@ pro loadsim, input_dir
   ;; Read time-integration error 
   ;;
   t_error = fltarr(n_kinetic,n_time)
-  read_array,t_error,'error.out',exists_t_error
+  read_array,t_error,'out.gyro.error',exists_t_error
   ;;-------------------------------------------------------
 
   ;;-------------------------------------------------------
@@ -219,7 +219,7 @@ pro loadsim, input_dir
   ;; 3 -> Im(dOmega)
   
   w = fltarr(4,n_n,n_time)
-  read_array,w,'freq.out',exists_omega
+  read_array,w,'out.gyro.freq',exists_omega
   ;;------------------------------------------------------
 
   ;;------------------------------------------------------
@@ -266,13 +266,13 @@ pro loadsim, input_dir
   ;;--------------------------------------------------------
 
   diff_QL_n = fltarr(n_kinetic,n_field,2,n_n,n_time)
-  read_array,diff_QL_n,'diff_QL_n.out',exists_diff_QL_n
+  read_array,diff_QL_n,'out.gyro.diff_QL_n',exists_diff_QL_n
 
   phi_squared_QL_n = fltarr(n_n,n_time)
-  read_array,phi_squared_QL_n,'phi_squared_QL_n.out',exists_phi_squared_QL_n
+  read_array,phi_squared_QL_n,'out.gyro.phi_squared_QL_n',exists_phi_squared_QL_n
 
   g_squared_QL_n = fltarr(3,n_n,n_time)
-  read_array,g_squared_QL_n,'g_squared_QL_n.out',exists_g_squared_QL_n
+  read_array,g_squared_QL_n,'out.gyro.g_squared_QL_n',exists_g_squared_QL_n
 
   nl_transfer = fltarr(n_r,2,n_n,n_time)
   read_array,nl_transfer,'out.gyro.nl_transfer',exists_nl_transfer
@@ -282,7 +282,7 @@ pro loadsim, input_dir
   ;; 1 -> a_fluxave
   
   zerobar = fltarr(2,n_r,n_time)
-  read_array,zerobar,'zerobar.out',exists_zerobar 
+  read_array,zerobar,'out.gyro.zerobar',exists_zerobar 
   ;;--------------------------------------------
 
   source = fltarr(n_kinetic,4,n_r,n_time)
