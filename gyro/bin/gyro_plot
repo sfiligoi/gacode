@@ -46,7 +46,7 @@ then
   echo "          -plot <type>"
   echo "          Generate plot of given type."
   echo "          If this keyword is omitted, data will be listed to the screen."
-  echo "            type> = gbflux,gbflux_n"
+  echo "            type> = gbflux, gbflux_n, balloon"
   echo
   echo "Example:"
   echo
@@ -122,24 +122,24 @@ then
    if [ $DIFF_FLAG -eq 1 ]
    then
       python $PYROOT/ldiff.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW
-      exit 0
    else
       python $PYROOT/lflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW
-      exit 0
    fi
-
-else
-
-   case "$PLOT_TYPE" in
-
-      gbflux)  
-	   python $PYROOT/gbflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE & ;;
-
-      gbflux_n) 
-	   python $PYROOT/gbflux_n.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE & ;;
-   
-   esac 
-
    exit 0
 
 fi
+
+case "$PLOT_TYPE" in
+
+   gbflux)  
+	python $PYROOT/gbflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE & ;;
+
+   gbflux_n) 
+        python $PYROOT/gbflux_n.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE & ;;
+
+   balloon) 
+        python $PYROOT/balloon.py $SIMDIR ;;
+   
+esac 
+
+exit 0

@@ -36,8 +36,6 @@ ftype     = sys.argv[5]
 n_field   = int(sim.profile['n_field'])
 n_kinetic = int(sim.profile['n_kinetic'])
 
-sim.make_gbflux()
-
 t    = sim.t['(c_s/a)t']
 flux = sim.gbflux
 

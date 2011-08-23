@@ -61,6 +61,7 @@ class GYROData:
         self.geometry = {}
         self.t = {}
         self.freq = {}
+        self.balloon = {}
         self.diff = []
         self.diff_i = []
         self.diff_n = []
@@ -419,6 +420,23 @@ class GYROData:
             t = len(k_perp_squared)/self.profile['n_n']
             self.k_perp_squared = k_perp_squared.reshape((self.profile['n_n'],t),order='F')
             self.loaded.append('k_perp_squared')
+
+    def read_balloon(self):
+        """Reads out.balloon.*
+           Output is numpy array"""
+
+        import glob
+        import string
+
+        m      = self.profile['box_multiplier']
+        n_x    = self.profile['n_x']
+        n_p    = n_x/m
+        n_next = self.profile['n_theta_plot']*n_p
+
+        for filename in glob.glob(self.directory_name+'/out.gyro.balloon*'):
+            ext = string.splitfields(filename,'.')[-1]
+            data = self.read_file(ext,12)
+            self.balloon[ext] = data.reshape((2,n_next,m,self.t['n_time']),order='F')
 
     #------------------------------------------------------------
     # Create data from other previously imported data
