@@ -7,17 +7,18 @@ import matplotlib.pyplot as plt
 from pyrats.gyro.data import GYROData
 
 #---------------------------------------------------------------
-def average(f,t,window):
+def average(f,t,window,n):
  
+    ave = np.zeros(n)
+
     n_time = len(t)
     tmin = (1.0-window)*t[n_time-1]
     tmax = t[n_time-1]
 
     t_window = 0.0
-    ave      = 0.0
     for i in range(n_time-1):
         if t[i] > tmin: 
-            ave = ave+0.5*(f[i]+f[i+1])*(t[i+1]-t[i])
+            ave[:] = ave[:]+0.5*(f[:,i]+f[:,i+1])*(t[i+1]-t[i])
             t_window = t_window+t[i+1]-t[i]
 
     ave = ave/t_window
@@ -31,16 +32,13 @@ sim       = GYROData(sys.argv[1])
 field     = sys.argv[2]
 i_moment  = int(sys.argv[3])
 window    = float(sys.argv[4])
+ftype     = sys.argv[5]
 
 n_field   = int(sim.profile['n_field'])
 n_kinetic = int(sim.profile['n_kinetic'])
-n_n       = int(sim.profile['n_n'])
-
-# Need to read gbflux_n data
-sim.read_gbflux_n()
 
 t    = sim.t['(c_s/a)t']
-flux = sim.gbflux_n
+flux = sim.gbflux_i
 
 # Manage field
 if field == 's':
@@ -66,36 +64,45 @@ if i_moment == 2:
 if i_moment == 3: 
     mtag = 'S/S_\mathrm{GB}'
 
+# Determine tmin
+for i in range(len(t)):
+    if t[i] < (1.0-window)*t[len(t)-1]:
+        imin = i
+
 #======================================
-fig = plt.figure(figsize=(6*n_kinetic,6))
+fig = plt.figure(figsize=(12,8))
+ax = fig.add_subplot(111)
+ax.grid(which="majorminor",ls=":")
+ax.grid(which="major",ls="-")
+ax.set_xlabel('$(c_s/a) t$',fontsize=GFONTSIZE)
+ax.set_ylabel('$'+mtag+' \;('+ftag+')$',color='k',fontsize=GFONTSIZE)
+ax.set_title(str(t[imin])+' < (c_s/a) t < '+str(t[-1]))
 #=====================================
 
 color = ['k','m','b','c']
-k = sim.profile['kt_rho']
-dk = k[1]-k[0]
 
-# Determine tmin
-imin=0
-for i in range(len(t)):
-    if t[i] < (1.0-window)*t[len(t)-1]:
-        imin = i+1
+n_x = sim.profile['n_x']
+ave = np.zeros(n_x)
 
 # Loop over species
 for i in range(n_kinetic):
-    ax = fig.add_subplot(1,n_kinetic,i+1)
-    ax.set_xlabel(r'$k_\theta \rho_s$',fontsize=GFONTSIZE)
-    ax.set_ylabel(r'$'+mtag+' \;('+ftag+')$',color='k',fontsize=GFONTSIZE)
-    if i == n_kinetic-1:
-        stag = 'elec'
-    else:
-        stag = 'ion-'+str(i+1)
+    if sim.profile['electron_method'] == 2 or  sim.profile['electron_method'] == 4:
+        if i == n_kinetic-1:
+            stag = 'elec  '
+        else:
+            stag = 'ion-'+str(i+1)+' '
+    if sim.profile['electron_method'] == 1:
+        stag = 'ion-'+str(i+1)+' '
+    if sim.profile['electron_method'] == 3:
+        stag = 'elec  '
 
-    ave = np.zeros((n_n))
-    for j in range(n_n):
-        ave[j] = average(flux0[i,i_moment,j,:],t,window)
+    label = stag
+    ave[:] = average(flux0[i,i_moment,:,:],t,window,n_x)
+    ax.plot(sim.profile['r'],ave[:],label=label,color=color[i])
 
-    ax.set_title(stag+':  '+str(t[imin])+' < (c_s/a) t < '+str(t[-1]))
-    ax.bar(k-dk/2.0,ave,width=dk/1.1,color=color[i],alpha=0.4,edgecolor='black')
-
-
-plt.show()
+ax.legend()
+if ftype == 'screen':
+    plt.show()
+else:
+    outfile = 'gbflux.'+ftype
+    plt.savefig(outfile)
