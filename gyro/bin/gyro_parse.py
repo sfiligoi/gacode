@@ -197,6 +197,7 @@ x.add('FIELDEIGEN_WR','-0.3')
 x.add('FIELDEIGEN_WI','0.2')
 x.add('FIELDEIGEN_TOL','1e-6')
 x.add('COLLISION_METHOD','2')
+x.add('REINTEGRATE_FLAG','0')
 #addition for hdf5 io
 x.add('IO_METHOD', '1')
 x.add('TIME_SKIP_WEDGE', '0')

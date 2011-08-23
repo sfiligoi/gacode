@@ -256,7 +256,7 @@ subroutine gyro_read_input
   call readbc_real(fieldeigen_tol)
 
   call readbc_int(collision_method)
-
+  call readbc_int(reintegrate_flag)
 
   !hdf5 output
   call readbc_int(io_method)

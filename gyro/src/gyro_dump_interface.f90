@@ -226,6 +226,8 @@ subroutine gyro_dump_interface
           "t_vec(4)",t_vec(4))
      call dumpRealInterface(21,"    gyro_ti_over_te_5_in ",    gyro_ti_over_te_5_in , &
           "t_vec(5)",t_vec(5))
+     call dumpIntInterface(21,"    gyro_reintegrate_flag_in ",    gyro_reintegrate_flag_in , &
+          "reintegrate_flag",reintegrate_flag)
      call dumpRealInterface(21,"    gyro_eps_dlnndr_in ",    gyro_eps_dlnndr_in , &
           "eps_dlnndr_vec(1)",eps_dlnndr_vec(1))
      call dumpRealInterface(21,"    gyro_eps_dlnndr_2_in ",    gyro_eps_dlnndr_2_in , &

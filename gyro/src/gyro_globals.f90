@@ -214,6 +214,7 @@ module gyro_globals
   integer :: geo_gradbcurv_flag
   integer :: geo_fastionbeta_flag
   integer :: fakefield_flag
+  integer :: reintegrate_flag
   !---------------------------------------------------------
 
   !-----------------------------------------------------------------------------------

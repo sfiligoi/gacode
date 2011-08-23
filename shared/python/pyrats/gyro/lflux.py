@@ -34,6 +34,11 @@ n_field   = int(sim.profile['n_field'])
 n_kinetic = int(sim.profile['n_kinetic'])
 
 t    = sim.t['(c_s/a)t']
+
+# Read data in gbflux_i and make gbflux
+sim.read_gbflux_i()
+sim.make_gbflux()
+
 flux = sim.gbflux
 
 # b is collection of all arrays to be plotted

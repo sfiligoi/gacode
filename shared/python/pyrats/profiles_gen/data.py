@@ -435,13 +435,13 @@ class profiles_genData:
             ax.set_title(u'Flux Surface at \u03c1 = ' + str(self.data['rho (-)'][self.match(inner, self.data['rho (-)'])]))
             ax.axhline(y=self.get('zmag (m)')[self.match(inner,self.get('rho (-)'))], c='m')
             ax.axvline(x=self.get('rmaj (m)')[self.match(inner, self.get('rho (-)'))], c='m')
-            ax.legend( ('Midplane', 'Miller-type', 'Fourier-type', 'Flux surface center'), loc=2,bbox_to_anchor=(1,1))
+            ax.legend( ('Midplane', 'Fourier-type', 'Miller-type', 'Flux surface center'), loc=2,bbox_to_anchor=(1,1))
         elif verbose:
             ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(inner) + u' and \u03c1 = ' + str(outer) + '.')
             ax.legend(loc=2,bbox_to_anchor=(1,1))
         else:
             ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(inner) + u' and \u03c1 = ' + str(outer) + '.')
-            ax.legend( ('Midplane', 'Miller-type', 'Fourier-type'), loc=2,bbox_to_anchor=(1,1))
+            ax.legend( ('Midplane', 'Fourier-type', 'Miller-type'), loc=2,bbox_to_anchor=(1,1))
         aspect = max((max(fz) - min(fz)), (max(fr) - min(fr)), (max(mz) - min(mz)), (max(mr) - min(mr))) + .5
         ax.set_xlim(rmaj - aspect/2, rmaj + aspect/2)
         ax.set_ylim(zmag - aspect/2, zmag + aspect/2)

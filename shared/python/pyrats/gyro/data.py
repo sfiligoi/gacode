@@ -38,11 +38,33 @@ class GYROData:
 
         self.init_data()
         self.set_directory(sim_directory)
-        self.read_data()
-        self.equil_time()
-        self.make_gbflux()
-        self.make_diff()
-        self.make_diff_i()
+        self.read_profile()
+        self.read_geometry()
+        self.read_t()
+
+        # The rest of the possible read routines should NOT be done automatically.
+
+        #self.read_freq()
+        #self.read_balloon()
+        #self.read_gbflux_i()
+        #self.read_gbflux_n()
+        #self.read_moment_u()
+        #self.read_moment_n()
+        #self.read_moment_e()
+        #self.read_moment_v()
+        #self.read_moment_zero()
+        #self.read_flux_velocity()
+        #self.read_k_perp_squared()
+
+        # There are also routines to make "optional fluxes"
+
+        #self.make_gbflux()
+        #self.make_diff()
+        #self.make_diff_i()
+
+        # And a routine to equalize the time-length.
+
+        #self.equil_time()
 
         import sys
         from os.path import expanduser, expandvars
@@ -57,24 +79,27 @@ class GYROData:
         """Initialize object data."""
 
         self.directory_name = ""
-        self.profile = {}
+
+        self.profile  = {}
         self.geometry = {}
-        self.t = {}
-        self.freq = {}
-        self.diff = []
-        self.diff_i = []
-        self.diff_n = []
-        self.gbflux = []
-        self.gbflux_i = []
-        self.gbflux_n = []
-        self.moment_u = []
-        self.moment_n = []
-        self.moment_e = []
-        self.moment_v = []
-        self.moment_zero = []
-        self.flux_velocity = []
+        self.t        = {}
+        self.freq     = {}
+        self.balloon  = {}
+
+        self.diff           = []
+        self.diff_i         = []
+        self.diff_n         = []
+        self.gbflux         = []
+        self.gbflux_i       = []
+        self.gbflux_n       = []
+        self.moment_u       = []
+        self.moment_n       = []
+        self.moment_e       = []
+        self.moment_v       = []
+        self.moment_zero    = []
+        self.flux_velocity  = []
         self.k_perp_squared = []
-        self.loaded = []
+        self.loaded         = []
 
 
     def set_directory(self, path):
@@ -102,24 +127,6 @@ class GYROData:
                 return 0
 
 
-    def read_data(self):
-        """Read in object data.  Executes read_profile, read_geometry, read_t,
-        and read_gbflux_i by default."""
-        
-        self.read_profile()
-        self.read_geometry()
-        self.read_t()
-        self.read_freq()
-        self.read_gbflux_i()
-        #self.read_gbflux_n()
-        #self.read_moment_u()
-        #self.read_moment_n()
-        #self.read_moment_e()
-        #self.read_moment_v()
-        #self.read_moment_zero()
-        #self.read_flux_velocity()
-        #self.read_k_perp_squared()
-
     def read_file(self, fname, dSize):
         """Reads GYRO data file.  Returns a numpy array with dimensions
         matching input data."""
@@ -136,19 +143,25 @@ class GYROData:
             f = fileupload.loadtxt(filename, dSize)
             return f
         else:
-            print "Warning: File " + fname + " does not exist."
-            return f
+            return []
+
 
     def read_t(self):
         """Read out.gyro.t to get time data."""
 
         import numpy as np
 
-        t = np.loadtxt(self.directory_name + '/out.gyro.t')
+        try:
+            t = np.loadtxt(self.directory_name + '/out.gyro.t')
+        except:
+            print "ERROR (GYROData): Fatal error!  Missing out.gyro.t."
+            sys.exit()
+
         self.t['n_time']   = len(t[:,0])
         self.t['i_time']   = t[:,0]
         self.t['(c_s/a)t'] = t[:,1]
         self.loaded.append('t')
+
 
     def read_freq(self):
         """Reads in frequency data.  Output is dictionary of numpy arrays with
@@ -157,24 +170,34 @@ class GYROData:
         import numpy as np
         import os.path
 
-        ifile = self.directory_name+'/out.gyro.freq'
+        try:
+            freq = np.loadtxt(self.directory_name+'/out.gyro.freq').transpose()
+        except:
+            print "ERROR (GYROData): Missing out.gyro.freq."
+            sys.exit()
 
-        if os.path.isfile(ifile):
-            freq = np.loadtxt(ifile)
-            temp = freq.reshape( (4, self.profile['n_n'], self.t['n_time']), order='F')
-            self.freq['(a/c_s)w']        = temp[0,:,:]
-            self.freq['(a/c_s)gamma']    = temp[1,:,:]
-            self.freq['err(a/c_s)w']     = temp[2,:,:]
-            self.freq['err(a/c_s)gamma'] = temp[3,:,:]
-            self.loaded.append('freq')
+        temp = freq.reshape((4,self.profile['n_n'],self.t['n_time']), order='F')
+     
+        self.freq['(a/c_s)w']        = temp[0,:,:]
+        self.freq['(a/c_s)gamma']    = temp[1,:,:]
+        self.freq['err(a/c_s)w']     = temp[2,:,:]
+        self.freq['err(a/c_s)gamma'] = temp[3,:,:]
+
+        self.loaded.append('freq')
+
 
     def read_profile(self):
         """Read out.gyro.profile to get control data.  Output is dictionary
         containing necessary information."""
 
+        import sys
         import numpy as np
 
-        profile = np.loadtxt(self.directory_name + '/out.gyro.profile')
+        try:
+            profile = np.loadtxt(self.directory_name + '/out.gyro.profile')
+        except:
+            print "ERROR (GYROData): Fatal error!  Missing out.gyro.profile."
+            sys.exit()
 
         n_x    = int(profile[0]) 
         n_spec = int(profile[15])
@@ -284,6 +307,8 @@ class GYROData:
         """Reads in gbflux_i data.  Output is numpy array with dimensions:
         n_kinetic x n_field x 4 x n_x x n_time"""
 
+        import sys
+
         n_kinetic = self.profile['n_kinetic']
         n_field   = self.profile['n_field']
         n_x       = self.profile['n_x']
@@ -293,11 +318,16 @@ class GYROData:
             t = len(gbflux_i)/(n_kinetic*n_field*4*n_x)
             self.gbflux_i = gbflux_i.reshape((n_kinetic,n_field,4,n_x,t),order='F')
             self.loaded.append('gbflux_i')
+        else:
+            print "ERROR (GYROData): out.gyro.gbflux_i not found."
+            sys.exit()
 
 
     def read_gbflux_n(self):
         """Reads gbflux_n data.  Output is numpy array with dimensions:
         n_kinetic x n_field x 4 x n_n x n_time"""
+
+        import sys
 
         n_kinetic = self.profile['n_kinetic']
         n_field   = self.profile['n_field']
@@ -308,6 +338,9 @@ class GYROData:
             t = len(gbflux_n)/(n_kinetic*n_field*4*n_n)
             self.gbflux_n = gbflux_n.reshape((n_kinetic,n_field,4,n_n,t),order='F')
             self.loaded.append('gbflux_n')
+        else:
+            print "ERROR (GYROData): out.gyro.gbflux_n not found."
+            sys.exit()
 
 
     def read_moment_u(self):
@@ -419,6 +452,32 @@ class GYROData:
             t = len(k_perp_squared)/self.profile['n_n']
             self.k_perp_squared = k_perp_squared.reshape((self.profile['n_n'],t),order='F')
             self.loaded.append('k_perp_squared')
+
+    def read_balloon(self):
+        """Reads out.gyro.balloon*.  Data is stored in self.balloon"""
+
+        import glob
+        import string
+        import sys
+
+        m     = self.profile['box_multiplier']
+        n_x   = self.profile['n_x']
+        n_ang = self.profile['n_theta_plot']*n_x/m
+
+        list = glob.glob(self.directory_name+'/out.gyro.balloon*')
+
+        # If list is empty, then exit with error message.
+        if len(list) == 0:
+            print "ERROR (GYROData): out.gyro.balloon* not found."
+            sys.exit()
+
+        for filename in list:
+            ext = string.splitfields(filename,'.')[-1]
+            data = self.read_file(ext,12)
+            u = data.reshape((2,n_ang,m,self.t['n_time']),order='F') 
+            self.balloon[ext] = u[0,...]+1j*u[1,...]
+            
+            
 
     #------------------------------------------------------------
     # Create data from other previously imported data

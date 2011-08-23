@@ -46,7 +46,11 @@ then
   echo "          -plot <type>"
   echo "          Generate plot of given type."
   echo "          If this keyword is omitted, data will be listed to the screen."
-  echo "            type> = gbflux,gbflux_n"
+  echo "           <type> = freq,"
+  echo "                    gbflux,"
+  echo "                    gbflux_i,"
+  echo "                    gbflux_n,"
+  echo "                    balloon,  [use -moment for indexing]"
   echo
   echo "Example:"
   echo
@@ -61,6 +65,7 @@ fi
 # Define variables for flag capture
 #
 # Default simulation directory
+LOCDIR=.
 SIMROOT=$PWD
 PLOT_FLAG=0
 PLOT_TYPE=gbflux
@@ -111,35 +116,41 @@ fi
 SIMDIR=$SIMROOT/$LOCDIR
 cd $SIMDIR
 
+PYROOT=$GACODE_ROOT/shared/python/pyrats/gyro
+
 #==============================================================================
 # Display diff if -ldiff set, then exit.
 #
-PYROOT=$GACODE_ROOT/shared/python/pyrats/gyro
-
 if [ $PLOT_FLAG -eq 0 ]
 then
 
    if [ $DIFF_FLAG -eq 1 ]
    then
       python $PYROOT/ldiff.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW
-      exit 0
    else
       python $PYROOT/lflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW
-      exit 0
    fi
-
-else
-
-   case "$PLOT_TYPE" in
-
-      gbflux)  
-	   python $PYROOT/gbflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE & ;;
-
-      gbflux_n) 
-	   python $PYROOT/gbflux_n.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE & ;;
-   
-   esac 
-
    exit 0
 
 fi
+
+case "$PLOT_TYPE" in
+
+   freq)  
+	python $PYROOT/freq.py $SIMDIR $WINDOW $FTYPE & ;;
+
+   gbflux)  
+	python $PYROOT/gbflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE & ;;
+
+   gbflux_n) 
+        python $PYROOT/gbflux_n.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE & ;;
+
+   gbflux_i) 
+        python $PYROOT/gbflux_i.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE & ;;
+
+   balloon) 
+        python $PYROOT/balloon.py $SIMDIR $I_MOMENT $FTYPE ;;
+   
+esac 
+
+exit 0

@@ -1,9 +1,9 @@
 #!/bin/bash
 #==============================================================================
-# profiles_gen__plot
+# profiles_gen_plot
 #
 # PURPOSE
-#  Handles plotting of profiles_gen input
+#  Script to manage plotting of profiles_gen input
 #==============================================================================
 
 #==============================================================================
@@ -14,68 +14,62 @@ n=$#
 if [ $n -eq 0 ]
 then
    echo
-   echo "Usage:       profiles_gen_plot [options]"
-   echo " "
-   echo "Plot options (in any order with -pl being last) include: "
-   echo " "
-   echo "             -l <directory>"
-   echo "             Set location of directory containing input.profiles."
-   echo "             Default is current directory."
-   echo " "
-   echo "             -options"
-   echo "             Display all possible simulated parameters to plot in"
-   echo "             current directory."
-   echo " "
-   echo "             -dim <integer> <integer>"
-   echo "             Set x and y dimensions for plotting windows, respectively."
-   echo " "
-   echo "             -p <var1> <var2> ... <varN>"
-   echo "             Produce plots of N parameters given.  Default is ne, ni,"
-   echo "             Te, and Ti."
-   echo
-   echo "Flux surface plotting options (in any order) :"
-   echo " "
-   echo "             -fp"
-   echo "             Produce flux surface plots according to settings."
-   echo
-   echo "             -l <directory>"
-   echo "             Set location of directory containing input.profiles"
-   echo "             and input.profiles.geo.  Default is current directory."
-   echo
-   echo "             -n <integer>"
-   echo "             Change number of flux surfaces to plot.  Default is 1."
-   echo
-   echo "             -in <float>"
-   echo "             Change inner flux surface to value between 0 and 1."
-   echo "             Default is .5."
-   echo
-   echo "             -out <float>"
-   echo "             Change outer flux surface to value between 0 and 1."
-   echo "             Default is 1."
-   echo
-   echo "             -m"
-   echo "             Display Miller-type equilibrium flux surfaces."
-   echo
-   echo "             -f"
-   echo "             Display Fourier-type equilibrium flux surfaces."
-   echo
-   echo "             -c"
-   echo "             Display both Miller-type and Fourier-type equilibrium"
-   echo "             flux surfaces.  This is the default setting."
+   echo "Usage:    profiles_gen_plot [options]"
    echo 
-   echo "             -v"
-   echo "             Print verbose legend output.  This will print the"
-   echo "             locations of all flux surfaces."
+   echo "          -p <path>"
+   echo "          Set optional path to simulation directory."
+   echo "          [The default path is the current directory]"
    echo
+   echo "          -e <simdir>"
+   echo "          Use data in <simdir>."
+   echo 
+   echo "          -dim <integer> <integer>"
+   echo "          Set x and y dimensions for plotting windows, respectively."
+   echo
+   echo " PROFILE PLOTTING MODE:"
+   echo
+   echo "          -options"
+   echo "          Display all possible simulated parameters to plot in"
+   echo "          current directory."
+   echo 
+   echo "          -plot <var1> <var2> ... <varN>"
+   echo "          Produce plots of N parameters given.  Default is ne, ni,"
+   echo "          Te, and Ti."
+   echo
+   echo " FLUX-SURFACE PLOTTING MODE:"
+   echo 
+   echo "          -fp"
+   echo "          Produce flux surface plots according to settings."
+   echo
+   echo "          -n <integer>"
+   echo "          Change number of flux surfaces to plot.  Default is 1."
+   echo
+   echo "          -in <float>"
+   echo "          Change inner flux surface to value between 0 and 1."
+   echo "          Default is .5."
+   echo
+   echo "          -out <float>"
+   echo "          Change outer flux surface to value between 0 and 1."
+   echo "          Default is 1."
+   echo
+   echo "          -m"
+   echo "          Display Miller-type equilibrium flux surfaces."
+   echo
+   echo "          -f"
+   echo "          Display Fourier-type equilibrium flux surfaces."
+   echo
+   echo "          -c"
+   echo "          Display both Miller-type and Fourier-type equilibrium"
+   echo "          flux surfaces (default)."
    echo
    echo "EXAMPLES:"
    echo
-   echo "             profiles_gen_plot -options"
-   echo "             profiles_gen_plot -p"
-   echo "             profiles_gen_plot -l example_directory -p"
-   echo "             profiles_gen_plot -dim 2 3 -p"
-   echo "             profiles_gen_plot -fp"
-   echo "             profiles_gen_plot -fp -f -in 0 -n 20"
+   echo "       profiles_gen_plot -options"
+   echo "       profiles_gen_plot -p"
+   echo "       profiles_gen_plot -l example_directory -p"
+   echo "       profiles_gen_plot -dim 2 3 -p"
+   echo "       profiles_gen_plot -fp"
+   echo "       profiles_gen_plot -fp -in 0 -n 20"
    echo
 fi
 
@@ -83,7 +77,8 @@ fi
 # Define variables for flag capture
 #
 # Default output directory
-PLOT_DIR=$PWD
+LOCDIR=.
+SIMROOT=$PWD
 N1=1
 N2=1
 PLOT_STRING=""
@@ -95,10 +90,7 @@ PLOT_FLAG=0
 FLUX_FLAG=0
 OPTIONS_FLAG=0
 DIM_FLAG=0
-VERBOSE_FLAG=0
-MILLER_FLAG=0
-FOURIER_FLAG=0
-COMP_FLAG=1
+SURF_TYPE=3
 #==============================================================================
 
 #==============================================================================
@@ -107,53 +99,54 @@ COMP_FLAG=1
 while [ $# -gt 0 ] ; do
   case "$1" in
 
-  -l) shift ; PLOT_DIR=$1 ; shift ;;
+  -e) shift ; LOCDIR=$1 ;;
 
-  -options) shift ; OPTIONS_FLAG=1 ;;
+  -p) shift ; SIMROOT=$1 ;;
 
-  -dim) shift ; DIM_FLAG=1 ; N1=$1 ; shift ; N2=$1 ; shift ;;
+  -options) OPTIONS_FLAG=1 ;;
 
-  -p) shift ; PLOT_FLAG=1 ; PLOT_STRING="$1" ; shift ; break ;;
+  -dim) shift ; DIM_FLAG=1 ; N1=$1 ; shift ; N2=$1 ;;
 
-  -fp) shift ; FLUX_FLAG=1 ;;
+  -plot) shift ; PLOT_FLAG=1 ; PLOT_STRING="$1" ; shift ; break ;;
 
-  -n) shift ; N_LINES=$1 ; shift ;;
+  -fp) FLUX_FLAG=1 ;;
 
-  -in) shift ; IN_SURFACE=$1 ; shift ;;
+  -n) shift ; N_LINES=$1 ;;
 
-  -out) shift ; OUT_SURFACE=$1 ; shift ;;
+  -in) shift ; IN_SURFACE=$1 ;;
 
-  -m) shift ; MILLER_FLAG=1 ; FOURIER_FLAG=0 ; COMP_FLAG=0 ;;
+  -out) shift ; OUT_SURFACE=$1 ;;
 
-  -f) shift ; FOURIER_FLAG=1 ; MILLER_FLAG=0 ; COMP_FLAG=0 ;;
+  -m) SURF_TYPE=1 ;;
 
-  -c) shift ; COMP_FLAG=1 ; MILLER_FLAG=0 ; FOURIER_FLAG=0 ;;
+  -f) SURF_TYPE=2 ;;
 
-  *) echo "ERROR: incorrect syntax." ; exit 1 ;;
+  -c) SURF_TYPE=3 ;;
+
+   *) echo "ERROR: incorrect syntax." ; exit 1 ;;
 
   esac
+  shift
 done
 #==============================================================================
+
+if [ "$LOCDIR" == "." ]
+then
+   LOCDIR=`basename $PWD`
+   cd .. ; SIMROOT=$PWD
+fi
+SIMDIR=$SIMROOT/$LOCDIR
+cd $SIMDIR
+
+PYROOT=$GACODE_ROOT/shared/python/pyrats/profiles_gen
 
 #==============================================================================
 # Plot flux surfaces
 
 if [ $FLUX_FLAG -eq 1 ]
 then
-  if [ $MILLER_FLAG -eq 1 ]
-  then
-    python ~/gacode/shared/python/pyrats/profiles_gen/fluxplot/miller.py $PLOT_DIR $IN_SURFACE $OUT_SURFACE $N_LINES $VERBOSE_FLAG &
-  fi
-  if [ $FOURIER_FLAG -eq 1 ]
-  then
-    python ~/gacode/shared/python/pyrats/profiles_gen/fluxplot/fourier.py $PLOT_DIR $IN_SURFACE $OUT_SURFACE $N_LINES $VERBOSE_FLAG &
-  fi
-  if [ $COMP_FLAG -eq 1 ]
-  then
-    python ~/gacode/shared/python/pyrats/profiles_gen/fluxplot/comparison.py $PLOT_DIR $IN_SURFACE $OUT_SURFACE $N_LINES $VERBOSE_FLAG &
-  fi
+   python $PYROOT/fluxplot.py $SIMDIR $IN_SURFACE $OUT_SURFACE $N_LINES $SURF_TYPE & 
 fi
-
 #==============================================================================
 
 #==============================================================================
@@ -171,10 +164,9 @@ then
     N1=2
     N2=2
   fi
-  python ~/gacode/shared/python/pyrats/profiles_gen/plot.py $PLOT_DIR $N1 $N2 $PLOT_STRING &
+  python $PYROOT/plot.py $SIMDIR $N1 $N2 $PLOT_STRING &
   exit 0
 fi
-
 #==============================================================================
 
 #==============================================================================
@@ -182,7 +174,6 @@ fi
 
 if [ $OPTIONS_FLAG -eq 1 ]
 then
-  python ~/gacode/shared/python/pyrats/profiles_gen/options.py $PLOT_DIR &
+  python $PYROOT/options.py $SIMDIR &
 fi
-
 #==============================================================================
