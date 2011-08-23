@@ -137,6 +137,22 @@ pro all_profiles_event, all_profiles_obj
   oplot,r,y,color=color_vec[1]
   oplot,r,y,psym=8,symsize=dotsize
 
+; TESTING CODE TO BE REMOVED BEGIN
+  if (i_all_profile EQ 5) then begin
+      arr = fltarr(2,200)
+      openr, 1, 'electron_dlntdr_s.orig.idlout'
+      readf, 1, arr
+      close, 1
+      oplot, arr[0,*], arr[1,*], color=color_vec[2]
+  endif else begin
+      arr = fltarr(2,200)
+      openr, 1, 'electron_tem_s.orig.idlout'
+      readf, 1, arr
+      close, 1
+      oplot, arr[0,*], arr[1,*], color=color_vec[2]
+  endelse
+;END
+
   ;;---------------------------------------------------
   ;; DATA EXPORT
   ;;
