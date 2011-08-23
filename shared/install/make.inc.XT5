@@ -12,9 +12,9 @@ F77 = ftn
 
 # Compiler options/flags
 FMATH  = -r8
-FOPT   = -tp istanbul-64 -O3 -fast -Msmartalloc -fastsse
-FDEBUG = -g -Ktrap=fp -Mbounds -Minform=inform -Msmartalloc
-FPROF  = -tp istanbul-64 -O3 -fast -Msmartalloc -Mprof=func
+FOPT   = -tp istanbul-64 -O3 -fast -Msmartalloc -fastsse -Mnoopenmp
+FDEBUG = -g -Ktrap=fp -Mbounds -Minform=inform -Msmartalloc -Mnoopenmp
+FPROF  = -tp istanbul-64 -O3 -fast -Msmartalloc -Mprof=func -Mnoopenmp
 
 # Execute 'module load fftw/2.1.5'
 # Execute 'module load mumps/4.7.3_par' (parallel version) 
