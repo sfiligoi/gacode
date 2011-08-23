@@ -37,6 +37,11 @@ n_field   = int(sim.profile['n_field'])
 n_kinetic = int(sim.profile['n_kinetic'])
 
 t    = sim.t['(c_s/a)t']
+
+# Read data in gbflux_i and make gbflux
+sim.read_gbflux_i()
+sim.make_gbflux()
+
 flux = sim.gbflux
 
 # Manage field
@@ -67,7 +72,7 @@ if i_moment == 3:
 fig = plt.figure(figsize=(12,8))
 ax = fig.add_subplot(111)
 ax.grid(which="majorminor",ls=":")
-ax.grid(which="major",ls="-")
+ax.grid(which="major",ls=":")
 ax.set_xlabel('$(c_s/a) t$',fontsize=GFONTSIZE)
 ax.set_ylabel('$'+mtag+' \;('+ftag+')$',color='k',fontsize=GFONTSIZE)
 #=====================================

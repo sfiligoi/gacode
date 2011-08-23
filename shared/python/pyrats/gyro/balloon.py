@@ -32,6 +32,7 @@ index  = int(sys.argv[2])
 ftype  = sys.argv[3]
 
 sim.read_balloon()
+print sim.balloon.keys()
 
 #======================================
 fig = plt.figure(figsize=(10,6))

@@ -46,7 +46,8 @@ then
   echo "          -plot <type>"
   echo "          Generate plot of given type."
   echo "          If this keyword is omitted, data will be listed to the screen."
-  echo "           <type> = gbflux,"
+  echo "           <type> = freq,"
+  echo "                    gbflux,"
   echo "                    gbflux_i,"
   echo "                    gbflux_n,"
   echo "                    balloon,  [use -moment for indexing]"
@@ -134,6 +135,9 @@ then
 fi
 
 case "$PLOT_TYPE" in
+
+   freq)  
+	python $PYROOT/freq.py $SIMDIR $WINDOW $FTYPE & ;;
 
    gbflux)  
 	python $PYROOT/gbflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE & ;;

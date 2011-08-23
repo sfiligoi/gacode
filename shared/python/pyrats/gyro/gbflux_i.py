@@ -38,6 +38,10 @@ n_field   = int(sim.profile['n_field'])
 n_kinetic = int(sim.profile['n_kinetic'])
 
 t    = sim.t['(c_s/a)t']
+
+# Read data in gbflux_i
+sim.read_gbflux_i()
+
 flux = sim.gbflux_i
 
 # Manage field
@@ -73,9 +77,9 @@ for i in range(len(t)):
 fig = plt.figure(figsize=(12,8))
 ax = fig.add_subplot(111)
 ax.grid(which="majorminor",ls=":")
-ax.grid(which="major",ls="-")
-ax.set_xlabel('$(c_s/a) t$',fontsize=GFONTSIZE)
-ax.set_ylabel('$'+mtag+' \;('+ftag+')$',color='k',fontsize=GFONTSIZE)
+ax.grid(which="major",ls=":")
+ax.set_xlabel(r'$(r/a)$',fontsize=GFONTSIZE)
+ax.set_ylabel(r'$'+mtag+' \;('+ftag+')$',color='k',fontsize=GFONTSIZE)
 ax.set_title(str(t[imin])+' < (c_s/a) t < '+str(t[-1]))
 #=====================================
 
