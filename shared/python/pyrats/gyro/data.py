@@ -428,16 +428,16 @@ class GYROData:
         import glob
         import string
 
-        m      = self.profile['box_multiplier']
-        n_x    = self.profile['n_x']
-        n_p    = n_x/m
-        n_next = self.profile['n_theta_plot']*n_p
+        m     = self.profile['box_multiplier']
+        n_x   = self.profile['n_x']
+        n_ang = self.profile['n_theta_plot']*n_x/m
 
         for filename in glob.glob(self.directory_name+'/out.gyro.balloon*'):
             ext = string.splitfields(filename,'.')[-1]
             data = self.read_file(ext,12)
-            self.balloon[ext] = data.reshape((2,n_next,m,self.t['n_time']),order='F')
-
+            u = data.reshape((2,n_ang,m,self.t['n_time']),order='F') 
+            self.balloon[ext] = u[0,...]+1j*u[1,...]
+             
     #------------------------------------------------------------
     # Create data from other previously imported data
 
