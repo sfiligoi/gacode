@@ -136,6 +136,8 @@ module gkcoll_globals
   real, dimension(:,:,:,:,:), allocatable :: f
   real, dimension(:,:) , allocatable :: phi
 
+  real, dimension(:), allocatable :: indx_xi, indx_r
+
   ! normalizations for experimental profiles
   real  :: temp_norm_fac, charge_norm_fac
   real  :: a_meters

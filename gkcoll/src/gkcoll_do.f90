@@ -53,6 +53,17 @@ subroutine gkcoll_do
   call gkcoll_check
   if(error_status > 0) goto 100
 
+  allocate(indx_xi(n_xi))
+  do ix=1,n_xi
+     indx_xi(ix) = ix-1
+  enddo
+  allocate(indx_r(n_radial))
+  do ir=1,n_radial
+     indx_r(ir) = -n_radial/2 + (ir-1)
+  enddo
+
+  call EQUIL_alloc(1)
+
   ! cyclic index (for theta-periodicity)
   allocate(thcyc(1-n_theta:2*n_theta))
   do it=1,n_theta
@@ -101,6 +112,8 @@ subroutine gkcoll_do
   enddo
 
 100 continue
+  if(allocated(indx_xi))    deallocate(indx_xi)
+  if(allocated(indx_r))     deallocate(indx_r)
   if(allocated(thcyc))      deallocate(thcyc)
   if(allocated(e_grid))     deallocate(e_grid)
   if(allocated(w_e))        deallocate(w_e)
@@ -110,6 +123,8 @@ subroutine gkcoll_do
   if(allocated(xi_mat_inv)) deallocate(xi_mat_inv)
   if(allocated(f))          deallocate(f)
   if(allocated(phi))        deallocate(phi)
+
+  call EQUIL_alloc(0)
 
 contains
 

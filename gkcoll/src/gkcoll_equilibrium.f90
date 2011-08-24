@@ -17,14 +17,12 @@ module gkcoll_equilibrium
   real, dimension(:), allocatable :: Bmag       ! B/Bunit
   real, dimension(:), allocatable :: gradpar_Bmag ! bhat dot grad/aBmag/Bunit
   real, dimension(:), allocatable :: bigR       ! R/a (global)
+  real, dimension(:,:), allocatable :: k_perp
   ! radial deriv of the volume enclosed by a flux surface
   real, dimension(:), allocatable :: v_prime_g  ! (ngr)
   
   ! Parameters needed for post-processing analysis
   real :: I_div_psip    ! I(psi)/psi_prime = q f / r
-  real :: Bmag2_avg     ! <(B/Bunit)^2>
-  real :: Bmag2inv_avg  ! <(Bunit/B)^2>
-  real :: gradpar_Bmag2_avg ! <(bhat dot grad/aBmag/Bunit)^2>
   
   logical, private :: initialized = .false.
   
@@ -53,6 +51,7 @@ contains
        allocate(Bmag(n_theta))
        allocate(gradpar_Bmag(n_theta))
        allocate(v_prime_g(n_gr))
+       allocate(k_perp(n_theta,n_radial))
        
 
        d_theta = 2*pi/n_theta
@@ -86,6 +85,7 @@ contains
        deallocate(Bmag)
        deallocate(gradpar_Bmag)
        deallocate(v_prime_g)
+       deallocate(k_perp)
 
        call GEO_alloc(0)
         
@@ -142,9 +142,17 @@ contains
             * (GEO_gcos1 * GEO_bt / Bmag(it)  & 
             -  GEO_gsin * GEO_nsin * GEO_grad_r) &
             * r(ir)
+
        ! flux-surface average weights
        w_theta(it) = GEO_g_theta / Bmag(it)
        sum = sum + w_theta(it)
+
+       do ir=1,n_radial
+          k_perp(it,ir) = sqrt((2.0*pi*indx_r(ir)*GEO_grad_r/r_length &
+               + k_theta*GEO_gq*GEO_captheta)**2 &
+               + (k_theta*GEO_gq)**2)
+       enddo
+       
     enddo
     
     I_div_psip = GEO_f * q(ir) / r(ir)
@@ -155,17 +163,6 @@ contains
     
     ! v_prime_g = d Volume of flux surface / dr
     v_prime_g(ir) = r(ir)*rmaj(ir)*sum/n_theta * 4 * pi * pi
-    
-    ! Flux surface averages of B^2 and 1/B^2
-    Bmag2_avg = 0.0
-    Bmag2inv_avg = 0.0
-    gradpar_Bmag2_avg = 0.0
-    do it=1,n_theta
-       Bmag2_avg = Bmag2_avg + w_theta(it) * Bmag(it) * Bmag(it)
-       Bmag2inv_avg = Bmag2inv_avg + w_theta(it) * 1.0 / (Bmag(it) * Bmag(it))
-       gradpar_Bmag2_avg = gradpar_Bmag2_avg + w_theta(it) * gradpar_Bmag(it) &
-            * gradpar_Bmag(it)
-    enddo
     
   end subroutine EQUIL_DO
 
