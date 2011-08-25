@@ -168,7 +168,7 @@ class GYROData:
         dimensions: n_n x n_time"""
 
         import numpy as np
-        import os.path
+        import sys
 
         try:
             freq = np.loadtxt(self.directory_name+'/out.gyro.freq').transpose()
@@ -345,7 +345,7 @@ class GYROData:
 
     def read_moment_u(self):
         """Reads in moment_u data.  Output is numpy array with dimensions:
-        2 x n_theta_plot x n_x x n_field x n_n x n_time"""
+        n_theta_plot x n_x x n_field x n_n x n_time"""
 
         n_theta_plot = self.profile['n_theta_plot']
         n_x          = self.profile['n_x']
@@ -362,7 +362,7 @@ class GYROData:
 
     def read_moment_n(self):
         """Reads in moment_n data.  Output is numpy array with dimensions:
-        2 x n_theta_plot x n_x x n_kinetic x n_n x n_time"""
+        n_theta_plot x n_x x n_kinetic x n_n x n_time"""
 
         n_theta_plot = self.profile['n_theta_plot']
         n_x          = self.profile['n_x']
@@ -379,7 +379,7 @@ class GYROData:
 
     def read_moment_e(self):
         """Reads in moment_e data.  Output is numpy array with dimensions:
-        2 x n_theta_plot x n_x x n_kinetic x n_n x n_time"""
+        n_theta_plot x n_x x n_kinetic x n_n x n_time"""
 
         n_theta_plot = self.profile['n_theta_plot']
         n_x          = self.profile['n_x']
@@ -396,7 +396,7 @@ class GYROData:
 
     def read_moment_v(self):
         """Reads in moment_v data.  Output is numpy array with dimensions:
-        2 x n_theta_plot x n_x x n_kinetic x n_n x n_time"""
+        n_theta_plot x n_x x n_kinetic x n_n x n_time"""
 
         n_theta_plot = self.profile['n_theta_plot']
         n_x          = self.profile['n_x']

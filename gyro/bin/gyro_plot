@@ -51,6 +51,7 @@ then
   echo "                    gbflux_i,"
   echo "                    gbflux_n,"
   echo "                    balloon,  [use -moment for indexing]"
+  echo "                    fluctuation2d"
   echo
   echo "Example:"
   echo
@@ -135,6 +136,9 @@ then
 fi
 
 case "$PLOT_TYPE" in
+
+   fluctuation2d)  
+	python $PYROOT/fluctuation2d.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE & ;;
 
    freq)  
 	python $PYROOT/freq.py $SIMDIR $WINDOW $FTYPE & ;;
