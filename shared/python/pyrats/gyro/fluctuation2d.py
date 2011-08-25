@@ -44,6 +44,11 @@ n_theta_plot = sim.profile['n_theta_plot']
 
 t = sim.t['(c_s/a)t']
 
+if field == 's':
+    field = 0
+
+field = int(field)
+
 # Read data in gbflux_i
 sim.read_moment_u()
 
@@ -52,7 +57,7 @@ if n_theta_plot == 1:
 else:
     j = n_theta_plot/2
 
-f = np.array(sim.moment_u[j,:,0,:,-1],dtype=complex)
+f = np.array(sim.moment_u[j,:,field,:,-1],dtype=complex)
 
 nxp = 256
 nyp = 8*n_n
@@ -97,16 +102,12 @@ ax.set_xlabel(r'$r/a$',fontsize=GFONTSIZE)
 ax.set_ylabel(r'$\alpha/2\pi$',fontsize=GFONTSIZE)
 
 # Manage field
-if field == 's':
-    ftag = '\mathrm{total}'
-else:
-    i_field = int(field)
-    if i_field == 0: 
-        ftag = '\mathrm{electrostatic}'
-    if i_field == 1: 
-        ftag = '\mathrm{flutter}'
-    if i_field == 2: 
-        ftag = '\mathrm{compression}'
+if i_field == 0: 
+    ftag = '\mathrm{electrostatic}'
+if i_field == 1: 
+    ftag = '\mathrm{flutter}'
+if i_field == 2: 
+    ftag = '\mathrm{compression}'
 
 # Manage moment
 if i_moment == 0: 
