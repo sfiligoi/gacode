@@ -25,7 +25,7 @@ def average(f,t,window):
     return ave
 #---------------------------------------------------------------
 
-GFONTSIZE=16
+GFONTSIZE=18
 
 sim       = GYROData(sys.argv[1])
 field     = sys.argv[2]
@@ -36,7 +36,7 @@ ftype     = sys.argv[5]
 n_field   = int(sim.profile['n_field'])
 n_kinetic = int(sim.profile['n_kinetic'])
 
-t    = sim.t['(c_s/a)t']
+t = sim.t['(c_s/a)t']
 
 # Read data in gbflux_i and make gbflux
 sim.read_gbflux_i()
@@ -47,26 +47,14 @@ flux = sim.gbflux
 # Manage field
 if field == 's':
     flux0 = np.sum(flux,axis=1)
-    ftag = '\mathrm{total}'
+    ftag  = sim.tagfield[3]
 else:
     i_field = int(field)
-    flux0 = flux[:,i_field,:,:]
-    if i_field == 0: 
-        ftag = '\mathrm{electrostatic}'
-    if i_field == 1: 
-        ftag = '\mathrm{flutter}'
-    if i_field == 2: 
-        ftag = '\mathrm{compression}'
+    flux0   = flux[:,i_field,:,:]
+    ftag    = sim.tagfield[i_field]
 
 # Manage moment
-if i_moment == 0: 
-    mtag = '\Gamma/\Gamma_\mathrm{GB}'
-if i_moment == 1: 
-    mtag = 'Q/Q_\mathrm{GB}'
-if i_moment == 2: 
-    mtag = '\Pi/\Pi_\mathrm{GB}'
-if i_moment == 3: 
-    mtag = 'S/S_\mathrm{GB}'
+mtag = sim.tagmom[i_moment]
 
 #======================================
 fig = plt.figure(figsize=(12,8))
@@ -86,20 +74,11 @@ color = ['k','m','b','c']
 
 # Loop over species
 for i in range(n_kinetic):
-    if sim.profile['electron_method'] == 2 or  sim.profile['electron_method'] == 4:
-        if i == n_kinetic-1:
-            stag = 'elec  '
-        else:
-            stag = 'ion-'+str(i+1)+' '
-    if sim.profile['electron_method'] == 1:
-        stag = 'ion-'+str(i+1)+' '
-    if sim.profile['electron_method'] == 3:
-        stag = 'elec  '
-
-    ave = average(flux0[i,i_moment,:],t,window)
-    y = ave*np.ones(len(t))
-    ax.plot(t[imin:],y[imin:],'--',color=color[i])
+    ave   = average(flux0[i,i_moment,:],t,window)
+    stag  = sim.tagspec[i]
     label = stag+': '+str(round(ave,3))
+    y     = ave*np.ones(len(t))
+    ax.plot(t[imin:],y[imin:],'--',color=color[i])
     ax.plot(t,flux0[i,i_moment,:],label=label,color=color[i])
 
 ax.legend()

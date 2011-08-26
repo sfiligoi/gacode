@@ -73,7 +73,7 @@ PLOT_TYPE=gbflux
 DIFF_FLAG=0
 I_KINETIC=0
 I_FIELD="s"
-I_MOMENT=1
+I_MOMENT=0
 WINDOW=0.8
 FTYPE=screen
 #==============================================================================

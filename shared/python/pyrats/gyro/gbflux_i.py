@@ -26,7 +26,7 @@ def average(f,t,window,n):
     return ave
 #---------------------------------------------------------------
 
-GFONTSIZE=16
+GFONTSIZE=18
 
 sim       = GYROData(sys.argv[1])
 field     = sys.argv[2]
@@ -37,7 +37,7 @@ ftype     = sys.argv[5]
 n_field   = int(sim.profile['n_field'])
 n_kinetic = int(sim.profile['n_kinetic'])
 
-t    = sim.t['(c_s/a)t']
+t = sim.t['(c_s/a)t']
 
 # Read data in gbflux_i
 sim.read_gbflux_i()
@@ -47,26 +47,14 @@ flux = sim.gbflux_i
 # Manage field
 if field == 's':
     flux0 = np.sum(flux,axis=1)
-    ftag = '\mathrm{total}'
+    ftag  = sim.tagfield[3]
 else:
     i_field = int(field)
     flux0 = flux[:,i_field,:,:,:]
-    if i_field == 0: 
-        ftag = '\mathrm{electrostatic}'
-    if i_field == 1: 
-        ftag = '\mathrm{flutter}'
-    if i_field == 2: 
-        ftag = '\mathrm{compression}'
+    ftag  = sim.tagfield[i_field]
 
 # Manage moment
-if i_moment == 0: 
-    mtag = '\Gamma/\Gamma_\mathrm{GB}'
-if i_moment == 1: 
-    mtag = 'Q/Q_\mathrm{GB}'
-if i_moment == 2: 
-    mtag = '\Pi/\Pi_\mathrm{GB}'
-if i_moment == 3: 
-    mtag = 'S/S_\mathrm{GB}'
+mtag = sim.tagmom[i_moment]
 
 # Determine tmin
 for i in range(len(t)):
@@ -78,9 +66,9 @@ fig = plt.figure(figsize=(12,8))
 ax = fig.add_subplot(111)
 ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
-ax.set_xlabel(r'$(r/a)$',fontsize=GFONTSIZE)
+ax.set_xlabel(r'$r/a$',fontsize=GFONTSIZE)
 ax.set_ylabel(r'$'+mtag+' \;('+ftag+')$',color='k',fontsize=GFONTSIZE)
-ax.set_title(str(t[imin])+' < (c_s/a) t < '+str(t[-1]))
+ax.set_title(r'$'+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'$',fontsize=GFONTSIZE)
 #=====================================
 
 color = ['k','m','b','c']
@@ -90,23 +78,13 @@ ave = np.zeros(n_x)
 
 # Loop over species
 for i in range(n_kinetic):
-    if sim.profile['electron_method'] == 2 or  sim.profile['electron_method'] == 4:
-        if i == n_kinetic-1:
-            stag = 'elec  '
-        else:
-            stag = 'ion-'+str(i+1)+' '
-    if sim.profile['electron_method'] == 1:
-        stag = 'ion-'+str(i+1)+' '
-    if sim.profile['electron_method'] == 3:
-        stag = 'elec  '
-
-    label = stag
+    stag = sim.tagspec[i]
     ave[:] = average(flux0[i,i_moment,:,:],t,window,n_x)
-    ax.plot(sim.profile['r'],ave[:],label=label,color=color[i])
+    ax.plot(sim.profile['r'],ave[:],label=stag,color=color[i])
 
 ax.legend()
 if ftype == 'screen':
     plt.show()
 else:
-    outfile = 'gbflux.'+ftype
+    outfile = 'gbflux_i.'+ftype
     plt.savefig(outfile)

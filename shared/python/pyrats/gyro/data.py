@@ -31,7 +31,9 @@ class GYROData:
         >>> plt.show()
     """
 
+    #---------------------------------------------------------------------------#
     # Methods
+
     def __init__(self, sim_directory):
         """Constructor reads in data from sim_directory and creates new object.
         """
@@ -41,6 +43,7 @@ class GYROData:
         self.read_profile()
         self.read_geometry()
         self.read_t()
+        self.make_tags()
 
         # The rest of the possible read routines should NOT be done automatically.
 
@@ -71,9 +74,12 @@ class GYROData:
         path = '$GACODE_ROOT/shared/python/pyrats'
         sys.path.append(expanduser(expandvars(path)))
 
+    #---------------------------------------------------------------------------#
+
     def __dir__(self):
         return self.loaded
 
+    #---------------------------------------------------------------------------#
 
     def init_data(self):
         """Initialize object data."""
@@ -101,13 +107,19 @@ class GYROData:
         self.k_perp_squared = []
         self.loaded         = []
 
-
+        self.tagspec    = []
+        self.tagmom     = []
+        self.tagmomtext = []
+ 
+    #---------------------------------------------------------------------------#
+        
     def set_directory(self, path):
         """Set the simulation directory."""
 
         from os.path import expanduser, expandvars
         self.directory_name = expanduser(expandvars(path))
 
+    #---------------------------------------------------------------------------#
 
     def get_input(self, input_name):
         """Return the specified variable from input.gyro.gen.
@@ -126,6 +138,7 @@ class GYROData:
                 print "Cannot find specified input parameter: ", input_name
                 return 0
 
+    #---------------------------------------------------------------------------#
 
     def read_file(self, fname, dSize):
         """Reads GYRO data file.  Returns a numpy array with dimensions
@@ -145,6 +158,7 @@ class GYROData:
         else:
             return []
 
+    #---------------------------------------------------------------------------#
 
     def read_t(self):
         """Read out.gyro.t to get time data."""
@@ -162,6 +176,7 @@ class GYROData:
         self.t['(c_s/a)t'] = t[:,1]
         self.loaded.append('t')
 
+    #---------------------------------------------------------------------------#
 
     def read_freq(self):
         """Reads in frequency data.  Output is dictionary of numpy arrays with
@@ -185,6 +200,7 @@ class GYROData:
 
         self.loaded.append('freq')
 
+    #---------------------------------------------------------------------------#
 
     def read_profile(self):
         """Read out.gyro.profile to get control data.  Output is dictionary
@@ -282,6 +298,7 @@ class GYROData:
             n_theta = self.profile['n_theta_plot']
             self.profile['theta_plot'] = -np.pi+2*np.pi*np.arange(n_theta)/float(n_theta)
 
+    #---------------------------------------------------------------------------#
 
     def read_geometry(self):
         """Reads in geometry_array data.  Output is dictionary of numpy arrays
@@ -302,6 +319,7 @@ class GYROData:
             self.geometry['G_q']     = temp[9,:,:]
             self.geometry['THETA']   = temp[10,:,:]
 
+    #---------------------------------------------------------------------------#
 
     def read_gbflux_i(self):
         """Reads in gbflux_i data.  Output is numpy array with dimensions:
@@ -322,6 +340,7 @@ class GYROData:
             print "ERROR (GYROData): out.gyro.gbflux_i not found."
             sys.exit()
 
+    #---------------------------------------------------------------------------#
 
     def read_gbflux_n(self):
         """Reads gbflux_n data.  Output is numpy array with dimensions:
@@ -342,6 +361,7 @@ class GYROData:
             print "ERROR (GYROData): out.gyro.gbflux_n not found."
             sys.exit()
 
+    #---------------------------------------------------------------------------#
 
     def read_moment_u(self):
         """Reads in moment_u data.  Output is numpy array with dimensions:
@@ -359,6 +379,7 @@ class GYROData:
             self.moment_u = self.moment_u[0] + 1j*self.moment_u[1]
             self.loaded.append('moment_u')
 
+    #---------------------------------------------------------------------------#
 
     def read_moment_n(self):
         """Reads in moment_n data.  Output is numpy array with dimensions:
@@ -376,6 +397,7 @@ class GYROData:
             self.moment_n = self.moment_n[0] + 1j*self.moment_n[1]
             self.loaded.append('moment_n')
 
+    #---------------------------------------------------------------------------#
 
     def read_moment_e(self):
         """Reads in moment_e data.  Output is numpy array with dimensions:
@@ -393,6 +415,7 @@ class GYROData:
             self.moment_e = self.moment_e[0] + 1j*self.moment_e[1]
             self.loaded.append('moment_e')
 
+    #---------------------------------------------------------------------------#
 
     def read_moment_v(self):
         """Reads in moment_v data.  Output is numpy array with dimensions:
@@ -410,6 +433,7 @@ class GYROData:
             self.moment_v = self.moment_v[0] + 1j*self.moment_v[1]
             self.loaded.append('moment_v')
 
+    #---------------------------------------------------------------------------#
 
     def read_moment_zero(self):
         """Reads in moment_zero data.  Output is numpy array with dimensions:
@@ -425,6 +449,7 @@ class GYROData:
             self.moment_zero = moment_zero.reshape((n_x,n_kinetic,n_moment,t),order='F')
             self.loaded.append('moment_zero')
 
+    #---------------------------------------------------------------------------#
 
     def read_flux_velocity(self):
         """Reads out.gyro.flux_velocity.  
@@ -443,6 +468,8 @@ class GYROData:
             self.loaded.append('flux_velocity')
 
 
+    #---------------------------------------------------------------------------#
+
     def read_k_perp_squared(self):
         """Reads out.gyro.k_perp_squared.  
            Output is numpy array with dimensions: (n_n,n_time)"""
@@ -452,6 +479,8 @@ class GYROData:
             t = len(k_perp_squared)/self.profile['n_n']
             self.k_perp_squared = k_perp_squared.reshape((self.profile['n_n'],t),order='F')
             self.loaded.append('k_perp_squared')
+
+    #---------------------------------------------------------------------------#
 
     def read_balloon(self):
         """Reads out.gyro.balloon*.  Data is stored in self.balloon"""
@@ -496,6 +525,7 @@ class GYROData:
             n = self.profile['n_explicit_damp']
             self.gbflux = np.mean(self.gbflux_i[:,:,:,n:-n,:],axis=3)
 
+    #---------------------------------------------------------------------------#
 
     def make_diff(self):
         """Makes diff.  Output is dictionary of numpy arrays with
@@ -526,6 +556,8 @@ class GYROData:
                 self.profile['tem_s'][i,ir_norm]*
                 self.profile['den_s'][i,ir_norm])
 
+
+    #---------------------------------------------------------------------------#
 
     def make_diff_i(self):
         """Makes diff_i.  Output is dictionary of numpy arrays with
@@ -567,7 +599,7 @@ class GYROData:
         ax = fig.add_subplot(dim[0], dim[1], self.plotcounter)
         ax.plot(x, y)
 
-    #----------------------------------------------------------------------#
+    #---------------------------------------------------------------------------#
 
     def equil_time(self):
         """Equalizes the lengths of the different data arrays, in the case that
@@ -617,3 +649,48 @@ class GYROData:
                 self.flux_velocity = self.flux_velocity[...,0:cutoff]
             elif item == 'k_perp_squared':
                 self.k_perp_squared = self.k_perp_squared[...,0:cutoff]
+
+
+    def make_tags(self):
+        """Generate tags for fields, moments and species"""                 
+
+        import numpy as np
+
+        n_kinetic = self.profile['n_kinetic']        
+        melec     = self.profile['electron_method']
+
+        # Species tags        
+
+        for i in range(n_kinetic):
+
+            if melec == 2 or melec == 4:
+                if i == n_kinetic-1:
+                    self.tagspec.append('elec')
+                else:
+                    self.tagspec.append('ion-'+str(i+1))
+ 
+            if melec == 1:
+                self.tagspec.append('ion-'+str(i+1))
+                    
+            if melec == 3:
+                self.tagspec.append('elec')
+        
+       # Moment tags
+
+        self.tagmomtext = ['GAMMA [GB]','Q [GB]','PI [GB]','S [GB]']
+
+        self.tagmom = ['\Gamma/\Gamma_\mathrm{GB}',
+                       'Q/Q_\mathrm{GB}',
+                       '\Pi/\Pi_\mathrm{GB}',
+                       'S/S_\mathrm{GB}']
+
+       # Field tags
+        self.tagfieldtext = ['Phi',
+                             'Apar',
+                             'Bpar',
+                             'Tot']        
+
+        self.tagfield = ['\mathrm{electrostatic}',
+                         '\mathrm{flutter}',
+                         '\mathrm{compression}',
+                         '\mathrm{total}']

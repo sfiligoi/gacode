@@ -25,7 +25,7 @@ def average(f,t,window):
     return ave
 #---------------------------------------------------------------
 
-GFONTSIZE=16
+GFONTSIZE=18
 
 sim    = GYROData(sys.argv[1])
 index  = int(sys.argv[2])
@@ -59,5 +59,5 @@ ax.legend()
 if ftype == 'screen':
     plt.show()
 else:
-    outfile = 'gbflux.'+ftype
+    outfile = key+'.'+ftype
     plt.savefig(outfile)
