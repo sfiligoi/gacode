@@ -31,6 +31,7 @@ sim       = GYROData(sys.argv[1])
 field     = sys.argv[2]
 i_moment  = int(sys.argv[3])
 window    = float(sys.argv[4])
+ftype     = sys.argv[5]
 
 n_field   = int(sim.profile['n_field'])
 n_kinetic = int(sim.profile['n_kinetic'])
