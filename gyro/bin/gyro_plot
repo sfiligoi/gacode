@@ -50,8 +50,12 @@ then
   echo "                    gbflux,"
   echo "                    gbflux_i,"
   echo "                    gbflux_n,"
-  echo "                    balloon,  [use -moment for indexing]"
-  echo "                    fluctuation2d"
+  echo "                    balloon [use -moment for indexing],"
+  echo "                    fluctuation2d [-moment 0 (n, all species) "
+  echo "                                   -moment 1 (v, all species) "
+  echo "                                   -moment 2 (e, all species) "
+  echo "                                   -moment 3 (all fields)],"
+  echo "                    moment_zero"
   echo
   echo "Example:"
   echo
@@ -137,8 +141,11 @@ fi
 
 case "$PLOT_TYPE" in
 
+   moment_zero)  
+	python $PYROOT/moment_zero.py $SIMDIR $I_MOMENT $WINDOW $FTYPE & ;;
+
    fluctuation2d)  
-	python $PYROOT/fluctuation2d.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE & ;;
+	python $PYROOT/fluctuation2d.py $SIMDIR $I_MOMENT $FTYPE & ;;
 
    freq)  
 	python $PYROOT/freq.py $SIMDIR $WINDOW $FTYPE & ;;

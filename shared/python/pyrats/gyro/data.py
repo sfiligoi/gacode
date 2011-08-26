@@ -457,8 +457,8 @@ class GYROData:
     #---------------------------------------------------------------------------#
 
     def read_moment_zero(self):
-        """Reads in moment_zero data.  Output is numpy array with dimensions:
-        n_x x n_kinetic x n_moment x n_time"""
+        """Read data in out.gyro.moment_zero, store in self.moment_zero. 
+        Dimensions: (n_x,n_kinetic,n_moment,n_time)"""
 
         import sys
         import numpy as np
