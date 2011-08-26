@@ -25,7 +25,7 @@ def average(f,t,window):
     return ave
 #---------------------------------------------------------------
 
-GFONTSIZE=16
+GFONTSIZE=18
 
 sim    = GYROData(sys.argv[1])
 index  = int(sys.argv[2])
@@ -34,13 +34,15 @@ ftype  = sys.argv[3]
 sim.read_balloon()
 print sim.balloon.keys()
 
+key = sim.balloon.keys()[index]
+
 #======================================
 fig = plt.figure(figsize=(10,6))
 ax = fig.add_subplot(111)
 ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
 ax.set_xlabel(r'$\theta_*/\pi$',fontsize=GFONTSIZE)
-ax.set_ylabel(sim.balloon.keys()[index],color='k',fontsize=GFONTSIZE)
+ax.set_ylabel(key,color='k',fontsize=GFONTSIZE)
 #=====================================
 
 n_p   = sim.profile['n_x']/sim.profile['box_multiplier']
@@ -48,12 +50,8 @@ n_ang = sim.profile['n_theta_plot']*n_p
 
 x = -(1.0+n_p)+2.0*n_p*np.arange(n_ang)/float(n_ang)
 
-p = 0
-for i in sim.balloon.keys():
-    if p == index:
-        ax.plot(x,np.real(sim.balloon[i][:,0,-1]),color='k',label='Re')
-        ax.plot(x,np.imag(sim.balloon[i][:,0,-1]),color='m',label='Im')
-    p = p+1
+ax.plot(x,np.real(sim.balloon[key][:,0,-1]),color='k',label='Re')
+ax.plot(x,np.imag(sim.balloon[key][:,0,-1]),color='m',label='Im')
 
 ax.set_xlim([1-n_p,-1+n_p])
 
@@ -61,5 +59,5 @@ ax.legend()
 if ftype == 'screen':
     plt.show()
 else:
-    outfile = 'gbflux.'+ftype
+    outfile = key+'.'+ftype
     plt.savefig(outfile)

@@ -3,7 +3,7 @@ class GYROData:
 
     Data:
 
-    directory_name = ""
+    dirname = ""
     profile  = {}
     geometry = {}
     t        = {}
@@ -31,7 +31,9 @@ class GYROData:
         >>> plt.show()
     """
 
+    #---------------------------------------------------------------------------#
     # Methods
+
     def __init__(self, sim_directory):
         """Constructor reads in data from sim_directory and creates new object.
         """
@@ -41,6 +43,7 @@ class GYROData:
         self.read_profile()
         self.read_geometry()
         self.read_t()
+        self.make_tags()
 
         # The rest of the possible read routines should NOT be done automatically.
 
@@ -71,14 +74,17 @@ class GYROData:
         path = '$GACODE_ROOT/shared/python/pyrats'
         sys.path.append(expanduser(expandvars(path)))
 
+    #---------------------------------------------------------------------------#
+
     def __dir__(self):
         return self.loaded
 
+    #---------------------------------------------------------------------------#
 
     def init_data(self):
         """Initialize object data."""
 
-        self.directory_name = ""
+        self.dirname = ""
 
         self.profile  = {}
         self.geometry = {}
@@ -101,13 +107,19 @@ class GYROData:
         self.k_perp_squared = []
         self.loaded         = []
 
-
+        self.tagspec    = []
+        self.tagmom     = []
+        self.tagmomtext = []
+ 
+    #---------------------------------------------------------------------------#
+        
     def set_directory(self, path):
         """Set the simulation directory."""
 
         from os.path import expanduser, expandvars
-        self.directory_name = expanduser(expandvars(path))
+        self.dirname = expanduser(expandvars(path))
 
+    #---------------------------------------------------------------------------#
 
     def get_input(self, input_name):
         """Return the specified variable from input.gyro.gen.
@@ -117,7 +129,7 @@ class GYROData:
         Ex: get_input("TIME_STEP")
         """
 
-        input_file = file(self.directory_name + 'input.gyro.gen', 'r')
+        input_file = file(self.dirname+'input.gyro.gen', 'r')
         for line in input_file:
             try:
                 if line.split()[1] == input_name:
@@ -126,33 +138,16 @@ class GYROData:
                 print "Cannot find specified input parameter: ", input_name
                 return 0
 
-
-    def read_file(self, fname, dSize):
-        """Reads GYRO data file.  Returns a numpy array with dimensions
-        matching input data."""
-
-        import numpy as np
-        import pyrats.fileupload as fileupload 
-        import sys
-        import os
-
-        fname = 'out.gyro.' + fname
-        filename = self.directory_name + '/' + fname
-        f = np.array([])
-        if fname in os.listdir(self.directory_name):
-            f = fileupload.loadtxt(filename, dSize)
-            return f
-        else:
-            return []
-
+    #---------------------------------------------------------------------------#
 
     def read_t(self):
         """Read out.gyro.t to get time data."""
 
+        import sys
         import numpy as np
 
         try:
-            t = np.loadtxt(self.directory_name + '/out.gyro.t')
+            t = np.loadtxt(self.dirname + '/out.gyro.t')
         except:
             print "ERROR (GYROData): Fatal error!  Missing out.gyro.t."
             sys.exit()
@@ -162,16 +157,17 @@ class GYROData:
         self.t['(c_s/a)t'] = t[:,1]
         self.loaded.append('t')
 
+    #---------------------------------------------------------------------------#
 
     def read_freq(self):
         """Reads in frequency data.  Output is dictionary of numpy arrays with
         dimensions: n_n x n_time"""
 
         import numpy as np
-        import os.path
+        import sys
 
         try:
-            freq = np.loadtxt(self.directory_name+'/out.gyro.freq').transpose()
+            freq = np.loadtxt(self.dirname+'/out.gyro.freq').transpose()
         except:
             print "ERROR (GYROData): Missing out.gyro.freq."
             sys.exit()
@@ -185,6 +181,7 @@ class GYROData:
 
         self.loaded.append('freq')
 
+    #---------------------------------------------------------------------------#
 
     def read_profile(self):
         """Read out.gyro.profile to get control data.  Output is dictionary
@@ -194,7 +191,7 @@ class GYROData:
         import numpy as np
 
         try:
-            profile = np.loadtxt(self.directory_name + '/out.gyro.profile')
+            profile = np.loadtxt(self.dirname+'/out.gyro.profile')
         except:
             print "ERROR (GYROData): Fatal error!  Missing out.gyro.profile."
             sys.exit()
@@ -282,176 +279,250 @@ class GYROData:
             n_theta = self.profile['n_theta_plot']
             self.profile['theta_plot'] = -np.pi+2*np.pi*np.arange(n_theta)/float(n_theta)
 
+    #---------------------------------------------------------------------------#
 
     def read_geometry(self):
         """Reads in geometry_array data.  Output is dictionary of numpy arrays
         with dimensions: n_fine x n_x."""
         
-        geometry = self.read_file('geometry_arrays', 16)
-        if len(geometry) > 0:
-            temp = geometry.reshape((11, self.profile['n_fine'], self.profile['n_x']), order='F')
-            self.geometry['v']       = temp[0,:,:]
-            self.geometry['gsin']    = temp[1,:,:]
-            self.geometry['gcos1']   = temp[2,:,:]
-            self.geometry['gcos2']   = temp[3,:,:]
-            self.geometry['usin']    = temp[4,:,:]
-            self.geometry['ucos']    = temp[5,:,:]
-            self.geometry['B']       = temp[6,:,:]
-            self.geometry['G_theta'] = temp[7,:,:]
-            self.geometry['grad_r']  = temp[8,:,:]
-            self.geometry['G_q']     = temp[9,:,:]
-            self.geometry['THETA']   = temp[10,:,:]
+        import sys
+        import numpy as np
 
+        try:
+            geometry = np.fromfile(self.dirname+'/out.gyro.geometry_arrays',dtype=float,sep=" ")
+        except:
+            print "ERROR (GYROData): out.gyro.geometry not found."
+            sys.exit()
+
+        temp = geometry.reshape((11, self.profile['n_fine'], self.profile['n_x']), order='F')
+        self.geometry['v']       = temp[0,:,:]
+        self.geometry['gsin']    = temp[1,:,:]
+        self.geometry['gcos1']   = temp[2,:,:]
+        self.geometry['gcos2']   = temp[3,:,:]
+        self.geometry['usin']    = temp[4,:,:]
+        self.geometry['ucos']    = temp[5,:,:]
+        self.geometry['B']       = temp[6,:,:]
+        self.geometry['G_theta'] = temp[7,:,:]
+        self.geometry['grad_r']  = temp[8,:,:]
+        self.geometry['G_q']     = temp[9,:,:]
+        self.geometry['THETA']   = temp[10,:,:]
+        self.loaded.append('geometry')
+
+    #---------------------------------------------------------------------------#
 
     def read_gbflux_i(self):
         """Reads in gbflux_i data.  Output is numpy array with dimensions:
         n_kinetic x n_field x 4 x n_x x n_time"""
 
         import sys
+        import numpy as np
 
         n_kinetic = self.profile['n_kinetic']
         n_field   = self.profile['n_field']
         n_x       = self.profile['n_x']
       
-        gbflux_i = self.read_file('gbflux_i',12)
-        if len(gbflux_i) > 0:
-            t = len(gbflux_i)/(n_kinetic*n_field*4*n_x)
-            self.gbflux_i = gbflux_i.reshape((n_kinetic,n_field,4,n_x,t),order='F')
-            self.loaded.append('gbflux_i')
-        else:
+        try:
+            gbflux_i = np.fromfile(self.dirname+'/out.gyro.gbflux_i',dtype=float,sep=" ")
+        except:
             print "ERROR (GYROData): out.gyro.gbflux_i not found."
             sys.exit()
 
+        t = len(gbflux_i)/(n_kinetic*n_field*4*n_x)
+        self.gbflux_i = gbflux_i.reshape((n_kinetic,n_field,4,n_x,t),order='F')
+        self.loaded.append('gbflux_i')
+
+    #---------------------------------------------------------------------------#
 
     def read_gbflux_n(self):
         """Reads gbflux_n data.  Output is numpy array with dimensions:
         n_kinetic x n_field x 4 x n_n x n_time"""
 
         import sys
+        import numpy as np
 
         n_kinetic = self.profile['n_kinetic']
         n_field   = self.profile['n_field']
         n_n       = self.profile['n_n']
 
-        gbflux_n = self.read_file('gbflux_n',12)
-        if len(gbflux_n) > 0:
-            t = len(gbflux_n)/(n_kinetic*n_field*4*n_n)
-            self.gbflux_n = gbflux_n.reshape((n_kinetic,n_field,4,n_n,t),order='F')
-            self.loaded.append('gbflux_n')
-        else:
+        try:
+            gbflux_n = np.fromfile(self.dirname+'/out.gyro.gbflux_n',dtype=float,sep=" ")
+        except:
             print "ERROR (GYROData): out.gyro.gbflux_n not found."
             sys.exit()
 
+        t = len(gbflux_n)/(n_kinetic*n_field*4*n_n)
+        self.gbflux_n = gbflux_n.reshape((n_kinetic,n_field,4,n_n,t),order='F')
+        self.loaded.append('gbflux_n')
+
+    #---------------------------------------------------------------------------#
 
     def read_moment_u(self):
         """Reads in moment_u data.  Output is numpy array with dimensions:
-        2 x n_theta_plot x n_x x n_field x n_n x n_time"""
+        n_theta_plot x n_x x n_field x n_n x n_time"""
+
+        import sys
+        import numpy as np
 
         n_theta_plot = self.profile['n_theta_plot']
         n_x          = self.profile['n_x']
         n_field      = self.profile['n_field']
         n_n          = self.profile['n_n']
 
-        moment_u = self.read_file('moment_u',12)
-        if len(moment_u) > 0:
-            t = len(moment_u)/(2*n_theta_plot*n_x*n_field*n_n)
-            self.moment_u = moment_u.reshape((2,n_theta_plot,n_x,n_field,n_n,t),order='F')
-            self.moment_u = self.moment_u[0] + 1j*self.moment_u[1]
-            self.loaded.append('moment_u')
+        try:
+            data = np.fromfile(self.dirname+'/out.gyro.moment_u',dtype=float,sep=" ")
+        except:
+            print "ERROR (GYROData): out.gyro.moment_u not found."
+            sys.exit()
 
+        t = len(data)/(2*n_theta_plot*n_x*n_field*n_n)
+        self.moment_u = data.reshape((2,n_theta_plot,n_x,n_field,n_n,t),order='F')
+        self.moment_u = self.moment_u[0] + 1j*self.moment_u[1]
+        self.loaded.append('moment_u')
+
+    #---------------------------------------------------------------------------#
 
     def read_moment_n(self):
         """Reads in moment_n data.  Output is numpy array with dimensions:
-        2 x n_theta_plot x n_x x n_kinetic x n_n x n_time"""
+        n_theta_plot x n_x x n_kinetic x n_n x n_time"""
+
+        import sys
+        import numpy as np
 
         n_theta_plot = self.profile['n_theta_plot']
         n_x          = self.profile['n_x']
         n_kinetic    = self.profile['n_kinetic']
         n_n          = self.profile['n_n']
 
-        moment_n = self.read_file('moment_n',12)
-        if len(moment_n) > 0:
-            t = len(moment_n)/(2*n_theta_plot*n_x*n_kinetic*n_n)
-            self.moment_n = moment_n.reshape((2,n_theta_plot,n_x,n_kinetic,n_n,t),order='F')
-            self.moment_n = self.moment_n[0] + 1j*self.moment_n[1]
-            self.loaded.append('moment_n')
+        try:
+            data = np.fromfile(self.dirname+'/out.gyro.moment_n',dtype=float,sep=" ")
+        except:
+            print "ERROR (GYROData): out.gyro.moment_n not found."
+            sys.exit()
 
+        t = len(data)/(2*n_theta_plot*n_x*n_kinetic*n_n)
+        self.moment_n = data.reshape((2,n_theta_plot,n_x,n_kinetic,n_n,t),order='F')
+        self.moment_n = self.moment_n[0] + 1j*self.moment_n[1]
+        self.loaded.append('moment_n')
+
+    #---------------------------------------------------------------------------#
 
     def read_moment_e(self):
         """Reads in moment_e data.  Output is numpy array with dimensions:
-        2 x n_theta_plot x n_x x n_kinetic x n_n x n_time"""
+        n_theta_plot x n_x x n_kinetic x n_n x n_time"""
+
+        import sys
+        import numpy as np
 
         n_theta_plot = self.profile['n_theta_plot']
         n_x          = self.profile['n_x']
         n_kinetic    = self.profile['n_kinetic']
         n_n          = self.profile['n_n']
 
-        moment_e = self.read_file('moment_e',12)
-        if len(moment_e) > 0:
-            t = len(moment_e)/(2*n_theta_plot*n_x*n_kinetic*n_n)
-            self.moment_e = moment_e.reshape((2,n_theta_plot,n_x,n_kinetic,n_n,t),order='F')
-            self.moment_e = self.moment_e[0] + 1j*self.moment_e[1]
-            self.loaded.append('moment_e')
+        try:
+            data = np.fromfile(self.dirname+'/out.gyro.moment_e',dtype=float,sep=" ")
+        except:
+            print "ERROR (GYROData): out.gyro.moment_e not found."
+            sys.exit()
 
+        t = len(data)/(2*n_theta_plot*n_x*n_kinetic*n_n)
+        self.moment_e = data.reshape((2,n_theta_plot,n_x,n_kinetic,n_n,t),order='F')
+        self.moment_e = self.moment_e[0] + 1j*self.moment_e[1]
+        self.loaded.append('moment_e')
+
+    #---------------------------------------------------------------------------#
 
     def read_moment_v(self):
         """Reads in moment_v data.  Output is numpy array with dimensions:
-        2 x n_theta_plot x n_x x n_kinetic x n_n x n_time"""
+        n_theta_plot x n_x x n_kinetic x n_n x n_time"""
+
+        import sys
+        import numpy as np
 
         n_theta_plot = self.profile['n_theta_plot']
         n_x          = self.profile['n_x']
         n_kinetic    = self.profile['n_kinetic']
         n_n          = self.profile['n_n']
 
-        moment_v = self.read_file('moment_v',12)
-        if len(moment_v) > 0:
-            t = len(moment_v)/(2*n_theta_plot*n_x*n_kinetic*n_n)
-            self.moment_v = moment_v.reshape((2,n_theta_plot,n_x,n_kinetic,n_n,t),order='F')
-            self.moment_v = self.moment_v[0] + 1j*self.moment_v[1]
-            self.loaded.append('moment_v')
+        try:
+            data = np.fromfile(self.dirname+'/out.gyro.moment_v',dtype=float,sep=" ")
+        except:
+            print "ERROR (GYROData): out.gyro.moment_v not found."
+            sys.exit()
+  
+        t = len(data)/(2*n_theta_plot*n_x*n_kinetic*n_n)
+        self.moment_v = data.reshape((2,n_theta_plot,n_x,n_kinetic,n_n,t),order='F')
+        self.moment_v = self.moment_v[0] + 1j*self.moment_v[1]
+        self.loaded.append('moment_v')
 
+    #---------------------------------------------------------------------------#
 
     def read_moment_zero(self):
         """Reads in moment_zero data.  Output is numpy array with dimensions:
         n_x x n_kinetic x n_moment x n_time"""
 
+        import sys
+        import numpy as np
+
         n_x          = self.profile['n_x']
         n_kinetic    = self.profile['n_kinetic']
         n_moment     = self.profile['n_moment']
 
-        moment_zero = self.read_file('moment_zero',12)
-        if len(moment_zero) > 0:
-            t = len(moment_zero)/(n_x*n_kinetic*n_moment)
-            self.moment_zero = moment_zero.reshape((n_x,n_kinetic,n_moment,t),order='F')
-            self.loaded.append('moment_zero')
+        try:
+            data = np.fromfile(self.dirname+'/out.gyro.moment_zero',dtype=float,sep=" ")
+        except:
+            print "ERROR (GYROData): out.gyro.moment_zero not found."
+            sys.exit()
 
+        t = len(data)/(n_x*n_kinetic*n_moment)
+        self.moment_zero = data.reshape((n_x,n_kinetic,n_moment,t),order='F')
+        self.loaded.append('moment_zero')
+
+    #---------------------------------------------------------------------------#
 
     def read_flux_velocity(self):
         """Reads out.gyro.flux_velocity.  
         Output is numpy array with dimensions: (n_energy,n_lambda,n_kinetic,n_field,2,n_n,n_time)"""
+        import sys
+        import numpy as np
+
         n_energy  = self.profile['n_energy']
         n_lambda  = self.profile['n_lambda']
         n_kinetic = self.profile['n_kinetic']
         n_field   = self.profile['n_field']
         n_n       = self.profile['n_n']
 
-        flux_velocity = self.read_file('flux_velocity', 12)
-        if len(flux_velocity) > 0:
-            t = len(flux_velocity)/(n_energy*n_lambda*n_kinetic*n_field*2*n_n)
-            self.flux_velocity = flux_velocity.reshape(
-                (n_energy,n_lambda,n_kinetic,n_field,2,n_n,t),order='F')
-            self.loaded.append('flux_velocity')
+        try:
+            data = np.fromfile(self.dirname+'/out.gyro.flux_velocity',dtype=float,sep=" ")
+        except:
+            print "ERROR (GYROData): out.gyro.flux_velocity not found."
+            sys.exit()
 
+        t = len(data)/(n_energy*n_lambda*n_kinetic*n_field*2*n_n)
+        self.flux_velocity = data.reshape(
+            (n_energy,n_lambda,n_kinetic,n_field,2,n_n,t),order='F')
+        self.loaded.append('flux_velocity')
+
+
+    #---------------------------------------------------------------------------#
 
     def read_k_perp_squared(self):
         """Reads out.gyro.k_perp_squared.  
            Output is numpy array with dimensions: (n_n,n_time)"""
 
-        k_perp_squared = self.read_file('k_perp_squared', 12)
-        if len(k_perp_squared) > 0:
-            t = len(k_perp_squared)/self.profile['n_n']
-            self.k_perp_squared = k_perp_squared.reshape((self.profile['n_n'],t),order='F')
-            self.loaded.append('k_perp_squared')
+        import sys
+        import numpy as np
+
+        try:
+            data = np.fromfile(self.dirname+'/out.gyro.k_perp_squared',dtype=float,sep=" ")
+        except:
+            print "ERROR (GYROData): out.gyro.kperp_squared not found."
+            sys.exit()
+
+        t = len(data)/self.profile['n_n']
+        self.k_perp_squared = data.reshape((self.profile['n_n'],t),order='F')
+        self.loaded.append('k_perp_squared')
+
+    #---------------------------------------------------------------------------#
 
     def read_balloon(self):
         """Reads out.gyro.balloon*.  Data is stored in self.balloon"""
@@ -459,12 +530,13 @@ class GYROData:
         import glob
         import string
         import sys
+        import numpy as np
 
         m     = self.profile['box_multiplier']
         n_x   = self.profile['n_x']
         n_ang = self.profile['n_theta_plot']*n_x/m
 
-        list = glob.glob(self.directory_name+'/out.gyro.balloon*')
+        list = glob.glob(self.dirname+'/out.gyro.balloon*')
 
         # If list is empty, then exit with error message.
         if len(list) == 0:
@@ -472,13 +544,11 @@ class GYROData:
             sys.exit()
 
         for filename in list:
+            data = np.fromfile(filename,dtype=float,sep=" ")
+            u = data.reshape((2,n_ang,m,self.t['n_time']),order='F')
             ext = string.splitfields(filename,'.')[-1]
-            data = self.read_file(ext,12)
-            u = data.reshape((2,n_ang,m,self.t['n_time']),order='F') 
             self.balloon[ext] = u[0,...]+1j*u[1,...]
             
-            
-
     #------------------------------------------------------------
     # Create data from other previously imported data
 
@@ -496,6 +566,7 @@ class GYROData:
             n = self.profile['n_explicit_damp']
             self.gbflux = np.mean(self.gbflux_i[:,:,:,n:-n,:],axis=3)
 
+    #---------------------------------------------------------------------------#
 
     def make_diff(self):
         """Makes diff.  Output is dictionary of numpy arrays with
@@ -526,6 +597,8 @@ class GYROData:
                 self.profile['tem_s'][i,ir_norm]*
                 self.profile['den_s'][i,ir_norm])
 
+
+    #---------------------------------------------------------------------------#
 
     def make_diff_i(self):
         """Makes diff_i.  Output is dictionary of numpy arrays with
@@ -567,7 +640,7 @@ class GYROData:
         ax = fig.add_subplot(dim[0], dim[1], self.plotcounter)
         ax.plot(x, y)
 
-    #----------------------------------------------------------------------#
+    #---------------------------------------------------------------------------#
 
     def equil_time(self):
         """Equalizes the lengths of the different data arrays, in the case that
@@ -617,3 +690,48 @@ class GYROData:
                 self.flux_velocity = self.flux_velocity[...,0:cutoff]
             elif item == 'k_perp_squared':
                 self.k_perp_squared = self.k_perp_squared[...,0:cutoff]
+
+
+    def make_tags(self):
+        """Generate tags for fields, moments and species"""                 
+
+        import numpy as np
+
+        n_kinetic = self.profile['n_kinetic']        
+        melec     = self.profile['electron_method']
+
+        # Species tags        
+
+        for i in range(n_kinetic):
+
+            if melec == 2 or melec == 4:
+                if i == n_kinetic-1:
+                    self.tagspec.append('elec')
+                else:
+                    self.tagspec.append('ion-'+str(i+1))
+ 
+            if melec == 1:
+                self.tagspec.append('ion-'+str(i+1))
+                    
+            if melec == 3:
+                self.tagspec.append('elec')
+        
+       # Moment tags
+
+        self.tagmomtext = ['GAMMA [GB]','Q [GB]','PI [GB]','S [GB]']
+
+        self.tagmom = ['\Gamma/\Gamma_\mathrm{GB}',
+                       'Q/Q_\mathrm{GB}',
+                       '\Pi/\Pi_\mathrm{GB}',
+                       'S/S_\mathrm{GB}']
+
+       # Field tags
+        self.tagfieldtext = ['Phi',
+                             'Apar',
+                             'Bpar',
+                             'Tot']        
+
+        self.tagfield = ['\mathrm{electrostatic}',
+                         '\mathrm{flutter}',
+                         '\mathrm{compression}',
+                         '\mathrm{total}']

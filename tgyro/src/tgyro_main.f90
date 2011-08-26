@@ -6,10 +6,17 @@ program tgyro_main
 
   implicit none
 
+  integer :: thd_support
+
   !-----------------------------------------------------------------
   ! Initialize MPI_COMM_WORLD communicator.
   !
   call MPI_INIT(ierr)
+  !call MPI_INIT_THREAD(MPI_THREAD_FUNNELED,thd_support,ierr)
+  !if (thd_support < MPI_THREAD_FUNNELED) then
+  !  print *, 'ERROR : multi-threading NOT supported by MPI implementation'
+  !  call MPI_FINALIZE(ierr)
+  !endif
   call MPI_COMM_RANK(MPI_COMM_WORLD,i_proc_global,ierr)
   call MPI_COMM_SIZE(MPI_COMM_WORLD,n_proc_global,ierr)
   !-----------------------------------------------------------------
