@@ -17,7 +17,7 @@ pro read_units
   common GLOBAL
   common COLLISION_DATA
 
-  file = 'units.out'
+  file = 'out.gyro.units'
 
   openr,1,file,err=i_err
   if (i_err eq 0) then begin
