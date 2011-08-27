@@ -297,7 +297,8 @@ subroutine gyro_do
           trim(path)//'out.gyro.profile',&
           trim(path)//'out.gyro.units',&
           trim(path)//'out.gyro.geometry_arrays',1)
-  elseif (io_method > 1) then  
+  endif
+  if (io_method > 1) then  
      call gyro_write_initdata_hdf5(trim(path)//'out.gyro.initdata.h5')
   endif
   !
