@@ -292,12 +292,13 @@ subroutine gyro_do
   !---------------------------------------------------------------
   ! I/O control for time-independent initial data
   !
-  if (io_method == 1) then
+  if (io_method == 1 .or. io_method==2) then
      call gyro_write_initdata(&
           trim(path)//'out.gyro.profile',&
           trim(path)//'out.gyro.units',&
           trim(path)//'out.gyro.geometry_arrays',1)
-  else
+  endif
+  if (io_method > 1) then  
      call gyro_write_initdata_hdf5(trim(path)//'out.gyro.initdata.h5')
   endif
   !
