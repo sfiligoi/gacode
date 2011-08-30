@@ -90,8 +90,10 @@ echo "#PBS -l walltime=$limit,size=$cores" >> $bfile
 echo "cd \${PBS_O_WORKDIR}" >> $bfile
 #if [ "$SHELL" = "/usr/bin/env bash" ] ; then
 #   echo "export OMP_NUM_THREADS=6" >> $bfile
+#   echo "export MPICH_MAX_THREAD_SAFETY=funneled" >> $bfile
 #else
 #   echo "setenv OMP_NUM_THREADS 6" >> $bfile
+#   echo "setenv MPICH_MAX_THREAD_SAFETY funneled" >> $bfile
 #fi
 echo "date" >> $bfile
 ## Node information

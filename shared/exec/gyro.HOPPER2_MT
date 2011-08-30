@@ -27,4 +27,7 @@ cd $simdir
 #   -S 1 means we want to spawn only 1 MPI task per NUMA node (meaning 2 MPI tasks per CPU)
 #   -d 6 spawns 5 additional threads per MPI process for total of 6 threads per NUMA node
 #   -cc processes constrained to CPU within assigned NUMA node but can migrate between cores
+# NOTE:
+#   - need to link with mpich_threadm library if full multi-thread support is needed
+export MPICH_MAX_THREAD_SAFETY=funneled
 aprun -n $nproc -ss -sn 4 -S 1 -d 6 -cc numa_node $exec
