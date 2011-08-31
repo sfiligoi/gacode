@@ -8,6 +8,7 @@ class GYROData:
     geometry = {}
     t        = {}
     freq     = {}
+    balloon  = []
     diff     = []
     diff_i   = []
     diff_n   = []
@@ -65,10 +66,6 @@ class GYROData:
         #self.make_diff()
         #self.make_diff_i()
 
-        # And a routine to equalize the time-length.
-
-        #self.equil_time()
-
         import sys
         from os.path import expanduser, expandvars
         path = '$GACODE_ROOT/shared/python/pyrats'
@@ -122,18 +119,21 @@ class GYROData:
     #---------------------------------------------------------------------------#
 
     def get_input(self, input_name):
-        """Return the specified variable from input.gyro.gen.
+        """Return the specified variable from out.gyro.run.
 
         input_name  -  requested input
 
         Ex: get_input("TIME_STEP")
         """
 
-        input_file = file(self.dirname+'input.gyro.gen', 'r')
+        import string
+
+        input_file = file(self.dirname+'/out.gyro.run', 'r')
         for line in input_file:
             try:
-                if line.split()[1] == input_name:
-                    return float(line.split()[0])
+                x = string.splitfields(line,':')
+                if string.strip(x[0]) == '.'+input_name:
+                    return float(string.strip(x[1]))
             except IndexError:
                 print "Cannot find specified input parameter: ", input_name
                 return 0
@@ -156,6 +156,8 @@ class GYROData:
         self.t['i_time']   = t[:,0]
         self.t['(c_s/a)t'] = t[:,1]
         self.loaded.append('t')
+
+        self.n = len(t[:,0])
 
     #---------------------------------------------------------------------------#
 
@@ -327,8 +329,13 @@ class GYROData:
             print "ERROR (GYROData): out.gyro.gbflux_i not found."
             sys.exit()
 
-        t = len(gbflux_i)/(n_kinetic*n_field*4*n_x)
-        self.gbflux_i = gbflux_i.reshape((n_kinetic,n_field,4,n_x,t),order='F')
+        nt = len(gbflux_i)/(n_kinetic*n_field*4*n_x)
+
+        if self.n > nt:
+            print 'ERROR (GYROData): '+self.dirname+'/out.gyro.gbflux_i too small. '
+            sys.exit()
+        
+        self.gbflux_i = gbflux_i.reshape((n_kinetic,n_field,4,n_x,nt),order='F')
         self.loaded.append('gbflux_i')
 
     #---------------------------------------------------------------------------#
@@ -350,8 +357,13 @@ class GYROData:
             print "ERROR (GYROData): out.gyro.gbflux_n not found."
             sys.exit()
 
-        t = len(gbflux_n)/(n_kinetic*n_field*4*n_n)
-        self.gbflux_n = gbflux_n.reshape((n_kinetic,n_field,4,n_n,t),order='F')
+        nt = len(gbflux_n)/(n_kinetic*n_field*4*n_n)
+
+        if self.n > nt:
+            print 'ERROR (GYROData): '+self.dirname+'/out.gyro.gbflux_n too small. '
+            sys.exit()
+        
+        self.gbflux_n = gbflux_n.reshape((n_kinetic,n_field,4,n_n,nt),order='F')
         self.loaded.append('gbflux_n')
 
     #---------------------------------------------------------------------------#
@@ -374,8 +386,13 @@ class GYROData:
             print "ERROR (GYROData): out.gyro.moment_u not found."
             sys.exit()
 
-        t = len(data)/(2*n_theta_plot*n_x*n_field*n_n)
-        self.moment_u = data.reshape((2,n_theta_plot,n_x,n_field,n_n,t),order='F')
+        nt = len(data)/(2*n_theta_plot*n_x*n_field*n_n)
+
+        if self.n > nt:
+            print 'ERROR (GYROData): '+self.dirname+'/out.gyro.moment_u too small. '
+            sys.exit()
+
+        self.moment_u = data.reshape((2,n_theta_plot,n_x,n_field,n_n,nt),order='F')
         self.moment_u = self.moment_u[0] + 1j*self.moment_u[1]
         self.loaded.append('moment_u')
 
@@ -399,8 +416,13 @@ class GYROData:
             print "ERROR (GYROData): out.gyro.moment_n not found."
             sys.exit()
 
-        t = len(data)/(2*n_theta_plot*n_x*n_kinetic*n_n)
-        self.moment_n = data.reshape((2,n_theta_plot,n_x,n_kinetic,n_n,t),order='F')
+        nt = len(data)/(2*n_theta_plot*n_x*n_kinetic*n_n)
+
+        if self.n > nt:
+            print 'ERROR (GYROData): '+self.dirname+'/out.gyro.moment_n too small. '
+            sys.exit()
+
+        self.moment_n = data.reshape((2,n_theta_plot,n_x,n_kinetic,n_n,nt),order='F')
         self.moment_n = self.moment_n[0] + 1j*self.moment_n[1]
         self.loaded.append('moment_n')
 
@@ -424,8 +446,13 @@ class GYROData:
             print "ERROR (GYROData): out.gyro.moment_e not found."
             sys.exit()
 
-        t = len(data)/(2*n_theta_plot*n_x*n_kinetic*n_n)
-        self.moment_e = data.reshape((2,n_theta_plot,n_x,n_kinetic,n_n,t),order='F')
+        nt = len(data)/(2*n_theta_plot*n_x*n_kinetic*n_n)
+
+        if self.n > nt:
+            print 'ERROR (GYROData): '+self.dirname+'/out.gyro.moment_e too small. '
+            sys.exit()
+
+        self.moment_e = data.reshape((2,n_theta_plot,n_x,n_kinetic,n_n,nt),order='F')
         self.moment_e = self.moment_e[0] + 1j*self.moment_e[1]
         self.loaded.append('moment_e')
 
@@ -449,8 +476,13 @@ class GYROData:
             print "ERROR (GYROData): out.gyro.moment_v not found."
             sys.exit()
   
-        t = len(data)/(2*n_theta_plot*n_x*n_kinetic*n_n)
-        self.moment_v = data.reshape((2,n_theta_plot,n_x,n_kinetic,n_n,t),order='F')
+        nt = len(data)/(2*n_theta_plot*n_x*n_kinetic*n_n)
+
+        if self.n > nt:
+            print 'ERROR (GYROData): '+self.dirname+'/out.gyro.moment_e too small. '
+            sys.exit()
+
+        self.moment_v = data.reshape((2,n_theta_plot,n_x,n_kinetic,n_n,nt),order='F')
         self.moment_v = self.moment_v[0] + 1j*self.moment_v[1]
         self.loaded.append('moment_v')
 
@@ -641,56 +673,6 @@ class GYROData:
         ax.plot(x, y)
 
     #---------------------------------------------------------------------------#
-
-    def equil_time(self):
-        """Equalizes the lengths of the different data arrays, in the case that
-        the time axis is longer in some than in others."""
-
-        import numpy as np
-
-        temp = []
-
-        for item in self.loaded:
-            if item == 't':
-                temp.append(self.t['n_time'])
-            elif item == 'freq':
-                temp.append(len(self.freq['(a/c_s)w'][-1]))
-            else:
-                temp.append(len(eval('self.' + item).T))
-
-        cutoff = min(temp)
-
-        for item in self.loaded:
-
-            if item == 't':
-                n = self.t['n_time']
-                self.t['i_time']   = self.t['i_time'][...,0:cutoff]
-                self.t['(c_s/a)t'] = self.t['(c_s/a)t'][...,0:cutoff]
-                self.t['n_time']   = cutoff
-            elif item == 'freq':
-                self.freq['(a/c_s)w']        = self.freq['(a/c_s)w'][...,0:cutoff]
-                self.freq['(a/c_s)gamma']    = self.freq['(a/c_s)gamma'][...,0:cutoff]
-                self.freq['err(a/c_s)w']     = self.freq['err(a/c_s)w'][...,0:cutoff]
-                self.freq['err(a/c_s)gamma'] = self.freq['err(a/c_s)gamma'][...,0:cutoff]
-            elif item == 'gbflux_i':
-                self.gbflux_i = self.gbflux_i[...,0:cutoff] 
-            elif item == 'gbflux_n':
-                self.gbflux_n = self.gbflux_n[...,0:cutoff]
-            elif item == 'moment_u':
-                self.moment_u = self.moment_u[...,0:cutoff]
-            elif item == 'moment_n':
-                self.moment_n = self.moment_n[...,0:cutoff]
-            elif item == 'moment_e':
-                self.moment_e = self.moment_e[...,0:cutoff]
-            elif item == 'moment_v':
-                self.moment_v = self.moment_v[...,0:cutoff]
-            elif item == 'moment_zero':
-                self.moment_zero = self.moment_zero[...,0:cutoff]
-            elif item == 'flux_velocity':
-                self.flux_velocity = self.flux_velocity[...,0:cutoff]
-            elif item == 'k_perp_squared':
-                self.k_perp_squared = self.k_perp_squared[...,0:cutoff]
-
 
     def make_tags(self):
         """Generate tags for fields, moments and species"""                 
