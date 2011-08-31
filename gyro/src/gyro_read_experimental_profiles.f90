@@ -152,7 +152,7 @@ subroutine gyro_read_experimental_profiles
 
   case (1)
 
-     call send_message('INFO: Taking densities directly from INPUT_profiles')
+     call send_message('INFO: Taking densities directly from input.profiles')
 
   case (2) 
 
