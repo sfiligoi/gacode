@@ -220,19 +220,15 @@ cd $SIMDIR
 if [ $SCOPY_FLAG -eq 1 ]
 then
    list="
-    $RUNBASE
-    $VERBASE
     input.gyro
     input.gyro.gen
     input.profiles
     input.profiles.gen
     input.profiles.geo
-    t.out
-    out.gyro.diff
-    out.gyro.diff_i
-    out.gyro.diff_n
+    out.gyro.run
+    out.gyro.t
+    out.gyro.freq
     out.gyro.error
-    out.gyro.gbflux
     out.gyro.gbflux_i
     out.gyro.gbflux_n
     out.gyro.geometry_arrays

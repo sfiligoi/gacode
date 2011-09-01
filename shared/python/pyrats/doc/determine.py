@@ -11,6 +11,8 @@ tgyro_flag = False
 profiles_gen_flag = False
 dirtree = os.walk(sys.argv[1])
 
+print sys.argv[1]
+
 for root, dirs, files in dirtree:
     for f in files:
         if string.find(f, 'out.neo') >= 0:
@@ -25,14 +27,13 @@ for root, dirs, files in dirtree:
 if neo_flag or gyro_flag or tgyro_flag or profiles_gen_flag:
     print "It looks like this directory contains the following file types:"
     if neo_flag:
-        print "neo"
+        print "* neo"
     if gyro_flag:
-        print "gyro"
+        print "* gyro"
     if tgyro_flag:
-        print "tgyro"
+        print "* tgyro"
     if profiles_gen_flag:
-        print "profiles_gen"
-    print "Try executing pyrats_help with one of these codes as the codename."
+        print "* profiles_gen"
+    print "Run pyrats_help with one of these codes as the codename."
 else:
-    print "It looks like this directory does not contain any NEO, GYRO, TGYRO,"
-    print "or profiles_gen files.  Please check the directory and try again."
+    print "No NEO, GYRO, TGYRO or profiles_gen files found."

@@ -15,7 +15,7 @@ else:
 
     else:
 
-        msg_str       = 'Array has dimensions: '
+        msg_str       = 'Array has dimensions: ('
         n_kinetic_str = 'n_kinetic='    + str(sim.profile['n_kinetic'])    +', '
         n_field_str   = 'n_field='      + str(sim.profile['n_field'])      +', '
         n_x_str       = 'n_x='          + str(sim.profile['n_x'])          +', '
@@ -30,6 +30,8 @@ else:
         if sys.argv[2] == 't':
             for key in sorted(sim.t.keys()):
                 print key.rjust(16),type(sim.t[key])
+        elif sys.argv[2] == 'dirname':
+            print 'dirname',type(sim.dirname)
         elif sys.argv[2] == 'freq':
             for key in sorted(sim.freq.keys()):
                 print key.rjust(16),type(sim.freq[key])

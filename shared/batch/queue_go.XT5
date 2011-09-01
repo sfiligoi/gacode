@@ -93,12 +93,12 @@ echo "date" >> $bfile
 #echo "/sw/xt5/bin/nodeinfo" >> $bfile
 echo "$code -e $sim -n $nproc -p $simpath" >> $bfile
 
-echo "Submit your job [y,n]?"
-
-read submit
-
-if [ "$submit" = "y" ] ; then
-   qsub $bfile
-fi
+#echo "Submit your job [y,n]?"
+#
+#read submit
+#
+#if [ "$submit" = "y" ] ; then
+#   qsub $bfile
+#fi
 
 exit 0

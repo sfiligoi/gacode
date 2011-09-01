@@ -25,4 +25,5 @@ cd $simdir
 #   -ss restricts processes to allocating local NUMA node memory only (reduces access latency)
 #   -sn makes certain you are allocated both compute blade NUMA nodes (recall that each CPU is referred to as a NUMA node)
 #   -cc bind processes to CPU cores
+export MPICH_MAX_THREAD_SAFETY=funneled
 aprun -n $nproc -ss -sn 2 -cc cpu $exec
