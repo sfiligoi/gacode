@@ -74,14 +74,22 @@ class NEOData:
     Example Usage:
         >>> from pyrats.neo.data import NEOData
         >>> sim1 = NEOData('example_directory')
-"""
+    """
+    
+    #---------------------------------------------------------------------------#
     # Methods
+
     def __init__(self, sim_directory):
         """Constructor reads in data from sim_directory and creates new object.
         """
 
         self.init_data()
         self.set_directory(sim_directory)
+        self.read_grid()
+        self.read_equil()
+        self.read_theory()
+        self.read_transport()
+        self.read_transport_gv()
 
     #---------------------------------------------------------------------------#
 
@@ -161,19 +169,38 @@ class NEOData:
         self.SIM_Q_gv = []
         self.SIM_PI_gv = []
 
+    #---------------------------------------------------------------------------#
+
     def set_directory(self, path):
         """Set the simulation directory."""
 
         from os.path import expanduser, expandvars
         self.dirname = expanduser(expandvars(path))
     
-    def read_data(self):
-        """Read in object data."""
-        self.read_grid()
-        self.read_equil()
-        self.read_theory()
-        self.read_transport()
-        self.read_transport_gv()
+    #---------------------------------------------------------------------------#
+
+    def read_grid(self):
+        """Reads out.neo.grid"""
+
+        import numpy as np
+        import sys
+
+        import sys
+        import numpy as np
+ 
+        try:
+            data = np.loadtxt(self.dirname+'/out.neo.grid')
+        except:
+            print "ERROR (NEOData): Fatal error!  Missing out.neo.grid."
+            sys.exit()
+                
+        self.n_species.append(grid[0])
+        self.n_energy.append(grid[1])
+        self.n_xi.append(grid[2])
+        self.n_theta.append(grid[3])
+        self.theta_gpoints.append(grid[4:4+self.n_theta[-1]])
+        self.n_radial.append(grid[4+self.n_theta[-1]])
+        self.radial_gpoints.append(grid[5+self.n_theta[-1]:6+self.n_theta[-1]+self.n_radial[-1]])
 
     def store_data(self):
         """Stores data into data dictionaries by variable name and directory.
@@ -310,69 +337,18 @@ class NEOData:
                                             'PI_gv/(nnorm*a*Tnorm)',
                               'Gyro-viscous second-order radial momentum flux')
 
-    def sort_data(self):
-        """Sorts data according to radius."""
-
-        import numpy as np
-
-        ind = self.control['r'].data.argsort()
-        self.control['r'].data = self.control['r'].data[ind]
-        for k, v in self.transport.iteritems():
-            if v.data.ndim == 1:
-                self.transport[k].data = v.data[ind]
-            elif v.data.ndim == 2:
-                for i in range(len(self.transport[k].data[0])):
-                    self.transport[k].data[:, i] = v.data[:, i][ind]
-        for k, v in self.HH_theory.iteritems():
-            if v.data.ndim == 1:
-                self.HH_theory[k].data = v.data[ind]
-            elif v.data.ndim == 2:
-                for i in range(len(self.HH_theory[k].data[0])):
-                    self.HH_theory[k].data[:, i] = v.data[:, i][ind]
-        for k, v in self.CH_theory.iteritems():
-            if v.data.ndim == 1:
-                self.CH_theory[k].data = v.data[ind]
-            elif v.data.ndim == 2:
-                for i in range(len(self.CH_theory[k].data[0])):
-                    self.CH_theory[k].data[:, i] = v.data[:, i][ind]
-        for k, v in self.TG_theory.iteritems():
-            if v.data.ndim == 1:
-                self.TG_theory[k].data = v.data[ind]
-            elif v.data.ndim == 2:
-                for i in range(len(self.TG_theory[k].data[0])):
-                    self.TG_theory[k].data[:, i] = v.data[:, i][ind]
-        for k, v in self.S_theory.iteritems():
-            if v.data.ndim == 1:
-                self.S_theory[k].data = v.data[ind]
-            elif v.data.ndim == 2:
-                for i in range(len(self.S_theory[k].data[0])):
-                    self.S_theory[k].data[:, i] = v.data[:, i][ind]
-        for k, v in self.HR_theory.iteritems():
-            if v.data.ndim == 1:
-                self.HR_theory[k].data = v.data[ind]
-            elif v.data.ndim == 2:
-                for i in range(len(self.HR_theory[k].data[0])):
-                    self.HR_theory[k].data[:, i] = v.data[:, i][ind]
-        for k, v in self.HS_theory.iteritems():
-            if v.data.ndim == 1:
-                self.HS_theory[k].data = v.data[ind]
-            elif v.data.ndim == 2:
-                for i in range(len(self.HS_theory[k].data[0])):
-                    self.HS_theory[k].data[:, i] = v.data[:, i][ind]
-
-    def read_file(self, fname):
-        """Reads NEO data file."""
-
-        import numpy as np
-
-        filename = self.dirname + '/out.neo.' + fname
-        f = np.atleast_2d(np.loadtxt(file(filename)))
-        return f
-
     def read_equil(self):
         """Read out.neo.equil."""
 
-        equil = self.read_file('equil')
+        import sys
+        import numpy as np
+ 
+        try:
+            equil = np.loadtxt(self.dirname + '/out.neo.equil')
+        except:
+            print "ERROR (NEOData): Fatal error!  Missing out.neo.equil."
+            sys.exit()
+            
         for i in range(int(self.n_radial[-1])):
             self.r.append(equil[i, 0])
             self.dPHI0dr.append(equil[i, 1])
@@ -401,25 +377,6 @@ class NEOData:
             self.a_over_LT.append(temp4)
             self.inv_tau_self.append(temp5)
 
-    def read_grid(self):
-        """Reads out.neo.grid"""
-
-        import numpy as np
-        import sys
-
-        filename = self.dirname + '/out.neo.grid'
-        grid = np.atleast_1d(np.loadtxt(file(filename)))
-        self.n_species.append(grid[0])
-        if self.n_species[-1] != self.n_species[0]:
-            print "ERROR: Number of species must be the same for all simulations."
-            print "Simulation " + self.dirname + " has the wrong number of species."
-            sys.exit()
-        self.n_energy.append(grid[1])
-        self.n_xi.append(grid[2])
-        self.n_theta.append(grid[3])
-        self.theta_gpoints.append(grid[4:4+self.n_theta[-1]])
-        self.n_radial.append(grid[4+self.n_theta[-1]])
-        self.radial_gpoints.append(grid[5+self.n_theta[-1]:6+self.n_theta[-1]+self.n_radial[-1]])
 
     def read_theory(self):
         """Reads out.neo.theory."""
