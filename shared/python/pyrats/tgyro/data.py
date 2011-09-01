@@ -8,7 +8,7 @@ class TGYROData:
      n_iterations
      n_fields
      n_radial
-     directory_name = ""
+     dirname = ""
      data
 
      Example Usage:
@@ -31,19 +31,19 @@ class TGYROData:
     def init_data(self):
         """Initialize object data."""
 
-        self.loc_n_ion = 0
-        self.tgyro_mode = 0
+        self.loc_n_ion    = 0
+        self.tgyro_mode   = 0
         self.n_iterations = 0
-        self.n_fields = 0
-        self.n_radial = 0
-        self.data = {}
+        self.n_fields     = 0
+        self.n_radial     = 0
+        self.data         = {}
 
     def set_directory(self, sim_directory):
         """Set the simulation directory."""
 
         from os.path import expanduser, expandvars
         path = sim_directory
-        self.directory_name = expanduser(expandvars(path))
+        self.dirname = expanduser(expandvars(path))
 
     def get_input(self, input_name):
         """Return the specified variable from input.tgyro.gen.
@@ -53,7 +53,7 @@ class TGYROData:
         Ex:    get_input("TGYRO_MODE")
         """
 
-        input_file = file(self.directory_name + '/input.tgyro.gen', 'r')
+        input_file = file(self.dirname + '/input.tgyro.gen', 'r')
         for line in input_file:
             try:
                 if line.split()[1] == input_name:
@@ -101,7 +101,7 @@ class TGYROData:
     def read_control(self):
         """Read control.out to set resolutions."""
         from numpy import loadtxt
-        control_file = self.directory_name + '/control.out'
+        control_file = self.dirname + '/control.out'
         control = loadtxt(file(control_file))
         self.n_radial = int(control[0])
         self.n_fields = int(control[1])
@@ -114,7 +114,7 @@ class TGYROData:
         current_line_number = 0
         elements = {}
         temp = []
-        fname = self.directory_name + '/' + file_name + '.out'
+        fname = self.dirname + '/' + file_name + '.out'
         raw_data = open(fname, 'r').readlines()
         for line in raw_data:
             if len(line.strip()) > 0:
@@ -137,7 +137,7 @@ class TGYROData:
     def read_residual(self):
         """Read residual.out"""
         from numpy import zeros, array
-        residual_file=open(self.directory_name + '/residual.out', 'r')
+        residual_file=open(self.dirname + '/residual.out', 'r')
         lines = residual_file.readlines()
         residual_file.close()
         count = 0
@@ -182,7 +182,7 @@ class TGYROData:
 
         from numpy import loadtxt
 
-        full_path = self.directory_name + '/' + file_name
+        full_path = self.dirname + '/' + file_name
         raw_data = loadtxt(file(full_path), skiprows=2, unpack=True)
         r = raw_data[0,:]
         freqs = raw_data[1:,:]
