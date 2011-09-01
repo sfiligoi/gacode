@@ -16,13 +16,15 @@ then
    echo
    echo "Usage:   pyrats_help [options]"
    echo
-   echo "         pyrats_help provides routing of command line queries to the"
+   echo "         Provides routing of command line queries to the"
    echo "         appropriate pyrats help file."
    echo
-   echo "         -l <path>"
-   echo "         Loads all output files in specified directory.  If no"
-   echo "         directory is given, then the current working directory is"
-   echo "         used."
+   echo "         -p <path>"
+   echo "         Set optional path to simulation directory."
+   echo "         [The default path is the current directory]"
+   echo
+   echo "         -e <simdir>"
+   echo "         Use data in <simdir>."
    echo
    echo "         -c <codename>"
    echo "         Specify a code to load help for (either gyro, neo, tgyro, or"
@@ -43,9 +45,9 @@ fi
 #==============================================================================
 # Define variables for flag capture
 #
-# Default output directory
-LOC_DIR=$PWD
-# Default variable values
+# Default simulation directory
+LOCDIR=.
+SIMROOT=$PWD
 CODENAME=0
 METHOD=""
 #==============================================================================
@@ -56,7 +58,9 @@ METHOD=""
 while [ $# -gt 0 ] ; do
   case "$1" in
 
-  -l) shift ; LOC_DIR=$1 ;;
+  -e) shift ; LOCDIR=$1 ;;
+
+  -p) shift ; SIMROOT=$1 ;;
 
   -c) shift ; CODENAME=$1 ;;
 
@@ -68,20 +72,35 @@ while [ $# -gt 0 ] ; do
   shift
 done
 #==============================================================================
+
+if [ "$LOCDIR" == "." ]
+then
+   LOCDIR=`basename $PWD`
+   cd .. ; SIMROOT=$PWD
+fi
+SIMDIR=$SIMROOT/$LOCDIR
+cd $SIMDIR
+
+PYROOT=$GACODE_ROOT/shared/python/pyrats/doc
+
+#==============================================================================
 # Execute proper scripts
 #
-if [ "$CODENAME" == "gyro" ]
-then
-  python ~/gacode/shared/python/pyrats/doc/gyro_help.py $LOC_DIR $METHOD
-elif [ "$CODENAME" == "tgyro" ]
-then
-  python ~/gacode/shared/python/pyrats/doc/tgyro_help.py $LOC_DIR $METHOD
-elif [ "$CODENAME" == "neo" ]
-then
-  python ~/gacode/shared/python/pyrats/doc/neo_help.py $LOC_DIR $METHOD
-elif [ "$CODENAME" == "profiles_gen" ]
-then
-  python ~/gacode/shared/python/pyrats/doc/profiles_gen_help.py $LOC_DIR $METHOD
-else
-  python ~/gacode/shared/python/pyrats/doc/determine.py $LOC_DIR
-fi
+case "$CODENAME" in
+   
+   gyro)
+      python $PYROOT/gyro_help.py $SIMDIR $METHOD ;;
+
+   tgyro)
+      python $PYROOT/tgyro_help.py $SIMDIR $METHOD ;;
+
+   neo)
+      python $PYROOT/neo_help.py $SIMDIR $METHOD ;;
+
+   profiles_gen)
+      python $PYROOT/profiles_gen_help.py $SIMDIR $METHOD ;;
+
+   *)
+      python $PYROOT/determine.py $SIMDIR ;;
+
+esac

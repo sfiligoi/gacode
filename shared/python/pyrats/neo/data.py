@@ -23,6 +23,7 @@ class NEOData:
         self.read_transport()
         self.read_transport_exp()
         self.read_vel()
+        self.read_rotation()
 
     #---------------------------------------------------------------------------#
 
@@ -36,6 +37,8 @@ class NEOData:
         self.transport     = {}
         self.transport_exp = {}
         self.vel           = []
+        self.veltag        = []
+        self.rotation      = {}
 
     #---------------------------------------------------------------------------#
 
@@ -195,6 +198,28 @@ class NEOData:
 
     #---------------------------------------------------------------------------#
 
+    def read_rotation(self):
+        """Reads out.neo.rotation."""
+
+        import sys
+        import numpy as np
+ 
+        try:
+            data = np.loadtxt(self.dirname+'/out.neo.rotation')
+        except:
+            print "ERROR (NEOData): Fatal error!  Missing out.neo.rotation."
+            sys.exit()
+            
+        n_spec  = self.grid['n_species']
+        n_theta = self.grid['n_theta']
+
+        self.rotation['r_over_a'] = data[:,0]
+        self.rotation['dphi_ave'] = data[:,1]
+        self.rotation['n_ratio']  = data[:,2+0*n_spec:2+1*n_spec]
+        self.rotation['dphi']     = data[:,2+1*n_spec:2+1*n_spec+1*n_theta]
+
+    #---------------------------------------------------------------------------#
+
     def read_vel(self):
         """Reads out.neo.vel."""
         
@@ -210,3 +235,5 @@ class NEOData:
         self.vel = data.reshape((self.grid['n_radial'],
                                  self.grid['n_species'],
                                  self.grid['n_theta']))
+
+        self.veltag = ['n_radial','n_species','n_theta']
