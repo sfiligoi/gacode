@@ -48,7 +48,7 @@ subroutine gyro_read_experimental_profiles
   if (EXPRO_nfourier < 0) then
      n_fourier_geo = 0
      if (num_equil_flag == 1) then
-        call catch_error('ERROR: Geometry coefficients missing.')
+        call catch_error('ERROR: (GYRO) Geometry coefficients missing.')
      endif
   else
      n_fourier_geo = EXPRO_nfourier

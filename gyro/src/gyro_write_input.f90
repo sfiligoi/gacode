@@ -227,6 +227,7 @@ subroutine gyro_write_input
      write(1,*) '-------- LOCAL PARAMETERS (diagnostic) ----------'
      write(1,20) 'n_i*z_i - n_e: ',neutral
      write(1,20) 'r/R0',r(ir_norm)/rmaj_s(ir_norm)
+     if (radial_profile_method == 3) write(1,20) 'rho_norm',rhogrid_s(ir_norm)
      write(1,20) 'b_unit',b_unit_norm
      write(1,20) 'beta_unit_norm',beta_unit_s(ir_norm)
      i = ir_norm
@@ -263,9 +264,11 @@ subroutine gyro_write_input
      if (electron_method == 2 .or. electron_method == 4) then
         write(1,20) 'orbit_upwind (elec)',orbit_upwind_vec(0)
      endif
-     write(1,*) '----------- SOURCE PARAMETERS -----------------'
-     write(1,20) 'nu_source', nu_source
-     write(1,10) 'n_source',n_source
+     if (source_flag == 1) then
+        write(1,*) '----------- SOURCE PARAMETERS -----------------'
+        write(1,20) 'nu_source',nu_source
+        write(1,10) 'n_source',n_source
+     endif
      write(1,*) '----------- RADIAL DOMAIN PARAMETERS ----------'
      write(1,20) 's_grid',s_grid
      write(1,20) 'box_multiplier',box_multiplier

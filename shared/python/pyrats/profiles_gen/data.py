@@ -55,7 +55,7 @@ class profiles_genData:
         """Set the directory which contains input.profiles."""
 
         from os.path import expanduser, expandvars
-        self.directory_name = expanduser(expandvars(directory))
+        self.dirname = expanduser(expandvars(directory))
 
     def read_data(self):
         """Read in object data from input.profiles."""
@@ -64,7 +64,7 @@ class profiles_genData:
 
         elements = {}
         temp = []
-        raw_data = open(self.directory_name + '/input.profiles', 'r').readlines()
+        raw_data = open(self.dirname + '/input.profiles', 'r').readlines()
         #Determines length of header, and reads in data
         while raw_data[self.hlen].strip()[0].isdigit() == False:
             self.hlen = self.hlen + 1
@@ -108,7 +108,7 @@ class profiles_genData:
         """Read in data from input.profiles.geo."""
 
         temp = []
-        raw_data = open(self.directory_name + '/input.profiles.geo', 'r').readlines()
+        raw_data = open(self.dirname + '/input.profiles.geo', 'r').readlines()
         for line in raw_data:
             temp.append(line.split()[0])
         count = int(temp[0]) + 1

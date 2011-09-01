@@ -21,11 +21,12 @@ program gyro
   !-----------------------------------------------------------------
   ! Initialize MPI_COMM_WORLD communicator.
   !
-  call MPI_INIT_THREAD(MPI_THREAD_FUNNELED,thd_support,ierr)
-  if (thd_support < MPI_THREAD_FUNNELED) then
-    print *, 'ERROR : multi-threading NOT supported by MPI implementation'
-    call MPI_FINALIZE(ierr)
-  endif
+  call MPI_INIT(i_err)
+!  call MPI_INIT_THREAD(MPI_THREAD_FUNNELED,thd_support,ierr)
+!  if (thd_support < MPI_THREAD_FUNNELED) then
+!    print *, 'ERROR : multi-threading NOT supported by MPI implementation'
+!    call MPI_FINALIZE(ierr)
+!  endif
   !-----------------------------------------------------------------
 
   !-----------------------------------------------------------------
