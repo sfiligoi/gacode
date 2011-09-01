@@ -25,11 +25,8 @@ class GYROData:
 
     Example Usage:
         >>> from pyrats.gyro.data import GYROData
-        >>> import matplotlib.pyplot as plt
         >>> sim = GYROData('example_directory')
         >>> sim.make_gbflux()
-        >>> plt.plot(sim.gbflux()[0][0][1])
-        >>> plt.show()
     """
 
     #---------------------------------------------------------------------------#
@@ -73,8 +70,8 @@ class GYROData:
 
     #---------------------------------------------------------------------------#
 
-    def __dir__(self):
-        return self.loaded
+ #   def __dir__(self):
+ #       return self.loaded
 
     #---------------------------------------------------------------------------#
 
@@ -115,28 +112,6 @@ class GYROData:
 
         from os.path import expanduser, expandvars
         self.dirname = expanduser(expandvars(path))
-
-    #---------------------------------------------------------------------------#
-
-    def get_input(self, input_name):
-        """Return the specified variable from out.gyro.run.
-
-        input_name  -  requested input
-
-        Ex: get_input("TIME_STEP")
-        """
-
-        import string
-
-        input_file = file(self.dirname+'/out.gyro.run', 'r')
-        for line in input_file:
-            try:
-                x = string.splitfields(line,':')
-                if string.strip(x[0]) == '.'+input_name:
-                    return float(string.strip(x[1]))
-            except IndexError:
-                print "Cannot find specified input parameter: ", input_name
-                return 0
 
     #---------------------------------------------------------------------------#
 
@@ -660,17 +635,6 @@ class GYROData:
                 self.profile['tem_s'][i,ir_norm]*
                 self.profile['den_s'][i,ir_norm])
 
-
-    def plot(self, x, y, dim=(1,1)):
-        """Creates matplotlib plot of requested data."""
-
-        import matplotlib.pyplot as plt
-        import numpy as np
-
-        fig = plt.figure(self.fignum)
-        self.fignum = self.fignum + 1
-        ax = fig.add_subplot(dim[0], dim[1], self.plotcounter)
-        ax.plot(x, y)
 
     #---------------------------------------------------------------------------#
 

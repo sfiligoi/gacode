@@ -1,28 +1,10 @@
-class NEOOutput:
-    """A class which holds individual pieces of NEO output data.
-
-    This class is just a simple holder that can attach the units and a
-    description to a piece of data.  It's only purpose is to be used by NEOData.
-
-    Data:
-    
-    data = {}
-    units = ''
-    descriptor = ''
-"""
-
-    def __init__(self, data, units, descriptor):
-        self.data=data
-        self.units=units
-        self.descriptor=descriptor
-
 class NEOData:
-    """A class of NEO output data.
+    """A class for management of NEO output data.
 
     Data (things that actually get used):
 
     master = ""
-    directory_name = ""
+    dirname = ""
     fignum = 1
     plotcounter = 1
     toplot = []
@@ -90,56 +72,38 @@ class NEOData:
     SIM_upar_by_theta = {}
 
     Example Usage:
-        >>> import matplotlib.pyplot as plt
         >>> from pyrats.neo.data import NEOData
         >>> sim1 = NEOData('example_directory')
-        >>> sim1.plot('jboot')
-        >>> plt.show()
 """
     # Methods
     def __init__(self, sim_directory):
         """Constructor reads in data from sim_directory and creates new object.
-
-        Every subdirectory of sim_directory will be searched for NEO output
-        files, and they will be stored in either the self.transport or one of
-        the self.theory dictionaries."""
-
-        import numpy
-        import os
-        import sys
+        """
 
         self.init_data()
-        self.master = sim_directory
-        self.dirtree = os.walk(sim_directory)
-        flag = 0
-        for root, dirs, files in self.dirtree:
-            if ('out.neo.grid' in files) and ('out.neo.equil' in files) and ('out.neo.theory' in files) and ('out.neo.transport' in files) and ('out.neo.transport_gv' in files):
-                flag = 1
-                self.toplot.append(root)
-                self.set_directory(root)
-                self.read_data()
-        if flag == 0:
-            print "ERROR: NEO files not in directory: " + self.master
-            sys.exit()
-        self.store_data()
-        self.sort_data()
+        self.set_directory(sim_directory)
+
+    #---------------------------------------------------------------------------#
 
     def init_data(self):
         """Initialize object data."""
 
-        self.master = ""
-        self.directory_name = ""
-        self.toplot = []
-        self.fignum = 1
+        self.master      = ""
+        self.dirname     = ""
+        self.toplot      = []
+        self.fignum      = 1
         self.plotcounter = 1
-        self.transport = {}
-        self.HH_theory = {}
-        self.CH_theory = {}
-        self.TG_theory = {}
-        self.S_theory = {}
-        self.HR_theory = {}
-        self.HS_theory = {}
-        self.control = {}
+        self.transport   = {}
+        self.HH_theory   = {}
+        self.CH_theory   = {}
+        self.TG_theory   = {}
+        self.S_theory    = {}
+        self.HR_theory   = {}
+        self.HS_theory   = {}
+        self.control     = {}
+
+        # 
+
         self.n_species = []
         self.n_energy = []
         self.n_xi = []
@@ -201,25 +165,8 @@ class NEOData:
         """Set the simulation directory."""
 
         from os.path import expanduser, expandvars
-        self.directory_name = expanduser(expandvars(path))
+        self.dirname = expanduser(expandvars(path))
     
-    def get_input(self, input_name):
-        """Return the specified variable from input.neo.gen.
-
-        input_name  -  requested input
-
-        Ex: get_input("NEO_MODE")
-        """
-
-        input_file = file(self.directory_name + 'input.neo.gen', 'r')
-        for line in input_file:
-            try:
-                if line.split()[1] == input_name:
-                    return float(line.split()[0])
-            except IndexError:
-                print "Cannot find specified input parameter: ", input_name
-                return 0
-
     def read_data(self):
         """Read in object data."""
         self.read_grid()
@@ -418,7 +365,7 @@ class NEOData:
 
         import numpy as np
 
-        filename = self.directory_name + '/out.neo.' + fname
+        filename = self.dirname + '/out.neo.' + fname
         f = np.atleast_2d(np.loadtxt(file(filename)))
         return f
 
@@ -460,12 +407,12 @@ class NEOData:
         import numpy as np
         import sys
 
-        filename = self.directory_name + '/out.neo.grid'
+        filename = self.dirname + '/out.neo.grid'
         grid = np.atleast_1d(np.loadtxt(file(filename)))
         self.n_species.append(grid[0])
         if self.n_species[-1] != self.n_species[0]:
             print "ERROR: Number of species must be the same for all simulations."
-            print "Simulation " + self.directory_name + " has the wrong number of species."
+            print "Simulation " + self.dirname + " has the wrong number of species."
             sys.exit()
         self.n_energy.append(grid[1])
         self.n_xi.append(grid[2])
