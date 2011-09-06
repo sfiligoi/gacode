@@ -29,19 +29,19 @@ ax.set_xlabel(rtext,size=16)
 ax.set_ylabel(r'$Q_{\rm GB}$',size=16)
 
 # For this case: 0=D, 1=C, 2=e:
-ne = neo1.control['n0_over_nnorm'].data[2]
-te = neo1.control['T0_over_Tnorm'].data[2]
-rhostar = neo1.control['rho_star'].data
+ne = neo1.equil['n'][:,2]
+te = neo1.equil['T'][:,2]
+rhostar = neo1.equil['rho_star']
 
 qgb = ne*te**2.5*rhostar**2
 
-q = neo1.transport['Q'].data
-r = neo1.control['r'].data
+q = neo1.transport['Q']
+r = neo1.transport_exp['r']
 
 # (0=D,1=e,2=C)
-a=ax.plot(r,q[0]/qgb,'b')
-b=ax.plot(r,q[1]/qgb,'r')
-c=ax.plot(r,q[2]/qgb,'k')
+a=ax.plot(r,q[:,0]/qgb,'b')
+b=ax.plot(r,q[:,1]/qgb,'r')
+c=ax.plot(r,q[:,2]/qgb,'k')
 
 ax.legend((a,b,c),(r'$Q_D$',
                    r'$Q_C$',
@@ -54,13 +54,13 @@ ax = fig.add_subplot(132)
 ax.set_xlabel(rtext,size=16)
 ax.set_ylabel(r'${\rm km/s}$',size=16)
 
-v0   = neo1.control['vnorm_over_a'].data/1000
-vtor = neo1.transport['1vtor0'].data
+v0   = neo1.equil['v_norm_over_a']/1000
+vtor = neo1.transport['vphi']
 
 # (0=D,1=e,2=c)
-a=ax.plot(r,vtor[0]*v0,'b')
-b=ax.plot(r,vtor[1]*v0,'r')
-c=ax.plot(r,vtor[2]*v0,'k')
+a=ax.plot(r,vtor[:,0]*v0,'b')
+b=ax.plot(r,vtor[:,1]*v0,'r')
+c=ax.plot(r,vtor[:,2]*v0,'k')
 
 ax.legend((a,b,c),(r'$v_D$',
                    r'$v_C$',
@@ -73,8 +73,8 @@ ax = fig.add_subplot(133)
 ax.set_xlabel(rtext,size=16)
 ax.set_ylabel(r'$\langle j_\parallel B \rangle/(e n_e v_D B_{\rm unit})$',size=16)
 
-nd = neo1.control['n0_over_nnorm'].data[0]
-jb = neo1.transport['jboot'].data*nd/ne
+nd = neo1.equil['n'][:,0]
+jb = neo1.transport['jparB']*nd/ne
 
 a=ax.plot(r,jb,'b')
 #-----------------------------------------------------------

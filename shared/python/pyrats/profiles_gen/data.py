@@ -74,7 +74,8 @@ class profiles_genData:
             if raw_data[line].strip()[0].isdigit() or raw_data[line].strip()[0] == '-':
                 temp.append(raw_data[line].split())
         self.hlen = self.hlen - 1
-        data = np.array(temp)
+        # JC: data cast to numpy float
+        data = np.array(temp,dtype=float)
 
         #Reads in variable names
         keywords = []
