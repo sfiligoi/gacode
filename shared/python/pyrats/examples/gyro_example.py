@@ -7,6 +7,14 @@ prop = matplotlib.font_manager.FontProperties(size=16)
 sim1 = GYROData('/home/candy/mysim/pyrats/gyro1')
 sim2 = GYROData('/home/candy/mysim/pyrats/gyro2')
 
+sim1.read_gbflux_i()
+sim1.read_gbflux_n()
+sim1.make_gbflux()
+
+sim2.read_gbflux_i()
+sim2.read_gbflux_n()
+sim2.make_gbflux()
+
 fig = plt.figure(figsize=(12,5))
 fig.subplots_adjust(left=0.16,right=0.94)
 fig.subplots_adjust(bottom=0.12,top=0.92)
