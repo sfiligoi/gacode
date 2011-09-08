@@ -11,6 +11,8 @@ PRO GYRO_RZ_COLOR_CONTOUR, field, R, Z, XRANGE=xrange, YRANGE=yrange, $
 ; v1.0 11/22/06
 ; v2.0 5/22/07: added support for plotrange = 2-element vector to
 ; explicitly specify plotmin/max, 1 element for equal&opposite values
+; v3.0 9/7/11: updated default xrange, yrange calculations to give 
+; accurate aspect ratio visulaization i.e. LX=LY by default now
 ;
 
   IF (N_ELEMENTS(Aphys) NE 0) THEN BEGIN
@@ -18,16 +20,14 @@ PRO GYRO_RZ_COLOR_CONTOUR, field, R, Z, XRANGE=xrange, YRANGE=yrange, $
       Zplot = Z*Aphys
       xtitle = 'R (cm)'
       ytitle = 'Z (cm)'
-      DEFAULT, xrange, [MIN(Rplot), MAX(Rplot)]
-      DEFAULT, yrange, [MIN(Zplot), MAX(Zplot)]
   ENDIF ELSE BEGIN
       Rplot = R
       Zplot = Z
       xtitle = 'R/a'
       ytitle = 'Z/a'
-      DEFAULT, xrange, [MIN(Rplot), MAX(Rplot)]
-      DEFAULT, yrange, [MIN(Zplot), MAX(Zplot)]
   ENDELSE
+  DEFAULT, yrange, 1.1*MAX(ABS(Zplot))*[-1,1]
+  DEFAULT, xrange, yrange + (MIN(Rplot)+MAX(Rplot))/2
 
   IF (N_ELEMENTS(plotrange) EQ 2) THEN BEGIN
       plotmin = plotrange[0]

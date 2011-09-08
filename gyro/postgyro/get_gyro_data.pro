@@ -1,4 +1,4 @@
-FUNCTION get_gyro_data, simdir, READ_LARGE = read_large
+FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
 ;
 ; C. Holland, UCSD
 ; v5.0: 8.25.2011
@@ -22,10 +22,13 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large
 ;                    if out.gyro.moment_n and _e are loaded, will also
 ;                    generate temperature fluctuations using T = (2/3)p-n
 ;
+;           HDF5: read data from out.gyro.initdata.h5,
+;           out.gyro.timedata.h5, rather than ASCII files
+;
 
   dirpath  =GETENV('GYRO_DIR') + '/sim/' + simdir
 
-  IF (READ_GYRO_PROFILE_DATA(simdir, profile_data) EQ 0) THEN BEGIN
+  IF (READ_GYRO_PROFILE_DATA(simdir, profile_data,HDF5=hdf5) EQ 0) THEN BEGIN
       PRINT, "Couldn't read out.gyro.profile, returning 0"
       RETURN, 0
   ENDIF ELSE BEGIN
@@ -132,7 +135,7 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large
       ;calculate temp fluctuations normalized to Te
       IF ((exists_n EQ 1) AND (exists_e EQ 1)) THEN exists_t = 1
       IF (exists_t) THEN BEGIN
-          PRINT, 'Generating temperature fluctuations
+          PRINT, 'Generating temperature fluctuations'
           mom_t = COMPLEXARR(n_theta_plot, n_r, profile_data.n_kinetic, $
                              n_n, n_time)
           FOR i_r = 0, n_r-1 DO FOR i_spec = 0, profile_data.n_kinetic-1 DO $
@@ -281,9 +284,9 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large
                    Pi_nt: Pi_nt, $
                    Sexch_nt: Sexch_nt, $
                    ;fluctuation fields
-                   exists_phi:exists_u, $
-                   exists_Apar:exists_u, $
-                   exists_Bpar:exists_u, $
+                   exists_phi:exists_phi, $
+                   exists_Apar:exists_Apar, $
+                   exists_Bpar:exists_Bpar, $
                    exists_n: exists_n, $
                    exists_e:exists_e, $
                    exists_t: exists_t, $
