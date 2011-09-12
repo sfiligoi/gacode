@@ -66,10 +66,14 @@ subroutine tglf_run()
        tglf_damp_sig_in)
 
   call put_model_parameters(tglf_adiabatic_elec_in, &
-       tglf_alpha_p_in, &
        tglf_alpha_e_in, &
-       tglf_alpha_kx0_in, &
-       tglf_alpha_kx1_in, &
+       tglf_alpha_p_in, &
+       tglf_alpha_n_in, &
+       tglf_alpha_t_in, &
+       tglf_alpha_kx_e_in, &
+       tglf_alpha_kx_p_in, &
+       tglf_alpha_kx_n_in, &
+       tglf_alpha_kx_t_in, &
        tglf_alpha_quench_in, &
        tglf_xnu_factor_in, &
        tglf_debye_factor_in, &

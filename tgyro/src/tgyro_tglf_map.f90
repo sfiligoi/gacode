@@ -236,12 +236,6 @@ subroutine tgyro_tglf_map
      ! APS07 
 
      tglf_alpha_quench_in = 1.0
-     tglf_alpha_e_in      = 0.0
-     tglf_alpha_p_in      = 0.0
-     tglf_alpha_kx0_in    = 0.0
-     tglf_alpha_kx1_in    = 0.0
-     tglf_sat_rule_in     = 0
-     tglf_kygrid_model_in = 1
      tglf_xnu_model_in    = 1
 
   case (2)
@@ -249,12 +243,6 @@ subroutine tgyro_tglf_map
      ! Summer 2009
 
      tglf_alpha_quench_in = 1.0
-     tglf_alpha_e_in      = 0.0
-     tglf_alpha_p_in      = 0.0
-     tglf_alpha_kx0_in    = 0.0
-     tglf_alpha_kx1_in    = 0.0
-     tglf_sat_rule_in     = 0
-     tglf_kygrid_model_in = 1
      tglf_xnu_model_in    = 2
 
   case (3)
@@ -262,12 +250,6 @@ subroutine tgyro_tglf_map
      ! EPS-2011 with new ExB shear model
 
      tglf_alpha_quench_in = 0.0
-     tglf_alpha_e_in      = 1.0
-     tglf_alpha_p_in      = 1.0
-     tglf_alpha_kx0_in    = 1.0
-     tglf_alpha_kx1_in    = 1.0
-     tglf_sat_rule_in     = 0
-     tglf_kygrid_model_in = 1
      tglf_xnu_model_in    = 2
 
   end select

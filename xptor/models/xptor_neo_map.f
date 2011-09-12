@@ -22,7 +22,7 @@ c
       mu3 = sqrt(amassimp_exp)*42.851
 
 ! Initialize NEO
-      call neo_init
+      call neo_init("path")
 
 ! Simulation mode (dke solve + analytic)
       neo_sim_model_in = 1
@@ -46,7 +46,7 @@ c
       qm = (q_exp(jm+1)+q_exp(jm))/2.0
       dr_loc = rmin_exp(jm+1)-rmin_exp(jm)
       drhodr_loc = arho_exp*(rho(jm+1)-rho(jm))/dr_loc
-      neo_write_out_mode_in    = 0
+!      neo_write_out_mode_in    = 0
       neo_equilibrium_model_in = 2
       neo_rmin_over_a_in = rminm/a0
       neo_rmaj_over_a_in = rmajm/a0
@@ -62,11 +62,9 @@ c
       neo_ipccw_in = sign_It_exp  !current direction counter clockwise from above
       neo_btccw_in = sign_Bt_exp  !magnetic field direction "
 
-      neo_n_species_in = 3
 !      neo_n_species_in = 4
-      neo_n_theta_in = 15
-      neo_n_xi_in = 15
-      neo_n_energy_in = 9
+      neo_n_species_in = 3
+
       b_unit = ABS(bt_exp)*(rhom/rminm)*drhodr(jm)
       neo_rho_star_in  = (1.02D2*DSQRT(m0*T0*1.D3)/
      >  (b_unit*1.D4))/(a0*100.D0)
@@ -116,7 +114,7 @@ c
       neo_rotation_model_in = 2
 !      neo_rotation_model_in = 1
       neo_omega_rot_in = vexbm*cv/(w0*rmajor_exp)
-!      neo_omega_rot_in = 0.0  ! eliminate mach number corrections
+      neo_omega_rot_in = 0.0  ! eliminate mach number corrections
       neo_omega_rot_deriv_in = drhodr_loc*a0*gradvexbm*cv
      > /(w0*rmajor_exp)
 !      neo_omega_rot_deriv_in = 0.0

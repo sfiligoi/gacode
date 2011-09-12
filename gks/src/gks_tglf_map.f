@@ -104,19 +104,24 @@
 !        write(*,*)"switches",iflux_tg,use_bper_tg,use_bpar_tg,
 !     >   ibranch_tg,nmodes_tg,nb_max_tg,nb_min_tg,nxgrid_tg,nky_tg
 !   
+      CALL put_rare_switches(theta_trapped_tg,park_tg,ghat_tg,
+     > gchat_tg, wd_zero_tg,Linsker_factor_tg,
+     > gradB_factor_tg,filter_tg,damp_psi_tg,damp_sig_tg)
+!
       CALL put_switches(iflux_tg,use_bper_tg,use_bpar_tg,
-     >  use_mhd_rule_tg,use_bisection_tg,ibranch_tg,
-     >  nmodes_tg,nbasis_max_tg,nbasis_min_tg,nxgrid_tg,nky_tg)
+     > use_mhd_rule_tg,use_bisection_tg,ibranch_tg,
+     > nmodes_tg,nbasis_max_tg,nbasis_min_tg,nxgrid_tg,nky_tg)
 !
         if(z3.gt.0)adiabatic_elec_tg=.TRUE.
 !        write(*,*)"parameters",adiabatic_elec_tg,alpha_p_tg,alpha_e_tg, 
 !     >   theta_trap_tg,xnu_fac_tg,debye_factor_tg
 !
-       CALL put_model_parameters(adiabatic_elec_tg,alpha_p_tg,
-     > alpha_e_tg,alpha_kx0_tg,alpha_kx1_tg,alpha_quench_tg,
-     > xnu_factor_tg,debye_factor_tg,etg_factor_tg,sat_rule_tg,
-     > kygrid_model_tg,xnu_model_tg,vpar_model_tg,
-     > vpar_shear_model_tg)
+      CALL put_model_parameters(adiabatic_elec_tg,alpha_e_tg,alpha_p_tg,
+     > alpha_n_tg,alpha_t_tg,alpha_kx_e_tg,alpha_kx_p_tg,    
+     > alpha_kx_n_tg,alpha_kx_t_tg,alpha_quench_tg,xnu_factor_tg,
+     > debye_factor_tg,etg_factor_tg,sat_rule_tg,kygrid_model_tg,
+     > xnu_model_tg,vpar_model_tg,vpar_shear_model_tg)
+!
       endif
       firstcall=.FALSE.
 !
@@ -489,8 +494,8 @@
          use_mhd_rule_tg=.TRUE.
          filter_tg=1.0
          alpha_e_tg=0.0
-         alpha_kx0_tg=0.0
-         alpha_kx1_tg=0.0
+         alpha_kx_e_tg=0.0
+         alpha_kx_p_tg=0.0
        endif
 !
 ! 1.82 version (TGLF09)
@@ -502,8 +507,8 @@
          use_mhd_rule_tg=.FALSE.
          filter_tg=1.0
          alpha_e_tg=0.0
-         alpha_kx0_tg=0.0
-         alpha_kx1_tg=0.0
+         alpha_kx_e_tg=0.0
+         alpha_kx_p_tg=0.0
        endif
 !
 ! 1.93 version (TGLF10)
@@ -515,8 +520,8 @@
          use_mhd_rule_tg=.TRUE.
          filter_tg=2.0
          alpha_e_tg=0.0
-         alpha_kx0_tg=0.0
-         alpha_kx1_tg=0.0         
+         alpha_kx_e_tg=0.0
+         alpha_kx_p_tg=0.0         
        endif
 !
       if(tglf_defaults.eq.0)then
