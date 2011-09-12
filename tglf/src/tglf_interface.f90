@@ -78,10 +78,14 @@ module tglf_interface
 
   ! Data passed to: put_model_parameters
   logical :: tglf_adiabatic_elec_in = .false.
+  real    :: tglf_alpha_e_in        = 1.0
   real    :: tglf_alpha_p_in        = 1.0
-  real    :: tglf_alpha_e_in        = 0.18
-  real    :: tglf_alpha_kx0_in      = 0.13
-  real    :: tglf_alpha_kx1_in      = 3.14
+  real    :: tglf_alpha_n_in        = 1.0
+  real    :: tglf_alpha_t_in        = 1.0
+  real    :: tglf_alpha_kx_e_in     = 1.0
+  real    :: tglf_alpha_kx_p_in     = 1.0
+  real    :: tglf_alpha_kx_n_in     = 1.0
+  real    :: tglf_alpha_kx_t_in     = 1.0
   real    :: tglf_alpha_quench_in   = 0.0
   real    :: tglf_xnu_factor_in     = 1.0
   real    :: tglf_debye_factor_in   = 1.0
@@ -113,8 +117,8 @@ module tglf_interface
   real    :: tglf_vexb_shear_in       = 0.0
 
   ! Data passed to: put_profile_shear
-  real    :: tglf_shear_ns_in(nsm) = 0.0
-  real    :: tglf_shear_ts_in(nsm) = 0.0
+  real    :: tglf_vns_shear_in(nsm) = 0.0
+  real    :: tglf_vts_shear_in(nsm) = 0.0
 
   ! Data passed to: put_averages
   real    :: tglf_taus_in(nsm)    = 0.0
@@ -228,11 +232,15 @@ contains
     write(1,*) 'gradB_factor = ', tglf_gradB_factor_in
     write(1,*) 'filter = ', tglf_filter_in
     write(1,*) 'sat_rule = ', tglf_sat_rule_in
-    write(1,*) 'alpha_p = ', tglf_alpha_p_in
     write(1,*) 'alpha_quench = ', tglf_alpha_quench_in
     write(1,*) 'alpha_e = ', tglf_alpha_e_in
-    write(1,*) 'alpha_kx0 = ', tglf_alpha_kx0_in
-    write(1,*) 'alpha_kx1 = ', tglf_alpha_kx1_in
+    write(1,*) 'alpha_p = ', tglf_alpha_p_in
+    write(1,*) 'alpha_n = ', tglf_alpha_n_in
+    write(1,*) 'alpha_t = ', tglf_alpha_t_in
+    write(1,*) 'alpha_kx_e = ', tglf_alpha_kx_e_in
+    write(1,*) 'alpha_kx_p = ', tglf_alpha_kx_p_in
+    write(1,*) 'alpha_kx_n = ', tglf_alpha_kx_n_in
+    write(1,*) 'alpha_kx_t = ', tglf_alpha_kx_t_in
     write(1,*) 'theta_trapped = ', tglf_theta_trapped_in
     write(1,*) 'xnu_factor = ', tglf_xnu_factor_in
     write(1,*) 'debye_factor = ', tglf_debye_factor_in
@@ -247,8 +255,8 @@ contains
     write(1,*) 'rlts = ', tglf_rlts_in(:)
     write(1,*) 'vpar_shear = ', tglf_vpar_shear_in(:)
     write(1,*) 'vexb_shear = ', tglf_vexb_shear_in
-    write(1,*) 'shear_ns = ', tglf_shear_ns_in(:)
-    write(1,*) 'shear_ts = ', tglf_shear_ts_in(:)
+    write(1,*) 'vns_shear = ', tglf_vns_shear_in(:)
+    write(1,*) 'vts_shear = ', tglf_vts_shear_in(:)
     write(1,*) 'as = ', tglf_as_in(:)
     write(1,*) 'taus = ', tglf_taus_in(:)
     write(1,*) 'vpar = ', tglf_vpar_in(:)
@@ -346,11 +354,15 @@ contains
     write(1,*) 'gradB_factor = ', gradB_factor_in
     write(1,*) 'filter = ', filter_in
     write(1,*) 'sat_rule = ', sat_rule_in
-    write(1,*) 'alpha_p = ', alpha_p_in
     write(1,*) 'alpha_quench = ', alpha_quench_in
     write(1,*) 'alpha_e = ', alpha_e_in
-    write(1,*) 'alpha_kx0 = ', alpha_kx0_in
-    write(1,*) 'alpha_kx1 = ', alpha_kx1_in
+    write(1,*) 'alpha_p = ', alpha_p_in
+    write(1,*) 'alpha_n = ', alpha_n_in
+    write(1,*) 'alpha_t = ', alpha_t_in
+    write(1,*) 'alpha_kx_e = ', alpha_kx_e_in
+    write(1,*) 'alpha_kx_p = ', alpha_kx_p_in
+    write(1,*) 'alpha_kx_n = ', alpha_kx_n_in
+    write(1,*) 'alpha_kx_t = ', alpha_kx_t_in
     write(1,*) 'theta_trapped = ', theta_trapped_in
     write(1,*) 'xnu_factor = ', xnu_factor_in
     write(1,*) 'debye_factor = ', debye_factor_in
@@ -365,8 +377,8 @@ contains
     write(1,*) 'rlts = ', rlts_in(:)
     write(1,*) 'vpar_shear = ', vpar_shear_in(:)
     write(1,*) 'vexb_shear = ', vexb_shear_in
-    write(1,*) 'shear_ns = ', shear_ns_in(:)
-    write(1,*) 'shear_ts = ', shear_ts_in(:)
+    write(1,*) 'vns_shear = ', vns_shear_in(:)
+    write(1,*) 'vts_shear = ', vts_shear_in(:)
     write(1,*) 'as = ', as_in(:)
     write(1,*) 'taus = ', taus_in(:)
     write(1,*) 'vpar = ', vpar_in(:)
