@@ -26,20 +26,20 @@ libgacodetglf_src_la_SOURCES = \
   tglf_read_input.f90 \
   tglf_dump_input.f90
 
-include_HEADERS= \
-  tglf_closure.mod \
-  tglf_global.mod \
-  tglf_nuei_coeff.mod \
-  tglf_tg.mod \
-  tglf_coeff.mod \
-  tglf_hermite.mod \
-  tglf_pkg.mod \
-  tglf_xgrid.mod \
-  tglf_dimensions.mod \
-  tglf_sgrid.mod \
-  tglf_eigen.mod \
-  tglf_kyspectrum.mod \
-  tglf_species.mod
+#include_HEADERS= \
+#  tglf_closure.mod \
+#  tglf_global.mod \
+#  tglf_nuei_coeff.mod \
+#  tglf_tg.mod \
+#  tglf_coeff.mod \
+#  tglf_hermite.mod \
+#  tglf_pkg.mod \
+#  tglf_xgrid.mod \
+#  tglf_dimensions.mod \
+#  tglf_sgrid.mod \
+#  tglf_eigen.mod \
+#  tglf_kyspectrum.mod \
+#  tglf_species.mod
 
 EXTRA_DIST = \
   tglf_inout.f90 \
