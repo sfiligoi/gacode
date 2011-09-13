@@ -463,6 +463,18 @@ c
      & len('exp. impurity parallel mach number'),
      & 'exp. impurity parallel mach number')
       j=j+1
+      oneval(j) = nf_def_var (ncid,'egamma_exp'
+     & ,nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     & len('exp. ExB velocity shear'),
+     & 'exp. ExB velocity shear')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'gamma_p_exp'
+     & ,nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     & len('exp. parallel velocity shear'),
+     & 'exp. parallel velocity shear')
+      j=j+1
       oneval(j) = nf_def_var (ncid,'zpne_exp',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'def',
      &          len('exp a/Lne (dimensionless)'),
@@ -1640,6 +1652,10 @@ c
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j),
      >    mach_exp(3,0:mxgrid))
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), egamma_exp)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), gamma_p_exp)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), zpne_exp)
       j=j+1
