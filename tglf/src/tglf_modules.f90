@@ -7,7 +7,7 @@
 !
       INTEGER, PARAMETER :: nb=32
       INTEGER, PARAMETER :: nxm=4*nb-1
-      INTEGER, PARAMETER :: nsm=6, nt0=40
+      INTEGER, PARAMETER :: nsm=3, nt0=40
       INTEGER, PARAMETER :: neq = 15*nsm,iar=neq*nb
       INTEGER, PARAMETER :: nkym=50
       INTEGER, PARAMETER :: maxmodes=4
@@ -78,12 +78,16 @@
       REAL :: gradB_factor_in=0.0
       REAL :: filter_in=2.0
       INTEGER :: sat_rule_in=0
-      REAL :: alpha_kx0_in=0.13
-      REAL :: alpha_kx1_in= 3.14
+      REAL :: alpha_kx_e_in=1.0
+      REAL :: alpha_kx_p_in=1.0
+      REAL :: alpha_kx_n_in=1.0
+      REAL :: alpha_kx_t_in=1.0
 ! Input model paramaters
       LOGICAL :: adiabatic_elec_in=.FALSE.
       REAL :: alpha_p_in=1.0
-      REAL :: alpha_e_in=0.12
+      REAL :: alpha_e_in=1.0
+      REAL :: alpha_n_in =1.0
+      REAL :: alpha_t_in =1.0
       REAL :: theta_trapped_in=0.7
       REAL :: xnu_factor_in=1.0
       REAL :: debye_factor_in=1.0
@@ -101,8 +105,8 @@
       REAL,DIMENSION(nsm) :: vpar_shear_in=0.0
       REAL :: vexb_shear_in=0.0
 ! Input profile shear
-      REAL,DIMENSION(nsm) :: shear_ns_in=0.0
-      REAL,DIMENSION(nsm) :: shear_ts_in=0.0
+      REAL,DIMENSION(nsm) :: vns_shear_in=0.0
+      REAL,DIMENSION(nsm) :: vts_shear_in=0.0
 ! Input field averages
       REAL,DIMENSION(nsm) :: as_in
       REAL,DIMENSION(nsm) :: taus_in
@@ -698,8 +702,10 @@
       REAL :: debye_tg=0.0
       REAL :: vexb_shear_tg=0.0
       REAL :: alpha_quench_tg=0.0
-      REAL :: alpha_p_tg=0.0
-      REAL :: alpha_e_tg=0.0
+      REAL :: alpha_p_tg=1.0
+      REAL :: alpha_e_tg=1.0
+      REAL :: alpha_n_tg=1.0
+      REAL :: alpha_t_tg=1.0
       REAL :: wd_zero_tg=0.1
       REAL :: Linsker_factor_tg=0.0
       REAL :: gradB_factor_tg=0.0
@@ -708,8 +714,10 @@
       REAL :: debye_factor_tg=1.0
       REAL :: etg_factor_tg = 1.25
       REAL :: filter_tg = 2.0
-      REAL :: alpha_kx0_tg=0.0
-      REAL :: alpha_kx1_tg=0.0
+      REAL :: alpha_kx_e_tg=1.0
+      REAL :: alpha_kx_p_tg=1.0
+      REAL :: alpha_kx_n_tg=1.0
+      REAL :: alpha_kx_t_tg=1.0
       REAL :: sign_Bt_tg=1.0
       REAL :: sign_It_tg=1.0
       REAL,DIMENSION(nsmax) :: taus_tg=1.0
@@ -720,8 +728,8 @@
       REAL,DIMENSION(nsmax) :: vpar_shear_tg=0.0
       REAL,DIMENSION(nsmax) :: zs_tg
       REAL,DIMENSION(nsmax) :: mass_tg
-      REAL,DIMENSION(nsmax) :: shear_ns_tg=0.0
-      REAL,DIMENSION(nsmax) :: shear_ts_tg=0.0
+      REAL,DIMENSION(nsmax) :: vns_shear_tg=0.0
+      REAL,DIMENSION(nsmax) :: vts_shear_tg=0.0
 ! Shifted cicle inputs
       REAL :: theta0_tg=0.0
       REAL :: shat_tg=1.0
@@ -755,8 +763,9 @@
       NAMELIST /tglfin/ adiabatic_elec_tg, find_width_tg, new_eikonal_tg, &
         nbasis_max_tg, nbasis_min_tg, nxgrid_tg, ibranch_tg, ns_tg, &
         nmodes_tg, iflux_tg, ky_tg, width_max_tg, width_min_tg, &
-        nwidth_tg, park_tg, ghat_tg, gchat_tg, alpha_e_tg, vexb_shear_tg, &
-        alpha_p_tg, vpar_shear_tg, alpha_quench_tg, igeo_tg, theta_trapped_tg, &
+        nwidth_tg, park_tg, ghat_tg, gchat_tg, &
+        alpha_e_tg, alpha_n_tg, alpha_t_tg, alpha_p_tg, &
+        vexb_shear_tg, vpar_shear_tg, alpha_quench_tg, igeo_tg, theta_trapped_tg, &
         theta0_tg,taus_tg,as_tg,rlns_tg,rlts_tg,mass_tg,zs_tg, &
         rmin_tg, rmaj_tg, zmaj_tg,use_bisection_tg,vpar_tg, &
         q_tg, xnue_tg, wd_zero_tg, betae_tg, shat_tg, alpha_tg, &
@@ -766,9 +775,9 @@
         p_prime_tg, filter_tg, Linsker_factor_tg, gradB_factor_tg,  &
         b_model_tg, ft_model_tg, xnu_factor_tg, debye_factor_tg, &
         nky_tg,etg_factor_tg,use_TM_tg,kygrid_model_tg,xnu_model_tg, &
-        sat_rule_tg,alpha_kx0_tg,alpha_kx1_tg,vpar_shear_model_tg, &
-        j_surface_tg,vpar_model_tg,sign_Bt_tg,sign_It_tg,shear_ns_tg, &
-        shear_ts_tg, nfourier_tg,fourier_tg
+        sat_rule_tg,alpha_kx_e_tg,alpha_kx_p_tg,alpha_kx_n_tg, alpha_kx_t_tg, &
+        vpar_shear_model_tg, j_surface_tg,vpar_model_tg,sign_Bt_tg,sign_It_tg, &
+        vns_shear_tg,vts_shear_tg, nfourier_tg,fourier_tg
 !
       END MODULE tglf_tg
 !______________________________________________________

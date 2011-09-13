@@ -51,10 +51,14 @@ subroutine tglf_read_input
 
   ! Data passed to: put_model_parameters
   read(1,*) tglf_adiabatic_elec_in
-  read(1,*) tglf_alpha_p_in
   read(1,*) tglf_alpha_e_in
-  read(1,*) tglf_alpha_kx0_in
-  read(1,*) tglf_alpha_kx1_in
+  read(1,*) tglf_alpha_p_in
+  read(1,*) tglf_alpha_n_in
+  read(1,*) tglf_alpha_t_in
+  read(1,*) tglf_alpha_kx_e_in
+  read(1,*) tglf_alpha_kx_p_in
+  read(1,*) tglf_alpha_kx_n_in
+  read(1,*) tglf_alpha_kx_t_in
   read(1,*) tglf_alpha_quench_in
   read(1,*) tglf_xnu_factor_in
   read(1,*) tglf_debye_factor_in
@@ -111,18 +115,18 @@ subroutine tglf_read_input
   read(1,*) tglf_vexb_shear_in
 
   ! Data passed to: put_profile_shear
-  read(1,*) tglf_shear_ns_in(1)
-  read(1,*) tglf_shear_ns_in(2)
-  read(1,*) tglf_shear_ns_in(3)
-  read(1,*) tglf_shear_ns_in(4)
-  read(1,*) tglf_shear_ns_in(5)
-  read(1,*) tglf_shear_ns_in(6)
-  read(1,*) tglf_shear_ts_in(1)
-  read(1,*) tglf_shear_ts_in(2)
-  read(1,*) tglf_shear_ts_in(3)
-  read(1,*) tglf_shear_ts_in(4)
-  read(1,*) tglf_shear_ts_in(5)
-  read(1,*) tglf_shear_ts_in(6)
+  read(1,*) tglf_vns_shear_in(1)
+  read(1,*) tglf_vns_shear_in(2)
+  read(1,*) tglf_vns_shear_in(3)
+  read(1,*) tglf_vns_shear_in(4)
+  read(1,*) tglf_vns_shear_in(5)
+  read(1,*) tglf_vns_shear_in(6)
+  read(1,*) tglf_vts_shear_in(1)
+  read(1,*) tglf_vts_shear_in(2)
+  read(1,*) tglf_vts_shear_in(3)
+  read(1,*) tglf_vts_shear_in(4)
+  read(1,*) tglf_vts_shear_in(5)
+  read(1,*) tglf_vts_shear_in(6)
 
   ! Data passed to: put_averages
   read(1,*) tglf_taus_in(1)

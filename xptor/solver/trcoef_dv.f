@@ -124,6 +124,7 @@ c      ca = 2.D0/3.D0
       enddo
       do k=0,mxgrd-1
        egamma_sum(k)=0.D0
+       gamma_p_sum(k)=0.D0
        anrate_sum(k)=0.D0
        anfreq_sum(k)=0.D0
        diffgb_sum(k)=0.D0
@@ -181,6 +182,7 @@ c      ca = 2.D0/3.D0
        xnu_m_sum(k)=0.0
        alpha_m_sum(k)=0.0
        betae_m_sum(k)=0.0
+c
        egamma_m(k)=0.D0
        anrate_m(k)=0.D0
        anfreq_m(k)=0.D0
