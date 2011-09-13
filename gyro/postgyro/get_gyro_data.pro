@@ -28,10 +28,21 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
 
   dirpath  =GETENV('GYRO_DIR') + '/sim/' + simdir
 
-  IF (READ_GYRO_PROFILE_DATA(simdir, profile_data,HDF5=hdf5) EQ 0) THEN BEGIN
-      PRINT, "Couldn't read out.gyro.profile, returning 0"
-      RETURN, 0
-  ENDIF ELSE BEGIN
+  use_hdf5 = KEYWORD_SET(hdf5) ;flag for using HDF5
+  got_profiles = 0
+  IF (use_hdf5 EQ 0) THEN BEGIN
+      IF (READ_GYRO_PROFILE_DATA(simdir, profile_data) EQ 0) THEN BEGIN
+          PRINT, "Couldn't read out.gyro.profile, returning 0"
+          RETURN, 0
+      ENDIF ELSE got_profiles = 1
+  ENDIF ELSE IF (use_hdf5 EQ 1) THEN BEGIN
+      IF (READ_GYRO_PROFILE_DATA_HDF5(simdir, profile_data) EQ 0) THEN BEGIN
+          PRINT, "Couldn't read out.gyro.initdata.h5, returning 0"
+          RETURN, 0
+      ENDIF ELSE got_profiles = 1
+  ENDIF
+
+  IF (got_profiles EQ 1) THEN BEGIN
       n_r = profile_data.n_r
       n_n = profile_data.n_n
       n_theta_plot = profile_data.n_theta_plot
@@ -43,6 +54,9 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
 
       time = READ_GYRO_TIMEVECTOR(dirpath)
       n_time = N_ELEMENTS(time)
+
+      IF (use_hdf5 EQ 1) THEN $
+        tdata = H5_PARSE(dirpath + '/out.gyro.timedata.h5',/READ_DATA)
 
       ;read in potentially large fluctuation field arrays
       DEFAULT, read_large, 0
@@ -87,7 +101,7 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
       ENDCASE
 
       ;start with out.gyro.moment_u: phi/A_||/B_||
-      IF (exists_u) THEN BEGIN
+      IF ((use_hdf5 EQ 0) AND (exists_u)) THEN BEGIN
           array = FLTARR(2,n_theta_plot,n_r,profile_data.n_field,n_n,n_time)
           exists_u = READ_GYRO_ARRAY(array, dirpath+'/out.gyro.moment_u')
           IF (exists_u) THEN BEGIN
@@ -113,7 +127,7 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
 
       ;load density moment fluctuations
       form = [n_theta_plot, n_r, profile_data.n_kinetic, n_n, n_time]
-      IF (exists_n) THEN BEGIN
+      IF ((use_hdf5 EQ 0) AND (exists_n)) THEN BEGIN
           array = FLTARR(2,n_theta_plot,n_r,profile_data.n_kinetic,n_n,n_time)
           exists_n = READ_GYRO_ARRAY(array, dirpath+'/out.gyro.moment_n')
           IF (exists_n) THEN BEGIN
@@ -123,7 +137,7 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
       ENDIF
 
       ;load energy moment fluctuations, form is same as moment_n
-      IF (exists_e) THEN BEGIN
+      IF ((use_hdf5 EQ 0) AND (exists_e)) THEN BEGIN
           array = FLTARR(2,n_theta_plot,n_r,profile_data.n_kinetic,n_n,n_time)
           exists_e = READ_GYRO_ARRAY(array, dirpath+'/out.gyro.moment_e')
           IF (exists_e) THEN BEGIN
@@ -132,6 +146,20 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
           ENDIF    
       ENDIF
       
+      ;load v_|| moment fluctuations, form is same as moment_n
+      IF ((use_hdf5 EQ 0) AND (exists_v)) THEN BEGIN
+          array = FLTARR(2,n_theta_plot,n_r,profile_data.n_kinetic,n_n,n_time)
+          exists_v = READ_GYRO_ARRAY(array, dirpath+'/out.gyro.moment_v')
+          IF (exists_v) THEN BEGIN
+              mom_v = COMPLEX(REFORM(TEMPORARY(array[0,*,*,*,*,*]),form), $
+                              REFORM(TEMPORARY(array[1,*,*,*,*,*]),form))
+          ENDIF    
+      ENDIF
+
+      IF (use_hdf5 EQ 1) THEN BEGIN  ;load HDF5 fluctuations
+          PRINT, 'load HDF5 fluctuations here'
+      ENDIF
+
       ;calculate temp fluctuations normalized to Te
       IF ((exists_n EQ 1) AND (exists_e EQ 1)) THEN exists_t = 1
       IF (exists_t) THEN BEGIN
@@ -143,17 +171,7 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
               profile_data.T[i_spec,i_r]*mom_n[*,i_r,i_spec,*,*])/$
               profile_data.n[i_spec, i_r]
       ENDIF
-      
-      ;load v_|| moment fluctuations, form is same as moment_n
-      IF (exists_v) THEN BEGIN
-          array = FLTARR(2,n_theta_plot,n_r,profile_data.n_kinetic,n_n,n_time)
-          exists_v = READ_GYRO_ARRAY(array, dirpath+'/out.gyro.moment_v')
-          IF (exists_v) THEN BEGIN
-              mom_v = COMPLEX(REFORM(TEMPORARY(array[0,*,*,*,*,*]),form), $
-                              REFORM(TEMPORARY(array[1,*,*,*,*,*]),form))
-          ENDIF    
-      ENDIF
-      
+            
       ;set species labels here
       kin_tags = STRARR(profile_data.n_kinetic)
       IF (profile_data.n_kinetic EQ profile_data.n_ion) THEN BEGIN ;only have ions
@@ -167,52 +185,62 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
           kin_tags[profile_data.n_kinetic-1] = 'electron'
       ENDELSE
 
-      ;load total fluxes vs. time
-      array = FLTARR(profile_data.n_kinetic,profile_data.n_field,4,n_time)
-      exists_flux = READ_GYRO_ARRAY(array, dirpath+'/out.gyro.gbflux')
-      IF (exists_flux) THEN BEGIN
-          form = [profile_data.n_kinetic,profile_data.n_field,n_time]
-          Gamma_t = REFORM(array[*,*,0,*],form)
-          Q_t = REFORM(array[*,*,1,*],form)
-          Pi_t = REFORM(array[*,*,2,*],form)
-          Sexch_t= REFORM(array[*,*,3,*],form)
-      ENDIF ELSE BEGIN
-          Gamma_t = 0
-          Q_t = 0
-          Pi_t = 0
-          Sexch_t = 0
-      ENDELSE
+      ;load fluxes- initalize first
+      Gamma_t = 0
+      Q_t = 0
+      Pi_t = 0
+      Sexch_t = 0
+      Gamma_rt = 0
+      Q_rt = 0
+      Pi_rt = 0
+      Sexch_rt = 0
+      Gamma_nt = 0
+      Q_nt = 0
+      Pi_nt = 0
+      Sexch_nt = 0
+ 
+     IF ((use_hdf5 EQ 1) AND (profile_data.nonlinear_flag EQ 1)) THEN BEGIN
+        Gamma_t = TRANSPOSE(REFORM(tdata.gbflux._data[*,0,*,*]),[2,1,0])
+        Gamma_rt = TRANSPOSE(REFORM(tdata.gbflux_i._data[*,*,0,*,*]),[3,2,1,0])
+        Q_t = TRANSPOSE(REFORM(tdata.gbflux._data[*,1,*,*]),[2,1,0])
+        Q_rt = TRANSPOSE(REFORM(tdata.gbflux_i._data[*,*,1,*,*]),[3,2,1,0])
+        Pi_t = TRANSPOSE(REFORM(tdata.gbflux._data[*,2,*,*]),[2,1,0])
+        Pi_rt = TRANSPOSE(REFORM(tdata.gbflux_i._data[*,*,2,*,*]),[3,2,1,0])
+        Secxh_t = TRANSPOSE(REFORM(tdata.gbflux._data[*,3,*,*]),[2,1,0])
+        Sexch_rt = TRANSPOSE(REFORM(tdata.gbflux_i._data[*,*,3,*,*]),[3,2,1,0])
+     ENDIF ELSE BEGIN           ;from ascii files
+          ;load total fluxes vs. time
+          array = FLTARR(profile_data.n_kinetic,profile_data.n_field,4,n_time)
+          exists_flux = READ_GYRO_ARRAY(array, dirpath+'/out.gyro.gbflux')
+          IF (exists_flux) THEN BEGIN
+              form = [profile_data.n_kinetic,profile_data.n_field,n_time]
+              Gamma_t = REFORM(array[*,*,0,*],form)
+              Q_t = REFORM(array[*,*,1,*],form)
+              Pi_t = REFORM(array[*,*,2,*],form)
+              Sexch_t= REFORM(array[*,*,3,*],form)
+          ENDIF
 
-      ;load total fluxes vs. radius & time
-      array = FLTARR(profile_data.n_kinetic,profile_data.n_field,4,n_r,n_time)
-      exists_flux = READ_GYRO_ARRAY(array, dirpath+'/out.gyro.gbflux_i')
-      IF (exists_flux) THEN BEGIN
-          form = [profile_data.n_kinetic,profile_data.n_field,n_r,n_time]
-          Gamma_rt = REFORM(array[*,*,0,*,*],form)
-          Q_rt = REFORM(array[*,*,1,*,*],form)
-          Pi_rt = REFORM(array[*,*,2,*,*],form)
-          Sexch_rt= REFORM(array[*,*,3,*,*],form)
-      ENDIF ELSE BEGIN
-          Gamma_rt = 0
-          Q_rt = 0
-          Pi_rt = 0
-          Sexch_rt = 0
-      ENDELSE
+          ;load total fluxes vs. radius & time
+          array = FLTARR(profile_data.n_kinetic,profile_data.n_field,4,n_r,n_time)
+          exists_flux = READ_GYRO_ARRAY(array, dirpath+'/out.gyro.gbflux_i')
+          IF (exists_flux) THEN BEGIN
+              form = [profile_data.n_kinetic,profile_data.n_field,n_r,n_time]
+              Gamma_rt = REFORM(array[*,*,0,*,*],form)
+              Q_rt = REFORM(array[*,*,1,*,*],form)
+              Pi_rt = REFORM(array[*,*,2,*,*],form)
+              Sexch_rt= REFORM(array[*,*,3,*,*],form)
+          ENDIF
 
-      ;load total fluxes vs. modenumbers & time
-      array = FLTARR(profile_data.n_kinetic,profile_data.n_field,4,n_n,n_time)
-      exists_flux = READ_GYRO_ARRAY(array, dirpath+'/out.gyro.gbflux_n')
-      IF (exists_flux) THEN BEGIN
-          form = [profile_data.n_kinetic,profile_data.n_field,n_n,n_time]
-          Gamma_nt = REFORM(array[*,*,0,*,*],form)
-          Q_nt = REFORM(array[*,*,1,*,*],form)
-          Pi_nt = REFORM(array[*,*,2,*,*],form)
-          Sexch_nt= REFORM(array[*,*,3,*,*],form)
-      ENDIF ELSE BEGIN
-          Gamma_nt = 0
-          Q_nt = 0
-          Pi_nt = 0
-          Sexch_nt = 0
+          ;load total fluxes vs. modenumbers & time
+          array = FLTARR(profile_data.n_kinetic,profile_data.n_field,4,n_n,n_time)
+          exists_flux = READ_GYRO_ARRAY(array, dirpath+'/out.gyro.gbflux_n')
+          IF (exists_flux) THEN BEGIN
+              form = [profile_data.n_kinetic,profile_data.n_field,n_n,n_time]
+              Gamma_nt = REFORM(array[*,*,0,*,*],form)
+              Q_nt = REFORM(array[*,*,1,*,*],form)
+              Pi_nt = REFORM(array[*,*,2,*,*],form)
+              Sexch_nt= REFORM(array[*,*,3,*,*],form)
+          ENDIF
       ENDELSE
 
       ;create struct
@@ -283,6 +311,7 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
                    Q_nt: Q_nt, $
                    Pi_nt: Pi_nt, $
                    Sexch_nt: Sexch_nt, $
+
                    ;fluctuation fields
                    exists_phi:exists_phi, $
                    exists_Apar:exists_Apar, $
@@ -301,6 +330,6 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
                    kin_tags:kin_tags, i_field:0, i_kin:0, simdir:simdir}     
 
       RETURN, gyro_data
-  ENDELSE
+  ENDIF
 END ;get_gyro_data
 
