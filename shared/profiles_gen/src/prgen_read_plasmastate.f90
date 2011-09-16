@@ -41,17 +41,6 @@ subroutine prgen_read_plasmastate
   err = nf90_Inquire_Dimension(ncid,varid,len=plst_dp1_nspec_th)
   if (verbose_flag == 1)  print *,err,plst_tag,plst_dp1_nspec_th
 
-  ! Number of thermal species 
-  plst_tag = 'dp1_nspec_tha'
-  err = nf90_inq_dimid(ncid,trim(plst_tag),varid)
-  err = nf90_Inquire_Dimension(ncid,varid,len=plst_dp1_nspec_tha)
-  if (verbose_flag == 1) print *,err,plst_tag,plst_dp1_nspec_tha
-
-  if (plst_dp1_nspec_th /= plst_dp1_nspec_tha) then
-     print *,'ERROR: plst_dp1_nspec_th /= plst_dp1_nspec_tha'
-     stop
-  endif
-
   ! Number of species (thermal + fast)
   plst_tag = 'dp1_nspec_alla'
   err = nf90_inq_dimid(ncid,trim(plst_tag),varid)
