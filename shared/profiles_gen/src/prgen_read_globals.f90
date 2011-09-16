@@ -152,7 +152,6 @@ module prgen_read_globals
   integer :: plst_dim_nrho
   integer :: plst_dim_nrho_eq_geo
   integer :: plst_dp1_nspec_th
-  integer :: plst_dp1_nspec_tha
   integer :: plst_dp1_nspec_alla
   character (len=32) :: plst_tag
   character (len=32), dimension(:), allocatable :: plst_alla_name
