@@ -106,7 +106,7 @@ subroutine gyro_alloc_distrib(flag)
 
      ! Gyroaverage arrays
      allocate(w_gyro(n_stack,-m_gyro:m_gyro-i_gyro,n_x,n_nek_loc_1,n_gk))
-     allocate(z_gyro(-m_gyro:m_gyro-i_gyro,-n_x/2:n_x/2-1))
+     allocate(z_gyro(-n_x/2:n_x/2,-n_x/2:n_x/2-1))
      allocate(w_gyro_rot(n_stack,-m_gyro:m_gyro-i_gyro,n_x,n_nek_loc_1,n_gk))
 
      if (n_field == 3) then

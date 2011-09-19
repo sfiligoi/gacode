@@ -34,7 +34,6 @@ subroutine make_ampere_blend
   complex, dimension(n_gk,-mg_dx:mg_dx-ig_dx) :: ion_current
   !---------------------------------------------------
 
-
   betae_eff = betae_unit_norm*ampere_scale
 
   do i=1,n_x
@@ -103,24 +102,6 @@ subroutine make_ampere_blend
                       v_gyro,&
                       f_x(is,:),&
                       2)
-
-                 if (n_1(in_1) == 0) then   
-
-                    if (i_gyro /= 1) then 
-
-                       !! JC
-                       ! Correct truncated gyroaverage                 
-
-                       temp = sum(f_x(is,:))-1.0
-                       f_x(is,0) = f_x(is,0)-temp
-
-                    endif
-
-                    ! Enforce EXACT reality 
-
-                    f_x(is,:) = real(f_x(is,:))
-
-                 endif
 
                  ion_current(is,:) = &
                       v_para(m,i,p_nek_loc,is)**2* &
