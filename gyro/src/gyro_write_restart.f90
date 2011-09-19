@@ -43,11 +43,11 @@ subroutine gyro_write_restart
   !
   if (i_proc == 0) then
 
-     print *,'[Saving to ',trim(path)//file_restart(i_restart),']'
+     !print *,'[Saving to ',trim(path)//file_restart(i_restart),']'
 
      open(unit=io,file=trim(path)//file_restart(i_restart),status='replace')
      write(io,fmtstr2) h
-     write(6,'(a,i1,a)',advance='no') '[',0,']'
+     !write(6,'(a,i1,a)',advance='no') '[',0,']'
 
   endif
 
@@ -94,10 +94,7 @@ subroutine gyro_write_restart
 
   enddo
 
-  if (i_proc == 0) then
-     print *
-     close(io)
-  endif
+  if (i_proc == 0) close(io)
   !------------------------------------------------
 
   !---------------------------------------------------------

@@ -36,7 +36,7 @@ subroutine gyro_bessel_stencils
   ! Set dimensions and functions
   !
   do p=-n_x/2,n_x/2-1
-     do m=-m_gyro,m_gyro-i_gyro
+     do m=-n_x/2,n_x/2
         z_gyro(m,p) = exp(-i_c*p*m*pi/(n_x/2))
      enddo
   enddo
@@ -90,22 +90,6 @@ subroutine gyro_bessel_stencils
                    g,&
                    1)
 
-              if (n_1(in_1) == 0) then
-
-                 if (i_gyro /= 1) then 
-
-                    ! Renormalize truncated gyroaverage
-                    temp = sum(g(:))-1.0
-                    g(0) = g(0)-temp
-
-                 endif
-
-                 ! Enforce EXACT reality 
-
-                 g(:) = real(g(:))
-
-              endif
-
               w_temp(m0,:) = g(:)
 
               !-------------------------------
@@ -135,14 +119,6 @@ subroutine gyro_bessel_stencils
                       v_gyro,&
                       g,&
                       4)
-
-                 if (n_1(in_1) == 0) then
-
-                    ! Enforce EXACT reality 
-
-                    g(:) = real(g(:))
-
-                 endif
 
                  w_temp_aperp(m0,:) = g(:)
 

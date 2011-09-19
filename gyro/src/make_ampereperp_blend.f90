@@ -64,18 +64,18 @@ subroutine make_ampereperp_blend
               ! Prepare argument of Bessel function
               !  
               omega_c = abs(z(is))*b_unit_s(i)*mu(is)**2
-              
+
               if (kill_gyro_b_flag == 0) then
                  omega_c = omega_c*b0_t(i,k,m0)
               endif
-              
+
               rho_gyro = rhos_norm*v_perp(m0,i,p_nek_loc,is)/omega_c
               !
               a_gyro = grad_r_t(i,k,m0)/x_length*dr_eodr(i)
               u_gyro = qrat_t(i,k,m0)*n_1(in_1)*q_s(i)/r_s(i)*captheta_t(i,k,m0)
               v_gyro = qrat_t(i,k,m0)*n_1(in_1)*q_s(i)/r_s(i)
               !---------------------------------------------------------------
-              
+
               f_x1(is,:) = (0.0,0.0) 
               f_x2(is,:) = (0.0,0.0)
 
@@ -95,12 +95,6 @@ subroutine make_ampereperp_blend
                    f_x2(is,:),&
                    6)
 
-              ! Enforce EXACT reality 
-              if (n_1(in_1) == 0) then 
-                 f_x1(is,:) = real(f_x1(is,:))
-                 f_x2(is,:) = real(f_x2(is,:))
-              endif
-
            enddo ! is
 
            do j=1,n_blend
@@ -108,15 +102,12 @@ subroutine make_ampereperp_blend
 
                  do i_diff=-m_gyro,m_gyro-i_gyro
 
-                    !----------------------------
-                    ! This will stagnate at i=n_x
-                    ! for i+i_diff > n_x
-                    !
+                    !-----------------------------------------------
+                    ! This will stagnate at i=n_x for i+i_diff > n_x
+                    ! if boundary_method=2:
                     ip = i_cyc(i+i_diff)
-                    !----------------------------
+                    !-----------------------------------------------
 
-
-                    !
                     ! FV[ (F*_j) (2*z_i*n_i*T_i*V[(ene*lambda*G_perp)^2]
                     !             + 1/beta_e) (F_jp) ]
                     !
@@ -131,8 +122,7 @@ subroutine make_ampereperp_blend
                          + b_unit_s(i)**2*1.0/betae_eff * w_g0(i_diff) &
                          * cs_blend(j,m0,i,p_nek_loc) &
                          * c_blend(jp,m0,ip,p_nek_loc)              
-                    
-                    !
+
                     ! FV[ (F*_j) (z_i*n_i*V[(ene*lambda*G*G_perp)]) (F_jp) ]
                     !
                     !  = L_BP 
@@ -143,15 +133,13 @@ subroutine make_ampereperp_blend
                          * lambda(i,k) &
                          * cs_blend(j,m0,i,p_nek_loc) &
                          * c_blend(jp,m0,ip,p_nek_loc)
-                         
 
                  enddo ! i_diff
-                 
+
               enddo ! jp
            enddo ! j
-           
+
         enddo ! m 
-        
      enddo ! p_nek_loc 
      !-------------------------------------------------------------------
 

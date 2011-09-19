@@ -52,7 +52,7 @@ subroutine gyro_write_timedata_hdf5
   ! Timestep data:
   !
   if (i_proc == 0) then
-     call write_step(trim(path)//'t.out',1)
+     call gyro_write_step(trim(path)//'t.out',1)
   endif
   !---------------------------------------------------
 

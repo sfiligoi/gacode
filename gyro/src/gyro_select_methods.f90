@@ -320,15 +320,6 @@ subroutine gyro_select_methods
         i_dx = 0
      endif
 
-     if (radial_profile_method == 2) then
-
-        ! profile_method == 2 only consistent with nonperiodic 
-        ! mode of operation.  Avoid resets.
-
-        call catch_error('INVALID: boundary_method/profile_method')
-
-     endif
-
      if (nonuniform_grid_flag == 1) then
         call catch_error('INVALID: cannot have nonuniform grid.')
      endif

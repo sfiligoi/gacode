@@ -62,7 +62,6 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
 
   p0 = n_x/2
 
-
   select case (itype)
 
   case (1)
@@ -139,7 +138,6 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
 
   end select
 
-
   do m=-m_gyro,m_gyro-i_gyro
      g0 = (0.0,0.0)
      do p=-p0,p0-1
@@ -148,7 +146,35 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
      g(m) = g0
   enddo
 
+  !-----------------------------------------------------
+  ! Correction for truncation: 
+  !  Make end-coefficients equal to sum of neglected 
+  !  gridpoints.
+  !
+  if (m_gyro < p0) then
+     do m=-p0,-m_gyro-1
+        g0 = (0.0,0.0)
+        do p=-p0,p0-1
+           g0 = g0 + z_gyro(m,p)*func(p)
+        enddo
+        g(-m_gyro) = g(-m_gyro)+g0
+     enddo
+     do m=m_gyro+1,p0
+        g0 = (0.0,0.0)
+        do p=-p0,p0-1
+           g0 = g0 + z_gyro(m,p)*func(p)
+        enddo
+        g(m_gyro) = g(m_gyro)+g0
+     enddo
+  endif
+  !-----------------------------------------------------
+     
   ! Add final factor of i for case 3
   if (itype == 3) g = -(i_c/2.0)*g
+
+  ! Enforce reality if n=0:
+  if (u == 0.0) then
+     g = real(g)
+  endif
 
 end subroutine gyro_bessel_operator
