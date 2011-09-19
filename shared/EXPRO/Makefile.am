@@ -14,6 +14,7 @@
 libdir = $(prefix)/lib
 noinst_LTLIBRARIES = libgacodeexpro.la
 libgacodeexpro_la_SOURCES = \
+  EXPRO_globals.f90 \
   EXPRO_interface.f90 \
   EXPRO_alloc.f90 \
   EXPRO_alloc_control.f90 \

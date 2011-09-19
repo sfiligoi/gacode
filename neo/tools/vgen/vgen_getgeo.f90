@@ -1,4 +1,5 @@
 subroutine vgen_getgeo
+
   use vgen_globals
   use EXPRO_interface
   use GEO_interface
@@ -21,7 +22,7 @@ subroutine vgen_getgeo
   GEO_signb_in    = EXPRO_ctrl_signb
   call GEO_alloc(1)
 
-  open(unit=1,file='vgen_geo.out',status='replace')
+  open(unit=1,file='out.vgen.geo',status='replace')
   r_min = EXPRO_rmin(EXPRO_n_exp)
 
   do i=2,EXPRO_n_exp

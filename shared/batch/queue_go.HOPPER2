@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /usr/bin/env bash
 #
 # SCRIPT:
 #  queue_go.HOPPER2
@@ -20,8 +20,16 @@ simpath=${4}
 code=${5}
 
 # raise nodes to a multiple of 24 cores; but use $nproc in the execute line
-nodes=$[24*(($nproc+23)/24)]
+nodes=$(($nproc/24))
+cores=$((24*nodes))
+resid=$(($nproc-$cores))
 
+if [ $resid -ne 0 ]
+then
+   echo "INFO: (batch) Adding extra node since number of cores not multiple of 24"
+   nodes=$(($nodes+1))
+   cores=$((24*$nodes))
+fi
 
 case "$queue_num" in
 
@@ -70,7 +78,7 @@ echo "#PBS -o $simpath/$sim/batch.out" >> $bfile
 echo "#PBS -e $simpath/$sim/batch.err" >> $bfile
 echo "#PBS -q $queue" >> $bfile
 echo "#PBS -l walltime=$limit" >> $bfile
-echo "#PBS -l mppwidth=$nodes" >> $bfile
+echo "#PBS -l mppwidth=$cores" >> $bfile
 echo "#PBS -m abe" >> $bfile
 echo "#PBS -M ${USER}@nersc.gov" >> $bfile
 

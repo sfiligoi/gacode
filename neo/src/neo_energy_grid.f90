@@ -87,6 +87,7 @@ contains
        deallocate(evec_e05)
        deallocate(evec_e105)
        deallocate(e_lag)
+       deallocate(xi_beta_l)
        deallocate(mygamma2)
        
        initialized_basis = .false.

@@ -11,11 +11,11 @@
 
 SUBDIRS	= autotool_config envvars math GEO UMFPACK EXPRO profiles_gen python bin exec
 
-lib_LTLIBRARIES = libgacodeshared.la
+lib_LTLIBRARIES = libgacodesshared.la
 
 
-libgacodeshared_la_SOURCES =
-libgacodeshared_la_LIBADD = \
+libgacodesshared_la_SOURCES =
+libgacodesshared_la_LIBADD = \
 	$(top_builddir)/shared/math/libgacodemath.la \
 	$(top_builddir)/shared/GEO/libgacodegeo.la \
 	$(top_builddir)/shared/EXPRO/libgacodeexpro.la \
@@ -25,7 +25,7 @@ if HAVE_FCIOWRAPPERS
 endif
 else
 SUBDIRS += vshdf5
-libgacodeshared_la_LIBADD += $(top_builddir)/shared/vshdf5/libvshdf5.la 
+libgacodesshared_la_LIBADD += $(top_builddir)/shared/vshdf5/libvshdf5.la 
 endif
 
 

@@ -30,7 +30,7 @@ subroutine gyro_initialize_timestep
 
      ! Initialize status to unconverged.
 
-     call set_exit_status('unconverged',0)
+     call gyro_set_exit_status('unconverged',0)
 
      if (abs(time_max) > 1.0) then
 
@@ -62,7 +62,7 @@ subroutine gyro_initialize_timestep
 
      ! Initialize status:
 
-     call set_exit_status('clean exit',0)
+     call gyro_set_exit_status('clean exit',0)
 
      freq_tol = 1e-10
      freq_err = 1.0

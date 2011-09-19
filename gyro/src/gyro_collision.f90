@@ -112,6 +112,9 @@ subroutine gyro_collision
      n_d = parallel_dim(n_k*n_i,n_proc_1)
      !
      call rTRANSP_INIT(n_i,n_j,n_k,NEW_COMM_1)
+     !
+     ! Is this initialization required for some core counts?
+     h_C = 0.0
      do m=1,n_stack
         call rTRANSP_DO(f_coll(m,:,:),h_C(m,:,:))
      enddo

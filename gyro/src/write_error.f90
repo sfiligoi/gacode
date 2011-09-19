@@ -36,33 +36,10 @@ subroutine write_error(datafile,io)
 
      if (i_proc == 0) then
 
-        ! output to screen
-
-        if (silent_flag == 0 .and. linsolve_method == 1) then
-           select case (electron_method)
-
-           case (1) 
-
-              print *
-              print 10,'t-integration error ({i}): ',time_error(:)
-
-           case (2,4)
-
-              print *
-              print 10,'t-integration error ({i},e): ',time_error(:)
-
-           case (3) 
-
-              print *
-              print 10,'t-integration error (e): ',time_error(:)
-
-           end select
-        endif
-
         ! output to file
 
         open(unit=io,file=datafile,status='old',position='append')
-        write(io,20) time_error(:)
+        write(io,10) time_error(:)
         close(io)
 
      endif
@@ -76,7 +53,7 @@ subroutine write_error(datafile,io)
         open(unit=io,file=datafile,status='old')
 
         do data_loop=0,data_step
-           read(io,20) dummy
+           read(io,10) dummy
         enddo
 
         endfile(io)
@@ -88,7 +65,6 @@ subroutine write_error(datafile,io)
 
   if (i_proc == 0 .and. debug_flag == 1) print *,'[write_error called]'
 
-10 format(t2,a,6(1pe11.4,1x))
-20 format(10(1pe11.4,1x))
+10 format(10(1pe11.4,1x))
 
 end subroutine write_error

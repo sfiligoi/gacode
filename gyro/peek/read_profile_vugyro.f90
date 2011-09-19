@@ -8,7 +8,7 @@ subroutine read_profile_vugyro(dir)
 
   character (len=*) :: dir
 
-  open(unit=1,file=trim(dir)//'profile_vugyro.out')
+  open(unit=1,file=trim(dir)//'out.gyro.profile')
   read(1,*) n_x
   read(1,*) n_theta_section
   read(1,*) n_pass

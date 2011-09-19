@@ -20,7 +20,7 @@
  character(100) :: fname
  character(100) :: gname
 !-------------------------
-   fname=trim(tglf_path_in)//"dump_inputs.txt"
+   fname=trim(tglf_path_in)//"tglf_dump_inputs.txt"
    open(unit=funit,file=trim(fname),status='replace')
    gname=trim(tglf_path_in)//"gen_input.dat"
    open(unit=gunit,file=trim(gname),status='replace')
@@ -30,6 +30,8 @@
  write(22,*) tglf_use_transport_model_in
  write(21,*) "tglf_geometry_flag_in = ",tglf_geometry_flag_in
  write(22,*) tglf_geometry_flag_in
+ write(21,*) "tglf_write_wavefunction_flag_in = ",tglf_write_wavefunction_flag_in
+ write(22,*) tglf_write_wavefunction_flag_in
  write(21,*) "tglf_sign_bt_in = ",tglf_sign_bt_in
  write(22,*) tglf_sign_bt_in
  write(21,*) "tglf_sign_it_in = ",tglf_sign_it_in
@@ -78,14 +80,22 @@
  write(22,*) tglf_nky_in
  write(21,*) "tglf_adiabatic_elec_in = ",tglf_adiabatic_elec_in
  write(22,*) tglf_adiabatic_elec_in
- write(21,*) "tglf_alpha_p_in = ",tglf_alpha_p_in
- write(22,*) tglf_alpha_p_in
  write(21,*) "tglf_alpha_e_in = ",tglf_alpha_e_in
  write(22,*) tglf_alpha_e_in
- write(21,*) "tglf_alpha_kx0_in = ",tglf_alpha_kx0_in
- write(22,*) tglf_alpha_kx0_in
- write(21,*) "tglf_alpha_kx1_in = ",tglf_alpha_kx1_in
- write(22,*) tglf_alpha_kx1_in
+ write(21,*) "tglf_alpha_p_in = ",tglf_alpha_p_in
+ write(22,*) tglf_alpha_p_in
+ write(21,*) "tglf_alpha_n_in = ",tglf_alpha_n_in
+ write(22,*) tglf_alpha_n_in
+ write(21,*) "tglf_alpha_t_in = ",tglf_alpha_t_in
+ write(22,*) tglf_alpha_t_in
+ write(21,*) "tglf_alpha_kx_e_in = ",tglf_alpha_kx_e_in
+ write(22,*) tglf_alpha_kx_e_in
+ write(21,*) "tglf_alpha_kx_p_in = ",tglf_alpha_kx_p_in
+ write(22,*) tglf_alpha_kx_p_in
+ write(21,*) "tglf_alpha_kx_n_in = ",tglf_alpha_kx_n_in
+ write(22,*) tglf_alpha_kx_n_in
+ write(21,*) "tglf_alpha_kx_t_in = ",tglf_alpha_kx_t_in
+ write(22,*) tglf_alpha_kx_t_in
  write(21,*) "tglf_alpha_quench_in = ",tglf_alpha_quench_in
  write(22,*) tglf_alpha_quench_in
  write(21,*) "tglf_xnu_factor_in = ",tglf_xnu_factor_in
@@ -178,30 +188,30 @@
  write(22,*) tglf_vpar_shear_in(6)
  write(21,*) "tglf_vexb_shear_in = ",tglf_vexb_shear_in
  write(22,*) tglf_vexb_shear_in
- write(21,*) "tglf_shear_ns_in(1) = ",tglf_shear_ns_in(1)
- write(22,*) tglf_shear_ns_in(1)
- write(21,*) "tglf_shear_ns_in(2) = ",tglf_shear_ns_in(2)
- write(22,*) tglf_shear_ns_in(2)
- write(21,*) "tglf_shear_ns_in(3) = ",tglf_shear_ns_in(3)
- write(22,*) tglf_shear_ns_in(3)
- write(21,*) "tglf_shear_ns_in(4) = ",tglf_shear_ns_in(4)
- write(22,*) tglf_shear_ns_in(4)
- write(21,*) "tglf_shear_ns_in(5) = ",tglf_shear_ns_in(5)
- write(22,*) tglf_shear_ns_in(5)
- write(21,*) "tglf_shear_ns_in(6) = ",tglf_shear_ns_in(6)
- write(22,*) tglf_shear_ns_in(6)
- write(21,*) "tglf_shear_ts_in(1) = ",tglf_shear_ts_in(1)
- write(22,*) tglf_shear_ts_in(1)
- write(21,*) "tglf_shear_ts_in(2) = ",tglf_shear_ts_in(2)
- write(22,*) tglf_shear_ts_in(2)
- write(21,*) "tglf_shear_ts_in(3) = ",tglf_shear_ts_in(3)
- write(22,*) tglf_shear_ts_in(3)
- write(21,*) "tglf_shear_ts_in(4) = ",tglf_shear_ts_in(4)
- write(22,*) tglf_shear_ts_in(4)
- write(21,*) "tglf_shear_ts_in(5) = ",tglf_shear_ts_in(5)
- write(22,*) tglf_shear_ts_in(5)
- write(21,*) "tglf_shear_ts_in(6) = ",tglf_shear_ts_in(6)
- write(22,*) tglf_shear_ts_in(6)
+ write(21,*) "tglf_vns_shear_in(1) = ",tglf_vns_shear_in(1)
+ write(22,*) tglf_vns_shear_in(1)
+ write(21,*) "tglf_vns_shear_in(2) = ",tglf_vns_shear_in(2)
+ write(22,*) tglf_vns_shear_in(2)
+ write(21,*) "tglf_vns_shear_in(3) = ",tglf_vns_shear_in(3)
+ write(22,*) tglf_vns_shear_in(3)
+ write(21,*) "tglf_vns_shear_in(4) = ",tglf_vns_shear_in(4)
+ write(22,*) tglf_vns_shear_in(4)
+ write(21,*) "tglf_vns_shear_in(5) = ",tglf_vns_shear_in(5)
+ write(22,*) tglf_vns_shear_in(5)
+ write(21,*) "tglf_vns_shear_in(6) = ",tglf_vns_shear_in(6)
+ write(22,*) tglf_vns_shear_in(6)
+ write(21,*) "tglf_vts_shear_in(1) = ",tglf_vts_shear_in(1)
+ write(22,*) tglf_vts_shear_in(1)
+ write(21,*) "tglf_vts_shear_in(2) = ",tglf_vts_shear_in(2)
+ write(22,*) tglf_vts_shear_in(2)
+ write(21,*) "tglf_vts_shear_in(3) = ",tglf_vts_shear_in(3)
+ write(22,*) tglf_vts_shear_in(3)
+ write(21,*) "tglf_vts_shear_in(4) = ",tglf_vts_shear_in(4)
+ write(22,*) tglf_vts_shear_in(4)
+ write(21,*) "tglf_vts_shear_in(5) = ",tglf_vts_shear_in(5)
+ write(22,*) tglf_vts_shear_in(5)
+ write(21,*) "tglf_vts_shear_in(6) = ",tglf_vts_shear_in(6)
+ write(22,*) tglf_vts_shear_in(6)
  write(21,*) "tglf_taus_in(1) = ",tglf_taus_in(1)
  write(22,*) tglf_taus_in(1)
  write(21,*) "tglf_taus_in(2) = ",tglf_taus_in(2)

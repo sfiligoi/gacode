@@ -61,7 +61,7 @@ subroutine gyro_read_restart
      ! Ignore restart facility
      !------------------------
 
-     call make_initial_h
+     call gyro_initial_condition
 
      t_current = 0.0
      i_restart = 0
@@ -73,7 +73,7 @@ subroutine gyro_read_restart
      ! New simulation block
      !---------------------
 
-     call make_initial_h
+     call gyro_initial_condition
 
      t_current = 0.0
      i_restart = 0
@@ -100,7 +100,7 @@ subroutine gyro_read_restart
              status='old')
 
         read(io,*) data_step
-        read(io,10) t_current
+        read(io,fmtstr) t_current
         read(io,*) n_proc_old
         read(io,*) i_restart
         close(io)
@@ -133,7 +133,7 @@ subroutine gyro_read_restart
      if (i_proc == 0) then
         open(unit=io,file=trim(path)//file_restart(i_restart),status='old')
         print '(t2,a)','Restarting: '
-        read(io,10) h
+        read(io,fmtstr2) h
         print '(a,i1,a,$)','[',0,']'
      endif
 
@@ -141,16 +141,18 @@ subroutine gyro_read_restart
 
         if (i_proc == 0) then
 
-           if (i_proc_w < 10) then
-              print '(a,i1,a,$)','[',i_proc_w,']'
-           else if (i_proc_w < 100) then
-              print '(a,i2,a,$)','[',i_proc_w,']'
-           else
-              print '(a,i3,a,$)','[',i_proc_w,']'
+           if (debug_flag == 1) then
+              if (i_proc_w < 10) then
+                 print '(a,i1,a,$)','[',i_proc_w,']'
+              else if (i_proc_w < 100) then
+                 print '(a,i2,a,$)','[',i_proc_w,']'
+              else
+                 print '(a,i3,a,$)','[',i_proc_w,']'
+              endif
+              if (modulo(i_proc_w,8) == 0) print *
            endif
-           if (modulo(i_proc_w,8) == 0) print *
 
-           read(io,10) h_in
+           read(io,fmtstr2) h_in
 
            call MPI_SEND(h_in,&
                 size(h_in),&
@@ -191,11 +193,7 @@ subroutine gyro_read_restart
   call get_field_explicit
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[read_restart done]'
+     print *,'[gyro_read_restart done]'
   endif
-
-  ! ** Keep this consistent with gyro_write_restart.f90
-
-10 format(2(es11.4,1x))
 
 end subroutine gyro_read_restart

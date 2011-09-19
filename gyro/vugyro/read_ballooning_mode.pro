@@ -7,67 +7,67 @@ pro read_ballooning_mode
 
   balloon_tag = strarr(9)
 
-  openr,1,'balloon_phi.out',error=i_err
+  openr,1,'out.gyro.balloon_phi',error=i_err
   if (i_err eq 0) then begin
      balloon_tag[n_balloon] = 'balloon_phi'
      n_balloon = n_balloon+1
      close,1
   endif
 
-  openr,1,'balloon_a.out',error=i_err
+  openr,1,'out.gyro.balloon_a',error=i_err
   if (i_err eq 0) then begin
      balloon_tag[n_balloon] = 'balloon_a'
      n_balloon = n_balloon+1
      close,1
   endif
 
-  openr,1,'balloon_aperp.out',error=i_err
+  openr,1,'out.gyro.balloon_aperp',error=i_err
   if (i_err eq 0) then begin
      balloon_tag[n_balloon] = 'balloon_aperp'
      n_balloon = n_balloon+1
      close,1
   endif
 
-  openr,1,'balloon_E_par.out',error=i_err
+  openr,1,'out.gyro.balloon_epar',error=i_err
   if (i_err eq 0) then begin
      balloon_tag[n_balloon] = 'balloon_epar'
      n_balloon = n_balloon+1
      close,1
   endif
 
-  openr,1,'balloon_n_ion.out',error=i_err
+  openr,1,'out.gyro.balloon_n_ion',error=i_err
   if (i_err eq 0) then begin
      balloon_tag[n_balloon] = 'balloon_n_ion'
      n_balloon = n_balloon+1
      close,1
   endif
-  openr,1,'balloon_n_elec.out',error=i_err
+  openr,1,'out.gyro.balloon_n_elec',error=i_err
   if (i_err eq 0) then begin
      balloon_tag[n_balloon] = 'balloon_n_elec'
      n_balloon = n_balloon+1
      close,1
   endif
 
-  openr,1,'balloon_e_ion.out',error=i_err
+  openr,1,'out.gyro.balloon_e_ion',error=i_err
   if (i_err eq 0) then begin
      balloon_tag[n_balloon] = 'balloon_e_ion'
      n_balloon = n_balloon+1
      close,1
   endif
-  openr,1,'balloon_e_elec.out',error=i_err
+  openr,1,'out.gyro.balloon_e_elec',error=i_err
   if (i_err eq 0) then begin
      balloon_tag[n_balloon] = 'balloon_e_elec'
      n_balloon = n_balloon+1
      close,1
   endif
 
-  openr,1,'balloon_v_ion.out',error=i_err
+  openr,1,'out.gyro.balloon_v_ion',error=i_err
   if (i_err eq 0) then begin
      balloon_tag[n_balloon] = 'balloon_v_ion'
      n_balloon = n_balloon+1
      close,1
   endif
-  openr,1,'balloon_v_elec.out',error=i_err
+  openr,1,'out.gyro.balloon_v_elec',error=i_err
   if (i_err eq 0) then begin
      balloon_tag[n_balloon] = 'balloon_v_elec'
      n_balloon = n_balloon+1
@@ -99,7 +99,7 @@ pro read_ballooning_mode
 
   endif else begin
 
-     print_found,'balloon*.out',0
+     print_found,'out.gyro.balloon*',0
      exists_balloon = 0
 
   endelse

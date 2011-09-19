@@ -16,14 +16,15 @@ module neo_interface
   implicit none
 
   ! Input parameters (set to default values from python/neo_dict.py)
-  integer :: neo_n_energy_in = 15
-  integer :: neo_n_xi_in = 15
-  integer :: neo_n_theta_in = 15
+  integer :: neo_n_energy_in = 6
+  integer :: neo_n_xi_in = 17
+  integer :: neo_n_theta_in = 17
   integer :: neo_n_radial_in = 1
+  integer :: neo_matsz_scalefac_in = 500
   real    :: neo_rmin_over_a_in = 0.5
   real    :: neo_rmin_over_a_2_in = 0.6
   real    :: neo_rmaj_over_a_in = 3.0
-  integer :: neo_write_out_mode_in = 2
+  integer :: neo_silent_flag_in = 0
   integer :: neo_sim_model_in = 1
   integer :: neo_equilibrium_model_in = 0
   integer :: neo_collision_model_in = 4
@@ -142,11 +143,12 @@ contains
     neo_n_xi_in = n_xi
     neo_n_theta_in = n_theta
     neo_n_radial_in = n_radial
+    neo_matsz_scalefac_in = matsz_scalefac
     neo_rmin_over_a_in = rmin_1_in
     neo_rmin_over_a_in = rmin_1_in
     neo_rmin_over_a_2_in = rmin_2_in
     neo_rmaj_over_a_in = rmaj_in
-    neo_write_out_mode_in = write_out_mode
+    neo_silent_flag_in = silent_flag
     neo_sim_model_in = sim_model
     neo_equilibrium_model_in = equilibrium_model
     neo_collision_model_in = collision_model
@@ -238,10 +240,11 @@ contains
     n_xi = neo_n_xi_in
     n_theta = neo_n_theta_in
     n_radial = neo_n_radial_in
+    matsz_scalefac = neo_matsz_scalefac_in
     rmin_1_in = neo_rmin_over_a_in
     rmin_2_in = neo_rmin_over_a_2_in
     rmaj_in = neo_rmaj_over_a_in
-    write_out_mode = neo_write_out_mode_in
+    silent_flag = neo_silent_flag_in
     sim_model = neo_sim_model_in
     equilibrium_model = neo_equilibrium_model_in
     collision_model = neo_collision_model_in

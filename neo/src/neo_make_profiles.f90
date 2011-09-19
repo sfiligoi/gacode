@@ -45,7 +45,7 @@ subroutine neo_make_profiles
   else if(num_ele == 1) then
      adiabatic_ele_model = 0
   else
-     call neo_error('ERROR: Only one electron species allowed')
+     call neo_error('ERROR: (NEO) Only one electron species allowed')
      return
   end if
   
@@ -415,8 +415,8 @@ subroutine neo_make_profiles
   endif
 
   ! Print the re-mapped equilibrium data
-  if(write_out_mode > 0) then
-     open(unit=io,file='equil.out',status='replace')
+  if(silent_flag == 0 .and. i_proc == 0) then
+     open(unit=io,file=trim(path)//'out.neo.equil',status='replace')
      do ir=1,n_radial
         write (io,'(e16.8,$)') r(ir)
         write (io,'(e16.8,$)') dphi0dr(ir)

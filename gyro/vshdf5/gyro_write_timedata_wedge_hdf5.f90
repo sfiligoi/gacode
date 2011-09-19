@@ -268,7 +268,7 @@ contains
     h5in%units="m"
     call dump_h5(gidwedge,'R',Rf*a_meters,h5in,h5err)
     call dump_h5(gidwedge,'Z',Zf*a_meters,h5in,h5err)
-    call dump_h5(gidwedge,'rho',r_c*a_meters,h5in,h5err)
+    call dump_h5(gidwedge,'r_min',r_c*a_meters,h5in,h5err)
     call dump_h5(gidwedge,'rtJacobian',rtJacobian*a_meters,h5in,h5err)
     h5in%units="radians"
     call dump_h5(gidwedge,'theta',theta,h5in,h5err)

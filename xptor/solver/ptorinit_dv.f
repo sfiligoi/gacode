@@ -172,10 +172,10 @@ c
      >    (zimp_gf**2-zimp_gf)
          if(dilution_model.eq.0)then
 c full impurity and fast ion dilution
-           ni_exp(k)=ne_exp(k)-nfst_exp(k)-zimp_gf*nz_exp(k) 
+           ni_exp(k)=ne_exp(k)-nfast_exp(k)-zimp_gf*nz_exp(k) 
          elseif(dilution_model.eq.1)then
 c just fast ion dilution
-           ni_exp(k) = ne_exp(k)-nfst_exp(k)
+           ni_exp(k) = ne_exp(k)-nfast_exp(k)
            nz_exp(k) = 0.0
          elseif(dilution_model.eq.2)then
 c no dilution
@@ -253,7 +253,7 @@ c
       a_unit_exp = rmin_exp(mxgrid)
 c      if(igeo_tg.eq.0)a_unit_exp=arho_exp
 c
-      call neo_flows(mxgrid-1,vneo_exp,vdia_exp)
+      call neo_flows(ngrid,vneo_exp,vdia_exp)
 c
       pow_ei_exp(0) = 0.0
       do k=1,mxgrid-1
@@ -639,13 +639,17 @@ c
 c
 c compute ExB shear on half grid using computed v_exb
 c
+      a_unit_exp=arho_exp
+      if(imodel.eq.82)a_unit_exp = rmin_exp(mxgrid)
       do k=1,mxgrid-1
          rminm=(rmin_exp(k+1)+rmin_exp(k))/2.0
          rhom=arho_exp*(rho(k+1)+rho(k))/2.0
          csdam=9.79D5*DSQRT(1.D3*(te_exp(k+1)+te_exp(k))/2.0)/
-     >    (arho_exp*100.D0)/DSQRT(amassgas_exp)
+     >    (a_unit_exp*100.D0)/DSQRT(amassgas_exp)
          egamma_exp(k) = -cv/csdam*rminm/rhom*drhodr(k)*theta_exp(k)*
      >  (vexb_exp(k+1)-vexb_exp(k))/dr(k,2)
+         gamma_p_exp(k) = -sign_Bt_exp*(cv/csdam)*drhodr(k)*
+     >   (vexb_exp(k+1)-vexb_exp(k))/dr(k,2)
 c       write(*,'i2,2x,0p6f10.5') k, rho(k), vexb_exp(k),
 c     >       egamma_exp(k)
       enddo

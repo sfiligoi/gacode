@@ -7,6 +7,7 @@
 
 subroutine tgyro_init_profiles
 
+  use mpi
   use tgyro_globals
   use EXPRO_interface
 
@@ -18,8 +19,6 @@ subroutine tgyro_init_profiles
   integer :: n_exp
   real :: xh
   real :: arho
-
-  include 'mpif.h'
 
   !------------------------------------------------------
   ! PHYSICAL CONSTANTS
@@ -86,7 +85,7 @@ subroutine tgyro_init_profiles
   EXPRO_ctrl_rotation_method = 1
 
   call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
-  call EXPRO_pread(MPI_COMM_WORLD,'./')
+  call EXPRO_pread
 
   n_exp = EXPRO_n_exp
 
@@ -131,9 +130,13 @@ subroutine tgyro_init_profiles
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnnidr(i_ion,:)/100.0,n_exp,r,dlnnidr(i_ion,:),n_r)
   enddo
 
-  ! Overwrite ni1 with corrected density (done in EXPRO):
+  ! QUASINEUTRALITY:
+  !
+  ! Overwrite main ion density and gradient with corrected density and gradient 
+  ! (done in EXPRO):
   if (loc_quasineutral_flag == 1) then
      call cub_spline(EXPRO_rmin(:)/r_min,1e13*EXPRO_ni_new(:),n_exp,r,ni(1,:),n_r)
+     call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnnidr_new(:)/100.0,n_exp,r,dlnnidr(1,:),n_r)
   endif
 
   ! Enforce quasineutrality (set ni based on ne,nz)
@@ -178,7 +181,7 @@ subroutine tgyro_init_profiles
 
      if (i_proc_global == 0) then
         open(unit=1,file=trim(runfile),position='append')
-        write(1,*) 'INFO: TGYRO passing input.profiles.geo information to components'
+        write(1,*) 'INFO: (TGYRO) Passing input.profiles.geo information to components'
         write(1,*)
         close(1)
      endif

@@ -134,7 +134,7 @@ FLAG_SUM=$[ $EXEC_FLAG + $TEST_FLAG + $GENERATE_FLAG
 
 if [ "$FLAG_SUM" -gt 1 ]
 then
-   echo "ERROR: Can only specify one of -e, -t, -g, -i"
+   echo "ERROR: Can only specify one of -e, -t, -g, -i, -plot"
    exit 1
 fi
 #============================================================
@@ -311,4 +311,3 @@ then
    exit 0
 fi
 #===========================================================
-

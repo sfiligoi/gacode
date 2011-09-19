@@ -1,5 +1,13 @@
 module neo_globals
 
+  !---------------------------------------------------------------
+  ! local MPI variables
+  ! 
+  integer :: i_proc
+  integer :: n_proc
+  integer :: NEO_COMM_WORLD
+  !---------------------------------------------------------------
+
   real, parameter :: pi=3.1415926535897932
 
   !---------------------------------------------------------------
@@ -46,7 +54,6 @@ module neo_globals
   real, dimension(6) :: nu_in
   !---------------------------------------------------------------
 
-
   !---------------------------------------------------------------
   ! Grid dimensions:
   !
@@ -55,6 +62,8 @@ module neo_globals
   integer :: n_xi
   integer :: n_theta
   integer :: n_radial
+
+  integer :: matsz_scalefac
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -77,7 +86,7 @@ module neo_globals
   !---------------------------------------------------------------
   ! Output mode:
   !
-  integer :: write_out_mode
+  integer :: silent_flag
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -85,6 +94,11 @@ module neo_globals
   !
   integer, dimension(:), allocatable :: z     ! charge (ns)
   real, dimension(:), allocatable :: mass     ! m/m_0  (ns)
+  !---------------------------------------------------------------
+
+  !---------------------------------------------------------------
+  ! Path to INPUT, read in the get_inputpath subroutine
+  character(len=80) :: path
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -162,6 +176,10 @@ module neo_globals
   integer :: error_status = 0
   character(len=80) :: error_message
 	
+  ! output file
+  character(len=80)  :: runfile_neoout = 'out.neo.run'
+  integer :: io_neoout = 12
+
   ! output vectors
 
   ! (n_species_max, transport coeff)

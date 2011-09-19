@@ -43,11 +43,11 @@ subroutine gyro_write_restart
   !
   if (i_proc == 0) then
 
-     print *,'[Saving to ',trim(path)//file_restart(i_restart),']'
+     !print *,'[Saving to ',trim(path)//file_restart(i_restart),']'
 
      open(unit=io,file=trim(path)//file_restart(i_restart),status='replace')
-     write(io,10) h
-     write(6,'(a,i1,a)',advance='no') '[',0,']'
+     write(io,fmtstr2) h
+     !write(6,'(a,i1,a)',advance='no') '[',0,']'
 
   endif
 
@@ -64,19 +64,21 @@ subroutine gyro_write_restart
              recv_status,&
              i_err)
 
-        write(io,10) h_0
+        write(io,fmtstr2) h_0
 
         ! Determine correct integer format for printing
         ! brackets:
 
-        if (i_proc_w < 10) then
-           write(6,'(a,i1,a)',advance='no') '[',i_proc_w,']'
-        else if (i_proc_w < 100) then
-           write(6,'(a,i2,a)',advance='no') '[',i_proc_w,']'
-        else
-           write(6,'(a,i3,a)',advance='no') '[',i_proc_w,']'
+        if (debug_flag == 1) then
+           if (i_proc_w < 10) then
+              write(6,'(a,i1,a)',advance='no') '[',i_proc_w,']'
+           else if (i_proc_w < 100) then
+              write(6,'(a,i2,a)',advance='no') '[',i_proc_w,']'
+           else
+              write(6,'(a,i3,a)',advance='no') '[',i_proc_w,']'
+           endif
+           if (modulo(i_proc_w,8) == 0) print *
         endif
-        if (modulo(i_proc_w,8) == 0) print *
 
      else if (i_proc == i_proc_w) then
 
@@ -92,10 +94,7 @@ subroutine gyro_write_restart
 
   enddo
 
-  if (i_proc == 0) then
-     print *
-     close(io)
-  endif
+  if (i_proc == 0) close(io)
   !------------------------------------------------
 
   !---------------------------------------------------------
@@ -107,14 +106,14 @@ subroutine gyro_write_restart
 
         open(unit=io,file=trim(path)//file_tag_restart(1),status='old')
         read(io,*) data_step_old
-        read(io,10) t_current_old
+        read(io,fmtstr) t_current_old
         read(io,*) n_proc_old
         read(io,*) i_restart_old
         close(io)
 
         open(unit=io,file=trim(path)//file_tag_restart(0),status='replace')
         write(io,*) data_step_old
-        write(io,10) t_current_old
+        write(io,fmtstr) t_current_old
         write(io,*) n_proc_old
         write(io,*) i_restart_old
         close(io)
@@ -122,7 +121,7 @@ subroutine gyro_write_restart
 
      open(unit=io,file=trim(path)//file_tag_restart(1),status='replace')
      write(io,*) data_step
-     write(io,10) t_current
+     write(io,fmtstr) t_current
      write(io,*) n_proc
      write(io,*) i_restart
      close(io)
@@ -131,7 +130,5 @@ subroutine gyro_write_restart
   !---------------------------------------------------------
 
   ! ** Keep this consistent with gyro_read_restart.f90
-
-10 format(2(es11.4,1x))
 
 end subroutine gyro_write_restart

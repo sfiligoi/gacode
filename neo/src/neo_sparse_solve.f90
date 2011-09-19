@@ -27,7 +27,7 @@ contains
     icntl(2) = 6
     !
     ! Use icntl(3) = 2 for more verbosity.
-    icntl(3) = 2
+    icntl(3) = 0
     !
     ! Use icntl(8)=n for n levels of iterative 
     ! refinement (set job=1).
@@ -50,7 +50,7 @@ contains
          rinfo)
 
     if(uinfo(1) < 0) then
-       call neo_error('ERROR: Matrix factorization failed')
+       call neo_error('ERROR: (NEO) Matrix factorization failed in neo_sparse_solve')
        return
     endif
 

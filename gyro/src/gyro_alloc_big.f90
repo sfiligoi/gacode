@@ -79,7 +79,7 @@ subroutine gyro_alloc_big(flag)
         endif
      endif
 
-     allocate(h_M(nv1_SSUB,msplit_SSUB,n_n,n_kinetic))
+     allocate(h_tran(nv1_SSUB,msplit_SSUB,n_n,n_kinetic))
      allocate(gyro_h(n_stack,n_x,n_nek_loc_1,n_kinetic))
 
      if (n_field == 3) then
@@ -93,7 +93,7 @@ subroutine gyro_alloc_big(flag)
      allocate(gyro_uv_old(n_stack,n_x,n_nek_loc_1,n_kinetic,n_field))
      allocate(gyro_uv_dot(n_stack,n_x,n_nek_loc_1,n_kinetic,n_field))
      allocate(gyro_u(n_stack,n_x,n_nek_loc_1,n_kinetic))
-     allocate(gyro_u_M(nv1_SSUB,msplit_SSUB,n_n,n_kinetic))
+     allocate(gyro_u_tran(nv1_SSUB,msplit_SSUB,n_n,n_kinetic))
      allocate(phi(n_theta_int,n_x,n_field))
      allocate(vel_sum_p(n_blend,n_x))
      allocate(vel_sum_a(n_blend,n_x))
@@ -143,6 +143,7 @@ subroutine gyro_alloc_big(flag)
 
      allocate(time_error(n_kinetic))
      allocate(w_time(time_skip))
+     allocate(omega_linear(n_n,2))
 
      !------------------------------------------------------------
      ! Source-related arrays
@@ -190,7 +191,7 @@ subroutine gyro_alloc_big(flag)
      if (allocated(h_C)) deallocate(h_C) 
      if (allocated(h_C_all)) deallocate(h_C_all)
 
-     deallocate(h_M)
+     deallocate(h_tran)
      deallocate(gyro_h)
      if  (allocated(gyro_h_aperp)) deallocate(gyro_h_aperp)
      deallocate(field_tau)
@@ -201,7 +202,7 @@ subroutine gyro_alloc_big(flag)
      deallocate(gyro_uv_old)
      deallocate(gyro_uv_dot)
      deallocate(gyro_u)
-     deallocate(gyro_u_M)
+     deallocate(gyro_u_tran)
      deallocate(phi)
      deallocate(vel_sum_p)
      deallocate(vel_sum_a)
@@ -243,6 +244,7 @@ subroutine gyro_alloc_big(flag)
 
      deallocate(time_error)
      deallocate(w_time)
+     deallocate(omega_linear)
      deallocate(h0_eq)
      deallocate(h0_mod)
      deallocate(h0_n)

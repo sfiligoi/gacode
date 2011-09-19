@@ -26,10 +26,37 @@ libgacodetglf_src_la_SOURCES = \
   tglf_read_input.f90 \
   tglf_dump_input.f90
 
+#include_HEADERS= \
+#  tglf_closure.mod \
+#  tglf_global.mod \
+#  tglf_nuei_coeff.mod \
+#  tglf_tg.mod \
+#  tglf_coeff.mod \
+#  tglf_hermite.mod \
+#  tglf_pkg.mod \
+#  tglf_xgrid.mod \
+#  tglf_dimensions.mod \
+#  tglf_sgrid.mod \
+#  tglf_eigen.mod \
+#  tglf_kyspectrum.mod \
+#  tglf_species.mod
+
 EXTRA_DIST = \
   tglf_inout.f90 \
   tglf_setup_geometry.f90 \
   tglf_TM.f90
+
+lib_LTLIBRARIES = libgacodestglf.la
+
+libgacodestglf_la_SOURCES =
+libgacodestglf_la_LIBADD = libgacodetglf_src.la
+
+if HAVE_MPI
+bin_PROGRAMS     = tglf
+tglf_SOURCES 	= tglf.f90
+tglf_LDADD  	= libgacodestglf.la \
+		  @LAPACK_LIBS@ @BLAS_LIBS@
+endif
 
 
 
@@ -46,4 +73,4 @@ endif
 AM_LIBTOOLFLAGS = --tag=FC
 AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG)
 AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG)
-CLEANFILES = *.mod *.o *.lo *.lst *.la
+CLEANFILES = *.mod *.o *.lo *.lst *.la tglf

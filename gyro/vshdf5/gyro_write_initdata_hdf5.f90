@@ -234,13 +234,18 @@ subroutine gyro_write_initdata_hdf5(datafile)
         call GEO_interp(theta)
         nu_coarse(j,i)=GEO_nu
      enddo
-     do j=1,n_wedge
-        theta=theta_wedge_offset+real(j-1)*theta_wedge_angle/       &
-             real(n_theta_plot*n_theta_mult-1)
-        if (n_wedge == 1) theta = 0.0 ! Test for special case
-        call GEO_interp(theta)
-        nu_wedge(j,i)=GEO_nu
-     enddo
+!     if (n_wedge>1) then
+       do j=1,n_wedge
+          if (n_wedge == 1) then
+            theta = 0.0 ! Test for special case
+          else
+          theta=theta_wedge_offset+real(j-1)*theta_wedge_angle/       &
+               real(n_theta_plot*n_theta_mult-1)
+          endif
+          call GEO_interp(theta)
+          nu_wedge(j,i)=GEO_nu
+       enddo
+!     endif
 
   enddo ! i
 

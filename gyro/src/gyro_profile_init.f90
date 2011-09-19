@@ -30,6 +30,7 @@ subroutine gyro_profile_init
   integer :: ic 
   real :: loglam
   real :: cc
+  real :: p_total
   !---------------------------------------------------
 
   !---------------------------------------------------
@@ -273,24 +274,58 @@ subroutine gyro_profile_init
         dlntdr_s(is,:) = dlntdr_s(is,:)*(1.0-eps_dlntdr_vec(is))
         dlnndr_s(is,:) = dlnndr_s(is,:)*(1.0-eps_dlnndr_vec(is))
         if (eps_dlntdr_vec(is) /= 0.0) then
-           call send_message_real('INFO: Ti gradient RESCALED by: ',&
-                1.0-eps_dlntdr_vec(is))
+           call send_message_real('INFO: Ti gradient RESCALED by: ',1.0-eps_dlntdr_vec(is))
+           if (reintegrate_flag == 1) then
+              call logint(tem_s(is,:),dlntdr_s(is,:),r_s,n_x,ir_norm)
+              call send_message('INFO: Ti profile REINTEGRATRED')
+           endif
         endif
         if (eps_dlnndr_vec(is) /= 0.0) then
-           call send_message_real('INFO: ni gradient RESCALED by: ',&
-                1.0-eps_dlnndr_vec(is))
+           call send_message_real('INFO: ni gradient RESCALED by: ',1.0-eps_dlnndr_vec(is))
+           if (reintegrate_flag == 1) then
+              call logint(den_s(is,:),dlntdr_s(is,:),r_s,n_x,ir_norm)
+              call send_message('INFO: ni profile REINTEGRATRED')
+           endif
         endif
      enddo
      !
      dlntdr_s(n_spec,:) = dlntdr_s(n_spec,:)*(1.0-eps_dlntdr_vec(0))
      dlnndr_s(n_spec,:) = dlnndr_s(n_spec,:)*(1.0-eps_dlnndr_vec(0))
      if (eps_dlntdr_vec(0) /= 0.0) then
-        call send_message_real('INFO: Te gradient RESCALED by: ',&
-             1.0-eps_dlntdr_vec(0))
+        call send_message_real('INFO: Te gradient RESCALED by: ',1.0-eps_dlntdr_vec(0))
+        if (reintegrate_flag == 1) then
+           call logint(tem_s(n_spec,:),dlntdr_s(n_spec,:),r_s,n_x,ir_norm)
+           call send_message('INFO: Te profile REINTEGRATRED')
+        endif
      endif
      if (eps_dlnndr_vec(0) /= 0.0) then
-        call send_message_real('INFO: ne gradient RESCALED by: ',&
-             1.0-eps_dlnndr_vec(0))
+        call send_message_real('INFO: ne gradient RESCALED by: ',1.0-eps_dlnndr_vec(0))
+        if (reintegrate_flag == 1) then
+           call logint(den_s(n_spec,:),dlnndr_s(n_spec,:),r_s,n_x,ir_norm)
+           call send_message('INFO: ne profile REINTEGRATRED')
+        endif
+     endif
+     !
+     if ((sum(abs(eps_dlntdr_vec(:))+abs(eps_dlnndr_vec(:))) > 0.0)  .and. &
+         (reintegrate_flag == 1)) then
+        call send_message('INFO: profiles changed, recalculating beta_unit')
+        
+        ! den_s  -> 1/m^3
+        ! tem_s  -> keV
+        ! b_unit -> T
+        !
+        ! beta calculation in CGS:
+        !
+        !         8*pi ( n[1e19/m^3]*1e-6*1e19 )( T[keV]*1.6022*1e-9 )
+        ! beta = ------------------------------------------------------
+        !                           ( 1e4*B[T] )^2
+        !
+        !      = 4.027e-3 n[1e19/m^3]*T[keV]/B[T]^2
+
+        do i=1,n_x
+           p_total = sum(den_s(:,i)*tem_s(:,i))
+           beta_unit_s(i) = 4.027e-3*p_total/b_unit_s(i)**2
+        enddo
      endif
      !------------------------------------------------------
 
@@ -386,6 +421,7 @@ subroutine gyro_profile_init
   else
 
      ! Pressure from total pressure including fast ions
+     ! Note that this is not updated even if reintegrate_flag=1.
 
      beta_star_s(:) = beta_unit_ptot_s(:)*dlnptotdr_s(:)
      call send_message('INFO: Using total dp/dr (+ fast ions) in GEO.')

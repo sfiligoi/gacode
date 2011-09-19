@@ -20,7 +20,7 @@ contains
     integer,parameter :: io=52
     integer :: i, is, ie, ix, it, je
     real, dimension(:,:,:,:), allocatable :: gall
-    
+
     allocate(ene(ne))
     do je=1, ne
        ene(je) = emin + (je-1) * (emax-emin) / (ne-1)
@@ -35,7 +35,7 @@ contains
           enddo
        enddo
     enddo
-    
+
     allocate(gall(n_species,0:n_xi,n_theta,ne))
     gall(:,:,:,:) = 0.0
 
@@ -49,16 +49,16 @@ contains
        enddo
     enddo
 
-    if(write_out_mode > 0) then
+    if(silent_flag == 0 .and. i_proc == 0) then
        if(ir == 1) then
-          open(unit=io,file='g_ene_x.out',status='replace')
+          open(unit=io,file=trim(path)//'out.neo.g_ene_x',status='replace')
           do je=1,ne
              write (io,'(e16.8,$)') ene(je)
           enddo
           close(io)
-          open(unit=io,file='g_ene_y.out',status='replace')
+          open(unit=io,file=trim(path)//'out.neo.g_ene_y',status='replace')
        else
-          open(unit=io,file='g_ene_y.out',status='old',position='append')
+          open(unit=io,file=trim(path)//'out.neo.g_ene_y',status='old',position='append')
        endif
        do is=1, n_species
           do ix=0, n_xi
@@ -75,7 +75,7 @@ contains
     deallocate(ene)
     deallocate(xval)
     deallocate(gall)
-    
+
   end subroutine g_energy
 
   
@@ -128,8 +128,8 @@ contains
        enddo
     enddo
 
-    if(write_out_mode > 0) then
-       open(unit=io,file='g_xi.out',status='replace')
+    if(silent_flag == 0 .and. i_proc == 0) then
+       open(unit=io,file=trim(path)//'out.neo.g_xi',status='replace')
        do is=1, n_species
           do it=1, n_theta
              do jx=1, nxi

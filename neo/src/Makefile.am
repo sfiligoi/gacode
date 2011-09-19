@@ -19,16 +19,18 @@ shared_includes= -I $(top_builddir)/shared/math \
 noinst_LTLIBRARIES = libgacodeneo_src.la
 libgacodeneo_src_la_SOURCES = \
   neo_globals.f90 \
+  neo_error.f90 \
   neo_profile_exp.f90 \
   neo_allocate_profile.f90 \
   neo_make_profiles.f90 \
   neo_experimental_profiles.f90 \
   neo_map_experimental_profiles.f90 \
   neo_sparse_solve.f90 \
+  neo_compute_fcoll.f90 \
   neo_equilibrium.f90 \
-  neo_g_velocitygrids.f90 \
   neo_nclass_dr.f90 \
   neo_energy_grid.f90 \
+  neo_g_velocitygrids.f90 \
   neo_theory.f90 \
   neo_check.f90 \
   neo_rotation.f90 \
@@ -37,18 +39,32 @@ libgacodeneo_src_la_SOURCES = \
   neo_init.f90 \
   neo_read_input.f90 \
   neo_run.f90 \
+  neo_spitzer.f90 \
   neo_do.f90
 
 
 
+lib_LTLIBRARIES = libgacodesneo.la
+
+
+libgacodesneo_la_SOURCES =
+libgacodesneo_la_LIBADD = libgacodeneo_src.la
+
+bin_PROGRAMS     = neo
+neo_SOURCES = neo.f90
+
+neo_LDADD  = libgacodesneo.la \
+  $(top_builddir)/neo/nclass/libgacodenclass.la \
+  $(top_builddir)/shared/libgacodesshared.la \
+ @FFTW_LIBS@  @LAPACK_LIBS@  @BLAS_LIBS@
 
  
 
 # To get to work with optimization reducing compiler wrappers
 #
 AM_LIBTOOLFLAGS = --tag=FC
-AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(FFTW_INC) $(shared_includes) 
-AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(FFTW_INC) $(shared_includes) 
+AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(FFTW_INC) $(shared_includes) -I.
+AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(FFTW_INC) $(shared_includes) -I.
 
 
 if TX_FORTRAN_MODNAMEISCAP
@@ -61,6 +77,6 @@ nodist_include_HEADERS = neo_interface.$(TX_FORTRAN_MODEXT)
 neo_interface.$(TX_FORTRAN_MODEXT): neo_interface.f90
 endif
 
-CLEANFILES = *.mod *.f90 *.lo *.lst *.la
+CLEANFILES = *.mod *.f90 *.lo *.lst *.la neo
 
 

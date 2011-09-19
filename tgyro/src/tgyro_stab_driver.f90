@@ -7,13 +7,13 @@
 
 subroutine tgyro_stab_driver
 
+  use mpi
   use tgyro_globals
   use gyro_interface
   use tglf_interface
 
   implicit none
 
-  integer :: i_search
   integer :: iky
   integer :: i_err
   integer :: i
@@ -39,8 +39,6 @@ subroutine tgyro_stab_driver
  
   integer, parameter :: i_print = 0
 
-
-  include 'mpif.h'
 
   wi_elec(:,:) = 0.0
   wr_elec(:,:) = 0.0

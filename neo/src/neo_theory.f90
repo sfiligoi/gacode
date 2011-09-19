@@ -19,7 +19,7 @@ module neo_theory
   real, private :: dens_ele, temp_ele, zeff
   integer, private :: ir_global, is_global, ietype
   integer, parameter, private :: io=40
-  character(len=80),private :: runfile = 'theory.out'
+  character(len=80),private :: runfile = 'out.neo.theory'
   logical, private :: initialized = .false.
 
 contains
@@ -45,8 +45,8 @@ contains
        allocate(pflux_multi_HS(n_species))
        allocate(eflux_multi_HS(n_species))
 
-       if(write_out_mode > 0) then
-          open(io,file=runfile,status='replace')
+       if(silent_flag == 0 .and. i_proc == 0) then
+          open(io,file=trim(path)//runfile,status='replace')
           close(io)
        end if
 
@@ -97,8 +97,11 @@ contains
        endif
     enddo
     if(is_ion == -1) then
-       if(write_out_mode > 1) then
-          print *, 'Warning: No ion species for neo_theory'
+       if(silent_flag==0 .and. i_proc==0) then
+          open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+               status='old',position='append')
+          write(io_neoout,*) 'Warning: No ion species for neo_theory'
+          close(io_neoout)
        endif
        ! assume primary ion species is is=1
        is_ion = 1
@@ -145,8 +148,8 @@ contains
     call compute_HR(ir,phi_HR)
     call compute_HS(ir,pflux_multi_HS, eflux_multi_HS)
 
-    if(write_out_mode > 0) then
-       open(io,file=runfile,status='old',position='append')
+    if(silent_flag == 0 .and. i_proc == 0) then
+       open(io,file=trim(path)//runfile,status='old',position='append')
        write(io,'(e16.8,$)') r(ir)
        write(io,'(e16.8,$)') pflux_HH
        write(io,'(e16.8,$)') efluxi_HH
@@ -168,7 +171,6 @@ contains
        enddo
        write (io,*)
        close(io)
-
     end if
 
     call NCLASS_DR_do(ir)

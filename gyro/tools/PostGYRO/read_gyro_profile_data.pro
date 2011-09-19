@@ -10,9 +10,8 @@ FUNCTION read_gyro_profile_data, simdir, profile_data ;, $
 ;      6-7-2008: added Bunit field
 ;      6-19-2008: added sim and expt diffusion profiles
 ;
-; Given GYRO sim directory simdir, reads in profile_vugyro.out.
-; Basically a cut and paste of vugyro routine
-; read_profile_vugyro.pro.
+; Given GYRO sim directory simdir, reads in out.gyro.profile.
+; Basically a cut and paste of vugyro routine read_profile_vugyro.pro.
 ;
 ; Returns 1 if file read successfull, 0 if not.  Profile data is
 ; stored in argument profile_data.
@@ -37,7 +36,7 @@ FUNCTION read_gyro_profile_data, simdir, profile_data ;, $
 ; 6.15.2010: added V' load from INPUT_profiles.extra
 ;
   dirpath = GETENV('GYRO_DIR') + '/sim/' + simdir
-  filepath =  dirpath + '/profile_vugyro.out'  
+  filepath =  dirpath + '/out.gyro.profile'  
 
   ;;get version info
   version_str = ' '

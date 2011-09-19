@@ -7,6 +7,7 @@
 
 subroutine tgyro_restart
 
+  use mpi
   use tgyro_globals
 
   implicit none
@@ -18,7 +19,6 @@ subroutine tgyro_restart
   real, dimension(9) :: x_read
   character(len=1) :: dummy
 
-  include 'mpif.h'
 
   if (i_proc_global == 0) then
 

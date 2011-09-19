@@ -130,10 +130,11 @@ c 301 elements (was 51)
       real*8 zpnz_m(0:jmaxmt), zpnitot_m(0:jmaxmt)
       real*8 zpti2_m(0:jmaxmt)
       real*8 te_exp(0:jmaxmt), ti_exp(0:jmaxmt), ne_exp(0:jmaxmt)
+      real*8 tfast_exp(0:jmaxmt)
       real*8 te_exp_sav(0:jmaxmt), ti_exp_sav(0:jmaxmt)
       real*8 angrotp_exp_sav(0:jmaxmt)
       real*8 vphip_exp_sav(0:jmaxmt)
-      real*8 ni_exp(0:jmaxmt), nz_exp(0:jmaxmt), nfst_exp(0:jmaxmt)
+      real*8 ni_exp(0:jmaxmt), nz_exp(0:jmaxmt), nfast_exp(0:jmaxmt)
       real*8 ptot_exp(0:jmaxmt), pfast_exp(0:jmaxmt)
       real*8 torque_exp(0:jmaxmt)
       real*8 stress_tor_exp(0:jmaxmt),stress_par_exp(0:jmaxmt)
@@ -167,7 +168,9 @@ c 301 elements (was 51)
       real*8 powi_wdot_exp(0:jmaxmt), powi_fus_exp(0:jmaxmt)
       real*8 pow_ei_exp(0:jmaxmt), pow_ei_cor_m(0:jmaxmt)
       real*8 pow_ei_m(0:jmaxmt), pow_ei_mexp(0:jmaxmt)
+      real*8 pow_ei_glf(0:jmaxmt)
       real*8 exch_m(0:jmaxmt), exch_exp(0:jmaxmt)
+      real*8 exch_glf(0:jmaxmt)
       real*8 powe_fus_m(0:jmaxmt), powi_fus_m(0:jmaxmt)
       real*8 powe_fus_cor_m(0:jmaxmt), powi_fus_cor_m(0:jmaxmt)
       real*8 pow_br_m(0:jmaxmt), pow_br_cor_m(0:jmaxmt)
@@ -432,7 +435,8 @@ c
      & , tiflux, vphiflux, vparflux, vexbflux
      & , zpte_m, zpti_m
      & , zpne_m, zpni_m, zpnz_m, zpnitot_m, zpti2_m
-     & , te_exp, ti_exp, ne_exp, ni_exp, nz_exp, nfst_exp, nitot_exp
+     & , te_exp, ti_exp, tfast_exp
+     & , ne_exp, ni_exp, nz_exp, nfast_exp, nitot_exp
      & , nm1_exp, nm2_exp, nm3_exp
      & , te_exp_sav, ti_exp_sav, angrotp_exp_sav
      & , ptot_exp, pfast_exp, torque_exp
@@ -463,7 +467,8 @@ c
      & , powe_rad_exp, powe_ion_exp, powe_wdot_exp, powe_fus_exp
      & , powi_beam_exp, powi_rf_exp, powi_ion_exp, powi_cx_exp
      & , powi_wdot_exp, powi_fus_exp, pow_ei_exp, pow_ei_cor_m
-     & , pow_ei_m, pow_ei_mexp, exch_m, exch_exp
+     & , pow_ei_m, pow_ei_glf, pow_ei_mexp
+     & , exch_m, exch_exp, exch_glf
      & , powe_fus_m, powi_fus_m, powe_fus_cor_m, powi_fus_cor_m
      & , pow_br_m, pow_br_cor_m, pow_cycl_m, pow_cycl_cor_m
      & , flow_wall_exp, flow_recom_exp, flow_beam_exp

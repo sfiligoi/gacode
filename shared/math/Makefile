@@ -30,7 +30,9 @@ OBJECTS = math_constants.o \
           cub_spline_deriv2.o \
           gamma.o \
           energy_integral.o \
-          curtis_rad.o
+          curtis_rad.o \
+          linint.o \
+          logint.o
 
 .SUFFIXES : .o .f90 .f
 

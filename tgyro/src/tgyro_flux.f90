@@ -7,6 +7,7 @@
 
 subroutine tgyro_flux
 
+  use mpi
   use tgyro_globals
   use gyro_interface
   use neo_interface
@@ -29,7 +30,12 @@ subroutine tgyro_flux
   real :: Pi_neo_GB
   real, dimension(8) :: x_out
 
-  include 'mpif.h'
+  call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+  if (i_proc_global == 0) then
+     open(unit=1,file=trim(runfile),position='append')
+     write(1,'(t2,a)') 'INFO: (TGYRO) Entered tgyro_flux'
+     close(1)
+  endif
 
   !-----------------------------
   ! Counter

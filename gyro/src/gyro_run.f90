@@ -1,9 +1,16 @@
-!-----------------------------------------------------------
+!---------------------------------------------------------------
 ! gyro_run.f90
 !
 ! PURPOSE:
-!  Manage call to local GYRO simulation.
-!---------------------------------------------------------
+!  This is the actual system call to run GYRO via subroutine 
+!  interface (i.e, from TGYRO).
+!
+! NOTES:
+!  In TGYRO, we do this:
+!
+!    call tgyro_gyro_map
+!    call gyro_run(...)
+!-------------------------------------------------------------
 
 subroutine gyro_run(&
      test_flag_in,&
@@ -64,6 +71,7 @@ subroutine gyro_run(&
 
   ! Run GYRO
   call gyro_do
+  call send_line('STATUS: '//gyro_exit_message)
 
   ! Get output information
 
@@ -91,7 +99,14 @@ subroutine gyro_run(&
 
   endif
 
-  ! Nonlinear transport
+  !-------------------------------------------------------------------------------------- 
+  ! Compute time-averaged transport fluxes
+  !
+  ! Sanity check for indices:
+  if (nstep/time_skip < data_step) then
+     call catch_error('ERROR: data_step > nstep/time_skip')
+  endif
+
   if (i_proc == 0 .and. transport_method == 2) then
 
      n_start = max(int((1.0-f_ave)*data_step),1)
@@ -131,7 +146,11 @@ subroutine gyro_run(&
      enddo
 
   endif
+  !-------------------------------------------------------------------------------------- 
 
+  !-------------------------------------------------------------------------------------- 
+  ! Broadcast results to all cores:
+  !
   ! Electrons
   call MPI_BCAST(gyro_elec_pflux_out, 1, MPI_DOUBLE_PRECISION, 0, GYRO_COMM_WORLD, err)
   call MPI_BCAST(gyro_elec_eflux_out, 1, MPI_DOUBLE_PRECISION, 0, GYRO_COMM_WORLD, err)
@@ -143,6 +162,7 @@ subroutine gyro_run(&
   call MPI_BCAST(gyro_ion_eflux_out, n_ion, MPI_DOUBLE_PRECISION, 0, GYRO_COMM_WORLD, err)
   call MPI_BCAST(gyro_ion_mflux_out, n_ion, MPI_DOUBLE_PRECISION, 0, GYRO_COMM_WORLD, err)
   call MPI_BCAST(gyro_ion_expwd_out, n_ion, MPI_DOUBLE_PRECISION, 0, GYRO_COMM_WORLD, err)
+  !-------------------------------------------------------------------------------------- 
 
   call gyro_cleanup
 

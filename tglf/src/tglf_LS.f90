@@ -279,7 +279,7 @@
             enddo
           enddo
           call zgesv(iur,1,zmat,iar,ipiv,v,iar,info)
-          if(info.ne.0)write(*,*)"error in zgesv",info
+          if(info.ne.0)write(*,*)"ERROR: zgesv failed in tglf_ls.f90.",info
 !  alpha/beta=-xi*(frequency+xi*growthrate)
           eigenvalue = xi*alpha(jmax(imax))/beta(jmax(imax))  
           call get_QL_weights(particle_QL,energy_QL,stress_par_QL,stress_tor_QL, &
@@ -1096,16 +1096,16 @@
         tgamma = 0.0
         if(alpha_quench_in.eq.0.0)egamma = -alpha_e_in*0.11*vexb_shear_s*sign_kx0
 !
-!            write(*,*)alpha_kx0_in,alpha_e_in
+!            write(*,*)alpha_kx_e_in,alpha_e_in
 !
 ! start of loop over species is,js for amat
 !
       do is = ns0,ns
 !
-!        if(alpha_quench_in.eq.0.0)then
-!          ngamma = -alpha_n_in*shear_ns_in(is)*sign_kx0
-!          tgamma = -alpha_t_in*shear_ts_in(is)*sign_kx0
-!        endif
+        if(alpha_quench_in.eq.0.0)then
+          ngamma = -0.11*alpha_n_in*vns_shear_in(is)*sign_kx0
+          tgamma = -0.11*alpha_t_in*vts_shear_in(is)*sign_kx0
+        endif
       do js = ns0,ns
 !
 ! start of loop over basis ib,jb for amat
@@ -3354,7 +3354,7 @@
 !      write(*,*)"cputime for zggev =",REAL(cpucount2-cpucount1)/REAL(cpurate)
 !      write(*,*)"jmax = ",jmax,alpha(jmax)/beta(jmax)
 !      write(*,*)"work(1)",work(1)
-      if(info.ne.0)write(*,*)"error in zggev",info
+      if(info.ne.0)write(*,*)"ERROR: zggev failed in tglf_ls.f90.",info
 !      cputime2=MPI_WTIME()
       do j1=1,iur
         beta2=REAL(CONJG(beta(j1))*beta(j1))
@@ -3664,9 +3664,9 @@
 !
 !      wp = ky*ave_hp1(2,1,1)*ABS(vpar_shear_in(2))/vs(2)
 !      stress_correction = (AIMAG(freq_QL)+2.0*wp)/(AIMAG(freq_QL)+wp)
-!      stress_correction = 1.0
       wp = ABS(vpar_shear_in(2)*R_unit/vs(2))
       stress_correction = 1.0 + ((0.11*wp)**1.5)/(1.0+(0.075*wp)**7)
+!      stress_correction = 1.0
 !
       do is=ns0,ns
         do i=1,nbasis
@@ -3714,7 +3714,7 @@
           stress_tor_weight(is,1) = stress_tor_weight(is,1)  &
             + REAL(xi*CONJG(phi(i))*(ave_c_tor_par(1,1)*stress_par(is,i,1)+ave_c_tor_per(1,1)*stress_per(is,i,1)))
           exchange_weight(is,1) = exchange_weight(is,1) &
-          + zs(is)*REAL(xi*freq_QL*CONJG(phi(i))*(n(is,i)-zs(is)*phi(i)/taus(is)))
+          + zs(is)*REAL(xi*freq_QL*CONJG(phi(i))*n(is,i))
           if(use_bper_in)then
             particle_weight(is,2) = particle_weight(is,2) &
             - vs(is)*REAL(xi*CONJG(psi(i))*u_par(is,i))

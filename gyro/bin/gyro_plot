@@ -1,0 +1,171 @@
+#!/bin/bash
+#==============================================================================
+# gyro_plot
+#
+# PURPOSE:
+#  Plotting/listing routines for GYRO output.
+#==============================================================================
+
+#==============================================================================
+# Syntax validity check and help message
+#
+n=$#
+
+if [ $n -eq 0 ]
+then
+  echo
+  echo "Usage:    gyro_plot [options]"
+  echo
+  echo "          -p <path>"
+  echo "          Set optional path to simulation directory."
+  echo "          [The default path is the current directory]"
+  echo
+  echo "          -e <simdir>"
+  echo "          Use data in <simdir>."
+  echo 
+  echo "          -f <filetype>"
+  echo "          Output file type."
+  echo "           <filetype>=emf, eps, pdf, png, ps, raw, rgba, svg, svgz"
+  echo 
+  echo "          -diff"
+  echo "          List gyroBohm diffusivity rather than flux coefficients."
+  echo
+  echo "          -field <value>"
+  echo "          Specify field to be plotted: [0,n_field-1]."
+  echo "          Alternatively, specifying 's' returns a sum of all fields (default=s)."
+  echo
+  echo "          -kinetic <value>"
+  echo "          Specify species to be plotted: [0,n_kinetic-1]."
+  echo
+  echo "          -moment <value>"
+  echo "          Specify moment to be plotted: [0,3] (default=1)"
+  echo
+  echo "          -w <fraction>"
+  echo "          Fraction of time record to use for average (default=0.8)."
+  echo
+  echo "          -plot <type>"
+  echo "          Generate plot of given type."
+  echo "          If this keyword is omitted, data will be listed to the screen."
+  echo "           <type> = freq,"
+  echo "                    gbflux,"
+  echo "                    gbflux_i,"
+  echo "                    gbflux_n,"
+  echo "                    gbflux_rt,"
+  echo "                    balloon [use -moment for indexing],"
+  echo "                    fluctuation2d [-moment 0 (n, all species) "
+  echo "                                   -moment 1 (v, all species) "
+  echo "                                   -moment 2 (e, all species) "
+  echo "                                   -moment 3 (all fields)],"
+  echo "                    moment_zero"
+  echo
+  echo "Example:"
+  echo
+  echo "   gyro_plot -e ."
+  echo "   gyro_plot -e . -plot"
+
+  exit 1
+fi
+#==============================================================================
+
+#==============================================================================
+# Define variables for flag capture
+#
+# Default simulation directory
+LOCDIR=.
+SIMROOT=$PWD
+PLOT_FLAG=0
+PLOT_TYPE=gbflux
+DIFF_FLAG=0
+I_KINETIC=0
+I_FIELD="s"
+I_MOMENT=0
+WINDOW=0.8
+FTYPE=screen
+#==============================================================================
+
+#==============================================================================
+# Parse command line options
+#
+while [ $# -gt 0 ] ; do
+  case "$1" in
+
+  -plot) shift ; PLOT_FLAG=1 ; PLOT_TYPE=$1 ;;
+
+  -diff) DIFF_FLAG=1 ;;
+  
+  -e) shift ; LOCDIR=$1 ;;
+
+  -p) shift ; SIMROOT=$1 ;;
+
+  -kinetic) shift ; I_KINETIC=$1 ;;
+
+  -field) shift ; I_FIELD=$1 ;;
+
+  -moment) shift ; I_MOMENT=$1 ;;
+
+  -w) shift ; WINDOW=$1 ;;
+
+  -f) shift ; FTYPE=$1 ;;
+
+  *) echo "ERROR: incorrect gyro syntax." ; exit 1 ;;
+
+  esac
+  shift
+done
+#==============================================================================
+
+if [ "$LOCDIR" == "." ]
+then
+   LOCDIR=`basename $PWD`
+   cd .. ; SIMROOT=$PWD
+fi
+SIMDIR=$SIMROOT/$LOCDIR
+cd $SIMDIR
+
+PYROOT=$GACODE_ROOT/shared/python/pyrats/gyro
+
+#==============================================================================
+# Display diff if -ldiff set, then exit.
+#
+if [ $PLOT_FLAG -eq 0 ]
+then
+
+   if [ $DIFF_FLAG -eq 1 ]
+   then
+      python $PYROOT/ldiff.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW
+   else
+      python $PYROOT/lflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW
+   fi
+   exit 0
+
+fi
+
+case "$PLOT_TYPE" in
+
+   moment_zero)  
+	python $PYROOT/moment_zero.py $SIMDIR $I_MOMENT $WINDOW $FTYPE & ;;
+
+   fluctuation2d)  
+	python $PYROOT/fluctuation2d.py $SIMDIR $I_MOMENT $FTYPE & ;;
+
+   freq)  
+	python $PYROOT/freq.py $SIMDIR $WINDOW $FTYPE & ;;
+
+   gbflux)  
+	python $PYROOT/gbflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE & ;;
+
+   gbflux_n) 
+        python $PYROOT/gbflux_n.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE & ;;
+
+   gbflux_i) 
+        python $PYROOT/gbflux_i.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE & ;;
+
+   gbflux_rt) 
+        python $PYROOT/gbflux_rt.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE & ;;
+
+   balloon) 
+        python $PYROOT/balloon.py $SIMDIR $I_MOMENT $FTYPE ;;
+   
+esac 
+
+exit 0

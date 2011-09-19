@@ -16,17 +16,18 @@ subroutine gyro_mpi_grid
   !
   integer, external :: parallel_dim
   integer :: i_group_mumps
+  integer :: splitkey
   !----------------------------------------
 
   !------------------------------------------------
   ! Check for grid validity
   !
   if (modulo(n_proc,n_n) /= 0) then
-     call catch_error('ERROR: bad processor count.')
+     call catch_error('ERROR: (GYRO) bad processor count.')
   endif
   !
   if (linsolve_method == 3 .and. modulo(n_energy,n_proc) /= 0) then
-     call catch_error('ERROR: bad processor count for LINSOLVE_METHOD=3.')
+     call catch_error('ERROR: (GYRO) bad processor count for LINSOLVE_METHOD=3.')
   endif
   !------------------------------------------------
 
@@ -41,7 +42,7 @@ subroutine gyro_mpi_grid
   !------------------------------------------------
   ! Local group indices:
   !
-  i_group_1  = i_proc/n_proc_1
+  i_group_1 = i_proc/n_proc_1
   i_group_2 = modulo(i_proc,n_proc_1)
   !
   !------------------------------------------------
@@ -51,19 +52,27 @@ subroutine gyro_mpi_grid
   !
   !             NEW_COMM_1  and  NEW_COMM_2
   !
+  splitkey = i_proc
+
   call MPI_COMM_SPLIT(GYRO_COMM_WORLD,&
        i_group_1,& 
-       i_proc,&
+       splitkey,&
        NEW_COMM_1, &
        i_err)
+  if (i_err /= 0) then
+     call CATCH_ERROR('ERROR: (GYRO) NEW_COMM_1 not created')
+  endif
 
   ! Local adjoint Group number
 
   call MPI_COMM_SPLIT(GYRO_COMM_WORLD,&
        i_group_2,& 
-       i_proc,&
+       splitkey,&
        NEW_COMM_2, &
        i_err)
+  if (i_err /= 0) then
+     call CATCH_ERROR('ERROR: (GYRO) NEW_COMM_2 not created')
+  endif
   !
   call MPI_COMM_RANK(NEW_COMM_1,i_proc_1,i_err)
   call MPI_COMM_RANK(NEW_COMM_2,i_proc_2,i_err)
@@ -86,17 +95,23 @@ subroutine gyro_mpi_grid
   endif
 
   !--------------------------------------------------------------
-  ! MUMPS
-  i_group_mumps = i_group_2/(min(n_proc_1,n_mumps_max))
-  call MPI_COMM_SPLIT(NEW_COMM_1,&
-       i_group_mumps,& 
-       i_proc_1,&
-       MUMPS_COMM, &
-       i_err)
+  ! Create MUMPS_COMM if using MUMPS:
+  !
+  if (sparse_method == 2) then
+     i_group_mumps = i_group_2/(min(n_proc_1,n_mumps_max))
+     call MPI_COMM_SPLIT(NEW_COMM_1,&
+          i_group_mumps,& 
+          i_proc_1,&
+          MUMPS_COMM, &
+          i_err)
+     if (i_err /= 0) then
+        call CATCH_ERROR('ERROR: (GYRO) MUMPS_COMM not created')
+     endif
+  endif
   !--------------------------------------------------------------  
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[make_MPI_grid done]'
+     print *,'[gyro_mpi_grid done]'
   endif
 
 end subroutine gyro_mpi_grid

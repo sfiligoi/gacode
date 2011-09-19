@@ -42,7 +42,7 @@ subroutine gyro_fulladvance
 
         ! Attempts to update fields; should not be used
 
-        call gyro_collision
+        call catch_error('ERROR: (GYRO) collision_method=1 is deprecated.')
 
      case (2) 
 
@@ -73,13 +73,13 @@ subroutine gyro_fulladvance
 
      ! All species explicit
 
-     call timestep_explicit
+     call gyro_timestep_explicit
 
   case (2)
 
      ! Drift-kinetic electrons
 
-     call timestep_SSP_322
+     call gyro_timestep_implicit
 
   end select
   !------------------------------------------------------
@@ -93,7 +93,7 @@ subroutine gyro_fulladvance
   ! MANAGE diagnostics
   !
   ! * Note that (2,3,4) are called once after making 
-  !   initial conditions (make_initial_h).
+  !   initial conditions (gyro_initial_condition).
   !
   ! 1. Compute flux-surface average of (phi,a)
   ! 
@@ -164,7 +164,7 @@ subroutine gyro_fulladvance
 
         rhs(:,:,:,:) = (0.0,0.0)
 
-        call get_nonlinear_advance
+        call gyro_rhs_nonlinear
         call gyro_nonlinear_transfer
 
      endif
@@ -207,7 +207,7 @@ subroutine gyro_fulladvance
   ! Convergence check for single-n simulation:
   ! freq_err calculated in write_freq
   !  
-  if (freq_err < freq_tol) call set_exit_status('converged',2)
+  if (freq_err < freq_tol) call gyro_set_exit_status('converged',2)
   !----------------------------------------------------
 
   !--------------------------------------

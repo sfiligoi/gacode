@@ -27,9 +27,10 @@
 !
       CALL put_species(ns_tg,zs_tg,mass_tg) 
 !
-      CALL put_model_parameters(adiabatic_elec_tg,alpha_p_tg,alpha_e_tg    &
-      ,alpha_kx0_tg,alpha_kx1_tg,alpha_quench_tg,xnu_factor_tg,debye_factor_tg   &
-      ,etg_factor_tg,sat_rule_tg,kygrid_model_tg,xnu_model_tg &
+      CALL put_model_parameters(adiabatic_elec_tg,alpha_e_tg,alpha_p_tg    &
+      ,alpha_n_tg,alpha_t_tg,alpha_kx_e_tg,alpha_kx_p_tg,alpha_kx_n_tg     &
+      ,alpha_kx_t_tg,alpha_quench_tg,xnu_factor_tg,debye_factor_tg         &
+      ,etg_factor_tg,sat_rule_tg,kygrid_model_tg,xnu_model_tg              &
       ,vpar_model_tg,vpar_shear_model_tg)
 !      
       CALL put_kys(ky_tg)
@@ -39,7 +40,7 @@
 !
       CALL put_gradients(rlns_tg,rlts_tg,vpar_shear_tg,vexb_shear_tg)
 !
-      CALL put_profile_shear(shear_ns_tg,shear_ts_tg)
+      CALL put_profile_shear(vns_shear_tg,vts_shear_tg)
 !
       CALL put_averages(taus_tg,as_tg,vpar_tg,betae_tg,xnue_tg,zeff_tg,debye_tg)
 !

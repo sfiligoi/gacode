@@ -41,19 +41,19 @@ module neo_transport
 
   integer, parameter, private :: io_transp=1, io_phi=2, io_vel=3, &
        io_exp=4, io_gv=8, io_check=9
-  character(len=80),private :: runfile_transp = 'transport.out'
-  character(len=80),private :: runfile_phi    = 'phi.out'
-  character(len=80),private :: runfile_vel    = 'vel.out'
-  character(len=80),private :: runfile_exp    = 'transport_exp.out'
-  character(len=80),private :: runfile_gv     = 'transport_gv.out'
-  character(len=80),private :: runfile_check  = 'check.out'
+  character(len=80),private :: runfile_transp = 'out.neo.transport'
+  character(len=80),private :: runfile_phi    = 'out.neo.phi'
+  character(len=80),private :: runfile_vel    = 'out.neo.vel'
+  character(len=80),private :: runfile_exp    = 'out.neo.transport_exp'
+  character(len=80),private :: runfile_gv     = 'out.neo.transport_gv'
+  character(len=80),private :: runfile_check  = 'out.neo.check'
   logical, private :: initialized = .false.
   real, private :: check_sum
 
 contains
 
   subroutine TRANSP_alloc(flag)
-    use neo_globals, only : n_species, n_theta, write_out_mode, profile_model, n_xi
+    use neo_globals
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
     integer :: is, ie 
@@ -87,18 +87,18 @@ contains
        allocate(vtor_th0(n_species))
 
        check_sum=0.0
-       
-       if(write_out_mode > 0) then
-          open(unit=io_transp,file=runfile_transp,status='replace')
+
+       if(silent_flag == 0 .and. i_proc == 0) then
+          open(unit=io_transp,file=trim(path)//runfile_transp,status='replace')
           close(io_transp)
-          open(unit=io_phi,file=runfile_phi,status='replace')
+          open(unit=io_phi,file=trim(path)//runfile_phi,status='replace')
           close(io_phi)
-          open(unit=io_vel,file=runfile_vel,status='replace')
+          open(unit=io_vel,file=trim(path)//runfile_vel,status='replace')
           close(io_vel)
-          open(unit=io_gv,file=runfile_gv,status='replace')
+          open(unit=io_gv,file=trim(path)//runfile_gv,status='replace')
           close(io_gv)
           if(profile_model >= 2) then
-             open(unit=io_exp,file=runfile_exp,status='replace')
+             open(unit=io_exp,file=trim(path)//runfile_exp,status='replace')
              close(io_exp)
           endif
        endif
@@ -131,12 +131,12 @@ contains
        deallocate(vpol_th0)
        deallocate(vtor_th0)
 
-       if(write_out_mode > 0) then
-          open(unit=io_check,file='check.out',status='replace')
+       if(silent_flag == 0 .and. i_proc == 0) then
+          open(unit=io_check,file=trim(path)//runfile_check,status='replace')
           write (io_check,'(e16.8,$)') check_sum
           close(io_check)
        endif
-       
+
        initialized = .false.
 
     endif
@@ -347,17 +347,20 @@ contains
     call compute_velocity(ir)
     
 
-    if(write_out_mode > 1) then
-       print *, '****************************************'
-       print '(a,i4)', 'ir = ', ir
+    if(silent_flag == 0 .and. i_proc == 0) then
+       open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+            status='old',position='append')
+       write(io_neoout,*)  '****************************************'
+       write(io_neoout,'(a,i4)') 'ir = ', ir
        fac=0.0
        do is=1, n_species
           fac = fac + Z(is) * pflux(is)
-          print '(a,e16.8)', 'pflux = ', pflux(is)
-          print '(a,e16.8)', 'eflux = ', eflux(is)
+          write(io_neoout,'(a,e16.8)') 'pflux = ', pflux(is)
+          write(io_neoout,'(a,e16.8)') 'eflux = ', eflux(is)
        enddo
-       print '(a,e16.8)', ' sum Z_s * Gamma_s = ', fac
-       print *, '****************************************'
+       write(io_neoout,'(a,e16.8)') ' sum Z_s * Gamma_s = ', fac
+       write(io_neoout,*) '****************************************'
+       close(io_neoout)
     endif
 
     ! Sugama gyro-viscosity "H" fluxes
@@ -442,7 +445,7 @@ contains
                + omega_rot_deriv(ir) * omega_rot(ir)/vth(is,ir)**2 &
                * (bigR_th0**2 - bigR(it)**2))
        end do
-       
+
        vpol_th0(is) = 0.0
        vtor_th0(is) = 0.0
        do jt=0, m_theta
@@ -478,7 +481,7 @@ contains
           vpol_th0(is) = vpol_th0(is) + vpol_fourier(is,jt,1)
           vtor_th0(is) = vtor_th0(is) + vtor_fourier(is,jt,1)
        enddo
-       
+
     enddo
 
     do jt=0, m_theta
@@ -518,10 +521,10 @@ contains
     integer, intent (in) :: ir
     integer :: is, it, jt
 
-    if(write_out_mode == 0) return
+    if(silent_flag > 0 .or. i_proc > 0) return
 
     ! transport coefficients (normalized)
-    open(io_transp,file=runfile_transp,status='old',position='append')
+    open(io_transp,file=trim(path)//runfile_transp,status='old',position='append')
     write (io_transp,'(e16.8,$)') r(ir)
     write (io_transp,'(e16.8,$)') d_phi_sqavg
     write (io_transp,'(e16.8,$)') jpar
@@ -539,10 +542,10 @@ contains
     enddo
     write (io_transp,*)
     close(io_transp)
-    
+
     ! transport coefficients (units)
     if(profile_model >= 2) then
-       open(io_exp,file=runfile_exp,status='old',position='append')
+       open(io_exp,file=trim(path)//runfile_exp,status='old',position='append')
        write (io_exp,'(e16.8,$)') r(ir) * a_meters
        ! m
        write (io_exp,'(e16.8,$)') &
@@ -585,18 +588,18 @@ contains
        write (io_exp,*)
        close(io_exp)
     end if
-    
+
     ! delta phi(theta)
-    open(io_phi,file=runfile_phi,status='old',position='append')
+    open(io_phi,file=trim(path)//runfile_phi,status='old',position='append')
     write(io_phi,*) d_phi(:)
     close(io_phi)
 
-    open(io_vel,file=runfile_vel,status='old',position='append')    
+    open(io_vel,file=trim(path)//runfile_vel,status='old',position='append')    
     write(io_vel,*) upar(:,:)
     close(io_vel)
 
     ! gyroviscosity transport coefficients
-    open(io_gv,file=runfile_gv,status='old',position='append')
+    open(io_gv,file=trim(path)//runfile_gv,status='old',position='append')
     write (io_gv,'(e16.8,$)') r(ir)
     do is=1, n_species
        write (io_gv,'(e16.8,$)') pflux_gv(is)

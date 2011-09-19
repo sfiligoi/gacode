@@ -80,7 +80,7 @@ then
    echo " "
    echo "             -nogq"
    echo "             Do not use q from GATO (by default, if gfile is specified q is from GATO)."
-    echo " "
+   echo " "
    echo "             -r <reorder sequence>"
    echo "             Reorder ions."
    echo
@@ -98,7 +98,7 @@ then
    echo
    echo "             -vgen_in <ion string> " 
    echo "             Choices: DC, HDC"
-   echo "             If this is blank, INPUT.v must exist."
+   echo "             If this is blank, input.vgen must exist."
    echo
    echo "             -vgen_e <flag>" 
    echo "             Method to compute Er."
@@ -189,8 +189,8 @@ then
    echo " "
    echo "              -n3n1 <ni_3/ni_1>"
    echo "              Default: 0.0 (No third ion species)"
-   echo " "
    echo
+   echo " "
    echo "EXAMPLES:"
    echo " "
    echo "    profiles_gen -i myfile" 
@@ -379,15 +379,15 @@ fi
 #
 if [ $FILE_FLAG -eq 0 ]
 then
-  echo "ERROR: Please specify an input file with -i <file>"
+  echo "ERROR: (profiles_gen) Please specify an input file with -i <file>"
   exit 0 
 fi
 
 if [ -f $FILE ] &&  [ "${#FILE}" -gt 0 ]
 then
-   echo "INFO: Found $FILE."
+   echo "INFO: (profiles_gen) $FILE found"
 else
-   echo "ERROR: $FILE not found."
+   echo "ERROR: (profiles_gen) $FILE not found"
    exit 0
 fi
 #=============================================================
@@ -406,17 +406,17 @@ then
    mkdir vgen
    cd vgen
 
-   # Check for INPUT.v file
+   # Check for input.vgen file
 
-   if [ -f $NEO_DIR/tools/input/vgen/INPUT.v.$VGEN_IN ]
+   if [ -f $NEO_DIR/tools/input/vgen/input.vgen.$VGEN_IN ]
    then
-     cp $NEO_DIR/tools/input/vgen/INPUT.v.$VGEN_IN input.neo
+     cp $NEO_DIR/tools/input/vgen/input.vgen.$VGEN_IN input.neo
    else 
-      if [ -f ../INPUT.v ]
+      if [ -f ../input.vgen ]
       then
-         cp ../INPUT.v input.neo
+         cp ../input.vgen input.neo
       else
-         echo "ERROR: Specify ion string with -vgen_in, or create INPUT.v"
+         echo "ERROR: (profiles_gen) Specify ion string with -vgen_in, or create input.vgen"
          exit 1
       fi
    fi
@@ -445,7 +445,7 @@ else
 
    # Clean old input.profiles* data.
 
-   echo "INFO: Removing old input.profiles* files."
+   echo "INFO: (profiles_gen) Removing old input.profiles* files"
    rm -rf input.profiles input.profiles.*
 
 fi 
@@ -508,11 +508,11 @@ if [ $G_FLAG -eq 1 ]
 then
    if [ ! -f $GATO ]
    then
-      echo "ERROR: You need to build the GATO executable: $ cd gato ; make"
+      echo "ERROR: (profiles_gen) You need to build the GATO executable: $ cd gato ; make"
       exit 1
    fi
-   echo "INFO: Running GATO mapper to generate flux surfaces from $GFILE."
-   echo "INFO: Running fluxfit to compute shape parameters from GATO mapping."
+   echo "INFO: (profiles_gen) Spawning GATO mapper to generate flux surfaces from $GFILE."
+   echo "INFO: (profiles_gen) Running fluxfit to compute shape parameters from GATO mapping."
    cp $GFILE eqgta
    cp $GATO_IN ingta
    $GATO >& gato.stdout
@@ -526,15 +526,18 @@ if [ $ORDER_FLAG -eq 1 ]
 then
    if [ ${#ORDER} -lt 8 ]
    then
-      echo "Incomplete order vector."
+      echo "ERROR: (profiles_gen) Incomplete order vector."
       exit 1;
    fi
-   ord_vec[0]=${ORDER:0:1}
-   ord_vec[1]=${ORDER:2:1}
-   ord_vec[2]=${ORDER:4:1}
-   ord_vec[3]=${ORDER:6:1}
-   ord_vec[4]=${ORDER:8:1}
+
+   p=0
+   for i in $(echo $ORDER | tr "," "\n")
+   do
+      ord_vec[$p]=$i
+      p=$(($p+1))
+   done
 fi
+
 echo ${ord_vec[0]} ${ord_vec[1]} ${ord_vec[2]} ${ord_vec[3]} ${ord_vec[4]} >> $CONFIG
 #==============================================================
 
@@ -547,9 +550,9 @@ if [ -f "success" ]
 then
    if [ $G_FLAG -eq 1 ]
    then
-      echo "DONE: Successfully wrote: input.profiles, input.profiles.geo."
+      echo "DONE: (profiles_gen) Successfully wrote: input.profiles, input.profiles.geo."
    else
-      echo "DONE: Successfully wrote: input.profiles." 
+      echo "DONE: (profiles_gen) Successfully wrote: input.profiles." 
    fi
 else
    echo "ERROR: Something went wrong in creation of input.profiles :("

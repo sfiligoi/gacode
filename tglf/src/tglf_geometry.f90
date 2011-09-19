@@ -27,6 +27,7 @@
       IMPLICIT NONE
       INTEGER :: i,is
       REAL :: thx,dthx,sn,cn,eps,Rx,Rx1,Rx2,f_gam
+      REAL :: kyi
 !
 ! debug
 !      write(*,*)"shat_sa=",shat_sa,"alpha_sa=",alpha_sa
@@ -46,15 +47,22 @@
 !
 ! fill the x-grid eikonal function arrays wdx and b0x 
       eps = rmin_sa/rmaj_sa
+!
 ! generalized quench rule kx0 shift
-      kx0=0.0
-      if(alpha_quench_in.eq.0.0)then
-        kx0 = alpha_kx0_in*(vexb_shear_s+alpha_kx1_in*shear_ns_in(2))*rmaj_sa/(ky*taus(2))
-        if(ABS(kx0).gt.alpha_kx1_in)kx0 = alpha_kx1_in*kx0/ABS(kx0)
-        kx0 = kx0*sign_Bt_in
+!
+        kx0 = 0.0
         sign_kx0=1.0
-        if(kx0.lt.0.0)sign_kx0=-1.0
-      endif
+        if(alpha_quench_in.eq.0.0)then
+          kyi = ky*vs(2)*mass(2)/ABS(zs(2))
+          kx0 = alpha_kx_e_in*0.19*TANH(vexb_shear_s*rmaj_sa/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
+          kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*rmaj_sa/vs(2)) &
+           *(0.06*kyi*kyi/(kyi*kyi+0.001)+0.25*TANH((1.9*kyi)**3))/ky
+          kx0 = kx0 + alpha_kx_n_in*0.19*TANH(vns_shear_in(2)*rmaj_sa/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
+          kx0 = kx0 - alpha_kx_t_in*0.19*TANH(vts_shear_in(2)*rmaj_sa/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
+!
+          if(kx0.lt.0.0)sign_kx0=-1.0
+          kx0 = sign_Bt_in*kx0           ! this is here to cancel the sign_Bt_in factor in kxx below
+        endif
 !
       do i=1,nx
         thx = width_in*x(i)
@@ -154,7 +162,7 @@
       REAL :: cxtorper1,cxtorper2
       REAL :: B2x1,B2x2,R2x1,R2x2,norm_ave,dlp
       REAL :: c_tor_par_ave_out, c_tor_per_ave_out
-      REAL :: kyi
+      REAL :: kyi, shear_factor
 !
 !
 !  find length along magnetic field y
@@ -193,14 +201,17 @@
         sign_kx0=1.0
         if(alpha_quench_in.eq.0.0)then
           kyi = ky*vs(2)*mass(2)/ABS(zs(2))
-          kx0 = alpha_kx0_in*0.19*TANH(vexb_shear_s*Rmaj_s/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
-          kx0 = kx0 -alpha_kx1_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*Rmaj_s/vs(2)) &
-           *(0.06*kyi*kyi/(kyi*kyi+0.001)+0.25*TANH((1.9*kyi)**3))/ky
+          kx0 = alpha_kx_e_in*0.19*TANH(vexb_shear_s*Rmaj_s/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
+          shear_factor = (rmin_s/q_s)*(rmin_s/q_s)*q_prime_s-0.25
+          kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*Rmaj_s/vs(2)) &
+           *shear_factor*(0.06*kyi*kyi/(kyi*kyi+0.001)+0.25*TANH((1.9*kyi)**3))/ky
+          kx0 = kx0 + alpha_kx_n_in*0.19*TANH(vns_shear_in(2)*Rmaj_s/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
+          kx0 = kx0 - alpha_kx_t_in*0.19*TANH(vts_shear_in(2)*Rmaj_s/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
 !
           if(kx0.lt.0.0)sign_kx0=-1.0
           kx0 = sign_Bt_in*kx0           ! this is here to cancel the sign_Bt_in factor in kxx below
         endif
-!        kx0 = alpha_kx1_in
+!        kx0 = alpha_kx_e_in
 !        write(*,*)"kx0=",kx0
 !        write(*,*)"1/qrat=",1.0/qrat_geo(0)
 !

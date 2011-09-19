@@ -72,17 +72,6 @@ subroutine prgen_read_plasmastate
   plst_tag = 'ALLA_name'
   err = nf90_inq_varid(ncid,trim(plst_tag),varid)
   err = nf90_get_var(ncid,varid,plst_alla_name(1:plst_dp1_nspec_alla))
-  print '(a)','INFO: Found these ion species'
-  do i=2,plst_dp1_nspec_alla
-     ip = reorder_vec(i-1)+1
-     if (i <= 6) then
-        print '(t6,i2,1x,3(a))',&
-             i-1,trim(plst_alla_name(i)),' -> ',trim(plst_alla_name(ip))
-     else
-        print '(t6,i2,1x,3(a))',&
-             i-1,trim(plst_alla_name(i)),' [unmapped]'
-     endif
-  enddo
 
   ! Flux-surface volume
   err = nf90_inq_varid(ncid,trim('vol'),varid)

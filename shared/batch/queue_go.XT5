@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /usr/bin/env bash
 #
 # SCRIPT:
 #  queue_go.XT5
@@ -16,14 +16,27 @@ queue_num=${2}
 sim=${3}
 simpath=${4}
 code=${5}
-# raise nodes to a multiple of 12 cores; use $nproc in execute line
-nodes=$[12*(($nproc+11)/12)]
+
+# DO NOT raise nodes to a multiple of 12 cores or TGYRO can fail.
+nodes=$(($nproc/12))
+cores=$((12*$nodes))
+resid=$(($nproc-$cores))
+
+if [ $resid -ne 0 ]
+then
+   echo "INFO: (batch) Adding extra node since number of cores not a multiple of 12"
+   nodes=$(($nodes+1))
+   cores=$((12*$nodes))
+fi
+
+queue="batch"
 
 case "$queue_num" in
 
    0 )
 
-      limit="0:30:00" ;;
+      limit="0:30:00" ;
+      queue="debug" ;;
 
    1 )
 
@@ -58,7 +71,7 @@ esac
 bfile=$simpath/$sim/batch.src
 
 echo "Output written to $bfile"
- 
+
 # Copy appropriate commands to batch directory:
 
 # Specify job name
@@ -70,28 +83,22 @@ echo "#PBS -o $simpath/$sim/batch.out" >> $bfile
 # STDERR
 echo "#PBS -e $simpath/$sim/batch.err" >> $bfile
 # Queue name
-#echo "#PBS -q $queue" >> $bfile
+echo "#PBS -q $queue" >> $bfile
 # Max wall-clock time and number of compute cores
-echo "#PBS -l walltime=$limit,size=$nodes" >> $bfile
+echo "#PBS -l walltime=$limit,size=$cores" >> $bfile
 echo "cd \${PBS_O_WORKDIR}" >> $bfile
-if [ "$SHELL" = "/bin/bash" ] ; then
-   echo "export MPICH_RANK_REORDER_METHOD=0" >> $bfile
-else
-   echo "setenv MPICH_RANK_REORDER_METHOD 0" >> $bfile
-fi
 echo "date" >> $bfile
 ## Node information
 ## Try running 'checkjob <jobid>' command
 #echo "/sw/xt5/bin/nodeinfo" >> $bfile
-echo "$code -e $sim -n $nproc -p $simpath" >> $bfile 
+echo "$code -e $sim -n $nproc -p $simpath" >> $bfile
 
-echo "Submit your job [y,n]?"
-   
-read submit
-   
-if [ "$submit" = "y" ] ; then
-   qsub $bfile
-fi
+#echo "Submit your job [y,n]?"
+#
+#read submit
+#
+#if [ "$submit" = "y" ] ; then
+#   qsub $bfile
+#fi
 
-exit 1
-
+exit 0

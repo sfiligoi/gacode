@@ -1,5 +1,5 @@
 !-----------------------------------------------------------
-! get_kinetic_advance.f90 [caller: timestep_SSP_322]
+! get_kinetic_advance.f90
 !
 ! PURPOSE:
 !  Manage implicit advance of fields and electron

@@ -135,19 +135,19 @@
 !
 !-----------------------------------------------------------------
 !
-      SUBROUTINE put_profile_shear(shear_ns,shear_ts)
+      SUBROUTINE put_profile_shear(vns_shear,vts_shear)
 !
       USE tglf_global
 !
       IMPLICIT NONE
-      REAL,INTENT(IN) :: shear_ns(nsm),shear_ts(nsm)
+      REAL,INTENT(IN) :: vns_shear(nsm),vts_shear(nsm)
       INTEGER :: is
 !
 ! transfer values
 !
       do is=1,nsm
-        shear_ns_in(is) = shear_ns(is)
-        shear_ts_in(is) = shear_ts(is)
+        vns_shear_in(is) = vns_shear(is)
+        vts_shear_in(is) = vts_shear(is)
       enddo
 !    
       END SUBROUTINE put_profile_shear
@@ -255,8 +255,9 @@
 !
 !-----------------------------------------------------------------
 !
-      SUBROUTINE put_model_parameters(adi_elec,alpha_p,alpha_e,  &
-         alpha_kx0,alpha_kx1,alpha_quench,xnu_fac,debye_fac,etg_fac, &
+      SUBROUTINE put_model_parameters(adi_elec,alpha_e,alpha_p,  &
+         alpha_n,alpha_t,alpha_kx_e,alpha_kx_p,alpha_kx_n,alpha_kx_t, &
+         alpha_quench,xnu_fac,debye_fac,etg_fac, &
          sat_rule,kygrid_model,xnu_model,vpar_model,vpar_shear_model)
 !
       USE tglf_global
@@ -265,9 +266,9 @@
       LOGICAL,INTENT(IN) :: adi_elec
       INTEGER :: sat_rule,xnu_model,kygrid_model
       INTEGER :: vpar_model,vpar_shear_model
-      REAL,INTENT(IN) :: alpha_p,alpha_e,etg_fac
-      REAL,INTENT(IN) :: alpha_kx0,alpha_kx1
-      REAL,INTENT(IN) :: alpha_quench,xnu_fac,debye_fac
+      REAL,INTENT(IN) :: alpha_e,alpha_p,alpha_n,alpha_t
+      REAL,INTENT(IN) :: alpha_kx_e,alpha_kx_p,alpha_kx_n,alpha_kx_t
+      REAL,INTENT(IN) :: alpha_quench,xnu_fac,debye_fac,etg_fac
 !
 ! check for changes and update flow controls
 !
@@ -283,8 +284,12 @@
       adiabatic_elec_in = adi_elec
       alpha_p_in = alpha_p
       alpha_e_in = alpha_e
-      alpha_kx0_in = alpha_kx0
-      alpha_kx1_in = alpha_kx1
+      alpha_n_in = alpha_n
+      alpha_t_in = alpha_t
+      alpha_kx_e_in = alpha_kx_e
+      alpha_kx_p_in = alpha_kx_p
+      alpha_kx_n_in = alpha_kx_n
+      alpha_kx_t_in = alpha_kx_t
       alpha_quench_in = alpha_quench
       xnu_factor_in = xnu_fac
       debye_factor_in = debye_fac
@@ -294,6 +299,18 @@
       kygrid_model_in = kygrid_model
       vpar_model_in = vpar_model
       vpar_shear_model_in = vpar_shear_model
+!
+      if(alpha_quench_in .ne.0.0)then
+! turn of generalized quench rule and only use Waltz quench rule
+        alpha_e_in = 0.0
+        alpha_p_in = 0.0
+        alpha_n_in = 0.0
+        alpha_t_in = 0.0
+        alpha_kx_e_in = 0.0
+        alpha_kx_p_in = 0.0
+        alpha_kx_n_in = 0.0
+        alpha_kx_t_in = 0.0
+      endif
 !
       END SUBROUTINE put_model_parameters
 !
@@ -1195,9 +1212,13 @@
        write(11,*)"      wd_zero_tg= ",wd_zero_in
        write(11,*)"      vexb_shear_tg = ",vexb_shear_in
        write(11,*)"      alpha_e_tg= ",alpha_e_in
-       write(11,*)"      alpha_kx0_tg= ",alpha_kx0_in
-       write(11,*)"      alpha_kx1_tg= ", alpha_kx1_in
        write(11,*)"      alpha_p_tg= ",alpha_p_in
+       write(11,*)"      alpha_n_tg= ",alpha_n_in
+       write(11,*)"      alpha_t_tg= ",alpha_t_in
+       write(11,*)"      alpha_kx_e_tg= ",alpha_kx_e_in
+       write(11,*)"      alpha_kx_p_tg= ", alpha_kx_p_in
+       write(11,*)"      alpha_kx_n_tg= ",alpha_kx_n_in
+       write(11,*)"      alpha_kx_t_tg= ", alpha_kx_t_in
        write(11,*)"      alpha_quench_tg= ",alpha_quench_in
        write(11,*)"      xnu_factor_tg= ",xnu_factor_in
        write(11,*)"      debye_factor_tg= ",debye_factor_in
@@ -1211,8 +1232,8 @@
         write(11,*)"      rlns_tg(",is,")= ",rlns_in(is)
         write(11,*)"      rlts_tg(",is,")= ",rlts_in(is)
         write(11,*)"      vpar_shear_tg(",is,")= ",vpar_shear_in(is)
-        write(11,*)"      shear_ns_tg(",is,")= ",shear_ns_in(is)
-        write(11,*)"      shear_ts_tg(",is,")= ",shear_ts_in(is)
+        write(11,*)"      vns_shear_tg(",is,")= ",vns_shear_in(is)
+        write(11,*)"      vts_shear_tg(",is,")= ",vts_shear_in(is)
        enddo
        write(11,*)"/"
        do is=1,ns

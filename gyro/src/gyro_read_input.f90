@@ -256,7 +256,7 @@ subroutine gyro_read_input
   call readbc_real(fieldeigen_tol)
 
   call readbc_int(collision_method)
-
+  call readbc_int(reintegrate_flag)
 
   !hdf5 output
   call readbc_int(io_method)
@@ -307,12 +307,7 @@ subroutine readbc_int(p)
 
   if (i_proc == 0) read(1,*) p
 
-  call MPI_BCAST(p,&
-       1 ,&
-       MPI_INTEGER,&
-       0 ,&
-       GYRO_COMM_WORLD,&
-       i_err)
+  call MPI_BCAST(p,1,MPI_INTEGER,0,GYRO_COMM_WORLD,i_err)
 
 end subroutine readbc_int
 !
@@ -328,12 +323,7 @@ subroutine readbc_real(x)
 
   if (i_proc == 0) read(1,*) x
 
-  call MPI_BCAST(x,&
-       1 ,&
-       MPI_DOUBLE_PRECISION,&
-       0 ,&
-       GYRO_COMM_WORLD,&
-       i_err)
+  call MPI_BCAST(x,1,MPI_DOUBLE_PRECISION,0,GYRO_COMM_WORLD,i_err)
 
 end subroutine readbc_real
 !------------------------------------------------------------

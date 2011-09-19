@@ -9,6 +9,15 @@
 module gyro_globals
  
   !----------------------------------------------------
+  ! Standard precision for IO 
+  !
+  ! Real
+  character(len=8) :: fmtstr='(es11.4)'
+  ! Complex
+  character(len=14) :: fmtstr2='(2(es11.4,1x))'
+  !----------------------------------------------------
+ 
+  !----------------------------------------------------
   ! Variables passed in via gyro_run routine:
   !
   ! Signal trivial test run (rather than full simulation)
@@ -91,7 +100,7 @@ module gyro_globals
   !
   integer :: io_method = 1
   integer :: time_skip_wedge = 0    ! Wedge files for synthetic diagnostics
-  integer :: n_torangle_wedge= 0    ! Number of toroidal planes to use in wedge plots
+  integer :: n_torangle_wedge= 1    ! Number of toroidal planes to use in wedge plots
   integer :: n_torangle_3d = 0
   real :: torangle_offset=0.0
   !
@@ -205,6 +214,7 @@ module gyro_globals
   integer :: geo_gradbcurv_flag
   integer :: geo_fastionbeta_flag
   integer :: fakefield_flag
+  integer :: reintegrate_flag
   !---------------------------------------------------------
 
   !-----------------------------------------------------------------------------------
@@ -444,7 +454,7 @@ module gyro_globals
   !
   real, dimension(:), allocatable :: w_time
   !
-  complex, dimension(2) :: freq_n
+  complex, dimension(:,:), allocatable :: omega_linear
   ! 
   real, dimension(:), allocatable :: time_error
   !---------------------------------------------------------
@@ -842,7 +852,7 @@ module gyro_globals
   !
   complex :: balloon_renorm
   !
-  ! Initial amplitudes (see make_initial_h)
+  ! Initial amplitudes (see gyro_initial_condition)
   !
   real :: amp_n
   real :: amp_0
@@ -877,7 +887,7 @@ module gyro_globals
   complex, dimension(:,:,:,:), allocatable :: f_store
   complex, dimension(:,:,:,:), allocatable :: p_store
   !
-  complex, dimension(:,:,:,:), allocatable :: h_M
+  complex, dimension(:,:,:,:), allocatable :: h_tran
   complex, dimension(:,:,:), allocatable :: h_C
   complex, dimension(:,:,:), allocatable :: f_coll
   complex, dimension(:,:,:), allocatable :: fb_coll
@@ -890,7 +900,7 @@ module gyro_globals
   complex, dimension(:,:,:,:,:), allocatable :: gyro_uv_old
   complex, dimension(:,:,:,:,:), allocatable :: gyro_uv_dot
   complex, dimension(:,:,:,:), allocatable :: gyro_u
-  complex, dimension(:,:,:,:), allocatable :: gyro_u_M
+  complex, dimension(:,:,:,:), allocatable :: gyro_u_tran
   !
   complex, dimension(:,:,:), allocatable :: RHS_krook
   !

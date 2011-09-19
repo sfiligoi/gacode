@@ -80,7 +80,7 @@
           deni_xpt(i+1)=ni_m(i)*1.e19  ! total ion density
           zeff_xpt(i+1)=zeff_exp(i)
           nimp_xpt(i+1)=nz_exp(i)*1.e19
-          nfst_xpt(i+1)=nfst_exp(i)*1.e19
+          nfst_xpt(i+1)=nfast_exp(i)*1.e19
           vphi_xpt(i+1)=rmajor_exp*angrot_exp(i)
         enddo
         call w_lin_interp(jmaxm+1,r_xpt,te_xpt,nr_r,rhot_r,te_r,
@@ -112,7 +112,7 @@ c
           deni_r(i,1)=ni_m(i-1)*1.e19  ! total ion density
           zeff_ex_r(i)=zeff_exp(i-1)
           denim_r(i)=nz_exp(i-1)*1.e19
-          denfst_r(i)=nfst_exp(i-1)*1.e19
+          denfst_r(i)=nfast_exp(i-1)*1.e19
           vt_im_ex_r(i)=rmajor_exp*angrot_exp(i-1)
         enddo
       endif

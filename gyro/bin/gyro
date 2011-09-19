@@ -220,27 +220,23 @@ cd $SIMDIR
 if [ $SCOPY_FLAG -eq 1 ]
 then
    list="
-    $RUNBASE
-    $VERBASE
-    t.out
-    diff.out
-    diff_i.out
-    diff_n.out
-    error.out
-    gbflux.out
-    gbflux_i.out
-    gbflux_n.out
-    geometry_arrays.out
     input.gyro
     input.gyro.gen
     input.profiles
     input.profiles.gen
     input.profiles.geo
-    kxkyspec.out
-    phase_space.out
-    profile_vugyro.out
-    timing.out
-    zerobar.out"
+    out.gyro.run
+    out.gyro.t
+    out.gyro.freq
+    out.gyro.error
+    out.gyro.gbflux_i
+    out.gyro.gbflux_n
+    out.gyro.geometry_arrays
+    out.gyro.kxkyspec
+    out.gyro.phase_space
+    out.gyro.profile
+    out.gyro.timing
+    out.gyro.zerobar"
 
    # Funny syntax below removes trailing /
    target=${SIMDIR%/}"-s"
@@ -281,8 +277,7 @@ echo 0 > halt
 #==========================================================
 # echo number of tasks, then parse INPUT
 #
-echo "[GYRO MPI tasks: $NPROC]" > $RUNBASE
-echo "[Parsing data in input.gyro]" >> $RUNBASE
+echo "[Parsing data in input.gyro]" > $RUNBASE
 
 python $GYRO_DIR/bin/gyro_parse.py >> $RUNBASE
 if [ $? -eq 1 ] 

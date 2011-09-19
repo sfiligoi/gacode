@@ -13,7 +13,7 @@ subroutine tgyro_neo_map
   mu1 = sqrt(mi(1)/(me*loc_me_multiplier))
 
   ! Initialize NEO
-  call neo_init
+  call neo_init(paths(i_r-1),gyro_comm)
 
   ! Simulation mode (dke solve vs. analytic)
   if (loc_neo_method == 1) then
@@ -22,8 +22,18 @@ subroutine tgyro_neo_map
      neo_sim_model_in = 1
   end if
 
+  ! Resolution
+  if (loc_n_ion < 4) then
+!     neo_n_energy_in = 10
+     neo_n_energy_in = 5
+  else
+!     neo_n_energy_in = 6
+     neo_n_energy_in = 5
+  endif
+  neo_n_xi_in = 11
+  neo_n_theta_in = 11
+
   ! Geometry
-  neo_write_out_mode_in    = 0
   neo_equilibrium_model_in = 2
   neo_rmin_over_a_in       = r(i_r)/r_min
   neo_rmaj_over_a_in       = r_maj(i_r)/r_min

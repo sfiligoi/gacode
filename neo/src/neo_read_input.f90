@@ -6,15 +6,16 @@ subroutine neo_read_input
 
   integer :: is
 
-  open(unit=1,file='input.neo.gen',status='old')
+  open(unit=1,file=trim(path)//'input.neo.gen',status='old')
   read(1,*) n_energy
   read(1,*) n_xi
   read(1,*) n_theta
   read(1,*) n_radial
+  read(1,*) matsz_scalefac
   read(1,*) rmin_1_in
   read(1,*) rmin_2_in
   read(1,*) rmaj_in
-  read(1,*) write_out_mode
+  read(1,*) silent_flag
   read(1,*) sim_model
   read(1,*) equilibrium_model
   read(1,*) collision_model

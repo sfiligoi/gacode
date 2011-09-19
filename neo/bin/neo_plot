@@ -1,0 +1,122 @@
+#!/bin/bash
+#==============================================================================
+# neo_plot
+#
+# PURPOSE
+#  Handles plotting of neo output
+#==============================================================================
+
+#==============================================================================
+# Syntax validity check and help message
+#
+n=$#
+
+if [ $n -eq 0 ]
+then
+   echo
+   echo "Usage:       neo_plot [options]"
+   echo " "
+   echo "Options (in any order with -p being last) include: "
+   echo " "
+   echo "             -l <directory>"
+   echo "             Set location of directory containing NEO output files"
+   echo "             and/or other directories with NEO output files.  Default"
+   echo "             is current directory."
+   echo " "
+   echo "             -options"
+   echo "             Display all possible simulated parameters to plot in"
+   echo "             current directory."
+   echo " "
+   echo "             -dim <integer> <integer>"
+   echo "             Set x and y dimensions for plotting windows, respectively."
+   echo
+   echo "             -s"
+   echo "             Suppress legends on requested plots."
+   echo
+   echo "             -v"
+   echo "             Display verbose descriptors of variables."
+   echo " "
+   echo "             -p <var1> <var2> ... <varN>"
+   echo "             Produce plots of N parameters given.  Default is GAMMA, Q,"
+   echo "             1upar, and jboot.  This will create plots of all the"
+   echo "             simulated data overlaid with the relevant theoretical"
+   echo "             predictions."
+   echo " "
+   echo
+   echo "EXAMPLES:"
+   echo
+   echo "             neo_plot -options"
+   echo "             neo_plot -p"
+   echo "             neo_plot -l example_directory -p"
+   echo "             neo_plot -dim 2 3 -p"
+   echo
+fi
+
+#==============================================================================
+# Define variables for flag capture
+#
+# Default output directory
+PLOT_DIR=$PWD
+N1=1
+N2=1
+# Plot mode flags
+PLOT_FLAG=0
+OPTIONS_FLAG=0
+DIM_FLAG=0
+LEGEND_FLAG=1
+VERBOSE_FLAG=0
+PLOT_STRING=""
+#==============================================================================
+
+#==============================================================================
+# Parse command line options
+#
+while [ $# -gt 0 ] ; do
+  case "$1" in
+
+  -l) shift ; PLOT_DIR=$1 ; shift ;;
+
+  -options) shift ; OPTIONS_FLAG=1 ;;
+
+  -dim) shift ; DIM_FLAG=1 ; N1=$1 ; shift ; N2=$1 ; shift ;;
+
+  -p) shift ; PLOT_FLAG=1 ; PLOT_STRING="$1" ; shift ; break ;;
+
+  -s) shift ; LEGEND_FLAG=0 ;;
+
+  -v) shift ; VERBOSE_FLAG=1 ;;
+
+  *) echo "ERROR: incorrect syntax." ; exit 1 ;;
+
+  esac
+done
+#==============================================================================
+# Plot data
+
+if [ $PLOT_FLAG -eq 1 ]
+then
+  while [ $# -gt 0 ]
+  do
+    PLOT_STRING="$PLOT_STRING $1"
+    shift
+  done
+  if [ "$PLOT_STRING" == "" ] && [ $DIM_FLAG -eq 0 ]
+  then
+    N1=2
+    N2=2
+  fi
+  python ~/gacode/shared/python/pyrats/neo/interpreter.py $PLOT_DIR $N1 $N2 $LEGEND_FLAG $VERBOSE_FLAG $PLOT_STRING &
+  exit 0
+fi
+
+#==============================================================================
+
+#==============================================================================
+# Give possible data to be plotted
+
+if [ $OPTIONS_FLAG -eq 1 ]
+then
+  python ~/gacode/shared/python/pyrats/neo/options.py $PLOT_DIR &
+fi
+
+#==============================================================================

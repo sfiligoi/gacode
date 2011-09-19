@@ -492,8 +492,8 @@ c
      >       dvoldr_m*1.5D0*nitot_exp(j-1)*ti_exp(j-1))*dr
          wstri_tot=wstri_tot+kevdsecpmw*1.D19*
      >       0.5D0*(dvoldr_p*1.5D0*(nitot_exp(j)+
-     >       nfst_exp(j))*ti_exp(j)+dvoldr_m*1.5D0*
-     >       (nitot_exp(j-1)+nfst_exp(j-1))*ti_exp(j-1))*dr
+     >       nfast_exp(j))*ti_exp(j)+dvoldr_m*1.5D0*
+     >       (nitot_exp(j-1)+nfast_exp(j-1))*ti_exp(j-1))*dr
 c
 c...  Core and pedestal We and Wi
 c

@@ -7,6 +7,7 @@
 
 subroutine tgyro_multi_driver
 
+  use mpi
   use tgyro_globals
 
   implicit none
@@ -14,7 +15,6 @@ subroutine tgyro_multi_driver
   integer :: i
   character(len=80), dimension(n_inst) :: ccollect
 
-  include 'mpif.h'
 
   allocate(gyro_exit_status(n_inst))
   allocate(gyro_exit_message(n_inst))
