@@ -42,8 +42,7 @@ subroutine gyro_fulladvance
 
         ! Attempts to update fields; should not be used
 
-        !call gyro_collision
-        call catch_error('ERROR: Using this collision_method=1 is now offically prohibited.')
+        call catch_error('ERROR: (GYRO) collision_method=1 is deprecated.')
 
      case (2) 
 

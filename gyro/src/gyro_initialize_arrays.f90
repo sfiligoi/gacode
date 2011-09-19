@@ -35,7 +35,7 @@ subroutine gyro_initialize_arrays
   !---------------------------------------------------
 
   !---------------------------------------------------
-  freq_n       = 0.0
+  omega_linear = 0.0
   time_error   = 0.0
   diff         = 0.0
   elapsed_time = 0.0

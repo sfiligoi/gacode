@@ -116,12 +116,11 @@ subroutine make_ampere_blend
 
                  do i_diff=-m_dx,m_dx-i_dx
 
-                    !----------------------------
-                    ! This will stagnate at i=n_x  
-                    ! for i+i_diff > n_x
-                    !
+                    !-----------------------------------------------
+                    ! This will stagnate at i=n_x for i+i_diff > n_x
+                    ! if boundary_method=2:
                     ip = i_cyc(i+i_diff)
-                    !----------------------------
+                    !-----------------------------------------------
 
                     vel_sum_loc(i_diff,j,jp) = vel_sum_loc(i_diff,j,jp)+&
                          grad_perp_ap(i_diff)* &
@@ -132,12 +131,11 @@ subroutine make_ampere_blend
 
                  do i_diff=-mg_dx,mg_dx-ig_dx
 
-                    !----------------------------
-                    ! This will stagnate at i=n_x  
-                    ! for i+i_diff > n_x
-                    !
+                    !-----------------------------------------------
+                    ! This will stagnate at i=n_x for i+i_diff > n_x
+                    ! if boundary_method=2:
                     ip = i_cyc(i+i_diff)
-                    !----------------------------
+                    !------------------------------------------------
 
                     vel_sum_loc(i_diff,j,jp) = vel_sum_loc(i_diff,j,jp)+&
                          fakefield_flag*sum(ion_current(:,i_diff))* &

@@ -33,7 +33,6 @@
 
 subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
 
-  use mpi
   use gyro_globals, only : z_gyro, i_gyro, m_gyro, n_x
   use math_constants
 

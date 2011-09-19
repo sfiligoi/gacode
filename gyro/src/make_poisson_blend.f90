@@ -134,7 +134,7 @@ subroutine make_poisson_blend(i_elec)
                       v_gyro,&
                       f_x(is,:),&
                       2)
- 
+
               endif
 
            enddo ! is
@@ -144,12 +144,11 @@ subroutine make_poisson_blend(i_elec)
 
                  do i_diff=-m_dx,m_dx-i_dx
 
-                    !----------------------------
-                    ! This will stagnate at i=n_x  
-                    ! for i+i_diff > n_x
-                    !
+                    !-----------------------------------------------
+                    ! This will stagnate at i=n_x for i+i_diff > n_x
+                    ! if boundary_method=2:
                     ip = i_cyc(i+i_diff)
-                    !----------------------------
+                    !-----------------------------------------------
 
                     vel_sum_loc(i_diff,j,jp) = vel_sum_loc(i_diff,j,jp)+&
                          grad_perp_phi(i_diff)* &
@@ -160,12 +159,11 @@ subroutine make_poisson_blend(i_elec)
 
                  do i_diff=-m_gyro,m_gyro-i_gyro
 
-                    !----------------------------
-                    ! This will stagnate at i=n_x
-                    ! for i+i_diff > n_x
-                    !
+                    !-----------------------------------------------
+                    ! This will stagnate at i=n_x for i+i_diff > n_x
+                    ! if boundary_method=2:
                     ip = i_cyc(i+i_diff)
-                    !----------------------------
+                    !-----------------------------------------------
 
                     cprod = cs_blend(j,m0,i,p_nek_loc)*c_blend(jp,m0,ip,p_nek_loc)
 
@@ -283,12 +281,11 @@ subroutine make_poisson_blend(i_elec)
 
         do i_diff=-m_gyro,m_gyro-i_gyro
 
-           !----------------------------
-           ! This will stagnate at i=n_x 
-           ! for i+i_diff > n_x
-           !
+           !-----------------------------------------------
+           ! This will stagnate at i=n_x for i+i_diff > n_x
+           ! if boundary_method=2:
            ip = i_cyc(i+i_diff)
-           !----------------------------
+           !-----------------------------------------------
 
            do j=1,n_blend
 

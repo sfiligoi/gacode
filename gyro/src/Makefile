@@ -115,6 +115,7 @@ OBJECTS = gyro_globals.o \
           gyro_write_input.o \
           gyro_write_precision.o \
           gyro_write_radial_op.o \
+          gyro_write_step.o \
           gyro_write_timedata.o \
           sparse_solve_umfpack.o \
           sparse_solve_mumps.o \
@@ -154,7 +155,6 @@ OBJECTS = gyro_globals.o \
           get_delta_he.o \
           get_phi_squared.o \
           get_g_squared.o \
-          write_step.o \
           write_freq.o \
           write_h.o \
           write_timing.o \

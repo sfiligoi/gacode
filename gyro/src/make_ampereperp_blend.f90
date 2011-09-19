@@ -102,15 +102,12 @@ subroutine make_ampereperp_blend
 
                  do i_diff=-m_gyro,m_gyro-i_gyro
 
-                    !----------------------------
-                    ! This will stagnate at i=n_x
-                    ! for i+i_diff > n_x
-                    !
+                    !-----------------------------------------------
+                    ! This will stagnate at i=n_x for i+i_diff > n_x
+                    ! if boundary_method=2:
                     ip = i_cyc(i+i_diff)
-                    !----------------------------
+                    !-----------------------------------------------
 
-
-                    !
                     ! FV[ (F*_j) (2*z_i*n_i*T_i*V[(ene*lambda*G_perp)^2]
                     !             + 1/beta_e) (F_jp) ]
                     !
@@ -126,7 +123,6 @@ subroutine make_ampereperp_blend
                          * cs_blend(j,m0,i,p_nek_loc) &
                          * c_blend(jp,m0,ip,p_nek_loc)              
 
-                    !
                     ! FV[ (F*_j) (z_i*n_i*V[(ene*lambda*G*G_perp)]) (F_jp) ]
                     !
                     !  = L_BP 
@@ -138,14 +134,12 @@ subroutine make_ampereperp_blend
                          * cs_blend(j,m0,i,p_nek_loc) &
                          * c_blend(jp,m0,ip,p_nek_loc)
 
-
                  enddo ! i_diff
 
               enddo ! jp
            enddo ! j
 
         enddo ! m 
-
      enddo ! p_nek_loc 
      !-------------------------------------------------------------------
 
