@@ -45,6 +45,12 @@ subroutine gyro_write_step(datafile,io)
                 '][w = ',omega_linear(1,1),&
                 '][dw = ',abs(omega_linear(1,2)),&
                 '] t_err: ',time_error(:)
+           do in=2,n_n
+              print '(t16,a,1pe10.3,1pe10.3,a,1pe9.3,a)',&
+                   '[w = ',omega_linear(in,1),&
+                   '][dw = ',abs(omega_linear(in,2)),&
+                   ']'
+           enddo
         else
            print '(a,1pe9.3,a,5(1pe9.3,1x))',&
                 '[t = ',t_current,&
