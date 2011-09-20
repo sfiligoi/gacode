@@ -41,7 +41,19 @@ subroutine prgen_read_plasmastate
   err = nf90_Inquire_Dimension(ncid,varid,len=plst_dp1_nspec_th)
   if (verbose_flag == 1)  print *,err,plst_tag,plst_dp1_nspec_th
 
+  ! Number of thermal species (abridged)
+  plst_tag = 'dp1_nspec_tha'
+  err = nf90_inq_dimid(ncid,trim(plst_tag),varid)
+  err = nf90_Inquire_Dimension(ncid,varid,len=plst_dp1_nspec_tha)
+  if (verbose_flag == 1)  print *,err,plst_tag,plst_dp1_nspec_tha
+
   ! Number of species (thermal + fast)
+  plst_tag = 'dp1_nspec_all'
+  err = nf90_inq_dimid(ncid,trim(plst_tag),varid)
+  err = nf90_Inquire_Dimension(ncid,varid,len=plst_dp1_nspec_all)
+  if (verbose_flag == 1) print *,err,plst_tag,plst_dp1_nspec_all
+
+  ! Number of species (thermal + fast, abridged)
   plst_tag = 'dp1_nspec_alla'
   err = nf90_inq_dimid(ncid,trim(plst_tag),varid)
   err = nf90_Inquire_Dimension(ncid,varid,len=plst_dp1_nspec_alla)
@@ -68,10 +80,15 @@ subroutine prgen_read_plasmastate
   call allocate_internals
   call allocate_plasmastate_vars
 
-  ! Species names
+  ! Species names (abridged)
   plst_tag = 'ALLA_name'
   err = nf90_inq_varid(ncid,trim(plst_tag),varid)
   err = nf90_get_var(ncid,varid,plst_alla_name(1:plst_dp1_nspec_alla))
+
+  ! Species names
+  plst_tag = 'ALL_name'
+  err = nf90_inq_varid(ncid,trim(plst_tag),varid)
+  err = nf90_get_var(ncid,varid,plst_all_name(1:plst_dp1_nspec_all))
 
   ! Flux-surface volume
   err = nf90_inq_varid(ncid,trim('vol'),varid)
