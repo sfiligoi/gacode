@@ -145,14 +145,14 @@ subroutine prgen_map_plasmastate
   ! Ion reordering diagnostics
 
   print '(a)','INFO: (prgen) Found these ion species'
-  do i=2,plst_dp1_nspec_alla
+  do i=2,plst_dp1_nspec_all
      ip = reorder_vec(i-1)+1
      if (i <= 6) then
         print '(t6,i2,1x,3(a))',&
-             i-1,trim(plst_alla_name(i)),' -> ',trim(plst_alla_name(ip))
+             i-1,trim(plst_all_name(i)),' -> ',trim(plst_all_name(ip))
      else
         print '(t6,i2,1x,3(a))',&
-             i-1,trim(plst_alla_name(i)),' [unmapped]'
+             i-1,trim(plst_all_name(i)),' [unmapped]'
      endif
   enddo
 
