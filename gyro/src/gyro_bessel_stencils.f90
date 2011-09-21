@@ -15,7 +15,7 @@ subroutine gyro_bessel_stencils
   !----------------------------------------------
   implicit none
   !
-  integer :: p
+  integer :: p,p0
   !
   real :: rho_gyro
   real :: a_gyro

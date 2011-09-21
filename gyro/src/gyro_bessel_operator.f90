@@ -1,10 +1,13 @@
-!--------------------------------------------------------------
+!-----------------------------------------------------------------
 ! gyro_bessel_operator.f90
 !
 ! PURPOSE:
 !  Compute all the Bessel-function kernel (averaging) stencils
-!  to the required bandwidth (m_gyro).  In the limit of maximal
-!  m_gyro (n_x/2), these are the pseudospectral operators.
+!  to the required bandwidth (m_gyro).  Truncation is accomplished
+!  by assuming functions are constant in the truncated region.
+!  
+!  In the limit of maximal m_gyro (n_x/2), these are the 
+!  pseudospectral operators.
 !
 ! NOTES:
 !
@@ -29,7 +32,7 @@
 !
 !  rho = v_perp/Omega_c               (itype=1,..,6)
 !  rho = rhos_unit*sqrt(T)/(mu*z*b0)  (itype=7)
-!---------------------------------------------------------------
+!------------------------------------------------------------------
 
 subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
 
@@ -55,6 +58,7 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
   real :: bessel(0:2)
   real :: func(-n_x/2:n_x/2-1)
   complex :: g0
+  complex :: gp
   !
   real, external :: BESJ0
   real, external :: BESEI0
@@ -83,9 +87,6 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
      enddo
 
   case (3)
-
-     ! POSSIBLE ISSUE: the accuracy of this operator when 
-     ! banded has not been studied.
 
      ! -(i/2)*k_x*rho*[ J0(z)+J2(z) ]
 
@@ -138,6 +139,12 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
 
   end select
 
+  !-----------------------------------------------------------
+  ! Real-space operators:
+  !
+  !  Construct real-space forms by summing over Fourier modes.
+  !  Real-space gridpoints in truncated region are ignored.
+  !
   do m=-m_gyro,m_gyro-i_gyro
      g0 = (0.0,0.0)
      do p=-p0,p0-1
@@ -145,11 +152,14 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
      enddo
      g(m) = g0
   enddo
+  !-----------------------------------------------------------
 
-  !-----------------------------------------------------
+  !-----------------------------------------------------------
   ! Correction for truncation: 
-  !  Make end-coefficients equal to sum of neglected 
-  !  gridpoints.
+  !
+  !  Make end-coefficients equal to sum of neglected ones.
+  !  This is equivalent to assuming that functions are 
+  !  constant over the truncated region.
   !
   if (m_gyro < p0) then
      do m=-p0,-m_gyro-1
@@ -157,18 +167,26 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
         do p=-p0,p0-1
            g0 = g0 + z_gyro(m,p)*func(p)
         enddo
-        g(-m_gyro) = g(-m_gyro)+g0
+        ! Periodic point (give 1/2 this bit to other end)
+        if (m == -p0) then
+           gp = g0/2.0
+           g(-m_gyro) = g(-m_gyro)+gp
+        else
+           g(-m_gyro) = g(-m_gyro)+g0
+        endif
      enddo
-     do m=m_gyro+1,p0
+     do m=m_gyro+1,p0-1
         g0 = (0.0,0.0)
         do p=-p0,p0-1
            g0 = g0 + z_gyro(m,p)*func(p)
         enddo
         g(m_gyro) = g(m_gyro)+g0
      enddo
+     ! Ficticious m=p0 gets half the contribution from m=-p0:
+     g(m_gyro) = g(m_gyro)+gp
   endif
-  !-----------------------------------------------------
-     
+  !-----------------------------------------------------------
+
   ! Add final factor of i for case 3
   if (itype == 3) g = -(i_c/2.0)*g
 
