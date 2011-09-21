@@ -10,7 +10,7 @@ subroutine gkcoll_make_profiles
 
   implicit none
 
-  integer :: ir, is, ip, num_ele, j
+  integer :: is, num_ele, j
   integer, parameter :: io=20
 
   real :: cc
@@ -18,12 +18,9 @@ subroutine gkcoll_make_profiles
 
   call PROFILE_SIM_alloc(1)
 
-  ! radially-local problem only
-  r(1) = rmin_in
-
   num_ele = 0
   do is=1, n_species
-     if(z_in(is) == -1) then
+     if(z(is) == -1) then
         num_ele = num_ele + 1
      endif
   enddo
@@ -36,13 +33,13 @@ subroutine gkcoll_make_profiles
      return
   end if
   
-  if(btccw_in > 0) then
+  if(btccw > 0) then
      sign_bunit = -1.0
   else
      sign_bunit =  1.0
   endif
 
-  if(ipccw_in > 0) then
+  if(ipccw > 0) then
      sign_q = -sign_bunit
   else
      sign_q =  sign_bunit
@@ -54,21 +51,8 @@ subroutine gkcoll_make_profiles
 
      ! Standard local simulation (one point)
 
-     ir = 1
-
-     rmaj(ir)      = rmaj_in
-     q(ir)         = abs(q_in) * sign_q
-     rho(ir)       = abs(rho_in) * sign_bunit
-     shat(ir)      = shat_in      
-     shift(ir)     = shift_in     
-     kappa(ir)     = kappa_in     
-     s_kappa(ir)   = s_kappa_in   
-     delta(ir)     = delta_in    
-     s_delta(ir)   = s_delta_in
-     zeta(ir)      = zeta_in    
-     s_zeta(ir)    = s_zeta_in
-     zmag(ir)      = zmag_in    
-     s_zmag(ir)    = s_zmag_in
+     q    = abs(q) * sign_q
+     rho  = abs(rho) * sign_bunit
 
      ! general geometry -- accessible only from interface 
      ! via parameters geo_ny_in and geo_yin_in
@@ -76,103 +60,59 @@ subroutine gkcoll_make_profiles
         geo_numeq_flag = 1
         deallocate(geo_yin)
         geo_ny = geo_ny_in   
-        allocate(geo_yin(8,0:geo_ny,1))
+        allocate(geo_yin(8,0:geo_ny))
         do j=0,geo_ny
-           geo_yin(:,j,1) = geo_yin_in(:,j)
+           geo_yin(:,j) = geo_yin_in(:,j)
         enddo
      endif
 
-     te_ade(ir)    = te_ade_in
-     ne_ade(ir)    = ne_ade_in
-
-     do is=1,n_species
-        z(is)         = z_in(is)
-        mass(is)      = mass_in(is)
-        dens(is,ir)   = dens_in(is)
-        temp(is,ir)   = temp_in(is)
-        dlnndr(is,ir) = dlnndr_in(is)
-        dlntdr(is,ir) = dlntdr_in(is)
-        nu(is,ir)     = nu_in(is)
-     enddo
-
      do is=1, n_species
-        vth(is,ir) = sqrt(temp(is,ir)/mass(is))
+        vth(is) = sqrt(temp(is)/mass(is))
      enddo
 
      ! These normalizations are arbitrary for local profiles
-     temp_norm_fac = 1.0
+     temp_norm_fac   = 1.0
      charge_norm_fac = 1.0
-     dens_norm(:) = 1.0
-     vth_norm(:) = 1.0
-     b_unit(:) = 1.0
-     a_meters        = 1.0
-     temp_norm(:)    = 1.0
-
+     a_norm          = 1.0
+     dens_norm       = 1.0
+     temp_norm       = 1.0
+     vth_norm        = 1.0
+     b_norm          = 1.0
 
   case (2)
 
      ! Standard simulation with experimental profiles
-
-     do is=1,n_species
-        z(is)    = z_in(is)
-        mass(is) = mass_in(is)
-     enddo
 
      call gkcoll_experimental_profiles
      if(error_status > 0) return
      call gkcoll_map_experimental_profiles
            
      ! Normalizing quantities
+     ! a_norm and b_norm are set in map_experimental_profiles
      temp_norm_fac   = 1.6022*1000
      charge_norm_fac = 1.6022
-     dens_norm(:) = dens(1,:)
-     temp_norm(:) = temp(1,:)
+     dens_norm       = dens(1)
+     temp_norm       = temp(1)
 
      ! Compute vth/a (1/s) using dimensional quantities.  
      ! mass(i) is thus measured in units of deuterium mass.
      do is=1,n_species
-        vth(is,:) = sqrt(temp(is,:) * temp_norm_fac &
+        vth(is) = sqrt(temp(is) * temp_norm_fac &
              / (mass(is) * mass_deuterium)) &
-             * 1.0e4 / a_meters
+             * 1.0e4 / a_norm
      enddo
-     vth_norm(:)  = vth(1,:) * sqrt(mass(1))
-
-     ! Determine the equilibrium parameters
-     select case (profile_equilibrium_model) 
-     case (0)
-        ! input equilibrium not used -- re-set for s-alpha geometry
-        ! use the input profile-averaged rmaj, q, and b_unit
-        equilibrium_model = 0
-        do ir=1, n_gr
-           rmaj(ir)   = 0.0
-           q(ir)      = 0.0
-           b_unit(ir) = 0.0
-           do ip=1,n_grid_exp
-              rmaj(ir)   = rmaj(ir)   + rmaj_p(ip)
-              q(ir)      = q(ir)      + q_exp(ir)
-              b_unit(ir) = b_unit(ir) + b_unit_p(ip)
-           enddo
-           rmaj(ir)   = rmaj(ir)   / (1.0 * n_grid_exp)
-           q(ir)      = q(ir)      / (1.0 * n_grid_exp)
-           b_unit(ir) = b_unit(ir) / (1.0 * n_grid_exp)
-        enddo
-
-     case(1)
-        ! use the input equilibrium parameters (miller)
-        equilibrium_model = 2
-
-     case(2)
-        ! use the input equilibrium parameters (general)
-        equilibrium_model = 3
- 
-    end select
+     vth_norm  = vth(1) * sqrt(mass(1))
 
      ! Compute rho/a for species 1 using dimensional quantities
      ! mass(i) is thus measured in units of deuterium mass.
-     rho(:) = sqrt(temp(1,:) * temp_norm_fac &
+     rho = sqrt(temp(1) * temp_norm_fac &
              * mass(1) * mass_deuterium) &
-             / (charge_norm_fac * b_unit(:)) &
-             * 1.0e-4 / a_meters
+             / (charge_norm_fac * b_norm) &
+             * 1.0e-4 / a_norm
+
+     ! Debye length
+     lambda_debye = profile_lambda_debye_scale*7.43* &
+          sqrt((1e3*te_ade)/(1e13*ne_ade))/a_norm
 
      ! Compute collision frequency
 
@@ -183,58 +123,70 @@ subroutine gkcoll_make_profiles
           * 1e9
 
      do is=1,n_species
-        do ir=1, n_gr
 
-           loglam = 24.0 - log(sqrt(ne_ade(ir)*1e13)/(te_ade(ir)*1000))
+        loglam = 24.0 - log(sqrt(ne_ade*1e13)/(te_ade*1000))
 
-           ! Collision rate (1/sec)
-           nu(is,ir) = cc * loglam * dens(is,ir) * z(is)**4 &
-                / (sqrt(mass(is)) * temp(is,ir)**1.5)
+        ! Collision rate (1/sec)
+        nu(is) = cc * loglam * dens(is) * z(is)**4 &
+             / (sqrt(mass(is)) * temp(is)**1.5)
+        
+        ! Express in local dimensionless GKCOLL units:
+        nu(is) = nu(is)/vth_norm
 
-           ! Express in local dimensionless GKCOLL units:
-           nu(is,ir) = nu(is,ir)/vth_norm(ir)
-
-        enddo
      enddo
 
      do is=1,n_species
-        do ir=1, n_gr
-           ! Normalize N and T to value at r for species 1.
-           dens(is,ir) = dens(is,ir)/dens_norm(ir)
-           temp(is,ir) = temp(is,ir)/temp_norm(ir)
-           if(is == 1) then
-              te_ade(ir) = te_ade(ir) / temp_norm(ir)
-              ne_ade(ir) = ne_ade(ir) / dens_norm(ir)
-           endif
-           ! Normalize vth/a
-           vth(is,ir) = vth(is,ir)/vth_norm(ir)
-        enddo
+        ! Normalize n and t to value at r for species 1.
+        dens(is) = dens(is)/dens_norm
+        temp(is) = temp(is)/temp_norm
+        if(is == 1) then
+           te_ade = te_ade / temp_norm
+           ne_ade = ne_ade / dens_norm
+        endif
+        ! Normalize vth/a
+        vth(is) = vth(is)/vth_norm
      enddo
-
+     
      call PROFILE_EXP_alloc(0)
-
+     
   end select
+
+  if(adiabatic_ele_model == 0) then
+     do is=1, n_species
+        if(Z(is) == -1) then
+           is_ele = is
+           exit
+        endif
+     enddo
+  endif
+  if(adiabatic_ele_model == 0) then
+     dens_ele = dens(is_ele)
+     temp_ele = temp(is_ele)
+  else
+     dens_ele = ne_ade
+     temp_ele = te_ade
+  endif
 
   ! Print the re-mapped equilibrium data
   if(silent_flag == 0 .and. i_proc == 0) then
      open(unit=io,file=trim(path)//'out.gkcoll.equil',status='replace')
-     do ir=1,n_gr
-        write (io,'(e16.8,$)') r(ir)
-        write (io,'(e16.8,$)') q(ir)
-        write (io,'(e16.8,$)') rho(ir)
-        write (io,'(e16.8,$)') rmaj(ir)
-        write (io,'(e16.8,$)') dens_norm(ir)
-        write (io,'(e16.8,$)') temp_norm(ir)
-        write (io,'(e16.8,$)') vth_norm(ir)
-        do is=1,n_species
-           write (io,'(e16.8,$)') dens(is,ir)
-           write (io,'(e16.8,$)') temp(is,ir)
-           write (io,'(e16.8,$)') dlnndr(is,ir)
-           write (io,'(e16.8,$)') dlntdr(is,ir)
-           write (io,'(e16.8,$)') nu(is,ir)
-        enddo
-        write (io,*)
+     write (io,'(e16.8,$)') rmin
+     write (io,'(e16.8,$)') q
+     write (io,'(e16.8,$)') rho
+     write (io,'(e16.8,$)') rmaj
+     write (io,'(e16.8,$)') dens_norm
+     write (io,'(e16.8,$)') temp_norm
+     write (io,'(e16.8,$)') vth_norm
+     write (io,'(e16.8,$)') a_norm
+     write (io,'(e16.8,$)') b_norm
+     do is=1,n_species
+        write (io,'(e16.8,$)') dens(is)
+        write (io,'(e16.8,$)') temp(is)
+        write (io,'(e16.8,$)') dlnndr(is)
+        write (io,'(e16.8,$)') dlntdr(is)
+        write (io,'(e16.8,$)') nu(is)
      enddo
+     write (io,*)
      close(io)
   end if
 

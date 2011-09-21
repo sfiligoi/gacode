@@ -19,74 +19,16 @@ contains
     if(flag == 1) then
        if(initialized_sim) return
 
-       allocate(r(n_gr))
-       allocate(rmaj(n_gr))
-       allocate(q(n_gr))
-       allocate(rho(n_gr))   
-       allocate(shat(n_gr))
-       allocate(shift(n_gr))
-       allocate(kappa(n_gr))
-       allocate(s_kappa(n_gr))
-       allocate(delta(n_gr))
-       allocate(s_delta(n_gr))
-       allocate(zeta(n_gr))
-       allocate(s_zeta(n_gr))
-       allocate(zmag(n_gr))
-       allocate(s_zmag(n_gr))
-       allocate(te_ade(n_gr))
-       allocate(ne_ade(n_gr))
-       allocate(dens(n_species,n_gr))
-       allocate(temp(n_species,n_gr))
-       allocate(vth(n_species,n_gr))
-       allocate(dlnndr(n_species,n_gr))
-       allocate(dlntdr(n_species,n_gr))
-       allocate(nu(n_species,n_gr))
-       allocate(z(n_species))
-       allocate(mass(n_species))
-       allocate(b_unit(n_gr))
-       allocate(dens_norm(n_gr))
-       allocate(temp_norm(n_gr))
-       allocate(vth_norm(n_gr))
-
        geo_numeq_flag = 0
        geo_ny = 0
-       allocate(geo_yin(8,0:geo_ny,n_gr))
-       geo_yin(:,:,:) = 0.0
+       allocate(geo_yin(8,0:geo_ny))
+       geo_yin(:,:) = 0.0
 
        initialized_sim = .true.
 
     else
 
        if(.NOT. initialized_sim) return
-
-       deallocate(r)
-       deallocate(rmaj)
-       deallocate(q)
-       deallocate(rho)   
-       deallocate(shat)
-       deallocate(shift)
-       deallocate(kappa)
-       deallocate(s_kappa)
-       deallocate(delta)
-       deallocate(s_delta)
-       deallocate(zeta)
-       deallocate(s_zeta)
-       deallocate(zmag)
-       deallocate(s_zmag)
-       deallocate(te_ade)
-       deallocate(ne_ade)
-       deallocate(dens)
-       deallocate(temp)
-       deallocate(vth)
-       deallocate(dlnndr)
-       deallocate(dlntdr)
-       deallocate(nu)
-       deallocate(z)
-       deallocate(mass)
-       deallocate(b_unit)
-       deallocate(dens_norm)
-       deallocate(temp_norm)
-       deallocate(vth_norm)
 
        deallocate(geo_yin)
 
@@ -101,7 +43,7 @@ contains
   subroutine PROFILE_EXP_alloc(flag)
 
     use gkcoll_profile_exp
-    use gkcoll_globals, only: n_gr, geo_ny
+    use gkcoll_globals, only: geo_ny
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
 
@@ -109,9 +51,7 @@ contains
        if(initialized_exp) return
 
        allocate(rhoN_torflux_exp(n_grid_exp))
-       allocate(rhoN_torflux(n_gr))
        allocate(psiN_polflux_exp(n_grid_exp))
-       allocate(psiN_polflux(n_gr))
        allocate(rmin_exp(n_grid_exp))
        allocate(rmaj_exp(n_grid_exp))
        allocate(q_exp(n_grid_exp))
@@ -145,9 +85,7 @@ contains
        if(.NOT. initialized_exp) return
 
        deallocate(rhoN_torflux_exp)
-       deallocate(rhoN_torflux)
        deallocate(psiN_polflux_exp)
-       deallocate(psiN_polflux)
        deallocate(rmin_exp)
        deallocate(rmaj_exp)
        deallocate(q_exp)

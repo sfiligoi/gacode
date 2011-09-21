@@ -4,7 +4,7 @@ subroutine gkcoll_check
 
   implicit none
 
-  integer :: ir, is
+  integer :: is
 
   if(silent_flag == 0 .and. i_proc == 0) then
      open(unit=io_gkcollout,file=trim(path)//runfile_gkcollout,&
@@ -24,8 +24,18 @@ subroutine gkcoll_check
      return
   endif
 
-  if(rho_in < 0) then
+  if(rho < 0) then
      call gkcoll_error('ERROR: (GKCOLL) rho_unit must be positive')
+     return
+  endif
+
+  if(k_theta < 0) then
+     call gkcoll_error('ERROR: (GKCOLL) k_theta must be positive')
+     return
+  endif
+
+  if(r_length < 0) then
+     call gkcoll_error('ERROR: (GKCOLL) r_length must be positive')
      return
   endif
 
@@ -131,17 +141,16 @@ subroutine gkcoll_check
 
   case (1) 
 
-     ir=1
      do is=1,n_species
-        if(dens(is,ir) <= 0.0) then
+        if(dens(is) <= 0.0) then
            call gkcoll_error('ERROR: (GKCOLL) density must be positive')
            return
         end if
-        if(temp(is,ir) <= 0.0) then
+        if(temp(is) <= 0.0) then
            call gkcoll_error('ERROR: (GKCOLL) temperature must be positive')
            return
         end if
-        if(nu(is,ir) <= 0.0) then
+        if(nu(is) <= 0.0) then
            call gkcoll_error('ERROR: (GKCOLL) collision frequency must be positive')
            return
         end if
@@ -156,64 +165,18 @@ subroutine gkcoll_check
      end if
 
   case (2) 
-
+     
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_gkcollout,*) 'profile_model      : GLOBAL PROFILE'
+        write(io_gkcollout,*) 'profile_model      : EXPERIMENTAL PROFILE'
      end if
-
-     select case (profile_temprescale_model)
-     case(0)
-        if(silent_flag == 0 .and. i_proc == 0) then
-           write(io_gkcollout,*)  'GLOBAL PROFILE profile_temprescale_model:  PROFILE TEMPERATURES ARE NOT RE-SCALED'
-        end if
-     case (1)
-        if(silent_flag == 0 .and. i_proc == 0) then
-           write(io_gkcollout,*) 'GLOBAL PROFILE profile_temprescale_model: PROFILE TEMPERATURES ARE RE-SCALED TO THE ELECTRON TEMP'
-        end if
-     case default
-        call gkcoll_error('ERROR: (GKCOLL) invalid profile_temprescale_model')
-        return
-     end select
-
-     select case (profile_equilibrium_model)
-     case(0)
-        if(silent_flag == 0 .and. i_proc == 0) then
-           write(io_gkcollout,*) 'GLOBAL PROFILE profile_equilibrium_model: WITH S-ALPHA GEOMETRY'
-        end if
-     case (1)
-        if(silent_flag == 0 .and. i_proc == 0) then
-           write(io_gkcollout,*) 'GLOBAL PROFILE profile_equilibrium_model: WITH MILLER GEOMETRY'
-           if(abs(profile_delta_scale-1.0) > epsilon(0.) ) then
-              write(io_gkcollout,*) 'GLOBAL PROFILE profile_equilibrium_model: DELTA AND S_DELTA ARE RE-SCALED'
-           endif
-           if(abs(profile_zeta_scale-1.0) > epsilon(0.) ) then
-              write(io_gkcollout,*) 'GLOBAL PROFILE profile_equilibrium_model: ZETA AND S_ZETA ARE RE-SCALED'
-           endif
-           if(abs(profile_zmag_scale-1.0) > epsilon(0.) ) then
-              write(io_gkcollout,*) 'GLOBAL PROFILE profile_equilibrium_model: ZMAG AND S_MAG ARE RE-SCALED'
-           endif
-        end if
-     case (2)
-        if(silent_flag == 0 .and. i_proc == 0) then
-           write(io_gkcollout,*) 'GLOBAL PROFILE profile_equilibrium_model: WITH GENERAL GEOMETRY'
-        endif
-     case default
-        call gkcoll_error('ERROR: (GKCOLL) invalid profile_equilibrium_model')
-        return
-     end select
-
-  case(3)
-     if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_gkcollout,*) 'profile_model      : GLOBAL PROFILE TEST'
-     end if
-
+     
   case default
-
+     
      call gkcoll_error('ERROR: (GKCOLL) invalid profile_model')
      return
-
+     
   end select
-
+  
   !-----------------------------------------------------------
   ! Sign of B checks
   if(sign_q > 0.0) then
@@ -248,35 +211,34 @@ subroutine gkcoll_check
      write(io_gkcollout,10) 'n_xi',n_xi
      write(io_gkcollout,10) 'n_theta',n_theta
 
-     do ir=1,n_gr
-        write(io_gkcollout,*) 
-        write(io_gkcollout,*) 'PHYSICS PARAMETERS'
-        write(io_gkcollout,*) '------------------'
-        write(io_gkcollout,20) 'r/R',r(ir)
-        write(io_gkcollout,20) 'q',q(ir)
-        write(io_gkcollout,20) 's',shat(ir)
-        write(io_gkcollout,20) 'shift',shift(ir)
-        write(io_gkcollout,20) 'kappa',kappa(ir)
-        write(io_gkcollout,20) 's_kappa',s_kappa(ir)
-        write(io_gkcollout,20) 'delta',delta(ir)
-        write(io_gkcollout,20) 's_delta',s_delta(ir)
-        write(io_gkcollout,20) 'zeta',zeta(ir)
-        write(io_gkcollout,20) 's_zeta',s_zeta(ir)
-        write(io_gkcollout,20) 'zmag',zmag(ir)
-        write(io_gkcollout,20) 's_zmag',s_zmag(ir)
+     write(io_gkcollout,*) 
+     write(io_gkcollout,*) 'PHYSICS PARAMETERS'
+     write(io_gkcollout,*) '------------------'
+     write(io_gkcollout,20) 'r/R',rmin
+     write(io_gkcollout,20) 'k_theta',k_theta
+     write(io_gkcollout,20) 'q',q
+     write(io_gkcollout,20) 's',shat
+     write(io_gkcollout,20) 'shift',shift
+     write(io_gkcollout,20) 'kappa',kappa
+     write(io_gkcollout,20) 's_kappa',s_kappa
+     write(io_gkcollout,20) 'delta',delta
+     write(io_gkcollout,20) 's_delta',s_delta
+     write(io_gkcollout,20) 'zeta',zeta
+     write(io_gkcollout,20) 's_zeta',s_zeta
+     write(io_gkcollout,20) 'zmag',zmag
+     write(io_gkcollout,20) 's_zmag',s_zmag
 
-        do is=1,n_species
-           write(io_gkcollout,*) 
-           write(io_gkcollout,'(t2,a,i1)') 'Species ',is
-           write(io_gkcollout,*) '----------'
-           write(io_gkcollout,10) 'Z',z(is)
-           write(io_gkcollout,20) 'dens',dens(is,ir)
-           write(io_gkcollout,20) 'temp',temp(is,ir)
-           write(io_gkcollout,20) 'mass',mass(is)
-           write(io_gkcollout,20) 'a/Ln',dlnndr(is,ir)
-           write(io_gkcollout,20) 'a/LT',dlntdr(is,ir)
-           write(io_gkcollout,20) 'nu',nu(is,ir)
-        enddo
+     do is=1,n_species
+        write(io_gkcollout,*) 
+        write(io_gkcollout,'(t2,a,i1)') 'Species ',is
+        write(io_gkcollout,*) '----------'
+        write(io_gkcollout,10) 'Z',z(is)
+        write(io_gkcollout,20) 'dens',dens(is)
+        write(io_gkcollout,20) 'temp',temp(is)
+        write(io_gkcollout,20) 'mass',mass(is)
+        write(io_gkcollout,20) 'a/Ln',dlnndr(is)
+        write(io_gkcollout,20) 'a/LT',dlntdr(is)
+        write(io_gkcollout,20) 'nu',nu(is)
      enddo
 
      write(io_gkcollout,*)
