@@ -88,7 +88,7 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
 
   case (3)
 
-     ! -(i/2)*k_x*rho*[ J0(z)+J2(z) ]
+     ! -(i/2)*k_x*rho*[ J_0(z)+J_2(z) ]
 
      ! The factor -(i/2) will be applied outside this loop
 

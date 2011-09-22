@@ -120,9 +120,9 @@ subroutine make_poisson_blend(i_elec)
 
                  rho_gyro = rhos_norm*v_perp(m0,i,p_nek_loc,is)/omega_c
                  !
-                 a_gyro = grad_r_t(i,k,m0)/x_length*dr_eodr(i)
-                 u_gyro = qrat_t(i,k,m0)*n_1(in_1)*q_s(i)/r_s(i)*captheta_t(i,k,m0)
-                 v_gyro = qrat_t(i,k,m0)*n_1(in_1)*q_s(i)/r_s(i)
+                 a_gyro = grad_r_t(i,k,m)/x_length*dr_eodr(i)
+                 v_gyro = qrat_t(i,k,m)*n_1(in_1)*q_s(i)/r_s(i)
+                 u_gyro = v_gyro*captheta_t(i,k,m)
                  !---------------------------------------------------------------
 
                  f_x(is,:) = (0.0,0.0) 
@@ -199,7 +199,7 @@ subroutine make_poisson_blend(i_elec)
 
      call MPI_ALLREDUCE(vel_sum_loc,&
           vel_sum_glob,&
-          n_blend*n_blend*(2*m_gyro-i_gyro+1),&
+          size(vel_sum_glob),&
           MPI_DOUBLE_COMPLEX,&
           MPI_SUM,&
           NEW_COMM_1,&

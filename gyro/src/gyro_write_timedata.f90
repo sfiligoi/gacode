@@ -414,7 +414,7 @@ subroutine gyro_write_timedata
   endif
   !-------------------------------------------------------------------
 
-  call write_error(trim(path)//'out.gyro.error',10)
+  call gyro_write_error(trim(path)//'out.gyro.error',10)
 
   !------------------------------------------------------------
   ! Entropy diagnostics

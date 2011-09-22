@@ -52,7 +52,7 @@ subroutine gyro_write_timedata_hdf5
   ! Timestep data:
   !
   if (i_proc == 0) then
-     call gyro_write_step(trim(path)//'t.out',1)
+     call gyro_write_step(trim(path)//'out.gyro.t',1)
   endif
   !---------------------------------------------------
 
@@ -342,7 +342,7 @@ subroutine gyro_write_timedata_hdf5
 
   endif
 
-  call write_error(trim(path)//'error.out',10)
+  call gyro_write_error(trim(path)//'out.gyro.error',10)
 
   !-------------------------------------------------------------------
   ! Entropy diagnostics
@@ -360,7 +360,7 @@ subroutine gyro_write_timedata_hdf5
   !
   if (velocity_output_flag == 1) then
      call get_nonlinear_flux_velocity
-     call write_distributed_real_h5('flux_velocity',dumpGid,&
+     call write_distributed_real_h5('out.gyro.flux_velocity',dumpGid,&
           size(nonlinear_flux_velocity),&
           nonlinear_flux_velocity,&
           h5in,h5err)
@@ -378,7 +378,7 @@ subroutine gyro_write_timedata_hdf5
   !
   call proc_time(CPU_diag_outp)
   CPU_diag_b = CPU_diag_b + (CPU_diag_outp - CPU_diag_mid)
-  call write_timing(trim(path)//'timing.out',10)
+  call write_timing(trim(path)//'out.gyro.timing',10)
   CPU_diag_mid = CPU_diag_outp
   !--------------------------------------
 

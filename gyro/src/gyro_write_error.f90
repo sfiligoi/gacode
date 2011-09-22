@@ -1,11 +1,11 @@
 !--------------------------------------------------------
-! write_error.f90
+! gyro_write_error.f90
 !
 ! PURPOSE:
 !  This routine prints the instantaneous timestep error.
 !--------------------------------------------------------
 
-subroutine write_error(datafile,io)
+subroutine gyro_write_error(datafile,io)
 
   use gyro_globals
 
@@ -63,8 +63,8 @@ subroutine write_error(datafile,io)
 
   end select
 
-  if (i_proc == 0 .and. debug_flag == 1) print *,'[write_error called]'
+  if (i_proc == 0 .and. debug_flag == 1) print *,'[gyro_write_error called]'
 
 10 format(10(1pe11.4,1x))
 
-end subroutine write_error
+end subroutine gyro_write_error
