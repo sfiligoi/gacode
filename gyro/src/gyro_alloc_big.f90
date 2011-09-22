@@ -143,6 +143,7 @@ subroutine gyro_alloc_big(flag)
 
      allocate(time_error(n_kinetic))
      allocate(w_time(time_skip))
+     allocate(omega_linear(n_n,2))
 
      !------------------------------------------------------------
      ! Source-related arrays
@@ -243,6 +244,7 @@ subroutine gyro_alloc_big(flag)
 
      deallocate(time_error)
      deallocate(w_time)
+     deallocate(omega_linear)
      deallocate(h0_eq)
      deallocate(h0_mod)
      deallocate(h0_n)

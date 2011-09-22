@@ -454,7 +454,7 @@ module gyro_globals
   !
   real, dimension(:), allocatable :: w_time
   !
-  complex, dimension(2) :: freq_n
+  complex, dimension(:,:), allocatable :: omega_linear
   ! 
   real, dimension(:), allocatable :: time_error
   !---------------------------------------------------------

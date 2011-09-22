@@ -7,7 +7,7 @@
 !
       INTEGER, PARAMETER :: nb=32
       INTEGER, PARAMETER :: nxm=4*nb-1
-      INTEGER, PARAMETER :: nsm=3, nt0=40
+      INTEGER, PARAMETER :: nsm=6, nt0=40
       INTEGER, PARAMETER :: neq = 15*nsm,iar=neq*nb
       INTEGER, PARAMETER :: nkym=50
       INTEGER, PARAMETER :: maxmodes=4

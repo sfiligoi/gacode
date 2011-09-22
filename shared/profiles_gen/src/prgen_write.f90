@@ -43,7 +43,7 @@ subroutine prgen_write
      write(1,'(a,1pe9.2,a)') '#               Q_EDGE : ',q(nx)
      write(1,20) '#'
      write(1,'(10(a,1x))') '#                 IONS :',&
-          (trim(plst_alla_name(reorder_vec(i-1)+1)),&
+          (trim(plst_all_name(reorder_vec(i-1)+1)),&
           i=2,min(plst_dp1_nspec_th+1,6))
 
   case (3)

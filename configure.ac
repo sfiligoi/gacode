@@ -12,7 +12,7 @@ dnl Version:  $Id: configure.ac 1267 2009-07-28 13:10:59Z srinath$
 dnl
 dnl------------------------------------------------------------------------
 
-AC_INIT(gacodes, 8.3.9, srinath@txcorp.com)
+AC_INIT(gacodes, 8.3.10, srinath@txcorp.com)
 AC_PREREQ([2.65])
 AC_CONFIG_AUX_DIR(shared/autotool_config)
 AC_CONFIG_MACRO_DIR([shared/autotool_config])

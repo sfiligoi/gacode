@@ -22,6 +22,12 @@ OBJECTS = gkcoll_globals.o \
           gkcoll_init.o \
           gkcoll_init_serial.o \
           gkcoll_run.o \
+	  gkcoll_legendre.o \
+          gkcoll_gyro.o \
+          gkcoll_poisson.o \
+          gkcoll_freq.o \
+          gkcoll_gk.o \
+	  gkcoll_collision.o \
           gkcoll_do.o
 
 .SUFFIXES : .o .f90

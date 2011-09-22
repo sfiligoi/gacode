@@ -153,7 +153,8 @@ class ProfileInput:
                     # Write scalar data into temp file
                     file_temp.write(line+'\n')
                 else:
-                    data = string.splitfields(line,'  ')
+# Originally '  ' was the pattern:       data = string.splitfields(line,'   ')
+                    data = string.split(line)
                     ncol = len(data)
                     for j in range (0,ncol):
                         # Save vector data in variable v.

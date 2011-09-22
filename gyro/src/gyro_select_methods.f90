@@ -188,10 +188,10 @@ subroutine gyro_select_methods
   end select
 
   if (linsolve_method == 2) then
-!     orbit_upwind_vec(n_ion) = 0.0
+     !     orbit_upwind_vec(n_ion) = 0.0
      orbit_upwind_vec(:) = 0.0
-!     orbit_upwind_vec(n_ion) = 1.0
-!     radial_upwind = 0.0
+     !     orbit_upwind_vec(n_ion) = 1.0
+     !     radial_upwind = 0.0
   endif
   !---------------------------------------------------
 
@@ -320,17 +320,8 @@ subroutine gyro_select_methods
         i_dx = 0
      endif
 
-     if (radial_profile_method == 2) then
-
-        ! profile_method == 2 only consistent with nonperiodic 
-        ! mode of operation.  Avoid resets.
-
-        call catch_error('INVALID: boundary_method/profile_method')
-
-     endif
-
      if (nonuniform_grid_flag == 1) then
-        call catch_error('INVALID: cannot have nonuniform grid.')
+        call catch_error('ERROR: (GYRO) cannot have nonuniform grid.')
      endif
 
   case (2)
@@ -339,12 +330,15 @@ subroutine gyro_select_methods
 
      ! No harmonic operators for nonperiodic case
 
-     i_dx   = 0
+     if (m_gyro == n_x/2 .or. m_dx == n_x/2) then
+        call catch_error('ERROR: (GYRO) cannot have nonperiodic pseudospectral.')
+     endif
      i_gyro = 0
+     i_dx   = 0
 
   case default
 
-     call catch_error('INVALID: boundary_method')
+     call catch_error('ERROR: (GYRO) invalid boundary_method')
 
   end select
   !----------------------------------------------------
@@ -383,7 +377,7 @@ subroutine gyro_select_methods
 
   case default
 
-     call catch_error('INVALID: profile_method')
+     call catch_error('ERROR: (GYRO) profile_method')
 
   end select
   !----------------------------------------------------
@@ -403,7 +397,7 @@ subroutine gyro_select_methods
      call send_line('geometry             : GENERAL SHAPE (from EFIT)')
 
   case default
-     call catch_error('INVALID: num_equil_flag')
+     call catch_error('ERROR: (GYRO) num_equil_flag')
 
   end select
   !----------------------------------------------------
@@ -431,7 +425,7 @@ subroutine gyro_select_methods
 
   case default
 
-     call catch_error('INVALID: electron_method')
+     call catch_error('ERROR: (GYRO) electron_method')
 
   end select
   !----------------------------------------------------
@@ -455,7 +449,7 @@ subroutine gyro_select_methods
 
   case default
 
-     call catch_error('INVALID: n_field')
+     call catch_error('ERROR: (GYRO) n_field')
 
   end select
   !----------------------------------------------------
@@ -475,7 +469,7 @@ subroutine gyro_select_methods
 
   case default
 
-     call catch_error('INVALID: boundary_method')
+     call catch_error('ERROR: (GYRO) boundary_method')
 
   end select
 
@@ -524,7 +518,7 @@ subroutine gyro_select_methods
 
   case default
 
-     call catch_error('INVALID: nonuniform_grid_flag')
+     call catch_error('ERROR: (GYRO) nonuniform_grid_flag')
 
   end select
   !----------------------------------------------------
@@ -554,7 +548,7 @@ subroutine gyro_select_methods
 
      case default
 
-        call catch_error('INVALID: integrator_method')
+        call catch_error('ERROR: (GYRO) integrator_method')
 
      end select
 
@@ -572,7 +566,7 @@ subroutine gyro_select_methods
 
      case default
 
-        call catch_error('INVALID: integrator_method')
+        call catch_error('ERROR: (GYRO) integrator_method')
 
      end select
 
@@ -594,7 +588,7 @@ subroutine gyro_select_methods
 
   case default
 
-     call catch_error('INVALID: sparse_method')
+     call catch_error('ERROR: (GYRO) sparse_method')
 
   end select
   !-------------------------------------------------------
@@ -616,12 +610,12 @@ subroutine gyro_select_methods
      n_lump = 4+n_source
 
      if (n_lump < 5) then
-        call catch_error('INVALID: N_SOURCE TOO SMALL')
+        call catch_error('ERROR: (GYRO) N_SOURCE TOO SMALL')
      endif
 
   case default
 
-     call catch_error('INVALID: source_flag')
+     call catch_error('ERROR: (GYRO) source_flag')
 
   end select
   !----------------------------------------------------
@@ -659,7 +653,7 @@ subroutine gyro_select_methods
 
      case default
 
-        call catch_error('INVALID: ord_rbf')
+        call catch_error('ERROR: (GYRO) ord_rbf')
 
      end select
 
@@ -693,7 +687,7 @@ subroutine gyro_select_methods
   case (2)
      call send_line('rotation effects     : WALTZ METHOD')
   case default
-     call catch_error('INVALID: rotation_theory_method')
+     call catch_error('ERROR: (GYRO) rotation_theory_method')
   end select
   !-------------------------------------------------------
 
@@ -745,7 +739,7 @@ subroutine gyro_select_methods
 
      case default
 
-        call catch_error('INVALID: lindiff_method')
+        call catch_error('ERROR: (GYRO) lindiff_method')
 
      end select
      !-------------------------------------------------------
@@ -769,14 +763,14 @@ subroutine gyro_select_methods
 
      case default
 
-        call catch_error('INVALID: nl_method')
+        call catch_error('ERROR: (GYRO) nl_method')
 
      end select
      !-------------------------------------------------------
 
   case default
 
-     call catch_error('INVALID: nonlinear_flag')
+     call catch_error('ERROR: (GYRO) nonlinear_flag')
 
   end select
   !-------------------------------------------------------

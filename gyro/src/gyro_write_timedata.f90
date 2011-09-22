@@ -40,7 +40,7 @@ subroutine gyro_write_timedata
   ! Timestep data:
   !
   if (i_proc == 0) then
-     call write_step(trim(path)//'out.gyro.t',1)
+     call gyro_write_step(trim(path)//'out.gyro.t',1)
   endif
   !---------------------------------------------------
 
@@ -414,7 +414,7 @@ subroutine gyro_write_timedata
   endif
   !-------------------------------------------------------------------
 
-  call write_error(trim(path)//'out.gyro.error',10)
+  call gyro_write_error(trim(path)//'out.gyro.error',10)
 
   !------------------------------------------------------------
   ! Entropy diagnostics

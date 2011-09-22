@@ -26,9 +26,8 @@ subroutine write_freq(datafile,io)
   complex, dimension(n_x,n_blend) :: freq_loc
   real,    dimension(n_x,n_blend) :: mode_weight
   !
-  complex, dimension(2) :: freq
-  complex, dimension(n_n,2) :: freq_collect
-  complex, dimension(2,n_n) :: dummy
+  complex, dimension(2) :: freq 
+  complex, dimension(n_n,2) :: dummy
   !
   real :: df_r
   real :: df_i
@@ -72,7 +71,7 @@ subroutine write_freq(datafile,io)
         total_weight = 0.0
 
         if (minval(abs(field_blend_old)) == 0.0) then
- 
+
            freq(1) = 0.0
            freq(2) = 1.0
 
@@ -119,38 +118,21 @@ subroutine write_freq(datafile,io)
         open(unit=io,file=datafile,status='old',position='append')
      endif
 
-     call collect_complex(freq,freq_collect,2)
+     call collect_complex(freq,omega_linear,2)
 
-     do in=1,n_n
-
-        ! Output to screen
-
-        freq_n(:) = freq_collect(in,:)
-
-        if (i_proc == 0) then
-
-           if (silent_flag == 0 .and. linsolve_method == 1) print 10,'n =',n(in),&
-                'freq =',freq_n(1), &
-                'df =',freq_n(2)  
-
-           if (output_flag == 1) then
-
-              ! Output to file
-
-              write(io,20) freq_n(1),freq_n(2)
-
-           endif
-
-        endif
-
-     enddo ! in
+     if (i_proc == 0 .and. output_flag == 1) then
+        ! Output to file
+        do in=1,n_n
+           write(io,20) omega_linear(in,:)
+        enddo ! in
+     endif
 
      ! Convergence check for single-n simulation:
      ! Halt will occur in gyro_fulladvance
 
      if (n_n == 1 .and. n_1(in_1) /= 0) then
 
-        freq_err = abs(freq_n(2))
+        freq_err = abs(omega_linear(1,2))
 
         call MPI_BCAST(freq_err, &
              1,&
@@ -186,7 +168,6 @@ subroutine write_freq(datafile,io)
 
   if (debug_flag == 1 .and. i_proc == 0) print *,'[write_freq called]'
 
-10 format(t2,a,i5,2(3x,a,2(es11.4,1x)))
 20 format(4(es11.4,1x))
 
 end subroutine write_freq

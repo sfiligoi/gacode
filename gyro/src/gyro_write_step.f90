@@ -1,11 +1,11 @@
 !------------------------------------------------
-! write_step.f90 [caller gyro_write_master]
+! gyro_write_step.f90
 !
 ! PURPOSE:
 !  Output of timestep data.
 !------------------------------------------------
  
-subroutine write_step(datafile,io)
+subroutine gyro_write_step(datafile,io)
 
   use gyro_globals
 
@@ -24,7 +24,7 @@ subroutine write_step(datafile,io)
 
   case(0)
 
-    return
+     return
 
   case(1)
 
@@ -38,13 +38,29 @@ subroutine write_step(datafile,io)
      ! Append
 
      if (silent_flag == 0 .and. linsolve_method == 1) then
-        print *
-        print 10,'|---------- Step',step,' of', &
-             nstep,'----------|   t = ',t_current
+
+        if (nonlinear_flag == 0) then
+           print '(a,1pe9.3,a,1pe10.3,1pe10.3,a,1pe9.3,a,5(1pe9.3,1x))',&
+                '[t = ',t_current,&
+                '][w = ',omega_linear(1,1),&
+                '][dw = ',abs(omega_linear(1,2)),&
+                '] t_err: ',time_error(:)
+           do in=2,n_n
+              print '(t16,a,1pe10.3,1pe10.3,a,1pe9.3,a)',&
+                   '[w = ',omega_linear(in,1),&
+                   '][dw = ',abs(omega_linear(in,2)),&
+                   ']'
+           enddo
+        else
+           print '(a,1pe9.3,a,5(1pe9.3,1x))',&
+                '[t = ',t_current,&
+                '] t_err: ',time_error(:)
+        endif
+
      endif
 
      open(unit=io,file=datafile,status='old',position='append')
-     write(io,20) data_step,t_current
+     write(io,10) data_step,t_current
      close(io)
 
   case(3)
@@ -54,7 +70,7 @@ subroutine write_step(datafile,io)
      open(unit=io,file=datafile,status='old')
 
      do data_loop=0,data_step
-        read(io,20) i_dummy,dummy
+        read(io,10) i_dummy,dummy
      enddo
 
      endfile(io)
@@ -62,7 +78,6 @@ subroutine write_step(datafile,io)
 
   end select
 
-10 format(t2,a,1x,i6,a,i6,a,f8.3)
-20 format(i6,1x,es12.5)
+10 format(i6,1x,es12.5)
 
-end subroutine write_step
+end subroutine gyro_write_step
