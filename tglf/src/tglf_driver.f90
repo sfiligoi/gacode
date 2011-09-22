@@ -191,11 +191,18 @@
       write(*,*) 'q_unit = ',get_q_unit()
       write(*,*) 'ave_wd(1,1) = ',get_ave_wd(1,1)
       write(*,*) 'ave_b0(1,1) = ',get_ave_b0(1,1)
+      if(nbasis_max_tg.gt.1)then
+        write(*,*) 'ave_wd(1,2) = ',get_ave_wd(1,2)
+        write(*,*) 'ave_b0(1,2) = ',get_ave_b0(1,2)
+        write(*,*) 'ave_wd(2,2) = ',get_ave_wd(2,2)
+        write(*,*) 'ave_b0(2,2) = ',get_ave_b0(2,2)
+      endif
       do i=1,nmodes_tg 
         write(*,*) 'mode number i =',i  
         write(*,*) 'gamma_tg(i) = ',get_growthrate(i)
         write(*,*) 'freq_tg(i)  = ',get_frequency(i)
         write(*,*) 'wd_bar(i) = ',get_wd_bar(i)
+        write(*,*) 'b0_bar(i) = ',get_b0_bar(i)
         if(iflux_tg)then
          do j=1,ns_tg
          do k=1,nfields

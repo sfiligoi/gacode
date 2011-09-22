@@ -538,10 +538,10 @@ c         powe_mm=powe_exp(k-1)
 c         if(iexch.ge.1) powe_mm=powe_mm+pow_ei_exp(k-1)
 c         if(iohm.ge.1) powe_mm=powe_mm-powe_oh_exp(k-1)         
          powe_p = pbescale*powe_beam_exp(k)+
-     >   prfscale*prfescale*powe_rf_exp(k)+powe_lh_exp(k)+
+     >   prfscale*prfescale*powe_rf_exp(k)+powe_lh_exp(k)
      >   -xion_exp*powe_ion_exp(k)-(1.D0-xwdot)*powe_wdot_exp(k)
          powe_mm = pbescale*powe_beam_exp(k-1)+
-     >   prfscale*prfescale*powe_rf_exp(k-1)+powe_lh_exp(k-1)+
+     >   prfscale*prfescale*powe_rf_exp(k-1)+powe_lh_exp(k-1)
      >   -xion_exp*powe_ion_exp(k-1)-(1.D0-xwdot)*powe_wdot_exp(k-1)
 c         powi_p=powi_exp(k)
 c         if(iexch.ge.1) powi_p=powi_p-pow_ei_exp(k) 

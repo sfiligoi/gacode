@@ -908,6 +908,20 @@
       END FUNCTION get_ave_wd
 !-----------------------------------------------------------------
 !
+      REAL FUNCTION get_b0_bar(n1)
+!
+      USE tglf_global
+      USE tglf_coeff
+!
+      IMPLICIT NONE
+! 
+      INTEGER,INTENT(IN):: n1
+!
+      get_b0_bar = b0_bar_out(n1)
+!
+      END FUNCTION get_b0_bar
+!-----------------------------------------------------------------
+!
       REAL FUNCTION get_wd_bar(n1)
 !
       USE tglf_global

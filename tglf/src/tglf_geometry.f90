@@ -50,13 +50,21 @@
 !
 ! generalized quench rule kx0 shift
 !
+        midplane_shear = shat_sa - alpha_sa
         kx0 = 0.0
         sign_kx0=1.0
         if(alpha_quench_in.eq.0.0)then
           kyi = ky*vs(2)*mass(2)/ABS(zs(2))
           kx0 = alpha_kx_e_in*0.19*TANH(vexb_shear_s*rmaj_sa/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
-          kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*rmaj_sa/vs(2)) &
-           *(0.06*kyi*kyi/(kyi*kyi+0.001)+0.25*TANH((1.9*kyi)**3))/ky
+! EPS2011          kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*rmaj_sa/vs(2)) &
+! EPS2011          *(0.06*kyi*kyi/(kyi*kyi+0.001)+0.25*TANH((1.9*kyi)**3))/ky
+          if(midplane_shear.gt.0.0)then
+            kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*Rmaj_sa/vs(2)) &
+           *midplane_shear*(1.215*EXP(-(5.4*kyi)**3)+1.274**TANH((1.7*kyi)**2))/(1.0 + kyi**2)
+          else
+            kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*Rmaj_sa/vs(2)) &
+           *midplane_shear*(1.132**TANH((1.4*kyi)**2))/(1.0 + kyi**2)
+          endif
           kx0 = kx0 + alpha_kx_n_in*0.19*TANH(vns_shear_in(2)*rmaj_sa/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
           kx0 = kx0 - alpha_kx_t_in*0.19*TANH(vts_shear_in(2)*rmaj_sa/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
 !
@@ -162,7 +170,8 @@
       REAL :: cxtorper1,cxtorper2
       REAL :: B2x1,B2x2,R2x1,R2x2,norm_ave,dlp
       REAL :: c_tor_par_ave_out, c_tor_per_ave_out
-      REAL :: kyi, shear_factor
+      REAL :: kyi
+      REAL :: shear1,shear2,shearx,ave_shear
 !
 !
 !  find length along magnetic field y
@@ -181,6 +190,13 @@
 !      R_unit = Rmaj_s*b_geo(0)/(qrat_geo(0)*(costheta_geo(0)+costheta_p_geo(0)))
       R_unit = Rmaj_s*b_geo(0)/(qrat_geo(0)*costheta_geo(0))
       q_unit = Ly/(pi_2*R_unit)
+! midplane effective shear: reduces to s-alpha in shifted circle 
+! note: S_prime(0)=0.0, S_prime(ms)=-2 pi q_prime, y(0)=0.0, y(ms)=Ly
+! midplane shear is average of left and right y-derivatives at midplane for general geometry
+         midplane_shear = -(Ly/pi_2)*((rmin_s/q_s)**2) &
+             *0.5*(S_prime(1)/y(1)+(S_prime(ms)-S_prime(ms-1))/(y(ms)-y(ms-1))) 
+!         write(*,*)"midplane_shear = ",midplane_shear
+         midplane_shear = midplane_shear + 0.11
 ! save f for output
        RBt_ave_out = f/B_unit
 !
@@ -202,9 +218,15 @@
         if(alpha_quench_in.eq.0.0)then
           kyi = ky*vs(2)*mass(2)/ABS(zs(2))
           kx0 = alpha_kx_e_in*0.19*TANH(vexb_shear_s*Rmaj_s/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
-          shear_factor = (rmin_s/q_s)*(rmin_s/q_s)*q_prime_s-0.25
-          kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*Rmaj_s/vs(2)) &
-           *shear_factor*(0.06*kyi*kyi/(kyi*kyi+0.001)+0.25*TANH((1.9*kyi)**3))/ky
+! EPS2011          kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*Rmaj_s/vs(2)) &
+! EPS2011          *(0.06*kyi*kyi/(kyi*kyi+0.001)+0.25*TANH((1.9*kyi)**3))/ky
+          if(midplane_shear.gt.0.0)then
+            kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*Rmaj_s/vs(2)) &
+           *midplane_shear*(1.43*EXP(-(5.4*kyi)**3)+1.50*TANH((1.7*kyi)**2))/(1.0 + kyi**2)
+          else
+            kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*Rmaj_s/vs(2)) &
+           *midplane_shear*(2.13*TANH((1.4*kyi)**2))/(1.0 + kyi**2)
+          endif
           kx0 = kx0 + alpha_kx_n_in*0.19*TANH(vns_shear_in(2)*Rmaj_s/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
           kx0 = kx0 - alpha_kx_t_in*0.19*TANH(vts_shear_in(2)*Rmaj_s/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
 !
@@ -212,7 +234,7 @@
           kx0 = sign_Bt_in*kx0           ! this is here to cancel the sign_Bt_in factor in kxx below
         endif
 !        kx0 = alpha_kx_e_in
-!        write(*,*)"kx0=",kx0
+!        write(*,*)"<kx>_gyro=",-kx0*ky
 !        write(*,*)"1/qrat=",1.0/qrat_geo(0)
 !
 !*************************************************************
@@ -222,6 +244,8 @@
 !  at the Hermite nodes x(i)
 !  thx is the ballooning angle = 2 pi y/Ly
 !  x is the argument of the Hermite basis functions = thx/width_in
+!
+      ave_shear = 0.0
 !
       do i=1,nx
         thx = width_in*x(i)
@@ -290,6 +314,13 @@
          b0x(i)=(b1+b2)/2.0
         endif
 !
+! interpolate shearx
+!
+        shear1 = -(S_prime(m1)+dkxky1)*(rmin_s/q_s)**2
+        shear2 = -(S_prime(m2)+dkxky2)*(rmin_s/q_s)**2
+        shearx = shear1 + (shear2-shear1)*(y_x-y1)/(y2-y1)
+        ave_shear = ave_shear + shearx*wx(i)*h(1,i)*h(2,i)
+!
 ! interpolate viscous stress projection coefficients
 !
        cxtorper1 = -R(m1)*Bp(m1)/b_geo(m1)
@@ -304,6 +335,7 @@
 !        write(*,*)" y_x =",y_x," m = ",m
 !        write(*,*)i," loops = ",loops
       enddo
+!      write(*,*)"ave_shear =",ave_shear,midplane_shear
 !
 !  compute flux surface averages  
 !
@@ -878,7 +910,6 @@
 
 	enddo
 !---------------------------------------------------------------
-
 !---------------------------------------------------------------
 ! Compute drift coefficients:
 !

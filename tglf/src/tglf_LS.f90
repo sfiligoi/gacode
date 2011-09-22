@@ -74,7 +74,7 @@
       REAL :: exchange_QL(nsm,3)
       REAL :: phi_QL,N_QL(nsm),T_QL(nsm)
       REAL :: Ne_Te_phase
-      REAL :: wd_bar,v2_bar,kyi
+      REAL :: wd_bar,b0_bar,v2_bar,kyi
       REAL :: get_intensity, get_gamma_net
 !      COMPLEX ::  v(iar)
 !      COMPLEX :: xi
@@ -283,8 +283,9 @@
 !  alpha/beta=-xi*(frequency+xi*growthrate)
           eigenvalue = xi*alpha(jmax(imax))/beta(jmax(imax))  
           call get_QL_weights(particle_QL,energy_QL,stress_par_QL,stress_tor_QL, &
-               exchange_QL,phi_QL,N_QL,T_QL,wd_bar,NE_Te_phase,field_weight)
+               exchange_QL,phi_QL,N_QL,T_QL,wd_bar,b0_bar,NE_Te_phase,field_weight)
           wd_bar_out(imax)=wd_bar
+          b0_bar_out(imax)=b0_bar
           phi_QL_out(imax)=phi_QL
           do i=1,nbasis
             do j=1,3
@@ -3476,7 +3477,7 @@
 !
       SUBROUTINE get_QL_weights(particle_weight,energy_weight, &
         stress_par_weight,stress_tor_weight,exchange_weight, &
-        phi_weight,N_weight,T_weight,wd_bar,Ne_Te_phase,field_weight)
+        phi_weight,N_weight,T_weight,wd_bar,b0_bar,Ne_Te_phase,field_weight)
 ! **************************************************************
 !
 ! compute the quasilinear weights for a single eigenmode
@@ -3514,6 +3515,7 @@
       COMPLEX :: phi(nb),psi(nb),bsig(nb)
       COMPLEX :: field_weight(3,nb)
       COMPLEX :: phi_wd_phi,wd_phi
+      COMPLEX :: phi_b0_phi,b0_phi
       COMPLEX :: dum,freq_QL
       REAL :: betae_psi,betae_sig
       REAL :: phi_norm,vnorm
@@ -3523,7 +3525,7 @@
       REAL :: stress_tor_weight(nsm,3)
       REAL :: exchange_weight(nsm,3)
       REAL :: N_weight(nsm),T_weight(nsm)
-      REAL :: wd_bar,phi_weight,epsilon
+      REAL :: wd_bar,b0_bar,phi_weight,epsilon
       REAL :: Ne_Te_phase,Ne_Te_cos,Ne_Te_sin
       REAL :: ft2,cu,cq1,cq3
       REAL :: stress_correction,wp
@@ -3648,17 +3650,23 @@
       if(phi_norm.lt.epsilon)phi_norm = epsilon
 !      write(*,*)"phi_norm =",phi_norm
 !
-! compute <phi|wd|phi>
+! compute <phi|wd|phi> and <phi|b0|phi>
       phi_wd_phi = 0.0
+      phi_b0_phi = 0.0
       do i=1,nbasis
          wd_phi = 0.0
+         b0_phi = 0.0
          do j=1,nbasis
            wd_phi = wd_phi +ave_wd(i,j)*phi(j)
+           b0_phi = b0_phi +ave_b0(i,j)*phi(j)
          enddo
          phi_wd_phi = phi_wd_phi + CONJG(phi(i))*wd_phi
+         phi_b0_phi = phi_b0_phi + CONJG(phi(i))*b0_phi
       enddo
       wd_bar = REAL(phi_wd_phi)/phi_norm
+      b0_bar = REAL(phi_b0_phi)/phi_norm
 !      write(*,*)"wd_bar = ",wd_bar
+!      write(*,*)"b0_bar = ",b0_bar
 !
 ! fill the stress moments
 !
