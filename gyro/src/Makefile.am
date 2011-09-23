@@ -188,14 +188,14 @@ libgacodegyro_SRC_la_SOURCES = \
 	$(theDoNlfftP) \
 	$(theReadRestart) \
 	gyro_set_exit_status.f90 \
-	write_step.f90 \
+	gyro_write_step.f90 \
 	gyro_radial_operators.f90 \
 	write_freq.f90 \
 	write_h.f90 \
 	gyro_write_efficiency.f90 \
 	write_timing.f90 \
 	$(theWriteRestart) \
-	write_error.f90 \
+	gyro_write_error.f90 \
 	write_matrix_stat.f90 \
   gyro_adaptive_source.f90 \
 	gyro_fieldeigen_kernel.f90 \

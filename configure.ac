@@ -218,7 +218,6 @@ AC_CONFIG_FILES([Makefile
     neo/src/Makefile
     tglf/Makefile
     tglf/bin/Makefile
-    tglf/python/Makefile
     tglf/src/Makefile
     tglf/tools/Makefile
     tglf/tools/input/Makefile
