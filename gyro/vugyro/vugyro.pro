@@ -660,7 +660,7 @@ pro vugyro, _EXTRA=extra
                       /menu)
 
   x = widget_button(top,$
-                    value='Contents of run.out',$
+                    value='Contents of out.gyro.run',$
                     uvalue='view_run')
 
   x = widget_button(top,$
