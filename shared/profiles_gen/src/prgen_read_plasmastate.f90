@@ -102,6 +102,10 @@ subroutine prgen_read_plasmastate
   err = nf90_inq_varid(ncid,trim('kccw_Bphi'),varid)
   err = nf90_get_var(ncid,varid,plst_kccw_bphi)
 
+  ! J_phi orientation
+  err = nf90_inq_varid(ncid,trim('kccw_Jphi'),varid)
+  err = nf90_get_var(ncid,varid,plst_kccw_jphi)
+
   ! Root of normalized toroidal flux (rho)
   err = nf90_inq_varid(ncid,trim('rho'),varid)
   err = nf90_get_var(ncid,varid,plst_rho(:))
@@ -245,8 +249,8 @@ subroutine prgen_read_plasmastate
 
   err = nf90_close(ncid)
 
-  ! Ensure zero of flux 
-  dpsi(:) = plst_psipol(:)-plst_psipol(1)
+  ! Ensure zero of flux and correct sign
+  dpsi(:) = abs(plst_psipol(:)-plst_psipol(1))*(-plst_kccw_jphi)
 
   ! Compute rmin and rmaj based on outer and 
   ! inner major radii at midplane (of course, 

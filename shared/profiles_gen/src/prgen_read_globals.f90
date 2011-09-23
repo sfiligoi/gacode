@@ -161,6 +161,7 @@ module prgen_read_globals
   character (len=32), dimension(:), allocatable :: plst_alla_name
   real :: plst_b_axis_vac
   integer :: plst_kccw_bphi
+  integer :: plst_kccw_jphi
   real, dimension(:,:), allocatable :: plst_ts
   real, dimension(:,:), allocatable :: plst_ns
   real, dimension(:), allocatable :: plst_ptowb

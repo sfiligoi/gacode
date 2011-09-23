@@ -18,7 +18,6 @@ subroutine prgen_map_plasmastate
   integer :: i
   integer :: ip
   real, dimension(nx) :: dphidpsi
-  real :: sign_omega0
   real :: sign_plst_omega
 
   !--------------------------------------------------------------------
@@ -61,31 +60,14 @@ subroutine prgen_map_plasmastate
   ! psi [Maxwell]  = 10^8 psi [Weber]
   ! c [cm/s] = 2.9979e10
   !
-  call bound_deriv(dphidpsi,plst_epot,plst_psipol,nx)
+  ! NOTE: dpsi = plst_psipol-plst_psipol(1)
   !
-  signpsi = abs(plst_psipol(nx)-plst_psipol(1))/&
-       (plst_psipol(nx)-plst_psipol(1))
+  call bound_deriv(dphidpsi,plst_epot,dpsi,nx)
   !
-  ! As computed, its not clear if this has the correct sign:
   omega0 = -2.9979e10*dphidpsi*(10.0/3.0)/1e8
   !
-  ! Get sign of desired omega computed above
-  if (omega0(1) < 0.0) then
-     sign_omega0 = -1.0
-  else
-     sign_omega0 = 1.0
-  endif
-  !
-  ! Get true sign of approximate omega (plst_omegat)
-  if (plst_omegat(1) < 0.0) then
-     sign_plst_omega = -1.0
-  else
-     sign_plst_omega = 1.0
-  endif
-  !
-  ! Ensure sign of omega is opposite plst_omegat (since plst 
-  ! definition of toroidal angle is opposite GYRO/NEO):
-  omega0 = omega0*sign_omega0*(-sign_plst_omega)
+  ! Diagnostic 
+  signpsi = dpsi(nx)/abs(dpsi(nx))
   !--------------------------------------------------------------------
 
   !---------------------------------------------------------
