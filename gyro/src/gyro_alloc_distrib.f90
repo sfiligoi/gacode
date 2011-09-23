@@ -149,9 +149,9 @@ subroutine gyro_alloc_distrib(flag)
      if (allocated(d_rbf_velint))      deallocate(d_rbf_velint)
 
      deallocate(w_gyro)
+     deallocate(z_gyro)
      if (allocated(w_gyro_rot))   deallocate(w_gyro_rot)
      if (allocated(w_gyro_aperp)) deallocate(w_gyro_aperp)
-     deallocate(z_gyro)
 
   endif
 
