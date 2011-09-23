@@ -47,7 +47,6 @@ OBJECTS = gyro_globals.o \
           gyro_build_sparse_maxwell.o \
           gyro_cleanup.o \
           gyro_collect_routines.o \
-          gyro_collision.o \
           gyro_collision_setup.o \
           gyro_collision_kernel.o \
 	  gyro_collision_ebelli.o \
@@ -139,7 +138,6 @@ OBJECTS = gyro_globals.o \
           make_poisson_blend.o \
 	  make_ampereperp_blend.o \
 	  make_poissonaperp_matrix.o \
-          get_ampere_coll.o \
           get_gyro_h.o \
 	  get_gyro_h_aperp.o \
           get_maxwell_solution.o \

@@ -39,7 +39,6 @@ subroutine make_poisson_blend(i_elec)
   real, dimension(-m_gyro:m_gyro-i_gyro) :: trace_1_glob
   real, dimension(n_gk,-m_gyro:m_gyro-i_gyro) :: trace_2_glob
   !
-  complex, external :: BLEND_F
   complex :: cprod 
   !---------------------------------------------------
 
@@ -115,10 +114,10 @@ subroutine make_poisson_blend(i_elec)
                  omega_c = abs(z(is))*b_unit_s(i)*mu(is)**2
 
                  if (kill_gyro_b_flag == 0) then
-                    omega_c = omega_c*b0_t(i,k,m0)
+                    omega_c = omega_c*b0_t(i,k,m)
                  endif
 
-                 rho_gyro = rhos_norm*v_perp(m0,i,p_nek_loc,is)/omega_c
+                 rho_gyro = rhos_norm*v_perp(m,i,p_nek_loc,is)/omega_c
                  !
                  a_gyro = grad_r_t(i,k,m)/x_length*dr_eodr(i)
                  v_gyro = qrat_t(i,k,m)*n_1(in_1)*q_s(i)/r_s(i)
