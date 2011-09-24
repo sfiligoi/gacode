@@ -21,10 +21,6 @@ subroutine get_kinetic_advance
   call proc_time(CPU_field_in)
 
   call get_delta_he
-
-  call get_gyro_h
-  if (n_field == 3) call get_gyro_h_aperp
-
   call gyro_field_solve_implicit
   call gyro_field_interpolation
   call gyro_get_he_implicit

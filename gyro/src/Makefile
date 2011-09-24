@@ -62,6 +62,7 @@ OBJECTS = gyro_globals.o \
           gyro_entropy.o \
           gyro_field_time_derivative.o \
           gyro_field_interpolation.o \
+          gyro_field_solve_explicit.o \
           gyro_field_solve_implicit.o \
 	  gyro_fieldeigen.o \
 	  gyro_fieldeigen_kernel.o \
@@ -139,14 +140,10 @@ OBJECTS = gyro_globals.o \
 	  make_poissonaperp_matrix.o \
           get_gyro_h.o \
 	  get_gyro_h_aperp.o \
-          get_poisson_explicit.o \
-          get_ampere_explicit.o \
-	  get_maxwell3_explicit.o \
           get_field_plot.o \
           get_field_r0_plot.o \
           get_nonlinear_flux_velocity.o \
           get_field_fluxave.o \
-          get_field_explicit.o \
           get_kinetic_advance.o \
           get_delta_he.o \
           get_phi_squared.o \
