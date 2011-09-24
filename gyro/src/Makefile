@@ -62,6 +62,7 @@ OBJECTS = gyro_globals.o \
           gyro_entropy.o \
           gyro_field_time_derivative.o \
           gyro_field_interpolation.o \
+          gyro_field_solve_implicit.o \
 	  gyro_fieldeigen.o \
 	  gyro_fieldeigen_kernel.o \
 	  gyro_fieldeigen_df.o \
@@ -119,9 +120,7 @@ OBJECTS = gyro_globals.o \
           gyro_write_timedata.o \
           sparse_solve_umfpack.o \
           sparse_solve_mumps.o \
-          get_vel_sum_p.o \
-          get_vel_sum_a.o \
-	  get_vel_sum_aperp.o \
+	  gyro_velocity_sum.o \
           catch_error.o \
           catch_blowup.o \
           catch_halt_signal.o \
@@ -140,8 +139,6 @@ OBJECTS = gyro_globals.o \
 	  make_poissonaperp_matrix.o \
           get_gyro_h.o \
 	  get_gyro_h_aperp.o \
-          get_maxwell_solution.o \
-          get_poisson_solution.o \
           get_poisson_explicit.o \
           get_ampere_explicit.o \
 	  get_maxwell3_explicit.o \

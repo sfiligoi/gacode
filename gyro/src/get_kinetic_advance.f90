@@ -23,15 +23,10 @@ subroutine get_kinetic_advance
   call get_delta_he
 
   call get_gyro_h
+  if (n_field == 3) call get_gyro_h_aperp
 
-  if (n_field == 1) then
-     call get_poisson_solution
-  else
-     call get_maxwell_solution
-  endif
-
+  call gyro_field_solve_implicit
   call gyro_field_interpolation
-
   call gyro_get_he_implicit
 
   call proc_time(CPU_field_out)

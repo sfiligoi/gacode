@@ -138,13 +138,11 @@ libgacodegyro_SRC_la_SOURCES = \
 	gyro_read_input_extra.f90 \
 	sparse_solve_umfpack.f90 \
 	$(theSparseSolveMumps) \
-	get_vel_sum_p.f90 \
-	get_vel_sum_a.f90 \
-	get_vel_sum_aperp.f90 \
 	gyro_initialize_timestep.f90 \
 	catch_error.f90 \
 	catch_blowup.f90 \
 	gyro_message_routines.f90 \
+	gyro_velocity_sum.f90 \
 	catch_halt_signal.f90 \
 	parallel_dim.f90 \
 	alloc_add.f90 \

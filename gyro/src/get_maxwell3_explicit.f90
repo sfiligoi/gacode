@@ -21,12 +21,12 @@ subroutine get_maxwell3_explicit
 
   ! Generate RHS (vel_sum_p) for phi part of field-solve.
   ! uses gyro_h = (G h)=J0 h
-  call get_vel_sum_p
+  call gyro_velocity_sum(1)
   
   ! Generate RHS (vel_sum_aperp) for bpar part of field-solve.
   ! uses gyro_h_perp = (G_aperp h)=1/2(J0+J1) h
   call get_gyro_h_aperp
-  call get_vel_sum_aperp
+  call gyro_velocity_sum(3)
 
   if (sparse_method == 1) then
      call sparse_solve_umfpack(n_poissonaperp,n_poissonaperp_row,4,1)

@@ -15,7 +15,7 @@ subroutine get_ampere_explicit
   !---------------------------------------------------
 
   ! Generate RHS (vel_sum_a) for Apar part of field-solve.
-  call get_vel_sum_a
+  call gyro_velocity_sum(2)
 
   if (sparse_method == 1) then
      call sparse_solve_umfpack(n_ampere,n_ampere_row,2,1)

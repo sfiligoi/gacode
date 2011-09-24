@@ -6,7 +6,6 @@ module gyro_collision_private
   integer :: n_x_max
   integer :: n_zero
   integer :: n_fini
-  integer :: n_t2
   integer :: n_x2
 
   complex :: val

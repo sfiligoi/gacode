@@ -18,8 +18,8 @@ subroutine get_poisson_explicit
   implicit none
   !---------------------------------------------------
 
-  ! Generate RHS (vel_sum_p) for phi part of field-solve.
-  call get_vel_sum_p
+  ! Generate RHS for phi part of field-solve.
+  call gyro_velocity_sum(1)
 
   if (sparse_method == 1) then
      call sparse_solve_umfpack(n_poisson,n_poisson_row,1,1)
