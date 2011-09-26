@@ -108,7 +108,6 @@ libgacodegyro_SRC_la_SOURCES = \
   gyro_profile_init.f90 \
   gyro_read_experimental_profiles.f90 \
   gyro_map_experimental_profiles.f90 \
-	gyro_collision.f90 \
 	gyro_collision_setup.f90 \
 	gyro_collision_kernel.f90 \
 	gyro_collision_ebelli.f90 \
