@@ -62,7 +62,7 @@ gyro_includes= -I $(top_builddir)/shared/math \
 
 # To get to work with optimization reducing compiler wrappers
 IOINC=@HDF5_FC_INC@ @HDF5_INC@
-IOLIBS=@HDF5_ALIBS@ @NETCDF_ALIBS@
+IOLIBS=@HDF5_ALIBS@ @NETCDF_ALIBS@ @Z_LIBS@
 AM_LIBTOOLFLAGS = --tag=FC
 AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) $(gyro_includes) $(CPPF90_FLAGS) -I.
 AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) $(gyro_includes) $(CPPF90_FLAGS) -I.
