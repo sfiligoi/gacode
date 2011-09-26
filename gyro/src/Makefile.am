@@ -163,19 +163,12 @@ libgacodegyro_SRC_la_SOURCES = \
 	make_ampereperp_blend.f90 \
 	make_poissonaperp_matrix.f90 \
 	gyro_nonlinear_transfer.f90 \
-	get_ampere_coll.f90 \
 	get_gyro_h.f90 \
 	get_gyro_h_aperp.f90 \
-	get_maxwell_solution.f90 \
-	get_poisson_solution.f90 \
-	get_poisson_explicit.f90 \
-	get_ampere_explicit.f90 \
-	get_maxwell3_explicit.f90 \
 	get_field_plot.f90 \
 	get_field_r0_plot.f90 \
 	get_nonlinear_flux_velocity.f90 \
 	get_field_fluxave.f90 \
-	get_field_explicit.f90 \
 	get_kinetic_advance.f90 \
 	get_delta_he.f90 \
 	get_phi_squared.f90 \
@@ -202,6 +195,8 @@ libgacodegyro_SRC_la_SOURCES = \
   gyro_fieldeigen_df.f90 \
 	gyro_fieldeigen_private.f90 \
 	gyro_field_interpolation.f90 \
+  gyro_field_solve_explicit.f90 \
+  gyro_field_solve_implicit.f90 \
 	gyro_build_sparse_maxwell.f90 \
 	gyro_entropy.f90 \
 	gyro_build_sparse_poisson.f90 \
