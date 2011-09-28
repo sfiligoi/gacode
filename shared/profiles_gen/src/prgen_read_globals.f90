@@ -179,7 +179,7 @@ module prgen_read_globals
   real, dimension(:), allocatable :: plst_r_midp_in
   real, dimension(:), allocatable :: plst_r_midp_out
   real, dimension(:), allocatable :: plst_z_midp
-  real, dimension(:), allocatable :: plst_zeff_th
+  real, dimension(:), allocatable :: plst_zeff
   real, dimension(:), allocatable :: plst_epot
   real, dimension(:), allocatable :: plst_omegat
   real, dimension(:), allocatable :: plst_pbe
