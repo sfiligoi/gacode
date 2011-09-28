@@ -84,7 +84,7 @@ subroutine prgen_map_plasmastate
   vec(6,:)  = delta(:)
   vec(7,:)  = plst_ts(:,1)
   vec(8,:)  = plst_ns(:,1)*1e-19
-  vec(9,:)  = plst_zeff_th(:)
+  vec(9,:)  = plst_zeff(:)
   vec(10,:) = omega0(:) 
   vec(11,:) = flow_mom(:)
   vec(12,:) = pow_e(:)
