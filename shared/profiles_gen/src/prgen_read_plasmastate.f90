@@ -148,9 +148,9 @@ subroutine prgen_read_plasmastate
   err = nf90_get_var(ncid,varid,plst_z_midp(:))
 
   ! Z_eff
-  err = nf90_inq_varid(ncid,trim('Zeff_th'),varid)
-  err = nf90_get_var(ncid,varid,plst_zeff_th(1:nx-1))
-  plst_zeff_th(nx) = 0.0
+  err = nf90_inq_varid(ncid,trim('Zeff'),varid)
+  err = nf90_get_var(ncid,varid,plst_zeff(1:nx-1))
+  plst_zeff(nx) = 0.0
 
   ! Temperatures
   err = nf90_inq_varid(ncid,trim('Ts'),varid)
