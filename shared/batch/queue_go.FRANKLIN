@@ -12,9 +12,10 @@
 #     quad-core utilization
 #
 
-repo="gc3"
+#repo="gc3"
 #repo="mp94"
 #repo="m414"
+repo=""
 
 nproc=${1}
 queue_num=${2}
@@ -79,7 +80,9 @@ echo "Output written to $bfile"
 # Copy appropriate commands to batch directory:
 
 echo "#PBS -N $sim" > $bfile
-echo "#PBS -A $repo" >> $bfile
+if [ "$repo" /= "" ] ; then
+   echo "#PBS -A $repo" >> $bfile
+fi
 echo "#PBS -o $simpath/$sim/batch.out" >> $bfile
 echo "#PBS -e $simpath/$sim/batch.err" >> $bfile
 echo "#PBS -q $queue" >> $bfile

@@ -17,7 +17,7 @@ gyro_includes= -I $(top_builddir)/gyro/src
 
 # To get to work with optimization reducing compiler wrappers
 IOINC=@HDF5_INC@ 
-IOLIBS=@HDF5_LIBS@ @NETCDF_LIBS@
+IOLIBS=@HDF5_LIBS@ @NETCDF_LIBS@ @Z_LIBS@
 AM_LIBTOOLFLAGS = --tag=FC
 AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) $(gyro_includes) $(CPPF90_FLAGS) -I.
 AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) $(gyro_includes) $(CPPF90_FLAGS) -I.

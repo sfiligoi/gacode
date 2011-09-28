@@ -62,7 +62,7 @@ gyro_includes= -I $(top_builddir)/shared/math \
 
 # To get to work with optimization reducing compiler wrappers
 IOINC=@HDF5_FC_INC@ @HDF5_INC@
-IOLIBS=@HDF5_ALIBS@ @NETCDF_ALIBS@
+IOLIBS=@HDF5_ALIBS@ @NETCDF_ALIBS@ @Z_LIBS@
 AM_LIBTOOLFLAGS = --tag=FC
 AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) $(gyro_includes) $(CPPF90_FLAGS) -I.
 AM_FFLAGS=$(FC_FIXED_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) $(gyro_includes) $(CPPF90_FLAGS) -I.
@@ -108,7 +108,6 @@ libgacodegyro_SRC_la_SOURCES = \
   gyro_profile_init.f90 \
   gyro_read_experimental_profiles.f90 \
   gyro_map_experimental_profiles.f90 \
-	gyro_collision.f90 \
 	gyro_collision_setup.f90 \
 	gyro_collision_kernel.f90 \
 	gyro_collision_ebelli.f90 \
@@ -138,13 +137,11 @@ libgacodegyro_SRC_la_SOURCES = \
 	gyro_read_input_extra.f90 \
 	sparse_solve_umfpack.f90 \
 	$(theSparseSolveMumps) \
-	get_vel_sum_p.f90 \
-	get_vel_sum_a.f90 \
-	get_vel_sum_aperp.f90 \
 	gyro_initialize_timestep.f90 \
 	catch_error.f90 \
 	catch_blowup.f90 \
 	gyro_message_routines.f90 \
+	gyro_velocity_sum.f90 \
 	catch_halt_signal.f90 \
 	parallel_dim.f90 \
 	alloc_add.f90 \
@@ -166,19 +163,12 @@ libgacodegyro_SRC_la_SOURCES = \
 	make_ampereperp_blend.f90 \
 	make_poissonaperp_matrix.f90 \
 	gyro_nonlinear_transfer.f90 \
-	get_ampere_coll.f90 \
 	get_gyro_h.f90 \
 	get_gyro_h_aperp.f90 \
-	get_maxwell_solution.f90 \
-	get_poisson_solution.f90 \
-	get_poisson_explicit.f90 \
-	get_ampere_explicit.f90 \
-	get_maxwell3_explicit.f90 \
 	get_field_plot.f90 \
 	get_field_r0_plot.f90 \
 	get_nonlinear_flux_velocity.f90 \
 	get_field_fluxave.f90 \
-	get_field_explicit.f90 \
 	get_kinetic_advance.f90 \
 	get_delta_he.f90 \
 	get_phi_squared.f90 \
@@ -205,6 +195,8 @@ libgacodegyro_SRC_la_SOURCES = \
   gyro_fieldeigen_df.f90 \
 	gyro_fieldeigen_private.f90 \
 	gyro_field_interpolation.f90 \
+  gyro_field_solve_explicit.f90 \
+  gyro_field_solve_implicit.f90 \
 	gyro_build_sparse_maxwell.f90 \
 	gyro_entropy.f90 \
 	gyro_build_sparse_poisson.f90 \

@@ -2,9 +2,8 @@
 ! make_poissonaperp_matrix.f90
 !
 ! PURPOSE:
-!  Define sparse form of Poisson-Ampere Perp 
+!  Define sparse form of Poisson-AmperePerp (PB) 
 !  matrix and factorize using UMFPACK.
-! 
 !-----------------------------------------------------
 
 subroutine make_poissonaperp_matrix
@@ -18,53 +17,45 @@ subroutine make_poissonaperp_matrix
 
   !----------------------------------------------------------------
   ! Begin by doing a hand-count of the nonzero elements in 
-  ! the sparse Poisson-Ampere Perp matrix:
+  ! the sparse PB matrix:
   !
- 
-  ! Row dimension of sparse Poisson-Ampere Perp  submatrix
+  ! Row dimension of sparse PB submatrix
   n_poissonaperp_row = 2*n_x*n_blend
 
-  ! radial band width
+  ! radial bandwidth
   n_gyro = 2*m_gyro-i_gyro+1
-  
-  ! theta/blending band width
-  ! n_t2 = 2*blend_fit_order-1
-  ! IMEX: no sparse assumption
-  n_t2 = n_blend
 
   if (boundary_method == 1) then
 
-     ! nonzero elements in n=0 Ampere matrix:
-     n_zero = (n_x-1)*n_gyro*n_blend*n_t2+n_x*n_blend & 
-          + (n_x-1)*n_gyro*n_blend*n_t2+n_x*n_blend &
-          + 2*(n_x-1)*n_gyro*n_blend*n_t2 
-     
-     ! nonzero elements in n>0 Ampere matrix:
-     n_fini = 4*n_x*n_gyro*n_blend*n_t2
-     
+     ! nonzero elements in n=0 PB matrix:
+     n_zero = 4*(n_x-1)*n_gyro*n_blend**2+2*n_x*n_blend 
+
+     ! nonzero elements in n>0 PB matrix:
+     n_fini = 4*n_x*n_gyro*n_blend**2
+
   else
-     
-     ! nonzero elements in nonperiodic Ampere matrices:
-     n_zero = 4*(n_x*n_gyro-m_gyro*(m_gyro+1))*n_blend*n_t2
-     
+
+     ! nonzero elements in nonperiodic PB matrices:
+     n_zero = 4*(n_x*n_gyro-m_gyro*(m_gyro+1))*n_blend**2 ! MPP,MPB,MBP,MBB
+
      n_fini = n_zero
-     
+
   endif
-  
+
   !----------------------------------------------------------------
-  
+
   if (n_1(in_1) == 0) then
      n_poissonaperp = n_zero
   else
      n_poissonaperp = n_fini
   endif
-  
+
   lindx(4)  = 2*n_poissonaperp
   lvalue(4) = n_poissonaperp
-  
+
   allocate(m_poissonaperp(lvalue(4)))
   allocate(indx_poissonaperp(lindx(4)))
-  
+
   if (n_1(in_1) == 0 .and. boundary_method == 1) then
      n_x_max  = n_x-1
   else
@@ -78,7 +69,7 @@ subroutine make_poissonaperp_matrix
      ! Adiabatic electrons or ions: (2-R) phi
 
      call make_poisson_blend(1)
- 
+
   else
 
      ! Kinetic electrons: (1-R) phi

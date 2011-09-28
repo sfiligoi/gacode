@@ -183,7 +183,7 @@ subroutine gyro_read_restart
 
   ! ** Regenerate fields:
 
-  call get_field_explicit
+  call gyro_field_solve_explicit
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[gyro_read_restart done]'

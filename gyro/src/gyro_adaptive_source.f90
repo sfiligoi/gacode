@@ -52,14 +52,14 @@ subroutine gyro_adaptive_source
 
   call MPI_ALLREDUCE(h0_loc,&
        h0_mod,&
-       n_x*n_energy*n_kinetic,&
+       size(h0_mod),&
        MPI_DOUBLE_PRECISION,&
        MPI_SUM,&
        NEW_COMM_1,&
        i_err)
 
   call MPI_BCAST(h0_mod,&
-       n_x*n_energy*n_kinetic,&
+       size(h0_mod),&
        MPI_DOUBLE_PRECISION,&
        0,&
        NEW_COMM_2,&
