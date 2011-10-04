@@ -29,12 +29,12 @@ subroutine gkcoll_check
      return
   endif
 
-  if(k_theta < 0) then
+  if(k_theta_rho < 0) then
      call gkcoll_error('ERROR: (GKCOLL) k_theta must be positive')
      return
   endif
 
-  if(r_length < 0) then
+  if(r_length_rho < 0) then
      call gkcoll_error('ERROR: (GKCOLL) r_length must be positive')
      return
   endif
@@ -72,6 +72,12 @@ subroutine gkcoll_check
 
      if(silent_flag == 0 .and. i_proc == 0) then
         write(io_gkcollout,*) 'collision_model    : FULL LINEARIZED FOKKER-PLANCK'
+     end if
+
+  case(-1)
+     
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_gkcollout,*) 'collision_model    : NONE'
      end if
 
   case (5) 
@@ -215,7 +221,7 @@ subroutine gkcoll_check
      write(io_gkcollout,*) 'PHYSICS PARAMETERS'
      write(io_gkcollout,*) '------------------'
      write(io_gkcollout,20) 'r/R',rmin
-     write(io_gkcollout,20) 'k_theta',k_theta
+     write(io_gkcollout,20) 'k_theta',k_theta_rho
      write(io_gkcollout,20) 'q',q
      write(io_gkcollout,20) 's',shat
      write(io_gkcollout,20) 'shift',shift

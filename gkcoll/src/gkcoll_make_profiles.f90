@@ -167,6 +167,9 @@ subroutine gkcoll_make_profiles
      temp_ele = te_ade
   endif
 
+  k_theta = k_theta_rho / rho
+  r_length = r_length_rho * rho
+
   ! Print the re-mapped equilibrium data
   if(silent_flag == 0 .and. i_proc == 0) then
      open(unit=io,file=trim(path)//'out.gkcoll.equil',status='replace')

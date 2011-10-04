@@ -49,7 +49,7 @@ contains
     integer :: is, ie, ix
     real :: sum_den
     
-    phi(ir,it) = 0.0
+    phi(ir,it) = (0.0,0.0)
     do is=1,n_species
        do ie=1,n_energy
           do ix=1,n_xi
@@ -73,6 +73,7 @@ contains
           enddo
        enddo
     enddo
+
     if(adiabatic_ele_model == 1) then
        sum_den = sum_den + dens_ele / temp_ele
     endif

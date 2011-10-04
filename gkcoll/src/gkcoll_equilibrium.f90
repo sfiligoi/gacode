@@ -5,7 +5,9 @@ module gkcoll_equilibrium
   public :: EQUIL_alloc, EQUIL_do
   
   ! equilibrium parameters (theta)
-  real, dimension(:), allocatable   :: w_theta      
+  real :: d_theta
+  real, dimension(:,:), allocatable   :: theta_B
+  real, dimension(:), allocatable   :: w_theta
   real, dimension(:,:), allocatable :: k_perp    
   real, dimension(:), allocatable   :: Bmag
   real, dimension(:,:), allocatable :: omega_stream
@@ -31,6 +33,7 @@ contains
        if(initialized) return
        
        allocate(theta(n_theta))
+       allocate(theta_B(n_radial,n_theta))
        allocate(w_theta(n_theta))
        allocate(Bmag(n_theta))
        allocate(k_perp(n_theta,n_radial))
@@ -41,8 +44,15 @@ contains
        allocate(omega_aprdrift(n_theta,n_species))
        allocate(omega_xprdrift(n_theta,n_species))
 
+       d_theta = (2*pi/n_theta)
        do it=1,n_theta
-          theta(it) = -pi+(it-1)*(2*pi/n_theta)
+          theta(it) = -pi+(it-1)*d_theta
+       enddo
+
+       do ir=1,n_radial
+          do it=1,n_theta
+             theta_B(ir,it) = theta(it)+2*pi*indx_r(ir)
+          enddo
        enddo
        
        if(equilibrium_model == 0) then
@@ -60,6 +70,7 @@ contains
        if(.NOT. initialized) return
        
        deallocate(theta)
+       deallocate(theta_B)
        deallocate(w_theta)
        deallocate(Bmag)
        deallocate(k_perp)
@@ -142,7 +153,7 @@ contains
        do ir=1,n_radial
           k_perp(it,ir) = sqrt((2.0*pi*indx_r(ir)*GEO_grad_r/r_length &
                + k_theta*GEO_gq*GEO_captheta)**2 &
-               + (k_theta*GEO_gq)**2) / rho
+               + (k_theta*GEO_gq)**2) 
        enddo
        
     enddo

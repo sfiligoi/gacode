@@ -13,9 +13,10 @@ subroutine gkcoll_read_input
   read(1,*) n_radial
   read(1,*) e_max
   read(1,*) delta_t
+  read(1,*) max_time
   read(1,*) freq_tol
-  read(1,*) k_theta
-  read(1,*) r_length
+  read(1,*) k_theta_rho
+  read(1,*) r_length_rho
   read(1,*) rmin
   read(1,*) rmaj
   read(1,*) silent_flag

@@ -5,7 +5,7 @@ module gkcoll_collision
   public :: COLLISION_alloc, COLLISION_do
   logical, private :: initialized = .false.
 
-  real, dimension(:,:,:,:), allocatable, private :: cmat
+  complex, dimension(:,:,:,:), allocatable, private :: cmat
   complex, dimension(:), allocatable, private :: cvec, bvec
   integer, dimension(:,:,:), allocatable, private :: indx_coll 
   integer, private :: msize
@@ -25,9 +25,13 @@ contains
     ! parameters for matrix solve
     integer :: info
     integer, dimension(:), allocatable :: i_piv
-    real, dimension(:), allocatable :: work 
-    real, dimension(:,:), allocatable :: amat, bmat
+    complex, dimension(:), allocatable :: work 
+    complex, dimension(:,:), allocatable :: amat, bmat
+    complex :: alpha = (1.0,0.0)
+    complex :: beta  = (0.0,0.0)
     
+    if(collision_model == -1) return
+
     if(flag == 1) then
        if(initialized) return
        
@@ -68,7 +72,7 @@ contains
        allocate(cvec(msize))
        allocate(bvec(msize))
        allocate(indx_coll(n_species,n_energy,n_xi))
-       
+
        p = 0
        do is=1,n_species
           do ie=1,n_energy
@@ -94,9 +98,9 @@ contains
        do ir=1,n_radial
           do it=1,n_theta
              
-             cmat(ir,it,:,:) = 0.0
-             amat(:,:)       = 0.0
-             
+             cmat(ir,it,:,:) = (0.0,0.0)
+             amat(:,:)       = (0.0,0.0)
+
              do is=1,n_species     
                 do ie=1,n_energy
                    do ix=1,n_xi
@@ -113,7 +117,7 @@ contains
                                   do ks=1,n_species
                                      sum_nu = sum_nu + nu_d(ie,is,ks)
                                   enddo
-                                  
+
                                   cmat(ir,it,p,pp)  &
                                        =  cmat(ir,it,p,pp) &
                                        + 1.0 &
@@ -127,7 +131,7 @@ contains
                                        * (-1.0*indx_xi(ix)) &
                                        * (indx_xi(ix)+1.0) * sum_nu
                                endif
-                               
+
                                ! Poisson component 
                                cmat(ir,it,p,pp)  &
                                     =  cmat(ir,it,p,pp) &
@@ -153,19 +157,19 @@ contains
                    enddo
                 enddo
              enddo
-             
+
              ! H_bar = (1 - dt/2 C - Poisson)^(-1) * (1 + dt/2 C + Poisson) H
              ! Lapack factorization and inverse of LHS
-             call DGETRF(msize,msize,cmat(ir,it,:,:),msize,i_piv,info)
-             call DGETRI(msize,cmat(ir,it,:,:),msize,i_piv,work,msize,info)
+             call ZGETRF(msize,msize,cmat(ir,it,:,:),msize,i_piv,info)
+             call ZGETRI(msize,cmat(ir,it,:,:),msize,i_piv,work,msize,info)
              ! Matrix multiply
-             call DGEMM('N','N',msize,msize,1.0,cmat(ir,it,:,:),&
-                  msize,amat,msize,0.0,bmat,msize)
+             call ZGEMM('N','N',msize,msize,msize,alpha,cmat(ir,it,:,:),&
+                  msize,amat,msize,beta,bmat,msize)
              cmat(ir,it,:,:) = bmat(:,:)
-             
+      
           enddo
        enddo
-       
+
        deallocate(amat)
        deallocate(bmat)
        deallocate(work)
@@ -173,7 +177,7 @@ contains
        deallocate(nu_d)
 
        initialized = .true.
-       
+
     else
        if(.NOT. initialized) return
        deallocate(cmat)
@@ -191,6 +195,10 @@ contains
     implicit none
     integer :: is,ir,it,ie,ix
     integer :: p
+    complex :: alpha = (1.0,0.0)
+    complex :: beta  = (0.0,0.0)
+
+    if(collision_model == -1) return
 
     ! compute new collisional cap_H: H = h + ze/T G phi
     
@@ -208,8 +216,8 @@ contains
           enddo
           
           ! Solve for H
-          call ZGEMV('N',msize,msize,1.0,cmat(ir,it,:,:),&
-               msize,cvec,1,0.0,bvec,1)
+          call ZGEMV('N',msize,msize,alpha,cmat(ir,it,:,:),&
+               msize,cvec,1,beta,bvec,1)
           
           do is=1,n_species
              do ie=1,n_energy

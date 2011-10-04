@@ -28,7 +28,9 @@ module gkcoll_globals
   real :: s_zeta
   real :: zmag
   real :: s_zmag
+  real :: k_theta_rho
   real :: k_theta
+  real :: r_length_rho
   real :: r_length
 
   !---------------------------------------------------------------
@@ -71,6 +73,7 @@ module gkcoll_globals
   integer :: n_radial
   real    :: e_max
   real    :: delta_t
+  real    :: max_time
   real    :: freq_tol
   !---------------------------------------------------------------
 

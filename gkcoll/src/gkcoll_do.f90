@@ -20,9 +20,19 @@ subroutine gkcoll_do
   use gkcoll_freq
   use gkcoll_allocate_profile
   implicit none
-  integer :: ix, ir
+  integer :: ix, ir, it, jr, p
   integer :: itime, nt_step
-  real    :: max_time=1000.0
+  character(len=80)  :: runfile_phi  = 'out.gkcoll.phi'
+  character(len=80)  :: runfile_phiB = 'out.gkcoll.phiB'
+  character(len=80)  :: runfile_hx   = 'out.gkcoll.hx'
+  character(len=80)  :: runfile_grids = 'out.gkcoll.grids'
+  integer :: myio = 20
+  complex, dimension(:,:), allocatable :: phi_B
+
+   if (silent_flag == 0 .and. i_proc == 0) then
+     open(unit=io_gkcollout,file=trim(path)//runfile_gkcollout,status='replace')
+     close(io_gkcollout)
+  endif
 
   call gkcoll_make_profiles
   if(error_status > 0) goto 100
@@ -37,7 +47,6 @@ subroutine gkcoll_do
   do ir=1,n_radial
      indx_r(ir) = -n_radial/2 + (ir-1)
   enddo
-
 
   ! set-up energy grid and weights
   allocate(energy(n_energy))
@@ -55,17 +64,42 @@ subroutine gkcoll_do
   allocate(cap_h_p(n_species,n_radial,n_theta,n_energy,n_xi))
   allocate(phi(n_radial,n_theta))
   allocate(phi_old(n_radial,n_theta))
+  allocate(phi_B(n_radial,n_theta))
 
   call EQUIL_alloc(1)
+  call EQUIL_do
   call GYRO_alloc(1)
   call GK_alloc(1)
   call COLLISION_alloc(1)
   call FREQ_alloc(1)
 
-  h_x     = 0.0
-  cap_h_p = (0.0,0.0)
-  phi = 1.0e-3
+  ! Initialization
+  call GK_init
+  
+  if(silent_flag == 0 .and. i_proc == 0) then
+     open(unit=myio,file=trim(path)//runfile_phi,status='replace')
+     close(myio)
+     open(unit=myio,file=trim(path)//runfile_phiB,status='replace')
+     close(myio)
+     open(unit=myio,file=trim(path)//runfile_hx,status='replace')
+     close(myio)
+     open(unit=myio,file=trim(path)//runfile_grids,status='replace')
+     write(myio,'(i4)') n_species
+     write(myio,'(i4)') n_radial
+     write(myio,'(i4)') n_theta
+     write(myio,'(i4)') n_energy
+     write(myio,'(i4)') n_xi
+     write(myio,'(i4)') indx_r(:)
+     write(myio,'(1pe12.5)') theta(:)
+     write(myio,'(1pe12.5)') energy(:)
+     write(myio,'(1pe12.5)') xi(:)
+     write(myio,'(1pe12.5)') theta_B(:,:)
+     close(myio)
+  endif
+
+  ! Time-stepping
   nt_step = nint(max_time/delta_t)
+  print *, max_time, delta_t, nt_step
   do itime =1, nt_step
 
      ! Collisionless gyrokinetic equation
@@ -79,11 +113,41 @@ subroutine gkcoll_do
      ! Compute frequency and check for convergence
      call FREQ_do
 
-     if(abs(freq_err) < freq_tol) exit
+     ! Print phi
+     if(silent_flag == 0 .and. i_proc == 0) then
+        open(unit=myio,file=trim(path)//runfile_phi,status='old',&
+             position='append')
+        write(myio,'(1pe12.5)') phi(:,:)
+        close(myio)
+        do ir=1,n_radial
+           do it=1,n_theta
+              phi_B(ir,it) = phi(ir,it) &
+                   *exp(-2*pi*i_c*indx_r(ir)*k_theta*rmin)
+           enddo
+        enddo
+        open(unit=myio,file=trim(path)//runfile_phiB,status='old',&
+             position='append')
+        write(myio,'(1pe12.5)') phi_B(:,:)
+        close(myio)
+     end if
+     
+     print *, abs(freq_err), freq_tol
+     if(abs(freq_err) < freq_tol) then
+        print *, 'Converged'
+        exit
+     endif
 
      phi_old = phi
 
   enddo
+
+  if(silent_flag == 0 .and. i_proc == 0) then
+     open(unit=myio,file=trim(path)//runfile_phi,status='old',&
+          position='append')
+     write(myio,'(1pe12.5)') h_x
+     close(myio)
+  endif
+     
 
 100 continue
   call EQUIL_alloc(0)
@@ -103,6 +167,6 @@ subroutine gkcoll_do
   if(allocated(cap_h_p))       deallocate(cap_h_p)
   if(allocated(phi))           deallocate(phi)
   if(allocated(phi_old))       deallocate(phi_old)
-
+  if(allocated(phi_B))         deallocate(phi_B)
 
 end subroutine gkcoll_do
