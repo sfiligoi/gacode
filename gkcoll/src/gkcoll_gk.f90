@@ -343,7 +343,7 @@ contains
                     ! omega_rdrift
                     val = omega_rdrift(it,is) &
                          * energy(ie) * (1.0 + xi(ix)**2) &
-                         * (2.0*pi*i_c*indx_r(ir)/r_length) 
+                         * (2.0*pi*i_c*indx_r(ir)*r_length_inv) 
                     rhs(ij,is,ir,it,ie,ix) = rhs(ij,is,ir,it,ie,ix) &
                          - val * cap_h_x(is,ir,it,ie,ix)
 

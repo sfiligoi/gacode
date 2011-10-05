@@ -15,8 +15,10 @@ subroutine gkcoll_read_input
   read(1,*) delta_t
   read(1,*) max_time
   read(1,*) freq_tol
+  read(1,*) toroidal_model
+  read(1,*) toroidal_num
+  read(1,*) rho
   read(1,*) k_theta_rho
-  read(1,*) r_length_rho
   read(1,*) rmin
   read(1,*) rmaj
   read(1,*) silent_flag
@@ -43,7 +45,6 @@ subroutine gkcoll_read_input
   enddo
 
   read(1,*) q
-  read(1,*) rho
   read(1,*) shat
   read(1,*) shift    
   read(1,*) kappa   

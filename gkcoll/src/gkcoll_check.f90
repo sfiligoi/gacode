@@ -24,21 +24,6 @@ subroutine gkcoll_check
      return
   endif
 
-  if(rho < 0) then
-     call gkcoll_error('ERROR: (GKCOLL) rho_unit must be positive')
-     return
-  endif
-
-  if(k_theta_rho < 0) then
-     call gkcoll_error('ERROR: (GKCOLL) k_theta must be positive')
-     return
-  endif
-
-  if(r_length_rho < 0) then
-     call gkcoll_error('ERROR: (GKCOLL) r_length must be positive')
-     return
-  endif
-
   !-----------------------------------------------------------
   if(silent_flag == 0 .and. i_proc == 0) then
      write(io_gkcollout,*) 'SWITCHES'
@@ -205,6 +190,40 @@ subroutine gkcoll_check
      end if
   end if
 
+  !------------------------------------------------------------
+  ! Toroidal mode number model
+  !
+  select case (toroidal_model)  
+
+  case(0)
+     if(profile_model == 2) then
+        call gkcoll_error('ERROR: (GKCOLL) toroidal_model=0 not valid with experimental profiles')
+        return
+     endif
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_gkcollout,*) 'toroidal_model: Specify k_theta'
+     endif
+     if(k_theta_rho < 0) then
+        call gkcoll_error('ERROR: (GKCOLL) k_theta must be positive')
+        return
+     endif
+     
+  case (1) 
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_gkcollout,*) 'toroidal_model: Specify rho'
+     endif
+     if(profile_model == 1 .and. rho < 0) then
+        call gkcoll_error('ERROR: (GKCOLL) rho_unit must be positive')
+        return
+     endif
+     
+  case default
+     
+     call gkcoll_error('ERROR: (GKCOLL) invalid toroidal_model')
+     return
+     
+  end select
+
 
   !------------------------------------------------------------
 
@@ -216,12 +235,12 @@ subroutine gkcoll_check
      write(io_gkcollout,10) 'n_energy',n_energy
      write(io_gkcollout,10) 'n_xi',n_xi
      write(io_gkcollout,10) 'n_theta',n_theta
-
+     
      write(io_gkcollout,*) 
      write(io_gkcollout,*) 'PHYSICS PARAMETERS'
      write(io_gkcollout,*) '------------------'
+     write(io_gkcollout,*) 'toroidal_num', toroidal_num
      write(io_gkcollout,20) 'r/R',rmin
-     write(io_gkcollout,20) 'k_theta',k_theta_rho
      write(io_gkcollout,20) 'q',q
      write(io_gkcollout,20) 's',shat
      write(io_gkcollout,20) 'shift',shift

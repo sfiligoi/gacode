@@ -52,7 +52,21 @@ subroutine gkcoll_make_profiles
      ! Standard local simulation (one point)
 
      q    = abs(q) * sign_q
-     rho  = abs(rho) * sign_bunit
+
+     if(toroidal_model == 0) then
+        ! k_theta_rho and n are specified; compute rho
+        k_theta_rho = abs(k_theta_rho)
+        rho = k_theta_rho * rmin / (q * toroidal_num)
+        k_theta = k_theta_rho / rho
+     else
+        ! rho and n are specified; compute k_theta
+        rho  = abs(rho) * sign_bunit
+        k_theta = (q * toroidal_num) / rmin
+        k_theta_rho = (q * toroidal_num) / rmin * rho
+        k_theta_rho = abs(k_theta_rho)
+     endif
+     ! compute r_length
+      r_length_inv =  q * toroidal_num * shat / rmin
 
      ! general geometry -- accessible only from interface 
      ! via parameters geo_ny_in and geo_yin_in
@@ -109,6 +123,13 @@ subroutine gkcoll_make_profiles
              * mass(1) * mass_deuterium) &
              / (charge_norm_fac * b_norm) &
              * 1.0e-4 / a_norm
+
+     ! rho and n are specified; compute k_theta
+     k_theta = (q * toroidal_num) / rmin
+     k_theta_rho = (q * toroidal_num) / rmin * rho
+     k_theta_rho = abs(k_theta_rho)
+     ! compute r_length
+      r_length_inv =  q * toroidal_num * shat / rmin
 
      ! Debye length
      lambda_debye = profile_lambda_debye_scale*7.43* &
@@ -167,16 +188,15 @@ subroutine gkcoll_make_profiles
      temp_ele = te_ade
   endif
 
-  k_theta = k_theta_rho / rho
-  r_length = r_length_rho * rho
-
   ! Print the re-mapped equilibrium data
   if(silent_flag == 0 .and. i_proc == 0) then
      open(unit=io,file=trim(path)//'out.gkcoll.equil',status='replace')
      write (io,'(e16.8,$)') rmin
-     write (io,'(e16.8,$)') q
-     write (io,'(e16.8,$)') rho
      write (io,'(e16.8,$)') rmaj
+     write (io,'(e16.8,$)') q
+     write (io,'(e16.8,$)') shat
+     write (io,'(e16.8,$)') rho
+     write (io,'(e16.8,$)') k_theta_rho
      write (io,'(e16.8,$)') dens_norm
      write (io,'(e16.8,$)') temp_norm
      write (io,'(e16.8,$)') vth_norm

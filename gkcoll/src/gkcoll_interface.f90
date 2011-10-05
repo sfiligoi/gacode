@@ -24,8 +24,10 @@ module gkcoll_interface
   real    :: gkcoll_delta_t_in  = 0.01
   real    :: gkcoll_max_time_in = 100.0
   real    :: gkcoll_freq_tol_in = 0.001
+  integer :: gkcoll_toroidal_model_in = 1
+  integer :: gkcoll_toroidal_num_in  = 1
+  real    :: gkcoll_rho_in      = 0.0025
   real    :: gkcoll_k_theta_rho_in  = 0.25
-  real    :: gkcoll_r_length_rho_in = 64.0
   real    :: gkcoll_rmin_in     = 0.5
   real    :: gkcoll_rmaj_in     = 3.0
   integer :: gkcoll_silent_flag_in = 0
@@ -82,7 +84,6 @@ module gkcoll_interface
   real    :: gkcoll_dlntdr_6_in = 1.0
   real    :: gkcoll_nu_6_in     = 0.0
   real    :: gkcoll_q_in        = 2.0
-  real    :: gkcoll_rho_in      = 0.001
   real    :: gkcoll_shat_in     = 1.0
   real    :: gkcoll_shift_in    = 0.0
   real    :: gkcoll_kappa_in    = 1.0
@@ -125,8 +126,10 @@ contains
     gkcoll_delta_t_in  = delta_t
     gkcoll_max_time_in = max_time
     gkcoll_freq_tol_in = freq_tol
+    gkcoll_toroidal_model_in = toroidal_model
+    gkcoll_toroidal_num_in = toroidal_num
+    gkcoll_rho_in      = rho
     gkcoll_k_theta_rho_in  = k_theta_rho
-    gkcoll_r_length_rho_in = r_length_rho
     gkcoll_rmin_in     = rmin
     gkcoll_rmaj_in     = rmaj
     gkcoll_silent_flag_in       = silent_flag
@@ -183,7 +186,6 @@ contains
     gkcoll_dlntdr_6_in = dlntdr(6)
     gkcoll_nu_6_in     = nu(6)
     gkcoll_q_in        = q
-    gkcoll_rho_in      = rho
     gkcoll_shat_in     = shat
     gkcoll_shift_in    = shift
     gkcoll_kappa_in    = kappa
@@ -214,8 +216,10 @@ contains
     delta_t  = gkcoll_delta_t_in
     max_time = gkcoll_max_time_in
     freq_tol = gkcoll_freq_tol_in
+    toroidal_model = gkcoll_toroidal_model_in
+    toroidal_num   = gkcoll_toroidal_num_in
+    rho       = gkcoll_rho_in
     k_theta_rho  = gkcoll_k_theta_rho_in
-    r_length_rho = gkcoll_r_length_rho_in
     rmin     = gkcoll_rmin_in
     rmaj     = gkcoll_rmaj_in
     silent_flag       = gkcoll_silent_flag_in
@@ -272,7 +276,6 @@ contains
     dlntdr(6) = gkcoll_dlntdr_6_in
     nu(6)     = gkcoll_nu_6_in
     q         = gkcoll_q_in
-    rho       = gkcoll_rho_in
     shat      = gkcoll_shat_in
     shift     = gkcoll_shift_in
     kappa     = gkcoll_kappa_in
