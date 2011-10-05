@@ -48,6 +48,7 @@ SIMROOT=$PWD
 SPECIES=0
 FTYPE=screen
 PLOT_TYPE=phi
+TIME=-1
 #==============================================================================
 
 #==============================================================================
@@ -65,6 +66,8 @@ while [ $# -gt 0 ] ; do
   -species) shift ; SPECIES=$1 ;;
 
   -f) shift ; FTYPE=$1 ;;
+
+  -t) shift ; TIME=$1 ;;
 
   *) echo "ERROR: incorrect syntax." ; exit 1 ;;
 
@@ -87,7 +90,7 @@ PYROOT=$GACODE_ROOT/gkcoll/tools/plot
 case "$PLOT_TYPE" in
 
    phi)  
-	python $PYROOT/pot.py $FTYPE & ;;
+	python $PYROOT/pot.py $FTYPE $TIME & ;;
 
 esac 
 

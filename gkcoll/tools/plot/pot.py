@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 
 GFONTSIZE=18
 ftype = sys.argv[1]
+itime = int(sys.argv[2])
 
 #-------------------------------------------------------
 # Read grid dimension and axes
@@ -39,6 +40,9 @@ thetab = np.array(data[mark:mark+n_theta*n_radial])
 # Read time
 t = np.loadtxt('out.gkcoll.time')
 n_time = len(t)
+if itime > n_time-1:
+    itime = n_time-1
+
 #-------------------------------------------------------
 
 #-------------------------------------------------------
@@ -65,8 +69,8 @@ ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
 ax.set_xlabel(r'$\theta_*/\pi$',fontsize=GFONTSIZE)
 
-ax.plot(thetab/np.pi,phib[0,:,0],color='k',label='Re')
-ax.plot(thetab/np.pi,phib[1,:,0],color='c',label='Im')
+ax.plot(thetab/np.pi,phib[0,:,itime],color='k',label='Re')
+ax.plot(thetab/np.pi,phib[1,:,itime],color='c',label='Im')
 
 ax.set_xlim([1-n_radial,-1+n_radial])
 ax.legend()
