@@ -22,11 +22,13 @@ subroutine gkcoll_do
   implicit none
   integer :: ix, ir, it, jr, p
   integer :: itime, nt_step
-  character(len=80)  :: runfile_phi  = 'out.gkcoll.phi'
-  character(len=80)  :: runfile_phiB = 'out.gkcoll.phiB'
-  character(len=80)  :: runfile_hx   = 'out.gkcoll.hx'
+  character(len=80)  :: runfile_phi   = 'out.gkcoll.phi'
+  character(len=80)  :: runfile_phiB  = 'out.gkcoll.phiB'
+  character(len=80)  :: runfile_hx    = 'out.gkcoll.hx'
   character(len=80)  :: runfile_grids = 'out.gkcoll.grids'
+  character(len=80)  :: runfile_time  = 'out.gkcoll.time'
   integer :: myio = 20
+  integer :: print_step=10
   complex, dimension(:,:), allocatable :: phi_B
 
    if (silent_flag == 0 .and. i_proc == 0) then
@@ -83,6 +85,8 @@ subroutine gkcoll_do
      close(myio)
      open(unit=myio,file=trim(path)//runfile_hx,status='replace')
      close(myio)
+     open(unit=myio,file=trim(path)//runfile_time,status='replace')
+     close(myio)
      open(unit=myio,file=trim(path)//runfile_grids,status='replace')
      write(myio,'(i4)') n_species
      write(myio,'(i4)') n_radial
@@ -93,14 +97,14 @@ subroutine gkcoll_do
      write(myio,'(1pe12.5)') theta(:)
      write(myio,'(1pe12.5)') energy(:)
      write(myio,'(1pe12.5)') xi(:)
-     write(myio,'(1pe12.5)') theta_B(:,:)
+     write(myio,'(1pe12.5)') transpose(theta_B(:,:))
      close(myio)
   endif
 
   ! Time-stepping
   nt_step = nint(max_time/delta_t)
-  print *, max_time, delta_t, nt_step
-  do itime =1, nt_step
+
+  do itime = 1, nt_step
 
      ! Collisionless gyrokinetic equation
      ! Returns new h_x, cap_h_x, cap_h_p, and phi 
@@ -110,39 +114,48 @@ subroutine gkcoll_do
      ! Returns new cap_h_p and phi
      call COLLISION_do
 
-     ! Compute frequency and check for convergence
-     call FREQ_do
+     if(mod(itime,print_step) == 0) then
 
-     ! Print phi
-     if(silent_flag == 0 .and. i_proc == 0) then
-        open(unit=myio,file=trim(path)//runfile_phi,status='old',&
-             position='append')
-        write(myio,'(1pe12.5)') phi(:,:)
-        close(myio)
-        do ir=1,n_radial
-           do it=1,n_theta
-              phi_B(ir,it) = phi(ir,it) &
-                   *exp(-2*pi*i_c*indx_r(ir)*k_theta*rmin)
+        ! Compute frequency and print
+        call FREQ_do
+
+        ! Print phi
+        if(silent_flag == 0 .and. i_proc == 0) then
+           open(unit=myio,file=trim(path)//runfile_time,status='old',&
+                position='append')
+           write(myio,'(1pe12.5)') (itime * delta_t)
+           close(myio)
+           open(unit=myio,file=trim(path)//runfile_phi,status='old',&
+                position='append')
+           write(myio,'(1pe12.5)') transpose(phi(:,:))
+           close(myio)
+           do ir=1,n_radial
+              do it=1,n_theta
+                 phi_B(ir,it) = phi(ir,it) &
+                      *exp(-2*pi*i_c*indx_r(ir)*k_theta*rmin)
+              enddo
            enddo
-        enddo
-        open(unit=myio,file=trim(path)//runfile_phiB,status='old',&
-             position='append')
-        write(myio,'(1pe12.5)') phi_B(:,:)
-        close(myio)
-     end if
-     
-     print *, abs(freq_err), freq_tol
-     if(abs(freq_err) < freq_tol) then
-        print *, 'Converged'
-        exit
+           open(unit=myio,file=trim(path)//runfile_phiB,status='old',&
+                position='append')
+           write(myio,'(1pe12.5)') transpose(phi_B(:,:))
+           close(myio)
+        end if
+        
+        ! Check for convergence
+        if(abs(freq_err) < freq_tol) then
+           if(silent_flag == 0 .and. i_proc == 0) then
+              print *, 'Converged'
+           endif
+           exit
+        endif
      endif
-
+     
      phi_old = phi
-
+     
   enddo
 
   if(silent_flag == 0 .and. i_proc == 0) then
-     open(unit=myio,file=trim(path)//runfile_phi,status='old',&
+     open(unit=myio,file=trim(path)//runfile_hx,status='old',&
           position='append')
      write(myio,'(1pe12.5)') h_x
      close(myio)
