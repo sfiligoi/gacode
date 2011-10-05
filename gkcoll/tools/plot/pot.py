@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 GFONTSIZE=18
-ftype = 'screen'
+ftype = sys.argv[1]
 
 #-------------------------------------------------------
 # Read grid dimension and axes
@@ -65,8 +65,8 @@ ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
 ax.set_xlabel(r'$\theta_*/\pi$',fontsize=GFONTSIZE)
 
-ax.plot(thetab/np.pi,phib[0,:,-1],color='k',label='Re')
-ax.plot(thetab/np.pi,phib[1,:,-1],color='c',label='Im')
+ax.plot(thetab/np.pi,phib[0,:,0],color='k',label='Re')
+ax.plot(thetab/np.pi,phib[1,:,0],color='c',label='Im')
 
 ax.set_xlim([1-n_radial,-1+n_radial])
 ax.legend()
@@ -108,11 +108,11 @@ for i in range(n_xi):
     ax.plot(theta/np.pi,hx[0,0,4,:,4,i])
 
 ax.set_xlim([-1,1])
-ax.legend()
+#ax.legend()
 #======================================
 
-#if ftype == 'screen':
-plt.show()
-#else:
-#    outfile = key+'.'+ftype
-#    plt.savefig(outfile)
+if ftype == 'screen':
+    plt.show()
+else:
+    outfile = key+'.'+ftype
+    plt.savefig(outfile)
