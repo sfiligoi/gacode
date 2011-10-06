@@ -30,10 +30,16 @@ then
   echo "          -species <value>"
   echo "          Specify species to be plotted: [0,n_species-1]."
   echo
+  echo "          -field <value>"
+  echo "          Specify field to be plotted: [0,n_field-1]."
+  echo
+  echo "          -t <value>"
+  echo "          Specify integer time index (-1 is last time)."
+  echo
   echo "          -plot <type>"
   echo "          Generate plot of given type."
-  echo "          If this keyword is omitted, data will be listed to the screen."
-  echo "           <type> = phi,"
+  echo "          <type> = phi,"
+  echo "                 = h"
 
   exit 1
 fi
@@ -46,8 +52,9 @@ fi
 LOCDIR=.
 SIMROOT=$PWD
 SPECIES=0
+FIELD=0
 FTYPE=screen
-PLOT_TYPE=phi
+PLOT_TYPE=field
 TIME=-1
 #==============================================================================
 
@@ -64,6 +71,8 @@ while [ $# -gt 0 ] ; do
   -p) shift ; SIMROOT=$1 ;;
 
   -species) shift ; SPECIES=$1 ;;
+
+  -field) shift ; FIELD=$1 ;;
 
   -f) shift ; FTYPE=$1 ;;
 
@@ -89,8 +98,11 @@ PYROOT=$GACODE_ROOT/gkcoll/tools/plot
 #==============================================================================
 case "$PLOT_TYPE" in
 
-   phi)  
-	python $PYROOT/pot.py $FTYPE $TIME & ;;
+   field)  
+	python $PYROOT/plot_field.py $FTYPE $TIME $FIELD & ;;
+
+   h)  
+	python $PYROOT/plot_h.py $FTYPE $TIME $SPECIES & ;;
 
 esac 
 
