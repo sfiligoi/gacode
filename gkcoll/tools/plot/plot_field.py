@@ -54,7 +54,6 @@ fig = plt.figure(figsize=(6,6))
 
 #======================================
 ax = fig.add_subplot(111)
-ax.set_title('p=0')
 ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
 ax.set_xlabel(r'$\theta_*/\pi$',fontsize=GFONTSIZE)

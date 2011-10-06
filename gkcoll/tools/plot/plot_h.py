@@ -40,7 +40,7 @@ thetab = np.array(data[mark:mark+n_theta*n_radial])
 # Read H
 #
 data = np.loadtxt('out.gkcoll.hx')
-hx = np.reshape(data,(2,n_species,n_radial,n_theta,n_energy,n_xi),'F')
+hx = np.reshape(data,(2,n_radial*n_theta,n_xi,n_energy,n_species),'F')
 #-------------------------------------------------------
 
 fig = plt.figure(figsize=(12,12),dpi=100)
@@ -60,17 +60,20 @@ for row in range(3):
     #======================================
     ax = fig.add_subplot(3,2,p)
 
-    ax.set_title(r'${\rm Re}(h)$')
+    if row == 0:
+        ax.set_title(r'${\rm Re}(h), \, {\rm spec}='+str(ispec)+'$')
     ax.set_xlabel(r'$\theta/\pi$')
     ax.set_ylabel(r'$\xi = v_\parallel/v$')
 
-    hp = np.array(hx[0,ispec,3,:,ie,:])
+    hp = np.transpose(np.array(hx[0,:,:,ie,ispec]))
     hmin = hp.min()
     hmax = hp.max()
+    dh = (hmax-hmin)/100.0
 
-    levels = np.arange(hmin,hmax,(hmax-hmin)/100.0)
+    levels = np.arange(hmin-dh,hmax+dh,dh)
 
-    ax.contourf(theta/np.pi,xi,hp,levels,cmap=cm.jet,origin='lower')
+    ax.contourf(thetab/np.pi,xi,hp,levels,cmap=cm.jet,origin='lower')
+    ax.set_xlim([1-n_radial,-1+n_radial])
     #======================================
 
     p = p+1
@@ -78,17 +81,20 @@ for row in range(3):
     #======================================
     ax = fig.add_subplot(3,2,p)
 
-    ax.set_title(r'${\rm Im}(h)$')
+    if row == 0:
+         ax.set_title(r'${\rm Im}(h), \, {\rm spec}='+str(ispec)+'$')
     ax.set_xlabel(r'$\theta/\pi$')
     ax.set_ylabel(r'$\xi = v_\parallel/v$')
 
-    hp = np.array(hx[1,ispec,3,:,ie,:])
+    hp = np.transpose(np.array(hx[1,:,:,ie,ispec]))
     hmin = hp.min()
     hmax = hp.max()
+    dh = (hmax-hmin)/100.0
 
-    levels = np.arange(hmin,hmax,(hmax-hmin)/100.0)
+    levels = np.arange(hmin-dh,hmax+dh,dh)
 
-    ax.contourf(theta/np.pi,xi,hp,levels,cmap=cm.jet,origin='lower')
+    ax.contourf(thetab/np.pi,xi,hp,levels,cmap=cm.jet,origin='lower')
+    ax.set_xlim([1-n_radial,-1+n_radial])
     #======================================
 
 

@@ -20,7 +20,8 @@ subroutine gkcoll_do
   use gkcoll_freq
   use gkcoll_allocate_profile
   implicit none
-  integer :: ix, ir, it, jr, p
+
+  integer :: ix, ir, it, jr, p, is, ie
   integer :: itime, nt_step
   character(len=80)  :: runfile_phi   = 'out.gkcoll.phi'
   character(len=80)  :: runfile_phiB  = 'out.gkcoll.phiB'
@@ -29,9 +30,9 @@ subroutine gkcoll_do
   character(len=80)  :: runfile_time  = 'out.gkcoll.time'
   integer :: myio = 20
   integer :: print_step=10
-  complex, dimension(:,:), allocatable :: phi_B
+  complex, dimension(:,:), allocatable :: f_balloon
 
-   if (silent_flag == 0 .and. i_proc == 0) then
+  if (silent_flag == 0 .and. i_proc == 0) then
      open(unit=io_gkcollout,file=trim(path)//runfile_gkcollout,status='replace')
      close(io_gkcollout)
   endif
@@ -66,7 +67,7 @@ subroutine gkcoll_do
   allocate(cap_h_p(n_species,n_radial,n_theta,n_energy,n_xi))
   allocate(phi(n_radial,n_theta))
   allocate(phi_old(n_radial,n_theta))
-  allocate(phi_B(n_radial,n_theta))
+  allocate(f_balloon(n_radial,n_theta))
 
   call EQUIL_alloc(1)
   call EQUIL_do
@@ -77,7 +78,7 @@ subroutine gkcoll_do
 
   ! Initialization
   call GK_init
-  
+
   if(silent_flag == 0 .and. i_proc == 0) then
      open(unit=myio,file=trim(path)//runfile_phi,status='replace')
      close(myio)
@@ -129,18 +130,20 @@ subroutine gkcoll_do
                 position='append')
            write(myio,'(1pe12.5)') transpose(phi(:,:))
            close(myio)
+
+           ! Construct ballooning-space form of phi
            do ir=1,n_radial
               do it=1,n_theta
-                 phi_B(ir,it) = phi(ir,it) &
+                 f_balloon(ir,it) = phi(ir,it) &
                       *exp(-2*pi*i_c*indx_r(ir)*k_theta*rmin)
               enddo
            enddo
            open(unit=myio,file=trim(path)//runfile_phiB,status='old',&
                 position='append')
-           write(myio,'(1pe12.5)') transpose(phi_B(:,:))
+           write(myio,'(1pe12.5)') transpose(f_balloon(:,:))
            close(myio)
-        end if
-        
+        endif
+
         ! Check for convergence
         if(abs(freq_err) < freq_tol) then
            if(silent_flag == 0 .and. i_proc == 0) then
@@ -149,18 +152,36 @@ subroutine gkcoll_do
            exit
         endif
      endif
-     
+
      phi_old = phi
-     
+
   enddo
 
   if(silent_flag == 0 .and. i_proc == 0) then
      open(unit=myio,file=trim(path)//runfile_hx,status='old',&
           position='append')
-     write(myio,'(1pe12.5)') h_x
+
+     do is=1,n_species
+        do ie=1,n_energy
+           do ix=1,n_xi
+
+              ! Construct ballooning-space form of h_x
+              do ir=1,n_radial
+                 do it=1,n_theta
+                    f_balloon(ir,it) = h_x(is,ir,it,ie,ix) &
+                         *exp(-2*pi*i_c*indx_r(ir)*k_theta*rmin)
+                 enddo
+              enddo
+
+              write(myio,'(1pe12.5)') transpose(f_balloon(:,:))
+
+           enddo
+        enddo
+     enddo
+
      close(myio)
   endif
-     
+
 
 100 continue
   call EQUIL_alloc(0)
@@ -180,6 +201,6 @@ subroutine gkcoll_do
   if(allocated(cap_h_p))       deallocate(cap_h_p)
   if(allocated(phi))           deallocate(phi)
   if(allocated(phi_old))       deallocate(phi_old)
-  if(allocated(phi_B))         deallocate(phi_B)
+  if(allocated(f_balloon))     deallocate(f_balloon)
 
 end subroutine gkcoll_do
