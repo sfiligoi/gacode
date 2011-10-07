@@ -9,6 +9,7 @@ ftype = sys.argv[1]
 itime = int(sys.argv[2])
 ispec = int(sys.argv[3])
 
+
 #-------------------------------------------------------
 # Read grid dimension and axes
 #
@@ -101,5 +102,5 @@ for row in range(3):
 if ftype == 'screen':
     plt.show()
 else:
-    outfile = key+'.'+ftype
+    outfile = 'h.'+ftype
     plt.savefig(outfile)
