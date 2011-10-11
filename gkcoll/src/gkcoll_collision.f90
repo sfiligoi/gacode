@@ -28,8 +28,8 @@ contains
     complex, dimension(:), allocatable :: work 
     complex, dimension(:,:), allocatable :: amat, bmat
     complex :: alpha = (1.0,0.0)
-    complex :: beta  = (0.0,0.0)
-    
+    complex :: beta  = (0.0,0.0) 
+
     if(collision_model == -1) return
 
     if(flag == 1) then
@@ -66,7 +66,7 @@ contains
              enddo
           enddo
        enddo
-       
+
        msize = n_species*n_energy*n_xi
        allocate(cmat(n_radial,n_theta,msize,msize))
        allocate(cvec(msize))
@@ -88,6 +88,9 @@ contains
        do is=1,n_species
           sum_den = sum_den + z(is)**2 * dens(is) / temp(is)
        enddo
+       if(adiabatic_ele_model == 1) then
+          sum_den = sum_den + dens_ele / temp_ele
+       endif
        
        ! matrix solve parameters
        allocate(work(msize))
@@ -214,7 +217,7 @@ contains
                 enddo
              enddo
           enddo
-          
+
           ! Solve for H
           call ZGEMV('N',msize,msize,alpha,cmat(ir,it,:,:),&
                msize,cvec,1,beta,bvec,1)
@@ -227,9 +230,6 @@ contains
                 enddo
              enddo
           enddo
-
-          ! Compute the new phi
-          call POISSONp_do(ir,it) 
           
        enddo
     enddo

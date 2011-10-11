@@ -141,10 +141,10 @@ subroutine gkcoll_check
            call gkcoll_error('ERROR: (GKCOLL) temperature must be positive')
            return
         end if
-        if(nu(is) <= 0.0) then
-           call gkcoll_error('ERROR: (GKCOLL) collision frequency must be positive')
-           return
-        end if
+        !if(nu(is) <= 0.0) then
+        !   call gkcoll_error('ERROR: (GKCOLL) collision frequency must be positive')
+        !   return
+        !end if
         if(z(is) == 0.0) then
            call gkcoll_error('ERROR: (GKCOLL) charge must be non-zero')
            return

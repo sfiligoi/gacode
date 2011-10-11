@@ -32,7 +32,7 @@ contains
                               * mass(is) / (z(is) * Bmag(it)) &
                               * sqrt(2.0* energy(ie)) &
                               * sqrt(1-xi(jx)**2)
-                         call legendre(ix,xi(jx),val)
+                         call legendre(indx_xi(ix),xi(jx),val)
                          gyrop_J0(is,ir,it,ie,ix) &
                               = gyrop_J0(is,ir,it,ie,ix) &
                               + 0.5 * w_xi(jx) * BESJ0(arg) * val

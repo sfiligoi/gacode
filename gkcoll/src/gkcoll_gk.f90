@@ -73,6 +73,7 @@ contains
              xi_deriv_mat(ix,jx) = val
           enddo
        enddo
+
        xi_mat_inv = xi_mat
        allocate(work(n_xi))
        allocate(i_piv(n_xi))
@@ -80,7 +81,7 @@ contains
        call ZGETRI(n_xi,xi_mat_inv,n_xi,i_piv,work,n_xi,info)
        deallocate(work)
        deallocate(i_piv)
-
+       
        initialized = .true.
 
     else
@@ -283,7 +284,7 @@ contains
           enddo
        enddo
     enddo
-    
+
   end subroutine GK_do
   
   subroutine get_gkRHS(ij)
