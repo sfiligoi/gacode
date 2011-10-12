@@ -112,7 +112,7 @@ subroutine gkcoll_do
      call GK_do
 
      ! Collision step
-     ! Returns new cap_h_p and phi
+     ! Returns new cap_h_p, h_x, and phi
      call COLLISION_do
 
      if(mod(itime,print_step) == 0) then

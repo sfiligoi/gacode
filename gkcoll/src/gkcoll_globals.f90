@@ -1,5 +1,8 @@
 module gkcoll_globals
 
+  ! EAB: temp parameter
+  integer :: trap_method=1
+
   !---------------------------------------------------------------
   ! local MPI variables
   ! 
@@ -77,6 +80,10 @@ module gkcoll_globals
   real    :: delta_t
   real    :: max_time
   real    :: freq_tol
+
+  real    :: rupwind_eps
+  integer :: rupwind_n
+
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------

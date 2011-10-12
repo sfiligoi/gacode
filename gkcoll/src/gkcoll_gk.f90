@@ -336,10 +336,12 @@ contains
                            - rval * cderiv(id) * thfac * ir_fac
                     enddo
 
-                    val = omega_trap(it,is) &
-                         * sqrt(energy(ie)) * (1.0 - xi(ix)**2)
+                    if(trap_method == 0) then
+                       val = omega_trap(it,is) &
+                            * sqrt(energy(ie)) * (1.0 - xi(ix)**2)
                        rhs(ij,is,ir,it,ie,ix) = rhs(ij,is,ir,it,ie,ix) &
                             - val  * cap_h_x_deriv(is,ir,it,ie,ix)
+                    endif
 
                     ! omega_rdrift
                     val = omega_rdrift(it,is) &
@@ -347,6 +349,17 @@ contains
                          * (2.0*pi*i_c*indx_r(ir)*r_length_inv) 
                     rhs(ij,is,ir,it,ie,ix) = rhs(ij,is,ir,it,ie,ix) &
                          - val * cap_h_x(is,ir,it,ie,ix)
+                    ! radial upwinding
+                    val = omega_rdrift(it,is) &
+                         * energy(ie) * (1.0 + xi(ix)**2)
+                    if(abs(val) /= 0.0) then
+                       val = abs(val)/val
+                    endif
+                    val = val * rupwind_eps & 
+                         * (1.0*indx_r(ir)/(1.0*n_radial))**rupwind_n &
+                         * (2.0*pi*r_length_inv) 
+                    rhs(ij,is,ir,it,ie,ix) = rhs(ij,is,ir,it,ie,ix) &
+                         - val * h_x(is,ir,it,ie,ix)
 
                     ! omega_dalpha
                     val = omega_adrift(it,is) &

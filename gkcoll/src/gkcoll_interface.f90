@@ -24,6 +24,8 @@ module gkcoll_interface
   real    :: gkcoll_delta_t_in  = 0.01
   real    :: gkcoll_max_time_in = 100.0
   real    :: gkcoll_freq_tol_in = 0.001
+  real    :: gkcoll_rupwind_eps_in = 0.0
+  integer :: gkcoll_rupwind_n_in = 0
   integer :: gkcoll_toroidal_model_in = 1
   integer :: gkcoll_toroidal_num_in  = 1
   real    :: gkcoll_rho_in      = 0.0025
@@ -126,6 +128,8 @@ contains
     gkcoll_delta_t_in  = delta_t
     gkcoll_max_time_in = max_time
     gkcoll_freq_tol_in = freq_tol
+    gkcoll_rupwind_eps_in = rupwind_eps
+    gkcoll_rupwind_n_in = rupwind_n
     gkcoll_toroidal_model_in = toroidal_model
     gkcoll_toroidal_num_in = toroidal_num
     gkcoll_rho_in      = rho
@@ -216,6 +220,8 @@ contains
     delta_t  = gkcoll_delta_t_in
     max_time = gkcoll_max_time_in
     freq_tol = gkcoll_freq_tol_in
+    rupwind_eps = gkcoll_rupwind_eps_in
+    rupwind_n = gkcoll_rupwind_n_in
     toroidal_model = gkcoll_toroidal_model_in
     toroidal_num   = gkcoll_toroidal_num_in
     rho       = gkcoll_rho_in

@@ -15,6 +15,7 @@ contains
   subroutine COLLISION_alloc(flag)
     use gkcoll_globals
     use gkcoll_gyro
+    use gkcoll_equilibrium, only : omega_trap
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
     real, dimension(:,:,:), allocatable :: nu_d
@@ -154,6 +155,40 @@ contains
                                     * gyrop_J0(is,ir,it,ie,ix) &
                                     * z(js)*dens(js) &
                                     * gyrop_J0(js,ir,it,je,jx) * w_e(je)
+
+                               ! Trapping component
+                               if(trap_method /= 0) then
+                                  if(is==js .and. ie==je) then
+                                     if(jx == ix+1) then
+                                        cmat(ir,it,p,pp)  &
+                                             =  cmat(ir,it,p,pp) & 
+                                             + (0.5*delta_t) &
+                                             * omega_trap(it,is) &
+                                             * sqrt(energy(ie)) &
+                                             * ((ix+1.0)*(ix+2.0)/(2*ix+3.0))
+                                        amat(p,pp)  &
+                                             =  amat(p,pp) & 
+                                             - (0.5*delta_t) &
+                                             * omega_trap(it,is) &
+                                             * sqrt(energy(ie)) &
+                                             * ((ix+1.0)*(ix+2.0)/(2*ix+3.0))
+                                     else if(jx == ix-1) then
+                                        cmat(ir,it,p,pp)  &
+                                             =  cmat(ir,it,p,pp) & 
+                                             + (0.5*delta_t) &
+                                             * omega_trap(it,is) &
+                                             * sqrt(energy(ie)) &
+                                             * (-ix*(ix-1.0)/(2*ix-1.0))
+                                        amat(p,pp)  &
+                                             =  amat(p,pp) & 
+                                             - (0.5*delta_t) &
+                                             * omega_trap(it,is) &
+                                             * sqrt(energy(ie)) &
+                                             * (-ix*(ix-1.0)/(2*ix-1.0))
+                                     endif
+                                  endif
+                               endif
+
                             enddo
                          enddo
                       enddo
@@ -195,6 +230,8 @@ contains
   subroutine COLLISION_do
     use gkcoll_globals
     use gkcoll_poisson
+    use gkcoll_gk, only : xi_mat
+    use gkcoll_gyro
     implicit none
     integer :: is,ir,it,ie,ix
     integer :: p
@@ -231,9 +268,30 @@ contains
              enddo
           enddo
           
+          ! Compute the new phi
+          call POISSONp_do(ir,it)
+
        enddo
     enddo
     
+    ! Compute the new h_x
+    do is=1,n_species
+       do ir=1,n_radial
+          do it=1,n_theta
+             do ie=1,n_energy
+                call ZGEMV('N',n_xi,n_xi,alpha,xi_mat,n_xi,&
+                     cap_h_p(is,ir,it,ie,:),1,beta,cap_h_x(is,ir,it,ie,:),1)
+                do ix=1,n_xi
+                   h_x(is,ir,it,ie,ix) = cap_h_x(is,ir,it,ie,ix) &
+                        - z(is)/temp(is) * gyrox_J0(is,ir,it,ie,ix) &
+                        * phi(ir,it)
+                enddo
+             enddo
+          enddo
+       enddo
+    enddo
+    
+
   end subroutine COLLISION_do
   
 end module gkcoll_collision
