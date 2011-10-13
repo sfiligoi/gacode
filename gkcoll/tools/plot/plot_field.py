@@ -66,7 +66,7 @@ else:
     phin = phimax
 
 ax.plot(thetab/np.pi,phib[0,:,itime]/phin,color='k',label='Re')
-ax.plot(thetab/np.pi,phib[1,:,itime]/phin,color='c',label='Im')
+ax.plot(thetab/np.pi,phib[1,:,itime]/phin,color='b',label='Im')
 
 ax.set_xlim([1-n_radial,-1+n_radial])
 ax.legend()

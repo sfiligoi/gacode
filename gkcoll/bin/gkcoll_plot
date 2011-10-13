@@ -39,7 +39,8 @@ then
   echo "          -plot <type>"
   echo "          Generate plot of given type."
   echo "          <type> = phi,"
-  echo "                 = h"
+  echo "                 = h,"
+  echo "                 = h_cut"
 
   exit 1
 fi
@@ -103,6 +104,9 @@ case "$PLOT_TYPE" in
 
    h)  
 	python $PYROOT/plot_h.py $FTYPE $TIME $SPECIES & ;;
+
+   h_cut)  
+	python $PYROOT/plot_h_cut.py $FTYPE $TIME $SPECIES & ;;
 
 esac 
 
