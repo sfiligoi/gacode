@@ -83,6 +83,7 @@ module gkcoll_globals
 
   real    :: rupwind_eps
   integer :: rupwind_n
+  real    :: tupwind_eps
 
   !---------------------------------------------------------------
 

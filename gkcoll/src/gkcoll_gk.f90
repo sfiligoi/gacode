@@ -298,7 +298,7 @@ contains
     real    :: rval
     complex :: val
     complex :: thfac
-    complex :: ir_fac
+    complex :: ir_fac, irup_fac
 
     ! Get the RHS collisionless GK little_h: h = H - ze/T G phi
     rhs(ij,:,:,:,:,:) = (0.0,0.0)
@@ -316,24 +316,30 @@ contains
                          thfac = cos(2*pi*k_theta*rmin) &
                               + i_c * sin(2*pi*k_theta*rmin)
                          if(ir-1 >= 1) then
-                            ir_fac = cap_h_x(is,ir-1,jt,ie,ix)
+                            ir_fac   = cap_h_x(is,ir-1,jt,ie,ix)
+                            irup_fac = h_x(is,ir-1,jt,ie,ix)
                          else
-                            ir_fac = cap_h_x(is,n_radial,jt,ie,ix)
+                            ir_fac   = cap_h_x(is,n_radial,jt,ie,ix)
+                            irup_fac = h_x(is,n_radial,jt,ie,ix)
                          endif
                       else if((it+id) > n_theta) then
                          thfac = cos(2*pi*k_theta*rmin) &
                               - i_c * sin(2*pi*k_theta*rmin)
                          if(ir+1 <= n_radial) then
-                            ir_fac = cap_h_x(is,ir+1,jt,ie,ix)
+                            ir_fac   = cap_h_x(is,ir+1,jt,ie,ix)
+                            irup_fac = h_x(is,ir+1,jt,ie,ix)
                          else
-                            ir_fac = cap_h_x(is,1,jt,ie,ix)
+                            ir_fac   = cap_h_x(is,1,jt,ie,ix)
+                            irup_fac = h_x(is,1,jt,ie,ix)
                          endif
                       else
                          thfac  = 1.0
                          ir_fac =  cap_h_x(is,ir,jt,ie,ix)
                       endif
                       rhs(ij,is,ir,it,ie,ix) = rhs(ij,is,ir,it,ie,ix) &
-                           - rval * cderiv(id) * thfac * ir_fac
+                           - rval * cderiv(id) * thfac * ir_fac &
+                           - tupwind_eps * abs(rval) * uderiv(id) &
+                           * thfac * irup_fac
                     enddo
 
                     if(trap_method == 0) then
