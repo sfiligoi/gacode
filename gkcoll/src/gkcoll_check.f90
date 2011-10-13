@@ -14,10 +14,10 @@ subroutine gkcoll_check
   !-----------------------------------------------------------
   ! Grid parameter checks
   !
-  if (modulo(n_theta,2) == 0) then 
-     call gkcoll_error('ERROR: (GKCOLL) n_theta must be odd')
-     return
-  endif
+  !if (modulo(n_theta,2) == 0) then 
+  !   call gkcoll_error('ERROR: (GKCOLL) n_theta must be odd')
+  !   return
+  !endif
   !
   if(n_species > 6) then
      call gkcoll_error('ERROR: (GKCOLL) max n_species is 6')
