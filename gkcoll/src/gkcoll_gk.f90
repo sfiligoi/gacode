@@ -334,7 +334,8 @@ contains
                          endif
                       else
                          thfac  = 1.0
-                         ir_fac =  cap_h_x(is,ir,jt,ie,ix)
+                         ir_fac   =  cap_h_x(is,ir,jt,ie,ix)
+                         irup_fac =  h_x(is,ir,jt,ie,ix)
                       endif
                       rhs(ij,is,ir,it,ie,ix) = rhs(ij,is,ir,it,ie,ix) &
                            - rval * cderiv(id) * thfac * ir_fac &
