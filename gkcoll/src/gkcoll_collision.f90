@@ -165,26 +165,34 @@ contains
                                              + (0.5*delta_t) &
                                              * omega_trap(it,is) &
                                              * sqrt(energy(ie)) &
-                                             * ((ix+1.0)*(ix+2.0)/(2*ix+3.0))
+                                             * (indx_xi(ix)+1.0) &
+                                             * (indx_xi(ix)+2.0) &
+                                             / (2*indx_xi(ix)+3.0)
                                         amat(p,pp)  &
                                              =  amat(p,pp) & 
                                              - (0.5*delta_t) &
                                              * omega_trap(it,is) &
                                              * sqrt(energy(ie)) &
-                                             * ((ix+1.0)*(ix+2.0)/(2*ix+3.0))
+                                             * (indx_xi(ix)+1.0) &
+                                             * (indx_xi(ix)+2.0) &
+                                             / (2*indx_xi(ix)+3.0)
                                      else if(jx == ix-1) then
                                         cmat(ir,it,p,pp)  &
                                              =  cmat(ir,it,p,pp) & 
                                              + (0.5*delta_t) &
                                              * omega_trap(it,is) &
                                              * sqrt(energy(ie)) &
-                                             * (-ix*(ix-1.0)/(2*ix-1.0))
+                                             * (-1.0*indx_xi(ix)) &
+                                             * (indx_xi(ix)-1.0)&
+                                             / (2*indx_xi(ix)-1.0)
                                         amat(p,pp)  &
                                              =  amat(p,pp) & 
                                              - (0.5*delta_t) &
                                              * omega_trap(it,is) &
                                              * sqrt(energy(ie)) &
-                                             * (-ix*(ix-1.0)/(2*ix-1.0))
+                                             * (-1.0*indx_xi(ix)) &
+                                             * (indx_xi(ix)-1.0)&
+                                             / (2*indx_xi(ix)-1.0)
                                      endif
                                   endif
                                endif
