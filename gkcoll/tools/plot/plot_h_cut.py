@@ -64,7 +64,7 @@ for row in range(3):
     ax.grid(which="major",ls=":")
 
     if row == 0:
-        ax.set_title(r'$\xi=0 \, {\rm spec}='+str(ispec)+'$')
+        ax.set_title(r'$\xi=0 \quad {\rm spec}='+str(ispec)+'$')
     ax.set_xlabel(r'$\theta/\pi$')
 
     hp = np.array(hx[0,:,:,ie,ispec])
@@ -82,7 +82,7 @@ for row in range(3):
     ax.grid(which="major",ls=":")
 
     if row == 0:
-         ax.set_title(r'$\theta=0 \, {\rm spec}='+str(ispec)+'$')
+         ax.set_title(r'$\theta=0 \quad {\rm spec}='+str(ispec)+'$')
     ax.set_xlabel(r'$\xi = v_\parallel/v$')
 
     n0 = (n_radial/2)*n_theta+n_theta/2
