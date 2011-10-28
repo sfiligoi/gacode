@@ -8,6 +8,7 @@ FOPT	= -O3 -xSSE2,SSE3,SSSE3,SSE4.1 -no-prec-div -funroll-loops -unroll-aggressi
 #FDEBUG	= -check all -warn all -fpe0 -ftrapuv
 FDEBUG	= -check bounds -fpe0 -ftrapuv
 FPROF	= -O -pg 
+FOMP    = -openmp
 
 # System math libraries
 

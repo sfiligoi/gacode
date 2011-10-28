@@ -5,7 +5,7 @@ ifeq ($(OPT),debug)
 else
    FFLAGS=${FOPT}
 endif
-      
+
 LLIB = gyro_lib
 
 OBJECTS = gyro_globals.o \
@@ -154,6 +154,12 @@ OBJECTS = gyro_globals.o \
           write_matrix_stat.o \
           gyro_dump_input.o \
           gyro_dump_interface.o
+
+ifeq ($(OMP),true)
+   FC += ${FOMP}
+else
+   OBJECTS += gyro_omp_lib.o
+endif
 
 .SUFFIXES : .o .f90 
 
