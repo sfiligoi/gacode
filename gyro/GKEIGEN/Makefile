@@ -15,6 +15,13 @@ OBJECTS = GKEIGEN_globals.o \
           GKEIGEN_catch_error.o \
           GKEIGEN_split_comm.o
 
+ifeq ($(OMP),true)
+   FC += ${FOMP}
+else
+   FC += ${FNOMP}
+   OBJECTS += ../src/gyro_omp_lib.o
+endif
+                  
 .SUFFIXES : .o .f90 .F
 
 lib: $(OBJECTS)

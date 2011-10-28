@@ -173,7 +173,7 @@
 !      EndIf
 
 !      do step = 1, nstep
-!        call get_field_explicit
+!        call gyro_field_solve_explicit
 !        call gyro_rhs_total
 !        h = h + dt*RHS
 !      enddo
@@ -239,7 +239,7 @@
              h(:,:,:,:) = (0.0,0.0)  
              If (i_proc_e == i_proc)                                    &
      &                h(m1,i1,p_nek_loc1,is1) = (1.0,0.0)
-               call get_field_explicit
+               call gyro_field_solve_explicit
                call gyro_rhs_total
                ielem = istate - istate_start
                jstate = jstate_start
@@ -622,7 +622,7 @@
             EndDo ! p_nek2
           EndDo ! is2
 
-          call get_field_explicit
+          call gyro_field_solve_explicit
 
           call gyro_field_interpolation
 !          call get_field_fluxave

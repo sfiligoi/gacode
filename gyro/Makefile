@@ -8,7 +8,12 @@ endif
  
 EXEC=gyro
 
-#SEK: Exports a bash variable?  Seems odd.
+ifeq ($(OMP),true)
+   FC += ${FOMP}
+else
+   FC += ${FNOMP}
+endif
+ 
 export EXTRA_LIBS = \
        ${GACODE_ROOT}/shared/EXPRO/EXPRO_lib.a \
        ${GACODE_ROOT}/shared/math/math_lib.a \
