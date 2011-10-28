@@ -16,15 +16,6 @@ subroutine gyro_write_timedata_hdf5
   !---------------------------------------------------
   implicit none
   !
-  real :: cp0
-  real :: cp1
-  real :: cp2
-  real :: cp3
-  real :: cp4
-  real :: cp5
-  real :: cp6
-  real :: cp7
-  real :: cp8
   real :: pi=3.141592653589793
   !
   real, dimension(:), allocatable, save :: zeta_phi
@@ -55,8 +46,6 @@ subroutine gyro_write_timedata_hdf5
      call gyro_write_step(trim(path)//'out.gyro.t',1)
   endif
   !---------------------------------------------------
-
-  call proc_time(cp0)
 
   !---------------------------------------------------
   ! Determine if the 3D files need to be written 
@@ -201,7 +190,6 @@ subroutine gyro_write_timedata_hdf5
   endif
   !--------------------------------------------------
 
-  call proc_time(cp1)
   call gyro_kxky_spectrum
   h5in%units="dimensionless"
   h5in%mesh=" "
@@ -210,7 +198,6 @@ subroutine gyro_write_timedata_hdf5
        size(kxkyspec),&
        kxkyspec,&
        h5in,h5err)
-  call proc_time(cp2)
 
   if (i_proc == 0 .and. io_control > 1) then
      h5in%units="dimensionless"
@@ -218,29 +205,15 @@ subroutine gyro_write_timedata_hdf5
      call add_h5(dumpTGid,'k_perp_squared',k_perp_squared,h5in,h5err)
   endif
 
-  !-----------------------------
-  ! Set remaining timers to zero
-  cp3 = 0.0
-  cp4 = 0.0
-  cp5 = 0.0
-  cp6 = 0.0
-  cp7 = 0.0
-  cp8 = 0.0
-  !-----------------------------
-
-  call proc_time(cp3)
   call get_field_fluxave
-  call proc_time(cp4)
 
   !-------------------------------------------------------------------
   ! Calculation of fundamental nonlinear fluxes and related 
   ! diffusivities
   !
   call gyro_nonlinear_flux
-  call proc_time(cp5)
   call gyro_diffusivity
   call gyro_gbflux
-  call proc_time(cp6)
   !-------------------------------------------------------------------
 
   !-------------------------------------------------------------------
@@ -261,8 +234,6 @@ subroutine gyro_write_timedata_hdf5
      !================
      ! BEGIN NONLINEAR 
      !================
-
-     call proc_time(cp7)
 
      h5in%units="diff units"
      call write_distributed_real_h5("diff_n",dumpTGid,&
@@ -297,8 +268,6 @@ subroutine gyro_write_timedata_hdf5
              nl_transfer,&
              h5in,h5err)
      endif
-
-     call proc_time(cp8)
 
      if (i_proc == 0 ) then
 
@@ -373,14 +342,9 @@ subroutine gyro_write_timedata_hdf5
   call gyro_write_precision(10,sum(abs(gbflux)))
   !------------------------------------------------------------
 
-  !--------------------------------------
-  ! ** Timer diagnostics last **
-  !
-  call proc_time(CPU_diag_outp)
-  CPU_diag_b = CPU_diag_b + (CPU_diag_outp - CPU_diag_mid)
-  call write_timing(trim(path)//'out.gyro.timing',10)
-  CPU_diag_mid = CPU_diag_outp
-  !--------------------------------------
+  !------------------------------------------------------------
+  call gyro_write_timers(trim(path)//'out.gyro.timing',10)
+  !------------------------------------------------------------
 
   !---------------------------------------------------------
   ! Dump restart parameters

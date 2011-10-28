@@ -63,11 +63,6 @@ subroutine gyro_collision_setup
   real, external :: DLANGE
   !-----------------------------------------------------------
 
-  if (collision_method > 2) then
-     call gyro_collision_setup_ebelli
-     return
-  endif
-
   nu_total(:,:,:) = 0.0
 
   condition_number = 0.0

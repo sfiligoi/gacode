@@ -18,15 +18,10 @@ subroutine get_kinetic_advance
   implicit none
   !-------------------------
 
-  call proc_time(CPU_field_in)
-
   call get_delta_he
   call gyro_field_solve_implicit
   call gyro_field_interpolation
   call gyro_get_he_implicit
-
-  call proc_time(CPU_field_out)
-  CPU_field = CPU_field + (CPU_field_out - CPU_field_in)
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'*[get_kinetic_advance done]'

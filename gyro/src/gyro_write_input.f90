@@ -324,13 +324,6 @@ subroutine gyro_write_input
         if (collision_flag == 1) then
            write(1,20) 'Log(RBF Cond. num.)',log10(c_max)
         endif
-        write(1,*) '----------- SETUP TIMING ----------------------'
-        write(1,20) 'Grid Setup',CPU_1-CPU_0
-        write(1,20) 'Build radial ops',CPU_2-CPU_1
-        write(1,20) 'Build advection ops',CPU_4-CPU_3
-        write(1,20) 'Build field matrices',CPU_6-CPU_5
-        write(1,*)
-        write(1,20) 'TOTAL SETUP',CPU_7-CPU_0
      endif
 
   endif

@@ -460,57 +460,6 @@ module gyro_globals
   !---------------------------------------------------------
 
   !---------------------------------------------------------
-  ! Timers:
-  !
-  integer :: clock_count
-  integer :: clock_rate
-  integer :: clock_max
-  !
-  real :: elapsed_time
-  !
-  real :: CPU_0
-  real :: CPU_1
-  real :: CPU_2
-  real :: CPU_2a
-  real :: CPU_3
-  real :: CPU_4
-  real :: CPU_5
-  real :: CPU_6
-  real :: CPU_7
-  real :: CPU_C_in
-  real :: CPU_C_out
-  real :: CPU_C
-  real :: CPU_Ct_in
-  real :: CPU_Ct_out
-  real :: CPU_Ct
-  real :: CPU_NL_in
-  real :: CPU_NL_out
-  real :: CPU_NL
-  real :: CPU_NLt_in
-  real :: CPU_NLt_out
-  real :: CPU_NLt
-  real :: CPU_RHS_in
-  real :: CPU_RHS_out
-  real :: CPU_RHS
-  real :: CPU_diag_in
-  real :: CPU_diag_mid
-  real :: CPU_diag_outp
-  real :: CPU_diag_out
-  real :: CPU_diag_a
-  real :: CPU_diag_b
-  real :: CPU_field_in
-  real :: CPU_field_out
-  real :: CPU_field
-  real :: CPU_field2_in
-  real :: CPU_field2_out
-  real :: CPU_field2
-  real :: CPU_interp
-  real :: CPU_interp_in
-  real :: CPU_interp_out
-  real :: CPU_ts
-  !---------------------------------------------------------
-
-  !---------------------------------------------------------
   ! Radial boundary parameters:
   !
   integer, dimension(:), allocatable :: i_cyc

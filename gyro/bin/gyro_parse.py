@@ -196,7 +196,6 @@ x.add('FIELDEIGEN_ROOT_METHOD','1')
 x.add('FIELDEIGEN_WR','-0.3')
 x.add('FIELDEIGEN_WI','0.2')
 x.add('FIELDEIGEN_TOL','1e-6')
-x.add('COLLISION_METHOD','2')
 x.add('REINTEGRATE_FLAG','0')
 #addition for hdf5 io
 x.add('IO_METHOD', '1')
@@ -232,6 +231,7 @@ x.dep('A_SCALE','reimplement using input.profiles.')
 x.dep('B_SCALE','reimplement using input.profiles.')
 x.dep('P_SCALE','reimplement using input.profiles.')
 x.dep('ROTATION_METHOD','use ROTATION_THEORY_METHOD.')
+x.dep('COLLISION_METHOD','Deprecated.  You no longer have a choice of method.')
   
 # Perform the parsing
 x.read_input('input.gyro')

@@ -13,12 +13,8 @@ subroutine gyro_field_solve_explicit
 
   implicit none
 
-  call proc_time(CPU_field_in)
-
   call get_gyro_h
   if (n_field == 3) call get_gyro_h_aperp
-
-  call proc_time(CPU_field2_in)
 
   ! Velocity-space sums (RHS)
   do ix=1,n_field
@@ -58,8 +54,5 @@ subroutine gyro_field_solve_explicit
   end select
 
   call gyro_field_interpolation
-
-  call proc_time(CPU_field_out)
-  CPU_field = CPU_field + (CPU_field_out - CPU_field_in)
 
 end subroutine gyro_field_solve_explicit

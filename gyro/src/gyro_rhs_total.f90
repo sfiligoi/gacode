@@ -37,8 +37,6 @@ subroutine gyro_rhs_total
   endif
   !---------------------------------------------
 
-  call proc_time(CPU_rhs_in)
-
   !----------------------------------------------------------------------
   ! Compute orbit-time derivative for ions ONLY, because this term is 
   ! explicit for ions.
@@ -174,9 +172,6 @@ subroutine gyro_rhs_total
      rhs(:,:,:,1) = rhs(:,:,:,1)+rhs_krook(:,:,:)
   endif
   !---------------------------------------------------------
-
-  call proc_time(CPU_rhs_out)
-  CPU_RHS = CPU_RHS + (CPU_rhs_out - CPU_rhs_in)
 
   deallocate(z_der)
   deallocate(z_dis)

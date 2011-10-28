@@ -18,15 +18,6 @@ subroutine gyro_write_timedata_wedge_hdf5
   !
   integer, parameter :: hr4=SELECTED_REAL_KIND(6,37)
   !
-  real :: cp0
-  real :: cp1
-  real :: cp2
-  real :: cp3
-  real :: cp4
-  real :: cp5
-  real :: cp6
-  real :: cp7
-  real :: cp8
   real :: pi=3.141592653589793
   !
   real, dimension(:), allocatable, save :: zeta_phi
@@ -90,8 +81,6 @@ subroutine gyro_write_timedata_wedge_hdf5
      call hdf5_write_wedge_coords
   endif
   !---------------------------------------------------
-
-  call proc_time(cp0)
 
   !--------------------------------------------------
   ! Output of field-like quantities:

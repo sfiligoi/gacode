@@ -42,20 +42,6 @@ subroutine gyro_do
      endif
   endif
 
-  ! Note sure what purpose this serves
-  !if (i_proc==0 .and. gkeigen_j_set == 0) print *,runfile
-
-  CPU_0 = 0.0
-  CPU_1 = 0.0
-  CPU_2 = 0.0
-  CPU_3 = 0.0
-  CPU_4 = 0.0
-  CPU_5 = 0.0
-  CPU_6 = 0.0
-  CPU_7 = 0.0
-
-  call proc_time(CPU_0)
-
   !-------------------------
   ! Early initializations:
   !
@@ -185,29 +171,23 @@ subroutine gyro_do
      ! for GKE solution.
      call gyro_omegas
 
-     call proc_time(CPU_1)
-
      ! Generate discrete Fourier and Fourier-sine transform 
      ! matrices for spectral Poisson and adaptive source methods, 
      ! compute radial derivative and gyroaverage operators,
      ! and then print them.
 
      call gyro_radial_operators
-     call proc_time(CPU_2)
      !
      ! Precomputation of arrays which depend on blending 
      ! coefficients.  These are used in the Maxwell solves.
      call gyro_set_blend_arrays
 
-     call proc_time(CPU_3)
-     if (electron_method == 2) then
+      if (electron_method == 2) then
 
         ! Make advection operators for electrons
         call make_implicit_advect(0)
 
      endif
-
-     call proc_time(CPU_4)
      !
      ! Collision setup (if required; note PNL hook)
      !
@@ -223,7 +203,6 @@ subroutine gyro_do
      !
      ! Explicit (Poisson,Ampere)
      !
-     call proc_time(CPU_5)
      if (n_field == 3) then
         call make_poissonaperp_matrix
      else
@@ -240,8 +219,6 @@ subroutine gyro_do
      if (electron_method == 2) then
         call make_maxwell_matrix
      endif
-     call proc_time(CPU_6)
-     !
      !------------------------------------------------------
 
      !------------------------------------------------------
@@ -272,8 +249,6 @@ subroutine gyro_do
      !
      call gyro_read_restart
      !------------------------------------------------------------
-
-     call proc_time(CPU_7)
 
      !---------------------------------------
      ! Write precision data:
@@ -347,15 +322,6 @@ subroutine gyro_do
      endif
   endif
   !--------------------------------------------
-
-  !--------------------------------------------
-  ! Start elapsed time.
-  !
-  if (step == 0) then
-     call system_clock(clock_count,clock_rate,clock_max)
-     elapsed_time = clock_count*1.0/clock_rate
-  endif
-  !--------------------------------------------------
 
   select case (linsolve_method)
 

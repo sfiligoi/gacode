@@ -49,11 +49,7 @@ OBJECTS = gyro_globals.o \
           gyro_collect_routines.o \
           gyro_collision_setup.o \
           gyro_collision_kernel.o \
-	  gyro_collision_ebelli.o \
-	  gyro_collision_setup_ebelli.o \
-	  gyro_collision_kernel_ebelli.o \
-	  gyro_conserve_number_ebelli.o \
-          gyro_collision_jc.o \
+          gyro_collision_main.o \
           gyro_collision_grid_write.o \
           gyro_collision_krook.o \
           gyro_conserve_number.o \
@@ -119,6 +115,7 @@ OBJECTS = gyro_globals.o \
           gyro_write_radial_op.o \
           gyro_write_step.o \
           gyro_write_timedata.o \
+          gyro_write_timers.o \
           sparse_solve_umfpack.o \
           sparse_solve_mumps.o \
 	  gyro_velocity_sum.o \
@@ -150,7 +147,6 @@ OBJECTS = gyro_globals.o \
           get_g_squared.o \
           write_freq.o \
           write_h.o \
-          write_timing.o \
           write_matrix_stat.o \
           gyro_dump_input.o \
           gyro_dump_interface.o

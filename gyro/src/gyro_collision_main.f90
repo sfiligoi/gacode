@@ -1,11 +1,11 @@
 !---------------------------------------------------------------
-! gyro_collision_jc.f90 
+! gyro_collision_main.f90 
 !
 ! PURPOSE:
-!  Collision step for real (rather than model Krook) collisions.
+!  Collision step for Lorentz collisions.
 !---------------------------------------------------------------
 
-subroutine gyro_collision_jc
+subroutine gyro_collision_main
 
   use gyro_globals
   use gyro_pointers
@@ -19,15 +19,11 @@ subroutine gyro_collision_jc
   integer :: n_k
   integer :: n_d
   integer, external :: parallel_dim
-  !
-  real :: CPU_temp
   !----------------------------------------
 
   !---------------------
   ! BEGIN Collision step
   !---------------------
-
-  call proc_time(CPU_Ct_in)
 
   do ic=1,n_coll
 
@@ -59,9 +55,6 @@ subroutine gyro_collision_jc
      enddo ! p_nek
      !-----------------------------------------------------
 
-     call proc_time(CPU_Ct_out)
-     CPU_temp = CPU_Ct_out-CPU_Ct_in
-
      !-----------------------------------------------
      ! Step 3:
      ! 
@@ -79,14 +72,9 @@ subroutine gyro_collision_jc
      enddo
      call rTRANSP_CLEANUP
      !
-     call proc_time(CPU_Ct_in)
-     !
      ! Crank-Nicholson advance of H.
      !
      call gyro_collision_kernel(ic)
-     !
-     call proc_time(CPU_Ct_out)
-     CPU_temp = CPU_temp+(CPU_Ct_out-CPU_Ct_in)
      !
      ! Permute p_ine,k -> p_nek,i
      n_i = n_x
@@ -105,8 +93,6 @@ subroutine gyro_collision_jc
      ! f_coll  = H = h+Psi
      ! fb_coll = H_new 
      !------------------------------------------------
-
-     call proc_time(CPU_Ct_in)
 
      !-------------------------------------------------------- 
      ! Step 4:
@@ -127,20 +113,15 @@ subroutine gyro_collision_jc
      endif
      !
      !--------------------------------------------------------
-     call proc_time(CPU_Ct_out)
-     CPU_temp = CPU_temp+(CPU_Ct_out-CPU_Ct_in)
 
      !---------------------
      ! END Collision step
      !---------------------
 
-     CPU_Ct = CPU_Ct+CPU_temp
-     CPU_Ct_in = CPU_Ct_out-CPU_temp
-
   enddo
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[gyro_collision_jc done]'
+     print *,'[gyro_collision_main done]'
   endif
 
-end subroutine gyro_collision_jc
+end subroutine gyro_collision_main

@@ -14,8 +14,6 @@ subroutine gyro_fulladvance
   implicit none
   !----------------------------------------
 
-  call proc_time(CPU_C_in)
-
   h_old(:,:,:,:) = h(:,:,:,:)
 
   h_cap_old2(:,:,:,:) = h_cap_old(:,:,:,:)
@@ -34,35 +32,8 @@ subroutine gyro_fulladvance
   !------------------------------------------------------
   ! MANAGE pitch-angle scattering:
   !
-  if (collision_flag == 1) then
-
-     select case (collision_method)
-
-     case (1) 
-
-        ! Attempts to update fields; should not be used
-
-        call catch_error('ERROR: (GYRO) collision_method=1 is deprecated.')
-
-     case (2) 
-
-        ! Default
-
-        call gyro_collision_jc
-
-     case (3,4)
-
-        ! For testing only, not for production use
-
-        call gyro_collision_ebelli
-
-     end select
-
-  endif
+  if (collision_flag == 1) call gyro_collision_main
   !------------------------------------------------------
-
-  call proc_time(CPU_C_out)   
-  CPU_C = CPU_C + (CPU_C_out - CPU_C_in)
 
   !------------------------------------------------------
   ! MANAGE time-integrator
@@ -83,9 +54,6 @@ subroutine gyro_fulladvance
 
   end select
   !------------------------------------------------------
-
-  call proc_time(CPU_diag_in)
-  CPU_ts = CPU_ts + (CPU_diag_in - CPU_C_out)
 
   call gyro_timestep_error
 
@@ -128,9 +96,6 @@ subroutine gyro_fulladvance
   !
   alltime_index = alltime_index+1
   !------------------------------------------------------
-
-  call proc_time(CPU_diag_mid)
-  CPU_diag_a = CPU_diag_a + (CPU_diag_mid - CPU_diag_in)
 
   !------------------------------------------------------
   ! MANAGE time:
@@ -210,16 +175,9 @@ subroutine gyro_fulladvance
   if (freq_err < freq_tol) call gyro_set_exit_status('converged',2)
   !----------------------------------------------------
 
-  !--------------------------------------
-  ! ** proc_time call for CPU_diag_outp in 
-  ! previous call to gyro_write_master:
-  !--------------------------------------
-
   if (debug_flag == 1 .and. i_proc == 0) then
      print '(t2,2(a,i5,3x))','-> step =',step,'data_step =',data_step
      print *,'**[gyro_fulladvance done]'
   endif
-  call proc_time(CPU_diag_out)
-  CPU_diag_b = CPU_diag_b + (CPU_diag_out - CPU_diag_mid)
 
 end subroutine gyro_fulladvance

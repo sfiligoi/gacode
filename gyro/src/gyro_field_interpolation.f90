@@ -38,8 +38,6 @@ subroutine gyro_field_interpolation
   complex, external :: BLEND_F
   !-----------------------------------------------------
 
-  call proc_time(CPU_interp_in)
-
   do i=1,n_x
      cmplx_phase = phase(in_1,i)
      do j_int=1,n_theta_int
@@ -239,9 +237,6 @@ subroutine gyro_field_interpolation
         enddo
      enddo
   enddo
-
-  call proc_time(CPU_interp_out)
-  CPU_interp = CPU_interp + (CPU_interp_out - CPU_interp_in)
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[gyro_field_interpolation done]'
