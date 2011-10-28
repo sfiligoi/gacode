@@ -21,6 +21,8 @@ subroutine gyro_field_solve_explicit
      call gyro_velocity_sum(ix)
   enddo
 
+  call gyro_timer(5,'FS explicit')
+
   select case (n_field)
 
   case (1)
@@ -52,6 +54,8 @@ subroutine gyro_field_solve_explicit
      endif
 
   end select
+
+  call gyro_timer(5,'out')
 
   call gyro_field_interpolation
 

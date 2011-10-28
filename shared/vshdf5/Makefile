@@ -26,4 +26,4 @@ vshdf5_dummy: dummy.o
 	$(FC) $(FMATH) $(FFLAGS) $(MPI_FLAG) $(HDF5_INC) -c $<
 
 clean:
-	rm -f *.o *.a
+	rm -f *.o *.a ${GACODE_ROOT}/modules/*hdf5*.mod

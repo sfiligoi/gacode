@@ -8,14 +8,16 @@
 program gyro
 
   use mpi
-  use omp_lib
   use gyro_globals
+  use omp_lib
 
   !-----------------------------------------------------------------
   implicit none
   !
   integer :: ierr
   integer :: supported
+  !integer, external :: omp_get_thread_num
+  !integer, external :: omp_get_max_threads
   !-----------------------------------------------------------------
 
   !-----------------------------------------------------------------
@@ -24,7 +26,7 @@ program gyro
   !
   call MPI_INIT_THREAD(MPI_THREAD_FUNNELED,supported,ierr)
   if (supported < MPI_THREAD_FUNNELED) then
-    call catch_error('ERROR: (GYRO) MPI_THREAD_FUNNELED > supported.')
+     call catch_error('ERROR: (GYRO) MPI_THREAD_FUNNELED > supported.')
   endif
   !-----------------------------------------------------------------
 
@@ -35,7 +37,7 @@ program gyro
   !-----------------------------------------------------------------
 
   !-----------------------------------------------------------------
-  ! Set the world MPI communicator
+  ! Query MPI for dimensions
   !
   GYRO_COMM_WORLD = MPI_COMM_WORLD
   !
@@ -43,7 +45,16 @@ program gyro
   !
   call MPI_COMM_RANK(GYRO_COMM_WORLD,i_proc,i_err)
   call MPI_COMM_SIZE(GYRO_COMM_WORLD,n_proc,i_err)
+  !-----------------------------------------------------------------
+
+  !-----------------------------------------------------------------
+  ! Query OpenMP for dimensions
   !
+  !i_omp = omp_get_thread_num()
+  !n_omp = omp_get_max_threads()
+  !-----------------------------------------------------------------
+
+  !-----------------------------------------------------------------
   ! Standard standalone operation
   transport_method = 1
   !

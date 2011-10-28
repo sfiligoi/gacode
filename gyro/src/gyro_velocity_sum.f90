@@ -20,6 +20,8 @@ subroutine gyro_velocity_sum(field)
   complex, dimension(n_stack,n_x) :: gz
   !---------------------------------------------------
 
+  call gyro_timer(4,'veloc sum')
+
   !----------------------------------------------------
   ! Now, compute blending projections:
   !
@@ -124,6 +126,8 @@ subroutine gyro_velocity_sum(field)
      sum_glob(:,n_x) = (0.0,0.0)
 
   endif
+
+  call gyro_timer(4,'out')
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[gyro_velocity_sum done]'

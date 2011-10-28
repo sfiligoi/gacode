@@ -42,12 +42,21 @@ subroutine gyro_do
      endif
   endif
 
-  !-------------------------
+  !--------------------------------------------------------------
   ! Early initializations:
   !
   total_memory  = 0.0
   alltime_index = 0
-  !-------------------------
+  !
+  ! Timers
+  call gyro_timer(1,'full step')
+  call gyro_timer(2,'gyro_h')
+  call gyro_timer(3,'field intrp')
+  call gyro_timer(4,'veloc sum')
+  call gyro_timer(5,'FS explicit')
+  call gyro_timer(6,'FS implicit')
+  call gyro_timer(7,'collisions')
+  !--------------------------------------------------------------
 
   !----------------------------------------------------------------
   ! If running in eigensolve mode.
@@ -336,7 +345,9 @@ subroutine gyro_do
 
      do step=1,nstep
 
+        call gyro_timer(1,'full step')
         call gyro_fulladvance
+        call gyro_timer(1,'out')
 
         !-------------------------------------
         ! Check for premature exit conditions

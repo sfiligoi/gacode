@@ -7,7 +7,7 @@
 !-----------------------------------------------------
 
 module gyro_globals
- 
+
   !----------------------------------------------------
   ! Standard precision for IO 
   !
@@ -16,7 +16,7 @@ module gyro_globals
   ! Complex
   character(len=14) :: fmtstr2='(2(es11.4,1x))'
   !----------------------------------------------------
- 
+
   !----------------------------------------------------
   ! Variables passed in via gyro_run routine:
   !
@@ -31,6 +31,14 @@ module gyro_globals
   integer :: gyro_exit_status
   character(len=80) :: gyro_exit_message
 
+  !---------------------------------------------------------
+  ! CPU timers
+  !
+  real, dimension(64) :: cpu=-1.0
+  real, dimension(64) :: cpu_in=0.0
+  character(len=11), dimension(64) :: cpu_tag
+  integer :: cpu_maxindx = 0
+  !---------------------------------------------------------
   !---------------------------------------------------------
   ! Restart parameters:
   !
@@ -973,6 +981,13 @@ module gyro_globals
   integer :: info
   integer, dimension(:), allocatable :: i_piv
   !-----------------------------------------------
+
+  !-----------------------------------------------------
+  ! OpenMP
+  !
+  integer :: n_omp
+  integer :: i_omp
+  !-----------------------------------------------------
 
   !------------------------------------------------------
   ! MPI

@@ -103,6 +103,7 @@ OBJECTS = gyro_globals.o \
           gyro_set_pointer_dim.o \
           gyro_tau_derivative.o \
           gyro_theta_grid.o \
+          gyro_timer.o \
           gyro_timestep_error.o \
           gyro_timestep_explicit.o \
           gyro_timestep_implicit.o \
@@ -167,6 +168,6 @@ lib: $(OBJECTS)
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:
-	rm -f *.o $(LLIB).a ${GACODE_ROOT}/modules/gyro*.mod
+	rm -f *.o $(LLIB).a ${GACODE_ROOT}/modules/gyro*.mod ${GACODE_ROOT}/modules/omp_lib.mod
 
 include ../install/make.ext.${GACODE_PLATFORM}

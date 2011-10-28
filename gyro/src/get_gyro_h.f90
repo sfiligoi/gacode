@@ -26,6 +26,8 @@ subroutine get_gyro_h
   complex, dimension(n_stack,i1_buffer:i2_buffer) :: hh
   !-------------------------------------------------------
 
+  call gyro_timer(2,'gyro_h')
+
   !-------------------------------------------------------
   ! Gyrokinetic species:
   !
@@ -86,6 +88,8 @@ subroutine get_gyro_h
      gyro_h(:,:,:,n_spec) = h(:,:,:,n_spec)
   endif
   !-------------------------------------------------------
+
+  call gyro_timer(2,'out')
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[get_gyro_h done]'

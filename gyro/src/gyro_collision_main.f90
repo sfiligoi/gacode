@@ -21,6 +21,8 @@ subroutine gyro_collision_main
   integer, external :: parallel_dim
   !----------------------------------------
 
+  call gyro_timer(7,'collision')
+
   !---------------------
   ! BEGIN Collision step
   !---------------------
@@ -119,6 +121,8 @@ subroutine gyro_collision_main
      !---------------------
 
   enddo
+
+  call gyro_timer(7,'out')
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[gyro_collision_main done]'
