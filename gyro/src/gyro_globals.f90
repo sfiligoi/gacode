@@ -173,7 +173,6 @@ module gyro_globals
   integer :: gyro_method
   integer :: sparse_method
   integer :: linsolve_method 
-  integer :: collision_method
   integer :: fieldeigen_root_method
   integer :: gkeigen_method
   !
@@ -859,15 +858,6 @@ module gyro_globals
   real, dimension(:,:,:,:), allocatable :: d_rbf
   real, dimension(:,:), allocatable :: d1_rbf
   complex, dimension(:,:,:,:), allocatable :: nu_op
-  !
-  ! For ebelli collision method (generally not used)
-  !
-  complex, dimension(:,:,:,:), allocatable :: h_C_all
-  real, dimension(:,:,:,:), allocatable   ::  d_rbf_lorentz
-  real, dimension(:,:,:,:,:), allocatable ::  d_rbf_rs
-  real, dimension(:,:,:,:), allocatable   ::  d_rbf_lorentz_int
-  real, dimension(:,:,:,:,:), allocatable ::  d_rbf_rs_int
-  real, dimension(:,:,:), allocatable     ::  d_rbf_velint
   !---------------------------------------------------------
 
   !---------------------------------------------------------

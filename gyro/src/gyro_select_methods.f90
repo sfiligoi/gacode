@@ -244,11 +244,6 @@ subroutine gyro_select_methods
   !
   if (collision_flag == 1) then
 
-     if (n_field == 3 .and. collision_method /= 2) then
-        call catch_error(&
-             'ERROR: (GYRO) This collision model incompatible with delta B_parallel')
-     endif
-
      if (n_pass < 4) then
         call catch_error(&
              'ERROR: (GYRO) N_PASS >= 4 required for collisions.')

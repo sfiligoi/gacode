@@ -25,7 +25,6 @@ subroutine make_ampere_blend
   real :: v_gyro
   !
   complex :: inqr
-  complex :: temp
   !
   complex, dimension(-mg_dx:mg_dx-ig_dx,n_blend,n_blend) :: vel_sum_loc
   complex, dimension(-mg_dx:mg_dx-ig_dx,n_blend,n_blend) :: vel_sum_glob

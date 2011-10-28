@@ -218,7 +218,6 @@ subroutine gyro_dump_input
      call dumpRealVar(funit,gunit,"fieldeigen_wr",fieldeigen_wr)
      call dumpRealVar(funit,gunit,"fieldeigen_wi",fieldeigen_wi)
      call dumpRealVar(funit,gunit,"fieldeigen_tol",fieldeigen_tol)
-     call dumpIntVar(funit,gunit,"collision_method",collision_method)
      call dumpIntVar(funit,gunit,"io_method",io_method)
      call dumpIntVar(funit,gunit,"time_skip_wedge",time_skip_wedge)
      call dumpIntVar(funit,gunit,"n_torangle_wedge",n_torangle_wedge)
