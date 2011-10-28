@@ -158,6 +158,7 @@ OBJECTS = gyro_globals.o \
 ifeq ($(OMP),true)
    FC += ${FOMP}
 else
+   FC += ${FNOMP}
    OBJECTS += gyro_omp_lib.o
 endif
 
