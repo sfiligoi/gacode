@@ -60,9 +60,10 @@ subroutine gyro_write_timers(datafile,io)
      if (i_proc == 0) then
 
         open(unit=io,file=datafile,status='old')
-        read(1,*) cpu_tag(1)
+        read(io,'(a)') cpu_tag(1)
+        read(io,'(a)') cpu_tag(1)
         do loop=0,data_step
-           read(io,*) cpu(1:cpu_maxindx)
+           read(io,10) frac
         enddo
         endfile(io)
         close(io)
