@@ -1,7 +1,9 @@
 include ../install/make.inc.${GACODE_PLATFORM}
 
+# We don't apply debug flags to UMFPACK because its old and trusted.
+
 ifeq ($(OPT),debug)
-   FFLAGS=${FDEBUG}
+   FFLAGS=
 else
    FFLAGS=${FOPT}
 endif

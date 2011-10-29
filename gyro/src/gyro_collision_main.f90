@@ -21,13 +21,13 @@ subroutine gyro_collision_main
   integer, external :: parallel_dim
   !----------------------------------------
 
-  call gyro_timer(7,'collision')
-
   !---------------------
   ! BEGIN Collision step
   !---------------------
 
   do ic=1,n_coll
+
+     call gyro_timer_in('Coll.-step')
 
      is = c_map(ic)
 
@@ -68,11 +68,17 @@ subroutine gyro_collision_main
      n_k = n_x
      n_d = parallel_dim(n_k*n_i,n_proc_1)
      !
+     call gyro_timer_out('Coll.-step')
+     call gyro_timer_in('Coll.-comm')
+     !
      call rTRANSP_INIT(n_i,n_j,n_k,NEW_COMM_1)
      do m=1,n_stack
         call rTRANSP_DO(f_coll(m,:,:),h_C(m,:,:))
      enddo
      call rTRANSP_CLEANUP
+     !
+     call gyro_timer_out('Coll.-comm')
+     call gyro_timer_in('Coll.-step')
      !
      ! Crank-Nicholson advance of H.
      !
@@ -84,11 +90,17 @@ subroutine gyro_collision_main
      n_k = n_lambda
      n_d = parallel_dim(n_j*n_k,n_proc_1)
      !
+     call gyro_timer_out('Coll.-step')
+     call gyro_timer_in('Coll.-comm')
+     !
      call fTRANSP_INIT(n_i,n_j,n_k,NEW_COMM_1)
      do m=1,n_stack
         call fTRANSP_DO(h_C(m,:,:),fb_coll(m,:,:))
      enddo
      call fTRANSP_CLEANUP
+     !
+     call gyro_timer_out('Coll.-comm')
+     call gyro_timer_in('Coll.-step')
      !
      ! NOW:
      !
@@ -120,9 +132,9 @@ subroutine gyro_collision_main
      ! END Collision step
      !---------------------
 
-  enddo
+     call gyro_timer_out('Coll.-step')
 
-  call gyro_timer(7,'out')
+  enddo
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[gyro_collision_main done]'

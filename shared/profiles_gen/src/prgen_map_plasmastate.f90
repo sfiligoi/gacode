@@ -18,7 +18,6 @@ subroutine prgen_map_plasmastate
   integer :: i
   integer :: ip
   real, dimension(nx) :: dphidpsi
-  real :: sign_plst_omega
 
   !--------------------------------------------------------------------
   ! Calculate transport sources:

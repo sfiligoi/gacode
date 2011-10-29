@@ -48,14 +48,21 @@ subroutine gyro_do
   total_memory  = 0.0
   alltime_index = 0
   !
-  ! Timers
-  call gyro_timer(1,'full step')
-  call gyro_timer(2,'gyro_h')
-  call gyro_timer(3,'field intrp')
-  call gyro_timer(4,'veloc sum')
-  call gyro_timer(5,'FS explicit')
-  call gyro_timer(6,'FS implicit')
-  call gyro_timer(7,'collisions')
+  ! String-tagged timers
+  !
+  ! NOTE: print order follows init. order below
+  !
+  call gyro_timer_init('Field-interp')
+  call gyro_timer_init('Velocity-sum')
+  call gyro_timer_init('Field-explicit')
+  call gyro_timer_init('Field-implicit')
+  call gyro_timer_init('Gyroave-h')
+  call gyro_timer_init('RHS-total')
+  call gyro_timer_init('Coll.-step')
+  call gyro_timer_init('Coll.-comm')
+  call gyro_timer_init('Diagnos.-allstep')
+  call gyro_timer_init('Diagnos.-datastep')
+  call gyro_timer_init('Full-step')
   !--------------------------------------------------------------
 
   !----------------------------------------------------------------
@@ -345,9 +352,9 @@ subroutine gyro_do
 
      do step=1,nstep
 
-        call gyro_timer(1,'full step')
+        call gyro_timer_in('Full-step')
         call gyro_fulladvance
-        call gyro_timer(1,'out')
+        call gyro_timer_out('Full-step')
 
         !-------------------------------------
         ! Check for premature exit conditions

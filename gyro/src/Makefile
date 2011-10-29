@@ -6,9 +6,16 @@ else
    FFLAGS=${FOPT}
 endif
 
+ifeq ($(OMP),true)
+   FC += ${FOMP}
+else
+   FC += ${FNOMP}
+   OBJECTS = gyro_omp_lib.o
+endif
+
 LLIB = gyro_lib
 
-OBJECTS = gyro_globals.o \
+OBJECTS += gyro_globals.o \
           gyro_profile_exp.o \
           gyro_pointers.o \
           gyro_nl_private.o \
@@ -151,13 +158,6 @@ OBJECTS = gyro_globals.o \
           write_matrix_stat.o \
           gyro_dump_input.o \
           gyro_dump_interface.o
-
-ifeq ($(OMP),true)
-   FC += ${FOMP}
-else
-   FC += ${FNOMP}
-   OBJECTS += gyro_omp_lib.o
-endif
 
 .SUFFIXES : .o .f90 
 

@@ -255,6 +255,7 @@ end subroutine prgen_read_iterdb_nc
 
 subroutine reorder(x,xt,n)
 
+  integer, intent(in) :: n
   real, dimension(n) :: x
   real, dimension(n) :: xt
   integer :: i

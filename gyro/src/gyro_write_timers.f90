@@ -15,8 +15,8 @@ subroutine gyro_write_timers(datafile,io)
   !
   integer, intent(in) :: io
   character (len=*), intent(in) :: datafile
+  character (len=9), dimension(64) :: a,b
   integer :: loop
-  character (len=11) :: sep='--------------'
   real :: frac
   !-------------------------------------------------
 
@@ -31,8 +31,13 @@ subroutine gyro_write_timers(datafile,io)
      ! Initial open
      if (i_proc == 0) then
         open(unit=io,file=datafile,status='replace')
-        write(io,'(64(a))') (cpu_tag(loop)//' ',loop=1,cpu_maxindx)
-        write(io,'(64(a))') (sep//' ',loop=1,cpu_maxindx)
+        do loop=1,cpu_maxindx
+           a(loop) = cpu_tag(loop)(1:scan(cpu_tag(loop),'-',.false.)-1)
+           b(loop) = cpu_tag(loop)(scan(cpu_tag(loop),'-',.false.)+1:len(trim(cpu_tag(loop))))
+        enddo
+        write(io,'(64(a))') (a(loop)//' ',loop=1,cpu_maxindx)
+        write(io,'(64(a))') (b(loop)//' ',loop=1,cpu_maxindx)
+        write(io,'(64(a))') ('--------- ',loop=1,cpu_maxindx)
         close(io)
      endif
 
@@ -42,7 +47,7 @@ subroutine gyro_write_timers(datafile,io)
         cpu(:) = 0.0
         frac = 0.0
      else
-        frac = sum(cpu(2:cpu_maxindx))/cpu(1)
+        frac = sum(cpu(1:cpu_maxindx-1))/cpu(cpu_maxindx)
      endif
      if (i_proc == 0) then
         open(unit=io,file=datafile,status='old',position='append')
@@ -62,6 +67,7 @@ subroutine gyro_write_timers(datafile,io)
         open(unit=io,file=datafile,status='old')
         read(io,'(a)') cpu_tag(1)
         read(io,'(a)') cpu_tag(1)
+        read(io,'(a)') cpu_tag(1)
         do loop=0,data_step
            read(io,10) frac
         enddo
@@ -74,6 +80,6 @@ subroutine gyro_write_timers(datafile,io)
 
   if (i_proc == 0 .and. debug_flag == 1) print *,'[gyro_write_timers called]'
 
-10 format(64(1pe11.5,1x))
+10 format(64(1pe9.3,1x))
 
 end subroutine gyro_write_timers

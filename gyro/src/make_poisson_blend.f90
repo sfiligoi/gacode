@@ -27,7 +27,6 @@ subroutine make_poisson_blend(i_elec)
   real :: v_gyro
   !
   complex :: inqr
-  complex :: temp
   ! 
   complex, dimension(-m_gyro:m_gyro-i_gyro,n_blend,n_blend) :: vel_sum_loc
   complex, dimension(-m_gyro:m_gyro-i_gyro,n_blend,n_blend) :: vel_sum_glob

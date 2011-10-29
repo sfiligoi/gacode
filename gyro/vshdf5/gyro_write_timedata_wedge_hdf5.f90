@@ -20,13 +20,8 @@ subroutine gyro_write_timedata_wedge_hdf5
   !
   real :: pi=3.141592653589793
   !
-  real, dimension(:), allocatable, save :: zeta_phi
-  real, dimension(:,:), allocatable :: a2
-  real, dimension(:,:,:), allocatable :: a3
-  !
-  complex, dimension(:,:,:), allocatable :: n_plot, e_plot, v_plot
   character(60) :: description
-  character(64) :: step_name, tempVarName
+  character(64) :: step_name
   character(128) :: dumpfile
   integer(HID_T) :: fidwedge,gidwedge
   integer :: n_wedge
@@ -41,9 +36,10 @@ subroutine gyro_write_timedata_wedge_hdf5
   n_wedge = n_theta_plot*n_theta_mult
 
   if (i_proc == 0) then
-    if (n_wedge <= 1) write(*,*) "Wedge caluculations need  n_theta_plot*n_theta_mult > 1."
+     if (n_wedge <= 1) then
+        write(*,*) "Wedge caluculations need n_theta_plot*n_theta_mult > 1."
+     endif
   endif
-
 
   !---------------------------------------------------
   ! SEK: Should I do this every time?
@@ -147,16 +143,16 @@ contains
     !    allocate(phi_plot(n_theta_plot,n_x,n_field+eparallel_plot_flag))
     !  This should be generalized to include the other GEO options
     !------------------------------------------
-    real, dimension(:,:), allocatable :: Rc,Zc,Rf,Zf
+    real, dimension(:,:), allocatable :: Rf,Zf
     real, dimension(:,:,:), allocatable :: bufferwedgeMesh
-    real :: rmajc, zmagc, kappac, deltac, zetac, dr,xdc,rhoc
+    real :: rmajc,zmagc,kappac,deltac,zetac,xdc,rhoc
     real :: dRdr,dZdr,dkappadr,ddeltadr,dzetadr 
     real, dimension (:), allocatable :: theta,r_c
     real, dimension (:,:), allocatable :: dRdrho,DRdtheta
     real, dimension (:,:), allocatable :: dZdrho,DZdtheta
     real, dimension (:,:), allocatable :: rtJacobian
     real :: zeta_wedge
-    integer :: iphi, ix, iy, j, ncoarse, nwedge
+    integer :: iphi,ix,j,ncoarse,nwedge
 
     ncoarse = n_theta_plot
     nwedge = n_theta_plot*n_theta_mult
@@ -179,12 +175,12 @@ contains
        else
           r_c(ix)=r(ix)
        endif
-    enddo 
+    enddo
     do j=1,nwedge
-          ! This needs to match up with what's in gyro_set_blend_arrays.f90
-          theta(j)=theta_wedge_offset+real(j-1)*theta_wedge_angle/       &
-               real(n_theta_plot*n_theta_mult-1)
-          !theta = -pi+REAL(j)*pi*2./REAL(nwedge)
+       ! This needs to match up with what's in gyro_set_blend_arrays.f90
+       theta(j)=theta_wedge_offset+real(j-1)*theta_wedge_angle/       &
+            real(n_theta_plot*n_theta_mult-1)
+       !theta = -pi+REAL(j)*pi*2./REAL(nwedge)
     enddo
 
     do ix=1,n_x
@@ -203,30 +199,30 @@ contains
 
        do j=1,nwedge
           if(radial_profile_method==1) then
-            Rf(j,ix)=rmajc+rhoc*cos(theta(j))
-            Zf(j,ix)=zmagc+rhoc*sin(theta(j))
+             Rf(j,ix)=rmajc+rhoc*cos(theta(j))
+             Zf(j,ix)=zmagc+rhoc*sin(theta(j))
           else
-            Rf(j,ix)=rmajc+rhoc*cos(theta(j)+xdc*sin(theta(j)))
-            Zf(j,ix)=zmagc+kappac*rhoc*sin(theta(j)+zetac*sin(2.*theta(j)))
+             Rf(j,ix)=rmajc+rhoc*cos(theta(j)+xdc*sin(theta(j)))
+             Zf(j,ix)=zmagc+kappac*rhoc*sin(theta(j)+zetac*sin(2.*theta(j)))
           endif
-!pieces of jacobian 
+          !pieces of jacobian 
           dRdrho(j,ix) = COS(theta(j)+xdc*SIN(theta(j))) + &
-            dRdr - (1./SQRT(1-deltac**2))* &
-            rhoc*SIN(theta(j))*SIN(theta(j)+xdc*SIN(theta(j)))*ddeltadr
+               dRdr - (1./SQRT(1-deltac**2))* &
+               rhoc*SIN(theta(j))*SIN(theta(j)+xdc*SIN(theta(j)))*ddeltadr
 
           dZdrho(j,ix) = SIN(theta(j)+SIN(2.*theta(j))*zetac*kappac) + &
-            dZdr + rhoc*COS(theta(j)+SIN(2.*theta(j))*zetac)*SIN(2.*theta(j))* &
-            kappac*dzetadr + &
-            rhoc*SIN(theta(j)+SIN(2.*theta(j))*zetac)*dkappadr
- 
+               dZdr + rhoc*COS(theta(j)+SIN(2.*theta(j))*zetac)*SIN(2.*theta(j))* &
+               kappac*dzetadr + &
+               rhoc*SIN(theta(j)+SIN(2.*theta(j))*zetac)*dkappadr
+
           dRdtheta(j,ix) = -1.*rhoc*(1.+xdc*COS(theta(j)))* &
-            SIN(theta(j)+xdc)*SIN(theta(j))
+               SIN(theta(j)+xdc)*SIN(theta(j))
 
           dZdtheta(j,ix)= rhoc*COS(theta(j)+SIN(2.*theta(j))*zetac) * &
-            (1.+2.*COS(2*theta(j))*zetac*kappac)
+               (1.+2.*COS(2*theta(j))*zetac*kappac)
 
           rtJacobian(j,ix) = dRdrho(j,ix)*dZdtheta(j,ix) - &
-            dZdrho(j,ix)*dRdtheta(j,ix)
+               dZdrho(j,ix)*dRdtheta(j,ix)
 
        enddo
     enddo

@@ -29,9 +29,7 @@ subroutine gyro_write_input
   real :: num_rho_r
   real :: num_rho_min
   real :: x_s
-  real :: grad_total
   real :: den_total
-  real :: beta_crit 
   real :: v_alfven
   real :: rhos_abs
   !
@@ -127,9 +125,9 @@ subroutine gyro_write_input
   if (i_proc == 0 .and. output_flag == 1 .and. gkeigen_j_set == 0) then
      open(unit=1,file=trim(runfile),status='old',position='append')
 
-     write(1,*) '----------- GRID DIMENSIONS -------------------'
+     write(1,*) '---------- PARLLELISM DIMENSIONS --------------'
      write(1,10) 'MPI tasks',n_proc
-     !write(1,10) 'OpenMP threads',n_omp
+     write(1,10) 'OpenMP threads',n_omp
      write(1,*) '----------- GRID DIMENSIONS -------------------'
      write(1,10) 'n_n',n_n
      write(1,10) 'n_x',n_x

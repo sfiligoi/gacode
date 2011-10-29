@@ -36,7 +36,7 @@ module gyro_globals
   !
   real, dimension(64) :: cpu=-1.0
   real, dimension(64) :: cpu_in=0.0
-  character(len=11), dimension(64) :: cpu_tag
+  character(len=19), dimension(64) :: cpu_tag
   integer :: cpu_maxindx = 0
   !---------------------------------------------------------
   !---------------------------------------------------------

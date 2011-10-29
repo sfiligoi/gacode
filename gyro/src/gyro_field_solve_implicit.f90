@@ -15,7 +15,7 @@ subroutine gyro_field_solve_implicit
      call gyro_velocity_sum(ix)
   enddo
 
-  call gyro_timer(6,'FS implicit')
+  call gyro_timer_in('Field-implicit')
 
   if (sparse_method == 1) then
      call sparse_solve_umfpack(n_maxwell,n_maxwell_row,3,1)
@@ -23,7 +23,7 @@ subroutine gyro_field_solve_implicit
      call sparse_solve_mumps(n_maxwell,n_maxwell_row,3,1)
   endif
 
-  call gyro_timer(6,'out')
+  call gyro_timer_out('Field-implicit')
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[gyro_field_solve_implicit done]'

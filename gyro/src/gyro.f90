@@ -50,8 +50,8 @@ program gyro
   !-----------------------------------------------------------------
   ! Query OpenMP for dimensions
   !
-  !i_omp = omp_get_thread_num()
-  !n_omp = omp_get_max_threads()
+  i_omp = omp_get_thread_num()
+  n_omp = omp_get_max_threads()
   !-----------------------------------------------------------------
 
   !-----------------------------------------------------------------

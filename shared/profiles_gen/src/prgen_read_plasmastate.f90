@@ -14,7 +14,6 @@ subroutine prgen_read_plasmastate
 
   ! NetCDF variables
   integer :: i
-  integer :: ip
   integer :: ncid
   integer :: varid
   integer :: err

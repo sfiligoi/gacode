@@ -1,28 +1,48 @@
-subroutine gyro_timer(indx,tag)
+subroutine gyro_timer_init(tag)
+
+  use gyro_globals
+
+  implicit none
+  character(len=*), intent(in) :: tag
+
+  cpu_maxindx = cpu_maxindx+1
+  cpu_tag(cpu_maxindx) = trim(tag)
+
+end subroutine gyro_timer_init
+
+subroutine gyro_timer_in(tag)
 
   use mpi
   use gyro_globals
 
   implicit none
-
-  integer, intent(in) :: indx
   character(len=*), intent(in) :: tag
+  integer :: indx
 
-  if (cpu(indx) < 0.0) then
+  do indx=1,cpu_maxindx
+     if (trim(tag) == trim(cpu_tag(indx))) then
+        cpu_in(indx) = MPI_Wtime()
+     endif
+  enddo
 
-     cpu(indx)     = 0.0
-     cpu_in(indx)  = MPI_Wtime()
-     cpu_tag(indx) = tag
-     if (indx > cpu_maxindx) cpu_maxindx=indx
+  cpu_in(indx) = MPI_Wtime()
 
-  else if (trim(tag) == 'out') then
+end subroutine gyro_timer_in
 
-     cpu(indx) = cpu(indx)+MPI_Wtime()-cpu_in(indx)
+subroutine gyro_timer_out(tag)
 
-  else
+  use mpi
+  use gyro_globals
 
-     cpu_in(indx) = MPI_Wtime()
+  implicit none
+  character(len=*), intent(in) :: tag
+  integer :: indx
 
-  endif
+  do indx=1,cpu_maxindx
+     if (trim(tag) == trim(cpu_tag(indx))) then
+        cpu(indx) = cpu(indx)+MPI_Wtime()-cpu_in(indx)
+     endif
+  enddo
 
-end subroutine gyro_timer
+end subroutine gyro_timer_out
+

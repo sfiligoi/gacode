@@ -160,7 +160,7 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
            theta(ip) = theta(im) + 2*pi*dl/l_tot
         enddo
 
-        call fluxfit_fourier(ar,br,az,bz,ns)
+        call fluxfit_fourier()
 
         do i=0,ns
            write(2,10) ar(i),br(i),az(i),bz(i) 

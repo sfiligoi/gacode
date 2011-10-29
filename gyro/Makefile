@@ -5,8 +5,6 @@ ifeq ($(OPT),debug)
 else
    FFLAGS=${FOPT}
 endif
- 
-EXEC=gyro
 
 ifeq ($(OMP),true)
    FC += ${FOMP}
@@ -14,6 +12,8 @@ else
    FC += ${FNOMP}
 endif
  
+EXEC=gyro
+
 export EXTRA_LIBS = \
        ${GACODE_ROOT}/shared/EXPRO/EXPRO_lib.a \
        ${GACODE_ROOT}/shared/math/math_lib.a \

@@ -17,9 +17,6 @@ subroutine gyro_write_initdata_hdf5(datafile)
   !
   character (len=*), intent(in) :: datafile
   !
-  integer :: data_loop
-  integer :: i_dummy
-  real :: dummy
   integer(HID_T) :: fid, rootid
   character(90) :: description
   type(hdf5InOpts) :: h5in

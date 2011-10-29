@@ -27,7 +27,7 @@ subroutine gyro_rhs_total
   allocate(z_dis(n_stack,n_nek_loc_1,n_kinetic))
   allocate(cap_h(n_stack,i1_buffer:i2_buffer,n_nek_loc_1,n_kinetic))
   allocate(lit_h(n_stack,i1_buffer:i2_buffer,n_nek_loc_1,n_kinetic))
-
+ 
   rhs(:,:,:,:)    = (0.0,0.0)
   rhs_dr(:,:,:,:) = 0.0
 
@@ -36,6 +36,8 @@ subroutine gyro_rhs_total
      call gyro_rhs_nonlinear
   endif
   !---------------------------------------------
+
+  call gyro_timer_in('RHS-total')
 
   !----------------------------------------------------------------------
   ! Compute orbit-time derivative for ions ONLY, because this term is 
@@ -177,6 +179,8 @@ subroutine gyro_rhs_total
   deallocate(z_dis)
   deallocate(cap_h)
   deallocate(lit_h)
+
+  call gyro_timer_out('RHS-total')
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'*[get_rhs_total done]'

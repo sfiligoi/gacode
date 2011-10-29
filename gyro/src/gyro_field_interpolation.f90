@@ -38,7 +38,7 @@ subroutine gyro_field_interpolation
   complex, external :: BLEND_F
   !-----------------------------------------------------
 
-  call gyro_timer(3,'field intrp')
+  call gyro_timer_in('Field-interp')
 
   do i=1,n_x
      cmplx_phase = phase(in_1,i)
@@ -240,7 +240,7 @@ subroutine gyro_field_interpolation
      enddo
   enddo
 
-  call gyro_timer(3,'out')
+  call gyro_timer_out('Field-interp')
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[gyro_field_interpolation done]'

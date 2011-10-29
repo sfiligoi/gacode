@@ -22,13 +22,11 @@ subroutine gyro_write_timedata_hdf5
   real, dimension(:,:), allocatable :: a2
   real, dimension(:,:,:), allocatable :: a3
   !
-  complex, dimension(:,:,:), allocatable :: n_plot, e_plot, v_plot
-  !
   ! HDF5 variables
   !
   integer, parameter :: hr4=SELECTED_REAL_KIND(6,37)
   character(60) :: description
-  character(64) :: step_name, tempVarName
+  character(64) :: step_name
   character(128) :: dumpfile
   character(20)   :: openmethod
   integer(HID_T) :: dumpGid,dumpFid,gid3D,fid3D
@@ -329,10 +327,11 @@ subroutine gyro_write_timedata_hdf5
   !
   if (velocity_output_flag == 1) then
      call get_nonlinear_flux_velocity
-     call write_distributed_real_h5('out.gyro.flux_velocity',dumpGid,&
-          size(nonlinear_flux_velocity),&
-          nonlinear_flux_velocity,&
-          h5in,h5err)
+     ! JC: The text below generates an debug error
+     !call write_distributed_real_h5('out.gyro.flux_velocity',dumpGid,&
+     !     size(nonlinear_flux_velocity),&
+     !     nonlinear_flux_velocity,&
+     !     h5in,h5err)
   endif
   !------------------------------------------------------------
 
@@ -382,11 +381,11 @@ contains
     !    allocate(phi_plot(n_theta_plot,n_x,n_field+eparallel_plot_flag))
     !  This should be generalized to include the other GEO options
     !------------------------------------------
-    real, dimension(:,:), allocatable :: Rc,Zc,Rf,Zf
+    real, dimension(:,:), allocatable :: Rc,Zc
     real, dimension(:,:,:,:), allocatable :: buffer
     real, dimension(:,:,:), allocatable :: bufferMesh
-    real :: theta, rmajc, zmagc, kappac, deltac, zetac, r_c, dr,xdc
-    integer :: iphi, ix, iy, j, ncoarse,nphi
+    real :: theta,rmajc,zmagc,kappac,deltac,zetac,r_c,xdc
+    integer :: iphi,ix,j,ncoarse,nphi
 
     ncoarse = n_theta_plot
     allocate(Rc(0:ncoarse,n_x), Zc(0:ncoarse,n_x))
@@ -516,11 +515,10 @@ subroutine write_hdf5_restart
   !---------------------------------------------------
   implicit none
   !
-  real :: pi=3.141592653589793
   character(60) :: description
   character(64) :: step_name, tempVarName
   character(128) :: dumpfile
-  integer(HID_T) :: dumpGid,dumpFid,fid3D
+  integer(HID_T) :: dumpGid,dumpFid
   type(hdf5ErrorType) :: errval
   character(4) :: iname
   type(hdf5InOpts) :: h5in
@@ -641,7 +639,6 @@ subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
   type(hdf5InOpts), intent(inout) :: h5in
   type(hdf5ErrorType), intent(inout) :: h5err
   !
-  integer :: data_loop
   integer :: i_group_send
   integer :: i_send
   integer :: ifld,ikin,imom,i
@@ -650,7 +647,6 @@ subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
   real, dimension(:,:,:,:), allocatable :: buffn
   character(128) :: tempVarName 
   character(128), dimension(:,:,:),allocatable :: vnameArray
-  character(3) :: n_name
   character(1) :: ikin_name
   !
   real :: fn_recv(n_fn)
@@ -820,17 +816,14 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
   complex, intent(in) :: fn(n_fn)
   logical, intent(in) :: plot3d, plotwedge
   character(128) :: tempVarName , tempVarNameGr
-  character(128), dimension(:),allocatable :: vnameArray,  pType
-  character(3) :: n_name
+  character(128), dimension(:),allocatable :: vnameArray
   character(1) :: ikin_name
   integer(HID_T) :: grGid
   type(hdf5InOpts), intent(inout) :: h5in
   type(hdf5ErrorType), intent(inout) :: h5err
   !
-  integer :: data_loop
   integer :: i_group_send, ispcs
-  integer :: i_send, iphi, istart,nn,i,ikin,in, ix,nphi
-  integer :: iloop
+  integer :: i_send, iphi, istart,nn,ikin,in, ix,nphi
   !
   complex :: fn_recv(n_fn), c_i
   complex, dimension(:,:,:,:), allocatable :: buffn

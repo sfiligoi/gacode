@@ -55,6 +55,8 @@ subroutine gyro_fulladvance
   end select
   !------------------------------------------------------
 
+  call gyro_timer_in('Diagnos.-allstep')
+
   call gyro_timestep_error
 
   !------------------------------------------------------
@@ -115,7 +117,11 @@ subroutine gyro_fulladvance
      endif
   endif
 
+  call gyro_timer_out('Diagnos.-allstep')
+
   if (modulo(step,time_skip) == 0) then
+
+     call gyro_timer_in('Diagnos.-datastep')
 
      ! Counter for number of data output events.
 
@@ -164,6 +170,8 @@ subroutine gyro_fulladvance
         call gyro_write_restart
 
      endif
+
+     call gyro_timer_out('Diagnos.-datastep')
 
   endif ! modulo(step,time_skip) test
   !-------------------------------------------------------------------
