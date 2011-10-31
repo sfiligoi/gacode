@@ -31,12 +31,10 @@ subroutine gyro_get_he_implicit
         
         ! ELECTROSTATIC
         
+!$omp parallel do default(shared) private(m,m0,j)
         do i=1,n_x
-           
            do m=1,n_stack
-              
               m0 = m_phys(ck,m)
-              
               do j=1,n_blend
                  
                  h(m,i,p_nek_loc,n_spec) = h(m,i,p_nek_loc,n_spec)+&
@@ -45,21 +43,18 @@ subroutine gyro_get_he_implicit
                       field_blend(j,i,1)
                  
               enddo ! j
-              
            enddo ! m
-           
         enddo ! i
+!$omp end parallel do
         
      else if (n_field == 2) then
         
         ! ELECTROMAGNETIC -- A_parallel only
         
-        do i=1,n_x
-           
+!$omp parallel do default(shared) private(m,m0,j)
+        do i=1,n_x           
            do m=1,n_stack
-              
               m0 = m_phys(ck,m)
-              
               do j=1,n_blend
                  
                  h(m,i,p_nek_loc,n_spec) = h(m,i,p_nek_loc,n_spec) &
@@ -70,21 +65,18 @@ subroutine gyro_get_he_implicit
                       o_fv(j,m,i,p_nek_loc))*field_blend(j,i,2)
                  
               enddo ! j
-              
            enddo ! m
-           
         enddo ! i
+!$omp end parallel do
         
      else
         
         ! ELECTROMAGNETIC -- A_parallel and B_parallel
         
+!$omp parallel do default(shared) private(m,m0,j)
         do i=1,n_x
-           
-           do m=1,n_stack
-              
-              m0 = m_phys(ck,m)
-              
+           do m=1,n_stack 
+              m0 = m_phys(ck,m)  
               do j=1,n_blend
                  
                  h(m,i,p_nek_loc,n_spec) = h(m,i,p_nek_loc,n_spec) &
@@ -97,11 +89,10 @@ subroutine gyro_get_he_implicit
                       energy(ie,indx_e)*lambda(i,k)*tem_s(n_spec,i)/z(n_spec)*&
                       (c_blend(j,m0,i,p_nek_loc)-o_f(j,m,i,p_nek_loc))*field_blend(j,i,3)
                  
-              enddo ! j
-              
+              enddo ! j  
            enddo ! m
-           
         enddo ! i
+!$omp end parallel do
         
      endif
 
