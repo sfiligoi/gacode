@@ -38,7 +38,7 @@ subroutine gyro_field_interpolation
   complex, external :: BLEND_F
   !-----------------------------------------------------
 
-  call gyro_timer_in('Field-interp')
+  call gyro_timer_in('Field-interp.a')
 
   do i=1,n_x
      cmplx_phase = phase(in_1,i)
@@ -87,6 +87,9 @@ subroutine gyro_field_interpolation
   enddo ! p_nek
   !
   !---------------------------------------------------------------
+
+  call gyro_timer_out('Field-interp.a')
+  call gyro_timer_in('Field-interp.b')
 
   !---------------------------------------------------------------
   ! GK SPECIES:
@@ -240,7 +243,7 @@ subroutine gyro_field_interpolation
      enddo
   enddo
 
-  call gyro_timer_out('Field-interp')
+  call gyro_timer_out('Field-interp.b')
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[gyro_field_interpolation done]'

@@ -118,10 +118,10 @@ subroutine gyro_fulladvance
   endif
 
   call gyro_timer_out('Diagnos.-allstep')
+  call gyro_timer_in('Diagnos.-datastep')
 
   if (modulo(step,time_skip) == 0) then
 
-     call gyro_timer_in('Diagnos.-datastep')
 
      ! Counter for number of data output events.
 
@@ -171,9 +171,10 @@ subroutine gyro_fulladvance
 
      endif
 
-     call gyro_timer_out('Diagnos.-datastep')
 
   endif ! modulo(step,time_skip) test
+
+  call gyro_timer_out('Diagnos.-datastep')
   !-------------------------------------------------------------------
 
   !----------------------------------------------------

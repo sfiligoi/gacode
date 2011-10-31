@@ -68,8 +68,8 @@ subroutine get_gyro_h_aperp
                       w_gyro_aperp(m,i_diff,i,p_nek_loc,is)*hh(m,i+i_diff)
 
               enddo ! m
-              gyro_h_aperp(:,i,p_nek_loc,is) = temp(:)
            enddo ! i_diff
+           gyro_h_aperp(:,i,p_nek_loc,is) = temp(:)
         enddo ! i
 
      enddo ! is

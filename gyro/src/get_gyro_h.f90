@@ -63,14 +63,14 @@ subroutine get_gyro_h
         enddo
 
         do i=1,n_x
-           temp(:) = (0.0,0.0)
-           do i_diff=-m_gyro,m_gyro-i_gyro
-              do m=1,n_stack
+         temp(:) = (0.0,0.0)
+          do i_diff=-m_gyro,m_gyro-i_gyro
+             do m=1,n_stack
                  temp(m) = temp(m)+&
                       w_gyro(m,i_diff,i,p_nek_loc,is)*hh(m,i+i_diff)
               enddo ! m
-              gyro_h(:,i,p_nek_loc,is) = temp(:)
            enddo ! i_diff
+           gyro_h(:,i,p_nek_loc,is) = temp(:)
         enddo ! i
 
      enddo ! is

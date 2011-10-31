@@ -48,11 +48,12 @@ subroutine gyro_do
   total_memory  = 0.0
   alltime_index = 0
   !
-  ! String-tagged timers
+  ! TIMER NOTES: 
+  ! - print order follows init. order below,
+  ! - strings will be split on '-' character.
   !
-  ! NOTE: print order follows init. order below
-  !
-  call gyro_timer_init('Field-interp')
+  call gyro_timer_init('Field-interp.a')
+  call gyro_timer_init('Field-interp.b')
   call gyro_timer_init('Velocity-sum')
   call gyro_timer_init('Field-explicit')
   call gyro_timer_init('Field-implicit')
