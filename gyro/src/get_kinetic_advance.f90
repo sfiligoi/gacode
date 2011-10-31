@@ -18,10 +18,16 @@ subroutine get_kinetic_advance
   implicit none
   !-------------------------
 
+  call gyro_timer_in('Implicit-he')
   call get_delta_he
+  call gyro_timer_out('Implicit-he')
+
   call gyro_field_solve_implicit
   call gyro_field_interpolation
+
+  call gyro_timer_in('Implicit-he')
   call gyro_get_he_implicit
+  call gyro_timer_out('Implicit-he')
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'*[get_kinetic_advance done]'

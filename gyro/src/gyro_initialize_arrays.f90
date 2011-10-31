@@ -65,7 +65,6 @@ subroutine gyro_initialize_arrays
 
   !---------------------------------------------------
   ! Initialization to prevent MPI-grid errors
-  field_tau = 0.0
   if (collision_flag == 1) then
      f_coll  = 0.0
      fb_coll = 0.0
