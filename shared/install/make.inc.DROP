@@ -10,6 +10,8 @@ F77	= mpif90
 FMATH	= -r8 
 FOPT	= -O3 -xSSE2,SSE3,SSSE3,SSE4.1,SSE4.2 -no-prec-div -funroll-loops -unroll-aggressive
 FDEBUG	= -check bounds -fpe0 -ftrapuv
+FOMP    = -openmp
+FNOMP   =
 
 # System math libraries
 

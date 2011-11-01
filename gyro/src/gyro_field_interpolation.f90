@@ -144,7 +144,7 @@ subroutine gyro_field_interpolation
                  enddo
               enddo
            enddo
-!omp end parallel do
+!$omp end parallel do
 
         case (2) 
 
@@ -168,7 +168,7 @@ subroutine gyro_field_interpolation
                  enddo
               enddo
            enddo
-!omp end parallel do
+!$omp end parallel do
 
         case (3)
 
@@ -270,6 +270,7 @@ subroutine gyro_field_interpolation
         enddo
      enddo
   enddo
+
 
   call gyro_timer_out('Field-interp.b')
 
