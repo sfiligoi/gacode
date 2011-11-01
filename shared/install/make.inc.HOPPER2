@@ -16,7 +16,7 @@ F77	= ftn
 
 FMATH	= -r8 
 FOPT	= -tp istanbul-64 -O3 -fast -Msmartalloc -fastsse -Mnoopenmp
-FDEBUG	= -g -Ktrap=fp -Mbounds -Minform,inform -Mnoopenmp
+FDEBUG	= -g -Ktrap=	  fp -Mbounds -Minform,inform -Mnoopenmp
 FBOUND	= -Minform,inform -Mbounds
 FPROF	= -tp istanbul-64 -O3 -fast -Msmartalloc -Mprof=func -Mnoopenmp
 
