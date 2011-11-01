@@ -7,8 +7,7 @@ subroutine gyro_field_solve_implicit
   implicit none
   !---------------------------------------------------
 
-  call get_gyro_h
-  if (n_field == 3) call get_gyro_h_aperp
+  call gyro_operators_on_h
 
   ! Generate RHS for field solve
   do ix=1,n_field

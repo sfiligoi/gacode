@@ -1,10 +1,9 @@
 !-----------------------------------------------------
-! get_gyro_h.f90
+! gyro_operators_on_h.f90
 !
 ! PURPOSE:
-!  Given h, compute the gyroaverage (gyro_h) for 
-!  IONS only.  For electrons the gyroaverage is
-!  the identity operation.
+!  Given h, compute the gyroaverages for all gyrokinetic 
+!  species, and limiting forms for DK electrons.
 !
 !  This is valid for periodic OR nonperiodic boundary
 !  conditions. 
@@ -14,7 +13,7 @@
 !   for the sake of speed.
 !-----------------------------------------------------
 
-subroutine get_gyro_h
+subroutine gyro_operators_on_h
 
   use gyro_globals
   use gyro_pointers
@@ -62,37 +61,66 @@ subroutine get_gyro_h
            hh(:,i) = h(:,i,p_nek_loc,is)
         enddo
 
-        do i=1,n_x
-         temp(:) = (0.0,0.0)
-          do i_diff=-m_gyro,m_gyro-i_gyro
-             do m=1,n_stack
-                 temp(m) = temp(m)+&
-                      w_gyro(m,i_diff,i,p_nek_loc,is)*hh(m,i+i_diff)
-              enddo ! m
-           enddo ! i_diff
-           gyro_h(:,i,p_nek_loc,is) = temp(:)
-        enddo ! i
+        if (n_field < 3) then
+
+!$omp parallel do default(shared) private(i_diff,m,temp)
+           do i=1,n_x
+              temp(:) = (0.0,0.0)
+              do i_diff=-m_gyro,m_gyro-i_gyro
+                 do m=1,n_stack
+                    temp(m) = temp(m)+&
+                         w_gyro(m,i_diff,i,p_nek_loc,is)*hh(m,i+i_diff)
+                 enddo ! m
+              enddo ! i_diff
+              gyro_h(:,i,p_nek_loc,is) = temp(:)
+           enddo ! i
+!$omp end parallel do
+
+        else
+
+!$omp parallel do default(shared) private(i_diff,m,temp)
+           do i=1,n_x
+              temp(:) = (0.0,0.0)
+              do i_diff=-m_gyro,m_gyro-i_gyro
+                 do m=1,n_stack
+                    temp(m) = temp(m)+&
+                         w_gyro(m,i_diff,i,p_nek_loc,is)*hh(m,i+i_diff)
+                 enddo ! m
+              enddo ! i_diff
+              gyro_h(:,i,p_nek_loc,is) = temp(:)
+              temp(:) = (0.0,0.0)
+              do i_diff=-m_gyro,m_gyro-i_gyro
+                 do m=1,n_stack
+                    temp(m) = temp(m) + &
+                         w_gyro_aperp(m,i_diff,i,p_nek_loc,is)*hh(m,i+i_diff)
+                 enddo ! m
+              enddo ! i_diff
+              gyro_h_aperp(:,i,p_nek_loc,is) = temp(:)
+           enddo ! i
+!$omp end parallel do
+
+        endif
 
      enddo ! is
   enddo ! p_nek
   !-------------------------------------------------------
 
-
   !-------------------------------------------------------
   ! Drift-kinetic electrons:
   !
-  ! It is convenient to have this defined for 
-  ! electrons as well, even though h=<h>.
+  ! J0        -> 1
+  ! (J0+J2)/2 -> 1/2
   !
   if (electron_method == 2) then
      gyro_h(:,:,:,n_spec) = h(:,:,:,n_spec)
+     if (n_field > 2) gyro_h_aperp(:,:,:,n_spec) = 0.5*h(:,:,:,n_spec)
   endif
   !-------------------------------------------------------
 
   call gyro_timer_out('Gyroave-h')
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[get_gyro_h done]'
+     print *,'[gyro_operators_on_h done]'
   endif
 
-end subroutine get_gyro_h
+end subroutine gyro_operators_on_h

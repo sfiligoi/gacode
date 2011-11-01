@@ -92,6 +92,7 @@ OBJECTS += gyro_globals.o \
           gyro_nonlinear_flux.o \
           gyro_nonlinear_transfer.o \
           gyro_omegas.o \
+          gyro_operators_on_h.o \
           gyro_profile_init.o \
           gyro_radial_operators.o \
           gyro_radial_simulation_box.o \
@@ -143,8 +144,6 @@ OBJECTS += gyro_globals.o \
           make_poisson_blend.o \
 	  make_ampereperp_blend.o \
 	  make_poissonaperp_matrix.o \
-          get_gyro_h.o \
-	  get_gyro_h_aperp.o \
           get_field_plot.o \
           get_field_r0_plot.o \
           get_nonlinear_flux_velocity.o \

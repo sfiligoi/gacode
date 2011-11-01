@@ -13,8 +13,7 @@ subroutine gyro_field_solve_explicit
 
   implicit none
 
-  call get_gyro_h
-  if (n_field == 3) call get_gyro_h_aperp
+  call gyro_operators_on_h
 
   ! Velocity-space sums (RHS)
   do ix=1,n_field
