@@ -16,14 +16,65 @@
 # - (1x) Gemini ASIC per 2 compute nodes arranged in 3D torus network topology
 
 simdir=${1}
-nproc=${2}
+nmpi=${2}
 exec=${3}
+nomp=${4}
 
 cd $simdir
 
-# NOTE:
-#   -ss restrict processes to allocating local NUMA node memory only in order to reduce access latency
-#   -sn make certain job allocated all 4 compute blade NUMA nodes
-#   -cc bind processes to CPU cores
+# Invoke parallel calculator (same as in queue_go)
+
+#=========================================================================
+# Calculator for parallel layout
+
+#---------------------------------
+# FIXED Hardware parameters
+CORES_PER_NODE=24
+CORES_PER_NUMA=6
+#----------------------------------
+
+#---------------------------------
+# ADJUSTABLE layoput parameters
+#
+# Use this many NUMAs per node
+numa=4
+# Use this many MPI tasks per numa
+mpinuma=1
+#----------------------------------
+
+# See if we are asking for too many NUMAs
+if [ $numa -gt $NUMAS_PER_NODE ] 
+then
+  echo 'Too many NUMAs per node requested'
+  exit 1
+fi
+
+# See if we are asking for too many OpenMP tasks
+i1 = $(($nomp*$mpinuma))
+i2 = $(($CORES_PER_NODE/$CORES_PER_NUMA)) 
+if [ $i1 -gt $i2 ] 
+then
+   echo 'Too many OpenMP tasks per MPI process'
+   exit 1
+fi
+
+# MPI tasks per node
+mpinode = $(($mpinuma*$NUMAS_PER_NODE))
+# Nodes requested 
+nodes = $(($nmpi/$mpinode))
+
+# If we need part of a node, then add a node
+if [ $nmpi -gt $(($nodes*$mpinode)) ] 
+then
+   $nodes = $(($nodes+1))
+   echo "WARNING: Using partial node"
+fi
+
+# Final core counts
+$cores_requested=$(($nodes*$CORES_PER_NODE))
+$cores_used=$(($nomp*$nmpi))
+#=========================================================================
+
 export MPICH_MAX_THREAD_SAFETY=funneled
-aprun -n $nproc -ss -sn 4 -cc cpu $exec
+export OMP_NUM_THREADS=$nomp
+aprun -n $nmpi -N $mpinode -d $nomp -S $mpinuma -ss $exec

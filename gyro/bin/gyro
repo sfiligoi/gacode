@@ -28,6 +28,9 @@ then
   echo "         -n <nproc>" 
   echo "         Number of cores."
   echo
+  echo "         -nomp <nproc>" 
+  echo "         Number of OpenMP threads."
+  echo
   echo "TEST MODE"
   echo
   echo "         -t <simdir>"  
@@ -51,8 +54,8 @@ then
   echo 
   echo "REGRESSION TESTING"
   echo
-  echo "         -r <nproc>"
-  echo "         Run full regression suite on <nproc> cores."
+  echo "         -r"
+  echo "         Auto-run the full regression suite."
   echo 
   echo "TEMPLATE GENERATION"
   echo
@@ -87,8 +90,9 @@ VERBASE='out.gyro.version'
 # Default simulation root and gyro directory
 SIMROOT=$PWD
 GYRO_DIR=$GACODE_ROOT/gyro
-# Default number of cores
+# Default number of cores and OpenMP threads
 NPROC=1
+NOMP=1
 # Execute/test mode flags
 EXEC_FLAG=0
 TEST_FLAG=0
@@ -117,11 +121,13 @@ while [ $# -gt 0 ] ; do
 
   -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
 
-  -r) shift ; NPROC=$1 ; REGRESS_FLAG=1 ;;
+  -r) REGRESS_FLAG=1 ;;
 
   -s) shift ; LOCDIR=$1 ; SCOPY_FLAG=1 ;;
 
   -n) shift ; NPROC=$1 ;;
+
+  -nomp) shift ; NOMP=$1 ;;
 
   -h) gacode_printversion GYRO ; exit 0 ;;
 
@@ -130,10 +136,6 @@ while [ $# -gt 0 ] ; do
   -k) shift ; KILL_STATUS=-1 ; LOCDIR=$1 ;;
 
   -c) shift ; KILL_STATUS=0 ; LOCDIR=$1 ;;
-
-  -pk) shift ; PEEK_FLAG=1 ; LOCDIR=$1 ;;
-
-  -pw) shift ; PEEK_WINDOW=$1 ;;
 
   *) echo "ERROR: incorrect gyro syntax." ; exit 1 ;;
  
@@ -191,14 +193,11 @@ then
    N2=$[ NPROC / 2 ]
    if [ $[ NPROC - 2 * N2 ] -eq 1 ]
    then
-      echo "GYRO regression tool"
-      echo 
-      echo "Usage:  gyro -r <n_proc>" 
-      echo 
-      echo "        <n_proc>  Number of processors (must be multiple of 2)" 
+      echo "ERROR: GYRO regression tool"
+      echo "       Number of processors must be multiple of 2." 
       exit 1
    fi   
-   gyro_reg_do $NPROC 
+   gyro_reg_do $NPROC $NOMP
    exit 0
 fi
 #============================================================
@@ -245,18 +244,6 @@ then
    do
       cp -av $i $target
    done
-   exit 0
-fi
-#=============================================================
-
-#=============================================================
-# Summarize transport coefficients
-#
-if [ $PEEK_FLAG -eq 1 ]
-then
-   echo "$PEEK_WINDOW" > /tmp/peekcfg
-   cd $SIMDIR ; $GYRO_DIR/peek/peek 
-   rm /tmp/peekcfg
    exit 0
 fi
 #=============================================================
@@ -340,7 +327,7 @@ fi
 #
 if [ $INIT_FLAG -ne 1 ] 
 then
-  $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM $SIMDIR $NPROC $GYRO_DIR/src/gyro
+  $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM $SIMDIR $NPROC $GYRO_DIR/src/gyro $NOMP
 fi
 
 if [ $TEST_FLAG -eq 1 ] 

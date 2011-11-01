@@ -26,8 +26,11 @@ then
   echo "         -e <simdir>" 
   echo "         Run GYRO using input data in <simdir>."
   echo
-  echo "         -n <nproc>" 
-  echo "         Number of cores."
+  echo "         -n <MPI tasks>" 
+  echo "         Number of MPI tasks."
+  echo
+  echo "         -nomp <threads>" 
+  echo "         Number of OpenMP threads."
 
   exit 1
 fi
@@ -42,6 +45,7 @@ SIMROOT=$PWD
 GYRO_DIR=$GACODE_ROOT/gyro
 # Default number of cores
 NPROC=1
+NOMP=1
 #=============================================================
 
 #=============================================================
@@ -55,6 +59,8 @@ while [ $# -gt 0 ] ; do
   -e) shift ; LOCDIR=$1 ; EXEC_FLAG=1 ;;
 
   -n) shift ; NPROC=$1 ;;
+
+  -nomp) shift ; NOMP=$1 ;;
 
    *) echo "ERROR: incorrect gyro_bat syntax." ; exit 1 ;;
  
@@ -76,6 +82,6 @@ cat $GACODE_ROOT/shared/batch/queue_msg.${GACODE_PLATFORM}
 
 read queue_num
 
-$GACODE_ROOT/shared/batch/queue_go.${GACODE_PLATFORM} $NPROC $queue_num $LOCDIR $SIMROOT $CODE
+$GACODE_ROOT/shared/batch/queue_go.${GACODE_PLATFORM} $NPROC $queue_num $LOCDIR $SIMROOT $CODE $NOMP
 
 exit 0

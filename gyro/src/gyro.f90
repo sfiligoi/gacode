@@ -16,8 +16,6 @@ program gyro
   !
   integer :: ierr
   integer :: supported
-  !integer, external :: omp_get_thread_num
-  !integer, external :: omp_get_max_threads
   !-----------------------------------------------------------------
 
   !-----------------------------------------------------------------
@@ -47,7 +45,7 @@ program gyro
   call MPI_COMM_SIZE(GYRO_COMM_WORLD,n_proc,i_err)
   !-----------------------------------------------------------------
 
-  !-----------------------------------------------------------------
+  !----------------------------------------------------------------
   ! Query OpenMP for dimensions
   !
   i_omp = omp_get_thread_num()

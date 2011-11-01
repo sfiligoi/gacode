@@ -4,32 +4,68 @@
 #  queue_go.HOPPER2
 #
 # FUNCTION:
-#  Batch generator for Cray XE6
-#  (hopper2.nersc.gov)  Early user period, may need to be updated later.
-#-------------------------------
-#
-# Created 10 December 2010
-#
+#  Batch generator for Cray XE6 (hopper.nersc.gov)  
+#---------------------------------------------------
 
 repo=${GYRO_REPO:-gc3}
 
-nproc=${1}
+nmpi=${1}
 queue_num=${2}
 sim=${3}
 simpath=${4}
 code=${5}
+nomp=${6}
 
-# raise nodes to a multiple of 24 cores; but use $nproc in the execute line
-nodes=$(($nproc/24))
-cores=$((24*nodes))
-resid=$(($nproc-$cores))
+#=========================================================================
+# Calculator for parallel layout
 
-if [ $resid -ne 0 ]
+#---------------------------------
+# FIXED Hardware parameters
+CORES_PER_NODE=24
+CORES_PER_NUMA=6
+#----------------------------------
+
+#---------------------------------
+# ADJUSTABLE layoput parameters
+#
+# Use this many NUMAs per node
+numa=4
+# Use this many MPI tasks per numa
+mpinuma=1
+#----------------------------------
+
+# See if we are asking for too many NUMAs
+if [ $numa -gt $NUMAS_PER_NODE ] 
 then
-   echo "INFO: (batch) Adding extra node since number of cores not multiple of 24"
-   nodes=$(($nodes+1))
-   cores=$((24*$nodes))
+  echo 'Too many NUMAs per node requested'
+  exit 1
 fi
+
+# See if we are asking for too many OpenMP tasks
+i1 = $(($nomp*$mpinuma))
+i2 = $(($CORES_PER_NODE/$CORES_PER_NUMA)) 
+if [ $i1 -gt $i2 ] 
+then
+   echo 'Too many OpenMP tasks per MPI process'
+   exit 1
+fi
+
+# MPI tasks per node
+mpinode = $(($mpinuma*$NUMAS_PER_NODE))
+# Nodes requested 
+nodes = $(($nmpi/$mpinode))
+
+# If we need part of a node, then add a node
+if [ $nmpi -gt $(($nodes*$mpinode)) ] 
+then
+   $nodes = $(($nodes+1))
+   echo "WARNING: Using partial node"
+fi
+
+# Final core counts
+$cores_requested=$(($nodes*$CORES_PER_NODE))
+$cores_used=$(($nomp*$nmpi))
+#=========================================================================
 
 case "$queue_num" in
 
@@ -78,11 +114,11 @@ echo "#PBS -o $simpath/$sim/batch.out" >> $bfile
 echo "#PBS -e $simpath/$sim/batch.err" >> $bfile
 echo "#PBS -q $queue" >> $bfile
 echo "#PBS -l walltime=$limit" >> $bfile
-echo "#PBS -l mppwidth=$cores" >> $bfile
+echo "#PBS -l mppwidth=$cores_requested" >> $bfile
 echo "#PBS -m abe" >> $bfile
 echo "#PBS -M ${USER}@nersc.gov" >> $bfile
 
-gyro_opts="-e $sim -n $nproc -p $simpath"
+gyro_opts="-e $sim -n $nmpi -nomp $nomp -p $simpath"
 
 echo "$code $gyro_opts" >> $bfile 
 
