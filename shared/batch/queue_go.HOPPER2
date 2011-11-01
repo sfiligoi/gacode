@@ -22,7 +22,7 @@ nomp=${6}
 #---------------------------------
 # FIXED Hardware parameters
 CORES_PER_NODE=24
-CORES_PER_NUMA=6
+NUMAS_PER_NODE=4
 #----------------------------------
 
 #---------------------------------
@@ -42,8 +42,8 @@ then
 fi
 
 # See if we are asking for too many OpenMP tasks
-i1 = $(($nomp*$mpinuma))
-i2 = $(($CORES_PER_NODE/$CORES_PER_NUMA)) 
+i1=$(($nomp*$mpinuma))
+i2=$(($CORES_PER_NODE/$NUMAS_PER_NODE)) 
 if [ $i1 -gt $i2 ] 
 then
    echo 'Too many OpenMP tasks per MPI process'
@@ -51,21 +51,28 @@ then
 fi
 
 # MPI tasks per node
-mpinode = $(($mpinuma*$NUMAS_PER_NODE))
+mpinode=$(($mpinuma*$NUMAS_PER_NODE))
 # Nodes requested 
-nodes = $(($nmpi/$mpinode))
+nodes=$(($nmpi/$mpinode))
 
 # If we need part of a node, then add a node
 if [ $nmpi -gt $(($nodes*$mpinode)) ] 
 then
-   $nodes = $(($nodes+1))
+   $nodes=$(($nodes+1))
    echo "WARNING: Using partial node"
 fi
 
 # Final core counts
-$cores_requested=$(($nodes*$CORES_PER_NODE))
-$cores_used=$(($nomp*$nmpi))
+cores_requested=$(($nodes*$CORES_PER_NODE))
+cores_used=$(($nomp*$nmpi))
 #=========================================================================
+
+echo "Cores requested (mppwidth) $cores_requested"
+echo "Cores used $cores_used"
+echo "Total MPI tasks (-n) $nmpi"
+echo "MPI tasks/node (-N) $mpinode"
+echo "OpenMP threads/MPI task(-d) $nomp"
+echo "MPI tasks per numa node (-S) $mpinuma"
 
 case "$queue_num" in
 
