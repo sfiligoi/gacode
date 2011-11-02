@@ -34,7 +34,6 @@ all:
 	cd SSUB ; make 
 	cd src ; make
 	cd GKEIGEN ; make
-	cd peek ; make
 	cd vshdf5 ; make
 
 	cd src ; $(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o gyro_lib.a $(EXTRA_LIBS)
@@ -45,7 +44,6 @@ clean:
 	cd SSUB ; make clean
 	cd src ; make clean
 	cd GKEIGEN ; make clean
-	cd peek ; make clean
 	cd vshdf5 ; make clean
 
 	cd src ; rm -f $(EXEC)
