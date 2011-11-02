@@ -30,7 +30,14 @@ then
   echo "         Number of MPI tasks."
   echo
   echo "         -nomp <threads>" 
-  echo "         Number of OpenMP threads."
+  echo "         Number of OpenMP threads per MPI task."
+  echo
+  echo "         -numa <n>" 
+  echo "         NUMAs active per node."
+  echo
+  echo "         -mpinuma <n>" 
+  echo "         MPI tasks per active NUMA."
+  echo
 
   exit 1
 fi
@@ -45,7 +52,9 @@ SIMROOT=$PWD
 GYRO_DIR=$GACODE_ROOT/gyro
 # Default number of cores
 NPROC=1
-NOMP=1
+NOMP=
+NUMA=
+MPINUMA=
 #=============================================================
 
 #=============================================================
@@ -78,10 +87,6 @@ SIMDIR=$SIMROOT/$LOCDIR
 
 # Determine queue
 
-cat $GACODE_ROOT/shared/batch/queue_msg.${GACODE_PLATFORM}
-
-read queue_num
-
-$GACODE_ROOT/shared/batch/queue_go.${GACODE_PLATFORM} $NPROC $queue_num $LOCDIR $SIMROOT $CODE $NOMP
+$GACODE_ROOT/shared/batch/queue.${GACODE_PLATFORM} $NPROC $LOCDIR $SIMROOT $CODE $NOMP $NUMA $MPINUMA
 
 exit 0

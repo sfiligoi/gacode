@@ -25,11 +25,17 @@ then
   echo "         -e <simdir>" 
   echo "         Run GYRO using input data in <simdir>."
   echo
-  echo "         -n <nproc>" 
-  echo "         Number of cores."
+  echo "         -n <MPI tasks>" 
+  echo "         Number of MPI tasks."
   echo
-  echo "         -nomp <nproc>" 
-  echo "         Number of OpenMP threads."
+  echo "         -nomp <threads>" 
+  echo "         Number of OpenMP threads per MPI task."
+  echo
+  echo "         -numa <n>" 
+  echo "         NUMAs active per node."
+  echo
+  echo "         -mpinuma <n>" 
+  echo "         MPI tasks per active NUMA."
   echo
   echo "TEST MODE"
   echo
@@ -90,9 +96,11 @@ VERBASE='out.gyro.version'
 # Default simulation root and gyro directory
 SIMROOT=$PWD
 GYRO_DIR=$GACODE_ROOT/gyro
-# Default number of cores and OpenMP threads
+# Parallelization parameters
 NPROC=1
-NOMP=1
+NOMP=
+NUMA=
+MPINUMA=
 # Execute/test mode flags
 EXEC_FLAG=0
 TEST_FLAG=0
@@ -128,6 +136,10 @@ while [ $# -gt 0 ] ; do
   -n) shift ; NPROC=$1 ;;
 
   -nomp) shift ; NOMP=$1 ;;
+
+  -numa) shift ; NUMA=$1 ;;
+
+  -mpinuma) shift ; MPINUMA=$1 ;;
 
   -h) gacode_printversion GYRO ; exit 0 ;;
 
@@ -327,7 +339,8 @@ fi
 #
 if [ $INIT_FLAG -ne 1 ] 
 then
-  $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM $SIMDIR $NPROC $GYRO_DIR/src/gyro $NOMP
+  $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM \
+    $SIMDIR $NPROC $GYRO_DIR/src/gyro $NOMP $NUMA $MPINUMA
 fi
 
 if [ $TEST_FLAG -eq 1 ] 
