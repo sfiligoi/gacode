@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # SCRIPT:
-#  queue_go.PPPL
+#  queue.PPPL
 #
 # FUNCTION:
 #  Batch script generator; PPPL Linux PBS for dawson, kite, kruskal
@@ -9,10 +9,6 @@
 # AUTHORS:
 #  David Mikkelsen <mikk@pppl.gov>
 #  Luc Peterson <jpeterso@pppl.gov>
-#
-# REVISIONS:
-#  23 April 2010
-#  7 July 2011 - change to dawson
 
 #------------------------------------
 # Functions:
@@ -20,7 +16,7 @@
 
 G_proc_check () {
 
-if [ $nproc -gt $proc_max ] ; then
+if [ $nmpi -gt $proc_max ] ; then
   echo " Try again: the \"${queue_sub}\" queue has a $proc_max processor limit"
 exit 1
 fi  
@@ -30,25 +26,34 @@ fi
 # Main script follows
 #-------------------------------------
 
+echo "PPPL Linux PBS queue choices:"
+echo
+echo "[1] dawson   ( up to 192 cores ) 8 cores/node"
+echo "[2] kite     ( up to 48 cores )  2 cores/node"
+echo "[3] kruskal  ( small partition: to 80 cores; large: 512 ) 8 cores/node"
+echo
+echo "Will request 2*Nproc GB of memory on all systems."
 
-nproc=${1}
-queue_num=${2}
-sim=${3}
-sim_path=${4}
-code=${5}
+read -p "Select a queue [1-3] " queue_num
+
+nmpi=${1}
+sim=${2}
+simpath=${3}
+code=${4}
+nomp=${5}
+numa=${6}
+mpinuma=${7}
+
+# nmpi = MPI tasks
+# nomp = OpenMP threads per MPI task
+# numa = NUMAs active per node
+# mpinuma = MPI tasks per active NUMA 
 
 case "$queue_num" in
-   1 ) queue_sub="dawson"
-       proc_max=192 ;; 
-
-   2 ) queue_sub="kite"
-       proc_max=48 ;;
-
-   3 ) queue_sub="kruskal"
-       proc_max=512 ;;
-
-   * ) echo " Unrecognized queue choice"
-       exit ;;
+  1) queue_sub="dawson"  ; proc_max=192 ;; 
+  2) queue_sub="kite"    ; proc_max=48 ;;
+  3) queue_sub="kruskal" ; proc_max=512 ;;
+  *) echo " Unrecognized queue choice" ; exit ;;
 esac
 
 #  check requested Nproc against the selected queue limit:
@@ -64,31 +69,31 @@ echo $time_limit | grep -q : || time_limit=${time_limit}:00:00
 # Special handling for large kruskal jobs
 #PBS -l nodes=64:ppn=8,walltime=1:00:00
 #PBS -l mem=1025795mb
-if [ ${nproc} -gt 340 ] ; then
-  mem_spec=$[1025795*$nproc/512]"mb"
+if [ ${nmpi} -gt 340 ] ; then
+  mem_spec=$[1025795*$nmpi/512]"mb"
 # Determine the number of kruskal nodes needed.
-  n_nodes=$[$nproc/8]
-  if [ $[$nproc%8] -ne 0 ] ; then
+  n_nodes=$[$nmpi/8]
+  if [ $[$nmpi%8] -ne 0 ] ; then
 # If not a multiple of 8, need extra
     n_nodes=$[$n_nodes+1]
   fi
   node_spec=${n_nodes}:ppn=8
 else
-  mem_spec=$[1900*$nproc]"mb"
-  node_spec=${nproc}
+  mem_spec=$[1900*$nmpi]"mb"
+  node_spec=${nmpi}
 fi
 
 # Make up the batch script:
 
-bfile=$sim_path/$sim/batch.src
+bfile=$simpath/$sim/batch.src
 echo "Output written to $bfile"
 
 echo "#!/bin/sh" > $bfile
 echo "#PBS -l nodes=${node_spec},walltime=$time_limit" >> $bfile
 echo "#PBS -l mem=${mem_spec}" >> $bfile
 echo "#PBS -N $sim" >> $bfile
-echo "#PBS -e $sim_path/$sim/batch.err" >> $bfile
-echo "#PBS -o $sim_path/$sim/batch.out" >> $bfile
+echo "#PBS -e $simpath/$sim/batch.err" >> $bfile
+echo "#PBS -o $simpath/$sim/batch.out" >> $bfile
 echo "#PBS -m aeb" >> $bfile
 echo "#PBS -M $USER@pppl.gov" >> $bfile
 echo "#PBS -r n" >> $bfile
@@ -101,7 +106,7 @@ echo 'echo The working directory is `echo $PBS_O_WORKDIR`' >> $bfile
 echo 'NPROCS=`wc -l < $PBS_NODEFILE`' >> $bfile
 echo 'echo This job has allocated $NPROCS nodes' >> $bfile
 echo '# Sort the PBS generated machine file for cleanup later' >> $bfile
-echo "PBS_SORT=$sim_path/$sim/pbs.nodes" >> $bfile
+echo "PBS_SORT=$simpath/$sim/pbs.nodes" >> $bfile
 echo 'sort -u $PBS_NODEFILE > $PBS_SORT' >> $bfile
 
 # added "sleep 5" to cure an NFS problem:
@@ -109,19 +114,15 @@ echo 'sleep 5' >> $bfile
 
 echo "echo -n 'Started : ' ; date" >> $bfile
 
-gyro_opts="-e $sim -n $nproc -p $sim_path"
+gyro_opts="-e $sim -n $nmpi -p $simpath"
 echo "$code $gyro_opts" >> $bfile
 
 echo "echo -n 'Finished: ' ; date" >> $bfile
 
-# Submit to queue?
-
-echo "Submit your job [y,n]?"
-   
-read submit
+read -p "Submit your job [y/n] " submit
    
 if [ "$submit" = "y" ] ; then   
    qsub $bfile
 fi
    
-exit 1
+exit 0
