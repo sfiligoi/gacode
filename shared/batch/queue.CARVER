@@ -6,6 +6,8 @@
 # FUNCTION:
 #  Batch generator for IBM iDataPlex (carver.nersc.gov)
 #---------------------------------------------------
+#  FIXED Hardware parameters
+CORES_PER_NODE=8
 
 nmpi=${1}
 sim=${2}
@@ -20,7 +22,16 @@ mpinuma=${7}
 # numa = NUMAs active per node
 # mpinuma = MPI tasks per active NUMA 
 
-nodes=$(($nmpi/8))
+#=========================================================================
+# Calculator for parallel layout
+
+nodes=$(($nmpi/$CORES_PER_NODE))
+# If we need part of a node, then add a node
+if [ $nmpi -gt $(($nodes*$CORES_PER_NODE)) ] 
+then
+   nodes=$(($nodes+1))
+   echo "** WARNING **: Using partial node"
+fi
 
 #=========================================================================
 
@@ -71,7 +82,8 @@ fi
 echo "#PBS -o $simpath/$sim/batch.out" >> $bfile
 echo "#PBS -e $simpath/$sim/batch.err" >> $bfile
 echo "#PBS -q $queue" >> $bfile
-echo "#PBS -l nodes=$nodes:ppn=8,walltime=$limit" >> $bfile
+echo "#PBS -l nodes=$nodes:ppn=$CORES_PER_NODE" >> $bfile
+echo "#PBS -l walltime=$limit" >> $bfile
 echo "#PBS -m ae" >> $bfile
 echo "#PBS -M ${USER}@nersc.gov" >> $bfile
 
