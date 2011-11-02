@@ -85,9 +85,9 @@ def plot_jac():
     plot.grid(True)
     
     plot.plot(r,dqidzi,'-o',color='darkgreen', lw=2.5, label="dQidzi")
-#    plot.plot(r,lndqidlnze,'-o',color='blue', lw=2.5, label="dQidze")
-#    plot.plot(r,lndqedlnzi,'-o',color='red', lw=2.5, label="dQedzi")
-#    plot.plot(r,lndqedlnze,'-o',color='magenta', lw=2.5, label="dQedze")
+    plot.plot(r,dqidze,'-o',color='blue', lw=2.5, label="dQidze")
+    plot.plot(r,dqedzi,'-o',color='red', lw=2.5, label="dQedzi")
+    plot.plot(r,dqedze,'-o',color='magenta', lw=2.5, label="dQedze")
 
     handles, labels=plot.get_legend_handles_labels()
     plot.legend(labels, 'best')
