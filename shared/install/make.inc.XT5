@@ -1,5 +1,5 @@
 #---------------------------------------------------
-# Cray XT5 (jaguarpf.ccs.ornl.gov)
+# Cray XT5 (jaguarpf.ccs.ornl.gov) [PGI]
 #---------------------------------------------------
 
 # Compilers and flags
@@ -12,20 +12,24 @@ F77 = ftn
 
 # Compiler options/flags
 FMATH  = -r8
-FOPT   = -tp istanbul-64 -O3 -fast -Msmartalloc -fastsse -Mnoopenmp
-FDEBUG = -g -Ktrap=fp -Mbounds -Minform=inform -Msmartalloc -Mnoopenmp
-FPROF  = -tp istanbul-64 -O3 -fast -Msmartalloc -Mprof=func -Mnoopenmp
+FOPT   = -fast -Mcache_align -Msmartalloc 
+FDEBUG = -Ktrap=fp -Mbounds -Minform=inform -Msmartalloc
+FOMP   = -mp=nonuma
+FNOMP  =
 
-# Execute 'module load fftw/2.1.5'
-# Execute 'module load mumps/4.7.3_par' (parallel version) 
-#  which defines MUMPS_PATH environment variable
-LMATH = -ldrfftw -ldfftw ${MUMPS_PATH} -lzmumps -lpord
+NETCDF = \
+  ${CRAY_NETCDF_DIR}/netcdf-hdf5parallel-pgi/lib/libnetcdff.a \
+  ${CRAY_NETCDF_DIR}/netcdf-hdf5parallel-pgi/lib/libnetcdf.a
+NETCDF_INC = ${CRAY_NETCDF_DIR}/netcdf-hdf5parallel-pgi/include
 
-# OPTIONAL : Load netCDF
-# Execute 'module load netcdf/4.0.1.1'
-NETCDF     = /opt/cray/netcdf/4.0.1.1/netcdf-pgi/lib/libnetcdf.a
-NETCDF_INC = /opt/cray/netcdf/4.0.1.1/netcdf-pgi/include
+HDF5_INC = -I${CRAY_HDF5_DIR}/hdf5-parallel-pgi/include
+HDF5_LIBS = \
+  ${CRAY_HDF5_DIR}/hdf5-parallel-pgi/lib/libhdf5_hl.a \
+  ${CRAY_HDF5_DIR}/hdf5-parallel-pgi/lib/libhdf5hl_fortran.a \
+  ${CRAY_HDF5_DIR}/hdf5-parallel-pgi/lib/libhdf5_fortran.a \
+  ${CRAY_HDF5_DIR}/hdf5-parallel-pgi/lib/libhdf5.a
 
-# Archive 
+VSHDF5_MAKECMD=vshdf5
+
+# Archive
 ARCH = ar cr
-

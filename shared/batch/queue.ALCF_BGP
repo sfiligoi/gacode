@@ -1,10 +1,10 @@
 #!/bin/sh
 #
 # SCRIPT:
-#  queue_go.UBGL
+#  queue_go.ALCF_BGP
 #
 # FUNCTION:
-#  Batch generator for ubgl.llnl.gov
+#  Batch generator for the ALCF Blue Gene/P
 
 nmpi=${1}
 sim=${2}

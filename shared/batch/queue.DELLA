@@ -1,10 +1,10 @@
 #!/bin/sh
 #
 # SCRIPT:
-#  queue_go.petrel
+#  queue.DELLA
 #
 # FUNCTION:
-#  Batch generator for Linux PBS on della.princeton.edu
+#  Batch generator for della.princeton.edu
 
 #------------------------------------
 # Functions:
@@ -12,7 +12,7 @@
 
 G_proc_check () {
 
-      if [ $nproc -gt $proc_max ] ; then
+      if [ $nmpi -gt $proc_max ] ; then
          echo " Quitting: the \"$queue\" queue has only $proc_max processors"
 	 exit 1
       fi  
@@ -24,11 +24,22 @@ G_proc_check () {
 
 repository="null"
 
-nproc=${1}
-queue_num=${2}
-sim=${3}
-simpath=${4}
-code=${5}
+nmpi=${1}
+sim=${2}
+simpath=${3}
+code=${4}
+nomp=${5}
+numa=${6}
+mpinuma=${7}
+
+echo "Della PBS queues"
+echo
+echo "[1] Infiniband (up to 128 CPUs)"
+echo "[2] Standard-Gigabit ethernet  (up to 256 CPUs)"
+echo "[3] short run (quicker service) (up to 128 CPUs)"
+echo
+
+read -p "Select a queue [1-3] " queue_num
 
 case "$queue_num" in
 # precede attribute with ":" as in ":gigabit"
@@ -74,8 +85,8 @@ echo "Output written to $bfile"
 # Make up the batch script:
 
 echo "#!/bin/sh" > $bfile
-N_nodes=$[$nproc/2]
-N_remainder=$[$nproc-2*$N_nodes]
+N_nodes=$[$nmpi/2]
+N_remainder=$[$nmpi-2*$N_nodes]
 #echo "N_nodes=" $N_nodes
 #echo "N_remainder=" $N_remainder
 if [ $N_remainder -ge 1 ] ; then
@@ -115,7 +126,7 @@ echo "PBS_SORT=$simpath/$sim/pbs.nodes" >> $bfile
 echo 'sort -u $PBS_NODEFILE > $PBS_SORT' >> $bfile
 
 echo "echo -n 'Started : ' ; date" >> $bfile
-echo "$code -e $sim -n $nproc -p $simpath > $simpath/$sim/batch.out" >> $bfile
+echo "$code -e $sim -n $nmpi -p $simpath > $simpath/$sim/batch.out" >> $bfile
 echo "echo -n 'Finished: ' ; date" >> $bfile
 
 #cat $bfile

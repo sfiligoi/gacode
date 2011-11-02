@@ -1,7 +1,0 @@
-
-Della PBS queues:
-
-[1] Infiniband (up to 128 CPUs)
-[2] Standard-Gigabit ethernet  (up to 256 CPUs)
-[3] short run (quicker service) (up to 128 CPUs)
-
