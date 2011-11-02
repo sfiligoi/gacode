@@ -17,6 +17,10 @@ FDEBUG = -Ktrap=fp -Mbounds -Minform=inform -Msmartalloc
 FOMP   = -mp=nonuma
 FNOMP  =
 
+#FFTW and MUMPS
+LMATH = -ldrfftw -ldfftw ${MUMPS_PATH} -lzmumps -lpord
+
+#Parallel NETCDF and HDF5
 NETCDF = \
   ${CRAY_NETCDF_DIR}/netcdf-hdf5parallel-pgi/lib/libnetcdff.a \
   ${CRAY_NETCDF_DIR}/netcdf-hdf5parallel-pgi/lib/libnetcdf.a
