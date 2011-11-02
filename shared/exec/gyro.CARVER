@@ -5,16 +5,16 @@
 #
 # FUNCTION:
 #  Parallel execution script
-#
-# Created 19 April 2010
-#
 
 simdir=${1}
-nproc=${2}
-exec=${3}  
+nmpi=${2}
+exec=${3}
+nomp=${4}
+numa=${5}
+mpinuma=${6}
 
 cd $simdir
 
-mpirun -n $nproc $exec
+mpirun -n $nmpi $exec
 
 
