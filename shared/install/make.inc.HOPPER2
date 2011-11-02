@@ -27,6 +27,5 @@ NETCDF = ${CRAY_NETCDF_DIR}/netcdf-pgi/lib/libnetcdf.a
 NETCDF_INC = ${CRAY_NETCDF_DIR}/netcdf-pgi/include
 
 # Archive 
-
 ARCH = ar cr
 

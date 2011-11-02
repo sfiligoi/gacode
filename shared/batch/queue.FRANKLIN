@@ -1,26 +1,14 @@
 #! /usr/bin/env bash
 #
 # SCRIPT:
-#  queue_go.HOPPER2
+#  queue_go.FRANKLIN
 #
 # FUNCTION:
-#  Batch generator for Cray XE6 (hopper.nersc.gov)  
-#
-# HOPPER SYSTEM INFO:
-# - Cray XE6
-# - 153,216 processor cores
-# - 6,384 compute nodes
-# - (2x) AMD Opteron 6172 (Magny-Cours) 12-core CPUs per 
-#   compute node running at 2.1GHz
-# - (4x) ccNUMA nodes per compute node (each CPU consists 
-#   two 6-core NUMA nodes)
-# - each compute node has 32GiB RAM (1.3GiB per core)
-# - (1x) Gemini ASIC per 2 compute nodes arranged in 3D 
-#   torus network topology
+#  Batch generator for Cray XT4 (franklin.nersc.gov)  
 #
 #  FIXED Hardware parameters
-CORES_PER_NODE=24
-NUMAS_PER_NODE=4
+CORES_PER_NODE=4
+NUMAS_PER_NODE=1
 #---------------------------------------------------
 
 nmpi=${1}
@@ -82,27 +70,26 @@ cores_requested=$(($nodes*$CORES_PER_NODE))
 cores_used=$(($nomp*$nmpi))
 #=========================================================================
 
-echo "---------------------------------"
-echo "Cray XE6 (hopper) [24 cores/node]"
-echo "--------------------------------"
+echo "----------------------------------"
+echo "Cray XT4 (franklin) [4 cores/node]"
+echo "----------------------------------"
 echo
 echo "Cores requested (mppwidth)   : $cores_requested"
 echo "Cores used                   : $cores_used"
 echo "Total MPI tasks (-n)         : $nmpi"
 echo "MPI tasks/node (-N)          : $mpinode"
 echo "OpenMP threads/MPI task(-d)  : $nomp"
-echo "MPI tasks per numa node (-S) : $mpinuma"
 echo
 echo "[0] debug   (10 min)   up to 512 nodes"
 echo "[1] debug   (30 min)   up to 512 nodes"
-echo "[2] regular (1 hours)  up to 6100 nodes" 
-echo "[3] regular (2 hours)  up to 6100 nodes" 
-echo "[4] regular (4 hours)  up to 6100 nodes" 
-echo "[5] regular (8 hours)  up to 6100 nodes" 
-echo "[6] regular (16 hours) up to 6100 nodes" 
-echo "[7] regular (24 hours) up to 6100 nodes" 
-echo "[8] low     (12 hours) up to 683 nodes" 
-echo "[9] premium (12 hours) up to 2048 nodes"
+echo "[2] regular (1 hours)  up to 8502 nodes" 
+echo "[3] regular (2 hours)  up to 8502 nodes" 
+echo "[4] regular (4 hours)  up to 8502 nodes" 
+echo "[5] regular (8 hours)  up to 8502 nodes" 
+echo "[6] regular (24 hours) up to 8502 nodes" 
+echo "[7] regular (48 hours) up to 255 nodes" 
+echo "[8] low     (24 hours) up to 1207 nodes" 
+echo "[9] premium (12 hours) up to 4096 nodes"
 
 read -p "Select a queue [0-9] " queue_num
 
@@ -113,9 +100,9 @@ case "$queue_num" in
   3) queue="regular" ; limit="2:00:00" ;;
   4) queue="regular" ; limit="4:00:00" ;;
   5) queue="regular" ; limit="8:00:00" ;;
-  6) queue="regular" ; limit="16:00:00" ;;
-  7) queue="regular" ; limit="24:00:00" ;;
-  8) queue="low"     ; limit="12:00:00" ;;
+  6) queue="regular" ; limit="24:00:00" ;;
+  7) queue="regular" ; limit="48:00:00" ;;
+  8) queue="low"     ; limit="24:00:00" ;;
   9) queue="premium" ; limit="12:00:00" ;;
 esac
 
