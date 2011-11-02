@@ -1,5 +1,5 @@
 #---------------------------------------------------
-# banach.gat.com
+# banach.gat.com (quad-core workstation)
 #---------------------------------------------------
 
 # Compilers
@@ -10,7 +10,6 @@ F77	= mpif90
 FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules
 FOPT	= -march=native -mfpmath=sse -fomit-frame-pointer -O3
 FDEBUG	= -O -Wall -Wunderflow -W -finit-real=nan -fbounds-check -ffpe-trap=invalid,zero,overflow
-FPROF	= -march=native -mfpmath=sse -O3 -pg
 FOMP    = -fopenmp
 FNOMP   =
 

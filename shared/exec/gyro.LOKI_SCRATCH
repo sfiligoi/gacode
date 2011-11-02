@@ -14,9 +14,12 @@
 #    - copies results back to /home directory on head node
 #
 
-executable=${3}
 simdir=${1}
-nproc=${2}
+nmpi=${2}
+exec=${3}
+nomp=${4}
+numa=${5}
+mpinuma=${6}
 
 workdir=/scratch`echo $simdir | sed -e "s/\/home//g"`
 
@@ -27,7 +30,7 @@ echo "     $simdir"
 echo "working directory:"
 echo "     $workdir"
 echo "number of processors:"
-echo "     $nproc"
+echo "     $nmpi"
 master=`hostname`
 echo "master node: "
 echo "     $master"
@@ -62,8 +65,7 @@ cd $workdir
 
 trap "copy_data"  SIGINT SIGTERM
 
-#mpirun -np $nproc -machinefile $PBS_NODEFILE $executable
-mpiexec -n $nproc   $executable
+mpiexec -n $nmpi $exec
 
 sleep 1
 

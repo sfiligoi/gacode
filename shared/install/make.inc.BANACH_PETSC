@@ -1,5 +1,5 @@
 #---------------------------------------------------
-# Generic {Pentium M, gfortran}
+# banach.gat.com (quad-core workstation)
 #---------------------------------------------------
 
 include ${SLEPC_DIR}/bmake/slepc_common_variables
@@ -12,7 +12,6 @@ F77	= mpif90
 FMATH	= -fdefault-real-8 -M $(GACODE_ROOT)/modules
 FOPT	= -march=native -mfpmath=sse -fomit-frame-pointer -O3
 FDEBUG	= -O -Wall -Wunderflow -W -Wuninitialized -fbounds-check -ffpe-trap=invalid,zero,overflow
-FPROF	= -march=native -mfpmath=sse -O3 -pg
 
 # System math libraries
 
