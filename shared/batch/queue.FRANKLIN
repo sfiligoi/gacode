@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 #
 # SCRIPT:
-#  queue_go.FRANKLIN
+#  queue.FRANKLIN
 #
 # FUNCTION:
 #  Batch generator for Cray XT4 (franklin.nersc.gov)  

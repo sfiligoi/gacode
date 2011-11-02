@@ -6,22 +6,30 @@
 # FUNCTION:
 #  Batch generator for ubgl.llnl.gov
 
-nproc=${1}
-queue_num=${2}
-sim=${3}
-simpath=${4}
-code=${5}
+nmpi=${1}
+sim=${2}
+simpath=${3}
+code=${4}
+nomp=${5}
+numa=${6}
+mpinuma=${7}
 
 # Lets assume we are in coprocessor mode
+nodes=$nmpi
 
-nodes=$nproc
+#=========================================================================
+
+echo "---------------------------------------"
+echo "            UBGL queue"
+echo "ALWAYS USE 32, 128 or a multiple of 512 
+echo "---------------------------------------"
+echo 
+echo "[0] pbatch"
+
+read -p "Select a queue [0] " queue_num
 
 case "$queue_num" in
-
-   1 )
-    
-      queue="debug" ;;
-
+   0) queue="debug" ;;
 esac
 
 bfile=$simpath/$sim/batch.src
@@ -38,14 +46,12 @@ echo "#PSUB -ln $nodes" >> $bfile
 
 # Submit to queue?
 
-echo "$code -e $sim -n $nproc -p $simpath" >> $bfile 
+echo "$code -e $sim -n $nmpi -nomp $nomp -p $simpath" >> $bfile 
 
-echo "Submit your job [y,n]?"
-   
-read submit
+read -p "Submit your job [y/n] " submit
    
 if [ "$submit" = "y" ] ; then
    psub $bfile
 fi
 
-exit 1
+exit 0
