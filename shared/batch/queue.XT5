@@ -107,9 +107,6 @@ bfile=$simpath/$sim/batch.src
  
 # Copy appropriate commands to batch directory:
 
-# Repository selection
-getnim -U `whoami`
-
 read -p "Specify a repository [0 for default] " repo
 
 echo "#PBS -N $sim" > $bfile

@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 #
 # SCRIPT:
-#  queue_go.HOPPER2
+#  queue.HOPPER2
 #
 # FUNCTION:
 #  Batch generator for Cray XE6 (hopper.nersc.gov)  
