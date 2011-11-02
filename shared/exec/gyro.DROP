@@ -7,14 +7,17 @@
 #  Parallel execution script
 
 simdir=${1}
-nproc=${2}
+nmpi=${2}
 exec=${3}
+nomp=${4}
+numa=${5}
+mpinuma=${6}
 
 cd $simdir
 
 if [ "$TMPDIR" = "" ]
 then
-   mpiexec -host head -n $nproc $exec
+   mpiexec -host head -n $nmpi $exec
 else
-   mpiexec -machinefile $TMPDIR/machines -n $nproc $exec
+   mpiexec -machinefile $TMPDIR/machines -n $nmpi $exec
 fi

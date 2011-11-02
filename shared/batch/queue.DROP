@@ -1,9 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 #
 # SCRIPT:
-#  queue_go.DROP
+#  queue.DROP
 #
 # FUNCTION:
+#  Batch generator for GA drop cluster  
 
 nmpi=${1}
 sim=${2}
@@ -13,7 +14,7 @@ nomp=${5}
 numa=${6}
 mpinuma=${7}
 
-nodes=$(($nproc/12))
+nodes=$(($nmpi/12))
 #=========================================================================
 
 echo "----------------------------------"
