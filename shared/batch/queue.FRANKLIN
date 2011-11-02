@@ -139,4 +139,4 @@ if [ "$submit" = "y" ] ; then
    qsub $bfile
 fi
 
-exit 1
+exit 0
