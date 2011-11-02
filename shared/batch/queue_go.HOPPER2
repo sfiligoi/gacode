@@ -30,6 +30,7 @@ NUMAS_PER_NODE=4
 #
 # Use this many NUMAs per node
 numa=4
+
 # Use this many MPI tasks per numa
 mpinuma=1
 #----------------------------------
