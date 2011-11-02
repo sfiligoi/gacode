@@ -98,9 +98,9 @@ SIMROOT=$PWD
 GYRO_DIR=$GACODE_ROOT/gyro
 # Parallelization parameters
 NPROC=1
-NOMP=
-NUMA=
-MPINUMA=
+NOMP=1
+NUMA=0
+MPINUMA=0
 # Execute/test mode flags
 EXEC_FLAG=0
 TEST_FLAG=0

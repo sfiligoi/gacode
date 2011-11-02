@@ -26,9 +26,19 @@ NUMAS_PER_NODE=4
 simdir=${1}
 nmpi=${2}
 exec=${3}
-nomp=${4:-1}
-numa=${5:-$NUMAS_PER_NODE}
-mpinuma=${6:-$(($CORES_PER_NODE/$NUMAS_PER_NODE))}
+nomp=${4}
+numa=${5}
+mpinuma=${6}
+
+# Default to densely-packed pure-MPI.
+if [ $numa -eq 0 ]
+then
+   numa=$NUMAS_PER_NODE
+fi
+if [ $mpinuma -eq 0 ]
+then
+   mpinuma=$(($CORES_PER_NODE/$NUMAS_PER_NODE))
+fi
 
 # nmpi = MPI tasks
 # nomp = OpenMP threads per MPI task

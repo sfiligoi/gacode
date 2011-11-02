@@ -52,9 +52,9 @@ SIMROOT=$PWD
 GYRO_DIR=$GACODE_ROOT/gyro
 # Default number of cores
 NPROC=1
-NOMP=
-NUMA=
-MPINUMA=
+NOMP=1
+NUMA=0
+MPINUMA=0
 #=============================================================
 
 #=============================================================
