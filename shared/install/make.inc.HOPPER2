@@ -15,10 +15,10 @@ FC	= ftn ${FC_LINKER_FLAGS} -module ${GACODE_ROOT}/modules ${FC_INCLUDES}
 F77	= ftn
 
 FMATH	= -r8 
-FOPT	= -tp istanbul-64 -O3 -fast -Msmartalloc -fastsse -Mnoopenmp
-FDEBUG	= -g -Ktrap=	  fp -Mbounds -Minform,inform -Mnoopenmp
-FBOUND	= -Minform,inform -Mbounds
-FPROF	= -tp istanbul-64 -O3 -fast -Msmartalloc -Mprof=func -Mnoopenmp
+FOPT	= -tp istanbul-64 -O3 -fast -Msmartalloc -fastsse
+FDEBUG	= -g -Ktrap=fp -Mbounds -Minform,inform 
+FOMP    = -mp
+FNOMP   = -Mnoopenmp
 
 # System math libraries
 

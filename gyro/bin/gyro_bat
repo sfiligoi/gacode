@@ -71,6 +71,10 @@ while [ $# -gt 0 ] ; do
 
   -nomp) shift ; NOMP=$1 ;;
 
+  -numa) shift ; NUMA=$1 ;;
+
+  -mpinuma) shift ; MPINUMA=$1 ;;
+
    *) echo "ERROR: incorrect gyro_bat syntax." ; exit 1 ;;
  
   esac
