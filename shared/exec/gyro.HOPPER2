@@ -75,4 +75,4 @@ cores_used=$(($nomp*$nmpi))
 
 export MPICH_MAX_THREAD_SAFETY=funneled
 export OMP_NUM_THREADS=$nomp
-echo "aprun -n $nmpi -N $mpinode -d $nomp -S $mpinuma -ss $exec"
+aprun -n $nmpi -N $mpinode -d $nomp -S $mpinuma -ss $exec
