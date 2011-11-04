@@ -6,9 +6,16 @@ else
    FFLAGS=${FOPT}
 endif
 
+ifeq ($(OMP),true)
+   FC += ${FOMP}
+else
+   FC += ${FNOMP}
+   OBJECTS = gyro_omp_lib.o
+endif
+
 EXEC = tgyro_main
 
-OBJECTS =	tgyro_globals.o \
+OBJECTS +=	tgyro_globals.o \
 		tgyro_iteration_variables.o \
 		tgyro_allocate_globals.o \
 		tgyro_catch_error.o \
