@@ -87,16 +87,18 @@ subroutine gyro_nl_direct
         !
         ! THIS IS EXPENSIVE LOOP #1
         !
-        do i_diff=-m_dx,m_dx-i_dx
+!$omp parallel do default(shared) private(i,i_diff,ip)
+        do nn=0,n_max
            do i=1,n_x
-              ip = i+i_diff
-              do nn=0,n_max
+              do i_diff=-m_dx,m_dx-i_dx
+                 ip = i+i_diff
                  fn_r(nn,i) = fn_r(nn,i)+w_d1(i_diff)*fn(nn,i_loop(ip))
                  gn_r(nn,i) = gn_r(nn,i)+w_d1(i_diff)*gn(nn,i_loop(ip))
-              enddo ! nn
+              enddo ! i_diff
            enddo ! i
-        enddo ! i_diff
-
+        enddo ! nn
+!$omp end parallel do
+        !
         do i=1,n_x
            do nn=1,n_max
               fn_r(-nn,i) = conjg(fn_r(nn,i))
@@ -111,6 +113,7 @@ subroutine gyro_nl_direct
         ! ** (i,nn) order here fixes cache problem on 
         !    Opteron and Power4
         ! 
+!$omp parallel do default(shared) private(nn,add1,add2,add3,n1)
         do i=1,n_x
            do nn=0,n_max
               add1 = (0.0,0.0)
@@ -139,6 +142,7 @@ subroutine gyro_nl_direct
               fg2(nn,i) = add3
            enddo ! nn
         enddo ! i 
+!$omp end parallel do
         !---------------------------------------------------------------
 
         !---------------------------------------------------------------
@@ -148,14 +152,16 @@ subroutine gyro_nl_direct
         !
         fgp_r = (0.0,0.0)
         !
-        do i=1,n_x
-           do i_diff=-m_dx,m_dx-i_dx
-              ip = i+i_diff
-              do nn=0,n_max
+!$omp parallel do default(shared) private(i,i_diff,ip)
+        do nn=0,n_max
+           do i=1,n_x
+              do i_diff=-m_dx,m_dx-i_dx
+                 ip = i+i_diff
                  fgp_r(nn,i) = fgp_r(nn,i)+w_d1(i_diff)*fgp(nn,i_loop(ip))
               enddo ! nn 
            enddo ! i_diff
         enddo ! i
+!$omp end parallel do
         !---------------------------------------------------------------
 
         !------------------------------------------------
