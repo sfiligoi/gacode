@@ -17,7 +17,7 @@ cd $simdir
 
 if [ "$TMPDIR" = "" ]
 then
-   mpiexec -host head -n $nmpi $exec
+   mpiexec -host head -env OMP_NUM_THREADS $nomp -n $nmpi $exec
 else
-   mpiexec -machinefile $TMPDIR/machines -n $nmpi $exec
+   mpiexec -env OMP_NUM_THREADS $nomp -machinefile $TMPDIR/machines -n $nmpi $exec
 fi
