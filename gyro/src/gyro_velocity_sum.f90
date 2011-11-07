@@ -86,7 +86,7 @@ subroutine gyro_velocity_sum(field)
            gz(:) = (0.0,0.0)
            do is=1,n_kinetic
               gz(:) = gz(:)+z(is)*gyro_h(:,i,p_nek_loc,is)*&
-                   v_para(:i,,p_nek_loc,is)
+                   v_para(:,i,p_nek_loc,is)
            enddo
 
            do m=1,n_stack
