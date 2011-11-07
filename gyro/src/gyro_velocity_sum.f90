@@ -71,34 +71,35 @@ subroutine gyro_velocity_sum(field)
      !
      ! sum_s FV[(F*_j) z_s*v_s*<h_s>]
 
-     p_nek_loc = 0
-     do p_nek=1+i_proc_1,n_nek_1,n_proc_1
+!$omp parallel do default(shared) private(p_nek_loc,p_nek,ie,k,ck,gz,m,m0,j)
+     do i=1,n_x
 
-        p_nek_loc = p_nek_loc+1
+        p_nek_loc = 0
+        do p_nek=1+i_proc_1,n_nek_1,n_proc_1
 
-        ie = nek_e(p_nek)  
-        k  = nek_k(p_nek)   
-        ck = class(k)
+           p_nek_loc = p_nek_loc+1
 
-        gz(:,:) = (0.0,0.0)
-        do i=1,n_x
+           ie = nek_e(p_nek)  
+           k  = nek_k(p_nek)   
+           ck = class(k)
+
+           gz(:) = (0.0,0.0)
            do is=1,n_kinetic
-              gz(:,i) = gz(:,i)+z(is)*gyro_h(:,i,p_nek_loc,is)*&
-                   v_para(:,i,p_nek_loc,is)
+              gz(:) = gz(:)+z(is)*gyro_h(:,i,p_nek_loc,is)*&
+                   v_para(:i,,p_nek_loc,is)
            enddo
-        enddo
 
-        do i=1,n_x
            do m=1,n_stack
               m0 = m_phys(ck,m)
               do j=1,n_blend
-                 sum_loc(j,i) = sum_loc(j,i)+gz(m,i)*&
+                 sum_loc(j,i) = sum_loc(j,i)+gz(m)*&
                       cs_blend(j,m0,i,p_nek_loc)
               enddo
            enddo ! m
-        enddo ! i
+        enddo ! p_nek_loc
 
-     enddo ! p_nek_loc
+     enddo ! i
+!$omp end parallel do
 
   case (3)
 
@@ -106,35 +107,38 @@ subroutine gyro_velocity_sum(field)
      !
      ! sum_s FV[(F*_j) G_perp(hi)*(-T_s*ene*lambda)]
 
-     p_nek_loc = 0
-     do p_nek=1+i_proc_1,n_nek_1,n_proc_1
+!$omp parallel do default(shared) private(p_nek_loc,p_nek,ie,k,ck,gz,m,m0,j)
+     do i=1,n_x
 
-        p_nek_loc = p_nek_loc+1
+        p_nek_loc = 0
+        do p_nek=1+i_proc_1,n_nek_1,n_proc_1
 
-        ie = nek_e(p_nek)  
-        k  = nek_k(p_nek)   
-        ck = class(k)
+           p_nek_loc = p_nek_loc+1
 
-        do i=1,n_x
+           ie = nek_e(p_nek)  
+           k  = nek_k(p_nek)   
+           ck = class(k)
+
+           gz(:) = (0.0,0.0)
            do is=1,n_kinetic 
-              gz(:,i) = gz(:,i)-gyro_h_aperp(:,i,p_nek_loc,is)*&
+              gz(:) = gz(:)-gyro_h_aperp(:,i,p_nek_loc,is)*&
                    tem_s(is,i)*energy(ie,is)*lambda(i,k)
            enddo
-        enddo
 
-        do i=1,n_x
            do m=1,n_stack
               m0 = m_phys(ck,m)
               do j=1,n_blend
-                 sum_loc(j,i) = sum_loc(j,i)+gz(m,i)*&
+                 sum_loc(j,i) = sum_loc(j,i)+gz(m)*&
                       cs_blend(j,m0,i,p_nek_loc)
               enddo
            enddo ! m
-        enddo ! i
 
-     enddo ! p_nek_loc
+        enddo ! p_nek_loc
 
-  end select
+     enddo ! i
+!$omp end parallel do
+
+ end select
 
   !--------------------------------------------------------------
 
