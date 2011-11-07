@@ -17,7 +17,7 @@ subroutine gyro_velocity_sum(field)
   integer, intent(in) :: field
   complex, dimension(n_blend,n_x) :: sum_loc
   complex, dimension(n_blend,n_x) :: sum_glob
-  complex, dimension(n_stack,n_x) :: gz
+  complex, dimension(n_stack) :: gz
   !---------------------------------------------------
 
   call gyro_timer_in('Velocity-sum')
@@ -28,47 +28,92 @@ subroutine gyro_velocity_sum(field)
   sum_loc(:,:)  = (0.0,0.0)
   sum_glob(:,:) = (0.0,0.0)
   !
-  p_nek_loc = 0
-  !
-  do p_nek=1+i_proc_1,n_nek_1,n_proc_1
+  select case (field)
 
-     p_nek_loc = p_nek_loc+1
+  case (1)
 
-     ie = nek_e(p_nek)  
-     k  = nek_k(p_nek)   
+     ! Phi
+     !
+     ! sum_s FV[(F*_j) z_s*<hi>]
 
-     ck = class(k)
+!$omp parallel do default(shared) private(p_nek_loc,p_nek,k,ck,gz,m,m0,j)
+     do i=1,n_x
 
-     gz(:,:) = (0.0,0.0)
+        p_nek_loc = 0
+        do p_nek=1+i_proc_1,n_nek_1,n_proc_1
 
-     select case (field)
+           p_nek_loc = p_nek_loc+1
 
-     case (1)
+           k  = nek_k(p_nek)   
+           ck = class(k)
 
-        ! Phi
-        !
-        ! sum_s FV[(F*_j) z_s*<hi>]
+           gz(:) = (0.0,0.0)
 
-        do is=1,n_kinetic
-           gz(:,:) = gz(:,:)+z(is)*gyro_h(:,:,p_nek_loc,is)
+           do is=1,n_kinetic
+              gz(:) = gz(:)+z(is)*gyro_h(:,i,p_nek_loc,is)
+           enddo
+
+           do m=1,n_stack
+              m0 = m_phys(ck,m)
+              do j=1,n_blend
+                 sum_loc(j,i) = sum_loc(j,i)+gz(m)*&
+                      cs_blend(j,m0,i,p_nek_loc)
+              enddo
+           enddo ! m
+        enddo ! p_nek_loc
+
+     enddo ! i
+!$omp end parallel do
+
+  case (2)
+
+     ! A_parallel
+     !
+     ! sum_s FV[(F*_j) z_s*v_s*<h_s>]
+
+     p_nek_loc = 0
+     do p_nek=1+i_proc_1,n_nek_1,n_proc_1
+
+        p_nek_loc = p_nek_loc+1
+
+        ie = nek_e(p_nek)  
+        k  = nek_k(p_nek)   
+        ck = class(k)
+
+        gz(:,:) = (0.0,0.0)
+        do i=1,n_x
+           do is=1,n_kinetic
+              gz(:,i) = gz(:,i)+z(is)*gyro_h(:,i,p_nek_loc,is)*&
+                   v_para(:,i,p_nek_loc,is)
+           enddo
         enddo
 
-     case (2)
+        do i=1,n_x
+           do m=1,n_stack
+              m0 = m_phys(ck,m)
+              do j=1,n_blend
+                 sum_loc(j,i) = sum_loc(j,i)+gz(m,i)*&
+                      cs_blend(j,m0,i,p_nek_loc)
+              enddo
+           enddo ! m
+        enddo ! i
 
-        ! A_parallel
-        !
-        ! sum_s FV[(F*_j) z_s*v_s*<h_s>]
+     enddo ! p_nek_loc
 
-        do is=1,n_kinetic
-           gz(:,:) = gz(:,:)+z(is)*gyro_h(:,:,p_nek_loc,is)*&
-                v_para(:,:,p_nek_loc,is)
-        enddo
+  case (3)
 
-     case (3)
+     ! B_parallel
+     !
+     ! sum_s FV[(F*_j) G_perp(hi)*(-T_s*ene*lambda)]
 
-        ! B_parallel
-        !
-        ! sum_s FV[(F*_j) G_perp(hi)*(-T_s*ene*lambda)]
+     p_nek_loc = 0
+     do p_nek=1+i_proc_1,n_nek_1,n_proc_1
+
+        p_nek_loc = p_nek_loc+1
+
+        ie = nek_e(p_nek)  
+        k  = nek_k(p_nek)   
+        ck = class(k)
 
         do i=1,n_x
            do is=1,n_kinetic 
@@ -77,22 +122,20 @@ subroutine gyro_velocity_sum(field)
            enddo
         enddo
 
-     end select
+        do i=1,n_x
+           do m=1,n_stack
+              m0 = m_phys(ck,m)
+              do j=1,n_blend
+                 sum_loc(j,i) = sum_loc(j,i)+gz(m,i)*&
+                      cs_blend(j,m0,i,p_nek_loc)
+              enddo
+           enddo ! m
+        enddo ! i
 
-     do i=1,n_x
-        do m=1,n_stack
+     enddo ! p_nek_loc
 
-           m0 = m_phys(ck,m)
+  end select
 
-           do j=1,n_blend
-              sum_loc(j,i) = sum_loc(j,i)+gz(m,i)*&
-                   cs_blend(j,m0,i,p_nek_loc)
-           enddo
-
-        enddo ! m
-     enddo ! i
-
-  enddo ! p_nek_loc
   !--------------------------------------------------------------
 
   !--------------------------------------------------------------
@@ -128,7 +171,7 @@ subroutine gyro_velocity_sum(field)
   endif
 
   call gyro_timer_out('Velocity-sum')
- 
+
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[gyro_velocity_sum done]'
   endif
