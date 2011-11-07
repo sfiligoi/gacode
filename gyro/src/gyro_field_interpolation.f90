@@ -57,17 +57,15 @@ subroutine gyro_field_interpolation
   !---------------------------------------------------------------
   ! Interpolate phi, A_par, and B_par onto orbit-grid:
   !
-  p_nek_loc = 0
-  do p_nek=1+i_proc_1,n_nek_1,n_proc_1
+!$omp parallel do default(shared) private(p_nek_loc,p_nek,k,ck,m,m0,ix)
+  do i=1,n_x
+     p_nek_loc = 0
+     do p_nek=1+i_proc_1,n_nek_1,n_proc_1
 
-     p_nek_loc = p_nek_loc+1
+        p_nek_loc = p_nek_loc+1
 
-     ie = nek_e(p_nek)  
-     k  = nek_k(p_nek)   
-
-     ck = class(k)
-
-     do i=1,n_x
+        k  = nek_k(p_nek)   
+        ck = class(k)
 
         do m=1,n_stack
 
@@ -80,9 +78,9 @@ subroutine gyro_field_interpolation
 
         enddo ! m
 
-     enddo ! i
-
-  enddo ! p_nek
+     enddo ! p_nek
+  enddo ! i
+!$end parallel do
   !
   !---------------------------------------------------------------
 
