@@ -79,6 +79,7 @@ module neo_globals
   integer :: rotation_model
   integer :: adiabatic_ele_model
   integer :: spitzer_model
+  real    :: epar0_spitzer
   real    :: sign_q
   real    :: sign_bunit
   !---------------------------------------------------------------

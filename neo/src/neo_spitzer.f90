@@ -113,7 +113,7 @@ subroutine neo_spitzer
   src1(2) = 0.0
   src2(2) = 1.0 
   ! Source term for check
-  src1(3) =  (1.0*Z(is))/temp(is,ir) * epar0(ir)  &
+  src1(3) =  (1.0*Z(is))/temp(is,ir) * epar0_spitzer  &
        + dlnndr(is,ir) + dlntdr(is,ir)    
   src2(3) =  dlntdr(is,ir)  
 

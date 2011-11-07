@@ -33,6 +33,7 @@ subroutine neo_read_input
   read(1,*) omega_rot_deriv_in
 
   read(1,*) spitzer_model
+  read(1,*) epar0_spitzer
 
   read(1,*) n_species
 
