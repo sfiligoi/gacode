@@ -72,7 +72,7 @@ subroutine gyro_set_blend_arrays
 
               f_b = BLEND_F(j,x,phase(in_1,i))
 
-              c_blend(j,m0,i,p_nek_loc)  = f_b
+              c_blend(j,m,i,p_nek_loc)  = f_b
               cs_blend(j,m0,i,p_nek_loc) = conjg(f_b)*w_p(ie,i,k,1)
 
               f_bp = BLEND_Fp(j,x,phase(in_1,i))/pi

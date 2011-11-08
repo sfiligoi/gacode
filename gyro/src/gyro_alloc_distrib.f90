@@ -59,7 +59,7 @@ subroutine gyro_alloc_distrib(flag)
 
      ! Blending arrays
      allocate(cs_blend(n_blend,n_theta(2),n_x,n_nek_loc_1))
-     allocate(c_blend(n_blend,n_theta(2),n_x,n_nek_loc_1))
+     allocate(c_blend(n_blend,n_stack,n_x,n_nek_loc_1))
      allocate(cs_blend_prime(n_blend,n_theta(2),n_x,n_nek_loc_1))
 
      if (electron_method == 2) then
