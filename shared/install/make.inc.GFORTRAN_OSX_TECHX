@@ -11,9 +11,14 @@
 MAKE = make
 
 # Compilers and flags
+#
+#set up for diff mpif90s
+#
+#MF90 = mpif90
+MF90 = openmpif90
 
-FC	= mpif90 -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -g 
-F77	= mpif90 -g 
+FC	= ${MF90} -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -g 
+F77	= ${MF90} -g 
 
 FMATH	= -fdefault-real-8
 FOPT	= -O3
