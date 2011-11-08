@@ -81,12 +81,14 @@ subroutine gyro_nl_direct
        !------------------------------------------------
         ! df/dp, dg/dp
         !
+!$omp parallel do default(shared) private(nn)
         do i=1,n_x
            do nn=-n_max,n_max
               fn_p(nn,i) = -i_c*n_p(nn)*fn(nn,i)
               gn_p(nn,i) = -i_c*n_p(nn)*gn(nn,i)
            enddo
         enddo
+!$omp end parallel do
         !------------------------------------------------
 
         !---------------------------------------------------------------
@@ -177,7 +179,7 @@ subroutine gyro_nl_direct
         !
         fgp_r = (0.0,0.0)
         !
-!$omp parallel do default(shared) private(i,i_diff,ip)
+!$omp parallel do default(shared) private(i,i_diff)
         do nn=0,n_max
            do i=1,n_x
               do i_diff=-m_dx,m_dx-i_dx
