@@ -17,8 +17,8 @@ subroutine gyro_nl_direct
   !--------------------------------------------
   implicit none
   !
-  complex, dimension(-n_max:n_max,i1_dx:i2_dx) :: fn
-  complex, dimension(-n_max:n_max,i1_dx:i2_dx) :: gn
+  complex, dimension(-n_max:n_max,i1_buffer:i2_buffer) :: fn
+  complex, dimension(-n_max:n_max,i1_buffer:i2_buffer) :: gn
   complex, dimension(0:n_max,n_x) :: nl
   !
   complex, dimension(-n_max:n_max,n_x) :: fn_p
@@ -28,7 +28,7 @@ subroutine gyro_nl_direct
   !
   complex, dimension(0:n_max,n_x) :: fgr
   complex, dimension(0:n_max,n_x) :: fgr_p
-  complex, dimension(0:n_max,i1_dx:i2_dx) :: fgp
+  complex, dimension(0:n_max,i1_buffer:i2_buffer) :: fgp
   complex, dimension(0:n_max,n_x) :: fgp_r
   complex, dimension(0:n_max,n_x) :: fg2
   !
@@ -41,8 +41,19 @@ subroutine gyro_nl_direct
   do is=1,n_kinetic
      do i_split=1,msplit_SSUB
 
-        ! fn, gn and fgp have ip indices; 
+        ! fn, gn and fgp have ip indices;
         ! must be zeroed.
+
+        do i=i1_buffer,0
+           fn(:,i) = (0.0,0.0)
+           gn(:,i) = (0.0,0.0)
+           fgp(:,i) = (0.0,0.0)
+        enddo
+        do i=n_x+1,i2_buffer
+           fn(:,i) = (0.0,0.0)
+           gn(:,i) = (0.0,0.0)
+           fgp(:,i) = (0.0,0.0)
+        enddo
 
         do i=1,n_x
            do nn=0,n_max
@@ -51,44 +62,22 @@ subroutine gyro_nl_direct
            enddo ! nn
         enddo ! i
 
-        if (boundary_method == 1) then
-           do i=i1_dx,0
-              fn(:,i) = fn(:,i+n_x)
-              gn(:,i) = gn(:,i+n_x)
-           enddo
-           do i=n_x+1,i2_dx
-              fn(:,i) = fn(:,i-n_x)
-              gn(:,i) = gn(:,i-n_x)
-           enddo
-        else
-           do i=i1_dx,0
-              fn(:,i)  = (0.0,0.0)
-              gn(:,i)  = (0.0,0.0)
-           enddo
-           do i=n_x+1,i2_dx
-              fn(:,i)  = (0.0,0.0)
-              gn(:,i)  = (0.0,0.0)
-           enddo
-        endif
-
-        do i=i1_dx,i2_dx
+        do i=1,n_x
            do nn=1,n_max
               gn(-nn,i) = conjg(gn(nn,i))
               fn(-nn,i) = conjg(fn(nn,i))
            enddo ! nn
         enddo ! i
 
-       !------------------------------------------------
+        !------------------------------------------------
         ! df/dp, dg/dp
         !
-!$omp parallel do default(shared) private(nn)
         do i=1,n_x
            do nn=-n_max,n_max
               fn_p(nn,i) = -i_c*n_p(nn)*fn(nn,i)
               gn_p(nn,i) = -i_c*n_p(nn)*gn(nn,i)
            enddo
         enddo
-!$omp end parallel do
         !------------------------------------------------
 
         !---------------------------------------------------------------
@@ -99,17 +88,16 @@ subroutine gyro_nl_direct
         !
         ! THIS IS EXPENSIVE LOOP #1
         !
-!$omp parallel do default(shared) private(i,i_diff)
-        do nn=0,n_max
+        do i_diff=-m_dx,m_dx-i_dx
            do i=1,n_x
-              do i_diff=-m_dx,m_dx-i_dx
-                 fn_r(nn,i) = fn_r(nn,i)+w_d1(i_diff)*fn(nn,i+i_diff)
-                 gn_r(nn,i) = gn_r(nn,i)+w_d1(i_diff)*gn(nn,i+i_diff)
-              enddo ! i_diff
+              ip = i+i_diff
+              do nn=0,n_max
+                 fn_r(nn,i) = fn_r(nn,i)+w_d1(i_diff)*fn(nn,i_loop(ip))
+                 gn_r(nn,i) = gn_r(nn,i)+w_d1(i_diff)*gn(nn,i_loop(ip))
+              enddo ! nn
            enddo ! i
-        enddo ! nn
-!$omp end parallel do
-        !
+        enddo ! i_diff
+
         do i=1,n_x
            do nn=1,n_max
               fn_r(-nn,i) = conjg(fn_r(nn,i))
@@ -121,10 +109,9 @@ subroutine gyro_nl_direct
         !---------------------------------------------------------------
         ! Nonlinear convolution
         !
-        ! ** (i,nn) order here fixes cache problem on 
-        !    Opteron and Power4
-        ! 
-!$omp parallel do default(shared) private(nn,add1,add2,add3,n1)
+        ! ** (i,nn) order here fixes cache problem on
+        ! Opteron and Power4
+        !
         do i=1,n_x
            do nn=0,n_max
               add1 = (0.0,0.0)
@@ -152,25 +139,8 @@ subroutine gyro_nl_direct
               fgp(nn,i) = add2
               fg2(nn,i) = add3
            enddo ! nn
-        enddo ! i 
-!$omp end parallel do
+        enddo ! i
         !---------------------------------------------------------------
-
-        if (boundary_method == 1) then
-           do i=i1_dx,0
-              fgp(:,i) = fgp(:,i+n_x)
-           enddo
-           do i=n_x+1,i2_dx
-              fgp(:,i) = fgp(:,i-n_x)
-           enddo
-        else
-           do i=i1_dx,0
-              fgp(:,i) = (0.0,0.0)
-           enddo
-           do i=n_x+1,i2_dx
-              fgp(:,i) = (0.0,0.0)
-           enddo
-        endif
 
         !---------------------------------------------------------------
         ! d/dr (g df/dp - f dg/dp)
@@ -179,42 +149,38 @@ subroutine gyro_nl_direct
         !
         fgp_r = (0.0,0.0)
         !
-!$omp parallel do default(shared) private(i,i_diff)
-        do nn=0,n_max
+        do i_diff=-m_dx,m_dx-i_dx
            do i=1,n_x
-              do i_diff=-m_dx,m_dx-i_dx
-                 fgp_r(nn,i) = fgp_r(nn,i)+w_d1(i_diff)*fgp(nn,i+i_diff)
-              enddo ! nn 
+              ip = i+i_diff
+              do nn=0,n_max
+                 fgp_r(nn,i) = fgp_r(nn,i)+w_d1(i_diff)*fgp(nn,i_loop(ip))
+              enddo ! nn
            enddo ! i_diff
         enddo ! i
-!$omp end parallel do
         !---------------------------------------------------------------
 
         !------------------------------------------------
         ! d/dp (f dg/dr - g df/dr)
         !
-!        do i=1,n_x
-!           do nn=0,n_max
-!              fgr_p(nn,i) = -i_c*n_p(nn)*fgr(nn,i)
-!           enddo ! nn
-!        enddo ! i
+        do i=1,n_x
+           do nn=0,n_max
+              fgr_p(nn,i) = -i_c*n_p(nn)*fgr(nn,i)
+           enddo ! nn
+        enddo ! i
         !------------------------------------------------
 
         !------------------------------------------------
         ! Arakawa scheme:
         !
         ! d/dp (f dg/dr - g df/dr)
-        !   + d/dr (g df/dp - f dg/dp)
-        !       + df/dp dg/dr - df/dr dg/dp
+        ! + d/dr (g df/dp - f dg/dp)
+        ! + df/dp dg/dr - df/dr dg/dp
         !
-!$omp parallel do default(shared) private(nn)
         do i=1,n_x
            do nn=0,n_max
-              fgr_p(nn,i) = -i_c*n_p(nn)*fgr(nn,i)
               nl(nn,i) = c_nl_i(i)*(fgr_p(nn,i)+fgp_r(nn,i)+fg2(nn,i))
            enddo ! nn
         enddo ! i
-!$omp end parallel do
         !------------------------------------------------
 
         !-----------------------------------------------------
@@ -224,9 +190,10 @@ subroutine gyro_nl_direct
            h_tran(:,i_split,i_p(nn),is) = nl(nn,:)/3.0
         enddo ! nn
         !
-        !-----------------------------------------------------   
+        !-----------------------------------------------------
 
      enddo ! i_split
   enddo ! is
 
 end subroutine gyro_nl_direct
+
