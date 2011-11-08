@@ -475,6 +475,9 @@ module gyro_globals
   integer :: i1_buffer
   integer :: i2_buffer
   !
+  integer :: i1_dx
+  integer :: i2_dx
+  !
   integer :: n_explicit_damp
   !
   real :: explicit_damp
