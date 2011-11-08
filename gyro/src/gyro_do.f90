@@ -111,6 +111,9 @@ subroutine gyro_do
   !------------------------------------------------------------
   ! The order of these routines is critical:
   !
+  ! Startup timer:
+  startup_time = MPI_Wtime()
+  !
   ! Sort through and check all combinations of operational modes
   !
   call gyro_select_methods
@@ -277,6 +280,8 @@ subroutine gyro_do
      !---------------------------------------
 
   endif
+
+  startup_time = MPI_Wtime()-startup_time
 
   !---------------------------------------
   ! Dump input parameters runfile

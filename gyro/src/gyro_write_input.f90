@@ -462,6 +462,8 @@ subroutine gyro_write_input
         write(1,*) '--------------------------------------------------'
      endif
 
+     write(1,20) 'Startup time',startup_time
+     write(1,*) '--------------------------------------------------'
      ! File list
      write(1,*) 'PLEASE SEE: '
      write(1,*) ' - out.gyro.units for normalizing parameters'
