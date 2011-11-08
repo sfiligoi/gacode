@@ -160,9 +160,8 @@ contains
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!
     ! Epar
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    ! EAB: Not yet implemented
     !  p_eb-<E.B> (V*T/m)
-    p_eb = 0.0
+    p_eb = epar0(ir) * (1000 * temp_norm(ir)) / a_meters * b_unit(ir)
 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!
     ! Geometry
@@ -342,15 +341,20 @@ contains
              rdum(k)=upar_s(j,k,i)
           enddo
           if(j==1) then
-             uparB_nc(i) = rdum(1) / (v_nc_norm * b_unit(ir))
+             uparB_nc(i) = (rdum(1)+rdum(2)) / (v_nc_norm * b_unit(ir))
           endif
        enddo
     enddo
     
     ! Bootstrap current: <J_bs.B>/Bunit (A/m**2)
     rdum(1)=p_bsjb/b_unit(ir)
-    jbs_nc = rdum(1) / jbs_nc_norm
-    
+    if(abs(p_eb) > 0.0) then
+       rdum(2) = (p_eb/p_etap)/b_unit(ir)
+    else
+       rdum(2) = 0.0
+    endif
+    jbs_nc = (rdum(1)+rdum(2)) / jbs_nc_norm
+
     !  Flow velocities on outside midplane (m/s)                      
     do i=1,m_s
        im=jm_s(i)
@@ -378,7 +382,7 @@ contains
        iz=jz_s(i)
        call RARRAY_COPY(5,gfl_s(1,i),1,rdum,1)
        rdum(6)=RARRAY_SUM(5,rdum,1)
-       pflux_nc(i) = (rdum(1) + rdum(2)) / pflux_nc_norm
+       pflux_nc(i) = (rdum(1) + rdum(2) + rdum(4)) / pflux_nc_norm
        do k=1,5
           if(iz > 0) then
              dum(k)=dum(k)+iz*gfl_s(k,i)
@@ -427,7 +431,7 @@ contains
           rdum(k)=qfl_s(k,i)+2.5*gfl_s(k,i)*temp_i(im)*z_j7kv
        end do
        rdum(6)=RARRAY_SUM(5,rdum,1)
-       eflux_nc(i) = (rdum(1) + rdum(2)) / eflux_nc_norm
+       eflux_nc(i) = (rdum(1) + rdum(2) + rdum(4)) / eflux_nc_norm
     enddo
     
     if(silent_flag == 0 .and. i_proc == 0) then
