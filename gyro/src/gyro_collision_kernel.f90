@@ -23,6 +23,7 @@ subroutine gyro_collision_kernel(ic)
 
   p_ine_loc = 0
 
+!$omp parallel do default(shared) private(i,ie,p,k,m,cphase,fc,fcp)
   do p_ine = 1+i_proc_1,n_ine_1,n_proc_1
 
      p_ine_loc = p_ine_loc+1
@@ -55,6 +56,7 @@ subroutine gyro_collision_kernel(ic)
      enddo
 
   enddo ! p_ine_loc
+!$omp end parallel do
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[gyro_collision_kernel done]'
