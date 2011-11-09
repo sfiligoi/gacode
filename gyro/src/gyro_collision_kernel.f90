@@ -17,7 +17,7 @@ subroutine gyro_collision_kernel(ic)
   implicit none
   !
   integer, intent(in) :: ic
-  integer :: p
+  integer :: p,pp
   complex, dimension(n_rbf) :: fc,fcp,cphase
   !---------------------------------------------------------------
 
@@ -42,9 +42,12 @@ subroutine gyro_collision_kernel(ic)
      !----------------------------------------------- 
      ! This is essentially the full collision advance
      !
-!$omp parallel do
+!$omp parallel do default(shared) private(pp)
      do p=1,n_rbf
-        fcp(p) = sum(d_rbf(:,p,p_ine_loc,ic)*fc(:))
+        fcp(p) = 0.0
+        do pp=1,n_rbf
+           fcp(p) = fcp(p)+d_rbf(pp,p,p_ine_loc,ic)*fc(pp)
+        enddo
      enddo
 !$omp end parallel do
      !----------------------------------------------- 
