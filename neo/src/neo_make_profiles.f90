@@ -121,24 +121,6 @@ subroutine neo_make_profiles
      enddo
 
      ! These normalizations are arbitrary for local profiles
-     ! But are needed for NCLASS
-     ! Assume normalizing mass is deuterium
-     ! Set T_norm = 1kEV and a_meters=1m
-     ! Then determine B_unit from input rho_star and dens_norm from 
-     ! input collision frequency
-     !temp_norm_fac   = 1.6022*1000
-     !charge_norm_fac = 1.6022
-     !a_meters        = 1.0
-     !temp_norm(:)    = 1.0
-     !vth_norm(:)     = sqrt(temp_norm(:) * temp_norm_fac &
-     !     / (mass_deuterium)) &
-     !     * 1.0e4 / a_meters
-     !b_unit(:)       =  sqrt(temp_norm(:) * temp_norm_fac &
-     !     * mass_deuterium) &
-     !     / (charge_norm_fac * rho(:)) &
-     !     * 1.0e-4 / a_meters
-     ! EAB: dens_norm not yet done
-     !dens_norm(:)    = 1.0
      temp_norm_fac = 1.0
      charge_norm_fac = 1.0
      dens_norm(:) = 1.0
