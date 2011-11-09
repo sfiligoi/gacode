@@ -14,20 +14,23 @@ nomp=${5}
 numa=${6}
 mpinuma=${7}
 
-nodes=$(($nmpi/12))
+nodes=$(($nmpi*$nomp/12))
+
+case "$nomp" in
+  1) queue="all.q" ;;
+  2) queue="mpi_6.q" ;;
+  3) queue="mpi_4.q" ;;
+  6) queue="mpi_2.q" ;;
+  *) echo "Invalid value for OpenMP thread" ; exit ;;
+esac
+
 #=========================================================================
 
 echo "----------------------------------"
 echo "Drop cluster queue (SGE)"
 echo "----------------------------------"
 echo 
-echo "[0] all jobs"
-
-read -p "Select a queue [0] " queue_num
-
-case "$queue_num" in
-  0) queue=" " ; wtime=" " ;;
-esac
+echo "Selected $queue with $(($nmpi*$nomp)) total cores."
 
 bfile=$simpath/$sim/batch.sh
 
@@ -39,6 +42,7 @@ echo "#$ -e $simpath/$sim/batch.err" >> $bfile
 echo "#$ -pe mvapich2_intel $nmpi" >> $bfile
 echo "#$ -S /bin/bash" >> $bfile
 echo "#$ -V" >> $bfile
+echo "#$ -q $queue" >> $bfile
 echo "source /act/Modules/3.2.6/init/sh" >> $bfile
 echo "module load mvapich2/intel" >> $bfile
 echo 'export MPD_CON_EXT="sge_$JOB_ID.$TASK_ID"' >> $bfile
