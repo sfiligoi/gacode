@@ -73,6 +73,7 @@ OBJECTS += gyro_globals.o \
           gyro_fulladvance.o \
           gyro_geometry_arrays.o \
           gyro_get_he_implicit.o \
+          gyro_get_delta_he.o \
           gyro_gbflux.o \
           gyro_initial_condition.o \
           gyro_initialize_arrays.o \
@@ -149,7 +150,6 @@ OBJECTS += gyro_globals.o \
           get_nonlinear_flux_velocity.o \
           get_field_fluxave.o \
           get_kinetic_advance.o \
-          get_delta_he.o \
           get_phi_squared.o \
           get_g_squared.o \
           write_freq.o \

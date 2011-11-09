@@ -38,6 +38,7 @@ subroutine gyro_get_he_implicit
            h(:,i,p_nek_loc,n_spec) = h(:,i,p_nek_loc,n_spec) + alpha_s(n_spec,i)*temp(:)
         enddo ! i
 !$omp end parallel do
+
      enddo ! p_nek_loc
 
   else if (n_field == 2) then
@@ -64,6 +65,7 @@ subroutine gyro_get_he_implicit
            enddo ! m
         enddo ! i
 !$omp end parallel do
+
      enddo ! p_nek_loc
 
   else
@@ -87,13 +89,15 @@ subroutine gyro_get_he_implicit
                       (c_blend(j,m,i,p_nek_loc)*v_para(m,i,p_nek_loc,n_spec)- &
                       o_fv(j,m,i,p_nek_loc))*field_blend(j,i,2) &
                       +alpha_s(n_spec,i)*&
-                      energy(nek_e(p_nek),indx_e)*lambda(i,nek_k(p_nek))*tem_s(n_spec,i)/z(n_spec)*&
+                      energy(nek_e(p_nek),indx_e)*lambda(i,nek_k(p_nek))*&
+                      tem_s(n_spec,i)/z(n_spec)*&
                       (c_blend(j,m,i,p_nek_loc)-o_f(j,m,i,p_nek_loc))*field_blend(j,i,3)
 
               enddo ! j  
            enddo ! m
         enddo ! i
 !$omp end parallel do
+
      enddo ! p_nek_loc
 
   endif

@@ -5,7 +5,7 @@
 !  Compute the "explicit" part of h_e.
 !-----------------------------------------------------
 
-subroutine get_delta_he
+subroutine gyro_get_delta_he
 
   use gyro_globals
   use gyro_pointers
@@ -73,7 +73,7 @@ subroutine get_delta_he
 
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[get_delta_he done]'
+     print *,'[gyro_get_delta_he done]'
   endif
 
-end subroutine get_delta_he
+end subroutine gyro_get_delta_he
