@@ -17,8 +17,8 @@ subroutine gyro_nl_direct
   !--------------------------------------------
   implicit none
   !
-  complex, dimension(-n_max:n_max,i1_buffer:i2_buffer) :: fn
-  complex, dimension(-n_max:n_max,i1_buffer:i2_buffer) :: gn
+  complex, dimension(-n_max:n_max,i1_dx:i2_dx) :: fn
+  complex, dimension(-n_max:n_max,i1_dx:i2_dx) :: gn
   complex, dimension(0:n_max,n_x) :: nl
   !
   complex, dimension(-n_max:n_max,n_x) :: fn_p
@@ -28,7 +28,7 @@ subroutine gyro_nl_direct
   !
   complex, dimension(0:n_max,n_x) :: fgr
   complex, dimension(0:n_max,n_x) :: fgr_p
-  complex, dimension(0:n_max,i1_buffer:i2_buffer) :: fgp
+  complex, dimension(0:n_max,i1_dx:i2_dx) :: fgp
   complex, dimension(0:n_max,n_x) :: fgp_r
   complex, dimension(0:n_max,n_x) :: fg2
   !
@@ -44,17 +44,6 @@ subroutine gyro_nl_direct
         ! fn, gn and fgp have ip indices;
         ! must be zeroed.
 
-        do i=i1_buffer,0
-           fn(:,i) = (0.0,0.0)
-           gn(:,i) = (0.0,0.0)
-           fgp(:,i) = (0.0,0.0)
-        enddo
-        do i=n_x+1,i2_buffer
-           fn(:,i) = (0.0,0.0)
-           gn(:,i) = (0.0,0.0)
-           fgp(:,i) = (0.0,0.0)
-        enddo
-
         do i=1,n_x
            do nn=0,n_max
               gn(nn,i) = h_tran(i,i_split,i_p(nn),is)
@@ -62,7 +51,27 @@ subroutine gyro_nl_direct
            enddo ! nn
         enddo ! i
 
-        do i=1,n_x
+        if (boundary_method == 1) then
+           do i=i1_dx,0
+              fn(:,i) = fn(:,i+n_x)
+              gn(:,i) = gn(:,i+n_x)
+           enddo
+           do i=n_x+1,i2_dx
+              fn(:,i) = fn(:,i-n_x)
+              gn(:,i) = gn(:,i-n_x)
+           enddo
+        else
+           do i=i1_dx,0
+              fn(:,i) = (0.0,0.0)
+              gn(:,i) = (0.0,0.0)
+           enddo
+           do i=n_x+1,i2_dx
+              fn(:,i) = (0.0,0.0)
+              gn(:,i) = (0.0,0.0)
+           enddo
+        endif
+
+        do i=i1_dx,i2_dx
            do nn=1,n_max
               gn(-nn,i) = conjg(gn(nn,i))
               fn(-nn,i) = conjg(fn(nn,i))
@@ -88,22 +97,25 @@ subroutine gyro_nl_direct
         !
         ! THIS IS EXPENSIVE LOOP #1
         !
-        do i_diff=-m_dx,m_dx-i_dx
-           do i=1,n_x
-              ip = i+i_diff
+!$omp parallel default(shared) private(nn,i_diff,add1,add2,add3,n1)
+!$omp do
+        do i=1,n_x
+           do i_diff=-m_dx,m_dx-i_dx
               do nn=0,n_max
-                 fn_r(nn,i) = fn_r(nn,i)+w_d1(i_diff)*fn(nn,i_loop(ip))
-                 gn_r(nn,i) = gn_r(nn,i)+w_d1(i_diff)*gn(nn,i_loop(ip))
-              enddo ! nn
+                 fn_r(nn,i) = fn_r(nn,i)+w_d1(i_diff)*fn(nn,i+i_diff)
+                 gn_r(nn,i) = gn_r(nn,i)+w_d1(i_diff)*gn(nn,i+i_diff)
+              enddo ! i_diff
            enddo ! i
-        enddo ! i_diff
-
+        enddo ! nn
+!$omp end do nowait
+!$omp do
         do i=1,n_x
            do nn=1,n_max
               fn_r(-nn,i) = conjg(fn_r(nn,i))
               gn_r(-nn,i) = conjg(gn_r(nn,i))
            enddo ! nn
         enddo ! i
+!$omp end do nowait
         !---------------------------------------------------------------
 
         !---------------------------------------------------------------
@@ -112,6 +124,7 @@ subroutine gyro_nl_direct
         ! ** (i,nn) order here fixes cache problem on
         ! Opteron and Power4
         !
+!$omp do
         do i=1,n_x
            do nn=0,n_max
               add1 = (0.0,0.0)
@@ -140,7 +153,25 @@ subroutine gyro_nl_direct
               fg2(nn,i) = add3
            enddo ! nn
         enddo ! i
+!$omp end do
+!$omp end parallel
         !---------------------------------------------------------------
+
+        if (boundary_method == 1) then
+           do i=i1_dx,0
+              fgp(:,i) = fgp(:,i+n_x)
+           enddo
+           do i=n_x+1,i2_dx
+              fgp(:,i) = fgp(:,i-n_x)
+           enddo
+        else
+           do i=i1_dx,0
+              fgp(:,i) = (0.0,0.0)
+           enddo
+           do i=n_x+1,i2_dx
+              fgp(:,i) = (0.0,0.0)
+           enddo
+        endif
 
         !---------------------------------------------------------------
         ! d/dr (g df/dp - f dg/dp)
@@ -149,48 +180,38 @@ subroutine gyro_nl_direct
         !
         fgp_r = (0.0,0.0)
         !
-        do i_diff=-m_dx,m_dx-i_dx
-           do i=1,n_x
-              ip = i+i_diff
+!$omp parallel default(shared) private(nn,i_diff)
+!$omp do 
+        do i=1,n_x
+           do i_diff=-m_dx,m_dx-i_dx
               do nn=0,n_max
-                 fgp_r(nn,i) = fgp_r(nn,i)+w_d1(i_diff)*fgp(nn,i_loop(ip))
+                 fgp_r(nn,i) = fgp_r(nn,i)+w_d1(i_diff)*fgp(nn,i+i_diff)
               enddo ! nn
            enddo ! i_diff
         enddo ! i
+!$omp end do nowait
         !---------------------------------------------------------------
 
         !------------------------------------------------
-        ! d/dp (f dg/dr - g df/dr)
-        !
-        do i=1,n_x
-           do nn=0,n_max
-              fgr_p(nn,i) = -i_c*n_p(nn)*fgr(nn,i)
-           enddo ! nn
-        enddo ! i
-        !------------------------------------------------
-
-        !------------------------------------------------
         ! Arakawa scheme:
+        !
+        ! fgr_p -> d/dp (f dg/dr - g df/dr)
         !
         ! d/dp (f dg/dr - g df/dr)
         ! + d/dr (g df/dp - f dg/dp)
         ! + df/dp dg/dr - df/dr dg/dp
         !
+!$omp do
         do i=1,n_x
            do nn=0,n_max
+              fgr_p(nn,i) = -i_c*n_p(nn)*fgr(nn,i)
               nl(nn,i) = c_nl_i(i)*(fgr_p(nn,i)+fgp_r(nn,i)+fg2(nn,i))
+              h_tran(i,i_split,i_p(nn),is) = nl(nn,i)/3.0
            enddo ! nn
         enddo ! i
+!$omp end do
+!$omp end parallel
         !------------------------------------------------
-
-        !-----------------------------------------------------
-        ! Finally, update global RHS (use h_tran for efficiency):
-        !
-        do nn=0,n_max
-           h_tran(:,i_split,i_p(nn),is) = nl(nn,:)/3.0
-        enddo ! nn
-        !
-        !-----------------------------------------------------
 
      enddo ! i_split
   enddo ! is

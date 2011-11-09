@@ -119,8 +119,12 @@ subroutine gyro_field_interpolation
            vf(:,i,:) = 0.0
         enddo
      endif
-     do i=1,n_x
-        vf(:,i,:) = field_tau(:,i,p_nek_loc,:)
+     do ix=1,n_field
+        do i=1,n_x
+           do m=1,n_stack
+              vf(m,i,ix) = field_tau(m,i,p_nek_loc,ix)
+           enddo
+        enddo
      enddo
 
      do is=1,n_gk
