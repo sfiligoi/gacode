@@ -111,7 +111,9 @@ subroutine neo_make_profiles
         temp(is,ir)   = temp_in(is)
         dlnndr(is,ir) = dlnndr_in(is)
         dlntdr(is,ir) = dlntdr_in(is)
-        nu(is,ir)     = nu_in(is)
+        nu(is,ir)     = nu_1_in *(1.0*z(is))**4/(1.0*z(1))**4 &
+             * dens(is,ir) / dens(1,ir) &
+             * sqrt(mass(1)/mass(is)) * (temp(1,ir)/temp(is,ir))**1.5
      enddo
 
      do ir=1,n_radial

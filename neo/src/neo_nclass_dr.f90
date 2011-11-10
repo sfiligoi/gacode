@@ -28,12 +28,6 @@ contains
 
     if (n_species < 2) then
        ! NCLASS driver requires at least 2 species
-       if(silent_flag==0 .and. i_proc==0) then
-          open(unit=io_neoout,file=trim(path)//runfile_neoout,&
-               status='old',position='append')
-          write(io_neoout,*) 'NCLASS not computed: Requires at least 2 species'
-          close(io_neoout)
-       endif
        return
     endif
 
@@ -106,9 +100,18 @@ contains
     ! declaration of functions
     real  RARRAY_SUM
 
+    if (n_species < 2) then
+       ! NCLASS driver requires at least 2 species
+       if(silent_flag==0 .and. i_proc==0) then
+          open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+               status='old',position='append')
+          write(io_neoout,*) 'NCLASS not computed: Requires at least 2 species'
+          close(io_neoout)
+       endif
+       return
+    endif
+
     if (profile_model /= 2) then
-       ! NCLASS driver not implemented for local mode
-       !return
        ! For local mode, need to set normalizations
        ! Assume normalizing mass is deuterium
        ! Set T_norm = 1kEV and a_meters=1m
@@ -139,11 +142,6 @@ contains
              endif
           endif
        enddo
-    endif
-
-    if (n_species < 2) then
-       ! NCLASS driver requires at least 2 species
-       return
     endif
     
     !  k_order-order of v moments to be solved
