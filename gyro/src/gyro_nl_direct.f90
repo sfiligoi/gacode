@@ -97,7 +97,7 @@ subroutine gyro_nl_direct
         !
         ! THIS IS EXPENSIVE LOOP #1
         !
-!$omp parallel default(shared) private(nn,i_diff,add1,add2,add3,n1)
+!$omp parallel default(shared) private(nn,i_diff)
 !$omp do
         do i=1,n_x
            do i_diff=-m_dx,m_dx-i_dx
@@ -121,10 +121,7 @@ subroutine gyro_nl_direct
         !---------------------------------------------------------------
         ! Nonlinear convolution
         !
-        ! ** (i,nn) order here fixes cache problem on
-        ! Opteron and Power4
-        !
-!$omp do
+!$omp do private(add1,add2,add3,n1)
         do i=1,n_x
            do nn=0,n_max
               add1 = (0.0,0.0)
