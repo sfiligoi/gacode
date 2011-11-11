@@ -119,6 +119,7 @@ OBJECTS += gyro_globals.o \
           gyro_to_geo.o \
           gyro_write_efficiency.o \
           gyro_write_error.o \
+          gyro_write_freq.o \
           gyro_write_initdata.o \
           gyro_write_input.o \
           gyro_write_precision.o \
@@ -152,7 +153,6 @@ OBJECTS += gyro_globals.o \
           get_kinetic_advance.o \
           get_phi_squared.o \
           get_g_squared.o \
-          write_freq.o \
           write_h.o \
           write_matrix_stat.o \
           gyro_dump_input.o \

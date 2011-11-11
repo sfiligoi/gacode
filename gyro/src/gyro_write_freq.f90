@@ -1,5 +1,5 @@
 !------------------------------------------------------
-! write_freq.f90 [caller gyro_write_timedata]
+! gyro_write_freq.f90 [caller gyro_write_timedata]
 !
 ! PURPOSE:
 !  This subroutine computes and prints the instantaeous 
@@ -14,7 +14,7 @@
 !  - Unstable modes have w_i > 0
 !------------------------------------------------------
 
-subroutine write_freq(datafile,io)
+subroutine gyro_write_freq(datafile,io)
 
   use mpi
   use gyro_globals
@@ -166,8 +166,8 @@ subroutine write_freq(datafile,io)
 
   end select
 
-  if (debug_flag == 1 .and. i_proc == 0) print *,'[write_freq called]'
+  if (debug_flag == 1 .and. i_proc == 0) print *,'[gyro_write_freq called]'
 
 20 format(4(es11.4,1x))
 
-end subroutine write_freq
+end subroutine gyro_write_freq

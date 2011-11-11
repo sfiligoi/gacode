@@ -152,7 +152,7 @@ subroutine gyro_write_timedata
      ! BEGIN LINEAR 
      !=============
 
-     call write_freq(trim(path)//'out.gyro.freq',10)
+     call gyro_write_freq(trim(path)//'out.gyro.freq',10)
 
      if (plot_u_flag == 1) then        
 
