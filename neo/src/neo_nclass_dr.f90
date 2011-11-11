@@ -16,6 +16,7 @@ module neo_nclass_dr
   real, dimension(:), allocatable :: pflux_nc, eflux_nc
   real, dimension(:), allocatable :: uparB_nc, vpol_nc, vtor_nc
   real :: jbs_nc
+  real :: cc, loglam
   
 contains
   
@@ -24,10 +25,6 @@ contains
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
 
-    if (profile_model /= 2) then
-       ! NCLASS driver not implemented for local mode
-       return
-    endif
 
     if (n_species < 2) then
        ! NCLASS driver requires at least 2 species
@@ -103,14 +100,48 @@ contains
     ! declaration of functions
     real  RARRAY_SUM
 
-    if (profile_model /= 2) then
-       ! NCLASS driver not implemented for local mode
+    if (n_species < 2) then
+       ! NCLASS driver requires at least 2 species
+       if(silent_flag==0 .and. i_proc==0) then
+          open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+               status='old',position='append')
+          write(io_neoout,*) 'NCLASS not computed: Requires at least 2 species'
+          close(io_neoout)
+       endif
        return
     endif
 
-    if (n_species < 2) then
-       ! NCLASS driver requires at least 2 species
-       return
+    if (profile_model /= 2) then
+       ! For local mode, need to set normalizations
+       ! Assume normalizing mass is deuterium
+       ! Set T_norm = 1kEV and a_meters=1m
+       ! Then determine B_unit from input rho_star
+       ! Dens in units and norm will be determined from input collision freqs
+       temp_norm_fac   = 1.6022*1000
+       charge_norm_fac = 1.6022
+       a_meters        = 1.0
+       temp_norm(ir)   = 1.0
+       vth_norm(ir)    = sqrt(temp_norm(ir) * temp_norm_fac &
+            / (mass_deuterium)) &
+            * 1.0e4 / a_meters
+       b_unit(ir)      =  sqrt(temp_norm(ir) * temp_norm_fac &
+            * mass_deuterium) &
+            / (charge_norm_fac * rho(ir)) &
+            * 1.0e-4 / a_meters
+       do is=2,n_species
+          if(abs(nu(is,ir)-nu(1,ir)*(1.0*z(is))**4/(1.0*z(1))**4 &
+               * dens(is,ir) / dens(1,ir) &
+               * sqrt(mass(1)/mass(is)) * (temp(1,ir)/temp(is,ir))**1.5) &
+               > 1e-6) then
+             if(silent_flag==0 .and. i_proc==0) then
+                open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+                     status='old',position='append')
+                write(io_neoout,*) 'Warning: NCLASS requires self-consistent collision frequencies'
+                close(io_neoout)
+                exit
+             endif
+          endif
+       enddo
     endif
     
     !  k_order-order of v moments to be solved
@@ -274,9 +305,27 @@ contains
     
     !  den_iz(i,z)-density of i,z (/m**3) 
     den_iz(:,:) = 0.0
-    do is=1,n_species
-       den_iz(is,abs(z(is))) = dens(is,ir) * dens_norm(ir) * 1e19
-    enddo
+    if(profile_model /=2) then
+       ! For local mode, determine dens in units from collision freqs
+       cc = sqrt(2.0) * pi * charge_norm_fac**4 &
+            * 1.0 / (4.0 * pi * 8.8542)**2 &
+            * 1.0 / (sqrt(mass_deuterium) * temp_norm_fac**1.5) &
+            * 1e9
+       ! use an approx for loglam
+       loglam = 24.0 - log(sqrt(1.0*1e13)/(1.0*1000))
+       is=1
+       den_iz(is,abs(z(is))) = (nu(is,ir)*vth_norm(ir)) &
+            / (cc * loglam * z(is)**4) &
+            * (sqrt(mass(is)) * (temp(is,ir)*temp_norm(ir))**1.5) * 1e19
+       dens_norm(ir) = den_iz(is,abs(z(is))) * 1e-19 / dens(is,ir)
+       do is=2,n_species
+          den_iz(is,abs(z(is))) = dens(is,ir)  * dens_norm(ir) * 1e19
+       enddo
+    else
+       do is=1,n_species
+          den_iz(is,abs(z(is))) = dens(is,ir) * dens_norm(ir) * 1e19
+       enddo
+    endif
     
     !  grp_iz(i,z)-pressure gradient of i,z (keV/m**3/rho)
     grp_iz(:,:) = 0.0

@@ -30,7 +30,6 @@ subroutine gyro_get_delta_he
 
      p_nek_loc = p_nek_loc+1
 
-     ie = nek_e(p_nek)  
      k  = nek_k(p_nek)   
 
      ck = class(k)

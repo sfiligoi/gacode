@@ -21,7 +21,8 @@ subroutine gyro_operators_on_h
   !-------------------------------------------------------
   implicit none
   !
-  complex :: temp(n_stack)
+  complex :: temp
+  complex :: temp2
   complex, dimension(n_stack,i1_buffer:i2_buffer) :: hh
   !-------------------------------------------------------
 
@@ -65,37 +66,33 @@ subroutine gyro_operators_on_h
 
 !$omp parallel do default(shared) private(i_diff,m,temp)
            do i=1,n_x
-              temp(:) = (0.0,0.0)
-              do i_diff=-m_gyro,m_gyro-i_gyro
-                 do m=1,n_stack
-                    temp(m) = temp(m)+&
+              do m=1,n_stack
+                 temp = (0.0,0.0)
+                 do i_diff=-m_gyro,m_gyro-i_gyro
+                    temp = temp+&
                          w_gyro(m,i_diff,i,p_nek_loc,is)*hh(m,i+i_diff)
-                 enddo ! m
-              enddo ! i_diff
-              gyro_h(:,i,p_nek_loc,is) = temp(:)
+                 enddo ! i_diff
+                 gyro_h(m,i,p_nek_loc,is) = temp
+              enddo ! m
            enddo ! i
 !$omp end parallel do
 
         else
 
-!$omp parallel do default(shared) private(i_diff,m,temp)
+!$omp parallel do default(shared) private(i_diff,m,temp,temp2)
            do i=1,n_x
-              temp(:) = (0.0,0.0)
-              do i_diff=-m_gyro,m_gyro-i_gyro
-                 do m=1,n_stack
-                    temp(m) = temp(m)+&
+              do m=1,n_stack
+                 temp = (0.0,0.0)
+                 temp2 = (0.0,0.0)
+                 do i_diff=-m_gyro,m_gyro-i_gyro
+                    temp = temp+&
                          w_gyro(m,i_diff,i,p_nek_loc,is)*hh(m,i+i_diff)
-                 enddo ! m
-              enddo ! i_diff
-              gyro_h(:,i,p_nek_loc,is) = temp(:)
-              temp(:) = (0.0,0.0)
-              do i_diff=-m_gyro,m_gyro-i_gyro
-                 do m=1,n_stack
-                    temp(m) = temp(m) + &
+                    temp2 = temp2+&
                          w_gyro_aperp(m,i_diff,i,p_nek_loc,is)*hh(m,i+i_diff)
-                 enddo ! m
-              enddo ! i_diff
-              gyro_h_aperp(:,i,p_nek_loc,is) = temp(:)
+                 enddo ! i_diff
+                 gyro_h(m,i,p_nek_loc,is) = temp
+                 gyro_h_aperp(m,i,p_nek_loc,is) = temp2
+              enddo ! m
            enddo ! i
 !$omp end parallel do
 

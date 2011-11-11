@@ -51,7 +51,8 @@ module neo_globals
   real, dimension(6) :: temp_in
   real, dimension(6) :: dlnndr_in
   real, dimension(6) :: dlntdr_in
-  real, dimension(6) :: nu_in
+  !
+  real :: nu_1_in
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
