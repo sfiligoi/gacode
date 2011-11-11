@@ -36,7 +36,7 @@ subroutine gyro_velocity_sum(field)
      !
      ! sum_s FV[(F*_j) z_s*<hi>]
 
-!$omp parallel do default(shared) private(p_nek_loc,p_nek,k,ck,gz,m,m0,j)
+!$omp parallel do default(shared) private(p_nek_loc,p_nek,k,ck,gz,m,m0,j,is)
      do i=1,n_x
 
         p_nek_loc = 0
@@ -48,7 +48,6 @@ subroutine gyro_velocity_sum(field)
            ck = class(k)
 
            gz(:) = (0.0,0.0)
-
            do is=1,n_kinetic
               gz(:) = gz(:)+z(is)*gyro_h(:,i,p_nek_loc,is)
            enddo
@@ -71,7 +70,7 @@ subroutine gyro_velocity_sum(field)
      !
      ! sum_s FV[(F*_j) z_s*v_s*<h_s>]
 
-!$omp parallel do default(shared) private(p_nek_loc,p_nek,ie,k,ck,gz,m,m0,j)
+!$omp parallel do default(shared) private(p_nek_loc,p_nek,ie,k,ck,gz,m,m0,j,is)
      do i=1,n_x
 
         p_nek_loc = 0
@@ -107,7 +106,7 @@ subroutine gyro_velocity_sum(field)
      !
      ! sum_s FV[(F*_j) G_perp(hi)*(-T_s*ene*lambda)]
 
-!$omp parallel do default(shared) private(p_nek_loc,p_nek,ie,k,ck,gz,m,m0,j)
+!$omp parallel do default(shared) private(p_nek_loc,p_nek,ie,k,ck,gz,m,m0,j,is)
      do i=1,n_x
 
         p_nek_loc = 0
