@@ -1,5 +1,6 @@
 #! /bin/bash
-export GACODE_ROOT=`pwd`
-export GACODE_PLATFORM=GFORTRAN_OSX_TECHX
+export GACODE_ROOT=${HOME}/work/gacode
+export GACODE_PLATFORM=GFORTRAN_OSX_MACPORTS
 export OPT=debug
-source ./shared/bin/gacode_setup
+source ${GACODE_ROOT}/shared/bin/gacode_setup
+export OMP=true
