@@ -19,8 +19,6 @@ subroutine gyro_select_methods
   !-------------------------------------------------------------
   ! Various consistency and error checks
   ! 
-  ! Special diffusivity check:
-  !
   ! Grid offset checks:
   !
   if (n_x_offset /= 0 .and. boundary_method == 1) then
@@ -772,6 +770,15 @@ subroutine gyro_select_methods
 
   call send_line(separator)
 
+  !-------------------------------------------------------
+  ! Print some MPI/OpenMP diagnostics
+  !
+  if (n_omp > 1) then 
+     call send_message('INFO: (GYRO) Initialized multi-threaded MPI')
+  else
+     call send_message('INFO: (GYRO) Dropped down to single-threaded MPI')
+  endif
+  !-------------------------------------------------------
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[select_methods done]'

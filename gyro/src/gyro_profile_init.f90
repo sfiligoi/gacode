@@ -124,7 +124,7 @@ subroutine gyro_profile_init
      enddo
   else
      if (udsymmetry_flag == 1) then
-        call send_message('INFO: Forcing up-down symmetry (UDSYMMETRY_FLAG=1).')
+        call send_message('INFO: (GYRO) Forcing up-down symmetry (UDSYMMETRY_FLAG=1).')
         zmag_s(:)  = 0.0
         dzmag_s(:) = 0.0
      endif
@@ -221,7 +221,7 @@ subroutine gyro_profile_init
      !
      if (boundary_method == 1) then
 
-        call send_message('INFO: Remapping into periodic domain.')
+        call send_message('INFO: (GYRO) Remapping into periodic domain.')
 
         if (box_multiplier < 0.0) then
            box_multiplier = 1.0
@@ -274,17 +274,17 @@ subroutine gyro_profile_init
         dlntdr_s(is,:) = dlntdr_s(is,:)*(1.0-eps_dlntdr_vec(is))
         dlnndr_s(is,:) = dlnndr_s(is,:)*(1.0-eps_dlnndr_vec(is))
         if (eps_dlntdr_vec(is) /= 0.0) then
-           call send_message_real('INFO: Ti gradient RESCALED by: ',1.0-eps_dlntdr_vec(is))
+           call send_message_real('INFO: (GYRO) Ti gradient RESCALED by: ',1.0-eps_dlntdr_vec(is))
            if (reintegrate_flag == 1) then
               call logint(tem_s(is,:),dlntdr_s(is,:),r_s,n_x,ir_norm)
-              call send_message('INFO: Ti profile REINTEGRATRED')
+              call send_message('INFO: (GYRO) Ti profile REINTEGRATRED')
            endif
         endif
         if (eps_dlnndr_vec(is) /= 0.0) then
-           call send_message_real('INFO: ni gradient RESCALED by: ',1.0-eps_dlnndr_vec(is))
+           call send_message_real('INFO: (GYRO) ni gradient RESCALED by: ',1.0-eps_dlnndr_vec(is))
            if (reintegrate_flag == 1) then
               call logint(den_s(is,:),dlntdr_s(is,:),r_s,n_x,ir_norm)
-              call send_message('INFO: ni profile REINTEGRATRED')
+              call send_message('INFO: (GYRO) ni profile REINTEGRATRED')
            endif
         endif
      enddo
@@ -292,23 +292,23 @@ subroutine gyro_profile_init
      dlntdr_s(n_spec,:) = dlntdr_s(n_spec,:)*(1.0-eps_dlntdr_vec(0))
      dlnndr_s(n_spec,:) = dlnndr_s(n_spec,:)*(1.0-eps_dlnndr_vec(0))
      if (eps_dlntdr_vec(0) /= 0.0) then
-        call send_message_real('INFO: Te gradient RESCALED by: ',1.0-eps_dlntdr_vec(0))
+        call send_message_real('INFO: (GYRO) Te gradient RESCALED by: ',1.0-eps_dlntdr_vec(0))
         if (reintegrate_flag == 1) then
            call logint(tem_s(n_spec,:),dlntdr_s(n_spec,:),r_s,n_x,ir_norm)
-           call send_message('INFO: Te profile REINTEGRATRED')
+           call send_message('INFO: (GYRO) Te profile REINTEGRATRED')
         endif
      endif
      if (eps_dlnndr_vec(0) /= 0.0) then
-        call send_message_real('INFO: ne gradient RESCALED by: ',1.0-eps_dlnndr_vec(0))
+        call send_message_real('INFO: (GYRO) ne gradient RESCALED by: ',1.0-eps_dlnndr_vec(0))
         if (reintegrate_flag == 1) then
            call logint(den_s(n_spec,:),dlnndr_s(n_spec,:),r_s,n_x,ir_norm)
-           call send_message('INFO: ne profile REINTEGRATRED')
+           call send_message('INFO: (GYRO) ne profile REINTEGRATRED')
         endif
      endif
      !
      if ((sum(abs(eps_dlntdr_vec(:))+abs(eps_dlnndr_vec(:))) > 0.0)  .and. &
          (reintegrate_flag == 1)) then
-        call send_message('INFO: profiles changed, recalculating beta_unit')
+        call send_message('INFO: (GYRO) profiles changed, recalculating beta_unit')
         
         ! den_s  -> 1/m^3
         ! tem_s  -> keV
@@ -415,7 +415,7 @@ subroutine gyro_profile_init
      beta_star_s(:) = beta_unit_s(:)*dlnpdr_s(:)*geo_betaprime_scale         
      if (geo_betaprime_scale /= 1.0) then
         call send_message_real(&
-             'INFO: Scaling dp/dr in GEO by: ',geo_betaprime_scale)
+             'INFO: (GYRO) Scaling dp/dr in GEO by: ',geo_betaprime_scale)
      endif
 
   else
@@ -424,7 +424,7 @@ subroutine gyro_profile_init
      ! Note that this is not updated even if reintegrate_flag=1.
 
      beta_star_s(:) = beta_unit_ptot_s(:)*dlnptotdr_s(:)
-     call send_message('INFO: Using total dp/dr (+ fast ions) in GEO.')
+     call send_message('INFO: (GYRO) Using total dp/dr (+ fast ions) in GEO.')
 
   endif
   !------------------------------------------------------
@@ -466,17 +466,17 @@ subroutine gyro_profile_init
      omega_eb_s(:) = -n_1(in_1)*w0_s(:)
 
      if (mach0_scale /= 1.0) then
-        call send_message_real('INFO: Scaling experimental Mach number by ',&
+        call send_message_real('INFO: (GYRO) Scaling experimental Mach number by ',&
              mach0_scale)
      endif
 
      if (pgamma0_scale /= 1.0) then
-        call send_message_real('INFO: Scaling experimental gamma_p by ',&
+        call send_message_real('INFO: (GYRO) Scaling experimental gamma_p by ',&
              pgamma0_scale)
      endif
 
      if (doppler_scale /= 1.0) then
-        call send_message_real('INFO: Scaling experimental gamma_e by ',&
+        call send_message_real('INFO: (GYRO) Scaling experimental gamma_e by ',&
              doppler_scale)
      endif
 
@@ -631,10 +631,10 @@ subroutine gyro_profile_init
   ! collisional species:
   !
   if (nu_ii_scale /= 1.0) then
-     call send_message_real('INFO: nu_ii rescaled by: ',nu_ii_scale)
+     call send_message_real('INFO: (GYRO) nu_ii rescaled by: ',nu_ii_scale)
   endif
   if (nu_ei_scale /= 1.0) then
-     call send_message_real('INFO: nu_ei rescaled by: ',nu_ei_scale)
+     call send_message_real('INFO: (GYRO) nu_ei rescaled by: ',nu_ei_scale)
   endif
   !
   ic = 0
