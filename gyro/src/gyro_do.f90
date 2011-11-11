@@ -325,11 +325,8 @@ subroutine gyro_do
      io_control = output_flag*3
   endif
   if (gkeigen_j_set == 0) then
-     if (io_method == 1) then
-        call gyro_write_timedata
-     else
-        call gyro_write_timedata_hdf5
-     endif
+     if (io_method >= 1) call gyro_write_timedata
+     if (io_method > 1) call gyro_write_timedata_hdf5
   endif
 
   !-------------------------------------------------
