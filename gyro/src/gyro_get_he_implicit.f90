@@ -34,7 +34,8 @@ subroutine gyro_get_he_implicit
                  temp = temp +(c_blend(j,m,i,p_nek_loc)-o_f(j,m,i,p_nek_loc))*&
                       field_blend(j,i,1)
               enddo ! j
-              h(m,i,p_nek_loc,n_spec) = h(m,i,p_nek_loc,n_spec) + alpha_s(n_spec,i)*temp
+              h(m,i,p_nek_loc,n_spec) = h(m,i,p_nek_loc,n_spec)+&
+                   alpha_s(n_spec,i)*temp
            enddo ! m
         enddo ! i
 !$omp end parallel do
@@ -75,7 +76,7 @@ subroutine gyro_get_he_implicit
      do p_nek=1+i_proc_1,n_nek_1,n_proc_1
         p_nek_loc = p_nek_loc+1
 
-!$omp parallel do default(shared) private(m,j)
+!$omp parallel do default(shared) private(m,j,temp)
         do i=1,n_x
            do m=1,n_stack 
               temp = 0.0
