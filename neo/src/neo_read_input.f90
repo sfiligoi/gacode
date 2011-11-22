@@ -21,7 +21,6 @@ subroutine neo_read_input
   read(1,*) collision_model
   read(1,*) profile_model
   read(1,*) profile_erad0_model
-  read(1,*) profile_temprescale_model
   read(1,*) profile_equilibrium_model
   read(1,*) ipccw_in
   read(1,*) btccw_in

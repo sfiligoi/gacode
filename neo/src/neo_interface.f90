@@ -30,7 +30,6 @@ module neo_interface
   integer :: neo_collision_model_in = 4
   integer :: neo_profile_model_in = 1
   integer :: neo_profile_erad0_model_in = 1
-  integer :: neo_profile_temprescale_model_in = 0
   integer :: neo_profile_equilibrium_model_in = 1
   integer :: neo_ipccw_in = -1
   integer :: neo_btccw_in = -1
@@ -150,7 +149,6 @@ contains
     neo_collision_model_in = collision_model
     neo_profile_model_in = profile_model
     neo_profile_erad0_model_in = profile_erad0_model
-    neo_profile_temprescale_model_in = profile_temprescale_model
     neo_profile_equilibrium_model_in = profile_equilibrium_model
     neo_ipccw_in  = ipccw_in
     neo_btccw_in  = btccw_in
@@ -242,7 +240,6 @@ contains
     collision_model = neo_collision_model_in
     profile_model = neo_profile_model_in
     profile_erad0_model = neo_profile_erad0_model_in
-    profile_temprescale_model = neo_profile_temprescale_model_in
     profile_equilibrium_model = neo_profile_equilibrium_model_in
     ipccw_in  = neo_ipccw_in
     btccw_in  = neo_btccw_in

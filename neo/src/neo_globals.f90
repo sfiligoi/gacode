@@ -75,7 +75,6 @@ module neo_globals
   integer :: collision_model 
   integer :: profile_model
   integer :: profile_erad0_model
-  integer :: profile_temprescale_model
   integer :: profile_equilibrium_model
   integer :: rotation_model
   integer :: adiabatic_ele_model

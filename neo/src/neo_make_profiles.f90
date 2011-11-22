@@ -398,6 +398,7 @@ subroutine neo_make_profiles
      dphi0dr(:) = 0.0
   endif
 
+
   ! Print the re-mapped equilibrium data
   if(silent_flag == 0 .and. i_proc == 0) then
      open(unit=io,file=trim(path)//'out.neo.equil',status='replace')
