@@ -21,7 +21,7 @@ MF90 = openmpif90
 #set up for diff mpif90s
 #
 
-FC	= ${MF90} -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -g  -D__MPI
+FC	= ${MF90} -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -g 
 F77	= ${MF90} -g 
 
 FMATH	= -fdefault-real-8
