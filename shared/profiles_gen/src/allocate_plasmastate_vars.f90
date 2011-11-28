@@ -4,6 +4,7 @@ subroutine allocate_plasmastate_vars
 
   implicit none
 
+  allocate(plst_all_name(plst_dp1_nspec_all))
   allocate(plst_alla_name(plst_dp1_nspec_alla))
   allocate(plst_ts(nx,plst_dp1_nspec_th+1))
   allocate(plst_ns(nx,plst_dp1_nspec_th+1))
@@ -22,7 +23,7 @@ subroutine allocate_plasmastate_vars
   allocate(plst_r_midp_in(nx))
   allocate(plst_r_midp_out(nx))
   allocate(plst_z_midp(nx))
-  allocate(plst_zeff_th(nx))
+  allocate(plst_zeff(nx))
   allocate(plst_epot(nx))
   allocate(plst_omegat(nx))
   allocate(plst_pbe(nx))

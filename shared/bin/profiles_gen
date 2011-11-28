@@ -529,12 +529,15 @@ then
       echo "ERROR: (profiles_gen) Incomplete order vector."
       exit 1;
    fi
-   ord_vec[0]=${ORDER:0:1}
-   ord_vec[1]=${ORDER:2:1}
-   ord_vec[2]=${ORDER:4:1}
-   ord_vec[3]=${ORDER:6:1}
-   ord_vec[4]=${ORDER:8:1}
+
+   p=0
+   for i in $(echo $ORDER | tr "," "\n")
+   do
+      ord_vec[$p]=$i
+      p=$(($p+1))
+   done
 fi
+
 echo ${ord_vec[0]} ${ord_vec[1]} ${ord_vec[2]} ${ord_vec[3]} ${ord_vec[4]} >> $CONFIG
 #==============================================================
 

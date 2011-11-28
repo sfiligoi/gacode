@@ -11,24 +11,27 @@
 #  Or for PPPL kestrel with gigabit
  
 simdir=${1}
-nproc=${2}
+nmpi=${2}
 exec=${3}
+nomp=${4}
+numa=${5}
+mpinuma=${6}
 
 if [ ! -e ${exec} ] ; then
   echo " GYRO executable not found: ${exec}"
-  echo " need to build GYRO for Kruskal's GYRO_DIR: ${GYRO_DIR}"
+  echo " need to build GYRO for Kruskal's GYRO_DIR: ${GACODE_ROOT}/gyro"
   exit
 fi
 
 cd $simdir
 
 #  Warning for "gyro -t" on nstxpool:
-if [ ${nproc} -eq 1 ]  ; then
+if [ ${nmpi} -eq 1 ]  ; then
   echo "  _nstxpool_ does not have gigabit; test with {ping node_name-g}"
   echo "  nodes with no gigabit connection will hang here"
 fi
 
-echo "mpirun -np $nproc $exec"
-mpirun -np $nproc $exec
+echo "mpirun -np $nmpi $exec"
+mpirun -np $nmpi $exec
 
 exit

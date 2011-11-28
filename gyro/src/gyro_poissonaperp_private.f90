@@ -12,7 +12,6 @@ module gyro_poissonaperp_private
   integer :: n_fini
   integer :: n_gyro
   integer :: n_dx
-  integer :: n_t2
   integer :: n_x_max
   !
   complex :: val

@@ -5,26 +5,17 @@ module gkcoll_equilibrium
   public :: EQUIL_alloc, EQUIL_do
   
   ! equilibrium parameters (theta)
-  real :: d_theta                                 ! delta theta
-  ! local (th)
-  real, dimension(:), allocatable :: k_par        ! bhat dot grad/a
-  real, dimension(:), allocatable :: v_drift_x    ! radial curvature drift vel
-  real, dimension(:), allocatable :: v_drift_th   ! theta  curvature drift vel
-  real, dimension(:), allocatable :: gradr        ! | grad r|
-  real, dimension(:), allocatable :: w_theta    ! flux surface avg weights
-  real, dimension(:), allocatable :: Btor       ! b_t / Bunit
-  real, dimension(:), allocatable :: Bpol       ! b_p / Bunit
-  real, dimension(:), allocatable :: Bmag       ! B/Bunit
-  real, dimension(:), allocatable :: gradpar_Bmag ! bhat dot grad/aBmag/Bunit
-  real, dimension(:), allocatable :: bigR       ! R/a (global)
-  ! radial deriv of the volume enclosed by a flux surface
-  real, dimension(:), allocatable :: v_prime_g  ! (ngr)
-  
-  ! Parameters needed for post-processing analysis
-  real :: I_div_psip    ! I(psi)/psi_prime = q f / r
-  real :: Bmag2_avg     ! <(B/Bunit)^2>
-  real :: Bmag2inv_avg  ! <(Bunit/B)^2>
-  real :: gradpar_Bmag2_avg ! <(bhat dot grad/aBmag/Bunit)^2>
+  real :: d_theta
+  real, dimension(:,:), allocatable   :: theta_B
+  real, dimension(:), allocatable   :: w_theta
+  real, dimension(:,:), allocatable :: k_perp    
+  real, dimension(:), allocatable   :: Bmag
+  real, dimension(:,:), allocatable :: omega_stream
+  real, dimension(:,:), allocatable :: omega_trap
+  real, dimension(:,:), allocatable :: omega_rdrift
+  real, dimension(:,:), allocatable :: omega_adrift
+  real, dimension(:,:), allocatable :: omega_aprdrift
+  real, dimension(:,:), allocatable :: omega_xprdrift
   
   logical, private :: initialized = .false.
   
@@ -35,29 +26,33 @@ contains
     use GEO_interface
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
-    integer :: it
+    integer :: it, ir
     integer, parameter :: geo_ntheta=1001 ! num grid pts for Miller geo grid
     
     if(flag == 1) then
        if(initialized) return
        
        allocate(theta(n_theta))
-       allocate(k_par(n_theta))
-       allocate(v_drift_x(n_theta))
-       allocate(v_drift_th(n_theta))
-       allocate(gradr(n_theta))
+       allocate(theta_B(n_radial,n_theta))
        allocate(w_theta(n_theta))
-       allocate(bigR(n_theta))
-       allocate(Btor(n_theta))
-       allocate(Bpol(n_theta))
        allocate(Bmag(n_theta))
-       allocate(gradpar_Bmag(n_theta))
-       allocate(v_prime_g(n_gr))
-       
+       allocate(k_perp(n_theta,n_radial))
+       allocate(omega_stream(n_theta,n_species))
+       allocate(omega_trap(n_theta,n_species))
+       allocate(omega_rdrift(n_theta,n_species))
+       allocate(omega_adrift(n_theta,n_species))
+       allocate(omega_aprdrift(n_theta,n_species))
+       allocate(omega_xprdrift(n_theta,n_species))
 
-       d_theta = 2*pi/n_theta
+       d_theta = (2*pi/n_theta)
        do it=1,n_theta
           theta(it) = -pi+(it-1)*d_theta
+       enddo
+
+       do ir=1,n_radial
+          do it=1,n_theta
+             theta_B(ir,it) = theta(it)+2*pi*indx_r(ir)
+          enddo
        enddo
        
        if(equilibrium_model == 0) then
@@ -75,17 +70,16 @@ contains
        if(.NOT. initialized) return
        
        deallocate(theta)
-       deallocate(k_par)
-       deallocate(v_drift_x)
-       deallocate(v_drift_th)
-       deallocate(gradr)
+       deallocate(theta_B)
        deallocate(w_theta)
-       deallocate(bigR)
-       deallocate(Btor)
-       deallocate(Bpol)
        deallocate(Bmag)
-       deallocate(gradpar_Bmag)
-       deallocate(v_prime_g)
+       deallocate(k_perp)
+       deallocate(omega_stream)
+       deallocate(omega_trap)
+       deallocate(omega_rdrift)
+       deallocate(omega_adrift)
+       deallocate(omega_aprdrift)
+       deallocate(omega_xprdrift)
 
        call GEO_alloc(0)
         
@@ -95,76 +89,77 @@ contains
     
   end subroutine EQUIL_alloc
   
-  subroutine EQUIL_do(ir)
+  subroutine EQUIL_do
     use gkcoll_globals
     use GEO_interface
     implicit none
-    integer, intent(in) :: ir
-    integer :: it, jt, id
+    integer :: it, ir, is
     real :: sum
+
     ! parameters needed for Miller equilibrium
-
-    sum=0.0
-
-    ! geo_numeq_flag, geo_ny, and geo_yin already set
-    
+    ! geo_numeq_flag, geo_ny, and geo_yin already set    
     GEO_signb_in     = sign_bunit
-    GEO_rmin_in      = r(ir)
-    GEO_rmaj_in      = rmaj(ir)
-    GEO_drmaj_in     = shift(ir)
-    GEO_zmag_in      = zmag(ir)
-    GEO_dzmag_in     = s_zmag(ir)
-    GEO_q_in         = q(ir)
-    GEO_s_in         = shat(ir)
-    GEO_kappa_in     = kappa(ir)
-    GEO_s_kappa_in   = s_kappa(ir)
-    GEO_delta_in     = delta(ir)
-    GEO_s_delta_in   = s_delta(ir)
-    GEO_zeta_in      = zeta(ir)
-    GEO_s_zeta_in    = s_zeta(ir)
-    GEO_beta_star_in = 0.0    ! EAB: set beta_star=0;t in first-order calc
-    ! NOTE: it is t implemented in v_drift defs
-    GEO_fourier_in(:,:) = geo_yin(:,:,ir)
+    GEO_rmin_in      = rmin
+    GEO_rmaj_in      = rmaj
+    GEO_drmaj_in     = shift
+    GEO_zmag_in      = zmag
+    GEO_dzmag_in     = s_zmag
+    GEO_q_in         = q
+    GEO_s_in         = shat
+    GEO_kappa_in     = kappa
+    GEO_s_kappa_in   = s_kappa
+    GEO_delta_in     = delta
+    GEO_s_delta_in   = s_delta
+    GEO_zeta_in      = zeta
+    GEO_s_zeta_in    = s_zeta
+    GEO_beta_star_in = 0.0    ! EAB: set beta_star=0; will add later
+    GEO_fourier_in(:,:) = geo_yin(:,:)
+
     call GEO_do()  
     
+    sum=0.0
     do it=1,n_theta
+
        call GEO_interp(theta(it))
-       k_par(it) = 1.0 / (q(ir) * rmaj(ir) * GEO_g_theta)
-       bigR(it) = GEO_bigr
-       Bmag(it)  = GEO_b
-       Btor(it)  = GEO_bt
-       Bpol(it)  = GEO_bp
-       gradpar_Bmag(it) = k_par(it) * GEO_dbdt
-       gradr(it)        = GEO_grad_r
-       v_drift_x(it)  = -rho(ir)/(rmaj(ir) * Bmag(it)) * &
-            GEO_grad_r * GEO_gsin
-       v_drift_th(it) = -rho(ir)/(rmaj(ir) * Bmag(it) * GEO_l_t) &
-            * (GEO_gcos1 * GEO_bt / Bmag(it)  & 
-            -  GEO_gsin * GEO_nsin * GEO_grad_r) &
-            * r(ir)
+
+       do is=1,n_species
+
+          omega_stream(it,is) = sqrt(2.0) * vth(is) / (q * rmaj * GEO_g_theta)
+          
+          omega_trap(it,is) = -0.5*sqrt(2.0) * vth(is) &
+               * (GEO_dbdt / GEO_b) / (q * rmaj * GEO_g_theta) 
+
+          omega_rdrift(it,is) = -rho * vth(is)**2 * mass(is)/(Z(is)*GEO_b) &
+               * GEO_grad_r / rmaj * GEO_gsin 
+
+          omega_adrift(it,is) = -rho * vth(is)**2 * mass(is)/(Z(is)*GEO_b) &
+               * GEO_gq / rmaj &
+               * (GEO_gcos1 + GEO_gcos2 + GEO_captheta * GEO_gsin) 
+
+          omega_aprdrift(it,is) = 2.0 * rho * vth(is)**2 &
+               * mass(is)/(Z(is)*GEO_b) * GEO_gq / rmaj * GEO_gcos2
+
+          omega_xprdrift(it,is) = rho * vth(is)**2 &
+               * mass(is)/(Z(is)*GEO_b) / rmaj**2 * GEO_gsin * GEO_gcos2
+
+       enddo
+
+       Bmag(it) = GEO_b
+
        ! flux-surface average weights
-       w_theta(it) = GEO_g_theta / Bmag(it)
+       w_theta(it) = GEO_g_theta / GEO_b
        sum = sum + w_theta(it)
+       
+       do ir=1,n_radial
+          k_perp(it,ir) = sqrt((2.0*pi*indx_r(ir)*GEO_grad_r*r_length_inv &
+               + k_theta*GEO_gq*GEO_captheta)**2 &
+               + (k_theta*GEO_gq)**2) 
+       enddo
+       
     enddo
-    
-    I_div_psip = GEO_f * q(ir) / r(ir)
     
     do it=1,n_theta
        w_theta(it) = w_theta(it) / sum
-    enddo
-    
-    ! v_prime_g = d Volume of flux surface / dr
-    v_prime_g(ir) = r(ir)*rmaj(ir)*sum/n_theta * 4 * pi * pi
-    
-    ! Flux surface averages of B^2 and 1/B^2
-    Bmag2_avg = 0.0
-    Bmag2inv_avg = 0.0
-    gradpar_Bmag2_avg = 0.0
-    do it=1,n_theta
-       Bmag2_avg = Bmag2_avg + w_theta(it) * Bmag(it) * Bmag(it)
-       Bmag2inv_avg = Bmag2inv_avg + w_theta(it) * 1.0 / (Bmag(it) * Bmag(it))
-       gradpar_Bmag2_avg = gradpar_Bmag2_avg + w_theta(it) * gradpar_Bmag(it) &
-            * gradpar_Bmag(it)
     enddo
     
   end subroutine EQUIL_DO

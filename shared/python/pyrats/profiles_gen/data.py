@@ -217,54 +217,6 @@ class profiles_genData:
 
         return self.data[var]
 
-    #-------------------------------------------- #
-    # Plotting functions
-    def plot(self, var, n1=2, n2=2, plotcounter=0, fignum=0):
-        """Plots requested data using matplotlib.
-
-        var is the requested variable to be plotted,
-        n1 is the horizontal number of plots in one window.
-        n2 is the vertical number of plots in one window.
-
-        Examples: self.plot(rmaj, 2, 2)"""
-
-        import matplotlib.pyplot as plt
-        import matplotlib as mpl
-
-        mpl.rcParams['figure.subplot.wspace'] = .3
-        mpl.rcParams['figure.subplot.hspace'] = .4
-
-        if plotcounter == 0:
-            plotcounter = self.plotcounter
-        if fignum == 0:
-            fignum = self.fignum
-
-        if plotcounter > (n1 * n2):
-            plotcounter = 1
-            fignum = fignum + 1
-        fig = plt.figure(fignum)
-        ax = fig.add_subplot(n2, n1, plotcounter)
-        for k in self.data.iterkeys():
-            if (var + ' ') == k[:len(var) + 1]:
-                toplot = k
-                ylab = k
-                ax.set_xlabel(k)
-        ax.set_xlabel(u'\u03c1 (-)')
-        if var == 'kappa':
-            ylab = u'\u03ba (-)'
-        if var == 'delta':
-            ylab = u'\u03b4 (-)'
-        if var == 'zeta':
-            ylab = u'\u03b6 (-)'
-        if var == 'omega0':
-            ylab = u'\u03c90 (1/s)'
-        ax.set_ylabel(ylab)
-        ax.set_title(ylab.split()[0] + u' vs. \u03c1')
-        ax.plot(self.data['rho (-)'], self.data[toplot])
-        plotcounter = plotcounter + 1
-        self.plotcounter = plotcounter
-        self.fignum = fignum
-
 
     def millerplot(self, inner, outer, n, verbose):
         """Creates plots of Miller-type equilibrium flux surfaces.

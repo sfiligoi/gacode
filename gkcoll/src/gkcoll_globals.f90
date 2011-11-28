@@ -1,5 +1,8 @@
 module gkcoll_globals
 
+  ! EAB: temp parameter
+  integer :: trap_method=1
+
   !---------------------------------------------------------------
   ! local MPI variables
   ! 
@@ -9,44 +12,60 @@ module gkcoll_globals
   !---------------------------------------------------------------
 
   real, parameter :: pi=3.1415926535897932
+  complex, parameter :: i_c = (0.0,1.0)
 
   !---------------------------------------------------------------
   ! Input parameters:
   !
-  real :: rmin_in
-  real :: rmaj_in
-  real :: q_in
-  real :: rho_in
-  real :: shat_in
-  real :: shift_in
-  real :: kappa_in
-  real :: s_kappa_in
-  real :: delta_in
-  real :: s_delta_in
-  real :: zeta_in
-  real :: s_zeta_in
-  real :: zmag_in
-  real :: s_zmag_in
+  real :: rmin
+  real :: rmaj
+  real :: q
+  real :: shat
+  real :: shift
+  real :: kappa
+  real :: s_kappa
+  real :: delta
+  real :: s_delta
+  real :: zeta
+  real :: s_zeta
+  real :: zmag
+  real :: s_zmag
+  
+  integer :: toroidal_model
+  integer :: toroidal_num
+  real :: rho
+  real :: k_theta_rho
+  real :: k_theta
+  real :: r_length_inv
+
+  !---------------------------------------------------------------
   integer :: geo_ny_in
   real, dimension(8,0:16) :: geo_yin_in
   !
-  real :: profile_delta_scale
-  real :: profile_zeta_scale
-  real :: profile_zmag_scale
+  integer :: geo_numeq_flag
+  integer :: geo_ny
+  real, dimension(:,:), allocatable :: geo_yin
+  !---------------------------------------------------------------
+
   !
-  integer :: ipccw_in
-  integer :: btccw_in
+  integer :: ipccw
+  integer :: btccw
   !
-  real :: te_ade_in
-  real :: ne_ade_in
+  real :: te_ade
+  real :: ne_ade
   !
-  integer, dimension(6) :: z_in 
-  real, dimension(6) :: mass_in
-  real, dimension(6) :: dens_in
-  real, dimension(6) :: temp_in
-  real, dimension(6) :: dlnndr_in
-  real, dimension(6) :: dlntdr_in
-  real, dimension(6) :: nu_in
+  real :: lambda_debye
+  real :: profile_lambda_debye_scale
+  !
+  integer, dimension(6) :: z
+  real, dimension(6) :: mass
+  real, dimension(6) :: dens
+  real, dimension(6) :: temp
+  real, dimension(6) :: dlnndr
+  real, dimension(6) :: dlntdr
+  real, dimension(6) :: nu
+  ! 
+  real, dimension(6) :: vth  
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -58,8 +77,14 @@ module gkcoll_globals
   integer :: n_theta
   integer :: n_radial
   real    :: e_max
+  real    :: delta_t
+  real    :: max_time
+  real    :: freq_tol
 
-  integer :: matsz_scalefac
+  real    :: rupwind_eps
+  integer :: rupwind_n
+  real    :: tupwind_eps
+
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -68,8 +93,6 @@ module gkcoll_globals
   integer :: equilibrium_model
   integer :: collision_model 
   integer :: profile_model
-  integer :: profile_temprescale_model
-  integer :: profile_equilibrium_model
   integer :: adiabatic_ele_model
   real    :: sign_q
   real    :: sign_bunit
@@ -82,67 +105,33 @@ module gkcoll_globals
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
-  ! Charge and mass
-  !
-  integer, dimension(:), allocatable :: z     ! charge (ns)
-  real, dimension(:), allocatable :: mass     ! m/m_0  (ns)
-  !---------------------------------------------------------------
-
-  !---------------------------------------------------------------
   ! Path to INPUT, read in the get_inputpath subroutine
   character(len=80) :: path
   !---------------------------------------------------------------
 
-  !---------------------------------------------------------------
-  ! Profile functions
-  !
-  integer, parameter :: n_gr=1   ! radially-local only
-  real, dimension(:), allocatable :: r
-  real, dimension(:), allocatable :: rmaj
-  real, dimension(:), allocatable :: q
-  real, dimension(:), allocatable :: rho
-  real, dimension(:), allocatable :: shat
-  real, dimension(:), allocatable :: shift
-  real, dimension(:), allocatable :: kappa
-  real, dimension(:), allocatable :: s_kappa
-  real, dimension(:), allocatable :: delta
-  real, dimension(:), allocatable :: s_delta
-  real, dimension(:), allocatable :: zeta
-  real, dimension(:), allocatable :: s_zeta
-  real, dimension(:), allocatable :: zmag
-  real, dimension(:), allocatable :: s_zmag
-  integer :: geo_numeq_flag
-  integer :: geo_ny
-  real, dimension(:,:,:), allocatable :: geo_yin
-  !
-  real, dimension(:), allocatable :: te_ade, ne_ade
-  ! ele temp and dens -- used only if ade (for Poisson calculation)
-  !
-  ! (species-dependent)
-  !
-  real, dimension(:,:), allocatable :: dens   ! n/n_0  (ns,nr)
-  real, dimension(:,:), allocatable :: temp   ! T/T_0  (ns,nr)
-  real, dimension(:,:), allocatable :: vth    ! vth/vth_0=sqrt(temp/mass) 
-  real, dimension(:,:), allocatable :: dlnndr ! a/Ln   (ns,nr)
-  real, dimension(:,:), allocatable :: dlntdr ! a/LT   (ns,nr)
-  real, dimension(:,:), allocatable :: nu     ! nu / (vth_0/a) (ns,nr)
-  !
-
-  !---------------------------------------------------------------
+  integer :: is_ele
+  real :: dens_ele, temp_ele
 
   real, dimension(:), allocatable :: theta
 
   ! Numerical/work arrays and dimensions
-  real, dimension(:,:,:,:,:), allocatable :: f
-  real, dimension(:,:) , allocatable :: phi
+  complex, dimension(:,:,:,:,:), allocatable :: h_x
+  complex, dimension(:,:,:,:,:), allocatable :: cap_h_x
+  complex, dimension(:,:,:,:,:), allocatable :: cap_h_p
+  complex, dimension(:,:) , allocatable :: phi
+  complex, dimension(:,:) , allocatable :: phi_old
+
+  integer, dimension(:), allocatable :: indx_xi, indx_r
+  real, dimension(:), allocatable :: energy, w_e
+  real, dimension(:), allocatable :: xi, w_xi
 
   ! normalizations for experimental profiles
   real  :: temp_norm_fac, charge_norm_fac
-  real  :: a_meters
-  real, dimension(:), allocatable :: dens_norm
-  real, dimension(:), allocatable :: temp_norm
-  real, dimension(:), allocatable :: vth_norm
-  real, dimension(:), allocatable :: b_unit
+  real  :: a_norm
+  real  :: dens_norm
+  real  :: temp_norm
+  real  :: vth_norm
+  real  :: b_norm
   real, parameter :: mass_deuterium = 3.3452   ! (x 10-27 kg)
 
   ! error checking

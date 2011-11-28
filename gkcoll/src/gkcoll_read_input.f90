@@ -7,52 +7,58 @@ subroutine gkcoll_read_input
   integer :: is
 
   open(unit=1,file=trim(path)//'input.gkcoll.gen',status='old')
+  read(1,*) trap_method
   read(1,*) n_energy
   read(1,*) n_xi
   read(1,*) n_theta
   read(1,*) n_radial
   read(1,*) e_max
-  read(1,*) matsz_scalefac
-  read(1,*) rmin_in
-  read(1,*) rmaj_in
+  read(1,*) delta_t
+  read(1,*) max_time
+  read(1,*) freq_tol
+  read(1,*) rupwind_eps
+  read(1,*) rupwind_n
+  read(1,*) tupwind_eps
+  read(1,*) toroidal_model
+  read(1,*) toroidal_num
+  read(1,*) rho
+  read(1,*) k_theta_rho
+  read(1,*) rmin
+  read(1,*) rmaj
   read(1,*) silent_flag
   read(1,*) equilibrium_model
   read(1,*) collision_model
   read(1,*) profile_model
-  read(1,*) profile_temprescale_model
-  read(1,*) profile_equilibrium_model
-  read(1,*) ipccw_in
-  read(1,*) btccw_in
-  read(1,*) te_ade_in
-  read(1,*) ne_ade_in
+  read(1,*) ipccw
+  read(1,*) btccw
+  read(1,*) te_ade
+  read(1,*) ne_ade
+  read(1,*) lambda_debye
+  read(1,*) profile_lambda_debye_scale
 
   read(1,*) n_species
 
   do is=1,6
-     read(1,*) z_in(is)
-     read(1,*) mass_in(is)
-     read(1,*) dens_in(is)
-     read(1,*) temp_in(is)
-     read(1,*) dlnndr_in(is)
-     read(1,*) dlntdr_in(is)
-     read(1,*) nu_in(is)
+     read(1,*) z(is)
+     read(1,*) mass(is)
+     read(1,*) dens(is)
+     read(1,*) temp(is)
+     read(1,*) dlnndr(is)
+     read(1,*) dlntdr(is)
+     read(1,*) nu(is)
   enddo
 
-  read(1,*) q_in
-  read(1,*) rho_in
-  read(1,*) shat_in
-  read(1,*) shift_in     
-  read(1,*) kappa_in    
-  read(1,*) s_kappa_in   
-  read(1,*) delta_in        
-  read(1,*) s_delta_in 
-  read(1,*) zeta_in        
-  read(1,*) s_zeta_in
-  read(1,*) zmag_in        
-  read(1,*) s_zmag_in
-  read(1,*) profile_delta_scale
-  read(1,*) profile_zeta_scale
-  read(1,*) profile_zmag_scale
+  read(1,*) q
+  read(1,*) shat
+  read(1,*) shift    
+  read(1,*) kappa   
+  read(1,*) s_kappa  
+  read(1,*) delta       
+  read(1,*) s_delta
+  read(1,*) zeta      
+  read(1,*) s_zeta
+  read(1,*) zmag       
+  read(1,*) s_zmag
 
   close(1)
 

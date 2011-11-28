@@ -13,8 +13,8 @@ F77	= mpif90
 FMATH	= -r8
 FOPT	= -vec-report0 -shared-intel
 FDEBUG	= -warn all -shared-intel -check all -g
-FBOUND	= 
-FPROF	= -pg
+FOMP    = -openmp
+FNOMP   =
 
 # Need the following modules, in this order:
 # module load intel

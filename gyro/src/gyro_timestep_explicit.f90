@@ -37,7 +37,7 @@ subroutine gyro_timestep_explicit
      RHSE_1 = RHS
 
      h = h_0+dt*RHSE_1
-     call get_field_explicit
+     call gyro_field_solve_explicit
 
      ! Stage 2
 
@@ -46,7 +46,7 @@ subroutine gyro_timestep_explicit
 
      RHS = 0.5*(RHSE_1+RHSE_2)
      h = h_0+dt*RHS
-     call get_field_explicit
+     call gyro_field_solve_explicit
 
      ! Error estimate
 
@@ -66,7 +66,7 @@ subroutine gyro_timestep_explicit
      RHSE_1 = RHS
 
      h = h_0+0.5*dt*RHSE_1
-     call get_field_explicit
+     call gyro_field_solve_explicit
 
      ! Stage 2
 
@@ -74,7 +74,7 @@ subroutine gyro_timestep_explicit
      RHSE_2 = RHS
 
      h = h_0+0.5*dt*RHSE_2
-     call get_field_explicit
+     call gyro_field_solve_explicit
 
      ! Stage 3
 
@@ -82,14 +82,14 @@ subroutine gyro_timestep_explicit
      RHSE_3 = RHS
 
      h = h_0+dt*RHSE_3
-     call get_field_explicit
+     call gyro_field_solve_explicit
 
      ! Stage 4
 
      call gyro_rhs_total
 
      h = h_0+dt*(RHSE_1+2.0*(RHSE_2+RHSE_3)+RHS)/6.0
-     call get_field_explicit
+     call gyro_field_solve_explicit
 
      ! Error estimate
 

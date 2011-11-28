@@ -31,5 +31,5 @@ lib: $(OBJECTS)
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:
-	rm -f *.o $(LLIB).a ${GACODE_ROOT}/modules/expro_interface.mod
+	rm -f *.o $(LLIB).a ${GACODE_ROOT}/modules/expro_*.mod
 

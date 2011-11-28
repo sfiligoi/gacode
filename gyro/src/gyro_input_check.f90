@@ -213,7 +213,6 @@ subroutine gyro_input_check
   call checkrealvar(funit,"fieldeigen_wr",fieldeigen_wr)
   call checkrealvar(funit,"fieldeigen_wi",fieldeigen_wi)
   call checkrealvar(funit,"fieldeigen_tol",fieldeigen_tol)
-  call checkintvar(funit,"collision_method",collision_method)
   call checkintvar(funit,"io_method",io_method)
   call checkintvar(funit,"time_skip_wedge",time_skip_wedge)
   call checkintvar(funit,"n_torangle_wedge",n_torangle_wedge)

@@ -9,24 +9,34 @@ program gyro
 
   use mpi
   use gyro_globals
+  use omp_lib
 
   !-----------------------------------------------------------------
   implicit none
   !
   integer :: ierr
+  integer :: supported
   !-----------------------------------------------------------------
 
-  integer :: thd_support
-
-  !-----------------------------------------------------------------
-  ! Initialize MPI_COMM_WORLD communicator.
+  !----------------------------------------------------------------
+  ! Query OpenMP for dimensions
   !
-  call MPI_INIT(i_err)
-!  call MPI_INIT_THREAD(MPI_THREAD_FUNNELED,thd_support,ierr)
-!  if (thd_support < MPI_THREAD_FUNNELED) then
-!    print *, 'ERROR : multi-threading NOT supported by MPI implementation'
-!    call MPI_FINALIZE(ierr)
-!  endif
+  i_omp = omp_get_thread_num()
+  n_omp = omp_get_max_threads()
+  !-----------------------------------------------------------------
+
+  !-----------------------------------------------------------------
+  ! Initialize MPI_COMM_WORLD communicator, including support for 
+  ! funneled threading (needed if OpenMP is enabled).
+  !
+  if (n_omp > 1) then
+     call MPI_INIT_THREAD(MPI_THREAD_FUNNELED,supported,ierr)
+     if (supported < MPI_THREAD_FUNNELED) then
+        call catch_error('ERROR: (GYRO) Multi-threaded MPI not supported.')
+     endif
+  else 
+     call MPI_INIT_THREAD(MPI_THREAD_SINGLE,supported,ierr)
+  endif
   !-----------------------------------------------------------------
 
   !-----------------------------------------------------------------
@@ -36,7 +46,7 @@ program gyro
   !-----------------------------------------------------------------
 
   !-----------------------------------------------------------------
-  ! Set the world MPI communicator
+  ! Query MPI for dimensions
   !
   GYRO_COMM_WORLD = MPI_COMM_WORLD
   !
@@ -44,7 +54,9 @@ program gyro
   !
   call MPI_COMM_RANK(GYRO_COMM_WORLD,i_proc,i_err)
   call MPI_COMM_SIZE(GYRO_COMM_WORLD,n_proc,i_err)
-  !
+  !-----------------------------------------------------------------
+
+  !-----------------------------------------------------------------
   ! Standard standalone operation
   transport_method = 1
   !

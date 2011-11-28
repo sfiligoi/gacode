@@ -24,6 +24,7 @@
       PUBLIC :: get_R_unit
       PUBLIC :: get_q_unit
       PUBLIC :: get_wd_bar
+      PUBLIC :: get_b0_bar
       PUBLIC :: get_ave_wd
       PUBLIC :: get_ave_b0
       PUBLIC :: get_particle_flux

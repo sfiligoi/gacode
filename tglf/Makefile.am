@@ -9,7 +9,7 @@
 
 ## ############################################################
 
-SUBDIRS= bin python src tools 
+SUBDIRS= bin src tools 
 
 libdir = $(prefix)/lib
 

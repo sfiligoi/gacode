@@ -35,10 +35,9 @@ subroutine gyro_initialize_arrays
   !---------------------------------------------------
 
   !---------------------------------------------------
-  freq_n       = 0.0
+  omega_linear = 0.0
   time_error   = 0.0
   diff         = 0.0
-  elapsed_time = 0.0
 
   ! NO field_blend
   field_blend_dot  = 0.0
@@ -66,7 +65,6 @@ subroutine gyro_initialize_arrays
 
   !---------------------------------------------------
   ! Initialization to prevent MPI-grid errors
-  field_tau = 0.0
   if (collision_flag == 1) then
      f_coll  = 0.0
      fb_coll = 0.0

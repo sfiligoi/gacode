@@ -14,4 +14,5 @@ clean:
 	cd gato ; make clean 
 	cd tglf ; make clean
 	cd tgyro ; make clean
-
+	cd gkcoll ; make clean
+	rm -f shared/python/pyrats/*/*.pyc

@@ -7,8 +7,11 @@
 #  Parallel execution script
 
 simdir=${1}
-nproc=${2}
+nmpi=${2}
 exec=${3}
+nomp=${4}
+numa=${5}
+mpinuma=${6}
   
 cd $simdir
 

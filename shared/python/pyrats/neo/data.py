@@ -203,20 +203,23 @@ class NEOData:
 
         import sys
         import numpy as np
+
+        n_spec   = self.grid['n_species']
+        n_theta  = self.grid['n_theta']
+        n_radial = self.grid['n_radial']
  
         try:
             data = np.loadtxt(self.dirname+'/out.neo.rotation')
+            self.rotation['r_over_a'] = data[:,0]
+            self.rotation['dphi_ave'] = data[:,1]
+            self.rotation['n_ratio']  = data[:,2+0*n_spec:2+1*n_spec]
+            self.rotation['dphi']     = data[:,2+1*n_spec:2+1*n_spec+1*n_theta]
         except:
-            print "ERROR (NEOData): Fatal error!  Missing out.neo.rotation."
-            sys.exit()
-            
-        n_spec  = self.grid['n_species']
-        n_theta = self.grid['n_theta']
-
-        self.rotation['r_over_a'] = data[:,0]
-        self.rotation['dphi_ave'] = data[:,1]
-        self.rotation['n_ratio']  = data[:,2+0*n_spec:2+1*n_spec]
-        self.rotation['dphi']     = data[:,2+1*n_spec:2+1*n_spec+1*n_theta]
+            print "Warning (NEOData): Missing out.neo.rotation."
+            self.rotation['r_over_a'] = self.grid['r_over_a']
+            self.rotation['dphi_ave'] = np.zeros([n_radial])
+            self.rotation['n_ratio']  = np.zeros([n_radial,n_spec])
+            self.rotation['dphi']     = np.zeros([n_radial,n_theta])
 
     #---------------------------------------------------------------------------#
 

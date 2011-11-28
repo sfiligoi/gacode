@@ -27,7 +27,6 @@ subroutine make_poisson_blend(i_elec)
   real :: v_gyro
   !
   complex :: inqr
-  complex :: temp
   ! 
   complex, dimension(-m_gyro:m_gyro-i_gyro,n_blend,n_blend) :: vel_sum_loc
   complex, dimension(-m_gyro:m_gyro-i_gyro,n_blend,n_blend) :: vel_sum_glob
@@ -39,7 +38,6 @@ subroutine make_poisson_blend(i_elec)
   real, dimension(-m_gyro:m_gyro-i_gyro) :: trace_1_glob
   real, dimension(n_gk,-m_gyro:m_gyro-i_gyro) :: trace_2_glob
   !
-  complex, external :: BLEND_F
   complex :: cprod 
   !---------------------------------------------------
 
@@ -115,14 +113,14 @@ subroutine make_poisson_blend(i_elec)
                  omega_c = abs(z(is))*b_unit_s(i)*mu(is)**2
 
                  if (kill_gyro_b_flag == 0) then
-                    omega_c = omega_c*b0_t(i,k,m0)
+                    omega_c = omega_c*b0_t(i,k,m)
                  endif
 
-                 rho_gyro = rhos_norm*v_perp(m0,i,p_nek_loc,is)/omega_c
+                 rho_gyro = rhos_norm*v_perp(m,i,p_nek_loc,is)/omega_c
                  !
-                 a_gyro = grad_r_t(i,k,m0)/x_length*dr_eodr(i)
-                 u_gyro = qrat_t(i,k,m0)*n_1(in_1)*q_s(i)/r_s(i)*captheta_t(i,k,m0)
-                 v_gyro = qrat_t(i,k,m0)*n_1(in_1)*q_s(i)/r_s(i)
+                 a_gyro = grad_r_t(i,k,m)/x_length*dr_eodr(i)
+                 v_gyro = qrat_t(i,k,m)*n_1(in_1)*q_s(i)/r_s(i)
+                 u_gyro = v_gyro*captheta_t(i,k,m)
                  !---------------------------------------------------------------
 
                  f_x(is,:) = (0.0,0.0) 
@@ -137,24 +135,6 @@ subroutine make_poisson_blend(i_elec)
 
               endif
 
-              if (n_1(in_1) == 0) then   
-
-                 if (i_gyro /= 1) then 
-
-                    !! JC
-                    ! Correct truncated gyroaverage                 
-
-                    temp = sum(f_x(is,:))-1.0
-                    f_x(is,0) = f_x(is,0)-temp
-
-                 endif
-
-                 ! Enforce EXACT reality 
-
-                 f_x(is,:) = real(f_x(is,:))
-
-              endif
-
            enddo ! is
 
            do j=1,n_blend
@@ -162,12 +142,11 @@ subroutine make_poisson_blend(i_elec)
 
                  do i_diff=-m_dx,m_dx-i_dx
 
-                    !----------------------------
-                    ! This will stagnate at i=n_x  
-                    ! for i+i_diff > n_x
-                    !
+                    !-----------------------------------------------
+                    ! This will stagnate at i=n_x for i+i_diff > n_x
+                    ! if boundary_method=2:
                     ip = i_cyc(i+i_diff)
-                    !----------------------------
+                    !-----------------------------------------------
 
                     vel_sum_loc(i_diff,j,jp) = vel_sum_loc(i_diff,j,jp)+&
                          grad_perp_phi(i_diff)* &
@@ -178,12 +157,11 @@ subroutine make_poisson_blend(i_elec)
 
                  do i_diff=-m_gyro,m_gyro-i_gyro
 
-                    !----------------------------
-                    ! This will stagnate at i=n_x
-                    ! for i+i_diff > n_x
-                    !
+                    !-----------------------------------------------
+                    ! This will stagnate at i=n_x for i+i_diff > n_x
+                    ! if boundary_method=2:
                     ip = i_cyc(i+i_diff)
-                    !----------------------------
+                    !-----------------------------------------------
 
                     cprod = cs_blend(j,m0,i,p_nek_loc)*c_blend(jp,m0,ip,p_nek_loc)
 
@@ -219,7 +197,7 @@ subroutine make_poisson_blend(i_elec)
 
      call MPI_ALLREDUCE(vel_sum_loc,&
           vel_sum_glob,&
-          n_blend*n_blend*(2*m_gyro-i_gyro+1),&
+          size(vel_sum_glob),&
           MPI_DOUBLE_COMPLEX,&
           MPI_SUM,&
           NEW_COMM_1,&
@@ -297,43 +275,25 @@ subroutine make_poisson_blend(i_elec)
                 f_x(is,:),&
                 7)
 
-           if (n_1(in_1) == 0) then   
-
-              if (i_gyro /= 1) then 
-
-                 ! Correct truncated gyroaverage for n=0
-
-                 temp = sum(f_x(is,:))-1.0
-                 f_x(is,0) = f_x(is,0)-temp
-
-              endif
-
-              ! Enforce EXACT reality 
-
-              f_x(is,:) = real(f_x(is,:))
-
-           endif
-
         enddo ! is
 
         do i_diff=-m_gyro,m_gyro-i_gyro
 
-           !----------------------------
-           ! This will stagnate at i=n_x 
-           ! for i+i_diff > n_x
-           !
+           !-----------------------------------------------
+           ! This will stagnate at i=n_x for i+i_diff > n_x
+           ! if boundary_method=2:
            ip = i_cyc(i+i_diff)
-           !----------------------------
+           !-----------------------------------------------
 
            do j=1,n_blend
 
               trace_1(i_diff) = trace_1(i_diff)+&
                    real(w_g0(i_diff)* &
-                   cs_blend(j,m0,i,p_nek_loc)*c_blend(j,m0,ip,p_nek_loc))
+                   cs_blend(j,m0,i,p_nek_loc)*c_blend(j,m0,i,p_nek_loc))
 
               trace_2(:,i_diff) = trace_2(:,i_diff)+&
                    real(f_x(:,i_diff)* &
-                   cs_blend(j,m0,i,p_nek_loc)*c_blend(j,m0,ip,p_nek_loc))
+                   cs_blend(j,m0,i,p_nek_loc)*c_blend(j,m0,i,p_nek_loc))
 
            enddo ! j
 

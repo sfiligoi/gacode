@@ -1,9 +1,0 @@
-
- PPPL Linux PBS queue choices:
-
-[1] dawson   ( up to 192 cores ) 8 cores/node
-[2] kite     ( up to 48 cores )  2 cores/node
-[3] kruskal  ( small partition: to 80 cores; large: 512 ) 8 cores/node
-
-Will request 2*Nproc GB of memory on all systems.
-

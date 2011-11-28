@@ -7,7 +7,7 @@
 !-----------------------------------------------------
 
 module gyro_globals
- 
+
   !----------------------------------------------------
   ! Standard precision for IO 
   !
@@ -16,7 +16,7 @@ module gyro_globals
   ! Complex
   character(len=14) :: fmtstr2='(2(es11.4,1x))'
   !----------------------------------------------------
- 
+
   !----------------------------------------------------
   ! Variables passed in via gyro_run routine:
   !
@@ -31,6 +31,15 @@ module gyro_globals
   integer :: gyro_exit_status
   character(len=80) :: gyro_exit_message
 
+  !---------------------------------------------------------
+  ! CPU timers
+  !
+  real, dimension(64) :: cpu=-1.0
+  real, dimension(64) :: cpu_in=0.0
+  character(len=19), dimension(64) :: cpu_tag
+  integer :: cpu_maxindx = 0
+  real :: startup_time
+  !---------------------------------------------------------
   !---------------------------------------------------------
   ! Restart parameters:
   !
@@ -173,7 +182,6 @@ module gyro_globals
   integer :: gyro_method
   integer :: sparse_method
   integer :: linsolve_method 
-  integer :: collision_method
   integer :: fieldeigen_root_method
   integer :: gkeigen_method
   !
@@ -454,60 +462,9 @@ module gyro_globals
   !
   real, dimension(:), allocatable :: w_time
   !
-  complex, dimension(2) :: freq_n
+  complex, dimension(:,:), allocatable :: omega_linear
   ! 
   real, dimension(:), allocatable :: time_error
-  !---------------------------------------------------------
-
-  !---------------------------------------------------------
-  ! Timers:
-  !
-  integer :: clock_count
-  integer :: clock_rate
-  integer :: clock_max
-  !
-  real :: elapsed_time
-  !
-  real :: CPU_0
-  real :: CPU_1
-  real :: CPU_2
-  real :: CPU_2a
-  real :: CPU_3
-  real :: CPU_4
-  real :: CPU_5
-  real :: CPU_6
-  real :: CPU_7
-  real :: CPU_C_in
-  real :: CPU_C_out
-  real :: CPU_C
-  real :: CPU_Ct_in
-  real :: CPU_Ct_out
-  real :: CPU_Ct
-  real :: CPU_NL_in
-  real :: CPU_NL_out
-  real :: CPU_NL
-  real :: CPU_NLt_in
-  real :: CPU_NLt_out
-  real :: CPU_NLt
-  real :: CPU_RHS_in
-  real :: CPU_RHS_out
-  real :: CPU_RHS
-  real :: CPU_diag_in
-  real :: CPU_diag_mid
-  real :: CPU_diag_outp
-  real :: CPU_diag_out
-  real :: CPU_diag_a
-  real :: CPU_diag_b
-  real :: CPU_field_in
-  real :: CPU_field_out
-  real :: CPU_field
-  real :: CPU_field2_in
-  real :: CPU_field2_out
-  real :: CPU_field2
-  real :: CPU_interp
-  real :: CPU_interp_in
-  real :: CPU_interp_out
-  real :: CPU_ts
   !---------------------------------------------------------
 
   !---------------------------------------------------------
@@ -518,6 +475,9 @@ module gyro_globals
   !
   integer :: i1_buffer
   integer :: i2_buffer
+  !
+  integer :: i1_dx
+  integer :: i2_dx
   !
   integer :: n_explicit_damp
   !
@@ -910,15 +870,6 @@ module gyro_globals
   real, dimension(:,:,:,:), allocatable :: d_rbf
   real, dimension(:,:), allocatable :: d1_rbf
   complex, dimension(:,:,:,:), allocatable :: nu_op
-  !
-  ! For ebelli collision method (generally not used)
-  !
-  complex, dimension(:,:,:,:), allocatable :: h_C_all
-  real, dimension(:,:,:,:), allocatable   ::  d_rbf_lorentz
-  real, dimension(:,:,:,:,:), allocatable ::  d_rbf_rs
-  real, dimension(:,:,:,:), allocatable   ::  d_rbf_lorentz_int
-  real, dimension(:,:,:,:,:), allocatable ::  d_rbf_rs_int
-  real, dimension(:,:,:), allocatable     ::  d_rbf_velint
   !---------------------------------------------------------
 
   !---------------------------------------------------------
@@ -1034,6 +985,13 @@ module gyro_globals
   integer :: info
   integer, dimension(:), allocatable :: i_piv
   !-----------------------------------------------
+
+  !-----------------------------------------------------
+  ! OpenMP
+  !
+  integer :: n_omp
+  integer :: i_omp
+  !-----------------------------------------------------
 
   !------------------------------------------------------
   ! MPI

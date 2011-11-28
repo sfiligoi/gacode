@@ -5,9 +5,10 @@ module gkcoll_profile_exp
 
   real :: rhoN_torflux_a
   real, dimension(:), allocatable :: rhoN_torflux_exp
-  real, dimension(:), allocatable :: rhoN_torflux
   real, dimension(:), allocatable :: psiN_polflux_exp
-  real, dimension(:), allocatable :: psiN_polflux
+  real :: rhoN_torflux
+  real :: psiN_polflux
+  
   real, dimension(:), allocatable :: rmin_exp
   real, dimension(:), allocatable :: rmaj_exp
   real, dimension(:), allocatable :: q_exp
@@ -35,8 +36,6 @@ module gkcoll_profile_exp
 
   real, dimension(:,:), allocatable :: dlnndr_p
   real, dimension(:,:), allocatable :: dlntdr_p
-
-  real, dimension(:), allocatable :: gradr0_p
 
   real, dimension(:,:,:), allocatable :: geo_yin_exp
 

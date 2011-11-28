@@ -14,8 +14,6 @@ subroutine gyro_fulladvance
   implicit none
   !----------------------------------------
 
-  call proc_time(CPU_C_in)
-
   h_old(:,:,:,:) = h(:,:,:,:)
 
   h_cap_old2(:,:,:,:) = h_cap_old(:,:,:,:)
@@ -34,36 +32,8 @@ subroutine gyro_fulladvance
   !------------------------------------------------------
   ! MANAGE pitch-angle scattering:
   !
-  if (collision_flag == 1) then
-
-     select case (collision_method)
-
-     case (1) 
-
-        ! Attempts to update fields; should not be used
-
-        !call gyro_collision
-        call catch_error('ERROR: Using this collision_method=1 is now offically prohibited.')
-
-     case (2) 
-
-        ! Default
-
-        call gyro_collision_jc
-
-     case (3,4)
-
-        ! For testing only, not for production use
-
-        call gyro_collision_ebelli
-
-     end select
-
-  endif
+  if (collision_flag == 1) call gyro_collision_main
   !------------------------------------------------------
-
-  call proc_time(CPU_C_out)   
-  CPU_C = CPU_C + (CPU_C_out - CPU_C_in)
 
   !------------------------------------------------------
   ! MANAGE time-integrator
@@ -85,8 +55,7 @@ subroutine gyro_fulladvance
   end select
   !------------------------------------------------------
 
-  call proc_time(CPU_diag_in)
-  CPU_ts = CPU_ts + (CPU_diag_in - CPU_C_out)
+  call gyro_timer_in('Diagnos.-allstep')
 
   call gyro_timestep_error
 
@@ -130,9 +99,6 @@ subroutine gyro_fulladvance
   alltime_index = alltime_index+1
   !------------------------------------------------------
 
-  call proc_time(CPU_diag_mid)
-  CPU_diag_a = CPU_diag_a + (CPU_diag_mid - CPU_diag_in)
-
   !------------------------------------------------------
   ! MANAGE time:
   !
@@ -151,7 +117,11 @@ subroutine gyro_fulladvance
      endif
   endif
 
+  call gyro_timer_out('Diagnos.-allstep')
+  call gyro_timer_in('Diagnos.-datastep')
+
   if (modulo(step,time_skip) == 0) then
+
 
      ! Counter for number of data output events.
 
@@ -177,11 +147,15 @@ subroutine gyro_fulladvance
      ! Main data I/O handler
 
      io_control = 2*output_flag
-     if (io_method == 1) then  
-        call gyro_write_timedata
-     else
-        call gyro_write_timedata_hdf5
-     endif
+!     if (io_method == 1) then  
+!        call gyro_write_timedata
+!     else
+!        call gyro_write_timedata_hdf5
+!     endif
+
+      if (io_method > 0) call gyro_write_timedata
+      if (io_method > 1) call gyro_write_timedata_hdf5
+    
 
      !--------------------------------------------------
      ! Update diffusivity and flux time-record for TGYRO 
@@ -201,26 +175,22 @@ subroutine gyro_fulladvance
 
      endif
 
+
   endif ! modulo(step,time_skip) test
+
+  call gyro_timer_out('Diagnos.-datastep')
   !-------------------------------------------------------------------
 
   !----------------------------------------------------
   ! Convergence check for single-n simulation:
-  ! freq_err calculated in write_freq
+  ! freq_err calculated in gyro_write_freq
   !  
   if (freq_err < freq_tol) call gyro_set_exit_status('converged',2)
   !----------------------------------------------------
-
-  !--------------------------------------
-  ! ** proc_time call for CPU_diag_outp in 
-  ! previous call to gyro_write_master:
-  !--------------------------------------
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print '(t2,2(a,i5,3x))','-> step =',step,'data_step =',data_step
      print *,'**[gyro_fulladvance done]'
   endif
-  call proc_time(CPU_diag_out)
-  CPU_diag_b = CPU_diag_b + (CPU_diag_out - CPU_diag_mid)
 
 end subroutine gyro_fulladvance

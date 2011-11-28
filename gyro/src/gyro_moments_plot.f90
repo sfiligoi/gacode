@@ -35,13 +35,15 @@ subroutine gyro_moments_plot
   complex, dimension(n_theta_plot,n_x,3) :: mom_tmp
   !---------------------------------------------------
 
-
   if (alltime_index == 0) then
      moments_plot(:,:,:,:) = (0.0,0.0)
   endif
   moments_zero_plot(:,:,:) = 0.0
 
+
   do is=1,n_kinetic
+
+     vel_sum_loc = (0.0,0.0)
 
      ! First compute gyro_h = <h+z*alpha*<U>>
      !
@@ -62,82 +64,69 @@ subroutine gyro_moments_plot
         ck = class(k)
 
         cap_h(:,:) = (0.0,0.0)
-        do i=1,n_x
-           cap_h(:,i) = h(:,i,p_nek_loc,is)+&
-                z(is)*alpha_s(is,i)*gyro_u(:,i,p_nek_loc,is)
-        enddo
 
-        do m=1,n_stack
-
-           m0 = m_phys(ck,m)
-
-           if (is <= n_gk) then
-              do i=1,n_x
-                 do i_diff=-m_gyro,m_gyro-i_gyro
-
-                    ip = i+i_diff
-
-                    gyro_h(m,i,p_nek_loc,1) = gyro_h(m,i,p_nek_loc,1)+ &
-                         w_gyro(m0,i_diff,i,p_nek_loc,is)*cap_h(m,i_loop(ip))
-
-                 enddo ! i_diff
-              enddo ! i
-           else
-              do i=1,n_x
-                 gyro_h(m,i,p_nek_loc,1) = cap_h(m,i)
-              enddo ! i
-           endif
-
-        enddo ! m
-
-     enddo ! p_nek
-
-     do i=1,n_x
-        gyro_h(:,i,:,1) = gyro_h(:,i,:,1) &
-             -z(is)*alpha_s(is,i)*field_tau(:,i,:,1)
-     enddo
-
-     !----------------------------------------------------
-     ! Now, compute blending projections:
-     !
-     ! vel_sum(j,i) -> FV[ (F*_j) gyro_h ]
-     !
-     vel_sum_loc = (0.0,0.0)
-     !
-     p_nek_loc = 0
-
-     do p_nek=1+i_proc_1,n_nek_1,n_proc_1
-
-        p_nek_loc = p_nek_loc+1
-
-        ie = nek_e(p_nek)  
-        k  = nek_k(p_nek)   
-
-        ck = class(k)
-
+!$omp parallel default(shared) private(m,m0,i_diff,j)
+!$omp do
         do i=1,n_x
            do m=1,n_stack
-
-              m0 = m_phys(ck,m)
-
-              ! 1: density moment
-              vel_sum_loc(:,i,1) = vel_sum_loc(:,i,1)+&
-                   gyro_h(m,i,p_nek_loc,1)*cs_blend(:,m0,i,p_nek_loc)
-
-              ! 2: energy moment
-              vel_sum_loc(:,i,2) = vel_sum_loc(:,i,2)+&
-                   energy(ie,is)*tem_s(is,i)*&
-                   gyro_h(m,i,p_nek_loc,1)*cs_blend(:,m0,i,p_nek_loc)
-
-              ! 3: v_parallel moment
-              vel_sum_loc(:,i,3) = vel_sum_loc(:,i,3)+&
-                   v_para(m,i,p_nek_loc,is)*&
-                   gyro_h(m,i,p_nek_loc,1)*cs_blend(:,m0,i,p_nek_loc)
-
+              cap_h(m,i) = h(m,i,p_nek_loc,is)+&
+                   z(is)*alpha_s(is,i)*gyro_u(m,i,p_nek_loc,is)
            enddo ! m
         enddo ! i
+!$omp end do nowait
 
-     enddo
+        if (is <= n_gk) then
+!$omp do
+           do i=1,n_x
+              do m=1,n_stack
+                 m0 = m_phys(ck,m)
+                 do i_diff=-m_gyro,m_gyro-i_gyro
+                    gyro_h(m,i,p_nek_loc,1) = gyro_h(m,i,p_nek_loc,1)+ &
+                         w_gyro(m0,i_diff,i,p_nek_loc,is)*cap_h(m,i_loop(i+i_diff))
+                 enddo ! i_diff
+              enddo ! m
+           enddo ! i
+!$omp end do nowait
+        else
+!$omp do
+           do i=1,n_x
+              do m=1,n_stack
+                 gyro_h(m,i,p_nek_loc,1) = cap_h(m,i)-&
+                      z(is)*alpha_s(is,i)*field_tau(m,i,p_nek_loc,1)
+              enddo ! m
+           enddo ! i
+!$omp end do nowait
+        endif
+
+        !----------------------------------------------------
+        ! Now, compute blending projections:
+        !
+        ! vel_sum(j,i) -> FV[ (F*_j) gyro_h ]
+        !
+!$omp do
+        do i=1,n_x
+           do m=1,n_stack
+              m0 = m_phys(ck,m)
+              do j=1,n_blend
+                 ! 1: density moment
+                 vel_sum_loc(j,i,1) = vel_sum_loc(j,i,1)+&
+                      gyro_h(m,i,p_nek_loc,1)*cs_blend(j,m0,i,p_nek_loc)
+
+                 ! 2: energy moment
+                 vel_sum_loc(j,i,2) = vel_sum_loc(j,i,2)+&
+                      energy(ie,is)*tem_s(is,i)*&
+                      gyro_h(m,i,p_nek_loc,1)*cs_blend(j,m0,i,p_nek_loc)
+
+                 ! 3: v_parallel moment
+                 vel_sum_loc(j,i,3) = vel_sum_loc(j,i,3)+&
+                      v_para(m,i,p_nek_loc,is)*&
+                      gyro_h(m,i,p_nek_loc,1)*cs_blend(j,m0,i,p_nek_loc)
+              enddo ! j
+           enddo ! m
+        enddo ! i
+!$omp end do
+!$omp end parallel
+     enddo ! p_nek
      !--------------------------------------------------------------
 
      call MPI_ALLREDUCE(vel_sum_loc,&

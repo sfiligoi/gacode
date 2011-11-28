@@ -97,17 +97,14 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, omega_deriv
      if(neo_z_2_in /= -1) then
         neo_dens_2_in = EXPRO_ni(2,i) / dens_norm
         neo_dlnndr_2_in = EXPRO_dlnnidr(2,i) * EXPRO_rmin(EXPRO_n_exp)
-        neo_temp_2_in = EXPRO_ti(1,i) / temp_norm ! assume equal ion temps
-        neo_dlntdr_2_in = EXPRO_dlntidr(1,i) * EXPRO_rmin(EXPRO_n_exp)
+        neo_temp_2_in = EXPRO_ti(2,i) / temp_norm 
+        neo_dlntdr_2_in = EXPRO_dlntidr(2,i) * EXPRO_rmin(EXPRO_n_exp)
      else
         neo_dens_2_in = EXPRO_ne(i) / dens_norm
         neo_temp_2_in = EXPRO_te(i) / temp_norm
         neo_dlnndr_2_in = EXPRO_dlnnedr(i) * EXPRO_rmin(EXPRO_n_exp)
         neo_dlntdr_2_in = EXPRO_dlntedr(i) * EXPRO_rmin(EXPRO_n_exp)
      endif
-     neo_nu_2_in = cc * loglam * neo_dens_2_in * dens_norm * neo_z_2_in**4 &
-          / (sqrt(neo_mass_2_in) * (neo_temp_2_in * temp_norm)**1.5) &
-          / vth_norm
   endif
   
   ! Species 3
@@ -116,17 +113,14 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, omega_deriv
      if(neo_z_3_in /= -1) then
         neo_dens_3_in = EXPRO_ni(3,i) / dens_norm
         neo_dlnndr_3_in = EXPRO_dlnnidr(3,i) * EXPRO_rmin(EXPRO_n_exp)
-        neo_temp_3_in = EXPRO_ti(1,i) / temp_norm ! assume equal ion temps
-        neo_dlntdr_3_in = EXPRO_dlntidr(1,i) * EXPRO_rmin(EXPRO_n_exp)
+        neo_temp_3_in = EXPRO_ti(3,i) / temp_norm 
+        neo_dlntdr_3_in = EXPRO_dlntidr(3,i) * EXPRO_rmin(EXPRO_n_exp)
      else
         neo_dens_3_in = EXPRO_ne(i) / dens_norm
         neo_temp_3_in = EXPRO_te(i) / temp_norm
         neo_dlnndr_3_in = EXPRO_dlnnedr(i) * EXPRO_rmin(EXPRO_n_exp)
         neo_dlntdr_3_in = EXPRO_dlntedr(i) * EXPRO_rmin(EXPRO_n_exp)
      endif
-     neo_nu_3_in = cc * loglam * neo_dens_3_in * dens_norm * neo_z_3_in**4 &
-          / (sqrt(neo_mass_3_in) * (neo_temp_3_in * temp_norm)**1.5) &
-          / vth_norm
   endif
   
   ! Species 4
@@ -135,17 +129,46 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, omega_deriv
      if(neo_z_4_in /= -1) then
         neo_dens_4_in = EXPRO_ni(4,i) / dens_norm
         neo_dlnndr_4_in = EXPRO_dlnnidr(4,i) * EXPRO_rmin(EXPRO_n_exp)
-        neo_temp_4_in = EXPRO_ti(1,i) / temp_norm  ! assume equal ion temps
-        neo_dlntdr_4_in = EXPRO_dlntidr(1,i) * EXPRO_rmin(EXPRO_n_exp)
+        neo_temp_4_in = EXPRO_ti(4,i) / temp_norm  
+        neo_dlntdr_4_in = EXPRO_dlntidr(4,i) * EXPRO_rmin(EXPRO_n_exp)
      else
         neo_dens_4_in = EXPRO_ne(i) / dens_norm
         neo_temp_4_in = EXPRO_te(i) / temp_norm
         neo_dlnndr_4_in = EXPRO_dlnnedr(i) * EXPRO_rmin(EXPRO_n_exp)
         neo_dlntdr_4_in = EXPRO_dlntedr(i) * EXPRO_rmin(EXPRO_n_exp)
      endif
-     neo_nu_4_in = cc * loglam * neo_dens_4_in * dens_norm * neo_z_4_in**4 &
-          / (sqrt(neo_mass_4_in) * (neo_temp_4_in * temp_norm)**1.5) &
-          / vth_norm
+  endif
+
+  ! Species 5
+  
+  if(neo_n_species_in >= 5) then
+     if(neo_z_5_in /= -1) then
+        neo_dens_5_in = EXPRO_ni(5,i) / dens_norm
+        neo_dlnndr_5_in = EXPRO_dlnnidr(5,i) * EXPRO_rmin(EXPRO_n_exp)
+        neo_temp_5_in = EXPRO_ti(5,i) / temp_norm  
+        neo_dlntdr_5_in = EXPRO_dlntidr(5,i) * EXPRO_rmin(EXPRO_n_exp)
+     else
+        neo_dens_5_in = EXPRO_ne(i) / dens_norm
+        neo_temp_5_in = EXPRO_te(i) / temp_norm
+        neo_dlnndr_5_in = EXPRO_dlnnedr(i) * EXPRO_rmin(EXPRO_n_exp)
+        neo_dlntdr_5_in = EXPRO_dlntedr(i) * EXPRO_rmin(EXPRO_n_exp)
+     endif
+  endif
+
+   ! Species 6
+  
+  if(neo_n_species_in >= 6) then
+     if(neo_z_6_in /= -1) then
+        neo_dens_6_in = EXPRO_ni(6,i) / dens_norm
+        neo_dlnndr_6_in = EXPRO_dlnnidr(6,i) * EXPRO_rmin(EXPRO_n_exp)
+        neo_temp_6_in = EXPRO_ti(6,i) / temp_norm  
+        neo_dlntdr_6_in = EXPRO_dlntidr(6,i) * EXPRO_rmin(EXPRO_n_exp)
+     else
+        neo_dens_6_in = EXPRO_ne(i) / dens_norm
+        neo_temp_6_in = EXPRO_te(i) / temp_norm
+        neo_dlnndr_6_in = EXPRO_dlnnedr(i) * EXPRO_rmin(EXPRO_n_exp)
+        neo_dlntdr_6_in = EXPRO_dlntedr(i) * EXPRO_rmin(EXPRO_n_exp)
+     endif
   endif
 
   ! Run NEO

@@ -173,6 +173,7 @@
       REAL :: U0=0.0
       REAL :: kx0=0.0
       REAL :: sign_kx0=1.0
+      REAL :: midplane_shear=1.0
 ! output
       COMPLEX,DIMENSION(maxmodes,3,nb) :: field_weight_out=0.0
       COMPLEX,DIMENSION(maxmodes,3,max_plot) :: plot_field_out=0.0
@@ -190,7 +191,7 @@
       REAL,DIMENSION(maxmodes) :: gamma_out=0.0,freq_out=0.0
       REAL,DIMENSION(maxmodes) :: wd_bar_out=0.0,phi_QL_out=0.0
       REAL,DIMENSION(maxmodes) :: phi_bar_out=0.0,v_bar_out=0.0
-      REAL,DIMENSION(maxmodes) :: ne_te_phase_out=0.0
+      REAL,DIMENSION(maxmodes) :: b0_bar_out=0.0,ne_te_phase_out=0.0
       REAL,DIMENSION(nsm) :: n_bar_sum_out=0.0,t_bar_sum_out=0.0
       REAL,DIMENSION(nsm) :: q_low_out=0.0
       REAL :: phi_bar_sum_out=0.0

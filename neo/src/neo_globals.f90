@@ -51,7 +51,8 @@ module neo_globals
   real, dimension(6) :: temp_in
   real, dimension(6) :: dlnndr_in
   real, dimension(6) :: dlntdr_in
-  real, dimension(6) :: nu_in
+  !
+  real :: nu_1_in
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -74,11 +75,11 @@ module neo_globals
   integer :: collision_model 
   integer :: profile_model
   integer :: profile_erad0_model
-  integer :: profile_temprescale_model
   integer :: profile_equilibrium_model
   integer :: rotation_model
   integer :: adiabatic_ele_model
   integer :: spitzer_model
+  real    :: epar0_spitzer
   real    :: sign_q
   real    :: sign_bunit
   !---------------------------------------------------------------

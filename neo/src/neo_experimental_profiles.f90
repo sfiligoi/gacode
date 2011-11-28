@@ -146,20 +146,9 @@ subroutine neo_experimental_profiles
   dlnndr_p(n_species_exp,:) = EXPRO_dlnnedr(:) * a_meters
 
   do i_ion=1,n_species_exp-1
-     ! ion temps must be equal 
-     if(profile_temprescale_model == 1) then
-        if(silent_flag == 0 .and. i_proc == 0) then
-           open(unit=io_neoout,file=trim(path)//runfile_neoout,&
-                status='old',position='append')
-           write(io_neoout,*) 'Re-scaling ion temperatures for equal temps Ti=Te'
-           close(io_neoout)
-        end if
-        tem_exp(i_ion,:)  = EXPRO_te(:)
-        dlntdr_p(i_ion,:) = EXPRO_dlntedr(:) * a_meters
-     else
-        tem_exp(i_ion,:)  = EXPRO_ti(1,:)
-        dlntdr_p(i_ion,:) = EXPRO_dlntidr(1,:) * a_meters
-     endif
+     ! ion temps should be equal, but not enforced 
+     tem_exp(i_ion,:)  = EXPRO_ti(i_ion,:)
+     dlntdr_p(i_ion,:) = EXPRO_dlntidr(i_ion,:) * a_meters
      ! first species density is re-set by quasi-neutrality
      if(i_ion == 1) then
         den_exp(i_ion,:)  = EXPRO_ni_new(:)
@@ -169,7 +158,7 @@ subroutine neo_experimental_profiles
         dlnndr_p(i_ion,:) = EXPRO_dlnnidr(i_ion,:) * a_meters
      endif
   enddo
-
+  
   ! Sanity check for temperatures
   do i=1,n_species_exp
      if (minval(den_exp(i,:)) <= 0.0) then

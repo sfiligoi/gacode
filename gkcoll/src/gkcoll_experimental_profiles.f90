@@ -31,9 +31,9 @@ subroutine gkcoll_experimental_profiles
   EXPRO_ctrl_density_method = 2  ! quasi-neutrality density flag
   EXPRO_ctrl_signb = sign_bunit
   EXPRO_ctrl_signq = sign_q
-  EXPRO_ctrl_rotation_method = 1 ! Standard method (Waltz=2 is not consistent with GKCOLL).
+  EXPRO_ctrl_rotation_method = 1 ! Standard method 
 
-  if (profile_equilibrium_model == 2) then
+  if (equilibrium_model == 3) then
      EXPRO_ctrl_numeq_flag = 1
   else
      EXPRO_ctrl_numeq_flag = 0
@@ -47,7 +47,7 @@ subroutine gkcoll_experimental_profiles
   if (adiabatic_ele_model == 1) then
      n_species_exp = n_species + 1
   else
-     if (Z(n_species) /= -1) then
+     if (z(n_species) /= -1) then
         call gkcoll_error('ERROR: (GKCOLL) For exp. profiles, electron species must be n_species')
         return
      endif
@@ -58,11 +58,11 @@ subroutine gkcoll_experimental_profiles
   EXPRO_ctrl_z(:) = 0.0
   if(adiabatic_ele_model == 1) then
      do is=1,n_species
-        EXPRO_ctrl_z(is) = 1.0 * Z(is)
+        EXPRO_ctrl_z(is) = 1.0 * z(is)
      enddo
   else
      do is=1,n_species-1
-        EXPRO_ctrl_z(is) = 1.0 * Z(is)
+        EXPRO_ctrl_z(is) = 1.0 * z(is)
      enddo
   endif
 
@@ -83,14 +83,14 @@ subroutine gkcoll_experimental_profiles
   rmaj_exp(:)         = EXPRO_rmaj(:)
   q_exp(:)            = EXPRO_q(:)
   kappa_exp(:)        = EXPRO_kappa(:)
-  delta_exp(:)        = EXPRO_delta(:)  * profile_delta_scale
-  zeta_exp(:)         = EXPRO_zeta(:)   * profile_zeta_scale
-  zmag_exp(:)         = EXPRO_zmag(:)   * profile_zmag_scale
+  delta_exp(:)        = EXPRO_delta(:)  
+  zeta_exp(:)         = EXPRO_zeta(:)   
+  zmag_exp(:)         = EXPRO_zmag(:)   
   shift_p(:)          = EXPRO_drmaj(:)
   s_kappa_p(:)        = EXPRO_skappa(:)
-  s_delta_p(:)        = EXPRO_sdelta(:) * profile_delta_scale
-  s_zeta_p(:)         = EXPRO_szeta(:)  * profile_zeta_scale
-  s_zmag_p(:)         = EXPRO_dzmag(:)  * profile_zmag_scale
+  s_delta_p(:)        = EXPRO_sdelta(:) 
+  s_zeta_p(:)         = EXPRO_szeta(:)  
+  s_zmag_p(:)         = EXPRO_dzmag(:) 
   shat_p(:)           = EXPRO_s(:)
   
   r_p(:)    = rmin_exp(:)/rmin_exp(n_grid_exp)
@@ -98,31 +98,9 @@ subroutine gkcoll_experimental_profiles
   zmag_p(:) = zmag_exp(:)/rmin_exp(n_grid_exp)
 
   ! Minor radius, a, in meters:
-  a_meters = rmin_exp(n_grid_exp)
+  a_norm = rmin_exp(n_grid_exp)
 
-  if(silent_flag == 0 .and. i_proc == 0 .and. &
-       abs(profile_delta_scale-1.0) > epsilon(0.) ) then
-     open(unit=io_gkcollout,file=trim(path)//runfile_gkcollout,&
-          status='old',position='append')
-     write(io_gkcollout,*) 'Delta and S_Delta are re-scaled'
-     close(io_gkcollout)
-  end if
-  if(silent_flag == 0 .and. i_proc == 0 .and. &
-       abs(profile_zeta_scale-1.0) > epsilon(0.)) then
-     open(unit=io_gkcollout,file=trim(path)//runfile_gkcollout,&
-          status='old',position='append')
-     write(io_gkcollout,*) 'Zeta and S_Zeta are re-scaled'
-     close(io_gkcollout)
-  end if
-  if(silent_flag == 0 .and. i_proc == 0 .and. &
-       abs(profile_zmag_scale-1.0) > epsilon(0.)) then
-     open(unit=io_gkcollout,file=trim(path)//runfile_gkcollout,&
-          status='old',position='append')
-     write(io_gkcollout,*) 'Zmag and S_Zmag are re-scaled'
-     close(io_gkcollout)
-  end if
-
-  if (profile_equilibrium_model == 2) then
+  if (equilibrium_model == 3) then
      if(EXPRO_nfourier <= 0) then
         call gkcoll_error('ERROR: (GKCOLL) Geometry coefficients missing')
         return
@@ -132,7 +110,7 @@ subroutine gkcoll_experimental_profiles
      deallocate(geo_yin)
      geo_ny = EXPRO_nfourier
      allocate(geo_yin_exp(8,0:geo_ny,n_grid_exp))
-     allocate(geo_yin(8,0:geo_ny,n_radial))
+     allocate(geo_yin(8,0:geo_ny))
      geo_yin_exp(1:4,:,:) = EXPRO_geo(:,:,:)/rmin_exp(n_grid_exp)
      geo_yin_exp(5:8,:,:) = EXPRO_dgeo(:,:,:)
   endif
@@ -141,36 +119,18 @@ subroutine gkcoll_experimental_profiles
   ne_ade_exp(:)     = EXPRO_ne(:)
 
   tem_exp(n_species_exp,:)  = EXPRO_te(:)
-  dlntdr_p(n_species_exp,:) = EXPRO_dlntedr(:) * a_meters
+  dlntdr_p(n_species_exp,:) = EXPRO_dlntedr(:) * a_norm
   den_exp(n_species_exp,:)  = EXPRO_ne(:)
-  dlnndr_p(n_species_exp,:) = EXPRO_dlnnedr(:) * a_meters
+  dlnndr_p(n_species_exp,:) = EXPRO_dlnnedr(:) * a_norm
 
   do i_ion=1,n_species_exp-1
-     ! ion temps must be equal 
-     if(profile_temprescale_model == 1) then
-        if(silent_flag == 0 .and. i_proc == 0) then
-           open(unit=io_gkcollout,file=trim(path)//runfile_gkcollout,&
-                status='old',position='append')
-           write(io_gkcollout,*) 'Re-scaling ion temperatures for equal temps Ti=Te'
-           close(io_gkcollout)
-        end if
-        tem_exp(i_ion,:)  = EXPRO_te(:)
-        dlntdr_p(i_ion,:) = EXPRO_dlntedr(:) * a_meters
-     else
-        tem_exp(i_ion,:)  = EXPRO_ti(1,:)
-        dlntdr_p(i_ion,:) = EXPRO_dlntidr(1,:) * a_meters
-     endif
-     ! first species density is re-set by quasi-neutrality
-     if(i_ion == 1) then
-        den_exp(i_ion,:)  = EXPRO_ni_new(:)
-        dlnndr_p(i_ion,:) = EXPRO_dlnnidr_new(:) * a_meters
-     else
-        den_exp(i_ion,:)  = EXPRO_ni(i_ion,:)
-        dlnndr_p(i_ion,:) = EXPRO_dlnnidr(i_ion,:) * a_meters
-     endif
+     tem_exp(i_ion,:)  = EXPRO_ti(i_ion,:)
+     dlntdr_p(i_ion,:) = EXPRO_dlntidr(i_ion,:) * a_norm
+     den_exp(i_ion,:)  = EXPRO_ni(i_ion,:)
+     dlnndr_p(i_ion,:) = EXPRO_dlnnidr(i_ion,:) * a_norm
   enddo
 
-  ! Sanity check for temperatures
+  ! Sanity check for density
   do i=1,n_species_exp
      if (minval(den_exp(i,:)) <= 0.0) then
         call gkcoll_error('ERROR: (GKCOLL) Nonpositive in exp. density profile')
