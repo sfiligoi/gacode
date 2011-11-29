@@ -383,12 +383,17 @@ then
   exit 0 
 fi
 
-if [ -f $FILE ] &&  [ "${#FILE}" -gt 0 ]
+if [ "$FILE" == "null" ]
 then
-   echo "INFO: (profiles_gen) $FILE found"
+   echo "INFO: (profiles_gen) Parsing gfile only"
 else
-   echo "ERROR: (profiles_gen) $FILE not found"
-   exit 0
+   if [ -f $FILE ] && [ "${#FILE}" -gt 0 ]
+   then
+      echo "INFO: (profiles_gen) $FILE found"
+   else
+      echo "ERROR: (profiles_gen) $FILE not found"
+      exit 0 
+   fi
 fi
 #=============================================================
 
