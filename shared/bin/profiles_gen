@@ -17,7 +17,10 @@
 #=============================================================
 # EXECUTABLE AND CONFIG FILE LOCATIONS:
 #
+# GYRO directory
 GYRO_DIR=${GACODE_ROOT}/gyro
+# VGEN directory
+VGEN_DIR=${GACODE_ROOT}/neo/tools/input/vgen
 # - profiles_gen converter executable
 EXEC=${GACODE_ROOT}/shared/profiles_gen/src/prgen
 # - GATO executable
@@ -219,13 +222,13 @@ then
    echo "    NEO will generate Er and all velocities:"
    echo 
    echo "    profiles_gen -i iterdb -g gfile"
-   echo "    profiles_gen -i input.profiles -vgen_e 2 -vgen_v 1 -vgen_in DC -vgen_x 2"
+   echo "    profiles_gen -vgen -i input.profiles -vgen_e 2 -vgen_v 1 -vgen_in DC -vgen_x 2"
    echo
    echo "(2) Typical usage for DIII-D plasmas with CER file available (2 steps)"
    echo "    NEO will take Er from CER file and generate all velocities:"
    echo 
    echo "    profiles_gen -i iterdb -g gfile -cer cerfile"
-   echo "    profiles_gen -i input.profiles -vgen_e 4 -vgen_v 2 -vgen_in DC -vgen_x 2"
+   echo "    profiles_gen -vgen -i input.profiles -vgen_e 4 -vgen_v 2 -vgen_in DC -vgen_x 2"
    echo 
    echo "(3) Manipulation example"
    echo 
@@ -417,6 +420,15 @@ fi
 #=============================================================
 
 #=============================================================
+# Manage execution of locpargen
+
+if [ $RADIUS -neq 0 ]
+then
+  echo "Execute locpargen."
+fi   
+#=============================================================
+
+#=============================================================
 # Manage execution of vgen
 #
 NEO_DIR=$GACODE_ROOT/neo
@@ -432,9 +444,9 @@ then
 
    # Check for input.vgen file
 
-   if [ -f $NEO_DIR/tools/input/vgen/input.vgen.$VGEN_IN ]
+   if [ -f $VGEN_DIR/input.vgen.$VGEN_IN ]
    then
-     cp $NEO_DIR/tools/input/vgen/input.vgen.$VGEN_IN input.neo
+     cp $VGEN_DIR/input.vgen.$VGEN_IN input.neo
    else 
       if [ -f ../input.vgen ]
       then
@@ -456,7 +468,7 @@ then
    echo "$VGEN_E"   > vgen.dat
    echo "$VGEN_V"  >> vgen.dat
    echo "$VGEN_X" >>  vgen.dat
-   $NEO_DIR/tools/vgen/vgen
+   $VGEN_DIR/vgen
 
    if [ -f "input.profiles.new" ]
        then
@@ -512,7 +524,7 @@ then
    echo "null" >> $CONFIG
 else
    echo $CER_FILE >> $CONFIG
-   echo "INFO: Will merge data from $CER_FILE"
+   echo "INFO:  (profiles_gen) Will merge data from $CER_FILE"
 fi
 
 # EFIT G-file
@@ -579,8 +591,8 @@ then
       echo "DONE: (profiles_gen) Successfully wrote: input.profiles." 
    fi
 else
-   echo "ERROR: Something went wrong in creation of input.profiles :("
-   echo "** Try running with -V option."
+   echo "ERROR: (profiles_gen) Something went wrong in creation of input.profiles :("
+   echo "       ** Try running with -V option **"
 fi
 
 #==============================================================
