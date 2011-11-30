@@ -58,7 +58,8 @@ then
    echo " "
    echo "             -V"
    echo "             Verbose (for debugging; use this if you get an error)."
-   echo " "
+   echo 
+   echo
    echo "ITERDB Options"
    echo " "
    echo "             -g <gfile>"
@@ -73,7 +74,7 @@ then
    echo "             -ver <version>"
    echo "             Version number (0=basic, 1=extra powers)."
    echo " "
-   echo "Plasma State Options"
+   echo "PLASMA STATE Options"
    echo
    echo "             -g <gfile>"
    echo "             Merge EFIT gfile for high-precision geometry data."
@@ -84,6 +85,7 @@ then
    echo "             -r <reorder sequence>"
    echo "             Reorder ions."
    echo
+   echo
    echo "ASTRA Options"
    echo
    echo "             -m <map file>"
@@ -91,10 +93,13 @@ then
    echo "             NOTE: uses 'astra_map_gyro' in current directory by default."
    echo
    echo "             -n <note text>"
-   echo "              Include <note text> in the input.profiles header."
+   echo "             Include <note text> in the input.profiles header."
    echo
-   echo " "
+   echo 
    echo "VELOCITY GENERATION MODE"
+   echo
+   echo "             -vgen"
+   echo "             Toggle vgen mode."
    echo
    echo "             -vgen_in <ion string> " 
    echo "             Choices: DC, HDC"
@@ -111,8 +116,8 @@ then
    echo "             -vgen_x <ion index>" 
    echo "             Index of ion species to match NEO and given velocities."
    echo
-   echo " "
-   echo "TRANSP Options"
+   echo 
+   echo "TRANSP MODE"
    echo
    echo "             -transp"
    echo "             Generate data from TRANSP servers via prompt."
@@ -137,60 +142,67 @@ then
    echo
    echo "             -trhelp"
    echo "             Detailed help message on transp2gyro."
-   echo " "
-   echo " input.profiles MANIPULATION MODE"
-   echo " "
-   echo "              -d [manipulate_options]"
-   echo " "
-   echo "              -d -comp [plasma_composition_options]"
-   echo " "
-   echo "              -modhelp"
-   echo "              Detailed help message on the input.profiles manipulation mode"
-   echo " "
-   echo "      manipulate_options:"
-   echo " "
-   echo "              -inf1 <input file 1>"
-   echo "              Default: input.profiles"
-   echo " "
-   echo "              -inf2 <input file 2>"
-   echo "              Default: input.profiles"
-   echo " "
-   echo "              -outf <output file>"
-   echo "              Default: input.profiles_mod"
-   echo " "
-   echo "              -scal <scaling factor>"
-   echo "              Default: 1.0 "
-   echo " "
-   echo "              -pin <input profile>"
-   echo "              Name of profile, as it appears in an input.profiles file"
-   echo "              Default: ni_1"
-   echo " "
-   echo "              -pout <output profile>"
-   echo "              Name of profile, as it appears in an input.profiles file"
-   echo "              Default: ni_1"
-   echo " "
-   echo "       plasma_composition_options:"
-   echo " "
-   echo "              -inf1 <input file 2>"
-   echo "              Default: input.profiles"
-   echo " "
-   echo "              -outf <output file>"
-   echo "              Default: input.profiles_mod"
-   echo " "
-   echo "              -Z1 <ion1 charge>"
-   echo "              Default: 1 (Hydrogen isotope)"
-   echo "              -Z2 <ion2 charge>"
-   echo "              Default: 6 (Carbon)"
-   echo "              -Z3 <ion3 charge>"
-   echo "              Default: 2 (Helium)"
-   echo " "
-   echo "              -Zeff <effective ion charge>"
-   echo "              Default: 2.0"
-   echo " "
-   echo "              -n3n1 <ni_3/ni_1>"
-   echo "              Default: 0.0 (No third ion species)"
+   echo 
    echo
+   echo "PROFILE MANIPULATION MODE"
+   echo 
+   echo "             -d [manipulate_options]"
+   echo 
+   echo "             -d -comp [plasma_composition_options]"
+   echo 
+   echo "             -modhelp"
+   echo "             Detailed help message on the input.profiles manipulation mode"
+   echo 
+   echo "  manipulate options:"
+   echo 
+   echo "             -inf1 <input file 1>"
+   echo "             Default: input.profiles"
+   echo 
+   echo "             -inf2 <input file 2>"
+   echo "             Default: input.profiles"
+   echo 
+   echo "             -outf <output file>"
+   echo "             Default: input.profiles_mod"
+   echo 
+   echo "             -scal <scaling factor>"
+   echo "             Default: 1.0 "
+   echo 
+   echo "             -pin <input profile>"
+   echo "             Name of profile, as it appears in an input.profiles file"
+   echo "             Default: ni_1"
+   echo 
+   echo "             -pout <output profile>"
+   echo "             Name of profile, as it appears in an input.profiles file"
+   echo "             Default: ni_1"
+   echo 
+   echo " compose options:"
+   echo 
+   echo "             -inf1 <input file 2>"
+   echo "             Default: input.profiles"
+   echo 
+   echo "             -outf <output file>"
+   echo "             Default: input.profiles_mod"
+   echo 
+   echo "             -Z1 <ion1 charge>"
+   echo "             Default: 1 (Hydrogen isotope)"
+   echo "             -Z2 <ion2 charge>"
+   echo "             Default: 6 (Carbon)"
+   echo "             -Z3 <ion3 charge>"
+   echo "             Default: 2 (Helium)"
+   echo 
+   echo "             -Zeff <effective ion charge>"
+   echo "             Default: 2.0"
+   echo 
+   echo "             -n3n1 <ni_3/ni_1>"
+   echo "             Default: 0.0 (No third ion species)"
+   echo
+   echo 
+   echo "LOCAL PARAMETER MODE"
    echo " "
+   echo "             -radius <r>"
+   echo "             Reference radius, r/a."
+   echo
+   echo
    echo "EXAMPLES:"
    echo " "
    echo "    profiles_gen -i myfile" 
@@ -203,33 +215,36 @@ then
    echo "    profiles_gen -i input.profiles -vgen_e 2 -vgen_v 1 -vgen_in DC -vgen_x 2"
    echo "    profiles_gen -i input.profiles -vgen_e 2 -vgen_v 1 -vgen_in HDC -vgen_x 3"
    echo 
-   echo " (1) Typical usage for DIII-D plasmas with iterdbfile only (2 steps)"
-   echo "     NEO will generate Er and all velocities:"
-   echo "  "
+   echo "(1) Typical usage for DIII-D plasmas with iterdbfile only (2 steps)"
+   echo "    NEO will generate Er and all velocities:"
+   echo 
    echo "    profiles_gen -i iterdb -g gfile"
    echo "    profiles_gen -i input.profiles -vgen_e 2 -vgen_v 1 -vgen_in DC -vgen_x 2"
    echo
-   echo " (2) Typical usage for DIII-D plasmas with CER file available (2 steps)"
-   echo "     NEO will take Er from CER file and generate all velocities:"
-   echo "  "
+   echo "(2) Typical usage for DIII-D plasmas with CER file available (2 steps)"
+   echo "    NEO will take Er from CER file and generate all velocities:"
+   echo 
    echo "    profiles_gen -i iterdb -g gfile -cer cerfile"
    echo "    profiles_gen -i input.profiles -vgen_e 4 -vgen_v 2 -vgen_in DC -vgen_x 2"
+   echo 
+   echo "(3) Manipulation example"
+   echo 
+   echo "    profiles_gen -d -inf1 input.profiles.1 \ "
+   echo "                    -inf2 input.profiles.2 \ " 
+   echo "                    -scal 0.85 -pin Te -pout Ti_2"
+   echo 
+   echo "    RESULT: input.profiles_mod is generated, containing the same data as" 
+   echo "    input.profiles.1 except that the Ti_2 profile is equal to 0.85*Te," 
+   echo "    where Te is from input.profiles.2"
    echo " "
-   echo " Examples on input.profiles manipulation:"
+   echo "(4) Composition example"
+   echo
+   echo "    profiles_gen -d -comp -Z2 8 -Zeff 2.2 -n3n1 0.1 -outf input.profiles.ox"
    echo " "
-   echo "    profiles_gen -d -inf1 somedir/input.profiles -inf2 anotherdir/input.profiles -scal 0.85 -pin Te -pout Ti_2"
-   echo " "
-   echo "     input.profiles_mod is generated, containing the same data as" 
-   echo "     'somedir/input.profiles' except that the Ti_2 profile is" 
-   echo "     equal to 0.85*Te, where Te is from 'anotherdir/input.profiles'."
-   echo " "
-   echo " profiles_gen -d -comp -Z2 8 -Zeff 2.2 -n3n1 0.1 -outf INPUT_ox"
-   echo " "
-   echo "     Based on the electron density profile ni_1, ni_2 and ni_3 are "
-   echo "     generated for a plasma with Zeff=2.2, Z1=1, Z2=8, Z3=4 and"
-   echo "     ni_3 / ni_1 = 0.1. The new data is written in INPUT_ox"
-   echo " "
-   echo " "
+   echo "    RESULT: input.profiles.ox is generated based on the electron density" 
+   echo "    profile ni_1, ni_2 and ni_3 are generated for a plasma with"
+   echo "    Zeff=2.2, Z1=1, Z2=8, Z3=4 and ni_3/ni_1 = 0.1."
+   echo 
 
    exit 1
 fi
@@ -253,6 +268,7 @@ VGEN_V=2
 VGEN_X=2
 VGEN_FLAG=0
 MODINP_FLAG=0
+RADIUS=0
 #=============================================================
 
 #=============================================================
@@ -281,7 +297,7 @@ while [ $# -gt 0 ] ; do
 
   -cer) shift ; CER_FLAG=1 ; CER_FILE="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-cer;$1" ;;
    
-  -g) shift ; G_FLAG=1 ; GFILE="$1" ;;
+  -g) shift ; G_FLAG=1 ; GFILE="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-g;$1" ;;
 
   -V) shift ; VERBOSE_FLAG=1 ; ITERDB_ARGS="${ITERDB_ARGS};-V";;
 
@@ -291,13 +307,15 @@ while [ $# -gt 0 ] ; do
 
   -ver) shift ; VERSION="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-ver;$1";;
 
-  -vgen_in) shift ; VGEN_IN=$1 ; ITERDB_ARGS="${ITERDB_ARGS};-vgen_in;$1";;
+  -vgen) VGEN_FLAG=1 ;;
 
-  -vgen_e) shift ; VGEN_E=$1  ; ITERDB_ARGS="${ITERDB_ARGS};-vgen_e;$1";;
+  -vgen_in) shift ; VGEN_IN=$1 ;;
 
-  -vgen_v) shift ; VGEN_V=$1  ; ITERDB_ARGS="${ITERDB_ARGS};-vgen_v;$1";;
+  -vgen_e) shift ; VGEN_E=$1 ;;
 
-  -vgen_x) shift ; VGEN_X=$1  ; ITERDB_ARGS="${ITERDB_ARGS};-vgen_x;$1";;
+  -vgen_v) shift ; VGEN_V=$1 ;;
+
+  -vgen_x) shift ; VGEN_X=$1 ;;
 
   -transp) TRANSP_FLAG=1 ;;
 
@@ -343,6 +361,8 @@ while [ $# -gt 0 ] ; do
 
   -modhelp) shift ; MODINP_ARGS="$MODINP_ARGS --modhelp";;
 
+  -radius) shift ; RADIUS=$1 ;;
+
   esac
   shift
 done
@@ -373,7 +393,6 @@ then
 fi
 #=============================================================
 
-
 #=============================================================
 # Trap error from no input data file (-i)
 #
@@ -402,7 +421,7 @@ fi
 #
 NEO_DIR=$GACODE_ROOT/neo
 
-if [ $FILE == "input.profiles" ]
+if [ $VGEN_FLAG -eq 1 ]
 then
 
    # Create vgen work directory
