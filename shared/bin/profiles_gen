@@ -45,49 +45,46 @@ n=$#
 if [ $n -eq 0 ]
 then
    echo "Usage:       profiles_gen [options]"
-   echo " "
+   echo 
    echo "Options (in any order) include: "
-   echo " "
+   echo 
    echo "             -i <raw_data_file>"
    echo "             Import data from <raw_data_file> with filename conventions:"
-   echo " "
-   echo "              *        : ITERDB text file (default)"
-   echo "              *.nc     : ITERDB NetCDF file"
-   echo "              *.cdf    : Plasma State NetCDF file"
-   echo "              *.astra  : ASTRA text file"
-   echo "              *.peq    : PEQDSK/ELITE text file"
-   echo " "
-   echo "              input.profiles : velocity generation mode"
-   echo " "
+   echo 
+   echo "              *              : ITERDB text file (default)"
+   echo "              *.nc           : ITERDB NetCDF file"
+   echo "              *.cdf          : Plasma State NetCDF file"
+   echo "              *.astra        : ASTRA text file"
+   echo "              *.peq          : PEQDSK/ELITE text file"
+   echo "              input.profiles : vgen or locpargen mode"
+   echo 
    echo "             -V"
    echo "             Verbose (for debugging; use this if you get an error)."
    echo 
-   echo
    echo "ITERDB Options"
-   echo " "
+   echo 
    echo "             -g <gfile>"
    echo "             Merge EFIT gfile for high-precision geometry data."
-   echo " "
+   echo 
    echo "             -nogq"
    echo "             Do not use q from GATO (by default, if gfile is specified q is from GATO)."
-   echo " "
+   echo 
    echo "             -cer <vpol>"
    echo "             Merge data Er and velocity data from Solomon's cer datafile."
-   echo " "
+   echo 
    echo "             -ver <version>"
    echo "             Version number (0=basic, 1=extra powers)."
-   echo " "
+   echo 
    echo "PLASMA STATE Options"
    echo
    echo "             -g <gfile>"
    echo "             Merge EFIT gfile for high-precision geometry data."
-   echo " "
+   echo 
    echo "             -nogq"
    echo "             Do not use q from GATO (by default, if gfile is specified q is from GATO)."
-   echo " "
+   echo 
    echo "             -r <reorder sequence>"
    echo "             Reorder ions."
-   echo
    echo
    echo "ASTRA Options"
    echo
@@ -98,7 +95,6 @@ then
    echo "             -n <note text>"
    echo "             Include <note text> in the input.profiles header."
    echo
-   echo 
    echo "VELOCITY GENERATION MODE"
    echo
    echo "             -vgen"
@@ -119,7 +115,6 @@ then
    echo "             -vgen_x <ion index>" 
    echo "             Index of ion species to match NEO and given velocities."
    echo
-   echo 
    echo "TRANSP MODE"
    echo
    echo "             -transp"
@@ -146,7 +141,6 @@ then
    echo "             -trhelp"
    echo "             Detailed help message on transp2gyro."
    echo 
-   echo
    echo "PROFILE MANIPULATION MODE"
    echo 
    echo "             -d [manipulate_options]"
@@ -199,12 +193,10 @@ then
    echo "             -n3n1 <ni_3/ni_1>"
    echo "             Default: 0.0 (No third ion species)"
    echo
-   echo 
    echo "LOCAL PARAMETER MODE"
-   echo " "
+   echo 
    echo "             -radius <r>"
    echo "             Reference radius, r/a."
-   echo
    echo
    echo "EXAMPLES:"
    echo " "
@@ -215,8 +207,8 @@ then
    echo "    profiles_gen -m mapfile -n 'this is a test' myfile.astra"
    echo "    profiles_gen -transp"
    echo "    profiles_gen -tok NSTX -year 07 -shot 124948A01 -time 250 -avg 2"
-   echo "    profiles_gen -i input.profiles -vgen_e 2 -vgen_v 1 -vgen_in DC -vgen_x 2"
-   echo "    profiles_gen -i input.profiles -vgen_e 2 -vgen_v 1 -vgen_in HDC -vgen_x 3"
+   echo "    profiles_gen -vgen -i input.profiles -vgen_e 2 -vgen_v 1 -vgen_in DC -vgen_x 2"
+   echo "    profiles_gen -vgen -i input.profiles -vgen_e 2 -vgen_v 1 -vgen_in HDC -vgen_x 3"
    echo 
    echo "(1) Typical usage for DIII-D plasmas with iterdbfile only (2 steps)"
    echo "    NEO will generate Er and all velocities:"
@@ -251,7 +243,7 @@ then
 
    exit 1
 fi
-#--------------------------------------------------------
+#=============================================================
 
 #=============================================================
 # Define variables for flag capture
