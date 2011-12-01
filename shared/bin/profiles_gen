@@ -571,6 +571,9 @@ then
    # GATO requires gfile as "eqgta"
    cp $GFILE eqgta
 
+   # Clear any stale error files
+   rm -f gato_error
+
    # Create entire GATO "ingta" namelist
    echo "GATO template" > ingta
    echo "129x129 200x400  ncase=0" >> ingta
@@ -680,6 +683,13 @@ then
    echo " &end" >> ingta
 
    $GATO >& out.gato.stdout
+   if [ -f 'gato_error' ]
+   then
+      echo 'ERROR: (gato) Fatal error.'
+      exit 1 
+   else
+      echo 'INFO: (gato) Success.'
+   fi
 fi
 #==============================================================
 

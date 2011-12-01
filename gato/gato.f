@@ -45992,6 +45992,13 @@ c
          write(kutty,2010) routine,ident,errmsg,vnam0,ier0,vnam1,ier1
          write(kuout,2010) routine,ident,errmsg,vnam0,ier0,vnam1,ier1
          call fileclose
+
+c        Extra "persistent" diagnostic (JC)
+         open(unit=1,file='gato_error',status='replace')
+         write(1,'(a)') 'fatal'
+         close(1)
+c        end extra diagnostic
+
          stop 'Terminated with Error'
 c
       elseif(iw .gt. +1) then
@@ -46000,9 +46007,12 @@ c
          write(kutty,2110) errmsg,vnam0,ier0,vnam1,ier1
          write(kuout,2110) errmsg,vnam0,ier0,vnam1,ier1
          call fileclose
+
          stop 'Calculation complete'
       endif
-c
+
+
+
 c
 c
 c 3.0 Return and end
