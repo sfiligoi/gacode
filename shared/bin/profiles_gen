@@ -436,6 +436,11 @@ fi
 
 if [ "$RADIUS" != "0" ]
 then
+  if [ ! -f $LOCPARGEN ]
+  then
+     echo "ERROR: (profiles_gen) You need to build the locpargen executable."
+     exit 1
+  fi
   python $GACODE_ROOT/shared/bin/profile_parse.py $FILE
   echo $RADIUS > input.locpargen
   echo $Z1 >> input.locpargen
