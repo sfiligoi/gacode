@@ -12,8 +12,7 @@ EXTRA_LIBS = ${GACODE_ROOT}/shared/EXPRO/EXPRO_lib.a \
              ${GACODE_ROOT}/shared/GEO/GEO_lib.a  \
              ${GACODE_ROOT}/shared/math/math_lib.a 
 
-OBJECTS = locpargen_globals.o \
-          $(EXEC).o
+OBJECTS = $(EXEC).o
 
 .SUFFIXES : .o .f90
 

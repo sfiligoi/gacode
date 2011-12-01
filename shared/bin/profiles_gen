@@ -100,6 +100,13 @@ then
    echo "             -gato_dpsisl <dpsisl>"
    echo "              DEFAULT: 0.0"
    echo
+   echo "             -Z1 <ion1 charge>"
+   echo "             Default: 1 (Hydrogen isotope)"
+   echo "             -Z2 <ion2 charge>"
+   echo "             Default: 6 (Carbon)"
+   echo "             -Z3 <ion3 charge>"
+   echo "             Default: 2 (Helium)"
+   echo
    echo "VELOCITY GENERATION MODE"
    echo
    echo "             -vgen"
@@ -270,7 +277,11 @@ VGEN_V=2
 VGEN_X=2
 VGEN_FLAG=0
 MODINP_FLAG=0
+
 RADIUS=0
+Z1=1.0
+Z2=6.0
+Z3=2.0
 #=============================================================
 
 #=============================================================
@@ -353,11 +364,11 @@ while [ $# -gt 0 ] ; do
   
   -comp) MODINP_ARGS="$MODINP_ARGS --comp";; 
   
-  -Z1) shift ; MODINP_ARGS="$MODINP_ARGS --Z1 $1" ;;  
+  -Z1) shift ; Z1=$1 ; MODINP_ARGS="$MODINP_ARGS --Z1 $1" ;;  
   
-  -Z2) shift ; MODINP_ARGS="$MODINP_ARGS --Z2 $1" ;;  
+  -Z2) shift ; Z2=$1 ; MODINP_ARGS="$MODINP_ARGS --Z2 $1" ;;  
   
-  -Z3) shift ; MODINP_ARGS="$MODINP_ARGS --Z3 $1" ;;  
+  -Z3) shift ; Z3=$1 ; MODINP_ARGS="$MODINP_ARGS --Z3 $1" ;;  
   
   -Zeff) shift ; MODINP_ARGS="$MODINP_ARGS --Zeff $1" ;;  
   
@@ -427,7 +438,11 @@ if [ "$RADIUS" != "0" ]
 then
   python $GACODE_ROOT/shared/bin/profile_parse.py $FILE
   echo $RADIUS > input.locpargen
+  echo $Z1 >> input.locpargen
+  echo $Z2 >> input.locpargen
+  echo $Z3 >> input.locpargen
   $LOCPARGEN
+  rm input.locpargen
   exit 0
 fi   
 #=============================================================
