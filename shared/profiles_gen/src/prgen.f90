@@ -124,7 +124,6 @@ program prgen
   if (trim(raw_data_file) == 'null') then
  
     ! Pure gfile parsing
-    print '(a)','INFO: (prgen) Parsing gfile only.'
 
     format_type = 0
 

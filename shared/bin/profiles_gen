@@ -25,8 +25,8 @@ VGEN_DIR=${GACODE_ROOT}/neo/tools/input/vgen
 EXEC=${GACODE_ROOT}/shared/profiles_gen/src/prgen
 # - GATO executable
 GATO=${GACODE_ROOT}/gato/gato
-# - GATO namelist
-GATO_IN=${GACODE_ROOT}/gato/data/ingta
+# - locpargen executable
+LOCPARGEN=${GACODE_ROOT}/shared/profiles_gen/locpargen/locpargen
 # - ASTRA converter
 ASTRA=${GACODE_ROOT}/shared/profiles_gen/astra/astra2gyro.py
 # - ASTRA default map file
@@ -94,6 +94,11 @@ then
    echo
    echo "             -n <note text>"
    echo "             Include <note text> in the input.profiles header."
+   echo
+   echo "GATO mapper control options"
+   echo 
+   echo "             -gato_dpsisl <dpsisl>"
+   echo "              DEFAULT: 0.0"
    echo
    echo "VELOCITY GENERATION MODE"
    echo
@@ -250,6 +255,8 @@ fi
 #
 CONFIG=.config
 
+GATO_DPSISL=0.0
+
 FILE_FLAG=0
 CER_FLAG=0
 G_FLAG=0
@@ -293,6 +300,8 @@ while [ $# -gt 0 ] ; do
   -cer) shift ; CER_FLAG=1 ; CER_FILE="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-cer;$1" ;;
    
   -g) shift ; G_FLAG=1 ; GFILE="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-g;$1" ;;
+
+  -gato_dpsisl) shift ; GATO_DPSISL="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-gato_dpsisl;$1" ;;
 
   -V) shift ; VERBOSE_FLAG=1 ; ITERDB_ARGS="${ITERDB_ARGS};-V";;
 
@@ -414,9 +423,12 @@ fi
 #=============================================================
 # Manage execution of locpargen
 
-if [ $RADIUS -neq 0 ]
+if [ "$RADIUS" != "0" ]
 then
-  echo "Execute locpargen."
+  python $GACODE_ROOT/shared/bin/profile_parse.py $FILE
+  echo $RADIUS > input.locpargen
+  $LOCPARGEN
+  exit 0
 fi   
 #=============================================================
 
@@ -540,10 +552,119 @@ then
       exit 1
    fi
    echo "INFO: (profiles_gen) Spawning GATO mapper to generate flux surfaces from $GFILE."
-   echo "INFO: (profiles_gen) Running fluxfit to compute shape parameters from GATO mapping."
+
+   # GATO requires gfile as "eqgta"
    cp $GFILE eqgta
-   cp $GATO_IN ingta
-   $GATO >& gato.stdout
+
+   # Create entire GATO "ingta" namelist
+   echo "GATO template" > ingta
+   echo "129x129 200x400  ncase=0" >> ingta
+   echo "n  = 1  ncorr=+1  Wall on the Plasma" >> ingta
+   echo " &inputd" >> ingta
+   echo " ntor     = 1" >> ingta
+   echo " ncase    = 0" >> ingta
+   echo " norm     = 0" >> ingta
+   echo " nmap     = 0" >> ingta
+   echo " neqtyp   = 0" >> ingta
+   echo " jpsi     = 100" >> ingta
+   echo " itht     = 200" >> ingta
+   echo " isym     = 0" >> ingta
+   echo " igrid    = 0" >> ingta
+   echo " ncorr    = +1" >> ingta
+   echo " corrfac  = 1.0000" >> ingta
+   echo " nmesh    = 2" >> ingta
+   echo " nedge    = +4" >> ingta
+   echo " sedg0    = 0.0" >> ingta
+   echo " sedg1    = 0.0" >> ingta
+   echo " maptrace = 0" >> ingta
+   echo " npak     = 0" >> ingta
+   echo " nrat     = 0" >> ingta
+   echo " nppack   = 0" >> ingta
+   echo " nqpack   = 0" >> ingta
+   echo " pkfrac   = 0.3333333333333333" >> ingta
+   echo " qpfrac   = 0.3333333333333333" >> ingta
+   echo " cspak    = 0.5" >> ingta
+   echo " npfit    = 150" >> ingta
+   echo " dpsisl   = $GATO_DPSISL" >> ingta
+   echo " dpsisd   = +0.10e-04" >> ingta
+   echo " delac    = 0.10e-02" >> ingta
+   echo " tolspln  = 0.10e-02" >> ingta
+   echo " ntrymx   = 10" >> ingta
+   echo " nccellr  = +1" >> ingta
+   echo " nqaxis   =  0" >> ingta
+   echo " qxin     = 0.0" >> ingta
+   echo " idnsty   = 0" >> ingta
+   echo " ifastp   = 0" >> ingta
+   echo " ndnxp0   = 0" >> ingta
+   echo " ndnxp1   = 2" >> ingta
+   echo " ndnxp2   = 2" >> ingta
+   echo " iwal     = 0" >> ingta
+   echo " nwall    = 60" >> ingta
+   echo " irext    = 0" >> ingta
+   echo " rext     = 1.000" >> ingta
+   echo " nrestrt  = 0" >> ingta
+   echo " ndsktim  = +1" >> ingta
+   echo " nev      = 1" >> ingta
+   echo " nreslv   = 0" >> ingta
+   echo " nbrmax   = 10" >> ingta
+   echo " nismax   = 10" >> ingta
+   echo " ncymax   = 1" >> ingta
+   echo " nitmax   = 20" >> ingta
+   echo " ncyfin   = 1" >> ingta
+   echo " al0      = -0.100000e-04" >> ingta
+   echo " dal0     = 10.0" >> ingta
+   echo " al0bas   = +0.00" >> ingta
+   echo " al0min   = -0.10e+00" >> ingta
+   echo " al0max   = -0.10e-11" >> ingta
+   echo " epschy   = 0.00001" >> ingta
+   echo " epscon   = 0.00001" >> ingta
+   echo " njplot   = +200" >> ingta
+   echo " niplot   = 1" >> ingta
+   echo " nskpi    = +2" >> ingta
+   echo " nskpj    = +2" >> ingta
+   echo " ncont    = 10" >> ingta
+   echo " ncplot   = 10" >> ingta
+   echo " nxisgn   = +1" >> ingta
+   echo " nxuplt   = +3" >> ingta
+   echo " nxiplt   = +1" >> ingta
+   echo " nxrplt   =  0" >> ingta
+   echo " nxpplt   =  0" >> ingta
+   echo " nbuplt   = +1" >> ingta
+   echo " nbiplt   = +1" >> ingta
+   echo " nbrplt   =  0" >> ingta
+   echo " nbpplt   =  0" >> ingta
+   echo " nauplt   = +1" >> ingta
+   echo " naiplt   = +1" >> ingta
+   echo " narplt   =  0" >> ingta
+   echo " napplt   =  0" >> ingta
+   echo " ntphase  = -4" >> ingta
+   echo " mshpsi   = 12" >> ingta
+   echo " mshchi   = 3" >> ingta
+   echo " nvfft    = 0" >> ingta
+   echo " iplotm   = +10" >> ingta
+   echo " ioutm    = 1" >> ingta
+   echo " ioutw    = 1" >> ingta
+   echo " ioute    = 0" >> ingta
+   echo " ioutp    = +19" >> ingta
+   echo " iomshp   = -2" >> ingta
+   echo " ioeqlp   = -2" >> ingta
+   echo " ioeigp   = +2" >> ingta
+   echo " iodlbp   = +2" >> ingta
+   echo " iodlap   = +2" >> ingta
+   echo " iopsip   = -2" >> ingta
+   echo " iolinp   = +2" >> ingta
+   echo " iolnbp   = +2" >> ingta
+   echo " iolnap   = +2" >> ingta
+   echo " iofftp   = +2" >> ingta
+   echo " ioffbp   = -2" >> ingta
+   echo " ioffap   = -2" >> ingta
+   echo " ioconp   = -2" >> ingta
+   echo " iodlbp   = -2" >> ingta
+   echo " iodlap   = -2" >> ingta
+   echo " iodlwp   = +2" >> ingta
+   echo " &end" >> ingta
+
+   $GATO >& out.gato.stdout
 fi
 #==============================================================
 
@@ -578,6 +699,7 @@ if [ -f "success" ]
 then
    if [ $G_FLAG -eq 1 ]
    then
+      echo "INFO: (profiles_gen) Fluxfit used to compute shape parameters from GATO mapping."
       echo "DONE: (profiles_gen) Successfully wrote: input.profiles, input.profiles.geo."
    else
       echo "DONE: (profiles_gen) Successfully wrote: input.profiles." 
@@ -586,19 +708,22 @@ else
    echo "ERROR: (profiles_gen) Something went wrong in creation of input.profiles :("
    echo "       ** Try running with -V option **"
 fi
+#==============================================================
 
 #==============================================================
 # Final cleanup:
-#  Remove configuration files, output files, etc.
 #
-rm -f egta ingta nova.*
+#  Remove configuration files, output files, etc.
+rm -f egta eqgta nova.*
+#  Remove stale files
+rm -f out.gato.* input.gato.*
 
 if [ $VERBOSE_FLAG -eq 0 ]
 then
-   rm -f $CONFIG fluxfit.* grid.dat eqgta o1gta gato.stdout success
+   rm -f $CONFIG fluxfit.* ingta o1gta grid.dat success
 else
-   mv o1gta gato.o1gta
-   mv eqgta gato.eqgta
-   mv grid.dat gato.grid.dat
+   mv ingta input.gato.ingta
+   mv o1gta out.gato.o1gta
+   mv grid.dat out.gato.grid
 fi
 #==============================================================
