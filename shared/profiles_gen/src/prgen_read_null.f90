@@ -11,7 +11,7 @@ subroutine prgen_read_null
 
   implicit none
 
-  nx = 16
+  nx = 40
 
   call allocate_internals
  
