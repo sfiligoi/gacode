@@ -11,34 +11,8 @@ subroutine prgen_map_null
 
   implicit none
 
-  real, dimension(:), allocatable :: chi_t
-  integer :: i 
-
-  !---------------------------------------------------------
-  ! Compute rho by integrating d(chi_t) = q d(psi_p)
-  ! using the trapezoidal rule
-  !
-  ! NOTE: chi_t/bref)
-  !
-  allocate(chi_t(nx))  
-  !
-  chi_t(1) = 0.0
-  do i=2,nx
-     chi_t(i) = chi_t(i-1) + 0.5*(q_gato(i)+q_gato(i-1))*(dpsi(i)-dpsi(i-1))
-  enddo
-  !
-  ! Even though bref is arbitrary, choose physically sensible values 
-  ! rather than, say, bref=1.  This is exact in the limit B is constant 
-  ! and the flux surfaces are elliptical with fixed kappa.
-  ! 
-  null_bref = 2*chi_t(nx)/(kappa(nx)*rmin(nx)**2)
-  null_arho = sqrt(kappa(nx))*rmin(nx)
-  !
-  ! Normalized root of chi_t:
-  !
-  rho(:) = sqrt(chi_t(:)/chi_t(nx))
-  deallocate(chi_t)
-  !---------------------------------------------------------
+  ! Compute rho, bref and arho:
+  call prgen_get_chi(nx,q_gato,kappa,rmin,dpsi,rho,null_bref,null_arho)
 
   !---------------------------------------------------------
   ! Map profile data onto single array:
