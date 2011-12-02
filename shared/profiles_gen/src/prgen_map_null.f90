@@ -53,6 +53,7 @@ subroutine prgen_map_null
   vec(7,:)  = 1.0
   vec(8,:)  = 1.0
   vec(9,:)  = 0.0
+  vec(10,:) = 0.0
   vec(11,:) = 0.0
   vec(12,:) = 0.0
   vec(13,:) = 0.0

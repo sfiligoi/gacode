@@ -25,8 +25,17 @@ then
   echo "         -e <simdir>" 
   echo "         Run TGYRO using input.tgyro data in <simdir>."
   echo
-  echo "         -n <nproc>" 
+  echo "         -n <MPI tasks>" 
   echo "         Number of cores."
+  echo
+  echo "         -nomp <threads>" 
+  echo "         Number of OpenMP threads per MPI task."
+  echo
+  echo "         -numa <n>" 
+  echo "         NUMAs active per node."
+  echo
+  echo "         -mpinuma <n>" 
+  echo "         MPI tasks per active NUMA."
   echo
   echo "TEST MODES"
   echo
@@ -70,8 +79,11 @@ VERBASE='out.tgyro.version'
 # Default simulation root directory
 SIMROOT=$PWD
 TGYRO_DIR=$GACODE_ROOT/tgyro
-# Default number of cores
+# Parallelization parameters
 NPROC=1
+NOMP=1
+NUMA=1
+MPINUMA=1
 # Execute/test mode flags
 EXEC_FLAG=0
 TEST_FLAG=0
@@ -100,6 +112,12 @@ while [ $# -gt 0 ] ; do
   -s) shift ; LOCDIR=$1 ; SCOPY_FLAG=1 ;;
 
   -n) shift ; NPROC=$1 ;;
+
+  -nomp) shift ; NOMP=$1 ;;
+
+  -numa) shift ; NUMA=$1 ;;
+
+  -mpinuma) shift ; MPINUMA=$1 ;;
 
   -h) gacode_printversion TGYRO ; exit 0 ;;
 
@@ -281,7 +299,8 @@ then
       echo "0" > "$SIMDIR/gyrotest_flag"
       # Call platform-specific exec file:
       echo " Passing control to TGYRO executable ..." >> $RUNBASE
-      $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM $SIMDIR $NPROC $TGYRO_DIR/src/tgyro_main
+      $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM \
+       $SIMDIR $NPROC $TGYRO_DIR/src/tgyro_main $NOMP $NUMA $MPINUMA
       exit 0
    fi
 fi
@@ -297,7 +316,8 @@ then
    else
       echo "1" > "$SIMDIR/gyrotest_flag"
       echo " Passing control to TGYRO executable (test mode) ..." >> $RUNBASE
-      $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM $SIMDIR $NPROC $TGYRO_DIR/src/tgyro_main
+      $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM \
+       $SIMDIR $NPROC $TGYRO_DIR/src/tgyro_main $NOMP $NUMA $MPINUMA
       exit 0
    fi
 fi
