@@ -17,6 +17,12 @@ module tgyro_globals
   !===============================================================
   ! SHARED parameters for both transport methods:
   !
+  !
+  ! OpenMP
+  !
+  integer :: n_omp
+  integer :: i_omp
+  !
   ! MPI related integers
   !
   integer :: i_proc_global

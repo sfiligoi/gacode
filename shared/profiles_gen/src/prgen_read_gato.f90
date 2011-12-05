@@ -87,7 +87,6 @@ subroutine prgen_read_gato
 
   ! When verbose_flag=1, fluxfit will echo lots of data
   call fluxfit_driver(1,1,gato_npsi,gato_ntheta,gato_bigr,gato_bigz,verbose_flag)
-
   allocate(gvec(6,0:gato_npsi))
 
   open(unit=1,file='fluxfit.profile',status='old')
@@ -101,14 +100,24 @@ subroutine prgen_read_gato
        gato_psi(1)*gvec(:,2))/&
        (gato_psi(2)-gato_psi(1))
 
-  ! Store total flux variation for future warnings
-  dpsi_data = dpsi(nx)
-  dpsi_gato = gato_psi(gato_npsi)
+  ! Mamage total flux variation 
+  if (format_type == 0) then
+     ! Case 1: raw gfile mode ; dpsi is undefined
+     dpsi_data = gato_psi(gato_npsi)
+     dpsi_gato = gato_psi(gato_npsi)
+     do i=1,nx
+        dpsi(i) = (i-1)*dpsi_gato/(nx-1)
+     enddo
+  else
+     ! Case 2: typical case 
+     dpsi_data = dpsi(nx)
+     dpsi_gato = gato_psi(gato_npsi)
 
-  ! Ensure max(dpsi) = max(gato_psi) 
-  dpsi(:)  = dpsi(:)*dpsi_gato/dpsi_data
-  ! Extra insurance against roundoff
-  dpsi(nx) = dpsi_gato 
+     ! Ensure max(dpsi) = max(gato_psi) 
+     dpsi(:)  = dpsi(:)*dpsi_gato/dpsi_data
+     ! Extra insurance against roundoff
+     dpsi(nx) = dpsi_gato 
+  endif
 
   ! Map shape coefficients onto poloidal flux (dpsi) grid:
   call cub_spline(gato_psi,gvec(1,:),gato_npsi+1,dpsi,rmin,nx)
@@ -120,7 +129,7 @@ subroutine prgen_read_gato
 
   ! Explicitly set rmin=0 at origin
   rmin(1) = 0.0
-  
+
   deallocate(gvec)
   !----------------------------------------------------
 
@@ -172,7 +181,7 @@ subroutine prgen_read_gato
         endif
      endif
   enddo
-  
+
   close(1)
 
   call cub_spline(gato_psi,gato_q,gato_npsi+1,dpsi,q_gato,nx)

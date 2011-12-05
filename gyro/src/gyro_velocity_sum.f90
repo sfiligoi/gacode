@@ -25,8 +25,7 @@ subroutine gyro_velocity_sum(field)
   !----------------------------------------------------
   ! Now, compute blending projections:
   !
-  sum_loc(:,:)  = (0.0,0.0)
-  sum_glob(:,:) = (0.0,0.0)
+  sum_loc(:,:) = (0.0,0.0)
   !
   select case (field)
 

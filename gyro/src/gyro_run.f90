@@ -6,10 +6,13 @@
 !  interface (i.e, from TGYRO).
 !
 ! NOTES:
-!  In TGYRO, we do this:
-!
-!    call tgyro_gyro_map
-!    call gyro_run(...)
+! - To run GYRO as a subroutine, do this:
+!   call gyro_init
+!   call gyro_run
+!  
+! - To run inside TGYRO, we do this:
+!   call tgyro_gyro_map
+!   call gyro_run(...)
 !-------------------------------------------------------------
 
 subroutine gyro_run(&
@@ -28,9 +31,9 @@ subroutine gyro_run(&
 
 
   ! Input parameters (IN) - REQUIRED
-  integer, intent(in)             :: test_flag_in
-  integer, intent(in)             :: restart_method_in
-  integer, intent(in)             :: transport_method_in
+  integer, intent(in) :: test_flag_in
+  integer, intent(in) :: restart_method_in
+  integer, intent(in) :: transport_method_in
 
   ! Input parameters (OUT) - REQUIRED
   integer,          intent(inout) :: status_out

@@ -2,7 +2,7 @@
 ! gyro.f90
 !
 ! PURPOSE:
-!  Main program wrapper. 
+!  Main program wrapper for *standalone* GYRO usage.
 !-----------------------------------------------------------------
 
 program gyro
