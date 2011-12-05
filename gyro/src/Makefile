@@ -84,7 +84,6 @@ OBJECTS += gyro_globals.o \
           gyro_map_experimental_profiles.o \
           gyro_message_routines.o \
           gyro_moments_plot.o \
-          gyro_moments_plot_wedge.o \
           gyro_mpi_grid.o \
           gyro_memory_usage.o \
           gyro_nl_setup.o \
