@@ -192,20 +192,6 @@ subroutine neo_check
         return
      end select
 
-     select case (profile_temprescale_model)
-     case(0)
-        if(silent_flag == 0 .and. i_proc == 0) then
-           write(io_neoout,*)  'GLOBAL PROFILE profile_temprescale_model:  PROFILE TEMPERATURES ARE NOT RE-SCALED'
-        end if
-     case (1)
-        if(silent_flag == 0 .and. i_proc == 0) then
-           write(io_neoout,*) 'GLOBAL PROFILE profile_temprescale_model: PROFILE TEMPERATURES ARE RE-SCALED TO THE ELECTRON TEMP'
-        end if
-     case default
-        call neo_error('ERROR: (NEO) invalid profile_temprescale_model')
-        return
-     end select
-
      select case (profile_equilibrium_model)
      case(0)
         if(silent_flag == 0 .and. i_proc == 0) then

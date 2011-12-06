@@ -73,6 +73,7 @@ OBJECTS += gyro_globals.o \
           gyro_fulladvance.o \
           gyro_geometry_arrays.o \
           gyro_get_he_implicit.o \
+          gyro_get_delta_he.o \
           gyro_gbflux.o \
           gyro_initial_condition.o \
           gyro_initialize_arrays.o \
@@ -83,7 +84,6 @@ OBJECTS += gyro_globals.o \
           gyro_map_experimental_profiles.o \
           gyro_message_routines.o \
           gyro_moments_plot.o \
-          gyro_moments_plot_wedge.o \
           gyro_mpi_grid.o \
           gyro_memory_usage.o \
           gyro_nl_setup.o \
@@ -118,6 +118,7 @@ OBJECTS += gyro_globals.o \
           gyro_to_geo.o \
           gyro_write_efficiency.o \
           gyro_write_error.o \
+          gyro_write_freq.o \
           gyro_write_initdata.o \
           gyro_write_input.o \
           gyro_write_precision.o \
@@ -149,10 +150,8 @@ OBJECTS += gyro_globals.o \
           get_nonlinear_flux_velocity.o \
           get_field_fluxave.o \
           get_kinetic_advance.o \
-          get_delta_he.o \
           get_phi_squared.o \
           get_g_squared.o \
-          write_freq.o \
           write_h.o \
           write_matrix_stat.o \
           gyro_dump_input.o \

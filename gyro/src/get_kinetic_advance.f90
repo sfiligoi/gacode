@@ -19,7 +19,7 @@ subroutine get_kinetic_advance
   !-------------------------
 
   call gyro_timer_in('Implicit-he')
-  call get_delta_he
+  call gyro_get_delta_he
   call gyro_timer_out('Implicit-he')
 
   call gyro_field_solve_implicit

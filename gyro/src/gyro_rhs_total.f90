@@ -1,3 +1,4 @@
+
 !-----------------------------------------------------------
 ! gyro_rhs_total.f90
 !
@@ -17,17 +18,15 @@ subroutine gyro_rhs_total
   !-----------------------------------------------------------------------------
   implicit none
   !
-  complex, dimension(:,:,:), allocatable :: z_der   
-  complex, dimension(:,:,:), allocatable :: z_dis
+  complex :: z_der   
+  complex :: z_dis
   complex, dimension(:,:,:,:), allocatable :: cap_h
   complex, dimension(:,:,:,:), allocatable :: lit_h
   !-----------------------------------------------------------------------------
 
-  allocate(z_der(n_stack,n_nek_loc_1,n_kinetic))
-  allocate(z_dis(n_stack,n_nek_loc_1,n_kinetic))
   allocate(cap_h(n_stack,i1_buffer:i2_buffer,n_nek_loc_1,n_kinetic))
   allocate(lit_h(n_stack,i1_buffer:i2_buffer,n_nek_loc_1,n_kinetic))
- 
+
   rhs(:,:,:,:)    = (0.0,0.0)
   rhs_dr(:,:,:,:) = 0.0
 
@@ -48,69 +47,80 @@ subroutine gyro_rhs_total
 
   !----------------------------------------------------------------------
   ! Derivative-friendly functions which have array elements outside
-  ! the region 1:n_x.
+  ! the region 1:n_x.                       
   !
   cap_h(:,:,:,:) = (0.0,0.0)
   lit_h(:,:,:,:) = (0.0,0.0)
 
-  do is=1,n_kinetic
-     p_nek_loc = 0
-     do p_nek=1+i_proc_1,n_nek_1,n_proc_1
-
-        p_nek_loc = p_nek_loc+1
-
-        ie = nek_e(p_nek)  
-        k  = nek_k(p_nek)   
-
-        ck = class(k)
-
-        do i=1,n_x
-           lit_h(:,i,p_nek_loc,is) = h(:,i,p_nek_loc,is)
-           cap_h(:,i,p_nek_loc,is) = h(:,i,p_nek_loc,is)+&
-                z(is)*alpha_s(is,i)*gyro_u(:,i,p_nek_loc,is)
-        enddo ! i
-
-     enddo ! p_nek
-  enddo ! is
+!$omp parallel default(shared)
+!$omp do private(is,p_nek_loc,m) 
+  do i=1,n_x
+     do is=1,n_kinetic
+        do p_nek_loc=1,n_nek_loc_1
+           do m=1,n_stack
+              lit_h(m,i,p_nek_loc,is) = h(m,i,p_nek_loc,is)
+              cap_h(m,i,p_nek_loc,is) = h(m,i,p_nek_loc,is)+&
+                   z(is)*alpha_s(is,i)*gyro_u(m,i,p_nek_loc,is)
+           enddo
+        enddo
+     enddo ! is
+  enddo ! i
+!$omp end do
   !----------------------------------------------------------------------
 
   !----------------------------------------------------------------------
   ! Drift (finite-kx) plus upwind dissipation
   !
+!$omp do private(z_der,z_dis,i_diff,is,p_nek_loc,m)
   do i=1,n_x
+     do is=1,n_kinetic
+        do p_nek_loc=1,n_nek_loc_1
+           do m=1,n_stack
+              z_der = 0.0
+              z_dis = 0.0
 
-     z_der(:,:,:) = 0.0
-     z_dis(:,:,:) = 0.0
+              do i_diff=-m_dx,m_dx-i_dx
+                 z_der = z_der+omega_dr(m,i,p_nek_loc,is)*&
+                      w_d1(i_diff)*cap_h(m,i_loop(i+i_diff),p_nek_loc,is)
 
-     do i_diff=-m_dx,m_dx-i_dx
+                 z_dis = z_dis+abs(omega_dr(m,i,p_nek_loc,is))*&
+                      s_d1(i_diff)*lit_h(m,i_loop(i+i_diff),p_nek_loc,is)
+              enddo
 
-        z_der(:,:,:) = z_der(:,:,:)+omega_dr(:,i,:,:)*&
-             w_d1(i_diff)*cap_h(:,i_loop(i+i_diff),:,:)
+              ! Derivative plus dissipation
+              rhs(m,i,p_nek_loc,is) = rhs(m,i,p_nek_loc,is)+&
+                   z_der+z_dis
 
-        z_dis(:,:,:) = z_dis(:,:,:)+abs(omega_dr(:,i,:,:))*&
-             s_d1(i_diff)*lit_h(:,i_loop(i+i_diff),:,:)
-
+              ! Entropy tracking
+              rhs_dr(m,i,p_nek_loc,is) = rhs_dr(m,i,p_nek_loc,is)+&
+                   real(z_dis*conjg(cap_h(m,i,p_nek_loc,is)))
+           enddo
+        enddo
      enddo
-
-     ! Derivative plus dissipation
-     rhs(:,i,:,:) = rhs(:,i,:,:)+z_der(:,:,:)+z_dis(:,:,:)
-
-     ! Entropy tracking
-     rhs_dr(:,i,:,:) = rhs_dr(:,i,:,:)+real(z_dis(:,:,:)*conjg(cap_h(:,i,:,:)))
-
   enddo ! i
+!$omp end do nowait
   !----------------------------------------------------------------------
 
   !----------------------------------------------------------------------
   ! Diagonal (ky) drift
   !
-  rhs(:,:,:,:) = rhs(:,:,:,:)+i_c*omega_d1(:,:,:,:)*cap_h(:,1:n_x,:,:)
-  !----------------------------------------------------------------------
-
-  !----------------------------------------------------------------------
-  ! Diamagnetic drift
-  !
-  rhs(:,:,:,:) = rhs(:,:,:,:)-i_c*omega_star(:,:,:,:)*gyro_u(:,:,:,:)
+!$omp do private(is,p_nek_loc,m)
+  do i=1,n_x
+     do is=1,n_kinetic
+        do p_nek_loc=1,n_nek_loc_1
+           do m=1,n_stack
+              ! Diagonal (ky) drift
+              rhs(m,i,p_nek_loc,is) = rhs(m,i,p_nek_loc,is)+&
+                   i_c*omega_d1(m,i,p_nek_loc,is)*cap_h(m,i,p_nek_loc,is)
+              ! Diamagnetic drift
+              rhs(m,i,p_nek_loc,is) = rhs(m,i,p_nek_loc,is)-&
+                   i_c*omega_star(m,i,p_nek_loc,is)*gyro_u(m,i,p_nek_loc,is)
+           enddo
+        enddo
+     enddo
+  enddo
+!$omp end do
+!$omp end parallel
   !----------------------------------------------------------------------
 
   !----------------------------------------------------------------------
@@ -175,8 +185,6 @@ subroutine gyro_rhs_total
   endif
   !---------------------------------------------------------
 
-  deallocate(z_der)
-  deallocate(z_dis)
   deallocate(cap_h)
   deallocate(lit_h)
 

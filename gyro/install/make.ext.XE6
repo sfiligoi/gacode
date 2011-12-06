@@ -1,3 +1,5 @@
+gyro_do.o : gyro_do.mpi_pcontrol.f90
+	$(FC) $(FMATH) $(FFLAGS) -o gyro_do.o -c gyro_do.mpi_pcontrol.f90
 gyro_nl_setup.o : gyro_nl_setup.fftw.f90
 	$(FC) $(FMATH) $(FFLAGS) -o gyro_nl_setup.o -c gyro_nl_setup.fftw.f90
 gyro_nl_fft.o : gyro_nl_fft.fftw.f90

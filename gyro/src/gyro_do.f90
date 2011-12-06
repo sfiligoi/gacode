@@ -36,8 +36,8 @@ subroutine gyro_do
      if (i_proc==0 .and. output_flag==1) THEN
         inquire(file=trim(runfile),exist=rfe)
         if (.not.rfe) then
-           open(unit=99,file=trim(runfile),status='unknown')
-           close(99)
+           open(unit=1,file=trim(runfile),status='unknown')
+           close(1)
         endif
      endif
   endif
@@ -110,6 +110,9 @@ subroutine gyro_do
 
   !------------------------------------------------------------
   ! The order of these routines is critical:
+  !
+  ! Startup timer:
+  startup_time = MPI_Wtime()
   !
   ! Sort through and check all combinations of operational modes
   !
@@ -202,7 +205,7 @@ subroutine gyro_do
      ! coefficients.  These are used in the Maxwell solves.
      call gyro_set_blend_arrays
 
-      if (electron_method == 2) then
+     if (electron_method == 2) then
 
         ! Make advection operators for electrons
         call make_implicit_advect(0)
@@ -278,6 +281,8 @@ subroutine gyro_do
 
   endif
 
+  startup_time = MPI_Wtime()-startup_time
+
   !---------------------------------------
   ! Dump input parameters runfile
   !
@@ -320,11 +325,8 @@ subroutine gyro_do
      io_control = output_flag*3
   endif
   if (gkeigen_j_set == 0) then
-     if (io_method == 1) then
-        call gyro_write_timedata
-     else
-        call gyro_write_timedata_hdf5
-     endif
+     if (io_method >= 1) call gyro_write_timedata
+     if (io_method > 1) call gyro_write_timedata_hdf5
   endif
 
   !-------------------------------------------------

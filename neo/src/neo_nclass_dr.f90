@@ -16,6 +16,7 @@ module neo_nclass_dr
   real, dimension(:), allocatable :: pflux_nc, eflux_nc
   real, dimension(:), allocatable :: uparB_nc, vpol_nc, vtor_nc
   real :: jbs_nc
+  real :: cc, loglam
   
 contains
   
@@ -24,10 +25,6 @@ contains
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
 
-    if (profile_model /= 2) then
-       ! NCLASS driver not implemented for local mode
-       return
-    endif
 
     if (n_species < 2) then
        ! NCLASS driver requires at least 2 species
@@ -103,14 +100,48 @@ contains
     ! declaration of functions
     real  RARRAY_SUM
 
-    if (profile_model /= 2) then
-       ! NCLASS driver not implemented for local mode
+    if (n_species < 2) then
+       ! NCLASS driver requires at least 2 species
+       if(silent_flag==0 .and. i_proc==0) then
+          open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+               status='old',position='append')
+          write(io_neoout,*) 'NCLASS not computed: Requires at least 2 species'
+          close(io_neoout)
+       endif
        return
     endif
 
-    if (n_species < 2) then
-       ! NCLASS driver requires at least 2 species
-       return
+    if (profile_model /= 2) then
+       ! For local mode, need to set normalizations
+       ! Assume normalizing mass is deuterium
+       ! Set T_norm = 1kEV and a_meters=1m
+       ! Then determine B_unit from input rho_star
+       ! Dens in units and norm will be determined from input collision freqs
+       temp_norm_fac   = 1.6022*1000
+       charge_norm_fac = 1.6022
+       a_meters        = 1.0
+       temp_norm(ir)   = 1.0
+       vth_norm(ir)    = sqrt(temp_norm(ir) * temp_norm_fac &
+            / (mass_deuterium)) &
+            * 1.0e4 / a_meters
+       b_unit(ir)      =  sqrt(temp_norm(ir) * temp_norm_fac &
+            * mass_deuterium) &
+            / (charge_norm_fac * rho(ir)) &
+            * 1.0e-4 / a_meters
+       do is=2,n_species
+          if(abs(nu(is,ir)-nu(1,ir)*(1.0*z(is))**4/(1.0*z(1))**4 &
+               * dens(is,ir) / dens(1,ir) &
+               * sqrt(mass(1)/mass(is)) * (temp(1,ir)/temp(is,ir))**1.5) &
+               > 1e-6) then
+             if(silent_flag==0 .and. i_proc==0) then
+                open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+                     status='old',position='append')
+                write(io_neoout,*) 'Warning: NCLASS requires self-consistent collision frequencies'
+                close(io_neoout)
+                exit
+             endif
+          endif
+       enddo
     endif
     
     !  k_order-order of v moments to be solved
@@ -160,9 +191,8 @@ contains
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!
     ! Epar
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    ! EAB: Not yet implemented
     !  p_eb-<E.B> (V*T/m)
-    p_eb = 0.0
+    p_eb = epar0(ir) * (1000 * temp_norm(ir)) / a_meters * b_unit(ir)
 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!
     ! Geometry
@@ -275,9 +305,27 @@ contains
     
     !  den_iz(i,z)-density of i,z (/m**3) 
     den_iz(:,:) = 0.0
-    do is=1,n_species
-       den_iz(is,abs(z(is))) = dens(is,ir) * dens_norm(ir) * 1e19
-    enddo
+    if(profile_model /=2) then
+       ! For local mode, determine dens in units from collision freqs
+       cc = sqrt(2.0) * pi * charge_norm_fac**4 &
+            * 1.0 / (4.0 * pi * 8.8542)**2 &
+            * 1.0 / (sqrt(mass_deuterium) * temp_norm_fac**1.5) &
+            * 1e9
+       ! use an approx for loglam
+       loglam = 24.0 - log(sqrt(1.0*1e13)/(1.0*1000))
+       is=1
+       den_iz(is,abs(z(is))) = (nu(is,ir)*vth_norm(ir)) &
+            / (cc * loglam * z(is)**4) &
+            * (sqrt(mass(is)) * (temp(is,ir)*temp_norm(ir))**1.5) * 1e19
+       dens_norm(ir) = den_iz(is,abs(z(is))) * 1e-19 / dens(is,ir)
+       do is=2,n_species
+          den_iz(is,abs(z(is))) = dens(is,ir)  * dens_norm(ir) * 1e19
+       enddo
+    else
+       do is=1,n_species
+          den_iz(is,abs(z(is))) = dens(is,ir) * dens_norm(ir) * 1e19
+       enddo
+    endif
     
     !  grp_iz(i,z)-pressure gradient of i,z (keV/m**3/rho)
     grp_iz(:,:) = 0.0
@@ -342,15 +390,20 @@ contains
              rdum(k)=upar_s(j,k,i)
           enddo
           if(j==1) then
-             uparB_nc(i) = rdum(1) / (v_nc_norm * b_unit(ir))
+             uparB_nc(i) = (rdum(1)+rdum(2)) / (v_nc_norm * b_unit(ir))
           endif
        enddo
     enddo
     
     ! Bootstrap current: <J_bs.B>/Bunit (A/m**2)
     rdum(1)=p_bsjb/b_unit(ir)
-    jbs_nc = rdum(1) / jbs_nc_norm
-    
+    if(abs(p_eb) > 0.0) then
+       rdum(2) = (p_eb/p_etap)/b_unit(ir)
+    else
+       rdum(2) = 0.0
+    endif
+    jbs_nc = (rdum(1)+rdum(2)) / jbs_nc_norm
+
     !  Flow velocities on outside midplane (m/s)                      
     do i=1,m_s
        im=jm_s(i)
@@ -378,7 +431,7 @@ contains
        iz=jz_s(i)
        call RARRAY_COPY(5,gfl_s(1,i),1,rdum,1)
        rdum(6)=RARRAY_SUM(5,rdum,1)
-       pflux_nc(i) = (rdum(1) + rdum(2)) / pflux_nc_norm
+       pflux_nc(i) = (rdum(1) + rdum(2) + rdum(4)) / pflux_nc_norm
        do k=1,5
           if(iz > 0) then
              dum(k)=dum(k)+iz*gfl_s(k,i)
@@ -427,7 +480,7 @@ contains
           rdum(k)=qfl_s(k,i)+2.5*gfl_s(k,i)*temp_i(im)*z_j7kv
        end do
        rdum(6)=RARRAY_SUM(5,rdum,1)
-       eflux_nc(i) = (rdum(1) + rdum(2)) / eflux_nc_norm
+       eflux_nc(i) = (rdum(1) + rdum(2) + rdum(4)) / eflux_nc_norm
     enddo
     
     if(silent_flag == 0 .and. i_proc == 0) then

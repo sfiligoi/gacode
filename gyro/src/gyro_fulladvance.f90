@@ -85,7 +85,7 @@ subroutine gyro_fulladvance
   !    selected OUTPUT_METHOD > 1.
   !
   call gyro_moments_plot 
-  if (io_method > 1 .and. time_skip_wedge > 0) call gyro_moments_plot_wedge
+  !if (io_method > 1 .and. time_skip_wedge > 0) call gyro_moments_plot_wedge
   !
   ! 4. Compute (phi,a) at r=r0 for plotting (if user 
   !    has selected FIELD_RO_FLAG=1).
@@ -147,11 +147,15 @@ subroutine gyro_fulladvance
      ! Main data I/O handler
 
      io_control = 2*output_flag
-     if (io_method == 1) then  
-        call gyro_write_timedata
-     else
-        call gyro_write_timedata_hdf5
-     endif
+!     if (io_method == 1) then  
+!        call gyro_write_timedata
+!     else
+!        call gyro_write_timedata_hdf5
+!     endif
+
+      if (io_method > 0) call gyro_write_timedata
+      if (io_method > 1) call gyro_write_timedata_hdf5
+    
 
      !--------------------------------------------------
      ! Update diffusivity and flux time-record for TGYRO 
@@ -179,7 +183,7 @@ subroutine gyro_fulladvance
 
   !----------------------------------------------------
   ! Convergence check for single-n simulation:
-  ! freq_err calculated in write_freq
+  ! freq_err calculated in gyro_write_freq
   !  
   if (freq_err < freq_tol) call gyro_set_exit_status('converged',2)
   !----------------------------------------------------

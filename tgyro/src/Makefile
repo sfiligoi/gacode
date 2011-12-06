@@ -10,7 +10,7 @@ ifeq ($(OMP),true)
    FC += ${FOMP}
 else
    FC += ${FNOMP}
-   OBJECTS = gyro_omp_lib.o
+   OBJECTS = ${GACODE_ROOT}/gyro/src/gyro_omp_lib.o
 endif
 
 EXEC = tgyro_main

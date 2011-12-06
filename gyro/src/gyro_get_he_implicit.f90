@@ -14,89 +14,91 @@ subroutine gyro_get_he_implicit
 
   !---------------------------
   implicit none
+  complex :: temp
   !---------------------------
 
-  p_nek_loc = 0
 
-  do p_nek=1+i_proc_1,n_nek_1,n_proc_1
+  if (n_field == 1) then
 
-     p_nek_loc = p_nek_loc+1
+     ! ELECTROSTATIC
 
-     ie = nek_e(p_nek)  
-     k  = nek_k(p_nek)   
+     p_nek_loc = 0
+     do p_nek=1+i_proc_1,n_nek_1,n_proc_1
+        p_nek_loc = p_nek_loc+1
 
-     ck = class(k)
-
-     if (n_field == 1) then
-        
-        ! ELECTROSTATIC
-        
-!$omp parallel do default(shared) private(m,m0,j)
+!$omp parallel do default(shared) private(m,j,temp)
         do i=1,n_x
            do m=1,n_stack
-              m0 = m_phys(ck,m)
+              temp = 0.0
               do j=1,n_blend
-                 
-                 h(m,i,p_nek_loc,n_spec) = h(m,i,p_nek_loc,n_spec)+&
-                      alpha_s(n_spec,i)*&
-                      (c_blend(j,m0,i,p_nek_loc)-o_f(j,m,i,p_nek_loc))*&
+                 temp = temp +(c_blend(j,m,i,p_nek_loc)-o_f(j,m,i,p_nek_loc))*&
                       field_blend(j,i,1)
-                 
               enddo ! j
+              h(m,i,p_nek_loc,n_spec) = h(m,i,p_nek_loc,n_spec)+&
+                   alpha_s(n_spec,i)*temp
            enddo ! m
         enddo ! i
 !$omp end parallel do
-        
-     else if (n_field == 2) then
-        
-        ! ELECTROMAGNETIC -- A_parallel only
-        
-!$omp parallel do default(shared) private(m,m0,j)
+
+     enddo ! p_nek_loc
+
+  else if (n_field == 2) then
+
+     ! ELECTROMAGNETIC -- A_parallel only
+
+     p_nek_loc = 0
+     do p_nek=1+i_proc_1,n_nek_1,n_proc_1
+        p_nek_loc = p_nek_loc+1
+
+!$omp parallel do default(shared) private(m,j,temp)
         do i=1,n_x           
            do m=1,n_stack
-              m0 = m_phys(ck,m)
+              temp = 0.0
               do j=1,n_blend
-                 
-                 h(m,i,p_nek_loc,n_spec) = h(m,i,p_nek_loc,n_spec) &
-                      +alpha_s(n_spec,i)*&
-                      (c_blend(j,m0,i,p_nek_loc)-o_f(j,m,i,p_nek_loc))*field_blend(j,i,1) &
-                      -alpha_s(n_spec,i)*&
-                      (c_blend(j,m0,i,p_nek_loc)*v_para(m,i,p_nek_loc,n_spec)- &
-                      o_fv(j,m,i,p_nek_loc))*field_blend(j,i,2)
-                 
+                 temp = temp+(c_blend(j,m,i,p_nek_loc)-o_f(j,m,i,p_nek_loc))*&
+                      field_blend(j,i,1)-(c_blend(j,m,i,p_nek_loc)*&
+                      v_para(m,i,p_nek_loc,n_spec)-o_fv(j,m,i,p_nek_loc))*&
+                      field_blend(j,i,2)
               enddo ! j
+              h(m,i,p_nek_loc,n_spec) = h(m,i,p_nek_loc,n_spec)+alpha_s(n_spec,i)*temp 
            enddo ! m
         enddo ! i
 !$omp end parallel do
-        
-     else
-        
-        ! ELECTROMAGNETIC -- A_parallel and B_parallel
-        
-!$omp parallel do default(shared) private(m,m0,j)
+
+     enddo ! p_nek_loc
+
+  else
+
+     ! ELECTROMAGNETIC -- A_parallel and B_parallel
+
+
+     p_nek_loc = 0
+     do p_nek=1+i_proc_1,n_nek_1,n_proc_1
+        p_nek_loc = p_nek_loc+1
+
+!$omp parallel do default(shared) private(m,j,temp)
         do i=1,n_x
            do m=1,n_stack 
-              m0 = m_phys(ck,m)  
+              temp = 0.0
               do j=1,n_blend
-                 
-                 h(m,i,p_nek_loc,n_spec) = h(m,i,p_nek_loc,n_spec) &
-                      +alpha_s(n_spec,i)*&
-                      (c_blend(j,m0,i,p_nek_loc)-o_f(j,m,i,p_nek_loc))*field_blend(j,i,1) &
-                      -alpha_s(n_spec,i)*&
-                      (c_blend(j,m0,i,p_nek_loc)*v_para(m,i,p_nek_loc,n_spec)- &
-                      o_fv(j,m,i,p_nek_loc))*field_blend(j,i,2) &
-                      +alpha_s(n_spec,i)*&
-                      energy(ie,indx_e)*lambda(i,k)*tem_s(n_spec,i)/z(n_spec)*&
-                      (c_blend(j,m0,i,p_nek_loc)-o_f(j,m,i,p_nek_loc))*field_blend(j,i,3)
-                 
+                 temp = temp+ &
+                      (c_blend(j,m,i,p_nek_loc)-o_f(j,m,i,p_nek_loc))*&
+                      field_blend(j,i,1)-&
+                      (c_blend(j,m,i,p_nek_loc)*v_para(m,i,p_nek_loc,n_spec)- &
+                      o_fv(j,m,i,p_nek_loc))*field_blend(j,i,2)+&
+                      energy(nek_e(p_nek),indx_e)*lambda(i,nek_k(p_nek))*&
+                      tem_s(n_spec,i)/z(n_spec)*&
+                      (c_blend(j,m,i,p_nek_loc)-o_f(j,m,i,p_nek_loc))*field_blend(j,i,3)
               enddo ! j  
+              h(m,i,p_nek_loc,n_spec) = h(m,i,p_nek_loc,n_spec)+alpha_s(n_spec,i)*temp 
            enddo ! m
         enddo ! i
 !$omp end parallel do
-        
-     endif
 
-  enddo ! p_nek_loc
+     enddo ! p_nek_loc
+
+  endif
+
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[gyro_get_he_implicit done]'

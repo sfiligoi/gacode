@@ -588,7 +588,7 @@ contains
 
                    else if(ix == 1) then
                       g(i) = sqrt(2.0) * vth(is,ir) * evec_e05(ie,ix) &
-                           * (1.0*Z(is))/temp(is,ir) * epar0(ir) &
+                           * (1.0*Z(is))/temp(is,ir) * epar0(ir) / Bmag(it) &
                            - driftxrot2(is,it) &
                            * ( (src_F0_Ln + src_P0 + src_Rot1) &
                            * evec_e05(ie,ix) &

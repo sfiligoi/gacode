@@ -5,7 +5,7 @@
 !  Compute the "explicit" part of h_e.
 !-----------------------------------------------------
 
-subroutine get_delta_he
+subroutine gyro_get_delta_he
 
   use gyro_globals
   use gyro_pointers
@@ -30,51 +30,49 @@ subroutine get_delta_he
 
      p_nek_loc = p_nek_loc+1
 
-     ie = nek_e(p_nek)  
      k  = nek_k(p_nek)   
 
      ck = class(k)
 
      if (ck == 1) then
 
-        do mp=1,n_s2
-
-           do i=1,n_x
-
+!$omp parallel do default(shared) private(m,mp)
+        do i=1,n_x
+           do mp=1,n_s2
               do m=1,n_s2
                  h(m,i,p_nek_loc,n_spec) = h(m,i,p_nek_loc,n_spec)+&
                       o_advect(m,mp,i,p_nek_loc)*h_temp(mp,i,p_nek_loc)
               enddo ! m
-           enddo ! i
-        enddo ! mp
-
-        do mp=n_s2+1,n_stack
-           do i=1,n_x
+           enddo ! mp
+           do mp=n_s2+1,n_stack
               do m=n_s2+1,n_stack
-
                  h(m,i,p_nek_loc,n_spec) = h(m,i,p_nek_loc,n_spec)+&
                       o_advect(m,mp,i,p_nek_loc)*h_temp(mp,i,p_nek_loc)
               enddo ! m
-           enddo ! i
-        enddo ! mp
+           enddo ! mp
+        enddo ! i
+!$omp end parallel do
 
      else
 
-        do mp=1,n_stack
-           do i=1,n_x
+!$omp parallel do default(shared) private(m,mp)
+        do i=1,n_x
+           do mp=1,n_stack
               do m=1,n_stack
                  h(m,i,p_nek_loc,n_spec) = h(m,i,p_nek_loc,n_spec)+&
                       o_advect(m,mp,i,p_nek_loc)*h_temp(mp,i,p_nek_loc)
-              enddo ! mp
-           enddo ! m
+              enddo ! m
+           enddo ! mp
         enddo ! i
+!$omp end parallel do
+
      endif
 
   enddo ! p_nek_loc
 
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[get_delta_he done]'
+     print *,'[gyro_get_delta_he done]'
   endif
 
-end subroutine get_delta_he
+end subroutine gyro_get_delta_he

@@ -38,6 +38,7 @@ module gyro_globals
   real, dimension(64) :: cpu_in=0.0
   character(len=19), dimension(64) :: cpu_tag
   integer :: cpu_maxindx = 0
+  real :: startup_time
   !---------------------------------------------------------
   !---------------------------------------------------------
   ! Restart parameters:
@@ -474,6 +475,9 @@ module gyro_globals
   !
   integer :: i1_buffer
   integer :: i2_buffer
+  !
+  integer :: i1_dx
+  integer :: i2_dx
   !
   integer :: n_explicit_damp
   !

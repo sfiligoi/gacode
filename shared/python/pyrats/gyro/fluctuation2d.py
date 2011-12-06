@@ -29,7 +29,7 @@ else:
 print
 print 'INFO (GYROData): Reading large datafile. Please wait.' 
 
-# Read data and assign time-slive f[n_x,n_kinetic,n_n]
+# Read data and store FINAL time-slice in f[n_x,n_kinetic,n_n]
 if i_moment > 2:
     # Fields
     sim.read_moment_u()

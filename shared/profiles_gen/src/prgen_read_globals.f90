@@ -195,13 +195,21 @@ module prgen_read_globals
   ! PEQDSK variables
   !
   integer :: peqdsk_nj
-  real :: peqdsk_bref, peqdsk_arho
+  real :: peqdsk_bref
+  real :: peqdsk_arho
   real, dimension(:), allocatable :: peqdsk_psi
   real, dimension(:), allocatable :: peqdsk_ne
   real, dimension(:), allocatable :: peqdsk_te
   real, dimension(:), allocatable :: peqdsk_ni
   real, dimension(:), allocatable :: peqdsk_ti
   real, dimension(:), allocatable :: peqdsk_omegat
+  !---------------------------------------------------------
+
+  !---------------------------------------------------------
+  ! null input variables
+  !
+  real :: null_bref
+  real :: null_arho
   !---------------------------------------------------------
 
   !--------------------------------------------------------

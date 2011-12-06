@@ -23,8 +23,8 @@ class profiles_genData:
      Example Usage:
      >>> import matplotlib.pyplot as plt
      >>> from pyrats.profiles_gen.data import profiles_genData
-     >>> prof1 = profiles_genData('$GACODE_ROOT/tgyro/tools/input/treg01')
-     >>> prof1.plot('ne')
+     >>> prof = profiles_genData('$GACODE_ROOT/tgyro/tools/input/treg01')
+     >>> prof.plot('ne')
      >>> plt.show()
 
 """
@@ -65,11 +65,13 @@ class profiles_genData:
         elements = {}
         temp = []
         raw_data = open(self.dirname + '/input.profiles', 'r').readlines()
+
         #Determines length of header, and reads in data
-        while raw_data[self.hlen].strip()[0].isdigit() == False:
+        while raw_data[self.hlen].strip()[0].isdigit() == False and raw_data[self.hlen].strip()[0] != '-':
             self.hlen = self.hlen + 1
             if raw_data[self.hlen].strip()[0:6] == 'N_EXP=':
                 self.n_exp = int(raw_data[self.hlen].strip()[6:])
+    
         for line in range(self.hlen, len(raw_data)):
             if raw_data[line].strip()[0].isdigit() or raw_data[line].strip()[0] == '-':
                 temp.append(raw_data[line].split())
@@ -168,9 +170,9 @@ class profiles_genData:
         dtheta = 0.01
         x = self.match(r, self.data['rho (-)'])
         while theta < 2 * math.pi:
-            a = float(self.data['rmaj (m)'][x]) + float(self.data['rmin (m)'][x]) * math.cos(theta + math.asin(float(self.data['delta (-)'][x])) * math.sin(theta))
+            a = float(self.data['rmaj (m)'][x]) + float(self.data['rmin (m)'][x])*math.cos(theta + math.asin(float(self.data['delta (-)'][x])) * math.sin(theta))
             R.append(a)
-            b = float(self.data['zmag (m)'][x]) + float(self.data['kappa (-)'][x]) * float(self.data['rmin (m)'][x]) * math.sin(theta + float(self.data['zeta (-)'][x]) * math.sin(2 * theta))
+            b = float(self.data['zmag (m)'][x]) + float(self.data['kappa (-)'][x])*float(self.data['rmin (m)'][x])*math.sin(theta + float(self.data['zeta (-)'][x])*math.sin(2 * theta))
             Z.append(b)
             theta = theta + dtheta
         tot.append(R)

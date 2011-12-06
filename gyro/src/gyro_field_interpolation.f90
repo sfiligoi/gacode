@@ -38,6 +38,7 @@ subroutine gyro_field_interpolation
 
   call gyro_timer_in('Field-interp.a')
 
+!$omp parallel do default(shared) private(cmplx_phase,j_int,x,vtemp,j)
   do i=1,n_x
      cmplx_phase = phase(in_1,i)
      do j_int=1,n_theta_int
@@ -53,21 +54,20 @@ subroutine gyro_field_interpolation
 
      enddo ! j_int
   enddo ! i
+!$end parallel do
 
   !---------------------------------------------------------------
   ! Interpolate phi, A_par, and B_par onto orbit-grid:
   !
-  p_nek_loc = 0
-  do p_nek=1+i_proc_1,n_nek_1,n_proc_1
+!$omp parallel do default(shared) private(p_nek_loc,p_nek,k,ck,m,m0,ix)
+  do i=1,n_x
+     p_nek_loc = 0
+     do p_nek=1+i_proc_1,n_nek_1,n_proc_1
 
-     p_nek_loc = p_nek_loc+1
+        p_nek_loc = p_nek_loc+1
 
-     ie = nek_e(p_nek)  
-     k  = nek_k(p_nek)   
-
-     ck = class(k)
-
-     do i=1,n_x
+        k  = nek_k(p_nek)   
+        ck = class(k)
 
         do m=1,n_stack
 
@@ -80,9 +80,9 @@ subroutine gyro_field_interpolation
 
         enddo ! m
 
-     enddo ! i
-
-  enddo ! p_nek
+     enddo ! p_nek
+  enddo ! i
+!$end parallel do
   !
   !---------------------------------------------------------------
 
@@ -119,8 +119,12 @@ subroutine gyro_field_interpolation
            vf(:,i,:) = 0.0
         enddo
      endif
-     do i=1,n_x
-        vf(:,i,:) = field_tau(:,i,p_nek_loc,:)
+     do ix=1,n_field
+        do i=1,n_x
+           do m=1,n_stack
+              vf(m,i,ix) = field_tau(m,i,p_nek_loc,ix)
+           enddo
+        enddo
      enddo
 
      do is=1,n_gk
