@@ -15,6 +15,7 @@ FMATH  = -r8
 FOPT   = -tp istanbul-64 -O3 -fast -Msmartalloc -fastsse -Mnoopenmp
 FDEBUG = -g -Ktrap=fp -Mbounds -Minform=inform -Msmartalloc -Mnoopenmp
 FPROF  = -tp istanbul-64 -O3 -fast -Msmartalloc -Mprof=func -Mnoopenmp
+LIPM = /global/u1/p/pravn/IPM-hopper-pgi/libipm.a
 
 # Execute 'module load fftw/2.1.5'
 # Execute 'module load mumps/4.7.3_par' (parallel version) 
