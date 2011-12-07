@@ -6,8 +6,12 @@ export EXTRA_LIBS = ${GACODE_ROOT}/tglf/src/tglf_lib.a  \
                     ${LMATH}  \
                     ${NETCDF}  
 
-all:
+all: lib
 	cd src ; make
+lib:
+	cd ${GACODE_ROOT}/tglf ; make
+	cd ${GACODE_ROOT}/dataread ; make 
+	cd ${GACODE_ROOT}/shared/math ; make 
 
 clean:
 	cd src ; make clean 
