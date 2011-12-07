@@ -29,9 +29,7 @@ subroutine gyro_write_input
   real :: num_rho_r
   real :: num_rho_min
   real :: x_s
-  real :: grad_total
   real :: den_total
-  real :: beta_crit 
   real :: v_alfven
   real :: rhos_abs
   !
@@ -127,6 +125,9 @@ subroutine gyro_write_input
   if (i_proc == 0 .and. output_flag == 1 .and. gkeigen_j_set == 0) then
      open(unit=1,file=trim(runfile),status='old',position='append')
 
+     write(1,*) '---------- PARLLELISM DIMENSIONS --------------'
+     write(1,10) 'MPI tasks',n_proc
+     write(1,10) 'OpenMP threads',n_omp
      write(1,*) '----------- GRID DIMENSIONS -------------------'
      write(1,10) 'n_n',n_n
      write(1,10) 'n_x',n_x
@@ -225,6 +226,7 @@ subroutine gyro_write_input
      write(1,*) '-------- LOCAL PARAMETERS (diagnostic) ----------'
      write(1,20) 'n_i*z_i - n_e: ',neutral
      write(1,20) 'r/R0',r(ir_norm)/rmaj_s(ir_norm)
+     if (radial_profile_method == 3) write(1,20) 'rho_norm',rhogrid_s(ir_norm)
      write(1,20) 'b_unit',b_unit_norm
      write(1,20) 'beta_unit_norm',beta_unit_s(ir_norm)
      i = ir_norm
@@ -261,9 +263,11 @@ subroutine gyro_write_input
      if (electron_method == 2 .or. electron_method == 4) then
         write(1,20) 'orbit_upwind (elec)',orbit_upwind_vec(0)
      endif
-     write(1,*) '----------- SOURCE PARAMETERS -----------------'
-     write(1,20) 'nu_source', nu_source
-     write(1,10) 'n_source',n_source
+     if (source_flag == 1) then
+        write(1,*) '----------- SOURCE PARAMETERS -----------------'
+        write(1,20) 'nu_source',nu_source
+        write(1,10) 'n_source',n_source
+     endif
      write(1,*) '----------- RADIAL DOMAIN PARAMETERS ----------'
      write(1,20) 's_grid',s_grid
      write(1,20) 'box_multiplier',box_multiplier
@@ -319,13 +323,6 @@ subroutine gyro_write_input
         if (collision_flag == 1) then
            write(1,20) 'Log(RBF Cond. num.)',log10(c_max)
         endif
-        write(1,*) '----------- SETUP TIMING ----------------------'
-        write(1,20) 'Grid Setup',CPU_1-CPU_0
-        write(1,20) 'Build radial ops',CPU_2-CPU_1
-        write(1,20) 'Build advection ops',CPU_4-CPU_3
-        write(1,20) 'Build field matrices',CPU_6-CPU_5
-        write(1,*)
-        write(1,20) 'TOTAL SETUP',CPU_7-CPU_0
      endif
 
   endif
@@ -465,18 +462,20 @@ subroutine gyro_write_input
         write(1,*) '--------------------------------------------------'
      endif
 
+     write(1,20) 'Startup time',startup_time
+     write(1,*) '--------------------------------------------------'
      ! File list
      write(1,*) 'PLEASE SEE: '
-     write(1,*) ' - units.out for normalizing parameters'
-     write(1,*) ' - alloc.out for memory usage'
-     write(1,*) ' - efficiency.out for parallelization efficiency'
-     write(1,*) ' - phase_space.out for velocity-space nodes and weights'
+     write(1,*) ' - out.gyro.units for normalizing parameters'
+     write(1,*) ' - out.gyro.memory for memory usage'
+     write(1,*) ' - out.gyro.efficiency for parallelization efficiency'
+     write(1,*) ' - out.gyro.phase_space for velocity-space nodes and weights'
      close(1)
 
   endif
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[gyro_write_stdout done]'
+     print *,'[gyro_write_input done]'
   endif
 
 10 format(t2,a,t23,': ',i4) 

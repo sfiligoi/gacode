@@ -117,6 +117,7 @@ module gyro_interface
   real    :: gyro_ti_over_te_3_in = 1.0
   real    :: gyro_ti_over_te_4_in = 1.0
   real    :: gyro_ti_over_te_5_in = 1.0
+  integer :: gyro_reintegrate_flag_in = 0
   real    :: gyro_eps_dlnndr_in = 0.0
   real    :: gyro_eps_dlnndr_2_in = 0.0
   real    :: gyro_eps_dlnndr_3_in = 0.0
@@ -204,14 +205,13 @@ module gyro_interface
   real    :: gyro_fieldeigen_wr_in = -0.3
   real    :: gyro_fieldeigen_wi_in = 0.2
   real    :: gyro_fieldeigen_tol_in = 1e-6
-  integer :: gyro_collision_method_in = 1
 
   ! io related to hdf5 and diagnostics  
   integer :: gyro_io_method_in = 1
   real    :: gyro_torangle_offset_in = 0.0
-  integer :: gyro_time_skip_wedge_in = 1
-  integer :: gyro_n_torangle_wedge_in = 1
-  integer :: gyro_n_torangle_3d_in = 20
+  integer :: gyro_time_skip_wedge_in = 0
+  integer :: gyro_n_torangle_wedge_in = 0
+  integer :: gyro_n_torangle_3d_in = 0
   real    :: gyro_theta_wedge_offset_in = 0.
   real    :: gyro_theta_wedge_angle_in =0.
 
@@ -344,6 +344,7 @@ contains
     gyro_ti_over_te_3_in = t_vec(3)
     gyro_ti_over_te_4_in = t_vec(4)
     gyro_ti_over_te_5_in = t_vec(5)
+    gyro_reintegrate_flag_in = reintegrate_flag
     gyro_eps_dlnndr_in = eps_dlnndr_vec(1)
     gyro_eps_dlnndr_2_in = eps_dlnndr_vec(2)
     gyro_eps_dlnndr_3_in = eps_dlnndr_vec(3)
@@ -431,17 +432,14 @@ contains
     gyro_fieldeigen_wr_in = fieldeigen_wr
     gyro_fieldeigen_wi_in = fieldeigen_wi
     gyro_fieldeigen_tol_in = fieldeigen_tol
-    gyro_collision_method_in = collision_method
 
-    gyro_io_method_in        = io_method
-    gyro_torangle_offset_in        = torangle_offset
-
+    gyro_io_method_in = io_method
+    gyro_torangle_offset_in = torangle_offset
     gyro_time_skip_wedge_in = time_skip_wedge
     gyro_n_torangle_wedge_in = n_torangle_wedge
     gyro_n_torangle_3d_in  = n_torangle_3d 
     gyro_theta_wedge_offset_in  = theta_wedge_offset
     gyro_theta_wedge_angle_in = theta_wedge_angle 
-
 
     gyro_n_fourier_geo_in = n_fourier_geo
     gyro_a_fourier_geo_in(:,:) = a_fourier_geo(:,:)
@@ -560,6 +558,7 @@ contains
     t_vec(3) = gyro_ti_over_te_3_in
     t_vec(4) = gyro_ti_over_te_4_in
     t_vec(5) = gyro_ti_over_te_5_in
+    reintegrate_flag = gyro_reintegrate_flag_in
     eps_dlnndr_vec(1) = gyro_eps_dlnndr_in
     eps_dlnndr_vec(2) = gyro_eps_dlnndr_2_in
     eps_dlnndr_vec(3) = gyro_eps_dlnndr_3_in
@@ -647,17 +646,14 @@ contains
     fieldeigen_wr = gyro_fieldeigen_wr_in
     fieldeigen_wi = gyro_fieldeigen_wi_in
     fieldeigen_tol = gyro_fieldeigen_tol_in
-    collision_method = gyro_collision_method_in
     
-    io_method      = gyro_io_method_in       
+    io_method = gyro_io_method_in       
     torangle_offset = gyro_torangle_offset_in        
-
     time_skip_wedge = gyro_time_skip_wedge_in 
     n_torangle_wedge = gyro_n_torangle_wedge_in 
     n_torangle_3d = gyro_n_torangle_3d_in  
     theta_wedge_offset = gyro_theta_wedge_offset_in   
     theta_wedge_angle = gyro_theta_wedge_angle_in  
-
 
     n_fourier_geo = gyro_n_fourier_geo_in
     a_fourier_geo(:,:) = gyro_a_fourier_geo_in(:,:)

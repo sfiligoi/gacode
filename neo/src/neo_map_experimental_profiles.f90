@@ -4,16 +4,6 @@
 ! PURPOSE:
 !  Generate radial profile functions on the simulation 
 !  (slice) r-grid.
-!
-! NOTES:
-! "_p" -> experimental (coarse) grid.
-! "_s" -> simulation (fine) grid.
-!
-!  Nonuniform grid technique:
-!  -------------------------
-!
-!  r_e -> equally spaced grid.
-!  r   -> physical grid (may be nonuniform).    
 !-----------------------------------------------------------
 
 subroutine neo_map_experimental_profiles
@@ -77,8 +67,8 @@ subroutine neo_map_experimental_profiles
 
   ! EAB diagnostic
   if(prof_check_flag) then
-     if(write_out_mode > 0) then
-        open(unit=30,file='profcheckp.out',status='replace')
+     if(silent_flag == 0 .and. i_proc == 0) then
+        open(unit=30,file=trim(path)//'out.neo.profcheckp',status='replace')
         do ir=1,n_grid_exp
            write (30,'(e16.8,$)') r_p(ir)
            write (30,'(e16.8,$)') b_unit_p(ir)
@@ -104,7 +94,7 @@ subroutine neo_map_experimental_profiles
         enddo
         close(30)
         
-        open(unit=30,file='profchecks.out',status='replace')
+        open(unit=30,file=trim(path)//'out.neo.profchecks',status='replace')
         do ir=1,n_radial
            write (30,'(e16.8,$)') r(ir)
            write (30,'(e16.8,$)') b_unit(ir)
@@ -130,14 +120,13 @@ subroutine neo_map_experimental_profiles
         enddo
         close(30)
         
-        open(unit=30,file='profchecks_rhoN.out',status='replace')
+        open(unit=30,file=trim(path)//'out.neo.profchecks_rhoN',status='replace')
         do ir=1,n_radial
            write (30,'(e16.8,$)') r(ir)
            write (30,'(e16.8,$)') rhoN_torflux(ir)
            write (30,'(e16.8,$)') psiN_polflux(ir)
            write (30,*)
         enddo
-        !print *, rhoN_torflux_a
         close(30)
         
      end if

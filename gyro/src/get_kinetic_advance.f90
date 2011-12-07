@@ -1,5 +1,5 @@
 !-----------------------------------------------------------
-! get_kinetic_advance.f90 [caller: timestep_SSP_322]
+! get_kinetic_advance.f90
 !
 ! PURPOSE:
 !  Manage implicit advance of fields and electron
@@ -18,24 +18,16 @@ subroutine get_kinetic_advance
   implicit none
   !-------------------------
 
-  call proc_time(CPU_field_in)
+  call gyro_timer_in('Implicit-he')
+  call gyro_get_delta_he
+  call gyro_timer_out('Implicit-he')
 
-  call get_delta_he
-
-  call get_gyro_h
-
-  if (n_field == 1) then
-     call get_poisson_solution
-  else
-     call get_maxwell_solution
-  endif
-
+  call gyro_field_solve_implicit
   call gyro_field_interpolation
 
+  call gyro_timer_in('Implicit-he')
   call gyro_get_he_implicit
-
-  call proc_time(CPU_field_out)
-  CPU_field = CPU_field + (CPU_field_out - CPU_field_in)
+  call gyro_timer_out('Implicit-he')
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'*[get_kinetic_advance done]'

@@ -1,0 +1,65 @@
+#---------------------------------------------------
+# Generic {Intel OSX,gfortran} 
+#---------------------------------------------------
+
+# NOTES:
+# 20 Aug 07: M. Fahey
+# - Have built gyro-6.4cvs with gfortran binary for Intel OS X
+
+# Reset make command
+
+MAKE = make
+
+HDF5_PATH=/opt/local
+NETCDF_PATH=/opt/local
+MF90 = openmpif90
+
+
+
+# Compilers and flags
+#
+#set up for diff mpif90s
+#
+
+FC	= ${MF90} -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -g 
+F77	= ${MF90} -g 
+
+FMATH	= -fdefault-real-8
+FOPT	= -O3
+FDEBUG	= -Wall -fbacktrace -fbounds-check -O0 -Wextra -finit-real=nan -Wunderflow -ffpe-trap=invalid,zero,overflow
+FBOUND	= -Wall -fbounds-check
+FPROF	= 
+FOMP	= -fopenmp
+
+# System math libraries
+
+#LMATH = /System/Library/Frameworks/vecLib.framework/Versions/A/vecLib \
+       -lSystemStubs -lSystem
+
+LMATH = -framework Accelerate
+
+# OPTIONAL: netCDF (for gyro2gkv)
+
+
+
+# OPTIONAL: HDF5 (for vshdf5)
+HDF5_LIBS = \
+  ${HDF5_PATH}/lib/libsz.a \
+  ${HDF5_PATH}/lib/libz.a \
+  ${HDF5_PATH}/lib/libhdf5hl_fortran.a \
+  ${HDF5_PATH}/lib/libhdf5_hl.a \
+  ${HDF5_PATH}/lib/libhdf5_fortran.a \
+  ${HDF5_PATH}/lib/libhdf5.a
+
+
+HDF5_INC =  -I${HDF5_PATH}/include -I${HDF5_PATH}/include/fortran
+VSHDF5_MAKECMD=vshdf5
+MPI_FLAG=-Wp,-D__MPI
+
+
+NETCDF = \
+    -L/opt/local/lib -lnetcdff -lnetcdf ${HDF5_LIBS}
+NETCDF_INC =${NETCDF_PATH}/include ${HDF5_INC}
+# Archive
+
+ARCH = ar cr

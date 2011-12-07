@@ -64,6 +64,8 @@ c
           smult(j)=s0_pt(i)
           if (i_proc .eq. 0)write(unit,*)smult(j)
         endif
+        INTEGRAL_LHS(i,0)=0.0
+        INTEGRAL_RHS(i,0)=0.0
         do k=1,mxgrid
           s(i,k) = 0.D0
           flux(i,k) = 0.D0
@@ -71,7 +73,7 @@ c
           Tstart(i,k)=0.D0
           St(i,k) = 0.D0
           INTEGRAL_LHS(i,k)=0.0
-          INTEGRAL_RHS(i,j)=0.0
+          INTEGRAL_RHS(i,k)=0.0
           do m=1,mxfields
             conv3(i,m,k) = 0.0
             diff(i,m,k) = 0.0
@@ -92,7 +94,7 @@ c
       if (i_proc .eq. 0)write(unit,20)nfields,ngrid,nsteps_v
  20   format('  nfields = ',i3,'  ngrid = ',i3,
      >   '  nsteps_v = ',i3)
-      jin_m=1      
+c      jin_m=1      
       if(xparam_pt(1).eq.0.D0)xparam_pt(1)=0.5D0
       if(xparam_pt(2).eq.0.D0)xparam_pt(2)=0.5D0
       if(xparam_pt(9).eq.0.D0)xparam_pt(9)=2.D0
@@ -337,18 +339,19 @@ c
 c recompute transport coefficients
 c
         gridcount=ngrid-1
-        do k=1,ngrid-1
-          mask_r(k)=1
-            sumS=0.D0
-            do i=1,nfields
-              sumS = sumS + DABS(S(i,k))/normT(i)
-            enddo
-            if(sumS.lt.DMAX1(normDT*Stest2,Stest2))then
-              mask_r(k)=0
-              gridcount=gridcount-1
-            endif
-        enddo
-        if(i_proc.eq.0)write(*,*)"active gridpoints = ",gridcount
+cc        do k=1,ngrid-1
+cc          mask_r(k)=1
+cc            sumS=0.D0
+cc            do i=1,nfields
+cc              sumS = sumS + DABS(S(i,k))/normT(i)
+cc            enddo
+cc            if(sumS.lt.DMAX1(normDT*Stest2,Stest2))then
+cc              mask_r(k)=0
+cc              gridcount=gridcount-1
+cc            endif
+cc        enddo
+cc        if(i_proc.eq.0)write(*,*)"active gridpoints = ",gridcount
+c
       call trcoef_dv(dt_imp)
 c        write(*,*)"third call", nglf23
       call norm_dv(normS,normDT,normT,ngrid)

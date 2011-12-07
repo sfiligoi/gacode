@@ -72,14 +72,10 @@ subroutine gyro_alloc_big(flag)
      if (collision_flag == 1) then
         allocate(f_coll(n_stack,n_x,n_nek_loc_1))
         allocate(fb_coll(n_stack,n_x,n_nek_loc_1))
-        if (collision_method > 2) then
-           allocate(h_C_all(n_kinetic,n_stack,n_lambda,n_ine_loc_1)) 
-        else
-           allocate(h_C(n_stack,n_lambda,n_ine_loc_1)) 
-        endif
+        allocate(h_C(n_stack,n_lambda,n_ine_loc_1)) 
      endif
 
-     allocate(h_M(nv1_SSUB,msplit_SSUB,n_n,n_kinetic))
+     allocate(h_tran(nv1_SSUB,msplit_SSUB,n_n,n_kinetic))
      allocate(gyro_h(n_stack,n_x,n_nek_loc_1,n_kinetic))
 
      if (n_field == 3) then
@@ -93,7 +89,7 @@ subroutine gyro_alloc_big(flag)
      allocate(gyro_uv_old(n_stack,n_x,n_nek_loc_1,n_kinetic,n_field))
      allocate(gyro_uv_dot(n_stack,n_x,n_nek_loc_1,n_kinetic,n_field))
      allocate(gyro_u(n_stack,n_x,n_nek_loc_1,n_kinetic))
-     allocate(gyro_u_M(nv1_SSUB,msplit_SSUB,n_n,n_kinetic))
+     allocate(gyro_u_tran(nv1_SSUB,msplit_SSUB,n_n,n_kinetic))
      allocate(phi(n_theta_int,n_x,n_field))
      allocate(vel_sum_p(n_blend,n_x))
      allocate(vel_sum_a(n_blend,n_x))
@@ -105,7 +101,7 @@ subroutine gyro_alloc_big(flag)
      endif
 
      allocate(moments_plot(n_theta_plot,n_x,n_kinetic,3))
-     
+
      !For synthetic diagnostic
      if (io_method > 1 .and. time_skip_wedge > 0) then
         allocate(moments_plot_wedge(n_theta_plot*n_theta_mult,n_x,n_kinetic,3))
@@ -143,6 +139,7 @@ subroutine gyro_alloc_big(flag)
 
      allocate(time_error(n_kinetic))
      allocate(w_time(time_skip))
+     allocate(omega_linear(n_n,2))
 
      !------------------------------------------------------------
      ! Source-related arrays
@@ -188,9 +185,8 @@ subroutine gyro_alloc_big(flag)
      if (allocated(f_coll)) deallocate(f_coll)
      if (allocated(fb_coll)) deallocate(fb_coll)
      if (allocated(h_C)) deallocate(h_C) 
-     if (allocated(h_C_all)) deallocate(h_C_all)
 
-     deallocate(h_M)
+     deallocate(h_tran)
      deallocate(gyro_h)
      if  (allocated(gyro_h_aperp)) deallocate(gyro_h_aperp)
      deallocate(field_tau)
@@ -201,7 +197,7 @@ subroutine gyro_alloc_big(flag)
      deallocate(gyro_uv_old)
      deallocate(gyro_uv_dot)
      deallocate(gyro_u)
-     deallocate(gyro_u_M)
+     deallocate(gyro_u_tran)
      deallocate(phi)
      deallocate(vel_sum_p)
      deallocate(vel_sum_a)
@@ -243,6 +239,7 @@ subroutine gyro_alloc_big(flag)
 
      deallocate(time_error)
      deallocate(w_time)
+     deallocate(omega_linear)
      deallocate(h0_eq)
      deallocate(h0_mod)
      deallocate(h0_n)

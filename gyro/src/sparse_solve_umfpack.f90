@@ -24,8 +24,6 @@ subroutine sparse_solve_umfpack(n_elem,n_row,matnum,i_solve)
   !
   !---------------------------------------------------
 
-  call proc_time(CPU_field2_in)
-
   select case(matnum)
 
   case(1) 
@@ -184,8 +182,6 @@ subroutine sparse_solve_umfpack(n_elem,n_row,matnum,i_solve)
      !----------
      ! SOLVE
      !----------
-
-     call proc_time(CPU_field2_in)
 
      allocate(b_UMF(n_row))
      allocate(x_UMF(n_row))
@@ -346,9 +342,6 @@ subroutine sparse_solve_umfpack(n_elem,n_row,matnum,i_solve)
      deallocate(w_UMF)
 
   endif
-
-  call proc_time(CPU_field2_out)
-  CPU_field2 = CPU_field2 + (CPU_field2_out - CPU_field2_in)
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[sparse_solve done]'

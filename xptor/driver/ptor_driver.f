@@ -732,7 +732,7 @@ c
         ne_m(j)=ne_exp(j)
         ni_m(j)=ni_exp(j)
         nz_m(j)=nz_exp(j)
-        ns_m(j)=nfst_exp(j)
+        ns_m(j)=nfast_exp(j)
        enddo
       endif
 c
@@ -763,7 +763,7 @@ c run PTOR or PTOR_DV
 c
       if (dvflag .gt. 0) then
         call ptor_dv
-        call derivedmodprofiles
+c        call derivedmodprofiles
       endif
 c
       if(dvflag.eq.0)then

@@ -74,7 +74,7 @@
       REAL :: exchange_QL(nsm,3)
       REAL :: phi_QL,N_QL(nsm),T_QL(nsm)
       REAL :: Ne_Te_phase
-      REAL :: wd_bar,v2_bar,kyi
+      REAL :: wd_bar,b0_bar,v2_bar,kyi
       REAL :: get_intensity, get_gamma_net
 !      COMPLEX ::  v(iar)
 !      COMPLEX :: xi
@@ -279,12 +279,13 @@
             enddo
           enddo
           call zgesv(iur,1,zmat,iar,ipiv,v,iar,info)
-          if(info.ne.0)write(*,*)"error in zgesv",info
+          if(info.ne.0)write(*,*)"ERROR: zgesv failed in tglf_ls.f90.",info
 !  alpha/beta=-xi*(frequency+xi*growthrate)
           eigenvalue = xi*alpha(jmax(imax))/beta(jmax(imax))  
           call get_QL_weights(particle_QL,energy_QL,stress_par_QL,stress_tor_QL, &
-               exchange_QL,phi_QL,N_QL,T_QL,wd_bar,NE_Te_phase,field_weight)
+               exchange_QL,phi_QL,N_QL,T_QL,wd_bar,b0_bar,NE_Te_phase,field_weight)
           wd_bar_out(imax)=wd_bar
+          b0_bar_out(imax)=b0_bar
           phi_QL_out(imax)=phi_QL
           do i=1,nbasis
             do j=1,3
@@ -1094,17 +1095,17 @@
         egamma = 0.0
         ngamma = 0.0
         tgamma = 0.0
-        if(alpha_quench_in.eq.0.0)egamma = -alpha_e_in*vexb_shear_s*sign_kx0
+        if(alpha_quench_in.eq.0.0)egamma = -alpha_e_in*0.11*vexb_shear_s*sign_kx0
 !
-!            write(*,*)alpha_kx0_in,alpha_e_in
+!            write(*,*)alpha_kx_e_in,alpha_e_in
 !
 ! start of loop over species is,js for amat
 !
       do is = ns0,ns
 !
         if(alpha_quench_in.eq.0.0)then
-          ngamma = -alpha_e_in*shear_ns_in(is)*sign_kx0
-          tgamma = -alpha_e_in*shear_ts_in(is)*sign_kx0
+          ngamma = -0.11*alpha_n_in*vns_shear_in(is)*sign_kx0
+          tgamma = -0.11*alpha_t_in*vts_shear_in(is)*sign_kx0
         endif
       do js = ns0,ns
 !
@@ -3354,7 +3355,7 @@
 !      write(*,*)"cputime for zggev =",REAL(cpucount2-cpucount1)/REAL(cpurate)
 !      write(*,*)"jmax = ",jmax,alpha(jmax)/beta(jmax)
 !      write(*,*)"work(1)",work(1)
-      if(info.ne.0)write(*,*)"error in zggev",info
+      if(info.ne.0)write(*,*)"ERROR: zggev failed in tglf_ls.f90.",info
 !      cputime2=MPI_WTIME()
       do j1=1,iur
         beta2=REAL(CONJG(beta(j1))*beta(j1))
@@ -3476,7 +3477,7 @@
 !
       SUBROUTINE get_QL_weights(particle_weight,energy_weight, &
         stress_par_weight,stress_tor_weight,exchange_weight, &
-        phi_weight,N_weight,T_weight,wd_bar,Ne_Te_phase,field_weight)
+        phi_weight,N_weight,T_weight,wd_bar,b0_bar,Ne_Te_phase,field_weight)
 ! **************************************************************
 !
 ! compute the quasilinear weights for a single eigenmode
@@ -3514,6 +3515,7 @@
       COMPLEX :: phi(nb),psi(nb),bsig(nb)
       COMPLEX :: field_weight(3,nb)
       COMPLEX :: phi_wd_phi,wd_phi
+      COMPLEX :: phi_b0_phi,b0_phi
       COMPLEX :: dum,freq_QL
       REAL :: betae_psi,betae_sig
       REAL :: phi_norm,vnorm
@@ -3523,7 +3525,7 @@
       REAL :: stress_tor_weight(nsm,3)
       REAL :: exchange_weight(nsm,3)
       REAL :: N_weight(nsm),T_weight(nsm)
-      REAL :: wd_bar,phi_weight,epsilon
+      REAL :: wd_bar,b0_bar,phi_weight,epsilon
       REAL :: Ne_Te_phase,Ne_Te_cos,Ne_Te_sin
       REAL :: ft2,cu,cq1,cq3
       REAL :: stress_correction,wp
@@ -3648,25 +3650,31 @@
       if(phi_norm.lt.epsilon)phi_norm = epsilon
 !      write(*,*)"phi_norm =",phi_norm
 !
-! compute <phi|wd|phi>
+! compute <phi|wd|phi> and <phi|b0|phi>
       phi_wd_phi = 0.0
+      phi_b0_phi = 0.0
       do i=1,nbasis
          wd_phi = 0.0
+         b0_phi = 0.0
          do j=1,nbasis
            wd_phi = wd_phi +ave_wd(i,j)*phi(j)
+           b0_phi = b0_phi +ave_b0(i,j)*phi(j)
          enddo
          phi_wd_phi = phi_wd_phi + CONJG(phi(i))*wd_phi
+         phi_b0_phi = phi_b0_phi + CONJG(phi(i))*b0_phi
       enddo
       wd_bar = REAL(phi_wd_phi)/phi_norm
+      b0_bar = REAL(phi_b0_phi)/phi_norm
 !      write(*,*)"wd_bar = ",wd_bar
+!      write(*,*)"b0_bar = ",b0_bar
 !
 ! fill the stress moments
 !
-      wp = ky*ave_hp1(2,1,1)*ABS(vpar_shear_in(2))/vs(2)
+!      wp = ky*ave_hp1(2,1,1)*ABS(vpar_shear_in(2))/vs(2)
 !      stress_correction = (AIMAG(freq_QL)+2.0*wp)/(AIMAG(freq_QL)+wp)
-!      stress_correction = 1.0
       wp = ABS(vpar_shear_in(2)*R_unit/vs(2))
-      stress_correction = 1.0 + ((0.149*wp)**1.5)/(1.0+(0.098*wp)**5.5)
+      stress_correction = 1.0 + ((0.11*wp)**1.5)/(1.0+(0.075*wp)**7)
+!      stress_correction = 1.0
 !
       do is=ns0,ns
         do i=1,nbasis
@@ -3714,7 +3722,7 @@
           stress_tor_weight(is,1) = stress_tor_weight(is,1)  &
             + REAL(xi*CONJG(phi(i))*(ave_c_tor_par(1,1)*stress_par(is,i,1)+ave_c_tor_per(1,1)*stress_per(is,i,1)))
           exchange_weight(is,1) = exchange_weight(is,1) &
-          + zs(is)*REAL(xi*freq_QL*CONJG(phi(i))*(n(is,i)-zs(is)*phi(i)/taus(is)))
+          + zs(is)*REAL(xi*freq_QL*CONJG(phi(i))*n(is,i))
           if(use_bper_in)then
             particle_weight(is,2) = particle_weight(is,2) &
             - vs(is)*REAL(xi*CONJG(psi(i))*u_par(is,i))

@@ -2,7 +2,8 @@
 ! tglf_run.f90
 !
 ! PURPOSE:
-!  Manage call to local TGLF simulation.
+!  Manage call to TGLF simulation for both standalone and 
+!  TGYRO usage.
 !---------------------------------------------------------
 
 subroutine tglf_run()
@@ -12,7 +13,7 @@ subroutine tglf_run()
 
   implicit none
 
-  integer :: i_ion, n
+  integer :: i_ion,n
   complex :: xi=(0.0,1.0)
 
   call put_species(tglf_ns_in, &
@@ -65,10 +66,14 @@ subroutine tglf_run()
        tglf_damp_sig_in)
 
   call put_model_parameters(tglf_adiabatic_elec_in, &
-       tglf_alpha_p_in, &
        tglf_alpha_e_in, &
-       tglf_alpha_kx0_in, &
-       tglf_alpha_kx1_in, &
+       tglf_alpha_p_in, &
+       tglf_alpha_n_in, &
+       tglf_alpha_t_in, &
+       tglf_alpha_kx_e_in, &
+       tglf_alpha_kx_p_in, &
+       tglf_alpha_kx_n_in, &
+       tglf_alpha_kx_t_in, &
        tglf_alpha_quench_in, &
        tglf_xnu_factor_in, &
        tglf_debye_factor_in, &
@@ -81,7 +86,7 @@ subroutine tglf_run()
 
   if (tglf_geometry_flag_in == 1 ) then
 
-     call put_Miller_geometry(tglf_rmin_loc_in, &
+     call put_miller_geometry(tglf_rmin_loc_in, &
           tglf_rmaj_loc_in, &
           tglf_zmaj_loc_in, &
           tglf_drmindx_loc_in, &
@@ -99,7 +104,7 @@ subroutine tglf_run()
 
   elseif (tglf_geometry_flag_in == 2)then
 
-     call put_Fourier_geometry(tglf_q_fourier_in,  &
+     call put_fourier_geometry(tglf_q_fourier_in,  &
           tglf_q_prime_fourier_in, &
           tglf_p_prime_fourier_in, &
           tglf_nfourier_in, &
@@ -126,7 +131,8 @@ subroutine tglf_run()
   endif
 
   if (tglf_use_transport_model_in)then
-     call tglf_TM
+
+     call tglf_tm
 
      !---------------------------------------------
      ! Output (normalized to Q_GB)
@@ -158,14 +164,21 @@ subroutine tglf_run()
         tglf_ion_mflux_out(i_ion) = get_stress_tor(i_ion+1,1)
 
      enddo
-  else
-     ! run single ky linear stability
-     call tglf_LS
 
-     !collect linear eigenvalues
+  else
+
+     ! Run single-ky linear stability
+     call tglf_ls
+
+     ! Collect linear eigenvalues
      do n=1,tglf_nmodes_in
         tglf_eigenvalue_out(n) = get_frequency(n) + xi*get_growthrate(n)
      enddo
+
+     ! Print eigenfunction if flag set
+     if (tglf_write_wavefunction_flag_in == 1) then
+        call write_wavefunction_out(trim(tglf_path_in)//'out.tglf.wavefunction')
+     endif
 
   endif
 

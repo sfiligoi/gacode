@@ -21,8 +21,6 @@ subroutine sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
   integer :: ij
   !---------------------------------------------------
 
-  call proc_time(CPU_field2_in)
-
   select case(matnum)
 
   case(1) 
@@ -124,8 +122,6 @@ subroutine sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
      !----------
      ! SOLVE
      !----------
-
-     call proc_time(CPU_field2_in)
 
      if (m_mumps(matnum)%MYID == 0) then
 
@@ -280,9 +276,6 @@ subroutine sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
 
 
   endif
-
-  call proc_time(CPU_field2_out)
-  CPU_field2 = CPU_field2 + (CPU_field2_out - CPU_field2_in)
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[sparse_solve done]'

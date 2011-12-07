@@ -13,6 +13,7 @@
 
 subroutine tgyro_comm_setup
 
+  use mpi
   use tgyro_globals
 
   implicit none
@@ -24,13 +25,12 @@ subroutine tgyro_comm_setup
 
   integer :: low
   integer :: high
+  integer :: splitkey
 
   integer, dimension(n_proc_global) :: colorvec
   integer, dimension(n_proc_global) :: workervec
   integer, dimension(n_proc_global) :: adjointvec
   integer, dimension(n_proc_global) :: workeradjvec
-
-  include 'mpif.h'
 
   call MPI_BCAST(paths,&
        n_inst*80,&
@@ -71,7 +71,7 @@ subroutine tgyro_comm_setup
         n_worker = n_evolve+1
 
         if (n_proc_global < n_worker*n_inst) then
-           call tgyro_catch_error('ERROR: Bad core count')
+           call tgyro_catch_error('ERROR: (TGYRO) Bad core count')
         endif
 
      else
@@ -86,9 +86,11 @@ subroutine tgyro_comm_setup
      ! Linear stability 
      !-----------------------------
 
-     !! Currently this selection method is a kludge and should be fixed.
+     ! Linear stability mode requires that only TGLF or GYRO is used 
+     ! at all radii.
 
-     if (paths(1) == "TGLF/") then
+     lpath = paths(1)
+     if (lpath(1:4) == "TGLF") then
 
         ! TGLF: number of workers is one
 
@@ -130,7 +132,7 @@ subroutine tgyro_comm_setup
      do j=1,n_worker
         i_color = i_color+1
         high = low+procs(i)/n_worker-1
-        if (i_proc_global >= low .AND. i_proc_global <= high) then
+        if (i_proc_global >= low .and. i_proc_global <= high) then
            color   = i_color-1
            worker  = j-1
            adjoint = i_proc_global-low+worker*procs(i)/n_worker
@@ -153,34 +155,47 @@ subroutine tgyro_comm_setup
        workeradjvec,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
 
   if (i_proc_global == 0) then
-     open(unit=1,file='taskmapping.out',status='replace')
+     open(unit=1,file='out.tgyro.taskmapping',status='replace')
      write(1,'(t2,a,t10,a,t18,a,t26,a,t34,a)') &
           'core','gcomm','worker','adjoint','workeradj'
      do i=1,n_proc_global
         write(1,'(5(i5,3x),a)') &
              i-1,colorvec(i),workervec(i),adjointvec(i),workeradjvec(i)
      enddo
+     close(1)
   endif
 
   ! Split MPI_COMM_WORLD into n_inst*n_worker different communicators.
 
+  ! Choose key for task ordering
+  splitkey = i_proc_global
+
   call MPI_COMM_SPLIT(MPI_COMM_WORLD,&
        color,&
-       i_proc_global,&
+       splitkey,&
        gyro_comm,&
        ierr)
+  if (ierr /= 0) then
+     call tgyro_catch_error('ERROR: (TGYRO) GYRO_COMM not created') 
+  endif
 
   call MPI_COMM_SPLIT(MPI_COMM_WORLD,&
        adjoint,&
-       i_proc_global,&
+       splitkey,&
        gyro_adj,&
        ierr)
+  if (ierr /= 0) then
+     call tgyro_catch_error('ERROR: (TGYRO) GYRO_ADJ not created') 
+  endif
 
   call MPI_COMM_SPLIT(MPI_COMM_WORLD,&
        workeradj,&
-       i_proc_global,&
+       splitkey,&
        gyro_rad,&
        ierr)
+  if (ierr /= 0) then
+     call tgyro_catch_error('ERROR: (TGYRO) GYRO_RAD not created') 
+  endif
 
   call MPI_COMM_RANK(gyro_comm,gyro_comm_rank,ierr)
   call MPI_COMM_RANK(gyro_adj,gyro_adj_rank,ierr)
@@ -215,6 +230,13 @@ subroutine tgyro_comm_setup
         if (worker == ip) worker_index=4
      endif
 
+  endif
+
+  call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+  if (i_proc_global == 0) then
+     open(unit=1,file=trim(runfile),position='append')
+     write(1,'(t2,a)') 'INFO: (TGYRO) MPI communicators split in TGYRO'
+     close(1)
   endif
 
 end subroutine tgyro_comm_setup

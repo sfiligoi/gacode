@@ -18,14 +18,13 @@ subroutine make_ampere_blend
   !
   real :: betae_eff
   !
-  real :: v_perp0
-  real :: x_s
+  real :: omega_c
   real :: rho_gyro
   real :: a_gyro
   real :: u_gyro
   real :: v_gyro
+  !
   complex :: inqr
-  complex :: temp
   !
   complex, dimension(-mg_dx:mg_dx-ig_dx,n_blend,n_blend) :: vel_sum_loc
   complex, dimension(-mg_dx:mg_dx-ig_dx,n_blend,n_blend) :: vel_sum_glob
@@ -33,7 +32,6 @@ subroutine make_ampere_blend
   complex, dimension(-m_dx:m_dx-i_dx) :: grad_perp_ap
   complex, dimension(n_gk,-mg_dx:mg_dx-ig_dx) :: ion_current
   !---------------------------------------------------
-
 
   betae_eff = betae_unit_norm*ampere_scale
 
@@ -78,20 +76,19 @@ subroutine make_ampere_blend
               else
 
                  !--------------------------------------------
-                 ! Parameters which depend on equilibrium:
+                 ! Prepare argument of Bessel function
                  !
-                 v_perp0 = sqrt(2.0*energy(ie,is)*lambda(i,k)*b0_t(i,k,m0))
-                 x_s = sqrt(tem_s(is,i))/mu(is)/abs(z(is))
+                 omega_c = abs(z(is))*b_unit_s(i)*mu(is)**2
                  !
                  if (kill_gyro_b_flag == 0) then
-                    rho_gyro = rhos_norm/b_unit_s(i)*v_perp0*x_s/b0_t(i,k,m0)
-                 else
-                    rho_gyro = rhos_norm/b_unit_s(i)*v_perp0*x_s
+                    omega_c = omega_c*b0_t(i,k,m)
                  endif
                  !
-                 a_gyro = grad_r_t(i,k,m0)/x_length*dr_eodr(i)
-                 u_gyro = qrat_t(i,k,m0)*n_1(in_1)*q_s(i)/r_s(i)*captheta_t(i,k,m0)
-                 v_gyro = qrat_t(i,k,m0)*n_1(in_1)*q_s(i)/r_s(i)
+                 rho_gyro = rhos_norm*v_perp(m,i,p_nek_loc,is)/omega_c
+                 !
+                 a_gyro = grad_r_t(i,k,m)/x_length*dr_eodr(i)
+                 v_gyro = qrat_t(i,k,m)*n_1(in_1)*q_s(i)/r_s(i)
+                 u_gyro = v_gyro*captheta_t(i,k,m)
                  !--------------------------------------------
 
                  f_x(is,:) = (0.0,0.0) 
@@ -103,24 +100,6 @@ subroutine make_ampere_blend
                       v_gyro,&
                       f_x(is,:),&
                       2)
-
-                 if (n_1(in_1) == 0) then   
-
-                    if (i_gyro /= 1) then 
-
-                       !! JC
-                       ! Correct truncated gyroaverage                 
-
-                       temp = sum(f_x(is,:))-1.0
-                       f_x(is,0) = f_x(is,0)-temp
-
-                    endif
-
-                    ! Enforce EXACT reality 
-
-                    f_x(is,:) = real(f_x(is,:))
-
-                 endif
 
                  ion_current(is,:) = &
                       v_para(m,i,p_nek_loc,is)**2* &
@@ -135,12 +114,11 @@ subroutine make_ampere_blend
 
                  do i_diff=-m_dx,m_dx-i_dx
 
-                    !----------------------------
-                    ! This will stagnate at i=n_x  
-                    ! for i+i_diff > n_x
-                    !
+                    !-----------------------------------------------
+                    ! This will stagnate at i=n_x for i+i_diff > n_x
+                    ! if boundary_method=2:
                     ip = i_cyc(i+i_diff)
-                    !----------------------------
+                    !-----------------------------------------------
 
                     vel_sum_loc(i_diff,j,jp) = vel_sum_loc(i_diff,j,jp)+&
                          grad_perp_ap(i_diff)* &
@@ -151,12 +129,11 @@ subroutine make_ampere_blend
 
                  do i_diff=-mg_dx,mg_dx-ig_dx
 
-                    !----------------------------
-                    ! This will stagnate at i=n_x  
-                    ! for i+i_diff > n_x
-                    !
+                    !-----------------------------------------------
+                    ! This will stagnate at i=n_x for i+i_diff > n_x
+                    ! if boundary_method=2:
                     ip = i_cyc(i+i_diff)
-                    !----------------------------
+                    !------------------------------------------------
 
                     vel_sum_loc(i_diff,j,jp) = vel_sum_loc(i_diff,j,jp)+&
                          fakefield_flag*sum(ion_current(:,i_diff))* &

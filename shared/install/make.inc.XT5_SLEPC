@@ -15,9 +15,10 @@ F77 = ftn
 
 # Compiler options/flags
 FMATH  = -r8
-FOPT   = -tp istanbul-64 -O3 -fast -Msmartalloc -fastsse
-FDEBUG = -g -Ktrap=fp -Mbounds -Minform=inform
-FPROF  = -tp istanbul-64 -O3 -fast -Msmartalloc -Mprof=func
+FOPT   = -fast -Msmartalloc 
+FDEBUG = -Ktrap=fp -Mbounds -Minform=inform
+FOMP   = -mp=nonuma
+FNOMP  =
 
 # Execute 'module load fftw/2.1.5'
 # Execute 'module load mumps/4.7.3_par' (parallel version) 

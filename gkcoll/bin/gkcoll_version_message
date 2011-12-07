@@ -1,0 +1,14 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  gkcoll_version_message
+#
+# FUNCTION:
+#  Echo version message.
+#------------------------------
+
+VERSION=`gacode_getversion`
+
+echo "=========================================================="
+echo "GKCOLL" `echo $VERSION` `echo $GACODE_PLATFORM` `uname -s` `uname -m`
+echo "=========================================================="

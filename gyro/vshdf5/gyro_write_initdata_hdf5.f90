@@ -4,7 +4,7 @@
  !    profile_vugyro.out
  !------------------------------------------
 
-subroutine gyro_write_initdata_hdf5(datafile,action)
+subroutine gyro_write_initdata_hdf5(datafile)
 
   use gyro_globals
   use hdf5
@@ -15,26 +15,20 @@ subroutine gyro_write_initdata_hdf5(datafile,action)
   implicit none
   include 'mpif.h'
   !
-  integer, intent(in) :: action
   character (len=*), intent(in) :: datafile
   !
-  integer :: data_loop
-  integer :: i_dummy
-  real :: dummy
   integer(HID_T) :: fid, rootid
   character(90) :: description
   type(hdf5InOpts) :: h5in
   type(hdf5ErrorType) :: h5err
   integer :: n_wedge
-  integer :: io_mode
   real :: theta
   real :: dr, buff
   real :: kt
   real, allocatable :: buffer(:,:,:)
-  !double precision :: buff
+
   !------------------------------------------
-  ! Do the initialization here.  Might need
-  ! better logic here based on action.
+  ! Do the initialization here.  
   !------------------------------------------
   call vshdf5_fcinit()
   if(i_proc/=0) return
@@ -237,16 +231,20 @@ subroutine gyro_write_initdata_hdf5(datafile,action)
         call GEO_interp(theta)
         nu_coarse(j,i)=GEO_nu
      enddo
-     do j=1,n_wedge
-        theta=theta_wedge_offset+real(j-1)*theta_wedge_angle/       &
-             real(n_theta_plot*n_theta_mult-1)
-        if (n_wedge == 1) theta = 0.0 ! Test for special case
-        call GEO_interp(theta)
-        nu_wedge(j,i)=GEO_nu
-     enddo
+!     if (n_wedge>1) then
+       do j=1,n_wedge
+          if (n_wedge == 1) then
+            theta = 0.0 ! Test for special case
+          else
+          theta=theta_wedge_offset+real(j-1)*theta_wedge_angle/       &
+               real(n_theta_plot*n_theta_mult-1)
+          endif
+          call GEO_interp(theta)
+          nu_wedge(j,i)=GEO_nu
+       enddo
+!     endif
 
   enddo ! i
-
 
   call dump_h5(rootid,"nu",      buffer(1,:,:),h5in,h5err)
   call dump_h5(rootid,"gsin",    buffer(2,:,:),h5in,h5err)

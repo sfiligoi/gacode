@@ -41,7 +41,6 @@ subroutine gyro_collision_krook
 
      h_tmp(:,:) = h(:,:,p_nek_loc,1)
 
-!DIR$ PREFERVECTOR
      do i=1,n_x
 
         do m=1,n_stack
@@ -141,7 +140,6 @@ subroutine gyro_collision_krook
 
      ck = class(k)
 
-!DIR$ PREFERVECTOR
      do i=1,n_x
 
         do m=1,n_stack

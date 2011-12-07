@@ -2,10 +2,10 @@
 ! gyro_write_timedata_hdf5.f90 
 !
 ! PURPOSE:
-!  This is an hdf5 version of gyro_write_master.f90
+!  This is an hdf5 version of gyro_write_timedata.f90
 !-----------------------------------------------------
 
-subroutine gyro_write_timedata_hdf5(action)
+subroutine gyro_write_timedata_hdf5
 
   use gyro_globals
   use hdf5
@@ -16,31 +16,17 @@ subroutine gyro_write_timedata_hdf5(action)
   !---------------------------------------------------
   implicit none
   !
-  integer :: mode
-  integer, intent(in) :: action
-  !
-  real :: cp0
-  real :: cp1
-  real :: cp2
-  real :: cp3
-  real :: cp4
-  real :: cp5
-  real :: cp6
-  real :: cp7
-  real :: cp8
   real :: pi=3.141592653589793
   !
   real, dimension(:), allocatable, save :: zeta_phi
   real, dimension(:,:), allocatable :: a2
   real, dimension(:,:,:), allocatable :: a3
   !
-  complex, dimension(:,:,:), allocatable :: n_plot, e_plot, v_plot
-  !
   ! HDF5 variables
   !
   integer, parameter :: hr4=SELECTED_REAL_KIND(6,37)
   character(60) :: description
-  character(64) :: step_name, tempVarName
+  character(64) :: step_name
   character(128) :: dumpfile
   character(20)   :: openmethod
   integer(HID_T) :: dumpGid,dumpFid,gid3D,fid3D
@@ -52,17 +38,42 @@ subroutine gyro_write_timedata_hdf5(action)
   !---------------------------------------------------
 
   !---------------------------------------------------
+  ! Timestep data:
+  !
+  if (i_proc == 0) then
+     call gyro_write_step(trim(path)//'out.gyro.t',1)
+  endif
+  !---------------------------------------------------
+
+  !---------------------------------------------------
   ! Determine if the 3D files need to be written 
   if (n_torangle_3d > 1 ) then
      write_threed = .true.
   else
      write_threed = .false.
   endif
+  !---------------------------------------------------
 
   !---------------------------------------------------
-  ! Initialization
+  ! io_control: 0=no I/O, 1=open, 2=append, 3=rewind
+  select case (io_control)
+  case(0)
+     return
+  case(1)
+     openmethod='overwr'
+  case(2)
+     openmethod='append'
+  case(3)
+     openmethod='append'
+  end select
   !---------------------------------------------------
+
   if (i_proc == 0) then
+
+     !---------------------------------------------------
+     ! Initialization (not executed during timestepping)
+     !---------------------------------------------------
+
      call vshdf5_inith5vars(h5in, h5err)
      h5in%comm=MPI_COMM_SELF
      h5in%info=MPI_INFO_NULL
@@ -76,64 +87,53 @@ subroutine gyro_write_timedata_hdf5(action)
      h5in%vsTime=t_current
      h5in%vsStep=step
 
-     !---------------------------------------------------
-     ! Timestep data:
-     !
-     number_label=NINT(t_current/dt)
-     if (number_label>999999) THEN
-        write(step_name,fmt='(i7.7)') number_label
-     else if (number_label>99999) THEN
-        write(step_name,fmt='(i6.6)') number_label
-     else
-        write(step_name,fmt='(i5.5)') number_label
-     endif
-
-     ! open the timedata file (incremental)
+     !------------------------------------------------
+     ! Open the monolithic timedata file (incremental)
      dumpfile=TRIM(path)//"out.gyro.timedata.h5" 
-     description="GYRO scalar time data file"
-
-     if (action == 1) then ! initialziation
-        if( restart_method /= 1 ) then 
-           openmethod='overwr'
-        else
-           openmethod='append'
-        endif
-     else ! sim running
-        openmethod='append'
-     endif
-
+     description="Time-dependent GYRO data"
      call open_h5file(trim(openmethod),dumpfile,dumpTFid,description,dumpTGid,h5in,h5err)
      if (h5err%errBool) call catch_error(h5err%errorMsg)
 
-     dumpfile=TRIM(path)//"gyro"//TRIM(step_name)//".h5"
-     description="GYRO field file"
-     call open_newh5file(dumpfile,dumpFid,description,dumpGid,h5in,h5err)
+     if (io_control > 1) then
 
-     if (write_threed) then
-        dumpfile=TRIM(path)//"gyro3D"//TRIM(step_name)//".h5"
-        description="GYRO 3D field file"
-        call open_newh5file(dumpfile,fid3d,description,gid3D,h5in,h5err)
+        !---------------------------------------------------
+        ! Call for each timestep
+        !---------------------------------------------------
+
+        number_label = nint(t_current/dt)
+        ! Write number_label to step_name using write statement
+        if (number_label > 999999) then
+           write(step_name,fmt='(i7.7)') number_label
+        else if (number_label > 99999) then
+           write(step_name,fmt='(i6.6)') number_label
+        else
+           write(step_name,fmt='(i5.5)') number_label
+        endif
+
+        ! Open a new file at each data step     
+
+        dumpfile    = trim(path)//"gyro"//trim(step_name)//".h5"
+        description = "GYRO field file"
+        call open_newh5file(dumpfile,dumpFid,description,dumpGid,h5in,h5err)
+
+        if (write_threed) then
+           dumpfile    = trim(path)//"gyro3D"//trim(step_name)//".h5"
+           description = "GYRO 3D field file"
+           call open_newh5file(dumpfile,fid3d,description,gid3D,h5in,h5err)
+        endif
+        call hdf5_write_coords
+
      endif
 
-     call hdf5_write_coords
   endif
   !---------------------------------------------------
-
-  call proc_time(cp0)
 
   !--------------------------------------------------
   ! Output of field-like quantities:
   !
-  !
   if (plot_u_flag == 1) then
      ! POTENTIALS
-     !SEK: Should find out the units here
-     !SEK: Need to figure out mesh
-     !SEK: h5in%mesh=" "
-
-     !SriV:  This needs to be a dump of phi PLUS both parallel
-     ! and perp vector potential
-     h5in%units="phi units"
+     h5in%units="dimensionless"
      h5in%mesh="/cartMesh"
      call write_distributed_complex_h5("phi",&
           dumpGid,gid3D,&
@@ -147,7 +147,7 @@ subroutine gyro_write_timedata_hdf5(action)
 
   if (plot_n_flag == 1) then
      ! DENSITY
-     h5in%units=" "
+     h5in%units="dimensionless"
      h5in%mesh="/cartMesh"
      call write_distributed_complex_h5("density",&
           dumpGid,gid3D,&
@@ -161,7 +161,7 @@ subroutine gyro_write_timedata_hdf5(action)
 
   if (plot_e_flag == 1) then
      ! ENERGY
-     h5in%units="energy units"
+     h5in%units="dimensionless"
      h5in%mesh="/cartMesh"
      call write_distributed_complex_h5("energy",&
           dumpGid,gid3D,&
@@ -175,7 +175,8 @@ subroutine gyro_write_timedata_hdf5(action)
 
   if (plot_v_flag == 1) then
      ! PARALLEL VELOCITY
-     h5in%units="vpar units"
+     h5in%units="dimensionless"
+     h5in%mesh="/cartMesh"
      call write_distributed_complex_h5("v_par",&
           dumpGid,gid3D,&
           n_theta_plot*n_x*n_kinetic,&
@@ -184,69 +185,33 @@ subroutine gyro_write_timedata_hdf5(action)
           write_threed,&
           .false., &
           h5in,h5err)
-
   endif
   !--------------------------------------------------
 
-  !--------------------------------------------------
-  ! Output of field at r=r0:
-  !
-  !-PRE  if (field_r0_flag == 1) then
-  !-PRE     h5in%units="?"
-  !-PRE     call write_distributed_complex_h5("field_r0",&
-  !-PRE          dumpGid,gid3D,&
-  !-PRE          size(field_r0_plot),&
-  !-PRE          size(field_r0_plot,1),&
-  !-PRE          size(field_r0_plot,2),&
-  !-PRE          size(field_r0_plot,3),&
-  !-PRE          field_r0_plot,&
-  !-PRE          write_threed,&
-  !-PRE          h5in,h5err)
-  !-PRE  endif
-  !--------------------------------------------------
-
-  call proc_time(cp1)
-  !Assume gyro_write_master.f90 has calculated this: call get_field_spectrum
-  h5in%units="m^-2?"
-  h5in%mesh=' '
+  call gyro_kxky_spectrum
+  h5in%units="dimensionless"
+  h5in%mesh=" "
   call write_distributed_real_h5("kxkyspec",dumpTGid,&
        n_x,1,1,&
        size(kxkyspec),&
        kxkyspec,&
        h5in,h5err)
-  call proc_time(cp2)
 
-  if (i_proc == 0) then
-     h5in%units="m^-2?"
+  if (i_proc == 0 .and. io_control > 1) then
+     h5in%units="dimensionless"
      h5in%mesh=" "
      call add_h5(dumpTGid,'k_perp_squared',k_perp_squared,h5in,h5err)
   endif
 
-  WRITE(*,*) "passed k_perp squared"
-  !-----------------------------
-  ! Set remaining timers to zero
-  cp3 = 0.0
-  cp4 = 0.0
-  cp5 = 0.0
-  cp6 = 0.0
-  cp7 = 0.0
-  cp8 = 0.0
-  !-----------------------------
-
-  call proc_time(cp3)
-  !SEK Assume write_big.f90 has calculated this
-  !SEK call get_field_fluxave
-  call proc_time(cp4)
+  call get_field_fluxave
 
   !-------------------------------------------------------------------
   ! Calculation of fundamental nonlinear fluxes and related 
   ! diffusivities
   !
   call gyro_nonlinear_flux
-  call proc_time(cp5)
   call gyro_diffusivity
   call gyro_gbflux
-  call proc_time(cp6)
   !-------------------------------------------------------------------
 
   !-------------------------------------------------------------------
@@ -255,8 +220,9 @@ subroutine gyro_write_timedata_hdf5(action)
   if (nonlinear_flag == 0) then
 
      !=============
-     ! BEGIN LINEAR 
+     ! BEGIN LINEAR
      !=============
+
      !=============
      ! END LINEAR 
      !=============
@@ -266,8 +232,6 @@ subroutine gyro_write_timedata_hdf5(action)
      !================
      ! BEGIN NONLINEAR 
      !================
-
-     call proc_time(cp7)
 
      h5in%units="diff units"
      call write_distributed_real_h5("diff_n",dumpTGid,&
@@ -288,7 +252,6 @@ subroutine gyro_write_timedata_hdf5(action)
              size(phi_squared_QL_n),&
              phi_squared_QL_n,&
              h5in,h5err)
-
         call write_distributed_real_h5('g_squared_QL_n',dumpTGid,&
              size(g_squared_QL_n),&
              3,1,1,&
@@ -303,8 +266,6 @@ subroutine gyro_write_timedata_hdf5(action)
              nl_transfer,&
              h5in,h5err)
      endif
-
-     call proc_time(cp8)
 
      if (i_proc == 0 ) then
 
@@ -347,6 +308,9 @@ subroutine gyro_write_timedata_hdf5(action)
      !================
 
   endif
+
+  call gyro_write_error(trim(path)//'out.gyro.error',10)
+
   !-------------------------------------------------------------------
   ! Entropy diagnostics
   !
@@ -362,19 +326,29 @@ subroutine gyro_write_timedata_hdf5(action)
   ! Velocity-space diagnostics
   !
   if (velocity_output_flag == 1) then
-     !SEK already assumed calculated
-     !SEK call get_nonlinear_flux_velocity
-     call write_distributed_real_h5('flux_velocity',dumpGid,&
-          size(nonlinear_flux_velocity),&
-          nonlinear_flux_velocity,&
-          h5in,h5err)
+     call get_nonlinear_flux_velocity
+     ! JC: The text below generates an debug error
+     !call write_distributed_real_h5('out.gyro.flux_velocity',dumpGid,&
+     !     size(nonlinear_flux_velocity),&
+     !     nonlinear_flux_velocity,&
+     !     h5in,h5err)
   endif
+  !------------------------------------------------------------
+
+  !------------------------------------------------------------
+  ! Write precision-monitoring data
+  !
+  call gyro_write_precision(10,sum(abs(gbflux)))
+  !------------------------------------------------------------
+
+  !------------------------------------------------------------
+  !call gyro_write_timers(trim(path)//'out.gyro.timing',10)
   !------------------------------------------------------------
 
   !---------------------------------------------------------
   ! Dump restart parameters
   !
-  if (i_proc == 0) then
+  if (i_proc == 0 .and. io_control > 1) then
      h5in%mesh=' '
      call add_h5(dumpTGid,'data_step',data_step,h5in,h5err)
      call add_h5(dumpTGid,'t_current',t_current,h5in,h5err)
@@ -384,12 +358,17 @@ subroutine gyro_write_timedata_hdf5(action)
      call dump_h5(dumpGid,'t_current',t_current,h5in,h5err)
      call dump_h5(dumpGid,'n_proc',n_proc,h5in,h5err)
   endif
+  !---------------------------------------------------------
 
   if (i_proc == 0) then
      call close_h5file(dumpTFid,dumpTGid,h5err)
-     call close_h5file(dumpFid,dumpGid,h5err)
-     if (write_threed) call close_h5file(fid3d,gid3d,h5err)
+     if (io_control > 1) then
+        call close_h5file(dumpFid,dumpGid,h5err)
+        if (write_threed) call close_h5file(fid3d,gid3d,h5err)
+     endif
   endif
+
+  if (i_proc == 0 .and. debug_flag == 1) print *,'[gyro_write_timedata_hdf5 done]'
 
 contains
 
@@ -402,11 +381,11 @@ contains
     !    allocate(phi_plot(n_theta_plot,n_x,n_field+eparallel_plot_flag))
     !  This should be generalized to include the other GEO options
     !------------------------------------------
-    real, dimension(:,:), allocatable :: Rc,Zc,Rf,Zf
+    real, dimension(:,:), allocatable :: Rc,Zc
     real, dimension(:,:,:,:), allocatable :: buffer
     real, dimension(:,:,:), allocatable :: bufferMesh
-    real :: theta, rmajc, zmagc, kappac, deltac, zetac, r_c, dr,xdc
-    integer :: iphi, ix, iy, j, ncoarse,nphi
+    real :: theta,rmajc,zmagc,kappac,deltac,zetac,r_c,xdc
+    integer :: iphi,ix,j,ncoarse,nphi
 
     ncoarse = n_theta_plot
     allocate(Rc(0:ncoarse,n_x), Zc(0:ncoarse,n_x))
@@ -526,6 +505,8 @@ contains
 end subroutine gyro_write_timedata_hdf5
 
 subroutine write_hdf5_restart
+
+  use mpi
   use gyro_globals
   use hdf5
   use hdf5_api
@@ -533,13 +514,11 @@ subroutine write_hdf5_restart
 
   !---------------------------------------------------
   implicit none
-  include 'mpif.h'
   !
-  real :: pi=3.141592653589793
   character(60) :: description
   character(64) :: step_name, tempVarName
   character(128) :: dumpfile
-  integer(HID_T) :: dumpGid,dumpFid,fid3D
+  integer(HID_T) :: dumpGid,dumpFid
   type(hdf5ErrorType) :: errval
   character(4) :: iname
   type(hdf5InOpts) :: h5in
@@ -621,23 +600,22 @@ end subroutine write_hdf5_restart
 
 
 subroutine myhdf5_close
+
   use gyro_globals
   use hdf5
   use hdf5_api
   use gyro_vshdf5_mod
-  integer ierr
-  call h5close_f(ierr)
-end subroutine myhdf5_close
 
-!------------------------------------------------------
-! write_distributed_real.f90
-!
-! PURPOSE:
-!  Control merged output of distributed real array.
-!------------------------------------------------------
+  implicit none
+  integer :: ierr
+
+  call h5close_f(ierr)
+
+end subroutine myhdf5_close
 
 subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
 
+  use mpi
   use hdf5_api
   use gyro_globals, only : &
        n_n,&
@@ -648,7 +626,8 @@ subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
        GYRO_COMM_WORLD,&
        i_proc,&
        i_err,&
-       electron_method
+       electron_method, &
+       io_control
 
   !------------------------------------------------------
   implicit none
@@ -660,7 +639,6 @@ subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
   type(hdf5InOpts), intent(inout) :: h5in
   type(hdf5ErrorType), intent(inout) :: h5err
   !
-  integer :: data_loop
   integer :: i_group_send
   integer :: i_send
   integer :: ifld,ikin,imom,i
@@ -669,15 +647,13 @@ subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
   real, dimension(:,:,:,:), allocatable :: buffn
   character(128) :: tempVarName 
   character(128), dimension(:,:,:),allocatable :: vnameArray
-  character(3) :: n_name
   character(1) :: ikin_name
-
   !
   real :: fn_recv(n_fn)
   !------------------------------------------------------
 
+  if (io_control < 2) return
 
-  include 'mpif.h'
   !------------------------------------------------------
   !  set up the names for setting species and "field" name
   ALLOCATE(vnameArray(n3,3,4))
@@ -698,9 +674,9 @@ subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
      enddo
      do i=1,3
         vnameArray(ikin,i,1)=trim(vnameArray(ikin,i,1))//"_density"
-        vnameArray(ikin,i,2)=trim(vnameArray(ikin,i,1))//"_energy"
-        vnameArray(ikin,i,3)=trim(vnameArray(ikin,i,1))//"_momentum"
-        vnameArray(ikin,i,4)=trim(vnameArray(ikin,i,1))//"_energyExchange"
+        vnameArray(ikin,i,2)=trim(vnameArray(ikin,i,2))//"_energy"
+        vnameArray(ikin,i,3)=trim(vnameArray(ikin,i,3))//"_momentum"
+        vnameArray(ikin,i,4)=trim(vnameArray(ikin,i,4))//"_energyExchange"
      enddo
   enddo
 
@@ -761,8 +737,6 @@ subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
      !
      !-----------------------------------------
 
-
-
      if (i_proc == 0) then
         !         WRITE(*,*) "varName=",varName 
         !         WRITE(*,*) " n_fn=",n_fn," and size of fn_recv=",size(fn_recv)
@@ -771,7 +745,6 @@ subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
         buffn(:,:,:,in)=reshape(fn_recv,(/n1,n2,n3/))
      endif
   enddo ! in
-
 
   !-----------------------------------------
   if (i_proc /= 0) return
@@ -795,24 +768,16 @@ subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
      enddo
   endif
 
-
   deallocate(buffn)
   deallocate(vnameArray)
 
-
-
-
 end subroutine write_distributed_real_h5
-!------------------------------------------------------
-! write_distributed_complex.f90
-!
-! PURPOSE:
-!  Control merged output of complex distributed array.
-!------------------------------------------------------
+
 
 subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
      n_fn,n1,n2,n3,fn,plot3d,plotwedge,h5in,h5err)
 
+  use mpi
   use gyro_vshdf5_mod
   use hdf5_api
   use gyro_globals, only : &
@@ -834,12 +799,14 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
        i_err, &
        electron_method,&
        n_torangle_wedge,&
-       n_torangle_3d
+       n_torangle_3d, &
+       io_control
 
   !------------------------------------------------------
   !   mom: n1,n2,n3=n_theta_plot,n_x,n_kinetic
   !   phi: n1,n2,n3=n_theta_plot,n_x,n_field
   !------------------------------------------------------
+
   implicit none
   !
   real :: pi=3.141592653589793
@@ -849,17 +816,14 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
   complex, intent(in) :: fn(n_fn)
   logical, intent(in) :: plot3d, plotwedge
   character(128) :: tempVarName , tempVarNameGr
-  character(128), dimension(:),allocatable :: vnameArray,  pType
-  character(3) :: n_name
+  character(128), dimension(:),allocatable :: vnameArray
   character(1) :: ikin_name
   integer(HID_T) :: grGid
   type(hdf5InOpts), intent(inout) :: h5in
   type(hdf5ErrorType), intent(inout) :: h5err
   !
-  integer :: data_loop
   integer :: i_group_send, ispcs
-  integer :: i_send, iphi, istart,nn,i,ikin,in, ix,nphi
-  integer :: iloop
+  integer :: i_send, iphi, istart,nn,ikin,in, ix,nphi
   !
   complex :: fn_recv(n_fn), c_i
   complex, dimension(:,:,:,:), allocatable :: buffn
@@ -869,14 +833,14 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
   logical :: iswedge
 
   !------------------------------------------------------
-  include 'mpif.h'
-  c_i=(0,1)
 
-  omega_exp=w0_s(ir_norm)
+  if (io_control < 2) return
 
+  c_i = (0.0,1.0)
 
+  omega_exp = w0_s(ir_norm)
 
-  if(.not. plotwedge) then
+  if (.not. plotwedge) then
      iswedge=.false.
      allocate(buffn(0:n1,n2,n3,n_n)); buffn=0.
   else

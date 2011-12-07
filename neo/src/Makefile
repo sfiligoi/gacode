@@ -9,9 +9,11 @@ endif
 EXEC = neo
 
 OBJECTS = neo_globals.o \
+          neo_error.o \
 	  neo_profile_exp.o \
           neo_check.o \
           neo_sparse_solve.o \
+          neo_compute_fcoll.o \
           neo_energy_grid.o \
 	  neo_allocate_profile.o \
 	  neo_make_profiles.o \
@@ -26,7 +28,9 @@ OBJECTS = neo_globals.o \
 	  neo_g_velocitygrids.o \
           neo_interface.o \
           neo_init.o \
+          neo_init_serial.o \
           neo_run.o \
+          neo_spitzer.o \
           neo_do.o
 
 .SUFFIXES : .o .f90

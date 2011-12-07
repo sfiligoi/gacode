@@ -24,10 +24,10 @@ all-local:
         done;
 	
 libdir = $(prefix)/lib
-lib_LTLIBRARIES = libgacodexptor.la
+lib_LTLIBRARIES = libgacodesxptor.la
 
-libgacodexptor_la_SOURCES =
-libgacodexptor_la_LIBADD = \
+libgacodesxptor_la_SOURCES =
+libgacodesxptor_la_LIBADD = \
   $(top_builddir)/xptor/datread/libgacodexptordatread.la \
   $(top_builddir)/xptor/misc/libgacodexptormisc.la \
   $(top_builddir)/xptor/models/libgacodexptormodels.la \
@@ -38,10 +38,10 @@ libgacodexptor_la_LIBADD = \
 
 bin_PROGRAMS     = xptor
 xptor_SOURCES 	= ptor_driver.f
-xptor_LDADD  	= libgacodexptor.la \
-  $(top_builddir)/tglf/libgacodetglf.la \
-  $(top_builddir)/neo/libgacodeneo.la \
-  $(top_builddir)/shared/libgacodeshared.la \
+xptor_LDADD  	= libgacodesxptor.la \
+  $(top_builddir)/tglf/libgacodestglf.la \
+  $(top_builddir)/neo/libgacodesneo.la \
+  $(top_builddir)/shared/libgacodesshared.la \
   @NETCDF_ALIBS@ \
   @LAPACK_LIBS@ @BLAS_LIBS@ 
 

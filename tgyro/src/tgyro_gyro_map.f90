@@ -14,6 +14,9 @@ subroutine tgyro_gyro_map
      gyro_output_flag_in = 0
   endif
 
+  ! Force TGYRO to handle profile parameter calculation
+  gyro_radial_profile_method_in = 5
+
   gyro_safety_factor_in = q(i_r)
   gyro_shear_in = s(i_r)
   gyro_delta_in = delta(i_r)

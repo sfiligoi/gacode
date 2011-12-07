@@ -10,7 +10,7 @@
 ##
 ## ############################################################################
 
-libdir = $(prefix)/lib/$(FC_LIBSUBDIR)
+libdir = $(prefix)/lib/
 #
 dist_noinst_DATA= \
   pamx_mi.inc \

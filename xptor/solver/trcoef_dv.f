@@ -93,12 +93,13 @@ c
       real*8 stress_tor_z_m_sum(0:mxgrd-1)
       real*8 stress_par_i_m_sum(0:mxgrd-1)
       real*8 stress_par_z_m_sum(0:mxgrd-1)
+      real*8 exch_glf_sum(0:mxgrd-1)
       real*8 xnu_m_sum(0:mxgrd-1)
       real*8 alpha_m_sum(0:mxgrd-1)
       real*8 betae_m_sum(0:mxgrd-1)
       real*8 S_ext(mxflds,mxgrd)
       real*8 glf_flux(0:10,mxflds,mxgrd),dflux(0:10,mxflds,mxgrd)
-      real*8 vdia_new_sum(3,0:mxgrd),vneo_new_sum(3,0:mxgrd)
+c      real*8 vdia_new_sum(3,0:mxgrd),vneo_new_sum(3,0:mxgrd)
 c
       x13 = xparam_pt(13)
       cv = 1000.0
@@ -123,6 +124,7 @@ c      ca = 2.D0/3.D0
       enddo
       do k=0,mxgrd-1
        egamma_sum(k)=0.D0
+       gamma_p_sum(k)=0.D0
        anrate_sum(k)=0.D0
        anfreq_sum(k)=0.D0
        diffgb_sum(k)=0.D0
@@ -166,6 +168,7 @@ c      ca = 2.D0/3.D0
        stress_tor_z_glf_sum(k)=0.0
        stress_par_i_glf_sum(k)=0.0
        stress_par_z_glf_sum(k)=0.0
+       exch_glf_sum(k)=0.0
        flowe_m_sum(k)=0.0
        flowi_m_sum(k)=0.0
        flowz_m_sum(k)=0.0
@@ -179,6 +182,7 @@ c      ca = 2.D0/3.D0
        xnu_m_sum(k)=0.0
        alpha_m_sum(k)=0.0
        betae_m_sum(k)=0.0
+c
        egamma_m(k)=0.D0
        anrate_m(k)=0.D0
        anfreq_m(k)=0.D0
@@ -224,6 +228,7 @@ c      ca = 2.D0/3.D0
        stress_tor_z_glf(k)=0.0
        stress_par_i_glf(k)=0.0
        stress_par_z_glf(k)=0.0
+       exch_glf(k)=0.0
        flowe_m(k)=0.0
        flowi_m(k)=0.0
        flowz_m(k)=0.0
@@ -237,12 +242,12 @@ c      ca = 2.D0/3.D0
        xnu_m(k)=0.0
        alpha_m(k)=0.0
        betae_m(k)=0.0
-       do i=1,nspecies
-        vdia_new(i,k) = 0.0
-        vneo_new(i,k) = 0.0
-        vdia_new_sum(i,k) = 0.0
-        vneo_new_sum(i,k) = 0.0
-       enddo
+c       do i=1,nspecies
+c        vdia_new(i,k) = 0.0
+c        vneo_new(i,k) = 0.0
+c        vdia_new_sum(i,k) = 0.0
+c        vneo_new_sum(i,k) = 0.0
+c       enddo
       enddo
 c
       dne = 1.D0
@@ -308,15 +313,15 @@ c        write(*,*)k,"unperturbed",i_proc,j_ret
         glf_flux(j_ret,3,k) = tifluxm
         glf_flux(j_ret,4,k) = vphifluxm
         glf_flux(j_ret,5,k) = vparfluxm
-        do i=1,nspecies
-          vdia_new(i,k) = vdia(i)
-          vneo_new(i,k) = vneo(i)
-        enddo
+c        do i=1,nspecies
+c          vdia_new(i,k) = vdia(i)
+c          vneo_new(i,k) = vneo(i)
+c        enddo
        endif
 c
       if(iparam_pt(1).lt.1 .or. mask_r(k).eq.0)go to 21
 c gradient variations
-cc      ipert_gf=1
+      ipert_gf=1
 c      j=0
       if(itport_pt(1).ne.0)then
        j_ret = 1
@@ -699,6 +704,10 @@ c
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
       call MPI_BCAST(stress_par_z_glf_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(exch_glf,exch_glf_sum,mxgrd,
+     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(exch_glf_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
       call MPI_REDUCE(flowe_m,flowe_m_sum,mxgrd,
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
       call MPI_BCAST(flowe_m_sum,mxgrd,MPI_DOUBLE_PRECISION
@@ -751,22 +760,22 @@ c
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
       call MPI_BCAST(betae_m_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
-      call MPI_REDUCE(vdia_new,vdia_new_sum,3*mxgrd,
-     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
-      call MPI_BCAST(vdia_new_sum,mxgrd,MPI_DOUBLE_PRECISION
-     >  ,0, MPI_COMM_WORLD, i_err)
-      call MPI_REDUCE(vneo_new,vneo_new_sum,3*mxgrd,
-     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
-      call MPI_BCAST(vneo_new_sum,mxgrd,MPI_DOUBLE_PRECISION
-     >  ,0, MPI_COMM_WORLD, i_err)
+c      call MPI_REDUCE(vdia_new,vdia_new_sum,3*mxgrd,
+c     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+c      call MPI_BCAST(vdia_new_sum,mxgrd,MPI_DOUBLE_PRECISION
+c     >  ,0, MPI_COMM_WORLD, i_err)
+c      call MPI_REDUCE(vneo_new,vneo_new_sum,3*mxgrd,
+c     > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+c      call MPI_BCAST(vneo_new_sum,mxgrd,MPI_DOUBLE_PRECISION
+c     >  ,0, MPI_COMM_WORLD, i_err)
 c
-      do i=1,nspecies
+c      do i=1,nspecies
 c set boundary conditions on 1/2 grid
-        vdia_new_sum(i,0)=vdia_new_sum(i,1)
-        vneo_new_sum(i,0)=vneo_new_sum(i,1)
-        vdia_new_sum(i,ngrid) = vdia_new_sum(i,ngrid-1)
-        vneo_new_sum(i,ngrid) = vneo_new_sum(i,ngrid-1)
-      enddo
+c        vdia_new_sum(i,0)=vdia_new_sum(i,1)
+c        vneo_new_sum(i,0)=vneo_new_sum(i,1)
+c        vdia_new_sum(i,ngrid) = vdia_new_sum(i,ngrid-1)
+c        vneo_new_sum(i,ngrid) = vneo_new_sum(i,ngrid-1)
+c      enddo
 c
       do k=1,ngrid-1
         egamma_m(k)=egamma_sum(k)
@@ -815,6 +824,7 @@ c
         stress_tor_z_glf(k) = stress_tor_z_glf_sum(k)
         stress_par_i_glf(k) = stress_par_i_glf_sum(k)
         stress_par_z_glf(k) = stress_par_z_glf_sum(k)
+        exch_glf(k) = exch_glf_sum(k)
         flowe_m(k) = flowe_m_sum(k)
         flowi_m(k) = flowi_m_sum(k)
         flowz_m(k) = flowz_m_sum(k)
@@ -825,11 +835,11 @@ c
         stress_tor_z_m(k) = stress_tor_z_m_sum(k)
         stress_par_i_m(k) = stress_par_i_m_sum(k)
         stress_par_z_m(k) = stress_par_z_m_sum(k)
-        do i=1,nspecies
+c        do i=1,nspecies
 c interpolate onto the full grid
-         vdia_new(i,k) = 0.5*(vdia_new_sum(i,k)+vdia_new_sum(i,k-1))
-         vneo_new(i,k) = 0.5*(vneo_new_sum(i,k)+vneo_new_sum(i,k-1))
-        enddo
+c         vdia_new(i,k) = 0.5*(vdia_new_sum(i,k)+vdia_new_sum(i,k-1))
+c         vneo_new(i,k) = 0.5*(vneo_new_sum(i,k)+vneo_new_sum(i,k-1))
+c        enddo
       enddo
       egamma_m(0)=egamma_m(1)
       gamma_p_m(0)=gamma_p_m(1)
@@ -839,12 +849,6 @@ c interpolate onto the full grid
       xnu_m(0)=xnu_m(1)
       alpha_m(0)=0.0
       cgyrobohm_m(0) = cgyrobohm_m(1)
-      do i=1,nspecies
-       vdia_new(i,0) = vdia_new(i,1)
-       vneo_new(i,0) = vneo_new(i,1)
-       vdia_new(i,ngrid) = vdia_new(i,ngrid-1)
-       vneo_new(i,ngrid) = vneo_new(i,ngrid-1)
-      enddo
       egamma_m(ngrid)=egamma_m(ngrid-1)
       gamma_p_m(ngrid)=gamma_p_m(ngrid-1)
       anrate_m(ngrid)=anrate_m(ngrid-1)
@@ -858,13 +862,13 @@ c interpolate onto the full grid
       etagb_phi_m(ngrid)=etagb_phi_m(ngrid-1)
       kpol_m(ngrid)=kpol_m(ngrid-1)
       nu_pol_m(ngrid)=nu_pol_m(ngrid-1)
-      do i=1,nspecies
+c      do i=1,nspecies
 c set boundary conditions on full grid
-        vdia_new(i,0)=vdia_new(i,1)
-        vneo_new(i,0)=vneo_new(i,1)
-        vdia_new(i,ngrid) = vdia_new(i,ngrid-1)
-        vneo_new(i,ngrid) = vneo_new(i,ngrid-1)
-      enddo
+c        vdia_new(i,0)=vdia_new(i,1)
+c        vneo_new(i,0)=vneo_new(i,1)
+c        vdia_new(i,ngrid) = vdia_new(i,ngrid-1)
+c        vneo_new(i,ngrid) = vneo_new(i,ngrid-1)
+c      enddo
 c
 c        do k=0,jmaxm
 c         write(*,155) i_proc,k,rho(k),chiineo_m(k),chiineo_sum(k)
@@ -1412,7 +1416,7 @@ c
 c      transport exb velocity
 c
          j=j+1
-         delt_v=dvmin*dvexb*nem
+         delt_v=dvmin*dvexb
          nefluxm = dflux(9,1,k)
          tefluxm = dflux(9,2,k)
          tifluxm = dflux(9,3,k)
@@ -1421,29 +1425,29 @@ c
          i=0 
          if(itport_pt(1).ne.0)then
            i=i+1
-           conv3(i,j,k)=(nefluxm - neflux(k))/(delt_v)
+           conv3(i,j,k)=(nefluxm - neflux(k))/(nem*delt_v)
      >       + conv3(i,j,k)
          endif
          if(itport_pt(2).ne.0)then
            i=i+1
-           conv3(i,j,k)=(tefluxm - teflux(k))/(delt_v)
+           conv3(i,j,k)=(tefluxm - teflux(k))/(nem*delt_v)
      >       + conv3(i,j,k)
          endif
          if(itport_pt(3).ne.0)then
            i=i+1
-           conv3(i,j,k)=(tifluxm - tiflux(k))/(delt_v)
+           conv3(i,j,k)=(tifluxm - tiflux(k))/(nem*delt_v)
      >       + conv3(i,j,k)
          endif
          if(itport_pt(4).ne.0)then
            i=i+1
            conv3(i,j,k)=
-     >       + (vphifluxm - vphiflux(k))/(delt_v)
+     >       + (vphifluxm - vphiflux(k))/(nem*delt_v)
      >       + conv3(i,j,k)
          endif
          if(itport_pt(5).ne.0)then
            i=i+1
            conv3(i,j,k)= 
-     >       + (vparfluxm - vparflux(k))/(delt_v)
+     >       + (vparfluxm - vparflux(k))/(nem*delt_v)
      >       + conv3(i,j,k)
          endif
        endif
@@ -1452,7 +1456,7 @@ c
 c      transport vpol
 c
          j=j+1
-         delt_v=dvmin*dvpol*nem
+         delt_v=dvmin*dvpol
          nefluxm = dflux(10,1,k)
          tefluxm = dflux(10,2,k)
          tifluxm = dflux(10,3,k)
@@ -1461,29 +1465,29 @@ c
          i=0 
          if(itport_pt(1).ne.0)then
            i=i+1
-           conv3(i,j,k)=(nefluxm - neflux(k))/(delt_v)
+           conv3(i,j,k)=(nefluxm - neflux(k))/(nem*delt_v)
      >       + conv3(i,j,k)
          endif
          if(itport_pt(2).ne.0)then
            i=i+1
-           conv3(i,j,k)=(tefluxm - teflux(k))/(delt_v)
+           conv3(i,j,k)=(tefluxm - teflux(k))/(nem*delt_v)
      >       + conv3(i,j,k)
          endif
          if(itport_pt(3).ne.0)then
            i=i+1
-           conv3(i,j,k)=(tifluxm - tiflux(k))/(delt_v)
+           conv3(i,j,k)=(tifluxm - tiflux(k))/(nem*delt_v)
      >       + conv3(i,j,k)
          endif
          if(itport_pt(4).ne.0)then
            i=i+1
            conv3(i,j,k)=
-     >       + (vphifluxm - vphiflux(k))/(delt_v)
+     >       + (vphifluxm - vphiflux(k))/(nem*delt_v)
      >       + conv3(i,j,k)
          endif
          if(itport_pt(5).ne.0)then
            i=i+1
            conv3(i,j,k)= 
-     >       + (vparfluxm - vparflux(k))/(delt_v)
+     >       + (vparfluxm - vparflux(k))/(nem*delt_v)
      >       + conv3(i,j,k)
          endif
        endif
@@ -1516,6 +1520,8 @@ c interpolate vrho3,nu_p,nu_2 and add time derivative terms to nu_p and nu_2
         do k=1,ngrid-1
          nu_p(i,j,k) = nu_p(i,j,k) + nu_pt(i,j,k)
          nu_2(i,j,k) = nu_2(i,j,k) + nu_pt(i,j,k)
+         nu_pt(i,j,k)=0.0
+         nu_2t(i,j,k)=0.0
         enddo
          vrho3(i,j,ngrid) = vrho3(i,j,ngrid-1)
          nu_p(i,j,ngrid) = nu_p(i,j,ngrid-1)
@@ -1583,13 +1589,16 @@ c
 c        S_pol(k) = -nu_pol_m(k)*vpolm + wp(1)*nu_pol_m(k)*unc(k)
 c     >   + wp(3)*nu_pol_m(k)*unc(k)
 c
-      pow_ei_cor_m(0)=0.D0
+      pow_ei_cor_m(0)=0.0
       stress_par_cor_m(0)=0.0
+      pow_ei_glf(0)=0.0
       do k=1,ngrid-1
         pow_ei_cor_m(k)= pow_ei_cor_m(k-1)
      >   - vprime(k,1)*dr(k,1)*S_ei(k)
         stress_par_cor_m(k) = stress_par_cor_m(k-1)
      >   - vprime(k,1)*dr(k,1)*S_pol(k)*cv*1.6726D-8
+        pow_ei_glf(k) = pow_ei_glf(k-1)
+     >   +vprime(k,1)*dr(k,1)*exch_glf(k)
       enddo
 c
 c feedback adjustments
@@ -1682,8 +1691,8 @@ c     >   + pow_ei_cor_m(k)
      >    (vprime(k,2)*flux(j,k))/
      >    (vprime(k,1)*dr(k,1)) 
      >    - S_ei(k)
-        powi_m(k)=vprime(k,2)*flux(j,k)
-     >   - pow_ei_cor_m(k)
+c        powi_m(k)=vprime(k,2)*flux(j,k)
+c     >   - pow_ei_cor_m(k)
          INTEGRAL_RHS(j,k) = vprime(k,1)*dr(k,1)*S_ext(j,k)
          do k=2,ngrid-1
         S_ext(j,k) =  smult(j)*Piaux(k)+Pi_alpha(k)
@@ -1691,8 +1700,8 @@ c     >   + pow_ei_cor_m(k)
      >    (vprime(k,2)*flux(j,k)-vprime(k-1,2)*flux(j,k-1))/
      >    (vprime(k,1)*dr(k,1)) 
      >    - S_ei(k)
-        powi_m(k)=vprime(k,2)*flux(j,k)
-     >   - pow_ei_cor_m(k)
+c        powi_m(k)=vprime(k,2)*flux(j,k)
+c     >   - pow_ei_cor_m(k)
          INTEGRAL_RHS(j,k) = INTEGRAL_RHS(j,k-1) +
      >   vprime(k,1)*dr(k,1)*S_ext(j,k)
 cdebug        write(6,10)Piaux(k),flux(j,k),s(j,k)

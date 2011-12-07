@@ -1,13 +1,12 @@
 subroutine tgyro_readbc_int(p)
 
+  use mpi
   use tgyro_globals
 
   implicit none
   
   integer, intent(inout) :: p
   integer :: i_err
-
-  include 'mpif.h'
 
   if (i_proc_global == 0) read(1,*) p
 

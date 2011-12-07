@@ -10,12 +10,16 @@
 # Used mpich2-1.0.3, so use mpirun rather than mpiexec
 
 simdir=${1}
-nproc=${2}
+nmpi=${2}
 exec=${3}
+nomp=${4}
+numa=${5}
+mpinuma=${6}
 
 echo $simdir
 
 cd $simdir
-  
-mpirun -np $nproc $exec
+export OMP_NUM_THREADS=$nomp 
+#mpirun -np $nmpi $exec
+openmpirun -np $nmpi $exec
 

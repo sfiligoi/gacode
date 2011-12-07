@@ -130,10 +130,11 @@ c 301 elements (was 51)
       real*8 zpnz_m(0:jmaxmt), zpnitot_m(0:jmaxmt)
       real*8 zpti2_m(0:jmaxmt)
       real*8 te_exp(0:jmaxmt), ti_exp(0:jmaxmt), ne_exp(0:jmaxmt)
+      real*8 tfast_exp(0:jmaxmt)
       real*8 te_exp_sav(0:jmaxmt), ti_exp_sav(0:jmaxmt)
       real*8 angrotp_exp_sav(0:jmaxmt)
       real*8 vphip_exp_sav(0:jmaxmt)
-      real*8 ni_exp(0:jmaxmt), nz_exp(0:jmaxmt), nfst_exp(0:jmaxmt)
+      real*8 ni_exp(0:jmaxmt), nz_exp(0:jmaxmt), nfast_exp(0:jmaxmt)
       real*8 ptot_exp(0:jmaxmt), pfast_exp(0:jmaxmt)
       real*8 torque_exp(0:jmaxmt)
       real*8 stress_tor_exp(0:jmaxmt),stress_par_exp(0:jmaxmt)
@@ -143,6 +144,8 @@ c 301 elements (was 51)
       real*8 vdia_exp(nspecies,0:jmaxmt), vneo_exp(nspecies,0:jmaxmt)
       real*8 mach_exp(nspecies,0:jmaxmt)
       real*8 vphi_exp(0:jmaxmt),vpar_exp(0:jmaxmt),vper_exp(0:jmaxmt)
+      real*8 vphie_exp(0:jmaxmt),vpare_exp(0:jmaxmt)
+      real*8 vphiz_exp(0:jmaxmt),vparz_exp(0:jmaxmt)
       real*8 pzmn_sol(0:jmaxmt), ne_p(0:jmaxmt)
       real*8 vphi_ncl_exp(0:jmaxmt), vpol_ncl_exp(0:jmaxmt)
       real*8 omexb_ncl_exp(0:jmaxmt)
@@ -165,7 +168,9 @@ c 301 elements (was 51)
       real*8 powi_wdot_exp(0:jmaxmt), powi_fus_exp(0:jmaxmt)
       real*8 pow_ei_exp(0:jmaxmt), pow_ei_cor_m(0:jmaxmt)
       real*8 pow_ei_m(0:jmaxmt), pow_ei_mexp(0:jmaxmt)
+      real*8 pow_ei_glf(0:jmaxmt)
       real*8 exch_m(0:jmaxmt), exch_exp(0:jmaxmt)
+      real*8 exch_glf(0:jmaxmt)
       real*8 powe_fus_m(0:jmaxmt), powi_fus_m(0:jmaxmt)
       real*8 powe_fus_cor_m(0:jmaxmt), powi_fus_cor_m(0:jmaxmt)
       real*8 pow_br_m(0:jmaxmt), pow_br_cor_m(0:jmaxmt)
@@ -205,6 +210,8 @@ c 301 elements (was 51)
       real*8 rhosda_m(0:jmaxmt), csda_m(0:jmaxmt)
       real*8 vexb_m(0:jmaxmt), vpol_m(0:jmaxmt)
       real*8 vphi_m(0:jmaxmt), vpar_m(0:jmaxmt), vper_m(0:jmaxmt)
+      real*8 vphie_m(0:jmaxmt), vpare_m(0:jmaxmt)
+      real*8 vphiz_m(0:jmaxmt), vparz_m(0:jmaxmt)
       real*8 vdia_m(nspecies,0:jmaxmt), vneo_m(nspecies,0:jmaxmt)
       real*8 vdia_new(nspecies,0:jmaxmt),vneo_new(nspecies,0:jmaxmt)
       real*8 mach_m(nspecies,0:jmaxmt)
@@ -428,7 +435,8 @@ c
      & , tiflux, vphiflux, vparflux, vexbflux
      & , zpte_m, zpti_m
      & , zpne_m, zpni_m, zpnz_m, zpnitot_m, zpti2_m
-     & , te_exp, ti_exp, ne_exp, ni_exp, nz_exp, nfst_exp, nitot_exp
+     & , te_exp, ti_exp, tfast_exp
+     & , ne_exp, ni_exp, nz_exp, nfast_exp, nitot_exp
      & , nm1_exp, nm2_exp, nm3_exp
      & , te_exp_sav, ti_exp_sav, angrotp_exp_sav
      & , ptot_exp, pfast_exp, torque_exp
@@ -446,6 +454,7 @@ c
      & , stress_tor_i_adhoc, stress_tor_z_adhoc
      & , stress_par_i_adhoc, stress_par_z_adhoc
      & , vpar_exp, vexb_exp, vper_exp
+     & , vphie_exp, vpare_exp, vphiz_exp, vparz_exp
      & , vpol_exp, vdia_exp, vneo_exp, mach_exp
      & , vphi_exp, vphi_ncl_exp, vpol_ncl_exp
      & , omexb_ncl_exp, pzmn_sol, ne_p
@@ -458,7 +467,8 @@ c
      & , powe_rad_exp, powe_ion_exp, powe_wdot_exp, powe_fus_exp
      & , powi_beam_exp, powi_rf_exp, powi_ion_exp, powi_cx_exp
      & , powi_wdot_exp, powi_fus_exp, pow_ei_exp, pow_ei_cor_m
-     & , pow_ei_m, pow_ei_mexp, exch_m, exch_exp
+     & , pow_ei_m, pow_ei_glf, pow_ei_mexp
+     & , exch_m, exch_exp, exch_glf
      & , powe_fus_m, powi_fus_m, powe_fus_cor_m, powi_fus_cor_m
      & , pow_br_m, pow_br_cor_m, pow_cycl_m, pow_cycl_cor_m
      & , flow_wall_exp, flow_recom_exp, flow_beam_exp
@@ -472,6 +482,7 @@ c
      & , stress_par_i_m, stress_par_z_m
      & , diff_exp, chie_exp, chii_exp, eta_tor_exp, egamma_g
      & , rhosda_m, csda_m, vexb_m, vpar_m, vphi_m, vper_m
+     & , vphie_m, vpare_m, vphiz_m, vparz_m
      & , vdia_m, vneo_m, vdia_new, vneo_new
      & , vpol_m, nu_pol_m, kpol_m, nuei_m
      & , vmode_m, vstar_m, vstarp_m, vetor_m, vepol_m, egamma_m

@@ -19,7 +19,6 @@ contains
     if(flag == 1) then
        if(initialized_sim) return
 
-       allocate(wd_rad(n_radial,n_radial))
        allocate(r(n_radial))
        allocate(rmaj(n_radial))
        allocate(dphi0dr(n_radial))
@@ -64,7 +63,6 @@ contains
 
        if(.NOT. initialized_sim) return
 
-       deallocate(wd_rad)
        deallocate(r)
        deallocate(rmaj)
        deallocate(dphi0dr)

@@ -18,8 +18,9 @@
       REAL :: dg1,dg2,dgmin
       REAL :: gamma_n(nt0),freq_n(nt0),width_n(nt0)
       REAL :: save_alpha_e,save_gamma_max
-      REAL :: save_vexb_shear,save_park
+      REAL :: save_vexb_shear
       REAL :: wkp_max,wgp_max,width_p_max 
+      REAL :: kyi
 !
       if(new_start)CALL tglf_start
 !
@@ -29,9 +30,9 @@
       save_width = width_in
       save_alpha_e = alpha_e_in
       save_vexb_shear = vexb_shear_in
-!      save_park = park_in
-!      if(alpha_quench_in.eq.0.0)vexb_shear_in = 0.0
-      wgp_max = ABS(vpar_shear_in(2)/vs(2)**2)*ky/(1+ky**2)
+!
+      kyi = ky_in*SQRT(taus_in(2)*mass_in(2))/ABS(zs_in(2))
+      wgp_max = ABS(vpar_shear_in(2)/vs(2))*kyi/(1+kyi**2)
       width_p_max = 3.6/(sqrt_two*R_unit*q_unit*MAX(wgp_max,0.001))
       width_p_max=MAX(width_p_max,0.01)
       width_min = width_min_in
@@ -41,11 +42,10 @@
 !        width_min = width_p_max/5.0
 !      endif
       if(width_p_max.lt.width_min_in)then
-!         park_in = save_park*width_min_in/width_p_max
-        width_min = 0.75*width_p_max
-        width_in = 4.0*width_min
+        width_min = width_p_max
+!        width_max = 4.0*width_min
       endif
-!      write(*,*)ky," width_p_max = ", width_p_max,park_in
+!      write(*,*)ky," width_p_max = ", width_p_max
 !
 ! for ibranch_in > 0 the most unstable positive frequency mode is stored 
 ! in gamma_out(1) and the most unstable negative frequency mode 
@@ -323,6 +323,5 @@
        iflux_in=save_iflux
        alpha_e_in = save_alpha_e
        vexb_shear_in = save_vexb_shear
-!       park_in = save_park
 !
       END SUBROUTINE tglf_max   

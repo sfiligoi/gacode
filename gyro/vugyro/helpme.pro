@@ -8,7 +8,7 @@ pro helpme
   if simdir eq 'null' then return
   ;;---------------------------------------------------------
  
-  spawn,'cat run.out > vugyro.tmp'
+  spawn,'cat out.gyro.run > vugyro.tmp'
   xdisplayfile,'vugyro.tmp'
 
 end

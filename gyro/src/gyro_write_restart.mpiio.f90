@@ -101,14 +101,14 @@ subroutine gyro_write_restart
 
            open(unit=io,file=trim(path)//file_tag_restart(1),status='old')
            read(io,*) data_step_old
-           read(io,10) t_current_old
+           read(io,fmtstr) t_current_old
            read(io,*) n_proc_old
            read(io,*) i_restart_old
            close(io)
 
            open(unit=io,file=trim(path)//file_tag_restart(0),status='replace')
            write(io,*) data_step_old
-           write(io,10) t_current_old
+           write(io,fmtstr) t_current_old
            write(io,*) n_proc_old
            write(io,*) i_restart_old
            close(io)
@@ -117,7 +117,7 @@ subroutine gyro_write_restart
 
         open(unit=io,file=trim(path)//file_tag_restart(1),status='replace')
         write(io,*) data_step
-        write(io,10) t_current
+        write(io,fmtstr) t_current
         write(io,*) n_proc
         write(io,*) i_restart
         close(io)
@@ -127,9 +127,5 @@ subroutine gyro_write_restart
      !---------------------------------------------------------
 
   end select
-
-  ! ** Keep this consistent with gyro_read_restart.f90
-
-10 format(2(es11.4,1x))
 
 end subroutine gyro_write_restart

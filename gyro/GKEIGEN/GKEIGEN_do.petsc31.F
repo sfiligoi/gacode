@@ -167,7 +167,7 @@
 !      EndIf
 
 !      do step = 1, nstep
-!        call get_field_explicit
+!        call gyro_field_solve_explicit
 !        call gyro_rhs_total
 !        h = h + dt*RHS
 !      enddo
@@ -233,7 +233,7 @@
              h(:,:,:,:) = (0.0,0.0)  
              If (i_proc_e == i_proc)                                    &
      &                h(m1,i1,p_nek_loc1,is1) = (1.0,0.0)
-               call get_field_explicit
+               call gyro_field_solve_explicit
                call gyro_rhs_total
                ielem = istate - istate_start
                jstate = jstate_start
@@ -333,7 +333,7 @@
 !
       Do gkeigen_j_set_e0 = 0, gkeigen_proc_mult-1
         iseq_start = gkeigen_j_set_e0*h_width_loc*h_length_block + 1
-        iseq_end = iseq_start + h_width_loc*h_length_block
+        iseq_end = iseq_start - 1 + h_width_loc*h_length_block
         Do iseq =  iseq_start, iseq_end
           iseq0 = iseq - iseq_start + 1
           M_seq(iseq0) = M_pass_2(iseq)
@@ -505,7 +505,6 @@
 
       call EPSGetConverged(epsolve,n_converged,ierr)
       If (l_print) Print *, n_converged, ' converged solution(s)'
-      open(unit=1,file=trim(path)//file_eigen_freq,status='replace')
       step = 0
       Do iev = 0, n_converged-1
         call EPSGetEigenpair(epsolve,iev,dummy_scalar,PETSC_NULL,       &
@@ -515,7 +514,15 @@
         ev_gamma = real(dummy_scalar)
         If (l_print) Then
           print 20, iev+1, ev_omega, ev_gamma, residual
+          if (iev==0) then
+           open(unit=1,file=trim(path)//file_eigen_freq,                &
+     &          status='replace')
+          else
+           open(unit=1,file=trim(path)//file_eigen_freq,                &
+     &          status='old',position='append')
+          endif
           write (1,30) ev_omega, ev_gamma, residual
+          close (unit=1)
           call gyro_write_precision(10,abs(ev_omega))
           step = step + 1
           call gyro_write_precision(10,abs(ev_gamma))
@@ -609,19 +616,19 @@
             EndDo ! p_nek2
           EndDo ! is2
 
-          call get_field_explicit
+          call gyro_field_solve_explicit
 
           call gyro_field_interpolation
 !          call get_field_fluxave
 !          call gyro_field_time_derivative
           call get_field_plot
           call gyro_moments_plot
-          call gyro_write_master(2)
+          call gyro_write_timedata
 
         endif
 
       EndDo
-      close(unit=1)
+
 !---------------------------------------------------------------------
 
       If (l_print) Then
@@ -630,7 +637,7 @@
       EndIf
 
       write(gkeigen_message,80) n_converged
-      call set_exit_status(gkeigen_message,2)
+      call gyro_set_exit_status(gkeigen_message,2)
 
       call VecDestroy(dummy_vec,ierr)
       call MatDestroy(time_derivative_matrix,ierr)

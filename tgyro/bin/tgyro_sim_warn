@@ -7,12 +7,6 @@
 #  Check for proper structure of tgyro sim directory
 #---------------------------------------------------------
 
-if [ $1 = $PWD ]
-  then
-  echo "ERROR: missing simulation directory."
-  exit 1
-fi
-
 if [ ! -d "$1" ]
   then
   echo "ERROR: $1 is not a valid simulation directory."

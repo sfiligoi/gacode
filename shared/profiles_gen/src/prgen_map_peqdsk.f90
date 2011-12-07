@@ -11,30 +11,9 @@ subroutine prgen_map_peqdsk
 
   implicit none
 
-  integer :: i
 
-  ! Compute rho from: d chi_t = q d psi_p
-  ! use the trapezoidal rule
-  ! rho = sqrt(2 * chi_t / bref)
-  rho(1) = 0.0
-  do i=2,peqdsk_nj
-     rho(i) = rho(i-1) + 0.5*(q_gato(i)+q_gato(i-1))*(dpsi(i)-dpsi(i-1))
-  enddo
-  !open(unit=1,file='mychi.dat',status='replace')
-  !do i=1,peqdsk_nj
-  !   write(1,'(e16.8,$)') rho(i)
-  !   write(1,'(e16.8,$)') dpsi(i)
-  !   write(1,'(e16.8,$)') q_gato(i)
-  !   write(1,'(e16.8,$)') rmin(i)
-  !   write(1,*)
-  !enddo
-  !close(1)
-  ! choose b_ref = 1
-  peqdsk_bref = 1.0
-  peqdsk_arho = sqrt(2.0 * rho(peqdsk_nj) / peqdsk_bref)
-  ! normalized rho
-  rho(:) = sqrt(rho(:) / rho(peqdsk_nj))
-
+  ! Compute rho, bref and arho:
+  call prgen_get_chi(nx,q_gato,kappa,rmin,dpsi,rho,peqdsk_bref,peqdsk_arho)
 
   !---------------------------------------------------------
   ! Map profile data onto single array:
@@ -64,8 +43,7 @@ subroutine prgen_map_peqdsk
   vec(20,:) = dpsi(:)
 
   ! ni
-  i=1
-  vec(21+i-1,:) = peqdsk_ni(:)*10
+  vec(21,:) = peqdsk_ni(:)*10
 
   ! ti
   vec(26,:) = peqdsk_ti(:)

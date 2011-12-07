@@ -19,82 +19,80 @@ subroutine gyro_select_methods
   !-------------------------------------------------------------
   ! Various consistency and error checks
   ! 
-  ! Special diffusivity check:
-  !
   ! Grid offset checks:
   !
   if (n_x_offset /= 0 .and. boundary_method == 1) then
-     call catch_error('ERROR: RADIAL_GRID_OFFSET must be zero.')
+     call catch_error('ERROR: (GYRO) RADIAL_GRID_OFFSET must be zero.')
   endif
   if (abs(n_x_offset) > n_x/2-1) then
-     call catch_error('ERROR: RADIAL_GRID_OFFSET too large.')
+     call catch_error('ERROR: (GYRO) RADIAL_GRID_OFFSET too large.')
   endif
   !
   ! Study mode check:
   !
   if (n_study < 0 .or. n_study > n_n) then
-     call catch_error('ERROR: N_STUDY out of bounds.')
+     call catch_error('ERROR: (GYRO) N_STUDY out of bounds.')
   endif
   !
   ! Toroidal grid check:
   !
   if (nonlinear_flag == 1 .and. n_n < 2) then
-     call catch_error('ERROR: Nonlinear runs require TOROIDAL_GRID > 1.')
+     call catch_error('ERROR: (GYRO) Nonlinear runs require TOROIDAL_GRID > 1.')
   endif
   !
   ! Distribution function print check: 
   !
   if (dist_print == 1) then
      if  (n_n > 1) then
-        call catch_error('ERROR: DIST_PRINT_FLAG=1 requires TOROIDAL_GRID=1.')
+        call catch_error('ERROR: (GYRO) DIST_PRINT_FLAG=1 requires TOROIDAL_GRID=1.')
      endif
      if  (n_proc > 1) then
-        call catch_error('ERROR: DIST_PRINT_FLAG=1 on one processor only.')
+        call catch_error('ERROR: (GYRO) DIST_PRINT_FLAG=1 on one processor only.')
      endif
   endif
   !
   ! Radial grid check:
   !
   if (n_x < 4) then
-     call catch_error('ERROR: You must have RADIAL_GRID >= 4.')
+     call catch_error('ERROR: (GYRO) You must have RADIAL_GRID >= 4.')
   endif
   !
   ! Radial gyroaverage check:
   !
   if (m_gyro > n_x/2) then
-     call catch_error('ERROR: RADIAL_GYRO_BAND cannot exceed half RADIAL_GRID. ')
+     call catch_error('ERROR: (GYRO) RADIAL_GYRO_BAND cannot exceed half RADIAL_GRID. ')
   endif
   !
   ! Buffer check:
   !
   if (boundary_method == 2 .and. n_x-2*n_explicit_damp <= 0) then
-     call catch_error('ERROR: Buffers are too large (see EXPLICIT_DAMP_GRID).')
+     call catch_error('ERROR: (GYRO) Buffers are too large (see EXPLICIT_DAMP_GRID).')
   endif
   !
   ! Source check:
   !
   if (n_source <= 0) then
-     call catch_error('ERROR: require N_SOURCE > 0.')
+     call catch_error('ERROR: (GYRO) require N_SOURCE > 0.')
   endif
   !
   ! Check for validity of transfer diagnostic
   !
   if (boundary_method == 2 .and. nonlinear_transfer_flag == 1) then
-     call catch_error('ERROR: Need BOUNDARY_METHOD=1 for NONLINEAR_TRANSFER_FLAG=1.')
+     call catch_error('ERROR: (GYRO) Need BOUNDARY_METHOD=1 for NONLINEAR_TRANSFER_FLAG=1.')
   endif
   !
   ! Check for solver consistency
   !
   if (linsolve_method > 1 .and. nonlinear_flag == 1) then
-     call catch_error('ERROR: Can only have NONLINEAR_FLAG=1 with LINSOLVE_METHOD=1.')
+     call catch_error('ERROR: (GYRO) Can only have NONLINEAR_FLAG=1 with LINSOLVE_METHOD=1.')
   endif
   !
   if (radial_upwind < 0.0) then
-     call catch_error('ERROR: RADIAL_UPWIND must be > 0.')
+     call catch_error('ERROR: (GYRO) RADIAL_UPWIND must be > 0.')
   endif
   !
   if (nonlinear_transfer_flag == 1 .and. integrator_method > 1) then
-     call catch_error('ERROR: Need INTEGRATOR_METHOD=1 for nonlinear transfer diag.')
+     call catch_error('ERROR: (GYRO) Need INTEGRATOR_METHOD=1 for nonlinear transfer diag.')
   endif
   !---------------------------------------------------
 
@@ -188,10 +186,10 @@ subroutine gyro_select_methods
   end select
 
   if (linsolve_method == 2) then
-!     orbit_upwind_vec(n_ion) = 0.0
+     !     orbit_upwind_vec(n_ion) = 0.0
      orbit_upwind_vec(:) = 0.0
-!     orbit_upwind_vec(n_ion) = 1.0
-!     radial_upwind = 0.0
+     !     orbit_upwind_vec(n_ion) = 1.0
+     !     radial_upwind = 0.0
   endif
   !---------------------------------------------------
 
@@ -244,19 +242,14 @@ subroutine gyro_select_methods
   !
   if (collision_flag == 1) then
 
-     if (n_field == 3 .and. collision_method /= 2) then
-        call catch_error(&
-             'ERROR: This collision model incompatible with delta B_parallel')
-     endif
-
      if (n_pass < 4) then
         call catch_error(&
-             'ERROR: N_PASS >= 4 required for collisions.')
+             'ERROR: (GYRO) N_PASS >= 4 required for collisions.')
      endif
 
      if (variable_egrid_flag == 1) then
         call catch_error(&
-             'ERROR: Collisions not supported with variable energy grid')
+             'ERROR: (GYRO) Collisions not supported with variable energy grid')
      endif
 
   endif
@@ -320,17 +313,8 @@ subroutine gyro_select_methods
         i_dx = 0
      endif
 
-     if (radial_profile_method == 2) then
-
-        ! profile_method == 2 only consistent with nonperiodic 
-        ! mode of operation.  Avoid resets.
-
-        call catch_error('INVALID: boundary_method/profile_method')
-
-     endif
-
      if (nonuniform_grid_flag == 1) then
-        call catch_error('INVALID: cannot have nonuniform grid.')
+        call catch_error('ERROR: (GYRO) cannot have nonuniform grid.')
      endif
 
   case (2)
@@ -339,12 +323,15 @@ subroutine gyro_select_methods
 
      ! No harmonic operators for nonperiodic case
 
-     i_dx   = 0
+     if (m_gyro == n_x/2 .or. m_dx == n_x/2) then
+        call catch_error('ERROR: (GYRO) cannot have nonperiodic pseudospectral.')
+     endif
      i_gyro = 0
+     i_dx   = 0
 
   case default
 
-     call catch_error('INVALID: boundary_method')
+     call catch_error('ERROR: (GYRO) invalid boundary_method')
 
   end select
   !----------------------------------------------------
@@ -383,7 +370,7 @@ subroutine gyro_select_methods
 
   case default
 
-     call catch_error('INVALID: profile_method')
+     call catch_error('ERROR: (GYRO) profile_method')
 
   end select
   !----------------------------------------------------
@@ -403,7 +390,7 @@ subroutine gyro_select_methods
      call send_line('geometry             : GENERAL SHAPE (from EFIT)')
 
   case default
-     call catch_error('INVALID: num_equil_flag')
+     call catch_error('ERROR: (GYRO) num_equil_flag')
 
   end select
   !----------------------------------------------------
@@ -431,7 +418,7 @@ subroutine gyro_select_methods
 
   case default
 
-     call catch_error('INVALID: electron_method')
+     call catch_error('ERROR: (GYRO) electron_method')
 
   end select
   !----------------------------------------------------
@@ -455,7 +442,7 @@ subroutine gyro_select_methods
 
   case default
 
-     call catch_error('INVALID: n_field')
+     call catch_error('ERROR: (GYRO) n_field')
 
   end select
   !----------------------------------------------------
@@ -475,7 +462,7 @@ subroutine gyro_select_methods
 
   case default
 
-     call catch_error('INVALID: boundary_method')
+     call catch_error('ERROR: (GYRO) boundary_method')
 
   end select
 
@@ -524,7 +511,7 @@ subroutine gyro_select_methods
 
   case default
 
-     call catch_error('INVALID: nonuniform_grid_flag')
+     call catch_error('ERROR: (GYRO) nonuniform_grid_flag')
 
   end select
   !----------------------------------------------------
@@ -554,7 +541,7 @@ subroutine gyro_select_methods
 
      case default
 
-        call catch_error('INVALID: integrator_method')
+        call catch_error('ERROR: (GYRO) integrator_method')
 
      end select
 
@@ -572,7 +559,7 @@ subroutine gyro_select_methods
 
      case default
 
-        call catch_error('INVALID: integrator_method')
+        call catch_error('ERROR: (GYRO) integrator_method')
 
      end select
 
@@ -594,7 +581,7 @@ subroutine gyro_select_methods
 
   case default
 
-     call catch_error('INVALID: sparse_method')
+     call catch_error('ERROR: (GYRO) sparse_method')
 
   end select
   !-------------------------------------------------------
@@ -616,12 +603,12 @@ subroutine gyro_select_methods
      n_lump = 4+n_source
 
      if (n_lump < 5) then
-        call catch_error('INVALID: N_SOURCE TOO SMALL')
+        call catch_error('ERROR: (GYRO) N_SOURCE TOO SMALL')
      endif
 
   case default
 
-     call catch_error('INVALID: source_flag')
+     call catch_error('ERROR: (GYRO) source_flag')
 
   end select
   !----------------------------------------------------
@@ -659,7 +646,7 @@ subroutine gyro_select_methods
 
      case default
 
-        call catch_error('INVALID: ord_rbf')
+        call catch_error('ERROR: (GYRO) ord_rbf')
 
      end select
 
@@ -693,7 +680,7 @@ subroutine gyro_select_methods
   case (2)
      call send_line('rotation effects     : WALTZ METHOD')
   case default
-     call catch_error('INVALID: rotation_theory_method')
+     call catch_error('ERROR: (GYRO) rotation_theory_method')
   end select
   !-------------------------------------------------------
 
@@ -745,7 +732,7 @@ subroutine gyro_select_methods
 
      case default
 
-        call catch_error('INVALID: lindiff_method')
+        call catch_error('ERROR: (GYRO) lindiff_method')
 
      end select
      !-------------------------------------------------------
@@ -769,20 +756,29 @@ subroutine gyro_select_methods
 
      case default
 
-        call catch_error('INVALID: nl_method')
+        call catch_error('ERROR: (GYRO) nl_method')
 
      end select
      !-------------------------------------------------------
 
   case default
 
-     call catch_error('INVALID: nonlinear_flag')
+     call catch_error('ERROR: (GYRO) nonlinear_flag')
 
   end select
   !-------------------------------------------------------
 
   call send_line(separator)
 
+  !-------------------------------------------------------
+  ! Print some MPI/OpenMP diagnostics
+  !
+  if (n_omp > 1) then 
+     call send_message('INFO: (GYRO) Initialized multi-threaded MPI')
+  else
+     call send_message('INFO: (GYRO) Dropped down to single-threaded MPI')
+  endif
+  !-------------------------------------------------------
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[select_methods done]'

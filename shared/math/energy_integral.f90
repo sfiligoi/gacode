@@ -73,7 +73,6 @@ subroutine energy_integral(n_energy,energy_max,n_kinetic,energy,w_energy)
   real :: s_max
   real :: s1
   real :: d_e
-  real :: r_star
   !
   real, dimension(:), allocatable :: sn
   real, dimension(:), allocatable :: wn

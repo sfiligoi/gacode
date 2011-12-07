@@ -39,7 +39,7 @@ subroutine catch_halt_signal
        i_err)  
   !
   if (abs(signal) == 1) then
-     call set_exit_status('user halt',1)
+     call gyro_set_exit_status('user halt',1)
   endif
   !------------------------------------------------
 

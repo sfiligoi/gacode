@@ -1,8 +1,14 @@
 module neo_globals
 
-  real, parameter :: pi=3.1415926535897932
+  !---------------------------------------------------------------
+  ! local MPI variables
+  ! 
+  integer :: i_proc
+  integer :: n_proc
+  integer :: NEO_COMM_WORLD
+  !---------------------------------------------------------------
 
-  logical, parameter :: case_spitzer = .false.
+  real, parameter :: pi=3.1415926535897932
 
   !---------------------------------------------------------------
   ! Input parameters:
@@ -45,9 +51,9 @@ module neo_globals
   real, dimension(6) :: temp_in
   real, dimension(6) :: dlnndr_in
   real, dimension(6) :: dlntdr_in
-  real, dimension(6) :: nu_in
+  !
+  real :: nu_1_in
   !---------------------------------------------------------------
-
 
   !---------------------------------------------------------------
   ! Grid dimensions:
@@ -57,23 +63,23 @@ module neo_globals
   integer :: n_xi
   integer :: n_theta
   integer :: n_radial
-  !
-  real :: energy_max, energy_min_connor, energy_tol
+
+  integer :: matsz_scalefac
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
   ! Models:
   !
-  integer :: n_order
   integer :: sim_model
   integer :: equilibrium_model
   integer :: collision_model 
   integer :: profile_model
   integer :: profile_erad0_model
-  integer :: profile_temprescale_model
   integer :: profile_equilibrium_model
   integer :: rotation_model
   integer :: adiabatic_ele_model
+  integer :: spitzer_model
+  real    :: epar0_spitzer
   real    :: sign_q
   real    :: sign_bunit
   !---------------------------------------------------------------
@@ -81,7 +87,7 @@ module neo_globals
   !---------------------------------------------------------------
   ! Output mode:
   !
-  integer :: write_out_mode
+  integer :: silent_flag
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -89,6 +95,11 @@ module neo_globals
   !
   integer, dimension(:), allocatable :: z     ! charge (ns)
   real, dimension(:), allocatable :: mass     ! m/m_0  (ns)
+  !---------------------------------------------------------------
+
+  !---------------------------------------------------------------
+  ! Path to INPUT, read in the get_inputpath subroutine
+  character(len=80) :: path
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -129,13 +140,10 @@ module neo_globals
   real, dimension(:), allocatable :: epar0    ! inductive Efield (e/T_0)*a (nr)
   real, dimension(:), allocatable :: omega_rot  ! omega_rot / (vth_0/a) (nr)
   real, dimension(:), allocatable :: omega_rot_deriv ! domega_rot/d(r/a) (nr)
-  integer :: zf_model
-  real    :: zf_time
 
   !---------------------------------------------------------------
 
   real, dimension(:), allocatable :: theta
-  real, dimension(:,:), allocatable :: wd_rad ! rad deriv weights (nr,nr)
 
   ! Numerical/work arrays and dimensions
 
@@ -148,10 +156,9 @@ module neo_globals
 
   integer, dimension(:), allocatable :: is_indx, ie_indx, ix_indx, it_indx
 
-  real, dimension(:,:), allocatable :: driftx, driftth, &
-       driftx_rot0, driftx_rot1, driftx_rot2, driftx_rot3
+  real, dimension(:,:), allocatable :: driftx, &
+       driftxrot1, driftxrot2, driftxrot3
   ! driftx   = vdrift dot grad r
-  ! driftth  =  r * vdrift dot grad theta 
 
   ! normalizations for experimental profiles
   real  :: temp_norm_fac, charge_norm_fac
@@ -166,26 +173,34 @@ module neo_globals
   integer, dimension(-2:2) :: cderiv
   integer, dimension(:), allocatable :: thcyc
 
+  ! error checking
+  integer :: error_status = 0
+  character(len=80) :: error_message
+	
+  ! output file
+  character(len=80)  :: runfile_neoout = 'out.neo.run'
+  integer :: io_neoout = 12
+
   ! output vectors
 
   ! (n_species_max, transport coeff)
   ! transport coeff: 1-> gamma, 2-> Q, 3->Pi, 4-> Q-omega*Pi
   !                  5-> vpol,  6-> vtor
-  real, dimension(6,6) :: neo_dke_out
+  real, dimension(6,6) :: neo_dke_out=0.0
 
   ! species-independent transport coeff (currently just jpar)
-  real                 :: neo_dke_1d_out
+  real                 :: neo_dke_1d_out= 0.0
 
   ! (n_species_max, transport coeff)  
   ! gyro-viscous fluxes: 1-> gamma, 2-> Q, 3->Pi, 4-> Q-omega*Pi
-  real, dimension(6,4) :: neo_gv_out
+  real, dimension(6,4) :: neo_gv_out=0.0
 
   ! pure plasma theory
   ! Gamma_HH, Qi_HH, Qe_HH, Qi_CH, jpar_HH, jpar_S
-  real, dimension(6)   :: neo_th_out
+  real, dimension(6)   :: neo_th_out=0.0
 
   ! (n_species_max, transport coeff)
   ! multi-species theory: 1-> gamma_HS, 2-> Q_HS
-  real, dimension(6,2)   :: neo_thHS_out
+  real, dimension(6,2)   :: neo_thHS_out=0.0
 
 end module neo_globals

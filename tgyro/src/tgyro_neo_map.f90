@@ -13,7 +13,7 @@ subroutine tgyro_neo_map
   mu1 = sqrt(mi(1)/(me*loc_me_multiplier))
 
   ! Initialize NEO
-  call neo_init
+  call neo_init(paths(i_r-1),gyro_comm)
 
   ! Simulation mode (dke solve vs. analytic)
   if (loc_neo_method == 1) then
@@ -23,10 +23,17 @@ subroutine tgyro_neo_map
   end if
 
   ! Resolution
-  neo_energy_max_in = 16.0
+  if (loc_n_ion < 4) then
+!     neo_n_energy_in = 10
+     neo_n_energy_in = 5
+  else
+!     neo_n_energy_in = 6
+     neo_n_energy_in = 5
+  endif
+  neo_n_xi_in = 11
+  neo_n_theta_in = 11
 
   ! Geometry
-  neo_write_out_mode_in    = 0
   neo_equilibrium_model_in = 2
   neo_rmin_over_a_in       = r(i_r)/r_min
   neo_rmaj_over_a_in       = r_maj(i_r)/r_min
@@ -51,8 +58,6 @@ subroutine tgyro_neo_map
   neo_temp_2_in   = 1.0/(ti(1,i_r)/te(i_r))
   neo_dlnndr_2_in = r_min*dlnnedr(i_r)
   neo_dlntdr_2_in = r_min*dlntedr(i_r)
-  neo_nu_2_in     = (nue(i_r)*r_min/c_s(i_r))/&
-       sqrt(ti(1,i_r)/te(i_r))*1.0/(ni(1,i_r)/ne(i_r))
 
   ! Main ions
   neo_z_1_in      = int(zi_vec(1))
@@ -72,8 +77,6 @@ subroutine tgyro_neo_map
      neo_dens_3_in   = ni(2,i_r)/ne(i_r)
      neo_dlnndr_3_in = r_min*dlnnidr(2,i_r)
      neo_dlntdr_3_in = r_min*dlntidr(2,i_r)
-     neo_nu_3_in = neo_nu_1_in*(neo_dens_3_in/neo_dens_1_in)*neo_z_3_in**4/&
-          sqrt(neo_mass_3_in)
 
   endif
 
@@ -85,8 +88,6 @@ subroutine tgyro_neo_map
      neo_dens_4_in   = ni(3,i_r)/ne(i_r)
      neo_dlnndr_4_in = r_min*dlnnidr(3,i_r)
      neo_dlntdr_4_in = r_min*dlntidr(3,i_r)
-     neo_nu_4_in = neo_nu_1_in*(neo_dens_4_in/neo_dens_1_in)*neo_z_4_in**4/&
-          sqrt(neo_mass_4_in)
 
   endif
 
@@ -98,8 +99,6 @@ subroutine tgyro_neo_map
      neo_dens_5_in   = ni(4,i_r)/ne(i_r)
      neo_dlnndr_5_in = r_min*dlnnidr(4,i_r)
      neo_dlntdr_5_in = r_min*dlntidr(4,i_r)
-     neo_nu_5_in = neo_nu_1_in*(neo_dens_5_in/neo_dens_1_in)*neo_z_5_in**4/&
-          sqrt(neo_mass_5_in)
 
   endif
 
@@ -111,8 +110,6 @@ subroutine tgyro_neo_map
      neo_dens_6_in   = ni(5,i_r)/ne(i_r)
      neo_dlnndr_6_in = r_min*dlnnidr(5,i_r)
      neo_dlntdr_6_in = r_min*dlntidr(5,i_r)
-     neo_nu_6_in = neo_nu_1_in*(neo_dens_6_in/neo_dens_1_in)*neo_z_6_in**4/&
-          sqrt(neo_mass_6_in)
 
   endif
 

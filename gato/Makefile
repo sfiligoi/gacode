@@ -1,5 +1,4 @@
 include ../shared/install/make.inc.${GACODE_PLATFORM}
-include install/make.ext.${GACODE_PLATFORM}
 
 ifeq ($(OPT),debug)
    FFLAGS=${FDEBUG} ${GATOFLAGS}

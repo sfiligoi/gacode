@@ -55,7 +55,7 @@ cd $testdir
 for sim in $list
 do 
    gyro -g $sim -p $testdir > out
-   rm -rf $sim/error.out $sim/$precfile $sim/CVS
+   rm -rf $sim/$precfile
    gyro -e $sim -n $n_proc -p $testdir > out
    gyro_reg $sim
 done

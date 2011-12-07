@@ -1,6 +1,6 @@
-[GYRO MPI tasks: 2]
-[Parsing data in INPUT]
+[Parsing data in input.gyro]
  -----------------------------------------------
+ operational mode     : INITIAL VALUE
  boundary conditions  : NONPERIODIC
  profiles             : FLAT
  geometry             : S-ALPHA
@@ -9,12 +9,11 @@
  gyro_method          : ORIGINAL (INTEGRATED) POLARIZATION
  fluctuation output   : PHI( ) N( ) E( ) V( )                   
  radial grid          : UNIFORM
- energy_method        : CONSTANT
  integrator_method    : RK2
  field solve          : UMFPACK (SEQUENTIAL)
  source_flag          : SOURCE OFF
  pitch-angle coll.    : OFF
- rotation effects     : CANDY METHOD
+ rotation parameters  : CANDY METHOD
  nonlinear dynamics   : OFF
  linear diffusivity   : RESPONSE FUNCTION
  -----------------------------------------------
@@ -39,12 +38,14 @@ INFO: nu_ei rescaled by: 0.000
            values:    14112
           indices:    14833
        iterations:        1
-
+ 
  ----------- UTILITY PARAMETERS ----------------
  Ion parallel motion     : ON
  Ion curvature drift     : ON
  Electron curvature drift: ON
  ----------- GRID DIMENSIONS -------------------
+ n_cores              :    2
+ --
  n_n                  :    1
  n_x                  :   12
  n_stack              :   20
@@ -66,6 +67,7 @@ INFO: nu_ei rescaled by: 0.000
  energy_max           :   6.000000
  dt                   :   0.100000
  --------------- LOCAL PARAMETERS ---------------
+  NOTE: use abs(SAFETY_FACTOR) as input
  # RADIUS [INPUT]     :   0.500000
  .RADIUS              :   0.501136
  .ASPECT_RATIO        :   3.000000
@@ -88,6 +90,8 @@ INFO: nu_ei rescaled by: 0.000
  .LAMBDA_DEBYE        :   0.000000
  .NU_EI               :   0.000000
  .NU_I_KROOK          :   0.000000
+ .IPCCW               :  -1.000000
+ .BTCCW               :  -1.000000
  # Ion  1
  .NI_OVER_NE          :   1.000000
  .TI_OVER_TE          :   1.000000
@@ -96,20 +100,23 @@ INFO: nu_ei rescaled by: 0.000
  .Z                   :   1.000000
  (NU_II)              :   0.000000
  .MU                  :   1.000000
+ --------------- TGLF PARAMETERS ---------------
+ Q_PRIME              :  15.927520
+ P_PRIME              :   0.000000
  -------- LOCAL PARAMETERS (diagnostic) ----------
  n_i*z_i - n_e:       :   0.000000
  r/R0                 :   0.167045
+ b_unit               :   1.000000
  beta_unit_norm       :   0.000000
  betai_unit           :   0.000000
  betae_unit_norm      :   0.000000
- omega_eb_0 (c_s/a)   :   0.000000
- * Note that f = f_sim exp(-i n omega_eb_0 t)
+ beta_*               :   0.000000
+ alpha_MHD            :   0.000000
+ omega_00 (c_s/a)     :   0.000000
+ * Note that f = f_sim exp(i n omega0[r0] t)
  ----------- UPWIND PARAMETERS -----------------
  radial_upwind        :   1.000000
  orbit_upwind         :   1.000000
- ----------- SOURCE PARAMETERS -----------------
- nu_source            :   0.100000
- n_source             :    1
  ----------- RADIAL DOMAIN PARAMETERS ----------
  s_grid               :   1.000000
  box_multiplier       :   3.000000
@@ -131,35 +138,38 @@ INFO: nu_ei rescaled by: 0.000
  plot_filter          :   1.000000
  time_skip            :    10
  restart_data_skip    :    10
- ----------- COURANT PARAMETERS ----------------
- max(THETA COURANT)   :   0.087854
- max(D1 COURANT)      :   0.173553
- max(DR COURANT)      :   0.402555
+ ----------- STABILITY PARAMETERS ----------------
+ d/dtau Courant       :   0.087854
+   d/dr Courant       :   0.402555
  ----------- SETUP TIMING ----------------------
- Grid Setup           :   0.131890
- Build radial ops     :   0.036500
- Build advection ops  :   0.000000
- Build field matrices :   0.227888
-
- TOTAL SETUP          :   0.422655
- ------ CENTRAL WAVENUMBERS SIMULATED -----------
- n =    30   k_theta rho_s = 0.300 [0.300][0.300]
- min(k_x*rho_s)       :     0.628319
- max(k_x*rho_s)       :     1.884956
- ------------- CENTRAL BOX SIZE -----------------
- Lx/rho_s             :    10.000000
- Ly/rho_s             :    20.943951
- => dx/rho_s          :     0.833333
- ------------------------------------------------
- ---------- GYRO-OPERATOR BANDWIDTH -------------
+ Grid Setup           :   0.179199
+ Build radial ops     :   0.041557
+ Build advection ops  :   0.000001
+ Build field matrices :   0.090266
+ 
+ TOTAL SETUP          :   0.334856
+ -------- CENTRAL WAVENUMBERS SIMULATED -----------
+     (k_y = nq/r, rho = rho_sD_unit)
+ n =    30   k_y rho =  0.300 [ 0.300][ 0.300]
+  
+ min resolved k_x*rho_sD :  0.628319
+ max resolved k_x*rho_sD :  1.884956
+ --------------- CENTRAL BOX SIZE -----------------
+ abs(Lx/rho_sD)       :    10.000000
+ abs(Ly/rho_sD)       :    20.943951
+ => abs(dx/rho_sD)    :     0.833333
+ --------------------------------------------------
+ ------------ GYRO-OPERATOR BANDWIDTH -------------
  Ion 1                :     9.166667
- ------------------------------------------------
- ---------- BUFFER WIDTH -------------
+ --------------------------------------------------
+ ---------------- BUFFER WIDTH --------------------
  Ion 1                :     0.909091     0.909091
  WARNING: All buffer widths should be > 8.0
+ --------------------------------------------------
  PLEASE SEE: 
-  - units.out for normalizing parameters
-  - alloc.out for memory usage
-  - efficiency.out for parallelization efficiency
-  - phase_space.out for velocity-space nodes and weights
- STATUS: converged                                                                       
+  - out.gyro.units for normalizing parameters
+  - out.gyro.memory for memory usage
+  - out.gyro.efficiency for parallelization efficiency
+  - out.gyro.phase_space for velocity-space nodes and weights
+ STATUS: converged                                                              
+          

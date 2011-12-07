@@ -6,28 +6,15 @@
 # FUNCTION:
 #  Parallel execute script.
 
-#simdir=${1}
-#nproc=${2}
-#exec=${3}
-
-#cd $simdir
-
-#mpirun -np $nproc -machinefile $PBS_NODEFILE /home/ypodpaly/gyro_runs/gyro/src/BigScience
-
-#sleep 1
-
-srcdir=${3}
 simdir=${1}
-nproc=${2}
+nmpi=${2}
+exec=${3}
+nomp=${4}
+numa=${5}
+mpinuma=${6}
 
-echo $srcdir
-echo $simdir
-echo $nproc
 cd $simdir
-#mpirun -np $nproc -machinefile $PBS_NODEFILE $srcdir
-mpiexec -n $nproc $srcdir
-
-sleep 1
-
+export OMP_NUM_THREADS=$nomp 
+mpiexec -n $nmpi $exec
 
 

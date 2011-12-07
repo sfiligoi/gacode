@@ -30,7 +30,7 @@ subroutine gyro_initialize_timestep
 
      ! Initialize status to unconverged.
 
-     call set_exit_status('unconverged',0)
+     call gyro_set_exit_status('unconverged',0)
 
      if (abs(time_max) > 1.0) then
 
@@ -62,7 +62,7 @@ subroutine gyro_initialize_timestep
 
      ! Initialize status:
 
-     call set_exit_status('clean exit',0)
+     call gyro_set_exit_status('clean exit',0)
 
      freq_tol = 1e-10
      freq_err = 1.0
@@ -89,46 +89,6 @@ subroutine gyro_initialize_timestep
   endif
 
   a_SDIRK = 0.5
-  !----------------------------------------------------
-
-  !----------------------------------------------------
-  ! Initialize CPU timers:
-  !
-  CPU_C_in       = 0.0
-  CPU_C_out      = 0.0
-  CPU_C          = 0.0
-
-  CPU_Ct_in      = 0.0
-  CPU_Ct_out     = 0.0
-  CPU_Ct         = 0.0
-
-  CPU_NL_in      = 0.0
-  CPU_NL_out     = 0.0
-  CPU_NL         = 0.0
-
-  CPU_NLt_in     = 0.0
-  CPU_NLt_out    = 0.0
-  CPU_NLt        = 0.0
-
-  CPU_RHS_in     = 0.0
-  CPU_RHS_out    = 0.0
-  CPU_RHS       = 0.0
-
-  CPU_diag_in    = 0.0
-  CPU_diag_mid   = 0.0
-  CPU_diag_out   = 0.0
-  CPU_diag_a     = 0.0
-  CPU_diag_b     = 0.0
-
-  CPU_field      = 0.0
-  CPU_field_in   = 0.0
-  CPU_field_out  = 0.0
-
-  CPU_field2     = 0.0
-  CPU_field2_in  = 0.0
-  CPU_field2_out = 0.0
-
-  CPU_ts         = 0.0
   !----------------------------------------------------
 
   if (debug_flag == 1 .and. i_proc == 0) then

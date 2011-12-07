@@ -107,7 +107,7 @@ c
         write(25,150) mxgrid
         do j=1,mxgrid
           write(25,200) j, rho(j), ne_exp(j), ni_exp(j),
-     &       nz_exp(j), nfst_exp(j), zeff_exp(j), q_exp(j)
+     &       nz_exp(j), nfast_exp(j), zeff_exp(j), q_exp(j)
         enddo
         close(25)
       endif

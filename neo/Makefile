@@ -17,13 +17,11 @@ all:
 	cd nclass ; make
 	cd src ; make
 	cd tools/vgen ; make
-	cd tools/squeeze ; make
 
 clean:
 	cd ../modules ; rm -f neo*.mod
 	cd src ; make clean
 	cd tools/vgen ; make clean 
-	cd tools/squeeze ; make clean 
 	cd nclass ; make clean 
 
 .IGNORE:

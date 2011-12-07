@@ -33,7 +33,7 @@ subroutine catch_blowup
        i_err)
   
   if (phi_max > phi_limit .and. nonlinear_flag == 1) then
-     call set_exit_status('field blowup',1)
+     call gyro_set_exit_status('field blowup',1)
   endif
   !
   !------------------------------------------------

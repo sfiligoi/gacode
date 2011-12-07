@@ -15,6 +15,8 @@ libdir = $(prefix)/lib
 noinst_LTLIBRARIES = libgacodemath.la
 libgacodemath_la_SOURCES = \
   math_constants.f90 \
+  linint.f90 \
+  logint.f90 \
   j0y0.f \
   i0.f \
   erf.f \

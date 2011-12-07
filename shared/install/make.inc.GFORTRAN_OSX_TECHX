@@ -11,9 +11,14 @@
 MAKE = make
 
 # Compilers and flags
+#
+#set up for diff mpif90s
+#
+#MF90 = mpif90
+MF90 = openmpif90
 
-FC	= mpif90 -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -g 
-F77	= mpif90 -g 
+FC	= ${MF90} -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -g 
+F77	= ${MF90} -g 
 
 FMATH	= -fdefault-real-8
 FOPT	= -O3
@@ -30,10 +35,7 @@ LMATH = -framework Accelerate
 
 # OPTIONAL: netCDF (for gyro2gkv)
 
-#NETCDF = $(SCRATCH)/volatile-gnu/netcdf/lib/libnetcdf.a
-NETCDF = ${HOME}/software/netcdf/lib/libnetcdf.a ${HOME}/software/netcdf/lib/libnetcdff.a
-#NETCDF_INC = $(SCRATCH)/volatile-gnu/netcdf/include
-NETCDF_INC =${HOME}/software/netcdf/include
+
 
 # OPTIONAL: HDF5 (for vshdf5)
 
@@ -49,6 +51,12 @@ HDF5_LIBS = ${HOME}/software/hdf5-par/lib/libhdf5_hl_f90cstub.a \
 HDF5_INC =  -I${HOME}/software/hdf5-par/include -I${HOME}/software/hdf5-par/include/fortran
 VSHDF5_MAKECMD=vshdf5
 MPI_FLAG=-Wp,-D__MPI
+
+
+#NETCDF = $(SCRATCH)/volatile-gnu/netcdf/lib/libnetcdf.a
+NETCDF = ${HOME}/software/netcdf/lib/libnetcdf.a ${HOME}/software/netcdf/lib/libnetcdff.a ${HDF5_LIBS}
+#NETCDF_INC = $(SCRATCH)/volatile-gnu/netcdf/include
+NETCDF_INC =${HOME}/software/netcdf/include ${HDF5_INC}
 # Archive
 
 ARCH = ar cr
