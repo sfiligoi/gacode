@@ -19,8 +19,10 @@
 #
 # GYRO directory
 GYRO_DIR=${GACODE_ROOT}/gyro
-# VGEN directory
+# VGEN inputs directory
 VGEN_DIR=${GACODE_ROOT}/neo/tools/input/vgen
+# VGEN exec directory
+VGEN_EXE=${GACODE_ROOT}/neo/tools/vgen
 # - profiles_gen converter executable
 EXEC=${GACODE_ROOT}/shared/profiles_gen/src/prgen
 # - GATO executable
@@ -498,7 +500,9 @@ then
    echo "$VGEN_E"   > vgen.dat
    echo "$VGEN_V"  >> vgen.dat
    echo "$VGEN_X" >>  vgen.dat
-   $VGEN_DIR/vgen
+   echo `pwd`
+   echo `ls $VGEN_EXE/vgen`
+   $VGEN_EXE/vgen
 
    if [ -f "input.profiles.new" ]
        then

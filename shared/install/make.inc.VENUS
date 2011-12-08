@@ -1,11 +1,11 @@
 #---------------------------------------------------
-# DELPHI, EOS, HESTIA, etc. at General Atomics
+# VENUS cluster, DELPHI2 (?), BENTEN (?) at General Atomics
 #---------------------------------------------------
 
 # Compilers and flags
-
-FC	= mpif90 -module $(GACODE_ROOT)/modules
-F77	= mpif90
+PGIROOT = /opt/pgi/linux86-64/2010
+F77	= $(PGIROOT)/mpi/mpich/bin/mpif90
+FC	= $(F77) -module $(GACODE_ROOT)/modules
 
 FMATH	= -r8 
 FOPT	= -fastsse
@@ -16,13 +16,17 @@ FPROF	= -fastsse -Mprof=func
 # System math libraries
 
 ROOT=/u/candy/local_software
+ROOT=/c/source
 
-LMATH = $(ROOT)/GotoBLAS2/libgoto2.a 
+LMATH = $(ROOT)/gotoblas/GotoBLAS_PGF9064/libgoto.a\
+        $(PGIROOT)/lib/liblapack.a\
+        $(PGIROOT)/lib/libblas.a
 
 # OPTIONAL: netCDF (for gyro2gkv)
 
 NETCDF = $(ROOT)/netcdf/lib/libnetcdf.a
-NETCDF_INC = $(ROOT)/netcdf/include
+NETCDF = $(ROOT)/netcdf/lib64/libnetcdf.a
+NETCDF_INC = $(ROOT)/netcdf/include64
 
 # Archive 
 
