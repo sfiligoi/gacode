@@ -1,0 +1,37 @@
+#---------------------------------------------------
+# Cray XK6 (not the car) [PGI]
+#---------------------------------------------------
+
+# Compilers and flags
+
+# Fortran 90/95 compiler
+FC  = ftn -module $(GACODE_ROOT)/modules
+
+# Fortran 77 compiler
+F77 = ftn
+
+# Compiler options/flags
+FMATH  = -r8
+FOPT   = -fast -Mcache_align -Msmartalloc 
+FDEBUG = -Ktrap=fp -Mbounds -Minform=inform -Msmartalloc
+FOMP   = -mp=nonuma
+FNOMP  =
+
+#FFTW and MUMPS
+LMATH = -ldrfftw -ldfftw
+
+#Parallel NETCDF and HDF5
+NETCDF = ${NETCDF_DIR}/lib/libnetcdff.a ${NETCDF_DIR}/lib/libnetcdf.a
+NETCDF_INC = ${NETCDF_DIR}/include
+
+HDF5_INC = -I${HDF5_DIR}/include
+HDF5_LIBS = \
+  ${HDF5_DIR}/lib/libhdf5_hl.a \
+  ${HDF5_DIR}/lib/libhdf5hl_fortran.a \
+  ${HDF5_DIR}/lib/libhdf5_fortran.a \
+  ${HDF5_DIR}/lib/libhdf5.a
+
+VSHDF5_MAKECMD=vshdf5
+
+# Archive
+ARCH = ar cr
