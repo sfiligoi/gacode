@@ -18,20 +18,18 @@ FOMP   = -mp=nonuma
 FNOMP  =
 
 #FFTW and MUMPS
-LMATH = -ldrfftw -ldfftw ${MUMPS_PATH} -lzmumps -lpord
+LMATH = -ldrfftw -ldfftw
 
 #Parallel NETCDF and HDF5
-NETCDF = \
-  ${CRAY_NETCDF_DIR}/netcdf-hdf5parallel-pgi/lib/libnetcdff.a \
-  ${CRAY_NETCDF_DIR}/netcdf-hdf5parallel-pgi/lib/libnetcdf.a
-NETCDF_INC = ${CRAY_NETCDF_DIR}/netcdf-hdf5parallel-pgi/include
+NETCDF = ${NETCDF_DIR}/lib/libnetcdff.a ${NETCDF_DIR}/lib/libnetcdf.a
+NETCDF_INC = ${NETCDF_DIR}/include
 
-HDF5_INC = -I${CRAY_HDF5_DIR}/hdf5-parallel-pgi/include
+HDF5_INC = -I${HDF5_DIR}/include
 HDF5_LIBS = \
-  ${CRAY_HDF5_DIR}/hdf5-parallel-pgi/lib/libhdf5_hl.a \
-  ${CRAY_HDF5_DIR}/hdf5-parallel-pgi/lib/libhdf5hl_fortran.a \
-  ${CRAY_HDF5_DIR}/hdf5-parallel-pgi/lib/libhdf5_fortran.a \
-  ${CRAY_HDF5_DIR}/hdf5-parallel-pgi/lib/libhdf5.a
+  ${HDF5_DIR}/lib/libhdf5_hl.a \
+  ${HDF5_DIR}/lib/libhdf5hl_fortran.a \
+  ${HDF5_DIR}/lib/libhdf5_fortran.a \
+  ${HDF5_DIR}/lib/libhdf5.a
 
 VSHDF5_MAKECMD=vshdf5
 

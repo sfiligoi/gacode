@@ -16,7 +16,7 @@
 # - (1x) SeaStar2+ ASIC per compute node arranged in 3D torus network topology
 #
 #  FIXED Hardware parameters
-CORES_PER_NODE=12
+CORES_PER_NODE=16
 NUMAS_PER_NODE=2
 #---------------------------------------------------
 
