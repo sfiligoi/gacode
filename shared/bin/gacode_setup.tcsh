@@ -9,5 +9,9 @@ setenv PATH ${PATH}:$GACODE_ROOT/neo/bin
 setenv PATH ${PATH}:$GACODE_ROOT/tglf/bin
 setenv PATH ${PATH}:$GACODE_ROOT/shared/bin
 
-setenv PYTHONPATH $GACODE_ROOT/shared/python
+if ( $?PYTHONPATH ) then
+ setenv PYTHONPATH ${PYTHONPATH}:$GACODE_ROOT/shared/python
+else
+ setenv PYTHONPATH $GACODE_ROOT/shared/python
+endif
 
