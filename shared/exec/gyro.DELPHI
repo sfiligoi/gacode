@@ -1,17 +1,18 @@
 #!/bin/sh
 #
 # SCRIPT:
-#  gyro.PG_OPT64
+#  gyro.DELPHI
 #
 # FUNCTION:
 #  Parallel execution script
 
 simdir=${1}
-nproc=${2}
+nmpi=${2}
 exec=${3}
+nomp=${4}
+numa=${5}
+mpinuma=${6}
 
 cd $simdir
-  
-mpirun -np $nproc $exec
-
+export OMP_NUM_THREADS=$nomp ; mpiexec -n $nmpi $exec
 

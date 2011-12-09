@@ -558,7 +558,7 @@ then
    echo "null" >> $CONFIG
 else
    echo $CER_FILE >> $CONFIG
-   echo "INFO:  (profiles_gen) Will merge data from $CER_FILE"
+   echo "INFO: (profiles_gen) Will merge data from $CER_FILE"
 fi
 
 # EFIT G-file

@@ -11,7 +11,8 @@ FMATH	= -r8
 FOPT	= -fastsse
 FDEBUG	= -g -Ktrap=fp -Mbounds -Minform,inform
 FBOUND	= -Minform,inform -Mbounds
-FPROF	= -fastsse -Mprof=func
+FOMP    = -mp
+FNOMP   = 
 
 # System math libraries
 
