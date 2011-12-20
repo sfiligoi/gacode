@@ -371,11 +371,11 @@ subroutine tgyro_write_input
 
      case (2)
 
-        write(1,10) 'TGYRO_TGLF_REVISION','Current'
+        write(1,10) 'TGYRO_TGLF_REVISION','TGLF-09'
 
      case (3)
 
-        write(1,10) 'TGYRO_TGLF_REVISION','TGLF-09'
+        write(1,10) 'TGYRO_TGLF_REVISION','in development'
 
      case default
 
