@@ -99,7 +99,7 @@ c
       integer n1d, n2d, n3d, nur
 c
       parameter(nrmax=301) !max number of radial points in experimental grid
-      parameter(ntmax=3800) !max number of time points in experimental grid
+      parameter(ntmax=3801) !max number of time points in experimental grid
       parameter(n1d=13)   !number of 1d fields read;
       parameter(n2d=48) 
       parameter(n3d=6)   !number of fields read for experimental data
@@ -2094,11 +2094,8 @@ c
       implicit none
 c
       integer nrmax, ntmax,it, nsmooth
-      parameter(nrmax=51) !max number of radial points in experimental grid
-c      parameter(ntmax=801) !max number of time points in experimental grid
+      parameter(nrmax=301) !max number of radial points in experimental grid
       parameter(ntmax=3801) !max number of time points in experimental grid
-c     parameter(nrmax=301) !max number of radial points in experimental grid
-c     parameter(ntmax=2500) !max number of time points in experimental grid
       real*8 parray(nrmax,ntmax), pxu(nrmax), pyu(ntmax), zu(6)
       integer kxdim, kxu, kydim, kyu, kufile, kdchar, kfchar, kerr
       integer  idchar, ifchar, ichar, ichmax, iprint, ierr
@@ -3045,8 +3042,7 @@ c--------1---------2---------3---------4---------5---------6---------7-c
 c
       implicit none
       integer nrmax, ntmax, nsmooth
-      parameter(nrmax=51) !max number of radial points in experimental grid
-c      parameter(ntmax=801) !max number of time points in experimental grid
+      parameter(nrmax=301) !max number of radial points in experimental grid
       parameter(ntmax=3801) !max number of time points in experimental grid
 c
       real*8 parray(ntmax), pxu(ntmax), zu(6)
