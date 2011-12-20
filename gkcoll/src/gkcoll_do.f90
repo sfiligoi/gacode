@@ -19,7 +19,10 @@ subroutine gkcoll_do
   use gkcoll_collision
   use gkcoll_freq
   use gkcoll_allocate_profile
+  use gkcoll_implicit
   implicit none
+
+  integer :: imp_flag = 0
 
   integer :: ix, ir, it, jr, p, is, ie
   integer :: itime, nt_step
@@ -73,6 +76,9 @@ subroutine gkcoll_do
   call EQUIL_do
   call GYRO_alloc(1)
   call GK_alloc(1)
+  if(imp_flag /= 0) then
+     call GKimp_alloc(1)
+  endif
   call COLLISION_alloc(1)
   call FREQ_alloc(1)
 
@@ -109,7 +115,11 @@ subroutine gkcoll_do
 
      ! Collisionless gyrokinetic equation
      ! Returns new h_x, cap_h_x, cap_h_p, and phi 
-     call GK_do
+     if(imp_flag /= 0) then
+        call GKimp_do
+     else
+        call GK_do
+     end if
 
      ! Collision step
      ! Returns new cap_h_p, h_x, and phi
@@ -187,6 +197,9 @@ subroutine gkcoll_do
   call EQUIL_alloc(0)
   call GYRO_alloc(0)
   call GK_alloc(0)
+  if(imp_flag /= 0) then
+     call GKimp_alloc(0)
+  endif
   call COLLISION_alloc(0)
   call FREQ_alloc(0)
 

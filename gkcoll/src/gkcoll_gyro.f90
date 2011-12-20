@@ -14,6 +14,7 @@ contains
     use gkcoll_legendre
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
+    real, external :: BESJ0
     integer :: is,ir,it,ie,ix, jx
     real :: arg, val
 
