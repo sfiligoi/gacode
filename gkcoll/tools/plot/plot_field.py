@@ -48,6 +48,11 @@ if itime > n_time-1:
 #
 data = np.loadtxt('out.gkcoll.phiB')
 phib = np.reshape(data,(2,n_theta*n_radial,n_time),'F')
+# Construct complex eigenfunction at selected time
+phic = phib[0,:,itime]+1j*phib[1,:,itime]
+# Pick out the central point assuming n_radial and n_theta are even: 
+i0 = n_theta*(n_radial/2)+n_theta/2
+phic = phic/phic[i0]
 #-------------------------------------------------------
 
 fig = plt.figure(figsize=(6,6))
@@ -58,15 +63,8 @@ ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
 ax.set_xlabel(r'$\theta_*/\pi$',fontsize=GFONTSIZE)
 
-phimin = phib[0,:,itime].min()
-phimax = phib[0,:,itime].max()
-if (abs(phimin) > abs(phimax)):
-    phin = phimin
-else:
-    phin = phimax
-
-ax.plot(thetab/np.pi,phib[0,:,itime]/phin,color='k',label='Re')
-ax.plot(thetab/np.pi,phib[1,:,itime]/phin,color='b',label='Im')
+ax.plot(thetab/np.pi,np.real(phic),color='k',label='Re')
+ax.plot(thetab/np.pi,np.imag(phic),color='b',label='Im')
 
 ax.set_xlim([1-n_radial,-1+n_radial])
 ax.legend()

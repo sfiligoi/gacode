@@ -38,7 +38,7 @@ then
   echo
   echo "          -plot <type>"
   echo "          Generate plot of given type."
-  echo "          <type> = phi,"
+  echo "          <type> = field,"
   echo "                 = h,"
   echo "                 = h_cut"
 
