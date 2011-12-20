@@ -1,7 +1,7 @@
 module gkcoll_legendre
   implicit none
 
-  public :: legendre, legendre_deriv
+  public :: legendre, legendre_deriv, legendre_deriv2
 
 contains
 
@@ -54,5 +54,21 @@ contains
     endif
  
   end subroutine legendre_deriv
+
+  subroutine legendre_deriv2(n,arg,val)
+    integer, intent (in) :: n
+    real, intent (in) :: arg
+    real, intent(out) :: val
+    real :: p, pp
+    
+    if(arg**2 == 1.0) then
+       call gkcoll_error('ERROR: (GKCOLL) Invalid arg in legendre_deriv2')
+       return
+    endif
+    call legendre(n,arg,p)
+    call legendre_deriv(n,arg,pp)
+    val = 1.0/(1.0-arg**2) * (2.0*arg*pp - n*(n+1.0)*p)
+    
+  end subroutine legendre_deriv2
 
 end module gkcoll_legendre

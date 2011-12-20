@@ -10,6 +10,7 @@ subroutine gyro_init(path_in, mpi_comm_in)
   use mpi
   use gyro_globals
   use gyro_interface
+  use omp_lib
 
   implicit none
 
@@ -23,8 +24,20 @@ subroutine gyro_init(path_in, mpi_comm_in)
   ! Set appropriate global variables
   path = path_in
   GYRO_COMM_WORLD = mpi_comm_in
+
+  !----------------------------------------------------------------
+  ! Query OpenMP for dimensions
+  !
+  i_omp = omp_get_thread_num()
+  n_omp = omp_get_max_threads()
+  !-----------------------------------------------------------------
+
+  !----------------------------------------------------------------
+  ! Query MPI for dimensions
+  !
   call MPI_COMM_RANK(GYRO_COMM_WORLD, i_proc, i_err)
   call MPI_COMM_SIZE(GYRO_COMM_WORLD, n_proc, i_err)
+  !-----------------------------------------------------------------
 
   ! Check if input.gyro.gen file exists and set:
   !
@@ -40,16 +53,18 @@ subroutine gyro_init(path_in, mpi_comm_in)
   if (i_proc == 0) then
      open(unit=1,file=trim(path)//trim(baserunfile),position='append')
      if (inputdat_flag .eqv. .true.) then
-        write(1,'(a,a,a)') 'INFO: (GYRO) gyro_init reading ',trim(path),'input.gyro.gen'
+        write(1,'(a,a,a)') 'INFO: (GYRO) gyro_init reading ',&
+             trim(path),'input.gyro.gen'
      else
-        write(1,'(a,a,a)') 'INFO: (GYRO) gyro_init NOT reading ',trim(path),'input.gyro.gen'
+        write(1,'(a,a,a)') 'INFO: (GYRO) gyro_init NOT reading ',&
+             trim(path),'input.gyro.gen'
      endif
      close(1)
   endif
 
   if (inputdat_flag .eqv. .true.) then
 
-    ! Only call read_input subroutine if input.gyro.gen file exists
+     ! Only call read_input subroutine if input.gyro.gen file exists
 
      call gyro_read_input
 

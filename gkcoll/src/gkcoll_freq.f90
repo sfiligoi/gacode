@@ -52,6 +52,7 @@ contains
     
     ! Frequency
     total_weight = 0.0
+    freq = (0.0,0.0)
     if(minval(abs(phi_old)) == 0.0) then
        freq     = 0.0
        freq_err = 1.0
@@ -83,6 +84,7 @@ contains
             position='append')
        write(io_freq,20) freq, freq_err
        close(io_freq)
+       print *, freq, freq_err
     endif
 
 20  format(4(es11.4,1x))

@@ -121,7 +121,17 @@ program prgen
   !
   ! Note that nx will be the experimental vector length in ALL cases:
   !
-  if (index(raw_data_file,'.nc',back) /= 0) then
+  if (trim(raw_data_file) == 'null') then
+ 
+    ! Pure gfile parsing
+
+    format_type = 0
+
+    ! Minimal processing required to merge gfile data into otherwise
+    ! empty input.profiles output file.
+    call prgen_read_null
+
+  else if (index(raw_data_file,'.nc',back) /= 0) then
 
      ! New NetCDF format
      print '(a)','INFO: (prgen) Assuming iterdb NetCDF format.'
@@ -173,7 +183,9 @@ program prgen
   if (gato_flag == 1) call prgen_read_gato
   !---------------------------------------------------
 
-  if (index(raw_data_file,'.cdf',back) /= 0) then
+  if (format_type == 0) then
+     call prgen_map_null
+  else if (index(raw_data_file,'.cdf',back) /= 0) then
      call prgen_map_plasmastate
   else if (index(raw_data_file,'.peq',back) /= 0) then
      call prgen_map_peqdsk

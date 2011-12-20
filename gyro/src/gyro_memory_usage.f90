@@ -71,7 +71,7 @@ subroutine gyro_memory_usage(data_file,io)
         call alloc_add(io,size(w_gyro),16,'w_gyro')
         call alloc_add(io,size(z_gyro),16,'z_gyro')
         call alloc_add(io,size(w_gyro_rot),16,'w_gyro_rot')
-       
+
         if (n_field == 3) then
            call alloc_add(io,size(w_gyro_aperp),16,'w_gyro_aperp')
         endif
@@ -159,7 +159,6 @@ subroutine gyro_memory_usage(data_file,io)
         call alloc_add(io,size(gbflux_n),8,'gbflux_n')
 
         if (transport_method == 2) then
-           call alloc_add(io,size(diff_vec),8,'diff_vec')
            call alloc_add(io,size(gbflux_vec),8,'gbflux_vec')
         endif
 
@@ -260,7 +259,46 @@ subroutine gyro_memory_usage(data_file,io)
   end select
 
   if (i_proc == 0 .and. debug_flag == 1) then
-     print *,'[gyro_memory_usage done]' 
+     print *,'[gyro_memory_usage done]'
   endif
 
 end subroutine gyro_memory_usage
+
+!------------------------------------------------
+! alloc_add.f90
+!
+! PURPOSE:
+!  Primitive allocation addition routine.
+!------------------------------------------------
+
+subroutine alloc_add(io,n_size,bytes,name)
+
+  use gyro_globals
+
+  implicit none
+  !
+  integer, intent(in) :: io
+  integer, intent(in) :: n_size
+  integer, intent(in) :: bytes
+  character (len=*), intent(in) :: name
+  !
+  real :: this_memory
+
+  select case (output_flag)
+
+  case (1)
+
+     if (i_proc == 0) then
+
+        this_memory  = 1.0*n_size*bytes
+        total_memory = total_memory+this_memory 
+
+        write(io,10) this_memory/1048576.0,' MB',name
+
+     endif
+
+  end select
+
+10 format(f7.3,a,3x,a)
+
+end subroutine alloc_add

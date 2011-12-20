@@ -18,16 +18,6 @@ subroutine gyro_write_timedata
   !---------------------------------------------------
   implicit none
   !
-  real :: cp0
-  real :: cp1
-  real :: cp2
-  real :: cp3
-  real :: cp4
-  real :: cp5
-  real :: cp6
-  real :: cp7
-  real :: cp8
-  !
   real, dimension(:,:), allocatable :: a2
   real, dimension(:,:,:), allocatable :: a3
   !
@@ -43,8 +33,6 @@ subroutine gyro_write_timedata
      call gyro_write_step(trim(path)//'out.gyro.t',1)
   endif
   !---------------------------------------------------
-
-  call proc_time(cp0)
 
   !--------------------------------------------------
   ! Output of field-like quantities:
@@ -129,14 +117,12 @@ subroutine gyro_write_timedata
   endif
   !--------------------------------------------------
 
-  call proc_time(cp1)
   call gyro_kxky_spectrum
   call write_distributed_real(&
        trim(path)//'out.gyro.kxkyspec',&
        10,&
        size(kxkyspec),&
        kxkyspec)
-  call proc_time(cp2)
 
   if (i_proc == 0) then
      call write_local_real(&
@@ -146,30 +132,15 @@ subroutine gyro_write_timedata
           k_perp_squared)
   endif
 
-
-  !-----------------------------
-  ! Set remaining timers to zero
-  cp3 = 0.0
-  cp4 = 0.0
-  cp5 = 0.0
-  cp6 = 0.0
-  cp7 = 0.0
-  cp8 = 0.0
-  !-----------------------------
-
-  call proc_time(cp3)
   call get_field_fluxave
-  call proc_time(cp4)
 
   !-------------------------------------------------------------------
   ! Calculation of fundamental nonlinear fluxes and related 
   ! diffusivities
   !
   call gyro_nonlinear_flux
-  call proc_time(cp5)
   call gyro_diffusivity
   call gyro_gbflux
-  call proc_time(cp6)
   !-------------------------------------------------------------------
 
   !-------------------------------------------------------------------
@@ -181,7 +152,7 @@ subroutine gyro_write_timedata
      ! BEGIN LINEAR 
      !=============
 
-     call write_freq(trim(path)//'out.gyro.freq',10)
+     call gyro_write_freq(trim(path)//'out.gyro.freq',10)
 
      if (plot_u_flag == 1) then        
 
@@ -314,8 +285,6 @@ subroutine gyro_write_timedata
      ! BEGIN NONLINEAR 
      !================
 
-     call proc_time(cp7)
-
      call write_distributed_real(&
           trim(path)//'out.gyro.diff_n',&
           10,&
@@ -348,8 +317,6 @@ subroutine gyro_write_timedata
              size(nl_transfer),&
              nl_transfer)
      endif
-
-     call proc_time(cp8)
 
      if (i_proc == 0) then
 
@@ -447,14 +414,9 @@ subroutine gyro_write_timedata
   call gyro_write_precision(10,sum(abs(gbflux)))
   !------------------------------------------------------------
 
-  !--------------------------------------
-  ! ** Timer diagnostics last **
-  !
-  call proc_time(CPU_diag_outp)
-  CPU_diag_b = CPU_diag_b + (CPU_diag_outp - CPU_diag_mid)
-  call write_timing(trim(path)//'out.gyro.timing',10)
-  CPU_diag_mid = CPU_diag_outp
-  !--------------------------------------
+  !------------------------------------------------------------
+  call gyro_write_timers(trim(path)//'out.gyro.timing',10)
+  !------------------------------------------------------------
 
   if (i_proc == 0 .and. debug_flag == 1) print *,'[gyro_write_timedata done]'
 

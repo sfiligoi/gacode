@@ -44,7 +44,7 @@ prgen_LDADD  = libgacodprgen_SRC.la $(top_builddir)/shared/math/libgacodemath.la
 
 
 IOINC=@HDF5_FC_INC@ @NETCDF_INC@
-IOLIBS=@NETCDF_ALIBS@ @HDF5_ALIBS@ 
+IOLIBS=@NETCDF_ALIBS@ @HDF5_ALIBS@ @Z_LIBS@ 
 
 AM_LIBTOOLFLAGS = --tag=FC
 AM_FCFLAGS=$(FC_FREE_FLAG) $(FC_DBL_FLAG) $(FC_PIC_FLAG) $(IOINC) -I.

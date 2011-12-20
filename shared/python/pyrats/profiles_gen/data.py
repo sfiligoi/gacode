@@ -23,8 +23,8 @@ class profiles_genData:
      Example Usage:
      >>> import matplotlib.pyplot as plt
      >>> from pyrats.profiles_gen.data import profiles_genData
-     >>> prof1 = profiles_genData('$GACODE_ROOT/tgyro/tools/input/treg01')
-     >>> prof1.plot('ne')
+     >>> prof = profiles_genData('$GACODE_ROOT/tgyro/tools/input/treg01')
+     >>> prof.plot('ne')
      >>> plt.show()
 
 """
@@ -65,11 +65,13 @@ class profiles_genData:
         elements = {}
         temp = []
         raw_data = open(self.dirname + '/input.profiles', 'r').readlines()
+
         #Determines length of header, and reads in data
-        while raw_data[self.hlen].strip()[0].isdigit() == False:
+        while raw_data[self.hlen].strip()[0].isdigit() == False and raw_data[self.hlen].strip()[0] != '-':
             self.hlen = self.hlen + 1
             if raw_data[self.hlen].strip()[0:6] == 'N_EXP=':
                 self.n_exp = int(raw_data[self.hlen].strip()[6:])
+    
         for line in range(self.hlen, len(raw_data)):
             if raw_data[line].strip()[0].isdigit() or raw_data[line].strip()[0] == '-':
                 temp.append(raw_data[line].split())
@@ -168,9 +170,9 @@ class profiles_genData:
         dtheta = 0.01
         x = self.match(r, self.data['rho (-)'])
         while theta < 2 * math.pi:
-            a = float(self.data['rmaj (m)'][x]) + float(self.data['rmin (m)'][x]) * math.cos(theta + math.asin(float(self.data['delta (-)'][x])) * math.sin(theta))
+            a = float(self.data['rmaj (m)'][x]) + float(self.data['rmin (m)'][x])*math.cos(theta + math.asin(float(self.data['delta (-)'][x])) * math.sin(theta))
             R.append(a)
-            b = float(self.data['zmag (m)'][x]) + float(self.data['kappa (-)'][x]) * float(self.data['rmin (m)'][x]) * math.sin(theta + float(self.data['zeta (-)'][x]) * math.sin(2 * theta))
+            b = float(self.data['zmag (m)'][x]) + float(self.data['kappa (-)'][x])*float(self.data['rmin (m)'][x])*math.sin(theta + float(self.data['zeta (-)'][x])*math.sin(2 * theta))
             Z.append(b)
             theta = theta + dtheta
         tot.append(R)
@@ -216,54 +218,6 @@ class profiles_genData:
         """Return requested variable."""
 
         return self.data[var]
-
-    #-------------------------------------------- #
-    # Plotting functions
-    def plot(self, var, n1=2, n2=2, plotcounter=0, fignum=0):
-        """Plots requested data using matplotlib.
-
-        var is the requested variable to be plotted,
-        n1 is the horizontal number of plots in one window.
-        n2 is the vertical number of plots in one window.
-
-        Examples: self.plot(rmaj, 2, 2)"""
-
-        import matplotlib.pyplot as plt
-        import matplotlib as mpl
-
-        mpl.rcParams['figure.subplot.wspace'] = .3
-        mpl.rcParams['figure.subplot.hspace'] = .4
-
-        if plotcounter == 0:
-            plotcounter = self.plotcounter
-        if fignum == 0:
-            fignum = self.fignum
-
-        if plotcounter > (n1 * n2):
-            plotcounter = 1
-            fignum = fignum + 1
-        fig = plt.figure(fignum)
-        ax = fig.add_subplot(n2, n1, plotcounter)
-        for k in self.data.iterkeys():
-            if (var + ' ') == k[:len(var) + 1]:
-                toplot = k
-                ylab = k
-                ax.set_xlabel(k)
-        ax.set_xlabel(u'\u03c1 (-)')
-        if var == 'kappa':
-            ylab = u'\u03ba (-)'
-        if var == 'delta':
-            ylab = u'\u03b4 (-)'
-        if var == 'zeta':
-            ylab = u'\u03b6 (-)'
-        if var == 'omega0':
-            ylab = u'\u03c90 (1/s)'
-        ax.set_ylabel(ylab)
-        ax.set_title(ylab.split()[0] + u' vs. \u03c1')
-        ax.plot(self.data['rho (-)'], self.data[toplot])
-        plotcounter = plotcounter + 1
-        self.plotcounter = plotcounter
-        self.fignum = fignum
 
 
     def millerplot(self, inner, outer, n, verbose):

@@ -38,7 +38,6 @@ subroutine gyro_initialize_arrays
   omega_linear = 0.0
   time_error   = 0.0
   diff         = 0.0
-  elapsed_time = 0.0
 
   ! NO field_blend
   field_blend_dot  = 0.0
@@ -55,18 +54,12 @@ subroutine gyro_initialize_arrays
   gyro_uv_old  = 0.0
   gyro_uv_old2 = 0.0
 
-  if (transport_method == 2) then
-     diff_vec = 0.0
-     gbflux_vec = 0.0
-  endif
-
   entropy(:,:)     = 0.0
   nl_transfer(:,:) = 0.0
   !---------------------------------------------------
 
   !---------------------------------------------------
   ! Initialization to prevent MPI-grid errors
-  field_tau = 0.0
   if (collision_flag == 1) then
      f_coll  = 0.0
      fb_coll = 0.0

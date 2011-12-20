@@ -1,0 +1,34 @@
+#---------------------------------------------------
+# VENUS cluster, DELPHI2 (?), BENTEN (?) at General Atomics
+#---------------------------------------------------
+
+# Compilers and flags
+PGIROOT = /opt/pgi/linux86-64/2010
+F77	= $(PGIROOT)/mpi/mpich/bin/mpif90
+FC	= $(F77) -module $(GACODE_ROOT)/modules
+
+FMATH	= -r8 
+FOPT	= -fastsse
+FDEBUG	= -g -Ktrap=fp -Mbounds -Minform,inform
+FBOUND	= -Minform,inform -Mbounds
+FPROF	= -fastsse -Mprof=func
+
+# System math libraries
+
+ROOT=/u/candy/local_software
+ROOT=/c/source
+
+LMATH = $(ROOT)/gotoblas/GotoBLAS_PGF9064/libgoto.a\
+        $(PGIROOT)/lib/liblapack.a\
+        $(PGIROOT)/lib/libblas.a
+
+# OPTIONAL: netCDF (for gyro2gkv)
+
+NETCDF = $(ROOT)/netcdf/lib/libnetcdf.a
+NETCDF = $(ROOT)/netcdf/lib64/libnetcdf.a
+NETCDF_INC = $(ROOT)/netcdf/include64
+
+# Archive 
+
+ARCH = ar cr
+

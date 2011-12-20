@@ -59,7 +59,7 @@ subroutine gyro_alloc_distrib(flag)
 
      ! Blending arrays
      allocate(cs_blend(n_blend,n_theta(2),n_x,n_nek_loc_1))
-     allocate(c_blend(n_blend,n_theta(2),n_x,n_nek_loc_1))
+     allocate(c_blend(n_blend,n_stack,n_x,n_nek_loc_1))
      allocate(cs_blend_prime(n_blend,n_theta(2),n_x,n_nek_loc_1))
 
      if (electron_method == 2) then
@@ -72,34 +72,11 @@ subroutine gyro_alloc_distrib(flag)
 
      if (collision_flag == 1) then
 
+        ! Collision arrays
         if (linsolve_method == 3) then
-
            allocate(d1_rbf(n_rbf,n_rbf))
-
         else
-
-           ! Collision arrays
-
-           select case (collision_method)
-
-           case (1) 
-              ! Standard method
-              allocate(d_rbf(n_rbf,n_rbf,n_ine_loc_1,n_coll))
-
-           case (2)
-              ! New method
-              allocate(d_rbf(n_rbf,n_rbf,n_ine_loc_1,n_coll))
-
-           case (3,4)
-              ! ebelli method
-              allocate(d_rbf_lorentz(n_rbf,n_rbf,n_kinetic,n_ine_loc_1))
-              allocate(d_rbf_rs(n_rbf,n_rbf,n_kinetic,n_kinetic,n_ine_loc_1))
-              allocate(d_rbf_lorentz_int(n_rbf,n_rbf,n_kinetic,n_ine_loc_1))
-              allocate(d_rbf_rs_int(n_rbf,n_rbf,n_kinetic,n_kinetic,n_ine_loc_1))
-              allocate(d_rbf_velint(n_kinetic**2,n_kinetic**2,n_ine_loc_1))
-
-           end select
-
+           allocate(d_rbf(n_rbf,n_rbf,n_ine_loc_1,n_coll))
         endif
 
      endif
@@ -140,18 +117,13 @@ subroutine gyro_alloc_distrib(flag)
      if (allocated(o_advect)) deallocate(o_advect)
      if (allocated(imp)) deallocate(imp)
 
-     if (allocated(d_rbf))             deallocate(d_rbf) 
-     if (allocated(d1_rbf))            deallocate(d1_rbf) 
-     if (allocated(d_rbf_lorentz))     deallocate(d_rbf_lorentz) 
-     if (allocated(d_rbf_rs))          deallocate(d_rbf_rs)
-     if (allocated(d_rbf_lorentz_int)) deallocate(d_rbf_lorentz_int) 
-     if (allocated(d_rbf_rs_int))      deallocate(d_rbf_rs_int)
-     if (allocated(d_rbf_velint))      deallocate(d_rbf_velint)
+     if (allocated(d_rbf)) deallocate(d_rbf) 
+     if (allocated(d1_rbf)) deallocate(d1_rbf) 
 
      deallocate(w_gyro)
+     deallocate(z_gyro)
      if (allocated(w_gyro_rot))   deallocate(w_gyro_rot)
      if (allocated(w_gyro_aperp)) deallocate(w_gyro_aperp)
-     deallocate(z_gyro)
 
   endif
 

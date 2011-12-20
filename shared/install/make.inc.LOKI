@@ -38,8 +38,8 @@ F77	= mpif90 -woff801
 FMATH	= -r8
 FOPT	= -Ofast -mcpu=opteron -fPIC
 FDEBUG	= -ffortran-bounds-check 
-FBOUND	= -ffortran-bounds-check
-FPROF	= 
+FOMP    = 
+FNOMP   =
 
 # Libraries
 

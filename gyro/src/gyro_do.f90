@@ -36,32 +36,38 @@ subroutine gyro_do
      if (i_proc==0 .and. output_flag==1) THEN
         inquire(file=trim(runfile),exist=rfe)
         if (.not.rfe) then
-           open(unit=99,file=trim(runfile),status='unknown')
-           close(99)
+           open(unit=1,file=trim(runfile),status='unknown')
+           close(1)
         endif
      endif
   endif
 
-  ! Note sure what purpose this serves
-  !if (i_proc==0 .and. gkeigen_j_set == 0) print *,runfile
-
-  CPU_0 = 0.0
-  CPU_1 = 0.0
-  CPU_2 = 0.0
-  CPU_3 = 0.0
-  CPU_4 = 0.0
-  CPU_5 = 0.0
-  CPU_6 = 0.0
-  CPU_7 = 0.0
-
-  call proc_time(CPU_0)
-
-  !-------------------------
+  !--------------------------------------------------------------
   ! Early initializations:
   !
   total_memory  = 0.0
   alltime_index = 0
-  !-------------------------
+  !
+  ! TIMER NOTES: 
+  ! - print order follows init. order below,
+  ! - strings will be split on '-' character.
+  !
+  call gyro_timer_init('Field-interp.a')
+  call gyro_timer_init('Field-interp.b')
+  call gyro_timer_init('Velocity-sum')
+  call gyro_timer_init('Field-explicit')
+  call gyro_timer_init('Field-implicit')
+  call gyro_timer_init('Gyroave-h')
+  call gyro_timer_init('Implicit-he')
+  call gyro_timer_init('RHS-total')
+  call gyro_timer_init('Coll.-step')
+  call gyro_timer_init('Coll.-comm')
+  call gyro_timer_init('Nonlinear-step')
+  call gyro_timer_init('Nonlinear-comm')
+  call gyro_timer_init('Diagnos.-allstep')
+  call gyro_timer_init('Diagnos.-datastep')
+  call gyro_timer_init('Full-step')
+  !--------------------------------------------------------------
 
   !----------------------------------------------------------------
   ! If running in eigensolve mode.
@@ -104,6 +110,9 @@ subroutine gyro_do
 
   !------------------------------------------------------------
   ! The order of these routines is critical:
+  !
+  ! Startup timer:
+  startup_time = MPI_Wtime()
   !
   ! Sort through and check all combinations of operational modes
   !
@@ -185,29 +194,23 @@ subroutine gyro_do
      ! for GKE solution.
      call gyro_omegas
 
-     call proc_time(CPU_1)
-
      ! Generate discrete Fourier and Fourier-sine transform 
      ! matrices for spectral Poisson and adaptive source methods, 
      ! compute radial derivative and gyroaverage operators,
      ! and then print them.
 
      call gyro_radial_operators
-     call proc_time(CPU_2)
      !
      ! Precomputation of arrays which depend on blending 
      ! coefficients.  These are used in the Maxwell solves.
      call gyro_set_blend_arrays
 
-     call proc_time(CPU_3)
      if (electron_method == 2) then
 
         ! Make advection operators for electrons
         call make_implicit_advect(0)
 
      endif
-
-     call proc_time(CPU_4)
      !
      ! Collision setup (if required; note PNL hook)
      !
@@ -223,7 +226,6 @@ subroutine gyro_do
      !
      ! Explicit (Poisson,Ampere)
      !
-     call proc_time(CPU_5)
      if (n_field == 3) then
         call make_poissonaperp_matrix
      else
@@ -240,8 +242,6 @@ subroutine gyro_do
      if (electron_method == 2) then
         call make_maxwell_matrix
      endif
-     call proc_time(CPU_6)
-     !
      !------------------------------------------------------
 
      !------------------------------------------------------
@@ -273,8 +273,6 @@ subroutine gyro_do
      call gyro_read_restart
      !------------------------------------------------------------
 
-     call proc_time(CPU_7)
-
      !---------------------------------------
      ! Write precision data:
      !
@@ -282,6 +280,8 @@ subroutine gyro_do
      !---------------------------------------
 
   endif
+
+  startup_time = MPI_Wtime()-startup_time
 
   !---------------------------------------
   ! Dump input parameters runfile
@@ -325,11 +325,8 @@ subroutine gyro_do
      io_control = output_flag*3
   endif
   if (gkeigen_j_set == 0) then
-     if (io_method == 1) then
-        call gyro_write_timedata
-     else
-        call gyro_write_timedata_hdf5
-     endif
+     if (io_method >= 1) call gyro_write_timedata
+     if (io_method > 1) call gyro_write_timedata_hdf5
   endif
 
   !-------------------------------------------------
@@ -348,15 +345,6 @@ subroutine gyro_do
   endif
   !--------------------------------------------
 
-  !--------------------------------------------
-  ! Start elapsed time.
-  !
-  if (step == 0) then
-     call system_clock(clock_count,clock_rate,clock_max)
-     elapsed_time = clock_count*1.0/clock_rate
-  endif
-  !--------------------------------------------------
-
   select case (linsolve_method)
 
   case (1)
@@ -370,7 +358,9 @@ subroutine gyro_do
 
      do step=1,nstep
 
+        call gyro_timer_in('Full-step')
         call gyro_fulladvance
+        call gyro_timer_out('Full-step')
 
         !-------------------------------------
         ! Check for premature exit conditions

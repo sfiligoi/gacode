@@ -18,6 +18,8 @@ subroutine tgyro_iteration_serial
   allocate(f_vec1(p_max))
   allocate(g_vec1(p_max))
 
+
+
   do i_tran_loop=1,tgyro_relax_iterations
 
      i_tran = i_tran+1
@@ -79,6 +81,7 @@ subroutine tgyro_iteration_serial
      jf(:,:) = 0.0
 
      ip = -1
+     
 
      if (loc_ti_feedback_flag == 1) then
 
@@ -89,8 +92,9 @@ subroutine tgyro_iteration_serial
               jf(p+pp,p+ip) = (f_vec(p+pp)-f_vec0(p+pp))/dx
            enddo
         enddo
-
+	call tgyro_write_jacobian('i')
      endif
+
 
      if (loc_te_feedback_flag == 1) then
 
@@ -101,8 +105,10 @@ subroutine tgyro_iteration_serial
               jf(p+pp,p+ip) = (f_vec(p+pp)-f_vec0(p+pp))/dx
            enddo
         enddo
-
+	call tgyro_write_jacobian('e')
      endif
+
+
 
      if (loc_ne_feedback_flag == 1) then
 
@@ -127,6 +133,12 @@ subroutine tgyro_iteration_serial
         enddo
 
      endif
+
+!     close(101)
+!     close(102)
+!     close(103)
+!     close(104)
+ 
      !
      !----------------------------------------------
 
@@ -202,5 +214,6 @@ subroutine tgyro_iteration_serial
      if (error_flag == 1) exit
 
   enddo
+
 
 end subroutine tgyro_iteration_serial

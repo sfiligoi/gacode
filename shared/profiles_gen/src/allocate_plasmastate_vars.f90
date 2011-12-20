@@ -23,7 +23,7 @@ subroutine allocate_plasmastate_vars
   allocate(plst_r_midp_in(nx))
   allocate(plst_r_midp_out(nx))
   allocate(plst_z_midp(nx))
-  allocate(plst_zeff_th(nx))
+  allocate(plst_zeff(nx))
   allocate(plst_epot(nx))
   allocate(plst_omegat(nx))
   allocate(plst_pbe(nx))

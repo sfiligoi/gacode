@@ -1,0 +1,142 @@
+#! /usr/bin/env bash
+#
+# SCRIPT:
+#  queue.FRANKLIN
+#
+# FUNCTION:
+#  Batch generator for Cray XT4 (franklin.nersc.gov)  
+#
+#  FIXED Hardware parameters
+CORES_PER_NODE=4
+NUMAS_PER_NODE=1
+#---------------------------------------------------
+
+nmpi=${1}
+sim=${2}
+simpath=${3}
+code=${4}
+nomp=${5}
+numa=${6}
+mpinuma=${7}
+
+# Default to densely-packed pure-MPI.
+if [ $numa -eq 0 ]
+then
+   numa=$NUMAS_PER_NODE
+fi
+if [ $mpinuma -eq 0 ]
+then
+   mpinuma=$(($CORES_PER_NODE/$NUMAS_PER_NODE))
+fi
+
+# nmpi = MPI tasks
+# nomp = OpenMP threads per MPI task
+# numa = NUMAs active per node
+# mpinuma = MPI tasks per active NUMA 
+
+#=========================================================================
+# Calculator for parallel layout
+
+# See if we are asking for too many NUMAs
+if [ $numa -gt $NUMAS_PER_NODE ] 
+then
+  echo 'Too many NUMAs per node requested'
+  exit 1
+fi
+
+# See if we are asking for too many OpenMP tasks
+i1=$(($nomp*$mpinuma))
+i2=$(($CORES_PER_NODE/$NUMAS_PER_NODE)) 
+if [ $i1 -gt $i2 ] 
+then
+   echo 'Too many OpenMP tasks per MPI process'
+   exit 1
+fi
+
+# MPI tasks per node
+mpinode=$(($mpinuma*$NUMAS_PER_NODE))
+# Nodes requested 
+nodes=$(($nmpi/$mpinode))
+
+# If we need part of a node, then add a node
+if [ $nmpi -gt $(($nodes*$mpinode)) ] 
+then
+   nodes=$(($nodes+1))
+   echo "** WARNING **: Using partial node"
+fi
+
+# Final core counts
+cores_requested=$(($nodes*$CORES_PER_NODE))
+cores_used=$(($nomp*$nmpi))
+#=========================================================================
+
+echo "----------------------------------"
+echo "Cray XT4 (franklin) [4 cores/node]"
+echo "----------------------------------"
+echo
+echo "Cores requested (mppwidth)   : $cores_requested"
+echo "Cores used                   : $cores_used"
+echo "Total MPI tasks (-n)         : $nmpi"
+echo "MPI tasks/node (-N)          : $mpinode"
+echo "OpenMP threads/MPI task(-d)  : $nomp"
+echo
+echo "[0] debug   (10 min)   up to 512 nodes"
+echo "[1] debug   (30 min)   up to 512 nodes"
+echo "[2] regular (1 hours)  up to 8502 nodes" 
+echo "[3] regular (2 hours)  up to 8502 nodes" 
+echo "[4] regular (4 hours)  up to 8502 nodes" 
+echo "[5] regular (8 hours)  up to 8502 nodes" 
+echo "[6] regular (24 hours) up to 8502 nodes" 
+echo "[7] regular (48 hours) up to 255 nodes" 
+echo "[8] low     (24 hours) up to 1207 nodes" 
+echo "[9] premium (12 hours) up to 4096 nodes"
+
+read -p "Select a queue [0-9] " queue_num
+
+case "$queue_num" in
+  0) queue="debug"   ; limit="0:10:00" ;;
+  1) queue="debug"   ; limit="0:30:00" ;;
+  2) queue="regular" ; limit="1:00:00" ;;
+  3) queue="regular" ; limit="2:00:00" ;;
+  4) queue="regular" ; limit="4:00:00" ;;
+  5) queue="regular" ; limit="8:00:00" ;;
+  6) queue="regular" ; limit="24:00:00" ;;
+  7) queue="regular" ; limit="48:00:00" ;;
+  8) queue="low"     ; limit="24:00:00" ;;
+  9) queue="premium" ; limit="12:00:00" ;;
+esac
+
+bfile=$simpath/$sim/batch.src
+ 
+# Copy appropriate commands to batch directory:
+
+# Repository selection
+getnim -U `whoami`
+
+read -p "Specify a repository [0 for default] " repo
+
+echo "#PBS -N $sim" > $bfile
+if [ "$repo" != "0" ]
+then
+   echo "#PBS -A $repo" >> $bfile
+fi
+echo "#PBS -o $simpath/$sim/batch.out" >> $bfile
+echo "#PBS -e $simpath/$sim/batch.err" >> $bfile
+echo "#PBS -q $queue" >> $bfile
+echo "#PBS -l walltime=$limit" >> $bfile
+echo "#PBS -l mppwidth=$cores_requested" >> $bfile
+echo "#PBS -m abe" >> $bfile
+echo "#PBS -M ${USER}@nersc.gov" >> $bfile
+
+gyro_opts="-e $sim -n $nmpi -nomp $nomp -numa $numa -mpinuma $mpinuma -p $simpath"
+
+echo "$code $gyro_opts" >> $bfile 
+echo "Output written to $bfile"
+
+read -p "Submit your job [y/n] " submit
+    
+if [ "$submit" = "y" ] ; then
+   qsub $bfile
+fi
+
+exit 0

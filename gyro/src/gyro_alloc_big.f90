@@ -72,11 +72,7 @@ subroutine gyro_alloc_big(flag)
      if (collision_flag == 1) then
         allocate(f_coll(n_stack,n_x,n_nek_loc_1))
         allocate(fb_coll(n_stack,n_x,n_nek_loc_1))
-        if (collision_method > 2) then
-           allocate(h_C_all(n_kinetic,n_stack,n_lambda,n_ine_loc_1)) 
-        else
-           allocate(h_C(n_stack,n_lambda,n_ine_loc_1)) 
-        endif
+        allocate(h_C(n_stack,n_lambda,n_ine_loc_1)) 
      endif
 
      allocate(h_tran(nv1_SSUB,msplit_SSUB,n_n,n_kinetic))
@@ -105,8 +101,8 @@ subroutine gyro_alloc_big(flag)
      endif
 
      allocate(moments_plot(n_theta_plot,n_x,n_kinetic,3))
-     
-     !For synthetic diagnostic
+
+     ! For synthetic diagnostics
      if (io_method > 1 .and. time_skip_wedge > 0) then
         allocate(moments_plot_wedge(n_theta_plot*n_theta_mult,n_x,n_kinetic,3))
      endif
@@ -135,8 +131,7 @@ subroutine gyro_alloc_big(flag)
      allocate(gbflux_n(n_kinetic,n_field,p_moment))
 
      if (transport_method == 2) then
-        allocate(diff_vec(n_kinetic,n_field,n_moment,(nstep/time_skip)+1))
-        allocate(gbflux_vec(n_kinetic,n_field,p_moment,(nstep/time_skip)+1))
+        allocate(gbflux_vec(n_kinetic,n_field,p_moment,n_x))
      endif
 
      allocate(nl_transfer(n_x,2))
@@ -189,7 +184,6 @@ subroutine gyro_alloc_big(flag)
      if (allocated(f_coll)) deallocate(f_coll)
      if (allocated(fb_coll)) deallocate(fb_coll)
      if (allocated(h_C)) deallocate(h_C) 
-     if (allocated(h_C_all)) deallocate(h_C_all)
 
      deallocate(h_tran)
      deallocate(gyro_h)
@@ -239,7 +233,6 @@ subroutine gyro_alloc_big(flag)
 
      deallocate(nl_transfer)
 
-     if (allocated(diff_vec)) deallocate(diff_vec)
      if (allocated(gbflux_vec)) deallocate(gbflux_vec)
 
      deallocate(time_error)

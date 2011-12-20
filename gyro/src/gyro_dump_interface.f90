@@ -402,9 +402,7 @@ subroutine gyro_dump_interface
           "fieldeigen_wi",fieldeigen_wi)
      call dumpRealInterface(21,"    gyro_fieldeigen_tol_in ",    gyro_fieldeigen_tol_in , &
           "fieldeigen_tol",fieldeigen_tol)
-     call dumpIntInterface(21,"    gyro_collision_method_in ",    gyro_collision_method_in , &
-          "collision_method",collision_method)
-     call dumpIntInterface(21,"    gyro_io_method_in        ",    gyro_io_method_in        , &
+      call dumpIntInterface(21,"    gyro_io_method_in        ",    gyro_io_method_in        , &
           "io_method",io_method)
      call dumpIntInterface(21,"    gyro_time_skip_wedge_in ",    gyro_time_skip_wedge_in , &
           "time_skip_wedge",time_skip_wedge)

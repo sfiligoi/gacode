@@ -72,7 +72,7 @@ subroutine gyro_set_blend_arrays
 
               f_b = BLEND_F(j,x,phase(in_1,i))
 
-              c_blend(j,m0,i,p_nek_loc)  = f_b
+              c_blend(j,m,i,p_nek_loc)  = f_b
               cs_blend(j,m0,i,p_nek_loc) = conjg(f_b)*w_p(ie,i,k,1)
 
               f_bp = BLEND_Fp(j,x,phase(in_1,i))/pi
@@ -245,18 +245,20 @@ subroutine gyro_set_blend_arrays
      enddo ! j_plot
   enddo ! i
   if (io_method > 1 .and. time_skip_wedge > 0) then
-    do i=1,n_x
-       do j_plot=1,n_theta_plot*n_theta_mult
-          !x = -pi+REAL(j-1)*pi_2/REAL(n_theta_plot*n_theta_mult)
-          x=theta_wedge_offset+real(j_plot-1)*theta_wedge_angle/real(n_theta_plot*n_theta_mult-1)
-          x=x/pi
-          do j=1,n_blend
-             blend_wedge(j,j_plot,i) = BLEND_F(j,x,phase(in_1,i))
-             blend_prime_wedge(j,j_plot,i) = BLEND_Fp(j,x,phase(in_1,i))/pi
-          enddo ! j
+     do i=1,n_x
+        do j_plot=1,n_theta_plot*n_theta_mult
 
-       enddo ! j_plot
-    enddo ! i
+           x = theta_wedge_offset+&
+                (j_plot-1)*theta_wedge_angle/(n_theta_plot*n_theta_mult-1)
+           x = x/pi
+
+           do j=1,n_blend
+              blend_wedge(j,j_plot,i) = BLEND_F(j,x,phase(in_1,i))
+              blend_prime_wedge(j,j_plot,i) = BLEND_Fp(j,x,phase(in_1,i))/pi
+           enddo ! j
+
+        enddo ! j_plot
+     enddo ! i
   endif
   !---------------------------------------------------------------  
 

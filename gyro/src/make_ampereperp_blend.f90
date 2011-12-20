@@ -22,8 +22,6 @@ subroutine make_ampereperp_blend
   real :: a_gyro
   real :: u_gyro
   real :: v_gyro
-  !
-  complex :: temp
   ! 
   complex, dimension(-m_gyro:m_gyro-i_gyro,n_blend,n_blend) :: vel_sum_loc1
   complex, dimension(n_gk,-m_gyro:m_gyro-i_gyro) :: f_x1

@@ -132,10 +132,7 @@ contains
 
     ! inductive electric field
     ! < E_|| B>
-    EparB_avg = 0.0
-    do it=1, n_theta
-       EparB_avg = EparB_avg + w_theta(it) * epar0(ir) * Bmag(it) 
-    enddo
+    EparB_avg = epar0(ir)
 
     ! compute the theory
     call compute_HH(ir,pflux_HH, efluxi_HH, efluxe_HH, &

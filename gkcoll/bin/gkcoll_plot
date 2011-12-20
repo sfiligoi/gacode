@@ -1,0 +1,113 @@
+#!/bin/bash
+#==============================================================================
+# gyro_plot
+#
+# PURPOSE:
+#  Plotting/listing routines for GYRO output.
+#==============================================================================
+
+#==============================================================================
+# Syntax validity check and help message
+#
+n=$#
+
+if [ $n -eq 0 ]
+then
+  echo
+  echo "Usage:    gkcoll_plot [options]"
+  echo
+  echo "          -p <path>"
+  echo "          Set optional path to simulation directory."
+  echo "          [The default path is the current directory]"
+  echo
+  echo "          -e <simdir>"
+  echo "          Use data in <simdir>."
+  echo 
+  echo "          -f <filetype>"
+  echo "          Output file type."
+  echo "           <filetype>=emf, eps, pdf, png, ps, raw, rgba, svg, svgz"
+  echo 
+  echo "          -species <value>"
+  echo "          Specify species to be plotted: [0,n_species-1]."
+  echo
+  echo "          -field <value>"
+  echo "          Specify field to be plotted: [0,n_field-1]."
+  echo
+  echo "          -t <value>"
+  echo "          Specify integer time index (-1 is last time)."
+  echo
+  echo "          -plot <type>"
+  echo "          Generate plot of given type."
+  echo "          <type> = field,"
+  echo "                 = h,"
+  echo "                 = h_cut"
+
+  exit 1
+fi
+#==============================================================================
+
+#==============================================================================
+# Define variables for flag capture
+#
+# Default simulation directory
+LOCDIR=.
+SIMROOT=$PWD
+SPECIES=0
+FIELD=0
+FTYPE=screen
+PLOT_TYPE=field
+TIME=-1
+#==============================================================================
+
+#==============================================================================
+# Parse command line options
+#
+while [ $# -gt 0 ] ; do
+  case "$1" in
+
+  -plot) shift ; PLOT_FLAG=1 ; PLOT_TYPE=$1 ;;
+
+  -e) shift ; LOCDIR=$1 ;;
+
+  -p) shift ; SIMROOT=$1 ;;
+
+  -species) shift ; SPECIES=$1 ;;
+
+  -field) shift ; FIELD=$1 ;;
+
+  -f) shift ; FTYPE=$1 ;;
+
+  -t) shift ; TIME=$1 ;;
+
+  *) echo "ERROR: incorrect syntax." ; exit 1 ;;
+
+  esac
+  shift
+done
+#==============================================================================
+
+if [ "$LOCDIR" == "." ]
+then
+   LOCDIR=`basename $PWD`
+   cd .. ; SIMROOT=$PWD
+fi
+SIMDIR=$SIMROOT/$LOCDIR
+cd $SIMDIR
+
+PYROOT=$GACODE_ROOT/gkcoll/tools/plot
+
+#==============================================================================
+case "$PLOT_TYPE" in
+
+   field)  
+	python $PYROOT/plot_field.py $FTYPE $TIME $FIELD & ;;
+
+   h)  
+	python $PYROOT/plot_h.py $FTYPE $TIME $SPECIES & ;;
+
+   h_cut)  
+	python $PYROOT/plot_h_cut.py $FTYPE $TIME $SPECIES & ;;
+
+esac 
+
+exit 0

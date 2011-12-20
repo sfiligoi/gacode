@@ -15,7 +15,7 @@ subroutine gyro_bessel_stencils
   !----------------------------------------------
   implicit none
   !
-  integer :: p,p0
+  integer :: p
   !
   real :: rho_gyro
   real :: a_gyro
@@ -23,8 +23,6 @@ subroutine gyro_bessel_stencils
   real :: v_gyro
   !
   real :: omega_c
-  !
-  complex :: temp
   !
   complex, dimension(n_theta(2),-m_gyro:m_gyro-i_gyro) :: w_temp
   complex, dimension(n_theta(2),-m_gyro:m_gyro-i_gyro) :: w_temp_rot

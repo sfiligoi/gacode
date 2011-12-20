@@ -86,7 +86,7 @@ pro read_ballooning_mode
      balloon_plot = fltarr(2,balloon_next,balloon_m,n_balloon,n_time)
 
      for i=0,n_balloon-1 do begin
-        openr,1,balloon_tag[i]+'.out'
+        openr,1,'out.gyro.'+balloon_tag[i]
         for tt=0,n_time1 do begin
            readf,1,x1
            balloon_plot[*,*,*,i,tt] = x1[*,*,*]

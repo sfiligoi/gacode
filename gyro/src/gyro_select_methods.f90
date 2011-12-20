@@ -19,8 +19,6 @@ subroutine gyro_select_methods
   !-------------------------------------------------------------
   ! Various consistency and error checks
   ! 
-  ! Special diffusivity check:
-  !
   ! Grid offset checks:
   !
   if (n_x_offset /= 0 .and. boundary_method == 1) then
@@ -243,11 +241,6 @@ subroutine gyro_select_methods
   ! Catch some collision-related errors
   !
   if (collision_flag == 1) then
-
-     if (n_field == 3 .and. collision_method /= 2) then
-        call catch_error(&
-             'ERROR: (GYRO) This collision model incompatible with delta B_parallel')
-     endif
 
      if (n_pass < 4) then
         call catch_error(&
@@ -777,6 +770,15 @@ subroutine gyro_select_methods
 
   call send_line(separator)
 
+  !-------------------------------------------------------
+  ! Print some MPI/OpenMP diagnostics
+  !
+  if (n_omp > 1) then 
+     call send_message('INFO: (GYRO) Initialized multi-threaded MPI')
+  else
+     call send_message('INFO: (GYRO) Dropped down to single-threaded MPI')
+  endif
+  !-------------------------------------------------------
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[select_methods done]'

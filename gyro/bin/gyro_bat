@@ -5,8 +5,8 @@
 #  gyro_bat
 #
 # PURPOSE:
-#  Generate a platform-specific batch file, and submit
-#  to queue if desired.
+#  High-level management for generations of platform-specific 
+#  gyro batch file, and submit to queue if desired.
 #--------------------------------------------------------
 
 #=============================================================
@@ -26,8 +26,21 @@ then
   echo "         -e <simdir>" 
   echo "         Run GYRO using input data in <simdir>."
   echo
-  echo "         -n <nproc>" 
-  echo "         Number of cores."
+  echo "         -n <MPI tasks>" 
+  echo "         Number of MPI tasks."
+  echo
+  echo "         -nomp <threads>" 
+  echo "         Number of OpenMP threads per MPI task."
+  echo
+  echo "         -numa <n>" 
+  echo "         NUMAs active per node."
+  echo
+  echo "         -mpinuma <n>" 
+  echo "         MPI tasks per active NUMA."
+  echo
+  echo "See https://fusion.gat.com/theory/Gyroplatforms for help"
+  echo " choosing -numa and -mpinuma flags."
+  echo
 
   exit 1
 fi
@@ -42,6 +55,9 @@ SIMROOT=$PWD
 GYRO_DIR=$GACODE_ROOT/gyro
 # Default number of cores
 NPROC=1
+NOMP=1
+NUMA=0
+MPINUMA=0
 #=============================================================
 
 #=============================================================
@@ -55,6 +71,12 @@ while [ $# -gt 0 ] ; do
   -e) shift ; LOCDIR=$1 ; EXEC_FLAG=1 ;;
 
   -n) shift ; NPROC=$1 ;;
+
+  -nomp) shift ; NOMP=$1 ;;
+
+  -numa) shift ; NUMA=$1 ;;
+
+  -mpinuma) shift ; MPINUMA=$1 ;;
 
    *) echo "ERROR: incorrect gyro_bat syntax." ; exit 1 ;;
  
@@ -70,12 +92,8 @@ then
 fi
 SIMDIR=$SIMROOT/$LOCDIR
 
-# Determine queue
-
-cat $GACODE_ROOT/shared/batch/queue_msg.${GACODE_PLATFORM}
-
-read queue_num
-
-$GACODE_ROOT/shared/batch/queue_go.${GACODE_PLATFORM} $NPROC $queue_num $LOCDIR $SIMROOT $CODE
+# Pass control to platform-specific script
+$GACODE_ROOT/shared/batch/queue.${GACODE_PLATFORM} \
+ $NPROC $LOCDIR $SIMROOT $CODE $NOMP $NUMA $MPINUMA
 
 exit 0

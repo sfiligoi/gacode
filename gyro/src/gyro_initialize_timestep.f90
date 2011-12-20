@@ -91,46 +91,6 @@ subroutine gyro_initialize_timestep
   a_SDIRK = 0.5
   !----------------------------------------------------
 
-  !----------------------------------------------------
-  ! Initialize CPU timers:
-  !
-  CPU_C_in       = 0.0
-  CPU_C_out      = 0.0
-  CPU_C          = 0.0
-
-  CPU_Ct_in      = 0.0
-  CPU_Ct_out     = 0.0
-  CPU_Ct         = 0.0
-
-  CPU_NL_in      = 0.0
-  CPU_NL_out     = 0.0
-  CPU_NL         = 0.0
-
-  CPU_NLt_in     = 0.0
-  CPU_NLt_out    = 0.0
-  CPU_NLt        = 0.0
-
-  CPU_RHS_in     = 0.0
-  CPU_RHS_out    = 0.0
-  CPU_RHS       = 0.0
-
-  CPU_diag_in    = 0.0
-  CPU_diag_mid   = 0.0
-  CPU_diag_out   = 0.0
-  CPU_diag_a     = 0.0
-  CPU_diag_b     = 0.0
-
-  CPU_field      = 0.0
-  CPU_field_in   = 0.0
-  CPU_field_out  = 0.0
-
-  CPU_field2     = 0.0
-  CPU_field2_in  = 0.0
-  CPU_field2_out = 0.0
-
-  CPU_ts         = 0.0
-  !----------------------------------------------------
-
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[gyro_initialize_timestep done]'
   endif

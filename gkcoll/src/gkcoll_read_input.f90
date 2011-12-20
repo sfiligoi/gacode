@@ -7,15 +7,22 @@ subroutine gkcoll_read_input
   integer :: is
 
   open(unit=1,file=trim(path)//'input.gkcoll.gen',status='old')
+  read(1,*) trap_method
   read(1,*) n_energy
   read(1,*) n_xi
   read(1,*) n_theta
   read(1,*) n_radial
   read(1,*) e_max
   read(1,*) delta_t
+  read(1,*) max_time
   read(1,*) freq_tol
-  read(1,*) k_theta
-  read(1,*) r_length
+  read(1,*) rupwind_eps
+  read(1,*) rupwind_n
+  read(1,*) tupwind_eps
+  read(1,*) toroidal_model
+  read(1,*) toroidal_num
+  read(1,*) rho
+  read(1,*) k_theta_rho
   read(1,*) rmin
   read(1,*) rmaj
   read(1,*) silent_flag
@@ -42,7 +49,6 @@ subroutine gkcoll_read_input
   enddo
 
   read(1,*) q
-  read(1,*) rho
   read(1,*) shat
   read(1,*) shift    
   read(1,*) kappa   

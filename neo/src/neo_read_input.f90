@@ -21,7 +21,6 @@ subroutine neo_read_input
   read(1,*) collision_model
   read(1,*) profile_model
   read(1,*) profile_erad0_model
-  read(1,*) profile_temprescale_model
   read(1,*) profile_equilibrium_model
   read(1,*) ipccw_in
   read(1,*) btccw_in
@@ -33,8 +32,11 @@ subroutine neo_read_input
   read(1,*) omega_rot_deriv_in
 
   read(1,*) spitzer_model
+  read(1,*) epar0_spitzer
 
   read(1,*) n_species
+ 
+  read(1,*) nu_1_in
 
   do is=1,6
      read(1,*) z_in(is)
@@ -43,7 +45,6 @@ subroutine neo_read_input
      read(1,*) temp_in(is)
      read(1,*) dlnndr_in(is)
      read(1,*) dlntdr_in(is)
-     read(1,*) nu_in(is)
   enddo
 
   read(1,*) dphi0dr_in

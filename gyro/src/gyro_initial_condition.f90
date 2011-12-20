@@ -168,7 +168,7 @@ subroutine gyro_initial_condition
 
 
   ! Compute fields from distribution
-  call get_field_explicit
+  call gyro_field_solve_explicit
 
   ! Generate interpolation of fields suitable for plotting
   call get_field_plot

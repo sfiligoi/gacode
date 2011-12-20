@@ -5,7 +5,7 @@ module gkcoll_collision
   public :: COLLISION_alloc, COLLISION_do
   logical, private :: initialized = .false.
 
-  real, dimension(:,:,:,:), allocatable, private :: cmat
+  complex, dimension(:,:,:,:), allocatable, private :: cmat
   complex, dimension(:), allocatable, private :: cvec, bvec
   integer, dimension(:,:,:), allocatable, private :: indx_coll 
   integer, private :: msize
@@ -15,6 +15,7 @@ contains
   subroutine COLLISION_alloc(flag)
     use gkcoll_globals
     use gkcoll_gyro
+    use gkcoll_equilibrium, only : omega_trap
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
     real, dimension(:,:,:), allocatable :: nu_d
@@ -25,9 +26,13 @@ contains
     ! parameters for matrix solve
     integer :: info
     integer, dimension(:), allocatable :: i_piv
-    real, dimension(:), allocatable :: work 
-    real, dimension(:,:), allocatable :: amat, bmat
-    
+    complex, dimension(:), allocatable :: work 
+    complex, dimension(:,:), allocatable :: amat, bmat
+    complex :: alpha = (1.0,0.0)
+    complex :: beta  = (0.0,0.0) 
+
+    if(collision_model == -1) return
+
     if(flag == 1) then
        if(initialized) return
        
@@ -62,13 +67,13 @@ contains
              enddo
           enddo
        enddo
-       
+
        msize = n_species*n_energy*n_xi
        allocate(cmat(n_radial,n_theta,msize,msize))
        allocate(cvec(msize))
        allocate(bvec(msize))
        allocate(indx_coll(n_species,n_energy,n_xi))
-       
+
        p = 0
        do is=1,n_species
           do ie=1,n_energy
@@ -84,6 +89,9 @@ contains
        do is=1,n_species
           sum_den = sum_den + z(is)**2 * dens(is) / temp(is)
        enddo
+       if(adiabatic_ele_model == 1) then
+          sum_den = sum_den + dens_ele / temp_ele
+       endif
        
        ! matrix solve parameters
        allocate(work(msize))
@@ -94,9 +102,9 @@ contains
        do ir=1,n_radial
           do it=1,n_theta
              
-             cmat(ir,it,:,:) = 0.0
-             amat(:,:)       = 0.0
-             
+             cmat(ir,it,:,:) = (0.0,0.0)
+             amat(:,:)       = (0.0,0.0)
+
              do is=1,n_species     
                 do ie=1,n_energy
                    do ix=1,n_xi
@@ -113,7 +121,7 @@ contains
                                   do ks=1,n_species
                                      sum_nu = sum_nu + nu_d(ie,is,ks)
                                   enddo
-                                  
+
                                   cmat(ir,it,p,pp)  &
                                        =  cmat(ir,it,p,pp) &
                                        + 1.0 &
@@ -127,7 +135,7 @@ contains
                                        * (-1.0*indx_xi(ix)) &
                                        * (indx_xi(ix)+1.0) * sum_nu
                                endif
-                               
+
                                ! Poisson component 
                                cmat(ir,it,p,pp)  &
                                     =  cmat(ir,it,p,pp) &
@@ -147,25 +155,67 @@ contains
                                     * gyrop_J0(is,ir,it,ie,ix) &
                                     * z(js)*dens(js) &
                                     * gyrop_J0(js,ir,it,je,jx) * w_e(je)
+
+                               ! Trapping component
+                               if(trap_method /= 0) then
+                                  if(is==js .and. ie==je) then
+                                     if(jx == ix+1) then
+                                        cmat(ir,it,p,pp)  &
+                                             =  cmat(ir,it,p,pp) & 
+                                             + (0.5*delta_t) &
+                                             * omega_trap(it,is) &
+                                             * sqrt(energy(ie)) &
+                                             * (indx_xi(ix)+1.0) &
+                                             * (indx_xi(ix)+2.0) &
+                                             / (2*indx_xi(ix)+3.0)
+                                        amat(p,pp)  &
+                                             =  amat(p,pp) & 
+                                             - (0.5*delta_t) &
+                                             * omega_trap(it,is) &
+                                             * sqrt(energy(ie)) &
+                                             * (indx_xi(ix)+1.0) &
+                                             * (indx_xi(ix)+2.0) &
+                                             / (2*indx_xi(ix)+3.0)
+                                     else if(jx == ix-1) then
+                                        cmat(ir,it,p,pp)  &
+                                             =  cmat(ir,it,p,pp) & 
+                                             + (0.5*delta_t) &
+                                             * omega_trap(it,is) &
+                                             * sqrt(energy(ie)) &
+                                             * (-1.0*indx_xi(ix)) &
+                                             * (indx_xi(ix)-1.0)&
+                                             / (2*indx_xi(ix)-1.0)
+                                        amat(p,pp)  &
+                                             =  amat(p,pp) & 
+                                             - (0.5*delta_t) &
+                                             * omega_trap(it,is) &
+                                             * sqrt(energy(ie)) &
+                                             * (-1.0*indx_xi(ix)) &
+                                             * (indx_xi(ix)-1.0)&
+                                             / (2*indx_xi(ix)-1.0)
+                                     endif
+                                  endif
+                               endif
+
                             enddo
                          enddo
                       enddo
                    enddo
                 enddo
              enddo
-             
+
              ! H_bar = (1 - dt/2 C - Poisson)^(-1) * (1 + dt/2 C + Poisson) H
              ! Lapack factorization and inverse of LHS
-             call DGETRF(msize,msize,cmat(ir,it,:,:),msize,i_piv,info)
-             call DGETRI(msize,cmat(ir,it,:,:),msize,i_piv,work,msize,info)
+             call ZGETRF(msize,msize,cmat(ir,it,:,:),msize,i_piv,info)
+             call ZGETRI(msize,cmat(ir,it,:,:),msize,i_piv,work,msize,info)
              ! Matrix multiply
-             call DGEMM('N','N',msize,msize,1.0,cmat(ir,it,:,:),&
-                  msize,amat,msize,0.0,bmat,msize)
+             call ZGEMM('N','N',msize,msize,msize,alpha,cmat(ir,it,:,:),&
+                  msize,amat,msize,beta,bmat,msize)
              cmat(ir,it,:,:) = bmat(:,:)
-             
+      
           enddo
        enddo
-       
+
        deallocate(amat)
        deallocate(bmat)
        deallocate(work)
@@ -173,7 +223,7 @@ contains
        deallocate(nu_d)
 
        initialized = .true.
-       
+
     else
        if(.NOT. initialized) return
        deallocate(cmat)
@@ -188,9 +238,15 @@ contains
   subroutine COLLISION_do
     use gkcoll_globals
     use gkcoll_poisson
+    use gkcoll_gk, only : xi_mat
+    use gkcoll_gyro
     implicit none
     integer :: is,ir,it,ie,ix
     integer :: p
+    complex :: alpha = (1.0,0.0)
+    complex :: beta  = (0.0,0.0)
+
+    if(collision_model == -1) return
 
     ! compute new collisional cap_H: H = h + ze/T G phi
     
@@ -206,10 +262,10 @@ contains
                 enddo
              enddo
           enddo
-          
+
           ! Solve for H
-          call ZGEMV('N',msize,msize,1.0,cmat(ir,it,:,:),&
-               msize,cvec,1,0.0,bvec,1)
+          call ZGEMV('N',msize,msize,alpha,cmat(ir,it,:,:),&
+               msize,cvec,1,beta,bvec,1)
           
           do is=1,n_species
              do ie=1,n_energy
@@ -219,13 +275,31 @@ contains
                 enddo
              enddo
           enddo
-
-          ! Compute the new phi
-          call POISSONp_do(ir,it) 
           
+          ! Compute the new phi
+          call POISSONp_do(ir,it)
+
        enddo
     enddo
     
+    ! Compute the new h_x
+    do is=1,n_species
+       do ir=1,n_radial
+          do it=1,n_theta
+             do ie=1,n_energy
+                call ZGEMV('N',n_xi,n_xi,alpha,xi_mat,n_xi,&
+                     cap_h_p(is,ir,it,ie,:),1,beta,cap_h_x(is,ir,it,ie,:),1)
+                do ix=1,n_xi
+                   h_x(is,ir,it,ie,ix) = cap_h_x(is,ir,it,ie,ix) &
+                        - z(is)/temp(is) * gyrox_J0(is,ir,it,ie,ix) &
+                        * phi(ir,it)
+                enddo
+             enddo
+          enddo
+       enddo
+    enddo
+    
+
   end subroutine COLLISION_do
   
 end module gkcoll_collision

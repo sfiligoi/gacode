@@ -1,5 +1,8 @@
 module gkcoll_globals
 
+  ! EAB: temp parameter
+  integer :: trap_method=1
+
   !---------------------------------------------------------------
   ! local MPI variables
   ! 
@@ -17,7 +20,6 @@ module gkcoll_globals
   real :: rmin
   real :: rmaj
   real :: q
-  real :: rho
   real :: shat
   real :: shift
   real :: kappa
@@ -28,8 +30,13 @@ module gkcoll_globals
   real :: s_zeta
   real :: zmag
   real :: s_zmag
+  
+  integer :: toroidal_model
+  integer :: toroidal_num
+  real :: rho
+  real :: k_theta_rho
   real :: k_theta
-  real :: r_length
+  real :: r_length_inv
 
   !---------------------------------------------------------------
   integer :: geo_ny_in
@@ -71,7 +78,13 @@ module gkcoll_globals
   integer :: n_radial
   real    :: e_max
   real    :: delta_t
+  real    :: max_time
   real    :: freq_tol
+
+  real    :: rupwind_eps
+  integer :: rupwind_n
+  real    :: tupwind_eps
+
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------

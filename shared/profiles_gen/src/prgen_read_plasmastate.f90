@@ -14,7 +14,6 @@ subroutine prgen_read_plasmastate
 
   ! NetCDF variables
   integer :: i
-  integer :: ip
   integer :: ncid
   integer :: varid
   integer :: err
@@ -102,6 +101,10 @@ subroutine prgen_read_plasmastate
   err = nf90_inq_varid(ncid,trim('kccw_Bphi'),varid)
   err = nf90_get_var(ncid,varid,plst_kccw_bphi)
 
+  ! J_phi orientation
+  err = nf90_inq_varid(ncid,trim('kccw_Jphi'),varid)
+  err = nf90_get_var(ncid,varid,plst_kccw_jphi)
+
   ! Root of normalized toroidal flux (rho)
   err = nf90_inq_varid(ncid,trim('rho'),varid)
   err = nf90_get_var(ncid,varid,plst_rho(:))
@@ -144,9 +147,9 @@ subroutine prgen_read_plasmastate
   err = nf90_get_var(ncid,varid,plst_z_midp(:))
 
   ! Z_eff
-  err = nf90_inq_varid(ncid,trim('Zeff_th'),varid)
-  err = nf90_get_var(ncid,varid,plst_zeff_th(1:nx-1))
-  plst_zeff_th(nx) = 0.0
+  err = nf90_inq_varid(ncid,trim('Zeff'),varid)
+  err = nf90_get_var(ncid,varid,plst_zeff(1:nx-1))
+  plst_zeff(nx) = 0.0
 
   ! Temperatures
   err = nf90_inq_varid(ncid,trim('Ts'),varid)
@@ -245,8 +248,8 @@ subroutine prgen_read_plasmastate
 
   err = nf90_close(ncid)
 
-  ! Ensure zero of flux 
-  dpsi(:) = plst_psipol(:)-plst_psipol(1)
+  ! Ensure zero of flux and correct sign
+  dpsi(:) = abs(plst_psipol(:)-plst_psipol(1))*(-plst_kccw_jphi)
 
   ! Compute rmin and rmaj based on outer and 
   ! inner major radii at midplane (of course, 

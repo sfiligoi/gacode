@@ -161,6 +161,7 @@ module prgen_read_globals
   character (len=32), dimension(:), allocatable :: plst_alla_name
   real :: plst_b_axis_vac
   integer :: plst_kccw_bphi
+  integer :: plst_kccw_jphi
   real, dimension(:,:), allocatable :: plst_ts
   real, dimension(:,:), allocatable :: plst_ns
   real, dimension(:), allocatable :: plst_ptowb
@@ -178,7 +179,7 @@ module prgen_read_globals
   real, dimension(:), allocatable :: plst_r_midp_in
   real, dimension(:), allocatable :: plst_r_midp_out
   real, dimension(:), allocatable :: plst_z_midp
-  real, dimension(:), allocatable :: plst_zeff_th
+  real, dimension(:), allocatable :: plst_zeff
   real, dimension(:), allocatable :: plst_epot
   real, dimension(:), allocatable :: plst_omegat
   real, dimension(:), allocatable :: plst_pbe
@@ -194,13 +195,21 @@ module prgen_read_globals
   ! PEQDSK variables
   !
   integer :: peqdsk_nj
-  real :: peqdsk_bref, peqdsk_arho
+  real :: peqdsk_bref
+  real :: peqdsk_arho
   real, dimension(:), allocatable :: peqdsk_psi
   real, dimension(:), allocatable :: peqdsk_ne
   real, dimension(:), allocatable :: peqdsk_te
   real, dimension(:), allocatable :: peqdsk_ni
   real, dimension(:), allocatable :: peqdsk_ti
   real, dimension(:), allocatable :: peqdsk_omegat
+  !---------------------------------------------------------
+
+  !---------------------------------------------------------
+  ! null input variables
+  !
+  real :: null_bref
+  real :: null_arho
   !---------------------------------------------------------
 
   !--------------------------------------------------------
