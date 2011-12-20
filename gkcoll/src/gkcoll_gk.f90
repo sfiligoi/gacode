@@ -10,9 +10,9 @@ module gkcoll_gk
   complex, dimension(:,:,:,:,:), allocatable, private :: cap_h_x_deriv
 
   ! theta derivative variables
-  real, dimension(-2:2) :: uderiv
-  real, dimension(-2:2) :: cderiv
-  integer, dimension(:), allocatable :: thcyc
+  real, dimension(-2:2), private :: uderiv
+  real, dimension(-2:2), private :: cderiv
+  integer, dimension(:), allocatable, private :: thcyc
 
   ! xi conversion matrices
   complex, dimension(:,:), allocatable :: xi_mat, xi_mat_inv, xi_deriv_mat
@@ -383,10 +383,10 @@ contains
                          - val * cap_h_x(is,ir,it,ie,ix)
 
                     ! omega_dalpha - pressure component with xi derivative
-                    val = omega_xprdrift(it,is) &
-                         * energy(ie) * xi(ix) * (1.0 - xi(ix)**2)
-                    rhs(ij,is,ir,it,ie,ix) = rhs(ij,is,ir,it,ie,ix) &
-                         - val * cap_h_x(is,ir,it,ie,ix)
+                    !val = omega_xprdrift(it,is) &
+                    !     * energy(ie) * xi(ix) * (1.0 - xi(ix)**2)
+                    !rhs(ij,is,ir,it,ie,ix) = rhs(ij,is,ir,it,ie,ix) &
+                    !     - val * cap_h_x(is,ir,it,ie,ix)
 
                     ! omega_star
                     val = i_c * k_theta &
