@@ -133,7 +133,6 @@ OBJECTS += gyro_globals.o \
           catch_blowup.o \
           catch_halt_signal.o \
           parallel_dim.o \
-          alloc_add.o \
           allocate_profile_exp.o \
           make_maxwell_matrix.o \
           make_implicit_advect.o \

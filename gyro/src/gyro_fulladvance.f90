@@ -147,24 +147,13 @@ subroutine gyro_fulladvance
      ! Main data I/O handler
 
      io_control = 2*output_flag
-!     if (io_method == 1) then  
-!        call gyro_write_timedata
-!     else
-!        call gyro_write_timedata_hdf5
-!     endif
 
-      if (io_method > 0) call gyro_write_timedata
-      if (io_method > 1) call gyro_write_timedata_hdf5
-    
+     if (io_method > 0) call gyro_write_timedata
+     if (io_method > 1) call gyro_write_timedata_hdf5
 
      !--------------------------------------------------
      ! Update diffusivity and flux time-record for TGYRO 
      !--------------------------------------------------
-
-     if (transport_method == 2) then
-        diff_vec(:,:,:,data_step+1) = diff(:,:,:)
-        gbflux_vec(:,:,:,data_step+1) = gbflux(:,:,:)
-     endif
 
      ! Restart test:
 

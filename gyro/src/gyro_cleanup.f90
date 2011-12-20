@@ -9,6 +9,7 @@ subroutine gyro_cleanup
 
   use mpi
   use gyro_globals
+  use gyro_interface
 
   implicit none
 
@@ -43,5 +44,15 @@ subroutine gyro_cleanup
      if (sparse_method == 2) call MPI_COMM_FREE(MUMPS_COMM,i_err)
 
   endif
+
+  ! (Possible) deallocation of interface variables
+  if (allocated(gyro_elec_pflux_out)) deallocate(gyro_elec_pflux_out)
+  if (allocated(gyro_elec_mflux_out)) deallocate(gyro_elec_mflux_out)
+  if (allocated(gyro_elec_eflux_out)) deallocate(gyro_elec_eflux_out)
+  if (allocated(gyro_elec_expwd_out)) deallocate(gyro_elec_expwd_out)
+  if (allocated(gyro_ion_pflux_out)) deallocate(gyro_ion_pflux_out)
+  if (allocated(gyro_ion_mflux_out)) deallocate(gyro_ion_mflux_out)
+  if (allocated(gyro_ion_eflux_out)) deallocate(gyro_ion_eflux_out)
+  if (allocated(gyro_ion_expwd_out)) deallocate(gyro_ion_expwd_out)
 
 end subroutine gyro_cleanup

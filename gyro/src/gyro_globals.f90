@@ -451,6 +451,8 @@ module gyro_globals
   integer :: data_step
   integer :: time_skip
   integer :: alltime_index
+  integer :: output_flag
+  integer :: p_ave
   !
   real :: time_max
   real :: freq_tol
@@ -914,10 +916,10 @@ module gyro_globals
   !------------------------------------------------
   ! Primitive fluxes:
   !
+  real, dimension(:,:,:,:,:), allocatable :: nonlinear_flux_velocity
   real, dimension(:,:,:,:), allocatable :: nonlinear_flux_passing
   real, dimension(:,:,:,:), allocatable :: nonlinear_flux_trapped
   real, dimension(:,:), allocatable :: nonlinear_flux_momparts
-  real, dimension(:,:,:,:,:), allocatable :: nonlinear_flux_velocity
   !
   ! Diffusivities:
   !
@@ -926,14 +928,6 @@ module gyro_globals
   real, dimension(:,:,:), allocatable :: diff
   real, dimension(:,:,:), allocatable :: diff_trapped
   real, dimension(:,:,:), allocatable :: diff_n
-  real, dimension(:,:,:), allocatable :: s_diff_i
-  real, dimension(:,:,:), allocatable :: s_diff_i_trapped
-  real, dimension(:,:), allocatable :: s_diff
-  real, dimension(:,:), allocatable :: s_diff_trapped
-  real, dimension(:,:,:,:), allocatable :: sp_diff_i
-  real, dimension(:,:,:,:), allocatable :: sp_diff_i_trapped
-  real, dimension(:,:,:), allocatable :: sp_diff
-  real, dimension(:,:,:), allocatable :: sp_diff_trapped
   !
   ! gyroBohm fluxes:
   !
@@ -953,9 +947,7 @@ module gyro_globals
   !
   real, dimension(:,:), allocatable :: nl_transfer
   !
-  real, dimension(:,:,:,:), allocatable :: diff_vec
   real, dimension(:,:,:,:), allocatable :: gbflux_vec
-  integer :: output_flag
   !------------------------------------------------
 
   !------------------------------------------------------
