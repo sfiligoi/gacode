@@ -38,7 +38,7 @@ subroutine gyro_moments_plot
 
   if (alltime_index == 0) then
      moments_plot(:,:,:,:) = (0.0,0.0)
-     moments_plot_wedge(:,:,:,:) = (0.0,0.0)
+     if (io_method > 1) moments_plot_wedge(:,:,:,:) = (0.0,0.0)
   endif
   moments_zero_plot(:,:,:) = 0.0
 
@@ -165,10 +165,10 @@ subroutine gyro_moments_plot
            do j_plot=1,n_theta_plot
               mom_tmp(j_plot,i,ix) = sum(vel_sum(:,i,ix)*blend_plot(:,j_plot,i))
            enddo ! j_plot
-           if(io_method > 1 .and. time_skip_wedge > 0) then
-             do j_plot=1,n_theta_plot*n_theta_mult
-               mom_tmp_wedge(j_plot,i,ix) = sum(vel_sum(:,i,ix)*blend_wedge(:,j_plot,i))
-             enddo ! j_plot
+           if (io_method > 1 .and. time_skip_wedge > 0) then
+              do j_plot=1,n_theta_plot*n_theta_mult
+                 mom_tmp_wedge(j_plot,i,ix) = sum(vel_sum(:,i,ix)*blend_wedge(:,j_plot,i))
+              enddo ! j_plot
            endif
         enddo ! i
      enddo ! ix
@@ -192,9 +192,9 @@ subroutine gyro_moments_plot
      !
      moments_plot(:,:,is,:) = moments_plot(:,:,is,:)+&
           w_time(alltime_index+1)*mom_tmp(:,:,:)
-     if(io_method > 1 .and. time_skip_wedge > 0) then
-       moments_plot_wedge(:,:,is,:) = moments_plot_wedge(:,:,is,:)+&
-          w_time(alltime_index+1)*mom_tmp_wedge(:,:,:)
+     if (io_method > 1 .and. time_skip_wedge > 0) then
+        moments_plot_wedge(:,:,is,:) = moments_plot_wedge(:,:,is,:)+&
+             w_time(alltime_index+1)*mom_tmp_wedge(:,:,:)
 
      endif
      !----------------------------------------------------------------
