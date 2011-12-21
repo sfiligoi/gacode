@@ -101,6 +101,8 @@ OBJECTS += gyro_globals.o \
           gyro_read_experimental_profiles.o \
           gyro_read_restart.o \
           gyro_set_exit_status.o \
+          gyro_sparse_solve_umfpack.o \
+          gyro_sparse_solve_mumps.o \
           gyro_write_restart.o \
           gyro_rhs_nonlinear.o \
           gyro_rhs_total.o \
@@ -126,8 +128,6 @@ OBJECTS += gyro_globals.o \
           gyro_write_step.o \
           gyro_write_timedata.o \
           gyro_write_timers.o \
-          sparse_solve_umfpack.o \
-          sparse_solve_mumps.o \
 	  gyro_velocity_sum.o \
           catch_error.o \
           catch_blowup.o \
@@ -152,7 +152,6 @@ OBJECTS += gyro_globals.o \
           get_phi_squared.o \
           get_g_squared.o \
           write_h.o \
-          write_matrix_stat.o \
           gyro_dump_input.o \
           gyro_dump_interface.o
 

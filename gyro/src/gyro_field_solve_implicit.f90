@@ -17,9 +17,9 @@ subroutine gyro_field_solve_implicit
   call gyro_timer_in('Field-implicit')
 
   if (sparse_method == 1) then
-     call sparse_solve_umfpack(n_maxwell,n_maxwell_row,3,1)
+     call gyro_sparse_solve_umfpack(n_maxwell,n_maxwell_row,3,1)
   else
-     call sparse_solve_mumps(n_maxwell,n_maxwell_row,3,1)
+     call gyro_sparse_solve_mumps(n_maxwell,n_maxwell_row,3,1)
   endif
 
   call gyro_timer_out('Field-implicit')

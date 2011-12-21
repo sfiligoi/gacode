@@ -63,9 +63,9 @@ subroutine make_ampere_matrix
   call make_ampere_blend
 
   if (sparse_method == 1) then
-     call sparse_solve_umfpack(n_ampere,n_ampere_row,2,0)
+     call gyro_sparse_solve_umfpack(n_ampere,n_ampere_row,2,0)
   else
-     call sparse_solve_mumps(n_ampere,n_ampere_row,2,0)
+     call gyro_sparse_solve_mumps(n_ampere,n_ampere_row,2,0)
   endif
 
   !---------------------------------------------
