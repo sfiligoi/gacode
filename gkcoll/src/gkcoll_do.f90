@@ -135,11 +135,11 @@ subroutine gkcoll_do
         if(silent_flag == 0 .and. i_proc == 0) then
            open(unit=myio,file=trim(path)//runfile_time,status='old',&
                 position='append')
-           write(myio,'(1pe12.5)') (itime * delta_t)
+           write(myio,'(1pe13.5e3)') (itime * delta_t)
            close(myio)
            open(unit=myio,file=trim(path)//runfile_phi,status='old',&
                 position='append')
-           write(myio,'(1pe12.5)') transpose(phi(:,:))
+           write(myio,'(1pe13.5e3)') transpose(phi(:,:))
            close(myio)
 
            ! Construct ballooning-space form of phi
@@ -151,7 +151,7 @@ subroutine gkcoll_do
            enddo
            open(unit=myio,file=trim(path)//runfile_phiB,status='old',&
                 position='append')
-           write(myio,'(1pe12.5)') transpose(f_balloon(:,:))
+           write(myio,'(1pe13.5e3)') transpose(f_balloon(:,:))
            close(myio)
         endif
 
@@ -200,7 +200,7 @@ subroutine gkcoll_do
                  enddo
               enddo
 
-              write(myio,'(1pe12.5)') transpose(f_balloon(:,:))
+              write(myio,'(1pe13.5e3)') transpose(f_balloon(:,:))
 
            enddo
         enddo
