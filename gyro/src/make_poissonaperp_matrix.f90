@@ -85,9 +85,9 @@ subroutine make_poissonaperp_matrix
   call make_electron_current_perp
 
   if (sparse_method == 1) then
-     call sparse_solve_umfpack(n_poissonaperp,n_poissonaperp_row,4,0)
+     call gyro_sparse_solve_umfpack(n_poissonaperp,n_poissonaperp_row,4,0)
   else
-     call sparse_solve_mumps(n_poissonaperp,n_poissonaperp_row,4,0)
+     call gyro_sparse_solve_mumps(n_poissonaperp,n_poissonaperp_row,4,0)
   endif
 
   !---------------------------------------------

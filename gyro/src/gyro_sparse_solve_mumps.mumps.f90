@@ -1,9 +1,16 @@
-!---------------------------------
-! i_solve=0: factor
-! i_solve=1: solve
-!---------------------------------
+!------------------------------------------------------------------
+! gyro_sparse_solve_mumps.f90
+!
+! PURPOSE:
+!  Manage factorize or solve for various field matrix combinations 
+!  using UMFPACK.
+!
+! NOTES:
+!  i_solve=0: factor
+!  i_solve=1: solve
+!------------------------------------------------------------------
 
-subroutine sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
+subroutine gyro_sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
 
   use mpi
   use gyro_globals
@@ -113,7 +120,7 @@ subroutine sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
      if (m_mumps(matnum)%MYID == 0) then
         if (m_mumps(matnum)%INFOG(1) < 0 ) then
            print *,m_mumps(matnum)%INFOG(1)
-           call catch_error('Exited ZMUMPS factorization with errors')
+           call catch_error('ERROR: (GYRO) Exited ZMUMPS factorization with errors.')
         endif
      endif
 
@@ -194,13 +201,14 @@ subroutine sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
      if (m_mumps(matnum)%MYID == 0) then
         if (m_mumps(matnum)%INFOG(1) < 0 ) then
            print *,m_mumps(matnum)%INFOG(1)
-           call catch_error('error in ZMUMPS solve')
+           call catch_error('ERROR: (GYRO) Error in ZMUMPS solve.')
         endif
      endif
 
      select case(matnum)
 
      case(1)
+
         if (m_mumps(matnum)%MYID == 0) then
            do i=1,n_x
               do j=1,n_blend
@@ -212,6 +220,7 @@ subroutine sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
         call MPI_BCAST(field_blend(:,:,1),n_x*n_blend,MPI_DOUBLE_COMPLEX,0,NEW_COMM_1,i_err)
 
      case(2) 
+
         if (m_mumps(matnum)%MYID == 0) then
            do i=1,n_x
               do j=1,n_blend
@@ -223,6 +232,7 @@ subroutine sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
         call MPI_BCAST(field_blend(:,:,2),n_x*n_blend,MPI_DOUBLE_COMPLEX,0,NEW_COMM_1,i_err)
 
      case(3) 
+
         if (m_mumps(matnum)%MYID == 0) then
            do i=1,n_x
               do j=1,n_blend
@@ -253,6 +263,7 @@ subroutine sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
         call MPI_BCAST(field_blend,size(field_blend),MPI_DOUBLE_COMPLEX,0,NEW_COMM_1,i_err)
 
      case(4)
+
         if (m_mumps(matnum)%MYID == 0) then
            do i=1,n_x
               do j=1,n_blend
@@ -274,11 +285,10 @@ subroutine sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
 
      end select
 
-
   endif
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[sparse_solve done]'
+     print *,'[gyro_sparse_solve_mumps done]'
   endif
 
-end subroutine sparse_solve_mumps
+end subroutine gyro_sparse_solve_mumps

@@ -156,9 +156,9 @@ subroutine make_maxwell_matrix
   endif
 
   if (sparse_method == 1) then
-     call sparse_solve_umfpack(n_maxwell,n_maxwell_row,3,0)
+     call gyro_sparse_solve_umfpack(n_maxwell,n_maxwell_row,3,0)
   else
-     call sparse_solve_mumps(n_maxwell,n_maxwell_row,3,0)
+     call gyro_sparse_solve_mumps(n_maxwell,n_maxwell_row,3,0)
   endif
 
   !---------------------------------------------

@@ -1,9 +1,16 @@
-!---------------------------------
-! i_solve=0: factor
-! i_solve=1: solve
-!---------------------------------
+!------------------------------------------------------------------
+! gyro_sparse_solve_umfpack.f90
+!
+! PURPOSE:
+!  Manage factorize or solve for various field matrix combinations 
+!  using UMFPACK.
+!
+! NOTES:
+!  i_solve=0: factor
+!  i_solve=1: solve
+!------------------------------------------------------------------
 
-subroutine sparse_solve_umfpack(n_elem,n_row,matnum,i_solve)
+subroutine gyro_sparse_solve_umfpack(n_elem,n_row,matnum,i_solve)
 
   use gyro_globals
 
@@ -21,7 +28,6 @@ subroutine sparse_solve_umfpack(n_elem,n_row,matnum,i_solve)
   complex, dimension(:), allocatable :: b_UMF
   complex, dimension(:), allocatable :: x_UMF
   complex, dimension(:), allocatable :: w_UMF
-  !
   !---------------------------------------------------
 
   select case(matnum)
@@ -273,7 +279,7 @@ subroutine sparse_solve_umfpack(n_elem,n_row,matnum,i_solve)
            print *,'matnum   =',matnum
            print *,'uinfo(1) =',uinfo(1)
         endif
-        call catch_error('Error: UMZ2SO')
+        call catch_error('ERROR: (GYRO) UMZ2SO failed.')
      endif
 
      select case(matnum)
@@ -344,7 +350,110 @@ subroutine sparse_solve_umfpack(n_elem,n_row,matnum,i_solve)
   endif
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[sparse_solve done]'
+     print *,'[sparse_solve_umfpack done]'
   endif
 
-end subroutine sparse_solve_umfpack
+end subroutine gyro_sparse_solve_umfpack
+
+
+subroutine write_matrix_stat(nelem,nval,nindx,niter,tag)
+
+  use gyro_globals
+
+  !------------------------------------------------
+  implicit none
+  !
+  integer, intent(in) :: nelem
+  integer, intent(in) :: nval
+  integer, intent(in) :: nindx
+  integer, intent(in) :: niter
+  !
+  integer :: nelem_c(n_n)
+  integer :: nval_c(n_n)
+  integer :: nindx_c(n_n)
+  integer :: niter_c(n_n)
+  integer :: p
+  !
+  integer, intent(in) :: tag
+  !
+  character (len=36) :: lab1
+  character (len=36) :: lab2
+  character (len=36) :: lab3
+  character (len=36) :: lab4
+  !------------------------------------------------
+
+  select case (output_flag)
+
+  case (1)
+
+     call collect_integer(nelem,nelem_c)
+     call collect_integer(nval,nval_c)
+     call collect_integer(nindx,nindx_c)
+     call collect_integer(niter,niter_c)
+
+     if (n(1) == 0 .and. n_n > 1) then
+        p = 2
+        lab1 = 'EXPLICIT POISSON:     n=0        n>0'
+        lab2 = ' EXPLICIT AMPERE:     n=0        n>0'
+        lab3 = '     TOTAL FIELD:     n=0        n>0'
+        lab4 = '  POISSON-AMPERE:     n=0        n>0'
+     endif
+
+     if (n(1) == 0 .and. n_n == 1) then
+        p = 1
+        lab1 = 'EXPLICIT POISSON:     n=0'
+        lab2 = ' EXPLICIT AMPERE:     n=0'
+        lab3 = '     TOTAL FIELD:     n=0'
+        lab4 = '  POISSON-AMPERE:     n=0'
+     endif
+
+     if (n(1) /= 0) then
+        p = 1
+        lab1 = 'EXPLICIT POISSON:     n>0'
+        lab2 = ' EXPLICIT AMPERE:     n>0'
+        lab3 = '     TOTAL FIELD:     n>0'
+        lab4 = '  POISSON-AMPERE:     n>0'
+     endif
+
+     if ((i_proc == 0) .and. (gkeigen_j_set == 0)) then
+        open(unit=1,file=trim(runfile),status='old',position='append')
+
+        select case (tag)
+
+        case (1)
+
+           write(1,*) '----------- SPARSE MATRIX STATS ---------------'
+           write(1,*) lab1
+
+        case (2)
+
+           write(1,*) lab2
+
+        case (3)
+
+           write(1,*) lab3
+
+        case (4)
+
+           write(1,*) '----------- SPARSE MATRIX STATS ---------------'
+           write(1,*) lab4
+
+        end select
+
+        write(1,40) '        nonzeros:',nelem_c(1:p)
+        write(1,40) '          values:',nval_c(1:p)
+        write(1,40) '         indices:',nindx_c(1:p)
+        write(1,40) '      iterations:',niter_c(1:p)
+        write(1,*)
+
+        close(1)
+
+     endif
+
+     return
+
+  end select
+
+40 format(t2,a,t20,4(i8,2x))
+
+end subroutine write_matrix_stat
