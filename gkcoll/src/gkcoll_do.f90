@@ -22,8 +22,6 @@ subroutine gkcoll_do
   use gkcoll_implicit
   implicit none
 
-  integer :: imp_flag = 0
-
   integer :: ix, ir, it, jr, p, is, ie
   integer :: itime, nt_step
   character(len=80)  :: runfile_phi   = 'out.gkcoll.phi'
@@ -34,6 +32,9 @@ subroutine gkcoll_do
   integer :: myio = 20
   integer :: print_step=10
   complex, dimension(:,:), allocatable :: f_balloon
+
+  integer :: signal
+  logical :: lfe
 
   if (silent_flag == 0 .and. i_proc == 0) then
      open(unit=io_gkcollout,file=trim(path)//runfile_gkcollout,status='replace')
@@ -161,6 +162,22 @@ subroutine gkcoll_do
            endif
            exit
         endif
+
+        ! Check for manual halt signal
+        if(i_proc == 0) then
+           inquire(file='halt',exist=lfe)
+           if (lfe .eqv. .true.) then
+              open(unit=1,file='halt',status='old')
+              read(1,*) signal
+              close(1)
+           else
+              signal = 0
+           endif
+        endif
+        if (abs(signal) == 1) then
+           exit
+        endif
+
      endif
 
      phi_old = phi
