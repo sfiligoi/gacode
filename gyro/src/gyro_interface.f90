@@ -212,24 +212,23 @@ module gyro_interface
   integer :: gyro_time_skip_wedge_in = 0
   integer :: gyro_n_torangle_wedge_in = 0
   integer :: gyro_n_torangle_3d_in = 0
-  real    :: gyro_theta_wedge_offset_in = 0.
-  real    :: gyro_theta_wedge_angle_in =0.
-
+  real    :: gyro_theta_wedge_offset_in = 0.0
+  real    :: gyro_theta_wedge_angle_in = 0.0
 
   ! Inputs available via interface but not by INPUT
   integer :: gyro_n_fourier_geo_in = 0
   real, dimension(8,0:16) :: gyro_a_fourier_geo_in = 0.0
 
   ! Output parameters
-  real :: gyro_elec_pflux_out = 0.0
-  real :: gyro_elec_mflux_out = 0.0
-  real :: gyro_elec_eflux_out = 0.0
-  real :: gyro_elec_expwd_out = 0.0
+  real, dimension(:), allocatable :: gyro_elec_pflux_out 
+  real, dimension(:), allocatable :: gyro_elec_mflux_out 
+  real, dimension(:), allocatable :: gyro_elec_eflux_out
+  real, dimension(:), allocatable :: gyro_elec_expwd_out 
 
-  real, dimension(5) :: gyro_ion_pflux_out = 0.0
-  real, dimension(5) :: gyro_ion_mflux_out = 0.0
-  real, dimension(5) :: gyro_ion_eflux_out = 0.0
-  real, dimension(5) :: gyro_ion_expwd_out = 0.0
+  real, dimension(:,:), allocatable :: gyro_ion_pflux_out
+  real, dimension(:,:), allocatable :: gyro_ion_mflux_out
+  real, dimension(:,:), allocatable :: gyro_ion_eflux_out
+  real, dimension(:,:), allocatable :: gyro_ion_expwd_out
 
   complex :: gyro_fieldeigen_omega_out
   real :: gyro_fieldeigen_error_out
@@ -443,6 +442,16 @@ contains
 
     gyro_n_fourier_geo_in = n_fourier_geo
     gyro_a_fourier_geo_in(:,:) = a_fourier_geo(:,:)
+
+    ! Allocate output arrays (deallocated in gyro_cleanup)
+    allocate(gyro_elec_pflux_out(n_x))
+    allocate(gyro_elec_mflux_out(n_x))
+    allocate(gyro_elec_eflux_out(n_x))
+    allocate(gyro_elec_expwd_out(n_x))
+    allocate(gyro_ion_pflux_out(n_x,5))
+    allocate(gyro_ion_mflux_out(n_x,5))
+    allocate(gyro_ion_eflux_out(n_x,5))
+    allocate(gyro_ion_expwd_out(n_x,5))
 
     if (debug_flag == 1 .and. i_proc == 0) then
        print *, '[map_global2interface done]'

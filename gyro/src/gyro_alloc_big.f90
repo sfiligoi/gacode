@@ -102,7 +102,7 @@ subroutine gyro_alloc_big(flag)
 
      allocate(moments_plot(n_theta_plot,n_x,n_kinetic,3))
 
-     !For synthetic diagnostic
+     ! For synthetic diagnostics
      if (io_method > 1 .and. time_skip_wedge > 0) then
         allocate(moments_plot_wedge(n_theta_plot*n_theta_mult,n_x,n_kinetic,3))
      endif
@@ -129,11 +129,7 @@ subroutine gyro_alloc_big(flag)
      allocate(gbflux_mom(n_kinetic,3))
      allocate(gbflux_trapped(n_kinetic,n_field,p_moment))
      allocate(gbflux_n(n_kinetic,n_field,p_moment))
-
-     if (transport_method == 2) then
-        allocate(diff_vec(n_kinetic,n_field,n_moment,(nstep/time_skip)+1))
-        allocate(gbflux_vec(n_kinetic,n_field,p_moment,(nstep/time_skip)+1))
-     endif
+     allocate(gbflux_vec(n_kinetic,n_field,p_moment,n_x))
 
      allocate(nl_transfer(n_x,2))
 
@@ -222,20 +218,17 @@ subroutine gyro_alloc_big(flag)
 
      deallocate(nonlinear_flux_passing)  
      deallocate(nonlinear_flux_trapped)
+     deallocate(nonlinear_flux_momparts)
 
-     if (allocated(nonlinear_flux_momparts)) deallocate(nonlinear_flux_momparts)
-
-     if (allocated(gbflux_i)) deallocate(gbflux_i)
-     if (allocated(gbflux_i_trapped)) deallocate(gbflux_i_trapped)
-     if (allocated(gbflux)) deallocate(gbflux)
-     if (allocated(gbflux_mom)) deallocate(gbflux_mom)
-     if (allocated(gbflux_trapped)) deallocate(gbflux_trapped)
-     if (allocated(gbflux_n)) deallocate(gbflux_n)
+     deallocate(gbflux_i)
+     deallocate(gbflux_i_trapped)
+     deallocate(gbflux)
+     deallocate(gbflux_mom)
+     deallocate(gbflux_trapped)
+     deallocate(gbflux_n)
+     deallocate(gbflux_vec)
 
      deallocate(nl_transfer)
-
-     if (allocated(diff_vec)) deallocate(diff_vec)
-     if (allocated(gbflux_vec)) deallocate(gbflux_vec)
 
      deallocate(time_error)
      deallocate(w_time)

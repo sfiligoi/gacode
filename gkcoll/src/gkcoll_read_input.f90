@@ -16,6 +16,7 @@ subroutine gkcoll_read_input
   read(1,*) delta_t
   read(1,*) max_time
   read(1,*) freq_tol
+  read(1,*) imp_flag
   read(1,*) rupwind_eps
   read(1,*) rupwind_n
   read(1,*) tupwind_eps

@@ -2,7 +2,7 @@
 ! STUB
 !---------------------------------
 
-subroutine sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
+subroutine gyro_sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
 
   !---------------------------------------------------
   integer, intent(in) :: n_elem
@@ -11,6 +11,6 @@ subroutine sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
   integer, intent(in) :: i_solve
   !---------------------------------------------------
 
-  call catch_error('MUMPS not available.')
+  call catch_error('ERROR: (GYRO) MUMPS not available.')
 
-end subroutine sparse_solve_mumps
+end subroutine gyro_sparse_solve_mumps

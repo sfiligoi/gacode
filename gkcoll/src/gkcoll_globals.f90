@@ -80,6 +80,7 @@ module gkcoll_globals
   real    :: delta_t
   real    :: max_time
   real    :: freq_tol
+  integer :: imp_flag
 
   real    :: rupwind_eps
   integer :: rupwind_n
