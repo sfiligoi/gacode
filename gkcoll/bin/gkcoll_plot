@@ -40,7 +40,8 @@ then
   echo "          Generate plot of given type."
   echo "          <type> = field,"
   echo "                 = h,"
-  echo "                 = h_cut"
+  echo "                 = h_cut,"
+  echo "                 = freq"
 
   exit 1
 fi
@@ -107,6 +108,9 @@ case "$PLOT_TYPE" in
 
    h_cut)  
 	python $PYROOT/plot_h_cut.py $FTYPE $TIME $SPECIES & ;;
+
+   freq)  
+	python $PYROOT/plot_freq.py $FTYPE & ;;
 
 esac 
 

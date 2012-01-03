@@ -22,8 +22,6 @@ subroutine gkcoll_do
   use gkcoll_implicit
   implicit none
 
-  integer :: imp_flag = 0
-
   integer :: ix, ir, it, jr, p, is, ie
   integer :: itime, nt_step
   character(len=80)  :: runfile_phi   = 'out.gkcoll.phi'
@@ -34,6 +32,9 @@ subroutine gkcoll_do
   integer :: myio = 20
   integer :: print_step=10
   complex, dimension(:,:), allocatable :: f_balloon
+
+  integer :: signal
+  logical :: lfe
 
   if (silent_flag == 0 .and. i_proc == 0) then
      open(unit=io_gkcollout,file=trim(path)//runfile_gkcollout,status='replace')
@@ -134,11 +135,11 @@ subroutine gkcoll_do
         if(silent_flag == 0 .and. i_proc == 0) then
            open(unit=myio,file=trim(path)//runfile_time,status='old',&
                 position='append')
-           write(myio,'(1pe12.5)') (itime * delta_t)
+           write(myio,'(1pe13.5e3)') (itime * delta_t)
            close(myio)
            open(unit=myio,file=trim(path)//runfile_phi,status='old',&
                 position='append')
-           write(myio,'(1pe12.5)') transpose(phi(:,:))
+           write(myio,'(1pe13.5e3)') transpose(phi(:,:))
            close(myio)
 
            ! Construct ballooning-space form of phi
@@ -150,7 +151,7 @@ subroutine gkcoll_do
            enddo
            open(unit=myio,file=trim(path)//runfile_phiB,status='old',&
                 position='append')
-           write(myio,'(1pe12.5)') transpose(f_balloon(:,:))
+           write(myio,'(1pe13.5e3)') transpose(f_balloon(:,:))
            close(myio)
         endif
 
@@ -161,6 +162,22 @@ subroutine gkcoll_do
            endif
            exit
         endif
+
+        ! Check for manual halt signal
+        if(i_proc == 0) then
+           inquire(file='halt',exist=lfe)
+           if (lfe .eqv. .true.) then
+              open(unit=1,file='halt',status='old')
+              read(1,*) signal
+              close(1)
+           else
+              signal = 0
+           endif
+        endif
+        if (abs(signal) == 1) then
+           exit
+        endif
+
      endif
 
      phi_old = phi
@@ -183,7 +200,7 @@ subroutine gkcoll_do
                  enddo
               enddo
 
-              write(myio,'(1pe12.5)') transpose(f_balloon(:,:))
+              write(myio,'(1pe13.5e3)') transpose(f_balloon(:,:))
 
            enddo
         enddo

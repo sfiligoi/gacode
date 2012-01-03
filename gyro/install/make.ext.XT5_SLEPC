@@ -8,8 +8,8 @@ gyro_write_restart.o : gyro_write_restart.mpiio.f90
 	$(FC) $(FMATH) $(FFLAGS) -o gyro_write_restart.o -c gyro_write_restart.mpiio.f90
 gyro_mumps_private.o : gyro_mumps_private.mumps.f90
 	$(FC) $(FMATH) $(FFLAGS) ${MUMPS_PATH} -o gyro_mumps_private.o -c gyro_mumps_private.mumps.f90
-sparse_solve_mumps.o : sparse_solve_mumps.mumps.f90
-	$(FC) $(FMATH) $(FFLAGS) ${MUMPS_PATH} -o sparse_solve_mumps.o -c sparse_solve_mumps.mumps.f90
+gyro_sparse_solve_mumps.o : gyro_sparse_solve_mumps.mumps.f90
+	$(FC) $(FMATH) $(FFLAGS) ${MUMPS_PATH} -o gyro_sparse_solve_mumps.o -c gyro_sparse_solve_mumps.mumps.f90
 cleanup_mumps.o : cleanup_mumps.mumps.f90
 	$(FC) $(FMATH) $(FFLAGS) ${MUMPS_PATH} -o cleanup_mumps.o -c cleanup_mumps.mumps.f90
 #GKEIGEN_do.o : GKEIGEN_do.petsc31.F

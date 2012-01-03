@@ -1,0 +1,1 @@
+GATOFLAGS = -r8 -O0
