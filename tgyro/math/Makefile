@@ -8,9 +8,7 @@ endif
       
 LLIB=math_lib
 
-OBJECTS = logint.o \
-          linint.o \
-          sigv.o \
+OBJECTS = sigv.o \
           ifs_pppl.o
 
 .SUFFIXES : .o .f90 

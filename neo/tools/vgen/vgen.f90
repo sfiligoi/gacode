@@ -7,6 +7,7 @@
 
 program vgen
 
+  use mpi
   use vgen_globals
   use neo_interface
   use EXPRO_interface
@@ -35,8 +36,6 @@ program vgen
 
   real, dimension(:), allocatable :: er_exp
   !---------------------------------------------------
-
-  include 'mpif.h'
 
   !-----------------------------------------------------------------
   ! Initialize MPI_COMM_WORLD communicator.
@@ -109,13 +108,12 @@ program vgen
 
   !---------------------------------------------------------------------
 
+  call neo_init_serial(path)
   call neo_read_input()
   call map_global2interface()
 
   neo_n_radial_in = 1
-  neo_n_order_in  = 1
   neo_profile_model_in = 1
-  !neo_write_out_mode_in = 0
 
   ! Species checks
 
@@ -133,9 +131,13 @@ program vgen
      num_ele  = num_ele + 1
      indx_ele = 3
   endif
-  if(neo_n_species_in >= 1 .and. neo_z_4_in == -1) then
+  if(neo_n_species_in >= 4 .and. neo_z_4_in == -1) then
      num_ele  = num_ele + 1
      indx_ele = 4
+  endif
+  if(neo_n_species_in >= 5 .and. neo_z_5_in == -1) then
+     num_ele  = num_ele + 1
+     indx_ele = 5
   endif
 
   if(num_ele == 0) then
@@ -146,14 +148,14 @@ program vgen
      n_ions = neo_n_species_in - 1
      if(indx_ele /= neo_n_species_in) then
         if(i_proc == 0) then
-           print '(a)','ERROR: For vgen, electron species must be n_species'
+           print '(a)','ERROR: (VGEN) Electron species must be n_species'
         endif
         call MPI_finalize(i_err)
         stop
      endif
   else
      if(i_proc == 0) then
-        print '(a)', 'ERROR: Only one electron species allowed'
+        print '(a)', 'ERROR: (VGEN) Only one electron species allowed'
      endif
      call MPI_finalize(i_err)
      stop
@@ -161,7 +163,7 @@ program vgen
 
   if(n_ions < 1) then
      if(i_proc == 0) then
-        print '(a)', 'ERROR: For vgen, there must be at least one ion species'
+        print '(a)', 'ERROR: (VGEN) There must be at least one ion species'
      endif
      call MPI_finalize(i_err)
      stop
@@ -169,7 +171,7 @@ program vgen
 
   if(erspecies_indx > n_ions) then
      if(i_proc == 0) then
-        print '(a)', 'ERROR: Invalid vgen species index'
+        print '(a)', 'ERROR: (VGEN) Invalid species index'
      endif
      call MPI_finalize(i_err)
      stop
@@ -194,6 +196,9 @@ program vgen
   if(neo_n_species_in >= 4 .and. neo_z_4_in /= -1) then
      EXPRO_ctrl_z(4) = 1.0*neo_z_4_in
   endif
+  if(neo_n_species_in >= 5 .and. neo_z_5_in /= -1) then
+     EXPRO_ctrl_z(5) = 1.0*neo_z_5_in
+  endif
 
   ! set equilibrium option for EXPRO
   if(neo_equilibrium_model_in == 3) then
@@ -203,7 +208,7 @@ program vgen
   endif
 
   ! set sign of b and q for EXPRO
-   if(neo_btccw_in > 0) then
+  if(neo_btccw_in > 0) then
      EXPRO_ctrl_signb = -1.0
   else
      EXPRO_ctrl_signb =  1.0
@@ -215,8 +220,8 @@ program vgen
      EXPRO_ctrl_signq =  EXPRO_ctrl_signb
   endif
 
-  call EXPRO_pread(MPI_COMM_WORLD,path)
-  if (i_proc == 0) call EXPRO_write_derived(path)
+  call EXPRO_pread
+  if (i_proc == 0) call EXPRO_write_derived
   !---------------------------------------------------------------------
 
   ! Storage for electric field at theta=0 (er0) 
@@ -233,7 +238,6 @@ program vgen
         endif
      enddo
   endif
-
   !======================================================================
   ! Four alternatives for Er calculation:
   !
@@ -244,7 +248,7 @@ program vgen
   !    strong rotation
   ! 4. Return the given Er
 
-  print '(a)', 'INFO: omega0 = (c*Er)/(R*Bp)'
+  print '(a)', 'INFO: (VGEN) omega0 = (c*Er)/(R*Bp)'
 
   select case (er_method) 
 
@@ -256,7 +260,8 @@ program vgen
 
         ! Er calculation first
 
-        open(unit=1,file='ercomp.out',status='replace')
+        open(unit=1,file='out.vgen.ercomp',status='replace')
+        close(1)
         do i=2,EXPRO_n_exp-1
            if(erspecies_indx == 1) then
               grad_p = -(EXPRO_dlnnidr_new(i) + EXPRO_dlntidr(1,i))
@@ -269,6 +274,7 @@ program vgen
                 + EXPRO_vtor(erspecies_indx,i) * EXPRO_bp0(i) &
                 - EXPRO_vpol(erspecies_indx,i) * EXPRO_bt0(i)) &
                 / 1000
+           open(unit=1,file='out.vgen.ercomp',status='old',position='append')
            write(1,'(e16.8,$)') EXPRO_rho(i)
            write(1,'(e16.8,$)') grad_p * EXPRO_grad_r0(i) &
                 * EXPRO_ti(1,i)*temp_norm_fac &
@@ -276,9 +282,8 @@ program vgen
            write(1,'(e16.8,$)') EXPRO_vtor(erspecies_indx,i) * EXPRO_bp0(i)/1000
            write(1,'(e16.8,$)') -EXPRO_vpol(erspecies_indx,i) * EXPRO_bt0(i)/1000
            write(1,*) 
-
+           close(1)
         enddo
-        close(1)
 
         ! Compute omega and omega_deriv from newly-generated Er:
 
@@ -314,8 +319,14 @@ program vgen
            er0 = er_exp(i)
            omega = EXPRO_w0(i) 
            omega_deriv = EXPRO_w0p(i) 
+
            call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
                 omega_deriv)
+
+           if (neo_error_status_out > 0) then
+              print *,neo_error_message_out
+              stop
+           endif
 
            do j=1,n_ions
               EXPRO_vpol(j,i) = neo_vpol_dke_out(j) &
@@ -342,6 +353,11 @@ program vgen
         omega_deriv = 0.0
         call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
              omega_deriv)
+
+        if (neo_error_status_out > 0) then
+           print *,neo_error_message_out
+           stop
+        endif
 
         ! omega = (vtor_measured - vtor_neo_ater0) / R
 
@@ -388,6 +404,10 @@ program vgen
            omega_deriv = EXPRO_w0p(i) 
            call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
                 omega_deriv)
+           if (neo_error_status_out > 0) then
+              print *,neo_error_message_out
+              stop
+           endif
            do j=1,n_ions
               EXPRO_vpol(j,i) = neo_vpol_dke_out(j) &
                    * vth_norm * EXPRO_rmin(EXPRO_n_exp)
@@ -431,6 +451,11 @@ program vgen
            omega_deriv = EXPRO_w0p(i)
            call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
                 omega_deriv)
+
+           if (neo_error_status_out > 0) then
+              print *,neo_error_message_out
+              stop
+           endif
 
            do j=1,n_ions
               EXPRO_vpol(j,i) = neo_vpol_dke_out(j) &
@@ -481,7 +506,7 @@ program vgen
   call bound_extrap(ya,yb,EXPRO_w0p,EXPRO_rmin,EXPRO_n_exp)
   EXPRO_w0p(1) = ya
   EXPRO_w0p(EXPRO_n_exp) = yb
-  open(unit=1,file='vgen.out',status='replace')
+  open(unit=1,file='out.vgen.out',status='replace')
   do i=1,EXPRO_n_exp
      write(1,'(e16.8,$)') EXPRO_rho(i)
      write(1,'(e16.8,$)') er_exp(i)
@@ -499,18 +524,16 @@ program vgen
   enddo
   close(1)
 
-  ! Write the new INPUT_PROFILES
+  ! Write the new input.profiles
 
   tag = '.new'
-  call EXPRO_write_original(path,tag)
+  call EXPRO_write_original(tag)
 
   call vgen_getgeo()
 
   deallocate(er_exp)
 
   call MPI_finalize(i_err)
-
-! 10 format('r/a=',f6.4,3x,'omega0(krad/s)=',f9.4,3x,'vtor_1(km/s)=',f9.4,3x,'vpol_1(km/s)=',f9.4)
 
 10 format('r/a=',f6.4,3x,'Er_0(kV/m)=',f9.4,3x,'vtor_1(km/s)=',f9.4,3x,'vpol_1(km/s)=',f9.4)
 

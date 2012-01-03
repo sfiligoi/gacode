@@ -10,7 +10,7 @@
 !
 !  Need to know n_lambda,n_stack before this is called.
 !
-!  See: gyro_banana_operators, make_geometry_arrays.
+!  See: gyro_banana_operators, gyro_geometry_arrays.
 !----------------------------------------------------------
 
 subroutine gyro_alloc_orbit(flag)
@@ -49,17 +49,17 @@ subroutine gyro_alloc_orbit(flag)
      allocate(theta_plot(n_theta_plot))
      allocate(theta_r0_plot(field_r0_grid))
 
-     theta_t=0.
-     tau=0.
-     m_cyc=0.
-     p_cyc=0.
-     m_phys=0.
-     p_phys=0.
-     omega=0.
-     m_map=0.
-     theta_int=0.
-     theta_plot=0.
-     theta_r0_plot=0.
+     !theta_t=0.
+     !tau=0.
+     !m_cyc=0.
+     !p_cyc=0.
+     !m_phys=0.
+     !p_phys=0.
+     !omega=0.
+     !m_map=0.
+     !theta_int=0.
+     !theta_plot=0.
+     !theta_r0_plot=0.
 
 
      ! Geometry functions
@@ -79,22 +79,21 @@ subroutine gyro_alloc_orbit(flag)
      allocate(usin_t(n_x,n_lambda,n_stack))   
      allocate(ucos_t(n_x,n_lambda,n_stack))   
 
-     b0_t=0.
-     g_theta_t=0.
-     grad_r_t=0.
-     qrat_t=0.
-     cos_t=0.
-     cos_p_t=0.
-     captheta_t=0.
-     sin_t=0.
-     bt_t=0.
-     bp_t=0.
-     bigr_t=0.
-     b0_plot=0.
-     g_theta_plot=0.
-     usin_t=0.
-     ucos_t=0.
-
+     !b0_t=0.
+     !g_theta_t=0.
+     !grad_r_t=0.
+     !qrat_t=0.
+     !cos_t=0.
+     !cos_p_t=0.
+     !captheta_t=0.
+     !sin_t=0.
+     !bt_t=0.
+     !bp_t=0.
+     !bigr_t=0.
+     !b0_plot=0.
+     !g_theta_plot=0.
+     !usin_t=0.
+     !ucos_t=0.
 
      ! Blending arrays
      allocate(c_fluxave(n_blend,n_x))
@@ -105,43 +104,30 @@ subroutine gyro_alloc_orbit(flag)
      allocate(blend_plot(n_blend,n_theta_plot,n_x))
      allocate(blend_prime_plot(n_blend,n_theta_plot,n_x))
 
-     c_fluxave=0.
-     ff_mm=0.
-     ff_mm_piv=0.
-     ff2_mm=0.
-     ff2_mm_piv=0.
-     blend_plot=0.
-     blend_prime_plot=0.
+     !c_fluxave=0.
+     !ff_mm=0.
+     !ff_mm_piv=0.
+     !ff2_mm=0.
+     !ff2_mm_piv=0.
+     !blend_plot=0.
+     !blend_prime_plot=0.
 
-     
-     
      !SEK: There might be a better method here
      if (io_method > 1 .and. time_skip_wedge > 0) then
-       allocate(blend_wedge(n_blend,n_theta_mult*n_theta_plot,n_x))
-       allocate(blend_prime_wedge(n_blend,n_theta_mult*n_theta_plot,n_x))
-       blend_wedge=0.
-       blend_prime_wedge=0.
+        allocate(blend_wedge(n_blend,n_theta_mult*n_theta_plot,n_x))
+        allocate(blend_prime_wedge(n_blend,n_theta_mult*n_theta_plot,n_x))
+        !blend_wedge=0.
+        !blend_prime_wedge=0.
      endif
      allocate(blend_r0_plot(n_blend,field_r0_grid))
-     blend_r0_plot=0.
+     !blend_r0_plot=0.
 
      if (collision_flag == 1) then
         ! Collision arrays
         allocate(nu_total(n_x,n_energy,indx_e))
         allocate(xi(n_x,n_lambda,n_stack))
-        nu_total=0.
-        xi=0.
-        if (collision_method > 2) then
-           ! for ebelli collisions
-           allocate(nu_coll_d(n_x,n_energy,n_kinetic,n_kinetic))
-           allocate(rs_coll_const(n_x,n_kinetic,n_kinetic))
-           allocate(rs_nunu_const(n_x,n_kinetic,n_kinetic,n_kinetic))
-           allocate(indx_coll(n_kinetic,n_kinetic))
-           nu_coll_d=0.
-           rs_coll_const=0.
-           rs_nunu_const=0.
-           indx_coll=0
-        endif
+        !nu_total=0.
+        !xi=0.
      endif
 
      if (n_field > 1) then
@@ -191,8 +177,8 @@ subroutine gyro_alloc_orbit(flag)
      deallocate(blend_plot)
      deallocate(blend_prime_plot)
      if (io_method > 1 .and. time_skip_wedge > 0) then
-       deallocate(blend_wedge)
-       deallocate(blend_prime_wedge)
+        deallocate(blend_wedge)
+        deallocate(blend_prime_wedge)
      endif
      deallocate(blend_r0_plot)
 

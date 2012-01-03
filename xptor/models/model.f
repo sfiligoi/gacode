@@ -260,7 +260,7 @@ c
        akappa_dk=elong_exp(jm)
        shat_dk=abs(shat_exp(jm))*drhodrrrho(jm)
        zth_dk=zeff_exp(jm)
-       xnbeam_dk=nfst_exp(jm)/ne_exp(jm)
+       xnbeam_dk=nfast_exp(jm)/ne_exp(jm)
        tau_dk=tim/tem
        eps_dk=rmin_exp(jm)/rmajor_exp
        xnu_dk=2.5D-7*nem*1.D13/((tem*1.D3)**1.5D0*(tim*1.D3)**0.5D0)
@@ -700,7 +700,7 @@ c...constants
         zce_kb  = 1.60210D-19
         zcmp_kb = 1.67252D-27
 c
-        fnsin_wn = nfst_exp(jm)/nem ! fast ion fraction ns/ne (JEK)
+        fnsin_wn = nfast_exp(jm)/nem ! fast ion fraction ns/ne (JEK)
 c
 crew        zpmnh_wn = 
 crew     >            -(dlog(ni_m(jm))-dlog(ni_m(jm+jd_m)))
@@ -880,7 +880,7 @@ c
         zpmne_wn = -(dlog(ne_exp(jm-1))-dlog(ne_exp(jm)))/ drho
         zpmnh_wn = -(dlog(ni_exp(jm-1))-dlog(ni_exp(jm)))/ drho
         zpmnz_wn = -(dlog(nz_exp(jm-1))-dlog(nz_exp(jm)))/ drho
-        zpmns_wn = -(dlog(nfst_exp(jm-1))-dlog(nfst_exp(jm)))/ drho
+        zpmns_wn = -(dlog(nfast_exp(jm-1))-dlog(nfast_exp(jm)))/ drho
         zpmni_wn = -(dlog(nitot_exp(jm-1))-dlog(nitot_exp(jm)))/drho
         zpmnq_wn =  (dlog(q_exp(jm-1))-dlog(q_exp(jm)))/ drho
         zpmte_wn = -(dlog(te_exp(jm-1))-dlog(te_exp(jm)))/ drho
@@ -1595,7 +1595,7 @@ c
         zpmne_wn = -(dlog(ne_exp(jm-1))-dlog(ne_exp(jm)))/ drho
         zpmnh_wn = -(dlog(ni_exp(jm-1))-dlog(ni_exp(jm)))/ drho
         zpmnz_wn = -(dlog(nz_exp(jm-1))-dlog(nz_exp(jm)))/ drho
-        zpmns_wn = -(dlog(nfst_exp(jm-1))-dlog(nfst_exp(jm)))/ drho
+        zpmns_wn = -(dlog(nfast_exp(jm-1))-dlog(nfast_exp(jm)))/ drho
         zpmni_wn = -(dlog(nitot_exp(jm-1))-dlog(nitot_exp(jm)))/drho
         zpmnq_wn =  (dlog(q_exp(jm-1))-dlog(q_exp(jm)))/ drho
         zpmte_wn = -(dlog(te_exp(jm-1))-dlog(te_exp(jm)))/ drho
@@ -1769,10 +1769,10 @@ c2/27/98     >    +zpmne+zpmte)
        if(i_dengrad.eq.3) then
         apwt_gf=nim/nem
         aiwt_jp1=(zeff_exp(jm+1)*ne_exp(jm+1)-ni_exp(jm+1)
-     >    -nfst_exp(jm+1))/(zimp_gf**2.D0*ne_exp(jm+1))
+     >    -nfast_exp(jm+1))/(zimp_gf**2.D0*ne_exp(jm+1))
         xnimp_jp1=aiwt_jp1*ne_exp(jm+1)
         aiwt_gf=(zeff_exp(jm)*ne_exp(jm)-ni_exp(jm)
-     >    -nfst_exp(jm))/(zimp_gf**2.D0*ne_exp(jm))
+     >    -nfast_exp(jm))/(zimp_gf**2.D0*ne_exp(jm))
         xnimp=aiwt_gf*ne_exp(jm)
         
         zpmnimp=-(dlog(xnimp_jp1)-dlog(xnimp))/(rho(jm+1)-rho(jm))

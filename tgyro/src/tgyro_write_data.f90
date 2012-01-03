@@ -80,7 +80,7 @@ subroutine tgyro_write_data(i_print)
      close(1)
 
      ! Special case: iteration status file (see loc_write_intermediate)
-     open(unit=1,file='iterate.out',status='replace')
+     open(unit=1,file='out.tgyro.iterate',status='replace')
      close(1)
 
      return
@@ -424,8 +424,8 @@ subroutine tgyro_write_data(i_print)
         write(1,10) r(i)/r_min,&
              ni(i_ion,i),&
              r_min*dlnnidr(i_ion,i),&
-	     ti(i_ion,i)/1e3,&
-	     r_min*dlntidr(i_ion,i)
+             ti(i_ion,i)/1e3,&
+             r_min*dlntidr(i_ion,i)
      enddo
 
      close(1)
@@ -462,7 +462,7 @@ subroutine tgyro_write_data(i_print)
   ! Text headers
 20 format(t2,a,t16,a,t30,a,t44,a,t58,a,t72,a,t86,a,t100,a,t114,a,t128,a,t142,a)
   ! Residual header
-30 format(t2,a,i3,1pe12.5,2x,'[',i4,']')
+30 format(t2,a,i3,1pe12.5,2x,'[',i6,']')
   ! Residuals
 40 format(t2,f8.6,4(2x,2(1pe10.3,1x)))
 

@@ -1,0 +1,177 @@
+#!/bin/bash
+#==============================================================================
+# profiles_gen_plot
+#
+# PURPOSE
+#  Script to manage plotting of profiles_gen input
+#==============================================================================
+
+#==============================================================================
+# Syntax validity check and help message
+#
+n=$#
+
+if [ $n -eq 0 ]
+then
+   echo
+   echo "Usage:    profiles_gen_plot [options]"
+   echo 
+   echo "          -p <path>"
+   echo "          Set optional path to simulation directory."
+   echo "          [The default path is the current directory]"
+   echo
+   echo "          -e <simdir>"
+   echo "          Use data in <simdir>."
+   echo
+   echo " PROFILE PLOTTING MODE:"
+   echo
+   echo "          -options"
+   echo "          Display all possible simulated parameters to plot in"
+   echo "          current directory."
+   echo 
+   echo "          -plot <var1>,<var2>,...,<varN>"
+   echo "          Produce plots of N parameters given."  
+   echo "          Default is ne,ni_1,Te,Ti_1."
+   echo 
+   echo "          -r <flux-surface coordinate for plotting>"
+   echo "          Choices are r,r/a,rho"
+   echo
+   echo " FLUX-SURFACE PLOTTING MODE:"
+   echo 
+   echo "          -fp"
+   echo "          Produce flux surface plots according to settings."
+   echo
+   echo "          -n <integer>"
+   echo "          Change number of flux surfaces to plot.  Default is 1."
+   echo
+   echo "          -in <float>"
+   echo "          Change inner flux surface to value between 0 and 1."
+   echo "          Default is .5."
+   echo
+   echo "          -out <float>"
+   echo "          Change outer flux surface to value between 0 and 1."
+   echo "          Default is 1."
+   echo
+   echo "          -m"
+   echo "          Display Miller-type equilibrium flux surfaces."
+   echo
+   echo "          -f"
+   echo "          Display Fourier-type equilibrium flux surfaces."
+   echo
+   echo "          -c"
+   echo "          Display both Miller-type and Fourier-type equilibrium"
+   echo "          flux surfaces (default)."
+   echo
+   echo "EXAMPLES:"
+   echo
+   echo "       profiles_gen_plot -options"
+   echo "       profiles_gen_plot -plot Te"
+   echo "       profiles_gen_plot -fp"
+   echo "       profiles_gen_plot -fp -in 0 -n 20"
+   echo
+fi
+
+#==============================================================================
+# Define variables for flag capture
+#
+# Default output directory
+LOCDIR=.
+SIMROOT=$PWD
+RVAR="r"
+PLOT_STRING=""
+N_LINES=1
+IN_SURFACE=0.5
+OUT_SURFACE=1
+# Plot mode flags
+PLOT_FLAG=0
+FLUX_FLAG=0
+OPTIONS_FLAG=0
+SURF_TYPE=3
+#==============================================================================
+
+#==============================================================================
+# Parse command line options
+#
+while [ $# -gt 0 ] ; do
+  case "$1" in
+
+  -e) shift ; LOCDIR=$1 ;;
+
+  -p) shift ; SIMROOT=$1 ;;
+
+  -options) OPTIONS_FLAG=1 ;;
+
+  -plot) shift ; PLOT_FLAG=1 ; PLOT_STRING="$1" ;;
+
+  -r) shift ; RVAR=$1 ;;
+
+  -fp) FLUX_FLAG=1 ;;
+
+  -n) shift ; N_LINES=$1 ;;
+
+  -in) shift ; IN_SURFACE=$1 ;;
+
+  -out) shift ; OUT_SURFACE=$1 ;;
+
+  -m) SURF_TYPE=1 ;;
+
+  -f) SURF_TYPE=2 ;;
+
+  -c) SURF_TYPE=3 ;;
+
+   *) echo "ERROR: incorrect syntax." ; exit 1 ;;
+
+  esac
+  shift
+done
+#==============================================================================
+
+if [ "$LOCDIR" == "." ]
+then
+   LOCDIR=`basename $PWD`
+   cd .. ; SIMROOT=$PWD
+fi
+SIMDIR=$SIMROOT/$LOCDIR
+cd $SIMDIR
+
+PYROOT=$GACODE_ROOT/shared/python/pyrats/profiles_gen
+
+#==============================================================================
+# Give possible data to be plotted
+
+if [ $OPTIONS_FLAG -eq 1 ]
+then
+  python $PYROOT/options.py $SIMDIR &
+  exit 0
+fi
+#==============================================================================
+
+#==============================================================================
+# Plot flux surfaces
+
+if [ $FLUX_FLAG -eq 1 ]
+then
+   python $PYROOT/fluxplot.py $SIMDIR $IN_SURFACE $OUT_SURFACE $N_LINES $SURF_TYPE & 
+   exit 0
+fi
+#==============================================================================
+
+#==============================================================================
+# Plot data
+
+if [ $PLOT_FLAG -eq 1 ]
+then
+   if [ "$PLOT_STRING" = "" ]
+   then
+      PLOT_STRING="ne,ni_1,Te,Ti_1"
+   fi
+
+   for i in $(echo $PLOT_STRING | tr "," "\n") 
+   do 
+      python $PYROOT/profileplot.py $SIMDIR $i $RVAR &
+      done
+   exit 0
+
+fi
+#==============================================================================
+

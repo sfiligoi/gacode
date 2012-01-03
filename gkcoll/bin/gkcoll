@@ -1,0 +1,184 @@
+#!/bin/bash
+#=============================================================
+# gkcoll
+#
+# PURPOSE:
+#  Top-level script controlling execution of GKCOLL.
+#=============================================================
+
+#=============================================================
+# Syntax validity check and help message
+#
+n=$#
+
+if [ $n -eq 0 ]
+then
+  echo
+  echo "Usage:   gkcoll [options]"
+  echo
+  echo "         -p <path>"
+  echo "         Set optional path to simulation directory."
+  echo "         The default path is \$GKCOLL_DIR/sim."
+  echo
+  echo "TEST MODE"
+  echo
+  echo "         -t <simdir>"  
+  echo "         Sanity test for INPUT data in <simdir>."
+  echo
+  echo "EXECUTE MODE (single core)"
+  echo
+  echo "         -e <simdir>" 
+  echo "         Run GKCOLL using INPUT data in <simdir>."
+  echo
+  echo "REGRESSION TESTING"
+  echo
+  echo "         -r"
+  echo "         Run full regression suite."
+  echo 
+  echo "TEMPLATE GENERATION"
+  echo
+  echo "         -g"
+  echo "         List available simulation templates."
+  echo
+  echo "         -g <template>"
+  echo "         Copy <template> into simulation path."
+  echo
+  echo "UTILITIES"
+  echo
+  echo "         -h" 
+  echo "         Version and platform information."
+
+  exit 1
+fi
+#=============================================================
+ 
+#=============================================================
+# Define variables for flag capture
+#
+SIMROOT=$PWD
+GKCOLL_DIR=$GACODE_ROOT/gkcoll
+# Default number of cores
+NPROC=1
+# Execute/test mode flags
+EXEC_FLAG=0
+GENERATE_FLAG=0
+REGRESS_FLAG=0
+#=============================================================
+
+#=============================================================
+# Parse command line options
+#
+while [ $# -gt 0 ] ; do
+  case "$1" in
+
+  -p) shift ; SIMROOT=$1 ;;
+
+  -e) shift ; LOCDIR=$1 ; EXEC_FLAG=1 ;;
+
+  -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
+
+  -r) shift ; REGRESS_FLAG=1 ;;
+
+  -h) gkcoll_version_message ; exit 0 ;;
+
+  *) echo "ERROR: incorrect gkcoll syntax." ; exit 1 ;;
+ 
+  esac
+  shift
+done
+#=============================================================
+
+if [ "$LOCDIR" == "." ]
+then
+   SIMDIR=$PWD
+   cd .. ; LOCDIR=$PWD
+else
+   SIMDIR=$SIMROOT/$LOCDIR
+fi
+
+RUN_FILE=$SIMDIR/out.gkcoll.run
+
+#============================================================
+# Check for inconsistent flags:
+FLAG_SUM=$[ $EXEC_FLAG + $TEST_FLAG + $GENERATE_FLAG 
+                       + $REGRESS_FLAG]
+if [ "$FLAG_SUM" -gt 1 ]
+then
+   echo "ERROR: Can only specify one of -e, -t, -g, -r"
+   exit 1
+fi
+#============================================================
+
+#============================================================
+# Generate simdir if -g set, then exit.
+#
+if [ $GENERATE_FLAG -eq 1 ]
+then
+   if [ ! -f "${GKCOLL_DIR}/tools/input/$LOCDIR/input.gkcoll" ]
+   then
+      cat ${GKCOLL_DIR}/tools/input/simdir_list
+   else
+      cp -ai ${GKCOLL_DIR}/tools/input/$LOCDIR $SIMDIR
+   fi
+   exit 0
+fi
+#============================================================
+
+#============================================================
+# Do the regression test if -r set, then exit.
+#
+if [ $REGRESS_FLAG -eq 1 ] 
+then 
+   gkcoll_reg_do
+   exit 0
+fi
+#============================================================
+
+#============================================================
+# Everything else must be done in $SIMDIR; so ensure existence 
+# of $SIMDIR (needed at this point) and go there: 
+#
+if ! gkcoll_sim_warn $SIMDIR
+then
+   exit 1 
+fi 
+
+cd $SIMDIR
+#============================================================
+
+#==========================================================
+# echo number of tasks, then parse INPUT
+#
+python $GKCOLL_DIR/bin/gkcoll_parse.py 
+#==========================================================
+
+#==========================================================
+# See if we are using experimental profiles
+
+if [ -f input.profiles ]
+then 
+   python $GACODE_ROOT/shared/bin/profile_parse.py input.profiles
+fi
+#==========================================================
+
+#===========================================================
+# RUN GKCOLL
+#
+
+# Standalone mode
+if [ $EXEC_FLAG -eq 1 ] 
+then
+
+   gkcoll_version_message 
+
+  #==========================================================
+  # Version stamp:
+  echo `gacode_getversion` > out.gkcoll.version 
+  echo $GACODE_PLATFORM >> out.gkcoll.version
+  date >> out.gkcoll.version
+  #==========================================================
+
+  $GKCOLL_DIR/src/gkcoll
+
+fi
+#===========================================================

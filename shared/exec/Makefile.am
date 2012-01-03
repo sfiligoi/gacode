@@ -24,7 +24,7 @@ gyro.KITE \
 gyro.PG_OPT64_MUMPS \
 gyro.XT_FAST \
 gyro.G95_OSX \
-gyro.HOPPER \
+gyro.HOPPER2 \
 gyro.LOHAN \
 gyro.PPPL \
 gyro.CARVER \

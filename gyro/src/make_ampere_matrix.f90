@@ -23,23 +23,20 @@ subroutine make_ampere_matrix
   ! radial band width
   n_x2 = 2*mg_dx-ig_dx+1
 
-  ! theta/blending band width
-  !  n_t2 = 2*blend_fit_order-1
-  n_t2 = n_blend
-
   if (boundary_method == 1) then
 
      ! nonzero elements in n=0 Ampere matrix:
-     n_zero = (n_x-1)*n_x2*n_blend*n_t2+n_x*n_blend
+     n_zero = (n_x-1)*n_x2*n_blend**2+n_x*n_blend
 
      ! nonzero elements in n>0 Ampere matrix:
-     n_fini = n_x*n_x2*n_blend*n_t2
+     n_fini = n_x*n_x2*n_blend**2
 
   else
 
      ! nonzero elements in nonperiodic Ampere matrices:
-     n_zero = (n_x*n_x2-mg_dx*(mg_dx+1))*n_blend*n_t2
+     n_zero = (n_x*n_x2-mg_dx*(mg_dx+1))*n_blend**2
 
+     ! same number of nonzeros in n>0 nonperiodic matrices:
      n_fini = n_zero
 
   endif
@@ -66,9 +63,9 @@ subroutine make_ampere_matrix
   call make_ampere_blend
 
   if (sparse_method == 1) then
-     call sparse_solve_umfpack(n_ampere,n_ampere_row,2,0)
+     call gyro_sparse_solve_umfpack(n_ampere,n_ampere_row,2,0)
   else
-     call sparse_solve_mumps(n_ampere,n_ampere_row,2,0)
+     call gyro_sparse_solve_mumps(n_ampere,n_ampere_row,2,0)
   endif
 
   !---------------------------------------------
@@ -77,7 +74,7 @@ subroutine make_ampere_matrix
   !
   deallocate(aa_mm)
   !---------------------------------------------
- 
+
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[make_ampere_matrix done]'
   endif

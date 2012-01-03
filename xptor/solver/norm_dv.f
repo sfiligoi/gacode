@@ -18,6 +18,7 @@ c
           normS = normS + s(i,k)*s(i,k)
           normDT = normDT + st(i,k)*st(i,k)
           normT(i) = normT(i) + (Tstart(i,k)*vrho3(i,i,k))**2
+c          normT(i) = normT(i) + (MAX(ABS(Tstart(i,k)),1.0)*vrho3(i,i,k))**2
         enddo
         normT(i) = DMAX1(1.D0,DSQRT(normT(i)))
         sumnormS = sumnormS + DSQRT(normS)/normT(i)

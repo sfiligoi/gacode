@@ -118,6 +118,10 @@ subroutine prgen_read_iterdb_nc
   err = nf90_inq_varid(ncid,trim('enbeam'),varid)
   err = nf90_get_var(ncid,varid,onetwo_enbeam(:,1:onetwo_nbion))
 
+  ! Total plasma pressure
+  err = nf90_inq_varid(ncid,trim('press'),varid)
+  err = nf90_get_var(ncid,varid,onetwo_press)
+
   err = nf90_inq_varid(ncid,trim('pressb'),varid)
   err = nf90_get_var(ncid,varid,onetwo_pressb(:,1:onetwo_nbion))
 
@@ -251,6 +255,7 @@ end subroutine prgen_read_iterdb_nc
 
 subroutine reorder(x,xt,n)
 
+  integer, intent(in) :: n
   real, dimension(n) :: x
   real, dimension(n) :: xt
   integer :: i

@@ -10,9 +10,9 @@
 ## ############################################################
 
 bin_PROGRAMS=gyro
-lib_LTLIBRARIES = libgacodegyro.la
+lib_LTLIBRARIES = libgacodesgyro.la
 
-SUBDIRS	= BLEND TRANSPOSE SSUB src tools bin vugyro GKEIGEN vshdf5 peek
+SUBDIRS	= BLEND TRANSPOSE SSUB tools bin vugyro src GKEIGEN vshdf5 peek 
 IOINC =@HDF5_INC@ @NETCDF_INC@
 
 if USE_FCIOWRAPPERS
@@ -21,7 +21,7 @@ IOLIBS=$(FCIOWRAPPERS_ALIBS) @HDF5_ALIBS@ @NETCDF_ALIBS@ @Z_LIBS@
 IOINC +=$(FCIOWRAPPERS_INC)  
 endif
 else
-IOLIBS=@HDF5_ALIBS@ @NETCDF_ALIBS@ @Z_LIBS@
+IOLIBS= @NETCDF_ALIBS@ @HDF5_ALIBS@ @Z_LIBS@
 IOINC+ =-I $(top_builddir)/share/vshdf5  
 endif
 
@@ -36,8 +36,8 @@ GACODE_ROOT=$(abs_top_builddir)
 
 LMATH=@LAPACK_LIBS@ @BLAS_LIBS@ 
 
-libgacodegyro_la_SOURCES =
-libgacodegyro_la_LIBADD = \
+libgacodesgyro_la_SOURCES =
+libgacodesgyro_la_LIBADD = \
 	$(top_builddir)/gyro/src/libgacodegyro_SRC.la \
 	$(top_builddir)/gyro/BLEND/libgacodeblend.la \
 	$(top_builddir)/gyro/TRANSPOSE/libgacodetranspose.la \
@@ -47,7 +47,7 @@ libgacodegyro_la_LIBADD = \
 
 
 gyro_SOURCES = src/gyro.f90
-gyro_LDADD  = libgacodegyro.la $(top_builddir)/shared/libgacodeshared.la @FFTW_LIBS@ $(LMATH) $(IOLIBS)
+gyro_LDADD  = libgacodesgyro.la $(top_builddir)/shared/libgacodesshared.la @FFTW_LIBS@ $(LMATH) $(IOLIBS)
 
 
 AM_LIBTOOLFLAGS = --tag=FC

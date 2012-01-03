@@ -1,0 +1,104 @@
+#!/bin/bash
+#==============================================================================
+# neo_plot
+#
+# PURPOSE:
+#  Plotting routines for NEO output.
+#==============================================================================
+
+#==============================================================================
+# Syntax validity check and help message
+#
+n=$#
+
+if [ $n -eq 0 ]
+then
+  echo
+  echo "Usage:    neo_plot [options]"
+  echo
+  echo "          -p <path>"
+  echo "          Set optional path to simulation directory."
+  echo "          [The default path is the current directory]"
+  echo
+  echo "          -e <simdir>"
+  echo "          Use data in <simdir>."
+  echo 
+  echo "          -f <filetype>"
+  echo "          Output file type."
+  echo "           <filetype>=emf, eps, pdf, png, ps, raw, rgba, svg, svgz"
+  echo
+  echo "          -kinetic <value>"
+  echo "          Specify species to be plotted: [0,n_kinetic-1]."
+  echo
+  echo "          -moment <value>"
+  echo "          Specify moment to be plotted: [0,3] (default=1)"
+  echo
+  echo "          -plot <type>"
+  echo "          Generate plot of given type."
+  echo "          If this keyword is omitted, data will be listed to the screen."
+  echo "           <type> = flux"
+  echo
+  echo "Example:"
+  echo
+  echo "   neo_plot -e . -plot flux"
+
+  exit 1
+fi
+#==============================================================================
+
+#==============================================================================
+# Define variables for flag capture
+#
+# Default simulation directory
+LOCDIR=.
+SIMROOT=$PWD
+PLOT_TYPE=flux
+KINETIC=0
+MOMENT=0
+FTYPE=screen
+#==============================================================================
+
+#==============================================================================
+# Parse command line options
+#
+while [ $# -gt 0 ] ; do
+  case "$1" in
+
+  -plot) shift ; PLOT_FLAG=1 ; PLOT_TYPE=$1 ;;
+ 
+  -e) shift ; LOCDIR=$1 ;;
+
+  -p) shift ; SIMROOT=$1 ;;
+
+  -kinetic) shift ; KINETIC=$1 ;;
+
+  -moment) shift ; MOMENT=$1 ;;
+
+  -f) shift ; FTYPE=$1 ;;
+
+  *) echo "ERROR: incorrect neo_plot syntax." ; exit 1 ;;
+
+  esac
+  shift
+done
+#==============================================================================
+
+if [ "$LOCDIR" == "." ]
+then
+   LOCDIR=`basename $PWD`
+   cd .. ; SIMROOT=$PWD
+fi
+SIMDIR=$SIMROOT/$LOCDIR
+cd $SIMDIR
+
+PYROOT=$GACODE_ROOT/shared/python/pyrats/neo
+
+#==============================================================================
+case "$PLOT_TYPE" in
+
+   flux)  
+	python $PYROOT/flux.py $SIMDIR $MOMENT $FTYPE & ;;
+   
+esac 
+
+exit 0

@@ -1,24 +1,23 @@
 subroutine tgyro_write_input
 
+  use mpi
   use tgyro_globals
 
   implicit none
 
   integer :: i_ion
 
-  include 'mpif.h'
-
   !----------------------------------------------------------------
   ! Trap miscellaneous errors
   !
   if (i_bc < 0) then
-     call tgyro_catch_error('ERROR: Problem with matching radius.')
+     call tgyro_catch_error('ERROR: (TGYRO) Problem with matching radius.')
   endif
   !
   ! Advanced iteration methods cannot do zero iterations:
   !
   if (tgyro_iteration_method >= 4 .and. tgyro_relax_iterations == 0) then
-     call tgyro_catch_error('ERROR: TGYRO_ITERATION_METHOD > 4 requires TGYRO_RELAX_ITERATIONS > 0.')
+     call tgyro_catch_error('ERROR: (TGYRO) TGYRO_ITERATION_METHOD > 4 requires TGYRO_RELAX_ITERATIONS > 0.')
   endif
   !----------------------------------------------------------------
 
@@ -332,6 +331,9 @@ subroutine tgyro_write_input
      case (2)
 
         write(1,10) 'LOC_NEO_METHOD','NEO code'
+        if (loc_n_ion >= 4) then
+           write(1,10) '        * INFO','Using reduced energy resolution to cope with so many ions.'
+        endif
 
      case default
 

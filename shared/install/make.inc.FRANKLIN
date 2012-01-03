@@ -1,5 +1,5 @@
 #---------------------------------------------------
-# Cray XT4 (franklin.nersc.gov) 
+# Cray XT4 (franklin.nersc.gov) (PGI)
 #---------------------------------------------------
 
 #include ${SLEPC_DIR}/bmake/slepc_common_variables
@@ -9,11 +9,11 @@
 FC	= ftn ${FC_LINKER_FLAGS} -module ${GACODE_ROOT}/modules ${FC_INCLUDES}
 F77	= ftn
 
-FMATH	= -r8 
-FOPT	= -fastsse  
-FDEBUG	= -g -Ktrap=fp -Mbounds -Minform,inform
-FBOUND	= -Minform,inform -Mbounds
-FPROF	= -fastsse -Mprof=func
+FMATH  = -r8 
+FOPT   = -fast -Mipa=safe 
+FDEBUG = -Ktrap=fp -Mbounds -Minfo=all 
+FOMP   = -mp=nonuma
+FNOMP  = 
 
 # System math libraries
 
@@ -35,7 +35,4 @@ HDF5_INC = -I/opt/cray/hdf5-parallel/default/hdf5-parallel-pgi/include
 VSHDF5_MAKECMD=vshdf5
 
 # Archive 
-
-GATOFLAGS = -r8 -i8
-
 ARCH = ar cr

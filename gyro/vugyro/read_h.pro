@@ -53,7 +53,7 @@ pro read_h
 
   close,1
 
-  file = 'hp.out'
+  file = 'out.gyro.hp'
 
   if (n_pass gt 0) then begin
      openr,1,file,error=i_err
@@ -74,7 +74,7 @@ pro read_h
      close,1
   endif
 
-  file = 'ht.out'
+  file = 'out.gyro.ht'
 
   if (n_trap gt 0) then begin
      openr,1,file,error=i_err

@@ -38,9 +38,9 @@ subroutine gyro_read_experimental_profiles
   if (n_vec(5) == 0.0) EXPRO_ctrl_z(5) = 0.0
 
   call EXPRO_palloc(GYRO_COMM_WORLD,path,1) 
-  call EXPRO_pread(GYRO_COMM_WORLD,path)
+  call EXPRO_pread
 
-  if (i_proc == 0) call EXPRO_write_derived(path)
+  if (i_proc == 0) call EXPRO_write_derived
   !---------------------------------------------------------------------
 
   !---------------------------------------------------------------------
@@ -48,7 +48,7 @@ subroutine gyro_read_experimental_profiles
   if (EXPRO_nfourier < 0) then
      n_fourier_geo = 0
      if (num_equil_flag == 1) then
-        call catch_error('ERROR: Geometry coefficients missing.')
+        call catch_error('ERROR: (GYRO) Geometry coefficients missing.')
      endif
   else
      n_fourier_geo = EXPRO_nfourier
@@ -152,7 +152,7 @@ subroutine gyro_read_experimental_profiles
 
   case (1)
 
-     call send_message('INFO: Taking densities directly from INPUT_profiles')
+     call send_message('INFO: Taking densities directly from input.profiles')
 
   case (2) 
 
@@ -194,10 +194,27 @@ subroutine gyro_read_experimental_profiles
      ! by GEO.  For comparison with DIII-D, beta should be 
      ! defined with respect to bt_exp.
      !
+     ! den_s  -> 1/m^3
+     ! tem_s  -> keV
+     ! b_unit -> T
+     !
+     ! beta calculation in CGS:
+     !
+     !         8*pi ( n[1e19/m^3]*1e-6*1e19 )( T[keV]*1.6022*1e-9 )
+     ! beta = ------------------------------------------------------
+     !                           ( 1e4*B[T] )^2
+     !
+     !      = 4.027e-3 n[1e19/m^3]*T[keV]/B[T]^2
+     !
      p_total = sum(den_exp(:,i_exp)*tem_exp(:,i_exp))
-
-     beta_unit_p(i_exp) = 400.0*p_total/(1e5*b_unit_p(i_exp)**2)
-     beta_unit_ptot_p(i_exp) = 400.0*ptot_exp(i_exp)/(1.6022*1e3)/(1.e5*b_unit_p(i_exp)**2)
+     !
+     beta_unit_p(i_exp) = 4.027e-3*p_total/b_unit_p(i_exp)**2
+     !
+     ! Here, ptot_exp is in Pa:
+     !
+     !  beta = 8*pi ( 10 ptot[Pa] )/( 1e4*B[T] )^2 = 2.513e-6 ptot[Pa]/B[T]^2
+     !
+     beta_unit_ptot_p(i_exp) = 2.513e-6*ptot_exp(i_exp)/b_unit_p(i_exp)**2
      !-------------------------------------------------------------
 
   enddo
@@ -210,7 +227,7 @@ subroutine gyro_read_experimental_profiles
   call EXPRO_palloc(GYRO_COMM_WORLD,path,0)
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[read_experimental_profiles done]'
+     print *,'[gyro_read_experimental_profiles done]'
   endif
   !---------------------------------------------------------------------
 

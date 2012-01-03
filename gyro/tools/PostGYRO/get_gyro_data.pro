@@ -192,7 +192,7 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, $
 
       RETURN, gyro_data
   ENDIF ELSE BEGIN
-      PRINT, "Couldn't read profile_vugyro.out, returning 0"
+      PRINT, "Couldn't read out.gyro.profile, returning 0"
       RETURN, 0
   ENDELSE
 END ;get_gyro_data

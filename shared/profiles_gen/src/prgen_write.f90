@@ -43,7 +43,7 @@ subroutine prgen_write
      write(1,'(a,1pe9.2,a)') '#               Q_EDGE : ',q(nx)
      write(1,20) '#'
      write(1,'(10(a,1x))') '#                 IONS :',&
-          (trim(plst_alla_name(reorder_vec(i-1)+1)),&
+          (trim(plst_all_name(reorder_vec(i-1)+1)),&
           i=2,min(plst_dp1_nspec_th+1,6))
 
   case (3)
@@ -107,16 +107,23 @@ subroutine prgen_write
   else
      write(1,25) 'N_EXP=',nx
   endif
-  if (format_type == 1) then
+
+  select case (format_type)
+
+  case (0)
+     write(1,'(a,sp1pe14.7)') 'BT_EXP=',null_bref
+     write(1,60) 'ARHO_EXP=',null_arho
+  case (1)
      write(1,'(a,sp1pe14.7)') 'BT_EXP=',-onetwo_Btor
      write(1,60) 'ARHO_EXP=',onetwo_rho_grid(onetwo_nj)
-  else if (format_type == 2) then
+  case (2)
      write(1,'(a,sp1pe14.7)') 'BT_EXP=',plst_b_axis_vac*(-plst_kccw_bphi)
      write(1,60) 'ARHO_EXP=',sqrt(plst_phit(nx)/plst_b_axis_vac/pi)
-  else
+  case (3)
      write(1,'(a,sp1pe14.7)') 'BT_EXP=',peqdsk_bref
      write(1,60) 'ARHO_EXP=',peqdsk_arho
-  endif
+
+  end select
 
   do indx=1,n_indx,5
 

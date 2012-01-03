@@ -10,11 +10,10 @@
 ## ############################################################
 
 
-MAINTAINERCLEANFILES    = Makefile.in 
+MAINTAINERCLEANFILES    = Makefile.in
 
 #sharedir=$(prefix)/share
-dist_noinst_DATA= \
-HELP_SINGLE HELP_BAT 
+dist_noinst_DATA= 
 
 dist_bin_SCRIPTS= \
   gyro \
@@ -30,7 +29,6 @@ dist_bin_SCRIPTS= \
   gyro_bat \
   gyro_loc \
   gyro_reg_do \
-  gyro_single \
   simdir_test \
   gyro_genDumpInput.py \
   gyro_genInterface2Global.py

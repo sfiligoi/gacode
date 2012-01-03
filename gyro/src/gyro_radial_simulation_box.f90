@@ -96,8 +96,13 @@ subroutine gyro_radial_simulation_box
 
   end select
 
+  ! General max-width "buffers"
   i1_buffer = 1-max(m_gyro,m_dx)
   i2_buffer = n_x+max(m_gyro-i_gyro,m_dx-i_dx)
+
+  ! Derivative "buffers"
+  i1_dx = 1-m_dx
+  i2_dx = n_x+m_dx-i_dx
   !
   do i=1,n_x
      r(i) = r0-0.5*x_length+d_x*(i-1.0+n_x_offset)

@@ -31,6 +31,6 @@ lib: $(OBJECTS)
 	$(FC) $(FMATH) $(FFLAGS) $(VSHDF5_INC) $(HDF5_INC) $(VSHDF5_INC) -c $<
 
 clean:  
-	rm -f *.o *.a ${GACODE_ROOT}/modules/gyro_vshdf5_mod.mod
+	rm -f *.o *.a ${GACODE_ROOT}/modules/*vshdf5*.mod
 
 include ${GACODE_ROOT}/gyro/install/make.ext.${GACODE_PLATFORM}

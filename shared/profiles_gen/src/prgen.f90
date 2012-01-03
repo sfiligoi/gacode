@@ -23,8 +23,6 @@ program prgen
   !--------------------------------------------------
   implicit none
   !
-  integer :: indx
-  integer :: info
   logical :: back
   !--------------------------------------------------
 
@@ -118,16 +116,25 @@ program prgen
   !--------------------------------------------------
 
 
-  !--------------------------------------------------
+  !------------------------------------------------------------------
   ! Read the iterdb file and define standard variables.
   !
-  ! Note that nx will be the experimental vector length 
-  ! in ALL cases:
+  ! Note that nx will be the experimental vector length in ALL cases:
   !
-  if (index(raw_data_file,'.nc',back) /= 0) then
+  if (trim(raw_data_file) == 'null') then
+ 
+    ! Pure gfile parsing
+
+    format_type = 0
+
+    ! Minimal processing required to merge gfile data into otherwise
+    ! empty input.profiles output file.
+    call prgen_read_null
+
+  else if (index(raw_data_file,'.nc',back) /= 0) then
 
      ! New NetCDF format
-     print '(a)','Assuming iterdb NetCDF format.'
+     print '(a)','INFO: (prgen) Assuming iterdb NetCDF format.'
 
      format_type = 1
 
@@ -136,7 +143,7 @@ program prgen
   else if (index(raw_data_file,'.cdf',back) /= 0) then
 
      ! Plasmastate format
-     print '(a)','INFO: Assuming plasma_state format.'
+     print '(a)','INFO: (prgen) Assuming plasma_state format.'
 
      format_type = 2
 
@@ -150,7 +157,7 @@ program prgen
      format_type = 3
 
      if (gato_flag /= 1) then
-        print '(a)','ERROR: geqdsk must be provided for peqdsk format'
+        print '(a)','ERROR: (prgen) geqdsk must be provided for peqdsk format'
         stop
      endif
 
@@ -159,14 +166,14 @@ program prgen
   else
 
      ! Old text format
-     print '(a)','INFO: Assuming old iterdb text format.'
+     print '(a)','INFO: (prgen) Assuming old iterdb text format.'
 
      format_type = 1
 
      call prgen_read_iterdb
 
   endif
-  !--------------------------------------------------
+  !------------------------------------------------------------------
 
   !---------------------------------------------------
   ! Read the GATO file for "better" geometry.  At this
@@ -176,7 +183,9 @@ program prgen
   if (gato_flag == 1) call prgen_read_gato
   !---------------------------------------------------
 
-  if (index(raw_data_file,'.cdf',back) /= 0) then
+  if (format_type == 0) then
+     call prgen_map_null
+  else if (index(raw_data_file,'.cdf',back) /= 0) then
      call prgen_map_plasmastate
   else if (index(raw_data_file,'.peq',back) /= 0) then
      call prgen_map_peqdsk

@@ -104,7 +104,6 @@ subroutine gyro_map_experimental_profiles
   end select
   !------------------------------------------------------------------
 
-
   !------------------------------------------------------------------
   ! Use local cubic spline interpolation to get the GYRO slice 
   ! profiles (_s) from experimental (_p) profiles.

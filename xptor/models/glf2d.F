@@ -295,7 +295,7 @@ c
 c
 c   return zero if no unstable modes
 c
-      if(ipert_gf.eq.1.and.ngrow_k_gf(0).eq.0)go to 888   
+cgms      if(ipert_gf.eq.1.and.ngrow_k_gf(0).eq.0)go to 888   
 c
 c...initialize variables
 c
@@ -361,11 +361,11 @@ c
       amassgas=amassgas_gf
       amassimp=amassimp_gf
       zimp=zimp_gf
-      if(ipert_gf.eq.0)then
+cgms      if(ipert_gf.eq.0)then
        do j=0,nmode
         ngrow_k_gf(j) = 0
        enddo
-      endif
+cgms      endif
 c
       idelta=0.D0
 c     if(ilh.eq.1) idelta=xi*xparam(1)+xparam(2)
@@ -654,9 +654,9 @@ c
 c
 c skip this k for perturbation if last call was stable
 c
-      if(ipert_gf.eq.1.and.ngrow_k_gf(iky0).eq.0)go to 777 
+cgms      if(ipert_gf.eq.1.and.ngrow_k_gf(iky0).eq.0)go to 777 
 c skip this k if the previous k was stable and 4 k's have been done      
-      if(iky.lt.ikymax_gf-4.and.ngrow_k_gf(iky0-1).eq.0)go to 777
+cgms      if(iky.lt.ikymax_gf-4.and.ngrow_k_gf(iky0-1).eq.0)go to 777
 c 
 c primary ions
 c 
@@ -1552,7 +1552,7 @@ c
      >  /(1.D0+(xparam(26)*gamma_net/gamma_r)**xparam(27))
        endif
 c set flag ngrow_k_gf: found at least one unstable mode for this k
-       if(ipert_gf.eq.0)ngrow_k_gf(iky0)=1
+cgms       if(ipert_gf.eq.0)ngrow_k_gf(iky0)=1
       endif
 c 
       if( gamma_net.le.0.) ph_m=0.D0
@@ -1563,7 +1563,7 @@ c
      >         dsqrt(1.D0+(dabs(alpha_star*gamma_star+
      >         alpha_e*gamma_e+alpha_mode*gamma_mode)/
      >         (dabs(gamma)+.00001D0))**xparam(24))
-          if(ipert_gf.eq.0)ngrow_k_gf(iky0)=1
+cgms          if(ipert_gf.eq.0)ngrow_k_gf(iky0)=1
         else
            ph_m=0.D0 
         endif
@@ -1702,12 +1702,12 @@ c     enddo
 c
 c check to see if any unstable modes were found
 c
-      if(ipert_gf.eq.0)then
-        do j=1,nmode
-         if(ngrow_k_gf(j).ne.0)ngrow_k_gf(0)=1
-        enddo
-        if(ngrow_k_gf(0).eq.0)go to 888
-      endif
+cgms      if(ipert_gf.eq.0)then
+cgms        do j=1,nmode
+cgms         if(ngrow_k_gf(j).ne.0)ngrow_k_gf(0)=1
+cgms        enddo
+cgms        if(ngrow_k_gf(0).eq.0)go to 888
+cgms      endif
 c
 c
 c***********************************************************************

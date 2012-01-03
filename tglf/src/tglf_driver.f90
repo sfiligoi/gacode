@@ -27,9 +27,10 @@
 !
       CALL put_species(ns_tg,zs_tg,mass_tg) 
 !
-      CALL put_model_parameters(adiabatic_elec_tg,alpha_p_tg,alpha_e_tg    &
-      ,alpha_kx0_tg,alpha_kx1_tg,alpha_quench_tg,xnu_factor_tg,debye_factor_tg   &
-      ,etg_factor_tg,sat_rule_tg,kygrid_model_tg,xnu_model_tg &
+      CALL put_model_parameters(adiabatic_elec_tg,alpha_e_tg,alpha_p_tg    &
+      ,alpha_n_tg,alpha_t_tg,alpha_kx_e_tg,alpha_kx_p_tg,alpha_kx_n_tg     &
+      ,alpha_kx_t_tg,alpha_quench_tg,xnu_factor_tg,debye_factor_tg         &
+      ,etg_factor_tg,sat_rule_tg,kygrid_model_tg,xnu_model_tg              &
       ,vpar_model_tg,vpar_shear_model_tg)
 !      
       CALL put_kys(ky_tg)
@@ -39,7 +40,7 @@
 !
       CALL put_gradients(rlns_tg,rlts_tg,vpar_shear_tg,vexb_shear_tg)
 !
-      CALL put_profile_shear(shear_ns_tg,shear_ts_tg)
+      CALL put_profile_shear(vns_shear_tg,vts_shear_tg)
 !
       CALL put_averages(taus_tg,as_tg,vpar_tg,betae_tg,xnue_tg,zeff_tg,debye_tg)
 !
@@ -179,7 +180,7 @@
 !
       CALL tglf
 !
-      CALL write_wavefunction_out
+      CALL write_wavefunction_out('out.tglf.wavefunction')
 !
       nfields=1
       if(use_bper_tg)nfields=2
@@ -190,11 +191,18 @@
       write(*,*) 'q_unit = ',get_q_unit()
       write(*,*) 'ave_wd(1,1) = ',get_ave_wd(1,1)
       write(*,*) 'ave_b0(1,1) = ',get_ave_b0(1,1)
+      if(nbasis_max_tg.gt.1)then
+        write(*,*) 'ave_wd(1,2) = ',get_ave_wd(1,2)
+        write(*,*) 'ave_b0(1,2) = ',get_ave_b0(1,2)
+        write(*,*) 'ave_wd(2,2) = ',get_ave_wd(2,2)
+        write(*,*) 'ave_b0(2,2) = ',get_ave_b0(2,2)
+      endif
       do i=1,nmodes_tg 
         write(*,*) 'mode number i =',i  
         write(*,*) 'gamma_tg(i) = ',get_growthrate(i)
         write(*,*) 'freq_tg(i)  = ',get_frequency(i)
         write(*,*) 'wd_bar(i) = ',get_wd_bar(i)
+        write(*,*) 'b0_bar(i) = ',get_b0_bar(i)
         if(iflux_tg)then
          do j=1,ns_tg
          do k=1,nfields

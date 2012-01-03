@@ -28,23 +28,18 @@ subroutine make_poisson_matrix
   ! radial band width
   n_gyro = 2*m_gyro-i_gyro+1
 
-  ! theta/blending band width
-  ! n_t2 = 2*blend_fit_order-1
-  ! IMEX: no sparse assumption
-  n_t2 = n_blend
-
   if (boundary_method == 1) then
 
-     ! nonzero elements in n=0 Poisson matrix:
-     n_zero = (n_x-1)*n_gyro*n_blend*n_t2+n_x*n_blend
+     ! nonzero elements in n=0 PP matrix:
+     n_zero = (n_x-1)*n_gyro*n_blend**2+n_x*n_blend
 
-     ! nonzero elements in n>0 Poisson matrix:
-     n_fini = n_x*n_gyro*n_blend*n_t2
+     ! nonzero elements in n>0 PP matrix:
+     n_fini = n_x*n_gyro*n_blend**2
 
   else
 
-     ! nonzero elements in n=0 nonperiodic Poisson matrices:
-     n_zero = (n_x*n_gyro-m_gyro*(m_gyro+1))*n_blend*n_t2
+     ! nonzero elements in n=0 nonperiodic PP matrix:
+     n_zero = (n_x*n_gyro-m_gyro*(m_gyro+1))*n_blend**2 ! MPP
 
      ! same number of nonzeros in n>0 nonperiodic matrices:
      n_fini = n_zero
@@ -65,7 +60,7 @@ subroutine make_poisson_matrix
   allocate(m_poisson(lvalue(1)))
   allocate(indx_poisson(lindx(1)))
 
-  if (n_1(in_1) == 0 .and. boundary_method == 1) then
+  if (n_1(in_1) == 0 .and.  boundary_method == 1) then
      n_x_max  = n_x-1
   else
      n_x_max  = n_x
@@ -88,9 +83,9 @@ subroutine make_poisson_matrix
   endif
 
   if (sparse_method == 1) then
-     call sparse_solve_umfpack(n_poisson,n_poisson_row,1,0)
+     call gyro_sparse_solve_umfpack(n_poisson,n_poisson_row,1,0)
   else
-     call sparse_solve_mumps(n_poisson,n_poisson_row,1,0)
+     call gyro_sparse_solve_mumps(n_poisson,n_poisson_row,1,0)
   endif
 
   !---------------------------------------------

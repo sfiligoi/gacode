@@ -25,19 +25,13 @@ subroutine neo_make_profiles
 
   call PROFILE_SIM_alloc(1)
 
-  if(n_order < 2) then
-     ! equally-spaced radial grid if only first-order (local) problem
-     if(n_radial == 1) then
-        r(1) = rmin_1_in
-     else
-        do ir=1,n_radial
-           r(ir) = rmin_1_in+(rmin_2_in-rmin_1_in)*(ir-1.0)/(n_radial-1)
-        enddo
-     endif
-     wd_rad(:,:) = 0.0
-  else 
-     ! Curtis-Clenshaw radial grid if higher-order problem
-     call curtis_rad(n_radial,rmin_1_in,rmin_2_in,r,wd_rad)
+  ! equally-spaced radial grid if only first-order (local) problem
+  if(n_radial == 1) then
+     r(1) = rmin_1_in
+  else
+     do ir=1,n_radial
+        r(ir) = rmin_1_in+(rmin_2_in-rmin_1_in)*(ir-1.0)/(n_radial-1)
+     enddo
   endif
 
   num_ele = 0
@@ -51,8 +45,8 @@ subroutine neo_make_profiles
   else if(num_ele == 1) then
      adiabatic_ele_model = 0
   else
-     print *, 'only one electron species allowed'
-     stop
+     call neo_error('ERROR: (NEO) Only one electron species allowed')
+     return
   end if
   
   if(btccw_in > 0) then
@@ -117,7 +111,9 @@ subroutine neo_make_profiles
         temp(is,ir)   = temp_in(is)
         dlnndr(is,ir) = dlnndr_in(is)
         dlntdr(is,ir) = dlntdr_in(is)
-        nu(is,ir)     = nu_in(is)
+        nu(is,ir)     = nu_1_in *(1.0*z(is))**4/(1.0*z(1))**4 &
+             * dens(is,ir) / dens(1,ir) &
+             * sqrt(mass(1)/mass(is)) * (temp(1,ir)/temp(is,ir))**1.5
      enddo
 
      do ir=1,n_radial
@@ -127,24 +123,6 @@ subroutine neo_make_profiles
      enddo
 
      ! These normalizations are arbitrary for local profiles
-     ! But are needed for NCLASS
-     ! Assume normalizing mass is deuterium
-     ! Set T_norm = 1kEV and a_meters=1m
-     ! Then determine B_unit from input rho_star and dens_norm from 
-     ! input collision frequency
-     !temp_norm_fac   = 1.6022*1000
-     !charge_norm_fac = 1.6022
-     !a_meters        = 1.0
-     !temp_norm(:)    = 1.0
-     !vth_norm(:)     = sqrt(temp_norm(:) * temp_norm_fac &
-     !     / (mass_deuterium)) &
-     !     * 1.0e4 / a_meters
-     !b_unit(:)       =  sqrt(temp_norm(:) * temp_norm_fac &
-     !     * mass_deuterium) &
-     !     / (charge_norm_fac * rho(:)) &
-     !     * 1.0e-4 / a_meters
-     ! EAB: dens_norm not yet done
-     !dens_norm(:)    = 1.0
      temp_norm_fac = 1.0
      charge_norm_fac = 1.0
      dens_norm(:) = 1.0
@@ -170,6 +148,7 @@ subroutine neo_make_profiles
      enddo
 
      call neo_experimental_profiles
+     if(error_status > 0) return
      call neo_map_experimental_profiles
            
      ! ** Normalizing quantities **
@@ -419,9 +398,10 @@ subroutine neo_make_profiles
      dphi0dr(:) = 0.0
   endif
 
+
   ! Print the re-mapped equilibrium data
-  if(write_out_mode > 0) then
-     open(unit=io,file='equil.out',status='replace')
+  if(silent_flag == 0 .and. i_proc == 0) then
+     open(unit=io,file=trim(path)//'out.neo.equil',status='replace')
      do ir=1,n_radial
         write (io,'(e16.8,$)') r(ir)
         write (io,'(e16.8,$)') dphi0dr(ir)

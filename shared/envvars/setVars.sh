@@ -1,5 +1,5 @@
 #! /bin/bash
-export GACODE_ROOT=`pwd`
-export GACODE_PLATFORM=GFORTRAN_TECHX
-export OPT=debug
-source ./shared/bin/gacode_setup
+export GACODE_ROOT=$HOME/gacode
+export GACODE_PLATFORM=XT5
+#export OPT=debug
+source $GACODE_ROOT/shared/bin/gacode_setup

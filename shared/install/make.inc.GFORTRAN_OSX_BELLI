@@ -12,23 +12,23 @@ FC	= mpif90 -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules
 F77	= mpif90
 
 FMATH	= -fdefault-real-8
-FOPT	= -O3
+FOPT	= -O3 -m64
 FDEBUG	= -O -Wall -Wunderflow -W -Wuninitialized -fbounds-check
 FPROF	= -pg
 
 # System math libraries
 
 LMATH = /System/Library/Frameworks/vecLib.framework/Versions/A/vecLib \
-       -lSystemStubs -lSystem
+       -lSystem
 
 # OPTIONAL: netCDF (for gyro2gkv)
-NETCDF = /usr/local/lib/libnetcdf.a
-NETCDF_INC = /usr/local/include
+NETCDF = /Users/belli/scisoft/lib/libnetcdf.a /Users/belli/scisoft/lib/libnetcdff.a -lcurl 
+NETCDF_INC = /Users/belli/scisoft/include/
  
 # OPTIONAL: GATO FLAGS
 GATOFLAGS=-fdefault-real-8 -fdefault-integer-8 -O0
 
 # Archive
 
-ARCH = ar cr
+ARCH = ar -c -r -s
 

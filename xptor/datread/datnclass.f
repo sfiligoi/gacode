@@ -75,7 +75,7 @@ c
       do j=1,nj_d
         zeff_exp(j-1)=zeff_d(j)
         nz_exp(j-1)=1.D-19*en_d(j,nprim_d+1)
-        nfst_exp(j-1)=1.D-19*enbeam_d(j)
+        nfast_exp(j-1)=1.D-19*enbeam_d(j)
         angrot_exp(j-1)=angrot_d(j)
       enddo
 c

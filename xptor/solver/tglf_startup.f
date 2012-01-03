@@ -25,6 +25,7 @@
       READ(3,nml=tglfin)
       CLOSE(3)
 !
+      if(i_proc.eq.0)write(*,*)"sign_bt=",sign_Bt_exp
 !
       CALL put_rare_switches(theta_trapped_tg,park_tg,ghat_tg,
      > gchat_tg, wd_zero_tg,Linsker_factor_tg,
@@ -36,8 +37,9 @@
 !
       CALL put_species(ns_tg,zs_tg,mass_tg)
 !
-      CALL put_model_parameters(adiabatic_elec_tg,alpha_p_tg,alpha_e_tg,    
-     > alpha_kx0_tg,alpha_kx1_tg,alpha_quench_tg,xnu_factor_tg,
+      CALL put_model_parameters(adiabatic_elec_tg,alpha_e_tg,alpha_p_tg,
+     > alpha_n_tg,alpha_t_tg,alpha_kx_e_tg,alpha_kx_p_tg,    
+     > alpha_kx_n_tg,alpha_kx_t_tg,alpha_quench_tg,xnu_factor_tg,
      > debye_factor_tg,etg_factor_tg,sat_rule_tg,kygrid_model_tg,
      > xnu_model_tg,vpar_model_tg,vpar_shear_model_tg)
 !

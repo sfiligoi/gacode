@@ -131,13 +131,12 @@ subroutine gyro_radial_operators
      enddo
 
      ! Arrays for efficient implementation of buffer damping
+     explicit_damp_vec(:,:) = 0.0
      do i=1,n_x
         if (n_1(in_1) == 0) then
            if (i <= n_explicit_damp .or. i > n_x-n_explicit_damp) then
               explicit_damp_vec(:,i)      = explicit_damp
               explicit_damp_vec(indx_e,i) = explicit_damp_elec
-           else
-              explicit_damp_vec(:,i) = 0.0
            endif
         endif
      enddo
@@ -232,7 +231,7 @@ subroutine gyro_radial_operators
   !-----------------------------------
   ! Find tau-space gyroaverage:
   !
-  call make_gyro
+  call gyro_bessel_stencils
   !-----------------------------------
 
   if (debug_flag == 1 .and. i_proc == 0) then

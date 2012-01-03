@@ -34,7 +34,7 @@ subroutine read_all
   !------------------------------------------
   ! Pull data out of profile_vugyro.out
   !
-  open(unit=1,file=trim(tag(2))//'/profile_vugyro.out',status='old')
+  open(unit=1,file=trim(tag(2))//'/out.gyro.profile',status='old')
 
   ! Essential scalars
   read(1,*) n_x
@@ -185,7 +185,7 @@ subroutine read_all
      if (f_flag == 0) then
      print *,'FOUND: u.out'
 
-     open(unit=1,file=trim(tag(2))//'/u.out',status='old')
+     open(unit=1,file=trim(tag(2))//'/out.gyro.moment_u',status='old')
      allocate(phi_in(2,n_theta_plot,n_x,n_field))
      allocate(phi0(2,n_x,n_n,n_time))
      if (n_field == 2) allocate(a_parallel0(2,n_x,n_n,n_time))
@@ -214,7 +214,7 @@ subroutine read_all
   !
 if (exists_u == 1) then  
    if (f_flag == 1) then
-      open(unit=1,file=trim(tag(2))//'/u.out',status='old')
+      open(unit=1,file=trim(tag(2))//'/out.gyro.moment_u',status='old')
       allocate(phi_in_full(2,n_theta_plot,n_x,n_field))
       allocate(phi0_full(2,n_theta_plot,n_x,n_n,n_time))
       allocate(a_parallel0_full(2,n_theta_plot,n_x,n_n,n_time))
@@ -251,7 +251,7 @@ endif
 
      print *,'FOUND: field_r0.out'
 
-     open(unit=1,file=trim(tag(2))//'/field_r0.out',status='old')
+     open(unit=1,file=trim(tag(2))//'/out.gyro.field_r0',status='old')
 
      allocate(phi_r0_in(2,field_r0_grid,n_field))
      allocate(phi_r0(2,field_r0_grid,n_n,n_time))
@@ -278,7 +278,7 @@ endif
      if (f_flag == 0) then
      print *,'FOUND: moment_n.out'
 
-     open(unit=1,file=trim(tag(2))//'/moment_n.out',status='old')
+     open(unit=1,file=trim(tag(2))//'/out.gyro.moment_n',status='old')
 
      allocate(moment_n_in(2,n_theta_plot,n_x,n_kinetic))
      allocate(moment_n(2,n_x,n_n,n_time))
@@ -305,7 +305,7 @@ endif
   if (exists_n == 1) then
      if (f_flag == 1) then
         print *,'moment_n.out: full flag on, will output full moment_n'
-     open(unit=1,file=trim(tag(2))//'/moment_n.out',status='old')
+     open(unit=1,file=trim(tag(2))//'/out.gyro.moment_n',status='old')
      allocate(moment_n_full_in(2,n_theta_plot,n_x,n_kinetic))
      allocate(moment_n_full(2,n_theta_plot,n_x,n_n,n_time))
      do i_time=1,n_time
@@ -330,12 +330,12 @@ endif
      if (f_flag == 0) then
      print *,'FOUND: moment_e.out'
 
-     open(unit=1,file=trim(tag(2))//'/moment_e.out',status='old')
+     open(unit=1,file=trim(tag(2))//'/out.gyro.moment_e',status='old')
 
      allocate(moment_e_in(2,n_theta_plot,n_x,n_kinetic))
      allocate(moment_e(2,n_x,n_n,n_time))
 
-     print *,'moment_e.out:' 
+     print *,'out.gyro.moment_e:' 
      do i_time=1,n_time
         if (i_time ==          1) print *,'[0/3 Done]'
         if (i_time ==   n_time/3) print *,'[1/3 Done]'
@@ -356,8 +356,8 @@ endif
   !
   if (exists_e == 1) then
      if (f_flag == 1) then
-        print *,'moment_e.out: full flag on, will output full moment_e'
-     open(unit=1,file=trim(tag(2))//'/moment_e.out',status='old')
+        print *,'out.gyro.moment_e: full flag on, will output full moment_e'
+     open(unit=1,file=trim(tag(2))//'/out.gyro.moment_e',status='old')
      allocate(moment_e_full_in(2,n_theta_plot,n_x,n_kinetic))
      allocate(moment_e_full(2,n_theta_plot,n_x,n_n,n_time))
      do i_time=1,n_time
@@ -381,9 +381,9 @@ endif
   !
   if (exists_diff_i == 1) then
 
-     print *,'FOUND: diff_i.out'
+     print *,'FOUND: out.gyro.diff_i'
 
-     open(unit=1,file=trim(tag(2))//'/diff_i.out',status='old')
+     open(unit=1,file=trim(tag(2))//'/out.gyro.diff_i',status='old')
 
      allocate(diff0(n_kinetic,n_field,2))
      allocate(diff_density(n_x,n_kinetic,n_time))

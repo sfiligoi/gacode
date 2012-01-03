@@ -1,4 +1,4 @@
-if test -f ${1}/profile_vugyro.out
+if test -f ${1}/out.gyro.profile
 then
   exit 1 ; 
 else

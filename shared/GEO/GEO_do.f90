@@ -76,7 +76,6 @@ subroutine GEO_do()
   real, dimension(:), allocatable :: loop
   real, dimension(:), allocatable :: a_R,b_R,a_Z,b_Z
   real, dimension(:), allocatable :: a_Rp,b_Rp,a_Zp,b_Zp
-  real, dimension(:), allocatable :: theta_nc
   !
   !-----------------------------------------------------------
     

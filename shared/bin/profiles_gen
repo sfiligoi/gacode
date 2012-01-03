@@ -17,13 +17,18 @@
 #=============================================================
 # EXECUTABLE AND CONFIG FILE LOCATIONS:
 #
+# GYRO directory
 GYRO_DIR=${GACODE_ROOT}/gyro
+# VGEN inputs directory
+VGEN_DIR=${GACODE_ROOT}/neo/tools/input/vgen
+# VGEN exec directory
+VGEN_EXE=${GACODE_ROOT}/neo/tools/vgen
 # - profiles_gen converter executable
 EXEC=${GACODE_ROOT}/shared/profiles_gen/src/prgen
 # - GATO executable
 GATO=${GACODE_ROOT}/gato/gato
-# - GATO namelist
-GATO_IN=${GACODE_ROOT}/gato/data/ingta
+# - locpargen executable
+LOCPARGEN=${GACODE_ROOT}/shared/profiles_gen/locpargen/locpargen
 # - ASTRA converter
 ASTRA=${GACODE_ROOT}/shared/profiles_gen/astra/astra2gyro.py
 # - ASTRA default map file
@@ -42,45 +47,44 @@ n=$#
 if [ $n -eq 0 ]
 then
    echo "Usage:       profiles_gen [options]"
-   echo " "
+   echo 
    echo "Options (in any order) include: "
-   echo " "
+   echo 
    echo "             -i <raw_data_file>"
    echo "             Import data from <raw_data_file> with filename conventions:"
-   echo " "
-   echo "              *        : ITERDB text file (default)"
-   echo "              *.nc     : ITERDB NetCDF file"
-   echo "              *.cdf    : Plasma State NetCDF file"
-   echo "              *.astra  : ASTRA text file"
-   echo "              *.peq    : PEQDSK/ELITE text file"
-   echo " "
-   echo "              input.profiles : velocity generation mode"
-   echo " "
+   echo 
+   echo "              *              : ITERDB text file (default)"
+   echo "              *.nc           : ITERDB NetCDF file"
+   echo "              *.cdf          : Plasma State NetCDF file"
+   echo "              *.astra        : ASTRA text file"
+   echo "              *.peq          : PEQDSK/ELITE text file"
+   echo "              input.profiles : vgen or locpargen mode"
+   echo 
    echo "             -V"
    echo "             Verbose (for debugging; use this if you get an error)."
-   echo " "
+   echo 
    echo "ITERDB Options"
-   echo " "
+   echo 
    echo "             -g <gfile>"
    echo "             Merge EFIT gfile for high-precision geometry data."
-   echo " "
+   echo 
    echo "             -nogq"
    echo "             Do not use q from GATO (by default, if gfile is specified q is from GATO)."
-   echo " "
+   echo 
    echo "             -cer <vpol>"
    echo "             Merge data Er and velocity data from Solomon's cer datafile."
-   echo " "
+   echo 
    echo "             -ver <version>"
    echo "             Version number (0=basic, 1=extra powers)."
-   echo " "
-   echo "Plasma State Options"
+   echo 
+   echo "PLASMA STATE Options"
    echo
    echo "             -g <gfile>"
    echo "             Merge EFIT gfile for high-precision geometry data."
-   echo " "
+   echo 
    echo "             -nogq"
    echo "             Do not use q from GATO (by default, if gfile is specified q is from GATO)."
-    echo " "
+   echo 
    echo "             -r <reorder sequence>"
    echo "             Reorder ions."
    echo
@@ -91,14 +95,28 @@ then
    echo "             NOTE: uses 'astra_map_gyro' in current directory by default."
    echo
    echo "             -n <note text>"
-   echo "              Include <note text> in the input.profiles header."
+   echo "             Include <note text> in the input.profiles header."
    echo
-   echo " "
+   echo "GATO mapper control options"
+   echo 
+   echo "             -gato_dpsisl <dpsisl>"
+   echo "              DEFAULT: 0.0"
+   echo
+   echo "             -Z1 <ion1 charge>"
+   echo "             Default: 1 (Hydrogen isotope)"
+   echo "             -Z2 <ion2 charge>"
+   echo "             Default: 6 (Carbon)"
+   echo "             -Z3 <ion3 charge>"
+   echo "             Default: 2 (Helium)"
+   echo
    echo "VELOCITY GENERATION MODE"
+   echo
+   echo "             -vgen"
+   echo "             Toggle vgen mode."
    echo
    echo "             -vgen_in <ion string> " 
    echo "             Choices: DC, HDC"
-   echo "             If this is blank, INPUT.v must exist."
+   echo "             If this is blank, input.vgen must exist."
    echo
    echo "             -vgen_e <flag>" 
    echo "             Method to compute Er."
@@ -111,8 +129,7 @@ then
    echo "             -vgen_x <ion index>" 
    echo "             Index of ion species to match NEO and given velocities."
    echo
-   echo " "
-   echo "TRANSP Options"
+   echo "TRANSP MODE"
    echo
    echo "             -transp"
    echo "             Generate data from TRANSP servers via prompt."
@@ -137,59 +154,66 @@ then
    echo
    echo "             -trhelp"
    echo "             Detailed help message on transp2gyro."
-   echo " "
-   echo " input.profiles MANIPULATION MODE"
-   echo " "
-   echo "              -d [manipulate_options]"
-   echo " "
-   echo "              -d -comp [plasma_composition_options]"
-   echo " "
-   echo "              -modhelp"
-   echo "              Detailed help message on the input.profiles manipulation mode"
-   echo " "
-   echo "      manipulate_options:"
-   echo " "
-   echo "              -inf1 <input file 1>"
-   echo "              Default: input.profiles"
-   echo " "
-   echo "              -inf2 <input file 2>"
-   echo "              Default: input.profiles"
-   echo " "
-   echo "              -outf <output file>"
-   echo "              Default: input.profiles_mod"
-   echo " "
-   echo "              -scal <scaling factor>"
-   echo "              Default: 1.0 "
-   echo " "
-   echo "              -pin <input profile>"
-   echo "              Name of profile, as it appears in an input.profiles file"
-   echo "              Default: ni_1"
-   echo " "
-   echo "              -pout <output profile>"
-   echo "              Name of profile, as it appears in an input.profiles file"
-   echo "              Default: ni_1"
-   echo " "
-   echo "       plasma_composition_options:"
-   echo " "
-   echo "              -inf1 <input file 2>"
-   echo "              Default: input.profiles"
-   echo " "
-   echo "              -outf <output file>"
-   echo "              Default: input.profiles_mod"
-   echo " "
-   echo "              -Z1 <ion1 charge>"
-   echo "              Default: 1 (Hydrogen isotope)"
-   echo "              -Z2 <ion2 charge>"
-   echo "              Default: 6 (Carbon)"
-   echo "              -Z3 <ion3 charge>"
-   echo "              Default: 2 (Helium)"
-   echo " "
-   echo "              -Zeff <effective ion charge>"
-   echo "              Default: 2.0"
-   echo " "
-   echo "              -n3n1 <ni_3/ni_1>"
-   echo "              Default: 0.0 (No third ion species)"
-   echo " "
+   echo 
+   echo "PROFILE MANIPULATION MODE"
+   echo 
+   echo "             -d [manipulate_options]"
+   echo 
+   echo "             -d -comp [plasma_composition_options]"
+   echo 
+   echo "             -modhelp"
+   echo "             Detailed help message on the input.profiles manipulation mode"
+   echo 
+   echo "  manipulate options:"
+   echo 
+   echo "             -inf1 <input file 1>"
+   echo "             Default: input.profiles"
+   echo 
+   echo "             -inf2 <input file 2>"
+   echo "             Default: input.profiles"
+   echo 
+   echo "             -outf <output file>"
+   echo "             Default: input.profiles_mod"
+   echo 
+   echo "             -scal <scaling factor>"
+   echo "             Default: 1.0 "
+   echo 
+   echo "             -pin <input profile>"
+   echo "             Name of profile, as it appears in an input.profiles file"
+   echo "             Default: ni_1"
+   echo 
+   echo "             -pout <output profile>"
+   echo "             Name of profile, as it appears in an input.profiles file"
+   echo "             Default: ni_1"
+   echo 
+   echo " compose options:"
+   echo 
+   echo "             -inf1 <input file 2>"
+   echo "             Default: input.profiles"
+   echo 
+   echo "             -outf <output file>"
+   echo "             Default: input.profiles_mod"
+   echo 
+   echo "             -Z1 <ion1 charge>"
+   echo "             Default: 1 (Hydrogen isotope)"
+   echo "             -Z2 <ion2 charge>"
+   echo "             Default: 6 (Carbon)"
+   echo "             -Z3 <ion3 charge>"
+   echo "             Default: 2 (Helium)"
+   echo 
+   echo "             -Zeff <effective ion charge>"
+   echo "             Default: 2.0"
+   echo 
+   echo "             -n3n1 <ni_3/ni_1>"
+   echo "             Default: 0.0 (No third ion species)"
+   echo
+   echo "LOCAL PARAMETER MODE"
+   echo 
+   echo "             -loc_rad <r/a>"
+   echo "             Reference radius, r/a."
+   echo 
+   echo "             -loc_rho <rho>"
+   echo "             Reference rho=sqrt[chi/chi(a)]"
    echo
    echo "EXAMPLES:"
    echo " "
@@ -200,45 +224,50 @@ then
    echo "    profiles_gen -m mapfile -n 'this is a test' myfile.astra"
    echo "    profiles_gen -transp"
    echo "    profiles_gen -tok NSTX -year 07 -shot 124948A01 -time 250 -avg 2"
-   echo "    profiles_gen -i input.profiles -vgen_e 2 -vgen_v 1 -vgen_in DC -vgen_x 2"
-   echo "    profiles_gen -i input.profiles -vgen_e 2 -vgen_v 1 -vgen_in HDC -vgen_x 3"
+   echo "    profiles_gen -vgen -i input.profiles -vgen_e 2 -vgen_v 1 -vgen_in DC -vgen_x 2"
+   echo "    profiles_gen -vgen -i input.profiles -vgen_e 2 -vgen_v 1 -vgen_in HDC -vgen_x 3"
    echo 
-   echo " (1) Typical usage for DIII-D plasmas with iterdbfile only (2 steps)"
-   echo "     NEO will generate Er and all velocities:"
-   echo "  "
+   echo "(1) Typical usage for DIII-D plasmas with iterdbfile only (2 steps)"
+   echo "    NEO will generate Er and all velocities:"
+   echo 
    echo "    profiles_gen -i iterdb -g gfile"
-   echo "    profiles_gen -i input.profiles -vgen_e 2 -vgen_v 1 -vgen_in DC -vgen_x 2"
+   echo "    profiles_gen -vgen -i input.profiles -vgen_e 2 -vgen_v 1 -vgen_in DC -vgen_x 2"
    echo
-   echo " (2) Typical usage for DIII-D plasmas with CER file available (2 steps)"
-   echo "     NEO will take Er from CER file and generate all velocities:"
-   echo "  "
+   echo "(2) Typical usage for DIII-D plasmas with CER file available (2 steps)"
+   echo "    NEO will take Er from CER file and generate all velocities:"
+   echo 
    echo "    profiles_gen -i iterdb -g gfile -cer cerfile"
-   echo "    profiles_gen -i input.profiles -vgen_e 4 -vgen_v 2 -vgen_in DC -vgen_x 2"
+   echo "    profiles_gen -vgen -i input.profiles -vgen_e 4 -vgen_v 2 -vgen_in DC -vgen_x 2"
+   echo 
+   echo "(3) Manipulation example"
+   echo 
+   echo "    profiles_gen -d -inf1 input.profiles.1 \ "
+   echo "                    -inf2 input.profiles.2 \ " 
+   echo "                    -scal 0.85 -pin Te -pout Ti_2"
+   echo 
+   echo "    RESULT: input.profiles_mod is generated, containing the same data as" 
+   echo "    input.profiles.1 except that the Ti_2 profile is equal to 0.85*Te," 
+   echo "    where Te is from input.profiles.2"
    echo " "
-   echo " Examples on input.profiles manipulation:"
+   echo "(4) Composition example"
+   echo
+   echo "    profiles_gen -d -comp -Z2 8 -Zeff 2.2 -n3n1 0.1 -outf input.profiles.ox"
    echo " "
-   echo "    profiles_gen -d -inf1 somedir/input.profiles -inf2 anotherdir/input.profiles -scal 0.85 -pin Te -pout Ti_2"
-   echo " "
-   echo "     input.profiles_mod is generated, containing the same data as" 
-   echo "     'somedir/input.profiles' except that the Ti_2 profile is" 
-   echo "     equal to 0.85*Te, where Te is from 'anotherdir/input.profiles'."
-   echo " "
-   echo " profiles_gen -d -comp -Z2 8 -Zeff 2.2 -n3n1 0.1 -outf INPUT_ox"
-   echo " "
-   echo "     Based on the electron density profile ni_1, ni_2 and ni_3 are "
-   echo "     generated for a plasma with Zeff=2.2, Z1=1, Z2=8, Z3=4 and"
-   echo "     ni_3 / ni_1 = 0.1. The new data is written in INPUT_ox"
-   echo " "
-   echo " "
+   echo "    RESULT: input.profiles.ox is generated based on the electron density" 
+   echo "    profile ni_1, ni_2 and ni_3 are generated for a plasma with"
+   echo "    Zeff=2.2, Z1=1, Z2=8, Z3=4 and ni_3/ni_1 = 0.1."
+   echo 
 
    exit 1
 fi
-#--------------------------------------------------------
+#=============================================================
 
 #=============================================================
 # Define variables for flag capture
 #
 CONFIG=.config
+
+GATO_DPSISL=0.0
 
 FILE_FLAG=0
 CER_FLAG=0
@@ -253,6 +282,12 @@ VGEN_V=2
 VGEN_X=2
 VGEN_FLAG=0
 MODINP_FLAG=0
+
+LOC_RAD=0
+LOC_RHO=0
+Z1=1.0
+Z2=6.0
+Z3=2.0
 #=============================================================
 
 #=============================================================
@@ -281,7 +316,9 @@ while [ $# -gt 0 ] ; do
 
   -cer) shift ; CER_FLAG=1 ; CER_FILE="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-cer;$1" ;;
    
-  -g) shift ; G_FLAG=1 ; GFILE="$1" ;;
+  -g) shift ; G_FLAG=1 ; GFILE="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-g;$1" ;;
+
+  -gato_dpsisl) shift ; GATO_DPSISL="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-gato_dpsisl;$1" ;;
 
   -V) shift ; VERBOSE_FLAG=1 ; ITERDB_ARGS="${ITERDB_ARGS};-V";;
 
@@ -291,13 +328,15 @@ while [ $# -gt 0 ] ; do
 
   -ver) shift ; VERSION="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-ver;$1";;
 
-  -vgen_in) shift ; VGEN_IN=$1 ; ITERDB_ARGS="${ITERDB_ARGS};-vgen_in;$1";;
+  -vgen) VGEN_FLAG=1 ;;
 
-  -vgen_e) shift ; VGEN_E=$1  ; ITERDB_ARGS="${ITERDB_ARGS};-vgen_e;$1";;
+  -vgen_in) shift ; VGEN_IN=$1 ;;
 
-  -vgen_v) shift ; VGEN_V=$1  ; ITERDB_ARGS="${ITERDB_ARGS};-vgen_v;$1";;
+  -vgen_e) shift ; VGEN_E=$1 ;;
 
-  -vgen_x) shift ; VGEN_X=$1  ; ITERDB_ARGS="${ITERDB_ARGS};-vgen_x;$1";;
+  -vgen_v) shift ; VGEN_V=$1 ;;
+
+  -vgen_x) shift ; VGEN_X=$1 ;;
 
   -transp) TRANSP_FLAG=1 ;;
 
@@ -331,17 +370,20 @@ while [ $# -gt 0 ] ; do
   
   -comp) MODINP_ARGS="$MODINP_ARGS --comp";; 
   
-  -Z1) shift ; MODINP_ARGS="$MODINP_ARGS --Z1 $1" ;;  
+  -Z1) shift ; Z1=$1 ; MODINP_ARGS="$MODINP_ARGS --Z1 $1" ;;  
   
-  -Z2) shift ; MODINP_ARGS="$MODINP_ARGS --Z2 $1" ;;  
+  -Z2) shift ; Z2=$1 ; MODINP_ARGS="$MODINP_ARGS --Z2 $1" ;;  
   
-  -Z3) shift ; MODINP_ARGS="$MODINP_ARGS --Z3 $1" ;;  
+  -Z3) shift ; Z3=$1 ; MODINP_ARGS="$MODINP_ARGS --Z3 $1" ;;  
   
   -Zeff) shift ; MODINP_ARGS="$MODINP_ARGS --Zeff $1" ;;  
   
   -n3n1) shift ; MODINP_ARGS="$MODINP_ARGS --n3n1 $1" ;;  
 
   -modhelp) shift ; MODINP_ARGS="$MODINP_ARGS --modhelp";;
+
+  -loc_rad) shift ; LOC_RAD=$1 ;;
+  -loc_rho) shift ; LOC_RHO=$1 ;;
 
   esac
   shift
@@ -373,23 +415,49 @@ then
 fi
 #=============================================================
 
-
 #=============================================================
 # Trap error from no input data file (-i)
 #
 if [ $FILE_FLAG -eq 0 ]
 then
-  echo "ERROR: Please specify an input file with -i <file>"
+  echo "ERROR: (profiles_gen) Please specify an input file with -i <file>"
   exit 0 
 fi
 
-if [ -f $FILE ] &&  [ "${#FILE}" -gt 0 ]
+if [ "$FILE" == "null" ]
 then
-   echo "INFO: Found $FILE."
+   echo "INFO: (profiles_gen) Parsing gfile only"
 else
-   echo "ERROR: $FILE not found."
-   exit 0
+   if [ -f $FILE ] && [ "${#FILE}" -gt 0 ]
+   then
+      echo "INFO: (profiles_gen) $FILE found"
+   else
+      echo "ERROR: (profiles_gen) $FILE not found"
+      exit 0 
+   fi
 fi
+#=============================================================
+
+#=============================================================
+# Manage execution of locpargen
+
+if [ "$LOC_RAD" != "0" ] || [ "$LOC_RHO" != "0" ]
+then
+  if [ ! -f $LOCPARGEN ]
+  then
+     echo "ERROR: (profiles_gen) You need to build the locpargen executable."
+     exit 1
+  fi
+  python $GACODE_ROOT/shared/bin/profile_parse.py $FILE
+  echo $LOC_RAD > input.locpargen
+  echo $LOC_RHO >> input.locpargen
+  echo $Z1 >> input.locpargen
+  echo $Z2 >> input.locpargen
+  echo $Z3 >> input.locpargen
+  $LOCPARGEN
+  rm input.locpargen
+  exit 0
+fi   
 #=============================================================
 
 #=============================================================
@@ -397,7 +465,7 @@ fi
 #
 NEO_DIR=$GACODE_ROOT/neo
 
-if [ $FILE == "input.profiles" ]
+if [ $VGEN_FLAG -eq 1 ]
 then
 
    # Create vgen work directory
@@ -406,17 +474,17 @@ then
    mkdir vgen
    cd vgen
 
-   # Check for INPUT.v file
+   # Check for input.vgen file
 
-   if [ -f $NEO_DIR/tools/input/vgen/INPUT.v.$VGEN_IN ]
+   if [ -f $VGEN_DIR/input.vgen.$VGEN_IN ]
    then
-     cp $NEO_DIR/tools/input/vgen/INPUT.v.$VGEN_IN input.neo
+     cp $VGEN_DIR/input.vgen.$VGEN_IN input.neo
    else 
-      if [ -f ../INPUT.v ]
+      if [ -f ../input.vgen ]
       then
-         cp ../INPUT.v input.neo
+         cp ../input.vgen input.neo
       else
-         echo "ERROR: Specify ion string with -vgen_in, or create INPUT.v"
+         echo "ERROR: (profiles_gen) Specify ion string with -vgen_in, or create input.vgen"
          exit 1
       fi
    fi
@@ -432,7 +500,9 @@ then
    echo "$VGEN_E"   > vgen.dat
    echo "$VGEN_V"  >> vgen.dat
    echo "$VGEN_X" >>  vgen.dat
-   $NEO_DIR/tools/vgen/vgen
+   echo `pwd`
+   echo `ls $VGEN_EXE/vgen`
+   $VGEN_EXE/vgen
 
    if [ -f "input.profiles.new" ]
        then
@@ -445,7 +515,7 @@ else
 
    # Clean old input.profiles* data.
 
-   echo "INFO: Removing old input.profiles* files."
+   echo "INFO: (profiles_gen) Removing old input.profiles* files"
    rm -rf input.profiles input.profiles.*
 
 fi 
@@ -488,7 +558,7 @@ then
    echo "null" >> $CONFIG
 else
    echo $CER_FILE >> $CONFIG
-   echo "INFO: Will merge data from $CER_FILE"
+   echo "INFO: (profiles_gen) Will merge data from $CER_FILE"
 fi
 
 # EFIT G-file
@@ -508,14 +578,133 @@ if [ $G_FLAG -eq 1 ]
 then
    if [ ! -f $GATO ]
    then
-      echo "ERROR: You need to build the GATO executable: $ cd gato ; make"
+      echo "ERROR: (profiles_gen) You need to build the GATO executable: $ cd gato ; make"
       exit 1
    fi
-   echo "INFO: Running GATO mapper to generate flux surfaces from $GFILE."
-   echo "INFO: Running fluxfit to compute shape parameters from GATO mapping."
+   echo "INFO: (profiles_gen) Spawning GATO mapper to generate flux surfaces from $GFILE."
+
+   # GATO requires gfile as "eqgta"
    cp $GFILE eqgta
-   cp $GATO_IN ingta
-   $GATO >& gato.stdout
+
+   # Clear any stale error files
+   rm -f gato_error
+
+   # Create entire GATO "ingta" namelist
+   echo "GATO template" > ingta
+   echo "129x129 200x400  ncase=0" >> ingta
+   echo "n  = 1  ncorr=+1  Wall on the Plasma" >> ingta
+   echo " &inputd" >> ingta
+   echo " ntor     = 1" >> ingta
+   echo " ncase    = 0" >> ingta
+   echo " norm     = 0" >> ingta
+   echo " nmap     = 0" >> ingta
+   echo " neqtyp   = 0" >> ingta
+   echo " jpsi     = 100" >> ingta
+   echo " itht     = 200" >> ingta
+   echo " isym     = 0" >> ingta
+   echo " igrid    = 0" >> ingta
+   echo " ncorr    = +1" >> ingta
+   echo " corrfac  = 1.0000" >> ingta
+   echo " nmesh    = 2" >> ingta
+   echo " nedge    = +4" >> ingta
+   echo " sedg0    = 0.0" >> ingta
+   echo " sedg1    = 0.0" >> ingta
+   echo " maptrace = 0" >> ingta
+   echo " npak     = 0" >> ingta
+   echo " nrat     = 0" >> ingta
+   echo " nppack   = 0" >> ingta
+   echo " nqpack   = 0" >> ingta
+   echo " pkfrac   = 0.3333333333333333" >> ingta
+   echo " qpfrac   = 0.3333333333333333" >> ingta
+   echo " cspak    = 0.5" >> ingta
+   echo " npfit    = 150" >> ingta
+   echo " dpsisl   = $GATO_DPSISL" >> ingta
+   echo " dpsisd   = +0.10e-04" >> ingta
+   echo " delac    = 0.10e-02" >> ingta
+   echo " tolspln  = 0.10e-02" >> ingta
+   echo " ntrymx   = 10" >> ingta
+   echo " nccellr  = +1" >> ingta
+   echo " nqaxis   =  0" >> ingta
+   echo " qxin     = 0.0" >> ingta
+   echo " idnsty   = 0" >> ingta
+   echo " ifastp   = 0" >> ingta
+   echo " ndnxp0   = 0" >> ingta
+   echo " ndnxp1   = 2" >> ingta
+   echo " ndnxp2   = 2" >> ingta
+   echo " iwal     = 0" >> ingta
+   echo " nwall    = 60" >> ingta
+   echo " irext    = 0" >> ingta
+   echo " rext     = 1.000" >> ingta
+   echo " nrestrt  = 0" >> ingta
+   echo " ndsktim  = +1" >> ingta
+   echo " nev      = 1" >> ingta
+   echo " nreslv   = 0" >> ingta
+   echo " nbrmax   = 10" >> ingta
+   echo " nismax   = 10" >> ingta
+   echo " ncymax   = 1" >> ingta
+   echo " nitmax   = 20" >> ingta
+   echo " ncyfin   = 1" >> ingta
+   echo " al0      = -0.100000e-04" >> ingta
+   echo " dal0     = 10.0" >> ingta
+   echo " al0bas   = +0.00" >> ingta
+   echo " al0min   = -0.10e+00" >> ingta
+   echo " al0max   = -0.10e-11" >> ingta
+   echo " epschy   = 0.00001" >> ingta
+   echo " epscon   = 0.00001" >> ingta
+   echo " njplot   = +200" >> ingta
+   echo " niplot   = 1" >> ingta
+   echo " nskpi    = +2" >> ingta
+   echo " nskpj    = +2" >> ingta
+   echo " ncont    = 10" >> ingta
+   echo " ncplot   = 10" >> ingta
+   echo " nxisgn   = +1" >> ingta
+   echo " nxuplt   = +3" >> ingta
+   echo " nxiplt   = +1" >> ingta
+   echo " nxrplt   =  0" >> ingta
+   echo " nxpplt   =  0" >> ingta
+   echo " nbuplt   = +1" >> ingta
+   echo " nbiplt   = +1" >> ingta
+   echo " nbrplt   =  0" >> ingta
+   echo " nbpplt   =  0" >> ingta
+   echo " nauplt   = +1" >> ingta
+   echo " naiplt   = +1" >> ingta
+   echo " narplt   =  0" >> ingta
+   echo " napplt   =  0" >> ingta
+   echo " ntphase  = -4" >> ingta
+   echo " mshpsi   = 12" >> ingta
+   echo " mshchi   = 3" >> ingta
+   echo " nvfft    = 0" >> ingta
+   echo " iplotm   = +10" >> ingta
+   echo " ioutm    = 1" >> ingta
+   echo " ioutw    = 1" >> ingta
+   echo " ioute    = 0" >> ingta
+   echo " ioutp    = +19" >> ingta
+   echo " iomshp   = -2" >> ingta
+   echo " ioeqlp   = -2" >> ingta
+   echo " ioeigp   = +2" >> ingta
+   echo " iodlbp   = +2" >> ingta
+   echo " iodlap   = +2" >> ingta
+   echo " iopsip   = -2" >> ingta
+   echo " iolinp   = +2" >> ingta
+   echo " iolnbp   = +2" >> ingta
+   echo " iolnap   = +2" >> ingta
+   echo " iofftp   = +2" >> ingta
+   echo " ioffbp   = -2" >> ingta
+   echo " ioffap   = -2" >> ingta
+   echo " ioconp   = -2" >> ingta
+   echo " iodlbp   = -2" >> ingta
+   echo " iodlap   = -2" >> ingta
+   echo " iodlwp   = +2" >> ingta
+   echo " &end" >> ingta
+
+   $GATO >& out.gato.stdout
+   if [ -f 'gato_error' ]
+   then
+      echo 'ERROR: (gato) Fatal error.'
+      exit 1 
+   else
+      echo 'INFO: (gato) Success.'
+   fi
 fi
 #==============================================================
 
@@ -526,15 +715,18 @@ if [ $ORDER_FLAG -eq 1 ]
 then
    if [ ${#ORDER} -lt 8 ]
    then
-      echo "Incomplete order vector."
+      echo "ERROR: (profiles_gen) Incomplete order vector."
       exit 1;
    fi
-   ord_vec[0]=${ORDER:0:1}
-   ord_vec[1]=${ORDER:2:1}
-   ord_vec[2]=${ORDER:4:1}
-   ord_vec[3]=${ORDER:6:1}
-   ord_vec[4]=${ORDER:8:1}
+
+   p=0
+   for i in $(echo $ORDER | tr "," "\n")
+   do
+      ord_vec[$p]=$i
+      p=$(($p+1))
+   done
 fi
+
 echo ${ord_vec[0]} ${ord_vec[1]} ${ord_vec[2]} ${ord_vec[3]} ${ord_vec[4]} >> $CONFIG
 #==============================================================
 
@@ -547,27 +739,31 @@ if [ -f "success" ]
 then
    if [ $G_FLAG -eq 1 ]
    then
-      echo "DONE: Successfully wrote: input.profiles, input.profiles.geo."
+      echo "INFO: (profiles_gen) Fluxfit used to compute shape parameters from GATO mapping."
+      echo "DONE: (profiles_gen) Successfully wrote: input.profiles, input.profiles.geo."
    else
-      echo "DONE: Successfully wrote: input.profiles." 
+      echo "DONE: (profiles_gen) Successfully wrote: input.profiles." 
    fi
 else
-   echo "ERROR: Something went wrong in creation of input.profiles :("
-   echo "** Try running with -V option."
+   echo "ERROR: (profiles_gen) Something went wrong in creation of input.profiles :("
+   echo "       ** Try running with -V option **"
 fi
+#==============================================================
 
 #==============================================================
 # Final cleanup:
-#  Remove configuration files, output files, etc.
 #
-rm -f egta ingta nova.*
+#  Remove configuration files, output files, etc.
+rm -f egta eqgta nova.*
+#  Remove stale files
+rm -f out.gato.* input.gato.*
 
 if [ $VERBOSE_FLAG -eq 0 ]
 then
-   rm -f $CONFIG fluxfit.* grid.dat eqgta o1gta gato.stdout success
+   rm -f $CONFIG fluxfit.* ingta o1gta grid.dat success
 else
-   mv o1gta gato.o1gta
-   mv eqgta gato.eqgta
-   mv grid.dat gato.grid.dat
+   mv ingta input.gato.ingta
+   mv o1gta out.gato.o1gta
+   mv grid.dat out.gato.grid
 fi
 #==============================================================

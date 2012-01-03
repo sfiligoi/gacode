@@ -7,6 +7,7 @@
 
 subroutine tgyro_flux
 
+  use mpi
   use tgyro_globals
   use gyro_interface
   use neo_interface
@@ -29,7 +30,12 @@ subroutine tgyro_flux
   real :: Pi_neo_GB
   real, dimension(8) :: x_out
 
-  include 'mpif.h'
+  call MPI_BARRIER(MPI_COMM_WORLD,ierr)
+  if (i_proc_global == 0) then
+     open(unit=1,file=trim(runfile),position='append')
+     write(1,'(t2,a)') 'INFO: (TGYRO) Entered tgyro_flux'
+     close(1)
+  endif
 
   !-----------------------------
   ! Counter
@@ -48,7 +54,7 @@ subroutine tgyro_flux
   mflux_e_neo(:)   = 0.0
 
   ! Map TGYRO parameters to NEO
-   call tgyro_neo_map  
+  call tgyro_neo_map  
 
   ! NEO normalization to GB output conversions
   ! Gamma_norm = n0_norm vt_norm
@@ -179,7 +185,7 @@ subroutine tgyro_flux
      mflux_i_tur(1:loc_n_ion,i_r) = tglf_ion_mflux_out(1:loc_n_ion)
 
      if (tglf_q_low_flag == 1) then
-        eflux_e_tur(i_r)   = tglf_elec_eflux_low_out
+        eflux_e_tur(i_r) = tglf_elec_eflux_low_out
         eflux_i_tur(1:loc_n_ion,i_r) = tglf_ion_eflux_low_out(1:loc_n_ion)
      endif
 
@@ -191,16 +197,23 @@ subroutine tgyro_flux
      call gyro_run(gyrotest_flag, gyro_restart_method, &
           transport_method, gyro_exit_status(i_r), gyro_exit_message(i_r))
 
-     ! Map GYRO output to TGYRO
-     pflux_e_tur(i_r) = gyro_elec_pflux_out
-     eflux_e_tur(i_r) = gyro_elec_eflux_out
-     mflux_e_tur(i_r) = gyro_elec_mflux_out
-     expwd_e_tur(i_r) = gyro_elec_expwd_out
+     if (tgyro_mode == 1) then
 
-     pflux_i_tur(1:loc_n_ion,i_r) = gyro_ion_pflux_out(1:loc_n_ion)
-     eflux_i_tur(1:loc_n_ion,i_r) = gyro_ion_eflux_out(1:loc_n_ion)
-     mflux_i_tur(1:loc_n_ion,i_r) = gyro_ion_mflux_out(1:loc_n_ion)
-     expwd_i_tur(1:loc_n_ion,i_r) = gyro_ion_expwd_out(1:loc_n_ion)
+        ! Map GYRO (local simulation) output to TGYRO
+
+        pflux_e_tur(i_r) = sum(gyro_elec_pflux_out)
+        eflux_e_tur(i_r) = sum(gyro_elec_eflux_out)
+        mflux_e_tur(i_r) = sum(gyro_elec_mflux_out)
+        expwd_e_tur(i_r) = sum(gyro_elec_expwd_out)
+
+        do i_ion=1,loc_n_ion
+           pflux_i_tur(i_ion,i_r) = sum(gyro_ion_pflux_out(:,i_ion))
+           eflux_i_tur(i_ion,i_r) = sum(gyro_ion_eflux_out(:,i_ion))
+           mflux_i_tur(i_ion,i_r) = sum(gyro_ion_mflux_out(:,i_ion))
+           expwd_i_tur(i_ion,i_r) = sum(gyro_ion_expwd_out(:,i_ion))
+        enddo
+
+     endif
 
   case (4)
 

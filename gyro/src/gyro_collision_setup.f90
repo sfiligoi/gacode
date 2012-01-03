@@ -63,11 +63,6 @@ subroutine gyro_collision_setup
   real, external :: DLANGE
   !-----------------------------------------------------------
 
-  if (collision_method > 2) then
-     call gyro_collision_setup_ebelli
-     return
-  endif
-
   nu_total(:,:,:) = 0.0
 
   condition_number = 0.0
@@ -273,7 +268,7 @@ subroutine gyro_collision_setup
 
   deallocate(i_piv)
 
-  if (i_proc == 0) call gyro_collision_grid_write(trim(path)//'gyro_collision_grid.out',1)
+  if (i_proc == 0) call gyro_collision_grid_write(trim(path)//'out.gyro.collision_grid',1)
 
   if (i_proc == 0 .and. debug_flag == 1) &
        print *,'[gyro_collision_setup]'

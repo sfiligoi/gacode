@@ -33,13 +33,12 @@ subroutine gyro_field_interpolation
   complex :: cmplx_phase
   !
   complex, dimension(n_stack,i1_buffer:i2_buffer,n_field) :: vf
-  complex, dimension(n_stack,-m_gyro:m_gyro-i_gyro,n_x,n_field) :: w_temp
-  !
   complex, external :: BLEND_F
   !-----------------------------------------------------
 
-  call proc_time(CPU_interp_in)
+  call gyro_timer_in('Field-interp.a')
 
+!$omp parallel do default(shared) private(cmplx_phase,j_int,x,vtemp,j)
   do i=1,n_x
      cmplx_phase = phase(in_1,i)
      do j_int=1,n_theta_int
@@ -55,21 +54,20 @@ subroutine gyro_field_interpolation
 
      enddo ! j_int
   enddo ! i
+!$end parallel do
 
   !---------------------------------------------------------------
   ! Interpolate phi, A_par, and B_par onto orbit-grid:
   !
-  p_nek_loc = 0
-  do p_nek=1+i_proc_1,n_nek_1,n_proc_1
+!$omp parallel do default(shared) private(p_nek_loc,p_nek,k,ck,m,m0,ix)
+  do i=1,n_x
+     p_nek_loc = 0
+     do p_nek=1+i_proc_1,n_nek_1,n_proc_1
 
-     p_nek_loc = p_nek_loc+1
+        p_nek_loc = p_nek_loc+1
 
-     ie = nek_e(p_nek)  
-     k  = nek_k(p_nek)   
-
-     ck = class(k)
-
-     do i=1,n_x
+        k  = nek_k(p_nek)   
+        ck = class(k)
 
         do m=1,n_stack
 
@@ -82,11 +80,14 @@ subroutine gyro_field_interpolation
 
         enddo ! m
 
-     enddo ! i
-
-  enddo ! p_nek
+     enddo ! p_nek
+  enddo ! i
+!$end parallel do
   !
   !---------------------------------------------------------------
+
+  call gyro_timer_out('Field-interp.a')
+  call gyro_timer_in('Field-interp.b')
 
   !---------------------------------------------------------------
   ! GK SPECIES:
@@ -118,75 +119,92 @@ subroutine gyro_field_interpolation
            vf(:,i,:) = 0.0
         enddo
      endif
-     do i=1,n_x
-        vf(:,i,:) = field_tau(:,i,p_nek_loc,:)
+     do ix=1,n_field
+        do i=1,n_x
+           do m=1,n_stack
+              vf(m,i,ix) = field_tau(m,i,p_nek_loc,ix)
+           enddo
+        enddo
      enddo
 
      do is=1,n_gk
 
-        w_temp(:,:,:,1) = w_gyro(:,:,:,p_nek_loc,is)
+        select case (n_field) 
 
-        if (n_field > 1) then
+        case(1)
+
+           gyro_uv(:,:,p_nek_loc,is,1) = (0.0,0.0)
+           kyro_uv(:,:,p_nek_loc,is,1) = (0.0,0.0)
+
+!$omp parallel do default(shared) private(i_diff,m)
            do i=1,n_x
               do i_diff=-m_gyro,m_gyro-i_gyro
                  do m=1,n_stack
-                    w_temp(m,i_diff,i,2) = -w_gyro(m,i_diff,i,p_nek_loc,is)*&
-                         v_para(m,i,p_nek_loc,is)
+                    gyro_uv(m,i,p_nek_loc,is,1) = gyro_uv(m,i,p_nek_loc,is,1)+&
+                         w_gyro(m,i_diff,i,p_nek_loc,is)*vf(m,i+i_diff,1)
+                    kyro_uv(m,i,p_nek_loc,is,1) = kyro_uv(m,i,p_nek_loc,is,1) + &
+                         w_gyro_rot(m,i_diff,i,p_nek_loc,is)*&
+                         vf(m,i+i_diff,1)
                  enddo
               enddo
            enddo
-        endif
+!$omp end parallel do
 
-        if (n_field > 2) then
+        case (2) 
+
+           gyro_uv(:,:,p_nek_loc,is,:) = (0.0,0.0)
+           kyro_uv(:,:,p_nek_loc,is,:) = (0.0,0.0)
+
+!$omp parallel do default(shared) private(i_diff,m)
            do i=1,n_x
               do i_diff=-m_gyro,m_gyro-i_gyro
                  do m=1,n_stack
-                    w_temp(m,i_diff,i,3) = w_gyro_aperp(m,i_diff,i,p_nek_loc,is) &
-                         * 2.0*energy(ie,is)*lambda(i,k)*tem_s(is,i)/z(is)
-                 enddo
-              enddo
-           enddo
-        endif
-
-        gyro_uv(:,:,p_nek_loc,is,:) = (0.0,0.0)
-
-        do ix=1,n_field
-           do i=1,n_x
-              do i_diff=-m_gyro,m_gyro-i_gyro
-                 do m=1,n_stack
-                    gyro_uv(m,i,p_nek_loc,is,ix) = gyro_uv(m,i,p_nek_loc,is,ix)+&
-                         w_temp(m,i_diff,i,ix)*vf(m,i+i_diff,ix)
-                 enddo
-              enddo
-           enddo
-        enddo
-
-        kyro_uv(:,:,p_nek_loc,is,:) = (0.0,0.0)
-
-        do i=1,n_x
-           do i_diff=-m_gyro,m_gyro-i_gyro
-              do m=1,n_stack
-                 kyro_uv(m,i,p_nek_loc,is,1) = kyro_uv(m,i,p_nek_loc,is,1) + &
-                      w_gyro_rot(m,i_diff,i,p_nek_loc,is)*&
-                      vf(m,i+i_diff,1)
-              enddo
-           enddo
-        enddo
-
-        if (n_field > 1) then
-           do i=1,n_x
-              do i_diff=-m_gyro,m_gyro-i_gyro
-                 do m=1,n_stack
+                    gyro_uv(m,i,p_nek_loc,is,1) = gyro_uv(m,i,p_nek_loc,is,1)+&
+                         w_gyro(m,i_diff,i,p_nek_loc,is)*vf(m,i+i_diff,1)
+                    gyro_uv(m,i,p_nek_loc,is,2) = gyro_uv(m,i,p_nek_loc,is,2)+&
+                         vf(m,i+i_diff,2)*&
+                         (-w_gyro(m,i_diff,i,p_nek_loc,is)*v_para(m,i,p_nek_loc,is))
+                    kyro_uv(m,i,p_nek_loc,is,1) = kyro_uv(m,i,p_nek_loc,is,1) + &
+                         w_gyro_rot(m,i_diff,i,p_nek_loc,is)*vf(m,i+i_diff,1)
                     kyro_uv(m,i,p_nek_loc,is,2) = kyro_uv(m,i,p_nek_loc,is,2) + &
                          w_gyro_rot(m,i_diff,i,p_nek_loc,is)*&
                          (-v_para(m,i,p_nek_loc,is)*vf(m,i+i_diff,2))
                  enddo
               enddo
            enddo
-        endif
+!$omp end parallel do
 
-        ! Note missing third component!
+        case (3)
 
+           gyro_uv(:,:,p_nek_loc,is,:) = (0.0,0.0)
+           kyro_uv(:,:,p_nek_loc,is,:) = (0.0,0.0)
+
+!$omp parallel do default(shared) private(i_diff,m)
+           do i=1,n_x
+              do i_diff=-m_gyro,m_gyro-i_gyro
+                 do m=1,n_stack
+                    gyro_uv(m,i,p_nek_loc,is,1) = gyro_uv(m,i,p_nek_loc,is,1)+&
+                         w_gyro(m,i_diff,i,p_nek_loc,is)*vf(m,i+i_diff,1)
+                    gyro_uv(m,i,p_nek_loc,is,2) = gyro_uv(m,i,p_nek_loc,is,2)+&
+                         (-w_gyro(m,i_diff,i,p_nek_loc,is)*&
+                         v_para(m,i,p_nek_loc,is)*vf(m,i+i_diff,2))
+                    gyro_uv(m,i,p_nek_loc,is,3) = gyro_uv(m,i,p_nek_loc,is,3)+&
+                         (w_gyro_aperp(m,i_diff,i,p_nek_loc,is) &
+                         *2.0*energy(ie,is)*lambda(i,k)*tem_s(is,i)/z(is))*&
+                         vf(m,i+i_diff,3)
+                    kyro_uv(m,i,p_nek_loc,is,1) = kyro_uv(m,i,p_nek_loc,is,1) + &
+                         w_gyro_rot(m,i_diff,i,p_nek_loc,is)*&
+                         vf(m,i+i_diff,1)
+                    kyro_uv(m,i,p_nek_loc,is,2) = kyro_uv(m,i,p_nek_loc,is,2) + &
+                         w_gyro_rot(m,i_diff,i,p_nek_loc,is)*&
+                         (-v_para(m,i,p_nek_loc,is)*vf(m,i+i_diff,2))
+                    ! Note missing third component!
+                 enddo
+              enddo
+           enddo
+!$omp end parallel do
+
+        end select
 
      enddo ! is
 
@@ -205,26 +223,43 @@ subroutine gyro_field_interpolation
         p_nek_loc = p_nek_loc+1
         ie = nek_e(p_nek)
         k  = nek_k(p_nek)
-        do i=1,n_x
-           do m=1,n_stack
 
-              gyro_uv(m,i,p_nek_loc,n_spec,1) = field_tau(m,i,p_nek_loc,1)
+        select case (n_field) 
 
-              if (n_field > 1) then
+        case(1)
+
+           gyro_uv(:,:,p_nek_loc,n_spec,1) = field_tau(:,:,p_nek_loc,1)
+
+        case(2)
+
+!$omp parallel do default(shared) private(m)
+           do i=1,n_x
+              do m=1,n_stack
+                 gyro_uv(m,i,p_nek_loc,n_spec,1) = field_tau(m,i,p_nek_loc,1)
                  gyro_uv(m,i,p_nek_loc,n_spec,2) = &
                       -v_para(m,i,p_nek_loc,n_spec)*field_tau(m,i,p_nek_loc,2)
-              endif
+              enddo
+           enddo
+!$omp end parallel do
 
-              if (n_field > 2) then
+        case (3)
+
+!$omp parallel do default(shared) private(m)
+           do i=1,n_x
+              do m=1,n_stack
+                 gyro_uv(m,i,p_nek_loc,n_spec,1) = field_tau(m,i,p_nek_loc,1)
+                 gyro_uv(m,i,p_nek_loc,n_spec,2) = &
+                      -v_para(m,i,p_nek_loc,n_spec)*field_tau(m,i,p_nek_loc,2)
                  gyro_uv(m,i,p_nek_loc,n_spec,3) = &
                       energy(ie,n_spec)*lambda(i,k)*tem_s(n_spec,i)/z(n_spec) &
                       *field_tau(m,i,p_nek_loc,3)
-              endif
+              enddo
+           enddo
+!$omp end parallel do
 
-           enddo ! m
-        enddo ! i
+        end select
 
-     enddo
+     enddo ! p_nek
 
      kyro_uv(:,:,:,n_spec,:) = (0.0,0.0)
 
@@ -240,8 +275,8 @@ subroutine gyro_field_interpolation
      enddo
   enddo
 
-  call proc_time(CPU_interp_out)
-  CPU_interp = CPU_interp + (CPU_interp_out - CPU_interp_in)
+
+  call gyro_timer_out('Field-interp.b')
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[gyro_field_interpolation done]'

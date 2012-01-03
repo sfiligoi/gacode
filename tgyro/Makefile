@@ -21,7 +21,7 @@ export EXTRA_LIBS = \
        ${GACODE_ROOT}/tgyro/qfm/qfm_lib.a \
        ${GACODE_ROOT}/gyro/vshdf5/gyrovshdf5_lib.a \
        ${GACODE_ROOT}/shared/vshdf5/vshdf5_lib.a \
-       ${HDF5_LIBS} ${LMATH}
+       ${HDF5_LIBS} ${LMATH} ${LIPM}
 
 all:
 	cd ${GACODE_ROOT}/shared ; make

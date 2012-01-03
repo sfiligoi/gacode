@@ -465,7 +465,7 @@ c
        ni_exp(j-1)=1.D-19*en_d(j,1)*bscale**(z4thrd)/ascale**(zthird)
        nz_exp(j-1)=1.D-19*en_d(j,nprim_d+1)*
      >      bscale**(z4thrd)/ascale**(zthird)
-       nfst_exp(j-1)=1.D-19*enbeam_d(j)*bscale**(z4thrd)/
+       nfast_exp(j-1)=1.D-19*enbeam_d(j)*bscale**(z4thrd)/
      >      ascale**(zthird)
 c   we are assuming dln(ni)/dr=dln(ne)/dr 
 c   and will use ion plasma sources as electron 

@@ -93,7 +93,7 @@ f.write('\\begin{multicols}{2}')
 f.write('{\small')
 f.write('\\begin{verbatim}')
 
-for line in open('run.out','r').readlines():
+for line in open('out.gyro.run','r').readlines():
     line = string.strip(line)
     f.write(line+'\n')
 

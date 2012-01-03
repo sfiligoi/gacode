@@ -172,10 +172,10 @@ c
      >    (zimp_gf**2-zimp_gf)
          if(dilution_model.eq.0)then
 c full impurity and fast ion dilution
-           ni_exp(k)=ne_exp(k)-nfst_exp(k)-zimp_gf*nz_exp(k) 
+           ni_exp(k)=ne_exp(k)-nfast_exp(k)-zimp_gf*nz_exp(k) 
          elseif(dilution_model.eq.1)then
 c just fast ion dilution
-           ni_exp(k) = ne_exp(k)-nfst_exp(k)
+           ni_exp(k) = ne_exp(k)-nfast_exp(k)
            nz_exp(k) = 0.0
          elseif(dilution_model.eq.2)then
 c no dilution
@@ -214,7 +214,7 @@ c  convert velocities to km/s
 c
 c  remember angrot_exp is the impurity ion rotation
 c
-         vphi_exp(k)=c_tor(k)*rmajor_exp*angrot_exp(k)/cv
+         vphiz_exp(k)=c_tor(k)*rmajor_exp*angrot_exp(k)/cv
 c  
          nuei_m(k) = 0.0
          vpol_exp(k) = 0.0
@@ -223,8 +223,8 @@ c
          Pi_alpha(k)=0.0
          Pe_alpha(k)=0.0
       enddo
-      bp_exp(0)=0.0
-      theta_exp(0)=0.0
+      bp_exp(0)=bp_exp(1)
+      theta_exp(0)=theta_exp(1)
       te_exp(0)=te_exp(1)
       ti_exp(0)=ti_exp(1)
       ne_exp(0)=ne_exp(1)
@@ -235,7 +235,7 @@ c
       nz_m(0)=nz_m(1)
       ti_m(0)=ti_m(1)
       te_m(0)=te_m(1)
-      vphi_exp(0)=vphi_exp(1)
+      vphiz_exp(0)=vphiz_exp(1)
       fi_m(0)=fi_m(1)
       fz_m(0)=fz_m(1)
       nuei_m(0) = nuei_m(1)
@@ -253,7 +253,7 @@ c
       a_unit_exp = rmin_exp(mxgrid)
 c      if(igeo_tg.eq.0)a_unit_exp=arho_exp
 c
-      call neo_flows(mxgrid,vneo_exp,vdia_exp)
+      call neo_flows(ngrid,vneo_exp,vdia_exp)
 c
       pow_ei_exp(0) = 0.0
       do k=1,mxgrid-1
@@ -302,9 +302,9 @@ c compute power balance chi's
         dvoldr = vprime(k,2)*drhodr(k)*drhodr(k)
         diff_exp(k)= -gradnem*flow_exp(k)
      >  /(dvoldr*1.6022D-3*MAX(1.0D-12,gradnem**2))
-        chie_exp(k)= -gradtem*(powe_exp(k)-pow_ei_exp(k))
+        chie_exp(k)= -gradtem*powe_exp(k)
      >   /(dvoldr*nem*1.6022D-3*MAX(1.0D-12,gradtem**2))
-        chii_exp(k)= -gradtim*(powi_exp(k)+pow_ei_exp(k))
+        chii_exp(k)= -gradtim*powi_exp(k)
      >   /(dvoldr*nim*1.6022D-3*MAX(1.0D-12,gradtim**2))
       enddo
       diff_exp(0) = diff_exp(1)
@@ -327,44 +327,51 @@ c compute power balance chi's
      &     /amassgas_exp/DSQRT(1000.D0*tew)**3
         pow_ei_exp(k) = pow_ei_exp(k-1) 
      >  -vprime(k,1)*dr(k,1)*1.6022D-3*nuei*(tiw-tew)
-        if(iexch.eq.0)pow_ei_exp(k)=0.0
 c
       do k=1,mxgrid-1
 c initialize vexb_exp to its neoclassical value (km/sec)
 c assuming ion species 3 is the CER measured one
-         vexb_exp(k) = (vphi_exp(k)-vneo_exp(3,k)*c_per(k))/c_tor(k)
+         vexb_exp(k) = (vphiz_exp(k)-vneo_exp(3,k)*c_per(k))/c_tor(k)
      >   - vdia_exp(3,k)
-c reset vphi_exp to the main ion toroidal flow
-c         vphi_exp(k) = c_per(k)*(vpol_exp(k)+vneo_exp(2,k))
-c     >    + c_tor(k)*(vexb_exp(k)+vdia_exp(2,k))
-c
+c compute the main ion and electron toroidal flow
+         vphi_exp(k) = c_per(k)*(vpol_exp(k)+vneo_exp(2,k))
+     >    + c_tor(k)*(vexb_exp(k)+vdia_exp(2,k))
+         vphie_exp(k) = c_per(k)*(vpol_exp(k)+vneo_exp(1,k))
+     >    + c_tor(k)*(vexb_exp(k)+vdia_exp(1,k))
 c compute the parallel flows for each species
+         vpare_exp(k)=a_pol(k)*vneo_exp(1,k)
+     >    +a_tor(k)*(vdia_exp(1,k)+vexb_exp(k))
          vpar_exp(k)=a_pol(k)*vneo_exp(2,k)
      >    +a_tor(k)*(vdia_exp(2,k)+vexb_exp(k))
+         vparz_exp(k)=a_pol(k)*vneo_exp(3,k)
+     >    +a_tor(k)*(vdia_exp(3,k)+vexb_exp(k))
          tem = (te_exp(k+1)+te_exp(k))/2.0
          tim = (ti_exp(k+1)+ti_exp(k))/2.0
 c thermal velocities in km/sec
          vthi = 9.79D3*DSQRT(2.D3*tim/amassgas_exp)/cv
          vthz = DSQRT(amassgas_exp/amassimp_exp)*vthi
          vthe = DSQRT(tem*amassgas_exp*1.8362D3/tim)*vthi
-         mach_exp(1,k)=(a_pol(k)*vneo_exp(1,k)
-     >    +a_tor(k)*(vdia_exp(1,k)+vexb_exp(k)))/vthe
-         mach_exp(2,k)=(a_pol(k)*vneo_exp(2,k)
-     >    +a_tor(k)*(vdia_exp(2,k)+vexb_exp(k)))/vthi
-         mach_exp(3,k)=(a_pol(k)*vneo_exp(3,k)
-     >    +a_tor(k)*(vdia_exp(3,k)+vexb_exp(k)))/vthz
+c toroidal mach numbers
+         mach_exp(1,k)=vphie_exp(k)/vthe
+         mach_exp(2,k)=vphi_exp(k)/vthi
+         mach_exp(3,k)=vphiz_exp(k)/vthz
        enddo
       vpar_exp(0) = vpar_exp(1)
-c      vpar_exp(1,0) = vpar_exp(1,1)
-c      vpar_exp(2,0) = vpar_exp(2,1)
-c      vpar_exp(3,0) = vpar_exp(3,1)
+      vpare_exp(0) = vpare_exp(1)
+      vparz_exp(0) = vparz_exp(1)
       vexb_exp(0) = vexb_exp(1)
       vphi_exp(0) = vphi_exp(1)
+      vphie_exp(0) = vphie_exp(1)
+      vphiz_exp(0) = vphiz_exp(1)
       zptheta_exp(0)=zptheta_exp(1)
       vexb_exp(mxgrid) = vexb_exp(mxgrid-1)
       zptheta_exp(mxgrid)=zptheta_exp(mxgrid-1)
+      vphie_exp(mxgrid) = vphie_exp(mxgrid-1)
       vphi_exp(mxgrid) = vphi_exp(mxgrid-1)
+      vphiz_exp(mxgrid) = vphiz_exp(mxgrid-1)
+      vpare_exp(mxgrid) = vpare_exp(mxgrid-1)
       vpar_exp(mxgrid) = vpar_exp(mxgrid-1)
+      vparz_exp(mxgrid) = vparz_exp(mxgrid-1)
 c
 c  overwrites for restart
 c
@@ -377,10 +384,12 @@ c
          vexb_m(k)=vexb_exp(k)
          vpol_m(k)=0.0
          vphi_m(k)=vphi_exp(k)
+         vphie_m(k)=vphie_exp(k)
+         vphiz_m(k)=vphiz_exp(k)
          vpar_m(k)=vpar_exp(k)
+         vpare_m(k)=vpare_exp(k)
+         vparz_m(k)=vparz_exp(k)
          do i=1,nspecies
-c           vphi_m(i,k)=vphi_exp(i,k)
-c           vpar_m(i,k)=vpar_exp(i,k)
            vneo_m(i,k)=vneo_exp(i,k)
            vdia_m(i,k)=vdia_exp(i,k)
            mach_m(i,k)=mach_exp(i,k)
@@ -401,12 +410,12 @@ c           vpar_m(i,k)=vpar_exp(i,k)
          vexb_m(k)=vexb_exp(k)
          vpol_m(k)=0.0
          vphi_m(k)=vphi_exp(k)
+         vphie_m(k)=vphie_exp(k)
+         vphiz_m(k)=vphiz_exp(k)
          vpar_m(k)=vpar_exp(k)
-         vphi_m(k)=vphi_exp(k)
-         vpar_m(k)=vpar_exp(k)
+         vpare_m(k)=vpare_exp(k)
+         vparz_m(k)=vparz_exp(k)
          do i=1,nspecies
-c           vphi_m(i,k)=vphi_exp(i,k)
-c           vpar_m(i,k)=vpar_exp(i,k)
            vneo_m(i,k)=vneo_exp(i,k)
            vdia_m(i,k)=vdia_exp(i,k)
          enddo
@@ -459,16 +468,17 @@ c
 c compute the parallel flows for each species
          vpar_m(k)=a_pol(k)*(vneo_m(2,k)+vpol_m(k))
      >    +a_tor(k)*(vdia_m(2,k)+vexb_m(k))
-c         vpar_m(1,k)=c_par(k)*(vneo_m(1,k)+vpol_m(k))
-c     >    +c_per(k)*(vdia_m(1,k)+vexb_m(k))
-c         vpar_m(2,k)=c_par(k)*(vneo_m(2,k)+vpol_m(k))
-c     >    +c_per(k)*(vdia_m(2,k)+vexb_exp(k))
-c         vpar_m(3,k)=c_par(k)*(vneo_m(3,k)+vpol_m(k))
-c     >    +c_per(k)*(vdia_m(3,k)+vexb_m(k))
-c  toridal imurity ion flow
-         vphi_m(k) = c_per(k)*(vpol_m(k)+vneo_m(3,k))
+         vpare_m(k)=a_pol(k)*(vneo_m(1,k)+vpol_m(k))
+     >    +a_tor(k)*(vdia_m(1,k)+vexb_m(k))
+         vparz_m(k)=a_pol(k)*(vneo_m(3,k)+vpol_m(k))
+     >    +a_tor(k)*(vdia_m(3,k)+vexb_m(k))
+c  toridal flows
+         vphie_m(k) = c_per(k)*(vpol_m(k)+vneo_m(1,k))
+     >    + c_tor(k)*(vexb_m(k)+vdia_m(1,k))
+         vphi_m(k) = c_per(k)*(vpol_m(k)+vneo_m(2,k))
+     >    + c_tor(k)*(vexb_m(k)+vdia_m(2,k))
+         vphiz_m(k) = c_per(k)*(vpol_m(k)+vneo_m(3,k))
      >    + c_tor(k)*(vexb_m(k)+vdia_m(3,k))
-c
        enddo
       endif 
 c set central derivatives to zero
@@ -478,7 +488,11 @@ c set central derivatives to zero
       vpol_m(0)=vpol_m(1)
       vexb_m(0)=vexb_m(1)
       vphi_m(0)=vphi_m(1)
+      vphie_m(0)=vphie_m(1)
+      vphiz_m(0)=vphiz_m(1)
       vpar_m(0)=vpar_m(1)
+      vpare_m(0)=vpare_m(1)
+      vparz_m(0)=vparz_m(1)
       ni_m(0)=ni_m(1)
       nz_m(0)=nz_m(1)
 c 
@@ -517,32 +531,46 @@ c
        stress_tor_exp(0) = 0.0
        stress_par_exp(0) = 0.0
        do k=1,mxgrid-1
-         powe_p=powe_exp(k)
+c         powe_p=powe_exp(k)
 c         if(iexch.ge.1) powe_p=powe_p+pow_ei_exp(k)
 c         if(iohm.ge.1) powe_p=powe_p-powe_oh_exp(k)
-         powe_mm=powe_exp(k-1)
+c         powe_mm=powe_exp(k-1)
 c         if(iexch.ge.1) powe_mm=powe_mm+pow_ei_exp(k-1)
 c         if(iohm.ge.1) powe_mm=powe_mm-powe_oh_exp(k-1)         
-         powi_p=powi_exp(k)
+         powe_p = pbescale*powe_beam_exp(k)+
+     >   prfscale*prfescale*powe_rf_exp(k)+powe_lh_exp(k)
+     >   -xion_exp*powe_ion_exp(k)-(1.D0-xwdot)*powe_wdot_exp(k)
+         powe_mm = pbescale*powe_beam_exp(k-1)+
+     >   prfscale*prfescale*powe_rf_exp(k-1)+powe_lh_exp(k-1)
+     >   -xion_exp*powe_ion_exp(k-1)-(1.D0-xwdot)*powe_wdot_exp(k-1)
+c         powi_p=powi_exp(k)
 c         if(iexch.ge.1) powi_p=powi_p-pow_ei_exp(k) 
-         powi_mm=powi_exp(k-1)
+c         powi_mm=powi_exp(k-1)
 c         if(iexch.ge.1) powi_mm=powi_mm-pow_ei_exp(k-1)
+         powi_p = pbiscale*powi_beam_exp(k)+
+     >   prfscale*prfiscale*powi_rf_exp(k)
+     >   -xion_exp*powi_ion_exp(k)+powi_cx_exp(k)-
+     >   (1.D0-xwdot)*powi_wdot_exp(k)
+         powi_mm = pbiscale*powi_beam_exp(k-1)+
+     >   prfscale*prfiscale*powi_rf_exp(k-1)
+     >   -xion_exp*powi_ion_exp(k-1)+powi_cx_exp(k-1)-
+     >   (1.D0-xwdot)*powi_wdot_exp(k-1)
          Peaux(k)=(powe_p-powe_mm)/vprime(k,1)/dr(k,1)
          Piaux(k)=(powi_p-powi_mm)/vprime(k,1)/dr(k,1)
-         Pohpro(k)=0.D0
-c this is inconsistent?
-c         if(iohm.ge.1)Pohpro(k)=(powe_oh_exp(k)-powe_oh_exp(k-1))
-c     >      /vprime(k,1)/dr(k,1)
-         if(ialpha.eq.0)then
-           Pe_alpha(k)=(powe_fus_exp(k)-powe_fus_exp(k-1))
-     >      /vprime(k,1)/dr(k,1)
-           Pi_alpha(k)=(powi_fus_exp(k)-powi_fus_exp(k-1))
-     >      /vprime(k,1)/dr(k,1)
-           Pe_alpha(k)=0.0
-           Pi_alpha(k)=0.0
+         if(iohm.eq.0)then
+           Pohpro(k)=(1.0-xoh_exp)*(powe_oh_exp(k)-powe_oh_exp(k-1))
+     >     /(vprime(k,1)*dr(k,1))
+         elseif(ialpha.eq.0)then
+           Pe_alpha(k)=xfus_exp*(powe_fus_exp(k)-powe_fus_exp(k-1))
+     >      /(vprime(k,1)*dr(k,1))
+           Pi_alpha(k)=xfus_exp*(powi_fus_exp(k)-powi_fus_exp(k-1))
+     >      /(vprime(k,1)*dr(k,1))
+         elseif(irad.eq.0)then
+           Pradb(k) = xrad_exp*(powe_rad_exp(k)-powe_rad_exp(k-1))
+     >     /(vprime(k,1)*dr(k,1))
+           Prads(k) = 0.0
          endif
 c
-c pow_e,i_exp (total power) in MW= MJ/sec
 c flow_exp in KA 
          sour_p=(flow_exp(k)-flow_wall_exp(k))
          sour_mm=(flow_exp(k-1)-flow_wall_exp(k-1))
@@ -611,13 +639,17 @@ c
 c
 c compute ExB shear on half grid using computed v_exb
 c
+      a_unit_exp=arho_exp
+      if(imodel.eq.82)a_unit_exp = rmin_exp(mxgrid)
       do k=1,mxgrid-1
          rminm=(rmin_exp(k+1)+rmin_exp(k))/2.0
          rhom=arho_exp*(rho(k+1)+rho(k))/2.0
          csdam=9.79D5*DSQRT(1.D3*(te_exp(k+1)+te_exp(k))/2.0)/
-     >    (arho_exp*100.D0)/DSQRT(amassgas_exp)
+     >    (a_unit_exp*100.D0)/DSQRT(amassgas_exp)
          egamma_exp(k) = -cv/csdam*rminm/rhom*drhodr(k)*theta_exp(k)*
      >  (vexb_exp(k+1)-vexb_exp(k))/dr(k,2)
+         gamma_p_exp(k) = -sign_Bt_exp*(cv/csdam)*drhodr(k)*
+     >   (vexb_exp(k+1)-vexb_exp(k))/dr(k,2)
 c       write(*,'i2,2x,0p6f10.5') k, rho(k), vexb_exp(k),
 c     >       egamma_exp(k)
       enddo

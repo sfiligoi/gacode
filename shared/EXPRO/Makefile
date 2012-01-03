@@ -9,6 +9,7 @@ endif
 LLIB=EXPRO_lib
 
 OBJECTS = EXPRO_interface.o \
+          EXPRO_globals.o \
           EXPRO_alloc.o \
           EXPRO_palloc.o \
           EXPRO_alloc_control.o \
@@ -30,5 +31,5 @@ lib: $(OBJECTS)
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:
-	rm -f *.o $(LLIB).a ${GACODE_ROOT}/modules/expro_interface.mod
+	rm -f *.o $(LLIB).a ${GACODE_ROOT}/modules/expro_*.mod
 

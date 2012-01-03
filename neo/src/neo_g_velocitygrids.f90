@@ -6,64 +6,59 @@ module neo_g_velocitygrids
 
 contains  
 
-  subroutine g_energy(i_iter,ir)
+  subroutine g_energy(ir)
     use neo_globals
     use neo_equilibrium, only : w_theta
+    use neo_energy_grid
     implicit none
-    integer, intent(in) :: i_iter, ir
-    real, dimension(:), allocatable :: ene, zene
-    real :: energy_min, b_arg, xval
-    integer :: i, is, ie, ix, it, je
-    real, dimension(:,:,:,:), allocatable :: gall
+    integer, intent(in) :: ir
+    real, dimension(:), allocatable :: ene
+    real, dimension(:,:,:), allocatable :: xval
+    real :: xvall
+    real,parameter :: emin=0.0, emax=10.0
     integer,parameter :: ne=100
     integer,parameter :: io=52
+    integer :: i, is, ie, ix, it, je
+    real, dimension(:,:,:,:), allocatable :: gall
 
     allocate(ene(ne))
-    allocate(zene(ne))
-    if(collision_model == 1) then
-       energy_min = energy_min_connor
-    else
-       energy_min = 0.0
-    endif
     do je=1, ne
-       ene(je) = energy_min + (je-1) * (energy_max-energy_min) / (ne-1)
-       zene(je) = 2.0/(1.0-sqrt(energy_min/energy_max)) &
-            * sqrt(ene(je)/energy_max) &
-            - (1.0+sqrt(energy_min/energy_max)) &
-            / (1.0-sqrt(energy_min/energy_max))
+       ene(je) = emin + (je-1) * (emax-emin) / (ne-1)
     enddo
-    
+
+    allocate(xval(0:n_energy,ne,0:n_xi))
+    do ix=0, n_xi
+       do ie=0,n_energy
+          do je=1,ne
+             call compute_laguerre(ie,e_lag(ix)*0.5,sqrt(ene(je))**e_alpha,xvall)
+             xval(ie,je,ix) = xvall * sqrt(ene(je))**xi_beta_l(ix)
+          enddo
+       enddo
+    enddo
+
     allocate(gall(n_species,0:n_xi,n_theta,ne))
     gall(:,:,:,:) = 0.0
 
     do je=1, ne
-       if(zene(je) <= -1.0) then
-          b_arg = pi  ! use x = -1
-       else if(zene(je) >= 1.0) then
-          b_arg = 0.0 ! use x = 1
-       else
-          b_arg = acos(zene(je))
-       endif
        do i=1,n_row      
           is = is_indx(i)
           ie = ie_indx(i)
           ix = ix_indx(i)
           it = it_indx(i)
-          xval = cos((ie-1) * b_arg)
-          gall(is,ix,it,je) =  gall(is,ix,it,je) + xval * g(i)
+          gall(is,ix,it,je) =  gall(is,ix,it,je) + xval(ie,je,ix) * g(i)
        enddo
     enddo
 
-    if(write_out_mode > 0) then
-       if(i_iter == 1 .and. ir == 1) then
-          open(unit=io,file='g_ene_x.out',status='replace')
+    if(silent_flag == 0 .and. i_proc == 0) then
+       if(ir == 1) then
+          open(unit=io,file=trim(path)//'out.neo.g_ene_x',status='replace')
           do je=1,ne
              write (io,'(e16.8,$)') ene(je)
           enddo
           close(io)
-          open(unit=io,file='g_ene_y.out',status='replace')
+          open(unit=io,file=trim(path)//'out.neo.g_ene_y',status='replace')
        else
-          open(unit=io,file='g_ene_y.out',status='old',position='append')
+          open(unit=io,file=trim(path)//'out.neo.g_ene_y',status='old',position='append')
        endif
        do is=1, n_species
           do ix=0, n_xi
@@ -78,9 +73,9 @@ contains
     endif
 
     deallocate(ene)
-    deallocate(zene)
+    deallocate(xval)
     deallocate(gall)
-    
+
   end subroutine g_energy
 
   
@@ -133,8 +128,8 @@ contains
        enddo
     enddo
 
-    if(write_out_mode > 0) then
-       open(unit=io,file='g_xi.out',status='replace')
+    if(silent_flag == 0 .and. i_proc == 0) then
+       open(unit=io,file=trim(path)//'out.neo.g_xi',status='replace')
        do is=1, n_species
           do it=1, n_theta
              do jx=1, nxi
@@ -156,6 +151,24 @@ contains
     deallocate(g1)
     
   end subroutine g_xi
+
+  subroutine compute_laguerre(n,k,arg,val)
+    integer, intent (in) :: n
+    real, intent (in) :: k, arg
+    real, intent(out) :: val
+    integer :: i
+    real :: L0, L1
+
+    val = 1.0
+    L1  = 0.0
+    
+    do i=1,n
+       L0  = L1
+       L1  = val
+       val = ((2*i-1+k-arg) * L1 - (i-1+k)*L0) / (1.0*i)
+    enddo
+
+  end subroutine compute_laguerre
 
   subroutine compute_legendre(n,arg,val)
     integer, intent (in) :: n

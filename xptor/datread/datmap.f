@@ -66,9 +66,10 @@ c... only 2 max impurity ions
         endif
         nitot_exp(j-1)=nscale*ni_exp(j-1)+nz_exp(j-1)
         if(ipure.eq.1) nitot_exp(j-1)=ne_exp(j-1)
-        nfst_exp(j-1)=nscale*1.D-19*enbeam_d(j)
+        nfast_exp(j-1)=nscale*1.D-19*enbeam_d(j)
         ptot_exp(j-1)=nscale*ptot_d(j)/1.6022D+3
         pfast_exp(j-1)=nscale*pfast_d(j)/1.6022D+3
+        tfast_exp(j-1) = pfast_exp(j-1)/MAX(nfast_exp(j-1),1.0D-10)
         torque_exp(j-1)=torque_d(j)
         psir_exp(j-1)=psir_d(j)
         q_exp(j-1)=q_d(j)
@@ -247,18 +248,18 @@ c power in MW
      >   1.D-6*0.5D0*(dvoldr_p*qfusi_d(j)+dvoldr_m*qfusi_d(j-1))*drm
         pow_ei_exp(j-1)=pow_ei_exp(j-2)-
      >   1.D-6*0.5D0*(dvoldr_p*qdelt_d(j)+dvoldr_m*qdelt_d(j-1))*drm
-c flows in KA
+c flows in KA = 1.0E-3*e*flow=1.6022E-22*flow
         flow_wall_exp(j-1)=flow_wall_exp(j-2)+wallneut*
-     >       1.6022D-21*0.5D0*(dvoldr_p*(sion_d(j,1))+
+     >       1.6022D-22*0.5D0*(dvoldr_p*(sion_d(j,1))+
      >       dvoldr_m*(sion_d(j-1,1)))*drm
         flow_recom_exp(j-1)=flow_recom_exp(j-2)+
-     >       1.6022D-21*0.5D0*(dvoldr_p*(srecom_d(j,1))+
+     >       1.6022D-22*0.5D0*(dvoldr_p*(srecom_d(j,1))+
      >       dvoldr_m*(srecom_d(j-1,1)))*drm 
-        flow_beam_exp(j-1)=flow_beam_exp(j-2)+1.6022D-21*0.5D0*
+        flow_beam_exp(j-1)=flow_beam_exp(j-2)+1.6022D-22*0.5D0*
      >       (dvoldr_p*(snbscale*sbeam_d(j)+sbcx_d(j,1))+
      >       dvoldr_m*(snbscale*sbeam_d(j-1)+sbcx_d(j-1,1)))*drm
         flow_sdot_exp(j-1)=flow_sdot_exp(j-2)+
-     >       1.6022D-21*0.5D0*(dvoldr_p*dudtsv_d(j,1)+
+     >       1.6022D-22*0.5D0*(dvoldr_p*dudtsv_d(j,1)+
      >       dvoldr_m*dudtsv_d(j-1,1))*drm
       enddo
 c

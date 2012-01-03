@@ -61,7 +61,6 @@ NEO_DIR=$GACODE_ROOT/neo
 NPROC=1
 # Execute/test mode flags
 EXEC_FLAG=0
-TEST_FLAG=0
 GENERATE_FLAG=0
 REGRESS_FLAG=0
 #=============================================================
@@ -75,8 +74,6 @@ while [ $# -gt 0 ] ; do
   -p) shift ; SIMROOT=$1 ;;
 
   -e) shift ; LOCDIR=$1 ; EXEC_FLAG=1 ;;
-
-  -t) shift ; LOCDIR=$1 ; TEST_FLAG=1 ;;
 
   -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
 
@@ -99,7 +96,7 @@ else
    SIMDIR=$SIMROOT/$LOCDIR
 fi
 
-RUN_FILE=$SIMDIR/run.out
+RUN_FILE=$SIMDIR/out.neo.run
 
 #============================================================
 # Check for inconsistent flags:
@@ -150,23 +147,9 @@ cd $SIMDIR
 #============================================================
 
 #==========================================================
-# Initialize halt file:
-#
-echo 0 > halt
-#==========================================================
-
-#==========================================================
 # echo number of tasks, then parse INPUT
 #
-echo "[NEO MPI tasks: $NPROC]" > $RUN_FILE
-echo "[Parsing data in input.neo]" >> $RUN_FILE
-
-python $NEO_DIR/bin/neo_parse.py >> $RUN_FILE
-if [ $? -eq 1 ] 
-then
-   cat $RUN_FILE
-   exit 1
-fi
+python $NEO_DIR/bin/neo_parse.py 
 #==========================================================
 
 #==========================================================
@@ -174,36 +157,9 @@ fi
 
 if [ -f input.profiles ]
 then 
-   python $GACODE_ROOT/shared/bin/profile_parse.py input.profiles >> $RUN_FILE
+   python $GACODE_ROOT/shared/bin/profile_parse.py input.profiles
 fi
 #==========================================================
-
-#==========================================================
-# Halt here if neo_parse or gyro_proparse returned a halt.
-#
-if [ `cat halt` = "1" ] 
-then
-   cat $RUN_FILE
-   exit 1
-fi
-#===========================================================
-
-#===========================================================
-# Set flags for execute or test:
-
-# Execute:
-if [ $EXEC_FLAG -eq 1 ] 
-then
-   neo_version_message 
-   echo "0" > "$SIMDIR/neotest_flag"
-fi
-
-# Test:
-if [ $TEST_FLAG -eq 1 ]
-then
-   echo "1" > "$SIMDIR/neotest_flag"
-fi
-#===========================================================
 
 #===========================================================
 # RUN NEO
@@ -213,20 +169,18 @@ fi
 if [ $EXEC_FLAG -eq 1 ] 
 then
 
+    rm -f out.neo.*
+
+   neo_version_message 
+
   #==========================================================
   # Version stamp:
-  echo `gacode_getversion` > VERSION_tag 
-  echo $GACODE_PLATFORM >> VERSION_tag
-  date >> VERSION_tag
+  echo `gacode_getversion` > out.neo.version 
+  echo $GACODE_PLATFORM >> out.neo.version
+  date >> out.neo.version
   #==========================================================
 
   $NEO_DIR/src/neo
 
-fi
-
-# Test mode
-if [ $TEST_FLAG -eq 1 ] 
-then
-   cat $RUN_FILE
 fi
 #===========================================================

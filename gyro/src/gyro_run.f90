@@ -1,9 +1,19 @@
-!-----------------------------------------------------------
+!---------------------------------------------------------------
 ! gyro_run.f90
 !
 ! PURPOSE:
-!  Manage call to local GYRO simulation.
-!---------------------------------------------------------
+!  This is the actual system call to run GYRO via subroutine 
+!  interface (i.e, from TGYRO).
+!
+! NOTES:
+! - To run GYRO as a subroutine, do this:
+!   call gyro_init
+!   call gyro_run
+!  
+! - To run inside TGYRO, we do this:
+!   call tgyro_gyro_map (calls gyro_init)
+!   call gyro_run(...)
+!-------------------------------------------------------------
 
 subroutine gyro_run(&
      test_flag_in,&
@@ -21,9 +31,9 @@ subroutine gyro_run(&
 
 
   ! Input parameters (IN) - REQUIRED
-  integer, intent(in)             :: test_flag_in
-  integer, intent(in)             :: restart_method_in
-  integer, intent(in)             :: transport_method_in
+  integer, intent(in) :: test_flag_in
+  integer, intent(in) :: restart_method_in
+  integer, intent(in) :: transport_method_in
 
   ! Input parameters (OUT) - REQUIRED
   integer,          intent(inout) :: status_out
@@ -34,7 +44,6 @@ subroutine gyro_run(&
   integer :: n_start
   integer :: n_ave
   integer :: err
-  real, parameter :: f_ave = 0.9
 
   ! Set corresponding global variables
   gyrotest_flag    = test_flag_in
@@ -59,11 +68,12 @@ subroutine gyro_run(&
      gyro_ti_over_te_3_in = gyro_ti_over_te_in
   endif
 
-  ! Map INTERFACE parameters -> GLOBAL variables
+  ! Map INTERFACE parameters -> GLOBAL variables and allocate output arrays
   call map_interface2global
 
   ! Run GYRO
   call gyro_do
+  call send_line('STATUS: '//gyro_exit_message)
 
   ! Get output information
 
@@ -91,58 +101,55 @@ subroutine gyro_run(&
 
   endif
 
-  ! Nonlinear transport
+  !-------------------------------------------------------------------------------------- 
+  ! Pack transport fluxes into interface output arrays
+  !
   if (i_proc == 0 .and. transport_method == 2) then
 
-     n_start = max(int((1.0-f_ave)*data_step),1)
-
-     n_ave = data_step+2-n_start
-
      if (electron_method == 2) then
-        ! Gamma_e/Gamma_GB
-        gyro_elec_pflux_out = &
-             sum(gbflux_vec(indx_e,1:n_field,1,n_start:data_step+1))/n_ave
-        ! Q_e/Q_GB
-        gyro_elec_eflux_out = &
-             sum(gbflux_vec(indx_e,1:n_field,2,n_start:data_step+1))/n_ave
-        ! Pi_e/Pi_GB
-        gyro_elec_mflux_out = &
-             sum(gbflux_vec(indx_e,1:n_field,3,n_start:data_step+1))/n_ave
-        ! H_e/H_GB
-        gyro_elec_expwd_out = &
-             sum(gbflux_vec(indx_e,1:n_field,4,n_start:data_step+1))/n_ave
+        do i=1,n_x
+           ! Gamma_e/Gamma_GB
+           gyro_elec_pflux_out(i) = sum(gbflux_vec(indx_e,1:n_field,1,i))
+           ! Q_e/Q_GB
+           gyro_elec_eflux_out(i) = sum(gbflux_vec(indx_e,1:n_field,2,i))
+           ! Pi_e/Pi_GB
+           gyro_elec_mflux_out(i) = sum(gbflux_vec(indx_e,1:n_field,3,i))
+           ! H_e/H_GB
+           gyro_elec_expwd_out(i) = sum(gbflux_vec(indx_e,1:n_field,4,i))
+        enddo
      endif
 
      do i_ion=1,n_ion
-
-        ! Gamma_i/Gamma_GB
-        gyro_ion_pflux_out(i_ion) = &
-             sum(gbflux_vec(i_ion,1:n_field,1,n_start:data_step+1))/n_ave
-        ! Q_i/Q_GB
-        gyro_ion_eflux_out(i_ion) = &
-             sum(gbflux_vec(i_ion,1:n_field,2,n_start:data_step+1))/n_ave
-        ! Pi_i/Pi_GB
-        gyro_ion_mflux_out(i_ion) = &
-             sum(gbflux_vec(i_ion,1:n_field,3,n_start:data_step+1))/n_ave
-        ! H_i/H_GB
-        gyro_ion_expwd_out(i_ion) = &
-             sum(gbflux_vec(i_ion,1:n_field,4,n_start:data_step+1))/n_ave
-
+        do i=1,n_x
+           ! Gamma_i/Gamma_GB
+           gyro_ion_pflux_out(i,i_ion) = sum(gbflux_vec(i_ion,1:n_field,1,i))
+           ! Q_i/Q_GB
+           gyro_ion_eflux_out(i,i_ion) = sum(gbflux_vec(i_ion,1:n_field,2,i))
+           ! Pi_i/Pi_GB
+           gyro_ion_mflux_out(i,i_ion) = sum(gbflux_vec(i_ion,1:n_field,3,i))
+           ! H_i/H_GB
+           gyro_ion_expwd_out(i,i_ion) = sum(gbflux_vec(i_ion,1:n_field,4,i))
+        enddo
      enddo
 
   endif
+  !-------------------------------------------------------------------------------------- 
 
+  !-------------------------------------------------------------------------------------- 
+  ! Broadcast results to all cores:
+  !
   ! Electrons
-  call MPI_BCAST(gyro_elec_pflux_out, 1, MPI_DOUBLE_PRECISION, 0, GYRO_COMM_WORLD, err)
-  call MPI_BCAST(gyro_elec_eflux_out, 1, MPI_DOUBLE_PRECISION, 0, GYRO_COMM_WORLD, err)
-  call MPI_BCAST(gyro_elec_mflux_out, 1, MPI_DOUBLE_PRECISION, 0, GYRO_COMM_WORLD, err)
-  call MPI_BCAST(gyro_elec_expwd_out, 1, MPI_DOUBLE_PRECISION, 0, GYRO_COMM_WORLD, err)
+  call MPI_BCAST(gyro_elec_pflux_out,n_x,MPI_DOUBLE_PRECISION,0,GYRO_COMM_WORLD,err)
+  call MPI_BCAST(gyro_elec_eflux_out,n_x,MPI_DOUBLE_PRECISION,0,GYRO_COMM_WORLD,err)
+  call MPI_BCAST(gyro_elec_mflux_out,n_x,MPI_DOUBLE_PRECISION,0,GYRO_COMM_WORLD,err)
+  call MPI_BCAST(gyro_elec_expwd_out,n_x,MPI_DOUBLE_PRECISION,0,GYRO_COMM_WORLD,err)
 
   ! Ions
-  call MPI_BCAST(gyro_ion_pflux_out, n_ion, MPI_DOUBLE_PRECISION, 0, GYRO_COMM_WORLD, err)
-  call MPI_BCAST(gyro_ion_eflux_out, n_ion, MPI_DOUBLE_PRECISION, 0, GYRO_COMM_WORLD, err)
-  call MPI_BCAST(gyro_ion_mflux_out, n_ion, MPI_DOUBLE_PRECISION, 0, GYRO_COMM_WORLD, err)
-  call MPI_BCAST(gyro_ion_expwd_out, n_ion, MPI_DOUBLE_PRECISION, 0, GYRO_COMM_WORLD, err)
+  call MPI_BCAST(gyro_ion_pflux_out,n_x*n_ion,MPI_DOUBLE_PRECISION,0,GYRO_COMM_WORLD,err)
+  call MPI_BCAST(gyro_ion_eflux_out,n_x*n_ion,MPI_DOUBLE_PRECISION,0,GYRO_COMM_WORLD,err)
+  call MPI_BCAST(gyro_ion_mflux_out,n_x*n_ion,MPI_DOUBLE_PRECISION,0,GYRO_COMM_WORLD,err)
+  call MPI_BCAST(gyro_ion_expwd_out,n_x*n_ion,MPI_DOUBLE_PRECISION,0,GYRO_COMM_WORLD,err)
+  !-------------------------------------------------------------------------------------- 
 
   call gyro_cleanup
 

@@ -14,7 +14,6 @@ subroutine prgen_read_plasmastate
 
   ! NetCDF variables
   integer :: i
-  integer :: ip
   integer :: ncid
   integer :: varid
   integer :: err
@@ -41,18 +40,19 @@ subroutine prgen_read_plasmastate
   err = nf90_Inquire_Dimension(ncid,varid,len=plst_dp1_nspec_th)
   if (verbose_flag == 1)  print *,err,plst_tag,plst_dp1_nspec_th
 
-  ! Number of thermal species 
+  ! Number of thermal species (abridged)
   plst_tag = 'dp1_nspec_tha'
   err = nf90_inq_dimid(ncid,trim(plst_tag),varid)
   err = nf90_Inquire_Dimension(ncid,varid,len=plst_dp1_nspec_tha)
-  if (verbose_flag == 1) print *,err,plst_tag,plst_dp1_nspec_tha
-
-  if (plst_dp1_nspec_th /= plst_dp1_nspec_tha) then
-     print *,'ERROR: plst_dp1_nspec_th /= plst_dp1_nspec_tha'
-     stop
-  endif
+  if (verbose_flag == 1)  print *,err,plst_tag,plst_dp1_nspec_tha
 
   ! Number of species (thermal + fast)
+  plst_tag = 'dp1_nspec_all'
+  err = nf90_inq_dimid(ncid,trim(plst_tag),varid)
+  err = nf90_Inquire_Dimension(ncid,varid,len=plst_dp1_nspec_all)
+  if (verbose_flag == 1) print *,err,plst_tag,plst_dp1_nspec_all
+
+  ! Number of species (thermal + fast, abridged)
   plst_tag = 'dp1_nspec_alla'
   err = nf90_inq_dimid(ncid,trim(plst_tag),varid)
   err = nf90_Inquire_Dimension(ncid,varid,len=plst_dp1_nspec_alla)
@@ -79,21 +79,15 @@ subroutine prgen_read_plasmastate
   call allocate_internals
   call allocate_plasmastate_vars
 
-  ! Species names
+  ! Species names (abridged)
   plst_tag = 'ALLA_name'
   err = nf90_inq_varid(ncid,trim(plst_tag),varid)
   err = nf90_get_var(ncid,varid,plst_alla_name(1:plst_dp1_nspec_alla))
-  print '(a)','INFO: Found these ion species'
-  do i=2,plst_dp1_nspec_alla
-     ip = reorder_vec(i-1)+1
-     if (i <= 6) then
-        print '(t6,i2,1x,3(a))',&
-             i-1,trim(plst_alla_name(i)),' -> ',trim(plst_alla_name(ip))
-     else
-        print '(t6,i2,1x,3(a))',&
-             i-1,trim(plst_alla_name(i)),' [unmapped]'
-     endif
-  enddo
+
+  ! Species names
+  plst_tag = 'ALL_name'
+  err = nf90_inq_varid(ncid,trim(plst_tag),varid)
+  err = nf90_get_var(ncid,varid,plst_all_name(1:plst_dp1_nspec_all))
 
   ! Flux-surface volume
   err = nf90_inq_varid(ncid,trim('vol'),varid)
@@ -106,6 +100,10 @@ subroutine prgen_read_plasmastate
   ! B_phi orientation
   err = nf90_inq_varid(ncid,trim('kccw_Bphi'),varid)
   err = nf90_get_var(ncid,varid,plst_kccw_bphi)
+
+  ! J_phi orientation
+  err = nf90_inq_varid(ncid,trim('kccw_Jphi'),varid)
+  err = nf90_get_var(ncid,varid,plst_kccw_jphi)
 
   ! Root of normalized toroidal flux (rho)
   err = nf90_inq_varid(ncid,trim('rho'),varid)
@@ -149,9 +147,9 @@ subroutine prgen_read_plasmastate
   err = nf90_get_var(ncid,varid,plst_z_midp(:))
 
   ! Z_eff
-  err = nf90_inq_varid(ncid,trim('Zeff_th'),varid)
-  err = nf90_get_var(ncid,varid,plst_zeff_th(1:nx-1))
-  plst_zeff_th(nx) = 0.0
+  err = nf90_inq_varid(ncid,trim('Zeff'),varid)
+  err = nf90_get_var(ncid,varid,plst_zeff(1:nx-1))
+  plst_zeff(nx) = 0.0
 
   ! Temperatures
   err = nf90_inq_varid(ncid,trim('Ts'),varid)
@@ -250,8 +248,8 @@ subroutine prgen_read_plasmastate
 
   err = nf90_close(ncid)
 
-  ! Ensure zero of flux 
-  dpsi(:) = plst_psipol(:)-plst_psipol(1)
+  ! Ensure zero of flux and correct sign
+  dpsi(:) = abs(plst_psipol(:)-plst_psipol(1))*(-plst_kccw_jphi)
 
   ! Compute rmin and rmaj based on outer and 
   ! inner major radii at midplane (of course, 

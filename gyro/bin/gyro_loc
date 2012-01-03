@@ -5,11 +5,7 @@
 #  gyro_loc
 #
 # FUNCTION:
-#  Extract local parameters from run.out
-#
-# REVISIONS:
-# 28 March 2006: jc
-#  Added documentation.
+#  Extract local parameters from out.gyro.run
 #--------------------------------------------------
 
 import sys
@@ -25,13 +21,13 @@ if n == 1:
     print " -a :  create new INPUT.append with local data"
     print
     print "Note: must be run in a sim directory containing"
-    print "      a run.out file."
+    print "      a out.gyro.run file."
     sys.exit(0)	
 
 try:
-    file=open('run.out','r')
+    file=open('out.gyro.run','r')
 except IOError:
-    print 'run.out is missing.  Run \'gyro -t\' first.'
+    print 'out.gyro.run is missing.  Run \'gyro -t\' first.'
     sys.exit(0)
 
 append=0

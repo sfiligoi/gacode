@@ -1,0 +1,6 @@
+Local gyrokinetic templates:
+
+ ade_c1              GA standard case
+                     - ions, adiabtic electrons
+                     - s-alpha geometry
+                     - Connor collisions
