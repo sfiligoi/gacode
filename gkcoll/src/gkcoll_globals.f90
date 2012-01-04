@@ -81,6 +81,9 @@ module gkcoll_globals
   real    :: max_time
   real    :: freq_tol
   integer :: imp_flag
+  integer :: restart_write
+  integer :: restart_mode
+  character(len=80)  :: runfile_restart = 'out.gkcoll.restart'
 
   real    :: rupwind_eps
   integer :: rupwind_n
