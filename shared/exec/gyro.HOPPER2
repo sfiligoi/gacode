@@ -55,6 +55,17 @@ fi
 
 # MPI tasks per node
 mpinode=$(($mpinuma*$numa))
+# Not enought MPI tasks to fill node?
+if [ $nmpi -lt $mpinode ]
+then
+   mpinode=$nmpi
+fi
+# Not enought MPI tasks to fill numa?
+if [ $nmpi -lt $mpinuma ]
+then
+   mpinuma=$nmpi
+fi
+
 # Nodes requested 
 nodes=$(($nmpi/$mpinode))
 
