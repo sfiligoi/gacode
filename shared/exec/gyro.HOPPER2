@@ -64,6 +64,7 @@ fi
 if [ $nmpi -lt $mpinuma ]
 then
    mpinuma=$nmpi
+   numa=1
 fi
 
 # Nodes requested 
