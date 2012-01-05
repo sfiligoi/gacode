@@ -2,6 +2,10 @@
 # Cray XK6 (not the car) [PGI]
 #---------------------------------------------------
 
+# FIXED Hardware parameters
+CORES_PER_NODE=16
+NUMAS_PER_NODE=2
+
 # Compilers and flags
 
 # Fortran 90/95 compiler

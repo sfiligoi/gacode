@@ -76,10 +76,6 @@ then
   echo "         -s <simdir>" 
   echo "         Create small portable copy of <simdir>."
   echo 
-  echo "         -pk <simdir> -pw <window>"
-  echo "         Summarize transport coefficients, with optional" 
-  echo "         averaging window: 0 < <window> <= 1"
-  echo
   echo "         -h" 
   echo "         Version and platform information."
 
@@ -99,8 +95,8 @@ GYRO_DIR=$GACODE_ROOT/gyro
 # Parallelization parameters
 NPROC=1
 NOMP=1
-NUMA=1
-MPINUMA=1
+NUMA=0
+MPINUMA=0
 # Execute/test mode flags
 EXEC_FLAG=0
 TEST_FLAG=0
@@ -109,8 +105,6 @@ GENERATE_FLAG=0
 REGRESS_FLAG=0
 SCOPY_FLAG=0
 KILL_STATUS=2
-PEEK_FLAG=0
-PEEK_WINDOW=0.5
 #=============================================================
 
 #=============================================================

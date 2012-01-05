@@ -5,23 +5,10 @@
 #
 # FUNCTION:
 #  Parallel execution script
-#
-# HOPPER SYSTEM INFO:
-# - Cray XE6
-# - 153,216 processor cores
-# - 6,384 compute nodes
-# - (2x) AMD Opteron 6172 (Magny-Cours) 12-core CPUs per 
-#   compute node running at 2.1GHz
-# - (4x) ccNUMA nodes per compute node (each CPU consists 
-#   two 6-core NUMA nodes)
-# - each compute node has 32GiB RAM (1.3GiB per core)
-# - (1x) Gemini ASIC per 2 compute nodes arranged in 3D 
-#   torus network topology
-#
-#  FIXED Hardware parameters
-CORES_PER_NODE=24
-NUMAS_PER_NODE=4
 #---------------------------------------------------
+
+# Extract CORES_PER_NODE and NUMAS_PER_NODE
+export `grep PER_NODE $GACODE_ROOT/shared/install/make.inc.$GACODE_PLATFORM`
 
 simdir=${1}
 nmpi=${2}
@@ -48,7 +35,7 @@ fi
 cd $simdir
 
 #=========================================================================
-# Calculator for parallel layout (identical code in queue_go.*)
+# Calculator for parallel layout (identical code in queue.*)
 
 # See if we are asking for too many NUMAs
 if [ $numa -gt $NUMAS_PER_NODE ] 
@@ -67,7 +54,7 @@ then
 fi
 
 # MPI tasks per node
-mpinode=$(($mpinuma*$NUMAS_PER_NODE))
+mpinode=$(($mpinuma*$numa))
 # Nodes requested 
 nodes=$(($nmpi/$mpinode))
 
@@ -85,4 +72,4 @@ cores_used=$(($nomp*$nmpi))
 
 export MPICH_MAX_THREAD_SAFETY=funneled
 export OMP_NUM_THREADS=$nomp
-aprun -n $nmpi -N $mpinode -d $nomp -S $mpinuma -ss $exec
+aprun -n $nmpi -N $mpinode -d $nomp -S $mpinuma -sn $numa -ss $exec
