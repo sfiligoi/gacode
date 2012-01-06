@@ -25,6 +25,8 @@ module gkcoll_interface
   real    :: gkcoll_max_time_in = 100.0
   real    :: gkcoll_freq_tol_in = 0.001
   integer :: gkcoll_imp_flag_in = 0
+  integer :: gkcoll_restart_write_in = 0
+  integer :: gkcoll_restart_mode_in  = 0
   real    :: gkcoll_rupwind_eps_in = 0.0
   integer :: gkcoll_rupwind_n_in = 0
   real    :: gkcoll_tupwind_eps_in = 1.0
@@ -131,6 +133,8 @@ contains
     gkcoll_max_time_in = max_time
     gkcoll_freq_tol_in = freq_tol
     gkcoll_imp_flag_in = imp_flag
+    gkcoll_restart_write_in = restart_write
+    gkcoll_restart_mode_in  = restart_mode
     gkcoll_rupwind_eps_in = rupwind_eps
     gkcoll_rupwind_n_in = rupwind_n
     gkcoll_tupwind_eps_in = tupwind_eps
@@ -225,6 +229,8 @@ contains
     max_time = gkcoll_max_time_in
     freq_tol = gkcoll_freq_tol_in
     imp_flag = gkcoll_imp_flag_in
+    restart_write = gkcoll_restart_write_in
+    restart_mode  = gkcoll_restart_mode_in  
     rupwind_eps = gkcoll_rupwind_eps_in
     rupwind_n = gkcoll_rupwind_n_in
     tupwind_eps = gkcoll_tupwind_eps_in

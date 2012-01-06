@@ -2,6 +2,10 @@
 # Cray XT4 (franklin.nersc.gov) (PGI)
 #---------------------------------------------------
 
+# FIXED Hardware parameters
+CORES_PER_NODE=4
+NUMAS_PER_NODE=1
+
 #include ${SLEPC_DIR}/bmake/slepc_common_variables
 
 # Compilers and flags
@@ -30,7 +34,8 @@ NETCDF_INC = /usr/common/usg/netcdf/default/include
 # version makes some things easier.
 # Set these to blanks to turn off:
 
-HDF5_LIBS = -L/opt/cray/hdf5-parallel/default/hdf5-parallel-pgi/lib -lhdf5_fortran -lhdf5 -L/usr/common/usg/szip/2.1/lib -lsz -lz
+HDF5_LIBS = -L/opt/cray/hdf5-parallel/default/hdf5-parallel-pgi/lib \
+            -lhdf5_fortran -lhdf5 -L/usr/common/usg/szip/2.1/lib -lsz -lz
 HDF5_INC = -I/opt/cray/hdf5-parallel/default/hdf5-parallel-pgi/include
 VSHDF5_MAKECMD=vshdf5
 

@@ -209,6 +209,11 @@ subroutine gkcoll_do
      close(myio)
   endif
 
+  if(restart_write == 1) then
+     open(unit=io_gkcollout,file=trim(path)//runfile_restart,status='replace')
+     write(io_gkcollout,*) h_x
+     close(io_gkcollout)
+  endif
 
 100 continue
   call EQUIL_alloc(0)
