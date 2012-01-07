@@ -15,7 +15,7 @@ contains
   subroutine COLLISION_alloc(flag)
     use gkcoll_globals
     use gkcoll_gyro
-    use gkcoll_equilibrium, only : omega_trap
+    use gkcoll_equilibrium, only : omega_trap, k_perp
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
     real, dimension(:,:,:), allocatable :: nu_d
@@ -140,7 +140,8 @@ contains
                                cmat(ir,it,p,pp)  &
                                     =  cmat(ir,it,p,pp) &
                                     - z(is)/temp(is) / &
-                                    (-lambda_debye**2 * dens_ele / temp_ele &
+                                    (-k_perp(it,ir)**2 * lambda_debye**2 &
+                                    * dens_ele / temp_ele &
                                      + sum_den) &
                                     * (2.0*indx_xi(ix) + 1) &
                                     * gyrop_J0(is,ir,it,ie,ix) &
@@ -149,7 +150,8 @@ contains
                                amat(p,pp)  &
                                     =  amat(p,pp) &
                                     - z(is)/temp(is) / &
-                                    (-lambda_debye**2 * dens_ele / temp_ele &
+                                    (-k_perp(it,ir)**2 * lambda_debye**2 &
+                                    * dens_ele / temp_ele &
                                      + sum_den) &
                                     * (2.0*indx_xi(ix) + 1) &
                                     * gyrop_J0(is,ir,it,ie,ix) &
@@ -159,7 +161,7 @@ contains
                                ! Trapping component
                                if(trap_method /= 0) then
                                   if(is==js .and. ie==je) then
-                                     if(jx == ix+1) then
+                                     if(indx_xi(jx) == indx_xi(ix+1)) then
                                         cmat(ir,it,p,pp)  &
                                              =  cmat(ir,it,p,pp) & 
                                              + (0.5*delta_t) &
@@ -176,7 +178,7 @@ contains
                                              * (indx_xi(ix)+1.0) &
                                              * (indx_xi(ix)+2.0) &
                                              / (2*indx_xi(ix)+3.0)
-                                     else if(jx == ix-1) then
+                                     else if(indx_xi(jx) == indx_xi(ix-1)) then
                                         cmat(ir,it,p,pp)  &
                                              =  cmat(ir,it,p,pp) & 
                                              + (0.5*delta_t) &
