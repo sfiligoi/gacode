@@ -12,7 +12,6 @@ subroutine tgyro_write_data(i_print)
 
   use mpi
   use tgyro_globals
-  use EXPRO_interface
 
   implicit none
 
@@ -457,34 +456,6 @@ subroutine tgyro_write_data(i_print)
   backspace(1)
   write(1,*) i_tran
   close(1)
-
-  if (tgyro_global_flag == 1) then
-
-     !--------------------------------------------------------
-     ! Global TGYRO
-
-     EXPRO_ctrl_density_method = loc_quasineutral_flag+1
-     EXPRO_ctrl_z = 0.0
-     EXPRO_ctrl_z(1:loc_n_ion) = zi_vec(1:loc_n_ion)
-     EXPRO_ctrl_numeq_flag = loc_num_equil_flag
-     EXPRO_ctrl_signq = tgyro_ipccw_in*tgyro_btccw_in
-     EXPRO_ctrl_signb = -tgyro_btccw_in
-     EXPRO_ctrl_rotation_method = 1
-
-     call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
-     call EXPRO_pread
-
-     ! Overlay profiles
-
-     ! XXXXX
-
-     call EXPRO_write_original(' ')
-     call EXPRO_palloc(MPI_COMM_WORLD,'./',0)
-     !--------------------------------------------------------
-
-  endif
-
-
 
   ! Data
 10 format(t1,11(1pe13.6,1x))

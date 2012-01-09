@@ -62,7 +62,6 @@ x.add('TGYRO_STAB_KYMIN','0.2')
 x.add('TGYRO_STAB_DELTAKY','0.1')
 x.add('TGYRO_RMIN','-1.0')
 x.add('TGYRO_RMAX','0.9')
-x.add('TGYRO_GLOBAL_FLAG','0')
 
 # Deprecated parameters
 x.dep('LOC_N_FEEDBACK','new parameter is LOC_NE_FEEDBACK_FLAG')

@@ -98,7 +98,6 @@ subroutine tgyro_read_input
   call tgyro_readbc_real(tgyro_stab_deltaky)
   call tgyro_readbc_real(tgyro_rmin)
   call tgyro_readbc_real(tgyro_rmax)
-  call tgyro_readbc_int(tgyro_global_flag)
   ! ** END add new parameters
   call tgyro_readbc_int(n_inst)
   !-------------------------------------------------------
@@ -113,7 +112,6 @@ subroutine tgyro_read_input
      do i=1,n_inst
 
         read(1,*) ipath,procs(i)
-
         ind = index(ipath,' ')
 
         ! Append '/' to path name for use later
