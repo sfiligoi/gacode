@@ -29,10 +29,10 @@ NETCDF_INC = ${CRAY_NETCDF_DIR}/pgi/109/include
 
 HDF5_INC = -I${CRAY_HDF5_DIR}/hdf5-parallel-pgi/include
 HDF5_LIBS = \
-  ${CRAY_HDF5_DIR}/hdf5-parallel-pgi/lib/libhdf5_hl.a \
-  ${CRAY_HDF5_DIR}/hdf5-parallel-pgi/lib/libhdf5hl_fortran.a \
-  ${CRAY_HDF5_DIR}/hdf5-parallel-pgi/lib/libhdf5_fortran.a \
-  ${CRAY_HDF5_DIR}/hdf5-parallel-pgi/lib/libhdf5.a
+  ${HDF5_DIR}/lib/libhdf5_hl.a \
+  ${HDF5_DIR}/lib/libhdf5hl_fortran.a \
+  ${HDF5_DIR}/lib/libhdf5_fortran.a \
+  ${HDF5_DIR}/lib/libhdf5.a
 
 VSHDF5_MAKECMD=vshdf5
 
