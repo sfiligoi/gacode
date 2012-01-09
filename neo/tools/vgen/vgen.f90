@@ -533,6 +533,8 @@ program vgen
 
   deallocate(er_exp)
 
+  call EXPRO_palloc(MPI_COMM_WORLD,path,0)
+
   call MPI_finalize(i_err)
 
 10 format('r/a=',f6.4,3x,'Er_0(kV/m)=',f9.4,3x,'vtor_1(km/s)=',f9.4,3x,'vpol_1(km/s)=',f9.4)
