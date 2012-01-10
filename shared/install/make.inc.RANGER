@@ -1,0 +1,37 @@
+#---------------------------------------------------
+# Generic {Opteron 64,Portland Group}  
+#---------------------------------------------------
+
+# Compilers and flags
+
+FC	= mpif90 -module $(GACODE_ROOT)/modules
+F77	= mpif90
+
+FMATH	= -r8 
+FOPT	= -fastsse -tp k8-64 -O2
+FDEBUG	= -g -Ktrap=fp -Mbounds -Minform=warn
+FBOUND	= -Minform=warn -Mbounds
+FPROF	= -Mprof=lines
+
+# System math libraries
+
+LMATH = /share/apps/pgi7_2/mvapich1_1_0_1/scalapack/1.8.0/lib/libscalapack.a \
+         /share/apps/pgi7_2/mvapich1_1_0_1/scalapack/1.8.0/lib/blacsF77init_MPI-LINUX-0.a \
+         /share/apps/pgi7_2/mvapich1_1_0_1/scalapack/1.8.0/lib/blacsCinit_MPI-LINUX-0.a \
+         /share/apps/pgi7_2/mvapich1_1_0_1/scalapack/1.8.0/lib/blacsCinit_MPI-LINUX-0.a \
+         /share/apps/pgi/7.1/linux86-64/7.1-2/lib/liblapack.a \
+         /share/apps/pgi/7.1/linux86-64/7.1-2/lib/libblas.a \
+         /share/apps/pgi/7.1/linux86-64/7.1-2/lib-gh/libblas.a\
+         
+# OPTIONAL: netCDF (for gyro2gkv)
+
+#NETCDF = $TACC_NETCDF_LIB/libnetcdf.a
+NETCDF = /share/apps/pgi7_2/netcdf/3.6.2/lib/libnetcdf.a
+
+#NETCDF_INC = $TACC_NETCDF_INC
+NETCDF_INC = /share/apps/pgi7_2/netcdf/3.6.2/include
+
+# Archive 
+
+ARCH = ar cr
+
