@@ -1,17 +1,21 @@
 #---------------------------------------------------
-# Generic {Opteron 64,Portland Group}  
+# Texas Ranger (16 Opteron cores per node)
 #---------------------------------------------------
+
+#  FIXED Hardware parameters
+CORES_PER_NODE=16
+NUMAS_PER_NODE=4
 
 # Compilers and flags
 
 FC	= mpif90 -module $(GACODE_ROOT)/modules
 F77	= mpif90
 
-FMATH	= -r8 
-FOPT	= -fastsse -tp k8-64 -O2
-FDEBUG	= -g -Ktrap=fp -Mbounds -Minform=warn
-FBOUND	= -Minform=warn -Mbounds
-FPROF	= -Mprof=lines
+FMATH  = -r8 
+FOPT   = -fast -Mipa=safe 
+FDEBUG = -Ktrap=fp -Mbounds -Minfo=all 
+FOMP   = -mp
+FNOMP  = 
 
 # System math libraries
 

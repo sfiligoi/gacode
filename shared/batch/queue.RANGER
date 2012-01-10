@@ -1,14 +1,10 @@
 #! /usr/bin/env bash
 #
 # SCRIPT:
-#  queue.FRANKLIN
+#  queue.RANGER
 #
 # FUNCTION:
-#  Batchfor Cray XT4 (franklin.nersc.gov)  
-#
-#  FIXED Hardware parameters
-CORES_PER_NODE=4
-NUMAS_PER_NODE=1
+#  Batch generator for UTexas Ranger.
 #---------------------------------------------------
 
 nmpi=${1}
@@ -19,56 +15,12 @@ nomp=${5}
 numa=${6}
 mpinuma=${7}
 
-# Default to densely-packed pure-MPI.
-if [ $numa -eq 0 ]
-then
-   numa=$NUMAS_PER_NODE
-fi
-if [ $mpinuma -eq 0 ]
-then
-   mpinuma=$(($CORES_PER_NODE/$NUMAS_PER_NODE))
-fi
-
 # nmpi = MPI tasks
 # nomp = OpenMP threads per MPI task
 # numa = NUMAs active per node
 # mpinuma = MPI tasks per active NUMA 
 
-#=========================================================================
-# Calculator for parallel layout
-
-# See if we are asking for too many NUMAs
-if [ $numa -gt $NUMAS_PER_NODE ] 
-then
-  echo 'Too many NUMAs per node requested'
-  exit 1
-fi
-
-# See if we are asking for too many OpenMP tasks
-i1=$(($nomp*$mpinuma))
-i2=$(($CORES_PER_NODE/$NUMAS_PER_NODE)) 
-if [ $i1 -gt $i2 ] 
-then
-   echo 'Too many OpenMP tasks per MPI process'
-   exit 1
-fi
-
-# MPI tasks per node
-mpinode=$(($mpinuma*$NUMAS_PER_NODE))
-# Nodes requested 
-nodes=$(($nmpi/$mpinode))
-
-# If we need part of a node, then add a node
-if [ $nmpi -gt $(($nodes*$mpinode)) ] 
-then
-   nodes=$(($nodes+1))
-   echo "** WARNING **: Using partial node"
-fi
-
-# Final core counts
-cores_requested=$(($nodes*$CORES_PER_NODE))
-cores_used=$(($nomp*$nmpi))
-#=========================================================================
+. $GACODE_ROOT/shared/bin/gacode_mpi_tool
 
 echo "----------------------------------"
 echo "RANGER"
@@ -108,22 +60,17 @@ bfile=$simpath/$sim/batch.src
  
 # Copy appropriate commands to batch directory:
 
-# Repository selection
-getnim -U `whoami`
-
-echo "#!/bin/bash" >> $bfile
+echo "#!/bin/bash" > $bfile
 echo "#$ -V" >> $bfile
 echo "#$ -cwd" >> $bfile
-echo "#$ -N gyro" >> $bfile
+echo "#$ -N $sim" >> $bfile
 echo "#$ -o $simpath/$sim/batch.out" >> $bfile
 echo "#$ -e $simpath/$sim/batch.err" >> $bfile
-echo "#$ -pe 1way 16" >> $bfile
+echo "#$ -pe $mpinode""way $cores_requested" >> $bfile
 echo "#$ -q $queue" >> $bfile
 echo "#$ -l h_rt=$limit" >> $bfile
-#echo "#PBS -l mppwidth=$cores_requested" >> $bfile
 echo "#$ -m abe" >> $bfile
 echo "#$ -M $USER@physics.utexas.edu" >> $bfile
-echo "set -x" >> $bfile
 
 gyro_opts="-e $sim -n $nmpi -nomp $nomp -numa $numa -mpinuma $mpinuma -p $simpath"
 
