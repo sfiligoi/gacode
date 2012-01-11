@@ -11,6 +11,7 @@ subroutine tgyro_global_iteration_driver
   use tgyro_globals
   use tgyro_iteration_variables
   use EXPRO_interface
+  use gyro_interface
 
   implicit none
 
@@ -36,6 +37,8 @@ subroutine tgyro_global_iteration_driver
 
   call gyro_run(gyrotest_flag, gyro_restart_method, &
        transport_method, gyro_exit_status(1), gyro_exit_message(1))
+
+  !print *,gyro_elec_eflux_out
 
   !--------------------------------------------------------
   ! Global TGYRO

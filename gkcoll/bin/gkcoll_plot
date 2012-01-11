@@ -41,7 +41,8 @@ then
   echo "          <type> = field,"
   echo "                 = h,"
   echo "                 = h_cut,"
-  echo "                 = freq"
+  echo "                 = freq,"
+  echo "                 = zf (zonal flow potential plot)"
 
   exit 1
 fi
@@ -111,6 +112,12 @@ case "$PLOT_TYPE" in
 
    freq)  
 	python $PYROOT/plot_freq.py $FTYPE & ;;
+
+   zf)  
+	python $PYROOT/plot_zf.py $FTYPE & ;;
+
+   *)
+        echo "Unrecognized argument to -plot" ; exit 1 ;;
 
 esac 
 
