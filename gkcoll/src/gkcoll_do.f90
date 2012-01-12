@@ -55,6 +55,13 @@ subroutine gkcoll_do
   do ir=1,n_radial
      indx_r(ir) = -n_radial/2 + (ir-1)
   enddo
+  if(toroidal_model == 2) then
+     if(n_radial /= 1) then
+        print *, 'Error: For zf test, n_radial must be 1'
+        stop
+     endif
+     indx_r(1) = 1
+  endif
 
   ! set-up energy grid and weights
   allocate(energy(n_energy))

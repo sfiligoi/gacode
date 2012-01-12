@@ -80,6 +80,8 @@ contains
     integer :: info
     integer, dimension(:), allocatable :: i_piv
     complex, dimension(:), allocatable :: work
+    ! n=0 test
+    complex, dimension(:,:,:), allocatable :: pzf
 
     allocate(nu_d(n_energy,n_species,n_species))
 
@@ -119,6 +121,29 @@ contains
     enddo
     if(adiabatic_ele_model == 1) then
        sum_den = sum_den + dens_ele / temp_ele
+    endif
+
+    if(toroidal_model == 2 .and. adiabatic_ele_model == 1) then
+       allocate(pzf(n_radial,n_theta,n_theta))
+       pzf(:,:,:) = (0.0,0.0)
+       do ir=1,n_radial
+          do it=1,n_theta
+             pzf(ir,it,it) = -k_perp(it,ir)**2 * lambda_debye**2 &
+                  * dens_ele / temp_ele + sum_den
+             do jt=1,n_theta
+                pzf(ir,it,jt) = pzf(ir,it,jt) &
+                     - dens_ele / temp_ele * w_theta(jt)
+             enddo
+          enddo
+       enddo
+       allocate(work(n_theta))
+       allocate(i_piv(n_theta))
+       do ir=1,n_radial
+          call ZGETRF(n_theta,n_theta,pzf(ir,:,:),n_theta,i_piv,info)
+          call ZGETRI(n_theta,pzf(ir,:,:),n_theta,i_piv,work,n_theta,info)
+       enddo
+       deallocate(i_piv)
+       deallocate(work)
     endif
 
     ! cyclic index (for theta-periodicity)
@@ -270,37 +295,73 @@ contains
                    endif
 
                    ! phi: (-ze/T) * G * (1-dt/2 * i*omega_star) * phi
-                   val = (0.5*delta_t) * i_c * k_theta &
-                         * rho *sqrt(temp(is)*mass(is))/(1.0*z(is)) * vth(is) &
-                         * (dlnndr(is) + dlntdr(is) * (energy(ie)-1.5))
-                   jr=ir; jt=it
-                   do js=1,n_species
-                      do je=1,n_energy
-                         do jx=1,n_xi
-                            pp = indx_gmat(jr,jt,js,je,jx)
-                            gmat(p,pp)  &
-                                 =  gmat(p,pp) &
-                                 - z(is)/temp(is) / &
-                                 (-k_perp(it,ir)**2 * lambda_debye**2 &
-                                 * dens_ele / temp_ele + sum_den) &
-                                 * (2.0*indx_xi(ix) + 1) &
-                                 * gyrop_J0(is,ir,it,ie,ix) &
-                                 * z(js)*dens(js) &
-                                 * gyrop_J0(js,ir,it,je,jx) * w_e(je) &
-                                 * (1.0 - val)
-                            gexp(p,pp)  &
-                                 =  gexp(p,pp) &
-                                 - z(is)/temp(is) / &
-                                 (-k_perp(it,ir)**2 * lambda_debye**2 &
-                                 * dens_ele / temp_ele + sum_den) &
-                                 * (2.0*indx_xi(ix) + 1) &
-                                 * gyrop_J0(is,ir,it,ie,ix) &
-                                 * z(js)*dens(js) &
-                                 * gyrop_J0(js,ir,it,je,jx) * w_e(je) &
-                                 * (1.0 + val)
+                   if(toroidal_model == 2 .and. adiabatic_ele_model == 1) then
+                      val = (0.5*delta_t) * i_c * k_theta &
+                           * rho *sqrt(temp(is)*mass(is))/(1.0*z(is)) &
+                           * vth(is) &
+                           * (dlnndr(is) + dlntdr(is) * (energy(ie)-1.5))
+                      jr=ir
+                      do js=1,n_species
+                         do je=1,n_energy
+                            do jx=1,n_xi
+                               do jt=1,n_theta
+                                  pp = indx_gmat(jr,jt,js,je,jx)
+                                  gmat(p,pp)  &
+                                       =  gmat(p,pp) &
+                                       - z(is)/temp(is) &
+                                       * pzf(ir,it,jt) &
+                                       * (2.0*indx_xi(ix) + 1) &
+                                       * gyrop_J0(is,ir,it,ie,ix) &
+                                       * z(js)*dens(js) &
+                                       * gyrop_J0(js,ir,jt,je,jx) * w_e(je) &
+                                       * (1.0 - val)
+                                  gexp(p,pp)  &
+                                    =  gexp(p,pp) &
+                                    - z(is)/temp(is) &
+                                    * pzf(ir,it,jt) &
+                                    * (2.0*indx_xi(ix) + 1) &
+                                    * gyrop_J0(is,ir,it,ie,ix) &
+                                    * z(js)*dens(js) &
+                                    * gyrop_J0(js,ir,jt,je,jx) * w_e(je) &
+                                    * (1.0 + val)
+                               enddo
+                            enddo
                          enddo
                       enddo
-                   enddo
+                   else
+                      val = (0.5*delta_t) * i_c * k_theta &
+                           * rho *sqrt(temp(is)*mass(is))/(1.0*z(is)) &
+                           * vth(is) &
+                           * (dlnndr(is) + dlntdr(is) * (energy(ie)-1.5))
+                      jr=ir; jt=it
+                      do js=1,n_species
+                         do je=1,n_energy
+                            do jx=1,n_xi
+                               pp = indx_gmat(jr,jt,js,je,jx)
+                               gmat(p,pp)  &
+                                    =  gmat(p,pp) &
+                                    - z(is)/temp(is) / &
+                                    (-k_perp(it,ir)**2 * lambda_debye**2 &
+                                    * dens_ele / temp_ele + sum_den) &
+                                    * (2.0*indx_xi(ix) + 1) &
+                                    * gyrop_J0(is,ir,it,ie,ix) &
+                                    * z(js)*dens(js) &
+                                    * gyrop_J0(js,ir,it,je,jx) * w_e(je) &
+                                    * (1.0 - val)
+                               gexp(p,pp)  &
+                                    =  gexp(p,pp) &
+                                    - z(is)/temp(is) / &
+                                    (-k_perp(it,ir)**2 * lambda_debye**2 &
+                                    * dens_ele / temp_ele + sum_den) &
+                                    * (2.0*indx_xi(ix) + 1) &
+                                    * gyrop_J0(is,ir,it,ie,ix) &
+                                    * z(js)*dens(js) &
+                                    * gyrop_J0(js,ir,it,je,jx) * w_e(je) &
+                                    * (1.0 + val)
+                            enddo
+                         enddo
+                      enddo
+                   endif
 
                 enddo
              enddo
@@ -308,9 +369,37 @@ contains
        enddo
     enddo
 
+    ! n=0 test
+    !if(toroidal_model == 2) then
+    !   ir=n_radial/2+1
+    !      do it=1,n_theta
+    !         do is=1,n_species
+    !            do ie=1,n_energy
+    !               do ix=1,n_xi
+    !                  p = indx_gmat(ir,it,is,ie,ix)
+    !                  jr=n_radial/2+1
+    !                  do jt=1,n_theta
+    !                     do js=1,n_species
+    !                        do je=1,n_energy
+    !                           do jx=1,n_xi
+    !                              pp = indx_gmat(jr,jt,js,je,jx)
+    !                              gmat(p,pp) = 1.0
+    !                              gexp(p,pp) = 1.0
+    !                           enddo
+    !                        enddo
+    !                     enddo
+    !                  enddo
+    !               enddo
+    !            enddo
+    !         enddo
+    !      enddo
+    !   endif
+                                  
     deallocate(thcyc)
     deallocate(nu_d)
-
+    if(toroidal_model == 2 .and. adiabatic_ele_model == 1) then
+       deallocate(pzf)
+    endif
 
     ! Lapack factorization and inverse
     allocate(work(msize))
@@ -353,6 +442,20 @@ contains
           enddo
        enddo
     enddo
+
+    !if(toroidal_model == 2) then
+    !   ir=n_radial/2+1
+    !      do it=1,n_theta
+    !         do is=1,n_species
+    !            do ie=1,n_energy
+    !               do ix=1,n_xi
+    !                  p = indx_gmat(ir,it,is,ie,ix)
+    !                  cvec(p) = 0.0
+    !               enddo
+    !            enddo
+    !         enddo
+    !      enddo
+    !   endif
 
     ! Solve for H
     call ZGEMV('N',msize,msize,alpha,gmat,&

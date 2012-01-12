@@ -34,6 +34,7 @@ module gkcoll_interface
   integer :: gkcoll_toroidal_num_in  = 1
   real    :: gkcoll_rho_in      = 0.0025
   real    :: gkcoll_k_theta_rho_in  = 0.25
+  real    :: gkcoll_r_length_rho_in  = 64.0
   real    :: gkcoll_rmin_in     = 0.5
   real    :: gkcoll_rmaj_in     = 3.0
   integer :: gkcoll_silent_flag_in = 0
@@ -142,6 +143,7 @@ contains
     gkcoll_toroidal_num_in = toroidal_num
     gkcoll_rho_in      = rho
     gkcoll_k_theta_rho_in  = k_theta_rho
+    gkcoll_r_length_rho_in = r_length_rho
     gkcoll_rmin_in     = rmin
     gkcoll_rmaj_in     = rmaj
     gkcoll_silent_flag_in       = silent_flag
@@ -238,6 +240,7 @@ contains
     toroidal_num   = gkcoll_toroidal_num_in
     rho       = gkcoll_rho_in
     k_theta_rho  = gkcoll_k_theta_rho_in
+    r_length_rho = gkcoll_r_length_rho_in
     rmin     = gkcoll_rmin_in
     rmaj     = gkcoll_rmaj_in
     silent_flag       = gkcoll_silent_flag_in

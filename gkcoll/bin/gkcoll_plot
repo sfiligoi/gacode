@@ -42,7 +42,8 @@ then
   echo "                 = h,"
   echo "                 = h_cut,"
   echo "                 = freq,"
-  echo "                 = zf (zonal flow potential plot)"
+  echo "                 = zf (zonal flow potential plot),"
+  echo "                 = zffield"
 
   exit 1
 fi
@@ -115,6 +116,9 @@ case "$PLOT_TYPE" in
 
    zf)  
 	python $PYROOT/plot_zf.py $FTYPE & ;;
+
+   zffield)
+   	python $PYROOT/plot_zffield.py $FTYPE $TIME $FIELD & ;;
 
    *)
         echo "Unrecognized argument to -plot" ; exit 1 ;;

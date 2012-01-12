@@ -53,20 +53,30 @@ subroutine gkcoll_make_profiles
 
      q    = abs(q) * sign_q
 
-     if(toroidal_model == 0) then
+     if(toroidal_model == 2) then
+        ! n=0 test
+        ! specify rho and r_length_inv
+        toroidal_num = 0
+        k_theta      = 0.0
+        k_theta_rho  = 0.0
+        rho  = abs(rho) * sign_bunit
+        r_length_inv = 1.0 / (r_length_rho) / rho
+     else if(toroidal_model == 0) then
         ! k_theta_rho and n are specified; compute rho
         k_theta_rho = abs(k_theta_rho)
         rho = k_theta_rho * rmin / (q * toroidal_num)
         k_theta = k_theta_rho / rho
-     else
+        r_length_inv =  q * toroidal_num * shat / rmin
+     else if(toroidal_model == 1) then
         ! rho and n are specified; compute k_theta
         rho  = abs(rho) * sign_bunit
         k_theta = (q * toroidal_num) / rmin
         k_theta_rho = (q * toroidal_num) / rmin * rho
         k_theta_rho = abs(k_theta_rho)
+        r_length_inv =  q * toroidal_num * shat / rmin
      endif
-     ! compute r_length
-      r_length_inv =  q * toroidal_num * shat / rmin
+
+
 
      ! general geometry -- accessible only from interface 
      ! via parameters geo_ny_in and geo_yin_in

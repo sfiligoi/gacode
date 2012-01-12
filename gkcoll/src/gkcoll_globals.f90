@@ -36,6 +36,7 @@ module gkcoll_globals
   real :: rho
   real :: k_theta_rho
   real :: k_theta
+  real :: r_length_rho
   real :: r_length_inv
 
   !---------------------------------------------------------------
