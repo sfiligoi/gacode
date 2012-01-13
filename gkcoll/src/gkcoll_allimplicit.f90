@@ -260,13 +260,15 @@ contains
                       endif
                    enddo
 
-                   ! Radial drift
+                   ! Radial and alpha drift
                    js = is; je = ie
                    jr = ir; jt = it
                    jx = ix
                    pp = indx_gmat(jr,jt,js,je,jx)
-                   val = (0.5*delta_t) * omega_rdrift(it,is) &
-                        * energy(ie)* (2.0*pi*i_c*indx_r(ir)*r_length_inv) &
+                   val = (0.5*delta_t) * energy(ie) &
+                        * (omega_rdrift(it,is) &
+                        * (2.0*pi*i_c*indx_r(ir)*r_length_inv) &
+                        + omega_adrift(it,is) * i_c * k_theta) &
                         * (1.0 + (indx_xi(ix)+1.0)*(indx_xi(ix)+1.0) &
                         / ( (2*indx_xi(ix)+1.0) * (2*indx_xi(ix)+3.0) ) &
                         + (1.0*indx_xi(ix)) * (1.0*indx_xi(ix)) &
