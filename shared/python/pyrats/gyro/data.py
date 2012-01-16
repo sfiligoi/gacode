@@ -555,8 +555,8 @@ class GYROData:
     # Create data from other previously imported data
 
     def make_gbflux(self):
-        """Makes gbflux.  Output is numpy array with dimensions:
-        n_kinetic x n_field x 4 x n_time"""
+        """Makes gbflux (omitting buffers properly). Output is numpy array
+           with dimensions: n_kinetic x n_field x 4 x n_time"""
 
         import numpy as np
 

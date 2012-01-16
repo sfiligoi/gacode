@@ -121,3 +121,6 @@ else:
     for i in range(n_kinetic):
         print tag[i],average(b[:,i+1],t,window)
 
+if sim.profile['boundary_method'] == 2:
+    print
+    print 'Buffers have been properly omitted from average.'
