@@ -15,8 +15,10 @@ subroutine tgyro_global_iteration_driver
 
   implicit none
 
+  integer :: imin,imax
+
   ! Initialize GYRO
-  call gyro_init('./',MPI_COMM_WORLD)
+  call gyro_init(paths(1),MPI_COMM_WORLD)
 
   n_r = 1
 
@@ -38,8 +40,6 @@ subroutine tgyro_global_iteration_driver
   call gyro_run(gyrotest_flag, gyro_restart_method, &
        transport_method, gyro_exit_status(1), gyro_exit_message(1))
 
-  !print *,gyro_elec_eflux_out
-
   !--------------------------------------------------------
   ! Global TGYRO
 
@@ -53,6 +53,15 @@ subroutine tgyro_global_iteration_driver
 
   call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
   call EXPRO_pread
+
+  imin = 1+gyro_explicit_damp_grid_in
+  imax = gyro_radial_grid_in-gyro_explicit_damp_grid_in
+
+  print *,gyro_r_out(imin),gyro_r_out(imax)
+
+  do i=1,gyro_radial_grid_in
+     print *,gyro_r_out(i),gyro_elec_eflux_out(i)
+  enddo
 
   ! Overlay profiles
 

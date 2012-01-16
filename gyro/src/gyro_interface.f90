@@ -230,6 +230,8 @@ module gyro_interface
   real, dimension(:,:), allocatable :: gyro_ion_eflux_out
   real, dimension(:,:), allocatable :: gyro_ion_expwd_out
 
+  real, dimension(:), allocatable :: gyro_r_out
+
   complex :: gyro_fieldeigen_omega_out
   real :: gyro_fieldeigen_error_out
 
@@ -444,14 +446,15 @@ contains
     gyro_a_fourier_geo_in(:,:) = a_fourier_geo(:,:)
 
     ! Allocate output arrays (deallocated in gyro_cleanup)
-    allocate(gyro_elec_pflux_out(n_x))
-    allocate(gyro_elec_mflux_out(n_x))
-    allocate(gyro_elec_eflux_out(n_x))
-    allocate(gyro_elec_expwd_out(n_x))
-    allocate(gyro_ion_pflux_out(n_x,5))
-    allocate(gyro_ion_mflux_out(n_x,5))
-    allocate(gyro_ion_eflux_out(n_x,5))
-    allocate(gyro_ion_expwd_out(n_x,5))
+    if (.not.allocated(gyro_elec_pflux_out)) allocate(gyro_elec_pflux_out(n_x))
+    if (.not.allocated(gyro_elec_mflux_out)) allocate(gyro_elec_mflux_out(n_x))
+    if (.not.allocated(gyro_elec_eflux_out)) allocate(gyro_elec_eflux_out(n_x))
+    if (.not.allocated(gyro_elec_expwd_out)) allocate(gyro_elec_expwd_out(n_x))
+    if (.not.allocated(gyro_ion_pflux_out)) allocate(gyro_ion_pflux_out(n_x,5))
+    if (.not.allocated(gyro_ion_mflux_out)) allocate(gyro_ion_mflux_out(n_x,5))
+    if (.not.allocated(gyro_ion_eflux_out)) allocate(gyro_ion_eflux_out(n_x,5))
+    if (.not.allocated(gyro_ion_expwd_out)) allocate(gyro_ion_expwd_out(n_x,5))
+    if (.not.allocated(gyro_r_out)) allocate(gyro_r_out(n_x))
 
     if (debug_flag == 1 .and. i_proc == 0) then
        print *, '[map_global2interface done]'
