@@ -51,7 +51,7 @@ subroutine gyro_build_sparse_poisson
                  ! COLUMN:
                  indx_poisson(k_counter+n_poisson) = ijp
 
-                 m_poisson(k_counter) = val
+                 m_poisson(k_counter) = m_poisson(k_counter)+val
 
               enddo ! jp
            enddo ! j
