@@ -132,6 +132,8 @@ subroutine gyro_run(&
         enddo
      enddo
 
+     gyro_r_out(:) = r(:)
+
   endif
   !-------------------------------------------------------------------------------------- 
 
@@ -149,6 +151,8 @@ subroutine gyro_run(&
   call MPI_BCAST(gyro_ion_eflux_out,n_x*n_ion,MPI_DOUBLE_PRECISION,0,GYRO_COMM_WORLD,err)
   call MPI_BCAST(gyro_ion_mflux_out,n_x*n_ion,MPI_DOUBLE_PRECISION,0,GYRO_COMM_WORLD,err)
   call MPI_BCAST(gyro_ion_expwd_out,n_x*n_ion,MPI_DOUBLE_PRECISION,0,GYRO_COMM_WORLD,err)
+
+  call MPI_BCAST(gyro_r_out,n_x,MPI_DOUBLE_PRECISION,0,GYRO_COMM_WORLD,err)
   !-------------------------------------------------------------------------------------- 
 
   call gyro_cleanup

@@ -45,14 +45,4 @@ subroutine gyro_cleanup
 
   endif
 
-  ! (Possible) deallocation of interface variables
-  if (allocated(gyro_elec_pflux_out)) deallocate(gyro_elec_pflux_out)
-  if (allocated(gyro_elec_mflux_out)) deallocate(gyro_elec_mflux_out)
-  if (allocated(gyro_elec_eflux_out)) deallocate(gyro_elec_eflux_out)
-  if (allocated(gyro_elec_expwd_out)) deallocate(gyro_elec_expwd_out)
-  if (allocated(gyro_ion_pflux_out)) deallocate(gyro_ion_pflux_out)
-  if (allocated(gyro_ion_mflux_out)) deallocate(gyro_ion_mflux_out)
-  if (allocated(gyro_ion_eflux_out)) deallocate(gyro_ion_eflux_out)
-  if (allocated(gyro_ion_expwd_out)) deallocate(gyro_ion_expwd_out)
-
 end subroutine gyro_cleanup
