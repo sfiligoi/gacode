@@ -156,9 +156,28 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
 
   if (truncation_method == 1) then
 
+     ! ORIGINAL METHOD
+
+     ! Add final factor of i for case 3
+     if (itype == 3) g = -(i_c/2.0)*g
+
+     ! Enforce reality if n=0:
+     if (u == 0.0) then
+        if (i_gyro /= 1) then 
+
+           ! Correct truncated gyroaverage                 
+           temp = sum(g(:))-1.0
+           g(0) = g(0)-temp
+
+        endif
+        g = real(g)
+     endif
+
+  else
+
+     ! ALTERNATIVE METHOD
+
      !-----------------------------------------------------------
-     ! Correction for truncation: 
-     !
      !  Make end-coefficients equal to sum of neglected ones.
      !  This is equivalent to assuming that functions are 
      !  constant over the truncated region.
@@ -194,23 +213,6 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
 
      ! Enforce reality if n=0:
      if (u == 0.0) g = real(g)
-
-  else
-
-     ! Add final factor of i for case 3
-     if (itype == 3) g = -(i_c/2.0)*g
-
-     ! Enforce reality if n=0:
-     if (u == 0.0) then
-        if (i_gyro /= 1) then 
-
-           ! Correct truncated gyroaverage                 
-           temp = sum(g(:))-1.0
-           g(0) = g(0)-temp
-
-        endif
-        g = real(g)
-     endif
 
   endif
 
