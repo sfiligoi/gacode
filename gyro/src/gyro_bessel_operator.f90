@@ -36,7 +36,7 @@
 
 subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
 
-  use gyro_globals, only : z_gyro, i_gyro, m_gyro, n_x
+  use gyro_globals, only : z_gyro, i_gyro, m_gyro, n_x, truncation_method
   use math_constants
 
   !-----------------------------------------
