@@ -166,8 +166,8 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
         if (i_gyro /= 1) then 
 
            ! Correct truncated gyroaverage                 
-           temp = sum(g(:))-1.0
-           g(0) = g(0)-temp
+           g0 = sum(g(:))-1.0
+           g(0) = g(0)-g0
 
         endif
         g = real(g)
