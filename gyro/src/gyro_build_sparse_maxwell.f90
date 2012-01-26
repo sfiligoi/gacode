@@ -65,7 +65,7 @@ subroutine gyro_build_sparse_maxwell
                  indx_maxwell(k_counter)           = ij
                  indx_maxwell(k_counter+n_maxwell) = ijp
 
-                 m_maxwell(k_counter) = val
+                 m_maxwell(k_counter) = m_maxwell(k_counter)+val
 
               enddo ! j
            enddo ! jp

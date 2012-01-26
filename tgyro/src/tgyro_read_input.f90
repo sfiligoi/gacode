@@ -112,7 +112,6 @@ subroutine tgyro_read_input
      do i=1,n_inst
 
         read(1,*) ipath,procs(i)
-
         ind = index(ipath,' ')
 
         ! Append '/' to path name for use later

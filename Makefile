@@ -16,7 +16,8 @@ clean:
 	cd gato ; make clean 
 	cd tglf ; make clean
 	cd tgyro ; make clean
-#	cd dataread ; make clean
-#	cd gks ; make clean 
+	cd dataread ; make clean
+	cd gks ; make clean 
 	cd gkcoll ; make clean
 	rm -f shared/python/pyrats/*/*.pyc
+	rm -f modules/*genmod*

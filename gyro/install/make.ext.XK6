@@ -1,5 +1,3 @@
-gyro_do.o : gyro_do.mpi_pcontrol.f90
-	$(FC) $(FMATH) $(FFLAGS) -o gyro_do.o -c gyro_do.mpi_pcontrol.f90
 gyro_nl_setup.o : gyro_nl_setup.fftw.f90
 	$(FC) $(FMATH) $(FFLAGS) -o gyro_nl_setup.o -c gyro_nl_setup.fftw.f90
 gyro_nl_fft.o : gyro_nl_fft.fftw.f90
@@ -8,11 +6,11 @@ gyro_read_restart.o : gyro_read_restart.mpiio.f90
 	$(FC) $(FMATH) $(FFLAGS) -o gyro_read_restart.o -c gyro_read_restart.mpiio.f90
 gyro_write_restart.o : gyro_write_restart.mpiio.f90
 	$(FC) $(FMATH) $(FFLAGS) -o gyro_write_restart.o -c gyro_write_restart.mpiio.f90
-gyro_mumps_private.o : gyro_mumps_private.mumps.f90
-	$(FC) $(FMATH) $(FFLAGS) ${MUMPS_PATH} -o gyro_mumps_private.o -c gyro_mumps_private.mumps.f90
-gyro_sparse_solve_mumps.o : gyro_sparse_solve_mumps.mumps.f90
-	$(FC) $(FMATH) $(FFLAGS) ${MUMPS_PATH} -o gyro_sparse_solve_mumps.o -c gyro_sparse_solve_mumps.mumps.f90
-cleanup_mumps.o : cleanup_mumps.mumps.f90
-	$(FC) $(FMATH) $(FFLAGS) ${MUMPS_PATH} -o cleanup_mumps.o -c cleanup_mumps.mumps.f90
+gyro_mumps_private.o : gyro_mumps_private.f90
+	$(FC) $(FMATH) $(FFLAGS) ${MUMPS_PATH} -o gyro_mumps_private.o -c gyro_mumps_private.f90
+gyro_sparse_solve_mumps.o : gyro_sparse_solve_mumps.f90
+	$(FC) $(FMATH) $(FFLAGS) ${MUMPS_PATH} -o gyro_sparse_solve_mumps.o -c gyro_sparse_solve_mumps.f90
+cleanup_mumps.o : cleanup_mumps.f90
+	$(FC) $(FMATH) $(FFLAGS) ${MUMPS_PATH} -o cleanup_mumps.o -c cleanup_mumps.f90
 GKEIGEN_do.o : GKEIGEN_do.stub.f90
 	$(FC) $(FMATH) $(FFLAGS) -o GKEIGEN_do.o -c GKEIGEN_do.stub.f90

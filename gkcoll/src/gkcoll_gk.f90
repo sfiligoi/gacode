@@ -106,12 +106,30 @@ contains
     use gkcoll_gyro
     implicit none
     integer :: is,ir,it,ie,ix
+    integer :: myio = 21
+    logical :: lfe
 
     phi_old(:,:) = (0.0,0.0)
     h_x(:,:,:,:,:) = (0.0,0.0)
-    do it=1,n_theta
-       h_x(1,n_radial/2+1,it,:,:) = (1.0e-3) * (cos(theta(it)/2.0))**2
-    enddo
+    if(restart_mode == 1) then
+       inquire(file=trim(path)//runfile_restart,exist=lfe)
+       if (lfe .eqv. .false.) then
+          call gkcoll_error('ERROR: (GKCOLL) Missing restart file')
+          return
+       endif
+       open(unit=io_gkcollout,file=trim(path)//runfile_restart,status='old')
+       read(io_gkcollout,*) h_x
+       close(io_gkcollout)
+    else
+       if(toroidal_model == 2) then
+          h_x(1,:,:,:,:) = 1.0
+          !h_x(1,n_radial/2+1,:,:,:) = 0.0
+       else
+          do it=1,n_theta
+             h_x(1,n_radial/2+1,it,:,:) = (1.0e-3) * (cos(theta(it)/2.0))**2
+          enddo
+       endif
+    endif
     do ir=1,n_radial
        do it=1,n_theta
           call POISSONx_do(ir,it)

@@ -621,7 +621,7 @@
           (bounce_y-delta_y(i-1))/(delta_y(i)-delta_y(i-1))
 !          write(*,*)i,"B_bounce =",B_bounce,Bmax
 	endif
-	ft = SQRT(1.D0 - Bmin/B_bounce)
+	ft = SQRT(1.0 - Bmin/B_bounce)
 !        write(*,*)"ft = ",ft
 !*************************************************************
 ! end of trapped fraction model
@@ -737,7 +737,7 @@
           endif
 	  R_s = (R(m1)-8.0*R(m2)+8.0*R(m3)-R(m4))/delta_s
 	  Z_s = (Z(m1)-8.0*Z(m2)+8.0*Z(m3)-Z(m4))/delta_s
-          s_p(m) = SQRT(R_s**2 + Z_s**2)
+          s_p(m) = sqrt(R_s**2 + Z_s**2)
 	  R_ss = (-R(m1)+16.0*R(m2)-30.0*R(m)+16.0*R(m3)-R(m4))/ds2
 	  Z_ss = (-Z(m1)+16.0*Z(m2)-30.0*Z(m)+16.0*Z(m3)-Z(m4))/ds2
 	  r_curv(m) = (s_p(m)**3)/(R_s*Z_ss - Z_s*R_ss)
@@ -752,7 +752,7 @@
 !        enddo
 !        close(3)
 !
-	error_check = SQRT(error_check/DBLE(ms))
+	error_check = SQRT(error_check/real(ms))
 	if(error_check .gt. 1.00) &
           write(*,*)"error in s-grid derivative = ",error_check
 !---------------------------------------------------------------
@@ -812,14 +812,14 @@
 	d_ffp(0) = 0.0
 ! 
 	dq1 = ds*s_p(0)*f/(R(0)*psi_x(0)**2) 
-	d0_s1 = -dq1*(2.D0/r_curv(0)+2.D0*sin_u(0)/R(0))
+	d0_s1 = -dq1*(2.0/r_curv(0)+2.0*sin_u(0)/R(0))
 	dp_s1 = dq1*4.0*pi*R(0)/Bp(0)
 	dffp_s1 = dq1*(R(0)/Bp(0))*(B(0)/f)**2 
 !
 	do m=1,ms
 	  dq2 = ds*s_p(m)*f/(R(m)*psi_x(m)**2) 
-	  d0_s2 = -dq2*(2.D0/r_curv(m)+2.D0*sin_u(m)/R(m))
-	  dp_s2 = dq2*4.D0*pi*R(m)/Bp(m)
+	  d0_s2 = -dq2*(2.0/r_curv(m)+2.0*sin_u(m)/R(m))
+	  dp_s2 = dq2*4.0*pi*R(m)/Bp(m)
 	  dffp_s2 = dq2*(R(m)/Bp(m))*(B(m)/f)**2 
 !
 	  d_0(m)   = d_0(m-1)+0.5*(d0_s1+d0_s2)
@@ -872,7 +872,7 @@
 !
 	do m=0,ms
 	  b_geo(m)    = B(m)
-	  pk_geo(m)   = 2.D0*Bp(m)/B(m)
+	  pk_geo(m)   = 2.0*Bp(m)/B(m)
 	  qrat_geo(m) = (rmin_s/R(m))*(B(m)/Bp(m))/q_s
 	enddo
 !---------------------------------------------------------------
@@ -929,7 +929,7 @@
 ! Waltz/Miller [[cos_p]]
 
 	  costheta_p_geo(m) =  -p_prime_zero_s* &
-          rmaj_s*(Bp(m)/B(m)**2)*(4.D0*pi*R(m)*p_prime_s)
+          rmaj_s*(Bp(m)/B(m)**2)*(4.0*pi*R(m)*p_prime_s)
 
 ! Waltz/Miller [[cos]
 
@@ -1221,9 +1221,9 @@
 !
 ! compute the arclength around the flux surface 
 !
-      theta = 0.D0
+      theta = 0.0
       arg_r   = theta+x_delta*sin(theta)
-      darg_r = 1.D0+x_delta*cos(theta)
+      darg_r = 1.0+x_delta*cos(theta)
       arg_z = theta + zeta_loc*sin(2.0*theta)
       darg_z = 1.0 + zeta_loc*2.0*cos(2.0*theta)
       r_t = -rmin_loc*sin(arg_r)*darg_r
@@ -1234,7 +1234,7 @@
 !
       l_t1 = l_t
       scale_max=l_t
-      arclength = 0.D0
+      arclength = 0.0
       do while(theta.lt.pi_2)
 	theta = theta + dtheta
 	if(theta.gt.pi_2)then
@@ -1245,7 +1245,7 @@
 !        write(*,*)"theta = ",theta,"dtheta=",dtheta
 	arg_r   = theta+x_delta*sin(theta)
 ! d(arg_r)/dtheta
-	darg_r = 1.D0+x_delta*cos(theta)
+	darg_r = 1.0+x_delta*cos(theta)
 ! dR/dtheta
 	r_t = -rmin_loc*sin(arg_r)*darg_r
 ! 
@@ -1257,7 +1257,7 @@
 ! dl/dtheta
 	l_t = SQRT(r_t**2+z_t**2)
 ! arclength along flux surface in poloidal direction
-	arclength = arclength + 0.5D0*(l_t + l_t1)*dtheta
+	arclength = arclength + 0.50*(l_t + l_t1)*dtheta
 ! save maximum expansion scale for later
 	if(l_t.gt.scale_max) scale_max = l_t
 	l_t1 = l_t			
@@ -1280,7 +1280,7 @@
 !  make a first guess based on theta=0.0
       theta=0.0
       arg_r   = theta+x_delta*sin(theta)
-      darg_r = 1.D0+x_delta*cos(theta)
+      darg_r = 1.0+x_delta*cos(theta)
       arg_z = theta + zeta_loc*sin(2.0*theta)
       darg_z = 1.0 + zeta_loc*2.0*cos(2.0*theta)
       r_t = -rmin_loc*sin(arg_r)*darg_r
@@ -1292,7 +1292,7 @@
 !
       do m=1,ms/2
 	arg_r   = theta+x_delta*sin(theta)
-	darg_r = 1.D0+x_delta*cos(theta)
+	darg_r = 1.0+x_delta*cos(theta)
         arg_z = theta + zeta_loc*sin(2.0*theta)
         darg_z = 1.0 + zeta_loc*2.0*cos(2.0*theta)
 	r_t = -rmin_loc*sin(arg_r)*darg_r
@@ -1476,7 +1476,7 @@
 !
       l_t1 = l_t
       scale_max=l_t
-      arclength = 0.D0
+      arclength = 0.0
       do while(theta.lt.pi_2)
 	theta = theta + dtheta
 	if(theta.gt.pi_2)then
@@ -1495,7 +1495,7 @@
 ! dl/dtheta
 	l_t = SQRT(r_t**2+z_t**2)
 ! arclength along flux surface in poloidal direction
-	arclength = arclength + 0.5D0*(l_t + l_t1)*dtheta
+	arclength = arclength + 0.50*(l_t + l_t1)*dtheta
 ! save maximum expansion scale for later
 	if(l_t.gt.scale_max) scale_max = l_t
 	l_t1 = l_t			

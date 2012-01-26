@@ -48,14 +48,14 @@ if itime > n_time-1:
 #-------------------------------------------------------
 # Read phib
 #
-data = np.loadtxt('out.gkcoll.phiB')
-phib = np.reshape(data,(2,n_theta*n_radial,n_time),'F')
+data = np.loadtxt('out.gkcoll.phi')
+phib = np.reshape(data,(2,n_theta,n_time),'F')
 # Construct complex eigenfunction at selected time
 phic = phib[0,:,itime]+1j*phib[1,:,itime]
 
 # Pick out the central point assuming n_radial is even:    
 if n_theta%2 == 0 : 
-    i0 = n_theta*(n_radial/2)+n_theta/2
+    i0 = n_theta/2
     phic = phic/phic[i0]
 else:
     # interpolate to get theta=0 by expanding function between -pi..pi as fourier series
@@ -63,7 +63,7 @@ else:
     m_theta = (n_theta-1)/2-1
     phifouriercosr = np.zeros(m_theta+1)
     phifouriercosi = np.zeros(m_theta+1)
-    itstart = n_theta*(n_radial/2)
+    itstart = 0
     for jt in range(0,m_theta):
         for it in range(0,n_theta-1):
             phifouriercosr[jt] = phifouriercosr[jt] + np.real(phic[itstart+it]) * math.cos(jt * thetab[itstart+it])
@@ -90,8 +90,8 @@ ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
 ax.set_xlabel(r'$\theta_*/\pi$',fontsize=GFONTSIZE)
 
-ax.plot(thetab/np.pi,np.real(phic),color='k',label='Re')
-ax.plot(thetab/np.pi,np.imag(phic),color='b',label='Im')
+ax.plot(theta/np.pi,np.real(phic),color='k',label='Re')
+ax.plot(theta/np.pi,np.imag(phic),color='b',label='Im')
 
 #ax.set_xlim([1-n_radial,-1+n_radial])
 ax.legend()

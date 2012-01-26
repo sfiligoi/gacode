@@ -234,6 +234,7 @@ subroutine gyro_read_input
   call readbc_real(geo_betaprime_scale)
   call readbc_int(poisson_z_eff_flag)
   call readbc_int(z_eff_method)
+  call readbc_int(truncation_method)
 
   ! GK eigenvalue solver inputs
   call readbc_int(gkeigen_proc_mult)
@@ -256,10 +257,8 @@ subroutine gyro_read_input
   call readbc_real(fieldeigen_tol)
 
   call readbc_int(reintegrate_flag)
-
   !hdf5 output
   call readbc_int(io_method)
-
   ! time intervals for hdf5 write outs
   call readbc_int(time_skip_wedge)
   ! pie-slice alpha ??
@@ -268,8 +267,6 @@ subroutine gyro_read_input
   ! toroidal direction
   call readbc_real(theta_wedge_offset)
   call readbc_real(theta_wedge_angle)
-
-
   !synthetic diagnostics
   call readbc_real(torangle_offset)
 
