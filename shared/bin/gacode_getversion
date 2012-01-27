@@ -7,4 +7,15 @@
 #  Get VERSION 
 #--------------------------------
 
-echo `cat $GACODE_ROOT/.VERSION` 
+file=`which git`
+
+if [ -e "$file" ] 
+then
+   cd $GACODE_ROOT 
+   VERSION=`git describe --abbrev=4`
+else
+   # Git not available.  That's bad.
+   VERSION="Version not available."
+fi
+
+echo $VERSION
