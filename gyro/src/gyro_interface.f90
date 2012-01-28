@@ -190,6 +190,7 @@ module gyro_interface
   real    :: gyro_geo_betaprime_scale_in = 1.0
   integer :: gyro_poisson_z_eff_flag_in = 1
   integer :: gyro_z_eff_method_in = 1
+  integer :: gyro_truncation_method_in = 1
   integer :: gyro_gkeigen_proc_mult_in = 1
   integer :: gyro_gkeigen_method_in = 1
   integer :: gyro_gkeigen_matrixonly_in = 0
@@ -418,6 +419,7 @@ contains
     gyro_geo_betaprime_scale_in = geo_betaprime_scale
     gyro_poisson_z_eff_flag_in = poisson_z_eff_flag
     gyro_z_eff_method_in = z_eff_method
+    gyro_truncation_method_in = truncation_method
     gyro_gkeigen_proc_mult_in = gkeigen_proc_mult
     gyro_gkeigen_method_in = gkeigen_method
     gyro_gkeigen_matrixonly_in = gkeigen_matrixonly
@@ -643,6 +645,7 @@ contains
     geo_betaprime_scale = gyro_geo_betaprime_scale_in
     poisson_z_eff_flag = gyro_poisson_z_eff_flag_in
     z_eff_method = gyro_z_eff_method_in
+    truncation_method = gyro_truncation_method_in
     gkeigen_proc_mult = gyro_gkeigen_proc_mult_in
     gkeigen_method = gyro_gkeigen_method_in
     gkeigen_matrixonly = gyro_gkeigen_matrixonly_in
