@@ -15,13 +15,17 @@ subroutine tgyro_global_iteration_driver
 
   implicit none
 
-  integer :: imin,imax
+  integer :: imin,imax,j
+  integer :: dn_gyro
+  real :: length
+  real :: dlength
 
   ! Initialize GYRO
   call gyro_init(paths(1),MPI_COMM_WORLD)
 
-  n_r = 1
+  n_r = tgyro_global_radii+1
 
+  allocate(f_vec(n_r))
   call tgyro_allocate_globals
 
   !---------------------------------------
@@ -54,14 +58,39 @@ subroutine tgyro_global_iteration_driver
   call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
   call EXPRO_pread
 
+  ! GYRO gridpoints corresponding to simulation domain ends
   imin = 1+gyro_explicit_damp_grid_in
   imax = gyro_radial_grid_in-gyro_explicit_damp_grid_in
 
-  print *,gyro_r_out(imin),gyro_r_out(imax)
+  ! Overwrite TGYRO variables with GYRO values
+  length  = gyro_r_out(imax)-gyro_r_out(imin) 
+  dlength = length/tgyro_global_radii
+  ! Number of GYRO gridpoints per TGYRO bin
+  dn_gyro = (imax-imin)/tgyro_global_radii
+  tgyro_rmin = gyro_r_out(imin)
+  tgyro_rmax = gyro_r_out(imax)
 
-  do i=1,gyro_radial_grid_in
-     print *,gyro_r_out(i),gyro_elec_eflux_out(i)
+  ! Compute internal TGYRO radii
+  r(1) = 0.0
+  do i=2,n_r
+     ! Normalized r (dimensionless)
+     r(i) = length/2+(i-2)*dlength
   enddo
+
+  ! Compute binned fluxes
+  f_vec(:) = 0.0
+  do i=2,n_r
+     do j=imin+(i-2)*dn_gyro,imin+(i-1)*dn_gyro
+        f_vec(i) = f_vec(i)+gyro_elec_eflux_out(i) 
+     enddo
+     f_vec(i) = f_vec(i)/dn_gyro
+     print *,i,f_vec(i)
+  enddo
+
+  ! Compute internal TGYRO fluxes
+  !  do i=1,gyro_radial_grid_in
+  !     print *,gyro_r_out(i),gyro_elec_eflux_out(i)
+  !  enddo
 
   ! Overlay profiles
 

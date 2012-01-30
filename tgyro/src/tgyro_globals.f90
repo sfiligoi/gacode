@@ -269,7 +269,7 @@ module tgyro_globals
   real :: tgyro_stab_deltaky
   real :: tgyro_rmin
   real :: tgyro_rmax
-  integer :: tgyro_global_flag
+  integer :: tgyro_global_radii
   !
   ! Iteration variables (global)
   !
