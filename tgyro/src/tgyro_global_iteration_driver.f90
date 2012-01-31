@@ -45,7 +45,7 @@ subroutine tgyro_global_iteration_driver
 
   gyro_restart_method = 0
   transport_method    = 2
-
+  gyrotest_flag = 1
   call gyro_run(gyrotest_flag, gyro_restart_method, &
        transport_method, gyro_exit_status(1), gyro_exit_message(1))
 
@@ -60,7 +60,7 @@ subroutine tgyro_global_iteration_driver
   EXPRO_ctrl_signb = -tgyro_btccw_in
   EXPRO_ctrl_rotation_method = 1
 
-  call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
+  call EXPRO_palloc(MPI_COMM_WORLD,paths(1),1) 
   call EXPRO_pread
 
   ! GYRO gridpoints corresponding to simulation domain ends
@@ -85,7 +85,14 @@ subroutine tgyro_global_iteration_driver
   print *,tgyro_rmin
   print *,tgyro_rmax
 
-  ! Compute binned fluxes
+  ! Initialize all fluxes
+  pflux_i_neo(:,:) = 0.0
+  pflux_e_neo(:) = 0.0
+  eflux_i_neo(:,:) = 0.0
+  eflux_e_neo(:) = 0.0
+  mflux_i_neo(:,:) = 0.0
+  mflux_e_neo(:) = 0.0
+
   pflux_i_tur(:,:) = 0.0
   pflux_e_tur(:) = 0.0
   eflux_i_tur(:,:) = 0.0
@@ -94,6 +101,11 @@ subroutine tgyro_global_iteration_driver
   mflux_e_tur(:) = 0.0
   expwd_i_tur(:,:) = 0.0
   expwd_e_tur(:) = 0.0
+
+  gyrotest_flag = 0
+  call gyro_run(gyrotest_flag, gyro_restart_method, &
+       transport_method, gyro_exit_status(1), gyro_exit_message(1))
+
   do i=2,n_r
      n_gyro = 0
      do j=imin,imax
@@ -139,9 +151,25 @@ subroutine tgyro_global_iteration_driver
   enddo ! i
   print *,sum(eflux_e_tur(2:n_r))/tgyro_global_radii
 
-  call EXPRO_write_original(' ')
-  call EXPRO_palloc(MPI_COMM_WORLD,'./',0)
+  call EXPRO_write_original('REWROTE')
+  call EXPRO_palloc(MPI_COMM_WORLD,paths(1),0)
   !--------------------------------------------------------
+
+  !----------------------------------------------------------
+  ! Compute total fluxes given neoclassical and turbulent 
+  ! components:
+  !
+  do i=1,n_r
+     pflux_e_tot(i) = pflux_e_neo(i)+pflux_e_tur(i)
+     pflux_i_tot(i) = sum(pflux_i_neo(:,i)+pflux_i_tur(:,i))
+
+     eflux_e_tot(i) = eflux_e_neo(i)+eflux_e_tur(i)
+     eflux_i_tot(i) = sum(eflux_i_neo(:,i)+eflux_i_tur(:,i))
+
+     mflux_tot(i) = mflux_e_neo(i)+mflux_e_tur(i)+&
+          sum(mflux_i_neo(:,i)+mflux_i_tur(:,i))
+  enddo
+  !----------------------------------------------------------
 
   call tgyro_write_input
   call tgyro_source
