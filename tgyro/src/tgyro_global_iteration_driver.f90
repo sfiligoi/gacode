@@ -80,6 +80,8 @@ subroutine tgyro_global_iteration_driver
      r(i) = tgyro_rmin+dlength/2+(i-2)*dlength
   enddo
 
+  call tgyro_global_init_profiles
+
   print *,tgyro_rmin
   print *,tgyro_rmax
 
@@ -95,7 +97,7 @@ subroutine tgyro_global_iteration_driver
   do i=2,n_r
      n_gyro = 0
      do j=imin,imax
-        x = gyro_r_out(j)-r(i)
+        x = gyro_r_out(j)-r(i)/r_min
         ! See if GYRO simulation point is inside TGYRO bin
         if (x > -dlength/2 .and. x < dlength/2) then
            n_gyro = n_gyro+1
@@ -133,12 +135,18 @@ subroutine tgyro_global_iteration_driver
         mflux_i_tur(i_ion,i) = mflux_i_tur(i_ion,i)/n_gyro
         expwd_i_tur(i_ion,i) = expwd_i_tur(i_ion,i)/n_gyro
      enddo ! i_ion
-     print *,i,r(i),eflux_e_tur(i)
+     print *,i,r(i)/r_min,eflux_e_tur(i)
   enddo ! i
   print *,sum(eflux_e_tur(2:n_r))/tgyro_global_radii
 
   call EXPRO_write_original(' ')
   call EXPRO_palloc(MPI_COMM_WORLD,'./',0)
   !--------------------------------------------------------
+
+  call tgyro_write_input
+  call tgyro_source
+
+  call tgyro_write_data(0)
+  call tgyro_write_data(1)
 
 end subroutine tgyro_global_iteration_driver
