@@ -14,7 +14,7 @@ subroutine gyro_cleanup
   implicit none
 
   ! No need for cleanup in test mode
-!  if (gyrotest_flag == 1) return
+  if (gyrotest_flag == 1) return
 
   if (allocated(r)) then
 

@@ -27,12 +27,13 @@ OBJECTS +=	tgyro_globals.o \
 		tgyro_gyro_map.o \
 		tgyro_init_profiles.o \
 		tgyro_global_init_profiles.o \
+		tgyro_global_iteration_driver.o \
+		tgyro_global_flux.o \
 		tgyro_iteration_driver.o \
 		tgyro_iteration_standard.o \
 		tgyro_iteration_pppl.o \
 		tgyro_iteration_serial.o \
 		tgyro_iteration_parallel.o \
-		tgyro_global_iteration_driver.o \
 		tgyro_multi_driver.o \
 		tgyro_neo_map.o \
 		tgyro_profile_functions.o \
