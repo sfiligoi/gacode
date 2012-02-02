@@ -106,8 +106,8 @@ subroutine tgyro_global_iteration_driver
   call tgyro_source
   call tgyro_write_data(1)
 
-  ! Modify gradient profile
-  dlntedr = dlntedr*1.1
+  ! Modify gradient profile based on some "diagonal rule"
+  dlntedr(:) = 0.1*(eflux_e_tot(:)-eflux_e_target(:))+dlntedr(:)
 
   ! Integrate profiles based on gradients
   call tgyro_profile_functions
