@@ -30,6 +30,7 @@ module gkcoll_interface
   real    :: gkcoll_rupwind_eps_in = 0.0
   integer :: gkcoll_rupwind_n_in = 0
   real    :: gkcoll_tupwind_eps_in = 1.0
+  integer :: gkcoll_neoclassical_model_in = 0
   integer :: gkcoll_toroidal_model_in = 1
   integer :: gkcoll_toroidal_num_in  = 1
   real    :: gkcoll_rho_in      = 0.0025
@@ -139,6 +140,7 @@ contains
     gkcoll_rupwind_eps_in = rupwind_eps
     gkcoll_rupwind_n_in = rupwind_n
     gkcoll_tupwind_eps_in = tupwind_eps
+    gkcoll_neoclassical_model_in = neoclassical_model
     gkcoll_toroidal_model_in = toroidal_model
     gkcoll_toroidal_num_in = toroidal_num
     gkcoll_rho_in      = rho
@@ -236,6 +238,7 @@ contains
     rupwind_eps = gkcoll_rupwind_eps_in
     rupwind_n = gkcoll_rupwind_n_in
     tupwind_eps = gkcoll_tupwind_eps_in
+    neoclassical_model = gkcoll_neoclassical_model_in
     toroidal_model = gkcoll_toroidal_model_in
     toroidal_num   = gkcoll_toroidal_num_in
     rho       = gkcoll_rho_in

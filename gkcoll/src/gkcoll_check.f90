@@ -233,6 +233,32 @@ subroutine gkcoll_check
      
   end select
 
+  !------------------------------------------------------------
+  ! Neoclassical model
+  !
+  select case (neoclassical_model)  
+
+  case(0)
+      if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_gkcollout,*) 'neoclassical_model: Gyrokinetic mode'
+     endif
+
+  case(1)
+     if(toroidal_model /= 2) then
+        call gkcoll_error('ERROR: (GKCOLL) neoclassical_model=1 requires toroidal_model=2')
+        return
+     endif
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_gkcollout,*) 'neoclassical_model: Neoclassical mode'
+     endif
+
+  case default
+     
+     call gkcoll_error('ERROR: (GKCOLL) invalid neoclassical_model')
+     return
+     
+  end select   
+  
 
   !------------------------------------------------------------
 

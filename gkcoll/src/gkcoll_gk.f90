@@ -123,7 +123,6 @@ contains
     else
        if(toroidal_model == 2) then
           h_x(1,:,:,:,:) = 1.0
-          !h_x(1,n_radial/2+1,:,:,:) = 0.0
        else
           do it=1,n_theta
              h_x(1,n_radial/2+1,it,:,:) = (1.0e-3) * (cos(theta(it)/2.0))**2
