@@ -22,6 +22,7 @@ subroutine gkcoll_read_input
   read(1,*) rupwind_eps
   read(1,*) rupwind_n
   read(1,*) tupwind_eps
+  read(1,*) neoclassical_model
   read(1,*) toroidal_model
   read(1,*) toroidal_num
   read(1,*) rho

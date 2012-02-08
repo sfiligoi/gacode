@@ -33,7 +33,7 @@ subroutine tgyro_read_input
      if (fileex) then
         open(unit=1,file=filename,status='old',iostat=ioerr)
      else
-        call tgyro_catch_error('ERROR: cannot open '//filename)
+        call tgyro_catch_error('ERROR: (TGYRO) cannot open '//filename)
      endif  ! fileex
 
   endif ! i_proc_global
@@ -98,6 +98,7 @@ subroutine tgyro_read_input
   call tgyro_readbc_real(tgyro_stab_deltaky)
   call tgyro_readbc_real(tgyro_rmin)
   call tgyro_readbc_real(tgyro_rmax)
+  call tgyro_readbc_int(tgyro_global_radii)
   ! ** END add new parameters
   call tgyro_readbc_int(n_inst)
   !-------------------------------------------------------

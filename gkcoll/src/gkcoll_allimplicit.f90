@@ -6,7 +6,7 @@ module gkcoll_allimplicit
   logical, private :: initialized = .false.
 
   complex, dimension(:,:), allocatable, private :: gmat
-  complex, dimension(:), allocatable, private :: cvec, bvec
+  complex, dimension(:), allocatable, private :: cvec, bvec, neovec
   integer, dimension(:,:,:,:,:), allocatable, private :: indx_gmat
   integer,private :: msize
 
@@ -26,6 +26,9 @@ contains
        allocate(gmat(msize,msize))
        allocate(cvec(msize))
        allocate(bvec(msize))
+       if(neoclassical_model == 1) then
+          allocate(neovec(msize))
+       endif
        allocate(indx_gmat(n_radial,n_theta,n_species,n_energy,n_xi))
 
        p = 0
@@ -52,6 +55,9 @@ contains
        deallocate(gmat)
        deallocate(cvec)
        deallocate(bvec)
+       if(neoclassical_model==1) then
+          deallocate(neovec)
+       endif
        deallocate(indx_gmat)
 
        initialized = .false.
@@ -67,7 +73,8 @@ contains
     integer :: p, pp, ir, jr, it, jt, id, is, js, ie, je, ix, jx, ks
     real, external :: derf
     real :: xa, xb, tauinv_ab
-    real, dimension(:,:,:), allocatable :: nu_d
+    real, dimension(:,:,:), allocatable :: nu_d, nu_s
+    real, dimension(:,:), allocatable :: rs
     real :: sum_nu, sum_den
     real, dimension(-2:2) :: cderiv
     integer, dimension(:), allocatable :: thcyc
@@ -84,6 +91,8 @@ contains
     complex, dimension(:,:,:), allocatable :: pzf
 
     allocate(nu_d(n_energy,n_species,n_species))
+    allocate(nu_s(n_energy,n_species,n_species))
+    allocate(rs(n_species,n_species))
 
     do ie=1,n_energy
        do is=1,n_species
@@ -93,24 +102,47 @@ contains
              tauinv_ab = nu(is) * (1.0*Z(js))**2 / (1.0*Z(is))**2 &
                   * dens(js)/dens(is)
              
-             if(is == js .or. &
-                  (abs(mass(is) - mass(js)) < epsilon(0.))) then
-                ! case 1: like-species/same mass collisions
+             if(collision_model == 1) then
+                ! Connor model
+                if(is == js .or. &
+                     (abs(mass(is) - mass(js)) < epsilon(0.))) then
+                   ! case 1: like-species/same mass collisions
+                   nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
+                        * (exp(-xb*xb)/(xb*sqrt(pi)) &
+                        + (1.0-1.0/(2.0*xb*xb)) * DERF(xb))
+                   
+                else if(mass(is) < mass(js)) then
+                   ! case 2: ele-ion and ion-imp(heavy) collisions
+                   nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3)
+                   
+                else
+                   ! case 3: ion-ele and imp(heavy)-ion collisions
+                   nu_d(ie,is,js) = tauinv_ab * 4.0/(3.0*sqrt(pi)) &
+                        * sqrt(mass(js)/mass(is)) &
+                        * (temp(is)/temp(js))**1.5
+                endif
+                nu_s(ie,is,js) = nu_d(ie,is,js)
+                
+             else
+                ! Reduced Hirshman-Sigmar model
                 nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
                      * (exp(-xb*xb)/(xb*sqrt(pi)) &
                      + (1.0-1.0/(2.0*xb*xb)) * DERF(xb))
-                
-             else if(mass(is) < mass(js)) then
-                ! case 2: ele-ion and ion-imp(heavy) collisions
-                nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3)
-                
-             else
-                ! case 3: ion-ele and imp(heavy)-ion collisions
-                nu_d(ie,is,js) = tauinv_ab * 4.0/(3.0*sqrt(pi)) &
-                     * sqrt(mass(js)/mass(is)) &
-                     * (temp(is)/temp(js))**1.5
-                
+                nu_s(ie,is,js) = tauinv_ab * (1.0/xa) &
+                     * (-exp(-xb*xb)/(xb*sqrt(pi)) &
+                     + (1.0/(2.0*xb*xb)) * DERF(xb)) &
+                     * (2.0*temp(is)/temp(js))*(1.0+mass(js)/mass(is))
              endif
+
+          enddo
+       enddo
+    enddo
+
+    do is=1,n_species
+       do js=1,n_species
+          rs(is,js) = 0.0
+          do ie=1,n_energy
+             rs(is,js) = rs(is,js) + w_e(ie) * nu_s(ie,is,js) * energy(ie)
           enddo
        enddo
     enddo
@@ -175,7 +207,7 @@ contains
                    gmat(p,p) = gmat(p,p) + 1.0
                    gexp(p,p) = gexp(p,p) + 1.0
 
-                   ! Lorentz collisions
+                   ! Collisions: Lorentz
                    js = is; je = ie; jx = ix
                    jr = ir; jt = it
                    pp = indx_gmat(jr,jt,js,je,jx)
@@ -188,6 +220,41 @@ contains
                         * (indx_xi(ix)+1.0) * sum_nu
                    gmat(p,pp) = gmat(p,pp) - val
                    gexp(p,pp) = gexp(p,pp) + val
+
+                   ! Collisions: Restoring terms
+                   if(indx_xi(ix) == 1) then
+                      jr = ir; jt = it
+                      jx = ix
+                      do je=1,n_energy
+                         do js=1,n_species
+                            pp = indx_gmat(jr,jt,js,je,jx)
+                            if(abs(rs(is,js)) < epsilon(0.)) then
+                               val = 0.0
+                            else
+                               val = (0.5*delta_t) &
+                                    * (mass(js)/mass(is))*(dens(js)/dens(is)) &
+                                    * (vth(js)/vth(is)) &
+                                    * nu_s(ie,is,js) * sqrt(energy(ie)) &
+                                    * nu_s(je,js,is) * sqrt(energy(je)) &
+                                    * w_e(je)/ rs(is,js)
+                            endif
+                            gmat(p,pp) = gmat(p,pp) - val
+                            gexp(p,pp) = gexp(p,pp) + val
+                         enddo
+                      enddo
+                      if(collision_model == 2) then
+                         je=ie; js=is
+                         pp = indx_gmat(jr,jt,js,je,jx)
+                         sum_nu = 0.0
+                         do ks=1,n_species
+                            sum_nu = sum_nu + (nu_d(ie,is,ks)-nu_s(ie,is,ks))
+                         enddo
+                         val = (0.5*delta_t) * sum_nu
+                         gmat(p,pp) = gmat(p,pp) - val
+                         gexp(p,pp) = gexp(p,pp) + val
+                      endif
+                   endif
+
 
                    ! Trapping
                    js = is; je = ie
@@ -278,8 +345,10 @@ contains
                    jx = ix-2
                    if(jx >= 1) then
                       pp = indx_gmat(jr,jt,js,je,jx)
-                      val = (0.5*delta_t) * omega_rdrift(it,is) &
-                           * energy(ie)* (2.0*pi*i_c*indx_r(ir)*r_length_inv) &
+                      val = (0.5*delta_t) * energy(ie) &
+                           * (omega_rdrift(it,is) &
+                           * (2.0*pi*i_c*indx_r(ir)*r_length_inv) &
+                           + omega_adrift(it,is) * i_c * k_theta) &
                            * ( (1.0*indx_xi(ix)) * (1.0*indx_xi(ix)-1.0) &
                            / ( (2*indx_xi(ix)-3.0) * (2*indx_xi(ix)-1.0) ) )
                       gmat(p,pp) = gmat(p,pp) + val
@@ -288,8 +357,10 @@ contains
                    jx = ix+2
                    if(jx <= n_xi) then
                       pp = indx_gmat(jr,jt,js,je,jx)
-                      val = (0.5*delta_t) * omega_rdrift(it,is) &
-                           * energy(ie)* (2.0*pi*i_c*indx_r(ir)*r_length_inv) &
+                      val = (0.5*delta_t) * energy(ie) &
+                           * (omega_rdrift(it,is) &
+                           * (2.0*pi*i_c*indx_r(ir)*r_length_inv) &
+                           + omega_adrift(it,is) * i_c * k_theta) &
                            * ( (1.0*indx_xi(ix)+1.0) * (1.0*indx_xi(ix)+2.0) &
                            / ( (2*indx_xi(ix)+3.0) * (2*indx_xi(ix)+5.0) ) )
                       gmat(p,pp) = gmat(p,pp) + val
@@ -297,7 +368,8 @@ contains
                    endif
 
                    ! phi: (-ze/T) * G * (1-dt/2 * i*omega_star) * phi
-                   if(toroidal_model == 2 .and. adiabatic_ele_model == 1) then
+                   if(toroidal_model == 2 .and. adiabatic_ele_model == 1 &
+                        .and. neoclassical_model /= 1) then
                       val = (0.5*delta_t) * i_c * k_theta &
                            * rho *sqrt(temp(is)*mass(is))/(1.0*z(is)) &
                            * vth(is) &
@@ -399,6 +471,8 @@ contains
                                   
     deallocate(thcyc)
     deallocate(nu_d)
+    deallocate(nu_s)
+    deallocate(rs)
     if(toroidal_model == 2 .and. adiabatic_ele_model == 1) then
        deallocate(pzf)
     endif
@@ -415,6 +489,34 @@ contains
     call ZGEMM('N','N',msize,msize,msize,alpha,gmat,&
          msize,gexp,msize,beta,gtemp,msize)
     deallocate(gexp)
+    
+    if(neoclassical_model == 1) then
+       cvec(:) = (0.0,0.0)
+       do ir=1,n_radial
+          do it=1,n_theta
+             do is=1,n_species
+                do ie=1,n_energy
+                   do ix=1,n_xi
+                      if(indx_xi(ix) == 0) then
+                         p = indx_gmat(ir,it,is,ie,ix)
+                         cvec(p) = (4.0/3.0) * delta_t * energy(ie) &
+                              * omega_rdrift(it,is) &
+                              * (dlnndr(is) + dlntdr(is) * (energy(ie)-1.5))
+                      else if(indx_xi(ix) == 2) then
+                         p = indx_gmat(ir,it,is,ie,ix)
+                         cvec(p) = (2.0/3.0) * delta_t * energy(ie) &
+                              * omega_rdrift(it,is) &
+                              * (dlnndr(is) + dlntdr(is) * (energy(ie)-1.5))
+                      endif
+                   enddo
+                enddo
+             enddo
+          enddo
+       enddo
+       call ZGEMV('N',msize,msize,alpha,gmat,&
+            msize,cvec,1,beta,neovec,1)
+    endif
+
     gmat = gtemp
     deallocate(gtemp)
 
@@ -429,7 +531,7 @@ contains
     integer :: ir,it,is,ie,ix,p
     complex :: alpha = (1.0,0.0)
     complex :: beta  = (0.0,0.0)
-    
+
     cvec(:) = (0.0,0.0)
     ! set-up the RHS
     do ir=1,n_radial
@@ -462,6 +564,13 @@ contains
     ! Solve for H
     call ZGEMV('N',msize,msize,alpha,gmat,&
          msize,cvec,1,beta,bvec,1)
+
+    ! Neoclassical driving term
+    if(neoclassical_model == 1) then
+       do p=1,msize
+          bvec(p) = bvec(p) + neovec(p)
+       enddo
+    endif
 
     do ir=1,n_radial
        do it=1,n_theta
