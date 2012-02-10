@@ -349,7 +349,7 @@ contains
           enddo
           
           ! Compute the new phi
-          call POISSONp_do(ir,it)
+          call POISSONp_do
 
        enddo
     enddo

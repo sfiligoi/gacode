@@ -155,7 +155,8 @@ contains
        sum_den = sum_den + dens_ele / temp_ele
     endif
 
-    if(toroidal_model == 2 .and. adiabatic_ele_model == 1) then
+    if(toroidal_model == 2 .and. adiabatic_ele_model == 1 &
+         .and. neoclassical_model /= 1) then
        allocate(pzf(n_radial,n_theta,n_theta))
        pzf(:,:,:) = (0.0,0.0)
        do ir=1,n_radial
@@ -442,38 +443,13 @@ contains
           enddo
        enddo
     enddo
-
-    ! n=0 test
-    !if(toroidal_model == 2) then
-    !   ir=n_radial/2+1
-    !      do it=1,n_theta
-    !         do is=1,n_species
-    !            do ie=1,n_energy
-    !               do ix=1,n_xi
-    !                  p = indx_gmat(ir,it,is,ie,ix)
-    !                  jr=n_radial/2+1
-    !                  do jt=1,n_theta
-    !                     do js=1,n_species
-    !                        do je=1,n_energy
-    !                           do jx=1,n_xi
-    !                              pp = indx_gmat(jr,jt,js,je,jx)
-    !                              gmat(p,pp) = 1.0
-    !                              gexp(p,pp) = 1.0
-    !                           enddo
-    !                        enddo
-    !                     enddo
-    !                  enddo
-    !               enddo
-    !            enddo
-    !         enddo
-    !      enddo
-    !   endif
                                   
     deallocate(thcyc)
     deallocate(nu_d)
     deallocate(nu_s)
     deallocate(rs)
-    if(toroidal_model == 2 .and. adiabatic_ele_model == 1) then
+    if(toroidal_model == 2 .and. adiabatic_ele_model == 1 &
+         .and. neoclassical_model /= 1) then
        deallocate(pzf)
     endif
 
@@ -547,20 +523,6 @@ contains
        enddo
     enddo
 
-    !if(toroidal_model == 2) then
-    !   ir=n_radial/2+1
-    !      do it=1,n_theta
-    !         do is=1,n_species
-    !            do ie=1,n_energy
-    !               do ix=1,n_xi
-    !                  p = indx_gmat(ir,it,is,ie,ix)
-    !                  cvec(p) = 0.0
-    !               enddo
-    !            enddo
-    !         enddo
-    !      enddo
-    !   endif
-
     ! Solve for H
     call ZGEMV('N',msize,msize,alpha,gmat,&
          msize,cvec,1,beta,bvec,1)
@@ -587,11 +549,7 @@ contains
     
     
     ! Compute the new phi
-    do ir=1,n_radial
-       do it=1,n_theta
-          call POISSONp_do(ir,it)
-       enddo
-    enddo
+    call POISSONp_do
 
     ! Compute the new h_x
     do is=1,n_species
