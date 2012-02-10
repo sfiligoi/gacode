@@ -1,6 +1,6 @@
 !-----------------------------------------------------------------
 !
-      SUBROUTINE tglf_TM
+      SUBROUTINE tglf_TM_mpi
 !
 !  Main transport model subroutine.
 !  Calls linear TGLF over a spectrum of ky's and computes spectral integrals of 
@@ -58,7 +58,7 @@
 !
 ! compute the flux spectrum
 !
-      CALL get_bilinear_spectrum
+      CALL get_bilinear_spectrum_mpi
 !
 ! sum over ky spectrum
 !
@@ -143,11 +143,11 @@
         ky0 = ky1
       enddo  ! i
 !
-      END SUBROUTINE tglf_TM
+      END SUBROUTINE tglf_TM_mpi
 !
 !-----------------------------------------------------------------
 !
-      SUBROUTINE get_bilinear_spectrum
+      SUBROUTINE get_bilinear_spectrum_mpi
 !
 ! computes the bilinear fluctuation moments 
 ! and saves them in flux_spectrum_out, intensity_spectrum_out
@@ -155,6 +155,7 @@
 !
       USE tglf_dimensions
       USE tglf_global
+      USE tglf_mpi
       USE tglf_species
       USE tglf_kyspectrum
       USE tglf_xgrid
@@ -173,25 +174,34 @@
       REAL :: stress_tor1,stress_par1
       REAL :: exch1
       REAL :: ns1,ts1
+      ! mpi 
+      REAL :: field_spectrum_save(2,nkym)
+      REAL :: intensity_spectrum_save(2,nsm,nkym)
+      REAL :: flux_spectrum_save(5,nsm,3,nkym)
+      INTEGER :: ierr,nrecv
+      INTEGER, dimension(9) :: itag,ireqr
+      INTEGER, dimension(MPI_STATUS_SIZE,9) :: statr
 !
 !
 ! setup the ky-spectrum
 !
-!      if(new_kyspectrum)CALL get_ky_spectrum
-      CALL get_ky_spectrum
+      CALL get_ky_spectrum_mpi
 !
-! initialize output arrays
+! initialize output arrays and mpi buffers
 !
       do i=1,nky
         do t = 1,2
+          field_spectrum_save(t,i) = 0.0
           field_spectrum_out(t,i) = 0.0
         enddo
         do is=ns0,ns
           do t=1,2
+            intensity_spectrum_save(t,is,i) = 0.0
             intensity_spectrum_out(t,is,i) = 0.0
           enddo
           do j=1,3
             do t=1,5
+              flux_spectrum_save(t,is,j,i) = 0.0
               flux_spectrum_out(t,is,j,i) = 0.0
             enddo
           enddo ! j
@@ -203,7 +213,7 @@
 ! save maximum width
       width_max = width_in
       iflux_in=.TRUE. 
-      do i=1,nky
+      do i=1+iProcTglf,nky,nProcTglf
         ky_in = ky_spectrum(i)
 !
         new_width=.TRUE.
@@ -297,8 +307,8 @@
 !          write(*,*)"modes",imax,phi_QL_out(imax)
 !          write(*,*)gamma_out(imax),freq_out(imax)
          enddo
-         field_spectrum_out(1,i) = v_bar1
-         field_spectrum_out(2,i) = phi_bar1
+         field_spectrum_save(1,i) = v_bar1
+         field_spectrum_save(2,i) = phi_bar1
         endif
 ! compute intensity_spectrum_out
         do is=ns0,ns
@@ -309,8 +319,8 @@
               ns1 = ns1+n_bar_out(imax,is)
               ts1 = ts1+t_bar_out(imax,is)
              enddo
-             intensity_spectrum_out(1,is,i) = ns1
-             intensity_spectrum_out(2,is,i) = ts1
+             intensity_spectrum_save(1,is,i) = ns1
+             intensity_spectrum_save(2,is,i) = ts1
            endif
          enddo  ! is
 !  compute flux_spectrum_out 
@@ -330,30 +340,55 @@
               stress_par1 = stress_par1+phi_bar*stress_par_QL_out(imax,is,j)
               exch1 = exch1+phi_bar*exchange_QL_out(imax,is,j)
              enddo
-             flux_spectrum_out(1,is,j,i) = pflux1
-             flux_spectrum_out(2,is,j,i) = eflux1
-             flux_spectrum_out(3,is,j,i) = stress_tor1
-             flux_spectrum_out(4,is,j,i) = stress_par1
-             flux_spectrum_out(5,is,j,i) = exch1
+             flux_spectrum_save(1,is,j,i) = pflux1
+             flux_spectrum_save(2,is,j,i) = eflux1
+             flux_spectrum_save(3,is,j,i) = stress_tor1
+             flux_spectrum_save(4,is,j,i) = stress_par1
+             flux_spectrum_save(5,is,j,i) = exch1
             endif
            enddo ! j
          enddo  ! is 
-!
 ! reset width to maximum if used tglf_max
         if(find_width_in)width_in=width_max
 !
       enddo  ! i 
+!
+! collect and broadcast the results 
+      call MPI_BARRIER(iCommTglf,ierr)
+
+      call MPI_ALLREDUCE(field_spectrum_save     &
+                        ,field_spectrum_out          &
+                        ,2*nkym                      &
+                        ,MPI_DOUBLE_PRECISION        &
+                        ,MPI_SUM                     &
+                        ,iCommTglf                   &
+                        ,ierr)
+      call MPI_ALLREDUCE(intensity_spectrum_save     &
+                        ,intensity_spectrum_out      &
+                        ,2*nsm*nkym                  &
+                        ,MPI_DOUBLE_PRECISION        &
+                        ,MPI_SUM                     &
+                        ,iCommTglf                   &
+                        ,ierr)
+      call MPI_ALLREDUCE(flux_spectrum_save          &
+                        ,flux_spectrum_out           &
+                        ,5*nsm*3*nkym                &
+                        ,MPI_DOUBLE_PRECISION        &
+                        ,MPI_SUM                     &
+                        ,iCommTglf                   &
+                        ,ierr)
+
 !
       if(new_eikonal_in)eikonal_unsaved=.FALSE.
       gamma_out(1) = gmax
       freq_out(1) = fmax
       new_eikonal_in = .TRUE.  ! reset default for next call to tglf_TM
       
-      END SUBROUTINE get_bilinear_spectrum
+      END SUBROUTINE get_bilinear_spectrum_mpi
 !
 !-------------------------------------------------------------------------------
 !
-      SUBROUTINE get_ky_spectrum
+      SUBROUTINE get_ky_spectrum_mpi
 !
       USE tglf_dimensions
       USE tglf_global
@@ -492,5 +527,5 @@
 !       write(*,*)i,"ky=",ky_spectrum(i),"dky=",dky_spectrum(i)
 !      enddo
 !
-      END SUBROUTINE get_ky_spectrum
+      END SUBROUTINE get_ky_spectrum_mpi
 

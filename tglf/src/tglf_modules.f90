@@ -194,6 +194,9 @@
       REAL,DIMENSION(maxmodes) :: b0_bar_out=0.0,ne_te_phase_out=0.0
       REAL,DIMENSION(nsm) :: n_bar_sum_out=0.0,t_bar_sum_out=0.0
       REAL,DIMENSION(nsm) :: q_low_out=0.0
+      REAL,DIMENSION(2,nkym) :: field_spectrum_out=0.0
+      REAL,DIMENSION(2,nsm,nkym) :: intensity_spectrum_out=0.0
+      REAL,DIMENSION(5,nsm,3,nkym) :: flux_spectrum_out=0.0
       REAL :: phi_bar_sum_out=0.0
       REAL :: v_bar_sum_out=0.0
       REAL :: gamma_nb_min_out=0.0
@@ -781,5 +784,23 @@
         vns_shear_tg,vts_shear_tg, nfourier_tg,fourier_tg
 !
       END MODULE tglf_tg
+!______________________________________________________
+!\
+! module for MPI version of TGLF
+!/
+
+      MODULE tglf_mpi
+        IMPLICIT NONE
+        include 'mpif.h'
+
+        ! local communicator
+        integer :: iCommTglf    = -1
+        integer :: iProcTglf    = -1
+        integer :: nProcTglf    = -1
+        integer :: iProc0Tglf   = 0
+        integer :: iGroupIDTglf = 1
+
+      END MODULE tglf_mpi
+!
 !______________________________________________________
 !
