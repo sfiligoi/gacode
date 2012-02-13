@@ -1,5 +1,5 @@
 !-----------------------------------------------------
-! make_ampere_matrix.f90
+! gyro_make_ampere_matrix.f90
 !
 ! PURPOSE:
 !  Define sparse form of Ampere matrix (also used 
@@ -7,7 +7,7 @@
 !  factorize using UMFPACK.
 !-----------------------------------------------------
 
-subroutine make_ampere_matrix
+subroutine gyro_make_ampere_matrix
 
   use gyro_globals
   use gyro_collision_private
@@ -59,8 +59,10 @@ subroutine make_ampere_matrix
      n_x_max  = n_x
   endif
 
+  ! Ampere MAA matrix
   allocate(aa_mm(n_x,-mg_dx:mg_dx-ig_dx,n_blend,n_blend))
   call make_ampere_blend
+  call make_electron_current(0)
 
   if (sparse_method == 1) then
      call gyro_sparse_solve_umfpack(n_ampere,n_ampere_row,2,0)
@@ -76,7 +78,7 @@ subroutine make_ampere_matrix
   !---------------------------------------------
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[make_ampere_matrix done]'
+     print *,'[gyro_make_ampere_matrix done]'
   endif
 
-end subroutine make_ampere_matrix
+end subroutine gyro_make_ampere_matrix
