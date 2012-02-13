@@ -39,8 +39,8 @@ LMATH = -L${FFTW_DIR} -l drfftw -L${FFTW_DIR} -l dfftw \
 
 # OPTIONAL: netCDF (for gyro2gkv)
 # CRAY_NETCDF_DIR is /opt/cray/netcdf/4.1.1.0  (Jan 21, 2011)
-NETCDF = ${CRAY_NETCDF_DIR}/netcdf-pgi/lib/libnetcdf.a
-NETCDF_INC = ${CRAY_NETCDF_DIR}/netcdf-pgi/include
+NETCDF = ${CRAY_NETCDF_DIR}/pgi/109/lib/libnetcdf.a
+NETCDF_INC = ${CRAY_NETCDF_DIR}/pgi/109/include
 
 # Archive 
 ARCH = ar cr
