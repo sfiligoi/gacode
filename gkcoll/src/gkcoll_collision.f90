@@ -164,7 +164,7 @@ contains
                                endif
 
                                ! Collision component: Restoring
-                               if(ix==1 .and. jx==1) then 
+                               if(indx_xi(ix)==1 .and. indx_xi(jx)==1) then 
                                   if(abs(rs(is,js)) > epsilon(0.)) then
                                      cmat(ir,it,p,pp)  &
                                           =  cmat(ir,it,p,pp) &
