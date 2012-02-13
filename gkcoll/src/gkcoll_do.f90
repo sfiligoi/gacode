@@ -16,11 +16,11 @@ subroutine gkcoll_do
   use gkcoll_equilibrium
   use gkcoll_gyro
   use gkcoll_gk
+  use gkcoll_poisson
   use gkcoll_collision
   use gkcoll_freq
   use gkcoll_neo
   use gkcoll_allocate_profile
-  use gkcoll_implicit
   use gkcoll_allimplicit
   implicit none
 
@@ -86,17 +86,12 @@ subroutine gkcoll_do
   allocate(phi_old(n_radial,n_theta))
   allocate(f_balloon(n_radial,n_theta))
 
-  if(imp_flag == 1) then
-     trap_method = 1
-  endif
-
   call EQUIL_alloc(1)
   call EQUIL_do
   call GYRO_alloc(1)
   call GK_alloc(1)
-  if(imp_flag == 1) then
-     call GKimp_alloc(1)
-  else if(imp_flag == 2) then
+  call POISSON_alloc(1)
+  if(imp_flag == 2) then
      call GKallimp_alloc(1)
   endif
   call COLLISION_alloc(1)
@@ -136,9 +131,7 @@ subroutine gkcoll_do
 
      ! Collisionless gyrokinetic equation
      ! Returns new h_x, cap_h_x, cap_h_p, and phi 
-     if(imp_flag == 1) then
-        call GKimp_do
-     else if(imp_flag == 2) then
+     if(imp_flag == 2) then
         call GKallimp_do
      else
         call GK_do
@@ -285,9 +278,8 @@ subroutine gkcoll_do
   call EQUIL_alloc(0)
   call GYRO_alloc(0)
   call GK_alloc(0)
-  if(imp_flag == 1) then
-     call GKimp_alloc(0)
-  else if(imp_flag == 2) then
+  call POISSON_alloc(0)
+  if(imp_flag == 2) then
      call GKallimp_alloc(0)
   endif
   call COLLISION_alloc(0)
