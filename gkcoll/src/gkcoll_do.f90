@@ -89,8 +89,8 @@ subroutine gkcoll_do
   call EQUIL_alloc(1)
   call EQUIL_do
   call GYRO_alloc(1)
-  call GK_alloc(1)
   call POISSON_alloc(1)
+  call GK_alloc(1)
   if(imp_flag == 2) then
      call GKallimp_alloc(1)
   endif

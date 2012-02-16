@@ -4,7 +4,8 @@ module gkcoll_poisson
   
   public :: POISSON_alloc, POISSONp_do, POISSONx_do
   logical, private :: initialized = .false.
-  complex, private :: sum_den_p, sum_den_x
+  complex, private :: sum_den_p
+  complex, dimension(:,:), allocatable, private :: sum_den_x
   complex, dimension(:,:,:), allocatable, private :: pzf ! for n=0 test
   complex, dimension(:,:,:), allocatable, private :: dzf
   complex, dimension(:), allocatable, private :: ptemp
@@ -26,25 +27,39 @@ contains
        if(initialized) return
        
        sum_den_p = (0.0,0.0)
-       sum_den_x = (0.0,0.0)
        do is=1,n_species
           do ie=1,n_energy
              do ix=1,n_xi
                 sum_den_p = sum_den_p &
                      + 0.5 * w_xi(ix) &
                      * z(is)**2/temp(is) *dens(is) * w_e(ie)
-                sum_den_x = sum_den_x &
-                     + 0.5 * w_xi(ix) &
-                     * (1.0 - gyrox_J0(is,ir,it,ie,ix)**2) &
-                     * z(is)**2/temp(is) *dens(is) * w_e(ie)
              enddo
           enddo
        enddo
        if(adiabatic_ele_model == 1) then
           sum_den_p = sum_den_p + dens_ele / temp_ele
-          sum_den_x = sum_den_x + dens_ele / temp_ele
        endif
        
+       allocate(sum_den_x(n_radial,n_theta))
+       do ir=1,n_radial
+          do it=1,n_theta
+             sum_den_x(ir,it) = (0.0,0.0)
+             do is=1,n_species
+                do ie=1,n_energy
+                   do ix=1,n_xi
+                      sum_den_x(ir,it) = sum_den_x(ir,it) &
+                           + 0.5 * w_xi(ix) &
+                           * (1.0 - gyrox_J0(is,ir,it,ie,ix)**2) &
+                           * z(is)**2/temp(is) *dens(is) * w_e(ie)
+                   enddo
+                enddo
+             enddo
+             if(adiabatic_ele_model == 1) then
+                sum_den_x(ir,it) = sum_den_x(ir,it) + dens_ele / temp_ele
+             endif
+          enddo
+       enddo
+
        if(toroidal_model == 2 .and. adiabatic_ele_model == 1 &
             .and. neoclassical_model /= 1) then
           
@@ -74,7 +89,7 @@ contains
           do ir=1,n_radial
              do it=1,n_theta
                 dzf(ir,it,it) = -k_perp(it,ir)**2 * lambda_debye**2 &
-                     * dens_ele / temp_ele + sum_den_x
+                     * dens_ele / temp_ele + sum_den_x(ir,it)
                 do jt=1,n_theta
                    dzf(ir,it,jt) = dzf(ir,it,jt) &
                         - dens_ele / temp_ele * w_theta(jt)
@@ -97,6 +112,8 @@ contains
        
     else
        if(.NOT. initialized) return
+
+       deallocate(sum_den_x)
 
        if(toroidal_model == 2 .and. adiabatic_ele_model == 1 &
             .and. neoclassical_model /= 1) then
@@ -146,7 +163,7 @@ contains
           enddo
        endif
     enddo
-    
+
   end subroutine POISSONp_do
   
   subroutine POISSONx_do
@@ -182,7 +199,7 @@ contains
        else
           do it=1,n_theta
              phi(ir,it) = phi(ir,it) / (-k_perp(it,ir)**2 * lambda_debye**2 &
-                  * dens_ele / temp_ele + sum_den_x)
+                  * dens_ele / temp_ele + sum_den_x(ir,it))
           enddo
        endif
     enddo
