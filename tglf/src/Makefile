@@ -1,9 +1,9 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
 ifeq ($(OPT),debug)
-   FFLAGS=${FDEBUG} -m64 -r8
+   FFLAGS=${FDEBUG}
 else
-   FFLAGS=${FOPT} -m64 -r8
+   FFLAGS=${FOPT}
 endif
 
 EXEC1=xtglf_mpi
