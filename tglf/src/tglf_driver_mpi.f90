@@ -1,8 +1,9 @@
 !
-      PROGRAM tglf_driver
+      PROGRAM tglf_driver_mpi
 !
       USE tglf_pkg
       USE tglf_tg
+      USE tglf_mpi
 !
       IMPLICIT NONE
 ! local variables
@@ -13,9 +14,16 @@
       INTEGER :: time_array(8)
       REAL :: cpu1,cpu2 
 !
+  ! initialize MPI
+      call MPI_INIT(ierr)
 
-!      CALL tglf
-!      write(*,*)"gamma=",get_growthrate(1)
+      iCommTglf = MPI_COMM_WORLD
+      call MPI_COMM_RANK(iCommTglf,iProcTglf,ierr)
+      call MPI_COMM_SIZE(iCommTglf,nProcTglf,ierr)
+      write(*,*)"ierr=",ierr
+      write(*,*)"iProcTglf=",iProcTglf
+      write(*,*)"nProcTglf=",nProcTglf
+
       OPEN (unit=3,file='./tglfin',status='old')
       READ(3,nml=tglfin)
       CLOSE(3)
@@ -87,25 +95,18 @@
       endif
 !
       call tglf_setup_geometry
-      write(*,*)"R2_ave = ",get_R2_ave()
-      write(*,*)"B2_ave =",get_B2_ave()*drmindx_tg**2
-      write(*,*)"Rbt_ave = ",get_Rbt_ave()*drmindx_tg
-      write(*,*)"a_pol=",get_a_pol()
-      write(*,*)"a_tor=",get_a_tor()
-!
-      if(use_TM_tg)then
-        CALL put_eikonal(new_eikonal_tg)
-        CALL tglf_TM
-!        call date_and_time(values=time_array)
-!        cpu1 = time_array(5)*3600 + time_array(6)*60 + time_array(7)+time_array(8)*0.001
-!        do j=1,5
-!        CALL tglf_TM
-!        enddo
-!        call date_and_time(values=time_array)
-!        cpu2 = time_array(5)*3600 + time_array(6)*60 + time_array(7)+time_array(8)*0.001
-!        write(*,*)"first call to TGLF_TM"
-!        write(*,*)"cputime = ",(cpu2-cpu1)/1.0
-        do j=1,ns_tg
+
+      CALL put_eikonal(new_eikonal_tg)
+
+      CALL tglf_TM_mpi
+
+      if(iProcTglf.eq.0)then
+         write(*,*)"R2_ave = ",get_R2_ave()
+         write(*,*)"B2_ave =",get_B2_ave()*drmindx_tg**2
+         write(*,*)"Rbt_ave = ",get_Rbt_ave()*drmindx_tg
+         write(*,*)"a_pol=",get_a_pol()
+         write(*,*)"a_tor=",get_a_tor()
+         do j=1,ns_tg
          cmult = 0.7967
          if(j.eq.2)cmult=1.207
 !         cmult = 1.059
@@ -153,16 +154,17 @@
           write(*,*)"q_high=",(get_energy_flux(j,1)+get_energy_flux(j,2) - get_q_low(j))*drmindx_tg**2
 !          write(*,*)"n_bar_sum=",get_n_bar_sum(j)
 !          write(*,*)"t_bar_sum=",get_t_bar_sum(j)
-        enddo 
+        enddo
 !
         CALL write_tglf_input
-        STOP 
+      endif 
 !        
-        new_eikonal_tg=.FALSE.
-        CALL put_eikonal(new_eikonal_tg)
-        CALL tglf_TM
-        write(*,*)"second call to TGLF_TM put_eikonal test"
-        do j=1,ns_tg
+      new_eikonal_tg=.FALSE.
+      CALL put_eikonal(new_eikonal_tg)
+      CALL tglf_TM_mpi
+     if(iProcTglf.eq.0)then
+       write(*,*)"second call to TGLF_TM put_eikonal test"
+       do j=1,ns_tg
           write(*,*)"total flux for species ",j
           write(*,*)"particle_flux=",get_particle_flux(j,1)          
           write(*,*)"energy_flux=",get_energy_flux(j,1)
@@ -170,62 +172,9 @@
           write(*,*)"stress_tor=",get_stress_tor(j,1)
           write(*,*)"n_bar_sum=",get_n_bar_sum(j)
           write(*,*)"t_bar_sum=",get_t_bar_sum(j)
-        enddo  
-      endif        
-!
-      CALL put_kys(ky_tg)
-!
-      write(*,*)"call to TGLF with ky=",ky_tg,find_width_tg
-      CALL put_gaussian_width(width_max_tg,width_min_tg,nwidth_tg &
-      ,find_width_tg)
-!
-      CALL tglf
-!
-      CALL write_wavefunction_out('out.tglf.wavefunction')
-!
-      nfields=1
-      if(use_bper_tg)nfields=2
-      if(use_bpar_tg)nfields=3
-      write(*,*)" single point call to TGLF with ky=",ky_tg
-      write(*,*) 'gaussian width = ',get_gaussian_width()
-      write(*,*) 'R_unit = ',get_R_unit()
-      write(*,*) 'q_unit = ',get_q_unit()
-      write(*,*) 'ave_wd(1,1) = ',get_ave_wd(1,1)
-      write(*,*) 'ave_b0(1,1) = ',get_ave_b0(1,1)
-      if(nbasis_max_tg.gt.1)then
-        write(*,*) 'ave_wd(1,2) = ',get_ave_wd(1,2)
-        write(*,*) 'ave_b0(1,2) = ',get_ave_b0(1,2)
-        write(*,*) 'ave_wd(2,2) = ',get_ave_wd(2,2)
-        write(*,*) 'ave_b0(2,2) = ',get_ave_b0(2,2)
-      endif
-      do i=1,nmodes_tg 
-        write(*,*) 'mode number i =',i  
-        write(*,*) 'gamma_tg(i) = ',get_growthrate(i)
-        write(*,*) 'freq_tg(i)  = ',get_frequency(i)
-        write(*,*) 'wd_bar(i) = ',get_wd_bar(i)
-        write(*,*) 'b0_bar(i) = ',get_b0_bar(i)
-        if(iflux_tg)then
-         do j=1,ns_tg
-         do k=1,nfields
-          write(*,*)"species number j =",j
-          write(*,*) 'QL_particle_flux_tg(i,j,k) = ',get_QL_particle_flux(i,j,k)
-          write(*,*) 'QL_energy_flux_tg(i,j,k) = ',get_QL_energy_flux(i,j,k)
-          write(*,*) 'QL_stress_par_tg(i,j,k) = ',get_QL_stress_par(i,j,k)
-          write(*,*) 'QL_stress_tor_tg(i,j,k) = ',get_QL_stress_tor(i,j,k)
-          write(*,*) 'QL_exchange_tg(i,j,k) = ',get_QL_exchange(i,j,k)
-          write(*,*) 'QL_density(i,j) = ',get_QL_density(i,j)
-          write(*,*) 'QL_temperature(i,j) = ',get_QL_temperature(i,j)
-         enddo
-         enddo
-         write(*,*) 'QL_phi(i) = ',get_QL_phi(i)
-         write(*,*) 'phi_bar(i) = ',get_phi_bar(i)*drmindx_tg**2
-         write(*,*)'Ne_Te_phase = ',get_Ne_Te_phase(1)
-        endif
-      enddo
-!     output with ELITE conventions
-      write(*,*)"D(I) = ",0.25-get_DM()," D(R) = ",-get_DR() 
-!
+       enddo  
+     endif        
 !
       STOP
 !  
-      END   !program tglf_driver
+      END   !program tglf_driver_mpi

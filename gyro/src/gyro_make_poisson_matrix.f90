@@ -1,12 +1,12 @@
 !-----------------------------------------------------
-! make_poisson_matrix.f90
+! gyro_make_poisson_matrix.f90
 !
 ! PURPOSE:
 !  Define sparse form of Poisson matrix used for 
 !  EXPLICIT field solve.
 !-----------------------------------------------------
 
-subroutine make_poisson_matrix
+subroutine gyro_make_poisson_matrix
 
   use gyro_globals
   use math_constants
@@ -88,15 +88,14 @@ subroutine make_poisson_matrix
      call gyro_sparse_solve_mumps(n_poisson,n_poisson_row,1,0)
   endif
 
-  !---------------------------------------------
-  ! These are large matrices and deallocation is
-  ! important:
+  !--------------------------------------------------------
+  ! These are large matrices and deallocation is important:
   !
   deallocate(ap_mm)
-  !---------------------------------------------
+  !--------------------------------------------------------
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[make_poisson_matrix done]'
+     print *,'[gyro_make_poisson_matrix done]'
   endif
 
-end subroutine make_poisson_matrix
+end subroutine gyro_make_poisson_matrix

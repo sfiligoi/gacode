@@ -1,12 +1,12 @@
 !-----------------------------------------------------
-! make_maxwell_matrix.f90
+! gyro_make_maxwell_matrix.f90
 !
 ! PURPOSE:
 !  Define sparse form of Poisson-Ampere (Maxwell) 
 !  matrix and factorize using UMFPACK.
 !-----------------------------------------------------
 
-subroutine make_maxwell_matrix
+subroutine gyro_make_maxwell_matrix
 
   use gyro_globals
   use gyro_maxwell_private
@@ -173,7 +173,7 @@ subroutine make_maxwell_matrix
   !---------------------------------------------
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[make_maxwell_matrix done]'
+     print *,'[gyro_make_maxwell_matrix done]'
   endif
 
-end subroutine make_maxwell_matrix
+end subroutine gyro_make_maxwell_matrix

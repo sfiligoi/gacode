@@ -1,12 +1,12 @@
 !-----------------------------------------------------
-! make_poissonaperp_matrix.f90
+! gyro_make_poissonaperp_matrix.f90
 !
 ! PURPOSE:
 !  Define sparse form of Poisson-AmperePerp (PB) 
 !  matrix and factorize using UMFPACK.
 !-----------------------------------------------------
 
-subroutine make_poissonaperp_matrix
+subroutine gyro_make_poissonaperp_matrix
 
   use gyro_globals
   use gyro_poissonaperp_private
@@ -78,7 +78,7 @@ subroutine make_poissonaperp_matrix
 
   endif
 
-  ! Ampere Perp MBB matrix , and the coupled matriced MBP and MPB
+  ! Ampere Perp MBB matrix, and the coupled matrices MBP and MPB
   allocate(ab_mm(n_x,-m_gyro:m_gyro-i_gyro,n_blend,n_blend))
   allocate(abp_mm(n_x,-m_gyro:m_gyro-i_gyro,n_blend,n_blend))
   call make_ampereperp_blend
@@ -100,7 +100,7 @@ subroutine make_poissonaperp_matrix
   !---------------------------------------------
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[make_poissonaperp_matrix done]'
+     print *,'[gyro_make_poissonaperp_matrix done]'
   endif
 
-end subroutine make_poissonaperp_matrix
+end subroutine gyro_make_poissonaperp_matrix
