@@ -88,6 +88,17 @@ then
    echo "             -r <reorder sequence>"
    echo "             Reorder ions."
    echo
+   echo "CORSICA Options"
+   echo
+   echo "             -g <gfile>"
+   echo "             Merge EFIT gfile for high-precision geometry data."
+   echo 
+   echo "             -nogq"
+   echo "             Do not use q from GATO (by default, if gfile is specified q is from GATO)."
+   echo 
+   echo "             -r <reorder sequence>"
+   echo "             Reorder ions."
+   echo
    echo "ASTRA Options"
    echo
    echo "             -m <map file>"
