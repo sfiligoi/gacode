@@ -12,7 +12,9 @@ subroutine prgen_map_corsica
   implicit none
 
   ! Compute rho, bref and arho:
-  call prgen_get_chi(nx,q_gato,kappa,rmin,dpsi,rho,peqdsk_bref,peqdsk_arho)
+  ! Ignore corsica input "rho", "rmin", and "q"; use gato and corsica poloidal
+  ! flux
+  call prgen_get_chi(nx,q_gato,kappa,rmin,dpsi,rho,corsica_bref,corsica_arho)
 
   !---------------------------------------------------------
   ! Map profile data onto single array:
@@ -20,10 +22,10 @@ subroutine prgen_map_corsica
   allocate(vec(n_indx,corsica_nvals))
   vec(:,:) = 0.0
   !
-  vec(1,:)  = corsica_rho(:)
+  vec(1,:)  = rho(:)
   vec(2,:)  = rmin(:)
   vec(3,:)  = rmaj(:)
-  vec(4,:)  = corsica_q(:)
+  vec(4,:)  = q(:)
   vec(5,:)  = kappa(:)
   vec(6,:)  = delta(:)
   vec(7,:)  = corsica_te(:)
@@ -41,11 +43,16 @@ subroutine prgen_map_corsica
   vec(19,:) = 0.0      ! ptot
   vec(20,:) = dpsi(:)
 
+  ! Construct ion densities and temperatures assuming corsica ion species
+  ! (n D+T) is two species, each with 1/2 n_corsica and same temperature
+
   ! ni
-  vec(21,:) = corsica_ndt(:)*10.
+  vec(21,:) = 0.5 * corsica_ndt(:)*10.0
+  vec(22,:) = 0.5 * corsica_ndt(:)*10.0
   
   ! ti
   vec(26,:) = corsica_ti(:)
+  vec(27,:) = corsica_ti(:)
 
   ! vphi
   vec(31,:) = 0.0

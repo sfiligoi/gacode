@@ -240,6 +240,8 @@ module prgen_read_globals
   real :: corsica_li3
 
   integer, parameter :: corsica_nvals = 81
+  real :: corsica_bref
+  real :: corsica_arho
   real, allocatable :: corsica_rho(:)
   real, allocatable :: corsica_r_a(:)
   real, allocatable :: corsica_psin(:)

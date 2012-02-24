@@ -166,10 +166,10 @@ program prgen
 
   else if (index(raw_data_file,'.corsica',back) /= 0) then
 
-     ! peqdsk format
+     ! corsica format
      print '(a)','INFO: Assuming corsica format.'
 
-     format_type = 3
+     format_type = 5
 
      if (gato_flag /= 1) then
         print '(a)','ERROR: (prgen) geqdsk must be provided for corsica format'
