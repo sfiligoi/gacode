@@ -15,12 +15,16 @@ subroutine tgyro_global_iteration_driver
 
   implicit none
 
-   real :: time_max_save
+  real :: time_max_save
+  integer :: n_exp
 
   ! Initialize GYRO
   call gyro_init(paths(1),MPI_COMM_WORLD)
 
   n_r = tgyro_global_radii+1
+  if (2*int(tgyro_global_radii/2) == tgyro_global_radii) then
+     call tgyro_catch_error('ERROR: Must have odd number of GYRO radii')
+  endif
 
   call tgyro_allocate_globals
 
@@ -74,6 +78,8 @@ subroutine tgyro_global_iteration_driver
   call EXPRO_palloc(MPI_COMM_WORLD,paths(1),1) 
   call EXPRO_pread
 
+  n_exp = EXPRO_n_exp
+
   call tgyro_global_init_profiles
 
   call EXPRO_write_original('REWROTE')
@@ -93,13 +99,16 @@ subroutine tgyro_global_iteration_driver
   !
   call EXPRO_palloc(MPI_COMM_WORLD,paths(1),1) 
   call EXPRO_pread
-  
-  EXPRO_te      = te(:)/1e3
-  EXPRO_ti(1,:) = ti(1,:)/1e3
+
+  call cub_spline(r/r_min,te/1e3,n_r,100*EXPRO_rmin(:)/r_min,EXPRO_te(:),n_exp)
+  print *,r/r_min,te/1e3
+  print *,100*EXPRO_rmin(:)/r_min,EXPRO_te(:)
 
   call EXPRO_write_original('REWROTE_1')
   call EXPRO_palloc(MPI_COMM_WORLD,paths(1),0)
   !------------------------------------------------------------
+
+  call tgyro_catch_error('ks')
 
   ! 1: Get global GYRO flux, compute targets, write data
   call tgyro_global_flux
@@ -107,7 +116,7 @@ subroutine tgyro_global_iteration_driver
   call tgyro_write_data(1)
 
   ! Modify gradient profile based on some "diagonal rule"
-  dlntedr(:) = 0.1*(eflux_e_tot(:)-eflux_e_target(:))+dlntedr(:)
+  !dlntedr(:) = 0.1*(eflux_e_tot(:)-eflux_e_target(:))+dlntedr(:)
 
   ! Integrate profiles based on gradients
   call tgyro_profile_functions
@@ -118,9 +127,8 @@ subroutine tgyro_global_iteration_driver
   !
   call EXPRO_palloc(MPI_COMM_WORLD,paths(1),1) 
   call EXPRO_pread
-  
-  EXPRO_te      = te(:)/1e3
-  EXPRO_ti(1,:) = ti(1,:)/1e3
+
+  call cub_spline(r,te/1e3,n_r,EXPRO_rmin(:)/r_min,EXPRO_te(:),n_exp)
 
   call EXPRO_write_original('REWROTE_1')
   call EXPRO_palloc(MPI_COMM_WORLD,paths(1),0)
