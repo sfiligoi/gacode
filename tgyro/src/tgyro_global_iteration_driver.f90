@@ -17,6 +17,7 @@ subroutine tgyro_global_iteration_driver
 
   real :: time_max_save
   integer :: n_exp
+  real, dimension(:), allocatable :: x,xt
 
   ! Initialize GYRO
   call gyro_init(paths(1),MPI_COMM_WORLD)
@@ -90,53 +91,69 @@ subroutine tgyro_global_iteration_driver
   call tgyro_write_input
   call tgyro_write_data(0)
 
+  !------------------------------------------------------------
   ! Integrate profiles based on gradients
   call tgyro_profile_functions
-
-  !------------------------------------------------------------
+  !
   ! Read profile data, copy current profiles into interface, 
   ! rewrite profiles
   !
   call EXPRO_palloc(MPI_COMM_WORLD,paths(1),1) 
   call EXPRO_pread
 
-  call cub_spline(r/r_min,te/1e3,n_r,100*EXPRO_rmin(:)/r_min,EXPRO_te(:),n_exp)
-  print *,r/r_min,te/1e3
-  print *,100*EXPRO_rmin(:)/r_min,EXPRO_te(:)
+  allocate(x(n_r+1))
+  allocate(xt(n_r+1))
+  x(1:n_r) = r/r_min
+  x(n_r+1) = 1.0
+  xt(1:n_r) = te/1e3
+  xt(n_r+1) = EXPRO_te(n_exp)
+
+  call cub_spline(x,xt,n_r+1,100*EXPRO_rmin(:)/r_min,EXPRO_te(:),n_exp)
+  deallocate(x)
+  deallocate(xt)
 
   call EXPRO_write_original('REWROTE_1')
-  call EXPRO_palloc(MPI_COMM_WORLD,paths(1),0)
-  !------------------------------------------------------------
-
-  call tgyro_catch_error('ks')
-
-  ! 1: Get global GYRO flux, compute targets, write data
+  call EXPRO_palloc(MPI_COMM_WORLD,paths(1),0) 
+  call system('mv '//trim(paths(1))//'input.profiles.new '//trim(paths(1))//'input.profiles.1')
+  call system('cp '//trim(paths(1))//'input.profiles.1 '//trim(paths(1))//'input.profiles')
+  ! Get global GYRO flux, compute targets, write data
   call tgyro_global_flux
   call tgyro_source
   call tgyro_write_data(1)
+  !------------------------------------------------------------
 
   ! Modify gradient profile based on some "diagonal rule"
-  !dlntedr(:) = 0.1*(eflux_e_tot(:)-eflux_e_target(:))+dlntedr(:)
-
-  ! Integrate profiles based on gradients
-  call tgyro_profile_functions
+  dlntedr(:) = 0.0*(eflux_e_tot(:)-eflux_e_target(:))+dlntedr(:)
 
   !--------------------------------------------------------
+  ! Integrate profiles based on gradients
+  call tgyro_profile_functions
+  !
   ! Read profile data, copy current profiles into interface, 
   ! rewrite profiles
   !
   call EXPRO_palloc(MPI_COMM_WORLD,paths(1),1) 
   call EXPRO_pread
 
-  call cub_spline(r,te/1e3,n_r,EXPRO_rmin(:)/r_min,EXPRO_te(:),n_exp)
+  allocate(x(n_r+1))
+  allocate(xt(n_r+1))
+  x(1:n_r) = r/r_min
+  x(n_r+1) = 1.0
+  xt(1:n_r) = te/1e3
+  xt(n_r+1) = EXPRO_te(n_exp)
 
-  call EXPRO_write_original('REWROTE_1')
+  call cub_spline(x,xt,n_r+1,100*EXPRO_rmin(:)/r_min,EXPRO_te(:),n_exp)
+  deallocate(x)
+  deallocate(xt)
+
+  call EXPRO_write_original('REWROTE_2')
   call EXPRO_palloc(MPI_COMM_WORLD,paths(1),0)
-  !--------------------------------------------------------
-
-  ! 2: Get global GYRO flux, compute targets, write data
+  call system('cp '//trim(paths(1))//'input.profiles.new '//trim(paths(1))//'input.profiles.2')  
+  call system('cp '//trim(paths(1))//'input.profiles.2 '//trim(paths(1))//'input.profiles')
+  ! Get global GYRO flux, compute targets, write data
   call tgyro_global_flux
   call tgyro_source
   call tgyro_write_data(1)
+  !--------------------------------------------------------
 
 end subroutine tgyro_global_iteration_driver
