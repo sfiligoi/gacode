@@ -3,6 +3,8 @@
   !
   ! PURPOSE:
   !  Capture fluxes from global GYRO simulation
+  !
+  ! NOTE:  Exchanges need normalization correction.
   !---------------------------------------------------------------
 
 subroutine tgyro_global_flux
@@ -11,11 +13,12 @@ subroutine tgyro_global_flux
   use gyro_interface
 
   implicit none
-  
+
   integer :: i
   integer :: j
   integer :: i_ion
   integer :: n_gyro
+  integer :: inorm
   real :: x
 
   ! Initialize all fluxes
@@ -39,30 +42,39 @@ subroutine tgyro_global_flux
   call gyro_run(gyrotest_flag, gyro_restart_method, &
        transport_method, gyro_exit_status(1), gyro_exit_message(1))
 
+  !------------------------------------------------------------------
+  ! Note that GYRO global fluxes are returned with normalizations  
+  ! based on GYRO norm radius, whereas in TGYRO the fluxes are based 
+  ! on the GB normalizations at the local radius.  So, we also 
+  ! perform this conversion below.
+  inorm = n_r/2
+  !------------------------------------------------------------------
+
   do i=2,n_r
      n_gyro = 0
+
      do j=igmin,igmax
         x = gyro_r_out(j)-r(i)/r_min
         ! See if GYRO simulation point is inside TGYRO bin
         if (x > -dlength/2 .and. x < dlength/2) then
            n_gyro = n_gyro+1
            pflux_e_tur(i) = pflux_e_tur(i)+&
-                gyro_elec_pflux_out(j)
+                gyro_elec_pflux_out(j)*gamma_gb(inorm)/gamma_gb(i)
            eflux_e_tur(i) = eflux_e_tur(i)+&
-                gyro_elec_eflux_out(j)  
+                gyro_elec_eflux_out(j)*q_gb(inorm)/q_gb(i) 
            mflux_e_tur(i) = mflux_e_tur(i)+&
-                gyro_elec_mflux_out(j)  
+                gyro_elec_mflux_out(j)*pi_gb(inorm)/pi_gb(i)  
            expwd_e_tur(i) = expwd_e_tur(i)+&
-                gyro_elec_expwd_out(j)  
+                gyro_elec_expwd_out(j)*0.0
            do i_ion=1,loc_n_ion
               pflux_i_tur(i_ion,i) = pflux_i_tur(i_ion,i)+&
-                   gyro_ion_pflux_out(j,i_ion) 
+                   gyro_ion_pflux_out(j,i_ion)*gamma_gb(inorm)/gamma_gb(i) 
               eflux_i_tur(i_ion,i) = eflux_i_tur(i_ion,i)+&
-                   gyro_ion_eflux_out(j,i_ion)  
+                   gyro_ion_eflux_out(j,i_ion)*q_gb(inorm)/q_gb(i) 
               mflux_i_tur(i_ion,i) = mflux_i_tur(i_ion,i)+&
-                   gyro_ion_mflux_out(j,i_ion)  
+                   gyro_ion_mflux_out(j,i_ion)*pi_gb(inorm)/pi_gb(i) 
               expwd_i_tur(i_ion,i) = expwd_i_tur(i_ion,i)+&
-                   gyro_ion_expwd_out(j,i_ion)  
+                   gyro_ion_expwd_out(j,i_ion)*0.0  
            enddo ! i_ion
         endif
      enddo ! j
