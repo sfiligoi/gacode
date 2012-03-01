@@ -19,6 +19,9 @@ subroutine tgyro_global_iteration_driver
   integer :: n_exp
   real, dimension(:), allocatable :: x,xt
 
+  ! Copy (TGYRO copy of input.profiles) -> (GYRO copy of input.profiles)
+  call system('cp input.profiles '//trim(paths(1))//'input.profiles')  
+
   ! Initialize GYRO
   call gyro_init(paths(1),MPI_COMM_WORLD)
 
@@ -42,6 +45,9 @@ subroutine tgyro_global_iteration_driver
   ! gyro_restart_method = 0 (no restart)
   !                     = 1 (standard restart)
 
+  !--------------------------------------------------------
+  ! INITIALIZE GLOBAL TGYRO PROFILES
+  !
   gyro_restart_method = 0
   transport_method    = 2
   time_max_save = gyro_time_max_in
@@ -67,7 +73,6 @@ subroutine tgyro_global_iteration_driver
      r(i) = tgyro_rmin+dlength/2+(i-2)*dlength
   enddo
 
-  !--------------------------------------------------------
   EXPRO_ctrl_density_method = loc_quasineutral_flag+1
   EXPRO_ctrl_z = 0.0
   EXPRO_ctrl_z(1:loc_n_ion) = zi_vec(1:loc_n_ion)
@@ -85,13 +90,16 @@ subroutine tgyro_global_iteration_driver
 
   call EXPRO_write_original('REWROTE')
   call EXPRO_palloc(MPI_COMM_WORLD,paths(1),0)
-  !--------------------------------------------------------
 
   ! Output initialization
   call tgyro_write_input
   call tgyro_write_data(0)
+  !--------------------------------------------------------
+
 
   !------------------------------------------------------------
+  ! TGYRO-GYRO CYCLE
+  !
   ! Integrate profiles based on gradients
   call tgyro_profile_functions
   !
@@ -122,10 +130,16 @@ subroutine tgyro_global_iteration_driver
   call tgyro_write_data(1)
   !------------------------------------------------------------
 
+  !------------------------------------------------------------
+  ! MODIFY GRADIENTS
+  !
   ! Modify gradient profile based on some "diagonal rule"
   dlntedr(:) = 0.0*(eflux_e_tot(:)-eflux_e_target(:))+dlntedr(:)
+  !------------------------------------------------------------
 
   !--------------------------------------------------------
+  ! TGYRO-GYRO CYCLE
+  !
   ! Integrate profiles based on gradients
   call tgyro_profile_functions
   !

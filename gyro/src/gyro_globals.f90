@@ -458,6 +458,7 @@ module gyro_globals
   real :: time_max
   real :: freq_tol
   real :: freq_err
+  real :: fluxaverage_window
   !
   real :: plot_filter
   real :: dt
