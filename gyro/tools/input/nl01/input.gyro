@@ -87,8 +87,8 @@ AMP_PHI_0=0.0
 
 THETA_PLOT=8
 
-PLOT_U_FLAG=1
-PLOT_N_FLAG=1
-PLOT_E_FLAG=1
-PLOT_V_FLAG=1
+PLOT_U_FLAG=0
+PLOT_N_FLAG=0
+PLOT_E_FLAG=0
+PLOT_V_FLAG=0
 #==============================================
