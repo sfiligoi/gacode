@@ -8,47 +8,53 @@
 !-----------------------------------------------------------------------
 ! code organization for hdf_api.
 !-----------------------------------------------------------------------
-! 0. check_dims 
-! 1. h5accessMethod
-! 2. vshdf5_fcinit
-! 3. vshdf5_inith5vars
-! 4. vshdf5_initprovenance
-! 5. open_oldh5file
-! 6. open_newh5file
-! 7. close_h5file
-! 8. open_group
-! 9. make_group
-! 10. close_group
-! 11. test_group
-! 12. get_nmember
-! 13. make reference
-! 20. make_mesh_group
-! 21. make_time_group
-! 22. make_vec_group
-! 23. make_limits_group
-! 14. write_attribute_ch_sc
-! 15. write_attribute_ch_vec
-! 16. write_attribute_int_sc
-! 17. write_attribute_int_vec
-! 18. write_attribute_rl_sc
-! 19. write_attribute_rl_vec
-! 25. dump_h5in_attributes
-! 26. dump_h5_int
-! 27. dump_h5
-! 28. dump_h5_1d
-! 29. dump_h5_2d
-! 30. dump_h5_3d
-! 31. dump_h5_4d
-! 32. dump_rl_1d
-! 33. dump_rl_2d
-! 34. dump_rl_3d
-! 35. dump_rl_4d
-! 36. read_dims
-! 37. read_h5_1d
-! 38. read_h5_2d
-! 39. read_h5_3d
-! 40. read_attribute_rl_sc
-!------------------------------------------------------------------
+! 1.  check_dims(dims, fdims, errval)
+! 2.  vshdf5_fcinit()
+! 3.  vshdf5_inith5vars(h5in, h5err)
+! 4.  open_h5file(openmethod,fname,fileid,fdesc,rootgid,h5in,h5err)
+! 5.  open_oldh5file(fname,fileid,fdesc,rootgid,h5in,h5err)
+! 6.  open_newh5file(fname,fileId,fdesc,rootGid,h5in,h5err)
+! 7.  close_h5file(fileId,root_id,h5err)
+! 8.  open_group(inid,gname,gid,errval)
+! 9.  make_group(inid,gname,gid,meshtitle,errval)
+! 10. close_group(gname,inid,errval)
+! 11. test_group(inid,gname,group_exists,errval)
+! 12. get_nmembers(inid,gname,nmembers,errval)
+! 13. make_reference(inid,in_gid,sname,tname,errval)
+! 14. make_mesh_group(gInId,gridId,h5in,meshName,&
+! 15. make_time_group(gInId,grName,h5in,h5err)
+!
+! 20. write_attribute_ch_sc(inid,aname,attribute,errval)
+! 21. write_attribute_ch_vec(inid,aname,attribute,errval)
+! 22. write_attribute_int_sc(inid,aname,attribute,errval)
+! 23. write_attribute_int_vec(inid,aname,attribute,errval)
+! 24. write_attribute_rl_sc(inid,aname,attribute,errval)
+! 25. write_attribute_rl_vec(inid,aname,attribute,errval)
+!
+! 30. dump_h5in_attributes(dset_id,h5in,h5err)
+! 31. dump_h5_int(inid,aname,value,h5in,errval)
+! 32. dump_h5_rldbl(inid,aname,value,h5in,errval)
+! 33. dump_h5_1d(inid,aname,array,h5in,errval)
+! 34. dump_h5_2d(inid,aname,array,h5in,errval)
+! 35. dump_h5_3d(inid,aname,array,h5in,errval)
+! 36. dump_h5_4d(inid,aname,array,h5in,errval)
+! 37. dump_rl_1d(inid,aname,array,h5in,errval)
+! 38. dump_rl_2d(inid,aname,array,h5in,errval)
+! 39. dump_rl_3d(inid,aname,array,h5in,errval)
+! 39. dump_rl_4d(inid,aname,array,h5in,errval)
+!
+! 40. add_h5_int(inid,aname,value,h5in,errval)
+! 42. add_h5_dbl(inid,aname,array,h5in,errval)
+! 42. add_h5_int_1d(inid,aname,array,h5in,errval)
+! 42. add_h5_1d(inid,aname,array,h5in,errval)
+! 43. add_h5_2d(inid,aname,array,h5in,errval)
+!
+! 50. read_dims(dset_id,aname,dims,errval)
+! 51. read_h5_1d(fid,aname,array,h5in,errval)
+! 52. read_h5_2d(fid,aname,array,h5in,errval)
+! 53. read_h5_3d(fid,aname,array,h5in,errval)
+! 54. read_attribute_rl_sc(fid,aname,val,h5in,errval)
+!-----------------------------------------------------------------------
 ! module hdf_api
 !-----------------------------------------------------------------------
   module hdf5_api
@@ -56,18 +62,18 @@
   implicit none
   character(5), parameter, private :: h5fortranapiversion="1.0"
   integer, parameter, private :: i4=selected_int_kind(9)
-  integER, PARAMETER, PRIVATE :: i8=selected_int_kind(18)
-  inteGER, PARAMETER, PRIVATE :: r4=selected_real_kind(6,37)
-  iNTEGER, PARAMETER, PRIVATE :: r8=selected_real_kind(13,307)
+  integer, parameter, private :: i8=selected_int_kind(18)
+  integer, parameter, private :: r4=selected_real_kind(6,37)
+  integer, parameter, private :: r8=selected_real_kind(13,307)
 !-----------------------------------------------------------------------
-!     Input parameters to control the attributes and how written out
-!     The method used to determine whether to write the character
-!     variables are written out is something like the following:
-!        IF(TRIM(h5in%vsMD)/="") THEN
-!           CALL write_attribute(dset_id,"vsMD",h5in%vsMD,errval)
-!        ENDIF
-!     This needs to be paid attention to if writing out several
-!     variables in a row.
+! Input parameters to control the attributes and how written out
+! The method used to determine whether to write the character
+! variables are written out is something like the following:
+!    if(TRIM(h5in%vsMD)/="") then
+!       call write_attribute(dset_id,"vsMD",h5in%vsMD,errval)
+!    endif
+! This needs to be paid attention to if writing out several
+! variables in a row.
 !
 ! MESH DISCUSSION:
 ! The key to making the vsSchema work is to associate fields with
@@ -100,20 +106,16 @@
      logical :: wrvstime              ! whether to write time to attribute
      logical :: typeconvert           ! whether to demote the type
      logical :: unitconvert           ! whether to write vsunitcnv
-     integer(selected_int_kind(9)) :: comm     ! Communicator associated w/ open file
-     integer(selected_int_kind(9)) :: info     ! mpi_info: set to MPI_INFO_NULL if unsure
-     character(len=30) :: mesh             ! See above
-     character(len=30) :: units            ! Units
-     character(len=30) :: vsAxisLabels     ! Axis labels
-     character(len=30) :: vsCentering      ! How to center variables on mesh
-     character(len=30) :: vsMD             ! Multidomain variable
-     character(len=30) :: vsTimeGroup      ! Time group label
-     character(len=30) :: vsIndexOrder     ! Data ordering
-     character(len=1000) :: vsLabels        ! Labels for (ic) (nqty)
-     real(r8) :: vsTime                    ! Time
-     integer(HID_T) :: vsStep=0            ! Step # associated with time
-     real(r8) :: vsUnitCnv=1.              ! conversion factor
-     character(len=30), dimension(3) :: vsAxis   ! For rectilinear meshes
+     integer(selected_int_kind(9)) :: comm     ! communicator associated w/ open file
+     integer(selected_int_kind(9)) :: info     ! mpi_info: set to mpi_info_null if unsure
+     character(len=30) :: mesh             ! see above
+     character(len=30) :: units            ! units
+     character(len=30) :: vscentering      ! how to center variables on mesh
+     character(len=30) :: vsmd             ! multidomain variable
+     real(r8) :: vstime                    ! bassi requires r8
+     integer(hid_t) :: vsstep=0            ! step # associated with time
+     real(r8) :: vsunitcnv=1.              ! conversion factor
+     ! double precision :: vstime          ! different b/c time dependent
   end type
 !-----------------------------------------------------------------------
 !     Example of how to use h5err type after an fcapi call.
@@ -128,14 +130,11 @@
 !-----------------------------------------------------------------------
   interface write_attribute
     module procedure write_attribute_ch_sc,write_attribute_ch_vec &
-                   ,write_attribute_rl_sc,write_attribute_rls_sc &
-                   ,write_attribute_rl_vec &
-                   ,write_attribute_int_sc,write_attribute_int_vec &
-                   ,write_attribute_intl_sc,write_attribute_intl_vec
+                   ,write_attribute_rl_sc,write_attribute_rl_vec &
+                   ,write_attribute_int_sc,write_attribute_int_vec
   end interface
   interface dump_h5
-    module procedure dump_int,dump_intl,dump_int_1d,dump_intl_1d, &
-                     dump_h5_rldbl,dump_h5_rls, &
+    module procedure  dump_h5_int,dump_h5_rldbl, &
                      dump_h5_1d,dump_h5_2d,dump_h5_3d,dump_h5_4d, &
                      dump_rl_1d,dump_rl_2d,dump_rl_3d,dump_rl_4d
   end interface
@@ -147,16 +146,15 @@
   end interface
   ! dump components into separate groups
   interface read_h5
-    module procedure read_h5_intl,read_h5_intl_1d,read_h5_1d,read_h5_2d,read_h5_3d
+    module procedure read_h5_1d,read_h5_2d,read_h5_3d
   end interface
   interface read_attribute
-    module procedure read_attribute_intl_sc,read_attribute_rl_sc,read_attribute_intl_vec
+    module procedure read_attribute_rl_sc
   end interface
 
   contains
 !-----------------------------------------------------------------------
-! subprogram 0. check_dims 
-! Write mismatched dimension errors
+! subprogram -1. write mismatched dimension errors
 !-----------------------------------------------------------------------
   subroutine check_dims(dims, fdims, errval)
   integer(hsize_t), dimension(:), intent(in) :: dims, fdims
@@ -200,8 +198,8 @@
 ! Open fortran hdf5 and set open/close parameters.
 !-----------------------------------------------------------------------
   subroutine vshdf5_fcinit()
-  integer(hid_t) :: err
-  ! integer :: err
+  ! integer(hid_t) :: err
+  integer :: err
   ! write(*, *) "vshdf5_fcinit: entered"
   call h5dont_atexit_f(err)
   ! write(*, *) "vshdf5_fcinit: h5dont_atexit_f returned."
@@ -212,7 +210,7 @@
   end subroutine vshdf5_fcinit
 
 !-----------------------------------------------------------------------
-! subprogram 3 vshdf5_inith5vars
+! subprogram 0.1 vshdf5_inith5vars
 ! Initialize these variables to default values.
 !-----------------------------------------------------------------------
   subroutine vshdf5_inith5vars(h5in, h5err)
@@ -234,15 +232,9 @@
   h5in%typeConvert=.false.
   h5in%unitConvert=.false.
   h5in%mesh =  " "
-  h5in%vsAxisLabels = " " 
   h5in%units =  " "
   h5in%vsCentering =  " "
   h5in%vsMD =  " "
-  ! Data-ordering options:
-  ! [ix][iy][iz][ic] compMinorC [iz][iy][ix][ic] compMinorF
-  ! [ic][ix][iy][iz] compMajorC [ic][iz][iy][ix] compMajorF
-  h5in%vsIndexOrder = " "
-  h5in%vsLabels = " "
   h5err%errBool = .false.
   h5err%errorMsg =  " "
   return
@@ -259,8 +251,13 @@
   integer(hid_t), intent(out) :: fileid,rootgid
   type(hdf5errortype), intent(inout) :: h5err
   type(hdf5inopts), intent(inout) :: h5in
+  integer(hid_t) :: access_mode
+  integer(hid_t) :: plist_id       ! property list identifier
   integer,parameter :: fail=-1
+  integer :: info
+  integer(hid_t) :: error
 
+  logical :: file_exists
   if (h5in%verbose) then
     write(*, *) " open_h5file: entered."
   endif
@@ -273,7 +270,7 @@
   case('overwr')
     call open_newh5file(fname,fileid,fdesc,rootgid,h5in,h5err)
   case('append')
-    call open_oldh5file(fname,fileid,rootgid,h5in,h5err)
+    call open_oldh5file(fname,fileid,fdesc,rootgid,h5in,h5err)
   case default
     h5err%errorMsg = "open_h5file called with incorrect openmethod"
     h5err%errBool = .true.
@@ -282,18 +279,20 @@
   return
   end subroutine open_h5file
 !-----------------------------------------------------------------------
-! subprogram 5. open_oldh5file
+! subprogram 1. open_oldh5file
 ! Open file for writing and write file attributes
 ! Create the group for the independent variables at this stage
 !-----------------------------------------------------------------------
-  subroutine open_oldh5file(fname,fileid,rootgid,h5in,h5err)
-  character(*), intent(in) :: fname
+  subroutine open_oldh5file(fname,fileid,fdesc,rootgid,h5in,h5err)
+  character(*), intent(in) :: fname,fdesc
   integer(hid_t), intent(out) :: fileid,rootgid
   type(hdf5errortype), intent(inout) :: h5err
   type(hdf5inopts), intent(inout) :: h5in
+  integer(hid_t) :: access_mode
+  integer(hid_t) :: plist_id       ! property list identifier
   integer,parameter :: fail=-1
+  integer :: info
   integer(hid_t) :: error
-  integer(hid_t) :: plist_id       ! Property list identifier
 
   logical :: file_exists
   if (h5in%verbose) then
@@ -335,11 +334,11 @@
   endif
 #ifdef __MPI
   if (h5in%pIO) then
-    call h5fopen_f(fname,H5F_ACC_RDONLY_F,fileId,error, &
+    call h5fopen_f(fname,H5F_ACC_RDWR_F,fileId,error, &
                   access_prp=plist_id)
   else
 #else
-  call h5fopen_f(fname, H5F_ACC_RDONLY_F, fileId, error)
+  call h5fopen_f(fname, H5F_ACC_RDWR_F, fileId, error)
 #endif
 #ifdef __MPI
   endif
@@ -373,8 +372,9 @@
   TYPE(hdf5ErrorType), intent(inoUT) :: h5err
   integer(HID_T) :: access_mode
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
-  integer(hid_t) :: plist_id       ! Property list identifier
+  integer(HID_T) :: plist_id       ! Property list identifier
+  integer :: error, info
+
   LOGICAL :: file_exists
 !-----------------------------------------------------------------------
 !    Setup file access property list with parallel I/O access.
@@ -439,16 +439,14 @@
   end subroutine open_newh5file
 
 !-----------------------------------------------------------------------
-! subprogram 7. close_h5file
-!     Close the file associated with fileId.
+! subprogram 2. close_h5file
+! Close the file associated with fileId.
 !-----------------------------------------------------------------------
   subroutine close_h5file(fileId,root_id,h5err)
-  integer(HID_T), intent(in)         :: fileId
-  integer(HID_T), intent(in)                :: root_id
+  integer, intent(in) :: fileId,root_id
   TYPE(hdf5ErrorType), intent(inoUT) :: h5err
-
   integer,parameter :: FAIL=-1
-  integer(HID_T)    :: error
+  integer :: error
 !-----------------------------------------------------------------------
 ! Close the root group and file
 !-----------------------------------------------------------------------
@@ -465,8 +463,8 @@
   end subroutine close_h5file
 
 !-----------------------------------------------------------------------
-! subprogram 8. open_group
-!     Open a group in a safe way
+! subprogram 3. open_group
+! Open a group in a safe way
 !-----------------------------------------------------------------------
   subroutine open_group(inid,gname,gid,errval)
   character(*), intent(in) :: gname
@@ -474,7 +472,7 @@
   integer(HID_T), intent(out) :: gid
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer :: error
 !-------------------------------------------------------------------
 ! Open group
 !-----------------------------------------------------------------------
@@ -489,20 +487,19 @@
   end subroutine open_group
 
 !-----------------------------------------------------------------------
-! subprogram 9. make_group
+! subprogram 3. make_group
 ! Create a group in a safe way
 !-----------------------------------------------------------------------
-  subroutine make_group(inid,gname,gid,h5in,errval)
+  subroutine make_group(inid,gname,gid,meshtitle,errval)
   character(*), intent(in) :: gname
+  character*(*), intent(in) :: meshtitle
   integer(HID_T), intent(in) :: inid
   integer(HID_T), intent(out) :: gid
-  type(hdf5InOpts), intent(in) :: h5in
-  type(hdf5ErrorType) :: errval
+  TYPE(hdf5ErrorType) :: errval
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
-  integer :: i
-  character(1) :: alabel
-  character(7) :: axisstr
+  integer :: error
+
+  character(64) :: msg
 !-----------------------------------------------------------------------
 ! Create group
 !-----------------------------------------------------------------------
@@ -519,30 +516,10 @@
 !-----------------------------------------------------------------------
 !  call write_attribute(gid,'CLASS','GROUP',errval)
 !  call write_attribute(gid,'VERSION','1.0',errval)
-  if(len_trim(h5in%mesh)>0) then
-   if(h5in%mesh(1:5)=="mesh-") then
-     if(h5in%debug) WRITE(*,*) 'Writing vsType attributes'
-     call write_attribute(gid,'vsType',"mesh",errval)
-     if(h5in%debug) WRITE(*,*) 'Writing vsMesh attributes',h5in%mesh(6:)
-     call write_attribute(gid,'vsKind',h5in%mesh(6:),errval)
-     do i=1,3
-        if(len_trim(h5in%vsAxis(i))>0) then
-           write(alabel,fmt='(i1.1)') i-1
-           axisstr="vsAxis"//alabel
-           call write_attribute(gid,axisstr,h5in%vsAxis(i),errval)
-        endif
-     enddo
-!SEK: Not sure 
-!   else
-!     if(h5in%debug) WRITE(*,*) 'Writing vsType attributes'
-!     call write_attribute(dset_id,'vsType',"variable",errval)
-!     if(h5in%debug) WRITE(*,*) 'Writing vsMesh attributes',h5in%mesh
-!     call write_attribute(dset_id,'vsMesh',h5in%mesh,errval)
-!     if(len_trim(h5in%vsCentering)>0) then
-!       if(h5in%debug) WRITE(*,*) 'Writing vsCentering attributes'
-!       call write_attribute(dset_id,'vsCentering',h5in%vsCentering, &
-!                              errval)
-   endif
+!   call write_attribute(gid,'TITLE',TRIM(meshtitle),errval)
+  if(len_trim(meshtitle)>0) then
+   call write_attribute(gid,'vsType','mesh',errval)
+   call write_attribute(gid,'vsKind','structured',errval)
   endif
 !-----------------------------------------------------------------------
   errval%errBool = .false.
@@ -550,7 +527,7 @@
   end subroutine make_group
 
 !-----------------------------------------------------------------------
-! subprogram 10. close_group
+! subprogram 4. close_group
 ! Close a group in a safe way
 !-----------------------------------------------------------------------
   subroutine close_group(gname,inid,errval)
@@ -558,7 +535,7 @@
   integer(HID_T), intent(in) :: inid
   TYPE(hdf5ErrorType) :: errval
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer :: error
 !-----------------------------------------------------------------------
 ! Close group
 !-----------------------------------------------------------------------
@@ -574,7 +551,7 @@
   end subroutine close_group
 
 !-----------------------------------------------------------------------
-! subprogram 11. test_group
+! subprogram 5. test_group
 ! See if group exists
 !-----------------------------------------------------------------------
   subroutine test_group(inid,gname,group_exists,errval)
@@ -583,7 +560,7 @@
   LOGICAL, intent(out) :: group_exists
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer :: error
   integer(HID_T) :: gid
 !-----------------------------------------------------------------------
 ! Determine whether group exists by trying to opening it and testing
@@ -602,7 +579,7 @@
   end subroutine test_group
 
 !-----------------------------------------------------------------------
-! subprogram 12. get_nmember
+! subprogram 6. get_nmember
 ! Get the number of members of a group
 !-----------------------------------------------------------------------
   subroutine get_nmembers(inid,gname,nmembers,errval)
@@ -611,7 +588,7 @@
   integer(HID_T), intent(out) :: nmembers
   TYPE(hdf5ErrorType) :: errval
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer :: error
 !-----------------------------------------------------------------------
 ! Determine whether group exists by trying to opening it and testing
 !  error message
@@ -628,19 +605,20 @@
   end subroutine get_nmembers
 
 !-----------------------------------------------------------------------
-! subprogram 13. make reference
+! subprogram 7. make reference
 ! Simplify referencing of one object (source) to another (target)
 !-----------------------------------------------------------------------
-  subroutine make_reference(inid,tname,errval)
-  integer(HID_T), intent(in) :: inid
-  character*(*), intent(in) :: tname
+  subroutine make_reference(inid,in_gid,sname,tname,errval)
+  integer(HID_T), intent(in) :: inid,in_gid
+  character*(*), intent(in) :: sname,tname
   TYPE(hdf5ErrorType) :: errval
-  integer(HID_T) :: error
+  integer :: error
 
   integer(HSIZE_T), dimension(1) :: dimsr= (/4/)
-  integer(HID_T) :: trank = 1
+  integer :: trank = 1
   integer(HID_T) :: type_id      ! Attribute Dataspace identifier
   integer(HID_T) :: tgt_id,tgt_sid       ! Attribute identifier
+  integer(HSIZE_T), dimension(1) :: adims = (/1/) ! Attribute dimension
 !-----------------------------------------------------------------------
 ! See refobjexample.f90
 !-----------------------------------------------------------------------
@@ -667,15 +645,16 @@
               meshKind,axis0,axis1,axis2,transform,trName,errval)
   integer(HID_T), intent(in) :: gInId
   integer(HID_T), intent(inoUT) :: gridId
-  TYPE(hdf5InOpts), intent(inout) :: h5in
+  TYPE(hdf5InOpts), intent(in) :: h5in
   character*(*), intent(in) :: meshname,axis0,axis1,axis2
   character*(*), intent(in) :: meshKind,transform,trName
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer,parameter :: FAIL=-1
+  integer :: error
 !-----------------------------------------------------------------------
 ! Open the group
 !-----------------------------------------------------------------------
-  call make_group(gInId, meshName, gridId,h5in,errval)
+  call make_group(gInId, meshName, gridId,"",errval)
 !-----------------------------------------------------------------------
 ! Add the VisSchema attributes
 !-----------------------------------------------------------------------
@@ -684,9 +663,6 @@
   call write_attribute(gridId,'vsAxis0',axis0,errval)
   call write_attribute(gridId,'vsAxis1',axis1,errval)
   call write_attribute(gridId,'vsAxis2',axis2,errval)
-  h5in%vsAxisLabels=trim(axis0)//", "//trim(axis1)
-  h5in%vsAxisLabels=h5in%vsAxisLabels//", "//trim(axis2)
-  call write_attribute(gridId,'vsAxisLabels',h5in%vsAxisLabels,errval)
   if(len_trim(transform)>0) then
      call write_attribute(gridId,'vsTransform',transform,errval)
      call write_attribute(gridId,'vsTransformedMesh',trName,errval)
@@ -705,86 +681,37 @@
   return
   end subroutine make_mesh_group
 !-----------------------------------------------------------------------
-! subprogram 21. make_time_group
+! subprogram 20. make_time_group
 ! Make a group that contains the time data.  See:
 !    https://ice.txcorp.com/trac/vizschema/wiki/OtherMetaData
 !-----------------------------------------------------------------------
-  subroutine make_time_group(gInId,h5in,h5err)
+  subroutine make_time_group(gInId,grName,h5in,h5err)
   integer(HID_T), intent(in) :: gInId
+  character*(*), intent(in) :: grName
   TYPE(hdf5InOpts), intent(in) :: h5in
   TYPE(hdf5ErrorType), intent(inoUT) :: h5err
   integer,parameter :: FAIL=-1
   integer(HID_T) :: timeId
+  integer :: error
 !-----------------------------------------------------------------------
 ! Open the group
 !-----------------------------------------------------------------------
-  call make_group(gInId, h5in%vstimegroup, timeId,h5in,h5err)
+  call make_group(gInId, grName, timeId,"",h5err)
 !-----------------------------------------------------------------------
 ! Add the VisSchema attributes
 !-----------------------------------------------------------------------
   call write_attribute(timeId,'vsType',"time",h5err)
   call write_attribute(timeId,'vsStep',h5in%vsStep,h5err)
   call write_attribute(timeId,'vsTime',h5in%vsTime,h5err)
-  if(len_trim(h5in%units)>0) then
-     if(h5in%debug) WRITE(*,*) 'Writing time units',h5in%units
-     call write_attribute(timeId,"units",h5in%units,h5err)
+  if(h5in%unitConvert) then
+     call write_attribute(timeId,'vsUnitConvert',h5in%vsUnitCnv,h5err)
   endif
-  call close_group(h5in%vstimegroup,timeId,h5err)
+  call close_group(grName,timeId,h5err)
   return
   end subroutine make_time_group
 
 !-----------------------------------------------------------------------
-! subprogram 22. make_vec_group
-! Make a group that defines a vector.  See:
-!    https://ice.txcorp.com/trac/vizschema/wiki/OtherMetaData
-!-----------------------------------------------------------------------
-  subroutine make_vec_group(gInId,grName,veclabel,h5in,h5err)
-  integer(HID_T), INTENT(IN) :: gInId
-  character*(*), INTENT(IN) :: grName,veclabel
-  type(hdf5InOpts), INTENT(IN) :: h5in
-  type(hdf5ErrorType), INTENT(INOUT) :: h5err
-  integer(HID_T) :: vecId
-!-----------------------------------------------------------------------
-! Open the group
-!-----------------------------------------------------------------------
-  call make_group(gInId, grName, vecId,h5in,h5err)
-!-----------------------------------------------------------------------
-! Add the VisSchema attributes
-!-----------------------------------------------------------------------
-  call write_attribute(vecId,'vsType',"vsVars",h5err)
-  call write_attribute(vecId,grName,veclabel,h5err)
-  call close_group(grName,vecId,h5err)
-  return
-  end subroutine make_vec_group
-!-----------------------------------------------------------------------
-! subprogram 23. make_limits_group
-! Make a group that contains the visualization region data.  See:
-!    https://ice.txcorp.com/trac/vizschema/wiki/OtherMetaData
-!-----------------------------------------------------------------------
-  SUBROUTINE make_limits_group(gInId,grName,vsKind,lowerBound,      &
-    upperBound,h5in,h5err)
-  integer(HID_T), intent(in) :: gInId
-  character*(*), intent(in) :: grName,vsKind
-  real(r8), dimension(:), intent(in) :: lowerBound, upperBound      
-  type(hdf5InOpts), intent(in) :: h5in
-  type(hdf5ErrorType), intent(inoUT) :: h5err
-  integer(HID_T) :: limitId
-!-----------------------------------------------------------------------
-! Open the group
-!-----------------------------------------------------------------------
-  call make_group(gInId, grName, limitId,h5in,h5err)
-!-----------------------------------------------------------------------
-! Add the VisSchema attributes
-!-----------------------------------------------------------------------
-  call write_attribute(limitId,'vsType',"region",h5err)
-  call write_attribute(limitId,'vsKind',vsKind,h5err)
-  call write_attribute(limitId,'vsLowerBound',lowerBound,h5err)
-  call write_attribute(limitId,'vsUpperBound',upperBound,h5err)
-  call close_group(grName,limitId,h5err)
-  return
-  END SUbroutine make_limits_group
-!-----------------------------------------------------------------------
-! subprogram 14. write_attribute_ch_sc
+! subprogram 10. write_attribute_ch_sc
 ! Create a group for the independent vars (aka dimensions, scales)
 !-----------------------------------------------------------------------
   subroutine write_attribute_ch_sc(inid,aname,attribute,errval)
@@ -792,13 +719,15 @@
   character*(*), intent(in) :: aname,attribute
   TYPE(hdf5ErrorType) :: errval
 
+  integer :: arank=1
   integer(HID_T) :: aspace_id     ! Attribute Dataspace identifier
   integer(HID_T) :: atype_id      ! Attribute Dataspace identifier
   integer(HID_T) :: attr_id       ! Attribute identifier
+  integer(HSIZE_T), dimension(1) :: adims = (/1/) ! Attribute dimension
   integer(SIZE_T) :: attrlen    ! Length of the attribute string
   integer(HSIZE_T), dimension(1) :: data_dims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer :: error
 !-----------------------------------------------------------------------
 ! If it is a null value then no need to write it out.
 !-----------------------------------------------------------------------
@@ -842,7 +771,7 @@
   end subroutine write_attribute_ch_sc
 
 !-----------------------------------------------------------------------
-! subprogram 15. write_attribute_ch_vec
+! subprogram 11. write_attribute_ch_vec
 ! Create a group for the independent vars (aka dimensions, scales)
 !-----------------------------------------------------------------------
   subroutine write_attribute_ch_vec(inid,aname,attribute,errval)
@@ -851,7 +780,7 @@
   character*(*), dimension(:), intent(in) :: attribute
   TYPE(hdf5ErrorType) :: errval
 
-  integer(HID_T) :: arank=1
+  integer :: arank=1
   integer(i4) :: i
   integer(HID_T) :: aspace_id     ! Attribute Dataspace identifier
   integer(HID_T) :: atype_id      ! Attribute Dataspace identifier
@@ -860,7 +789,7 @@
   integer(SIZE_T) :: attrlen    ! Length of the attribute string
   integer(HSIZE_T), dimension(1) :: data_dims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer :: error
   integer(SIZE_T) :: ati
 !-----------------------------------------------------------------------
 ! If it is a null value then no need to write it out.
@@ -910,7 +839,7 @@
   end subroutine write_attribute_ch_vec
 
 !-----------------------------------------------------------------------
-! subprogram 16. write_attribute_int_sc
+! subprogram 12. write_attribute_int_sc
 ! Create a group for the independent vars (aka dimensions, scales)
 !-----------------------------------------------------------------------
   subroutine write_attribute_int_sc(inid,aname,attribute,errval)
@@ -919,14 +848,14 @@
   integer(i4), intent(in) :: attribute
   TYPE(hdf5ErrorType) :: errval
 
-  integer(HID_T) :: arank=1
+  integer :: arank=1
   integer(HID_T) :: aspace_id     ! Attribute Dataspace identifier
   integer(HID_T) :: atype_id      ! Attribute Dataspace identifier
   integer(HID_T) :: attr_id       ! Attribute identifier
   integer(HSIZE_T), dimension(1) :: adims = (/1/) ! Attribute dimension
   integer(HSIZE_T), dimension(1) :: data_dims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer :: error
 !-----------------------------------------------------------------------
 ! See attrexample.f90
 !-----------------------------------------------------------------------
@@ -958,7 +887,7 @@
   end subroutine write_attribute_int_sc
 
 !-----------------------------------------------------------------------
-! subprogram 17. write_attribute_int_vec
+! subprogram 13. write_attribute_int_vec
 ! Create a group for the independent vars (aka dimensions, scales)
 !-----------------------------------------------------------------------
   subroutine write_attribute_int_vec(inid,aname,attribute,errval)
@@ -967,14 +896,14 @@
   integer(i4), dimension(:), intent(in) :: attribute
   TYPE(hdf5ErrorType) :: errval
 
-  integer(HID_T) :: arank=1
+  integer :: arank=1
   integer(HID_T) :: aspace_id     ! Attribute Dataspace identifier
   integer(HID_T) :: atype_id      ! Attribute Dataspace identifier
   integer(HID_T) :: attr_id       ! Attribute identifier
   integer(HSIZE_T), dimension(1) :: adims  ! Attribute dimension
   integer(HSIZE_T), dimension(1) :: data_dims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer :: error
 !-----------------------------------------------------------------------
 ! See attrexample.f90
 !-----------------------------------------------------------------------
@@ -1008,105 +937,7 @@
   end subroutine write_attribute_int_vec
 
 !-----------------------------------------------------------------------
-! subprogram 12. write_attribute_intl_sc
-! Create a group for the independent vars (aka dimensions, scales)
-!-----------------------------------------------------------------------
-  subroutine write_attribute_intl_sc(inid,aname,attribute,errval)
-  integer(HID_T), intent(in) :: inid
-  character*(*), intent(in) :: aname
-  integer(i8), intent(in) :: attribute
-  TYPE(hdf5ErrorType) :: errval
-
-  integer(HID_T) :: arank=1
-  integer(HID_T) :: aspace_id     ! Attribute Dataspace identifier
-  integer(HID_T) :: atype_id      ! Attribute Dataspace identifier
-  integer(HID_T) :: attr_id       ! Attribute identifier
-  integer(HSIZE_T), dimension(1) :: adims = (/1/) ! Attribute dimension
-  integer(HSIZE_T), dimension(1) :: data_dims
-  integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
-!-----------------------------------------------------------------------
-! See attrexample.f90
-!-----------------------------------------------------------------------
-  data_dims(1) = 1
-
-  ! Create the data space for the time attribute.
-  call h5screate_simple_f(arank, adims, aspace_id, error)
-
-  ! Create dataset attribute for the group
-  call h5tcopy_f(H5T_NATIVE_integer, atype_id, error)
-  call h5acreate_f(inid,aname,atype_id,aspace_id,attr_id,error)
-
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Can not create attribute '//aname
-     errval%errBool = .true.
-     return
-  else
-    ! Write the attribute data.
-    call h5awrite_f(attr_id, atype_id, int(attribute,i4), data_dims, error)
-    ! Close the attribute.
-    call h5aclose_f(attr_id, error)
-  endif
-
-  ! Close the dataspace.
-  call h5sclose_f(aspace_id,error)
-
-  errval%errBool = .false.
-  return
-  end subroutine write_attribute_intl_sc
-
-!-----------------------------------------------------------------------
-! subprogram 13. write_attribute_int_vec
-! Create a group for the independent vars (aka dimensions, scales)
-!-----------------------------------------------------------------------
-  subroutine write_attribute_intl_vec(inid,aname,attribute,errval)
-  integer(HID_T), intent(in) :: inid
-  character*(*), intent(in) :: aname
-  integer(i8), dimension(:), intent(in) :: attribute
-  TYPE(hdf5ErrorType) :: errval
-
-  integer(HID_T) :: arank=1
-  integer(HID_T) :: aspace_id     ! Attribute Dataspace identifier
-  integer(HID_T) :: atype_id      ! Attribute Dataspace identifier
-  integer(HID_T) :: attr_id       ! Attribute identifier
-  integer(HSIZE_T), dimension(1) :: adims  ! Attribute dimension
-  integer(HSIZE_T), dimension(1) :: data_dims
-  integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
-!-----------------------------------------------------------------------
-! See attrexample.f90
-!-----------------------------------------------------------------------
-  data_dims(1) = SIZE(attribute)
-  adims(:) = (/data_dims(1)/)
-
-  ! Create the data space for the attribute.
-  call h5screate_simple_f(arank, adims, aspace_id, error)
-
-  ! Create dataset attribute for the group
-  call h5tcopy_f(H5T_NATIVE_integer, atype_id, error)
-  call h5acreate_f(inid,aname,atype_id,aspace_id,attr_id,error)
-
-
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Can not create attribute '//aname
-     errval%errBool = .true.
-     return
-  else
-    ! Write the attribute data.
-    call h5awrite_f(attr_id, atype_id, int(attribute,i4), data_dims, error)
-    ! Close the attribute.
-    call h5aclose_f(attr_id, error)
-  endif
-
-  ! Close the dataspace.
-  call h5sclose_f(aspace_id,error)
-
-  errval%errBool = .false.
-  return
-  end subroutine write_attribute_intl_vec
-
-!-----------------------------------------------------------------------
-! subprogram 18. write_attribute_rl_sc
+! subprogram 13. write_attribute_rl_sc
 !-----------------------------------------------------------------------
   subroutine write_attribute_rl_sc(inid,aname,attribute,errval)
   integer(HID_T), intent(in) :: inid
@@ -1114,12 +945,14 @@
   real(r8), intent(in) :: attribute
   TYPE(hdf5ErrorType), intent(out) :: errval
 
+  integer :: arank=1
   integer(HID_T) :: aspace_id     ! Attribute Dataspace identifier
   integer(HID_T) :: atype_id      ! Attribute Dataspace identifier
   integer(HID_T) :: attr_id       ! Attribute identifier
+  integer(HSIZE_T), dimension(1) :: adims = (/1/) ! Attribute dimension
   integer(HSIZE_T), dimension(1) :: data_dims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer :: error
 !-----------------------------------------------------------------------
 ! See attrexample.f90
 !-----------------------------------------------------------------------
@@ -1156,57 +989,7 @@
   end subroutine write_attribute_rl_sc
 
 !-----------------------------------------------------------------------
-! subprogram 13. write_attribute_rls_sc
-!-----------------------------------------------------------------------
-  subroutine write_attribute_rls_sc(inid,aname,attribute,errval)
-  integer(HID_T), intent(in) :: inid
-  character*(*), intent(in) :: aname
-  real(r4), intent(in) :: attribute
-  TYPE(hdf5ErrorType), intent(out) :: errval
-
-  integer(HID_T) :: aspace_id     ! Attribute Dataspace identifier
-  integer(HID_T) :: atype_id      ! Attribute Dataspace identifier
-  integer(HID_T) :: attr_id       ! Attribute identifier
-  integer(HSIZE_T), dimension(1) :: data_dims
-  integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
-!-----------------------------------------------------------------------
-! See attrexample.f90
-!-----------------------------------------------------------------------
-  data_dims(1) = 1
-
-  ! Create the data space for the time attribute.
-  call h5screate_f(H5S_SCALAR_F, aspace_id, error)
-
-  ! Create dataset attribute for the group
-
-  call h5tcopy_f(H5T_NATIVE_DOUBLE, atype_id, error)
-  call h5acreate_f(inid,aname,atype_id,aspace_id,attr_id,error)
-
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Can not create attribute '//aname
-     errval%errBool = .true.
-     return
-  else
-    ! Write the attribute data.
-!-PRE        if (h5in%typeConvert) then
-!-PRE          call h5awrite_f(attr_id, atype_id, real(attribute,r4), data_dims, error)
-!-PRE        else
-      call h5awrite_f(attr_id, atype_id, attribute, data_dims, error)
-!-PRE        endif
-    ! Close the attribute.
-    call h5aclose_f(attr_id, error)
-  endif
-
-  ! Close the dataspace.
-  call h5sclose_f(aspace_id,error)
-
-  errval%errBool = .false.
-  return
-  end subroutine write_attribute_rls_sc
-
-!-----------------------------------------------------------------------
-! subprogram 19. write_attribute_rl_vec
+! subprogram 14. write_attribute_rl_vec
 ! Create a group for the independent vars (aka dimensions, scales)
 !-----------------------------------------------------------------------
   subroutine write_attribute_rl_vec(inid,aname,attribute,errval)
@@ -1214,14 +997,14 @@
   character*(*), intent(in) :: aname
   real(r8), dimension(:), intent(in) :: attribute
   type(hdf5ErrorType) :: errval
-  integer(HID_T) :: arank=1
+  integer :: arank=1
   integer(HID_T) :: aspace_id     ! Attribute Dataspace identifier
   integer(HID_T) :: atype_id      ! Attribute Dataspace identifier
   integer(HID_T) :: attr_id       ! Attribute identifier
   integer(HSIZE_T), dimension(1) :: adims  ! Attribute dimension
   integer(HSIZE_T), dimension(1) :: data_dims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer :: error
 !-------------------------------------------------------------------
 ! See attrexample.f90
 !-------------------------------------------------------------------
@@ -1251,22 +1034,23 @@
   endif
 
   ! Close the dataspace.
-  CALL h5sclose_f(aspace_id,error)
+  call h5sclose_f(aspace_id,error)
 
   errval%errBool = .false.
   return
   end subroutine write_attribute_rl_vec
 
 !-----------------------------------------------------------------------
-! subprogram 25. dump_h5in_attributes
+! subprogram 20. dump_h5in_attributes
 ! Write an hdf5 array + references to independent vars
 !-----------------------------------------------------------------------
   subroutine dump_h5in_attributes(dset_id,h5in,h5err)
   integer(HID_T), intent(in) :: dset_id
-  type(hdf5InOpts), intent(in) :: h5in
-  type(hdf5ErrorType), intent(inout) :: h5err
+  TYPE(hdf5InOpts), intent(in) :: h5in
+  TYPE(hdf5ErrorType), intent(inoUT) :: h5err
   integer,parameter :: FAIL=-1
-!-----------------------------------------------------------------------
+  integer :: error
+!-------------------------------------------------------------------
 ! Add the VisSchema attributes
 !-----------------------------------------------------------------------
   if(len_trim(h5in%mesh)>0) then
@@ -1275,11 +1059,6 @@
      call write_attribute(dset_id,'vsType',"mesh",h5err)
      if(h5in%debug) WRITE(*,*) 'Writing vsMesh attributes',h5in%mesh(6:)
      call write_attribute(dset_id,'vsKind',h5in%mesh(6:),h5err)
-     if(len_trim(h5in%vsAxisLabels)>0) then
-       if(h5in%debug) WRITE(*,*) 'Writing vsAxisLabels'
-       call write_attribute(dset_id,'vsAxisLabels',&
-                              h5in%vsAxisLabels,h5err)
-     endif
    else
      if(h5in%debug) WRITE(*,*) 'Writing vsType attributes'
      call write_attribute(dset_id,'vsType',"variable",h5err)
@@ -1290,22 +1069,7 @@
        call write_attribute(dset_id,'vsCentering',h5in%vsCentering, &
                               h5err)
      endif
-     if(len_trim(h5in%vsLabels)>0) then
-       if(h5in%debug) WRITE(*,*) 'Writing vsLabels attributes'
-       call write_attribute(dset_id,'vsLabels',h5in%vsLabels,h5err)
-     endif
-     if(len_trim(h5in%vstimegroup)>0 .and. h5in%wrvstime) then
-        if(h5in%debug) WRITE(*,*) 'Writing vsTimeGroup attributes'
-        call write_attribute(dset_id,'vsTimeGroup',h5in%vstimegroup,h5err)
-     endif
    endif
-  endif
-!-----------------------------------------------------------------------
-! vsIndexOrder: set ordering (defined in initialization)
-!-----------------------------------------------------------------------
-  if(len_trim(h5in%vsIndexOrder)>0) then
-    if(h5in%debug) WRITE(*,*) 'Writing vsIndexOrder attributes'
-    call write_attribute(dset_id,'vsIndexOrder',h5in%vsIndexOrder,h5err)
   endif
 !-----------------------------------------------------------------------
 ! vsMD: Multidomain cabilities
@@ -1332,19 +1096,18 @@
   return
   end subroutine dump_h5in_attributes
 !-----------------------------------------------------------------------
-! subprogram 20. dump_int
+! subprogram 20. dump_h5_int
 ! Write an hdf5 array + references to independent vars
 !-----------------------------------------------------------------------
-  subroutine dump_int(inid,aname,value,h5in,errval)
+  subroutine dump_h5_int(inid,aname,value,h5in,errval)
   integer(HID_T), intent(in) :: inid
   character*(*), intent(in) :: aname
   integer(i4), intent(in) :: value
   TYPE(hdf5ErrorType) :: errval
   TYPE(hdf5InOpts), intent(in) :: h5in
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
-  integer(HID_T) :: dspace_id
-  integer(HID_T) :: dset_id
+  integer :: error
+  integer(HID_T) :: dspace_id, dset_id
   integer(HID_T) :: plist_id       ! Property list identifier
   integer(HSIZE_T), dimension(1) :: dims=0
 !-----------------------------------------------------------------------
@@ -1414,281 +1177,9 @@
 !-------------------------------------------------------------------
   errval%errBool = .false.
   return
-  end subroutine dump_int
-!-----------------------------------------------------------------------
-! subprogram 20. dump_int_1d
-! Write an hdf5 array + references to independent vars
-!-----------------------------------------------------------------------
-  subroutine dump_int_1d(inid,aname,array,h5in,errval)
-  integer(HID_T), intent(in) :: inid
-  character*(*), intent(in) :: aname
-  integer(i4), dimension(:), intent(in) :: array
-  TYPE(hdf5ErrorType) :: errval
-  TYPE(hdf5InOpts), intent(in) :: h5in
-  integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
-  integer(HID_T) :: rank
-  integer(HID_T) :: dspace_id, dset_id
-  integer(HSIZE_T), dimension(1) :: dims
-!-----------------------------------------------------------------------
-! Define the rank and dimensions of the data set to be created.
-!-----------------------------------------------------------------------
-  if(h5in%verbose) WRITE(*,*) 'Writing ', aname
-  rank = 1;            dims(:) = (/SIZE(array,1)/)
-!-----------------------------------------------------------------------
-! Create the data space.
-!-----------------------------------------------------------------------
-  call h5screate_simple_f(rank,dims,dspace_id,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Create data space failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-----------------------------------------------------------------------
-! Create the data set.
-! Note: wrd_type is data type being written into file (r4 or r8)
-!-----------------------------------------------------------------------
-  call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Create data set failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-----------------------------------------------------------------------
-!    Create property list for collective dataset write
-!-----------------------------------------------------------------------
-#if 0
-#ifdef __MPI
-  call h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
-  call h5pset_dxpl_mpio_f(plist_id,H5FD_MPIO_COLLECTIVE_F,error)
-   if (error==FAIL) then
-      errval%errorMsg = 'ERROR: Creating plist failed for '//aname
-      errval%errBool = .true.
-      return
-   endif
-#endif
-#endif
-!-----------------------------------------------------------------------
-! Write stored data to "name" data set.
-!-----------------------------------------------------------------------
-!#ifdef __MPI
-!   call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error, &
-!                 xfer_prp = plist_id)
-!#else
-  if(h5in%typeConvert) then
-   call h5dwrite_f(dset_id,h5in%wrd_type,real(array,r4),dims,error)
-  else
-   call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error)
-  endif
-!#endif
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Data set write failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-----------------------------------------------------------------------
-! Add the VisSchema attributes
-!-----------------------------------------------------------------------
-  call dump_h5in_attributes(dset_id,h5in,errval)
-!-----------------------------------------------------------------------
-! Terminate access to the dataset and dataspace
-!-----------------------------------------------------------------------
-  call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Close data set failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-  call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Close data space failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-----------------------------------------------------------------------
-  errval%errBool = .false.
-  return
-  end subroutine dump_int_1d
-!-----------------------------------------------------------------------
-! subprogram 20. dump_intl
-! Write an hdf5 array + references to independent vars
-!-----------------------------------------------------------------------
-  subroutine dump_intl(inid,aname,value,h5in,errval)
-  integer(HID_T), intent(in) :: inid
-  character*(*), intent(in) :: aname
-  integer(i8), intent(in) :: value
-  TYPE(hdf5ErrorType) :: errval
-  TYPE(hdf5InOpts), intent(in) :: h5in
-  integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
-  integer(HID_T) :: dspace_id
-  integer(HID_T) :: dset_id
-  integer(HSIZE_T), dimension(1) :: dims=0
-!-----------------------------------------------------------------------
-  if(h5in%verbose) WRITE(*,*) 'Writing ', aname
-!-----------------------------------------------------------------------
-! Create the data space.
-!-----------------------------------------------------------------------
-  call h5screate_f(H5S_SCALAR_F, dspace_id, error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Create data space failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-----------------------------------------------------------------------
-! Create the data set.
-! Note: wrd_type is data type being written into file (r4 or r8)
-!-----------------------------------------------------------------------
-  call h5dcreate_f(inid,aname, &
-                  H5T_NATIVE_integer,dspace_id,dset_id,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Create data set failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-----------------------------------------------------------------------
-!Create property list for collective dataset write
-!-----------------------------------------------------------------------
-#if 0
-#ifdef __MPI
-  call h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
-  call h5pset_dxpl_mpio_f(plist_id,H5FD_MPIO_COLLECTIVE_F,error)
-   if (error==FAIL) then
-      errval%errorMsg = 'ERROR: Creating plist failed for '//aname
-      errval%errBool = .true.
-      return
-   endif
-#endif
-#endif
-!-----------------------------------------------------------------------
-! Write stored data to "name" data set.
-!-----------------------------------------------------------------------
-  call h5dwrite_f(dset_id,H5T_NATIVE_INTEGER,int(value,i4),dims,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Data set write failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-----------------------------------------------------------------------
-! Add the VisSchema attributes
-!-----------------------------------------------------------------------
-  call dump_h5in_attributes(dset_id,h5in,errval)
-!-----------------------------------------------------------------------
-! Terminate access to the dataset and dataspace
-!-----------------------------------------------------------------------
-  call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Close data set failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-  call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Close data space failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
+  end subroutine dump_h5_int
 !-------------------------------------------------------------------
-  errval%errBool = .false.
-  return
-  end subroutine dump_intl
-!-----------------------------------------------------------------------
-! subprogram 20. dump_intl_1d
-! Write an hdf5 array + references to independent vars
-!-----------------------------------------------------------------------
-  subroutine dump_intl_1d(inid,aname,array,h5in,errval)
-  integer(HID_T), intent(in) :: inid
-  character*(*), intent(in) :: aname
-  integer(i8), dimension(:), intent(in) :: array
-  integer(i4), dimension(:), allocatable :: intarray
-  TYPE(hdf5ErrorType) :: errval
-  TYPE(hdf5InOpts), intent(in) :: h5in
-  integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
-  integer(HID_T) :: rank
-  integer(HID_T) :: dspace_id, dset_id
-  integer(HSIZE_T), dimension(1) :: dims
-!-----------------------------------------------------------------------
-! Define the rank and dimensions of the data set to be created.
-!-----------------------------------------------------------------------
-  if(h5in%verbose) WRITE(*,*) 'Writing ', aname
-  rank = 1;            dims(:) = (/SIZE(array,1)/)
-  ALLOCATE(intarray(dims(1)))
-  intarray=array
-!-----------------------------------------------------------------------
-! Create the data space.
-!-----------------------------------------------------------------------
-  call h5screate_simple_f(rank,dims,dspace_id,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Create data space failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-----------------------------------------------------------------------
-! Create the data set.
-! Note: wrd_type is data type being written into file (r4 or r8)
-!-----------------------------------------------------------------------
-  call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Create data set failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-----------------------------------------------------------------------
-!    Create property list for collective dataset write
-!-----------------------------------------------------------------------
-#if 0
-#ifdef __MPI
-  call h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
-  call h5pset_dxpl_mpio_f(plist_id,H5FD_MPIO_COLLECTIVE_F,error)
-   if (error==FAIL) then
-      errval%errorMsg = 'ERROR: Creating plist failed for '//aname
-      errval%errBool = .true.
-      return
-   endif
-#endif
-#endif
-!-----------------------------------------------------------------------
-! Write stored data to "name" data set.
-!-----------------------------------------------------------------------
-!#ifdef __MPI
-!   call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error, &
-!                 xfer_prp = plist_id)
-!#else
-   call h5dwrite_f(dset_id,H5T_NATIVE_INTEGER,intarray,dims,error)
-!#endif
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Data set write failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-  DEALLOCATE(intarray)
-!-----------------------------------------------------------------------
-! Add the VisSchema attributes
-!-----------------------------------------------------------------------
-  call dump_h5in_attributes(dset_id,h5in,errval)
-!-----------------------------------------------------------------------
-! Terminate access to the dataset and dataspace
-!-----------------------------------------------------------------------
-  call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Close data set failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-  call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Close data space failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-----------------------------------------------------------------------
-  errval%errBool = .false.
-  return
-  end subroutine dump_intl_1d
-
-!-----------------------------------------------------------------------
-! subprogram 27. dump_h5_rldbl
+! subprogram 20. dump_h5
 ! Write an hdf5 array + references to independent vars
 !-------------------------------------------------------------------
   subroutine dump_h5_rldbl(inid,aname,value,h5in,errval)
@@ -1698,8 +1189,9 @@
   TYPE(hdf5ErrorType) :: errval
   TYPE(hdf5InOpts), intent(in) :: h5in
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer :: error
   integer(HID_T) :: dspace_id, dset_id
+  integer(HID_T) :: plist_id       ! Property list identifier
   integer(HSIZE_T), dimension(1) :: dims=0
 !-------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) 'Writing ', aname
@@ -1772,95 +1264,8 @@
   errval%errBool = .false.
   return
   end subroutine dump_h5_rldbl
-
-!-------------------------------------------------------------------
-! subprogram 20. dump_h5_rls
-! Write an hdf5 array + references to independent vars
-!-------------------------------------------------------------------
-  subroutine dump_h5_rls(inid,aname,value,h5in,errval)
-  integer(HID_T), intent(in) :: inid
-  character*(*), intent(in) :: aname
-  real(r4), intent(in) :: value
-  TYPE(hdf5ErrorType) :: errval
-  TYPE(hdf5InOpts), intent(in) :: h5in
-  integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
-  integer(HID_T) :: dspace_id, dset_id
-  integer(HSIZE_T), dimension(1) :: dims=0
-!-------------------------------------------------------------------
-  if(h5in%verbose) WRITE(*,*) 'Writing ', aname
-!-------------------------------------------------------------------
-! Create the data space.
-!-------------------------------------------------------------------
-  call h5screate_f(H5S_SCALAR_F, dspace_id, error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Create data space failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-------------------------------------------------------------------
-! Create the data set.
-! Note: wrd_type is data type being written into file (r4 or r8)
-!-------------------------------------------------------------------
-  call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Create data set failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
 !-----------------------------------------------------------------------
-!    Create property list for collective dataset write
-!-----------------------------------------------------------------------
-#if 0
-#ifdef __MPI
-      call h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
-      call h5pset_dxpl_mpio_f(plist_id,H5FD_MPIO_COLLECTIVE_F,error)
-       if (error==FAIL) then
-          errval%errorMsg = 'ERROR: Creating plist failed for '//aname
-          errval%errBool = .true.
-          return
-       endif
-#endif
-#endif
-!-----------------------------------------------------------------------
-! Write stored data to "name" data set.
-!-----------------------------------------------------------------------
-  if(h5in%typeConvert) then
-    call h5dwrite_f(dset_id,h5in%wrd_type,value,dims,error)
-  else
-    call h5dwrite_f(dset_id,h5in%wrd_type,value,dims,error)
-  endif
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Data set write failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-----------------------------------------------------------------------
-! Add the VisSchema attributes
-!-----------------------------------------------------------------------
-  call dump_h5in_attributes(dset_id,h5in,errval)
-!-----------------------------------------------------------------------
-! Terminate access to the dataset and dataspace
-!-----------------------------------------------------------------------
-  call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Close data set failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-  call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Close data space failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-----------------------------------------------------------------------
-  errval%errBool = .false.
-  return
-  end subroutine dump_h5_rls
-
-!-----------------------------------------------------------------------
-! subprogram 28. dump_h5_1d
+! subprogram 20. dump_h5_1d
 ! Write an hdf5 array + references to independent vars
 !-----------------------------------------------------------------------
   subroutine dump_h5_1d(inid,aname,array,h5in,errval)
@@ -1870,11 +1275,11 @@
   TYPE(hdf5ErrorType) :: errval
   TYPE(hdf5InOpts), intent(in) :: h5in
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
-  integer(HID_T) :: rank
+  integer :: error
+  integer :: rank
   integer(HID_T) :: dspace_id, dset_id
+  integer(HID_T) :: plist_id       ! Property list identifier
   integer(HSIZE_T), dimension(1) :: dims
-  integer(hid_t) :: plist_id       ! Property list identifier
 !-----------------------------------------------------------------------
 ! Define the rank and dimensions of the data set to be created.
 !-----------------------------------------------------------------------
@@ -1955,7 +1360,7 @@
   return
   end subroutine dump_h5_1d
 !-----------------------------------------------------------------------
-! subprogram 29. dump_h5_2d
+! subprogram 21. dump_h5_2d
 ! Create a "simple dataset" and write it out.
 !-----------------------------------------------------------------------
   subroutine dump_h5_2d(inid,aname,array,h5in,errval)
@@ -1965,10 +1370,9 @@
   TYPE(hdf5InOpts), intent(in) :: h5in
   TYPE(hdf5ErrorType) :: errval
   integer,parameter :: FAIL=-1
-  integer(hid_t) :: plist_id       ! Property list identifier
-  integer(HID_T) :: error
+  integer :: error
 
-  integer(HID_T) dspace_id, rank, dset_id
+  integer(HID_T) dspace_id, rank, dset_id, plist_id
   integer(HSIZE_T) :: dims(2)
 !-----------------------------------------------------------------------
 ! Define the rank and dimensions of the data set to be created.
@@ -2079,7 +1483,7 @@
   end subroutine dump_h5_2d
 
 !-----------------------------------------------------------------------
-! subprogram 30. dump_h5_3d
+! subprogram 22. dump_h5_3d
 !-----------------------------------------------------------------------
   subroutine dump_h5_3d(inid,aname,array,h5in,errval)
   integer(HID_T), intent(in) :: inid
@@ -2088,12 +1492,10 @@
   TYPE(hdf5InOpts), intent(in) :: h5in
   TYPE(hdf5ErrorType) :: errval
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
-  integer :: i,j
-  integer(hid_t) :: plist_id       ! Property list identifier
+  integer :: error, i,j
   real(r8), dimension(:,:,:), allocatable :: tmparray
 
-  integer(HID_T) dspace_id, rank, dset_id
+  integer(HID_T) dspace_id, rank, dset_id, plist_id
   integer(HSIZE_T) :: dims(3)
 !-----------------------------------------------------------------------
 ! Define the rank and dimensions of the data set to be created.
@@ -2212,7 +1614,7 @@
   return
   end subroutine dump_h5_3d
 !-----------------------------------------------------------------------
-! subprogram 31. dump_h5_4d
+! subprogram 23. dump_h5_4d
 !-----------------------------------------------------------------------
   subroutine dump_h5_4d(inid,aname,array,h5in,errval)
   integer(HID_T), intent(in) :: inid
@@ -2221,12 +1623,10 @@
   TYPE(hdf5InOpts), intent(in) :: h5in
   TYPE(hdf5ErrorType) :: errval
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
-  integer :: i,j,k
-  integer(hid_t) :: plist_id       ! Property list identifier
+  integer :: error, i,j,k
   real(r8), dimension(:,:,:,:), allocatable :: tmparray
 
-  integer(HID_T) dspace_id, rank, dset_id
+  integer(HID_T) dspace_id, rank, dset_id, plist_id
   integer(HSIZE_T) :: dims(4)
 !-----------------------------------------------------------------------
 ! Define the rank and dimensions of the data set to be created.
@@ -2264,7 +1664,7 @@
      return
   endif
 !-----------------------------------------------------------------------
-!Create property list for collective dataset write
+! reate property list for collective dataset write
 !-----------------------------------------------------------------------
 #ifdef __MPI
   call h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
@@ -2336,7 +1736,7 @@
   return
   end subroutine dump_h5_4d
 !-----------------------------------------------------------------------
-! subprogram 32. dump_rl_1d
+! subprogram 20. dump_rl_1d
 ! Write an hdf5 array + references to independent vars
 !-----------------------------------------------------------------------
   subroutine dump_rl_1d(inid,aname,array,h5in,errval)
@@ -2346,9 +1746,10 @@
   TYPE(hdf5ErrorType) :: errval
   TYPE(hdf5InOpts), intent(in) :: h5in
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
-  integer(HID_T) :: rank
+  integer :: error
+  integer :: rank
   integer(HID_T) :: dspace_id, dset_id
+  integer(HID_T) :: plist_id       ! Property list identifier
   integer(HSIZE_T), dimension(1) :: dims
 !-----------------------------------------------------------------------
 ! Define the rank and dimensions of the data set to be created.
@@ -2426,7 +1827,7 @@
   return
   end subroutine dump_rl_1d
 !-----------------------------------------------------------------------
-! subprogram 33. dump_rl_2d
+! subprogram 21. dump_rl_2d
 ! Create a "simple dataset" and write it out.
 !-----------------------------------------------------------------------
   subroutine dump_rl_2d(inid,aname,array,h5in,errval)
@@ -2436,10 +1837,9 @@
   TYPE(hdf5InOpts), intent(in) :: h5in
   TYPE(hdf5ErrorType) :: errval
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
-  integer(hid_t) :: plist_id       ! Property list identifier
+  integer :: error
 
-  integer(HID_T) dspace_id, rank, dset_id
+  integer(HID_T) dspace_id, rank, dset_id, plist_id
   integer(HSIZE_T) :: dims(2)
 !-----------------------------------------------------------------------
 ! Define the rank and dimensions of the data set to be created.
@@ -2531,7 +1931,7 @@
   end subroutine dump_rl_2d
 
 !-----------------------------------------------------------------------
-! subprogram 34. dump_rl_3d
+! subprogram 22. dump_rl_3d
 !-----------------------------------------------------------------------
   subroutine dump_rl_3d(inid,aname,array,h5in,errval)
   integer(HID_T), intent(in) :: inid
@@ -2540,12 +1940,10 @@
   TYPE(hdf5InOpts), intent(in) :: h5in
   TYPE(hdf5ErrorType) :: errval
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
-  integer(hid_t) :: plist_id       ! Property list identifier
-  integer :: i,j
+  integer :: error, i,j
   real(r8), dimension(:,:,:), allocatable :: tmparray
 
-  integer(HID_T) dspace_id, rank, dset_id
+  integer(HID_T) dspace_id, rank, dset_id, plist_id
   integer(HSIZE_T) :: dims(3)
 !-----------------------------------------------------------------------
 ! Define the rank and dimensions of the data set to be created.
@@ -2641,7 +2039,7 @@
   return
   end subroutine dump_rl_3d
 !-----------------------------------------------------------------------
-! subprogram 35. dump_rl_4d
+! subprogram 23. dump_rl_4d
 !-----------------------------------------------------------------------
   subroutine dump_rl_4d(inid,aname,array,h5in,errval)
   integer(HID_T), intent(in) :: inid
@@ -2650,12 +2048,10 @@
   TYPE(hdf5InOpts), intent(in) :: h5in
   TYPE(hdf5ErrorType) :: errval
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
-  integer(hid_t) :: plist_id       ! Property list identifier
-  integer :: i,j,k
+  integer :: error, i,j,k
   real(r8), dimension(:,:,:,:), allocatable :: tmparray
 
-  integer(HID_T) dspace_id, rank, dset_id
+  integer(HID_T) dspace_id, rank, dset_id, plist_id
   integer(HSIZE_T) :: dims(4)
 !-----------------------------------------------------------------------
 ! Define the rank and dimensions of the data set to be created.
@@ -2765,14 +2161,14 @@
   TYPE(hdf5ErrorType) :: errval
   TYPE(hdf5InOpts), intent(in) :: h5in
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: rank = 1
-  integer(HID_T) :: error
-  integer(HID_T) :: dspace_id, filespace
-  integer(HID_T) :: dset_id
+  integer :: rank = 1
+  integer :: error
+  integer(HID_T) :: dspace_id, dset_id, filespace
+  integer(HID_T) :: plist_id       ! Property list identifier
   integer(HSIZE_T), dimension(1) :: dims,maxdims,chunk_dims,extdims,offset
   integer(HSIZE_T), dimension(1) :: olddims,oldmaxdims
   integer(HID_T) :: cparms        !dataset creatation property identifier 
-  LOGICAL(i4) :: dset_exists
+  LOGICAL :: dset_exists
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) 'Writing ', aname
 !-----------------------------------------------------------------------
@@ -2886,13 +2282,14 @@
   TYPE(hdf5ErrorType) :: errval
   TYPE(hdf5InOpts), intent(in) :: h5in
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: rank = 1
-  integer(HID_T) :: error
+  integer :: rank = 1
+  integer :: error
   integer(HID_T) :: dspace_id=0, dset_id=0, filespace=0
+  integer(HID_T) :: plist_id       ! Property list identifier
   integer(HSIZE_T), dimension(1) :: dims=0,maxdims,extdims,offset
   integer(HSIZE_T), dimension(1) :: olddims,oldmaxdims
   integer(HID_T) :: cparms        !dataset creatation property identifier 
-  LOGICAL(i4) :: dset_exists
+  LOGICAL :: dset_exists
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) 'Writing ', aname
 !-----------------------------------------------------------------------
@@ -3008,14 +2405,14 @@
   TYPE(hdf5ErrorType) :: errval
   TYPE(hdf5InOpts), intent(in) :: h5in
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: rank = 2
-  integer :: asize
-  integer(HID_T) :: error
+  integer :: rank = 2, asize
+  integer :: error
   integer(HID_T) :: dspace_id, dset_id, filespace
+  integer(HID_T) :: plist_id       ! Property list identifier
   integer(HSIZE_T), dimension(2) :: dims,maxdims,chunk_dims,extdims,offset
   integer(HSIZE_T), dimension(2) :: olddims,oldmaxdims
   integer(HID_T) :: cparms        !dataset creatation property identifier 
-  LOGICAL(i4) :: dset_exists
+  LOGICAL :: dset_exists
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) 'Writing ', aname
 !-----------------------------------------------------------------------
@@ -3132,14 +2529,14 @@
   TYPE(hdf5ErrorType) :: errval
   TYPE(hdf5InOpts), intent(in) :: h5in
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: rank = 2
-  integer :: asize
-  integer(HID_T) :: error
+  integer :: rank = 2, asize
+  integer :: error
   integer(HID_T) :: dspace_id, dset_id, filespace
+  integer(HID_T) :: plist_id       ! Property list identifier
   integer(HSIZE_T), dimension(2) :: dims,maxdims,chunk_dims,extdims,offset
   integer(HSIZE_T), dimension(2) :: olddims,oldmaxdims
   integer(HID_T) :: cparms        !dataset creatation property identifier 
-  LOGICAL(i4) :: dset_exists
+  LOGICAL :: dset_exists
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) 'Writing ', aname
 !-----------------------------------------------------------------------
@@ -3256,14 +2653,15 @@
   TYPE(hdf5ErrorType) :: errval
   TYPE(hdf5InOpts), intent(in) :: h5in
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: rank = 3
-  integer(HID_T) :: error
+  integer :: rank = 3
+  integer :: error
   integer(HID_T) :: dspace_id, dset_id, filespace
+  integer(HID_T) :: plist_id       ! Property list identifier
   integer, dimension(2)          :: asize
   integer(HSIZE_T), dimension(3) :: dims,maxdims,chunk_dims,extdims,offset
   integer(HSIZE_T), dimension(3) :: olddims,oldmaxdims
   integer(HID_T) :: cparms        !dataset creatation property identifier 
-  LOGICAL(i4) :: dset_exists
+  LOGICAL :: dset_exists
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) 'Writing ', aname
 !-----------------------------------------------------------------------
@@ -3402,14 +2800,15 @@
   TYPE(hdf5ErrorType) :: errval
   TYPE(hdf5InOpts), intent(in) :: h5in
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: rank = 4
-  integer(HID_T) :: error
+  integer :: rank = 4
+  integer :: error
   integer(HID_T) :: dspace_id, dset_id, filespace
+  integer(HID_T) :: plist_id       ! Property list identifier
   integer, dimension(3)          :: asize
   integer(HSIZE_T), dimension(4) :: dims,maxdims,chunk_dims,extdims,offset
   integer(HSIZE_T), dimension(4) :: olddims,oldmaxdims
   integer(HID_T) :: cparms        !dataset creatation property identifier 
-  LOGICAL(i4) :: dset_exists
+  LOGICAL :: dset_exists
   integer ::i,j
   real(r8), dimension(:,:,:), allocatable :: tmparray
 !-----------------------------------------------------------------------
@@ -3556,14 +2955,15 @@
   TYPE(hdf5ErrorType) :: errval
   TYPE(hdf5InOpts), intent(in) :: h5in
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: rank = 5
-  integer(HID_T) :: error
+  integer :: rank = 5
+  integer :: error
   integer(HID_T) :: dspace_id, dset_id, filespace
+  integer(HID_T) :: plist_id       ! Property list identifier
   integer, dimension(4)          :: asize
   integer(HSIZE_T), dimension(5) :: dims,maxdims,chunk_dims,extdims,offset
   integer(HSIZE_T), dimension(5) :: olddims,oldmaxdims
   integer(HID_T) :: cparms        !dataset creatation property identifier 
-  LOGICAL(i4) :: dset_exists
+  LOGICAL :: dset_exists
   integer :: i,j,k
   real(r8), dimension(:,:,:,:), allocatable :: tmparray
 !-----------------------------------------------------------------------
@@ -3700,15 +3100,16 @@
   return
   end subroutine add_h5_4d
 !-----------------------------------------------------------------------
-! subprogram 36. read_dims
+! subprogram 40. read_dims
 ! Read the dimensions of dataset associated with aname: 1d array
 !-----------------------------------------------------------------------
-  subroutine read_dims(dset_id,dims,errval)
+  subroutine read_dims(dset_id,aname,dims,errval)
   integer(HID_T), intent(in) :: dset_id
+  character(*), intent(in) :: aname
   integer(HSIZE_T), dimension(:), intent(inoUT) :: dims
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer :: error
 
   integer(HSIZE_T), dimension(:), allocatable :: maxdims
   integer(HID_T) dspace_id
@@ -3727,117 +3128,7 @@
   end subroutine read_dims
 
 !-----------------------------------------------------------------------
-! subprogram 41. read_h5_intl
-! Read simple data set: 1d array
-!-----------------------------------------------------------------------
-  subroutine read_h5_intl(fid,aname,value,h5in,errval)
-  integer(HID_T), intent(in) :: fid
-  character*(*), intent(in) :: aname
-  TYPE(hdf5InOpts), intent(in) :: h5in
-  integer(i8), intent(inoUT) :: value
-  TYPE(hdf5ErrorType), intent(inoUT) :: errval
-  integer(HSIZE_T), dimension(1) :: dims
-  integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
-  integer(HID_T) :: dset_id
-
-  integer(i4) :: intvalue
-!-----------------------------------------------------------------------
-! Open the dataset specified by aname
-!-----------------------------------------------------------------------
-  if(h5in%verbose) WRITE(*,*) ' Reading integer value: ', aname
-  call h5dopen_f(fid, aname, dset_id, error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Find data set failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-----------------------------------------------------------------------
-! Read data set
-!-----------------------------------------------------------------------
-  if (errval%errBool) return
-  call h5dread_f(dset_id,h5in%wrd_type,intvalue,dims,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Reading data set failed for '//aname
-     errval%errBool = .true.
-     call h5dclose_f(dset_id,error)
-     return
-  endif
-  value = intvalue
-!-----------------------------------------------------------------------
-! Terminate access to the dataset
-!-----------------------------------------------------------------------
-  call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Close data set failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-----------------------------------------------------------------------
-  errval%errBool = .false.
-  return
-  end subroutine read_h5_intl
-
-!-----------------------------------------------------------------------
-! subprogram 41. read_h5_intl_1d
-! Read simple data set: 1d array
-!-----------------------------------------------------------------------
-  subroutine read_h5_intl_1d(fid,aname,array,h5in,errval)
-  integer(HID_T), intent(in) :: fid
-  character*(*), intent(in) :: aname
-  TYPE(hdf5InOpts), intent(in) :: h5in
-  integer(i8), dimension(:), intent(inoUT) :: array
-  TYPE(hdf5ErrorType), intent(inoUT) :: errval
-  integer(HSIZE_T), dimension(1) :: dims, fdims
-  integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
-  integer(HID_T) :: dset_id
-
-  integer(i4), dimension(:), allocatable :: intarray
-  
-!-----------------------------------------------------------------------
-! Open the dataset specified by aname
-!-----------------------------------------------------------------------
-  if(h5in%verbose) WRITE(*,*) ' Reading 1d array: ', aname
-  call h5dopen_f(fid, aname, dset_id, error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Find data set failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-----------------------------------------------------------------------
-! Read data set
-!-----------------------------------------------------------------------
-  dims(1)=SIZE(intarray)
-  ALLOCATE(intarray(dims(1)))
-  intarray=array
-  call read_dims(dset_id,fdims,errval)
-  call check_dims(dims,fdims, errval)
-  if (errval%errBool) return
-  call h5dread_f(dset_id,h5in%wrd_type,intarray,dims,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Reading data set failed for '//aname
-     errval%errBool = .true.
-     call h5dclose_f(dset_id,error)
-     return
-  endif
-  array = intarray
-!-----------------------------------------------------------------------
-! Terminate access to the dataset
-!-----------------------------------------------------------------------
-  call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Close data set failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-----------------------------------------------------------------------
-  errval%errBool = .false.
-  return
-  end subroutine read_h5_intl_1d
-
-!-----------------------------------------------------------------------
-! subprogram 37. read_h5_1d
+! subprogram 41. read_h5_1d
 ! Read simple data set: 1d array
 !-----------------------------------------------------------------------
   subroutine read_h5_1d(fid,aname,array,h5in,errval)
@@ -3848,9 +3139,9 @@
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer(HSIZE_T), dimension(1) :: dims, fdims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer :: error
 
-  integer(HID_T) :: dset_id
+  integer(HID_T) dset_id
 !-----------------------------------------------------------------------
 ! Open the dataset specified by aname
 !-----------------------------------------------------------------------
@@ -3865,7 +3156,7 @@
 ! Read data set
 !-----------------------------------------------------------------------
   dims(1)=SIZE(array)
-  call read_dims(dset_id,fdims,errval)
+  call read_dims(dset_id,aname,fdims,errval)
   call check_dims(dims,fdims, errval)
   if (errval%errBool) return
   call h5dread_f(dset_id,h5in%wrd_type,array,dims,error)
@@ -3894,18 +3185,17 @@
 ! Read simple data set: 2d array
 !-----------------------------------------------------------------------
   subroutine read_h5_2d(fid,aname,array,h5in,errval)
-  integer(HID_T), intent(in) :: fid
+  integer, intent(in) :: fid
   character*(*), intent(in) :: aname
   real(r8), dimension(:,:), intent(inoUT) :: array
   TYPE(hdf5InOpts), intent(in) :: h5in
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer(HSIZE_T), dimension(2) :: dims, fdims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error 
-  integer :: i
+  integer :: error, i
   real(r8), dimension(:,:), allocatable :: tmparray
 
-  integer(HID_T) :: dset_id
+  integer(HID_T) dset_id
 !-----------------------------------------------------------------------
 ! Open the dataset specified by aname
 !-----------------------------------------------------------------------
@@ -3924,7 +3214,7 @@
   else
      dims(1)=SIZE(array,2); dims(2)=SIZE(array,1)
   endif
-  call read_dims(dset_id,fdims,errval)
+  call read_dims(dset_id,aname,fdims,errval)
   call check_dims(dims,fdims, errval)
   if (errval%errBool) then
     call h5dclose_f(dset_id,error)
@@ -3962,22 +3252,21 @@
   end subroutine read_h5_2d
 
 !-----------------------------------------------------------------------
-! subprogram 39. read_h5_3d
+! subprogram 43. read_h5_3d
 ! Read simple data set: 3d array
 !-----------------------------------------------------------------------
   subroutine read_h5_3d(fid,aname,array,h5in,errval)
-  integer(HID_T), intent(in) :: fid
+  integer, intent(in) :: fid
   character*(*), intent(in) :: aname
   real(r8), dimension(:,:,:), intent(inoUT) :: array
   TYPE(hdf5InOpts), intent(in) :: h5in
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer(HSIZE_T), dimension(3) :: dims, fdims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
-  integer :: i,j
+  integer :: error, i,j
   real(r8), dimension(:,:,:), allocatable :: tmparray
 
-  integer(HID_T) :: dset_id
+  integer dset_id
 !-----------------------------------------------------------------------
 ! Open the dataset specified by aname
 !-----------------------------------------------------------------------
@@ -4000,7 +3289,7 @@
      dims(2)=SIZE(array,2)
      dims(3)=SIZE(array,1)
   endif
-  call read_dims(dset_id,fdims,errval)
+  call read_dims(dset_id,aname,fdims,errval)
   !call check_dims(dims,fdims, errval)
   if (errval%errBool) then
     call h5dclose_f(dset_id,error)
@@ -4037,59 +3326,6 @@
   errval%errBool = .false.
   return
   end subroutine read_h5_3d
-
-!-----------------------------------------------------------------------
-! subprogram 41. read_attribute_intl_sc
-! Read real scalar attribute
-!-----------------------------------------------------------------------
-  subroutine read_attribute_intl_sc(fid,aname,val,h5in,errval)
-  integer(HID_T), intent(in) :: fid
-  character*(*), intent(in) :: aname
-  TYPE(hdf5InOpts), intent(in) :: h5in
-  integer(i8), intent(inoUT) :: val
-  TYPE(hdf5ErrorType), intent(inoUT) :: errval
-  integer(HSIZE_T), dimension(1) :: dims
-  integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
-  integer(HID_T) aset_id
-
-  integer(i4) :: intval
-!-----------------------------------------------------------------------
-! Open the dataset specified by aname
-!-----------------------------------------------------------------------
-  if(h5in%verbose) WRITE(*,*) ' Reading attribute: ', aname
-  call h5aopen_name_f(fid, aname, aset_id, error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Find data set failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-----------------------------------------------------------------------
-! Read attribute
-!-----------------------------------------------------------------------
-  dims(1)=1
-  call h5aread_f(aset_id,h5in%wrd_type,intval,dims,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Reading data set failed for '//aname
-     errval%errBool = .true.
-     call h5aclose_f(aset_id,error)
-     return
-  endif
-  val = intval
-!-----------------------------------------------------------------------
-! Terminate access to the dataset
-!-----------------------------------------------------------------------
-  call h5aclose_f(aset_id,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Close data set failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-----------------------------------------------------------------------
-  errval%errBool = .false.
-  return
-  end subroutine read_attribute_intl_sc
-
 !-----------------------------------------------------------------------
 ! subprogram 41. read_attribute_rl_sc
 ! Read real scalar attribute
@@ -4100,9 +3336,9 @@
   TYPE(hdf5InOpts), intent(in) :: h5in
   double precision, intent(inoUT) :: val
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
-  integer(HSIZE_T), dimension(1) :: dims
+  integer(HSIZE_T), dimension(1) :: dims, fdims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer :: error
 
   integer(HID_T) aset_id
 !-----------------------------------------------------------------------
@@ -4139,61 +3375,7 @@
   errval%errBool = .false.
   return
   end subroutine read_attribute_rl_sc
-
-!-----------------------------------------------------------------------
-! subprogram 41. read_attribute_intl_vec
-! Read integer vector attribute
-!-----------------------------------------------------------------------
-  subroutine read_attribute_intl_vec(fid,aname,array,h5in,errval)
-  integer(HID_T), intent(in) :: fid
-  character*(*), intent(in) :: aname
-  TYPE(hdf5InOpts), intent(in) :: h5in
-  integer(i8), dimension(:), intent(inoUT) :: array
-  TYPE(hdf5ErrorType), intent(inoUT) :: errval
-  integer(HSIZE_T), dimension(1) :: dims
-  integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
-  integer(HID_T) aset_id
-
-  integer(i4), dimension(:), allocatable :: intarray
-!-----------------------------------------------------------------------
-! Open the dataset specified by aname
-!-----------------------------------------------------------------------
-  if(h5in%verbose) WRITE(*,*) ' Reading attribute: ', aname
-  call h5aopen_name_f(fid, aname, aset_id, error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Find data set failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-----------------------------------------------------------------------
-! Read attribute
-!-----------------------------------------------------------------------
-  dims(1)=size(array)
-  allocate(intarray(dims(1)))
-  intarray = array
-  call h5aread_f(aset_id,h5in%wrd_type,intarray,dims,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Reading data set failed for '//aname
-     errval%errBool = .true.
-     call h5aclose_f(aset_id,error)
-     return
-  endif
-  array = intarray
-!-----------------------------------------------------------------------
-! Terminate access to the dataset
-!-----------------------------------------------------------------------
-  call h5aclose_f(aset_id,error)
-  if (error==FAIL) then
-     errval%errorMsg = 'ERROR: Close data set failed for '//aname
-     errval%errBool = .true.
-     return
-  endif
-!-----------------------------------------------------------------------
-  errval%errBool = .false.
-  return
-  end subroutine read_attribute_intl_vec
 !-----------------------------------------------------------------------
 ! close module.
-!-----------------------------------------------------------------------
-  end module hdf5_api
+!-------------------------------------------------------------------
+  END MODULE hdf5_api
