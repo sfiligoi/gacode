@@ -14,8 +14,8 @@ MAKE = make
 #
 #set up for diff mpif90s
 #
-#MF90 = mpif90
-MF90 = openmpif90
+MF90 = mpif90
+#MF90 = openmpif90
 
 FC	= ${MF90} -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -g 
 F77	= ${MF90} -g 

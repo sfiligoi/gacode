@@ -226,21 +226,21 @@ subroutine gyro_do
      !
      ! Explicit (Poisson,Ampere)
      !
-     if (n_field == 3) then
-        call make_poissonaperp_matrix
-     else
-        call make_poisson_matrix
-     endif
-     !
-     if (n_field > 1) then
-        call make_electron_current(0)
-        call make_ampere_matrix
-     endif
-     !
+     select case (n_field)
+     case (1)
+        call gyro_make_poisson_matrix
+     case (2)
+        call gyro_make_poisson_matrix
+        call gyro_make_ampere_matrix
+     case (3)
+        call gyro_make_poissonaperp_matrix
+        call gyro_make_ampere_matrix
+     end select
+
      ! Implicit (Maxwell)
      !
      if (electron_method == 2) then
-        call make_maxwell_matrix
+        call gyro_make_maxwell_matrix
      endif
      !------------------------------------------------------
 

@@ -122,6 +122,9 @@ subroutine prgen_write
   case (3)
      write(1,'(a,sp1pe14.7)') 'BT_EXP=',peqdsk_bref
      write(1,60) 'ARHO_EXP=',peqdsk_arho
+  case (5)
+     write(1,'(a,sp1pe14.7)') 'BT_EXP=',corsica_bref
+     write(1,60) 'ARHO_EXP=',corsica_arho
 
   end select
 

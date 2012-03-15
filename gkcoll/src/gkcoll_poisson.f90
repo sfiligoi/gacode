@@ -2,91 +2,207 @@ module gkcoll_poisson
   
   implicit none
   
-  public :: POISSONp_do, POISSONx_do
+  public :: POISSON_alloc, POISSONp_do, POISSONx_do
+  logical, private :: initialized = .false.
+  complex, private :: sum_den_p
+  complex, dimension(:,:), allocatable, private :: sum_den_x
+  complex, dimension(:,:,:), allocatable, private :: pzf ! for n=0 test
+  complex, dimension(:,:,:), allocatable, private :: dzf
+  complex, dimension(:), allocatable, private :: ptemp
   
 contains
   
-  subroutine POISSONp_do(ir,it)
+  subroutine POISSON_alloc(flag)
     use gkcoll_globals
     use gkcoll_gyro
     use gkcoll_equilibrium
     implicit none
-    integer, intent (in) :: ir, it
-    integer :: is, ie, ix
-    real :: sum_den
+    integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
+    integer :: is, ie, ix, ir, it, jt
+    integer :: info
+    integer, dimension(:), allocatable :: i_piv
+    complex, dimension(:), allocatable :: work
     
-    phi(ir,it) = (0.0,0.0)
-    do is=1,n_species
-       do ie=1,n_energy
-          do ix=1,n_xi
-             phi(ir,it) = phi(ir,it) &
-                  + gyrop_J0(is,ir,it,ie,ix) &
-                  * z(is)*dens(is) * w_e(ie) &
-                  * cap_h_p(is,ir,it,ie,ix)
+    if(flag == 1) then
+       if(initialized) return
+       
+       sum_den_p = (0.0,0.0)
+       do is=1,n_species
+          do ie=1,n_energy
+             do ix=1,n_xi
+                sum_den_p = sum_den_p &
+                     + 0.5 * w_xi(ix) &
+                     * z(is)**2/temp(is) *dens(is) * w_e(ie)
+             enddo
           enddo
        enddo
-    enddo
-
-    sum_den = 0.0
-    do is=1,n_species
-       do ie=1,n_energy
-          do ix=1,n_xi
-             sum_den = sum_den &
-                  + 0.5 * w_xi(ix) &
-                  * z(is)**2/temp(is) *dens(is) * w_e(ie)
+       if(adiabatic_ele_model == 1) then
+          sum_den_p = sum_den_p + dens_ele / temp_ele
+       endif
+       
+       allocate(sum_den_x(n_radial,n_theta))
+       do ir=1,n_radial
+          do it=1,n_theta
+             sum_den_x(ir,it) = (0.0,0.0)
+             do is=1,n_species
+                do ie=1,n_energy
+                   do ix=1,n_xi
+                      sum_den_x(ir,it) = sum_den_x(ir,it) &
+                           + 0.5 * w_xi(ix) &
+                           * (1.0 - gyrox_J0(is,ir,it,ie,ix)**2) &
+                           * z(is)**2/temp(is) *dens(is) * w_e(ie)
+                   enddo
+                enddo
+             enddo
+             if(adiabatic_ele_model == 1) then
+                sum_den_x(ir,it) = sum_den_x(ir,it) + dens_ele / temp_ele
+             endif
           enddo
        enddo
-    enddo
 
-    if(adiabatic_ele_model == 1) then
-       sum_den = sum_den + dens_ele / temp_ele
+       if(toroidal_model == 2 .and. adiabatic_ele_model == 1 &
+            .and. neoclassical_model /= 1) then
+          
+          allocate(pzf(n_radial,n_theta,n_theta))
+          pzf(:,:,:) = (0.0,0.0)      
+          do ir=1,n_radial
+             do it=1,n_theta
+                pzf(ir,it,it) = -k_perp(it,ir)**2 * lambda_debye**2 &
+                     * dens_ele / temp_ele + sum_den_p
+                do jt=1,n_theta
+                   pzf(ir,it,jt) = pzf(ir,it,jt) &
+                        - dens_ele / temp_ele * w_theta(jt)
+                enddo
+             enddo
+          enddo
+          allocate(work(n_theta))
+          allocate(i_piv(n_theta))
+          do ir=1,n_radial
+             call ZGETRF(n_theta,n_theta,pzf(ir,:,:),n_theta,i_piv,info)
+             call ZGETRI(n_theta,pzf(ir,:,:),n_theta,i_piv,work,n_theta,info)
+          enddo
+          deallocate(i_piv)
+          deallocate(work)
+          
+          allocate(dzf(n_radial,n_theta,n_theta))
+          dzf(:,:,:) = (0.0,0.0)      
+          do ir=1,n_radial
+             do it=1,n_theta
+                dzf(ir,it,it) = -k_perp(it,ir)**2 * lambda_debye**2 &
+                     * dens_ele / temp_ele + sum_den_x(ir,it)
+                do jt=1,n_theta
+                   dzf(ir,it,jt) = dzf(ir,it,jt) &
+                        - dens_ele / temp_ele * w_theta(jt)
+                enddo
+             enddo
+          enddo
+          allocate(work(n_theta))
+          allocate(i_piv(n_theta))
+          do ir=1,n_radial
+             call ZGETRF(n_theta,n_theta,dzf(ir,:,:),n_theta,i_piv,info)
+             call ZGETRI(n_theta,dzf(ir,:,:),n_theta,i_piv,work,n_theta,info)
+          enddo
+          deallocate(i_piv)
+          deallocate(work)
+          
+          allocate(ptemp(n_theta))
+       endif
+
+       initialized = .true.
+       
+    else
+       if(.NOT. initialized) return
+
+       deallocate(sum_den_x)
+
+       if(toroidal_model == 2 .and. adiabatic_ele_model == 1 &
+            .and. neoclassical_model /= 1) then
+          deallocate(pzf)
+          deallocate(dzf)
+          deallocate(ptemp)
+       endif
+
+       initialized = .false.
     endif
 
-    phi(ir,it) = phi(ir,it) / (-k_perp(it,ir)**2 * lambda_debye**2 &
-         * dens_ele / temp_ele + sum_den) 
-    
+  end subroutine POISSON_alloc
+
+  subroutine POISSONp_do
+    use gkcoll_globals
+    use gkcoll_gyro
+    use gkcoll_equilibrium
+    implicit none
+    integer :: is, ie, ix, ir, it
+    complex :: alpha = (1.0,0.0)
+    complex :: beta  = (0.0,0.0)
+
+    do ir=1,n_radial
+       do it=1,n_theta
+          phi(ir,it) = (0.0,0.0)
+          do is=1,n_species
+             do ie=1,n_energy
+                do ix=1,n_xi
+                   phi(ir,it) = phi(ir,it) &
+                        + gyrop_J0(is,ir,it,ie,ix) &
+                        * z(is)*dens(is) * w_e(ie) &
+                        * cap_h_p(is,ir,it,ie,ix)
+                enddo
+             enddo
+          enddo
+       enddo
+
+       if(toroidal_model == 2 .and. adiabatic_ele_model == 1 &
+            .and. neoclassical_model /= 1) then
+          call ZGEMV('N',n_theta,n_theta,alpha,pzf(ir,:,:),&
+               n_theta,phi(ir,:),1,beta,ptemp,1)
+          phi(ir,:) = ptemp(:)
+       else
+          do it=1,n_theta
+             phi(ir,it) = phi(ir,it) / (-k_perp(it,ir)**2 * lambda_debye**2 &
+                  * dens_ele / temp_ele + sum_den_p)
+          enddo
+       endif
+    enddo
+
   end subroutine POISSONp_do
   
-  subroutine POISSONx_do(ir,it)
+  subroutine POISSONx_do
     use gkcoll_globals
     use gkcoll_gyro
     use gkcoll_equilibrium
     implicit none
-    integer, intent (in) :: ir, it
-    integer :: is, ie, ix
-    real :: sum_den
+    integer :: is, ie, ix, ir, it
+    complex :: alpha = (1.0,0.0)
+    complex :: beta  = (0.0,0.0)
     
-    phi(ir,it) = (0.0,0.0)
-    do is=1,n_species
-       do ie=1,n_energy
-          do ix=1,n_xi
-             phi(ir,it) = phi(ir,it) &
-                  + 0.5 * w_xi(ix) &
-                  * gyrox_J0(is,ir,it,ie,ix) &
-                  * z(is)*dens(is) * w_e(ie) &
-                  * h_x(is,ir,it,ie,ix)
+    do ir=1,n_radial
+       do it=1,n_theta
+          phi(ir,it) = (0.0,0.0)
+          do is=1,n_species
+             do ie=1,n_energy
+                do ix=1,n_xi
+                   phi(ir,it) = phi(ir,it) &
+                        + 0.5 * w_xi(ix) &
+                        * gyrox_J0(is,ir,it,ie,ix) &
+                        * z(is)*dens(is) * w_e(ie) &
+                        * h_x(is,ir,it,ie,ix)
+                enddo
+             enddo
           enddo
        enddo
-    enddo
-    
-    sum_den = 0.0
-    do is=1,n_species
-       do ie=1,n_energy
-          do ix=1,n_xi
-             sum_den = sum_den &
-                  + 0.5 * w_xi(ix) &
-                  * (1.0 - gyrox_J0(is,ir,it,ie,ix)**2) &
-                  * z(is)**2/temp(is) *dens(is) * w_e(ie)
+
+       if(toroidal_model == 2 .and. adiabatic_ele_model == 1 &
+            .and. neoclassical_model /= 1) then
+          call ZGEMV('N',n_theta,n_theta,alpha,dzf(ir,:,:),&
+               n_theta,phi(ir,:),1,beta,ptemp,1)
+          phi(ir,:) = ptemp(:)
+       else
+          do it=1,n_theta
+             phi(ir,it) = phi(ir,it) / (-k_perp(it,ir)**2 * lambda_debye**2 &
+                  * dens_ele / temp_ele + sum_den_x(ir,it))
           enddo
-       enddo
+       endif
     enddo
-
-    if(adiabatic_ele_model == 1) then
-       sum_den = sum_den + dens_ele / temp_ele
-    endif
-
-    phi(ir,it) = phi(ir,it) / (-k_perp(it,ir)**2 * lambda_debye**2 &
-         * dens_ele / temp_ele + sum_den) 
 
   end subroutine POISSONx_do
 

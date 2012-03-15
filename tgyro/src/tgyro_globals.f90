@@ -281,6 +281,12 @@ module tgyro_globals
   integer :: i_tran
   integer :: i_bc
   integer :: flux_counter
+  !
+  ! Global TGYRO variables
+  integer :: igmin
+  integer :: igmax
+  real :: length
+  real :: dlength 
   !---------------------------------------------------------
 
 end module tgyro_globals

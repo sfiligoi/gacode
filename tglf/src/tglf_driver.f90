@@ -6,16 +6,17 @@
 !
       IMPLICIT NONE
 ! local variables
-      INTEGER :: i,j,k,nfields
+      INTEGER :: i,j,k,nfields,ierr
       REAL :: cmult,a_unit=100.0,B_unit=10000.0
       REAL :: t,dt
 ! timing test
       INTEGER :: time_array(8)
       REAL :: cpu1,cpu2 
 !
+
 !      CALL tglf
 !      write(*,*)"gamma=",get_growthrate(1)
-      OPEN (unit=3,file='tglfin',status='old')
+      OPEN (unit=3,file='./tglfin',status='old')
       READ(3,nml=tglfin)
       CLOSE(3)
 !

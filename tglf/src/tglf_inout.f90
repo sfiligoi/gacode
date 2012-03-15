@@ -1124,8 +1124,113 @@
       get_v_bar_sum = v_bar_sum_out
 !
       END FUNCTION get_v_bar_sum
+!----------------------------------------------------------------
+!
+      REAL FUNCTION get_flux_spectrum(itype,ispec,ifield,iky)
+!
+      USE tglf_global
+!   
+      IMPLICIT NONE
+!
+      INTEGER,INTENT(IN) :: itype,ispec,ifield,iky
+      INTEGER :: error=0
+!
+      get_flux_spectrum = 0.0
+      if(itype.lt.1.or.itype.gt.2)then
+        write(*,*)"itype out of bounds",1,2
+        error=1
+      elseif(ispec.lt.1.or.ispec.gt.nsm)then
+        write(*,*)"ispec out of bounds",1,nsm
+        error=1        
+      elseif(ifield.lt.1.or.ifield.gt.3)then
+        write(*,*)"ifield out of bounds",1,3
+        error=1        
+      elseif(iky.lt.1.or.iky.gt.nkym)then
+        write(*,*)"iky out of bounds",1,nkym
+        error=1
+      endif
+!
+!
+      if(error.eq.0)then
+        get_flux_spectrum=flux_spectrum_out(itype,ispec,ifield,iky)
+      endif
+!
+      END FUNCTION get_flux_spectrum
+!----------------------------------------------------------------
+!
+      REAL FUNCTION get_intensity_spectrum(itype,ispec,iky)
+!
+      USE tglf_global
+!   
+      IMPLICIT NONE
+!
+      INTEGER,INTENT(IN) :: itype,ispec,iky
+      INTEGER :: error=0
+!
+      get_intensity_spectrum = 0.0
+      if(itype.lt.1.or.itype.gt.2)then
+        write(*,*)"ntype out of bounds",1,2
+        error=1
+      elseif(ispec.lt.1.or.ispec.gt.nsm)then
+        write(*,*)"ispec out of bounds",1,nsm
+        error=1        
+      elseif(iky.lt.1.or.iky.gt.nkym)then
+        write(*,*)"iky out of bounds",1,nkym
+        error=1
+      endif
+!
+      if(error.eq.0)then
+        get_intensity_spectrum=intensity_spectrum_out(itype,ispec,iky)
+      endif
+!
+      END FUNCTION get_intensity_spectrum
+!----------------------------------------------------------------
+!
+      REAL FUNCTION get_field_spectrum(itype,iky)
+!
+      USE tglf_global
+!   
+      IMPLICIT NONE
+!
+      INTEGER,INTENT(IN) :: itype,iky
+      INTEGER :: error=0
+!
+      get_field_spectrum = 0.0
+      if(itype.lt.1.or.itype.gt.2)then
+        write(*,*)"itype out of bounds",1,2
+        error=1
+      elseif(iky.lt.1.or.iky.gt.nkym)then
+        write(*,*)"nky out of bounds",1,nkym
+        error=1
+      endif
+!
+      if(error.eq.0)then
+        get_field_spectrum=field_spectrum_out(itype,iky)
+      endif
+!
+      END FUNCTION get_field_spectrum
 !-----------------------------------------------------------------
 !
+      REAL FUNCTION get_ky_spectrum_out(iky)
+!
+      USE tglf_global
+      USE tglf_kyspectrum
+!
+      IMPLICIT NONE
+!
+      INTEGER,INTENT(IN) :: iky
+!
+      if(iky.lt.1.or.iky.gt.nkym)then
+        write(*,*)"iky out of bounds",1,nkym
+        get_ky_spectrum_out = 0.0
+      else
+        get_ky_spectrum_out = ky_spectrum(iky)
+      endif
+!
+      END FUNCTION get_ky_spectrum_out
+!-----------------------------------------------------------------
+!
+
       REAL FUNCTION get_DM()
 !
       USE tglf_global

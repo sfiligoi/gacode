@@ -29,7 +29,6 @@ subroutine gyro_run(&
 
   implicit none
 
-
   ! Input parameters (IN) - REQUIRED
   integer, intent(in) :: test_flag_in
   integer, intent(in) :: restart_method_in

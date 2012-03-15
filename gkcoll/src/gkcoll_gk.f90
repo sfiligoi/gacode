@@ -123,18 +123,13 @@ contains
     else
        if(toroidal_model == 2) then
           h_x(1,:,:,:,:) = 1.0
-          !h_x(1,n_radial/2+1,:,:,:) = 0.0
        else
           do it=1,n_theta
              h_x(1,n_radial/2+1,it,:,:) = (1.0e-3) * (cos(theta(it)/2.0))**2
           enddo
        endif
     endif
-    do ir=1,n_radial
-       do it=1,n_theta
-          call POISSONx_do(ir,it)
-       enddo
-    enddo
+    call POISSONx_do
     do is=1,n_species
        do ir=1,n_radial
           do it=1,n_theta
@@ -185,11 +180,7 @@ contains
     
     call get_gkRHS(1)
     h_x = h0_x + 0.5 * delta_t * rhs(1,:,:,:,:,:)
-    do ir=1,n_radial
-       do it=1,n_theta
-          call POISSONx_do(ir,it)
-       enddo
-    enddo
+    call POISSONx_do
     
     !!!!!!!!!!
     ! Stage 2
@@ -216,11 +207,7 @@ contains
     
     call get_gkRHS(2)
     h_x = h0_x + 0.5 * delta_t * rhs(2,:,:,:,:,:)
-    do ir=1,n_radial
-       do it=1,n_theta
-          call POISSONx_do(ir,it)
-       enddo
-    enddo
+    call POISSONx_do
     
     !!!!!!!!!!
     ! Stage 3
@@ -247,11 +234,7 @@ contains
     
     call get_gkRHS(3)
     h_x = h0_x + delta_t * rhs(3,:,:,:,:,:)
-    do ir=1,n_radial
-       do it=1,n_theta
-          call POISSONx_do(ir,it)
-       enddo
-    enddo
+    call POISSONx_do
     
     !!!!!!!!!!
     ! Stage 4
@@ -280,11 +263,7 @@ contains
     
     h_x = h0_x + delta_t/6.0 * (rhs(1,:,:,:,:,:) + 2.0*rhs(2,:,:,:,:,:) &
          + 2.0*rhs(3,:,:,:,:,:) + rhs(4,:,:,:,:,:))     
-    do ir=1,n_radial
-       do it=1,n_theta
-          call POISSONx_do(ir,it)
-       enddo
-    enddo
+    call POISSONx_do
     
     ! Re-map to get new cap_h
     do is=1,n_species

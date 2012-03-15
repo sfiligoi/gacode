@@ -1,24 +1,23 @@
 !-----------------------------------------------------------------
 !
       SUBROUTINE tglf_TM
+!
+!  Main transport model subroutine.
+!  Calls linear TGLF over a spectrum of ky's and computes spectral integrals of 
+!  field, intensity and fluxes.
+!
       USE tglf_dimensions
       USE tglf_global
       USE tglf_species
       USE tglf_kyspectrum
-      USE tglf_xgrid
       IMPLICIT NONE
 !
       LOGICAL :: unstable
       INTEGER :: i,j,k,is,imax
       INTEGER :: save_nbasis_max
       REAL :: dky
-      REAL :: width_max
-      REAL :: gmax,fmax
       REAL :: phi_bar,phi_bar0,phi_bar1
       REAl :: v_bar,v_bar0,v_bar1
-      REAL :: gamma_cutoff,reduce,rexp
-      REAL :: gamma_net_1
-      REAL :: save_vexb_shear
       REAL :: dky0,dky1,ky0,ky1
       REAL :: pflux0(nsm,3),eflux0(nsm,3)
       REAL :: stress_par0(nsm,3),stress_tor0(nsm,3)
@@ -29,8 +28,11 @@
       REAL :: exch1(nsm,3)
       REAL :: nsum1(nsm),tsum1(nsm)
 !
+      if(new_start)CALL tglf_start
+!
 ! initialize fluxes
-      do is=1,nsm
+!
+      do is=ns0,ns
         do j=1,3 
           particle_flux_out(is,j) = 0.0
           energy_flux_out(is,j) = 0.0
@@ -51,19 +53,15 @@
       enddo
       phi_bar_sum_out = 0.0
       v_bar_sum_out = 0.0
-      gmax = 0.0
-      fmax = 0.0
       v_bar0 = 0.0
       phi_bar0 = 0.0     
 !
-! save maximum width
-      width_max = width_in
+! compute the flux spectrum
 !
-      if(new_start)CALL tglf_start
-!      if(new_kyspectrum)CALL get_ky_spectrum
-      CALL get_ky_spectrum
+      CALL get_bilinear_spectrum
 !
 ! sum over ky spectrum
+!
       iflux_in=.TRUE. 
       dky0=0.0
       ky0=0.0 
@@ -82,6 +80,131 @@
 ! choice of temperature and mass scales 
         dky0 = dky0*SQRT(taus_in(1)*mass_in(2))
         dky1 = dky1*SQRT(taus_in(1)*mass_in(2))
+!
+! compute the field integrals
+!
+        v_bar1 = field_spectrum_out(1,i)
+        phi_bar1 = field_spectrum_out(2,i)
+        phi_bar_sum_out = phi_bar_sum_out + dky0*phi_bar0 + dky1*phi_bar1
+        v_bar_sum_out = v_bar_sum_out + dky0*v_bar0 + dky1*v_bar1
+        phi_bar0 = phi_bar1
+        v_bar0 = v_bar1
+!
+! compute the intensity integrals
+!
+        do is=ns0,ns
+          nsum1(is) = intensity_spectrum_out(1,is,i)
+          tsum1(is) = intensity_spectrum_out(2,is,i)
+           n_bar_sum_out(is) = n_bar_sum_out(is) &
+              + dky0*nsum0(is) + dky1*nsum1(is)
+           t_bar_sum_out(is) = t_bar_sum_out(is) &
+              + dky0*tsum0(is) + dky1*tsum1(is)
+           nsum0(is) = nsum1(is)
+           tsum0(is) = tsum1(is)
+        enddo
+!
+! compute the flux integrals
+!
+        do is=ns0,ns
+          do j=1,3
+            pflux1(is,j) = flux_spectrum_out(1,is,j,i)
+            eflux1(is,j) = flux_spectrum_out(2,is,j,i)
+            stress_tor1(is,j) = flux_spectrum_out(3,is,j,i)
+            stress_par1(is,j) = flux_spectrum_out(4,is,j,i)
+            exch1(is,j) = flux_spectrum_out(5,is,j,i)
+             particle_flux_out(is,j) = particle_flux_out(is,j) &
+              + dky0*pflux0(is,j) + dky1*pflux1(is,j)
+             energy_flux_out(is,j) = energy_flux_out(is,j) &
+              + dky0*eflux0(is,j) + dky1*eflux1(is,j)
+             stress_tor_out(is,j) = stress_tor_out(is,j) &
+              + dky0*stress_tor0(is,j) + dky1*stress_tor1(is,j)
+             stress_par_out(is,j) = stress_par_out(is,j) &
+              + dky0*stress_par0(is,j) + dky1*stress_par1(is,j)
+             exchange_out(is,j) = exchange_out(is,j) &
+              + dky0*exch0(is,j) + dky1*exch1(is,j)
+!            write(*,*)is,j,i
+!            write(*,*)"ky0=",ky0,"ky1=",ky1
+!            write(*,*)"pflux0=",pflux0,"pflux1=",pflux1
+!            write(*,*)"eflux0=",eflux0,"eflux1=",eflux1
+!            write(*,*)dky0*pflux0+dky1*pflux1
+!            write(*,*)dky0*eflux0+dky1*eflux1
+!            write(*,*)"stress_tor_out=",stress_tor_out(is,1)
+             pflux0 = pflux1
+             eflux0 = eflux1
+             stress_par0(is,j) = stress_par1(is,j)
+             stress_tor0(is,j) = stress_tor1(is,j)
+             exch0 = exch1(is,j)
+           enddo  ! j
+           if(ky_in*SQRT(taus_in(2)*mass_in(2)).le.1.0)then
+             q_low_out(is) = energy_flux_out(is,1)+energy_flux_out(is,2)
+           endif
+         enddo  ! is 
+!
+        ky0 = ky1
+      enddo  ! i
+!
+      END SUBROUTINE tglf_TM
+!
+!-----------------------------------------------------------------
+!
+      SUBROUTINE get_bilinear_spectrum
+!
+! computes the bilinear fluctuation moments 
+! and saves them in flux_spectrum_out, intensity_spectrum_out
+! and field_spectrum_out
+!
+      USE tglf_dimensions
+      USE tglf_global
+      USE tglf_species
+      USE tglf_kyspectrum
+      USE tglf_xgrid
+      IMPLICIT NONE
+!
+      LOGICAL :: unstable
+      INTEGER :: i,j,k,is,imax,t
+      REAL :: width_max
+      REAL :: gmax,fmax
+      REAL :: phi_bar,phi_bar1
+      REAl :: v_bar,v_bar1
+      REAL :: gamma_cutoff,reduce,rexp
+      REAL :: gamma_net_1
+      REAL :: save_vexb_shear
+      REAL :: pflux1,eflux1
+      REAL :: stress_tor1,stress_par1
+      REAL :: exch1
+      REAL :: ns1,ts1
+!
+!
+! setup the ky-spectrum
+!
+!      if(new_kyspectrum)CALL get_ky_spectrum
+      CALL get_ky_spectrum
+!
+! initialize output arrays
+!
+      do i=1,nky
+        do t = 1,2
+          field_spectrum_out(t,i) = 0.0
+        enddo
+        do is=ns0,ns
+          do t=1,2
+            intensity_spectrum_out(t,is,i) = 0.0
+          enddo
+          do j=1,3
+            do t=1,5
+              flux_spectrum_out(t,is,j,i) = 0.0
+            enddo
+          enddo ! j
+        enddo ! is
+      enddo  !i
+!
+! loop over ky spectrum
+!
+! save maximum width
+      width_max = width_in
+      iflux_in=.TRUE. 
+      do i=1,nky
+        ky_in = ky_spectrum(i)
 !
         new_width=.TRUE.
 !
@@ -138,7 +261,7 @@
             gamma_out(1)=0.0
           endif
         endif
-!        write(*,*)i,"ky=",ky_in,"width=",width_in,"dky=",dky
+!        write(*,*)i,"ky=",ky_in,"width=",width_in
 !        write(*,*)"nbasis=",nbasis_max_in,nbasis_min_in
 !        write(*,*)"ft=",ft,"R=",R_unit,"q=",q_unit
 !        write(*,*)"wdx=",wdx(1),"b0x=",b0x(1)
@@ -156,9 +279,10 @@
 !            write(*,*)"phi reduced",ky_in,gamma_nb_min_out,gamma_out(1)
           endif
         endif
-!
+! compute field_spectrum_out
         phi_bar1 = 0.0
         v_bar1 = 0.0
+        gmax = 0.0
         if(unstable)then
          do imax=1,nmodes_out
            phi_bar = reduce*phi_bar_out(imax)
@@ -173,93 +297,61 @@
 !          write(*,*)"modes",imax,phi_QL_out(imax)
 !          write(*,*)gamma_out(imax),freq_out(imax)
          enddo
+         field_spectrum_out(1,i) = v_bar1
+         field_spectrum_out(2,i) = phi_bar1
         endif
-        phi_bar_sum_out = phi_bar_sum_out + dky0*phi_bar0 + dky1*phi_bar1
-        v_bar_sum_out = v_bar_sum_out + dky0*v_bar0 + dky1*v_bar1
-        phi_bar0 = phi_bar1
-        v_bar0 = v_bar1
-!
-        do is=1,ns
-          do j=1,3
-            pflux1(is,j) = 0.0
-            eflux1(is,j) = 0.0 
-            stress_par1(is,j) = 0.0
-            stress_tor1(is,j) = 0.0
-            exch1(is,j) = 0.0
-          enddo
-          nsum1(is) = 0.0
-          tsum1(is) = 0.0
+! compute intensity_spectrum_out
+        do is=ns0,ns
+          ns1 = 0.0
+          ts1 = 0.0
           if(unstable)then
             do imax=1,nmodes_out
-              phi_bar = reduce*phi_bar_out(imax)
-              do j=1,3
-                pflux1(is,j) = pflux1(is,j)+phi_bar*particle_QL_out(imax,is,j)
-                eflux1(is,j) = eflux1(is,j)+phi_bar*energy_QL_out(imax,is,j)
-                stress_par1(is,j) = stress_par1(is,j)+phi_bar*stress_par_QL_out(imax,is,j)
-                stress_tor1(is,j) = stress_tor1(is,j)+phi_bar*stress_tor_QL_out(imax,is,j)
-                exch1(is,j) = exch1(is,j)+phi_bar*exchange_QL_out(imax,is,j)
-              enddo
-              nsum1(is) = nsum1(is)+n_bar_out(imax,is)
-              tsum1(is) = tsum1(is)+t_bar_out(imax,is)
+              ns1 = ns1+n_bar_out(imax,is)
+              ts1 = ts1+t_bar_out(imax,is)
              enddo
+             intensity_spectrum_out(1,is,i) = ns1
+             intensity_spectrum_out(2,is,i) = ts1
            endif
-!           if(is.eq.2)write(*,*)ky_in,(dky0*eflux0(is,1)+dky1*eflux1(is,1))/rlts_in(is)
-!           if(is.eq.2)write(*,*)"stress_tor",ky,stress_tor1(2,1)
-           do j=1,3
-             particle_flux_out(is,j) = particle_flux_out(is,j) &
-              + dky0*pflux0(is,j) + dky1*pflux1(is,j)
-             energy_flux_out(is,j) = energy_flux_out(is,j) &
-              + dky0*eflux0(is,j) + dky1*eflux1(is,j)
-             stress_par_out(is,j) = stress_par_out(is,j) &
-              + dky0*stress_par0(is,j) + dky1*stress_par1(is,j)
-             stress_tor_out(is,j) = stress_tor_out(is,j) &
-              + dky0*stress_tor0(is,j) + dky1*stress_tor1(is,j)
-             exchange_out(is,j) = exchange_out(is,j) &
-              + dky0*exch0(is,j) + dky1*exch1(is,j)
-           enddo
-           n_bar_sum_out(is) = n_bar_sum_out(is) &
-              + dky0*nsum0(is) + dky1*nsum1(is)
-           t_bar_sum_out(is) = t_bar_sum_out(is) &
-              + dky0*tsum0(is) + dky1*tsum1(is)
-!            write(*,*)"ky0=",ky0,"ky1=",ky1
-!            write(*,*)"gamma=",gamma_out(1),gamma_nb_min_out
-!            write(*,*)"reduce=",reduce
-!            write(*,*)"is=",is,"unstable=",unstable
-!            write(*,*)"pflux0=",pflux0(is),"pflux1=",pflux1(is)
-!            write(*,*)"eflux0=",eflux0(is),"eflux1=",eflux1(is)
-!            write(*,*)dky0*pflux0(is,1)+dky1*pflux1(is,1)
-!            write(*,*)dky0*eflux0(is,1)+dky1*eflux1(is,1)
-!            write(*,*)"stress_tor_out=",stress_tor_out(is,1)
-           do j=1,3
-             pflux0(is,j) = pflux1(is,j)
-             eflux0(is,j) = eflux1(is,j)
-             stress_par0(is,j) = stress_par1(is,j)
-             stress_tor0(is,j) = stress_tor1(is,j)
-             exch0(is,j) = exch1(is,j)
-           enddo
-           nsum0(is) = nsum1(is)
-           tsum0(is) = tsum1(is)
-           if(ky_in*SQRT(taus_in(2)*mass_in(2)).le.1.0)then
-             q_low_out(is) = energy_flux_out(is,1)+energy_flux_out(is,2)
-           endif
-!          write(*,*)ky,imax,dky*phi_bar*energy_QL_out(imax,1)
-
+         enddo  ! is
+!  compute flux_spectrum_out 
+        do is=ns0,ns
+          do j=1,3
+            pflux1 = 0.0
+            eflux1 = 0.0 
+            stress_tor1 = 0.0
+            stress_par1 = 0.0
+            exch1 = 0.0
+            if(unstable)then
+             do imax=1,nmodes_out
+              phi_bar = reduce*phi_bar_out(imax)
+              pflux1 = pflux1+phi_bar*particle_QL_out(imax,is,j)
+              eflux1 = eflux1+phi_bar*energy_QL_out(imax,is,j)
+              stress_tor1 = stress_tor1+phi_bar*stress_tor_QL_out(imax,is,j)
+              stress_par1 = stress_par1+phi_bar*stress_par_QL_out(imax,is,j)
+              exch1 = exch1+phi_bar*exchange_QL_out(imax,is,j)
+             enddo
+             flux_spectrum_out(1,is,j,i) = pflux1
+             flux_spectrum_out(2,is,j,i) = eflux1
+             flux_spectrum_out(3,is,j,i) = stress_tor1
+             flux_spectrum_out(4,is,j,i) = stress_par1
+             flux_spectrum_out(5,is,j,i) = exch1
+            endif
+           enddo ! j
          enddo  ! is 
 !
 ! reset width to maximum if used tglf_max
         if(find_width_in)width_in=width_max
 !
-        ky0 = ky1
-      enddo  ! i
+      enddo  ! i 
 !
       if(new_eikonal_in)eikonal_unsaved=.FALSE.
       gamma_out(1) = gmax
       freq_out(1) = fmax
       new_eikonal_in = .TRUE.  ! reset default for next call to tglf_TM
+      
+      END SUBROUTINE get_bilinear_spectrum
 !
-      END SUBROUTINE tglf_TM
-!
-!-----------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !
       SUBROUTINE get_ky_spectrum
 !
@@ -401,6 +493,4 @@
 !      enddo
 !
       END SUBROUTINE get_ky_spectrum
-
-
 

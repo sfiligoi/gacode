@@ -26,8 +26,8 @@ OBJECTS = gkcoll_globals.o \
           gkcoll_gyro.o \
           gkcoll_poisson.o \
           gkcoll_freq.o \
+          gkcoll_neo.o \
           gkcoll_gk.o \
-	  gkcoll_implicit.o \
 	  gkcoll_allimplicit.o \
 	  gkcoll_collision.o \
           gkcoll_do.o

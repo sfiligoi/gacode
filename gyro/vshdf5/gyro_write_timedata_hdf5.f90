@@ -40,9 +40,17 @@ subroutine gyro_write_timedata_hdf5
   !---------------------------------------------------
   ! Timestep data:
   !
-  if (i_proc == 0) then
-     call gyro_write_step(trim(path)//'out.gyro.t',1)
+!  if (i_proc == 0) then
+!     call gyro_write_step(trim(path)//'out.gyro.t',1)
+!  endif
+
+
+  if (i_proc == 0 .and. io_control > 1) then
+     h5in%units="dimensionless"
+     h5in%mesh=" "
+     call add_h5(dumpTGid,'k_perp_squared',k_perp_squared,h5in,h5err)
   endif
+
   !---------------------------------------------------
 
   !---------------------------------------------------

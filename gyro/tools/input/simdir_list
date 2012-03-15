@@ -28,14 +28,18 @@ h5reg20: [nl+gki+dke+cem+pure+mod+ sym+ncol+ rot+np+inp]
 
 Full nonlinear cases
 
-nl01: [nl+gki+dke+ es+pure+mod+ sym+ncol+nrot+ p+inp]
-      GA standard case, 16 modes.
-nl02: [nl+gki+dke+tem+pure+gen+ sym+ col+nrot+ p+exp]
-      Guttenfelder's NSTX microtearing case.
-nl03: [nl+gki+dke+ es+ imp+mod+ sym+ col+nrot+np+exp]
-      Holland's 40-mode DIII-D case.
-nl04: [nl+gki+gke+ es+ imp+mod+ sym+ col+nrot+np+exp]
-      Holland's 80-mode DIII-D case.
+nl01:  [nl+gki+dke+ es+pure+mod+ sym+ncol+nrot+ p+inp]
+       GA standard case, 16 modes.
+nl02a: [nl+gki+dke+tem+pure+gen+ sym+ col+nrot+ p+exp]
+       Guttenfelder's NSTX microtearing case (8 modes, 400 radii).
+nl02b: [nl+gki+dke+tem+pure+gen+ sym+ col+nrot+ p+exp]
+       Guttenfelder's NSTX microtearing case (16 modes, 540 radii).
+nl02c: [nl+gki+dke+tem+pure+gen+ sym+ col+nrot+ p+exp]
+       Guttenfelder's NSTX microtearing case (32 modes, 800 radii).
+nl03:  [nl+gki+dke+ es+ imp+mod+ sym+ col+nrot+np+exp]
+       Holland's 40-mode DIII-D case.
+nl04:  [nl+gki+gke+ es+ imp+mod+ sym+ col+nrot+np+exp]
+       Holland's 80-mode DIII-D case.
 
 Eigenvalue cases:
 

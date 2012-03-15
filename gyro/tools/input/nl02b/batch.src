@@ -1,0 +1,10 @@
+#PBS -N 384-1
+#PBS -A gc3
+#PBS -o /global/homes/c/candy/nl02b_s2/384-1/batch.out
+#PBS -e /global/homes/c/candy/nl02b_s2/384-1/batch.err
+#PBS -q regular
+#PBS -l walltime=1:00:00
+#PBS -l mppwidth=384
+#PBS -m abe
+#PBS -M candy@nersc.gov
+gyro -e 384-1 -n 384 -nomp 1 -numa 4 -mpinuma 6 -p /global/homes/c/candy/nl02b_s2

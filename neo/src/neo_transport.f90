@@ -39,11 +39,11 @@ module neo_transport
   real, dimension(:), allocatable :: d_phi         ! (ntheta)
   real                            :: d_phi_sqavg ! <d_phi^2>_theta 
 
-  integer, parameter, private :: io_transp=1, io_phi=2, io_vel=3, &
-       io_exp=4, io_gv=8, io_check=9
+  integer, parameter, private :: io=1
   character(len=80),private :: runfile_transp = 'out.neo.transport'
   character(len=80),private :: runfile_phi    = 'out.neo.phi'
   character(len=80),private :: runfile_vel    = 'out.neo.vel'
+  character(len=80),private :: runfile_vel_fourier    = 'out.neo.vel_fourier'
   character(len=80),private :: runfile_exp    = 'out.neo.transport_exp'
   character(len=80),private :: runfile_gv     = 'out.neo.transport_gv'
   character(len=80),private :: runfile_check  = 'out.neo.check'
@@ -89,17 +89,19 @@ contains
        check_sum=0.0
 
        if(silent_flag == 0 .and. i_proc == 0) then
-          open(unit=io_transp,file=trim(path)//runfile_transp,status='replace')
-          close(io_transp)
-          open(unit=io_phi,file=trim(path)//runfile_phi,status='replace')
-          close(io_phi)
-          open(unit=io_vel,file=trim(path)//runfile_vel,status='replace')
-          close(io_vel)
-          open(unit=io_gv,file=trim(path)//runfile_gv,status='replace')
-          close(io_gv)
+          open(unit=io,file=trim(path)//runfile_transp,status='replace')
+          close(io)
+          open(unit=io,file=trim(path)//runfile_phi,status='replace')
+          close(io)
+          open(unit=io,file=trim(path)//runfile_vel,status='replace')
+          close(io)
+          open(unit=io,file=trim(path)//runfile_vel_fourier,status='replace')
+          close(io)
+          open(unit=io,file=trim(path)//runfile_gv,status='replace')
+          close(io)
           if(profile_model >= 2) then
-             open(unit=io_exp,file=trim(path)//runfile_exp,status='replace')
-             close(io_exp)
+             open(unit=io,file=trim(path)//runfile_exp,status='replace')
+             close(io)
           endif
        endif
 
@@ -132,9 +134,9 @@ contains
        deallocate(vtor_th0)
 
        if(silent_flag == 0 .and. i_proc == 0) then
-          open(unit=io_check,file=trim(path)//runfile_check,status='replace')
-          write (io_check,'(e16.8,$)') check_sum
-          close(io_check)
+          open(unit=io,file=trim(path)//runfile_check,status='replace')
+          write (io,'(e16.8,$)') check_sum
+          close(io)
        endif
 
        initialized = .false.
@@ -524,90 +526,116 @@ contains
     if(silent_flag > 0 .or. i_proc > 0) return
 
     ! transport coefficients (normalized)
-    open(io_transp,file=trim(path)//runfile_transp,status='old',position='append')
-    write (io_transp,'(e16.8,$)') r(ir)
-    write (io_transp,'(e16.8,$)') d_phi_sqavg
-    write (io_transp,'(e16.8,$)') jpar
-    write (io_transp,'(e16.8,$)') vtor_0order_th0
-    write (io_transp,'(e16.8,$)') uparB_0order
+    open(io,file=trim(path)//runfile_transp,status='old',position='append')
+    write (io,'(e16.8,$)') r(ir)
+    write (io,'(e16.8,$)') d_phi_sqavg
+    write (io,'(e16.8,$)') jpar
+    write (io,'(e16.8,$)') vtor_0order_th0
+    write (io,'(e16.8,$)') uparB_0order
     do is=1, n_species
-       write (io_transp,'(e16.8,$)') pflux(is)
-       write (io_transp,'(e16.8,$)') eflux(is)
-       write (io_transp,'(e16.8,$)') mflux(is)
-       write (io_transp,'(e16.8,$)') uparB(is)
-       write (io_transp,'(e16.8,$)') klittle_upar(is)
-       write (io_transp,'(e16.8,$)') kbig_upar(is)
-       write (io_transp,'(e16.8,$)') vpol_th0(is)
-       write (io_transp,'(e16.8,$)') vtor_th0(is)
+       write (io,'(e16.8,$)') pflux(is)
+       write (io,'(e16.8,$)') eflux(is)
+       write (io,'(e16.8,$)') mflux(is)
+       write (io,'(e16.8,$)') uparB(is)
+       write (io,'(e16.8,$)') klittle_upar(is)
+       write (io,'(e16.8,$)') kbig_upar(is)
+       write (io,'(e16.8,$)') vpol_th0(is)
+       write (io,'(e16.8,$)') vtor_th0(is)
     enddo
-    write (io_transp,*)
-    close(io_transp)
+    write (io,*)
+    close(io)
 
     ! transport coefficients (units)
     if(profile_model >= 2) then
-       open(io_exp,file=trim(path)//runfile_exp,status='old',position='append')
-       write (io_exp,'(e16.8,$)') r(ir) * a_meters
+       open(io,file=trim(path)//runfile_exp,status='old',position='append')
+       write (io,'(e16.8,$)') r(ir) * a_meters
        ! m
-       write (io_exp,'(e16.8,$)') &
+       write (io,'(e16.8,$)') &
             d_phi_sqavg * (temp_norm(ir)*temp_norm_fac/charge_norm_fac)**2
        ! V^2
-       write (io_exp,'(e16.8,$)') &
+       write (io,'(e16.8,$)') &
             jpar * (charge_norm_fac*dens_norm(ir)*vth_norm(ir)*a_meters)
        ! A/m^2 (jpar B/Bunit)
-       write (io_exp,'(e16.8,$)') &
+       write (io,'(e16.8,$)') &
             vtor_0order_th0 * (vth_norm(ir)*a_meters)
        ! m/s
-       write (io_exp,'(e16.8,$)') &
+       write (io,'(e16.8,$)') &
             uparB_0order * (vth_norm(ir)*a_meters)
        ! m/s (upar B/Bunit)
        do is=1, n_species
-          write (io_exp,'(e16.8,$)') &
+          write (io,'(e16.8,$)') &
                pflux(is) * (dens_norm(ir)*vth_norm(ir)*a_meters) 
           ! e19 m-2 s-1
-          write (io_exp,'(e16.8,$)') &
+          write (io,'(e16.8,$)') &
                eflux(is) * (dens_norm(ir)*vth_norm(ir)*a_meters &
                *temp_norm(ir)*temp_norm_fac)
           ! W/m^2 
-          write (io_exp,'(e16.8,$)') & 
+          write (io,'(e16.8,$)') & 
                mflux(is) * (dens_norm(ir)*a_meters*temp_norm(ir)*temp_norm_fac)
           ! N/m
-          write (io_exp,'(e16.8,$)') &
+          write (io,'(e16.8,$)') &
                uparB(is) * (vth_norm(ir)*a_meters)
           ! m/s (upar B/Bunit)
-          write (io_exp,'(e16.8,$)') klittle_upar(is)  ! dimensionless
-          write (io_exp,'(e16.8,$)') &
+          write (io,'(e16.8,$)') klittle_upar(is)  ! dimensionless
+          write (io,'(e16.8,$)') &
                kbig_upar(is) * (dens_norm(ir)*vth_norm(ir)*a_meters/b_unit(ir))
           ! e19 1/(m^2 s T)
-          write (io_exp,'(e16.8,$)') &
+          write (io,'(e16.8,$)') &
                vpol_th0(is) * (vth_norm(ir)*a_meters)
           ! m/s
-          write (io_exp,'(e16.8,$)') &
+          write (io,'(e16.8,$)') &
                vtor_th0(is) * (vth_norm(ir)*a_meters)
           ! m/s
        enddo
-       write (io_exp,*)
-       close(io_exp)
+       write (io,*)
+       close(io)
     end if
 
     ! delta phi(theta)
-    open(io_phi,file=trim(path)//runfile_phi,status='old',position='append')
-    write(io_phi,*) d_phi(:)
-    close(io_phi)
+    open(io,file=trim(path)//runfile_phi,status='old',position='append')
+    write(io,*) d_phi(:)
+    close(io)
 
-    open(io_vel,file=trim(path)//runfile_vel,status='old',position='append')    
-    write(io_vel,*) upar(:,:)
-    close(io_vel)
+    ! u_par(theta)
+    open(io,file=trim(path)//runfile_vel,status='old',position='append')    
+    write(io,*) upar(:,:)
+    close(io)
+
+    ! u_par, vpol, vtor theta fourier coefficients
+    open(io,file=trim(path)//runfile_vel_fourier,status='old',position='append')
+    do is=1,n_species
+       do jt=0,m_theta
+          write (io,'(e16.8,$)') upar_fourier(is,jt,1)
+       enddo
+       do jt=0,m_theta
+          write (io,'(e16.8,$)') upar_fourier(is,jt,2)
+       enddo
+       do jt=0,m_theta
+          write (io,'(e16.8,$)') vpol_fourier(is,jt,1)
+       enddo
+       do jt=0,m_theta
+          write (io,'(e16.8,$)') vpol_fourier(is,jt,2)
+       enddo
+       do jt=0,m_theta
+          write (io,'(e16.8,$)') vtor_fourier(is,jt,1)
+       enddo
+       do jt=0,m_theta
+          write (io,'(e16.8,$)') vtor_fourier(is,jt,2)
+       enddo
+    enddo
+    write (io,*)
+    close(io)
 
     ! gyroviscosity transport coefficients
-    open(io_gv,file=trim(path)//runfile_gv,status='old',position='append')
-    write (io_gv,'(e16.8,$)') r(ir)
+    open(io,file=trim(path)//runfile_gv,status='old',position='append')
+    write (io,'(e16.8,$)') r(ir)
     do is=1, n_species
-       write (io_gv,'(e16.8,$)') pflux_gv(is)
-       write (io_gv,'(e16.8,$)') eflux_gv(is)
-       write (io_gv,'(e16.8,$)') mflux_gv(is)
+       write (io,'(e16.8,$)') pflux_gv(is)
+       write (io,'(e16.8,$)') eflux_gv(is)
+       write (io,'(e16.8,$)') mflux_gv(is)
     enddo
-    write (io_gv,*)
-    close(io_gv)
+    write (io,*)
+    close(io)
 
   end subroutine TRANSP_write
 
