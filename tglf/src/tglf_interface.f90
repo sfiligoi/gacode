@@ -181,10 +181,10 @@ module tglf_interface
   real :: tglf_elec_eflux_low_out = 0.0
   real :: tglf_elec_mflux_out = 0.0
 
-  real, dimension(5) :: tglf_ion_pflux_out = 0.0
-  real, dimension(5) :: tglf_ion_eflux_out = 0.0
-  real, dimension(5) :: tglf_ion_eflux_low_out = 0.0
-  real, dimension(5) :: tglf_ion_mflux_out = 0.0
+  real, dimension(nsm-1) :: tglf_ion_pflux_out = 0.0
+  real, dimension(nsm-1) :: tglf_ion_eflux_out = 0.0
+  real, dimension(nsm-1) :: tglf_ion_eflux_low_out = 0.0
+  real, dimension(nsm-1) :: tglf_ion_mflux_out = 0.0
   
   ! LINEAR OUTPUT PARAMETERS
   complex :: tglf_eigenvalue_out(maxmodes)

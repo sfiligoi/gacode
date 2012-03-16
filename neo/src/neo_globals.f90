@@ -151,8 +151,8 @@ module neo_globals
   integer :: n_max
 
   real, dimension(:), allocatable :: g
-  real, dimension(:), allocatable :: a
-  integer, dimension(:), allocatable :: a_indx
+  real, dimension(:), allocatable :: amat
+  integer, dimension(:), allocatable :: amat_indx
 
   integer, dimension(:), allocatable :: is_indx, ie_indx, ix_indx, it_indx
 

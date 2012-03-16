@@ -18,8 +18,6 @@ subroutine tgyro_iteration_serial
   allocate(f_vec1(p_max))
   allocate(g_vec1(p_max))
 
-
-
   do i_tran_loop=1,tgyro_relax_iterations
 
      i_tran = i_tran+1
@@ -82,7 +80,6 @@ subroutine tgyro_iteration_serial
 
      ip = -1
      
-
      if (loc_ti_feedback_flag == 1) then
 
         ip = ip+1
@@ -133,12 +130,6 @@ subroutine tgyro_iteration_serial
         enddo
 
      endif
-
-!     close(101)
-!     close(102)
-!     close(103)
-!     close(104)
- 
      !
      !----------------------------------------------
 

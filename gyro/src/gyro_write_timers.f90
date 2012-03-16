@@ -76,6 +76,9 @@ subroutine gyro_write_timers(datafile,io)
 
      endif
 
+     ! Reset all timers
+     cpu(1:cpu_maxindx) = 0.0
+
   end select
 
   if (i_proc == 0 .and. debug_flag == 1) print *,'[gyro_write_timers called]'

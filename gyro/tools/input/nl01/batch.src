@@ -1,0 +1,10 @@
+#PBS -N 128-1
+#PBS -A gc3
+#PBS -o /global/homes/c/candy/nl01_scaling/128-1/batch.out
+#PBS -e /global/homes/c/candy/nl01_scaling/128-1/batch.err
+#PBS -q debug
+#PBS -l walltime=0:30:00
+#PBS -l mppwidth=144
+#PBS -m abe
+#PBS -M candy@nersc.gov
+gyro -e 128-1 -n 128 -nomp 1 -numa 4 -mpinuma 6 -p /global/homes/c/candy/nl01_scaling

@@ -38,9 +38,12 @@ then
   echo
   echo "          -plot <type>"
   echo "          Generate plot of given type."
-  echo "          <type> = phi,"
+  echo "          <type> = field,"
   echo "                 = h,"
-  echo "                 = h_cut"
+  echo "                 = h_cut,"
+  echo "                 = freq,"
+  echo "                 = zf (zonal flow potential plot),"
+  echo "                 = zffield"
 
   exit 1
 fi
@@ -107,6 +110,18 @@ case "$PLOT_TYPE" in
 
    h_cut)  
 	python $PYROOT/plot_h_cut.py $FTYPE $TIME $SPECIES & ;;
+
+   freq)  
+	python $PYROOT/plot_freq.py $FTYPE & ;;
+
+   zf)  
+	python $PYROOT/plot_zf.py $FTYPE & ;;
+
+   zffield)
+   	python $PYROOT/plot_zffield.py $FTYPE $TIME $FIELD & ;;
+
+   *)
+        echo "Unrecognized argument to -plot" ; exit 1 ;;
 
 esac 
 

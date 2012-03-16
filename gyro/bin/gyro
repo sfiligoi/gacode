@@ -76,10 +76,6 @@ then
   echo "         -s <simdir>" 
   echo "         Create small portable copy of <simdir>."
   echo 
-  echo "         -pk <simdir> -pw <window>"
-  echo "         Summarize transport coefficients, with optional" 
-  echo "         averaging window: 0 < <window> <= 1"
-  echo
   echo "         -h" 
   echo "         Version and platform information."
 
@@ -109,8 +105,6 @@ GENERATE_FLAG=0
 REGRESS_FLAG=0
 SCOPY_FLAG=0
 KILL_STATUS=2
-PEEK_FLAG=0
-PEEK_WINDOW=0.5
 #=============================================================
 
 #=============================================================
@@ -330,6 +324,8 @@ fi
 # Test:
 if [ $TEST_FLAG -eq 1 ]
 then
+   NUMA=1
+   MPINUMA=1
    echo "1" > "$SIMDIR/gyrotest_flag"
 fi
 #===========================================================
@@ -348,6 +344,5 @@ then
    cat $RUNBASE
 fi
 #===========================================================
-
 
 exit 0

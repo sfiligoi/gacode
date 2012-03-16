@@ -39,7 +39,6 @@ subroutine gyro_gbflux
   endif
   !-----------------------------------------------------
 
-
   !----------------------------------------------------------
   ! Compute particle/momentum/energy diffusivities:
   !
@@ -92,7 +91,7 @@ subroutine gyro_gbflux
 
         gbflux_mom_loc(:,:) = nonlinear_flux_momparts(:,:)/sum(phi_squared(:)/n_x)
 
-    end select
+     end select
 
   endif
   !-----------------------------------------------------------------
@@ -178,6 +177,15 @@ subroutine gyro_gbflux
         gbflux_i_trapped(:,:,:,:) = gbflux_i_trapped(:,:,:,:)/gbflux_norm
 
      endif
+  endif
+
+  ! Compute running time-average of radially-dependent fluxes
+  if (step > int((1.0-fluxaverage_window)*nstep)) then
+     p_ave = p_ave+1
+     gbflux_vec(:,:,:,:) = ((p_ave-1)*gbflux_vec(:,:,:,:)+gbflux_i(:,:,:,:))/p_ave
+  else
+     p_ave = 0
+     gbflux_vec(:,:,:,:) = 0.0
   endif
 
   if (i_proc == 0) then

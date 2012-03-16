@@ -9,6 +9,7 @@ subroutine gyro_cleanup
 
   use mpi
   use gyro_globals
+  use gyro_interface
 
   implicit none
 

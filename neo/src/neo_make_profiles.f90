@@ -401,6 +401,7 @@ subroutine neo_make_profiles
 
   ! Print the re-mapped equilibrium data
   if(silent_flag == 0 .and. i_proc == 0) then
+
      open(unit=io,file=trim(path)//'out.neo.equil',status='replace')
      do ir=1,n_radial
         write (io,'(e16.8,$)') r(ir)
@@ -410,9 +411,6 @@ subroutine neo_make_profiles
         write (io,'(e16.8,$)') rmaj(ir)
         write (io,'(e16.8,$)') omega_rot(ir)
         write (io,'(e16.8,$)') omega_rot_deriv(ir)
-        write (io,'(e16.8,$)') dens_norm(ir)
-        write (io,'(e16.8,$)') temp_norm(ir)
-        write (io,'(e16.8,$)') vth_norm(ir)
         do is=1,n_species
            write (io,'(e16.8,$)') dens(is,ir)
            write (io,'(e16.8,$)') temp(is,ir)
@@ -423,6 +421,22 @@ subroutine neo_make_profiles
         write (io,*)
      enddo
      close(io)
-  end if
+
+     if(profile_model >= 2) then
+        open(unit=io,file=trim(path)//'out.neo.expnorm',status='replace')
+        do ir=1,n_radial
+           write (io,'(e16.8,$)') r(ir)
+           write (io,'(e16.8,$)') a_meters
+           write (io,'(e16.8,$)') mass_deuterium
+           write (io,'(e16.8,$)') dens_norm(ir)
+           write (io,'(e16.8,$)') temp_norm(ir)
+           write (io,'(e16.8,$)') vth_norm(ir)*a_meters
+           write (io,'(e16.8,$)') b_unit(ir)
+           write (io,*)
+        enddo
+        close(io)
+     end if
+
+  endif
 
 end subroutine neo_make_profiles

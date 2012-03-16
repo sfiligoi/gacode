@@ -14,6 +14,5 @@ numa=${5}
 mpinuma=${6}
 
 cd $simdir
-export OMP_NUM_THREADS=$nomp 
-mpiexec -n $nmpi $exec
+export OMP_NUM_THREADS=$nomp ; mpiexec -n $nmpi $exec
 

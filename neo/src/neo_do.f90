@@ -25,9 +25,13 @@ subroutine neo_do
 
   integer :: ir, is, ie, ix, it, jr, js, je, jx, jt, ks, ke
   integer, dimension(:,:,:,:), allocatable :: mindx  ! (ns,ne,nxi+1,nth)
-  integer :: n_elem
   integer :: i, j, k, id
   integer :: ierr
+  integer :: n_elem
+  real, dimension(:), allocatable :: a
+  integer, dimension(:), allocatable :: a_iindx
+  integer, dimension(:), allocatable :: a_jindx
+  integer :: ifac, matfac_err, max_ifac=5
 
   ! kinetic equation terms: 
   real :: stream, trap, rotkin
@@ -110,13 +114,32 @@ subroutine neo_do
 
   ! Matrix solve allocations
   n_row = n_species*(n_energy+1)*(n_xi+1)*n_theta
-  n_max = n_species*(n_energy+1)*(n_energy+1)*(n_xi+1)*n_theta*matsz_scalefac
+  ! Estimate number of elements
+  i = 0
+  ! constraint
+  if(collision_model == 1 .or. collision_model == 2) then
+     i = i + n_species*n_theta * (n_energy+1)
+  else
+     i = i + n_species*n_theta * 2
+  endif
+  ! collisions
+  i = i + n_species*(n_xi+1)*n_theta*(n_energy+1)**2 * (1 + n_species)
+  ! streaming
+  i = i + n_species*n_theta*(n_energy+1)**2*((n_xi-1)*4*2 + 2*4)
+  ! trapping/rotation
+  i = i + n_species*n_theta*(n_energy+1)**2*((n_xi-1)*2 + 2)
+  n_max = i
   allocate(a(n_max),stat=ierr)
   if(ierr /= 0) then
      call neo_error('ERROR: (NEO) Array allocation failed')
      goto 100
   end if
-  allocate(a_indx(2*n_max),stat=ierr)
+  allocate(a_iindx(n_max),stat=ierr)
+  if(ierr /= 0) then
+     call neo_error('ERROR: (NEO) Array allocation failed')
+     goto 100
+  end if
+  allocate(a_jindx(n_max),stat=ierr)
   if(ierr /= 0) then
      call neo_error('ERROR: (NEO) Array allocation failed')
      goto 100
@@ -208,7 +231,8 @@ subroutine neo_do
 
      ! Set the LHS
 
-     a_indx(:) = 0.0
+     a_iindx(:) = 0
+     a_jindx(:) = 0
      a(:) = 0.0
      k = 0
 
@@ -267,8 +291,8 @@ subroutine neo_do
                        j = mindx(js,je,jx,jt)
                        k = k+1
                        a(k) = w_theta(jt)
-                       a_indx(k) = i
-                       a_indx(k+n_max) = j
+                       a_iindx(k) = i
+                       a_jindx(k) = j
                     enddo
 
                  else if(ix==0 .and. it == 1 &
@@ -281,10 +305,9 @@ subroutine neo_do
                        j = mindx(js,je,jx,jt)
                        k = k+1
                        a(k) = w_theta(jt)
-                       a_indx(k) = i
-                       a_indx(k+n_max) = j
+                       a_iindx(k) = i
+                       a_jindx(k) = j
                     enddo
-
 
                  else
 
@@ -302,8 +325,8 @@ subroutine neo_do
                                - emat_coll_test(is,ks,ie,je,ix) &
                                * dens_fac(ks,it)
                        enddo
-                       a_indx(k) = i
-                       a_indx(k+n_max) = j
+                       a_iindx(k) = i
+                       a_jindx(k) = j
                     enddo
 
                     ! field particle                     
@@ -313,8 +336,8 @@ subroutine neo_do
                           k = k+1
                           a(k) = -emat_coll_field(is,js,ie,je,ix) &
                                * dens_fac(js,it)
-                          a_indx(k) = i
-                          a_indx(k+n_max) = j
+                          a_iindx(k) = i
+                          a_jindx(k) = j
                        enddo
                     enddo
 
@@ -332,8 +355,8 @@ subroutine neo_do
                                 a(k) = stream &
                                      * ix/(2*ix-1.0) * cderiv(id) &
                                      * emat_e05(ie,je,ix,1) 
-                                a_indx(k) = i
-                                a_indx(k+n_max) = j
+                                a_iindx(k) = i
+                                a_jindx(k) = j
                              endif
                              jx = ix+1
                              if (jx <= n_xi) then
@@ -342,8 +365,8 @@ subroutine neo_do
                                 a(k) = stream &
                                      * (ix+1.0)/(2*ix+3.0) * cderiv(id) &
                                      * emat_e05(ie,je,ix,2) 
-                                a_indx(k) = i
-                                a_indx(k+n_max) = j
+                                a_iindx(k) = i
+                                a_jindx(k) = j
                              endif
                           endif
                        enddo
@@ -364,8 +387,8 @@ subroutine neo_do
                                - rotkin &
                                * ix*(ix-1.0)/(2*ix-1.0) &
                                * emat_en05(ie,je,ix,1)
-                          a_indx(k) = i
-                          a_indx(k+n_max) = j                      
+                          a_iindx(k) = i
+                          a_jindx(k) = j                      
                        endif
                        jx = ix+1
                        if (jx <= n_xi) then
@@ -380,8 +403,8 @@ subroutine neo_do
                                + rotkin &
                                * (ix+1.0)*(ix+2.0)/(2*ix+3.0) &
                                * emat_en05(ie,je,ix,2)
-                          a_indx(k) = i
-                          a_indx(k+n_max) = j
+                          a_iindx(k) = i
+                          a_jindx(k) = j
                        endif
                     enddo
 
@@ -391,27 +414,65 @@ subroutine neo_do
         enddo ! ie
      enddo ! is
 
-     n_elem = k
-     do k=1,n_elem
-        a_indx(n_elem+k) = a_indx(n_max+k)
-     enddo
-
      ! Factor the Matrix -- uses a(:) and a_indx(:)
-     if(silent_flag == 0 .and. i_proc == 0) then
-        open(unit=io_neoout,file=trim(path)//runfile_neoout,&
-             status='old',position='append')
-        write(io_neoout,*) 'Begin matrix factor'
-        close(io_neoout)
+
+     n_elem = k
+     n_max = n_elem*matsz_scalefac
+     matfac_err = 0
+     
+     do ifac = 1, max_ifac
+
+        if(allocated(amat))       deallocate(amat)
+        allocate(amat(n_max),stat=ierr)
+        if(ierr /= 0) then
+           call neo_error('ERROR: (NEO) Array allocation failed')
+           goto 100
+        end if
+        if(allocated(amat_indx))  deallocate(amat_indx)
+        allocate(amat_indx(2*n_max),stat=ierr)
+        if(ierr /= 0) then
+           call neo_error('ERROR: (NEO) Array allocation failed')
+           goto 100
+        end if
+
+        amat(:) = 0.0
+        amat_indx(:) = 0
+        do k=1,n_elem
+           amat(k) = a(k)
+           amat_indx(k) = a_iindx(k)
+           amat_indx(n_elem+k) = a_jindx(k)
+        enddo
+
+        if(silent_flag == 0 .and. i_proc == 0) then
+           open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+                status='old',position='append')
+           if(ifac == 1) then
+              write(io_neoout,*) 'Begin matrix factor'
+           else
+              write(io_neoout,*) 'Re-trying matrix factorization'
+           endif
+           close(io_neoout)
+        endif
+        call SOLVE_factor(n_elem)
+        if(error_status > 0) then
+           error_status = 0
+           n_max = n_max * 2
+        else
+           matfac_err = 1
+           exit
+        endif
+     enddo
+     if(matfac_err == 0) then
+        call neo_error('ERROR: (NEO) Matrix factorization failed. Try increasing MATSZ_SCALEFAC.')
+        goto 100
      endif
-     call SOLVE_factor(n_elem)
-     if(error_status > 0) goto 100
      if(silent_flag == 0 .and. i_proc == 0) then
         open(unit=io_neoout,file=trim(path)//runfile_neoout,&
              status='old',position='append')
         write(io_neoout,*) 'Done matrix factor'
         close(io_neoout)
      endif
-
+     
      ! Set the RHS source 
      call set_RHS_source
 
@@ -506,7 +567,9 @@ subroutine neo_do
   call TRANSP_alloc(0)
   call PROFILE_SIM_alloc(0)
   if(allocated(a))          deallocate(a)
-  if(allocated(a_indx))     deallocate(a_indx)
+  if(allocated(a_iindx))    deallocate(a_jindx)
+  if(allocated(amat))       deallocate(amat)
+  if(allocated(amat_indx))  deallocate(amat_indx)
   if(allocated(g))          deallocate(g)
   if(allocated(mindx))      deallocate(mindx)
   if(allocated(is_indx))    deallocate(is_indx)

@@ -43,7 +43,7 @@ subroutine gyro_read_restart
 
      if (i_err /= 0 .and. restart_method > 0) then
         call send_message(&
-             'INFO: Restart data not available.  Reseting restart_method.')
+             'INFO: (gyro) Restart data not available.  Reseting restart_method.')
         restart_method = 0
      endif
 
@@ -132,9 +132,9 @@ subroutine gyro_read_restart
 
      if (i_proc == 0) then
         open(unit=io,file=trim(path)//file_restart(i_restart),status='old')
-        print '(t2,a)','Restarting: '
         read(io,fmtstr2) h
-        print '(a,i1,a,$)','[',0,']'
+        call send_line('INFO: (gyro) Restarting.')
+        !print '(a,i1,a,$)','[',0,']'
      endif
 
      do i_proc_w=1,n_proc-1
@@ -178,13 +178,13 @@ subroutine gyro_read_restart
      enddo
 
      if (i_proc == 0) then
-        print *
+        !print *
         close(io)
      endif
 
   case default
 
-     call catch_error('Bad value for restart_method.')
+     call catch_error('ERROR: (gyro) Bad value for restart_method.')
 
   end select
 

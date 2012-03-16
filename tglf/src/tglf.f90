@@ -20,7 +20,6 @@ program tglf
   character (len=4) :: tag(5)=(/'ion1','ion2','ion3','ion4','ion5'/)
   real :: prec
 
-
   call tglf_read_input()
   call tglf_run() 
 

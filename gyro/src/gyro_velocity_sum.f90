@@ -25,8 +25,7 @@ subroutine gyro_velocity_sum(field)
   !----------------------------------------------------
   ! Now, compute blending projections:
   !
-  sum_loc(:,:)  = (0.0,0.0)
-  sum_glob(:,:) = (0.0,0.0)
+  sum_loc(:,:) = (0.0,0.0)
   !
   select case (field)
 
@@ -137,7 +136,7 @@ subroutine gyro_velocity_sum(field)
      enddo ! i
 !$omp end parallel do
 
- end select
+  end select
 
   !--------------------------------------------------------------
 
@@ -153,6 +152,13 @@ subroutine gyro_velocity_sum(field)
        i_err)
   !--------------------------------------------------------------
 
+  if (n_1(in_1) == 0 .and. boundary_method == 1) then
+
+     ! Eliminate average in periodic case
+     sum_glob(:,n_x) = (0.0,0.0)
+
+  endif
+
   !--------------------------------------------------------------
   select case (field)
 
@@ -165,13 +171,6 @@ subroutine gyro_velocity_sum(field)
 
   end select
   !--------------------------------------------------------------
-
-  if (n_1(in_1) == 0 .and. boundary_method == 1) then
-
-     ! Eliminate average in periodic case
-     sum_glob(:,n_x) = (0.0,0.0)
-
-  endif
 
   call gyro_timer_out('Velocity-sum')
 

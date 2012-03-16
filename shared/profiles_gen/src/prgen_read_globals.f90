@@ -195,13 +195,21 @@ module prgen_read_globals
   ! PEQDSK variables
   !
   integer :: peqdsk_nj
-  real :: peqdsk_bref, peqdsk_arho
+  real :: peqdsk_bref
+  real :: peqdsk_arho
   real, dimension(:), allocatable :: peqdsk_psi
   real, dimension(:), allocatable :: peqdsk_ne
   real, dimension(:), allocatable :: peqdsk_te
   real, dimension(:), allocatable :: peqdsk_ni
   real, dimension(:), allocatable :: peqdsk_ti
   real, dimension(:), allocatable :: peqdsk_omegat
+  !---------------------------------------------------------
+
+  !---------------------------------------------------------
+  ! null input variables
+  !
+  real :: null_bref
+  real :: null_arho
   !---------------------------------------------------------
 
   !--------------------------------------------------------
@@ -211,4 +219,41 @@ module prgen_read_globals
   integer :: gato_ntheta
   !--------------------------------------------------------
 
+  !---------------------------------------------------------
+  ! CORSICA variables
+  !
+  real :: corsica_time
+  real :: corsica_current
+  real :: corsica_loop_voltage
+  real :: corsica_fusion_power
+  real :: corsica_bootstrap_fraction
+  real :: corsica_betat
+  real :: corsica_betan
+  real :: corsica_taue
+  real :: corsica_q95
+  real :: corsica_r
+  real :: corsica_a
+  real :: corsica_kappa
+  real :: corsica_delta
+  real :: corsica_fusion_gain
+  real :: corsica_betap
+  real :: corsica_li3
+
+  integer, parameter :: corsica_nvals = 81
+  real :: corsica_bref
+  real :: corsica_arho
+  real, allocatable :: corsica_rho(:)
+  real, allocatable :: corsica_r_a(:)
+  real, allocatable :: corsica_psin(:)
+  real, allocatable :: corsica_vl(:)
+  real, allocatable :: corsica_te(:)
+  real, allocatable :: corsica_ti(:)
+  real, allocatable :: corsica_ne(:)
+  real, allocatable :: corsica_ndt(:)
+  real, allocatable :: corsica_nz(:)
+  real, allocatable :: corsica_nalpha(:)
+  real, allocatable :: corsica_zeff(:)
+  real, allocatable :: corsica_q(:)
+  real, allocatable :: corsica_j(:)
+  real, allocatable :: corsica_jbs(:)
 end module prgen_read_globals

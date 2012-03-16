@@ -11,6 +11,7 @@
 !  2. ONETWO iterdb NetCDF (*.nc)
 !  3. PEQDSK text (*.peq)
 !  4. PLASMA STATE NetCDF (*.cdf)
+!  5. CORSICA text (*.corsica)
 !
 ! Note that ASTRA (*.astra) format is handled by a separate python 
 ! routine.
@@ -121,7 +122,17 @@ program prgen
   !
   ! Note that nx will be the experimental vector length in ALL cases:
   !
-  if (index(raw_data_file,'.nc',back) /= 0) then
+  if (trim(raw_data_file) == 'null') then
+ 
+    ! Pure gfile parsing
+
+    format_type = 0
+
+    ! Minimal processing required to merge gfile data into otherwise
+    ! empty input.profiles output file.
+    call prgen_read_null
+
+  else if (index(raw_data_file,'.nc',back) /= 0) then
 
      ! New NetCDF format
      print '(a)','INFO: (prgen) Assuming iterdb NetCDF format.'
@@ -153,6 +164,20 @@ program prgen
 
      call prgen_read_peqdsk
 
+  else if (index(raw_data_file,'.corsica',back) /= 0) then
+
+     ! corsica format
+     print '(a)','INFO: Assuming corsica format.'
+
+     format_type = 5
+
+     if (gato_flag /= 1) then
+        print '(a)','ERROR: (prgen) geqdsk must be provided for corsica format'
+        stop
+     endif
+
+     call prgen_read_corsica
+
   else
 
      ! Old text format
@@ -173,10 +198,14 @@ program prgen
   if (gato_flag == 1) call prgen_read_gato
   !---------------------------------------------------
 
-  if (index(raw_data_file,'.cdf',back) /= 0) then
+  if (format_type == 0) then
+     call prgen_map_null
+  else if (index(raw_data_file,'.cdf',back) /= 0) then
      call prgen_map_plasmastate
   else if (index(raw_data_file,'.peq',back) /= 0) then
      call prgen_map_peqdsk
+  else if (index(raw_data_file,'.corsica',back) /= 0) then
+     call prgen_map_corsica
   else
      call prgen_map_iterdb
   endif

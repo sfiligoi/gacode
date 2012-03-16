@@ -54,11 +54,6 @@ subroutine gyro_initialize_arrays
   gyro_uv_old  = 0.0
   gyro_uv_old2 = 0.0
 
-  if (transport_method == 2) then
-     diff_vec = 0.0
-     gbflux_vec = 0.0
-  endif
-
   entropy(:,:)     = 0.0
   nl_transfer(:,:) = 0.0
   !---------------------------------------------------

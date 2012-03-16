@@ -3,20 +3,36 @@ program tgyro_main
   use mpi
   use tgyro_globals
   use gyro_globals, only : path, GYRO_COMM_WORLD
-
-  implicit none
-
-  integer :: thd_support
+  use omp_lib
 
   !-----------------------------------------------------------------
-  ! Initialize MPI_COMM_WORLD communicator.
+  implicit none
   !
-  call MPI_INIT(ierr)
- ! call MPI_INIT_THREAD(MPI_THREAD_FUNNELED,thd_support,ierr)
- ! if (thd_support < MPI_THREAD_FUNNELED) then
- !   print *, 'ERROR : multi-threading NOT supported by MPI implementation'
- !   call MPI_FINALIZE(ierr)
- ! endif
+  integer :: supported
+  !-----------------------------------------------------------------
+
+  !----------------------------------------------------------------
+  ! Query OpenMP for dimensions
+  !
+  i_omp = omp_get_thread_num()
+  n_omp = omp_get_max_threads()
+  !-----------------------------------------------------------------
+
+  !-----------------------------------------------------------------
+  ! Initialize MPI_COMM_WORLD communicator, including support for 
+  ! funneled threading (needed if OpenMP is enabled).
+  !
+  if (n_omp > 1) then
+     call MPI_INIT_THREAD(MPI_THREAD_FUNNELED,supported,ierr)
+     if (supported < MPI_THREAD_FUNNELED) then
+        call catch_error('ERROR: (GYRO) Multi-threaded MPI not supported.')
+     endif
+  else 
+     call MPI_INIT_THREAD(MPI_THREAD_SINGLE,supported,ierr)
+  endif
+  !-----------------------------------------------------------------
+
+  !-----------------------------------------------------------------
   call MPI_COMM_RANK(MPI_COMM_WORLD,i_proc_global,ierr)
   call MPI_COMM_SIZE(MPI_COMM_WORLD,n_proc_global,ierr)
   !-----------------------------------------------------------------
@@ -39,8 +55,6 @@ program tgyro_main
   GYRO_COMM_WORLD = gyro_comm
   !-----------------------------------------------------------------
 
-  !call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-
   select case (tgyro_mode)
 
   case (1,2)
@@ -62,9 +76,13 @@ program tgyro_main
 
      call tgyro_multi_driver
 
+  case (4)
+
+     call tgyro_global_iteration_driver          
+
   case default
 
-     call tgyro_catch_error('ERROR: bad tgyro_mode')
+     call tgyro_catch_error('ERROR: (tgyro) Bad value for tgyro_mode')
 
   end select
 

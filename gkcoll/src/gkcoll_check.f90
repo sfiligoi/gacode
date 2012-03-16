@@ -216,6 +216,15 @@ subroutine gkcoll_check
         call gkcoll_error('ERROR: (GKCOLL) rho_unit must be positive')
         return
      endif
+
+  case(2)
+     if(profile_model == 2) then
+        call gkcoll_error('ERROR: (GKCOLL) toroidal_model=2 not valid with experimental profiles')
+        return
+     endif
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_gkcollout,*) 'toroidal_model: n=0 test; Specify rho and r_length_rho'
+     endif
      
   case default
      
@@ -224,6 +233,32 @@ subroutine gkcoll_check
      
   end select
 
+  !------------------------------------------------------------
+  ! Neoclassical model
+  !
+  select case (neoclassical_model)  
+
+  case(0)
+      if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_gkcollout,*) 'neoclassical_model: Gyrokinetic mode'
+     endif
+
+  case(1)
+     if(toroidal_model /= 2) then
+        call gkcoll_error('ERROR: (GKCOLL) neoclassical_model=1 requires toroidal_model=2')
+        return
+     endif
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_gkcollout,*) 'neoclassical_model: Neoclassical mode'
+     endif
+
+  case default
+     
+     call gkcoll_error('ERROR: (GKCOLL) invalid neoclassical_model')
+     return
+     
+  end select   
+  
 
   !------------------------------------------------------------
 

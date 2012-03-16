@@ -1,5 +1,5 @@
 !------------------------------------------------------------------------
-! gyro_moments_plot.f90
+! gyro_moments_plot_wedge.f90
 !
 ! PURPOSE:
 !  Make density, energy and V_parallel fluctuation moments (with 

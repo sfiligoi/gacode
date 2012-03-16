@@ -20,7 +20,7 @@ vshdf5_dummy: dummy.o
 	$(ARCH) vshdf5_lib.a dummy.o
 
 .f90.o :
-	$(FC) $(FMATH) $(FFLAGS) $(HDF5_INC) -c $<
+	$(FC) $(FMATH) $(FFLAGS) $(MPI_FLAG) $(HDF5_INC) -c $<
 
 .F90.o :
 	$(FC) $(FMATH) $(FFLAGS) $(MPI_FLAG) $(HDF5_INC) -c $<

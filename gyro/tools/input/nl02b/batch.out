@@ -1,0 +1,36 @@
+==========================================================
+GYRO r4-13-g6e2fab HOPPER2 Linux x86_64
+==========================================================
+> aprun -n 384 -N 24 -d 1 -S 6 -sn 4 -ss /global/homes/c/candy/gacode_H/gyro/src/gyro
+[t = 0.000E+00] t_err: 0.000E+00 0.000E+00
+[t = 1.000E-02] t_err: 2.387E-06 2.242E-04
+[t = 2.000E-02] t_err: 1.808E-06 1.893E-04
+[t = 3.000E-02] t_err: 1.545E-06 1.594E-04
+[t = 4.000E-02] t_err: 1.435E-06 1.331E-04
+[t = 5.000E-02] t_err: 1.499E-06 1.129E-04
+ [Saving to ./RESTART_1]
+[t = 6.000E-02] t_err: 1.487E-06 9.454E-05
+[t = 7.000E-02] t_err: 1.471E-06 7.921E-05
+[t = 8.000E-02] t_err: 1.485E-06 6.769E-05
+[t = 9.000E-02] t_err: 1.509E-06 5.896E-05
+[t = 1.000E-01] t_err: 1.512E-06 5.108E-05
+ [Saving to ./RESTART_0]
+Application 6213941 resources: utime ~170120s, stime ~771s
+
+ + --------------------------------------------------------------------------
+ +        Job name: 384-1
+ +          Job Id: 1361197.sdb
+ +          System: hopper
+ +     Queued Time: Mon Mar  5 12:17:23 2012
+ +      Start Time: Mon Mar  5 13:54:36 2012
+ + Completion Time: Mon Mar  5 14:02:16 2012
+ +            User: candy
+ +        MOM Host: nid04754
+ +           Queue: reg_1hour
+ +  Req. Resources: other=QSUBPID:9836:hopper03,walltime=01:00:00
+ +  Used Resources: cput=00:00:01,mem=8420kb,vmem=64764kb,walltime=00:07:40
+ +     Acct String: gc3
+ +   PBS_O_WORKDIR: /global/homes/c/candy/nl02b_s2
+ +     Submit Args: 384-1/batch.src
+ + --------------------------------------------------------------------------
+
