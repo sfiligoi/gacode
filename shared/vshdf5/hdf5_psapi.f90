@@ -68,18 +68,19 @@
 ! Make a group that contains the provenance data.  See:
 !  https://ice.txcorp.com/trac/vizschema/wiki/ProvenanceMetaData
 !-----------------------------------------------------------------------
-  subroutine write_provenance(gInId,grName,prin,h5err)
+  subroutine write_provenance(gInId,grName,prin,h5in,h5err)
   integer(HID_T), intent(in) :: gInId
   character*(*), intent(in) :: grName
-  TYPE(provenanceData), intent(in) :: prin
-  TYPE(hdf5ErrorType), intent(inoUT) :: h5err
+  type(provenanceData), intent(in) :: prin
+  type(hdf5InOpts), intent(in) :: h5in
+  type(hdf5ErrorType), intent(inoUT) :: h5err
   integer,parameter :: FAIL=-1
   integer(HID_T) :: prId
   integer :: error
 !-----------------------------------------------------------------------
 ! Open the group
 !-----------------------------------------------------------------------
-  call make_group(gInId, grName, prId,"",h5err)
+  call make_group(gInId, grName, prId,h5in,h5err)
 !-----------------------------------------------------------------------
 !     Add the VisSchema attributes for provenance data
 !  Att vsType = "runInfo"                             // Required string

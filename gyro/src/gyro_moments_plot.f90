@@ -36,8 +36,18 @@ subroutine gyro_moments_plot
   complex, dimension(n_theta_plot*n_theta_mult,n_x,3) :: mom_tmp_wedge
   !---------------------------------------------------
 
+  write(*,*) "in gyro_moments_plot"
+
   if (alltime_index == 0) then
+     write(*,*) "alltime_index=0"
+    
      moments_plot(:,:,:,:) = (0.0,0.0)
+      if(allocated( moments_plot_wedge)) then 
+          write(*,*) "moments_plot_wedge is allocated"
+      else
+          write(*,*) "moments_plot_wedge is NOT allocated"
+      endif
+          
      if (io_method > 1) moments_plot_wedge(:,:,:,:) = (0.0,0.0)
   endif
   moments_zero_plot(:,:,:) = 0.0

@@ -176,6 +176,8 @@ subroutine gyro_initial_condition
   ! Compute gyro_u needed for gyro_moments_plot
   call gyro_field_interpolation
 
+    write(*,*) "WTF?"
+
   ! Generate data for moments plot
   call gyro_moments_plot
 

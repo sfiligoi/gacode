@@ -934,7 +934,8 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
   !-----------------------------------------
   do ispcs=1,n3
      tempVarNameGr=trim(vnameArray(ispcs))//"_modes"
-     call make_group(rGid,trim(tempVarNameGr),grGid,"",h5err)
+     call make_group(rGid,trim(tempVarNameGr),grGid,h5in,h5err)
+     !call make_group(rGid,trim(tempVarNameGr),grGid,"",h5err)
      tempVarName=trim(vnameArray(ispcs))//"_real"
      call dump_h5(grGid,trim(tempVarName),real(buffn(:,:,ispcs,:)),h5in,h5err)
      tempVarName=trim(vnameArray(ispcs))//"_imag"
@@ -1000,7 +1001,8 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
      ! Dump each phi slice as a separate variable
      do ikin=1,n3
         tempVarNameGr=trim(vnameArray(ikin))//"_toroidal"
-        call make_group(r3Did,trim(tempVarNameGr),grGid,"",h5err)
+        !call make_group(r3Did,trim(tempVarNameGr),grGid,"",h5err)
+        call make_group(r3Did,trim(tempVarNameGr),grGid,h5in,h5err)
         call dump_h5(grGid,trim(vnameArray(ikin)),real_buff(:,:,ikin,:),h5in,h5err)
         call close_group(trim(tempVarNameGr),grGid,h5err)
      enddo
