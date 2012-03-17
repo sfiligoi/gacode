@@ -500,10 +500,12 @@ then
       fi
    fi
  
-   cp ../input.profiles .
-   if [ -f "../input.profiles.geo" ]
+   cp ../$FILE input.profiles
+   if [ -f "../$FILE.geo" ]
        then
-       cp ../input.profiles.geo .
+       cp ../$FILE.geo input.profiles.geo
+   else
+       echo "Warning: $FILE.geo not found."
    fi
 
    python $NEO_DIR/bin/neo_parse.py
