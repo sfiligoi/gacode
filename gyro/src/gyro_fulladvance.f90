@@ -148,7 +148,7 @@ subroutine gyro_fulladvance
 
      io_control = 2*output_flag
 
-     if (io_method > 0) call gyro_write_timedata
+     if (io_method < 3 .and. io_method > 0) call gyro_write_timedata
      if (io_method > 1) call gyro_write_timedata_hdf5
 
      !--------------------------------------------------

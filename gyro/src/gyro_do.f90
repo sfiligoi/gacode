@@ -292,7 +292,7 @@ subroutine gyro_do
   !---------------------------------------------------------------
   ! I/O control for time-independent initial data
   !
-  if (io_method == 1 .or. io_method==2) then
+  if (io_method < 3) then
      call gyro_write_initdata(&
           trim(path)//'out.gyro.profile',&
           trim(path)//'out.gyro.units',&
@@ -325,19 +325,18 @@ subroutine gyro_do
      io_control = output_flag*3
   endif
   if (gkeigen_j_set == 0) then
-     if (io_method >= 1) call gyro_write_timedata
-     if (io_method > 1) call gyro_write_timedata_hdf5
+     if (io_method < 3) call gyro_write_timedata
   endif
 
   !-------------------------------------------------
   ! NEW SIMULATION ONLY: write *initial conditions*
   !
   if (restart_method /= 1) then
+     ! Write to output files.
      io_control = output_flag*2
      if (gkeigen_j_set == 0) then
-        if (io_method == 1) then
-           call gyro_write_timedata
-        else
+        if (io_method < 3) call gyro_write_timedata
+        if (io_method > 1) then
            call gyro_write_timedata_hdf5
            if (time_skip_wedge > 0) call gyro_write_timedata_wedge_hdf5
         endif
