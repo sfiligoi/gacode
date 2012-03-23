@@ -326,6 +326,10 @@ subroutine gyro_do
   endif
   if (gkeigen_j_set == 0) then
      if (io_method < 3) call gyro_write_timedata
+     if (io_method > 1) then
+         call gyro_write_timedata_hdf5
+         if (time_skip_wedge > 0) call gyro_write_timedata_wedge_hdf5
+     endif
   endif
 
   !-------------------------------------------------
