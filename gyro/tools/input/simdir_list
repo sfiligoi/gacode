@@ -36,6 +36,8 @@ nl02b: [nl+gki+dke+tem+pure+gen+ sym+ col+nrot+ p+exp]
        Guttenfelder's NSTX microtearing case (16 modes, 540 radii).
 nl02c: [nl+gki+dke+tem+pure+gen+ sym+ col+nrot+ p+exp]
        Guttenfelder's NSTX microtearing case (32 modes, 800 radii).
+nl02d: [nl+gki+dke+tem+pure+gen+ sym+ col+nrot+ p+exp]
+       Guttenfelder's NSTX microtearing case (64 modes, 800 radii).
 nl03:  [nl+gki+dke+ es+ imp+mod+ sym+ col+nrot+np+exp]
        Holland's 40-mode DIII-D case.
 nl04:  [nl+gki+gke+ es+ imp+mod+ sym+ col+nrot+np+exp]
