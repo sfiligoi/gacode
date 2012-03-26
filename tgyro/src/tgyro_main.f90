@@ -25,7 +25,7 @@ program tgyro_main
   if (n_omp > 1) then
      call MPI_INIT_THREAD(MPI_THREAD_FUNNELED,supported,ierr)
      if (supported < MPI_THREAD_FUNNELED) then
-        call catch_error('ERROR: (GYRO) Multi-threaded MPI not supported.')
+        call tgyro_catch_error('ERROR: (TGYRO) Multi-threaded MPI not supported.')
      endif
   else 
      call MPI_INIT_THREAD(MPI_THREAD_SINGLE,supported,ierr)

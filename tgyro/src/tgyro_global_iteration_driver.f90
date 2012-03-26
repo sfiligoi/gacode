@@ -20,7 +20,9 @@ subroutine tgyro_global_iteration_driver
   real, dimension(:), allocatable :: x,xt
 
   ! Copy (TGYRO copy of input.profiles) -> (GYRO copy of input.profiles)
-  call system('cp input.profiles '//trim(paths(1))//'input.profiles')  
+  if (i_proc_global == 0) then
+     call system('cp input.profiles '//trim(paths(1))//'input.profiles')  
+  endif
 
   ! Initialize GYRO
   call gyro_init(paths(1),MPI_COMM_WORLD)
@@ -122,8 +124,10 @@ subroutine tgyro_global_iteration_driver
 
   call EXPRO_write_original('REWROTE_1')
   call EXPRO_palloc(MPI_COMM_WORLD,paths(1),0) 
-  call system('mv '//trim(paths(1))//'input.profiles.new '//trim(paths(1))//'input.profiles.1')
-  call system('cp '//trim(paths(1))//'input.profiles.1 '//trim(paths(1))//'input.profiles')
+  if (i_proc_global == 0) then
+     call system('mv '//trim(paths(1))//'input.profiles.new '//trim(paths(1))//'input.profiles.1')
+     call system('cp '//trim(paths(1))//'input.profiles.1 '//trim(paths(1))//'input.profiles')
+  endif
   ! Get global GYRO flux, compute targets, write data
   call tgyro_global_flux
   call tgyro_source
@@ -162,8 +166,10 @@ subroutine tgyro_global_iteration_driver
 
   call EXPRO_write_original('REWROTE_2')
   call EXPRO_palloc(MPI_COMM_WORLD,paths(1),0)
-  call system('cp '//trim(paths(1))//'input.profiles.new '//trim(paths(1))//'input.profiles.2')  
-  call system('cp '//trim(paths(1))//'input.profiles.2 '//trim(paths(1))//'input.profiles')
+  if (i_proc_global == 0) then
+     call system('cp '//trim(paths(1))//'input.profiles.new '//trim(paths(1))//'input.profiles.2')  
+     call system('cp '//trim(paths(1))//'input.profiles.2 '//trim(paths(1))//'input.profiles')
+  endif
   ! Get global GYRO flux, compute targets, write data
   call tgyro_global_flux
   call tgyro_source

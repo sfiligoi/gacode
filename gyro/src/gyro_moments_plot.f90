@@ -38,7 +38,9 @@ subroutine gyro_moments_plot
 
   if (alltime_index == 0) then
      moments_plot(:,:,:,:) = (0.0,0.0)
-     if (io_method > 1) moments_plot_wedge(:,:,:,:) = (0.0,0.0)
+     if (io_method > 1 .and. time_skip_wedge > 0) then
+         moments_plot_wedge(:,:,:,:) = (0.0,0.0)
+     endif
   endif
   moments_zero_plot(:,:,:) = 0.0
 
