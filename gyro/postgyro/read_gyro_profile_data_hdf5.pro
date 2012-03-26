@@ -73,6 +73,8 @@ FUNCTION read_gyro_profile_data_HDF5, simdir, profile_data
 
   exists_nu_geo = 1
   nu_geo = data.nu._data
+  nusize = SIZE(nu_geo)
+  theta_mult = nusize[1]/n_theta_plot
 
   ;return useful data in structure, easy to add to as needed
   profile_data = {n_r:n_r, $    ;# of radial grid points
@@ -105,10 +107,10 @@ FUNCTION read_gyro_profile_data_HDF5, simdir, profile_data
                   exists_nu_geo:exists_nu_geo, $
 
                   ;mean profiles
-                  n:den_s, $    ;density profiles
-                  dlnndr: dlnndr_s, $ ;a/Ln
-                  T:tem_s, $    ;temperature profiles
-                  dlnTdr: dlnTdr_s, $ ;a/LT
+                  n:TRANSPOSE(den_s), $    ;density profiles
+                  dlnndr: TRANSPOSE(dlnndr_s), $ ;a/Ln
+                  T:TRANSPOSE(tem_s), $    ;temperature profiles
+                  dlnTdr: TRANSPOSE(dlnTdr_s), $ ;a/LT
                   Z:zcharge, $  ;Z(species)
                   B_unit:B_unit_s, $ ;effective_B
                   gamma_e: gamma_e_s, $ ;ExB shear
