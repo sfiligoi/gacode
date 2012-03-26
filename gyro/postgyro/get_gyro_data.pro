@@ -4,6 +4,8 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
 ; v5.0: 8.25.2011
 ;         Brand new version for use with gacode, new out.gyro.xxx file
 ;         naming convetions
+; v5.1: 11.8.2011
+;	  Added in support for HDF5 output
 ;
 ; SUMMARY: works like loading a simulation into vugyro, but now puts
 ;         data into an IDL data structure.  Usage is:
@@ -52,11 +54,11 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
 
       n = profile_data.n_0 + profile_data.n_dn*INDGEN(profile_data.n_n)
 
-      time = READ_GYRO_TIMEVECTOR(dirpath)
+      IF (use_hdf5 EQ 1) THEN BEGIN
+	tdata = H5_PARSE(dirpath + '/out.gyro.timedata.h5',/READ_DATA)
+	time = tdata.t_current._data
+      ENDIF ELSE time = READ_GYRO_TIMEVECTOR(dirpath)
       n_time = N_ELEMENTS(time)
-
-      IF (use_hdf5 EQ 1) THEN $
-        tdata = H5_PARSE(dirpath + '/out.gyro.timedata.h5',/READ_DATA)
 
       ;read in potentially large fluctuation field arrays
       DEFAULT, read_large, 0
@@ -156,9 +158,209 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
           ENDIF    
       ENDIF
 
-      IF (use_hdf5 EQ 1) THEN BEGIN  ;load HDF5 fluctuations
-          PRINT, 'load HDF5 fluctuations here'
-      ENDIF
+      ;load HDF5 fluctuations
+      tskip = 200 ;SHOULD GET FROM H5 files in future work
+      IF (use_hdf5 EQ 1) THEN BEGIN
+
+          IF (exists_u) THEN BEGIN
+              exists_phi = 1
+              phi = COMPLEXARR(n_theta_plot,n_r,n_n,n_time)
+
+              IF (profile_data.n_field GT 1) THEN BEGIN
+                  exists_Apar = 1
+                  Apar = COMPLEXARR(n_theta_plot,n_r,n_n,n_time)
+              ENDIF
+
+              IF (profile_data.n_field GT 1) THEN BEGIN
+                  exists_Bpar = 1
+                  Bpar = COMPLEXARR(n_theta_plot,n_r,n_n,n_time)
+              ENDIF
+          ENDIF
+
+          IF (exists_n) THEN $
+            mom_n = COMPLEXARR(n_theta_plot,n_r,profile_data.n_kinetic,n_n,n_time)
+
+          IF (exists_e) THEN $
+            mom_e = COMPLEXARR(n_theta_plot,n_r,profile_data.n_kinetic,n_n,n_time)
+
+          IF (exists_v) THEN $
+            mom_v = COMPLEXARR(n_theta_plot,n_r,profile_data.n_kinetic,n_n,n_time)
+
+          FOR it = 0, n_time-1 DO BEGIN
+              tlabel = STRCOMPRESS(STRING(it*tskip),/REMOVE_ALL)
+              WHILE (STRLEN(tlabel) LT 5) DO tlabel = '0' + tlabel 
+              print, tlabel
+              flucfile = 'gyro'+tlabel+'.h5'
+              flucdata = H5_PARSE(dirpath+'/'+flucfile, /READ)
+
+              IF (exists_u) THEN BEGIN
+                  PRINT, 'Loading HDF5 phi, B fluctuations from ' + flucfile
+                  phi[*,*,*,it] = COMPLEX($
+                                  TRANSPOSE(flucdata.phi_modes.phi_real._data[*,*,0:n_theta_plot-1],[2,1,0]),$
+                                 TRANSPOSE(flucdata.phi_modes.phi_imag._data[*,*,0:n_theta_plot-1],[2,1,0]))
+
+                  IF (exists_Apar) THEN BEGIN
+                      Apar[*,*,*,it] = COMPLEX($
+                                      TRANSPOSE(flucdata.Apar_modes.Apar_real._data[*,*,0:n_theta_plot-1],[2,1,0]),$
+                                      TRANSPOSE(flucdata.Apar_modes.Apar_imag._data[*,*,0:n_theta_plot-1],[2,1,0]))
+                  ENDIF
+
+                  IF (exists_Bpar) THEN BEGIN
+                      Bpar[*,*,*,it] = COMPLEX($
+                                      TRANSPOSE(flucdata.Bpar_modes.Bpar_real._data[*,*,0:n_theta_plot-1],[2,1,0]),$
+                                      TRANSPOSE(flucdata.Bpar_modes.Bpar_imag._data[*,*,0:n_theta_plot-1],[2,1,0]))
+                  ENDIF
+              ENDIF
+              
+              IF (exists_n) THEN BEGIN
+                  PRINT, 'Loading HDF5 density fluctuations from ' + flucfile
+                  
+                  tmp = COMPLEX($
+                        TRANSPOSE(flucdata.density_ion0_modes.density_ion0_real._data,[2,1,0]),$
+                        TRANSPOSE(flucdata.density_ion0_modes.density_ion0_imag._data,[2,1,0]))
+                  mom_n[*,*,0,*,it] = $
+                    REFORM(tmp[0:n_theta_plot-1,*,*], [n_theta_plot,n_r,1,n_n,1])
+
+                  IF (profile_data.n_ion GE 2) THEN BEGIN
+                      tmp = COMPLEX($
+                            TRANSPOSE(flucdata.density_ion1_modes.density_ion1_real._data,$
+                                      [2,1,0]),$
+                            TRANSPOSE(flucdata.density_ion1_modes.density_ion1_imag._data,$
+                                      [2,1,0]))
+                      mom_n[*,*,1,*,it] = $
+                        REFORM(tmp[0:n_theta_plot-1,*,*], [n_theta_plot,n_r,1,n_n,1])
+                  ENDIF
+
+                  IF (profile_data.n_ion GE 3) THEN BEGIN
+                      tmp = COMPLEX($
+                            TRANSPOSE(flucdata.density_ion2_modes.density_ion2_real._data, $
+                                      [2,1,0]),$
+                            TRANSPOSE(flucdata.density_ion2_modes.density_ion2_imag._data, $
+                                      [2,1,0]))
+                      mom_n[*,*,2,*,it] = $
+                        REFORM(tmp[0:n_theta_plot-1,*,*], [n_theta_plot,n_r,1,n_n,1])
+                  ENDIF
+
+                  IF (profile_data.n_ion GE 3) THEN BEGIN
+                      tmp = COMPLEX($
+                            TRANSPOSE(flucdata.density_ion3_modes.density_ion3_real._data, $
+                                      [2,1,0]),$
+                            TRANSPOSE(flucdata.density_ion3_modes.density_ion3_imag._data,$
+                                      [2,1,0]))
+                      mom_n[*,*,1,*,it] = $
+                        REFORM(tmp[0:n_theta_plot-1,*,*], [n_theta_plot,n_r,1,n_n,1])
+                  ENDIF
+
+                  IF (profile_data.n_kinetic GT profile_data.n_ion) THEN BEGIN
+                      tmp = COMPLEX(TRANSPOSE(flucdata.density_electron_modes.$
+                      density_electron_real._data,[2,1,0]),$
+                        TRANSPOSE(flucdata.density_electron_modes.$
+                      density_electron_imag._data,[2,1,0]))
+                      mom_n[*,*,profile_data.n_kinetic-1,*,it] = $
+                        REFORM(tmp[0:n_theta_plot-1,*,*], [n_theta_plot,n_r,1,n_n,1])
+                  ENDIF
+              ENDIF ;mom_n
+
+              IF (exists_e) THEN BEGIN
+                  PRINT, 'Loading HDF5 energy fluctuations from ' + flucfile
+                  
+                  tmp = COMPLEX($
+                        TRANSPOSE(flucdata.energy_ion0_modes.energy_ion0_real._data,[2,1,0]),$
+                        TRANSPOSE(flucdata.energy_ion0_modes.energy_ion0_imag._data,[2,1,0]))
+                  mom_e[*,*,0,*,it] = $
+                    REFORM(tmp[0:n_theta_plot-1,*,*], [n_theta_plot,n_r,1,n_n,1])
+
+                  IF (profile_data.n_ion GE 2) THEN BEGIN
+                      tmp = COMPLEX($
+                            TRANSPOSE(flucdata.energy_ion1_modes.energy_ion1_real._data,$
+                                      [2,1,0]),$
+                            TRANSPOSE(flucdata.energy_ion1_modes.energy_ion1_imag._data,$
+                                      [2,1,0]))
+                      mom_e[*,*,1,*,it] = $
+                        REFORM(tmp[0:n_theta_plot-1,*,*], [n_theta_plot,n_r,1,n_n,1])
+                  ENDIF
+
+                  IF (profile_data.n_ion GE 3) THEN BEGIN
+                      tmp = COMPLEX($
+                            TRANSPOSE(flucdata.energy_ion2_modes.energy_ion2_real._data, $
+                                      [2,1,0]),$
+                            TRANSPOSE(flucdata.energy_ion2_modes.energy_ion2_imag._data, $
+                                      [2,1,0]))
+                      mom_e[*,*,2,*,it] = $
+                        REFORM(tmp[0:n_theta_plot-1,*,*], [n_theta_plot,n_r,1,n_n,1])
+                  ENDIF
+
+                  IF (profile_data.n_ion GE 3) THEN BEGIN
+                      tmp = COMPLEX($
+                            TRANSPOSE(flucdata.energy_ion3_modes.energy_ion3_real._data, $
+                                      [2,1,0]),$
+                            TRANSPOSE(flucdata.energy_ion3_modes.energy_ion3_imag._data,$
+                                      [2,1,0]))
+                      mom_e[*,*,1,*,it] = $
+                        REFORM(tmp[0:n_theta_plot-1,*,*], [n_theta_plot,n_r,1,n_n,1])
+                  ENDIF
+
+                  IF (profile_data.n_kinetic GT profile_data.n_ion) THEN BEGIN
+                      tmp = COMPLEX(TRANSPOSE(flucdata.energy_electron_modes.$
+                      energy_electron_real._data,[2,1,0]),$
+                        TRANSPOSE(flucdata.energy_electron_modes.$
+                      energy_electron_imag._data,[2,1,0]))
+                      mom_e[*,*,profile_data.n_kinetic-1,*,it] = $
+                        REFORM(tmp[0:n_theta_plot-1,*,*], [n_theta_plot,n_r,1,n_n,1])
+                  ENDIF
+              ENDIF ;mom_e
+
+              IF (exists_v) THEN BEGIN
+                  PRINT, 'Loading HDF5 vpar fluctuations from ' + flucfile
+                  
+                  tmp = COMPLEX($
+                        TRANSPOSE(flucdata.v_par_ion0_modes.v_par_ion0_real._data,[2,1,0]),$
+                        TRANSPOSE(flucdata.v_par_ion0_modes.v_par_ion0_imag._data,[2,1,0]))
+                  mom_v[*,*,0,*,it] = $
+                    REFORM(tmp[0:n_theta_plot-1,*,*], [n_theta_plot,n_r,1,n_n,1])
+
+                  IF (profile_data.n_ion GE 2) THEN BEGIN
+                      tmp = COMPLEX($
+                            TRANSPOSE(flucdata.v_par_ion1_modes.v_par_ion1_real._data,$
+                                      [2,1,0]),$
+                            TRANSPOSE(flucdata.v_par_ion1_modes.v_par_ion1_imag._data,$
+                                      [2,1,0]))
+                      mom_v[*,*,1,*,it] = $
+                        REFORM(tmp[0:n_theta_plot-1,*,*], [n_theta_plot,n_r,1,n_n,1])
+                  ENDIF
+
+                  IF (profile_data.n_ion GE 3) THEN BEGIN
+                      tmp = COMPLEX($
+                            TRANSPOSE(flucdata.v_par_ion2_modes.v_par_ion2_real._data, $
+                                      [2,1,0]),$
+                            TRANSPOSE(flucdata.v_par_ion2_modes.v_par_ion2_imag._data, $
+                                      [2,1,0]))
+                      mom_v[*,*,2,*,it] = $
+                        REFORM(tmp[0:n_theta_plot-1,*,*], [n_theta_plot,n_r,1,n_n,1])
+                  ENDIF
+
+                  IF (profile_data.n_ion GE 3) THEN BEGIN
+                      tmp = COMPLEX($
+                            TRANSPOSE(flucdata.v_par_ion3_modes.v_par_ion3_real._data, $
+                                      [2,1,0]),$
+                            TRANSPOSE(flucdata.v_par_ion3_modes.v_par_ion3_imag._data,$
+                                      [2,1,0]))
+                      mom_v[*,*,1,*,it] = $
+                        REFORM(tmp[0:n_theta_plot-1,*,*], [n_theta_plot,n_r,1,n_n,1])
+                  ENDIF
+
+                  IF (profile_data.n_kinetic GT profile_data.n_ion) THEN BEGIN
+                      tmp = COMPLEX(TRANSPOSE(flucdata.v_par_electron_modes.$
+                      v_par_electron_real._data,[2,1,0]),$
+                        TRANSPOSE(flucdata.v_par_electron_modes.$
+                      v_par_electron_imag._data,[2,1,0]))
+                      mom_v[*,*,profile_data.n_kinetic-1,*,it] = $
+                        REFORM(tmp[0:n_theta_plot-1,*,*], [n_theta_plot,n_r,1,n_n,1])
+                  ENDIF
+              ENDIF ;mom_v
+
+          ENDFOR
+      ENDIF ;HDF5 flucs
 
       ;calculate temp fluctuations normalized to Te
       IF ((exists_n EQ 1) AND (exists_e EQ 1)) THEN exists_t = 1
@@ -200,14 +402,67 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
       Sexch_nt = 0
  
      IF ((use_hdf5 EQ 1) AND (profile_data.nonlinear_flag EQ 1)) THEN BEGIN
-        Gamma_t = TRANSPOSE(REFORM(tdata.gbflux._data[*,0,*,*]),[2,1,0])
-        Gamma_rt = TRANSPOSE(REFORM(tdata.gbflux_i._data[*,*,0,*,*]),[3,2,1,0])
-        Q_t = TRANSPOSE(REFORM(tdata.gbflux._data[*,1,*,*]),[2,1,0])
-        Q_rt = TRANSPOSE(REFORM(tdata.gbflux_i._data[*,*,1,*,*]),[3,2,1,0])
-        Pi_t = TRANSPOSE(REFORM(tdata.gbflux._data[*,2,*,*]),[2,1,0])
-        Pi_rt = TRANSPOSE(REFORM(tdata.gbflux_i._data[*,*,2,*,*]),[3,2,1,0])
-        Secxh_t = TRANSPOSE(REFORM(tdata.gbflux._data[*,3,*,*]),[2,1,0])
-        Sexch_rt = TRANSPOSE(REFORM(tdata.gbflux_i._data[*,*,3,*,*]),[3,2,1,0])
+         ;load total fluxes vs. time
+         dsize = SIZE(tdata.gbflux._data)
+         refarr = [dsize[1],dsize[3],dsize[4]]
+         Gamma_t = TRANSPOSE(REFORM(tdata.gbflux._data[*,0,*,*],refarr),[2,1,0])
+         Q_t = TRANSPOSE(REFORM(tdata.gbflux._data[*,1,*,*],refarr),[2,1,0])
+         Pi_t = TRANSPOSE(REFORM(tdata.gbflux._data[*,2,*,*],refarr),[2,1,0])
+         Secxh_t = TRANSPOSE(REFORM(tdata.gbflux._data[*,3,*,*],refarr),[2,1,0])
+
+         ;load total fluxes vs.radius & time
+         dsize = SIZE(tdata.gbflux_i._data)
+         refarr = [dsize[1],dsize[2],dsize[4],dsize[5]]
+         Gamma_rt = TRANSPOSE(REFORM(tdata.gbflux_i._data[*,*,0,*,*],refarr),[3,2,1,0])
+         Q_rt = TRANSPOSE(REFORM(tdata.gbflux_i._data[*,*,1,*,*],refarr),[3,2,1,0])
+         Pi_rt = TRANSPOSE(REFORM(tdata.gbflux_i._data[*,*,2,*,*],refarr),[3,2,1,0])
+         Sexch_rt = TRANSPOSE(REFORM(tdata.gbflux_i._data[*,*,3,*,*],refarr),[3,2,1,0])
+        
+         ;load total fluxes vs. modenumber & time
+         Gamma_nt = FLTARR(profile_data.n_kinetic,profile_data.n_field,n_n,n_time)
+         Q_nt = FLTARR(profile_data.n_kinetic,profile_data.n_field,n_n,n_time)
+         Pi_nt = FLTARR(profile_data.n_kinetic,profile_data.n_field,n_n,n_time)
+         Sexch_nt = FLTARR(profile_data.n_kinetic,profile_data.n_field,n_n,n_time)         
+
+         ;load electrostatic component of fluxes vs. modenumber & time
+         FOR i_kin = 0, profile_data.n_kinetic-1 DO BEGIN
+             i_kin_str = NUMTOSTRING(i_kin)
+             com = 'Gamma_nt['+i_kin_str+',0,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_phi_density._data)'
+             r = EXECUTE(com)
+             com = 'Q_nt['+i_kin_str+',0,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_phi_energy._data)'
+             r = EXECUTE(com)
+             com = 'Pi_nt['+i_kin_str+',0,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_phi_momentum._data)'
+             r = EXECUTE(com)
+             com = 'Sexch_nt['+i_kin_str+',0,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_phi_energyexchange._data)'
+             r = EXECUTE(com)
+         ENDFOR
+
+         ;load Apar component of fluxes vs. modenumber & time
+         IF (profile_data.n_field GE 2) THEN FOR i_kin = 0, profile_data.n_kinetic-1 DO BEGIN
+             i_kin_str = NUMTOSTRING(i_kin)
+             com = 'Gamma_nt['+i_kin_str+',1,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_apar_density._data)'
+             r = EXECUTE(com)
+             com = 'Q_nt['+i_kin_str+',1,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_apar_energy._data)'
+             r = EXECUTE(com)
+             com = 'Pi_nt['+i_kin_str+',1,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_apar_momentum._data)'
+             r = EXECUTE(com)
+             com = 'Sexch_nt['+i_kin_str+',1,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_apar_energyexchange._data)'
+             r = EXECUTE(com)
+         ENDFOR
+
+        ;load Bpar component of fluxes vs. modenumber & time
+        IF (profile_data.n_field EQ 3) THEN FOR i_kin = 0, profile_data.n_kinetic-1 DO BEGIN
+             i_kin_str = NUMTOSTRING(i_kin)
+             com = 'Gamma_nt['+i_kin_str+',2,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_bpar_density._data)'
+             r = EXECUTE(com)
+             com = 'Q_nt['+i_kin_str+',2,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_bpar_energy._data)'
+             r = EXECUTE(com)
+             com = 'Pi_nt['+i_kin_str+',2,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_bpar_momentum._data)'
+             r = EXECUTE(com)
+             com = 'Sexch_nt['+i_kin_str+',2,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_bpar_energyexchange._data)'
+             r = EXECUTE(com)
+         ENDFOR
+
      ENDIF ELSE BEGIN           ;from ascii files
           ;load total fluxes vs. time
           array = FLTARR(profile_data.n_kinetic,profile_data.n_field,4,n_time)
@@ -242,7 +497,7 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
               Sexch_nt= REFORM(array[*,*,3,*,*],form)
           ENDIF
       ENDELSE
-
+      
       ;create struct
       gyro_data = {n_r:n_r, $
                    n_bnd: profile_data.n_bnd, $ ;# pts in boundary layer
