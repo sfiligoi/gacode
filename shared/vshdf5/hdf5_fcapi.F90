@@ -3423,7 +3423,6 @@
   asize(2)=SIZE(array,2)
   asize(3)=SIZE(array,3)
   ! For convenience, put the time step (extendible set, as the first index
-  if(h5in%verbose) WRITE(*,*) 'Writing ', aname
   if(h5in%doTranspose) then
     dims = (/1, asize(3), asize(2),asize(1)/)
     allocate(tmparray(dims(2),dims(3),dims(4)))

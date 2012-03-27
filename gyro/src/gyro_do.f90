@@ -17,6 +17,7 @@ subroutine gyro_do
   implicit none
   !
   logical :: rfe
+  integer :: h5_control
   !--------------------------------------
 
   ! Begin with clean exit status
@@ -326,24 +327,26 @@ subroutine gyro_do
   endif
   if (gkeigen_j_set == 0) then
      if (io_method < 3) call gyro_write_timedata
-     if (io_method > 1) then
-         call gyro_write_timedata_hdf5
-         if (time_skip_wedge > 0) call gyro_write_timedata_wedge_hdf5
-     endif
+!     if (io_method > 1) then
+!         call gyro_write_timedata_hdf5
+!         if (time_skip_wedge > 0) call gyro_write_timedata_wedge_hdf5
+!     endif
   endif
 
+  h5_control=(restart_method+1)*output_flag
   !-------------------------------------------------
   ! NEW SIMULATION ONLY: write *initial conditions*
   !
+
   if (restart_method /= 1) then
      ! Write to output files.
      io_control = output_flag*2
      if (gkeigen_j_set == 0) then
         if (io_method < 3) call gyro_write_timedata
-!        if (io_method > 1 ) then
-!           call gyro_write_timedata_hdf5
-!           if (time_skip_wedge > 0) call gyro_write_timedata_wedge_hdf5
-!        endif
+        if (io_method > 1 ) then
+           call gyro_write_timedata_hdf5(h5_control)
+           if (time_skip_wedge > 0) call gyro_write_timedata_wedge_hdf5
+        endif
      endif
   endif
   !--------------------------------------------
