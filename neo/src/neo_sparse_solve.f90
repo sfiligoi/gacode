@@ -41,8 +41,8 @@ contains
          .false.,&
          n_max,&
          2*n_max,&
-         a,&
-         a_indx,&
+         amat,&
+         amat_indx,&
          keep,&
          cntl,&
          icntl,&
@@ -70,8 +70,8 @@ contains
          .false.,&
          n_max,&
          2*n_max,&
-         a,&
-         a_indx,&
+         amat,&
+         amat_indx,&
          keep,&
          g,&
          gs,&

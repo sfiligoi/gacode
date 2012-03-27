@@ -138,19 +138,19 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc, N_ion=N_ion
   READF, 1, s
   READF, 1, arr
   exp_Vtor = REFORM(arr[0,*])
-  exp_Vtor2 = REFORM(arr[0,*])
-  exp_Vtor3 = REFORM(arr[0,*])
-  exp_Vtor4 = REFORM(arr[0,*])
-  exp_Vtor5 = REFORM(arr[0,*])
+  exp_Vtor2 = REFORM(arr[1,*])
+  exp_Vtor3 = REFORM(arr[2,*])
+  exp_Vtor4 = REFORM(arr[3,*])
+  exp_Vtor5 = REFORM(arr[4,*])
 
   READF, 1, s
   READF, 1, s
   READF, 1, arr
   exp_Vpol = REFORM(arr[0,*])
-  exp_Vpol2 = REFORM(arr[0,*])
-  exp_Vpol3 = REFORM(arr[0,*])
-  exp_Vpol4 = REFORM(arr[0,*])
-  exp_Vpol5 = REFORM(arr[0,*])
+  exp_Vpol2 = REFORM(arr[1,*])
+  exp_Vpol3 = REFORM(arr[2,*])
+  exp_Vpol4 = REFORM(arr[3,*])
+  exp_Vpol5 = REFORM(arr[4,*])
 
   CLOSE, 1
 
