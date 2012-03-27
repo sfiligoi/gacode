@@ -20,7 +20,7 @@ PRO plot_gyro_RZ, data, IT = it, SF=sf, TITLE = title, PLOT_N = plot_n, $
 ; v5.1: 9.7.11: added local normalization ability
 
   DEFAULT, it, data.n_time/2
-  DEFAULT, sf, 8
+  DEFAULT, sf, data.theta_mult
 
   IF (KEYWORD_SET(plot_t) AND data.exists_t) THEN BEGIN
       field = REFORM(data.mom_t[*,*,data.i_kin,*,it])
