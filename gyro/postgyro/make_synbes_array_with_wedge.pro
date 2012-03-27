@@ -1,21 +1,19 @@
-FUNCTION make_synbes_array, data, n_e, TOR_FRAC=tor_frac, $
-  ITMIN = itmin, ITMAX = itmax,  INTERP=interp, OMEGA0=omega0, $
-  N_TOR_FRAC=n_tor_frac, NR_BESchannels = NR_BESchannels, $
-  NZ_BESchannels = NZ_BESchannels, BES_Z00 = BES_Z00, $
-  BES_RMIN_OFFSET = BES_RMIN_OFFSET, BES_DR=BES_DR, BES_DZ=BES_DZ, $
-  SHOW_WINDOWS=show_windows, $
+FUNCTION make_synbes_array_with_wedge, data, wedge, $
+  ITMIN = itmin, ITMAX = itmax, OMEGA0=omega0, $
+  NR_BESchannels = NR_BESchannels, $
+  NZ_BESchannels = NZ_BESchannels, BES_Z00 = BES_Z00, BES_DR=BES_DR, $
+  BES_DZ=BES_DZ, SHOW_WINDOWS=show_windows, $
   Aphys = Aphys, A_over_Cs = a_over_cs
 ;
 ; C. Holland, UCSD
-; v1.0: 9.14.2010
-; v1.1: 10.12.2010: added Aphys, a_over_cs keywords to enable external
-; inputs for these parameters when using tgyro2gyro input files
-; v2.0: 8.25.2011: updated for consistency with gacode file structures
-; v2.1: 2.22.2012: added BES_RMIN_OFFSET keyword to shift center away from sim center
+; v1.0: 3.26.2012: takes postgyro data file plus HDF5 wedge data file
+; and generates synthetic BES array using wedge output
 ;
-; takes PostGYRO data  (for profile, time info) +
-; ne=[n_theta_plot,n_r,n_n,n_time] complex arrays, generates 
-; NRxNZxn_tor_fac synthetic BES channels
+; use
+; IDL> data = GET_GYRO_DATA(simdir, /HDF5)
+; IDL> wedge = GET_GYRO_HDF5_WEDGE(data)
+; IDL> results = MAKE_SYNBES_ARRAY(data, wedge, ...)
+;
 ; 
 ; SF is intepolation in theta (set equal to
 ; data.profile_data.n_theta_mult to use GYRO-caluclated nu_geo)
@@ -33,23 +31,17 @@ FUNCTION make_synbes_array, data, n_e, TOR_FRAC=tor_frac, $
 
   DEFAULT, omega0, data.w0[data.n_r/2]
   PRINT, 'omega0 (c_s/a): ', omega0
-  DEFAULT, n_tor_frac, 1
+  DEFAULT, n_tor_frac, wedge.n_tor_frac
   PRINT, '# toroidal locations: ', n_tor_frac
   delta_tor_frac = 1./n_tor_frac;
-  sf = data.theta_mult
-  PRINT, 'sf = ', sf
-  DEFAULT, itmin, data.n_time/2
+  DEFAULT, itmin, 0
   PRINT, 'itmin = ', itmin
-  DEFAULT, itmax, data.n_time-1
+  DEFAULT, itmax, wedge.n_time-1
   PRINT, 'itmax = ', itmax
-  DEFAULT, interp, 1
-  PRINT, 'interp = ', interp
   DEFAULT, NR_BESchannels, 5
   PRINT, 'NR_BESchannels = ', NR_BESchannels
   DEFAULT, NZ_BESchannels, 6
   PRINT, 'NZ_BESchannels = ', NZ_BESchannels
-  DEFAULT, BES_RMIN_OFFSET, 0.
-  PRINT, 'BES r_min/a OFFSET = ', BES_RMIN_OFFSET
   DEFAULT, BES_Z00, -4. ;cm
   PRINT, 'BES Z00 (cm): ', BES_Z00
   DEFAULT, BES_DR, 0.9 ;cm
@@ -62,13 +54,11 @@ FUNCTION make_synbes_array, data, n_e, TOR_FRAC=tor_frac, $
   DEFAULT, a_over_cs, 1.e3/data.csda  ;data.csda in kHz
   PRINT, 'a_over_cs (microsec) = ', a_over_cs
 
-  ;create GYRO (R,Z) coords, set up triangles for interpolation
-  ny = sf*data.n_theta_plot
-  GYRO_GENERATE_RZCOORDS, data, ny, GYRO_R, GYRO_Z
+  ;get GYRO (R,Z) coords from wedge file
+  GYRO_R = wedge.R_GYRO
+  GYRO_Z = wedge.Z_GYRO
 
   ;start with BES
-;  psf = psf_in   ;will alter some fields in psf, so work on temp
-;  compy
   RESTORE, GETENV('GYRO_DIR') + '/sim/' + data.simdir + '/psf.sav'
   psf.r = (psf.r - psf.stats.r)/Aphys
   psf.p = (psf.p - psf.stats.z)/Aphys
@@ -78,7 +68,9 @@ FUNCTION make_synbes_array, data, n_e, TOR_FRAC=tor_frac, $
   psf_dx = (psf.r[psf_NR-1] - psf.r[0])/(psf_NR-1)
   psf_dz = (psf.p[psf_NZ-1] - psf.p[0])/(psf_NZ-1)
 
-  psf_interp = FLTARR(data.n_r, ny, NR_BESchannels, NZ_BESchannels)
+  n_r = wedge.n_r
+  n_y = wedge.n_y
+  psf_interp = FLTARR(n_r, n_y, NR_BESchannels, NZ_BESchannels)
   psf_interp_norm = FLTARR(NR_BESchannels, NZ_BESchannels)
   BES_xloc = FLTARR(NR_BESchannels, NZ_BESchannels)
   BES_zloc = FLTARR(NR_BESchannels, NZ_BESchannels)
@@ -86,7 +78,7 @@ FUNCTION make_synbes_array, data, n_e, TOR_FRAC=tor_frac, $
 
   ;R00 = major radius/a of bes channel 9 is at middle of shot
   ir = data.n_r/2
-  R00 =  (data.R0[ir] + data.r[ir] + BES_rmin_offset)
+  R00 =  (data.R0[ir] + data.r[ir])
   Z00 = BES_Z00/Aphys
 
   ;create array BES psfs interpolated onto GYRO grid
@@ -105,21 +97,17 @@ FUNCTION make_synbes_array, data, n_e, TOR_FRAC=tor_frac, $
       psf_interp[*,*,ir,iz] = BILINEAR(psf.psf, ir_GYRO, iz_GYRO, MISSING=0)
       psf_interp_norm[ir,iz] = TOTAL(psf_interp[*,*,ir,iz])
   ENDFOR
-  PRINT, 'BES r_min/a = ', BES_xloc[*,0] - data.R0[data.n_r/2]
 
   it = itmin
-  ne_RZ = TRANSPOSE(GYRO_RTHETA_TRANSFORM(n_e[*,*,*,it], data,sf,$
-                                          NU_SILENT=nu_silent, TOR_FRAC = tor_frac))
+  ne_RZ = REFORM(wedge.n_rz[data.n_kinetic-1,0,*,*,0])
 
-  help, ne_RZ, GYRO_R, GYRO_Z
   IF (windows_flag) THEN BEGIN ; plot BES locations
       WINDOW, 0
       xr =BES_XLOC[NR_BESchannels/2,0]*Aphys + [-6,6]
       GYRO_RZ_COLOR_CONTOUR, TRANSPOSE(ne_RZ), GYRO_R, GYRO_Z, $
         XRANGE=xr, YRANGE=[-10,2]+BES_Z00, Aphys=Aphys, $
         TITLE = '!4d!Xn!De!N (t = ' + NUMTOSTRING(data.t[it]) + ')'
-
- OPLOT, GYRO_R[data.n_r-1-data.n_bnd,*]*Aphys, GYRO_Z[data.n_r-1-data.n_bnd,*]*Aphys, LINESTYLE=2	      
+      
       FOR ir = 0, NR_BESchannels-1 DO FOR iz=0, NZ_BESchannels-1 DO BEGIN
           PLOTS, BES_xloc[ir,iz]*Aphys, BES_zloc[ir,iz]*Aphys, psym=4
           PLOTS, GYRO_R(BES_gyroidx[ir,iz])*Aphys, $
@@ -136,41 +124,22 @@ FUNCTION make_synbes_array, data, n_e, TOR_FRAC=tor_frac, $
   ENDIF
 
   ;set up time axis and result storage arrays
-  NT0 = itmax - itmin + 1
-  NT = 1 + interp*(NT0-1)
-  t = itmin + FINDGEN(NT)/interp
-  t_int = itmin+ INDGEN(NT)/interp
-  eps = t - t_int
+  NT = itmax - itmin + 1
+  t = wedge.time_skip*(itmin + FINDGEN(NT))
 
   GYRO_ne_sig = FLTARR(NR_BESchannels, NZ_BESchannels, N_tor_frac, NT)
   syn_ne_sig = FLTARR(NR_BESchannels, NZ_BESchannels, N_tor_frac, NT)
   C_I = COMPLEX(0,1)
 
   ;begin iterations
-  I_THETA = FLTARR(data.n_theta_plot)+1
+  IY = FLTARR(n_y) + 1
   FOR it = 0,NT-1 DO BEGIN
       PRINT, it,  '/', NT-1
-      ;translate GYRO to rtheta space, apply rho_s renorm
-      ne_lf = n_e[*,*,*,t_int[it]]
-
-      ;do linear time interpolation
-      IF (eps[it] GT 0) THEN BEGIN
-          ne_lf2 = n_e[*,*,*,t_int[it]+1]
-          ne_lf = (1. - eps[it])*ne_lf + eps[it]*ne_lf2
-      ENDIF
-
-      ;apply doppler shift, and equilibrium density correction
-      ;(only does things in global sims)
-      FOR i_n = 1, data.n_n-1 DO BEGIN
-          ne_lf[*,*,i_n] *= EXP(-C_I*data.n[i_n]*omega0*t[it])/$
-                            (REFORM(data.n_eq[data.n_spec-1,*])#I_THETA)
-      ENDFOR
 
       FOR i_tf = 0, n_tor_frac-1 DO BEGIN
-          ne_RZ = TRANSPOSE(GYRO_RTHETA_TRANSFORM(ne_lf, data,sf,$
-                                                  NU_SILENT=nu_silent, TOR_FRAC=tor_frac))
-          
-          nu_silent = 1
+          ne_RZ = REFORM(wedge.n_RZ[data.n_kinetic-1, i_tf,*,*,it])/$
+                  (REFORM(data.n_eq[data.n_spec-1,*])#IY)
+
           FOR ir=0,NR_BESchannels-1 DO FOR iz=0,NZ_BESchannels-1 DO BEGIN
               GYRO_ne_sig[ir,iz,i_tf,it] = ne_RZ[BES_gyroidx[ir,iz]]
               syn_ne_sig[ir,iz,i_tf,it] = TOTAL(ne_RZ*psf_interp[*,*,ir,iz])/$
@@ -185,14 +154,13 @@ FUNCTION make_synbes_array, data, n_e, TOR_FRAC=tor_frac, $
   	OPLOT, t, syn_ne_sig[0,0,0,*], COLOR=100
   ENDIF
 
-  results = {SF:sf, NT:nt, T:t, INTERP:interp, $
+  results = {NT:nt, T:t, $
                  ITMIN:itmin, ITMAX:itmax, $
                  Aphys:Aphys, omega0:omega0, $
                  N_tor_frac: n_tor_frac, $
                  a_over_cs: a_over_cs, $
                  NR_BESCHANNELS:NR_BESchannels, $
                  NZ_BESCHANNELS:NZ_BESchannels, $
-		 BES_RMIN_OFFSET: BES_rmin_offset, $
                  GYRO_ne:GYRO_ne_sig, syn_ne:syn_ne_sig, $
                  syn_BES_XLOC:BES_xloc, syn_BES_ZLOC: BES_zloc, $
                  GYRO_BES_XLOC:GYRO_R[BES_gyroidx], $

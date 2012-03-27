@@ -218,18 +218,18 @@ FUNCTION read_gyro_profile_data, simdir, profile_data
                      Pi_gB: Pi_gB, $ ;Nm/m**2
                      S_gB: S_gB, $ ;W/cm**3
 
-                     n_bnd: n_bnd $ ;# pts in boundary layer
+                     n_bnd: n_bnd, $ ;# pts in boundary layer
+                     nonlinear_flag: nonlinear_flag $
                     }
-     ierr = 0
+     did_read = 1
      PRINT, 'Read ' + filepath
    
   ENDIF ELSE BEGIN
 
-     PRINT, 'FATAL ERROR: missing profile_vugyro.out'
-     ierr = 1
+     ;PRINT, 'FATAL ERROR: missing profile_vugyro.out'
+     did_read = 0
 
   ENDELSE
-
-  RETURN, ABS(NOT(ierr))
+  RETURN, did_read
 END ;read_gyro_profile_data
 
