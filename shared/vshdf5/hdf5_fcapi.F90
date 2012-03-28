@@ -3229,12 +3229,14 @@
 
     call H5Sget_simple_extent_dims_f(filespace, olddims, oldmaxdims,error)
     if(h5in%debug) write(*,*) " In add_h5_1d and dset_exists: H5Sget_simple_extent_dims_f error =", error
-    if (error.ne.0) then
+    if(h5in%debug) write(*,*) " In add_h5_1d and dset_exists: H5Sget_simple_extent_dims_f  olddims =", &
+       olddims, "  oldmaxdims =",  oldmaxdims
+     if (error.ne.0) then
        errval%errorMsg = 'ERROR: H5Sget_simple_extent_dims_f failed for '//aname
        errval%errBool = .true.
        return
     endif
-
+   
     
     ! Extend the dataset. This call assures that dataset has the space
     dims = (/1, asize/)
