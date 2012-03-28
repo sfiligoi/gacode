@@ -366,10 +366,22 @@ subroutine gyro_write_timedata_hdf5(h5_control)
 
   if (i_proc == 0) then
      call close_h5file(dumpTFid,dumpTGid,h5err)
-     !if (io_control > 1) then
-        call close_h5file(dumpFid,dumpGid,h5err)
-        if (write_threed) call close_h5file(fid3d,gid3d,h5err)
-     !endif
+     if(h5err.ne.0) then
+        write(*,*) "Error:  close_h5file of dumpTFid in gyro_write_timedata_hdf5.f90"
+        return
+     endif
+     call close_h5file(dumpFid,dumpGid,h5err)
+     if(h5err.ne.0) then
+        write(*,*) "Error:  close_h5file of dumpFid in gyro_write_timedata_hdf5.f90"
+        return
+     endif
+     if (write_threed) then
+      call close_h5file(fid3d,gid3d,h5err)
+        if(h5err.ne.0) then
+          write(*,*) "Error:  close_h5file of dumpFid in gyro_write_timedata_hdf5.f90"
+          return
+        endif
+     endif
   endif
 
   if (i_proc == 0 .and. debug_flag == 1) print *,'[gyro_write_timedata_hdf5 done]'
