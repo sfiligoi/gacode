@@ -80,6 +80,9 @@ subroutine gyro_write_timedata_hdf5(h5_control)
      h5in%vsTime=t_current
      h5in%vsStep=step
 
+
+      if (debug_flag==1) h5in%debug=.true.
+
      !------------------------------------------------
      ! Open the monolithic timedata file (incremental)
      dumpfile=TRIM(path)//"out.gyro.timedata.h5" 
