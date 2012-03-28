@@ -303,7 +303,7 @@ subroutine gyro_write_timedata_hdf5(h5_control)
 
   endif
 
-  if (io_method == 2) call gyro_write_error(trim(path)//'out.gyro.error',10)
+ ! if (io_method == 2) call gyro_write_error(trim(path)//'out.gyro.error',10)
 
   !-------------------------------------------------------------------
   ! Entropy diagnostics
