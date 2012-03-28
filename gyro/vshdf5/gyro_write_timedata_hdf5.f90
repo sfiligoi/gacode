@@ -366,20 +366,23 @@ subroutine gyro_write_timedata_hdf5(h5_control)
 
   if (i_proc == 0) then
      call close_h5file(dumpTFid,dumpTGid,h5err)
-     if(h5err.ne.0) then
+     if(h5in%debug) write(*,*) "closing dumpTFid"
+     if(h5err%errBool) then
         write(*,*) "Error:  close_h5file of dumpTFid in gyro_write_timedata_hdf5.f90"
         return
      endif
      call close_h5file(dumpFid,dumpGid,h5err)
-     if(h5err.ne.0) then
+     if(h5in%debug) write(*,*) "closing dumpFid"
+     if(h5err%errBool) then
         write(*,*) "Error:  close_h5file of dumpFid in gyro_write_timedata_hdf5.f90"
         return
      endif
      if (write_threed) then
-      call close_h5file(fid3d,gid3d,h5err)
-        if(h5err.ne.0) then
-          write(*,*) "Error:  close_h5file of dumpFid in gyro_write_timedata_hdf5.f90"
-          return
+       call close_h5file(fid3d,gid3d,h5err)
+         if(h5in%debug) write(*,*) "closing fid3d"
+         if(h5err%errBool) then
+           write(*,*) "Error:  close_h5file of dumpFid in gyro_write_timedata_hdf5.f90"
+           return
         endif
      endif
   endif
