@@ -185,11 +185,11 @@ subroutine gyro_write_timedata_hdf5(h5_control)
   call gyro_kxky_spectrum
   h5in%units="dimensionless"
   h5in%mesh=" "
-  call write_distributed_real_h5("kxkyspec",dumpTGid,&
-       n_x,1,1,&
-       size(kxkyspec),&
-       kxkyspec,&
-       h5in,h5err)
+!  call write_distributed_real_h5("kxkyspec",dumpTGid,&
+!       n_x,1,1,&
+!       size(kxkyspec),&
+!       kxkyspec,&
+!       h5in,h5err)
 
   if (i_proc == 0) then
      h5in%units="dimensionless"
@@ -227,18 +227,18 @@ subroutine gyro_write_timedata_hdf5(h5_control)
      ! BEGIN NONLINEAR 
      !================
 
-     h5in%units="diff units"
-     call write_distributed_real_h5("diff_n",dumpTGid,&
-          n_kinetic,n_field,2,&
-          size(diff_n),&
-          diff_n,&
-          h5in,h5err)
-
-     call write_distributed_real_h5("gbflux_n",dumpTGid,&
-          n_kinetic,n_field,4,&
-          size(gbflux_n),&
-          gbflux_n,&
-          h5in,h5err)
+!     h5in%units="diff units"
+!     call write_distributed_real_h5("diff_n",dumpTGid,&
+!          n_kinetic,n_field,2,&
+!          size(diff_n),&
+!          diff_n,&
+!          h5in,h5err)
+!
+!     call write_distributed_real_h5("gbflux_n",dumpTGid,&
+!          n_kinetic,n_field,4,&
+!          size(gbflux_n),&
+!          gbflux_n,&
+!          h5in,h5err)
 
      if (lindiff_method >= 4) then
         call write_distributed_real_h5('phi_squared_QL_n',dumpTGid,&
@@ -263,12 +263,12 @@ subroutine gyro_write_timedata_hdf5(h5_control)
 
      if (i_proc == 0 ) then
 
-        call add_h5(dumpTGid,'field_rms',ave_phi,h5in,h5err)
-        call add_h5(dumpTGid,'diff',diff,h5in,h5err)
-        call add_h5(dumpTGid,'diff_i',diff_i,h5in,h5err)
-        call add_h5(dumpTGid,'gbflux',gbflux,h5in,h5err)
-        call add_h5(dumpTGid,'gbflux_mom',gbflux_mom,h5in,h5err)
-        call add_h5(dumpTGid,'gbflux_i',gbflux_i,h5in,h5err)
+!        call add_h5(dumpTGid,'field_rms',ave_phi,h5in,h5err)
+!        call add_h5(dumpTGid,'diff',diff,h5in,h5err)
+!        call add_h5(dumpTGid,'diff_i',diff_i,h5in,h5err)
+!        call add_h5(dumpTGid,'gbflux',gbflux,h5in,h5err)
+!        call add_h5(dumpTGid,'gbflux_mom',gbflux_mom,h5in,h5err)
+!        call add_h5(dumpTGid,'gbflux_i',gbflux_i,h5in,h5err)
 
         if (trapdiff_flag == 1) then
            call add_h5(dumpTGid,'diff_trapped',diff_trapped,h5in,h5err)
@@ -281,7 +281,7 @@ subroutine gyro_write_timedata_hdf5(h5_control)
         a2(1,:) = phi_fluxave(:) 
         a2(2,:) = a_fluxave(:)
         a2(3,:) = aperp_fluxave(:)
-        call add_h5(dumpTGid,'zerobar',a2,h5in,h5err)
+!        call add_h5(dumpTGid,'zerobar',a2,h5in,h5err)
         deallocate(a2)
 
         allocate(a3(n_kinetic,4,n_x))
@@ -291,10 +291,10 @@ subroutine gyro_write_timedata_hdf5(h5_control)
            a3(:,3,i) = source_n(:,i)
            a3(:,4,i) = source_e(:,i)
         enddo
-        call add_h5(dumpTGid,'source',a3,h5in,h5err)
+!        call add_h5(dumpTGid,'source',a3,h5in,h5err)
         deallocate(a3)
 
-        call add_h5(dumpTGid,'moments_zero',moments_zero_plot,h5in,h5err)
+!        call add_h5(dumpTGid,'moments_zero',moments_zero_plot,h5in,h5err)
      endif
 
      !================
@@ -343,9 +343,9 @@ subroutine gyro_write_timedata_hdf5(h5_control)
   !
   if (i_proc == 0) then
      h5in%mesh=' '
-     call add_h5(dumpTGid,'data_step',data_step,h5in,h5err)
-     call add_h5(dumpTGid,'t_current',t_current,h5in,h5err)
-     call dump_h5(dumpTGid,'n_proc',n_proc,h5in,h5err)
+!     call add_h5(dumpTGid,'data_step',data_step,h5in,h5err)
+!     call add_h5(dumpTGid,'t_current',t_current,h5in,h5err)
+!     call dump_h5(dumpTGid,'n_proc',n_proc,h5in,h5err)
 
      ! dump in the field
       call dump_h5(dumpGid,'data_step',data_step,h5in,h5err)
