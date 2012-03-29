@@ -335,12 +335,10 @@
   endif
 #ifdef __MPI
   if (h5in%pIO) then
-    !call h5fopen_f(fname,H5F_ACC_RDONLY_F,fileId,error, &
     call h5fopen_f(fname,H5F_ACC_RDWR_F,fileId,error, &
                   access_prp=plist_id)
   else
 #else
-  !call h5fopen_f(fname, H5F_ACC_RDONLY_F, fileId, error)
   call h5fopen_f(fname, H5F_ACC_RDWR_F, fileId, error)
 #endif
 #ifdef __MPI

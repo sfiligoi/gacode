@@ -198,6 +198,7 @@ subroutine gyro_write_timedata_hdf5(h5_control)
      h5in%units="dimensionless"
      h5in%mesh=" "
      call add_h5(dumpTGid,'k_perp_squared',k_perp_squared,h5in,h5err)
+     if(h5err%errBool) write(*,*) h5err%errorMsg
   endif
 
   call get_field_fluxave
@@ -266,12 +267,18 @@ subroutine gyro_write_timedata_hdf5(h5_control)
 
      if (i_proc == 0 ) then
 
-!        call add_h5(dumpTGid,'field_rms',ave_phi,h5in,h5err)
-!        call add_h5(dumpTGid,'diff',diff,h5in,h5err)
-!        call add_h5(dumpTGid,'diff_i',diff_i,h5in,h5err)
-!        call add_h5(dumpTGid,'gbflux',gbflux,h5in,h5err)
-!        call add_h5(dumpTGid,'gbflux_mom',gbflux_mom,h5in,h5err)
-!        call add_h5(dumpTGid,'gbflux_i',gbflux_i,h5in,h5err)
+        call add_h5(dumpTGid,'field_rms',ave_phi,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
+        call add_h5(dumpTGid,'diff',diff,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
+        call add_h5(dumpTGid,'diff_i',diff_i,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
+        call add_h5(dumpTGid,'gbflux',gbflux,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
+        call add_h5(dumpTGid,'gbflux_mom',gbflux_mom,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
+        call add_h5(dumpTGid,'gbflux_i',gbflux_i,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
 
         if (trapdiff_flag == 1) then
            call add_h5(dumpTGid,'diff_trapped',diff_trapped,h5in,h5err)
@@ -284,7 +291,8 @@ subroutine gyro_write_timedata_hdf5(h5_control)
         a2(1,:) = phi_fluxave(:) 
         a2(2,:) = a_fluxave(:)
         a2(3,:) = aperp_fluxave(:)
-!        call add_h5(dumpTGid,'zerobar',a2,h5in,h5err)
+        call add_h5(dumpTGid,'zerobar',a2,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
         deallocate(a2)
 
         allocate(a3(n_kinetic,4,n_x))
@@ -294,10 +302,12 @@ subroutine gyro_write_timedata_hdf5(h5_control)
            a3(:,3,i) = source_n(:,i)
            a3(:,4,i) = source_e(:,i)
         enddo
-!        call add_h5(dumpTGid,'source',a3,h5in,h5err)
+        call add_h5(dumpTGid,'source',a3,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
         deallocate(a3)
 
-!        call add_h5(dumpTGid,'moments_zero',moments_zero_plot,h5in,h5err)
+        call add_h5(dumpTGid,'moments_zero',moments_zero_plot,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
      endif
 
      !================
@@ -315,6 +325,7 @@ subroutine gyro_write_timedata_hdf5(h5_control)
      call gyro_entropy 
      if (i_proc == 0) then 
         call add_h5(dumpTGid,'entropy',entropy,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
      endif
   endif
   !------------------------------------------------------------
@@ -352,14 +363,20 @@ subroutine gyro_write_timedata_hdf5(h5_control)
 
      ! dump in the field
       call dump_h5(dumpGid,'data_step',data_step,h5in,h5err)
+      if(h5err%errBool) write(*,*) h5err%errorMsg
       call dump_h5(dumpGid,'t_current',t_current,h5in,h5err)
+      if(h5err%errBool) write(*,*) h5err%errorMsg
       call dump_h5(dumpGid,'n_proc',n_proc,h5in,h5err)
+      if(h5err%errBool) write(*,*) h5err%errorMsg
 
     ! dump 3D
     if (write_threed) then
       call dump_h5(gid3D,'data_step',data_step,h5in,h5err)
+      if(h5err%errBool) write(*,*) h5err%errorMsg
       call dump_h5(gid3D,'t_current',t_current,h5in,h5err)
+      if(h5err%errBool) write(*,*) h5err%errorMsg
       call dump_h5(gid3D,'n_proc',n_proc,h5in,h5err)
+      if(h5err%errBool) write(*,*) h5err%errorMsg
     endif
   endif
   !---------------------------------------------------------
@@ -368,20 +385,20 @@ subroutine gyro_write_timedata_hdf5(h5_control)
      call close_h5file(dumpTFid,dumpTGid,h5err)
      if(h5in%debug) write(*,*) "closing dumpTFid"
      if(h5err%errBool) then
-        write(*,*) "Error:  close_h5file of dumpTFid in gyro_write_timedata_hdf5.f90"
+           write(*,*) h5err%errorMsg, " for dumpTFid"
         return
      endif
      call close_h5file(dumpFid,dumpGid,h5err)
      if(h5in%debug) write(*,*) "closing dumpFid"
      if(h5err%errBool) then
-        write(*,*) "Error:  close_h5file of dumpFid in gyro_write_timedata_hdf5.f90"
+           write(*,*) h5err%errorMsg, " for dumpFid"
         return
      endif
      if (write_threed) then
        call close_h5file(fid3d,gid3d,h5err)
          if(h5in%debug) write(*,*) "closing fid3d"
          if(h5err%errBool) then
-           write(*,*) "Error:  close_h5file of dumpFid in gyro_write_timedata_hdf5.f90"
+           write(*,*) h5err%errorMsg, " for fid3d"
            return
         endif
      endif
