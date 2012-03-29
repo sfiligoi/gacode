@@ -188,11 +188,12 @@ subroutine gyro_write_timedata_hdf5(h5_control)
   call gyro_kxky_spectrum
   h5in%units="dimensionless"
   h5in%mesh=" "
-!  call write_distributed_real_h5("kxkyspec",dumpTGid,&
-!       n_x,1,1,&
-!       size(kxkyspec),&
-!       kxkyspec,&
-!       h5in,h5err)
+  call write_distributed_real_h5("kxkyspec",dumpTGid,&
+       n_x,1,1,&
+       size(kxkyspec),&
+       kxkyspec,&
+       h5in,h5err)
+  if(h5err%errBool) write(*,*) h5err%errorMsg
 
   if (i_proc == 0) then
      h5in%units="dimensionless"
@@ -231,18 +232,20 @@ subroutine gyro_write_timedata_hdf5(h5_control)
      ! BEGIN NONLINEAR 
      !================
 
-!     h5in%units="diff units"
-!     call write_distributed_real_h5("diff_n",dumpTGid,&
-!          n_kinetic,n_field,2,&
-!          size(diff_n),&
-!          diff_n,&
-!          h5in,h5err)
-!
-!     call write_distributed_real_h5("gbflux_n",dumpTGid,&
-!          n_kinetic,n_field,4,&
-!          size(gbflux_n),&
-!          gbflux_n,&
-!          h5in,h5err)
+     h5in%units="diff units"
+     call write_distributed_real_h5("diff_n",dumpTGid,&
+          n_kinetic,n_field,2,&
+          size(diff_n),&
+          diff_n,&
+          h5in,h5err)
+     if(h5err%errBool) write(*,*) h5err%errorMsg
+
+     call write_distributed_real_h5("gbflux_n",dumpTGid,&
+          n_kinetic,n_field,4,&
+          size(gbflux_n),&
+          gbflux_n,&
+          h5in,h5err)
+     if(h5err%errBool) write(*,*) h5err%errorMsg
 
      if (lindiff_method >= 4) then
         call write_distributed_real_h5('phi_squared_QL_n',dumpTGid,&
@@ -250,11 +253,13 @@ subroutine gyro_write_timedata_hdf5(h5_control)
              size(phi_squared_QL_n),&
              phi_squared_QL_n,&
              h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
         call write_distributed_real_h5('g_squared_QL_n',dumpTGid,&
              size(g_squared_QL_n),&
              3,1,1,&
              g_squared_QL_n,&
              h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
      endif
 
      if (nonlinear_transfer_flag == 1) then
@@ -263,6 +268,7 @@ subroutine gyro_write_timedata_hdf5(h5_control)
              size(nl_transfer),&
              nl_transfer,&
              h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
      endif
 
      if (i_proc == 0 ) then
@@ -282,9 +288,13 @@ subroutine gyro_write_timedata_hdf5(h5_control)
 
         if (trapdiff_flag == 1) then
            call add_h5(dumpTGid,'diff_trapped',diff_trapped,h5in,h5err)
+           if(h5err%errBool) write(*,*) h5err%errorMsg
            call add_h5(dumpTGid,'diff_i_trapped',diff_i_trapped,h5in,h5err)
+           if(h5err%errBool) write(*,*) h5err%errorMsg
            call add_h5(dumpTGid,'gbflux_trapped',gbflux_trapped,h5in,h5err)
+           if(h5err%errBool) write(*,*) h5err%errorMsg
            call add_h5(dumpTGid,'gbflux_i_trapped',gbflux_i_trapped,h5in,h5err)
+           if(h5err%errBool) write(*,*) h5err%errorMsg
         endif
 
         allocate(a2(3,n_x))
