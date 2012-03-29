@@ -335,11 +335,13 @@
   endif
 #ifdef __MPI
   if (h5in%pIO) then
-    call h5fopen_f(fname,H5F_ACC_RDONLY_F,fileId,error, &
+    !call h5fopen_f(fname,H5F_ACC_RDONLY_F,fileId,error, &
+    call h5fopen_f(fname,H5F_ACC_RDWR_F,fileId,error, &
                   access_prp=plist_id)
   else
 #else
-  call h5fopen_f(fname, H5F_ACC_RDONLY_F, fileId, error)
+  !call h5fopen_f(fname, H5F_ACC_RDONLY_F, fileId, error)
+  call h5fopen_f(fname, H5F_ACC_RDWR_F, fileId, error)
 #endif
 #ifdef __MPI
   endif
@@ -3139,7 +3141,7 @@
   integer(HSIZE_T), dimension(2) :: dims,maxdims,chunk_dims,extdims,offset
   integer(HSIZE_T), dimension(2) :: olddims,oldmaxdims
   integer(HID_T) :: cparms        !dataset creatation property identifier 
-  LOGICAL(i4) :: dset_exists
+  LOGICAL(i4) :: dset_exists =.false.
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) 'Writing ', aname
 !-----------------------------------------------------------------------
@@ -3147,7 +3149,18 @@
 ! whether data exists or not.
 !-----------------------------------------------------------------------
   call h5lexists_f(inid, aname, dset_exists, error)
+    if(h5in%debug) write(*,*) "add_h5_1d : h5lexists_f"
+    if(h5in%debug) write(*,*) inid, aname, dset_exists, error
+   if (error.ne.0) then
+      errval%errorMsg = 'ERROR: h5lexists_f  failed for '//aname
+      errval%errBool = .true.
+      return
+    endif
+
+  !get number of elements in array
   asize=SIZE(array)
+    if(h5in%debug) write(*,*) "add_h5_1d asize=",asize
+  
 
 !-----------------------------------------------------------------------
 ! Do the case of creating the data
@@ -3158,6 +3171,8 @@
     !
     ! Create the data space with unlimited dimensions.
     maxdims = (/H5S_UNLIMITED_f, H5S_UNLIMITED_f/)
+    if(h5in%debug) write(*,*) "H5S_UNLIMITED_f= ", H5S_UNLIMITED_f
+
     ! For convenience, put the time step (extendible set, as the first index
     dims = (/1, asize/)
     call h5screate_simple_f(rank, dims, dspace_id, error, maxdims)
@@ -3231,12 +3246,14 @@
     if(h5in%debug) write(*,*) " In add_h5_1d and dset_exists: H5Sget_simple_extent_dims_f error =", error
     if(h5in%debug) write(*,*) " In add_h5_1d and dset_exists: H5Sget_simple_extent_dims_f  olddims =", &
        olddims, "  oldmaxdims =",  oldmaxdims
-     if (error.ne.0) then
+     ! is seems 2 is the error I get with odlmaxdims = -1 (value of H5S_UNLIMITED_f)
+     if (error.ne.2) then
        errval%errorMsg = 'ERROR: H5Sget_simple_extent_dims_f failed for '//aname
        errval%errBool = .true.
        return
     endif
-   
+  
+    !would be nice if the fortran for H5Dget_access_plist(dataset_id) existed
     
     ! Extend the dataset. This call assures that dataset has the space
     dims = (/1, asize/)
@@ -3244,8 +3261,11 @@
     extdims(1)=olddims(1)+dims(1)
     extdims(2)=asize
     call h5dextend_f(dset_id, extdims, error)
+    !call h5dset_extent_f(dset_id, extdims, error)
+    if(h5in%debug) write(*,*) " In add_h5_1d and dset_exists:  h5dextend_f error =", error
     if (error.ne.0) then
        errval%errorMsg = 'ERROR: h5dextend_f failed for '//aname
+       !errval%errorMsg = 'ERROR: h5dset_extent_f failed for '//aname
        errval%errBool = .true.
        return
     endif
