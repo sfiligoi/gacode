@@ -357,9 +357,10 @@ subroutine gyro_write_timedata_hdf5(h5_control)
   !
   if (i_proc == 0) then
      h5in%mesh=' '
-!     call add_h5(dumpTGid,'data_step',data_step,h5in,h5err)
-!     call add_h5(dumpTGid,'t_current',t_current,h5in,h5err)
-!     call dump_h5(dumpTGid,'n_proc',n_proc,h5in,h5err)
+     call add_h5(dumpTGid,'data_step',data_step,h5in,h5err)
+      if(h5err%errBool) write(*,*) h5err%errorMsg
+     call add_h5(dumpTGid,'t_current',t_current,h5in,h5err)
+      if(h5err%errBool) write(*,*) h5err%errorMsg
 
      ! dump in the field
       call dump_h5(dumpGid,'data_step',data_step,h5in,h5err)
