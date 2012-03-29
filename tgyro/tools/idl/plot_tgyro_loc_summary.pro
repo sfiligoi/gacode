@@ -1,5 +1,6 @@
 PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks,$
-  WCM2 = wcm2, DATA2 = data2, Nit2=N_it2, PS = ps, SUMMARY=summary, _EXTRA=extra
+  WCM2 = wcm2, DATA2 = data2, Nit2=N_it2, PS = ps, SUMMARY=summary, $
+	PLOT_GRADIENTS=plot_gradients, _EXTRA=extra
 ;
 ; C. Holland, UCSD
 ;
@@ -171,6 +172,16 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
 
   !P.MULTI = [0,2,4]
 
+  IF KEYWORD_SET(plot_gradients) THEN BEGIN
+  exp_a_over_Lti = -DERIV(data.exp_rmin, data.exp_ti)/data.exp_ti
+  ymax = (MAX(exp_a_over_Lti) > MAX(data.a_over_Lti[*,N_it])) < 10
+  PLOT, x_exp, exp_a_over_Lti, XRANGE = [0,1], TITLE = data.simdir, $
+        THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
+        CHARSIZE=cs, YRANGE=[0,ymax]
+  OPLOT, x, data.a_over_Lti[*,N_it], COLOR=100,PSYM=-4, THICK=thick
+  XYOUTS, 0.6, 0.8*ymax, 'a/L!DTi!N',$
+          CHARSIZE=2,CHARTHICK=thick
+  ENDIF ELSE BEGIN
   ymax = MAX(data.exp_ti) > MAX(data.ti[*,N_it])
   PLOT, x_exp, data.exp_ti, XRANGE = [0,1], TITLE = data.simdir, $
         THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
@@ -181,6 +192,7 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
           CHARSIZE=2,CHARTHICK=thick
   IF (d2flag) THEN XYOUTS, 0.5, ymax, data2.simdir, ALIGN=0.5, $
     COLOR=150, CHARTHICK=thick, CHARSIZE=cs
+  ENDELSE
 
   ymax = MAX(Qi_target) > MAX(Qi_tot)
   IF KEYWORD_SET(mks) THEN BEGIN
@@ -202,6 +214,16 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
   XYOUTS, x0, 0.8*ymax, 'Q!Di!N ' + units,$
           CHARSIZE=2,CHARTHICK=thick
 
+  IF KEYWORD_SET(plot_gradients) THEN BEGIN
+  exp_a_over_Lte = -DERIV(data.exp_rmin, data.exp_te)/data.exp_te
+  ymax = (MAX(exp_a_over_Lte) > MAX(data.a_over_Lte[*,N_it])) < 15
+  PLOT, x_exp, exp_a_over_Lte, XRANGE = [0,1], TITLE = data.simdir, $
+        THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
+        CHARSIZE=cs, YRANGE=[0,ymax]
+  OPLOT, x, data.a_over_Lte[*,N_it], COLOR=100,PSYM=-4, THICK=thick
+  XYOUTS, 0.6, 0.8*ymax, 'a/L!DTe!N',$
+          CHARSIZE=2,CHARTHICK=thick
+  ENDIF ELSE BEGIN
   ymax = MAX(data.exp_te) > MAX(data.te[*,N_it])
   PLOT, x_exp, data.exp_te, XRANGE = [0,1], CHARSIZE=cs, $
         THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
@@ -212,6 +234,7 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
           CHARSIZE=2,CHARTHICK=thick
   IF (d2flag) THEN XYOUTS, 0.5, ymax, 'iteration # ' + NUMTOSTRING(N_it2), $
     ALIGN=0.5, COLOR=150, CHARTHICK=thick, CHARSIZE=cs
+  ENDELSE
 
   ymax = MAX(Qe_target) > MAX(Qe_tot)
   IF KEYWORD_SET(mks) THEN BEGIN
@@ -233,6 +256,16 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
   XYOUTS, x0, 0.8*ymax, 'Q!De!N ' + units,$
           CHARSIZE=2,CHARTHICK=thick
 
+  IF KEYWORD_SET(plot_gradients) THEN BEGIN
+  exp_a_over_Lne = -DERIV(data.exp_rmin, data.exp_ne)/data.exp_ne
+  ymax = (MAX(exp_a_over_Lne) > MAX(data.a_over_Lne[*,N_it])) < 5
+  PLOT, x_exp, exp_a_over_Lne, XRANGE = [0,1], TITLE = data.simdir, $
+        THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
+        CHARSIZE=cs, YRANGE=[0,ymax]
+  OPLOT, x, data.a_over_Lne[*,N_it], COLOR=100,PSYM=-4, THICK=thick
+  XYOUTS, 0.6, 0.8*ymax, 'a/L!Dne!N',$
+          CHARSIZE=2,CHARTHICK=thick
+  ENDIF ELSE BEGIN
   ymin = MIN(data.exp_ne) < MIN(data.n_e[*,N_it])
   ymax = MAX(data.exp_ne) > MAX(data.n_e[*,N_it])
   PLOT, x_exp, data.exp_ne, XRANGE = [0,1], $
@@ -243,6 +276,7 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
   OPLOT, x, data.n_e[*,N_it], COLOR=100,PSYM=-4, THICK=thick
   XYOUTS, 0.4, 0.8*ymax, 'n!De!N (10!U19!N/m!U3!N)',$
           CHARSIZE=2,CHARTHICK=thick
+  ENDELSE
   
   ymax = MAX(ABS(Ge_tot)) > MAX(Ge_target)
   PLOT, x, Ge_target, XRANGE=[0,1], LINESTYLE=2, $
