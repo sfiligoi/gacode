@@ -225,6 +225,9 @@ then
    echo 
    echo "             -loc_rho <rho>"
    echo "             Reference rho=sqrt[chi/chi(a)]"
+   echo 
+   echo "             -loc_psi <psi_N>"
+   echo "             Reference psi_N=psi/psi(a)"
    echo
    echo "EXAMPLES:"
    echo " "
@@ -296,6 +299,7 @@ MODINP_FLAG=0
 
 LOC_RAD=0
 LOC_RHO=0
+LOC_PSI=0
 Z1=1.0
 Z2=6.0
 Z3=2.0
@@ -395,6 +399,7 @@ while [ $# -gt 0 ] ; do
 
   -loc_rad) shift ; LOC_RAD=$1 ;;
   -loc_rho) shift ; LOC_RHO=$1 ;;
+  -loc_psi) shift ; LOC_PSI=$1 ;;
 
   esac
   shift
@@ -452,7 +457,7 @@ fi
 #=============================================================
 # Manage execution of locpargen
 
-if [ "$LOC_RAD" != "0" ] || [ "$LOC_RHO" != "0" ]
+if [ "$LOC_RAD" != "0" ] || [ "$LOC_RHO" != "0" ] || [ "$LOC_PSI" != "0" ]
 then
   if [ ! -f $LOCPARGEN ]
   then
@@ -462,6 +467,7 @@ then
   python $GACODE_ROOT/shared/bin/profile_parse.py $FILE
   echo $LOC_RAD > input.locpargen
   echo $LOC_RHO >> input.locpargen
+  echo $LOC_PSI >> input.locpargen
   echo $Z1 >> input.locpargen
   echo $Z2 >> input.locpargen
   echo $Z3 >> input.locpargen

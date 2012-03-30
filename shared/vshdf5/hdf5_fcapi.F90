@@ -335,11 +335,11 @@
   endif
 #ifdef __MPI
   if (h5in%pIO) then
-    call h5fopen_f(fname,H5F_ACC_RDONLY_F,fileId,error, &
+    call h5fopen_f(fname,H5F_ACC_RDWR_F,fileId,error, &
                   access_prp=plist_id)
   else
 #else
-  call h5fopen_f(fname, H5F_ACC_RDONLY_F, fileId, error)
+  call h5fopen_f(fname, H5F_ACC_RDWR_F, fileId, error)
 #endif
 #ifdef __MPI
   endif
@@ -352,7 +352,7 @@
 ! Grab the root group id which is created by default
 !-----------------------------------------------------------------------
   call h5gopen_f(fileId,"/",rootGid,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      h5err%errorMsg = 'ERROR: Error grabbing root ID: '//fname
      h5err%errBool = .true.
      return
@@ -411,7 +411,7 @@
      call h5fcreate_f(TRIM(fname),access_mode,fileId,error)
 #endif
   endif
-  if (error==FAIL) then
+  if (error.ne.0) then
      h5err%errorMsg = 'ERROR: Error opening file: '//fname
      h5err%errBool = .true.
      return
@@ -420,7 +420,7 @@
 ! Grab the root group id which is created by default
 !-----------------------------------------------------------------------
   call h5gopen_f(fileId,"/",rootGid,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      h5err%errorMsg = 'ERROR: Error grabbing root ID: '//fname
      h5err%errBool = .true.
      return
@@ -454,7 +454,7 @@
 !-----------------------------------------------------------------------
   call h5gclose_f(root_id, error)
   call h5fclose_f(fileId, error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      h5err%errorMsg = 'ERROR: Error in close_h5file'
      h5err%errBool = .true.
      return
@@ -479,7 +479,7 @@
 ! Open group
 !-----------------------------------------------------------------------
   call h5gopen_f(inid,gname,gid,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Error opening group: '//gname
      errval%errBool = .true.
      return
@@ -509,7 +509,7 @@
   !call h5gopen_f(inid,gname,gid,error)
   ! If it failed, most likely it doesn't exist
   call h5gcreate_f(inid,gname,gid,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Error opening group: '//gname
      errval%errBool = .true.
      return
@@ -563,7 +563,7 @@
 ! Close group
 !-----------------------------------------------------------------------
   call h5gclose_f(inid,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Error closing group: '//TRIM(gname)
      errval%errBool = .true.
      return
@@ -590,7 +590,7 @@
 !  error message
 !-----------------------------------------------------------------------
   call h5gopen_f(inid,gname,gid,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
       group_exists=.FALSE.
   else
       group_exists=.TRUE.
@@ -617,7 +617,7 @@
 !  error message
 !-----------------------------------------------------------------------
   call h5gn_members_f(inid,gname,nmembers, error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Error in get_nmembers for'//gname
      errval%errBool = .true.
      return
@@ -823,7 +823,7 @@
   ! Create dataset attribute for the group
   call h5acreate_f(inid, aname, atype_id, aspace_id,attr_id, error)
 
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'Cannot create attribute '//aname//attribute
      errval%errBool = .true.
      return
@@ -891,7 +891,7 @@
   ! Create dataset attribute for the group
   call h5acreate_f(inid, aname, atype_id, aspace_id,attr_id, error)
 
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Can not create attribute '//aname
      errval%errBool = .true.
      return
@@ -939,7 +939,7 @@
   call h5tcopy_f(H5T_NATIVE_integer, atype_id, error)
   call h5acreate_f(inid,aname,atype_id,aspace_id,attr_id,error)
 
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Can not create attribute '//aname
      errval%errBool = .true.
      return
@@ -989,7 +989,7 @@
   call h5acreate_f(inid,aname,atype_id,aspace_id,attr_id,error)
 
 
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Can not create attribute '//aname
      errval%errBool = .true.
      return
@@ -1037,7 +1037,7 @@
   call h5tcopy_f(H5T_NATIVE_integer, atype_id, error)
   call h5acreate_f(inid,aname,atype_id,aspace_id,attr_id,error)
 
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Can not create attribute '//aname
      errval%errBool = .true.
      return
@@ -1087,7 +1087,7 @@
   call h5acreate_f(inid,aname,atype_id,aspace_id,attr_id,error)
 
 
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Can not create attribute '//aname
      errval%errBool = .true.
      return
@@ -1133,7 +1133,7 @@
   call h5tcopy_f(H5T_NATIVE_DOUBLE, atype_id, error)
   call h5acreate_f(inid,aname,atype_id,aspace_id,attr_id,error)
 
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Can not create attribute '//aname
      errval%errBool = .true.
      return
@@ -1183,7 +1183,7 @@
   call h5tcopy_f(H5T_NATIVE_DOUBLE, atype_id, error)
   call h5acreate_f(inid,aname,atype_id,aspace_id,attr_id,error)
 
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Can not create attribute '//aname
      errval%errBool = .true.
      return
@@ -1235,7 +1235,7 @@
   call h5tcopy_f(H5T_NATIVE_DOUBLE, atype_id, error)
   call h5acreate_f(inid,aname,atype_id,aspace_id,attr_id,error)
 
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Can not create attribute '//aname
      errval%errBool = .true.
      return
@@ -1353,7 +1353,7 @@
 ! Create the data space.
 !-----------------------------------------------------------------------
   call h5screate_f(H5S_SCALAR_F, dspace_id, error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
      errval%errBool = .true.
      return
@@ -1364,7 +1364,7 @@
 !-----------------------------------------------------------------------
   call h5dcreate_f(inid,aname, &
                   H5T_NATIVE_integer,dspace_id,dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
      return
@@ -1376,7 +1376,7 @@
 #ifdef __MPI
   call h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
   call h5pset_dxpl_mpio_f(plist_id,H5FD_MPIO_COLLECTIVE_F,error)
-   if (error==FAIL) then
+   if (error.ne.0) then
       errval%errorMsg = 'ERROR: Creating plist failed for '//aname
       errval%errBool = .true.
       return
@@ -1387,7 +1387,7 @@
 ! Write stored data to "name" data set.
 !-----------------------------------------------------------------------
   call h5dwrite_f(dset_id,H5T_NATIVE_INTEGER,value,dims,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Data set write failed for '//aname
      errval%errBool = .true.
      return
@@ -1400,13 +1400,13 @@
 ! Terminate access to the dataset and dataspace
 !-----------------------------------------------------------------------
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
   endif
   call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data space failed for '//aname
      errval%errBool = .true.
      return
@@ -1439,7 +1439,7 @@
 ! Create the data space.
 !-----------------------------------------------------------------------
   call h5screate_simple_f(rank,dims,dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
      errval%errBool = .true.
      return
@@ -1449,7 +1449,7 @@
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-----------------------------------------------------------------------
   call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
      return
@@ -1461,7 +1461,7 @@
 #ifdef __MPI
   call h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
   call h5pset_dxpl_mpio_f(plist_id,H5FD_MPIO_COLLECTIVE_F,error)
-   if (error==FAIL) then
+   if (error.ne.0) then
       errval%errorMsg = 'ERROR: Creating plist failed for '//aname
       errval%errBool = .true.
       return
@@ -1481,7 +1481,7 @@
    call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error)
   endif
 !#endif
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Data set write failed for '//aname
      errval%errBool = .true.
      return
@@ -1494,13 +1494,13 @@
 ! Terminate access to the dataset and dataspace
 !-----------------------------------------------------------------------
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
   endif
   call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data space failed for '//aname
      errval%errBool = .true.
      return
@@ -1530,7 +1530,7 @@
 ! Create the data space.
 !-----------------------------------------------------------------------
   call h5screate_f(H5S_SCALAR_F, dspace_id, error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
      errval%errBool = .true.
      return
@@ -1541,7 +1541,7 @@
 !-----------------------------------------------------------------------
   call h5dcreate_f(inid,aname, &
                   H5T_NATIVE_integer,dspace_id,dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
      return
@@ -1553,7 +1553,7 @@
 #ifdef __MPI
   call h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
   call h5pset_dxpl_mpio_f(plist_id,H5FD_MPIO_COLLECTIVE_F,error)
-   if (error==FAIL) then
+   if (error.ne.0) then
       errval%errorMsg = 'ERROR: Creating plist failed for '//aname
       errval%errBool = .true.
       return
@@ -1564,7 +1564,7 @@
 ! Write stored data to "name" data set.
 !-----------------------------------------------------------------------
   call h5dwrite_f(dset_id,H5T_NATIVE_INTEGER,int(value,i4),dims,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Data set write failed for '//aname
      errval%errBool = .true.
      return
@@ -1577,13 +1577,13 @@
 ! Terminate access to the dataset and dataspace
 !-----------------------------------------------------------------------
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
   endif
   call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data space failed for '//aname
      errval%errBool = .true.
      return
@@ -1619,7 +1619,7 @@
 ! Create the data space.
 !-----------------------------------------------------------------------
   call h5screate_simple_f(rank,dims,dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
      errval%errBool = .true.
      return
@@ -1629,7 +1629,7 @@
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-----------------------------------------------------------------------
   call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
      return
@@ -1641,7 +1641,7 @@
 #ifdef __MPI
   call h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
   call h5pset_dxpl_mpio_f(plist_id,H5FD_MPIO_COLLECTIVE_F,error)
-   if (error==FAIL) then
+   if (error.ne.0) then
       errval%errorMsg = 'ERROR: Creating plist failed for '//aname
       errval%errBool = .true.
       return
@@ -1657,7 +1657,7 @@
 !#else
    call h5dwrite_f(dset_id,H5T_NATIVE_INTEGER,intarray,dims,error)
 !#endif
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Data set write failed for '//aname
      errval%errBool = .true.
      return
@@ -1671,13 +1671,13 @@
 ! Terminate access to the dataset and dataspace
 !-----------------------------------------------------------------------
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
   endif
   call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data space failed for '//aname
      errval%errBool = .true.
      return
@@ -1707,7 +1707,7 @@
 ! Create the data space.
 !-------------------------------------------------------------------
   call h5screate_f(H5S_SCALAR_F, dspace_id, error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
      errval%errBool = .true.
      return
@@ -1717,7 +1717,7 @@
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-------------------------------------------------------------------
   call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
      return
@@ -1729,7 +1729,7 @@
 #ifdef __MPI
       call h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
       call h5pset_dxpl_mpio_f(plist_id,H5FD_MPIO_COLLECTIVE_F,error)
-       if (error==FAIL) then
+       if (error.ne.0) then
           errval%errorMsg = 'ERROR: Creating plist failed for '//aname
           errval%errBool = .true.
           return
@@ -1744,7 +1744,7 @@
   else
     call h5dwrite_f(dset_id,h5in%wrd_type,value,dims,error)
   endif
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Data set write failed for '//aname
      errval%errBool = .true.
      return
@@ -1757,13 +1757,13 @@
 ! Terminate access to the dataset and dataspace
 !-----------------------------------------------------------------------
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
   endif
   call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data space failed for '//aname
      errval%errBool = .true.
      return
@@ -1793,7 +1793,7 @@
 ! Create the data space.
 !-------------------------------------------------------------------
   call h5screate_f(H5S_SCALAR_F, dspace_id, error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
      errval%errBool = .true.
      return
@@ -1803,7 +1803,7 @@
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-------------------------------------------------------------------
   call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
      return
@@ -1815,7 +1815,7 @@
 #ifdef __MPI
       call h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
       call h5pset_dxpl_mpio_f(plist_id,H5FD_MPIO_COLLECTIVE_F,error)
-       if (error==FAIL) then
+       if (error.ne.0) then
           errval%errorMsg = 'ERROR: Creating plist failed for '//aname
           errval%errBool = .true.
           return
@@ -1830,7 +1830,7 @@
   else
     call h5dwrite_f(dset_id,h5in%wrd_type,value,dims,error)
   endif
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Data set write failed for '//aname
      errval%errBool = .true.
      return
@@ -1843,13 +1843,13 @@
 ! Terminate access to the dataset and dataspace
 !-----------------------------------------------------------------------
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
   endif
   call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data space failed for '//aname
      errval%errBool = .true.
      return
@@ -1884,7 +1884,7 @@
 ! Create the data space.
 !-----------------------------------------------------------------------
   call h5screate_simple_f(rank,dims,dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
      errval%errBool = .true.
      return
@@ -1894,7 +1894,7 @@
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-----------------------------------------------------------------------
   call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
      return
@@ -1906,7 +1906,7 @@
 #ifdef __MPI
   call h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
   call h5pset_dxpl_mpio_f(plist_id,H5FD_MPIO_COLLECTIVE_F,error)
-   if (error==FAIL) then
+   if (error.ne.0) then
       errval%errorMsg = 'ERROR: Creating plist failed for '//aname
       errval%errBool = .true.
       return
@@ -1926,7 +1926,7 @@
    call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error)
   endif
 !#endif
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Data set write failed for '//aname
      errval%errBool = .true.
      return
@@ -1939,13 +1939,13 @@
 ! Terminate access to the dataset and dataspace
 !-----------------------------------------------------------------------
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
   endif
   call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data space failed for '//aname
      errval%errBool = .true.
      return
@@ -1984,7 +1984,7 @@
 ! Create the data space.
 !-----------------------------------------------------------------------
   call h5screate_simple_f(rank,dims,dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
      errval%errBool = .true.
      return
@@ -1994,7 +1994,7 @@
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-----------------------------------------------------------------------
   call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
      return
@@ -2005,7 +2005,7 @@
 #ifdef __MPI
   call h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
   call h5pset_dxpl_mpio_f(plist_id,H5FD_MPIO_COLLECTIVE_F,error)
-   if (error==FAIL) then
+   if (error.ne.0) then
       errval%errorMsg = 'ERROR: Creating plist failed for '//aname
       errval%errBool = .true.
       return
@@ -2049,7 +2049,7 @@
    endif
   endif
 #endif
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Writing data set failed for '//aname
      errval%errBool = .true.
      return
@@ -2062,13 +2062,13 @@
 ! Terminate access to the dataset and dataspace
 !-----------------------------------------------------------------------
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
   endif
   call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data space failed for '//aname
      errval%errBool = .true.
      return
@@ -2114,7 +2114,7 @@
 !-----------------------------------------------------------------------
   if(h5in%debug) WRITE(*,*) 'Calling h5screate_simple_f', dims
   call h5screate_simple_f(rank,dims,dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
      errval%errBool = .true.
      return
@@ -2125,7 +2125,7 @@
 !-----------------------------------------------------------------------
   if(h5in%debug) WRITE(*,*) 'Calling h5dcreate_simple_f', h5in%wrd_type
   call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
      return
@@ -2136,7 +2136,7 @@
 #ifdef __MPI
   call h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
   call h5pset_dxpl_mpio_f(plist_id,H5FD_MPIO_COLLECTIVE_F,error)
-   if (error==FAIL) then
+   if (error.ne.0) then
       errval%errorMsg = 'ERROR: Creating plist failed for '//aname
       errval%errBool = .true.
       return
@@ -2182,7 +2182,7 @@
    endif
   endif
 #endif
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Writing data set failed for '//aname
      errval%errBool = .true.
      return
@@ -2195,13 +2195,13 @@
 ! Terminate access to the dataset and dataspace
 !-----------------------------------------------------------------------
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
   endif
   call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data space failed for '//aname
      errval%errBool = .true.
      return
@@ -2248,7 +2248,7 @@
 ! Create the data space.
 !-----------------------------------------------------------------------
   call h5screate_simple_f(rank,dims,dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
      errval%errBool = .true.
      return
@@ -2258,7 +2258,7 @@
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-----------------------------------------------------------------------
   call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
      return
@@ -2269,7 +2269,7 @@
 #ifdef __MPI
   call h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
   call h5pset_dxpl_mpio_f(plist_id,H5FD_MPIO_COLLECTIVE_F,error)
-   if (error==FAIL) then
+   if (error.ne.0) then
       errval%errorMsg = 'ERROR: Creating plist failed for '//aname
       errval%errBool = .true.
       return
@@ -2306,7 +2306,7 @@
     call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error)
   endif
 #endif
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Writing data set failed for '//aname
      errval%errBool = .true.
      return
@@ -2319,13 +2319,13 @@
 ! Terminate access to the dataset and dataspace
 !-----------------------------------------------------------------------
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
   endif
   call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data space failed for '//aname
      errval%errBool = .true.
      return
@@ -2359,7 +2359,7 @@
 ! Create the data space.
 !-----------------------------------------------------------------------
   call h5screate_simple_f(rank,dims,dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
      errval%errBool = .true.
      return
@@ -2369,7 +2369,7 @@
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-----------------------------------------------------------------------
   call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
      return
@@ -2381,7 +2381,7 @@
 #ifdef __MPI
   call h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
   call h5pset_dxpl_mpio_f(plist_id,H5FD_MPIO_COLLECTIVE_F,error)
-   if (error==FAIL) then
+   if (error.ne.0) then
       errval%errorMsg = 'ERROR: Creating plist failed for '//aname
       errval%errBool = .true.
       return
@@ -2397,7 +2397,7 @@
 !#else
    call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error)
 !#endif
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Data set write failed for '//aname
      errval%errBool = .true.
      return
@@ -2410,13 +2410,13 @@
 ! Terminate access to the dataset and dataspace
 !-----------------------------------------------------------------------
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
   endif
   call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data space failed for '//aname
      errval%errBool = .true.
      return
@@ -2455,7 +2455,7 @@
 ! Create the data space.
 !-----------------------------------------------------------------------
   call h5screate_simple_f(rank,dims,dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
      errval%errBool = .true.
      return
@@ -2465,7 +2465,7 @@
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-----------------------------------------------------------------------
   call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
      return
@@ -2476,7 +2476,7 @@
 #ifdef __MPI
   call h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
   call h5pset_dxpl_mpio_f(plist_id,H5FD_MPIO_COLLECTIVE_F,error)
-   if (error==FAIL) then
+   if (error.ne.0) then
       errval%errorMsg = 'ERROR: Creating plist failed for '//aname
       errval%errBool = .true.
       return
@@ -2501,7 +2501,7 @@
     call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error)
   endif
 #endif
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Writing data set failed for '//aname
      errval%errBool = .true.
      return
@@ -2514,13 +2514,13 @@
 ! Terminate access to the dataset and dataspace
 !-----------------------------------------------------------------------
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
   endif
   call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data space failed for '//aname
      errval%errBool = .true.
      return
@@ -2565,7 +2565,7 @@
 ! Create the data space.
 !-----------------------------------------------------------------------
   call h5screate_simple_f(rank,dims,dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
      errval%errBool = .true.
      return
@@ -2575,7 +2575,7 @@
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-----------------------------------------------------------------------
   call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
      return
@@ -2586,7 +2586,7 @@
 #ifdef __MPI
   call h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
   call h5pset_dxpl_mpio_f(plist_id,H5FD_MPIO_COLLECTIVE_F,error)
-   if (error==FAIL) then
+   if (error.ne.0) then
       errval%errorMsg = 'ERROR: Creating plist failed for '//aname
       errval%errBool = .true.
       return
@@ -2612,7 +2612,7 @@
     call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error)
   endif
 #endif
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Writing data set failed for '//aname
      errval%errBool = .true.
      return
@@ -2625,13 +2625,13 @@
 ! Terminate access to the dataset and dataspace
 !-----------------------------------------------------------------------
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
   endif
   call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data space failed for '//aname
      errval%errBool = .true.
      return
@@ -2677,7 +2677,7 @@
 ! Create the data space.
 !-----------------------------------------------------------------------
   call h5screate_simple_f(rank,dims,dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
      errval%errBool = .true.
      return
@@ -2687,7 +2687,7 @@
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-----------------------------------------------------------------------
   call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
      return
@@ -2698,7 +2698,7 @@
 #ifdef __MPI
   call h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
   call h5pset_dxpl_mpio_f(plist_id,H5FD_MPIO_COLLECTIVE_F,error)
-   if (error==FAIL) then
+   if (error.ne.0) then
       errval%errorMsg = 'ERROR: Creating plist failed for '//aname
       errval%errBool = .true.
       return
@@ -2724,7 +2724,7 @@
     call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error)
   endif
 #endif
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Writing data set failed for '//aname
      errval%errBool = .true.
      return
@@ -2737,13 +2737,13 @@
 ! Terminate access to the dataset and dataspace
 !-----------------------------------------------------------------------
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
   endif
   call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data space failed for '//aname
      errval%errBool = .true.
      return
@@ -2790,7 +2790,7 @@
     maxdims = (/H5S_UNLIMITED_f/)
     dims = (/1/)
     call h5screate_simple_f(rank, dims, dspace_id, error, maxdims)
-     if (error==FAIL) then
+     if (error.ne.0) then
        errval%errorMsg = 'ERROR: Create data space failed for '//aname
        errval%errBool = .true.
        return
@@ -2802,20 +2802,20 @@
 
     ! Create a new dataset within the file using cparms creation properties.
     call h5dcreate_f(inid,aname,H5T_NATIVE_INTEGER,dspace_id,dset_id,error,cparms)
-    if (error==FAIL) then
+    if (error.ne.0) then
        errval%errorMsg = 'ERROR: Create data set failed for '//aname
        errval%errBool = .true.
        return
     endif
     ! Write stored data to "name" data set.
     call h5dwrite_f(dset_id,H5T_NATIVE_INTEGER,value,dims,error)
-    if (error==FAIL) then
+    if (error.ne.0) then
        errval%errorMsg = 'ERROR: Data set write failed for '//aname
        errval%errBool = .true.
        return
     endif
     call h5pclose_f(cparms, error) !Close the property list.
-    if (error==FAIL) then
+    if (error.ne.0) then
        errval%errorMsg = 'ERROR: Close property list failed for '//aname
        errval%errBool = .true.
        return
@@ -2858,13 +2858,13 @@
 ! Terminate access to the dataset and dataspace
 !-----------------------------------------------------------------------
   call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data space failed for '//aname
      errval%errBool = .true.
      return
   endif
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
@@ -2911,7 +2911,7 @@
     maxdims = (/H5S_UNLIMITED_f/)
     dims = (/1/)
     call h5screate_simple_f(rank, dims, dspace_id, error, maxdims)
-     if (error==FAIL) then
+     if (error.ne.0) then
        errval%errorMsg = 'ERROR: Create data space failed for '//aname
        errval%errBool = .true.
        return
@@ -2922,13 +2922,13 @@
 
     ! Create a new dataset within the file using cparms creation properties.
     call h5dcreate_f(inid,aname,H5T_NATIVE_DOUBLE,dspace_id,dset_id,error,cparms)
-    if (error==FAIL) then
+    if (error.ne.0) then
        errval%errorMsg = 'ERROR: Create data set failed for '//aname
        errval%errBool = .true.
        return
     endif
     call h5pclose_f(cparms, error) !Close the property list.
-    if (error==FAIL) then
+    if (error.ne.0) then
        errval%errorMsg = 'ERROR: Close property list failed for '//aname
        errval%errBool = .true.
        return
@@ -2937,7 +2937,7 @@
     ! Write stored data to "name" data set.
     !call h5dwrite_f(dset_id,H5T_NATIVE_DOUBLE,value,dims,error)
     call H5Dwrite_f(dset_id,H5T_NATIVE_DOUBLE,value,dims,error)
-    if (error==FAIL) then
+    if (error.ne.0) then
        errval%errorMsg = 'ERROR: Data set write failed for '//aname
        errval%errBool = .true.
        return
@@ -2980,13 +2980,13 @@
 ! Terminate access to the dataset and dataspace
 !-----------------------------------------------------------------------
   call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data space failed for '//aname
      errval%errBool = .true.
      return
   endif
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
@@ -3035,7 +3035,7 @@
     ! For convenience, put the time step (extendible set, as the first index
     dims = (/1, asize/)
     call h5screate_simple_f(rank, dims, dspace_id, error, maxdims)
-     if (error==FAIL) then
+     if (error.ne.0) then
        errval%errorMsg = 'ERROR: Create data space failed for '//aname
        errval%errBool = .true.
        return
@@ -3047,20 +3047,20 @@
 
     ! Create a new dataset within the file using cparms creation properties.
     call h5dcreate_f(inid,aname,H5T_NATIVE_INTEGER,dspace_id,dset_id,error,cparms)
-    if (error==FAIL) then
+    if (error.ne.0) then
        errval%errorMsg = 'ERROR: Create data set failed for '//aname
        errval%errBool = .true.
        return
     endif
     ! Write stored data to "name" data set.
     call h5dwrite_f(dset_id,H5T_NATIVE_INTEGER,array,dims,error)
-    if (error==FAIL) then
+    if (error.ne.0) then
        errval%errorMsg = 'ERROR: Data set write failed for '//aname
        errval%errBool = .true.
        return
     endif
     call h5pclose_f(cparms, error) !Close the property list.
-    if (error==FAIL) then
+    if (error.ne.0) then
        errval%errorMsg = 'ERROR: Close property list failed for '//aname
        errval%errBool = .true.
        return
@@ -3104,13 +3104,13 @@
 ! Terminate access to the dataset and dataspace
 !-----------------------------------------------------------------------
   call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data space failed for '//aname
      errval%errBool = .true.
      return
   endif
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
@@ -3139,7 +3139,7 @@
   integer(HSIZE_T), dimension(2) :: dims,maxdims,chunk_dims,extdims,offset
   integer(HSIZE_T), dimension(2) :: olddims,oldmaxdims
   integer(HID_T) :: cparms        !dataset creatation property identifier 
-  LOGICAL(i4) :: dset_exists
+  LOGICAL(i4) :: dset_exists =.false.
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) 'Writing ', aname
 !-----------------------------------------------------------------------
@@ -3147,44 +3147,70 @@
 ! whether data exists or not.
 !-----------------------------------------------------------------------
   call h5lexists_f(inid, aname, dset_exists, error)
+    if(h5in%debug) write(*,*) "add_h5_1d : h5lexists_f"
+    if(h5in%debug) write(*,*) inid, aname, dset_exists, error
+   if (error.ne.0) then
+      errval%errorMsg = 'ERROR: h5lexists_f  failed for '//aname
+      errval%errBool = .true.
+      return
+    endif
+
+  !get number of elements in array
   asize=SIZE(array)
+    if(h5in%debug) write(*,*) "add_h5_1d asize=",asize
+  
 
 !-----------------------------------------------------------------------
 ! Do the case of creating the data
 !-----------------------------------------------------------------------
   if (.NOT. dset_exists) then
+
+    if(h5in%debug) write(*,*) ".NOT. dset_exists"
     !
     ! Create the data space with unlimited dimensions.
     maxdims = (/H5S_UNLIMITED_f, H5S_UNLIMITED_f/)
+    if(h5in%debug) write(*,*) "H5S_UNLIMITED_f= ", H5S_UNLIMITED_f
+
     ! For convenience, put the time step (extendible set, as the first index
     dims = (/1, asize/)
     call h5screate_simple_f(rank, dims, dspace_id, error, maxdims)
-     if (error==FAIL) then
+     if (error.ne.0) then
        errval%errorMsg = 'ERROR: Create data space failed for '//aname
        errval%errBool = .true.
        return
     endif
     ! Modify dataset creation properties, i.e. enable chunking
     call h5pcreate_f(H5P_DATASET_CREATE_F, cparms, error)
+    if (error.ne.0) then
+      errval%errorMsg = 'ERROR: h5pcreate_f failed for '//aname
+      errval%errBool = .true.
+      return
+    endif
     chunk_dims = dims
     call h5pset_chunk_f(cparms, rank, chunk_dims, error)
+    if (error.ne.0) then
+       errval%errorMsg = 'ERROR: h5pset_chunk_f failed for '//aname
+       errval%errBool = .true.
+       return
+    endif
+
 
     ! Create a new dataset within the file using cparms creation properties.
     call h5dcreate_f(inid,aname,H5T_NATIVE_DOUBLE,dspace_id,dset_id,error,cparms)
-    if (error==FAIL) then
+    if (error.ne.0) then
        errval%errorMsg = 'ERROR: Create data set failed for '//aname
        errval%errBool = .true.
        return
     endif
     ! Write stored data to "name" data set.
     call h5dwrite_f(dset_id,H5T_NATIVE_DOUBLE,array,dims,error)
-    if (error==FAIL) then
+    if (error.ne.0) then
        errval%errorMsg = 'ERROR: Data set write failed for '//aname
        errval%errBool = .true.
        return
     endif
     call h5pclose_f(cparms, error) !Close the property list.
-    if (error==FAIL) then
+    if (error.ne.0) then
        errval%errorMsg = 'ERROR: Close property list failed for '//aname
        errval%errBool = .true.
        return
@@ -3195,12 +3221,37 @@
 ! Case for appending the dataset
 !-----------------------------------------------------------------------
   else
+    if(h5in%debug) write(*,*) " In add_h5_1d and dset_exists"
+
     call h5dopen_f(inid,aname, dset_id, error)
-    
+    if (error.ne.0) then
+       errval%errorMsg = 'ERROR:  h5dopen_f failed for '//aname
+       errval%errBool = .true.
+       return
+    endif
+
     ! Open filespace in existing dataset and get existing shape and size of data
     call h5dget_space_f(dset_id, filespace, error)
+    if(h5in%debug) write(*,*) " In add_h5_1d and dset_exists: h5dget_space_f error =", error
+    if (error.ne.0) then
+       errval%errorMsg = 'ERROR: h5dget_space_f failed for '//aname
+       errval%errBool = .true.
+       return
+    endif
+
 
     call H5Sget_simple_extent_dims_f(filespace, olddims, oldmaxdims,error)
+    if(h5in%debug) write(*,*) " In add_h5_1d and dset_exists: H5Sget_simple_extent_dims_f error =", error
+    if(h5in%debug) write(*,*) " In add_h5_1d and dset_exists: H5Sget_simple_extent_dims_f  olddims =", &
+       olddims, "  oldmaxdims =",  oldmaxdims
+     ! is seems 2 is the error I get with odlmaxdims = -1 (value of H5S_UNLIMITED_f)
+     if (error.ne.2) then
+       errval%errorMsg = 'ERROR: H5Sget_simple_extent_dims_f failed for '//aname
+       errval%errBool = .true.
+       return
+    endif
+  
+    !would be nice if the fortran for H5Dget_access_plist(dataset_id) existed
     
     ! Extend the dataset. This call assures that dataset has the space
     dims = (/1, asize/)
@@ -3208,33 +3259,70 @@
     extdims(1)=olddims(1)+dims(1)
     extdims(2)=asize
     call h5dextend_f(dset_id, extdims, error)
+    !call h5dset_extent_f(dset_id, extdims, error)
+    if(h5in%debug) write(*,*) " In add_h5_1d and dset_exists:  h5dextend_f error =", error
+    if (error.ne.0) then
+       errval%errorMsg = 'ERROR: h5dextend_f failed for '//aname
+       !errval%errorMsg = 'ERROR: h5dset_extent_f failed for '//aname
+       errval%errBool = .true.
+       return
+    endif
 
     ! Define memory space
     call h5screate_simple_f(rank, dims, dspace_id, error)
+    if (error.ne.0) then
+       errval%errorMsg = 'ERROR: h5screate_simple_f failed for '//aname
+       errval%errBool = .true.
+       return
+    endif
 
     ! Open filespace in existing dataset and get existing shape and size of data
     call h5dget_space_f(dset_id, filespace, error)
+    if (error.ne.0) then
+      errval%errorMsg = 'ERROR:  h5dget_space_f failed for '//aname
+      errval%errBool = .true.
+      return
+    endif
+
+
 
     offset=0
     offset(1) = olddims(1)
     call h5sselect_hyperslab_f(filespace, H5S_SELECT_SET_F, offset, dims, error) 
-    
+    if (error.ne.0) then
+      errval%errorMsg = 'ERROR:  h5sselect_hyperslab_f failed for '//aname
+      errval%errBool = .true.
+      return
+    endif
+
     ! Write the data to the hyperslab.
     call H5Dwrite_f(dset_id,H5T_NATIVE_DOUBLE,array,dims,error,  &
                     file_space_id=filespace,mem_space_id=dspace_id)
+    if (error.ne.0) then
+      errval%errorMsg = 'ERROR: H5Dwrite_f  failed for '//aname
+      errval%errBool = .true.
+      return
+    endif
+
     call h5sclose_f(filespace, error)
+    if (error.ne.0) then
+      errval%errorMsg = 'ERROR: h5sclose_f  failed for '//aname
+      errval%errBool = .true.
+      return
+    endif
+
   endif
 !-----------------------------------------------------------------------
 ! Terminate access to the dataset and dataspace
 !-----------------------------------------------------------------------
   call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data space failed for '//aname
      errval%errBool = .true.
      return
   endif
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
@@ -3290,7 +3378,7 @@
     maxdims = (/H5S_UNLIMITED_f, H5S_UNLIMITED_f, H5S_UNLIMITED_f/)
     ! For convenience, put the time step (extendible set, as the first index
     call h5screate_simple_f(rank, dims, dspace_id, error, maxdims)
-     if (error==FAIL) then
+     if (error.ne.0) then
        errval%errorMsg = 'ERROR: Create data space failed for '//aname
        errval%errBool = .true.
        return
@@ -3302,7 +3390,7 @@
 
     ! Create a new dataset within the file using cparms creation properties.
     call h5dcreate_f(inid,aname,H5T_NATIVE_DOUBLE,dspace_id,dset_id,error,cparms)
-    if (error==FAIL) then
+    if (error.ne.0) then
        errval%errorMsg = 'ERROR: Create data set failed for '//aname
        errval%errBool = .true.
        return
@@ -3314,13 +3402,13 @@
       call h5dwrite_f(dset_id,H5T_NATIVE_DOUBLE,array,dims,error)
     endif
 
-    if (error==FAIL) then
+    if (error.ne.0) then
        errval%errorMsg = 'ERROR: Data set write failed for '//aname
        errval%errBool = .true.
        return
     endif
     call h5pclose_f(cparms, error) !Close the property list.
-    if (error==FAIL) then
+    if (error.ne.0) then
        errval%errorMsg = 'ERROR: Close property list failed for '//aname
        errval%errBool = .true.
        return
@@ -3373,13 +3461,13 @@
 ! Terminate access to the dataset and dataspace
 !-----------------------------------------------------------------------
   call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data space failed for '//aname
      errval%errBool = .true.
      return
   endif
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
@@ -3423,7 +3511,6 @@
   asize(2)=SIZE(array,2)
   asize(3)=SIZE(array,3)
   ! For convenience, put the time step (extendible set, as the first index
-  if(h5in%verbose) WRITE(*,*) 'Writing ', aname
   if(h5in%doTranspose) then
     dims = (/1, asize(3), asize(2),asize(1)/)
     allocate(tmparray(dims(2),dims(3),dims(4)))
@@ -3443,7 +3530,7 @@
     maxdims = (/H5S_UNLIMITED_f, H5S_UNLIMITED_f, H5S_UNLIMITED_f, H5S_UNLIMITED_f/)
 
     call h5screate_simple_f(rank, dims, dspace_id, error, maxdims)
-     if (error==FAIL) then
+     if (error.ne.0) then
        errval%errorMsg = 'ERROR: Create data space failed for '//aname
        errval%errBool = .true.
        return
@@ -3455,7 +3542,7 @@
 
     ! Create a new dataset within the file using cparms creation properties.
     call h5dcreate_f(inid,aname,H5T_NATIVE_DOUBLE,dspace_id,dset_id,error,cparms)
-    if (error==FAIL) then
+    if (error.ne.0) then
        errval%errorMsg = 'ERROR: Create data set failed for '//aname
        errval%errBool = .true.
        return
@@ -3467,13 +3554,13 @@
       call h5dwrite_f(dset_id,H5T_NATIVE_DOUBLE,array,dims,error)
     endif
 
-    if (error==FAIL) then
+    if (error.ne.0) then
        errval%errorMsg = 'ERROR: Data set write failed for '//aname
        errval%errBool = .true.
        return
     endif
     call h5pclose_f(cparms, error) !Close the property list.
-    if (error==FAIL) then
+    if (error.ne.0) then
        errval%errorMsg = 'ERROR: Close property list failed for '//aname
        errval%errBool = .true.
        return
@@ -3527,13 +3614,13 @@
 ! Terminate access to the dataset and dataspace
 !-----------------------------------------------------------------------
   call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data space failed for '//aname
      errval%errBool = .true.
      return
   endif
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
@@ -3599,7 +3686,7 @@
     maxdims = (/H5S_UNLIMITED_f, H5S_UNLIMITED_f, H5S_UNLIMITED_f, H5S_UNLIMITED_f, H5S_UNLIMITED_f/)
     ! For convenience, put the time step (extendible set, as the first index
     call h5screate_simple_f(rank, dims, dspace_id, error, maxdims)
-     if (error==FAIL) then
+     if (error.ne.0) then
        errval%errorMsg = 'ERROR: Create data space failed for '//aname
        errval%errBool = .true.
        return
@@ -3611,7 +3698,7 @@
 
     ! Create a new dataset within the file using cparms creation properties.
     call h5dcreate_f(inid,aname,H5T_NATIVE_DOUBLE,dspace_id,dset_id,error,cparms)
-    if (error==FAIL) then
+    if (error.ne.0) then
        errval%errorMsg = 'ERROR: Create data set failed for '//aname
        errval%errBool = .true.
        return
@@ -3622,13 +3709,13 @@
     else
       call h5dwrite_f(dset_id,H5T_NATIVE_DOUBLE,array,dims,error)
     endif
-    if (error==FAIL) then
+    if (error.ne.0) then
        errval%errorMsg = 'ERROR: Data set write failed for '//aname
        errval%errBool = .true.
        return
     endif
     call h5pclose_f(cparms, error) !Close the property list.
-    if (error==FAIL) then
+    if (error.ne.0) then
        errval%errorMsg = 'ERROR: Close property list failed for '//aname
        errval%errBool = .true.
        return
@@ -3683,13 +3770,13 @@
 ! Terminate access to the dataset and dataspace
 !-----------------------------------------------------------------------
   call h5sclose_f(dspace_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data space failed for '//aname
      errval%errBool = .true.
      return
   endif
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
@@ -3747,7 +3834,7 @@
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) ' Reading integer value: ', aname
   call h5dopen_f(fid, aname, dset_id, error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Find data set failed for '//aname
      errval%errBool = .true.
      return
@@ -3757,7 +3844,7 @@
 !-----------------------------------------------------------------------
   if (errval%errBool) return
   call h5dread_f(dset_id,h5in%wrd_type,intvalue,dims,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Reading data set failed for '//aname
      errval%errBool = .true.
      call h5dclose_f(dset_id,error)
@@ -3768,7 +3855,7 @@
 ! Terminate access to the dataset
 !-----------------------------------------------------------------------
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
@@ -3800,7 +3887,7 @@
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) ' Reading 1d array: ', aname
   call h5dopen_f(fid, aname, dset_id, error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Find data set failed for '//aname
      errval%errBool = .true.
      return
@@ -3815,7 +3902,7 @@
   call check_dims(dims,fdims, errval)
   if (errval%errBool) return
   call h5dread_f(dset_id,h5in%wrd_type,intarray,dims,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Reading data set failed for '//aname
      errval%errBool = .true.
      call h5dclose_f(dset_id,error)
@@ -3826,7 +3913,7 @@
 ! Terminate access to the dataset
 !-----------------------------------------------------------------------
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
@@ -3856,7 +3943,7 @@
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) ' Reading 1d array: ', aname
   call h5dopen_f(fid, aname, dset_id, error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Find data set failed for '//aname
      errval%errBool = .true.
      return
@@ -3869,7 +3956,7 @@
   call check_dims(dims,fdims, errval)
   if (errval%errBool) return
   call h5dread_f(dset_id,h5in%wrd_type,array,dims,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Reading data set failed for '//aname
      errval%errBool = .true.
      call h5dclose_f(dset_id,error)
@@ -3879,7 +3966,7 @@
 ! Terminate access to the dataset
 !-----------------------------------------------------------------------
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
@@ -3911,7 +3998,7 @@
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) ' Reading 2d array: ', aname
   call h5dopen_f(fid, aname, dset_id, error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Find data set failed for '//aname
      errval%errBool = .true.
      return
@@ -3941,7 +4028,7 @@
      do i=1,dims(1);      array(:,i)=tmparray(i,:);     enddo
      deallocate(tmparray)
   endif
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Read data set failed for '//aname
      errval%errBool = .true.
      call h5dclose_f(dset_id,error)
@@ -3951,7 +4038,7 @@
 ! Terminate access to the dataset
 !-----------------------------------------------------------------------
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
@@ -3983,7 +4070,7 @@
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) ' Reading 3d array: ', aname
   call h5dopen_f(fid, TRIM(aname), dset_id, error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Find data set failed for '//aname
      errval%errBool = .true.
      return
@@ -4019,7 +4106,7 @@
      enddo; enddo
      deallocate(tmparray)
   endif
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Read data set failed for '//aname
      errval%errBool = .true.
      return
@@ -4028,7 +4115,7 @@
 ! Terminate access to the dataset
 !-----------------------------------------------------------------------
   call h5dclose_f(dset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
@@ -4059,7 +4146,7 @@
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) ' Reading attribute: ', aname
   call h5aopen_name_f(fid, aname, aset_id, error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Find data set failed for '//aname
      errval%errBool = .true.
      return
@@ -4069,7 +4156,7 @@
 !-----------------------------------------------------------------------
   dims(1)=1
   call h5aread_f(aset_id,h5in%wrd_type,intval,dims,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Reading data set failed for '//aname
      errval%errBool = .true.
      call h5aclose_f(aset_id,error)
@@ -4080,7 +4167,7 @@
 ! Terminate access to the dataset
 !-----------------------------------------------------------------------
   call h5aclose_f(aset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
@@ -4110,7 +4197,7 @@
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) ' Reading attribute: ', aname
   call h5aopen_name_f(fid, aname, aset_id, error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Find data set failed for '//aname
      errval%errBool = .true.
      return
@@ -4120,7 +4207,7 @@
 !-----------------------------------------------------------------------
   dims(1)=1
   call h5aread_f(aset_id,h5in%wrd_type,val,dims,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Reading data set failed for '//aname
      errval%errBool = .true.
      call h5aclose_f(aset_id,error)
@@ -4130,7 +4217,7 @@
 ! Terminate access to the dataset
 !-----------------------------------------------------------------------
   call h5aclose_f(aset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
@@ -4161,7 +4248,7 @@
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) ' Reading attribute: ', aname
   call h5aopen_name_f(fid, aname, aset_id, error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Find data set failed for '//aname
      errval%errBool = .true.
      return
@@ -4173,7 +4260,7 @@
   allocate(intarray(dims(1)))
   intarray = array
   call h5aread_f(aset_id,h5in%wrd_type,intarray,dims,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Reading data set failed for '//aname
      errval%errBool = .true.
      call h5aclose_f(aset_id,error)
@@ -4184,7 +4271,7 @@
 ! Terminate access to the dataset
 !-----------------------------------------------------------------------
   call h5aclose_f(aset_id,error)
-  if (error==FAIL) then
+  if (error.ne.0) then
      errval%errorMsg = 'ERROR: Close data set failed for '//aname
      errval%errBool = .true.
      return
