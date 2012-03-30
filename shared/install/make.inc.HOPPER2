@@ -45,3 +45,24 @@ NETCDF_INC = ${CRAY_NETCDF_DIR}/pgi/109/include
 # Archive 
 ARCH = ar cr
 
+# OPTIONAL: HDF5 (for vshdf5)
+# Even though our use of HDF5 is essentially serial, using the parallel
+# version makes some things easier.
+# Set these to blanks to turn off:
+
+#HDF5_LIBS = -L/contrib/hdf5-par/lib -lhdf5_fortran -lhdf5_f90cstub -lhdf5 -lz
+#
+#
+HDF5_LIBS = \
+  ${HDF5_DIR}/lib/libhdf5_fortran_pgi_parallel.a \
+  ${HDF5_DIR}/lib/libhdf5hl_fortran_pgi_parallel.a \
+  ${HDF5_DIR}/lib/libhdf5_hl_pgi_parallel.a \
+  ${HDF5_DIR}/lib/libhdf5_pgi_parallel.a
+
+
+HDF5_INC = -I${HDF5_INCLUDE_OPTS}
+VSHDF5_MAKECMD=vshdf5
+VSHDF5_ALLLIBS= ../vshdf5/libgyro_vshdf5.a ../../shared/vshdf5/libvshdf5.a $(HDF5LIBS)
+MPI_FLAG=-Wp,-D__MPI
+
+
