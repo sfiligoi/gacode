@@ -34,7 +34,7 @@ FNOMP  =
 
 # System math libraries
 
-LMATH = -L${FFTW_DIR} -l drfftw -L${FFTW_DIR} -l dfftw \
+LMATH = -L${FFTW_DIR} -ldrfftw -L${FFTW_DIR} -ldfftw \
         -L${SLEPC_LIB}
 
 # OPTIONAL: netCDF (for gyro2gkv)
