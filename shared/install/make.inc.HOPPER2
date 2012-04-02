@@ -63,6 +63,6 @@ HDF5_LIBS = \
 HDF5_INC = -I${HDF5_INCLUDE_OPTS}
 VSHDF5_MAKECMD=vshdf5
 VSHDF5_ALLLIBS= ../vshdf5/libgyro_vshdf5.a ../../shared/vshdf5/libvshdf5.a $(HDF5LIBS)
-MPI_FLAG=-Wp,-D__MPI
+MPI_FLAG=-D__MPI
 
 
