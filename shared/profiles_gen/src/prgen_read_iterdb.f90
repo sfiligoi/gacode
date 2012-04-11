@@ -67,6 +67,7 @@ subroutine prgen_read_iterdb
   read(1,*) t ; read(1,*) q
   read(1,*) t ; read(1,*) onetwo_ene
 
+
   do i=1,onetwo_nion
      read(1,*) t ; read(1,*) onetwo_enion(:,i)
   enddo
@@ -86,19 +87,19 @@ subroutine prgen_read_iterdb
 
   read(1,*) t ; read(1,*) xv ! fast ion density
 
-  do i=1,1
+  do i=1,onetwo_nprim
      read(1,*) t ; read(1,*) xv ! neutral density
   enddo
 
-  do i=1,1
+  do i=1,onetwo_nprim
      read(1,*) t ; read(1,*) xv ! neutral density from wall source
   enddo
 
-  do i=1,1
+  do i=1,onetwo_nprim
      read(1,*) t ; read(1,*) xv ! neutral density from volume source
   enddo
 
-  do i=1,1
+  do i=1,onetwo_nprim
      read(1,*) t ; read(1,*) xv ! volume source of neutrals
   enddo
 
@@ -145,7 +146,7 @@ subroutine prgen_read_iterdb
   read(1,*) t ; read(1,*) onetwo_volume ! 63
   read(1,*) t ; read(1,*) kappa ! 64
   read(1,*) t ; read(1,*) delta ! 65
-  read(1,*) t ; read(1,*) xv !indentation of each flux surface
+  read(1,*) t ; read(1,*) xv ! indentation of each flux surface
   read(1,*) t
   read(1,*) t ; read(1,*) xv ! surface area each flux surface
   read(1,*) t ; read(1,*) xv ! cross-sectional area each surface 
