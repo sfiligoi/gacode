@@ -13,6 +13,8 @@ else
    OBJECTS = gyro_omp_lib.o
 endif
 
+FFLAGS += ${FHDF5}
+
 LLIB = gyro_lib
 
 OBJECTS += gyro_globals.o \
@@ -155,12 +157,15 @@ OBJECTS += gyro_globals.o \
           gyro_dump_input.o \
           gyro_dump_interface.o
 
-.SUFFIXES : .o .f90 
+.SUFFIXES : .o .f90 .F90
 
 lib: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
 
 .f90.o :
+	$(FC) $(FMATH) $(FFLAGS) -c $<
+
+.F90.o :
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:

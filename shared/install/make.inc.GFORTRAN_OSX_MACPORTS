@@ -30,6 +30,7 @@ FDEBUG	= -Wall -fbacktrace -fbounds-check -O0 -Wextra -finit-real=nan -Wunderflo
 FBOUND	= -Wall -fbounds-check
 FPROF	= 
 FOMP	= -fopenmp
+FHDF5 = -DHAVE_HDF5
 
 # System math libraries
 

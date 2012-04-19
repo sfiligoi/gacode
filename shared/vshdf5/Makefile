@@ -6,6 +6,8 @@ else
    FFLAGS=${FOPT}
 endif
 
+FFLAGS += ${FHDF5}
+
 OBJECTS =  hdf5_fcapi.o 
 
 .SUFFIXES : .o .f90  .F90 

@@ -222,6 +222,158 @@ subroutine gyro_write_timedata_hdf5(h5_control)
      ! BEGIN LINEAR
      !=============
 
+!     call get_frequency
+!     if (i_proc == 0 ) then
+!        call add_h5(dumpTGid,'omega',real(omega_linear(:,1)),h5in,h5err)
+!        call add_h5(dumpTGid,'gamma',aimag(omega_linear(:,1)),h5in,h5err)
+!        call add_h5(dumpTGid,'error_omega',real(omega_linear(:,2)),h5in,h5err)
+!        call add_h5(dumpTGid,'error_gamma',aimag(omega_linear(:,2)),h5in,h5err)
+!     endif
+ 
+!     if (plot_u_flag == 1) then        
+!
+!        ! PHI
+!        call get_ballooning_mode(1,0)
+!        if (i_proc==0 .and. io_method>1) then
+!            call add_h5(dumpTGid,'balloon_phi_real',real(ballooning_mode),h5in,h5err)
+!            call add_h5(dumpTGid,'balloon_phi_imag',aimag(ballooning_mode),h5in,h5err)
+!        endif
+!
+!        if (n_field > 1) then
+!           ! A_PARALLEL 
+!           call get_ballooning_mode(2,0)
+!           if (i_proc==0 .and. io_method>1) then
+!               call add_h5(dumpTGid,'balloon_a_real',real(ballooning_mode),h5in,h5err)
+!               call add_h5(dumpTGid,'balloon_a_imag',aimag(ballooning_mode),h5in,h5err)
+!           endif
+!        endif
+!
+!        if (n_field > 2) then
+!           ! B_PARALLEL 
+!           call get_ballooning_mode(3,0)
+!           if (i_proc==0 .and. io_method>1) then
+!               call add_h5(dumpTGid,'balloon_aperp_real',real(ballooning_mode),h5in,h5err)
+!               call add_h5(dumpTGid,'balloon_aperp_imag',aimag(ballooning_mode),h5in,h5err)
+!           endif
+!        endif
+!
+!        ! E_PARALLEL
+!        if (eparallel_plot_flag == 1) then
+!           call get_ballooning_mode(n_field+1,0)
+!           if (i_proc==0 .and. io_method>1) then
+!               call add_h5(dumpTGid,'balloon_epar_real',real(ballooning_mode),h5in,h5err)
+!               call add_h5(dumpTGid,'balloon_epar_imag',aimag(ballooning_mode),h5in,h5err)
+!           endif
+!        endif
+!
+!     endif
+!
+!     if (plot_n_flag == 1) then
+!
+!        ! DENSITY
+!        if (electron_method /= 3) then
+!           call get_ballooning_mode(5,1)
+!           if (i_proc==0 .and. io_method>1) then
+!               call add_h5(dumpTGid,'balloon_n_ion_real',real(ballooning_mode),h5in,h5err)
+!               call add_h5(dumpTGid,'balloon_n_ion_imag',aimag(ballooning_mode),h5in,h5err)
+!           endif
+!        endif
+!        if (electron_method > 1) then 
+!           call get_ballooning_mode(5,indx_e)
+!           if (i_proc==0 .and. io_method>1) then
+!               call add_h5(dumpTGid,'balloon_n_elec_real',real(ballooning_mode),h5in,h5err)
+!               call add_h5(dumpTGid,'balloon_n_elec_imag',aimag(ballooning_mode),h5in,h5err)
+!           endif
+!        endif
+!     endif
+!
+!     if (plot_e_flag == 1) then
+!
+!        ! ENERGY
+!        if (electron_method /= 3) then
+!           call get_ballooning_mode(6,1)
+!           if (i_proc==0 .and. io_method>1) then
+!               call add_h5(dumpTGid,'balloon_e_ion_real',real(ballooning_mode),h5in,h5err)
+!               call add_h5(dumpTGid,'balloon_e_ion_imag',aimag(ballooning_mode),h5in,h5err)
+!           endif
+!        endif
+!        if (electron_method > 1) then 
+!           call get_ballooning_mode(6,indx_e)
+!           if (i_proc==0 .and. io_method>1) then
+!               call add_h5(dumpTGid,'balloon_e_elec_real',real(ballooning_mode),h5in,h5err)
+!               call add_h5(dumpTGid,'balloon_e_elec_imag',aimag(ballooning_mode),h5in,h5err)
+!           endif
+!        endif
+!     endif
+!
+!     if (plot_v_flag == 1) then
+!
+!        ! ENERGY
+!        if (electron_method /= 3) then
+!           call get_ballooning_mode(7,1)
+!           if (i_proc==0 .and. io_method>1) then
+!               call add_h5(dumpTGid,'balloon_v_ion_real',real(ballooning_mode),h5in,h5err)
+!               call add_h5(dumpTGid,'balloon_v_ion_imag',aimag(ballooning_mode),h5in,h5err)
+!           endif
+!        endif
+!        if (electron_method > 1) then 
+!           call get_ballooning_mode(7,indx_e)
+!           if (i_proc==0 .and. io_method>1) then
+!               call add_h5(dumpTGid,'balloon_v_elec_real',real(ballooning_mode),h5in,h5err)
+!               call add_h5(dumpTGid,'balloon_v_elec_imag',aimag(ballooning_mode),h5in,h5err)
+!           endif
+!        endif
+!     endif
+
+     !-----------------------------------------------------------------
+     ! Distribution function data:
+     !
+     if (n_proc == 1 .and. n_n == 1 .and. dist_print == 1) then
+        call write_h(trim(path)//'out.gyro.hp',trim(path)//'out.gyro.ht',10,11)
+     endif
+     !-----------------------------------------------------------------
+
+     if (i_proc == 0 .and. lindiff_method > 1) then
+
+        call add_h5(dumpTGid,'diff',diff,h5in,h5err)
+        call add_h5(dumpTGid,'diff_i',diff_i,h5in,h5err)
+        call add_h5(dumpTGid,'gbflux',gbflux,h5in,h5err)
+        call add_h5(dumpTGid,'gbflux_mom',gbflux_mom,h5in,h5err)
+        call add_h5(dumpTGid,'gbflux_i',gbflux_i,h5in,h5err)
+
+        if (trapdiff_flag == 1) then
+           call add_h5(dumpTGid,'diff_trapped',diff_trapped,h5in,h5err)
+           call add_h5(dumpTGid,'diff_i_trapped',diff_i_trapped,h5in,h5err)
+           call add_h5(dumpTGid,'gbflux_trapped',gbflux_trapped,h5in,h5err)
+           call add_h5(dumpTGid,'gbflux_i_trapped',gbflux_i_trapped,h5in,h5err)
+        endif
+
+     endif
+
+     if (lindiff_method >= 4) then
+
+        call write_distributed_real_h5('phi_squared_QL_n',dumpTGid,&
+             1,1,1,&
+             size(phi_squared_QL_n),&
+             phi_squared_QL_n,&
+             h5in,h5err)
+        call write_distributed_real_h5('g_squared_QL_n',dumpTGid,&
+             size(g_squared_QL_n),&
+             3,1,1,&
+             g_squared_QL_n,&
+             h5in,h5err)
+
+        call write_distributed_real_h5("gbflux_n",dumpTGid,&
+             n_kinetic,n_field,4,&
+             size(gbflux_n),&
+             gbflux_n,&
+             h5in,h5err)
+
+
+     endif
+
+
+
      !=============
      ! END LINEAR 
      !=============

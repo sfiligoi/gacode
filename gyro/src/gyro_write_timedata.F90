@@ -1,5 +1,5 @@
 !------------------------------------------------------
-! gyro_write_timedata.f90
+! gyro_write_timedata.F90
 !
 ! PURPOSE:
 !  This is the master file controlling output of
