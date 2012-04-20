@@ -307,7 +307,7 @@ subroutine gyro_do
      call gyro_write_initdata(&
           trim(path)//'out.gyro.profile',&
           trim(path)//'out.gyro.units',&
-          trim(path)//'out.gyro.geometry_arrays',1 &
+          trim(path)//'out.gyro.geometry_arrays',1, &
           trim(path)//'out.gyro.initdata.h5')
 !  endif
 !  if (io_method > 1) then  
