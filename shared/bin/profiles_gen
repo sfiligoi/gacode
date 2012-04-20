@@ -60,6 +60,13 @@ then
    echo "              *.peq          : PEQDSK/ELITE text file"
    echo "              input.profiles : vgen or locpargen mode"
    echo 
+   echo "             -p <path>"
+   echo "             Set optional path to simulation directory."
+   echo "             [The default path is the current directory]"
+   echo
+   echo "             -e <workdir>"
+   echo "             Working directory (default is present directory)"
+   echo 
    echo "             -V"
    echo "             Verbose (for debugging; use this if you get an error)."
    echo 
@@ -279,6 +286,9 @@ fi
 #=============================================================
 # Define variables for flag capture
 #
+# Default working root 
+SIMROOT=$PWD
+
 CONFIG=.config
 
 GATO_DPSISL=0.0
@@ -303,6 +313,7 @@ LOC_PSI=0
 Z1=1.0
 Z2=6.0
 Z3=2.0
+
 #=============================================================
 
 #=============================================================
@@ -320,6 +331,10 @@ ord_vec[4]=5
 #
 while [ $# -gt 0 ] ; do
   case "$1" in 
+
+  -p) shift ; SIMROOT=$1 ;;
+
+  -e) shift ; LOCDIR=$1 ;;
 
   -h) echo "1" > $CONFIG ; submit ; exit 0 ;;
 
@@ -406,6 +421,15 @@ while [ $# -gt 0 ] ; do
 done
 
 #=============================================================
+
+if [ "$LOCDIR" == "." ]
+then
+   LOCDIR=`basename $PWD`
+   cd .. ; SIMROOT=$PWD
+fi
+SIMDIR=$SIMROOT/$LOCDIR
+
+cd $SIMDIR
 
 #=============================================================
 # Call transp2gyro if specified and pass it the iterdb args
@@ -535,7 +559,7 @@ else
    # Clean old input.profiles* data.
 
    echo "INFO: (profiles_gen) Removing old input.profiles* files"
-   rm -rf input.profiles input.profiles.*
+   rm -rf input.profiles input.profiles.geo input.profiles.extra
 
 fi 
 #=============================================================
@@ -786,3 +810,5 @@ else
    mv grid.dat out.gato.grid
 fi
 #==============================================================
+
+cd $PATH
