@@ -25,7 +25,7 @@ OBJECTS += gyro_globals.o \
           gyro_fieldeigen_private.o \
           gyro_maxwell_private.o \
           gyro_poisson_private.o \
-	  gyro_poissonaperp_private.o \
+	  			gyro_poissonaperp_private.o \
           gyro_mumps_private.o \
           gyro_banana_private.o \
           gyro.o \
@@ -69,9 +69,9 @@ OBJECTS += gyro_globals.o \
           gyro_field_interpolation.o \
           gyro_field_solve_explicit.o \
           gyro_field_solve_implicit.o \
-	  gyro_fieldeigen.o \
-	  gyro_fieldeigen_kernel.o \
-	  gyro_fieldeigen_df.o \
+	  			gyro_fieldeigen.o \
+	 				gyro_fieldeigen_kernel.o \
+	  			gyro_fieldeigen_df.o \
           gyro_fulladvance.o \
           gyro_geometry_arrays.o \
           gyro_get_he_implicit.o \
@@ -86,7 +86,7 @@ OBJECTS += gyro_globals.o \
           gyro_make_maxwell_matrix.o \
           gyro_make_poisson_matrix.o \
           gyro_make_ampere_matrix.o \
-	  gyro_make_poissonaperp_matrix.o \
+	 				gyro_make_poissonaperp_matrix.o \
           gyro_map_experimental_profiles.o \
           gyro_message_routines.o \
           gyro_moments_plot.o \
@@ -137,7 +137,7 @@ OBJECTS += gyro_globals.o \
           gyro_write_timedata_hdf5.o \
           gyro_write_timedata_wedge_hdf5.o \
           gyro_write_timers.o \
-	  gyro_velocity_sum.o \
+	  			gyro_velocity_sum.o \
           catch_error.o \
           catch_blowup.o \
           catch_halt_signal.o \
@@ -145,10 +145,10 @@ OBJECTS += gyro_globals.o \
           allocate_profile_exp.o \
           make_implicit_advect.o \
           make_electron_current.o \
-	  make_electron_current_perp.o \
+	  			make_electron_current_perp.o \
           make_ampere_blend.o \
           make_poisson_blend.o \
-	  make_ampereperp_blend.o \
+	  			make_ampereperp_blend.o \
           get_field_plot.o \
           get_field_r0_plot.o \
           get_nonlinear_flux_velocity.o \

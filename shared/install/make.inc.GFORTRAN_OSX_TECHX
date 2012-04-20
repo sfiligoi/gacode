@@ -25,6 +25,7 @@ FOPT	= -O3
 FDEBUG	= -Wall -fbacktrace -fbounds-check -O0 -Wextra -finit-real=nan -Wunderflow -ffpe-trap=invalid,zero,overflow
 FBOUND	= -Wall -fbounds-check
 FPROF	= 
+FHDF5 = -DHAVE_HDF5
 
 # System math libraries
 

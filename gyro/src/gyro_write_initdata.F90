@@ -49,7 +49,7 @@ subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io,h5datafile)
 
   if (output_flag == 0) return
 
-  if (i_proc == 0) then
+  if (i_proc /= 0) return
 
   if(io_method < 3) then
      open(unit=io,file=datafile1,status='replace')
@@ -164,6 +164,10 @@ subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io,h5datafile)
 
 
      n_wedge = n_theta_plot*n_theta_mult
+              
+#ifdef HAVE_HDF5
+  if(io_method > 1) allocate(buffer(14,1:n_x,n_wedge))
+#endif
 
      do i=1,n_x
 
@@ -225,18 +229,20 @@ subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io,h5datafile)
            call GEO_interp(theta)
 
 #ifdef HAVE_HDF5
-            allocate(buffer(14,1:n_x,n_wedge))
-            buffer(1 ,i,j)=GEO_nu
-            buffer(2 ,i,j)=GEO_gsin
-            buffer(3 ,i,j)=GEO_gcos1
-            buffer(4 ,i,j)=GEO_gcos2
-            buffer(5 ,i,j)=GEO_usin
-            buffer(6 ,i,j)=GEO_ucos
-            buffer(7 ,i,j)=GEO_b
-            buffer(8 ,i,j)=GEO_g_theta
-            buffer(9 ,i,j)=GEO_grad_r
-            buffer(10,i,j)=GEO_gq
-            buffer(11,i,j)=GEO_captheta
+            if(io_method > 1) then
+                
+              buffer(1 ,i,j)=GEO_nu
+              buffer(2 ,i,j)=GEO_gsin
+              buffer(3 ,i,j)=GEO_gcos1
+              buffer(4 ,i,j)=GEO_gcos2
+              buffer(5 ,i,j)=GEO_usin
+              buffer(6 ,i,j)=GEO_ucos
+              buffer(7 ,i,j)=GEO_b
+              buffer(8 ,i,j)=GEO_g_theta
+              buffer(9 ,i,j)=GEO_grad_r
+              buffer(10,i,j)=GEO_gq
+              buffer(11,i,j)=GEO_captheta
+           endif
 #endif
 
            write(io,10) GEO_nu
@@ -253,24 +259,26 @@ subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io,h5datafile)
 
         enddo ! j
 #ifdef HAVE_HDF5
-     ! Set up nu for plotting and synthetic diagnostic.
-     ! Note we need theta=-pi and pi so include 0 index
-     do j=0,n_theta_plot
-        theta = -pi+real(j)*pi_2/n_theta_plot
-        if (n_theta_plot == 1) theta = 0.0 ! Test for special case
-        call GEO_interp(theta)
-        nu_coarse(j,i)=GEO_nu
-     enddo
-       do j=1,n_wedge
-          if (n_wedge == 1) then
-            theta = 0.0 ! Test for special case
-          else
-          theta=theta_wedge_offset+real(j-1)*theta_wedge_angle/       &
-               real(n_theta_plot*n_theta_mult-1)
-          endif
+     if(io_method > 1 ) then
+       ! Set up nu for plotting and synthetic diagnostic.
+       ! Note we need theta=-pi and pi so include 0 index
+       do j=0,n_theta_plot
+          theta = -pi+real(j)*pi_2/n_theta_plot
+          if (n_theta_plot == 1) theta = 0.0 ! Test for special case
           call GEO_interp(theta)
-          nu_wedge(j,i)=GEO_nu
+          nu_coarse(j,i)=GEO_nu
        enddo
+         do j=1,n_wedge
+            if (n_wedge == 1) then
+              theta = 0.0 ! Test for special case
+            else
+            theta=theta_wedge_offset+real(j-1)*theta_wedge_angle/       &
+                 real(n_theta_plot*n_theta_mult-1)
+            endif
+            call GEO_interp(theta)
+            nu_wedge(j,i)=GEO_nu
+         enddo
+      endif
 #endif
      enddo ! i
 
@@ -417,8 +425,8 @@ subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io,h5datafile)
     call dump_h5(rootid,"captheta",buffer(11,:,:),h5in,h5err)
 
     call close_h5file(fid,rootid,h5err)
+    deallocate(buffer)
   endif !io_method >1 
-  deallocate(buffer)
 #endif 
   if (debug_flag == 1 ) then
      print *,'[gyro_write_initdata done]'
@@ -428,6 +436,6 @@ subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io,h5datafile)
 20 format(i4)
 26 format(t2,1pe15.8,2x,a) 
 
-  endif !i_proc == 0 
+!  endif !i_proc == 0 
 
 end subroutine gyro_write_initdata
