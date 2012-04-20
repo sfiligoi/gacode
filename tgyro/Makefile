@@ -19,7 +19,6 @@ export EXTRA_LIBS = \
        ${GACODE_ROOT}/gyro/GKEIGEN/GKEIGEN_lib.a \
        ${GACODE_ROOT}/tgyro/math/math_lib.a \
        ${GACODE_ROOT}/tgyro/qfm/qfm_lib.a \
-       ${GACODE_ROOT}/gyro/vshdf5/gyrovshdf5_lib.a \
        ${GACODE_ROOT}/shared/vshdf5/vshdf5_lib.a \
        ${HDF5_LIBS} ${LMATH} ${LIPM}
 

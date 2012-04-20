@@ -17,7 +17,7 @@ subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io,h5datafile)
   use gyro_profile_exp
   use math_constants
   use GEO_interface
-#ifdef HAVE_HFD5
+#ifdef HAVE_HDF5
   use hdf5_api
 #endif
 

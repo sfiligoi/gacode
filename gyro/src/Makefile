@@ -124,6 +124,7 @@ OBJECTS += gyro_globals.o \
           gyro_timestep_explicit.o \
           gyro_timestep_implicit.o \
           gyro_to_geo.o \
+					gyro_vshdf5_mod.o \
           gyro_write_efficiency.o \
           gyro_write_error.o \
           gyro_write_freq.o \
@@ -133,6 +134,8 @@ OBJECTS += gyro_globals.o \
           gyro_write_radial_op.o \
           gyro_write_step.o \
           gyro_write_timedata.o \
+          gyro_write_timedata_hdf5.o \
+          gyro_write_timedata_wedge_hdf5.o \
           gyro_write_timers.o \
 	  gyro_velocity_sum.o \
           catch_error.o \
