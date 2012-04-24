@@ -27,8 +27,8 @@ subroutine gyro_cleanup
      if (nonlinear_flag == 1) call gyro_alloc_nl(0)
 
      ! Sparse field arrays 
-     deallocate(m_poisson)
-     deallocate(indx_poisson)
+     if (allocated(m_poisson)) deallocate(m_poisson)
+     if (allocated(indx_poisson)) deallocate(indx_poisson)
      if (allocated(m_ampere)) deallocate(m_ampere)
      if (allocated(indx_ampere)) deallocate(indx_ampere)
      if (allocated(m_maxwell)) deallocate(m_maxwell)
