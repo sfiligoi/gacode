@@ -38,6 +38,7 @@ subroutine gyro_write_timedata_wedge_hdf5
   if (i_proc == 0) then
      if (n_wedge <= 1) then
         write(*,*) "Wedge caluculations need n_theta_plot*n_theta_mult > 1."
+        return 
      endif
   endif
 
