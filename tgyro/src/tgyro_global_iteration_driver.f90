@@ -138,7 +138,13 @@ subroutine tgyro_global_iteration_driver
   ! MODIFY GRADIENTS
   !
   ! Modify gradient profile based on some "diagonal rule"
-  dlntedr(:) = 0.0*(eflux_e_tot(:)-eflux_e_target(:))+dlntedr(:)
+!  dlntedr(:) = 0.0*(eflux_e_tot(:)-eflux_e_target(:))+dlntedr(:)
+! CH test: try (delta z)/z = - alpha (delta Q)/Q
+!  --> z = (1 - alpha (dQ/Q))*z
+! alpha = 1/(Waltz stiffness), use alpha=0.1 <=> S = 10
+  dlntedr(2:n_r) = -0.1*( (eflux_e_tot(2:n_r) - eflux_e_target(2:n_r))/eflux_e_target(2:n_r))*dlntedr(2:n_r) + dlntedr(2:n_r)
+!  dlntedr(:) = dlntedr(:)*(1.0 - 0.1*(eflux_e_tot(:) - eflux_e_target(:))/ABS(eflux_e_tot(:) - eflux_e_target(:)))
+  dlntedr(1) = 0.
   !------------------------------------------------------------
 
   !--------------------------------------------------------
