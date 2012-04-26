@@ -113,11 +113,8 @@ subroutine gyro_radial_operators
 
   else
 
-     ! These forms will be used in:
-     !
-     ! make_poisson_blend
-     ! make_ampere_blend
-
+     ! These forms will be used in gyro_blend_*:
+  
      do i=1,n_x
         i_cyc(i+n_x) = n_x
         i_cyc(i) = i

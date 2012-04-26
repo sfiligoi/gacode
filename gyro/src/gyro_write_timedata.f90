@@ -213,7 +213,7 @@ subroutine gyro_write_timedata
      ! Distribution function data:
      !
      if (n_proc == 1 .and. n_n == 1 .and. dist_print == 1) then
-        call write_h(trim(path)//'out.gyro.hp',trim(path)//'out.gyro.ht',10,11)
+        call gyro_write_h(trim(path)//'out.gyro.hp',trim(path)//'out.gyro.ht',10,11)
      endif
      !-----------------------------------------------------------------
 

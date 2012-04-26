@@ -61,7 +61,7 @@ subroutine gyro_make_ampere_matrix
 
   ! Ampere MAA matrix
   allocate(aa_mm(n_x,-mg_dx:mg_dx-ig_dx,n_blend,n_blend))
-  call make_ampere_blend
+  call gyro_blend_ampere
   call make_electron_current(0)
 
   if (sparse_method == 1) then

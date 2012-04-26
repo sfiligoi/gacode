@@ -1,11 +1,11 @@
 !------------------------------------------------------
-! write_h.f90 [caller gyro_write_master]
+! gyro_write_h.f90 [caller gyro_write_master]
 !
 ! PURPOSE:
 !  Distribution function output for all kinetic species.
 !-----------------------------------------------------
 
-subroutine write_h(datafile1,datafile2,io1,io2)
+subroutine gyro_write_h(datafile1,datafile2,io1,io2)
 
   use gyro_globals
   use gyro_pointers
@@ -102,4 +102,4 @@ subroutine write_h(datafile1,datafile2,io1,io2)
 
   if (debug_flag == 1) print *,'[write_h called]'
 
-end subroutine write_h
+end subroutine gyro_write_h
