@@ -111,33 +111,16 @@ subroutine gyro_fulladvance
   !-------------------------------------------------------------------
   ! MANAGE data output: 
   !
-  if (time_skip_wedge > 0) then
-     if (modulo(step,time_skip_wedge) == 0 .and. io_method > 1) then
-    !------------------------------------------------
-     ! Compute nonlinear transfer and turbulent energy 
-     !------------------------------------------------
-
-!     if (n_substep == 0 .and. nonlinear_transfer_flag == 1) then
-!
-!        rhs(:,:,:,:) = (0.0,0.0)
-!
-!        call gyro_rhs_nonlinear
-!        call gyro_nonlinear_transfer
-!
+!  if (time_skip_wedge > 0) then
+!     if (modulo(step,time_skip_wedge) == 0 .and. io_method > 1) then
+!          call gyro_write_timedata_wedge_hdf5
 !     endif
-!
-!     ! Reset micro-step counter.
-!
-!     alltime_index = 0
-
-         call gyro_write_timedata_wedge_hdf5
-     endif
-  endif
+!  endif
 
   call gyro_timer_out('Diagnos.-allstep')
   call gyro_timer_in('Diagnos.-datastep')
 
-  if (modulo(step,time_skip) == 0) then
+  if (modulo(step,time_skip) == 0 .or. modulo(step,time_skip_wedge) == 0 ) then
 
 
      ! Counter for number of data output events.
@@ -165,11 +148,22 @@ subroutine gyro_fulladvance
 
      io_control = 2*output_flag
      h5_control = 2*output_flag
+     
+     if(modulo(step,time_skip) == 0) then
+      if (io_method < 3 .and. io_method > 0) call gyro_write_timedata
+      if (io_method > 1) then
+        call gyro_write_timedata_hdf5(h5_control)
+      endif
+    endif
 
-     if (io_method < 3 .and. io_method > 0) call gyro_write_timedata
-     if (io_method > 1) then
-       call gyro_write_timedata_hdf5(h5_control)
-     endif
+    if(modulo(step,time_skip_wedge) == 0) then
+      if (time_skip_wedge > 0 .and. io_method > 1 ) then
+        call gyro_write_timedata_wedge_hdf5
+      endif
+    endif
+        
+        
+      
 
      !--------------------------------------------------
      ! Update diffusivity and flux time-record for TGYRO 
@@ -185,7 +179,7 @@ subroutine gyro_fulladvance
      endif
 
 
-  endif ! modulo(step,time_skip) test
+  endif ! modulo(step,time_skip.or.) test
 
   call gyro_timer_out('Diagnos.-datastep')
   !-------------------------------------------------------------------
