@@ -109,7 +109,7 @@ subroutine tgyro_global_iteration_driver
   !------------------------------------------------------------
   ! TGYRO-GYRO ITERATION CYCLE
   !
-  do i_tran_loop=1,2
+  do i_tran_loop=1,tgyro_relax_iterations
 
      ! Integrate profiles based on gradients
      call tgyro_profile_functions
