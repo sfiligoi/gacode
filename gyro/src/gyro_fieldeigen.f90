@@ -169,17 +169,17 @@ subroutine gyro_fieldeigen
   ! electron_method=2.
   !
   allocate(ap_mm(n_x,-m_gyro:m_gyro-i_gyro,n_blend,n_blend))
-  call make_poisson_blend(1)
+  call gyro_blend_poisson(1)
 
   if (n_field > 1) then
      allocate(aa_mm(n_x,-mg_dx:mg_dx-ig_dx,n_blend,n_blend))
-     call make_ampere_blend
+     call gyro_blend_ampere
   endif
 
   if (n_field > 2) then
      allocate(ab_mm(n_x,-m_gyro:m_gyro-i_gyro,n_blend,n_blend))
      allocate(abp_mm(n_x,-m_gyro:m_gyro-i_gyro,n_blend,n_blend))
-     call make_ampereperp_blend
+     call gyro_blend_ampereperp
   endif
   !-----------------------------------------------------------------------
 

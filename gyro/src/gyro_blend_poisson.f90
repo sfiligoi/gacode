@@ -1,5 +1,5 @@
 !----------------------------------------------------------
-! make_poisson_blend.f90
+! gyro_blend_poisson.f90
 !
 ! PURPOSE:
 !  Generate matrix L_P of paper.
@@ -8,7 +8,7 @@
 !         = 1:
 !----------------------------------------------------------
 
-subroutine make_poisson_blend(i_elec)
+subroutine gyro_blend_poisson(i_elec)
 
   use mpi
   use gyro_globals
@@ -337,4 +337,4 @@ subroutine make_poisson_blend(i_elec)
      print *,'[make_poisson_blend done]'
   endif
 
-end subroutine make_poisson_blend
+end subroutine gyro_blend_poisson

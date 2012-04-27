@@ -6,8 +6,17 @@ else
    FFLAGS=${FOPT}
 endif
 
-EXEC1=xtglf_mpi
-EXEC2=tglf_mpi
+ifeq ($(MPI),true)
+   EXEC1=xtglf_mpi
+   EXEC2=tglf_mpi
+   SRC1=tglf_driver_mpi
+   SRC2=tglf_mpi
+else
+   EXEC1=xtglf
+   EXEC2=tglf
+   SRC1=tglf_driver
+   SRC2=tglf
+endif
 
 LLIB=tglf_lib
 
@@ -27,11 +36,11 @@ OBJECTS = tglf_modules.o \
 
 all: $(LLIB).a $(EXEC1) $(EXEC2)
 
-$(EXEC1): $(LLIB).a tglf_driver_mpi.o
-	$(FC) $(FFLAGS) -o $(EXEC1) tglf_driver_mpi.o $(LLIB).a $(EXTRA_LIBS)
+$(EXEC1): $(LLIB).a $(SRC1).o
+	$(FC) $(FFLAGS) -o $(EXEC1) $(SRC1).o $(LLIB).a $(EXTRA_LIBS)
 
-$(EXEC2): $(LLIB).a tglf_mpi.o
-	$(FC) $(FFLAGS) -o $(EXEC2) tglf_mpi.o $(LLIB).a $(EXTRA_LIBS)
+$(EXEC2): $(LLIB).a $(SRC2).o
+	$(FC) $(FFLAGS) -o $(EXEC2) $(SRC2).o $(LLIB).a $(EXTRA_LIBS)
 
 $(LLIB).a: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
@@ -40,5 +49,5 @@ $(LLIB).a: $(OBJECTS)
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:
-	rm -f *.o $(LLIB).a $(EXEC1) $(EXEC2)
+	rm -f *.o $(LLIB).a xtglf xtglf_mpi tglf tglf_mpi
 	rm -f ${GACODE_ROOT}/modules/tglf*.mod 

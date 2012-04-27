@@ -18,7 +18,8 @@ FNOMP   =
 
 ROOT=/u/candy/local_software
 
-LMATH = $(ROOT)/GotoBLAS2/libgoto2.a 
+LMATH=/opt/pgi/linux86-64/11.10/lib/liblapack.a \
+      /opt/pgi/linux86-64/11.10/lib/libblas.a
 
 # OPTIONAL: netCDF (for gyro2gkv)
 
