@@ -196,15 +196,7 @@ subroutine gyro_moments_plot
           w_time(alltime_index+1)*mom_tmp(:,:,:)
      if (io_method > 1 .and. time_skip_wedge > 0) then
         moments_plot_wedge(:,:,is,:) = moments_plot_wedge(:,:,is,:)+&
-             w_time(alltime_index+1)*mom_tmp_wedge(:,:,:)
-!        if(i_proc==0) then
-!          write(*,*) "alltime_index = ", alltime_index
-!          write(*,*) "w_time(alltime_index+1 ) =",w_time(alltime_index+1)
-!          write(*,*) "mom_tmp_wedge(1,1,1) = ", mom_tmp_wedge(1,1,1)
-!          write(*,*) "mom_tmp(1,1,1) =", mom_tmp(1,1,1)
-!          write(*,*) " moments_plot(1,1,is,1) = ",  moments_plot(1,1,is,1)
-!          write(*,*) "moments_plot_wedge(1,1,is,1) = ", moments_plot_wedge(1,1,is,1)
-!        endif
+             w_time_wedge(alltime_index+1)*mom_tmp_wedge(:,:,:)
      endif
      !----------------------------------------------------------------
 

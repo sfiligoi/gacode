@@ -465,6 +465,7 @@ module gyro_globals
   real :: t_current
   !
   real, dimension(:), allocatable :: w_time
+  real, dimension(:), allocatable :: w_time_wedge
   !
   complex, dimension(:,:), allocatable :: omega_linear
   ! 
