@@ -32,6 +32,7 @@ OBJECTS += gyro_globals.o \
           gyro_init.o \
           gyro_run.o \
           gyro_do.o \
+          gyro_alloc_profile_exp.o \
           gyro_alloc_profile_sim.o \
           gyro_alloc_big.o \
           gyro_alloc_orbit.o \
@@ -140,7 +141,6 @@ OBJECTS += gyro_globals.o \
           catch_error.o \
           catch_blowup.o \
           catch_halt_signal.o \
-          allocate_profile_exp.o \
           make_implicit_advect.o \
           make_electron_current.o \
 	  make_electron_current_perp.o \
