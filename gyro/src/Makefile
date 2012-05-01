@@ -32,6 +32,7 @@ OBJECTS += gyro_globals.o \
           gyro_init.o \
           gyro_run.o \
           gyro_do.o \
+          gyro_alloc_profile_exp.o \
           gyro_alloc_profile_sim.o \
           gyro_alloc_big.o \
           gyro_alloc_orbit.o \
@@ -47,6 +48,9 @@ OBJECTS += gyro_globals.o \
           gyro_banana_s2lambda.o \
           gyro_bessel_operator.o \
           gyro_bessel_stencils.o \
+          gyro_blend_ampere.o \
+          gyro_blend_ampereperp.o \
+          gyro_blend_poisson.o \
           gyro_bounce_points.o \
           gyro_build_sparse_ampere.o \
           gyro_build_sparse_poisson.o \
@@ -125,6 +129,7 @@ OBJECTS += gyro_globals.o \
           gyro_write_efficiency.o \
           gyro_write_error.o \
           gyro_write_freq.o \
+          gyro_write_h.o \
           gyro_write_initdata.o \
           gyro_write_input.o \
           gyro_write_precision.o \
@@ -136,14 +141,9 @@ OBJECTS += gyro_globals.o \
           catch_error.o \
           catch_blowup.o \
           catch_halt_signal.o \
-          parallel_dim.o \
-          allocate_profile_exp.o \
           make_implicit_advect.o \
           make_electron_current.o \
 	  make_electron_current_perp.o \
-          make_ampere_blend.o \
-          make_poisson_blend.o \
-	  make_ampereperp_blend.o \
           get_field_plot.o \
           get_field_r0_plot.o \
           get_nonlinear_flux_velocity.o \
@@ -151,7 +151,6 @@ OBJECTS += gyro_globals.o \
           get_kinetic_advance.o \
           get_phi_squared.o \
           get_g_squared.o \
-          write_h.o \
           gyro_dump_input.o \
           gyro_dump_interface.o
 

@@ -18,6 +18,7 @@ subroutine tgyro_global_iteration_driver
   real :: time_max_save
   integer :: n_exp
   real, dimension(:), allocatable :: x,xt
+  character (len=16) :: ittag
 
   ! Copy (TGYRO copy of input.profiles) -> (GYRO copy of input.profiles)
   if (i_proc_global == 0) then
@@ -108,7 +109,7 @@ subroutine tgyro_global_iteration_driver
   !------------------------------------------------------------
   ! TGYRO-GYRO ITERATION CYCLE
   !
-  do i_tran_loop=1,2
+  do i_tran_loop=1,tgyro_relax_iterations
 
      ! Integrate profiles based on gradients
      call tgyro_profile_functions
@@ -129,11 +130,13 @@ subroutine tgyro_global_iteration_driver
      call cub_spline(x,xt,n_r+1,100*EXPRO_rmin(:)/r_min,EXPRO_ti(1,:),n_exp)
      EXPRO_ti(2,:) = EXPRO_ti(1,:)
 
-     call EXPRO_write_original('REWROTE_1')
+     ittag = '.'//achar(i_tran_loop-1+iachar("1"))  
+
+     call EXPRO_write_original('REWRITE'//ittag)
      call EXPRO_palloc(MPI_COMM_WORLD,paths(1),0) 
      if (i_proc_global == 0) then
-        call system('mv '//trim(paths(1))//'input.profiles.new '//trim(paths(1))//'input.profiles.1')
-        call system('cp '//trim(paths(1))//'input.profiles.1 '//trim(paths(1))//'input.profiles')
+        call system('cp '//trim(paths(1))//'input.profiles.new '//trim(paths(1))//'input.profiles'//ittag)
+        call system('cp '//trim(paths(1))//'input.profiles'//ittag//' '//trim(paths(1))//'input.profiles')
      endif
 
      ! Get global GYRO flux, compute targets, write data

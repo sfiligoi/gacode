@@ -1,12 +1,12 @@
 !------------------------------------------------------------
-! make_ampere_blend.f90
+! gyro_blend_ampere.f90
 !
 ! PURPOSE:
 !  Generate matrix L_A of paper by pushing the factor 
 !  [-nabla_perp A] into a velocity integral. 
 !------------------------------------------------------------
 
-subroutine make_ampere_blend
+subroutine gyro_blend_ampere
 
   use mpi
   use gyro_globals
@@ -165,4 +165,4 @@ subroutine make_ampere_blend
      print *,'[make_ampere_blend done]'
   endif
 
-end subroutine make_ampere_blend
+end subroutine gyro_blend_ampere

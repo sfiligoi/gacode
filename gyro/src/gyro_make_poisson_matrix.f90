@@ -72,13 +72,13 @@ subroutine gyro_make_poisson_matrix
 
      ! Adiabatic electrons or ions: (2-R) phi
 
-     call make_poisson_blend(1)
+     call gyro_blend_poisson(1)
 
   else
 
      ! Kinetic electrons: (1-R) phi
 
-     call make_poisson_blend(0)
+     call gyro_blend_poisson(0)
 
   endif
 
