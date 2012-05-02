@@ -193,7 +193,7 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
             THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
             CHARSIZE=cs, YRANGE=[0,ymax]
       IF (data.ti_data_rho[0] NE -1) THEN $
-        OPLOT, data.ti_data_rho, data.ti_data, PSYM=3, THICK=thick
+        OPLOT, data.ti_data_rho, data.ti_data, PSYM=1, THICK=thick
       IF (d2flag) THEN OPLOT, x2, data2.ti[*,N_it2], COLOR=150, PSYM=-2,THICK=thick
       OPLOT, x, data.ti[*,N_it], COLOR=100,PSYM=-4, THICK=thick
       XYOUTS, 0.6, 0.8*ymax, 'T!Di!N (keV)',$
@@ -238,7 +238,7 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
             THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
             TITLE = 'iteration # ' + NUMTOSTRING(N_it), YRANGE=[0,ymax]
       IF (data.te_data_rho[0] NE -1) THEN $
-        OPLOT, data.te_data_rho, data.te_data, PSYM=3, THICK=thick
+        OPLOT, data.te_data_rho, data.te_data, PSYM=1, THICK=thick
       IF (d2flag) THEN OPLOT, x2, data2.te[*,N_it2], COLOR=150, PSYM=-2,THICK=thick
       OPLOT, x, data.te[*,N_it], COLOR=100,PSYM=-4, THICK=thick
       XYOUTS, 0.6, 0.8*ymax, 'T!De!N (keV)',$
@@ -285,7 +285,7 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
             THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
             CHARSIZE=cs, YRANGE=[ymin,ymax]
       IF (data.ne_data_rho[0] NE -1) THEN $
-        OPLOT, data.ne_data_rho, data.ne_data, PSYM=3, THICK=thick
+        OPLOT, data.ne_data_rho, data.ne_data, PSYM=1, THICK=thick
       IF (d2flag) THEN OPLOT, x2, data2.n_e[*,N_it2], COLOR=150, PSYM=-2,$
         THICK=thick
       OPLOT, x, data.n_e[*,N_it], COLOR=100,PSYM=-4, THICK=thick
