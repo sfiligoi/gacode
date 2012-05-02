@@ -1,6 +1,6 @@
 PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks,$
   WCM2 = wcm2, DATA2 = data2, Nit2=N_it2, PS = ps, SUMMARY=summary, $
-	PLOT_GRADIENTS=plot_gradients, _EXTRA=extra
+	PLOT_GRADIENTS=plot_gradients, PLOT_ROT=plot_rot, _EXTRA=extra
 ;
 ; C. Holland, UCSD
 ;
@@ -55,6 +55,7 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
 ; SUMMARY: set=1 to generate an Encapsulated postscript version of
 ; plot named summary.eps in simdir.  Best used with PS=1.  X11 plot
 ; will still be generated.
+; PLOT_ROT: plot rotation profiles and fluxes
 ;
 ; v1.0.1: Nov. 11, 2008
 ; Added SUMMARY flag.  Set equal to 1 to make a file called
@@ -79,6 +80,10 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
 ; v3.0: March 3, 2011
 ; Updated for use with new gacode file structure.
 ;
+; v3.1: May 2, 2012
+; Updated to use expt. data point fields returned by
+; GET_TYGRO_LOC_DATA and plot_rot keyword
+
   IF KEYWORD_SET(ps) THEN BEGIN
      thick = 6
      cs = 2
@@ -170,36 +175,39 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
       ENDIF
   ENDIF
 
-  !P.MULTI = [0,2,4]
-
+  IF KEYWORD_SET(plot_rot) THEN !P.MULTI = [0,2,4] $
+  ELSE !P.MULTI = [0,2,3]
+ 
   IF KEYWORD_SET(plot_gradients) THEN BEGIN
-  exp_a_over_Lti = -DERIV(data.exp_rmin, data.exp_ti)/data.exp_ti
-  ymax = (MAX(exp_a_over_Lti) > MAX(data.a_over_Lti[*,N_it])) < 10
-  PLOT, x_exp, exp_a_over_Lti, XRANGE = [0,1], TITLE = data.simdir, $
-        THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
-        CHARSIZE=cs, YRANGE=[0,ymax]
-  OPLOT, x, data.a_over_Lti[*,N_it], COLOR=100,PSYM=-4, THICK=thick
-  XYOUTS, 0.6, 0.8*ymax, 'a/L!DTi!N',$
-          CHARSIZE=2,CHARTHICK=thick
+      exp_a_over_Lti = -DERIV(data.exp_rmin, data.exp_ti)/data.exp_ti
+      ymax = (MAX(exp_a_over_Lti) > MAX(data.a_over_Lti[*,N_it])) < 10
+      PLOT, x_exp, exp_a_over_Lti, XRANGE = [0,1], TITLE = data.simdir, $
+            THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
+            CHARSIZE=cs, YRANGE=[0,ymax]
+      OPLOT, x, data.a_over_Lti[*,N_it], COLOR=100,PSYM=-4, THICK=thick
+      XYOUTS, 0.6, 0.8*ymax, 'a/L!DTi!N',$
+              CHARSIZE=2,CHARTHICK=thick
   ENDIF ELSE BEGIN
-  ymax = MAX(data.exp_ti) > MAX(data.ti[*,N_it])
-  PLOT, x_exp, data.exp_ti, XRANGE = [0,1], TITLE = data.simdir, $
-        THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
-        CHARSIZE=cs, YRANGE=[0,ymax]
-  IF (d2flag) THEN OPLOT, x2, data2.ti[*,N_it2], COLOR=150, PSYM=-2,THICK=thick
-  OPLOT, x, data.ti[*,N_it], COLOR=100,PSYM=-4, THICK=thick
-  XYOUTS, 0.6, 0.8*ymax, 'T!Di!N (keV)',$
-          CHARSIZE=2,CHARTHICK=thick
-  IF (d2flag) THEN XYOUTS, 0.5, ymax, data2.simdir, ALIGN=0.5, $
-    COLOR=150, CHARTHICK=thick, CHARSIZE=cs
+      ymax = MAX(data.exp_ti) > MAX(data.ti[*,N_it]) > MAX(data.ti_data)
+      PLOT, x_exp, data.exp_ti, XRANGE = [0,1], TITLE = data.simdir, $
+            THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
+            CHARSIZE=cs, YRANGE=[0,ymax]
+      IF (data.ti_data_rho[0] NE -1) THEN $
+        OPLOT, data.ti_data_rho, data.ti_data, PSYM=3, THICK=thick
+      IF (d2flag) THEN OPLOT, x2, data2.ti[*,N_it2], COLOR=150, PSYM=-2,THICK=thick
+      OPLOT, x, data.ti[*,N_it], COLOR=100,PSYM=-4, THICK=thick
+      XYOUTS, 0.6, 0.8*ymax, 'T!Di!N (keV)',$
+              CHARSIZE=2,CHARTHICK=thick
+      IF (d2flag) THEN XYOUTS, 0.5, ymax, data2.simdir, ALIGN=0.5, $
+        COLOR=150, CHARTHICK=thick, CHARSIZE=cs
   ENDELSE
 
-  ymax = MAX(Qi_target) > MAX(Qi_tot)
+  ymax = MAX(Qi_target) > MAX(Qi_tot) > MAX(Qi0)
   IF KEYWORD_SET(mks) THEN BEGIN
      ymin = 0
      ylog = 0
   ENDIF ELSE BEGIN
-     ymin = 0.1*(MIN(Qi_target[1:*]) < MIN(Qi_tot[1:*]))
+     ymin = 0.1*(MIN(Qi_target[1:*]) < MIN(Qi_tot[1:*])) < MIN(Qi0[1:*])
      ylog = 1
   ENDELSE
   PLOT, x, Qi_target, XRANGE=[0,1], LINESTYLE=2, YLOG = ylog, $
@@ -215,33 +223,36 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
           CHARSIZE=2,CHARTHICK=thick
 
   IF KEYWORD_SET(plot_gradients) THEN BEGIN
-  exp_a_over_Lte = -DERIV(data.exp_rmin, data.exp_te)/data.exp_te
-  ymax = (MAX(exp_a_over_Lte) > MAX(data.a_over_Lte[*,N_it])) < 15
-  PLOT, x_exp, exp_a_over_Lte, XRANGE = [0,1], TITLE = data.simdir, $
-        THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
-        CHARSIZE=cs, YRANGE=[0,ymax]
-  OPLOT, x, data.a_over_Lte[*,N_it], COLOR=100,PSYM=-4, THICK=thick
-  XYOUTS, 0.6, 0.8*ymax, 'a/L!DTe!N',$
-          CHARSIZE=2,CHARTHICK=thick
+      exp_a_over_Lte = -DERIV(data.exp_rmin, data.exp_te)/data.exp_te
+      ymax = (MAX(exp_a_over_Lte) > MAX(data.a_over_Lte[*,N_it])) < 15
+      PLOT, x_exp, exp_a_over_Lte, XRANGE = [0,1], $
+            TITLE = 'iteration # ' + NUMTOSTRING(N_it), $
+            THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
+            CHARSIZE=cs, YRANGE=[0,ymax]
+      OPLOT, x, data.a_over_Lte[*,N_it], COLOR=100,PSYM=-4, THICK=thick
+      XYOUTS, 0.6, 0.8*ymax, 'a/L!DTe!N',$
+              CHARSIZE=2,CHARTHICK=thick
   ENDIF ELSE BEGIN
-  ymax = MAX(data.exp_te) > MAX(data.te[*,N_it])
-  PLOT, x_exp, data.exp_te, XRANGE = [0,1], CHARSIZE=cs, $
-        THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
-        TITLE = 'iteration # ' + NUMTOSTRING(N_it), YRANGE=[0,ymax]
-  IF (d2flag) THEN OPLOT, x2, data2.te[*,N_it2], COLOR=150, PSYM=-2,THICK=thick
-  OPLOT, x, data.te[*,N_it], COLOR=100,PSYM=-4, THICK=thick
-  XYOUTS, 0.6, 0.8*ymax, 'T!De!N (keV)',$
-          CHARSIZE=2,CHARTHICK=thick
-  IF (d2flag) THEN XYOUTS, 0.5, ymax, 'iteration # ' + NUMTOSTRING(N_it2), $
-    ALIGN=0.5, COLOR=150, CHARTHICK=thick, CHARSIZE=cs
+      ymax = MAX(data.exp_te) > MAX(data.te[*,N_it]) > MAX(data.te_data)
+      PLOT, x_exp, data.exp_te, XRANGE = [0,1], CHARSIZE=cs, $
+            THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
+            TITLE = 'iteration # ' + NUMTOSTRING(N_it), YRANGE=[0,ymax]
+      IF (data.te_data_rho[0] NE -1) THEN $
+        OPLOT, data.te_data_rho, data.te_data, PSYM=3, THICK=thick
+      IF (d2flag) THEN OPLOT, x2, data2.te[*,N_it2], COLOR=150, PSYM=-2,THICK=thick
+      OPLOT, x, data.te[*,N_it], COLOR=100,PSYM=-4, THICK=thick
+      XYOUTS, 0.6, 0.8*ymax, 'T!De!N (keV)',$
+              CHARSIZE=2,CHARTHICK=thick
+      IF (d2flag) THEN XYOUTS, 0.5, ymax, 'iteration # ' + NUMTOSTRING(N_it2), $
+        ALIGN=0.5, COLOR=150, CHARTHICK=thick, CHARSIZE=cs
   ENDELSE
 
-  ymax = MAX(Qe_target) > MAX(Qe_tot)
+  ymax = MAX(Qe_target) > MAX(Qe_tot) > MAX(Qe0)
   IF KEYWORD_SET(mks) THEN BEGIN
      ymin = 0
      ylog = 0
   ENDIF ELSE BEGIN
-     ymin = 0.1*(MIN(Qe_target[1:*]) < MIN(Qe_tot[1:*]))
+     ymin = 0.1*(MIN(Qe_target[1:*]) < MIN(Qe_tot[1:*])) < MIN(Qe0[1:*])
      ylog = 1
   ENDELSE
   PLOT, x, Qe_target, XRANGE=[0,1], XTITLE=xtitle, LINESTYLE=2, YLOG=ylog, $
@@ -256,31 +267,35 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
   XYOUTS, x0, 0.8*ymax, 'Q!De!N ' + units,$
           CHARSIZE=2,CHARTHICK=thick
 
+  IF KEYWORD_SET(plot_rot) THEN dens_xtitle = ' ' ELSE dens_xtitle = xtitle
+
   IF KEYWORD_SET(plot_gradients) THEN BEGIN
-  exp_a_over_Lne = -DERIV(data.exp_rmin, data.exp_ne)/data.exp_ne
-  ymax = (MAX(exp_a_over_Lne) > MAX(data.a_over_Lne[*,N_it])) < 5
-  PLOT, x_exp, exp_a_over_Lne, XRANGE = [0,1], TITLE = data.simdir, $
-        THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
-        CHARSIZE=cs, YRANGE=[0,ymax]
-  OPLOT, x, data.a_over_Lne[*,N_it], COLOR=100,PSYM=-4, THICK=thick
-  XYOUTS, 0.6, 0.8*ymax, 'a/L!Dne!N',$
-          CHARSIZE=2,CHARTHICK=thick
+      exp_a_over_Lne = -DERIV(data.exp_rmin, data.exp_ne)/data.exp_ne
+      ymax = (MAX(exp_a_over_Lne) > MAX(data.a_over_Lne[*,N_it])) < 5
+      PLOT, x_exp, exp_a_over_Lne, XRANGE = [0,1], $
+            THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
+            CHARSIZE=cs, YRANGE=[0,ymax], XTITLE = dens_xtitle
+      OPLOT, x, data.a_over_Lne[*,N_it], COLOR=100,PSYM=-4, THICK=thick
+      XYOUTS, 0.6, 0.8*ymax, 'a/L!Dne!N',$
+              CHARSIZE=2,CHARTHICK=thick
   ENDIF ELSE BEGIN
-  ymin = MIN(data.exp_ne) < MIN(data.n_e[*,N_it])
-  ymax = MAX(data.exp_ne) > MAX(data.n_e[*,N_it])
-  PLOT, x_exp, data.exp_ne, XRANGE = [0,1], $
-        THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
-        CHARSIZE=cs, YRANGE=[ymin,ymax]
-  IF (d2flag) THEN OPLOT, x2, data2.n_e[*,N_it2], COLOR=150, PSYM=-2,$
-                          THICK=thick
-  OPLOT, x, data.n_e[*,N_it], COLOR=100,PSYM=-4, THICK=thick
-  XYOUTS, 0.4, 0.8*ymax, 'n!De!N (10!U19!N/m!U3!N)',$
-          CHARSIZE=2,CHARTHICK=thick
+      ymin = 0 ;MIN(data.exp_ne) < MIN(data.n_e[*,N_it])
+      ymax = MAX(data.exp_ne) > MAX(data.n_e[*,N_it]) > MAX(data.ne_data)
+      PLOT, x_exp, data.exp_ne, XRANGE = [0,1], XTITLE = dens_xtitle, $
+            THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
+            CHARSIZE=cs, YRANGE=[ymin,ymax]
+      IF (data.ne_data_rho[0] NE -1) THEN $
+        OPLOT, data.ne_data_rho, data.ne_data, PSYM=3, THICK=thick
+      IF (d2flag) THEN OPLOT, x2, data2.n_e[*,N_it2], COLOR=150, PSYM=-2,$
+        THICK=thick
+      OPLOT, x, data.n_e[*,N_it], COLOR=100,PSYM=-4, THICK=thick
+      XYOUTS, 0.4, 0.8*ymax, 'n!De!N (10!U19!N/m!U3!N)',$
+              CHARSIZE=2,CHARTHICK=thick
   ENDELSE
   
   ymax = MAX(ABS(Ge_tot)) > MAX(Ge_target)
   PLOT, x, Ge_target, XRANGE=[0,1], LINESTYLE=2, $
-        YRANGE=[-ymax,ymax], CHARSIZE=cs, $
+        YRANGE=[-ymax,ymax], CHARSIZE=cs, XTITLE = dens_xtitle, $
         THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick
   OPLOT, x, Ge_tot, COLOR=100,PSYM=-4, THICK=thick
   OPLOT, x, Ge_neo, COLOR=50, PSYM=-4, THICK=thick
@@ -290,34 +305,35 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
             CHARSIZE=2,CHARTHICK=thick $
   ELSE XYOUTS, 0.4, 0.7*ymax, '!4C!X!De!N ' + ge_units, CHARSIZE=2,CHARTHICK=thick
 
-  exp_rot = -data.exp_omega0*data.exp_Rmaj*data.a/1e5
-  rot = data.M[*,N_it]*data.c_s[*,N_it]/1e5
-  ymin = MIN(exp_rot) < MIN(rot)
-  ymax = MAX(exp_rot) > MAX(rot)
-  PLOT, x_exp, exp_rot, XRANGE = [0,1], $
-        THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
-        CHARSIZE=cs, XTITLE=xtitle, YRANGE=[ymin,ymax]
-  OPLOT, x, rot, COLOR=100, PSYM=-4, THICK=thick
-  IF (d2flag) THEN OPLOT, x2, data2.M[*,N_it2]*data2.c_s[*,N_it2]/1e5, COLOR=150, $
-                          PSYM=-2, THICK=thick
-  XYOUTS, 0.2, 0.8*ymax, 'V!Dtor!N = R!4x!X!D0!N (10!U5!N m/s)', CHARSIZE=2,$
-          CHARTHICK=thick
+  IF KEYWORD_SET(plot_rot) THEN BEGIN
+      exp_rot = -data.exp_omega0*data.exp_Rmaj*data.a/1e5
+      rot = data.M[*,N_it]*data.c_s[*,N_it]/1e5
+      ymin = MIN(exp_rot) < MIN(rot)
+      ymax = MAX(exp_rot) > MAX(rot)
+      PLOT, x_exp, exp_rot, XRANGE = [0,1], $
+            THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
+            CHARSIZE=cs, XTITLE=xtitle, YRANGE=[ymin,ymax]
+      OPLOT, x, rot, COLOR=100, PSYM=-4, THICK=thick
+      IF (d2flag) THEN OPLOT, x2, data2.M[*,N_it2]*data2.c_s[*,N_it2]/1e5, COLOR=150, $
+        PSYM=-2, THICK=thick
+      XYOUTS, 0.2, 0.8*ymax, 'V!Dtor!N = R!4x!X!D0!N (10!U5!N m/s)', CHARSIZE=2,$
+              CHARTHICK=thick
 
-  ymax = MAX(Mflux_target) > MAX(Mflux_tot)
-  IF KEYWORD_SET(mks) THEN ymin = 0 ELSE $
-     ymin = 0.1*(MIN(Mflux_target[1:*]) < MIN(Mflux_tot[1:*]))
-
-  PLOT, x, Mflux_target, XRANGE=[0,1], XTITLE=xtitle, LINESTYLE=2, $
-        YRANGE=[ymin,ymax], CHARSIZE=cs, $
-        THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick
-  OPLOT, x, Mflux0, THICK=thick
-  OPLOT, x, Mflux_tot, COLOR=100,PSYM=-4, THICK=thick
-  OPLOT, x, Mflux_neo, COLOR=50, PSYM=-4, THICK=thick
-  IF (d2flag) THEN OPLOT, x2, data2.mflux_tot[*,N_it2]*d2mnorm, $
-                          COLOR=150, PSYM=-4, THICK=thick
-  XYOUTS, x0, 0.8*ymax, '!4P!X' + mflux_units,$
-          CHARSIZE=2,CHARTHICK=thick
-
+      ymax = MAX(Mflux_target) > MAX(Mflux_tot)
+      IF KEYWORD_SET(mks) THEN ymin = 0 ELSE $
+        ymin = 0.1*(MIN(Mflux_target[1:*]) < MIN(Mflux_tot[1:*]))
+      
+      PLOT, x, Mflux_target, XRANGE=[0,1], XTITLE=xtitle, LINESTYLE=2, $
+            YRANGE=[ymin,ymax], CHARSIZE=cs, $
+            THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick
+      OPLOT, x, Mflux0, THICK=thick
+      OPLOT, x, Mflux_tot, COLOR=100,PSYM=-4, THICK=thick
+      OPLOT, x, Mflux_neo, COLOR=50, PSYM=-4, THICK=thick
+      IF (d2flag) THEN OPLOT, x2, data2.mflux_tot[*,N_it2]*d2mnorm, $
+        COLOR=150, PSYM=-4, THICK=thick
+      XYOUTS, x0, 0.8*ymax, '!4P!X' + mflux_units,$
+              CHARSIZE=2,CHARTHICK=thick
+  ENDIF
   !P.MULTI=0
 
   IF KEYWORD_SET(summary) THEN BEGIN
@@ -325,7 +341,7 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
       DEVICE, XS=30,YS=30, /ENCAPS, /COLOR, BITS=8, $
               FILE = dirloc +'/' + simdir + '/summary.eps'
       PLOT_TGYRO_LOC_SUMMARY, simdir, N_it = N_it, RHO=rho, MKS=mks,$
-        PS = 1, DATA2 = data2, Nit2=N_it2,  _EXTRA=extra
+        PS = 1, DATA2 = data2, Nit2=N_it2,  PLOT_ROT=plot_rot, _EXTRA=extra
       DEVICE, /CLOSE
       SET_PLOT, 'X'
   ENDIF
