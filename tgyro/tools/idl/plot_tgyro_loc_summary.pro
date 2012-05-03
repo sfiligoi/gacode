@@ -1,6 +1,7 @@
 PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks,$
   WCM2 = wcm2, DATA2 = data2, Nit2=N_it2, PS = ps, SUMMARY=summary, $
-	PLOT_GRADIENTS=plot_gradients, PLOT_ROT=plot_rot, _EXTRA=extra
+  PLOT_GRADIENTS=plot_gradients, PLOT_ROT=plot_rot, $
+  DATA_PSYM=data_psym, _EXTRA=extra
 ;
 ; C. Holland, UCSD
 ;
@@ -56,6 +57,8 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
 ; plot named summary.eps in simdir.  Best used with PS=1.  X11 plot
 ; will still be generated.
 ; PLOT_ROT: plot rotation profiles and fluxes
+; DATA_PSYM: set equal to value of symbol desired to plot expt. data
+; if loaded (DEFAULT of 0 means no expt. data point plot even if loaded)
 ;
 ; v1.0.1: Nov. 11, 2008
 ; Added SUMMARY flag.  Set equal to 1 to make a file called
@@ -91,6 +94,8 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
      thick = 1
      cs = 2
   ENDELSE
+
+  DEFAULT, data_psym, 0
 
   data = GET_TGYRO_LOC_DATA(simdir, DIRLOC=dirloc)
   IF (N_ELEMENTS(data2) GT 0) THEN d2flag = 1 ELSE d2flag = 0
@@ -192,8 +197,8 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
       PLOT, x_exp, data.exp_ti, XRANGE = [0,1], TITLE = data.simdir, $
             THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
             CHARSIZE=cs, YRANGE=[0,ymax]
-      IF (data.ti_data_rho[0] NE -1) THEN $
-        OPLOT, data.ti_data_rho, data.ti_data, PSYM=1, THICK=thick
+      IF ((data_psym GT 0) AND (data.ti_data_rho[0] NE -1)) THEN $
+        OPLOT, data.ti_data_rho, data.ti_data, PSYM=data_psym, THICK=thick
       IF (d2flag) THEN OPLOT, x2, data2.ti[*,N_it2], COLOR=150, PSYM=-2,THICK=thick
       OPLOT, x, data.ti[*,N_it], COLOR=100,PSYM=-4, THICK=thick
       XYOUTS, 0.6, 0.8*ymax, 'T!Di!N (keV)',$
@@ -237,8 +242,8 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
       PLOT, x_exp, data.exp_te, XRANGE = [0,1], CHARSIZE=cs, $
             THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
             TITLE = 'iteration # ' + NUMTOSTRING(N_it), YRANGE=[0,ymax]
-      IF (data.te_data_rho[0] NE -1) THEN $
-        OPLOT, data.te_data_rho, data.te_data, PSYM=1, THICK=thick
+      IF ((data_psym GT 0) AND (data.te_data_rho[0] NE -1)) THEN $
+        OPLOT, data.te_data_rho, data.te_data, PSYM=data_psym, THICK=thick
       IF (d2flag) THEN OPLOT, x2, data2.te[*,N_it2], COLOR=150, PSYM=-2,THICK=thick
       OPLOT, x, data.te[*,N_it], COLOR=100,PSYM=-4, THICK=thick
       XYOUTS, 0.6, 0.8*ymax, 'T!De!N (keV)',$
@@ -255,7 +260,7 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
      ymin = 0.1*(MIN(Qe_target[1:*]) < MIN(Qe_tot[1:*])) < MIN(Qe0[1:*])
      ylog = 1
   ENDELSE
-  PLOT, x, Qe_target, XRANGE=[0,1], XTITLE=xtitle, LINESTYLE=2, YLOG=ylog, $
+  PLOT, x, Qe_target, XRANGE=[0,1], LINESTYLE=2, YLOG=ylog, $
         TITLE = 'dashed: target, blue: neo', YRANGE=[ymin,ymax], $
         CHARSIZE=cs, $
         THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick
@@ -284,8 +289,8 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
       PLOT, x_exp, data.exp_ne, XRANGE = [0,1], XTITLE = dens_xtitle, $
             THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
             CHARSIZE=cs, YRANGE=[ymin,ymax]
-      IF (data.ne_data_rho[0] NE -1) THEN $
-        OPLOT, data.ne_data_rho, data.ne_data, PSYM=1, THICK=thick
+      IF ((data_psym GT 0) AND (data.ne_data_rho[0] NE -1)) THEN $
+        OPLOT, data.ne_data_rho, data.ne_data, PSYM=data_psym, THICK=thick
       IF (d2flag) THEN OPLOT, x2, data2.n_e[*,N_it2], COLOR=150, PSYM=-2,$
         THICK=thick
       OPLOT, x, data.n_e[*,N_it], COLOR=100,PSYM=-4, THICK=thick
@@ -341,7 +346,8 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
       DEVICE, XS=30,YS=30, /ENCAPS, /COLOR, BITS=8, $
               FILE = dirloc +'/' + simdir + '/summary.eps'
       PLOT_TGYRO_LOC_SUMMARY, simdir, N_it = N_it, RHO=rho, MKS=mks,$
-        PS = 1, DATA2 = data2, Nit2=N_it2,  PLOT_ROT=plot_rot, _EXTRA=extra
+        PS = 1, DATA2 = data2, Nit2=N_it2,  PLOT_ROT=plot_rot, $
+        DATA_PSYM=data_psym, _EXTRA=extra
       DEVICE, /CLOSE
       SET_PLOT, 'X'
   ENDIF
