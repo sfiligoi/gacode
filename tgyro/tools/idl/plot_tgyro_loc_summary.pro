@@ -1,3 +1,23 @@
+FUNCTION integrate_tgyro_z, prof0, z, rmin, rmin_exp
+
+  n_exp = N_ELEMENTS(rmin_exp)
+  z_exp = INTERPOL(z, rmin, rmin_exp)
+  prof_exp = FLTARR(n_exp)
+  ir_max = MAX(WHERE(rmin_exp LE MAX(rmin)))
+
+  FOR ir = 1, ir_max DO $
+           prof_exp[ir] = INT_TABULATED(rmin_exp[0:ir],z_exp[0:ir])
+  prof_exp = prof0*EXP(-prof_exp)
+
+;  FOR ir = 0, ir_max-1 DO $
+;           prof_exp[ir] = INT_TABULATED(rmin_exp[ir:ir_max],z_exp[ir:ir_max])
+;  prof_exp = prof0*EXP(prof_exp)
+
+  prof_exp[ir_max+1:n_exp-1] = 0.
+
+  RETURN, prof_exp  
+END ;integrate_tgyro_z
+
 PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks,$
   WCM2 = wcm2, DATA2 = data2, Nit2=N_it2, PS = ps, SUMMARY=summary, $
   PLOT_GRADIENTS=plot_gradients, PLOT_ROT=plot_rot, $
@@ -197,10 +217,24 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
       PLOT, x_exp, data.exp_ti, XRANGE = [0,1], TITLE = data.simdir, $
             THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
             CHARSIZE=cs, YRANGE=[0,ymax]
+
       IF ((data_psym GT 0) AND (data.ti_data_rho[0] NE -1)) THEN $
         OPLOT, data.ti_data_rho, data.ti_data, PSYM=data_psym, THICK=thick
-      IF (d2flag) THEN OPLOT, x2, data2.ti[*,N_it2], COLOR=150, PSYM=-2,THICK=thick
-      OPLOT, x, data.ti[*,N_it], COLOR=100,PSYM=-4, THICK=thick
+
+      IF (d2flag) THEN BEGIN
+          Ti2_smooth = INTEGRATE_TGYRO_Z(data2.ti[0,N_it2], data2.a_over_Lti[*,N_it2], $
+                                        data2.rmin, data2.exp_rmin)
+          idx =WHERE (Ti2_smooth GT 0)
+          IF (N_it2 GT 0) THEN OPLOT, x_exp[idx], Ti2_smooth[idx], COLOR=150, THICK=thick
+          OPLOT, x2, data2.ti[*,N_it2], COLOR=150, PSYM=2,THICK=thick
+      ENDIF
+
+      Ti_smooth = INTEGRATE_TGYRO_Z(data.ti[0,N_it], data.a_over_Lti[*,N_it], $
+                                    data.rmin, data.exp_rmin)
+      idx =WHERE (Ti_smooth GT 0)
+      IF (N_it GT 0) THEN OPLOT, x_exp[idx], Ti_smooth[idx], COLOR=100, THICK=thick
+
+      OPLOT, x, data.ti[*,N_it], COLOR=100,PSYM=4, THICK=thick
       XYOUTS, 0.6, 0.8*ymax, 'T!Di!N (keV)',$
               CHARSIZE=2,CHARTHICK=thick
       IF (d2flag) THEN XYOUTS, 0.5, ymax, data2.simdir, ALIGN=0.5, $
@@ -242,10 +276,25 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
       PLOT, x_exp, data.exp_te, XRANGE = [0,1], CHARSIZE=cs, $
             THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
             TITLE = 'iteration # ' + NUMTOSTRING(N_it), YRANGE=[0,ymax]
+
       IF ((data_psym GT 0) AND (data.te_data_rho[0] NE -1)) THEN $
         OPLOT, data.te_data_rho, data.te_data, PSYM=data_psym, THICK=thick
-      IF (d2flag) THEN OPLOT, x2, data2.te[*,N_it2], COLOR=150, PSYM=-2,THICK=thick
-      OPLOT, x, data.te[*,N_it], COLOR=100,PSYM=-4, THICK=thick
+
+      IF (d2flag) THEN BEGIN
+          Te2_smooth = INTEGRATE_TGYRO_Z(data2.te[0,N_it2], data2.a_over_Lte[*,N_it2], $
+                                        data2.rmin, data2.exp_rmin)
+          idx =WHERE (Te2_smooth GT 0)
+          IF (N_it2 GT 0) THEN OPLOT, x_exp[idx], Te2_smooth[idx], COLOR=150, THICK=thick
+          OPLOT, x2, data2.te[*,N_it2], COLOR=150, PSYM=2,THICK=thick
+      ENDIF
+
+      Te_smooth = INTEGRATE_TGYRO_Z(data.te[0,N_it], data.a_over_Lte[*,N_it], $
+                                    data.rmin, data.exp_rmin)
+      idx =WHERE (Te_smooth GT 0)
+      IF (N_it GT 0) THEN OPLOT, x_exp[idx], Te_smooth[idx], COLOR=100, THICK=thick
+
+      OPLOT, x, data.te[*,N_it], COLOR=100,PSYM=4, THICK=thick
+
       XYOUTS, 0.6, 0.8*ymax, 'T!De!N (keV)',$
               CHARSIZE=2,CHARTHICK=thick
       IF (d2flag) THEN XYOUTS, 0.5, ymax, 'iteration # ' + NUMTOSTRING(N_it2), $
@@ -286,14 +335,29 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
   ENDIF ELSE BEGIN
       ymin = 0 ;MIN(data.exp_ne) < MIN(data.n_e[*,N_it])
       ymax = MAX(data.exp_ne) > MAX(data.n_e[*,N_it]) > MAX(data.ne_data)
+
       PLOT, x_exp, data.exp_ne, XRANGE = [0,1], XTITLE = dens_xtitle, $
             THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
             CHARSIZE=cs, YRANGE=[ymin,ymax]
+
       IF ((data_psym GT 0) AND (data.ne_data_rho[0] NE -1)) THEN $
         OPLOT, data.ne_data_rho, data.ne_data, PSYM=data_psym, THICK=thick
-      IF (d2flag) THEN OPLOT, x2, data2.n_e[*,N_it2], COLOR=150, PSYM=-2,$
-        THICK=thick
-      OPLOT, x, data.n_e[*,N_it], COLOR=100,PSYM=-4, THICK=thick
+
+      IF (d2flag) THEN BEGIN
+          ne2_smooth = INTEGRATE_TGYRO_Z(data2.n_e[0,N_it2], $
+                                         data2.a_over_Lne[*,N_it2], $
+                                         data2.rmin, data2.exp_rmin)
+          idx =WHERE (ne2_smooth GT 0)
+          IF (N_it2 GT 0) THEN OPLOT, x_exp[idx], ne2_smooth[idx], COLOR=150, THICK=thick
+          OPLOT, x2, data2.n_e[*,N_it2], COLOR=150, PSYM=2,THICK=thick
+      ENDIF
+
+      ne_smooth = INTEGRATE_TGYRO_Z(data.n_e[0,N_it], data.a_over_Lne[*,N_it], $
+                                    data.rmin, data.exp_rmin)
+      idx =WHERE (ne_smooth GT 0)
+      IF (N_it GT 0) THEN OPLOT, x_exp[idx], ne_smooth[idx], COLOR=100, THICK=thick
+
+      OPLOT, x, data.n_e[*,N_it], COLOR=100,PSYM=4, THICK=thick
       XYOUTS, 0.4, 0.8*ymax, 'n!De!N (10!U19!N/m!U3!N)',$
               CHARSIZE=2,CHARTHICK=thick
   ENDELSE
@@ -315,12 +379,21 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
       rot = data.M[*,N_it]*data.c_s[*,N_it]/1e5
       ymin = MIN(exp_rot) < MIN(rot)
       ymax = MAX(exp_rot) > MAX(rot)
+
       PLOT, x_exp, exp_rot, XRANGE = [0,1], $
             THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
             CHARSIZE=cs, XTITLE=xtitle, YRANGE=[ymin,ymax]
-      OPLOT, x, rot, COLOR=100, PSYM=-4, THICK=thick
-      IF (d2flag) THEN OPLOT, x2, data2.M[*,N_it2]*data2.c_s[*,N_it2]/1e5, COLOR=150, $
-        PSYM=-2, THICK=thick
+
+      IF (d2flag) THEN BEGIN
+          IF (N_it2 GT 0) THEN OPLOT, x2, data2.M[*,N_it2]*data2.c_s[*,N_it2]/1e5, $
+            COLOR=150, PSYM=-2, THICK=thick $
+          ELSE OPLOT, x2, data2.M[*,N_it2]*data2.c_s[*,N_it2]/1e5, $
+                      COLOR=150, PSYM=2, THICK=thick
+      ENDIF
+
+      IF (N_it GT 0) THEN OPLOT, x, rot, COLOR=100, PSYM=-4, THICK=thick $
+      ELSE OPLOT, x, rot, COLOR=100, PSYM=4, THICK=thick
+
       XYOUTS, 0.2, 0.8*ymax, 'V!Dtor!N = R!4x!X!D0!N (10!U5!N m/s)', CHARSIZE=2,$
               CHARTHICK=thick
 
