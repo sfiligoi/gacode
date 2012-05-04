@@ -79,9 +79,9 @@ echo "#PBS -e $simpath/$sim/batch.err" >> $bfile
 echo "#PBS -q $queue" >> $bfile
 echo "#PBS -l walltime=$limit" >> $bfile
 echo "#PBS -l mppwidth=$cores_requested" >> $bfile
-echo " "
-echo "export CRAY_ROOTFS=DSL"
-echo "module load python"
+echo " " >> $bfile
+echo "export CRAY_ROOTFS=DSL" >> $bfile
+echo "module load python" >> $bfile
 
 gyro_opts="-e $sim -n $nmpi -nomp $nomp -numa $numa -mpinuma $mpinuma -p $simpath"
 
