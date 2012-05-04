@@ -22,7 +22,8 @@ subroutine tgyro_global_iteration_driver
 
   ! Copy (TGYRO copy of input.profiles) -> (GYRO copy of input.profiles)
   if (i_proc_global == 0) then
-     call system('cp input.profiles '//trim(paths(1))//'input.profiles')  
+     call system('python $GACODE_ROOT/shared/bin/profile_parse.py input.profiles')
+     call system('cp input.profiles.gen '//trim(paths(1)))  
   endif
 
   ! Initialize GYRO
@@ -84,7 +85,7 @@ subroutine tgyro_global_iteration_driver
   EXPRO_ctrl_signb = -tgyro_btccw_in
   EXPRO_ctrl_rotation_method = 1
 
-  call EXPRO_palloc(MPI_COMM_WORLD,paths(1),1) 
+  call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
   call EXPRO_pread
 
   n_exp = EXPRO_n_exp
@@ -92,7 +93,7 @@ subroutine tgyro_global_iteration_driver
   call tgyro_global_init_profiles
 
   call EXPRO_write_original('REWROTE')
-  call EXPRO_palloc(MPI_COMM_WORLD,paths(1),0)
+  call EXPRO_palloc(MPI_COMM_WORLD,'./',0)
 
   ! Output initialization
   call tgyro_write_input
@@ -116,7 +117,7 @@ subroutine tgyro_global_iteration_driver
 
      ! Read profile data, copy current profiles into interface, 
      ! rewrite profiles
-     call EXPRO_palloc(MPI_COMM_WORLD,paths(1),1) 
+     call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
      call EXPRO_pread
 
      ! Map Te from TGYRO variable to EXPRO interface varaible
@@ -133,11 +134,12 @@ subroutine tgyro_global_iteration_driver
      ittag = '.'//achar(i_tran_loop-1+iachar("1"))  
 
      call EXPRO_write_original('REWRITE'//ittag)
-     call EXPRO_palloc(MPI_COMM_WORLD,paths(1),0) 
+     call EXPRO_palloc(MPI_COMM_WORLD,'./',0) 
      if (i_proc_global == 0) then
-        call system('cp '//trim(paths(1))//'input.profiles.new '//trim(paths(1))//'input.profiles'//ittag)
-        call system('cp '//trim(paths(1))//'input.profiles'//ittag//' '//trim(paths(1))//'input.profiles')
-     endif
+        call system('cp input.profiles.new input.profiles'//ittag)
+        call system('python $GACODE_ROOT/shared/bin/profile_parse.py input.profiles.new')
+        call system('cp input.profiles.gen '//trim(paths(1)))
+    endif
 
      ! Get global GYRO flux, compute targets, write data
      call tgyro_global_flux
