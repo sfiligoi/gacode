@@ -22,8 +22,7 @@ subroutine tgyro_global_iteration_driver
 
   ! Copy (TGYRO copy of input.profiles) -> (GYRO copy of input.profiles)
   if (i_proc_global == 0) then
-     call system('python $GACODE_ROOT/shared/bin/profile_parse.py input.profiles')
-     call system('cp input.profiles.gen '//trim(paths(1)))  
+     call system('$GACODE_ROOT/tgyro/bin/tgyro_global_helper input.profiles '//trim(paths(1)))
   endif
 
   ! Initialize GYRO
@@ -137,9 +136,8 @@ subroutine tgyro_global_iteration_driver
      call EXPRO_palloc(MPI_COMM_WORLD,'./',0) 
      if (i_proc_global == 0) then
         call system('cp input.profiles.new input.profiles'//ittag)
-        call system('python $GACODE_ROOT/shared/bin/profile_parse.py input.profiles.new')
-        call system('cp input.profiles.gen '//trim(paths(1)))
-    endif
+        call system('$GACODE_ROOT/tgyro/bin/tgyro_global_helper input.profiles.new '//trim(paths(1)))
+     endif
 
      ! Get global GYRO flux, compute targets, write data
      call tgyro_global_flux
