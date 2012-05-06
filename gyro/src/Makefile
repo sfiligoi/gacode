@@ -92,6 +92,8 @@ OBJECTS += gyro_globals.o \
           gyro_make_ampere_matrix.o \
 	  gyro_make_poissonaperp_matrix.o \
           gyro_make_implicit_advect.o \
+          gyro_make_jpar_elec.o \
+          gyro_make_jperp_elec.o \
           gyro_map_experimental_profiles.o \
           gyro_message_routines.o \
           gyro_moments_plot.o \
@@ -141,8 +143,6 @@ OBJECTS += gyro_globals.o \
           gyro_write_timedata.o \
           gyro_write_timers.o \
 	  gyro_velocity_sum.o \
-          make_electron_current.o \
-	  make_electron_current_perp.o \
           get_field_plot.o \
           get_field_r0_plot.o \
           get_nonlinear_flux_velocity.o \

@@ -1,12 +1,12 @@
 !------------------------------------------------------------------
-! make_electron_current_perp.f90 [caller make_poissonaperp_matrix]
+! gyro_make_jperp_elec.f90 
 !
 ! PURPOSE:
 !  Generate matrix of velocity-space averaged blending projection 
-!  integrals.
+!  integrals for jperp.
 !------------------------------------------------------------------
 
-subroutine make_electron_current_perp
+subroutine gyro_make_jperp_elec
 
   use mpi
   use gyro_globals
@@ -111,7 +111,7 @@ subroutine make_electron_current_perp
   enddo ! jp
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[make_electron_current_perp done]'
+     print *,'[gyro_make_jperp_elec done]'
   endif
 
-end subroutine make_electron_current_perp
+end subroutine gyro_make_jperp_elec

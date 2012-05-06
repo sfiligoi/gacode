@@ -1,12 +1,12 @@
 !-----------------------------------------------------
-! make_electron_current.f90 [caller BigScience]
+! gyro_make_jpar_elec.f90
 !
 ! PURPOSE:
 !  Generate matrix of velocity-space averaged 
 !  blending projection integrals.
 !---------------------------------------------
 
-subroutine make_electron_current(i_print)
+subroutine gyro_make_jpar_elec(i_print)
 
   use mpi
   use gyro_globals
@@ -104,7 +104,7 @@ subroutine make_electron_current(i_print)
   endif
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[make_electron_current done]'
+     print *,'[gyro_make_jpar_elec done]'
   endif
 
-end subroutine make_electron_current
+end subroutine gyro_make_jpar_elec
