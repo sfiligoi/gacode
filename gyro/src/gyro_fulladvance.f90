@@ -68,7 +68,7 @@ subroutine gyro_fulladvance
   !
   ! 1. Compute flux-surface average of (phi,a)
   ! 
-  call get_field_fluxave
+  call gyro_field_fluxave
   !
   ! 2. Compute (phi,a) for plotting; we want to call 
   !    get_field_plot every timestep because it is 

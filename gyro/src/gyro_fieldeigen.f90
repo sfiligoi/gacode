@@ -526,7 +526,7 @@ subroutine gyro_fieldeigen
   ! Call plotting and other IO functions:
   !
   call gyro_fieldeigen_df
-  call get_field_fluxave
+  call gyro_field_fluxave
   call gyro_field_time_derivative
   call get_field_plot
   call gyro_moments_plot

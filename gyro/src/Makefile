@@ -68,6 +68,7 @@ OBJECTS += gyro_globals.o \
           gyro_conserve_all.o \
           gyro_diffusivity.o \
           gyro_entropy.o \
+          gyro_field_fluxave.o \
           gyro_field_time_derivative.o \
           gyro_field_interpolation.o \
           gyro_field_solve_explicit.o \
@@ -146,7 +147,6 @@ OBJECTS += gyro_globals.o \
           get_field_plot.o \
           get_field_r0_plot.o \
           get_nonlinear_flux_velocity.o \
-          get_field_fluxave.o \
           get_phi_squared.o \
           get_g_squared.o \
           gyro_dump_input.o \
