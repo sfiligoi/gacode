@@ -56,6 +56,7 @@ OBJECTS += gyro_globals.o \
           gyro_build_sparse_poisson.o \
           gyro_build_sparse_poissonaperp.o \
           gyro_build_sparse_maxwell.o \
+          gyro_catch_error_routines.o \
           gyro_cleanup.o \
           gyro_collect_routines.o \
           gyro_collision_setup.o \
@@ -84,11 +85,13 @@ OBJECTS += gyro_globals.o \
           gyro_initialize_timestep.o \
           gyro_input_check.o \
           gyro_kxky_spectrum.o \
+          gyro_kinetic_advance.o \
           gyro_lambda_grid.o \
           gyro_make_maxwell_matrix.o \
           gyro_make_poisson_matrix.o \
           gyro_make_ampere_matrix.o \
 	  gyro_make_poissonaperp_matrix.o \
+          gyro_make_implicit_advect.o \
           gyro_map_experimental_profiles.o \
           gyro_message_routines.o \
           gyro_moments_plot.o \
@@ -138,17 +141,12 @@ OBJECTS += gyro_globals.o \
           gyro_write_timedata.o \
           gyro_write_timers.o \
 	  gyro_velocity_sum.o \
-          catch_error.o \
-          catch_blowup.o \
-          catch_halt_signal.o \
-          make_implicit_advect.o \
           make_electron_current.o \
 	  make_electron_current_perp.o \
           get_field_plot.o \
           get_field_r0_plot.o \
           get_nonlinear_flux_velocity.o \
           get_field_fluxave.o \
-          get_kinetic_advance.o \
           get_phi_squared.o \
           get_g_squared.o \
           gyro_dump_input.o \

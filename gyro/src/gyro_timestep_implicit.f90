@@ -35,13 +35,13 @@ subroutine gyro_timestep_implicit
 
   h_0 = h
 
-  call get_kinetic_advance
+  call gyro_kinetic_advance
   RHSI_1 = (h-h_0)/(0.5*dt)
 
   h = h_0-0.5*dt*RHSI_1
 
   RHSI_2 = h
-  call get_kinetic_advance
+  call gyro_kinetic_advance
   RHSI_2 = (h-RHSI_2)/(0.5*dt)
 
   call gyro_rhs_total
@@ -50,7 +50,7 @@ subroutine gyro_timestep_implicit
   h = h_0+dt*RHSE_2+0.5*dt*RHSI_2
 
   RHSI_3 = h
-  call get_kinetic_advance
+  call gyro_kinetic_advance
   RHSI_3 = (h-RHSI_3)/(0.5*dt)
 
   call gyro_rhs_total

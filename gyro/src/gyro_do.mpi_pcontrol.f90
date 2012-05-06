@@ -208,7 +208,7 @@ subroutine gyro_do
      if (electron_method == 2) then
 
         ! Make advection operators for electrons
-        call make_implicit_advect(0)
+        call gyro_make_implicit_advect(0)
 
      endif
      !

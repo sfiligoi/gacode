@@ -1,16 +1,12 @@
 !-----------------------------------------------------------
-! get_kinetic_advance.f90
+! gyro_kinetic_advance.f90
 !
 ! PURPOSE:
 !  Manage implicit advance of fields and electron
 !  distribution.  Explicit ion RHS done with gyro_rhs_total.
-!  
-! NOTES:
-!  Analogous routine for adiabatic electrons is 
-!  get_adiabatic_advance. 
 !-----------------------------------------------------------
 
-subroutine get_kinetic_advance
+subroutine gyro_kinetic_advance
 
   use gyro_globals
 
@@ -30,7 +26,7 @@ subroutine get_kinetic_advance
   call gyro_timer_out('Implicit-he')
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'*[get_kinetic_advance done]'
+     print *,'*[gyro_kinetic_advance done]'
   endif
 
-end subroutine get_kinetic_advance
+end subroutine gyro_kinetic_advance
