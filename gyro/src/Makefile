@@ -104,9 +104,11 @@ OBJECTS += gyro_globals.o \
           gyro_nl_direct.o \
           gyro_nl_fft.o \
           gyro_nonlinear_flux.o \
+          gyro_nonlinear_flux_velocity.o \
           gyro_nonlinear_transfer.o \
           gyro_omegas.o \
           gyro_operators_on_h.o \
+          gyro_phi_kp_squared.o \
           gyro_profile_init.o \
           gyro_radial_operators.o \
           gyro_radial_simulation_box.o \
@@ -146,8 +148,6 @@ OBJECTS += gyro_globals.o \
 	  gyro_velocity_sum.o \
           get_field_plot.o \
           get_field_r0_plot.o \
-          get_nonlinear_flux_velocity.o \
-          get_phi_squared.o \
           get_g_squared.o \
           gyro_dump_input.o \
           gyro_dump_interface.o

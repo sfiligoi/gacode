@@ -394,7 +394,7 @@ subroutine gyro_write_timedata
   ! Velocity-space diagnostics
   !
   if (velocity_output_flag == 1) then
-     call get_nonlinear_flux_velocity
+     call gyro_nonlinear_flux_velocity
      call write_distributed_real(&
           trim(path)//'out.gyro.flux_velocity',&
           10,&
