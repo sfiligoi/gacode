@@ -14,6 +14,11 @@
 subroutine gyro_write_timedata
 
   use gyro_globals
+#ifdef HAVE_HDF5
+  use hdf5_api
+  use gyro_vshdf5_mod
+  use mpi
+#endif
 
   !---------------------------------------------------
   implicit none
@@ -24,6 +29,23 @@ subroutine gyro_write_timedata
   complex, dimension(n_theta_plot,n_x,n_kinetic) :: n_plot
   complex, dimension(n_theta_plot,n_x,n_kinetic) :: e_plot
   complex, dimension(n_theta_plot,n_x,n_kinetic) :: v_plot
+  !
+  real :: pi=3.141592653589793
+#ifdef HAVE_HDF5
+  integer, parameter :: hr4=SELECTED_REAL_KIND(6,37)
+  character(60) :: description
+  character(64) :: step_name
+  character(128) :: dumpfile
+  character(20)   :: openmethod
+  integer(HID_T) :: dumpGid,dumpFid,gid3D,fid3D
+  integer(HID_T) :: dumpTGid,dumpTFid
+  type(hdf5InOpts) :: h5in
+  type(hdf5ErrorType) :: h5err
+  integer :: number_label
+  logical :: write_threed
+  !integer, INTENT(IN) :: h5_control
+#endif
+
   !---------------------------------------------------
 
   !---------------------------------------------------
@@ -33,7 +55,15 @@ subroutine gyro_write_timedata
      call gyro_write_step(trim(path)//'out.gyro.t',1)
   endif
   !---------------------------------------------------
-
+#ifdef HAVE_HDF5
+!---------------------------------------------------
+  ! Determine if the 3D files need to be written 
+  if (n_torangle_3d > 1 ) then
+     write_threed = .true.
+  else
+     write_threed = .false.
+  endif
+#endif
   !--------------------------------------------------
   ! Output of field-like quantities:
   !

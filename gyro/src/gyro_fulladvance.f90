@@ -149,19 +149,6 @@ subroutine gyro_fulladvance
      io_control = 2*output_flag
      h5_control = 2*output_flag
      
-!     if(modulo(step,time_skip) == 0) then
-!      if (io_method < 3 .and. io_method > 0) call gyro_write_timedata
-!      if (io_method > 1) then
-!        call gyro_write_timedata_hdf5(h5_control)
-!      endif
-!    endif
-!
-!    if(modulo(step,time_skip_wedge) == 0) then
-!      if (time_skip_wedge > 0 .and. io_method > 1 ) then
-!        call gyro_write_timedata_wedge_hdf5
-!      endif
-!    endif
-        
         
        if (modulo(step,time_skip) == 0) then
          if (io_method < 3 .and. io_method > 0) call gyro_write_timedata
