@@ -17,6 +17,8 @@ subroutine tgyro_flux
   implicit none
 
   integer :: i_ion
+  integer :: i1,i2
+  integer :: n_12
   real :: dummy1
   real :: dummy2
   real :: rltcrit
@@ -199,18 +201,22 @@ subroutine tgyro_flux
 
      if (tgyro_mode == 1) then
 
+        i1 = 1+gyro_explicit_damp_grid_in
+        i2 = gyro_radial_grid_in-gyro_explicit_damp_grid_in
+        nx = gyro_radial_grid_in-2*gyro_explicit_damp_grid_in
+
         ! Map GYRO (local simulation) output to TGYRO
 
-        pflux_e_tur(i_r) = sum(gyro_elec_pflux_out)/gyro_radial_grid_in
-        eflux_e_tur(i_r) = sum(gyro_elec_eflux_out)/gyro_radial_grid_in
-        mflux_e_tur(i_r) = sum(gyro_elec_mflux_out)/gyro_radial_grid_in
-        expwd_e_tur(i_r) = sum(gyro_elec_expwd_out)/gyro_radial_grid_in
+        pflux_e_tur(i_r) = sum(gyro_elec_pflux_out(i1:i2))/n_12
+        eflux_e_tur(i_r) = sum(gyro_elec_eflux_out(i1:i2))/n_12
+        mflux_e_tur(i_r) = sum(gyro_elec_mflux_out(i1:i2))/n_12
+        expwd_e_tur(i_r) = sum(gyro_elec_expwd_out(i1:i2))/n_12
 
         do i_ion=1,loc_n_ion
-           pflux_i_tur(i_ion,i_r) = sum(gyro_ion_pflux_out(:,i_ion))/gyro_radial_grid_in
-           eflux_i_tur(i_ion,i_r) = sum(gyro_ion_eflux_out(:,i_ion))/gyro_radial_grid_in
-           mflux_i_tur(i_ion,i_r) = sum(gyro_ion_mflux_out(:,i_ion))/gyro_radial_grid_in
-           expwd_i_tur(i_ion,i_r) = sum(gyro_ion_expwd_out(:,i_ion))/gyro_radial_grid_in
+           pflux_i_tur(i_ion,i_r) = sum(gyro_ion_pflux_out(i1:i2,i_ion))/n_12
+           eflux_i_tur(i_ion,i_r) = sum(gyro_ion_eflux_out(i1:i2,i_ion))/n_12
+           mflux_i_tur(i_ion,i_r) = sum(gyro_ion_mflux_out(i1:i2,i_ion))/n_12
+           expwd_i_tur(i_ion,i_r) = sum(gyro_ion_expwd_out(i1:i2,i_ion))/n_12
         enddo
 
      endif
