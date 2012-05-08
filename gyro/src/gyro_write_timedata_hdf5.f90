@@ -328,9 +328,9 @@ subroutine gyro_write_timedata_hdf5(h5_control)
      !-----------------------------------------------------------------
      ! Distribution function data:
      !
-     if (n_proc == 1 .and. n_n == 1 .and. dist_print == 1) then
-        call write_h(trim(path)//'out.gyro.hp',trim(path)//'out.gyro.ht',10,11)
-     endif
+!     if (n_proc == 1 .and. n_n == 1 .and. dist_print == 1) then
+!        call write_h(trim(path)//'out.gyro.hp',trim(path)//'out.gyro.ht',10,11)
+!     endif
      !-----------------------------------------------------------------
 
      if (i_proc == 0 .and. lindiff_method > 1) then
