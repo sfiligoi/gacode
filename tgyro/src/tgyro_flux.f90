@@ -203,7 +203,7 @@ subroutine tgyro_flux
 
         i1 = 1+gyro_explicit_damp_grid_in
         i2 = gyro_radial_grid_in-gyro_explicit_damp_grid_in
-        nx = gyro_radial_grid_in-2*gyro_explicit_damp_grid_in
+        n_12 = gyro_radial_grid_in-2*gyro_explicit_damp_grid_in
 
         ! Map GYRO (local simulation) output to TGYRO
 
