@@ -26,7 +26,7 @@ subroutine gyro_diffusivity
   !-----------------------------------------------------------------
   ! Define factors useful for quasilinear normalizations
   !
-  call get_phi_squared
+  call gyro_phi_kp_squared
   call get_g_squared
 
   ! phi_squared_QL_n = <|phi_n(x)|^2>/rho_s^2   

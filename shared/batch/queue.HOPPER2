@@ -68,7 +68,8 @@ getnim -U `whoami`
 
 read -p "Specify a repository [0 for default] " repo
 
-echo "#PBS -N $sim" > $bfile
+echo "#!/bin/bash -l" > $bfile
+echo "#PBS -N $sim" >> $bfile
 if [ "$repo" != "0" ]
 then
    echo "#PBS -A $repo" >> $bfile
@@ -78,8 +79,9 @@ echo "#PBS -e $simpath/$sim/batch.err" >> $bfile
 echo "#PBS -q $queue" >> $bfile
 echo "#PBS -l walltime=$limit" >> $bfile
 echo "#PBS -l mppwidth=$cores_requested" >> $bfile
-echo "#PBS -m abe" >> $bfile
-echo "#PBS -M ${USER}@nersc.gov" >> $bfile
+echo " " >> $bfile
+echo "export CRAY_ROOTFS=DSL" >> $bfile
+echo "module load python" >> $bfile
 
 gyro_opts="-e $sim -n $nmpi -nomp $nomp -numa $numa -mpinuma $mpinuma -p $simpath"
 

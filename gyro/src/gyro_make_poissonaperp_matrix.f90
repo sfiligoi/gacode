@@ -82,7 +82,7 @@ subroutine gyro_make_poissonaperp_matrix
   allocate(ab_mm(n_x,-m_gyro:m_gyro-i_gyro,n_blend,n_blend))
   allocate(abp_mm(n_x,-m_gyro:m_gyro-i_gyro,n_blend,n_blend))
   call gyro_blend_ampereperp
-  call make_electron_current_perp
+  call gyro_make_jperp_elec
 
   if (sparse_method == 1) then
      call gyro_sparse_solve_umfpack(n_poissonaperp,n_poissonaperp_row,4,0)

@@ -788,9 +788,7 @@ module gyro_globals
   !
   real, dimension(:), allocatable :: phi_squared
   real, dimension(:,:), allocatable :: g_squared
-  real, dimension(:), allocatable :: phi_fluxave
-  real, dimension(:), allocatable :: a_fluxave
-  real, dimension(:), allocatable :: aperp_fluxave
+  real, dimension(:,:), allocatable :: field_fluxave
   !
   complex, dimension(:,:,:), allocatable :: phi
   complex, dimension(:,:,:), allocatable :: phi_plot

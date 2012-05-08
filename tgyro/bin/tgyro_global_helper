@@ -1,0 +1,14 @@
+#!/bin/bash
+#
+# SCRIPT:
+#  tgyro_global_helper
+#
+# PURPOSE:
+#  Parse and copy input.profiles.
+#--------------------------------------------------------------
+        
+# $1 = input.profiles
+# $2 = GYRO subdirectory
+        
+python $GACODE_ROOT/shared/bin/profile_parse.py $1
+cp input.profiles.gen $2
