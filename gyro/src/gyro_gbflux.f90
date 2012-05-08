@@ -62,7 +62,7 @@ subroutine gyro_gbflux
   !-----------------------------------------------------------------
   ! Define factors useful for quasilinear normalizations
   !
-  call get_phi_squared
+  call gyro_phi_kp_squared
   !-----------------------------------------------------------------
 
   !-----------------------------------------------------------------

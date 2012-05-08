@@ -18,10 +18,11 @@ subroutine tgyro_global_iteration_driver
   real :: time_max_save
   integer :: n_exp
   real, dimension(:), allocatable :: x,xt
+  character (len=16) :: ittag
 
   ! Copy (TGYRO copy of input.profiles) -> (GYRO copy of input.profiles)
   if (i_proc_global == 0) then
-     call system('cp input.profiles '//trim(paths(1))//'input.profiles')  
+     call system('$GACODE_ROOT/tgyro/bin/tgyro_global_helper input.profiles '//trim(paths(1)))
   endif
 
   ! Initialize GYRO
@@ -83,7 +84,7 @@ subroutine tgyro_global_iteration_driver
   EXPRO_ctrl_signb = -tgyro_btccw_in
   EXPRO_ctrl_rotation_method = 1
 
-  call EXPRO_palloc(MPI_COMM_WORLD,paths(1),1) 
+  call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
   call EXPRO_pread
 
   n_exp = EXPRO_n_exp
@@ -91,95 +92,80 @@ subroutine tgyro_global_iteration_driver
   call tgyro_global_init_profiles
 
   call EXPRO_write_original('REWROTE')
-  call EXPRO_palloc(MPI_COMM_WORLD,paths(1),0)
+  call EXPRO_palloc(MPI_COMM_WORLD,'./',0)
 
   ! Output initialization
   call tgyro_write_input
   call tgyro_write_data(0)
   !--------------------------------------------------------
 
-
-  !------------------------------------------------------------
-  ! TGYRO-GYRO CYCLE
-  !
-  ! Integrate profiles based on gradients
-  call tgyro_profile_functions
-  !
-  ! Read profile data, copy current profiles into interface, 
-  ! rewrite profiles
-  !
-  call EXPRO_palloc(MPI_COMM_WORLD,paths(1),1) 
-  call EXPRO_pread
-
+  ! Allocation and initialization of work variables
   allocate(x(n_r+1))
   allocate(xt(n_r+1))
+
   x(1:n_r) = r/r_min
   x(n_r+1) = 1.0
-  xt(1:n_r) = te/1e3
-  xt(n_r+1) = EXPRO_te(n_exp)
 
-  call cub_spline(x,xt,n_r+1,100*EXPRO_rmin(:)/r_min,EXPRO_te(:),n_exp)
+  !------------------------------------------------------------
+  ! TGYRO-GYRO ITERATION CYCLE
+  !
+  do i_tran_loop=1,tgyro_relax_iterations
+
+     ! Integrate profiles based on gradients
+     call tgyro_profile_functions
+
+     ! Read profile data, copy current profiles into interface, 
+     ! rewrite profiles
+     call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
+     call EXPRO_pread
+
+     ! Map Te from TGYRO variable to EXPRO interface varaible
+     xt(1:n_r) = te(:)/1e3
+     xt(n_r+1) = EXPRO_te(n_exp)
+     call cub_spline(x,xt,n_r+1,100*EXPRO_rmin(:)/r_min,EXPRO_te(:),n_exp)
+
+     ! Map Ti from TGYRO variable to EXPRO interface varaible
+     xt(1:n_r) = ti(1,:)/1e3
+     xt(n_r+1) = EXPRO_ti(1,n_exp)
+     call cub_spline(x,xt,n_r+1,100*EXPRO_rmin(:)/r_min,EXPRO_ti(1,:),n_exp)
+     EXPRO_ti(2,:) = EXPRO_ti(1,:)
+
+     ittag = '.'//achar(i_tran_loop-1+iachar("1"))  
+
+     call EXPRO_write_original('REWRITE'//ittag)
+     call EXPRO_palloc(MPI_COMM_WORLD,'./',0) 
+     if (i_proc_global == 0) then
+        call system('cp input.profiles.new input.profiles'//ittag)
+        call system('$GACODE_ROOT/tgyro/bin/tgyro_global_helper input.profiles.new '//trim(paths(1)))
+     endif
+
+     ! Get global GYRO flux, compute targets, write data
+     call tgyro_global_flux
+     call tgyro_source
+     call tgyro_write_data(1)
+
+     !------------------------------------------------------------
+     ! MODIFY GRADIENTS
+     !
+     ! Modify gradient profile based on some "diagonal rule"
+     !  dlntedr(:) = 0.0*(eflux_e_tot(:)-eflux_e_target(:))+dlntedr(:)
+     ! CH test: try (delta z)/z = - alpha (delta Q)/Q
+     !  --> z = (1 - alpha (dQ/Q))*z
+     ! alpha = 1/(Waltz stiffness), use alpha=0.1 <=> S = 10
+
+     dlntedr(2:n_r) = -0.1*( (eflux_e_tot(2:n_r) &
+          - eflux_e_target(2:n_r))/eflux_e_target(2:n_r) )*dlntedr(2:n_r) + dlntedr(2:n_r)
+
+     dlntidr(1,2:n_r) = -0.1*( (eflux_i_tot(2:n_r) &
+          - eflux_i_target(2:n_r))/eflux_i_target(2:n_r) )*dlntidr(1,2:n_r) + dlntidr(1,2:n_r)
+
+     dlntedr(1)   = 0.0
+     dlntidr(:,1) = 0.0
+     !------------------------------------------------------------
+
+  enddo
+
   deallocate(x)
   deallocate(xt)
-
-  call EXPRO_write_original('REWROTE_1')
-  call EXPRO_palloc(MPI_COMM_WORLD,paths(1),0) 
-  if (i_proc_global == 0) then
-     call system('mv '//trim(paths(1))//'input.profiles.new '//trim(paths(1))//'input.profiles.1')
-     call system('cp '//trim(paths(1))//'input.profiles.1 '//trim(paths(1))//'input.profiles')
-  endif
-  ! Get global GYRO flux, compute targets, write data
-  call tgyro_global_flux
-  call tgyro_source
-  call tgyro_write_data(1)
-  !------------------------------------------------------------
-
-  !------------------------------------------------------------
-  ! MODIFY GRADIENTS
-  !
-  ! Modify gradient profile based on some "diagonal rule"
-!  dlntedr(:) = 0.0*(eflux_e_tot(:)-eflux_e_target(:))+dlntedr(:)
-! CH test: try (delta z)/z = - alpha (delta Q)/Q
-!  --> z = (1 - alpha (dQ/Q))*z
-! alpha = 1/(Waltz stiffness), use alpha=0.1 <=> S = 10
-  dlntedr(2:n_r) = -0.1*( (eflux_e_tot(2:n_r) - eflux_e_target(2:n_r))/eflux_e_target(2:n_r))*dlntedr(2:n_r) + dlntedr(2:n_r)
-!  dlntedr(:) = dlntedr(:)*(1.0 - 0.1*(eflux_e_tot(:) - eflux_e_target(:))/ABS(eflux_e_tot(:) - eflux_e_target(:)))
-  dlntedr(1) = 0.
-  !------------------------------------------------------------
-
-  !--------------------------------------------------------
-  ! TGYRO-GYRO CYCLE
-  !
-  ! Integrate profiles based on gradients
-  call tgyro_profile_functions
-  !
-  ! Read profile data, copy current profiles into interface, 
-  ! rewrite profiles
-  !
-  call EXPRO_palloc(MPI_COMM_WORLD,paths(1),1) 
-  call EXPRO_pread
-
-  allocate(x(n_r+1))
-  allocate(xt(n_r+1))
-  x(1:n_r) = r/r_min
-  x(n_r+1) = 1.0
-  xt(1:n_r) = te/1e3
-  xt(n_r+1) = EXPRO_te(n_exp)
-
-  call cub_spline(x,xt,n_r+1,100*EXPRO_rmin(:)/r_min,EXPRO_te(:),n_exp)
-  deallocate(x)
-  deallocate(xt)
-
-  call EXPRO_write_original('REWROTE_2')
-  call EXPRO_palloc(MPI_COMM_WORLD,paths(1),0)
-  if (i_proc_global == 0) then
-     call system('cp '//trim(paths(1))//'input.profiles.new '//trim(paths(1))//'input.profiles.2')  
-     call system('cp '//trim(paths(1))//'input.profiles.2 '//trim(paths(1))//'input.profiles')
-  endif
-  ! Get global GYRO flux, compute targets, write data
-  call tgyro_global_flux
-  call tgyro_source
-  call tgyro_write_data(1)
-  !--------------------------------------------------------
 
 end subroutine tgyro_global_iteration_driver

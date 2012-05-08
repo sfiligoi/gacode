@@ -1,5 +1,5 @@
 !-------------------------------------------------------------------------
-! get_phi_squared.f90 [caller: gyro_write_master]
+! gyro_phi_kp_squared.f90
 !
 ! PURPOSE:
 !  Calculate
@@ -10,7 +10,7 @@
 ! Here, F is a flux-surface average and <> is a radial average.
 !-------------------------------------------------------------------------
 
-subroutine get_phi_squared
+subroutine gyro_phi_kp_squared
 
   use mpi
   use gyro_globals
@@ -156,7 +156,7 @@ subroutine get_phi_squared
   ave_phi(2,:) = sqrt(ave_phi_n(:)/(n_theta_int*n_x))
 
   if (i_proc == 0 .and. debug_flag == 1) then
-     print *,'[get_phi_squared called]'
+     print *,'[gyro_phi_kp_squared called]'
   endif
 
-end subroutine get_phi_squared
+end subroutine gyro_phi_kp_squared

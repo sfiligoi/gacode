@@ -1,11 +1,11 @@
 !----------------------------------------------------------
-! get_nonlinear_flux_velocity.f90 [caller: gyro_write_master]
+! gyro_nonlinear_flux_velocity.f90
 !
 ! PURPOSE:
 !  Calculate the velocity dependence of the flux integrals.
 !----------------------------------------------------------
 
-subroutine get_nonlinear_flux_velocity
+subroutine gyro_nonlinear_flux_velocity
 
   use mpi
   use gyro_globals
@@ -161,4 +161,4 @@ subroutine get_nonlinear_flux_velocity
      print *,'[get_nonlinear_flux_energy called]'
   endif
 
-end subroutine get_nonlinear_flux_velocity
+end subroutine gyro_nonlinear_flux_velocity

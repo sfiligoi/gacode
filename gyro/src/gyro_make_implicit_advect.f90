@@ -1,5 +1,5 @@
 !------------------------------------------------
-! make_implicit_advect.f90
+! gyro_make_implicit_advect.f90
 !
 ! PURPOSE:
 !  Generate matrices used for implicit electron 
@@ -7,7 +7,7 @@
 !  operators used for time-stepping.
 !------------------------------------------------
 
-subroutine make_implicit_advect(i_print)
+subroutine gyro_make_implicit_advect(i_print)
 
   use mpi
   use gyro_globals
@@ -382,4 +382,4 @@ subroutine make_implicit_advect(i_print)
 
 10 format(32(f11.5,1x))
 
-end subroutine make_implicit_advect
+end subroutine gyro_make_implicit_advect

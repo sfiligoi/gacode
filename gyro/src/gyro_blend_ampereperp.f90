@@ -1,11 +1,11 @@
 !------------------------------------------------
-! make_ampereperp_blend.f90
+! gyro_blend_ampereperp.f90
 !
 ! PURPOSE:
 !  Generate matrices L_BB and LBP (LPB=-2*LBP) of paper.
 !------------------------------------------------
 
-subroutine make_ampereperp_blend
+subroutine gyro_blend_ampereperp
 
   use mpi
   use gyro_globals
@@ -167,4 +167,4 @@ subroutine make_ampereperp_blend
      print *,'[make_ampereperp_blend done]'
   endif
 
-end subroutine make_ampereperp_blend
+end subroutine gyro_blend_ampereperp

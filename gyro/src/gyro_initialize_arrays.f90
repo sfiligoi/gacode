@@ -49,8 +49,6 @@ subroutine gyro_initialize_arrays
   h_cap_old  = 0.0
   h_cap_old2 = 0.0
 
-  a_fluxave = 0.0
-
   gyro_uv_old  = 0.0
   gyro_uv_old2 = 0.0
 

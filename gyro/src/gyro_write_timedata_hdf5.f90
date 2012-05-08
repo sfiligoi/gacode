@@ -202,7 +202,7 @@ subroutine gyro_write_timedata_hdf5(h5_control)
      if(h5err%errBool) write(*,*) h5err%errorMsg
   endif
 
-  call get_field_fluxave
+  call gyro_field_fluxave
 
   !-------------------------------------------------------------------
   ! Calculation of fundamental nonlinear fluxes and related 
@@ -449,13 +449,8 @@ subroutine gyro_write_timedata_hdf5(h5_control)
            if(h5err%errBool) write(*,*) h5err%errorMsg
         endif
 
-        allocate(a2(3,n_x))
-        a2(1,:) = phi_fluxave(:) 
-        a2(2,:) = a_fluxave(:)
-        a2(3,:) = aperp_fluxave(:)
-        call add_h5(dumpTGid,'zerobar',a2,h5in,h5err)
-        if(h5err%errBool) write(*,*) h5err%errorMsg
-        deallocate(a2)
+        call add_h5(dumpTGid,'zerobar',transpose(field_fluxave),h5in,h5err)
+        if (h5err%errBool) write(*,*) h5err%errorMsg
 
         allocate(a3(n_kinetic,4,n_x))
         do i=1,n_x

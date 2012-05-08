@@ -58,6 +58,9 @@ subroutine gyro_do
   !
   total_memory  = 0.0
   alltime_index = 0
+  cpu_maxindx   = 0
+  cpu           = -1.0
+  cpu_in        = 0.0
   !
   ! TIMER NOTES: 
   ! - print order follows init. order below,
@@ -219,7 +222,7 @@ subroutine gyro_do
      if (electron_method == 2) then
 
         ! Make advection operators for electrons
-        call make_implicit_advect(0)
+        call gyro_make_implicit_advect(0)
 
      endif
      !

@@ -1,5 +1,5 @@
 !-----------------------------------------------------
-! allocate_profile_exp.f90 [caller: make_profiles]
+! gyro_alloc_profile_exp.f90
 !
 ! PURPOSE:
 !  Allocate experimental-grid profile functions 
@@ -7,7 +7,7 @@
 !  already allocated.
 !-----------------------------------------------------
 
-subroutine allocate_profile_exp
+subroutine gyro_alloc_profile_exp
 
   use gyro_globals
   use gyro_profile_exp
@@ -59,4 +59,4 @@ subroutine allocate_profile_exp
 
   endif
 
-end subroutine allocate_profile_exp
+end subroutine gyro_alloc_profile_exp

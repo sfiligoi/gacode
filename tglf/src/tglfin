@@ -7,7 +7,7 @@
      sat_rule_tg=0
      vpar_model_tg=0
      vpar_shear_model_tg=0
-     nbasis_max_tg=4
+     nbasis_max_tg=12
      nbasis_min_tg=2
      nxgrid_tg=16
      ibranch_tg=-1

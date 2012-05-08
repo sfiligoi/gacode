@@ -68,21 +68,21 @@ subroutine gyro_make_poissonaperp_matrix
 
      ! Adiabatic electrons or ions: (2-R) phi
 
-     call make_poisson_blend(1)
+     call gyro_blend_poisson(1)
 
   else
 
      ! Kinetic electrons: (1-R) phi
 
-     call make_poisson_blend(0)
+     call gyro_blend_poisson(0)
 
   endif
 
   ! Ampere Perp MBB matrix, and the coupled matrices MBP and MPB
   allocate(ab_mm(n_x,-m_gyro:m_gyro-i_gyro,n_blend,n_blend))
   allocate(abp_mm(n_x,-m_gyro:m_gyro-i_gyro,n_blend,n_blend))
-  call make_ampereperp_blend
-  call make_electron_current_perp
+  call gyro_blend_ampereperp
+  call gyro_make_jperp_elec
 
   if (sparse_method == 1) then
      call gyro_sparse_solve_umfpack(n_poissonaperp,n_poissonaperp_row,4,0)

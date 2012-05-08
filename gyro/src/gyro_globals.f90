@@ -34,10 +34,10 @@ module gyro_globals
   !---------------------------------------------------------
   ! CPU timers
   !
-  real, dimension(64) :: cpu=-1.0
-  real, dimension(64) :: cpu_in=0.0
+  real, dimension(64) :: cpu
+  real, dimension(64) :: cpu_in
   character(len=19), dimension(64) :: cpu_tag
-  integer :: cpu_maxindx = 0
+  integer :: cpu_maxindx
   real :: startup_time
   !---------------------------------------------------------
   !---------------------------------------------------------
@@ -109,9 +109,9 @@ module gyro_globals
   !
   integer :: io_method = 1
   integer :: time_skip_wedge = 0    ! Wedge files for synthetic diagnostics
-  integer :: n_torangle_wedge= 1    ! Number of toroidal planes to use in wedge plots
+  integer :: n_torangle_wedge = 1    ! Number of toroidal planes to use in wedge plots
   integer :: n_torangle_3d = 0
-  real :: torangle_offset=0.0
+  real :: torangle_offset = 0.0
   !
   ! This defines a wedge in the poloidal plane 
   ! To recover the normal global plot, set 
@@ -789,9 +789,7 @@ module gyro_globals
   !
   real, dimension(:), allocatable :: phi_squared
   real, dimension(:,:), allocatable :: g_squared
-  real, dimension(:), allocatable :: phi_fluxave
-  real, dimension(:), allocatable :: a_fluxave
-  real, dimension(:), allocatable :: aperp_fluxave
+  real, dimension(:,:), allocatable :: field_fluxave
   !
   complex, dimension(:,:,:), allocatable :: phi
   complex, dimension(:,:,:), allocatable :: phi_plot
