@@ -528,7 +528,7 @@ subroutine gyro_fieldeigen
   call gyro_fieldeigen_df
   call gyro_field_fluxave
   call gyro_field_time_derivative
-  call get_field_plot
+  call gyro_field_plot
   call gyro_moments_plot
   if (io_method == 1) then 
      call gyro_write_timedata

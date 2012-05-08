@@ -1,11 +1,11 @@
 !---------------------------------------------------------
-! get_field_plot.f90
+! gyro_field_plot.f90
 !
 ! PURPOSE:
 !  Generate interpolation of fields suitable for plotting.
 !---------------------------------------------------------
 
-subroutine get_field_plot
+subroutine gyro_field_plot
 
   use gyro_globals
   use gyro_pointers
@@ -117,7 +117,7 @@ subroutine get_field_plot
   !---------------------------------------------------------
 
   if (i_proc == 0 .and. debug_flag == 1) then
-     print *,'[get_field_plot done]' 
+     print *,'[gyro_field_plot done]' 
   endif
 
-end subroutine get_field_plot
+end subroutine gyro_field_plot

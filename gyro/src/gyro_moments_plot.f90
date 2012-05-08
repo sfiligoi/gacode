@@ -5,7 +5,7 @@
 !  Make density, energy and V_parallel fluctuation moments (with 
 !  same functional form as phi_plot) for diagnostic output file.
 ! 
-!  This routine assumes phi_plot has been computed get_field_plot.
+!  This routine assumes phi_plot has been computed gyro_field_plot.
 ! 
 !     density moment: moments_plot(:,:,:,1)
 !      energy moment: moments_plot(:,:,:,2)
