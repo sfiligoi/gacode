@@ -71,7 +71,7 @@ subroutine gyro_fulladvance
   call gyro_field_fluxave
   !
   ! 2. Compute (phi,a) for plotting; we want to call 
-  !    get_field_plot every timestep because it is 
+  !    gyro_field_plot every timestep because it is 
   !    averaged (with a weight) over every timestep.
   !
   !    To compute E_parallel
@@ -80,7 +80,7 @@ subroutine gyro_fulladvance
   !
   !    then 
   !
-  call get_field_plot
+  call gyro_field_plot
   !
   ! 3. Compute (n,T) moments for plotting if user has 
   !    selected OUTPUT_METHOD > 1.

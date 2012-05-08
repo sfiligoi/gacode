@@ -171,7 +171,7 @@ subroutine gyro_initial_condition
   call gyro_field_solve_explicit
 
   ! Generate interpolation of fields suitable for plotting
-  call get_field_plot
+  call gyro_field_plot
 
   ! Compute gyro_u needed for gyro_moments_plot
   call gyro_field_interpolation

@@ -73,6 +73,7 @@ OBJECTS += gyro_globals.o \
           gyro_field_fluxave.o \
           gyro_field_time_derivative.o \
           gyro_field_interpolation.o \
+          gyro_field_plot.o \
           gyro_field_solve_explicit.o \
           gyro_field_solve_implicit.o \
 	  			gyro_fieldeigen.o \
@@ -151,7 +152,6 @@ OBJECTS += gyro_globals.o \
           gyro_write_timedata_wedge_hdf5.o \
           gyro_write_timers.o \
 	  gyro_velocity_sum.o \
-          get_field_plot.o \
           get_field_r0_plot.o \
           get_g_squared.o \
           gyro_dump_input.o \
