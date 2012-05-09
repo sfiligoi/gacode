@@ -619,9 +619,9 @@
           call gyro_field_solve_explicit
 
           call gyro_field_interpolation
-!          call get_field_fluxave
+!          call gyro_field_fluxave
 !          call gyro_field_time_derivative
-          call get_field_plot
+          call gyro_field_plot
           call gyro_moments_plot
           call gyro_write_timedata
 
