@@ -68,7 +68,12 @@ getnim -U `whoami`
 
 read -p "Specify a repository [0 for default] " repo
 
-echo "#!$SHELL -l" > $bfile
+if [ "$SHELL" == "/bin/bash" ]
+then
+   echo "#!$SHELL -l" > $bfile
+else
+   echo "#!$SHELL" > $bfile
+fi
 echo "#PBS -N $sim" >> $bfile
 if [ "$repo" != "0" ]
 then
