@@ -291,7 +291,7 @@ then
    else
       #==========================================================
       # Version stamp:
-      echo `gacode_getversion` > $VERBASE 
+      cat $GACODE_ROOT/tgyro/.VERSION > $VERBASE 
       echo $GACODE_PLATFORM >> $VERBASE
       date >> $VERBASE
       #==========================================================

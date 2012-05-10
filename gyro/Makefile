@@ -28,6 +28,7 @@ export EXTRA_LIBS = \
        ${HDF5_LIBS} ${LMATH} ${LIPM}
 
 all:
+	gacode_getversion > .VERSION
 	cd ${GACODE_ROOT}/shared ; make
 	cd BLEND ; make 
 	cd TRANSPOSE ; make 
@@ -46,6 +47,6 @@ clean:
 	cd GKEIGEN ; make clean
 	cd vshdf5 ; make clean
 
-	cd src ; rm -f $(EXEC)
+	cd src ; rm -f $(EXEC) .VERSION
 
 .IGNORE:
