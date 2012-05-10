@@ -8,7 +8,11 @@ subroutine tgyro_profile_functions
   real :: c_exch
   real, dimension(n_r) :: loglam
 
-  if (loc_lock_profile_flag == 0 .or. i_tran > 0) then
+! CH use this line to evolve profiles
+!  if (loc_lock_profile_flag == 0 .or. i_tran > 0) then
+! CH: new flag to only evolve only gradients
+  if (loc_evolve_grad_only_flag == 0 .and. &
+       (loc_lock_profile_flag == 0 .or. i_tran > 0)) then
 
      !-------------------------------------------
      ! Integrate gradients to obtain profiles:
