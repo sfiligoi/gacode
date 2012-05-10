@@ -23,6 +23,7 @@ export EXTRA_LIBS = \
        ${HDF5_LIBS} ${LMATH} ${LIPM}
 
 all:
+	gacode_getversion > .VERSION
 	cd ${GACODE_ROOT}/shared ; make
 	cd ${GACODE_ROOT}/neo ; make
 	cd ${GACODE_ROOT}/tglf ; make
@@ -35,5 +36,6 @@ clean:
 	cd math ; make clean
 	cd qfm ; make clean
 	cd src ; make clean
+	rm -rf .VERSION
 
 .IGNORE:
