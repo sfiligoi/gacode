@@ -31,6 +31,9 @@ subroutine gyro_write_timedata
   !
   real :: pi=3.141592653589793
 #ifdef HAVE_HDF5
+  real, dimension(:), allocatable, save :: zeta_phi
+  real, dimension(:,:), allocatable :: a2
+
   integer, parameter :: hr4=SELECTED_REAL_KIND(6,37)
   character(60) :: description
   character(64) :: step_name
@@ -586,123 +589,12 @@ subroutine gyro_write_timedata
 
 10 format(t2,a,t24,es9.3)
 
-end subroutine gyro_write_timedata
-
 #ifdef HAVE_HDF5
-!===========================================================================
-subroutine write_hdf5_restart
-
-  use mpi
-  use gyro_globals
-  !use hdf5
-  use hdf5_api
-  use gyro_vshdf5_mod
-
-  !---------------------------------------------------
-  implicit none
-  !
-  character(60) :: description
-  character(64) :: step_name, tempVarName
-  character(128) :: dumpfile
-  integer(HID_T) :: dumpGid,dumpFid
-  type(hdf5ErrorType) :: errval
-  character(4) :: iname
-  type(hdf5InOpts) :: h5in
-  type(hdf5ErrorType) :: h5err
-  integer :: number_label
-
-  !---------------------------------------------------
-  if (i_proc == 0) then
-     call vshdf5_inith5vars(h5in, h5err)
-     h5in%comm=MPI_COMM_SELF
-     h5in%info=MPI_INFO_NULL
-     h5in%wrd_type=H5T_NATIVE_DOUBLE
-     h5in%doTranspose=.true.
-     h5in%vsTime=t_current
-     h5in%wrVsTime=.true.
-     h5in%verbose=.true.
-
-     !---------------------------------------------------
-     ! Timestep data:
-     !
-     number_label=NINT(t_current/dt)
-     if (number_label>999999) THEN
-        write(step_name,fmt='(i7.7)') number_label
-     else if (data_step>99999) THEN
-        write(step_name,fmt='(i6.6)') number_label
-     else
-        write(step_name,fmt='(i5.5)') number_label
-     endif
-
-     dumpfile=TRIM(path)//"gyroRestart"//TRIM(step_name)//".h5"
-     description="GYRO restart file"
-     call open_newh5file(dumpfile,dumpFid,description,dumpGid,h5in,h5err)
-
-     h5in%mesh=' '
-     call write_attribute(dumpGid,"data_step",data_step,errval)
-     call write_attribute(dumpGid,"n_proc",n_proc,errval)
-     call write_attribute(dumpGid,"i_restart",i_restart,errval)
-  endif
-
-  if (n_proc-1 == 0) then
-     call dump_h5(dumpGid,'h_0_real',REAL(h_0),h5in,h5err)
-     call dump_h5(dumpGid,'h_0_imag',AIMAG(h_0),h5in,h5err)
-     call close_h5file(dumpFid,dumpGid,h5err)
-     return
-  endif
-
-  do i_proc_w=1,n_proc-1
-
-     if (i_proc == 0) then
-        call MPI_RECV(h_0,&
-             size(h_0),&
-             MPI_DOUBLE_COMPLEX,&
-             i_proc_w,&
-             i_proc_w,&
-             GYRO_COMM_WORLD,&
-             recv_status,&
-             i_err)
-
-        WRITE(iname,fmt='(i4.4)') i_proc_w
-        tempVarName="h_0_real"//iname
-        call dump_h5(dumpGid,tempVarName,REAL(h_0),h5in,h5err)
-        tempVarName="h_0_imag"//iname
-        call dump_h5(dumpGid,tempVarName,AIMAG(h_0),h5in,h5err)
-
-     else if (i_proc == i_proc_w) then
-        call MPI_SEND(h,&
-             size(h),&
-             MPI_DOUBLE_COMPLEX,&
-             0,&
-             i_proc_w,&
-             GYRO_COMM_WORLD,&
-             i_err)
-     endif
-  enddo
-
-  if (i_proc == 0) call close_h5file(dumpFid,dumpGid,h5err)
-
-end subroutine write_hdf5_restart
-
-
-subroutine myhdf5_close
-
-  use gyro_globals
-  !use hdf5
-  use hdf5_api
-  use gyro_vshdf5_mod
-
-  implicit none
-  integer :: ierr
-
-  call h5close_f(ierr)
-
-end subroutine myhdf5_close
+  contains
   !------------------------------------------------------
   subroutine hdf5_write_coords
 
     use GEO_interface
-    use gyro_vshdf5_mod
     !------------------------------------------
     !  Write the coordinates out
     !  We want to have same coordinate system as:
@@ -829,6 +721,120 @@ end subroutine myhdf5_close
     deallocate(zeta_phi)
 
   end subroutine hdf5_write_coords
+#endif
+
+end subroutine gyro_write_timedata
+
+#ifdef HAVE_HDF5
+!===========================================================================
+subroutine write_hdf5_restart
+
+  use mpi
+  use gyro_globals
+  !use hdf5
+  use hdf5_api
+  use gyro_vshdf5_mod
+
+  !---------------------------------------------------
+  implicit none
+  !
+  character(60) :: description
+  character(64) :: step_name, tempVarName
+  character(128) :: dumpfile
+  integer(HID_T) :: dumpGid,dumpFid
+  type(hdf5ErrorType) :: errval
+  character(4) :: iname
+  type(hdf5InOpts) :: h5in
+  type(hdf5ErrorType) :: h5err
+  integer :: number_label
+
+  !---------------------------------------------------
+  if (i_proc == 0) then
+     call vshdf5_inith5vars(h5in, h5err)
+     h5in%comm=MPI_COMM_SELF
+     h5in%info=MPI_INFO_NULL
+     h5in%wrd_type=H5T_NATIVE_DOUBLE
+     h5in%doTranspose=.true.
+     h5in%vsTime=t_current
+     h5in%wrVsTime=.true.
+     h5in%verbose=.true.
+
+     !---------------------------------------------------
+     ! Timestep data:
+     !
+     number_label=NINT(t_current/dt)
+     if (number_label>999999) THEN
+        write(step_name,fmt='(i7.7)') number_label
+     else if (data_step>99999) THEN
+        write(step_name,fmt='(i6.6)') number_label
+     else
+        write(step_name,fmt='(i5.5)') number_label
+     endif
+
+     dumpfile=TRIM(path)//"gyroRestart"//TRIM(step_name)//".h5"
+     description="GYRO restart file"
+     call open_newh5file(dumpfile,dumpFid,description,dumpGid,h5in,h5err)
+
+     h5in%mesh=' '
+     call write_attribute(dumpGid,"data_step",data_step,errval)
+     call write_attribute(dumpGid,"n_proc",n_proc,errval)
+     call write_attribute(dumpGid,"i_restart",i_restart,errval)
+  endif
+
+  if (n_proc-1 == 0) then
+     call dump_h5(dumpGid,'h_0_real',REAL(h_0),h5in,h5err)
+     call dump_h5(dumpGid,'h_0_imag',AIMAG(h_0),h5in,h5err)
+     call close_h5file(dumpFid,dumpGid,h5err)
+     return
+  endif
+
+  do i_proc_w=1,n_proc-1
+
+     if (i_proc == 0) then
+        call MPI_RECV(h_0,&
+             size(h_0),&
+             MPI_DOUBLE_COMPLEX,&
+             i_proc_w,&
+             i_proc_w,&
+             GYRO_COMM_WORLD,&
+             recv_status,&
+             i_err)
+
+        WRITE(iname,fmt='(i4.4)') i_proc_w
+        tempVarName="h_0_real"//iname
+        call dump_h5(dumpGid,tempVarName,REAL(h_0),h5in,h5err)
+        tempVarName="h_0_imag"//iname
+        call dump_h5(dumpGid,tempVarName,AIMAG(h_0),h5in,h5err)
+
+     else if (i_proc == i_proc_w) then
+        call MPI_SEND(h,&
+             size(h),&
+             MPI_DOUBLE_COMPLEX,&
+             0,&
+             i_proc_w,&
+             GYRO_COMM_WORLD,&
+             i_err)
+     endif
+  enddo
+
+  if (i_proc == 0) call close_h5file(dumpFid,dumpGid,h5err)
+
+end subroutine write_hdf5_restart
+
+
+subroutine myhdf5_close
+
+  use gyro_globals
+  !use hdf5
+  use hdf5_api
+  use gyro_vshdf5_mod
+
+  implicit none
+  integer :: ierr
+
+  call h5close_f(ierr)
+
+end subroutine myhdf5_close
 #endif
 
 !===========================================================================
