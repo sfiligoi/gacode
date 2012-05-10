@@ -312,7 +312,7 @@ then
 
    #==========================================================
    # Version stamp:  
-   echo `gacode_getversion` > $VERBASE
+   cat $GACODE_ROOT/gyro/.VERSION > $VERBASE
    echo $GACODE_PLATFORM >> $VERBASE
    date >> $VERBASE
    #==========================================================

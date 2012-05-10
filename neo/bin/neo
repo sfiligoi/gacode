@@ -175,7 +175,7 @@ then
 
   #==========================================================
   # Version stamp:
-  echo `gacode_getversion` > out.neo.version 
+  cat $GACODE_ROOT/neo/.VERSION > out.neo.version 
   echo $GACODE_PLATFORM >> out.neo.version
   date >> out.neo.version
   #==========================================================
