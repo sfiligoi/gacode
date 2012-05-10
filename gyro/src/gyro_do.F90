@@ -17,7 +17,7 @@ subroutine gyro_do
   implicit none
   !
   logical :: rfe
-  integer :: h5_control
+!  integer :: h5_control
   !--------------------------------------
 
   ! Begin with clean exit status
@@ -328,7 +328,7 @@ subroutine gyro_do
   endif
   !------------------------------------------------------------
 
-  h5_control=(restart_method+1)*output_flag
+!  h5_control=(restart_method+1)*output_flag
   if (restart_method == 0) then
      ! Open
      io_control = output_flag*1
@@ -337,9 +337,9 @@ subroutine gyro_do
      io_control = output_flag*3
   endif
   if (gkeigen_j_set == 0) then
-     if (io_method < 3) call gyro_write_timedata
+     if (io_method < 3 .and. io_method > 0) call gyro_write_timedata
      if (io_method > 1) then
-         call gyro_write_timedata_hdf5(h5_control)
+  !       call gyro_write_timedata_hdf5(h5_control)
          if (time_skip_wedge > 0) call gyro_write_timedata_wedge_hdf5
      endif
   endif
@@ -352,9 +352,9 @@ subroutine gyro_do
      ! Write to output files.
      io_control = output_flag*2
      if (gkeigen_j_set == 0) then
-        if (io_method < 3) call gyro_write_timedata
+        if (io_method < 3.and. io_method > 0) call gyro_write_timedata
         if (io_method > 1 ) then
-           call gyro_write_timedata_hdf5(h5_control)
+!           call gyro_write_timedata_hdf5(h5_control)
            if (time_skip_wedge > 0) call gyro_write_timedata_wedge_hdf5
         endif
      endif

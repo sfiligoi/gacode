@@ -12,7 +12,7 @@ subroutine gyro_fulladvance
 
   !----------------------------------------
   implicit none
-  integer :: h5_control
+!  integer :: h5_control
   !----------------------------------------
 
   h_old(:,:,:,:) = h(:,:,:,:)
@@ -147,12 +147,12 @@ subroutine gyro_fulladvance
      ! Main data I/O handler
 
      io_control = 2*output_flag
-     h5_control = 2*output_flag
+     !h5_control = 2*output_flag
      
         
        if (modulo(step,time_skip) == 0) then
          if (io_method < 3 .and. io_method > 0) call gyro_write_timedata
-         if (io_method > 1) call gyro_write_timedata_hdf5(h5_control)
+         !if (io_method > 1) call gyro_write_timedata_hdf5(h5_control)
       endif
 
       if(modulo(step,time_skip_wedge) == 0) then

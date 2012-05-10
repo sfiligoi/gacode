@@ -148,7 +148,6 @@ OBJECTS += gyro_globals.o \
           gyro_write_radial_op.o \
           gyro_write_step.o \
           gyro_write_timedata.o \
-          gyro_write_timedata_hdf5.o \
           gyro_write_timedata_wedge_hdf5.o \
           gyro_write_timers.o \
 	  gyro_velocity_sum.o \
@@ -156,6 +155,8 @@ OBJECTS += gyro_globals.o \
           get_g_squared.o \
           gyro_dump_input.o \
           gyro_dump_interface.o
+
+#          gyro_write_timedata_hdf5.o \
 
 .SUFFIXES : .o .f90 .F90
 
