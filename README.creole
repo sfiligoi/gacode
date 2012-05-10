@@ -47,7 +47,7 @@ See [[https://fusion.gat.com/theory/Gyro|TGYRO Wiki]] for more details.
 
 {{https://fusion.gat.com/THEORY/images/4/47/Supertorus-small-2.jpg|GYRO in action.}}
 
-=== Version logging ===
+=== Automagic version logging ===
 
 When building a version of gacode pulled from GitHub, the system will query git for the current revision, 
 and log this during the build.  Running GYRO will yield an output file out.gyro.version containing the hash 
@@ -58,3 +58,5 @@ r4-131-gef39
 BANACH
 Thu May 10 14:25:20 PDT 2012
 }}}
+
+The same applies to tgyro and neo runs.
