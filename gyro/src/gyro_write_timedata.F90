@@ -183,12 +183,27 @@ subroutine gyro_write_timedata
 
      ! PARALLEL ELECTRIC FIELD
 
+    if(io_method < 3) then
      call write_distributed_complex(&
           trim(path)//'out.gyro.moment_epar',&
           10,&
           size(phi_plot(:,:,n_field+1)),&
           phi_plot(:,:,n_field+1))
-
+    endif
+#ifdef HAVE_HDF5
+    if(io_method >1) then
+       h5in%units="dimensionless"
+       h5in%mesh="/cartMesh"
+       call write_distributed_complex_h5("epar",&
+            dumpGid,gid3D,&
+            n_theta_plot*n_x*n_field,&
+            n_theta_plot,n_x,n_field,&
+            phi_plot(:,:,n_field+1),&
+            write_threed,&
+            .false., &
+            h5in,h5err)
+    endif
+#endif
   endif
 
   if (plot_n_flag == 1) then
@@ -280,27 +295,54 @@ subroutine gyro_write_timedata
   ! Output of field at r=r0:
   !
   if (field_r0_flag == 1) then
+    if(io_method < 3) then
      call write_distributed_complex(&
           trim(path)//'out.gyro.field_r0',&
           10,&
           size(field_r0_plot),&
           field_r0_plot)
+    endif
   endif
   !--------------------------------------------------
 
   call gyro_kxky_spectrum
+
+
+  if(io_method < 3) then
   call write_distributed_real(&
        trim(path)//'out.gyro.kxkyspec',&
        10,&
        size(kxkyspec),&
        kxkyspec)
+  endif
+#ifdef HAVE_HDf5
+  if(io_method > 1) then
+    h5in%units="dimensionless"
+    h5in%mesh=" "
+    call write_distributed_real_h5("kxkyspec",dumpTGid,&
+         n_x,1,1,&
+         size(kxkyspec),&
+         kxkyspec,&
+         h5in,h5err)
+    if(h5err%errBool) write(*,*) h5err%errorMsg
+
+    if (i_proc == 0) then
+       h5in%units="dimensionless"
+       h5in%mesh=" "
+       call add_h5(dumpTGid,'k_perp_squared',k_perp_squared,h5in,h5err)
+       if(h5err%errBool) write(*,*) h5err%errorMsg
+    endif
+  endif
+#endif
 
   if (i_proc == 0) then
+     if(io_method < 3) then
      call write_local_real(&
           trim(path)//'out.gyro.k_perp_squared',&
           10,&
           size(k_perp_squared),&
           k_perp_squared)
+     endif
   endif
 
   call gyro_field_fluxave
@@ -324,6 +366,8 @@ subroutine gyro_write_timedata
      !=============
 
      call gyro_write_freq(trim(path)//'out.gyro.freq',10)
+
+!srinathV...we'll have to revisit getting the linear run info 
 
      if (plot_u_flag == 1) then        
 
@@ -389,36 +433,56 @@ subroutine gyro_write_timedata
      !-----------------------------------------------------------------
 
      if (i_proc == 0 .and. lindiff_method > 1) then
+        if(io_method <3) then
+          call write_local_real( &
+               trim(path)//'out.gyro.diff',10,size(diff),diff) 
+          call write_local_real( &
+               trim(path)//'out.gyro.diff_i',10,size(diff_i),diff_i)
+          call write_local_real( &
+               trim(path)//'out.gyro.gbflux',10,size(gbflux),gbflux)
+          call write_local_real( &
+               trim(path)//'out.gyro.gbflux_mom',10,size(gbflux_mom),gbflux_mom)
+          call write_local_real( &
+               trim(path)//'out.gyro.gbflux_i',10,size(gbflux_i),gbflux_i)
 
-        call write_local_real( &
-             trim(path)//'out.gyro.diff',10,size(diff),diff) 
-        call write_local_real( &
-             trim(path)//'out.gyro.diff_i',10,size(diff_i),diff_i)
-        call write_local_real( &
-             trim(path)//'out.gyro.gbflux',10,size(gbflux),gbflux)
-        call write_local_real( &
-             trim(path)//'out.gyro.gbflux_mom',10,size(gbflux_mom),gbflux_mom)
-        call write_local_real( &
-             trim(path)//'out.gyro.gbflux_i',10,size(gbflux_i),gbflux_i)
+          if (trapdiff_flag == 1) then
+             call write_local_real( &
+                  trim(path)//'out.gyro.diff_trapped',&
+                  10,size(diff_trapped),diff_trapped)
+             call write_local_real( &
+                  trim(path)//'out.gyro.diff_i_trapped',&
+                  10,size(diff_i_trapped),diff_i_trapped)
+             call write_local_real( &
+                  trim(path)//'out.gyro.gbflux_trapped',&
+                  10,size(gbflux_trapped),gbflux_trapped)
+             call write_local_real( &
+                  trim(path)//'out.gyro.gbflux_i_trapped',&
+                  10,size(gbflux_i_trapped),gbflux_i_trapped)
+          endif
+#ifdef HAVE_HDF5
+        if(io_method > 1 ) then 
+          call add_h5(dumpTGid,'diff',diff,h5in,h5err)
+        call add_h5(dumpTGid,'diff_i',diff_i,h5in,h5err)
+        call add_h5(dumpTGid,'gbflux',gbflux,h5in,h5err)
+        call add_h5(dumpTGid,'gbflux_mom',gbflux_mom,h5in,h5err)
+        call add_h5(dumpTGid,'gbflux_i',gbflux_i,h5in,h5err)
 
         if (trapdiff_flag == 1) then
-           call write_local_real( &
-                trim(path)//'out.gyro.diff_trapped',&
-                10,size(diff_trapped),diff_trapped)
-           call write_local_real( &
-                trim(path)//'out.gyro.diff_i_trapped',&
-                10,size(diff_i_trapped),diff_i_trapped)
-           call write_local_real( &
-                trim(path)//'out.gyro.gbflux_trapped',&
-                10,size(gbflux_trapped),gbflux_trapped)
-           call write_local_real( &
-                trim(path)//'out.gyro.gbflux_i_trapped',&
-                10,size(gbflux_i_trapped),gbflux_i_trapped)
+           call add_h5(dumpTGid,'diff_trapped',diff_trapped,h5in,h5err)
+           call add_h5(dumpTGid,'diff_i_trapped',diff_i_trapped,h5in,h5err)
+           call add_h5(dumpTGid,'gbflux_trapped',gbflux_trapped,h5in,h5err)
+           call add_h5(dumpTGid,'gbflux_i_trapped',gbflux_i_trapped,h5in,h5err)
+        endif
+      endif
+#endif
+
         endif
 
      endif
 
      if (lindiff_method >= 4) then
+
+      if(io_method < 3 ) then
 
         call write_distributed_real(&
              trim(path)//'out.gyro.diff_n',&
@@ -443,7 +507,28 @@ subroutine gyro_write_timedata
              10,&
              size(gbflux_n),&
              gbflux_n)
+      endif
+#ifdef HAVE_HDF5
+        if(io_method > 1 ) then
+            call write_distributed_real_h5('phi_squared_QL_n',dumpTGid,&
+                 1,1,1,&
+                 size(phi_squared_QL_n),&
+                 phi_squared_QL_n,&
+                 h5in,h5err)
+            call write_distributed_real_h5('g_squared_QL_n',dumpTGid,&
+                 size(g_squared_QL_n),&
+                 3,1,1,&
+                 g_squared_QL_n,&
+                 h5in,h5err)
 
+            call write_distributed_real_h5("gbflux_n",dumpTGid,&
+                 n_kinetic,n_field,4,&
+                 size(gbflux_n),&
+                 gbflux_n,&
+                 h5in,h5err)
+        endif
+#endif
+  
      endif
 
      !=============
@@ -455,7 +540,7 @@ subroutine gyro_write_timedata
      !================
      ! BEGIN NONLINEAR 
      !================
-
+    if (io_method < 3) then
      call write_distributed_real(&
           trim(path)//'out.gyro.diff_n',&
           10,&
@@ -488,9 +573,57 @@ subroutine gyro_write_timedata
              size(nl_transfer),&
              nl_transfer)
      endif
+    endif
+#ifdef HAVE_HDF5
+  if (io_method > 1 ) then
+        h5in%units="diff units"
+     call write_distributed_real_h5("diff_n",dumpTGid,&
+          n_kinetic,n_field,2,&
+          size(diff_n),&
+          diff_n,&
+          h5in,h5err)
+     if(h5err%errBool) write(*,*) h5err%errorMsg
+
+     call write_distributed_real_h5("gbflux_n",dumpTGid,&
+          n_kinetic,n_field,4,&
+          size(gbflux_n),&
+          gbflux_n,&
+          h5in,h5err)
+     if(h5err%errBool) write(*,*) h5err%errorMsg
+
+     if (lindiff_method >= 4) then
+        call write_distributed_real_h5('phi_squared_QL_n',dumpTGid,&
+             1,1,1,&
+             size(phi_squared_QL_n),&
+             phi_squared_QL_n,&
+             h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
+        call write_distributed_real_h5('g_squared_QL_n',dumpTGid,&
+             size(g_squared_QL_n),&
+             3,1,1,&
+             g_squared_QL_n,&
+             h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
+     endif
+
+     if (nonlinear_transfer_flag == 1) then
+        call write_distributed_real_h5('nl_transfer',dumpTGid,&
+             n_x,2,1,&
+             size(nl_transfer),&
+             nl_transfer,&
+             h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
+     endif
+    endif
+#endif
+    
+
+
+
 
      if (i_proc == 0) then
-
+        
+        if(io_method < 3) then
         call write_local_real(trim(path)//'out.gyro.field_rms',10,size(ave_phi),ave_phi)
 
         call write_local_real( &
@@ -524,6 +657,38 @@ subroutine gyro_write_timedata
              trim(path)//'out.gyro.zerobar',10,&
              size(field_fluxave),transpose(field_fluxave))
 
+       endif !io_method < 3
+#ifdef HAVE_HDF5
+      if(io_method > 1 ) then
+        call add_h5(dumpTGid,'field_rms',ave_phi,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
+        call add_h5(dumpTGid,'diff',diff,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
+        call add_h5(dumpTGid,'diff_i',diff_i,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
+        call add_h5(dumpTGid,'gbflux',gbflux,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
+        call add_h5(dumpTGid,'gbflux_mom',gbflux_mom,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
+        call add_h5(dumpTGid,'gbflux_i',gbflux_i,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
+
+        if (trapdiff_flag == 1) then
+           call add_h5(dumpTGid,'diff_trapped',diff_trapped,h5in,h5err)
+           if(h5err%errBool) write(*,*) h5err%errorMsg
+           call add_h5(dumpTGid,'diff_i_trapped',diff_i_trapped,h5in,h5err)
+           if(h5err%errBool) write(*,*) h5err%errorMsg
+           call add_h5(dumpTGid,'gbflux_trapped',gbflux_trapped,h5in,h5err)
+           if(h5err%errBool) write(*,*) h5err%errorMsg
+           call add_h5(dumpTGid,'gbflux_i_trapped',gbflux_i_trapped,h5in,h5err)
+           if(h5err%errBool) write(*,*) h5err%errorMsg
+        endif
+
+        call add_h5(dumpTGid,'zerobar',transpose(field_fluxave),h5in,h5err)
+        if (h5err%errBool) write(*,*) h5err%errorMsg
+      endif !io_method > 1
+#endif
+
         allocate(a3(n_kinetic,4,n_x))
         do i=1,n_x
            a3(:,1,i) = h0_n(:,i)
@@ -531,15 +696,27 @@ subroutine gyro_write_timedata
            a3(:,3,i) = source_n(:,i)
            a3(:,4,i) = source_e(:,i)
         enddo
-        call write_local_real( &
-             trim(path)//'out.gyro.source',10,size(a3),a3)
+
+        if (io_method < 3) then
+          call write_local_real( &
+               trim(path)//'out.gyro.source',10,size(a3),a3)
+          deallocate(a3)
+
+          call write_local_real( &
+               trim(path)//'out.gyro.moment_zero',10,&
+               size(moments_zero_plot),moments_zero_plot)
+        endif !io_method <3)
+#ifdef HAVE_HDF5
+      if (io_method > 1 ) then
+        call add_h5(dumpTGid,'source',a3,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
         deallocate(a3)
 
-        call write_local_real( &
-             trim(path)//'out.gyro.moment_zero',10,&
-             size(moments_zero_plot),moments_zero_plot)
-
-     endif
+        call add_h5(dumpTGid,'moments_zero',moments_zero_plot,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
+      endif !io_method > 1
+#endif
+     endif! i_proc ==0
 
      !================
      ! END NONLINEAR 
@@ -556,8 +733,16 @@ subroutine gyro_write_timedata
   if (entropy_flag == 1) then
      call gyro_entropy 
      if (i_proc == 0) then 
-        call write_local_real(&
-             trim(path)//'out.gyro.entropy.out',10,size(entropy),entropy)
+        if(io_method < 3) then
+          call write_local_real(&
+            trim(path)//'out.gyro.entropy.out',10,size(entropy),entropy)
+        endif
+#ifdef HAVE_HDF5
+        if(io_method > 1 ) then
+          call add_h5(dumpTGid,'entropy',entropy,h5in,h5err)
+          if(h5err%errBool) write(*,*) h5err%errorMsg
+        endif
+#endif
      endif
   endif
   !------------------------------------------------------------
@@ -573,6 +758,8 @@ subroutine gyro_write_timedata
           size(nonlinear_flux_velocity),&
           nonlinear_flux_velocity)
   endif
+
+!srinathv: need and hdf5 implementiotion for above
   !------------------------------------------------------------
 
   !------------------------------------------------------------
@@ -586,6 +773,58 @@ subroutine gyro_write_timedata
   !------------------------------------------------------------
 
   if (i_proc == 0 .and. debug_flag == 1) print *,'[gyro_write_timedata done]'
+
+
+#ifdef HAVE_HDF5
+  if(io_method >1 ) then
+    if (i_proc == 0) then
+       h5in%mesh=' '
+       call add_h5(dumpTGid,'data_step',data_step,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
+       call add_h5(dumpTGid,'t_current',t_current,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
+
+       ! dump in the field
+        call dump_h5(dumpGid,'data_step',data_step,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
+        call dump_h5(dumpGid,'t_current',t_current,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
+        call dump_h5(dumpGid,'n_proc',n_proc,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
+
+      ! dump 3D
+      if (write_threed) then
+        call dump_h5(gid3D,'data_step',data_step,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
+        call dump_h5(gid3D,'t_current',t_current,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
+        call dump_h5(gid3D,'n_proc',n_proc,h5in,h5err)
+        if(h5err%errBool) write(*,*) h5err%errorMsg
+      endif
+ 
+      call close_h5file(dumpTFid,dumpTGid,h5err)
+         if(h5in%debug) write(*,*) "closing dumpTFid"
+         if(h5err%errBool) then
+               write(*,*) h5err%errorMsg, " for dumpTFid"
+            return
+         endif
+         call close_h5file(dumpFid,dumpGid,h5err)
+         if(h5in%debug) write(*,*) "closing dumpFid"
+         if(h5err%errBool) then
+               write(*,*) h5err%errorMsg, " for dumpFid"
+            return
+         endif
+         if (write_threed) then
+           call close_h5file(fid3d,gid3d,h5err)
+             if(h5in%debug) write(*,*) "closing fid3d"
+             if(h5err%errBool) then
+               write(*,*) h5err%errorMsg, " for fid3d"
+               return
+            endif
+         endif
+      endif
+  endif !io_method > 1
+#endif
 
 10 format(t2,a,t24,es9.3)
 
