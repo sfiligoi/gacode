@@ -3,12 +3,12 @@
 === Environment variables ===
 
 The environment variable setup is simplified from the original GYRO/NEO/TGYRO requirements.\\
-Here is all that's required on the Cray XT5, assuming you put the git repository gacode in your home directory:\\
+Here is all that's required on the NERSC Cray (hopper), assuming you put the git repository gacode in your home directory:\\
 
 bash:
 
 {{{
-export GACODE_PLATFORM=XT5
+export GACODE_PLATFORM=HOPPER2
 export GACODE_ROOT=$HOME/gacode
 . $GACODE_ROOT/shared/bin/gacode_setup
 }}}
@@ -16,7 +16,7 @@ export GACODE_ROOT=$HOME/gacode
 tcsh:
 
 {{{
-setenv GACODE_PLATFORM XT5
+setenv GACODE_PLATFORM HOPPER2
 setenv GACODE_ROOT $HOME/gacode
 source $GACODE_ROOT/shared/bin/gacode_setup.tcsh
 }}}
@@ -27,6 +27,12 @@ You can make the entire gacode project by typing
 
 {{{
 $ make
+}}}
+
+You can make the OpemMP-aware version of gacode by typing
+
+{{{
+$ make OMP=true
 }}}
 
 You can build a debug version of all libraries by typing
@@ -40,3 +46,15 @@ The build system is recursive, so this logic works as well in the subdirectories
 See [[https://fusion.gat.com/theory/Gyro|TGYRO Wiki]] for more details.
 
 {{https://fusion.gat.com/THEORY/images/4/47/Supertorus-small-2.jpg|GYRO in action.}}
+
+=== Version logging ===
+
+When building a version of gacode pulled from GitHub, the system will query git for the current revision, 
+and log this during the build.  Running GYRO will yield an output file out.gyro.version containing the hash 
+of the git version (which exactly identifies the state of the sources), the platform, and the execuation date.
+
+{{{
+r4-131-gef39
+BANACH
+Thu May 10 14:25:20 PDT 2012
+}}}
