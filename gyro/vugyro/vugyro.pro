@@ -452,6 +452,10 @@ pro vugyro, _EXTRA=extra
                      uvalue='gbflux_i_see')
 
   x1 = widget_button(x,$
+                     value='flux vs. radius + time',$
+                     uvalue='gbflux_rt_see')
+
+  x1 = widget_button(x,$
                      value='flux vs. ky',$
                      uvalue='gbflux_n_see')
 
