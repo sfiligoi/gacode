@@ -1,13 +1,16 @@
-FUNCTION get_input_profiles, simdir, DIRLOC=dirloc
+FUNCTION get_input_profiles, simdir, FILENAME=filename, DIRLOC=dirloc
 ;
 ; C. Holland, UCSD
 ;
 ; v1.0: Sept. 15,2011 stolen from get_loc_tgyro_data.pro
+; v2.0: May 11, 2012 updated to read in input.profiles files with arbitrary names
+;	(e.g. input.profiles.orig, old.input.prof, etc.)
 ;
 ; Reads in input.profiles from a local subdirectory
 ;
 ; KEYWORDS
 ; simdir: string containing name of valid subdirectory in local directory
+; filename: name of input.profiles file to open, defaults to input.profiles
 ; dirloc: string with pathname to directory containing simdir
 ;
   IF N_ELEMENTS(simdir) EQ 0 THEN BEGIN
@@ -19,10 +22,12 @@ FUNCTION get_input_profiles, simdir, DIRLOC=dirloc
   DEFAULT, dirloc, '.'
   dirpath = dirloc + '/' + simdir + '/'
 
+  DEFAULT, filename, 'input.profiles'
+
   s = STRING('#')
-  OPENR, 1, dirpath + 'input.profiles', ERROR=err
+  OPENR, 1, dirpath + filename, ERROR=err
   IF (err NE 0) THEN BEGIN
-      PRINT, "Couldn't open " + dirpath + "input.profiles!  Returning 0"
+      PRINT, "Couldn't open " + dirpath + ' ' + filename + "!  Returning 0"
       RETURN, 0
   ENDIF
 
