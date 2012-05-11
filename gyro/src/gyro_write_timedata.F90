@@ -72,11 +72,6 @@ subroutine gyro_write_timedata
       !---------------------------------------------------
       ! io_control: 0=no I/O, 1=open, 2=append, 3=rewind
 
-      !h5_control=(restart_method+1)*output_flag
-    !  select case (h5_control)
-
-      write(*,*) "io_control = ", io_control
-
       select case (io_control)
       case(0)
          return
@@ -88,8 +83,6 @@ subroutine gyro_write_timedata
          openmethod='append'
       end select
          
-      write(*,*) "openmethod before = " , trim(openmethod)
-
       if (i_proc == 0) then
 
          !---------------------------------------------------
@@ -101,7 +94,6 @@ subroutine gyro_write_timedata
          h5in%info=MPI_INFO_NULL
          h5in%wrd_type=H5T_NATIVE_REAL
          h5in%typeConvert=.true.
-         !h5in%wrd_type=H5T_NATIVE_DOUBLE
          h5in%doTranspose=.true.
          h5in%verbose=.true.
          h5in%debug=.false.
@@ -110,13 +102,12 @@ subroutine gyro_write_timedata
          h5in%vsStep=step
 
 
-         ! if (debug_flag==1) h5in%debug=.true.
+         if (debug_flag==1) h5in%debug=.true.
 
          !------------------------------------------------
          ! Open the monolithic timedata file (incremental)
          dumpfile=TRIM(path)//"out.gyro.timedata.h5" 
          description="Time-dependent GYRO data"
-         write(*,*) "openmethod = " , trim(openmethod)
          call open_h5file(trim(openmethod),dumpfile,dumpTFid,description,dumpTGid,h5in,h5err)
          if (h5err%errBool) call catch_error(h5err%errorMsg)
 
@@ -884,15 +875,6 @@ subroutine gyro_write_timedata
        enddo
     enddo
 
-    !------------------------------------------------
-    ! Set up the toroidal grid.  Only used for coarse grid
-    !-------------------------------------------------
-
-    allocate(zeta_phi(n_torangle_3d))
-    do iphi=1,n_torangle_3d
-       zeta_phi(iphi)=REAL(iphi-1)/REAL(n_torangle_3d-1)*2.*pi
-    end do
-
     !----------------------------------------
     ! Dump the coarse meshes
     !---------------------------------------- 
@@ -919,45 +901,53 @@ subroutine gyro_write_timedata
     ! Dump the coarse mesh(es) in 3D
     !---------------------------------------- 
     if (write_threed) then
-       !-------------------------------------------------------
-       ! Set up the alpha grid
-       ! These are set up in a module so no need to recalculate
-       !-------------------------------------------------------
+    !------------------------------------------------
+    ! Set up the toroidal grid.  Only used for coarse grid
+    !-------------------------------------------------
+      allocate(zeta_phi(n_torangle_3d))
+      do iphi=1,n_torangle_3d
+         zeta_phi(iphi)=REAL(iphi-1)/REAL(n_torangle_3d-1)*2.*pi
+      end do
 
-       if (.not. allocated(alpha_phi) ) then 
-          nphi=1
-          if (n_torangle_3d > 0 ) nphi=n_torangle_3d 
-          allocate(alpha_phi(0:ncoarse,n_x,nphi))
-          do iphi=1,n_torangle_3d
-             alpha_phi(:,:,iphi)=zeta_phi(iphi)+nu_coarse(:,:)
-          end do
-       endif
+     !-------------------------------------------------------
+     ! Set up the alpha grid
+     ! These are set up in a module so no need to recalculate
+     !-------------------------------------------------------
+     if (.not. allocated(alpha_phi) ) then 
+        nphi=1
+        if (n_torangle_3d > 0 ) nphi=n_torangle_3d 
+        allocate(alpha_phi(0:ncoarse,n_x,nphi))
+        do iphi=1,n_torangle_3d
+           alpha_phi(:,:,iphi)=zeta_phi(iphi)+nu_coarse(:,:)
+        end do
+     endif
 
-       h5in%units="m"
-       call dump_h5(gid3d,'R',Rc*a_meters,h5in,h5err)
-       call dump_h5(gid3d,'Z',Zc*a_meters,h5in,h5err)
-       h5in%units="radians"
-       call dump_h5(gid3d,'torAngle',zeta_phi,h5in,h5err)
-       call dump_h5(gid3d,'torangle_offset',torangle_offset,h5in,h5err)
-       call dump_h5(gid3d,'alpha',alpha_phi,h5in,h5err)
+     h5in%units="m"
+     call dump_h5(gid3d,'R',Rc*a_meters,h5in,h5err)
+     call dump_h5(gid3d,'Z',Zc*a_meters,h5in,h5err)
+     h5in%units="radians"
+     call dump_h5(gid3d,'torAngle',zeta_phi,h5in,h5err)
+     call dump_h5(gid3d,'torangle_offset',torangle_offset,h5in,h5err)
+     call dump_h5(gid3d,'alpha',alpha_phi,h5in,h5err)
 
-       allocate(buffer(ncoarse+1,n_x,n_torangle_3d,3))
-       do iphi=1,n_torangle_3d
-          buffer(:,:,iphi,1)= Rc(:,:)*COS(zeta_phi(iphi))
-          buffer(:,:,iphi,2)=-Rc(:,:)*SIN(zeta_phi(iphi))
-          buffer(:,:,iphi,3)= Zc(:,:)
-       enddo
+     allocate(buffer(ncoarse+1,n_x,n_torangle_3d,3))
+     do iphi=1,n_torangle_3d
+        buffer(:,:,iphi,1)= Rc(:,:)*COS(zeta_phi(iphi))
+        buffer(:,:,iphi,2)=-Rc(:,:)*SIN(zeta_phi(iphi))
+        buffer(:,:,iphi,3)= Zc(:,:)
+     enddo
 
-       h5in%units="m"; h5in%mesh="mesh-structured"
-       call dump_h5(gid3d,'cartMesh',buffer*a_meters,h5in,h5err)
-       deallocate(buffer)
+     h5in%units="m"; h5in%mesh="mesh-structured"
+     call dump_h5(gid3d,'cartMesh',buffer*a_meters,h5in,h5err)
+     deallocate(buffer)
     endif
 
     !----------------------------------------
     ! Dump the wedge mesh(es)
     !---------------------------------------- 
-    deallocate(Rc, Zc)
-    deallocate(zeta_phi)
+    if (allocated(Rc)) deallocate(Rc)
+    if (allocated(Zc)) deallocate(Zc)
+    if (allocated(zeta_phi)) deallocate(zeta_phi)
 
   end subroutine hdf5_write_coords
 #endif
