@@ -18,7 +18,7 @@ pro gbflux_i_see, group=group
   ;; Return conditions
   ;;
   if exists_gbflux_i eq 0 then return 
-  if xregistered('diffusion_i_ave_see') then return
+  if xregistered('gbflux_i_see') then return
   ;;-----------------------------------------------
 
   base = widget_base(title=simdir,$
