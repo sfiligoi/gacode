@@ -119,16 +119,24 @@ subroutine tgyro_global_iteration_driver
      call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
      call EXPRO_pread
 
-     ! Map Te from TGYRO variable to EXPRO interface varaible
+     ! Map Te,ze from TGYRO variable to EXPRO interface variable
      xt(1:n_r) = te(:)/1e3
      xt(n_r+1) = EXPRO_te(n_exp)
      call cub_spline(x,xt,n_r+1,100*EXPRO_rmin(:)/r_min,EXPRO_te(:),n_exp)
+     xt(1:n_r) = dlntedr(:)*1e2
+     xt(n_r+1) = EXPRO_dlntedr(n_exp)
+     call cub_spline(x,xt,n_r+1,100*EXPRO_rmin(:)/r_min,EXPRO_dlntedr(:),n_exp)
 
-     ! Map Ti from TGYRO variable to EXPRO interface varaible
+     ! Map Ti,zi from TGYRO variable to EXPRO interface variable
      xt(1:n_r) = ti(1,:)/1e3
      xt(n_r+1) = EXPRO_ti(1,n_exp)
      call cub_spline(x,xt,n_r+1,100*EXPRO_rmin(:)/r_min,EXPRO_ti(1,:),n_exp)
-     EXPRO_ti(2,:) = EXPRO_ti(1,:)
+     xt(1:n_r) = dlntidr(1,:)*1e2
+     xt(n_r+1) = EXPRO_dlntidr(1,n_exp)
+     call cub_spline(x,xt,n_r+1,100*EXPRO_rmin(:)/r_min,EXPRO_dlntidr(1,:),n_exp)
+
+     EXPRO_ti(2,:)      = EXPRO_ti(1,:)
+     EXPRO_dlntidr(2,:) = EXPRO_dlntidr(1,:)
 
      ittag = '.'//achar(i_tran_loop-1+iachar("1"))  
 
