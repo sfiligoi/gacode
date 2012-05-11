@@ -118,6 +118,11 @@ module gyro_globals
   ! theta_wedge_offset=-pi and theta_wedge_angle=2*pi
   real  :: theta_wedge_offset = 0.0
   real  :: theta_wedge_angle = 0.0
+
+  !
+  real, dimension(:,:,:), allocatable :: alpha_phi
+  real, dimension(:,:,:), allocatable :: alpha_phi_wedge
+
   !---------------------------------------------------------
 
   !---------------------------------------------------------

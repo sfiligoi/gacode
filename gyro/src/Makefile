@@ -137,7 +137,6 @@ OBJECTS += gyro_globals.o \
           gyro_timestep_explicit.o \
           gyro_timestep_implicit.o \
           gyro_to_geo.o \
-					gyro_vshdf5_mod.o \
           gyro_write_efficiency.o \
           gyro_write_error.o \
           gyro_write_freq.o \

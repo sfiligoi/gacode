@@ -16,7 +16,6 @@ subroutine gyro_write_timedata
   use gyro_globals
 #ifdef HAVE_HDF5
   use hdf5_api
-  use gyro_vshdf5_mod
   use mpi
 #endif
 
@@ -962,7 +961,6 @@ subroutine write_hdf5_restart
   use gyro_globals
   !use hdf5
   use hdf5_api
-  use gyro_vshdf5_mod
 
   !---------------------------------------------------
   implicit none
@@ -1056,7 +1054,6 @@ subroutine myhdf5_close
   use gyro_globals
   !use hdf5
   use hdf5_api
-  use gyro_vshdf5_mod
 
   implicit none
   integer :: ierr
@@ -1509,7 +1506,6 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
      n_fn,n1,n2,n3,fn,plot3d,plotwedge,h5in,h5err)
 
   use mpi
-  use gyro_vshdf5_mod
   use hdf5_api
   use gyro_globals, only : &
        q, &
@@ -1531,7 +1527,9 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
        electron_method,&
        n_torangle_wedge,&
        n_torangle_3d, &
-       io_control
+       io_control, &
+       alpha_phi, &
+       alpha_phi_wedge
 
   !------------------------------------------------------
   !   mom: n1,n2,n3=n_theta_plot,n_x,n_kinetic

@@ -8,9 +8,7 @@
 subroutine gyro_write_timedata_wedge_hdf5
 
   use gyro_globals
-  !use hdf5
   use hdf5_api
-  use gyro_vshdf5_mod
 
   !---------------------------------------------------
   implicit none
