@@ -120,7 +120,8 @@ subroutine gyro_fulladvance
   call gyro_timer_out('Diagnos.-allstep')
   call gyro_timer_in('Diagnos.-datastep')
 
-  if (modulo(step,time_skip) == 0 .or. modulo(step,time_skip_wedge) == 0 ) then
+  if ((time_skip > 0 .and. modulo(step,time_skip) == 0) &
+     .or. (time_skip_wedge > 0 .and. modulo(step,time_skip_wedge) == 0) ) then
 
 
      ! Counter for number of data output events.
@@ -150,12 +151,11 @@ subroutine gyro_fulladvance
      !h5_control = 2*output_flag
      
         
-       if (modulo(step,time_skip) == 0) then
+       if (time_skip > 0 .and. modulo(step,time_skip) == 0) then
          if (io_method < 3 .and. io_method > 0) call gyro_write_timedata
-         !if (io_method > 1) call gyro_write_timedata_hdf5(h5_control)
       endif
 
-      if(modulo(step,time_skip_wedge) == 0) then
+      if(time_skip_wedge > 0 .and. modulo(step,time_skip_wedge) == 0) then
         if (io_method > 1) call gyro_write_timedata_wedge_hdf5
       endif
       

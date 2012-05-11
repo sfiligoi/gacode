@@ -53,95 +53,100 @@ subroutine gyro_write_timedata
   !---------------------------------------------------
   ! Timestep data:
   !
-  if (i_proc == 0) then
-     call gyro_write_step(trim(path)//'out.gyro.t',1)
+  if (io_method < 3) then
+    if (i_proc == 0) then
+       call gyro_write_step(trim(path)//'out.gyro.t',1)
+    endif
   endif
   !---------------------------------------------------
 #ifdef HAVE_HDF5
+
+  if (io_method > 1 ) then
 !---------------------------------------------------
-  ! Determine if the 3D files need to be written 
-  if (n_torangle_3d > 1 ) then
-     write_threed = .true.
-  else
-     write_threed = .false.
-  endif
- !---------------------------------------------------
-
-  !---------------------------------------------------
-  ! io_control: 0=no I/O, 1=open, 2=append, 3=rewind
-
-  !h5_control=(restart_method+1)*output_flag
-!  select case (h5_control)
-  select case (io_control)
-  case(0)
-     return
-  case(1)
-     openmethod='overwr'
-!  case(2)
-!     openmethod='append'
-  case(3)
-     openmethod='append'
-  end select
-
-  if (i_proc == 0) then
-
-     !---------------------------------------------------
-     ! Initialization (not executed during timestepping)
+      ! Determine if the 3D files need to be written 
+      if (n_torangle_3d > 1 ) then
+         write_threed = .true.
+      else
+         write_threed = .false.
+      endif
      !---------------------------------------------------
 
-     call vshdf5_inith5vars(h5in, h5err)
-     h5in%comm=MPI_COMM_SELF
-     h5in%info=MPI_INFO_NULL
-     h5in%wrd_type=H5T_NATIVE_REAL
-     h5in%typeConvert=.true.
-     !h5in%wrd_type=H5T_NATIVE_DOUBLE
-     h5in%doTranspose=.true.
-     h5in%verbose=.true.
-     h5in%debug=.false.
-     h5in%wrVsTime=.true.
-     h5in%vsTime=t_current
-     h5in%vsStep=step
+      !---------------------------------------------------
+      ! io_control: 0=no I/O, 1=open, 2=append, 3=rewind
+
+      !h5_control=(restart_method+1)*output_flag
+    !  select case (h5_control)
+      select case (io_control)
+      case(0)
+         return
+      case(1)
+         openmethod='overwr'
+    !  case(2)
+    !     openmethod='append'
+      case(3)
+         openmethod='append'
+      end select
+
+      if (i_proc == 0) then
+
+         !---------------------------------------------------
+         ! Initialization (not executed during timestepping)
+         !---------------------------------------------------
+
+         call vshdf5_inith5vars(h5in, h5err)
+         h5in%comm=MPI_COMM_SELF
+         h5in%info=MPI_INFO_NULL
+         h5in%wrd_type=H5T_NATIVE_REAL
+         h5in%typeConvert=.true.
+         !h5in%wrd_type=H5T_NATIVE_DOUBLE
+         h5in%doTranspose=.true.
+         h5in%verbose=.true.
+         h5in%debug=.false.
+         h5in%wrVsTime=.true.
+         h5in%vsTime=t_current
+         h5in%vsStep=step
 
 
-     ! if (debug_flag==1) h5in%debug=.true.
+         ! if (debug_flag==1) h5in%debug=.true.
 
-     !------------------------------------------------
-     ! Open the monolithic timedata file (incremental)
-     dumpfile=TRIM(path)//"out.gyro.timedata.h5" 
-     description="Time-dependent GYRO data"
-     call open_h5file(trim(openmethod),dumpfile,dumpTFid,description,dumpTGid,h5in,h5err)
-     if (h5err%errBool) call catch_error(h5err%errorMsg)
-
-
-        !---------------------------------------------------
-        ! Call for each timestep
-        !---------------------------------------------------
-
-        number_label = nint(t_current/dt)
-        ! Write number_label to step_name using write statement
-        if (number_label > 999999) then
-           write(step_name,fmt='(i7.7)') number_label
-        else if (number_label > 99999) then
-           write(step_name,fmt='(i6.6)') number_label
-        else
-           write(step_name,fmt='(i5.5)') number_label
-        endif
-
-        ! Open a new file at each data step     
-
-        dumpfile    = trim(path)//"gyro"//trim(step_name)//".h5"
-        description = "GYRO field file"
-        call open_newh5file(dumpfile,dumpFid,description,dumpGid,h5in,h5err)
-
-        if (write_threed) then
-           dumpfile    = trim(path)//"gyro3D"//trim(step_name)//".h5"
-           description = "GYRO 3D field file"
-           call open_newh5file(dumpfile,fid3d,description,gid3D,h5in,h5err)
-        endif
-        call hdf5_write_coords
+         !------------------------------------------------
+         ! Open the monolithic timedata file (incremental)
+         dumpfile=TRIM(path)//"out.gyro.timedata.h5" 
+         description="Time-dependent GYRO data"
+         call open_h5file(trim(openmethod),dumpfile,dumpTFid,description,dumpTGid,h5in,h5err)
+         if (h5err%errBool) call catch_error(h5err%errorMsg)
 
 
-  endif
+            !---------------------------------------------------
+            ! Call for each timestep
+            !---------------------------------------------------
+
+            number_label = nint(t_current/dt)
+            ! Write number_label to step_name using write statement
+            if (number_label > 999999) then
+               write(step_name,fmt='(i7.7)') number_label
+            else if (number_label > 99999) then
+               write(step_name,fmt='(i6.6)') number_label
+            else
+               write(step_name,fmt='(i5.5)') number_label
+            endif
+
+            ! Open a new file at each data step     
+
+            dumpfile    = trim(path)//"gyro"//trim(step_name)//".h5"
+            description = "GYRO field file"
+            call open_newh5file(dumpfile,dumpFid,description,dumpGid,h5in,h5err)
+
+            if (write_threed) then
+               dumpfile    = trim(path)//"gyro3D"//trim(step_name)//".h5"
+               description = "GYRO 3D field file"
+               call open_newh5file(dumpfile,fid3d,description,gid3D,h5in,h5err)
+            endif
+            call hdf5_write_coords
+
+
+      endif
+  endif ! io_method > 1
 #endif
   !--------------------------------------------------
   ! Output of field-like quantities:
