@@ -50,6 +50,7 @@ subroutine tgyro_read_input
   call tgyro_readbc_real(loc_dx_max) 
   call tgyro_readbc_real(loc_relax) 
   call tgyro_readbc_int(loc_lock_profile_flag) 
+  call tgyro_readbc_int(loc_evolve_grad_only_flag) 
   call tgyro_readbc_int(loc_restart_flag) 
   call tgyro_readbc_int(loc_scenario) 
   call tgyro_readbc_int(loc_quasineutral_flag) 
