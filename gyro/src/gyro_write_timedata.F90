@@ -45,7 +45,6 @@ subroutine gyro_write_timedata
   type(hdf5ErrorType) :: h5err
   integer :: number_label
   logical :: write_threed
-!  integer :: h5_control
 #endif
 
   !---------------------------------------------------
@@ -60,7 +59,6 @@ subroutine gyro_write_timedata
   endif
   !---------------------------------------------------
 #ifdef HAVE_HDF5
-
   if (io_method > 1 ) then
 !---------------------------------------------------
       ! Determine if the 3D files need to be written 
@@ -76,16 +74,21 @@ subroutine gyro_write_timedata
 
       !h5_control=(restart_method+1)*output_flag
     !  select case (h5_control)
+
+      write(*,*) "io_control = ", io_control
+
       select case (io_control)
       case(0)
          return
       case(1)
          openmethod='overwr'
-    !  case(2)
-    !     openmethod='append'
+      case(2)
+         openmethod='append'
       case(3)
          openmethod='append'
       end select
+         
+      write(*,*) "openmethod before = " , trim(openmethod)
 
       if (i_proc == 0) then
 
@@ -113,6 +116,7 @@ subroutine gyro_write_timedata
          ! Open the monolithic timedata file (incremental)
          dumpfile=TRIM(path)//"out.gyro.timedata.h5" 
          description="Time-dependent GYRO data"
+         write(*,*) "openmethod = " , trim(openmethod)
          call open_h5file(trim(openmethod),dumpfile,dumpTFid,description,dumpTGid,h5in,h5err)
          if (h5err%errBool) call catch_error(h5err%errorMsg)
 
@@ -145,7 +149,7 @@ subroutine gyro_write_timedata
             call hdf5_write_coords
 
 
-      endif
+      endif !i_proc ==0
   endif ! io_method > 1
 #endif
   !--------------------------------------------------
@@ -182,7 +186,7 @@ subroutine gyro_write_timedata
             h5in,h5err)
     endif
 #endif
-  endif
+  endif !u_flag==1
 
   if (plot_epar_flag == 1) then
 
@@ -209,7 +213,7 @@ subroutine gyro_write_timedata
             h5in,h5err)
     endif
 #endif
-  endif
+  endif !epar_flag==1
 
   if (plot_n_flag == 1) then
 
@@ -237,7 +241,7 @@ subroutine gyro_write_timedata
           h5in,h5err)
     endif
 #endif
-  endif
+  endif !n_flag ==1 
 
   if (plot_e_flag == 1) then
 
@@ -264,7 +268,7 @@ subroutine gyro_write_timedata
           h5in,h5err)
     endif
 #endif
-  endif
+  endif !e_flag==1
 
   if (plot_v_flag == 1) then
 
@@ -292,7 +296,7 @@ subroutine gyro_write_timedata
           h5in,h5err)
     endif
 #endif
-  endif
+  endif !v_flag==1
 
   !--------------------------------------------------
 
@@ -336,8 +340,8 @@ subroutine gyro_write_timedata
        h5in%mesh=" "
        call add_h5(dumpTGid,'k_perp_squared',k_perp_squared,h5in,h5err)
        if(h5err%errBool) write(*,*) h5err%errorMsg
-    endif
-  endif
+    endif !i_proc == 0
+  endif !io_method > 1
 #endif
 
   if (i_proc == 0) then
@@ -464,6 +468,7 @@ subroutine gyro_write_timedata
                   trim(path)//'out.gyro.gbflux_i_trapped',&
                   10,size(gbflux_i_trapped),gbflux_i_trapped)
           endif
+        endif !io_method < 3
 #ifdef HAVE_HDF5
         if(io_method > 1 ) then 
           call add_h5(dumpTGid,'diff',diff,h5in,h5err)
@@ -477,17 +482,13 @@ subroutine gyro_write_timedata
            call add_h5(dumpTGid,'diff_i_trapped',diff_i_trapped,h5in,h5err)
            call add_h5(dumpTGid,'gbflux_trapped',gbflux_trapped,h5in,h5err)
            call add_h5(dumpTGid,'gbflux_i_trapped',gbflux_i_trapped,h5in,h5err)
-        endif
-      endif
+        endif !trapdiff_flag == 1
+      endif !io_method > 1
 #endif
-
-        endif
-
-     endif
+    endif !i_proc ==0 and lindiff >1 
 
      if (lindiff_method >= 4) then
-
-      if(io_method < 3 ) then
+       if(io_method < 3 ) then
 
         call write_distributed_real(&
              trim(path)//'out.gyro.diff_n',&
@@ -512,7 +513,7 @@ subroutine gyro_write_timedata
              10,&
              size(gbflux_n),&
              gbflux_n)
-      endif
+      endif !io_method < 3
 #ifdef HAVE_HDF5
         if(io_method > 1 ) then
             call write_distributed_real_h5('phi_squared_QL_n',dumpTGid,&
@@ -531,16 +532,15 @@ subroutine gyro_write_timedata
                  size(gbflux_n),&
                  gbflux_n,&
                  h5in,h5err)
-        endif
+        endif !io_method > 1
 #endif
-  
-     endif
+     endif !lindiff_method >= 4
 
      !=============
      ! END LINEAR 
      !=============
 
-  else
+  else !nonlinear !=0
 
      !================
      ! BEGIN NONLINEAR 
@@ -569,7 +569,7 @@ subroutine gyro_write_timedata
              10,&
              size(g_squared_QL_n),&
              g_squared_QL_n)
-     endif
+     endif !lindiff_method >= 4
 
      if (nonlinear_transfer_flag == 1) then
         call write_distributed_real(&
@@ -577,8 +577,8 @@ subroutine gyro_write_timedata
              10,&
              size(nl_transfer),&
              nl_transfer)
-     endif
-    endif
+     endif !nonlinear_transfer_flag ==1 
+    endif !io_method <3
 #ifdef HAVE_HDF5
   if (io_method > 1 ) then
         h5in%units="diff units"
@@ -609,7 +609,7 @@ subroutine gyro_write_timedata
              g_squared_QL_n,&
              h5in,h5err)
         if(h5err%errBool) write(*,*) h5err%errorMsg
-     endif
+     endif !lindiff_method >=4
 
      if (nonlinear_transfer_flag == 1) then
         call write_distributed_real_h5('nl_transfer',dumpTGid,&
@@ -618,16 +618,12 @@ subroutine gyro_write_timedata
              nl_transfer,&
              h5in,h5err)
         if(h5err%errBool) write(*,*) h5err%errorMsg
-     endif
-    endif
+     endif !nonlinear_transfer_flag==1
+    endif !io_method > 1
 #endif
     
 
-
-
-
      if (i_proc == 0) then
-        
         if(io_method < 3) then
         call write_local_real(trim(path)//'out.gyro.field_rms',10,size(ave_phi),ave_phi)
 
@@ -656,7 +652,7 @@ subroutine gyro_write_timedata
            call write_local_real( &
                 trim(path)//'out.gyro.gbflux_i_trapped',10,&
                 size(gbflux_i_trapped),gbflux_i_trapped)
-        endif
+        endif !trapdiff_flag == 1
 
         call write_local_real( &
              trim(path)//'out.gyro.zerobar',10,&
@@ -705,7 +701,6 @@ subroutine gyro_write_timedata
         if (io_method < 3) then
           call write_local_real( &
                trim(path)//'out.gyro.source',10,size(a3),a3)
-          deallocate(a3)
 
           call write_local_real( &
                trim(path)//'out.gyro.moment_zero',10,&
@@ -715,12 +710,12 @@ subroutine gyro_write_timedata
       if (io_method > 1 ) then
         call add_h5(dumpTGid,'source',a3,h5in,h5err)
         if(h5err%errBool) write(*,*) h5err%errorMsg
-        deallocate(a3)
 
         call add_h5(dumpTGid,'moments_zero',moments_zero_plot,h5in,h5err)
         if(h5err%errBool) write(*,*) h5err%errorMsg
       endif !io_method > 1
 #endif
+       deallocate(a3)
      endif! i_proc ==0
 
      !================
