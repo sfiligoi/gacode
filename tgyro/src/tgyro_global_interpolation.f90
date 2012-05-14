@@ -1,9 +1,11 @@
 !-----------------------------------------------------------------
-! tgyro_comm_sync.f90
+! tgyro_global_inerpolation.f90
 !
 ! PURPOSE:
-!  Synchronization (gather, broadcast) of variables returned by 
-!  calls to flux routines.
+!  Linearly interpolates TGYRO "coarse" z-profile onto "fine"
+!  EXPRO grid, then calls LOGINT to calculate corresponding
+!  profiles on fine grid.  Used to generate updated input.profiles
+!  in global GYRO-TGYRO runs.
 !
 ! NOTES:
 !  i -> coarse
@@ -27,6 +29,8 @@ subroutine tgyro_global_interpolation(x_coarse,z_coarse,t_coarse,n_coarse,n_fine
   real, dimension(n_fine) :: z_fine
   integer :: i,j,i_bc
 
+  !set z_fine(x > MAX(x_coarse)) = z_coarse(MAX(x_coarse)
+  !set BC for integration at x = MAX(x_coarse)
   do j=n_fine,1,-1
      if (x_fine(j) >= x_coarse(n_coarse)) then
         z_fine(j) = z_coarse(n_coarse)
@@ -41,8 +45,13 @@ subroutine tgyro_global_interpolation(x_coarse,z_coarse,t_coarse,n_coarse,n_fine
      endif
   enddo ! j
 
-  t_fine = t_coarse(n_coarse)
+! CH: use these calls to put BC at outermost TGYRO radial instance
+!  t_fine = t_coarse(n_coarse)
+!  call logint(t_fine,z_fine,x_fine,n_fine,i_bc)
 
-  call logint(t_fine,z_fine,x_fine,n_fine,i_bc)
+! CH: use the calls to put logint BC at r=0
+! seems to reproduce TGYRO profiles slightly better
+  t_fine(1) = t_coarse(1)
+  call logint(t_fine,z_fine,x_fine,n_fine,1)
 
 end subroutine tgyro_global_interpolation
