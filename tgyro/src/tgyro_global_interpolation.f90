@@ -1,8 +1,17 @@
-! i -> coarse
-! j -> fine
-! Values of z on coarse grid are zero at i=1
+!-----------------------------------------------------------------
+! tgyro_comm_sync.f90
+!
+! PURPOSE:
+!  Synchronization (gather, broadcast) of variables returned by 
+!  calls to flux routines.
+!
+! NOTES:
+!  i -> coarse
+!  j -> fine
+!  Values of z on coarse grid are zero at i=1.
+!-----------------------------------------------------------------
 
-subroutine tgyro_global_interpolation(x_coarse,z_coarse,t_coarse,n_coarse,n_fine,t_fine)
+subroutine tgyro_global_interpolation(x_coarse,z_coarse,t_coarse,n_coarse,n_fine,x_fine,t_fine)
 
   implicit none
 
@@ -12,14 +21,13 @@ subroutine tgyro_global_interpolation(x_coarse,z_coarse,t_coarse,n_coarse,n_fine
   real, intent(in), dimension(n_coarse)  :: t_coarse
 
   integer, intent(in) :: n_fine
-  real, intent(inout) :: t_fine
+  real, intent(inout), dimension(n_fine) :: x_fine
+  real, intent(inout), dimension(n_fine) :: t_fine
 
-  real, dimension(n_fine) :: x_fine
   real, dimension(n_fine) :: z_fine
   integer :: i,j,i_bc
 
   do j=n_fine,1,-1
-     x_fine(j) = (j-1)*1.0/(n_fine-1)
      if (x_fine(j) >= x_coarse(n_coarse)) then
         z_fine(j) = z_coarse(n_coarse)
         i_bc = j

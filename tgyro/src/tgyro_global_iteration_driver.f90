@@ -17,7 +17,6 @@ subroutine tgyro_global_iteration_driver
 
   real :: time_max_save
   integer :: n_exp
-  real, dimension(:), allocatable :: x,xt
   character (len=16) :: ittag
   real, parameter :: cgrad = 1e-20
 
@@ -100,10 +99,6 @@ subroutine tgyro_global_iteration_driver
   call tgyro_write_data(0)
   !--------------------------------------------------------
 
-  ! Allocation and initialization of work variables
-  allocate(x(n_r))
-  x(1:n_r) = r/r_min
-
   !------------------------------------------------------------
   ! TGYRO-GYRO ITERATION CYCLE
   !
@@ -118,18 +113,10 @@ subroutine tgyro_global_iteration_driver
      call EXPRO_pread
 
      ! Map Te,ze from TGYRO variable to EXPRO interface variable
-     !xt(1:n_r) = te(:)/1e3
-     !xt(n_r+1) = EXPRO_te(n_exp)
-     !call cub_spline(x,xt,n_r+1,100*EXPRO_rmin(:)/r_min,EXPRO_te(:),n_exp)
-
-     call tgyro_global_interpolation(x,dlntedr*1e2,te/1e3,n_r,n_exp,EXPRO_te)
+     call tgyro_global_interpolation(r/1e2,dlntedr*1e2,te/1e3,n_r,n_exp,EXPRO_rmin,EXPRO_te)
 
      ! Map Ti,zi from TGYRO variable to EXPRO interface variable
-     !xt(1:n_r) = ti(1,:)/1e3
-     !xt(n_r+1) = EXPRO_ti(1,n_exp)
-     !call cub_spline(x,xt,n_r+1,100*EXPRO_rmin(:)/r_min,EXPRO_ti(1,:),n_exp)
-
-     call tgyro_global_interpolation(x,dlntidr(1,:)*1e2,ti(1,:)/1e3,n_r,n_exp,EXPRO_ti(1,:))
+     call tgyro_global_interpolation(r/1e2,dlntidr(1,:)*1e2,ti(1,:)/1e3,n_r,n_exp,EXPRO_rmin,EXPRO_ti(1,:))
 
      EXPRO_ti(2,:) = EXPRO_ti(1,:)
 
@@ -168,8 +155,5 @@ subroutine tgyro_global_iteration_driver
      !------------------------------------------------------------
 
   enddo
-
-  deallocate(x)
-  !deallocate(xt)
 
 end subroutine tgyro_global_iteration_driver
