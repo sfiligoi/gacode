@@ -14,7 +14,11 @@
 !  - Unstable modes have w_i > 0
 !------------------------------------------------------
 
-subroutine gyro_write_freq(datafile,io,dumpTGid,h5in,h5err)
+#ifndef HAVE_HDF5
+  subroutine gyro_write_freq(datafile,io)
+#else
+  subroutine gyro_write_freq(datafile,io,dumpTGid,h5in,h5err)
+#endif
 
   use mpi
   use gyro_globals
@@ -42,9 +46,9 @@ subroutine gyro_write_freq(datafile,io,dumpTGid,h5in,h5err)
   character (len=*), intent(in) :: datafile
 
 #ifdef HAVE_HDF5
-  integer(HID_T), OPTIONAL        :: dumpTGid
-  type(hdf5InOpts), OPTIONAL      :: h5in
-  type(hdf5ErrorType), OPTIONAL   :: h5err 
+  integer(HID_T)        :: dumpTGid
+  type(hdf5InOpts)      :: h5in
+  type(hdf5ErrorType)   :: h5err 
 #endif
 
 

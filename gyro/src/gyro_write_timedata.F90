@@ -374,21 +374,42 @@ subroutine gyro_write_timedata
      if (plot_u_flag == 1) then        
 
         ! PHI
+#ifndef HAVE_HDF5
         call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_phi',10,1,0)
+#else
+        call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_phi',10,1,0, &
+            "ballon_phi",dumpTGid,h5in,h5err)
+#endif
 
         if (n_field > 1) then
            ! A_PARALLEL 
+#ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_a',10,2,0)
+#else
+           call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_a',10,2,0, &
+              "balloon_a",dumpTGid,h5in,h5err)
+#endif
         endif
 
         if (n_field > 2) then
            ! B_PARALLEL 
+#ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_aperp',10,3,0)
+#else
+           call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_aperp', &
+            10,3,0, "balloon_aperp",dumpTGid,h5in,h5err)
+#endif
+
         endif
 
         ! E_PARALLEL
         if (eparallel_plot_flag == 1) then
+#ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_epar',10,n_field+1,0)
+#else
+           call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_epar',10, &
+            n_field+1,0,"balloon_epar",dumpTGid,h5in,h5err)
+#endif
         endif
 
      endif
@@ -397,10 +418,21 @@ subroutine gyro_write_timedata
 
         ! DENSITY
         if (electron_method /= 3) then
+#ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_n_ion',10,5,1)
+#else
+           call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_n_ion', &
+            10,5,1,"n_ion",dumpTGid,h5in,h5err)
+#endif
+
         endif
         if (electron_method > 1) then 
+#ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_n_elec',10,5,indx_e)
+#else
+           call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_n_elec', &
+            10,5,indx_e,"n_elec",dumpTGid,h5in,h5err)
+#endif
         endif
      endif
 
@@ -408,10 +440,21 @@ subroutine gyro_write_timedata
 
         ! ENERGY
         if (electron_method /= 3) then
+#ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_e_ion',10,6,1)
+#else
+           call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_e_ion', &
+            10,6,1,"e_ion",dumpTGid,h5in,h5err)
+#endif
+
         endif
         if (electron_method > 1) then 
+#ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_e_elec',10,6,indx_e)
+#else
+           call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_e_elec', &
+            10,6,indx_e,"e_elec",dumpTGid,h5in,h5err)
+#endif
         endif
      endif
 
@@ -419,10 +462,20 @@ subroutine gyro_write_timedata
 
         ! ENERGY
         if (electron_method /= 3) then
+#ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_v_ion',10,7,1)
+#else
+           call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_v_ion', &
+              10,7,1,"v_ion",dumpTGid,h5in,h5err)
+#endif
         endif
         if (electron_method > 1) then 
+#ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_v_elec',10,7,indx_e)
+#else
+           call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_v_elec', &
+            10,7,indx_e,"v_elec",dumpTGid,h5in,h5err)
+#endif
         endif
      endif
 
