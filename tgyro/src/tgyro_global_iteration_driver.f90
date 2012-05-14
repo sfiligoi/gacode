@@ -19,6 +19,7 @@ subroutine tgyro_global_iteration_driver
   integer :: n_exp
   real, dimension(:), allocatable :: x,xt
   character (len=16) :: ittag
+  real, parameter :: cgrad = 1e-20
 
   ! Copy (TGYRO copy of input.profiles) -> (GYRO copy of input.profiles)
   if (i_proc_global == 0) then
@@ -100,11 +101,8 @@ subroutine tgyro_global_iteration_driver
   !--------------------------------------------------------
 
   ! Allocation and initialization of work variables
-  allocate(x(n_r+1))
-  allocate(xt(n_r+1))
-
+  allocate(x(n_r))
   x(1:n_r) = r/r_min
-  x(n_r+1) = 1.0
 
   !------------------------------------------------------------
   ! TGYRO-GYRO ITERATION CYCLE
@@ -120,23 +118,20 @@ subroutine tgyro_global_iteration_driver
      call EXPRO_pread
 
      ! Map Te,ze from TGYRO variable to EXPRO interface variable
-     xt(1:n_r) = te(:)/1e3
-     xt(n_r+1) = EXPRO_te(n_exp)
-     call cub_spline(x,xt,n_r+1,100*EXPRO_rmin(:)/r_min,EXPRO_te(:),n_exp)
-     xt(1:n_r) = dlntedr(:)*1e2
-     xt(n_r+1) = EXPRO_dlntedr(n_exp)
-     call cub_spline(x,xt,n_r+1,100*EXPRO_rmin(:)/r_min,EXPRO_dlntedr(:),n_exp)
+     !xt(1:n_r) = te(:)/1e3
+     !xt(n_r+1) = EXPRO_te(n_exp)
+     !call cub_spline(x,xt,n_r+1,100*EXPRO_rmin(:)/r_min,EXPRO_te(:),n_exp)
+
+     call tgyro_global_interpolation(x,dlntedr*1e2,te/1e3,n_r,n_exp,EXPRO_te)
 
      ! Map Ti,zi from TGYRO variable to EXPRO interface variable
-     xt(1:n_r) = ti(1,:)/1e3
-     xt(n_r+1) = EXPRO_ti(1,n_exp)
-     call cub_spline(x,xt,n_r+1,100*EXPRO_rmin(:)/r_min,EXPRO_ti(1,:),n_exp)
-     xt(1:n_r) = dlntidr(1,:)*1e2
-     xt(n_r+1) = EXPRO_dlntidr(1,n_exp)
-     call cub_spline(x,xt,n_r+1,100*EXPRO_rmin(:)/r_min,EXPRO_dlntidr(1,:),n_exp)
+     !xt(1:n_r) = ti(1,:)/1e3
+     !xt(n_r+1) = EXPRO_ti(1,n_exp)
+     !call cub_spline(x,xt,n_r+1,100*EXPRO_rmin(:)/r_min,EXPRO_ti(1,:),n_exp)
 
-     EXPRO_ti(2,:)      = EXPRO_ti(1,:)
-     EXPRO_dlntidr(2,:) = EXPRO_dlntidr(1,:)
+     call tgyro_global_interpolation(x,dlntidr(1,:)*1e2,ti(1,:)/1e3,n_r,n_exp,EXPRO_ti(1,:))
+
+     EXPRO_ti(2,:) = EXPRO_ti(1,:)
 
      ittag = '.'//achar(i_tran_loop-1+iachar("1"))  
 
@@ -161,19 +156,20 @@ subroutine tgyro_global_iteration_driver
      !  --> z = (1 - alpha (dQ/Q))*z
      ! alpha = 1/(Waltz stiffness), use alpha=0.1 <=> S = 10
 
-     dlntedr(2:n_r) = -0.1*( (eflux_e_tot(2:n_r) &
+     dlntedr(2:n_r) = -cgrad*( (eflux_e_tot(2:n_r) &
           - eflux_e_target(2:n_r))/eflux_e_target(2:n_r) )*dlntedr(2:n_r) + dlntedr(2:n_r)
 
-     dlntidr(1,2:n_r) = -0.1*( (eflux_i_tot(2:n_r) &
+     dlntidr(1,2:n_r) = -cgrad*( (eflux_i_tot(2:n_r) &
           - eflux_i_target(2:n_r))/eflux_i_target(2:n_r) )*dlntidr(1,2:n_r) + dlntidr(1,2:n_r)
 
-     dlntedr(1)   = 0.0
-     dlntidr(:,1) = 0.0
+     ! Not needed
+     !     dlntedr(1)   = 0.0
+     !     dlntidr(:,1) = 0.0
      !------------------------------------------------------------
 
   enddo
 
   deallocate(x)
-  deallocate(xt)
+  !deallocate(xt)
 
 end subroutine tgyro_global_iteration_driver
