@@ -14,7 +14,7 @@
 !  - Unstable modes have w_i > 0
 !------------------------------------------------------
 
-subroutine gyro_write_freq(datafile,io)
+subroutine gyro_write_freq(datafile,io,dumpTGid,h5in,h5err)
 
   use mpi
   use gyro_globals
@@ -40,6 +40,14 @@ subroutine gyro_write_freq(datafile,io)
   !  
   integer, intent(in) :: io  
   character (len=*), intent(in) :: datafile
+
+#ifdef HAVE_HDF5
+  integer(HID_T), OPTIONAL        :: dumpTGid
+  type(hdf5InOpts), OPTIONAL      :: h5in
+  type(hdf5ErrorType), OPTIONAL   :: h5err 
+#endif
+
+
   !--------------------------------------------------
 
   select case (io_control)
@@ -143,7 +151,8 @@ subroutine gyro_write_freq(datafile,io)
 #else
     if(io_method >1 ) then
       if (i_proc == 0 ) then
-        write(*,*) "need to put things here to for add_h5 (blah)"
+       call add_h5(dumpTGid,'omega_linear_real',REAL(omega_linear),h5in,h5err) 
+       call add_h5(dumpTGid,'omega_linear_imag',AIMAG(omega_linear),h5in,h5err) 
       endif
     endif
 #endif

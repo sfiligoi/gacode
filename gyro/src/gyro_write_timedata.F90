@@ -14,9 +14,9 @@
 subroutine gyro_write_timedata
 
   use gyro_globals
+  use mpi
 #ifdef HAVE_HDF5
   use hdf5_api
-  use mpi
 #endif
 
   !---------------------------------------------------
@@ -363,9 +363,12 @@ subroutine gyro_write_timedata
      !=============
      ! BEGIN LINEAR 
      !=============
-
+#ifndef HAVE_HDF5
      call gyro_write_freq(trim(path)//'out.gyro.freq',10)
-
+#else
+     call gyro_write_freq(trim(path)//'out.gyro.freq',10,dumpTGid,h5in,h5err)
+#endif
+  
 !srinathV...we'll have to revisit getting the linear run info 
 
      if (plot_u_flag == 1) then        
@@ -461,7 +464,7 @@ subroutine gyro_write_timedata
         endif !io_method < 3
 #ifdef HAVE_HDF5
         if(io_method > 1 ) then 
-          call add_h5(dumpTGid,'diff',diff,h5in,h5err)
+        call add_h5(dumpTGid,'diff',diff,h5in,h5err)
         call add_h5(dumpTGid,'diff_i',diff_i,h5in,h5err)
         call add_h5(dumpTGid,'gbflux',gbflux,h5in,h5err)
         call add_h5(dumpTGid,'gbflux_mom',gbflux_mom,h5in,h5err)
