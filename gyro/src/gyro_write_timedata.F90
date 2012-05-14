@@ -506,6 +506,12 @@ subroutine gyro_write_timedata
       endif !io_method < 3
 #ifdef HAVE_HDF5
         if(io_method > 1 ) then
+           call write_distributed_real_h5('diff_n',dumpTGid,&
+                 n_kinetic,n_field,2, &
+                 size(diff_n),&
+                 diff_n,&
+                 h5in,h5err)
+
             call write_distributed_real_h5('phi_squared_QL_n',dumpTGid,&
                  1,1,1,&
                  size(phi_squared_QL_n),&
@@ -536,6 +542,7 @@ subroutine gyro_write_timedata
      ! BEGIN NONLINEAR 
      !================
     if (io_method < 3) then
+          h5in%units="diff units"
      call write_distributed_real(&
           trim(path)//'out.gyro.diff_n',&
           10,&
