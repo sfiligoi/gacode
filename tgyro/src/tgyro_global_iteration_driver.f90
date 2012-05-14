@@ -95,6 +95,7 @@ subroutine tgyro_global_iteration_driver
   call EXPRO_palloc(MPI_COMM_WORLD,'./',0)
 
   ! Output initialization
+  i_tran = 0
   call tgyro_write_input
   call tgyro_write_data(0)
   !--------------------------------------------------------
@@ -103,6 +104,8 @@ subroutine tgyro_global_iteration_driver
   ! TGYRO-GYRO ITERATION CYCLE
   !
   do i_tran_loop=1,tgyro_relax_iterations
+
+     i_tran = i_tran+1
 
      ! Integrate profiles based on gradients
      call tgyro_profile_functions
