@@ -18,7 +18,9 @@ subroutine tgyro_global_iteration_driver
   real :: time_max_save
   integer :: n_exp
   character (len=16) :: ittag
-  real, parameter :: cgrad = 1e-20
+! CH: replace with loc_relax
+!  real, parameter :: cgrad = 1e-20
+!  real, parameter :: cgrad = 0.1
 
   ! Copy (TGYRO copy of input.profiles) -> (GYRO copy of input.profiles)
   if (i_proc_global == 0) then
@@ -95,7 +97,11 @@ subroutine tgyro_global_iteration_driver
   call EXPRO_palloc(MPI_COMM_WORLD,'./',0)
 
   ! Output initialization
-  i_tran = 0
+! CH i_tran initialized in tgyro_global_init_profiles
+!  i_tran = 0
+  if (i_tran == 0) then
+	i_tran = -1
+  endif
   call tgyro_write_input
   call tgyro_write_data(0)
   !--------------------------------------------------------
@@ -105,7 +111,10 @@ subroutine tgyro_global_iteration_driver
   !
   do i_tran_loop=1,tgyro_relax_iterations
 
-     i_tran = i_tran+1
+     !CH: account for iteration 0 off initial profiles
+!     if ((i_tran_loop > 1) then
+	i_tran = i_tran+1
+!     endif
 
      ! Integrate profiles based on gradients
      call tgyro_profile_functions
@@ -145,12 +154,17 @@ subroutine tgyro_global_iteration_driver
      ! CH test: try (delta z)/z = - alpha (delta Q)/Q
      !  --> z = (1 - alpha (dQ/Q))*z
      ! alpha = 1/(Waltz stiffness), use alpha=0.1 <=> S = 10
+     ! use alpha = loc_relax as TGYRO input
 
-     dlntedr(2:n_r) = -cgrad*( (eflux_e_tot(2:n_r) &
-          - eflux_e_target(2:n_r))/eflux_e_target(2:n_r) )*dlntedr(2:n_r) + dlntedr(2:n_r)
+     if (loc_te_feedback_flag == 1) then
+     	dlntedr(2:n_r) = -loc_relax*( (eflux_e_tot(2:n_r) &
+             - eflux_e_target(2:n_r))/eflux_e_target(2:n_r) )*dlntedr(2:n_r) + dlntedr(2:n_r)
+     endif	
 
-     dlntidr(1,2:n_r) = -cgrad*( (eflux_i_tot(2:n_r) &
-          - eflux_i_target(2:n_r))/eflux_i_target(2:n_r) )*dlntidr(1,2:n_r) + dlntidr(1,2:n_r)
+     if (loc_te_feedback_flag == 1) then
+        dlntidr(1,2:n_r) = -loc_relax*( (eflux_i_tot(2:n_r) &
+             - eflux_i_target(2:n_r))/eflux_i_target(2:n_r) )*dlntidr(1,2:n_r) + dlntidr(1,2:n_r)
+     endif
 
      ! Not needed
      !     dlntedr(1)   = 0.0
