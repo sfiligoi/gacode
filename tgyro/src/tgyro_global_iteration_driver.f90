@@ -1,9 +1,23 @@
-!-----------------------------------------------------------
-! tgyro_global_iteration_driver.f90
+!---------------------------------------------------------------------
+! tgyro_global_iteration_driver.f90-
 !
 ! PURPOSE:
 !  Main driver for global solver.
-!----------------------------------------------------------
+!
+! NOTES:
+!  Management of input.profiles is somewhat complicated.  We will end 
+!  up with the following structure:
+!
+!  tgyrodir/input.profiles
+!  tgyrodir/input.profiles.gen
+!  tgyrodir/input.profiles.{n}
+!  tgyrodir/input.profiles.{n}.gen
+!
+!  tgyrodir/GYRO*/input.profiles.gen
+!  
+!  In general, the GYRO*/input.profiles.gen will correspond to the 
+!  latest tgyrodir/input.profiles.{n}.gen.
+!---------------------------------------------------------------------
 
 subroutine tgyro_global_iteration_driver
 
