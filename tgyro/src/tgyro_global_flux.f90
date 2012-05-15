@@ -47,7 +47,16 @@ subroutine tgyro_global_flux
   ! based on GYRO norm radius, whereas in TGYRO the fluxes are based 
   ! on the GB normalizations at the local radius.  So, we also 
   ! perform this conversion below.
-  inorm = n_r/2
+  !
+  ! CH: since using an total even number of points
+  ! n_r = 1 + tgyro_global_radii want to use
+
+  inorm = n_r/2 + 1
+
+  ! to specify (approximate) center of box.  For instance, with
+  ! tgyro_global_radii = 3, corrsponding to [r1,r2,r3], total of
+  ! n_r = 4 point (r = [0,r1,r2,r3]) in solver.  Since r2 is norm
+  ! point, want inorm = n_r/2 + 1 = 3.
   !------------------------------------------------------------------
 
   do i=2,n_r
