@@ -166,7 +166,7 @@ subroutine gyro_write_timedata
     if(io_method >1) then
        h5in%units="dimensionless"
        h5in%mesh="/cartMesh"
-       call write_distributed_complex_h5("phi",&
+       call write_distributed_complex_3d_h5("phi",&
             dumpGid,gid3D,&
             n_theta_plot*n_x*n_field,&
             n_theta_plot,n_x,n_field,&
@@ -193,7 +193,7 @@ subroutine gyro_write_timedata
     if(io_method >1) then
        h5in%units="dimensionless"
        h5in%mesh="/cartMesh"
-       call write_distributed_complex_h5("epar",&
+       call write_distributed_complex_3d_h5("epar",&
             dumpGid,gid3D,&
             n_theta_plot*n_x*n_field,&
             n_theta_plot,n_x,n_field,&
@@ -221,7 +221,7 @@ subroutine gyro_write_timedata
     if(io_method >1) then
      h5in%units="dimensionless"
      h5in%mesh="/cartMesh"
-     call write_distributed_complex_h5("density",&
+     call write_distributed_complex_3d_h5("density",&
           dumpGid,gid3D,&
           n_theta_plot*n_x*n_kinetic,&
           n_theta_plot,n_x,n_kinetic,&
@@ -248,7 +248,7 @@ subroutine gyro_write_timedata
     if(io_method >1) then
     h5in%units="dimensionless"
     h5in%mesh="/cartMesh"
-    call write_distributed_complex_h5("energy",&
+    call write_distributed_complex_3d_h5("energy",&
           dumpGid,gid3D,&
           n_theta_plot*n_x*n_kinetic,&
           n_theta_plot,n_x,n_kinetic,&
@@ -276,7 +276,7 @@ subroutine gyro_write_timedata
     if(io_method >1) then
      h5in%units="dimensionless"
      h5in%mesh="/cartMesh"
-     call write_distributed_complex_h5("v_par",&
+     call write_distributed_complex_3d_h5("v_par",&
           dumpGid,gid3D,&
           n_theta_plot*n_x*n_kinetic,&
           n_theta_plot,n_x,n_kinetic,&
@@ -301,6 +301,20 @@ subroutine gyro_write_timedata
           size(field_r0_plot),&
           field_r0_plot)
     endif
+!field_r0_grid,n_field  size of field_r0 (2d)
+!    if(io_method >1) then
+!     h5in%units="dimensionless"
+!     h5in%mesh="/cartMesh"
+!     call write_distributed_complex_2d_h5("field_r0",&
+!          dumpGid,gid3D,&
+!          n_theta_plot*n_x*n_kinetic,&
+!          n_theta_plot,n_x,n_kinetic,&
+!          field_r0_plot,&
+!          write_threed,&
+!          .false., &
+!          h5in,h5err)
+!    endif
+
   endif
   !--------------------------------------------------
 
@@ -813,6 +827,8 @@ subroutine gyro_write_timedata
   endif
 
 !srinathv: need and hdf5 implementiotion for above
+!flux_velocity size:n_energy,n_lambda,n_kinetic,n_field,n_moment
+
   !------------------------------------------------------------
 
   !------------------------------------------------------------
@@ -1565,7 +1581,7 @@ subroutine write_distributed_complex(datafile,io,n_fn,fn)
 end subroutine write_distributed_complex
 !===========================================================================
 #ifdef HAVE_HDF5
-subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
+subroutine write_distributed_complex_3d_h5(vname,rGid,r3Did,&
      n_fn,n1,n2,n3,fn,plot3d,plotwedge,h5in,h5err)
 
   use mpi
@@ -1795,7 +1811,7 @@ subroutine write_distributed_complex_h5(vname,rGid,r3Did,&
   deallocate(real_buff)
   deallocate(vnameArray)
 
-end subroutine write_distributed_complex_h5
+end subroutine write_distributed_complex_3d_h5
 #endif
 !===========================================================================
 
