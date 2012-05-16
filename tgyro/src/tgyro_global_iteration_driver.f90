@@ -17,6 +17,25 @@
 !  
 !  In general, the GYRO*/input.profiles.gen will correspond to the 
 !  latest tgyrodir/input.profiles.{n}.gen.
+!
+!  GLOBAL-TO-LOCAL GRID MAPPING:
+!
+!  n_r = 6
+!  tgyro_global_radii = 5
+!
+!                            length
+!                  <-------------------------> 
+!  |
+!  |            left GYRO                right GYRO
+!  |             buffer                    buffer
+!  |               +                         +
+!  |               +            dlength      +
+!  |               +            <---->       +
+!  |               +  |    |    |    |    |  +
+!  ------------------------------------------------------
+! i=1                i=2  i=3  i=4  i=5  i=6
+! r=0                
+!
 !---------------------------------------------------------------------
 
 subroutine tgyro_global_iteration_driver
@@ -32,9 +51,6 @@ subroutine tgyro_global_iteration_driver
   real :: time_max_save
   integer :: n_exp
   character (len=16) :: ittag
-! CH: replace with loc_relax
-!  real, parameter :: cgrad = 1e-20
-!  real, parameter :: cgrad = 0.1
 
   ! Copy (TGYRO copy of input.profiles) -> (GYRO copy of input.profiles)
   if (i_proc_global == 0) then
@@ -111,10 +127,10 @@ subroutine tgyro_global_iteration_driver
   call EXPRO_palloc(MPI_COMM_WORLD,'./',0)
 
   ! Output initialization
-! CH i_tran initialized in tgyro_global_init_profiles
-!  i_tran = 0
+  ! CH i_tran initialized in tgyro_global_init_profiles
+  !  i_tran = 0
   if (i_tran == 0) then
-	i_tran = -1
+     i_tran = -1
   endif
   call tgyro_write_input
   call tgyro_write_data(0)
@@ -126,9 +142,9 @@ subroutine tgyro_global_iteration_driver
   do i_tran_loop=1,tgyro_relax_iterations
 
      !CH: account for iteration 0 off initial profiles
-!     if ((i_tran_loop > 1) then
-	i_tran = i_tran+1
-!     endif
+     !     if ((i_tran_loop > 1) then
+     i_tran = i_tran+1
+     !     endif
 
      ! Integrate profiles based on gradients
      call tgyro_profile_functions
@@ -164,25 +180,22 @@ subroutine tgyro_global_iteration_driver
      ! MODIFY GRADIENTS
      !
      ! Modify gradient profile based on some "diagonal rule"
-     !  dlntedr(:) = 0.0*(eflux_e_tot(:)-eflux_e_target(:))+dlntedr(:)
-     ! CH test: try (delta z)/z = - alpha (delta Q)/Q
-     !  --> z = (1 - alpha (dQ/Q))*z
+     ! 
+     !  (delta z)/z = - alpha (delta Q)/Q
+     !  z = (1 - alpha (dQ/Q))*z
+     ! 
      ! alpha = 1/(Waltz stiffness), use alpha=0.1 <=> S = 10
      ! use alpha = loc_relax as TGYRO input
 
      if (loc_te_feedback_flag == 1) then
      	dlntedr(2:n_r) = -loc_relax*( (eflux_e_tot(2:n_r) &
              - eflux_e_target(2:n_r))/eflux_e_target(2:n_r) )*dlntedr(2:n_r) + dlntedr(2:n_r)
-     endif	
+     endif
 
      if (loc_te_feedback_flag == 1) then
         dlntidr(1,2:n_r) = -loc_relax*( (eflux_i_tot(2:n_r) &
              - eflux_i_target(2:n_r))/eflux_i_target(2:n_r) )*dlntidr(1,2:n_r) + dlntidr(1,2:n_r)
      endif
-
-     ! Not needed
-     !     dlntedr(1)   = 0.0
-     !     dlntidr(:,1) = 0.0
      !------------------------------------------------------------
 
   enddo
