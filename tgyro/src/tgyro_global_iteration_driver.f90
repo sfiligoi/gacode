@@ -65,6 +65,8 @@ subroutine tgyro_global_iteration_driver
      call tgyro_catch_error('ERROR: Must have odd number of GYRO radii')
   endif
 
+  p_max = n_evolve*(n_r-1)
+
   call tgyro_allocate_globals
 
   !---------------------------------------
@@ -76,6 +78,19 @@ subroutine tgyro_global_iteration_driver
   gyro_exit_status(:)  = 0
   gyro_exit_message(:) = 'N/A'
   !---------------------------------------
+
+  ! Map function from radius/field to p-index.
+  p = 0
+  do ip=1,n_evolve
+     do i=2,n_r
+        p = p+1
+        pmap(i,ip) = p
+     enddo
+  enddo
+
+  ! Set initial values
+  res(:)   = 1.0
+  relax(:) = 0.0
 
   ! gyro_restart_method = 0 (no restart)
   !                     = 1 (standard restart)
@@ -127,8 +142,9 @@ subroutine tgyro_global_iteration_driver
   call EXPRO_palloc(MPI_COMM_WORLD,'./',0)
 
   ! Output initialization
-  ! CH i_tran initialized in tgyro_global_init_profiles
-  !  i_tran = 0
+  !  i_tran initialized in tgyro_global_init_profiles
+  !  If not restarting, reduce by 1 to get iteration 0 in loop
+  !
   if (i_tran == 0) then
      i_tran = -1
   endif
@@ -141,10 +157,7 @@ subroutine tgyro_global_iteration_driver
   !
   do i_tran_loop=1,tgyro_relax_iterations
 
-     !CH: account for iteration 0 off initial profiles
-     !     if ((i_tran_loop > 1) then
      i_tran = i_tran+1
-     !     endif
 
      ! Integrate profiles based on gradients
      call tgyro_profile_functions
@@ -154,13 +167,30 @@ subroutine tgyro_global_iteration_driver
      call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
      call EXPRO_pread
 
+     !------------------------------------------------------------------------------------------
+     ! TGYRO-TO-GYRO PROFILE MAPPING:
+     !
      ! Map Te,ze from TGYRO variable to EXPRO interface variable
-     call tgyro_global_interpolation(r/1e2,dlntedr*1e2,te/1e3,n_r,n_exp,EXPRO_rmin,EXPRO_te)
+     call tgyro_global_interpolation(r/1e2,dlntedr*1e2,te/1e3,&
+          n_r,n_exp,EXPRO_rmin,EXPRO_te)
 
      ! Map Ti,zi from TGYRO variable to EXPRO interface variable
-     call tgyro_global_interpolation(r/1e2,dlntidr(1,:)*1e2,ti(1,:)/1e3,n_r,n_exp,EXPRO_rmin,EXPRO_ti(1,:))
+     call tgyro_global_interpolation(r/1e2,dlntidr(1,:)*1e2,ti(1,:)/1e3,& 
+          n_r,n_exp,EXPRO_rmin,EXPRO_ti(1,:))
 
      EXPRO_ti(2,:) = EXPRO_ti(1,:)
+
+     ! Map ne,zne from TGYRO variable to EXPRO interface variable
+     call tgyro_global_interpolation(r/1e2,dlnnedr*1e2,ne/1e13,n_r,&
+          n_exp,EXPRO_rmin,EXPRO_ne)
+
+     ! Map ni,zni from TGYRO variable to EXPRO interface variable, enforcing quasineutrality as appropriate
+     if (loc_quasineutral_flag == 1) then
+	call tgyro_quasineutral(ni,ne,dlnnidr,dlnnedr,zi_vec,loc_n_ion,n_r)
+     endif
+     call tgyro_global_interpolation(r/1e2,dlnnidr(1,:)*1e2,ni(1,:)/1e13,n_r,&
+          n_exp,EXPRO_rmin,EXPRO_ni(1,:))
+     !------------------------------------------------------------------------------------------
 
      ittag = '.'//achar(i_tran_loop-1+iachar("1"))  
 
@@ -187,16 +217,37 @@ subroutine tgyro_global_iteration_driver
      ! alpha = 1/(Waltz stiffness), use alpha=0.1 <=> S = 10
      ! use alpha = loc_relax as TGYRO input
 
-     if (loc_te_feedback_flag == 1) then
-     	dlntedr(2:n_r) = -loc_relax*( (eflux_e_tot(2:n_r) &
-             - eflux_e_target(2:n_r))/eflux_e_target(2:n_r) )*dlntedr(2:n_r) + dlntedr(2:n_r)
+     p = 0
+
+     if (loc_ti_feedback_flag == 1) then
+        do i=2,n_r
+           p = p+1
+           res(p) = (eflux_i_tot(i)-eflux_i_target(i))/eflux_i_target(i) 
+           dlntidr(1,i) = dlntidr(1,i)-loc_relax*res(p)*dlntidr(1,i)
+        enddo
      endif
 
      if (loc_te_feedback_flag == 1) then
-        dlntidr(1,2:n_r) = -loc_relax*( (eflux_i_tot(2:n_r) &
-             - eflux_i_target(2:n_r))/eflux_i_target(2:n_r) )*dlntidr(1,2:n_r) + dlntidr(1,2:n_r)
+        do i=2,n_r
+           p = p+1
+           res(p) = (eflux_e_tot(i)-eflux_e_target(i))/eflux_e_target(i)
+           dlntedr(i) = dlntedr(i)-loc_relax*res(p)*dlntedr(i)
+        enddo
+     endif
+
+     if (loc_ne_feedback_flag == 1) then
+        do i=2,n_r
+           p = p+1
+           res(p) = (pflux_e_tot(i)-pflux_e_target(i))/max(abs(pflux_e_tot(i)),1.0) 
+           dlnnedr(i) = dlnnedr(i)-loc_relax*res(p)*dlnnedr(i)
+        enddo
+        if (loc_quasineutral_flag == 1) then
+           call tgyro_quasineutral(ni,ne,dlnnidr,dlnnedr,zi_vec,loc_n_ion,n_r)
+        endif
      endif
      !------------------------------------------------------------
+
+     res = abs(res)
 
   enddo
 
