@@ -37,7 +37,7 @@ subroutine gyro_field_interpolation
   !-----------------------------------------------------
 
   call gyro_timer_in('Field-interp.a')
-
+!$acc region
 !$omp parallel do default(shared) private(cmplx_phase,j_int,x,vtemp,j)
   do i=1,n_x
      cmplx_phase = phase(in_1,i)
@@ -55,6 +55,7 @@ subroutine gyro_field_interpolation
      enddo ! j_int
   enddo ! i
 !$end parallel do
+!$acc end region
 
   !---------------------------------------------------------------
   ! Interpolate phi, A_par, and B_par onto orbit-grid:

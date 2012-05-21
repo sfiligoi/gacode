@@ -11,6 +11,10 @@ ifeq ($(OMP),true)
 else
    FC += ${FNOMP}
 endif
+
+ifeq ($(ACC),true)
+   FC += ${FACC}
+endif
  
 EXEC=gyro
 

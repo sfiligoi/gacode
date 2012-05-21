@@ -13,6 +13,10 @@ else
    OBJECTS = gyro_omp_lib.o
 endif
 
+ifeq ($(ACC),true)
+   FC += ${FACC}
+endif
+
 FFLAGS += ${FHDF5} ${HDF5_INC}
 
 LLIB = gyro_lib
