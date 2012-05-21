@@ -87,7 +87,7 @@ subroutine gyro_write_timedata_wedge_hdf5
      ! DENSITY
      h5in%units=" "
      h5in%mesh="/cartMesh"
-     call write_distributed_complex_3d_h5("density",&
+     call write_distributed_complex_sorf_h5("density",&
           gidwedge,gidwedge,&
           n_wedge*n_x*n_kinetic,&
           n_wedge,n_x,n_kinetic,&
@@ -101,7 +101,7 @@ subroutine gyro_write_timedata_wedge_hdf5
      ! ENERGY
      h5in%units="energy units"
      h5in%mesh="/cartMesh"
-     call write_distributed_complex_3d_h5("energy",&
+     call write_distributed_complex_sorf_h5("energy",&
           gidwedge,gidwedge,&
           n_wedge*n_x*n_kinetic,&
           n_wedge,n_x,n_kinetic,&
@@ -115,7 +115,7 @@ subroutine gyro_write_timedata_wedge_hdf5
      ! PARALLEL VELOCITY
      h5in%units="vpar units"
      h5in%mesh="/cartMesh"
-     call write_distributed_complex_3d_h5("v_par",&
+     call write_distributed_complex_sorf_h5("v_par",&
           gidwedge,gidwedge,&
           n_wedge*n_x*n_kinetic,&
           n_wedge,n_x,n_kinetic,&

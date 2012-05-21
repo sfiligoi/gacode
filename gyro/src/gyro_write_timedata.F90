@@ -166,7 +166,7 @@ subroutine gyro_write_timedata
     if(io_method >1) then
        h5in%units="dimensionless"
        h5in%mesh="/cartMesh"
-       call write_distributed_complex_3d_h5("phi",&
+       call write_distributed_complex_sorf_h5("phi",&
             dumpGid,gid3D,&
             n_theta_plot*n_x*n_field,&
             n_theta_plot,n_x,n_field,&
@@ -193,7 +193,7 @@ subroutine gyro_write_timedata
     if(io_method >1) then
        h5in%units="dimensionless"
        h5in%mesh="/cartMesh"
-       call write_distributed_complex_3d_h5("epar",&
+       call write_distributed_complex_sorf_h5("epar",&
             dumpGid,gid3D,&
             n_theta_plot*n_x*n_field,&
             n_theta_plot,n_x,n_field,&
@@ -221,7 +221,7 @@ subroutine gyro_write_timedata
     if(io_method >1) then
      h5in%units="dimensionless"
      h5in%mesh="/cartMesh"
-     call write_distributed_complex_3d_h5("density",&
+     call write_distributed_complex_sorf_h5("density",&
           dumpGid,gid3D,&
           n_theta_plot*n_x*n_kinetic,&
           n_theta_plot,n_x,n_kinetic,&
@@ -248,7 +248,7 @@ subroutine gyro_write_timedata
     if(io_method >1) then
     h5in%units="dimensionless"
     h5in%mesh="/cartMesh"
-    call write_distributed_complex_3d_h5("energy",&
+    call write_distributed_complex_sorf_h5("energy",&
           dumpGid,gid3D,&
           n_theta_plot*n_x*n_kinetic,&
           n_theta_plot,n_x,n_kinetic,&
@@ -276,7 +276,7 @@ subroutine gyro_write_timedata
     if(io_method >1) then
      h5in%units="dimensionless"
      h5in%mesh="/cartMesh"
-     call write_distributed_complex_3d_h5("v_par",&
+     call write_distributed_complex_sorf_h5("v_par",&
           dumpGid,gid3D,&
           n_theta_plot*n_x*n_kinetic,&
           n_theta_plot,n_x,n_kinetic,&
@@ -1581,9 +1581,11 @@ subroutine write_distributed_complex(datafile,io,n_fn,fn)
 end subroutine write_distributed_complex
 !===========================================================================
 #ifdef HAVE_HDF5
-subroutine write_distributed_complex_3d_h5(vname,rGid,r3Did,&
+subroutine write_distributed_complex_sorf_h5(vname,rGid,r3Did,&
      n_fn,n1,n2,n3,fn,plot3d,plotwedge,h5in,h5err)
-
+! _sorf_ stands for species and fields. 
+! this allows for the unrolling of the arrays 
+! and indicating the species OR  field quantities.
   use mpi
   use hdf5_api
   use gyro_globals, only : &
@@ -1801,7 +1803,6 @@ subroutine write_distributed_complex_3d_h5(vname,rGid,r3Did,&
      ! Dump each phi slice as a separate variable
      do ikin=1,n3
         tempVarNameGr=trim(vnameArray(ikin))//"_toroidal"
-        !call make_group(r3Did,trim(tempVarNameGr),grGid,"",h5err)
         call make_group(r3Did,trim(tempVarNameGr),grGid,h5in,h5err)
         call dump_h5(grGid,trim(vnameArray(ikin)),real_buff(:,:,ikin,:),h5in,h5err)
         call close_group(trim(tempVarNameGr),grGid,h5err)
@@ -1811,7 +1812,7 @@ subroutine write_distributed_complex_3d_h5(vname,rGid,r3Did,&
   deallocate(real_buff)
   deallocate(vnameArray)
 
-end subroutine write_distributed_complex_3d_h5
+end subroutine write_distributed_complex_sorf_h5
 #endif
 !===========================================================================
 
