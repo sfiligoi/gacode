@@ -112,6 +112,7 @@ module gyro_globals
   integer :: n_torangle_wedge = 1    ! Number of toroidal planes to use in wedge plots
   integer :: n_torangle_3d = 0
   real :: torangle_offset = 0.0
+  logical :: hdf5_skip=.false.
   !
   ! This defines a wedge in the poloidal plane 
   ! To recover the normal global plot, set 
