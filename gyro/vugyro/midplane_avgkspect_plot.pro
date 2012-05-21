@@ -11,6 +11,7 @@ PRO midplane_avgkspect_plot, pwr_idx, krmax, USE_N = use_n, $
 ; v1.1: Jul 19, 2007- updated to use vuGyro postscript plotting
 ;                     options, no_kr option
 ; v1.2: Aug 16, 2007- added use_n feature to allow n or r-dep k_theta plots
+; v1.3: May 16, 2012- reinstate color bar, abs(ky)
 
   common GLOBAL
   common PROFILE_SIM_DATA
@@ -30,11 +31,11 @@ PRO midplane_avgkspect_plot, pwr_idx, krmax, USE_N = use_n, $
       xrange = [MIN(r),MAX(r)]
 
       IF KEYWORD_SET(use_n) THEN BEGIN
-          yaxis = (FLTARR(n_r) + 1) # n_tor
-          ytitle = '!3n'
+          yaxis = (FLTARR(n_r) + 1) # ABS(n_tor)
+          ytitle = '!3|n|'
           title = title + '(r,n)|!U2!N!12>!X'
       ENDIF ELSE BEGIN
-          yaxis = ((q_m/r_m)*rho_s*(sqrt(tem_s(n_spec-1,*))/b_unit_s))#n_tor
+          yaxis = ABS(((q_m/r_m)*rho_s*(sqrt(tem_s(n_spec-1,*))/b_unit_s))#n_tor)
           ytitle = kt_rho_string
           title = title + '(r,k!D!4h!X!N)|!U2!N!12>!X'
       ENDELSE
@@ -48,11 +49,11 @@ PRO midplane_avgkspect_plot, pwr_idx, krmax, USE_N = use_n, $
       xtitle = '!3' + kr_rho_string
       xrange = [-krmax, krmax]
       IF KEYWORD_SET(use_n) THEN BEGIN
-          yaxis = n_tor
-          ytitle = '!3n'
+          yaxis = ABS(n_tor)
+          ytitle = '!3|n|'
           title = title + '(k!Dr!N,n)|!U2!N!12>!X'
       ENDIF ELSE BEGIN
-          yaxis = kt_rho
+          yaxis = ABS(kt_rho)
           ytitle = '!3' + kt_rho_string
           title = title + '(k!Dr!N,k!D!4h!X!N)|!U2!N!12>!X'
       ENDELSE
@@ -93,9 +94,9 @@ PRO midplane_avgkspect_plot, pwr_idx, krmax, USE_N = use_n, $
   ;colorbar
   LOADCT, CTab, /SILENT
 ; 11/20/07- out until IDL bug fixed
-;  COLORBAR, NCOLORS = !D.TABLE_SIZE, MINRANGE = plotmin, $
-;	MAXRANGE = plotmax, /VERTICAL, /RIGHT, POSITION = colorbar_position, $
-;       FORMAT = '(G10.2)'
+  COLORBAR, NCOLORS = !D.TABLE_SIZE, MINRANGE = plotmin, $
+	MAXRANGE = plotmax, /VERTICAL, /RIGHT, POSITION = colorbar_position, $
+       FORMAT = '(G10.2)'
 
   plot_finish
   set_line_colors
