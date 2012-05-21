@@ -57,6 +57,9 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
       IF (use_hdf5 EQ 1) THEN BEGIN
 	tdata = H5_PARSE(dirpath + '/out.gyro.timedata.h5',/READ_DATA)
 	time = tdata.t_current._data
+;!TMP FIX
+PRINT, 'HDF5: time = time[1:*]'
+time = time[1:*]
       ENDIF ELSE time = READ_GYRO_TIMEVECTOR(dirpath)
       n_time = N_ELEMENTS(time)
 
@@ -159,8 +162,10 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
       ENDIF
 
       ;load HDF5 fluctuations
-      tskip = 200 ;SHOULD GET FROM H5 files in future work
       IF (use_hdf5 EQ 1) THEN BEGIN
+;      tskip = 200 ;SHOULD GET FROM H5 files in future work
+          tskip = profile_data.time_skip
+          PRINT, 'HDF5 time_skip: ', tskip
 
           IF (exists_u) THEN BEGIN
               exists_phi = 1

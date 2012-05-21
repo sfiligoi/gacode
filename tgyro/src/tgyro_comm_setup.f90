@@ -122,6 +122,12 @@ subroutine tgyro_comm_setup
 
      n_worker = 1
 
+     n_evolve = &
+          loc_ti_feedback_flag+&
+          loc_te_feedback_flag+&
+          loc_ne_feedback_flag+&
+          loc_er_feedback_flag
+
   end select
 
   ! Sort processors into communicators (color), workers

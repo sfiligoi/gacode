@@ -76,6 +76,9 @@ FUNCTION read_gyro_profile_data_HDF5, simdir, profile_data
   nusize = SIZE(nu_geo)
   theta_mult = nusize[1]/n_theta_plot
 
+  time_skip = data.time_skip._data
+  time_step = data.time_step._data
+
   ;return useful data in structure, easy to add to as needed
   profile_data = {n_r:n_r, $    ;# of radial grid points
                   n_theta_plot:n_theta_plot, $ ;# of _saved_ theta points
@@ -126,7 +129,10 @@ FUNCTION read_gyro_profile_data_HDF5, simdir, profile_data
                   S_gB: S_gB, $ ;W/cm**3
                   
                   n_bnd: n_bnd, $ ;# pts in boundary layer
-                  nonlinear_flag: FIX(data.nonlinear_flag._data) $
+                  nonlinear_flag: FIX(data.nonlinear_flag._data), $
+
+		  time_skip: time_skip, $   ;ASCII output at time_skip*time_step
+		  time_step: time_step  $   ;RK integration step h
                  }
 
   PRINT, 'Read ' + filepath

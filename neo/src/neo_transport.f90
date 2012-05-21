@@ -56,7 +56,6 @@ contains
     use neo_globals
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
-    integer :: is, ie 
 
     if(flag == 1) then
        if(initialized) return
@@ -521,7 +520,7 @@ contains
     use neo_equilibrium, only: bigR_th0, Btor_th0, I_div_psip
     implicit none
     integer, intent (in) :: ir
-    integer :: is, it, jt
+    integer :: is, jt
 
     if(silent_flag > 0 .or. i_proc > 0) return
 

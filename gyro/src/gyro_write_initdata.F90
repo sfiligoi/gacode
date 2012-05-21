@@ -7,8 +7,6 @@
 !  file2: units
 !  file3: geometry data
 !
-! NOTES:
-!  This will be superceded by gyro_write_initdata_hdf5.f90 
 !-----------------------------------------------------------
 
 subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io,h5datafile)
