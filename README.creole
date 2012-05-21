@@ -29,13 +29,13 @@ You can make the entire gacode project by typing
 $ make
 }}}
 
-You can make the OpemMP-aware version of gacode by typing
+You can make the OpemMP-aware version of gacode by typing:
 
 {{{
 $ make OMP=true
 }}}
 
-You can build a debug version of all libraries by typing
+You can build a debug version of all libraries by typing:
 
 {{{
 $ make OPT=debug

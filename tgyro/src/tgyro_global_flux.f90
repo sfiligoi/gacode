@@ -41,6 +41,7 @@ subroutine tgyro_global_flux
   gyro_restart_method = 1
   call gyro_run(gyrotest_flag, gyro_restart_method, &
        transport_method, gyro_exit_status(1), gyro_exit_message(1))
+  flux_counter = flux_counter+1
 
   !------------------------------------------------------------------
   ! Note that GYRO global fluxes are returned with normalizations  
