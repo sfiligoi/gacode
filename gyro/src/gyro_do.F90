@@ -351,6 +351,7 @@ subroutine gyro_do
   if (restart_method /= 1) then
      ! Write to output files.
      io_control = output_flag*2
+     hdf5_skip=.true.
      if (gkeigen_j_set == 0) then
         if (io_method < 3.and. io_method > 0) call gyro_write_timedata
         if (io_method > 1 ) then
@@ -358,6 +359,7 @@ subroutine gyro_do
            if (time_skip_wedge > 0) call gyro_write_timedata_wedge_hdf5
         endif
      endif
+     hdf5_skip=.false.
   endif
   !--------------------------------------------
 
