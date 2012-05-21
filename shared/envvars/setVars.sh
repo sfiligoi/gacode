@@ -1,5 +1,5 @@
 #! /bin/bash
-export GACODE_ROOT=$HOME/work/gacode
-export GACODE_PLATFORM=GFORTRAN_OSX_TECHX
+export GACODE_ROOT=/ccs/home/vadlaman/gacode
+export GACODE_PLATFORM=JAGUAR
 export OPT=debug
 source $GACODE_ROOT/shared/bin/gacode_setup
