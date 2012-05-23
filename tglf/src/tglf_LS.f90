@@ -58,7 +58,7 @@
       USE tglf_eigen
 !
       IMPLICIT NONE
-      REAL,PARAMETER :: epsilon = 1.D-12
+      REAL,PARAMETER :: epsilon1 = 1.D-12
       INTEGER :: j1, j2, j, i, k, jmax(maxmodes), imax, iroot
       INTEGER :: is,js
       INTEGER :: cpucount1,cpucount2,cpurate
@@ -74,7 +74,7 @@
       REAL :: exchange_QL(nsm,3)
       REAL :: phi_QL,N_QL(nsm),T_QL(nsm)
       REAL :: Ne_Te_phase
-      REAL :: wd_bar,b0_bar,v2_bar,kyi
+      REAL :: wd_bar,b0_bar,kx_bar,kpar_bar,v2_bar,kyi
       REAL :: get_intensity, get_gamma_net
 !      COMPLEX ::  v(iar)
 !      COMPLEX :: xi
@@ -200,12 +200,14 @@
       enddo
 !
       if(ibranch_in.ge.0)then
+!       write(*,*)"nmodes_in=",nmodes_in
+      nmodes_out = nmodes_in
 !
 ! sort the unstable modes into electron and ion frequencies
       mi = 0
       me = 0
       do j1=1,iur
-        if(rr(j1).gt.epsilon)then
+        if(rr(j1).gt.epsilon1)then
          if(ri(j1).gt.0.0)then
 ! note that ri = -freq, rr = gamma
            mi = mi+1
@@ -217,7 +219,7 @@
 !          write(*,*)"debug sort",j1,rr(j1),ri(j1),me,mi
         endif
       enddo
-      nmodes_out = mi+me
+!      nmodes_out = mi+me
 ! find the most unstable mode for each branch
       if(me.gt.0)then
         zgamax = 0.0
@@ -248,9 +250,9 @@
       if(ibranch_in.eq.-1)then
 !
 !  find the top nmodes most unstable modes
-        CALL sort_eigenvalues(nmodes_in,jmax)
+       CALL sort_eigenvalues(nmodes_in,jmax)
         nmodes_out = 0
-        do j1=1,nmodes_in 
+         do j1=1,nmodes_in 
           if(jmax(j1).ne.0)then
             nmodes_out = nmodes_out + 1
             gamma_out(j1)=rr(jmax(j1))
@@ -265,6 +267,11 @@
         do j1=1,nmodes_in
           gamma_out(j1) = get_gamma_net(gamma_out(j1))
         enddo
+      elseif(vexb_shear_in.ne.0.0)then
+! use spectral shift model
+        do j1=1,nmodes_in
+          gamma_out(j1) = gamma_reference_kx0(j1)
+        enddo 
       endif
 !      
 !  get the fluxes for the most unstable modes
@@ -283,10 +290,12 @@
 !  alpha/beta=-xi*(frequency+xi*growthrate)
           eigenvalue = xi*alpha(jmax(imax))/beta(jmax(imax))  
           call get_QL_weights(particle_QL,energy_QL,stress_par_QL,stress_tor_QL, &
-               exchange_QL,phi_QL,N_QL,T_QL,wd_bar,b0_bar,NE_Te_phase,field_weight)
+               exchange_QL,phi_QL,N_QL,T_QL,wd_bar,b0_bar,kx_bar,kpar_bar,NE_Te_phase,field_weight)
           wd_bar_out(imax)=wd_bar
           b0_bar_out(imax)=b0_bar
           phi_QL_out(imax)=phi_QL
+          kx_bar_out(imax)=kx_bar
+          kpar_bar_out(imax)=kpar_bar
           do i=1,nbasis
             do j=1,3
              field_weight_out(imax,j,i)=field_weight(j,i)
@@ -307,7 +316,7 @@
           ne_te_phase_out(imax) = Ne_Te_phase
           kyi=ky
           v2_bar =  &
-            get_intensity(kyi,gamma_out(imax),imax)
+            get_intensity(kyi,gamma_out(imax))
           v_bar_out(imax) = v2_bar
 !
           phi_bar_out(imax) = v2_bar*phi_QL_out(imax)
@@ -326,7 +335,7 @@
 !
 !--------------------------------------------------------------
 !
-      REAL FUNCTION get_intensity(kp,gp,imode)
+      REAL FUNCTION get_intensity(kp,gp)
 !
       USE tglf_species
       USE tglf_global
@@ -334,8 +343,8 @@
       IMPLICIT NONE
 !
       REAL,INTENT(IN) :: kp,gp
-      INTEGER :: imax,imode
-      REAL :: cnorm,exponent
+      INTEGER :: imax
+      REAL :: cnorm,exponent1
       REAL :: wd0,gnet
       REAL :: c1,pols,ks
       REAL :: get_GAM_freq
@@ -347,11 +356,11 @@
         if(nmodes_in.ne.4)then
 ! this fit is for nmodes_in=2
           cnorm = 30.40*pols
-          exponent = 1.657
+          exponent1 = 1.657
         else
 ! this fit is for nmodes_in=4
           cnorm = 24.58*pols
-          exponent = 1.761
+          exponent1 = 1.761
         endif
         if(ks.gt.1.0)cnorm=cnorm/(ks)**etg_factor_in
         c1 = 0.0
@@ -359,19 +368,19 @@
         if(nmodes_in.ne.4)then
 ! this fit is for nmodes_in=2
           cnorm = 32.48*pols
-          exponent = 1.547
+          exponent1 = 1.547
           c1 = 0.534
         else
 ! this fit is for nmodes_in=4
           cnorm = 30.03*pols
-          exponent = 1.66
+          exponent1 = 1.66
           c1 = 0.234
         endif
         if(ks.gt.1.0)cnorm=cnorm/(ks)**etg_factor_in
        endif
        wd0 =ks*SQRT(taus(1)/mass(2))/R_unit  ! renomalized for scale invariance
        gnet = gp/wd0
-       get_intensity = cnorm*(wd0**2)*(gnet**exponent &
+       get_intensity = cnorm*(wd0**2)*(gnet**exponent1 &
         + c1*gnet)/(kp**4)
       elseif(sat_rule_in.eq.1)then
 !
@@ -379,14 +388,18 @@
 !
 !       wd0 = get_GAM_freq()
        wd0 =  1.219*get_GAM_freq()
-!       exponent = 1.22
-       exponent = 1.208
+!       exponent1 = 1.22
+       exponent1 = 1.208
        gnet = gp
-!       get_intensity = 9.09*pols*(gnet**exponent)*(gnet**2+0.3935*wd0**2)**(1.0-exponent/2.0)
-       get_intensity = 8.347*pols*(gnet**exponent)*(gnet**2+wd0**2)**(1.0-exponent/2.0)
-!       exponent = 1.53
-!       get_intensity = 15.29*pols*(gnet**exponent)*get_GAM_freq()**(2.0-exponent)
+!       get_intensity = 9.09*pols*(gnet**exponent1)*(gnet**2+0.3935*wd0**2)**(1.0-exponent/2.0)
+       get_intensity = 8.347*pols*(gnet**exponent1)*(gnet**2+wd0**2)**(1.0-exponent1/2.0)
+!       exponent1 = 1.53
+!       get_intensity = 15.29*pols*(gnet**exponent1)*get_GAM_freq()**(2.0-exponent1)
        get_intensity = get_intensity/(kp**4)
+      endif
+      if(alpha_quench_in.eq.0.0.and.kx0_e.ne.0.0)then
+        get_intensity = get_intensity/(1.0+0.56*kx0_e**2)**1.5
+        get_intensity = get_intensity/(1.0+(1.22*kx0_e)**4)**2
       endif
       get_intensity = get_intensity/B_unit**2
 !
@@ -500,10 +513,10 @@
       do is=1,ns
         rlns(is) = rlns_in(is)
         rlts(is) = rlts_in(is)
-        vpar_shear_s(is) = alpha_p_in*vpar_shear_in(is)
+        vpar_shear_s(is) = alpha_p_in*vpar_shear_in(is)*sign_Bt_in*sign_It_in
         taus(is) = taus_in(is)
         as(is) = as_in(is)
-        vpar_s(is) = vpar_in(is)
+        vpar_s(is) = vpar_in(is)*sign_Bt_in*sign_It_in
         if(vpar_model_in.ne.0)vpar_s(is)=0.0
         if(nbasis_min_in.eq.1.and.(vpar_shear_s(is).ne.0.0.or.vpar_s(is).ne.0.0))then
           nbasis_min_in = 2      
@@ -519,10 +532,10 @@
 !        write(*,*)zs(is),mass(is)
       enddo
 !
-      vexb_shear_s = vexb_shear_in
-      if(vpar_shear_model_in.eq.1)then
-        vexb_shear_s = sign_Bt_in*vexb_shear_in
-      endif
+      vexb_shear_s = vexb_shear_in*sign_It_in
+!      if(vpar_shear_model_in.eq.1)then  
+!        vexb_shear_s = sign_Bt_in*vexb_shear_in
+!      endif
 !
       ns0 = 1
       if(adiabatic_elec_in) then
@@ -834,9 +847,10 @@
        b33 = (b1 - b3)/(3.0)
        d33 = (d1 - d3)/(3.0)
 !
-       if(vpar_shear_model_in.eq.1)then  ! convert from gyro convetions
+       if(vpar_shear_model_in.eq.1)then  
+! include R(theta)/R0 factor like gyro convetions. Note that sign_Bt_in is in ave_c_tor_par
          do is=1,ns
-           vpar_shear_s(is)=alpha_p_in*vpar_shear_in(is)*ave_c_tor_par(1,1)/R_input
+           vpar_shear_s(is)=sign_It_in*alpha_p_in*vpar_shear_in(is)*ave_c_tor_par(1,1)/R_input
          enddo
        endif
 !
@@ -927,10 +941,10 @@
          xnu_u_b = xnu_factor_in*xnu_bndry*xnu_q1_q1_1 
          xnu_q3_b = xnu_u_b
          xnu_q1_b = xnu_u_b
-          if(park_in.eq.0.D0)then
-           xnu_u_b = 0.D0
-           xnu_q1_b=0.D0
-           xnu_q3_b =0.D0
+          if(park_in.eq.0.0)then
+           xnu_u_b = 0.0
+           xnu_q1_b=0.0
+           xnu_q3_b =0.0
         endif
       endif
 ! debug
@@ -1095,7 +1109,7 @@
         egamma = 0.0
         ngamma = 0.0
         tgamma = 0.0
-        if(alpha_quench_in.eq.0.0)egamma = -alpha_e_in*0.11*vexb_shear_s*sign_kx0
+!EPS2011        if(alpha_quench_in.eq.0.0)egamma = -alpha_e_in*0.11*vexb_shear_s*sign_kx0
 !
 !            write(*,*)alpha_kx_e_in,alpha_e_in
 !
@@ -1103,10 +1117,10 @@
 !
       do is = ns0,ns
 !
-        if(alpha_quench_in.eq.0.0)then
-          ngamma = -0.11*alpha_n_in*vns_shear_in(is)*sign_kx0
-          tgamma = -0.11*alpha_t_in*vts_shear_in(is)*sign_kx0
-        endif
+!EPS2011        if(alpha_quench_in.eq.0.0)then
+!EPS2011          ngamma = -0.11*alpha_n_in*vns_shear_in(is)*sign_kx0
+!EPS2011          tgamma = -0.11*alpha_t_in*vts_shear_in(is)*sign_kx0
+!EPS2011        endif
       do js = ns0,ns
 !
 ! start of loop over basis ib,jb for amat
@@ -1485,8 +1499,8 @@
 !         write(*,*)"c35*modwdgu3-modwd",c35*modwdgu3-ave_modwd(ib,jb)
 !         write(*,*)"c35*modwdgu33-modwd",c35*modwdgu33-ave_modwd(ib,jb)
 !         write(*,*)"ave_modwd(1,1)=",ave_modwd(1,1)
-!         write(*,*)"c35*gu3-1",c35*ave_gu3(is,ib,jb)-1.D0
-!         write(*,*)"c35*gu33-1",c35*ave_gu33(is,ib,jb)-1.D0
+!         write(*,*)"c35*gu3-1",c35*ave_gu3(is,ib,jb)-1.0
+!         write(*,*)"c35*gu33-1",c35*ave_gu33(is,ib,jb)-1.0
 !         write(*,*)"gu1r = ",gu1r
 !         write(*,*)"gu2r = ",gu2r
 !         write(*,*)"gu3r = ",gu3r
@@ -1661,7 +1675,7 @@
            E_i = zs(is)/taus(is)
            N_j = zs(js)*as(js)
 !
-!        xnu_therm=0.D0
+!        xnu_therm=0.0
 !        write(*,*)is,js,ib,jb,xnuei,d_ab
 !        write(*,*)is,js,ib,jb,gradB,mod_kpar
 !        write(*,*)is,js,ib,jb,w_s,w_cd,w_d,modw_d
@@ -1941,7 +1955,7 @@
       bmat(ia,ja) = d_ab -0.5*sig_B
 !
       ja = 3*nbasis+jb + ja0
-      amat(ia,ja) = 1.5*sig_A -2.D0*taus(is)* &
+      amat(ia,ja) = 1.5*sig_A -2.0*taus(is)* &
            (modw_d1*hv2r/ABS(zs(is)) +w_d1*xi*hv2i/zs(is)) &
        -d_ee*nuei_p1_p3_1  &
        -xnuei*d_ab*xnu_p1_1
@@ -1952,7 +1966,7 @@
       bmat(ia,ja) = 0.0
 !
       ja = 5*nbasis+jb + ja0
-      amat(ia,ja) = -bm*3.D0*gradB*vs(is)
+      amat(ia,ja) = -bm*3.0*gradB*vs(is)
       bmat(ia,ja) = 0.0
 !
       if(nroot.gt.6)then
@@ -2154,7 +2168,7 @@
 !
       ja = 2*nbasis+jb + ja0
       amat(ia,ja) = -k_par1*(kpar_hu1 -grad_hu1 - gradhr11p1)*vs(is) &
-       - k_par1*kpar_hb1*vs(is) + (am+bm*1.5D0)*gradBhu1*vs(is)      &
+       - k_par1*kpar_hb1*vs(is) + (am+bm*1.5)*gradBhu1*vs(is)      &
        -d_11*k_par*vs(is)*c06
       bmat(ia,ja) = 0.0
 !
@@ -2266,12 +2280,12 @@
 !
       ja = 2*nbasis+jb + ja0
       amat(ia,ja) = - k_par1*(kpar_hu3 -grad_hu3 - gradhr13p1)*vs(is) & 
-       - k_par1*kpar_hb33*vs(is) + (am+bm*0.5D0)*gradBhu3*vs(is)      &
+       - k_par1*kpar_hb33*vs(is) + (am+bm*0.5)*gradBhu3*vs(is)      &
        -d_11*k_par*vs(is)*c07
       bmat(ia,ja) = 0.0
 !
       ja = 3*nbasis+jb + ja0
-      amat(ia,ja) = -k_par1*kpar_hb3*vs(is) - bm*1.5D0*gradBhu33*vs(is) &
+      amat(ia,ja) = -k_par1*kpar_hb3*vs(is) - bm*1.5*gradBhu33*vs(is) &
        +d_11*k_par*vs(is)*c07 
       bmat(ia,ja) = 0.0
 !
@@ -2853,11 +2867,11 @@
 !
       ja = 8*nbasis+jb + ja0
       amat(ia,ja) =  -k_par1*(kpar_gu1 -grad_gu1 - gradgr11p1)*vs(is) &
-        - k_par1*kpar_gb1*vs(is) + (am+bm*1.5D0)*gradBgu1*vs(is)
+        - k_par1*kpar_gb1*vs(is) + (am+bm*1.5)*gradBgu1*vs(is)
       bmat(ia,ja) = 0.0
 !
       ja = 9*nbasis+jb + ja0
-      amat(ia,ja) = -bm*4.5D0*gradBgu3*vs(is) 
+      amat(ia,ja) = -bm*4.5*gradBgu3*vs(is) 
       bmat(ia,ja) = 0.0
 !
       ja = 10*nbasis+jb + ja0
@@ -3398,7 +3412,7 @@
       IMPLICIT NONE
       INTEGER :: i, j, k, ngrow,imid, iend, it, nsorted
       INTEGER :: grow_index(iar),sorted_index(maxmodes)
-      REAL,PARAMETER ::  epsilon=1.0D-12
+      REAL,PARAMETER ::  epsilon1=1.0D-12
       REAL :: growthrate(iar),frequency(iar)
 !
 !  find all of the unstable modes and the most unstable
@@ -3406,10 +3420,10 @@
       ngrow = 0
 !      write(*,*)iur,"eigenvalues"
       do i=1,iur
-        growthrate(i)=0.D0
-        frequency(i)=0.D0
+        growthrate(i)=0.0
+        frequency(i)=0.0
         grow_index(i)=0
-        if(rr(i).gt.epsilon)then
+        if(rr(i).gt.epsilon1)then
           ngrow = ngrow + 1
           grow_index(ngrow) = i
 !          write(*,*)
@@ -3477,7 +3491,8 @@
 !
       SUBROUTINE get_QL_weights(particle_weight,energy_weight, &
         stress_par_weight,stress_tor_weight,exchange_weight, &
-        phi_weight,N_weight,T_weight,wd_bar,b0_bar,Ne_Te_phase,field_weight)
+        phi_weight,N_weight,T_weight,wd_bar,b0_bar,kx_bar,kpar_bar, &
+        Ne_Te_phase,field_weight)
 ! **************************************************************
 !
 ! compute the quasilinear weights for a single eigenmode
@@ -3516,6 +3531,8 @@
       COMPLEX :: field_weight(3,nb)
       COMPLEX :: phi_wd_phi,wd_phi
       COMPLEX :: phi_b0_phi,b0_phi
+      COMPLEX :: phi_kx_phi,kx_phi
+      COMPLEX :: phi_kpar_phi,kpar_phi
       COMPLEX :: dum,freq_QL
       REAL :: betae_psi,betae_sig
       REAL :: phi_norm,vnorm
@@ -3525,13 +3542,14 @@
       REAL :: stress_tor_weight(nsm,3)
       REAL :: exchange_weight(nsm,3)
       REAL :: N_weight(nsm),T_weight(nsm)
-      REAL :: wd_bar,b0_bar,phi_weight,epsilon
+      REAL :: wd_bar,b0_bar,kx_bar,kpar_bar
+      REAL :: phi_weight,epsilon1
       REAL :: Ne_Te_phase,Ne_Te_cos,Ne_Te_sin
       REAL :: ft2,cu,cq1,cq3
       REAL :: stress_correction,wp
 !
-!      xi=(0.D0,1.D0)
-      epsilon = 1.D-12
+!      xi=(0.0,1.0)
+      epsilon1 = 1.D-12
       freq_QL = eigenvalue
       ft2=ft*ft
       cu = 1.0
@@ -3647,43 +3665,49 @@
       do i=1,nbasis
         phi_norm = phi_norm + REAL(phi(i)*CONJG(phi(i)))
       enddo
-      if(phi_norm.lt.epsilon)phi_norm = epsilon
+      if(phi_norm.lt.epsilon1)phi_norm = epsilon1
 !      write(*,*)"phi_norm =",phi_norm
 !
 ! compute <phi|wd|phi> and <phi|b0|phi>
       phi_wd_phi = 0.0
       phi_b0_phi = 0.0
+      phi_kx_phi = 0.0
+      phi_kpar_phi = 0.0
       do i=1,nbasis
          wd_phi = 0.0
          b0_phi = 0.0
+         kx_phi = 0.0
+         kpar_phi = 0.0
          do j=1,nbasis
            wd_phi = wd_phi +ave_wd(i,j)*phi(j)
            b0_phi = b0_phi +ave_b0(i,j)*phi(j)
+           kx_phi = kx_phi +ave_kx(i,j)*phi(j)
+           kpar_phi = kpar_phi +xi*ave_kpar(i,j)*phi(j)
          enddo
          phi_wd_phi = phi_wd_phi + CONJG(phi(i))*wd_phi
          phi_b0_phi = phi_b0_phi + CONJG(phi(i))*b0_phi
+         phi_kx_phi = phi_kx_phi + CONJG(phi(i))*kx_phi
+         phi_kpar_phi = phi_kpar_phi + CONJG(phi(i))*kpar_phi
       enddo
       wd_bar = REAL(phi_wd_phi)/phi_norm
       b0_bar = REAL(phi_b0_phi)/phi_norm
+      kx_bar = REAL(phi_kx_phi)/phi_norm
+      kpar_bar = REAL(phi_kpar_phi)/phi_norm
 !      write(*,*)"wd_bar = ",wd_bar
 !      write(*,*)"b0_bar = ",b0_bar
+!      write(*,*)"kx_bar = ",kx_bar
+!      write(*,*)"kpar_bar = ",kpar_bar
 !
 ! fill the stress moments
 !
-!      wp = ky*ave_hp1(2,1,1)*ABS(vpar_shear_in(2))/vs(2)
-!      stress_correction = (AIMAG(freq_QL)+2.0*wp)/(AIMAG(freq_QL)+wp)
-      wp = ABS(vpar_shear_in(2)*R_unit/vs(2))
-      stress_correction = 1.0 + ((0.11*wp)**1.5)/(1.0+(0.075*wp)**7)
-!      stress_correction = 1.0
+      stress_correction = 1.0
 !
       do is=ns0,ns
-        do i=1,nbasis
-!          if(i+1.eq.2*((i+1)/2))then
-            stress_par(is,i,1) = u_par(is,i)*stress_correction
+        wp = ky*ave_hp1(is,1,1)*ABS(vpar_shear_in(is))/vs(is)
+        stress_correction = (AIMAG(freq_QL)+2.0*wp)/(AIMAG(freq_QL)+wp)
 !            write(*,*)"stress_corr=",i,stress_correction
-!          else
-!            stress_par(is,i,1) = u_par(is,i)
-!          endif
+        do i=1,nbasis
+          stress_par(is,i,1) = u_par(is,i)*stress_correction
           stress_par(is,i,2) = p_par(is,i)
           stress_per(is,i,1) = 0.0
           stress_per(is,i,2) = 0.0
@@ -3711,16 +3735,18 @@
           + REAL(xi*CONJG(phi(i))*n(is,i))
           energy_weight(is,1) = energy_weight(is,1) &
           + REAL(xi*CONJG(phi(i))*p_tot(is,i))
-!          do j=1,nbasis
+          do j=1,nbasis
 !              stress_par_weight(is,1) = stress_par_weight(is,1)  &
 !            + REAL(xi*CONJG(phi(i))*ave_c_par_par(i,j)*stress_par(is,j,1))           
-!              stress_tor_weight(is,1) = stress_tor_weight(is,1)  &
-!            + REAL(xi*CONJG(phi(i))*(ave_c_tor_par(i,j)*stress_par(is,j,1)+ave_c_tor_per(i,j)*stress_per(is,j,1)))
-!          enddo
+              stress_tor_weight(is,1) = stress_tor_weight(is,1)  &
+            + REAL(xi*CONJG(phi(i))*(ave_c_tor_par(i,j)*stress_par(is,j,1)+ave_c_tor_per(i,j)*stress_per(is,j,1)))
+          enddo
           stress_par_weight(is,1) = stress_par_weight(is,1)  &
-            + REAL(xi*CONJG(phi(i))*stress_par(is,i,1)*ave_c_par_par(1,1))           
-          stress_tor_weight(is,1) = stress_tor_weight(is,1)  &
-            + REAL(xi*CONJG(phi(i))*(ave_c_tor_par(1,1)*stress_par(is,i,1)+ave_c_tor_per(1,1)*stress_per(is,i,1)))
+           + REAL(xi*CONJG(phi(i))*u_par(is,i))
+!          stress_par_weight(is,1) = stress_par_weight(is,1)  &
+!            + REAL(xi*CONJG(phi(i))*stress_par(is,i,1)*ave_c_par_par(1,1))           
+!          stress_tor_weight(is,1) = stress_tor_weight(is,1)  &
+!            + REAL(xi*CONJG(phi(i))*(ave_c_tor_par(1,1)*stress_par(is,i,1)+ave_c_tor_per(1,1)*stress_per(is,i,1)))
           exchange_weight(is,1) = exchange_weight(is,1) &
           + zs(is)*REAL(xi*freq_QL*CONJG(phi(i))*n(is,i))
           if(use_bper_in)then
@@ -3747,9 +3773,9 @@
 !
         do j=1,3
           particle_weight(is,j) = as(is)*ky*particle_weight(is,j)/phi_norm
-          energy_weight(is,j) = as(is)*taus(is)*1.5D0*ky*energy_weight(is,j)/phi_norm
+          energy_weight(is,j) = as(is)*taus(is)*1.5*ky*energy_weight(is,j)/phi_norm
           stress_par_weight(is,j) = mass(is)*as(is)*vs(is)*ky*stress_par_weight(is,j)/phi_norm
-          stress_tor_weight(is,j) = mass(is)*as(is)*vs(is)*ky*stress_tor_weight(is,j)/phi_norm
+          stress_tor_weight(is,j) = sign_It_in*mass(is)*as(is)*vs(is)*ky*stress_tor_weight(is,j)/phi_norm
           exchange_weight(is,j) = as(is)*exchange_weight(is,j)/phi_norm
         enddo
       enddo
@@ -3817,7 +3843,7 @@
       REAL :: p1,p2,p3,pp,z,z1
 !
 !      write(*,*)"gauher",nx
-      h0 = 1.D0/pi**0.25
+      h0 = 1.0/pi**0.25
 !
 ! set up the hermite basis x-grid
 !
@@ -3839,22 +3865,22 @@
         endif
         do its = 1,maxit
           p1 = h0
-          p2 = 0.D0
+          p2 = 0.0
           do j=1,n
             p3 = p2
             p2 = p1
-            p1 = z*SQRT(2.D0/REAL(j))*p2 - SQRT(REAL(j-1)/REAL(j))*p3
+            p1 = z*SQRT(2.0/REAL(j))*p2 - SQRT(REAL(j-1)/REAL(j))*p3
           enddo
-          pp = SQRT(2.D0*REAL(n))*p2
+          pp = SQRT(2.0*REAL(n))*p2
           z1 = z
           z = z1 - p1/pp
           if(ABS(z-z1).le.eps)exit
          enddo
 !         write(*,*)i,"its = ",its
          y(i) = z
-         wy(i) = 2.D0/(pp*pp)
+         wy(i) = 2.0/(pp*pp)
       enddo
-         wy(1) = wy(1)/2.D0
+         wy(1) = wy(1)/2.0
 !
 !      write(*,*)"*** check x,wx ***"
 !      do i=1,nx
@@ -3863,11 +3889,11 @@
       do i=1,m
         x(m+i-1) = y(i)
         x(i) = - y(m+1-i)
-        wx(m+i-1) = wy(i)/2.D0
-        wx(i) = wy(m+1-i)/2.D0
+        wx(m+i-1) = wy(i)/2.0
+        wx(i) = wy(m+1-i)/2.0
       enddo
-      x(m)=0.D0
-      wx(m) = 2.D0*wx(m)
+      x(m)=0.0
+      wx(m) = 2.0*wx(m)
 !      write(*,*)"  check weights "
 !      do i=1,nx
 !       write(*,*)x(i),wx(i)
@@ -3884,20 +3910,20 @@
 !     and weights w.
 !
 !     The hermite basis functions of the wave function are
-!       H(1,i) = 1.D0
-!       H(2,i) = 2.D0*x(i)
+!       H(1,i) = 1.0
+!       H(2,i) = 2.0*x(i)
 !       for j>= 3
-!       H(j,i) = 2.D0*x(i)*H(j-1,i)-2.D0*(j-2)*H(j-2,i)
+!       H(j,i) = 2.0*x(i)*H(j-1,i)-2.0*(j-2)*H(j-2,i)
 !
-!       H(3,i) = 4.D0*x(i)**2 -2.D0
-!       H(4,i) = 8.D0*x(i)**3 -12.D0*x(i)
-!       H(5,i) = 16.D0*x(i)**4 -48.D0*x(i)**2 + 12.D0
-!       H(6,i) = 32.D0*x(i)**5 -160.D0*x(i)**3 + 120.D0*x(i)
-!       H(7,i) = 64.D0*x(i)**6 -480.D0*x(i)**4 +720.D0*x(i)**2 -120.D0
-!       H(8,i) = 128.D0*x(i)**7 -1344.D0*x(i)**5 +3360.D0*x(i)**3 -1680.D0*x(i)
-!       H(9,i) = 256.D0*x(i)**8 -3584.D0*x(i)**6 +13440.D0*x(i)**4 -13440.D0*x(i)**2 +1680.D0
-!       H(10,i)= 512.D0*x(i)**9 -9216.D0*x(i)**7 +48384.D0*x(i)**5 -80640.D0*x(i)**3 +30240.D0*x(i)
-!       H(11,i)= 1024.D0*x(i)**10 -23040.D0*x(i)**8 +161280.D0*x(i)**6 -403200.D0*x(i)**4 +302400.D0*x(i)**2 -30240.D0
+!       H(3,i) = 4.0*x(i)**2 -2.0
+!       H(4,i) = 8.0*x(i)**3 -12.0*x(i)
+!       H(5,i) = 16.0*x(i)**4 -48.0*x(i)**2 + 12.0
+!       H(6,i) = 32.0*x(i)**5 -160.0*x(i)**3 + 120.0*x(i)
+!       H(7,i) = 64.0*x(i)**6 -480.0*x(i)**4 +720.0*x(i)**2 -120.0
+!       H(8,i) = 128.0*x(i)**7 -1344.0*x(i)**5 +3360.0*x(i)**3 -1680.0*x(i)
+!       H(9,i) = 256.0*x(i)**8 -3584.0*x(i)**6 +13440.0*x(i)**4 -13440.0*x(i)**2 +1680.0
+!       H(10,i)= 512.0*x(i)**9 -9216.0*x(i)**7 +48384.0*x(i)**5 -80640.0*x(i)**3 +30240.0*x(i)
+!       H(11,i)= 1024.0*x(i)**10 -23040.0*x(i)**8 +161280.0*x(i)**6 -403200.0*x(i)**4 +302400.0*x(i)**2 -30240.0
 !     The normalized hermite polynomial are
 !       h(j+1,i) = H(j,i)/SQRT(sum(w*H(j)**2))
 !     These have been pre-evaluated for speed.
@@ -3920,7 +3946,7 @@
        h(2,i) = x(i)*sqrt_two*h0
        if(nbasis.gt.2)then
          do j=3,nbasis
-          h(j,i) = x(i)*SQRT(2.D0/REAL(j-1))*h(j-1,i) &
+          h(j,i) = x(i)*SQRT(2.0/REAL(j-1))*h(j-1,i) &
            - SQRT(REAL(j-2)/REAL(j-1))*h(j-2,i)
          enddo
        endif
@@ -3930,7 +3956,7 @@
 !       write(*,*)(h(i,k),i=1,nbasis)
 !      enddo
 !      do i=1,nbasis
-!        h2(i,i)=0.D0
+!        h2(i,i)=0.0
 !        do k=1,nx
 !         h2(i,i) = h2(i,i) + wx(k)*h(i,k)*h(i,k)
 !        enddo
@@ -3943,7 +3969,7 @@
 !       write(*,*)"***** Hermite ***"
 !      do i=1,nbasis
 !      do j=i,nbasis
-!       h2(i,j)=0.D0
+!       h2(i,j)=0.0
 !      do k=1,nx
 !         h2(i,j) = h2(i,j) + wx(k)*h(i,k)*h(j,k)
 !      enddo
@@ -4014,7 +4040,7 @@
        hp(2,i) = xp(i)*sqrt_two*hp0*EXP(-xp(i)*xp(i)/2.0)
        if(nbasis.gt.2)then
          do j=3,nbasis
-          hp(j,i) = xp(i)*SQRT(2.D0/REAL(j-1))*hp(j-1,i) &
+          hp(j,i) = xp(i)*SQRT(2.0/REAL(j-1))*hp(j-1,i) &
            - SQRT(REAL(j-2)/REAL(j-1))*hp(j-2,i)
          enddo
        endif
@@ -4148,9 +4174,9 @@
       REAL :: vm(21,20),vbm(21,20)
 !
       DATA fm / &
-       0.0D0, 0.05D0, 0.1D0, 0.15D0, 0.2D0, 0.25D0, 0.3D0, &
-       0.35D0, 0.4D0, 0.45D0, 0.5D0, 0.55D0, 0.6D0, 0.65D0, &
-       0.7D0, 0.75D0, 0.8D0, 0.85D0, 0.9D0, 0.95D0, 1.0D0 /
+       0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, &
+       0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, &
+       0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0 /
 !
 !    fm = 0.0  actually fit at ft=0.01
 !

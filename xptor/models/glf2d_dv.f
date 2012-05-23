@@ -1329,11 +1329,13 @@ c use GYRO conventions
         vpar_tg(1) = sign_Bt_exp*cv*a_tor(jm)*vexbm/(a_unit_exp*csdam)
         vpar_tg(2) = vpar_tg(1)
         vpar_tg(3) = vpar_tg(1)
+        vexb_tg=0.0
       endif
       if(alpha_p_tg.eq.0.0)then
         vpar_tg(1)=0.0
         vpar_tg(2)=0.0
         vpar_tg(3)=0.0
+        vexb_tg=0.0
       endif
 c      debye_tg = debyelorhos**2
        debye_tg = debyelorhos
@@ -1342,7 +1344,7 @@ c      write(*,*)"jm=",jm,"ipert_gf=",ipert_gf
 c      write(*,*)"debug","gradtem=",gradtem,"tem=",tem
 c      write(*,*)"debug","gradtim=",gradtim,"tim=",tim     
 c
-      CALL put_averages(taus_tg,as_tg,vpar_tg,betae_tg,xnue_tg,
+      CALL put_averages(taus_tg,as_tg,vpar_tg,vexb_tg,betae_tg,xnue_tg,
      > zeff_tg,debye_tg)
 c
 c      if(ipert_gf.eq.0)then

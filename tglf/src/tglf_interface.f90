@@ -28,9 +28,9 @@
 
 module tglf_interface
 
-  use tglf_dimensions
+  use tglf_max_dimensions
 
-  !  NOTE: tglf_dimensions defines 
+  !  NOTE: tglf_max_dimensions defines 
   !   nsm=6
   !   maxmodes=4
 
@@ -114,7 +114,7 @@ module tglf_interface
   real    :: tglf_rlns_in(nsm)      = 0.0
   real    :: tglf_rlts_in(nsm)      = 0.0
   real    :: tglf_vpar_shear_in(nsm)= 0.0
-  real    :: tglf_vexb_shear_in       = 0.0
+  real    :: tglf_vexb_shear_in     = 0.0
 
   ! Data passed to: put_profile_shear
   real    :: tglf_vns_shear_in(nsm) = 0.0
@@ -124,10 +124,11 @@ module tglf_interface
   real    :: tglf_taus_in(nsm)    = 0.0
   real    :: tglf_as_in(nsm)      = 0.0
   real    :: tglf_vpar_in(nsm)    = 0.0
-  real    :: tglf_betae_in          = 0.0
-  real    :: tglf_xnue_in           = 0.0
-  real    :: tglf_zeff_in           = 1.0
-  real    :: tglf_debye_in          = 0.0
+  real    :: tglf_vexb_in         = 0.0
+  real    :: tglf_betae_in        = 0.0
+  real    :: tglf_xnue_in         = 0.0
+  real    :: tglf_zeff_in         = 1.0
+  real    :: tglf_debye_in        = 0.0
 
   ! Data passed to: put_eikonal
   logical :: tglf_new_eikonal_in    = .true.
@@ -159,6 +160,7 @@ module tglf_interface
   real    :: tglf_q_loc_in          = 2.0
   real    :: tglf_q_prime_loc_in    = 16.0
   real    :: tglf_p_prime_loc_in    = 0.0
+  real    :: tglf_kx0_loc_in        = 0.0
 
   ! Data passed to Fourier_geometry
   integer :: tglf_nfourier_in        = 16
@@ -235,12 +237,12 @@ contains
     write(1,*) 'alpha_quench = ', tglf_alpha_quench_in
     write(1,*) 'alpha_e = ', tglf_alpha_e_in
     write(1,*) 'alpha_p = ', tglf_alpha_p_in
-    write(1,*) 'alpha_n = ', tglf_alpha_n_in
-    write(1,*) 'alpha_t = ', tglf_alpha_t_in
-    write(1,*) 'alpha_kx_e = ', tglf_alpha_kx_e_in
-    write(1,*) 'alpha_kx_p = ', tglf_alpha_kx_p_in
-    write(1,*) 'alpha_kx_n = ', tglf_alpha_kx_n_in
-    write(1,*) 'alpha_kx_t = ', tglf_alpha_kx_t_in
+!    write(1,*) 'alpha_n = ', tglf_alpha_n_in
+!    write(1,*) 'alpha_t = ', tglf_alpha_t_in
+!    write(1,*) 'alpha_kx_e = ', tglf_alpha_kx_e_in
+!    write(1,*) 'alpha_kx_p = ', tglf_alpha_kx_p_in
+!    write(1,*) 'alpha_kx_n = ', tglf_alpha_kx_n_in
+!    write(1,*) 'alpha_kx_t = ', tglf_alpha_kx_t_in
     write(1,*) 'theta_trapped = ', tglf_theta_trapped_in
     write(1,*) 'xnu_factor = ', tglf_xnu_factor_in
     write(1,*) 'debye_factor = ', tglf_debye_factor_in
@@ -357,12 +359,12 @@ contains
     write(1,*) 'alpha_quench = ', alpha_quench_in
     write(1,*) 'alpha_e = ', alpha_e_in
     write(1,*) 'alpha_p = ', alpha_p_in
-    write(1,*) 'alpha_n = ', alpha_n_in
-    write(1,*) 'alpha_t = ', alpha_t_in
-    write(1,*) 'alpha_kx_e = ', alpha_kx_e_in
-    write(1,*) 'alpha_kx_p = ', alpha_kx_p_in
-    write(1,*) 'alpha_kx_n = ', alpha_kx_n_in
-    write(1,*) 'alpha_kx_t = ', alpha_kx_t_in
+!    write(1,*) 'alpha_n = ', alpha_n_in
+!    write(1,*) 'alpha_t = ', alpha_t_in
+!    write(1,*) 'alpha_kx_e = ', alpha_kx_e_in
+!    write(1,*) 'alpha_kx_p = ', alpha_kx_p_in
+!    write(1,*) 'alpha_kx_n = ', alpha_kx_n_in
+!    write(1,*) 'alpha_kx_t = ', alpha_kx_t_in
     write(1,*) 'theta_trapped = ', theta_trapped_in
     write(1,*) 'xnu_factor = ', xnu_factor_in
     write(1,*) 'debye_factor = ', debye_factor_in
@@ -382,6 +384,7 @@ contains
     write(1,*) 'as = ', as_in(:)
     write(1,*) 'taus = ', taus_in(:)
     write(1,*) 'vpar = ', vpar_in(:)
+    write(1,*) 'vexb = ', vexb_in
     write(1,*) 'betae = ', betae_in
     write(1,*) 'xnuei = ', xnue_in
     write(1,*) 'zeff = ', zeff_in

@@ -66,7 +66,7 @@
 !       do is = ns0,ns
 !        do i=1,nbasis
 !        do j=1,nbasis
-!         hp1 = 0.D0
+!         hp1 = 0.0
 !         do k=1,nbasis
 !           hp1 = hp1 + ave_ht1(is,i,k)*ave_hn(is,k,j)
 !         enddo
@@ -111,7 +111,7 @@
 !       do is = 1,ns
 !        do i=1,nbasis
 !        do j=1,nbasis
-!         gp1 = 0.D0
+!         gp1 = 0.0
 !         do k=1,nbasis
 !           gp1 = gp1 + ave_gt1(is,i,k)*ave_gn(is,k,j)
 !         enddo
@@ -166,15 +166,15 @@
       do is = ns0,ns   
        do i=1,nbasis
        do j=i,nbasis
-        ave_hn(is,i,j) = 0.D0
-        ave_hp1(is,i,j) = 0.D0
-        ave_hp3(is,i,j) = 0.D0
-        ave_hr11(is,i,j) = 0.D0
-        ave_hr13(is,i,j) = 0.D0
-        ave_hr33(is,i,j) = 0.D0
-        ave_hw113(is,i,j) = 0.D0
-        ave_hw133(is,i,j) = 0.D0
-        ave_hw333(is,i,j) = 0.D0
+        ave_hn(is,i,j) = 0.0
+        ave_hp1(is,i,j) = 0.0
+        ave_hp3(is,i,j) = 0.0
+        ave_hr11(is,i,j) = 0.0
+        ave_hr13(is,i,j) = 0.0
+        ave_hr33(is,i,j) = 0.0
+        ave_hw113(is,i,j) = 0.0
+        ave_hw133(is,i,j) = 0.0
+        ave_hw333(is,i,j) = 0.0
 !
         do k=1,nx
          hn = hxn(is,k)
@@ -199,15 +199,15 @@
          ave_hw133(is,i,j) = ave_hw133(is,i,j) + hw133*ww
          ave_hw333(is,i,j) = ave_hw333(is,i,j) + hw333*ww
         enddo
-        if(ABS(ave_hn(is,i,j)).lt.zero_cut)ave_hn(is,i,j)=0.D0
-        if(ABS(ave_hp1(is,i,j)).lt.zero_cut)ave_hp1(is,i,j)=0.D0
-        if(ABS(ave_hp3(is,i,j)).lt.zero_cut)ave_hp3(is,i,j)=0.D0
-        if(ABS(ave_hr11(is,i,j)).lt.zero_cut)ave_hr11(is,i,j)=0.D0
-        if(ABS(ave_hr13(is,i,j)).lt.zero_cut)ave_hr13(is,i,j)=0.D0
-        if(ABS(ave_hr33(is,i,j)).lt.zero_cut)ave_hr33(is,i,j)=0.D0
-        if(ABS(ave_hw113(is,i,j)).lt.zero_cut)ave_hw113(is,i,j)=0.D0
-        if(ABS(ave_hw133(is,i,j)).lt.zero_cut)ave_hw133(is,i,j)=0.D0
-        if(ABS(ave_hw333(is,i,j)).lt.zero_cut)ave_hw333(is,i,j)=0.D0
+        if(ABS(ave_hn(is,i,j)).lt.zero_cut)ave_hn(is,i,j)=0.0
+        if(ABS(ave_hp1(is,i,j)).lt.zero_cut)ave_hp1(is,i,j)=0.0
+        if(ABS(ave_hp3(is,i,j)).lt.zero_cut)ave_hp3(is,i,j)=0.0
+        if(ABS(ave_hr11(is,i,j)).lt.zero_cut)ave_hr11(is,i,j)=0.0
+        if(ABS(ave_hr13(is,i,j)).lt.zero_cut)ave_hr13(is,i,j)=0.0
+        if(ABS(ave_hr33(is,i,j)).lt.zero_cut)ave_hr33(is,i,j)=0.0
+        if(ABS(ave_hw113(is,i,j)).lt.zero_cut)ave_hw113(is,i,j)=0.0
+        if(ABS(ave_hw133(is,i,j)).lt.zero_cut)ave_hw133(is,i,j)=0.0
+        if(ABS(ave_hw333(is,i,j)).lt.zero_cut)ave_hw333(is,i,j)=0.0
 ! symmetrize
          ave_hn(is,j,i)   = ave_hn(is,i,j) 
          ave_hp1(is,j,i)  = ave_hp1(is,i,j)
@@ -239,9 +239,9 @@
       do is = ns0,ns
        do i=1,nbasis
        do j=1,nbasis
-        gradhp1 = 0.D0
-!        gradhr11 = 0.D0
-!        gradhr13 = 0.D0
+        gradhp1 = 0.0
+!        gradhr11 = 0.0
+!        gradhr13 = 0.0
         do k=1,nbasis
          gradhp1 = gradhp1 + &
          ave_kpar(i,k)*ave_hp1(is,k,j) - ave_hp1(is,i,k)*ave_kpar(k,j) 
@@ -257,8 +257,8 @@
        enddo
        do i=1,nbasis
        do j=1,nbasis
-        gradhr11 = 0.D0
-        gradhr13 = 0.D0
+        gradhr11 = 0.0
+        gradhr13 = 0.0
         do k=1,nbasis
          gradhr11 = gradhr11 + &
          ave_hu1(is,i,k)*ave_gradhp1(is,k,j) 
@@ -271,12 +271,12 @@
        enddo
        do i=1,nbasis
        do j=1,nbasis
-         gradhp1p1 = 0.D0
-         gradhr11p1 = 0.D0
-         gradhr13p1 = 0.D0
-         gradhp1 = 0.D0
-         gradhr11 = 0.D0
-         gradhr13 = 0.D0
+         gradhp1p1 = 0.0
+         gradhr11p1 = 0.0
+         gradhr13p1 = 0.0
+         gradhp1 = 0.0
+         gradhr11 = 0.0
+         gradhr13 = 0.0
          do k=1,nbasis
             gradhp1p1 = gradhp1p1 &
             + ave_gradhp1(is,i,k)*ave_hp1inv(is,k,j)
@@ -317,11 +317,11 @@
       do is=ns0,ns
        do i=1,nbasis
        do j=1,nbasis
-          ht1 = 0.D0
-          ht3 = 0.D0
-          hu1 = 0.D0
-          hu3 = 0.D0
-          hu33 = 0.D0
+          ht1 = 0.0
+          ht3 = 0.0
+          hu1 = 0.0
+          hu3 = 0.0
+          hu33 = 0.0
           do k=1,nbasis
             ht1   = ht1  + ave_hp1(is,i,k)*ave_hninv(is,k,j)
             ht3   = ht3  + ave_hp3(is,i,k)*ave_hninv(is,k,j)
@@ -340,10 +340,10 @@
       do is=ns0,ns
        do i=1,nbasis
        do j=1,nbasis
-          hu3ht1 = 0.D0
-          hu3ht3 = 0.D0
-          hu33ht1 = 0.D0
-          hu33ht3 = 0.D0
+          hu3ht1 = 0.0
+          hu3ht3 = 0.0
+          hu33ht1 = 0.0
+          hu33ht3 = 0.0
           do k=1,nbasis
             hu3ht1   = hu3ht1  + ave_hu3(is,i,k)*ave_ht1(is,k,j)
             hu33ht1  = hu33ht1 + ave_hu33(is,i,k)*ave_ht1(is,k,j)
@@ -377,12 +377,12 @@
       do is=ns0,ns
        do i=1,nbasis
        do j=1,nbasis
-          hn = 0.D0
-          hp1 = 0.D0
-          hp3 = 0.D0
-          hr11 = 0.D0
-          hr13 = 0.D0
-          hr33 = 0.D0
+          hn = 0.0
+          hp1 = 0.0
+          hp3 = 0.0
+          hr11 = 0.0
+          hr13 = 0.0
+          hr33 = 0.0
           do k=1,nbasis
             hn    = hn    + ave_hn(is,i,k)*ave_p0inv(k,j)
             hp1   = hp1   + ave_hp1(is,i,k)*ave_p0inv(k,j)
@@ -542,14 +542,14 @@
       do is=ns0,ns
        do i=1,nbasis
        do j=1,nbasis
-          gradBhp1 = 0.D0
-          gradBhp3 = 0.D0
-          gradBhr11 = 0.D0
-          gradBhr13 = 0.D0
-          gradBhr33 = 0.D0
-          gradBhu1 = 0.D0
-          gradBhu3 = 0.D0
-          gradBhu33 = 0.D0
+          gradBhp1 = 0.0
+          gradBhp3 = 0.0
+          gradBhr11 = 0.0
+          gradBhr13 = 0.0
+          gradBhr33 = 0.0
+          gradBhu1 = 0.0
+          gradBhu3 = 0.0
+          gradBhu33 = 0.0
           do k=1,nbasis
             gradBhp1  = gradBhp1 + ave_gradB(i,k)*ave_hp1p0(is,k,j)
             gradBhp3  = gradBhp3 + ave_gradB(i,k)*ave_hp3p0(is,k,j)
@@ -595,15 +595,15 @@
        do i=1,nbasis
        do j=i,nbasis
 !  initialize the bessel function averages
-        ave_gn(is,i,j) = 0.D0
-        ave_gp1(is,i,j) = 0.D0
-        ave_gp3(is,i,j) = 0.D0
-        ave_gr11(is,i,j) = 0.D0
-        ave_gr13(is,i,j) = 0.D0
-        ave_gr33(is,i,j) = 0.D0
-        ave_gw113(is,i,j) = 0.D0
-        ave_gw133(is,i,j) = 0.D0
-        ave_gw333(is,i,j) = 0.D0
+        ave_gn(is,i,j) = 0.0
+        ave_gp1(is,i,j) = 0.0
+        ave_gp3(is,i,j) = 0.0
+        ave_gr11(is,i,j) = 0.0
+        ave_gr13(is,i,j) = 0.0
+        ave_gr33(is,i,j) = 0.0
+        ave_gw113(is,i,j) = 0.0
+        ave_gw133(is,i,j) = 0.0
+        ave_gw333(is,i,j) = 0.0
 !
         do k=1,nx
          gn = gxn(is,k)
@@ -627,15 +627,15 @@
          ave_gw133(is,i,j) = ave_gw133(is,i,j) + gw133*ww
          ave_gw333(is,i,j) = ave_gw333(is,i,j) + gw333*ww
         enddo
-        if(ABS(ave_gn(is,i,j)).lt.zero_cut)ave_gn(is,i,j)=0.D0
-        if(ABS(ave_gp1(is,i,j)).lt.zero_cut)ave_gp1(is,i,j)=0.D0
-        if(ABS(ave_gp3(is,i,j)).lt.zero_cut)ave_gp3(is,i,j)=0.D0
-        if(ABS(ave_gr11(is,i,j)).lt.zero_cut)ave_gr11(is,i,j)=0.D0
-        if(ABS(ave_gr13(is,i,j)).lt.zero_cut)ave_gr13(is,i,j)=0.D0
-        if(ABS(ave_gr33(is,i,j)).lt.zero_cut)ave_gr33(is,i,j)=0.D0
-        if(ABS(ave_gw113(is,i,j)).lt.zero_cut)ave_gw113(is,i,j)=0.D0
-        if(ABS(ave_gw133(is,i,j)).lt.zero_cut)ave_gw133(is,i,j)=0.D0
-        if(ABS(ave_gw333(is,i,j)).lt.zero_cut)ave_gw333(is,i,j)=0.D0
+        if(ABS(ave_gn(is,i,j)).lt.zero_cut)ave_gn(is,i,j)=0.0
+        if(ABS(ave_gp1(is,i,j)).lt.zero_cut)ave_gp1(is,i,j)=0.0
+        if(ABS(ave_gp3(is,i,j)).lt.zero_cut)ave_gp3(is,i,j)=0.0
+        if(ABS(ave_gr11(is,i,j)).lt.zero_cut)ave_gr11(is,i,j)=0.0
+        if(ABS(ave_gr13(is,i,j)).lt.zero_cut)ave_gr13(is,i,j)=0.0
+        if(ABS(ave_gr33(is,i,j)).lt.zero_cut)ave_gr33(is,i,j)=0.0
+        if(ABS(ave_gw113(is,i,j)).lt.zero_cut)ave_gw113(is,i,j)=0.0
+        if(ABS(ave_gw133(is,i,j)).lt.zero_cut)ave_gw133(is,i,j)=0.0
+        if(ABS(ave_gw333(is,i,j)).lt.zero_cut)ave_gw333(is,i,j)=0.0
 ! symmetrize
          ave_gn(is,j,i) = ave_gn(is,i,j) 
          ave_gp1(is,j,i) = ave_gp1(is,i,j)
@@ -667,9 +667,9 @@
       do is = ns0,ns
        do i=1,nbasis
        do j=1,nbasis
-        gradgp1 = 0.D0
-!        gradgr11 = 0.D0
-!        gradgr13 = 0.D0
+        gradgp1 = 0.0
+!        gradgr11 = 0.0
+!        gradgr13 = 0.0
         do k=1,nbasis
          gradgp1 = gradgp1 + &
          ave_kpar(i,k)*ave_gp1(is,k,j) - ave_gp1(is,i,k)*ave_kpar(k,j) 
@@ -685,8 +685,8 @@
        enddo
        do i=1,nbasis
        do j=1,nbasis
-        gradgr11 = 0.D0
-        gradgr13 = 0.D0
+        gradgr11 = 0.0
+        gradgr13 = 0.0
         do k=1,nbasis
          gradgr11 = gradgr11 + &
          ave_gu1(is,i,k)*ave_gradgp1(is,k,j) 
@@ -699,12 +699,12 @@
        enddo
        do i=1,nbasis
        do j=1,nbasis
-         gradgp1p1 = 0.D0
-         gradgr11p1 = 0.D0
-         gradgr13p1 = 0.D0
-         gradgp1 = 0.D0
-         gradgr11 = 0.D0
-         gradgr13 = 0.D0
+         gradgp1p1 = 0.0
+         gradgr11p1 = 0.0
+         gradgr13p1 = 0.0
+         gradgp1 = 0.0
+         gradgr11 = 0.0
+         gradgr13 = 0.0
          do k=1,nbasis
             gradgp1p1 = gradgp1p1 &
             + ave_gradgp1(is,i,k)*ave_gp1inv(is,k,j)
@@ -745,11 +745,11 @@
       do is=ns0,ns
        do i=1,nbasis
        do j=1,nbasis
-          gt1 = 0.D0
-          gt3 = 0.D0
-          gu1 = 0.D0
-          gu3 = 0.D0
-          gu33 = 0.D0
+          gt1 = 0.0
+          gt3 = 0.0
+          gu1 = 0.0
+          gu3 = 0.0
+          gu33 = 0.0
           do k=1,nbasis
             gt1   = gt1  + ave_gp1(is,i,k)*ave_gninv(is,k,j)
             gt3   = gt3  + ave_gp3(is,i,k)*ave_gninv(is,k,j)
@@ -769,10 +769,10 @@
       do is=ns0,ns
        do i=1,nbasis
        do j=1,nbasis
-          gu3gt1 = 0.D0
-          gu3gt3 = 0.D0
-          gu33gt1 = 0.D0
-          gu33gt3 = 0.D0
+          gu3gt1 = 0.0
+          gu3gt3 = 0.0
+          gu33gt1 = 0.0
+          gu33gt3 = 0.0
           do k=1,nbasis
             gu3gt1   = gu3gt1  + ave_gu3(is,i,k)*ave_gt1(is,k,j)
             gu33gt1  = gu33gt1 + ave_gu33(is,i,k)*ave_gt1(is,k,j)
@@ -806,12 +806,12 @@
       do is=ns0,ns
        do i=1,nbasis
        do j=1,nbasis
-          gn = 0.D0
-          gp1 = 0.D0
-          gp3 = 0.D0
-          gr11 = 0.D0
-          gr13 = 0.D0
-          gr33 = 0.D0
+          gn = 0.0
+          gp1 = 0.0
+          gp3 = 0.0
+          gr11 = 0.0
+          gr13 = 0.0
+          gr33 = 0.0
           do k=1,nbasis
             gn    = gn    + ave_gn(is,i,k)*ave_p0inv(k,j)
             gp1   = gp1   + ave_gp1(is,i,k)*ave_p0inv(k,j)
@@ -972,14 +972,14 @@
       do is=ns0,ns
        do i=1,nbasis
        do j=1,nbasis
-          gradBgp1 = 0.D0
-          gradBgp3 = 0.D0
-          gradBgr11 = 0.D0
-          gradBgr13 = 0.D0
-          gradBgr33 = 0.D0
-          gradBgu1 = 0.D0
-          gradBgu3 = 0.D0
-          gradBgu33 = 0.D0
+          gradBgp1 = 0.0
+          gradBgp3 = 0.0
+          gradBgr11 = 0.0
+          gradBgr13 = 0.0
+          gradBgr33 = 0.0
+          gradBgu1 = 0.0
+          gradBgu3 = 0.0
+          gradBgu33 = 0.0
           do k=1,nbasis
             gradBgp1  = gradBgp1 + ave_gradB(i,k)*ave_gp1p0(is,k,j)
             gradBgp3  = gradBgp3 + ave_gradB(i,k)*ave_gp3p0(is,k,j)
@@ -1149,6 +1149,8 @@
          enddo
          enddo
        endif
+! 
+       kx_shear = ave_kx(1,2)
 !
 !  debug
 !       write(*,*)"check ave_p0inv"
@@ -1862,7 +1864,7 @@
 !
       if(nm.eq.1)then
         do is=ns0,ns
-          ave_minv(is,1,1) = 1.D0/ave_m(is,1,1)
+          ave_minv(is,1,1) = 1.0/ave_m(is,1,1)
         enddo
         go to 100
       endif
@@ -1870,7 +1872,7 @@
       if(nm.eq.2)then
         do is=ns0,ns
          detm = ave_m(is,1,1)*ave_m(is,2,2)-ave_m(is,1,2)*ave_m(is,2,1)
-         if(detm.eq.0.D0)detm = 1.D-12
+         if(detm.eq.0.0)detm = 1.D-12
          ave_minv(is,1,1) = ave_m(is,2,2)/detm
          ave_minv(is,2,2) = ave_m(is,1,1)/detm
          ave_minv(is,1,2) = -ave_m(is,1,2)/detm
@@ -1934,7 +1936,7 @@
 !       write(*,*)"check minv",is
 !        do i=1,nm
 !        do j=1,nm
-!         check = 0.D0
+!         check = 0.0
 !         do k=1,nm
 !           check = check + ave_m(is,i,k)*ave_minv(is,k,j)
 !         enddo
@@ -1967,7 +1969,7 @@
       zero = 1.0D-12
 !
       if(nm.eq.1)then
-        ave_minv(1,1) = 1.D0/ave_m(1,1)
+        ave_minv(1,1) = 1.0/ave_m(1,1)
         go to 100
       endif
 !
@@ -2033,7 +2035,7 @@
 !       write(*,*)"check minv"
 !        do i=1,nm
 !        do j=1,nm
-!         check = 0.D0
+!         check = 0.0
 !         do k=1,nm
 !           check = check + ave_m(i,k)*ave_minv(k,j)
 !         enddo
@@ -2087,12 +2089,12 @@
         hxn(is,i)    = FLR_Hn(fth,b)
         hxp1(is,i)   = hxn(is,i)
         hxp3(is,i)   = FLR_dHp3(fth,b)+hxn(is,i)
-        hxr11(is,i)  = 3.D0*hxp1(is,i)
-        hxr13(is,i)  = FLR_dHr13(fth,b)+(5.D0/3.D0)*hxp1(is,i)
-        hxr33(is,i)  = FLR_dHr33(fth,b)+(5.D0/3.D0)*hxp3(is,i)
-        hxw113(is,i) = FLR_dHw113(fth,b)+(7.D0/3.D0)*hxr11(is,i)
-        hxw133(is,i) = FLR_dHw133(fth,b)+(7.D0/3.D0)*hxr13(is,i)
-        hxw333(is,i) = FLR_dHw333(fth,b)+(7.D0/3.D0)*hxr33(is,i)
+        hxr11(is,i)  = 3.0*hxp1(is,i)
+        hxr13(is,i)  = FLR_dHr13(fth,b)+(5.0/3.0)*hxp1(is,i)
+        hxr33(is,i)  = FLR_dHr33(fth,b)+(5.0/3.0)*hxp3(is,i)
+        hxw113(is,i) = FLR_dHw113(fth,b)+(7.0/3.0)*hxr11(is,i)
+        hxw133(is,i) = FLR_dHw133(fth,b)+(7.0/3.0)*hxr13(is,i)
+        hxw333(is,i) = FLR_dHw333(fth,b)+(7.0/3.0)*hxr33(is,i)
 ! debug
 !          write(*,*)is,i,"b = ",b
 !          write(*,*)"hxn = ",hxn(is,i)
@@ -2111,12 +2113,12 @@
            gxn(is,i)    = FLR_Hn(ftx,b)
            gxp1(is,i)   = FLR_dHp1(ftx,b)  + ft2*gxn(is,i)
            gxp3(is,i)   = FLR_dHp3(ftx,b)  + gxn(is,i)
-           gxr11(is,i)  = FLR_dHr11(ftx,b) + 3.D0*ft2*gxp1(is,i)
-           gxr13(is,i)  = FLR_dHr13(ftx,b) + (5.D0/3.D0)*gxp1(is,i)
-           gxr33(is,i)  = FLR_dHr33(ftx,b) + (5.D0/3.D0)*gxp3(is,i)
-           gxw113(is,i) = FLR_dHw113(ftx,b)+(7.D0/3.D0)*gxr11(is,i)
-           gxw133(is,i) = FLR_dHw133(ftx,b)+(7.D0/3.D0)*gxr13(is,i)
-           gxw333(is,i) = FLR_dHw333(ftx,b)+(7.D0/3.D0)*gxr33(is,i)
+           gxr11(is,i)  = FLR_dHr11(ftx,b) + 3.0*ft2*gxp1(is,i)
+           gxr13(is,i)  = FLR_dHr13(ftx,b) + (5.0/3.0)*gxp1(is,i)
+           gxr33(is,i)  = FLR_dHr33(ftx,b) + (5.0/3.0)*gxp3(is,i)
+           gxw113(is,i) = FLR_dHw113(ftx,b)+(7.0/3.0)*gxr11(is,i)
+           gxw133(is,i) = FLR_dHw133(ftx,b)+(7.0/3.0)*gxr13(is,i)
+           gxw333(is,i) = FLR_dHw333(ftx,b)+(7.0/3.0)*gxr33(is,i)
 ! debug
 !          write(*,*)is,i,"b = ",b
 !          write(*,*)"gxn = ",gxn(is,i)
@@ -2483,12 +2485,12 @@
 !
       b2 = b*b
       b25 = b**2.5
-      h0 = 1.D0/(1.D0+b)
+      h0 = 1.0/(1.0+b)
       do i=1,4
        h(i) = b/( y(i)**4 + b2)
       enddo
       do i=5,na
-       h(i) = b2/(0.25D0*y(i)**5 + b25)       
+       h(i) = b2/(0.25*y(i)**5 + b25)       
       enddo
 ! transform to gt grid
       gt = SQRT(1-ft)
@@ -2497,7 +2499,7 @@
       if(gt.le.g(2))then
         i=1
       else
-        i = IDINT(gt/0.025D0)
+        i = IDINT(gt/0.025)
       endif
       j = i+1
 !      write(*,*)"FLR_Hn",i,gt,ft
@@ -2863,12 +2865,12 @@
 !
       b2 = b*b
       b25 = b**2.5
-      h0 = 0.D0
+      h0 = 0.0
       do i=1,4
        h(i) = b/( y(i)**4 + b2)
       enddo
       do i=5,na
-       h(i) = b2/(0.25D0*y(i)**5 + b25)       
+       h(i) = b2/(0.25*y(i)**5 + b25)       
       enddo
 ! transform to gt grid
       gt = SQRT(1-ft)
@@ -2877,7 +2879,7 @@
       if(gt.le.g(2))then
         i=1
       else
-        i = IDINT(gt/0.025D0)
+        i = IDINT(gt/0.025)
       endif
       j = i+1
 ! interpolate the coefficients
@@ -3242,12 +3244,12 @@
 !
       b2 = b*b
       b25 = b**2.5
-      h0 = 0.D0
+      h0 = 0.0
       do i=1,4
        h(i) = b/( y(i)**4 + b2)
       enddo
       do i=5,na
-       h(i) = b2/(0.25D0*y(i)**5 + b25)       
+       h(i) = b2/(0.25*y(i)**5 + b25)       
       enddo
 ! transform to gt grid
       gt = SQRT(1-ft)
@@ -3256,7 +3258,7 @@
       if(gt.le.g(2))then
         i=1
       else
-        i = IDINT(gt/0.025D0)
+        i = IDINT(gt/0.025)
       endif
       j = i+1
 ! interpolate the coefficients
@@ -3621,12 +3623,12 @@
 !
       b2 = b*b
       b25 = b**2.5
-      h0 = 0.D0
+      h0 = 0.0
       do i=1,4
        h(i) = b/( y(i)**4 + b2)
       enddo
       do i=5,na
-       h(i) = b2/(0.25D0*y(i)**5 + b25)       
+       h(i) = b2/(0.25*y(i)**5 + b25)       
       enddo
 ! transform to gt grid
       gt = SQRT(1-ft)
@@ -3635,7 +3637,7 @@
       if(gt.le.g(2))then
         i=1
       else
-        i = IDINT(gt/0.025D0)
+        i = IDINT(gt/0.025)
       endif
       j = i+1
 ! interpolate the coefficients
@@ -3647,7 +3649,7 @@
         hs = hs + ca*h(k)
       enddo
 ! final answer
-      FLR_dHr11 = (3.D0*ft**5)*hs
+      FLR_dHr11 = (3.0*ft**5)*hs
 ! 
       END FUNCTION FLR_dHr11
 !
@@ -4000,12 +4002,12 @@
 !
       b2 = b*b
       b25 = b**2.5
-      h0 = 0.D0
+      h0 = 0.0
       do i=1,4
        h(i) = b/( y(i)**4 + b2)
       enddo
       do i=5,na
-       h(i) = b2/(0.25D0*y(i)**5 + b25)       
+       h(i) = b2/(0.25*y(i)**5 + b25)       
       enddo
 ! transform to gt grid
       gt = SQRT(1-ft)
@@ -4014,7 +4016,7 @@
       if(gt.le.g(2))then
         i=1
       else
-        i = IDINT(gt/0.025D0)
+        i = IDINT(gt/0.025)
       endif
       j = i+1
 ! interpolate the coefficients
@@ -4026,7 +4028,7 @@
         hs = hs + ca*h(k)
       enddo
 ! final answer
-      FLR_dHr13 = (5.D0/3.D0)*(ft**3)*hs
+      FLR_dHr13 = (5.0/3.0)*(ft**3)*hs
 ! 
       END FUNCTION FLR_dHr13
 !
@@ -4379,12 +4381,12 @@
 !
       b2 = b*b
       b25 = b**2.5
-      h0 = 0.D0
+      h0 = 0.0
       do i=1,4
        h(i) = b/( y(i)**4 + b2)
       enddo
       do i=5,na
-       h(i) = b2/(0.25D0*y(i)**5 + b25)       
+       h(i) = b2/(0.25*y(i)**5 + b25)       
       enddo
 ! transform to gt grid
       gt = SQRT(1-ft)
@@ -4393,7 +4395,7 @@
       if(gt.le.g(2))then
         i=1
       else
-        i = IDINT(gt/0.025D0)
+        i = IDINT(gt/0.025)
       endif
       j = i+1
 ! interpolate the coefficients
@@ -4405,7 +4407,7 @@
         hs = hs + ca*h(k)
       enddo
 ! final answer
-      FLR_dHr33 = (5.D0/3.D0)*ft*hs
+      FLR_dHr33 = (5.0/3.0)*ft*hs
 ! 
       END FUNCTION FLR_dHr33
 !
@@ -4757,12 +4759,12 @@
 !
       b2 = b*b
       b25 = b**2.5
-      h0 = 0.D0
+      h0 = 0.0
       do i=1,4
        h(i) = b/( y(i)**4 + b2)
       enddo
       do i=5,na
-       h(i) = b2/(0.25D0*y(i)**5 + b25)       
+       h(i) = b2/(0.25*y(i)**5 + b25)       
       enddo
 ! transform to gt grid
       gt = SQRT(1-ft)
@@ -4771,7 +4773,7 @@
       if(gt.le.g(2))then
         i=1
       else
-        i = IDINT(gt/0.025D0)
+        i = IDINT(gt/0.025)
       endif
       j = i+1
 ! interpolate the coefficients
@@ -4783,7 +4785,7 @@
         hs = hs + ca*h(k)
       enddo
 ! final answer
-      FLR_dHw113 = hs*7.D0*ft**5
+      FLR_dHw113 = hs*7.0*ft**5
 ! 
       END FUNCTION FLR_dHw113
 !
@@ -5135,12 +5137,12 @@
 !
       b2 = b*b
       b25 = b**2.5
-      h0 = 0.D0
+      h0 = 0.0
       do i=1,4
        h(i) = b/( y(i)**4 + b2)
       enddo
       do i=5,na
-       h(i) = b2/(0.25D0*y(i)**5 + b25)       
+       h(i) = b2/(0.25*y(i)**5 + b25)       
       enddo
 ! transform to gt grid
       gt = SQRT(1-ft)
@@ -5149,7 +5151,7 @@
       if(gt.le.g(2))then
         i=1
       else
-        i = IDINT(gt/0.025D0)
+        i = IDINT(gt/0.025)
       endif
       j = i+1
 ! interpolate the coefficients
@@ -5161,7 +5163,7 @@
         hs = hs + ca*h(k)
       enddo
 ! final answer
-      FLR_dHw133 = hs*(35.D0/9.D0)*ft**3
+      FLR_dHw133 = hs*(35.0/9.0)*ft**3
 ! 
       END FUNCTION FLR_dHw133
 !
@@ -5513,12 +5515,12 @@
 !
       b2 = b*b
       b25 = b**2.5
-      h0 = 0.D0
+      h0 = 0.0
       do i=1,4
        h(i) = b/( y(i)**4 + b2)
       enddo
       do i=5,na
-       h(i) = b2/(0.25D0*y(i)**5 + b25)       
+       h(i) = b2/(0.25*y(i)**5 + b25)       
       enddo
 ! transform to gt grid
       gt = SQRT(1-ft)
@@ -5527,7 +5529,7 @@
       if(gt.le.g(2))then
         i=1
       else
-        i = IDINT(gt/0.025D0)
+        i = IDINT(gt/0.025)
       endif
       j = i+1
 ! interpolate the coefficients
@@ -5539,7 +5541,7 @@
         hs = hs + ca*h(k)
       enddo
 ! final answer
-      FLR_dHw333 = (35.D0/9.D0)*ft*hs
+      FLR_dHw333 = (35.0/9.0)*ft*hs
 ! 
       END FUNCTION FLR_dHw333
 !
