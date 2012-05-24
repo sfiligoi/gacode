@@ -284,6 +284,7 @@ contains
        write(1,*) 's_zeta_loc = ', tglf_s_zeta_loc_in
        write(1,*) 'p_prime_loc = ', tglf_p_prime_loc_in
        write(1,*) 'q_prime_loc = ', tglf_q_prime_loc_in
+       write(1,*) 'kx0_loc = ', tglf_kx0_loc_in
 
     elseif (tglf_geometry_flag_in == 2 ) then
 
@@ -407,6 +408,7 @@ contains
        write(1,*) 's_zeta_loc = ', s_zeta_loc
        write(1,*) 'p_prime_loc = ', p_prime_loc
        write(1,*) 'q_prime_loc = ', q_prime_loc
+       write(1,*) 'kx0_loc =', kx0_loc
 
     elseif (tglf_geometry_flag_in == 2 ) then
 

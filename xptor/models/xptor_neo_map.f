@@ -22,10 +22,15 @@ c
       mu3 = sqrt(amassimp_exp)*42.851
 
 ! Initialize NEO
-      call neo_init("path")
+      call neo_init("path",MPI_COMM_WORLD)
 
 ! Simulation mode (dke solve + analytic)
       neo_sim_model_in = 1
+
+  ! Resolution
+      neo_n_energy_in = 5
+      neo_n_xi_in = 11
+      neo_n_theta_in = 11
 
 !  units: 
       m0 = amassgas_exp       !proton mass
@@ -85,36 +90,41 @@ c
       neo_temp_2_in   = 1.0
       neo_dlnndr_2_in = -drhodr_loc*a0*gradnim/nim
       neo_dlntdr_2_in = -drhodr_loc*a0*gradtim/tim
-      neo_nu_2_in     = (xnue/w0)*(nim/nem)/(mu2*(tim/tem)**1.5)
+!      neo_nu_2_in     = (xnue/w0)*(nim/nem)/(mu2*(tim/tem)**1.5)
 
+      if(neo_n_species_in.gt.2)then
   ! Impurity
-      neo_z_3_in      = zimp_exp
-      neo_mass_3_in   = amassimp_exp/amassgas_exp
-      neo_dens_3_in   = nzm/n0
-      neo_temp_3_in   = 1.0
-      neo_dlnndr_3_in = -drhodr_loc*a0*gradnzm/nzm
-      neo_dlntdr_3_in = -drhodr_loc*a0*gradtim/tim
-      neo_nu_3_in = (xnue/w0)*(nzm/nem)*(zimp_exp**4)
-     >  /(mu3*(tim/tem)**1.5)
-
+        neo_z_3_in      = zimp_exp
+        neo_mass_3_in   = amassimp_exp/amassgas_exp
+        neo_dens_3_in   = nzm/n0
+        neo_temp_3_in   = 1.0
+        neo_dlnndr_3_in = -drhodr_loc*a0*gradnzm/nzm
+        neo_dlntdr_3_in = -drhodr_loc*a0*gradtim/tim
+!        neo_nu_3_in = (xnue/w0)*(nzm/nem)*(zimp_exp**4)
+!     >  /(mu3*(tim/tem)**1.5)
+      endif
+      if(neo_n_species_in.gt.3)then
   ! fast ions
-      nbm = 0.5*(nfast_exp(jm+1)+nfast_exp(jm))
-      tbm = 0.5*(tfast_exp(jm+1)+tfast_exp(jm))
-      gradnbm = (nfast_exp(jm+1)-nfast_exp(jm))/dr_loc
-      gradtbm = (tfast_exp(jm+1)-tfast_exp(jm))/dr_loc
-      neo_z_4_in      = 1.0
-      neo_mass_4_in   = 1.0
-      neo_dens_4_in   = nfast_exp(jm)/n0
-      neo_temp_4_in   = tbm/t0
-      neo_dlnndr_4_in = -a0*gradnbm/nbm
-      neo_dlntdr_4_in = -a0*gradtbm/tbm
-      neo_nu_4_in = (xnue/w0)*(nbm/nem)/(mu2*(tbm/tem)**1.5)
+        nbm = 0.5*(nfast_exp(jm+1)+nfast_exp(jm))
+        tbm = 0.5*(tfast_exp(jm+1)+tfast_exp(jm))
+        gradnbm = (nfast_exp(jm+1)-nfast_exp(jm))/dr_loc
+        gradtbm = (tfast_exp(jm+1)-tfast_exp(jm))/dr_loc
+        neo_z_4_in      = 1.0
+        neo_mass_4_in   = 1.0
+        neo_dens_4_in   = nfast_exp(jm)/n0
+        neo_temp_4_in   = tbm/t0
+        neo_dlnndr_4_in = -a0*gradnbm/nbm
+        neo_dlntdr_4_in = -a0*gradtbm/tbm
+!        neo_nu_4_in = (xnue/w0)*(nbm/nem)/(mu2*(tbm/tem)**1.5)
+      endif
 
   ! Rotation is always active
-      neo_rotation_model_in = 2
-!      neo_rotation_model_in = 1
-      neo_omega_rot_in = vexbm*cv/(w0*rmajor_exp)
-      neo_omega_rot_in = 0.0  ! eliminate mach number corrections
+!      neo_rotation_model_in = 2  !solves Hinton-Wong model
+      neo_rotation_model_in = 1
+      neo_omega_rot_in = 0.0  
+      if(neo_rotation_model_in.eq.2)then
+        neo_omega_rot_in = vexbm*cv/(w0*rmajor_exp)
+      endif
       neo_omega_rot_deriv_in = drhodr_loc*a0*gradvexbm*cv
      > /(w0*rmajor_exp)
 !      neo_omega_rot_deriv_in = 0.0

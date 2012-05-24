@@ -186,7 +186,7 @@
         vpar_tg(1)=mach3
         vpar_tg(2)=mach1
         vpar_tg(3)=mach2
-        vexb_shear_tg=0.0
+        vexb_tg=0.0
         if(ncspec2.eq.0)as_tg(3)=0.0  ! treat impurity as dilution only
         betae_tg = beta*temp3   
         xnue_tg = cnewk3*SQRT(2.0/temp3)*vnewk3
@@ -196,7 +196,7 @@
 !        write(*,*)taus_tg(1),taus_tg(2),taus_tg(3)
 !        write(*,*)as_tg(1),as_tg(2),as_tg(3)
 !
-      CALL put_averages(taus_tg,as_tg,vpar_tg,vexb_sher_tg,betae_tg,
+      CALL put_averages(taus_tg,as_tg,vpar_tg,vexb_tg,betae_tg,
      >  xnue_tg,zeff_tg,debye_tg)
 !
         rmin_tg = eps/epsa
@@ -230,7 +230,7 @@
 !        write(*,*)taus_tg(1),taus_tg(2),taus_tg(3)
 !        write(*,*)as_tg(1),as_tg(2),as_tg(3)
 !
-      CALL put_averages(taus_tg,as_tg,vpar_tg,betae_tg,
+      CALL put_averages(taus_tg,as_tg,vpar_tg,vexb_tg,betae_tg,
      >  xnue_tg,zeff_tg,debye_tg)
 !
         rmin_tg = rmin_loc
@@ -262,7 +262,7 @@
         if(new_gridpoint)then
           CALL put_Miller_geometry(rmin_tg,rmaj_tg,zmaj_tg,drmindx_tg,
      >    drmajdx_tg,dzmajdx_tg,kappa_tg,s_kappa_tg,delta_tg,s_delta_tg,
-     >    zeta_tg,s_zeta_tg,q_tg,q_prime_tg,p_prime_tg)
+     >    zeta_tg,s_zeta_tg,q_tg,q_prime_tg,p_prime_tg,kx0_tg)
         endif
       else
         write(*,*)"igeo_tg invalid",igeo_tg
@@ -470,8 +470,8 @@
         CALL put_species(ns_tg,zs_tg,mass_tg) 
         CALL put_gradients(rlns_tg,rlts_tg,vpar_shear_tg,
      > vexb_shear_tg)
-        CALL put_averages(taus_tg,as_tg,vpar_tg,betae_tg,xnue_tg,
-     >  zeff_tg,debye_tg)
+        CALL put_averages(taus_tg,as_tg,vpar_tg,vexb_tg,
+     >  betae_tg,xnue_tg,zeff_tg,debye_tg)
 !
       if(igeo_tg.eq.0)then
         CALL put_s_alpha_geometry(rmin_tg,rmaj_tg,q_tg,
@@ -479,7 +479,7 @@
       elseif(igeo_tg.eq.1)then
         CALL put_Miller_geometry(rmin_tg,rmaj_tg,zmaj_tg,drmindx_tg,
      >  drmajdx_tg,dzmajdx_tg,kappa_tg,s_kappa_tg,delta_tg,s_delta_tg,
-     >  zeta_tg,s_zeta_tg,q_tg,q_prime_tg,p_prime_tg)
+     >  zeta_tg,s_zeta_tg,q_tg,q_prime_tg,p_prime_tg,kx0_tg)
       endif
 !
       RETURN

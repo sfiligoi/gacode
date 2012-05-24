@@ -1398,7 +1398,7 @@ c why prevent negative s_kappa?
          s_zeta_tg=0.0
         CALL put_Miller_geometry(rmin_tg,rmaj_tg,zmaj_tg,drmindx_tg,
      >  drmajdx_tg,dzmajdx_tg,kappa_tg,s_kappa_tg,delta_tg,s_delta_tg,
-     >  zeta_tg,s_zeta_tg,q_tg,q_prime_tg,p_prime_tg)
+     >  zeta_tg,s_zeta_tg,q_tg,q_prime_tg,p_prime_tg,kx0_tg)
 c
        else
         write(*,*)"igeo_tg invalid",igeo_tg
