@@ -583,6 +583,7 @@
       INTEGER :: info,lwork
       INTEGER :: cpucount1,cpucount2,cpurate
       INTEGER :: xnu_model
+      INTEGER :: idum=0
       REAL :: cputime0,cputime1,cputime2
       REAL :: ft2,ft3,ft4,ft5
       REAL :: Linsker,am,bm
@@ -1127,6 +1128,8 @@
 !
        do ib = 1,nbasis
        do jb = 1,nbasis
+! trick to fool compiler into not messing with these loops
+         if(idum.eq.0)write(*,*)"fooled you"
 !        if(js.eq.ns0)then
 !         write(*,*)"is=",is,"js=",js,"ib=",ib,"jb=",jb
 !
