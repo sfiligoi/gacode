@@ -173,7 +173,8 @@ PRO midplane_corr_plot, i_r0, which_plot, FINITE_N=finite_n, $
 
       contour,corr,xaxis,yaxis,$
               nlevels=nlevels,$
-              levels=clevels,$
+              levels = -1. + 2*FINDGEN(nlevels)/(nlevels-1), $
+              c_colors=clevels,$
               xtitle=xtitle, $
               xstyle=1,$
               ytitle=ytitle, $
@@ -182,11 +183,14 @@ PRO midplane_corr_plot, i_r0, which_plot, FINITE_N=finite_n, $
               /fill, $
               position=plot_position
 
+      contour, corr, xaxis, yaxis, nlevels=1, levels=0., /overplot, $
+               position=plot_position, c_linestyle=2
+
      ;plot colorbar
 ;11/20/07- out until IDL bug fixed
-;      COLORBAR, NCOLORS = !D.TABLE_SIZE, MINRANGE = MIN(corr), $
-;	MAXRANGE = 1, /VERTICAL, /RIGHT, POSITION = colorbar_position, $
-;       FORMAT = '(G10.2)'
+      COLORBAR, NCOLORS = !D.TABLE_SIZE, MINRANGE = -1., $ ;MIN(corr), $
+	MAXRANGE = 1, /VERTICAL, /RIGHT, POSITION = colorbar_position, $
+       FORMAT = '(G10.2)'
 
   ENDIF ELSE BEGIN ;1d plot
       PLOT, xaxis, corr, /XS, XTITLE=xtitle, TITLE = title

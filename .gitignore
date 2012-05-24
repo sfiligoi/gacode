@@ -1,4 +1,3 @@
-
 # Gyro build stuff
 modules/*.mod
 */*.o
@@ -8,16 +7,21 @@ modules/*.mod
 */*.pyc
 */*/*.pyc
 */*/*/*.pyc
+*/*/*/*/*.pyc
 
+# Version tags
+gyro/.VERSION
+tgyro/.VERSION
+neo/.VERSION
 
 # Executables
 gato/gato
-gyro/peek/peek
 gyro/src/gyro
 neo/src/neo
 neo/tools/squeeze/squeeze
 neo/tools/vgen/vgen
 shared/profiles_gen/src/prgen
+shared/profiles_gen/locpargen/locpargen
 tglf/src/tglf
 tglf/src/xtglf
 tgyro/src/tgyro_main

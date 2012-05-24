@@ -5,6 +5,7 @@ PRO MIDPLANE_RMS_FLUCAMP_PLOT, LOCAL_NORM = local_norm, FINITE_N=finite_n, $
 ; 11/9/2007: added finite-n option
 ; 11/20/2007: added toroidal averaging
 ; 9/26/2008: updated to display magnetic fluctuations
+; 5/11/2012: updated to plot in (%) rathern than absolute levels
 
   common GLOBAL
   common PROFILE_SIM_DATA
@@ -61,6 +62,10 @@ PRO MIDPLANE_RMS_FLUCAMP_PLOT, LOCAL_NORM = local_norm, FINITE_N=finite_n, $
       rmsamp /= norm
       ytitle = ytitle + '(r)'
   ENDIF ELSE ytitle = ytitle + '(r!D0!N)'
+
+  ;convert to % rather than abs. value
+  rmsamp *= 100.
+  ytitle += ' (%)'
 
   mean_amp = MEAN(rmsamp[n_bnd:n_r-1-n_bnd])
   mean_sdom = SDOM(rmsamp[n_bnd:n_r-1-n_bnd])

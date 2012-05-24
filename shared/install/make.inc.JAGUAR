@@ -1,6 +1,22 @@
 #---------------------------------------------------
 # Cray XK6 (not the car) [PGI]
+#
+# JAGUAR SYSTEM INFO:
+# - Cray XK6
+# - 224,256 processor cores
+# - 18,688 compute nodes
+# - (2x) AMD Opteron 2435 (Istanbul) 6-core CPUs 
+#   per compute node running at 2.6GHz
+# - (2x) ccNUMA nodes per compute node (each 
+#   CPU referred to as NUMA node)
+# - each compute node has 16GiB RAM (1.3GiB per core)
+# - (1x) SeaStar2+ ASIC per compute node arranged 
+#   in 3D torus network topology
 #---------------------------------------------------
+
+# FIXED Hardware parameters
+CORES_PER_NODE=16
+NUMAS_PER_NODE=2
 
 # Compilers and flags
 

@@ -17,6 +17,7 @@ subroutine gyro_do
   implicit none
   !
   logical :: rfe
+  integer :: h5_control
   !--------------------------------------
 
   ! Begin with clean exit status
@@ -47,6 +48,9 @@ subroutine gyro_do
   !
   total_memory  = 0.0
   alltime_index = 0
+  cpu_maxindx   = 0
+  cpu           = -1.0
+  cpu_in        = 0.0
   !
   ! TIMER NOTES: 
   ! - print order follows init. order below,
@@ -208,7 +212,7 @@ subroutine gyro_do
      if (electron_method == 2) then
 
         ! Make advection operators for electrons
-        call make_implicit_advect(0)
+        call gyro_make_implicit_advect(0)
 
      endif
      !
@@ -226,21 +230,21 @@ subroutine gyro_do
      !
      ! Explicit (Poisson,Ampere)
      !
-     if (n_field == 3) then
-        call make_poissonaperp_matrix
-     else
-        call make_poisson_matrix
-     endif
-     !
-     if (n_field > 1) then
-        call make_electron_current(0)
-        call make_ampere_matrix
-     endif
-     !
+     select case (n_field)
+     case (1)
+        call gyro_make_poisson_matrix
+     case (2)
+        call gyro_make_poisson_matrix
+        call gyro_make_ampere_matrix
+     case (3)
+        call gyro_make_poissonaperp_matrix
+        call gyro_make_ampere_matrix
+     end select
+
      ! Implicit (Maxwell)
      !
      if (electron_method == 2) then
-        call make_maxwell_matrix
+        call gyro_make_maxwell_matrix
      endif
      !------------------------------------------------------
 
@@ -292,7 +296,7 @@ subroutine gyro_do
   !---------------------------------------------------------------
   ! I/O control for time-independent initial data
   !
-  if (io_method == 1 .or. io_method==2) then
+  if (io_method < 3) then
      call gyro_write_initdata(&
           trim(path)//'out.gyro.profile',&
           trim(path)//'out.gyro.units',&
@@ -317,7 +321,8 @@ subroutine gyro_do
   endif
   !------------------------------------------------------------
 
-  if (restart_method < 1) then
+  h5_control=(restart_method+1)*output_flag
+  if (restart_method == 0) then
      ! Open
      io_control = output_flag*1
   else
@@ -325,22 +330,26 @@ subroutine gyro_do
      io_control = output_flag*3
   endif
   if (gkeigen_j_set == 0) then
-     if (io_method >= 1) call gyro_write_timedata
-     if (io_method > 1) call gyro_write_timedata_hdf5
+     if (io_method < 3) call gyro_write_timedata
+     if (io_method > 1) then
+         call gyro_write_timedata_hdf5(h5_control)
+         if (time_skip_wedge > 0) call gyro_write_timedata_wedge_hdf5
+     endif
   endif
 
   !-------------------------------------------------
   ! NEW SIMULATION ONLY: write *initial conditions*
   !
+
   if (restart_method /= 1) then
+     ! Write to output files.
      io_control = output_flag*2
      if (gkeigen_j_set == 0) then
-        if (io_method == 1) then
-           call gyro_write_timedata
-        else
-           call gyro_write_timedata_hdf5
-           if (time_skip_wedge > 0) call gyro_write_timedata_wedge_hdf5
-        endif
+        if (io_method < 3) call gyro_write_timedata
+!        if (io_method > 1 ) then
+!           call gyro_write_timedata_hdf5(h5_control)
+!           if (time_skip_wedge > 0) call gyro_write_timedata_wedge_hdf5
+!        endif
      endif
   endif
   !--------------------------------------------

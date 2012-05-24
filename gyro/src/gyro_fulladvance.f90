@@ -12,6 +12,7 @@ subroutine gyro_fulladvance
 
   !----------------------------------------
   implicit none
+  integer :: h5_control
   !----------------------------------------
 
   h_old(:,:,:,:) = h(:,:,:,:)
@@ -67,10 +68,10 @@ subroutine gyro_fulladvance
   !
   ! 1. Compute flux-surface average of (phi,a)
   ! 
-  call get_field_fluxave
+  call gyro_field_fluxave
   !
   ! 2. Compute (phi,a) for plotting; we want to call 
-  !    get_field_plot every timestep because it is 
+  !    gyro_field_plot every timestep because it is 
   !    averaged (with a weight) over every timestep.
   !
   !    To compute E_parallel
@@ -79,7 +80,7 @@ subroutine gyro_fulladvance
   !
   !    then 
   !
-  call get_field_plot
+  call gyro_field_plot
   !
   ! 3. Compute (n,T) moments for plotting if user has 
   !    selected OUTPUT_METHOD > 1.
@@ -147,9 +148,10 @@ subroutine gyro_fulladvance
      ! Main data I/O handler
 
      io_control = 2*output_flag
+     h5_control = 2*output_flag
 
-     if (io_method > 0) call gyro_write_timedata
-     if (io_method > 1) call gyro_write_timedata_hdf5
+     if (io_method < 3 .and. io_method > 0) call gyro_write_timedata
+     if (io_method > 1) call gyro_write_timedata_hdf5(h5_control)
 
      !--------------------------------------------------
      ! Update diffusivity and flux time-record for TGYRO 

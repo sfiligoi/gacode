@@ -18,7 +18,6 @@ subroutine gyro_write_timedata
   !---------------------------------------------------
   implicit none
   !
-  real, dimension(:,:), allocatable :: a2
   real, dimension(:,:,:), allocatable :: a3
   !
   complex, dimension(n_theta_plot,n_x,n_kinetic) :: n_plot
@@ -132,7 +131,7 @@ subroutine gyro_write_timedata
           k_perp_squared)
   endif
 
-  call get_field_fluxave
+  call gyro_field_fluxave
 
   !-------------------------------------------------------------------
   ! Calculation of fundamental nonlinear fluxes and related 
@@ -213,7 +212,7 @@ subroutine gyro_write_timedata
      ! Distribution function data:
      !
      if (n_proc == 1 .and. n_n == 1 .and. dist_print == 1) then
-        call write_h(trim(path)//'out.gyro.hp',trim(path)//'out.gyro.ht',10,11)
+        call gyro_write_h(trim(path)//'out.gyro.hp',trim(path)//'out.gyro.ht',10,11)
      endif
      !-----------------------------------------------------------------
 
@@ -349,13 +348,9 @@ subroutine gyro_write_timedata
                 size(gbflux_i_trapped),gbflux_i_trapped)
         endif
 
-        allocate(a2(3,n_x))
-        a2(1,:) = phi_fluxave(:) 
-        a2(2,:) = a_fluxave(:)
-        a2(3,:) = aperp_fluxave(:)
         call write_local_real( &
-             trim(path)//'out.gyro.zerobar',10,size(a2),a2)
-        deallocate(a2)
+             trim(path)//'out.gyro.zerobar',10,&
+             size(field_fluxave),transpose(field_fluxave))
 
         allocate(a3(n_kinetic,4,n_x))
         do i=1,n_x
@@ -399,7 +394,7 @@ subroutine gyro_write_timedata
   ! Velocity-space diagnostics
   !
   if (velocity_output_flag == 1) then
-     call get_nonlinear_flux_velocity
+     call gyro_nonlinear_flux_velocity
      call write_distributed_real(&
           trim(path)//'out.gyro.flux_velocity',&
           10,&

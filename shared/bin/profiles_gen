@@ -60,6 +60,13 @@ then
    echo "              *.peq          : PEQDSK/ELITE text file"
    echo "              input.profiles : vgen or locpargen mode"
    echo 
+   echo "             -p <path>"
+   echo "             Set optional path to simulation directory."
+   echo "             [The default path is the current directory]"
+   echo
+   echo "             -e <workdir>"
+   echo "             Working directory (default is present directory)"
+   echo 
    echo "             -V"
    echo "             Verbose (for debugging; use this if you get an error)."
    echo 
@@ -78,6 +85,17 @@ then
    echo "             Version number (0=basic, 1=extra powers)."
    echo 
    echo "PLASMA STATE Options"
+   echo
+   echo "             -g <gfile>"
+   echo "             Merge EFIT gfile for high-precision geometry data."
+   echo 
+   echo "             -nogq"
+   echo "             Do not use q from GATO (by default, if gfile is specified q is from GATO)."
+   echo 
+   echo "             -r <reorder sequence>"
+   echo "             Reorder ions."
+   echo
+   echo "CORSICA Options"
    echo
    echo "             -g <gfile>"
    echo "             Merge EFIT gfile for high-precision geometry data."
@@ -214,6 +232,9 @@ then
    echo 
    echo "             -loc_rho <rho>"
    echo "             Reference rho=sqrt[chi/chi(a)]"
+   echo 
+   echo "             -loc_psi <psi_N>"
+   echo "             Reference psi_N=psi/psi(a)"
    echo
    echo "EXAMPLES:"
    echo " "
@@ -265,6 +286,9 @@ fi
 #=============================================================
 # Define variables for flag capture
 #
+# Default working root 
+SIMROOT=$PWD
+
 CONFIG=.config
 
 GATO_DPSISL=0.0
@@ -285,9 +309,11 @@ MODINP_FLAG=0
 
 LOC_RAD=0
 LOC_RHO=0
+LOC_PSI=0
 Z1=1.0
 Z2=6.0
 Z3=2.0
+
 #=============================================================
 
 #=============================================================
@@ -305,6 +331,10 @@ ord_vec[4]=5
 #
 while [ $# -gt 0 ] ; do
   case "$1" in 
+
+  -p) shift ; SIMROOT=$1 ;;
+
+  -e) shift ; LOCDIR=$1 ;;
 
   -h) echo "1" > $CONFIG ; submit ; exit 0 ;;
 
@@ -384,12 +414,22 @@ while [ $# -gt 0 ] ; do
 
   -loc_rad) shift ; LOC_RAD=$1 ;;
   -loc_rho) shift ; LOC_RHO=$1 ;;
+  -loc_psi) shift ; LOC_PSI=$1 ;;
 
   esac
   shift
 done
 
 #=============================================================
+
+if [ "$LOCDIR" == "." ]
+then
+   LOCDIR=`basename $PWD`
+   cd .. ; SIMROOT=$PWD
+fi
+SIMDIR=$SIMROOT/$LOCDIR
+
+cd $SIMDIR
 
 #=============================================================
 # Call transp2gyro if specified and pass it the iterdb args
@@ -441,7 +481,7 @@ fi
 #=============================================================
 # Manage execution of locpargen
 
-if [ "$LOC_RAD" != "0" ] || [ "$LOC_RHO" != "0" ]
+if [ "$LOC_RAD" != "0" ] || [ "$LOC_RHO" != "0" ] || [ "$LOC_PSI" != "0" ]
 then
   if [ ! -f $LOCPARGEN ]
   then
@@ -451,6 +491,7 @@ then
   python $GACODE_ROOT/shared/bin/profile_parse.py $FILE
   echo $LOC_RAD > input.locpargen
   echo $LOC_RHO >> input.locpargen
+  echo $LOC_PSI >> input.locpargen
   echo $Z1 >> input.locpargen
   echo $Z2 >> input.locpargen
   echo $Z3 >> input.locpargen
@@ -489,10 +530,12 @@ then
       fi
    fi
  
-   cp ../input.profiles .
-   if [ -f "../input.profiles.geo" ]
+   cp ../$FILE input.profiles
+   if [ -f "../$FILE.geo" ]
        then
-       cp ../input.profiles.geo .
+       cp ../$FILE.geo input.profiles.geo
+   else
+       echo "Warning: $FILE.geo not found."
    fi
 
    python $NEO_DIR/bin/neo_parse.py
@@ -516,7 +559,7 @@ else
    # Clean old input.profiles* data.
 
    echo "INFO: (profiles_gen) Removing old input.profiles* files"
-   rm -rf input.profiles input.profiles.*
+   rm -rf input.profiles input.profiles.geo input.profiles.extra
 
 fi 
 #=============================================================
@@ -767,3 +810,5 @@ else
    mv grid.dat out.gato.grid
 fi
 #==============================================================
+
+cd $SIMROOT

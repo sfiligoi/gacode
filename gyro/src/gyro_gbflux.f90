@@ -27,9 +27,6 @@ subroutine gyro_gbflux
   real, dimension(n_kinetic,n_field,p_moment) :: gbflux_loc
   real, dimension(n_kinetic,n_field,p_moment) :: gbflux_loc_trapped
   real :: gbflux_norm
-  !
-  ! Averaging window
-  real, parameter :: f_ave = 0.9
   !-------------------------------------------------------------
 
   !-----------------------------------------------------
@@ -65,7 +62,7 @@ subroutine gyro_gbflux
   !-----------------------------------------------------------------
   ! Define factors useful for quasilinear normalizations
   !
-  call get_phi_squared
+  call gyro_phi_kp_squared
   !-----------------------------------------------------------------
 
   !-----------------------------------------------------------------
@@ -183,7 +180,7 @@ subroutine gyro_gbflux
   endif
 
   ! Compute running time-average of radially-dependent fluxes
-  if (step > int((1.0-f_ave)*nstep)) then
+  if (step > int((1.0-fluxaverage_window)*nstep)) then
      p_ave = p_ave+1
      gbflux_vec(:,:,:,:) = ((p_ave-1)*gbflux_vec(:,:,:,:)+gbflux_i(:,:,:,:))/p_ave
   else

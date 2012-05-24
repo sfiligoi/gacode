@@ -51,6 +51,11 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc, N_ion=N_ion
 ; v3.0: March 3, 2011
 ; updated to be compatible with new gacode file structure
 ;
+; v3.1: May 2, 2012
+; updated to read in expt. data points from files name, ne_data.txt,
+; te_data.txt, ti_data.txt in TGYRO dir and pass along- no problem if
+;                                                       not available
+
   IF N_ELEMENTS(simdir) EQ 0 THEN BEGIN
       MESSAGE, 'Need to specify a directory!', /INFO
       RETURN, 0
@@ -138,19 +143,19 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc, N_ion=N_ion
   READF, 1, s
   READF, 1, arr
   exp_Vtor = REFORM(arr[0,*])
-  exp_Vtor2 = REFORM(arr[0,*])
-  exp_Vtor3 = REFORM(arr[0,*])
-  exp_Vtor4 = REFORM(arr[0,*])
-  exp_Vtor5 = REFORM(arr[0,*])
+  exp_Vtor2 = REFORM(arr[1,*])
+  exp_Vtor3 = REFORM(arr[2,*])
+  exp_Vtor4 = REFORM(arr[3,*])
+  exp_Vtor5 = REFORM(arr[4,*])
 
   READF, 1, s
   READF, 1, s
   READF, 1, arr
   exp_Vpol = REFORM(arr[0,*])
-  exp_Vpol2 = REFORM(arr[0,*])
-  exp_Vpol3 = REFORM(arr[0,*])
-  exp_Vpol4 = REFORM(arr[0,*])
-  exp_Vpol5 = REFORM(arr[0,*])
+  exp_Vpol2 = REFORM(arr[1,*])
+  exp_Vpol3 = REFORM(arr[2,*])
+  exp_Vpol4 = REFORM(arr[3,*])
+  exp_Vpol5 = REFORM(arr[4,*])
 
   CLOSE, 1
 
@@ -484,7 +489,7 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc, N_ion=N_ion
   Qi2_neo = FLTARR(NX,N_it)
   Qi2_tur = FLTARR(NX,N_it)
 
-  IF (N_ion EQ 2) THEN BEGIN
+  IF (N_ion GE 2) THEN BEGIN
 
      ;read chi_i2.out
      Di2_neo = FLTARR(NX,N_it)
@@ -524,7 +529,52 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc, N_ion=N_ion
      ENDFOR
      CLOSE, 1
   ENDIF
- 
+
+ ne_data_rho = -1
+ ne_data = 0
+ ne_data_err = 0
+ OPENR, 1, dirpath + 'ne_data.txt', ERR=err
+ IF (err EQ 0) THEN BEGIN
+     READF, 1, n_data_pts
+     arr = FLTARR(3,n_data_pts)
+     READF, 1, arr
+     CLOSE, 1
+
+     ne_data_rho = REFORM(arr[0,*])
+     ne_data = REFORM(arr[1,*])
+     ne_data_err = REFORM(arr[2,*])
+ ENDIF
+
+ te_data_rho = -1
+ te_data = 0
+ te_data_err = 0
+ OPENR, 1, dirpath + 'te_data.txt', ERR=err
+ IF (err EQ 0) THEN BEGIN
+     READF, 1, n_data_pts
+     arr = FLTARR(3,n_data_pts)
+     READF, 1, arr
+     CLOSE, 1
+
+     te_data_rho = REFORM(arr[0,*])
+     te_data = REFORM(arr[1,*])
+     te_data_err = REFORM(arr[2,*])
+ ENDIF
+
+ ti_data_rho = -1
+ ti_data = 0
+ ti_data_err = 0
+ OPENR, 1, dirpath + 'ti_data.txt', ERR=err
+ IF (err EQ 0) THEN BEGIN
+     READF, 1, n_data_pts
+     arr = FLTARR(3,n_data_pts)
+     READF, 1, arr
+     CLOSE, 1
+
+     ti_data_rho = REFORM(arr[0,*])
+     ti_data = REFORM(arr[1,*])
+     ti_data_err = REFORM(arr[2,*])
+ ENDIF
+
  data = {simdir: simdir, $     ;simulation directory
 
           ;experimental profile info, form FLTARR[EXP_N_RHO]
@@ -655,7 +705,18 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc, N_ion=N_ion
           Gi2_neo: Gi2_neo, $
           Gi2_tur: Gi2_tur, $
           Qi2_neo: Qi2_neo, $
-          Qi2_tur: Qi2_tur $
+          Qi2_tur: Qi2_tur, $
+
+          ;expt. data points
+         ne_data_rho: ne_data_rho, $
+         ne_data: ne_data, $
+         ne_data_err: ne_data_err, $
+         te_data_rho: te_data_rho, $
+         te_data: te_data, $
+         te_data_err: te_data_err, $
+         ti_data_rho: ti_data_rho, $
+         ti_data: ti_data, $
+         ti_data_err: ti_data_err $
          }
   RETURN, data
 END ;get_tgyro_loc_data

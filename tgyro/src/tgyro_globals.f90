@@ -229,6 +229,7 @@ module tgyro_globals
   real :: loc_dx_max
   real :: loc_relax
   integer :: loc_lock_profile_flag
+  integer :: loc_evolve_grad_only_flag
   integer :: loc_restart_flag
   integer :: loc_scenario
   integer :: loc_quasineutral_flag
@@ -269,6 +270,7 @@ module tgyro_globals
   real :: tgyro_stab_deltaky
   real :: tgyro_rmin
   real :: tgyro_rmax
+  integer :: tgyro_global_radii
   !
   ! Iteration variables (global)
   !
@@ -280,6 +282,12 @@ module tgyro_globals
   integer :: i_tran
   integer :: i_bc
   integer :: flux_counter
+  !
+  ! Global TGYRO variables
+  integer :: igmin
+  integer :: igmax
+  real :: length
+  real :: dlength 
   !---------------------------------------------------------
 
 end module tgyro_globals

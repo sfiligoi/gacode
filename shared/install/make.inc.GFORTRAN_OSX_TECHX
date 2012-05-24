@@ -14,13 +14,13 @@ MAKE = make
 #
 #set up for diff mpif90s
 #
-#MF90 = mpif90
-MF90 = openmpif90
+MF90 = mpif90
+#MF90 = openmpif90
 
 FC	= ${MF90} -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -g 
 F77	= ${MF90} -g 
 
-FMATH	= -fdefault-real-8
+FMATH	= -fdefault-real-8 -fdefault-double-8
 FOPT	= -O3
 FDEBUG	= -Wall -fbacktrace -fbounds-check -O0 -Wextra -finit-real=nan -Wunderflow -ffpe-trap=invalid,zero,overflow
 FBOUND	= -Wall -fbounds-check

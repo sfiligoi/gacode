@@ -66,8 +66,10 @@
       REAL :: aky1_save=0.0
       REAL :: rmin_save=-1.0
       REAL :: particle_flux_tg(2,2),energy_flux_tg(2,2)
+      REAL :: stress_par_tg(2,2)
       INTEGER :: nmodes,nfields,nplot,jmode
       REAL :: angle(max_plot)
+      REAL :: factor1,factor2
       COMPLEX :: wavefunction(maxmodes,3,max_plot)
 !
       if(firstcall)then
@@ -117,8 +119,7 @@
 !     >   theta_trap_tg,xnu_fac_tg,debye_factor_tg
 !
       CALL put_model_parameters(adiabatic_elec_tg,alpha_e_tg,alpha_p_tg,
-     > alpha_n_tg,alpha_t_tg,alpha_kx_e_tg,alpha_kx_p_tg,    
-     > alpha_kx_n_tg,alpha_kx_t_tg,alpha_quench_tg,xnu_factor_tg,
+     > alpha_quench_tg,xnu_factor_tg,
      > debye_factor_tg,etg_factor_tg,sat_rule_tg,kygrid_model_tg,
      > xnu_model_tg,vpar_model_tg,vpar_shear_model_tg)
 !
@@ -163,9 +164,9 @@
       rlts_tg(2) = tprim1
       rlts_tg(3) = tprim1
       vexb_shear_tg= egamma
-      vpar_shear_tg(1)=sign_Bt_tg*uprim3/SQRT(2.0/temp3)
-      vpar_shear_tg(2)=sign_Bt_tg*uprim1/SQRT(2.0/temp3)
-      vpar_shear_tg(3)=sign_Bt_tg*uprim2/SQRT(2.0/temp3)
+      vpar_shear_tg(1)=uprim3/SQRT(2.0/temp3)
+      vpar_shear_tg(2)=uprim1/SQRT(2.0/temp3)
+      vpar_shear_tg(3)=uprim2/SQRT(2.0/temp3)
 !      write(*,*)"gradients",rlns_tg(1),rlns_tg(2),rlns_tg(3)
 !      write(*,*)rlts_tg(1),rlts_tg(2),rlts_tg(3)
 !      write(*,*)"vexb_shear_tg=",vexb_shear_tg
@@ -182,9 +183,10 @@
         as_tg(1) = 1.0
         as_tg(2) = an1
         as_tg(3) = an2
-        vpar_tg(1)=sign_Bt_tg*mach3
-        vpar_tg(2)=sign_Bt_tg*mach1
-        vpar_tg(3)=sign_Bt_tg*mach2
+        vpar_tg(1)=mach3
+        vpar_tg(2)=mach1
+        vpar_tg(3)=mach2
+        vexb_tg=0.0
         if(ncspec2.eq.0)as_tg(3)=0.0  ! treat impurity as dilution only
         betae_tg = beta*temp3   
         xnue_tg = cnewk3*SQRT(2.0/temp3)*vnewk3
@@ -194,17 +196,18 @@
 !        write(*,*)taus_tg(1),taus_tg(2),taus_tg(3)
 !        write(*,*)as_tg(1),as_tg(2),as_tg(3)
 !
-      CALL put_averages(taus_tg,as_tg,vpar_tg,betae_tg,xnue_tg,
-     >  zeff_tg,debye_tg)
+      CALL put_averages(taus_tg,as_tg,vpar_tg,vexb_tg,betae_tg,
+     >  xnue_tg,zeff_tg,debye_tg)
 !
         rmin_tg = eps/epsa
         rmaj_tg = 1.0/epsa
         q_tg = 2.0*epsa/pk
         shat_tg = shat
         alpha_tg = shift
+        theta0_tg = -3.1416*thetamin   ! note sign flip
         if(igyro_fix.eq.1)b_model_tg=1
 !        write(*,*)"geometry",rmin_tg,rmaj_tg,q_tg,shat_tg,alpha_tg
-!
+        write(*,*)"theta0_tg=",theta0_tg
         if(new_gridpoint)CALL put_s_alpha_geometry(rmin_tg,rmaj_tg,q_tg,
      > shat_tg,alpha_tg,xwell_tg,theta0_tg,b_model_tg,ft_model_tg)
 !        write(*,*)"debug",new_gridpoint,xwell_tg,theta0_tg,
@@ -227,7 +230,7 @@
 !        write(*,*)taus_tg(1),taus_tg(2),taus_tg(3)
 !        write(*,*)as_tg(1),as_tg(2),as_tg(3)
 !
-      CALL put_averages(taus_tg,as_tg,vpar_tg,betae_tg,
+      CALL put_averages(taus_tg,as_tg,vpar_tg,vexb_tg,betae_tg,
      >  xnue_tg,zeff_tg,debye_tg)
 !
         rmin_tg = rmin_loc
@@ -259,7 +262,7 @@
         if(new_gridpoint)then
           CALL put_Miller_geometry(rmin_tg,rmaj_tg,zmaj_tg,drmindx_tg,
      >    drmajdx_tg,dzmajdx_tg,kappa_tg,s_kappa_tg,delta_tg,s_delta_tg,
-     >    zeta_tg,s_zeta_tg,q_tg,q_prime_tg,p_prime_tg)
+     >    zeta_tg,s_zeta_tg,q_tg,q_prime_tg,p_prime_tg,kx0_tg)
         endif
       else
         write(*,*)"igeo_tg invalid",igeo_tg
@@ -321,17 +324,24 @@
         energy_flux_tg(1,2) = get_QL_energy_flux(1,2,1)
         energy_flux_tg(2,1) = get_QL_energy_flux(2,1,1)
         energy_flux_tg(2,2) = get_QL_energy_flux(2,2,1)
+        stress_par_tg(1,1) = get_QL_stress_par(1,1,1)
+        stress_par_tg(1,2) = get_QL_stress_par(1,2,1)
+        stress_par_tg(2,1) = get_QL_stress_par(2,1,1)
+        stress_par_tg(2,2) = get_QL_stress_par(2,2,1)
 !
 ! set fluxes for the most unstable mode in GKS units
 !
+        factor1 = sqrt(2.0/temp3)/temp3
+        factor2 = factor1/sqrt(temp3)
         n=1
         if(agammas(2).gt.agammas(3))n=2
-        peflxa=particle_flux_tg(n,1)*SQRT(2.0/temp3)/temp3
-        eeflxa=energy_flux_tg(n,1)*SQRT(2.0/temp3)/temp3
-        eiflxa=energy_flux_tg(n,2)*SQRT(2.0/temp3)/temp3
-        mflxea(1)=get_QL_stress_par(1,2,1)*SQRT(2.0/temp3)/temp3
+        peflxa=particle_flux_tg(n,1)*factor1
+        eeflxa=energy_flux_tg(n,1)*factor2
+        eiflxa=energy_flux_tg(n,2)*factor2
+        miflxa=stress_par_tg(n,2)*factor2
         if(ncspec2.ne.0)then
-          eiflxa=eiflxa+get_QL_energy_flux(n,3,1)*SQRT(2.0/temp3)/temp3
+          eiflxa=eiflxa+get_QL_energy_flux(n,3,1)*factor2
+          miflxa=miflxa+get_QL_stress_par(n,3,1)*factor2
         endif
 ! save the fluctuation intensities summed over nmodes_tg
         phi_bar_k = 0.0
@@ -460,8 +470,8 @@
         CALL put_species(ns_tg,zs_tg,mass_tg) 
         CALL put_gradients(rlns_tg,rlts_tg,vpar_shear_tg,
      > vexb_shear_tg)
-        CALL put_averages(taus_tg,as_tg,vpar_tg,betae_tg,xnue_tg,
-     >  zeff_tg,debye_tg)
+        CALL put_averages(taus_tg,as_tg,vpar_tg,vexb_tg,
+     >  betae_tg,xnue_tg,zeff_tg,debye_tg)
 !
       if(igeo_tg.eq.0)then
         CALL put_s_alpha_geometry(rmin_tg,rmaj_tg,q_tg,
@@ -469,7 +479,7 @@
       elseif(igeo_tg.eq.1)then
         CALL put_Miller_geometry(rmin_tg,rmaj_tg,zmaj_tg,drmindx_tg,
      >  drmajdx_tg,dzmajdx_tg,kappa_tg,s_kappa_tg,delta_tg,s_delta_tg,
-     >  zeta_tg,s_zeta_tg,q_tg,q_prime_tg,p_prime_tg)
+     >  zeta_tg,s_zeta_tg,q_tg,q_prime_tg,p_prime_tg,kx0_tg)
       endif
 !
       RETURN

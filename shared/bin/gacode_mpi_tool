@@ -1,0 +1,63 @@
+# Calculator for task/thread layout for hybrid MPI - OpemMP jobs.
+#
+# nmpi = MPI tasks
+# nomp = OpenMP threads per MPI task
+# numa = NUMAs active per node
+# mpinuma = MPI tasks per active NUMA 
+
+# Extract CORES_PER_NODE and NUMAS_PER_NODE
+export `grep PER_NODE $GACODE_ROOT/shared/install/make.inc.$GACODE_PLATFORM`
+
+# Default to densely-packed pure-MPI.
+if [ $numa -eq 0 ]
+then
+   numa=$NUMAS_PER_NODE
+fi
+if [ $mpinuma -eq 0 ]
+then
+   mpinuma=$(($CORES_PER_NODE/$NUMAS_PER_NODE))
+fi
+
+# See if we are asking for too many NUMAs
+if [ $numa -gt $NUMAS_PER_NODE ] 
+then
+  echo 'Too many NUMAs per node requested'
+  exit 1
+fi
+
+# See if we are asking for too many OpenMP tasks
+i1=$(($nomp*$mpinuma))
+i2=$(($CORES_PER_NODE/$NUMAS_PER_NODE)) 
+if [ $i1 -gt $i2 ] 
+then
+   echo 'Too many OpenMP tasks per MPI process'
+   exit 1
+fi
+
+# MPI tasks per node
+mpinode=$(($mpinuma*$numa))
+# Not enought MPI tasks to fill node?
+if [ $nmpi -lt $mpinode ]
+then
+   mpinode=$nmpi
+fi
+# Not enought MPI tasks to fill numa?
+if [ $nmpi -lt $mpinuma ]
+then
+   mpinuma=$nmpi
+   numa=1
+fi
+
+# Nodes requested 
+nodes=$(($nmpi/$mpinode))
+
+# If we need part of a node, then add a node
+if [ $nmpi -gt $(($nodes*$mpinode)) ] 
+then
+   nodes=$(($nodes+1))
+   echo "WARNING: Using partial node"
+fi
+
+# Final core counts
+cores_requested=$(($nodes*$CORES_PER_NODE))
+cores_used=$(($nomp*$nmpi))

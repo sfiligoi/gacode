@@ -6,16 +6,17 @@
 !
       IMPLICIT NONE
 ! local variables
-      INTEGER :: i,j,k,nfields
+      INTEGER :: i,j,k,nfields,ierr
       REAL :: cmult,a_unit=100.0,B_unit=10000.0
       REAL :: t,dt
 ! timing test
       INTEGER :: time_array(8)
       REAL :: cpu1,cpu2 
 !
+
 !      CALL tglf
 !      write(*,*)"gamma=",get_growthrate(1)
-      OPEN (unit=3,file='tglfin',status='old')
+      OPEN (unit=3,file='./tglfin',status='old')
       READ(3,nml=tglfin)
       CLOSE(3)
 !
@@ -28,8 +29,7 @@
       CALL put_species(ns_tg,zs_tg,mass_tg) 
 !
       CALL put_model_parameters(adiabatic_elec_tg,alpha_e_tg,alpha_p_tg    &
-      ,alpha_n_tg,alpha_t_tg,alpha_kx_e_tg,alpha_kx_p_tg,alpha_kx_n_tg     &
-      ,alpha_kx_t_tg,alpha_quench_tg,xnu_factor_tg,debye_factor_tg         &
+      ,alpha_quench_tg,xnu_factor_tg,debye_factor_tg                       &
       ,etg_factor_tg,sat_rule_tg,kygrid_model_tg,xnu_model_tg              &
       ,vpar_model_tg,vpar_shear_model_tg)
 !      
@@ -40,9 +40,7 @@
 !
       CALL put_gradients(rlns_tg,rlts_tg,vpar_shear_tg,vexb_shear_tg)
 !
-      CALL put_profile_shear(vns_shear_tg,vts_shear_tg)
-!
-      CALL put_averages(taus_tg,as_tg,vpar_tg,betae_tg,xnue_tg,zeff_tg,debye_tg)
+      CALL put_averages(taus_tg,as_tg,vpar_tg,vexb_tg,betae_tg,xnue_tg,zeff_tg,debye_tg)
 !
       if(igeo_tg.eq.0)then
         CALL put_s_alpha_geometry(rmin_tg,rmaj_tg,q_tg,shat_tg,alpha_tg, &
@@ -50,7 +48,7 @@
       elseif(igeo_tg.eq.1)then
 !        q_prime_tg = shat_tg*(q_tg/rmin_tg)**2
         CALL put_Miller_geometry(rmin_tg,rmaj_tg,zmaj_tg,drmindx_tg,drmajdx_tg,dzmajdx_tg, &
-         kappa_tg,s_kappa_tg,delta_tg,s_delta_tg,zeta_tg,s_zeta_tg,q_tg,q_prime_tg,p_prime_tg)
+         kappa_tg,s_kappa_tg,delta_tg,s_delta_tg,zeta_tg,s_zeta_tg,q_tg,q_prime_tg,p_prime_tg,kx0_tg)
       elseif(igeo_tg.eq.2)then
         CALL put_Fourier_geometry(q_tg,q_prime_tg,p_prime_tg,nfourier_tg,fourier_tg)
       elseif(igeo_tg.eq.3)then

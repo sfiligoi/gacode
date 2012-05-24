@@ -10,6 +10,7 @@
 
 subroutine tgyro_write_data(i_print)
 
+  use mpi
   use tgyro_globals
 
   implicit none

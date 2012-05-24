@@ -15,10 +15,11 @@ contains
   subroutine COLLISION_alloc(flag)
     use gkcoll_globals
     use gkcoll_gyro
-    use gkcoll_equilibrium, only : omega_trap
+    use gkcoll_equilibrium, only : omega_trap, k_perp
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
-    real, dimension(:,:,:), allocatable :: nu_d
+    real, dimension(:,:,:), allocatable :: nu_d, nu_s
+    real, dimension(:,:), allocatable :: rs
     real, external :: derf
     real :: xa, xb, tauinv_ab
     real :: sum_nu, sum_den
@@ -32,12 +33,15 @@ contains
     complex :: beta  = (0.0,0.0) 
 
     if(collision_model == -1) return
+    if(imp_flag==2) return
 
     if(flag == 1) then
        if(initialized) return
        
        allocate(nu_d(n_energy,n_species,n_species))
-       
+       allocate(nu_s(n_energy,n_species,n_species))
+       allocate(rs(n_species,n_species))
+
        do ie=1,n_energy
           do is=1,n_species
              do js=1,n_species
@@ -46,24 +50,47 @@ contains
                 tauinv_ab = nu(is) * (1.0*Z(js))**2 / (1.0*Z(is))**2 &
                      * dens(js)/dens(is)
                 
-                if(is == js .or. &
-                     (abs(mass(is) - mass(js)) < epsilon(0.))) then
-                   ! case 1: like-species/same mass collisions
+                if(collision_model == 1) then
+                   ! Connor model
+                   if(is == js .or. &
+                        (abs(mass(is) - mass(js)) < epsilon(0.))) then
+                      ! case 1: like-species/same mass collisions
+                      nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
+                           * (exp(-xb*xb)/(xb*sqrt(pi)) &
+                           + (1.0-1.0/(2.0*xb*xb)) * DERF(xb))
+                      
+                   else if(mass(is) < mass(js)) then
+                      ! case 2: ele-ion and ion-imp(heavy) collisions
+                      nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3)
+                      
+                   else
+                      ! case 3: ion-ele and imp(heavy)-ion collisions
+                      nu_d(ie,is,js) = tauinv_ab * 4.0/(3.0*sqrt(pi)) &
+                           * sqrt(mass(js)/mass(is)) &
+                           * (temp(is)/temp(js))**1.5
+                   endif
+                   nu_s(ie,is,js) = nu_d(ie,is,js)
+                   
+                else
+                   ! Reduced Hirshman-Sigmar model
                    nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
                         * (exp(-xb*xb)/(xb*sqrt(pi)) &
                         + (1.0-1.0/(2.0*xb*xb)) * DERF(xb))
-                   
-                else if(mass(is) < mass(js)) then
-                   ! case 2: ele-ion and ion-imp(heavy) collisions
-                   nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3)
-                   
-                else
-                   ! case 3: ion-ele and imp(heavy)-ion collisions
-                   nu_d(ie,is,js) = tauinv_ab * 4.0/(3.0*sqrt(pi)) &
-                        * sqrt(mass(js)/mass(is)) &
-                        * (temp(is)/temp(js))**1.5
-                   
+                   nu_s(ie,is,js) = tauinv_ab * (1.0/xa) &
+                        * (-exp(-xb*xb)/(xb*sqrt(pi)) &
+                        + (1.0/(2.0*xb*xb)) * DERF(xb)) &
+                        * (2.0*temp(is)/temp(js))*(1.0+mass(js)/mass(is))
                 endif
+                
+             enddo
+          enddo
+       enddo
+
+       do is=1,n_species
+          do js=1,n_species
+             rs(is,js) = 0.0
+             do ie=1,n_energy
+                rs(is,js) = rs(is,js) + w_e(ie) * nu_s(ie,is,js) * energy(ie)
              enddo
           enddo
        enddo
@@ -115,7 +142,7 @@ contains
                                pp = indx_coll(js,je,jx)
                                
                                if(is==js .and. ie==je .and. ix==jx) then
-                                  ! Collision component
+                                  ! Collision component: Lorentz
                                   
                                   sum_nu = 0.0
                                   do ks=1,n_species
@@ -136,11 +163,52 @@ contains
                                        * (indx_xi(ix)+1.0) * sum_nu
                                endif
 
+                               ! Collision component: Restoring
+                               if(indx_xi(ix)==1 .and. indx_xi(jx)==1) then 
+                                  if(abs(rs(is,js)) > epsilon(0.)) then
+                                     cmat(ir,it,p,pp)  &
+                                          =  cmat(ir,it,p,pp) &
+                                          - (0.5*delta_t) &
+                                          * (mass(js)/mass(is)) &
+                                          *(dens(js)/dens(is)) &
+                                          * (vth(js)/vth(is)) &
+                                          * nu_s(ie,is,js) * sqrt(energy(ie)) &
+                                          * nu_s(je,js,is) * sqrt(energy(je)) &
+                                          * w_e(je)/ rs(is,js)
+                                     amat(p,pp)  &
+                                          =  amat(p,pp) &
+                                          + (0.5*delta_t) &
+                                          * (mass(js)/mass(is)) &
+                                          *(dens(js)/dens(is)) &
+                                          * (vth(js)/vth(is)) &
+                                          * nu_s(ie,is,js) * sqrt(energy(ie)) &
+                                          * nu_s(je,js,is) * sqrt(energy(je)) &
+                                          * w_e(je)/ rs(is,js)
+                                  endif
+                                  if(collision_model == 2) then
+                                     if(is==js .and. ie==je) then
+                                        sum_nu = 0.0
+                                        do ks=1,n_species
+                                           sum_nu = sum_nu &
+                                                + (nu_d(ie,is,ks) &
+                                                -nu_s(ie,is,ks))
+                                        enddo
+                                        cmat(ir,it,p,pp)  &
+                                          =  cmat(ir,it,p,pp) &
+                                          - (0.5*delta_t) * sum_nu
+                                        amat(p,pp)  &
+                                          =  amat(p,pp) &
+                                          + (0.5*delta_t) * sum_nu
+                                     endif
+                                  endif
+                               endif
+
                                ! Poisson component 
                                cmat(ir,it,p,pp)  &
                                     =  cmat(ir,it,p,pp) &
                                     - z(is)/temp(is) / &
-                                    (-lambda_debye**2 * dens_ele / temp_ele &
+                                    (-k_perp(it,ir)**2 * lambda_debye**2 &
+                                    * dens_ele / temp_ele &
                                      + sum_den) &
                                     * (2.0*indx_xi(ix) + 1) &
                                     * gyrop_J0(is,ir,it,ie,ix) &
@@ -149,7 +217,8 @@ contains
                                amat(p,pp)  &
                                     =  amat(p,pp) &
                                     - z(is)/temp(is) / &
-                                    (-lambda_debye**2 * dens_ele / temp_ele &
+                                    (-k_perp(it,ir)**2 * lambda_debye**2 &
+                                    * dens_ele / temp_ele &
                                      + sum_den) &
                                     * (2.0*indx_xi(ix) + 1) &
                                     * gyrop_J0(is,ir,it,ie,ix) &
@@ -159,7 +228,7 @@ contains
                                ! Trapping component
                                if(trap_method /= 0) then
                                   if(is==js .and. ie==je) then
-                                     if(jx == ix+1) then
+                                     if(indx_xi(jx) == indx_xi(ix+1)) then
                                         cmat(ir,it,p,pp)  &
                                              =  cmat(ir,it,p,pp) & 
                                              + (0.5*delta_t) &
@@ -176,7 +245,7 @@ contains
                                              * (indx_xi(ix)+1.0) &
                                              * (indx_xi(ix)+2.0) &
                                              / (2*indx_xi(ix)+3.0)
-                                     else if(jx == ix-1) then
+                                     else if(indx_xi(jx) == indx_xi(ix-1)) then
                                         cmat(ir,it,p,pp)  &
                                              =  cmat(ir,it,p,pp) & 
                                              + (0.5*delta_t) &
@@ -221,6 +290,8 @@ contains
        deallocate(work)
        deallocate(i_piv)
        deallocate(nu_d)
+       deallocate(nu_s)
+       deallocate(rs)
 
        initialized = .true.
 
@@ -247,6 +318,7 @@ contains
     complex :: beta  = (0.0,0.0)
 
     if(collision_model == -1) return
+    if(imp_flag==2) return
 
     ! compute new collisional cap_H: H = h + ze/T G phi
     
@@ -277,7 +349,7 @@ contains
           enddo
           
           ! Compute the new phi
-          call POISSONp_do(ir,it)
+          call POISSONp_do
 
        enddo
     enddo

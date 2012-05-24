@@ -53,7 +53,7 @@ phib = np.reshape(data,(2,n_theta*n_radial,n_time),'F')
 # Construct complex eigenfunction at selected time
 phic = phib[0,:,itime]+1j*phib[1,:,itime]
 
-# Pick out the central point assuming n_radial is even:
+# Pick out the central point assuming n_radial is even:    
 if n_theta%2 == 0 : 
     i0 = n_theta*(n_radial/2)+n_theta/2
     phic = phic/phic[i0]
@@ -93,7 +93,7 @@ ax.set_xlabel(r'$\theta_*/\pi$',fontsize=GFONTSIZE)
 ax.plot(thetab/np.pi,np.real(phic),color='k',label='Re')
 ax.plot(thetab/np.pi,np.imag(phic),color='b',label='Im')
 
-ax.set_xlim([1-n_radial,-1+n_radial])
+#ax.set_xlim([1-n_radial,-1+n_radial])
 ax.legend()
 #======================================
 

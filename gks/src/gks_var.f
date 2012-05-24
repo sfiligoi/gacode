@@ -452,15 +452,17 @@
        real  eflxtea(nspecmax)                               !real
        real  eflxtma(nspecmax)                               !real
        real  mflxea(nspecmax)                                !real
-       real  peflx(-ntml:ntm)                                 !real
-       real  eeflx(-ntml:ntm)                                 !real
-       real  piflx(-ntml:ntm)                                 !real
-       real  eiflx(-ntml:ntm)                                 !real
-       real  peflxa                                       !real
-       real  eeflxa                                       !real
-       real  piflxa                                       !real
-       real  eiflxa                                       !real
-       real  cwave                                        !real
+       real  peflx(-ntml:ntm)                                !real
+       real  eeflx(-ntml:ntm)                                !real
+       real  piflx(-ntml:ntm)                                !real
+       real  eiflx(-ntml:ntm)                                !real
+       real  miflx(-ntml:ntm)                                !real
+       real  peflxa                                          !real
+       real  eeflxa                                          !real
+       real  piflxa                                          !real
+       real  eiflxa                                          !real
+       real  miflxa                                          !real
+       real  cwave                                           !real
        real ominst           !real
        real  tol              !real
        real  gamma            !real

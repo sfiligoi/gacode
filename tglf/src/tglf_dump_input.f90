@@ -248,6 +248,8 @@
  write(22,*) tglf_vpar_in(5)
  write(21,*) "tglf_vpar_in(6) = ",tglf_vpar_in(6)
  write(22,*) tglf_vpar_in(6)
+ write(21,*) "tglf_vexb_in = ", tglf_vexb_in
+ write(22,*) tglf_vexb_in
  write(21,*) "tglf_betae_in = ",tglf_betae_in
  write(22,*) tglf_betae_in
  write(21,*) "tglf_xnue_in = ",tglf_xnue_in

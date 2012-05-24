@@ -1,9 +1,8 @@
-      MODULE tglf_dimensions
+      MODULE tglf_max_dimensions
 !
 ! global dimensions for shared arrays
 !
       IMPLICIT NONE
-      SAVE
 !
       INTEGER, PARAMETER :: nb=32
       INTEGER, PARAMETER :: nxm=4*nb-1
@@ -15,13 +14,23 @@
       INTEGER, PARAMETER :: max_fourier = 16
       INTEGER, PARAMETER :: ms = 128  ! ms needs to be divisible by 8
       INTEGER, PARAMETER :: max_plot =6*ms/8+1
+!
+      END MODULE tglf_max_dimensions
+!
+      MODULE tglf_dimensions
+      USE tglf_max_dimensions
+!
 ! dimensions determined by inputs
+! 
+      IMPLICIT NONE
+      SAVE
+!
       INTEGER nx,nbasis,ns0,ns
 !
       END MODULE tglf_dimensions
 !
       MODULE tglf_global
-      USE tglf_dimensions
+      USE tglf_max_dimensions
 !
 !  global controls for the tglf driver routine
 !
@@ -78,16 +87,16 @@
       REAL :: gradB_factor_in=0.0
       REAL :: filter_in=2.0
       INTEGER :: sat_rule_in=0
-      REAL :: alpha_kx_e_in=1.0
-      REAL :: alpha_kx_p_in=1.0
-      REAL :: alpha_kx_n_in=1.0
-      REAL :: alpha_kx_t_in=1.0
+      REAL :: alpha_kx_e_in=0.0
+      REAL :: alpha_kx_p_in=0.0
+      REAL :: alpha_kx_n_in=0.0
+      REAL :: alpha_kx_t_in=0.0
 ! Input model paramaters
       LOGICAL :: adiabatic_elec_in=.FALSE.
       REAL :: alpha_p_in=1.0
       REAL :: alpha_e_in=1.0
-      REAL :: alpha_n_in =1.0
-      REAL :: alpha_t_in =1.0
+      REAL :: alpha_n_in =0.0
+      REAL :: alpha_t_in =0.0
       REAL :: theta_trapped_in=0.7
       REAL :: xnu_factor_in=1.0
       REAL :: debye_factor_in=1.0
@@ -111,6 +120,7 @@
       REAL,DIMENSION(nsm) :: as_in
       REAL,DIMENSION(nsm) :: taus_in
       REAL,DIMENSION(nsm) :: vpar_in=0.0
+      REAL :: vexb_in = 0.0
       REAL :: betae_in=0.0
       REAL :: xnue_in=0.0
       REAL :: zeff_in=1.0
@@ -144,6 +154,7 @@
       REAL :: s_zeta_loc=0.0
       REAL :: p_prime_loc=0.0 
       REAL :: q_prime_loc=16.0
+      REAL :: kx0_loc = 0.0
 ! Fourier geometry inputs
       INTEGER :: nfourier_in        = 16
       REAL :: q_fourier_in          = 2.0
@@ -167,13 +178,14 @@
       REAL :: B_unit=1.0
       REAL :: R_input = 3.0
       REAL :: q_input = 3.0
-      REAL :: gamma_reference_GQ=0.0
-      REAL :: gamma_exb_GQ = 0.0
+      REAL,DIMENSION(maxmodes) :: gamma_reference_kx0=0.0
       REAL :: pol=1.0
       REAL :: U0=0.0
       REAL :: kx0=0.0
-      REAL :: sign_kx0=1.0
-      REAL :: midplane_shear=1.0
+      REAL :: kx0_e=0.0
+      REAL :: kx0_p = 0.0
+      REAL :: midplane_shear=1.0,kx_shear=0.0
+      REAL :: kx0_factor=1.0
 ! output
       COMPLEX,DIMENSION(maxmodes,3,nb) :: field_weight_out=0.0
       COMPLEX,DIMENSION(maxmodes,3,max_plot) :: plot_field_out=0.0
@@ -192,8 +204,12 @@
       REAL,DIMENSION(maxmodes) :: wd_bar_out=0.0,phi_QL_out=0.0
       REAL,DIMENSION(maxmodes) :: phi_bar_out=0.0,v_bar_out=0.0
       REAL,DIMENSION(maxmodes) :: b0_bar_out=0.0,ne_te_phase_out=0.0
+      REAL,DIMENSION(maxmodes) :: kx_bar_out=0.0,kpar_bar_out=0.0
       REAL,DIMENSION(nsm) :: n_bar_sum_out=0.0,t_bar_sum_out=0.0
       REAL,DIMENSION(nsm) :: q_low_out=0.0
+      REAL,DIMENSION(2,nkym) :: field_spectrum_out=0.0
+      REAL,DIMENSION(2,nsm,nkym) :: intensity_spectrum_out=0.0
+      REAL,DIMENSION(5,nsm,3,nkym) :: flux_spectrum_out=0.0
       REAL :: phi_bar_sum_out=0.0
       REAL :: v_bar_sum_out=0.0
       REAL :: gamma_nb_min_out=0.0
@@ -245,7 +261,7 @@
 !-------------------------------------------------
       MODULE tglf_hermite
 ! hermite basis functions and x-grid
-      USE tglf_dimensions
+      USE tglf_max_dimensions
       IMPLICIT NONE
       SAVE
 !
@@ -255,7 +271,7 @@
 !
       MODULE tglf_species
 ! species parameters
-      USE tglf_dimensions
+      USE tglf_max_dimensions
       IMPLICIT NONE
       SAVE
 !
@@ -271,7 +287,7 @@
 !
 ! ky spectrum for computing total fluxes and intensities
 !
-      USE tglf_dimensions
+      USE tglf_max_dimensions
       IMPLICIT NONE
       SAVE
 !
@@ -287,7 +303,7 @@
 !
 ! eigenvalues, eigenvectors and fluxes
 !
-      USE tglf_dimensions
+      USE tglf_max_dimensions
       IMPLICIT NONE
       SAVE
 !
@@ -308,7 +324,7 @@
 !
 ! functions on the x-grid
 !
-      USE tglf_dimensions
+      USE tglf_max_dimensions
       IMPLICIT NONE
       SAVE
 !
@@ -340,7 +356,7 @@
 !
 ! functions on the s-grid
 !
-      USE tglf_dimensions
+      USE tglf_max_dimensions
       IMPLICIT NONE
       SAVE
 !
@@ -389,7 +405,7 @@
 !
 ! store the hermite basis matrix coefficients
 !
-      USE tglf_dimensions
+      USE tglf_max_dimensions
       IMPLICIT NONE
       SAVE
 ! ave_h
@@ -656,7 +672,7 @@
 !
 ! input data for the tglf model
 !
-      USE tglf_dimensions
+      USE tglf_max_dimensions
       IMPLICIT NONE
       SAVE
 !
@@ -702,11 +718,12 @@
       REAL :: zeff_tg=1.0
       REAL :: debye_tg=0.0
       REAL :: vexb_shear_tg=0.0
+      REAL :: vexb_tg
       REAL :: alpha_quench_tg=0.0
       REAL :: alpha_p_tg=1.0
       REAL :: alpha_e_tg=1.0
-      REAL :: alpha_n_tg=1.0
-      REAL :: alpha_t_tg=1.0
+      REAL :: alpha_n_tg=0.0
+      REAL :: alpha_t_tg=0.0
       REAL :: wd_zero_tg=0.1
       REAL :: Linsker_factor_tg=0.0
       REAL :: gradB_factor_tg=0.0
@@ -715,10 +732,10 @@
       REAL :: debye_factor_tg=1.0
       REAL :: etg_factor_tg = 1.25
       REAL :: filter_tg = 2.0
-      REAL :: alpha_kx_e_tg=1.0
-      REAL :: alpha_kx_p_tg=1.0
-      REAL :: alpha_kx_n_tg=1.0
-      REAL :: alpha_kx_t_tg=1.0
+      REAL :: alpha_kx_e_tg=0.0
+      REAL :: alpha_kx_p_tg=0.0
+      REAL :: alpha_kx_n_tg=0.0
+      REAL :: alpha_kx_t_tg=0.0
       REAL :: sign_Bt_tg=1.0
       REAL :: sign_It_tg=1.0
       REAL,DIMENSION(nsmax) :: taus_tg=1.0
@@ -750,6 +767,7 @@
       REAL :: s_zeta_tg=0.0
       REAL :: q_prime_tg=0.0
       REAL :: p_prime_tg=0.0
+      REAL :: kx0_tg=0.0
 ! Fourier inputs
       INTEGER :: nfourier_tg = 4
       REAL :: fourier_tg(8,0:fouriermax)=0.0
@@ -778,8 +796,26 @@
         nky_tg,etg_factor_tg,use_TM_tg,kygrid_model_tg,xnu_model_tg, &
         sat_rule_tg,alpha_kx_e_tg,alpha_kx_p_tg,alpha_kx_n_tg, alpha_kx_t_tg, &
         vpar_shear_model_tg, j_surface_tg,vpar_model_tg,sign_Bt_tg,sign_It_tg, &
-        vns_shear_tg,vts_shear_tg, nfourier_tg,fourier_tg
+        vns_shear_tg,vts_shear_tg, nfourier_tg,fourier_tg,vexb_tg,kx0_tg
 !
       END MODULE tglf_tg
+!______________________________________________________
+!\
+! module for MPI version of TGLF
+!/
+
+      MODULE tglf_mpi
+        IMPLICIT NONE
+        include 'mpif.h'
+
+        ! local communicator
+        integer :: iCommTglf    = -1
+        integer :: iProcTglf    = -1
+        integer :: nProcTglf    = -1
+        integer :: iProc0Tglf   = 0
+        integer :: iGroupIDTglf = 1
+
+      END MODULE tglf_mpi
+!
 !______________________________________________________
 !
