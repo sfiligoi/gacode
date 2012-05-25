@@ -110,12 +110,12 @@ pro spectrum_n_ave_event, spectrum_n_ave
     avekxky[*,*]=sumkxky[*,*]/t_total
     openw,1,'avekxky.idlout'
     kxrho = (indgen(n_r)-n_r/2)*2*!pi/(r[n_r-1]-r[0])*rho_s
-    printf,1,'kx',kt_rho[0:n_n-1],format='(a3,128(2x,e15.5))
+    printf,1,'kx',kt_rho[0:n_n-1],format='(a3,128(2x,e15.5))'
     for ir=0,n_r-1 do begin
-        printf,1,kxrho[ir],avekxky[ir,0:n_n-1],format='(128(2x,e15.5))
-   endfor
-   close,1
-   print,'Exported time average kxky spectrum to avekxky.idlout'
+        printf,1,kxrho[ir],avekxky[ir,0:n_n-1],format='(128(2x,e15.5))'
+    endfor
+    close,1
+    print,'Exported time average kxky spectrum to avekxky.idlout'
   endif
   ;;---------------------------------------------------
 

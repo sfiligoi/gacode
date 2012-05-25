@@ -27,7 +27,7 @@
       IMPLICIT NONE
       INTEGER :: i,is
       REAL :: thx,dthx,sn,cn,eps,Rx,Rx1,Rx2,f_gam
-      REAL :: kyi
+      REAL :: kyi,wE
 !
 ! debug
 !      write(*,*)"shat_sa=",shat_sa,"alpha_sa=",alpha_sa
@@ -50,27 +50,30 @@
 !
 ! generalized quench rule kx0 shift
 !
-        midplane_shear = shat_sa - alpha_sa
-        kx0 = 0.0
-        sign_kx0=1.0
-        if(alpha_quench_in.eq.0.0)then
+!EPS2011        midplane_shear = shat_sa - alpha_sa
+!EPS2011        sign_kx0=1.0
+      kx0 = 0.0
+      if(alpha_quench_in.eq.0.0.and.gamma_reference_kx0(1).ne.0.0)then
           kyi = ky*vs(2)*mass(2)/ABS(zs(2))
-          kx0 = alpha_kx_e_in*0.19*TANH(vexb_shear_s*rmaj_sa/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
+          wE = MIN(kyi/0.3,1.0)*vexb_shear_s/gamma_reference_kx0(1)
+!          write(*,*)"wE=",wE
+          kx0_e = -alpha_e_in*(0.36*vexb_shear_s/gamma_reference_kx0(1) + 0.29*wE*TANH((0.71*wE)**6))
+!
+! EPS2011          kx0 = alpha_kx_e_in*0.19*TANH(vexb_shear_s*rmaj_sa/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
 ! EPS2011          kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*rmaj_sa/vs(2)) &
 ! EPS2011          *(0.06*kyi*kyi/(kyi*kyi+0.001)+0.25*TANH((1.9*kyi)**3))/ky
-          if(midplane_shear.gt.0.0)then
-            kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*Rmaj_sa/vs(2)) &
-           *midplane_shear*(1.215*EXP(-(5.4*kyi)**3)+1.274**TANH((1.7*kyi)**2))/(1.0 + kyi**2)
-          else
-            kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*Rmaj_sa/vs(2)) &
-           *midplane_shear*(1.132**TANH((1.4*kyi)**2))/(1.0 + kyi**2)
-          endif
-          kx0 = kx0 + alpha_kx_n_in*0.19*TANH(vns_shear_in(2)*rmaj_sa/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
-          kx0 = kx0 - alpha_kx_t_in*0.19*TANH(vts_shear_in(2)*rmaj_sa/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
-!
-          if(kx0.lt.0.0)sign_kx0=-1.0
-          kx0 = sign_Bt_in*kx0           ! this is here to cancel the sign_Bt_in factor in kxx below
-        endif
+! EPS2011          if(midplane_shear.gt.0.0)then
+! EPS2011            kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*Rmaj_sa/vs(2)) &
+! EPS2011           *midplane_shear*(1.215*EXP(-(5.4*kyi)**3)+1.274**TANH((1.7*kyi)**2))/(1.0 + kyi**2)
+! EPS2011          else
+! EPS2011            kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*Rmaj_sa/vs(2)) &
+! EPS2011           *midplane_shear*(1.132**TANH((1.4*kyi)**2))/(1.0 + kyi**2)
+! EPS2011          endif
+! EPS2011          kx0 = kx0 + alpha_kx_n_in*0.19*TANH(vns_shear_in(2)*rmaj_sa/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
+! EPS2011          kx0 = kx0 - alpha_kx_t_in*0.19*TANH(vts_shear_in(2)*rmaj_sa/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
+! EPS2011          if(kx0.lt.0.0)sign_kx0=-1.0
+          kx0 = sign_Bt_in*kx0_e           ! this is here to cancel the sign_Bt_in factor in kxx below
+      endif
 !
       do i=1,nx
         thx = width_in*x(i)
@@ -78,7 +81,7 @@
         cn = cos(thx)
         Rx = 1.0 + eps*cn
         Bx(i) = 1.0/Rx
-        kxx(i) = -shat_sa*(thx-theta0_sa) + alpha_sa*sn + kx0
+        kxx(i) = -shat_sa*(thx-theta0_sa) + alpha_sa*sn - kx0
         kxx(i) = sign_Bt_in*kxx(i)
 !        wdx(i) =  -xwell_sa*MIN(1.0,alpha_sa)+ &
 !         cn+sn*(shat_sa*(thx-theta0_sa) - alpha_sa*sn)
@@ -169,21 +172,20 @@
       REAL :: cxtorpar1,cxtorpar2
       REAL :: cxtorper1,cxtorper2
       REAL :: B2x1,B2x2,R2x1,R2x2,norm_ave,dlp
-      REAL :: c_tor_par_ave_out, c_tor_per_ave_out
       REAL :: kyi
-      REAL :: shear1,shear2,shearx,ave_shear
+      REAL :: wE,wd0,gamma_eff
 !
 !
 !  find length along magnetic field y
 !
-      y(0)=0.D0
+      y(0)=0.0
 ! pk_geo = 2 Bp/B = 2 ds/dy
       do m=1,ms
-!        y(m) = y(m-1)+0.5D0*(2.D0/pk_geo(m)+2.D0/pk_geo(m-1))*ds
+!        y(m) = y(m-1)+0.5*(2.0/pk_geo(m)+2.0/pk_geo(m-1))*ds
         y(m) = y(m-1)+s_p(m)*ds*4.0/(pk_geo(m)+pk_geo(m-1))
-!      y(1)=y(0)+0.5D0*(2.D0*ds/(0.25D0*(pk_geo(1)+pk_geo(ms-1))))
+!      y(1)=y(0)+0.5*(2.0*ds/(0.25*(pk_geo(1)+pk_geo(ms-1))))
 !      do m=1,ms-1
-!        y(m+1)=y(m-1)+2.D0*ds/(0.25D0*(pk_geo(m+1)+pk_geo(m-1)))
+!        y(m+1)=y(m-1)+2.0*ds/(0.25*(pk_geo(m+1)+pk_geo(m-1)))
       enddo
 ! set the global units
       Ly=y(ms)
@@ -213,28 +215,41 @@
 !
 ! generalized quench rule kx0 shift
 !
-        kx0 = 0.0
-        sign_kx0=1.0
-        if(alpha_quench_in.eq.0.0)then
+        kx0 = kx0_loc/ky   ! note that kx0 is kx/ky 
+        kx0_e=0.0
+        kx0_p=0.0
+!EPS2011        sign_kx0=1.0
+        if(alpha_quench_in.eq.0.0.and.gamma_reference_kx0(1).ne.0.0)then
           kyi = ky*vs(2)*mass(2)/ABS(zs(2))
-          kx0 = alpha_kx_e_in*0.19*TANH(vexb_shear_s*Rmaj_s/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
-! EPS2011          kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*Rmaj_s/vs(2)) &
-! EPS2011          *(0.06*kyi*kyi/(kyi*kyi+0.001)+0.25*TANH((1.9*kyi)**3))/ky
-          if(midplane_shear.gt.0.0)then
-            kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*Rmaj_s/vs(2)) &
-           *midplane_shear*(1.43*EXP(-(5.4*kyi)**3)+1.50*TANH((1.7*kyi)**2))/(1.0 + kyi**2)
-          else
-            kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*Rmaj_s/vs(2)) &
-           *midplane_shear*(2.13*TANH((1.4*kyi)**2))/(1.0 + kyi**2)
-          endif
-          kx0 = kx0 + alpha_kx_n_in*0.19*TANH(vns_shear_in(2)*Rmaj_s/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
-          kx0 = kx0 - alpha_kx_t_in*0.19*TANH(vts_shear_in(2)*Rmaj_s/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
+          wE=0.0
+          wd0 = ABS(ky/Rmaj_s)
+          kx0_factor = ABS(b_geo(0)/qrat_geo(0)**2)
+          kx0_factor = 1.0+0.40*(kx0_factor-1.0)**2
+!          write(*,*)"kx0_factor=",kx0_factor
+          wE = kx0_factor*MIN(kyi/0.3,1.0)*vexb_shear_s/gamma_reference_kx0(1)
+!          write(*,*)"wE=",wE
+!          kx0_factor = alpha_kx_p_in
+          kx0_e = -alpha_e_in*(0.36*vexb_shear_s/gamma_reference_kx0(1) + 0.29*wE*TANH((0.71*wE)**6))
 !
-          if(kx0.lt.0.0)sign_kx0=-1.0
-          kx0 = sign_Bt_in*kx0           ! this is here to cancel the sign_Bt_in factor in kxx below
-        endif
+!APS2010          kx0 = alpha_kx_e_in*0.19*TANH(vexb_shear_s*Rmaj_s/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
+!EPS2011          kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*Rmaj_s/vs(2)) &
+!EPS2011          *(0.06*kyi*kyi/(kyi*kyi+0.001)+0.25*TANH((1.9*kyi)**3))/ky
+!EPS2011        if(midplane_shear.gt.0.0)then
+!EPS2011            kx0_p =  -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*Rmaj_s/vs(2)) &
+!EPS2011           *midplane_shear*(1.43*EXP(-(5.4*kyi)**3)+1.50*TANH((1.7*kyi)**2))/(1.0 + kyi**2)
+!EPS2011        else        
+!EPS2011            kx0_p = -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*Rmaj_s/vs(2)) &
+!EPS2011           *midplane_shear*(2.13*TANH((1.4*kyi)**2))/(1.0 + kyi**2)
+!EPS2011        endif
+!          kx0 = kx0 + alpha_kx_n_in*0.19*TANH(vns_shear_in(2)*Rmaj_s/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
+!          kx0 = kx0 - alpha_kx_t_in*0.19*TANH(vts_shear_in(2)*Rmaj_s/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
+!
+!ESP2011          if(kx0.lt.0.0)sign_kx0=-1.0
+!EPS2011          kx0 = kx0_e + kx0_p
+!          write(*,*)ky,"kx0_e",kx0_e,"kx0_p=",kx0_p,"kx0=",kx0
+          kx0 = sign_Bt_in*kx0_e          ! this is here to cancel the sign_Bt_in factor in kxx below
+         endif
 !        kx0 = alpha_kx_e_in
-!        write(*,*)"<kx>_gyro=",-kx0*ky
 !        write(*,*)"1/qrat=",1.0/qrat_geo(0)
 !
 !*************************************************************
@@ -245,12 +260,10 @@
 !  thx is the ballooning angle = 2 pi y/Ly
 !  x is the argument of the Hermite basis functions = thx/width_in
 !
-      ave_shear = 0.0
-!
       do i=1,nx
         thx = width_in*x(i)
-	sign_theta=1.D0
-	if(thx.lt.0.D0) sign_theta=-1.D0 
+	sign_theta=1.0
+	if(thx.lt.0.0) sign_theta=-1.0 
 !
 !  use quasi-periodic property of S_prime to evaluate it when thx > 2pi
 !  S_prime(0)=0
@@ -258,7 +271,7 @@
 !
 	loops = REAL(INT(ABS(thx/pi_2)))
 	y_x = Ly*(ABS(thx) - loops*pi_2)/pi_2
-	if(thx.lt.0.D0)then
+	if(thx.lt.0.0)then
 !
 !  not always up/down symmetric so can't just use symmetry
 !  for negative theta = -(t+m*2pi) use
@@ -289,23 +302,23 @@
 ! we can use f(-t-m*2pi) = f(2pi-t) if f(0)=f(2pi) and 0<t<2pi
 !
 ! intepolate kxx
-        kxx1 = (kx_factor(m1)*(S_prime(m1)+dkxky1)+kx0*b_geo(m1)/qrat_geo(m1)**2)*qrat_geo(m1)/b_geo(m1)
-        kxx2 = (kx_factor(m2)*(S_prime(m2)+dkxky2)+kx0*b_geo(m2)/qrat_geo(m2)**2)*qrat_geo(m2)/b_geo(m2)
+        kxx1 = (kx_factor(m1)*(S_prime(m1)+dkxky1)-kx0*b_geo(m1)/qrat_geo(m1)**2)*qrat_geo(m1)/b_geo(m1)
+        kxx2 = (kx_factor(m2)*(S_prime(m2)+dkxky2)-kx0*b_geo(m2)/qrat_geo(m2)**2)*qrat_geo(m2)/b_geo(m2)
         kxx(i) = kxx1 +(kxx2-kxx1)*(y_x-y1)/(y2-y1)
         kxx(i) = sign_Bt_in*kxx(i)
 ! interpolate wdx        
 	wd1 = (qrat_geo(m1)/b_geo(m1))*(costheta_geo(m1) &
-        +(kx_factor(m1)*(S_prime(m1)+dkxky1)+kx0*b_geo(m1)/qrat_geo(m1)**2)*sintheta_geo(m1))
+        +(kx_factor(m1)*(S_prime(m1)+dkxky1)-kx0*b_geo(m1)/qrat_geo(m1)**2)*sintheta_geo(m1))
 	wd2 = (qrat_geo(m2)/b_geo(m2))*(costheta_geo(m2) &
-        +(kx_factor(m2)*(S_prime(m2)+dkxky2)+kx0*b_geo(m2)/qrat_geo(m2)**2)*sintheta_geo(m2))
+        +(kx_factor(m2)*(S_prime(m2)+dkxky2)-kx0*b_geo(m2)/qrat_geo(m2)**2)*sintheta_geo(m2))
 !        write(*,*)"wd1,,wd2=",wd1,wd2
         wdx(i) = wd1 +(wd2-wd1)*(y_x-y1)/(y2-y1)
         wdx(i) = (R_unit/Rmaj_s)*wdx(i)
 !        write(*,*)i,"wdx = ",wdx(i),y_x,x(i),y1,y2
 ! interpolate b0x
-        b1 = (1.D0+(kx_factor(m1)*(S_prime(m1)+dkxky1)+kx0*b_geo(m1)/qrat_geo(m1)**2)**2) &
+        b1 = (1.0+(kx_factor(m1)*(S_prime(m1)+dkxky1)-kx0*b_geo(m1)/qrat_geo(m1)**2)**2) &
              *(qrat_geo(m1)/b_geo(m1))**2	
-        b2 = (1.D0+(kx_factor(m2)*(S_prime(m2)+dkxky2)+kx0*b_geo(m2)/qrat_geo(m2)**2)**2) &
+        b2 = (1.0+(kx_factor(m2)*(S_prime(m2)+dkxky2)-kx0*b_geo(m2)/qrat_geo(m2)**2)**2) &
              *(qrat_geo(m2)/b_geo(m2))**2		
 !        write(*,*)"b1,b2,b3,b4=",b1,b2,b3,b4
         b0x(i) = b1 +(b2-b1)*(y_x-y1)/(y2-y1)
@@ -313,13 +326,6 @@
          write(*,*)"interpolation error b0x < 0",i,b0x(i),b1,b2
          b0x(i)=(b1+b2)/2.0
         endif
-!
-! interpolate shearx
-!
-        shear1 = -(S_prime(m1)+dkxky1)*(rmin_s/q_s)**2
-        shear2 = -(S_prime(m2)+dkxky2)*(rmin_s/q_s)**2
-        shearx = shear1 + (shear2-shear1)*(y_x-y1)/(y2-y1)
-        ave_shear = ave_shear + shearx*wx(i)*h(1,i)*h(2,i)
 !
 ! interpolate viscous stress projection coefficients
 !
@@ -408,24 +414,24 @@
 !       theta_max = theta_trapped_in*theta_eff*pi/sqrt_two
        theta_max = theta_trapped_in*width_in*pi/sqrt_two
        if(theta_max.gt.pi)theta_max=pi
-       Bmax = 1.D0/(1.D0 + eps*COS(theta_max))
+       Bmax = 1.0/(1.0 + eps*COS(theta_max))
 !       write(*,*)"theta_max = ",theta_max," Bmax = ",Bmax
-       Bmin = 1.D0/(1.D0 + eps)
+       Bmin = 1.0/(1.0 + eps)
 !
        if(ft_model_sa.eq.0)then
 !       Gauss-Chebyshev integration of trappped fraction
 !       over the bounce angle weighted by gaussian wavefunction
-        ft = 0.D0
-        norm = 0.D0
+        ft = 0.0
+        norm = 0.0
         do i=1,nx
          ww = COS(pi*REAL(2*i-1)/REAL(2*nx))
          thx = ww*theta_max 
          cn = COS(thx)
-         Rx = (1.D0 + eps*cn)
-         Bx = 1.D0/Rx
-         ftx = 1.D0 - Bx/Bmax
+         Rx = (1.0 + eps*cn)
+         Bx = 1.0/Rx
+         ftx = 1.0 - Bx/Bmax
          ftx = SQRT(ftx)
-         ww = SQRT(1.D0 - ww**2)*EXP(-(thx/width_in)**2)          
+         ww = SQRT(1.0 - ww**2)*EXP(-(thx/width_in)**2)          
          ft = ft + ww*ftx
          norm = norm + ww
         enddo
@@ -433,22 +439,22 @@
 !        write(*,*)"ft = ",ft
        endif
 !
-       if(ft_model_sa.eq.1)ft = SQRT(1.D0-Bmin/Bmax)
+       if(ft_model_sa.eq.1)ft = SQRT(1.0-Bmin/Bmax)
 !
        if(ft_model_sa.eq.2)then
 !       Gauss-Chebyshev integration of trappped fraction
 !       over the bounce angle
-        ft = 0.D0
-        norm = 0.D0
+        ft = 0.0
+        norm = 0.0
         do i=1,nx
          ww = COS(pi*REAL(2*i-1)/REAL(2*nx))
          thx = ww*theta_max 
          cn = COS(thx)
-         Rx = (1.D0 + eps*cn)
-         Bx = 1.D0/Rx
-         ftx = 1.D0 - Bx/Bmax
+         Rx = (1.0 + eps*cn)
+         Bx = 1.0/Rx
+         ftx = 1.0 - Bx/Bmax
          ftx = SQRT(ftx)
-         ww = SQRT(1.D0 - ww**2)
+         ww = SQRT(1.0 - ww**2)
          ft = ft + ww*ftx
          norm = norm + ww
         enddo
@@ -467,7 +473,7 @@
 !           write(*,*)i,"thx = ",thx,"ftx=",ftx
            ft = ft + ww*ftx
          enddo
-!         write(*,*)"ft = ",ft,"ft0=",SQRT(1.D0-Bmin/Bmax)
+!         write(*,*)"ft = ",ft,"ft0=",SQRT(1.0-Bmin/Bmax)
        endif
 !      write(*,*)"ft = ",ft,"ft_model_sa =",ft_model_sa
 !
@@ -546,7 +552,7 @@
           if(j.gt.ms)j=j-ms
 	  test1=b_geo(j-1)-By(i)
 	  test2=b_geo(j)-By(i)
-	  if(test1*test2.le.0.D0)then
+	  if(test1*test2.le.0.0)then
 	    if(ABS(test1).lt.ABS(test2))then
 	      qm=j-1
 	    else
@@ -569,7 +575,7 @@
           if(j.lt.0)j=j+ms
 	  test1=b_geo(j+1)-By(i)
 	  test2=b_geo(j)-By(i)
-	  if(test1*test2.le.0.D0)then
+	  if(test1*test2.le.0.0)then
 	    if(ABS(test1).lt.ABS(test2))then
 	      qm=j+1
 	    else
@@ -593,7 +599,7 @@
 !
 !  make a table of distances along field lines between the turning points for lookup
 !
-       delta_y(0)=0.D0
+       delta_y(0)=0.0
        do i=1,nb_grid
          if(y(pm(1,i)).gt.y(pm(2,i)))then
 	  delta_y(i) = y(pm(1,i))-y(pm(2,i))
@@ -723,18 +729,10 @@
 ! note that the point 0 and ms are the same so m+1->1 and m-1->ms-1 at m=0
         error_check=0.0
 	do m=0,ms
-          m1=m-2
-          m2=m-1
-          m3=m+1
-          m4=m+2
-          if(m.lt.2)then
-           m1=ms+m-2
-           m2=ms+m-1
-          endif
-          if(m.gt.ms-2)then
-           m3=m+1-ms
-           m4=m+2-ms
-          endif
+          m1 = MOD(ms+m-2,ms)
+          m2 = MOD(ms+m-1,ms)
+          m3 = MOD(m+1,ms)
+          m4 = MOD(m+2,ms)
 	  R_s = (R(m1)-8.0*R(m2)+8.0*R(m3)-R(m4))/delta_s
 	  Z_s = (Z(m1)-8.0*Z(m2)+8.0*Z(m3)-Z(m4))/delta_s
           s_p(m) = sqrt(R_s**2 + Z_s**2)
@@ -742,9 +740,10 @@
 	  Z_ss = (-Z(m1)+16.0*Z(m2)-30.0*Z(m)+16.0*Z(m3)-Z(m4))/ds2
 	  r_curv(m) = (s_p(m)**3)/(R_s*Z_ss - Z_s*R_ss)
 	  sin_u(m) = -Z_s/s_p(m)
+!          write(*,*)m,m1,m2,m3,m4
 !          write(*,*)m," r_curv =",r_curv(m),"sin_u =",sin_u(m)
-!          write(*,*)"error=",m,ABS(s_p(m) -1.D0)
-!	  error_check = error_check + (s_p(m)**2 -1.D0)**2
+!          write(*,*)"error=",m,ABS(s_p(m) -1.0)
+!	  error_check = error_check + (s_p(m)**2 -1.0)**2
 	enddo
 !        open(3,file='curv.dat',status='replace')
 !        do m=0,ms
@@ -946,20 +945,13 @@
 	do m=0,ms
 
 ! Waltz/Miller [[sin]]
-          m1=m-2
-          m2=m-1
-          m3=m+1
-          m4=m+2
-          if(m.lt.2)then
-           m1=ms+m-2
-           m2=ms+m-1
-          endif
-          if(m.gt.ms-2)then
-           m3=m+1-ms
-           m4=m+2-ms
-          endif
+          m1=MOD(ms+m-2,ms)
+          m2=MOD(ms+m-1,ms)
+          m3=MOD(m+1,ms)
+          m4=MOD(m+2,ms)
 	  sintheta_geo(m) = -rmaj_s*(f/(R(m)*B(m)**2))* &
           (B(m1)-8.0*B(m2)+8.0*B(m3)-B(m4))/(delta_s*s_p(m))
+!        write(*,*)m,m1,m2,m3,m4,"sintheta_geo=",sintheta_geo(m)
 
 	enddo
 !

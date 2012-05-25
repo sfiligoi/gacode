@@ -7,7 +7,7 @@
      sat_rule_tg=0
      vpar_model_tg=0
      vpar_shear_model_tg=0
-     nbasis_max_tg=12
+     nbasis_max_tg=4
      nbasis_min_tg=2
      nxgrid_tg=16
      ibranch_tg=-1
@@ -16,6 +16,7 @@
      nky_tg = 12
      ky_tg=0.3
      sign_Bt_tg=1.0
+     sign_It_tg=1.0
      iflux_tg=.TRUE.
      igeo_tg=1
      width_max_tg=1.65
@@ -61,19 +62,9 @@
      Linsker_factor_tg=0.0
      gradB_factor_tg=0.0
      wd_zero_tg=0.1
-     vexb_shear_tg = 0.0
-!     alpha_e_tg=0.12
-!     alpha_kx0_tg=0.13
      alpha_e_tg=1.0
      alpha_p_tg=1.0
-     alpha_n_tg=1.0
-     alpha_t_tg=1.0
-     alpha_kx_e_tg=1.0
-     alpha_kx_p_tg=1.0
-     alpha_kx_n_tg=0.0
-     alpha_kx_t_tg=0.0
      alpha_quench_tg=0.0
-! alpha_quench_tg=1.0
       xnu_factor_tg=1.0
       debye_factor_tg=0.0
       etg_factor_tg = 1.25
@@ -91,6 +82,7 @@
       as_tg(1)=1.0
       as_tg(2)=1.0
       as_tg(3)=0.0
+      vexb_tg=0.0
       vpar_tg(1)=0.0
       vpar_tg(2)=0.0
       vpar_tg(3)=0.0
@@ -100,14 +92,9 @@
       rlts_tg(1)=3.0
       rlts_tg(2)=3.0
       rlts_tg(3)=3.0
+      vexb_shear_tg = 0.0
       vpar_shear_tg(1)=0.0
       vpar_shear_tg(2)=0.0
       vpar_shear_tg(3)=0.0
-      vns_shear_tg(1)= 0.0
-      vns_shear_tg(2)= 0.0
-      vns_shear_tg(3)=0.0
-      vts_shear_tg(1)=0.0
-      vts_shear_tg(2)=0.0
-      vts_shear_tg(3)=0.0
 
 /

@@ -143,8 +143,10 @@
        ibranch_tg,nmodes_tg,nb_max_tg,nb_min_tg,nx_tg,nky_tg,  &
        kygrid_model_tg,xnu_model_tg)
 !
-      CALL put_model_parameters(adi_elec_tg,alpha_p_tg,alpha_e_tg    &
-      ,theta_trap_tg,xnuei_fac_tg,debye_fac_tg,etg_fac_tg,filter_tg)
+      CALL put_model_parameters(adiabatic_elec_tg,alpha_e_tg,alpha_p_tg    &
+      ,alpha_quench_tg,xnu_factor_tg,debye_factor_tg                       &
+      ,etg_factor_tg,sat_rule_tg,kygrid_model_tg,xnu_model_tg              &
+      ,vpar_model_tg,vpar_shear_model_tg)
 !
       RETURN
       END SUBROUTINE tglf_startup
@@ -164,11 +166,10 @@
       IMPLICIT NONE
       INTEGER :: j,k
 !
-      CALL put_averages(taus_tg,as_tg,betae_tg,xnuei_tg,zeff_tg,debye_tg   &
-      ,vexb_mach_tg,vpar_mach_tg)
+      CALL put_averages(taus_tg,as_tg,vpar_tg,vexb_tg,betae_tg,xnue_tg,zeff_tg,debye_tg)
 !
 !
-      CALL put_gradients(rlns_tg,rlts_tg,gamma_e_tg,gamma_p_tg)
+      CALL put_gradients(rlns_tg,rlts_tg,vpar_shear_tg,vexb_shear_tg)
 !
 !
       if(igeo_tg.eq.0)then
