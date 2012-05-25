@@ -189,8 +189,12 @@ subroutine prgen_map_iterdb
      allocate(vtorc_exp(nx))
      call prgen_read_cer
      vec(10,:) = omega0(:)
-     vec(31+onetwo_nprim,:) = vtorc_exp(:)
-     vec(36+onetwo_nprim,:) = vpolc_exp(:)
+     do i=1,5
+        if (reorder_vec(i) == onetwo_nprim+1) then
+           vec(30+i,:) = vtorc_exp(:)
+           vec(35+i,:) = vpolc_exp(:)
+        endif
+     enddo
   endif
   !---------------------------------------------------
 

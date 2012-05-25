@@ -137,10 +137,10 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
   ! Gamma_ExB (ExB shearing rate, units of a/cs)
   if (tgyro_rotation_flag == 1) then
-     tglf_vexb_shear_in = gamma_eb(i_r)*r_min/c_s(i_r)  !need to take out sign of q
-     tglf_vpar_shear_in(1) = tglf_sign_Bt_in*gamma_p(i_r)*r_min/c_s(i_r)  ! electrons
+     tglf_vexb_shear_in = tglf_sign_Bt_in*gamma_eb(i_r)*r_min/c_s(i_r)  !need to take out sign of q
+     tglf_vpar_shear_in(1) = gamma_p(i_r)*r_min/c_s(i_r)  ! electrons
      do i_ion=1,loc_n_ion
-       tglf_vpar_shear_in(i_ion+1) = tglf_sign_Bt_in*gamma_p(i_r)*r_min/c_s(i_r)
+       tglf_vpar_shear_in(i_ion+1) = gamma_p(i_r)*r_min/c_s(i_r)
      enddo
   endif
   !----------------------------------------------------------------
@@ -247,7 +247,7 @@ subroutine tgyro_tglf_map
 
   case (3)
 
-     ! EPS-2011 with new ExB shear model
+     ! IAEA-2012 with spectral shift ExB shear model
 
      tglf_alpha_quench_in = 0.0
      tglf_xnu_model_in    = 2

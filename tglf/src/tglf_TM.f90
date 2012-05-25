@@ -216,7 +216,7 @@
             gamma_nb_min_out = gamma_out(1)
           endif
           mask_save(i) = 1
-          if(gamma_out(1).eq.0.D0)mask_save(i)=0
+          if(gamma_out(1).eq.0.0)mask_save(i)=0
 !          write(*,*)i,"ky=",ky_in,mask_save(i),gamma_out(1)
           gamma_nb_min_save(i) = gamma_nb_min_out
           width_save(i) = width_in
@@ -246,16 +246,6 @@
              kxx(j) = kxx_save(i,j)
           enddo
           if(mask_save(i).eq.1)then
-!            if(alpha_kx0_in.ne.0.0)then
-!              save_nbasis_max = nbasis_max_in
-!              save_vexb_shear = vexb_shear_in
-!              nbasis_max_in = nbasis_min_in
-!              vexb_shear_in = 0.0
-!              CALL tglf_LS
-!              gamma_reference_GQ = gamma_out(1) 
-!              nbasis_max_in = save_nbasis_max
-!              vexb_shear_in = save_vexb_shear
-!            endif
             CALL tglf_LS
           else
             gamma_out(1)=0.0

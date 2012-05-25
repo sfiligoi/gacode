@@ -63,7 +63,7 @@ program tglf
 
   endif
 
-  open(unit=1,file=trim(tglf_path_in)//'out.tglf.precision')
+  open(unit=1,file=trim(tglf_path_in)//'out.tglf.prec')
   write(1,*) prec
   close(1)
 
