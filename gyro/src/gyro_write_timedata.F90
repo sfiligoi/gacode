@@ -848,10 +848,12 @@ subroutine gyro_write_timedata
   if(io_method >1 ) then
     if (i_proc == 0) then
        h5in%mesh=' '
-       call add_h5(dumpTGid,'data_step',data_step,h5in,h5err)
-        if(h5err%errBool) write(*,*) h5err%errorMsg
-       call add_h5(dumpTGid,'t_current',t_current,h5in,h5err)
-        if(h5err%errBool) write(*,*) h5err%errorMsg
+       skip_at_tzero : if (.not. hdf5_skip) then
+         call add_h5(dumpTGid,'data_step',data_step,h5in,h5err)
+          if(h5err%errBool) write(*,*) h5err%errorMsg
+         call add_h5(dumpTGid,'t_current',t_current,h5in,h5err)
+          if(h5err%errBool) write(*,*) h5err%errorMsg
+        endif skip_at_tzero
 
        ! dump in the field
         call dump_h5(dumpGid,'data_step',data_step,h5in,h5err)
