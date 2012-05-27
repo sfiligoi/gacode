@@ -49,9 +49,10 @@
       PUBLIC :: get_R2_ave
       PUBLIC :: get_B2_ave
       PUBLIC :: get_RBt_ave
-      PUBLIC :: get_field_spectrum
-      PUBLIC :: get_intensity_spectrum
-      PUBLIC :: get_flux_spectrum
+      PUBLIC :: get_nky_out
+      PUBLIC :: get_field_spectrum_out
+      PUBLIC :: get_intensity_spectrum_out
+      PUBLIC :: get_flux_spectrum_out
       PUBLIC :: get_ky_spectrum_out
       PUBLIC :: get_DM
       PUBLIC :: get_DR
@@ -81,10 +82,6 @@
       END SUBROUTINE tglf
 !
       include 'tglf_inout.f90'
-!      include 'tglf_geometry.f90'
-!      include 'tglf_matrix.f90'
-!      include 'tglf_LS.f90'
-!      include 'tglf_max.f90'
       include 'tglf_setup_geometry.f90'
       include 'tglf_TM.f90'
       include 'tglf_TM_mpi.f90'
