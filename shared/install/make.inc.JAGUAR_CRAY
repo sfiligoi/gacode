@@ -27,13 +27,13 @@ FC  = ftn -module $(GACODE_ROOT)/modules
 F77 = ftn
 
 # Compiler options/flags
-FMATH  = -r8
-FOPT   = -fast -Mcache_align -Msmartalloc 
-FDEBUG = -Ktrap=fp -Mbounds -Minform=inform -Msmartalloc
-FOMP   = -mp=nonuma
-FNOMP  =
-FACC   = -ta=nvidia
-FHDF5 = -DHAVE_HDF5
+FMATH  = -dp
+FOPT   = -G fast 
+FDEBUG = -R b,c,d,p,s -e c,C
+FOMP   = -h omp
+FNOMP  = -h noomp
+FACC   = -h acc
+FHDF5 = -D HAVE_HDF5
 
 #FFTW and MUMPS
 LMATH = -ldrfftw -ldfftw
