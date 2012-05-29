@@ -9,7 +9,7 @@ F77	= mpif90
 
 FMATH	= -r8
 FOPT	= -O1
-FDEBUG	= -check bounds,uninit -warn usage -O0
+FDEBUG	= -O2 -check all
 FOMP    = -openmp
 FNOMP   =
 
