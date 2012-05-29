@@ -8,7 +8,7 @@ FC	= mpif90 -mod $(GACODE_ROOT)/modules -I $(GACODE_ROOT)/modules
 F77	= mpif90
 
 FMATH	= -r8
-FOPT	= -O3
+FOPT	= -O1
 FDEBUG	= -check bounds,uninit -warn usage -O0
 FOMP    = -openmp
 FNOMP   =
