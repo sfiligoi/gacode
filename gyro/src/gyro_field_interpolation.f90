@@ -37,7 +37,7 @@ subroutine gyro_field_interpolation
   !-----------------------------------------------------
 
   call gyro_timer_in('Field-interp.a')
-!$acc region
+!$acc parallel loop
 !$omp parallel do default(shared) private(cmplx_phase,j_int,x,vtemp,j)
   do i=1,n_x
      cmplx_phase = phase(in_1,i)
@@ -55,11 +55,12 @@ subroutine gyro_field_interpolation
      enddo ! j_int
   enddo ! i
 !$end parallel do
-!$acc end region
+!$acc end parallel loop
 
   !---------------------------------------------------------------
   ! Interpolate phi, A_par, and B_par onto orbit-grid:
   !
+!$acc parallel
 !$omp parallel do default(shared) private(p_nek_loc,p_nek,k,ck,m,m0,ix)
   do i=1,n_x
      p_nek_loc = 0
@@ -84,6 +85,7 @@ subroutine gyro_field_interpolation
      enddo ! p_nek
   enddo ! i
 !$end parallel do
+!$acc end parallel
   !
   !---------------------------------------------------------------
 
@@ -137,6 +139,7 @@ subroutine gyro_field_interpolation
            gyro_uv(:,:,p_nek_loc,is,1) = (0.0,0.0)
            kyro_uv(:,:,p_nek_loc,is,1) = (0.0,0.0)
 
+!$acc region
 !$omp parallel do default(shared) private(i_diff,m)
            do i=1,n_x
               do i_diff=-m_gyro,m_gyro-i_gyro
@@ -150,12 +153,14 @@ subroutine gyro_field_interpolation
               enddo
            enddo
 !$omp end parallel do
+!$acc end region
 
         case (2) 
 
            gyro_uv(:,:,p_nek_loc,is,:) = (0.0,0.0)
            kyro_uv(:,:,p_nek_loc,is,:) = (0.0,0.0)
 
+!$acc region
 !$omp parallel do default(shared) private(i_diff,m)
            do i=1,n_x
               do i_diff=-m_gyro,m_gyro-i_gyro
@@ -173,6 +178,7 @@ subroutine gyro_field_interpolation
                  enddo
               enddo
            enddo
+!$acc end region
 !$omp end parallel do
 
         case (3)
