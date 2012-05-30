@@ -80,11 +80,17 @@ pro midplane_mapper
 
   if ((exists_mom_e eq 1) AND (exists_mom_n eq 1)) then begin
      for is=0,n_kinetic-1 do begin
-         mid_e = complex(mom_e[0,j,*,is,*,*],$
-                         mom_e[1,j,*,is,*,*])
-         mid_n = complex(mom_n[0,j,*,is,*,*],$
-                         mom_n[1,j,*,is,*,*])
-         pwr[i_pwr,*,*,*] = (2./3)*mid_e - mid_n
+;  define E = (3/2)nT -> dE = (3/2)*(dn*T0 + n0*dT)
+;  -> dT = [(2/3)dE -T0*dn]/n0
+         mid_e = REFORM(complex(mom_e[0,j,*,is,*,*],$
+                                mom_e[1,j,*,is,*,*]))
+         mid_n = REFORM(complex(mom_n[0,j,*,is,*,*],$
+                                mom_n[1,j,*,is,*,*]))
+
+         for ir = 0, n_r-1 do pwr[i_pwr,ir,*,*] = $
+           REFORM(((2./3)*mid_e[ir,*,*] - tem_s[is,ir]*mid_n[ir,*,*])/$
+                  den_s[is,ir])
+
          tag[i_pwr] = 'tem_'+tag_spec[is]
          i_pwr = i_pwr+1
      endfor

@@ -80,12 +80,6 @@ module tglf_interface
   logical :: tglf_adiabatic_elec_in = .false.
   real    :: tglf_alpha_e_in        = 1.0
   real    :: tglf_alpha_p_in        = 1.0
-  real    :: tglf_alpha_n_in        = 1.0
-  real    :: tglf_alpha_t_in        = 1.0
-  real    :: tglf_alpha_kx_e_in     = 1.0
-  real    :: tglf_alpha_kx_p_in     = 1.0
-  real    :: tglf_alpha_kx_n_in     = 1.0
-  real    :: tglf_alpha_kx_t_in     = 1.0
   real    :: tglf_alpha_quench_in   = 0.0
   real    :: tglf_xnu_factor_in     = 1.0
   real    :: tglf_debye_factor_in   = 1.0

@@ -1,0 +1,29 @@
+#!/bin/sh
+# 
+# SCRIPT:
+#  tglf_reg_do
+#
+# PURPOSE:
+#  Run through full suite of TGLF regression tests
+#----------------------------------------------------
+
+precfile='out.tglf.prec'
+
+list="
+tglf01 
+tglf02
+tglf03"
+
+echo "REGRESSION TESTING:"
+
+testdir=$PWD/tglf_regression_test
+mkdir $testdir
+cd $testdir
+
+for sim in $list
+do 
+   tglf -g $sim -p $testdir > out
+   rm -rf $sim/$precfile
+   tglf -e $sim -p $testdir > out
+   tglf_reg $sim
+done
