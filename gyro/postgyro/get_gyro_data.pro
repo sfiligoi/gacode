@@ -57,9 +57,7 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
       IF (use_hdf5 EQ 1) THEN BEGIN
 	tdata = H5_PARSE(dirpath + '/out.gyro.timedata.h5',/READ_DATA)
 	time = tdata.t_current._data
-;!TMP FIX
-PRINT, 'HDF5: time = time[1:*]'
-time = time[1:*]
+
       ENDIF ELSE time = READ_GYRO_TIMEVECTOR(dirpath)
       n_time = N_ELEMENTS(time)
 
@@ -163,7 +161,6 @@ time = time[1:*]
 
       ;load HDF5 fluctuations
       IF (use_hdf5 EQ 1) THEN BEGIN
-;      tskip = 200 ;SHOULD GET FROM H5 files in future work
           tskip = profile_data.time_skip
           PRINT, 'HDF5 time_skip: ', tskip
 
@@ -191,15 +188,18 @@ time = time[1:*]
           IF (exists_v) THEN $
             mom_v = COMPLEXARR(n_theta_plot,n_r,profile_data.n_kinetic,n_n,n_time)
 
-          FOR it = 0, n_time-1 DO BEGIN
+;          FOR it = 0, n_time-1 DO BEGIN
+PRINT, 'not loading t=0 HDF5 fluctuations'
+          FOR it = 1, n_time-1 DO BEGIN
               tlabel = STRCOMPRESS(STRING(it*tskip),/REMOVE_ALL)
               WHILE (STRLEN(tlabel) LT 5) DO tlabel = '0' + tlabel 
               print, tlabel
               flucfile = 'gyro'+tlabel+'.h5'
               flucdata = H5_PARSE(dirpath+'/'+flucfile, /READ)
-
+print, flucfile
               IF (exists_u) THEN BEGIN
                   PRINT, 'Loading HDF5 phi, B fluctuations from ' + flucfile
+help, flucdata, /str
                   phi[*,*,*,it] = COMPLEX($
                                   TRANSPOSE(flucdata.phi_modes.phi_real._data[*,*,0:n_theta_plot-1],[2,1,0]),$
                                  TRANSPOSE(flucdata.phi_modes.phi_imag._data[*,*,0:n_theta_plot-1],[2,1,0]))
