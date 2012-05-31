@@ -62,23 +62,13 @@ class TGYROData:
                 print "Cannot find specified input parameter: ", input_name
                 return 0
 
-    def read_tgyro_mode(self):
-        """Read TGYRO_MODE and store as self.tgyro_mode."""
-        
-        self.tgyro_mode = self.get_input("TGYRO_MODE")
-
-    def read_num_ions(self):
-        """Read LOC_N_ION and store as self.loc_n_ion."""
-
-        self.loc_n_ion = self.get_input("LOC_N_ION")
-
     def read_data(self):
         """Read in object data."""
-        self.read_tgyro_mode()
+        self.tgyro_mode = self.get_input("TGYRO_MODE")
         if self.tgyro_mode == 2:
             self.read_stabilities()
         else:
-            self.read_num_ions()
+            self.loc_n_ion = self.get_input("LOC_N_ION")
             self.read_control()
             self.read_chi_e()
             self.read_chi_i(self.loc_n_ion)
