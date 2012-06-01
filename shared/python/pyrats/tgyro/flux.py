@@ -17,22 +17,22 @@ fig.subplots_adjust(wspace=0.3)
 n = sim.n_iterations
 
 ax = fig.add_subplot(131)
-ax.plot(sim.data['r/a'][4],sim.data['pflux_e_tot'][n],label='total')
-ax.plot(sim.data['r/a'][4],sim.data['pflux_e_target'][n],label='target')
+ax.plot(sim.data['r/a'][4],sim.data['pflux_e_tur'][n],label='tur')
+ax.plot(sim.data['r/a'][4],sim.data['pflux_e_neo'][n],label='neo')
 ax.set_ylabel('$\Gamma/\Gamma_{GB}$',color='k',fontsize=GFONTSIZE)
 ax.set_xlabel('$r/a$',fontsize=GFONTSIZE)
 ax.legend()
 
 ax = fig.add_subplot(132)
-ax.plot(sim.data['r/a'][4],sim.data['eflux_e_tot'][n],label='total')
-ax.plot(sim.data['r/a'][4],sim.data['eflux_e_target'][n],label='target')
+ax.plot(sim.data['r/a'][4],sim.data['eflux_e_tur'][n],label='tur')
+ax.plot(sim.data['r/a'][4],sim.data['eflux_e_neo'][n],label='neo')
 ax.set_ylabel('$Q_e/Q_{GB}$',color='k',fontsize=GFONTSIZE)
 ax.set_xlabel('$r/a$',fontsize=GFONTSIZE)
 ax.legend()
 
 ax = fig.add_subplot(133)
-ax.plot(sim.data['r/a'][4],sim.data['eflux_i_tot'][n],label='total')
-ax.plot(sim.data['r/a'][4],sim.data['eflux_i_target'][n],label='target')
+ax.plot(sim.data['r/a'][4],sim.data['eflux_i_tur'][n],label='tur')
+ax.plot(sim.data['r/a'][4],sim.data['eflux_i_neo'][n],label='neo')
 ax.set_ylabel('$Q_i/Q_{GB}$',color='k',fontsize=GFONTSIZE)
 ax.set_xlabel('$r/a$',fontsize=GFONTSIZE)
 ax.legend()
@@ -40,5 +40,5 @@ ax.legend()
 if ftype == 'screen':
     plt.show()
 else:
-    outfile = 'flux_tot.'+ftype
+    outfile = 'flux.'+ftype
     plt.savefig(outfile)

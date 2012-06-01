@@ -27,20 +27,13 @@ then
   echo "          Output file type."
   echo "           <filetype>=emf, eps, pdf, png, ps, raw, rgba, svg, svgz"
   echo 
-  echo "          -field <value>"
-  echo "          Specify field to be plotted: [0,n_field-1]."
-  echo "          Alternatively, specifying 's' returns a sum of all fields (default=s)."
-  echo
-  echo "          -kinetic <value>"
-  echo "          Specify species to be plotted: [0,n_kinetic-1]."
-  echo
-  echo "          -moment <value>"
-  echo "          Specify moment to be plotted: [0,3] (default=1)"
-  echo
   echo "          -plot <type>"
   echo "          Generate plot of given type."
   echo "          If this keyword is omitted, data will be listed to the screen."
-  echo "           <type> = flux_tot,"
+  echo "           <type> = flux,"
+  echo "                    flux_tot,"
+  echo "                    profile,"
+  echo "                    profile_smooth."
   echo
   echo "Example:"
   echo
@@ -57,7 +50,6 @@ fi
 LOCDIR=.
 SIMROOT=$PWD
 PLOT_TYPE=
-DIFF_FLAG=0
 I_KINETIC=0
 I_FIELD="s"
 I_MOMENT=0
@@ -75,12 +67,6 @@ while [ $# -gt 0 ] ; do
   -e) shift ; LOCDIR=$1 ;;
 
   -p) shift ; SIMROOT=$1 ;;
-
-  -kinetic) shift ; I_KINETIC=$1 ;;
-
-  -field) shift ; I_FIELD=$1 ;;
-
-  -moment) shift ; I_MOMENT=$1 ;;
 
   -f) shift ; FTYPE=$1 ;;
 
@@ -106,8 +92,17 @@ PYROOT=$GACODE_ROOT/shared/python/pyrats/tgyro
 #
 case "$PLOT_TYPE" in
 
+   flux)  
+	python $PYROOT/flux.py $SIMDIR $FTYPE & ;;
+
    flux_tot)  
 	python $PYROOT/flux_tot.py $SIMDIR $FTYPE & ;;
+
+   profile)  
+	python $PYROOT/profile.py $SIMDIR $FTYPE & ;;
+
+   profile_smooth)  
+	python $PYROOT/profile_smooth.py $SIMDIR $FTYPE & ;;
 
 esac 
 
