@@ -328,7 +328,7 @@ subroutine gyro_write_timedata
        size(kxkyspec),&
        kxkyspec)
   endif
-#ifdef HAVE_HDf5
+#ifdef HAVE_HDF5
   if(io_method > 1) then
     h5in%units="dimensionless"
     h5in%mesh=" "
@@ -1407,10 +1407,6 @@ subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
      !-----------------------------------------
 
      if (i_proc == 0) then
-        !         WRITE(*,*) "varName=",varName 
-        !         WRITE(*,*) " n_fn=",n_fn," and size of fn_recv=",size(fn_recv)
-        !         WRITE(*,*) "shape of buffn =", shape(buffn)        
-        !         WRITE(*,*) "n1=",n1," n2=",n2," n3=",n3
         buffn(:,:,:,in)=reshape(fn_recv,(/n1,n2,n3/))
      endif
   enddo ! in
