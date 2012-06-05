@@ -1,32 +1,33 @@
 class TGYROData:
-    """A class of TGYRO output data.
+    """TGYRO output data class.
 
-     Data:
+    Data:
 
-     loc_n_ion
-     tgyro_mode
-     n_iterations
-     n_fields
-     n_radial
-     dirname = ""
-     data
+    loc_n_ion
+    tgyro_mode
+    n_iterations
+    n_fields
+    n_radial
+    dirname = ""
+    data
 
-     Example Usage:
-         >>> from matplotlib import pyplot
-         >>> from pyrats.tgyro.data import TGYROData
-         >>> sim1 = TGYROData('$GACODE_ROOT/tgyro/tools/input/treg01')
-         >>> pyplot.plot(sim1.get_r(), sim1.get_Te())
-         >>> pyplot.show()
+    Example Usage:
+    >>> from pyrats.tgyro.data import TGYROData
+    >>> sim = TGYROData('examples')
+    """
 
-"""
-
+    #---------------------------------------------------------------------------#
     # Methods
+
     def __init__(self, sim_directory):
         """Constructor reads in data from sim_directory and creates new object.
-"""
-        self.set_directory(sim_directory)
+        """
+        
         self.init_data()
+        self.set_directory(sim_directory)
         self.read_data()
+
+    #---------------------------------------------------------------------------#
 
     def init_data(self):
         """Initialize object data."""
@@ -38,41 +39,28 @@ class TGYROData:
         self.n_radial     = 0
         self.data         = {}
 
-    def set_directory(self, sim_directory):
+    #---------------------------------------------------------------------------#
+
+    def set_directory(self, path):
         """Set the simulation directory."""
 
         from os.path import expanduser, expandvars
-        path = sim_directory
         self.dirname = expanduser(expandvars(path))
 
-    def get_input(self, input_name):
-        """Return the specified variable from input.tgyro.gen.
-
-        input_name  -  requested input
-
-        Ex:    get_input("TGYRO_MODE")
-        """
-
-        input_file = file(self.dirname + '/input.tgyro.gen', 'r')
-        for line in input_file:
-            try:
-                if line.split()[1] == input_name:
-                    return float(line.split()[0])
-            except IndexError:
-                print "Cannot find specified input parameter: ", input_name
-                return 0
+    #---------------------------------------------------------------------------#
 
     def read_data(self):
         """Read in object data."""
-        self.tgyro_mode = self.get_input("TGYRO_MODE")
+        
+        self.tgyro_mode = self.get_tag_value("TGYRO_MODE")
         if self.tgyro_mode == 2:
             self.read_stabilities()
         else:
-            self.loc_n_ion = self.get_input("LOC_N_ION")
+            self.loc_n_ion = self.get_tag_value("LOC_N_ION")
             self.read_control()
+            self.read_gyrobohm()
             self.read_chi_e()
             self.read_chi_i(self.loc_n_ion)
-            self.read_gyrobohm()
             self.read_profile()
             self.read_geometry()
             self.read_flux(self.loc_n_ion)
@@ -88,17 +76,86 @@ class TGYROData:
             if self.loc_n_ion > 4:
                 self.read_profile5()
 
+    #---------------------------------------------------------------------------#
+
+    def get_tag_value(self, tag):
+        """Return the specified variable from input.tgyro.gen.
+        
+        tag = input.tgyro tag
+        """
+
+        datafile = file(self.dirname + '/input.tgyro.gen', 'r')
+
+        for line in datafile:
+            try:
+                if line.split()[1] == tag:
+                    return float(line.split()[0])
+            except IndexError:
+                print "Cannot find specified input parameter: ", tag
+                return 0
+
+    #---------------------------------------------------------------------------#
+
     def read_control(self):
-        """Read control.out to set resolutions."""
-        from numpy import loadtxt
+        """Read control.out to set resolutions.
+        """
+
+        import numpy as np
+        
         control_file = self.dirname + '/control.out'
-        control = loadtxt(file(control_file))
-        self.n_radial = int(control[0])
-        self.n_fields = int(control[1])
+        control = np.loadtxt(file(control_file))
+
+        self.n_radial     = int(control[0])
+        self.n_fields     = int(control[1])
         self.n_iterations = int(control[2])
 
+    #---------------------------------------------------------------------------#
+
+    def read_residual(self):
+        """Read residual.out
+        """
+        import numpy as np
+        
+        datafile = open(self.dirname + '/residual.out', 'r')
+        lines = datafile.readlines()
+        datafile.close()
+
+        count = 0
+        iteration = -1
+        data = []
+        num_fields = len(lines[-1].split())
+        local_res = []
+        global_res = []
+        flux_count = []
+
+        for line in lines:
+            line = line.replace(']',' ').replace('[',' ').replace(':',' ')
+            if count % self.n_radial == 0:
+                global_res.append(eval(line.split()[2]))
+                flux_count.append(eval(line.split()[3]))
+                iteration = iteration + 1
+                if data:
+                    local_res.append(np.array(data))
+                data = [np.zeros(num_fields)]
+
+            else:
+                b = []
+                for i in line.split():
+                    b.append(eval(i))
+                data.append(b)
+            count = count + 1
+        local_res.append(np.array(data))
+
+        self.data['local_res'] = local_res
+        self.data['global_res'] = global_res
+        self.data['flux_count'] = flux_count
+
+    #---------------------------------------------------------------------------#
+        
     def read_file(self, file_name):
-        """Read TGYRO output file. Output is data['column_header'][iteration]"""
+        """Read TGYRO output file.
+        Output is data['column_header'][iteration]
+        """
         from numpy import array
 
         current_line_number = 0
@@ -124,40 +181,10 @@ class TGYROData:
             data = data[self.n_radial:, :]
         return elements
 
-    def read_residual(self):
-        """Read residual.out"""
-        from numpy import zeros, array
-        residual_file=open(self.dirname + '/residual.out', 'r')
-        lines = residual_file.readlines()
-        residual_file.close()
-        count = 0
-        iteration = -1
-        data = []
-        num_fields = len(lines[-1].split())
-        local_res = []
-        global_res = []
-        flux_count = []
 
-        for line in lines:
-            line = line.replace(']',' ').replace('[',' ')
-            if count % self.n_radial == 0:
-                global_res.append(eval(line.split()[3]))
-                flux_count.append(eval(line.split()[4]))
-                iteration = iteration + 1
-                if data:
-                    local_res.append(array(data))
-                data = [zeros(num_fields)]
-
-            else:
-                b = []
-                for i in line.split():
-                    b.append(eval(i))
-                data.append(b)
-            count = count + 1
-        local_res.append(array(data))
-        self.data['local_res'] = local_res
-        self.data['global_res'] = global_res
-        self.data['flux_count'] = flux_count
+    def read_gyrobohm(self):
+        """Read and store gyrobohm.out in self.gyro_bohm_unit."""
+        self.data.update(self.read_file('gyrobohm'))
 
     def read_stab_file(self, file_name):
         """Read files generated with stability analysis mode.
@@ -252,10 +279,6 @@ class TGYROData:
         if num_ions > 5:
             print "Strange number of ions: ", num_ions
             print "Only the first 5 will be read."
-
-    def read_gyrobohm(self):
-        """Read and store gyrobohm.out in self.gyro_bohm_unit."""
-        self.data.update(self.read_file('gyrobohm'))
 
     def read_profile(self):
         """Read and store profile.out in self.profile."""

@@ -27,6 +27,9 @@ then
   echo "          Output file type."
   echo "           <filetype>=emf, eps, pdf, png, ps, raw, rgba, svg, svgz"
   echo 
+  echo "          -u <units>"
+  echo "          Plot units (0=GB,1=Physical)."
+  echo 
   echo "          -plot <type>"
   echo "          Generate plot of given type."
   echo "          If this keyword is omitted, data will be listed to the screen."
@@ -50,9 +53,7 @@ fi
 LOCDIR=.
 SIMROOT=$PWD
 PLOT_TYPE=
-I_KINETIC=0
-I_FIELD="s"
-I_MOMENT=0
+UNITS=0
 FTYPE=screen
 #==============================================================================
 
@@ -69,6 +70,8 @@ while [ $# -gt 0 ] ; do
   -p) shift ; SIMROOT=$1 ;;
 
   -f) shift ; FTYPE=$1 ;;
+
+  -u) shift ; UNITS=$1 ;;
 
   *) echo "ERROR: incorrect tgyro_plot syntax." ; exit 1 ;;
 
@@ -93,10 +96,10 @@ PYROOT=$GACODE_ROOT/shared/python/pyrats/tgyro
 case "$PLOT_TYPE" in
 
    flux)  
-	python $PYROOT/flux.py $SIMDIR $FTYPE & ;;
+	python $PYROOT/flux.py $SIMDIR $UNITS $FTYPE & ;;
 
    flux_tot)  
-	python $PYROOT/flux_tot.py $SIMDIR $FTYPE & ;;
+	python $PYROOT/flux_tot.py $SIMDIR $UNITS $FTYPE & ;;
 
    profile)  
 	python $PYROOT/profile.py $SIMDIR $FTYPE & ;;
