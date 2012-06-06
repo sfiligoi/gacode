@@ -41,11 +41,13 @@ LMATH = -framework Accelerate
 # OPTIONAL: HDF5 (for vshdf5)
 
 #HDF5_LIBS = -L${HOME}/software/hdf5-par/lib -lhdf5_hl_f90cstub -lhdf5_hl_fortran -lhdf5_hl -lhdf5_f90cstub -lhdf5_fortran -lhdf5
-HDF5_LIBS = ${HOME}/software/hdf5-par/lib/libhdf5_hl_f90cstub.a \
+HDF5_LIBS = \
   ${HOME}/software/hdf5-par/lib/libhdf5_hl_fortran.a \
+  ${HOME}/software/hdf5-par/lib/libhdf5_hl_f90cstub.a \
   ${HOME}/software/hdf5-par/lib/libhdf5_hl.a \
   ${HOME}/software/hdf5-par/lib/libhdf5_f90cstub.a \
   ${HOME}/software/hdf5-par/lib/libhdf5_fortran.a \
+  ${HOME}/software/hdf5-par/lib/libhdf5_f90cstub.a \
   ${HOME}/software/hdf5-par/lib/libhdf5.a
 #HDF5_LIBS = -L$(SCRATCH)/volatile-gnu/hdf5/lib -lhdf5_fortran -lhdf5
 #HDF5_INC =  -I$(SCRATCH)/volatile-gnu/hdf5/include
