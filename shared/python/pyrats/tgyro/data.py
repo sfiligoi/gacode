@@ -67,7 +67,7 @@ class TGYROData:
             self.fileparser('profile.out')
             self.fileparser('gradient.out')
             self.fileparser('geometry.out')
-            self.read_residual()
+           # self.read_residual()
 
     #---------------------------------------------------------------------------#
 
@@ -145,8 +145,8 @@ class TGYROData:
         # Data dimensions
         nr = self.n_radial+1
         nb = self.n_iterations+1
-        nc = 1+2*self.get_tag_value("LOC_NE_FEEDBACK_FLAG")
-              +2*self.get_tag_value("LOC_TE_FEEDBACK_FLAG")
+        nc = 1+2*self.get_tag_value("LOC_NE_FEEDBACK_FLAG") \
+              +2*self.get_tag_value("LOC_TE_FEEDBACK_FLAG") \
               +2*self.get_tag_value("LOC_TI_FEEDBACK_FLAG")
 
         numdata = np.zeros((nc,nb,nr-2))
