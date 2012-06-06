@@ -50,7 +50,9 @@ contains
           close(io)
        end if
 
-       call NCLASS_DR_alloc(1)
+       if(sim_model == 1) then
+          call NCLASS_DR_alloc(1)
+       endif
        
        initialized = .true.
 
@@ -58,7 +60,9 @@ contains
        if(.NOT. initialized) return
        deallocate(pflux_multi_HS)
        deallocate(eflux_multi_HS)
-       call NCLASS_DR_alloc(0)
+       if(sim_model == 1) then
+          call NCLASS_DR_alloc(0)
+       endif
        initialized = .false.
     end if
 
@@ -170,7 +174,9 @@ contains
        close(io)
     end if
 
-    call NCLASS_DR_do(ir)
+    if(sim_model == 1) then
+       call NCLASS_DR_do(ir)
+    endif
 
   end subroutine THEORY_do
 

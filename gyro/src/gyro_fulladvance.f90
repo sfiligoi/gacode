@@ -120,13 +120,14 @@ subroutine gyro_fulladvance
   call gyro_timer_out('Diagnos.-allstep')
   call gyro_timer_in('Diagnos.-datastep')
 
-  if ((time_skip > 0 .and. modulo(step,time_skip) == 0) &
+  mod_time_skip: if ((time_skip > 0 .and. modulo(step,time_skip) == 0) &
      .or. (time_skip_wedge > 0 .and. modulo(step,time_skip_wedge) == 0) ) then
 
 
      ! Counter for number of data output events.
-
-     data_step = data_step+1
+     if (time_skip > 0 .and. modulo(step,time_skip) == 0) then
+        data_step = data_step+1
+     endif
 
      !------------------------------------------------
      ! Compute nonlinear transfer and turbulent energy 
@@ -151,7 +152,7 @@ subroutine gyro_fulladvance
      !h5_control = 2*output_flag
      
         
-       if (time_skip > 0 .and. modulo(step,time_skip) == 0) then
+      if (time_skip > 0 .and. modulo(step,time_skip) == 0) then
          if (io_method < 3 .and. io_method > 0) call gyro_write_timedata
       endif
 
@@ -175,7 +176,7 @@ subroutine gyro_fulladvance
      endif
 
 
-  endif ! modulo(step,time_skip.or.) test
+  endif mod_time_skip
 
   call gyro_timer_out('Diagnos.-datastep')
   !-------------------------------------------------------------------

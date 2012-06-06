@@ -84,6 +84,9 @@ subroutine tgyro_write_data(i_print)
      open(unit=1,file='out.tgyro.iterate',status='replace')
      close(1)
 
+     open(unit=1,file='out.tgyro.prec',status='replace')
+     close(1)
+
      return
 
   endif
@@ -455,6 +458,10 @@ subroutine tgyro_write_data(i_print)
   open(unit=1,file='control.out',status='old',position='append')
   backspace(1)
   write(1,*) i_tran
+  close(1)
+
+  open(unit=1,file='out.tgyro.prec',status='old',position='append')
+  write(1,*) sum(abs(eflux_i_tot(:))+abs(eflux_e_tot(:)))
   close(1)
 
   ! Data

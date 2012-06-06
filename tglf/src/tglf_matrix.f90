@@ -2499,7 +2499,7 @@
       if(gt.le.g(2))then
         i=1
       else
-        i = IDINT(gt/0.025)
+        i = INT(gt/0.025)
       endif
       j = i+1
 !      write(*,*)"FLR_Hn",i,gt,ft
@@ -2879,7 +2879,7 @@
       if(gt.le.g(2))then
         i=1
       else
-        i = IDINT(gt/0.025)
+        i = INT(gt/0.025)
       endif
       j = i+1
 ! interpolate the coefficients
@@ -3258,7 +3258,7 @@
       if(gt.le.g(2))then
         i=1
       else
-        i = IDINT(gt/0.025)
+        i = INT(gt/0.025)
       endif
       j = i+1
 ! interpolate the coefficients
@@ -3637,7 +3637,7 @@
       if(gt.le.g(2))then
         i=1
       else
-        i = IDINT(gt/0.025)
+        i = INT(gt/0.025)
       endif
       j = i+1
 ! interpolate the coefficients
@@ -4016,7 +4016,7 @@
       if(gt.le.g(2))then
         i=1
       else
-        i = IDINT(gt/0.025)
+        i = INT(gt/0.025)
       endif
       j = i+1
 ! interpolate the coefficients
@@ -4395,7 +4395,7 @@
       if(gt.le.g(2))then
         i=1
       else
-        i = IDINT(gt/0.025)
+        i = INT(gt/0.025)
       endif
       j = i+1
 ! interpolate the coefficients
@@ -4773,7 +4773,7 @@
       if(gt.le.g(2))then
         i=1
       else
-        i = IDINT(gt/0.025)
+        i = INT(gt/0.025)
       endif
       j = i+1
 ! interpolate the coefficients
@@ -5151,7 +5151,7 @@
       if(gt.le.g(2))then
         i=1
       else
-        i = IDINT(gt/0.025)
+        i = INT(gt/0.025)
       endif
       j = i+1
 ! interpolate the coefficients
@@ -5529,7 +5529,7 @@
       if(gt.le.g(2))then
         i=1
       else
-        i = IDINT(gt/0.025)
+        i = INT(gt/0.025)
       endif
       j = i+1
 ! interpolate the coefficients
