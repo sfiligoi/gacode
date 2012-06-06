@@ -44,7 +44,11 @@ subroutine neo_check
      endif
   case(1)
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'sim_model    : NUMERICAL'
+        write(io_neoout,*) 'sim_model    : NUMERICAL (with theory and nclass)'
+     endif
+  case(2)
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'sim_model    : NUMERICAL (with theory)'
      endif
   case default   
      call neo_error('ERROR: (NEO) invalid sim_model')

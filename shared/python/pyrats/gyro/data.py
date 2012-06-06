@@ -1,8 +1,8 @@
 class GYROData:
-    """A class for management of GYRO output data.
+    """GYRO output data class.
 
     Data:
-
+    
     dirname = ""
     profile  = {}
     geometry = {}
