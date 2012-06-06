@@ -61,7 +61,7 @@ then
   echo "Example:"
   echo
   echo "   gyro_plot -e ."
-  echo "   gyro_plot -e . -plot"
+  echo "   gyro_plot -e . -plot freq"
 
   exit 1
 fi
@@ -107,7 +107,7 @@ while [ $# -gt 0 ] ; do
 
   -f) shift ; FTYPE=$1 ;;
 
-  *) echo "ERROR: incorrect gyro syntax." ; exit 1 ;;
+  *) echo "ERROR: incorrect gyro_plot syntax." ; exit 1 ;;
 
   esac
   shift

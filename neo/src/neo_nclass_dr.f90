@@ -326,7 +326,7 @@ contains
           den_iz(is,abs(z(is))) = dens(is,ir) * dens_norm(ir) * 1e19
        enddo
     endif
-    
+
     !  grp_iz(i,z)-pressure gradient of i,z (keV/m**3/rho)
     grp_iz(:,:) = 0.0
     do is=1,n_species

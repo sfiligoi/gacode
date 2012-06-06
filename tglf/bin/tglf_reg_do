@@ -11,9 +11,10 @@ precfile='out.tglf.prec'
 
 list="
 tglf01 
-tglf02"
+tglf02
+tglf03"
 
-echo "REGRESSION TESTING:"
+echo "TGLF REGRESSION TESTING:"
 
 testdir=$PWD/tglf_regression_test
 mkdir $testdir

@@ -1,0 +1,41 @@
+#!/bin/sh
+# 
+# SCRIPT:
+#  tgyro_reg_do
+#
+# PURPOSE:
+#  Run through full suite of TGYRO regression tests
+#----------------------------------------------------
+
+precfile='out.tgyro.prec'
+
+n=$#
+
+if [ $n -eq 0 ] 
+then
+  echo "ERROR: Need to set number of CPUs."
+  exit 1
+fi
+
+# Define list of test directories:
+
+n_proc=${1}
+n_omp=${2}
+
+list="
+treg01
+treg02"
+
+echo "TGYRO REGRESSION TESTING [this could take a while]:"
+
+testdir=$PWD/tgyro_regression_test
+mkdir $testdir
+cd $testdir
+
+for sim in $list
+do 
+   tgyro -g $sim -p $testdir > out
+   rm -rf $sim/$precfile
+   tgyro -e $sim -n $n_proc -nomp $n_omp -p $testdir > out
+   tgyro_reg $sim
+done

@@ -31,7 +31,7 @@ exp_geo_norot
 exp_geo_rot 
 exp_geo_rot_multir"
 
-echo "REGRESSION TESTING:"
+echo "NEO REGRESSION TESTING:"
 
 testdir=$PWD/neo_regression_test
 mkdir $testdir
