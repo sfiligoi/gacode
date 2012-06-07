@@ -50,16 +50,12 @@ subroutine gyro_field_plot
         do i=1,time_skip
            w_time(i) = exp(-abs(i-time_skip)/plot_filter)
         enddo
-!        do i=1,time_skip_wedge
-!           w_time_wedge(i) = exp(-abs(i-time_skip_wedge)/plot_filter)
-!        enddo
-!sri v. : turned off b/c possible use of wedge dumps with large number of
-!timesteps between dumps
+         do i=1,time_skip_wedge
+           w_time_wedge(i) = exp(-abs(i-time_skip_wedge)/plot_filter)
+        enddo
 
         w_time(:) = w_time(:)/sum(w_time(:))
-!        w_time_wedge(:) = w_time_wedge(:)/sum(w_time_wedge(:))
-        w_time_wedge(:) = 0.0
-        w_time_wedge(time_skip_wedge) = 1.0
+        w_time_wedge(:) = w_time_wedge(:)/sum(w_time_wedge(:))
 
      else
 
