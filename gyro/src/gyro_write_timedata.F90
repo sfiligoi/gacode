@@ -1010,12 +1010,22 @@ subroutine gyro_write_timedata
      call dump_h5(gid3d,'torangle_offset',torangle_offset,h5in,h5err)
      call dump_h5(gid3d,'alpha',alpha_phi,h5in,h5err)
 
-     allocate(buffer(ncoarse+1,n_x,n_torangle_3d,3))
-     do iphi=1,n_torangle_3d
-        buffer(:,:,iphi,1)= Rc(:,:)*COS(zeta_phi(iphi))
-        buffer(:,:,iphi,2)=-Rc(:,:)*SIN(zeta_phi(iphi))
-        buffer(:,:,iphi,3)= Zc(:,:)
+     allocate(buffer(0:ncourse,n_x,n_torangle_3d,3))
+!     do iphi=1,n_torangle_3d
+!        buffer(:,:,iphi,1)= Rc(:,:)*COS(zeta_phi(iphi))
+!        buffer(:,:,iphi,2)=-Rc(:,:)*SIN(zeta_phi(iphi))
+!        buffer(:,:,iphi,3)= Zc(:,:)
+!     enddo
+    do iphi=1,n_torangle_3d
+      do j=0,ncourse
+        do ix=1,n_torangle
+          buffer(j,ix,iphi,1)= Rc(j,ix)*COS(zeta_phi(iphi))
+          buffer(j,ix,iphi,2)=-Rc(j,ix)*SIN(zeta_phi(iphi))
+          buffer(j,ix,iphi,3)= Zc(j,ix)
+        enddo
+      enddo
      enddo
+
 
      h5in%units="m"; h5in%mesh="mesh-structured"
      call dump_h5(gid3d,'cartMesh',buffer*a_meters,h5in,h5err)
