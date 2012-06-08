@@ -920,6 +920,7 @@ module gyro_globals
   real, dimension(:,:,:,:), allocatable :: nonlinear_flux_passing
   real, dimension(:,:,:,:), allocatable :: nonlinear_flux_trapped
   real, dimension(:,:), allocatable :: nonlinear_flux_momparts
+  real, dimension(:,:), allocatable :: nonlinear_flux_excparts
   !
   ! Diffusivities:
   !
@@ -935,6 +936,7 @@ module gyro_globals
   real, dimension(:,:,:,:), allocatable :: gbflux_i_trapped
   real, dimension(:,:,:), allocatable :: gbflux
   real, dimension(:,:), allocatable :: gbflux_mom
+  real, dimension(:,:), allocatable :: gbflux_exc
   real, dimension(:,:,:), allocatable :: gbflux_trapped
   real, dimension(:,:,:), allocatable :: gbflux_n
   !
