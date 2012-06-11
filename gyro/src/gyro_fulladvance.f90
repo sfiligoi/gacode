@@ -23,6 +23,9 @@ subroutine gyro_fulladvance
   field_blend_old2(:,:,:) = field_blend_old(:,:,:)
   field_blend_old(:,:,:)  = field_blend(:,:,:)
 
+  field_tau_old2(:,:,:,:) = field_tau_old(:,:,:,:)
+  field_tau_old(:,:,:,:)  = field_tau(:,:,:,:)
+
   gyro_uv_old2(:,:,:,:,:) = gyro_uv_old(:,:,:,:,:)
   gyro_uv_old(:,:,:,:,:)  = gyro_uv(:,:,:,:,:)
 
