@@ -790,6 +790,11 @@ module gyro_globals
   real, dimension(:,:), allocatable :: g_squared
   real, dimension(:,:), allocatable :: field_fluxave
   !
+  complex, dimension(:,:,:,:), allocatable :: field_tau
+  complex, dimension(:,:,:,:), allocatable :: field_tau_old
+  complex, dimension(:,:,:,:), allocatable :: field_tau_old2
+  complex, dimension(:,:,:,:), allocatable :: field_tau_dot
+  !
   complex, dimension(:,:,:), allocatable :: phi
   complex, dimension(:,:,:), allocatable :: phi_plot
   complex, dimension(:,:), allocatable :: field_r0_plot
@@ -826,11 +831,6 @@ module gyro_globals
   !
   complex, dimension(:,:,:,:), allocatable :: gyro_h
   complex, dimension(:,:,:,:), allocatable :: gyro_h_aperp
-  !
-  ! Phi and A mapped onto the orbit grid (i.e., as
-  ! functions of tau).
-  !
-  complex, dimension(:,:,:,:), allocatable :: field_tau
   !---------------------------------------------------------
 
   !---------------------------------------------------------
@@ -920,6 +920,7 @@ module gyro_globals
   real, dimension(:,:,:,:), allocatable :: nonlinear_flux_passing
   real, dimension(:,:,:,:), allocatable :: nonlinear_flux_trapped
   real, dimension(:,:), allocatable :: nonlinear_flux_momparts
+  real, dimension(:,:), allocatable :: nonlinear_flux_excparts
   !
   ! Diffusivities:
   !
@@ -935,6 +936,7 @@ module gyro_globals
   real, dimension(:,:,:,:), allocatable :: gbflux_i_trapped
   real, dimension(:,:,:), allocatable :: gbflux
   real, dimension(:,:), allocatable :: gbflux_mom
+  real, dimension(:,:), allocatable :: gbflux_exc
   real, dimension(:,:,:), allocatable :: gbflux_trapped
   real, dimension(:,:,:), allocatable :: gbflux_n
   !

@@ -49,6 +49,7 @@ class GYROData:
         #self.read_balloon()
         #self.read_gbflux_i()
         #self.read_gbflux_n()
+        #self.read_gbflux_exc()
         #self.read_moment_u()
         #self.read_moment_n()
         #self.read_moment_e()
@@ -87,6 +88,7 @@ class GYROData:
         self.gbflux         = []
         self.gbflux_i       = []
         self.gbflux_n       = []
+        self.gbflux_exc     = []
         self.moment_u       = []
         self.moment_n       = []
         self.moment_e       = []
@@ -335,6 +337,32 @@ class GYROData:
         
         self.gbflux_n = gbflux_n.reshape((n_kinetic,n_field,4,n_n,nt),order='F')
         self.loaded.append('gbflux_n')
+
+     #---------------------------------------------------------------------------#
+
+    def read_gbflux_exc(self):
+        """Reads gbflux_exc data.  Output is numpy array with dimensions:
+        n_kinetic x 4 x n_time"""
+
+        import sys
+        import numpy as np
+
+        n_kinetic = self.profile['n_kinetic']
+
+        try:
+            gbflux_exc = np.fromfile(self.dirname+'/out.gyro.gbflux_exc',dtype=float,sep=" ")
+        except:
+            print "ERROR (GYROData): out.gyro.gbflux_exc not found."
+            sys.exit()
+
+        nt = len(gbflux_exc)/(n_kinetic*4)
+
+        if self.n > nt:
+            print 'ERROR (GYROData): '+self.dirname+'/out.gyro.gbflux_exc too small. '
+            sys.exit()
+        
+        self.gbflux_exc = gbflux_exc.reshape((n_kinetic,4,nt),order='F')
+        self.loaded.append('gbflux_exc')
 
     #---------------------------------------------------------------------------#
 
