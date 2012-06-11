@@ -47,6 +47,10 @@ subroutine gyro_field_time_derivative
           +0.5*field_blend_old2(:,i,:))/dt &
           +i_c*minus_n_omega*field_blend(:,i,:)
 
+     field_tau_dot(:,i,:,:) = (1.5*field_tau(:,i,:,:)-2*field_tau_old(:,i,:,:) &
+          +0.5*field_tau_old2(:,i,:,:))/dt &
+          +i_c*minus_n_omega*field_tau(:,i,:,:)
+
      gyro_uv_dot(:,i,:,:,:)=(1.5*gyro_uv(:,i,:,:,:)-2*gyro_uv_old(:,i,:,:,:) &
           +0.5*gyro_uv_old2(:,i,:,:,:))/dt &
           +i_c*minus_n_omega*gyro_uv(:,i,:,:,:)

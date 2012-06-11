@@ -142,10 +142,10 @@ subroutine gyro_nonlinear_flux
                       conjg(cap_h(i,is))*gyro_uv_dot(m,i,p_nek_loc,is,ix)*w_p(ie,i,k,is))
                  exctemp(2) = z(is)*real( &
                       conjg(h_cap_dot(m,i,p_nek_loc,is))*gyro_uv(m,i,p_nek_loc,is,ix)*w_p(ie,i,k,is))
-                 exctemp(3) = 0.0
+                 exctemp(3) = z(is)*real( &
+                      conjg(gyro_cap_h(i,is))*field_tau_dot(m,i,p_nek_loc,ix)*w_p(ie,i,k,is))
                  exctemp(4) = z(is)*real( &
                       conjg(gyro_cap_h_dot(i,is))*field_tau(m,i,p_nek_loc,ix)*w_p(ie,i,k,is))
-
 
                  excparts(is,:) = excparts(is,:)+exctemp(:)/n_x 
 
