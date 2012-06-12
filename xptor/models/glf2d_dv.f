@@ -1329,11 +1329,13 @@ c use GYRO conventions
         vpar_tg(1) = sign_Bt_exp*cv*a_tor(jm)*vexbm/(a_unit_exp*csdam)
         vpar_tg(2) = vpar_tg(1)
         vpar_tg(3) = vpar_tg(1)
+        vexb_tg=0.0
       endif
       if(alpha_p_tg.eq.0.0)then
         vpar_tg(1)=0.0
         vpar_tg(2)=0.0
         vpar_tg(3)=0.0
+        vexb_tg=0.0
       endif
 c      debye_tg = debyelorhos**2
        debye_tg = debyelorhos
@@ -1342,7 +1344,7 @@ c      write(*,*)"jm=",jm,"ipert_gf=",ipert_gf
 c      write(*,*)"debug","gradtem=",gradtem,"tem=",tem
 c      write(*,*)"debug","gradtim=",gradtim,"tim=",tim     
 c
-      CALL put_averages(taus_tg,as_tg,vpar_tg,betae_tg,xnue_tg,
+      CALL put_averages(taus_tg,as_tg,vpar_tg,vexb_tg,betae_tg,xnue_tg,
      > zeff_tg,debye_tg)
 c
 c      if(ipert_gf.eq.0)then
@@ -1396,7 +1398,7 @@ c why prevent negative s_kappa?
          s_zeta_tg=0.0
         CALL put_Miller_geometry(rmin_tg,rmaj_tg,zmaj_tg,drmindx_tg,
      >  drmajdx_tg,dzmajdx_tg,kappa_tg,s_kappa_tg,delta_tg,s_delta_tg,
-     >  zeta_tg,s_zeta_tg,q_tg,q_prime_tg,p_prime_tg)
+     >  zeta_tg,s_zeta_tg,q_tg,q_prime_tg,p_prime_tg,kx0_tg)
 c
        else
         write(*,*)"igeo_tg invalid",igeo_tg

@@ -34,10 +34,10 @@ module gyro_globals
   !---------------------------------------------------------
   ! CPU timers
   !
-  real, dimension(64) :: cpu=-1.0
-  real, dimension(64) :: cpu_in=0.0
+  real, dimension(64) :: cpu
+  real, dimension(64) :: cpu_in
   character(len=19), dimension(64) :: cpu_tag
-  integer :: cpu_maxindx = 0
+  integer :: cpu_maxindx
   real :: startup_time
   !---------------------------------------------------------
   !---------------------------------------------------------
@@ -109,9 +109,9 @@ module gyro_globals
   !
   integer :: io_method = 1
   integer :: time_skip_wedge = 0    ! Wedge files for synthetic diagnostics
-  integer :: n_torangle_wedge= 1    ! Number of toroidal planes to use in wedge plots
+  integer :: n_torangle_wedge = 1    ! Number of toroidal planes to use in wedge plots
   integer :: n_torangle_3d = 0
-  real :: torangle_offset=0.0
+  real :: torangle_offset = 0.0
   !
   ! This defines a wedge in the poloidal plane 
   ! To recover the normal global plot, set 
@@ -458,6 +458,7 @@ module gyro_globals
   real :: time_max
   real :: freq_tol
   real :: freq_err
+  real :: fluxaverage_window
   !
   real :: plot_filter
   real :: dt
@@ -787,9 +788,12 @@ module gyro_globals
   !
   real, dimension(:), allocatable :: phi_squared
   real, dimension(:,:), allocatable :: g_squared
-  real, dimension(:), allocatable :: phi_fluxave
-  real, dimension(:), allocatable :: a_fluxave
-  real, dimension(:), allocatable :: aperp_fluxave
+  real, dimension(:,:), allocatable :: field_fluxave
+  !
+  complex, dimension(:,:,:,:), allocatable :: field_tau
+  complex, dimension(:,:,:,:), allocatable :: field_tau_old
+  complex, dimension(:,:,:,:), allocatable :: field_tau_old2
+  complex, dimension(:,:,:,:), allocatable :: field_tau_dot
   !
   complex, dimension(:,:,:), allocatable :: phi
   complex, dimension(:,:,:), allocatable :: phi_plot
@@ -827,11 +831,6 @@ module gyro_globals
   !
   complex, dimension(:,:,:,:), allocatable :: gyro_h
   complex, dimension(:,:,:,:), allocatable :: gyro_h_aperp
-  !
-  ! Phi and A mapped onto the orbit grid (i.e., as
-  ! functions of tau).
-  !
-  complex, dimension(:,:,:,:), allocatable :: field_tau
   !---------------------------------------------------------
 
   !---------------------------------------------------------
@@ -921,6 +920,7 @@ module gyro_globals
   real, dimension(:,:,:,:), allocatable :: nonlinear_flux_passing
   real, dimension(:,:,:,:), allocatable :: nonlinear_flux_trapped
   real, dimension(:,:), allocatable :: nonlinear_flux_momparts
+  real, dimension(:,:), allocatable :: nonlinear_flux_excparts
   !
   ! Diffusivities:
   !
@@ -936,6 +936,7 @@ module gyro_globals
   real, dimension(:,:,:,:), allocatable :: gbflux_i_trapped
   real, dimension(:,:,:), allocatable :: gbflux
   real, dimension(:,:), allocatable :: gbflux_mom
+  real, dimension(:,:), allocatable :: gbflux_exc
   real, dimension(:,:,:), allocatable :: gbflux_trapped
   real, dimension(:,:,:), allocatable :: gbflux_n
   !

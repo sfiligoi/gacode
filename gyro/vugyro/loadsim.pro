@@ -190,7 +190,7 @@ pro loadsim, input_dir
      read_array,mom_e,'out.gyro.moment_e',exists_mom_e
 
      mom_v = fltarr(2,n_theta_plot,n_r,n_kinetic,n_n,n_time)
-     read_array,mom_v,'out.gyro.moment_v.out',exists_mom_v
+     read_array,mom_v,'out.gyro.moment_v',exists_mom_v
 
   endif else if skip_large eq 2 then begin
 

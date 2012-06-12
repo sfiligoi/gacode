@@ -496,7 +496,25 @@ subroutine tgyro_write_input
 
      end select
      !--------------------------------------------------------
-     do i_ion=1,loc_n_ion
+      !--------------------------------------------------------
+     select case (loc_evolve_grad_only_flag)
+
+     case (0)
+
+        write(1,10) 'LOC_EVOLVE_GRAD_ONLY_FLAG','Self-consistently evolve profiles with gradients'
+
+     case (1)
+
+        write(1,10) 'LOC_EVOLVE_GRAD_ONLY_FLAG','Evolve gradients but *NOT* corresponding profiles'
+
+     case default
+
+        error_flag = 1
+        error_msg = 'Error: LOC_LOCK_PROFILE_FLAG'
+
+     end select
+     !--------------------------------------------------------
+    do i_ion=1,loc_n_ion
         write(1,20) 'ion '//trim(ion_tag(i_ion))//' mass',mi_vec(i_ion)
         write(1,20) 'ion '//trim(ion_tag(i_ion))//' charge ',zi_vec(i_ion)
      enddo

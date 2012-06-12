@@ -54,7 +54,7 @@ subroutine gyro_read_experimental_profiles
      n_fourier_geo = EXPRO_nfourier
   endif
   !
-  call allocate_profile_exp
+  call gyro_alloc_profile_exp
   !
   ! Transfer data from read arrays to individual arrays:
   !

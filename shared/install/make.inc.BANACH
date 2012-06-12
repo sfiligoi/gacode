@@ -1,5 +1,6 @@
 #---------------------------------------------------
 # banach.gat.com (quad-core workstation)
+# VECTORIZER BUG REQUIRES -no-vec option
 #---------------------------------------------------
 
 # Compilers
@@ -8,8 +9,8 @@ FC	= mpif90 -mod $(GACODE_ROOT)/modules -I $(GACODE_ROOT)/modules
 F77	= mpif90
 
 FMATH	= -r8
-FOPT	= -O3 -xSSE4.1
-FDEBUG	= -check all -warn all -fpe0 -ftrapuv
+FOPT	= -O3 -xHost -no-vec
+FDEBUG	= -O2 -check all -warn 
 FOMP    = -openmp
 FNOMP   =
 

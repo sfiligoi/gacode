@@ -99,6 +99,7 @@ subroutine gyro_write_initdata_hdf5(datafile)
   call dump_h5(rootid,"nu_s",nu_s,h5in,h5err)
   call dump_h5(rootid,"w0_s",w0_s,h5in,h5err)
   call dump_h5(rootid,"box_multiplier",box_multiplier,h5in,h5err)
+  call dump_h5(rootid,"n_explicit_damp",n_explicit_damp,h5in,h5err)
 
   call dump_h5(rootid,"lambda", lambda(ir_norm,:),h5in,h5err)
   call dump_h5(rootid,"energy", energy,h5in,h5err)
@@ -108,6 +109,9 @@ subroutine gyro_write_initdata_hdf5(datafile)
   call dump_h5(rootid,"zcharge", z(:),h5in,h5err)
   call dump_h5(rootid,"n_moment", n_moment ,h5in,h5err)
 
+
+  call dump_h5(rootid,"time_skip", time_skip,h5in,h5err)
+  call dump_h5(rootid,"time_step", dt ,h5in,h5err)
   !---------------------------------------------------------------------
   ! These variables are essentially gyro_write_units.f90
   !---------------------------------------------------------------------

@@ -39,17 +39,20 @@ subroutine gyro_initialize_arrays
   time_error   = 0.0
   diff         = 0.0
 
-  ! NO field_blend
+  ! No field_blend
   field_blend_dot  = 0.0
   field_blend_old  = 0.0
   field_blend_old2 = 0.0
 
-  ! NO cap_h 
+  ! No field_tau
+  field_tau_dot  = 0.0
+  field_tau_old  = 0.0
+  field_tau_old2 = 0.0
+
+  ! No cap_h 
   h_cap_dot  = 0.0
   h_cap_old  = 0.0
   h_cap_old2 = 0.0
-
-  a_fluxave = 0.0
 
   gyro_uv_old  = 0.0
   gyro_uv_old2 = 0.0

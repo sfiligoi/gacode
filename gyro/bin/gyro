@@ -312,7 +312,7 @@ then
 
    #==========================================================
    # Version stamp:  
-   echo `gacode_getversion` > $VERBASE
+   cat $GACODE_ROOT/gyro/.VERSION > $VERBASE
    echo $GACODE_PLATFORM >> $VERBASE
    date >> $VERBASE
    #==========================================================
@@ -342,6 +342,7 @@ fi
 if [ $TEST_FLAG -eq 1 ] 
 then
    cat $RUNBASE
+   cat out.expro.run
 fi
 #===========================================================
 
