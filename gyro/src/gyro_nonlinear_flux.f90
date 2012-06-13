@@ -159,13 +159,20 @@ subroutine gyro_nonlinear_flux
 
                  ! Exchange breakdown (sum over i, ix, ck): ** valid for ES only **
 
+                 ! 1. H <phi_dot> [Sugama]
                  exctemp(1) = z(is)*real( &
                       conjg(cap_h(i,is))*gyro_uv_dot(m,i,p_nek_loc,is,ix)*w_p(ie,i,k,is))
-                 exctemp(2) = z(is)*real( &
+                 
+                 ! 2. -H_dot <phi>
+                 exctemp(2) = -z(is)*real( &
                       conjg(h_cap_dot(m,i,p_nek_loc,is))*gyro_uv(m,i,p_nek_loc,is,ix)*w_p(ie,i,k,is))
+
+                 ! 3. <H> phi_dot
                  exctemp(3) = z(is)*real( &
                       conjg(gyro_h_cap(i,is))*field_tau_dot(m,i,p_nek_loc,ix)*w_p(ie,i,k,is))
-                 exctemp(4) = z(is)*real( &
+
+                 ! 4. -<H_dot> phi
+                 exctemp(4) = -z(is)*real( &
                       conjg(gyro_h_cap_dot(i,is))*field_tau(m,i,p_nek_loc,ix)*w_p(ie,i,k,is))
 
                  excparts(is,:) = excparts(is,:)+exctemp(:)/n_x 

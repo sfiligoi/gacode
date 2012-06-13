@@ -4,7 +4,7 @@ FC	= mpif90 -mod $(GACODE_ROOT)/modules -I $(GACODE_ROOT)/modules
 F77	= mpif90
 
 FMATH	= -r8 
-FOPT	= -O3 -xHost
+FOPT	= -O2 -no-vec
 FDEBUG	= -check all -warn all -fpe0 -ftrapuv 
 FOMP    = -openmp
 FNOMP   = 
