@@ -256,10 +256,15 @@
   h5err%errBool = .false.
   h5err%errorMsg =  " "
 
-  h5in%h5_kind_type_r4 = h5kind_to_type(r4,H5_REAL_KIND)
-  h5in%h5_kind_type_r8 = h5kind_to_type(r8,H5_REAL_KIND)
-  h5in%h5_kind_type_i4 = h5kind_to_type(i4,H5_INTEGER_KIND)
-  h5in%h5_kind_type_i8 = h5kind_to_type(i8,H5_INTEGER_KIND)
+!  h5in%h5_kind_type_r4 = h5kind_to_type(r4,H5_REAL_KIND)
+!  h5in%h5_kind_type_r8 = h5kind_to_type(r8,H5_REAL_KIND)
+!  h5in%h5_kind_type_i4 = h5kind_to_type(i4,H5_INTEGER_KIND)
+!  h5in%h5_kind_type_i8 = h5kind_to_type(i8,H5_INTEGER_KIND)
+  h5in%h5_kind_type_r4 = r4
+  h5in%h5_kind_type_r8 = r8
+  h5in%h5_kind_type_i4 = i4
+  h5in%h5_kind_type_i8 = i8
+
   h5in%wrd_type=h5in%h5_kind_type_r8
 
   return
