@@ -236,6 +236,7 @@ then
     out.gyro.error
     out.gyro.gbflux_i
     out.gyro.gbflux_n
+    out.gyro.gbflux_exc
     out.gyro.geometry_arrays
     out.gyro.kxkyspec
     out.gyro.phase_space

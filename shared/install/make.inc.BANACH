@@ -10,7 +10,7 @@ F77	= mpif90
 
 FMATH	= -r8
 FOPT	= -O3 -xHost -no-vec
-FDEBUG	= -O2 -check all -warn 
+FDEBUG	= -O2 -check bounds,uninit -warn 
 FOMP    = -openmp
 FNOMP   =
 
