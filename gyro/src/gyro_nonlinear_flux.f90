@@ -25,16 +25,25 @@ subroutine gyro_nonlinear_flux
   implicit none
   !
   real, dimension(n_x,n_kinetic,n_field,p_moment,2) :: moment
+  real, dimension(n_kinetic,4) :: excparts
   real, dimension(n_kinetic,3) :: momparts
+  real, dimension(4) :: exctemp
   real, dimension(3) :: momtemp
 
   complex, dimension(i1_buffer:i2_buffer,n_kinetic) :: cap_h
+  complex, dimension(i1_buffer:i2_buffer,n_kinetic) :: h1
+  complex, dimension(i1_buffer:i2_buffer,n_kinetic) :: h2
+  complex, dimension(i1_buffer:i2_buffer,n_kinetic) :: gyro_h_cap
+  complex, dimension(i1_buffer:i2_buffer,n_kinetic) :: gyro_h_cap_dot
   complex, dimension(n_x) :: ikrho
   !--------------------------------------------------  
 
 
   moment(:,:,:,:,:) = 0.0
+  excparts(:,:)     = 0.0
   momparts(:,:)     = 0.0
+  exctemp(:)        = 0.0
+  momtemp(:)        = 0.0
 
   p_nek_loc = 0
   do p_nek=1+i_proc_1,n_nek_1,n_proc_1
@@ -49,10 +58,49 @@ subroutine gyro_nonlinear_flux
      do m=1,n_stack
 
         cap_h(:,:) = (0.0,0.0)
+        cap_h(1:n_x,:) = h_cap(m,:,p_nek_loc,:)
+
+        do i=1,n_x
+           h1(i,:) = h_cap(m,i,p_nek_loc,:)
+           h2(i,:) = h_cap_dot(m,i,p_nek_loc,:)
+        enddo
+        if (boundary_method == 1) then
+           do i=1-m_gyro,0
+              h1(i,:) = h_cap(m,i+n_x,p_nek_loc,:)
+              h2(i,:) = h_cap_dot(m,i+n_x,p_nek_loc,:)
+           enddo
+           do i=n_x+1,n_x+m_gyro-i_gyro
+              h1(i,:) = h_cap(m,i-n_x,p_nek_loc,:)
+              h2(i,:) = h_cap_dot(m,i-n_x,p_nek_loc,:)
+           enddo
+        else
+           do i=1-m_gyro,0
+              h1(i,:) = 0.0
+              h2(i,:) = 0.0
+           enddo
+           do i=n_x+1,n_x+m_gyro
+              h1(i,:) = 0.0
+              h2(i,:) = 0.0
+           enddo
+        endif
+
+        gyro_h_cap(:,:) = (0.0,0.0)
         do is=1,n_kinetic
            do i=1,n_x
-              cap_h(i,is) = h(m,i,p_nek_loc,is)+&
-                   z(is)*alpha_s(is,i)*gyro_u(m,i,p_nek_loc,is)
+              do i_diff=-m_gyro,m_gyro-i_gyro
+                 gyro_h_cap(i,is) = gyro_h_cap(i,is)+&
+                      w_gyro(m,i_diff,i,p_nek_loc,is)*h1(i+i_diff,is)
+              enddo ! i_diff
+           enddo
+        enddo
+
+        gyro_h_cap_dot(:,:) = (0.0,0.0)
+        do is=1,n_kinetic
+           do i=1,n_x
+              do i_diff=-m_gyro,m_gyro-i_gyro
+                 gyro_h_cap_dot(i,is) = gyro_h_cap_dot(i,is)+&
+                      w_gyro(m,i_diff,i,p_nek_loc,is)*h2(i+i_diff,is)
+              enddo ! i_diff
            enddo
         enddo
 
@@ -109,6 +157,26 @@ subroutine gyro_nonlinear_flux
                  moment(i,is,ix,4,ck) = moment(i,is,ix,4,ck)+z(is)*real( &
                       conjg(cap_h(i,is))*gyro_uv_dot(m,i,p_nek_loc,is,ix)*w_p(ie,i,k,is))
 
+                 ! Exchange breakdown (sum over i, ix, ck): ** valid for ES only **
+
+                 ! 1. H <phi_dot> [Sugama]
+                 exctemp(1) = z(is)*real( &
+                      conjg(cap_h(i,is))*gyro_uv_dot(m,i,p_nek_loc,is,ix)*w_p(ie,i,k,is))
+                 
+                 ! 2. -H_dot <phi>
+                 exctemp(2) = -z(is)*real( &
+                      conjg(h_cap_dot(m,i,p_nek_loc,is))*gyro_uv(m,i,p_nek_loc,is,ix)*w_p(ie,i,k,is))
+
+                 ! 3. <H> phi_dot
+                 exctemp(3) = z(is)*real( &
+                      conjg(gyro_h_cap(i,is))*field_tau_dot(m,i,p_nek_loc,ix)*w_p(ie,i,k,is))
+
+                 ! 4. -<H_dot> phi
+                 exctemp(4) = -z(is)*real( &
+                      conjg(gyro_h_cap_dot(i,is))*field_tau(m,i,p_nek_loc,ix)*w_p(ie,i,k,is))
+
+                 excparts(is,:) = excparts(is,:)+exctemp(:)/n_x 
+
               enddo ! i
            enddo ! is
         enddo ! ix
@@ -141,6 +209,14 @@ subroutine gyro_nonlinear_flux
   call MPI_ALLREDUCE(momparts(:,:), &
        nonlinear_flux_momparts, &
        size(nonlinear_flux_momparts), &
+       MPI_DOUBLE_PRECISION, &
+       MPI_SUM, &
+       NEW_COMM_1, &
+       i_err)
+
+  call MPI_ALLREDUCE(excparts(:,:), &
+       nonlinear_flux_excparts, &
+       size(nonlinear_flux_excparts), &
        MPI_DOUBLE_PRECISION, &
        MPI_SUM, &
        NEW_COMM_1, &

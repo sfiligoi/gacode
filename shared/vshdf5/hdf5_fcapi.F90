@@ -114,6 +114,10 @@
      integer(HID_T) :: vsStep=0            ! Step # associated with time
      real(r8) :: vsUnitCnv=1.              ! conversion factor
      character(len=30), dimension(3) :: vsAxis   ! For rectilinear meshes
+     INTEGER(HID_T) :: h5_kind_type_r4
+     INTEGER(HID_T) :: h5_kind_type_r8
+     INTEGER(HID_T) :: h5_kind_type_i4
+     INTEGER(HID_T) :: h5_kind_type_i8
   end type
 !-----------------------------------------------------------------------
 !     Example of how to use h5err type after an fcapi call.
@@ -123,6 +127,8 @@
      logical :: errbool
      character(64) :: errormsg
   end type
+
+
 !-----------------------------------------------------------------------
 ! subprogram name interfaces
 !-----------------------------------------------------------------------
@@ -153,7 +159,10 @@
     module procedure read_attribute_intl_sc,read_attribute_rl_sc,read_attribute_intl_vec
   end interface
 
+
   contains
+
+
 !-----------------------------------------------------------------------
 ! subprogram 0. check_dims 
 ! Write mismatched dimension errors
@@ -208,6 +217,7 @@
   call h5open_f(err)
   ! write(*, *) "vshdf5_fcinit: h5open_f returned."
   ! write(*, *) "vshdf5_fcinit: leaving."
+
   return
   end subroutine vshdf5_fcinit
 
@@ -224,7 +234,7 @@
   ! According to xlf:
   ! (E) Null literal string is not permitted.  A single blank is assumed.
   ! So these should be single blanks to avoid warnings
-  h5in%wrd_type=H5T_NATIVE_DOUBLE
+  !h5in%wrd_type=H5T_NATIVE_DOUBLE
   h5in%vsCentering=" "
   h5in%doTranspose=.false.
   h5in%verbose=.false.
@@ -245,6 +255,13 @@
   h5in%vsLabels = " "
   h5err%errBool = .false.
   h5err%errorMsg =  " "
+
+  h5in%h5_kind_type_r4 = h5kind_to_type(r4,H5_REAL_KIND)
+  h5in%h5_kind_type_r8 = h5kind_to_type(r8,H5_REAL_KIND)
+  h5in%h5_kind_type_i4 = h5kind_to_type(i4,H5_INTEGER_KIND)
+  h5in%h5_kind_type_i8 = h5kind_to_type(i8,H5_INTEGER_KIND)
+  h5in%wrd_type=h5in%h5_kind_type_r8
+
   return
   end subroutine vshdf5_inith5vars
 !-----------------------------------------------------------------------
