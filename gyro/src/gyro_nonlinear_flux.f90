@@ -85,23 +85,23 @@ subroutine gyro_nonlinear_flux
         endif
 
         gyro_h_cap(:,:) = (0.0,0.0)
-        do is=1,n_kinetic
-           do i=1,n_x
-              do i_diff=-m_gyro,m_gyro-i_gyro
-                 gyro_h_cap(i,is) = gyro_h_cap(i,is)+&
-                      w_gyro(m,i_diff,i,p_nek_loc,is)*h1(i+i_diff,is)
-              enddo ! i_diff
-           enddo
-        enddo
-
         gyro_h_cap_dot(:,:) = (0.0,0.0)
         do is=1,n_kinetic
-           do i=1,n_x
-              do i_diff=-m_gyro,m_gyro-i_gyro
-                 gyro_h_cap_dot(i,is) = gyro_h_cap_dot(i,is)+&
-                      w_gyro(m,i_diff,i,p_nek_loc,is)*h2(i+i_diff,is)
-              enddo ! i_diff
-           enddo
+           if (is <= n_gk) then
+              do i=1,n_x
+                 do i_diff=-m_gyro,m_gyro-i_gyro
+                    gyro_h_cap(i,is) = gyro_h_cap(i,is)+&
+                         w_gyro(m,i_diff,i,p_nek_loc,is)*h1(i+i_diff,is)
+                    gyro_h_cap_dot(i,is) = gyro_h_cap_dot(i,is)+&
+                         w_gyro(m,i_diff,i,p_nek_loc,is)*h2(i+i_diff,is)
+                 enddo ! i_diff
+              enddo
+           else
+              do i=1,n_x
+                    gyro_h_cap(i,is)     = h1(i,is)
+                    gyro_h_cap_dot(i,is) = h2(i,is)
+              enddo
+           endif
         enddo
 
         !-----------------------------------------------------
@@ -162,7 +162,7 @@ subroutine gyro_nonlinear_flux
                  ! 1. H <phi_dot> [Sugama]
                  exctemp(1) = z(is)*real( &
                       conjg(cap_h(i,is))*gyro_uv_dot(m,i,p_nek_loc,is,ix)*w_p(ie,i,k,is))
-                 
+
                  ! 2. -H_dot <phi>
                  exctemp(2) = -z(is)*real( &
                       conjg(h_cap_dot(m,i,p_nek_loc,is))*gyro_uv(m,i,p_nek_loc,is,ix)*w_p(ie,i,k,is))
