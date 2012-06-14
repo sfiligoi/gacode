@@ -1,1 +1,1 @@
-GATOFLAGS = -dp -O0
+GATOFLAGS =-s real64
