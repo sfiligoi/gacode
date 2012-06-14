@@ -1012,23 +1012,24 @@ subroutine gyro_write_timedata
      call dump_h5(gid3d,'alpha',alpha_phi,h5in,h5err)
 
      allocate(buffer(0:ncoarse,n_x,n_torangle_3d,3))
+      buffer = 9999
 !     do iphi=1,n_torangle_3d
 !        buffer(:,:,iphi,1)= Rc(:,:)*COS(zeta_phi(iphi))
 !        buffer(:,:,iphi,2)=-Rc(:,:)*SIN(zeta_phi(iphi))
 !        buffer(:,:,iphi,3)= Zc(:,:)
 !     enddo
-    do iphi=1,n_torangle_3d
-      do j=0,ncoarse
-        do ix=1,n_x
-          buffer(j,ix,iphi,1)= Rc(j,ix)*COS(zeta_phi(iphi))
-!	 write(*,*) "j=",j,"ix=",ix,"iphi=",iphi &
-!		,"Rc=",Rc(j,ix),"zeta=",zeta_phi(iphi)
-!	write(*,*) " buffer(j,ix,iphi,1) = ", buffer(j,ix,iphi,1)
-	buffer(j,ix,iphi,2)=-Rc(j,ix)*SIN(zeta_phi(iphi))
-          buffer(j,ix,iphi,3)= Zc(j,ix)
-        enddo
-      enddo
-     enddo
+!    do iphi=1,n_torangle_3d
+!      do j=0,ncoarse
+!        do ix=1,n_x
+!          buffer(j,ix,iphi,1)= Rc(j,ix)*COS(zeta_phi(iphi))
+!!	 write(*,*) "j=",j,"ix=",ix,"iphi=",iphi &
+!!		,"Rc=",Rc(j,ix),"zeta=",zeta_phi(iphi)
+!!	write(*,*) " buffer(j,ix,iphi,1) = ", buffer(j,ix,iphi,1)
+!	buffer(j,ix,iphi,2)=-Rc(j,ix)*SIN(zeta_phi(iphi))
+!          buffer(j,ix,iphi,3)= Zc(j,ix)
+!        enddo
+!      enddo
+!     enddo
 
 
      h5in%units="m"; h5in%mesh="mesh-structured"
