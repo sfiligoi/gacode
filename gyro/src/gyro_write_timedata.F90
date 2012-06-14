@@ -1012,12 +1012,12 @@ subroutine gyro_write_timedata
      call dump_h5(gid3d,'alpha',alpha_phi,h5in,h5err)
 
      allocate(buffer(0:ncoarse,n_x,n_torangle_3d,3))
-      buffer = 9999
-!     do iphi=1,n_torangle_3d
-!        buffer(:,:,iphi,1)= Rc(:,:)*COS(zeta_phi(iphi))
-!        buffer(:,:,iphi,2)=-Rc(:,:)*SIN(zeta_phi(iphi))
-!        buffer(:,:,iphi,3)= Zc(:,:)
-!     enddo
+      buffer = -9999.999
+     do iphi=1,n_torangle_3d
+        buffer(:,:,iphi,1)= Rc(:,:)*COS(zeta_phi(iphi))
+        buffer(:,:,iphi,2)=-Rc(:,:)*SIN(zeta_phi(iphi))
+        buffer(:,:,iphi,3)= Zc(:,:)
+     enddo
 !    do iphi=1,n_torangle_3d
 !      do j=0,ncoarse
 !        do ix=1,n_x
