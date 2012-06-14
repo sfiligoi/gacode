@@ -35,7 +35,7 @@ FHDF5 = -DHAVE_HDF5
 # System math libraries
 
 #LMATH = /System/Library/Frameworks/vecLib.framework/Versions/A/vecLib \
-       -lSystemStubs -lSystem
+#       -lSystemStubs -lSystem
 
 LMATH = -framework Accelerate
 
