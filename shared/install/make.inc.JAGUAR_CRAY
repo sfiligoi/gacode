@@ -21,7 +21,7 @@ NUMAS_PER_NODE=2
 # Compilers and flags
 
 # Fortran 90/95 compiler
-FC  = ftn -J $(GACODE_ROOT)/modules
+FC  = ftn -em -J $(GACODE_ROOT)/modules
 
 # Fortran 77 compiler
 F77 = ftn
@@ -29,7 +29,7 @@ F77 = ftn
 # Compiler options/flags
 FMATH  = -s real64 
 FOPT   = -G fast 
-FDEBUG = -e acCDn
+FDEBUG = -e acCD
 FOMP   = -h omp
 FNOMP  = -h noomp
 FACC   = -h acc
