@@ -24,7 +24,7 @@ NUMAS_PER_NODE=2
 FC  = hmpp ftn -em -J $(GACODE_ROOT)/modules -h keepfiles -c
 
 # Fortran 77 compiler
-F77 = ftn
+F77 = ftn -c
 
 # Compiler options/flags
 FMATH  = -s real64 
