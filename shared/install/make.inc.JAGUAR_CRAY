@@ -21,7 +21,7 @@ NUMAS_PER_NODE=2
 # Compilers and flags
 
 # Fortran 90/95 compiler
-FC  = ftn -em -J $(GACODE_ROOT)/modules
+FC  = ftn -em -J $(GACODE_ROOT)/modules -h keepfiles
 
 # Fortran 77 compiler
 F77 = ftn
