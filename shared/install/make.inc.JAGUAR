@@ -21,10 +21,10 @@ NUMAS_PER_NODE=2
 # Compilers and flags
 
 # Fortran 90/95 compiler
-FC  = ftn -module $(GACODE_ROOT)/modules -c
+FC  = ftn -module $(GACODE_ROOT)/modules 
 
 # Fortran 77 compiler
-F77 = ftn -c 
+F77 = ftn  
 
 # Compiler options/flags
 FMATH  = -r8

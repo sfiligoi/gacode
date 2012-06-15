@@ -21,11 +21,11 @@ NUMAS_PER_NODE=2
 # Compilers and flags
 
 # Fortran 90/95 compiler
-FC  = hmpp ftn -em -J $(GACODE_ROOT)/modules -h keepfiles -c
+FC  = hmpp ftn -em -J $(GACODE_ROOT)/modules -h keepfiles 
 
 # Fortran 77 compiler
-F77 = ftn -c
-
+F77 = ftn
+ 
 # Compiler options/flags
 FMATH  = -s real64 
 FOPT   = -G fast 
