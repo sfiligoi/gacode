@@ -223,6 +223,44 @@ subroutine neo_check
         return
      end select
 
+     if(abs(profile_dlnndr_1_scale-1.0) > epsilon(0.) ) then
+        write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNNDR_1 IS RE-SCALED'
+     endif
+     if(abs(profile_dlnndr_2_scale-1.0) > epsilon(0.) ) then
+        write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNNDR_2 IS RE-SCALED'
+     endif
+     if(abs(profile_dlnndr_3_scale-1.0) > epsilon(0.) ) then
+        write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNNDR_3 IS RE-SCALED'
+     endif
+     if(abs(profile_dlnndr_4_scale-1.0) > epsilon(0.) ) then
+        write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNNDR_4 IS RE-SCALED'
+     endif
+     if(abs(profile_dlnndr_5_scale-1.0) > epsilon(0.) ) then
+        write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNNDR_5 IS RE-SCALED'
+     endif
+     if(abs(profile_dlnndr_6_scale-1.0) > epsilon(0.) ) then
+        write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNNDR_6 IS RE-SCALED'
+     endif
+
+     if(abs(profile_dlntdr_1_scale-1.0) > epsilon(0.) ) then
+        write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNTDR_1 IS RE-SCALED'
+     endif
+     if(abs(profile_dlntdr_2_scale-1.0) > epsilon(0.) ) then
+        write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNTDR_2 IS RE-SCALED'
+     endif
+     if(abs(profile_dlntdr_3_scale-1.0) > epsilon(0.) ) then
+        write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNTDR_3 IS RE-SCALED'
+     endif
+     if(abs(profile_dlntdr_4_scale-1.0) > epsilon(0.) ) then
+        write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNTDR_4 IS RE-SCALED'
+     endif
+     if(abs(profile_dlntdr_5_scale-1.0) > epsilon(0.) ) then
+        write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNTDR_5 IS RE-SCALED'
+     endif
+     if(abs(profile_dlntdr_6_scale-1.0) > epsilon(0.) ) then
+        write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNTDR_6 IS RE-SCALED'
+     endif
+
   case(3)
      if(silent_flag == 0 .and. i_proc == 0) then
         write(io_neoout,*) 'profile_model      : GLOBAL PROFILE TEST'
