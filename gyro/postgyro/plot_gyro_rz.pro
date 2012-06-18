@@ -2,7 +2,8 @@ PRO plot_gyro_RZ, data, IT = it, SF=sf, TITLE = title, PLOT_N = plot_n, $
                   PLOT_E = plot_e, PLOT_T = plot_t, PLOT_V = plot_v, $
                   PLOT_Apar=PLOT_apar, NU_SILENT = nu_silent, $
                   LOCAL=local, FINITE_N = finite_n, $
-		  N_WEIGHTS = n_weights, _EXTRA = extra
+		  N_WEIGHTS = n_weights, LAB_FRAME=lab_frame, $
+		  _EXTRA = extra
 ;
 ; C. Holland, UCSD
 ; v1.0: 2/27/2007
@@ -20,6 +21,7 @@ PRO plot_gyro_RZ, data, IT = it, SF=sf, TITLE = title, PLOT_N = plot_n, $
 ; v5.0: 8.25.11; updated for gacode compatibility
 ; v5.1: 9.7.11: added local normalization ability
 ; v5.2: 9.14.2011: added finite-n flag, n_weights keyword
+; v5.3: 6.18.2012: added lab-frame keyword to add exp(-I*n*omega0*t[it])) phase
 
   DEFAULT, it, data.n_time/2
   DEFAULT, sf, data.theta_mult
@@ -60,6 +62,12 @@ PRO plot_gyro_RZ, data, IT = it, SF=sf, TITLE = title, PLOT_N = plot_n, $
   IF KEYWORD_SET(finite_n) THEN field[*,*,0] = 0.
   IF (N_ELEMENTS(n_weights) EQ data.n_n) THEN FOR i_n=0,data.n_n-1 DO $
 	field[*,*,i_n] *= n_weights[i_n]
+
+  IF KEYWORD_SET(lab_frame) THEN BEGIN
+	omega0 = data.w0[data.n_r/2]
+	C_I = COMPLEX(0,1)
+	FOR i_n=0,data.n_n-1 DO field[*,*,i_n] *=EXP(-C_I*data.n[i_n]*omega0*data.t[it])
+  ENDIF
 
   field_rtheta_tmp = GYRO_RTHETA_TRANSFORM(field,data,sf,$
                                       NU_SILENT=nu_silent)

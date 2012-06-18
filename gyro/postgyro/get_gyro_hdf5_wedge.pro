@@ -36,9 +36,9 @@ FUNCTION get_gyro_HDF5_wedge, data, N_TIME=n_time, TIME_SKIP=tskip
           V_RZ = 0
 
           IF (data.exists_n) THEN n_RZ = FLTARR(data.n_kinetic, n_tor_frac, n_r, n_y, n_time)
-          IF (data.exists_E) THEN E_RZ = FLTARR(data.n_kinetic, n_tor_frac, n_r, n_y, n_time)
-          IF (data.exists_T) THEN T_RZ = FLTARR(data.n_kinetic, n_tor_frac, n_r, n_y, n_time)
-          IF (data.exists_V) THEN V_RZ = FLTARR(data.n_kinetic, n_tor_frac, n_r, n_y, n_time)
+;          IF (data.exists_E) THEN E_RZ = FLTARR(data.n_kinetic, n_tor_frac, n_r, n_y, n_time)
+;          IF (data.exists_T) THEN T_RZ = FLTARR(data.n_kinetic, n_tor_frac, n_r, n_y, n_time)
+;          IF (data.exists_V) THEN V_RZ = FLTARR(data.n_kinetic, n_tor_frac, n_r, n_y, n_time)
       ENDIF
 
       ;load ion fluctuations
