@@ -38,6 +38,22 @@ module neo_globals
   real :: profile_delta_scale
   real :: profile_zeta_scale
   real :: profile_zmag_scale
+
+  real :: profile_dlnndr_1_scale
+  real :: profile_dlnndr_2_scale
+  real :: profile_dlnndr_3_scale
+  real :: profile_dlnndr_4_scale
+  real :: profile_dlnndr_5_scale
+  real :: profile_dlnndr_6_scale
+
+  real :: profile_dlntdr_1_scale
+  real :: profile_dlntdr_2_scale
+  real :: profile_dlntdr_3_scale
+  real :: profile_dlntdr_4_scale
+  real :: profile_dlntdr_5_scale
+  real :: profile_dlntdr_6_scale
+  real, dimension(6) :: dlnndr_scale
+  real, dimension(6) :: dlntdr_scale
   !
   integer :: ipccw_in
   integer :: btccw_in

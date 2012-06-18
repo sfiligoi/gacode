@@ -85,6 +85,20 @@ x.add('S_ZMAG','0.0')
 x.add('PROFILE_DELTA_SCALE','1.0')
 x.add('PROFILE_ZETA_SCALE','1.0')
 x.add('PROFILE_ZMAG_SCALE','1.0')
+
+x.add('PROFILE_DLNNDR_1_SCALE','1.0')
+x.add('PROFILE_DLNNDR_2_SCALE','1.0')
+x.add('PROFILE_DLNNDR_3_SCALE','1.0')
+x.add('PROFILE_DLNNDR_4_SCALE','1.0')
+x.add('PROFILE_DLNNDR_5_SCALE','1.0')
+x.add('PROFILE_DLNNDR_6_SCALE','1.0')
+
+x.add('PROFILE_DLNTDR_1_SCALE','1.0')
+x.add('PROFILE_DLNTDR_2_SCALE','1.0')
+x.add('PROFILE_DLNTDR_3_SCALE','1.0')
+x.add('PROFILE_DLNTDR_4_SCALE','1.0')
+x.add('PROFILE_DLNTDR_5_SCALE','1.0')
+x.add('PROFILE_DLNTDR_6_SCALE','1.0')
        	
 # Deprecated parameters
 x.dep('NU_2','Only NU_1 is input now.  NU for other species is computed internally.')
