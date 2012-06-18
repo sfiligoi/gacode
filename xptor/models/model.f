@@ -232,7 +232,7 @@ c
        etagb_par_m(jm)=etaparm/cgyrobohm_m(jm)
        etagb_per_m(jm)=etaperm/cgyrobohm_m(jm)
 c
-       chie_e_gb_m(jm)=chie_e_gf*cmodel*gfac
+       chiegb_etg_m(jm)=chie_e_gf*cmodel*gfac
 c
        diff_m(jm)=diffnem
        chie_m(jm)=chietem
@@ -1892,7 +1892,7 @@ c  to be compared with diff_gf or chii_gf
        etagb_par_m(jm)=eta_par_gf*cmodel*gfac
        etagb_per_m(jm)=eta_per_gf*cmodel*gfac
     
-       chie_e_gb_m(jm)=chie_e_gf*cmodel*gfac
+       chiegb_etg_m(jm)=chie_e_gf*cmodel*gfac
   
 c exch_m in MW/m**3  
 

@@ -609,9 +609,9 @@ c    >     +powi_beam_exp(jmaxm)+powi_rf_exp(jmaxm)
 c    >     -(1.D0-xwdot)*powi_wdot_exp(jmaxm)
           p_glob_exp =
      >      powe_beam_exp(njj-1)+powe_rf_exp(njj-1)
-     >     +powe_oh_exp(njj-1)-(1.D0-xwdot)*powe_wdot_exp(njj-1)
+     >     +powe_oh_exp(njj-1)-xwdot*powe_wdot_exp(njj-1)
      >     +powi_beam_exp(njj-1)+powi_rf_exp(njj-1)
-     >     -(1.D0-xwdot)*powi_wdot_exp(njj-1)
+     >     -xwdot*powi_wdot_exp(njj-1)
 c          write(6,*) 'p_glob_exp calculated from 1D data',
         endif
 c

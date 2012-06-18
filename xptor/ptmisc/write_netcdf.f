@@ -1036,20 +1036,26 @@ c
      &          len('electron thermal diffusivity m^2/s'),
      &          'electron thermal diffusivity m^2/s')
       j=j+1
-      oneval(j) = nf_def_var (ncid,'chie_e_m',nf_double,1,rdim,rhid1(j))
+      oneval(j) = nf_def_var(ncid,'etaphi_m',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     &          len('electron high-k thermal diffusivity m^2/s'),
-     &          'electron high-k thermal diffusivity m^2/s')
+     &          len('tor. momentum diffusivity m^2/s'),
+     &          'tor. momentum diffusivity m^2/s')
       j=j+1
       oneval(j)=nf_def_var(ncid,'chii_neo_m',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
      &          len('ion neo thermal diffusivity m^2/s'),
      &          'ion neo thermal diffusivity m^2/s')
       j=j+1
-      oneval(j) = nf_def_var(ncid,'etaphi_m',nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_def_var(ncid,'chie_neo_m',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
-     &          len('tor. momentum diffusivity m^2/s'),
-     &          'tor. momentum diffusivity m^2/s')
+     &          len('electron neo thermal diffusivity m^2/s'),
+     &          'electron neo thermal diffusivity m^2/s')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'chie_etg_m',nf_double,1,rdim,
+     &            rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &          len('electron high-k thermal diffusivity m^2/s'),
+     &          'electron high-k thermal diffusivity m^2/s')
       j=j+1
       oneval(j) = nf_def_var (ncid,'cgyrobohm_m',nf_double,1,
      &            rdim,rhid1(j))
@@ -1894,12 +1900,16 @@ c
       oneval(j) = nf_put_var_double(ncid,rhid1(j),chiegb_m*cgyrobohm_m)
       j=j+1
       oneval(j) = nf_put_var_double(ncid,rhid1(j),
-     &            chie_e_gb_m*cgyrobohm_m)
-      j=j+1
-      oneval(j) = nf_put_var_double(ncid,rhid1(j),chiineo_m)
+     >            etagb_phi_m*cgyrobohm_m)
       j=j+1
       oneval(j) = nf_put_var_double(ncid,rhid1(j),
-     &            etagb_phi_m*cgyrobohm_m)
+     >            chiineogb_m*cgyrobohm_m)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid,rhid1(j),
+     >            chieneogb_m*cgyrobohm_m)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid,rhid1(j),
+     >            chiegb_etg_m*cgyrobohm_m)
       j=j+1
       oneval(j) = nf_put_var_double(ncid,rhid1(j),cgyrobohm_m)
       j=j+1

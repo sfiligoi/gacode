@@ -108,11 +108,11 @@ c..1200 elements (was 200)
 c..903 elements (was 151)
       real*8 flow_p_j(0:jmaxmt,3)
 c..602 elements
-      real*8 sion_exp(0:jmaxmt,2), srecom_exp(0:jmaxmt,2)
-      real*8 scx_exp(0:jmaxmt,2), sbcx_exp(0:jmaxmt,2) 
-      real*8 s_exp(0:jmaxmt,2), sdot_exp(0:jmaxmt,2)
-      real*8 enn_exp(0:jmaxmt,2), ennw_exp(0:jmaxmt,2)
-      real*8 ennv_exp(0:jmaxmt,2), volsn_exp(0:jmaxmt,2)
+      real*8 sion_exp(0:jmaxmt,3), srecom_exp(0:jmaxmt,3)
+      real*8 scx_exp(0:jmaxmt,3), sbcx_exp(0:jmaxmt,3) 
+      real*8 s_exp(0:jmaxmt,3), sdot_exp(0:jmaxmt,3)
+      real*8 enn_exp(0:jmaxmt,3), ennw_exp(0:jmaxmt,3)
+      real*8 ennv_exp(0:jmaxmt,3), volsn_exp(0:jmaxmt,3)
 c
 c..301 elements
       real*8 theta_exp(0:jmaxmt), zptheta_exp(0:jmaxmt)
@@ -232,7 +232,7 @@ c 301 elements (was 51)
       real*8 chiegb_glf(0:jmaxmt), chiigb_glf(0:jmaxmt)
       real*8 diffgb_glf(0:jmaxmt), etagb_phi_glf(0:jmaxmt)
       real*8 etagb_par_glf(0:jmaxmt), etagb_per_glf(0:jmaxmt)
-      real*8 chie_e_gb_m(0:jmaxmt), chie_m(0:jmaxmt), chii_m(0:jmaxmt)
+      real*8 chiegb_etg_m(0:jmaxmt), chie_m(0:jmaxmt), chii_m(0:jmaxmt)
       real*8 diff_m(0:jmaxmt),chie_e_m(0:jmaxmt)
       real*8 etapar_m(0:jmaxmt), etaper_m(0:jmaxmt)
       real*8 etaexb_m(0:jmaxmt), etaphi_m(0:jmaxmt)
@@ -494,7 +494,7 @@ c
      & , etagb_par_m, etagb_per_m
      & , chiegb_glf, chiigb_glf, diffgb_glf, etagb_phi_glf
      & , etagb_par_glf, etagb_per_glf
-     & , chie_e_gb_m, chie_m, chii_m, diff_m, chie_e_m
+     & , chiegb_etg_m, chie_m, chii_m, diff_m, chie_e_m
      & , etapar_m, etaper_m, etaexb_m, etaphi_m
      & , rotstab_m, diffmxlgb_m, deltheta_m
      & , taue_m, taui_m, taut_m, taupe_m, taupi_m, rhosda_exp

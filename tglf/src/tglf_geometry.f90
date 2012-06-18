@@ -58,6 +58,7 @@
           wE = MIN(kyi/0.3,1.0)*vexb_shear_s/gamma_reference_kx0(1)
 !          write(*,*)"wE=",wE
           kx0_e = -alpha_e_in*(0.36*vexb_shear_s/gamma_reference_kx0(1) + 0.29*wE*TANH((0.71*wE)**6))
+          kx0_e = TANH(kx0_e)
 !
 ! EPS2011          kx0 = alpha_kx_e_in*0.19*TANH(vexb_shear_s*rmaj_sa/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
 ! EPS2011          kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*rmaj_sa/vs(2)) &
@@ -173,7 +174,7 @@
       REAL :: cxtorper1,cxtorper2
       REAL :: B2x1,B2x2,R2x1,R2x2,norm_ave,dlp
       REAL :: kyi
-      REAL :: wE,wd0,gamma_eff
+      REAL :: wE,wd0,gamma_eff,a0
 !
 !
 !  find length along magnetic field y
@@ -229,7 +230,15 @@
           wE = kx0_factor*MIN(kyi/0.3,1.0)*vexb_shear_s/gamma_reference_kx0(1)
 !          write(*,*)"wE=",wE
 !          kx0_factor = alpha_kx_p_in
-          kx0_e = -alpha_e_in*(0.36*vexb_shear_s/gamma_reference_kx0(1) + 0.29*wE*TANH((0.71*wE)**6))
+!!          kx0_e = -(0.36*vexb_shear_s/gamma_reference_kx0(1) + 0.29*wE*TANH((0.71*wE)**6))
+          kx0_e = -(0.36*vexb_shear_s/gamma_reference_kx0(1) + 0.38*wE*TANH((0.69*wE)**6))
+!a=3.0          kx0_e = -(0.36*vexb_shear_s/gamma_reference_kx0(1) + 0.32*wE*TANH((0.71*wE)**6))
+          a0 = alpha_e_in
+          if(alpha_e_in.ne.0.0)then
+            kx0_e = a0*TANH(kx0_e/a0)
+          else
+            kx0_e = 0.0
+          endif
 !
 !APS2010          kx0 = alpha_kx_e_in*0.19*TANH(vexb_shear_s*Rmaj_s/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
 !EPS2011          kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*Rmaj_s/vs(2)) &
