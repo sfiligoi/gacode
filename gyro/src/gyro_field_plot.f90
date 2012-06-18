@@ -51,7 +51,7 @@ subroutine gyro_field_plot
            w_time(i) = exp(-abs(i-time_skip)/plot_filter)
         enddo
          do i=1,time_skip_wedge
-           w_time(i) = exp(-abs(i-time_skip_wedge)/plot_filter)
+           w_time_wedge(i) = exp(-abs(i-time_skip_wedge)/plot_filter)
         enddo
 
         w_time(:) = w_time(:)/sum(w_time(:))

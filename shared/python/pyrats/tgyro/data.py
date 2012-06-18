@@ -1,32 +1,33 @@
 class TGYROData:
-    """A class of TGYRO output data.
+    """TGYRO output data class.
 
-     Data:
+    Data:
 
-     loc_n_ion
-     tgyro_mode
-     n_iterations
-     n_fields
-     n_radial
-     dirname = ""
-     data
+    loc_n_ion
+    tgyro_mode
+    n_iterations
+    n_fields
+    n_radial
+    dirname = ""
+    data
 
-     Example Usage:
-         >>> from matplotlib import pyplot
-         >>> from pyrats.tgyro.data import TGYROData
-         >>> sim1 = TGYROData('$GACODE_ROOT/tgyro/tools/input/treg01')
-         >>> pyplot.plot(sim1.get_r(), sim1.get_Te())
-         >>> pyplot.show()
+    Example Usage:
+    >>> from pyrats.tgyro.data import TGYROData
+    >>> sim = TGYROData('examples')
+    """
 
-"""
-
+    #---------------------------------------------------------------------------#
     # Methods
+
     def __init__(self, sim_directory):
         """Constructor reads in data from sim_directory and creates new object.
-"""
-        self.set_directory(sim_directory)
+        """
+        
         self.init_data()
+        self.set_directory(sim_directory)
         self.read_data()
+
+    #---------------------------------------------------------------------------#
 
     def init_data(self):
         """Initialize object data."""
@@ -38,136 +39,128 @@ class TGYROData:
         self.n_radial     = 0
         self.data         = {}
 
-    def set_directory(self, sim_directory):
+    #---------------------------------------------------------------------------#
+
+    def set_directory(self, path):
         """Set the simulation directory."""
 
         from os.path import expanduser, expandvars
-        path = sim_directory
         self.dirname = expanduser(expandvars(path))
 
-    def get_input(self, input_name):
-        """Return the specified variable from input.tgyro.gen.
-
-        input_name  -  requested input
-
-        Ex:    get_input("TGYRO_MODE")
-        """
-
-        input_file = file(self.dirname + '/input.tgyro.gen', 'r')
-        for line in input_file:
-            try:
-                if line.split()[1] == input_name:
-                    return float(line.split()[0])
-            except IndexError:
-                print "Cannot find specified input parameter: ", input_name
-                return 0
-
-    def read_tgyro_mode(self):
-        """Read TGYRO_MODE and store as self.tgyro_mode."""
-        
-        self.tgyro_mode = self.get_input("TGYRO_MODE")
-
-    def read_num_ions(self):
-        """Read LOC_N_ION and store as self.loc_n_ion."""
-
-        self.loc_n_ion = self.get_input("LOC_N_ION")
+    #---------------------------------------------------------------------------#
 
     def read_data(self):
         """Read in object data."""
-        self.read_tgyro_mode()
+        
+        self.tgyro_mode = self.get_tag_value("TGYRO_MODE")
         if self.tgyro_mode == 2:
             self.read_stabilities()
         else:
-            self.read_num_ions()
+            self.loc_n_ion = self.get_tag_value("LOC_N_ION")
             self.read_control()
-            self.read_chi_e()
-            self.read_chi_i(self.loc_n_ion)
-            self.read_gyrobohm()
-            self.read_profile()
-            self.read_geometry()
-            self.read_flux(self.loc_n_ion)
-            self.read_mflux(self.loc_n_ion)
-            self.read_gradient()
-            self.read_residual()
-            if self.loc_n_ion > 1:
-                self.read_profile2()
-            if self.loc_n_ion > 2:
-                self.read_profile3()
-            if self.loc_n_ion > 3:
-                self.read_profile4()
-            if self.loc_n_ion > 4:
-                self.read_profile5()
+            self.fileparser('gyrobohm.out')
+            self.fileparser('flux_e.out')
+            self.fileparser('flux_i.out')
+            self.fileparser('flux_target.out')
+            self.fileparser('chi_e.out')
+            self.fileparser('chi_i.out')
+            self.fileparser('profile.out')
+            self.fileparser('gradient.out')
+            self.fileparser('geometry.out')
+           # self.read_residual()
+
+    #---------------------------------------------------------------------------#
+
+    def get_tag_value(self, tag):
+        """
+        Return the specified variable from input.tgyro.gen.
+        tag = input.tgyro tag
+        """
+
+        datafile = file(self.dirname+'/input.tgyro.gen','r')
+
+        for line in datafile:
+            try:
+                if line.split()[1] == tag:
+                    return float(line.split()[0])
+            except IndexError:
+                print "Cannot find specified input parameter: ", tag
+                return 0
+
+    #---------------------------------------------------------------------------#
 
     def read_control(self):
-        """Read control.out to set resolutions."""
-        from numpy import loadtxt
-        control_file = self.dirname + '/control.out'
-        control = loadtxt(file(control_file))
-        self.n_radial = int(control[0])
-        self.n_fields = int(control[1])
-        self.n_iterations = int(control[2])
+        """
+        Read control.out to set resolutions.
+        """
 
-    def read_file(self, file_name):
-        """Read TGYRO output file. Output is data['column_header'][iteration]"""
-        from numpy import array
+        import numpy as np
+    
+        data = np.loadtxt(self.dirname+'/control.out')
 
-        current_line_number = 0
-        elements = {}
-        temp = []
-        fname = self.dirname + '/' + file_name + '.out'
-        raw_data = open(fname, 'r').readlines()
-        for line in raw_data:
-            if len(line.strip()) > 0:
-                if line.strip()[0].isdigit():
-                    temp.append(map(float, line.split()))
-        data = array(temp)
+        self.n_radial     = int(data[0])
+        self.n_fields     = int(data[1])
+        self.n_iterations = int(data[2])
 
-        # This catches error from columns running into each other
-        keywords = raw_data[0].replace('target', 'target ').split()
-        for key in keywords:
-            elements[key] = range(self.n_iterations + 1)
-        for iteration in range(self.n_iterations + 1):
-            column = 0
-            for key in keywords:
-                elements[key][iteration] = data[0:self.n_radial, column]
-                column = column + 1
-            data = data[self.n_radial:, :]
-        return elements
+    #---------------------------------------------------------------------------#
 
-    def read_residual(self):
-        """Read residual.out"""
-        from numpy import zeros, array
-        residual_file=open(self.dirname + '/residual.out', 'r')
-        lines = residual_file.readlines()
-        residual_file.close()
-        count = 0
-        iteration = -1
-        data = []
-        num_fields = len(lines[-1].split())
-        local_res = []
-        global_res = []
-        flux_count = []
+    def fileparser(self,file):
+        """
+        Generic parser for standard TGYRO file format.
+        """
 
-        for line in lines:
-            line = line.replace(']',' ').replace('[',' ')
-            if count % self.n_radial == 0:
-                global_res.append(eval(line.split()[3]))
-                flux_count.append(eval(line.split()[4]))
-                iteration = iteration + 1
-                if data:
-                    local_res.append(array(data))
-                data = [zeros(num_fields)]
+        import string
+        import numpy as np
 
-            else:
-                b = []
-                for i in line.split():
-                    b.append(eval(i))
-                data.append(b)
-            count = count + 1
-        local_res.append(array(data))
-        self.data['local_res'] = local_res
-        self.data['global_res'] = global_res
-        self.data['flux_count'] = flux_count
+        data = open(self.dirname+'/'+file,'r').readlines()
+
+        # Data dimensions
+        nr = self.n_radial+2
+        nc = len(string.split(data[0]))
+        nb = self.n_iterations+1
+
+        numdata = np.zeros((nc,nb,nr-2))
+    
+        for ib in range(nb):
+            tags=string.split(data[ib*nr])
+            null=string.split(data[ib*nr+1])
+            for ir in range(nr-2):
+                row=string.split(data[ib*nr+ir+2])
+                for ic in range(nc):
+                    numdata[ic,ib,ir] = row[ic]
+
+        for ic in range(nc):
+            self.data[tags[ic]] = numdata[ic,:,:]
+
+    #---------------------------------------------------------------------------#
+
+    def get_residual(self):
+        """Read residual.out
+        """
+        import string
+        import numpy as np
+
+        data = open(self.dirname+'/'+file,'r').readlines()
+        
+        # Data dimensions
+        nr = self.n_radial+1
+        nb = self.n_iterations+1
+        nc = 1+2*self.get_tag_value("LOC_NE_FEEDBACK_FLAG") \
+              +2*self.get_tag_value("LOC_TE_FEEDBACK_FLAG") \
+              +2*self.get_tag_value("LOC_TI_FEEDBACK_FLAG")
+
+        numdata = np.zeros((nc,nb,nr-2))
+    
+        for ib in range(nb):
+            tags=string.split(data[ib*nr])
+            for ir in range(nr-1):
+                row=string.split(data[ib*nr+ir+1])
+                for ic in range(nc):
+                    numdata[ic,ib,ir] = row[ic]
+
+        self.data['residual'] = numdata[ic,:,:]
+        
+    #---------------------------------------------------------------------------#
 
     def read_stab_file(self, file_name):
         """Read files generated with stability analysis mode.
@@ -209,93 +202,6 @@ class TGYROData:
 
         self.data['r/a'] = self.data['wr_ion'][0]
         self.n_radial = len(self.data['r/a'])
-
-    def read_flux(self, num_ions = 1):
-        """Read flux_e.out, flux_i(2-5).out, flux_target.out."""
-        self.data.update(self.read_file('flux_e'))
-        self.data.update(self.read_file('flux_i'))
-        if num_ions > 1:
-           self.data.update(self.read_file('flux_i2'))
-        if num_ions > 2:
-           self.data.update(self.read_file('flux_i3'))
-        if num_ions > 3:
-           self.data.update(self.read_file('flux_i4'))
-        if num_ions > 4:
-           self.data.update(self.read_file('flux_i5'))
-        if num_ions > 5:
-            print "Too many ions: ", num_ions
-            print "Only the first 5 will be read."
-        self.data.update(self.read_file('flux_target'))
-
-    def read_mflux(self, num_ions = 1):
-        """Read mflux_e.out, mflux_i(2-5).out, mflux_target.out."""
-        self.data.update(self.read_file('mflux_e'))
-        self.data.update(self.read_file('mflux_i'))
-        if num_ions > 1:
-           self.data.update(self.read_file('mflux_i2'))
-        if num_ions > 2:
-           self.data.update(self.read_file('mflux_i3'))
-        if num_ions > 3:
-           self.data.update(self.read_file('mflux_i4'))
-        if num_ions > 4:
-           self.data.update(self.read_file('mflux_i5'))
-        if num_ions > 5:
-            print "Too many ions: ", num_ions
-            print "Only the first 5 will be read."
-        self.data.update(self.read_file('mflux_target'))
-
-    def read_chi_e(self):
-        """Read in chi_e.out and store in self.chi_e."""
-        self.data.update(self.read_file('chi_e'))
-
-    def read_chi_i(self, num_ions = 1):
-        """Read in chi_i.out and store in self.chi_i."""
-        self.data.update(self.read_file('chi_i'))
-        if num_ions > 1:
-            self.data.update(self.read_file('chi_i2'))
-        if num_ions > 2:
-            self.data.update(self.read_file('chi_i3'))
-        if num_ions > 3:
-            self.data.update(self.read_file('chi_i4'))
-        if num_ions > 4:
-            self.data.update(self.read_file('chi_i5'))
-        if num_ions > 5:
-            print "Strange number of ions: ", num_ions
-            print "Only the first 5 will be read."
-
-    def read_gyrobohm(self):
-        """Read and store gyrobohm.out in self.gyro_bohm_unit."""
-        self.data.update(self.read_file('gyrobohm'))
-
-    def read_profile(self):
-        """Read and store profile.out in self.profile."""
-        self.data.update(self.read_file('profile'))
-
-    def read_profile2(self):
-        """Read and store profile2.out in self.profile2."""
-        self.data.update(self.read_file('profile2'))
-
-    def read_profile3(self):
-        """Read and store profile3.out in self.profile3."""
-        self.data.update(self.read_file('profile3'))
-
-    def read_profile4(self):
-        """Read and store profile4.out in self.profile4."""
-        self.data.update(self.read_file('profile4'))
-
-    def read_profile5(self):
-        """Read and store profile5.out in self.profile5."""
-        self.data.update(self.read_file('profile5'))
-
-    def read_geometry(self):
-        """Read and store geometry.out in self.geometry."""
-        self.data.update(self.read_file('geometry'))
-
-    def read_gradient(self):
-        """Read and store gradient.out in self.gradient."""
-        self.data.update(self.read_file('gradient'))
-
-
     
     # ----------------------------------------- #
     # Get data back

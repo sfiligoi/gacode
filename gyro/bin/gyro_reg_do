@@ -20,6 +20,7 @@ fi
 # Define list of test directories:
 
 n_proc=${1}
+n_omp=${2}
 
 list="
 reg01 
@@ -46,7 +47,7 @@ eig01
 eig02 
 gkeig01"
 
-echo "REGRESSION TESTING:"
+echo "GYRO REGRESSION TESTING:"
 
 testdir=$PWD/gyro_regression_test
 mkdir $testdir
@@ -56,6 +57,6 @@ for sim in $list
 do 
    gyro -g $sim -p $testdir > out
    rm -rf $sim/$precfile
-   gyro -e $sim -n $n_proc -p $testdir > out
+   gyro -e $sim -n $n_proc -nomp $n_omp -p $testdir > out
    gyro_reg $sim
 done

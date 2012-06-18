@@ -92,6 +92,7 @@ subroutine gyro_write_timedata
          h5in%comm=MPI_COMM_SELF
          h5in%info=MPI_INFO_NULL
          h5in%wrd_type=H5T_NATIVE_REAL
+         !h5in%wrd_type=h5in%h5_kind_type_r4
          h5in%typeConvert=.true.
          h5in%doTranspose=.true.
          h5in%verbose=.true.
@@ -328,7 +329,7 @@ subroutine gyro_write_timedata
        size(kxkyspec),&
        kxkyspec)
   endif
-#ifdef HAVE_HDf5
+#ifdef HAVE_HDF5
   if(io_method > 1) then
     h5in%units="dimensionless"
     h5in%mesh=" "
@@ -1010,15 +1011,29 @@ subroutine gyro_write_timedata
      call dump_h5(gid3d,'torangle_offset',torangle_offset,h5in,h5err)
      call dump_h5(gid3d,'alpha',alpha_phi,h5in,h5err)
 
-     allocate(buffer(ncoarse+1,n_x,n_torangle_3d,3))
+     allocate(buffer(0:ncoarse,n_x,n_torangle_3d,3))
+      buffer = -9999.999
      do iphi=1,n_torangle_3d
         buffer(:,:,iphi,1)= Rc(:,:)*COS(zeta_phi(iphi))
         buffer(:,:,iphi,2)=-Rc(:,:)*SIN(zeta_phi(iphi))
         buffer(:,:,iphi,3)= Zc(:,:)
      enddo
+!    do iphi=1,n_torangle_3d
+!      do j=0,ncoarse
+!        do ix=1,n_x
+!          buffer(j,ix,iphi,1)= Rc(j,ix)*COS(zeta_phi(iphi))
+!!	 write(*,*) "j=",j,"ix=",ix,"iphi=",iphi &
+!!		,"Rc=",Rc(j,ix),"zeta=",zeta_phi(iphi)
+!!	write(*,*) " buffer(j,ix,iphi,1) = ", buffer(j,ix,iphi,1)
+!	buffer(j,ix,iphi,2)=-Rc(j,ix)*SIN(zeta_phi(iphi))
+!          buffer(j,ix,iphi,3)= Zc(j,ix)
+!        enddo
+!      enddo
+!     enddo
+
 
      h5in%units="m"; h5in%mesh="mesh-structured"
-     call dump_h5(gid3d,'cartMesh',buffer*a_meters,h5in,h5err)
+     call dump_h5_4d(gid3d,'cartMesh',buffer*a_meters,h5in,h5err)
      deallocate(buffer)
     endif
 
@@ -1062,6 +1077,7 @@ subroutine write_hdf5_restart
      h5in%comm=MPI_COMM_SELF
      h5in%info=MPI_INFO_NULL
      h5in%wrd_type=H5T_NATIVE_DOUBLE
+     !h5in%wrd_type=h5in%h5_kind_type_r8
      h5in%doTranspose=.true.
      h5in%vsTime=t_current
      h5in%wrVsTime=.true.
@@ -1407,10 +1423,6 @@ subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
      !-----------------------------------------
 
      if (i_proc == 0) then
-        !         WRITE(*,*) "varName=",varName 
-        !         WRITE(*,*) " n_fn=",n_fn," and size of fn_recv=",size(fn_recv)
-        !         WRITE(*,*) "shape of buffn =", shape(buffn)        
-        !         WRITE(*,*) "n1=",n1," n2=",n2," n3=",n3
         buffn(:,:,:,in)=reshape(fn_recv,(/n1,n2,n3/))
      endif
   enddo ! in

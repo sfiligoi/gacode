@@ -13,7 +13,11 @@ else
    OBJECTS = gyro_omp_lib.o
 endif
 
-FFLAGS += ${FHDF5}
+ifeq ($(ACC),true)
+   FC += ${FACC}
+endif
+
+FFLAGS += ${FHDF5} ${HDF5_INC}
 
 LLIB = gyro_lib
 
@@ -149,13 +153,12 @@ OBJECTS += gyro_globals.o \
           gyro_write_timedata.o \
           gyro_write_timedata_wedge_hdf5.o \
           gyro_write_timers.o \
-	  gyro_velocity_sum.o \
+	  			gyro_velocity_sum.o \
           get_field_r0_plot.o \
           get_g_squared.o \
           gyro_dump_input.o \
           gyro_dump_interface.o
 
-#          gyro_write_timedata_hdf5.o \
 
 .SUFFIXES : .o .f90 .F90
 

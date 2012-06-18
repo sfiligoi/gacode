@@ -48,6 +48,7 @@ subroutine gyro_write_timedata_wedge_hdf5
      h5in%comm=MPI_COMM_SELF
      h5in%info=MPI_INFO_NULL
      h5in%wrd_type=H5T_NATIVE_REAL
+     !h5in%wrd_type=h5in%h5_kind_type_r4
      h5in%typeConvert=.true.
      !h5in%wrd_type=H5T_NATIVE_DOUBLE
      h5in%doTranspose=.true.

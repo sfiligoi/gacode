@@ -248,7 +248,7 @@ subroutine neo_make_profiles
                 / (sqrt(mass(is)) * temp(is,ir)**1.5)
 
            ! Express in local dimensionless NEO units:
-           nu(is,ir) = nu(is,ir)/vth_norm(ir)
+           nu(is,ir) = nu(is,ir)/vth_norm(ir) 
 
         enddo
      enddo
@@ -397,7 +397,6 @@ subroutine neo_make_profiles
      ! phi_(0) is used only in the weak rotation limit
      dphi0dr(:) = 0.0
   endif
-
 
   ! Print the re-mapped equilibrium data
   if(silent_flag == 0 .and. i_proc == 0) then

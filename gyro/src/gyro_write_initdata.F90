@@ -298,6 +298,7 @@ subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io,h5datafile)
     h5in%info=MPI_INFO_NULL
     h5in%typeConvert=.true.
     h5in%wrd_type=H5T_NATIVE_REAL
+    !h5in%wrd_type=h5in%h5_kind_type_r4
     !h5in%wrd_type=H5T_NATIVE_DOUBLE
     h5in%doTranspose=.true.
     !h5in%vsTime=intime
