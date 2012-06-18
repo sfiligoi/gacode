@@ -95,6 +95,18 @@ module neo_interface
   real    :: neo_profile_delta_scale_in = 1.0
   real    :: neo_profile_zeta_scale_in = 1.0
   real    :: neo_profile_zmag_scale_in = 1.0
+  real    :: neo_profile_dlnndr_1_scale_in = 1.0
+  real    :: neo_profile_dlnndr_2_scale_in = 1.0
+  real    :: neo_profile_dlnndr_3_scale_in = 1.0
+  real    :: neo_profile_dlnndr_4_scale_in = 1.0
+  real    :: neo_profile_dlnndr_5_scale_in = 1.0
+  real    :: neo_profile_dlnndr_6_scale_in = 1.0
+  real    :: neo_profile_dlntdr_1_scale_in = 1.0
+  real    :: neo_profile_dlntdr_2_scale_in = 1.0
+  real    :: neo_profile_dlntdr_3_scale_in = 1.0
+  real    :: neo_profile_dlntdr_4_scale_in = 1.0
+  real    :: neo_profile_dlntdr_5_scale_in = 1.0
+  real    :: neo_profile_dlntdr_6_scale_in = 1.0
   integer :: neo_geo_ny_in = 0
   real, dimension(8,0:16) :: neo_geo_yin_in = 0.0
 
@@ -214,6 +226,18 @@ contains
     neo_profile_delta_scale_in = profile_delta_scale
     neo_profile_zeta_scale_in = profile_zeta_scale
     neo_profile_zmag_scale_in = profile_zmag_scale
+    neo_profile_dlnndr_1_scale_in = profile_dlnndr_1_scale
+    neo_profile_dlnndr_2_scale_in = profile_dlnndr_2_scale
+    neo_profile_dlnndr_3_scale_in = profile_dlnndr_3_scale
+    neo_profile_dlnndr_4_scale_in = profile_dlnndr_4_scale
+    neo_profile_dlnndr_5_scale_in = profile_dlnndr_5_scale
+    neo_profile_dlnndr_6_scale_in = profile_dlnndr_6_scale
+    neo_profile_dlntdr_1_scale_in = profile_dlntdr_1_scale
+    neo_profile_dlntdr_2_scale_in = profile_dlntdr_2_scale
+    neo_profile_dlntdr_3_scale_in = profile_dlntdr_3_scale
+    neo_profile_dlntdr_4_scale_in = profile_dlntdr_4_scale
+    neo_profile_dlntdr_5_scale_in = profile_dlntdr_5_scale
+    neo_profile_dlntdr_6_scale_in = profile_dlntdr_6_scale
     neo_geo_ny_in = geo_ny_in
     neo_geo_yin_in(:,:) = geo_yin_in(:,:)
 
@@ -305,6 +329,18 @@ contains
     profile_delta_scale = neo_profile_delta_scale_in
     profile_zeta_scale = neo_profile_zeta_scale_in
     profile_zmag_scale = neo_profile_zmag_scale_in
+    profile_dlnndr_1_scale = neo_profile_dlnndr_1_scale_in
+    profile_dlnndr_2_scale = neo_profile_dlnndr_2_scale_in
+    profile_dlnndr_3_scale = neo_profile_dlnndr_3_scale_in
+    profile_dlnndr_4_scale = neo_profile_dlnndr_4_scale_in
+    profile_dlnndr_5_scale = neo_profile_dlnndr_5_scale_in
+    profile_dlnndr_6_scale = neo_profile_dlnndr_6_scale_in
+    profile_dlntdr_1_scale = neo_profile_dlntdr_1_scale_in
+    profile_dlntdr_2_scale = neo_profile_dlntdr_2_scale_in
+    profile_dlntdr_3_scale = neo_profile_dlntdr_3_scale_in
+    profile_dlntdr_4_scale = neo_profile_dlntdr_4_scale_in
+    profile_dlntdr_5_scale = neo_profile_dlntdr_5_scale_in
+    profile_dlntdr_6_scale = neo_profile_dlntdr_6_scale_in
     geo_ny_in = neo_geo_ny_in
     geo_yin_in(:,:) = neo_geo_yin_in(:,:)
 
