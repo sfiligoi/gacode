@@ -203,6 +203,8 @@
 ! save maximum width
       width_max = width_in
       iflux_in=.TRUE. 
+      gmax = 0.0
+      fmax=0.0
       do i=1,nky
         ky_in = ky_spectrum(i)
 !
@@ -272,14 +274,13 @@
 ! compute field_spectrum_out
         phi_bar1 = 0.0
         v_bar1 = 0.0
-        gmax = 0.0
         if(unstable)then
          do imax=1,nmodes_out
            phi_bar = reduce*phi_bar_out(imax)
            v_bar = reduce*v_bar_out(imax)
            phi_bar1 = phi_bar1 + phi_bar
            v_bar1 = v_bar1 + v_bar      
-           if(ky_in.lt.1.0.and.gamma_out(imax).gt.gmax)then
+           if(ky_in.le.1.0.and.gamma_out(imax).gt.gmax)then
              gmax=gamma_out(imax)
              fmax=freq_out(imax)
            endif

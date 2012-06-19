@@ -56,8 +56,6 @@ c       xparam_gf(10)=1.D0
       xchi=0.1D0
       chiaddexp=1.D0
       iexch_m=1
-      iohm=0
-      irad=0
       ineutp=0
       idt=0
       jin_m=1
@@ -82,8 +80,6 @@ c       irot2=1
       ipfst=0
       fuscale=1.D0
       itest_ntcc=0
-      ialpha=0
-      ifusmodel=0
       pfusion_max=2000.D0
       ibound=0
       cped=1.D0
@@ -91,8 +87,6 @@ c       irot2=1
       ibranch_gf=0
       theta0_gf=0.0
       nbasis_gf=4
-      xoh_exp=0.D0
-      xfus_exp=0.D0
 c
       return
       end

@@ -232,17 +232,15 @@ c
           pow_ei_exp(j-1)=pow_ei_exp(j-2)-1.D-6*zhalf*
      &         (dvoldr_p*qdelt_d(j)+dvoldr_m*qdelt_d(j-1))*drho
 c
-c          xoh_exp=1.D0
-c          if(iexp_oh.eq.-1) xoh_exp=0.D0
           powe_exp(j-1)=powe_beam_exp(j-1)+
      &      powe_rf_exp(j-1)+xoh_exp*powe_oh_exp(j-1)
      &      -xrad_exp*powe_rad_exp(j-1)-powe_ion_exp(j-1)-
-     &      (1.D0-xwdot)*powe_wdot_exp(j-1)
+     &      xwdot*powe_wdot_exp(j-1)
      &      -pow_ei_exp(j-1)+xfus_exp*powe_fus_exp(j-1)
           powi_exp(j-1)=powi_beam_exp(j-1)+
      &      powi_rf_exp(j-1)
      &      -powi_ion_exp(j-1)+powi_cx_exp(j-1)-
-     &      (1.D0-xwdot)*powi_wdot_exp(j-1)
+     &      xwdot*powi_wdot_exp(j-1)
      &      +pow_ei_exp(j-1)+xfus_exp*powi_fus_exp(j-1)
 c        write(*,100) j, rho(j-1),powe_exp(j-1),powi_exp(j-1)
         enddo

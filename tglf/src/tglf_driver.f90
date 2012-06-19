@@ -102,6 +102,8 @@
 !        cpu2 = time_array(5)*3600 + time_array(6)*60 + time_array(7)+time_array(8)*0.001
 !        write(*,*)"first call to TGLF_TM"
 !        write(*,*)"cputime = ",(cpu2-cpu1)/1.0
+        write(*,*)"gmax =",get_growthrate(1)
+        write(*,*)"fmax=",get_frequency(1)
         do j=1,ns_tg
          cmult = 0.7967
          if(j.eq.2)cmult=1.207

@@ -1532,19 +1532,17 @@ c
 c
 c... JAK 6/21/95 Sign changed for qrad, qione, qioni
 c    
-c       xoh_exp=1.D0
-c       if(iexp_oh.eq.-1) xoh_exp=0.D0
         powe_exp(j-1)=
      >    powe_beam_exp(j-1)+powe_rf_exp(j-1)+xoh_exp*powe_oh_exp(j-1)
      >   -xrad_exp*powe_rad_exp(j-1)-powe_ion_exp(j-1)-
-     >    (1.D0-xwdot)*powe_wdot_exp(j-1)
+     >    xwdot*powe_wdot_exp(j-1)
      >   -pow_ei_exp(j-1)
      >   +xfus_exp*powe_fus_exp(j-1)
 c  
         powi_exp(j-1)=
      >    powi_beam_exp(j-1)+powi_rf_exp(j-1)
      >   -powi_ion_exp(j-1)+powi_cx_exp(j-1)-
-     >    (1.D0-xwdot)*powi_wdot_exp(j-1)
+     >    xwdot*powi_wdot_exp(j-1)
      >   +pow_ei_exp(j-1)
      >   +xfus_exp*powi_fus_exp(j-1)
 c    
@@ -1564,7 +1562,7 @@ c
 c 
         flow_exp(j-1)=flow_wall_exp(j-1)+flow_recom_exp(j-1)+
      >                nfscale*flow_beam_exp(j-1)-
-     >                (1.D0-xsdot)*flow_sdot_exp(j-1)
+     >                xsdot*flow_sdot_exp(j-1)
 c     
        enddo      
 c

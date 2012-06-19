@@ -75,8 +75,8 @@ c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
 c
 c... experimental rho_hat grid
 c
-      do j=0,nj
-        rhox(j)=0.D0
+      do j=0,nj-1
+        rhox(j)=0.0
       enddo
 c
       do j=0,nj_d-1

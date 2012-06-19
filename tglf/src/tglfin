@@ -2,7 +2,7 @@
 ! GA-std case 
      adiabatic_elec_tg=.FALSE.
      use_TM_tg=.TRUE.
-     kygrid_model_tg = 1
+   kygrid_model_tg = 0
      xnu_model_tg=2
      sat_rule_tg=0
      vpar_model_tg=0
@@ -13,8 +13,8 @@
      ibranch_tg=-1
      nmodes_tg=2
      ns_tg=2
-     nky_tg = 12
-     ky_tg=0.3
+   nky_tg = 15
+   ky_tg=1.5
      sign_Bt_tg=1.0
      sign_It_tg=1.0
      iflux_tg=.TRUE.
