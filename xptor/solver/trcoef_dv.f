@@ -51,7 +51,8 @@ c
       real*8 diffgb_sum(0:mxgrd-1)
       real*8 chiegb_sum(0:mxgrd-1), chiigb_sum(0:mxgrd-1)
       real*8 chiegb_e_sum(0:mxgrd-1),cgb_sum(0:mxgrd-1)
-      real*8 chiineo_sum(0:mxgrd-1),etagb_phi_sum(0:mxgrd-1)
+      real*8 chiineo_sum(0:mxgrd-1),chieneo_sum(0:mxgrd-1)
+      real*8 etagb_phi_sum(0:mxgrd-1)
       real*8 kpol_m_sum(0:mxgrd-1),nu_pol_m_sum(0:mxgrd-1)
       real*8 flowe_neo_sum(0:mxgrd-1)
       real*8 flowi_neo_sum(0:mxgrd-1)
@@ -132,10 +133,11 @@ c      ca = 2.D0/3.D0
        chiigb_sum(k)=0.D0
        chiegb_e_sum(k)=0.D0
        chiineo_sum(k)=0.D0
+       chieneo_sum(k)=0.0
        kpol_m_sum(k)=0.D0
        nu_pol_m_sum(k)=0.D0
-       chiineo_m(k)=0.D0
        chiineogb_m(k)=0.D0
+       chieneogb_m(k)=0.D0
        cgb_sum(k)=0.D0
        etagb_phi_sum(k)=0.D0
        flowe_neo_sum(k)=0.0
@@ -193,7 +195,7 @@ c
        chiegb_m(k)=0.D0
        chiigb_m(k)=0.D0
        diffgb_m(k)=0.D0
-       chie_e_gb_m(k)=0.D0
+       chiegb_etg_m(k)=0.D0
        etagb_phi_m(k)=0.D0
        etagb_par_m(k)=0.D0
        etagb_per_m(k)=0.D0
@@ -556,7 +558,7 @@ c
      >  ,MPI_SUM,0,MPI_COMM_WORLD,i_err)
       call MPI_BCAST(chiegb_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
-      call MPI_REDUCE(chie_e_gb_m,chiegb_e_sum,mxgrd,
+      call MPI_REDUCE(chiegb_etg_m,chiegb_e_sum,mxgrd,
      >  MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,i_err)
       call MPI_BCAST(chiegb_e_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
@@ -564,9 +566,13 @@ c
      >  ,MPI_SUM,0,MPI_COMM_WORLD,i_err)
       call MPI_BCAST(chiigb_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
-      call MPI_REDUCE(chiineo_m,chiineo_sum,mxgrd,
+      call MPI_REDUCE(chiineogb_m,chiineo_sum,mxgrd,
      >   MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,i_err)
       call MPI_BCAST(chiineo_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(chieneogb_m,chieneo_sum,mxgrd,
+     >   MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,i_err)
+      call MPI_BCAST(chieneo_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
       call MPI_REDUCE(cgyrobohm_m,cgb_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,MPI_SUM,0,MPI_COMM_WORLD, i_err)
@@ -785,8 +791,9 @@ c
         diffgb_m(k)=diffgb_sum(k)
         chiegb_m(k)=chiegb_sum(k)
         chiigb_m(k)=chiigb_sum(k)
-        chiineo_m(k)=chiineo_sum(k)
-        chie_e_gb_m(k)=chiegb_e_sum(k)
+        chiineogb_m(k)=chiineo_sum(k)
+        chieneogb_m(k)=chieneo_sum(k)
+        chiegb_etg_m(k)=chiegb_e_sum(k)
         cgyrobohm_m(k)=cgb_sum(k)
         etagb_phi_m(k)=etagb_phi_sum(k)
         kpol_m(k)=kpol_m_sum(k)
@@ -856,8 +863,9 @@ c        enddo
       diffgb_m(ngrid)=diffgb_m(ngrid-1)
       chiegb_m(ngrid)=chiegb_m(ngrid-1)
       chiigb_m(ngrid)=chiigb_m(ngrid-1)
-      chiineo_m(ngrid)=chiineo_m(ngrid-1)
-      chie_e_gb_m(ngrid)=chie_e_gb_m(ngrid-1)
+      chiineogb_m(ngrid)=chiineogb_m(ngrid-1)
+      chieneogb_m(ngrid)=chieneogb_m(ngrid-1)
+      chiegb_etg_m(ngrid)=chiegb_etg_m(ngrid-1)
       cgyrobohm_m(ngrid)=cgyrobohm_m(ngrid-1)
       etagb_phi_m(ngrid)=etagb_phi_m(ngrid-1)
       kpol_m(ngrid)=kpol_m(ngrid-1)
@@ -987,16 +995,6 @@ c       write(*,*)k,"dflux",dflux(0,2,k),dflux(2,2,k)
        tiflux(k) = tifluxm
        vphiflux(k) = vphifluxm
        vparflux(k) = vparfluxm
-       diffgb_m(k) = -gradnem*nefluxm
-     >  /(cgyrobohm_m(k)*1.6022D-3*MAX(1.0D-10,gradnem*gradnem))
-       chiegb_m(k) = -gradtem*tefluxm
-     >  /(cgyrobohm_m(k)*1.6022D-3*nem*MAX(1.0D-10,gradtem*gradtem))
-       chiigb_m(k) = -gradtim*tifluxm
-     >  /(cgyrobohm_m(k)*1.6022D-3*nim*MAX(1.0D-10,gradtim*gradtim))
-       gradvphim = cv*(vphi_m(k+1)-vphi_m(k))/dr(k,2)
-       etagb_phi_m(k) = -gradvphim*vphifluxm
-     >  /(cgyrobohm_m(k)*1.6726D-8*amassgas_exp*nim
-     >     *MAX(1.0D-10,gradvphim*gradvphim))
 c
        j = 0
        if(itport_pt(1).ne.0)then
@@ -1274,7 +1272,10 @@ c     > (arho_exp*(rho(k+1)+rho(k))/2.D0)
 c           endif
 c           if(ifixeta.eq.1.and.DABS(diff(i,j,k)).lt.testeta)then
 c             diff(i,j,k)=testeta
-c           endif           
+c           endif 
+           if(ifixeta.eq.1.and.j.eq.i)then
+             if(diff(i,j,k).lt.0.0)diff(i,j,k)=ABS(eta_tor_exp(k))
+           endif          
            conv3(i,j,k)= diff(i,j,k)*gradnem/nem
            vrho3(i,j,k) = c_per(k)*mass_density
          endif

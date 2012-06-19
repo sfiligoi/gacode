@@ -20,12 +20,18 @@ c
 c
       integer j, jj, ialpha, ipure
       real*8 drm, dvoldr_p, dvoldr_m, shift_shaf, dummy1, aomega
+      real*8 flip_sign
       real*8 dum(nj)
 c
       pi_m=atan2(0.0D0,-1.0D0)
       ipure=0
 c
       if(nscale.eq.0) nscale=1.D0
+c
+      flip_sign=1.0
+      if(idata.eq.1) then
+       flip_sign=-1.0
+      endif
 c
 c... 1D variable transfers
 c
@@ -96,9 +102,9 @@ c... only 2 max impurity ions
         qrfe_exp(j-1) = qrfe_d(j)
         qrfi_exp(j-1) = qrfi_d(j)
         qohm_exp(j-1) = qohm_d(j)
-        qrad_exp(j-1) = qrad_d(j)
-        qione_exp(j-1) = qione_d(j)
-        qioni_exp(j-1) = qioni_d(j)
+        qrad_exp(j-1) = flip_sign*qrad_d(j)
+        qione_exp(j-1) = flip_sign*qione_d(j)
+        qioni_exp(j-1) = flip_sign*qioni_d(j)
         sbeame_exp(j-1)=sbion_d(j)
         sbeam_exp(j-1)=sbeam_d(j)
 c
@@ -226,9 +232,9 @@ c power in MW
      >   1.D-6*0.5D0*(dvoldr_p*qlhe_d(j)+dvoldr_m*qlhe_d(j-1))*drm
         powe_oh_exp(j-1)=powe_oh_exp(j-2)+
      >   1.D-6*0.5D0*(dvoldr_p*qohm_d(j)+dvoldr_m*qohm_d(j-1))*drm
-        powe_rad_exp(j-1)=powe_rad_exp(j-2)+ 
+        powe_rad_exp(j-1)=powe_rad_exp(j-2)+flip_sign* 
      >   1.D-6*0.5D0*(dvoldr_p*qrad_d(j)+dvoldr_m*qrad_d(j-1))*drm
-        powe_ion_exp(j-1)=powe_ion_exp(j-2)+wallneutp*
+        powe_ion_exp(j-1)=powe_ion_exp(j-2)+flip_sign*wallneutp*
      >   1.D-6*0.5D0*(dvoldr_p*qione_d(j)+ dvoldr_m*qione_d(j-1))*drm
         powe_wdot_exp(j-1)=powe_wdot_exp(j-2)+
      >   1.D-6*0.5D0*(dvoldr_p*dpedtc_d(j)+dvoldr_m*dpedtc_d(j-1))*drm
@@ -238,7 +244,7 @@ c power in MW
      >   1.D-6*0.5D0*(dvoldr_p*qbeami_d(j)+dvoldr_m*qbeami_d(j-1))*drm
         powi_rf_exp(j-1)=powi_rf_exp(j-2)+
      >   1.D-6*0.5D0*(dvoldr_p*qrfi_d(j)+dvoldr_m*qrfi_d(j-1))*drm
-        powi_ion_exp(j-1)=powi_ion_exp(j-2)+wallneutp*
+        powi_ion_exp(j-1)=powi_ion_exp(j-2)+flip_sign*wallneutp*
      >   1.D-6*0.5D0*(dvoldr_p*qioni_d(j)+dvoldr_m*qioni_d(j-1))*drm
         powi_cx_exp(j-1)=powi_cx_exp(j-2)+wallneutp*
      >   1.D-6*0.5D0*(dvoldr_p*qcx_d(j)+dvoldr_m*qcx_d(j-1))*drm
@@ -266,29 +272,24 @@ c
 c... total flows
 c    Note: switches (xoh_exp,xwdot,xfus_exp) in input.m
 c
-      if(idata.eq.1) then
-        xrad_exp=-xrad_exp
-        xion_exp=-xion_exp
-      endif
 c
-c      write(*,*) 'xfus_exp = ',xfus_exp
       do j=2,nj_d
         powe_exp(j-1)=pbescale*powe_beam_exp(j-1)+
      >   prfscale*prfescale*powe_rf_exp(j-1)+powe_lh_exp(j-1)+
-     >   (1.D0-xoh_exp)*powe_oh_exp(j-1)
+     >   xoh_exp*powe_oh_exp(j-1)
      >   -xrad_exp*powe_rad_exp(j-1)-xion_exp*powe_ion_exp(j-1)-
-     >   (1.D0-xwdot)*powe_wdot_exp(j-1)
+     >   xwdot*powe_wdot_exp(j-1)
      >   -pow_ei_exp(j-1)
      >   +xfus_exp*powe_fus_exp(j-1)
         powi_exp(j-1)=pbiscale*powi_beam_exp(j-1)+
      >   prfscale*prfiscale*powi_rf_exp(j-1)
      >   -xion_exp*powi_ion_exp(j-1)+powi_cx_exp(j-1)-
-     >   (1.D0-xwdot)*powi_wdot_exp(j-1)
+     >   xwdot*powi_wdot_exp(j-1)
      >   +pow_ei_exp(j-1)
      >   +xfus_exp*powi_fus_exp(j-1)
         flow_exp(j-1)=flow_wall_exp(j-1)+flow_recom_exp(j-1)+
      >                nfscale*flow_beam_exp(j-1)-
-     >                (1.D0-xsdot)*flow_sdot_exp(j-1)
+     >                xsdot*flow_sdot_exp(j-1)
       enddo
 c
 c... Exchange flow
@@ -410,7 +411,7 @@ c
 c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
 c... read in experimental ExB shear profile
 c
-      if(iexb.eq.1) then
+      if(iexb.eq.3) then
         open(unit=5,status='unknown',access='sequential',
      >             file='omega.dat')
         do j=0,jmaxm
@@ -466,8 +467,8 @@ c
         write(6,'(a32,2F10.3)') ' Total integrated Pexch-e,i [MW]:',
      >   -pow_ei_exp(nj_d-1),pow_ei_exp(nj_d-1)
         write(6,'(a32,2F10.3)') ' Total integrated Pwdot-e,i [MW]:',
-     >   (1.D0-xwdot)*powe_wdot_exp(nj_d-1),
-     >   (1.D0-xwdot)*powi_wdot_exp(nj_d-1)
+     >   xwdot*powe_wdot_exp(nj_d-1),
+     >   xwdot*powi_wdot_exp(nj_d-1)
         if(ialpha.eq.1) then
           write(6,'(a31,1x,2F10.3)') 'Total integrated Pfus-e,i [MW]:',
      >     powe_fus_exp(nj_d-1),powi_fus_exp(nj_d-1)

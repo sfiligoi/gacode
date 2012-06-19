@@ -14,8 +14,12 @@ c
       real*8 T(mxflds,mxgrd),dT(mxflds,mxgrd)
       real*8 scale,test,rescale
       real*8 normT, normDT
-      real*8 x13
+      real*8 x13,x14
       integer i,is,j,k,iflag
+c
+      x13 = xparam_pt(13)
+      x14 = xparam_pt(14)
+c
       if(iflag .eq. 1)go to 100
 c
 c first check for too large of a change in fields
@@ -114,7 +118,7 @@ c so only the electron and main ion densities are changed
       if(itport_pt(4).ne.0)then
         j=j+1
         do i=1,ngrid-1
-          T(j,i) = T(j,i)+scale*dT(j,i)
+          T(j,i) = T(j,i)+x14*scale*dT(j,i)
           vexb_m(i)= T(j,i)/ne_m(i)
         enddo
         vexb_m(0)=vexb_m(1)
@@ -122,7 +126,7 @@ c so only the electron and main ion densities are changed
       if(itport_pt(5).ne.0)then
         j=j+1
         do i=1,ngrid-1
-          T(j,i) = T(j,i)+scale*dT(j,i)
+          T(j,i) = T(j,i)+x14*scale*dT(j,i)
           vpol_m(i)= T(j,i)/ne_m(i)
         enddo
         vpol_m(0)=vpol_m(1)
@@ -131,7 +135,6 @@ c
       if(alpha_dia.ne.0.0)then
 c        call advance_neo_flows(xparam_pt(13))
         call neo_flows(ngrid,vneo_new,vdia_new)
-        x13 = xparam_pt(13)
         do i=1,nspecies
           do k=1,ngrid-1
             vneo_m(i,k) = x13*vneo_m(i,k)+(1.0-x13)*vneo_new(i,k)

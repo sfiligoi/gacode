@@ -24,7 +24,8 @@ c
       real*8 sour_p,sour_mm,mparsour_p,mparsour_mm
       real*8 lnu_eilam,r_eps,fcm,kpol1, kpol2, b_unit
       real*8 rhom,rminm,qm,temm,gradrm
-      real*8 thetamin,Peaux_tot,Piaux_tot,Pohm_tot
+      real*8 thetamin
+      real*8 Peaux_tot,Piaux_tot,Pohm_tot,Prad_tot
       real*8 ugradte,ugradti,ugradne
       real*8 ugradfi,ugradfz,ugradni,ugradnz
       real*8 thetam,dvoldr
@@ -539,10 +540,10 @@ c         if(iexch.ge.1) powe_mm=powe_mm+pow_ei_exp(k-1)
 c         if(iohm.ge.1) powe_mm=powe_mm-powe_oh_exp(k-1)         
          powe_p = pbescale*powe_beam_exp(k)+
      >   prfscale*prfescale*powe_rf_exp(k)+powe_lh_exp(k)
-     >   -xion_exp*powe_ion_exp(k)-(1.D0-xwdot)*powe_wdot_exp(k)
+     >   -xion_exp*powe_ion_exp(k)-xwdot*powe_wdot_exp(k)
          powe_mm = pbescale*powe_beam_exp(k-1)+
      >   prfscale*prfescale*powe_rf_exp(k-1)+powe_lh_exp(k-1)
-     >   -xion_exp*powe_ion_exp(k-1)-(1.D0-xwdot)*powe_wdot_exp(k-1)
+     >   -xion_exp*powe_ion_exp(k-1)-xwdot*powe_wdot_exp(k-1)
 c         powi_p=powi_exp(k)
 c         if(iexch.ge.1) powi_p=powi_p-pow_ei_exp(k) 
 c         powi_mm=powi_exp(k-1)
@@ -550,22 +551,24 @@ c         if(iexch.ge.1) powi_mm=powi_mm-pow_ei_exp(k-1)
          powi_p = pbiscale*powi_beam_exp(k)+
      >   prfscale*prfiscale*powi_rf_exp(k)
      >   -xion_exp*powi_ion_exp(k)+powi_cx_exp(k)-
-     >   (1.D0-xwdot)*powi_wdot_exp(k)
+     >   xwdot*powi_wdot_exp(k)
          powi_mm = pbiscale*powi_beam_exp(k-1)+
      >   prfscale*prfiscale*powi_rf_exp(k-1)
      >   -xion_exp*powi_ion_exp(k-1)+powi_cx_exp(k-1)-
-     >   (1.D0-xwdot)*powi_wdot_exp(k-1)
+     >   xwdot*powi_wdot_exp(k-1)
          Peaux(k)=(powe_p-powe_mm)/vprime(k,1)/dr(k,1)
          Piaux(k)=(powi_p-powi_mm)/vprime(k,1)/dr(k,1)
          if(iohm.eq.0)then
-           Pohpro(k)=(1.0-xoh_exp)*(powe_oh_exp(k)-powe_oh_exp(k-1))
+           Pohpro(k)=xoh_exp*(powe_oh_exp(k)-powe_oh_exp(k-1))
      >     /(vprime(k,1)*dr(k,1))
-         elseif(ialpha.eq.0)then
+         endif
+         if(ialpha.eq.0)then
            Pe_alpha(k)=xfus_exp*(powe_fus_exp(k)-powe_fus_exp(k-1))
      >      /(vprime(k,1)*dr(k,1))
            Pi_alpha(k)=xfus_exp*(powi_fus_exp(k)-powi_fus_exp(k-1))
      >      /(vprime(k,1)*dr(k,1))
-         elseif(irad.eq.0)then
+         endif
+         if(irad.eq.0)then
            Pradb(k) = xrad_exp*(powe_rad_exp(k)-powe_rad_exp(k-1))
      >     /(vprime(k,1)*dr(k,1))
            Prads(k) = 0.0
@@ -581,15 +584,15 @@ c wall source
          sour_mm=flow_wall_exp(k-1)
          Psour_wall(k)=(sour_p-sour_mm)/(vprime(k,1)*dr(k,1))
 c Mphi and Mpar momentum velocity sources
+         if(itorque.eq.0)then
 c cosbeam is a barm angle
+           cosbeam=0.5
 c vbeam is a beam ion velocity in m/sec..same units as vpar
-         cosbeam=0.5D0
 c effective beam velocity from 0.5*m*vbeam^2 = power/flux
-          vbeam = SQRT(2.0*(qbeame_exp(k)+qbeami_exp(k))/
-     >     (sbeam_exp(k)*amassgas_exp*1.6726D-27))
+            vbeam = SQRT(ABS(2.0*(qbeame_exp(k)+qbeami_exp(k))/
+     >     (sbeam_exp(k)*amassgas_exp*1.6726D-27)))
 c         mparsour_p=flow_beam_exp(k)*cosbeam*vbeam
 c         mparsour_mm=flow_beam_exp(k-1)*cosbeam*vbeam
-         if(itorque.eq.0)then
 c torque denty in NT/M^2
            torque_exp(k)=(amassgas_exp*rmajor_exp*1.6726D-27)*
      >     cosbeam*vbeam*sbeam_exp(k)
@@ -608,7 +611,7 @@ c torque denty in NT/M^2
           gradvphim =(ctorm*gradvexbm+grad_c_tor*vexbm)*cv
           eta_tor_exp(k) = -stress_tor_exp(k)*gradvphim/
      >    (1.62726D-8*amassgas_exp*nim*rmajor_exp*dvoldr
-     >    *MAX(1.0D-12,gradvphim**2))
+     >    *MAX(1.0D-12,gradvphim*gradvphim))
 c         endif
          Mpar(k)=Mphi(k)*c_per(k)/c_tor(k)
 c         write(*,'(i2,4x,1p2e12.4," Mphi")') k,rho(k),Mphi(k)
@@ -619,6 +622,7 @@ c         write(*,'(i2,4x,1p2e12.4," Mphi")') k,rho(k),Mphi(k)
        Peaux_tot=volint(Peaux)
        Piaux_tot=volint(Piaux)
        Pohm_tot=volint(Pohpro)
+       Prad_tot=volint(Pradb)+volint(Prads)
        if(i_proc.eq.0)write(6,*)"Pohm = ",Pohm_tot       
        p_glob_exp = Peaux_tot+Piaux_tot+Pohm_tot
        if(i_proc.eq.0)write(6,*)"Paux = ",Peaux_tot,Piaux_tot
@@ -627,6 +631,7 @@ c         write(*,'(i2,4x,1p2e12.4," Mphi")') k,rho(k),Mphi(k)
        Piaux_tot=volint(Pi_alpha)
        if(i_proc.eq.0)write(6,*)"P_alpha = ",Peaux_tot,Piaux_tot
      >  ,Piaux_tot+Peaux_tot
+       if(i_proc.eq.0)write(6,*)"Prad = ",Prad_tot
        if(i_proc.eq.0)write(6,*)"cmodel = ",cmodel
        if(i_proc.eq.0)write(6,*)"xparam_gf(10) = ",xparam_gf(10)
 c
@@ -660,7 +665,7 @@ c in GYRO while a=rho(a) in XPTOR
 c Note #2: turn off smoothing of rmin,rmaj using average7_1d
 c in datmap.f
 c
-      if(iexb.eq.2) then
+      if(iexb.eq.3) then
 c
       do k=1,mxgrid-1
         rminm=(rmin_exp(k+1)+rmin_exp(k))/2.D0

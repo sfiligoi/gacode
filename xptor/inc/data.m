@@ -82,13 +82,13 @@ c
 c
       real*8 en_nm1_d(nj), en_nm2_d(nj), en_nm3_d(nj),
      &   torque_d(nj)
-      real*8 sion_d(nj,1), srecom_d(nj,1), scx_d(nj,1),
-     &   sbcx_d(nj,1), s_d(nj,1), dudtsv_d(nj,1), 
-     &   enn_d(nj,1), ennw_d(nj,1), ennv_d(nj,1), volsn_d(nj,1)
+      real*8 sion_d(nj,ng), srecom_d(nj,ng), scx_d(nj,ng),
+     &   sbcx_d(nj,ng), s_d(nj,ng), dudtsv_d(nj,ng), 
+     &   enn_d(nj,ng), ennw_d(nj,ng), ennv_d(nj,ng), volsn_d(nj,ng)
 c.. 903 elements
 c     real*8 rhob_nc(nj,ng)
 c.. 1204 elements
-      real*8 en_d(nj,4)
+      real*8 en_d(nj,ng+1)
 c
 c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
       common /data/ en_d, sion_d, srecom_d, scx_d,

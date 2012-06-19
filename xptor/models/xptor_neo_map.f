@@ -22,15 +22,17 @@ c
       mu3 = sqrt(amassimp_exp)*42.851
 
 ! Initialize NEO
-      call neo_init("path",MPI_COMM_WORLD)
+      neo_silent_flag_in=0
+      call neo_init("./ ",MPI_COMM_WORLD)
 
 ! Simulation mode (dke solve + analytic)
-      neo_sim_model_in = 1
+      neo_sim_model_in = 2
 
   ! Resolution
-      neo_n_energy_in = 5
-      neo_n_xi_in = 11
+      neo_n_radial_in = 1
       neo_n_theta_in = 11
+      neo_n_xi_in = 11
+      neo_n_energy_in = 5
 
 !  units: 
       m0 = amassgas_exp       !proton mass
@@ -51,7 +53,7 @@ c
       qm = (q_exp(jm+1)+q_exp(jm))/2.0
       dr_loc = rmin_exp(jm+1)-rmin_exp(jm)
       drhodr_loc = arho_exp*(rho(jm+1)-rho(jm))/dr_loc
-!      neo_write_out_mode_in    = 0
+!  
       neo_equilibrium_model_in = 2
       neo_rmin_over_a_in = rminm/a0
       neo_rmaj_over_a_in = rmajm/a0
@@ -63,11 +65,10 @@ c
      >                (elong_exp(jm+1)-elong_exp(jm))/dr_loc
       neo_delta_in       =  0.5*(delta_exp(jm+1)+delta_exp(jm))
       neo_s_delta_in     = rminm*(delta_exp(jm+1)-delta_exp(jm))/dr_loc
+      neo_ipccw_in = INT(sign_It_exp)  !current direction counter clockwise from above
+      neo_btccw_in = INT(sign_Bt_exp)  !magnetic field direction "
 
-      neo_ipccw_in = sign_It_exp  !current direction counter clockwise from above
-      neo_btccw_in = sign_Bt_exp  !magnetic field direction "
-
-!      neo_n_species_in = 4
+!      neo_n_species_in = 2
       neo_n_species_in = 3
 
       b_unit = ABS(bt_exp)*(rhom/rminm)*drhodr(jm)
@@ -84,17 +85,18 @@ c
       neo_nu_1_in     = xnue/w0
 
   ! Main ions
-      neo_z_2_in      = 1.0
+      neo_z_2_in      = 1
       neo_mass_2_in   = 1.0
       neo_dens_2_in   = nim/n0
+      if(neo_n_species_in.eq.2)neo_dens_2_in = nem/n0
       neo_temp_2_in   = 1.0
       neo_dlnndr_2_in = -drhodr_loc*a0*gradnim/nim
       neo_dlntdr_2_in = -drhodr_loc*a0*gradtim/tim
-!      neo_nu_2_in     = (xnue/w0)*(nim/nem)/(mu2*(tim/tem)**1.5)
+!      neo_nu_1_in     = (xnue/w0)*(nim/nem)/(mu2*(tim/tem)**1.5)
 
       if(neo_n_species_in.gt.2)then
   ! Impurity
-        neo_z_3_in      = zimp_exp
+        neo_z_3_in      = INT(zimp_exp)
         neo_mass_3_in   = amassimp_exp/amassgas_exp
         neo_dens_3_in   = nzm/n0
         neo_temp_3_in   = 1.0
@@ -109,7 +111,7 @@ c
         tbm = 0.5*(tfast_exp(jm+1)+tfast_exp(jm))
         gradnbm = (nfast_exp(jm+1)-nfast_exp(jm))/dr_loc
         gradtbm = (tfast_exp(jm+1)-tfast_exp(jm))/dr_loc
-        neo_z_4_in      = 1.0
+        neo_z_4_in      = 1
         neo_mass_4_in   = 1.0
         neo_dens_4_in   = nfast_exp(jm)/n0
         neo_temp_4_in   = tbm/t0
@@ -120,7 +122,7 @@ c
 
   ! Rotation is always active
 !      neo_rotation_model_in = 2  !solves Hinton-Wong model
-      neo_rotation_model_in = 1
+      neo_rotation_model_in = 2
       neo_omega_rot_in = 0.0  
       if(neo_rotation_model_in.eq.2)then
         neo_omega_rot_in = vexbm*cv/(w0*rmajor_exp)
@@ -130,7 +132,7 @@ c
 !      neo_omega_rot_deriv_in = 0.0
 
   ! Parameter only used for global runs.
-      neo_rmin_over_a_2_in = neo_rmin_over_a_in
+!      neo_rmin_over_a_2_in = neo_rmin_over_a_in
 
   ! General geometry Fourier coefficients
 c not yet availible for xptor
@@ -141,5 +143,42 @@ c      endif
 c
 c      neo_geo_ny_in = n_fourier_geo
 c      neo_geo_yin_in(:,:) = a_fourier_geo(:,:,i_r)
+      if(i_proc.eq.-99)then
+c debug 
+       write(*,*)"neo"
+       write(*,*)neo_ipccw_in
+       write(*,*)neo_btccw_in
+       write(*,*)neo_rho_star_in
+       write(*,*)neo_rmin_over_a_in
+       write(*,*)neo_rmaj_over_a_in
+       write(*,*)neo_q_in
+       write(*,*)neo_shear_in
+       write(*,*)neo_shift_in
+       write(*,*)neo_kappa_in
+       write(*,*)neo_s_kappa_in
+       write(*,*)neo_delta_in
+       write(*,*)neo_s_delta_in
+       write(*,*)neo_z_1_in
+       write(*,*)neo_mass_1_in
+       write(*,*)neo_dens_1_in
+       write(*,*)neo_temp_1_in
+       write(*,*)neo_dlnndr_1_in
+       write(*,*)neo_dlntdr_1_in
+       write(*,*)neo_nu_1_in
+       write(*,*)neo_z_2_in
+       write(*,*)neo_mass_2_in
+       write(*,*)neo_dens_2_in
+       write(*,*)neo_temp_2_in
+       write(*,*)neo_dlnndr_2_in
+       write(*,*)neo_dlntdr_2_in
+       write(*,*)neo_z_3_in
+       write(*,*)neo_mass_3_in
+       write(*,*)neo_dens_3_in
+       write(*,*)neo_temp_3_in
+       write(*,*)neo_dlnndr_3_in
+       write(*,*)neo_dlntdr_3_in
+       write(*,*)neo_omega_rot_in
+       write(*,*)neo_omega_rot_deriv_in
+      endif
 
       end subroutine xptor_neo_map

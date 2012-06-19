@@ -212,7 +212,9 @@
 !
 ! save maximum width
       width_max = width_in
-      iflux_in=.TRUE. 
+      iflux_in=.TRUE.
+      gmax = 0.0
+      fmax = 0.0
       do i=1+iProcTglf,nky,nProcTglf
         ky_in = ky_spectrum(i)
 !
@@ -282,7 +284,6 @@
 ! compute field_spectrum_out
         phi_bar1 = 0.0
         v_bar1 = 0.0
-        gmax = 0.0
         if(unstable)then
          do imax=1,nmodes_out
            phi_bar = reduce*phi_bar_out(imax)

@@ -513,10 +513,10 @@
       do is=1,ns
         rlns(is) = rlns_in(is)
         rlts(is) = rlts_in(is)
-        vpar_shear_s(is) = alpha_p_in*vpar_shear_in(is)*sign_Bt_in*sign_It_in
+        vpar_shear_s(is) = alpha_p_in*vpar_shear_in(is)*sign_It_in
         taus(is) = taus_in(is)
         as(is) = as_in(is)
-        vpar_s(is) = vpar_in(is)*sign_Bt_in*sign_It_in
+        vpar_s(is) = vpar_in(is)*sign_It_in
         if(vpar_model_in.ne.0)vpar_s(is)=0.0
         if(nbasis_min_in.eq.1.and.(vpar_shear_s(is).ne.0.0.or.vpar_s(is).ne.0.0))then
           nbasis_min_in = 2      
@@ -3707,6 +3707,8 @@
 !
       do is=ns0,ns
         wp = ky*ave_hp1(is,1,1)*ABS(vpar_shear_in(is))/vs(is)
+!        wp =(wp*sqrt_two*R_unit*q_unit*width_in/vs(is))/3.6
+!        stress_correction = (1+2.3*wp)/(1+wp)
         stress_correction = (AIMAG(freq_QL)+2.0*wp)/(AIMAG(freq_QL)+wp)
 !            write(*,*)"stress_corr=",i,stress_correction
         do i=1,nbasis
