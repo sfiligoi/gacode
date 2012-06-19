@@ -44,6 +44,7 @@ subroutine gyro_write_timedata
   type(hdf5ErrorType) :: h5err
   integer :: number_label
   logical :: write_threed
+  logical :: h5_rewind=.false.
 #endif
 
   !---------------------------------------------------
@@ -80,6 +81,7 @@ subroutine gyro_write_timedata
          openmethod='append'
       case(3)
          openmethod='append'
+         h5_rewind = .true.
       end select
          
       if (i_proc == 0) then
@@ -343,7 +345,7 @@ subroutine gyro_write_timedata
     if (i_proc == 0) then
        h5in%units="dimensionless"
        h5in%mesh=" "
-       call add_h5(dumpTGid,'k_perp_squared',k_perp_squared,h5in,h5err)
+       call add_h5(dumpTGid,'k_perp_squared',k_perp_squared,h5in,data_step,h5err)
        if(h5err%errBool) write(*,*) h5err%errorMsg
     endif !i_proc == 0
   endif !io_method > 1
@@ -532,17 +534,17 @@ subroutine gyro_write_timedata
         endif !io_method < 3
 #ifdef HAVE_HDF5
         if(io_method > 1 ) then 
-        call add_h5(dumpTGid,'diff',diff,h5in,h5err)
-        call add_h5(dumpTGid,'diff_i',diff_i,h5in,h5err)
-        call add_h5(dumpTGid,'gbflux',gbflux,h5in,h5err)
-        call add_h5(dumpTGid,'gbflux_mom',gbflux_mom,h5in,h5err)
-        call add_h5(dumpTGid,'gbflux_i',gbflux_i,h5in,h5err)
+        call add_h5(dumpTGid,'diff',diff,h5in,data_step,h5err)
+        call add_h5(dumpTGid,'diff_i',diff_i,h5in,data_step,h5err)
+        call add_h5(dumpTGid,'gbflux',gbflux,h5in,data_step,h5err)
+        call add_h5(dumpTGid,'gbflux_mom',gbflux_mom,h5in,data_step,h5err)
+        call add_h5(dumpTGid,'gbflux_i',gbflux_i,h5in,data_step,h5err)
 
         if (trapdiff_flag == 1) then
-           call add_h5(dumpTGid,'diff_trapped',diff_trapped,h5in,h5err)
-           call add_h5(dumpTGid,'diff_i_trapped',diff_i_trapped,h5in,h5err)
-           call add_h5(dumpTGid,'gbflux_trapped',gbflux_trapped,h5in,h5err)
-           call add_h5(dumpTGid,'gbflux_i_trapped',gbflux_i_trapped,h5in,h5err)
+           call add_h5(dumpTGid,'diff_trapped',diff_trapped,h5in,data_step,h5err)
+           call add_h5(dumpTGid,'diff_i_trapped',diff_i_trapped,h5in,data_step,h5err)
+           call add_h5(dumpTGid,'gbflux_trapped',gbflux_trapped,h5in,data_step,h5err)
+           call add_h5(dumpTGid,'gbflux_i_trapped',gbflux_i_trapped,h5in,data_step,h5err)
         endif !trapdiff_flag == 1
       endif !io_method > 1
 #endif
@@ -729,31 +731,31 @@ subroutine gyro_write_timedata
        endif !io_method < 3
 #ifdef HAVE_HDF5
       if(io_method > 1 ) then
-        call add_h5(dumpTGid,'field_rms',ave_phi,h5in,h5err)
+        call add_h5(dumpTGid,'field_rms',ave_phi,h5in,data_step,h5err)
         if(h5err%errBool) write(*,*) h5err%errorMsg
-        call add_h5(dumpTGid,'diff',diff,h5in,h5err)
+        call add_h5(dumpTGid,'diff',diff,h5in,data_step,h5err)
         if(h5err%errBool) write(*,*) h5err%errorMsg
-        call add_h5(dumpTGid,'diff_i',diff_i,h5in,h5err)
+        call add_h5(dumpTGid,'diff_i',diff_i,h5in,data_step,h5err)
         if(h5err%errBool) write(*,*) h5err%errorMsg
-        call add_h5(dumpTGid,'gbflux',gbflux,h5in,h5err)
+        call add_h5(dumpTGid,'gbflux',gbflux,h5in,data_step,h5err)
         if(h5err%errBool) write(*,*) h5err%errorMsg
-        call add_h5(dumpTGid,'gbflux_mom',gbflux_mom,h5in,h5err)
+        call add_h5(dumpTGid,'gbflux_mom',gbflux_mom,h5in,data_step,h5err)
         if(h5err%errBool) write(*,*) h5err%errorMsg
-        call add_h5(dumpTGid,'gbflux_i',gbflux_i,h5in,h5err)
+        call add_h5(dumpTGid,'gbflux_i',gbflux_i,h5in,data_step,h5err)
         if(h5err%errBool) write(*,*) h5err%errorMsg
 
         if (trapdiff_flag == 1) then
-           call add_h5(dumpTGid,'diff_trapped',diff_trapped,h5in,h5err)
+           call add_h5(dumpTGid,'diff_trapped',diff_trapped,h5in,data_step,h5err)
            if(h5err%errBool) write(*,*) h5err%errorMsg
-           call add_h5(dumpTGid,'diff_i_trapped',diff_i_trapped,h5in,h5err)
+           call add_h5(dumpTGid,'diff_i_trapped',diff_i_trapped,h5in,data_step,h5err)
            if(h5err%errBool) write(*,*) h5err%errorMsg
-           call add_h5(dumpTGid,'gbflux_trapped',gbflux_trapped,h5in,h5err)
+           call add_h5(dumpTGid,'gbflux_trapped',gbflux_trapped,h5in,data_step,h5err)
            if(h5err%errBool) write(*,*) h5err%errorMsg
-           call add_h5(dumpTGid,'gbflux_i_trapped',gbflux_i_trapped,h5in,h5err)
+           call add_h5(dumpTGid,'gbflux_i_trapped',gbflux_i_trapped,h5in,data_step,h5err)
            if(h5err%errBool) write(*,*) h5err%errorMsg
         endif
 
-        call add_h5(dumpTGid,'zerobar',transpose(field_fluxave),h5in,h5err)
+        call add_h5(dumpTGid,'zerobar',transpose(field_fluxave),h5in,data_step,h5err)
         if (h5err%errBool) write(*,*) h5err%errorMsg
       endif !io_method > 1
 #endif
@@ -776,10 +778,10 @@ subroutine gyro_write_timedata
         endif !io_method <3)
 #ifdef HAVE_HDF5
       if (io_method > 1 ) then
-        call add_h5(dumpTGid,'source',a3,h5in,h5err)
+        call add_h5(dumpTGid,'source',a3,h5in,data_step,h5err)
         if(h5err%errBool) write(*,*) h5err%errorMsg
 
-        call add_h5(dumpTGid,'moments_zero',moments_zero_plot,h5in,h5err)
+        call add_h5(dumpTGid,'moments_zero',moments_zero_plot,h5in,data_step,h5err)
         if(h5err%errBool) write(*,*) h5err%errorMsg
       endif !io_method > 1
 #endif
@@ -807,7 +809,7 @@ subroutine gyro_write_timedata
         endif
 #ifdef HAVE_HDF5
         if(io_method > 1 ) then
-          call add_h5(dumpTGid,'entropy',entropy,h5in,h5err)
+          call add_h5(dumpTGid,'entropy',entropy,h5in,data_step,h5err)
           if(h5err%errBool) write(*,*) h5err%errorMsg
         endif
 #endif
@@ -850,9 +852,9 @@ subroutine gyro_write_timedata
     if (i_proc == 0) then
        h5in%mesh=' '
        skip_at_tzero : if (.not. hdf5_skip) then
-         call add_h5(dumpTGid,'data_step',data_step,h5in,h5err)
+         call add_h5(dumpTGid,'data_step',data_step,h5in,data_step,h5err)
           if(h5err%errBool) write(*,*) h5err%errorMsg
-         call add_h5(dumpTGid,'t_current',t_current,h5in,h5err)
+         call add_h5(dumpTGid,'t_current',t_current,h5in,data_step,h5err)
           if(h5err%errBool) write(*,*) h5err%errorMsg
         endif skip_at_tzero
 
@@ -1433,9 +1435,9 @@ subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
 
   if (n3==1) then
      if(n2==1) then
-        call add_h5(rGid,trim(varName),buffn(:,1,1,:),h5in,h5err)
+        call add_h5(rGid,trim(varName),buffn(:,1,1,:),h5in,data_step,h5err)
      else  
-        call add_h5(rGid,trim(varName),buffn(:,:,1,:),h5in,h5err)
+        call add_h5(rGid,trim(varName),buffn(:,:,1,:),h5in,data_step,h5err)
      endif
   else
      ! n1 = n_kinetic; n2 = n_field, n3=n_moment, n4=n_n
@@ -1443,7 +1445,7 @@ subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
         do ifld=1,n2
            do imom=1,n3
               tempVarName=trim(vnameArray(ikin,ifld,imom))
-              call add_h5(rGid,trim(tempVarName),buffn(ikin,ifld,imom,:),h5in,h5err)
+              call add_h5(rGid,trim(tempVarName),buffn(ikin,ifld,imom,:),h5in,data_step,h5err)
            enddo
         enddo
      enddo

@@ -171,9 +171,9 @@
      enddo
 #ifdef HAVE_HDF5
     if(io_method >1 ) then
-       call add_h5(dumpTGid,TRIM(modeName)//"_real",REAL(amp),h5in,h5err) 
-       if(h5err%errBool) write(*,*) h5err%errorMsg
-       call add_h5(dumpTGid,TRIM(modeName)//"_imag",AIMAG(amp),h5in,h5err) 
+       call add_h5(dumpTGid,TRIM(modeName)//"_real",REAL(amp),h5in,data_step,h5err) 
+      if(h5err%errBool) write(*,*) h5err%errorMsg
+       call add_h5(dumpTGid,TRIM(modeName)//"_imag",AIMAG(amp),h5in,data_step,h5err) 
        if(h5err%errBool) write(*,*) h5err%errorMsg
     endif
 #endif

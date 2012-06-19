@@ -155,8 +155,8 @@
 #else
     if(io_method >1 ) then
       if (i_proc == 0 ) then
-       call add_h5(dumpTGid,'omega_linear_real',REAL(omega_linear),h5in,h5err) 
-       call add_h5(dumpTGid,'omega_linear_imag',AIMAG(omega_linear),h5in,h5err) 
+       call add_h5(dumpTGid,'omega_linear_real',REAL(omega_linear),h5in,data_step,h5err) 
+       call add_h5(dumpTGid,'omega_linear_imag',AIMAG(omega_linear),h5in,data_step,h5err) 
       endif
     endif
 #endif

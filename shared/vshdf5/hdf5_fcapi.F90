@@ -2780,7 +2780,7 @@
 ! writing things like time data
 ! You pass in a scalar, and it adds it to a 1D array
 !-----------------------------------------------------------------------
-  subroutine add_h5_int(inid,aname,value,h5in,errval)
+  subroutine add_h5_int(inid,aname,value,h5in,data_step,errval)
   integer(HID_T), intent(in) :: inid
   character(*), intent(in) :: aname
   integer(i4), intent(in) :: value
@@ -2794,6 +2794,8 @@
   integer(HSIZE_T), dimension(1) :: dims,maxdims,chunk_dims,extdims,offset
   integer(HSIZE_T), dimension(1) :: olddims,oldmaxdims
   integer(HID_T) :: cparms        !dataset creatation property identifier 
+  integer   :: data_step ! length of array to preserve
+                                           !before writing/appending
   LOGICAL(i4) :: dset_exists
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) 'Writing ', aname
@@ -2854,6 +2856,8 @@
     call h5dget_space_f(dset_id, filespace, error)
 
     call H5Sget_simple_extent_dims_f(filespace, olddims, oldmaxdims,error)
+  
+    olddims(1)=data_step
     
     ! Extend the dataset. This call assures that dataset has the space
     dims = (/1/)
@@ -2901,7 +2905,7 @@
 ! writing things like time data
 ! You pass in a scalar, and it adds it to a 1D array
 !-----------------------------------------------------------------------
-  subroutine add_h5_dbl(inid,aname,value,h5in,errval)
+  subroutine add_h5_dbl(inid,aname,value,h5in,data_step,errval)
   integer(HID_T), intent(in) :: inid
   character(*), intent(in) :: aname
   double precision, intent(in) :: value
@@ -2913,7 +2917,10 @@
   integer(HID_T) :: dspace_id=0, dset_id=0, filespace=0
   integer(HSIZE_T), dimension(1) :: dims=0,maxdims,extdims,offset
   integer(HSIZE_T), dimension(1) :: olddims,oldmaxdims
-  integer(HID_T) :: cparms        !dataset creatation property identifier 
+  integer(HID_T) :: cparms        !dataset creatation property identifie
+  integer   :: data_step ! length of array to preserve
+                                           !before writing/appending
+
   LOGICAL(i4) :: dset_exists
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) 'Writing ', aname
@@ -2977,6 +2984,8 @@
 
     call H5Sget_simple_extent_dims_f(filespace, olddims, oldmaxdims,error)
     
+    olddims(1)=data_step
+    
     ! Extend the dataset. This call assures that dataset has the space
     dims = (/1/)
     extdims=dims
@@ -3023,7 +3032,7 @@
 ! writing things like time data
 ! You pass in a scalar, and it adds it to a array array
 !-----------------------------------------------------------------------
-  subroutine add_h5_int_1d(inid,aname,array,h5in,errval)
+  subroutine add_h5_int_1d(inid,aname,array,h5in,data_step,errval)
   integer(HID_T), intent(in) :: inid
   character(*), intent(in) :: aname
   integer(i4), dimension(:), intent(in) :: array
@@ -3036,7 +3045,10 @@
   integer(HID_T) :: dspace_id, dset_id, filespace
   integer(HSIZE_T), dimension(2) :: dims,maxdims,chunk_dims,extdims,offset
   integer(HSIZE_T), dimension(2) :: olddims,oldmaxdims
-  integer(HID_T) :: cparms        !dataset creatation property identifier 
+  integer(HID_T) :: cparms        !dataset creatation property identifie
+  integer   :: data_step ! length of array to preserve
+                                           !before writing/appending
+ 
   LOGICAL(i4) :: dset_exists
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) 'Writing ', aname
@@ -3100,6 +3112,8 @@
 
     call H5Sget_simple_extent_dims_f(filespace, olddims, oldmaxdims,error)
     
+    olddims(1)=data_step
+    
     ! Extend the dataset. This call assures that dataset has the space
     dims = (/1, asize/)
     extdims=dims
@@ -3147,7 +3161,7 @@
 ! writing things like time data
 ! You pass in a scalar, and it adds it to a array array
 !-----------------------------------------------------------------------
-  subroutine add_h5_1d(inid,aname,array,h5in,errval)
+  subroutine add_h5_1d(inid,aname,array,h5in,data_step,errval)
   integer(HID_T), intent(in) :: inid
   character(*), intent(in) :: aname
   double precision, dimension(:), intent(in) :: array
@@ -3161,6 +3175,9 @@
   integer(HSIZE_T), dimension(2) :: dims,maxdims,chunk_dims,extdims,offset
   integer(HSIZE_T), dimension(2) :: olddims,oldmaxdims
   integer(HID_T) :: cparms        !dataset creatation property identifier 
+  integer :: data_step ! length of array to preserve
+                                           !before writing/appending
+
   LOGICAL(i4) :: dset_exists =.false.
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) 'Writing ', aname
@@ -3263,6 +3280,9 @@
 
 
     call H5Sget_simple_extent_dims_f(filespace, olddims, oldmaxdims,error)
+
+    olddims(1)=data_step
+
     if(h5in%debug) write(*,*) " In add_h5_1d and dset_exists: H5Sget_simple_extent_dims_f error =", error
     if(h5in%debug) write(*,*) " In add_h5_1d and dset_exists: H5Sget_simple_extent_dims_f  olddims =", &
        olddims, "  oldmaxdims =",  oldmaxdims
@@ -3359,7 +3379,7 @@
 ! writing things like time data
 ! You pass in a scalar, and it adds it to a array array
 !-----------------------------------------------------------------------
-  subroutine add_h5_2d(inid,aname,array,h5in,errval)
+  subroutine add_h5_2d(inid,aname,array,h5in,data_step,errval)
   integer(HID_T), intent(in) :: inid
   character(*), intent(in) :: aname
   double precision, dimension(:,:), intent(in) :: array
@@ -3373,6 +3393,9 @@
   integer(HSIZE_T), dimension(3) :: dims,maxdims,chunk_dims,extdims,offset
   integer(HSIZE_T), dimension(3) :: olddims,oldmaxdims
   integer(HID_T) :: cparms        !dataset creatation property identifier 
+  integer   :: data_step ! length of array to preserve
+                                           !before writing/appending
+
   LOGICAL(i4) :: dset_exists
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) 'Writing ', aname
@@ -3447,6 +3470,9 @@
     call h5dget_space_f(dset_id, filespace, error)
 
     call H5Sget_simple_extent_dims_f(filespace, olddims, oldmaxdims,error)
+
+  
+    olddims(1)=data_step
     
     ! Extend the dataset. This call assures that dataset has the space
     extdims=dims
@@ -3505,7 +3531,7 @@
 ! writing things like time data
 ! You pass in a scalar, and it adds it to a array array
 !-----------------------------------------------------------------------
-  subroutine add_h5_3d(inid,aname,array,h5in,errval)
+  subroutine add_h5_3d(inid,aname,array,h5in,data_step,errval)
   integer(HID_T), intent(in) :: inid
   character(*), intent(in) :: aname
   double precision, dimension(:,:,:), intent(in) :: array
@@ -3522,6 +3548,9 @@
   LOGICAL(i4) :: dset_exists
   integer ::i,j
   real(r8), dimension(:,:,:), allocatable :: tmparray
+  integer   :: data_step ! length of array to preserve
+                                           !before writing/appending
+
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) 'Writing ', aname
 !-----------------------------------------------------------------------
@@ -3599,6 +3628,9 @@
     call h5dget_space_f(dset_id, filespace, error)
 
     call H5Sget_simple_extent_dims_f(filespace, olddims, oldmaxdims,error)
+
+  
+    olddims(1)=data_step
     
     ! Extend the dataset. This call assures that dataset has the space
     extdims=dims
@@ -3658,7 +3690,7 @@
 ! writing things like time data
 ! You pass in a scalar, and it adds it to a array array
 !-----------------------------------------------------------------------
-  subroutine add_h5_4d(inid,aname,array,h5in,errval)
+  subroutine add_h5_4d(inid,aname,array,h5in,data_step,errval)
   integer(HID_T), intent(in) :: inid
   character(*), intent(in) :: aname
   double precision, dimension(:,:,:,:), intent(in) :: array
@@ -3675,6 +3707,9 @@
   LOGICAL(i4) :: dset_exists
   integer :: i,j,k
   real(r8), dimension(:,:,:,:), allocatable :: tmparray
+  integer   :: data_step ! length of array to preserve
+                                           !before writing/appending
+
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) 'Writing ', aname
 !-----------------------------------------------------------------------
@@ -3754,6 +3789,8 @@
     call h5dget_space_f(dset_id, filespace, error)
 
     call H5Sget_simple_extent_dims_f(filespace, olddims, oldmaxdims,error)
+    
+    olddims(1)=data_step
     
     ! Extend the dataset. This call assures that dataset has the space
     extdims=dims

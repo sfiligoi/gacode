@@ -328,7 +328,6 @@ subroutine gyro_do
   endif
   !------------------------------------------------------------
 
-!  h5_control=(restart_method+1)*output_flag
   if (restart_method == 0) then
      ! Open
      io_control = output_flag*1
