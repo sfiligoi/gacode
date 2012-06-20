@@ -32,7 +32,6 @@ then
   echo 
   echo "          -plot <type>"
   echo "          Generate plot of given type."
-  echo "          If this keyword is omitted, data will be listed to the screen."
   echo "           <type> = flux,"
   echo "                    flux_tot,"
   echo "                    profile,"
@@ -52,7 +51,7 @@ fi
 # Default simulation directory
 LOCDIR=.
 SIMROOT=$PWD
-PLOT_TYPE=
+PLOT_TYPE=null
 UNITS=0
 FTYPE=screen
 #==============================================================================
@@ -107,6 +106,12 @@ case "$PLOT_TYPE" in
    profile_smooth)  
 	python $PYROOT/profile_smooth.py $SIMDIR $FTYPE & ;;
 
+   null)
+        echo "Please specify a plot type via -plot." ;;
+
+   *)
+        echo "Unrecognized plot type: $PLOT_TYPE" ;;
+   
 esac 
 
 exit 0

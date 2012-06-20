@@ -23,7 +23,7 @@ class profiles_genData:
      Example Usage:
      >>> import matplotlib.pyplot as plt
      >>> from pyrats.profiles_gen.data import profiles_genData
-     >>> prof = profiles_genData('$GACODE_ROOT/tgyro/tools/input/treg01')
+     >>> prof = profiles_genData('$GACODE_ROOT/tgyro/tools/input/treg01/input.profiles')
      >>> prof.plot('ne')
      >>> plt.show()
 
@@ -31,10 +31,10 @@ class profiles_genData:
 
 
     #Methods
-    def __init__(self, directory = '.'):
+    def __init__(self,infile):
         """Constructor reads in data from directory and creates new object."""
         
-        self.set_directory(directory)
+        self.infile=infile
         self.init_data()
         self.store_data()
 
@@ -51,12 +51,6 @@ class profiles_genData:
         self.az = []
         self.bz = []
 
-    def set_directory(self, directory):
-        """Set the directory which contains input.profiles."""
-
-        from os.path import expanduser, expandvars
-        self.dirname = expanduser(expandvars(directory))
-
     def read_data(self):
         """Read in object data from input.profiles."""
 
@@ -64,9 +58,9 @@ class profiles_genData:
 
         elements = {}
         temp = []
-        raw_data = open(self.dirname + '/input.profiles', 'r').readlines()
+        raw_data = open(self.infile,'r').readlines()
 
-        #Determines length of header, and reads in data
+        # Determines length of header, and reads in data
         while raw_data[self.hlen].strip()[0].isdigit() == False and raw_data[self.hlen].strip()[0] != '-':
             self.hlen = self.hlen + 1
             if raw_data[self.hlen].strip()[0:6] == 'N_EXP=':
@@ -111,7 +105,7 @@ class profiles_genData:
         """Read in data from input.profiles.geo."""
 
         temp = []
-        raw_data = open(self.dirname + '/input.profiles.geo', 'r').readlines()
+        raw_data = open(self.infile+'.geo', 'r').readlines()
         for line in raw_data:
             temp.append(line.split()[0])
         count = int(temp[0]) + 1
