@@ -127,7 +127,7 @@ PYROOT=$GACODE_ROOT/shared/python/pyrats/profiles_gen
 
 if [ $OPTIONS_FLAG -eq 1 ]
 then
-  python $PYROOT/options.py '/.' &
+  python $PYROOT/options.py $INFILES &
   exit 0
 fi
 #==============================================================================
@@ -147,7 +147,6 @@ fi
 
 if [ $PLOT_FLAG -eq 1 ]
 then
-   echo "python $PYROOT/profileplot.py $RVAR $INFILES $PLOTS &"
    python $PYROOT/profileplot.py $RVAR $INFILES $PLOTS &
    exit 0
 fi

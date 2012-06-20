@@ -19,6 +19,12 @@ n = len(plotvec)
 
 for j in range(n):
 
+    if filevec[j] == '.':
+            filevec[j] = filevec[j-1]
+
+    if plotvec[j] == '.':
+            plotvec[j] = plotvec[j-1]
+
     prof = profiles_genData(filevec[j])
     tag  = plotvec[j]
     keys  = sorted(prof.data.keys())
@@ -29,31 +35,31 @@ for j in range(n):
             success = 1
             fulltag = keys[i]
 
-        if success == 0:
-            print "ERROR (profiles_gen_plot): Bad profile = "+tag
-            sys.exit()
+    if success == 0:
+        print "ERROR (profiles_gen_plot): Bad profile = "+tag
+        sys.exit()
 
-        if j==0:
-            fig = plt.figure(figsize=(12,7))
-            ax  = fig.add_subplot(111)
+    if j==0:
+        fig = plt.figure(figsize=(12,7))
+        ax  = fig.add_subplot(111)
 
-            if rvar == "r":
-                ax.set_xlabel(r"$r \, (m)$",fontsize=GFONTSIZE)
-                x = prof.data['rmin (m)']
+        if rvar == "r":
+            ax.set_xlabel(r"$r \, (m)$",fontsize=GFONTSIZE)
+            x = prof.data['rmin (m)']
 
-            if rvar == "r/a":
-                ax.set_xlabel(r"$r/a$",fontsize=GFONTSIZE)
-                x = prof.data['rmin (m)']
-                x = x/max(x)
+        if rvar == "r/a":
+            ax.set_xlabel(r"$r/a$",fontsize=GFONTSIZE)
+            x = prof.data['rmin (m)']
+            x = x/max(x)
 
-            if rvar == "rho":
-                ax.set_xlabel(r"$\rho$",fontsize=GFONTSIZE)
-                x = prof.data['rho (-)']
+        if rvar == "rho":
+            ax.set_xlabel(r"$\rho$",fontsize=GFONTSIZE)
+            x = prof.data['rho (-)']
 
-            ax.grid(which="majorminor",ls=":")
-            ax.grid(which="major",ls=":")
-            ax.set_ylabel(tag,color='k',fontsize=GFONTSIZE)
+        ax.grid(which="majorminor",ls=":")
+        ax.grid(which="major",ls=":")
 
-        ax.plot(x,prof.data[fulltag])
+    ax.plot(x,prof.data[fulltag],label=tag)
 
+ax.legend(loc=1)
 plt.show()
