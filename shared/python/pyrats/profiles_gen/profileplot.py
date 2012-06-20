@@ -20,10 +20,10 @@ n = len(plotvec)
 for j in range(n):
 
     if filevec[j] == '.':
-            filevec[j] = filevec[j-1]
+        filevec[j] = filevec[j-1]
 
     if plotvec[j] == '.':
-            plotvec[j] = plotvec[j-1]
+        plotvec[j] = plotvec[j-1]
 
     prof = profiles_genData(filevec[j])
     tag  = plotvec[j]

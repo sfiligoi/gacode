@@ -137,7 +137,7 @@ fi
 
 if [ $FLUX_FLAG -eq 1 ]
 then
-   python $PYROOT/fluxplot.py $SIMDIR $IN_SURFACE $OUT_SURFACE $N_LINES $SURF_TYPE & 
+   python $PYROOT/fluxplot.py $INFILES $IN_SURFACE $OUT_SURFACE $N_LINES $SURF_TYPE & 
    exit 0
 fi
 #==============================================================================

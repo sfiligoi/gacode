@@ -91,6 +91,6 @@ nrot = no rotation effects
 p  = periodic BCs
 np = nonperiodic BCs
 
-inp = profile parameters via INPUT
-exp = profile input via INPUT_profiles
+inp = profile parameters via input.gyro
+exp = profile input via input.profiles
  
