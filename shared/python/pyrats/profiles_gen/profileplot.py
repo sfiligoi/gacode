@@ -13,16 +13,15 @@ infiles = sys.argv[2]
 plots   = sys.argv[3]
 
 plotvec = string.splitfields(plots,',')
+filevec = string.splitfields(infiles,',')
 
 n = len(plotvec)
 
-tag  = sys.argv[2]
-
 for j in range(n):
 
-    print infiles[j]
-    prof = profiles_genData(infiles[j])
-    keys = sorted(prof.data.keys())
+    prof = profiles_genData(filevec[j])
+    tag  = plotvec[j]
+    keys  = sorted(prof.data.keys())
 
     success = 0
     for i in range(len(keys)):
