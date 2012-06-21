@@ -35,11 +35,16 @@ then
   echo "           <type> = flux,"
   echo "                    flux_tot,"
   echo "                    profile,"
-  echo "                    profile_smooth."
+  echo "                    profile_smooth,"
+  echo "                    one."
+  echo
+  echo "          -func <func>"
+  echo "          <func> = any output quantity."
   echo
   echo "Example:"
   echo
   echo "   tgyro_plot -e . -plot flux_tot"
+  echo "   tgyro_plot -e . -plot one -func a/Lp"
 
   exit 1
 fi
@@ -54,6 +59,7 @@ SIMROOT=$PWD
 PLOT_TYPE=null
 UNITS=0
 FTYPE=screen
+FUNC=null
 #==============================================================================
 
 #==============================================================================
@@ -69,6 +75,8 @@ while [ $# -gt 0 ] ; do
   -p) shift ; SIMROOT=$1 ;;
 
   -f) shift ; FTYPE=$1 ;;
+
+  -func) shift ; FUNC=$1 ;;
 
   -u) shift ; UNITS=$1 ;;
 
@@ -105,6 +113,9 @@ case "$PLOT_TYPE" in
 
    profile_smooth)  
 	python $PYROOT/profile_smooth.py $SIMDIR $FTYPE & ;;
+
+   one)  
+	python $PYROOT/oneplot.py $SIMDIR $FUNC $FTYPE & ;;
 
    null)
         echo "Please specify a plot type via -plot." ;;
