@@ -45,16 +45,16 @@ for j in range(n):
 
         if rvar == "r":
             ax.set_xlabel(r"$r \, (m)$",fontsize=GFONTSIZE)
-            x = prof.data['rmin (m)']
+            x = prof.data['rmin']
 
         if rvar == "r/a":
             ax.set_xlabel(r"$r/a$",fontsize=GFONTSIZE)
-            x = prof.data['rmin (m)']
+            x = prof.data['rmin']
             x = x/max(x)
 
         if rvar == "rho":
             ax.set_xlabel(r"$\rho$",fontsize=GFONTSIZE)
-            x = prof.data['rho (-)']
+            x = prof.data['rho']
 
         ax.grid(which="majorminor",ls=":")
         ax.grid(which="major",ls=":")

@@ -1,20 +1,11 @@
-"""This data.py contains data classes for input.profiles.
-
-    Contents:
-        profiles_genData
-
-"""
-
 class profiles_genData:
-    """A class of profiles_gen data.
+    """profiles_gen output data (i.e., input.profiles) class.
 
      Data:
 
      data
      n_exp
      hlen
-     fignum
-     plotcounter
      ar
      br
      az
@@ -23,83 +14,93 @@ class profiles_genData:
      Example Usage:
      >>> import matplotlib.pyplot as plt
      >>> from pyrats.profiles_gen.data import profiles_genData
-     >>> prof = profiles_genData('$GACODE_ROOT/tgyro/tools/input/treg01/input.profiles')
-     >>> prof.plot('ne')
-     >>> plt.show()
+     >>> prof = profiles_genData('input.profiles')
 
-"""
+     """
 
+    #---------------------------------------------------------------------------#
+    # Methods
 
-    #Methods
     def __init__(self,infile):
-        """Constructor reads in data from directory and creates new object."""
-        
+        """
+        Constructor reads in data from directory and creates new object.
+        """
+
+        import string
+        import numpy as np
+
         self.infile=infile
-        self.init_data()
-        self.store_data()
 
-    def init_data(self):
-        """Initialize object data."""
-
+        # Initialize data
         self.data = {}
         self.n_exp = 0
         self.hlen = 0
-        self.fignum = 1
-        self.plotcounter = 1
         self.ar = []
         self.br = []
         self.az = []
         self.bz = []
 
-    def read_data(self):
-        """Read in object data from input.profiles."""
+        # Read data
+        row  = 0
+        for line in open(infile,'r').readlines():
+            row = row+1
+            if line[0:5] == 'N_EXP':
+                self.n_exp = int(string.splitfields(line,'=')[1])
+            if line[0:7] == '#rho(-)':
+                break
 
-        import numpy as np
+        data = np.loadtxt(infile,skiprows=row)
 
-        elements = {}
-        temp = []
-        raw_data = open(self.infile,'r').readlines()
+        n = self.n_exp
 
-        # Determines length of header, and reads in data
-        while raw_data[self.hlen].strip()[0].isdigit() == False and raw_data[self.hlen].strip()[0] != '-':
-            self.hlen = self.hlen + 1
-            if raw_data[self.hlen].strip()[0:6] == 'N_EXP=':
-                self.n_exp = int(raw_data[self.hlen].strip()[6:])
-    
-        for line in range(self.hlen, len(raw_data)):
-            if raw_data[line].strip()[0].isdigit() or raw_data[line].strip()[0] == '-':
-                temp.append(raw_data[line].split())
-        self.hlen = self.hlen - 1
-        # JC: data cast to numpy float
-        data = np.array(temp,dtype=float)
+        self.data['rho']   = data[0:n,0]
+        self.data['rmin']  = data[0:n,1]
+        self.data['rmaj']  = data[0:n,2]
+        self.data['q']     = data[0:n,3]
+        self.data['kappa'] = data[0:n,4]
 
-        #Reads in variable names
-        keywords = []
-        for count in range(5):
-            #This line separates columns when they run together
-            keywords = raw_data[(self.n_exp + 2)*count + self.hlen].replace('(kW/eV)', '(kW/eV) ').split()
-            column = 0
-            for key in keywords:
-                elements[key] = data[0:self.n_exp, column]
-                column = column + 1
-            data = data[self.n_exp:, :]
-        #We have to separate the keys into two chunks because the spacing
-        #changes after the 5th group of variables, and so we need a different
-        #method for reading them.
-        for count in range(5, 8):
-            keys = raw_data[(self.n_exp + 2) * count + self.hlen].split('  ')
-            c = keys.count('')
-            for n in range(c):
-                keys.remove('')
-            keywords = []
-            for x in range(5):
-                keywords.append(keys[x])
-            column = 0
-            for key in keywords:
-                elements[key] = data[0:self.n_exp, column]
-                column = column + 1
-            data = data[self.n_exp:, :]
-        return elements
+        self.data['delta']  = data[n:2*n,0]
+        self.data['Te']     = data[n:2*n,1]
+        self.data['ne']     = data[n:2*n,2]
+        self.data['z_eff']  = data[n:2*n,3]
+        self.data['omega0'] = data[n:2*n,4]
+
+        self.data['flow_mom'] = data[2*n:3*n,0]
+        self.data['pow_e']    = data[2*n:3*n,1]
+        self.data['pow_i']    = data[2*n:3*n,2]
+        self.data['pow_ei']   = data[2*n:3*n,3]
+        self.data['zeta']     = data[2*n:3*n,4]
+
+        self.data['flow_beam'] = data[3*n:4*n,0]
+        self.data['flow_wall'] = data[3*n:4*n,1]
+        self.data['zmag']      = data[3*n:4*n,2]
+        self.data['ptot']      = data[3*n:4*n,3]
+        #self.data['']         = data[3*n:4*n,4]
+
+        self.data['ni_1'] = data[4*n:5*n,0]
+        self.data['ni_2'] = data[4*n:5*n,1]
+        self.data['ni_3'] = data[4*n:5*n,2]
+        self.data['ni_4'] = data[4*n:5*n,3]
+        self.data['ni_5'] = data[4*n:5*n,4]
+
+        self.data['Ti_1'] = data[5*n:6*n,0]
+        self.data['Ti_2'] = data[5*n:6*n,1]
+        self.data['Ti_3'] = data[5*n:6*n,2]
+        self.data['Ti_4'] = data[5*n:6*n,3]
+        self.data['Ti_5'] = data[5*n:6*n,4]
+
+        self.data['vtor_1'] = data[6*n:7*n,0]
+        self.data['vtor_2'] = data[6*n:7*n,1]
+        self.data['vtor_3'] = data[6*n:7*n,2]
+        self.data['vtor_4'] = data[6*n:7*n,3]
+        self.data['vtor_5'] = data[6*n:7*n,4]
+
+        self.data['vpol_1'] = data[7*n:8*n,0]
+        self.data['vpol_2'] = data[7*n:8*n,1]
+        self.data['vpol_3'] = data[7*n:8*n,2]
+        self.data['vpol_4'] = data[7*n:8*n,3]
+        self.data['vpol_5'] = data[7*n:8*n,4]
+
 
     def read_fourier(self):
         """Read in data from input.profiles.geo."""
@@ -109,7 +110,7 @@ class profiles_genData:
         for line in raw_data:
             temp.append(line.split()[0])
         count = int(temp[0]) + 1
-        x = 1
+
         for x in range(self.n_exp):
             arn = []
             brn = []
@@ -125,31 +126,6 @@ class profiles_genData:
             self.az.append(azn)
             self.bz.append(bzn)
 
-    def store_data(self):
-        """Reads data and renames it appropriately.
-
-        store_data is necessary because the names of the different parameters are
-        not uniformly formatted.  store_data cleans them up by inserting spaces
-        where necessary, and by deleting #-signs when necessary."""
-
-        self.data = self.read_data()
-        for k in self.data.keys():
-            flag = False
-            temp = list(k)
-            for i in range(len(temp)):
-                if temp[i] == '#':
-                    del temp[i]
-                    flag = True
-                    break
-            for i in range(len(temp)):
-                if temp[i] == '(':
-                    if temp[i-1] != ' ':
-                        temp.insert(i, ' ')
-                        flag = True
-                        break
-            if flag:
-                self.data[''.join(temp)] = self.data[k]
-                self.data.pop(k)
 
     def compute_mtypeeq(self, r):
 
@@ -233,8 +209,7 @@ class profiles_genData:
         midplane = [0, 0]
 
         #Produces a matplotlib figure object and creates the labels.
-        fig = plt.figure(self.fignum)
-        self.fignum = self.fignum + 1
+        fig = plt.figure(figsize=(12,7))
         ax = fig.add_subplot(111, aspect='equal')
         ax.set_ylabel('Z (m)')
         ax.set_xlabel('R (m)')
@@ -294,8 +269,7 @@ class profiles_genData:
         midplane = [0, 0]
 
         #Produces a matplotlib figure object and creates the labels.
-        fig = plt.figure(self.fignum)
-        self.fignum = self.fignum + 1
+        fig = plt.figure(figsize=(12,7))
         ax = fig.add_subplot(111, aspect='equal')
         ax.set_ylabel('Z (m)')
         ax.set_xlabel('R (m)')
@@ -354,8 +328,7 @@ class profiles_genData:
         midplane = [0, 0]
 
         #Produces a matplotlib figure object and creates the labels.
-        fig = plt.figure(self.fignum)
-        self.fignum = self.fignum + 1
+        fig = plt.figure(figsize=(12,7))
         ax = fig.add_subplot(111, aspect='equal')
         ax.set_ylabel('Z (m)')
         ax.set_xlabel('R (m)')
