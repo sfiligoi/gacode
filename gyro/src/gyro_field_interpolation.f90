@@ -277,6 +277,10 @@ subroutine gyro_field_interpolation
 
   endif
 
+
+!!! added acc region by Sri V. that is not mapped to the openMP set.
+!!! will have to remove the one of the (!) to get working.
+!!$acc region
   do is=1,n_kinetic
      do p_nek_loc=1,n_nek_loc_1
         do i=1,n_x
@@ -286,7 +290,7 @@ subroutine gyro_field_interpolation
         enddo
      enddo
   enddo
-
+!!$acc end region
 
   call gyro_timer_out('Field-interp.b')
 
