@@ -85,7 +85,7 @@ subroutine gyro_field_interpolation
      enddo ! p_nek
   enddo ! i
 !$end parallel do
-!$acc end regend 
+!$acc end region
   !
   !---------------------------------------------------------------
 

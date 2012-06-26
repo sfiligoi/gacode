@@ -37,6 +37,7 @@ FHDF5 = -DHAVE_HDF5
 
 #FFTW and MUMPS
 LMATH = -ldrfftw -ldfftw
+LMATH = ${FFTW_DIR}/libdrfftw.a ${FFTW_DIR}/libdfftw.a
 
 #Parallel NETCDF and HDF5
 NETCDF = ${NETCDF_DIR}/lib/libnetcdff.a ${NETCDF_DIR}/lib/libnetcdf.a
