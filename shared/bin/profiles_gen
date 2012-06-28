@@ -133,7 +133,7 @@ then
    echo "             Toggle vgen mode."
    echo
    echo "             -vgen_in <ion string> " 
-   echo "             Choices: DC, HDC"
+   echo "             Choices: DC, DC.revip, DCD, DHCD, HDC"
    echo "             If this is blank, input.vgen must exist."
    echo
    echo "             -vgen_e <flag>" 
@@ -241,13 +241,11 @@ then
    echo "    profiles_gen -i myfile" 
    echo "    profiles_gen -i myfile.nc"
    echo "    profiles_gen -i myfile.cdf -r 1,3,2,5,4"
-   echo "    profiles_gen -i myfile -e3 myerfile"
-   echo "    profiles_gen -m mapfile -n 'this is a test' myfile.astra"
-   echo "    profiles_gen -transp"
-   echo "    profiles_gen -tok NSTX -year 07 -shot 124948A01 -time 250 -avg 2"
    echo "    profiles_gen -vgen -i input.profiles -vgen_e 2 -vgen_v 1 -vgen_in DC -vgen_x 2"
    echo "    profiles_gen -vgen -i input.profiles -vgen_e 2 -vgen_v 1 -vgen_in HDC -vgen_x 3"
-   echo 
+   echo "    profiles_gen -transp"
+   echo "    profiles_gen -tok NSTX -year 07 -shot 124948A01 -time 250 -avg 2"
+   echo
    echo "(1) Typical usage for DIII-D plasmas with iterdbfile only (2 steps)"
    echo "    NEO will generate Er and all velocities:"
    echo 
