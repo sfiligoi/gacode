@@ -2,7 +2,9 @@ import sys
 import string
 from pyrats.profiles_gen.data import profiles_genData
 
-prof = profiles_genData(sys.argv[1])
+filevec = string.splitfields(sys.argv[1],',')
+
+prof = profiles_genData(filevec[0])
 keys = sorted(prof.data.keys())
 
 print 

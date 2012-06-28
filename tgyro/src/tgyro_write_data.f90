@@ -465,10 +465,10 @@ subroutine tgyro_write_data(i_print)
   close(1)
 
   ! Data
-10 format(t1,11(1pe13.6,1x))
+10 format(t1,11(1pe13.6,2x))
   !10 format(t1,11(1pe19.12,1x))
   ! Text headers
-20 format(t2,a,t16,a,t30,a,t44,a,t58,a,t72,a,t86,a,t100,a,t114,a,t128,a,t142,a)
+20 format(t2,a,t17,a,t32,a,t47,a,t62,a,t77,a,t92,a,t107,a,t122,a,t137,a,t152,a)
   ! Residual header
 30 format(t2,a,i3,1pe12.5,2x,'[',i6,']')
   ! Residuals
