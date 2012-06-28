@@ -334,7 +334,8 @@ subroutine gyro_write_timedata
 #ifdef HAVE_HDF5
   if(io_method > 1) then
     h5in%units="dimensionless"
-    h5in%mesh=" "
+    h5in%mesh="/t_current"
+    h5in%vsCentering="nodal"
     call write_distributed_real_h5("kxkyspec",dumpTGid,&
          n_x,1,1,&
          size(kxkyspec),&
@@ -344,7 +345,7 @@ subroutine gyro_write_timedata
 
     if (i_proc == 0) then
        h5in%units="dimensionless"
-       h5in%mesh=" "
+       h5in%mesh="/t_current"
        call add_h5(dumpTGid,'k_perp_squared',k_perp_squared,h5in,data_step,h5err)
        if(h5err%errBool) write(*,*) h5err%errorMsg
     endif !i_proc == 0
@@ -383,6 +384,7 @@ subroutine gyro_write_timedata
 #ifndef HAVE_HDF5
      call gyro_write_freq(trim(path)//'out.gyro.freq',10)
 #else
+     h5in%mesh="/t_current"
      call gyro_write_freq(trim(path)//'out.gyro.freq',10,dumpTGid,h5in,h5err)
 #endif
   
@@ -394,6 +396,7 @@ subroutine gyro_write_timedata
 #ifndef HAVE_HDF5
         call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_phi',10,1,0)
 #else
+        h5in%mesh="/t_current"
         call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_phi',10,1,0, &
             "ballon_phi",dumpTGid,h5in,h5err)
 #endif
@@ -403,6 +406,7 @@ subroutine gyro_write_timedata
 #ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_a',10,2,0)
 #else
+           h5in%mesh="/t_current"
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_a',10,2,0, &
               "balloon_a",dumpTGid,h5in,h5err)
 #endif
@@ -413,6 +417,7 @@ subroutine gyro_write_timedata
 #ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_aperp',10,3,0)
 #else
+           h5in%mesh="/t_current"
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_aperp', &
             10,3,0, "balloon_aperp",dumpTGid,h5in,h5err)
 #endif
@@ -424,6 +429,7 @@ subroutine gyro_write_timedata
 #ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_epar',10,n_field+1,0)
 #else
+           h5in%mesh="/t_current"
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_epar',10, &
             n_field+1,0,"balloon_epar",dumpTGid,h5in,h5err)
 #endif
@@ -438,6 +444,7 @@ subroutine gyro_write_timedata
 #ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_n_ion',10,5,1)
 #else
+           h5in%mesh="/t_current"
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_n_ion', &
             10,5,1,"n_ion",dumpTGid,h5in,h5err)
 #endif
@@ -447,6 +454,7 @@ subroutine gyro_write_timedata
 #ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_n_elec',10,5,indx_e)
 #else
+           h5in%mesh="/t_current"
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_n_elec', &
             10,5,indx_e,"n_elec",dumpTGid,h5in,h5err)
 #endif
@@ -460,6 +468,7 @@ subroutine gyro_write_timedata
 #ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_e_ion',10,6,1)
 #else
+           h5in%mesh="/t_current"
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_e_ion', &
             10,6,1,"e_ion",dumpTGid,h5in,h5err)
 #endif
@@ -469,6 +478,7 @@ subroutine gyro_write_timedata
 #ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_e_elec',10,6,indx_e)
 #else
+           h5in%mesh="/t_current"
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_e_elec', &
             10,6,indx_e,"e_elec",dumpTGid,h5in,h5err)
 #endif
@@ -482,6 +492,7 @@ subroutine gyro_write_timedata
 #ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_v_ion',10,7,1)
 #else
+           h5in%mesh="/t_current"
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_v_ion', &
               10,7,1,"v_ion",dumpTGid,h5in,h5err)
 #endif
@@ -490,6 +501,7 @@ subroutine gyro_write_timedata
 #ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_v_elec',10,7,indx_e)
 #else
+           h5in%mesh="/t_current"
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_v_elec', &
             10,7,indx_e,"v_elec",dumpTGid,h5in,h5err)
 #endif
@@ -534,6 +546,7 @@ subroutine gyro_write_timedata
         endif !io_method < 3
 #ifdef HAVE_HDF5
         if(io_method > 1 ) then 
+        h5in%mesh="/t_current"
         call add_h5(dumpTGid,'diff',diff,h5in,data_step,h5err)
         call add_h5(dumpTGid,'diff_i',diff_i,h5in,data_step,h5err)
         call add_h5(dumpTGid,'gbflux',gbflux,h5in,data_step,h5err)
@@ -541,6 +554,7 @@ subroutine gyro_write_timedata
         call add_h5(dumpTGid,'gbflux_i',gbflux_i,h5in,data_step,h5err)
 
         if (trapdiff_flag == 1) then
+           h5in%mesh="/t_current"
            call add_h5(dumpTGid,'diff_trapped',diff_trapped,h5in,data_step,h5err)
            call add_h5(dumpTGid,'diff_i_trapped',diff_i_trapped,h5in,data_step,h5err)
            call add_h5(dumpTGid,'gbflux_trapped',gbflux_trapped,h5in,data_step,h5err)
@@ -579,6 +593,7 @@ subroutine gyro_write_timedata
       endif !io_method < 3
 #ifdef HAVE_HDF5
         if(io_method > 1 ) then
+           h5in%mesh="/t_current"
            call write_distributed_real_h5('diff_n',dumpTGid,&
                  n_kinetic,n_field,2, &
                  size(diff_n),&
@@ -615,7 +630,6 @@ subroutine gyro_write_timedata
      ! BEGIN NONLINEAR 
      !================
     if (io_method < 3) then
-          h5in%units="diff units"
      call write_distributed_real(&
           trim(path)//'out.gyro.diff_n',&
           10,&
@@ -652,6 +666,7 @@ subroutine gyro_write_timedata
 #ifdef HAVE_HDF5
   if (io_method > 1 ) then
         h5in%units="diff units"
+        h5in%mesh="/t_current"
      call write_distributed_real_h5("diff_n",dumpTGid,&
           n_kinetic,n_field,2,&
           size(diff_n),&
@@ -731,6 +746,8 @@ subroutine gyro_write_timedata
        endif !io_method < 3
 #ifdef HAVE_HDF5
       if(io_method > 1 ) then
+        h5in%units="diff units"
+        h5in%mesh="/t_current"
         call add_h5(dumpTGid,'field_rms',ave_phi,h5in,data_step,h5err)
         if(h5err%errBool) write(*,*) h5err%errorMsg
         call add_h5(dumpTGid,'diff',diff,h5in,data_step,h5err)
@@ -778,6 +795,7 @@ subroutine gyro_write_timedata
         endif !io_method <3)
 #ifdef HAVE_HDF5
       if (io_method > 1 ) then
+        h5in%mesh="/t_current"
         call add_h5(dumpTGid,'source',a3,h5in,data_step,h5err)
         if(h5err%errBool) write(*,*) h5err%errorMsg
 
@@ -809,6 +827,7 @@ subroutine gyro_write_timedata
         endif
 #ifdef HAVE_HDF5
         if(io_method > 1 ) then
+          h5in%mesh="/t_current"
           call add_h5(dumpTGid,'entropy',entropy,h5in,data_step,h5err)
           if(h5err%errBool) write(*,*) h5err%errorMsg
         endif
@@ -850,7 +869,8 @@ subroutine gyro_write_timedata
 #ifdef HAVE_HDF5
   if(io_method >1 ) then
     if (i_proc == 0) then
-       h5in%mesh=' '
+       h5in%mesh="mesh-structured"
+       h5in%units="time"
        skip_at_tzero : if (.not. hdf5_skip) then
          call add_h5(dumpTGid,'data_step',data_step,h5in,data_step,h5err)
           if(h5err%errBool) write(*,*) h5err%errorMsg
@@ -858,6 +878,7 @@ subroutine gyro_write_timedata
           if(h5err%errBool) write(*,*) h5err%errorMsg
         endif skip_at_tzero
 
+       h5in%mesh='mesh-structured'
        ! dump in the field
         call dump_h5(dumpGid,'data_step',data_step,h5in,h5err)
         if(h5err%errBool) write(*,*) h5err%errorMsg
@@ -868,6 +889,7 @@ subroutine gyro_write_timedata
 
       ! dump 3D
       if (write_threed) then
+        h5in%mesh='mesh-structured'
         call dump_h5(gid3D,'data_step',data_step,h5in,h5err)
         if(h5err%errBool) write(*,*) h5err%errorMsg
         call dump_h5(gid3D,'t_current',t_current,h5in,h5err)
