@@ -1057,7 +1057,10 @@ subroutine gyro_write_timedata
 
 
      h5in%units="m"; h5in%mesh="mesh-structured"
-     call dump_h5_4d(gid3d,'cartMesh',buffer*a_meters,h5in,h5err)
+ !    call dump_h5_4d(gid3d,'cartMesh',buffer*a_meters,h5in,h5err)
+! This is what I want for the external linking.
+!     call dump_h5(gid3d,'cartMesh',figGrid,gidGrid,'threeDMesh',buffer*a_meters,h5in,h5err)
+     call dump_h5(gid3d,'cartMesh',buffer*a_meters,h5in,h5err)
      deallocate(buffer)
     endif
 
