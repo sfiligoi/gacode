@@ -145,6 +145,7 @@ OBJECTS += gyro_globals.o \
           gyro_write_error.o \
           gyro_write_freq.o \
           gyro_write_h.o \
+					gyro_write_h5mesh.o \
           gyro_write_initdata.o \
           gyro_write_input.o \
           gyro_write_precision.o \

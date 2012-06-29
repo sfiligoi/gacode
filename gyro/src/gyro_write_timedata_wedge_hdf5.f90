@@ -74,7 +74,7 @@ subroutine gyro_write_timedata_wedge_hdf5
      description="GYRO real space file at single phi plane.  On wedge mesh"
      call open_newh5file(dumpfile,fidwedge,description,gidwedge,h5in,h5err)
 
-     call hdf5_write_wedge_coords
+!     call hdf5_write_wedge_coords
   endif
   !---------------------------------------------------
 

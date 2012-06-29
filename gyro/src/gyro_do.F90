@@ -327,6 +327,9 @@ subroutine gyro_do
      return
   endif
   !------------------------------------------------------------
+    if (i_proc ==0 .and. alltime_index ==0 .and.  io_method > 1) then 
+        call hdf5_write_coords 
+    endif
 
   if (restart_method == 0) then
      ! Open
