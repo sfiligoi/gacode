@@ -17,7 +17,6 @@ ifeq ($(ACC),true)
    FC += ${FACC}
 endif
 
-FFLAGS += ${FHDF5} ${HDF5_INC}
 
 LLIB = gyro_lib
 
@@ -145,14 +144,12 @@ OBJECTS += gyro_globals.o \
           gyro_write_error.o \
           gyro_write_freq.o \
           gyro_write_h.o \
-					gyro_write_h5mesh.o \
           gyro_write_initdata.o \
           gyro_write_input.o \
           gyro_write_precision.o \
           gyro_write_radial_op.o \
           gyro_write_step.o \
           gyro_write_timedata.o \
-          gyro_write_timedata_wedge_hdf5.o \
           gyro_write_timers.o \
 	  			gyro_velocity_sum.o \
           get_field_r0_plot.o \
@@ -160,6 +157,12 @@ OBJECTS += gyro_globals.o \
           gyro_dump_input.o \
           gyro_dump_interface.o
 
+ifeq($(HDF5),true)
+	FFLAGS += ${FHDF5} ${HDF5_INC}
+	OBJECTS += \
+          gyro_write_timedata_wedge_hdf5.o \
+					gyro_write_h5mesh.o 
+endif
 
 .SUFFIXES : .o .f90 .F90
 
