@@ -23,6 +23,15 @@
     logical :: write_threed
     logical :: h5_rewind=.false.
 
+    !---------------------------------------
+    ! 1) open grid file 
+    ! 2) add poloidal group
+    ! 3) calculate poloidal coordinates
+    ! 4) write poloidal coordinates
+    ! 2) add 3d group
+    ! 3) calculate 3d coordinates
+    ! 4) write 3d coordinates
+    ! 5) close file 
 
     ncoarse = n_theta_plot
     allocate(Rc(0:ncoarse,n_x), Zc(0:ncoarse,n_x))
@@ -187,6 +196,14 @@
     allocate(dZdtheta(1:nwedge,1:n_x))
     allocate(rtJacobian(1:nwedge,1:n_x))
 
+
+    !---------------------------------------
+    ! 1)open grid file 
+    ! 2)add wedge group
+    ! 3) calculate wedge coordinates
+    ! 4) write wedge coordinates
+    ! 5) close file 
+    
     !----------------------------------------
     ! Calculate the R,Z coordinates.  See write_geometry_arrays.f90
     !---------------------------------------- 
