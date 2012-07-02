@@ -15,16 +15,42 @@
     real :: theta,rmajc,zmagc,kappac,deltac,zetac,r_c,xdc
     integer :: iphi,ix,j,ncoarse,nphi
 
-    integer(HID_T) :: dumpGid,dumpFid,gid3D,fid3D
-    integer(HID_T) :: dumpTGid,dumpTFid
+    character(60) :: description
+    character(128) :: dumpfile
+`
+    integer(HID_T) :: gridFileID,gridGroupID
     type(hdf5InOpts) :: h5in
     type(hdf5ErrorType) :: h5err
     integer :: number_label
     logical :: write_threed
     logical :: h5_rewind=.false.
 
+  !wedge w/ duplicates **CLEAN UP**
+    real, dimension(:,:), allocatable :: Rf,Zf
+    real, dimension(:,:,:), allocatable :: bufferwedgeMesh
+    real :: rmajc,zmagc,kappac,deltac,zetac,xdc,rhoc
+    real :: dRdr,dZdr,dkappadr,ddeltadr,dzetadr 
+    real, dimension (:), allocatable :: theta,r_c
+    real, dimension (:,:), allocatable :: dRdrho,DRdtheta
+    real, dimension (:,:), allocatable :: dZdrho,DZdtheta
+    real, dimension (:,:), allocatable :: rtJacobian
+    real :: zeta_wedge
+    integer :: iphi,ix,j,ncoarse,nwedge
+
+
+    !---------------------------------------
+    !0) init h5in and set things 
+
+
     !---------------------------------------
     ! 1) open grid file 
+         dumpfile=TRIM(path)//"gyroMesh.h5" 
+         description=""
+         call open_h5file(trim(openmethod),dumpfile,gridFileID,description, &
+            gridGroupID,h5in,h5err)
+         if (h5err%errBool) call catch_error(h5err%errorMsg)
+
+
     ! 2) add poloidal group
     ! 3) calculate poloidal coordinates
     ! 4) write poloidal coordinates
@@ -162,29 +188,10 @@
     if (allocated(Zc)) deallocate(Zc)
     if (allocated(zeta_phi)) deallocate(zeta_phi)
 
-  end subroutine hdf5_write_coords
-!--------------------------------------------------------------------------------
-!--------------------------------------------------------------------------------
-!--------------------------------------------------------------------------------
-  subroutine hdf5_write_wedge_coords
-    use GEO_interface
-    !------------------------------------------
-    !  Write the coordinates out
-    !  We want to have same coordinate system as:
-    !    allocate(phi_plot(n_theta_plot,n_x,n_field+eparallel_plot_flag))
-    !  This should be generalized to include the other GEO options
-    !------------------------------------------
-    real, dimension(:,:), allocatable :: Rf,Zf
-    real, dimension(:,:,:), allocatable :: bufferwedgeMesh
-    real :: rmajc,zmagc,kappac,deltac,zetac,xdc,rhoc
-    real :: dRdr,dZdr,dkappadr,ddeltadr,dzetadr 
-    real, dimension (:), allocatable :: theta,r_c
-    real, dimension (:,:), allocatable :: dRdrho,DRdtheta
-    real, dimension (:,:), allocatable :: dZdrho,DZdtheta
-    real, dimension (:,:), allocatable :: rtJacobian
-    real :: zeta_wedge
-    integer :: iphi,ix,j,ncoarse,nwedge
+!----------------------dump wedge grid ------------------
 
+   wedge: if(time_skip_wedge > 0) then:
+    
     ncoarse = n_theta_plot
     nwedge = n_theta_plot*n_theta_mult
     allocate(Rf(1:nwedge,n_x), Zf(1:nwedge,n_x))
@@ -197,14 +204,8 @@
     allocate(rtJacobian(1:nwedge,1:n_x))
 
 
-    !---------------------------------------
-    ! 1)open grid file 
-    ! 2)add wedge group
-    ! 3) calculate wedge coordinates
-    ! 4) write wedge coordinates
-    ! 5) close file 
-    
-    !----------------------------------------
+
+        !----------------------------------------
     ! Calculate the R,Z coordinates.  See write_geometry_arrays.f90
     !---------------------------------------- 
 
@@ -280,6 +281,7 @@
        end do
     endif
 
+
     !----------------------------------------
     ! Dump the wedge meshes
     !---------------------------------------- 
@@ -312,8 +314,15 @@
     !---------------------------------------- 
     deallocate(Rf, Zf)
 
+
     deallocate(theta, dRdrho,dZdrho,dRdtheta,dZdtheta)
 
-    return
-  end subroutine hdf5_write_wedge_coords
+
+    endif wedge
+
+
+    call close_h5file(gridFileID,gridGroupID,h5err)
+
+
+  end subroutine hdf5_write_coords
 

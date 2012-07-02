@@ -329,7 +329,7 @@ subroutine gyro_do
   !------------------------------------------------------------
     if (i_proc ==0 .and. alltime_index ==0 .and.  io_method > 1) then 
         call hdf5_write_coords 
-        if (time_skip_wedge > 0) call hdf5_write_wedge_coords
+!        if (time_skip_wedge > 0) call hdf5_write_wedge_coords
     endif
 
   if (restart_method == 0) then
