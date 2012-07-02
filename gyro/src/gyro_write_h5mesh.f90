@@ -70,11 +70,12 @@
          call make_group(gridGroupID,"poloidalMesh",poloidalGridID,h5in,&
               h5err)
          call close_group("poloidalMesh",poloidalGridID,h5err)
-!         call make_mesh_group(gridGroupID,threeDGridID,h5in,"threeDMesh",&
-!              h5err)
-!         call make_mesh_group(gridGroupID,wedgeGridID,h5in,"wedgeMesh",&
-!              h5err)
-!
+         call make_group(gridGroupID,"threeDMesh",threeDGridID,h5in,&
+              h5err)
+         call close_group("threeDMesh",threeDGridID,h5err)
+         call make_group(gridGroupID,"wedgeMesh",wedgeGridID,h5in,&
+              h5err)
+         call close_group("wedgeMesh",wedgeGridID,h5err)
           call close_h5file(gridFileID,gridGroupID,h5err)
  
 !         if (h5err%errBool) call catch_error(h5err%errorMsg)
