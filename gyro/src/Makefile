@@ -28,7 +28,7 @@ OBJECTS += gyro_globals.o \
           gyro_fieldeigen_private.o \
           gyro_maxwell_private.o \
           gyro_poisson_private.o \
-	  			gyro_poissonaperp_private.o \
+          gyro_poissonaperp_private.o \
           gyro_mumps_private.o \
           gyro_banana_private.o \
           gyro.o \
@@ -79,9 +79,9 @@ OBJECTS += gyro_globals.o \
           gyro_field_plot.o \
           gyro_field_solve_explicit.o \
           gyro_field_solve_implicit.o \
-	  			gyro_fieldeigen.o \
-	 				gyro_fieldeigen_kernel.o \
-	  			gyro_fieldeigen_df.o \
+          gyro_fieldeigen.o \
+          gyro_fieldeigen_kernel.o \
+          gyro_fieldeigen_df.o \
           gyro_fulladvance.o \
           gyro_geometry_arrays.o \
           gyro_get_he_implicit.o \
@@ -97,7 +97,7 @@ OBJECTS += gyro_globals.o \
           gyro_make_maxwell_matrix.o \
           gyro_make_poisson_matrix.o \
           gyro_make_ampere_matrix.o \
-	 				gyro_make_poissonaperp_matrix.o \
+          gyro_make_poissonaperp_matrix.o \
           gyro_make_implicit_advect.o \
           gyro_make_jpar_elec.o \
           gyro_make_jperp_elec.o \
@@ -151,17 +151,17 @@ OBJECTS += gyro_globals.o \
           gyro_write_step.o \
           gyro_write_timedata.o \
           gyro_write_timers.o \
-	  			gyro_velocity_sum.o \
+          gyro_velocity_sum.o \
           get_field_r0_plot.o \
           get_g_squared.o \
           gyro_dump_input.o \
           gyro_dump_interface.o
 
-ifeq($(HDF5),true)
+ifeq ($(HDF5),true)
 	FFLAGS += ${FHDF5} ${HDF5_INC}
 	OBJECTS += \
           gyro_write_timedata_wedge_hdf5.o \
-					gyro_write_h5mesh.o 
+					gyro_write_h5mesh.o
 endif
 
 .SUFFIXES : .o .f90 .F90
