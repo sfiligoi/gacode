@@ -693,8 +693,8 @@
   integer(HID_T), intent(in) :: gInId
   integer(HID_T), intent(inoUT) :: gridId
   TYPE(hdf5InOpts), intent(inout) :: h5in
-  character*(*), intent(in) :: meshname,axis0,axis1,axis2
-  character*(*), intent(in) :: meshKind,transform,trName
+  character*(*), intent(in) :: meshName!,axis0,axis1,axis2
+  !character*(*), intent(in) :: meshKind,transform,trName
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer,parameter :: FAIL=-1
 !-----------------------------------------------------------------------
