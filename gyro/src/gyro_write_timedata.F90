@@ -143,6 +143,10 @@ subroutine gyro_write_timedata
                call open_newh5file(dumpfile,fid3d,description,gid3D,h5in,h5err)
             endif
 
+          ! make external links
+          call make_external_link(TRIM(meshfile),"poloidalMesh", &
+            dumpFid,"polMesh", h5in,h5err)
+
       endif !i_proc ==0
   endif ! io_method > 1
 #endif

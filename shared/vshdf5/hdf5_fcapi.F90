@@ -818,7 +818,7 @@
   SUBROUTINE make_external_link(file_name, obj_name, link_loc_id, link_name, &
              h5in,h5err)
   IMPLICIT NONE
-  CHARACTER(LEN=*), INTENT(IN) :: file_ame  
+  CHARACTER(LEN=*), INTENT(IN) :: file_name  
                        ! Name of the file containing the target object. Neither 
                        ! the file nor the target object is required to exist. 
                        ! May be the file the link is being created in.
@@ -828,7 +828,7 @@
                        ! The file or group identifier for the new link.
   CHARACTER(LEN=*), INTENT(IN) :: link_name 
                        ! The name of the new link.
-  INTEGER, INTENT(OUT) :: hdferr        
+  INTEGER :: hdferr        
                        ! Error code: 
                        ! 0 on success and -1 on failure
   type(hdf5InOpts), intent(in) :: h5in
