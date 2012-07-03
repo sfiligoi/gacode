@@ -1633,9 +1633,9 @@ subroutine write_distributed_complex_sorf_h5(vname,rGid,r3Did,&
   ! Dump each species independently
   !-----------------------------------------
   if (.not.iswedge) then
-    h5in%mesh="/poloidalMesh/cartMesh"
+    h5in%mesh="poloidalMesh"
   else
-    h5in%mesh="/wedgeMesh/cartMesh"
+    h5in%mesh="wedgeMesh"
   endif
 
   do ispcs=1,n3
@@ -1701,13 +1701,13 @@ subroutine write_distributed_complex_sorf_h5(vname,rGid,r3Did,&
 
 
   if (.not. iswedge) then
-     h5in%mesh="/threeDMesh/cartMesh"
+     h5in%mesh="threeDMesh"
      do ikin=1,n3
         tempVarName=trim(vnameArray(ikin))
         call dump_h5(r3Did,trim(tempVarName),real_buff(:,:,ikin,:),h5in,h5err)
      enddo
   else
-     h5in%mesh="/wedgeMesh/cartMesh"
+     h5in%mesh="wedgeMesh"
      ! Dump each phi slice as a separate variable
      do ikin=1,n3
         tempVarNameGr=trim(vnameArray(ikin))//"_toroidal"
