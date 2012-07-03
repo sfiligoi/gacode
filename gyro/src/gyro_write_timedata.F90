@@ -37,6 +37,7 @@ subroutine gyro_write_timedata
   character(60) :: description
   character(64) :: step_name
   character(128) :: dumpfile
+  character(128) :: meshfile
   character(20)   :: openmethod
   integer(HID_T) :: dumpGid,dumpFid,gid3D,fid3D
   integer(HID_T) :: dumpTGid,dumpTFid
@@ -112,6 +113,8 @@ subroutine gyro_write_timedata
          description="Time-dependent GYRO data"
          call open_h5file(trim(openmethod),dumpfile,dumpTFid,description,dumpTGid,h5in,h5err)
          if (h5err%errBool) call catch_error(h5err%errorMsg)
+
+          meshfile=TRIM(path)//"gyroMesh.h5"
 
 
             !---------------------------------------------------
@@ -970,6 +973,7 @@ subroutine write_hdf5_restart
         write(step_name,fmt='(i5.5)') number_label
      endif
 
+     
      dumpfile=TRIM(path)//"gyroRestart"//TRIM(step_name)//".h5"
      description="GYRO restart file"
      call open_newh5file(dumpfile,dumpFid,description,dumpGid,h5in,h5err)

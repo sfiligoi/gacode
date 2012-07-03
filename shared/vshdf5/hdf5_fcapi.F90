@@ -810,6 +810,37 @@
   return
   END SUbroutine make_limits_group
 !-----------------------------------------------------------------------
+! subprogram 23b. make_external_link
+! 
+! Creates an external link, a soft link to an object in a different file
+!-----------------------------------------------------------------------
+
+  SUBROUTINE make_external_link(file_name, obj_name, link_loc_id, link_name, &
+             h5in,h5err)
+  IMPLICIT NONE
+  CHARACTER(LEN=*), INTENT(IN) :: file_ame  
+                       ! Name of the file containing the target object. Neither 
+                       ! the file nor the target object is required to exist. 
+                       ! May be the file the link is being created in.
+  CHARACTER(LEN=*), INTENT(IN) :: obj_name  
+                       ! Name of the target object, which need not already exist.
+  INTEGER(HID_T), INTENT(IN) :: link_loc_id 
+                       ! The file or group identifier for the new link.
+  CHARACTER(LEN=*), INTENT(IN) :: link_name 
+                       ! The name of the new link.
+  INTEGER, INTENT(OUT) :: hdferr        
+                       ! Error code: 
+                       ! 0 on success and -1 on failure
+  type(hdf5InOpts), intent(in) :: h5in
+  type(hdf5ErrorType), intent(inoUT) :: h5err
+
+
+   call h5lcreate_external_f(file_name, obj_name, link_loc_id, link_name, &
+                          hdferr)
+
+
+  END SUBROUTINE make_external_link
+!-----------------------------------------------------------------------
 ! subprogram 14. write_attribute_ch_sc
 ! Create a group for the independent vars (aka dimensions, scales)
 !-----------------------------------------------------------------------
