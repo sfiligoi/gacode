@@ -175,7 +175,7 @@ subroutine gyro_write_timedata
 #ifdef HAVE_HDF5
     if(io_method >1 ) then
        h5in%units="dimensionless"
-       h5in%mesh="/cartMesh"
+       h5in%mesh="/threeDMesh/cartMesh"
        call write_distributed_complex_sorf_h5("phi",&
             dumpGid,gid3D,&
             n_theta_plot*n_x*n_field,&
@@ -1632,6 +1632,12 @@ subroutine write_distributed_complex_sorf_h5(vname,rGid,r3Did,&
   !-----------------------------------------
   ! Dump each species independently
   !-----------------------------------------
+  if (.not.iswedge) then
+    h5in%mesh="/poloidalMesh/cartMesh"
+  else
+    h5in%mesh="/wedgeMesh/cartMesh"
+  endif
+
   do ispcs=1,n3
      tempVarNameGr=trim(vnameArray(ispcs))//"_modes"
      call make_group(rGid,trim(tempVarNameGr),grGid,h5in,h5err)
@@ -1692,12 +1698,16 @@ subroutine write_distributed_complex_sorf_h5(vname,rGid,r3Did,&
   deallocate(buffn,alpha_loc)
 
   ! Mapping of the variable names to array indices depends on input types
+
+
   if (.not. iswedge) then
+     h5in%mesh="/threeDMesh/cartMesh"
      do ikin=1,n3
         tempVarName=trim(vnameArray(ikin))
         call dump_h5(r3Did,trim(tempVarName),real_buff(:,:,ikin,:),h5in,h5err)
      enddo
   else
+     h5in%mesh="/wedgeMesh/cartMesh"
      ! Dump each phi slice as a separate variable
      do ikin=1,n3
         tempVarNameGr=trim(vnameArray(ikin))//"_toroidal"
