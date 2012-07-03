@@ -312,7 +312,14 @@ subroutine gyro_do
           trim(path)//'out.gyro.units',&
           trim(path)//'out.gyro.geometry_arrays',1, &
           trim(path)//'out.gyro.initdata.h5')
-  !
+
+! write hdf5 grid file 
+
+    if (i_proc ==0 .and. alltime_index ==0 .and.  io_method > 1) then 
+        call hdf5_write_coords 
+    endif
+
+ !
   ! Close geometry (GEO) library
   call GEO_alloc(0)
   !---------------------------------------------------------------
@@ -327,10 +334,6 @@ subroutine gyro_do
      return
   endif
   !------------------------------------------------------------
-    if (i_proc ==0 .and. alltime_index ==0 .and.  io_method > 1) then 
-        call hdf5_write_coords 
-!        if (time_skip_wedge > 0) call hdf5_write_wedge_coords
-    endif
 
   if (restart_method == 0) then
      ! Open
