@@ -145,7 +145,9 @@ subroutine gyro_write_timedata
 
           ! make external links
           call make_external_link(TRIM(meshfile),"poloidalMesh", &
-            dumpFid,"polMesh", h5in,h5err)
+            dumpGid,"poloidalMesh", h5in,h5err)
+          call make_external_link(TRIM(meshfile),"threeDMesh", &
+            gid3D,"threeDMesh", h5in,h5err)
 
       endif !i_proc ==0
   endif ! io_method > 1
