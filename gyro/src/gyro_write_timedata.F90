@@ -144,9 +144,9 @@ subroutine gyro_write_timedata
             endif
 
           ! make external links
-          call make_external_link(TRIM(meshfile),"poloidalMesh", &
+          call make_external_link(TRIM(meshfile),"poloidalMesh/cartMesh", &
             dumpGid,"poloidalMesh", h5in,h5err)
-          call make_external_link(TRIM(meshfile),"threeDMesh", &
+          call make_external_link(TRIM(meshfile),"threeDMesh/cartMesh", &
             gid3D,"threeDMesh", h5in,h5err)
 
       endif !i_proc ==0
@@ -1633,9 +1633,9 @@ subroutine write_distributed_complex_sorf_h5(vname,rGid,r3Did,&
   ! Dump each species independently
   !-----------------------------------------
   if (.not.iswedge) then
-    h5in%mesh="poloidalMesh"
+    h5in%mesh="/poloidalMesh/cartMesh"
   else
-    h5in%mesh="wedgeMesh"
+    h5in%mesh="/wedgeMesh/cartMesh"
   endif
 
   do ispcs=1,n3
@@ -1701,13 +1701,13 @@ subroutine write_distributed_complex_sorf_h5(vname,rGid,r3Did,&
 
 
   if (.not. iswedge) then
-     h5in%mesh="threeDMesh"
+     h5in%mesh="/threeDMesh/cartMesh"
      do ikin=1,n3
         tempVarName=trim(vnameArray(ikin))
         call dump_h5(r3Did,trim(tempVarName),real_buff(:,:,ikin,:),h5in,h5err)
      enddo
   else
-     h5in%mesh="wedgeMesh"
+     h5in%mesh="/wedgeMesh/cartMesh"
      ! Dump each phi slice as a separate variable
      do ikin=1,n3
         tempVarNameGr=trim(vnameArray(ikin))//"_toroidal"
