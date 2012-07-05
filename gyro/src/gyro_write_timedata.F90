@@ -145,9 +145,11 @@ subroutine gyro_write_timedata
 
           ! make external links
           call make_external_link(TRIM(meshfile),"poloidalMesh/cartMesh", &
-            dumpGid,"poloidalMesh", h5in,h5err)
+            dumpFid,"poloidalMesh", h5in,h5err)
+            !dumpGid,"poloidalMesh", h5in,h5err)
           call make_external_link(TRIM(meshfile),"threeDMesh/cartMesh", &
-            gid3D,"threeDMesh", h5in,h5err)
+            fid3d,"threeDMesh", h5in,h5err)
+            !gid3D,"threeDMesh", h5in,h5err)
 
       endif !i_proc ==0
   endif ! io_method > 1
@@ -175,7 +177,7 @@ subroutine gyro_write_timedata
 #ifdef HAVE_HDF5
     if(io_method >1 ) then
        h5in%units="dimensionless"
-       h5in%mesh="/threeDMesh/cartMesh"
+       h5in%mesh="/cartMesh"
        call write_distributed_complex_sorf_h5("phi",&
             dumpGid,gid3D,&
             n_theta_plot*n_x*n_field,&

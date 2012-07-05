@@ -188,7 +188,8 @@
         buffer(:,:,iphi,3)= Zc(:,:)
      enddo
 
-     h5in%units="m"; h5in%mesh="mesh-structured"
+     h5in%units="m"
+     h5in%mesh="mesh-structured"
      call dump_h5(threeDGridID,'cartMesh',buffer*a_meters,h5in,h5err)
      deallocate(buffer)
     endif
