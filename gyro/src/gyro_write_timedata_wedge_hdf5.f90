@@ -79,7 +79,7 @@ subroutine gyro_write_timedata_wedge_hdf5
 
      write(*,*) "before wedge link"
      meshfile=TRIM(path)//"gyroMesh.h5"
-     call make_external_link(TRIM(meshfile),"wedgeMesh", &
+     call make_external_link(TRIM(meshfile),"/wedgeMesh/cartMesh", &
         gidwedge,"wedgeMesh", h5in,h5err)
 
 

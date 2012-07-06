@@ -76,11 +76,11 @@
 
 
       !1.1) make groups
-         call make_mesh_group(gridGroupID,"poloidalMesh",poloidalGridID,h5in,&
+         call make_group(gridGroupID,"poloidalMesh",poloidalGridID,h5in,&
               h5err)
-         call make_mesh_group(gridGroupID,"threeDMesh",threeDGridID,h5in,&
+         call make_group(gridGroupID,"threeDMesh",threeDGridID,h5in,&
               h5err)
-         call make_mesh_group(gridGroupID,"wedgeMesh",wedgeGridID,h5in,&
+         call make_group(gridGroupID,"wedgeMesh",wedgeGridID,h5in,&
               h5err)
 
 
