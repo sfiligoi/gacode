@@ -314,10 +314,11 @@ subroutine gyro_do
           trim(path)//'out.gyro.initdata.h5')
 
 ! write hdf5 grid file 
-
+#ifdef HAVE_HDF5
     if (i_proc ==0 .and. alltime_index ==0 .and.  io_method > 1) then 
         call hdf5_write_coords 
     endif
+#endif
 
  !
   ! Close geometry (GEO) library
