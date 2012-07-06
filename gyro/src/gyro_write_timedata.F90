@@ -37,6 +37,7 @@ subroutine gyro_write_timedata
   character(60) :: description
   character(64) :: step_name
   character(128) :: dumpfile
+  character(128) :: meshfile
   character(20)   :: openmethod
   integer(HID_T) :: dumpGid,dumpFid,gid3D,fid3D
   integer(HID_T) :: dumpTGid,dumpTFid
@@ -113,6 +114,8 @@ subroutine gyro_write_timedata
          call open_h5file(trim(openmethod),dumpfile,dumpTFid,description,dumpTGid,h5in,h5err)
          if (h5err%errBool) call catch_error(h5err%errorMsg)
 
+          meshfile=TRIM(path)//"gyroMesh.h5"
+
 
             !---------------------------------------------------
             ! Call for each timestep
@@ -139,8 +142,14 @@ subroutine gyro_write_timedata
                description = "GYRO 3D field file"
                call open_newh5file(dumpfile,fid3d,description,gid3D,h5in,h5err)
             endif
-            call hdf5_write_coords
 
+          ! make external links
+          call make_external_link(TRIM(meshfile),"/poloidalMesh/cartMesh", &
+            dumpFid,"poloidalMesh", h5in,h5err)
+            !dumpGid,"poloidalMesh", h5in,h5err)
+          call make_external_link(TRIM(meshfile),"/threeDMesh/cartMesh", &
+            fid3d,"threeDMesh", h5in,h5err)
+            !gid3D,"threeDMesh", h5in,h5err)
 
       endif !i_proc ==0
   endif ! io_method > 1
@@ -334,7 +343,8 @@ subroutine gyro_write_timedata
 #ifdef HAVE_HDF5
   if(io_method > 1) then
     h5in%units="dimensionless"
-    h5in%mesh=" "
+    h5in%mesh="/t_current"
+    h5in%vsCentering="nodal"
     call write_distributed_real_h5("kxkyspec",dumpTGid,&
          n_x,1,1,&
          size(kxkyspec),&
@@ -344,7 +354,7 @@ subroutine gyro_write_timedata
 
     if (i_proc == 0) then
        h5in%units="dimensionless"
-       h5in%mesh=" "
+       h5in%mesh="/t_current"
        call add_h5(dumpTGid,'k_perp_squared',k_perp_squared,h5in,data_step,h5err)
        if(h5err%errBool) write(*,*) h5err%errorMsg
     endif !i_proc == 0
@@ -383,6 +393,7 @@ subroutine gyro_write_timedata
 #ifndef HAVE_HDF5
      call gyro_write_freq(trim(path)//'out.gyro.freq',10)
 #else
+     h5in%mesh="/t_current"
      call gyro_write_freq(trim(path)//'out.gyro.freq',10,dumpTGid,h5in,h5err)
 #endif
   
@@ -394,6 +405,7 @@ subroutine gyro_write_timedata
 #ifndef HAVE_HDF5
         call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_phi',10,1,0)
 #else
+        h5in%mesh="/t_current"
         call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_phi',10,1,0, &
             "ballon_phi",dumpTGid,h5in,h5err)
 #endif
@@ -403,6 +415,7 @@ subroutine gyro_write_timedata
 #ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_a',10,2,0)
 #else
+           h5in%mesh="/t_current"
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_a',10,2,0, &
               "balloon_a",dumpTGid,h5in,h5err)
 #endif
@@ -413,6 +426,7 @@ subroutine gyro_write_timedata
 #ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_aperp',10,3,0)
 #else
+           h5in%mesh="/t_current"
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_aperp', &
             10,3,0, "balloon_aperp",dumpTGid,h5in,h5err)
 #endif
@@ -424,6 +438,7 @@ subroutine gyro_write_timedata
 #ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_epar',10,n_field+1,0)
 #else
+           h5in%mesh="/t_current"
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_epar',10, &
             n_field+1,0,"balloon_epar",dumpTGid,h5in,h5err)
 #endif
@@ -438,6 +453,7 @@ subroutine gyro_write_timedata
 #ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_n_ion',10,5,1)
 #else
+           h5in%mesh="/t_current"
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_n_ion', &
             10,5,1,"n_ion",dumpTGid,h5in,h5err)
 #endif
@@ -447,6 +463,7 @@ subroutine gyro_write_timedata
 #ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_n_elec',10,5,indx_e)
 #else
+           h5in%mesh="/t_current"
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_n_elec', &
             10,5,indx_e,"n_elec",dumpTGid,h5in,h5err)
 #endif
@@ -460,6 +477,7 @@ subroutine gyro_write_timedata
 #ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_e_ion',10,6,1)
 #else
+           h5in%mesh="/t_current"
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_e_ion', &
             10,6,1,"e_ion",dumpTGid,h5in,h5err)
 #endif
@@ -469,6 +487,7 @@ subroutine gyro_write_timedata
 #ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_e_elec',10,6,indx_e)
 #else
+           h5in%mesh="/t_current"
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_e_elec', &
             10,6,indx_e,"e_elec",dumpTGid,h5in,h5err)
 #endif
@@ -482,6 +501,7 @@ subroutine gyro_write_timedata
 #ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_v_ion',10,7,1)
 #else
+           h5in%mesh="/t_current"
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_v_ion', &
               10,7,1,"v_ion",dumpTGid,h5in,h5err)
 #endif
@@ -490,6 +510,7 @@ subroutine gyro_write_timedata
 #ifndef HAVE_HDF5
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_v_elec',10,7,indx_e)
 #else
+           h5in%mesh="/t_current"
            call gyro_ballooning_mode(trim(path)//'out.gyro.balloon_v_elec', &
             10,7,indx_e,"v_elec",dumpTGid,h5in,h5err)
 #endif
@@ -534,6 +555,7 @@ subroutine gyro_write_timedata
         endif !io_method < 3
 #ifdef HAVE_HDF5
         if(io_method > 1 ) then 
+        h5in%mesh="/t_current"
         call add_h5(dumpTGid,'diff',diff,h5in,data_step,h5err)
         call add_h5(dumpTGid,'diff_i',diff_i,h5in,data_step,h5err)
         call add_h5(dumpTGid,'gbflux',gbflux,h5in,data_step,h5err)
@@ -541,6 +563,7 @@ subroutine gyro_write_timedata
         call add_h5(dumpTGid,'gbflux_i',gbflux_i,h5in,data_step,h5err)
 
         if (trapdiff_flag == 1) then
+           h5in%mesh="/t_current"
            call add_h5(dumpTGid,'diff_trapped',diff_trapped,h5in,data_step,h5err)
            call add_h5(dumpTGid,'diff_i_trapped',diff_i_trapped,h5in,data_step,h5err)
            call add_h5(dumpTGid,'gbflux_trapped',gbflux_trapped,h5in,data_step,h5err)
@@ -579,6 +602,7 @@ subroutine gyro_write_timedata
       endif !io_method < 3
 #ifdef HAVE_HDF5
         if(io_method > 1 ) then
+           h5in%mesh="/t_current"
            call write_distributed_real_h5('diff_n',dumpTGid,&
                  n_kinetic,n_field,2, &
                  size(diff_n),&
@@ -615,7 +639,6 @@ subroutine gyro_write_timedata
      ! BEGIN NONLINEAR 
      !================
     if (io_method < 3) then
-          h5in%units="diff units"
      call write_distributed_real(&
           trim(path)//'out.gyro.diff_n',&
           10,&
@@ -652,6 +675,7 @@ subroutine gyro_write_timedata
 #ifdef HAVE_HDF5
   if (io_method > 1 ) then
         h5in%units="diff units"
+        h5in%mesh="/t_current"
      call write_distributed_real_h5("diff_n",dumpTGid,&
           n_kinetic,n_field,2,&
           size(diff_n),&
@@ -731,6 +755,8 @@ subroutine gyro_write_timedata
        endif !io_method < 3
 #ifdef HAVE_HDF5
       if(io_method > 1 ) then
+        h5in%units="diff units"
+        h5in%mesh="/t_current"
         call add_h5(dumpTGid,'field_rms',ave_phi,h5in,data_step,h5err)
         if(h5err%errBool) write(*,*) h5err%errorMsg
         call add_h5(dumpTGid,'diff',diff,h5in,data_step,h5err)
@@ -778,6 +804,7 @@ subroutine gyro_write_timedata
         endif !io_method <3)
 #ifdef HAVE_HDF5
       if (io_method > 1 ) then
+        h5in%mesh="/t_current"
         call add_h5(dumpTGid,'source',a3,h5in,data_step,h5err)
         if(h5err%errBool) write(*,*) h5err%errorMsg
 
@@ -809,6 +836,7 @@ subroutine gyro_write_timedata
         endif
 #ifdef HAVE_HDF5
         if(io_method > 1 ) then
+          h5in%mesh="/t_current"
           call add_h5(dumpTGid,'entropy',entropy,h5in,data_step,h5err)
           if(h5err%errBool) write(*,*) h5err%errorMsg
         endif
@@ -850,7 +878,8 @@ subroutine gyro_write_timedata
 #ifdef HAVE_HDF5
   if(io_method >1 ) then
     if (i_proc == 0) then
-       h5in%mesh=' '
+       h5in%mesh="mesh-structured"
+       h5in%units="time"
        skip_at_tzero : if (.not. hdf5_skip) then
          call add_h5(dumpTGid,'data_step',data_step,h5in,data_step,h5err)
           if(h5err%errBool) write(*,*) h5err%errorMsg
@@ -858,6 +887,7 @@ subroutine gyro_write_timedata
           if(h5err%errBool) write(*,*) h5err%errorMsg
         endif skip_at_tzero
 
+       h5in%mesh='mesh-structured'
        ! dump in the field
         call dump_h5(dumpGid,'data_step',data_step,h5in,h5err)
         if(h5err%errBool) write(*,*) h5err%errorMsg
@@ -868,6 +898,7 @@ subroutine gyro_write_timedata
 
       ! dump 3D
       if (write_threed) then
+        h5in%mesh='mesh-structured'
         call dump_h5(gid3D,'data_step',data_step,h5in,h5err)
         if(h5err%errBool) write(*,*) h5err%errorMsg
         call dump_h5(gid3D,'t_current',t_current,h5in,h5err)
@@ -901,154 +932,6 @@ subroutine gyro_write_timedata
 #endif
 
 10 format(t2,a,t24,es9.3)
-
-#ifdef HAVE_HDF5
-  contains
-  !------------------------------------------------------
-  subroutine hdf5_write_coords
-
-    use GEO_interface
-    !------------------------------------------
-    !  Write the coordinates out
-    !  We want to have same coordinate system as:
-    !    allocate(phi_plot(n_theta_plot,n_x,n_field+eparallel_plot_flag))
-    !  This should be generalized to include the other GEO options
-    !------------------------------------------
-    real, dimension(:,:), allocatable :: Rc,Zc
-    real, dimension(:,:,:,:), allocatable :: buffer
-    real, dimension(:,:,:), allocatable :: bufferMesh
-    real :: theta,rmajc,zmagc,kappac,deltac,zetac,r_c,xdc
-    integer :: iphi,ix,j,ncoarse,nphi
-
-    ncoarse = n_theta_plot
-    allocate(Rc(0:ncoarse,n_x), Zc(0:ncoarse,n_x))
-
-    !----------------------------------------
-    ! Calculate the R,Z coordinates.  See write_geometry_arrays.f90
-    ! The theta grid needs to correspond to the the theta_plot
-    ! array which sets the interpolation arrays in 
-    ! gyro_set_blend_arrays.  The theta_plot array is defined as:
-    !  do j=1,n_theta_plot
-    !          theta_plot(j) = -pi+(j-1)*pi_2/n_theta_plot
-    !  enddo
-    ! such that theta E [0,2 pi) in gyro_banana_operators.f90
-    ! For the 3D arrays, we want the periodic point repeated for
-    ! nice plots; i.e., theta E [0,2 pi], but we plot the raw
-    ! mode data on theta E [0, 2 pi).  Can be a bit confusing.
-    !---------------------------------------- 
-
-    do ix=1,n_x
-       r_c=r(ix)
-       rmajc = rmaj_s(ix)
-       zmagc = zmag_s(ix)
-       kappac = kappa_s(ix)
-       deltac = delta_s(ix)
-       xdc    = asin(deltac)
-       zetac  = zeta_s(ix)
-       ! Note:  This needs to be generalized for all geometries
-       do j=0,ncoarse
-          theta = -pi+REAL(j)*pi*2./REAL(ncoarse)
-          if(radial_profile_method==1) then
-             Rc(j,ix)=rmajc+r_c*cos(theta)
-             Zc(j,ix)=zmagc+r_c*sin(theta)
-          else
-             Rc(j,ix)=rmajc+r_c*cos(theta+xdc*sin(theta))
-             Zc(j,ix)=zmagc+kappac*r_c*sin(theta+zetac*sin(2.*theta))
-          endif
-       enddo
-    enddo
-
-    !----------------------------------------
-    ! Dump the coarse meshes
-    !---------------------------------------- 
-
-    h5in%units=""
-    call dump_h5(dumpGid,'Rgyro',Rc,h5in,h5err)
-    call dump_h5(dumpGid,'Zgyro',Zc,h5in,h5err)
-    h5in%units="m"
-    call dump_h5(dumpGid,'R',Rc*a_meters,h5in,h5err)
-    call dump_h5(dumpGid,'Z',Zc*a_meters,h5in,h5err)
-
-    ! Here we do not repeat the points since this is the grid
-    ! that will be used for the mode plots on thete E [0,2 pi)
-    allocate(bufferMesh(0:ncoarse,n_x,2))
-    bufferMesh(:,:,1)= Rc*a_meters
-    bufferMesh(:,:,2)= Zc*a_meters
-    h5in%units="m"
-    h5in%mesh="mesh-structured"
-    call dump_h5(dumpGid,'cartMesh',bufferMesh(:,:,:),h5in,h5err)
-    h5in%mesh=" "
-    deallocate(bufferMesh)
-
-    !----------------------------------------
-    ! Dump the coarse mesh(es) in 3D
-    !---------------------------------------- 
-    if (write_threed) then
-    !------------------------------------------------
-    ! Set up the toroidal grid.  Only used for coarse grid
-    !-------------------------------------------------
-      allocate(zeta_phi(n_torangle_3d))
-      do iphi=1,n_torangle_3d
-         zeta_phi(iphi)=REAL(iphi-1)/REAL(n_torangle_3d-1)*2.*pi
-      end do
-
-     !-------------------------------------------------------
-     ! Set up the alpha grid
-     ! These are set up in a module so no need to recalculate
-     !-------------------------------------------------------
-     if (.not. allocated(alpha_phi) ) then 
-        nphi=1
-        if (n_torangle_3d > 0 ) nphi=n_torangle_3d 
-        allocate(alpha_phi(0:ncoarse,n_x,nphi))
-        do iphi=1,n_torangle_3d
-           alpha_phi(:,:,iphi)=zeta_phi(iphi)+nu_coarse(:,:)
-        end do
-     endif
-
-     h5in%units="m"
-     call dump_h5(gid3d,'R',Rc*a_meters,h5in,h5err)
-     call dump_h5(gid3d,'Z',Zc*a_meters,h5in,h5err)
-     h5in%units="radians"
-     call dump_h5(gid3d,'torAngle',zeta_phi,h5in,h5err)
-     call dump_h5(gid3d,'torangle_offset',torangle_offset,h5in,h5err)
-     call dump_h5(gid3d,'alpha',alpha_phi,h5in,h5err)
-
-     allocate(buffer(0:ncoarse,n_x,n_torangle_3d,3))
-      buffer = -9999.999
-     do iphi=1,n_torangle_3d
-        buffer(:,:,iphi,1)= Rc(:,:)*COS(zeta_phi(iphi))
-        buffer(:,:,iphi,2)=-Rc(:,:)*SIN(zeta_phi(iphi))
-        buffer(:,:,iphi,3)= Zc(:,:)
-     enddo
-!    do iphi=1,n_torangle_3d
-!      do j=0,ncoarse
-!        do ix=1,n_x
-!          buffer(j,ix,iphi,1)= Rc(j,ix)*COS(zeta_phi(iphi))
-!!	 write(*,*) "j=",j,"ix=",ix,"iphi=",iphi &
-!!		,"Rc=",Rc(j,ix),"zeta=",zeta_phi(iphi)
-!!	write(*,*) " buffer(j,ix,iphi,1) = ", buffer(j,ix,iphi,1)
-!	buffer(j,ix,iphi,2)=-Rc(j,ix)*SIN(zeta_phi(iphi))
-!          buffer(j,ix,iphi,3)= Zc(j,ix)
-!        enddo
-!      enddo
-!     enddo
-
-
-     h5in%units="m"; h5in%mesh="mesh-structured"
-     !h5in%doTranspose=.true.
-     call dump_h5(gid3d,'cartMesh',buffer*a_meters,h5in,h5err)
-     deallocate(buffer)
-    endif
-
-    !----------------------------------------
-    ! Dump the wedge mesh(es)
-    !---------------------------------------- 
-    if (allocated(Rc)) deallocate(Rc)
-    if (allocated(Zc)) deallocate(Zc)
-    if (allocated(zeta_phi)) deallocate(zeta_phi)
-
-  end subroutine hdf5_write_coords
-#endif
 
 end subroutine gyro_write_timedata
 
@@ -1098,6 +981,7 @@ subroutine write_hdf5_restart
         write(step_name,fmt='(i5.5)') number_label
      endif
 
+     
      dumpfile=TRIM(path)//"gyroRestart"//TRIM(step_name)//".h5"
      description="GYRO restart file"
      call open_newh5file(dumpfile,dumpFid,description,dumpGid,h5in,h5err)
@@ -1750,6 +1634,14 @@ subroutine write_distributed_complex_sorf_h5(vname,rGid,r3Did,&
   !-----------------------------------------
   ! Dump each species independently
   !-----------------------------------------
+  if (.not.iswedge) then
+    h5in%mesh="/poloidalMesh"
+    !h5in%mesh="/poloidalMesh/cartMesh"
+  else
+    h5in%mesh="/wedgeMesh"
+    !h5in%mesh="/wedgeMesh/cartMesh"
+  endif
+
   do ispcs=1,n3
      tempVarNameGr=trim(vnameArray(ispcs))//"_modes"
      call make_group(rGid,trim(tempVarNameGr),grGid,h5in,h5err)
@@ -1810,12 +1702,18 @@ subroutine write_distributed_complex_sorf_h5(vname,rGid,r3Did,&
   deallocate(buffn,alpha_loc)
 
   ! Mapping of the variable names to array indices depends on input types
+
+
   if (.not. iswedge) then
+     h5in%mesh="/threeDMesh"
+     !h5in%mesh="/threeDMesh/cartMesh"
      do ikin=1,n3
         tempVarName=trim(vnameArray(ikin))
         call dump_h5(r3Did,trim(tempVarName),real_buff(:,:,ikin,:),h5in,h5err)
      enddo
   else
+     h5in%mesh="/wedgeMesh"
+     !h5in%mesh="/wedgeMesh/cartMesh"
      ! Dump each phi slice as a separate variable
      do ikin=1,n3
         tempVarNameGr=trim(vnameArray(ikin))//"_toroidal"

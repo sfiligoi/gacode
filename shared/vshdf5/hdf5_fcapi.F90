@@ -23,6 +23,7 @@
 ! 12. get_nmember
 ! 13. make reference
 ! 20. make_mesh_group
+! 20.1 make_mesh_external_link
 ! 21. make_time_group
 ! 22. make_vec_group
 ! 23. make_limits_group
@@ -685,13 +686,15 @@
 ! Defines a mesh group that points to other variables that define
 !  the actual mesh
 !-----------------------------------------------------------------------
-  subroutine make_mesh_group(gInId,gridId,h5in,meshName,&
-              meshKind,axis0,axis1,axis2,transform,trName,errval)
+!  subroutine make_mesh_group(gInId,gridId,h5in,meshName,&
+!              meshKind,axis0,axis1,axis2,transform,trName,errval)
+  subroutine make_mesh_group(gInId,meshName,gridId,h5in,&
+              errval)
   integer(HID_T), intent(in) :: gInId
+  character*(*), intent(in) :: meshName!,axis0,axis1,axis2
   integer(HID_T), intent(inoUT) :: gridId
   TYPE(hdf5InOpts), intent(inout) :: h5in
-  character*(*), intent(in) :: meshname,axis0,axis1,axis2
-  character*(*), intent(in) :: meshKind,transform,trName
+  !character*(*), intent(in) :: meshKind,transform,trName
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer,parameter :: FAIL=-1
 !-----------------------------------------------------------------------
@@ -702,17 +705,18 @@
 ! Add the VisSchema attributes
 !-----------------------------------------------------------------------
   call write_attribute(gridId,'vsType',"mesh",errval)
-  call write_attribute(gridId,'vsKind',meshKind,errval)
-  call write_attribute(gridId,'vsAxis0',axis0,errval)
-  call write_attribute(gridId,'vsAxis1',axis1,errval)
-  call write_attribute(gridId,'vsAxis2',axis2,errval)
-  h5in%vsAxisLabels=trim(axis0)//", "//trim(axis1)
-  h5in%vsAxisLabels=h5in%vsAxisLabels//", "//trim(axis2)
-  call write_attribute(gridId,'vsAxisLabels',h5in%vsAxisLabels,errval)
-  if(len_trim(transform)>0) then
-     call write_attribute(gridId,'vsTransform',transform,errval)
-     call write_attribute(gridId,'vsTransformedMesh',trName,errval)
-  endif
+  call write_attribute(gridId,'vsKind',"structured",errval)
+!  call write_attribute(gridId,'vsKind',meshKind,errval)
+!  call write_attribute(gridId,'vsAxis0',axis0,errval)
+!  call write_attribute(gridId,'vsAxis1',axis1,errval)
+!  call write_attribute(gridId,'vsAxis2',axis2,errval)
+!  h5in%vsAxisLabels=trim(axis0)//", "//trim(axis1)
+!  h5in%vsAxisLabels=h5in%vsAxisLabels//", "//trim(axis2)
+!  call write_attribute(gridId,'vsAxisLabels',h5in%vsAxisLabels,errval)
+!  if(len_trim(transform)>0) then
+!     call write_attribute(gridId,'vsTransform',transform,errval)
+!     call write_attribute(gridId,'vsTransformedMesh',trName,errval)
+!  endif
   if(len_trim(h5in%vsCentering)>0) then
     call write_attribute(gridId,'vsCentering',h5in%vsCentering,&
                               errval)
@@ -805,6 +809,37 @@
   call close_group(grName,limitId,h5err)
   return
   END SUbroutine make_limits_group
+!-----------------------------------------------------------------------
+! subprogram 23b. make_external_link
+! 
+! Creates an external link, a soft link to an object in a different file
+!-----------------------------------------------------------------------
+
+  SUBROUTINE make_external_link(file_name, obj_name, link_loc_id, link_name, &
+             h5in,h5err)
+  IMPLICIT NONE
+  CHARACTER(LEN=*), INTENT(IN) :: file_name  
+                       ! Name of the file containing the target object. Neither 
+                       ! the file nor the target object is required to exist. 
+                       ! May be the file the link is being created in.
+  CHARACTER(LEN=*), INTENT(IN) :: obj_name  
+                       ! Name of the target object, which need not already exist.
+  INTEGER(HID_T), INTENT(IN) :: link_loc_id 
+                       ! The file or group identifier for the new link.
+  CHARACTER(LEN=*), INTENT(IN) :: link_name 
+                       ! The name of the new link.
+  INTEGER :: hdferr        
+                       ! Error code: 
+                       ! 0 on success and -1 on failure
+  type(hdf5InOpts), intent(in) :: h5in
+  type(hdf5ErrorType), intent(inoUT) :: h5err
+
+
+   call h5lcreate_external_f(file_name, obj_name, link_loc_id, link_name, &
+                          hdferr)
+
+
+  END SUBROUTINE make_external_link
 !-----------------------------------------------------------------------
 ! subprogram 14. write_attribute_ch_sc
 ! Create a group for the independent vars (aka dimensions, scales)
