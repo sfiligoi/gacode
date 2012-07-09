@@ -127,14 +127,13 @@ subroutine tgyro_flux
   !-----------------------------------------------------------
 
   pflux_i_tur(:,:) = 0.0
-  pflux_e_tur(:) = 0.0
+  pflux_e_tur(:)   = 0.0
   eflux_i_tur(:,:) = 0.0
-  eflux_e_tur(:) = 0.0
+  eflux_e_tur(:)   = 0.0
   mflux_i_tur(:,:) = 0.0
-  mflux_e_tur(:) = 0.0
-
-  expwd_e_tur(:) = 0.0
+  mflux_e_tur(:)   = 0.0
   expwd_i_tur(:,:) = 0.0
+  expwd_e_tur(:)   = 0.0
 
   select case (flux_method)
 
@@ -181,10 +180,12 @@ subroutine tgyro_flux
      pflux_e_tur(i_r) = tglf_elec_pflux_out
      eflux_e_tur(i_r) = tglf_elec_eflux_out
      mflux_e_tur(i_r) = tglf_elec_mflux_out
+     expwd_e_tur(i_r) = tglf_elec_expwd_out
 
      pflux_i_tur(1:loc_n_ion,i_r) = tglf_ion_pflux_out(1:loc_n_ion)
      eflux_i_tur(1:loc_n_ion,i_r) = tglf_ion_eflux_out(1:loc_n_ion)
      mflux_i_tur(1:loc_n_ion,i_r) = tglf_ion_mflux_out(1:loc_n_ion)
+     expwd_i_tur(1:loc_n_ion,i_r) = tglf_ion_expwd_out(1:loc_n_ion)
 
      if (tglf_q_low_flag == 1) then
         eflux_e_tur(i_r) = tglf_elec_eflux_low_out

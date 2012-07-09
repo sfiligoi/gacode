@@ -242,6 +242,7 @@ then
     out.gyro.phase_space
     out.gyro.profile
     out.gyro.timing
+    out.gyro.units
     out.gyro.zerobar"
 
    # Funny syntax below removes trailing /

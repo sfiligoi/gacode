@@ -57,6 +57,9 @@ subroutine tgyro_profile_functions
   ! Gyrobohm unit energy flux (erg/cm^2/s)
   q_gb(:) = ne(:)*k*te(:)*c_s(:)*(rho_s(:)/r_min)**2
 
+  ! Gyrobohm unit exchange power density (erg/cm^3/s)
+  s_gb(:) = ne(:)*k*te(:)*(c_s(:)/r_min)*(rho_s(:)/r_min)**2
+
   ! Coulomb logarithm
   loglam(:) = 24.0-log(sqrt(ne(:))/te(:))
 
