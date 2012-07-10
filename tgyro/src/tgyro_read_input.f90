@@ -100,6 +100,7 @@ subroutine tgyro_read_input
   call tgyro_readbc_real(tgyro_rmin)
   call tgyro_readbc_real(tgyro_rmax)
   call tgyro_readbc_int(tgyro_global_radii)
+  call tgyro_readbc_int(tgyro_expwd_flag)
   ! ** END add new parameters
   call tgyro_readbc_int(n_inst)
   !-------------------------------------------------------
