@@ -1,11 +1,7 @@
-DIR TGLF 1
-DIR TGLF 1
-DIR TGLF 1
-DIR TGLF 1
-DIR TGLF 1
-DIR TGLF 1
-DIR TGLF 1
-DIR TGLF 1
+DIR TGLF1 1
+DIR TGLF2 1
+DIR TGLF3 1
+DIR TGLF4 1
 
 #-----------------------------------------------------
 # TGLF control
@@ -20,7 +16,7 @@ LOC_NEO_METHOD=1
 
 #-----------------------------------------------------
 # Profile control
-LOC_NE_FEEDBACK_FLAG=1
+LOC_NE_FEEDBACK_FLAG=0
 LOC_PFLUX_METHOD=2
 LOC_TE_FEEDBACK_FLAG=1
 LOC_TI_FEEDBACK_FLAG=1
@@ -36,11 +32,12 @@ LOC_BETAE_SCALE=1.0
 LOC_NU_SCALE=1.0
 TGYRO_ROTATION_FLAG=1
 TGYRO_ROTATION_THEORY_METHOD=1
+TGYRO_EXPWD_FLAG=0
 #-----------------------------------------------------
 
 #-----------------------------------------------------
 # Iteration control
-TGYRO_ITERATION_METHOD=1
+TGYRO_ITERATION_METHOD=4
 LOC_RESIDUAL_METHOD=2
 
 LOC_BC_OFFSET=0
