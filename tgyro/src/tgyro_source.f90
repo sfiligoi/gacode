@@ -33,11 +33,18 @@ subroutine tgyro_source
 
      s_brem(i) = 1e7*1.69e-32*ne(i)**2*sqrt(te(i))*z_eff(i)
 
-     ! Electron-ion energy exchange
+     ! Classical electron-ion energy exchange
      ! - Positive as defined on RHS of ion equation
      ! - Multiply formulary expression by (3/2)ne:
 
      s_exch(i) = 1.5*nu_exch(i)*ne(i)*k*(te(i)-ti(1,i))
+
+     ! Anomalous electron-ion energy exchange
+     ! - Positive as defined on RHS of ion equation
+     ! - Average ion and -electron results to obtain best estimate  
+     !   of ion value.
+
+     s_expwd(i) = 0.5*(sum(expwd_i_tur(1:loc_n_ion,i))-expwd_e_tur(i))*s_gb(i)*1e6*1e7/1e6
 
   enddo
   !-------------------------------------------------------
@@ -51,8 +58,11 @@ subroutine tgyro_source
   ! Get integrated Bremsstrahlung power
   call tgyro_volume_int(s_brem,p_brem)
 
-  ! Get integrated exchange power
+  ! Get integrated anomalous exchange power
   call tgyro_volume_int(s_exch,p_exch)
+
+  ! Get integrated canomalous exchange power
+  call tgyro_volume_int(s_expwd,p_expwd)
   !-------------------------------------------------------
 
   !-------------------------------------------------------

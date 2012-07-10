@@ -78,6 +78,7 @@ OBJECTS += gyro_globals.o \
 	  gyro_fieldeigen_kernel.o \
 	  gyro_fieldeigen_df.o \
           gyro_fulladvance.o \
+          gyro_g_squared.o \
           gyro_geometry_arrays.o \
           gyro_get_he_implicit.o \
           gyro_get_delta_he.o \
@@ -148,7 +149,6 @@ OBJECTS += gyro_globals.o \
           gyro_write_timers.o \
 	  gyro_velocity_sum.o \
           get_field_r0_plot.o \
-          get_g_squared.o \
           gyro_dump_input.o \
           gyro_dump_interface.o
 

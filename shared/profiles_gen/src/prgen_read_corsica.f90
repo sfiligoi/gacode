@@ -13,6 +13,7 @@ subroutine prgen_read_corsica
   
   integer :: i
   real :: index
+  character(len=16) :: buf
 
   ! profile lengths are always the same (I think)
   ! so arrays can be allocated ahead of time
@@ -22,10 +23,16 @@ subroutine prgen_read_corsica
   open(unit=1, file=raw_data_file, action='read', status='old')
     
   ! skip header
-  do i=1, 6
-     read(1,*)
+  do 
+     read(1,'(A)',err=10) buf
+     if(buf.eq.'#New time slice ') goto 99
   end do
+10 continue
+  print *, 'Error: could not find time slice data'
+  close(1)
+  return
 
+99 continue
   ! read scalar data
 100 format (1e12.5)
   read(1, 100) corsica_time

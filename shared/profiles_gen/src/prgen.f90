@@ -172,8 +172,7 @@ program prgen
      format_type = 5
 
      if (gato_flag /= 1) then
-        print '(a)','ERROR: (prgen) geqdsk must be provided for corsica format'
-        stop
+        print '(a)','WARNING: (prgen) geqdsk must be provided for corsica format'
      endif
 
      call prgen_read_corsica
