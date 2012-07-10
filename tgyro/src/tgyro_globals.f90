@@ -274,6 +274,7 @@ module tgyro_globals
   real :: tgyro_rmin
   real :: tgyro_rmax
   integer :: tgyro_global_radii
+  integer :: tgyro_expwd_flag
   !
   ! Iteration variables (global)
   !

@@ -126,7 +126,7 @@ subroutine tglf_run()
      call tglf_dump_global
   endif
 
-  if (tglf_use_transport_model_in)then
+  if (tglf_use_transport_model_in) then
 
      call tglf_tm
 

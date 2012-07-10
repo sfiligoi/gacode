@@ -44,7 +44,7 @@ subroutine tgyro_source
      ! - Average ion and -electron results to obtain best estimate  
      !   of ion value.
 
-     s_expwd(i) = 0.5*(sum(expwd_i_tur(1:loc_n_ion,i))-expwd_e_tur(i))*s_gb(i)*1e6*1e7/1e6
+     s_expwd(i) = 0.5*(sum(expwd_i_tur(1:loc_n_ion,i))-expwd_e_tur(i))*s_gb(i)
 
   enddo
   !-------------------------------------------------------
@@ -61,7 +61,7 @@ subroutine tgyro_source
   ! Get integrated anomalous exchange power
   call tgyro_volume_int(s_exch,p_exch)
 
-  ! Get integrated canomalous exchange power
+  ! Get integrated anomalous exchange power
   call tgyro_volume_int(s_expwd,p_expwd)
   !-------------------------------------------------------
 
@@ -86,8 +86,11 @@ subroutine tgyro_source
      ! 
      ! Input power is fixed but exchange is computed 
 
-     p_i(:) = p_i_in(:)+(p_exch(:)-p_exch_in(:))
-     p_e(:) = p_e_in(:)-(p_exch(:)-p_exch_in(:))
+     p_i(:) = p_i_in(:) & 
+          +(p_exch(:)-p_exch_in(:))+p_expwd(:)*tgyro_expwd_flag
+
+     p_e(:) = p_e_in(:) & 
+          -(p_exch(:)-p_exch_in(:))-p_expwd(:)*tgyro_expwd_flag
 
   case (3)
 
@@ -95,13 +98,13 @@ subroutine tgyro_source
      ! and exchange; input auxiliary power.
 
      p_i = (1.0-loc_alpha_elec)*p_alpha & 
-          +p_exch &                       
-          +p_i_aux_in                       
+          +p_i_aux_in &                      
+          +p_exch+p_expwd(:)*tgyro_expwd_flag
 
      p_e = loc_alpha_elec*p_alpha  &
-          -p_exch &      
           +p_e_aux_in &                   
-          -p_brem                       
+          -p_brem &                      
+          -p_exch-p_expwd(:)*tgyro_expwd_flag
 
   end select
   !-------------------------------------------------------
@@ -135,7 +138,6 @@ subroutine tgyro_source
   ! Target angular momentum fluxes in erg/cm^2
   ! 
   mflux_target(1) = 0.0 
-
   mflux_target(2:n_r) = 0.0
   !------------------------------------------------
 
