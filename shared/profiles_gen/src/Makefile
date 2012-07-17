@@ -29,6 +29,7 @@ OBJECTS = prgen_read_globals.o \
           prgen_read_plasmastate.o \
 	  prgen_read_peqdsk.o \
 	  prgen_read_corsica.o \
+	  prgen_read_ufile.o \
           prgen_write.o \
           fluxfit_driver.o \
           fluxfit_moments.o \
@@ -42,7 +43,7 @@ OBJECTS = prgen_read_globals.o \
 .SUFFIXES : .o .f90
 
 exec: $(OBJECTS)
-	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(GACODE_ROOT)/shared/math/math_lib.a $(LMATH) $(NETCDF)
+	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(GACODE_ROOT)/shared/math/math_lib.a $(LMATH) $(NETCDF) $(GACODE_ROOT)/dataread/src/dataread_lib.a
 
 .f90.o :
 	$(FC) $(FMATH) $(FFLAGS) -I $(NETCDF_INC) -c $<

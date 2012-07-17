@@ -177,6 +177,15 @@ program prgen
 
      call prgen_read_corsica
 
+  else if (index(raw_data_file,'.ufile',back) /= 0) then
+
+     ! UFILE format
+     print '(a)','INFO: Assuming UFILE format.'
+
+     format_type = 6
+
+     call prgen_read_ufile
+
   else
 
      ! Old text format
