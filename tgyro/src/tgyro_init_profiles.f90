@@ -175,6 +175,7 @@ subroutine tgyro_init_profiles
 
   ! Convert flows to 1/s (from MW/keV)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_flow_beam(:)*1e22/1.6022,n_exp,r,f_b_in,n_r)
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_flow_wall(:)*1e22/1.6022,n_exp,r,f_w_in,n_r)
 
   ! Fourier coefficients for plasma shape
   if (EXPRO_nfourier > 0) then

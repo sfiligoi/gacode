@@ -233,6 +233,10 @@ subroutine tgyro_write_input
 
            write(1,10) 'LOC_PFLUX_METHOD','gamma=beam'
 
+        case (3)
+
+           write(1,10) 'LOC_PFLUX_METHOD','gamma=beam+wall'
+
         case default
 
            error_flag = 1
