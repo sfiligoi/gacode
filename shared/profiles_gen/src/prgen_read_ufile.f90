@@ -8,7 +8,7 @@
 subroutine prgen_read_ufile
 
   use prgen_read_globals
-  use data_interface
+  !use data_interface
 
   implicit none
 
@@ -48,20 +48,20 @@ subroutine prgen_read_ufile
   idatzero = 1 
   iproc_d = 0
 
-  call readufiles(&
-       tok,&
-       shot,&
-       phase,&
-       cudir,&
-       xp_time,&
-       endtime,&
-       time_series,&
-       itorque,&
-       iptot,&
-       mxgrid,&
-       nsmooth,&
-       idatzero,&
-       iproc_d)
+  !call readufiles(&
+  !     tok,&
+  !     shot,&
+  !     phase,&
+  !     cudir,&
+  !     xp_time,&
+  !     endtime,&
+  !     time_series,&
+  !     itorque,&
+  !     iptot,&
+  !     mxgrid,&
+  !     nsmooth,&
+  !     idatzero,&
+  !     iproc_d)
 
 end subroutine prgen_read_ufile
 
