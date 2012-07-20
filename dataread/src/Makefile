@@ -1,10 +1,8 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
-ifeq ($(OPT),debug)
-   FFLAGS=${FDEBUG}
-else
-   FFLAGS=${FOPT}
-endif
+FC=gfortran -fdefault-real-8 -fdefault-double-8
+FFLAGS=-O2
+FMATH=
 
 EXEC=reader
 LLIB=dataread_lib

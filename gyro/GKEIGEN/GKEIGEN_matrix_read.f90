@@ -12,6 +12,7 @@ subroutine GKEIGEN_matrix_read(n_last_col)
   use gyro_globals
   use gyro_pointers
   use GKEIGEN_globals
+  use mpi
 
   !---------------------------------
   implicit none
@@ -26,8 +27,6 @@ subroutine GKEIGEN_matrix_read(n_last_col)
   !
   character :: dummy
   !---------------------------------
-
-  include 'mpif.h'
 
 10 format(1x,'(',g14.6,',',g14.6,')')
 20 format('----------------- Column: ',I6,'  ----------------------')

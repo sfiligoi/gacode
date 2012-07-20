@@ -3,7 +3,7 @@ subroutine tgyro_write_jacobian(particle)
   use tgyro_iteration_variables
   implicit none
 
-  character*1, intent(in):: particle
+  character(len=1), intent(in):: particle
      open(unit=101, file='jac-'//trim(particle)//'.out')
      open(unit=102, file='Q-z-'//trim(particle)//'.out')
      do p=1,p_max,n_evolve

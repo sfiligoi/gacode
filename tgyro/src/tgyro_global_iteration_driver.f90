@@ -54,7 +54,7 @@ subroutine tgyro_global_iteration_driver
 
   ! Copy (TGYRO copy of input.profiles) -> (GYRO copy of input.profiles)
   if (i_proc_global == 0) then
-     call system('$GACODE_ROOT/tgyro/bin/tgyro_global_helper input.profiles '//trim(paths(1)))
+     call execute_command_line('$GACODE_ROOT/tgyro/bin/tgyro_global_helper input.profiles '//trim(paths(1)))
   endif
 
   ! Initialize GYRO
@@ -186,7 +186,7 @@ subroutine tgyro_global_iteration_driver
 
      ! Map ni,zni from TGYRO variable to EXPRO interface variable, enforcing quasineutrality as appropriate
      if (loc_quasineutral_flag == 1) then
-	call tgyro_quasineutral(ni,ne,dlnnidr,dlnnedr,zi_vec,loc_n_ion,n_r)
+        call tgyro_quasineutral(ni,ne,dlnnidr,dlnnedr,zi_vec,loc_n_ion,n_r)
      endif
      call tgyro_global_interpolation(r/1e2,dlnnidr(1,:)*1e2,ni(1,:)/1e13,n_r,&
           n_exp,EXPRO_rmin,EXPRO_ni(1,:))
@@ -197,8 +197,8 @@ subroutine tgyro_global_iteration_driver
      call EXPRO_write_original('REWRITE'//ittag)
      call EXPRO_palloc(MPI_COMM_WORLD,'./',0) 
      if (i_proc_global == 0) then
-        call system('cp input.profiles.new input.profiles'//ittag)
-        call system('$GACODE_ROOT/tgyro/bin/tgyro_global_helper input.profiles'//ittag//' '//trim(paths(1)))
+        call execute_command_line('cp input.profiles.new input.profiles'//ittag)
+        call execute_command_line('$GACODE_ROOT/tgyro/bin/tgyro_global_helper input.profiles'//ittag//' '//trim(paths(1)))
      endif
 
      ! Get global GYRO flux, compute targets, write data

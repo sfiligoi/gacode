@@ -31,7 +31,7 @@ c
         write(34,500) (ti_m(j),j=0,nj_d-1)
         write(34,'(a12)')' ne - xptor'
         write(34,500) (ne_m(j),j=0,nj_d-1)
-        write(34,'(a12))')' ni - xptor'
+        write(34,'(a12)')' ni - xptor'
         write(34,500) (ni_m(j),j=0,nj_d-1)
       endif
 c

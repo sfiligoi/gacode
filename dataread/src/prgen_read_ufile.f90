@@ -35,7 +35,7 @@ program prgen_read_ufile
   tok   = 'd3d'
   shot  = '90108'
   phase = ''
-  cudir = '/home/staebler/TESTCASES/90108'
+  cudir = '/home/candy/mysim/staebler/90108'
   xp_time = 3.09
   endtime = 1000.0
   time_series = 0

@@ -1,1 +1,1 @@
-GATOFLAGS = -r8 -O0 -pad
+GATOFLAGS = -fdefault-real-8 -fdefault-integer-8
