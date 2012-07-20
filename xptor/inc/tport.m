@@ -80,6 +80,7 @@ c..301x2001 elements
       real*8 ni_t(0:jmaxmt,0:kmaxmt), ne_t(0:jmaxmt,0:kmaxmt)
       real*8 nz_t(0:jmaxmt,0:kmaxmt), vpol_t(0:jmaxmt,0:kmaxmt)
       real*8 vexb_t(0:jmaxmt,0:kmaxmt), vphi_t(0:jmaxmt,0:kmaxmt)
+      real*8 doppler_shear_t(0:jmaxmt,0:kmaxmt)
       real*8 xte_t(0:jmaxmt,0:kmaxmt), xti_t(0:jmaxmt,0:kmaxmt)
       real*8 vetor_t(0:jmaxmt,0:kmaxmt)
       real*8 vepol_t(0:jmaxmt,0:kmaxmt), vstar_t(0:jmaxmt,0:kmaxmt)
@@ -116,6 +117,7 @@ c..602 elements
 c
 c..301 elements
       real*8 theta_exp(0:jmaxmt), zptheta_exp(0:jmaxmt)
+      real*8 h_m(0:jmaxmt)
 c 301 elements (was 51)
       real*8 radfunc(0:jmaxmt), te_m(0:jmaxmt), ti_m(0:jmaxmt)
       real*8 fi_m(0:jmaxmt), fz_m(0:jmaxmt)
@@ -216,7 +218,8 @@ c 301 elements (was 51)
       real*8 vdia_new(nspecies,0:jmaxmt),vneo_new(nspecies,0:jmaxmt)
       real*8 mach_m(nspecies,0:jmaxmt)
       real*8 vmode_m(0:jmaxmt), vstar_m(0:jmaxmt), vstarp_m(0:jmaxmt)
-      real*8 vetor_m(0:jmaxmt), vepol_m(0:jmaxmt), egamma_m(0:jmaxmt)
+      real*8 vetor_m(0:jmaxmt), vepol_m(0:jmaxmt) 
+      real*8 egamma_m(0:jmaxmt),doppler_shear_m(0:jmaxmt)
       real*8 egamma_vphi(0:jmaxmt), egamma_vpol(0:jmaxmt)
       real*8 egamma_vstar(0:jmaxmt)
       real*8 gamma_mode_m(0:jmaxmt), gamma_p_m(0:jmaxmt)
@@ -417,6 +420,7 @@ c
 c
       common /tport/ xi, te_t, ti_t, te_exp_t, ti_exp_t, vphi_exp_t
      & , ne_t, ni_t, nz_t, powe_t, powi_t, vphi_t, vexb_t, vpol_t
+     & , doppler_shear_t
      & , xte_t, xti_t, vetor_t, vepol_t, vstar_t, egamma_t 
      & , egamma_vphi_t, egamma_vpol_t, egamma_vstar_t, anratem_t
      & , chie_t, chii_t, etapar_t, etaphi_t
@@ -485,7 +489,8 @@ c
      & , vphie_m, vpare_m, vphiz_m, vparz_m
      & , vdia_m, vneo_m, vdia_new, vneo_new
      & , vpol_m, nu_pol_m, kpol_m, nuei_m
-     & , vmode_m, vstar_m, vstarp_m, vetor_m, vepol_m, egamma_m
+     & , vmode_m, vstar_m, vstarp_m, vetor_m, vepol_m 
+     & , egamma_m, doppler_shear_m
      & , mach_m, egamma_vphi, egamma_vpol, egamma_vstar
      & , gamma_mode_m, gamma_p_m, cgyrobohm_m
      & , betae_m, betai_m, betat_m, betaf_m
@@ -524,7 +529,7 @@ c
      & , curden_exp, curboot_exp, curbeam_exp
      & , currf_exp, curohm_exp
      & , er_exp, angrot_exp, angrotp_exp, psi_exp, betat_exp
-     & , theta_exp, zptheta_exp
+     & , theta_exp, zptheta_exp, h_m
      & , b_unit_loc_s, b_norm_loc_s, rhosda_loc_s, csda_loc_s
      & , aspectratio_loc_s, kappa_loc_s, s_kappa_loc_s, delta_loc_s
      & , s_delta_loc_s, shift_loc_s, beta_loc_s, q_loc_s

@@ -46,6 +46,7 @@ c
         open (12,file='tipulse.dat',status='unknown')
         open (15,file='vexbpulse.dat',status='unknown')
         open (31,file='vpolpulse.dat',status='unknown')
+        open (11,file='dopspulse.dat',status='unknown')
         open (16,file='exb.dat',status='unknown')
         open (17,file='vexb.dat',status='unknown')
         open (18,file='vetor.dat',status='unknown')
@@ -118,6 +119,7 @@ c
         write(12,150) ntime_t, ngrid
         write(15,150) ntime_t, ngrid
         write(31,150) ntime_t, ngrid
+        write(11,150) ntime_t, ngrid
         write(32,150) ntime_t, ngrid
         write(33,150) ntime_t, ngrid
         do j=0,ntime_t
@@ -126,6 +128,7 @@ c
           write(12,310) time_t(j), ti_t(0:ngrid,j)
           write(15,310) time_t(j), vexb_t(0:ngrid,j)
           write(31,310) time_t(j), vpol_t(0:ngrid,j)
+          write(11,310) time_t(j), doppler_shear_t(0:ngrid,j)
           write(32,310) time_t(j), chie_t(0:ngrid,j)
           write(33,310) time_t(j), chii_t(0:ngrid,j)
         enddo
@@ -195,6 +198,7 @@ c
       close(8)
       close(9)
       close(10)
+      close(11)
       close(12)
       close(15)
       close(16)

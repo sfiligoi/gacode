@@ -233,7 +233,7 @@
 !!          kx0_e = -(0.36*vexb_shear_s/gamma_reference_kx0(1) + 0.29*wE*TANH((0.71*wE)**6))
           kx0_e = -(0.36*vexb_shear_s/gamma_reference_kx0(1) + 0.38*wE*TANH((0.69*wE)**6))
 !a=3.0          kx0_e = -(0.36*vexb_shear_s/gamma_reference_kx0(1) + 0.32*wE*TANH((0.71*wE)**6))
-          a0 = alpha_e_in
+          a0 = alpha_e_in*2.0
           if(alpha_e_in.ne.0.0)then
             kx0_e = a0*TANH(kx0_e/a0)
           else
