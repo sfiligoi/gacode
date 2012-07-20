@@ -24,7 +24,7 @@ program prgen
   !--------------------------------------------------
   implicit none
   !
-  logical :: back
+  logical :: back=0
   !--------------------------------------------------
 
   !--------------------------------------------------
@@ -172,11 +172,19 @@ program prgen
      format_type = 5
 
      if (gato_flag /= 1) then
-        print '(a)','ERROR: (prgen) geqdsk must be provided for corsica format'
-        stop
+        print '(a)','WARNING: (prgen) geqdsk must be provided for corsica format'
      endif
 
      call prgen_read_corsica
+
+  else if (index(raw_data_file,'.ufile',back) /= 0) then
+
+     ! UFILE format
+     print '(a)','INFO: Assuming UFILE format.'
+
+     format_type = 6
+
+     call prgen_read_ufile
 
   else
 

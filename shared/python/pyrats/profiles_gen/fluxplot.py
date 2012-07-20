@@ -1,12 +1,13 @@
 import sys
+import string
 import matplotlib.pyplot as plt
 from math import *
-from os.path import expanduser, expandvars
 from pyrats.profiles_gen.data import profiles_genData
 
 verbose = False
 
-simdir = sys.argv[1]
+filevec = string.splitfields(sys.argv[1],',')
+prof    = profiles_genData(filevec[0])
 
 try:
     m1 = float(sys.argv[2])
@@ -39,12 +40,6 @@ maxr = max(m1, m2)
 
 if minr == maxr:
     print "ERROR: Radius interval must be greater than zero."
-    sys.exit()
-
-try:
-    prof = profiles_genData(simdir)
-except IOError:
-    print "ERROR: No profile data in "+simdir 
     sys.exit()
 
 maxn = prof.match(maxr,prof.get('rho (-)'))-prof.match(minr,prof.get('rho (-)'))

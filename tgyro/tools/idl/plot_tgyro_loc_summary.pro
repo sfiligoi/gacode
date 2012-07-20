@@ -210,6 +210,8 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
             THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
             CHARSIZE=cs, YRANGE=[0,ymax]
       OPLOT, x, data.a_over_Lti[*,N_it], COLOR=100,PSYM=-4, THICK=thick
+      IF (d2flag) THEN OPLOT, x2, data2.a_over_Lti[*,N_it2], COLOR=150, $
+        PSYM=-2, THICK=thick
       XYOUTS, 0.6, 0.8*ymax, 'a/L!DTi!N',$
               CHARSIZE=2,CHARTHICK=thick
   ENDIF ELSE BEGIN
@@ -237,9 +239,11 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
       OPLOT, x, data.ti[*,N_it], COLOR=100,PSYM=4, THICK=thick
       XYOUTS, 0.6, 0.8*ymax, 'T!Di!N (keV)',$
               CHARSIZE=2,CHARTHICK=thick
-      IF (d2flag) THEN XYOUTS, 0.5, ymax, data2.simdir, ALIGN=0.5, $
-        COLOR=150, CHARTHICK=thick, CHARSIZE=cs
+;      IF (d2flag) THEN XYOUTS, 0.5, ymax, data2.simdir, ALIGN=0.5, $
+;        COLOR=150, CHARTHICK=thick, CHARSIZE=cs
   ENDELSE
+  IF (d2flag) THEN XYOUTS, 0.5, 0.9*ymax, data2.simdir, ALIGN=0.5, $
+    COLOR=150, CHARTHICK=thick, CHARSIZE=cs
 
   ymax = MAX(Qi_target) > MAX(Qi_tot) > MAX(Qi0)
   IF KEYWORD_SET(mks) THEN BEGIN
@@ -269,6 +273,8 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
             THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
             CHARSIZE=cs, YRANGE=[0,ymax]
       OPLOT, x, data.a_over_Lte[*,N_it], COLOR=100,PSYM=-4, THICK=thick
+      IF (d2flag) THEN OPLOT, x2, data2.a_over_Lte[*,N_it2], COLOR=150, $
+        PSYM=-2, THICK=thick
       XYOUTS, 0.6, 0.8*ymax, 'a/L!DTe!N',$
               CHARSIZE=2,CHARTHICK=thick
   ENDIF ELSE BEGIN
@@ -297,9 +303,11 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
 
       XYOUTS, 0.6, 0.8*ymax, 'T!De!N (keV)',$
               CHARSIZE=2,CHARTHICK=thick
-      IF (d2flag) THEN XYOUTS, 0.5, ymax, 'iteration # ' + NUMTOSTRING(N_it2), $
-        ALIGN=0.5, COLOR=150, CHARTHICK=thick, CHARSIZE=cs
+;      IF (d2flag) THEN XYOUTS, 0.5, ymax, 'iteration # ' + NUMTOSTRING(N_it2), $
+;        ALIGN=0.5, COLOR=150, CHARTHICK=thick, CHARSIZE=cs
   ENDELSE
+  IF (d2flag) THEN XYOUTS, 0.5, 0.9*ymax, 'iteration # ' + NUMTOSTRING(N_it2), $
+    ALIGN=0.5, COLOR=150, CHARTHICK=thick, CHARSIZE=cs
 
   ymax = MAX(Qe_target) > MAX(Qe_tot) > MAX(Qe0)
   IF KEYWORD_SET(mks) THEN BEGIN
@@ -330,7 +338,9 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
             THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
             CHARSIZE=cs, YRANGE=[0,ymax], XTITLE = dens_xtitle
       OPLOT, x, data.a_over_Lne[*,N_it], COLOR=100,PSYM=-4, THICK=thick
-      XYOUTS, 0.6, 0.8*ymax, 'a/L!Dne!N',$
+       IF (d2flag) THEN OPLOT, x2, data2.a_over_Lni[*,N_it2], COLOR=150, $
+        PSYM=-2, THICK=thick
+     XYOUTS, 0.6, 0.8*ymax, 'a/L!Dne!N',$
               CHARSIZE=2,CHARTHICK=thick
   ENDIF ELSE BEGIN
       ymin = 0 ;MIN(data.exp_ne) < MIN(data.n_e[*,N_it])
@@ -397,13 +407,21 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
       XYOUTS, 0.2, 0.8*ymax, 'V!Dtor!N = R!4x!X!D0!N (10!U5!N m/s)', CHARSIZE=2,$
               CHARTHICK=thick
 
+;hack in Mflux_target for now
+IF (KEYWORD_SET(mks)) THEN BEGIN
+    mflux_target = INTERPOL(data.exp_flow_mom, data.exp_rmin, data.rmin)/data.vprime
+    mflux_target[0] = 0.
+ENDIF
+
       ymax = MAX(Mflux_target) > MAX(Mflux_tot)
       IF KEYWORD_SET(mks) THEN ymin = 0 ELSE $
         ymin = 0.1*(MIN(Mflux_target[1:*]) < MIN(Mflux_tot[1:*]))
-      
+IF KEYWORD_SET(mks) THEN ymin = MIN(mflux_target) < MIN(mflux_tot)
+
       PLOT, x, Mflux_target, XRANGE=[0,1], XTITLE=xtitle, LINESTYLE=2, $
             YRANGE=[ymin,ymax], CHARSIZE=cs, $
             THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick
+OPLOT, x, -Mflux_target, linestyle=4, thick=thick
       OPLOT, x, Mflux0, THICK=thick
       OPLOT, x, Mflux_tot, COLOR=100,PSYM=-4, THICK=thick
       OPLOT, x, Mflux_neo, COLOR=50, PSYM=-4, THICK=thick
@@ -420,7 +438,8 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
               FILE = dirloc +'/' + simdir + '/summary.eps'
       PLOT_TGYRO_LOC_SUMMARY, simdir, N_it = N_it, RHO=rho, MKS=mks,$
         PS = 1, DATA2 = data2, Nit2=N_it2,  PLOT_ROT=plot_rot, $
-        DATA_PSYM=data_psym, _EXTRA=extra
+        DATA_PSYM=data_psym, PLOT_GRADIENTS=plot_gradients, $
+        WCM2=wcm2, _EXTRA=extra
       DEVICE, /CLOSE
       SET_PLOT, 'X'
   ENDIF

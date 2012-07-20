@@ -126,7 +126,7 @@ subroutine tglf_run()
      call tglf_dump_global
   endif
 
-  if (tglf_use_transport_model_in)then
+  if (tglf_use_transport_model_in) then
 
      call tglf_tm
 
@@ -145,6 +145,9 @@ subroutine tglf_run()
      ! Pi_e/Pi_GB
      tglf_elec_mflux_out = get_stress_tor(1,1)
 
+     ! S_e/S_GB
+     tglf_elec_expwd_out = get_exchange(1,1)
+
      ! Ions
 
      do i_ion=1,5
@@ -158,6 +161,9 @@ subroutine tglf_run()
 
         ! Pi_i/Pi_GB
         tglf_ion_mflux_out(i_ion) = get_stress_tor(i_ion+1,1)
+
+        ! S_i/S_GB
+        tglf_ion_expwd_out(i_ion) = get_exchange(i_ion+1,1)
 
      enddo
 

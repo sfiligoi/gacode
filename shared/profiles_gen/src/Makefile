@@ -29,6 +29,7 @@ OBJECTS = prgen_read_globals.o \
           prgen_read_plasmastate.o \
 	  prgen_read_peqdsk.o \
 	  prgen_read_corsica.o \
+	  prgen_read_ufile.o \
           prgen_write.o \
           fluxfit_driver.o \
           fluxfit_moments.o \

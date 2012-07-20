@@ -115,6 +115,7 @@ module tgyro_globals
   real, dimension(:), allocatable :: gamma_gb
   real, dimension(:), allocatable :: pi_gb
   real, dimension(:), allocatable :: q_gb
+  real, dimension(:), allocatable :: s_gb
 
   ! Collision frequencies
   real, dimension(:), allocatable :: nue
@@ -183,12 +184,15 @@ module tgyro_globals
   real, dimension(:), allocatable :: p_alpha
   real, dimension(:), allocatable :: p_brem
   real, dimension(:), allocatable :: p_exch
+  real, dimension(:), allocatable :: p_expwd
   real, dimension(:), allocatable :: p_i_aux_in
   real, dimension(:), allocatable :: p_e_aux_in
   real, dimension(:), allocatable :: f_b_in
+  real, dimension(:), allocatable :: f_w_in
   real, dimension(:), allocatable :: s_alpha
   real, dimension(:), allocatable :: s_brem
   real, dimension(:), allocatable :: s_exch
+  real, dimension(:), allocatable :: s_expwd
 
   real, dimension(:), allocatable :: res
   real, dimension(:), allocatable :: res0
@@ -271,6 +275,7 @@ module tgyro_globals
   real :: tgyro_rmin
   real :: tgyro_rmax
   integer :: tgyro_global_radii
+  integer :: tgyro_expwd_flag
   !
   ! Iteration variables (global)
   !

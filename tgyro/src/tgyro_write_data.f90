@@ -33,7 +33,7 @@ subroutine tgyro_write_data(i_print)
      open(unit=1,file='nu_rho.out',status='replace')
      close(1)
 
-     open(unit=1,file='power.out',status='replace')
+     open(unit=1,file='out.tgyro.power',status='replace')
      close(1)
 
      open(unit=1,file='flux_target.out',status='replace')
@@ -147,18 +147,19 @@ subroutine tgyro_write_data(i_print)
 
   close(1)
 
-  ! Power (power.out)
+  ! Power (out.tgyro.power) (erg/s = 1e-7 W = 1e-7*1e-6 MW)
 
-  open(unit=1,file='power.out',status='old',position='append')
+  open(unit=1,file='out.tgyro.power',status='old',position='append')
 
-  write(1,20) 'r/a','p_alpha','p_brem','p_exch','p_i_aux','p_e_aux','p_i','p_e'
-  write(1,20) '','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)'
+  write(1,20) 'r/a','p_alpha','p_brem','p_exch','p_expwd','p_i_aux','p_e_aux','p_i','p_e'
+  write(1,20) '','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)'
   do i=1,n_r
      write(1,10) &
           r(i)/r_min,&
           p_alpha(i)*1e-7*1e-6,&
           -p_brem(i)*1e-7*1e-6,&
           p_exch(i)*1e-7*1e-6,&
+          p_expwd(i)*1e-7*1e-6,&
           p_i_aux_in(i)*1e-7*1e-6,&
           p_e_aux_in(i)*1e-7*1e-6,&
           p_i(i)*1e-7*1e-6,&
@@ -465,10 +466,10 @@ subroutine tgyro_write_data(i_print)
   close(1)
 
   ! Data
-10 format(t1,11(1pe13.6,1x))
+10 format(t1,11(1pe13.6,2x))
   !10 format(t1,11(1pe19.12,1x))
   ! Text headers
-20 format(t2,a,t16,a,t30,a,t44,a,t58,a,t72,a,t86,a,t100,a,t114,a,t128,a,t142,a)
+20 format(t2,a,t17,a,t32,a,t47,a,t62,a,t77,a,t92,a,t107,a,t122,a,t137,a,t152,a)
   ! Residual header
 30 format(t2,a,i3,1pe12.5,2x,'[',i6,']')
   ! Residuals

@@ -1,5 +1,5 @@
 !-------------------------------------------------------
-! get_g_squared.f90 [caller: get_diffusivity.f90]
+! gyro_g_squared.f90 [caller: get_diffusivity.f90]
 !
 ! PURPOSE:
 !  Calculates the flux-surface average of g_star*g
@@ -11,7 +11,7 @@
 !  (quasilinear (QL) norm).
 !--------------------------------------------------------------------------
 
-subroutine get_g_squared
+subroutine gyro_g_squared
 
   use mpi
   use gyro_globals
@@ -125,7 +125,7 @@ subroutine get_g_squared
   !----------------------------------------------------------------------
 
   if (i_proc == 0 .and. debug_flag == 1) then
-     print *,'[get_g_squared called]'
+     print *,'[gyro_g_squared called]'
   endif
 
-end subroutine get_g_squared
+end subroutine gyro_g_squared
