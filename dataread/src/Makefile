@@ -1,25 +1,21 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
-EXEC=reader
 LLIB=dataread_lib
 
 OBJECTS = data_interface.o \
+          data_avg.o      \
           data_run.o       \
           data_readufiles.o \
           data_readiterdb.o   \
-          data_avg.o      \
 	  data_gridsetup.o  \
           data_LIBPACK.o 
 
 .SUFFIXES : .o .f .f90
 
-all: $(LLIB).a $(EXEC) prgen_read_ufile.o
+all: $(LLIB).a
 
 $(LLIB).a: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
-
-$(EXEC): prgen_read_ufile.o
-	$(FC) $(FMATH) -o $(EXEC) prgen_read_ufile.o $(LLIB).a
 
 .f90.o :
 	$(FC) $(FMATH) $(FFLAGS) -c $<

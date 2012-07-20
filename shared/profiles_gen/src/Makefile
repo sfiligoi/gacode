@@ -43,7 +43,7 @@ OBJECTS = prgen_read_globals.o \
 .SUFFIXES : .o .f90
 
 exec: $(OBJECTS)
-	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(GACODE_ROOT)/shared/math/math_lib.a $(LMATH) $(NETCDF)
+	$(FC) $(FMATH) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS)
 
 .f90.o :
 	$(FC) $(FMATH) $(FFLAGS) -I $(NETCDF_INC) -c $<
