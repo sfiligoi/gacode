@@ -54,7 +54,7 @@ subroutine tgyro_global_iteration_driver
 
   ! Copy (TGYRO copy of input.profiles) -> (GYRO copy of input.profiles)
   if (i_proc_global == 0) then
-     call execute_command_line('$GACODE_ROOT/tgyro/bin/tgyro_global_helper input.profiles '//trim(paths(1)))
+     call system('$GACODE_ROOT/tgyro/bin/tgyro_global_helper input.profiles '//trim(paths(1)))
   endif
 
   ! Initialize GYRO
@@ -197,8 +197,8 @@ subroutine tgyro_global_iteration_driver
      call EXPRO_write_original('REWRITE'//ittag)
      call EXPRO_palloc(MPI_COMM_WORLD,'./',0) 
      if (i_proc_global == 0) then
-        call execute_command_line('cp input.profiles.new input.profiles'//ittag)
-        call execute_command_line('$GACODE_ROOT/tgyro/bin/tgyro_global_helper input.profiles'//ittag//' '//trim(paths(1)))
+        call system('cp input.profiles.new input.profiles'//ittag)
+        call system('$GACODE_ROOT/tgyro/bin/tgyro_global_helper input.profiles'//ittag//' '//trim(paths(1)))
      endif
 
      ! Get global GYRO flux, compute targets, write data
