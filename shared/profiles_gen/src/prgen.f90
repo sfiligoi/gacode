@@ -212,6 +212,8 @@ program prgen
      call prgen_map_peqdsk
   else if (index(raw_data_file,'.corsica') /= 0) then
      call prgen_map_corsica
+  else if (index(raw_data_file,'.ufile') /= 0) then
+     call prgen_map_ufile
   else
      call prgen_map_iterdb
   endif

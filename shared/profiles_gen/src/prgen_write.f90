@@ -53,6 +53,14 @@ subroutine prgen_write
      write(1,20) '#'
      write(1,20) '#                 IONS : D [assumed]'
 
+  case (6)
+     write(1,20) '#              TOKAMAK : ',ufile_tok
+     write(1,20) '#          SHOT NUMBER : ',ufile_shot
+     write(1,30) '#    RADIAL GRIDPOINTS : ',nx
+     write(1,'(a,1pe9.2,a)') '#               Q_EDGE : ',q(nx)
+     write(1,20) '#'
+     write(1,20) '#                 IONS : D [assumed]'
+
   end select
 
   write(1,20) '# '
@@ -125,6 +133,9 @@ subroutine prgen_write
   case (5)
      write(1,'(a,sp,1pe14.7)') 'BT_EXP=',corsica_bref
      write(1,60) 'ARHO_EXP=',corsica_arho
+  case (6)
+     write(1,'(a,sp,1pe14.7)') 'BT_EXP=',ufile_bref
+     write(1,60) 'ARHO_EXP=',ufile_arho
 
   end select
 

@@ -15,12 +15,14 @@ OBJECTS = prgen_read_globals.o \
           allocate_plasmastate_vars.o \
 	  allocate_peqdsk_vars.o \
 	  allocate_corsica_vars.o \
+	  allocate_ufile_vars.o \
           prgen_get_chi.o \
           prgen_map_iterdb.o \
           prgen_map_null.o \
           prgen_map_plasmastate.o \
 	  prgen_map_peqdsk.o \
 	  prgen_map_corsica.o \
+	  prgen_map_ufile.o \
           prgen_read_cer.o \
           prgen_read_gato.o \
           prgen_read_iterdb.o \
