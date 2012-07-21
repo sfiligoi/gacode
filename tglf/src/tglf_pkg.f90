@@ -4,8 +4,7 @@
       PRIVATE
 ! linear stability and transport model drivers
       PUBLIC :: tglf,tglf_TM,tglf_TM_mpi
-
-! gemetry setup routine
+! geometry setup utility
       PUBLIC :: tglf_setup_geometry
 ! input routines
       PUBLIC :: put_species,put_kys,put_signs
@@ -82,8 +81,8 @@
       END SUBROUTINE tglf
 !
       include 'tglf_inout.f90'
-      include 'tglf_setup_geometry.f90'
       include 'tglf_TM.f90'
       include 'tglf_TM_mpi.f90'
+      include 'tglf_setup_geometry.f90'
 !
       END MODULE tglf_pkg

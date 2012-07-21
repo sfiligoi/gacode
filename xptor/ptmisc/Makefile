@@ -1,9 +1,10 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
+include ../install/make.ext.${GACODE_PLATFORM}
 
 ifeq ($(OPT),debug)
-   FFLAGS=${FDEBUG}
+   FFLAGS=${FDEBUG} ${XPTORFLAGS}
 else
-   FFLAGS=${FOPT}
+   FFLAGS=${FOPT} ${XPTORFLAGS}
 endif
 
 LLIB=../driver/xptor_lib
@@ -36,13 +37,13 @@ lib: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS) 
 
 .f.o :
-	$(FC) $(FMATH) $(FFLAGS) -c $<
+	$(FC) $(FFLAGS) -c $<
 
 write_netcdf.o:	write_netcdf.f
-	$(FC) $(FMATH) $(FFLAGS)  -I $(NETCDF_INC) -c $<
+	$(FC) $(FFLAGS)  -I $(NETCDF_INC) -c $<
 
 .F.o :
-	$(FC) -c $(FMATH) $(FFLAGS) $(SPECIAL) $<
+	$(FC) -c $(FFLAGS) $(SPECIAL) $<
 
 clean:
 	rm -f *.o 

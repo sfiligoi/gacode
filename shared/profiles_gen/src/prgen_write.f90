@@ -53,6 +53,14 @@ subroutine prgen_write
      write(1,20) '#'
      write(1,20) '#                 IONS : D [assumed]'
 
+  case (6)
+     write(1,20) '#              TOKAMAK : ',ufile_tok
+     write(1,20) '#          SHOT NUMBER : ',ufile_shot
+     write(1,30) '#    RADIAL GRIDPOINTS : ',nx
+     write(1,'(a,1pe9.2,a)') '#               Q_EDGE : ',q(nx)
+     write(1,20) '#'
+     write(1,20) '#                 IONS : D [assumed]'
+
   end select
 
   write(1,20) '# '
@@ -111,20 +119,23 @@ subroutine prgen_write
   select case (format_type)
 
   case (0)
-     write(1,'(a,sp1pe14.7)') 'BT_EXP=',null_bref
+     write(1,'(a,sp,1pe14.7)') 'BT_EXP=',null_bref
      write(1,60) 'ARHO_EXP=',null_arho
   case (1)
-     write(1,'(a,sp1pe14.7)') 'BT_EXP=',-onetwo_Btor
+     write(1,'(a,sp,1pe14.7)') 'BT_EXP=',-onetwo_Btor
      write(1,60) 'ARHO_EXP=',onetwo_rho_grid(onetwo_nj)
   case (2)
-     write(1,'(a,sp1pe14.7)') 'BT_EXP=',plst_b_axis_vac*(-plst_kccw_bphi)
+     write(1,'(a,sp,1pe14.7)') 'BT_EXP=',plst_b_axis_vac*(-plst_kccw_bphi)
      write(1,60) 'ARHO_EXP=',sqrt(plst_phit(nx)/plst_b_axis_vac/pi)
   case (3)
-     write(1,'(a,sp1pe14.7)') 'BT_EXP=',peqdsk_bref
+     write(1,'(a,sp,1pe14.7)') 'BT_EXP=',peqdsk_bref
      write(1,60) 'ARHO_EXP=',peqdsk_arho
   case (5)
-     write(1,'(a,sp1pe14.7)') 'BT_EXP=',corsica_bref
+     write(1,'(a,sp,1pe14.7)') 'BT_EXP=',corsica_bref
      write(1,60) 'ARHO_EXP=',corsica_arho
+  case (6)
+     write(1,'(a,sp,1pe14.7)') 'BT_EXP=',ufile_bref
+     write(1,60) 'ARHO_EXP=',ufile_arho
 
   end select
 

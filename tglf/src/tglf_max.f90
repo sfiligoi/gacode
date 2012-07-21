@@ -1,12 +1,14 @@
       SUBROUTINE tglf_max
 !
       USE tglf_global
+      USE tglf_dimensions
       USE tglf_species
+      USE tglf_pkg
 !
       IMPLICIT NONE
       INTEGER,PARAMETER :: nbmax=4
       LOGICAL :: save_iflux
-      INTEGER :: nt,i,imax,ntm
+      INTEGER :: nt,i,is,imax,ntm
       INTEGER :: save_nbasis
       INTEGER :: igamma,branch
       REAL :: width_max=1.65
@@ -23,7 +25,7 @@
       REAL :: wkp_max,wgp_max,width_p_max 
       REAL :: kyi
 !
-      if(new_start)CALL tglf_start
+      CALL tglf_setup_geometry
 !
       do i=1,nmodes_in
         gamma_reference_kx0(i)=0.0
@@ -35,21 +37,28 @@
       if(alpha_quench_in.eq.0.0)vexb_shear_in = 0.0
       save_alpha_kx_p = alpha_kx_p_in
       alpha_kx_p_in=0.0
-!
-      kyi = ky_in*SQRT(taus_in(2)*mass_in(2))/ABS(zs_in(2))
-      wgp_max = ABS(vpar_shear_in(2)/vs(2))*kyi/(1+kyi**2)
-      width_p_max = 3.6/(sqrt_two*R_unit*q_unit*MAX(wgp_max,0.001))
-      width_p_max=MAX(width_p_max,0.01)
       width_min = width_min_in
       width_max = ABS(width_in)
-!      if(width_p_max.gt.width_in)then
-!        width_in = width_p_max
-!        width_min = width_p_max/5.0
-!      endif
-      if(width_p_max.lt.width_min_in)then
-        width_min = width_p_max
-      endif
-!      write(*,*)ky," width_p_max = ", width_p_max
+!
+!      write(*,*)"R_unit=",R_unit,"q_unit=",q_unit
+!      write(*,*)ns0,ns,ky_in
+      do is=ns0,ns
+        kyi = ky_in*SQRT(taus(is)*mass(is))/ABS(zs(is))
+        wgp_max = ABS((taus(is)/zs(is))*vpar_shear_in(is)/vs(is))*ky_in/(1+kyi**2)
+        width_p_max = 3.6*vs(is)/(sqrt_two*R_unit*q_unit*MAX(wgp_max,0.001))
+        width_p_max=MAX(width_p_max,0.01)
+         if(width_p_max.lt.width_min_in)then
+          width_min = width_p_max
+        endif
+      enddo
+!        kyi = ky_in*SQRT(taus_in(2)*mass_in(2))/ABS(zs_in(2))
+!        wgp_max = ABS(vpar_shear_in(2)/vs(2))*kyi/(1+kyi**2)
+!        width_p_max = 3.6/(sqrt_two*R_unit*q_unit*MAX(wgp_max,0.001))
+!        width_p_max=MAX(width_p_max,0.01)
+!         if(width_p_max.lt.width_min_in)then
+!          width_min = width_p_max
+!        endif
+!      write(*,*)ky," width_p_max = ", width_p_max,width_min
 !
 ! for ibranch_in > 0 the most unstable positive frequency mode is stored 
 ! in gamma_out(1) and the most unstable negative frequency mode 

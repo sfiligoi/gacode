@@ -22,7 +22,7 @@ c
       mu3 = sqrt(amassimp_exp)*42.851
 
 ! Initialize NEO
-      neo_silent_flag_in=0
+      neo_silent_flag_in=1
       call neo_init("./ ",MPI_COMM_WORLD)
 
 ! Simulation mode (dke solve + analytic)
@@ -122,7 +122,7 @@ c
 
   ! Rotation is always active
 !      neo_rotation_model_in = 2  !solves Hinton-Wong model
-      neo_rotation_model_in = 2
+      neo_rotation_model_in = 1  ! diamagnetic ordering
       neo_omega_rot_in = 0.0  
       if(neo_rotation_model_in.eq.2)then
         neo_omega_rot_in = vexbm*cv/(w0*rmajor_exp)

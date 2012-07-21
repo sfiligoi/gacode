@@ -53,14 +53,5 @@
      &  ifusmodel, idt, fuscale, jgeo_gks, lprint_gks,
      &  tauscale, iglf2d, ibound, cped, irunmax, xvarmin, xvarmax,
      &  iglf2d_scan, iglf2d_jrun, glf2d_zvarmin, glf2d_zvarmax,
-     &   igrid, igyro, ibranch_gf, theta0_gf,dilution_model
-!     &  nroot_tg, nbasis_tg, nx_tg, ibranch_tg, phii_tg,
-!     &  xparam_tg, iflagin_tg, xky0_tg, rms_theta_tg, park_tg, ghat_tg,
-!     &  gchat_tg, adamp_tg, alpha_star_tg, alpha_e_tg, gamma_e_tg,
-!     &  xkdamp_tg, alpha_p_tg, gamma_p_tg,
-!     &  cnorm_tg, ikymax_tg, theta0_tg, 
-!     &  xkymin_tg, xkymax_tg, lprint_tg, rlti_tg, rlte_tg, rlne_tg,
-!     &  rlni_tg, rlnimp_tg, dil_tg, apwt_tg, aiwt_tg, zimp_tg,
-!     &  amassimp_tg, taui_tg, rmin_tg, rmaj_tg, q_tg, xnu_tg,
-!     &  betae_tg, shat_tg, alpha_tg, elong_tg, igeo_tg, xwell_tg,
-!     &  kappa_tg, delta_tg, s_kappa_tg, s_delta_tg,
+     &  igrid, igyro, ibranch_gf, theta0_gf,dilution_model,
+     &  doppler_shear_model

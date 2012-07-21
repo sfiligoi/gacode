@@ -6,7 +6,7 @@ all:
 	cd gato ; make 
 	cd tglf ; make
 	cd tgyro ; make
-#	cd dataread ; make
+	cd dataread ; make
 #	cd gks ; make
 
 clean:

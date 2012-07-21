@@ -32,8 +32,8 @@ module gyro_nl_private
   !-----------------------------------------------
   ! FFTW-specific parameters:
   !
-  integer*8 :: plan_f 
-  integer*8 :: plan_b
+  integer(8) :: plan_f 
+  integer(8) :: plan_b
   !-----------------------------------------------
 
   !-----------------------------------------------

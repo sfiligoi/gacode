@@ -186,7 +186,7 @@ subroutine tgyro_global_iteration_driver
 
      ! Map ni,zni from TGYRO variable to EXPRO interface variable, enforcing quasineutrality as appropriate
      if (loc_quasineutral_flag == 1) then
-	call tgyro_quasineutral(ni,ne,dlnnidr,dlnnedr,zi_vec,loc_n_ion,n_r)
+        call tgyro_quasineutral(ni,ne,dlnnidr,dlnnedr,zi_vec,loc_n_ion,n_r)
      endif
      call tgyro_global_interpolation(r/1e2,dlnnidr(1,:)*1e2,ni(1,:)/1e13,n_r,&
           n_exp,EXPRO_rmin,EXPRO_ni(1,:))
