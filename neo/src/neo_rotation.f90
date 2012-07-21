@@ -166,13 +166,13 @@ module neo_rotation
 
       if(silent_flag == 0 .and. i_proc == 0 .and. rotation_model == 2) then
          open(io_rot,file=trim(path)//runfile,status='old',position='append')
-         write (io_rot,'(e16.8,$)') r(ir)
-         write (io_rot,'(e16.8,$)') phi_rot_avg
+         write (io_rot,'(e16.8)',advance='no') r(ir)
+         write (io_rot,'(e16.8)',advance='no') phi_rot_avg
          do is=1, n_species
-            write (io_rot,'(e16.8,$)') dens_avg(is)
+            write (io_rot,'(e16.8)',advance='no') dens_avg(is)
          enddo
          do it=1, n_theta
-            write (io_rot,'(e16.8,$)') phi_rot(it)
+            write (io_rot,'(e16.8)',advance='no') phi_rot(it)
          enddo
          write(io_rot,*)
          close(io_rot)

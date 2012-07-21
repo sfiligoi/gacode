@@ -131,6 +131,12 @@ subroutine tgyro_source
      pflux_e_target(1) = 0.0
      pflux_e_target(2:n_r) = f_b_in(2:n_r)/volp(2:n_r)
 
+  case (3)
+
+     pflux_e_target(1) = 0.0
+     pflux_e_target(2:n_r) = (f_b_in(2:n_r) + f_w_in(2:n_r)) &
+          /volp(2:n_r) 
+
   end select
   !------------------------------------------------
 

@@ -805,8 +805,10 @@
 !/
 
       MODULE tglf_mpi
+
+        use mpi
+
         IMPLICIT NONE
-        include 'mpif.h'
 
         ! local communicator
         integer :: iCommTglf    = -1

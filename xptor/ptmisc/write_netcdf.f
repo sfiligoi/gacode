@@ -942,6 +942,11 @@ c
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'def.',
      & len('omega / (cs/a)'),'omega / (cs/a)')
       j=j+1
+      oneval(j) = nf_def_var (ncid,'doppler_shear_m',
+     &  nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'def.',
+     & len('Doppler_shear / (cs/a)'),'Doppler_shear / (cs/a)')
+      j=j+1
       oneval(j) = nf_def_var (ncid,'egamma_m',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'def.',
      & len('gamma_E / (cs/a)'),'gamma_E / (cs/a)')
@@ -1062,6 +1067,16 @@ c
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
      &          len('gb diffusivity m^2/s'),
      &          'gb diffusivity m^2/s')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'csda_m',nf_double,1,
+     &            rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &          len('cs/a 1/s'),'cs/a 1/s')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'rhosda_m',nf_double,1,
+     &            rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &          len('rhos/a '), 'rhos/a ')
       j=j+1
       oneval(j) = nf_def_var(ncid,'flowe_glf',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
@@ -1659,7 +1674,8 @@ c
       oneval(j) = nf_put_var_double(ncid, rhid1(j),
      >    mach_exp(3,0:mxgrid))
       j=j+1
-      oneval(j) = nf_put_var_double(ncid, rhid1(j), egamma_exp)
+      oneval(j) = nf_put_var_double(ncid, rhid1(j),
+     >    egamma_exp(0:mxgrid)*cv/csda_exp(0:mxgrid))
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), gamma_p_exp)
       j=j+1
@@ -1788,10 +1804,10 @@ c
       oneval(j) = nf_put_var_double(ncid, rhid1(j), c_tor)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), 
-     &            vprime(1:mxgrid+1,1))
+     &            vprime(1:mxgrid,1))
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), 
-     &            vprime(1:mxgrid+1,2))
+     &            vprime(1:mxgrid,2))
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), sfarea_exp)
       j=j+1
@@ -1854,7 +1870,11 @@ c
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), anfreq_m)
       j=j+1
-      oneval(j) = nf_put_var_double(ncid, rhid1(j), egamma_m)
+      oneval(j) = nf_put_var_double(ncid, rhid1(j),
+     >   doppler_shear_m(0:mxgrid)*cv/csda_m(0:mxgrid))
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j),
+     >   egamma_m(0:mxgrid)*cv/csda_m(0:mxgrid))
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), gamma_p_m)
       j=j+1
@@ -1912,6 +1932,10 @@ c
      >            chiegb_etg_m*cgyrobohm_m)
       j=j+1
       oneval(j) = nf_put_var_double(ncid,rhid1(j),cgyrobohm_m)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid,rhid1(j),csda_m)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid,rhid1(j),rhosda_m)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), flowe_glf)
       j=j+1
@@ -2011,15 +2035,15 @@ c
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), exch_glf)
       j=j+1
-      oneval(j) = nf_put_var_double(ncid, rhid1(j), S(1,1:mxgrid+1))
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), S(1,1:mxgrid))
       j=j+1
-      oneval(j) = nf_put_var_double(ncid, rhid1(j), S(2,1:mxgrid+1))
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), S(2,1:mxgrid))
       j=j+1
-      oneval(j) = nf_put_var_double(ncid, rhid1(j), S(3,1:mxgrid+1))
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), S(3,1:mxgrid))
       j=j+1
-      oneval(j) = nf_put_var_double(ncid, rhid1(j), S(4,1:mxgrid+1))
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), S(4,1:mxgrid))
       j=j+1
-      oneval(j) = nf_put_var_double(ncid, rhid1(j), S(5,1:mxgrid+1))
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), S(5,1:mxgrid))
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j),
      >  INTEGRAL_LHS(1,0:mxgrid))
@@ -2051,19 +2075,19 @@ c
       oneval(j) = nf_put_var_double(ncid, rhid1(j),
      >  INTEGRAL_RHS(5,0:mxgrid))
       j=j+1
-      oneval(j)=nf_put_var_double(ncid, rhid1(j),diff(1,1,1:mxgrid+1))
+      oneval(j)=nf_put_var_double(ncid, rhid1(j),diff(1,1,1:mxgrid))
       j=j+1
-      oneval(j)=nf_put_var_double(ncid, rhid1(j),conv3(1,1,1:mxgrid+1))
+      oneval(j)=nf_put_var_double(ncid, rhid1(j),conv3(1,1,1:mxgrid))
       j=j+1
-      oneval(j)=nf_put_var_double(ncid, rhid1(j),nu(1,1,1:mxgrid+1))
+      oneval(j)=nf_put_var_double(ncid, rhid1(j),nu(1,1,1:mxgrid))
       j=j+1
-      oneval(j)=nf_put_var_double(ncid, rhid1(j),stiff(1,1,1:mxgrid+1))
+      oneval(j)=nf_put_var_double(ncid, rhid1(j),stiff(1,1,1:mxgrid))
       j=j+1
-      oneval(j)=nf_put_var_double(ncid, rhid1(j),stiff(2,1,1:mxgrid+1))
+      oneval(j)=nf_put_var_double(ncid, rhid1(j),stiff(2,1,1:mxgrid))
       j=j+1
-      oneval(j)=nf_put_var_double(ncid, rhid1(j),stiff(1,2,1:mxgrid+1))
+      oneval(j)=nf_put_var_double(ncid, rhid1(j),stiff(1,2,1:mxgrid))
       j=j+1
-      oneval(j)=nf_put_var_double(ncid, rhid1(j),stiff(2,2,1:mxgrid+1))
+      oneval(j)=nf_put_var_double(ncid, rhid1(j),stiff(2,2,1:mxgrid))
 c
 c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
 

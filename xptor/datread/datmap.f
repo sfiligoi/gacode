@@ -411,7 +411,7 @@ c
 c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
 c... read in experimental ExB shear profile
 c
-      if(iexb.eq.3) then
+      if(iexb.eq.2) then
         open(unit=5,status='unknown',access='sequential',
      >             file='omega.dat')
         do j=0,jmaxm

@@ -58,14 +58,14 @@ subroutine vgen_getgeo
         call GEO_do()
      endif
     
-     write(1,'(e16.8,$)') EXPRO_rho(i)
+     write(1,'(e16.8)',advance='no') EXPRO_rho(i)
      do j=1, n_theta
         call GEO_interp(theta(j))
-        write(1,'(e16.8,$)') theta(j)
-        write(1,'(e16.8,$)') GEO_b  * EXPRO_bunit(i)
-        write(1,'(e16.8,$)') GEO_bp * EXPRO_bunit(i)
-        write(1,'(e16.8,$)') GEO_bt * EXPRO_bunit(i)
-        write(1,'(e16.8,$)') GEO_bigr * r_min
+        write(1,'(e16.8)',advance='no') theta(j)
+        write(1,'(e16.8)',advance='no') GEO_b  * EXPRO_bunit(i)
+        write(1,'(e16.8)',advance='no') GEO_bp * EXPRO_bunit(i)
+        write(1,'(e16.8)',advance='no') GEO_bt * EXPRO_bunit(i)
+        write(1,'(e16.8)',advance='no') GEO_bigr * r_min
      enddo
      write(1,*)
      

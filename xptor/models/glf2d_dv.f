@@ -369,20 +369,21 @@ c     > +grad_c_per*(vpolm+vneom(2))+grad_c_tor*(vexbm+vdiam(2))
 c
         gamma_e_gf = -cv/csdam*(rminm/rhom)*drhodr(jm)
      >  *theta_exp(jm)*gradvexbm
-      if(iexb.eq.1)then
-        gamma_e_gf = -cv/csdam*(rminm/rhom)*drhodr(jm)
-     >  *theta_exp(jm)*(vexb_m(jm+1)-vexb_m(jm))/dr(jm,2)
-      elseif(iexb.ge.2)then
-        gamma_e_gf = egamma_exp(jm)
+      if(ipert_gf.eq.0)egamma_m(jm)=csdam*gamma_e_gf/cv
+      if(iexb.ge.1)then
+c        gamma_e_gf = egamma_exp(jm)
+        gamma_e_gf =(cv/csdam)* egamma_exp(jm)
+      endif
+      if(doppler_shear_model.eq.1)then
+c        gamma_e_gf = -cv/csdam*(rminm/rhom)*drhodr(jm)
+c     >  *theta_exp(jm)*(vexb_m(jm+1)-vexb_m(jm))/dr(jm,2)
+        gamma_e_gf = (cv/csdam)*doppler_shear_m(jm)
       endif
       gamma_p_gf = -(cv/csdam)*drhodr(jm)*
      >  (apolm*(gradvpolm+gradvneom(2))+atorm*(gradvexbm+gradvdiam(2))
      >  +(vpolm+vneom(2))*grad_a_pol+(vexbm+vdiam(2))*grad_a_tor)
       if(jm.eq.ngrid-1.and.itport_pt(5).eq.0)gamma_e_gf=0.0
-      if(ipert_gf.eq.0)then
-        egamma_m(jm)= gamma_e_gf
-        gamma_p_m(jm) = gamma_p_gf
-      endif
+      if(ipert_gf.eq.0)gamma_p_m(jm) = gamma_p_gf
       exch_gf=0.D0
 c   local rho_star
       if(bt_flag.gt.0)then
@@ -1218,25 +1219,28 @@ c set TGLF gradients
       rlns_tg(3)=zpmnz
       vexb_shear_tg = -(cv/csdam)*(rminm/rhom)*drhodr(jm)
      >  *theta_exp(jm)*gradvexbm
-      if(iexb.eq.1)then
+      if(ipert_gf.eq.0)egamma_m(jm)=vexb_shear_tg*csdam/cv
+      if(iexb.ge.1)then
+c        vexb_shear_tg = egamma_exp(jm)
+        vexb_shear_tg =(cv/csdam)* egamma_exp(jm)
+      endif
+      if(doppler_shear_model.eq.1)then
 c this takes out the pertubation of the Doppler shear through gradvexbm
-        vexb_shear_tg = -(cv/csdam)*(rminm/rhom)*drhodr(jm)
-     >  *theta_exp(jm)*(vexb_m(jm+1)-vexb_m(jm))/dr(jm,2)
-      elseif(iexb.ge.2)then
-        vexb_shear_tg = egamma_exp(jm)
+c        vexb_shear_tg = -(cv/csdam)*(rminm/rhom)*drhodr(jm)
+c     >  *theta_exp(jm)*(vexb_m(jm+1)-vexb_m(jm))/dr(jm,2)
+        vexb_shear_tg = (cv/csdam)*doppler_shear_m(jm)
       endif
 c      if(jm.eq.ngrid-1.and.itport_pt(5).eq.0)vexb_shear_tg=0.0
-      if(ipert_gf.eq.0)egamma_m(jm)=vexb_shear_tg
 c
       vpar_shear_tg(1) = -sign_Bt_exp*(cv/(csdam))*drhodr(jm)*
-     >  (apolm*(gradvpolm+gradvneom(1))+atorm*(gradvexbm+gradvdiam(1)) 
-     >  +(vpolm+vneom(1))*grad_a_pol+(vexbm+vdiam(1))*grad_a_tor)
+     >  (apolm*(gradvpolm+gradvneom(1))+atorm*(gradvexbm+gradvdiam(1))) 
+cc     >  +(vpolm+vneom(1))*grad_a_pol+(vexbm+vdiam(1))*grad_a_tor)
       vpar_shear_tg(2) = -sign_Bt_exp*(cv/(csdam))*drhodr(jm)*
-     >  (apolm*(gradvpolm+gradvneom(2))+atorm*(gradvexbm+gradvdiam(2)) 
-     >  +(vpolm+vneom(2))*grad_a_pol+(vexbm+vdiam(2))*grad_a_tor)
+     >  (apolm*(gradvpolm+gradvneom(2))+atorm*(gradvexbm+gradvdiam(2))) 
+cc     >  +(vpolm+vneom(2))*grad_a_pol+(vexbm+vdiam(2))*grad_a_tor)
       vpar_shear_tg(3) = -sign_Bt_exp*(cv/(csdam))*drhodr(jm)*
-     >  (apolm*(gradvpolm+gradvneom(3))+atorm*(gradvexbm+gradvdiam(3)) 
-     >  +(vpolm+vneom(3))*grad_a_pol+(vexbm+vdiam(3))*grad_a_tor)
+     >  (apolm*(gradvpolm+gradvneom(3))+atorm*(gradvexbm+gradvdiam(3))) 
+cc     >  +(vpolm+vneom(3))*grad_a_pol+(vexbm+vdiam(3))*grad_a_tor)
 c
       if(ipert_gf.eq.0)gamma_p_m(jm)=sign_Bt_exp*vpar_shear_tg(2)
 c
@@ -1273,20 +1277,20 @@ c
       vns_shear_tg(3) =  -cv/csdam*(rminm/rhom)*drhodr(jm)
      >  *theta_exp(jm)*te_m(jm)*(wstar1 - wstar0)/dr(jm,2)
 c
-      if(jm.eq.ngrid-1)then
+c      if(jm.eq.ngrid-1)then
 c set diamagnetic and neoclassical flow gradeints to zero at boundary
-        vpar_shear_tg(1) = -sign_Bt_exp*(cv/(csdam))*drhodr(jm)*
-     >  (apolm*(gradvpolm)+atorm*(gradvexbm) 
-     >  +(vpolm)*grad_a_pol+(vexbm)*grad_a_tor)
-        vpar_shear_tg(2)=vpar_shear_tg(1)
-        vpar_shear_tg(3)=vpar_shear_tg(1)
-        vns_shear_tg(1) = 0.0
-        vns_shear_tg(2) = 0.0
-        vns_shear_tg(3) = 0.0
-        vts_shear_tg(1) = 0.0
-        vts_shear_tg(2) = 0.0
-        vts_shear_tg(3) = 0.0
-      endif
+c        vpar_shear_tg(1) = -sign_Bt_exp*(cv/(csdam))*drhodr(jm)*
+c     >  (apolm*(gradvpolm)+atorm*(gradvexbm)) 
+c     >  +(vpolm)*grad_a_pol+(vexbm)*grad_a_tor)
+c        vpar_shear_tg(2)=vpar_shear_tg(1)
+c        vpar_shear_tg(3)=vpar_shear_tg(1)
+c        vns_shear_tg(1) = 0.0
+c        vns_shear_tg(2) = 0.0
+c        vns_shear_tg(3) = 0.0
+c        vts_shear_tg(1) = 0.0
+c        vts_shear_tg(2) = 0.0
+c        vts_shear_tg(3) = 0.0
+c      endif
       if(vpar_shear_model_tg.eq.1)then
 c use GYRO conventions
         gamma_p_m(jm) = -(cv/csdam)*drhodr(jm)*gradvexbm
@@ -1353,6 +1357,7 @@ c
       betae_tg=cbetae*betae_m(jm)
       xnue_tg =xnu_m(jm)
       zeff_tg=zeffm
+      vexb_tg=0.0
       vpar_tg(1) = sign_Bt_exp*cv*(a_pol(jm)*(vpolm+vneom(1))
      >     +a_tor(jm)*(vexbm+vdiam(1)))/(a_unit_exp*csdam)
       vpar_tg(2) = sign_Bt_exp*cv*(a_pol(jm)*(vpolm+vneom(2))
@@ -1370,7 +1375,6 @@ c use GYRO conventions
         vpar_tg(1) = sign_Bt_exp*cv*a_tor(jm)*vexbm/(a_unit_exp*csdam)
         vpar_tg(2) = vpar_tg(1)
         vpar_tg(3) = vpar_tg(1)
-        vexb_tg=0.0
       endif
       if(alpha_p_tg.eq.0.0)then
         vpar_tg(1)=0.0
@@ -1713,7 +1717,8 @@ c
         tiflux_adhoc = -1.6022D-3*nim*chiitim*gradtim
         ctorm = (c_tor(jm+1)+c_tor(jm))/2.0
         grad_c_tor=(c_tor(jm+1)-c_tor(jm))/dr(jm,2)
-        gradvphim =cv*(ctorm*gradvexbm+grad_c_tor*vexbm)
+c        gradvphim =cv*(ctorm*gradvexbm+grad_c_tor*vexbm)
+        gradvphim =cv*ctorm*gradvexbm
         vphiflux_adhoc = -1.6726D-8*amassgas_exp*nim*
      >                    rmajor_exp*etaphim*gradvphim
         vparflux_adhoc = vphiflux_adhoc*c_per(jm)/c_tor(jm)

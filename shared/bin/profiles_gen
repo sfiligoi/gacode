@@ -58,6 +58,7 @@ then
    echo "              *.cdf          : Plasma State NetCDF file"
    echo "              *.astra        : ASTRA text file"
    echo "              *.peq          : PEQDSK/ELITE text file"
+   echo "              *.ufile        : UFILE text config file"
    echo "              input.profiles : vgen or locpargen mode"
    echo 
    echo "             -p <path>"
