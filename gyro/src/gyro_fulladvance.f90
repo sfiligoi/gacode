@@ -114,11 +114,6 @@ subroutine gyro_fulladvance
   !-------------------------------------------------------------------
   ! MANAGE data output: 
   !
-!  if (time_skip_wedge > 0) then
-!     if (modulo(step,time_skip_wedge) == 0 .and. io_method > 1) then
-!          call gyro_write_timedata_wedge_hdf5
-!     endif
-!  endif
 
   call gyro_timer_out('Diagnos.-allstep')
   call gyro_timer_in('Diagnos.-datastep')
@@ -159,10 +154,12 @@ subroutine gyro_fulladvance
          if (io_method < 3 .and. io_method > 0) call gyro_write_timedata
       endif
 
+#ifdef HAVE_HDF5
       if(time_skip_wedge > 0 .and. modulo(step,time_skip_wedge) == 0) then
         if (io_method > 1) call gyro_write_timedata_wedge_hdf5
       endif
-      
+#endif      
+
 
 
      !--------------------------------------------------
