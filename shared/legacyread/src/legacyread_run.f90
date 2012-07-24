@@ -2,7 +2,7 @@ subroutine data_run(idata,shot,tok,cudir,xp_time,endtime,&
      time_series,itorque,iptot,ncl_flag,&
      mxgrid,ismooth,idatzero,iproc_d)
 
-  use data_interface
+  use legacyread_interface
 
   implicit none
 

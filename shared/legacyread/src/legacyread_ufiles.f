@@ -87,7 +87,7 @@ c u3dy = values of measured quantities like TEXP, TEXBR, etc.
 c nx3  = number of points in u3dx and u3dy.
 c
 c************************************************************************
-      use data_interface
+      use legacyread_interface
 c
       implicit none
 c

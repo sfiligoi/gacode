@@ -8,7 +8,7 @@
 !  
 subroutine datavg(ismooth,ncl_flag)
 
-  use data_interface
+  use legacyread_interface
 
   implicit none
 

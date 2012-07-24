@@ -6,7 +6,6 @@ all:
 	cd gato ; make 
 	cd tglf ; make
 	cd tgyro ; make
-	cd dataread ; make
 #	cd gks ; make
 
 clean:
@@ -16,7 +15,6 @@ clean:
 	cd gato ; make clean 
 	cd tglf ; make clean
 	cd tgyro ; make clean
-	cd dataread ; make clean
 	cd gks ; make clean 
 	cd gkcoll ; make clean
 	rm -f shared/python/pyrats/*/*.pyc

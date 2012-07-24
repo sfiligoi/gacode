@@ -8,7 +8,7 @@
 subroutine prgen_read_ufile
 
   use prgen_read_globals
-  use data_interface
+  use legacyread_interface
 
   implicit none
 
