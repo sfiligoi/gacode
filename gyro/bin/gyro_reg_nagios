@@ -1,0 +1,78 @@
+#!/bin/bash
+# 
+# SCRIPT:
+#  gyro_reg_nagios <nproc> <testrootdir>
+#
+# PURPOSE:
+#  Run through full suite of GYRO regression tests
+#----------------------------------------------------
+
+n=$#
+
+if [ $n -lt 2 ] 
+then
+  echo "ERROR: Need to set number of CPUs and testdir."
+  echo
+  echo "    gyro_reg_nagios <nproc> <testrootdir>"    
+  exit 2
+fi
+
+# Number of MPI tasks
+n_proc=${1}
+
+# NUmber of OMP threads
+n_omp=1
+
+# Test directory (/tmp for example)
+testdir=${2}/gyro_regression
+
+# File where regression results end up
+regfile='out.gyro.regression'
+
+# List of regression test directories:
+list="
+reg01 
+reg02 
+reg03 
+reg04 
+"
+
+# Files containing precision data
+precfile='out.gyro.prec'
+
+rm -rf $testdir ; mkdir $testdir
+cd $testdir
+touch $regfile
+
+fails=0
+for sim in $list
+do 
+   gyro -g $sim -p $testdir > out
+   rm -rf $sim/$precfile
+   gyro -e $sim -n $n_proc -nomp $n_omp -p $testdir > out
+   gyro_reg $sim > out
+   string=`cat out`
+   if [ "${string:7:4}" == "FAIL" ]
+   then
+      fails=$((fails+1))
+   fi
+   cat out >> $regfile
+done
+
+# Good (0)
+if [ $fails -eq 0 ] 
+then
+   exit 0
+fi
+
+# Warning (1)
+if [ $fails -lt 3 ] 
+then
+   exit 1
+fi
+
+# Critical (2)
+exit 2
+
+
+
