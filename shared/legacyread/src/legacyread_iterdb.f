@@ -9,7 +9,7 @@ c
       subroutine readiterdb(tok,shot,cudir,iptot,itorque,
      >           ncl_flag)
 c
-      use data_interface
+      use legacyread_interface
 c
       implicit none
 cc      include 'input.m'
