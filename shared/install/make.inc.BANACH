@@ -16,10 +16,10 @@ FNOMP   =
 
 # System math libraries (from Ubuntu repository)
 
-LMATH = /usr/lib/lapack/liblapack.so.3gf /usr/lib/libblas/libblas.so.3gf
+LMATH = /usr/lib64/liblapack.so.3 /usr/lib64/libblas.so.3
 
 # OPTIONAL NetCDF:
-NETCDF=-L/usr/local/lib -lnetcdff -lnetcdf -lm
+NETCDF=-L/usr/local/lib -lnetcdff -lnetcdf -lm -lz -lcurl
 NETCDF_INC=/usr/local/include
 
 # Archive 

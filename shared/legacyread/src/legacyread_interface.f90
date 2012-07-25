@@ -1,7 +1,7 @@
 !@data_interface.f90 March 18, 2011 G. Staebler, General Atomics
 !---------------------------------------------------------------------
 
-module data_interface
+module legacyread_interface
 
   implicit none
 
@@ -48,4 +48,4 @@ module data_interface
   !.. 4000 elements
   real :: bblank_d(nplasb)
 
-end module data_interface
+end module legacyread_interface

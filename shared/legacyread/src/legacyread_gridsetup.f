@@ -5,7 +5,7 @@ c... setup transport grid
 c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
       subroutine gridsetup(mxgrid)
 c
-      use data_interface
+      use legacyread_interface
 c
       implicit none
 c      include 'mpif.h'

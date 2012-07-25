@@ -39,7 +39,7 @@ c
       program gks_driver
 c
       use gks_var
-      use data_interface
+      use legacyread_interface
 c
 c
       implicit none

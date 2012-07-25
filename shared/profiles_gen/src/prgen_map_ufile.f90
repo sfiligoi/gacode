@@ -17,24 +17,22 @@ subroutine prgen_map_ufile
   implicit none
 
   integer :: i
-  integer :: nion=1
-  integer :: nb=1
 
   !---------------------------------------------------------
   ! Map profile data onto single array:
   !
-  allocate(vec(n_indx,ufile_nj))
+  allocate(vec(n_indx,nx))
   vec(:,:) = 0.0
   !
   vec(1,:)  = rho(:)
   vec(2,:)  = rmin(:)
-  vec(3,:)  = 0.0
+  vec(3,:)  = rmaj(:)
   vec(4,:)  = q(:)
   vec(5,:)  = kappa(:)
   vec(6,:)  = delta(:)
   vec(7,:)  = ufile_te(:)
-  vec(8,:)  = 0.0
-  vec(9,:)  = 0.0
+  vec(8,:)  = ufile_ene(:)*1e-19
+  vec(9,:)  = ufile_zeff(:)
   vec(11,:) = 0.0
   vec(12,:) = 0.0
   vec(13,:) = 0.0
@@ -43,26 +41,25 @@ subroutine prgen_map_ufile
   vec(16,:) = 0.0
   vec(17,:) = 0.0
   vec(18,:) = 0.0
-  vec(19,:) = 0.0
-  vec(20,:) = 0.0 
+  vec(19,:) = ufile_ptot(:)
+  vec(20,:) = dpsi(:)
 
   !-----------------------------------------------------------------
   ! Construct ion densities and temperatures with reordering
   ! in general case.  Use vphi and vpol as temporary arrays.
   !
-  
-  do i=1,nion
+  do i=1,ufile_nion
      ! ni
-     vec(31+i-1,:) = 0.0
+     vec(31+i-1,:) = ufile_en(:,i)*1e-19
      ! Ti
-     vec(36+i-1,:) = 0.0
+     vec(36+i-1,:) = ufile_ti(:)
   enddo
-  ! Beam ions
-  do i=1,nb
+  ! Beam ions: one only
+  do i=1,ufile_ibion
      ! ni
-     vec(31+i+nion-1,:) = 0.0
+     vec(31+i+ufile_nion-1,:) = ufile_enbeam(:)*1e-19
      ! Ti: T[keV] = (p/n)[J]/1.6022e-16[J/eV]
-     vec(36+i+nion-1,:) = 0.0
+     vec(36+i+ufile_nion-1,:) = ufile_pfast(:)/ufile_enbeam(:)/1.6022e-16
   enddo
 
   ! reorder
@@ -76,8 +73,8 @@ subroutine prgen_map_ufile
 
   ! Insert carbon toroidal velocity
   do i=1,5
-     if (reorder_vec(i) == nion+1) then
-        vec(30+i,:) = 0.0
+     if (reorder_vec(i) == ufile_nprim+1) then
+        vec(30+i,:) = -ufile_angrot(:)*(rmaj(:)+rmin(:))
      endif
   enddo
 

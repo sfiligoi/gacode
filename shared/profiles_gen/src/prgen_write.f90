@@ -59,7 +59,8 @@ subroutine prgen_write
      write(1,30) '#    RADIAL GRIDPOINTS : ',nx
      write(1,'(a,1pe9.2,a)') '#               Q_EDGE : ',q(nx)
      write(1,20) '#'
-     write(1,20) '#                 IONS : D [assumed]'
+ !    write(1,20) '#                 IONS : ',&
+ !         (trim(ion_name(reorder_vec(i))),i=1,ufile_nion)
 
   end select
 
@@ -135,7 +136,7 @@ subroutine prgen_write
      write(1,60) 'ARHO_EXP=',corsica_arho
   case (6)
      write(1,'(a,sp,1pe14.7)') 'BT_EXP=',ufile_bref
-     write(1,60) 'ARHO_EXP=',ufile_arho
+     write(1,60) 'ARHO_EXP=',ufile_rho(nx)
 
   end select
 
