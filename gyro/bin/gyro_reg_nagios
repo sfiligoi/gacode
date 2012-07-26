@@ -51,6 +51,8 @@ rm -rf $testdir ; mkdir $testdir
 cd $testdir
 touch $regfile
 
+start_sim_time=`date +%s`
+
 passes=0
 for sim in $list
 do 
@@ -66,23 +68,41 @@ do
    cat out >> $regfile
 done
 
+regfile_mod_time=`date +%s --reference $regfile`
+
+# Critical (2)
+# Make sure timestamp on $regfile is newer than
+# the start of simulation; otherwise, $regfile may
+# be left over from a previous run.
+if [ $regfile_mod_time -le $start_sim_time ]
+then
+   echo "Error: Output file not updated"
+   exit 2
+fi
+
 # Critical (2)
 if [ $passes -eq 0 ] 
 then
+   echo "Error: All tests failed"
+   cat $regfile
    exit 2
 fi
 
 # Good (0)
 if [ $passes -eq $p ] 
 then
+   echo "Good: All tests passed"
+   cat $regfile
    exit 0
 fi
 
 # Warning (1)
 if [ $passes -ge $((p-2)) ] 
 then
+   echo "Warning: Some tests failed"
+   cat $regfile
    exit 1
 fi
 
-# Critical
+# Critical 
 exit 2
