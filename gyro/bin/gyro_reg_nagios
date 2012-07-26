@@ -37,6 +37,13 @@ reg03
 reg04 
 "
 
+# Count tests
+p=0
+for sim in $list
+do
+   p=$((p+1))	
+done
+
 # Files containing precision data
 precfile='out.gyro.prec'
 
@@ -44,7 +51,7 @@ rm -rf $testdir ; mkdir $testdir
 cd $testdir
 touch $regfile
 
-fails=0
+passes=0
 for sim in $list
 do 
    gyro -g $sim -p $testdir > out
@@ -52,27 +59,30 @@ do
    gyro -e $sim -n $n_proc -nomp $n_omp -p $testdir > out
    gyro_reg $sim > out
    string=`cat out`
-   if [ "${string:7:4}" == "FAIL" ]
+   if [ "${string:7:4}" == "PASS" ]
    then
-      fails=$((fails+1))
+      passes=$((passes+1))
    fi
    cat out >> $regfile
 done
 
+# Critical (2)
+if [ $passes -eq 0 ] 
+then
+   exit 2
+fi
+
 # Good (0)
-if [ $fails -eq 0 ] 
+if [ $passes -eq $p ] 
 then
    exit 0
 fi
 
 # Warning (1)
-if [ $fails -lt 3 ] 
+if [ $passes -ge $((p-2)) ] 
 then
    exit 1
 fi
 
-# Critical (2)
+# Critical
 exit 2
-
-
-
