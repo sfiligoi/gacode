@@ -10,7 +10,7 @@ c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
 c  
       subroutine datmap
 c
-      use data_interface
+      use legacyread_interface
 c
       implicit none
 c

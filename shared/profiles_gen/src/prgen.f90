@@ -23,8 +23,6 @@ program prgen
 
   !--------------------------------------------------
   implicit none
-  !
-  logical :: back=0
   !--------------------------------------------------
 
   !--------------------------------------------------
@@ -132,7 +130,7 @@ program prgen
     ! empty input.profiles output file.
     call prgen_read_null
 
-  else if (index(raw_data_file,'.nc',back) /= 0) then
+  else if (index(raw_data_file,'.nc') /= 0) then
 
      ! New NetCDF format
      print '(a)','INFO: (prgen) Assuming iterdb NetCDF format.'
@@ -141,7 +139,7 @@ program prgen
 
      call prgen_read_iterdb_nc
 
-  else if (index(raw_data_file,'.cdf',back) /= 0) then
+  else if (index(raw_data_file,'.cdf') /= 0) then
 
      ! Plasmastate format
      print '(a)','INFO: (prgen) Assuming plasma_state format.'
@@ -150,7 +148,7 @@ program prgen
 
      call prgen_read_plasmastate
 
-  else if (index(raw_data_file,'.peq',back) /= 0) then
+  else if (index(raw_data_file,'.peq') /= 0) then
 
      ! peqdsk format
      print '(a)','INFO: Assuming peqdsk format.'
@@ -164,7 +162,7 @@ program prgen
 
      call prgen_read_peqdsk
 
-  else if (index(raw_data_file,'.corsica',back) /= 0) then
+  else if (index(raw_data_file,'.corsica') /= 0) then
 
      ! corsica format
      print '(a)','INFO: Assuming corsica format.'
@@ -177,7 +175,7 @@ program prgen
 
      call prgen_read_corsica
 
-  else if (index(raw_data_file,'.ufile',back) /= 0) then
+  else if (index(raw_data_file,'.ufile') /= 0) then
 
      ! UFILE format
      print '(a)','INFO: Assuming UFILE format.'
@@ -208,12 +206,14 @@ program prgen
 
   if (format_type == 0) then
      call prgen_map_null
-  else if (index(raw_data_file,'.cdf',back) /= 0) then
+  else if (index(raw_data_file,'.cdf') /= 0) then
      call prgen_map_plasmastate
-  else if (index(raw_data_file,'.peq',back) /= 0) then
+  else if (index(raw_data_file,'.peq') /= 0) then
      call prgen_map_peqdsk
-  else if (index(raw_data_file,'.corsica',back) /= 0) then
+  else if (index(raw_data_file,'.corsica') /= 0) then
      call prgen_map_corsica
+  else if (index(raw_data_file,'.ufile') /= 0) then
+     call prgen_map_ufile
   else
      call prgen_map_iterdb
   endif

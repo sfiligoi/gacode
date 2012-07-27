@@ -275,12 +275,12 @@ program vgen
                 - EXPRO_vpol(erspecies_indx,i) * EXPRO_bt0(i)) &
                 / 1000
            open(unit=1,file='out.vgen.ercomp',status='old',position='append')
-           write(1,'(e16.8,$)') EXPRO_rho(i)
-           write(1,'(e16.8,$)') grad_p * EXPRO_grad_r0(i) &
+           write(1,'(e16.8)',advance='no') EXPRO_rho(i)
+           write(1,'(e16.8)',advance='no') grad_p * EXPRO_grad_r0(i) &
                 * EXPRO_ti(1,i)*temp_norm_fac &
                 / (EXPRO_ctrl_z(erspecies_indx) * charge_norm_fac) / 1000
-           write(1,'(e16.8,$)') EXPRO_vtor(erspecies_indx,i) * EXPRO_bp0(i)/1000
-           write(1,'(e16.8,$)') -EXPRO_vpol(erspecies_indx,i) * EXPRO_bt0(i)/1000
+           write(1,'(e16.8)',advance='no') EXPRO_vtor(erspecies_indx,i) * EXPRO_bp0(i)/1000
+           write(1,'(e16.8)',advance='no') -EXPRO_vpol(erspecies_indx,i) * EXPRO_bt0(i)/1000
            write(1,*) 
            close(1)
         enddo
@@ -508,15 +508,15 @@ program vgen
   EXPRO_w0p(EXPRO_n_exp) = yb
   open(unit=1,file='out.vgen.out',status='replace')
   do i=1,EXPRO_n_exp
-     write(1,'(e16.8,$)') EXPRO_rho(i)
-     write(1,'(e16.8,$)') er_exp(i)
-     write(1,'(e16.8,$)') EXPRO_w0(i)
-     write(1,'(e16.8,$)') EXPRO_w0p(i)
+     write(1,'(e16.8)',advance='no') EXPRO_rho(i)
+     write(1,'(e16.8)',advance='no') er_exp(i)
+     write(1,'(e16.8)',advance='no') EXPRO_w0(i)
+     write(1,'(e16.8)',advance='no') EXPRO_w0p(i)
      do j=1,n_ions
-        write(1,'(e16.8,$)') EXPRO_vpol(j,i)
-        write(1,'(e16.8,$)') EXPRO_vtor(j,i)
-        write(1,'(e16.8,$)') EXPRO_vpol(j,i) / EXPRO_bp0(i)
-        write(1,'(e16.8,$)') (EXPRO_vtor(j,i) &
+        write(1,'(e16.8)',advance='no') EXPRO_vpol(j,i)
+        write(1,'(e16.8)',advance='no') EXPRO_vtor(j,i)
+        write(1,'(e16.8)',advance='no') EXPRO_vpol(j,i) / EXPRO_bp0(i)
+        write(1,'(e16.8)',advance='no') (EXPRO_vtor(j,i) &
              - EXPRO_vpol(j,i)*EXPRO_bt0(i)/ EXPRO_bp0(i)) &
              / (EXPRO_rmaj(i)+EXPRO_rmin(i))
      enddo

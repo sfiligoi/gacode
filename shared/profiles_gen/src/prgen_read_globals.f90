@@ -4,7 +4,7 @@ module prgen_read_globals
   real, parameter :: kevdsecpmw=1.6022e-19*1e3*1e-6
   real, parameter :: pi=3.14159265358979323846
   integer, parameter :: nfourier=8
-  
+
   ! List of possible data files
   character (len=70) :: date
   character (len=70) :: raw_data_file
@@ -190,7 +190,7 @@ module prgen_read_globals
   real, dimension(:), allocatable :: plst_tq_trans
   real, dimension(:), allocatable :: plst_sn_trans
   !---------------------------------------------------------
- 
+
   !---------------------------------------------------------
   ! PEQDSK variables
   !
@@ -256,4 +256,32 @@ module prgen_read_globals
   real, allocatable :: corsica_q(:)
   real, allocatable :: corsica_j(:)
   real, allocatable :: corsica_jbs(:)
+  !---------------------------------------------------------
+
+  !---------------------------------------------------------
+  ! UFILE variables
+  !
+  integer :: ufile_nion
+  integer :: ufile_nprim
+  integer :: ufile_nimp
+  integer :: ufile_ibion
+
+  integer :: ufile_nj
+  real :: ufile_bref
+  character (len=10) :: ufile_tok
+  character (len=40) :: ufile_shot
+  real, dimension(:), allocatable :: ufile_rho 
+  real, dimension(:), allocatable :: ufile_r
+  real, dimension(:), allocatable :: ufile_te 
+  real, dimension(:), allocatable :: ufile_ti
+  real, dimension(:), allocatable :: ufile_zeff 
+  real, dimension(:), allocatable :: ufile_ne 
+  real, dimension(:), allocatable :: ufile_ene
+  real, dimension(:,:), allocatable :: ufile_en
+  real, dimension(:), allocatable :: ufile_enbeam
+  real, dimension(:), allocatable :: ufile_pfast
+  real, dimension(:), allocatable :: ufile_ptot
+  real, dimension(:), allocatable :: ufile_angrot
+  !---------------------------------------------------------
+
 end module prgen_read_globals

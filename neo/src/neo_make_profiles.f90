@@ -403,19 +403,19 @@ subroutine neo_make_profiles
 
      open(unit=io,file=trim(path)//'out.neo.equil',status='replace')
      do ir=1,n_radial
-        write (io,'(e16.8,$)') r(ir)
-        write (io,'(e16.8,$)') dphi0dr(ir)
-        write (io,'(e16.8,$)') q(ir)
-        write (io,'(e16.8,$)') rho(ir)
-        write (io,'(e16.8,$)') rmaj(ir)
-        write (io,'(e16.8,$)') omega_rot(ir)
-        write (io,'(e16.8,$)') omega_rot_deriv(ir)
+        write (io,'(e16.8)',advance='no') r(ir)
+        write (io,'(e16.8)',advance='no') dphi0dr(ir)
+        write (io,'(e16.8)',advance='no') q(ir)
+        write (io,'(e16.8)',advance='no') rho(ir)
+        write (io,'(e16.8)',advance='no') rmaj(ir)
+        write (io,'(e16.8)',advance='no') omega_rot(ir)
+        write (io,'(e16.8)',advance='no') omega_rot_deriv(ir)
         do is=1,n_species
-           write (io,'(e16.8,$)') dens(is,ir)
-           write (io,'(e16.8,$)') temp(is,ir)
-           write (io,'(e16.8,$)') dlnndr(is,ir)
-           write (io,'(e16.8,$)') dlntdr(is,ir)
-           write (io,'(e16.8,$)') nu(is,ir)
+           write (io,'(e16.8)',advance='no') dens(is,ir)
+           write (io,'(e16.8)',advance='no') temp(is,ir)
+           write (io,'(e16.8)',advance='no') dlnndr(is,ir)
+           write (io,'(e16.8)',advance='no') dlntdr(is,ir)
+           write (io,'(e16.8)',advance='no') nu(is,ir)
         enddo
         write (io,*)
      enddo
@@ -424,13 +424,13 @@ subroutine neo_make_profiles
      if(profile_model >= 2) then
         open(unit=io,file=trim(path)//'out.neo.expnorm',status='replace')
         do ir=1,n_radial
-           write (io,'(e16.8,$)') r(ir)
-           write (io,'(e16.8,$)') a_meters
-           write (io,'(e16.8,$)') mass_deuterium
-           write (io,'(e16.8,$)') dens_norm(ir)
-           write (io,'(e16.8,$)') temp_norm(ir)
-           write (io,'(e16.8,$)') vth_norm(ir)*a_meters
-           write (io,'(e16.8,$)') b_unit(ir)
+           write (io,'(e16.8)',advance='no') r(ir)
+           write (io,'(e16.8)',advance='no') a_meters
+           write (io,'(e16.8)',advance='no') mass_deuterium
+           write (io,'(e16.8)',advance='no') dens_norm(ir)
+           write (io,'(e16.8)',advance='no') temp_norm(ir)
+           write (io,'(e16.8)',advance='no') vth_norm(ir)*a_meters
+           write (io,'(e16.8)',advance='no') b_unit(ir)
            write (io,*)
         enddo
         close(io)

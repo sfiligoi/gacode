@@ -1,9 +1,10 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
+include ../install/make.ext.${GACODE_PLATFORM}
 
 ifeq ($(OPT),debug)
-   FFLAGS=${FDEBUG}
+   FFLAGS=${FDEBUG} ${XPTORFLAGS}
 else
-   FFLAGS=${FOPT}
+   FFLAGS=${FOPT} ${XPTORFLAGS}
 endif
 
 EXEC=xptor
@@ -38,9 +39,9 @@ lib : $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS) 
 
 .f.o :
-	$(FC) $(FMATH) $(FFLAGS) -I $(NETCDF_INC)  -c $<
+	$(FC) $(FFLAGS) -I $(NETCDF_INC)  -c $<
 .f90.o :
-	$(FC) $(FMATH) $(FFLAGS) -I $(NETCDF_INC)  -c $<
+	$(FC) $(FFLAGS) -I $(NETCDF_INC)  -c $<
 
 
 clean:

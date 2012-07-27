@@ -203,6 +203,6 @@ program locpargen
 
   call EXPRO_alloc('./',0) 
 
-10 format(a,sp1pe12.5)
+10 format(a,sp,1pe12.5)
 
 end program locpargen

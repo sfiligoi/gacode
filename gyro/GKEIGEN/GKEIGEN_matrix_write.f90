@@ -12,6 +12,7 @@ subroutine GKEIGEN_matrix_write(restart_cols,n_last_col)
   use gyro_globals
   use gyro_pointers
   use GKEIGEN_globals
+  use mpi
 
   !---------------------------------
   implicit none
@@ -23,8 +24,6 @@ subroutine GKEIGEN_matrix_write(restart_cols,n_last_col)
   complex, dimension(500,h_length_loc) :: restart_cols
   complex, dimension(h_length_loc) :: one_col_w
   !---------------------------------
-
-  include 'mpif.h'
 
   10 format(1x,'(',g14.6,',',g14.6,')')
   20 format('----------------- Column: ',I6,'  ----------------------')
