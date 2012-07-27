@@ -296,7 +296,8 @@ subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io,h5datafile)
     call vshdf5_inith5vars(h5in, h5err)
     h5in%comm=MPI_COMM_SELF
     h5in%info=MPI_INFO_NULL
-    h5in%typeConvert=.true.
+!    h5in%typeConvert=.true.
+    h5in%typeConvert=.false.
     h5in%wrd_type=H5T_NATIVE_REAL
     !h5in%wrd_type=h5in%h5_kind_type_r4
     !h5in%wrd_type=H5T_NATIVE_DOUBLE
