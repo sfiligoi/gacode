@@ -8,7 +8,7 @@
 FC	= mpif90 -I $(GACODE_ROOT)/modules -Wp,-D__MPI
 F77	= mpif90
 
-FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules
+FMATH	= -fdefault-double-8 -fdefault-real-8 -J $(GACODE_ROOT)/modules
 FOPT	= -O3
 FDEBUG	= -Wall -fcheck=all -fbacktrace -O -Wall -Wunderflow -W -finit-real=nan -fbounds-check -ffpe-trap=invalid,zero,overflow
 FOMP    = -fopenmp
