@@ -72,7 +72,7 @@ c
       integer ichiep, ktime_chiep
       integer lprint_glf2, istep_glf, lprint_glfstep, lprint_glfgrid,
      &        lprint_time_cdf
-      integer doppler_shear_model
+      integer doppler_shear_model, j_write_state
 c
       common /ptorcmn/ flux, flux_s
      & , r, vprime, dr
@@ -113,6 +113,6 @@ c
      & , ifix, izero_m, idvloop_max
      & , ichiep, ktime_chiep
      & , istep_glf, lprint_glfstep, lprint_glfgrid, lprint_glf2
-     & , lprint_time_cdf, doppler_shear_model
+     & , lprint_time_cdf, doppler_shear_model, j_write_state
 
 
