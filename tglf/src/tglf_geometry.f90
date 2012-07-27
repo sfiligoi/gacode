@@ -41,7 +41,8 @@ SUBROUTINE xgrid_functions_sa
   !
   ! set global input values
   !
-  R_input = rmaj_sa
+  rmin_input = rmin_sa
+  Rmaj_input = rmaj_sa
   q_input = q_sa
   !
   ! fill the x-grid eikonal function arrays wdx and b0x
@@ -1200,7 +1201,8 @@ SUBROUTINE miller_geo
   !-------------------------------------------
   ! set global input values
   !
-  R_input = rmaj_loc
+  rmin_input = rmin_loc
+  Rmaj_input = rmaj_loc
   q_input = q_loc
 
   ! write(*,*)"miller_geo"
@@ -1455,7 +1457,8 @@ SUBROUTINE fourier_geo
   !
   ! set global input values
   !
-  R_input = Rmaj_s
+  rmin_input = rmin_s
+  Rmaj_input = Rmaj_s
   q_input = q_s
   !
   ! compute the arclength around the flux surface
@@ -1722,6 +1725,12 @@ SUBROUTINE ELITE_geo
   write(*,*)"area = ",area,"volume = ",pi_2*R0*area
   write(*,*)"Z0 = ",Z0,"R0 = ",R0
   write(*,*)"arclength = ",arclength
+  !
+  ! set global input values
+  !
+  rmin_input = (Rmax-Rmin)/2.0
+  Rmaj_input = (Rmax+Rmin)/2.0
+  q_input = q_s
 
   !
   ! find the major and minor radius at Z0
@@ -1803,12 +1812,6 @@ SUBROUTINE ELITE_geo
   p_prime_s = p_prime_ELITE
   q_s = q_ELITE
   q_prime_s = q_prime_ELITE
-  !
-  ! set global input values
-  !
-  R_input = Rmaj_s
-  q_input = q_s
-
   ! debug
   write(*,*)"Rmax = ",Rmax
   write(*,*)"Zmax = ",Zmax
