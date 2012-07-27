@@ -667,8 +667,11 @@ c cosbeam is a barm angle
            cosbeam=0.5
 c vbeam is a beam ion velocity in m/sec..same units as vpar
 c effective beam velocity from 0.5*m*vbeam^2 = power/flux
-            vbeam = SQRT(ABS(2.0*(qbeame_exp(k)+qbeami_exp(k))/
-     >     (sbeam_exp(k)*amassgas_exp*1.6726D-27)))
+           vbeam = 0.0
+           if(sbeam_exp(k).gt.0.0)then
+             vbeam = SQRT(ABS(2.0*(qbeame_exp(k)+qbeami_exp(k))/
+     >      (sbeam_exp(k)*amassgas_exp*1.6726D-27)))
+           endif
 c         mparsour_p=flow_beam_exp(k)*cosbeam*vbeam
 c         mparsour_mm=flow_beam_exp(k-1)*cosbeam*vbeam
 c torque denty in NT/M^2

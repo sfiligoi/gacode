@@ -1125,15 +1125,16 @@
       END FUNCTION get_nky_out
 !----------------------------------------------------------------
 !
-      REAL FUNCTION get_flux_spectrum_out(itype,ispec,ifield,iky)
+      REAL FUNCTION get_flux_spectrum_out(itype,ispec,ifield,iky,imode)
 !
       USE tglf_global
 !   
       IMPLICIT NONE
 !
-      INTEGER,INTENT(IN) :: itype,ispec,ifield,iky
-      INTEGER :: error=0
+      INTEGER,INTENT(IN) :: itype,ispec,ifield,iky,imode
+      INTEGER :: error
 !
+      error=0
       get_flux_spectrum_out = 0.0
       if(itype.lt.1.or.itype.gt.5)then
         write(*,*)"itype out of bounds",1,5
@@ -1147,25 +1148,57 @@
       elseif(iky.lt.1.or.iky.gt.nkym)then
         write(*,*)"iky out of bounds",1,nkym
         error=1
+      elseif(imode.lt.1.or.imode.gt.maxmodes)then
+        write(*,*)"imode out of bounds",1,maxmodes
+        error=1
       endif
 !
-!
       if(error.eq.0)then
-        get_flux_spectrum_out=flux_spectrum_out(itype,ispec,ifield,iky)
+        get_flux_spectrum_out=flux_spectrum_out(itype,ispec,ifield,iky,imode)
       endif
 !
       END FUNCTION get_flux_spectrum_out
 !----------------------------------------------------------------
 !
-      REAL FUNCTION get_intensity_spectrum_out(itype,ispec,iky)
+      REAL FUNCTION get_eigenvalue_spectrum_out(itype,iky,imode)
 !
       USE tglf_global
 !   
       IMPLICIT NONE
 !
-      INTEGER,INTENT(IN) :: itype,ispec,iky
-      INTEGER :: error=0
+      INTEGER,INTENT(IN) :: itype,iky,imode
+      INTEGER :: error
 !
+      error=0
+      get_eigenvalue_spectrum_out = 0.0
+      if(itype.lt.1.or.itype.gt.2)then
+        write(*,*)"ntype out of bounds",1,2
+        error=1
+      elseif(iky.lt.1.or.iky.gt.nkym)then
+        write(*,*)"iky out of bounds",1,nkym
+        error=1
+      elseif(imode.lt.1.or.imode.gt.maxmodes)then
+        write(*,*)"imode out of bounds",1,maxmodes
+        error=1
+      endif
+!
+      if(error.eq.0)then
+        get_eigenvalue_spectrum_out=eigenvalue_spectrum_out(itype,iky,imode)
+      endif
+!
+      END FUNCTION get_eigenvalue_spectrum_out
+!----------------------------------------------------------------
+!
+      REAL FUNCTION get_intensity_spectrum_out(itype,ispec,iky,imode)
+!
+      USE tglf_global
+!   
+      IMPLICIT NONE
+!
+      INTEGER,INTENT(IN) :: itype,ispec,iky,imode
+      INTEGER :: error
+!
+      error=0
       get_intensity_spectrum_out = 0.0
       if(itype.lt.1.or.itype.gt.2)then
         write(*,*)"ntype out of bounds",1,2
@@ -1176,24 +1209,28 @@
       elseif(iky.lt.1.or.iky.gt.nkym)then
         write(*,*)"iky out of bounds",1,nkym
         error=1
+      elseif(imode.lt.1.or.imode.gt.maxmodes)then
+        write(*,*)"imode out of bounds",1,maxmodes
+        error=1
       endif
 !
       if(error.eq.0)then
-        get_intensity_spectrum_out=intensity_spectrum_out(itype,ispec,iky)
+        get_intensity_spectrum_out=intensity_spectrum_out(itype,ispec,iky,imode)
       endif
 !
       END FUNCTION get_intensity_spectrum_out
 !----------------------------------------------------------------
 !
-      REAL FUNCTION get_field_spectrum_out(itype,iky)
+      REAL FUNCTION get_field_spectrum_out(itype,iky,imode)
 !
       USE tglf_global
 !   
       IMPLICIT NONE
 !
-      INTEGER,INTENT(IN) :: itype,iky
-      INTEGER :: error=0
+      INTEGER,INTENT(IN) :: itype,iky,imode
+      INTEGER :: error
 !
+      error = 0
       get_field_spectrum_out = 0.0
       if(itype.lt.1.or.itype.gt.2)then
         write(*,*)"itype out of bounds",1,2
@@ -1201,10 +1238,13 @@
       elseif(iky.lt.1.or.iky.gt.nkym)then
         write(*,*)"nky out of bounds",1,nkym
         error=1
+      elseif(imode.lt.1.or.imode.gt.maxmodes)then
+        write(*,*)"imode out of bounds",1,maxmodes
+        error=1
       endif
 !
       if(error.eq.0)then
-        get_field_spectrum_out=field_spectrum_out(itype,iky)
+        get_field_spectrum_out=field_spectrum_out(itype,iky,imode)
       endif
 !
       END FUNCTION get_field_spectrum_out
@@ -1250,6 +1290,28 @@
       get_DR = DR_out
 !
       END FUNCTION get_DR
+!-----------------------------------------------------------------
+!
+      SUBROUTINE get_DEP_parameters(r_dep,rmaj_dep,q_dep,taui_dep,rlni_dep,rlti_dep,ni_dep)
+!
+      USE tglf_global
+!
+      IMPLICIT NONE
+!
+      REAL,INTENT(OUT) :: r_dep,rmaj_dep,q_dep,taui_dep,rlni_dep,rlti_dep,ni_dep
+!
+! warning this routine assumes that the call put_species set the main ion species to be index 2
+!
+      taui_dep = taus_in(2)
+      rlni_dep = rlns_in(2)
+      rlti_dep = rlts_in(2)
+      ni_dep = as_in(2)
+! note that rmin_input,Rmaj_input,q_input are set the different geometry routines 
+      r_dep = rmin_input
+      rmaj_dep = Rmaj_input
+      q_dep = q_input
+!
+      END SUBROUTINE get_DEP_parameters
 !-----------------------------------------------------------------
 !
       SUBROUTINE write_tglf_input

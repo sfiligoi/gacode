@@ -1459,7 +1459,7 @@ c      CALL put_eikonal(new_eikonal_tg)
       CALL tglf_TM
 c      new_eikonal_tg=.TRUE.
 c
-      if(ipert_gf.eq.0.and.jm.eq.25)then
+      if(ipert_gf.eq.0.and.jm.eq.j_write_state)then
         call write_tglf_input      
       endif
       if(ipert_gf.eq.0)then
@@ -1634,7 +1634,6 @@ c
        close(11)
       endif
 c
-      if(i_proc.eq.0.and.jm.eq.35)call write_tglf_input
 c
 c
 c      write(*,*)"debug tglf",jm

@@ -43,7 +43,7 @@ lib: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
 
 .f.o :
-	$(F77) $(FFLAGS) -c $<
+	$(FC) $(FFLAGS) -c $<
 
 .f90.o :
 	$(FC) $(FMATH) $(FFLAGS) -c $<
