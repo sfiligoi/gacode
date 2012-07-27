@@ -5,12 +5,12 @@
 
 # Compilers
 
-FC	= mpif90 -I $(GACODE_ROOT)/modules -Wp,-D__MPI
+FC	= mpif90 -I $(GACODE_ROOT)/modules 
 F77	= mpif90
 
-FMATH	= -fdefault-double-8 -fdefault-real-8 -J $(GACODE_ROOT)/modules
+FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules
 FOPT	= -O3
-FDEBUG	= -Wall -fcheck=all -fbacktrace -O -Wall -Wunderflow -W -finit-real=nan -fbounds-check -ffpe-trap=invalid,zero,overflow
+FDEBUG	= -O -Wall -Wunderflow -W -finit-real=nan -fbounds-check -ffpe-trap=invalid,zero,overflow
 FOMP    = -fopenmp
 FNOMP   = 
 
@@ -19,7 +19,7 @@ FNOMP   =
 LMATH = /usr/lib64/liblapack.so.3 /usr/lib64/libblas.so.3
 
 # OPTIONAL NetCDF:
-NETCDF=-L/usr/local/lib -lnetcdff -lnetcdf -lm -lz -lcurl
+NETCDF=-L/usr/local/lib -lnetcdff -lnetcdf -lm
 NETCDF_INC=/usr/local/include
 
 # Archive 
@@ -27,8 +27,6 @@ NETCDF_INC=/usr/local/include
 ARCH = ar cr
 
 # HDF5
-#HDF5_LIBS=-Lusr/lib -lhdf5_fortran -lhdf5 -lz
-HDF5_LIBS=-L/home/vadlaman/software/lib -lhdf5_fortran -lhdf5 -lz 
+#HDF5_LIBS=-L/usr/lib -lhdf5_fortran -lhdf5 -lz
 #HDF5_INC=-I/usr/include
-HDF5_INC=-I/home/vadlaman/software/include 
-VSHDF5_MAKECMD=vshdf5
+#VSHDF5_MAKECMD=vshdf5

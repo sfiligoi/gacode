@@ -49,12 +49,14 @@
       PUBLIC :: get_B2_ave
       PUBLIC :: get_RBt_ave
       PUBLIC :: get_nky_out
+      PUBLIC :: get_eigenvalue_spectrum_out
       PUBLIC :: get_field_spectrum_out
       PUBLIC :: get_intensity_spectrum_out
       PUBLIC :: get_flux_spectrum_out
       PUBLIC :: get_ky_spectrum_out
       PUBLIC :: get_DM
       PUBLIC :: get_DR
+      PUBLIC :: get_DEP_parameters
       PUBLIC :: get_wavefunction_out
       PUBLIC :: write_tglf_input
       PUBLIC :: write_wavefunction_out
