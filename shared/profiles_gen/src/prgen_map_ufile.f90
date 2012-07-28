@@ -41,19 +41,21 @@ subroutine prgen_map_ufile
   vec(16,:) = 0.0
   vec(17,:) = 0.0
   vec(18,:) = 0.0
-  !vec(19,:) = ufile_ptot(:)
-  !vec(20,:) = dpsi(:)
+  vec(19,:) = ufile_pres(:)
+  vec(20,:) = dpsi(:)
 
   !-----------------------------------------------------------------
   ! Construct ion densities and temperatures with reordering
   ! in general case.  Use vphi and vpol as temporary arrays.
   !
-  !do i=1,ufile_nion
-     ! ni
-  !   vec(31+i-1,:) = ufile_en(:,i)*1e-19
-     ! Ti
-  !   vec(36+i-1,:) = ufile_ti(:)
-  !enddo
+  vec(31,:) = ufile_nm1(:)*1e-19
+  if (ufile_nion > 1) vec(32,:) = ufile_nm2(:)*1e-19
+  if (ufile_nion > 2) vec(33,:) = ufile_nm3(:)*1e-19
+
+  vec(36,:) = ufile_ti(:)
+  if (ufile_nion > 1) vec(37,:) = ufile_ti(:)
+  if (ufile_nion > 2) vec(38,:) = ufile_ti(:)
+  
   ! Beam ions: one only
   !do i=1,ufile_ibion
      ! ni
@@ -63,13 +65,13 @@ subroutine prgen_map_ufile
   !enddo
 
   ! reorder
-  !do i=1,5 
-  !   vec(20+i,:) = vec(30+reorder_vec(i),:)
-  !   vec(25+i,:) = vec(35+reorder_vec(i),:)
-  !enddo
+  do i=1,5 
+     vec(20+i,:) = vec(30+reorder_vec(i),:)
+     vec(25+i,:) = vec(35+reorder_vec(i),:)
+  enddo
 
   ! vphi
-  !vec(31:35,:) = 0.0
+  vec(31:35,:) = 0.0
 
   ! Insert carbon toroidal velocity
   !do i=1,5

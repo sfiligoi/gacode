@@ -479,7 +479,7 @@ if [ $FILE_FLAG -eq 0 ] ; then
 elif [ "$FILE" == "UFILE" ] ; then
 
    # UFILE mode
-   echo "INFO: (profiles_gen) Extracting and averaging UFILE com data."
+   echo "INFO: (profiles_gen) Extracting UFILE com data."
    python ${GACODE_ROOT}/shared/bin/gacode_ufile_tool.py *com.dat > out.ufile.log
    echo "INFO: (profiles_gen) Extracting and averaging UFILE 1d data."
    python ${GACODE_ROOT}/shared/bin/gacode_ufile_tool.py *1d.dat $UFILETIME >> out.ufile.log

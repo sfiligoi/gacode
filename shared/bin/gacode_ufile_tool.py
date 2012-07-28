@@ -12,14 +12,28 @@ import sys
 import numpy as np
 
 def extractcom(infile):
+
     print 'Extracting shot comments'
     f=open('out.com','w')
     f.write(infile.split('_com')[0]+'\n')
+
+    run   = ''
+    pulse = ''
+
     for line in open(infile,'r').readlines():
         if line.count("Tokamak") == 1:
-            f.write(line.split(":")[1].strip()+'\n')
+            tok=line.split(":")[1].strip()
         if line.count("Run number") == 1:
-            f.write(line.split(":")[1].strip()+'\n')
+            run=line.split(":")[1].strip()
+        if line.count("Pulse") == 1:
+            pulse=line.split(":")[1].strip()
+
+    f.write(tok+'\n')
+    if len(run) == 0:
+        f.write(pulse+'\n')
+    else:
+        f.write(run+'\n')
+
     f.close()
 
 
