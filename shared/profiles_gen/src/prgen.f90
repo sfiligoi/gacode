@@ -12,6 +12,7 @@
 !  3. PEQDSK text (*.peq)
 !  4. PLASMA STATE NetCDF (*.cdf)
 !  5. CORSICA text (*.corsica)
+!  6. UFILE text (UFILE)
 !
 ! Note that ASTRA (*.astra) format is handled by a separate python 
 ! routine.
@@ -175,7 +176,7 @@ program prgen
 
      call prgen_read_corsica
 
-  else if (index(raw_data_file,'.ufile') /= 0) then
+  else if (index(raw_data_file,'UFILE') /= 0) then
 
      ! UFILE format
      print '(a)','INFO: Assuming UFILE format.'
@@ -204,19 +205,22 @@ program prgen
   if (gato_flag == 1) call prgen_read_gato
   !---------------------------------------------------
 
-  if (format_type == 0) then
+  select case (format_type)
+
+  case (0)
      call prgen_map_null
-  else if (index(raw_data_file,'.cdf') /= 0) then
-     call prgen_map_plasmastate
-  else if (index(raw_data_file,'.peq') /= 0) then
-     call prgen_map_peqdsk
-  else if (index(raw_data_file,'.corsica') /= 0) then
-     call prgen_map_corsica
-  else if (index(raw_data_file,'.ufile') /= 0) then
-     call prgen_map_ufile
-  else
+  case (1)
      call prgen_map_iterdb
-  endif
+  case (2) 
+     call prgen_map_plasmastate
+  case (3) 
+     call prgen_map_peqdsk
+  case (5) 
+     call prgen_map_corsica
+  case (6)
+     call prgen_map_ufile
+
+  end select
 
   call prgen_write
 

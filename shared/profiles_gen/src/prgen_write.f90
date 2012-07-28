@@ -136,7 +136,7 @@ subroutine prgen_write
      write(1,60) 'ARHO_EXP=',corsica_arho
   case (6)
      write(1,'(a,sp,1pe14.7)') 'BT_EXP=',ufile_bref
-     write(1,60) 'ARHO_EXP=',ufile_rho(nx)
+     write(1,60) 'ARHO_EXP=',ufile_arho
 
   end select
 
