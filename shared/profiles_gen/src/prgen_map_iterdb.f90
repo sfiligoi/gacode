@@ -12,7 +12,7 @@
 
 subroutine prgen_map_iterdb
 
-  use prgen_read_globals
+  use prgen_globals
 
   implicit none
 
@@ -262,7 +262,7 @@ end subroutine prgen_map_iterdb
 
 subroutine volint(f,fdv)
 
-  use prgen_read_globals, &
+  use prgen_globals, &
        only : onetwo_rho_grid,pi,onetwo_R0,onetwo_hcap,onetwo_nj
 
   implicit none 

@@ -12,6 +12,7 @@
 #  - Plasma State (NetCDF)
 #  - ASTRA (also requires mapping file).
 #  - PEQDSK (ELITE pfile)
+#  - ITPA UFILES
 #============================================================= 
 
 #=============================================================
@@ -58,7 +59,8 @@ then
    echo "              *.cdf          : Plasma State NetCDF file"
    echo "              *.astra        : ASTRA text file"
    echo "              *.peq          : PEQDSK/ELITE text file"
-   echo "              *.ufile        : UFILE text config file"
+   echo "              UFILE          : UFILE mode"
+   echo "              null           : gfile only"
    echo "              input.profiles : vgen or locpargen mode"
    echo 
    echo "             -p <path>"
@@ -104,6 +106,14 @@ then
    echo "             -nogq"
    echo "             Do not use q from GATO (by default, if gfile is specified q is from GATO)."
    echo 
+   echo "             -r <reorder sequence>"
+   echo "             Reorder ions."
+   echo
+   echo "UFILE Options"
+   echo
+   echo "             -t <time>"
+   echo "             Time for averaging."
+   echo
    echo "             -r <reorder sequence>"
    echo "             Reorder ions."
    echo
@@ -305,6 +315,7 @@ VGEN_V=2
 VGEN_X=2
 VGEN_FLAG=0
 MODINP_FLAG=0
+UFILETIME=null
 
 LOC_RAD=0
 LOC_RHO=0
@@ -366,6 +377,8 @@ while [ $# -gt 0 ] ; do
   -vgen_v) shift ; VGEN_V=$1 ;;
 
   -vgen_x) shift ; VGEN_X=$1 ;;
+
+  -t) shift ; UFILETIME="$1" ;;
 
   -transp) TRANSP_FLAG=1 ;;
 
@@ -455,25 +468,44 @@ fi
 #=============================================================
 
 #=============================================================
-# Trap error from no input data file (-i)
-#
-if [ $FILE_FLAG -eq 0 ]
-then
-  echo "ERROR: (profiles_gen) Please specify an input file with -i <file>"
-  exit 0 
-fi
+# Managing input file
 
-if [ "$FILE" == "null" ]
-then
-   echo "INFO: (profiles_gen) Parsing gfile only"
-else
-   if [ -f $FILE ] && [ "${#FILE}" -gt 0 ]
+if [ $FILE_FLAG -eq 0 ] ; then
+
+  # No file!
+  echo "ERROR: (profiles_gen) Please specify an input file with -i <file>"
+  exit 1 
+
+elif [ "$FILE" == "UFILE" ] ; then
+
+   # UFILE mode
+   echo "INFO: (profiles_gen) Extracting UFILE com data."
+   python ${GACODE_ROOT}/shared/bin/gacode_ufile_tool.py *com.dat > out.ufile.log
+   echo "INFO: (profiles_gen) Extracting and averaging UFILE 1d data."
+   python ${GACODE_ROOT}/shared/bin/gacode_ufile_tool.py *1d.dat $UFILETIME >> out.ufile.log
+   echo "INFO: (profiles_gen) Extracting and averaging UFILE 2d data."
+   python ${GACODE_ROOT}/shared/bin/gacode_ufile_tool.py *2d.dat $UFILETIME >> out.ufile.log
+   if [ "$UFILETIME" == "null" ]
    then
-      echo "INFO: (profiles_gen) $FILE found"
-   else
-      echo "ERROR: (profiles_gen) $FILE not found"
-      exit 0 
+      cat out.ufile.log
+      exit 1
    fi
+
+elif [ "$FILE" == "null" ] ; then
+
+   # gfile-only mode
+   echo "INFO: (profiles_gen) Parsing gfile only"
+
+elif [ ! -f $FILE ] ; then
+
+   # bad filename
+   echo "ERROR: (profiles_gen) $FILE not found"
+   exit 1 
+
+else
+
+   echo "INFO: (profiles_gen) $FILE found"
+
 fi
 #=============================================================
 
@@ -803,10 +835,17 @@ rm -f out.gato.* input.gato.*
 if [ $VERBOSE_FLAG -eq 0 ]
 then
    rm -f $CONFIG fluxfit.* ingta o1gta grid.dat success
+   rm -f *.ave out.com out.dim out.ufile.log
 else
-   mv ingta input.gato.ingta
-   mv o1gta out.gato.o1gta
-   mv grid.dat out.gato.grid
+   if [ -f "ingta" ] ; then 
+      mv ingta input.gato.ingta
+   fi
+   if [ -f "o1gta" ] ; then
+      mv o1gta out.gato.o1gta
+   fi
+   if [ -f "grid.dat" ] ; then
+      mv grid.dat out.gato.grid
+   fi
 fi
 #==============================================================
 

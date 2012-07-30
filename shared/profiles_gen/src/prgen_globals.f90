@@ -1,4 +1,4 @@
-module prgen_read_globals
+module prgen_globals
 
   ! Parameters
   real, parameter :: kevdsecpmw=1.6022e-19*1e3*1e-6
@@ -261,27 +261,21 @@ module prgen_read_globals
   !---------------------------------------------------------
   ! UFILE variables
   !
+  integer, parameter :: ufile_nx=51
   integer :: ufile_nion
-  integer :: ufile_nprim
-  integer :: ufile_nimp
-  integer :: ufile_ibion
-
-  integer :: ufile_nj
   real :: ufile_bref
+  real :: ufile_arho
   character (len=10) :: ufile_tok
   character (len=40) :: ufile_shot
-  real, dimension(:), allocatable :: ufile_rho 
-  real, dimension(:), allocatable :: ufile_r
+  real, dimension(:), allocatable :: ufile_ne
+  real, dimension(:), allocatable :: ufile_nm1
+  real, dimension(:), allocatable :: ufile_nm2
+  real, dimension(:), allocatable :: ufile_nm3
   real, dimension(:), allocatable :: ufile_te 
   real, dimension(:), allocatable :: ufile_ti
-  real, dimension(:), allocatable :: ufile_zeff 
-  real, dimension(:), allocatable :: ufile_ne 
-  real, dimension(:), allocatable :: ufile_ene
-  real, dimension(:,:), allocatable :: ufile_en
-  real, dimension(:), allocatable :: ufile_enbeam
-  real, dimension(:), allocatable :: ufile_pfast
-  real, dimension(:), allocatable :: ufile_ptot
-  real, dimension(:), allocatable :: ufile_angrot
+  real, dimension(:), allocatable :: ufile_zeff
+  real, dimension(:), allocatable :: ufile_pres
+  real, dimension(:), allocatable :: ufile_vrot
   !---------------------------------------------------------
 
-end module prgen_read_globals
+end module prgen_globals
