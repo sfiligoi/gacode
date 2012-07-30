@@ -257,6 +257,7 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
         TITLE = 'B/W: iteration 0, red: TGYRO', YRANGE=[ymin,ymax], $
         CHARSIZE=cs, $
         THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick
+  OPLOT, x, Qi_target, LINESTYLE=2, COLOR=100, THICK=thick
   IF (d2flag) THEN OPLOT, x2, data2.Qi_tot[*,N_it2]*d2norm, COLOR=150, $
     PSYM=-2,THICK=thick
   OPLOT, x, Qi0, THICK=thick
@@ -321,6 +322,7 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
         TITLE = 'dashed: target, blue: neo', YRANGE=[ymin,ymax], $
         CHARSIZE=cs, $
         THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick
+  OPLOT, x, Qe_target, LINESTYLE=2, COLOR=100, THICK=thick
   IF (d2flag) THEN OPLOT, x2, data2.Qe_tot[*,N_it2]*d2norm, COLOR=150, $
     PSYM=-2,THICK=thick
   OPLOT, x, Qe0, THICK=thick
