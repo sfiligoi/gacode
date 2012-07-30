@@ -7,7 +7,7 @@
       INCLUDE 'input.m'
 !
       INTEGER iblock,save_nstep,save_icontinue,nstep_tot,i
-      REAL save_delt,test
+      REAL*8 save_delt,test
 !
       if(igks_model.lt.0.or.igks_model.gt.1)then
         write(*,*)"use igks_model=0 for original gks, =1 for tglf "
@@ -63,14 +63,14 @@
       LOGICAL :: firstcall=.TRUE.
       LOGICAL :: new_gridpoint=.FALSE.
       INTEGER :: n,i
-      REAL :: aky1_save=0.0
-      REAL :: rmin_save=-1.0
-      REAL :: particle_flux_tg(2,2),energy_flux_tg(2,2)
-      REAL :: stress_par_tg(2,2)
+      REAL*8 :: aky1_save=0.0
+      REAL*8 :: rmin_save=-1.0
+      REAL*8 :: particle_flux_tg(2,2),energy_flux_tg(2,2)
+      REAL*8 :: stress_par_tg(2,2)
       INTEGER :: nmodes,nfields,nplot,jmode
-      REAL :: angle(max_plot)
-      REAL :: factor1,factor2
-      COMPLEX :: wavefunction(maxmodes,3,max_plot)
+      REAL*8 :: angle(max_plot)
+      REAL*8 :: factor1,factor2
+      COMPLEX*16 :: wavefunction(maxmodes,3,max_plot)
 !
       if(firstcall)then
         call tglf_startup

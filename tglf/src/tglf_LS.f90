@@ -851,7 +851,7 @@
        if(vpar_shear_model_in.eq.1)then  
 ! include R(theta)/R0 factor like gyro convetions. Note that sign_Bt_in is in ave_c_tor_par
          do is=1,ns
-           vpar_shear_s(is)=sign_It_in*alpha_p_in*vpar_shear_in(is)*ave_c_tor_par(1,1)/R_input
+           vpar_shear_s(is)=sign_It_in*alpha_p_in*vpar_shear_in(is)*ave_c_tor_par(1,1)/Rmaj_input
          enddo
        endif
 !
@@ -3707,10 +3707,13 @@
 !
       do is=ns0,ns
         wp = ky*ave_hp1(is,1,1)*ABS(vpar_shear_in(is))/vs(is)
+!        wp = wp*taus(is)/(ABS(zs(is))*ave_hn(is,1,1))
+!        wp = ABS(vpar_shear_in(is))*R_unit/vs(is)
 !        wp =(wp*sqrt_two*R_unit*q_unit*width_in/vs(is))/3.6
-!        stress_correction = (1+2.3*wp)/(1+wp)
+!        stress_correction = (1.0 + alpha_p_in*wp)/(1.0 + wp)
+!        stress_correction = (1.0 + 2.3*wp)/(1.0 + wp)
         stress_correction = (AIMAG(freq_QL)+2.0*wp)/(AIMAG(freq_QL)+wp)
-!            write(*,*)"stress_corr=",i,stress_correction
+!            write(*,*)is,"stress_corr=",stress_correction
         do i=1,nbasis
           stress_par(is,i,1) = u_par(is,i)*stress_correction
           stress_par(is,i,2) = p_par(is,i)

@@ -14,7 +14,7 @@
 
 subroutine prgen_read_gato
 
-  use prgen_read_globals
+  use prgen_globals
 
   implicit none
 

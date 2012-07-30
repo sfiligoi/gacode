@@ -176,14 +176,14 @@ subroutine neo_spitzer
 
   if (silent_flag == 0 .and. i_proc == 0) then
      open(unit=io_sp,file=trim(path)//'out.neo.spitzer',status='replace')
-     write (io_sp,'(e16.8,$)') L11
-     write (io_sp,'(e16.8,$)') L12
-     write (io_sp,'(e16.8,$)') L21
-     write (io_sp,'(e16.8,$)') L22
-     write (io_sp,'(e16.8,$)') sp_pflux(3)
-     write (io_sp,'(e16.8,$)') (L11*src1(3) + L12*src2(3))*L0
-     write (io_sp,'(e16.8,$)') sp_eflux(3)
-     write (io_sp,'(e16.8,$)') (L21*src1(3) + L22*src2(3))*L0
+     write (io_sp,'(e16.8)',advance='no') L11
+     write (io_sp,'(e16.8)',advance='no') L12
+     write (io_sp,'(e16.8)',advance='no') L21
+     write (io_sp,'(e16.8)',advance='no') L22
+     write (io_sp,'(e16.8)',advance='no') sp_pflux(3)
+     write (io_sp,'(e16.8)',advance='no') (L11*src1(3) + L12*src2(3))*L0
+     write (io_sp,'(e16.8)',advance='no') sp_eflux(3)
+     write (io_sp,'(e16.8)',advance='no') (L21*src1(3) + L22*src2(3))*L0
      close(io_sp)
   endif
 

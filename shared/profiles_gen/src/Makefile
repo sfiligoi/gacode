@@ -8,19 +8,21 @@ endif
 
 EXEC = prgen
 
-OBJECTS = prgen_read_globals.o \
+OBJECTS = prgen_globals.o \
           prgen_fluxfit_globals.o \
           allocate_internals.o \
           allocate_iterdb_vars.o \
           allocate_plasmastate_vars.o \
 	  allocate_peqdsk_vars.o \
 	  allocate_corsica_vars.o \
+	  allocate_ufile_vars.o \
           prgen_get_chi.o \
           prgen_map_iterdb.o \
           prgen_map_null.o \
           prgen_map_plasmastate.o \
 	  prgen_map_peqdsk.o \
 	  prgen_map_corsica.o \
+	  prgen_map_ufile.o \
           prgen_read_cer.o \
           prgen_read_gato.o \
           prgen_read_iterdb.o \
@@ -29,6 +31,7 @@ OBJECTS = prgen_read_globals.o \
           prgen_read_plasmastate.o \
 	  prgen_read_peqdsk.o \
 	  prgen_read_corsica.o \
+	  prgen_read_ufile.o \
           prgen_write.o \
           fluxfit_driver.o \
           fluxfit_moments.o \
@@ -42,7 +45,7 @@ OBJECTS = prgen_read_globals.o \
 .SUFFIXES : .o .f90
 
 exec: $(OBJECTS)
-	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(GACODE_ROOT)/shared/math/math_lib.a $(LMATH) $(NETCDF)
+	$(FC) $(FMATH) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS)
 
 .f90.o :
 	$(FC) $(FMATH) $(FFLAGS) -I $(NETCDF_INC) -c $<

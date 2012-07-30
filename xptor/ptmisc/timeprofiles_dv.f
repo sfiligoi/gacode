@@ -16,6 +16,7 @@ c
         vpol_t(j,ntime_t)=vpol_m(j)
         vexb_t(j,ntime_t)=vexb_m(j)
         vphi_t(j,ntime_t)=vphi_m(j)
+        doppler_shear_t(j,ntime_t)=doppler_shear_m(j)
         egamma_t(j,ntime_t)=egamma_m(j)
         anratem_t(j,ntime_t)=anrate_m(j)
         powe_t(j,ntime_t)=powe_exp(j)

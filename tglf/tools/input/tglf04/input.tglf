@@ -1,0 +1,8 @@
+# GA standard case with Miller geometry and ExB shear
+
+GEOMETRY_FLAG=1
+ALPHA_E=1.0
+VEXB_SHEAR=0.1
+
+
+

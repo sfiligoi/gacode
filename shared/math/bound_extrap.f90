@@ -2,7 +2,7 @@
 ! bound_extrap.f90
 !
 ! PURPOSE:
-!  EXtrapolate to left and right boundaries. 
+!  Extrapolate to left and right boundaries. 
 !-------------------------------------------------------
 
 subroutine bound_extrap(fa,fb,f,r,n)

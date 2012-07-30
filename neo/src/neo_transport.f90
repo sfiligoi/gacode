@@ -134,7 +134,7 @@ contains
 
        if(silent_flag == 0 .and. i_proc == 0) then
           open(unit=io,file=trim(path)//runfile_check,status='replace')
-          write (io,'(e16.8,$)') check_sum
+          write (io,'(e16.8)',advance='no') check_sum
           close(io)
        endif
 
@@ -526,20 +526,20 @@ contains
 
     ! transport coefficients (normalized)
     open(io,file=trim(path)//runfile_transp,status='old',position='append')
-    write (io,'(e16.8,$)') r(ir)
-    write (io,'(e16.8,$)') d_phi_sqavg
-    write (io,'(e16.8,$)') jpar
-    write (io,'(e16.8,$)') vtor_0order_th0
-    write (io,'(e16.8,$)') uparB_0order
+    write (io,'(e16.8)',advance='no') r(ir)
+    write (io,'(e16.8)',advance='no') d_phi_sqavg
+    write (io,'(e16.8)',advance='no') jpar
+    write (io,'(e16.8)',advance='no') vtor_0order_th0
+    write (io,'(e16.8)',advance='no') uparB_0order
     do is=1, n_species
-       write (io,'(e16.8,$)') pflux(is)
-       write (io,'(e16.8,$)') eflux(is)
-       write (io,'(e16.8,$)') mflux(is)
-       write (io,'(e16.8,$)') uparB(is)
-       write (io,'(e16.8,$)') klittle_upar(is)
-       write (io,'(e16.8,$)') kbig_upar(is)
-       write (io,'(e16.8,$)') vpol_th0(is)
-       write (io,'(e16.8,$)') vtor_th0(is)
+       write (io,'(e16.8)',advance='no') pflux(is)
+       write (io,'(e16.8)',advance='no') eflux(is)
+       write (io,'(e16.8)',advance='no') mflux(is)
+       write (io,'(e16.8)',advance='no') uparB(is)
+       write (io,'(e16.8)',advance='no') klittle_upar(is)
+       write (io,'(e16.8)',advance='no') kbig_upar(is)
+       write (io,'(e16.8)',advance='no') vpol_th0(is)
+       write (io,'(e16.8)',advance='no') vtor_th0(is)
     enddo
     write (io,*)
     close(io)
@@ -547,42 +547,42 @@ contains
     ! transport coefficients (units)
     if(profile_model >= 2) then
        open(io,file=trim(path)//runfile_exp,status='old',position='append')
-       write (io,'(e16.8,$)') r(ir) * a_meters
+       write (io,'(e16.8)',advance='no') r(ir) * a_meters
        ! m
-       write (io,'(e16.8,$)') &
+       write (io,'(e16.8)',advance='no') &
             d_phi_sqavg * (temp_norm(ir)*temp_norm_fac/charge_norm_fac)**2
        ! V^2
-       write (io,'(e16.8,$)') &
+       write (io,'(e16.8)',advance='no') &
             jpar * (charge_norm_fac*dens_norm(ir)*vth_norm(ir)*a_meters)
        ! A/m^2 (jpar B/Bunit)
-       write (io,'(e16.8,$)') &
+       write (io,'(e16.8)',advance='no') &
             vtor_0order_th0 * (vth_norm(ir)*a_meters)
        ! m/s
-       write (io,'(e16.8,$)') &
+       write (io,'(e16.8)',advance='no') &
             uparB_0order * (vth_norm(ir)*a_meters)
        ! m/s (upar B/Bunit)
        do is=1, n_species
-          write (io,'(e16.8,$)') &
+          write (io,'(e16.8)',advance='no') &
                pflux(is) * (dens_norm(ir)*vth_norm(ir)*a_meters) 
           ! e19 m-2 s-1
-          write (io,'(e16.8,$)') &
+          write (io,'(e16.8)',advance='no') &
                eflux(is) * (dens_norm(ir)*vth_norm(ir)*a_meters &
                *temp_norm(ir)*temp_norm_fac)
           ! W/m^2 
-          write (io,'(e16.8,$)') & 
+          write (io,'(e16.8)',advance='no') & 
                mflux(is) * (dens_norm(ir)*a_meters*temp_norm(ir)*temp_norm_fac)
           ! N/m
-          write (io,'(e16.8,$)') &
+          write (io,'(e16.8)',advance='no') &
                uparB(is) * (vth_norm(ir)*a_meters)
           ! m/s (upar B/Bunit)
-          write (io,'(e16.8,$)') klittle_upar(is)  ! dimensionless
-          write (io,'(e16.8,$)') &
+          write (io,'(e16.8)',advance='no') klittle_upar(is)  ! dimensionless
+          write (io,'(e16.8)',advance='no') &
                kbig_upar(is) * (dens_norm(ir)*vth_norm(ir)*a_meters/b_unit(ir))
           ! e19 1/(m^2 s T)
-          write (io,'(e16.8,$)') &
+          write (io,'(e16.8)',advance='no') &
                vpol_th0(is) * (vth_norm(ir)*a_meters)
           ! m/s
-          write (io,'(e16.8,$)') &
+          write (io,'(e16.8)',advance='no') &
                vtor_th0(is) * (vth_norm(ir)*a_meters)
           ! m/s
        enddo
@@ -604,22 +604,22 @@ contains
     open(io,file=trim(path)//runfile_vel_fourier,status='old',position='append')
     do is=1,n_species
        do jt=0,m_theta
-          write (io,'(e16.8,$)') upar_fourier(is,jt,1)
+          write (io,'(e16.8)',advance='no') upar_fourier(is,jt,1)
        enddo
        do jt=0,m_theta
-          write (io,'(e16.8,$)') upar_fourier(is,jt,2)
+          write (io,'(e16.8)',advance='no') upar_fourier(is,jt,2)
        enddo
        do jt=0,m_theta
-          write (io,'(e16.8,$)') vpol_fourier(is,jt,1)
+          write (io,'(e16.8)',advance='no') vpol_fourier(is,jt,1)
        enddo
        do jt=0,m_theta
-          write (io,'(e16.8,$)') vpol_fourier(is,jt,2)
+          write (io,'(e16.8)',advance='no') vpol_fourier(is,jt,2)
        enddo
        do jt=0,m_theta
-          write (io,'(e16.8,$)') vtor_fourier(is,jt,1)
+          write (io,'(e16.8)',advance='no') vtor_fourier(is,jt,1)
        enddo
        do jt=0,m_theta
-          write (io,'(e16.8,$)') vtor_fourier(is,jt,2)
+          write (io,'(e16.8)',advance='no') vtor_fourier(is,jt,2)
        enddo
     enddo
     write (io,*)
@@ -627,11 +627,11 @@ contains
 
     ! gyroviscosity transport coefficients
     open(io,file=trim(path)//runfile_gv,status='old',position='append')
-    write (io,'(e16.8,$)') r(ir)
+    write (io,'(e16.8)',advance='no') r(ir)
     do is=1, n_species
-       write (io,'(e16.8,$)') pflux_gv(is)
-       write (io,'(e16.8,$)') eflux_gv(is)
-       write (io,'(e16.8,$)') mflux_gv(is)
+       write (io,'(e16.8)',advance='no') pflux_gv(is)
+       write (io,'(e16.8)',advance='no') eflux_gv(is)
+       write (io,'(e16.8)',advance='no') mflux_gv(is)
     enddo
     write (io,*)
     close(io)

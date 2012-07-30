@@ -1,6 +1,6 @@
 subroutine allocate_peqdsk_vars
 
-  use prgen_read_globals
+  use prgen_globals
 
   implicit none
 

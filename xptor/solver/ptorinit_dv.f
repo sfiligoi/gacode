@@ -156,6 +156,8 @@ c
       q0=q_exp(0) 
       cnc =  -1.0*alpha_dia/bt_exp 
       cv=1000.0    
+      a_unit_exp=arho_exp
+      if(imodel.eq.82)a_unit_exp = rmin_exp(mxgrid)
 c
 c Initialize profiles:
 c
@@ -191,6 +193,7 @@ c no dilution
          ti_m(k)=ti_exp(k)
          te_m(k)=te_exp(k)
          mask_r(k) = 1
+         h_m(k) = EXP(-xparam_pt(15)*rho(k))
          theta_exp(k)= arho_exp*rho(k)/(q_exp(k)*rmajor_exp)
 c         if(theta_exp(k).lt.thetamin)theta_exp(k)=thetamin
 c         bp_exp(k) = (psir_exp(k)-psir_exp(k-1))/dr(k,1)
@@ -254,7 +257,7 @@ c
       a_unit_exp = rmin_exp(mxgrid)
 c      if(igeo_tg.eq.0)a_unit_exp=arho_exp
 c
-      call neo_flows(ngrid,vneo_exp,vdia_exp)
+      call neo_flows(mxgrid,vneo_exp,vdia_exp)
 c
       pow_ei_exp(0) = 0.0
       do k=1,mxgrid-1
@@ -283,6 +286,18 @@ c
         zpnz_exp(k) = -a_unit_exp*(gradnzm/nzm)
         zpte_exp(k) = -a_unit_exp*(gradtem/tem)
         zpti_exp(k) = -a_unit_exp*(gradtim/tim)
+c compute reference scales
+      if(igeo_m.eq.0)then
+        b_unit = bt_exp
+c        if(bt_flag.gt.0)b_unit = bteff_exp(jm)
+      else
+        b_unit = bt_exp*(rhom/rminm)*drhodr(jm)
+      endif
+      csda_exp(k)=9.79D5*DSQRT(tem*1.D3)/
+     > (a_unit_exp*100.D0)/DSQRT(amassgas_exp)
+      rhosda_exp(k)=(1.02D2*DSQRT((tem*1.D3)*amassgas_exp)/
+     >  (b_unit*1.D4))/(a_unit_exp*100.D0)
+      cgyrobohm_exp(k)= csda_exp(k)*(rhosda_exp(k)*a_unit_exp)**2
 c compute energy exchange
         tew = te_exp(k)
         new = ne_exp(k)
@@ -308,6 +323,9 @@ c compute power balance chi's
         chii_exp(k)= -gradtim*powi_exp(k)
      >   /(dvoldr*nim*1.6022D-3*MAX(1.0D-12,gradtim**2))
       enddo
+      csda_exp(0) = csda_exp(1)
+      rhosda_exp(0) = rhosda_exp(1)
+      cgyrobohm_exp(0) = cgyrobohm_exp(1)
       diff_exp(0) = diff_exp(1)
       chie_exp(0) = chie_exp(1)
       chii_exp(0) = chii_exp(1)
@@ -315,6 +333,9 @@ c compute power balance chi's
       chie_exp(mxgrid) = chie_exp(mxgrid-1)
       chii_exp(mxgrid) = chii_exp(mxgrid-1)
       k=mxgrid
+        csda_exp(k) = csda_exp(k-1)
+        rhosda_exp(k) = rhosda_exp(k-1)
+        cgyrobohm_exp(k) = cgyrobohm_exp(k-1)
         tew = te_exp(k)
         new = ne_exp(k)
         niw = ni_exp(k)
@@ -374,6 +395,48 @@ c toroidal mach numbers
       vpar_exp(mxgrid) = vpar_exp(mxgrid-1)
       vparz_exp(mxgrid) = vparz_exp(mxgrid-1)
 c
+c compute ExB velocity on half grid using exp. Er
+c Note: GYRO uses local Te in c_s/a and a=r(a)
+c in GYRO while a=rho(a) in XPTOR
+c Note #2: turn off smoothing of rmin,rmaj using average7_1d
+c in datmap.f
+c
+      if(iexb.eq.2) then
+c
+        do k=1,mxgrid-1
+          rminm=(rmin_exp(k+1)+rmin_exp(k))/2.D0
+          rhom=arho_exp*(rho(k+1)+rho(k))/2.D0
+c        if(igeo_tg.eq.0)then
+c          b_unit = bt_exp
+c        else
+          b_unit = bt_exp*(rhom/rminm)*drhodr(k)
+c        endif
+          gradr_exp(k)=1.D0 / ( 1.D0 +drhodr(k)*
+     >             ( rmaj_exp(k+1)-rmaj_exp(k) )/dr(k,2) )
+          vexb_exp(k) = er_exp(k)/b_unit
+c        write(*,'i2,2x,0p6f10.5') k, rho(k), er_exp(k),
+c     >        b_unit, vexb_exp(k)
+        enddo
+      endif
+c
+c compute ExB shear on half grid using computed v_exb
+c
+      do k=1,mxgrid-1
+         rminm=(rmin_exp(k+1)+rmin_exp(k))/2.0
+         rhom=arho_exp*(rho(k+1)+rho(k))/2.0
+c         egamma_exp(k) = -cv/csdam*rminm/rhom*drhodr(k)*theta_exp(k)*
+c     >  (vexb_exp(k+1)-vexb_exp(k))/dr(k,2)
+         gamma_p_exp(k) = -sign_Bt_exp*(cv/csda_exp(k))*drhodr(k)*
+     >   (vexb_exp(k+1)-vexb_exp(k))/dr(k,2)
+         egamma_exp(k) = -rminm/rhom*drhodr(k)*theta_exp(k)*
+     >  (vexb_exp(k+1)-vexb_exp(k))/dr(k,2)
+c       write(*,'i2,2x,0p6f10.5') k, rho(k), vexb_exp(k),
+c     >       egamma_exp(k)
+      enddo
+      egamma_exp(0)=0.0
+      egamma_exp(mxgrid)=egamma_exp(mxgrid-1)
+
+c
 c  overwrites for restart
 c
         do k=ngrid,mxgrid
@@ -390,6 +453,8 @@ c
          vpar_m(k)=vpar_exp(k)
          vpare_m(k)=vpare_exp(k)
          vparz_m(k)=vparz_exp(k)
+         egamma_m(k)=egamma_exp(k)
+         doppler_shear_m(k) = egamma_exp(k)
          do i=1,nspecies
            vneo_m(i,k)=vneo_exp(i,k)
            vdia_m(i,k)=vdia_exp(i,k)
@@ -416,6 +481,7 @@ c
          vpar_m(k)=vpar_exp(k)
          vpare_m(k)=vpare_exp(k)
          vparz_m(k)=vparz_exp(k)
+         doppler_shear_m(k)=egamma_exp(k)
          do i=1,nspecies
            vneo_m(i,k)=vneo_exp(i,k)
            vdia_m(i,k)=vdia_exp(i,k)
@@ -429,18 +495,21 @@ c
         open (12,file='tipulse.dat',status='unknown')
         open (15,file='vexbpulse.dat',status='unknown')
         open (31,file='vpolpulse.dat',status='unknown')
+        open (11,file='dopspulse.dat',status='unknown')
 c cgms       write(6,*)"restart_pt = ", restart_pt
         read(9,150)  ntime_t, ngrid
         read(10,150) ntime_t, ngrid
         read(12,150) ntime_t, ngrid
         read(15,150) ntime_t, ngrid
         read(31,150) ntime_t, ngrid
+        read(11,150) ntime_t, ngrid
         do j=0,ntime_t
          read(9,310) time_t(j), ne_t(0:ngrid,j)
          read(10,310) time_t(j), te_t(0:ngrid,j)
          read(12,310) time_t(j), ti_t(0:ngrid,j)
          read(15,310) time_t(j), vexb_t(0:ngrid,j)
          read(31,310) time_t(j), vpol_t(0:ngrid,j)
+         read(11,310) time_t(j), doppler_shear_t(0:ngrid,j)
          if(time_t(j).ge.restart_pt) exit
         enddo
         if(j.gt.ntime_t)j=ntime_t
@@ -454,16 +523,24 @@ c cgms       write(6,*)"restart_pt = ", restart_pt
           ti_m(k)=ti_t(k,j)
           vexb_m(k)=vexb_t(k,j)
           vpol_m(k)=vpol_t(k,j)
+          doppler_shear_m(k)=doppler_shear_t(k,j)
         enddo
+c
         close(9)
         close(10)
         close(12)
         close(15)
-        close(31) 
+        close(31)
+        close(11) 
 c
 c compute vdia_m and vneo_m
 c
       call neo_flows(ngrid,vneo_m,vdia_m)
+c set diamagnetic and neo flow shear to zero at boundary
+        do i=1,nspecies
+           vneo_m(i,ngrid)=vneo_m(i,ngrid-1)
+           vdia_m(i,ngrid)=vdia_m(i,ngrid-1)
+        enddo
 c
       do k=1,ngrid
 c compute the parallel flows for each species
@@ -496,6 +573,7 @@ c set central derivatives to zero
       vparz_m(0)=vparz_m(1)
       ni_m(0)=ni_m(1)
       nz_m(0)=nz_m(1)
+      doppler_shear_m(0)=0.0
 c 
 c  boundary conditions
 c
@@ -589,8 +667,11 @@ c cosbeam is a barm angle
            cosbeam=0.5
 c vbeam is a beam ion velocity in m/sec..same units as vpar
 c effective beam velocity from 0.5*m*vbeam^2 = power/flux
-            vbeam = SQRT(ABS(2.0*(qbeame_exp(k)+qbeami_exp(k))/
-     >     (sbeam_exp(k)*amassgas_exp*1.6726D-27)))
+           vbeam = 0.0
+           if(sbeam_exp(k).gt.0.0)then
+             vbeam = SQRT(ABS(2.0*(qbeame_exp(k)+qbeami_exp(k))/
+     >      (sbeam_exp(k)*amassgas_exp*1.6726D-27)))
+           endif
 c         mparsour_p=flow_beam_exp(k)*cosbeam*vbeam
 c         mparsour_mm=flow_beam_exp(k-1)*cosbeam*vbeam
 c torque denty in NT/M^2
@@ -640,105 +721,38 @@ crew6.30
        pow_ei_cor_m(j)=0.
       enddo
 c
-c
-c
-c compute ExB shear on half grid using computed v_exb
-c
-      a_unit_exp=arho_exp
-      if(imodel.eq.82)a_unit_exp = rmin_exp(mxgrid)
-      do k=1,mxgrid-1
-         rminm=(rmin_exp(k+1)+rmin_exp(k))/2.0
-         rhom=arho_exp*(rho(k+1)+rho(k))/2.0
-         csdam=9.79D5*DSQRT(1.D3*(te_exp(k+1)+te_exp(k))/2.0)/
-     >    (a_unit_exp*100.D0)/DSQRT(amassgas_exp)
-         egamma_exp(k) = -cv/csdam*rminm/rhom*drhodr(k)*theta_exp(k)*
-     >  (vexb_exp(k+1)-vexb_exp(k))/dr(k,2)
-         gamma_p_exp(k) = -sign_Bt_exp*(cv/csdam)*drhodr(k)*
-     >   (vexb_exp(k+1)-vexb_exp(k))/dr(k,2)
-c       write(*,'i2,2x,0p6f10.5') k, rho(k), vexb_exp(k),
-c     >       egamma_exp(k)
-      enddo
-c
-c compute ExB shear on half grid using exp. Er
-c Note: GYRO uses local Te in c_s/a and a=r(a)
-c in GYRO while a=rho(a) in XPTOR
-c Note #2: turn off smoothing of rmin,rmaj using average7_1d
-c in datmap.f
-c
-      if(iexb.eq.3) then
-c
-      do k=1,mxgrid-1
-        rminm=(rmin_exp(k+1)+rmin_exp(k))/2.D0
-        rhom=arho_exp*(rho(k+1)+rho(k))/2.D0
-c        if(igeo_tg.eq.0)then
-c          b_unit = bt_exp
-c        else
-          b_unit = bt_exp*(rhom/rminm)*drhodr(k)
-c        endif
-        gradr_exp(k)=1.D0 / ( 1.D0 +drhodr(k)*
-     >             ( rmaj_exp(k+1)-rmaj_exp(k) )/dr(k,2) )
-        vexb_exp(k) = er_exp(k)/b_unit
-c        write(*,'i2,2x,0p6f10.5') k, rho(k), er_exp(k),
-c     >        b_unit, vexb_exp(k)
-      enddo
-c
-c      write(*,*) 'arho = ',arho_exp, rmin_exp(mxgrid)
-      do k=1,mxgrid-1
-         rminm=(rmin_exp(k+1)+rmin_exp(k))/2.D0
-         rhom=arho_exp*(rho(k+1)+rho(k))/2.D0
-         qm=(q_exp(k+1)+q_exp(k))/2.D0
-         temm=(te_exp(k+1)+te_exp(k))/2.D0
-         gradrm=(gradr_exp(k+1)+gradr_exp(k))/2.D0
-         csdam=9.79D5*DSQRT(1.D3*temm)/
-     >    (arho_exp*100.D0)/DSQRT(amassgas_exp)
-c         egamma_exp(k) = 1000.D0*rminm/rhom*drhodr(k)*
-c     >     ((vexb_exp(k+1)-vexb_exp(k))/dr(k,2)
-c     >     + zptheta_exp(k)*(vexb_exp(k+1)+vexb_exp(k))/2.D0)/
-c     >     gradrm/csdam*
-c     >     dsqrt(temm)/dsqrt(1.24416)
-         egamma_exp(k) = 1000.D0*rminm/qm*drhodr(k)*
-     >     ( (q_exp(k+1)/rmin_exp(k+1))*vexb_exp(k+1) -
-     >       (q_exp(k)/rmin_exp(k))*vexb_exp(k) ) / dr(k,2) /
-     >     gradrm/csdam*rmin_exp(mxgrid)/arho_exp*
-     >     dsqrt(temm)/dsqrt(1.24416)
-c       write(*,'i2,2x,0p6f10.5') k,rho(k),rmin_exp(k),vexb_exp(k),
-c     >       vexb_m(k), gradr_exp(k), egamma_exp(k)
-      enddo
-      endif
-c
-      egamma_exp(0)=0.D0
-      egamma_exp(mxgrid)=egamma_exp(mxgrid-1)
+c  initialized transport fields Told
 c
       j=0
 c
       if(itport_pt(1).ne.0)then
         j=j+1
         do k=1,ngrid
-          Told(j,k) = ne_m(k)
+          Told(j,k) = h_m(k)*ne_m(k)
         enddo
       endif
       if(itport_pt(2).ne.0)then
         j=j+1
         do k=1,ngrid
-           Told(j,k) = te_m(k)
+           Told(j,k) = h_m(k)*te_m(k)
         enddo
       endif
       if(itport_pt(3).ne.0)then
         j=j+1
         do k=1,ngrid
-           Told(j,k) = ti_m(k)
+           Told(j,k) = h_m(k)*ti_m(k)
         enddo
       endif
       if(itport_pt(4).ne.0)then
         j=j+1
         do k=1,ngrid
-          Told(j,k) = ne_m(k)*vexb_m(k)
+          Told(j,k) = h_m(k)*vexb_m(k)
         enddo
       endif
       if(itport_pt(5).ne.0)then
         j=j+1
         do k=1,ngrid
-          Told(j,k) = ne_m(k)*vpol_m(k)
+          Told(j,k) = h_m(k)*vpol_m(k)
         enddo
       endif
 c

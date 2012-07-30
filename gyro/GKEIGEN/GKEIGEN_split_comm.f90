@@ -10,10 +10,9 @@
 subroutine GKEIGEN_split_comm
 
   use gyro_globals
+  use mpi
 
   integer :: ierr
-
-  include 'mpif.h'
 
   !----------------------------------------------------------------
   ! Split the communicator into gkeigen_proc_mult parallel instances

@@ -11,7 +11,7 @@
 
 subroutine prgen_map_plasmastate
 
-  use prgen_read_globals
+  use prgen_globals
 
   implicit none
 

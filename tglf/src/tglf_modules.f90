@@ -176,8 +176,9 @@
       REAL :: R_unit=3.0
       REAL :: q_unit=2.0
       REAL :: B_unit=1.0
-      REAL :: R_input = 3.0
-      REAL :: q_input = 3.0
+      REAL :: Rmaj_input = 3.0
+      REAL :: q_input = 2.0
+      REAL :: rmin_input=0.5
       REAL,DIMENSION(maxmodes) :: gamma_reference_kx0=0.0
       REAL :: pol=1.0
       REAL :: U0=0.0
@@ -207,9 +208,10 @@
       REAL,DIMENSION(maxmodes) :: kx_bar_out=0.0,kpar_bar_out=0.0
       REAL,DIMENSION(nsm) :: n_bar_sum_out=0.0,t_bar_sum_out=0.0
       REAL,DIMENSION(nsm) :: q_low_out=0.0
-      REAL,DIMENSION(2,nkym) :: field_spectrum_out=0.0
-      REAL,DIMENSION(2,nsm,nkym) :: intensity_spectrum_out=0.0
-      REAL,DIMENSION(5,nsm,3,nkym) :: flux_spectrum_out=0.0
+      REAL,DIMENSION(2,nkym,maxmodes) :: field_spectrum_out=0.0
+      REAL,DIMENSION(2,nsm,nkym,maxmodes) :: intensity_spectrum_out=0.0
+      REAL,DIMENSION(5,nsm,3,nkym,maxmodes) :: flux_spectrum_out=0.0
+      REAL,DIMENSION(2,nkym,maxmodes) :: eigenvalue_spectrum_out=0.0
       REAL :: phi_bar_sum_out=0.0
       REAL :: v_bar_sum_out=0.0
       REAL :: gamma_nb_min_out=0.0
@@ -805,8 +807,10 @@
 !/
 
       MODULE tglf_mpi
+
+        use mpi
+
         IMPLICIT NONE
-        include 'mpif.h'
 
         ! local communicator
         integer :: iCommTglf    = -1

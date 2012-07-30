@@ -81,7 +81,7 @@ subroutine gyro_write_timedata_hdf5(h5_control)
      h5in%vsStep=step
 
 
-      if (debug_flag==1) h5in%debug=.true.
+     ! if (debug_flag==1) h5in%debug=.true.
 
      !------------------------------------------------
      ! Open the monolithic timedata file (incremental)

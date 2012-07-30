@@ -117,6 +117,8 @@ c
       pbescale3=1.D0
       pbiscale3=1.D0
       dilution_model=0
+      doppler_shear_model=0
+      j_write_state=-1
 c
       return
       end
