@@ -56,6 +56,7 @@ subroutine prgen_write
   case (6)
      write(1,20) '#              TOKAMAK : ',ufile_tok
      write(1,20) '#          SHOT NUMBER : ',ufile_shot
+     write(1,20) '#             TIME (s) : ',ufile_time
      write(1,30) '#    RADIAL GRIDPOINTS : ',nx
      write(1,'(a,1pe9.2,a)') '#               Q_EDGE : ',q(nx)
      write(1,20) '#'
