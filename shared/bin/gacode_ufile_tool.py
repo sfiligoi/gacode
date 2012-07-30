@@ -11,7 +11,7 @@
 import sys
 import numpy as np
 
-def extractcom(infile):
+def extractcom(infile,t0):
 
     print 'Extracting shot comments'
     f=open('out.com','w')
@@ -21,9 +21,9 @@ def extractcom(infile):
     pulse = ''
 
     for line in open(infile,'r').readlines():
-        if line.count("Tokamak") == 1:
+        if line.count("Tokamak:") == 1:
             tok=line.split(":")[1].strip()
-        if line.count("Run number") == 1:
+        if line.count("Run number:") == 1:
             run=line.split(":")[1].strip()
         if line.count("Pulse") == 1:
             pulse=line.split(":")[1].strip()
@@ -34,6 +34,7 @@ def extractcom(infile):
     else:
         f.write(run+'\n')
 
+    f.write(t0)
     f.close()
 
 
@@ -170,7 +171,7 @@ except:
     sys.exit()
 
 if infile.split("_")[-1]=='com.dat':
-    extractcom(infile)
+    extractcom(infile,sys.argv[2])
     sys.exit()
 
 # <time> Time-point for desired radial output
