@@ -52,7 +52,8 @@ def extract1d(infile,t0):
                 # Write the averaged data for current profile (var)
                 np.savetxt('out.'+var+'.ave',yave,fmt='%1.6e')
             else:
-                print var+'  '+str(vt[0])+' <= t <= '+str(vt[-1])
+                print str(vt[0])+' <= t <= '+str(vt[-1])
+                return
 
         if data_region == 0:
 
@@ -92,7 +93,7 @@ def extract2d(infile,t0):
 
     data_region = 0
     for line in open(infile,'r').readlines():
-
+        #print line
         if line.count("END-OF-DATA") == 1:
             data_region = 0
             if t0 >= vt[0] and t0 <= vt[-1]:
@@ -105,7 +106,8 @@ def extract2d(infile,t0):
                     # Write the averaged data for current profile (var)
                     np.savetxt('out.'+var+'.ave',np.transpose((vx,yave)),fmt='%1.6e')
             else:
-                print var+'  '+str(vt[0])+' <= t <= '+str(vt[-1])
+                print str(vt[0])+' <= t <= '+str(vt[-1])
+                return
 
         if data_region == 0:
 
@@ -175,13 +177,13 @@ if infile.split("_")[-1]=='com.dat':
 try:
     t0=float(sys.argv[2])
 except:
+    t0 = -1.0
     # Print list of included profiles (tags)
     for line in open(infile,'r').readlines():
         if line.count("-DEP") == 1:
             # Extract current variable name
             var=line.split('  ')[0].strip()
             print var
-    sys.exit()
 
 if infile.split("_")[-1]=='1d.dat':
     extract1d(infile,t0)

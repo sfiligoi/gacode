@@ -20,7 +20,7 @@
 
 program prgen
 
-  use prgen_read_globals
+  use prgen_globals
 
   !--------------------------------------------------
   implicit none

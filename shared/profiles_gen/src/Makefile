@@ -8,7 +8,7 @@ endif
 
 EXEC = prgen
 
-OBJECTS = prgen_read_globals.o \
+OBJECTS = prgen_globals.o \
           prgen_fluxfit_globals.o \
           allocate_internals.o \
           allocate_iterdb_vars.o \

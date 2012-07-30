@@ -1,10 +1,9 @@
-module prgen_read_globals
+module prgen_globals
 
   ! Parameters
   real, parameter :: kevdsecpmw=1.6022e-19*1e3*1e-6
   real, parameter :: pi=3.14159265358979323846
   integer, parameter :: nfourier=8
-  integer, parameter :: n_ufile=11
 
   ! List of possible data files
   character (len=70) :: date
@@ -262,6 +261,7 @@ module prgen_read_globals
   !---------------------------------------------------------
   ! UFILE variables
   !
+  integer, parameter :: ufile_nx=51
   integer :: ufile_nion
   real :: ufile_bref
   real :: ufile_arho
@@ -275,6 +275,7 @@ module prgen_read_globals
   real, dimension(:), allocatable :: ufile_ti
   real, dimension(:), allocatable :: ufile_zeff
   real, dimension(:), allocatable :: ufile_pres
+  real, dimension(:), allocatable :: ufile_vrot
   !---------------------------------------------------------
 
-end module prgen_read_globals
+end module prgen_globals

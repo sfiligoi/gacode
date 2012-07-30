@@ -7,7 +7,7 @@
 
 subroutine prgen_write
 
-  use prgen_read_globals
+  use prgen_globals
 
   !---------------------------------------------------------------
   implicit none

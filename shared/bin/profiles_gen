@@ -485,6 +485,11 @@ elif [ "$FILE" == "UFILE" ] ; then
    python ${GACODE_ROOT}/shared/bin/gacode_ufile_tool.py *1d.dat $UFILETIME >> out.ufile.log
    echo "INFO: (profiles_gen) Extracting and averaging UFILE 2d data."
    python ${GACODE_ROOT}/shared/bin/gacode_ufile_tool.py *2d.dat $UFILETIME >> out.ufile.log
+   if [ "$UFILETIME" == "null" ]
+   then
+      cat out.ufile.log
+      exit 1
+   fi
 
 elif [ "$FILE" == "null" ] ; then
 

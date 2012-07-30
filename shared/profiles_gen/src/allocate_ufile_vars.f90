@@ -1,6 +1,6 @@
 subroutine allocate_ufile_vars
 
-  use prgen_read_globals
+  use prgen_globals
 
   implicit none
 
@@ -12,5 +12,6 @@ subroutine allocate_ufile_vars
   allocate(ufile_ti(nx))
   allocate(ufile_zeff(nx))
   allocate(ufile_pres(nx))
+  allocate(ufile_vrot(nx))
 
 end subroutine allocate_ufile_vars

@@ -8,7 +8,7 @@
 
 subroutine prgen_read_ufile
 
-  use prgen_read_globals
+  use prgen_globals
 
   implicit none
 
@@ -32,7 +32,7 @@ subroutine prgen_read_ufile
   read(1,*) ufile_shot
   close(1)
 
-  nx = n_ufile
+  nx = ufile_nx
 
   call allocate_internals
   call allocate_ufile_vars
@@ -50,10 +50,13 @@ subroutine prgen_read_ufile
   call ufile_mapper('out.ZEFFR.ave',rho,ufile_zeff,nx,0)
   call ufile_mapper('out.RMAJOR.ave',rho,rmaj,nx,0)
   call ufile_mapper('out.RMINOR.ave',rho,rmin,nx,0)
+  ! Correct rmin on magnetic axis
+  rmin(1) = 0.0
   call ufile_mapper('out.Q.ave',rho,q,nx,0)
   call ufile_mapper('out.KAPPAR.ave',rho,kappa,nx,0)
   call ufile_mapper('out.DELTAR.ave',rho,delta,nx,0)
   call ufile_mapper('out.PRES.ave',rho,ufile_pres,nx,1)
+  call ufile_mapper('out.VROT.ave',rho,ufile_vrot,nx,1)
 
   call ufile_mapper('out.NM1.ave',rho,ufile_nm1,nx,1)
   ufile_nion=1
@@ -132,8 +135,9 @@ subroutine ufile_mapper(file,x,y,nx,neg_protect)
      y0(0) = ya
      call cub_spline(x0(0:nx0),y0(0:nx0),nx0+1,x,y,nx)
   else
-     print *,'ERROR: (prgen) Boundary issue in prgen_read_ufile.'
-     stop
+     print '(a)','WARNING: (prgen) Bad data in prgen_read_ufile: '//file
+     y(:) = 0.0
+     return
   endif
 
   deallocate(x0)

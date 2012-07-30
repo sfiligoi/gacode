@@ -12,7 +12,7 @@
 
 subroutine prgen_map_ufile
 
-  use prgen_read_globals
+  use prgen_globals
 
   implicit none
 
@@ -74,17 +74,13 @@ subroutine prgen_map_ufile
   vec(31:35,:) = 0.0
 
   ! Insert carbon toroidal velocity
-  !do i=1,5
-  !   if (reorder_vec(i) == ufile_nprim+1) then
-  !      vec(30+i,:) = -ufile_angrot(:)*(rmaj(:)+rmin(:))
-  !   endif
-  !enddo
+  do i=1,5
+     if (reorder_vec(i) == 2) then
+        vec(30+i,:) = -ufile_vrot(:)*(rmaj(:)+rmin(:))
+     endif
+  enddo
 
   ! vpol
-  vec(36,:) = 0.0
-  vec(37,:) = 0.0
-  vec(38,:) = 0.0
-  vec(39,:) = 0.0
-  vec(40,:) = 0.0
+  vec(36:40,:) = 0.0
 
 end subroutine prgen_map_ufile
