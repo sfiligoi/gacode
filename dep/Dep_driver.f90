@@ -8,7 +8,7 @@
 
 program Dep_driver
 
-  use from_tglf_to_Dep     !krho(n), omega_tglf(n,nb)
+  use Dep_from_tglf        !krho(n), omega_tglf(n,nb)
                            !chi_i_tglf_wt(n,nb), chi_i_tglf
                            !r_hat,rmaj_hat,q_saf, Ti_hat, aoLT_i, aoLn_i
 
@@ -18,7 +18,7 @@ program Dep_driver
                            !D_EP_starOchi_i_kernal(ie,k,isig,n,nb)
                            !A_EP(ie,k,isig,n)
 
-  use from_nubeam_to_Dep   !T_EP_hat, aoLf_EP
+  use Dep_from_nubeam      !T_EP_hat, aoLf_EP
 
   use tglf_pkg             !tglf package interface
 
