@@ -106,20 +106,74 @@ subroutine Dep_mainsub
     integer :: ie
     integer :: k
     integer :: isig
+    integer :: i_chk_input
+    integer :: i_chk_output
  
     real :: D_EPOchi_i_TGLF
+
+   
+    i_chk_input = 1
+    i_chk_output =1
+
+   if(i_chk_input .eq. 1) then
+    print *, 'after call to TGLF ---------------------------------------'
+   !print *, 'chi_i_tglf=',chi_i_tglf
+    print *, 'chi_i_tglf=',chi_i_tglf/ni_hat/aoLT_i
+    print *, 'r_hat=',r_hat
+    print *, 'rmaj_hat=',rmaj_hat
+    print *, 'q_saf=',q_saf
+    print *, 'Ti_hat=',Ti_hat
+    print *, 'aoLT_i=',aoLT_i
+    print *, 'aoLn_i=',aoLn_i
+    print *, 'ni_hat=',ni_hat
+   do n=1,n_max
+    print *,'krho=',krho(n)
+   enddo
+   do n=1,n_max
+    do nb=1,nb_max
+    print *, n,nb
+    print *, 'omega_tglf=',omega_tglf(n,nb)
+    print *, 'chi_i_tglf_wt=',chi_i_tglf_wt(n,nb)
+    enddo
+   enddo
+    print *,'T_EP_hat=',T_EP_hat
+    print *, '----------------------------------------'
+
+
+   endif
 
    
     call Dep_kernel !calls Dep_grid_wts
 
     D_EP_starOchi_i_TGLF(:,:,:) = 0.
  
-    do n=1,n_max
-     do nb=1,nb_max
+    do nb=1,nb_max
+     print *, 'nb=',nb
+
+     do n=1,n_max
       D_EP_starOchi_i_TGLF(:,:,:)=D_EP_starOchi_i_TGLF(:,:,:)+ &
            D_EP_starOchi_i_kernal(:,:,:,n,nb)*chi_i_tglf_wt(n,nb)
-     enddo
-    enddo
+     enddo ! n
+  
+    if(i_chk_output .eq. 1) then
+    print *, '--------------------------------------------------'
+    do k=1,k_max
+     if(k .eq. 3 .or. k .eq. 6) then
+       if(k .eq. 3) print *, 'lambda=',lambda(k), '  pass sample'
+       if(k .eq. 6) print *, 'lambda=',lambda(k), '  trap sample'
+
+     do ie=1,ie_max
+    print *, '--------------------------------------------------'
+      do isig=1,2
+      print *, 'e_hat=',e_hat(ie), ' isig=',isig
+      print *, 'D_EP_starOchi_i_TGLF=',D_EP_starOchi_i_TGLF(ie,k,isig)
+      enddo !isig
+     enddo !ie
+     endif
+    enddo !k
+    endif !i_chk_output
+
+    enddo !nb
 
 ! check on Maxwellian  D_EPOchi_i_TGLF  assuming  aoLT_EP = 0.
 
@@ -143,5 +197,6 @@ subroutine Dep_mainsub
      
     
 
+    print *, 'Dep_mainsub done'
 
 end subroutine Dep_mainsub

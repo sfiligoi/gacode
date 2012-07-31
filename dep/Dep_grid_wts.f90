@@ -105,5 +105,6 @@ subroutine  Dep_grid_wts
 
      print *, 'total sum_lambda_wts=',sum_lambda_wts
 
+     print *, 'Dep_grid_wts done'
 
 end  subroutine Dep_grid_wts
