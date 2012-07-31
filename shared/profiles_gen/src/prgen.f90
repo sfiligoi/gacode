@@ -152,7 +152,7 @@ program prgen
   else if (index(raw_data_file,'.peq') /= 0) then
 
      ! peqdsk format
-     print '(a)','INFO: Assuming peqdsk format.'
+     print '(a)','INFO: (prgen) Assuming peqdsk format.'
 
      format_type = 3
 
@@ -166,7 +166,7 @@ program prgen
   else if (index(raw_data_file,'.corsica') /= 0) then
 
      ! corsica format
-     print '(a)','INFO: Assuming corsica format.'
+     print '(a)','INFO: (prgen) Assuming corsica format.'
 
      format_type = 5
 
@@ -179,7 +179,7 @@ program prgen
   else if (index(raw_data_file,'UFILE') /= 0) then
 
      ! UFILE format
-     print '(a)','INFO: Assuming UFILE format.'
+     print '(a)','INFO: (prgen) Assuming UFILE format.'
 
      format_type = 6
 

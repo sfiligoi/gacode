@@ -1,13 +1,12 @@
 !------------------------------------------------------------
-! prgen_map_iterdb.f90
+! prgen_map_ufile.f90
 !
 ! PURPOSE:
-!  Map native iterdb data onto input.profiles standard.  
+!  Map UFILE data onto input.profiles standard.  
 !  
 ! NOTES:
-!  - This routine is common to both text and NetCDF formats.
-!  - See map_plasmastate.f90 for analogous routine for 
-!    plasmastate data.
+!  - See UFILE documentation at
+!    http://tokamak-profiledb.ccfe.ac.uk/DOCS/PR08MAN/pdbman.html
 !------------------------------------------------------------
 
 subroutine prgen_map_ufile
