@@ -10,7 +10,7 @@
 subroutine Dep_allocate
 
   use Dep_global
-  use from_nubeam_to_Dep
+  use Dep_from_nubeam
 
   implicit none
 
