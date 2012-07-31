@@ -1,5 +1,5 @@
 !-------------------------------------------------------------------------
-! tglf_to_Dep.f90
+! Dep_from_tglf.f90
 !
 ! PURPOSE:
 !  Provides interface TGLF to Dep
@@ -10,7 +10,7 @@
 !
 !-------------------------------------------------------------------------
 
-  module  from_tglf_to_Dep
+  module  Dep_from_tglf
 !
   implicit none
 
@@ -59,7 +59,7 @@
        !usual GYRO norms  delta_phi_hat = e*delta_phi/Te 
        !                   delta_A_par_hat = e*(c_s/c)*delta_A_par/Te
 
-    end module from_tglf_to_Dep
+    end module Dep_from_tglf
 !
     SUBROUTINE map_tglf_to_Dep
 ! PURPOSE: collects data from TGLF for use in Dep.
@@ -69,7 +69,7 @@
 ! This will be true if n_max <= 10 for kygrid_model_in = 1 in TGLF.
 !
     USE tglf_pkg
-    USE from_tglf_to_Dep
+    USE Dep_from_tglf
 ! 
     IMPLICIT NONE
 !

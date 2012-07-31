@@ -19,10 +19,10 @@ module Dep_global
   ! PRIVATE PARAMETERS
   ! Number  of n-modes:  n_max  = 10  !  tglf  low-k default
      !! integer, parameter :: n_max = 10
-         integer, parameter :: n_max = 1
+         integer, parameter :: n_max = 10
   ! Maximum number of unstable branches  nb_max = 2  !  tglf default
      !! integer, parameter :: nb_max = 2
-         integer, parameter :: nb_max = 1
+         integer, parameter :: nb_max = 2
 
    integer, parameter :: ie_max=8
    integer, parameter :: k_max=8
@@ -38,7 +38,7 @@ module Dep_global
   real :: Fmax(ie_max)
 
   real :: D_EP_starOchi_i_kernal(ie_max,k_max,2,n_max,nb_max)
-  real :: D_EP_starOchi_i_kernal_den
+  real :: D_EP_starOchi_i_kernal_den(n_max,nb_max)
   real :: A_EP(ie_max,k_max,2,n_max)
 
 end module Dep_global

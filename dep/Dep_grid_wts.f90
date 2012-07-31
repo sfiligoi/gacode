@@ -15,7 +15,7 @@ subroutine  Dep_grid_wts
                              !D_EP_starOchi_i_kernal(ie,k,isig,n,nb)
                              !A_EP(ie,k,isig,n)
 
-    use from_tglf_to_Dep     !krho(n), omega_tglf(n,nb)
+    use Dep_from_tglf        !krho(n), omega_tglf(n,nb)
                              !chi_i_tglf_wt(n,nb), chi_i_tglf
                              !r_hat,rmaj_hat,q_saf, Ti_hat, aoLT_i, aoLn_i
 
@@ -78,19 +78,19 @@ subroutine  Dep_grid_wts
 
     !passing
     do k=1,4
-     lambda(k)=lambda_m/8.*(2.*float(k)-1.0)
+     lambda(k)=lambda_m/8.*(2.*REAL(k)-1.0)
      lambda_wts(k) = sqrt(1.-(lambda_m/4.)* &
-        (float(k)-1.0))- &
-                     sqrt(1.-(lambda_m/4.)*float(k))
+        (REAL(k)-1.0))- &
+                     sqrt(1.-(lambda_m/4.)*REAL(k))
       print *, 'lambda=',lambda(k),'  lambda_wts=',lambda_wts(k)
     enddo
 
     !trapped
     do k=5,8
-     lambda(k)=(1.-lambda_m)/8.*(2.*(float(k)-4.)-1.0) +lambda_m
+     lambda(k)=(1.-lambda_m)/8.*(2.*(REAL(k)-4.)-1.0) +lambda_m
      lambda_wts(k) = sqrt(1.-((1.-lambda_m)/4.)* &
-        ((float(k)-4.0)-1.0)-lambda_m)- &
-                     sqrt(1.-((1.-lambda_m)/4.)*(float(k)-4.)-lambda_m)
+        ((REAL(k)-4.0)-1.0)-lambda_m)- &
+                     sqrt(1.-((1.-lambda_m)/4.)*(REAL(k)-4.)-lambda_m)
      print *, 'lambda=',lambda(k),'  lambda_wts=',lambda_wts(k)
     enddo
     !test sum
@@ -105,5 +105,6 @@ subroutine  Dep_grid_wts
 
      print *, 'total sum_lambda_wts=',sum_lambda_wts
 
+     print *, 'Dep_grid_wts done'
 
 end  subroutine Dep_grid_wts

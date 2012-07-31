@@ -96,6 +96,11 @@ subroutine prgen_read_ufile
 
 end subroutine prgen_read_ufile
 
+
+!---------------------------------------------------------------------
+! Routine to read split 2D UFILE data.
+!---------------------------------------------------------------------
+
 subroutine ufile_mapper(file,x,y,nx,neg_protect)
 
   character(len=*), intent(in) :: file
@@ -157,6 +162,13 @@ subroutine ufile_mapper(file,x,y,nx,neg_protect)
   deallocate(y0)
 
 end subroutine ufile_mapper
+
+
+!---------------------------------------------------------------------
+! Routine, based on math/bound_extrap.f90, to use extrapolation based
+! on an inferred scale length at the right end of the data.  This is 
+! appropriate for profiles (n,T for example) that must remain positive.
+!---------------------------------------------------------------------
 
 subroutine bound_exp(fa,fb,f,r,n)
 
