@@ -2,9 +2,9 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
 ifeq ($(OPT),debug)
-   FFLAGS=${FDEBUG}
+   FFLAGS=${FDEBUG} ${HDF5_FLAGS}
 else
-   FFLAGS=${FOPT}
+   FFLAGS=${FOPT} ${HDF5_FLAGS}
 endif
 
 LLIB=gyrovshdf5_lib

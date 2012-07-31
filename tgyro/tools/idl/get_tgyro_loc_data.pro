@@ -458,25 +458,45 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc, N_ion=N_ion
   p_alpha = FLTARR(NX,N_it)
   p_brem = FLTARR(NX,N_it)
   p_exch = FLTARR(NX,N_it)
+  p_expwd = FLTARR(NX,N_it)
   p_i_aux = FLTARR(NX,N_it)
   p_e_aux = FLTARR(NX,N_it)
   p_i = FLTARR(NX,N_it)
   p_e = FLTARR(NX,N_it)
   s = ' '
-  arr = fltarr(8,NX)
-  OPENR, 1, dirpath + 'power.out'
-  FOR ii = 0, N_it-1 DO BEGIN
-      READF, 1, s
-      READF, 1, s
-      READF, 1, arr
-      p_alpha[*,ii] = arr[1,*]
-      p_brem[*,ii] = arr[2,*]
-      p_exch[*,ii] = arr[3,*]
-      p_i_aux[*,ii] = arr[4,*]
-      p_e_aux[*,ii] = arr[5,*]
-      p_i[*,ii] = arr[6,*]
-      p_e[*,ii] = arr[7,*]
-  ENDFOR
+  OPENR, 1, dirpath + 'out.tgyro.power', ERROR=err
+  IF (err EQ 0 ) THEN BEGIN
+      arr = fltarr(9,NX)
+      FOR ii = 0, N_it-1 DO BEGIN
+          READF, 1, s
+          READF, 1, s
+          READF, 1, arr
+          p_alpha[*,ii] = arr[1,*]
+          p_brem[*,ii] = arr[2,*]
+          p_exch[*,ii] = arr[3,*]
+          p_expwd[*,ii] =arr[4,*]
+          p_i_aux[*,ii] = arr[5,*]
+          p_e_aux[*,ii] = arr[6,*]
+          p_i[*,ii] = arr[7,*]
+          p_e[*,ii] = arr[8,*]
+      ENDFOR
+  ENDIF ELSE BEGIN
+      arr = fltarr(8,NX)      
+      PRINT, 'Using old power.out file'
+      OPENR, 1, dirpath + 'power.out'
+      FOR ii = 0, N_it-1 DO BEGIN
+          READF, 1, s
+          READF, 1, s
+          READF, 1, arr
+          p_alpha[*,ii] = arr[1,*]
+          p_brem[*,ii] = arr[2,*]
+          p_exch[*,ii] = arr[3,*]
+          p_i_aux[*,ii] = arr[4,*]
+          p_e_aux[*,ii] = arr[5,*]
+          p_i[*,ii] = arr[6,*]
+          p_e[*,ii] = arr[7,*]
+      ENDFOR
+  ENDELSE
   CLOSE, 1
 
   DEFAULT, N_ion, 1

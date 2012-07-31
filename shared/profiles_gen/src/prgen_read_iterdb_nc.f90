@@ -7,7 +7,7 @@
 
 subroutine prgen_read_iterdb_nc
 
-  use prgen_read_globals
+  use prgen_globals
   use netcdf
 
   implicit none

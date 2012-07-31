@@ -7,7 +7,7 @@
 
 subroutine prgen_map_corsica
 
-  use prgen_read_globals
+  use prgen_globals
 
   implicit none
 

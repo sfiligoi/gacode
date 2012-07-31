@@ -5,10 +5,10 @@
 
 # Compilers
 
-FC	= mpif90 -I $(GACODE_ROOT)/modules -Wp,-D__MPI
+FC	= mpif90 -I $(GACODE_ROOT)/modules
 F77	= mpif90
 
-FMATH	= -fdefault-double-8 -fdefault-real-8 -J $(GACODE_ROOT)/modules
+FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules
 FOPT	= -O3
 FDEBUG	= -Wall -fcheck=all -fbacktrace -O -Wall -Wunderflow -W -finit-real=nan -fbounds-check -ffpe-trap=invalid,zero,overflow
 FOMP    = -fopenmp
@@ -27,8 +27,8 @@ NETCDF_INC=/usr/local/include
 ARCH = ar cr
 
 # HDF5
-#HDF5_LIBS=-Lusr/lib -lhdf5_fortran -lhdf5 -lz
-HDF5_LIBS=-L/home/vadlaman/software/lib -lhdf5_fortran -lhdf5 -lz 
-#HDF5_INC=-I/usr/include
-HDF5_INC=-I/home/vadlaman/software/include 
+HDFDIR=/home/SOFTWARE/hdf5
+HDF5_LIBS=-L$(HDFDIR)/lib -lhdf5_fortran -lhdf5 -lz 
+HDF5_INC=-I$(HDFDIR)/include
+HDF5_FLAGS=-Wp,-D__MPI -fdefault-double-8
 VSHDF5_MAKECMD=vshdf5

@@ -20,7 +20,7 @@ c
       integer j, aj, nex, ngg, mxgrid
       real*8 rhox(0:nj-1)
 cc      real*8 rho(0:nj-1)
-      real, allocatable, dimension(:) :: r_new,
+      real*8, allocatable, dimension(:) :: r_new,
      &   fcap_new, gcap_new, hcap_new, rbp_new, bp0_new,
      &   te_new, ti_new, q_new, ene_new,
      &   en1_new, en2_new, sion_new, 

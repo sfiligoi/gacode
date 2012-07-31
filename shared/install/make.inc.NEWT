@@ -5,12 +5,12 @@
 
 # Compilers
 
-FC	= mpif90 -I $(GACODE_ROOT)/modules 
+FC	= mpif90 -I $(GACODE_ROOT)/modules
 F77	= mpif90
 
-FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules
+FMATH	=  -fdefault-real-8 -J $(GACODE_ROOT)/modules
 FOPT	= -O3
-FDEBUG	= -O -Wall -Wunderflow -W -finit-real=nan -fbounds-check -ffpe-trap=invalid,zero,overflow
+FDEBUG	= -O2 -fbounds-check
 FOMP    = -fopenmp
 FNOMP   = 
 
@@ -27,6 +27,8 @@ NETCDF_INC=/usr/local/include
 ARCH = ar cr
 
 # HDF5
-#HDF5_LIBS=-L/usr/lib -lhdf5_fortran -lhdf5 -lz
-#HDF5_INC=-I/usr/include
-#VSHDF5_MAKECMD=vshdf5
+HDFDIR=/home/candy/SOFTWARE/hdf5
+HDF5_LIBS=-L$(HDFDIR)/lib -lhdf5_fortran -lhdf5
+HDF5_INC=-I$(HDFDIR)/include
+HDF5_FLAGS=-Wp,-D__MPI -fdefault-double-8
+VSHDF5_MAKECMD=vshdf5
