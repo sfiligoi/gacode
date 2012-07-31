@@ -44,6 +44,7 @@ subroutine Dep_read_input
 
   do i_n = 1, n_max_input      ! Loop for  krho
    read(1,*) krho(i_n)
+   print *, 'krho=',krho(i_n)
   enddo ! i_n
 
      print *, '----------------------------------------'
