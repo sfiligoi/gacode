@@ -1,4 +1,8 @@
-SCALAR CALLING SEQUENCE:
+1. Prepare input.profiles.gen from input.profiles:
+
+  $ python $(GACODE_ROOT)/shared/bin/profile_parse.py input.profiles
+
+2. Scalar calling sequence from f90 program:
 
   use EXPRO_interface
 
