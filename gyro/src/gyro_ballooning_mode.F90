@@ -150,6 +150,7 @@
      ! Sew together mode in extended angle and write to file.
      ! 
      ALLOCATE(amp(m0*np*n_theta_plot))
+     ampCount = 1
      do l0=0,m0-1
         do pp=-np/2,np/2-1
            p = m0*pp+l0
