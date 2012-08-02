@@ -31,6 +31,7 @@ FOPT   = -fast -Mipa=safe
 FDEBUG = -Ktrap=fp -Mbounds -Minfo=all 
 FOMP   = -mp=nonuma
 FNOMP  = 
+FHDF5 = -DHAVE_HDF5
 
 # System math libraries
 
@@ -61,8 +62,6 @@ ARCH = ar cr
 
 
 HDF5_INC = -I${HDF5_INCLUDE_OPTS}
-#VSHDF5_MAKECMD=vshdf5
-VSHDF5_ALLLIBS= ../vshdf5/libgyro_vshdf5.a ../../shared/vshdf5/libvshdf5.a $(HDF5LIBS)
-MPI_FLAG=-D__MPI
+HDF5_FLAGS = -D__MPI 
 
 

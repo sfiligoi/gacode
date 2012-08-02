@@ -42,6 +42,7 @@ LMATH = -ldrfftw -ldfftw
 NETCDF = ${NETCDF_DIR}/lib/libnetcdff.a ${NETCDF_DIR}/lib/libnetcdf.a
 NETCDF_INC = ${NETCDF_DIR}/include
 
+HDF5_FLAGS= -D __MPI
 HDF5_INC = -I${HDF5_DIR}/include
 HDF5_LIBS = \
   ${HDF5_DIR}/lib/libhdf5_hl.a \
@@ -49,7 +50,6 @@ HDF5_LIBS = \
   ${HDF5_DIR}/lib/libhdf5_fortran.a \
   ${HDF5_DIR}/lib/libhdf5.a
 
-VSHDF5_MAKECMD=vshdf5
 
 # Archive
 ARCH = ar cr

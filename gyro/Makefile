@@ -15,6 +15,12 @@ endif
 ifeq ($(ACC),true)
    FC += ${FACC}
 endif
+
+ifeq ($(HDF5),true)
+  HDF5LIBS = \
+    ${GACODE_ROOT}/shared/vshdf5/vshdf5_lib.a \
+    ${HDF5_LIBS} 
+endif
  
 EXEC=gyro
 
@@ -27,8 +33,10 @@ export EXTRA_LIBS = \
        ${GACODE_ROOT}/gyro/TRANSPOSE/TRANSP_lib.a \
        ${GACODE_ROOT}/gyro/SSUB/SSUB_lib.a \
        ${GACODE_ROOT}/gyro/GKEIGEN/GKEIGEN_lib.a \
-       ${GACODE_ROOT}/shared/vshdf5/vshdf5_lib.a \
-       ${HDF5_LIBS} ${LMATH} ${LIPM}
+			 ${HDF5LIBS} \
+       ${LMATH} ${LIPM}
+
+	
 
 all:
 	gacode_getversion > .VERSION

@@ -13,6 +13,7 @@ FOPT	= -O3
 FDEBUG	= -Wall -fcheck=all -fbacktrace -O -Wall -Wunderflow -W -finit-real=nan -fbounds-check -ffpe-trap=invalid,zero,overflow
 FOMP    = -fopenmp
 FNOMP   = 
+FHDF5 = -DHAVE_HDF5
 
 # System math libraries (from Ubuntu repository)
 
@@ -31,4 +32,3 @@ HDFDIR=/home/SOFTWARE/hdf5
 HDF5_LIBS=-L$(HDFDIR)/lib -lhdf5_fortran -lhdf5 -lz 
 HDF5_INC=-I$(HDFDIR)/include
 HDF5_FLAGS=-Wp,-D__MPI -fdefault-double-8
-VSHDF5_MAKECMD=vshdf5
