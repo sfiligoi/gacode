@@ -5,6 +5,7 @@ PRO MIDPLANE_RMS_FLUCAMP_PLOT, LOCAL_NORM = local_norm, FINITE_N=finite_n, $
 ; 11/9/2007: added finite-n option
 ; 11/20/2007: added toroidal averaging
 ; 9/26/2008: updated to display magnetic fluctuations
+; 5/11/2012: updated to plot in (%) rathern than absolute levels
 
   common GLOBAL
   common PROFILE_SIM_DATA
@@ -34,6 +35,14 @@ PRO MIDPLANE_RMS_FLUCAMP_PLOT, LOCAL_NORM = local_norm, FINITE_N=finite_n, $
           ytitle = '!4d!XT!Di!N(r)/T!Di0!N'
           norm = REFORM(tem_s[0,*])
       ENDELSE
+  ENDIF ELSE IF (STRPOS(tag[i_pwr],'vparallel') NE -1) THEN BEGIN
+      IF (STRPOS(tag[i_pwr],'elec') NE -1) THEN BEGIN
+          ytitle = '!4d!Xv!D||,e!N(r)/c!Ds!N'
+          norm = REFORM(tem_s[n_spec-1,*])
+      ENDIF ELSE BEGIN
+          ytitle = '!4d!Xv!D||,i!N(r)/c!Ds!N'
+          norm = REFORM(tem_s[n_spec-1,*])
+      ENDELSE
   ENDIF ELSE IF (STRPOS(tag[i_pwr],'energy') NE -1) THEN BEGIN
       IF (STRPOS(tag[i_pwr],'elec') NE -1) THEN BEGIN
           ytitle = '!4d!Xp!De!N(r)/p!De0!N'
@@ -44,7 +53,7 @@ PRO MIDPLANE_RMS_FLUCAMP_PLOT, LOCAL_NORM = local_norm, FINITE_N=finite_n, $
       ENDELSE
   ENDIF ELSE IF (STRPOS(tag[i_pwr],'density') NE -1) THEN BEGIN
       IF (STRPOS(tag[i_pwr],'elec') NE -1) THEN BEGIN
-          ytitle = '!4d!Xn1De!N(r)/n!De0!N'
+          ytitle = '!4d!Xn!De!N(r)/n!De0!N'
           norm = REFORM(den_s[n_spec-1,*])
       ENDIF ELSE BEGIN
           ytitle = '!4d!Xn!Di!N(r)/n!Di0!N'
@@ -61,6 +70,10 @@ PRO MIDPLANE_RMS_FLUCAMP_PLOT, LOCAL_NORM = local_norm, FINITE_N=finite_n, $
       rmsamp /= norm
       ytitle = ytitle + '(r)'
   ENDIF ELSE ytitle = ytitle + '(r!D0!N)'
+
+  ;convert to % rather than abs. value
+  rmsamp *= 100.
+  ytitle += ' (%)'
 
   mean_amp = MEAN(rmsamp[n_bnd:n_r-1-n_bnd])
   mean_sdom = SDOM(rmsamp[n_bnd:n_r-1-n_bnd])

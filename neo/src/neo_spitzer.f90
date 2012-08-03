@@ -55,36 +55,36 @@ subroutine neo_spitzer
 
   n_row = n_energy+1
   n_max = (n_energy+1)**2 * 10
-  allocate(a(n_max),stat=ierr)
+  allocate(amat(n_max),stat=ierr)
   if(ierr /= 0) then
      call neo_error('ERROR: (NEO) Spitzer allocation failed')
      goto 100
   end if
-  allocate(a_indx(2*n_max),stat=ierr)
+  allocate(amat_indx(2*n_max),stat=ierr)
   if(ierr /= 0) then
      call neo_error('ERROR: (NEO) Spitzer allocation failed')
      goto 100
   end if
   allocate(g(n_row))
 
-  a_indx(:) = 0.0
-  a(:) = 0.0
+  amat_indx(:) = 0.0
+  amat(:) = 0.0
   k = 0
   do ie=0,n_energy
      i = ie+1
      do je=0,n_energy
         j = je+1
         k = k+1
-        a(k) = -(emat_coll_test(is,is,ie,je,ix) &
+        amat(k) = -(emat_coll_test(is,is,ie,je,ix) &
              + emat_coll_field(is,is,ie,je,ix) &
              + emat_coll_test(is,is_ion,ie,je,ix))
-        a_indx(k) = i
-        a_indx(k+n_max) = j
+        amat_indx(k) = i
+        amat_indx(k+n_max) = j
      enddo
   enddo
   n_elem = k
   do k=1,n_elem
-     a_indx(n_elem+k) = a_indx(n_max+k)
+     amat_indx(n_elem+k) = amat_indx(n_max+k)
   enddo
 
   if(silent_flag == 0 .and. i_proc == 0) then
@@ -176,14 +176,14 @@ subroutine neo_spitzer
 
   if (silent_flag == 0 .and. i_proc == 0) then
      open(unit=io_sp,file=trim(path)//'out.neo.spitzer',status='replace')
-     write (io_sp,'(e16.8,$)') L11
-     write (io_sp,'(e16.8,$)') L12
-     write (io_sp,'(e16.8,$)') L21
-     write (io_sp,'(e16.8,$)') L22
-     write (io_sp,'(e16.8,$)') sp_pflux(3)
-     write (io_sp,'(e16.8,$)') (L11*src1(3) + L12*src2(3))*L0
-     write (io_sp,'(e16.8,$)') sp_eflux(3)
-     write (io_sp,'(e16.8,$)') (L21*src1(3) + L22*src2(3))*L0
+     write (io_sp,'(e16.8)',advance='no') L11
+     write (io_sp,'(e16.8)',advance='no') L12
+     write (io_sp,'(e16.8)',advance='no') L21
+     write (io_sp,'(e16.8)',advance='no') L22
+     write (io_sp,'(e16.8)',advance='no') sp_pflux(3)
+     write (io_sp,'(e16.8)',advance='no') (L11*src1(3) + L12*src2(3))*L0
+     write (io_sp,'(e16.8)',advance='no') sp_eflux(3)
+     write (io_sp,'(e16.8)',advance='no') (L21*src1(3) + L22*src2(3))*L0
      close(io_sp)
   endif
 
@@ -191,8 +191,8 @@ subroutine neo_spitzer
 100 continue
   call ENERGY_basis_ints_alloc(0)
   call ENERGY_coll_ints_alloc(0)
-  if(allocated(a))      deallocate(a)
-  if(allocated(a_indx)) deallocate(a_indx)
+  if(allocated(amat))      deallocate(amat)
+  if(allocated(amat_indx)) deallocate(amat_indx)
   if(allocated(g))      deallocate(g)
 
 end subroutine neo_spitzer

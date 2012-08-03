@@ -154,13 +154,13 @@
 !
 !-----------------------------------------------------------------
 !
-      SUBROUTINE put_averages(tsp,asp,vpar,betae,xnue,zeff,debye)
+      SUBROUTINE put_averages(tsp,asp,vpar,vexb,betae,xnue,zeff,debye)
 !
       USE tglf_global
 !
       IMPLICIT NONE
       REAL,INTENT(IN) :: tsp(nsm),asp(nsm),vpar(nsm)
-      REAL,INTENT(IN) :: betae,xnue,zeff,debye
+      REAL,INTENT(IN) :: vexb,betae,xnue,zeff,debye
       INTEGER :: is
 !
 ! set flow control switch
@@ -171,6 +171,7 @@
         as_in(is) = asp(is)
         vpar_in(is) = vpar(is)
       enddo
+      vexb_in = vexb
       betae_in = betae
       xnue_in = xnue
       zeff_in = zeff
@@ -256,7 +257,6 @@
 !-----------------------------------------------------------------
 !
       SUBROUTINE put_model_parameters(adi_elec,alpha_e,alpha_p,  &
-         alpha_n,alpha_t,alpha_kx_e,alpha_kx_p,alpha_kx_n,alpha_kx_t, &
          alpha_quench,xnu_fac,debye_fac,etg_fac, &
          sat_rule,kygrid_model,xnu_model,vpar_model,vpar_shear_model)
 !
@@ -266,8 +266,7 @@
       LOGICAL,INTENT(IN) :: adi_elec
       INTEGER :: sat_rule,xnu_model,kygrid_model
       INTEGER :: vpar_model,vpar_shear_model
-      REAL,INTENT(IN) :: alpha_e,alpha_p,alpha_n,alpha_t
-      REAL,INTENT(IN) :: alpha_kx_e,alpha_kx_p,alpha_kx_n,alpha_kx_t
+      REAL,INTENT(IN) :: alpha_e,alpha_p
       REAL,INTENT(IN) :: alpha_quench,xnu_fac,debye_fac,etg_fac
 !
 ! check for changes and update flow controls
@@ -284,12 +283,6 @@
       adiabatic_elec_in = adi_elec
       alpha_p_in = alpha_p
       alpha_e_in = alpha_e
-      alpha_n_in = alpha_n
-      alpha_t_in = alpha_t
-      alpha_kx_e_in = alpha_kx_e
-      alpha_kx_p_in = alpha_kx_p
-      alpha_kx_n_in = alpha_kx_n
-      alpha_kx_t_in = alpha_kx_t
       alpha_quench_in = alpha_quench
       xnu_factor_in = xnu_fac
       debye_factor_in = debye_fac
@@ -301,15 +294,8 @@
       vpar_shear_model_in = vpar_shear_model
 !
       if(alpha_quench_in .ne.0.0)then
-! turn of generalized quench rule and only use Waltz quench rule
+! turn off spectral shift and model and only use Waltz quench rule
         alpha_e_in = 0.0
-        alpha_p_in = 0.0
-        alpha_n_in = 0.0
-        alpha_t_in = 0.0
-        alpha_kx_e_in = 0.0
-        alpha_kx_p_in = 0.0
-        alpha_kx_n_in = 0.0
-        alpha_kx_t_in = 0.0
       endif
 !
       END SUBROUTINE put_model_parameters
@@ -357,7 +343,7 @@
 !
 
       SUBROUTINE put_Miller_geometry(rmin,rmaj,zmaj,drmindx,drmajdx,dzmajdx, &
-       kappa,s_kappa,delta,s_delta,zeta,s_zeta,q,q_prime,p_prime)
+       kappa,s_kappa,delta,s_delta,zeta,s_zeta,q,q_prime,p_prime,kx0_m)
 !
 ! This routine eliminates the need for subroutine miller_init 
 ! and the miller.dat input file.
@@ -365,7 +351,7 @@
       USE tglf_global
 !
       IMPLICIT NONE
-      REAL,INTENT(IN) :: rmin,rmaj,zmaj,q,q_prime,p_prime
+      REAL,INTENT(IN) :: rmin,rmaj,zmaj,q,q_prime,p_prime,kx0_m
       REAL,INTENT(IN) :: drmindx,drmajdx,dzmajdx
       REAL,INTENT(IN) :: kappa,s_kappa,delta,s_delta,zeta,s_zeta
 !
@@ -395,6 +381,7 @@
       s_delta_loc = s_delta
       zeta_loc = zeta
       s_zeta_loc = s_zeta
+      kx0_loc = kx0_m
 !
 ! validatiy checks
 !
@@ -492,40 +479,40 @@
 !  output routines
 !-----------------------------------------------------------------
 !
-      REAL FUNCTION get_growthrate(index)
+      REAL FUNCTION get_growthrate(index1)
 !
       USE tglf_global
 !
       IMPLICIT NONE
-      INTEGER,INTENT(IN) :: index
+      INTEGER,INTENT(IN) :: index1
       INTEGER :: i3
 !
       i3 = SIZE(gamma_out)
-      if(index.gt.i3)then
+      if(index1.gt.i3)then
         write(*,*)"requested growthrate index out of bounds",i3
         get_growthrate = 0.0
       else
-        get_growthrate = gamma_out(index)
+        get_growthrate = gamma_out(index1)
       endif
 !
       END FUNCTION get_growthrate
 !
 !-----------------------------------------------------------------
 !
-      REAL FUNCTION get_frequency(index)
+      REAL FUNCTION get_frequency(index1)
 !
       USE tglf_global
 !
       IMPLICIT NONE
-      INTEGER,INTENT(IN) :: index
+      INTEGER,INTENT(IN) :: index1
       INTEGER :: i3
 !
       i3 = SIZE(freq_out)
-      if(index.gt.i3)then
+      if(index1.gt.i3)then
         write(*,*)"requested frequency index is of bounds",i3
         get_frequency = 0.0
       else
-        get_frequency = freq_out(index)
+        get_frequency = freq_out(index1)
       endif
 !
       END FUNCTION get_frequency
@@ -1126,6 +1113,163 @@
       END FUNCTION get_v_bar_sum
 !-----------------------------------------------------------------
 !
+      REAL FUNCTION get_nky_out()
+!
+      USE tglf_global
+      USE tglf_kyspectrum
+!
+      IMPLICIT NONE
+!
+        get_nky_out = nky
+!
+      END FUNCTION get_nky_out
+!----------------------------------------------------------------
+!
+      REAL FUNCTION get_flux_spectrum_out(itype,ispec,ifield,iky,imode)
+!
+      USE tglf_global
+!   
+      IMPLICIT NONE
+!
+      INTEGER,INTENT(IN) :: itype,ispec,ifield,iky,imode
+      INTEGER :: error
+!
+      error=0
+      get_flux_spectrum_out = 0.0
+      if(itype.lt.1.or.itype.gt.5)then
+        write(*,*)"itype out of bounds",1,5
+        error=1
+      elseif(ispec.lt.1.or.ispec.gt.nsm)then
+        write(*,*)"ispec out of bounds",1,nsm
+        error=1        
+      elseif(ifield.lt.1.or.ifield.gt.3)then
+        write(*,*)"ifield out of bounds",1,3
+        error=1        
+      elseif(iky.lt.1.or.iky.gt.nkym)then
+        write(*,*)"iky out of bounds",1,nkym
+        error=1
+      elseif(imode.lt.1.or.imode.gt.maxmodes)then
+        write(*,*)"imode out of bounds",1,maxmodes
+        error=1
+      endif
+!
+      if(error.eq.0)then
+        get_flux_spectrum_out=flux_spectrum_out(itype,ispec,ifield,iky,imode)
+      endif
+!
+      END FUNCTION get_flux_spectrum_out
+!----------------------------------------------------------------
+!
+      REAL FUNCTION get_eigenvalue_spectrum_out(itype,iky,imode)
+!
+      USE tglf_global
+!   
+      IMPLICIT NONE
+!
+      INTEGER,INTENT(IN) :: itype,iky,imode
+      INTEGER :: error
+!
+      error=0
+      get_eigenvalue_spectrum_out = 0.0
+      if(itype.lt.1.or.itype.gt.2)then
+        write(*,*)"ntype out of bounds",1,2
+        error=1
+      elseif(iky.lt.1.or.iky.gt.nkym)then
+        write(*,*)"iky out of bounds",1,nkym
+        error=1
+      elseif(imode.lt.1.or.imode.gt.maxmodes)then
+        write(*,*)"imode out of bounds",1,maxmodes
+        error=1
+      endif
+!
+      if(error.eq.0)then
+        get_eigenvalue_spectrum_out=eigenvalue_spectrum_out(itype,iky,imode)
+      endif
+!
+      END FUNCTION get_eigenvalue_spectrum_out
+!----------------------------------------------------------------
+!
+      REAL FUNCTION get_intensity_spectrum_out(itype,ispec,iky,imode)
+!
+      USE tglf_global
+!   
+      IMPLICIT NONE
+!
+      INTEGER,INTENT(IN) :: itype,ispec,iky,imode
+      INTEGER :: error
+!
+      error=0
+      get_intensity_spectrum_out = 0.0
+      if(itype.lt.1.or.itype.gt.2)then
+        write(*,*)"ntype out of bounds",1,2
+        error=1
+      elseif(ispec.lt.1.or.ispec.gt.nsm)then
+        write(*,*)"ispec out of bounds",1,nsm
+        error=1        
+      elseif(iky.lt.1.or.iky.gt.nkym)then
+        write(*,*)"iky out of bounds",1,nkym
+        error=1
+      elseif(imode.lt.1.or.imode.gt.maxmodes)then
+        write(*,*)"imode out of bounds",1,maxmodes
+        error=1
+      endif
+!
+      if(error.eq.0)then
+        get_intensity_spectrum_out=intensity_spectrum_out(itype,ispec,iky,imode)
+      endif
+!
+      END FUNCTION get_intensity_spectrum_out
+!----------------------------------------------------------------
+!
+      REAL FUNCTION get_field_spectrum_out(itype,iky,imode)
+!
+      USE tglf_global
+!   
+      IMPLICIT NONE
+!
+      INTEGER,INTENT(IN) :: itype,iky,imode
+      INTEGER :: error
+!
+      error = 0
+      get_field_spectrum_out = 0.0
+      if(itype.lt.1.or.itype.gt.2)then
+        write(*,*)"itype out of bounds",1,2
+        error=1
+      elseif(iky.lt.1.or.iky.gt.nkym)then
+        write(*,*)"nky out of bounds",1,nkym
+        error=1
+      elseif(imode.lt.1.or.imode.gt.maxmodes)then
+        write(*,*)"imode out of bounds",1,maxmodes
+        error=1
+      endif
+!
+      if(error.eq.0)then
+        get_field_spectrum_out=field_spectrum_out(itype,iky,imode)
+      endif
+!
+      END FUNCTION get_field_spectrum_out
+!-----------------------------------------------------------------
+!
+      REAL FUNCTION get_ky_spectrum_out(iky)
+!
+      USE tglf_global
+      USE tglf_kyspectrum
+!
+      IMPLICIT NONE
+!
+      INTEGER,INTENT(IN) :: iky
+!
+      if(iky.lt.1.or.iky.gt.nkym)then
+        write(*,*)"iky out of bounds",1,nkym
+        get_ky_spectrum_out = 0.0
+      else
+        get_ky_spectrum_out = ky_spectrum(iky)
+      endif
+!
+      END FUNCTION get_ky_spectrum_out
+!-----------------------------------------------------------------
+!
+
       REAL FUNCTION get_DM()
 !
       USE tglf_global
@@ -1146,6 +1290,28 @@
       get_DR = DR_out
 !
       END FUNCTION get_DR
+!-----------------------------------------------------------------
+!
+      SUBROUTINE get_DEP_parameters(r_dep,rmaj_dep,q_dep,taui_dep,rlni_dep,rlti_dep,ni_dep)
+!
+      USE tglf_global
+!
+      IMPLICIT NONE
+!
+      REAL,INTENT(OUT) :: r_dep,rmaj_dep,q_dep,taui_dep,rlni_dep,rlti_dep,ni_dep
+!
+! warning this routine assumes that the call put_species set the main ion species to be index 2
+!
+      taui_dep = taus_in(2)
+      rlni_dep = rlns_in(2)
+      rlti_dep = rlts_in(2)
+      ni_dep = as_in(2)
+! note that rmin_input,Rmaj_input,q_input are set the different geometry routines 
+      r_dep = rmin_input
+      rmaj_dep = Rmaj_input
+      q_dep = q_input
+!
+      END SUBROUTINE get_DEP_parameters
 !-----------------------------------------------------------------
 !
       SUBROUTINE write_tglf_input
@@ -1250,7 +1416,7 @@
         write(11,*)"      vts_shear_tg(",is,")= ",vts_shear_in(is)
        enddo
        write(11,*)"/"
-       do is=1,ns
+       do is=1,ns_in
         write(11,*)"! particle_flux(",is,",1) = ",get_particle_flux(is,1)
         write(11,*)"! energy_flux(",is,",1) = ",get_energy_flux(is,1)
         write(11,*)"! stress_tor(",is,",1) = ",get_stress_tor(is,1)
@@ -1272,7 +1438,7 @@
       INTEGER :: i,n,k,noff
       REAL :: wave(maxmodes*6)
       CHARACTER(len=80) :: header
-      CHARACTER(len=10) :: theta="    theta  "
+      CHARACTER(len=11) :: theta="    theta  "
       CHARACTER(len=22) :: phi="  RE(phi)    IM(phi)  "
       CHARACTER(len=24) :: Bper="  RE(Bper)    IM(Bper)  "
       CHARACTER(len=24) :: Bpar="  RE(Bpar)    IM(Bpar)  "

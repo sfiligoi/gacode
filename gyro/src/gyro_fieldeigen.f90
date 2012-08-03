@@ -169,17 +169,17 @@ subroutine gyro_fieldeigen
   ! electron_method=2.
   !
   allocate(ap_mm(n_x,-m_gyro:m_gyro-i_gyro,n_blend,n_blend))
-  call make_poisson_blend(1)
+  call gyro_blend_poisson(1)
 
   if (n_field > 1) then
      allocate(aa_mm(n_x,-mg_dx:mg_dx-ig_dx,n_blend,n_blend))
-     call make_ampere_blend
+     call gyro_blend_ampere
   endif
 
   if (n_field > 2) then
      allocate(ab_mm(n_x,-m_gyro:m_gyro-i_gyro,n_blend,n_blend))
      allocate(abp_mm(n_x,-m_gyro:m_gyro-i_gyro,n_blend,n_blend))
-     call make_ampereperp_blend
+     call gyro_blend_ampereperp
   endif
   !-----------------------------------------------------------------------
 
@@ -526,15 +526,15 @@ subroutine gyro_fieldeigen
   ! Call plotting and other IO functions:
   !
   call gyro_fieldeigen_df
-  call get_field_fluxave
+  call gyro_field_fluxave
   call gyro_field_time_derivative
-  call get_field_plot
+  call gyro_field_plot
   call gyro_moments_plot
-  if (io_method == 1) then 
+  !if (io_method == 1) then 
      call gyro_write_timedata
-  else
-     call gyro_write_timedata_hdf5
-  endif
+  !else
+  !   call gyro_write_timedata_hdf5
+  !endif
   step = 1
   call gyro_write_precision(10,abs(omega_eigen))
   !-------------------------------------------------------------------

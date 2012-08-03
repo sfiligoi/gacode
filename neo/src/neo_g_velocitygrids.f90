@@ -53,7 +53,7 @@ contains
        if(ir == 1) then
           open(unit=io,file=trim(path)//'out.neo.g_ene_x',status='replace')
           do je=1,ne
-             write (io,'(e16.8,$)') ene(je)
+             write (io,'(e16.8)',advance='no') ene(je)
           enddo
           close(io)
           open(unit=io,file=trim(path)//'out.neo.g_ene_y',status='replace')
@@ -64,7 +64,7 @@ contains
           do ix=0, n_xi
              do it=1,n_theta
                 do je=1, ne
-                   write (io,'(e16.8,$)') gall(is,ix,it,je)
+                   write (io,'(e16.8)',advance='no') gall(is,ix,it,je)
                 enddo
              enddo
           enddo
@@ -133,10 +133,10 @@ contains
        do is=1, n_species
           do it=1, n_theta
              do jx=1, nxi
-                write (io,'(e16.8,$)') xi(jx)
-                write (io,'(e16.8,$)') gall(is,it,jx)
-                write (io,'(e16.8,$)') g0(is,it,jx)
-                write (io,'(e16.8,$)') g1(is,it,jx)
+                write (io,'(e16.8)',advance='no') xi(jx)
+                write (io,'(e16.8)',advance='no') gall(is,it,jx)
+                write (io,'(e16.8)',advance='no') g0(is,it,jx)
+                write (io,'(e16.8)',advance='no') g1(is,it,jx)
                 write (io,*)
              enddo
           enddo

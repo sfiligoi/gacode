@@ -3,8 +3,8 @@
       IMPLICIT NONE
       PRIVATE
 ! linear stability and transport model drivers
-      PUBLIC :: tglf,tglf_TM
-! gemetry setup routine
+      PUBLIC :: tglf,tglf_TM,tglf_TM_mpi
+! geometry setup utility
       PUBLIC :: tglf_setup_geometry
 ! input routines
       PUBLIC :: put_species,put_kys,put_signs
@@ -48,8 +48,15 @@
       PUBLIC :: get_R2_ave
       PUBLIC :: get_B2_ave
       PUBLIC :: get_RBt_ave
+      PUBLIC :: get_nky_out
+      PUBLIC :: get_eigenvalue_spectrum_out
+      PUBLIC :: get_field_spectrum_out
+      PUBLIC :: get_intensity_spectrum_out
+      PUBLIC :: get_flux_spectrum_out
+      PUBLIC :: get_ky_spectrum_out
       PUBLIC :: get_DM
       PUBLIC :: get_DR
+      PUBLIC :: get_DEP_parameters
       PUBLIC :: get_wavefunction_out
       PUBLIC :: write_tglf_input
       PUBLIC :: write_wavefunction_out
@@ -76,11 +83,8 @@
       END SUBROUTINE tglf
 !
       include 'tglf_inout.f90'
-!      include 'tglf_geometry.f90'
-!      include 'tglf_matrix.f90'
-!      include 'tglf_LS.f90'
-!      include 'tglf_max.f90'
-      include 'tglf_setup_geometry.f90'
       include 'tglf_TM.f90'
+      include 'tglf_TM_mpi.f90'
+      include 'tglf_setup_geometry.f90'
 !
       END MODULE tglf_pkg

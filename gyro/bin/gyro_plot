@@ -50,6 +50,7 @@ then
   echo "                    gbflux,"
   echo "                    gbflux_i,"
   echo "                    gbflux_n,"
+  echo "                    gbflux_exc,"
   echo "                    gbflux_rt,"
   echo "                    balloon [use -moment for indexing],"
   echo "                    fluctuation2d [-moment 0 (n, all species) "
@@ -61,7 +62,7 @@ then
   echo "Example:"
   echo
   echo "   gyro_plot -e ."
-  echo "   gyro_plot -e . -plot"
+  echo "   gyro_plot -e . -plot freq"
 
   exit 1
 fi
@@ -107,7 +108,7 @@ while [ $# -gt 0 ] ; do
 
   -f) shift ; FTYPE=$1 ;;
 
-  *) echo "ERROR: incorrect gyro syntax." ; exit 1 ;;
+  *) echo "ERROR: incorrect gyro_plot syntax." ; exit 1 ;;
 
   esac
   shift
@@ -162,6 +163,9 @@ case "$PLOT_TYPE" in
 
    gbflux_rt) 
         Python -i  $PYROOT/gbflux_rt.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE  ;;
+
+   gbflux_exc) 
+        python $PYROOT/gbflux_exc.py $SIMDIR $WINDOW $FTYPE & ;;
 
    balloon) 
         Python -i  $PYROOT/balloon.py $SIMDIR $I_MOMENT $FTYPE ;;

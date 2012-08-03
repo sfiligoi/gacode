@@ -21,6 +21,10 @@ reg18: [nl+gki+ ae+ es+pure+ sa+ sym+ncol+nrot+ p+inp]
 reg19: [ l+gki+gke+cem+pure+mod+ sym+ col+nrot+ p+inp]
 reg20: [nl+gki+dke+cem+pure+mod+ sym+ncol+ rot+np+inp]
 
+Pedestal cases:
+ped95iv: [ l+gki+dke+tem+pure+gen+asym+ncol+nrot+ p+exp]
+ped95ev: [ l+gki+gke+tem+pure+gen+asym+ncol+nrot+ p+exp]
+
 HDF5 test cases (HDF5 I/O)
 
 h5reg01: [ l+gki+ ae+ es+pure+ sa+ sym+ncol+nrot+ p+inp]
@@ -28,14 +32,20 @@ h5reg20: [nl+gki+dke+cem+pure+mod+ sym+ncol+ rot+np+inp]
 
 Full nonlinear cases
 
-nl01: [nl+gki+dke+ es+pure+mod+ sym+ncol+nrot+ p+inp]
-      GA standard case, 16 modes.
-nl02: [nl+gki+dke+tem+pure+gen+ sym+ col+nrot+ p+exp]
-      Guttenfelder's NSTX microtearing case.
-nl03: [nl+gki+dke+ es+ imp+mod+ sym+ col+nrot+np+exp]
-      Holland's 40-mode DIII-D case.
-nl04: [nl+gki+gke+ es+ imp+mod+ sym+ col+nrot+np+exp]
-      Holland's 80-mode DIII-D case.
+nl01:  [nl+gki+dke+ es+pure+mod+ sym+ncol+nrot+ p+inp]
+       GA standard case, 16 modes.
+nl02a: [nl+gki+dke+tem+pure+gen+ sym+ col+nrot+ p+exp]
+       Guttenfelder's NSTX microtearing case (8 modes, 400 radii).
+nl02b: [nl+gki+dke+tem+pure+gen+ sym+ col+nrot+ p+exp]
+       Guttenfelder's NSTX microtearing case (16 modes, 540 radii).
+nl02c: [nl+gki+dke+tem+pure+gen+ sym+ col+nrot+ p+exp]
+       Guttenfelder's NSTX microtearing case (32 modes, 800 radii).
+nl02d: [nl+gki+dke+tem+pure+gen+ sym+ col+nrot+ p+exp]
+       Guttenfelder's NSTX microtearing case (64 modes, 800 radii).
+nl03:  [nl+gki+dke+ es+ imp+mod+ sym+ col+nrot+np+exp]
+       Holland's 40-mode DIII-D case.
+nl04:  [nl+gki+gke+ es+ imp+mod+ sym+ col+nrot+np+exp]
+       Holland's 80-mode DIII-D case.
 
 Eigenvalue cases:
 
@@ -81,6 +91,6 @@ nrot = no rotation effects
 p  = periodic BCs
 np = nonperiodic BCs
 
-inp = profile parameters via INPUT
-exp = profile input via INPUT_profiles
+inp = profile parameters via input.gyro
+exp = profile input via input.profiles
  

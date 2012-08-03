@@ -37,6 +37,7 @@ subroutine tglf_run()
   call put_averages(tglf_taus_in, &
        tglf_as_in, &
        tglf_vpar_in, &
+       tglf_vexb_in,  &
        tglf_betae_in, &
        tglf_xnue_in, &
        tglf_zeff_in, &
@@ -68,12 +69,6 @@ subroutine tglf_run()
   call put_model_parameters(tglf_adiabatic_elec_in, &
        tglf_alpha_e_in, &
        tglf_alpha_p_in, &
-       tglf_alpha_n_in, &
-       tglf_alpha_t_in, &
-       tglf_alpha_kx_e_in, &
-       tglf_alpha_kx_p_in, &
-       tglf_alpha_kx_n_in, &
-       tglf_alpha_kx_t_in, &
        tglf_alpha_quench_in, &
        tglf_xnu_factor_in, &
        tglf_debye_factor_in, &
@@ -100,7 +95,8 @@ subroutine tglf_run()
           tglf_s_zeta_loc_in, &
           tglf_q_loc_in, &
           tglf_q_prime_loc_in, &
-          tglf_p_prime_loc_in)
+          tglf_p_prime_loc_in, &
+          tglf_kx0_loc_in)
 
   elseif (tglf_geometry_flag_in == 2)then
 
@@ -130,7 +126,7 @@ subroutine tglf_run()
      call tglf_dump_global
   endif
 
-  if (tglf_use_transport_model_in)then
+  if (tglf_use_transport_model_in) then
 
      call tglf_tm
 
@@ -149,6 +145,9 @@ subroutine tglf_run()
      ! Pi_e/Pi_GB
      tglf_elec_mflux_out = get_stress_tor(1,1)
 
+     ! S_e/S_GB
+     tglf_elec_expwd_out = get_exchange(1,1)
+
      ! Ions
 
      do i_ion=1,5
@@ -162,6 +161,9 @@ subroutine tglf_run()
 
         ! Pi_i/Pi_GB
         tglf_ion_mflux_out(i_ion) = get_stress_tor(i_ion+1,1)
+
+        ! S_i/S_GB
+        tglf_ion_expwd_out(i_ion) = get_exchange(i_ion+1,1)
 
      enddo
 

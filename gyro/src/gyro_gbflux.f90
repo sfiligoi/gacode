@@ -24,6 +24,7 @@ subroutine gyro_gbflux
   real, dimension(n_kinetic,n_field,p_moment,n_x) :: gbflux_i_loc
   real, dimension(n_kinetic,n_field,p_moment,n_x) :: gbflux_i_loc_trapped
   real, dimension(n_kinetic,3) :: gbflux_mom_loc
+  real, dimension(n_kinetic,4) :: gbflux_exc_loc
   real, dimension(n_kinetic,n_field,p_moment) :: gbflux_loc
   real, dimension(n_kinetic,n_field,p_moment) :: gbflux_loc_trapped
   real :: gbflux_norm
@@ -38,7 +39,6 @@ subroutine gyro_gbflux
      j = 2
   endif
   !-----------------------------------------------------
-
 
   !----------------------------------------------------------
   ! Compute particle/momentum/energy diffusivities:
@@ -58,12 +58,13 @@ subroutine gyro_gbflux
   enddo ! ix
 
   gbflux_mom_loc(:,:) = j*nonlinear_flux_momparts(:,:)/rhos_norm**2
+  gbflux_exc_loc(:,:) = j*nonlinear_flux_excparts(:,:)/rhos_norm**2
   !----------------------------------------------------------
 
   !-----------------------------------------------------------------
   ! Define factors useful for quasilinear normalizations
   !
-  call get_phi_squared
+  call gyro_phi_kp_squared
   !-----------------------------------------------------------------
 
   !-----------------------------------------------------------------
@@ -91,8 +92,9 @@ subroutine gyro_gbflux
         enddo ! i
 
         gbflux_mom_loc(:,:) = nonlinear_flux_momparts(:,:)/sum(phi_squared(:)/n_x)
+        gbflux_exc_loc(:,:) = nonlinear_flux_excparts(:,:)/sum(phi_squared(:)/n_x)
 
-    end select
+     end select
 
   endif
   !-----------------------------------------------------------------
@@ -126,6 +128,14 @@ subroutine gyro_gbflux
   call MPI_ALLREDUCE(gbflux_mom_loc, &
        gbflux_mom, &
        size(gbflux_mom), &
+       MPI_DOUBLE_PRECISION, &
+       MPI_SUM, &
+       NEW_COMM_2, &
+       i_err)
+
+  call MPI_ALLREDUCE(gbflux_exc_loc, &
+       gbflux_exc, &
+       size(gbflux_exc), &
        MPI_DOUBLE_PRECISION, &
        MPI_SUM, &
        NEW_COMM_2, &
@@ -178,6 +188,15 @@ subroutine gyro_gbflux
         gbflux_i_trapped(:,:,:,:) = gbflux_i_trapped(:,:,:,:)/gbflux_norm
 
      endif
+  endif
+
+  ! Compute running time-average of radially-dependent fluxes
+  if (step > int((1.0-fluxaverage_window)*nstep)) then
+     p_ave = p_ave+1
+     gbflux_vec(:,:,:,:) = ((p_ave-1)*gbflux_vec(:,:,:,:)+gbflux_i(:,:,:,:))/p_ave
+  else
+     p_ave = 0
+     gbflux_vec(:,:,:,:) = 0.0
   endif
 
   if (i_proc == 0) then

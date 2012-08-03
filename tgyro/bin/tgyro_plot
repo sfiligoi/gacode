@@ -3,7 +3,7 @@
 # tgyro_plot
 #
 # PURPOSE:
-#  Handles plotting of tgyro output
+#  Plotting/listing routines for TGYRO output.
 #==============================================================================
 
 #==============================================================================
@@ -13,56 +13,53 @@ n=$#
 
 if [ $n -eq 0 ]
 then
-   echo
-   echo "Usage:   tgyro_plot [options]"
-   echo
-   echo "         tgyro_plot provides primitive plotting routines for output"
-   echo "         from tgyro through python and matplotlib.  The acquisition"
-   echo "         and storage of data is handled through a python class called"
-   echo "         TGYROData, which is automatically called when this script is"
-   echo "         run."
-   echo
-   echo "         -l <path>"
-   echo "         Loads all output files in specified directory.  If no"
-   echo "         directory is given, then the current working directory is"
-   echo "         used."
-   echo
-   echo "         -p <options>"
-   echo "         Opens python for editing with specified directory loaded, and"
-   echo "         creates requested summary plots.  Options are:"
-   echo "             Typing 'ps' after '-p' creates a profile summary plot."
-   echo "             gs creates a gradient summary plot"
-   echo "             cs creates a chi-value summary plot"
-   echo "             fs creates an energy flux summary plot"
-   echo "             ms creates a momentum flux summary plot"
-   echo "         If no options are specified, then the python shell opens with"
-   echo "         no plots created by default.  There is no limit to the number"
-   echo "         of summary plots that may be specified after -p.  After the"
-   echo "         shell has loaded, type 'help(TGYROData)' for information on"
-   echo "         how to create plots with python."
-   echo "         Typing 'help(plt)' is also useful, but can be a little"
-   echo "         overwhelming.  The online help for matplotlib is much better"
-   echo "         organized, and searchable as well.  At time of creation of"
-   echo "         this file, the website for matplotlib was:"
-   echo "         http://matplotlib.sourceforge.net/"
-   echo ""
+  echo
+  echo "Usage:    tgyro_plot [options]"
+  echo
+  echo "          -p <path>"
+  echo "          Set optional path to simulation directory."
+  echo "          [The default path is the current directory]"
+  echo
+  echo "          -e <simdir>"
+  echo "          Use data in <simdir>."
+  echo 
+  echo "          -f <filetype>"
+  echo "          Output file type."
+  echo "           <filetype>=emf, eps, pdf, png, ps, raw, rgba, svg, svgz"
+  echo 
+  echo "          -u <units>"
+  echo "          Plot units (0=GB,1=Physical)."
+  echo 
+  echo "          -plot <type>"
+  echo "          Generate plot of given type."
+  echo "           <type> = flux,"
+  echo "                    flux_tot,"
+  echo "                    profile,"
+  echo "                    profile_smooth,"
+  echo "                    one."
+  echo
+  echo "          -func <func>"
+  echo "          <func> = any output quantity."
+  echo
+  echo "Example:"
+  echo
+  echo "   tgyro_plot -e . -plot flux_tot"
+  echo "   tgyro_plot -e . -plot one -func a/Lp"
 
-exit 1
+  exit 1
 fi
+#==============================================================================
 
 #==============================================================================
 # Define variables for flag capture
 #
-# Default output directory
-PLOT_DIR=$PWD
-N1=1
-N2=1
-# Plot mode flags
-LOAD_FLAG=0
-LINE_FLAG=0
-VERBOSE_FLAG=0
-LEGEND_FLAG=0
-PLOT_STRING=""
+# Default simulation directory
+LOCDIR=.
+SIMROOT=$PWD
+PLOT_TYPE=null
+UNITS=0
+FTYPE=screen
+FUNC=null
 #==============================================================================
 
 #==============================================================================
@@ -71,37 +68,61 @@ PLOT_STRING=""
 while [ $# -gt 0 ] ; do
   case "$1" in
 
-  -l) shift ; PLOT_DIR=$1 ; shift ;;
+  -plot) shift ; PLOT_TYPE=$1 ;;
+  
+  -e) shift ; LOCDIR=$1 ;;
 
-  -p) shift ; LINE_FLAG=1 ; PLOT_STRING="$1" ; shift ; break ;;
+  -p) shift ; SIMROOT=$1 ;;
 
-  -dim) shift ; N1=$1 ; shift ; N2=$1 ; shift ;;
+  -f) shift ; FTYPE=$1 ;;
 
-  -v) shift ; VERBOSE_FLAG=1 ;;
+  -func) shift ; FUNC=$1 ;;
 
-  -s) shift ; LEGEND_FLAG=0 ;;
+  -u) shift ; UNITS=$1 ;;
 
-  *) echo "ERROR: incorrect syntax." ; exit 1 ;;
+  *) echo "ERROR: incorrect tgyro_plot syntax." ; exit 1 ;;
 
   esac
+  shift
 done
 #==============================================================================
-# Plot data
 
-if [ $LINE_FLAG -eq 1 ]
+if [ "$LOCDIR" == "." ]
 then
-  while [ $# -gt 0 ]
-  do
-    PLOT_STRING="$PLOT_STRING $1"
-    shift
-  done
-  echo `which python`
-  if [ "$PLOT_STRING" != "" ]
-  then
-    Python $GACODE_ROOT/shared/python/pyrats/tgyro/interpreter.py $PLOT_DIR $N1 $N2 $VERBOSE_FLAG $LEGEND_FLAG $PLOT_STRING &
-    exit 0
-  else
-    Python -i $GACODE_ROOT/shared/python/pyrats/tgyro/interpreter.py $PLOT_DIR $N1 $N2 $VERBOSE_FLAG $LEGEND_FLAG $PLOT_STRING
-    exit 0
-  fi
+   LOCDIR=`basename $PWD`
+   cd .. ; SIMROOT=$PWD
 fi
+SIMDIR=$SIMROOT/$LOCDIR
+cd $SIMDIR
+
+PYROOT=$GACODE_ROOT/shared/python/pyrats/tgyro
+
+#==============================================================================
+# Display diff if -ldiff set, then exit.
+#
+case "$PLOT_TYPE" in
+
+   flux)  
+	Python -i $PYROOT/flux.py $SIMDIR $UNITS $FTYPE & ;;
+
+   flux_tot)  
+	Python -i $PYROOT/flux_tot.py $SIMDIR $UNITS $FTYPE & ;;
+
+   profile)  
+	Python -i $PYROOT/profile.py $SIMDIR $FTYPE & ;;
+
+   profile_smooth)  
+	Python -i $PYROOT/profile_smooth.py $SIMDIR $FTYPE & ;;
+
+   one)  
+	Python -i $PYROOT/oneplot.py $SIMDIR $FUNC $FTYPE & ;;
+
+   null)
+        echo "Please specify a plot type via -plot." ;;
+
+   *)
+        echo "Unrecognized plot type: $PLOT_TYPE" ;;
+   
+esac 
+
+exit 0

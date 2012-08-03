@@ -26,9 +26,6 @@ LMATH =${HOME}/local_software/GotoBLAS2/libgoto2.a
 NETCDF=/usr/local/lib/libnetcdff.a /usr/local/lib/libnetcdf.a -lcurl
 NETCDF_INC=/usr/local/include
 
-# OPTIONAL: GATO FLAGS
-GATOFLAGS=-fdefault-real-8 -fdefault-integer-8 -O0
-
 # Archive 
 
 ARCH = ar cr

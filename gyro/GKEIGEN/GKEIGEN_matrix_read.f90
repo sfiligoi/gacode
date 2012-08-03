@@ -12,12 +12,12 @@ subroutine GKEIGEN_matrix_read(n_last_col)
   use gyro_globals
   use gyro_pointers
   use GKEIGEN_globals
+  use mpi
 
   !---------------------------------
   implicit none
   !
   integer :: n_last_col
-  integer :: irestart
   integer :: ierr
   !
   real :: real_entry
@@ -28,10 +28,8 @@ subroutine GKEIGEN_matrix_read(n_last_col)
   character :: dummy
   !---------------------------------
 
-  include 'mpif.h'
-
-  10 format(1x,'(',g14.6,',',g14.6,')')
-  20 format('----------------- Column: ',I6,'  ----------------------')
+10 format(1x,'(',g14.6,',',g14.6,')')
+20 format('----------------- Column: ',I6,'  ----------------------')
 
   n_last_col = 0
 
@@ -39,33 +37,33 @@ subroutine GKEIGEN_matrix_read(n_last_col)
 
   read (1,*) dummy
 
-  Do istate_1 = 0, h_length-1
+  do istate_1=0,h_length-1
 
-    read (1,20,end=100) n_last_col
-    Do i_proc_w = 0, n_proc_1-1
+     read (1,20,end=100) n_last_col
+     do i_proc_w = 0, n_proc_1-1
 
-      If (i_proc == i_proc_w) Then
+        if (i_proc == i_proc_w) Then
 
-        Do jstate = 1, h_length_loc
-          read (1,10,advance='no') real_entry, imag_entry
-          one_col_r(jstate) = real_entry*(1.0,0.0) + imag_entry*(0.0,1.0)
-        EndDo
-        eigensolve_matrix(:,istate_1+1) = one_col_r(:)
-        read (1,*) dummy
+           do jstate=1,h_length_loc
+              read (1,10,advance='no') real_entry, imag_entry
+              one_col_r(jstate) = real_entry*(1.0,0.0) + imag_entry*(0.0,1.0)
+           enddo
+           eigensolve_matrix(:,istate_1+1) = one_col_r(:)
+           read (1,*) dummy
 
-      Else
+        else
 
-        read (1,*) dummy
+           read (1,*) dummy
 
-      EndIf
+        endif
 
-      call MPI_BARRIER(GYRO_COMM_WORLD,ierr)
+        call MPI_BARRIER(GYRO_COMM_WORLD,ierr)
 
-    EndDo ! i_proc_w
+     enddo ! i_proc_w
 
-  EndDo ! istate_1
+  enddo ! istate_1
 
-  100 close (unit=1)
+100 close (unit=1)
 
 end subroutine GKEIGEN_matrix_read
 

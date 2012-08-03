@@ -8,7 +8,11 @@ subroutine tgyro_profile_functions
   real :: c_exch
   real, dimension(n_r) :: loglam
 
-  if (loc_lock_profile_flag == 0 .or. i_tran > 0) then
+  ! CH use this line to evolve profiles
+  !  if (loc_lock_profile_flag == 0 .or. i_tran > 0) then
+  ! CH: new flag to only evolve only gradients
+  if (loc_evolve_grad_only_flag == 0 .and. &
+       (loc_lock_profile_flag == 0 .or. i_tran > 0)) then
 
      !-------------------------------------------
      ! Integrate gradients to obtain profiles:
@@ -53,6 +57,9 @@ subroutine tgyro_profile_functions
   ! Gyrobohm unit energy flux (erg/cm^2/s)
   q_gb(:) = ne(:)*k*te(:)*c_s(:)*(rho_s(:)/r_min)**2
 
+  ! Gyrobohm unit exchange power density (erg/cm^3/s)
+  s_gb(:) = ne(:)*k*te(:)*(c_s(:)/r_min)*(rho_s(:)/r_min)**2
+
   ! Coulomb logarithm
   loglam(:) = 24.0-log(sqrt(ne(:))/te(:))
 
@@ -94,7 +101,7 @@ subroutine tgyro_profile_functions
   dlnpdr(:) = ne(:)*k*te(:)*(dlnnedr(:)+dlntedr(:))/pr(:)
   do i_ion=1,loc_n_ion
      dlnpdr(:) = dlnpdr(:)+&
-       ni(i_ion,:)*k*ti(i_ion,:)*(dlnnidr(i_ion,:)+dlntidr(i_ion,:))/pr(:)
+          ni(i_ion,:)*k*ti(i_ion,:)*(dlnnidr(i_ion,:)+dlntidr(i_ion,:))/pr(:)
   enddo
 
   !----------------------------------

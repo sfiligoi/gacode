@@ -13,6 +13,8 @@ c
       include '../inc/ptor.m'
       include '../inc/glf.m'
 c
+      real*8 gradvphim
+c
       call neoclassical
 c
       if(ipert_gf.eq.0)then
@@ -115,6 +117,37 @@ c
       tifluxm = tifluxm + tzfluxm
       vphifluxm = vphifluxm + vphizfluxm
       vparfluxm = vparfluxm + vparzfluxm
+c
+      if(ipert_gf.eq.0)then
+       diffgb_m(jm) = -gradnem*nefluxm
+     >  /(cgyrobohm_m(jm)*1.6022D-3*MAX(1.0D-10,gradnem*gradnem))
+       chiegb_m(jm) = -gradtem*tefluxm
+     >  /(cgyrobohm_m(jm)*1.6022D-3*nem*MAX(1.0D-10,gradtem*gradtem))
+       chiigb_m(jm) = -gradtim*tifluxm
+     >  /(cgyrobohm_m(jm)*1.6022D-3*nim*MAX(1.0D-10,gradtim*gradtim))
+       gradvphim = cv*(vphi_m(jm+1)-vphi_m(jm))/dr(jm,2)
+       etagb_phi_m(jm) = -gradvphim*vphifluxm
+     >  /(cgyrobohm_m(jm)*1.6726D-8*amassgas_exp*nim
+     >     *MAX(1.0D-10,gradvphim*gradvphim))
+       chiegb_etg_m(jm) = -gradtem*tefluxm_etg
+     >  /(cgyrobohm_m(jm)*1.6022D-3*nem*MAX(1.0D-10,gradtem*gradtem))
+       chiineogb_m(jm) = -gradtim*(tiflux_neo+tzflux_neo)
+     >  /(cgyrobohm_m(jm)*1.6022D-3*nim*MAX(1.0D-10,gradtim*gradtim)) 
+       chieneogb_m(jm) = -gradtem*teflux_neo
+     >  /(cgyrobohm_m(jm)*1.6022D-3*nem*MAX(1.0D-10,gradtem*gradtem)) 
+      else
+c this is needed in order for mpi to sum up right
+        diffgb_m(jm) = 0.0
+        chiegb_m(jm) = 0.0
+        chiigb_m(jm) = 0.0
+        etagb_phi_m(jm) = 0.0
+        chiegb_etg_m(jm) = 0.0
+        chiineogb_m(jm) = 0.0
+        chieneogb_m(jm) = 0.0
+        rhosda_m(jm) = 0.0
+        csda_m(jm) = 0.0
+        cgyrobohm_m(jm) = 0.0
+      endif
 c
       return
       END 
@@ -289,6 +322,7 @@ c
       real*8 gradvphim
       real*8 cparm,cperm,ctorm,grad_c_par,grad_c_per,grad_c_tor
       real*8 apolm,atorm,grad_a_pol,grad_a_tor
+      real*8 chietem_etg
 c
       cxnu = 1.D0
       qm =(q_exp(jm+1)+q_exp(jm))/2.D0
@@ -332,25 +366,24 @@ c       gradvphim = -gamma_p_m(jm)*csdam/cv
 c       gradvphim =
 c     >  cperm*(gradvpolm+gradvneom(2))+ctorm*(gradvexbm+gradvdiam(2))
 c     > +grad_c_per*(vpolm+vneom(2))+grad_c_tor*(vexbm+vdiam(2))
-c      if(iexb.eq.2) then
-c        egamma_m(jm)=egamma_exp(jm)
-c      else
-c        egamma_m(jm)=gamma_e_gf
-c      endif
-      if(iexb.eq.2)then
-        gamma_e_gf = egamma_exp(jm)
-      else
+c
         gamma_e_gf = -cv/csdam*(rminm/rhom)*drhodr(jm)
      >  *theta_exp(jm)*gradvexbm
+      if(ipert_gf.eq.0)egamma_m(jm)=csdam*gamma_e_gf/cv
+      if(iexb.ge.1)then
+c        gamma_e_gf = egamma_exp(jm)
+        gamma_e_gf =(cv/csdam)* egamma_exp(jm)
+      endif
+      if(doppler_shear_model.eq.1)then
+c        gamma_e_gf = -cv/csdam*(rminm/rhom)*drhodr(jm)
+c     >  *theta_exp(jm)*(vexb_m(jm+1)-vexb_m(jm))/dr(jm,2)
+        gamma_e_gf = (cv/csdam)*doppler_shear_m(jm)
       endif
       gamma_p_gf = -(cv/csdam)*drhodr(jm)*
      >  (apolm*(gradvpolm+gradvneom(2))+atorm*(gradvexbm+gradvdiam(2))
      >  +(vpolm+vneom(2))*grad_a_pol+(vexbm+vdiam(2))*grad_a_tor)
       if(jm.eq.ngrid-1.and.itport_pt(5).eq.0)gamma_e_gf=0.0
-      if(ipert_gf.eq.0)then
-        egamma_m(jm)= gamma_e_gf
-        gamma_p_m(jm) = gamma_p_gf
-      endif
+      if(ipert_gf.eq.0)gamma_p_m(jm) = gamma_p_gf
       exch_gf=0.D0
 c   local rho_star
       if(bt_flag.gt.0)then
@@ -545,7 +578,7 @@ c
        etagb_phi_m(jm)=eta_phi_gf*cmodel
        etagb_par_m(jm)=eta_par_gf*cmodel
        etagb_per_m(jm)=eta_per_gf*cmodel   
-       chie_e_gb_m(jm)=chie_e_gf*cmodel
+       chiegb_etg_m(jm)=chie_e_gf*cmodel
 c  
 c exch_m in MW/m**3  
 c
@@ -601,6 +634,7 @@ c
       etaphim=cmodel*gfac*eta_phi_gf*cgyrobohm_m(jm)
       etaphim=DABS(etaphim)
       etaparm=DABS(etaparm)
+      chietem_etg = cmodel*gfac*chie_e_gf*cgyrobohm_m(jm)
 c      etaexbm=etaparm
 cgms temporary
 c       etaexbm = DABS(chiitim)
@@ -620,7 +654,7 @@ c
       etagb_par_m(jm)=etaparm/cgyrobohm_m(jm)
       etagb_per_m(jm)=etaperm/cgyrobohm_m(jm)
       etagb_phi_m(jm)=etaphim/cgyrobohm_m(jm)
-      chie_e_gb_m(jm)=chie_e_gf*cmodel*gfac
+      chiegb_etg_m(jm)=chietem_etg/cgyrobohm_m(jm)
 c
 c compute fluxes
 c
@@ -641,6 +675,7 @@ c
        tzflux_glf = 0.0
        vphizflux_glf = 0.0
        vparzflux_glf = 0.0
+       tefluxm_etg = (1.6022D-3)*tem*nem*zpmte*chietem_etg/arho_exp
 c      
  50   format(2x,i2,2x,0p1f10.6,1p6e12.4)
 c
@@ -914,6 +949,10 @@ c use large ExB rotation form
       tzflux_neo = 0.0
       vparzflux_neo = 0.0
       vphizflux_neo = 0.0
+      neflux_neo = neflux_neo*drhodr(jm)
+      teflux_neo = teflux_neo*drhodr(jm)
+      tiflux_neo = tiflux_neo*drhodr(jm)
+      vphiflux_neo = vphiflux_neo*drhodr(jm)
 c
 c
       RETURN
@@ -991,10 +1030,10 @@ c
      >     (neo_efluxtot_dke_out(2)+neo_efluxtot_gv_out(2))
        tzflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*T0*
      >     (neo_efluxtot_dke_out(3)+neo_efluxtot_gv_out(3))
-       vphiflux_neo = drhodr(jm)*(1.6726D-8)*m0*n0*a0*v0*v0*
-     >     (neo_mflux_dke_out(2)+neo_mflux_gv_out(2))
-       vphizflux_neo = drhodr(jm)*(1.6726D-8)*m0*n0*a0*v0*v0*
-     >     (neo_mflux_dke_out(3)+neo_mflux_gv_out(3))
+       vphiflux_neo = -sign_It_exp*drhodr(jm)*(1.6726D-8)*
+     > m0*n0*a0*v0*v0*(neo_mflux_dke_out(2)+neo_mflux_gv_out(2))
+       vphizflux_neo = -sign_It_exp*drhodr(jm)*(1.6726D-8)*
+     > m0*n0*a0*v0*v0*(neo_mflux_dke_out(3)+neo_mflux_gv_out(3))
 c      
       RETURN
       END ! SUBROUTINE get_neo
@@ -1178,26 +1217,32 @@ c set TGLF gradients
       rlns_tg(1)=zpmne
       rlns_tg(2)=zpmni
       rlns_tg(3)=zpmnz
-      if(iexb.eq.2) then
-        vexb_shear_tg = egamma_exp(jm)
-      else
-        vexb_shear_tg = -(cv/csdam)*(rminm/rhom)*drhodr(jm)
-     >  *theta_exp(jm)*(vexb_m(jm+1)-vexb_m(jm))/dr(jm,2)
+      vexb_shear_tg = -(cv/csdam)*(rminm/rhom)*drhodr(jm)
+     >  *theta_exp(jm)*gradvexbm
+      if(ipert_gf.eq.0)egamma_m(jm)=vexb_shear_tg*csdam/cv
+      if(iexb.ge.1)then
+c        vexb_shear_tg = egamma_exp(jm)
+        vexb_shear_tg =(cv/csdam)* egamma_exp(jm)
       endif
-      if(jm.eq.ngrid-1.and.itport_pt(5).eq.0)vexb_shear_tg=0.0
-      if(ipert_gf.eq.0)egamma_m(jm)=vexb_shear_tg
+      if(doppler_shear_model.eq.1)then
+c this takes out the pertubation of the Doppler shear through gradvexbm
+c        vexb_shear_tg = -(cv/csdam)*(rminm/rhom)*drhodr(jm)
+c     >  *theta_exp(jm)*(vexb_m(jm+1)-vexb_m(jm))/dr(jm,2)
+        vexb_shear_tg = (cv/csdam)*doppler_shear_m(jm)
+      endif
+c      if(jm.eq.ngrid-1.and.itport_pt(5).eq.0)vexb_shear_tg=0.0
 c
       vpar_shear_tg(1) = -sign_Bt_exp*(cv/(csdam))*drhodr(jm)*
-     >  (apolm*(gradvpolm+gradvneom(1))+atorm*(gradvexbm+gradvdiam(1)) 
-     >  +(vpolm+vneom(1))*grad_a_pol+(vexbm+vdiam(1))*grad_a_tor)
+     >  (apolm*(gradvpolm+gradvneom(1))+atorm*(gradvexbm+gradvdiam(1))) 
+cc     >  +(vpolm+vneom(1))*grad_a_pol+(vexbm+vdiam(1))*grad_a_tor)
       vpar_shear_tg(2) = -sign_Bt_exp*(cv/(csdam))*drhodr(jm)*
-     >  (apolm*(gradvpolm+gradvneom(2))+atorm*(gradvexbm+gradvdiam(2)) 
-     >  +(vpolm+vneom(2))*grad_a_pol+(vexbm+vdiam(2))*grad_a_tor)
+     >  (apolm*(gradvpolm+gradvneom(2))+atorm*(gradvexbm+gradvdiam(2))) 
+cc     >  +(vpolm+vneom(2))*grad_a_pol+(vexbm+vdiam(2))*grad_a_tor)
       vpar_shear_tg(3) = -sign_Bt_exp*(cv/(csdam))*drhodr(jm)*
-     >  (apolm*(gradvpolm+gradvneom(3))+atorm*(gradvexbm+gradvdiam(3)) 
-     >  +(vpolm+vneom(3))*grad_a_pol+(vexbm+vdiam(3))*grad_a_tor)
+     >  (apolm*(gradvpolm+gradvneom(3))+atorm*(gradvexbm+gradvdiam(3))) 
+cc     >  +(vpolm+vneom(3))*grad_a_pol+(vexbm+vdiam(3))*grad_a_tor)
 c
-      if(ipert_gf.eq.0)gamma_p_m(jm)=vpar_shear_tg(2)
+      if(ipert_gf.eq.0)gamma_p_m(jm)=sign_Bt_exp*vpar_shear_tg(2)
 c
       cnc = -alpha_dia/bt_exp
       wstar0 = -(cnc/theta_exp(jm))*(te_m(jm+1)-te_m(jm-1))
@@ -1232,20 +1277,20 @@ c
       vns_shear_tg(3) =  -cv/csdam*(rminm/rhom)*drhodr(jm)
      >  *theta_exp(jm)*te_m(jm)*(wstar1 - wstar0)/dr(jm,2)
 c
-      if(jm.eq.ngrid-1)then
+c      if(jm.eq.ngrid-1)then
 c set diamagnetic and neoclassical flow gradeints to zero at boundary
-        vpar_shear_tg(1) = -sign_Bt_exp*(cv/(csdam))*drhodr(jm)*
-     >  (apolm*(gradvpolm)+atorm*(gradvexbm) 
-     >  +(vpolm)*grad_a_pol+(vexbm)*grad_a_tor)
-        vpar_shear_tg(2)=vpar_shear_tg(1)
-        vpar_shear_tg(3)=vpar_shear_tg(1)
-        vns_shear_tg(1) = 0.0
-        vns_shear_tg(2) = 0.0
-        vns_shear_tg(3) = 0.0
-        vts_shear_tg(1) = 0.0
-        vts_shear_tg(2) = 0.0
-        vts_shear_tg(3) = 0.0
-      endif
+c        vpar_shear_tg(1) = -sign_Bt_exp*(cv/(csdam))*drhodr(jm)*
+c     >  (apolm*(gradvpolm)+atorm*(gradvexbm)) 
+c     >  +(vpolm)*grad_a_pol+(vexbm)*grad_a_tor)
+c        vpar_shear_tg(2)=vpar_shear_tg(1)
+c        vpar_shear_tg(3)=vpar_shear_tg(1)
+c        vns_shear_tg(1) = 0.0
+c        vns_shear_tg(2) = 0.0
+c        vns_shear_tg(3) = 0.0
+c        vts_shear_tg(1) = 0.0
+c        vts_shear_tg(2) = 0.0
+c        vts_shear_tg(3) = 0.0
+c      endif
       if(vpar_shear_model_tg.eq.1)then
 c use GYRO conventions
         gamma_p_m(jm) = -(cv/csdam)*drhodr(jm)*gradvexbm
@@ -1298,7 +1343,7 @@ c     > ibranch_tg,nmodes_tg,nb_max_tg,nb_min_tg,nx_tg,nky_tg)
 c
       CALL put_gradients(rlns_tg,rlts_tg,vpar_shear_tg,vexb_shear_tg)
 c
-      CALL put_profile_shear(vns_shear_tg,vts_shear_tg)
+c      CALL put_profile_shear(vns_shear_tg,vts_shear_tg)
 c      if(ipert_gf.eq.0)then
 c      write(*,*)"pro",jm,vns_shear_tg(2),vts_shear_tg(2),vexb_shear_tg
 c      endif
@@ -1312,6 +1357,7 @@ c
       betae_tg=cbetae*betae_m(jm)
       xnue_tg =xnu_m(jm)
       zeff_tg=zeffm
+      vexb_tg=0.0
       vpar_tg(1) = sign_Bt_exp*cv*(a_pol(jm)*(vpolm+vneom(1))
      >     +a_tor(jm)*(vexbm+vdiam(1)))/(a_unit_exp*csdam)
       vpar_tg(2) = sign_Bt_exp*cv*(a_pol(jm)*(vpolm+vneom(2))
@@ -1334,6 +1380,7 @@ c use GYRO conventions
         vpar_tg(1)=0.0
         vpar_tg(2)=0.0
         vpar_tg(3)=0.0
+        vexb_tg=0.0
       endif
 c      debye_tg = debyelorhos**2
        debye_tg = debyelorhos
@@ -1342,7 +1389,7 @@ c      write(*,*)"jm=",jm,"ipert_gf=",ipert_gf
 c      write(*,*)"debug","gradtem=",gradtem,"tem=",tem
 c      write(*,*)"debug","gradtim=",gradtim,"tim=",tim     
 c
-      CALL put_averages(taus_tg,as_tg,vpar_tg,betae_tg,xnue_tg,
+      CALL put_averages(taus_tg,as_tg,vpar_tg,vexb_tg,betae_tg,xnue_tg,
      > zeff_tg,debye_tg)
 c
 c      if(ipert_gf.eq.0)then
@@ -1396,7 +1443,7 @@ c why prevent negative s_kappa?
          s_zeta_tg=0.0
         CALL put_Miller_geometry(rmin_tg,rmaj_tg,zmaj_tg,drmindx_tg,
      >  drmajdx_tg,dzmajdx_tg,kappa_tg,s_kappa_tg,delta_tg,s_delta_tg,
-     >  zeta_tg,s_zeta_tg,q_tg,q_prime_tg,p_prime_tg)
+     >  zeta_tg,s_zeta_tg,q_tg,q_prime_tg,p_prime_tg,kx0_tg)
 c
        else
         write(*,*)"igeo_tg invalid",igeo_tg
@@ -1412,7 +1459,7 @@ c      CALL put_eikonal(new_eikonal_tg)
       CALL tglf_TM
 c      new_eikonal_tg=.TRUE.
 c
-      if(ipert_gf.eq.0.and.jm.eq.25)then
+      if(ipert_gf.eq.0.and.jm.eq.j_write_state)then
         call write_tglf_input      
       endif
       if(ipert_gf.eq.0)then
@@ -1496,11 +1543,8 @@ cgms      if(igeo_tg.ne.0)gb_unit = gb_unit*drhodr(jm)
      >    *amassgas_exp/(ABS(bt_exp/B_unit))
         endif
       endif
-       tefluxm_etg = nem*tem*gb_unit*(get_energy_flux(1,1)-get_q_low(1))
-       if(ipert_gf.eq.0)then
-        chie_e_gb_m(jm) = -gradtem*tefluxm_etg
-     >   /(cgyrobohm_m(jm)*nem*MAX(1.0D-10,gradtem*gradtem))
-       endif
+       tefluxm_etg = 1.6022D-3*nem*tem*gb_unit*(get_energy_flux(1,1)
+     >              +get_energy_flux(1,2) -get_q_low(1))
        if(ns_tg.eq.2)then
 c model for impurity contributions to viscous stress
          vphiflux_glf = mass_factor*vphiflux_glf
@@ -1590,7 +1634,6 @@ c
        close(11)
       endif
 c
-      if(i_proc.eq.0.and.jm.eq.35)call write_tglf_input
 c
 c
 c      write(*,*)"debug tglf",jm
@@ -1673,7 +1716,8 @@ c
         tiflux_adhoc = -1.6022D-3*nim*chiitim*gradtim
         ctorm = (c_tor(jm+1)+c_tor(jm))/2.0
         grad_c_tor=(c_tor(jm+1)-c_tor(jm))/dr(jm,2)
-        gradvphim =cv*(ctorm*gradvexbm+grad_c_tor*vexbm)
+c        gradvphim =cv*(ctorm*gradvexbm+grad_c_tor*vexbm)
+        gradvphim =cv*ctorm*gradvexbm
         vphiflux_adhoc = -1.6726D-8*amassgas_exp*nim*
      >                    rmajor_exp*etaphim*gradvphim
         vparflux_adhoc = vphiflux_adhoc*c_per(jm)/c_tor(jm)

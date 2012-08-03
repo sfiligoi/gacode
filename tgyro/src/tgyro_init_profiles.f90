@@ -108,7 +108,7 @@ subroutine tgyro_init_profiles
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_zeta(:),n_exp,r,zeta,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_szeta(:),n_exp,r,s_zeta,n_r)
 
-  ! Convert V and dV/dr from m^n to cm^n
+  ! Convert V and dV/dr from m^3 to cm^3
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_vol(:)*1e6,n_exp,r,vol,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_volp(:)*1e4,n_exp,r,volp,n_r)
 
@@ -175,6 +175,7 @@ subroutine tgyro_init_profiles
 
   ! Convert flows to 1/s (from MW/keV)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_flow_beam(:)*1e22/1.6022,n_exp,r,f_b_in,n_r)
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_flow_wall(:)*1e22/1.6022,n_exp,r,f_w_in,n_r)
 
   ! Fourier coefficients for plasma shape
   if (EXPRO_nfourier > 0) then

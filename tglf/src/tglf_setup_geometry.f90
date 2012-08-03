@@ -9,6 +9,7 @@
 !  B2_ave_out
 !  others to be added later
 !***********************************************************
+      USE tglf_dimensions
       USE tglf_global
 !
       new_geometry = .TRUE.

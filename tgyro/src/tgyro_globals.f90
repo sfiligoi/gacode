@@ -115,6 +115,7 @@ module tgyro_globals
   real, dimension(:), allocatable :: gamma_gb
   real, dimension(:), allocatable :: pi_gb
   real, dimension(:), allocatable :: q_gb
+  real, dimension(:), allocatable :: s_gb
 
   ! Collision frequencies
   real, dimension(:), allocatable :: nue
@@ -183,12 +184,15 @@ module tgyro_globals
   real, dimension(:), allocatable :: p_alpha
   real, dimension(:), allocatable :: p_brem
   real, dimension(:), allocatable :: p_exch
+  real, dimension(:), allocatable :: p_expwd
   real, dimension(:), allocatable :: p_i_aux_in
   real, dimension(:), allocatable :: p_e_aux_in
   real, dimension(:), allocatable :: f_b_in
+  real, dimension(:), allocatable :: f_w_in
   real, dimension(:), allocatable :: s_alpha
   real, dimension(:), allocatable :: s_brem
   real, dimension(:), allocatable :: s_exch
+  real, dimension(:), allocatable :: s_expwd
 
   real, dimension(:), allocatable :: res
   real, dimension(:), allocatable :: res0
@@ -229,6 +233,7 @@ module tgyro_globals
   real :: loc_dx_max
   real :: loc_relax
   integer :: loc_lock_profile_flag
+  integer :: loc_evolve_grad_only_flag
   integer :: loc_restart_flag
   integer :: loc_scenario
   integer :: loc_quasineutral_flag
@@ -269,6 +274,8 @@ module tgyro_globals
   real :: tgyro_stab_deltaky
   real :: tgyro_rmin
   real :: tgyro_rmax
+  integer :: tgyro_global_radii
+  integer :: tgyro_expwd_flag
   !
   ! Iteration variables (global)
   !
@@ -280,6 +287,12 @@ module tgyro_globals
   integer :: i_tran
   integer :: i_bc
   integer :: flux_counter
+  !
+  ! Global TGYRO variables
+  integer :: igmin
+  integer :: igmax
+  real :: length
+  real :: dlength 
   !---------------------------------------------------------
 
 end module tgyro_globals

@@ -1,9 +1,9 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
 ifeq ($(OPT),debug)
-   FFLAGS=${FDEBUG}
+   FFLAGS=${FDEBUG} ${HDF5_FLAGS}
 else
-   FFLAGS=${FOPT}
+   FFLAGS=${FOPT} ${HDF5_FLAGS}
 endif
 
 ifeq ($(OMP),true)
@@ -12,6 +12,11 @@ else
    FC += ${FNOMP}
    OBJECTS = gyro_omp_lib.o
 endif
+
+ifeq ($(ACC),true)
+   FC += ${FACC}
+endif
+
 
 LLIB = gyro_lib
 
@@ -23,7 +28,7 @@ OBJECTS += gyro_globals.o \
           gyro_fieldeigen_private.o \
           gyro_maxwell_private.o \
           gyro_poisson_private.o \
-	  gyro_poissonaperp_private.o \
+          gyro_poissonaperp_private.o \
           gyro_mumps_private.o \
           gyro_banana_private.o \
           gyro.o \
@@ -32,6 +37,7 @@ OBJECTS += gyro_globals.o \
           gyro_init.o \
           gyro_run.o \
           gyro_do.o \
+          gyro_alloc_profile_exp.o \
           gyro_alloc_profile_sim.o \
           gyro_alloc_big.o \
           gyro_alloc_orbit.o \
@@ -47,11 +53,15 @@ OBJECTS += gyro_globals.o \
           gyro_banana_s2lambda.o \
           gyro_bessel_operator.o \
           gyro_bessel_stencils.o \
+          gyro_blend_ampere.o \
+          gyro_blend_ampereperp.o \
+          gyro_blend_poisson.o \
           gyro_bounce_points.o \
           gyro_build_sparse_ampere.o \
           gyro_build_sparse_poisson.o \
           gyro_build_sparse_poissonaperp.o \
           gyro_build_sparse_maxwell.o \
+          gyro_catch_error_routines.o \
           gyro_cleanup.o \
           gyro_collect_routines.o \
           gyro_collision_setup.o \
@@ -63,14 +73,17 @@ OBJECTS += gyro_globals.o \
           gyro_conserve_all.o \
           gyro_diffusivity.o \
           gyro_entropy.o \
+          gyro_field_fluxave.o \
           gyro_field_time_derivative.o \
           gyro_field_interpolation.o \
+          gyro_field_plot.o \
           gyro_field_solve_explicit.o \
           gyro_field_solve_implicit.o \
-	  gyro_fieldeigen.o \
-	  gyro_fieldeigen_kernel.o \
-	  gyro_fieldeigen_df.o \
+          gyro_fieldeigen.o \
+          gyro_fieldeigen_kernel.o \
+          gyro_fieldeigen_df.o \
           gyro_fulladvance.o \
+          gyro_g_squared.o \
           gyro_geometry_arrays.o \
           gyro_get_he_implicit.o \
           gyro_get_delta_he.o \
@@ -80,7 +93,15 @@ OBJECTS += gyro_globals.o \
           gyro_initialize_timestep.o \
           gyro_input_check.o \
           gyro_kxky_spectrum.o \
+          gyro_kinetic_advance.o \
           gyro_lambda_grid.o \
+          gyro_make_maxwell_matrix.o \
+          gyro_make_poisson_matrix.o \
+          gyro_make_ampere_matrix.o \
+          gyro_make_poissonaperp_matrix.o \
+          gyro_make_implicit_advect.o \
+          gyro_make_jpar_elec.o \
+          gyro_make_jperp_elec.o \
           gyro_map_experimental_profiles.o \
           gyro_message_routines.o \
           gyro_moments_plot.o \
@@ -90,9 +111,11 @@ OBJECTS += gyro_globals.o \
           gyro_nl_direct.o \
           gyro_nl_fft.o \
           gyro_nonlinear_flux.o \
+          gyro_nonlinear_flux_velocity.o \
           gyro_nonlinear_transfer.o \
           gyro_omegas.o \
           gyro_operators_on_h.o \
+          gyro_phi_kp_squared.o \
           gyro_profile_init.o \
           gyro_radial_operators.o \
           gyro_radial_simulation_box.o \
@@ -101,6 +124,8 @@ OBJECTS += gyro_globals.o \
           gyro_read_experimental_profiles.o \
           gyro_read_restart.o \
           gyro_set_exit_status.o \
+          gyro_sparse_solve_umfpack.o \
+          gyro_sparse_solve_mumps.o \
           gyro_write_restart.o \
           gyro_rhs_nonlinear.o \
           gyro_rhs_total.o \
@@ -119,6 +144,7 @@ OBJECTS += gyro_globals.o \
           gyro_write_efficiency.o \
           gyro_write_error.o \
           gyro_write_freq.o \
+          gyro_write_h.o \
           gyro_write_initdata.o \
           gyro_write_input.o \
           gyro_write_precision.o \
@@ -126,43 +152,27 @@ OBJECTS += gyro_globals.o \
           gyro_write_step.o \
           gyro_write_timedata.o \
           gyro_write_timers.o \
-          sparse_solve_umfpack.o \
-          sparse_solve_mumps.o \
-	  gyro_velocity_sum.o \
-          catch_error.o \
-          catch_blowup.o \
-          catch_halt_signal.o \
-          parallel_dim.o \
-          alloc_add.o \
-          allocate_profile_exp.o \
-          make_maxwell_matrix.o \
-          make_implicit_advect.o \
-          make_electron_current.o \
-	  make_electron_current_perp.o \
-          make_ampere_matrix.o \
-          make_poisson_matrix.o \
-          make_ampere_blend.o \
-          make_poisson_blend.o \
-	  make_ampereperp_blend.o \
-	  make_poissonaperp_matrix.o \
-          get_field_plot.o \
+          gyro_velocity_sum.o \
           get_field_r0_plot.o \
-          get_nonlinear_flux_velocity.o \
-          get_field_fluxave.o \
-          get_kinetic_advance.o \
-          get_phi_squared.o \
-          get_g_squared.o \
-          write_h.o \
-          write_matrix_stat.o \
           gyro_dump_input.o \
           gyro_dump_interface.o
 
-.SUFFIXES : .o .f90 
+ifeq ($(HDF5),true)
+	FFLAGS += ${FHDF5} ${HDF5_INC}
+	OBJECTS += \
+          gyro_write_timedata_wedge_hdf5.o \
+					gyro_write_h5mesh.o
+endif
+
+.SUFFIXES : .o .f90 .F90
 
 lib: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
 
 .f90.o :
+	$(FC) $(FMATH) $(FFLAGS) -c $<
+
+.F90.o :
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:

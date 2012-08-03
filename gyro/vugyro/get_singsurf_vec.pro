@@ -1,4 +1,6 @@
 pro get_singsurf_vec,n,r_surf
+; CH edit 5.11.2012: update to use ABS(q_i) to account for -q values
+; which now sometimes arise depending on IPCCW, BTCCW signs
 
   common GLOBAL
 
@@ -15,8 +17,7 @@ pro get_singsurf_vec,n,r_surf
   for m=1,10*n do begin
 
      q_0 = float(m)/n
-
-     q_diff[*] = q_i[*]-q_0
+     q_diff[*] = ABS(q_i[*])-q_0
 
      for i=0,n_r-2 do begin
         if (q_diff[i] le 0.0 and q_diff[i+1] ge 0.0) then begin

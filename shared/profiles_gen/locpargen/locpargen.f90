@@ -14,6 +14,7 @@ program locpargen
 
   real :: r0
   real :: rho0
+  real :: psi0
   real :: a
   real, dimension(1) :: x
   real, dimension(1) :: y
@@ -24,6 +25,7 @@ program locpargen
   open(unit=1,file='input.locpargen',status='old')
   read(1,*) r0
   read(1,*) rho0
+  read(1,*) psi0
   read(1,*) z(1)
   read(1,*) z(2)
   read(1,*) z(3)
@@ -58,12 +60,23 @@ program locpargen
      ! RADIUS
      print 10,'RADIUS=',r0
 
-  else
+  else if (rho0 > 0.0) then
 
      ! Use local rho
 
      x(1)  = rho0
      x_vec = EXPRO_rho
+
+     ! RADIUS
+     call cub_spline(x_vec,EXPRO_rmin/a,EXPRO_n_exp,x,y,1)
+     print 10,'RADIUS=',y(1)
+
+  else 
+
+     ! Use local psi_N
+
+     x(1)  = psi0*EXPRO_poloidalfluxover2pi(EXPRO_n_exp)
+     x_vec = EXPRO_poloidalfluxover2pi
 
      ! RADIUS
      call cub_spline(x_vec,EXPRO_rmin/a,EXPRO_n_exp,x,y,1)
@@ -174,12 +187,12 @@ program locpargen
 
   !---------------------------------------
   ! Some added physical quantities
-  if (r0 > 0.0) then
-     call cub_spline(x_vec,EXPRO_rho,EXPRO_n_exp,x,y,1)
-     print 10,'rho         : ',y(1)
-  else
-     print 10,'rho         : ',rho0
-  endif
+  call cub_spline(x_vec,EXPRO_rho,EXPRO_n_exp,x,y,1)
+  print 10,'rho         : ',y(1)
+  call cub_spline(x_vec,EXPRO_rmin,EXPRO_n_exp,x,y,1)
+  print 10,'rmin [m]    : ',y(1)
+  call cub_spline(x_vec,EXPRO_poloidalfluxover2pi,EXPRO_n_exp,x,y,1)
+  print 10,'psi_N       : ',y(1)/EXPRO_poloidalfluxover2pi(EXPRO_n_exp)
   call cub_spline(x_vec,EXPRO_bunit,EXPRO_n_exp,x,y,1)
   print 10,'B_unit [T]  : ',y(1)
   call cub_spline(x_vec,EXPRO_cs,EXPRO_n_exp,x,y,1)
@@ -190,6 +203,6 @@ program locpargen
 
   call EXPRO_alloc('./',0) 
 
-10 format(a,sp1pe12.5)
+10 format(a,sp,1pe12.5)
 
 end program locpargen

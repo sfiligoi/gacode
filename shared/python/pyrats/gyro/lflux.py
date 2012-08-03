@@ -10,6 +10,14 @@ import numpy as np
 def average(f,t,window):
  
     n_time = len(t)
+
+    # Manage eigenvalue case (2 time points)
+    if len(t) == 2:
+        tmin = t[n_time-1]
+        tmax = tmin
+        ave  = f[n_time-1]
+        return ave
+    
     tmin = (1.0-window)*t[n_time-1]
     tmax = t[n_time-1]
 
@@ -121,3 +129,6 @@ else:
     for i in range(n_kinetic):
         print tag[i],average(b[:,i+1],t,window)
 
+if sim.profile['boundary_method'] == 2:
+    print
+    print 'Buffers have been properly omitted from average.'

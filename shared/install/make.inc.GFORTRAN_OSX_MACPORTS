@@ -22,19 +22,18 @@ MF90 = openmpif90
 #
 
 FC	= ${MF90} -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules -g 
+#-std=f2008 
 F77	= ${MF90} -g 
 
-FMATH	= -fdefault-real-8
+FMATH	= -fdefault-real-8 
 FOPT	= -O3
-FDEBUG	= -Wall -fbacktrace -fbounds-check -O0 -Wextra -finit-real=nan -Wunderflow -ffpe-trap=invalid,zero,overflow
+FDEBUG	= -Wall -fcheck=all -fbacktrace -fbounds-check -O0 -Wextra -finit-real=nan -Wunderflow -ffpe-trap=invalid,zero,overflow
 FBOUND	= -Wall -fbounds-check
 FPROF	= 
 FOMP	= -fopenmp
+FHDF5 = -DHAVE_HDF5
 
 # System math libraries
-
-#LMATH = /System/Library/Frameworks/vecLib.framework/Versions/A/vecLib \
-       -lSystemStubs -lSystem
 
 LMATH = -framework Accelerate
 
@@ -53,8 +52,7 @@ HDF5_LIBS = \
 
 
 HDF5_INC =  -I${HDF5_PATH}/include -I${HDF5_PATH}/include/fortran
-VSHDF5_MAKECMD=vshdf5
-MPI_FLAG=-Wp,-D__MPI
+HDF5_FLAGS=-Wp,-D__MPI -fdefault-double-8
 
 
 NETCDF = \

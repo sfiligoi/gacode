@@ -70,14 +70,20 @@ c
       wall_mult=1.0
       te_bc_mult=1.0
       ti_bc_mult=1.0
-c      if(iexch.eq.0) iexch=1
+      iexch=1
       irot1=1
       irot2=1
       iohm=0
       irad=0
+      ialpha=0
+      ifusmodel=0
       xconv=0.D0
-      xwdot=0.D0
-      xsdot=0.D0
+      xwdot=1.D0
+      xsdot=1.D0
+      xion_exp=1.D0
+      xrad_exp=1.D0
+      xoh_exp=1.D0
+      xfus_exp=1.D0
       sigma=0.D0
       ichiep=0
       pimpa=12.D0
@@ -98,8 +104,6 @@ c      if(iexch.eq.0) iexch=1
       smoo_vphim=0.D0
       istep_smoo=9999
       ifilter = 0
-      xion_exp=1.D0
-      xrad_exp=1.D0
       didledge_n=0.D0
       didledge_te=0.D0
       didledge_ti=0.D0
@@ -113,6 +117,8 @@ c      if(iexch.eq.0) iexch=1
       pbescale3=1.D0
       pbiscale3=1.D0
       dilution_model=0
+      doppler_shear_model=0
+      j_write_state=-1
 c
       return
       end

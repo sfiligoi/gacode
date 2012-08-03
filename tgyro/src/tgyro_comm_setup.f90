@@ -53,7 +53,7 @@ subroutine tgyro_comm_setup
   case (1)
 
      !-----------------------------
-     ! Transport
+     ! Local Transport
      !-----------------------------
 
      ! The number of workers is related to the number of profiles 
@@ -106,13 +106,27 @@ subroutine tgyro_comm_setup
 
   case (3)
 
-     ! 1 worker; each DIR line specifies exact number of cores to GYRO
-
      !-----------------------------
      ! Multi-job 
      !-----------------------------
 
+      ! 1 worker; each DIR line specifies exact number of cores to GYRO
+
+    n_worker = 1
+
+  case (4)
+
+     !-----------------------------
+     ! Global transport
+     !-----------------------------
+
      n_worker = 1
+
+     n_evolve = &
+          loc_ti_feedback_flag+&
+          loc_te_feedback_flag+&
+          loc_ne_feedback_flag+&
+          loc_er_feedback_flag
 
   end select
 

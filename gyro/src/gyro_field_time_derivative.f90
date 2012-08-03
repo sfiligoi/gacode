@@ -33,7 +33,9 @@ subroutine gyro_field_time_derivative
      enddo ! i
   enddo ! is
 
-  h_cap_dot = 1.5*h_cap-2.0*h_cap_old+0.5*h_cap_old2
+  ! Use 3-point rule for time derivative
+
+  h_cap_dot = (1.5*h_cap-2.0*h_cap_old+0.5*h_cap_old2)/dt
 
   do i=1,n_x   
 
@@ -41,13 +43,13 @@ subroutine gyro_field_time_derivative
 
      minus_n_omega = omega_eb_s(i)
 
-     ! Crude 2-point rule for time derivative
-
      field_blend_dot(:,i,:) = (1.5*field_blend(:,i,:)-2*field_blend_old(:,i,:) &
           +0.5*field_blend_old2(:,i,:))/dt &
           +i_c*minus_n_omega*field_blend(:,i,:)
 
-     ! Better 3-point rule for time derivative (requires extra storage)
+     field_tau_dot(:,i,:,:) = (1.5*field_tau(:,i,:,:)-2*field_tau_old(:,i,:,:) &
+          +0.5*field_tau_old2(:,i,:,:))/dt &
+          +i_c*minus_n_omega*field_tau(:,i,:,:)
 
      gyro_uv_dot(:,i,:,:,:)=(1.5*gyro_uv(:,i,:,:,:)-2*gyro_uv_old(:,i,:,:,:) &
           +0.5*gyro_uv_old2(:,i,:,:,:))/dt &

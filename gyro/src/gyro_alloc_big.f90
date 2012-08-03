@@ -43,12 +43,14 @@ subroutine gyro_alloc_big(flag)
      allocate(field_blend_old(n_blend,n_x,n_field))
      allocate(field_blend_old2(n_blend,n_x,n_field))
      allocate(field_blend_dot(n_blend,n_x,n_field))
+     allocate(field_tau(n_stack,n_x,n_nek_loc_1,n_field))
+     allocate(field_tau_old(n_stack,n_x,n_nek_loc_1,n_field))
+     allocate(field_tau_old2(n_stack,n_x,n_nek_loc_1,n_field))
+     allocate(field_tau_dot(n_stack,n_x,n_nek_loc_1,n_field))
      allocate(phi_squared(n_x))
      allocate(g_squared(2,n_x))
-     allocate(phi_fluxave(n_x))
+     allocate(field_fluxave(n_x,3))
      allocate(ave_phi(2,n_field))
-     allocate(a_fluxave(n_x))
-     allocate(aperp_fluxave(n_x))
      allocate(h_err(n_stack,n_x,n_nek_loc_1,n_kinetic))
 
      if (.not.allocated(h)) allocate(h(n_stack,n_x,n_nek_loc_1,n_kinetic))
@@ -81,7 +83,6 @@ subroutine gyro_alloc_big(flag)
      if (n_field == 3) then
         allocate(gyro_h_aperp(n_stack,n_x,n_nek_loc_1,n_kinetic))
      endif
-     allocate(field_tau(n_stack,n_x,n_nek_loc_1,n_field))
 
      allocate(gyro_uv(n_stack,n_x,n_nek_loc_1,n_kinetic,n_field))
      allocate(kyro_uv(n_stack,n_x,n_nek_loc_1,n_kinetic,n_field))
@@ -102,7 +103,7 @@ subroutine gyro_alloc_big(flag)
 
      allocate(moments_plot(n_theta_plot,n_x,n_kinetic,3))
 
-     !For synthetic diagnostic
+     ! For synthetic diagnostics
      if (io_method > 1 .and. time_skip_wedge > 0) then
         allocate(moments_plot_wedge(n_theta_plot*n_theta_mult,n_x,n_kinetic,3))
      endif
@@ -123,22 +124,21 @@ subroutine gyro_alloc_big(flag)
      allocate(nonlinear_flux_passing(n_x,n_kinetic,n_field,p_moment))
      allocate(nonlinear_flux_trapped(n_x,n_kinetic,n_field,p_moment))
      allocate(nonlinear_flux_momparts(n_kinetic,3))
+     allocate(nonlinear_flux_excparts(n_kinetic,4))
      allocate(gbflux_i(n_kinetic,n_field,p_moment,n_x))
      allocate(gbflux_i_trapped(n_kinetic,n_field,p_moment,n_x))
      allocate(gbflux(n_kinetic,n_field,p_moment))
      allocate(gbflux_mom(n_kinetic,3))
+     allocate(gbflux_exc(n_kinetic,4))
      allocate(gbflux_trapped(n_kinetic,n_field,p_moment))
      allocate(gbflux_n(n_kinetic,n_field,p_moment))
-
-     if (transport_method == 2) then
-        allocate(diff_vec(n_kinetic,n_field,n_moment,(nstep/time_skip)+1))
-        allocate(gbflux_vec(n_kinetic,n_field,p_moment,(nstep/time_skip)+1))
-     endif
+     allocate(gbflux_vec(n_kinetic,n_field,p_moment,n_x))
 
      allocate(nl_transfer(n_x,2))
 
      allocate(time_error(n_kinetic))
      allocate(w_time(time_skip))
+     allocate(w_time_wedge(time_skip_wedge))
      allocate(omega_linear(n_n,2))
 
      !------------------------------------------------------------
@@ -159,12 +159,14 @@ subroutine gyro_alloc_big(flag)
      deallocate(field_blend_old)
      deallocate(field_blend_old2)
      deallocate(field_blend_dot)
+     deallocate(field_tau)
+     deallocate(field_tau_old)
+     deallocate(field_tau_old2)
+     deallocate(field_tau_dot)
      deallocate(phi_squared)
      deallocate(g_squared) 
-     deallocate(phi_fluxave)
+     deallocate(field_fluxave)
      deallocate(ave_phi)
-     deallocate(a_fluxave)
-     deallocate(aperp_fluxave)
      deallocate(h_err)
 
      deallocate(h)
@@ -189,7 +191,6 @@ subroutine gyro_alloc_big(flag)
      deallocate(h_tran)
      deallocate(gyro_h)
      if  (allocated(gyro_h_aperp)) deallocate(gyro_h_aperp)
-     deallocate(field_tau)
 
      deallocate(gyro_uv)
      if (allocated(kyro_uv)) deallocate(kyro_uv)
@@ -222,20 +223,19 @@ subroutine gyro_alloc_big(flag)
 
      deallocate(nonlinear_flux_passing)  
      deallocate(nonlinear_flux_trapped)
+     deallocate(nonlinear_flux_momparts)
+     deallocate(nonlinear_flux_excparts)
 
-     if (allocated(nonlinear_flux_momparts)) deallocate(nonlinear_flux_momparts)
-
-     if (allocated(gbflux_i)) deallocate(gbflux_i)
-     if (allocated(gbflux_i_trapped)) deallocate(gbflux_i_trapped)
-     if (allocated(gbflux)) deallocate(gbflux)
-     if (allocated(gbflux_mom)) deallocate(gbflux_mom)
-     if (allocated(gbflux_trapped)) deallocate(gbflux_trapped)
-     if (allocated(gbflux_n)) deallocate(gbflux_n)
+     deallocate(gbflux_i)
+     deallocate(gbflux_i_trapped)
+     deallocate(gbflux)
+     deallocate(gbflux_mom)
+     deallocate(gbflux_exc)
+     deallocate(gbflux_trapped)
+     deallocate(gbflux_n)
+     deallocate(gbflux_vec)
 
      deallocate(nl_transfer)
-
-     if (allocated(diff_vec)) deallocate(diff_vec)
-     if (allocated(gbflux_vec)) deallocate(gbflux_vec)
 
      deallocate(time_error)
      deallocate(w_time)

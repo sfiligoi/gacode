@@ -98,6 +98,24 @@ pro spectrum_n_ave_event, spectrum_n_ave
      close,1
      print,'Exported data to ',pname+'.idlout'
      plot_export = 0
+  ;; output time average kxky spectrum to file
+     t_total = t[it2]-t[it1]
+     sumkxky=fltarr(n_r,n_n)
+     avekxky=fltarr(n_r,n_n)
+     sumkxky[*,*] = 0.0
+     for i=it1,it2-1 do begin
+       dt = t[i+1]-t[i]
+       sumkxky[*,*] = sumkxky[*,*]+0.5*(kxkyspec[*,*,i+1]+kxkyspec[*,*,i])*dt
+    endfor
+    avekxky[*,*]=sumkxky[*,*]/t_total
+    openw,1,'avekxky.idlout'
+    kxrho = (indgen(n_r)-n_r/2)*2*!pi/(r[n_r-1]-r[0])*rho_s
+    printf,1,'kx',kt_rho[0:n_n-1],format='(a3,128(2x,e15.5))'
+    for ir=0,n_r-1 do begin
+        printf,1,kxrho[ir],avekxky[ir,0:n_n-1],format='(128(2x,e15.5))'
+    endfor
+    close,1
+    print,'Exported time average kxky spectrum to avekxky.idlout'
   endif
   ;;---------------------------------------------------
 

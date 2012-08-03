@@ -16,18 +16,15 @@ then
    echo
    echo "Usage:    profiles_gen_plot [options]"
    echo 
-   echo "          -p <path>"
-   echo "          Set optional path to simulation directory."
-   echo "          [The default path is the current directory]"
-   echo
-   echo "          -e <simdir>"
-   echo "          Use data in <simdir>."
+   echo "          -i <file1>,<file2>,...,<fileN>"
+   echo "          Sequence of input.profiles files."
+   echo "          [Default is input.profiles in the current directory]"
    echo
    echo " PROFILE PLOTTING MODE:"
    echo
    echo "          -options"
    echo "          Display all possible simulated parameters to plot in"
-   echo "          current directory."
+   echo "          <file1>."
    echo 
    echo "          -plot <var1>,<var2>,...,<varN>"
    echo "          Produce plots of N parameters given."  
@@ -74,11 +71,10 @@ fi
 #==============================================================================
 # Define variables for flag capture
 #
-# Default output directory
-LOCDIR=.
-SIMROOT=$PWD
+INFILES=input.profiles,.,.,.,.
+PLOTS=Te,Ti_1
+#
 RVAR="r"
-PLOT_STRING=""
 N_LINES=1
 IN_SURFACE=0.5
 OUT_SURFACE=1
@@ -95,13 +91,11 @@ SURF_TYPE=3
 while [ $# -gt 0 ] ; do
   case "$1" in
 
-  -e) shift ; LOCDIR=$1 ;;
-
-  -p) shift ; SIMROOT=$1 ;;
+  -i) shift ; INFILES=$1 ;;
 
   -options) OPTIONS_FLAG=1 ;;
 
-  -plot) shift ; PLOT_FLAG=1 ; PLOT_STRING="$1" ;;
+  -plot) shift ; PLOT_FLAG=1 ; PLOTS="$1" ;;
 
   -r) shift ; RVAR=$1 ;;
 
@@ -126,14 +120,6 @@ while [ $# -gt 0 ] ; do
 done
 #==============================================================================
 
-if [ "$LOCDIR" == "." ]
-then
-   LOCDIR=`basename $PWD`
-   cd .. ; SIMROOT=$PWD
-fi
-SIMDIR=$SIMROOT/$LOCDIR
-cd $SIMDIR
-
 PYROOT=$GACODE_ROOT/shared/python/pyrats/profiles_gen
 
 #==============================================================================
@@ -141,7 +127,7 @@ PYROOT=$GACODE_ROOT/shared/python/pyrats/profiles_gen
 
 if [ $OPTIONS_FLAG -eq 1 ]
 then
-  Python $PYROOT/options.py $SIMDIR &
+  Python -i $PYROOT/options.py $INFILES &
   exit 0
 fi
 #==============================================================================
@@ -151,7 +137,7 @@ fi
 
 if [ $FLUX_FLAG -eq 1 ]
 then
-   python $PYROOT/fluxplot.py $SIMDIR $IN_SURFACE $OUT_SURFACE $N_LINES $SURF_TYPE & 
+   python $PYROOT/fluxplot.py $INFILES $IN_SURFACE $OUT_SURFACE $N_LINES $SURF_TYPE & 
    exit 0
 fi
 #==============================================================================
@@ -161,19 +147,8 @@ fi
 
 if [ $PLOT_FLAG -eq 1 ]
 then
-   if [ "$PLOT_STRING" = "" ]
-   then
-      PLOT_STRING="ne,ni_1,Te,Ti_1"
-   fi
-
-   for i in $(echo $PLOT_STRING | tr "," "\n") 
-   do 
-      #echo `which python`
-      echo Python  -i $PYROOT/profileplot.py $SIMDIR $i $RVAR 
-      Python  -i $PYROOT/profileplot.py $SIMDIR $i $RVAR 
-      done
+   Python -i $PYROOT/profileplot.py $RVAR $INFILES $PLOTS &
    exit 0
-
 fi
 #==============================================================================
 

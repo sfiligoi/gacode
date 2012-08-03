@@ -1,4 +1,5 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
+include ../install/make.ext.${GACODE_PLATFORM}
 
 export EXTRA_LIBS =  \
        ${GACODE_ROOT}/tglf/src/tglf_lib.a  \
@@ -12,9 +13,9 @@ export EXTRA_LIBS =  \
        ${NETCDF}
 
 ifeq ($(OPT),debug)
-   FFLAGS=${FDEBUG}
+   FFLAGS=${FDEBUG} ${XPTORFLAGS}
 else
-   FFLAGS=${FOPT}
+   FFLAGS=${FOPT} ${XPTORFLAGS}
 endif
 
 EXEC=xptor
@@ -26,7 +27,7 @@ all:  ptor_driver.o
 	$(FC) $(FFLAGS) -o $(EXEC) ptor_driver.o  $(LLIB).a  $(EXTRA_LIBS)
 
 .f.o : 
-	$(FC) $(FMATH) $(FFLAGS) -c $<
+	$(FC) $(FFLAGS) -c $<
 
 clean:
 	rm -f *.o $(EXEC) $(LLIB).a

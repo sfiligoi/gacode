@@ -47,9 +47,10 @@ c          To use chi-phi-neo=delta^3/2*chii-neo, set ineophi=1.
 c
 c       3) ExB shear stabilization
 c             iexb
-c              0         ExB shear using exp. vphi, neoclassical v_theta (Kim formula)
-c              1         ExB shear using omega.dat file, stored in megamma_exp
-c              3         NCLASS Hahm-Burrell formula, egamma_exp=egamma_ncl_exp
+c              0         ExB shear using gradvexbm with perturbations in Diff
+c              1         ExB shear using gradvexbm without perturbations in Diff
+c              2         ExB shear computed from vexb_exp
+c              3         ExB shear using omega.dat file, stored in megamma_exp
 c
 c       4) Shafranov shift stabilization:
 c       To include the effect of Shafranov shift stabilization in GLF23
@@ -125,7 +126,7 @@ c          ave_field > 0 for averaging of fields 1-5
 c          ave_ve > 0 for averaging of ve
 c    Wdot terms:
 c       The wdot and sdot terms are included by default. To exclude
-c       them in the total power flows, set xwdot=1 for DWIR, DWER and xsdot=1 for DNER.
+c       them in the total power flows, set xwdot=0.0 for DWIR, DWER and xsdot=0.0 for DNER.
 c    Fusion power:
 c       Switches: ialpha, idt, ifusmodel,fuscale
 c       XPTOR can compute the alpha power by setting ialpha=1. The default
@@ -450,7 +451,7 @@ c        if(ismooth_all.ne.0) call datavg ! smoothing in readufiles for now
           write(*,*) 'Error: idata out of range'
                   stop
       endif
-      if (iexb.eq.2) call read_er
+      if (iexb.eq.3) call read_er
 c
 c... interpolate to new grid
 c
@@ -470,7 +471,7 @@ c
       imyneoclass=0
       if (use_xneo_m.eq.0 .or. use_xneo_m.eq.1 .or.
      &    use_xneo_m.eq.-1) call datneo
-      if(use_xneo_m.eq.2 .or. iexb.eq.3) call datnclass
+      if(use_xneo_m.eq.2) call datnclass
 c
 c... map to _exp variables
 c
@@ -558,7 +559,7 @@ c
 c
 c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
 c create GYRO output 'expprofile'
-c Note: set iexb=2 to read in exp Er data
+c Note: set iexb=3 to read in exp Er data
 c cub_spline is used in readiterdb for mapping
 c
       if (igyro.gt.0) then

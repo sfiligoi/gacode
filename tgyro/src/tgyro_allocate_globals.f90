@@ -42,6 +42,7 @@ subroutine tgyro_allocate_globals
   allocate(gamma_gb(n_r))
   allocate(pi_gb(n_r))
   allocate(q_gb(n_r))
+  allocate(s_gb(n_r))
 
   ! Collision frequencies
   allocate(nue(n_r))
@@ -107,6 +108,7 @@ subroutine tgyro_allocate_globals
   allocate(p_i_aux_in(n_r))
   allocate(p_e_aux_in(n_r))
   allocate(f_b_in(n_r))
+  allocate(f_w_in(n_r))
 
   allocate(p_i(n_r))
   allocate(p_e(n_r))
@@ -117,6 +119,8 @@ subroutine tgyro_allocate_globals
   allocate(p_brem(n_r))
   allocate(s_exch(n_r))
   allocate(p_exch(n_r))
+  allocate(s_expwd(n_r))
+  allocate(p_expwd(n_r))
 
   allocate(res(p_max))
   allocate(res0(p_max))

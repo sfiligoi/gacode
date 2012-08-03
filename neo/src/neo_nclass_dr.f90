@@ -326,7 +326,7 @@ contains
           den_iz(is,abs(z(is))) = dens(is,ir) * dens_norm(ir) * 1e19
        enddo
     endif
-    
+
     !  grp_iz(i,z)-pressure gradient of i,z (keV/m**3/rho)
     grp_iz(:,:) = 0.0
     do is=1,n_species
@@ -485,14 +485,14 @@ contains
     
     if(silent_flag == 0 .and. i_proc == 0) then
        open(io_nc,file=trim(path)//runfile,status='old',position='append')
-       write (io_nc,'(e16.8,$)') r(ir)
-       write(io_nc,'(e16.8,$)') jbs_nc 
+       write (io_nc,'(e16.8)',advance='no') r(ir)
+       write(io_nc,'(e16.8)',advance='no') jbs_nc 
        do is=1,n_species
-          write(io_nc,'(e16.8,$)') pflux_nc(is)
-          write(io_nc,'(e16.8,$)') eflux_nc(is) 
-          write(io_nc,'(e16.8,$)') uparB_nc(is) 
-          write(io_nc,'(e16.8,$)') vpol_nc(is)
-          write(io_nc,'(e16.8,$)') vtor_nc(is)
+          write(io_nc,'(e16.8)',advance='no') pflux_nc(is)
+          write(io_nc,'(e16.8)',advance='no') eflux_nc(is) 
+          write(io_nc,'(e16.8)',advance='no') uparB_nc(is) 
+          write(io_nc,'(e16.8)',advance='no') vpol_nc(is)
+          write(io_nc,'(e16.8)',advance='no') vtor_nc(is)
        enddo
        write(io_nc,*)
        close(io_nc)

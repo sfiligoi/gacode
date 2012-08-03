@@ -65,6 +65,21 @@ subroutine neo_read_input
   read(1,*) profile_zeta_scale
   read(1,*) profile_zmag_scale
 
+  read(1,*) profile_dlnndr_1_scale
+  read(1,*) profile_dlnndr_2_scale
+  read(1,*) profile_dlnndr_3_scale
+  read(1,*) profile_dlnndr_4_scale
+  read(1,*) profile_dlnndr_5_scale
+  read(1,*) profile_dlnndr_6_scale
+
+  read(1,*) profile_dlntdr_1_scale
+  read(1,*) profile_dlntdr_2_scale
+  read(1,*) profile_dlntdr_3_scale
+  read(1,*) profile_dlntdr_4_scale
+  read(1,*) profile_dlntdr_5_scale
+  read(1,*) profile_dlntdr_6_scale
+
+
   close(1)
 
   ! GEO fourier coefficients are not yet available to read-in

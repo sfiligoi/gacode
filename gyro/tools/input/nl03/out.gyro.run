@@ -1,0 +1,236 @@
+[Parsing data in input.gyro]
+ -----------------------------------------------
+ operational mode     : INITIAL VALUE
+ boundary conditions  : NONPERIODIC
+ profiles             : EXPERIMENTAL
+ geometry             : MODEL SHAPE
+ electron_method      : IMPLICIT DRIFT-KINETIC ELECTRONS
+ fluctuations         : ELECTROSTATIC
+ gyro_method          : ORIGINAL (INTEGRATED) POLARIZATION
+ fluctuation output   : PHI(+) N(+) E(+) V( )                   
+ radial grid          : UNIFORM
+ integrator_method    : IMEX2+RK4
+ field solve          : UMFPACK (SEQUENTIAL)
+ source_flag          : SOURCE ON
+ pitch-angle coll.    : RBF r^3
+ rotation parameters  : CANDY METHOD
+ nonlinear dynamics   : ON
+ nonlinear bracket    : DIRECT
+ -----------------------------------------------
+----------------------------------------------------------
+INFO: (GYRO) Dropped down to single-threaded MPI
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: (GYRO) Forcing up-down symmetry (UDSYMMETRY_FLAG=1).
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: Offsetting main ions to force sum(ni) = ne
+----------------------------------------------------------
+ ----------- SPARSE MATRIX STATS ---------------
+ EXPLICIT POISSON:     n=0        n>0
+         nonzeros:  1078758   1078758
+           values:  3236274   3236274
+          indices:  4477040   4477040
+       iterations:        1         1
+ 
+      TOTAL FIELD:     n=0        n>0
+         nonzeros:  1078758   1078758
+           values:  3236274   3236274
+          indices:  4477040   4477040
+       iterations:        1         1
+ 
+ ----------- UTILITY PARAMETERS ----------------
+ Ion parallel motion     : ON
+ Ion curvature drift     : ON
+ Electron curvature drift: ON
+ ---------- PARLLELISM DIMENSIONS --------------
+ MPI tasks            : 1600
+ OpenMP threads       :    1
+ ----------- GRID DIMENSIONS -------------------
+ n_n                  :   40
+ n_x                  :  500
+ n_stack              :   32
+ n_blend              :    9
+ n_pass               :    5
+ n_trap               :    5
+ n_energy             :    8
+ n_field              :    1
+ --
+ n_spec               :    3
+ n_ion                :    2
+ n_kinetic            :    3
+ n_gk                 :    2
+ indx_e               :    3
+ --
+ FIELD POINTS:        :    180000
+ DIST. POINTS:        : 153600000
+ --
+ energy_max           :   6.000000
+ dt                   :   0.002000
+ --------------- LOCAL PARAMETERS ---------------
+  NOTE: use abs(SAFETY_FACTOR) as input
+ # RADIUS [INPUT]     :   0.600000
+ .RADIUS              :   0.600451
+ .ASPECT_RATIO        :   2.697736
+ .SHIFT               :  -0.097382
+ .ZMAG                :   0.000000
+ .DZMAG               :   0.000000
+ .KAPPA               :   1.271251
+ .S_KAPPA             :   0.089924
+ .DELTA               :   0.026917
+ .S_DELTA             :   0.036443
+ .ZETA                :  -0.012727
+ .S_ZETA              :  -0.031506
+ .SAFETY_FACTOR       :   2.015184
+ .SHEAR               :   1.142628
+ .RHO_STAR            :   0.002642
+ .Z_EFF               :   2.867879
+ .MACH                :   0.000000
+ .PGAMMA              :   0.000000
+ .GAMMA_E             :   0.000000
+ .LAMBDA_DEBYE        :   0.000000
+ .NU_EI               :   0.103382
+ .NU_I_KROOK          :   0.000000
+ .IPCCW               :  -1.000000
+ .BTCCW               :  -1.000000
+ # Ion  1
+ .NI_OVER_NE          :   0.626421
+ .TI_OVER_TE          :   0.621330
+ .DLNNDR              :   1.375249
+ .DLNTDR              :   1.515397
+ .Z                   :   1.000000
+ (NU_II)              :   0.003306
+ .MU                  :   1.000000
+ # Ion  2
+ .NI_OVER_NE_2        :   0.062263
+ .TI_OVER_TE_2        :   0.621330
+ .DLNNDR_2            :   1.282323
+ .DLNTDR_2            :   1.515397
+ .Z_2                 :   6.000000
+ (NU_II_2)            :   0.004826
+ .MU_2                :   0.408000
+ # Electrons
+ .DLNNDR_ELECTRON     :   1.340558
+ .DLNTDR_ELECTRON     :   2.505286
+ (Z_ELECTRON)         :  -1.000000
+ .BETAE_UNIT          :   0.000846
+ .MU_ELECTRON         :  40.000000
+ --------------- TGLF PARAMETERS ---------------
+ Q_PRIME              :  12.870031
+ P_PRIME              :   0.000574
+ -------- LOCAL PARAMETERS (diagnostic) ----------
+ n_i*z_i - n_e:       :   0.000000
+ r/R0                 :   0.222576
+ rho_norm             :   0.555730
+ b_unit               :   2.675864
+ beta_unit_norm       :   0.001208
+ betai_unit           :   0.000329
+ betai_unit_2         :   0.000033
+ betae_unit_norm      :   0.000846
+ beta_*               :   0.004298
+ alpha_MHD            :   0.047084
+ omega_00 (c_s/a)     :   0.000000
+ * Note that f = f_sim exp(i n omega0[r0] t)
+ -------- ALFVEN WAVE PARAMETERS (diagnostic) ----------
+ (v_A/c_s)            :  48.606000
+ Omega_TAE            :   4.470392
+ Omega_A              :   8.940785
+ ----------- UPWIND PARAMETERS -----------------
+ radial_upwind        :   1.000000
+ orbit_upwind         :   1.000000
+ orbit_upwind_2       :   1.000000
+ orbit_upwind (elec)  :   0.000000
+ ----------- SOURCE PARAMETERS -----------------
+ nu_source            :   1.000000
+ n_source             :    2
+ ----------- RADIAL DOMAIN PARAMETERS ----------
+ s_grid               :   1.000000
+ box_multiplier       :  15.000000
+ L/a                  :   0.450000
+ --
+ explicit_damp(i)     :  24 (  1.0000)
+ explicit_damp(e)     :  24 (  1.0000)
+ --
+ offset               :   0 (  0.0000)
+ LEFT : r_a           :   0.375000
+ LEFT : r_a_physical  :   0.396643
+ NORM : r(ir_norm)    :   0.600451
+ RIGHT: r_b_physical  :   0.803357
+ RIGHT: r_b           :   0.825000
+ ----------- PARALLELIZATION PARAMETERS --------
+ (nek) per subgroup:  :         2
+ (ine) per subgroup:  :       100
+ ----------- TIME STEPPING PARAMETERS ----------
+ plot_filter          :   1.000000
+ time_skip            :    10
+ restart_data_skip    :    10
+ ----------- STABILITY PARAMETERS ----------------
+ d/dtau Courant       :   0.177982
+   d/dr Courant       :   0.041959
+ Log(RBF Cond. num.)  :   8.560946
+ -------- CENTRAL WAVENUMBERS SIMULATED -----------
+     (k_y = nq/r, rho = rho_sD_unit)
+ n =     0   k_y rho =  0.000 [ 0.000][ 0.000]
+ n =     8   k_y rho =  0.071 [ 0.109][ 0.047]
+ n =    16   k_y rho =  0.142 [ 0.218][ 0.094]
+ n =    24   k_y rho =  0.213 [ 0.327][ 0.142]
+ n =    32   k_y rho =  0.284 [ 0.436][ 0.189]
+ n =    40   k_y rho =  0.355 [ 0.545][ 0.236]
+ n =    48   k_y rho =  0.426 [ 0.654][ 0.283]
+ n =    56   k_y rho =  0.497 [ 0.763][ 0.330]
+ n =    64   k_y rho =  0.567 [ 0.872][ 0.378]
+ n =    72   k_y rho =  0.638 [ 0.981][ 0.425]
+ n =    80   k_y rho =  0.709 [ 1.090][ 0.472]
+ n =    88   k_y rho =  0.780 [ 1.199][ 0.519]
+ n =    96   k_y rho =  0.851 [ 1.307][ 0.566]
+ n =   104   k_y rho =  0.922 [ 1.416][ 0.614]
+ n =   112   k_y rho =  0.993 [ 1.525][ 0.661]
+ n =   120   k_y rho =  1.064 [ 1.634][ 0.708]
+ n =   128   k_y rho =  1.135 [ 1.743][ 0.755]
+ n =   136   k_y rho =  1.206 [ 1.852][ 0.803]
+ n =   144   k_y rho =  1.277 [ 1.961][ 0.850]
+ n =   152   k_y rho =  1.348 [ 2.070][ 0.897]
+ n =   160   k_y rho =  1.419 [ 2.179][ 0.944]
+ n =   168   k_y rho =  1.490 [ 2.288][ 0.991]
+ n =   176   k_y rho =  1.560 [ 2.397][ 1.039]
+ n =   184   k_y rho =  1.631 [ 2.506][ 1.086]
+ n =   192   k_y rho =  1.702 [ 2.615][ 1.133]
+ n =   200   k_y rho =  1.773 [ 2.724][ 1.180]
+ n =   208   k_y rho =  1.844 [ 2.833][ 1.227]
+ n =   216   k_y rho =  1.915 [ 2.942][ 1.275]
+ n =   224   k_y rho =  1.986 [ 3.051][ 1.322]
+ n =   232   k_y rho =  2.057 [ 3.160][ 1.369]
+ n =   240   k_y rho =  2.128 [ 3.269][ 1.416]
+ n =   248   k_y rho =  2.199 [ 3.378][ 1.463]
+ n =   256   k_y rho =  2.270 [ 3.487][ 1.511]
+ n =   264   k_y rho =  2.341 [ 3.596][ 1.558]
+ n =   272   k_y rho =  2.412 [ 3.705][ 1.605]
+ n =   280   k_y rho =  2.483 [ 3.814][ 1.652]
+ n =   288   k_y rho =  2.553 [ 3.922][ 1.699]
+ n =   296   k_y rho =  2.624 [ 4.031][ 1.747]
+ n =   304   k_y rho =  2.695 [ 4.140][ 1.794]
+ n =   312   k_y rho =  2.766 [ 4.249][ 1.841]
+  
+ min resolved k_x*rho_sD :  0.036886
+ max resolved k_x*rho_sD :  4.610774
+ --------------- CENTRAL BOX SIZE -----------------
+ abs(Lx/rho_sD)       :   170.339774
+ abs(Ly/rho_sD)       :    88.584177
+ => abs(dx/rho_sD)    :     0.340680
+ --------------------------------------------------
+ ------------ GYRO-OPERATOR BANDWIDTH -------------
+ Ion 1                :    11.669403
+ Ion 2                :    28.566699
+ --------------------------------------------------
+ ---------------- BUFFER WIDTH --------------------
+ Ion 1                :     8.826087    12.744593
+ Ion 2                :    21.606260    31.198764
+ --------------------------------------------------
+ Startup time         : 114.451443
+ --------------------------------------------------
+ PLEASE SEE: 
+  - out.gyro.units for normalizing parameters
+  - out.gyro.memory for memory usage
+  - out.gyro.efficiency for parallelization efficiency
+  - out.gyro.phase_space for velocity-space nodes and weights
+ STATUS: clean exit                                                                      
