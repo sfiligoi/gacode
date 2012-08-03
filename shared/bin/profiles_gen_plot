@@ -141,7 +141,7 @@ PYROOT=$GACODE_ROOT/shared/python/pyrats/profiles_gen
 
 if [ $OPTIONS_FLAG -eq 1 ]
 then
-  python $PYROOT/options.py $SIMDIR &
+  Python $PYROOT/options.py $SIMDIR &
   exit 0
 fi
 #==============================================================================
@@ -168,7 +168,9 @@ then
 
    for i in $(echo $PLOT_STRING | tr "," "\n") 
    do 
-      python $PYROOT/profileplot.py $SIMDIR $i $RVAR &
+      #echo `which python`
+      echo Python  -i $PYROOT/profileplot.py $SIMDIR $i $RVAR 
+      Python  -i $PYROOT/profileplot.py $SIMDIR $i $RVAR 
       done
    exit 0
 
