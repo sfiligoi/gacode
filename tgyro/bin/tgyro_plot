@@ -95,12 +95,13 @@ then
     PLOT_STRING="$PLOT_STRING $1"
     shift
   done
+  echo `which python`
   if [ "$PLOT_STRING" != "" ]
   then
-    python ~/gacode/shared/python/pyrats/tgyro/interpreter.py $PLOT_DIR $N1 $N2 $VERBOSE_FLAG $LEGEND_FLAG $PLOT_STRING &
+    Python $GACODE_ROOT/shared/python/pyrats/tgyro/interpreter.py $PLOT_DIR $N1 $N2 $VERBOSE_FLAG $LEGEND_FLAG $PLOT_STRING &
     exit 0
   else
-    python -i ~/gacode/shared/python/pyrats/tgyro/interpreter.py $PLOT_DIR $N1 $N2 $VERBOSE_FLAG $LEGEND_FLAG $PLOT_STRING
+    Python -i $GACODE_ROOT/shared/python/pyrats/tgyro/interpreter.py $PLOT_DIR $N1 $N2 $VERBOSE_FLAG $LEGEND_FLAG $PLOT_STRING
     exit 0
   fi
 fi
