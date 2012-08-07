@@ -132,8 +132,7 @@ class GYROData:
               self.t['n_time']   = self.t['i_time'].shape[0]
               f.close()
             else:
-              print "ERROR (GYROData): File does not exist "+h5file
-              sys.exit()
+              print "ERROR (GYROData): Problem reading file "+h5file
         except:
             if self.debug:
                 print "Unable to use HDF5 data"
@@ -178,7 +177,6 @@ class GYROData:
                 f.close()
             except:
                 print "ERROR (GYROData): Problem reading "+h5file
-                sys.exit()
         if os.path.exists(ascfile):
             try:
                 freq = np.loadtxt(ascfile).transpose()
@@ -280,9 +278,7 @@ class GYROData:
                   f.close()
 
               except:
-                  print "ERROR (GYROData): Fatal error! Missing "+h5file
-                  raise
-                  sys.exit()
+                  print "ERROR (GYROData): Problem reading file "+h5file
         except:
             print "Problem importing h5 file"
             raise
@@ -374,7 +370,7 @@ class GYROData:
 
             except:
                 print "ERROR (GYROData): Fatal error! While reading "+ascfile
-                sys.exit()
+                raise
         else:
             print "ERROR (GYROData): Fatal error!  Missing "+ascfile
             sys.exit()
@@ -407,8 +403,7 @@ class GYROData:
                 self.geometry['THETA']   = f.root.THETA.read() 
                 f.close()
             except:
-                print "ERROR (GYROData): File does not exist "+h5file
-                sys.exit()
+                print "ERROR (GYROData): Problem reading file "+h5file
         if os.path.exists(ascfile):
             try:
                 geometry = np.fromfile(self.dirname+'/out.gyro.geometry_arrays',dtype=float,sep=" ")
@@ -454,8 +449,7 @@ class GYROData:
                 self.gbflux_i = f.root.gbflux_i.read()
                 f.close()
             except:
-                print "ERROR (GYROData): File does not exist "+h5file
-                sys.exit()
+                print "ERROR (GYROData): Problem reading file "+h5file
         if os.path.exists(ascfile):
             try:
                 gbflux_i = np.fromfile(ascfile,dtype=float,sep=" ")
@@ -496,8 +490,7 @@ class GYROData:
                 self.gbflux_i = f.root.gbflux_n.read()
                 f.close()
             except:
-                print "ERROR (GYROData): File does not exist "+h5file
-                sys.exit()
+                print "ERROR (GYROData): Problem reading file "+h5file
         if os.path.exists(ascfile):
             try:
                 gbflux_n = np.fromfile(self.dirname+'/out.gyro.gbflux_n',dtype=float,sep=" ")
@@ -565,8 +558,7 @@ class GYROData:
                 self.moment_u = f.root.moment_uread()
                 f.close()
             except:
-                print "ERROR (GYROData): File does not exist "+h5file
-                sys.exit()
+                print "ERROR (GYROData): Problem opening file "+h5file
         if os.path.exists(ascfile):
             try:
                 data = np.fromfile(ascfile,dtype=float,sep=" ")
@@ -611,8 +603,7 @@ class GYROData:
                 self.moment_n = f.root.moment_n.read()
                 f.close()
             except:
-                print "ERROR (GYROData): File does not exist "+h5file
-                sys.exit()
+                print "ERROR (GYROData): Problem opening file "+h5file
         if os.path.exists(ascfile):
             try:
                 data = np.fromfile(ascfile,dtype=float,sep=" ")
@@ -657,8 +648,7 @@ class GYROData:
                 self.moment_e = f.root.moment_e.read()
                 f.close()
             except:
-                print "ERROR (GYROData): File does not exist "+h5file
-                sys.exit()
+                print "ERROR (GYROData): Problem opening file "+h5file
         if os.path.exists(ascfile):
             try:
                 data = np.fromfile(ascfile,dtype=float,sep=" ")
@@ -703,8 +693,7 @@ class GYROData:
                 self.moment_v = f.root.moment_v.read()
                 f.close()
             except:
-                print "ERROR (GYROData): File does not exist "+h5file
-                sys.exit()
+                print "ERROR (GYROData): Problem opening file "+h5file
         if os.path.exists(ascfile):
             try:
                 data = np.fromfile(ascfile,dtype=float,sep=" ")
@@ -748,8 +737,7 @@ class GYROData:
                 self.moment_zero = f.root.moment_zero.read()
                 f.close()
             except:
-                print "ERROR (GYROData): File does not exist "+h5file
-                sys.exit()
+                print "ERROR (GYROData): Problem opening file "+h5file
         if os.path.exists(ascfile):
             try:
                 data = np.fromfile(self.dirname+'/out.gyro.moment_zero',dtype=float,sep=" ")
@@ -789,8 +777,7 @@ class GYROData:
                 self.flux_velocity = f.root.flux_velocity.read()
                 f.close()
             except:
-                print "ERROR (GYROData): File does not exist "+h5file
-                sys.exit()
+                print "ERROR (GYROData): Problem opening file "+h5file
         if os.path.exists(ascfile):
             try:
                 data = np.fromfile(ascfile,dtype=float,sep=" ")
@@ -825,8 +812,7 @@ class GYROData:
                 self.k_perp_squared = f.root.k_perp_squared.read()
                 f.close()
             except:
-                print "ERROR (GYROData): File does not exist "+h5file
-                sys.exit()
+                print "ERROR (GYROData): Problem opening file "+h5file
         if os.path.exists(ascfile):
             try:
                 data = np.fromfile(self.dirname+'/out.gyro.k_perp_squared',dtype=float,sep=" ")
@@ -864,7 +850,6 @@ class GYROData:
                 f.close()
             except:
                 print "ERROR (GYROData): Error reading file "+h5file
-                sys.exit()
         else:
             list = glob.glob(self.dirname+'/out.gyro.balloon*')
 
