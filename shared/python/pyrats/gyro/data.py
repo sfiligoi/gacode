@@ -42,6 +42,7 @@ class GYROData:
         self.read_geometry()
         self.read_t()
         self.make_tags()
+        self.debug=False
 
         # The rest of the possible read routines should NOT be done automatically.
 
@@ -64,7 +65,7 @@ class GYROData:
         #self.make_diff()
         #self.make_diff_i()
 
-        import sys
+        import sys, os
         from os.path import expanduser, expandvars
         path = '$GACODE_ROOT/shared/python/pyrats'
         sys.path.append(expanduser(expandvars(path)))
@@ -75,6 +76,7 @@ class GYROData:
         """Initialize object data."""
 
         self.dirname = ""
+        self.debug=False
 
         self.profile  = {}
         self.geometry = {}
@@ -115,7 +117,7 @@ class GYROData:
     def read_t(self):
         """Read out.gyro.t to get time data."""
 
-        import sys
+        import sys, os
         import numpy as np
 
         try:
@@ -384,7 +386,7 @@ class GYROData:
         """Reads in geometry_array data.  Output is dictionary of numpy arrays
         with dimensions: n_fine x n_x."""
         
-        import sys
+        import sys, os
         import numpy as np
 
         h5file=self.dirname+'/out.gyro.initdata.h5'
@@ -437,7 +439,7 @@ class GYROData:
         """Reads in gbflux_i data.  Output is numpy array with dimensions:
         n_kinetic x n_field x 4 x n_x x n_time"""
 
-        import sys
+        import sys, os
         import numpy as np
 
         n_kinetic = self.profile['n_kinetic']
@@ -479,7 +481,7 @@ class GYROData:
         """Reads gbflux_n data.  Output is numpy array with dimensions:
         n_kinetic x n_field x 4 x n_n x n_time"""
 
-        import sys
+        import sys, os
         import numpy as np
 
         n_kinetic = self.profile['n_kinetic']
@@ -521,7 +523,7 @@ class GYROData:
         """Reads gbflux_exc data.  Output is numpy array with dimensions:
         n_kinetic x 4 x n_time"""
 
-        import sys
+        import sys, os
         import numpy as np
 
         n_kinetic = self.profile['n_kinetic']
@@ -547,7 +549,7 @@ class GYROData:
         """Reads in moment_u data.  Output is numpy array with dimensions:
         n_theta_plot x n_x x n_field x n_n x n_time"""
 
-        import sys
+        import sys, os
         import numpy as np
 
         n_theta_plot = self.profile['n_theta_plot']
@@ -593,7 +595,7 @@ class GYROData:
         """Reads in moment_n data.  Output is numpy array with dimensions:
         n_theta_plot x n_x x n_kinetic x n_n x n_time"""
 
-        import sys
+        import sys, os
         import numpy as np
 
         n_theta_plot = self.profile['n_theta_plot']
@@ -639,7 +641,7 @@ class GYROData:
         """Reads in moment_e data.  Output is numpy array with dimensions:
         n_theta_plot x n_x x n_kinetic x n_n x n_time"""
 
-        import sys
+        import sys, os
         import numpy as np
 
         n_theta_plot = self.profile['n_theta_plot']
@@ -685,7 +687,7 @@ class GYROData:
         """Reads in moment_v data.  Output is numpy array with dimensions:
         n_theta_plot x n_x x n_kinetic x n_n x n_time"""
 
-        import sys
+        import sys, os
         import numpy as np
 
         n_theta_plot = self.profile['n_theta_plot']
@@ -731,7 +733,7 @@ class GYROData:
         """Read data in out.gyro.moment_zero, store in self.moment_zero. 
         Dimensions: (n_x,n_kinetic,n_moment,n_time)"""
 
-        import sys
+        import sys, os
         import numpy as np
 
         n_x          = self.profile['n_x']
@@ -769,7 +771,7 @@ class GYROData:
     def read_flux_velocity(self):
         """Reads out.gyro.flux_velocity.  
         Output is numpy array with dimensions: (n_energy,n_lambda,n_kinetic,n_field,2,n_n,n_time)"""
-        import sys
+        import sys, os
         import numpy as np
 
         n_energy  = self.profile['n_energy']
@@ -812,7 +814,7 @@ class GYROData:
         """Reads out.gyro.k_perp_squared.  
            Output is numpy array with dimensions: (n_n,n_time)"""
 
-        import sys
+        import sys, os
         import numpy as np
 
         h5file=self.dirname+'/out.gyro.timedata.h5'
@@ -847,7 +849,7 @@ class GYROData:
 
         import glob
         import string
-        import sys
+        import sys, os
         import numpy as np
 
         m     = self.profile['box_multiplier']
