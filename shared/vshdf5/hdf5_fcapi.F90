@@ -1703,7 +1703,7 @@
 ! Write stored data to "name" data set.
 !-----------------------------------------------------------------------
 !#ifdef __MPI
-!   call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error, &
+!   call h5dwrite_f(dset_id,wrd_type,array,dims,error, &
 !                 xfer_prp = plist_id)
 !#else
    call h5dwrite_f(dset_id,wrd_type,int(array,i4),dims,error)
@@ -2395,18 +2395,18 @@
 #else
   if(h5in%doTranspose) then
     if (h5in%write_kind_real==r4) then
-      call h5dwrite_f(dset_id,h5in%wrd_type,real(tmparray,r4),dims,error)
+      call h5dwrite_f(dset_id,wrd_type,real(tmparray,r4),dims,error)
     elseif (h5in%write_kind_real==r8) then
-      call h5dwrite_f(dset_id,h5in%wrd_type,real(tmparray,r8),dims,error)
+      call h5dwrite_f(dset_id,wrd_type,real(tmparray,r8),dims,error)
     else
       write(*,*) "Unkown datatype"
       error=1
     endif
   else
     if (h5in%write_kind_real==r4) then
-      call h5dwrite_f(dset_id,h5in%wrd_type,real(array,r4),dims,error)
+      call h5dwrite_f(dset_id,wrd_type,real(array,r4),dims,error)
     elseif (h5in%write_kind_real==r8) then
-      call h5dwrite_f(dset_id,h5in%wrd_type,real(array,r8),dims,error)
+      call h5dwrite_f(dset_id,wrd_type,real(array,r8),dims,error)
     else
       write(*,*) "Unkown datatype"
       error=1
@@ -4130,7 +4130,7 @@
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer(HSIZE_T), dimension(1) :: dims, fdims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer(HID_T) :: error, wrd_type
   integer(HID_T) :: dset_id
 
   integer(i4), dimension(:), allocatable :: intarray
@@ -4154,7 +4154,8 @@
   call read_dims(dset_id,fdims,errval)
   call check_dims(dims,fdims, errval)
   if (errval%errBool) return
-  call h5dread_f(dset_id,h5in%wrd_type,intarray,dims,error)
+  wrd_type=h5kind_to_type(i4,H5_INTEGER_KIND)
+  call h5dread_f(dset_id,wrd_type,intarray,dims,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Reading data set failed for '//aname
      errval%errBool = .true.
@@ -4188,7 +4189,7 @@
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer(HSIZE_T), dimension(1) :: dims, fdims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer(HID_T) :: error, wrd_type
 
   integer(HID_T) :: dset_id
 !-----------------------------------------------------------------------
@@ -4208,7 +4209,8 @@
   call read_dims(dset_id,fdims,errval)
   call check_dims(dims,fdims, errval)
   if (errval%errBool) return
-  call h5dread_f(dset_id,h5in%wrd_type,array,dims,error)
+  wrd_type=h5kind_to_type(r8,H5_REAL_KIND)
+  call h5dread_f(dset_id,wrd_type,array,dims,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Reading data set failed for '//aname
      errval%errBool = .true.
@@ -4241,7 +4243,7 @@
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer(HSIZE_T), dimension(2) :: dims, fdims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error 
+  integer(HID_T) :: error, wrd_type
   integer :: i
   real(r8), dimension(:,:), allocatable :: tmparray
 
@@ -4273,11 +4275,12 @@
 !-----------------------------------------------------------------------
 ! Read data set
 !-----------------------------------------------------------------------
+  wrd_type=h5kind_to_type(r8,H5_REAL_KIND)
   if(.NOT. h5in%doTranspose) then
-     call h5dread_f(dset_id,h5in%wrd_type,array,dims,error)
+     call h5dread_f(dset_id,wrd_type,array,dims,error)
   else
      allocate(tmparray(dims(1),dims(2)))
-     call h5dread_f(dset_id,h5in%wrd_type,tmparray,dims,error)
+     call h5dread_f(dset_id,wrd_type,tmparray,dims,error)
      do i=1,dims(1);      array(:,i)=tmparray(i,:);     enddo
      deallocate(tmparray)
   endif
@@ -4313,7 +4316,7 @@
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer(HSIZE_T), dimension(3) :: dims, fdims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer(HID_T) :: error, wrd_type
   integer :: i,j
   real(r8), dimension(:,:,:), allocatable :: tmparray
 
@@ -4349,11 +4352,12 @@
 !-----------------------------------------------------------------------
 ! Read data set
 !-----------------------------------------------------------------------
+  wrd_type=h5kind_to_type(r8,H5_REAL_KIND)
   if(.NOT. h5in%doTranspose) then
-     call h5dread_f(dset_id,h5in%wrd_type,array,dims,error)
+     call h5dread_f(dset_id,wrd_type,array,dims,error)
   else
      allocate(tmparray(dims(1),dims(2),dims(3)))
-     call h5dread_f(dset_id,h5in%wrd_type,tmparray,dims,error)
+     call h5dread_f(dset_id,wrd_type,tmparray,dims,error)
      do i=1,dims(1); do j=1,dims(2)
       array(:,j,i)=tmparray(i,j,:)
      enddo; enddo
@@ -4390,7 +4394,7 @@
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer(HSIZE_T), dimension(1) :: dims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer(HID_T) :: error, wrd_type
   integer(HID_T) aset_id
 
   integer(i4) :: intval
@@ -4408,7 +4412,8 @@
 ! Read attribute
 !-----------------------------------------------------------------------
   dims(1)=1
-  call h5aread_f(aset_id,h5in%wrd_type,intval,dims,error)
+  wrd_type=h5kind_to_type(i4,H5_INTEGER_KIND)
+  call h5aread_f(aset_id,wrd_type,intval,dims,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Reading data set failed for '//aname
      errval%errBool = .true.
@@ -4442,7 +4447,7 @@
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer(HSIZE_T), dimension(1) :: dims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer(HID_T) :: error, wrd_type
 
   integer(HID_T) aset_id
 !-----------------------------------------------------------------------
@@ -4459,7 +4464,8 @@
 ! Read attribute
 !-----------------------------------------------------------------------
   dims(1)=1
-  call h5aread_f(aset_id,h5in%wrd_type,val,dims,error)
+  wrd_type=h5kind_to_type(r8,H5_REAL_KIND)
+  call h5aread_f(aset_id,wrd_type,val,dims,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Reading data set failed for '//aname
      errval%errBool = .true.
@@ -4492,7 +4498,7 @@
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer(HSIZE_T), dimension(1) :: dims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer(HID_T) :: error, wrd_type
   integer(HID_T) aset_id
 
   integer(i4), dimension(:), allocatable :: intarray
@@ -4512,7 +4518,8 @@
   dims(1)=size(array)
   allocate(intarray(dims(1)))
   intarray = array
-  call h5aread_f(aset_id,h5in%wrd_type,intarray,dims,error)
+  wrd_type=h5kind_to_type(r8,H5_REAL_KIND)
+  call h5aread_f(aset_id,wrd_type,intarray,dims,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Reading data set failed for '//aname
      errval%errBool = .true.
