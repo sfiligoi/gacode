@@ -1791,7 +1791,14 @@
 !-----------------------------------------------------------------------
 ! Write stored data to "name" data set.
 !-----------------------------------------------------------------------
-  call h5dwrite_f(dset_id,wrd_type,real(value,h5in%write_kind_real),dims,error)
+  if (h5in%write_kind_real==r4) then
+    call h5dwrite_f(dset_id,wrd_type,real(value,r4),dims,error)
+  elseif (h5in%write_kind_real==r8) then
+   call h5dwrite_f(dset_id,wrd_type,real(value,r8),dims,error)
+  else
+    write(*,*) "Unkown datatype"
+    error=1
+  endif
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Data set write failed for '//aname
      errval%errBool = .true.
@@ -1875,7 +1882,14 @@
 !-----------------------------------------------------------------------
 ! Write stored data to "name" data set.
 !-----------------------------------------------------------------------
-  call h5dwrite_f(dset_id,wrd_type,real(value,h5in%write_kind_real),dims,error)
+  if (h5in%write_kind_real==r4) then
+    call h5dwrite_f(dset_id,wrd_type,real(value,r4),dims,error)
+  elseif (h5in%write_kind_real==r8) then
+    call h5dwrite_f(dset_id,wrd_type,real(value,r8),dims,error)
+  else
+    write(*,*) "Unkown datatype"
+    error=1
+  endif
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Data set write failed for '//aname
      errval%errBool = .true.
@@ -1969,7 +1983,14 @@
 !   call h5dwrite_f(dset_id,wrd_type,real(array,h5in%write_kind_real),dims,error, &
 !                 xfer_prp = plist_id)
 !#else
-   call h5dwrite_f(dset_id,wrd_type,real(array,h5in%write_kind_real),dims,error)
+  if (h5in%write_kind_real==r4) then
+    call h5dwrite_f(dset_id,wrd_type,real(array,r4),dims,error)
+  elseif (h5in%write_kind_real==r8) then
+    call h5dwrite_f(dset_id,wrd_type,real(array,r8),dims,error)
+  else
+    write(*,*) "Unkown datatype"
+    error=1
+  endif
 !#endif
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Data set write failed for '//aname
@@ -2063,21 +2084,47 @@
 !-----------------------------------------------------------------------
 #ifdef __MPI
    if(h5in%doTranspose) then
-     call h5dwrite_f(dset_id,wrd_type, &
-                   TRANSPOSE(real(array,h5in%write_kind_real)),dims, &
+     if (h5in%write_kind_real==r4) then
+     call h5dwrite_f(dset_id,wrd_type, TRANSPOSE(real(array,r4)),dims, &
                    error,xfer_prp = plist_id)
+     elseif (h5in%write_kind_real==r8) then
+     call h5dwrite_f(dset_id,wrd_type, TRANSPOSE(real(array,r8)),dims, &
+                   error,xfer_prp = plist_id)
+     else
+       write(*,*) "Unkown datatype"
+       error=1
+     endif
    else
-     call h5dwrite_f(dset_id,wrd_type, &
-                   real(array,h5in%write_kind_real),dims, &
-                   error,xfer_prp = plist_id)
+     if (h5in%write_kind_real==r4) then
+       call h5dwrite_f(dset_id,wrd_type, real(array,r4),dims, &
+                     error,xfer_prp = plist_id)
+     elseif (h5in%write_kind_real==r8) then
+       call h5dwrite_f(dset_id,wrd_type, real(array,r8),dims, &
+                     error,xfer_prp = plist_id)
+     else
+       write(*,*) "Unkown datatype"
+       error=1
+     endif
    endif
 #else
    if(h5in%doTranspose) then
-    call h5dwrite_f(dset_id,wrd_type, &
-                   TRANSPOSE(real(array,h5in%write_kind_real)),dims,error)
+     if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type,TRANSPOSE(real(array,r4)),dims,error)
+     elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type,TRANSPOSE(real(array,r8)),dims,error)
+     else
+       write(*,*) "Unkown datatype"
+       error=1
+     endif
    else
-    call h5dwrite_f(dset_id,wrd_type, &
-                   real(array,h5in%write_kind_real),dims,error)
+     if (h5in%write_kind_real==r4) then
+       call h5dwrite_f(dset_id,wrd_type, real(array,r4),dims,error)
+     elseif (h5in%write_kind_real==r8) then
+       call h5dwrite_f(dset_id,wrd_type, real(array,r8),dims,error)
+     else
+       write(*,*) "Unkown datatype"
+       error=1
+     endif
    endif
 #endif
   if (error.ne.0) then
@@ -2180,19 +2227,47 @@
 !-----------------------------------------------------------------------
 #ifdef __MPI
  if(h5in%doTranspose) then
-  call h5dwrite_f(dset_id,wrd_type,real(tmparray,h5in%write_kind_real), &
+     if (h5in%write_kind_real==r4) then
+        call h5dwrite_f(dset_id,wrd_type,real(tmparray,r4), &
                  dims,error,xfer_prp = plist_id)
+     elseif (h5in%write_kind_real==r8) then
+        call h5dwrite_f(dset_id,wrd_type,real(tmparray,r8), &
+                 dims,error,xfer_prp = plist_id)
+     else
+       write(*,*) "Unkown datatype"
+       error=1
+     endif
  else
-  call h5dwrite_f(dset_id,wrd_type,real(array,h5in%write_kind_real), &
+  if (h5in%write_kind_real==r4) then
+     call h5dwrite_f(dset_id,wrd_type,real(array,r4), &
                  dims,error,xfer_prp = plist_id)
+  elseif (h5in%write_kind_real==r8) then
+     call h5dwrite_f(dset_id,wrd_type,real(array,r8), &
+                 dims,error,xfer_prp = plist_id)
+  else
+    write(*,*) "Unkown datatype"
+    error=1
+  endif
  endif
 #else
  if(h5in%doTranspose) then
-  call h5dwrite_f(dset_id,wrd_type,real(tmparray,h5in%write_kind_real),&
-                  dims,error)
+  if (h5in%write_kind_real==r4) then
+    call h5dwrite_f(dset_id,wrd_type,real(tmparray,r4),dims,error)
+  elseif (h5in%write_kind_real==r8) then
+    call h5dwrite_f(dset_id,wrd_type,real(tmparray,r8),dims,error)
+  else
+    write(*,*) "Unkown datatype"
+    error=1
+  endif
  else
-  call h5dwrite_f(dset_id,wrd_type,real(array,h5in%write_kind_real),&
-                  dims,error)
+  if (h5in%write_kind_real==r4) then
+     call h5dwrite_f(dset_id,wrd_type,real(array,r4), dims,error)
+  elseif (h5in%write_kind_real==r8) then
+     call h5dwrite_f(dset_id,wrd_type,real(array,r8), dims,error)
+  else
+    write(*,*) "Unkown datatype"
+    error=1
+  endif
  endif
 #endif
   if (error.ne.0) then
@@ -2295,17 +2370,47 @@
 !-----------------------------------------------------------------------
 #ifdef __MPI
   if(h5in%doTranspose) then
-    call h5dwrite_f(dset_id,wrd_type,real(tmparray,h5in%write_kind_real), &
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type,real(tmparray,r4), &
                    dims,error,xfer_prp = plist_id)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type,real(tmparray,r8), &
+                   dims,error,xfer_prp = plist_id)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
   else
-    call h5dwrite_f(dset_id,wrd_type,real(array,h5in%write_kind_real), &
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r4), &
                    dims,error,xfer_prp = plist_id)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r8), &
+                   dims,error,xfer_prp = plist_id)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
   endif
 #else
   if(h5in%doTranspose) then
-    call h5dwrite_f(dset_id,h5in%wrd_type,tmparray,dims,error)
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,h5in%wrd_type,real(tmparray,r4),dims,error)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,h5in%wrd_type,real(tmparray,r8),dims,error)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
   else
-    call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error)
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,h5in%wrd_type,real(array,r4),dims,error)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,h5in%wrd_type,real(array,r8),dims,error)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
   endif
 #endif
   if (error.ne.0) then
@@ -2399,7 +2504,14 @@
 !   call h5dwrite_f(dset_id,wrd_type,array,dims,error, &
 !                 xfer_prp = plist_id)
 !#else
-   call h5dwrite_f(dset_id,wrd_type,real(array,h5in%write_kind_real),dims,error)
+    if (h5in%write_kind_real==r4) then
+       call h5dwrite_f(dset_id,wrd_type,real(array,r4),dims,error)
+    elseif (h5in%write_kind_real==r8) then
+       call h5dwrite_f(dset_id,wrd_type,real(array,r8),dims,error)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
 !#endif
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Data set write failed for '//aname
@@ -2493,20 +2605,47 @@
 !-----------------------------------------------------------------------
 #ifdef __MPI
   if(h5in%doTranspose) then
-    call h5dwrite_f(dset_id,wrd_type, &
-                   TRANSPOSE(real(array,h5in%write_kind_real)), &
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type, TRANSPOSE(real(array,r4)), &
                    dims,error,xfer_prp = plist_id)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type, TRANSPOSE(real(array,r8)), &
+                   dims,error,xfer_prp = plist_id)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
   else
-    call h5dwrite_f(dset_id,wrd_type, &
-                   real(array,h5in%write_kind_real), &
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type, real(array,r4), &
                    dims,error,xfer_prp = plist_id)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type, real(array,r8), &
+                   dims,error,xfer_prp = plist_id)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
   endif
 #else
   if(h5in%doTranspose) then
-    call h5dwrite_f(dset_id,wrd_type, &
-                   TRANSPOSE(real(array,h5in%write_kind_real)),dims,error)
+    if (h5in%write_kind_real==r4) then
+       call h5dwrite_f(dset_id,wrd_type,TRANSPOSE(real(array,r4)),dims,error)
+    elseif (h5in%write_kind_real==r8) then
+       call h5dwrite_f(dset_id,wrd_type,TRANSPOSE(real(array,r8)),dims,error)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
   else
-    call h5dwrite_f(dset_id,wrd_type,real(array,h5in%write_kind_real),dims,error)
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r4),dims,error)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r8),dims,error)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
   endif
 #endif
   if (error.ne.0) then
@@ -2607,20 +2746,49 @@
 !-----------------------------------------------------------------------
 #ifdef __MPI
   if(h5in%doTranspose) then
-    call h5dwrite_f(dset_id,wrd_type,real(tmparray,h5in%write_kind_real),dims, &
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type,real(tmparray,r4),dims, &
                    error,xfer_prp = plist_id)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type,real(tmparray,r8),dims, &
+                   error,xfer_prp = plist_id)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
     deallocate(tmparray)
   else
-    call h5dwrite_f(dset_id,wrd_type,real(array,h5in%write_kind_real),dims, &
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r4),dims, &
                    error,xfer_prp = plist_id)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r8),dims, &
+                   error,xfer_prp = plist_id)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
   endif
 #else
   if(h5in%doTranspose) then
-    call h5dwrite_f(dset_id,wrd_type,real(tmparray,h5in%write_kind_real),&
-                    dims,error)
+    if (h5in%write_kind_real==r4) then
+       call h5dwrite_f(dset_id,wrd_type,real(tmparray,r4), dims,error)
+    elseif (h5in%write_kind_real==r8) then
+       call h5dwrite_f(dset_id,wrd_type,real(tmparray,r8), dims,error)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
     deallocate(tmparray)
   else
-    call h5dwrite_f(dset_id,wrd_type,real(array,h5in%write_kind_real),dims,error)
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r4),dims,error)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r8),dims,error)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
   endif
 #endif
   if (error.ne.0) then
@@ -2721,21 +2889,53 @@
 !-----------------------------------------------------------------------
 #ifdef __MPI
   if(h5in%doTranspose) then
-    call h5dwrite_f(dset_id,wrd_type,real(tmparray,h5in%write_kind_real), &
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type,real(tmparray,r4), &
                    dims,error,xfer_prp = plist_id)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type,real(tmparray,r8), &
+                   dims,error,xfer_prp = plist_id)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
     deallocate(tmparray)
   else
-    call h5dwrite_f(dset_id,wrd_type,real(array,h5in%write_kind_real), &
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r4), &
                    dims,error,xfer_prp = plist_id)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r8), &
+                   dims,error,xfer_prp = plist_id)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
   endif
 #else
   if(h5in%doTranspose) then
-    call h5dwrite_f(dset_id,wrd_type,real(tmparray,h5in%write_kind_real), &
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type,real(tmparray,r4), &
                     dims,error)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type,real(tmparray,r8), &
+                    dims,error)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
     deallocate(tmparray)
   else
-    call h5dwrite_f(dset_id,wrd_type,real(array,h5in%write_kind_real), &
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r4), &
                     dims,error)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r8), &
+                    dims,error)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
   endif
 #endif
   if (error.ne.0) then
