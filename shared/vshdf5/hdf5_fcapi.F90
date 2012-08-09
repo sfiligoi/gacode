@@ -1581,7 +1581,7 @@
 !-----------------------------------------------------------------------
 ! Create the data space.
 !-----------------------------------------------------------------------
-  wrd_type=h5kind_to_type(int_kind_16,H5_INTEGER_KIND)
+  wrd_type=h5kind_to_type(h5in%write_kind_int,H5_INTEGER_KIND)
   call h5screate_f(H5S_SCALAR_F, dspace_id, error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
@@ -2050,7 +2050,7 @@
 !-----------------------------------------------------------------------
 ! Create the data space.
 !-----------------------------------------------------------------------
-  wrd_type=h5kind_to_type(real_kind_7,H5_REAL_KIND)
+  wrd_type=h5kind_to_type(h5in%write_kind_real,H5_REAL_KIND)
   call h5screate_simple_f(rank,dims,dspace_id,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
@@ -4077,7 +4077,7 @@
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer(HSIZE_T), dimension(1) :: dims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer(HID_T) :: error ,wrd_type
   integer(HID_T) :: dset_id
 
   integer(i4) :: intvalue
@@ -4096,7 +4096,7 @@
 !-----------------------------------------------------------------------
   wrd_type=h5kind_to_type(h5in%write_kind_int,H5_INTEGER_KIND)
   if (errval%errBool) return
-  call h5dread_f(dset_id,wrd_type,int(intvalue,i4),dims,error)
+  call h5dread_f(dset_id,wrd_type,intvalue,dims,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Reading data set failed for '//aname
      errval%errBool = .true.
