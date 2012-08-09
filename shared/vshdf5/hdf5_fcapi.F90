@@ -1439,7 +1439,7 @@
 !-----------------------------------------------------------------------
 ! Write stored data to "name" data set.
 !-----------------------------------------------------------------------
-  call h5dwrite_f(dset_id,wrd_type,int(value,h5in%write_kind_int),dims,error)
+  call h5dwrite_f(dset_id,wrd_type,int(value,i4),dims,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Data set write failed for '//aname
      errval%errBool = .true.
@@ -1492,7 +1492,7 @@
 !-----------------------------------------------------------------------
 ! Create the data space.
 !-----------------------------------------------------------------------
-  wrd_type=h5kind_to_type(h5in%write_kind,H5_INTEGER_KIND)
+  wrd_type=h5kind_to_type(h5in%write_kind_int,H5_INTEGER_KIND)
   call h5screate_simple_f(rank,dims,dspace_id,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
@@ -1530,7 +1530,7 @@
 !   call h5dwrite_f(dset_id,wrd_type,array,dims,error, &
 !                 xfer_prp = plist_id)
 !#else
-   call h5dwrite_f(dset_id,wrd_type,int(array,h5in%write_kind_int),dims,error)
+   call h5dwrite_f(dset_id,wrd_type,int(array,i4),dims,error)
 !#endif
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Data set write failed for '//aname
@@ -1615,7 +1615,7 @@
 !-----------------------------------------------------------------------
 ! Write stored data to "name" data set.
 !-----------------------------------------------------------------------
-  call h5dwrite_f(dset_id,wrd_type,int(value,h5in%write_kind_int),dims,error)
+  call h5dwrite_f(dset_id,wrd_type,int(value,i4),dims,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Data set write failed for '//aname
      errval%errBool = .true.
@@ -1706,7 +1706,7 @@
 !   call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error, &
 !                 xfer_prp = plist_id)
 !#else
-   call h5dwrite_f(dset_id,wrd_type,int(array,h5in%write_kind_int),dims,error)
+   call h5dwrite_f(dset_id,wrd_type,int(array,i4),dims,error)
 !#endif
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Data set write failed for '//aname
@@ -1945,7 +1945,7 @@
 !-----------------------------------------------------------------------
 ! Create the data space.
 !-----------------------------------------------------------------------
-  wrd_type=h5kind_to_type(h5in%wrd_type,H5_REAL_KIND)
+  wrd_type=h5kind_to_type(h5in%write_kind_real,H5_REAL_KIND)
   call h5screate_simple_f(rank,dims,dspace_id,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
@@ -2203,7 +2203,7 @@
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-----------------------------------------------------------------------
   wrd_type=h5kind_to_type(h5in%write_kind_real,H5_REAL_KIND)
-  if(h5in%debug) WRITE(*,*) 'Calling h5dcreate_simple_f', h5in%wrd_type
+  if(h5in%debug) WRITE(*,*) 'Calling h5dcreate_simple_f', wrd_type
   call h5dcreate_f(inid,aname,wrd_type,dspace_id,dset_id,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
@@ -4096,7 +4096,7 @@
 !-----------------------------------------------------------------------
   wrd_type=h5kind_to_type(h5in%write_kind_int,H5_INTEGER_KIND)
   if (errval%errBool) return
-  call h5dread_f(dset_id,wrd_type,int(intvalue,h5in%write_kind_int),dims,error)
+  call h5dread_f(dset_id,wrd_type,int(intvalue,i4),dims,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Reading data set failed for '//aname
      errval%errBool = .true.
