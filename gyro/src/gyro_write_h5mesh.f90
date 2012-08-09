@@ -54,8 +54,6 @@
          call vshdf5_inith5vars(h5in, h5err)
          h5in%comm=MPI_COMM_SELF
          h5in%info=MPI_INFO_NULL
-         h5in%wrd_type=H5T_NATIVE_REAL
-         h5in%typeConvert=.true.
          h5in%doTranspose=.true.
          h5in%verbose=.true.
          h5in%debug=.false.
@@ -150,7 +148,7 @@
     !----------------------------------------
     ! Dump the coarse mesh(es) in 3D
     !---------------------------------------- 
-    if (write_threed) then
+  threed: if (write_threed) then
     !------------------------------------------------
     ! Set up the toroidal grid.  Only used for coarse grid
     !-------------------------------------------------
@@ -173,6 +171,7 @@
      endif
 
      h5in%units="m"
+     h5in%write_kind_real=h5in%h5_kind_type_r4 
      call dump_h5(threeDGridID,'R',Rc*a_meters,h5in,h5err)
      call dump_h5(threeDGridID,'Z',Zc*a_meters,h5in,h5err)
      h5in%units="radians"
@@ -192,7 +191,8 @@
      h5in%mesh="mesh-structured"
      call dump_h5(threeDGridID,'cartMesh',buffer*a_meters,h5in,h5err)
      deallocate(buffer)
-    endif
+     h5in%write_kind_real=h5in%h5_kind_type_r8
+    endif threed
 
     if (allocated(Rc)) deallocate(Rc)
     if (allocated(Zc)) deallocate(Zc)
@@ -334,11 +334,6 @@
 
 
          call close_h5file(gridFileID,gridGroupID,h5err)
-
-
-
-
-
 
   end subroutine hdf5_write_coords
 
