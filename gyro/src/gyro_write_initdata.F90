@@ -296,8 +296,8 @@ subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io,h5datafile)
     call vshdf5_inith5vars(h5in, h5err)
     h5in%comm=MPI_COMM_SELF
     h5in%info=MPI_INFO_NULL
-    h5in%typeConvert=.true.
-    h5in%wrd_type=H5T_NATIVE_REAL
+    !h5in%typeConvert=.true.
+    !h5in%wrd_type=H5T_NATIVE_REAL
     h5in%doTranspose=.true.
     h5in%wrVsTime=.false.
     h5in%verbose=.true.
@@ -413,6 +413,10 @@ subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io,h5datafile)
     call dump_h5(rootid,"gsin",    buffer(2,:,:),h5in,h5err)
     call dump_h5(rootid,"gcos1",   buffer(3,:,:),h5in,h5err)
     call dump_h5(rootid,"gcos2",   buffer(4,:,:),h5in,h5err)
+    call dump_h5(rootid,"b",       buffer(7,:,:),h5in,h5err)
+    call dump_h5(rootid,"g_theta", buffer(8,:,:),h5in,h5err)
+    call dump_h5(rootid,"grad_r",  buffer(9,:,:),h5in,h5err)
+    call dump_h5(rootid,"gq",      buffer(10,:,:),h5in,h5err)
     call dump_h5(rootid,"b",       buffer(7,:,:),h5in,h5err)
     call dump_h5(rootid,"g_theta", buffer(8,:,:),h5in,h5err)
     call dump_h5(rootid,"grad_r",  buffer(9,:,:),h5in,h5err)

@@ -94,9 +94,6 @@ subroutine gyro_write_timedata
          call vshdf5_inith5vars(h5in, h5err)
          h5in%comm=MPI_COMM_SELF
          h5in%info=MPI_INFO_NULL
-         h5in%wrd_type=H5T_NATIVE_REAL
-         !h5in%wrd_type=h5in%h5_kind_type_r4
-         h5in%typeConvert=.true.
          h5in%doTranspose=.true.
          h5in%verbose=.true.
          h5in%debug=.false.
@@ -140,16 +137,16 @@ subroutine gyro_write_timedata
             if (write_threed) then
                dumpfile    = trim(path)//"gyro3D"//trim(step_name)//".h5"
                description = "GYRO 3D field file"
+               h5in%write_kind_real=h5in%h5_kind_type_r4
                call open_newh5file(dumpfile,fid3d,description,gid3D,h5in,h5err)
+               h5in%write_kind_real=h5in%h5_kind_type_r8
             endif
 
           ! make external links
           call make_external_link(TRIM(meshfile),"/coarseMesh/cartMesh", &
             dumpFid,"coarseMesh", h5in,h5err)
-            !dumpGid,"coarseMesh", h5in,h5err)
           call make_external_link(TRIM(meshfile),"/threeDMesh/cartMesh", &
             fid3d,"threeDMesh", h5in,h5err)
-            !gid3D,"threeDMesh", h5in,h5err)
 
       endif !i_proc ==0
   endif ! io_method > 1
@@ -1706,14 +1703,14 @@ subroutine write_distributed_complex_sorf_h5(vname,rGid,r3Did,&
 
   if (.not. iswedge) then
      h5in%mesh="/threeDMesh"
-     !h5in%mesh="/threeDMesh/cartMesh"
+     h5in%write_kind_real=h5in%h5_kind_type_r4
      do ikin=1,n3
         tempVarName=trim(vnameArray(ikin))
         call dump_h5(r3Did,trim(tempVarName),real_buff(:,:,ikin,:),h5in,h5err)
      enddo
+     h5in%write_kind_real=h5in%h5_kind_type_r8
   else
      h5in%mesh="/wedgeMesh"
-     !h5in%mesh="/wedgeMesh/cartMesh"
      ! Dump each phi slice as a separate variable
      do ikin=1,n3
         tempVarNameGr=trim(vnameArray(ikin))//"_toroidal"
