@@ -129,7 +129,7 @@ class GYROData:
               f=tables.openFile(h5file,'r')
               self.t['data_step']   = f.root.data_step.read()
               self.t['(c_s/a)t'] = f.root.t_current.read()
-              self.t['n_time']   = self.t['i_time'].shape[0]
+              self.t['n_time']   = self.t['data_step'].shape[0]
               f.close()
             else:
               print "ERROR (GYROData): Problem reading file "+h5file
@@ -162,13 +162,13 @@ class GYROData:
         dimensions: n_n x n_time"""
 
         import numpy as np
-        import sys
+        import sys, os
 
         h5file=self.dirname+'/out.gyro.timedata.h5'
         ascfile=self.dirname+'/out.gyro.freq'
         if os.path.exists(h5file):
             try:
-                print "Frequency data not implemented in HDF5 yet"
+                import tables
                 f=tables.openFile(h5file,'r')
                 self.freq['(a/c_s)w']        = f.root.omega.read()
                 self.freq['(a/c_s)gamma']    = f.root.gamma.read()
@@ -241,7 +241,7 @@ class GYROData:
                   self.profile['dlnndr_s']        = f.root.dlnndr_s.read() 
                   self.profile['tem_s']           = f.root.tem_s.read() 
                   self.profile['den_s']           = f.root.den_s.read() 
-                  self.profile['rmaj_s/r_s']      = f.root.rmaj_s.read() 
+                  self.profile['rmaj_s/r_s']      = f.root.Rmaj_s.read() 
                   self.profile['delta_s']         = f.root.delta_s.read() 
                   self.profile['zeta_s']          = f.root.zeta_s.read() 
                   self.profile['kappa_s']         = f.root.kappa_s.read() 
@@ -265,9 +265,9 @@ class GYROData:
                   #self.profile['lambda']          = eval("f.root.lambda.read()") 
                   self.profile['energy']          = f.root.energy.read() 
                   self.profile['lambda_tp']       = f.root.lambda_tp.read() 
-                  self.profile['kt_rho']          = f.root.kt_rho.read() 
-                  self.profile['rho_s']           = f.root.rho_s.read() 
-                  self.profile['z']               = f.root.z.read() 
+                  self.profile['kt_rho']          = f.root.krho_collect.read() 
+                  self.profile['rho_s']           = f.root.rhos_norm.read() 
+                  self.profile['z']               = f.root.zcharge.read() 
                   self.profile['n_fine']          = f.root.n_fine.read() 
                   self.profile['n_moment']        = f.root.n_moment.read() 
                   if self.profile['n_theta_plot'] == 1:
@@ -278,6 +278,7 @@ class GYROData:
                   f.close()
 
               except:
+                  print "ERROR (GYROData): Problem reading file "+h5file
                   print "ERROR (GYROData): Problem reading file "+h5file
         except:
             print "Problem importing h5 file"
@@ -384,23 +385,25 @@ class GYROData:
         
         import sys, os
         import numpy as np
+        import tables
 
         h5file=self.dirname+'/out.gyro.initdata.h5'
         ascfile=self.dirname+'/out.gyro.t'
         if os.path.exists(h5file):
             try:
+                import tables
                 f=tables.openFile(h5file,'r')
-                self.geometry['v']       = f.root.v.read() 
+                self.geometry['v']       = f.root.nu.read() 
                 self.geometry['gsin']    = f.root.gsin.read() 
                 self.geometry['gcos1']   = f.root.gcos1.read() 
                 self.geometry['gcos2']   = f.root.gcos2.read() 
                 self.geometry['usin']    = f.root.usin.read() 
                 self.geometry['ucos']    = f.root.ucos.read() 
-                self.geometry['B']       = f.root.B.read() 
-                self.geometry['G_theta'] = f.root.G_theta.read() 
+                self.geometry['B']       = f.root.b.read() 
+                self.geometry['G_theta'] = f.root.g_theta.read() 
                 self.geometry['grad_r']  = f.root.grad_r.read() 
-                self.geometry['G_q']     = f.root.G_q.read() 
-                self.geometry['THETA']   = f.root.THETA.read() 
+                self.geometry['G_q']     = f.root.gq.read() 
+                self.geometry['THETA']   = f.root.captheta.read() 
                 f.close()
             except:
                 print "ERROR (GYROData): Problem reading file "+h5file
@@ -445,6 +448,7 @@ class GYROData:
         ascfile=self.dirname+'/out.gyro.gbflux_i'
         if os.path.exists(h5file):
             try:
+                import tables
                 f=tables.openFile(h5file,'r')
                 self.gbflux_i = f.root.gbflux_i.read()
                 f.close()
@@ -486,6 +490,7 @@ class GYROData:
         ascfile=self.dirname+'/out.gyro.gbflux_n'
         if os.path.exists(h5file):
             try:
+                import tables
                 f=tables.openFile(h5file,'r')
                 self.gbflux_i = f.root.gbflux_n.read()
                 f.close()
@@ -554,6 +559,7 @@ class GYROData:
         ascfile=self.dirname+'/out.gyro.moment_u'
         if os.path.exists(h5file):
             try:
+                import tables
                 f=tables.openFile(h5file,'r')
                 self.moment_u = f.root.moment_uread()
                 f.close()
@@ -599,6 +605,7 @@ class GYROData:
         ascfile=self.dirname+'/out.gyro.moment_n'
         if os.path.exists(h5file):
             try:
+                import tables
                 f=tables.openFile(h5file,'r')
                 self.moment_n = f.root.moment_n.read()
                 f.close()
@@ -644,6 +651,7 @@ class GYROData:
         ascfile=self.dirname+'/out.gyro.moment_e'
         if os.path.exists(h5file):
             try:
+                import tables
                 f=tables.openFile(h5file,'r')
                 self.moment_e = f.root.moment_e.read()
                 f.close()
@@ -689,6 +697,7 @@ class GYROData:
         ascfile=self.dirname+'/out.gyro.moment_v'
         if os.path.exists(h5file):
             try:
+                import tables
                 f=tables.openFile(h5file,'r')
                 self.moment_v = f.root.moment_v.read()
                 f.close()
@@ -733,8 +742,9 @@ class GYROData:
         ascfile=self.dirname+'/out.gyro.gbflux_n'
         if os.path.exists(h5file):
             try:
+                import tables
                 f=tables.openFile(h5file,'r')
-                self.moment_zero = f.root.moment_zero.read()
+                self.moment_zero = f.root.moments_zero.read()
                 f.close()
             except:
                 print "ERROR (GYROData): Problem opening file "+h5file
@@ -773,6 +783,7 @@ class GYROData:
         ascfile=self.dirname+'/out.gyro.flux_velocity'
         if os.path.exists(h5file):
             try:
+                import tables
                 f=tables.openFile(h5file,'r')
                 self.flux_velocity = f.root.flux_velocity.read()
                 f.close()
@@ -808,6 +819,7 @@ class GYROData:
         ascfile=self.dirname+'/out.gyro.gbflux_n'
         if os.path.exists(h5file):
             try:
+                import tables
                 f=tables.openFile(h5file,'r')
                 self.k_perp_squared = f.root.k_perp_squared.read()
                 f.close()
@@ -845,6 +857,7 @@ class GYROData:
         h5file=self.dirname+'/out.gyro.timedata.h5'
         if os.path.exists(h5file):
             try:
+                import tables
                 f=tables.openFile(h5file,'r')
                 #INSERT
                 f.close()
