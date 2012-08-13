@@ -1,23 +1,3 @@
-FUNCTION integrate_tgyro_z, prof0, z, rmin, rmin_exp
-
-  n_exp = N_ELEMENTS(rmin_exp)
-  z_exp = INTERPOL(z, rmin, rmin_exp)
-  prof_exp = FLTARR(n_exp)
-  ir_max = MAX(WHERE(rmin_exp LE MAX(rmin)))
-
-  FOR ir = 1, ir_max DO $
-           prof_exp[ir] = INT_TABULATED(rmin_exp[0:ir],z_exp[0:ir])
-  prof_exp = prof0*EXP(-prof_exp)
-
-;  FOR ir = 0, ir_max-1 DO $
-;           prof_exp[ir] = INT_TABULATED(rmin_exp[ir:ir_max],z_exp[ir:ir_max])
-;  prof_exp = prof0*EXP(prof_exp)
-
-  prof_exp[ir_max+1:n_exp-1] = 0.
-
-  RETURN, prof_exp  
-END ;integrate_tgyro_z
-
 PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks,$
   WCM2 = wcm2, DATA2 = data2, Nit2=N_it2, PS = ps, SUMMARY=summary, $
   PLOT_GRADIENTS=plot_gradients, PLOT_ROT=plot_rot, $
