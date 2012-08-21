@@ -1,13 +1,12 @@
 !------------------------------------------------------------
-! prgen_map_iterdb.f90
+! prgen_map_ufile.f90
 !
 ! PURPOSE:
-!  Map native iterdb data onto input.profiles standard.  
+!  Map UFILE data onto input.profiles standard.  
 !  
 ! NOTES:
-!  - This routine is common to both text and NetCDF formats.
-!  - See map_plasmastate.f90 for analogous routine for 
-!    plasmastate data.
+!  - See UFILE documentation at
+!    http://tokamak-profiledb.ccfe.ac.uk/DOCS/PR08MAN/pdbman.html
 !------------------------------------------------------------
 
 subroutine prgen_map_ufile
@@ -15,8 +14,33 @@ subroutine prgen_map_ufile
   use prgen_globals
 
   implicit none
+  real, dimension(:), allocatable :: powd_i
+  real, dimension(:), allocatable :: powd_e
 
   integer :: i
+
+
+  allocate(powd_i(nx))
+  allocate(powd_e(nx))
+
+  powd_i(:) = ufile_qnbii(:) &
+       +ufile_qicrhi(:) &
+       +ufile_qei(:) &
+       +ufile_qechi(:) &
+       -ufile_qwalli(:)
+
+  powd_e(:) = ufile_qnbie(:) &
+       +ufile_qicrhe(:) &
+       -ufile_qei(:) &
+       +ufile_qrad(:) &
+       +ufile_qeche(:) &
+       +ufile_qohm(:) &
+       -ufile_qwalle(:) 
+
+  ! Convert W to MW (1e-6):
+  call ufile_volint(rho,1e-6*powd_i,pow_i,ufile_volume,nx)
+  call ufile_volint(rho,1e-6*powd_e,pow_e,ufile_volume,nx)
+  call ufile_volint(rho,1e-6*ufile_qei,pow_ei_exp,ufile_volume,nx)
 
   !---------------------------------------------------------
   ! Map profile data onto single array:
@@ -34,9 +58,9 @@ subroutine prgen_map_ufile
   vec(8,:)  = ufile_ne(:)*1e-19
   vec(9,:)  = ufile_zeff(:)
   vec(11,:) = 0.0
-  vec(12,:) = 0.0
-  vec(13,:) = 0.0
-  vec(14,:) = 0.0
+  vec(12,:) = pow_e(:)
+  vec(13,:) = pow_i(:)
+  vec(14,:) = pow_ei_exp(:)
   vec(15,:) = 0.0
   vec(16,:) = 0.0
   vec(17,:) = 0.0
@@ -55,12 +79,12 @@ subroutine prgen_map_ufile
   vec(36,:) = ufile_ti(:)
   if (ufile_nion > 1) vec(37,:) = ufile_ti(:)
   if (ufile_nion > 2) vec(38,:) = ufile_ti(:)
-  
+
   ! Beam ions: one only
   !do i=1,ufile_ibion
-     ! ni
+  ! ni
   !   vec(31+i+ufile_nion-1,:) = ufile_enbeam(:)*1e-19
-     ! Ti: T[keV] = (p/n)[J]/1.6022e-16[J/eV]
+  ! Ti: T[keV] = (p/n)[J]/1.6022e-16[J/eV]
   !   vec(36+i+ufile_nion-1,:) = ufile_pfast(:)/ufile_enbeam(:)/1.6022e-16
   !enddo
 
@@ -84,3 +108,24 @@ subroutine prgen_map_ufile
   vec(36:40,:) = 0.0
 
 end subroutine prgen_map_ufile
+
+subroutine ufile_volint(x,f,fi,v,n)
+
+  implicit none 
+
+  integer, intent(in) :: n 
+  real, intent(in) :: x(n),f(n),v(n)
+  real, intent(inout) :: fi(n)
+  real, dimension(n) :: vp
+  integer :: i
+
+  ! dv/dx
+  call bound_deriv(vp,v,x,n)
+
+  fi(1) = 0.0
+  do i=2,n
+     fi(i) = fi(i-1)+0.5*(vp(i-1)*f(i-1)+vp(i)*f(i))*(x(i)-x(i-1))
+  enddo
+
+end subroutine ufile_volint
+

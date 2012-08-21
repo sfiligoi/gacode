@@ -14,11 +14,18 @@
 !  - Unstable modes have w_i > 0
 !------------------------------------------------------
 
-subroutine gyro_write_freq(datafile,io)
+#ifndef HAVE_HDF5
+  subroutine gyro_write_freq(datafile,io)
+#else
+  subroutine gyro_write_freq(datafile,io,dumpTGid,h5in,h5err)
+#endif
 
   use mpi
   use gyro_globals
   use math_constants
+#ifdef HAVE_HDF5
+  use hdf5_api
+#endif
 
   !--------------------------------------------------
   implicit none 
@@ -37,6 +44,14 @@ subroutine gyro_write_freq(datafile,io)
   !  
   integer, intent(in) :: io  
   character (len=*), intent(in) :: datafile
+
+#ifdef HAVE_HDF5
+  integer(HID_T)        :: dumpTGid
+  type(hdf5InOpts)      :: h5in
+  type(hdf5ErrorType)   :: h5err 
+#endif
+
+
   !--------------------------------------------------
 
   select case (io_control)
@@ -114,18 +129,40 @@ subroutine gyro_write_freq(datafile,io)
      !
      !---------------------------------------------------------------
 
-     if (i_proc == 0) then
-        open(unit=io,file=datafile,status='old',position='append')
-     endif
-
      call collect_complex(freq,omega_linear,2)
 
-     if (i_proc == 0 .and. output_flag == 1) then
-        ! Output to file
-        do in=1,n_n
-           write(io,20) omega_linear(in,:)
-        enddo ! in
-     endif
+! I/O output
+     if(io_method < 3) then 
+       if (i_proc == 0) then
+        open(unit=io,file=datafile,status='old',position='append')
+          if (output_flag == 1) then
+          ! Output to file
+            do in=1,n_n
+             write(io,20) omega_linear(in,:)
+            enddo ! in
+            close(io)
+          endif !output_flag
+        endif !i_proc
+      endif !io_method
+
+#ifndef HAVE_HDF5
+    if(io_method > 1) then
+       if (i_proc == 0) then
+        write(*,*) "This gyro was not built with HDF5, please use IO_METHOD=1."
+        !**need the exit call here
+       endif
+    endif
+#else
+    if(io_method >1 ) then
+      if (i_proc == 0 ) then
+       call add_h5(dumpTGid,'omega_linear_real',REAL(omega_linear),h5in,data_step,h5err) 
+       call add_h5(dumpTGid,'omega_linear_imag',AIMAG(omega_linear),h5in,data_step,h5err) 
+      endif
+    endif
+#endif
+    
+      
+
 
      ! Convergence check for single-n simulation:
      ! Halt will occur in gyro_fulladvance
@@ -143,10 +180,7 @@ subroutine gyro_write_freq(datafile,io)
 
      endif
 
-     if (i_proc == 0 .and. output_flag == 1) then
-        close(io)
-     endif
-
+  
   case(3)
 
      ! Reposition after restart

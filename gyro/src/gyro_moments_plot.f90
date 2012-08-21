@@ -208,8 +208,7 @@ subroutine gyro_moments_plot
           w_time(alltime_index+1)*mom_tmp(:,:,:)
      if (io_method > 1 .and. time_skip_wedge > 0) then
         moments_plot_wedge(:,:,is,:) = moments_plot_wedge(:,:,is,:)+&
-             w_time(alltime_index+1)*mom_tmp_wedge(:,:,:)
-
+             w_time_wedge(alltime_index+1)*mom_tmp_wedge(:,:,:)
      endif
      !----------------------------------------------------------------
 

@@ -11,9 +11,14 @@
 import sys
 import numpy as np
 
-def extractcom(infile):
+def extractcom(infile,t0):
 
-    print 'Extracting shot comments'
+    # Write the following strings:
+    # <file rootname>
+    # <tokamak>
+    # <shot/pulse number>
+    # <time>
+
     f=open('out.com','w')
     f.write(infile.split('_com')[0]+'\n')
 
@@ -21,9 +26,9 @@ def extractcom(infile):
     pulse = ''
 
     for line in open(infile,'r').readlines():
-        if line.count("Tokamak") == 1:
+        if line.count("Tokamak:") == 1:
             tok=line.split(":")[1].strip()
-        if line.count("Run number") == 1:
+        if line.count("Run number:") == 1:
             run=line.split(":")[1].strip()
         if line.count("Pulse") == 1:
             pulse=line.split(":")[1].strip()
@@ -34,6 +39,8 @@ def extractcom(infile):
     else:
         f.write(run+'\n')
 
+    # Also write the time 
+    f.write(t0+'\n')
     f.close()
 
 
@@ -52,7 +59,7 @@ def extract1d(infile,t0):
                 # Write the averaged data for current profile (var)
                 np.savetxt('out.'+var+'.ave',yave,fmt='%1.6e')
             else:
-                print str(vt[0])+' <= t <= '+str(vt[-1])
+                print 'INFO: (ufile_tool) Time window: '+'t=['+str(vt[0])+','+str(vt[-1])+']'
                 return
 
         if data_region == 0:
@@ -106,7 +113,7 @@ def extract2d(infile,t0):
                     # Write the averaged data for current profile (var)
                     np.savetxt('out.'+var+'.ave',np.transpose((vx,yave)),fmt='%1.6e')
             else:
-                print str(vt[0])+' <= t <= '+str(vt[-1])
+                print 'INFO: (ufile_tool) Time window: '+'t=['+str(vt[0])+','+str(vt[-1])+']'
                 return
 
         if data_region == 0:
@@ -159,31 +166,42 @@ def extract2d(infile,t0):
                     vy[iy]=float(line[1+13*i:1+13*i+13])
                     iy = iy+1
 
-#--------------------------------------------
+#----------------------------------------------------------------------------
 # Manage input parameters
 
 # <datafile>
 try:
     infile=sys.argv[1]
+    infileval='0'
+    if infile.split("_")[-1]=='1d.dat':
+        infileval='1'
+    if infile.split("_")[-1]=='2d.dat':
+        infileval='2'
 except:
     print 'Usage: python split.py <datafile> <time>'
     sys.exit()
 
 if infile.split("_")[-1]=='com.dat':
-    extractcom(infile)
+    extractcom(infile,sys.argv[2])
     sys.exit()
 
 # <time> Time-point for desired radial output
 try:
     t0=float(sys.argv[2])
 except:
+    # GENERATE DIAGNOSTICS IF NO TIME SPECIFIED
+    varlist = []
     t0 = -1.0
-    # Print list of included profiles (tags)
+    # Generate list of included profiles (tags)
     for line in open(infile,'r').readlines():
         if line.count("-DEP") == 1:
             # Extract current variable name
             var=line.split('  ')[0].strip()
-            print var
+            varlist.append(var)
+    # Print list of included profiles (tags) in blocks of 10
+    print 'INFO: (ufile_tool) '+infileval+'D tags ->'
+    for i in np.arange(start=0,stop=len(varlist),step=10):
+        print '       '+' '.join(varlist[i:i+10])
 
 if infile.split("_")[-1]=='1d.dat':
     extract1d(infile,t0)

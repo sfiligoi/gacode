@@ -530,11 +530,11 @@ subroutine gyro_fieldeigen
   call gyro_field_time_derivative
   call gyro_field_plot
   call gyro_moments_plot
-  if (io_method == 1) then 
+  !if (io_method == 1) then 
      call gyro_write_timedata
-  else
-     call gyro_write_timedata_hdf5
-  endif
+  !else
+  !   call gyro_write_timedata_hdf5
+  !endif
   step = 1
   call gyro_write_precision(10,abs(omega_eigen))
   !-------------------------------------------------------------------

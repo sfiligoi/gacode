@@ -5,7 +5,7 @@
 !  Distribution function output for all kinetic species.
 !-----------------------------------------------------
 
-subroutine gyro_write_h(datafile1,datafile2,io1,io2)
+  subroutine gyro_write_h(datafile1,datafile2,io1,io2)
 
   use gyro_globals
   use gyro_pointers
@@ -17,6 +17,9 @@ subroutine gyro_write_h(datafile1,datafile2,io1,io2)
   character (len=*), intent(in) :: datafile1
   integer, intent(in) :: io2
   character (len=*), intent(in) :: datafile2
+
+
+
   !---------------------------------------------------
 
   select case (io_control)

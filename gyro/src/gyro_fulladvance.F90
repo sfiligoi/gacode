@@ -12,7 +12,7 @@ subroutine gyro_fulladvance
 
   !----------------------------------------
   implicit none
-  integer :: h5_control
+!  integer :: h5_control
   !----------------------------------------
 
   h_old(:,:,:,:) = h(:,:,:,:)
@@ -89,7 +89,6 @@ subroutine gyro_fulladvance
   !    selected OUTPUT_METHOD > 1.
   !
   call gyro_moments_plot 
-  !if (io_method > 1 .and. time_skip_wedge > 0) call gyro_moments_plot_wedge
   !
   ! 4. Compute (phi,a) at r=r0 for plotting (if user 
   !    has selected FIELD_RO_FLAG=1).
@@ -115,21 +114,18 @@ subroutine gyro_fulladvance
   !-------------------------------------------------------------------
   ! MANAGE data output: 
   !
-  if (time_skip_wedge > 0) then
-     if (modulo(step,time_skip_wedge) == 0 .and. io_method > 1) then
-        call gyro_write_timedata_wedge_hdf5
-     endif
-  endif
 
   call gyro_timer_out('Diagnos.-allstep')
   call gyro_timer_in('Diagnos.-datastep')
 
-  if (modulo(step,time_skip) == 0) then
+  mod_time_skip: if ((time_skip > 0 .and. modulo(step,time_skip) == 0) &
+     .or. (time_skip_wedge > 0 .and. modulo(step,time_skip_wedge) == 0) ) then
 
 
      ! Counter for number of data output events.
-
-     data_step = data_step+1
+     if (time_skip > 0 .and. modulo(step,time_skip) == 0) then
+        data_step = data_step+1
+     endif
 
      !------------------------------------------------
      ! Compute nonlinear transfer and turbulent energy 
@@ -151,10 +147,20 @@ subroutine gyro_fulladvance
      ! Main data I/O handler
 
      io_control = 2*output_flag
-     h5_control = 2*output_flag
+     !h5_control = 2*output_flag
+     
+        
+      if (time_skip > 0 .and. modulo(step,time_skip) == 0) then
+         if (io_method < 3 .and. io_method > 0) call gyro_write_timedata
+      endif
 
-     if (io_method < 3 .and. io_method > 0) call gyro_write_timedata
-     if (io_method > 1) call gyro_write_timedata_hdf5(h5_control)
+#ifdef HAVE_HDF5
+      if(time_skip_wedge > 0 .and. modulo(step,time_skip_wedge) == 0) then
+        if (io_method > 1) call gyro_write_timedata_wedge_hdf5
+      endif
+#endif      
+
+
 
      !--------------------------------------------------
      ! Update diffusivity and flux time-record for TGYRO 
@@ -170,7 +176,7 @@ subroutine gyro_fulladvance
      endif
 
 
-  endif ! modulo(step,time_skip) test
+  endif mod_time_skip
 
   call gyro_timer_out('Diagnos.-datastep')
   !-------------------------------------------------------------------

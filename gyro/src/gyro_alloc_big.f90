@@ -138,6 +138,7 @@ subroutine gyro_alloc_big(flag)
 
      allocate(time_error(n_kinetic))
      allocate(w_time(time_skip))
+     allocate(w_time_wedge(time_skip_wedge))
      allocate(omega_linear(n_n,2))
 
      !------------------------------------------------------------

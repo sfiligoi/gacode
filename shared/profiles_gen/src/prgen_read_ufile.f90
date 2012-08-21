@@ -30,6 +30,7 @@ subroutine prgen_read_ufile
   read(1,*) raw_data_file
   read(1,*) ufile_tok
   read(1,*) ufile_shot
+  read(1,*) ufile_time
   close(1)
 
   nx = ufile_nx
@@ -57,6 +58,18 @@ subroutine prgen_read_ufile
   call ufile_mapper('out.DELTAR.ave',rho,delta,nx,0)
   call ufile_mapper('out.PRES.ave',rho,ufile_pres,nx,1)
   call ufile_mapper('out.VROT.ave',rho,ufile_vrot,nx,1)
+  call ufile_mapper('out.VOLUME.ave',rho,ufile_volume,nx,1)
+  call ufile_mapper('out.QNBII.ave',rho,ufile_qnbii,nx,0)
+  call ufile_mapper('out.QNBIE.ave',rho,ufile_qnbie,nx,0)
+  call ufile_mapper('out.QICRHI.ave',rho,ufile_qicrhi,nx,0)
+  call ufile_mapper('out.QICRHE.ave',rho,ufile_qicrhe,nx,0)
+  call ufile_mapper('out.QEI.ave',rho,ufile_qei,nx,0)
+  call ufile_mapper('out.QRAD.ave',rho,ufile_qrad,nx,0)
+  call ufile_mapper('out.QECHE.ave',rho,ufile_qeche,nx,0)
+  call ufile_mapper('out.QECHI.ave',rho,ufile_qechi,nx,0)
+  call ufile_mapper('out.QOHM.ave',rho,ufile_qohm,nx,0)
+  call ufile_mapper('out.QWALLI.ave',rho,ufile_qwalli,nx,0)
+  call ufile_mapper('out.QWALLE.ave',rho,ufile_qwalle,nx,0)
 
   call ufile_mapper('out.NM1.ave',rho,ufile_nm1,nx,1)
   ufile_nion=1
@@ -82,6 +95,11 @@ subroutine prgen_read_ufile
   !------------------------------------------------------------------------
 
 end subroutine prgen_read_ufile
+
+
+!---------------------------------------------------------------------
+! Routine to read split 2D UFILE data.
+!---------------------------------------------------------------------
 
 subroutine ufile_mapper(file,x,y,nx,neg_protect)
 
@@ -144,6 +162,13 @@ subroutine ufile_mapper(file,x,y,nx,neg_protect)
   deallocate(y0)
 
 end subroutine ufile_mapper
+
+
+!---------------------------------------------------------------------
+! Routine, based on math/bound_extrap.f90, to use extrapolation based
+! on an inferred scale length at the right end of the data.  This is 
+! appropriate for profiles (n,T for example) that must remain positive.
+!---------------------------------------------------------------------
 
 subroutine bound_exp(fa,fb,f,r,n)
 

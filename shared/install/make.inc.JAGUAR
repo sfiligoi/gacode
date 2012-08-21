@@ -21,10 +21,10 @@ NUMAS_PER_NODE=2
 # Compilers and flags
 
 # Fortran 90/95 compiler
-FC  = ftn -module $(GACODE_ROOT)/modules
+FC  = ftn -module $(GACODE_ROOT)/modules 
 
 # Fortran 77 compiler
-F77 = ftn
+F77 = ftn  
 
 # Compiler options/flags
 FMATH  = -r8
@@ -32,22 +32,24 @@ FOPT   = -fast -Mcache_align -Msmartalloc
 FDEBUG = -Ktrap=fp -Mbounds -Minform=inform -Msmartalloc
 FOMP   = -mp=nonuma
 FNOMP  =
+FACC   = -ta=nvidia
+FHDF5 = -DHAVE_HDF5
 
 #FFTW and MUMPS
-LMATH = -ldrfftw -ldfftw
+#LMATH = -ldrfftw -ldfftw
+LMATH = ${FFTW_DIR}/libdrfftw.a ${FFTW_DIR}/libdfftw.a
 
 #Parallel NETCDF and HDF5
 NETCDF = ${NETCDF_DIR}/lib/libnetcdff.a ${NETCDF_DIR}/lib/libnetcdf.a
 NETCDF_INC = ${NETCDF_DIR}/include
 
+HDF5_FLAGS = -D__MPI
 HDF5_INC = -I${HDF5_DIR}/include
 HDF5_LIBS = \
   ${HDF5_DIR}/lib/libhdf5_hl.a \
   ${HDF5_DIR}/lib/libhdf5hl_fortran.a \
   ${HDF5_DIR}/lib/libhdf5_fortran.a \
   ${HDF5_DIR}/lib/libhdf5.a
-
-VSHDF5_MAKECMD=vshdf5
 
 # Archive
 ARCH = ar cr

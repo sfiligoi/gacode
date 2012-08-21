@@ -20,7 +20,7 @@
 
 subroutine Dep_kernel
 
-    use from_tglf_to_Dep     !krho(n), omega_tglf(n,nb)
+    use Dep_from_tglf        !krho(n), omega_tglf(n,nb)
                              !chi_i_tglf_wt(n,nb), chi_i_tglf
                              !r_hat,rmaj_hat,q_saf, Ti_hat, aoLT_i, aoLn_i
 
@@ -30,7 +30,7 @@ subroutine Dep_kernel
                              !D_EP_starOchi_i_kernal(ie,k,isig,n,nb)
                              !A_EP(ie,k,isig,n)
 
-    use from_nubeam_to_Dep   !T_EP_hat, aoLf_EP
+    use Dep_from_nubeam      !T_EP_hat, aoLf_EP
                              
 !
   implicit none
@@ -65,6 +65,8 @@ subroutine Dep_kernel
     complex :: xi
 
     real, external :: BESJ0
+ 
+!!!    print *, 'Dep_kernel start'
 
     pi = 3.14159265
     xi = (0.,1.0)
@@ -77,6 +79,8 @@ subroutine Dep_kernel
 
 
     aoLn_EP =1.  !default
+
+    if(abs(aoLf_EP(1,1,1)) .lt. 0.0000001) aoLf_EP(:,:,:) = aoLn_EP
 
 
     omega_d_fit = 1.0  ! to be adjusted
@@ -105,7 +109,10 @@ subroutine Dep_kernel
 !                            does depend on n via k_par/krho part of omega_db
 !   which means the A_EP d/de parts must be convolved with chi_i_tglf_wt 
 
-   D_EP_starOchi_i_kernal_den=0.0
+   D_EP_starOchi_i_kernal_den(:,:)=0.0
+
+!!!   print *, 'Dep_kernel loop start'
+!!!   print *, 'n, nb, ie, k, isig'
 
     do n=1,n_max
      do nb=1,nb_max
@@ -113,6 +120,7 @@ subroutine Dep_kernel
       do ie=1,ie_max
        do k=1,k_max
         do isig=1,2
+!!!     print *, n,nb,ie,k,isig
          
 
      krho_i = krho(n)*sqrt(Ti_hat)*sqrt(2.*e_hat(ie)*lambda(k))
@@ -123,9 +131,9 @@ subroutine Dep_kernel
      !!!call CALJY0(krho_EP,j0_EP,0)
      j0_EP = BESJ0(krho_EP)
    
-     !test print
-     !     print *, ie,k,isig,krho_i,krho_EP,j0_i,j0_EP
-     !test print
+!!!     !test print
+!!!     !     print *, ie,k,isig,krho_i,krho_EP,j0_i,j0_EP
+!!!     !test print
 
      omega_star_i(ie) = krho(n)*(aoLn_i + aoLT_i*(e_hat(ie)-1.5))
 
@@ -137,23 +145,40 @@ subroutine Dep_kernel
               (e_hat(ie)*(1.-lambda(k))+1./2.*e_hat(ie)*lambda(k)) &
           +k_par(k)*Mysign(isig)*mu_EP*sqrt(T_EP_hat)*sqrt(2.*e_hat(ie)*(1.0-lambda(k)))
 
+!!!     !test print
+!!!     print *, krho(n)
+!!!     print *, e_hat(ie)
+!!!     print *, lambda(k)
+!!!     print *, k_par(k)
+!!!     print *, Mysign(isig)
+
+!!!     print *, omega_star_i(ie), omega_db_i(ie,k,isig,n),omega_db_EP(ie,k,isig,n)
+!!!     print *, j0_i,j0_EP
+!!!     print *, omega_tglf(n,nb)
+     
+
 ! EP numerator
 !-----------------------------------------------------------------------------
     D_EP_starOchi_i_kernal(ie,k,isig,n,nb) = e_wts(ie)*lambda_wts(k)/Fmax(ie)* &
                 j0_EP**2*Real(xi*krho(n)/ &
                 (omega_tglf(n,nb)+omega_db_EP(ie,k,isig,n)))
+!!!    print *, D_EP_starOchi_i_kernal(ie,k,isig,n,nb)
 !1/Fmax  since the v-space wts have a Maxwellian factor built-in & must remove
 !
 !
 !    energy derivative off diagonal
 !-----------------------------------------------------------------------------
 !     aoLf_EP(ie,k,isig) = -d(ln f_Ep(ie,k,isig))/dr_hat
+!!!     print *, Z_EP, T_EP_hat,aoLn_EP
+!!!     print *, aoLf_EP(ie,k,isig)
+!!!     print *, A_EP(ie,k,isig,n)
 
-     if(aoLf_EP(ie,k,isig) .eq. 0.)  aoLf_EP(ie,k,isig) = aoLn_EP
+!!!     print *, aoLf_EP(ie,k,isig)
 
        A_EP(ie,k,isig,n)=Z_EP/T_EP_hat*(omega_db_EP(ie,k,isig,n)/krho(n))/ &
                 aoLf_EP(ie,k,isig)
 !-----------------------------------------------------------------------------
+!!!     print *, A_EP(ie,k,isig,n)
 
     
 
@@ -165,9 +190,13 @@ subroutine Dep_kernel
                 (omega_tglf(n,nb)+omega_db_i(ie,k,isig,n))/ &
                                                            aoLT_i)
 
-     D_EP_starOchi_i_kernal_den = D_EP_starOchi_i_kernal_den + D_chi_i_den_part(ie,k,isig,n,nb)
+     D_EP_starOchi_i_kernal_den(n,nb) = D_EP_starOchi_i_kernal_den(n,nb) + &
+                                             D_chi_i_den_part(ie,k,isig,n,nb)
 !  D_EP_starOchi_i_kernal_den = chi_i(n,nb)  GYRO defined
 !-----------------------------------------------------------------------------
+!!!     print *, D_chi_i_den_part(ie,k,isig,n,nb)
+!!!     print *, D_EP_starOchi_i_kernal_den
+!!!     print *, 'end loop inside'
 
         enddo ! isig
        enddo ! k
@@ -176,34 +205,68 @@ subroutine Dep_kernel
 
      enddo !nb
     enddo !n
+!!!    print *, 'Dep_kernel loop end'
     
 ! divide numerator by denominator
 !-----------------------------------------------------------------------------        
 
-   print *, 'D_EP_starOchi_i_kernal_den=',D_EP_starOchi_i_kernal_den
 
-   D_EP_starOchi_i_kernal(:,:,:,:,:) = D_EP_starOchi_i_kernal(:,:,:,:,:)/ &
-                                             D_EP_starOchi_i_kernal_den 
+  print *, 'chi_i_denominator'
+   do nb=1,nb_max
+    do n=1,n_max
+     print *,n,nb, ' chi_i_denominator=',D_EP_starOchi_i_kernal_den(n,nb)
+    enddo
+   enddo
 
-   do n = 1,n_max
-    do nb = 1,nb_max
+  print *, 'end check chi_i_denominator(n,nb)'
+   
+  !divide by chi_i_denominator(n.nb)
+
+  do n=1,n_max
+   do nb=1,nb_max
+    do ie=1,ie_max
      do k=1,k_max
-  if(k .eq. 3 .or. k .eq. 6) then
+      do isig=1,2
+    if(D_EP_starOchi_i_kernal_den(n,nb) .ne. 0.) then 
+     D_EP_starOchi_i_kernal(ie,k,isig,n,nb) = D_EP_starOchi_i_kernal(ie,k,isig,n,nb)/ &
+                                             D_EP_starOchi_i_kernal_den(n,nb) 
+    endif
+      enddo
+     enddo
+    enddo
+   enddo
+  enddo
+
+  print *, 'main result'
+    print *, '----------------------------------------------------------------'
+   do nb = 1,nb_max
+    if(nb .eq. 1) print *, 'dominant mode'
+    if(nb .eq. 2) print *, 'sub dominant mode'
+    do n = 1,n_max
+    print *, '----------------------------------------------------------------'
+    print *, n, nb, '  krho=',krho(n)
+    print *, '----------------------------------------------------------------'
+
+
+     do k=1,k_max
+  if(k .eq. 3 .or. k .eq. 6) then   !print only 1 pass and 1 trap sample
       print *, '----------------------------------------------------------------'
-    print *, ' lambda=',lambda(k)
+     print *, ' lambda=',lambda(k)
+     if(k .eq. 3)  print *, 'sample passing'
+     if(k .eq. 6)  print *, 'sample trapped'
       do ie = 1,ie_max
       print *, '----------------------------------------------------------------'
        do isig = 1,2
       print *, 'e_hat=',e_hat(ie),' sign=',Mysign(isig)
 
       print *, 'D_EP_star=',D_EP_starOchi_i_kernal(ie,k,isig,n,nb), ' A_EP=',A_EP(ie,k,isig,n)
-      print *, 'D_chi_i_den_part=',D_chi_i_den_part(ie,k,isig,n,nb)
        enddo ! isig
       enddo ! ie
    endif
      enddo !k
-    enddo !nb
-   enddo !n
+    enddo !n
+   enddo !nb
+
 
   print *, 'Dep_kernel Done'
 

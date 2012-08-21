@@ -31,6 +31,7 @@ FOPT   = -fast -Mipa=safe
 FDEBUG = -Ktrap=fp -Mbounds -Minfo=all 
 FOMP   = -mp=nonuma
 FNOMP  = 
+FHDF5 = -DHAVE_HDF5
 
 # System math libraries
 
@@ -38,9 +39,8 @@ LMATH = -L${FFTW_DIR} -ldrfftw -L${FFTW_DIR} -ldfftw \
         -L${SLEPC_LIB}
 
 # OPTIONAL: netCDF (for gyro2gkv)
-# CRAY_NETCDF_DIR is /opt/cray/netcdf/4.1.1.0  (Jan 21, 2011)
-NETCDF = ${CRAY_NETCDF_DIR}/pgi/109/lib/libnetcdf.a
-NETCDF_INC = ${CRAY_NETCDF_DIR}/pgi/109/include
+NETCDF = ${NETCDF_DIR}/lib/libnetcdf.a
+NETCDF_INC = ${NETCDF_DIR}/include
 
 # Archive 
 ARCH = ar cr
@@ -61,8 +61,6 @@ ARCH = ar cr
 
 
 HDF5_INC = -I${HDF5_INCLUDE_OPTS}
-#VSHDF5_MAKECMD=vshdf5
-VSHDF5_ALLLIBS= ../vshdf5/libgyro_vshdf5.a ../../shared/vshdf5/libvshdf5.a $(HDF5LIBS)
-MPI_FLAG=-D__MPI
+HDF5_FLAGS = -D__MPI 
 
 

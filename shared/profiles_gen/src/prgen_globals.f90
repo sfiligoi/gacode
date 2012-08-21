@@ -267,6 +267,7 @@ module prgen_globals
   real :: ufile_arho
   character (len=10) :: ufile_tok
   character (len=40) :: ufile_shot
+  character (len=10) :: ufile_time
   real, dimension(:), allocatable :: ufile_ne
   real, dimension(:), allocatable :: ufile_nm1
   real, dimension(:), allocatable :: ufile_nm2
@@ -276,6 +277,18 @@ module prgen_globals
   real, dimension(:), allocatable :: ufile_zeff
   real, dimension(:), allocatable :: ufile_pres
   real, dimension(:), allocatable :: ufile_vrot
+  real, dimension(:), allocatable :: ufile_volume
+  real, dimension(:), allocatable :: ufile_qnbii
+  real, dimension(:), allocatable :: ufile_qnbie
+  real, dimension(:), allocatable :: ufile_qicrhi
+  real, dimension(:), allocatable :: ufile_qicrhe
+  real, dimension(:), allocatable :: ufile_qei
+  real, dimension(:), allocatable :: ufile_qrad
+  real, dimension(:), allocatable :: ufile_qeche
+  real, dimension(:), allocatable :: ufile_qechi
+  real, dimension(:), allocatable :: ufile_qohm
+  real, dimension(:), allocatable :: ufile_qwalli
+  real, dimension(:), allocatable :: ufile_qwalle
   !---------------------------------------------------------
 
 end module prgen_globals

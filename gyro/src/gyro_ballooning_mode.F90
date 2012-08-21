@@ -7,11 +7,19 @@
 !  together the full ballooning mode f_*(theta_*) from 
 !  these p-harmonics, and then writes to disk.
 !------------------------------------------------------
-
-subroutine gyro_ballooning_mode(datafile,io,index,is_in)
+#ifndef HAVE_HDF5
+  subroutine gyro_ballooning_mode(datafile,io,index,is_in)
+#else
+  subroutine gyro_ballooning_mode(datafile,io,index,is_in, &
+          modeName,dumpTGid,h5in,h5err)
+#endif
 
   use gyro_globals
   use math_constants
+#ifdef HAVE_HDF5
+  use hdf5_api
+#endif
+
 
   !--------------------------------------------------
   implicit none
@@ -28,10 +36,20 @@ subroutine gyro_ballooning_mode(datafile,io,index,is_in)
   integer :: np
   integer :: j_renorm(1)
   integer :: data_loop
+  integer :: ampCount
   !
   complex, dimension(-n_x/2:n_x/2-1,n_theta_plot) :: f_bar
   complex, dimension(n_theta_plot,n_x) :: fplot
+  complex, allocatable                 :: amp(:)
   complex :: dummy
+
+#ifdef HAVE_HDF5
+  character (len=*)         :: modeName
+  integer(HID_T)            :: dumpTGid
+  type(hdf5InOpts)          :: h5in
+  type(hdf5ErrorType)       :: h5err 
+#endif
+
   !--------------------------------------------------
 
   !------------------------------------------------------
@@ -131,6 +149,8 @@ subroutine gyro_ballooning_mode(datafile,io,index,is_in)
      !-------------------------------------------------------
      ! Sew together mode in extended angle and write to file.
      ! 
+     ALLOCATE(amp(m0*np*n_theta_plot))
+     ampCount = 1
      do l0=0,m0-1
         do pp=-np/2,np/2-1
            p = m0*pp+l0
@@ -140,11 +160,26 @@ subroutine gyro_ballooning_mode(datafile,io,index,is_in)
               !
               !   theta_extended = theta_plot(j_int)+2*pi*pp
 
-              write(io,fmtstr2) f_bar(p,j_int)*phase(in_1,ir_norm)**(real(p)/real(m0))
-
+              amp(ampCount) = f_bar(p,j_int)*phase(in_1,ir_norm)**(real(p)/real(m0))
+              !write(io,fmtstr2) f_bar(p,j_int)*phase(in_1,ir_norm)**(real(p)/real(m0))
+    
+              if(io_method <3 ) then
+                write(io,fmtstr2) amp(ampCount)
+              endif
+            ampCount=ampCount+1
            enddo
         enddo
      enddo
+#ifdef HAVE_HDF5
+    if(io_method >1 ) then
+       call add_h5(dumpTGid,TRIM(modeName)//"_real",REAL(amp),h5in,data_step,h5err) 
+      if(h5err%errBool) write(*,*) h5err%errorMsg
+       call add_h5(dumpTGid,TRIM(modeName)//"_imag",AIMAG(amp),h5in,data_step,h5err) 
+       if(h5err%errBool) write(*,*) h5err%errorMsg
+    endif
+#endif
+     DEALLOCATE(amp)
+     
      !-------------------------------------------------------
 
   case(3)
