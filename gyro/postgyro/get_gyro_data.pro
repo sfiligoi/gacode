@@ -1,4 +1,4 @@
-FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
+FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5, N_TIME=n_time
 ;
 ; C. Holland, UCSD
 ; v5.0: 8.25.2011
@@ -27,6 +27,7 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
 ;           HDF5: read data from out.gyro.initdata.h5,
 ;           out.gyro.timedata.h5, rather than ASCII files
 ;
+; N_TIME: hack to limit read data range to [0:n_time]
 
   dirpath  =GETENV('GYRO_DIR') + '/sim/' + simdir
 
@@ -57,8 +58,12 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
       IF (use_hdf5 EQ 1) THEN BEGIN
 	tdata = H5_PARSE(dirpath + '/out.gyro.timedata.h5',/READ_DATA)
 	time = tdata.t_current._data
+
       ENDIF ELSE time = READ_GYRO_TIMEVECTOR(dirpath)
-      n_time = N_ELEMENTS(time)
+;      n_time = N_ELEMENTS(time)
+;HACK
+      IF N_ELEMENTS(n_time) EQ 0 THEN n_time = N_ELEMENTS(time) $
+      ELSE time = time[0:n_time-1]
 
       ;read in potentially large fluctuation field arrays
       DEFAULT, read_large, 0
@@ -159,8 +164,9 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
       ENDIF
 
       ;load HDF5 fluctuations
-      tskip = 200 ;SHOULD GET FROM H5 files in future work
       IF (use_hdf5 EQ 1) THEN BEGIN
+          tskip = profile_data.time_skip
+          PRINT, 'HDF5 time_skip: ', tskip
 
           IF (exists_u) THEN BEGIN
               exists_phi = 1
@@ -189,11 +195,13 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
           FOR it = 0, n_time-1 DO BEGIN
               tlabel = STRCOMPRESS(STRING(it*tskip),/REMOVE_ALL)
               WHILE (STRLEN(tlabel) LT 5) DO tlabel = '0' + tlabel 
-              print, tlabel
               flucfile = 'gyro'+tlabel+'.h5'
-              flucdata = H5_PARSE(dirpath+'/'+flucfile, /READ)
+	      h5filetest = FINDFILE(dirpath+'/'+flucfile,COUNT=count)
+	      IF (count EQ 0) THEN BEGIN
+		  PRINT, "Can't find " + flucfile + ', ending HDF5 fluctuation load'
+	      ENDIF ELSE flucdata = H5_PARSE(dirpath+'/'+flucfile, /READ)
 
-              IF (exists_u) THEN BEGIN
+              IF ((count EQ 1) AND (exists_u)) THEN BEGIN
                   PRINT, 'Loading HDF5 phi, B fluctuations from ' + flucfile
                   phi[*,*,*,it] = COMPLEX($
                                   TRANSPOSE(flucdata.phi_modes.phi_real._data[*,*,0:n_theta_plot-1],[2,1,0]),$
@@ -212,7 +220,7 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
                   ENDIF
               ENDIF
               
-              IF (exists_n) THEN BEGIN
+              IF ((count EQ 1) AND (exists_n)) THEN BEGIN
                   PRINT, 'Loading HDF5 density fluctuations from ' + flucfile
                   
                   tmp = COMPLEX($
@@ -261,7 +269,7 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
                   ENDIF
               ENDIF ;mom_n
 
-              IF (exists_e) THEN BEGIN
+              IF ((count EQ 1) AND (exists_e)) THEN BEGIN
                   PRINT, 'Loading HDF5 energy fluctuations from ' + flucfile
                   
                   tmp = COMPLEX($
@@ -310,7 +318,7 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
                   ENDIF
               ENDIF ;mom_e
 
-              IF (exists_v) THEN BEGIN
+             IF ((count EQ 1) AND (exists_v)) THEN BEGIN
                   PRINT, 'Loading HDF5 vpar fluctuations from ' + flucfile
                   
                   tmp = COMPLEX($
@@ -425,41 +433,42 @@ FUNCTION get_gyro_data, simdir, READ_LARGE = read_large, HDF5=hdf5
          Sexch_nt = FLTARR(profile_data.n_kinetic,profile_data.n_field,n_n,n_time)         
 
          ;load electrostatic component of fluxes vs. modenumber & time
+;N_TIME cludge in while HDF5 restart fixed
          FOR i_kin = 0, profile_data.n_kinetic-1 DO BEGIN
              i_kin_str = NUMTOSTRING(i_kin)
-             com = 'Gamma_nt['+i_kin_str+',0,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_phi_density._data)'
+             com = 'Gamma_nt['+i_kin_str+',0,*,*] = REFORM(TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_phi_density._data[0:n_time-1,*]))'
              r = EXECUTE(com)
-             com = 'Q_nt['+i_kin_str+',0,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_phi_energy._data)'
+             com = 'Q_nt['+i_kin_str+',0,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_phi_energy._data[0:n_time-1,*])'
              r = EXECUTE(com)
-             com = 'Pi_nt['+i_kin_str+',0,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_phi_momentum._data)'
+             com = 'Pi_nt['+i_kin_str+',0,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_phi_momentum._data[0:n_time-1,*])'
              r = EXECUTE(com)
-             com = 'Sexch_nt['+i_kin_str+',0,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_phi_energyexchange._data)'
+             com = 'Sexch_nt['+i_kin_str+',0,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_phi_energyexchange._data[0:n_time-1,*])'
              r = EXECUTE(com)
          ENDFOR
 
          ;load Apar component of fluxes vs. modenumber & time
          IF (profile_data.n_field GE 2) THEN FOR i_kin = 0, profile_data.n_kinetic-1 DO BEGIN
              i_kin_str = NUMTOSTRING(i_kin)
-             com = 'Gamma_nt['+i_kin_str+',1,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_apar_density._data)'
+             com = 'Gamma_nt['+i_kin_str+',1,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_apar_density._data[0:n_time-1,*])'
              r = EXECUTE(com)
-             com = 'Q_nt['+i_kin_str+',1,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_apar_energy._data)'
+             com = 'Q_nt['+i_kin_str+',1,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_apar_energy._data[0:n_time-1,*])'
              r = EXECUTE(com)
-             com = 'Pi_nt['+i_kin_str+',1,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_apar_momentum._data)'
+             com = 'Pi_nt['+i_kin_str+',1,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_apar_momentum._data[0:n_time-1,*])'
              r = EXECUTE(com)
-             com = 'Sexch_nt['+i_kin_str+',1,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_apar_energyexchange._data)'
+             com = 'Sexch_nt['+i_kin_str+',1,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_apar_energyexchange._data[0:n_time-1,*])'
              r = EXECUTE(com)
          ENDFOR
 
         ;load Bpar component of fluxes vs. modenumber & time
         IF (profile_data.n_field EQ 3) THEN FOR i_kin = 0, profile_data.n_kinetic-1 DO BEGIN
              i_kin_str = NUMTOSTRING(i_kin)
-             com = 'Gamma_nt['+i_kin_str+',2,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_bpar_density._data)'
+             com = 'Gamma_nt['+i_kin_str+',2,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_bpar_density._data[0:n_time-1,*])'
              r = EXECUTE(com)
-             com = 'Q_nt['+i_kin_str+',2,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_bpar_energy._data)'
+             com = 'Q_nt['+i_kin_str+',2,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_bpar_energy._data[0:n_time-1,*])'
              r = EXECUTE(com)
-             com = 'Pi_nt['+i_kin_str+',2,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_bpar_momentum._data)'
+             com = 'Pi_nt['+i_kin_str+',2,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_bpar_momentum._data[0:n_time-1,*])'
              r = EXECUTE(com)
-             com = 'Sexch_nt['+i_kin_str+',2,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_bpar_energyexchange._data)'
+             com = 'Sexch_nt['+i_kin_str+',2,*,*] = TRANSPOSE(tdata.gbflux_n_ion' + i_kin_str + '_bpar_energyexchange._data[0:n_time-1,*])'
              r = EXECUTE(com)
          ENDFOR
 
