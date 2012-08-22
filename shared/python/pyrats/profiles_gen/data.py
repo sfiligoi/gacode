@@ -46,6 +46,8 @@ class profiles_genData:
             row = row+1
             if line[0:5] == 'N_EXP':
                 self.n_exp = int(string.splitfields(line,'=')[1])
+            if line[0:8] == 'ARHO_EXP':
+                self.max_rho = float(line.split('=')[1])
             if line[0:7] == '#rho(-)':
                 break
 
