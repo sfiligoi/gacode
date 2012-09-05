@@ -24,6 +24,10 @@ subroutine tgyro_stab_driver
   real, dimension(0:tgyro_stab_nky-1,n_inst) :: wi_elec
   real, dimension(0:tgyro_stab_nky-1,n_inst) :: wr_ion
   real, dimension(0:tgyro_stab_nky-1,n_inst) :: wr_elec
+  real, dimension(0:tgyro_stab_nky-1,n_inst) :: wi_ion_gather
+  real, dimension(0:tgyro_stab_nky-1,n_inst) :: wi_elec_gather
+  real, dimension(0:tgyro_stab_nky-1,n_inst) :: wr_ion_gather
+  real, dimension(0:tgyro_stab_nky-1,n_inst) :: wr_elec_gather
 
   real :: wi_ion_loc 
   real :: wr_ion_loc 
@@ -44,6 +48,10 @@ subroutine tgyro_stab_driver
   wr_elec(:,:) = 0.0
   wi_ion(:,:)  = 0.0
   wr_ion(:,:)  = 0.0
+  wi_elec_gather(:,:) = 0.0
+  wr_elec_gather(:,:) = 0.0
+  wi_ion_gather(:,:)  = 0.0
+  wr_ion_gather(:,:)  = 0.0
 
   select case (flux_method)
 
@@ -197,7 +205,7 @@ subroutine tgyro_stab_driver
   call MPI_ALLGATHER(wi_elec(:,i_r-1),&
        tgyro_stab_nky,&
        MPI_DOUBLE_PRECISION,&
-       wi_elec,&
+       wi_elec_gather,&
        tgyro_stab_nky,&
        MPI_DOUBLE_PRECISION,&
        gyro_adj,&
@@ -206,7 +214,7 @@ subroutine tgyro_stab_driver
   call MPI_ALLGATHER(wi_ion(:,i_r-1),&
        tgyro_stab_nky,&
        MPI_DOUBLE_PRECISION,&
-       wi_ion,&
+       wi_ion_gather,&
        tgyro_stab_nky,&
        MPI_DOUBLE_PRECISION,&
        gyro_adj,&
@@ -215,7 +223,7 @@ subroutine tgyro_stab_driver
   call MPI_ALLGATHER(wr_elec(:,i_r-1),&
        tgyro_stab_nky,&
        MPI_DOUBLE_PRECISION,&
-       wr_elec,&
+       wr_elec_gather,&
        tgyro_stab_nky,&
        MPI_DOUBLE_PRECISION,&
        gyro_adj,&
@@ -224,7 +232,7 @@ subroutine tgyro_stab_driver
   call MPI_ALLGATHER(wr_ion(:,i_r-1),&
        tgyro_stab_nky,&
        MPI_DOUBLE_PRECISION,&
-       wr_ion,&
+       wr_ion_gather,&
        tgyro_stab_nky,&
        MPI_DOUBLE_PRECISION,&
        gyro_adj,&
@@ -239,7 +247,7 @@ subroutine tgyro_stab_driver
      write(1,'(t10,a)') 'ky rho'
      write(1,20) 'r/a',ky(:)
      do i=1,n_inst
-        write(1,10) r(i+1)/r_min,wi_elec(:,i)
+        write(1,10) r(i+1)/r_min,wi_elec_gather(:,i)
      enddo
 
      close(1)
@@ -249,7 +257,7 @@ subroutine tgyro_stab_driver
      write(1,'(t10,a)') 'ky rho'
      write(1,20) 'r/a',ky(:)
      do i=1,n_inst
-        write(1,10) r(i+1)/r_min,wi_ion(:,i)
+        write(1,10) r(i+1)/r_min,wi_ion_gather(:,i)
      enddo
 
      close(1)
@@ -259,7 +267,7 @@ subroutine tgyro_stab_driver
      write(1,'(t10,a)') 'ky rho'
      write(1,20) 'r/a',ky(:)
      do i=1,n_inst
-        write(1,10) r(i+1)/r_min,wr_elec(:,i)
+        write(1,10) r(i+1)/r_min,wr_elec_gather(:,i)
      enddo
 
      close(1)
@@ -269,7 +277,7 @@ subroutine tgyro_stab_driver
      write(1,'(t10,a)') 'ky rho'
      write(1,20) 'r/a',ky(:)
      do i=1,n_inst
-        write(1,10) r(i+1)/r_min,wr_ion(:,i)
+        write(1,10) r(i+1)/r_min,wr_ion_gather(:,i)
      enddo
 
      close(1)
