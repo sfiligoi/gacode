@@ -11,7 +11,7 @@ module Dep_global
                              !e_wts(ie),lambda_wts(k),Fmax(ie)
                              !ie_max,ie,k_max,n_max,nb_max
                              !D_EP_starOchi_i_kernal(ie,k,isig,n,nb)
-                             !A_EP(ie,k,isig,n)
+                             !A_EP(ie,k,isig,n,nb)
 
 
   implicit none
@@ -39,6 +39,6 @@ module Dep_global
 
   real :: D_EP_starOchi_i_kernal(ie_max,k_max,2,n_max,nb_max)
   real :: D_EP_starOchi_i_kernal_den(n_max,nb_max)
-  real :: A_EP(ie_max,k_max,2,n_max)
+  real :: A_EP(ie_max,k_max,2,n_max,nb_max)
 
 end module Dep_global

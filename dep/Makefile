@@ -4,7 +4,7 @@
 
 # Define compilers and flags.
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
-export EXTRA_LIBS = ${GACODE_ROOT}/tglf/src/tglf_lib.a
+export EXTRA_LIBS = ${GACODE_ROOT}/tglf/src/tglf_lib.a $(LMATH)
 
 ifeq ($(OPT),debug)
    FFLAGS=${FDEBUG}
@@ -25,7 +25,6 @@ OBJECTS = Dep_from_tglf.o \
           Dep_read_input.o \
           Dep_i0.o \
           Dep_j0y0.o \
-          Dep_allocate.o \
           Dep_mainsub.o 
 
 .SUFFIXES : .o .f90 .f
@@ -39,10 +38,10 @@ $(LLIB).a: $(OBJECTS)
 	 $(ARCH) $(LLIB).a $(OBJECTS) 
 
 .f90.o :
-	$(FC) $(FFLAGS) -r8 -c $<
+	$(FC) $(FFLAGS) $(FMATH) -c $<
 
 .f.o :
-	$(FC) $(FFLAGS) -r4 -c $<
+	$(FC) $(FFLAGS) -c $<
 
 clean:
 	rm -f *.o  $(EXEC) $(LLIB).a
