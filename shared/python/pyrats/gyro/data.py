@@ -183,7 +183,7 @@ class GYROData:
             
             import tables
 
-            f=tables.openFile(self.dirname+'/out.gyro.timedata.h5','r')
+            f = tables.openFile(self.dirname+'/out.gyro.timedata.h5','r')
             self.freq['(a/c_s)w']        = f.root.omega.read()
             self.freq['(a/c_s)gamma']    = f.root.gamma.read()
             self.freq['err(a/c_s)w']     = f.root.error_omega.read()
@@ -200,7 +200,7 @@ class GYROData:
                 print "ERROR (GYROData): Missing out.gyro.freq."
                 sys.exit()
 
-                temp = freq.reshape((4,self.profile['n_n'],self.t['n_time']), order='F')
+            temp = freq.reshape((4,self.profile['n_n'],self.t['n_time']), order='F')
 
             self.freq['(a/c_s)w']        = temp[0,:,:]
             self.freq['(a/c_s)gamma']    = temp[1,:,:]
@@ -228,7 +228,7 @@ class GYROData:
 
             import tables
 
-            f=tables.openFile(self.dirname+'/out.gyro.initdata.h5','r')
+            f = tables.openFile(self.dirname+'/out.gyro.initdata.h5','r')
             self.profile['n_x']             = f.root.n_x.read()
             self.profile['n_theta_section'] = f.root.n_theta_section.read()
             self.profile['n_pass']          = f.root.n_pass.read()
