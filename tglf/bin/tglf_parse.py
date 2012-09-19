@@ -123,7 +123,7 @@ x.add('VPAR_5','0.0')
 x.add('VPAR_6','0.0')
 x.add('VEXB','0.0')
 x.add('BETAE','0.0')
-x.add('XNUEI','0.0')
+x.add('XNUE','0.0')
 x.add('ZEFF','1.0')
 x.add('DEBYE','0.0')
 
