@@ -189,6 +189,7 @@ module tgyro_globals
   real, dimension(:), allocatable :: p_e_aux_in
   real, dimension(:), allocatable :: f_b_in
   real, dimension(:), allocatable :: f_w_in
+  real, dimension(:), allocatable :: mf_in
   real, dimension(:), allocatable :: s_alpha
   real, dimension(:), allocatable :: s_brem
   real, dimension(:), allocatable :: s_exch

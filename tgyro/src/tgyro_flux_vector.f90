@@ -54,6 +54,8 @@ subroutine tgyro_flux_vector(x_vec,f_vec,dx,index)
         endif
      endif
 
+     !if (i_proc_global == 0) print *,w0p(i),dx
+
   enddo
 
   call tgyro_flux

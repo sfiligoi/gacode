@@ -109,6 +109,7 @@ subroutine tgyro_allocate_globals
   allocate(p_e_aux_in(n_r))
   allocate(f_b_in(n_r))
   allocate(f_w_in(n_r))
+  allocate(mf_in(n_r))
 
   allocate(p_i(n_r))
   allocate(p_e(n_r))

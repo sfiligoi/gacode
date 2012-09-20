@@ -92,7 +92,6 @@ subroutine tgyro_iteration_serial
         call tgyro_write_jacobian('i')
      endif
 
-
      if (loc_te_feedback_flag == 1) then
 
         ip = ip+1
@@ -104,8 +103,6 @@ subroutine tgyro_iteration_serial
         enddo
         call tgyro_write_jacobian('e')
      endif
-
-
 
      if (loc_ne_feedback_flag == 1) then
 
@@ -142,6 +139,13 @@ subroutine tgyro_iteration_serial
      !
      jfg(:,:) = jf(:,:)-jg(:,:)
      !----------------------------------------------
+
+     !if (i_proc_global == 0) then
+     !   do p=1,p_max
+     !      print '(10(1pe12.5,1x))',jfg(:,p)
+     !   enddo
+     !endif
+
 
      !----------------------------------------------------
      ! Compute actual-target: Relaxation is added to move 

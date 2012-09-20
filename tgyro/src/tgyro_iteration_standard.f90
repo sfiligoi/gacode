@@ -7,7 +7,7 @@
 !----------------------------------------------------------
 
 subroutine tgyro_iteration_standard
- 
+
   use mpi
   use tgyro_globals
   use tgyro_iteration_variables
@@ -245,14 +245,7 @@ subroutine tgyro_iteration_standard
 
      !----------------------------------------------------
      ! Check to see if gradient is too negative
-     ! NOTE: this is modified from original behaviour.
      !
-     !  do p=1,p_max
-     !     if (x_vec(p) < -0.001/r_min) then
-     !        x_vec(p)  = -1.0/r_min
-     !        b_flag(p) = '#'
-     !     endif
-     !  enddo
      do p=1,p_max
         if (x_vec(p) < 0.0) then
            x_vec(p) = 0.0001
