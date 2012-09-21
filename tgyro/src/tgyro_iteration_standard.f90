@@ -101,23 +101,23 @@ subroutine tgyro_iteration_standard
      p = 0
      do i=2,n_r
         if (loc_ti_feedback_flag == 1) then
-           p = p + 1
+           p = p+1
            dlntidr(1,i) = x_vec(p)
            if (loc_n_ion == 2) dlntidr(2,i) = dlntidr(1,i)
         endif
         if (loc_te_feedback_flag == 1) then
-           p = p + 1
+           p = p+1
            dlntedr(i) = x_vec(p)
         endif
         if (loc_ne_feedback_flag == 1) then
-           p = p + 1
+           p = p+1
            dlnnedr(i) = x_vec(p)
            ! Set dlnnidr(1,i) according to quasineutrality
            call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(:),loc_n_ion)
         endif
         if (loc_er_feedback_flag == 1) then
-           p = p + 1
-           w0p(i) = x_vec(p)
+           p = p+1
+           f_rot(i) = x_vec(p)
         endif
      enddo
 

@@ -136,7 +136,7 @@ subroutine tgyro_iteration_driver
      endif
      if (loc_er_feedback_flag == 1) then
         p = p+1
-        x_vec(p) = w0p(i)
+        x_vec(p) = f_rot(i)
      endif
   enddo
 

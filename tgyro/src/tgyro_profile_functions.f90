@@ -8,6 +8,7 @@ subroutine tgyro_profile_functions
   real :: c_exch
   real, dimension(n_r) :: loglam
 
+
   ! Note flag to only evolve only gradients
   if (loc_evolve_grad_only_flag == 0 .and. &
        (loc_lock_profile_flag == 0 .or. i_tran > 0)) then
@@ -20,7 +21,6 @@ subroutine tgyro_profile_functions
         call logint(ni(i_ion,:),dlnnidr(i_ion,:),r,n_r,i_bc)
         ! ti in eV
         call logint(ti(i_ion,:),dlntidr(i_ion,:),r,n_r,i_bc)
-        !
      enddo
      !
      ! ne in 1/cm^3
@@ -29,12 +29,9 @@ subroutine tgyro_profile_functions
      ! te in eV
      call logint(te,dlntedr,r,n_r,i_bc)
 
-     !if (i_proc_global == 0) print *,'in',w0p
-
      ! w0 in rad/s
+     w0p(:) = f_rot(:)*w0p_norm
      call linint(w0,w0p,r,n_r,i_bc)
-
-     !if (i_proc_global == 0) print *,'out',w0p
      !-------------------------------------------
 
   endif

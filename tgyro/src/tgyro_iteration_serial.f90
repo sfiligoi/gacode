@@ -140,13 +140,6 @@ subroutine tgyro_iteration_serial
      jfg(:,:) = jf(:,:)-jg(:,:)
      !----------------------------------------------
 
-     !if (i_proc_global == 0) then
-     !   do p=1,p_max
-     !      print '(10(1pe12.5,1x))',jfg(:,p)
-     !   enddo
-     !endif
-
-
      !----------------------------------------------------
      ! Compute actual-target: Relaxation is added to move 
      ! less aggressively to target solution, f0=g0.
@@ -154,11 +147,23 @@ subroutine tgyro_iteration_serial
      b(:) = -(f_vec0(:)-g_vec0(:))
      !----------------------------------------------------
 
+     !if (i_proc_global == 0) then
+     !   do p=1,p_max
+     !      print '(10(1pe12.5,1x))',jfg(:,p),b(p)
+     !   enddo
+     !endif
+
      ! LAPACK matrix factorization into L/U components
      call DGETRF(p_max,p_max,jfg,p_max,ipiv,ierr) 
 
      ! LAPACK matrix solve (jfg)x=b (pass jfg and b, return x in b).
      call DGETRS('N',p_max,1,jfg,p_max,ipiv,b,p_max,ierr)
+
+     !if (i_proc_global == 0) then
+     !   do p=1,p_max
+     !      print '(10(1pe12.5,1x))',b(p)
+     !   enddo
+     !endif
 
      if (ierr < 0) then
         call tgyro_catch_error('ERROR: DGETRS failed in tgyro_iteration_parallel')

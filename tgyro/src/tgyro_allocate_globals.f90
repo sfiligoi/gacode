@@ -81,6 +81,7 @@ subroutine tgyro_allocate_globals
   allocate(c_s(n_r))
   allocate(v_i(n_r))
   allocate(er(n_r))
+  allocate(f_rot(n_r))
 
   allocate(rho(n_r))
   allocate(r(n_r))

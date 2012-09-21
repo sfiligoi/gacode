@@ -17,6 +17,8 @@ subroutine tgyro_tglf_map
   real :: q_abs
   real :: q_prime
   real :: p_prime
+  real :: gamma_eb0
+  real :: gamma_p0
 
   ! Currently TGLF uses toroidal current as reference direction
   tglf_sign_bt_in = tgyro_btccw_in*tgyro_ipccw_in
@@ -155,9 +157,14 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
   ! Gamma_ExB (ExB shearing rate, units of a/cs)
   if (tgyro_rotation_flag == 1) then
+
+     gamma_p0  = -r_maj(i_r)*w0p(i_r)
+     gamma_eb0 = gamma_p0*r(i_r)/(q(i_r)*r_maj(i_r)) 
+
      ! Need to take out sign of q
-     tglf_vexb_shear_in = tglf_sign_bt_in*gamma_eb(i_r)*r_min/c_s(i_r)  
-     tglf_vpar_shear_in(:) = gamma_p(i_r)*r_min/c_s(i_r)
+     tglf_vexb_shear_in = tglf_sign_bt_in*gamma_eb0*r_min/c_s(i_r)  
+     tglf_vpar_shear_in(:) = gamma_p0*r_min/c_s(i_r)
+
   endif
   !----------------------------------------------------------------
 

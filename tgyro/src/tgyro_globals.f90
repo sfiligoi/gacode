@@ -147,6 +147,8 @@ module tgyro_globals
   real, dimension(:), allocatable :: gamma_p
   real, dimension(:), allocatable :: u00
 
+  real :: w0p_norm
+
   real, dimension(:), allocatable :: pr
   real, dimension(:), allocatable :: dlnpdr
   real, dimension(:), allocatable :: beta_unit
@@ -175,6 +177,7 @@ module tgyro_globals
   real, dimension(:), allocatable :: volp
   real, dimension(:), allocatable :: vol
   real, dimension(:), allocatable :: er
+  real, dimension(:), allocatable :: f_rot
 
   real, dimension(:), allocatable :: p_i_in
   real, dimension(:), allocatable :: p_e_in

@@ -195,7 +195,7 @@ subroutine tgyro_init_profiles
   !
   ! (3) Angular momentum flow -- convert to erg (dyne-cm) from N-m.
   !
-  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_flow_mom(:)*1e7,n_exp,r,mf_in,n_r)
+  call cub_spline(EXPRO_rmin(:)/r_min,-EXPRO_flow_mom(:)*1e7,n_exp,r,mf_in,n_r)
   !------------------------------------------------------------------------------------------
 
 
@@ -272,8 +272,16 @@ subroutine tgyro_init_profiles
   endif
   !----------------------------------------------------------
 
+  ! First, unity normalization for initialization
+  w0p_norm = 1.0
+  f_rot(:) = w0p(:)/w0p_norm
+
   ! Now compute all profiles:
   call tgyro_profile_functions
+
+  ! Rotation normalization
+  w0p_norm = -r_maj(1)*r_min/c_s(1)
+  f_rot(:) = w0p(:)/w0p_norm
 
   !----------------------------------------------------
   ! Set conditions at r=0

@@ -5,6 +5,7 @@ subroutine tgyro_neo_map
 
   implicit none
   real :: mu1
+  real :: gamma_p0,u000
 
   if (loc_n_ion > 5) then
      call tgyro_catch_error('ERROR: Too many ions for NEO') 
@@ -24,10 +25,10 @@ subroutine tgyro_neo_map
 
   ! Resolution
   if (loc_n_ion < 4) then
-!     neo_n_energy_in = 10
+     !     neo_n_energy_in = 10
      neo_n_energy_in = 5
   else
-!     neo_n_energy_in = 6
+     !     neo_n_energy_in = 6
      neo_n_energy_in = 5
   endif
   neo_n_xi_in = 11
@@ -114,10 +115,13 @@ subroutine tgyro_neo_map
   endif
 
   ! Rotation is always active
+  gamma_p0  = -r_maj(i_r)*w0p(i_r)
+  u000      = r_maj(i_r)*w0(i_r)
+
   neo_rotation_model_in = 2
-  neo_omega_rot_in = u00(i_r) * r_min / r_maj(i_r) &
+  neo_omega_rot_in = u000 * r_min / r_maj(i_r) &
        / (c_s(i_r) * sqrt(ti(1,i_r)/te(i_r))) * (-1.0*tgyro_ipccw_in)
-  neo_omega_rot_deriv_in = -gamma_p(i_r) * r_min**2 / r_maj(i_r) &
+  neo_omega_rot_deriv_in = -gamma_p0 * r_min**2 / r_maj(i_r) &
        / (c_s(i_r) * sqrt(ti(1,i_r)/te(i_r))) * (-1.0*tgyro_ipccw_in)
 
   ! Parameter only used for global runs.
