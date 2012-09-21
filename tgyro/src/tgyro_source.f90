@@ -144,7 +144,7 @@ subroutine tgyro_source
   ! Target angular momentum fluxes in erg/cm^2
   ! 
   mflux_target(1) = 0.0 
-  mflux_target(2:n_r) = 0.0
+  mflux_target(2:n_r) = mf_in(2:n_r)/volp(2:n_r)
   !------------------------------------------------
 
   !------------------------------------------------
@@ -152,6 +152,7 @@ subroutine tgyro_source
   eflux_i_target(:) = eflux_i_target(:)/q_gb(:)
   eflux_e_target(:) = eflux_e_target(:)/q_gb(:)
   pflux_e_target(:) = pflux_e_target(:)/gamma_gb(:)
+  mflux_target(:)   = mflux_target(:)/pi_gb(:)
   !------------------------------------------------
 
 end subroutine tgyro_source

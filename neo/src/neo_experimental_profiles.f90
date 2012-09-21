@@ -78,7 +78,12 @@ subroutine neo_experimental_profiles
   !
   rhoN_torflux_a      = EXPRO_arho
   rhoN_torflux_exp(:) = EXPRO_rho(:)
-  psiN_polflux_exp(:) = EXPRO_poloidalfluxover2pi(:) / EXPRO_poloidalfluxover2pi(n_grid_exp)
+  if(abs(EXPRO_poloidalfluxover2pi(n_grid_exp)) < epsilon(0.)) then
+     psiN_polflux_exp(:) = 0.0
+  else
+     psiN_polflux_exp(:) = EXPRO_poloidalfluxover2pi(:) &
+          / EXPRO_poloidalfluxover2pi(n_grid_exp)
+  endif
   rmin_exp(:)         = EXPRO_rmin(:)
   rmaj_exp(:)         = EXPRO_rmaj(:)
   q_exp(:)            = EXPRO_q(:)
@@ -92,7 +97,7 @@ subroutine neo_experimental_profiles
   s_zeta_p(:)         = EXPRO_szeta(:)  * profile_zeta_scale
   s_zmag_p(:)         = EXPRO_dzmag(:)  * profile_zmag_scale
   shat_p(:)           = EXPRO_s(:)
-  
+
   r_p(:)    = rmin_exp(:)/rmin_exp(n_grid_exp)
   rmaj_p(:) = rmaj_exp(:)/rmin_exp(n_grid_exp)
   zmag_p(:) = zmag_exp(:)/rmin_exp(n_grid_exp)

@@ -60,3 +60,20 @@ Thu May 10 14:25:20 PDT 2012
 }}}
 
 The same applies to tgyro and neo runs.
+
+=== Experimental functionality ===
+
+You can build the OpenACC-aware version of GYRO using
+
+{{{
+$ make ACC=true
+}}}
+
+HDF5 I/O capability is enabled by compiling with
+
+{{{
+$ make HDF5=true
+}}}
+
+
+

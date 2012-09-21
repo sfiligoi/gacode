@@ -48,9 +48,9 @@ subroutine tgyro_flux_vector(x_vec,f_vec,dx,index)
      if (loc_er_feedback_flag == 1) then
         p = p+1
         if (index == 4) then
-           w0p(i) = x_vec(p)+dx
+           f_rot(i) = x_vec(p)+dx
         else
-           w0p(i) = x_vec(p)
+           f_rot(i) = x_vec(p)
         endif
      endif
 

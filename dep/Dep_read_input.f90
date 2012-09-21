@@ -26,8 +26,8 @@ subroutine Dep_read_input
   !--------------------------------------
   implicit none
   !
-  real :: n_max_input
-  real :: nb_max_input
+  integer :: n_max_input
+  integer :: nb_max_input
   integer :: i_n
   integer :: i_nb
   character(len=80) :: comment

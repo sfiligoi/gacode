@@ -1,1 +1,1 @@
-GKSFLAGS = --default-real-8 --default-double-8
+GKSFLAGS = -fdefault-real-8 -fdefault-double-8

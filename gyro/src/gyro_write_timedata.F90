@@ -722,13 +722,15 @@ subroutine gyro_write_timedata
              trim(path)//'out.gyro.diff',10,size(diff),diff)
         call write_local_real( &
              trim(path)//'out.gyro.diff_i',10,size(diff_i),diff_i)
-
         call write_local_real( &
              trim(path)//'out.gyro.gbflux',10,size(gbflux),gbflux)
         call write_local_real( &
+             trim(path)//'out.gyro.gbflux_i',10,size(gbflux_i),gbflux_i)
+
+        call write_local_real( &
              trim(path)//'out.gyro.gbflux_mom',10,size(gbflux_mom),gbflux_mom)
         call write_local_real( &
-             trim(path)//'out.gyro.gbflux_i',10,size(gbflux_i),gbflux_i)
+             trim(path)//'out.gyro.gbflux_exc',10,size(gbflux_exc),gbflux_exc)
 
         if (trapdiff_flag == 1) then
            call write_local_real( &

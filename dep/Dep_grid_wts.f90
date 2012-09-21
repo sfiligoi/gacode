@@ -13,7 +13,7 @@ subroutine  Dep_grid_wts
                              !e_wts(ie),lambda_wts(k),Fmax(ie)
                              !ie_max,ie,k_max,n_max,nb_max
                              !D_EP_starOchi_i_kernal(ie,k,isig,n,nb)
-                             !A_EP(ie,k,isig,n)
+                             !A_EP(ie,k,isig,n,nb)
 
     use Dep_from_tglf        !krho(n), omega_tglf(n,nb)
                              !chi_i_tglf_wt(n,nb), chi_i_tglf
@@ -27,11 +27,20 @@ subroutine  Dep_grid_wts
     integer :: k
     integer :: isig
 
+    integer :: i_chk_print
+
    
    real :: lambda_m
    real :: sum_energy_wts
    real :: sum_lambda_wts
    real :: pi
+
+
+   i_chk_print =1
+  !i_chk_print =0
+
+!!!   print *, 'start inside Dep_grid_wts'
+!!!   print *,n_max,nb_max,ie_max,k_max
 
    pi=3.14159265
 
@@ -59,12 +68,15 @@ subroutine  Dep_grid_wts
      do ie=1,8
       Fmax(ie)=1./(pi*sqrt(pi))*exp(-e_hat(ie))
      enddo
+!  Fmax is actually not used anywhere except Fmax(ie)/Fmax(ie)
 
    !test sum
     sum_energy_wts=0.
     do ie=1,8
+     print *,'ie=',ie,'e_hat=',e_hat(ie),'e_wts=',e_wts(ie) 
      sum_energy_wts=sum_energy_wts+e_wts(ie)
     enddo
+    if(i_chk_print .eq. 1) &
     print *, 'sum_energy_wts=',sum_energy_wts
 
    !note:  e_wts(ie) has Fmax(ie) built-in, so delta_f --->delta_f/Fmax                      
@@ -72,9 +84,11 @@ subroutine  Dep_grid_wts
 
    !make lambda grids and wts
     lambda_m = (1.-r_hat/rmaj_hat)/(1.+r_hat/rmaj_hat)
+        if(i_chk_print .eq. 1) then
      print *, 'lambda_m =',lambda_m 
      print *, 'passing wts=',1.0-sqrt(1-lambda_m)
      print *, 'trapped wts=', sqrt(1-lambda_m)
+        endif
 
     !passing
     do k=1,4
@@ -82,6 +96,7 @@ subroutine  Dep_grid_wts
      lambda_wts(k) = sqrt(1.-(lambda_m/4.)* &
         (REAL(k)-1.0))- &
                      sqrt(1.-(lambda_m/4.)*REAL(k))
+    if(i_chk_print .eq. 1) &
       print *, 'lambda=',lambda(k),'  lambda_wts=',lambda_wts(k)
     enddo
 
@@ -91,6 +106,7 @@ subroutine  Dep_grid_wts
      lambda_wts(k) = sqrt(1.-((1.-lambda_m)/4.)* &
         ((REAL(k)-4.0)-1.0)-lambda_m)- &
                      sqrt(1.-((1.-lambda_m)/4.)*(REAL(k)-4.)-lambda_m)
+    if(i_chk_print .eq. 1) &
      print *, 'lambda=',lambda(k),'  lambda_wts=',lambda_wts(k)
     enddo
     !test sum
@@ -98,12 +114,18 @@ subroutine  Dep_grid_wts
     do k=1,4
      sum_lambda_wts=sum_lambda_wts+lambda_wts(k)
     enddo
+    if(i_chk_print .eq. 1) &
      print *, 'passing sum_lambda_wts=',sum_lambda_wts
     do k=5,8
      sum_lambda_wts=sum_lambda_wts+lambda_wts(k)
     enddo
 
+    if(i_chk_print .eq. 1) then 
      print *, 'total sum_lambda_wts=',sum_lambda_wts
+     lambda_wts(:)=lambda_wts(:)/2.
+     print *, 'lambda_wts divided by 2. to compensate isig + and - sum'
+     print *, 'Sum_isig Sum_ie Sum_k e_wts(ie)*lambda_wts(k) = 1.0 = Int dv**3*Fmax'
+    endif 
 
      print *, 'Dep_grid_wts done'
 

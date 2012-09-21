@@ -4,6 +4,7 @@ subroutine tgyro_gyro_map
   use gyro_interface
 
   implicit none
+  real :: gamma_eb0,gamma_p0,u000
 
   ! Initialize GYRO
   call gyro_init(paths(i_r-1), gyro_comm)
@@ -93,9 +94,13 @@ subroutine tgyro_gyro_map
 
   if (tgyro_rotation_flag == 1) then
 
-     gyro_gamma_e_in = gamma_eb(i_r)*r_min/c_s(i_r)
-     gyro_pgamma_in = gamma_p(i_r)*r_min/c_s(i_r)
-     gyro_mach_in = u00(i_r)/c_s(i_r)
+     u000      = r_maj(i_r)*w0(i_r)
+     gamma_p0  = -r_maj(i_r)*w0p(i_r)
+     gamma_eb0 = gamma_p0*r(i_r)/(q(i_r)*r_maj(i_r)) 
+
+     gyro_gamma_e_in = gamma_eb0*r_min/c_s(i_r)
+     gyro_pgamma_in = gamma_p0*r_min/c_s(i_r)
+     gyro_mach_in = u000/c_s(i_r)
 
   else
 

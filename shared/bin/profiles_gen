@@ -694,6 +694,7 @@ then
    echo " npfit    = 150" >> ingta
    echo " dpsisl   = $GATO_DPSISL" >> ingta
    echo " dpsisd   = +0.10e-04" >> ingta
+   echo " psipak   = 1.0" >> ingta
    echo " delac    = 0.10e-02" >> ingta
    echo " tolspln  = 0.10e-02" >> ingta
    echo " ntrymx   = 10" >> ingta

@@ -62,7 +62,7 @@ program prgen
   tag(7)  = 'Te(keV)'
   tag(8)  = 'ne(10^19/m^3)'
   tag(9)  = 'z_eff(-)'
-  tag(10) = 'omega0(1/s)'
+  tag(10) = 'omega0(rad/s)'
   tag(11) = 'flow_mom(N-m)'
   tag(12) = 'pow_e(MW)'
   tag(13) = 'pow_i(MW)'
