@@ -272,16 +272,22 @@ subroutine tgyro_init_profiles
   endif
   !----------------------------------------------------------
 
-  ! First, unity normalization for initialization
+  !----------------------------------------------------------
+  ! Primitive quantity to evolve for rotation/Er evolution is 
+  !
+  ! f_rot = (a/c_s)*gamma_p = w0p/w0p_norm
+  !
+  ! First, "bogus" unity normalization since c_s is unknown
   w0p_norm = 1.0
   f_rot(:) = w0p(:)/w0p_norm
 
   ! Now compute all profiles:
   call tgyro_profile_functions
 
-  ! Rotation normalization
-  w0p_norm = -r_maj(1)*r_min/c_s(1)
+  ! Proper rotation normalization
+  w0p_norm = -c_s(1)/(r_min*r_maj(1))
   f_rot(:) = w0p(:)/w0p_norm
+  !----------------------------------------------------------
 
   !----------------------------------------------------
   ! Set conditions at r=0

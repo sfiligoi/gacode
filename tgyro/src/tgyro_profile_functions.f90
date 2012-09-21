@@ -72,7 +72,7 @@ subroutine tgyro_profile_functions
   nue(:) = sqrt(2.0)*pi*ne(:)*e**4*loglam(:) &
        /(sqrt(me)*(k*te(:))**1.5)
 
-  ! Hinton-Hazeltine scatering rates (one ion):
+  ! Hinton-Hazeltine scattering rates (one ion):
   nui_HH(:) = 4.0/(3*sqrt(2.0*pi))*nui(1,:)
   nue_HH(:) = 4.0/(3*sqrt(pi))*nue(:)*(ni(1,:)*zi_vec(1)**2/ne(:))
 

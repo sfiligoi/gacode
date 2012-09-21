@@ -3,6 +3,12 @@
 !
 ! PURPOSE:
 !  Main driver for local solver.
+!
+!  Quantities to evolve:
+!   Ti: dlntidr
+!   Te: dlntedr
+!   ne: dlnnedr
+!   Er: f_rot = [a/c_s(0)]*r_maj(0)*gamma_p/r_maj
 !----------------------------------------------------------
 
 subroutine tgyro_iteration_driver
