@@ -171,18 +171,19 @@ c     1 : fast ion dilution only
 c     2 : ni=ne, nz=0
 c
       do k=1,mxgrid
-         nz_exp(k)=ne_exp(k)*(zeff_exp(k)-1.0D0)/
-     >    (zimp_gf**2-zimp_gf)
+         nz_exp(k)=ne_exp(k)*(zeff_exp(k)-zgas_exp)/
+     >    (zimp_exp*(zimp_exp-zgas_exp))
          if(dilution_model.eq.0)then
 c full impurity and fast ion dilution
-           ni_exp(k)=ne_exp(k)-nfast_exp(k)-zimp_gf*nz_exp(k) 
+           ni_exp(k)=(ne_exp(k)-zimp_gf*nz_exp(k))/zgas_exp 
+     >     -nfast_exp(k) 
          elseif(dilution_model.eq.1)then
 c just fast ion dilution
-           ni_exp(k) = ne_exp(k)-nfast_exp(k)
+           ni_exp(k) = ne_exp(k)/zgas_exp -nfast_exp(k)
            nz_exp(k) = 0.0
          elseif(dilution_model.eq.2)then
 c no dilution
-           ni_exp(k) = ne_exp(k)
+           ni_exp(k) = ne_exp(k)/zgas_exp
            nz_exp(k) = 0.0
          endif
          fi_m(k) = ni_exp(k)/ne_exp(k)
@@ -216,9 +217,13 @@ c temporary: should be <R**2>
 c         
 c  convert velocities to km/s
 c
-c  remember angrot_exp is the impurity ion rotation
+c  remember angrot_exp is the cer ion rotation
 c
-         vphiz_exp(k)=c_tor(k)*rmajor_exp*angrot_exp(k)/cv
+         if(cer_ion_exp.eq.1)then
+           vphi_exp(k) = c_tor(k)*rmajor_exp*angrot_exp(k)/cv
+         elseif(cer_ion_exp.eq.2)then
+           vphiz_exp(k)=c_tor(k)*rmajor_exp*angrot_exp(k)/cv
+         endif
 c  
          nuei_m(k) = 0.0
          vpol_exp(k) = 0.0
@@ -286,12 +291,16 @@ c
         zpnz_exp(k) = -a_unit_exp*(gradnzm/nzm)
         zpte_exp(k) = -a_unit_exp*(gradtem/tem)
         zpti_exp(k) = -a_unit_exp*(gradtim/tim)
+        rhom = arho_exp*(rho(k+1)+rho(k))/2.0
+        rminm = (rmin_exp(k+1)+rmin_exp(k))/2.0
+        drhodr(k) = arho_exp*(rho(k+1)-rho(k))
+     >              /(rmin_exp(k+1)-rmin_exp(k))
 c compute reference scales
       if(igeo_m.eq.0)then
         b_unit = bt_exp
-c        if(bt_flag.gt.0)b_unit = bteff_exp(jm)
+c        if(bt_flag.gt.0)b_unit = bteff_exp(k)
       else
-        b_unit = bt_exp*(rhom/rminm)*drhodr(jm)
+        b_unit = bt_exp*(rhom/rminm)*drhodr(k)
       endif
       csda_exp(k)=9.79D5*DSQRT(tem*1.D3)/
      > (a_unit_exp*100.D0)/DSQRT(amassgas_exp)
@@ -304,7 +313,8 @@ c compute energy exchange
         niw = ni_exp(k)
         nzw = nz_exp(k)
         tiw = ti_exp(k)
-        zbrac=(niw+amassgas_exp*nzw*zimp_exp**2/amassimp_exp)/new
+        zbrac=(niw*zgas_exp**2
+     >   +amassgas_exp*nzw*zimp_exp**2/amassimp_exp)/new
         lnlam=24.D0-DLOG(DSQRT(1.D13*new)/(1000.D0*tew))
         lnlam=DMAX1(lnlam,1.D0)
         nuei= 1.5D0*new*new*zbrac
@@ -341,7 +351,8 @@ c compute power balance chi's
         niw = ni_exp(k)
         nzw = nz_exp(k)
         tiw = ti_exp(k)
-        zbrac=(niw+amassgas_exp*nzw*zimp_exp**2/amassimp_exp)/new
+        zbrac=(niw*zgas_exp**2
+     >  +amassgas_exp*nzw*zimp_exp**2/amassimp_exp)/new
         lnlam=24.D0-DLOG(DSQRT(1.D13*new)/(1000.D0*tew))
         lnlam=DMAX1(lnlam,1.D0)
         nuei= 1.5D0*new*new*zbrac
@@ -352,12 +363,18 @@ c compute power balance chi's
 c
       do k=1,mxgrid-1
 c initialize vexb_exp to its neoclassical value (km/sec)
-c assuming ion species 3 is the CER measured one
+        if(cer_ion_exp.eq.1)then
+         vexb_exp(k) = (vphi_exp(k)-vneo_exp(2,k)*c_per(k))/c_tor(k)
+     >   - vdia_exp(2,k)
+         vphiz_exp(k) = c_per(k)*(vpol_exp(k)+vneo_exp(3,k))
+     >    + c_tor(k)*(vexb_exp(k)+vdia_exp(3,k))
+        elseif(cer_ion_exp.eq.2)then
          vexb_exp(k) = (vphiz_exp(k)-vneo_exp(3,k)*c_per(k))/c_tor(k)
      >   - vdia_exp(3,k)
-c compute the main ion and electron toroidal flow
          vphi_exp(k) = c_per(k)*(vpol_exp(k)+vneo_exp(2,k))
      >    + c_tor(k)*(vexb_exp(k)+vdia_exp(2,k))
+        endif
+c compute the electron toroidal flow
          vphie_exp(k) = c_per(k)*(vpol_exp(k)+vneo_exp(1,k))
      >    + c_tor(k)*(vexb_exp(k)+vdia_exp(1,k))
 c compute the parallel flows for each species

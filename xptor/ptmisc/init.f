@@ -43,6 +43,9 @@ c
       do j=1,8
         upsrc(j)=0
       enddo
+      cer_ion_exp=3
+      zgas_exp=1.0
+      zimp_exp=6.0
       amassgas_exp=2.0
       amassimp_exp=12.0
       idatzero=0

@@ -85,7 +85,7 @@ c
       neo_nu_1_in     = xnue/w0
 
   ! Main ions
-      neo_z_2_in      = 1
+      neo_z_2_in      = INT(zgas_exp)
       neo_mass_2_in   = 1.0
       neo_dens_2_in   = nim/n0
       if(neo_n_species_in.eq.2)neo_dens_2_in = nem/n0

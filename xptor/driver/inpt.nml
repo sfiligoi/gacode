@@ -54,4 +54,4 @@
      &  tauscale, iglf2d, ibound, cped, irunmax, xvarmin, xvarmax,
      &  iglf2d_scan, iglf2d_jrun, glf2d_zvarmin, glf2d_zvarmax,
      &  igrid, igyro, ibranch_gf, theta0_gf,dilution_model,
-     &  doppler_shear_model,j_write_state
+     &  doppler_shear_model,j_write_state,cer_ion_exp
