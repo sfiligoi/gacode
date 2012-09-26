@@ -109,18 +109,15 @@ subroutine prgen_map_plasmastate
   enddo
 
   ! vphi
-  vec(31,:) = 0.0
-  vec(32,:) = 0.0
-  vec(33,:) = 0.0
-  vec(34,:) = 0.0
-  vec(35,:) = 0.0
+  do i=2,min(plst_dp1_nspec_th+1,6)
+     ip = reorder_vec(i-1)+1
+     if (trim(plst_all_name(ip)) == 'C') then
+        vec(31+i-2,:) = -plst_omegat(:)*(rmaj(:)+rmin(:))
+     endif
+  enddo
 
   ! vpol
-  vec(36,:) = 0.0
-  vec(37,:) = 0.0
-  vec(38,:) = 0.0
-  vec(39,:) = 0.0
-  vec(40,:) = 0.0
+  vec(36:40,:) = 0.0
   !---------------------------------------------------------
 
   ! Ion reordering diagnostics
