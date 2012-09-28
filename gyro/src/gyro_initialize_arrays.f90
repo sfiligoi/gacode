@@ -45,7 +45,6 @@ subroutine gyro_initialize_arrays
   field_blend_old2 = 0.0
 
   ! No field_tau
-  field_tau_dot  = 0.0
   field_tau_old  = 0.0
   field_tau_old2 = 0.0
 

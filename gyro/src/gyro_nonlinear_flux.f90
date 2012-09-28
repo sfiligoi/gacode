@@ -25,16 +25,12 @@ subroutine gyro_nonlinear_flux
   implicit none
   !
   real, dimension(n_x,n_kinetic,n_field,p_moment,2) :: moment
-  real, dimension(n_kinetic,4) :: excparts
+  real, dimension(n_kinetic,2) :: excparts
   real, dimension(n_kinetic,3) :: momparts
-  real, dimension(4) :: exctemp
+  real, dimension(2) :: exctemp
   real, dimension(3) :: momtemp
 
-  complex, dimension(i1_buffer:i2_buffer,n_kinetic) :: cap_h
-  complex, dimension(i1_buffer:i2_buffer,n_kinetic) :: h1
-  complex, dimension(i1_buffer:i2_buffer,n_kinetic) :: h2
-  complex, dimension(i1_buffer:i2_buffer,n_kinetic) :: gyro_h_cap
-  complex, dimension(i1_buffer:i2_buffer,n_kinetic) :: gyro_h_cap_dot
+  complex, dimension(n_x,n_kinetic) :: cap_h
   complex, dimension(n_x) :: ikrho
   !--------------------------------------------------  
 
@@ -57,52 +53,7 @@ subroutine gyro_nonlinear_flux
 
      do m=1,n_stack
 
-        cap_h(:,:) = (0.0,0.0)
-        cap_h(1:n_x,:) = h_cap(m,:,p_nek_loc,:)
-
-        do i=1,n_x
-           h1(i,:) = h_cap(m,i,p_nek_loc,:)
-           h2(i,:) = h_cap_dot(m,i,p_nek_loc,:)
-        enddo
-        if (boundary_method == 1) then
-           do i=1-m_gyro,0
-              h1(i,:) = h_cap(m,i+n_x,p_nek_loc,:)
-              h2(i,:) = h_cap_dot(m,i+n_x,p_nek_loc,:)
-           enddo
-           do i=n_x+1,n_x+m_gyro-i_gyro
-              h1(i,:) = h_cap(m,i-n_x,p_nek_loc,:)
-              h2(i,:) = h_cap_dot(m,i-n_x,p_nek_loc,:)
-           enddo
-        else
-           do i=1-m_gyro,0
-              h1(i,:) = 0.0
-              h2(i,:) = 0.0
-           enddo
-           do i=n_x+1,n_x+m_gyro
-              h1(i,:) = 0.0
-              h2(i,:) = 0.0
-           enddo
-        endif
-
-        gyro_h_cap(:,:) = (0.0,0.0)
-        gyro_h_cap_dot(:,:) = (0.0,0.0)
-        do is=1,n_kinetic
-           if (is <= n_gk) then
-              do i=1,n_x
-                 do i_diff=-m_gyro,m_gyro-i_gyro
-                    gyro_h_cap(i,is) = gyro_h_cap(i,is)+&
-                         w_gyro(m,i_diff,i,p_nek_loc,is)*h1(i+i_diff,is)
-                    gyro_h_cap_dot(i,is) = gyro_h_cap_dot(i,is)+&
-                         w_gyro(m,i_diff,i,p_nek_loc,is)*h2(i+i_diff,is)
-                 enddo ! i_diff
-              enddo
-           else
-              do i=1,n_x
-                    gyro_h_cap(i,is)     = h1(i,is)
-                    gyro_h_cap_dot(i,is) = h2(i,is)
-              enddo
-           endif
-        enddo
+        cap_h(:,:) = h_cap(m,:,p_nek_loc,:)
 
         !-----------------------------------------------------
         ! Compute basic fluxes
@@ -154,10 +105,11 @@ subroutine gyro_nonlinear_flux
                  momparts(is,:) = momparts(is,:)+momtemp(:)/n_x 
 
                  ! Moment 4: Exchange
-                 moment(i,is,ix,4,ck) = moment(i,is,ix,4,ck)+z(is)*real( &
-                      conjg(cap_h(i,is))*gyro_uv_dot(m,i,p_nek_loc,is,ix)*w_p(ie,i,k,is))
+                 moment(i,is,ix,4,ck) = moment(i,is,ix,4,ck)+z(is)*w_p(ie,i,k,is)*real( &
+                      conjg(cap_h(i,is))*gyro_uv_dot(m,i,p_nek_loc,is,ix) &
+                      -conjg(h_cap_dot(m,i,p_nek_loc,is))*gyro_uv(m,i,p_nek_loc,is,ix))
 
-                 ! Exchange breakdown (sum over i, ix, ck): ** valid for ES only **
+                 ! Exchange breakdown (sum over i, ix, ck):
 
                  ! 1. H <phi_dot> [Sugama]
                  exctemp(1) = z(is)*real( &
@@ -166,14 +118,6 @@ subroutine gyro_nonlinear_flux
                  ! 2. -H_dot <phi>
                  exctemp(2) = -z(is)*real( &
                       conjg(h_cap_dot(m,i,p_nek_loc,is))*gyro_uv(m,i,p_nek_loc,is,ix)*w_p(ie,i,k,is))
-
-                 ! 3. <H> phi_dot
-                 exctemp(3) = z(is)*real( &
-                      conjg(gyro_h_cap(i,is))*field_tau_dot(m,i,p_nek_loc,ix)*w_p(ie,i,k,is))
-
-                 ! 4. -<H_dot> phi
-                 exctemp(4) = -z(is)*real( &
-                      conjg(gyro_h_cap_dot(i,is))*field_tau(m,i,p_nek_loc,ix)*w_p(ie,i,k,is))
 
                  excparts(is,:) = excparts(is,:)+exctemp(:)/n_x 
 
