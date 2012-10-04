@@ -326,7 +326,7 @@ contains
           den_iz(is,abs(z(is))) = dens(is,ir) * dens_norm(ir) * 1e19
        enddo
     endif
-    
+
     !  grp_iz(i,z)-pressure gradient of i,z (keV/m**3/rho)
     grp_iz(:,:) = 0.0
     do is=1,n_species
@@ -340,8 +340,7 @@ contains
          * temp_norm(ir)*temp_norm_fac
     jbs_nc_norm   = charge_norm_fac*dens_norm(ir)*vth_norm(ir)*a_meters
     v_nc_norm   = vth_norm(ir) * a_meters
-    
-    
+
     ! compute friction and viscosity coefficients and flows
     CALL NCLASS(k_order,k_potato,m_i,m_z,c_den,c_potb,c_potl,p_b2, &
          p_bm2,p_eb,p_fhat,p_fm,p_ft,p_grbm2,p_grphi,p_gr2phi, &
@@ -366,7 +365,7 @@ contains
        end if
        close(io_neoout)
     end if
-    
+
     ! check error flags
     if(iflag > 0) then
        if(iflag == 1) then
@@ -379,6 +378,8 @@ contains
           call neo_error('ERROR: (NEO) NCLASS - require 0<m_s<mx_ms')
        else if(iflag == 5) then
           call neo_error('ERROR: (NEO) NCLASS - inversion of flow matrix failed')
+       else if(iflag == 6) then
+          call neo_error('ERROR: (NEO) NCLASS - invalid trapped fraction')
        endif
        return
     endif
@@ -482,17 +483,18 @@ contains
        rdum(6)=RARRAY_SUM(5,rdum,1)
        eflux_nc(i) = (rdum(1) + rdum(2) + rdum(4)) / eflux_nc_norm
     enddo
+
     
     if(silent_flag == 0 .and. i_proc == 0) then
        open(io_nc,file=trim(path)//runfile,status='old',position='append')
-       write (io_nc,'(e16.8,$)') r(ir)
-       write(io_nc,'(e16.8,$)') jbs_nc 
+       write (io_nc,'(e16.8)',advance='no') r(ir)
+       write(io_nc,'(e16.8)',advance='no') jbs_nc 
        do is=1,n_species
-          write(io_nc,'(e16.8,$)') pflux_nc(is)
-          write(io_nc,'(e16.8,$)') eflux_nc(is) 
-          write(io_nc,'(e16.8,$)') uparB_nc(is) 
-          write(io_nc,'(e16.8,$)') vpol_nc(is)
-          write(io_nc,'(e16.8,$)') vtor_nc(is)
+          write(io_nc,'(e16.8)',advance='no') pflux_nc(is)
+          write(io_nc,'(e16.8)',advance='no') eflux_nc(is) 
+          write(io_nc,'(e16.8)',advance='no') uparB_nc(is) 
+          write(io_nc,'(e16.8)',advance='no') vpol_nc(is)
+          write(io_nc,'(e16.8)',advance='no') vtor_nc(is)
        enddo
        write(io_nc,*)
        close(io_nc)

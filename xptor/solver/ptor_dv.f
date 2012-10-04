@@ -141,7 +141,8 @@ c
 c get initial sources and transport coefficients
 c
       dt_imp = DABS(dt_v)
-      iparam_pt(1)=1
+      isave_pt1=iparam_pt(1)
+c      iparam_pt(1)=1
 c      if(nsteps_v.eq.0)iparam_pt(1)=-1
  100  call trcoef_dv(dt_imp)
       if(imodel.eq.82)then
@@ -219,14 +220,14 @@ c iendstep = 2 failed
         ireject = 0
         ifail=0
         deltat=xparam_pt(1)
-        dt_newton=dt_imp*dtmult
-        call vtrans_dv(dt_newton,ierror)
-c        call vtrans_dv(dt_imp,ierror)
+c        dt_newton=dt_imp*dtmult
+c        call vtrans_dv(dt_newton,ierror)
+        call vtrans_dv(dt_imp,ierror)
         if(ifilter.eq.1)call filter_dv
         call advancefields(Told,Tnew,deltat,0)
 c recompute the fluxes and adjust deltat
  31     continue
-      isave_pt1=iparam_pt(1)
+c      isave_pt1=iparam_pt(1)
       iparam_pt(1)=-1
       call trcoef_dv(dt_imp)
       iparam_pt(1)=isave_pt1

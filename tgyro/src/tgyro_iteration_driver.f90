@@ -3,6 +3,12 @@
 !
 ! PURPOSE:
 !  Main driver for local solver.
+!
+!  Quantities to evolve:
+!   Ti: dlntidr
+!   Te: dlntedr
+!   ne: dlnnedr
+!   Er: f_rot = [a/c_s(0)]*r_maj(0)*gamma_p/r_maj
 !----------------------------------------------------------
 
 subroutine tgyro_iteration_driver
@@ -136,7 +142,7 @@ subroutine tgyro_iteration_driver
      endif
      if (loc_er_feedback_flag == 1) then
         p = p+1
-        x_vec(p) = w0p(i)
+        x_vec(p) = f_rot(i)
      endif
   enddo
 

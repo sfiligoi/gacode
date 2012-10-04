@@ -194,7 +194,7 @@ subroutine gyro_fieldeigen_df
               do m=1,n_stack
                  do k=1,n_lambda
                     imk = i+(m-1)*n_x+(k-1)*n_x*n_stack
-                    h(m,i,p_nek_vec(ie2,k),is) = z(is)*alpha_s(is,i)*h_vec(imk)
+                    h(m,i,p_nek_vec(ie2,k),is) = h_vec(imk)
                  enddo
               enddo
            enddo

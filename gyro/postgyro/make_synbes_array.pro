@@ -1,8 +1,9 @@
 FUNCTION make_synbes_array, data, n_e, TOR_FRAC=tor_frac, $
   ITMIN = itmin, ITMAX = itmax,  INTERP=interp, OMEGA0=omega0, $
   N_TOR_FRAC=n_tor_frac, NR_BESchannels = NR_BESchannels, $
-  NZ_BESchannels = NZ_BESchannels, BES_Z00 = BES_Z00, BES_DR=BES_DR, $
-  BES_DZ=BES_DZ, SHOW_WINDOWS=show_windows, $
+  NZ_BESchannels = NZ_BESchannels, BES_Z00 = BES_Z00, $
+  BES_RMIN_OFFSET = BES_RMIN_OFFSET, BES_DR=BES_DR, BES_DZ=BES_DZ, $
+  SHOW_WINDOWS=show_windows, $
   Aphys = Aphys, A_over_Cs = a_over_cs
 ;
 ; C. Holland, UCSD
@@ -10,6 +11,7 @@ FUNCTION make_synbes_array, data, n_e, TOR_FRAC=tor_frac, $
 ; v1.1: 10.12.2010: added Aphys, a_over_cs keywords to enable external
 ; inputs for these parameters when using tgyro2gyro input files
 ; v2.0: 8.25.2011: updated for consistency with gacode file structures
+; v2.1: 2.22.2012: added BES_RMIN_OFFSET keyword to shift center away from sim center
 ;
 ; takes PostGYRO data  (for profile, time info) +
 ; ne=[n_theta_plot,n_r,n_n,n_time] complex arrays, generates 
@@ -46,6 +48,8 @@ FUNCTION make_synbes_array, data, n_e, TOR_FRAC=tor_frac, $
   PRINT, 'NR_BESchannels = ', NR_BESchannels
   DEFAULT, NZ_BESchannels, 6
   PRINT, 'NZ_BESchannels = ', NZ_BESchannels
+  DEFAULT, BES_RMIN_OFFSET, 0.
+  PRINT, 'BES r_min/a OFFSET = ', BES_RMIN_OFFSET
   DEFAULT, BES_Z00, -4. ;cm
   PRINT, 'BES Z00 (cm): ', BES_Z00
   DEFAULT, BES_DR, 0.9 ;cm
@@ -82,7 +86,7 @@ FUNCTION make_synbes_array, data, n_e, TOR_FRAC=tor_frac, $
 
   ;R00 = major radius/a of bes channel 9 is at middle of shot
   ir = data.n_r/2
-  R00 =  (data.R0[ir] + data.r[ir])
+  R00 =  (data.R0[ir] + data.r[ir] + BES_rmin_offset)
   Z00 = BES_Z00/Aphys
 
   ;create array BES psfs interpolated onto GYRO grid
@@ -101,18 +105,21 @@ FUNCTION make_synbes_array, data, n_e, TOR_FRAC=tor_frac, $
       psf_interp[*,*,ir,iz] = BILINEAR(psf.psf, ir_GYRO, iz_GYRO, MISSING=0)
       psf_interp_norm[ir,iz] = TOTAL(psf_interp[*,*,ir,iz])
   ENDFOR
+  PRINT, 'BES r_min/a = ', BES_xloc[*,0] - data.R0[data.n_r/2]
 
   it = itmin
   ne_RZ = TRANSPOSE(GYRO_RTHETA_TRANSFORM(n_e[*,*,*,it], data,sf,$
                                           NU_SILENT=nu_silent, TOR_FRAC = tor_frac))
 
+  help, ne_RZ, GYRO_R, GYRO_Z
   IF (windows_flag) THEN BEGIN ; plot BES locations
       WINDOW, 0
       xr =BES_XLOC[NR_BESchannels/2,0]*Aphys + [-6,6]
       GYRO_RZ_COLOR_CONTOUR, TRANSPOSE(ne_RZ), GYRO_R, GYRO_Z, $
         XRANGE=xr, YRANGE=[-10,2]+BES_Z00, Aphys=Aphys, $
         TITLE = '!4d!Xn!De!N (t = ' + NUMTOSTRING(data.t[it]) + ')'
-      
+
+ OPLOT, GYRO_R[data.n_r-1-data.n_bnd,*]*Aphys, GYRO_Z[data.n_r-1-data.n_bnd,*]*Aphys, LINESTYLE=2	      
       FOR ir = 0, NR_BESchannels-1 DO FOR iz=0, NZ_BESchannels-1 DO BEGIN
           PLOTS, BES_xloc[ir,iz]*Aphys, BES_zloc[ir,iz]*Aphys, psym=4
           PLOTS, GYRO_R(BES_gyroidx[ir,iz])*Aphys, $
@@ -185,6 +192,7 @@ FUNCTION make_synbes_array, data, n_e, TOR_FRAC=tor_frac, $
                  a_over_cs: a_over_cs, $
                  NR_BESCHANNELS:NR_BESchannels, $
                  NZ_BESCHANNELS:NZ_BESchannels, $
+		 BES_RMIN_OFFSET: BES_rmin_offset, $
                  GYRO_ne:GYRO_ne_sig, syn_ne:syn_ne_sig, $
                  syn_BES_XLOC:BES_xloc, syn_BES_ZLOC: BES_zloc, $
                  GYRO_BES_XLOC:GYRO_R[BES_gyroidx], $

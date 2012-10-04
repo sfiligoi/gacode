@@ -22,10 +22,12 @@ subroutine gkcoll_read_input
   read(1,*) rupwind_eps
   read(1,*) rupwind_n
   read(1,*) tupwind_eps
+  read(1,*) neoclassical_model
   read(1,*) toroidal_model
   read(1,*) toroidal_num
   read(1,*) rho
   read(1,*) k_theta_rho
+  read(1,*) r_length_rho
   read(1,*) rmin
   read(1,*) rmaj
   read(1,*) silent_flag

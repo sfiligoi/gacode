@@ -1,0 +1,108 @@
+#!/bin/bash
+# 
+# SCRIPT:
+#  gyro_reg_nagios <nproc> <testrootdir>
+#
+# PURPOSE:
+#  Run through full suite of GYRO regression tests
+#----------------------------------------------------
+
+n=$#
+
+if [ $n -lt 2 ] 
+then
+  echo "ERROR: Need to set number of CPUs and testdir."
+  echo
+  echo "    gyro_reg_nagios <nproc> <testrootdir>"    
+  exit 2
+fi
+
+# Number of MPI tasks
+n_proc=${1}
+
+# NUmber of OMP threads
+n_omp=1
+
+# Test directory (/tmp for example)
+testdir=${2}/gyro_regression
+
+# File where regression results end up
+regfile='out.gyro.regression'
+
+# List of regression test directories:
+list="
+reg01 
+reg02 
+reg03 
+reg04 
+"
+
+# Count tests
+p=0
+for sim in $list
+do
+   p=$((p+1))	
+done
+
+# Files containing precision data
+precfile='out.gyro.prec'
+
+rm -rf $testdir ; mkdir $testdir
+cd $testdir
+touch $regfile
+
+start_sim_time=`date +%s`
+
+passes=0
+for sim in $list
+do 
+   gyro -g $sim -p $testdir > out
+   rm -rf $sim/$precfile
+   gyro -e $sim -n $n_proc -nomp $n_omp -p $testdir > out
+   gyro_reg $sim > out
+   string=`cat out`
+   if [ "${string:7:4}" == "PASS" ]
+   then
+      passes=$((passes+1))
+   fi
+   cat out >> $regfile
+done
+
+regfile_mod_time=`date +%s --reference $regfile`
+
+# Critical (2)
+# Make sure timestamp on $regfile is newer than
+# the start of simulation; otherwise, $regfile may
+# be left over from a previous run.
+if [ $regfile_mod_time -le $start_sim_time ]
+then
+   echo "Error: Output file not updated"
+   exit 2
+fi
+
+# Critical (2)
+if [ $passes -eq 0 ] 
+then
+   echo "Error: All tests failed"
+   cat $regfile
+   exit 2
+fi
+
+# Good (0)
+if [ $passes -eq $p ] 
+then
+   echo "Good: All tests passed"
+   cat $regfile
+   exit 0
+fi
+
+# Warning (1)
+if [ $passes -ge $((p-2)) ] 
+then
+   echo "Warning: Some tests failed"
+   cat $regfile
+   exit 1
+fi
+
+# Critical 
+exit 2

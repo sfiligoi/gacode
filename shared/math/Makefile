@@ -13,6 +13,7 @@ OBJECTS = math_constants.o \
           i0.o \
           erf.o \
           proc_time.o \
+	  parallel_dim.o \
           p32.o \
           invert_p32.o \
           gauss_legendre.o \
@@ -42,7 +43,7 @@ lib: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
 
 .f.o :
-	$(F77) $(FFLAGS) -c $<
+	$(FC) $(FFLAGS) -c $<
 
 .f90.o :
 	$(FC) $(FMATH) $(FFLAGS) -c $<

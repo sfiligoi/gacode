@@ -53,6 +53,11 @@ then
   echo "         -K <simdir>" 
   echo "         Set non-persistent halt signal in <simdir>."
   echo 
+  echo "REGRESSION TESTING"
+  echo
+  echo "         -r"
+  echo "         Auto-run the full regression suite."
+  echo 
   echo "TEMPLATE GENERATION"
   echo
   echo "         -g"
@@ -89,6 +94,7 @@ EXEC_FLAG=0
 TEST_FLAG=0
 INIT_FLAG=0
 GENERATE_FLAG=0
+REGRESS_FLAG=0
 SCOPY_FLAG=0
 KILL_STATUS=2
 #=============================================================
@@ -108,6 +114,8 @@ while [ $# -gt 0 ] ; do
   -i) shift ; LOCDIR=$1 ; INIT_FLAG=1 ;;
 
   -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
+
+  -r) REGRESS_FLAG=1 ;;
 
   -s) shift ; LOCDIR=$1 ; SCOPY_FLAG=1 ;;
 
@@ -168,6 +176,16 @@ then
    else
       cp -ai ${TGYRO_DIR}/tools/input/$LOCDIR $SIMDIR
    fi
+   exit 0
+fi
+#============================================================
+
+#============================================================
+# Do the regression test if -r set, then exit.
+#
+if [ $REGRESS_FLAG -eq 1 ] 
+then 
+   tgyro_reg_do $NPROC $NOMP
    exit 0
 fi
 #============================================================
@@ -291,7 +309,7 @@ then
    else
       #==========================================================
       # Version stamp:
-      echo `gacode_getversion` > $VERBASE 
+      cat $GACODE_ROOT/tgyro/.VERSION > $VERBASE 
       echo $GACODE_PLATFORM >> $VERBASE
       date >> $VERBASE
       #==========================================================

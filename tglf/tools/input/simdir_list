@@ -1,5 +1,6 @@
 Regression cases
 
-tglf01: GA standard case with Miller geometry
-tglf02: GA standard case with Miller geometry, high elongation.
-
+tglf01: [GA standard case, Miller geometry]
+tglf02: [GA standard case, Miller geometry, high elongation]
+tglf03: [GA standard case, s-alpha geometry]
+tglf04: [GA standard case, Miller geometry, ExB shear]

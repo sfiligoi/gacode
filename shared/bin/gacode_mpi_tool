@@ -1,3 +1,5 @@
+# Calculator for task/thread layout for hybrid MPI - OpemMP jobs.
+#
 # nmpi = MPI tasks
 # nomp = OpenMP threads per MPI task
 # numa = NUMAs active per node

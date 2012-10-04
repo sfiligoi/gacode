@@ -7,7 +7,7 @@
 
 subroutine prgen_read_iterdb_nc
 
-  use prgen_read_globals
+  use prgen_globals
   use netcdf
 
   implicit none
@@ -158,6 +158,8 @@ subroutine prgen_read_iterdb_nc
 
   err = nf90_inq_varid(ncid,trim('qdelt'),varid)
   err = nf90_get_var(ncid,varid,onetwo_qdelt)
+  !Correct for difference in sign convention with ASCII format iterdb
+  onetwo_qdelt(:) = -1*onetwo_qdelt(:)
 
   err = nf90_inq_varid(ncid,trim('qbeami'),varid)
   err = nf90_get_var(ncid,varid,onetwo_qbeami)
@@ -170,12 +172,16 @@ subroutine prgen_read_iterdb_nc
 
   err = nf90_inq_varid(ncid,trim('qione'),varid)
   err = nf90_get_var(ncid,varid,onetwo_qione)
+  !Correct for difference in sign convention with ASCII format iterdb
+  onetwo_qione(:) = -1*onetwo_qione(:)
 
   err = nf90_inq_varid(ncid,trim('qioni'),varid)
   err = nf90_get_var(ncid,varid,onetwo_qioni)
 
   err = nf90_inq_varid(ncid,trim('qcx'),varid)
   err = nf90_get_var(ncid,varid,onetwo_qcx)
+  !Correct for difference in sign convention with ASCII format iterdb
+  onetwo_qcx(:) = -1*onetwo_qcx(:)
 
   err = nf90_inq_varid(ncid,trim('qfuse'),varid)
   err = nf90_get_var(ncid,varid,onetwo_qfuse)
@@ -185,6 +191,8 @@ subroutine prgen_read_iterdb_nc
 
   err = nf90_inq_varid(ncid,trim('qrad'),varid)
   err = nf90_get_var(ncid,varid,onetwo_qrad)
+  !Correct for difference in sign convention with ASCII format iterdb
+  onetwo_qrad(:) = -1*onetwo_qrad(:)
 
   err = nf90_inq_varid(ncid,trim('qohm'),varid)
   err = nf90_get_var(ncid,varid,onetwo_qohm)

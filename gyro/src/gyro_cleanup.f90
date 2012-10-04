@@ -27,8 +27,8 @@ subroutine gyro_cleanup
      if (nonlinear_flag == 1) call gyro_alloc_nl(0)
 
      ! Sparse field arrays 
-     deallocate(m_poisson)
-     deallocate(indx_poisson)
+     if (allocated(m_poisson)) deallocate(m_poisson)
+     if (allocated(indx_poisson)) deallocate(indx_poisson)
      if (allocated(m_ampere)) deallocate(m_ampere)
      if (allocated(indx_ampere)) deallocate(indx_ampere)
      if (allocated(m_maxwell)) deallocate(m_maxwell)
@@ -44,15 +44,5 @@ subroutine gyro_cleanup
      if (sparse_method == 2) call MPI_COMM_FREE(MUMPS_COMM,i_err)
 
   endif
-
-  ! (Possible) deallocation of interface variables
-  if (allocated(gyro_elec_pflux_out)) deallocate(gyro_elec_pflux_out)
-  if (allocated(gyro_elec_mflux_out)) deallocate(gyro_elec_mflux_out)
-  if (allocated(gyro_elec_eflux_out)) deallocate(gyro_elec_eflux_out)
-  if (allocated(gyro_elec_expwd_out)) deallocate(gyro_elec_expwd_out)
-  if (allocated(gyro_ion_pflux_out)) deallocate(gyro_ion_pflux_out)
-  if (allocated(gyro_ion_mflux_out)) deallocate(gyro_ion_mflux_out)
-  if (allocated(gyro_ion_eflux_out)) deallocate(gyro_ion_eflux_out)
-  if (allocated(gyro_ion_expwd_out)) deallocate(gyro_ion_expwd_out)
 
 end subroutine gyro_cleanup

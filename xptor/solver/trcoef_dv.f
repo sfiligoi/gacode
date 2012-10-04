@@ -44,14 +44,18 @@ c
       real*8 last_lhs
       real*8 d_vdia,d_vneo,d_vexb,d_vpar
       real*8 gradvphim
+      real*8 hm, gradhm
       real*8 unc(0:mxgrd)
       real*8 S_ei(0:mxgrd), S_pol(0:mxgrd)
-      real*8 egamma_sum(0:mxgrd-1),gamma_p_sum(0:mxgrd-1)
+      real*8 egamma_sum(0:mxgrd-1)
+      real*8 gamma_p_sum(0:mxgrd-1)
       real*8 anrate_sum(0:mxgrd-1),anfreq_sum(0:mxgrd-1)
       real*8 diffgb_sum(0:mxgrd-1)
       real*8 chiegb_sum(0:mxgrd-1), chiigb_sum(0:mxgrd-1)
       real*8 chiegb_e_sum(0:mxgrd-1),cgb_sum(0:mxgrd-1)
-      real*8 chiineo_sum(0:mxgrd-1),etagb_phi_sum(0:mxgrd-1)
+      real*8 rhosda_sum(0:mxgrd-1),csda_sum(0:mxgrd-1)
+      real*8 chiineo_sum(0:mxgrd-1),chieneo_sum(0:mxgrd-1)
+      real*8 etagb_phi_sum(0:mxgrd-1)
       real*8 kpol_m_sum(0:mxgrd-1),nu_pol_m_sum(0:mxgrd-1)
       real*8 flowe_neo_sum(0:mxgrd-1)
       real*8 flowi_neo_sum(0:mxgrd-1)
@@ -108,8 +112,8 @@ c      ca = 2.D0/3.D0
       ca = 1.D0
       ap = (1.D0 + ca)/2.D0
       am = (1.D0 - ca)/4.D0
-      do j=1,mxflds
-      do k=1,mxgrd
+      do j=1,mxfields
+      do k=1,mxgrid
         S_ext(j,k)=0.0
         do i=0,10
           glf_flux(i,j,k) = 0.D0
@@ -122,7 +126,7 @@ c      ca = 2.D0/3.D0
         S_ei(k)=0.D0
         S_pol(k)=0.D0
       enddo
-      do k=0,mxgrd-1
+      do k=0,mxgrid
        egamma_sum(k)=0.D0
        gamma_p_sum(k)=0.D0
        anrate_sum(k)=0.D0
@@ -132,11 +136,14 @@ c      ca = 2.D0/3.D0
        chiigb_sum(k)=0.D0
        chiegb_e_sum(k)=0.D0
        chiineo_sum(k)=0.D0
+       chieneo_sum(k)=0.0
        kpol_m_sum(k)=0.D0
        nu_pol_m_sum(k)=0.D0
-       chiineo_m(k)=0.D0
        chiineogb_m(k)=0.D0
+       chieneogb_m(k)=0.D0
        cgb_sum(k)=0.D0
+       csda_sum(k)=0.0
+       rhosda_sum(k)=0.0
        etagb_phi_sum(k)=0.D0
        flowe_neo_sum(k)=0.0
        flowi_neo_sum(k)=0.0
@@ -182,18 +189,19 @@ c      ca = 2.D0/3.D0
        xnu_m_sum(k)=0.0
        alpha_m_sum(k)=0.0
        betae_m_sum(k)=0.0
-c
        egamma_m(k)=0.D0
        anrate_m(k)=0.D0
        anfreq_m(k)=0.D0
        gamma_p_m(k)=0.D0
        nu_pol_m(k)=0.D0
        kpol_m(k)=0.D0
+       csda_m(k)=0.0
+       rhosda_m(k)=0.0
        cgyrobohm_m(k)=0.D0
        chiegb_m(k)=0.D0
        chiigb_m(k)=0.D0
        diffgb_m(k)=0.D0
-       chie_e_gb_m(k)=0.D0
+       chiegb_etg_m(k)=0.D0
        etagb_phi_m(k)=0.D0
        etagb_par_m(k)=0.D0
        etagb_per_m(k)=0.D0
@@ -258,7 +266,7 @@ c
 c      dx = arho_exp/4.D0
       dx = 1.D0
       cnc = -1.0*alpha_dia/bt_exp
-      cnc=0.0
+c      cnc=0.0
 c
 c start of main dv-method loop
 c
@@ -556,7 +564,7 @@ c
      >  ,MPI_SUM,0,MPI_COMM_WORLD,i_err)
       call MPI_BCAST(chiegb_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
-      call MPI_REDUCE(chie_e_gb_m,chiegb_e_sum,mxgrd,
+      call MPI_REDUCE(chiegb_etg_m,chiegb_e_sum,mxgrd,
      >  MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,i_err)
       call MPI_BCAST(chiegb_e_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
@@ -564,13 +572,25 @@ c
      >  ,MPI_SUM,0,MPI_COMM_WORLD,i_err)
       call MPI_BCAST(chiigb_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
-      call MPI_REDUCE(chiineo_m,chiineo_sum,mxgrd,
+      call MPI_REDUCE(chiineogb_m,chiineo_sum,mxgrd,
      >   MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,i_err)
       call MPI_BCAST(chiineo_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(chieneogb_m,chieneo_sum,mxgrd,
+     >   MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,i_err)
+      call MPI_BCAST(chieneo_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
       call MPI_REDUCE(cgyrobohm_m,cgb_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,MPI_SUM,0,MPI_COMM_WORLD, i_err)
       call MPI_BCAST(cgb_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(csda_m,csda_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(csda_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,0, MPI_COMM_WORLD, i_err)
+      call MPI_REDUCE(rhosda_m,rhosda_sum,mxgrd,MPI_DOUBLE_PRECISION
+     >  ,MPI_SUM,0,MPI_COMM_WORLD, i_err)
+      call MPI_BCAST(rhosda_sum,mxgrd,MPI_DOUBLE_PRECISION
      >  ,0, MPI_COMM_WORLD, i_err)
       call MPI_REDUCE(etagb_phi_m,etagb_phi_sum,mxgrd,
      > MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD, i_err)
@@ -785,9 +805,12 @@ c
         diffgb_m(k)=diffgb_sum(k)
         chiegb_m(k)=chiegb_sum(k)
         chiigb_m(k)=chiigb_sum(k)
-        chiineo_m(k)=chiineo_sum(k)
-        chie_e_gb_m(k)=chiegb_e_sum(k)
+        chiineogb_m(k)=chiineo_sum(k)
+        chieneogb_m(k)=chieneo_sum(k)
+        chiegb_etg_m(k)=chiegb_e_sum(k)
         cgyrobohm_m(k)=cgb_sum(k)
+        csda_m(k)=csda_sum(k)
+        rhosda_m(k)=rhosda_sum(k)
         etagb_phi_m(k)=etagb_phi_sum(k)
         kpol_m(k)=kpol_m_sum(k)
         nu_pol_m(k)=nu_pol_m_sum(k)
@@ -841,27 +864,27 @@ c         vdia_new(i,k) = 0.5*(vdia_new_sum(i,k)+vdia_new_sum(i,k-1))
 c         vneo_new(i,k) = 0.5*(vneo_new_sum(i,k)+vneo_new_sum(i,k-1))
 c        enddo
       enddo
-      egamma_m(0)=egamma_m(1)
-      gamma_p_m(0)=gamma_p_m(1)
-      anrate_m(0)=anrate_m(1)
       kpol_m(0)=kpol_m(1)
       nu_pol_m(0)=nu_pol_m(1)
       xnu_m(0)=xnu_m(1)
       alpha_m(0)=0.0
       cgyrobohm_m(0) = cgyrobohm_m(1)
-      egamma_m(ngrid)=egamma_m(ngrid-1)
-      gamma_p_m(ngrid)=gamma_p_m(ngrid-1)
-      anrate_m(ngrid)=anrate_m(ngrid-1)
-      anfreq_m(ngrid)=anfreq_m(ngrid-1)
+      csda_m(0)=csda_m(1)
+      rhosda_m(0)=rhosda_m(1)
       diffgb_m(ngrid)=diffgb_m(ngrid-1)
       chiegb_m(ngrid)=chiegb_m(ngrid-1)
       chiigb_m(ngrid)=chiigb_m(ngrid-1)
-      chiineo_m(ngrid)=chiineo_m(ngrid-1)
-      chie_e_gb_m(ngrid)=chie_e_gb_m(ngrid-1)
-      cgyrobohm_m(ngrid)=cgyrobohm_m(ngrid-1)
+      chiineogb_m(ngrid)=chiineogb_m(ngrid-1)
+      chieneogb_m(ngrid)=chieneogb_m(ngrid-1)
+      chiegb_etg_m(ngrid)=chiegb_etg_m(ngrid-1)
       etagb_phi_m(ngrid)=etagb_phi_m(ngrid-1)
       kpol_m(ngrid)=kpol_m(ngrid-1)
       nu_pol_m(ngrid)=nu_pol_m(ngrid-1)
+      do k=ngrid,mxgrid
+        cgyrobohm_m(k)=cgyrobohm_exp(k)
+        csda_m(k)=csda_exp(k)
+        rhosda_m(k)=rhosda_exp(k)
+      enddo
 c      do i=1,nspecies
 c set boundary conditions on full grid
 c        vdia_new(i,0)=vdia_new(i,1)
@@ -897,6 +920,7 @@ c        nzm=(nz_m(k+1)+nz_m(k))/2.D0
 c        thetam = theta_exp(k)*f_exp(k)
         thetam = theta_exp(k)
         qm=q_exp(k)
+        hm =(h_m(k+1)+h_m(k))/2.0
         gradnem = (ne_m(k+1)-ne_m(k))/dr(k,2)
 c        gradnim = (ni_m(k+1)-ni_m(k))/dr(k,2)
 c        gradnzm = (nz_m(k+1)-nz_m(k))/dr(k,2)
@@ -908,6 +932,7 @@ c        gradnzm = (nz_m(k+1)-nz_m(k))/dr(k,2)
         gradfzm = (fz_m(k+1)-fz_m(k))/dr(k,2)
         gradnim = fim*gradnem + nem*gradfim
         gradnzm = fzm*gradnem + nzm*gradfzm
+        gradhm = (h_m(k+1)-h_m(k))/dr(k,2)
 c diagnostic output
         a_unit_exp = rmin_exp(mxgrid)
         zpne_m(k) = -a_unit_exp*gradnem/nem
@@ -965,7 +990,8 @@ c Note difference due to density ne_m 1.0e13 not 1.0e14
 c Note the ONETWO version is used here but not in ptorinit since have GLF here
 c
         if(iexch.ne.0)then
-          zbrac=(niw+amassgas_exp*nzw*zimp_exp**2/amassimp_exp)/new
+          zbrac=(niw*zgas_exp**2 
+     >    +amassgas_exp*nzw*zimp_exp**2/amassimp_exp)/new
           lnlam=24.D0-DLOG(DSQRT(1.D13*new)/(1000.D0*tew))
           lnlam=DMAX1(lnlam,1.D0)
            nuei_m(k)= 1.5D0*new*new*zbrac
@@ -987,16 +1013,6 @@ c       write(*,*)k,"dflux",dflux(0,2,k),dflux(2,2,k)
        tiflux(k) = tifluxm
        vphiflux(k) = vphifluxm
        vparflux(k) = vparfluxm
-       diffgb_m(k) = -gradnem*nefluxm
-     >  /(cgyrobohm_m(k)*1.6022D-3*MAX(1.0D-10,gradnem*gradnem))
-       chiegb_m(k) = -gradtem*tefluxm
-     >  /(cgyrobohm_m(k)*1.6022D-3*nem*MAX(1.0D-10,gradtem*gradtem))
-       chiigb_m(k) = -gradtim*tifluxm
-     >  /(cgyrobohm_m(k)*1.6022D-3*nim*MAX(1.0D-10,gradtim*gradtim))
-       gradvphim = cv*(vphi_m(k+1)-vphi_m(k))/dr(k,2)
-       etagb_phi_m(k) = -gradvphim*vphifluxm
-     >  /(cgyrobohm_m(k)*1.6726D-8*amassgas_exp*nim
-     >     *MAX(1.0D-10,gradvphim*gradvphim))
 c
        j = 0
        if(itport_pt(1).ne.0)then
@@ -1028,7 +1044,7 @@ c
 c       transport electron density
 c
          j = j+1
-         delt_v=dvmin*dne/dx
+         delt_v=hm*dvmin*dne/dx
          nefluxm = dflux(1,1,k)
          tefluxm = dflux(1,2,k)
          tifluxm = dflux(1,3,k)
@@ -1038,33 +1054,35 @@ c
          if(itport_pt(1).ne.0)then
            i=i+1
            diff(i,j,k)=(nefluxm - neflux(k))/(delt_v)
-           conv3(i,j,k) = diff(i,j,k)*gradnem/nem
-           vrho3(i,j,k) = 1.0*1.6022D-3
+           conv3(i,j,k) = diff(i,j,k)*(gradnem/nem+gradhm/hm)
+           vrho3(i,j,k) = (1.0/h_m(k))*1.6022D-3
          endif
          if(itport_pt(2).ne.0)then
            i=i+1
            diff(i,j,k)= (tefluxm - teflux(k))/(delt_v)
-           conv3(i,j,k) = diff(i,j,k)*gradnem/nem
-           vrho3(i,j,k)=1.5D0*te_m(k)*1.6022D-3
+           conv3(i,j,k) = diff(i,j,k)*(gradnem/nem+gradhm/hm)
+           vrho3(i,j,k)=1.5D0*(te_m(k)/h_m(k))*1.6022D-3
          endif
          if(itport_pt(3).ne.0)then
            i=i+1
            diff(i,j,k)=(tifluxm - tiflux(k))/(delt_v)
-           conv3(i,j,k) = diff(i,j,k)*gradnem/nem
-           vrho3(i,j,k)=1.5D0*(fi_m(k)+fz_m(k))*ti_m(k)*1.6022D-3 
+           conv3(i,j,k) = diff(i,j,k)*(gradnem/nem+gradhm/hm)
+           vrho3(i,j,k)=1.5D0*(fi_m(k)+fz_m(k))
+     >                  *(ti_m(k)/h_m(k))*1.6022D-3 
          endif
          if(itport_pt(4).ne.0)then
            i=i+1
            diff(i,j,k)=(vphifluxm - vphiflux(k))/(delt_v)
-           conv3(i,j,k) = diff(i,j,k)*gradnem/nem
+           conv3(i,j,k) = diff(i,j,k)*(gradnem/nem+gradhm/hm)
+           vrho3(i,j,k) = mass_density*c_tor(k)*vexb_m(k)/h_m(k)
            nu_pt(i,j,k) = -mass_density*c_tor(k)*
-     >     (cnc/thetam)*tia/dt
+     >     (cnc/thetam)*tia/(dt*h_m(k))
            nu_2t(i,j,k) = -mass_density*c_tor(k)*(cnc/thetam)
-     >     *(ugradti+tia*ugradfi/fia)/dt
+     >     *(ugradti+tia*ugradfi/fia)/(dt*h_m(k))
            if(itport_pt(5).eq.0)then
              nu_2t(i,j,k) = nu_2t(i,j,k) 
      >       +mass_density*c_per(k)*(cnc/thetam)
-     >        *kpol_m(k)*ugradti/dt
+     >        *kpol_m(k)*ugradti/(dt*h_m(k))
            else
              nu_pt(i,j,k) = nu_pt(i,j,k)*
      >      (1.0-c_per(k)*c_per(k)/(c_par(k)*c_tor(k)))
@@ -1075,20 +1093,16 @@ c
          if(itport_pt(5).ne.0)then
            i=i+1
            diff(i,j,k)=(vparfluxm -vparflux(k))/(delt_v)
-           conv3(i,j,k) = diff(i,j,k)*gradnem/nem
-           nu_p(i,j,k) = -nu_pol_m(k)*(cnc/thetam)*
-     >     (-c_per(k)/c_par(k))*tia
-           nu_2(i,j,k)= -nu_pol_m(k)*(cnc/thetam)*
-     >     (kpol_m(k)*ugradti-(c_per(k)/c_par(k))*
-     >     (ugradti+tia*ugradfi/fia))
+           conv3(i,j,k) = diff(i,j,k)*(gradnem/nem+gradhm/hm)
          endif
        endif
+c
 c
        if(itport_pt(2).ne.0)then
 c      transport electron energy
 c
          j=j+1
-         delt_v=dvmin*dte/dx
+         delt_v=hm*dvmin*dte/dx
          nefluxm = dflux(2,1,k)
          tefluxm = dflux(2,2,k)
          tifluxm = dflux(2,3,k)
@@ -1098,36 +1112,36 @@ c
          if(itport_pt(1).ne.0)then
            i=i+1
            diff(i,j,k)=(nefluxm - neflux(k))/(delt_v)
-           conv3(i,j,k) = diff(i,j,k)*gradtem/tem
+           conv3(i,j,k) = diff(i,j,k)*(gradtem/tem+gradhm/hm)
          endif
          if(itport_pt(2).ne.0)then
            i=i+1
            diff(i,j,k)=(tefluxm - teflux(k))/(delt_v)
-           conv3(i,j,k) = diff(i,j,k)*gradtem/tem
-           nu(i,j,k)= nuei_m(k)*1.6022D-3
-           vrho3(i,j,k) = 1.5D0*ne_m(k)*1.6022D-3
+           conv3(i,j,k) = diff(i,j,k)*(gradtem/tem+gradhm/hm)
+           nu(i,j,k)= (nuei_m(k)/h_m(k))*1.6022D-3
+           vrho3(i,j,k) = 1.5D0*(ne_m(k)/h_m(k))*1.6022D-3
            if(ABS(teflux(k)).gt.1.0D-12)then
-             stiff(1,1,k) = -gradtem*diff(i,j,k)/teflux(k)
+             stiff(1,1,k) = -hm*gradtem*diff(i,j,k)/teflux(k)
            endif
          endif
          if(itport_pt(3).ne.0)then
            i=i+1
            diff(i,j,k)=(tifluxm - tiflux(k))/(delt_v)
-           conv3(i,j,k) = diff(i,j,k)*gradtem/tem
-           nu(i,j,k)= - nuei_m(k)*1.6022D-3
+           conv3(i,j,k) = diff(i,j,k)*(gradtem/tem+gradhm/hm)
+           nu(i,j,k)= - (nuei_m(k)/h_m(k))*1.6022D-3
            if(ABS(tiflux(k)).gt.1.0D-12)then
-             stiff(2,1,k) = -gradtem*diff(i,j,k)/tiflux(k)
+             stiff(2,1,k) = -hm*gradtem*diff(i,j,k)/tiflux(k)
            endif
          endif
          if(itport_pt(4).ne.0)then
            i=i+1
            diff(i,j,k)=(vphifluxm - vphiflux(k))/(delt_v)
-           conv3(i,j,k) = diff(i,j,k)*gradtem/tem
+           conv3(i,j,k) = diff(i,j,k)*(gradtem/tem+gradhm/hm)
          endif
          if(itport_pt(5).ne.0)then
            i=i+1
            diff(i,j,k)=(vparfluxm - vparflux(k))/(delt_v)
-           conv3(i,j,k) = diff(i,j,k)*gradtem/tem
+           conv3(i,j,k) = diff(i,j,k)*(gradtem/tem+gradhm/hm)
          endif
        endif
 c
@@ -1135,7 +1149,7 @@ c
 c      transport ion energy
 c
          j=j+1
-         delt_v=dvmin*dti/dx
+         delt_v=hm*dvmin*dti/dx
          nefluxm = dflux(3,1,k)
          tefluxm = dflux(3,2,k)
          tifluxm = dflux(3,3,k)
@@ -1145,38 +1159,39 @@ c
          if(itport_pt(1).ne.0)then
            i=i+1
            diff(i,j,k)=(nefluxm - neflux(k))/(delt_v)
-           conv3(i,j,k) = diff(i,j,k)*gradtim/tim
+           conv3(i,j,k) = diff(i,j,k)*(gradtim/tim+gradhm/hm)
          endif
          if(itport_pt(2).ne.0)then
            i=i+1
            diff(i,j,k)=(tefluxm - teflux(k))/(delt_v)
-           conv3(i,j,k)=diff(i,j,k)*gradtim/tim
-           nu(i,j,k)=-nuei_m(k)*1.6022D-3
+           conv3(i,j,k) = diff(i,j,k)*(gradtim/tim+gradhm/hm)
+           nu(i,j,k)=-(nuei_m(k)/h_m(k))*1.6022D-3
            if(ABS(teflux(k)).gt.1.0D-12)then
-             stiff(1,2,k) = -gradtim*diff(i,j,k)/teflux(k)
+             stiff(1,2,k) = -hm*gradtim*diff(i,j,k)/teflux(k)
            endif
          endif
          if(itport_pt(3).ne.0)then
            i=i+1
            diff(i,j,k)=(tifluxm - tiflux(k))/(delt_v)
-           conv3(i,j,k) = diff(i,j,k)*gradtim/tim
-           nu(i,j,k)=nuei_m(k)*1.6022D-3
-           vrho3(i,j,k)=1.5D0*(fi_m(k)+fz_m(k))*ne_m(k)*1.6022D-3
+           conv3(i,j,k) = diff(i,j,k)*(gradtim/tim+gradhm/hm)
+           nu(i,j,k)=(nuei_m(k)/h_m(k))*1.6022D-3
+           vrho3(i,j,k)=1.5D0*(fi_m(k)+fz_m(k))
+     >                  *(ne_m(k)/h_m(k))*1.6022D-3
            if(ABS(tiflux(k)).gt.1.0D-12)then
-             stiff(2,2,k) = -gradtim*diff(i,j,k)/tiflux(k)
+             stiff(2,2,k) = -hm*gradtim*diff(i,j,k)/tiflux(k)
            endif
          endif
          if(itport_pt(4).ne.0)then
            i=i+1
            diff(i,j,k)=(vphifluxm - vphiflux(k))/(delt_v)
-           conv3(i,j,k)=diff(i,j,k)*gradtim/tim
+           conv3(i,j,k) = diff(i,j,k)*(gradtim/tim+gradhm/hm)
            nu_pt(i,j,k) = -mass_density*c_tor(k)
-     >     *(cnc/thetam)*nea/dt
-           nu_2t(i,j,k) = -mass_density*c_tor(k)
-     >     *(cnc/thetam)*(nea*ugradfi/fia+ugradne)/dt
+     >     *(cnc/thetam)*nea/(dt*h_m(k))
+           nu_2t(i,j,k) = -mass_density*c_tor(k)/h_m(k)
+     >     *(cnc/thetam)*(nea*ugradfi/fia+ugradne)/(dt*h_m(k))
            if(itport_pt(5).eq.0)then
              nu_pt(i,j,k) = nu_pt(i,j,k) +mass_density*c_per(k)
-     >       *kpol_m(k)*(cnc/thetam)*nea/dt
+     >       *kpol_m(k)*(cnc/thetam)*nea/(dt*h_m(k))
            else
              nu_pt(i,j,k) = nu_pt(i,j,k)*
      >      (1.0-c_per(k)*c_per(k)/(c_par(k)*c_tor(k)))
@@ -1187,11 +1202,11 @@ c
          if(itport_pt(5).ne.0)then
            i=i+1
            diff(i,j,k)=(vparfluxm - vparflux(k))/(delt_v)
-           conv3(i,j,k)=diff(i,j,k)*gradtim/tim
+           conv3(i,j,k) = diff(i,j,k)*(gradtim/tim+gradhm/hm)
            nu_p(i,j,k) = -nu_pol_m(k)*(cnc/thetam)*nea*
-     >     (kpol_m(k)-(c_per(k)/c_par(k)))
+     >     (kpol_m(k)-(c_per(k)/c_par(k)))/h_m(k)
            nu_2(i,j,k) = -nu_pol_m(k)*(cnc/thetam)*
-     >     (-c_per(k)/c_par(k))*(nea*ugradfi/fia+ugradne)
+     >     (-c_per(k)/c_par(k))*(nea*ugradfi/fia+ugradne)/h_m(k)
          endif
        endif
 c
@@ -1199,7 +1214,7 @@ c
 c        vexb_m
 c
          j=j+1
-         delt_v=dvmin*dvexb/dx
+         delt_v=hm*dvmin*dvexb/dx
          nefluxm = dflux(4,1,k)
          tefluxm = dflux(4,2,k)
          tifluxm = dflux(4,3,k)
@@ -1208,30 +1223,30 @@ c
          i=0 
          if(itport_pt(1).ne.0)then
            i=i+1
-           diff(i,j,k)=(nefluxm - neflux(k))/(nem*delt_v)
-           conv3(i,j,k)=diff(i,j,k)*gradnem/nem
+           diff(i,j,k)=(nefluxm - neflux(k))/(delt_v)
+           conv3(i,j,k) = diff(i,j,k)*gradhm/hm
          endif
          if(itport_pt(2).ne.0)then
            i=i+1
-           diff(i,j,k)=(tefluxm - teflux(k))/(nem*delt_v)
-           conv3(i,j,k)=diff(i,j,k)*gradnem/nem
+           diff(i,j,k)=(tefluxm - teflux(k))/(delt_v)
+           conv3(i,j,k) = diff(i,j,k)*gradhm/hm
          endif
          if(itport_pt(3).ne.0)then
            i=i+1
-           diff(i,j,k)=(tifluxm - tiflux(k))/(nem*delt_v)
-           conv3(i,j,k)=diff(i,j,k)*gradnem/nem
+           diff(i,j,k)=(tifluxm - tiflux(k))/(delt_v)
+           conv3(i,j,k) = diff(i,j,k)*gradhm/hm
          endif
          if(itport_pt(4).ne.0)then
            i=i+1
-           diff(i,j,k)=(vphifluxm - vphiflux(k))/(nem*delt_v)
-           conv3(i,j,k)=diff(i,j,k)*gradnem/nem
-           vrho3(i,j,k) = c_tor(k)*mass_density
+           diff(i,j,k)=(vphifluxm - vphiflux(k))/(delt_v)
+           conv3(i,j,k) = diff(i,j,k)*gradhm/hm
+           vrho3(i,j,k) = c_tor(k)*mass_density*ne_m(k)/h_m(k)
          endif
          if(itport_pt(5).ne.0)then
            i=i+1
-           diff(i,j,k)=(vparfluxm - vparflux(k))/(nem*delt_v)
-           conv3(i,j,k)=diff(i,j,k)*gradnem/nem
-           vrho3(i,j,k) = a_tor(k)*mass_density
+           diff(i,j,k)=(vparfluxm - vparflux(k))/(delt_v)
+           conv3(i,j,k) = diff(i,j,k)*gradhm/hm
+           vrho3(i,j,k) = a_tor(k)*mass_density/h_m(k)
          endif
         endif
 c
@@ -1239,7 +1254,7 @@ c
 c         vpol_m
 c
          j=j+1
-         delt_v=dvmin*dvpol/dx
+         delt_v=hm*dvmin*dvpol/dx
          nefluxm = dflux(5,1,k)
          tefluxm = dflux(5,2,k)
          tifluxm = dflux(5,3,k)
@@ -1248,45 +1263,35 @@ c
           i=0
          if(itport_pt(1).ne.0)then
            i=i+1
-           diff(i,j,k)=(nefluxm - neflux(k))/(nem*delt_v)
-           conv3(i,j,k)= diff(i,j,k)*gradnem/nem
+           diff(i,j,k)=(nefluxm - neflux(k))/(delt_v)
+           conv3(i,j,k) = diff(i,j,k)*gradhm/hm
          endif
          if(itport_pt(2).ne.0)then
            i=i+1
-           diff(i,j,k)=(tefluxm - teflux(k))/(nem*delt_v)
-           conv3(i,j,k)= diff(i,j,k)*gradnem/nem
+           diff(i,j,k)=(tefluxm - teflux(k))/(delt_v)
+           conv3(i,j,k) = diff(i,j,k)*gradhm/hm
          endif
          if(itport_pt(3).ne.0)then
            i=i+1
-           diff(i,j,k)=(tifluxm - tiflux(k))/(nem*delt_v)
-           conv3(i,j,k) = diff(i,j,k)*gradnem/nem
+           diff(i,j,k)=(tifluxm - tiflux(k))/(delt_v)
+           conv3(i,j,k) = diff(i,j,k)*gradhm/hm
          endif
          if(itport_pt(4).ne.0)then
            i=i+1
-           diff(i,j,k)=(vphifluxm - vphiflux(k))/(nem*delt_v)
-c           gradvexbm = gradvexbm + zptheta_exp(k)*vexbm
-c           if(DABS(gradvexbm).gt.dvmin)then
-c             testeta = -vexbfluxm/(nim*gradvexbm)
-c           else
-c             testeta = 
-c     >  xparam_gf(6)*chiineo_m(k)*rmin_exp(k)*drhodr(k)/
-c     > (arho_exp*(rho(k+1)+rho(k))/2.D0)
-c           endif
-c           if(ifixeta.eq.1.and.DABS(diff(i,j,k)).lt.testeta)then
-c             diff(i,j,k)=testeta
-c           endif           
-           conv3(i,j,k)= diff(i,j,k)*gradnem/nem
-           vrho3(i,j,k) = c_per(k)*mass_density
+           diff(i,j,k)=(vphifluxm - vphiflux(k))/(delt_v)
+           if(ifixeta.eq.1.and.j.eq.i)then
+             if(diff(i,j,k).lt.0.0)diff(i,j,k)=ABS(eta_tor_exp(k))
+           endif          
+           conv3(i,j,k) = diff(i,j,k)*gradhm/hm
+           vrho3(i,j,k) = c_per(k)*mass_density/h_m(k)
          endif
-          if(itport_pt(5).ne.0)then
+         if(itport_pt(5).ne.0)then
            i=i+1
-           diff(i,j,k)=(vparfluxm - vparflux(k))/(nem*delt_v)
-           conv3(i,j,k) = diff(i,j,k)*gradnem/nem
-           nu(i,j,k) = nu_pol_m(k)
-           vrho3(i,j,k) = a_pol(k)*mass_density
-c           lamda = DSQRT(DABS(diff(i,j,k))/nu_pol_m(k))
-c           if(lamda .lt. lamdamin)lamdamin = lamda
-          endif
+           diff(i,j,k)=(vparfluxm - vparflux(k))/(delt_v)
+           conv3(i,j,k) = diff(i,j,k)*gradhm/hm
+           nu(i,j,k) = nu_pol_m(k)/h_m(k)
+           vrho3(i,j,k) = a_pol(k)*mass_density/h_m(k)
+         endif
         endif
 c end of diffusion terms
 c
@@ -1298,7 +1303,7 @@ c
 c       transport electron density
 c
          j=j+1
-         delt_v=dvmin*dne
+         delt_v=hm*dvmin*dne
          nefluxm = dflux(6,1,k)
          tefluxm = dflux(6,2,k)
          tifluxm = dflux(6,3,k)
@@ -1336,7 +1341,7 @@ c
 c      transport electron energy
 c
          j=j+1
-         delt_v=dvmin*dte
+         delt_v=hm*dvmin*dte
          nefluxm = dflux(7,1,k)
          tefluxm = dflux(7,2,k)
          tifluxm = dflux(7,3,k)
@@ -1376,7 +1381,7 @@ c
 c      transport ion energy
 c
          j=j+1
-         delt_v=dvmin*dti
+         delt_v=hm*dvmin*dti
          nefluxm = dflux(8,1,k)
          tefluxm = dflux(8,2,k)
          tifluxm = dflux(8,3,k)
@@ -1416,7 +1421,7 @@ c
 c      transport exb velocity
 c
          j=j+1
-         delt_v=dvmin*dvexb
+         delt_v=hm*dvmin*dvexb
          nefluxm = dflux(9,1,k)
          tefluxm = dflux(9,2,k)
          tifluxm = dflux(9,3,k)
@@ -1425,30 +1430,28 @@ c
          i=0 
          if(itport_pt(1).ne.0)then
            i=i+1
-           conv3(i,j,k)=(nefluxm - neflux(k))/(nem*delt_v)
+           conv3(i,j,k)=(nefluxm - neflux(k))/(delt_v)
      >       + conv3(i,j,k)
          endif
          if(itport_pt(2).ne.0)then
            i=i+1
-           conv3(i,j,k)=(tefluxm - teflux(k))/(nem*delt_v)
+           conv3(i,j,k)=(tefluxm - teflux(k))/(delt_v)
      >       + conv3(i,j,k)
          endif
          if(itport_pt(3).ne.0)then
            i=i+1
-           conv3(i,j,k)=(tifluxm - tiflux(k))/(nem*delt_v)
+           conv3(i,j,k)=(tifluxm - tiflux(k))/(delt_v)
      >       + conv3(i,j,k)
          endif
          if(itport_pt(4).ne.0)then
            i=i+1
-           conv3(i,j,k)=
-     >       + (vphifluxm - vphiflux(k))/(nem*delt_v)
-     >       + conv3(i,j,k)
+           conv3(i,j,k)= conv3(i,j,k)
+     >       + (vphifluxm - vphiflux(k))/(delt_v)
          endif
          if(itport_pt(5).ne.0)then
            i=i+1
-           conv3(i,j,k)= 
-     >       + (vparfluxm - vparflux(k))/(nem*delt_v)
-     >       + conv3(i,j,k)
+           conv3(i,j,k)= conv3(i,j,k)
+     >       + (vparfluxm - vparflux(k))/(delt_v)
          endif
        endif
 c
@@ -1456,7 +1459,7 @@ c
 c      transport vpol
 c
          j=j+1
-         delt_v=dvmin*dvpol
+         delt_v=hm*dvmin*dvpol
          nefluxm = dflux(10,1,k)
          tefluxm = dflux(10,2,k)
          tifluxm = dflux(10,3,k)
@@ -1465,29 +1468,29 @@ c
          i=0 
          if(itport_pt(1).ne.0)then
            i=i+1
-           conv3(i,j,k)=(nefluxm - neflux(k))/(nem*delt_v)
+           conv3(i,j,k)=(nefluxm - neflux(k))/(delt_v)
      >       + conv3(i,j,k)
          endif
          if(itport_pt(2).ne.0)then
            i=i+1
-           conv3(i,j,k)=(tefluxm - teflux(k))/(nem*delt_v)
+           conv3(i,j,k)=(tefluxm - teflux(k))/(delt_v)
      >       + conv3(i,j,k)
          endif
          if(itport_pt(3).ne.0)then
            i=i+1
-           conv3(i,j,k)=(tifluxm - tiflux(k))/(nem*delt_v)
+           conv3(i,j,k)=(tifluxm - tiflux(k))/(delt_v)
      >       + conv3(i,j,k)
          endif
          if(itport_pt(4).ne.0)then
            i=i+1
            conv3(i,j,k)=
-     >       + (vphifluxm - vphiflux(k))/(nem*delt_v)
+     >       + (vphifluxm - vphiflux(k))/(delt_v)
      >       + conv3(i,j,k)
          endif
          if(itport_pt(5).ne.0)then
            i=i+1
            conv3(i,j,k)= 
-     >       + (vparfluxm - vparflux(k))/(nem*delt_v)
+     >       + (vparfluxm - vparflux(k))/(delt_v)
      >       + conv3(i,j,k)
          endif
        endif
@@ -1554,8 +1557,8 @@ c        thetam=theta_exp(k)*f_exp(k)
         thetam=theta_exp(k)
         tim=ap*ti_m(k)+am*(ti_m(k+1)+ti_m(k-1))
         tem=ap*te_m(k)+am*(te_m(k+1)+te_m(k-1))
-        vexbm=ap*ne_m(k)*vexb_m(k)+
-     >    am*(ne_m(k+1)*vexb_m(k+1)+ne_m(k-1)*vexb_m(k-1))
+c        vexbm=ap*ne_m(k)*vexb_m(k)+
+c     >    am*(ne_m(k+1)*vexb_m(k+1)+ne_m(k-1)*vexb_m(k-1))
         vpolm=ap*ne_m(k)*vpol_m(k)+
      >    am*(ne_m(k+1)*vpol_m(k+1)+ne_m(k-1)*vpol_m(k-1))
         S_ei(k) = nuei_m(k)*(tim-tem)*1.6022D-3
@@ -1567,8 +1570,8 @@ c     >   + wp(3)*nu_pol_m(k+1)*unc(k+1)+wp(2)*nu_pol_m(k)*unc(k)
         thetam=theta_exp(k)
         tim=ap*ti_m(k)+am*(ti_m(k+1)+ti_m(k))
         tem=ap*te_m(k)+am*(te_m(k+1)+te_m(k))
-        vexbm=ap*ne_m(k)*vexb_m(k)+
-     >    am*(ne_m(k+1)*vexb_m(k+1)+ne_m(k)*vexb_m(k))
+c        vexbm=ap*ne_m(k)*vexb_m(k)+
+c     >    am*(ne_m(k+1)*vexb_m(k+1)+ne_m(k)*vexb_m(k))
         vpolm=ap*ne_m(k)*vpol_m(k)+
      >    am*(ne_m(k+1)*vpol_m(k+1)+ne_m(k)*vpol_m(k))
         S_ei(k) = nuei_m(k)*(tim-tem)*1.6022D-3
@@ -1580,8 +1583,8 @@ c
         thetam=theta_exp(k)
         tim=ap*ti_m(k)+am*(ti_m(k+1)+ti_m(k))
         tem=ap*te_m(k)+am*(te_m(k+1)+te_m(k))
-        vexbm=ap*ne_m(k)*vexb_m(k)+
-     >    am*(ne_m(k+1)*vexb_m(k+1)+ne_m(k)*vexb_m(k))
+c        vexbm=ap*ne_m(k)*vexb_m(k)+
+c     >    am*(ne_m(k+1)*vexb_m(k+1)+ne_m(k)*vexb_m(k))
         vpolm=ap*ne_m(k)*vpol_m(k)+
      >    am*(ne_m(k+1)*vpol_m(k+1)+ne_m(k)*vpol_m(k))
         S_ei(k) = nuei_m(k)*(tim-tem)*1.6022D-3
@@ -1864,7 +1867,7 @@ c
       if(xparam_pt(12).ne.0.0)then
        j=0
        do i=1,5
-        if(itport_pt(i).eq.1)then
+        if(itport_pt(i).ne.0)then
          j=j+1
          do k=1,ngrid-1
           T_ave = (Told(j,k+1)+Told(j,k))/2.0

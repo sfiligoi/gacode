@@ -13,13 +13,14 @@ export EXTRA_LIBS = \
        ${LMATH}
 
 all:
+	gacode_getversion > .VERSION
 	cd ${GACODE_ROOT}/shared ; make
 	cd nclass ; make
 	cd src ; make
 	cd tools/vgen ; make
 
 clean:
-	cd ../modules ; rm -f neo*.mod
+	cd ../modules ; rm -f neo*.mod .VERSION
 	cd src ; make clean
 	cd tools/vgen ; make clean 
 	cd nclass ; make clean 

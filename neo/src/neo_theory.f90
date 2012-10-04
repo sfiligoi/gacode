@@ -50,7 +50,9 @@ contains
           close(io)
        end if
 
-       call NCLASS_DR_alloc(1)
+       if(sim_model == 1) then
+          call NCLASS_DR_alloc(1)
+       endif
        
        initialized = .true.
 
@@ -58,7 +60,9 @@ contains
        if(.NOT. initialized) return
        deallocate(pflux_multi_HS)
        deallocate(eflux_multi_HS)
-       call NCLASS_DR_alloc(0)
+       if(sim_model == 1) then
+          call NCLASS_DR_alloc(0)
+       endif
        initialized = .false.
     end if
 
@@ -147,30 +151,32 @@ contains
 
     if(silent_flag == 0 .and. i_proc == 0) then
        open(io,file=trim(path)//runfile,status='old',position='append')
-       write(io,'(e16.8,$)') r(ir)
-       write(io,'(e16.8,$)') pflux_HH
-       write(io,'(e16.8,$)') efluxi_HH
-       write(io,'(e16.8,$)') efluxe_HH
-       write(io,'(e16.8,$)') jpar_HH
-       write(io,'(e16.8,$)') kpar_HH
-       write(io,'(e16.8,$)') uparB_HH
-       write(io,'(e16.8,$)') vpol_ion_HH
-       write(io,'(e16.8,$)') efluxi_CH
-       write(io,'(e16.8,$)') efluxi_TG
-       write(io,'(e16.8,$)') jpar_S
-       write(io,'(e16.8,$)') kpar_S
-       write(io,'(e16.8,$)') uparB_S
-       write(io,'(e16.8,$)') vpol_ion_S
-       write(io,'(e16.8,$)') phi_HR
+       write(io,'(e16.8)',advance='no') r(ir)
+       write(io,'(e16.8)',advance='no') pflux_HH
+       write(io,'(e16.8)',advance='no') efluxi_HH
+       write(io,'(e16.8)',advance='no') efluxe_HH
+       write(io,'(e16.8)',advance='no') jpar_HH
+       write(io,'(e16.8)',advance='no') kpar_HH
+       write(io,'(e16.8)',advance='no') uparB_HH
+       write(io,'(e16.8)',advance='no') vpol_ion_HH
+       write(io,'(e16.8)',advance='no') efluxi_CH
+       write(io,'(e16.8)',advance='no') efluxi_TG
+       write(io,'(e16.8)',advance='no') jpar_S
+       write(io,'(e16.8)',advance='no') kpar_S
+       write(io,'(e16.8)',advance='no') uparB_S
+       write(io,'(e16.8)',advance='no') vpol_ion_S
+       write(io,'(e16.8)',advance='no') phi_HR
        do is=1, n_species
-          write(io,'(e16.8,$)') pflux_multi_HS(is)
-          write(io,'(e16.8,$)') eflux_multi_HS(is)
+          write(io,'(e16.8)',advance='no') pflux_multi_HS(is)
+          write(io,'(e16.8)',advance='no') eflux_multi_HS(is)
        enddo
        write (io,*)
        close(io)
     end if
 
-    call NCLASS_DR_do(ir)
+    if(sim_model == 1) then
+       call NCLASS_DR_do(ir)
+    endif
 
   end subroutine THEORY_do
 
@@ -428,11 +434,6 @@ contains
          X34, L34_S, Rpe, X33, sigma_S, sigma_spitzer
     real :: nue_S, nue_star_S
 
-    nue_S  = nue_HH * (dens_ele/dens(is_ion,ir)) &
-         * (1.0*zeff) / (1.0* Z(is_ion))**2 
-    nue_star_S = nue_S * rmaj(ir) * abs(q(ir)) &
-            / (sqrt(eps)*sqrt(eps)*sqrt(eps) * vth(is_ele,ir))
-
     alpha_0 = -1.17*(1.0-ftrap) / (1.0 - 0.22*ftrap - 0.19*ftrap*ftrap)
     
     alpha_S = ( (alpha_0 + 0.25*(1.0-ftrap*ftrap) * sqrt(nui_star_HH)) &
@@ -454,6 +455,11 @@ contains
 
     else
 
+       nue_S  = nue_HH * (dens_ele/dens(is_ion,ir)) &
+            * (1.0*zeff) / (1.0* Z(is_ion))**2 
+       nue_star_S = nue_S * rmaj(ir) * abs(q(ir)) &
+            / (sqrt(eps)*sqrt(eps)*sqrt(eps) * vth(is_ele,ir))
+       
        X31    = ftrap / (1.0 + (1.0-0.1*ftrap) * sqrt(nue_star_S)  &
             + 0.5*(1.0-ftrap) * nue_star_S / (1.0*zeff))
        
@@ -673,7 +679,8 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! uses ir_global, is_global, ietype, eps
-  real*8 function myHSenefunc(x)
+  real function myHSenefunc(x)
+
     use neo_globals
     use neo_equilibrium, only : ftrap
     implicit none
@@ -692,19 +699,19 @@ contains
     ene = emax * ( (x-xb) / xa )**2
     de = 2.0 * sqrt(emax) / xa
     val = de * exp(-ene) ! weight w/o ene factor
-    
+
     ! nu_d * ene 
     nu_d_tot = 0.0
     do js=1, n_species
        call get_coll_freqs(0, ir_global,is_global,js,ene,nu_d)
        nu_d_tot = nu_d_tot + nu_d * nu(is_global,ir_global)
     enddo
-    
+
     ft_star = (3.0*pi/16.0) * eps**2 * vth(is_global,ir_global) &
          * sqrt(2.0) * ene**1.5 &
          / (rmaj(ir_global) * q(ir_global) * nu_d_tot)
     ft_fac  = 1.0 / (1.0 + ftrap / ft_star)
-    
+
     ! interpolated
     if(ietype == 1) then
        myHSenefunc = val * nu_d_tot * ene * ft_fac
@@ -714,7 +721,7 @@ contains
        myHSenefunc = val * nu_d_tot * ene * ene * ene * ft_fac
 
     endif
-    
+
   end function myHSenefunc
 
   ! Compute the energy-dependent coll freqs for a given ir, is, js

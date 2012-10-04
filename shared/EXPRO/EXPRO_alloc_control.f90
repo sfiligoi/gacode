@@ -29,6 +29,9 @@ subroutine EXPRO_alloc_control(i_proc,flag)
            read(io,*) EXPRO_nblock
            read(io,*) EXPRO_n_exp
            close(io)
+           open(unit=io,file=trim(path)//trim(runfile),status='replace')
+           write(io,'(a)') 'INFO: (EXPRO) input.profiles.gen found'
+           close(io)
         else
            close(io)
            open(unit=io,file=trim(path)//trim(runfile),status='replace')

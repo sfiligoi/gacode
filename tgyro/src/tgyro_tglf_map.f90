@@ -15,6 +15,10 @@ subroutine tgyro_tglf_map
   ! Local variables
   integer :: i_ion
   real :: q_abs
+  real :: q_prime
+  real :: p_prime
+  real :: gamma_eb0
+  real :: gamma_p0
 
   ! Currently TGLF uses toroidal current as reference direction
   tglf_sign_bt_in = tgyro_btccw_in*tgyro_ipccw_in
@@ -58,11 +62,15 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
 
   !----------------------------------------------------------------
+  ! TGLF-specific quantities
+  q_prime = (q_abs/(r(i_r)/r_min))**2*s(i_r)
+  p_prime = (q_abs/(r(i_r)/r_min))*(beta_unit(i_r)/(8*pi))*(-r_min*dlnpdr(i_r))
+  !----------------------------------------------------------------
+
+  !----------------------------------------------------------------
   ! Geometry parameters:
   !
-  tglf_geometry_flag_in = 1  ! Miller
-  if(loc_num_equil_flag ==1)tglf_geometry_flag_in = 2  ! Fourier 
-  ! s-alpha
+  ! s-alpha (not really needed)
   tglf_rmin_sa_in     = r(i_r)/r_min
   tglf_rmaj_sa_in     = r_maj(i_r)/r_min
   tglf_q_sa_in        = q_abs
@@ -72,27 +80,39 @@ subroutine tgyro_tglf_map
   tglf_theta0_sa_in   = 0.0
   tglf_b_model_sa_in  = 0
   tglf_ft_model_sa_in = 1
-  ! Miller
-  tglf_rmin_loc_in    = r(i_r)/r_min
-  tglf_rmaj_loc_in    = r_maj(i_r)/r_min
-  tglf_zmaj_loc_in    = zmag(i_r)
-  tglf_drmajdx_loc_in = shift(i_r)
-  tglf_dzmajdx_loc_in = dzmag(i_r)
-  tglf_kappa_loc_in   = kappa(i_r)
-  tglf_s_kappa_loc_in = s_kappa(i_r)
-  tglf_delta_loc_in   = delta(i_r)
-  tglf_s_delta_loc_in = s_delta(i_r)
-  tglf_zeta_loc_in    = zeta(i_r)
-  tglf_s_zeta_loc_in  = s_zeta(i_r)
-  tglf_q_loc_in       = q_abs
-  tglf_q_prime_loc_in = (q_abs/(r(i_r)/r_min))**2*s(i_r)
-  tglf_p_prime_loc_in = (q_abs/(r(i_r)/r_min))*(beta_unit(i_r)/(8*pi))*(-r_min*dlnpdr(i_r))
-  ! Fourier
-  tglf_q_fourier_in       = q_abs
-  tglf_q_prime_fourier_in = (q_abs/(r(i_r)/r_min))**2*s(i_r)
-  tglf_p_prime_fourier_in = (q_abs/(r(i_r)/r_min))*(beta_unit(i_r)/(8*pi))*(-r_min*dlnpdr(i_r))
-  tglf_nfourier_in        = n_fourier_geo
-  tglf_fourier_in(:,:)    = a_fourier_geo(:,:,i_r)
+
+  if (loc_num_equil_flag == 1) then
+
+     ! Numerical (Fourier) shape
+     tglf_geometry_flag_in = 2
+
+     tglf_q_fourier_in       = q_abs
+     tglf_q_prime_fourier_in = q_prime
+     tglf_p_prime_fourier_in = p_prime
+     tglf_nfourier_in        = n_fourier_geo
+     tglf_fourier_in(:,:)    = a_fourier_geo(:,:,i_r)
+
+  else
+
+     ! Model (Miller) shape
+     tglf_geometry_flag_in = 1 
+
+     tglf_rmin_loc_in    = r(i_r)/r_min
+     tglf_rmaj_loc_in    = r_maj(i_r)/r_min
+     tglf_zmaj_loc_in    = zmag(i_r)
+     tglf_drmajdx_loc_in = shift(i_r)
+     tglf_dzmajdx_loc_in = dzmag(i_r)
+     tglf_kappa_loc_in   = kappa(i_r)
+     tglf_s_kappa_loc_in = s_kappa(i_r)
+     tglf_delta_loc_in   = delta(i_r)
+     tglf_s_delta_loc_in = s_delta(i_r)
+     tglf_zeta_loc_in    = zeta(i_r)
+     tglf_s_zeta_loc_in  = s_zeta(i_r)
+     tglf_q_loc_in       = q_abs
+     tglf_q_prime_loc_in = q_prime
+     tglf_p_prime_loc_in = p_prime
+
+  endif
   !----------------------------------------------------------------
 
   !-----------------------------------
@@ -137,11 +157,14 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
   ! Gamma_ExB (ExB shearing rate, units of a/cs)
   if (tgyro_rotation_flag == 1) then
-     tglf_vexb_shear_in = gamma_eb(i_r)*r_min/c_s(i_r)  !need to take out sign of q
-     tglf_vpar_shear_in(1) = tglf_sign_Bt_in*gamma_p(i_r)*r_min/c_s(i_r)  ! electrons
-     do i_ion=1,loc_n_ion
-       tglf_vpar_shear_in(i_ion+1) = tglf_sign_Bt_in*gamma_p(i_r)*r_min/c_s(i_r)
-     enddo
+
+     gamma_p0  = -r_maj(i_r)*f_rot(i_r)*w0p_norm
+     gamma_eb0 = gamma_p0*r(i_r)/(q(i_r)*r_maj(i_r)) 
+
+     ! Need to take out sign of q
+     tglf_vexb_shear_in = tglf_sign_bt_in*gamma_eb0*r_min/c_s(i_r)  
+     tglf_vpar_shear_in(:) = gamma_p0*r_min/c_s(i_r)
+
   endif
   !----------------------------------------------------------------
 
@@ -247,7 +270,7 @@ subroutine tgyro_tglf_map
 
   case (3)
 
-     ! EPS-2011 with new ExB shear model
+     ! IAEA-2012 with spectral shift ExB shear model
 
      tglf_alpha_quench_in = 0.0
      tglf_xnu_model_in    = 2

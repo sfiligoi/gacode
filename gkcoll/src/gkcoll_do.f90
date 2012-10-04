@@ -16,10 +16,12 @@ subroutine gkcoll_do
   use gkcoll_equilibrium
   use gkcoll_gyro
   use gkcoll_gk
+  use gkcoll_poisson
   use gkcoll_collision
   use gkcoll_freq
+  use gkcoll_neo
   use gkcoll_allocate_profile
-  use gkcoll_implicit
+  use gkcoll_allimplicit
   implicit none
 
   integer :: ix, ir, it, jr, p, is, ie
@@ -29,12 +31,16 @@ subroutine gkcoll_do
   character(len=80)  :: runfile_hx    = 'out.gkcoll.hx'
   character(len=80)  :: runfile_grids = 'out.gkcoll.grids'
   character(len=80)  :: runfile_time  = 'out.gkcoll.time'
+  character(len=80)  :: runfile_test  = 'out.gkcoll.test'
+  character(len=80)  :: runfile_test2 = 'out.gkcoll.test2'
   integer :: myio = 20
   integer :: print_step=10
   complex, dimension(:,:), allocatable :: f_balloon
 
   integer :: signal
   logical :: lfe
+
+  complex :: sum1, sum2, sum3
 
   if (silent_flag == 0 .and. i_proc == 0) then
      open(unit=io_gkcollout,file=trim(path)//runfile_gkcollout,status='replace')
@@ -54,6 +60,13 @@ subroutine gkcoll_do
   do ir=1,n_radial
      indx_r(ir) = -n_radial/2 + (ir-1)
   enddo
+  if(toroidal_model == 2) then
+     if(n_radial /= 1) then
+        print *, 'Error: For zf test, n_radial must be 1'
+        stop
+     endif
+     indx_r(1) = 1
+  endif
 
   ! set-up energy grid and weights
   allocate(energy(n_energy))
@@ -76,12 +89,14 @@ subroutine gkcoll_do
   call EQUIL_alloc(1)
   call EQUIL_do
   call GYRO_alloc(1)
+  call POISSON_alloc(1)
   call GK_alloc(1)
-  if(imp_flag /= 0) then
-     call GKimp_alloc(1)
+  if(imp_flag == 2) then
+     call GKallimp_alloc(1)
   endif
   call COLLISION_alloc(1)
   call FREQ_alloc(1)
+  call NEO_alloc(1)
 
   ! Initialization
   call GK_init
@@ -116,8 +131,8 @@ subroutine gkcoll_do
 
      ! Collisionless gyrokinetic equation
      ! Returns new h_x, cap_h_x, cap_h_p, and phi 
-     if(imp_flag /= 0) then
-        call GKimp_do
+     if(imp_flag == 2) then
+        call GKallimp_do
      else
         call GK_do
      end if
@@ -129,7 +144,12 @@ subroutine gkcoll_do
      if(mod(itime,print_step) == 0) then
 
         ! Compute frequency and print
-        call FREQ_do
+
+        if(neoclassical_model == 1) then
+           call NEO_do
+        else
+           call FREQ_do
+        endif
 
         ! Print phi
         if(silent_flag == 0 .and. i_proc == 0) then
@@ -156,11 +176,13 @@ subroutine gkcoll_do
         endif
 
         ! Check for convergence
-        if(abs(freq_err) < freq_tol) then
-           if(silent_flag == 0 .and. i_proc == 0) then
-              print *, 'Converged'
+        if(neoclassical_model /= 1) then
+           if(abs(freq_err) < freq_tol) then
+              if(silent_flag == 0 .and. i_proc == 0) then
+                 print *, 'Converged'
+              endif
+              exit
            endif
-           exit
         endif
 
         ! Check for manual halt signal
@@ -215,15 +237,54 @@ subroutine gkcoll_do
      close(io_gkcollout)
   endif
 
+  open(unit=io_gkcollout,file=trim(path)//runfile_test,status='replace')
+  is=1
+  ir=n_radial/2+1
+  do it=1,n_theta
+     sum1=(0.0,0.0)
+     sum2=(0.0,0.0)
+     sum3=(0.0,0.0)
+     do ie=1,n_energy
+        sum1 = sum1 + cap_h_p(is,ir,it,ie,1) * w_e(ie)
+        sum2 = sum2 + cap_h_p(is,ir,it,ie,2) * w_e(ie)
+        sum3 = sum3 + cap_h_p(is,ir,it,ie,3) * w_e(ie)
+     enddo
+     write(io_gkcollout,'(1pe13.5e3,$)') real(sum1)
+     write(io_gkcollout,'(1pe13.5e3,$)') imag(sum1)
+     write(io_gkcollout,'(1pe13.5e3,$)') real(sum2)
+     write(io_gkcollout,'(1pe13.5e3,$)') imag(sum2)
+     write(io_gkcollout,'(1pe13.5e3,$)') real(sum3)
+     write(io_gkcollout,'(1pe13.5e3,$)') imag(sum3)
+     write(io_gkcollout,*)
+  enddo
+  close(io_gkcollout)
+
+  open(unit=io_gkcollout,file=trim(path)//runfile_test2,status='replace')
+  is=1
+  ir=n_radial/2+1
+  it=3
+  do ie=1,n_energy
+     write(io_gkcollout,'(1pe13.5e3,$)') real(cap_h_p(is,ir,it,ie,1))
+     write(io_gkcollout,'(1pe13.5e3,$)') imag(cap_h_p(is,ir,it,ie,1))
+     write(io_gkcollout,'(1pe13.5e3,$)') real(cap_h_p(is,ir,it,ie,2))
+     write(io_gkcollout,'(1pe13.5e3,$)') imag(cap_h_p(is,ir,it,ie,2))
+     write(io_gkcollout,'(1pe13.5e3,$)') real(cap_h_p(is,ir,it,ie,3))
+     write(io_gkcollout,'(1pe13.5e3,$)') imag(cap_h_p(is,ir,it,ie,3))
+     write(io_gkcollout,*)
+  enddo
+  close(io_gkcollout)
+
 100 continue
   call EQUIL_alloc(0)
   call GYRO_alloc(0)
   call GK_alloc(0)
-  if(imp_flag /= 0) then
-     call GKimp_alloc(0)
+  call POISSON_alloc(0)
+  if(imp_flag == 2) then
+     call GKallimp_alloc(0)
   endif
   call COLLISION_alloc(0)
   call FREQ_alloc(0)
+  call NEO_alloc(0)
 
   if(allocated(indx_xi))       deallocate(indx_xi)
   if(allocated(indx_r))        deallocate(indx_r)

@@ -134,7 +134,6 @@ subroutine gyro_read_restart
         open(unit=io,file=trim(path)//file_restart(i_restart),status='old')
         read(io,fmtstr2) h
         call send_line('INFO: (gyro) Restarting.')
-        !print '(a,i1,a,$)','[',0,']'
      endif
 
      do i_proc_w=1,n_proc-1
@@ -143,11 +142,11 @@ subroutine gyro_read_restart
 
            if (debug_flag == 1) then
               if (i_proc_w < 10) then
-                 print '(a,i1,a,$)','[',i_proc_w,']'
+                 write(*,'(a,i1,a)',advance='no') '[',i_proc_w,']'
               else if (i_proc_w < 100) then
-                 print '(a,i2,a,$)','[',i_proc_w,']'
+                  write(*,'(a,i2,a)',advance='no') '[',i_proc_w,']'
               else
-                 print '(a,i3,a,$)','[',i_proc_w,']'
+                  write(*,'(a,i3,a)',advance='no') '[',i_proc_w,']'
               endif
               if (modulo(i_proc_w,8) == 0) print *
            endif

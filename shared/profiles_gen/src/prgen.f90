@@ -11,6 +11,8 @@
 !  2. ONETWO iterdb NetCDF (*.nc)
 !  3. PEQDSK text (*.peq)
 !  4. PLASMA STATE NetCDF (*.cdf)
+!  5. CORSICA text (*.corsica)
+!  6. UFILE text (UFILE)
 !
 ! Note that ASTRA (*.astra) format is handled by a separate python 
 ! routine.
@@ -18,12 +20,10 @@
 
 program prgen
 
-  use prgen_read_globals
+  use prgen_globals
 
   !--------------------------------------------------
   implicit none
-  !
-  logical :: back
   !--------------------------------------------------
 
   !--------------------------------------------------
@@ -62,7 +62,7 @@ program prgen
   tag(7)  = 'Te(keV)'
   tag(8)  = 'ne(10^19/m^3)'
   tag(9)  = 'z_eff(-)'
-  tag(10) = 'omega0(1/s)'
+  tag(10) = 'omega0(rad/s)'
   tag(11) = 'flow_mom(N-m)'
   tag(12) = 'pow_e(MW)'
   tag(13) = 'pow_i(MW)'
@@ -131,7 +131,7 @@ program prgen
     ! empty input.profiles output file.
     call prgen_read_null
 
-  else if (index(raw_data_file,'.nc',back) /= 0) then
+  else if (index(raw_data_file,'.nc') /= 0) then
 
      ! New NetCDF format
      print '(a)','INFO: (prgen) Assuming iterdb NetCDF format.'
@@ -140,7 +140,7 @@ program prgen
 
      call prgen_read_iterdb_nc
 
-  else if (index(raw_data_file,'.cdf',back) /= 0) then
+  else if (index(raw_data_file,'.cdf') /= 0) then
 
      ! Plasmastate format
      print '(a)','INFO: (prgen) Assuming plasma_state format.'
@@ -149,10 +149,10 @@ program prgen
 
      call prgen_read_plasmastate
 
-  else if (index(raw_data_file,'.peq',back) /= 0) then
+  else if (index(raw_data_file,'.peq') /= 0) then
 
      ! peqdsk format
-     print '(a)','INFO: Assuming peqdsk format.'
+     print '(a)','INFO: (prgen) Assuming peqdsk format.'
 
      format_type = 3
 
@@ -162,6 +162,28 @@ program prgen
      endif
 
      call prgen_read_peqdsk
+
+  else if (index(raw_data_file,'.corsica') /= 0) then
+
+     ! corsica format
+     print '(a)','INFO: (prgen) Assuming corsica format.'
+
+     format_type = 5
+
+     if (gato_flag /= 1) then
+        print '(a)','WARNING: (prgen) geqdsk must be provided for corsica format'
+     endif
+
+     call prgen_read_corsica
+
+  else if (index(raw_data_file,'UFILE') /= 0) then
+
+     ! UFILE format
+     print '(a)','INFO: (prgen) Assuming UFILE format.'
+
+     format_type = 6
+
+     call prgen_read_ufile
 
   else
 
@@ -183,15 +205,22 @@ program prgen
   if (gato_flag == 1) call prgen_read_gato
   !---------------------------------------------------
 
-  if (format_type == 0) then
+  select case (format_type)
+
+  case (0)
      call prgen_map_null
-  else if (index(raw_data_file,'.cdf',back) /= 0) then
-     call prgen_map_plasmastate
-  else if (index(raw_data_file,'.peq',back) /= 0) then
-     call prgen_map_peqdsk
-  else
+  case (1)
      call prgen_map_iterdb
-  endif
+  case (2) 
+     call prgen_map_plasmastate
+  case (3) 
+     call prgen_map_peqdsk
+  case (5) 
+     call prgen_map_corsica
+  case (6)
+     call prgen_map_ufile
+
+  end select
 
   call prgen_write
 

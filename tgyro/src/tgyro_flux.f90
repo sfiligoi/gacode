@@ -17,6 +17,8 @@ subroutine tgyro_flux
   implicit none
 
   integer :: i_ion
+  integer :: i1,i2
+  integer :: n_12
   real :: dummy1
   real :: dummy2
   real :: rltcrit
@@ -125,14 +127,13 @@ subroutine tgyro_flux
   !-----------------------------------------------------------
 
   pflux_i_tur(:,:) = 0.0
-  pflux_e_tur(:) = 0.0
+  pflux_e_tur(:)   = 0.0
   eflux_i_tur(:,:) = 0.0
-  eflux_e_tur(:) = 0.0
+  eflux_e_tur(:)   = 0.0
   mflux_i_tur(:,:) = 0.0
-  mflux_e_tur(:) = 0.0
-
-  expwd_e_tur(:) = 0.0
+  mflux_e_tur(:)   = 0.0
   expwd_i_tur(:,:) = 0.0
+  expwd_e_tur(:)   = 0.0
 
   select case (flux_method)
 
@@ -179,10 +180,12 @@ subroutine tgyro_flux
      pflux_e_tur(i_r) = tglf_elec_pflux_out
      eflux_e_tur(i_r) = tglf_elec_eflux_out
      mflux_e_tur(i_r) = tglf_elec_mflux_out
+     expwd_e_tur(i_r) = tglf_elec_expwd_out
 
      pflux_i_tur(1:loc_n_ion,i_r) = tglf_ion_pflux_out(1:loc_n_ion)
      eflux_i_tur(1:loc_n_ion,i_r) = tglf_ion_eflux_out(1:loc_n_ion)
      mflux_i_tur(1:loc_n_ion,i_r) = tglf_ion_mflux_out(1:loc_n_ion)
+     expwd_i_tur(1:loc_n_ion,i_r) = tglf_ion_expwd_out(1:loc_n_ion)
 
      if (tglf_q_low_flag == 1) then
         eflux_e_tur(i_r) = tglf_elec_eflux_low_out
@@ -199,18 +202,22 @@ subroutine tgyro_flux
 
      if (tgyro_mode == 1) then
 
+        i1 = 1+gyro_explicit_damp_grid_in
+        i2 = gyro_radial_grid_in-gyro_explicit_damp_grid_in
+        n_12 = gyro_radial_grid_in-2*gyro_explicit_damp_grid_in
+
         ! Map GYRO (local simulation) output to TGYRO
 
-        pflux_e_tur(i_r) = sum(gyro_elec_pflux_out)
-        eflux_e_tur(i_r) = sum(gyro_elec_eflux_out)
-        mflux_e_tur(i_r) = sum(gyro_elec_mflux_out)
-        expwd_e_tur(i_r) = sum(gyro_elec_expwd_out)
+        pflux_e_tur(i_r) = sum(gyro_elec_pflux_out(i1:i2))/n_12
+        eflux_e_tur(i_r) = sum(gyro_elec_eflux_out(i1:i2))/n_12
+        mflux_e_tur(i_r) = sum(gyro_elec_mflux_out(i1:i2))/n_12
+        expwd_e_tur(i_r) = sum(gyro_elec_expwd_out(i1:i2))/n_12
 
         do i_ion=1,loc_n_ion
-           pflux_i_tur(i_ion,i_r) = sum(gyro_ion_pflux_out(:,i_ion))
-           eflux_i_tur(i_ion,i_r) = sum(gyro_ion_eflux_out(:,i_ion))
-           mflux_i_tur(i_ion,i_r) = sum(gyro_ion_mflux_out(:,i_ion))
-           expwd_i_tur(i_ion,i_r) = sum(gyro_ion_expwd_out(:,i_ion))
+           pflux_i_tur(i_ion,i_r) = sum(gyro_ion_pflux_out(i1:i2,i_ion))/n_12
+           eflux_i_tur(i_ion,i_r) = sum(gyro_ion_eflux_out(i1:i2,i_ion))/n_12
+           mflux_i_tur(i_ion,i_r) = sum(gyro_ion_mflux_out(i1:i2,i_ion))/n_12
+           expwd_i_tur(i_ion,i_r) = sum(gyro_ion_expwd_out(i1:i2,i_ion))/n_12
         enddo
 
      endif

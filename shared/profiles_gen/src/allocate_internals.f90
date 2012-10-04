@@ -1,6 +1,6 @@
 subroutine allocate_internals
 
-  use prgen_read_globals
+  use prgen_globals
 
   implicit none
 

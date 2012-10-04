@@ -7,7 +7,7 @@
 
 subroutine prgen_read_null
 
-  use prgen_read_globals
+  use prgen_globals
 
   implicit none
 

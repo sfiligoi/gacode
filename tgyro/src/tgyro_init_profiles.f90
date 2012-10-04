@@ -95,6 +95,9 @@ subroutine tgyro_init_profiles
   ! arho in cm
   arho  = 100*EXPRO_arho
 
+  !------------------------------------------------------------------------------------------
+  ! Direct input of simple profiles:
+  !
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_rho(:),n_exp,r,rho,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_q(:),n_exp,r,q,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_s(:),n_exp,r,s,n_r)
@@ -108,7 +111,7 @@ subroutine tgyro_init_profiles
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_zeta(:),n_exp,r,zeta,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_szeta(:),n_exp,r,s_zeta,n_r)
 
-  ! Convert V and dV/dr from m^n to cm^n
+  ! Convert V and dV/dr from m^3 to cm^3
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_vol(:)*1e6,n_exp,r,vol,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_volp(:)*1e4,n_exp,r,volp,n_r)
 
@@ -129,8 +132,10 @@ subroutine tgyro_init_profiles
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlntidr(i_ion,:)/100.0,n_exp,r,dlntidr(i_ion,:),n_r)
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnnidr(i_ion,:)/100.0,n_exp,r,dlnnidr(i_ion,:),n_r)
   enddo
+  !------------------------------------------------------------------------------------------
 
-  ! QUASINEUTRALITY:
+  !------------------------------------------------------------------------------------------
+  ! Quasineutrality:
   !
   ! Overwrite main ion density and gradient with corrected density and gradient 
   ! (done in EXPRO):
@@ -138,43 +143,62 @@ subroutine tgyro_init_profiles
      call cub_spline(EXPRO_rmin(:)/r_min,1e13*EXPRO_ni_new(:),n_exp,r,ni(1,:),n_r)
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnnidr_new(:)/100.0,n_exp,r,dlnnidr(1,:),n_r)
   endif
+  !------------------------------------------------------------------------------------------
 
-  ! Enforce quasineutrality (set ni based on ne,nz)
-  !call tgyro_quasineutral(ni,ne,dlnnidr,dlnnedr,zi_vec,loc_n_ion,n_r)
-
+  !------------------------------------------------------------------------------------------
+  ! Rotation and rotation shear:
+  !
   ! w0 (1/s)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_w0(:),n_exp,r,w0,n_r)
   ! w0p = d(w0)/dr (1/s/cm)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_w0p(:)/100.0,n_exp,r,w0p,n_r)
+  !------------------------------------------------------------------------------------------
 
-  ! Determine Z_eff
+  !------------------------------------------------------------------------------------------
+  ! Z_eff:
+  !
   if (loc_zeff_flag == 1) then
+     ! Set based on data in input.profiles
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_z_eff(:),n_exp,r,z_eff,n_r)
   else
+     ! Set to unity
      z_eff = 1.0
   endif
+  !------------------------------------------------------------------------------------------
 
-  ! Below, convert powers to erg/s (from MW):
-
-  ! Exchange power
+  !------------------------------------------------------------------------------------------
+  ! SOURCES:
+  !
+  ! (1) Power -- convert powers to erg/s from MW:
+  !
+  ! Classical exchange power
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_ei(:)*1e13,n_exp,r,p_exch_in,n_r)
-
+  !
   if (loc_scenario == 3) then
 
      ! Assume auxiliary power is contained in pow_e and pow_i 
-
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e(:)*1e13,n_exp,r,p_e_aux_in,n_r)
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_i(:)*1e13,n_exp,r,p_i_aux_in,n_r)
 
   else
 
+     ! Integrated electron and ion powers
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e(:)*1e13,n_exp,r,p_e_in,n_r)
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_i(:)*1e13,n_exp,r,p_i_in,n_r)
 
   endif
-
-  ! Convert flows to 1/s (from MW/keV)
+  !
+  ! (2) Particle flow -- convert to 1/s from MW/keV
+  !
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_flow_beam(:)*1e22/1.6022,n_exp,r,f_b_in,n_r)
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_flow_wall(:)*1e22/1.6022,n_exp,r,f_w_in,n_r)
+  !
+  ! (3) Angular momentum flow -- convert to erg (dyne-cm) from N-m.
+  !
+  call cub_spline(EXPRO_rmin(:)/r_min,-EXPRO_flow_mom(:)*1e7,n_exp,r,mf_in,n_r)
+  !------------------------------------------------------------------------------------------
+
+
 
   ! Fourier coefficients for plasma shape
   if (EXPRO_nfourier > 0) then
@@ -248,8 +272,22 @@ subroutine tgyro_init_profiles
   endif
   !----------------------------------------------------------
 
+  !----------------------------------------------------------
+  ! Primitive quantity to evolve for rotation/Er evolution is 
+  !
+  ! f_rot = (a/c_s)*gamma_p = w0p/w0p_norm
+  !
+  ! First, "bogus" unity normalization since c_s is unknown
+  w0p_norm = 1.0
+  f_rot(:) = w0p(:)/w0p_norm
+
   ! Now compute all profiles:
   call tgyro_profile_functions
+
+  ! Proper rotation normalization
+  w0p_norm = -c_s(1)/(r_min*r_maj(1))
+  f_rot(:) = w0p(:)/w0p_norm
+  !----------------------------------------------------------
 
   !----------------------------------------------------
   ! Set conditions at r=0
@@ -285,7 +323,7 @@ subroutine tgyro_init_profiles
   eflux_i_target(1) = 0.0
   eflux_e_target(1) = 0.0
   pflux_e_target(1) = 0.0
-  mflux_target(1) = 0.0
+  mflux_target(1)   = 0.0
 
   p_i_aux_in(1) = 0.0
   p_e_aux_in(1) = 0.0

@@ -5146,9 +5146,10 @@ c*****
         mflxe(j,is)=0.
        enddo
        if(ncspec(is).ne.0) then
+! note negative sign in order to make this positive for vprim > 0
        do j=-ntgridl,ntgrid
           mflxe(j,is)=
-     >     +amass(is)*an(is)*real(conjg(geint(j,is))*(-zi*aky*phi(j)))
+     >     -amass(is)*an(is)*real(conjg(geint(j,is))*(-zi*aky*phi(j)))
      >     /(cabs(phi00))**2
        enddo
        endif
@@ -5218,12 +5219,14 @@ c*****
       do j=-ntgridl,ntgrid
        piflx(j)=0.
        eiflx(j)=0.
+       miflx(j)=0.
       enddo
       do is=1,nspec
        if(is.ne.3) then
        do j=-ntgridl,ntgrid
         piflx(j)=piflx(j)+pflxe(j,is)+pflxm(j,is)
         eiflx(j)=eiflx(j)+eflxe(j,is)+eflxm(j,is)
+        miflx(j)=miflx(j)+mflxe(j,is)
        enddo
        endif
       enddo
@@ -5233,10 +5236,12 @@ c*****
       
       piflxa=0.
       eiflxa=0.
+      miflxa=0.
       do is=1,nspec
        if(is.ne.3) then
         piflxa=piflxa+pflxea(is)+pflxma(is)
         eiflxa=eiflxa+eflxea(is)+eflxma(is)
+        miflxa=miflxa+mflxea(is)
        endif
       enddo
        

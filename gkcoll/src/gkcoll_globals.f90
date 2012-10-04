@@ -30,12 +30,14 @@ module gkcoll_globals
   real :: s_zeta
   real :: zmag
   real :: s_zmag
-  
+ 
+  integer :: neoclassical_model 
   integer :: toroidal_model
   integer :: toroidal_num
   real :: rho
   real :: k_theta_rho
   real :: k_theta
+  real :: r_length_rho
   real :: r_length_inv
 
   !---------------------------------------------------------------

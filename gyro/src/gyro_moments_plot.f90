@@ -5,7 +5,7 @@
 !  Make density, energy and V_parallel fluctuation moments (with 
 !  same functional form as phi_plot) for diagnostic output file.
 ! 
-!  This routine assumes phi_plot has been computed get_field_plot.
+!  This routine assumes phi_plot has been computed gyro_field_plot.
 ! 
 !     density moment: moments_plot(:,:,:,1)
 !      energy moment: moments_plot(:,:,:,2)
@@ -38,7 +38,9 @@ subroutine gyro_moments_plot
 
   if (alltime_index == 0) then
      moments_plot(:,:,:,:) = (0.0,0.0)
-     if (io_method > 1) moments_plot_wedge(:,:,:,:) = (0.0,0.0)
+     if (io_method > 1 .and. time_skip_wedge > 0) then
+         moments_plot_wedge(:,:,:,:) = (0.0,0.0)
+     endif
   endif
   moments_zero_plot(:,:,:) = 0.0
 
@@ -91,14 +93,26 @@ subroutine gyro_moments_plot
 !$omp end do nowait
         else
 !$omp do
+           ! Implicit electrons (gyroave=1)
            do i=1,n_x
               do m=1,n_stack
-                 gyro_h(m,i,p_nek_loc,1) = cap_h(m,i)-&
-                      z(is)*alpha_s(is,i)*field_tau(m,i,p_nek_loc,1)
+                 gyro_h(m,i,p_nek_loc,1) = cap_h(m,i)
               enddo ! m
            enddo ! i
 !$omp end do nowait
         endif
+        
+!$omp do
+        ! Subtract potential for all moments to give
+        !  moment(i) = Int[ d3v w(i) { <cap_h> - e (delta_phi)/T } ]
+        !    where w(i)=[1,E,v_par] 
+        do i=1,n_x
+           do m=1,n_stack
+              gyro_h(m,i,p_nek_loc,1) = gyro_h(m,i,p_nek_loc,1)-&
+                   z(is)*alpha_s(is,i)*field_tau(m,i,p_nek_loc,1)
+           enddo ! m
+        enddo ! i
+!$omp end do nowait
 
         !----------------------------------------------------
         ! Now, compute blending projections:
@@ -194,8 +208,7 @@ subroutine gyro_moments_plot
           w_time(alltime_index+1)*mom_tmp(:,:,:)
      if (io_method > 1 .and. time_skip_wedge > 0) then
         moments_plot_wedge(:,:,is,:) = moments_plot_wedge(:,:,is,:)+&
-             w_time(alltime_index+1)*mom_tmp_wedge(:,:,:)
-
+             w_time_wedge(alltime_index+1)*mom_tmp_wedge(:,:,:)
      endif
      !----------------------------------------------------------------
 

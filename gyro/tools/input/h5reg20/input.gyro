@@ -85,7 +85,7 @@ ENERGY_MAX=6.0
 #==============================================
 # Control parameters
 #
-BOUNDARY_METHOD=2
+BOUNDARY_METHOD=1
 EXPLICIT_DAMP_GRID=2
 
 AMP_PHI_N=1e-4

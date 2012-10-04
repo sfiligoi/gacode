@@ -53,12 +53,6 @@ subroutine tglf_read_input
   read(1,*) tglf_adiabatic_elec_in
   read(1,*) tglf_alpha_e_in
   read(1,*) tglf_alpha_p_in
-  read(1,*) tglf_alpha_n_in
-  read(1,*) tglf_alpha_t_in
-  read(1,*) tglf_alpha_kx_e_in
-  read(1,*) tglf_alpha_kx_p_in
-  read(1,*) tglf_alpha_kx_n_in
-  read(1,*) tglf_alpha_kx_t_in
   read(1,*) tglf_alpha_quench_in
   read(1,*) tglf_xnu_factor_in
   read(1,*) tglf_debye_factor_in
@@ -147,6 +141,7 @@ subroutine tglf_read_input
   read(1,*) tglf_vpar_in(4)
   read(1,*) tglf_vpar_in(5)
   read(1,*) tglf_vpar_in(6)
+  read(1,*) tglf_vexb_in
   read(1,*) tglf_betae_in
   read(1,*) tglf_xnue_in
   read(1,*) tglf_zeff_in
@@ -182,6 +177,7 @@ subroutine tglf_read_input
   read(1,*) tglf_q_loc_in
   read(1,*) tglf_q_prime_loc_in
   read(1,*) tglf_p_prime_loc_in
+  read(1,*) tglf_kx0_loc_in
 
   close(1)
 

@@ -78,7 +78,12 @@ subroutine neo_experimental_profiles
   !
   rhoN_torflux_a      = EXPRO_arho
   rhoN_torflux_exp(:) = EXPRO_rho(:)
-  psiN_polflux_exp(:) = EXPRO_poloidalfluxover2pi(:) / EXPRO_poloidalfluxover2pi(n_grid_exp)
+  if(abs(EXPRO_poloidalfluxover2pi(n_grid_exp)) < epsilon(0.)) then
+     psiN_polflux_exp(:) = 0.0
+  else
+     psiN_polflux_exp(:) = EXPRO_poloidalfluxover2pi(:) &
+          / EXPRO_poloidalfluxover2pi(n_grid_exp)
+  endif
   rmin_exp(:)         = EXPRO_rmin(:)
   rmaj_exp(:)         = EXPRO_rmaj(:)
   q_exp(:)            = EXPRO_q(:)
@@ -92,7 +97,7 @@ subroutine neo_experimental_profiles
   s_zeta_p(:)         = EXPRO_szeta(:)  * profile_zeta_scale
   s_zmag_p(:)         = EXPRO_dzmag(:)  * profile_zmag_scale
   shat_p(:)           = EXPRO_s(:)
-  
+
   r_p(:)    = rmin_exp(:)/rmin_exp(n_grid_exp)
   rmaj_p(:) = rmaj_exp(:)/rmin_exp(n_grid_exp)
   zmag_p(:) = zmag_exp(:)/rmin_exp(n_grid_exp)
@@ -140,25 +145,48 @@ subroutine neo_experimental_profiles
   te_ade_exp(:)     = EXPRO_te(:)
   ne_ade_exp(:)     = EXPRO_ne(:)
 
+  dlnndr_scale(1) = profile_dlnndr_1_scale
+  dlnndr_scale(2) = profile_dlnndr_2_scale
+  dlnndr_scale(3) = profile_dlnndr_3_scale
+  dlnndr_scale(4) = profile_dlnndr_4_scale
+  dlnndr_scale(5) = profile_dlnndr_5_scale
+
+  dlntdr_scale(1) = profile_dlntdr_1_scale
+  dlntdr_scale(2) = profile_dlntdr_2_scale
+  dlntdr_scale(3) = profile_dlntdr_3_scale
+  dlntdr_scale(4) = profile_dlntdr_4_scale
+  dlntdr_scale(5) = profile_dlntdr_5_scale
+
   tem_exp(n_species_exp,:)  = EXPRO_te(:)
-  dlntdr_p(n_species_exp,:) = EXPRO_dlntedr(:) * a_meters
+  dlntdr_p(n_species_exp,:) = EXPRO_dlntedr(:) * a_meters * dlntdr_scale(n_species_exp)
   den_exp(n_species_exp,:)  = EXPRO_ne(:)
-  dlnndr_p(n_species_exp,:) = EXPRO_dlnnedr(:) * a_meters
+  dlnndr_p(n_species_exp,:) = EXPRO_dlnnedr(:) * a_meters * dlnndr_scale(n_species_exp)
 
   do i_ion=1,n_species_exp-1
      ! ion temps should be equal, but not enforced 
      tem_exp(i_ion,:)  = EXPRO_ti(i_ion,:)
-     dlntdr_p(i_ion,:) = EXPRO_dlntidr(i_ion,:) * a_meters
+     dlntdr_p(i_ion,:) = EXPRO_dlntidr(i_ion,:) * a_meters * dlntdr_scale(i_ion)
+
      ! first species density is re-set by quasi-neutrality
      if(i_ion == 1) then
         den_exp(i_ion,:)  = EXPRO_ni_new(:)
-        dlnndr_p(i_ion,:) = EXPRO_dlnnidr_new(:) * a_meters
+        dlnndr_p(i_ion,:) = EXPRO_dlnnidr_new(:) * a_meters * dlnndr_scale(i_ion)
      else
         den_exp(i_ion,:)  = EXPRO_ni(i_ion,:)
-        dlnndr_p(i_ion,:) = EXPRO_dlnnidr(i_ion,:) * a_meters
+        dlnndr_p(i_ion,:) = EXPRO_dlnnidr(i_ion,:) * a_meters * dlnndr_scale(i_ion)
+
      endif
   enddo
-  
+
+  ! If desired, reset electron density gradient to ensure quasi-neutrality
+  if (dlnndr_scale(n_species_exp) < 0.0) then
+     dlnndr_p(n_species_exp,:) = 0.0
+     do i_ion=1,n_species_exp-1
+        dlnndr_p(n_species_exp,:) = dlnndr_p(n_species_exp,:) + &
+             EXPRO_ctrl_z(i_ion)*den_exp(i_ion,:)/den_exp(n_species_exp,:)*dlnndr_p(i_ion,:)
+     enddo
+  endif
+
   ! Sanity check for temperatures
   do i=1,n_species_exp
      if (minval(den_exp(i,:)) <= 0.0) then

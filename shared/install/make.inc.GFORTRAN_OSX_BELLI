@@ -13,8 +13,8 @@ F77	= mpif90
 
 FMATH	= -fdefault-real-8
 FOPT	= -O3 -m64
-FDEBUG	= -O -Wall -Wunderflow -W -Wuninitialized -fbounds-check
-FPROF	= -pg
+#FDEBUG	= -O -Wall -Wunderflow -W -Wuninitialized -fbounds-check
+FDEBUG  = -Wall -fcheck=all -fbacktrace -O -Wall -Wunderflow -W -finit-real=nan -fbounds-check -ffpe-trap=invalid,zero,overflow
 
 # System math libraries
 
@@ -25,9 +25,6 @@ LMATH = /System/Library/Frameworks/vecLib.framework/Versions/A/vecLib \
 NETCDF = /Users/belli/scisoft/lib/libnetcdf.a /Users/belli/scisoft/lib/libnetcdff.a -lcurl 
 NETCDF_INC = /Users/belli/scisoft/include/
  
-# OPTIONAL: GATO FLAGS
-GATOFLAGS=-fdefault-real-8 -fdefault-integer-8 -O0
-
 # Archive
 
 ARCH = ar -c -r -s

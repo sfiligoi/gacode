@@ -43,6 +43,9 @@ subroutine gyro_operators_on_h
 
      do is=1,n_gk
 
+        do i=1,n_x
+           hh(:,i) = h(:,i,p_nek_loc,is)
+        enddo
         if (boundary_method == 1) then
            do i=1-m_gyro,0
               hh(:,i) = h(:,i+n_x,p_nek_loc,is)
@@ -54,13 +57,10 @@ subroutine gyro_operators_on_h
            do i=1-m_gyro,0
               hh(:,i) = 0.0
            enddo
-           do i=n_x+1,n_x+m_gyro-i_gyro
+           do i=n_x+1,n_x+m_gyro
               hh(:,i) = 0.0
            enddo
         endif
-        do i=1,n_x
-           hh(:,i) = h(:,i,p_nek_loc,is)
-        enddo
 
         if (n_field < 3) then
 

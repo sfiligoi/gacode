@@ -140,7 +140,7 @@ module gyro_interface
   real    :: gyro_orbit_upwind_3_in = 1.0
   real    :: gyro_orbit_upwind_4_in = 1.0
   real    :: gyro_orbit_upwind_5_in = 1.0
-  real    :: gyro_orbit_upwind_electron_in = 0.0
+  real    :: gyro_orbit_upwind_electron_in = 1.0
   real    :: gyro_pgamma_in = 0.0
   real    :: gyro_pgamma_scale_in = 1.0
   real    :: gyro_mach_in = 0.0
@@ -190,6 +190,8 @@ module gyro_interface
   real    :: gyro_geo_betaprime_scale_in = 1.0
   integer :: gyro_poisson_z_eff_flag_in = 1
   integer :: gyro_z_eff_method_in = 1
+  integer :: gyro_truncation_method_in = 1
+  real    :: gyro_fluxaverage_window_in = 0.9
   integer :: gyro_gkeigen_proc_mult_in = 1
   integer :: gyro_gkeigen_method_in = 1
   integer :: gyro_gkeigen_matrixonly_in = 0
@@ -229,6 +231,8 @@ module gyro_interface
   real, dimension(:,:), allocatable :: gyro_ion_mflux_out
   real, dimension(:,:), allocatable :: gyro_ion_eflux_out
   real, dimension(:,:), allocatable :: gyro_ion_expwd_out
+
+  real, dimension(:), allocatable :: gyro_r_out
 
   complex :: gyro_fieldeigen_omega_out
   real :: gyro_fieldeigen_error_out
@@ -416,6 +420,8 @@ contains
     gyro_geo_betaprime_scale_in = geo_betaprime_scale
     gyro_poisson_z_eff_flag_in = poisson_z_eff_flag
     gyro_z_eff_method_in = z_eff_method
+    gyro_truncation_method_in = truncation_method
+    gyro_fluxaverage_window_in = fluxaverage_window
     gyro_gkeigen_proc_mult_in = gkeigen_proc_mult
     gyro_gkeigen_method_in = gkeigen_method
     gyro_gkeigen_matrixonly_in = gkeigen_matrixonly
@@ -444,14 +450,15 @@ contains
     gyro_a_fourier_geo_in(:,:) = a_fourier_geo(:,:)
 
     ! Allocate output arrays (deallocated in gyro_cleanup)
-    allocate(gyro_elec_pflux_out(n_x))
-    allocate(gyro_elec_mflux_out(n_x))
-    allocate(gyro_elec_eflux_out(n_x))
-    allocate(gyro_elec_expwd_out(n_x))
-    allocate(gyro_ion_pflux_out(n_x,5))
-    allocate(gyro_ion_mflux_out(n_x,5))
-    allocate(gyro_ion_eflux_out(n_x,5))
-    allocate(gyro_ion_expwd_out(n_x,5))
+    if (.not.allocated(gyro_elec_pflux_out)) allocate(gyro_elec_pflux_out(n_x))
+    if (.not.allocated(gyro_elec_mflux_out)) allocate(gyro_elec_mflux_out(n_x))
+    if (.not.allocated(gyro_elec_eflux_out)) allocate(gyro_elec_eflux_out(n_x))
+    if (.not.allocated(gyro_elec_expwd_out)) allocate(gyro_elec_expwd_out(n_x))
+    if (.not.allocated(gyro_ion_pflux_out)) allocate(gyro_ion_pflux_out(n_x,5))
+    if (.not.allocated(gyro_ion_mflux_out)) allocate(gyro_ion_mflux_out(n_x,5))
+    if (.not.allocated(gyro_ion_eflux_out)) allocate(gyro_ion_eflux_out(n_x,5))
+    if (.not.allocated(gyro_ion_expwd_out)) allocate(gyro_ion_expwd_out(n_x,5))
+    if (.not.allocated(gyro_r_out)) allocate(gyro_r_out(n_x))
 
     if (debug_flag == 1 .and. i_proc == 0) then
        print *, '[map_global2interface done]'
@@ -640,6 +647,8 @@ contains
     geo_betaprime_scale = gyro_geo_betaprime_scale_in
     poisson_z_eff_flag = gyro_poisson_z_eff_flag_in
     z_eff_method = gyro_z_eff_method_in
+    truncation_method = gyro_truncation_method_in
+    fluxaverage_window = gyro_fluxaverage_window_in
     gkeigen_proc_mult = gyro_gkeigen_proc_mult_in
     gkeigen_method = gyro_gkeigen_method_in
     gkeigen_matrixonly = gyro_gkeigen_matrixonly_in

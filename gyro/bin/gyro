@@ -236,11 +236,13 @@ then
     out.gyro.error
     out.gyro.gbflux_i
     out.gyro.gbflux_n
+    out.gyro.gbflux_exc
     out.gyro.geometry_arrays
     out.gyro.kxkyspec
     out.gyro.phase_space
     out.gyro.profile
     out.gyro.timing
+    out.gyro.units
     out.gyro.zerobar"
 
    # Funny syntax below removes trailing /
@@ -312,7 +314,7 @@ then
 
    #==========================================================
    # Version stamp:  
-   echo `gacode_getversion` > $VERBASE
+   cat $GACODE_ROOT/gyro/.VERSION > $VERBASE
    echo $GACODE_PLATFORM >> $VERBASE
    date >> $VERBASE
    #==========================================================
@@ -342,6 +344,7 @@ fi
 if [ $TEST_FLAG -eq 1 ] 
 then
    cat $RUNBASE
+   cat out.expro.run
 fi
 #===========================================================
 
