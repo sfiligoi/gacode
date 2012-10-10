@@ -4,6 +4,9 @@ pro spectrum_n_event, spectrum_n
   common PLOT_VARIABLES
   common PRIVATE_SPECTRUM_N
 
+; In auto mode  spectrum_n won't be defined
+if(n_elements(spectrum_n) le 0) then goto,plot_it
+
   widget_control, spectrum_n.id, $
     get_uvalue=uvalue
 
@@ -143,7 +146,9 @@ pro spectrum_n_event, spectrum_n
            yn[0,tt] = sqrt(y[0,tt])
         endfor
 
+;  y_axis_magic is for arrays with a single dimension, so this doesn't work:
         y_axis_magic,yn,ymin,ymax,d_y
+        ymax=max(yn) ; this looks at all of yn
 
         spectrum_n_max = ymax/zoom
 

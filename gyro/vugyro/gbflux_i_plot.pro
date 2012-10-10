@@ -12,7 +12,30 @@ pro gbflux_i_plot
   gbflux_tag,title,pname,ytitle,units1,units2,units3
   
   pname = 'gbflux_i-'+pname
-  
+  plot_def_new,pname
+  xtitle = '!3r/a with'+t_string
+
+; Overlay different units choices; start units-loop here  <     <     <     <
+if(gb_i_overlay gt 0) then begin
+  Nun_pl=2 ; 2 for 'auto' plotting with overlay of fluxes
+endif else begin
+  Nun_pl=1 ; set to 1 to get standard behavior
+endelse
+
+  for iun_pl=0,Nun_pl-1 do begin
+
+case (iun_pl) of
+  0: iun_sav=i_units
+  1: begin
+     if (iun_sav le 1) then i_units=2
+     if (iun_sav eq 2) then i_units=0
+     end
+else: begin
+     print,' gbflux_i_plot: Nun_pl is too large'
+     goto, end_plot
+     end
+endcase
+
   case (i_units) of
 
      0: begin
@@ -35,9 +58,6 @@ pro gbflux_i_plot
 
   endcase
 
-  xtitle = '!3r/a with'+t_string
-
-  plot_def_new,pname
   ;;-------------------------------------------------------
 
   ;;-------------------------------------------------------
@@ -117,21 +137,42 @@ pro gbflux_i_plot
   ;;-------------------------------------------------------
   ;; PLOT results
   ;;
-  plot,[0],[0],$
+if (Nun_pl eq 1) then begin
+   ystyle=1
+   position=[0.133,0.133,0.960,0.933]
+endif else begin
+   ystyle=9
+   position=[0.133,0.133,0.88,0.933]
+endelse
+
+; y_exp[0] is Inf or NaN ?!?
+;y_test=xnorm*[y_r[n_bnd:n_r-1-n_bnd],y_exp[1:*]]
+i_exp=where((r_from_rho-min(r))*(r_from_rho-max(r)) le 0.)
+y_test=xnorm*[y_r[n_bnd:n_r-1-n_bnd],y_exp[i_exp]]
+y_min=min(y_test)
+y_max=max(y_test)
+y_mid=0.5*(y_min+y_max)
+y_range=[i_zero*(y_mid-(y_mid-y_min)*zoom), y_mid+(y_max-y_mid)*zoom]
+; Old:       yrange=[-i_zero*zoom,zoom]*max(abs(y_r*xnorm)),$
+
+if (iun_pl eq 0) then plot,[0],[0],position=position,$
        /nodata,$
        title=title,$
        xstyle=1,$
        xrange=[min(r),max(r)],$
        xtitle=xtitle,$
-       ystyle=1,$
-       yrange=[-i_zero*zoom,zoom]*max(abs(y_r*xnorm)),$
+       ystyle=ystyle,$
+       yrange=y_range,$
        ytitle=ytitle+units,$
        color=line
+if (iun_pl eq 1) then axis,yaxis=1,ystyle=1,/save,$
+       yrange=y_range,$
+       ytitle=ytitle+units+' (ylw & grn)'
+  oplot,r,y_r*xnorm,color=color_vec[0+2*iun_pl]
+  if (exists_exp_derived) then oplot,r_from_rho,y_exp*xnorm,$
+    color=color_vec[1+2*iun_pl]
 
-  oplot,r,y_r*xnorm,color=color_vec[0]
-  if (exists_exp_derived) then oplot,r_from_rho,y_exp*xnorm,color=color_vec[1]
-
-  ;; Ron's addition
+ ;; Ron's addition
   if (i_moment eq 3) then begin
      if (i_units eq 2) then begin
         y_r2 = fltarr(n_r)
@@ -144,8 +185,12 @@ pro gbflux_i_plot
         print, 'plot radially integrated exchange flow in MW over simulation'
         oplot,r,y_r2*xnorm,color=color_vec[1]
      endif
-  endif
+ endif
 
+endfor      ; End units-loop here  <     <     <     <     <     <     
+
+end_plot:
+if (Nun_pl gt 1) then i_units=iun_sav
 
   ;; Plot singular surface(s)
 
@@ -168,14 +213,14 @@ pro gbflux_i_plot
      for i=0,n_r-1 do begin
         printf,1,r[i],y_r[i]*xnorm,y_exp_fine[i]
      endfor
-     printf,1,'Average:',t_min,t_max
+     printf,1,'Average:',t_min,t_max,'   Nbuffer=',n_bnd
      printf,1,'Units: '+units
      close,1
      print,'Exported data to ',pname+'.idlout'
+     print,"  Units are "+units
      plot_export = 0
   endif
   ;;---------------------------------------------------
-
   plot_finish
 
   return

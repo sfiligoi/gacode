@@ -40,6 +40,7 @@ pro t_error_see, group=group
                      xsize=sx, $
                      ysize=sy)
 
+ ; widget_control, base,xoffset=500,yoffset=100, $
   widget_control, base, $
       set_uvalue=state,$
       /no_copy, $
