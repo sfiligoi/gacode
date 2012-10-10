@@ -912,6 +912,8 @@ class GYROData:
 
             # ASCII
 
+            list = glob.glob(self.dirname+'/out.gyro.balloon*')
+
             # If list is empty, then exit with error message.
             if len(list) == 0:
                 print "ERROR (GYROData): out.gyro.balloon* not found."
