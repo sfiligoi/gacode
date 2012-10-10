@@ -22,6 +22,7 @@ subroutine gyro_entropy
   use mpi
   use gyro_globals
   use gyro_pointers
+  use math_constants
 
   !-------------------------------------------------------------
   implicit none
@@ -29,6 +30,7 @@ subroutine gyro_entropy
   integer :: ii
   !
   real, dimension(n_kinetic,n_entro) :: entropy_loc
+  complex :: h_cap_dot_0
   !-------------------------------------------------------------
 
 
@@ -72,8 +74,12 @@ subroutine gyro_entropy
 
               ! 2: - H* dH/dt
 
+              ! Remove advective part from time derivative
+              h_cap_dot_0 = h_cap_dot(m,i,p_nek_loc,is) &
+                   -i_c*omega_eb_s(i)*h_cap(m,i,p_nek_loc,is)
+
               entropy_loc(is,2) = entropy_loc(is,2)-w_p(ie,i,k,is) &
-                   *real(conjg(h_cap(m,i,p_nek_loc,is))*h_cap_dot(m,i,p_nek_loc,is))
+                   *real(conjg(h_cap(m,i,p_nek_loc,is))*h_cap_dot_0)
 
               ! 3: collisional dissipation
 

@@ -104,20 +104,19 @@ subroutine gyro_nonlinear_flux
 
                  momparts(is,:) = momparts(is,:)+momtemp(:)/n_x 
 
-                 ! Moment 4: Exchange
-                 moment(i,is,ix,4,ck) = moment(i,is,ix,4,ck)+z(is)*w_p(ie,i,k,is)*real( &
-                      conjg(cap_h(i,is))*gyro_uv_dot(m,i,p_nek_loc,is,ix) &
-                      -conjg(h_cap_dot(m,i,p_nek_loc,is))*gyro_uv(m,i,p_nek_loc,is,ix))
+                 ! Moment 4: Exchange (time derivatives contain advective part)
 
-                 ! Exchange breakdown (sum over i, ix, ck):
-
-                 ! 1. H <phi_dot> [Sugama]
+                 ! 4a. H <phi_dot> [Sugama]
                  exctemp(1) = z(is)*real( &
                       conjg(cap_h(i,is))*gyro_uv_dot(m,i,p_nek_loc,is,ix)*w_p(ie,i,k,is))
 
-                 ! 2. -H_dot <phi>
+                 ! 4b. -H_dot <phi>
                  exctemp(2) = -z(is)*real( &
                       conjg(h_cap_dot(m,i,p_nek_loc,is))*gyro_uv(m,i,p_nek_loc,is,ix)*w_p(ie,i,k,is))
+
+                 moment(i,is,ix,4,ck) = moment(i,is,ix,4,ck)+sum(exctemp(:))
+
+                 ! Exchange breakdown (sum over i, ix, ck):
 
                  excparts(is,:) = excparts(is,:)+exctemp(:)/n_x 
 
