@@ -10,6 +10,7 @@
 #  - ITERDB (legacy text)
 #  - ITERDB (NetCDF)
 #  - Plasma State (NetCDF)
+#  - Corsica
 #  - ASTRA (also requires mapping file).
 #  - PEQDSK (ELITE pfile)
 #  - ITPA UFILES
@@ -58,6 +59,7 @@ then
    echo "              *.nc           : ITERDB NetCDF file"
    echo "              *.cdf          : Plasma State NetCDF file"
    echo "              *.astra        : ASTRA text file"
+   echo "              *.corsica      : CORSICA text file"
    echo "              *.peq          : PEQDSK/ELITE text file"
    echo "              UFILE          : UFILE mode"
    echo "              null           : gfile only"

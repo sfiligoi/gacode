@@ -5,6 +5,11 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from pyrats.gyro.data import GYROData
+from matplotlib import rc
+
+GFONTSIZE=18
+rc('text',usetex=True)
+rc('font',size=GFONTSIZE)
 
 #---------------------------------------------------------------
 def average(f,t,window):
@@ -25,7 +30,6 @@ def average(f,t,window):
     return ave
 #---------------------------------------------------------------
 
-GFONTSIZE=18
 
 sim    = GYROData(sys.argv[1])
 index  = int(sys.argv[2])
@@ -36,13 +40,24 @@ print sim.balloon.keys()
 
 key = sim.balloon.keys()[index]
 
+ytitle = '\\begin{verbatim}'+key+'\\end{verbatim}'
+
+if key == 'balloon_a':
+    ytitle = r'$\delta A_\parallel$'
+if key == 'balloon_phi':
+    ytitle = r'$\delta \phi$'
+if key == 'balloon_aperp':
+    ytitle = r'$\delta B_\parallel$'
+if key == 'balloon_epar':
+    ytitle = r'$\delta E_\parallel$'
+
 #======================================
 fig = plt.figure(figsize=(10,6))
 ax = fig.add_subplot(111)
 ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
-ax.set_xlabel(r'$\theta_*/\pi$',fontsize=GFONTSIZE)
-ax.set_ylabel(key,color='k',fontsize=GFONTSIZE)
+ax.set_xlabel(r'$\theta_*/\pi$')
+ax.set_ylabel(ytitle)
 #=====================================
 
 n_p   = sim.profile['n_x']/sim.profile['box_multiplier']
