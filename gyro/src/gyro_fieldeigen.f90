@@ -450,13 +450,6 @@ subroutine gyro_fieldeigen
 
   end select
 
-  !  if (i_proc == 0 .and. output_flag == 1) then
-  !     open(unit=1,file='fieldeigen_INPUT.out',status='replace')
-  !     write(1,'(a,1pe12.4)') 'FIELDEIGEN_WR=',real(omega_eigen)
-  !     write(1,'(a,1pe12.4)') 'FIELDEIGEN_WI=',aimag(omega_eigen)
-  !     close(1)
-  !  endif
-
   !----------------------------------------------------------------------------
   ! Compute the eigenfunction
   !
@@ -527,14 +520,14 @@ subroutine gyro_fieldeigen
   !
   call gyro_fieldeigen_df
   call gyro_field_fluxave
-  call gyro_field_time_derivative
+
+  ! In lieu of calling gyro_field_time_derivative, compute field_blend_dot
+  ! for use in gyro_moments_plot (needed for E_par)
+  field_blend_dot(:,:,:) = -i_c*omega_eigen*field_blend(:,:,:)
+
   call gyro_field_plot
   call gyro_moments_plot
-  !if (io_method == 1) then 
-     call gyro_write_timedata
-  !else
-  !   call gyro_write_timedata_hdf5
-  !endif
+  call gyro_write_timedata
   step = 1
   call gyro_write_precision(10,abs(omega_eigen))
   !-------------------------------------------------------------------
