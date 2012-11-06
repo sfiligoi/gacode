@@ -15,3 +15,8 @@ else
  setenv PYTHONPATH $GACODE_ROOT/shared/python
 endif
 
+if ( $?IDL_PATH ) then
+ setenv IDL_PATH ${IDL_PATH}:$GACODE_ROOT/gyro/vugyro
+else
+ setenv IDL_PATH $GACODE_ROOT/gyro/vugyro
+endif
