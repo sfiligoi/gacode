@@ -14,7 +14,7 @@ FPROF	= -march=nocona -mfpmath=sse -O3 -pg
 
 # System math libraries
 
-LMATH = /contrib/clapack-cmake-3.2.1-ser/lib/liblapack.a /contrib/clapack-cmake-3.2.1-ser/lib/libblas.a /contrib/clapack-cmake-3.2.1-ser/lib/libf2c.a 
+LMATH = /usr/lib64/liblapack.a /usr/lib64/libblas.a
 #LMATH = /home/SOFTWARE/GotoBLAS2/libgoto2.a
 
 # OPTIONAL: netCDF (for gyro2gkv)

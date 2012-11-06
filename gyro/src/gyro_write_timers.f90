@@ -69,7 +69,7 @@ subroutine gyro_write_timers(datafile,io)
         read(io,'(a)') cpu_tag(1)
         read(io,'(a)') cpu_tag(1)
         do loop=0,data_step
-           read(io,10) frac
+           read(io,'(a)') cpu_tag(1)
         enddo
         endfile(io)
         close(io)

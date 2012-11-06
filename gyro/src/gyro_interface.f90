@@ -140,7 +140,7 @@ module gyro_interface
   real    :: gyro_orbit_upwind_3_in = 1.0
   real    :: gyro_orbit_upwind_4_in = 1.0
   real    :: gyro_orbit_upwind_5_in = 1.0
-  real    :: gyro_orbit_upwind_electron_in = 0.0
+  real    :: gyro_orbit_upwind_electron_in = 1.0
   real    :: gyro_pgamma_in = 0.0
   real    :: gyro_pgamma_scale_in = 1.0
   real    :: gyro_mach_in = 0.0

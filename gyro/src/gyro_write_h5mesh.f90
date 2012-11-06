@@ -20,7 +20,7 @@
     character(128) :: dumpfile
 
     integer(HID_T) :: gridFileID,gridGroupID
-    integer(HID_T) :: poloidalGridID, threeDGridID, wedgeGridID 
+    integer(HID_T) :: coarseGridID, threeDGridID, wedgeGridID 
     type(hdf5InOpts) :: h5in
     type(hdf5ErrorType) :: h5err
     integer :: number_label
@@ -54,9 +54,6 @@
          call vshdf5_inith5vars(h5in, h5err)
          h5in%comm=MPI_COMM_SELF
          h5in%info=MPI_INFO_NULL
-         h5in%wrd_type=H5T_NATIVE_REAL
-         h5in%typeConvert=.false.
-         !h5in%typeConvert=.true.
          h5in%doTranspose=.true.
          h5in%verbose=.true.
          h5in%debug=.false.
@@ -77,7 +74,7 @@
 
 
       !1.1) make groups
-         call make_group(gridGroupID,"poloidalMesh",poloidalGridID,h5in,&
+         call make_group(gridGroupID,"coarseMesh",coarseGridID,h5in,&
               h5err)
          call make_group(gridGroupID,"threeDMesh",threeDGridID,h5in,&
               h5err)
@@ -131,11 +128,11 @@
     !---------------------------------------- 
 
     h5in%units=""
-    call dump_h5(poloidalGridID,'Rgyro',Rc,h5in,h5err)
-    call dump_h5(poloidalGridID,'Zgyro',Zc,h5in,h5err)
+    call dump_h5(coarseGridID,'Rgyro',Rc,h5in,h5err)
+    call dump_h5(coarseGridID,'Zgyro',Zc,h5in,h5err)
     h5in%units="m"
-    call dump_h5(poloidalGridID,'R',Rc*a_meters,h5in,h5err)
-    call dump_h5(poloidalGridID,'Z',Zc*a_meters,h5in,h5err)
+    call dump_h5(coarseGridID,'R',Rc*a_meters,h5in,h5err)
+    call dump_h5(coarseGridID,'Z',Zc*a_meters,h5in,h5err)
 
     ! Here we do not repeat the points since this is the grid
     ! that will be used for the mode plots on thete E [0,2 pi)
@@ -144,14 +141,14 @@
     bufferMesh(:,:,2)= Zc*a_meters
     h5in%units="m"
     h5in%mesh="mesh-structured"
-    call dump_h5(poloidalGridID,'cartMesh',bufferMesh(:,:,:),h5in,h5err)
+    call dump_h5(coarseGridID,'cartMesh',bufferMesh(:,:,:),h5in,h5err)
     h5in%mesh=" "
     deallocate(bufferMesh)
 
     !----------------------------------------
     ! Dump the coarse mesh(es) in 3D
     !---------------------------------------- 
-    if (write_threed) then
+  threed: if (write_threed) then
     !------------------------------------------------
     ! Set up the toroidal grid.  Only used for coarse grid
     !-------------------------------------------------
@@ -174,6 +171,7 @@
      endif
 
      h5in%units="m"
+     h5in%write_kind_real=h5in%h5_kind_type_r4 
      call dump_h5(threeDGridID,'R',Rc*a_meters,h5in,h5err)
      call dump_h5(threeDGridID,'Z',Zc*a_meters,h5in,h5err)
      h5in%units="radians"
@@ -193,7 +191,8 @@
      h5in%mesh="mesh-structured"
      call dump_h5(threeDGridID,'cartMesh',buffer*a_meters,h5in,h5err)
      deallocate(buffer)
-    endif
+     h5in%write_kind_real=h5in%h5_kind_type_r8
+    endif threed
 
     if (allocated(Rc)) deallocate(Rc)
     if (allocated(Zc)) deallocate(Zc)
@@ -329,17 +328,12 @@
 
     endif wedge
 
-         call close_group("poloidalMesh",poloidalGridID,h5err)
+         call close_group("coarseMesh",coarseGridID,h5err)
          call close_group("threeDMesh",threeDGridID,h5err)
          call close_group("wedgeMesh",wedgeGridID,h5err)
 
 
          call close_h5file(gridFileID,gridGroupID,h5err)
-
-
-
-
-
 
   end subroutine hdf5_write_coords
 

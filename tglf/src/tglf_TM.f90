@@ -85,7 +85,7 @@
 !
         v_bar1 = 0.0
         phi_bar1 = 0.0
-        do imax = 1,nmodes_out
+        do imax = 1,nmodes_in
           v_bar1 = v_bar1 + field_spectrum_out(1,i,imax)
           phi_bar1 = phi_bar1 + field_spectrum_out(2,i,imax)
         enddo
@@ -99,7 +99,7 @@
         do is=ns0,ns
           nsum1(is) = 0.0
           tsum1(is) = 0.0
-          do imax = 1,nmodes_out
+          do imax = 1,nmodes_in
             nsum1(is) = nsum1(is) + intensity_spectrum_out(1,is,i,imax)
             tsum1(is) = tsum1(is) + intensity_spectrum_out(2,is,i,imax)
           enddo
@@ -120,7 +120,7 @@
             stress_tor1(is,j) = 0.0
             stress_par1(is,j) = 0.0
             exch1(is,j) = 0.0
-            do imax = 1,nmodes_out
+            do imax = 1,nmodes_in
               pflux1(is,j) = pflux1(is,j) + flux_spectrum_out(1,is,j,i,imax)
               eflux1(is,j) = eflux1(is,j) + flux_spectrum_out(2,is,j,i,imax)
               stress_tor1(is,j) = stress_tor1(is,j) + &
@@ -199,7 +199,7 @@
 !
 ! initialize output arrays
 !
-      do k=1,nmodes_out
+      do k=1,nmodes_in
        do i=1,nky
         do t = 1,2
           eigenvalue_spectrum_out(t,i,k) = 0.0

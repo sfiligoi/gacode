@@ -60,6 +60,10 @@
   integER, PARAMETER, PRIVATE :: i8=selected_int_kind(18)
   inteGER, PARAMETER, PRIVATE :: r4=selected_real_kind(6,37)
   iNTEGER, PARAMETER, PRIVATE :: r8=selected_real_kind(13,307)
+  !integer, parameter, private :: i4=H5T_NATIVE_integer
+  !integer, parameter, private :: i8=H5T_NATIVE_INT16  
+  !integER, PARAMETER, PRIVATE :: r4=H5T_NATIVE_REAL
+  !iNTEGER, PARAMETER, PRIVATE :: r8=H5T_NATIVE_DOUBLE
 !-----------------------------------------------------------------------
 !     Input parameters to control the attributes and how written out
 !     The method used to determine whether to write the character
@@ -80,12 +84,6 @@
 ! For valid types of meshes, details on how the multi-domain
 ! specification works, and centering issues, see the visSchema wiki:
 !  https://ice.txcorp.com/trac/vizschema/wiki/
-!
-! WRD_TYPE:  Valid wrd_types are:
-!  H5T_NATIVE_REAL
-!  H5T_NATIVE_DOUBLE
-!  H5T_NATIVE_integer
-!  H5T_NATIVE_INT16   !?
 !-----------------------------------------------------------------------
 ! IMPORTANT:::
 ! It is very important to have codes use this API use the initvars
@@ -93,7 +91,9 @@
 !  initializing correctly.
 !-----------------------------------------------------------------------
   type hdf5inopts
-     integer(hid_t) :: wrd_type
+     !integer(hid_t) :: wrd_type
+     integer :: write_kind_real
+     integer :: write_kind_int
      logical :: dotranspose        
      logical :: verbose               ! whether to write verbose output
      logical :: debug                 ! write even more verbose output for debugging
@@ -235,14 +235,12 @@
   ! According to xlf:
   ! (E) Null literal string is not permitted.  A single blank is assumed.
   ! So these should be single blanks to avoid warnings
-  !h5in%wrd_type=H5T_NATIVE_DOUBLE
   h5in%vsCentering=" "
   h5in%doTranspose=.false.
   h5in%verbose=.false.
   h5in%debug=.false.
   h5in%pIO=.false.
   h5in%wrVsTime=.false.
-  h5in%typeConvert=.false.
   h5in%unitConvert=.false.
   h5in%mesh =  " "
   h5in%vsAxisLabels = " " 
@@ -257,16 +255,13 @@
   h5err%errBool = .false.
   h5err%errorMsg =  " "
 
-!  h5in%h5_kind_type_r4 = h5kind_to_type(r4,H5_REAL_KIND)
-!  h5in%h5_kind_type_r8 = h5kind_to_type(r8,H5_REAL_KIND)
-!  h5in%h5_kind_type_i4 = h5kind_to_type(i4,H5_INTEGER_KIND)
-!  h5in%h5_kind_type_i8 = h5kind_to_type(i8,H5_INTEGER_KIND)
   h5in%h5_kind_type_r4 = r4
   h5in%h5_kind_type_r8 = r8
   h5in%h5_kind_type_i4 = i4
   h5in%h5_kind_type_i8 = i8
 
-  h5in%wrd_type=h5in%h5_kind_type_r8
+  h5in%write_kind_real=h5in%h5_kind_type_r8
+  h5in%write_kind_int=h5in%h5_kind_type_i4
 
   return
   end subroutine vshdf5_inith5vars
@@ -1399,6 +1394,7 @@
   TYPE(hdf5ErrorType) :: errval
   TYPE(hdf5InOpts), intent(in) :: h5in
   integer,parameter :: FAIL=-1
+  integer(HID_T) :: wrd_type
   integer(HID_T) :: error
   integer(HID_T) :: dspace_id
   integer(HID_T) :: dset_id
@@ -1409,6 +1405,7 @@
 !-----------------------------------------------------------------------
 ! Create the data space.
 !-----------------------------------------------------------------------
+  wrd_type=h5kind_to_type(h5in%write_kind_int,H5_INTEGER_KIND)
   call h5screate_f(H5S_SCALAR_F, dspace_id, error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
@@ -1419,8 +1416,7 @@
 ! Create the data set.
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-----------------------------------------------------------------------
-  call h5dcreate_f(inid,aname, &
-                  H5T_NATIVE_integer,dspace_id,dset_id,error)
+  call h5dcreate_f(inid,aname,wrd_type,dspace_id,dset_id,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
@@ -1443,7 +1439,7 @@
 !-----------------------------------------------------------------------
 ! Write stored data to "name" data set.
 !-----------------------------------------------------------------------
-  call h5dwrite_f(dset_id,H5T_NATIVE_INTEGER,value,dims,error)
+  call h5dwrite_f(dset_id,wrd_type,int(value,i4),dims,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Data set write failed for '//aname
      errval%errBool = .true.
@@ -1483,6 +1479,7 @@
   TYPE(hdf5ErrorType) :: errval
   TYPE(hdf5InOpts), intent(in) :: h5in
   integer,parameter :: FAIL=-1
+  integer(HID_T) :: wrd_type
   integer(HID_T) :: error
   integer(HID_T) :: rank
   integer(HID_T) :: dspace_id, dset_id
@@ -1495,6 +1492,7 @@
 !-----------------------------------------------------------------------
 ! Create the data space.
 !-----------------------------------------------------------------------
+  wrd_type=h5kind_to_type(h5in%write_kind_int,H5_INTEGER_KIND)
   call h5screate_simple_f(rank,dims,dspace_id,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
@@ -1505,7 +1503,7 @@
 ! Create the data set.
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-----------------------------------------------------------------------
-  call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
+  call h5dcreate_f(inid,aname,wrd_type,dspace_id,dset_id,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
@@ -1529,14 +1527,10 @@
 ! Write stored data to "name" data set.
 !-----------------------------------------------------------------------
 !#ifdef __MPI
-!   call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error, &
+!   call h5dwrite_f(dset_id,wrd_type,array,dims,error, &
 !                 xfer_prp = plist_id)
 !#else
-  if(h5in%typeConvert) then
-   call h5dwrite_f(dset_id,h5in%wrd_type,real(array,r4),dims,error)
-  else
-   call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error)
-  endif
+   call h5dwrite_f(dset_id,wrd_type,int(array,i4),dims,error)
 !#endif
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Data set write failed for '//aname
@@ -1577,6 +1571,7 @@
   TYPE(hdf5ErrorType) :: errval
   TYPE(hdf5InOpts), intent(in) :: h5in
   integer,parameter :: FAIL=-1
+  integer(HID_T) :: wrd_type
   integer(HID_T) :: error
   integer(HID_T) :: dspace_id
   integer(HID_T) :: dset_id
@@ -1586,6 +1581,7 @@
 !-----------------------------------------------------------------------
 ! Create the data space.
 !-----------------------------------------------------------------------
+  wrd_type=h5kind_to_type(h5in%write_kind_int,H5_INTEGER_KIND)
   call h5screate_f(H5S_SCALAR_F, dspace_id, error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
@@ -1596,8 +1592,7 @@
 ! Create the data set.
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-----------------------------------------------------------------------
-  call h5dcreate_f(inid,aname, &
-                  H5T_NATIVE_integer,dspace_id,dset_id,error)
+  call h5dcreate_f(inid,aname, wrd_type,dspace_id,dset_id,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
@@ -1620,7 +1615,7 @@
 !-----------------------------------------------------------------------
 ! Write stored data to "name" data set.
 !-----------------------------------------------------------------------
-  call h5dwrite_f(dset_id,H5T_NATIVE_INTEGER,int(value,i4),dims,error)
+  call h5dwrite_f(dset_id,wrd_type,int(value,i4),dims,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Data set write failed for '//aname
      errval%errBool = .true.
@@ -1657,10 +1652,10 @@
   integer(HID_T), intent(in) :: inid
   character*(*), intent(in) :: aname
   integer(i8), dimension(:), intent(in) :: array
-  integer(i4), dimension(:), allocatable :: intarray
   TYPE(hdf5ErrorType) :: errval
   TYPE(hdf5InOpts), intent(in) :: h5in
   integer,parameter :: FAIL=-1
+  integer(HID_T) :: wrd_type
   integer(HID_T) :: error
   integer(HID_T) :: rank
   integer(HID_T) :: dspace_id, dset_id
@@ -1670,8 +1665,7 @@
 !-----------------------------------------------------------------------
   if(h5in%verbose) WRITE(*,*) 'Writing ', aname
   rank = 1;            dims(:) = (/SIZE(array,1)/)
-  ALLOCATE(intarray(dims(1)))
-  intarray=array
+  wrd_type=h5kind_to_type(h5in%write_kind_int,H5_INTEGER_KIND)
 !-----------------------------------------------------------------------
 ! Create the data space.
 !-----------------------------------------------------------------------
@@ -1685,7 +1679,7 @@
 ! Create the data set.
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-----------------------------------------------------------------------
-  call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
+  call h5dcreate_f(inid,aname,wrd_type,dspace_id,dset_id,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
@@ -1709,17 +1703,16 @@
 ! Write stored data to "name" data set.
 !-----------------------------------------------------------------------
 !#ifdef __MPI
-!   call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error, &
+!   call h5dwrite_f(dset_id,wrd_type,array,dims,error, &
 !                 xfer_prp = plist_id)
 !#else
-   call h5dwrite_f(dset_id,H5T_NATIVE_INTEGER,intarray,dims,error)
+   call h5dwrite_f(dset_id,wrd_type,int(array,i4),dims,error)
 !#endif
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Data set write failed for '//aname
      errval%errBool = .true.
      return
   endif
-  DEALLOCATE(intarray)
 !-----------------------------------------------------------------------
 ! Add the VisSchema attributes
 !-----------------------------------------------------------------------
@@ -1755,6 +1748,7 @@
   TYPE(hdf5ErrorType) :: errval
   TYPE(hdf5InOpts), intent(in) :: h5in
   integer,parameter :: FAIL=-1
+  integer(HID_T) :: wrd_type
   integer(HID_T) :: error
   integer(HID_T) :: dspace_id, dset_id
   integer(HSIZE_T), dimension(1) :: dims=0
@@ -1763,6 +1757,7 @@
 !-------------------------------------------------------------------
 ! Create the data space.
 !-------------------------------------------------------------------
+  wrd_type=h5kind_to_type(h5in%write_kind_real,H5_REAL_KIND)
   call h5screate_f(H5S_SCALAR_F, dspace_id, error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
@@ -1773,7 +1768,7 @@
 ! Create the data set.
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-------------------------------------------------------------------
-  call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
+  call h5dcreate_f(inid,aname,wrd_type,dspace_id,dset_id,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
@@ -1796,10 +1791,13 @@
 !-----------------------------------------------------------------------
 ! Write stored data to "name" data set.
 !-----------------------------------------------------------------------
-  if(h5in%typeConvert) then
-    call h5dwrite_f(dset_id,h5in%wrd_type,real(value,r4),dims,error)
+  if (h5in%write_kind_real==r4) then
+    call h5dwrite_f(dset_id,wrd_type,real(value,r4),dims,error)
+  elseif (h5in%write_kind_real==r8) then
+   call h5dwrite_f(dset_id,wrd_type,real(value,r8),dims,error)
   else
-    call h5dwrite_f(dset_id,h5in%wrd_type,value,dims,error)
+    write(*,*) "Unkown datatype"
+    error=1
   endif
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Data set write failed for '//aname
@@ -1841,6 +1839,7 @@
   TYPE(hdf5ErrorType) :: errval
   TYPE(hdf5InOpts), intent(in) :: h5in
   integer,parameter :: FAIL=-1
+  integer(HID_T) :: wrd_type
   integer(HID_T) :: error
   integer(HID_T) :: dspace_id, dset_id
   integer(HSIZE_T), dimension(1) :: dims=0
@@ -1849,6 +1848,7 @@
 !-------------------------------------------------------------------
 ! Create the data space.
 !-------------------------------------------------------------------
+  wrd_type=h5kind_to_type(h5in%write_kind_real,H5_REAL_KIND)
   call h5screate_f(H5S_SCALAR_F, dspace_id, error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
@@ -1859,7 +1859,7 @@
 ! Create the data set.
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-------------------------------------------------------------------
-  call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
+  call h5dcreate_f(inid,aname,wrd_type,dspace_id,dset_id,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
@@ -1882,10 +1882,13 @@
 !-----------------------------------------------------------------------
 ! Write stored data to "name" data set.
 !-----------------------------------------------------------------------
-  if(h5in%typeConvert) then
-    call h5dwrite_f(dset_id,h5in%wrd_type,value,dims,error)
+  if (h5in%write_kind_real==r4) then
+    call h5dwrite_f(dset_id,wrd_type,real(value,r4),dims,error)
+  elseif (h5in%write_kind_real==r8) then
+    call h5dwrite_f(dset_id,wrd_type,real(value,r8),dims,error)
   else
-    call h5dwrite_f(dset_id,h5in%wrd_type,value,dims,error)
+    write(*,*) "Unkown datatype"
+    error=1
   endif
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Data set write failed for '//aname
@@ -1927,11 +1930,13 @@
   TYPE(hdf5ErrorType) :: errval
   TYPE(hdf5InOpts), intent(in) :: h5in
   integer,parameter :: FAIL=-1
+  integer(HID_T) :: wrd_type
   integer(HID_T) :: error
   integer(HID_T) :: rank
   integer(HID_T) :: dspace_id, dset_id
   integer(HSIZE_T), dimension(1) :: dims
   integer(hid_t) :: plist_id       ! Property list identifier
+  integer :: type_from_kind
 !-----------------------------------------------------------------------
 ! Define the rank and dimensions of the data set to be created.
 !-----------------------------------------------------------------------
@@ -1940,6 +1945,7 @@
 !-----------------------------------------------------------------------
 ! Create the data space.
 !-----------------------------------------------------------------------
+  wrd_type=h5kind_to_type(h5in%write_kind_real,H5_REAL_KIND)
   call h5screate_simple_f(rank,dims,dspace_id,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
@@ -1950,7 +1956,7 @@
 ! Create the data set.
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-----------------------------------------------------------------------
-  call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
+  call h5dcreate_f(inid,aname,wrd_type,dspace_id,dset_id,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
@@ -1974,13 +1980,16 @@
 ! Write stored data to "name" data set.
 !-----------------------------------------------------------------------
 !#ifdef __MPI
-!   call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error, &
+!   call h5dwrite_f(dset_id,wrd_type,real(array,h5in%write_kind_real),dims,error, &
 !                 xfer_prp = plist_id)
 !#else
-  if(h5in%typeConvert) then
-   call h5dwrite_f(dset_id,h5in%wrd_type,real(array,r4),dims,error)
+  if (h5in%write_kind_real==r4) then
+    call h5dwrite_f(dset_id,wrd_type,real(array,r4),dims,error)
+  elseif (h5in%write_kind_real==r8) then
+    call h5dwrite_f(dset_id,wrd_type,real(array,r8),dims,error)
   else
-   call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error)
+    write(*,*) "Unkown datatype"
+    error=1
   endif
 !#endif
   if (error.ne.0) then
@@ -2024,6 +2033,7 @@
   integer,parameter :: FAIL=-1
   integer(hid_t) :: plist_id       ! Property list identifier
   integer(HID_T) :: error
+  integer(HID_T) :: wrd_type
 
   integer(HID_T) dspace_id, rank, dset_id
   integer(HSIZE_T) :: dims(2)
@@ -2040,6 +2050,7 @@
 !-----------------------------------------------------------------------
 ! Create the data space.
 !-----------------------------------------------------------------------
+  wrd_type=h5kind_to_type(h5in%write_kind_real,H5_REAL_KIND)
   call h5screate_simple_f(rank,dims,dspace_id,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data space failed for '//aname
@@ -2050,7 +2061,7 @@
 ! Create the data set.
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-----------------------------------------------------------------------
-  call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
+  call h5dcreate_f(inid,aname,wrd_type,dspace_id,dset_id,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
@@ -2072,39 +2083,49 @@
 ! Write stored data to "name" data set.
 !-----------------------------------------------------------------------
 #ifdef __MPI
-  if(h5in%typeConvert) then
    if(h5in%doTranspose) then
-     call h5dwrite_f(dset_id,h5in%wrd_type,TRANSPOSE(real(array,r4)),dims, &
+     if (h5in%write_kind_real==r4) then
+     call h5dwrite_f(dset_id,wrd_type, TRANSPOSE(real(array,r4)),dims, &
                    error,xfer_prp = plist_id)
+     elseif (h5in%write_kind_real==r8) then
+     call h5dwrite_f(dset_id,wrd_type, TRANSPOSE(real(array,r8)),dims, &
+                   error,xfer_prp = plist_id)
+     else
+       write(*,*) "Unkown datatype"
+       error=1
+     endif
    else
-     call h5dwrite_f(dset_id,h5in%wrd_type,real(array,r4),dims, &
-                   error,xfer_prp = plist_id)
+     if (h5in%write_kind_real==r4) then
+       call h5dwrite_f(dset_id,wrd_type, real(array,r4),dims, &
+                     error,xfer_prp = plist_id)
+     elseif (h5in%write_kind_real==r8) then
+       call h5dwrite_f(dset_id,wrd_type, real(array,r8),dims, &
+                     error,xfer_prp = plist_id)
+     else
+       write(*,*) "Unkown datatype"
+       error=1
+     endif
    endif
-  else
-   if(h5in%doTranspose) then
-     call h5dwrite_f(dset_id,h5in%wrd_type,TRANSPOSE(array),dims, &
-                   error,xfer_prp = plist_id)
-   else
-     call h5dwrite_f(dset_id,h5in%wrd_type,array,dims, &
-                   error,xfer_prp = plist_id)
-   endif
-  endif
 #else
-  if(h5in%typeConvert) then
    if(h5in%doTranspose) then
-    call h5dwrite_f(dset_id,h5in%wrd_type,TRANSPOSE(real(array,r4)),dims, &
-                   error)
+     if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type,TRANSPOSE(real(array,r4)),dims,error)
+     elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type,TRANSPOSE(real(array,r8)),dims,error)
+     else
+       write(*,*) "Unkown datatype"
+       error=1
+     endif
    else
-    call h5dwrite_f(dset_id,h5in%wrd_type,real(array,r4),dims,error)
+     if (h5in%write_kind_real==r4) then
+       call h5dwrite_f(dset_id,wrd_type, real(array,r4),dims,error)
+     elseif (h5in%write_kind_real==r8) then
+       call h5dwrite_f(dset_id,wrd_type, real(array,r8),dims,error)
+     else
+       write(*,*) "Unkown datatype"
+       error=1
+     endif
    endif
-  else
-   if(h5in%doTranspose) then
-    call h5dwrite_f(dset_id,h5in%wrd_type,TRANSPOSE(array),dims, &
-                   error)
-   else
-    call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error)
-   endif
-  endif
 #endif
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Writing data set failed for '//aname
@@ -2145,6 +2166,7 @@
   TYPE(hdf5InOpts), intent(in) :: h5in
   TYPE(hdf5ErrorType) :: errval
   integer,parameter :: FAIL=-1
+  integer(HID_T) :: wrd_type
   integer(HID_T) :: error
   integer :: i,j
   integer(hid_t) :: plist_id       ! Property list identifier
@@ -2180,8 +2202,9 @@
 ! Create the data set.
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-----------------------------------------------------------------------
-  if(h5in%debug) WRITE(*,*) 'Calling h5dcreate_simple_f', h5in%wrd_type
-  call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
+  wrd_type=h5kind_to_type(h5in%write_kind_real,H5_REAL_KIND)
+  if(h5in%debug) WRITE(*,*) 'Calling h5dcreate_simple_f', wrd_type
+  call h5dcreate_f(inid,aname,wrd_type,dspace_id,dset_id,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
@@ -2203,41 +2226,49 @@
 ! Write stored data to "name" data set.
 !-----------------------------------------------------------------------
 #ifdef __MPI
-  if(h5in%typeConvert) then
-   if(h5in%doTranspose) then
-    call h5dwrite_f(dset_id,h5in%wrd_type,real(tmparray,r4),dims, &
-                   error,xfer_prp = plist_id)
-    deallocate(tmparray)
-   else
-    call h5dwrite_f(dset_id,h5in%wrd_type,real(array,r4),dims, &
-                   error,xfer_prp = plist_id)
-   endif
+ if(h5in%doTranspose) then
+     if (h5in%write_kind_real==r4) then
+        call h5dwrite_f(dset_id,wrd_type,real(tmparray,r4), &
+                 dims,error,xfer_prp = plist_id)
+     elseif (h5in%write_kind_real==r8) then
+        call h5dwrite_f(dset_id,wrd_type,real(tmparray,r8), &
+                 dims,error,xfer_prp = plist_id)
+     else
+       write(*,*) "Unkown datatype"
+       error=1
+     endif
+ else
+  if (h5in%write_kind_real==r4) then
+     call h5dwrite_f(dset_id,wrd_type,real(array,r4), &
+                 dims,error,xfer_prp = plist_id)
+  elseif (h5in%write_kind_real==r8) then
+     call h5dwrite_f(dset_id,wrd_type,real(array,r8), &
+                 dims,error,xfer_prp = plist_id)
   else
-   if(h5in%doTranspose) then
-    call h5dwrite_f(dset_id,h5in%wrd_type,tmparray,dims, &
-                   error,xfer_prp = plist_id)
-    deallocate(tmparray)
-   else
-    call h5dwrite_f(dset_id,h5in%wrd_type,array,dims, &
-                   error,xfer_prp = plist_id)
-   endif
+    write(*,*) "Unkown datatype"
+    error=1
   endif
+ endif
 #else
-  if(h5in%typeConvert) then
-   if(h5in%doTranspose) then
-    call h5dwrite_f(dset_id,h5in%wrd_type,real(tmparray,r4),dims,error)
-    deallocate(tmparray)
-   else
-    call h5dwrite_f(dset_id,h5in%wrd_type,real(array,r4),dims,error)
-   endif
+ if(h5in%doTranspose) then
+  if (h5in%write_kind_real==r4) then
+    call h5dwrite_f(dset_id,wrd_type,real(tmparray,r4),dims,error)
+  elseif (h5in%write_kind_real==r8) then
+    call h5dwrite_f(dset_id,wrd_type,real(tmparray,r8),dims,error)
   else
-   if(h5in%doTranspose) then
-    call h5dwrite_f(dset_id,h5in%wrd_type,tmparray,dims,error)
-    deallocate(tmparray)
-   else
-    call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error)
-   endif
+    write(*,*) "Unkown datatype"
+    error=1
   endif
+ else
+  if (h5in%write_kind_real==r4) then
+     call h5dwrite_f(dset_id,wrd_type,real(array,r4), dims,error)
+  elseif (h5in%write_kind_real==r8) then
+     call h5dwrite_f(dset_id,wrd_type,real(array,r8), dims,error)
+  else
+    write(*,*) "Unkown datatype"
+    error=1
+  endif
+ endif
 #endif
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Writing data set failed for '//aname
@@ -2280,6 +2311,7 @@
   integer,parameter :: FAIL=-1
   integer(HID_T) :: error
   integer :: i,j,k
+  integer(hid_t) :: wrd_type
   integer(hid_t) :: plist_id       ! Property list identifier
   real(r8), dimension(:,:,:,:), allocatable :: tmparray
 
@@ -2314,7 +2346,8 @@
 ! Create the data set.
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-----------------------------------------------------------------------
-  call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
+  wrd_type=h5kind_to_type(h5in%write_kind_real,H5_REAL_KIND)
+  call h5dcreate_f(inid,aname,wrd_type,dspace_id,dset_id,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
@@ -2336,31 +2369,48 @@
 ! Write stored data to "name" data set.
 !-----------------------------------------------------------------------
 #ifdef __MPI
-  if(h5in%typeConvert) then
-    if(h5in%doTranspose) then
-      call h5dwrite_f(dset_id,h5in%wrd_type,real(tmparray,r4),dims, &
-                     error,xfer_prp = plist_id)
-      deallocate(tmparray)
+  if(h5in%doTranspose) then
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type,real(tmparray,r4), &
+                   dims,error,xfer_prp = plist_id)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type,real(tmparray,r8), &
+                   dims,error,xfer_prp = plist_id)
     else
-      call h5dwrite_f(dset_id,h5in%wrd_type,real(array,r4),dims, &
-                     error,xfer_prp = plist_id)
+      write(*,*) "Unkown datatype"
+      error=1
     endif
   else
-    if(h5in%doTranspose) then
-      call h5dwrite_f(dset_id,h5in%wrd_type,tmparray,dims, &
-                     error,xfer_prp = plist_id)
-      deallocate(tmparray)
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r4), &
+                   dims,error,xfer_prp = plist_id)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r8), &
+                   dims,error,xfer_prp = plist_id)
     else
-      call h5dwrite_f(dset_id,h5in%wrd_type,array,dims, &
-                     error,xfer_prp = plist_id)
+      write(*,*) "Unkown datatype"
+      error=1
     endif
   endif
 #else
   if(h5in%doTranspose) then
-    call h5dwrite_f(dset_id,h5in%wrd_type,tmparray,dims,error)
-    deallocate(tmparray)
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type,real(tmparray,r4),dims,error)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type,real(tmparray,r8),dims,error)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
   else
-    call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error)
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r4),dims,error)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r8),dims,error)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
   endif
 #endif
   if (error.ne.0) then
@@ -2403,6 +2453,7 @@
   TYPE(hdf5ErrorType) :: errval
   TYPE(hdf5InOpts), intent(in) :: h5in
   integer,parameter :: FAIL=-1
+  integer(HID_T) :: wrd_type
   integer(HID_T) :: error
   integer(HID_T) :: rank
   integer(HID_T) :: dspace_id, dset_id
@@ -2425,7 +2476,8 @@
 ! Create the data set.
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-----------------------------------------------------------------------
-  call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
+  wrd_type=h5kind_to_type(h5in%write_kind_real,H5_REAL_KIND)
+  call h5dcreate_f(inid,aname,wrd_type,dspace_id,dset_id,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
@@ -2449,10 +2501,17 @@
 ! Write stored data to "name" data set.
 !-----------------------------------------------------------------------
 !#ifdef __MPI
-!   call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error, &
+!   call h5dwrite_f(dset_id,wrd_type,array,dims,error, &
 !                 xfer_prp = plist_id)
 !#else
-   call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error)
+    if (h5in%write_kind_real==r4) then
+       call h5dwrite_f(dset_id,wrd_type,real(array,r4),dims,error)
+    elseif (h5in%write_kind_real==r8) then
+       call h5dwrite_f(dset_id,wrd_type,real(array,r8),dims,error)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
 !#endif
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Data set write failed for '//aname
@@ -2493,6 +2552,7 @@
   TYPE(hdf5InOpts), intent(in) :: h5in
   TYPE(hdf5ErrorType) :: errval
   integer,parameter :: FAIL=-1
+  integer(HID_T) :: wrd_type
   integer(HID_T) :: error
   integer(hid_t) :: plist_id       ! Property list identifier
 
@@ -2521,7 +2581,8 @@
 ! Create the data set.
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-----------------------------------------------------------------------
-  call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
+  wrd_type=h5kind_to_type(h5in%write_kind_real,H5_REAL_KIND)
+  call h5dcreate_f(inid,aname,wrd_type,dspace_id,dset_id,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
@@ -2544,18 +2605,47 @@
 !-----------------------------------------------------------------------
 #ifdef __MPI
   if(h5in%doTranspose) then
-    call h5dwrite_f(dset_id,h5in%wrd_type,TRANSPOSE(array),dims, &
-                   error,xfer_prp = plist_id)
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type, TRANSPOSE(real(array,r4)), &
+                   dims,error,xfer_prp = plist_id)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type, TRANSPOSE(real(array,r8)), &
+                   dims,error,xfer_prp = plist_id)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
   else
-    call h5dwrite_f(dset_id,h5in%wrd_type,array,dims, &
-                   error,xfer_prp = plist_id)
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type, real(array,r4), &
+                   dims,error,xfer_prp = plist_id)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type, real(array,r8), &
+                   dims,error,xfer_prp = plist_id)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
   endif
 #else
   if(h5in%doTranspose) then
-    call h5dwrite_f(dset_id,h5in%wrd_type,TRANSPOSE(array),dims, &
-                   error)
+    if (h5in%write_kind_real==r4) then
+       call h5dwrite_f(dset_id,wrd_type,TRANSPOSE(real(array,r4)),dims,error)
+    elseif (h5in%write_kind_real==r8) then
+       call h5dwrite_f(dset_id,wrd_type,TRANSPOSE(real(array,r8)),dims,error)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
   else
-    call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error)
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r4),dims,error)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r8),dims,error)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
   endif
 #endif
   if (error.ne.0) then
@@ -2597,6 +2687,7 @@
   TYPE(hdf5InOpts), intent(in) :: h5in
   TYPE(hdf5ErrorType) :: errval
   integer,parameter :: FAIL=-1
+  integer(HID_T) :: wrd_type
   integer(HID_T) :: error
   integer(hid_t) :: plist_id       ! Property list identifier
   integer :: i,j
@@ -2631,7 +2722,8 @@
 ! Create the data set.
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-----------------------------------------------------------------------
-  call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
+  wrd_type=h5kind_to_type(h5in%write_kind_real,H5_REAL_KIND)
+  call h5dcreate_f(inid,aname,wrd_type,dspace_id,dset_id,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
@@ -2654,19 +2746,49 @@
 !-----------------------------------------------------------------------
 #ifdef __MPI
   if(h5in%doTranspose) then
-    call h5dwrite_f(dset_id,h5in%wrd_type,tmparray,dims, &
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type,real(tmparray,r4),dims, &
                    error,xfer_prp = plist_id)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type,real(tmparray,r8),dims, &
+                   error,xfer_prp = plist_id)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
     deallocate(tmparray)
   else
-    call h5dwrite_f(dset_id,h5in%wrd_type,array,dims, &
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r4),dims, &
                    error,xfer_prp = plist_id)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r8),dims, &
+                   error,xfer_prp = plist_id)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
   endif
 #else
   if(h5in%doTranspose) then
-    call h5dwrite_f(dset_id,h5in%wrd_type,tmparray,dims,error)
+    if (h5in%write_kind_real==r4) then
+       call h5dwrite_f(dset_id,wrd_type,real(tmparray,r4), dims,error)
+    elseif (h5in%write_kind_real==r8) then
+       call h5dwrite_f(dset_id,wrd_type,real(tmparray,r8), dims,error)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
     deallocate(tmparray)
   else
-    call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error)
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r4),dims,error)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r8),dims,error)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
   endif
 #endif
   if (error.ne.0) then
@@ -2712,7 +2834,7 @@
   integer :: i,j,k
   real(r8), dimension(:,:,:,:), allocatable :: tmparray
 
-  integer(HID_T) dspace_id, rank, dset_id
+  integer(HID_T) dspace_id, rank, dset_id, wrd_type
   integer(HSIZE_T) :: dims(4)
 !-----------------------------------------------------------------------
 ! Define the rank and dimensions of the data set to be created.
@@ -2743,7 +2865,8 @@
 ! Create the data set.
 ! Note: wrd_type is data type being written into file (r4 or r8)
 !-----------------------------------------------------------------------
-  call h5dcreate_f(inid,aname,h5in%wrd_type,dspace_id,dset_id,error)
+  wrd_type=h5kind_to_type(h5in%write_kind_real,H5_REAL_KIND)
+  call h5dcreate_f(inid,aname,wrd_type,dspace_id,dset_id,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Create data set failed for '//aname
      errval%errBool = .true.
@@ -2766,19 +2889,53 @@
 !-----------------------------------------------------------------------
 #ifdef __MPI
   if(h5in%doTranspose) then
-    call h5dwrite_f(dset_id,h5in%wrd_type,tmparray,dims, &
-                   error,xfer_prp = plist_id)
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type,real(tmparray,r4), &
+                   dims,error,xfer_prp = plist_id)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type,real(tmparray,r8), &
+                   dims,error,xfer_prp = plist_id)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
     deallocate(tmparray)
   else
-    call h5dwrite_f(dset_id,h5in%wrd_type,array,dims, &
-                   error,xfer_prp = plist_id)
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r4), &
+                   dims,error,xfer_prp = plist_id)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r8), &
+                   dims,error,xfer_prp = plist_id)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
   endif
 #else
   if(h5in%doTranspose) then
-    call h5dwrite_f(dset_id,h5in%wrd_type,tmparray,dims,error)
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type,real(tmparray,r4), &
+                    dims,error)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type,real(tmparray,r8), &
+                    dims,error)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
     deallocate(tmparray)
   else
-    call h5dwrite_f(dset_id,h5in%wrd_type,array,dims,error)
+    if (h5in%write_kind_real==r4) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r4), &
+                    dims,error)
+    elseif (h5in%write_kind_real==r8) then
+      call h5dwrite_f(dset_id,wrd_type,real(array,r8), &
+                    dims,error)
+    else
+      write(*,*) "Unkown datatype"
+      error=1
+    endif
   endif
 #endif
   if (error.ne.0) then
@@ -2823,6 +2980,7 @@
   TYPE(hdf5InOpts), intent(in) :: h5in
   integer,parameter :: FAIL=-1
   integer(HID_T) :: rank = 1
+  integer(HID_T) :: wrd_type
   integer(HID_T) :: error
   integer(HID_T) :: dspace_id, filespace
   integer(HID_T) :: dset_id
@@ -3919,7 +4077,7 @@
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer(HSIZE_T), dimension(1) :: dims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer(HID_T) :: error ,wrd_type
   integer(HID_T) :: dset_id
 
   integer(i4) :: intvalue
@@ -3936,8 +4094,9 @@
 !-----------------------------------------------------------------------
 ! Read data set
 !-----------------------------------------------------------------------
+  wrd_type=h5kind_to_type(h5in%write_kind_int,H5_INTEGER_KIND)
   if (errval%errBool) return
-  call h5dread_f(dset_id,h5in%wrd_type,intvalue,dims,error)
+  call h5dread_f(dset_id,wrd_type,intvalue,dims,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Reading data set failed for '//aname
      errval%errBool = .true.
@@ -3971,7 +4130,7 @@
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer(HSIZE_T), dimension(1) :: dims, fdims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer(HID_T) :: error, wrd_type
   integer(HID_T) :: dset_id
 
   integer(i4), dimension(:), allocatable :: intarray
@@ -3995,7 +4154,8 @@
   call read_dims(dset_id,fdims,errval)
   call check_dims(dims,fdims, errval)
   if (errval%errBool) return
-  call h5dread_f(dset_id,h5in%wrd_type,intarray,dims,error)
+  wrd_type=h5kind_to_type(i4,H5_INTEGER_KIND)
+  call h5dread_f(dset_id,wrd_type,intarray,dims,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Reading data set failed for '//aname
      errval%errBool = .true.
@@ -4029,7 +4189,7 @@
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer(HSIZE_T), dimension(1) :: dims, fdims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer(HID_T) :: error, wrd_type
 
   integer(HID_T) :: dset_id
 !-----------------------------------------------------------------------
@@ -4049,7 +4209,8 @@
   call read_dims(dset_id,fdims,errval)
   call check_dims(dims,fdims, errval)
   if (errval%errBool) return
-  call h5dread_f(dset_id,h5in%wrd_type,array,dims,error)
+  wrd_type=h5kind_to_type(r8,H5_REAL_KIND)
+  call h5dread_f(dset_id,wrd_type,array,dims,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Reading data set failed for '//aname
      errval%errBool = .true.
@@ -4082,7 +4243,7 @@
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer(HSIZE_T), dimension(2) :: dims, fdims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error 
+  integer(HID_T) :: error, wrd_type
   integer :: i
   real(r8), dimension(:,:), allocatable :: tmparray
 
@@ -4114,11 +4275,12 @@
 !-----------------------------------------------------------------------
 ! Read data set
 !-----------------------------------------------------------------------
+  wrd_type=h5kind_to_type(r8,H5_REAL_KIND)
   if(.NOT. h5in%doTranspose) then
-     call h5dread_f(dset_id,h5in%wrd_type,array,dims,error)
+     call h5dread_f(dset_id,wrd_type,array,dims,error)
   else
      allocate(tmparray(dims(1),dims(2)))
-     call h5dread_f(dset_id,h5in%wrd_type,tmparray,dims,error)
+     call h5dread_f(dset_id,wrd_type,tmparray,dims,error)
      do i=1,dims(1);      array(:,i)=tmparray(i,:);     enddo
      deallocate(tmparray)
   endif
@@ -4154,7 +4316,7 @@
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer(HSIZE_T), dimension(3) :: dims, fdims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer(HID_T) :: error, wrd_type
   integer :: i,j
   real(r8), dimension(:,:,:), allocatable :: tmparray
 
@@ -4190,11 +4352,12 @@
 !-----------------------------------------------------------------------
 ! Read data set
 !-----------------------------------------------------------------------
+  wrd_type=h5kind_to_type(r8,H5_REAL_KIND)
   if(.NOT. h5in%doTranspose) then
-     call h5dread_f(dset_id,h5in%wrd_type,array,dims,error)
+     call h5dread_f(dset_id,wrd_type,array,dims,error)
   else
      allocate(tmparray(dims(1),dims(2),dims(3)))
-     call h5dread_f(dset_id,h5in%wrd_type,tmparray,dims,error)
+     call h5dread_f(dset_id,wrd_type,tmparray,dims,error)
      do i=1,dims(1); do j=1,dims(2)
       array(:,j,i)=tmparray(i,j,:)
      enddo; enddo
@@ -4231,7 +4394,7 @@
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer(HSIZE_T), dimension(1) :: dims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer(HID_T) :: error, wrd_type
   integer(HID_T) aset_id
 
   integer(i4) :: intval
@@ -4249,7 +4412,8 @@
 ! Read attribute
 !-----------------------------------------------------------------------
   dims(1)=1
-  call h5aread_f(aset_id,h5in%wrd_type,intval,dims,error)
+  wrd_type=h5kind_to_type(i4,H5_INTEGER_KIND)
+  call h5aread_f(aset_id,wrd_type,intval,dims,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Reading data set failed for '//aname
      errval%errBool = .true.
@@ -4283,7 +4447,7 @@
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer(HSIZE_T), dimension(1) :: dims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer(HID_T) :: error, wrd_type
 
   integer(HID_T) aset_id
 !-----------------------------------------------------------------------
@@ -4300,7 +4464,8 @@
 ! Read attribute
 !-----------------------------------------------------------------------
   dims(1)=1
-  call h5aread_f(aset_id,h5in%wrd_type,val,dims,error)
+  wrd_type=h5kind_to_type(r8,H5_REAL_KIND)
+  call h5aread_f(aset_id,wrd_type,val,dims,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Reading data set failed for '//aname
      errval%errBool = .true.
@@ -4333,7 +4498,7 @@
   TYPE(hdf5ErrorType), intent(inoUT) :: errval
   integer(HSIZE_T), dimension(1) :: dims
   integer,parameter :: FAIL=-1
-  integer(HID_T) :: error
+  integer(HID_T) :: error, wrd_type
   integer(HID_T) aset_id
 
   integer(i4), dimension(:), allocatable :: intarray
@@ -4353,7 +4518,8 @@
   dims(1)=size(array)
   allocate(intarray(dims(1)))
   intarray = array
-  call h5aread_f(aset_id,h5in%wrd_type,intarray,dims,error)
+  wrd_type=h5kind_to_type(r8,H5_REAL_KIND)
+  call h5aread_f(aset_id,wrd_type,intarray,dims,error)
   if (error.ne.0) then
      errval%errorMsg = 'ERROR: Reading data set failed for '//aname
      errval%errBool = .true.

@@ -54,6 +54,7 @@ c
       integer itorque, iptotr, ipfst, ipramp
       integer ifilter, ifixeta, iglf2d, ibound
       integer idatzero, igyro
+      integer cer_ion_exp
 c
       common /input/ t_ped, ave_field
      & , d_m, dpiv_m, dxe_m, dxi_m, dxn_m, limin, limout
@@ -82,5 +83,5 @@ c
      & , nplasbdryd, ntime_d, ntimemax
      & , islice_d, ncl_flag, bt_flag, ilog, lprint_pflow
      & , itorque, iptotr, ipfst, ipramp, ifilter
-     & , ifixeta, iglf2d, ibound, igyro
+     & , ifixeta, iglf2d, ibound, igyro, cer_ion_exp
 

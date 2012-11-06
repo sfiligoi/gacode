@@ -6,7 +6,7 @@
 ;  visualization utility for the gyro code.
 ;--------------------------------------------------------
 
-pro vugyro, _EXTRA=extra
+pro vugyro, quick_exit=quick_exit, _EXTRA=extra
 
   common GLOBAL,$
     ave_poloidal, $
@@ -229,7 +229,9 @@ pro vugyro, _EXTRA=extra
     xsize, $
     ysize, $
     zcharge, $
-    zerobar
+    zerobar, $
+    gb_i_overlay, $
+    sim_home
 
   
 ;  Reduce name conflicts for those who use IDL in non-GYRO contexts:
@@ -246,6 +248,8 @@ pro vugyro, _EXTRA=extra
   device,get_visual_depth=deep
   ;;  print,deep
   device,true_color=24,decomposed=0
+  ;; Set line-plotting colors:
+  set_line_colors
   ;;-----------------------------------;
 
   ;;---------------------------------------;
@@ -302,6 +306,17 @@ pro vugyro, _EXTRA=extra
   ;;--------------------------------------------
 
   initialize
+  ;;--------------------------------------------
+  ;; exit now after setting up for 'auto' plotting
+  ;;   gb_i_overlay flag controls Nun_pl=2 in gbflux_i_plot.pro
+if (n_elements(quick_exit) gt 0) then begin
+   gb_i_overlay=1          ; non-zero makes overlays
+   sim_home='.'  ; default works if IDL is run in sim_home
+   return
+endif else begin
+   gb_i_overlay=0      ; zero gives standard plots
+endelse
+
 
   ;;-----------------------------------;
   ;; Get list of simulation directories
@@ -686,10 +701,6 @@ pro vugyro, _EXTRA=extra
 
   ;; Render the top-level widget
   widget_control, mainwindow, /hourglass, /realize
-
-  ;; Set line-plotting colors:
-
-  set_line_colors
 
   ;; Use X-windows cursor:
 

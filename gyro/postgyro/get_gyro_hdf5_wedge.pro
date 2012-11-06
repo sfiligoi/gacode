@@ -1,4 +1,4 @@
-FUNCTION get_gyro_HDF5_wedge, data, N_TIME=n_time, TIME_SKIP=tskip
+FUNCTION get_gyro_HDF5_wedge, data, N_TIME=n_time, TIME_SKIP=tskip, ELEC_ONLY=elec_only
 ;
 ; C. Holland, UCSD
 ; v1.0: 3.26.2012
@@ -6,10 +6,13 @@ FUNCTION get_gyro_HDF5_wedge, data, N_TIME=n_time, TIME_SKIP=tskip
 ; routine to load in wedge HDF5 files in directory specified by
 ; data.simdir
 ;
+; set elec_only = 1 to only load electron data (default = 0)
+;
+  DEFAULT, n_time, data.n_time
+  DEFAULT, tskip, 100
+  DEFAULT, elec_only, 0
 
-  DEFAULT, n_time, 41
-  DEFAULT, tskip, 50
-  dirpath  =GETENV('GYRO_DIR') + '/sim/' + data.simdir
+  dirpath  = GETENV('GYRO_DIR') + '/sim/' + data.simdir
 
   FOR it = 0, n_time-1 DO BEGIN
       tlabel = STRCOMPRESS(STRING(it*tskip),/REMOVE_ALL)
@@ -49,22 +52,28 @@ FUNCTION get_gyro_HDF5_wedge, data, N_TIME=n_time, TIME_SKIP=tskip
          com = 'n_RZ['+i_kin_str+',*,*,*,'+NUMTOSTRING(it) + $
                 '] = wedge.density_ion'+ i_kin_str + '_toroidal' + $
                 '.density_ion' + i_kin_str+ '._data'
-          print, com
-          IF (data.exists_n) THEN r = EXECUTE(com)
+         IF ((data.exists_n) AND (elec_only EQ 0)) THEN BEGIN
+	        print, com
+		r = EXECUTE(com)
+	 ENDIF
 
          com = 'E_RZ['+i_kin_str+',*,*,*,'+NUMTOSTRING(it) + $
                 '] = wedge.energy_ion'+ i_kin_str + '_toroidal' + $
                 '.energy_ion' + i_kin_str+ '._data'
-          print, com
-          IF (data.exists_E) THEN r = EXECUTE(com)
+         IF ((data.exists_E) AND (elec_only EQ 0)) THEN BEGIN
+	        print, com
+		r = EXECUTE(com)
+	 ENDIF
 
          com = 'V_RZ['+i_kin_str+',*,*,*,'+NUMTOSTRING(it) + $
                 '] = wedge.v_par_ion'+ i_kin_str + '_toroidal' + $
                 '.v_par_ion' + i_kin_str+ '._data'
-          print, com
-          IF (data.exists_V) THEN r = EXECUTE(com)
+         IF ((data.exists_V) AND (elec_only EQ 0)) THEN BEGIN
+	        print, com
+		r = EXECUTE(com)
+	 ENDIF
 
-          IF (data.exists_T) THEN FOR i_tor_frac = 0, n_tor_frac-1 DO $
+         IF ((data.exists_T) AND (elec_only EQ 0)) THEN FOR i_tor_frac = 0, n_tor_frac-1 DO $
             T_RZ[i_kin, i_tor_frac,*,*,it] = $
               ((2./3)*REFORM(E_RZ[i_kin,i_tor_frac,*,*,it]) - $
                (REFORM(data.T_eq[i_kin,*]) # IY)*REFORM(n_RZ[i_kin,i_tor_frac,*,*,it]))/$
@@ -78,20 +87,27 @@ FUNCTION get_gyro_HDF5_wedge, data, N_TIME=n_time, TIME_SKIP=tskip
          com = 'n_RZ['+i_kin_str+',*,*,*,'+NUMTOSTRING(it) + $
                 '] = wedge.density_electron_toroidal' + $
                 '.density_electron._data'
-          print, com
-          IF (data.exists_n) THEN r = EXECUTE(com)
+         IF (data.exists_n) THEN BEGIN
+;	help, wedge,/str
+	        print, com
+		r = EXECUTE(com)
+	 ENDIF
 
          com = 'E_RZ['+i_kin_str+',*,*,*,'+NUMTOSTRING(it) + $
                 '] = wedge.energy_electron_toroidal' + $
                 '.energy_electron._data'
-          print, com
-          IF (data.exists_E) THEN r = EXECUTE(com)
+         IF (data.exists_E) THEN BEGIN
+	        print, com
+		r = EXECUTE(com)
+	 ENDIF
 
          com = 'V_RZ['+i_kin_str+',*,*,*,'+NUMTOSTRING(it) + $
                 '] = wedge.v_par_electron_toroidal' + $
                 '.v_par_electron._data'
-          print, com
-          IF (data.exists_V) THEN r = EXECUTE(com)
+         IF (data.exists_V) THEN BEGIN
+	        print, com
+		r = EXECUTE(com)
+	 ENDIF
  
           IF (data.exists_T) THEN FOR i_tor_frac = 0, n_tor_frac-1 DO $
             T_RZ[i_kin, i_tor_frac,*,*,it] = $

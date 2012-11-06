@@ -5,9 +5,9 @@ all:
 	cd GEO ; make "OPT=${OPT}"
 	cd UMFPACK ; make "OPT=${OPT}"
 	cd EXPRO ; make "OPT=${OPT}"
-	cd legacyread ; make "OPT=${OPT}"
 	cd profiles_gen ; make "OPT=${OPT}"
 	cd vshdf5 ; make "OPT=${OPT}"
+#	cd legacyread ; make "OPT=${OPT}"
 
 clean:
 	cd math ; make clean

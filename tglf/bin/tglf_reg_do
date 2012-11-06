@@ -12,7 +12,8 @@ precfile='out.tglf.prec'
 list="
 tglf01 
 tglf02
-tglf03"
+tglf03
+tglf04"
 
 echo "TGLF REGRESSION TESTING:"
 

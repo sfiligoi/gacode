@@ -924,7 +924,7 @@ c diamagnetic velocity (km/sec)
 c
       vdia(1) = (-cnc/thetam)*(gradtem+tem*gradnem/nem)
       vdia(2) = (cnc/thetam)
-     >   *(gradtim +tim*gradfim/fim+tim*gradnem/nem)
+     >   *(gradtim +tim*gradfim/fim+tim*gradnem/nem)/zgas_exp
       vdia(3) = (cnc/thetam)*(gradtim+tim*gradfzm/fzm
      >   +tim*gradnem/nem)/zimp_exp
 c
@@ -1007,7 +1007,7 @@ c diamagnetic velocity (km/sec)
 c
       vdia(1) = (-cnc/thetam)*(gradtem+tem*gradnem/nem)
       vdia(2) = (cnc/thetam)
-     >   *(gradtim +tim*gradfim/fim+tim*gradnem/nem)
+     >   *(gradtim +tim*gradfim/fim+tim*gradnem/nem)/zgas_exp
       vdia(3) = (cnc/thetam)*(gradtim+tim*gradfzm/fzm
      >   +tim*gradnem/nem)/zimp_exp
 c

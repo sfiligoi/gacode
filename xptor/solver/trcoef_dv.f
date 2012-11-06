@@ -990,7 +990,8 @@ c Note difference due to density ne_m 1.0e13 not 1.0e14
 c Note the ONETWO version is used here but not in ptorinit since have GLF here
 c
         if(iexch.ne.0)then
-          zbrac=(niw+amassgas_exp*nzw*zimp_exp**2/amassimp_exp)/new
+          zbrac=(niw*zgas_exp**2 
+     >    +amassgas_exp*nzw*zimp_exp**2/amassimp_exp)/new
           lnlam=24.D0-DLOG(DSQRT(1.D13*new)/(1000.D0*tew))
           lnlam=DMAX1(lnlam,1.D0)
            nuei_m(k)= 1.5D0*new*new*zbrac

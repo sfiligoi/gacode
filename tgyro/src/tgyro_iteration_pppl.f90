@@ -119,7 +119,7 @@ subroutine tgyro_iteration_pppl
         endif
         if (loc_er_feedback_flag == 1) then
            p = p + 1
-           w0p(i) = x_vec(p)
+           f_rot(i) = x_vec(p)
         endif
      enddo
 

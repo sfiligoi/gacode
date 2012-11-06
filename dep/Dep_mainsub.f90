@@ -1,7 +1,7 @@
 !---------------------------------------------------------
 ! Dep_mainsub.f90
 !
-!  Called by NUBEAM to get D_EP_starOchi_i_TGLF(ie,k,isig) (and cA_EP) 
+!  Called by NUBEAM to get D_EP_starOchi_i_TGLF(ie,k,isig) (and A_EP) 
 !      at each local r_hat
 !
 !            NUBEAM supplies local T_EP_hat
@@ -92,7 +92,7 @@ subroutine Dep_mainsub
                              !e_wts(ie),lambda_wts(k),Fmax(ie)
                              !ie_max,ie,k_max,n_max,nb_max
                              !D_EP_starOchi_i_kernal(ie,k,isig,n,nb)
-                             !A_EP(ie,k,isig,n)
+                             !A_EP(ie,k,isig,n,nb)
 
     use Dep_from_nubeam      !T_EP_hat, aoLf_EP
     
@@ -110,15 +110,30 @@ subroutine Dep_mainsub
     integer :: i_chk_output
  
     real :: D_EPOchi_i_TGLF
+    real :: D_EPOchi_i_TGLF_star
+    real :: aoLn_EP
+
+    real :: chk_chi_i_wts
 
    
     i_chk_input = 1
     i_chk_output =1
 
+!   if not supplied by NUBEAM then defaults are
+
+   if(T_EP_hat .lt. 0.01) T_EP_hat=10.  !default
+    aoLn_EP=1.0 !default
+   if(abs(aoLf_EP(1,1,1)) .lt. 0.0000001) aoLf_EP(:,:,:) = aoLn_EP
+
    if(i_chk_input .eq. 1) then
+    print *, '      '
+    print *, '----------------------------------------------------------'
+    print *, 'star Dep_mainsub:  r_hat=',r_hat
+    print *, '----------------------------------------------------------'
+    print *, '      '
     print *, 'after call to TGLF ---------------------------------------'
    !print *, 'chi_i_tglf=',chi_i_tglf
-    print *, 'chi_i_tglf=',chi_i_tglf/ni_hat/aoLT_i
+    print *, 'chi_i_tglf=',chi_i_tglf/Ti_hat/ni_hat/aoLT_i
     print *, 'r_hat=',r_hat
     print *, 'rmaj_hat=',rmaj_hat
     print *, 'q_saf=',q_saf
@@ -137,28 +152,75 @@ subroutine Dep_mainsub
     enddo
    enddo
     print *,'T_EP_hat=',T_EP_hat
+    print *,'aoLf_EP(1,1,1)=',aoLf_EP(1,1,1)
     print *, '----------------------------------------'
 
+   chk_chi_i_wts = 0.0
+    do nb=1,nb_max
+     do n=1,n_max
+      chk_chi_i_wts = chk_chi_i_wts + chi_i_tglf_wt(n,nb)
+     enddo
+     print *, 'chk_chi_i_wts=',chk_chi_i_wts
+    enddo
 
    endif
 
    
     call Dep_kernel !calls Dep_grid_wts
 
+  
+    if(i_chk_output .eq. 1) then
+    print *, '      '
+    print *, '----------------------------------------------------------'
+    print *, 'r_hat=',r_hat,' D_EP_starOchi_i_TGLF(:,:,:)'
+    print *, '----------------------------------------------------------'
+    print *, '      '
+    endif
+
     D_EP_starOchi_i_TGLF(:,:,:) = 0.
+
+    D_EP_rEOchi_i_TGLF(:,:,:) = 0.
+    D_EP_ErOchi_i_TGLF(:,:,:) = 0.
+    D_EP_EEOchi_i_TGLF(:,:,:) = 0.
  
+   ! Note: D_EP_rrOchi_i_TGLF(:,:,:) = D_EP_starOchi_i_TGLF(:,:,:) 
+
     do nb=1,nb_max
+    if(i_chk_output .eq. 1) then
+    print *, '----------------------------------------------------------'
+
      print *, 'nb=',nb
+     if(nb .eq. 1) print *, 'dominant mode part'
+     if(nb .eq. 2) print *, 'total nb=1 + nb=2'
+    print *, '----------------------------------------------------------'
+    endif
+
 
      do n=1,n_max
       D_EP_starOchi_i_TGLF(:,:,:)=D_EP_starOchi_i_TGLF(:,:,:)+ &
            D_EP_starOchi_i_kernal(:,:,:,n,nb)*chi_i_tglf_wt(n,nb)
+     enddo ! n
+!rew added 8.20.12
+     do n=1,n_max
+      D_EP_rEOchi_i_TGLF(:,:,:)=D_EP_rEOchi_i_TGLF(:,:,:)- &
+           D_EP_starOchi_i_kernal(:,:,:,n,nb)*chi_i_tglf_wt(n,nb)*A_EP(:,:,:,n,nb)
+     enddo ! n
+
+     do n=1,n_max
+      D_EP_ErOchi_i_TGLF(:,:,:)=D_EP_ErOchi_i_TGLF(:,:,:)- &
+           D_EP_starOchi_i_kernal(:,:,:,n,nb)*chi_i_tglf_wt(n,nb)*A_EP(:,:,:,n,nb)
+     enddo ! n
+
+     do n=1,n_max
+      D_EP_EEOchi_i_TGLF(:,:,:)=D_EP_EEOchi_i_TGLF(:,:,:)+ &
+           D_EP_starOchi_i_kernal(:,:,:,n,nb)*chi_i_tglf_wt(n,nb)*A_EP(:,:,:,n,nb)**2
      enddo ! n
   
     if(i_chk_output .eq. 1) then
     print *, '--------------------------------------------------'
     do k=1,k_max
      if(k .eq. 3 .or. k .eq. 6) then
+    print *, '--------------------------------------------------'
        if(k .eq. 3) print *, 'lambda=',lambda(k), '  pass sample'
        if(k .eq. 6) print *, 'lambda=',lambda(k), '  trap sample'
 
@@ -178,22 +240,52 @@ subroutine Dep_mainsub
 ! check on Maxwellian  D_EPOchi_i_TGLF  assuming  aoLT_EP = 0.
 
    D_EPOchi_i_TGLF=0.0
-
    do n = 1,n_max
     do nb = 1,nb_max
      do ie = 1,ie_max
       do k = 1,k_max
        do isig = 1,2
          D_EPOchi_i_TGLF=D_EPOchi_i_TGLF+ &
-           D_EP_starOchi_i_kernal(ie,k,isig,n,nb)*(1. - A_EP(ie,k,isig,n))*&
-              Fmax(ie)*chi_i_tglf_wt(n,nb)
+           D_EP_starOchi_i_kernal(ie,k,isig,n,nb)*&
+                        (1. - A_EP(ie,k,isig,n,nb)/aoLf_EP(ie,k,isig))*&
+              Fmax(ie)*chi_i_tglf_wt(n,nb)* &
+                e_wts(ie)*lambda_wts(k)/Fmax(ie)
+!   phase space weight put in here
        enddo !isig
       enddo !k
      enddo !ie
     enddo !nb
    enddo !n
 
+    print *, '--------------------------------------------------'
+    print *, 'with off-diagonal part'
     print *, 'r_hat=',r_hat,'  D_EPOchi_i_TGLF=',D_EPOchi_i_TGLF
+    print *, '--------------------------------------------------'
+
+
+   D_EPOchi_i_TGLF_star=0.0
+   do n = 1,n_max
+    do nb = 1,nb_max
+     do ie = 1,ie_max
+      do k = 1,k_max
+       do isig = 1,2
+         D_EPOchi_i_TGLF_star=D_EPOchi_i_TGLF_star+ &
+           D_EP_starOchi_i_kernal(ie,k,isig,n,nb)*&
+              Fmax(ie)*chi_i_tglf_wt(n,nb)* &
+                e_wts(ie)*lambda_wts(k)/Fmax(ie)
+!   phase space weight put in here
+       enddo !isig
+      enddo !k
+     enddo !ie
+    enddo !nb
+   enddo !n
+
+    print *, '--------------------------------------------------'
+    print *, 'without  off-diagonal part'
+    print *, 'r_hat=',r_hat,'  D_EPOchi_i_TGLF_star=',D_EPOchi_i_TGLF_star
+    print *, '--------------------------------------------------'
+
+
      
     
 

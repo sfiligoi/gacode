@@ -434,11 +434,6 @@ contains
          X34, L34_S, Rpe, X33, sigma_S, sigma_spitzer
     real :: nue_S, nue_star_S
 
-    nue_S  = nue_HH * (dens_ele/dens(is_ion,ir)) &
-         * (1.0*zeff) / (1.0* Z(is_ion))**2 
-    nue_star_S = nue_S * rmaj(ir) * abs(q(ir)) &
-            / (sqrt(eps)*sqrt(eps)*sqrt(eps) * vth(is_ele,ir))
-
     alpha_0 = -1.17*(1.0-ftrap) / (1.0 - 0.22*ftrap - 0.19*ftrap*ftrap)
     
     alpha_S = ( (alpha_0 + 0.25*(1.0-ftrap*ftrap) * sqrt(nui_star_HH)) &
@@ -460,6 +455,11 @@ contains
 
     else
 
+       nue_S  = nue_HH * (dens_ele/dens(is_ion,ir)) &
+            * (1.0*zeff) / (1.0* Z(is_ion))**2 
+       nue_star_S = nue_S * rmaj(ir) * abs(q(ir)) &
+            / (sqrt(eps)*sqrt(eps)*sqrt(eps) * vth(is_ele,ir))
+       
        X31    = ftrap / (1.0 + (1.0-0.1*ftrap) * sqrt(nue_star_S)  &
             + 0.5*(1.0-ftrap) * nue_star_S / (1.0*zeff))
        

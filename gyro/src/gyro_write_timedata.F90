@@ -94,9 +94,6 @@ subroutine gyro_write_timedata
          call vshdf5_inith5vars(h5in, h5err)
          h5in%comm=MPI_COMM_SELF
          h5in%info=MPI_INFO_NULL
-         h5in%wrd_type=H5T_NATIVE_REAL
-         !h5in%wrd_type=h5in%h5_kind_type_r4
-         h5in%typeConvert=.true.
          h5in%doTranspose=.true.
          h5in%verbose=.true.
          h5in%debug=.false.
@@ -140,16 +137,16 @@ subroutine gyro_write_timedata
             if (write_threed) then
                dumpfile    = trim(path)//"gyro3D"//trim(step_name)//".h5"
                description = "GYRO 3D field file"
+               h5in%write_kind_real=h5in%h5_kind_type_r4
                call open_newh5file(dumpfile,fid3d,description,gid3D,h5in,h5err)
+               h5in%write_kind_real=h5in%h5_kind_type_r8
             endif
 
           ! make external links
-          call make_external_link(TRIM(meshfile),"/poloidalMesh/cartMesh", &
-            dumpFid,"poloidalMesh", h5in,h5err)
-            !dumpGid,"poloidalMesh", h5in,h5err)
+          call make_external_link(TRIM(meshfile),"/coarseMesh/cartMesh", &
+            dumpFid,"coarseMesh", h5in,h5err)
           call make_external_link(TRIM(meshfile),"/threeDMesh/cartMesh", &
             fid3d,"threeDMesh", h5in,h5err)
-            !gid3D,"threeDMesh", h5in,h5err)
 
       endif !i_proc ==0
   endif ! io_method > 1
@@ -725,13 +722,15 @@ subroutine gyro_write_timedata
              trim(path)//'out.gyro.diff',10,size(diff),diff)
         call write_local_real( &
              trim(path)//'out.gyro.diff_i',10,size(diff_i),diff_i)
-
         call write_local_real( &
              trim(path)//'out.gyro.gbflux',10,size(gbflux),gbflux)
         call write_local_real( &
+             trim(path)//'out.gyro.gbflux_i',10,size(gbflux_i),gbflux_i)
+
+        call write_local_real( &
              trim(path)//'out.gyro.gbflux_mom',10,size(gbflux_mom),gbflux_mom)
         call write_local_real( &
-             trim(path)//'out.gyro.gbflux_i',10,size(gbflux_i),gbflux_i)
+             trim(path)//'out.gyro.gbflux_exc',10,size(gbflux_exc),gbflux_exc)
 
         if (trapdiff_flag == 1) then
            call write_local_real( &
@@ -941,7 +940,6 @@ subroutine write_hdf5_restart
 
   use mpi
   use gyro_globals
-  !use hdf5
   use hdf5_api
 
   !---------------------------------------------------
@@ -962,8 +960,6 @@ subroutine write_hdf5_restart
      call vshdf5_inith5vars(h5in, h5err)
      h5in%comm=MPI_COMM_SELF
      h5in%info=MPI_INFO_NULL
-     h5in%wrd_type=H5T_NATIVE_DOUBLE
-     !h5in%wrd_type=h5in%h5_kind_type_r8
      h5in%doTranspose=.true.
      h5in%vsTime=t_current
      h5in%wrVsTime=.true.
@@ -1635,8 +1631,8 @@ subroutine write_distributed_complex_sorf_h5(vname,rGid,r3Did,&
   ! Dump each species independently
   !-----------------------------------------
   if (.not.iswedge) then
-    h5in%mesh="/poloidalMesh"
-    !h5in%mesh="/poloidalMesh/cartMesh"
+    h5in%mesh="/coarseMesh"
+    !h5in%mesh="/coarseMesh/cartMesh"
   else
     h5in%mesh="/wedgeMesh"
     !h5in%mesh="/wedgeMesh/cartMesh"
@@ -1706,14 +1702,14 @@ subroutine write_distributed_complex_sorf_h5(vname,rGid,r3Did,&
 
   if (.not. iswedge) then
      h5in%mesh="/threeDMesh"
-     !h5in%mesh="/threeDMesh/cartMesh"
+     h5in%write_kind_real=h5in%h5_kind_type_r4
      do ikin=1,n3
         tempVarName=trim(vnameArray(ikin))
         call dump_h5(r3Did,trim(tempVarName),real_buff(:,:,ikin,:),h5in,h5err)
      enddo
+     h5in%write_kind_real=h5in%h5_kind_type_r8
   else
      h5in%mesh="/wedgeMesh"
-     !h5in%mesh="/wedgeMesh/cartMesh"
      ! Dump each phi slice as a separate variable
      do ikin=1,n3
         tempVarNameGr=trim(vnameArray(ikin))//"_toroidal"

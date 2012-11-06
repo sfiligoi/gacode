@@ -171,14 +171,24 @@ c
       do k=1,ngrid-1
         if(itport_pt(4).eq.0)then
           if(irotstab.eq.1)then
-c keep vphiz_m fixed and update vexb_m
-           vexb_m(k) = (-c_per(k)*(vpol_m(k)+vneo_m(3,k))
-     >     +vphiz_m(k))/c_tor(k) -vdia_m(3,k)
+c keep cer ion toroidal velocity fixed and update vexb_m
+           if(cer_ion_exp.eq.1)then
+           vexb_m(k) = (-c_per(k)*(vpol_m(k)+vneo_m(2,k))
+     >     +vphi_m(k))/c_tor(k) -vdia_m(2,k)
+           elseif(cer_ion_exp.eq.2)then
+             vexb_m(k) = (-c_per(k)*(vpol_m(k)+vneo_m(3,k))
+     >       +vphiz_m(k))/c_tor(k) -vdia_m(3,k)
+           endif
           endif
           if(irotstab.eq.2)then
-c keep vpar_m fixed and update vexb_m
-           vexb_m(k) =(-a_pol(k)*(vpol_m(k)+vneo_m(2,k))
-     >     +vpar_m(k))/a_tor(k) - vdia_m(2,k)    
+c keep cer ion parallel velocity fixed and update vexb_m
+            if(cer_ion_exp.eq.1)then
+              vexb_m(k) =(-a_pol(k)*(vpol_m(k)+vneo_m(2,k))
+     >        +vpar_m(k))/a_tor(k) - vdia_m(2,k)  
+            elseif(cer_ion_exp.eq.2)then
+              vexb_m(k) =(-a_pol(k)*(vpol_m(k)+vneo_m(3,k))
+     >        +vparz_m(k))/a_tor(k) - vdia_m(3,k)  
+           endif  
           endif
          endif
 c carry the toroidal and parallel velocities along for the ride

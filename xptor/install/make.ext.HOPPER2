@@ -1,1 +1,1 @@
-XPTORFLAGS=-r8
+XPTORFLAGS=-r8 -Msave 

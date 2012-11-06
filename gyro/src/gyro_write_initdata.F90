@@ -296,13 +296,9 @@ subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io,h5datafile)
     call vshdf5_inith5vars(h5in, h5err)
     h5in%comm=MPI_COMM_SELF
     h5in%info=MPI_INFO_NULL
-!    h5in%typeConvert=.true.
-    h5in%typeConvert=.false.
-    h5in%wrd_type=H5T_NATIVE_REAL
-    !h5in%wrd_type=h5in%h5_kind_type_r4
-    !h5in%wrd_type=H5T_NATIVE_DOUBLE
+    !h5in%typeConvert=.true.
+    !h5in%wrd_type=H5T_NATIVE_REAL
     h5in%doTranspose=.true.
-    !h5in%vsTime=intime
     h5in%wrVsTime=.false.
     h5in%verbose=.true.
     !---------------------------------------------------------------------
@@ -329,6 +325,7 @@ subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io,h5datafile)
     call dump_h5(rootid,"n_spec",n_spec,h5in,h5err)
     call dump_h5(rootid,"field_r0_flag",field_r0_flag,h5in,h5err)
     call dump_h5(rootid,"field_r0_grid",field_r0_grid,h5in,h5err)
+    call dump_h5(rootid,"n_grid_exp",n_grid_exp,h5in,h5err)
     call dump_h5(rootid,"boundary_method",boundary_method,h5in,h5err)
     call dump_h5(rootid,"r",r,h5in,h5err)
     call dump_h5(rootid,"q",q,h5in,h5err)
@@ -368,6 +365,7 @@ subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io,h5datafile)
     call dump_h5(rootid,"krho_collect", krho_collect(:),h5in,h5err)
     call dump_h5(rootid,"rhos_norm", rhos_norm,h5in,h5err)
     call dump_h5(rootid,"zcharge", z(:),h5in,h5err)
+    call dump_h5(rootid,"n_fine", n_theta_plot*n_theta_mult,h5in,h5err)
     call dump_h5(rootid,"n_moment", n_moment ,h5in,h5err)
 
 

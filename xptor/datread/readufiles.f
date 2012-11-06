@@ -644,14 +644,14 @@ c       pimpa=12.0           pimpz=6.0
 c     All five variables may also be set in the input file 
 c     if the 0D file information is not present or desired.
 c
-      if (apgasa.lt.1.D-3) apgasa=amassgas_exp
-      if (apgasz.lt.1.D-3) apgasz=zgas_exp
-      if (abgasa.lt.1.D-2) abgasa=amassgas_exp
-      if (abgasz.lt.1.D-2) abgasz=1.D0
-      if (apimpa.lt.1.D-2) apimpa=pimpa
-      if (apimpz.lt.1.D-2) apimpz=pimpz
-c      if (apimpa.lt.1.D-2) apimpa=amassimp_exp
-c      if (apimpz.lt.1.D-2) apimpz=zimp_exp
+      if(ifail.ne.0)then
+        apgasa=amassgas_exp
+        apgasz=zgas_exp
+        abgasa=amassgas_exp
+        abgasz=zgas_exp
+        apimpa=pimpa
+        apimpz=pimpz
+      endif
 c
       if (iproc.eq.0) then
         write(*,11)

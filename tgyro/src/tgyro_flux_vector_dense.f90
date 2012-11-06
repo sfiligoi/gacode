@@ -30,7 +30,7 @@ subroutine tgyro_flux_vector_dense(x_vec,f_vec)
      endif
      if (loc_er_feedback_flag == 1) then
         p = p+1
-        w0p(i) = x_vec(p)
+        f_rot(i) = x_vec(p)
      endif
   enddo
 
@@ -45,27 +45,24 @@ subroutine tgyro_flux_vector_dense(x_vec,f_vec)
 
      if (loc_ti_feedback_flag == 1) then
         p = p+1
-        f_vec(p) = eflux_i_tot(i)! * q_gb(i)
+        f_vec(p) = eflux_i_tot(i) ! * q_gb(i)
      endif
 
      if (loc_te_feedback_flag == 1) then
         p = p+1
-        f_vec(p) = eflux_e_tot(i)! * q_gb(i)
+        f_vec(p) = eflux_e_tot(i) ! * q_gb(i)
      endif
 
      if (loc_ne_feedback_flag == 1) then
         p = p+1
-        f_vec(p) = pflux_e_tot(i)! * gamma_gb(i) * k * te(i)
+        f_vec(p) = pflux_e_tot(i) ! * gamma_gb(i) * k * te(i)
      endif
 
      if (loc_er_feedback_flag == 1) then
         p = p+1
-        f_vec(p) = mflux_tot(i)! * pi_gb(i) * c_s(i)
+        f_vec(p) = mflux_tot(i) ! * pi_gb(i) * c_s(i)
      endif
 
   enddo
-
-  ! Normalize
-  !f_vec(:) = f_vec(:)/q_gb(i_bc)
 
 end subroutine tgyro_flux_vector_dense
