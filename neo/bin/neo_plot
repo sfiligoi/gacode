@@ -38,6 +38,9 @@ then
   echo "          If this keyword is omitted, data will be listed to the screen."
   echo "           <type> = flux"
   echo
+  echo "          -i"
+  echo "          Use python in interactive mode.  Useful if matplotlibrc has interactive:True  "
+  echo
   echo "Example:"
   echo
   echo "   neo_plot -e . -plot flux"
@@ -56,6 +59,7 @@ PLOT_TYPE=flux
 KINETIC=0
 MOMENT=0
 FTYPE=screen
+INTERACTIVE=
 #==============================================================================
 
 #==============================================================================
@@ -75,6 +79,8 @@ while [ $# -gt 0 ] ; do
   -moment) shift ; MOMENT=$1 ;;
 
   -f) shift ; FTYPE=$1 ;;
+  
+  -i) INTERACTIVE=-i ;;
 
   *) echo "ERROR: incorrect neo_plot syntax." ; exit 1 ;;
 
@@ -97,7 +103,7 @@ PYROOT=$GACODE_ROOT/shared/python/pyrats/neo
 case "$PLOT_TYPE" in
 
    flux)  
-	python $PYROOT/flux.py $SIMDIR $MOMENT $FTYPE & ;;
+	python $INTERACTIVE $PYROOT/flux.py $SIMDIR $MOMENT $FTYPE  ;;
    
 esac 
 

@@ -171,7 +171,7 @@ case "$PLOT_TYPE" in
         python $INTERACTIVE  $PYROOT/gbflux_rt.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE  ;;
 
    gbflux_exc) 
-        python $PYROOT/gbflux_exc.py $SIMDIR $WINDOW $FTYPE & ;;
+        python $PYROOT/gbflux_exc.py $SIMDIR $WINDOW $FTYPE  ;;
 
    balloon) 
         python $INTERACTIVE  $PYROOT/balloon.py $SIMDIR $I_MOMENT $FTYPE ;;
