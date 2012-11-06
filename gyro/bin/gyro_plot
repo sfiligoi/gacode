@@ -59,6 +59,9 @@ then
   echo "                                   -moment 3 (all fields)],"
   echo "                    moment_zero"
   echo
+  echo "          -i"
+  echo "          Use python in interactive mode.  Useful if matplotlibrc has interactive:True  "
+  echo
   echo "Example:"
   echo
   echo "   gyro_plot -e ."
@@ -82,6 +85,7 @@ I_FIELD="s"
 I_MOMENT=0
 WINDOW=0.8
 FTYPE=screen
+INTERACTIVE=
 #==============================================================================
 
 #==============================================================================
@@ -107,6 +111,8 @@ while [ $# -gt 0 ] ; do
   -w) shift ; WINDOW=$1 ;;
 
   -f) shift ; FTYPE=$1 ;;
+  
+  -i) INTERACTIVE=-i ;;
 
   *) echo "ERROR: incorrect gyro_plot syntax." ; exit 1 ;;
 
@@ -133,9 +139,9 @@ then
 
    if [ $DIFF_FLAG -eq 1 ]
    then
-      Python -i  $PYROOT/ldiff.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW
+      python $INTERACTIVE  $PYROOT/ldiff.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW
    else
-      Python -i  $PYROOT/lflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW
+      python $INTERACTIVE  $PYROOT/lflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW
    fi
    exit 0
 
@@ -144,31 +150,31 @@ fi
 case "$PLOT_TYPE" in
 
    moment_zero)  
-	Python -i  $PYROOT/moment_zero.py $SIMDIR $I_MOMENT $WINDOW $FTYPE  ;;
+	python $INTERACTIVE  $PYROOT/moment_zero.py $SIMDIR $I_MOMENT $WINDOW $FTYPE  ;;
 
    fluctuation2d)  
-	Python -i  $PYROOT/fluctuation2d.py $SIMDIR $I_MOMENT $FTYPE  ;;
+	python $INTERACTIVE  $PYROOT/fluctuation2d.py $SIMDIR $I_MOMENT $FTYPE  ;;
 
    freq)  
-	Python -i  $PYROOT/freq.py $SIMDIR $WINDOW $FTYPE  ;;
+	python $INTERACTIVE  $PYROOT/freq.py $SIMDIR $WINDOW $FTYPE  ;;
 
    gbflux)  
-	Python -i  $PYROOT/gbflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE  ;;
+	python $INTERACTIVE  $PYROOT/gbflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE  ;;
 
    gbflux_n) 
-        Python -i  $PYROOT/gbflux_n.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE  ;;
+        python $INTERACTIVE  $PYROOT/gbflux_n.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE  ;;
 
    gbflux_i) 
-        Python -i  $PYROOT/gbflux_i.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE  ;;
+        python $INTERACTIVE  $PYROOT/gbflux_i.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE  ;;
 
    gbflux_rt) 
-        Python -i  $PYROOT/gbflux_rt.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE  ;;
+        python $INTERACTIVE  $PYROOT/gbflux_rt.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE  ;;
 
    gbflux_exc) 
         python $PYROOT/gbflux_exc.py $SIMDIR $WINDOW $FTYPE & ;;
 
    balloon) 
-        Python -i  $PYROOT/balloon.py $SIMDIR $I_MOMENT $FTYPE ;;
+        python $INTERACTIVE  $PYROOT/balloon.py $SIMDIR $I_MOMENT $FTYPE ;;
    
 esac 
 
