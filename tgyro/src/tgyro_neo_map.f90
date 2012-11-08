@@ -46,8 +46,8 @@ subroutine tgyro_neo_map
   neo_delta_in             = delta(i_r)
   neo_s_delta_in           = s_delta(i_r)
 
-  neo_ipccw_in = tgyro_ipccw_in
-  neo_btccw_in = tgyro_btccw_in
+  neo_ipccw_in = int(tgyro_ipccw_in)
+  neo_btccw_in = int(tgyro_btccw_in)
 
   neo_n_species_in = loc_n_ion+1
   neo_rho_star_in  = 0.001

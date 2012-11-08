@@ -13,11 +13,8 @@ subroutine tgyro_global_init_profiles
 
   implicit none
 
-  integer :: i
   integer :: i_ion
-  integer :: n
   integer :: n_exp
-  real :: xh
   real :: arho
 
   !------------------------------------------------------
