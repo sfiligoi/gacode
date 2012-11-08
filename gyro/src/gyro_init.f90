@@ -51,8 +51,6 @@ subroutine gyro_init(path_in, mpi_comm_in)
   call MPI_BCAST(inputdat_flag, 1, MPI_LOGICAL, 0, GYRO_COMM_WORLD, i_err)
 
   if (i_proc == 0) then
-     print *,path
-     print *,baserunfile
      open(unit=1,file=trim(path)//trim(baserunfile),position='append')
      if (inputdat_flag .eqv. .true.) then
         write(1,'(a,a,a)') 'INFO: (GYRO) gyro_init reading ',&

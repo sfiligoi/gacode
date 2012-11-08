@@ -102,6 +102,12 @@ subroutine tgyro_comm_setup
 
         n_worker = tgyro_stab_nsearch
 
+        if (sum(procs) < n_worker*n_inst) then
+           call tgyro_catch_error(&
+                'ERROR: (TGYRO) Ensure CPUs on each DIR line is a multiple of TGYRO_STAB_NSEARCH')
+        endif
+
+
      endif
 
   case (3)
@@ -110,9 +116,9 @@ subroutine tgyro_comm_setup
      ! Multi-job 
      !-----------------------------
 
-      ! 1 worker; each DIR line specifies exact number of cores to GYRO
+     ! 1 worker; each DIR line specifies exact number of cores to GYRO
 
-    n_worker = 1
+     n_worker = 1
 
   case (4)
 
