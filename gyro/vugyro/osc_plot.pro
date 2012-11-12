@@ -102,6 +102,9 @@ pro osc_plot
   endfor
   
   y_mid = y_eq[n_r/2]
+  y_min=min(y0_ave[n_bnd:n_r-1-n_bnd])
+  y_max=max(y0_ave[n_bnd:n_r-1-n_bnd])
+  y_mid=0.5*(y_min+y_max)  ; overwrites original y_mid
 
   title = title+' ['+strtrim(string(n_ss),2)+']'
 
@@ -112,9 +115,10 @@ pro osc_plot
     xrange=[min(r),max(r)],$
     xtitle=xtitle,$
     ystyle=1,$
-    yrange=y_mid*i_zero+[-i_zero,1]*zoom,$
+    yrange=y_mid*i_zero+[-i_zero,1]*(y_max-y_mid*i_zero)*zoom,$
     ytitle=ytitle,$
     color=line
+; original:    yrange=y_mid*i_zero+[-i_zero,1]*zoom,$
 
   ;; Equilibrium
 

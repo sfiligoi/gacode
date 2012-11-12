@@ -23,9 +23,7 @@ subroutine tgyro_flux
   real :: dummy2
   real :: rltcrit
   real :: rltcritz
-  real :: de0
   real :: chii0
-  real :: chii_ch
   real :: chie0
   real :: Gamma_neo_GB
   real :: Q_neo_GB

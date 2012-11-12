@@ -11,7 +11,6 @@ subroutine gyro_fieldeigen_df
   use gyro_globals
   use gyro_pointers
   use math_constants
-  use gyro_collision_private, only : nu_total
   use gyro_fieldeigen_private
 
   !---------------------------------------------------------------

@@ -484,7 +484,6 @@ subroutine gyro_write_input
 30 format(t2,a,t23,': ',i9) 
 40 format(t2,a,t23,': ',i3,' (',f8.4,')') 
 50 format(t2,a,t23,': ',i5) 
-60 format(t2,a,t23,': ',a)
 
 end subroutine gyro_write_input
 

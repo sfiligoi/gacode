@@ -523,6 +523,16 @@ subroutine tgyro_write_input
         write(1,20) 'ion '//trim(ion_tag(i_ion))//' charge ',zi_vec(i_ion)
      enddo
 
+     !--------------------------------------------------------
+     write(1,*)
+     write(1,*) 'Input profile rescaling factors'
+     write(1,*) 
+     write(1,20) 'TGYRO_INPUT_DEN_SCALE',tgyro_input_den_scale
+     write(1,20) 'TGYRO_INPUT_TE_SCALE',tgyro_input_te_scale
+     write(1,20) 'TGYRO_INPUT_TI_SCALE',tgyro_input_ti_scale
+     write(1,20) 'TGYRO_INPUT_W0_SCALE',tgyro_input_w0_scale
+     write(1,20) 'TGYRO_INPUT_PAUX_SCALE',tgyro_input_paux_scale
+
      write(1,*)'-----------------------------------------------------------------'
 
      close(1)

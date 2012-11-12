@@ -800,7 +800,6 @@ module gyro_globals
   complex, dimension(:,:,:,:), allocatable :: field_tau
   complex, dimension(:,:,:,:), allocatable :: field_tau_old
   complex, dimension(:,:,:,:), allocatable :: field_tau_old2
-  complex, dimension(:,:,:,:), allocatable :: field_tau_dot
   !
   complex, dimension(:,:,:), allocatable :: phi
   complex, dimension(:,:,:), allocatable :: phi_plot

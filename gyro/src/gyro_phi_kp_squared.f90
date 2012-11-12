@@ -118,8 +118,7 @@ subroutine gyro_phi_kp_squared
      do i=1,n_x
         do j=1,n_theta_int
            ave_phi_n_loc(:) = ave_phi_n_loc(:)+&
-                2.0*phi(j,i,:)*&
-                conjg(phi(j,i,:))
+                2.0*real(phi(j,i,:)*conjg(phi(j,i,:)))
         enddo
      enddo
 
@@ -130,7 +129,7 @@ subroutine gyro_phi_kp_squared
      do i=1,n_x
         do j=1,n_theta_int
            ave_phi_0_loc(:) = ave_phi_0_loc(:)+&
-                phi(j,i,:)*conjg(phi(j,i,:))
+                real(phi(j,i,:)*conjg(phi(j,i,:)))
         enddo
      enddo
 
