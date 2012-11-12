@@ -398,8 +398,8 @@
        get_intensity = get_intensity/(kp**4)
       endif
       if(alpha_quench_in.eq.0.0.and.kx0_e.ne.0.0)then
-        get_intensity = get_intensity/(1.0+0.56*kx0_e**2)**1.5
-        get_intensity = get_intensity/(1.0+(1.22*kx0_e)**4)**2
+        get_intensity = get_intensity/(1.0+0.56*kx0_e**2)**2
+        get_intensity = get_intensity/(1.0+(1.15*kx0_e)**4)**2
       endif
       get_intensity = get_intensity/B_unit**2
 !

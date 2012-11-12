@@ -59,6 +59,7 @@ c
       ipramp = 0
       ismooth = 0
       ismooth_all=0
+      ismooth_geo=1
       ilog=0
       ifixeta=0
       dvflag=1

@@ -43,7 +43,7 @@
      &  vexb_bc, s0_pt, s1_pt, endtime_pt, restart_pt, time_series,
      &  ichiep, ktime_chiep, chiep_a, chiep_b, chiep_c, xwdot, xsdot,
      &  ismooth, istep_smoo, smoo_tim, smoo_nim, smoo_vphim,
-     &  ilog, ipramp, itest_ntcc, itest_ncl,ismooth_all,
+     &  ilog, ipramp, itest_ntcc, itest_ncl,ismooth_all,ismooth_geo,
      &  lprint_pflow, lprint_cdf, lprint_prof, lprint_smoo,
      &  lprint_pulse, lprint_glf, nroot_gf, time_upd, upsrc,
      &  ismoo_ne, ismoo_ni, ismoo_nf, ismoo_zeff, ismoo_q, ismoo_vrot,
