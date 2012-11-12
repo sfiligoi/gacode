@@ -10,8 +10,10 @@ all:
 	cd ${GACODE_ROOT}/shared/GEO ; make
 	cd ${GACODE_ROOT}/shared/EXPRO ; make
 	cd locpargen ; make
+	cd exprodump ; make
 	cd src ; make
 
 clean:
 	cd locpargen ; make clean
+	cd exprodump ; make clean
 	cd src ; make clean
