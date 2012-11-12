@@ -280,6 +280,11 @@ module tgyro_globals
   real :: tgyro_rmax
   integer :: tgyro_global_radii
   integer :: tgyro_expwd_flag
+  real :: tgyro_input_den_scale
+  real :: tgyro_input_te_scale
+  real :: tgyro_input_ti_scale
+  real :: tgyro_input_w0_scale
+  real :: tgyro_input_paux_scale
   !
   ! Iteration variables (global)
   !

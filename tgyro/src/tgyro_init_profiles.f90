@@ -131,6 +131,7 @@ subroutine tgyro_init_profiles
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlntidr(i_ion,:)/100.0,n_exp,r,dlntidr(i_ion,:),n_r)
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnnidr(i_ion,:)/100.0,n_exp,r,dlnnidr(i_ion,:),n_r)
   enddo
+
   !------------------------------------------------------------------------------------------
 
   !------------------------------------------------------------------------------------------
@@ -151,6 +152,18 @@ subroutine tgyro_init_profiles
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_w0(:),n_exp,r,w0,n_r)
   ! w0p = d(w0)/dr (1/s/cm)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_w0p(:)/100.0,n_exp,r,w0p,n_r)
+  !------------------------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------------------------
+  ! Apply rescaling factors
+  ne(:) = tgyro_input_den_scale*ne(:)
+  te(:) = tgyro_input_te_scale*te(:)
+  do i_ion=1,loc_n_ion
+     ni(i_ion,:) = tgyro_input_den_scale*ni(i_ion,:)
+     ti(i_ion,:) = tgyro_input_ti_scale*ti(i_ion,:)
+  enddo
+  w0(:) = tgyro_input_w0_scale*w0(:)
+  w0p(:) = tgyro_input_w0_scale*w0p(:)
   !------------------------------------------------------------------------------------------
 
   !------------------------------------------------------------------------------------------
@@ -179,12 +192,18 @@ subroutine tgyro_init_profiles
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e(:)*1e13,n_exp,r,p_e_aux_in,n_r)
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_i(:)*1e13,n_exp,r,p_i_aux_in,n_r)
 
+     ! Apply rescale factor
+     p_e_aux_in = tgyro_input_paux_scale*p_e_aux_in
+     p_i_aux_in = tgyro_input_paux_scale*p_i_aux_in
   else
 
      ! Integrated electron and ion powers
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e(:)*1e13,n_exp,r,p_e_in,n_r)
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_i(:)*1e13,n_exp,r,p_i_in,n_r)
 
+     ! Apply auxillary power rescale
+     p_e_in = tgyro_input_paux_scale*(p_e_in + p_exch_in) - p_exch_in
+     p_i_in = tgyro_input_paux_scale*(p_i_in - p_exch_in) + p_exch_in
   endif
   !
   ! (2) Particle flow -- convert to 1/s from MW/keV
