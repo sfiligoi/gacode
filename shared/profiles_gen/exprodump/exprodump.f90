@@ -68,6 +68,14 @@ program locpargen
      print *,'dzmag'
      print *,'sdelta'
 
+     print *,'vol'
+     print *,'volp'
+     print *,'cs'
+     print *,'rhos'
+
+     print *,'THIS LIST IS INCOMPLETE.  PLEASE SEND EMAIL TO candy@fusion.gat.com'
+     print *,'if you want me to finish the coding.'
+
   case ('rho')
 
      do i=1,EXPRO_n_exp
@@ -216,6 +224,30 @@ program locpargen
 
      do i=1,EXPRO_n_exp
         print 10,EXPRO_rho(i),EXPRO_sdelta(i)
+     enddo
+
+  case ('vol')
+
+     do i=1,EXPRO_n_exp
+        print 10,EXPRO_rho(i),EXPRO_vol(i)
+     enddo
+
+  case ('volp')
+
+     do i=1,EXPRO_n_exp
+        print 10,EXPRO_rho(i),EXPRO_volp(i)
+     enddo
+
+  case ('cs')
+
+     do i=1,EXPRO_n_exp
+        print 10,EXPRO_rho(i),EXPRO_cs(i)
+     enddo
+
+  case ('rhos')
+
+     do i=1,EXPRO_n_exp
+        print 10,EXPRO_rho(i),EXPRO_rhos(i)
      enddo
 
   end select
