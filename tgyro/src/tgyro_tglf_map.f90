@@ -274,6 +274,8 @@ subroutine tgyro_tglf_map
 
      tglf_alpha_quench_in = 0.0
      tglf_xnu_model_in    = 2
+     tglf_alpha_e_in = 1.0
+     tglf_alpha_p_in = 1.0
 
   end select
 

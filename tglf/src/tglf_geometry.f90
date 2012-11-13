@@ -26,7 +26,7 @@ SUBROUTINE xgrid_functions_sa
   IMPLICIT NONE
   INTEGER :: i,is
   REAL :: thx,dthx,sn,cn,eps,Rx,Rx1,Rx2,f_gam
-  REAL :: kyi,wE
+  REAL :: kyi,wE,a0
   !
   ! debug
   ! write(*,*)"shat_sa=",shat_sa,"alpha_sa=",alpha_sa
@@ -52,13 +52,18 @@ SUBROUTINE xgrid_functions_sa
   !
   !EPS2011 midplane_shear = shat_sa - alpha_sa
   !EPS2011 sign_kx0=1.0
-  kx0 = 0.0
+  kx0_e = 0.0
   if(alpha_quench_in.eq.0.0.and.gamma_reference_kx0(1).ne.0.0)then
      kyi = ky*vs(2)*mass(2)/ABS(zs(2))
      wE = MIN(kyi/0.3,1.0)*vexb_shear_s/gamma_reference_kx0(1)
      ! write(*,*)"wE=",wE
-     kx0_e = -alpha_e_in*(0.36*vexb_shear_s/gamma_reference_kx0(1) + 0.29*wE*TANH((0.71*wE)**6))
-     kx0_e = TANH(kx0_e)
+     kx0_e = -alpha_e_in*(0.36*vexb_shear_s/gamma_reference_kx0(1) + 0.38*wE*TANH((0.69*wE)**6))
+     a0 = alpha_e_in*2.0
+     if(alpha_e_in.ne.0.0)then
+        kx0_e = a0*TANH(kx0_e/a0)
+     else
+        kx0_e = 0.0
+     endif
      !
      ! EPS2011 kx0 = alpha_kx_e_in*0.19*TANH(vexb_shear_s*rmaj_sa/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
      ! EPS2011 kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*rmaj_sa/vs(2)) &
@@ -75,7 +80,7 @@ SUBROUTINE xgrid_functions_sa
      ! EPS2011 if(kx0.lt.0.0)sign_kx0=-1.0
      kx0 = sign_Bt_in*kx0_e ! this is here to cancel the sign_Bt_in factor in kxx below
   endif
-  !
+ !
   do i=1,nx
      thx = width_in*x(i)
      sn = sin(thx)
