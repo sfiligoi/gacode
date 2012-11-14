@@ -1,11 +1,13 @@
 #---------------------------------------------------
-# DELPHI, EOS, HESTIA, etc. at General Atomics
+# DELPHI, EOS, HESTIA, VENUS, etc. at General Atomics
+# Make sure to source /u/candy/local_software/setup 
+# (even in your .login file on VENUS)
 #---------------------------------------------------
 
 # Compilers and flags
 
-FC	= mpif90 -module $(GACODE_ROOT)/modules
 F77	= mpif90
+FC	= $(F77) -module $(GACODE_ROOT)/modules
 
 FMATH	= -r8 
 FOPT	= -fastsse

@@ -41,6 +41,9 @@ then
   echo "          -func <func>"
   echo "          <func> = any output quantity."
   echo
+  echo "          -i"
+  echo "          Use python in interactive mode.  Useful if matplotlibrc has interactive:True  "
+  echo
   echo "Example:"
   echo
   echo "   tgyro_plot -e . -plot flux_tot"
@@ -60,6 +63,7 @@ PLOT_TYPE=null
 UNITS=0
 FTYPE=screen
 FUNC=null
+INTERACTIVE=
 #==============================================================================
 
 #==============================================================================
@@ -79,6 +83,8 @@ while [ $# -gt 0 ] ; do
   -func) shift ; FUNC=$1 ;;
 
   -u) shift ; UNITS=$1 ;;
+  
+  -i) INTERACTIVE=-i ;;
 
   *) echo "ERROR: incorrect tgyro_plot syntax." ; exit 1 ;;
 
@@ -103,19 +109,19 @@ PYROOT=$GACODE_ROOT/shared/python/pyrats/tgyro
 case "$PLOT_TYPE" in
 
    flux)  
-	python $PYROOT/flux.py $SIMDIR $UNITS $FTYPE & ;;
+	python $INTERACTIVE $PYROOT/flux.py $SIMDIR $UNITS $FTYPE  ;;
 
    flux_tot)  
-	python $PYROOT/flux_tot.py $SIMDIR $UNITS $FTYPE & ;;
+	python $INTERACTIVE $PYROOT/flux_tot.py $SIMDIR $UNITS $FTYPE  ;;
 
    profile)  
-	python $PYROOT/profile.py $SIMDIR $FTYPE & ;;
+	python $INTERACTIVE $PYROOT/profile.py $SIMDIR $FTYPE  ;;
 
    profile_smooth)  
-	python $PYROOT/profile_smooth.py $SIMDIR $FTYPE & ;;
+	python $INTERACTIVE $PYROOT/profile_smooth.py $SIMDIR $FTYPE  ;;
 
    one)  
-	python $PYROOT/oneplot.py $SIMDIR $FUNC $FTYPE & ;;
+	python $INTERACTIVE $PYROOT/oneplot.py $SIMDIR $FUNC $FTYPE  ;;
 
    null)
         echo "Please specify a plot type via -plot." ;;
