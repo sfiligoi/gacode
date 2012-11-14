@@ -366,44 +366,78 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
             CHARSIZE=2,CHARTHICK=thick $
   ELSE XYOUTS, 0.4, 0.7*ymax, '!4C!X!De!N ' + ge_units, CHARSIZE=2,CHARTHICK=thick
 
-  IF KEYWORD_SET(plot_rot) THEN BEGIN
-      exp_rot = -data.exp_omega0*data.exp_Rmaj*data.a/1e5
-      rot = data.M[*,N_it]*data.c_s[*,N_it]/1e5
-      ymin = MIN(exp_rot) < MIN(rot)
-      ymax = MAX(exp_rot) > MAX(rot)
+  IF (KEYWORD_SET(plot_rot)) THEN BEGIN
 
-      PLOT, x_exp, exp_rot, XRANGE = [0,1], $
-            THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
-            CHARSIZE=cs, XTITLE=xtitle, YRANGE=[ymin,ymax]
+      IF KEYWORD_SET(plot_gradients) THEN BEGIN
+          exp_gamma_e = data.gamma_e[*,0]
+          gamma_e = data.gamma_e[*,N_it]
+          ylabel = '!4c!X!DExB!X!N (c!Ds!N/a)'
 
-      IF (d2flag) THEN BEGIN
-          IF (N_it2 GT 0) THEN OPLOT, x2, data2.M[*,N_it2]*data2.c_s[*,N_it2]/1e5, $
-            COLOR=150, PSYM=-2, THICK=thick $
-          ELSE OPLOT, x2, data2.M[*,N_it2]*data2.c_s[*,N_it2]/1e5, $
-                      COLOR=150, PSYM=2, THICK=thick
+          IF KEYWORD_SET(mks) THEN BEGIN
+              exp_gamma_e *= data.c_s[*,0]/data.a
+              gamma_e *= data.c_s[*,N_it]/data.a
+              ylabel = '!4c!X!DExB!X!N (rad/s)'
+          ENDIF
+
+         ymin = MIN(exp_gamma_e) < MIN(gamma_e)
+         ymax = MAX(exp_gamma_e) > MAX(gamma_e)
+
+         PLOT, x, exp_gamma_e, psym=-4, XRANGE=[0,1], $
+                THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
+                CHARSIZE=cs, XTITLE=xtitle, YRANGE=[ymin,ymax]
+
+         IF (d2flag) THEN BEGIN
+             IF (N_it2 GT 0) THEN OPLOT, x2, $
+               data2.gamma_e[*,N_it2]*data2.c_s[*,N_it2]/data2.a, $
+               COLOR=150, PSYM=-2, THICK=thick $
+             ELSE OPLOT, x2, data2.gamma_e[*,N_it2]*data2.c_s[*,N_it2]/data2.a, $
+                         COLOR=150, PSYM=2, THICK=thick
+         ENDIF
+
+         IF (N_it GT 0) THEN OPLOT, x, gamma_e, COLOR=100, PSYM=-4, THICK=thick $
+         ELSE OPLOT, x, gamma_e, COLOR=100, PSYM=4, THICK=thick
+
+          XYOUTS, 0.05, 0.9*ymax, ylabel, CHARSIZE=2,$
+                  CHARTHICK=thick
+
+      ENDIF ELSE BEGIN
+          exp_rot = -data.exp_omega0*data.exp_Rmaj*data.a/1e5
+          rot = data.M[*,N_it]*data.c_s[*,N_it]/1e5
+          ymin = MIN(exp_rot) < MIN(rot)
+          ymax = MAX(exp_rot) > MAX(rot)
+
+          PLOT, x_exp, exp_rot, XRANGE = [0,1], $
+                THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick, $
+                CHARSIZE=cs, XTITLE=xtitle, YRANGE=[ymin,ymax]
+
+          IF (d2flag) THEN BEGIN
+              IF (N_it2 GT 0) THEN OPLOT, x2, data2.M[*,N_it2]*data2.c_s[*,N_it2]/1e5, $
+                COLOR=150, PSYM=-2, THICK=thick $
+              ELSE OPLOT, x2, data2.M[*,N_it2]*data2.c_s[*,N_it2]/1e5, $
+                          COLOR=150, PSYM=2, THICK=thick
+          ENDIF
+
+          IF (N_it GT 0) THEN OPLOT, x, rot, COLOR=100, PSYM=-4, THICK=thick $
+          ELSE OPLOT, x, rot, COLOR=100, PSYM=4, THICK=thick
+
+          XYOUTS, 0.2, 0.8*ymax, 'V!Dtor!N = R!4x!X!D0!N (10!U5!N m/s)', CHARSIZE=2,$
+                  CHARTHICK=thick
+      ENDELSE
+
+      mflux_exp = FLTARR(data.nx)
+      IF (KEYWORD_SET(mks)) THEN BEGIN
+          mflux_exp = INTERPOL(data.exp_flow_mom, data.exp_rmin, data.rmin)/data.vprime
+          mflux_exp[0] = 0.
       ENDIF
 
-      IF (N_it GT 0) THEN OPLOT, x, rot, COLOR=100, PSYM=-4, THICK=thick $
-      ELSE OPLOT, x, rot, COLOR=100, PSYM=4, THICK=thick
-
-      XYOUTS, 0.2, 0.8*ymax, 'V!Dtor!N = R!4x!X!D0!N (10!U5!N m/s)', CHARSIZE=2,$
-              CHARTHICK=thick
-
-;hack in Mflux_target for now
-IF (KEYWORD_SET(mks)) THEN BEGIN
-    mflux_target = INTERPOL(data.exp_flow_mom, data.exp_rmin, data.rmin)/data.vprime
-    mflux_target[0] = 0.
-ENDIF
-
-      ymax = MAX(Mflux_target) > MAX(Mflux_tot)
-      IF KEYWORD_SET(mks) THEN ymin = 0 ELSE $
-        ymin = 0.1*(MIN(Mflux_target[1:*]) < MIN(Mflux_tot[1:*]))
-IF KEYWORD_SET(mks) THEN ymin = MIN(mflux_target) < MIN(mflux_tot)
+      ymax = MAX(Mflux_target) > MAX(Mflux_tot) > MAX(mflux_exp)
+      ymin = MIN(mflux_target) < MIN(mflux_tot) < MIN(mflux_exp)
 
       PLOT, x, Mflux_target, XRANGE=[0,1], XTITLE=xtitle, LINESTYLE=2, $
             YRANGE=[ymin,ymax], CHARSIZE=cs, $
             THICK=thick,XTHICK=thick,YTHICK=thick,CHARTHICK=thick
-OPLOT, x, -Mflux_target, linestyle=4, thick=thick
+      OPLOT, x, Mflux_exp, linestyle=4
+      OPLOT, x, -Mflux_exp, linestyle=4, thick=thick
       OPLOT, x, Mflux0, THICK=thick
       OPLOT, x, Mflux_tot, COLOR=100,PSYM=-4, THICK=thick
       OPLOT, x, Mflux_neo, COLOR=50, PSYM=-4, THICK=thick
