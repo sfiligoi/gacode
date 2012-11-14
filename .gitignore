@@ -23,36 +23,7 @@ neo/tools/squeeze/squeeze
 neo/tools/vgen/vgen
 shared/profiles_gen/src/prgen
 shared/profiles_gen/locpargen/locpargen
+shared/profiles_gen/exprodump/exprodump
 tglf/src/tglf
 tglf/src/xtglf
 tgyro/src/tgyro_main
-
-# SEK: I like to my configuration on a per directory basis
-config.csh
-
-# http://www.gnu.org/software/automake
-
-Makefile.in
-*/Makefile.in
-
-# http://www.gnu.org/software/autoconf
-
-/autom4te.cache
-/aclocal.m4
-/compile
-/configure
-/depcomp
-/install-sh
-/missing
-.config.opts
-.config.with
-builds/
-config.h.in
-config/config.guess
-config/config.sub
-config/libtool.m4
-config/ltmain.sh
-config/ltoptions.m4
-config/ltsugar.m4
-config/ltversion.m4
-config/lt~obsolete.m4

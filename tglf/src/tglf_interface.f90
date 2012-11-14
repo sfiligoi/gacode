@@ -39,7 +39,6 @@ module tglf_interface
   ! CONTROL PARAMETERS
   character (len=256)  :: tglf_path_in        = ''
   logical              :: tglf_dump_flag_in   = .false.
-  character (len=64)   :: tglf_dump_suffix_in = ''
 
   ! INPUT PARAMETERS
 
@@ -194,119 +193,117 @@ contains
 
     implicit none
 
-    integer :: ioerr
+    integer :: ierr
 
-    open(unit=1,file=trim(tglf_path_in)//'tglf_local.dump'//trim(tglf_dump_suffix_in),&
-         status='replace',iostat=ioerr)
+    open(unit=1,file=trim(tglf_path_in)//'out.tglf.localdump',&
+         status='replace',iostat=ierr)
 
-    write(1,*) 'new_eikonal = ', tglf_new_eikonal_in
-    write(1,*) 'find_width = ', tglf_find_width_in
-    write(1,*) 'nwidth = ', tglf_nwidth_in
-    write(1,*) 'width = ', tglf_width_in
-    write(1,*) 'width_min = ', tglf_width_min_in
-    write(1,*) 'ky = ', tglf_ky_in
-    write(1,*) 'nky = ', tglf_nky_in
-    write(1,*) 'nmodes = ', tglf_nmodes_in
-    write(1,*) 'ns = ', tglf_ns_in
-    write(1,*) 'mass = ', tglf_mass_in(:)
-    write(1,*) 'zs = ', tglf_zs_in(:)
-    write(1,*) 'iflux = ', tglf_iflux_in
-    write(1,*) 'use_bper = ', tglf_use_bper_in
-    write(1,*) 'use_bpar = ', tglf_use_bpar_in
-    write(1,*) 'use_mhd_rule = ', tglf_use_mhd_rule_in
-    write(1,*) 'use_bisection = ', tglf_use_bisection_in
-    write(1,*) 'ibranch = ', tglf_ibranch_in
-    write(1,*) 'nbasis_max = ', tglf_nbasis_max_in
-    write(1,*) 'nbasis_min = ', tglf_nbasis_min_in
-    write(1,*) 'nxgrid = ', tglf_nxgrid_in
-    write(1,*) 'adiabatic_elec = ', tglf_adiabatic_elec_in
-    write(1,*) 'damp_psi = ', tglf_damp_psi_in
-    write(1,*) 'damp_sig = ', tglf_damp_sig_in
-    write(1,*) 'park = ', tglf_park_in
-    write(1,*) 'ghat = ', tglf_ghat_in
-    write(1,*) 'gchat = ', tglf_gchat_in
-    write(1,*) 'wd_zero = ', tglf_wd_zero_in
-    write(1,*) 'linsker_factor = ', tglf_linsker_factor_in
-    write(1,*) 'gradB_factor = ', tglf_gradB_factor_in
-    write(1,*) 'filter = ', tglf_filter_in
-    write(1,*) 'sat_rule = ', tglf_sat_rule_in
-    write(1,*) 'alpha_quench = ', tglf_alpha_quench_in
-    write(1,*) 'alpha_e = ', tglf_alpha_e_in
-    write(1,*) 'alpha_p = ', tglf_alpha_p_in
-!    write(1,*) 'alpha_n = ', tglf_alpha_n_in
-!    write(1,*) 'alpha_t = ', tglf_alpha_t_in
-!    write(1,*) 'alpha_kx_e = ', tglf_alpha_kx_e_in
-!    write(1,*) 'alpha_kx_p = ', tglf_alpha_kx_p_in
-!    write(1,*) 'alpha_kx_n = ', tglf_alpha_kx_n_in
-!    write(1,*) 'alpha_kx_t = ', tglf_alpha_kx_t_in
-    write(1,*) 'theta_trapped = ', tglf_theta_trapped_in
-    write(1,*) 'xnu_factor = ', tglf_xnu_factor_in
-    write(1,*) 'debye_factor = ', tglf_debye_factor_in
-    write(1,*) 'etg_factor = ', tglf_etg_factor_in
-    write(1,*) 'kygrid_model = ', tglf_kygrid_model_in
-    write(1,*) 'xnu_model = ', tglf_xnu_model_in
-    write(1,*) 'vpar_model = ', tglf_vpar_model_in
-    write(1,*) 'vpar_shear_model = ', tglf_vpar_shear_model_in 
-    write(1,*) 'sign_Bt = ', tglf_sign_bt_in
-    write(1,*) 'sign_It = ', tglf_sign_it_in
-    write(1,*) 'rlns = ', tglf_rlns_in(:)
-    write(1,*) 'rlts = ', tglf_rlts_in(:)
-    write(1,*) 'vpar_shear = ', tglf_vpar_shear_in(:)
-    write(1,*) 'vexb_shear = ', tglf_vexb_shear_in
-    write(1,*) 'vns_shear = ', tglf_vns_shear_in(:)
-    write(1,*) 'vts_shear = ', tglf_vts_shear_in(:)
-    write(1,*) 'as = ', tglf_as_in(:)
-    write(1,*) 'taus = ', tglf_taus_in(:)
-    write(1,*) 'vpar = ', tglf_vpar_in(:)
-    write(1,*) 'betae = ', tglf_betae_in
-    write(1,*) 'xnuei = ', tglf_xnue_in
-    write(1,*) 'zeff = ', tglf_zeff_in
-    write(1,*) 'debye = ', tglf_debye_in
+    write(1,10) 'new_eikonal',tglf_new_eikonal_in
+    write(1,10) 'find_width',tglf_find_width_in
+    write(1,20) 'nwidth',tglf_nwidth_in
+    write(1,30) 'width',tglf_width_in
+    write(1,30) 'width_min',tglf_width_min_in
+    write(1,30) 'ky',tglf_ky_in
+    write(1,20) 'nky',tglf_nky_in
+    write(1,20) 'nmodes',tglf_nmodes_in
+    write(1,20) 'ns',tglf_ns_in
+    write(1,30) 'mass',tglf_mass_in(:)
+    write(1,30) 'zs',tglf_zs_in(:)
+    write(1,10) 'iflux',tglf_iflux_in
+    write(1,10) 'use_bper',tglf_use_bper_in
+    write(1,10) 'use_bpar',tglf_use_bpar_in
+    write(1,10) 'use_mhd_rule',tglf_use_mhd_rule_in
+    write(1,10) 'use_bisection',tglf_use_bisection_in
+    write(1,20) 'ibranch',tglf_ibranch_in
+    write(1,20) 'nbasis_max',tglf_nbasis_max_in
+    write(1,20) 'nbasis_min',tglf_nbasis_min_in
+    write(1,20) 'nxgrid',tglf_nxgrid_in
+    write(1,10) 'adiabatic_elec',tglf_adiabatic_elec_in
+    write(1,30) 'damp_psi',tglf_damp_psi_in
+    write(1,30) 'damp_sig',tglf_damp_sig_in
+    write(1,30) 'park',tglf_park_in
+    write(1,30) 'ghat',tglf_ghat_in
+    write(1,30) 'gchat',tglf_gchat_in
+    write(1,30) 'wd_zero',tglf_wd_zero_in
+    write(1,30) 'linsker_factor',tglf_linsker_factor_in
+    write(1,30) 'gradb_factor',tglf_gradB_factor_in
+    write(1,30) 'filter',tglf_filter_in
+    write(1,20) 'sat_rule',tglf_sat_rule_in
+    write(1,30) 'alpha_quench',tglf_alpha_quench_in
+    write(1,30) 'alpha_e',tglf_alpha_e_in
+    write(1,30) 'alpha_p',tglf_alpha_p_in
+    write(1,30) 'theta_trapped ',tglf_theta_trapped_in
+    write(1,30) 'xnu_factor',tglf_xnu_factor_in
+    write(1,30) 'debye_factor',tglf_debye_factor_in
+    write(1,30) 'etg_factor',tglf_etg_factor_in
+    write(1,20) 'kygrid_model',tglf_kygrid_model_in
+    write(1,20) 'xnu_model',tglf_xnu_model_in
+    write(1,20) 'vpar_model',tglf_vpar_model_in
+    write(1,20) 'vpar_shear_model',tglf_vpar_shear_model_in 
+    write(1,30) 'sign_bt',tglf_sign_bt_in
+    write(1,30) 'sign_it',tglf_sign_it_in
+    write(1,30) 'rlns',tglf_rlns_in(:)
+    write(1,30) 'rlts',tglf_rlts_in(:)
+    write(1,30) 'vpar_shear',tglf_vpar_shear_in(:)
+    write(1,30) 'vexb_shear',tglf_vexb_shear_in
+    write(1,30) 'vns_shear',tglf_vns_shear_in(:)
+    write(1,30) 'vts_shear',tglf_vts_shear_in(:)
+    write(1,30) 'as',tglf_as_in(:)
+    write(1,30) 'taus',tglf_taus_in(:)
+    write(1,30) 'vpar',tglf_vpar_in(:)
+    write(1,30) 'betae',tglf_betae_in
+    write(1,30) 'xnuei',tglf_xnue_in
+    write(1,30) 'zeff',tglf_zeff_in
+    write(1,30) 'debye',tglf_debye_in
 
     if (tglf_geometry_flag_in == 1) then
 
-       write(1,*) 'rmin_loc = ', tglf_rmin_loc_in
-       write(1,*) 'rmaj_loc = ', tglf_rmaj_loc_in
-       write(1,*) 'zmaj_loc = ', tglf_zmaj_loc_in
-       write(1,*) 'drmindx_loc = ', tglf_drmindx_loc_in
-       write(1,*) 'drmajdx_loc = ', tglf_drmajdx_loc_in
-       write(1,*) 'dzmajdx_loc = ', tglf_dzmajdx_loc_in
-       write(1,*) 'q_loc = ', tglf_q_loc_in
-       write(1,*) 'kappa_loc = ', tglf_kappa_loc_in
-       write(1,*) 's_kappa_loc = ', tglf_s_kappa_loc_in
-       write(1,*) 'delta_loc = ', tglf_delta_loc_in
-       write(1,*) 's_delta_loc = ', tglf_s_delta_loc_in
-       write(1,*) 'zeta_loc = ', tglf_zeta_loc_in
-       write(1,*) 's_zeta_loc = ', tglf_s_zeta_loc_in
-       write(1,*) 'p_prime_loc = ', tglf_p_prime_loc_in
-       write(1,*) 'q_prime_loc = ', tglf_q_prime_loc_in
-       write(1,*) 'kx0_loc = ', tglf_kx0_loc_in
+       write(1,30) 'rmin_loc',tglf_rmin_loc_in
+       write(1,30) 'rmaj_loc',tglf_rmaj_loc_in
+       write(1,30) 'zmaj_loc',tglf_zmaj_loc_in
+       write(1,30) 'drmindx_loc',tglf_drmindx_loc_in
+       write(1,30) 'drmajdx_loc',tglf_drmajdx_loc_in
+       write(1,30) 'dzmajdx_loc',tglf_dzmajdx_loc_in
+       write(1,30) 'q_loc',tglf_q_loc_in
+       write(1,30) 'kappa_loc',tglf_kappa_loc_in
+       write(1,30) 's_kappa_loc',tglf_s_kappa_loc_in
+       write(1,30) 'delta_loc',tglf_delta_loc_in
+       write(1,30) 's_delta_loc',tglf_s_delta_loc_in
+       write(1,30) 'zeta_loc',tglf_zeta_loc_in
+       write(1,30) 's_zeta_loc',tglf_s_zeta_loc_in
+       write(1,30) 'p_prime_loc',tglf_p_prime_loc_in
+       write(1,30) 'q_prime_loc',tglf_q_prime_loc_in
+       write(1,30) 'kx0_loc',tglf_kx0_loc_in
 
     elseif (tglf_geometry_flag_in == 2 ) then
 
-       write(1,*) 'q_fourier_in = ', tglf_q_fourier_in
-       write(1,*) 'q_prime_fourier_in = ', tglf_q_prime_fourier_in
-       write(1,*) 'p_prime_fourier_in = ', tglf_p_prime_fourier_in
-       write(1,*) 'nfourier_in = ', tglf_nfourier_in
-       write(1,*) 'fourier_in = ', tglf_fourier_in(:,:)
+       write(1,30) 'q_fourier_in',tglf_q_fourier_in
+       write(1,30) 'q_prime_fourier_in',tglf_q_prime_fourier_in
+       write(1,30) 'p_prime_fourier_in',tglf_p_prime_fourier_in
+       write(1,20) 'nfourier_in',tglf_nfourier_in
+       write(1,30) 'fourier_in',tglf_fourier_in(:,:)
 
     else
 
-       write(1,*) 'rmin_sa = ', tglf_rmin_sa_in
-       write(1,*) 'rmaj_sa = ', tglf_rmaj_sa_in
-       write(1,*) 'q_sa = ', tglf_q_sa_in
-       write(1,*) 'shat_sa = ', tglf_shat_sa_in
-       write(1,*) 'alpha_sa = ', tglf_alpha_sa_in
-       write(1,*) 'xwell_sa = ', tglf_xwell_sa_in
-       write(1,*) 'theta0_sa = ', tglf_theta0_sa_in
-       write(1,*) 'b_model_sa = ', tglf_b_model_sa_in
-       write(1,*) 'ft_model_sa = ', tglf_ft_model_sa_in
+       write(1,30) 'rmin_sa',tglf_rmin_sa_in
+       write(1,30) 'rmaj_sa',tglf_rmaj_sa_in
+       write(1,30) 'q_sa',tglf_q_sa_in
+       write(1,30) 'shat_sa',tglf_shat_sa_in
+       write(1,30) 'alpha_sa',tglf_alpha_sa_in
+       write(1,30) 'xwell_sa',tglf_xwell_sa_in
+       write(1,30) 'theta0_sa',tglf_theta0_sa_in
+       write(1,20) 'b_model_sa',tglf_b_model_sa_in
+       write(1,20) 'ft_model_sa',tglf_ft_model_sa_in
 
     endif
 
-    write(1,*) 'write_wavefunction_flag = ', tglf_write_wavefunction_flag_in
+    write(1,20) 'write_wavefunction_flag',tglf_write_wavefunction_flag_in
 
     close(1)
+
+   10 format(t2,a,t25,':',t29,l1)
+   20 format(t2,a,t25,':',t27,i3)
+   30 format(t2,a,t25,':',t27,6(1pe12.5,1x))
 
   end subroutine tglf_dump_local
 
@@ -317,10 +314,10 @@ contains
 
     implicit none
 
-    integer :: ioerr
+    integer :: ierr
 
-    open(unit=1,file=trim(tglf_path_in)//'tglf_global.dump'//trim(tglf_dump_suffix_in),&
-         status='replace',iostat=ioerr)
+    open(unit=1,file=trim(tglf_path_in)//'out.tglf.globaldump',&
+         status='replace',iostat=ierr)
 
     write(1,*) 'new_eikonal = ', new_eikonal_in
     write(1,*) 'find_width = ', find_width_in
@@ -356,12 +353,6 @@ contains
     write(1,*) 'alpha_quench = ', alpha_quench_in
     write(1,*) 'alpha_e = ', alpha_e_in
     write(1,*) 'alpha_p = ', alpha_p_in
-!    write(1,*) 'alpha_n = ', alpha_n_in
-!    write(1,*) 'alpha_t = ', alpha_t_in
-!    write(1,*) 'alpha_kx_e = ', alpha_kx_e_in
-!    write(1,*) 'alpha_kx_p = ', alpha_kx_p_in
-!    write(1,*) 'alpha_kx_n = ', alpha_kx_n_in
-!    write(1,*) 'alpha_kx_t = ', alpha_kx_t_in
     write(1,*) 'theta_trapped = ', theta_trapped_in
     write(1,*) 'xnu_factor = ', xnu_factor_in
     write(1,*) 'debye_factor = ', debye_factor_in

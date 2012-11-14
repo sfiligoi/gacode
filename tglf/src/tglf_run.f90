@@ -123,7 +123,7 @@ subroutine tglf_run()
   ! Create paramter dump files
   if (tglf_dump_flag_in .eqv. .true.) then
      call tglf_dump_local
-     call tglf_dump_global
+     !call tglf_dump_global
   endif
 
   if (tglf_use_transport_model_in) then

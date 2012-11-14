@@ -287,6 +287,5 @@ subroutine tgyro_tglf_map
   else
      tglf_dump_flag_in = .true.
   endif
-  tglf_dump_suffix_in = achar(i_proc_global+iachar("0"))
 
 end subroutine tgyro_tglf_map
