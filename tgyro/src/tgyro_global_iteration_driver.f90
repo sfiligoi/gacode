@@ -81,11 +81,23 @@ subroutine tgyro_global_iteration_driver
 
   ! Map function from radius/field to p-index.
   p = 0
-  do ip=1,n_evolve
-     do i=2,n_r
+  do i=2,n_r
+     if (loc_ti_feedback_flag == 1) then
         p = p+1
-        pmap(i,ip) = p
-     enddo
+        pmap(i,1) = p
+     endif
+     if (loc_te_feedback_flag == 1) then
+        p = p+1
+        pmap(i,2) = p
+     endif
+     if (loc_ne_feedback_flag == 1) then
+        p = p+1
+        pmap(i,3) = p
+     endif
+     if (loc_er_feedback_flag == 1) then
+        p = p+1
+        pmap(i,4) = p
+     endif
   enddo
 
   ! Set initial values

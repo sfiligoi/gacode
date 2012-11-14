@@ -449,7 +449,7 @@ subroutine tgyro_write_data(i_print)
 
   do i=2,n_r
      write(1,40) &
-          r(i)/r_min,(res(pmap(i,ip))/size(res),relax(pmap(i,ip)),ip=1,n_evolve)
+          r(i)/r_min,(res(pmap(i,ip)),relax(pmap(i,ip)),ip=1,n_evolve)
   enddo
 
   close(1)
@@ -467,7 +467,6 @@ subroutine tgyro_write_data(i_print)
 
   ! Data
 10 format(t1,11(1pe13.6,2x))
-  !10 format(t1,11(1pe19.12,1x))
   ! Text headers
 20 format(t2,a,t17,a,t32,a,t47,a,t62,a,t77,a,t92,a,t107,a,t122,a,t137,a,t152,a)
   ! Residual header

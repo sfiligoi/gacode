@@ -49,13 +49,25 @@ subroutine tgyro_iteration_driver
   gyro_exit_message(:) = 'N/A'
   !---------------------------------------
 
-  ! Map function from radius/field to p-index.
+  ! Mapping function from radius/field to p
   p = 0
-  do ip=1,n_evolve
-     do i=2,n_r
+  do i=2,n_r
+     if (loc_ti_feedback_flag == 1) then
         p = p+1
-        pmap(i,ip) = p
-     enddo
+        pmap(i,1) = p
+     endif
+     if (loc_te_feedback_flag == 1) then
+        p = p+1
+        pmap(i,2) = p
+     endif
+     if (loc_ne_feedback_flag == 1) then
+        p = p+1
+        pmap(i,3) = p
+     endif
+     if (loc_er_feedback_flag == 1) then
+        p = p+1
+        pmap(i,4) = p
+     endif
   enddo
 
   ! Generate ALL radial profiles.
@@ -126,6 +138,7 @@ subroutine tgyro_iteration_driver
 
   correct_flag = 0
 
+
   p = 0
   do i=2,n_r
      if (loc_ti_feedback_flag == 1) then
@@ -145,7 +158,6 @@ subroutine tgyro_iteration_driver
         x_vec(p) = f_rot(i)
      endif
   enddo
-
 
   select case (tgyro_iteration_method) 
 
