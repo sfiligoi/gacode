@@ -14,7 +14,7 @@ FPROF	= -march=native -mfpmath=sse -O3 -pg
 
 # System math libraries
 
-LMATH = /home/buuck/Summer11/SOFTWARE/GotoBLAS2/libgoto2.a
+LMATH = /home/SOFTWARE/GotoBLAS2/libgoto2.a
 
 # OPTIONAL NetCDF:
 NETCDF=/usr/local/lib/libnetcdff.a /usr/local/lib/libnetcdf.a
@@ -23,10 +23,3 @@ NETCDF_INC=/usr/local/include
 # Archive 
 
 ARCH = ar cr
-
-# HDF5
-#HROOT=/home/buuck/Summer11/SOFTWARE/hdf5-1.8.6/hdf5
-#HDF5_LIBS = -L$(HROOT)/lib -lhdf5_fortran -lhdf5 -lz
-#HDF5_INC = -I $(HROOT)/include/
-#VSHDF5_MAKECMD=vshdf5
-

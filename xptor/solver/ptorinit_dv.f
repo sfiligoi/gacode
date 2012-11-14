@@ -180,11 +180,11 @@ c full impurity and fast ion dilution
          elseif(dilution_model.eq.1)then
 c just fast ion dilution
            ni_exp(k) = ne_exp(k)/zgas_exp -nfast_exp(k)
-           nz_exp(k) = 0.0
+           nz_exp(k) = 1.0D-10
          elseif(dilution_model.eq.2)then
 c no dilution
            ni_exp(k) = ne_exp(k)/zgas_exp
-           nz_exp(k) = 0.0
+           nz_exp(k) = 1.0D-10
          endif
          fi_m(k) = ni_exp(k)/ne_exp(k)
          fz_m(k) = nz_exp(k)/ne_exp(k)

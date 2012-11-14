@@ -25,7 +25,7 @@ subroutine gyro_field_fluxave
      do i=1,n_x
         do j=1,n_blend
            field_fluxave(i,ix) = field_fluxave(i,ix) &
-                + c_fluxave(j,i)*field_blend(j,i,ix)
+                + c_fluxave(j,i)*real(field_blend(j,i,ix))
         enddo ! j
      enddo ! i
   enddo ! ix

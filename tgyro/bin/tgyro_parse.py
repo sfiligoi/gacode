@@ -65,6 +65,11 @@ x.add('TGYRO_RMIN','-1.0')
 x.add('TGYRO_RMAX','0.9')
 x.add('TGYRO_GLOBAL_RADII','4')
 x.add('TGYRO_EXPWD_FLAG','0')
+x.add('TGYRO_INPUT_DEN_SCALE','1.0')
+x.add('TGYRO_INPUT_TE_SCALE','1.0')
+x.add('TGYRO_INPUT_TI_SCALE','1.0')
+x.add('TGYRO_INPUT_W0_SCALE','1.0')
+x.add('TGYRO_INPUT_PAUX_SCALE','1.0')
 
 # Deprecated parameters
 x.dep('LOC_N_FEEDBACK','new parameter is LOC_NE_FEEDBACK_FLAG')

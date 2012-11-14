@@ -26,7 +26,7 @@ c
       character*(2) namep_d(3), namei_d(3), namen_d(3)
       integer ishot_d, nj_d, nj, nion_d, nprim_d, nimp_d,
      &   nneu_d, ibion_d, nplasbdry_d, nr_xp, ismooth_all, shotno,
-     &   ipptot, lprint_smoo
+     &   ipptot, lprint_smoo, ismooth_geo
       integer nplasb, ng_nc,
      &   numzones_nc, nkimod_nc, istringer_nc, ng,
      &   imyneoclass, itest_ntcc, itest_ncl
@@ -117,7 +117,7 @@ c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
      &   ismoo_delta, echconv, pimpa, pimpz,
      &   apgasa, apgasz, abgasa, abgasz, apimpa, apimpz,
      &   ishot_d, nj_d, nion_d, nprim_d, nimp_d, ismooth_all,
-     &   shotno, nneu_d, ibion_d, nplasbdry_d, 
+     &   ismooth_geo, shotno, nneu_d, ibion_d, nplasbdry_d, 
      &   imyneoclass, ipptot,
      &   lprint_smoo, itest_ntcc, itest_ncl, nr_xp,
      &   namep_d, namei_d, namen_d

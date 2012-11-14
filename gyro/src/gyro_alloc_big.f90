@@ -237,6 +237,7 @@ subroutine gyro_alloc_big(flag)
 
      deallocate(time_error)
      deallocate(w_time)
+     deallocate(w_time_wedge)
      deallocate(omega_linear)
      deallocate(h0_eq)
      deallocate(h0_mod)

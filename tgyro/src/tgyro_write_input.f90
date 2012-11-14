@@ -401,6 +401,11 @@ subroutine tgyro_write_input
      write(1,20) 'LOC_RMAX',r(n_r)/r_min
      write(1,20) 'LOC_NU_SCALE',loc_nu_scale
      write(1,20) 'LOC_BETAE_SCALE',loc_betae_scale
+     if (loc_betae_scale > 0.0) then
+        write(1,10) '-> Fluctuations','Electromagnetic'
+     else
+        write(1,10) '-> Fluctuations','Electrostatic'
+     endif
 
      !--------------------------------------------------------
      select case (loc_zeff_flag)
@@ -449,19 +454,23 @@ subroutine tgyro_write_input
 
         write(1,10) 'TGYRO_ROTATION_THEORY_METHOD','Waltz method'
 
+        error_flag = 1
+        error_msg = 'Error: Waltz method for TGYRO_ROTATION_THEORY_METHOD not implemented.'
+
      case default
 
         error_flag = 1
         error_msg = 'Error: TGYRO_ROTATION_THEORY_METHOD'
 
      end select
+
+     if (tgyro_rotation_flag == 1) then
+        write(1,10) 'TGYRO_ROTATION_FLAG','Rotation effects ON'
+     else
+        write(1,10) 'TGYRO_ROTATION_FLAG','Rotation effects OFF'
+     endif
      !--------------------------------------------------------
 
-     if (loc_betae_scale > 0.0) then
-        write(1,10) 'Fluctuations','Electromagnetic'
-     else
-        write(1,10) 'Fluctuations','Electrostatic'
-     endif
 
 
      !--------------------------------------------------------
@@ -500,7 +509,7 @@ subroutine tgyro_write_input
 
      end select
      !--------------------------------------------------------
-      !--------------------------------------------------------
+     !--------------------------------------------------------
      select case (loc_evolve_grad_only_flag)
 
      case (0)
@@ -518,10 +527,20 @@ subroutine tgyro_write_input
 
      end select
      !--------------------------------------------------------
-    do i_ion=1,loc_n_ion
+     do i_ion=1,loc_n_ion
         write(1,20) 'ion '//trim(ion_tag(i_ion))//' mass',mi_vec(i_ion)
         write(1,20) 'ion '//trim(ion_tag(i_ion))//' charge ',zi_vec(i_ion)
      enddo
+
+     !--------------------------------------------------------
+     write(1,*)
+     write(1,*) 'Input profile rescaling factors'
+     write(1,*) 
+     write(1,20) 'TGYRO_INPUT_DEN_SCALE',tgyro_input_den_scale
+     write(1,20) 'TGYRO_INPUT_TE_SCALE',tgyro_input_te_scale
+     write(1,20) 'TGYRO_INPUT_TI_SCALE',tgyro_input_ti_scale
+     write(1,20) 'TGYRO_INPUT_W0_SCALE',tgyro_input_w0_scale
+     write(1,20) 'TGYRO_INPUT_PAUX_SCALE',tgyro_input_paux_scale
 
      write(1,*)'-----------------------------------------------------------------'
 

@@ -28,7 +28,6 @@ subroutine gyro_write_timedata
   complex, dimension(n_theta_plot,n_x,n_kinetic) :: e_plot
   complex, dimension(n_theta_plot,n_x,n_kinetic) :: v_plot
   !
-  real :: pi=3.141592653589793
 #ifdef HAVE_HDF5
   real, dimension(:), allocatable, save :: zeta_phi
   real, dimension(:,:), allocatable :: a2
@@ -929,8 +928,6 @@ subroutine gyro_write_timedata
       endif
   endif !io_method > 1
 #endif
-
-10 format(t2,a,t24,es9.3)
 
 end subroutine gyro_write_timedata
 

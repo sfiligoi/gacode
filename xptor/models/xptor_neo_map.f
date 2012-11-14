@@ -70,7 +70,7 @@ c
 
 !      neo_n_species_in = 2
       neo_n_species_in = 3
-
+      if(dilution_model.ne.0)neo_n_species_in=2
       b_unit = ABS(bt_exp)*(rhom/rminm)*drhodr(jm)
       neo_rho_star_in  = (1.02D2*DSQRT(m0*T0*1.D3)/
      >  (b_unit*1.D4))/(a0*100.D0)
@@ -79,7 +79,7 @@ c
       neo_z_1_in      = -1
       neo_mass_1_in   = 1.0/mu2**2
       neo_dens_1_in   = nem/n0
-      neo_temp_1_in   = tem/tim
+      neo_temp_1_in   = tem/T0
       neo_dlnndr_1_in = -drhodr_loc*a0*gradnem/nem
       neo_dlntdr_1_in = -drhodr_loc*a0*gradtem/tem
       neo_nu_1_in     = xnue/w0
@@ -89,7 +89,7 @@ c
       neo_mass_2_in   = 1.0
       neo_dens_2_in   = nim/n0
       if(neo_n_species_in.eq.2)neo_dens_2_in = nem/n0
-      neo_temp_2_in   = 1.0
+      neo_temp_2_in   = tim/T0
       neo_dlnndr_2_in = -drhodr_loc*a0*gradnim/nim
       neo_dlntdr_2_in = -drhodr_loc*a0*gradtim/tim
 !      neo_nu_1_in     = (xnue/w0)*(nim/nem)/(mu2*(tim/tem)**1.5)
@@ -99,7 +99,7 @@ c
         neo_z_3_in      = INT(zimp_exp)
         neo_mass_3_in   = amassimp_exp/amassgas_exp
         neo_dens_3_in   = nzm/n0
-        neo_temp_3_in   = 1.0
+        neo_temp_3_in   = tim/T0
         neo_dlnndr_3_in = -drhodr_loc*a0*gradnzm/nzm
         neo_dlntdr_3_in = -drhodr_loc*a0*gradtim/tim
 !        neo_nu_3_in = (xnue/w0)*(nzm/nem)*(zimp_exp**4)

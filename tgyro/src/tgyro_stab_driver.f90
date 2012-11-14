@@ -129,6 +129,9 @@ subroutine tgyro_stab_driver
      ! Set this so was can specify L_Y=ky*rhos exactly.
      gyro_box_multiplier_in = -1.0
 
+     ! Silent running
+     gyro_silent_flag_in = 1
+     
      do iky=0,tgyro_stab_nky-1
 
         wi_ion_loc  = 0.0

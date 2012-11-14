@@ -138,43 +138,45 @@ c... some ufile data
         nm2_exp(j-1)=nscale*1.D-19*en_nm2_d(j)
         nm3_exp(j-1)=nscale*1.D-19*en_nm3_d(j)
       enddo
+      if(ismooth_geo.eq.1)then
 c smooth rmin gradient
-      do j=1,nj_d-1
-        dum(j+1) = rmin_exp(j)-rmin_exp(j-1)
-      enddo
-      dum(1) = dum(2)
-      if(igyro.ne.1) call average7_1d(dum,nj_d)
-      rmin_exp(0)=0.0
-      do j=1,nj_d-1
-        rmin_exp(j) = rmin_exp(j-1)+dum(j+1)
-      enddo
+        do j=1,nj_d-1
+          dum(j+1) = rmin_exp(j)-rmin_exp(j-1)
+        enddo
+        dum(1) = dum(2)
+        call average7_1d(dum,nj_d)
+        rmin_exp(0)=0.0
+        do j=1,nj_d-1
+          rmin_exp(j) = rmin_exp(j-1)+dum(j+1)
+        enddo
 c smooth rmaj gradient
-      do j=1,nj_d-1
-        dum(j+1) = rmaj_exp(j)-rmaj_exp(j-1)
-      enddo
-      dum(1) = dum(2)
-      if(igyro.ne.1) call average7_1d(dum,nj_d)
-      do j=1,nj_d-1
-        rmaj_exp(j) = rmaj_exp(j-1)+dum(j+1)
-      enddo
+        do j=1,nj_d-1
+          dum(j+1) = rmaj_exp(j)-rmaj_exp(j-1)
+        enddo
+        dum(1) = dum(2)
+        call average7_1d(dum,nj_d)
+        do j=1,nj_d-1
+          rmaj_exp(j) = rmaj_exp(j-1)+dum(j+1)
+        enddo
 ! smooth delta gradient
-      do j=1,nj_d-1
-        dum(j+1) = delta_exp(j)-delta_exp(j-1)
-      enddo
-      dum(1) = dum(2)
-      if(igyro.ne.1) call average7_1d(dum,nj_d)
-      do j=1,nj_d-1
-        delta_exp(j) = delta_exp(j-1)+dum(j+1)
-      enddo
+        do j=1,nj_d-1
+          dum(j+1) = delta_exp(j)-delta_exp(j-1)
+        enddo
+        dum(1) = dum(2)
+        call average7_1d(dum,nj_d)
+        do j=1,nj_d-1
+          delta_exp(j) = delta_exp(j-1)+dum(j+1)
+        enddo
 ! smooth elong gradient
-      do j=1,nj_d-1
-        dum(j+1) = elong_exp(j)-elong_exp(j-1)
-      enddo
-      dum(1) = dum(2)
-      if(igyro.ne.1) call average7_1d(dum,nj_d)
-      do j=1,nj_d-1
-        elong_exp(j) = elong_exp(j-1)+dum(j+1)
-      enddo
+        do j=1,nj_d-1
+          dum(j+1) = elong_exp(j)-elong_exp(j-1)
+        enddo
+        dum(1) = dum(2)
+        call average7_1d(dum,nj_d)
+        do j=1,nj_d-1
+          elong_exp(j) = elong_exp(j-1)+dum(j+1)
+        enddo
+      endif
 c
 c... 2d energy and particle flows
 c    central values needed up front

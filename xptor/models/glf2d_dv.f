@@ -1001,7 +1001,7 @@ c
      >       *ABS(bt_exp/Bp0(jm))
       vneo(1) = cvpol*neo_vpol_dke_out(1)
       vneo(2) = cvpol*neo_vpol_dke_out(2)
-      vneo(3) = cvpol*neo_vpol_dke_out(3)
+      if(neo_n_species_in.gt.2)vneo(3) = cvpol*neo_vpol_dke_out(3)
 c
 c diamagnetic velocity (km/sec)
 c
@@ -1022,18 +1022,20 @@ c
      >     (neo_pflux_dke_out(1)+neo_pflux_gv_out(1))
        niflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*
      >     (neo_pflux_dke_out(2)+neo_pflux_gv_out(2))
-       nzflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*
-     >     (neo_pflux_dke_out(3)+neo_pflux_gv_out(3))
        teflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*T0*
      >     (neo_efluxtot_dke_out(1)+neo_efluxtot_gv_out(1))
        tiflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*T0*
      >     (neo_efluxtot_dke_out(2)+neo_efluxtot_gv_out(2))
-       tzflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*T0*
-     >     (neo_efluxtot_dke_out(3)+neo_efluxtot_gv_out(3))
        vphiflux_neo = -sign_It_exp*drhodr(jm)*(1.6726D-8)*
      > m0*n0*a0*v0*v0*(neo_mflux_dke_out(2)+neo_mflux_gv_out(2))
-       vphizflux_neo = -sign_It_exp*drhodr(jm)*(1.6726D-8)*
-     > m0*n0*a0*v0*v0*(neo_mflux_dke_out(3)+neo_mflux_gv_out(3))
+       if(neo_n_species_in.gt.2)then
+         nzflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*
+     >     (neo_pflux_dke_out(3)+neo_pflux_gv_out(3))
+         tzflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*T0*
+     >     (neo_efluxtot_dke_out(3)+neo_efluxtot_gv_out(3))
+         vphizflux_neo = -sign_It_exp*drhodr(jm)*(1.6726D-8)*
+     >   m0*n0*a0*v0*v0*(neo_mflux_dke_out(3)+neo_mflux_gv_out(3))
+      endif
 c      
       RETURN
       END ! SUBROUTINE get_neo

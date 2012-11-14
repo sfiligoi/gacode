@@ -40,8 +40,6 @@ subroutine gyro_run(&
 
   ! Local variables
   integer :: i_ion
-  integer :: n_start
-  integer :: n_ave
   integer :: err
 
   ! Set corresponding global variables
@@ -113,7 +111,7 @@ subroutine gyro_run(&
            gyro_elec_eflux_out(i) = sum(gbflux_vec(indx_e,1:n_field,2,i))
            ! Pi_e/Pi_GB
            gyro_elec_mflux_out(i) = sum(gbflux_vec(indx_e,1:n_field,3,i))
-           ! H_e/H_GB
+           ! S_e/S_GB
            gyro_elec_expwd_out(i) = sum(gbflux_vec(indx_e,1:n_field,4,i))
         enddo
      endif
@@ -126,7 +124,7 @@ subroutine gyro_run(&
            gyro_ion_eflux_out(i,i_ion) = sum(gbflux_vec(i_ion,1:n_field,2,i))
            ! Pi_i/Pi_GB
            gyro_ion_mflux_out(i,i_ion) = sum(gbflux_vec(i_ion,1:n_field,3,i))
-           ! H_i/H_GB
+           ! S_i/S_GB
            gyro_ion_expwd_out(i,i_ion) = sum(gbflux_vec(i_ion,1:n_field,4,i))
         enddo
      enddo
