@@ -10,6 +10,7 @@ class profiles_genData:
      br
      az
      bz
+     max_rho
 
      Example Usage:
      >>> import matplotlib.pyplot as plt
