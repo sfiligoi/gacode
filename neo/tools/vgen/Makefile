@@ -1,3 +1,6 @@
+# This should be made from the NEO directory, to get the right definition of 
+# EXTRA_LIBS
+
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
 ifeq ($(OPT),debug)
