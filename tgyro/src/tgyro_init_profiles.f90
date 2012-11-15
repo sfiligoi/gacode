@@ -155,7 +155,8 @@ subroutine tgyro_init_profiles
   !------------------------------------------------------------------------------------------
 
   !------------------------------------------------------------------------------------------
-  ! Apply rescaling factors
+  ! Apply rescaling factors:
+  !
   ne(:) = tgyro_input_den_scale*ne(:)
   te(:) = tgyro_input_te_scale*te(:)
   do i_ion=1,loc_n_ion
@@ -215,8 +216,6 @@ subroutine tgyro_init_profiles
   !
   call cub_spline(EXPRO_rmin(:)/r_min,-EXPRO_flow_mom(:)*1e7,n_exp,r,mf_in,n_r)
   !------------------------------------------------------------------------------------------
-
-
 
   ! Fourier coefficients for plasma shape
   if (EXPRO_nfourier > 0) then
@@ -310,10 +309,25 @@ subroutine tgyro_init_profiles
   !----------------------------------------------------
   ! Set conditions at r=0
   !
+  ! Zero derivatives of (ne,ni,Te,Ti) at origin.
   dlnnidr(:,1) = 0.0
   dlnnedr(1) = 0.0
   dlntidr(:,1) = 0.0
   dlntedr(1) = 0.0
+
+  if (loc_er_feedback_flag == 1) then
+     select case(tgyro_er_bc)
+     case (1)
+        ! Fixed derivative of w0 
+        f_rot(1) = f_rot(1)
+     case (2)
+        ! Zero derivative of w0, similar to profiles
+        f_rot(1) = 0.0
+     case(3)
+        ! Zero second derivative
+        f_rot(1) = f_rot(2)
+     end select
+  endif
 
   pflux_e_neo(1) = 0.0
   pflux_e_tur(1) = 0.0

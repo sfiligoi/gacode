@@ -30,6 +30,19 @@ subroutine tgyro_profile_functions
      call logint(te,dlntedr,r,n_r,i_bc)
 
      ! w0 in rad/s
+     if (loc_er_feedback_flag == 1) then
+        select case(tgyro_er_bc)
+        case (1)
+           ! Fixed derivative of w0 
+           f_rot(1) = f_rot(1)
+        case (2)
+           ! Zero derivative of w0, similar to profiles
+           f_rot(1) = 0.0
+        case(3)
+           ! Zero second derivative
+           f_rot(1) = f_rot(2)
+        end select
+     endif
      w0p(:) = f_rot(:)*w0p_norm
      call linint(w0,w0p,r,n_r,i_bc)
      !-------------------------------------------

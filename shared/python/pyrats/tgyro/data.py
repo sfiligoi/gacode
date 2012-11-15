@@ -62,12 +62,12 @@ class TGYROData:
             self.fileparser('flux_e.out')
             self.fileparser('flux_i.out')
             self.fileparser('flux_target.out')
+            self.fileparser('mflux_target.out')
             self.fileparser('chi_e.out')
             self.fileparser('chi_i.out')
             self.fileparser('profile.out')
             self.fileparser('gradient.out')
             self.fileparser('geometry.out')
-           # self.read_residual()
 
     #---------------------------------------------------------------------------#
 
