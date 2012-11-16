@@ -185,8 +185,10 @@ subroutine tgyro_iteration_serial
      enddo
 
      if (correct_flag == 1) then
+        ! The correction step reduced the residual, so reset the index.
         search_index = 1
      else
+        ! Residual not reduced, so try different search length 
         search_index = search_index+1
         if (search_index > search_max) then
            error_flag = 1

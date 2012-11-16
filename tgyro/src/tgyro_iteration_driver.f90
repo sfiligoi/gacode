@@ -52,21 +52,26 @@ subroutine tgyro_iteration_driver
   ! Mapping function from radius/field to p
   p = 0
   do i=2,n_r
+     ip = 0
      if (loc_ti_feedback_flag == 1) then
-        p = p+1
-        pmap(i,1) = p
+        p  = p+1
+        ip = ip+1
+        pmap(i,ip) = p
      endif
      if (loc_te_feedback_flag == 1) then
-        p = p+1
-        pmap(i,2) = p
+        p  = p+1
+        ip = ip+1
+        pmap(i,ip) = p
      endif
      if (loc_ne_feedback_flag == 1) then
-        p = p+1
-        pmap(i,3) = p
+        p  = p+1
+        ip = ip+1
+        pmap(i,ip) = p
      endif
      if (loc_er_feedback_flag == 1) then
-        p = p+1
-        pmap(i,4) = p
+        p  = p+1
+        ip = ip+1
+        pmap(i,ip) = p
      endif
   enddo
 

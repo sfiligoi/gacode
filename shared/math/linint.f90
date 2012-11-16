@@ -11,11 +11,11 @@
 !                   x*
 !  
 !  obtain fi by trapezoidal integration.  It is assumed 
-!  that fi(x*) is known.
+!  that fi(x*) is known, where x(i0)=x*.
 !
 ! NOTES:
 !      f(1:n) : (input) gradients
-!       fi(n) : (input) boundary condition
+!      fi(i0) : (input) boundary condition
 !   fi(1:n-1) : (output) interior values
 !------------------------------------------------------
 
