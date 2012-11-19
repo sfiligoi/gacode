@@ -17,7 +17,6 @@ subroutine gyro_do
   implicit none
   !
   logical :: rfe
-!  integer :: h5_control
   !--------------------------------------
 
   ! Begin with clean exit status
