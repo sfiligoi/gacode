@@ -1,0 +1,15 @@
+In order to compile the full GACODE package on a new machine, the following files have to be created:
+
+$GACODE_ROOT/shared/install/make.inc.$GACODE_PLATFORM:
+Machines specific compilation options. 
+
+$GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM:
+Run commands for the various GACODE components. 
+
+$GACODE_ROOT/gyro/install/make.ext.$GACODE_PLATFORM
+$GACODE_ROOT/gks/install/make.ext.$GACODE_PLATFORM
+$GACODE_ROOT/gato/instal/make.ext.$GACODE_PLATFORM:
+(not sure)
+
+Templates for each of these files can be found in the specific folders. 
+
