@@ -81,7 +81,7 @@ subroutine tgyro_iteration_driver
   !----------------------------------------------
   ! Choose flux_method based on path information.
   !
-  if (lpath == "IFS/") then
+  if (lpath(1:3) == "IFS") then
 
      ! IFS-PPPL
      flux_method = 1
@@ -93,14 +93,6 @@ subroutine tgyro_iteration_driver
 
      ! TGLF
      flux_method = 2
-
-     ! Step-length for Jacobian
-     dx = loc_dx/r_min
-
-  else if (lpath == "QFM/") then
-
-     ! QFM
-     flux_method = 4
 
      ! Step-length for Jacobian
      dx = loc_dx/r_min

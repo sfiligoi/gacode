@@ -308,13 +308,20 @@ class ManagerInput:
 
         # Add special entries (DIR) to output file, and overlay
         # extra parameters onto GYRO or TGLF input files.
+        #
+        # NOTE:
+        #  - GYRO directories must be of the form GYRO*
+        #  - IFS directories must be of the form IFS*
+        #  - TGLF directories must be of the form TGLF*
+
         for p in range(len(self.slavepath)):
             self.sum_proc = self.sum_proc + int(self.slaveproc[p])
             basedir = self.slavepath[p]
             file_outfile.write(basedir+' '+self.slaveproc[p]+'\n') 
 
-            if basedir == 'TGLF':
+            if basedir[0:3] == 'IFS':
                 print 'INFO: Detected '+basedir+'; CPU_max=1'
+
             elif basedir[0:4] == 'TGLF':
                 basefile = basedir+'/input.tglf' 
                 tempfile = basedir+'/input.tglf.temp' 
@@ -336,12 +343,8 @@ class ManagerInput:
 
                 os.system('tglf -i '+basedir+' -p $PWD')
                 print 'INFO: Processed input.* in '+basedir+'; CPU_max=1'
-
-            elif basedir == 'IFS':
-                print 'INFO: Detected '+basedir+'; CPU_max=1'
-            elif basedir == 'QFM':
-                print 'INFO: Detected '+basedir+'; CPU_max=1'
-            else:
+                
+            elif basedir[0:4] == 'GYRO':
                 basefile = basedir+'/input.gyro' 
                 tempfile = basedir+'/input.gyro.temp' 
                 file_base = open(basefile,'r')
