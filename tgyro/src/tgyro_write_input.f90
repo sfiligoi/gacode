@@ -93,6 +93,10 @@ subroutine tgyro_write_input
 
         write(1,10) 'TGYRO_ITERATION_METHOD','Block method (parallel)'
 
+     case (6)
+
+        write(1,10) 'TGYRO_ITERATION_METHOD','Simple Relax (*IN DEVELOPMENT*)'
+
      case default
 
         error_flag = 1

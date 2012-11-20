@@ -174,6 +174,10 @@ subroutine tgyro_iteration_driver
 
      call tgyro_iteration_parallel
 
+ case (6) 
+
+     call tgyro_iteration_simplerelax
+
   end select
 
 end subroutine tgyro_iteration_driver
