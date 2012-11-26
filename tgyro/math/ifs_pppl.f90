@@ -264,6 +264,24 @@ subroutine ifs_pppl(rlt,&
   real :: chie1,chie2,g_fac1
 
 
+10 format(t2,a,t10,1pe12.5)
+  if (q > 1.7 .and. q < 1.9) then
+     print 10,'rlt',rlt
+     print 10,'rln',rln
+     print 10,'rlne',rlne
+     print 10,'q',q
+     print 10,'kappa',kappa
+     print 10,'shat',shat
+     print 10,'zth',zth
+     print 10,'nbeam',nbeam
+     print 10,'tau',tau
+     print 10,'eps',eps
+     print 10,'gnu',gnu
+     print 10,'rmajor',rmajor
+     print 10,'rho_i',rho_i
+     print 10,'v_ti',v_ti
+  endif
+
   taub = tau/(1.0-nbeam)
   nu   = gnu*0.84
 

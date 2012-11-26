@@ -72,6 +72,7 @@ program locpargen
      print *,'volp'
      print *,'cs'
      print *,'rhos'
+     print *,'drdrho'
 
      print *,'THIS LIST IS INCOMPLETE.  PLEASE SEND EMAIL TO candy@fusion.gat.com'
      print *,'if you want me to finish the coding.'
@@ -248,6 +249,12 @@ program locpargen
 
      do i=1,EXPRO_n_exp
         print 10,EXPRO_rho(i),EXPRO_rhos(i)
+     enddo
+
+  case ('drdrho')
+
+     do i=1,EXPRO_n_exp
+        print 10,EXPRO_rho(i),EXPRO_drdrho(i)
      enddo
 
   end select
