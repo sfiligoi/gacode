@@ -192,7 +192,11 @@ program locpargen
   call cub_spline(x_vec,EXPRO_rmin,EXPRO_n_exp,x,y,1)
   print 10,'rmin [m]    : ',y(1)
   call cub_spline(x_vec,EXPRO_poloidalfluxover2pi,EXPRO_n_exp,x,y,1)
-  print 10,'psi_N       : ',y(1)/EXPRO_poloidalfluxover2pi(EXPRO_n_exp)
+  if (EXPRO_poloidalfluxover2pi(EXPRO_n_exp) > 0.0) then
+     print 10,'psi_N       : ',y(1)/EXPRO_poloidalfluxover2pi(EXPRO_n_exp)
+  else
+     print '(a)','psi_N       : UNAVAILABLE'
+  endif
   call cub_spline(x_vec,EXPRO_bunit,EXPRO_n_exp,x,y,1)
   print 10,'B_unit [T]  : ',y(1)
   call cub_spline(x_vec,EXPRO_cs,EXPRO_n_exp,x,y,1)
