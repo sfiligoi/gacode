@@ -94,6 +94,9 @@ subroutine tgyro_init_profiles
   ! arho in cm
   arho  = 100*EXPRO_arho
 
+  ! b_ref in Gauss
+  b_ref = 1e4*EXPRO_b_ref
+
   !------------------------------------------------------------------------------------------
   ! Direct input of simple profiles:
   !
@@ -113,6 +116,8 @@ subroutine tgyro_init_profiles
   ! Convert V and dV/dr from m^3 to cm^3
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_vol(:)*1e6,n_exp,r,vol,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_volp(:)*1e4,n_exp,r,volp,n_r)
+
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_ave_grad_r(:),n_exp,r,ave_grad_r,n_r)
 
   ! Convert B to Gauss (from T):
   call cub_spline(EXPRO_rmin(:)/r_min,1e4*EXPRO_bunit(:),n_exp,r,b_unit,n_r)

@@ -24,10 +24,10 @@ subroutine tgyro_write_data(i_print)
 
   if (i_print == 0) then
 
-     open(unit=1,file='geometry.out',status='replace')
+     open(unit=1,file='out.tgyro.geometry.1',status='replace')
      close(1)
 
-     open(unit=1,file='geometry_extra.out',status='replace')
+     open(unit=1,file='out.tgyro.geometry.2',status='replace')
      close(1)
 
      open(unit=1,file='nu_rho.out',status='replace')
@@ -74,6 +74,9 @@ subroutine tgyro_write_data(i_print)
      open(unit=1,file='profile.out',status='replace')
      close(1)
 
+     open(unit=1,file='out.tgyro.trinity.eflux.out',status='replace')
+     close(1)
+
      open(unit=1,file='control.out',status='replace')
      write(1,*) n_r
      write(1,*) n_evolve
@@ -91,9 +94,9 @@ subroutine tgyro_write_data(i_print)
 
   endif
 
-  ! Geometry (geometry.out) [** constant **]
+  ! Geometry 1 [** constant **]
 
-  open(unit=1,file='geometry.out',status='old',position='append')
+  open(unit=1,file='out.tgyro.geometry.1',status='old',position='append')
 
   write(1,20) 'r/a','rho','q','s','kappa','s_kappa','delta','s_delta','shift','rmaj/a','b_unit'
   write(1,20) '','','','','','','','','','','(T)'
@@ -113,12 +116,12 @@ subroutine tgyro_write_data(i_print)
 
   close(1)
 
-  ! Geometry (geometry_extra.out) [** constant **]
+  ! Geometry 2 [** constant **]
 
-  open(unit=1,file='geometry_extra.out',status='old',position='append')
+  open(unit=1,file='out.tgyro.geometry.2',status='old',position='append')
 
-  write(1,20) 'r/a','zmag/a','dzmag','zeta','s_zeta','volume','d(vol)/dr'
-  write(1,20) '','','','','','m^3','m^2'
+  write(1,20) 'r/a','zmag/a','dzmag','zeta','s_zeta','volume','d(vol)/dr','<|grad r|>'
+  write(1,20) '','','','','','m^3','m^2',''
   do i=1,n_r
      write(1,10) r(i)/r_min,&
           zmag(i)/r_min,&
@@ -126,7 +129,9 @@ subroutine tgyro_write_data(i_print)
           zeta(i),&
           s_zeta(i),&
           vol(i)/1e6,&
-          volp(i)/1e4
+          volp(i)/1e4,&
+          ave_grad_r(i)
+
   enddo
 
   close(1)
@@ -464,6 +469,26 @@ subroutine tgyro_write_data(i_print)
   open(unit=1,file='out.tgyro.prec',status='old',position='append')
   write(1,*) sum(abs(eflux_i_tot(:))+abs(eflux_e_tot(:)))
   close(1)
+
+  !--------------------------------------------------------------------------------
+  ! Trinity-type fluxes
+  ! Electron particle and energy fluxes (flux_e.out)
+
+  open(unit=1,file='out.tgyro.trinity.eflux.out',status='old',position='append')
+
+  write(1,20) 'r/a','eflux_i_neo','eflux_e_neo','eflux_i_tur','eflux_e_tur'
+  write(1,20) '','(TGB)','(TGB)','(TGB)','(TGB)'
+  do i=1,n_r
+     write(1,10) r(i)/r_min,&
+          eflux_i_neo(1,i)*q_gb(i)/q_tgb(i),&
+          eflux_e_neo(i)*q_gb(i)/q_tgb(i),&
+          eflux_i_tur(1,i)*q_gb(i)/q_tgb(i),&
+          eflux_e_tur(i)*q_gb(i)/q_tgb(i)
+  enddo
+
+  close(1)
+  !--------------------------------------------------------------------------------
+
 
   ! Data
 10 format(t1,11(1pe13.6,2x))

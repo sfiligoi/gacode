@@ -117,6 +117,8 @@ module tgyro_globals
   real, dimension(:), allocatable :: q_gb
   real, dimension(:), allocatable :: s_gb
 
+  real, dimension(:), allocatable :: q_tgb
+
   ! Collision frequencies
   real, dimension(:), allocatable :: nue
   real, dimension(:,:), allocatable :: nui
@@ -176,6 +178,7 @@ module tgyro_globals
   real, dimension(:), allocatable :: b_unit
   real, dimension(:), allocatable :: volp
   real, dimension(:), allocatable :: vol
+  real, dimension(:), allocatable :: ave_grad_r
   real, dimension(:), allocatable :: er
   real, dimension(:), allocatable :: f_rot
 
@@ -213,7 +216,7 @@ module tgyro_globals
   real :: mp
   real :: c
   !
-  real :: b0
+  real :: b_ref
   real :: r_min
   !
   integer, dimension(:,:), allocatable :: pmap

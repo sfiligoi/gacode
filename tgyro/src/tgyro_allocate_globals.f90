@@ -44,6 +44,8 @@ subroutine tgyro_allocate_globals
   allocate(q_gb(n_r))
   allocate(s_gb(n_r))
 
+  allocate(q_tgb(n_r))
+
   ! Collision frequencies
   allocate(nue(n_r))
   allocate(nui(loc_n_ion,n_r))
@@ -100,6 +102,7 @@ subroutine tgyro_allocate_globals
   allocate(b_unit(n_r))
   allocate(volp(n_r))
   allocate(vol(n_r))
+  allocate(ave_grad_r(n_r))
   allocate(rho_i(n_r))
   allocate(rho_s(n_r))
 

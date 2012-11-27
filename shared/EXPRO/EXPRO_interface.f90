@@ -99,6 +99,7 @@
 !  EXPRO_ni_new(:)      ni [Corrected for quasin.]
 !  EXPRO_dlnnidr_new(:) -dln(ni)/dr (1/m) [Corrected for quasin.] 
 !  EXPRO_grad_r0(:)     |grad r| at theta=0 
+!  EXPRO_ave_grad_r(:)  Flux-surface average <|grad r|> 
 !  EXPRO_drdrho(:)      dr/d(rho) [r and rho have units of length]
 !  EXPRO_bp0(:)         B_pol at theta=0 (T)
 !  EXPRO_bt0(:)         B_tor at theta=0 (T)
@@ -182,6 +183,7 @@ module EXPRO_interface
   real, dimension(:),allocatable :: EXPRO_ni_new
   real, dimension(:),allocatable :: EXPRO_dlnnidr_new
   real, dimension(:),allocatable :: EXPRO_grad_r0
+  real, dimension(:),allocatable :: EXPRO_ave_grad_r
   real, dimension(:),allocatable :: EXPRO_drdrho
 
   real, dimension(:),allocatable :: EXPRO_bp0

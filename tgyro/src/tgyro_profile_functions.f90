@@ -61,7 +61,7 @@ subroutine tgyro_profile_functions
   chi_gb(:) = rho_s(:)**2*c_s(:)/r_min
 
   ! Gyrobohm unit particle flux (1/cm^2/s)
-  gamma_gb(:) = ne(:)*c_s(:)*(rho_s(:)/r_min)**2
+  gamma_gb(:)  = ne(:)*c_s(:)*(rho_s(:)/r_min)**2
 
   ! Gyrobohm unit momentum flux (erg/cm^2)
   pi_gb(:) = ne(:)*k*te(:)*r_min*(rho_s(:)/r_min)**2
@@ -128,5 +128,13 @@ subroutine tgyro_profile_functions
   !
   ! gamma_p (1/s)
   gamma_p(:)  = -r_maj(:)*w0p(:)
+
+  !----------------------------------------------------------------------
+  ! Trinity gyroBohm factor
+  !
+  q_tgb(:) = ni(1,:)*k*ti(1,:)*(sqrt(2.0)*v_i(:))*&
+       (sqrt(2.0)*rho_i(:)*b_unit(:)/b_ref/r_min)**2
+  !----------------------------------------------------------------------
+
 
 end subroutine tgyro_profile_functions

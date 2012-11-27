@@ -204,6 +204,9 @@ subroutine EXPRO_compute_derived
      ! |grad r| at theta=0
      EXPRO_grad_r0(i) = GEO_grad_r0
 
+     ! <|grad r|> 
+     EXPRO_ave_grad_r(i) = GEO_fluxsurfave_grad_r
+
      call GEO_interp(0.0)
 
      ! B_poloidal and B_toroidal at theta=0
