@@ -1,0 +1,23 @@
+GACODE User Agreement
+
+GACODE development is funded by the US Department of Energy (DoE), and distribution is 
+subject to DoE requirements and restrictions.
+
+In order to acquire access to the code sources, the recipient agrees:
+
+1. to compile/use the GACODE source code AS IS without modification; users however 
+are welcome to request changes, or to contribute modifications subject to 
+approval of the authors;  
+
+2. if the copy of the GACODE downloaded by the authorized user is made available 
+to third parties, to ensure that the user agreement is followed by the third parties;
+ 
+3. to inform the first author of each code module (GYRO, NEO, TGLF, etc) of 
+planned research using that module,
+
+4. prior to publication, to communicate any significant results derived from 
+a module to the main author,
+    
+5. to include in any published results, talks or presentations the proper code 
+name(s) and appropriate reference.
+

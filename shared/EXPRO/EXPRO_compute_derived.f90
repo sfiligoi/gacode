@@ -128,6 +128,8 @@ subroutine EXPRO_compute_derived
      EXPRO_dlnptotdr = 0.0
   endif
 
+  ! dr/d(rho)
+  call bound_deriv(EXPRO_drdrho,EXPRO_rmin,rho,EXPRO_n_exp)
   !--------------------------------------------------------------------
 
   !-------------------------------------------------------------------

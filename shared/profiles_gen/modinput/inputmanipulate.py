@@ -213,7 +213,7 @@ def scalecol():
     nf = open(params['extractname'] + params['paramin'] + '_n', 'w') 
     datacol = f.readlines()
     for line in datacol: 
-        achar = line.strip()           
+        achar = line.strip()
         a = float(achar),
         b = a[0]
         scale=float(params['scaling'])

@@ -121,6 +121,17 @@ then
    echo "             -r <reorder sequence>"
    echo "             Reorder ions."
    echo
+   echo "PEQDSK/PFILE Options"
+   echo
+   echo "             -g <gfile>"
+   echo "             Merge EFIT gfile for high-precision geometry data."
+   echo "             [This is required for pfiles]"
+   echo 
+   echo "             -pZ2 <Z2>"
+   echo "             Creation impurity ion with given charge to make"
+   echo "             input.profile quasineutral"
+   echo
+   echo
    echo "ASTRA Options"
    echo
    echo "             -m <map file>"
@@ -343,6 +354,8 @@ Z3=2.0
 
 DUMP_FLAG=0
 DUMP_VAR=null
+
+PZ2=0
 #=============================================================
 
 #=============================================================
@@ -449,6 +462,8 @@ while [ $# -gt 0 ] ; do
 
   -dump) shift ; DUMP_FLAG=1 ; DUMP_VAR=$1 ;;
 
+  -pZ2) shift ; PZ2=$1 ;;  
+  
   esac
   shift
 done
@@ -688,6 +703,9 @@ echo $NOGQ_FLAG >> $CONFIG
 
 # Verbosity
 echo $VERBOSE_FLAG >> $CONFIG
+
+# PFILE Z2 value
+echo $PZ2 >> $CONFIG
 #=============================================================
 
 #==============================================================
