@@ -359,6 +359,10 @@ subroutine ifs_pppl(rlt,&
   chi_i = max(0.0,chi_i)
   chi_e = max(0.0,chi_e)
 
+  if (q > 1.7 .and. q < 1.9) then
+     print 10,'chi_0',chi_0
+  endif
+
   return
 
 end subroutine ifs_pppl
