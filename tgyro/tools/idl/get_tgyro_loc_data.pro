@@ -184,7 +184,11 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc, N_ion=N_ion
   b_unit = FLTARR(NX)  ;b_unit (T)
   s = ' '
   arr = fltarr(11,NX)
-  OPENR, 1, dirpath + 'geometry.out'
+  OPENR, 1, dirpath + 'out.tgyro.geometry.1', ERROR=err
+  IF (err NE 0) THEN BEGIN
+      PRINT, 'Using old geometry.out'
+      OPENR, 1, dirpath + 'geometry.out'
+  ENDIF
   READF, 1, s
   READF, 1, s
   READF, 1, arr
@@ -203,8 +207,13 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc, N_ion=N_ion
 
   ;read geometry_extra.out
   s = ' '
-  arr = FLTARR(7,NX)
-  OPENR, 1, dirpath + 'geometry_extra.out'
+  OPENR, 1, dirpath + 'out.tgyro.geometry.2', ERROR=err
+  arr = FLTARR(8,NX)
+  IF (err NE 0) THEN BEGIN
+      PRINT, 'Using old geometry_extra.out'
+      OPENR, 1, dirpath + 'geometry_extra.out'
+      arr = FLTARR(7,NX)
+  ENDIF
   READF, 1, s
   READF, 1, s
   READF, 1, arr
