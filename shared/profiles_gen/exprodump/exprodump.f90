@@ -74,6 +74,9 @@ program locpargen
      print *,'rhos'
      print *,'drdrho'
 
+     print *,'grad_r0'
+     print *,'ave_grad_r'
+
      print *,'THIS LIST IS INCOMPLETE.  PLEASE SEND EMAIL TO candy@fusion.gat.com'
      print *,'if you want me to finish the coding.'
 
@@ -255,6 +258,18 @@ program locpargen
 
      do i=1,EXPRO_n_exp
         print 10,EXPRO_rho(i),EXPRO_drdrho(i)
+     enddo
+
+  case ('grad_r0')
+
+     do i=1,EXPRO_n_exp
+        print 10,EXPRO_rho(i),EXPRO_grad_r0(i)
+     enddo
+
+  case ('ave_grad_r')
+
+     do i=1,EXPRO_n_exp
+        print 10,EXPRO_rho(i),EXPRO_ave_grad_r(i)
      enddo
 
   end select

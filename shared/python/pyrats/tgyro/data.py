@@ -67,7 +67,8 @@ class TGYROData:
             self.fileparser('chi_i.out')
             self.fileparser('profile.out')
             self.fileparser('gradient.out')
-            self.fileparser('geometry.out')
+            self.fileparser('out.tgyro.geometry.1')
+            self.fileparser('out.tgyro.geometry.2')
 
     #---------------------------------------------------------------------------#
 

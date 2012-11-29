@@ -311,9 +311,6 @@ subroutine GEO_do()
      g_theta(i)    = bigr(i)*b(i)*l_t(i)/(GEO_rmin_in*GEO_rmaj_in*grad_r(i))
      gq(i)    = GEO_rmin_in*b(i)/(GEO_q_in*bigr(i)*bp(i))
 
-!     usin(i)  = -bigr_t(i)/(g_theta(i)*GEO_rmin_in)
-!     ucos(i)  = (GEO_rmaj_in*bt(i)/bigr(i)/b(i))*bigz_l(i)
-
      usin(i)  = -bigr_t(i)/l_t(i)
      ucos(i)  = (bt(i)/b(i))*bigz_l(i)
 

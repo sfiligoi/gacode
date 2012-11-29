@@ -120,7 +120,7 @@ subroutine tgyro_write_data(i_print)
 
   open(unit=1,file='out.tgyro.geometry.2',status='old',position='append')
 
-  write(1,20) 'r/a','zmag/a','dzmag','zeta','s_zeta','volume','d(vol)/dr','<|grad r|>'
+  write(1,20) 'r/a','zmag/a','dzmag','zeta','s_zeta','volume','d(vol)/dr','<|grad_r|>'
   write(1,20) '','','','','','m^3','m^2',''
   do i=1,n_r
      write(1,10) r(i)/r_min,&
