@@ -344,7 +344,7 @@ class ManagerInput:
                 os.system('tglf -i '+basedir+' -p $PWD')
                 print 'INFO: Processed input.* in '+basedir+'; CPU_max=1'
                 
-            elif basedir[0:4] == 'GYRO':
+            else:
                 basefile = basedir+'/input.gyro' 
                 tempfile = basedir+'/input.gyro.temp' 
                 file_base = open(basefile,'r')
