@@ -10,6 +10,7 @@ FUNCTION make_synrefl_array, data, n_e, ITMIN = itmin, $
 ;                         n_tor_frac, global_loc keywords
 ; v2.1 4-18-2011: Added equilbrium density correction for variation in
 ; global sims
+; v3.0 12-3-2012: Updated for latest version of PostGYRO compatibility
 ;
 ; takes PostGYRO data  (for profile, time info) +
 ; n_e=[n_theta_plot,n_R,n_n,n_time] complex arrays, generates 
@@ -25,32 +26,28 @@ FUNCTION make_synrefl_array, data, n_e, ITMIN = itmin, $
 ; spacing, if not set, defaults to 5 equally spaced pairs
 ;  n_tor_Frac = # of equally spaced toroidal locations for 2D calculations
 ;
+  IF KEYWORD_SET(show_windows) THEN windows_flag=1 ELSE windows_flag=0
+  PRINT, 'windows_flag = ', windows_flag
+
   DEFAULT, itmin, data.n_time/2
-  DEFAULT, itmax, itmin
-  DEFAULT, sf, data.profile_data.theta_mult
+  DEFAULT, itmax, data.n_time-1
+  DEFAULT, sf, data.theta_mult
   DEFAULT, interp, 1
-  DEFAULT, omega0, 0
+  DEFAULT, omega0, data.w0[data.n_r/2]
   DEFAULT, zloc, 5.5  ;cm
   DEFAULT, lr, 1.0 ;cm
   DEFAULT, lz, 3.5 ;cm
   DEFAULT, dx, 0.5 ;m
   DEFAULT, n_tor_frac, 1
   delta_tor_frac = 1./n_tor_frac
-
-  OPENR, 1, GETENV('GYRO_DIR') + '/sim/' + data.simdir + '/units.out'
-  READF, 1, tmp  ;m_ref
-  READF, 1, tmp  ;b_unit
-  READF, 1, Aphys
-  Aphys *= 100 ; convert to cm
-  PRINT, 'units.out: Aphys (cm) = ', Aphys
-  READF, 1, tmp  ;c_s/a
-  a_over_cs = 1e6/tmp  ;conver to microsec
-  PRINT, 'units.out: a_over_cs (microsec) = ', a_over_cs
-  CLOSE, 1
+  DEFAULT, Aphys, data.Aphys
+  PRINT, 'Aphys (cm) = ', Aphys
+  DEFAULT, a_over_cs, 1.e3/data.csda  ;data.csda in kHz
+  PRINT, 'a_over_cs (microsec) = ', a_over_cs
 
   ;create GYRO (R,Z) coords, set up triangles for interpolation
   ny = sf*data.n_theta_plot
-  GYRO_GENERATE_RZCOORDS, data.profile_data, ny, GYRO_R, GYRO_Z
+  GYRO_GENERATE_RZCOORDS, data, ny, GYRO_R, GYRO_Z
 
   ;create N_REFL *pairs* of REFL channels (for statistics) 
   ;spot = exp(-0.5*((R-R0)^2/Lr^2 + (Z-Z0)^2/Lz^2))
@@ -74,11 +71,11 @@ FUNCTION make_synrefl_array, data, n_e, ITMIN = itmin, $
   REFL_rmid = FLTARR(2*N_REFL)
   for ir=0,N_REFL-1 do begin
       mind = MIN(ABS(REFL_r0[ir] - data.r),idx)
-      REFL_rmid[2*ir] = data.profile_data.r[idx] 
-      REFL_xloc[2*ir] = data.profile_data.R0[idx] + data.r[idx]
+      REFL_rmid[2*ir] = data.r[idx] 
+      REFL_xloc[2*ir] = data.R0[idx] + data.r[idx]
       mind = MIN(ABS(REFL_r0[ir]+REFL_dx - data.r),idx)
-      REFL_rmid[2*ir+1] = data.profile_data.r[idx] 
-      REFL_xloc[2*ir+1] = data.profile_data.R0[idx] + data.r[idx]
+      REFL_rmid[2*ir+1] = data.r[idx] 
+      REFL_xloc[2*ir+1] = data.R0[idx] + data.r[idx]
   ENDFOR
 
   FOR ir = 0, 2*N_REFL-1 DO BEGIN
@@ -95,26 +92,26 @@ FUNCTION make_synrefl_array, data, n_e, ITMIN = itmin, $
       WINDOW, 0
       it = itmin
       ne_RZ = TRANSPOSE(GYRO_RTHETA_TRANSFORM(n_e[*,*,*,it], $
-                                              data.profile_data,sf,$
+                                              data,sf,$
                                               NU_SILENT=nu_silent, $
                                               TOR_FRAC=tor_frac))
       NR = data.n_r
-      xr = [(data.profile_data.R0[0]+data.profile_data.r[0]),$
-            (data.profile_data.R0[NR-1]+data.profile_data.r[NR-1])]*Aphys
-      x0 =(data.profile_data.R0[NR/2]+data.profile_data.r[NR/2])*Aphys
+      xr = [(data.R0[0]+data.r[0]),$
+            (data.R0[NR-1]+data.r[NR-1])]*Aphys
+      x0 =(data.R0[NR/2]+data.r[NR/2])*Aphys
       LX = 0.8*(xr[1] - xr[0])
       GYRO_RZ_COLOR_CONTOUR, TRANSPOSE(ne_RZ)/$
-        (REFORM(data.profile_data.n[data.profile_data.n_spec-1,*])#I_THETA), $
+        (REFORM(data.n_eq[data.n_spec-1,*])#I_THETA), $
         GYRO_R, GYRO_Z, $
         XRANGE = [0.98*xr[0],1.02*xr[1]], $
         YRANGE=[Zloc-LX/2,Zloc+LX/2], $
         Aphys=Aphys, /XS, /YS, $
         TITLE = '!4d!Xn!De!N (t = ' + NUMTOSTRING(data.t[it]) + ')'
-      OPLOT, GYRO_R[data.profile_data.n_bnd,*]*Aphys, $
-             GYRO_Z[data.profile_data.n_bnd,*]*Aphys,$
+      OPLOT, GYRO_R[data.n_bnd,*]*Aphys, $
+             GYRO_Z[data.n_bnd,*]*Aphys,$
              LINESTYLE=3
-      OPLOT, GYRO_R[data.n_r-data.profile_data.n_bnd-1,*]*Aphys, $
-             GYRO_Z[data.n_r-data.profile_data.n_bnd-1,*]*Aphys,$
+      OPLOT, GYRO_R[data.n_r-data.n_bnd-1,*]*Aphys, $
+             GYRO_Z[data.n_r-data.n_bnd-1,*]*Aphys,$
              LINESTYLE=3
 
       FOR ir = 0, 2*N_REFL-1 DO BEGIN
@@ -160,12 +157,12 @@ FUNCTION make_synrefl_array, data, n_e, ITMIN = itmin, $
       ;apply doppler shift and equilibrium density correction
       FOR i_n = 1, data.n_n-1 DO BEGIN
           ne_lf[*,*,i_n] *= EXP(-C_I*data.n[i_n]*omega0*t[it])/$
-                            (REFORM(data.profile_data.n[data.profile_data.n_spec-1,*])#I_THETA)
+                            (REFORM(data.n_eq[data.n_spec-1,*])#I_THETA)
       ENDFOR
 
       FOR i_tf = 0, n_tor_frac-1 DO BEGIN
           tor_frac = i_tf*delta_tor_frac
-          ne_RZ = TRANSPOSE(GYRO_RTHETA_TRANSFORM(ne_lf, data.profile_data,sf,$
+          ne_RZ = TRANSPOSE(GYRO_RTHETA_TRANSFORM(ne_lf, data,sf,$
                                                   NU_SILENT=nu_silent, $
                                                   TOR_FRAC=tor_frac))
           
@@ -185,7 +182,7 @@ FUNCTION make_synrefl_array, data, n_e, ITMIN = itmin, $
       OPLOT, t, REFL_sig[N_refl,0,*], COLOR=100
   ENDIF
 
-  result = {SF:sf, NT:nt, T:t, a_over_cs: a_over_cs, INTERP:interp, $
+  results = {SF:sf, NT:nt, T:t, a_over_cs: a_over_cs, INTERP:interp, $
             GYRO_ne:GYRO_ne_Sig, REFL:REFL_sig, $
             REFL_XLOC:REFL_xloc, REFL_ZLOC:REFL_zloc, $
             GYRO_REFL_XLOC:GYRO_R[REFL_gyroidx], $
@@ -194,5 +191,5 @@ FUNCTION make_synrefl_array, data, n_e, ITMIN = itmin, $
             REFL_rmid: REFL_rmid, $
             Aphys:Aphys, N_TOR_FRAC:N_tor_frac, DIR:data.simdir}
 
-  RETURN, result
+  RETURN, results
 END ;make_synrefl_array

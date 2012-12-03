@@ -1,9 +1,10 @@
-PRO analyze_synxphase, simdir, NFFT=NFFT, FMIN=fmin, FMAX=fmax
+PRO analyze_synxphase, simdir, NFFT=NFFT, FMIN=fmin, FMAX=fmax, $
+	IMIN=imin, IMAX=imax, FILENAME=filename
 
 ; C. Holland, UCSD
 ; v1.0: 9/17/2010: based of 2009 APS routine by AEW, uses output from
 ; make_syncece_arrays.pro, make_synrefl_arrays.pro
-;
+; v2.0: 12/3/2012: updated for compatibility with current PostGYRO
 
   dirpath = GETENV('GYRO_DIR') + '/sim/' + simdir + '/'
   RESTORE, dirpath + 'syncece.sav'
@@ -27,7 +28,10 @@ PRO analyze_synxphase, simdir, NFFT=NFFT, FMIN=fmin, FMAX=fmax
   syn_xphase = FLTARR(NFFT/2+1)
   syn_xphase_err = FLTARR(NFFT/2+1)
 
-  FOR i_tf=0, results.n_tor_frac-1 DO FOR ir = 0, 2*N_pair-1 DO BEGIN
+  DEFAULT, imin, 0
+  DEFAULT, imax, N_pair-1
+;  FOR i_tf=0, results.n_tor_frac-1 DO FOR ir = 0, 2*N_pair-1 DO BEGIN
+  FOR i_tf=0, results.n_tor_frac-1 DO FOR ir = 2*imin, 2*imax+1 DO BEGIN
       unfilt_xspect += CALC_RFSPECT1D_PHASE_ONE(refl.gyro_ne[ir,i_tf,*], $
                                                 cece.gyro_te[ir,i_tf,*], $
                                                 NFFT=NFFT, ERR=err, $
@@ -48,7 +52,7 @@ PRO analyze_synxphase, simdir, NFFT=NFFT, FMIN=fmin, FMAX=fmax
       syn_xphase += ph
       syn_xphase_err += pherr
   ENDFOR
-  NM = results.N_tor_frac*2*N_pair
+  NM = results.N_tor_frac*2*(imax-imin+1)
   unfilt_xspect /= NM
   unfilt_xspect_err /= NM
   unfilt_coh /= NM
@@ -98,5 +102,10 @@ PRO analyze_synxphase, simdir, NFFT=NFFT, FMIN=fmin, FMAX=fmax
   avg_syn_xphase_err = MEAN(syn_xphase_err[idx1:idx2])
 
   PRINT, 'average unfiltered cross-phase: ', avg_unfilt_xphase ,'+/-', avg_unfilt_xphase_err
-  PRINT, 'average unfiltered cross-phase: ', avg_syn_xphase ,'+/-', avg_syn_xphase_err
+  PRINT, 'average synthetic cross-phase: ', avg_syn_xphase ,'+/-', avg_syn_xphase_err
+
+ IF N_ELEMENTS(filename) NE 0 THEN BEGIN
+	SAVE, freq, unfilt_xphase, unfilt_xphase_err, syn_xphase, syn_xphase_err, $
+		FILENAME = filename
+  ENDIF
 END ;analyze_syncece

@@ -53,7 +53,7 @@ PRO analyze_synrefl, simdir, NFFT=NFFT, FMIN=fmin, FMAX=fmax, $
   syn_ne_xspect_err = SQRT(syn_ne_xspect_err)/(NM*df)
 
   !P.MULTI = [0,0,2]
-  PLOT, freq, gyro_ne_xspect[imin,*], /XS, YTITLE = '<|T_e(f)|**2> (1/kHz)',charsize=2
+  PLOT, freq, gyro_ne_xspect[imin,*], /XS, YTITLE = '<|n_e(f)|**2> (1/kHz)',charsize=2
   ERRPLOT, freq, gyro_ne_xspect[imin,*]-gyro_ne_xspect_err[imin,*], $
            gyro_ne_xspect[imin,*]+gyro_ne_xspect_err[imin,*]
   OPLOT, freq, gyro_ne_xspect[imax,*], LINESTYLE=2

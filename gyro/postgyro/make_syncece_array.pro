@@ -40,7 +40,8 @@ FUNCTION make_synCECE_array, data, Te, ITMIN = itmin, $
   PRINT, 'zloc (cm) = ', zloc
   DEFAULT, lr, 1.1 ;cm
   PRINT, 'lr (cm) = ', lr
-  DEFAULT, lz, 3.2 ;cm
+;  DEFAULT, lz, 3.2 ;cm ;**CHANGED 12/3/2012 pe JCH**
+  DEFAULT, lz, 3.5 ;cm
   PRINT, 'lz (cm) = ', lz
   DEFAULT, dx, 0.5 ;cm
   PRINT, 'dx (cm) = ', dx
