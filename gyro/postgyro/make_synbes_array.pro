@@ -1,4 +1,4 @@
-FUNCTION make_synbes_array, data, n_e, TOR_FRAC=tor_frac, $
+FUNCTION make_synbes_array, data, n_e, $
   ITMIN = itmin, ITMAX = itmax,  INTERP=interp, OMEGA0=omega0, $
   N_TOR_FRAC=n_tor_frac, NR_BESchannels = NR_BESchannels, $
   NZ_BESchannels = NZ_BESchannels, BES_Z00 = BES_Z00, $

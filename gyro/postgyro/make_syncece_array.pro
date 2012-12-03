@@ -23,14 +23,7 @@ FUNCTION make_synCECE_array, data, Te, ITMIN = itmin, $
 ; spacing, if not set, defaults to 5 equally spaced pairs
 ;  n_tor_Frac = # of equally spaced toroidal locations for 2D calculations
 ;
-  ;DEFAULT, n_tor_frac, 1
-  ;delta_tor_frac = 1./n_tor_frac
-  ;DEFAULT, itmin, data.n_time/2
-  ;DEFAULT, itmax, data.n_time-1
-  ;sf = data.profile_data.theta_mult
-  ;DEFAULT, interp, 1
-  ;DEFAULT, omega0, 0
-  DEFAULT, omega0, 0
+  DEFAULT, omega0, data.w0[data.n_r/2]
   PRINT, 'omega0 (c_s/a): ', omega0
   DEFAULT, n_tor_frac, 1
   PRINT, '# toroidal locations: ', n_tor_frac
@@ -69,7 +62,6 @@ FUNCTION make_synCECE_array, data, Te, ITMIN = itmin, $
 
   ;create GYRO (R,Z) coords, set up triangles for interpolation
   ny = sf*data.n_theta_plot
-;  GYRO_GENERATE_RZCOORDS, data.profile_data, ny, GYRO_R, GYRO_Z
   GYRO_GENERATE_RZCOORDS, data, ny, GYRO_R, GYRO_Z
 
   ;create N_CECE *pairs* of CECE channels (for statistics) at
