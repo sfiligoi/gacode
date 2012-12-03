@@ -117,8 +117,8 @@ subroutine gyro_nonlinear_flux
                  moment(i,is,ix,4,ck) = moment(i,is,ix,4,ck)+sum(exctemp(:))
 
                  ! Exchange breakdown (sum over i, ix, ck):
-
-                 excparts(is,:) = excparts(is,:)+exctemp(:)/n_x 
+                 !  Use symmetric form (average of 4a,4b)
+                 excparts(is,:) = excparts(is,:)+0.5*(exctemp(1)+exctemp(2))/n_x 
 
               enddo ! i
            enddo ! is

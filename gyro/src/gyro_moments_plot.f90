@@ -77,7 +77,7 @@ subroutine gyro_moments_plot
                    z(is)*alpha_s(is,i)*gyro_u(m,i,p_nek_loc,is)
            enddo ! m
         enddo ! i
-!$omp end do nowait
+!$omp end do
 
         if (is <= n_gk) then
 !$omp do
