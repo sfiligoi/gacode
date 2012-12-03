@@ -276,6 +276,26 @@ subroutine tgyro_write_input
      !--------------------------------------------------------
 
      !--------------------------------------------------------
+     select case (TGYRO_EXPWD_FLAG)
+
+     case (0)
+
+           write(1,10) 'TGYRO_EXPWD_FLAG','Turbulent exchange OFF'
+    
+     case (1)
+
+           write(1,10) 'TGYRO_EXPWD_FLAG','Turbulent exchange ON'
+
+     case default
+
+        error_flag = 1
+        error_msg = 'Error: TGYRO_EXPWD_FLAG'
+
+     end select
+     !--------------------------------------------------------
+
+
+     !--------------------------------------------------------
      select case (loc_scenario)
 
      case (1)
@@ -347,25 +367,6 @@ subroutine tgyro_write_input
 
         error_flag = 1
         error_msg = 'Error: LOC_NEO_METHOD'
-
-     end select
-     !--------------------------------------------------------
-
-     !--------------------------------------------------------
-     select case (neo_gv_flag)
-
-     case (0)
-
-        write(1,10) 'NEO_GV_FLAG','OFF (no gyroviscosity)'
-
-     case (1)
-
-        write(1,10) 'NEO_GV_FLAG','ON (include gyroviscosity)'
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: NEO_GV_FLAG'
 
      end select
      !--------------------------------------------------------

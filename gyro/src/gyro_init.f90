@@ -28,7 +28,6 @@ subroutine gyro_init(path_in, mpi_comm_in)
   !----------------------------------------------------------------
   ! Query OpenMP for dimensions
   !
-  i_omp = omp_get_thread_num()
   n_omp = omp_get_max_threads()
   !-----------------------------------------------------------------
 
