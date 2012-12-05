@@ -21,6 +21,8 @@ setenv GACODE_ROOT $HOME/gacode
 source $GACODE_ROOT/shared/bin/gacode_setup.tcsh
 }}}
 
+For complete build instructions, see [[https://fusion.gat.com/theory/Gyroquickstart | the these Wiki pages]].
+
 === Building ===
 
 You can make the entire gacode project by typing
