@@ -3,29 +3,8 @@ fluxes is requested."""
 
 import sys
 import numpy as np
-import matplotlib.pyplot as plt
+from gacodeplotdefs import *
 from pyrats.gyro.data import GYROData
-
-#---------------------------------------------------------------
-def average(f,t,window):
- 
-    n_time = len(t)
-    tmin = (1.0-window)*t[n_time-1]
-    tmax = t[n_time-1]
-
-    t_window = 0.0
-    ave      = 0.0
-    for i in range(n_time-1):
-        if t[i] > tmin: 
-            ave = ave+0.5*(f[i]+f[i+1])*(t[i+1]-t[i])
-            t_window = t_window+t[i+1]-t[i]
-
-    ave = ave/t_window
-
-    return ave
-#---------------------------------------------------------------
-
-GFONTSIZE=18
 
 sim       = GYROData(sys.argv[1])
 field     = sys.argv[2]
