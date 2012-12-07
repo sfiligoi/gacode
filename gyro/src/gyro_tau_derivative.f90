@@ -40,7 +40,7 @@ subroutine gyro_tau_derivative
   complex :: temp2
   !---------------------------------------
 
-  RHS_dt = 0.0
+  rhs_dt = 0.0
 
   ! We should be calling this for gyrokinetic species only
 
@@ -99,11 +99,11 @@ subroutine gyro_tau_derivative
               !------------------------------------------------
               ! Entropy tracking:
               !
-              RHS_dt(m,i,p_nek_loc,is) =  RHS_dt(m,i,p_nek_loc,is) &
+              rhs_dt(m,i,p_nek_loc,is) =  rhs_dt(m,i,p_nek_loc,is) &
                    +real(v0(i)*(-upwind*temp2)*conjg(fh(i,m)))
               !------------------------------------------------
 
-              RHS(m,i,p_nek_loc,is) = RHS(m,i,p_nek_loc,is)+ &
+              rhs(m,i,p_nek_loc,is) = rhs(m,i,p_nek_loc,is)+ &
                    v0(i)*(sigma_tau(ck,p)*temp1-upwind*temp2)
 
            enddo ! i

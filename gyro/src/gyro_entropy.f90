@@ -92,12 +92,12 @@ subroutine gyro_entropy
               ! 4: orbit dissipation
 
               entropy_loc(is,4) = entropy_loc(is,4)+&
-                   w_p(ie,i,k,is)*RHS_dt(m,i,p_nek_loc,is) 
+                   w_p(ie,i,k,is)*rhs_dt(m,i,p_nek_loc,is) 
 
               ! 5: radial dissipation
 
               entropy_loc(is,5) = entropy_loc(is,5)+&
-                   w_p(ie,i,k,is)*RHS_dr(m,i,p_nek_loc,is) 
+                   w_p(ie,i,k,is)*rhs_dr(m,i,p_nek_loc,is) 
 
            enddo ! m
         enddo ! i

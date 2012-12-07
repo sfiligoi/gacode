@@ -95,7 +95,7 @@ subroutine gyro_sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
         allocate(m_mumps(matnum)%A(n_elem))
         allocate(m_mumps(matnum)%IRN(n_elem))
         allocate(m_mumps(matnum)%JCN(n_elem))
-        allocate(m_mumps(matnum)%RHS(n_row))
+        allocate(m_mumps(matnum)%rhs(n_row))
 
         ! copy data from general pointer into mumps structure
         m_mumps(matnum)%A = m_sparse(1:n_elem)
@@ -138,7 +138,7 @@ subroutine gyro_sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
            do i=1,n_x
               do j=1,n_blend
                  ij  = i+(j-1)*n_x
-                 m_mumps(matnum)%RHS(ij) = vel_sum_p(j,i)
+                 m_mumps(matnum)%rhs(ij) = vel_sum_p(j,i)
               enddo ! j
            enddo ! i
 
@@ -146,7 +146,7 @@ subroutine gyro_sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
            do i=1,n_x
               do j=1,n_blend
                  ij = i+(j-1)*n_x
-                 m_mumps(matnum)%RHS(ij) = vel_sum_a(j,i)
+                 m_mumps(matnum)%rhs(ij) = vel_sum_a(j,i)
               enddo ! j
            enddo ! i
 
@@ -154,7 +154,7 @@ subroutine gyro_sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
            do i=1,n_x
               do j=1,n_blend
                  ij = i+(j-1)*n_x
-                 m_mumps(matnum)%RHS(ij) = vel_sum_p(j,i)
+                 m_mumps(matnum)%rhs(ij) = vel_sum_p(j,i)
               enddo ! j
            enddo ! i
 
@@ -162,7 +162,7 @@ subroutine gyro_sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
               do i=1,n_x
                  do j=1,n_blend
                     ij = i+(j-1)*n_x + n_x*n_blend
-                    m_mumps(matnum)%RHS(ij) = vel_sum_a(j,i)
+                    m_mumps(matnum)%rhs(ij) = vel_sum_a(j,i)
                  enddo ! j
               enddo ! i
            endif
@@ -171,7 +171,7 @@ subroutine gyro_sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
               do i=1,n_x
                  do j=1,n_blend
                     ij = i+(j-1)*n_x + 2*n_x*n_blend
-                    m_mumps(matnum)%RHS(ij) = vel_sum_aperp(j,i)
+                    m_mumps(matnum)%rhs(ij) = vel_sum_aperp(j,i)
                  enddo ! j
               enddo ! i
            endif
@@ -180,14 +180,14 @@ subroutine gyro_sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
            do i=1,n_x
               do j=1,n_blend
                  ij = i+(j-1)*n_x
-                 m_mumps(matnum)%RHS(ij) = vel_sum_p(j,i)
+                 m_mumps(matnum)%rhs(ij) = vel_sum_p(j,i)
               enddo ! j
            enddo ! i        
 
            do i=1,n_x
               do j=1,n_blend
                  ij = i+(j-1)*n_x + n_x*n_blend
-                 m_mumps(matnum)%RHS(ij) = vel_sum_aperp(j,i)
+                 m_mumps(matnum)%rhs(ij) = vel_sum_aperp(j,i)
               enddo ! j
            enddo ! i     
 
@@ -213,7 +213,7 @@ subroutine gyro_sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
            do i=1,n_x
               do j=1,n_blend
                  ij = i+(j-1)*n_x
-                 field_blend(j,i,1) = m_mumps(matnum)%RHS(ij)
+                 field_blend(j,i,1) = m_mumps(matnum)%rhs(ij)
               enddo ! j
            enddo ! i
         endif
@@ -225,7 +225,7 @@ subroutine gyro_sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
            do i=1,n_x
               do j=1,n_blend
                  ij = i+(j-1)*n_x
-                 field_blend(j,i,2) = m_mumps(matnum)%RHS(ij)
+                 field_blend(j,i,2) = m_mumps(matnum)%rhs(ij)
               enddo
            enddo
         endif
@@ -237,7 +237,7 @@ subroutine gyro_sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
            do i=1,n_x
               do j=1,n_blend
                  ij = i+(j-1)*n_x
-                 field_blend(j,i,1) = m_mumps(matnum)%RHS(ij)
+                 field_blend(j,i,1) = m_mumps(matnum)%rhs(ij)
               enddo
            enddo
 
@@ -245,7 +245,7 @@ subroutine gyro_sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
               do i=1,n_x
                  do j=1,n_blend
                     ij = i+(j-1)*n_x + n_x*n_blend
-                    field_blend(j,i,2) = m_mumps(matnum)%RHS(ij)
+                    field_blend(j,i,2) = m_mumps(matnum)%rhs(ij)
                  enddo
               enddo
            endif
@@ -254,7 +254,7 @@ subroutine gyro_sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
               do i=1,n_x
                  do j=1,n_blend
                     ij = i+(j-1)*n_x + 2*n_x*n_blend
-                    field_blend(j,i,3) = m_mumps(matnum)%RHS(ij)
+                    field_blend(j,i,3) = m_mumps(matnum)%rhs(ij)
                  enddo
               enddo
            endif
@@ -268,14 +268,14 @@ subroutine gyro_sparse_solve_mumps(n_elem,n_row,matnum,i_solve)
            do i=1,n_x
               do j=1,n_blend
                  ij = i+(j-1)*n_x
-                 field_blend(j,i,1) = m_mumps(matnum)%RHS(ij)
+                 field_blend(j,i,1) = m_mumps(matnum)%rhs(ij)
               enddo
            enddo
 
            do i=1,n_x
               do j=1,n_blend
                  ij = i+(j-1)*n_x + n_x*n_blend
-                 field_blend(j,i,3) = m_mumps(matnum)%RHS(ij)
+                 field_blend(j,i,3) = m_mumps(matnum)%rhs(ij)
               enddo
            enddo
         endif

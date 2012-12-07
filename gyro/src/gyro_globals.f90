@@ -850,7 +850,7 @@ module gyro_globals
   complex, dimension(:,:,:,:), allocatable :: h_cap_old
   complex, dimension(:,:,:,:), allocatable :: h_cap_old2
   complex, dimension(:,:,:,:), allocatable :: h_cap_dot
-  complex, dimension(:,:,:,:), allocatable :: RHS
+  complex, dimension(:,:,:,:), allocatable :: rhs
 
   complex, dimension(:,:,:,:), allocatable :: f_store
   complex, dimension(:,:,:,:), allocatable :: p_store
@@ -870,7 +870,7 @@ module gyro_globals
   complex, dimension(:,:,:,:), allocatable :: gyro_u
   complex, dimension(:,:,:,:), allocatable :: gyro_u_tran
   !
-  complex, dimension(:,:,:), allocatable :: RHS_krook
+  complex, dimension(:,:,:), allocatable :: rhs_krook
   !
   ! Collision operator
   !
@@ -885,8 +885,8 @@ module gyro_globals
   !
   real, dimension(:,:), allocatable :: entropy
   !
-  real, dimension(:,:,:,:), allocatable :: RHS_dr
-  real, dimension(:,:,:,:), allocatable :: RHS_dt
+  real, dimension(:,:,:,:), allocatable :: rhs_dr
+  real, dimension(:,:,:,:), allocatable :: rhs_dt
   !---------------------------------------------------------
 
   !---------------------------------------------------------

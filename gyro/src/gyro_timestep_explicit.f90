@@ -13,14 +13,14 @@ subroutine gyro_timestep_explicit
   !--------------------------------------------------------------
   implicit none
   !
-  complex, dimension(:,:,:,:), allocatable :: RHSE_1
-  complex, dimension(:,:,:,:), allocatable :: RHSE_2
-  complex, dimension(:,:,:,:), allocatable :: RHSE_3
+  complex, dimension(:,:,:,:), allocatable :: rhse_1
+  complex, dimension(:,:,:,:), allocatable :: rhse_2
+  complex, dimension(:,:,:,:), allocatable :: rhse_3
   !--------------------------------------------------------------
 
-  allocate(RHSE_1(n_stack,n_x,n_nek_loc_1,n_kinetic))
-  allocate(RHSE_2(n_stack,n_x,n_nek_loc_1,n_kinetic))
-  allocate(RHSE_3(n_stack,n_x,n_nek_loc_1,n_kinetic))
+  allocate(rhse_1(n_stack,n_x,n_nek_loc_1,n_kinetic))
+  allocate(rhse_2(n_stack,n_x,n_nek_loc_1,n_kinetic))
+  allocate(rhse_3(n_stack,n_x,n_nek_loc_1,n_kinetic))
 
 
   if (integrator_method == 1) then
@@ -34,23 +34,23 @@ subroutine gyro_timestep_explicit
      ! Stage 1
 
      call gyro_rhs_total
-     RHSE_1 = RHS
+     rhse_1 = rhs
 
-     h = h_0+dt*RHSE_1
+     h = h_0+dt*rhse_1
      call gyro_field_solve_explicit
 
      ! Stage 2
 
      call gyro_rhs_total
-     RHSE_2 = RHS
+     rhse_2 = rhs
 
-     RHS = 0.5*(RHSE_1+RHSE_2)
-     h = h_0+dt*RHS
+     rhs = 0.5*(rhse_1+rhse_2)
+     h   = h_0+dt*rhs
      call gyro_field_solve_explicit
 
      ! Error estimate
 
-     h_err = 0.5*dt*(-RHSE_1+RHSE_2)
+     h_err = 0.5*dt*(-rhse_1+rhse_2)
 
   else 
 
@@ -63,42 +63,42 @@ subroutine gyro_timestep_explicit
      ! Stage 1
 
      call gyro_rhs_total
-     RHSE_1 = RHS
+     rhse_1 = rhs
 
-     h = h_0+0.5*dt*RHSE_1
+     h = h_0+0.5*dt*rhse_1
      call gyro_field_solve_explicit
 
      ! Stage 2
 
      call gyro_rhs_total
-     RHSE_2 = RHS
+     rhse_2 = rhs
 
-     h = h_0+0.5*dt*RHSE_2
+     h = h_0+0.5*dt*rhse_2
      call gyro_field_solve_explicit
 
      ! Stage 3
 
      call gyro_rhs_total
-     RHSE_3 = RHS
+     rhse_3 = rhs
 
-     h = h_0+dt*RHSE_3
+     h = h_0+dt*rhse_3
      call gyro_field_solve_explicit
 
      ! Stage 4
 
      call gyro_rhs_total
 
-     h = h_0+dt*(RHSE_1+2.0*(RHSE_2+RHSE_3)+RHS)/6.0
+     h = h_0+dt*(rhse_1+2.0*(rhse_2+rhse_3)+rhs)/6.0
      call gyro_field_solve_explicit
 
      ! Error estimate
 
-     h_err = dt*(-RHSE_1+RHSE_2+RHSE_3-RHS)/12.0
+     h_err = dt*(-rhse_1+rhse_2+rhse_3-rhs)/12.0
 
   endif
 
-  deallocate(RHSE_1)
-  deallocate(RHSE_2)
-  deallocate(RHSE_3)
+  deallocate(rhse_1)
+  deallocate(rhse_2)
+  deallocate(rhse_3)
 
 end subroutine gyro_timestep_explicit

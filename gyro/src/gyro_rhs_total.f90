@@ -141,7 +141,7 @@ subroutine gyro_rhs_total
   if (source_flag == 1) then
 
      call gyro_adaptive_source
-
+ 
      do is=1,n_kinetic
 
         p_nek_loc = 0

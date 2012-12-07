@@ -128,7 +128,7 @@ subroutine gyro_collision_krook
   !---------------------------------------------------
   ! Get collision term:
   !
-  RHS_krook(:,:,:) = (0.0,0.0)
+  rhs_krook(:,:,:) = (0.0,0.0)
   !
   p_nek_loc = 0
   do p_nek=1+i_proc_1,n_nek_1,n_proc_1
@@ -148,8 +148,8 @@ subroutine gyro_collision_krook
 
            do j=1,n_blend
 
-              RHS_krook(m,i,p_nek_loc) = &
-                   RHS_krook(m,i,p_nek_loc)+ &
+              rhs_krook(m,i,p_nek_loc) = &
+                   rhs_krook(m,i,p_nek_loc)+ &
                    (sum2_glob(j,i)+ &
                    sum_glob(j,i)*v_para(m,i,p_nek_loc,1)+ &
                    sum2_glob(j+n_blend,i)*energy(ie,1))*c_blend(j,m0,i,p_nek_loc)
@@ -163,11 +163,11 @@ subroutine gyro_collision_krook
   enddo ! p_nek_loc
 
   do i=1,n_x
-     RHS_krook(:,i,:) = -nu_i_krook*(h(:,i,:,1)-RHS_krook(:,i,:))
+     rhs_krook(:,i,:) = -nu_i_krook*(h(:,i,:,1)-rhs_krook(:,i,:))
   enddo
 
   if (debug_flag == 1 .and. i_proc == 0) then
-     print *,'[do_collision_krook done]'
+     print *,'[gyro_collision_krook done]'
   endif
 
 end subroutine gyro_collision_krook
