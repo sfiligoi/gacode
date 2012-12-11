@@ -14,8 +14,15 @@ FUNCTION CALCULATE_GYRO_TIME_ENS, y, itmin, itmax, itavg, T_ENS = t_ens
 
 END ;calculate_gyro_time_ens
 
-PRO PLOT_GYRO_SUMMARY, simdir, ITMIN=itmin, ITMAX=itmax, ITAVG=itavg, USE_LX=use_lx
+PRO PLOT_GYRO_SUMMARY, simdir, ITMIN=itmin, ITMAX=itmax, ITAVG=itavg, USE_LX=use_lx,$
+	THICK=th, CHARSIZE=cs
 ; USE_LX keyword plots radial profiles vs Dx/rhos instead of rmin/a
+; good EPS versions via
+; IDL> SET_PLOT, 'PS'
+; IDL> DEVICE, XS=30, YS=30, /encaps, /color, bits=8,file='<filename>.eps'
+; IDL> PLOT_GYRO_SUMMARY, <simdir>, THICK=6, CHARSIZE=3, ...
+; IDL> DEVICE, /CLOSE
+; IDL> SET_PLOT, 'X'
 
   data = GET_GYRO_DATA(simdir)
   Q_t = TOTAL(data.q_t,2)
@@ -34,41 +41,47 @@ PRO PLOT_GYRO_SUMMARY, simdir, ITMIN=itmin, ITMAX=itmax, ITAVG=itavg, USE_LX=use
   DEFAULT, itmin, data.n_time/2
   DEFAULT, itmax, data.n_time-1
   DEFAULT, itavg, 1
-
+  
   dcolor = !D.TABLE_SIZE/5
+  DEFAULT, th, 1
+  DEFAULT, cs, 2
   !P.MULTI=[0,0,3]
 
   PLOT, data.t, Qi_t, YRANGE=[ymin, ymax], /XS, $
-	XTITLE = 'time (a/c!Ds!N)', CHARSIZE=2, TITLE=simdir
+	XTITLE = 'time (a/c!Ds!N)', CHARSIZE=cs, TITLE=simdir, $
+	THICK=th, XTHICK=th, YTHICK=th, CHARTHICK=th
   Qi_t_ens = CALCULATE_GYRO_TIME_ENS(Qi_t,itmin,itmax,itavg,T_ENS=t_ens)
   NM = N_ELEMENTS(t_ens)
-  OPLOT, [t_ens[0], t_ens[NM-1]+itavg-1], [1,1]*MEAN(Qi_t_ens)
+  OPLOT, [t_ens[0], t_ens[NM-1]+itavg-1], [1,1]*MEAN(Qi_t_ens), THICK=th
   XYOUTS, t_ens[0], 1.1*MEAN(Qi_t_ens), 'Q!Di!N/Q!DgB!N', $
-	CHARSIZE=2
-  OPLOT, data.t, data.t*0, LINESTYLE=1
+	CHARSIZE=2, CHARTHICK=th
+  OPLOT, data.t, data.t*0, LINESTYLE=1, THICK=th
 
-  OPLOT, data.t, Pi_t, COLOR=dcolor
+  OPLOT, data.t, Pi_t, COLOR=dcolor, THICK=th
   Pi_t_ens = CALCULATE_GYRO_TIME_ENS(Pi_t,itmin,itmax,itavg)
   OPLOT, [t_ens[0], t_ens[NM-1]+itavg-1], [1,1]*MEAN(Pi_t_ens), $
-	COLOR=dcolor
+	COLOR=dcolor, THICK=th
   XYOUTS, t_ens[0], 1.1*MEAN(Pi_t_ens), '!4P!X!Di!N/!4P!X!DgB!N', $
-	COLOR=dcolor, CHARSIZE=2
+	COLOR=dcolor, CHARSIZE=2, CHARTHICK=th
 
-  IF (data.n_kinetic GT 1) THEN BEGIN
-	OPLOT, data.t, Qe_t, COLOR=2*dcolor
+  IF (data.n_kinetic GT data.n_ion) THEN BEGIN
+	OPLOT, data.t, Qe_t, COLOR=2*dcolor, THICK=th
   	Qe_t_ens = CALCULATE_GYRO_TIME_ENS(Qe_t,itmin,itmax,itavg)
   	OPLOT, [t_ens[0], t_ens[NM-1]+itavg-1], [1,1]*MEAN(Qe_t_ens), $
-		COLOR=2*dcolor
+		COLOR=2*dcolor, THICK=th
 	XYOUTS, t_ens[0], 1.1*MEAN(Qe_t_ens), 'Q!De!N/Q!DgB!N', $
-		COLOR=2*dcolor, CHARSIZE=2
+		COLOR=2*dcolor, CHARSIZE=2, CHARTHICK=th
 
-	OPLOT, data.t, 1.5*Ge_t, COLOR=3*dcolor
+	OPLOT, data.t, 1.5*Ge_t, COLOR=3*dcolor, THICK=th
   	Ge_t_ens = CALCULATE_GYRO_TIME_ENS(Ge_t,itmin,itmax,itavg)
   	OPLOT, [t_ens[0], t_ens[NM-1]+itavg-1], [1,1]*1.5*MEAN(Ge_t_ens), $
-		COLOR=3*dcolor
+		COLOR=3*dcolor, THICK=th
 	XYOUTS, t_ens[0], 1.1*1.5*MEAN(Ge_t_ens), '1.5!4C!X!De!N/!4C!X!DgB!N', $
-		COLOR=3*dcolor, CHARSIZE=2
-  ENDIF
+		COLOR=3*dcolor, CHARSIZE=2, CHARTHICK=th
+  ENDIF ELSE BEGIN
+	Qe_t_ens = FLTARR(NM)
+	Ge_t_ens = FLTARR(NM)
+  ENDELSE
 
   PRINT, 'NM: ', NM
   PRINT, 'it=['+NUMTOSTRING(itmin)+':'+NUMTOSTRING(t_ens[NM-1]+itavg-1)+']'
@@ -94,6 +107,10 @@ PRO PLOT_GYRO_SUMMARY, simdir, ITMIN=itmin, ITMAX=itmax, ITAVG=itavg, USE_LX=use
   Pi_kt_sdom = FLTARR(data.n_n)
   Qe_kt_sdom = FLTARR(data.n_n)
   Ge_kt_sdom = FLTARR(data.n_n)
+  IF (data.n_kinetic EQ data.n_ion) THEN BEGIN
+	Qe_kt[*,*] = 0.
+	Ge_kt[*,*] = 0.
+  ENDIF
 
   FOR i_n = 0, data.n_n-1 DO BEGIN
 	Qi_kt_ens[i_n,*] = CALCULATE_GYRO_TIME_ENS(REFORM(Qi_kt[i_n,*]),itmin,itmax,itavg)
@@ -113,17 +130,29 @@ PRO PLOT_GYRO_SUMMARY, simdir, ITMIN=itmin, ITMAX=itmax, ITAVG=itavg, USE_LX=use
   ymin = MIN(Qi_kt_mean) < MIN(Qe_kt_mean) < MIN(Pi_kt_mean) < 1.5*MIN(Ge_kt_mean) < 0
   ymax = MAX(Qi_kt_mean) > MAX(Qe_kt_mean) > MAX(Pi_kt_mean) > 1.5*MAX(Ge_kt_mean) > 0
 
-  PLOT, data.ktheta, Qi_kt_mean, PSYM=-4, XTITLE = 'k!D!4h!Nq!X!Ds!N', CHARSIZE=2, $
-	YRANGE=[ymin, ymax], /XS
-  ERRPLOT, data.ktheta, Qi_kt_mean-Qi_kt_sdom, Qi_kt_mean+Qi_kt_sdom
-  OPLOT, data.t, data.t*0, LINESTYLE=1
+  PLOT, data.ktheta, Qi_kt_mean, PSYM=-4, XTITLE = 'k!D!4h!Nq!X!Ds!N', CHARSIZE=cs, $
+	YRANGE=[ymin, ymax], /XS, $
+	TITLE='t=['+NUMTOSTRING(data.t[itmin])+':'+NUMTOSTRING(data.t[t_ens[NM-1]+itavg-1])+'], itavg ='+$
+	NUMTOSTRING(itavg) + ', NM = ' +NUMTOSTRING(NM), $
+        THICK=th, XTHICK=th, YTHICK=th, CHARTHICK=th
+  ERRPLOT, data.ktheta, Qi_kt_mean-Qi_kt_sdom, Qi_kt_mean+Qi_kt_sdom, THICK=th
+  OPLOT, data.t, data.t*0, LINESTYLE=1, THICK=th
 
-  OPLOT, data.ktheta, Pi_kt_mean, PSYM=-2, COLOR=dcolor
-  ERRPLOT, data.ktheta, Pi_kt_mean-Pi_kt_sdom, Pi_kt_mean+Pi_kt_sdom, COLOR=dcolor
-  OPLOT, data.ktheta, Qe_kt_mean, PSYM=-1, COLOR=2*dcolor
-  ERRPLOT, data.ktheta, Qe_kt_mean-Qe_kt_sdom, Qe_kt_mean+Qe_kt_sdom, COLOR=2*dcolor
-  OPLOT, data.ktheta, 1.5*Ge_kt_mean, PSYM=-1, COLOR=3*dcolor
-  ERRPLOT, data.ktheta, 1.5*(Ge_kt_mean-Ge_kt_sdom), 1.5*(ge_kt_mean+Ge_kt_sdom), COLOR=3*dcolor
+  OPLOT, data.ktheta, Pi_kt_mean, PSYM=-2, COLOR=dcolor, THICK=th
+  ERRPLOT, data.ktheta, Pi_kt_mean-Pi_kt_sdom, Pi_kt_mean+Pi_kt_sdom, COLOR=dcolor, THICK=th
+  OPLOT, data.ktheta, Qe_kt_mean, PSYM=-1, COLOR=2*dcolor, THICK=th
+  ERRPLOT, data.ktheta, Qe_kt_mean-Qe_kt_sdom, Qe_kt_mean+Qe_kt_sdom, COLOR=2*dcolor, THICK=th
+  OPLOT, data.ktheta, 1.5*Ge_kt_mean, PSYM=-1, COLOR=3*dcolor, THICK=th
+  ERRPLOT, data.ktheta, 1.5*(Ge_kt_mean-Ge_kt_sdom), 1.5*(ge_kt_mean+Ge_kt_sdom), COLOR=3*dcolor, THICK=th
+
+  XYOUTS, data.ktheta[data.n_n/2], 0.95*ymax, 'Q!Di!N/Q!DgB!N: ' + NUMTOSTRING(MEAN(Qi_t_ens)) + '!9 + !X' + $
+	NUMTOSTRING(SDOM(Qi_t_ens)), CHARTHICK=th, CHARSIZE=2
+  XYOUTS, data.ktheta[data.n_n/2], 0.75*ymax, 'Q!De!N/Q!DgB!N: ' + NUMTOSTRING(MEAN(Qe_t_ens)) + '!9 + !X' + $
+	NUMTOSTRING(SDOM(Qe_t_ens)), CHARTHICK=th, CHARSIZE=2, COLOR=2*dcolor
+  XYOUTS, data.ktheta[data.n_n/2], 0.55*ymax, '!4C!X!De!N/!4C!X!DgB!N: ' + NUMTOSTRING(MEAN(Ge_t_ens)) + '!9 + !X' + $
+	NUMTOSTRING(SDOM(Ge_t_ens)), CHARTHICK=th, CHARSIZE=2, COLOR=3*dcolor
+  XYOUTS, data.ktheta[data.n_n/2], 0.35*ymax, '!4P!X!Di!N/!4P!X!DgB!N: ' + NUMTOSTRING(MEAN(Pi_t_ens)) + '!9 + !X' + $
+	NUMTOSTRING(SDOM(Pi_t_ens)), CHARTHICK=th, CHARSIZE=2, COLOR=dcolor
 
   ;profiles
   Qi_rt = TOTAL(TOTAL(data.q_rt[0:data.n_ion-1,*,*,*],2),1)
@@ -142,6 +171,10 @@ PRO PLOT_GYRO_SUMMARY, simdir, ITMIN=itmin, ITMAX=itmax, ITAVG=itavg, USE_LX=use
   Pi_rt_sdom = FLTARR(data.n_r)
   Qe_rt_sdom = FLTARR(data.n_r)
   Ge_rt_sdom = FLTARR(data.n_r)
+  IF (data.n_kinetic EQ data.n_ion) THEN BEGIN
+	Qe_rt[*,*] = 0.
+	Ge_rt[*,*] = 0.
+  ENDIF
 
   FOR i_r = 0, data.n_r-1 DO BEGIN
 	Qi_rt_ens[i_r,*] = CALCULATE_GYRO_TIME_ENS(REFORM(Qi_rt[i_r,*]),itmin,itmax,itavg)
@@ -168,31 +201,32 @@ PRO PLOT_GYRO_SUMMARY, simdir, ITMIN=itmin, ITMAX=itmax, ITAVG=itavg, USE_LX=use
 	xtitle = '!4D!Xx/!4q!X!Ds!N'
   ENDIF
 
-  PLOT, x, Qi_rt_mean, CHARSIZE=2, YRANGE=[ymin,ymax], /XS, XTITLE=xtitle
-  OPLOT, x, Qi_rt_mean + Qi_rt_sdom, LINE=2
-  OPLOT, x, Qi_rt_mean - Qi_rt_sdom, LINE=2
-  OPLOT, [x[data.n_bnd],x[data.n_r-1-data.n_bnd]],[1,1]*MEAN(Qi_t_ens)
+  PLOT, x, Qi_rt_mean, CHARSIZE=cs, YRANGE=[ymin,ymax], /XS, XTITLE=xtitle, $
+        THICK=th, XTHICK=th, YTHICK=th, CHARTHICK=th
+  OPLOT, x, Qi_rt_mean + Qi_rt_sdom, LINE=2, THICK=th
+  OPLOT, x, Qi_rt_mean - Qi_rt_sdom, LINE=2, THICK=th
+  OPLOT, [x[data.n_bnd],x[data.n_r-1-data.n_bnd]],[1,1]*MEAN(Qi_t_ens), THICK=th
 
-  OPLOT, x, x*0, linestyle=1
-  OPLOT, [1,1]*x[data.n_bnd], 10.*[ymin,ymax], linestyle=2
-  OPLOT, [1,1]*x[data.n_r-1-data.n_bnd], 10.*[ymin,ymax], linestyle=2
+  OPLOT, x, x*0, linestyle=1, THICK=th
+  OPLOT, [1,1]*x[data.n_bnd], 10.*[ymin,ymax], linestyle=2, THICK=th
+  OPLOT, [1,1]*x[data.n_r-1-data.n_bnd], 10.*[ymin,ymax], linestyle=2, THICK=th
 
-  OPLOT, x, Pi_rt_mean, COLOR=dcolor
-  OPLOT, x, Pi_rt_mean + Pi_rt_sdom, LINE=2, COLOR=dcolor
-  OPLOT, x, pi_rt_mean - Pi_rt_sdom, LINE=2, COLOR=dcolor
+  OPLOT, x, Pi_rt_mean, COLOR=dcolor, THICK=th
+  OPLOT, x, Pi_rt_mean + Pi_rt_sdom, LINE=2, COLOR=dcolor, THICK=th
+  OPLOT, x, pi_rt_mean - Pi_rt_sdom, LINE=2, COLOR=dcolor, THICK=th
   OPLOT, [x[data.n_bnd],x[data.n_r-1-data.n_bnd]],[1,1]*MEAN(Pi_t_ens), $
-	COLOR=dcolor
+	COLOR=dcolor, THICK=th
 
-  OPLOT, x, Qe_rt_mean, COLOR=2*dcolor
-  OPLOT, x, Qe_rt_mean + Qe_rt_sdom, LINE=2, COLOR=2*dcolor
-  OPLOT, x, Qe_rt_mean - Qe_rt_sdom, LINE=2, COLOR=2*dcolor
+  OPLOT, x, Qe_rt_mean, COLOR=2*dcolor, THICK=th
+  OPLOT, x, Qe_rt_mean + Qe_rt_sdom, LINE=2, COLOR=2*dcolor, THICK=th
+  OPLOT, x, Qe_rt_mean - Qe_rt_sdom, LINE=2, COLOR=2*dcolor, THICK=th
   OPLOT, [x[data.n_bnd],x[data.n_r-1-data.n_bnd]],[1,1]*MEAN(Qe_t_ens), $
-	COLOR=2*dcolor
+	COLOR=2*dcolor, THICK=th
 
-  OPLOT, x, 1.5*Ge_rt_mean, COLOR=3*dcolor
-  OPLOT, x, 1.5*(Ge_rt_mean + Ge_rt_sdom), LINE=2, COLOR=3*dcolor
-  OPLOT, x, 1.5*(Ge_rt_mean - Ge_rt_sdom), LINE=2, COLOR=3*dcolor
-  OPLOT, [x[data.n_bnd],x[data.n_r-1-data.n_bnd]],[1,1]*MEAN(Ge_t_ens), $
-	COLOR=3*dcolor
+  OPLOT, x, 1.5*Ge_rt_mean, COLOR=3*dcolor, THICK=th
+  OPLOT, x, 1.5*(Ge_rt_mean + Ge_rt_sdom), LINE=2, COLOR=3*dcolor, THICK=th
+  OPLOT, x, 1.5*(Ge_rt_mean - Ge_rt_sdom), LINE=2, COLOR=3*dcolor, THICK=th
+  OPLOT, [x[data.n_bnd],x[data.n_r-1-data.n_bnd]],[1,1]*1.5*MEAN(Ge_t_ens), $
+	COLOR=3*dcolor, THICK=th
   !P.MULTI=0
 END ;PLOT_GYRO_SUMMARY
