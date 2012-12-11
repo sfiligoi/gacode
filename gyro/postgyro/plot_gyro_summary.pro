@@ -71,6 +71,7 @@ PRO PLOT_GYRO_SUMMARY, simdir, ITMIN=itmin, ITMAX=itmax, ITAVG=itavg, USE_LX=use
   ENDIF
 
   PRINT, 'NM: ', NM
+  PRINT, 'it=['+NUMTOSTRING(itmin)+':'+NUMTOSTRING(t_ens[NM-1]+itavg-1)+']'
   PRINT, 'Q_ion: ', MEAN(Qi_t_ens), '+/-', SDOM(Qi_t_ens)
   PRINT, 'Q_e: ', MEAN(Qe_t_ens), '+/-', SDOM(Qe_t_ens)
   PRINT, 'Gamma_e: ', MEAN(Ge_t_ens), '+/-', SDOM(Ge_t_ens)
