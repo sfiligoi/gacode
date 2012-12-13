@@ -87,7 +87,7 @@ PRO plot_gyro_midplane_ralpha, data, IT=it, SF = sf, THICK=thick, $
   Lx = data.r
   xtitle = 'r!Dmin!N/a'
   ytitle = '!4a!X/2!4p!X'
-  r_bnd = [data.r[data.n_bnd], data.r[data.n_r-data.n_bnd]]
+  r_bnd = [data.r[data.n_bnd], data.r[data.n_r-data.n_bnd-1]]
   IF KEYWORD_SET(fluxtube_axes) THEN BEGIN
       Lx = (data.r - data.r[data.n_r/2])/data.rho_s
       r_bnd = (r_bnd - data.r[data.n_r/2])/data.rho_s
