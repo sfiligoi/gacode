@@ -83,7 +83,7 @@ def extract1d(infile,t0):
             # Here we are reading numbers
 
             # Number of columns 
-            n = line.count("E")
+            n = np.max([line.count("E"),line.count("e")])
 
             if it < nt:
                 # Read the time grid [nt points]
@@ -148,8 +148,8 @@ def extract2d(infile,t0):
             # Here we are reading numbers
 
             # Number of columns 
-            n = line.count("E")
-
+            n = np.max([line.count("E"),line.count("e")])
+        
             if ix < nx:
                 # Read the radial grid [nx points]
                 for i in range(n):

@@ -82,7 +82,7 @@ subroutine prgen_read_ufile
   ! Use classic parameterization chi_t = B_ref/2 rho^2
   ! where chi_t is toroidal flux over 2pi.
   !
-  ufile_arho = sqrt(2*chi_ta/ufile_bref)
+  ufile_arho = sqrt(2*chi_ta/abs(ufile_bref))
   chi_t(:)   = chi_ta*rho**2
   !
   ! Compute psi_p by integrating d(chi_t)/q = d(psi_p)
