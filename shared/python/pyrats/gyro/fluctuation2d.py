@@ -2,9 +2,9 @@
 
 import sys
 import numpy as np
-import matplotlib.pyplot as plt
-from pyrats.gyro.data import GYROData
 import scipy.interpolate
+from gacodeplotdefs import *
+from pyrats.gyro.data import GYROData
 
 GFONTSIZE=18
 
@@ -30,6 +30,7 @@ print
 print 'INFO (GYROData): Reading large datafile. Please wait.' 
 
 # Read data and store FINAL time-slice in f[n_x,n_kinetic,n_n]
+
 if i_moment > 2:
     # Fields
     sim.read_moment_u()
