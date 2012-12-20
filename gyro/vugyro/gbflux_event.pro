@@ -165,8 +165,9 @@ pro gbflux_event, gbflux_wid
 
   y[*] = y[*]*xnorm
   if (i_units eq 2) then begin
-     ;; Multiply by V'
-     y[*] = y[*]*INTERPOL(exp_derived[22,*],r_from_rho,r[n_r/2])
+     ;; Multiply by V'- CH fix 12.20.2012
+;     y[*] = y[*]*INTERPOL(exp_derived[22,*],r_from_rho,r[n_r/2])
+     y[*] = y[*]*INTERPOL(exp_derived[24,*],r_from_rho,r[n_r/2])
   endif
 
   y_axis_magic,y,ymin,ymax,d_y

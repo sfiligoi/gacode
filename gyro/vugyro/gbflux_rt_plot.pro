@@ -2,6 +2,7 @@
 ; C. Holland, UCSD
 ; v1.0: May 10, 2012: plots flux-surface avg fluxes as function of
 ; (r,t)
+; v2.0: Dec 20, 2012: updated for new input.profiles.extra structure
 ;
 PRO GBFLUX_RT_PLOT, SAVEFILE = savefile
 
@@ -34,7 +35,9 @@ PRO GBFLUX_RT_PLOT, SAVEFILE = savefile
         unit_norm = xunits[9+i_moment]
         if (exists_exp_derived) then begin
             ;; Multiply by V'
-            unit_norm *= INTERPOL(exp_derived[22,*],r_from_rho,r)
+;            unit_norm *= INTERPOL(exp_derived[22,*],r_from_rho,r)
+; CH fix 12.20.2012: update for new input.profiles.extra structure
+            unit_norm *= INTERPOL(exp_derived[24,*],r_from_rho,r)
         endif
         units = units3
      end

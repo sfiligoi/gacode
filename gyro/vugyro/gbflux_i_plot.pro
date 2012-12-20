@@ -97,7 +97,9 @@ endcase
 
         ;; Particle flux
 
-        y_exp[*] = exp_profile[15,*]/xunits[9]/exp_derived[22,*]
+;CH fix 12.20.2012
+;        y_exp[*] = exp_profile[15,*]/xunits[9]/exp_derived[22,*]
+        y_exp[*] = exp_profile[15,*]/xunits[9]/exp_derived[24,*]
 
      endif
 
@@ -107,10 +109,14 @@ endcase
 
         if (i_spec eq n_kinetic-1) or (electron_method eq 3) then begin
            ;; Qe
-           y_exp[*] = exp_profile[11,*]/xunits[10]/exp_derived[22,*]
+;CH fix 12.20.2012
+;           y_exp[*] = exp_profile[11,*]/xunits[10]/exp_derived[22,*]
+           y_exp[*] = exp_profile[11,*]/xunits[10]/exp_derived[24,*]
         endif else begin
            ;; Qi
-           y_exp[*] = exp_profile[12,*]/xunits[10]/exp_derived[22,*]
+;CH fix 12.2012
+;           y_exp[*] = exp_profile[12,*]/xunits[10]/exp_derived[22,*]
+           y_exp[*] = exp_profile[12,*]/xunits[10]/exp_derived[24,*]
         endelse
         
      endif
@@ -119,7 +125,9 @@ endcase
 
         ;; Momentum flux
 
-        y_exp[*] = exp_profile[10,*]/xunits[11]/exp_derived[22,*]
+;CH fix 12.20.2102
+;        y_exp[*] = exp_profile[10,*]/xunits[11]/exp_derived[22,*]
+        y_exp[*] = exp_profile[10,*]/xunits[11]/exp_derived[24,*]
         
      endif
 
@@ -128,9 +136,11 @@ endcase
   ;; ** At this point, y and y_exp are in gyroBohm units **
 
   if (i_units eq 2) then begin
-     ;; Multiply by V'
-     y_r[*]   = y_r[*]*INTERPOL(exp_derived[22,*],r_from_rho,r)
-     y_exp[*] = y_exp[*]*exp_derived[22,*]
+     ;; Multiply by V'- CH fix 12.20.2012
+;     y_r[*]   = y_r[*]*INTERPOL(exp_derived[22,*],r_from_rho,r)
+;     y_exp[*] = y_exp[*]*exp_derived[22,*]
+     y_r[*]   = y_r[*]*INTERPOL(exp_derived[24,*],r_from_rho,r)
+     y_exp[*] = y_exp[*]*exp_derived[24,*]
   endif
   ;;-------------------------------------------------------
 

@@ -76,7 +76,9 @@ pro loadsim, input_dir
 
      ;; Read list of derived experimental profile
 
-     n_exp_derived = 25
+     ;; CH fix 12.20.2012
+     n_exp_derived = 37
+;;     n_exp_derived = 25
 
      exp_derived = fltarr(n_rho,n_exp_derived)
      read_array,exp_derived,'input.profiles.extra',exists_exp_derived
