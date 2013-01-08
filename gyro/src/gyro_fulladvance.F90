@@ -12,7 +12,7 @@ subroutine gyro_fulladvance
 
   !----------------------------------------
   implicit none
-!  integer :: h5_control
+  integer :: wedge_flag 
   !----------------------------------------
 
   h_old(:,:,:,:) = h(:,:,:,:)
@@ -114,16 +114,21 @@ subroutine gyro_fulladvance
   !-------------------------------------------------------------------
   ! MANAGE data output: 
   !
-
   call gyro_timer_out('Diagnos.-allstep')
   call gyro_timer_in('Diagnos.-datastep')
 
-  mod_time_skip: if ((time_skip > 0 .and. modulo(step,time_skip) == 0) &
-     .or. (time_skip_wedge > 0 .and. modulo(step,time_skip_wedge) == 0) ) then
+  wedge_flag = 0
+  if (time_skip_wedge > 0) then
+     if (modulo(step,time_skip_wedge) == 0) then
+        wedge_flag = 1
+     endif
+  endif
 
+
+  if (modulo(step,time_skip) == 0 .or. wedge_flag == 1) then
 
      ! Counter for number of data output events.
-     if (time_skip > 0 .and. modulo(step,time_skip) == 0) then
+     if (modulo(step,time_skip) == 0) then
         data_step = data_step+1
      endif
 
@@ -147,20 +152,16 @@ subroutine gyro_fulladvance
      ! Main data I/O handler
 
      io_control = 2*output_flag
-     !h5_control = 2*output_flag
-     
         
-      if (time_skip > 0 .and. modulo(step,time_skip) == 0) then
+      if (modulo(step,time_skip) == 0) then
          if (io_method < 3 .and. io_method > 0) call gyro_write_timedata
       endif
 
 #ifdef HAVE_HDF5
-      if(time_skip_wedge > 0 .and. modulo(step,time_skip_wedge) == 0) then
-        if (io_method > 1) call gyro_write_timedata_wedge_hdf5
+      if (wedge_flag == 1) then
+            if (io_method > 1) call gyro_write_timedata_wedge_hdf5
       endif
 #endif      
-
-
 
      !--------------------------------------------------
      ! Update diffusivity and flux time-record for TGYRO 
@@ -175,8 +176,7 @@ subroutine gyro_fulladvance
 
      endif
 
-
-  endif mod_time_skip
+  endif
 
   call gyro_timer_out('Diagnos.-datastep')
   !-------------------------------------------------------------------

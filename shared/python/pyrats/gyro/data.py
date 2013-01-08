@@ -635,7 +635,7 @@ class GYROData:
 
         n_theta_plot = self.profile['n_theta_plot']
         n_x          = self.profile['n_x']
-        n_field      = self.profile['n_field']
+        n_kinetic    = self.profile['n_kinetic']
         n_n          = self.profile['n_n']
 
         if self.useh5 == 1:
@@ -657,13 +657,13 @@ class GYROData:
             except:
                 raise IOError("ERROR (GYROData): out.gyro.moment_n not found.")
 
-            nt = len(data)/(2*n_theta_plot*n_x*n_field*n_n)
+            nt = len(data)/(2*n_theta_plot*n_x*n_kinetic*n_n)
 
             if self.n > nt:
                 raise IOError('ERROR (GYROData): '+self.dirname+
                             '/out.gyro.moment_n too small. ')
 
-            self.moment_n = data.reshape((2,n_theta_plot,n_x,n_field,n_n,nt),order='F')
+            self.moment_n = data.reshape((2,n_theta_plot,n_x,n_kinetic,n_n,nt),order='F')
             self.moment_n = self.moment_n[0] + 1j*self.moment_n[1]
 
         # Common
@@ -678,7 +678,7 @@ class GYROData:
 
         n_theta_plot = self.profile['n_theta_plot']
         n_x          = self.profile['n_x']
-        n_field      = self.profile['n_field']
+        n_kinetic    = self.profile['n_kinetic']
         n_n          = self.profile['n_n']
 
         if self.useh5 == 1:
@@ -700,14 +700,14 @@ class GYROData:
             except:
                 raise IOError("ERROR (GYROData): out.gyro.moment_e not found.")
 
-            nt = len(data)/(2*n_theta_plot*n_x*n_field*n_n)
+            nt = len(data)/(2*n_theta_plot*n_x*n_kinetic*n_n)
 
             if self.n > nt:
                 raise IOError('ERROR (GYROData): '+self.dirname+
                               '/out.gyro.moment_e too small. ')
 
 
-            self.moment_e = data.reshape((2,n_theta_plot,n_x,n_field,n_n,nt),order='F')
+            self.moment_e = data.reshape((2,n_theta_plot,n_x,n_kinetic,n_n,nt),order='F')
             self.moment_e = self.moment_e[0] + 1j*self.moment_e[1]
 
         # Common
@@ -723,7 +723,7 @@ class GYROData:
 
         n_theta_plot = self.profile['n_theta_plot']
         n_x          = self.profile['n_x']
-        n_field      = self.profile['n_field']
+        n_kinetic    = self.profile['n_kinetic']
         n_n          = self.profile['n_n']
 
         if self.useh5 == 1:
@@ -745,13 +745,13 @@ class GYROData:
             except:
                 raise IOError("ERROR (GYROData): out.gyro.moment_v not found.")
 
-            nt = len(data)/(2*n_theta_plot*n_x*n_field*n_n)
+            nt = len(data)/(2*n_theta_plot*n_x*n_kinetic*n_n)
 
             if self.n > nt:
                 raise IOError('ERROR (GYROData): '+self.dirname+
                   '/out.gyro.moment_e too small. ')
 
-            self.moment_v = data.reshape((2,n_theta_plot,n_x,n_field,n_n,nt),order='F')
+            self.moment_v = data.reshape((2,n_theta_plot,n_x,n_kinetic,n_n,nt),order='F')
             self.moment_v = self.moment_v[0] + 1j*self.moment_v[1]
 
         # Common
@@ -798,7 +798,8 @@ class GYROData:
 
     def read_flux_velocity(self):
         """Reads out.gyro.flux_velocity.  
-        Output is numpy array with dimensions: (n_energy,n_lambda,n_kinetic,n_field,2,n_n,n_time)"""
+        Output is numpy array with dimensions: 
+          (n_energy,n_lambda,n_kinetic,n_field,2,n_n,n_time)"""
 
         n_energy  = self.profile['n_energy']
         n_lambda  = self.profile['n_lambda']

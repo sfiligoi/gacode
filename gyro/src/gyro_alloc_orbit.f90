@@ -79,22 +79,6 @@ subroutine gyro_alloc_orbit(flag)
      allocate(usin_t(n_x,n_lambda,n_stack))   
      allocate(ucos_t(n_x,n_lambda,n_stack))   
 
-     !b0_t=0.
-     !g_theta_t=0.
-     !grad_r_t=0.
-     !qrat_t=0.
-     !cos_t=0.
-     !cos_p_t=0.
-     !captheta_t=0.
-     !sin_t=0.
-     !bt_t=0.
-     !bp_t=0.
-     !bigr_t=0.
-     !b0_plot=0.
-     !g_theta_plot=0.
-     !usin_t=0.
-     !ucos_t=0.
-
      ! Blending arrays
      allocate(c_fluxave(n_blend,n_x))
      allocate(ff_mm(n_blend,n_blend,n_x,2))
@@ -103,14 +87,6 @@ subroutine gyro_alloc_orbit(flag)
      allocate(ff2_mm_piv(2*n_blend,n_x))
      allocate(blend_plot(n_blend,n_theta_plot,n_x))
      allocate(blend_prime_plot(n_blend,n_theta_plot,n_x))
-
-     !c_fluxave=0.
-     !ff_mm=0.
-     !ff_mm_piv=0.
-     !ff2_mm=0.
-     !ff2_mm_piv=0.
-     !blend_plot=0.
-     !blend_prime_plot=0.
 
      !SEK: There might be a better method here
      if (io_method > 1 .and. time_skip_wedge > 0) then

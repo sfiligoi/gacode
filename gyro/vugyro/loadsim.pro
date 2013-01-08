@@ -76,6 +76,9 @@ pro loadsim, input_dir
 
      ;; Read list of derived experimental profile
 
+     ;; CH fix 12.20.2012
+;;     n_exp_derived = 37
+     ;; CH fix 1.3.2013- better for backwards compatibility
      n_exp_derived = 25
 
      exp_derived = fltarr(n_rho,n_exp_derived)
