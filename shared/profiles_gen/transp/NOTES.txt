@@ -1,0 +1,40 @@
+====Required Software====
+<tt>transp2gyro</tt> uses [http://www.python.org/ Python] and [http://w3.pppl.gov/ntcc/TrXplib/ trxpl]. Both can be downloaded for free, should be installed on your local machine and in your <tt>$PATH</tt>. See the softwares' websites and your local system admin on how to do this. Python '''must''' be at least version 2.5.
+
+
+====PPPL TRANSP Grid Access====
+The MDS+ tree for <tt>transp2gyro</tt> is defined by the environment variable <tt>MDS_TRANSP_SERVER</tt>. It is possible to use the PPPL MDS+ tree, <tt>transpgrid.pppl.gov</tt>, which has TRANSP shots from a variety of different machines (NSTX, ITER, TFTR, MAST ...). This is currently supported at PPPL (<tt>portal.pppl.gov</tt>) and at General Atomics (<tt>delphi.gat.com</tt>), but in principle could work from anywhere. To use this you need to be added to a PPPL user list. Send an email to [mailto:lscimeca@pppl.gov Lena Scimeca] and ask to be put on the MDS+ access list.
+
+At PPPL add the following to the end of your .cshrc file:
+<pre>
+source ${GACODE_ROOT}/shared/profiles_gen/transp/transp2gyro_setup_pppl
+</pre>
+At General Atomics add the following to the end of your .cshrc file:
+<pre>
+if ( $HOST == delphi.gat.com ) then
+    source ${GACODE_ROOT}/shared/profiles_gen/transp/transp2gyro_setup_ga
+endif
+</pre>
+On other platforms, you should add this to your .cshrc file:
+<pre>
+setenv MDS_TRANSP_SERVER transpgrid.pppl.gov
+setenv PYTHON_COMMAND <path to python 2.5 or higher>
+</pre>
+
+====Other MDS+ Access====
+To get <tt>transp2gyro</tt> to work with other MDS+ trees you should define these environment variables in your .cshrc file:
+<pre>
+setenv MDS_TRANSP_SERVER my_mds_plus_server.my_website.org
+setenv PYTHON_COMMAND <path to python 2.5 or higher>
+</pre>
+
+====Browsing for Shots====
+As there is no a priori way of knowing which TRANSP shots are "good," it is recommended to speak to the physicist who ran the discharge analysis. However, it is possible to search through NSTX shots [http://nstx.pppl.gov/nstx/Software/WebTool/truns_display.html online].
+
+Additionally, all of the <tt>transpgrid</tt> listings are stored at PPPL. On <tt>portal.pppl.gov</tt> these can be found in <tt>$TRINF/<tokamak>/<year></tt>:
+<pre>
+[jpeterso@sunfire06 ~]$ ls $TRINF
+ASDX  CFNS  D3D   HL1M  ITER  JULI  MST   NSST  PBXM  TFTR  WRK
+AUGD  CIT   DIII  HL2A  JET   KSTR  NCSX  NSTX  PDX   TORS
+BPX   CMOD  EAST  ISX   JT60  MAST  NHTX  PBX   PLT   TXTR
+</pre>

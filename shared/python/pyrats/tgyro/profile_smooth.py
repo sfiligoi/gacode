@@ -1,15 +1,10 @@
 import sys
 import numpy as np
-import matplotlib.pyplot as plt
+from gacodeplotdefs import *
 from pyrats.tgyro.data import TGYROData
-from matplotlib import rc
-         
+
 sim   = TGYROData(sys.argv[1])
 ftype = sys.argv[2]
-
-GFONTSIZE=18
-rc('text',usetex=True)
-rc('font',size=GFONTSIZE)
 
 #======================================
 fig = plt.figure(figsize=(12,10))

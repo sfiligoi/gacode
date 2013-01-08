@@ -591,6 +591,8 @@ then
      exit 1
   fi
   python $GACODE_ROOT/shared/bin/profile_parse.py $FILE
+  cp $FILE.gen temp
+  mv temp input.profiles.gen
   echo $LOC_RAD > input.locpargen
   echo $LOC_RHO >> input.locpargen
   echo $LOC_PSI >> input.locpargen
