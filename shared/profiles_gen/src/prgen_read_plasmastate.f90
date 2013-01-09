@@ -174,7 +174,7 @@ subroutine prgen_read_plasmastate
   ! Densities (n at r/a=1)
   err = nf90_inq_varid(ncid,trim('ns_bdy'),varid)
   err = nf90_get_var(ncid,varid,plst_ns(nx,1:plst_dp1_nspec_th)) 
-  
+
   ! Bean density
   err = nf90_inq_varid(ncid,trim('nbeami'),varid)
   err = nf90_get_var(ncid,varid,plst_nb(1:nx-1))
@@ -266,6 +266,7 @@ subroutine prgen_read_plasmastate
   ! Error check for missing/zero boundary (n,T)
   !
   do i=1,plst_dp1_nspec_th  
+     print *,plst_all_name(i)     
      call boundary_fix(plst_rho,plst_ts(:,i),nx)
      call boundary_fix(plst_rho,plst_ns(:,i),nx)
   enddo
@@ -276,6 +277,14 @@ subroutine prgen_read_plasmastate
 
 end subroutine prgen_read_plasmastate
 
+!----------------------------------------------------------
+! boundary_fix
+!
+! Simple routine to correct anomalous boundary point.
+! Normally, the issue is that the boundary point is 
+! zero or very close to zero.
+!----------------------------------------------------------
+
 subroutine boundary_fix(x,f,n)
 
   implicit none
@@ -284,14 +293,27 @@ subroutine boundary_fix(x,f,n)
   real, intent(in), dimension(n) :: x
   real, intent(inout), dimension(n) :: f
   real, parameter :: edge_tol = 1e-6
-  real :: dx
-  real :: xlen
 
-  if (f(n)/f(1) > edge_tol) return
+  if (f(n)/f(1) > edge_tol) then
 
-  dx   = x(n-1)-x(n-2)
-  xlen = log(f(n-2)/f(n-1))
-  f(n) = f(n-1)*exp(-dx/xlen) 
+     ! Exit if boundary point needs no correction
+
+     return
+
+  else
+
+     if (f(n-1) > f(n-2)) then
+        ! Upward trend
+        f(n) = f(n-1)+(f(n-1)-f(n-2))/(x(n-1)-x(n-2))*(x(n)-x(n-1))
+     else
+        ! Downward trend
+        f(n) = f(n-1)+(f(n-1)-f(n-2))/(x(n-1)-x(n-2))*(x(n)-x(n-1))
+        if (f(n)/f(1) < edge_tol) then
+           f(n) = f(n-1)/2.0
+        endif
+     endif
+
+  endif
 
 end subroutine boundary_fix
 

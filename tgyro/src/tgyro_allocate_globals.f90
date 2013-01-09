@@ -51,6 +51,7 @@ subroutine tgyro_allocate_globals
   allocate(nui(loc_n_ion,n_r))
   allocate(nui_HH(n_r))
   allocate(nue_HH(n_r))
+  allocate(nue_star(n_r))
 
   allocate(z_eff(n_r))
 

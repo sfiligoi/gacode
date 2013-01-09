@@ -124,6 +124,7 @@ module tgyro_globals
   real, dimension(:,:), allocatable :: nui
   real, dimension(:), allocatable :: nui_HH
   real, dimension(:), allocatable :: nue_HH
+  real, dimension(:), allocatable :: nue_star
 
   real, dimension(:), allocatable :: z_eff
 

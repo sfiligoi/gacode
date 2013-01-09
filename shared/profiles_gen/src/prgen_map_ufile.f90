@@ -76,17 +76,9 @@ subroutine prgen_map_ufile
   if (ufile_nion > 1) vec(32,:) = ufile_nm2(:)*1e-19
   if (ufile_nion > 2) vec(33,:) = ufile_nm3(:)*1e-19
 
-  vec(36,:) = ufile_ti(:)
-  if (ufile_nion > 1) vec(37,:) = ufile_ti(:)
-  if (ufile_nion > 2) vec(38,:) = ufile_ti(:)
-
-  ! Beam ions: one only
-  !do i=1,ufile_ibion
-  ! ni
-  !   vec(31+i+ufile_nion-1,:) = ufile_enbeam(:)*1e-19
-  ! Ti: T[keV] = (p/n)[J]/1.6022e-16[J/eV]
-  !   vec(36+i+ufile_nion-1,:) = ufile_pfast(:)/ufile_enbeam(:)/1.6022e-16
-  !enddo
+  vec(36,:) = ufile_ti(:)*1e-3
+  if (ufile_nion > 1) vec(37,:) = ufile_ti(:)*1e-3
+  if (ufile_nion > 2) vec(38,:) = ufile_ti(:)*1e-3
 
   ! reorder
   do i=1,5 

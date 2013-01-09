@@ -89,6 +89,10 @@ subroutine tgyro_profile_functions
   nui_HH(:) = 4.0/(3*sqrt(2.0*pi))*nui(1,:)
   nue_HH(:) = 4.0/(3*sqrt(pi))*nue(:)*(ni(1,:)*zi_vec(1)**2/ne(:))
 
+  ! INVERSE of nue_star
+  nue_star(:) = (r(:)/r_maj(:))**1.5/abs(q(:))/nue_HH(:)* &
+       (c_s(:)*sqrt(mi(1)/me))/r_maj(:)/z_eff(:)
+
   ! NOTE: 
   ! c_exch = 1.8e-19 is the formulary exch. coefficient
   c_exch = 2.0*(4.0/3)*sqrt(2.0*pi)*e**4/k**1.5
