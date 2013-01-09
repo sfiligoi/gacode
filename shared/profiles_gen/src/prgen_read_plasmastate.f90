@@ -265,8 +265,7 @@ subroutine prgen_read_plasmastate
   !----------------------------------------------
   ! Error check for missing/zero boundary (n,T)
   !
-  do i=1,plst_dp1_nspec_th  
-     print *,plst_all_name(i)     
+  do i=1,plst_dp1_nspec_th     
      call boundary_fix(plst_rho,plst_ts(:,i),nx)
      call boundary_fix(plst_rho,plst_ns(:,i),nx)
   enddo
