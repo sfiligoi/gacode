@@ -82,13 +82,14 @@ subroutine gyro_read_restart
      ! i_restart is always tagged to most recent output 
      ! files.  If restart_new_flag = 0, then we want 1-i_restart
 
-  case (1,2)
+  case (1,2,3)
 
      !-------------------------------------------
      ! Restart block
      !
      ! 1=restart, continue writing restart files
      ! 2=restart, but do not write restart files
+     ! 3=restart, set t=0
      !-------------------------------------------
 
      ! Get restart values from last run
@@ -119,8 +120,8 @@ subroutine gyro_read_restart
      call MPI_BCAST(i_restart,&
           1,MPI_INTEGER,0,GYRO_COMM_WORLD,i_err)
 
-     ! Reset time if running TGYRO local method
-     if (transport_method == 2) then
+     ! Reset time if running TGYRO local method or using "gyro -start init"
+     if (transport_method == 2 .or. restart_method == 3) then
         t_current = 0.0
         data_step = 0
      endif
@@ -144,9 +145,9 @@ subroutine gyro_read_restart
               if (i_proc_w < 10) then
                  write(*,'(a,i1,a)',advance='no') '[',i_proc_w,']'
               else if (i_proc_w < 100) then
-                  write(*,'(a,i2,a)',advance='no') '[',i_proc_w,']'
+                 write(*,'(a,i2,a)',advance='no') '[',i_proc_w,']'
               else
-                  write(*,'(a,i3,a)',advance='no') '[',i_proc_w,']'
+                 write(*,'(a,i3,a)',advance='no') '[',i_proc_w,']'
               endif
               if (modulo(i_proc_w,8) == 0) print *
            endif
@@ -176,10 +177,7 @@ subroutine gyro_read_restart
 
      enddo
 
-     if (i_proc == 0) then
-        !print *
-        close(io)
-     endif
+     if (i_proc == 0) close(io)
 
   case default
 

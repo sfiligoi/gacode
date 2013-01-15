@@ -37,6 +37,16 @@ then
   echo "         -mpinuma <n>" 
   echo "         MPI tasks per active NUMA."
   echo
+  echo "STARTUP CONTROL"
+  echo
+  echo "         -start <mode>"  
+  echo "         Mode for start/restart control"
+  echo "         <mode>=nosave (start new, don't save restart data),"
+  echo "                new    (start new, save restart data) [DEFAULT],"
+  echo "                cont   (continue simulation with restart data, save restart data),"
+  echo "                retry  (continue simulation with restart data, don't save restart data),"
+  echo "                init   (continue simulation with restart data, reset time to t=0)."
+  echo
   echo "TEST MODE"
   echo
   echo "         -t <simdir>"  
@@ -105,6 +115,7 @@ GENERATE_FLAG=0
 REGRESS_FLAG=0
 SCOPY_FLAG=0
 KILL_STATUS=2
+START=new
 #=============================================================
 
 #=============================================================
@@ -142,6 +153,8 @@ while [ $# -gt 0 ] ; do
   -k) shift ; KILL_STATUS=-1 ; LOCDIR=$1 ;;
 
   -c) shift ; KILL_STATUS=0 ; LOCDIR=$1 ;;
+
+  -start) shift ; START=$1 ;;
 
   *) echo "ERROR: incorrect gyro syntax." ; exit 1 ;;
  
@@ -330,6 +343,19 @@ then
    MPINUMA=1
    echo "1" > "$SIMDIR/gyrotest_flag"
 fi
+#===========================================================
+
+#===========================================================
+# Manage start control
+# 
+case "$START" in
+  nosave) echo "-1" > restart.dat ;;
+  new)    echo  "0" > restart.dat ;;
+  cont)   echo  "1" > restart.dat ;;
+  retry)  echo  "2" > restart.dat ;;
+  init)   echo  "3" > restart.dat ;;
+  *) echo "ERROR: bad argument to -start." ; exit 1 ;;
+esac
 #===========================================================
 
 #===========================================================

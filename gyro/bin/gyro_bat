@@ -23,6 +23,8 @@ then
   echo "         Set optional path to simulation directory."
   echo "         [The default path is the current directory]"
   echo
+  echo "BATCH EXECUTE MODE"
+  echo
   echo "         -e <simdir>" 
   echo "         Run GYRO using input data in <simdir>."
   echo
@@ -37,6 +39,16 @@ then
   echo
   echo "         -mpinuma <n>" 
   echo "         MPI tasks per active NUMA."
+  echo
+  echo "STARTUP CONTROL"
+  echo
+  echo "         -start <mode>"  
+  echo "         Mode for start/restart control"
+  echo "         <mode>=nosave (start new, don't save restart data),"
+  echo "                new    (start new, save restart data) [DEFAULT],"
+  echo "                cont   (continue simulation with restart data, save restart data),"
+  echo "                retry  (continue simulation with restart data, don't save restart data),"
+  echo "                init   (continue simulation with restart data, reset time to t=0)."
   echo
   echo "See https://fusion.gat.com/theory/Gyroplatforms for help"
   echo " choosing -numa and -mpinuma flags."
@@ -58,6 +70,7 @@ NPROC=1
 NOMP=1
 NUMA=0
 MPINUMA=0
+START=new
 #=============================================================
 
 #=============================================================
@@ -78,6 +91,8 @@ while [ $# -gt 0 ] ; do
 
   -mpinuma) shift ; MPINUMA=$1 ;;
 
+  -start) shift ; START=$1 ;;
+
    *) echo "ERROR: incorrect gyro_bat syntax." ; exit 1 ;;
  
   esac
@@ -91,6 +106,19 @@ then
    cd .. ; SIMROOT=$PWD
 fi
 SIMDIR=$SIMROOT/$LOCDIR
+
+#===========================================================
+# Manage start control
+# 
+case "$START" in
+  nosave) echo "-1" > $SIMDIR/restart.dat ;;
+  new)    echo  "0" > $SIMDIR/restart.dat ;;
+  cont)   echo  "1" > $SIMDIR/restart.dat ;;
+  retry)  echo  "2" > $SIMDIR/restart.dat ;;
+  init)   echo  "3" > $SIMDIR/restart.dat ;;
+  *) echo "ERROR: bad argument to -start." ; exit 1 ;;
+esac
+#===========================================================
 
 # Pass control to platform-specific script
 $GACODE_ROOT/shared/batch/queue.${GACODE_PLATFORM} \
