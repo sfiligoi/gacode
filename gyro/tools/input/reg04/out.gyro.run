@@ -44,7 +44,7 @@ INFO: (GYRO) nu_ii rescaled by: 0.000
  Ion curvature drift     : ON
  Electron curvature drift: ON
  ---------- PARLLELISM DIMENSIONS --------------
- MPI tasks            :    4
+ MPI tasks            :    2
  OpenMP threads       :    1
  ----------- GRID DIMENSIONS -------------------
  n_n                  :    1
@@ -140,8 +140,8 @@ INFO: (GYRO) nu_ii rescaled by: 0.000
  RIGHT: r_b_physical  :   0.502778
  RIGHT: r_b           :   0.502778
  ----------- PARALLELIZATION PARAMETERS --------
- (nek) per subgroup:  :        16
- (ine) per subgroup:  :        12
+ (nek) per subgroup:  :        32
+ (ine) per subgroup:  :        24
  ----------- TIME STEPPING PARAMETERS ----------
  plot_filter          :   1.000000
  time_skip            :    10
@@ -163,7 +163,7 @@ INFO: (GYRO) nu_ii rescaled by: 0.000
  ------------ GYRO-OPERATOR BANDWIDTH -------------
  => EXACT BESSEL.
  --------------------------------------------------
- Startup time         :   0.097446
+ Startup time         :   0.116932
  --------------------------------------------------
  PLEASE SEE: 
   - out.gyro.units for normalizing parameters

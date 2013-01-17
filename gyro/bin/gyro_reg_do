@@ -7,8 +7,6 @@
 #  Run through full suite of GYRO regression tests
 #----------------------------------------------------
 
-precfile='out.gyro.prec'
-
 n=$#
 
 if [ $n -eq 0 ] 
@@ -21,6 +19,7 @@ fi
 
 n_proc=${1}
 n_omp=${2}
+reset=${3}
 
 list="
 reg01 
@@ -56,7 +55,13 @@ cd $testdir
 for sim in $list
 do 
    gyro -g $sim -p $testdir > out
-   rm -rf $sim/$precfile
+   rm -rf $sim/out.gyro.prec
    gyro -e $sim -n $n_proc -nomp $n_omp -p $testdir > out
    gyro_reg $sim
+   if [ $reset -eq 1 ]
+   then
+      # Overwrite regression data with current data
+      cp $sim/out.gyro.prec $GACODE_ROOT/gyro/tools/input/$sim
+      cp $sim/out.gyro.run  $GACODE_ROOT/gyro/tools/input/$sim
+   fi
 done

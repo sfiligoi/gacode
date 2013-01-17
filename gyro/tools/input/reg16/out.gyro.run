@@ -1,5 +1,4 @@
-[GYRO MPI tasks: 2]
-[Parsing data in INPUT]
+[Parsing data in input.gyro]
  -----------------------------------------------
  operational mode     : INITIAL VALUE
  boundary conditions  : PERIODIC
@@ -10,7 +9,6 @@
  gyro_method          : ORIGINAL (INTEGRATED) POLARIZATION
  fluctuation output   : PHI( ) N( ) E( ) V( )                   
  radial grid          : UNIFORM
- energy_method        : CONSTANT
  integrator_method    : IMEX2
  field solve          : UMFPACK (SEQUENTIAL)
  source_flag          : SOURCE OFF
@@ -19,6 +17,9 @@
  nonlinear dynamics   : OFF
  linear diffusivity   : RESPONSE FUNCTION
  -----------------------------------------------
+----------------------------------------------------------
+INFO: (GYRO) Dropped down to single-threaded MPI
+----------------------------------------------------------
 ----------------------------------------------------------
 INFO: You are using TOROIDAL_REFERENCE=-1
 ----------------------------------------------------------
@@ -29,10 +30,10 @@ INFO: TOROIDAL_REFERENCE reset to lowest nonzero mode.
 INFO: Offsetting main ions to force sum(ni) = ne
 ----------------------------------------------------------
 ----------------------------------------------------------
-INFO: Remapping into periodic domain.
+INFO: (GYRO) Remapping into periodic domain.
 ----------------------------------------------------------
 ----------------------------------------------------------
-INFO: nu_ii rescaled by: 0.000
+INFO: (GYRO) nu_ii rescaled by: 0.000
 ----------------------------------------------------------
  ----------- SPARSE MATRIX STATS ---------------
  EXPLICIT POISSON:     n>0           
@@ -40,23 +41,26 @@ INFO: nu_ii rescaled by: 0.000
            values:     3924
           indices:     5257
        iterations:        1
- 
+
   EXPLICIT AMPERE:     n>0           
          nonzeros:     1080
            values:     3708
           indices:     4393
        iterations:        1
- 
+
       TOTAL FIELD:     n>0           
          nonzeros:     2808
            values:    13248
           indices:    11377
        iterations:        2
- 
+
  ----------- UTILITY PARAMETERS ----------------
  Ion parallel motion     : ON
  Ion curvature drift     : ON
  Electron curvature drift: ON
+ ---------- PARLLELISM DIMENSIONS --------------
+ MPI tasks            :    2
+ OpenMP threads       :    1
  ----------- GRID DIMENSIONS -------------------
  n_n                  :    1
  n_x                  :    6
@@ -124,35 +128,33 @@ INFO: nu_ii rescaled by: 0.000
  .DLNNDR_ELECTRON     :   0.689228
  .DLNTDR_ELECTRON     :   2.063966
  (Z_ELECTRON)         :  -1.000000
- .BETAE_UNIT          :   0.007884
+ .BETAE_UNIT          :   0.007937
  .MU_ELECTRON         :  60.000000
  --------------- TGLF PARAMETERS ---------------
  Q_PRIME              :   6.307417
- P_PRIME              :   0.002759
+ P_PRIME              :   0.002778
  -------- LOCAL PARAMETERS (diagnostic) ----------
  n_i*z_i - n_e:       :   0.000000
  r/R0                 :   0.207348
+ rho_norm             :   0.524227
  b_unit               :   2.605223
- beta_unit_norm       :   0.012494
- betai_unit           :   0.004432
- betai_unit_2         :   0.000179
- betae_unit_norm      :   0.007884
- beta_*               :   0.031513
- alpha_MHD            :   0.158994
- omega_00 (c_s/a)     :   0.060593
- * Note that f = f_sim exp(-i n omega_00 t)
+ beta_unit_norm       :   0.012579
+ betai_unit           :   0.004461
+ betai_unit_2         :   0.000180
+ betae_unit_norm      :   0.007937
+ beta_*               :   0.031726
+ alpha_MHD            :   0.160067
+ omega_00 (c_s/a)     :  -0.060593
+ * Note that f = f_sim exp(i n omega0[r0] t)
  -------- ALFVEN WAVE PARAMETERS (diagnostic) ----------
- (v_A/c_s)            :  15.926928
- Omega_TAE            :   2.084161
- Omega_A              :   4.168322
+ (v_A/c_s)            :  15.873445
+ Omega_TAE            :   2.077162
+ Omega_A              :   4.154325
  ----------- UPWIND PARAMETERS -----------------
  radial_upwind        :   1.000000
  orbit_upwind         :   1.000000
  orbit_upwind_2       :   1.000000
  orbit_upwind (elec)  :   0.000000
- ----------- SOURCE PARAMETERS -----------------
- nu_source            :   0.100000
- n_source             :    1
  ----------- RADIAL DOMAIN PARAMETERS ----------
  s_grid               :   1.000000
  box_multiplier       :   1.000000
@@ -175,21 +177,15 @@ INFO: nu_ii rescaled by: 0.000
  time_skip            :    20
  restart_data_skip    :    10
  ----------- STABILITY PARAMETERS ----------------
- d/dtau Courant       :   8.482258
-   d/dr Courant       :   0.883069
- Log(RBF Cond. num.)  :   7.019329
- ----------- SETUP TIMING ----------------------
- Grid Setup           :   0.161375
- Build radial ops     :   0.013214
- Build advection ops  :   0.015004
- Build field matrices :   0.068257
- 
- TOTAL SETUP          :   0.518716
+ d/dtau Courant       :   8.482257
+   d/dr Courant       :   0.883378
+ Log(RBF Cond. num.)  :   7.030041
  -------- CENTRAL WAVENUMBERS SIMULATED -----------
      (k_y = nq/r, rho = rho_sD_unit)
  n =    30   k_y rho =  0.300 [ 0.300][ 0.300]
- min(k_x*rho_sD)      :     2.454799
- max(k_x*rho_sD)      :     3.682199
+  
+ min resolved k_x*rho_sD :  2.454799
+ max resolved k_x*rho_sD :  3.682199
  --------------- CENTRAL BOX SIZE -----------------
  abs(Lx/rho_sD)       :     2.559552
  abs(Ly/rho_sD)       :    20.943951
@@ -198,10 +194,11 @@ INFO: nu_ii rescaled by: 0.000
  ------------ GYRO-OPERATOR BANDWIDTH -------------
  => EXACT BESSEL.
  --------------------------------------------------
+ Startup time         :   0.864337
+ --------------------------------------------------
  PLEASE SEE: 
-  - units.out for normalizing parameters
-  - alloc.out for memory usage
-  - efficiency.out for parallelization efficiency
-  - phase_space.out for velocity-space nodes and weights
- STATUS: clean exit                                                             
-          
+  - out.gyro.units for normalizing parameters
+  - out.gyro.memory for memory usage
+  - out.gyro.efficiency for parallelization efficiency
+  - out.gyro.phase_space for velocity-space nodes and weights
+ STATUS: clean exit                                                                      

@@ -73,6 +73,9 @@ then
   echo "         -r"
   echo "         Auto-run the full regression suite."
   echo 
+  echo "         -reset"
+  echo "         Reset regression data."
+  echo 
   echo "TEMPLATE GENERATION"
   echo
   echo "         -g"
@@ -113,6 +116,7 @@ TEST_FLAG=0
 INIT_FLAG=0
 GENERATE_FLAG=0
 REGRESS_FLAG=0
+REGRESS_RESET=0
 SCOPY_FLAG=0
 KILL_STATUS=2
 START=new
@@ -135,6 +139,8 @@ while [ $# -gt 0 ] ; do
   -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
 
   -r) REGRESS_FLAG=1 ;;
+
+  -reset) REGRESS_RESET=1 ;;
 
   -s) shift ; LOCDIR=$1 ; SCOPY_FLAG=1 ;;
 
@@ -216,7 +222,7 @@ then
       echo "       Number of processors must be multiple of 2." 
       exit 1
    fi   
-   gyro_reg_do $NPROC $NOMP
+   gyro_reg_do $NPROC $NOMP $REGRESS_RESET
    exit 0
 fi
 #============================================================

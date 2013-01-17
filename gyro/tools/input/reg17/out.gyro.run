@@ -18,7 +18,10 @@
  linear diffusivity   : RESPONSE FUNCTION
  -----------------------------------------------
 ----------------------------------------------------------
-INFO: Forcing up-down symmetry (UDSYMMETRY_FLAG=1).
+INFO: (GYRO) Dropped down to single-threaded MPI
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: (GYRO) Forcing up-down symmetry (UDSYMMETRY_FLAG=1).
 ----------------------------------------------------------
 ----------------------------------------------------------
 INFO: You are using TOROIDAL_REFERENCE=-1
@@ -27,10 +30,10 @@ INFO: You are using TOROIDAL_REFERENCE=-1
 INFO: TOROIDAL_REFERENCE reset to lowest nonzero mode.
 ----------------------------------------------------------
 ----------------------------------------------------------
-INFO: Scaling dp/dr in GEO by: 0.000
+INFO: (GYRO) Scaling dp/dr in GEO by: 0.000
 ----------------------------------------------------------
 ----------------------------------------------------------
-INFO: nu_ii rescaled by: 0.000
+INFO: (GYRO) nu_ii rescaled by: 0.000
 ----------------------------------------------------------
  ----------- SPARSE MATRIX STATS ---------------
  EXPLICIT POISSON:     n>0           
@@ -38,26 +41,27 @@ INFO: nu_ii rescaled by: 0.000
            values:    14112
           indices:    14833
        iterations:        1
- 
+
   EXPLICIT AMPERE:     n>0           
          nonzeros:     2592
            values:     8688
           indices:    10513
        iterations:        1
- 
+
       TOTAL FIELD:     n>0           
          nonzeros:     7128
            values:    24176
           indices:    28801
        iterations:        1
- 
+
  ----------- UTILITY PARAMETERS ----------------
  Ion parallel motion     : ON
  Ion curvature drift     : ON
  Electron curvature drift: ON
+ ---------- PARLLELISM DIMENSIONS --------------
+ MPI tasks            :    2
+ OpenMP threads       :    1
  ----------- GRID DIMENSIONS -------------------
- n_cores              :    2
- --
  n_n                  :    1
  n_x                  :   12
  n_stack              :   20
@@ -164,13 +168,6 @@ INFO: nu_ii rescaled by: 0.000
  ----------- STABILITY PARAMETERS ----------------
  d/dtau Courant       :   5.271226
    d/dr Courant       :   0.402555
- ----------- SETUP TIMING ----------------------
- Grid Setup           :   0.141003
- Build radial ops     :   0.031415
- Build advection ops  :   0.059118
- Build field matrices :   0.253154
- 
- TOTAL SETUP          :   0.559609
  -------- CENTRAL WAVENUMBERS SIMULATED -----------
      (k_y = nq/r, rho = rho_sD_unit)
  n =    30   k_y rho =  0.300 [ 0.300][ 0.300]
@@ -189,10 +186,11 @@ INFO: nu_ii rescaled by: 0.000
  Ion 1                :     0.909091     0.909091
  WARNING: All buffer widths should be > 8.0
  --------------------------------------------------
+ Startup time         :   0.580133
+ --------------------------------------------------
  PLEASE SEE: 
   - out.gyro.units for normalizing parameters
   - out.gyro.memory for memory usage
   - out.gyro.efficiency for parallelization efficiency
   - out.gyro.phase_space for velocity-space nodes and weights
- STATUS: converged                                                              
-          
+ STATUS: converged                                                                       

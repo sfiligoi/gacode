@@ -1,5 +1,4 @@
-[GYRO MPI tasks: 2]
-[Parsing data in INPUT]
+[Parsing data in input.gyro]
 ----------------------------------------------------------
 INFO: Rotation effects with delta B_parallel are experimental.
 ----------------------------------------------------------
@@ -13,17 +12,19 @@ INFO: Rotation effects with delta B_parallel are experimental.
  gyro_method          : GRID-BASED J0^2 POLARIZATION
  fluctuation output   : PHI( ) N( ) E( ) V( )                   
  radial grid          : UNIFORM
- energy_method        : CONSTANT
  integrator_method    : RK2
  field solve          : UMFPACK (SEQUENTIAL)
  source_flag          : SOURCE OFF
  pitch-angle coll.    : OFF
- rotation effects     : CANDY METHOD
+ rotation parameters  : CANDY METHOD
  nonlinear dynamics   : OFF
  linear diffusivity   : OFF
  -----------------------------------------------
 ----------------------------------------------------------
-INFO: Forcing up-down symmetry (UDSYMMETRY_FLAG=1).
+INFO: (GYRO) Dropped down to single-threaded MPI
+----------------------------------------------------------
+----------------------------------------------------------
+INFO: (GYRO) Forcing up-down symmetry (UDSYMMETRY_FLAG=1).
 ----------------------------------------------------------
 ----------------------------------------------------------
 INFO: You are using TOROIDAL_REFERENCE=-1
@@ -32,7 +33,7 @@ INFO: You are using TOROIDAL_REFERENCE=-1
 INFO: TOROIDAL_REFERENCE reset to lowest nonzero mode.
 ----------------------------------------------------------
 ----------------------------------------------------------
-INFO: nu_ii rescaled by: 0.000
+INFO: (GYRO) nu_ii rescaled by: 0.000
 ----------------------------------------------------------
  ----------- SPARSE MATRIX STATS ---------------
    POISSON-AMPERE:     n>0           
@@ -51,6 +52,9 @@ INFO: nu_ii rescaled by: 0.000
  Ion parallel motion     : ON
  Ion curvature drift     : ON
  Electron curvature drift: ON
+ ---------- PARLLELISM DIMENSIONS --------------
+ MPI tasks            :    2
+ OpenMP threads       :    1
  ----------- GRID DIMENSIONS -------------------
  n_n                  :    1
  n_x                  :    4
@@ -73,6 +77,7 @@ INFO: nu_ii rescaled by: 0.000
  energy_max           :   6.000000
  dt                   :   0.200000
  --------------- LOCAL PARAMETERS ---------------
+  NOTE: use abs(SAFETY_FACTOR) as input
  # RADIUS [INPUT]     :   0.700000
  .RADIUS              :   0.700000
  .ASPECT_RATIO        :   1.650000
@@ -95,6 +100,8 @@ INFO: nu_ii rescaled by: 0.000
  .LAMBDA_DEBYE        :   0.000000
  .NU_EI               :   0.000000
  .NU_I_KROOK          :   0.000000
+ .IPCCW               :  -1.000000
+ .BTCCW               :  -1.000000
  # Ion  1
  .NI_OVER_NE          :   1.000000
  .TI_OVER_TE          :   1.000000
@@ -109,25 +116,28 @@ INFO: nu_ii rescaled by: 0.000
  (Z_ELECTRON)         :  -1.000000
  .BETAE_UNIT          :   0.017000
  .MU_ELECTRON         :  60.000000
+ --------------- TGLF PARAMETERS ---------------
+ Q_PRIME              :  16.163265
+ P_PRIME              :   0.011596
  -------- LOCAL PARAMETERS (diagnostic) ----------
  n_i*z_i - n_e:       :   0.000000
  r/R0                 :   0.424242
+ b_unit               :   1.000000
  beta_unit_norm       :   0.034000
  betai_unit           :   0.017000
  betae_unit_norm      :   0.017000
- beta_prime           :   0.068000
- omega_eb_0 (c_s/a)   :   0.000000
- * Note that f = f_sim exp(-i n omega_eb_0 t)
+ beta_*               :   0.068000
+ alpha_MHD            :   1.009800
+ omega_00 (c_s/a)     :   0.000000
+ * Note that f = f_sim exp(i n omega0[r0] t)
  -------- ALFVEN WAVE PARAMETERS (diagnostic) ----------
  (v_A/c_s)            :  10.845017
- Omega_A              :   1.095456
+ Omega_TAE            :   1.095456
+ Omega_A              :   2.190912
  ----------- UPWIND PARAMETERS -----------------
  radial_upwind        :   1.000000
  orbit_upwind         :   1.000000
- orbit_upwind (elec)  :   0.000000
- ----------- SOURCE PARAMETERS -----------------
- nu_source            :   0.100000
- n_source             :    1
+ orbit_upwind (elec)  :   1.000000
  ----------- RADIAL DOMAIN PARAMETERS ----------
  s_grid               :   0.880000
  box_multiplier       :   1.000000
@@ -149,32 +159,28 @@ INFO: nu_ii rescaled by: 0.000
  plot_filter          :   1.000000
  time_skip            :     5
  restart_data_skip    :    10
- ----------- COURANT PARAMETERS ----------------
- max(THETA COURANT)   :  23.253966
- max(D1 COURANT)      :   0.755937
- max(DR COURANT)      :   1.431419
- ----------- SETUP TIMING ----------------------
- Grid Setup           :   0.041612
- Build radial ops     :   0.015184
- Build advection ops  :   0.000000
- Build field matrices :   0.247905
-
- TOTAL SETUP          :   0.355276
- ------ CENTRAL WAVENUMBERS SIMULATED -----------
- n =    30   k_theta rho_s = 0.250 [0.250][0.250]
- min(k_x*rho_s)       :     1.382301
- max(k_x*rho_s)       :     1.382301
- ------------- CENTRAL BOX SIZE -----------------
- Lx/rho_s             :     4.545455
- Ly/rho_s             :    25.132741
- => dx/rho_s          :     1.136364
- ------------------------------------------------
- ---------- GYRO-OPERATOR BANDWIDTH -------------
+ ----------- STABILITY PARAMETERS ----------------
+ d/dtau Courant       :  23.241361
+   d/dr Courant       :   1.430858
+ -------- CENTRAL WAVENUMBERS SIMULATED -----------
+     (k_y = nq/r, rho = rho_sD_unit)
+ n =    30   k_y rho =  0.250 [ 0.250][ 0.250]
+  
+ min resolved k_x*rho_sD :  1.382301
+ max resolved k_x*rho_sD :  1.382301
+ --------------- CENTRAL BOX SIZE -----------------
+ abs(Lx/rho_sD)       :     4.545455
+ abs(Ly/rho_sD)       :    25.132741
+ => abs(dx/rho_sD)    :     1.136364
+ --------------------------------------------------
+ ------------ GYRO-OPERATOR BANDWIDTH -------------
  => EXACT BESSEL.
- ------------------------------------------------
+ --------------------------------------------------
+ Startup time         :   0.216035
+ --------------------------------------------------
  PLEASE SEE: 
-  - units.out for normalizing parameters
-  - alloc.out for memory usage
-  - efficiency.out for parallelization efficiency
-  - phase_space.out for velocity-space nodes and weights
+  - out.gyro.units for normalizing parameters
+  - out.gyro.memory for memory usage
+  - out.gyro.efficiency for parallelization efficiency
+  - out.gyro.phase_space for velocity-space nodes and weights
  STATUS: clean exit                                                                      
