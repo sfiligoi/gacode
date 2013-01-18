@@ -28,11 +28,10 @@ FC  = ftn -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules
 F77 = ftn
 
 # Compiler options/flags
+FOMP   = -fopenmp
 FMATH  = -fdefault-real-8 -fdefault-double-8
 FOPT   = -O3 
 FDEBUG = -Wall -fbacktrace -fbounds-check -O0 -Wextra -finit-real=nan -Wunderflow -ffpe-trap=invalid,zero,overflow -fbounds-check
-FOMP   = 
-FNOMP  = -fopenmp
 FHDF5 = -DHAVE_HDF5
 
 #FFTW and MUMPS

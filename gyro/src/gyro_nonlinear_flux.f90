@@ -20,6 +20,7 @@ subroutine gyro_nonlinear_flux
   use gyro_globals
   use gyro_pointers
   use math_constants
+  use ompdata
 
   !---------------------------------------------------
   implicit none
@@ -36,8 +37,11 @@ subroutine gyro_nonlinear_flux
 
 
   moment(:,:,:,:,:) = 0.0
+
   excparts(:,:)     = 0.0
   momparts(:,:)     = 0.0
+
+!$omp parallel private(exctemp,momtemp,p_nek_loc,ie,k,ck) reduction(+:momparts,excparts)
   exctemp(:)        = 0.0
   momtemp(:)        = 0.0
 
@@ -53,16 +57,16 @@ subroutine gyro_nonlinear_flux
 
      do m=1,n_stack
 
-        cap_h(:,:) = h_cap(m,:,p_nek_loc,:)
+        cap_h(ibeg:iend,:) = h_cap(m,ibeg:iend,p_nek_loc,:)
 
         !-----------------------------------------------------
         ! Compute basic fluxes
         !
-        ikrho(:) = i_c*krho_i(in_1,:)
+        ikrho(ibeg:iend) = i_c*krho_i(in_1,ibeg:iend)
         !
         do ix=1,n_field
            do is=1,n_kinetic
-              do i=1,n_x
+              do i = ibeg, iend
 
                  ! Keep running total of moment over p_nek_loc and m:
 
@@ -117,7 +121,7 @@ subroutine gyro_nonlinear_flux
                  moment(i,is,ix,4,ck) = moment(i,is,ix,4,ck)+0.5*sum(exctemp(:))
 
                  ! Exchange breakdown (sum over i, ix, ck):
-                 !  Use symmetric form (average of 4a,4b)
+
                  excparts(is,:) = excparts(is,:)+exctemp(:)/n_x 
 
               enddo ! i
@@ -128,6 +132,7 @@ subroutine gyro_nonlinear_flux
      enddo ! m
 
   enddo ! p_nek
+!$omp end parallel
 
   !----------------------------------------------------------------------
   ! ALLREDUCE to obtain full velocity-space sums.  The nonlinear

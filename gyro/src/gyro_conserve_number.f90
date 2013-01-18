@@ -12,6 +12,7 @@ subroutine gyro_conserve_number
   use mpi
   use gyro_globals
   use gyro_pointers
+  use ompdata
 
   !---------------------------------------------------
   implicit none
@@ -23,10 +24,11 @@ subroutine gyro_conserve_number
   !----------------------------------------------------
   ! Now, compute blending projections:
   !
-  vel_sum_loc(:,:) = (0.0,0.0)
   !
+!$omp parallel private(p_nek_loc,ie,k,ck,m0)
+  vel_sum_loc(:,ibeg:iend) = (0.0,0.0)
+
   p_nek_loc = 0
-  !
   do p_nek=1+i_proc_1,n_nek_1,n_proc_1
 
      p_nek_loc = p_nek_loc+1
@@ -36,7 +38,8 @@ subroutine gyro_conserve_number
 
      ck = class(k)
 
-     do i=1,n_x
+     do i = ibeg, iend
+
 
         do m=1,n_stack
 
@@ -55,6 +58,7 @@ subroutine gyro_conserve_number
      enddo ! i
 
   enddo ! p_nek_loc
+!$omp end parallel
   !--------------------------------------------------------------
 
   call MPI_ALLREDUCE(vel_sum_loc,&
@@ -68,6 +72,7 @@ subroutine gyro_conserve_number
   !---------------------------------------------------
   ! Solve for blending coefficients
   !
+!$omp parallel do private(info) schedule(static)
   do i=1,n_x
 
      call ZGETRS('N',&
@@ -87,6 +92,7 @@ subroutine gyro_conserve_number
   !---------------------------------------------------
   ! Correct distribution
   !
+!$omp parallel private(p_nek_loc,ie,k,ck,m0,is)
   p_nek_loc = 0
   do p_nek=1+i_proc_1,n_nek_1,n_proc_1
 
@@ -97,7 +103,7 @@ subroutine gyro_conserve_number
 
      ck = class(k)
 
-     do i=1,n_x
+     do i = ibeg, iend
 
         do m=1,n_stack
 
@@ -113,5 +119,6 @@ subroutine gyro_conserve_number
      enddo ! i
 
   enddo ! p_nek_loc
+!$omp end parallel
 
 end subroutine gyro_conserve_number

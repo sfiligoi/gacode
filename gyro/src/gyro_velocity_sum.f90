@@ -10,6 +10,7 @@ subroutine gyro_velocity_sum(field)
   use mpi
   use gyro_globals
   use gyro_pointers
+  use ompdata
 
   !---------------------------------------------------
   implicit none
@@ -25,7 +26,8 @@ subroutine gyro_velocity_sum(field)
   !----------------------------------------------------
   ! Now, compute blending projections:
   !
-  sum_loc(:,:) = (0.0,0.0)
+!$omp parallel private(p_nek_loc,k,ck,gz,m0)
+  sum_loc(:,ibeg:iend) = (0.0,0.0)
   !
   select case (field)
 
@@ -34,17 +36,15 @@ subroutine gyro_velocity_sum(field)
      ! Phi
      !
      ! sum_s FV[(F*_j) z_s*<hi>]
+     p_nek_loc = 0
+     do p_nek=1+i_proc_1,n_nek_1,n_proc_1
 
-!$omp parallel do default(shared) private(p_nek_loc,p_nek,k,ck,gz,m,m0,j,is)
-     do i=1,n_x
+        p_nek_loc = p_nek_loc+1
 
-        p_nek_loc = 0
-        do p_nek=1+i_proc_1,n_nek_1,n_proc_1
+        k  = nek_k(p_nek)   
+        ck = class(k)
 
-           p_nek_loc = p_nek_loc+1
-
-           k  = nek_k(p_nek)   
-           ck = class(k)
+        do i = ibeg, iend
 
            gz(:) = (0.0,0.0)
            do is=1,n_kinetic
@@ -58,10 +58,9 @@ subroutine gyro_velocity_sum(field)
                       cs_blend(j,m0,i,p_nek_loc)
               enddo
            enddo ! m
-        enddo ! p_nek_loc
+        enddo 
 
-     enddo ! i
-!$omp end parallel do
+     enddo 
 
   case (2)
 
@@ -69,17 +68,16 @@ subroutine gyro_velocity_sum(field)
      !
      ! sum_s FV[(F*_j) z_s*v_s*<h_s>]
 
-!$omp parallel do default(shared) private(p_nek_loc,p_nek,ie,k,ck,gz,m,m0,j,is)
-     do i=1,n_x
+     p_nek_loc = 0
+     do p_nek=1+i_proc_1,n_nek_1,n_proc_1
 
-        p_nek_loc = 0
-        do p_nek=1+i_proc_1,n_nek_1,n_proc_1
+        p_nek_loc = p_nek_loc+1
 
-           p_nek_loc = p_nek_loc+1
+        ie = nek_e(p_nek)  
+        k  = nek_k(p_nek)   
+        ck = class(k)
 
-           ie = nek_e(p_nek)  
-           k  = nek_k(p_nek)   
-           ck = class(k)
+        do i = ibeg, iend
 
            gz(:) = (0.0,0.0)
            do is=1,n_kinetic
@@ -94,10 +92,9 @@ subroutine gyro_velocity_sum(field)
                       cs_blend(j,m0,i,p_nek_loc)
               enddo
            enddo ! m
-        enddo ! p_nek_loc
+        enddo 
 
-     enddo ! i
-!$omp end parallel do
+     enddo
 
   case (3)
 
@@ -105,17 +102,16 @@ subroutine gyro_velocity_sum(field)
      !
      ! sum_s FV[(F*_j) G_perp(hi)*(-T_s*ene*lambda)]
 
-!$omp parallel do default(shared) private(p_nek_loc,p_nek,ie,k,ck,gz,m,m0,j,is)
-     do i=1,n_x
+     p_nek_loc = 0
+     do p_nek=1+i_proc_1,n_nek_1,n_proc_1
 
-        p_nek_loc = 0
-        do p_nek=1+i_proc_1,n_nek_1,n_proc_1
+        p_nek_loc = p_nek_loc+1
 
-           p_nek_loc = p_nek_loc+1
+        ie = nek_e(p_nek)  
+        k  = nek_k(p_nek)   
+        ck = class(k)
 
-           ie = nek_e(p_nek)  
-           k  = nek_k(p_nek)   
-           ck = class(k)
+        do i = ibeg, iend
 
            gz(:) = (0.0,0.0)
            do is=1,n_kinetic 
@@ -131,12 +127,12 @@ subroutine gyro_velocity_sum(field)
               enddo
            enddo ! m
 
-        enddo ! p_nek_loc
+        enddo 
 
-     enddo ! i
-!$omp end parallel do
+     enddo 
 
   end select
+!$omp end parallel 
 
   !--------------------------------------------------------------
 

@@ -23,38 +23,31 @@ subroutine rTRANSP_DO(g,gT)
 
   implicit none
 
-  complex, intent(in), dimension(n_k,n_ij_loc) :: g
-  complex, intent(inout), dimension(n_j,n_ki_loc) :: gT
-
+  complex, intent(in), dimension(n_m,n_k,n_ij_loc) :: g
+  complex, intent(inout), dimension(n_m,n_j,n_ki_loc) :: gT
 
   ! Sort g into packages to be sent to each
   ! processor: q_send(:,i_recv)
 
-  s = 0
+  s(:) = 0
   p_ij_loc = 0
   do p_ij=1+i_proc,n_ij,n_proc
-
      i = i_ij(p_ij)
      p_ij_loc = p_ij_loc+1
-
      do k=1,n_k
-
         i_recv    = i_rc(k,i)
         s(i_recv) = s(i_recv)+1
-
-        q_send(s(i_recv),i_recv) = g(k,p_ij_loc)
-
+        q_send(:,s(i_recv),i_recv) = g(:,k,p_ij_loc)
      enddo ! k
-
   enddo ! p_ij
 
   ! Do all-to-all exchange of q_send into q_recv
 
   call MPI_ALLTOALL(q_send, &
-       s_dim, &
+       s_dim*n_m, &
        MPI_DOUBLE_COMPLEX, &
        q_recv, &
-       s_dim, &
+       s_dim*n_m, &
        MPI_DOUBLE_COMPLEX, &
        TRANSP_COMM, &
        i_err)
@@ -66,7 +59,7 @@ subroutine rTRANSP_DO(g,gT)
      do s0=1,s_dim
         j = j_map(s0,i_from)
         p_ki_loc = p_ki_loc_map(s0,i_from)
-        if (p_ki_loc > 0) gT(j,p_ki_loc) = q_recv(s0,i_from)
+        if (p_ki_loc > 0) gT(:,j,p_ki_loc) = q_recv(:,s0,i_from)
      enddo
   enddo
 

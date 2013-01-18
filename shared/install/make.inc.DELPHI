@@ -4,17 +4,13 @@
 # (even in your .login file on VENUS)
 #---------------------------------------------------
 
-# Compilers and flags
-
+FC	= $(F77) -module $(GACODE_ROOT)/modules -mp
 F77	= mpif90
-FC	= $(F77) -module $(GACODE_ROOT)/modules
 
 FMATH	= -r8 
 FOPT	= -fastsse
 FDEBUG	= -g -Ktrap=fp -Mbounds -Minform,inform
 FBOUND	= -Minform,inform -Mbounds
-FOMP    = -mp
-FNOMP   = 
 
 # System math libraries
 

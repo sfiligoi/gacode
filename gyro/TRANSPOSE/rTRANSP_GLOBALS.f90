@@ -14,6 +14,7 @@ module rTRANSP_GLOBALS
   integer :: n_i
   integer :: n_j
   integer :: n_k
+  integer :: n_m
 
   integer :: n_ij
   integer :: n_ki
@@ -29,8 +30,8 @@ module rTRANSP_GLOBALS
   integer :: i_recv
   integer :: i_from
 
-  complex, dimension(:,:), allocatable :: q_send
-  complex, dimension(:,:), allocatable :: q_recv
+  complex, dimension(:,:,:), allocatable :: q_send
+  complex, dimension(:,:,:), allocatable :: q_recv
 
   integer, dimension(:), allocatable :: s
 

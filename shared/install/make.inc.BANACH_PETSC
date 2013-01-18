@@ -9,6 +9,7 @@ include ${SLEPC_DIR}/bmake/slepc_common_variables
 FC	= mpif90 ${FC_LINKER_FLAGS} -I $(GACODE_ROOT)/modules ${FC_INCLUDES}
 F77	= mpif90
 
+FOMP    = -fopenmp
 FMATH	= -fdefault-real-8 -M $(GACODE_ROOT)/modules
 FOPT	= -march=native -mfpmath=sse -fomit-frame-pointer -O3
 FDEBUG	= -O -Wall -Wunderflow -W -Wuninitialized -fbounds-check -ffpe-trap=invalid,zero,overflow

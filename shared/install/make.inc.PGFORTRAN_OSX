@@ -14,8 +14,6 @@ HDF5_PATH=/Users/srinath/software/hdf5-1.8.8-par-pgfort
 NETCDF_PATH=/Users/srinath/software/netcdf-4.1.2-par-pgfort
 MF90 = /Users/srinath/software/openmpi-1.6-pgfortran/bin/mpif90
 
-
-
 # Compilers and flags
 #
 #set up for diff mpif90s
@@ -24,12 +22,10 @@ MF90 = /Users/srinath/software/openmpi-1.6-pgfortran/bin/mpif90
 FC	= ${MF90} -I$(GACODE_ROOT)/modules -module $(GACODE_ROOT)/modules -g 
 F77	= ${MF90} -g 
 
+FOMP	= -mp=nonuma
 FMATH	= -r8
 FOPT	= -fast -Mcache_align  
 FDEBUG	= -gopt -Mchkfpstk -Mchkptr -Mchkstk -Mdwarf2 -Mnodwarf -traceback
-FBOUND	= -Mbounds 
-FPROF	= 
-FOMP	= mp=nonuma
 FHDF5 = -DHAVE_HDF5
 
 # System math libraries

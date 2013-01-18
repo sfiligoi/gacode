@@ -13,11 +13,10 @@ NUMAS_PER_NODE=1
 FC	= ftn ${FC_LINKER_FLAGS} -module ${GACODE_ROOT}/modules ${FC_INCLUDES}
 F77	= ftn
 
+FOMP   = -mp=nonuma
 FMATH  = -r8 
 FOPT   = -fast -Mipa=safe 
 FDEBUG = -Ktrap=fp -Mbounds -Minfo=all 
-FOMP   = -mp=nonuma
-FNOMP  = 
 
 # System math libraries
 

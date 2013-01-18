@@ -1,5 +1,5 @@
 #---------------------------------------------------
-# Cray XT5 (jaguarpf.ccs.ornl.gov)
+# LINDGREN (Swedish XE6)
 #---------------------------------------------------
 
 # Compilers and flags
@@ -11,10 +11,10 @@ FC  = ftn -module $(GACODE_ROOT)/modules
 F77 = ftn
 
 # Compiler options/flags
+FOMP   = 
 FMATH  = -r8
 FOPT   =
 FDEBUG = 
-FPROF  = 
 
 # Execute 'module load fftw/2.1.5'
 # Execute 'module load mumps/4.7.3_par' (parallel version) 

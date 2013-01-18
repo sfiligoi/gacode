@@ -11,23 +11,22 @@ subroutine gyro_get_he_implicit
   use gyro_globals
   use gyro_pointers
   use math_constants
+  use ompdata
 
   !---------------------------
   implicit none
   complex :: temp
   !---------------------------
 
-
+!$omp parallel private(p_nek_loc,temp)
   if (n_field == 1) then
 
      ! ELECTROSTATIC
-
      p_nek_loc = 0
      do p_nek=1+i_proc_1,n_nek_1,n_proc_1
         p_nek_loc = p_nek_loc+1
 
-!$omp parallel do default(shared) private(m,j,temp)
-        do i=1,n_x
+        do i = ibeg, iend
            do m=1,n_stack
               temp = 0.0
               do j=1,n_blend
@@ -38,20 +37,17 @@ subroutine gyro_get_he_implicit
                    alpha_s(n_spec,i)*temp
            enddo ! m
         enddo ! i
-!$omp end parallel do
 
      enddo ! p_nek_loc
 
   else if (n_field == 2) then
 
      ! ELECTROMAGNETIC -- A_parallel only
-
      p_nek_loc = 0
      do p_nek=1+i_proc_1,n_nek_1,n_proc_1
         p_nek_loc = p_nek_loc+1
 
-!$omp parallel do default(shared) private(m,j,temp)
-        do i=1,n_x           
+        do i = ibeg, iend    
            do m=1,n_stack
               temp = 0.0
               do j=1,n_blend
@@ -63,7 +59,6 @@ subroutine gyro_get_he_implicit
               h(m,i,p_nek_loc,n_spec) = h(m,i,p_nek_loc,n_spec)+alpha_s(n_spec,i)*temp 
            enddo ! m
         enddo ! i
-!$omp end parallel do
 
      enddo ! p_nek_loc
 
@@ -71,13 +66,11 @@ subroutine gyro_get_he_implicit
 
      ! ELECTROMAGNETIC -- A_parallel and B_parallel
 
-
      p_nek_loc = 0
      do p_nek=1+i_proc_1,n_nek_1,n_proc_1
         p_nek_loc = p_nek_loc+1
 
-!$omp parallel do default(shared) private(m,j,temp)
-        do i=1,n_x
+        do i = ibeg, iend
            do m=1,n_stack 
               temp = 0.0
               do j=1,n_blend
@@ -93,12 +86,11 @@ subroutine gyro_get_he_implicit
               h(m,i,p_nek_loc,n_spec) = h(m,i,p_nek_loc,n_spec)+alpha_s(n_spec,i)*temp 
            enddo ! m
         enddo ! i
-!$omp end parallel do
 
      enddo ! p_nek_loc
 
   endif
-
+!$omp end parallel
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[gyro_get_he_implicit done]'

@@ -6,11 +6,7 @@ else
    FFLAGS=${FOPT}
 endif
 
-ifeq ($(OMP),true)
-   FC += ${FOMP}
-else
-   FC += ${FNOMP}
-endif
+FC += ${FOMP}
 
 ifeq ($(ACC),true)
    FC += ${FACC}

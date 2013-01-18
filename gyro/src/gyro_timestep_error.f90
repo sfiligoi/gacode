@@ -10,6 +10,7 @@ subroutine gyro_timestep_error
   use mpi
   use gyro_globals
   use gyro_pointers
+  use ompdata
 
   !---------------------------------------------------
   implicit none
@@ -17,22 +18,22 @@ subroutine gyro_timestep_error
   real :: rk_error_loc(n_kinetic,2)
   real :: rk_error(n_kinetic,2)
   real :: tol = 1e-20
+  real :: err1, err2
   !---------------------------------------------------
-
   rk_error_loc(:,:) = 0.0
 
+!$omp parallel reduction(+:rk_error_loc)
   do is=1,n_kinetic
      do p_nek_loc=1,n_nek_loc_1
-        do i=1,n_x
+        do i = ibeg, iend
            do m=1,n_stack
-              rk_error_loc(is,1) = rk_error_loc(is,1)+&
-                   abs(h_err(m,i,p_nek_loc,is))
-              rk_error_loc(is,2) = rk_error_loc(is,2)+&
-                   abs(h(m,i,p_nek_loc,is))
+              rk_error_loc(is,1) = rk_error_loc(is,1) + abs(h_err(m,i,p_nek_loc,is))
+              rk_error_loc(is,2) = rk_error_loc(is,2) + abs(h(m,i,p_nek_loc,is))
            enddo
         enddo
      enddo
   enddo
+!$omp end parallel
 
   call MPI_ALLREDUCE(rk_error_loc,&
        rk_error,&

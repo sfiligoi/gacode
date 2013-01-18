@@ -7,12 +7,11 @@
 FC	= mpif90 --mod $(GACODE_ROOT)/modules
 F77	= mpif90
 
+FOMP    = --openmp
 FMATH	= --dbl
 #FOPT	= --tpp --nap --nchk --ng -O --npca --nsav --ntrace
 FOPT	= --tpp --nap --nchk -O --npca --nsav --ntrace
 FDEBUG	= --ap --chk --co --f95 -g --lst --pca --sav --trace --warn --xref
-FBOUND	= 
-FPROF	= 
 
 # System math libraries
 

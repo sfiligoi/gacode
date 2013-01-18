@@ -30,10 +30,10 @@ subroutine gyro_collision_kernel(ic)
      i  = ine_i(p_ine)
      ie = ine_e(p_ine)
 
-     p = 0
+!$omp parallel do private(p) schedule(static)
      do k=1,n_lambda
         do m=1,n_stack
-           p = p+1
+           p = m + (k - 1)*n_stack
            cphase(p) = exp(i_c*angp(i)*theta_t(i,k,m))
            fc(p) = h_C(m,k,p_ine_loc)*cphase(p)
         enddo
@@ -42,20 +42,19 @@ subroutine gyro_collision_kernel(ic)
      !----------------------------------------------- 
      ! This is essentially the full collision advance
      !
-!$omp parallel do default(shared) private(pp)
+!$omp parallel do default(shared) private(pp) schedule(static)
      do p=1,n_rbf
         fcp(p) = 0.0
         do pp=1,n_rbf
            fcp(p) = fcp(p)+d_rbf(pp,p,p_ine_loc,ic)*fc(pp)
         enddo
      enddo
-!$omp end parallel do
      !----------------------------------------------- 
 
-     p = 0
+!$omp parallel do private(p) schedule(static)
      do k=1,n_lambda
         do m=1,n_stack
-           p = p+1
+           p = m + (k - 1)*n_stack
            h_C(m,k,p_ine_loc) = fcp(p)/cphase(p)
         enddo
      enddo

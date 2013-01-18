@@ -11,11 +11,10 @@ FC  = ftn -module $(GACODE_ROOT)/modules
 F77 = ftn
 
 # Compiler options/flags
+FOMP   = -mp=nonuma
 FMATH  = -r8
 FOPT   = -fast -Mcache_align -Msmartalloc 
 FDEBUG = -Ktrap=fp -Mbounds -Minform=inform -Msmartalloc
-FOMP   = -mp=nonuma
-FNOMP  =
 
 #FFTW and MUMPS
 LMATH = -ldrfftw -ldfftw ${MUMPS_PATH} -lzmumps -lpord

@@ -37,10 +37,10 @@ subroutine fSSUB(x_IN,xt)
   !-------------------------------------------------------
 
 
-  s = 0
+!$omp parallel do private(s) schedule(static)
   do j=1,nj
      do p=1,nv2
-        s = s+1 
+        s = p + (j - 1)*nv2
         x(:,s) = x_IN(j,:,p)
      enddo
   enddo
@@ -49,10 +49,10 @@ subroutine fSSUB(x_IN,xt)
      x(:,s) = (0.0,0.0)
   enddo
 
-  call MPI_ALLTOALL(x(:,:), &
+  call MPI_ALLTOALL(x, &
        nv1*jsplit, &
        MPI_DOUBLE_COMPLEX, &
-       xt(:,:,:), &
+       xt, &
        nv1*jsplit, &
        MPI_DOUBLE_COMPLEX, &
        SSUB_COMM, &

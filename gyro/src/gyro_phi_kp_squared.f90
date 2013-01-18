@@ -16,6 +16,7 @@ subroutine gyro_phi_kp_squared
   use gyro_globals
   use gyro_pointers
   use math_constants
+  use ompdata
 
   !---------------------------------------------------
   implicit none
@@ -26,8 +27,8 @@ subroutine gyro_phi_kp_squared
   complex :: inqr
   real :: k_perp_squared_loc(1)
   !
-  complex, dimension(i1_buffer:i2_buffer) :: k0phi
-  complex, dimension(i1_buffer:i2_buffer) :: k2phi
+  complex, dimension(i1_buffer:i2_buffer,n_stack) :: k0phi
+  complex k2phi
   !
   real, dimension(n_field) :: ave_phi_0_loc
   real, dimension(n_field) :: ave_phi_n_loc
@@ -35,8 +36,8 @@ subroutine gyro_phi_kp_squared
   real, dimension(n_field) :: ave_phi_n
   !--------------------------------------------------  
 
-
-  moment(:,:) = 0.0
+!$omp parallel private(p_nek_loc,ie,k,k2phi,inqr,ip)
+  moment(ibeg:iend,:) = 0.0
 
   !-----------------------------------------------------------
   p_nek_loc = 0
@@ -47,39 +48,39 @@ subroutine gyro_phi_kp_squared
      ie = nek_e(p_nek) 
      k  = nek_k(p_nek)
 
-     ck = class(k)
-
+!$omp barrier
+!$omp single
      do m=1,n_stack
-
-        m0 = m_phys(ck,m)
-
-        k2phi(:) = 0.0
-        k0phi(:) = 0.0
-        k0phi(1:n_x) = field_tau(m,:,p_nek_loc,1)
+        k0phi(i1_buffer:0,m)     = 0.0
+        k0phi(1:n_x,m)           = field_tau(m,:,p_nek_loc,1)
+        k0phi(n_x+1:i2_buffer,m) = 0.0
+     end do
+!$omp end single
+!$omp barrier  ! ensure all k0phi values are available
 
         ! k_perp^2 phi
 
-        do i=1,n_x
+     do i = ibeg, iend
+        do m=1,n_stack
+           k2phi = 0.0
            inqr = i_c*n_1(in_1)*q_s(i)/r_s(i) 
            do i_diff=-m_dx,m_dx-i_dx
               ip = i+i_diff
-              k2phi(i) = k2phi(i)-(inqr**2*qrat_t(i,k,m)**2* &
+              k2phi = k2phi-(inqr**2*qrat_t(i,k,m)**2* &
                    (1.0+captheta_t(i,k,m)**2)*w_d0(i_diff)+ &
                    2.0*inqr*qrat_t(i,k,m)*captheta_t(i,k,m)* &
                    grad_r_t(i,k,m)*dr_eodr(i)*w_d1(i_diff)+ &
                    (grad_r_t(i,k,m)*dr_eodr(i))**2*w_d2(i_diff))*&
-                   k0phi(i_loop(ip))
+                   k0phi(i_loop(ip),m)
            enddo
+
+           moment(i,1) = moment(i,1)+w_p(ie,i,k,1)*k0phi(i,m)*conjg(k0phi(i,m))
+           moment(i,2) = moment(i,2)+w_p(ie,i,k,1)*k2phi*conjg(k0phi(i,m))
         enddo
-
-        do i=1,n_x
-           moment(i,1) = moment(i,1)+w_p(ie,i,k,1)*k0phi(i)*conjg(k0phi(i))
-           moment(i,2) = moment(i,2)+w_p(ie,i,k,1)*k2phi(i)*conjg(k0phi(i))
-        enddo ! i
-
-     enddo ! m
+     enddo
 
   enddo ! p_nek
+!$omp end parallel
   !
   !------------------------------------------------------------
 

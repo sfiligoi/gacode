@@ -16,6 +16,7 @@ subroutine gyro_tau_derivative
 
   use gyro_globals
   use gyro_pointers
+  use ompdata
 
   !---------------------------------------
   implicit none
@@ -40,10 +41,9 @@ subroutine gyro_tau_derivative
   complex :: temp2
   !---------------------------------------
 
-  rhs_dt = 0.0
-
   ! We should be calling this for gyrokinetic species only
 
+!$omp parallel private(upwind,p_nek_loc,ie,k,ck,p,mff,mf,mc,mb,mbb,pff,pf,pc,pb,pbb,temp1,temp2)
   do is=1,n_gk
 
      ! q has sign ipccw*btccw, but upwind dissipation must have 
@@ -60,13 +60,15 @@ subroutine gyro_tau_derivative
 
         ck = class(k)
 
-        do i=1,n_x
+        do i = ibeg, iend
 
            fh0(i,:) = h(:,i,p_nek_loc,is) 
            fh(i,:)  = fh0(i,:)+ &
                 z(is)*alpha_s(is,i)*gyro_u(:,i,p_nek_loc,is)
 
            v0(i) = mu(is)*sqrt(tem_s(is,i))*v_theta(i,ie,k,is)/d_tau(ck)
+
+           RHS_dt(:,i,p_nek_loc,is) = 0.0
 
            do m=1,n_stack
 
@@ -99,19 +101,20 @@ subroutine gyro_tau_derivative
               !------------------------------------------------
               ! Entropy tracking:
               !
-              rhs_dt(m,i,p_nek_loc,is) =  rhs_dt(m,i,p_nek_loc,is) &
+              RHS_dt(m,i,p_nek_loc,is) =  RHS_dt(m,i,p_nek_loc,is) &
                    +real(v0(i)*(-upwind*temp2)*conjg(fh(i,m)))
               !------------------------------------------------
 
-              rhs(m,i,p_nek_loc,is) = rhs(m,i,p_nek_loc,is)+ &
+              RHS(m,i,p_nek_loc,is) = RHS(m,i,p_nek_loc,is)+ &
                    v0(i)*(sigma_tau(ck,p)*temp1-upwind*temp2)
 
-           enddo ! i
+           enddo ! m
 
-        enddo ! m
+        enddo ! i
 
      enddo ! p_nek
 
   enddo ! is
+!$omp end parallel
 
 end subroutine gyro_tau_derivative

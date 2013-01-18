@@ -8,7 +8,7 @@
 !  Communication routine originally used in old GYRO.
 !-----------------------------------------------------
 
-subroutine fTRANSP_INIT(n0_i,n0_j,n0_k,COMM)
+subroutine fTRANSP_INIT(n0_i,n0_j,n0_k,n0_m,COMM)
 
   use mpi
   use fTRANSP_GLOBALS
@@ -18,6 +18,7 @@ subroutine fTRANSP_INIT(n0_i,n0_j,n0_k,COMM)
   integer, intent(in) :: n0_i
   integer, intent(in) :: n0_j
   integer, intent(in) :: n0_k
+  integer, intent(in) :: n0_m
   integer, intent(in) :: COMM
 
   integer, external :: parallel_dim
@@ -45,6 +46,7 @@ subroutine fTRANSP_INIT(n0_i,n0_j,n0_k,COMM)
   n_i = n0_i
   n_j = n0_j
   n_k = n0_k
+  n_m = n0_m
 
   n_ij = n_i*n_j
   n_jk = n_j*n_k
@@ -109,8 +111,8 @@ subroutine fTRANSP_INIT(n0_i,n0_j,n0_k,COMM)
   ! Allocate send and receive package arrays
   ! (deallocated in TRANSP_CLEANUP)
   !
-  allocate(q_send(s_dim,0:n_proc-1))
-  allocate(q_recv(s_dim,0:n_proc-1))
+  allocate(q_send(n_m,s_dim,0:n_proc-1))
+  allocate(q_recv(n_m,s_dim,0:n_proc-1))
   !
   !-----------------------------------------
 

@@ -14,6 +14,7 @@ subroutine gyro_field_time_derivative
   use mpi
   use gyro_globals
   use math_constants
+  use ompdata
 
   !---------------------------------------------------
   implicit none
@@ -21,9 +22,9 @@ subroutine gyro_field_time_derivative
   real :: minus_n_omega
   !---------------------------------------------------
 
-
+!$omp parallel private(minus_n_omega)
   do is=1,n_kinetic
-     do i=1,n_x
+     do i = ibeg, iend
         do m=1,n_stack
 
            h_cap(m,i,:,is) = h(m,i,:,is) &
@@ -34,7 +35,7 @@ subroutine gyro_field_time_derivative
   enddo ! is
 
 
-  do i=1,n_x   
+  do i = ibeg, iend
 
      ! Use 3-point rule for time derivative
 
@@ -55,6 +56,7 @@ subroutine gyro_field_time_derivative
           +i_c*minus_n_omega*h_cap(:,i,:,:)
 
   enddo
+!$omp end parallel
 
   if (i_proc == 0 .and. debug_flag == 1) then
      print *,'[gyro_field_time_derivative called]'

@@ -8,12 +8,11 @@
 FC	= mpif90 -I $(GACODE_ROOT)/modules
 F77	= mpif90
 
+FOMP    = -fopenmp
 FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules
 FOPT	= -O3
 FDEBUG	= -Wall -fcheck=all -fbacktrace -O -Wall -Wunderflow -W -finit-real=nan -fbounds-check -ffpe-trap=invalid,zero,overflow
-FOMP    = -fopenmp
-FNOMP   = 
-FHDF5 = -DHAVE_HDF5
+FHDF5   = -DHAVE_HDF5
 
 # System math libraries (from Ubuntu repository)
 

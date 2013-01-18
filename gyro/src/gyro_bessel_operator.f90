@@ -71,7 +71,6 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
   case (1)
 
      ! J_0
-
      do p=-p0,p0-1
         x = rho*sqrt((pi_2*p*a+u)**2+v**2)
         func(p)=BESJ0(x)/n_x
@@ -80,7 +79,6 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
   case (2)
 
      ! J_0^2
-
      do p=-p0,p0-1
         x = rho*sqrt((pi_2*p*a+u)**2+v**2)
         func(p)=BESJ0(x)**2/n_x
@@ -91,7 +89,6 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
      ! -(i/2)*k_x*rho*[ J_0(z)+J_2(z) ]
 
      ! The factor -(i/2) will be applied outside this loop
-
      do p=-p0,p0-1
         x = rho*sqrt((pi_2*p*a+u)**2+v**2)
         call RJBESL(x,0.0,3,bessel,ierr)
@@ -101,7 +98,6 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
   case (4)
 
      ! G = (1/2)*[ J_0(z)+J_2(z) ] 
-
      do p=-p0,p0-1
         x = rho*sqrt((pi_2*p*a+u)**2+v**2)
         call RJBESL(x,0.0,3,bessel,ierr)
@@ -111,7 +107,6 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
   case (5)
 
      ! G^2 
-
      do p=-p0,p0-1
         x = rho*sqrt((pi_2*p*a+u)**2+v**2)
         call RJBESL(x,0.0,3,bessel,ierr)
@@ -121,7 +116,6 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
   case (6)
 
      ! G * J_0
-
      do p=-p0,p0-1
         x = rho*sqrt((pi_2*p*a+u)**2+v**2)
         call RJBESL(x,0.0,3,bessel,ierr)
@@ -131,7 +125,6 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
   case (7)
 
      ! I_0
-
      do p=-p0,p0-1
         x = rho*sqrt((pi_2*p*a+u)**2+v**2)
         func(p) = BESEI0(x*x)/n_x
@@ -145,6 +138,7 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
   !  Construct real-space forms by summing over Fourier modes.
   !  Real-space gridpoints in truncated region are ignored.
   !
+!$omp parallel do private(g0) schedule(static)
   do m=-m_gyro,m_gyro-i_gyro
      g0 = (0.0,0.0)
      do p=-p0,p0-1

@@ -7,6 +7,7 @@
 FC  = mpif90 ${FC_LINKER_FLAGS} -module $(GACODE_ROOT)/modules ${FC_INCLUDES}
 F77 = mpif90
 
+FOMP   = -mp
 FMATH  = -r8 
 FOPT   = -fast  
 FDEBUG = -g -Ktrap=fp -Mbounds -Minform,inform

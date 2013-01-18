@@ -10,7 +10,7 @@ subroutine gyro_init(path_in, mpi_comm_in)
   use mpi
   use gyro_globals
   use gyro_interface
-  use omp_lib
+  use ompdata
 
   implicit none
 
@@ -20,6 +20,8 @@ subroutine gyro_init(path_in, mpi_comm_in)
 
   ! Local variable
   logical :: inputdat_flag
+
+  integer, external :: omp_get_max_threads
 
   ! Set appropriate global variables
   path = path_in
@@ -66,6 +68,9 @@ subroutine gyro_init(path_in, mpi_comm_in)
      ! Only call read_input subroutine if input.gyro.gen file exists
 
      call gyro_read_input
+
+     ! initialize OpenMP parameters including block indices
+     call gyro_init_ompdata()
 
      ! Map GLOBAL variables -> INTERFACE parameters
      call map_global2interface

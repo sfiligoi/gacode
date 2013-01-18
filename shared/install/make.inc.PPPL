@@ -10,11 +10,10 @@
 FC	= mpif90 -mod $(GACODE_ROOT)/modules -I $(GACODE_ROOT)/modules
 F77	= mpif90
 
+FOMP    = -openmp
 FMATH	= -r8
 FOPT	= -vec-report0 -shared-intel
 FDEBUG	= -warn all -shared-intel -check all -g
-FOMP    = -openmp
-FNOMP   =
 
 # Need the following modules, in this order:
 # module load intel

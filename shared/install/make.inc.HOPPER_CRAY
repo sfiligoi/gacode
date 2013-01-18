@@ -23,43 +23,23 @@ include ${SLEPC_DIR}/conf/slepc_common_variables
 
 # Compilers and flags
 
-FC     = ftn ${FC_LINKER_FLAGS} -module ${GACODE_ROOT}/modules ${FC_INCLUDES}
+FC     = ftn -e m -J ${GACODE_ROOT}/modules
 F77    = ftn
 
-FOMP   = -mp=nonuma
-FMATH  = -r8 
-FOPT   = -fast -Mipa=safe 
-FDEBUG = -Ktrap=fp -Mbounds -Minfo=all 
-FHDF5 = -DHAVE_HDF5
+FOMP   = 
+FMATH  = -s real64
+FOPT   = -O3 -hfp3 
+FDEBUG = -R bc 
+FPETSC = ${FC_LINKER_FLAGS} ${FC_INCLUDES}
 
 # System math libraries
 
-LMATH = -L${FFTW_DIR} -ldrfftw -L${FFTW_DIR} -ldfftw \
-        -L${SLEPC_LIB}
+LMATH = -ldrfftw -ldfftw ${SLEPC_LIB}
 
 # OPTIONAL: netCDF (for gyro2gkv)
-NETCDF = ${NETCDF_DIR}/lib/libnetcdf.a
+NETCDF = ${NETCDF_DIR}/lib/libnetcdf.a {NETCDF_DIR}/lib/libnetcdf.a
 NETCDF_INC = ${NETCDF_DIR}/include
 
 # Archive 
 ARCH = ar cr
-
-# OPTIONAL: HDF5 (for vshdf5)
-# Even though our use of HDF5 is essentially serial, using the parallel
-# version makes some things easier.
-# Set these to blanks to turn off:
-
-#HDF5_LIBS = -L/contrib/hdf5-par/lib -lhdf5_fortran -lhdf5_f90cstub -lhdf5 -lz
-#
-#
-#HDF5_LIBS = \
-#  ${HDF5_DIR}/lib/libhdf5_fortran_pgi_parallel.a \
-#  ${HDF5_DIR}/lib/libhdf5hl_fortran_pgi_parallel.a \
-#  ${HDF5_DIR}/lib/libhdf5_hl_pgi_parallel.a \
-#  ${HDF5_DIR}/lib/libhdf5_pgi_parallel.a
-
-
-HDF5_INC = -I${HDF5_INCLUDE_OPTS}
-HDF5_FLAGS = -D__MPI 
-
 

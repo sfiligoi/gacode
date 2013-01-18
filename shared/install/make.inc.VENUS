@@ -7,11 +7,10 @@ PGIROOT = /opt/pgi/linux86-64/2010
 F77	= $(PGIROOT)/mpi/mpich/bin/mpif90
 FC	= $(F77) -module $(GACODE_ROOT)/modules
 
+FOMP    = -mp
 FMATH	= -r8 
 FOPT	= -fastsse
 FDEBUG	= -g -Ktrap=fp -Mbounds -Minform,inform
-FBOUND	= -Minform,inform -Mbounds
-FPROF	= -fastsse -Mprof=func
 
 # System math libraries
 

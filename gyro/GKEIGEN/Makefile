@@ -6,12 +6,8 @@ else
    FFLAGS=${FOPT}
 endif      
 
-ifeq ($(OMP),true)
-   FC += ${FOMP}
-else
-   FC += ${FNOMP}
-   OBJECTS = ../src/gyro_omp_lib.o
-endif
+FC += ${FOMP}
+FC += ${FPETSC}
 
 LLIB=GKEIGEN_lib
 

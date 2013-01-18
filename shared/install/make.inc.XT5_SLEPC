@@ -14,11 +14,10 @@ FC  = ftn -module $(GACODE_ROOT)/modules ${FC_INCLUDES}
 F77 = ftn
 
 # Compiler options/flags
+FOMP   = -mp=nonuma
 FMATH  = -r8
 FOPT   = -fast -Msmartalloc 
 FDEBUG = -Ktrap=fp -Mbounds -Minform=inform
-FOMP   = -mp=nonuma
-FNOMP  =
 
 # Execute 'module load fftw/2.1.5'
 # Execute 'module load mumps/4.7.3_par' (parallel version) 

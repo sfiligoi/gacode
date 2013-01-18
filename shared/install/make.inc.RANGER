@@ -11,11 +11,10 @@ NUMAS_PER_NODE=4
 FC	= mpif90 -module $(GACODE_ROOT)/modules
 F77	= mpif90
 
+FOMP   = -mp
 FMATH  = -r8 
 FOPT   = -fast -Mipa=safe 
 FDEBUG = -Ktrap=fp -Mbounds -Minfo=all 
-FOMP   = -mp
-FNOMP  = 
 
 # System math libraries
 

@@ -13,6 +13,7 @@ subroutine gyro_nl_direct
   use gyro_pointers
   use gyro_nl_private
   use math_constants
+  use ompdata
 
   !--------------------------------------------
   implicit none
@@ -37,92 +38,84 @@ subroutine gyro_nl_direct
   complex :: add3
   !--------------------------------------------
 
-
   do is=1,n_kinetic
      do i_split=1,msplit_SSUB
 
         ! fn, gn and fgp have ip indices;
         ! must be zeroed.
-
-        do i=1,n_x
+!$omp parallel private(add1,add2,add3)
+        do i = ibeg, iend
            do nn=0,n_max
               gn(nn,i) = h_tran(i,i_split,i_p(nn),is)
               fn(nn,i) = gyro_u_tran(i,i_split,i_p(nn),is)
            enddo ! nn
-        enddo ! i
-
-        if (boundary_method == 1) then
-           do i=i1_dx,0
-              fn(:,i) = fn(:,i+n_x)
-              gn(:,i) = gn(:,i+n_x)
-           enddo
-           do i=n_x+1,i2_dx
-              fn(:,i) = fn(:,i-n_x)
-              gn(:,i) = gn(:,i-n_x)
-           enddo
-        else
-           do i=i1_dx,0
-              fn(:,i) = (0.0,0.0)
-              gn(:,i) = (0.0,0.0)
-           enddo
-           do i=n_x+1,i2_dx
-              fn(:,i) = (0.0,0.0)
-              gn(:,i) = (0.0,0.0)
-           enddo
-        endif
-
-        do i=i1_dx,i2_dx
            do nn=1,n_max
               gn(-nn,i) = conjg(gn(nn,i))
               fn(-nn,i) = conjg(fn(nn,i))
            enddo ! nn
         enddo ! i
-
-        !------------------------------------------------
-        ! df/dp, dg/dp
-        !
-        do i=1,n_x
-           do nn=-n_max,n_max
-              fn_p(nn,i) = -i_c*n_p(nn)*fn(nn,i)
-              gn_p(nn,i) = -i_c*n_p(nn)*gn(nn,i)
+!$omp barrier
+!$omp single
+        if (boundary_method == 1) then
+           do i=i1_dx,0
+              fn(0:n_max,i) = fn(0:n_max,i+n_x)
+              gn(0:n_max,i) = gn(0:n_max,i+n_x)
            enddo
-        enddo
-        !------------------------------------------------
+           do i=n_x+1,i2_dx
+              fn(0:n_max,i) = fn(0:n_max,i-n_x)
+              gn(0:n_max,i) = gn(0:n_max,i-n_x)
+           enddo
+        else
+           do i=i1_dx,0
+              fn(0:n_max,i) = (0.0,0.0)
+              gn(0:n_max,i) = (0.0,0.0)
+           enddo
+           do i=n_x+1,i2_dx
+              fn(0:n_max,i) = (0.0,0.0)
+              gn(0:n_max,i) = (0.0,0.0)
+           enddo
+        endif
 
+        do i=i1_dx,0
+           do nn=1,n_max
+              gn(-nn,i) = conjg(gn(nn,i))
+              fn(-nn,i) = conjg(fn(nn,i))
+           enddo ! nn
+        enddo ! i
+        do i=n_x+1,i2_dx
+           do nn=1,n_max
+              gn(-nn,i) = conjg(gn(nn,i))
+              fn(-nn,i) = conjg(fn(nn,i))
+           enddo ! nn
+        enddo ! i
+!$omp end single
+!$omp barrier  ! ensure all gn, fn values are available
         !---------------------------------------------------------------
-        ! df/dr, dg/dr
-        !
-        fn_r = (0.0,0.0)
-        gn_r = (0.0,0.0)
         !
         ! THIS IS EXPENSIVE LOOP #1
         !
-!$omp parallel default(shared) private(nn,i_diff)
-!$omp do
-        do i=1,n_x
+        do i = ibeg, iend
+           ! df/dp, dg/dp
+           fn_p(:,i) = -i_c*n_p(:)*fn(:,i)
+           gn_p(:,i) = -i_c*n_p(:)*gn(:,i)
+           ! df/dr, dg/dr
+           fn_r(:,i) = (0.0,0.0)
+           gn_r(:,i) = (0.0,0.0)
            do i_diff=-m_dx,m_dx-i_dx
               do nn=0,n_max
                  fn_r(nn,i) = fn_r(nn,i)+w_d1(i_diff)*fn(nn,i+i_diff)
                  gn_r(nn,i) = gn_r(nn,i)+w_d1(i_diff)*gn(nn,i+i_diff)
               enddo ! i_diff
-           enddo ! i
-        enddo ! nn
-!$omp end do nowait
-!$omp do
-        do i=1,n_x
+           enddo
+
            do nn=1,n_max
               fn_r(-nn,i) = conjg(fn_r(nn,i))
               gn_r(-nn,i) = conjg(gn_r(nn,i))
            enddo ! nn
-        enddo ! i
-!$omp end do nowait
-        !---------------------------------------------------------------
 
         !---------------------------------------------------------------
         ! Nonlinear convolution
         !
-!$omp do private(add1,add2,add3,n1)
-        do i=1,n_x
            do nn=0,n_max
               add1 = (0.0,0.0)
               add2 = (0.0,0.0)
@@ -150,10 +143,9 @@ subroutine gyro_nl_direct
               fg2(nn,i) = add3
            enddo ! nn
         enddo ! i
-!$omp end do
-!$omp end parallel
+!$omp barrier
         !---------------------------------------------------------------
-
+!$omp single
         if (boundary_method == 1) then
            do i=i1_dx,0
               fgp(:,i) = fgp(:,i+n_x)
@@ -169,25 +161,21 @@ subroutine gyro_nl_direct
               fgp(:,i) = (0.0,0.0)
            enddo
         endif
-
+!$omp end single
+!$omp barrier
         !---------------------------------------------------------------
         ! d/dr (g df/dp - f dg/dp)
         !
         ! THIS IS EXPENSIVE LOOP #2
         !
-        fgp_r = (0.0,0.0)
         !
-!$omp parallel default(shared) private(nn,i_diff)
-!$omp do 
-        do i=1,n_x
+        do i = ibeg, iend
+           fgp_r(:,i) = (0.0,0.0)
            do i_diff=-m_dx,m_dx-i_dx
               do nn=0,n_max
                  fgp_r(nn,i) = fgp_r(nn,i)+w_d1(i_diff)*fgp(nn,i+i_diff)
               enddo ! nn
            enddo ! i_diff
-        enddo ! i
-!$omp end do nowait
-        !---------------------------------------------------------------
 
         !------------------------------------------------
         ! Arakawa scheme:
@@ -198,15 +186,12 @@ subroutine gyro_nl_direct
         ! + d/dr (g df/dp - f dg/dp)
         ! + df/dp dg/dr - df/dr dg/dp
         !
-!$omp do
-        do i=1,n_x
            do nn=0,n_max
               fgr_p(nn,i) = -i_c*n_p(nn)*fgr(nn,i)
               nl(nn,i) = c_nl_i(i)*(fgr_p(nn,i)+fgp_r(nn,i)+fg2(nn,i))
               h_tran(i,i_split,i_p(nn),is) = nl(nn,i)/3.0
            enddo ! nn
         enddo ! i
-!$omp end do
 !$omp end parallel
         !------------------------------------------------
 

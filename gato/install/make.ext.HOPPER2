@@ -1,1 +1,1 @@
-GATOFLAGS = -r8 -O0 
+GKSFLAGS=-r8

@@ -9,6 +9,7 @@ subroutine gyro_collision_main
 
   use gyro_globals
   use gyro_pointers
+  use ompdata
 
   !----------------------------------------
   implicit none
@@ -37,6 +38,7 @@ subroutine gyro_collision_main
      !
      ! We will ignore d(Psi_a)/dt
 
+!$omp parallel private(p_nek_loc,ie,k)
      p_nek_loc = 0
      do p_nek=1+i_proc_1,n_nek_1,n_proc_1
 
@@ -46,7 +48,7 @@ subroutine gyro_collision_main
         k  = nek_k(p_nek)   
 
         do m=1,n_stack
-           do i=1,n_x
+           do i = ibeg, iend
 
               f_coll(m,i,p_nek_loc) = h(m,i,p_nek_loc,is)+&
                    z(is)*alpha_s(is,i)*gyro_u(m,i,p_nek_loc,is)
@@ -55,6 +57,7 @@ subroutine gyro_collision_main
         enddo ! m
 
      enddo ! p_nek
+!$omp end parallel
      !-----------------------------------------------------
 
      !-----------------------------------------------
@@ -71,10 +74,8 @@ subroutine gyro_collision_main
      call gyro_timer_out('Coll.-step')
      call gyro_timer_in('Coll.-comm')
      !
-     call rTRANSP_INIT(n_i,n_j,n_k,NEW_COMM_1)
-     do m=1,n_stack
-        call rTRANSP_DO(f_coll(m,:,:),h_C(m,:,:))
-     enddo
+     call rTRANSP_INIT(n_i,n_j,n_k,n_stack,NEW_COMM_1)
+     call rTRANSP_DO(f_coll,h_C)
      call rTRANSP_CLEANUP
      !
      call gyro_timer_out('Coll.-comm')
@@ -93,10 +94,8 @@ subroutine gyro_collision_main
      call gyro_timer_out('Coll.-step')
      call gyro_timer_in('Coll.-comm')
      !
-     call fTRANSP_INIT(n_i,n_j,n_k,NEW_COMM_1)
-     do m=1,n_stack
-        call fTRANSP_DO(h_C(m,:,:),fb_coll(m,:,:))
-     enddo
+     call fTRANSP_INIT(n_i,n_j,n_k,n_stack,NEW_COMM_1)
+     call fTRANSP_DO(h_C,fb_coll)
      call fTRANSP_CLEANUP
      !
      call gyro_timer_out('Coll.-comm')

@@ -10,6 +10,7 @@
 subroutine gyro_select_methods
 
   use gyro_globals
+  use ompdata
 
   !--------------------------
   implicit none

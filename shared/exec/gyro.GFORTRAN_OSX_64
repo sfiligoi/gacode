@@ -1,21 +1,18 @@
 #!/bin/sh
 #
 # SCRIPT:
-#  gyro.GFORTRAN_OSX
+#  gyro.GFORTRAN_OSX_64
 #
 # FUNCTION:
-#  Parallel execution script.
-#
-# NOTES:
-# Used mpich2-1.0.3, so use mpirun rather than mpiexec
+#  Parallel execution script
 
 simdir=${1}
-nproc=${2}
+nmpi=${2}
 exec=${3}
-
-echo $simdir
+nomp=${4}
+numa=${5}
+mpinuma=${6}
 
 cd $simdir
-  
-mpirun -np $nproc $exec
+export OMP_NUM_THREADS=$nomp ; mpiexec -n $nmpi $exec
 

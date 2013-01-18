@@ -26,6 +26,7 @@ subroutine gyro_kxky_spectrum
 
   use gyro_globals
   use math_constants
+  use ompdata
 
   !-------------------------------------
   implicit none
@@ -38,14 +39,15 @@ subroutine gyro_kxky_spectrum
   f_bar = (0.0,0.0)
 
   ! Compute FT of phi.
-
+!$omp parallel
   do i=1,n_x  
-     do p=1,n_x
+     do p = ibeg, iend
         do j=1,n_theta_int
            f_bar(j,p) = f_bar(j,p)+phi(j,i,1)*cRi(p,i)
         enddo ! j
      enddo ! p
   enddo ! i
+!$omp end parallel
 
   ! Find spectral sum:
 

@@ -5,7 +5,9 @@ ifeq ($(OPT),debug)
 else
    FFLAGS=${FOPT}
 endif
-      
+
+FC += ${FOMP}
+
 LLIB=SSUB_lib
 
 OBJECTS = SSUB_private.o \

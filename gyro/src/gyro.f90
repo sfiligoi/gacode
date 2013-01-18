@@ -9,17 +9,18 @@ program gyro
 
   use mpi
   use gyro_globals
-  use omp_lib
+  use ompdata
 
   !-----------------------------------------------------------------
   implicit none
   !
   integer :: ierr
   integer :: supported
+  integer, external :: omp_get_max_threads
   !-----------------------------------------------------------------
 
   !----------------------------------------------------------------
-  ! Query OpenMP for dimensions
+  ! Query OpenMP for threads
   !
   n_omp = omp_get_max_threads()
   !-----------------------------------------------------------------
@@ -61,6 +62,10 @@ program gyro
   !
   call gyro_read_input
   call gyro_read_input_extra
+  !
+  !-----------------------------------------------------------------
+  ! initialize OpenMP runtime parameters including block indices
+  call gyro_init_ompdata()
   !
   !----------------------------------------------------------------
   ! Split the communicator if using GKEIGEN added parallelization.

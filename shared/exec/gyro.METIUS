@@ -1,17 +1,18 @@
 #!/bin/sh
 #
 # SCRIPT:
-#  gyro.PACER
-
+#  gyro.METIUS
+#
 # FUNCTION:
 #  Parallel execution script
 
 simdir=${1}
-nproc=${2}
+nmpi=${2}
 exec=${3}
+nomp=${4}
+numa=${5}
+mpinuma=${6}
 
 cd $simdir
-  
-mpiexec -n $nproc $exec
-
+export OMP_NUM_THREADS=$nomp ; mpiexec -n $nmpi $exec
 

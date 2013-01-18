@@ -7,11 +7,10 @@
 FC	= mpif90 -module $(GACODE_ROOT)/modules
 F77	= mpif90
 
+FOMP    = -mp
 FMATH	= -r8 
 FOPT	=  
 FDEBUG	= -g -Ktrap=fp -Mbounds -Minform,inform
-FBOUND	= -Minform,inform -Mbounds
-FPROF	= -fastsse -Mprof=func
 
 # System math libraries
 

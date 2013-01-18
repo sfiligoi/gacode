@@ -22,6 +22,7 @@ subroutine gyro_moments_plot
   use gyro_globals
   use gyro_pointers
   use math_constants
+  use ompdata
 
   !---------------------------------------------------
   implicit none
@@ -47,14 +48,13 @@ subroutine gyro_moments_plot
 
   do is=1,n_kinetic
 
-     vel_sum_loc = (0.0,0.0)
+!$omp parallel private(p_nek_loc,ie,k,ck,m0)
+     vel_sum_loc(:,ibeg:iend,:) = (0.0,0.0)
 
      ! First compute gyro_h = <h+z*alpha*<U>>
      !
      ! Note that gyro_h is really a temporary variable 
      ! here; only gyro_h(:,:,:,1) is used.
-
-     gyro_h(:,:,:,1) = (0.0,0.0)
 
      p_nek_loc = 0
 
@@ -67,21 +67,22 @@ subroutine gyro_moments_plot
 
         ck = class(k)
 
-        cap_h(:,:) = (0.0,0.0)
-
-!$omp parallel default(shared) private(m,m0,i_diff,j)
-!$omp do
-        do i=1,n_x
+!$omp barrier
+!$omp single
+        cap_h(:,i1_buffer:0) = (0.0,0.0)
+        cap_h(:,n_x+1:i2_buffer) = (0.0,0.0)
+!$omp end single
+        do i = ibeg, iend
            do m=1,n_stack
               cap_h(m,i) = h(m,i,p_nek_loc,is)+&
                    z(is)*alpha_s(is,i)*gyro_u(m,i,p_nek_loc,is)
            enddo ! m
         enddo ! i
-!$omp end do
+!$omp barrier  ! ensure all cap_h values are available
 
         if (is <= n_gk) then
-!$omp do
-           do i=1,n_x
+           do i = ibeg, iend
+              gyro_h(:,i,p_nek_loc,1) = (0.0,0.0)
               do m=1,n_stack
                  m0 = m_phys(ck,m)
                  do i_diff=-m_gyro,m_gyro-i_gyro
@@ -90,37 +91,31 @@ subroutine gyro_moments_plot
                  enddo ! i_diff
               enddo ! m
            enddo ! i
-!$omp end do nowait
         else
-!$omp do
            ! Implicit electrons (gyroave=1)
-           do i=1,n_x
+           do i = ibeg, iend
               do m=1,n_stack
                  gyro_h(m,i,p_nek_loc,1) = cap_h(m,i)
               enddo ! m
            enddo ! i
-!$omp end do nowait
         endif
         
-!$omp do
         ! Subtract potential for all moments to give
         !  moment(i) = Int[ d3v w(i) { <cap_h> - e (delta_phi)/T } ]
         !    where w(i)=[1,E,v_par] 
-        do i=1,n_x
+        do i = ibeg, iend
            do m=1,n_stack
               gyro_h(m,i,p_nek_loc,1) = gyro_h(m,i,p_nek_loc,1)-&
                    z(is)*alpha_s(is,i)*field_tau(m,i,p_nek_loc,1)
            enddo ! m
         enddo ! i
-!$omp end do nowait
 
         !----------------------------------------------------
         ! Now, compute blending projections:
         !
         ! vel_sum(j,i) -> FV[ (F*_j) gyro_h ]
         !
-!$omp do
-        do i=1,n_x
+        do i = ibeg, iend
            do m=1,n_stack
               m0 = m_phys(ck,m)
               do j=1,n_blend
@@ -140,9 +135,8 @@ subroutine gyro_moments_plot
               enddo ! j
            enddo ! m
         enddo ! i
-!$omp end do
-!$omp end parallel
      enddo ! p_nek
+!$omp end parallel
      !--------------------------------------------------------------
 
      call MPI_ALLREDUCE(vel_sum_loc,&
@@ -156,6 +150,7 @@ subroutine gyro_moments_plot
      !---------------------------------------------------
      ! Solve for blending coefficients:
      !
+!$omp parallel do private(info) schedule(static)
      do i=1,n_x
 
         call ZGETRS('N',&

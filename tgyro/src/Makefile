@@ -6,12 +6,7 @@ else
    FFLAGS=${FOPT}
 endif
 
-ifeq ($(OMP),true)
-   FC += ${FOMP}
-else
-   FC += ${FNOMP}
-   OBJECTS = ${GACODE_ROOT}/gyro/src/gyro_omp_lib.o
-endif
+FC += ${FOMP}
 
 EXEC = tgyro_main
 

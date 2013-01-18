@@ -30,19 +30,19 @@ subroutine rSSUB(xt,x_OUT)
   !-------------------------------------------------------  
 
 
-  call MPI_ALLTOALL(xt(:,:,:), &
+  call MPI_ALLTOALL(xt, &
        nv1*jsplit, &
        MPI_DOUBLE_COMPLEX, &
-       x(:,:), &
+       x, &
        nv1*jsplit, &
        MPI_DOUBLE_COMPLEX, &
        SSUB_COMM, &
        i_err)
 
-  s = 0
+!$omp parallel do private(s) schedule(static)
   do j=1,nj
      do p=1,nv2
-        s = s+1 
+        s = p + (j - 1)*nv2
         x_OUT(j,:,p) = x(:,s)
      enddo
   enddo

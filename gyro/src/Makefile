@@ -6,17 +6,11 @@ else
    FFLAGS=${FOPT} ${HDF5_FLAGS}
 endif
 
-ifeq ($(OMP),true)
-   FC += ${FOMP}
-else
-   FC += ${FNOMP}
-   OBJECTS = gyro_omp_lib.o
-endif
+FC += ${FOMP}
 
 ifeq ($(ACC),true)
    FC += ${FACC}
 endif
-
 
 LLIB = gyro_lib
 
@@ -31,10 +25,12 @@ OBJECTS += gyro_globals.o \
           gyro_poissonaperp_private.o \
           gyro_mumps_private.o \
           gyro_banana_private.o \
+          gyro_module_ompdata.o \
           gyro.o \
           gyro_adaptive_source.o \
           gyro_interface.o \
           gyro_init.o \
+          gyro_init_ompdata.o \
           gyro_run.o \
           gyro_do.o \
           gyro_alloc_profile_exp.o \
@@ -176,6 +172,6 @@ lib: $(OBJECTS)
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:
-	rm -f *.o $(LLIB).a ${GACODE_ROOT}/modules/gyro*.mod ${GACODE_ROOT}/modules/omp_lib.mod
+	rm -f *.o $(LLIB).a ${GACODE_ROOT}/modules/gyro*.mod
 
 include ../install/make.ext.${GACODE_PLATFORM}

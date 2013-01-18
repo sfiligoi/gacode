@@ -3,11 +3,10 @@
 FC	= mpif90 -mod $(GACODE_ROOT)/modules -I $(GACODE_ROOT)/modules
 F77	= mpif90
 
+FOMP    = -openmp
 FMATH	= -r8 
 FOPT	= -O2 -no-vec
 FDEBUG	= -check all -warn all -fpe0 -ftrapuv 
-FOMP    = -openmp
-FNOMP   = 
 
 # System math libraries
 

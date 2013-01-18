@@ -4,14 +4,13 @@
 
 # Compilers
 
-FC	= mpif90 -I $(GACODE_ROOT)/modules 
+FC	= mpif90 -I $(GACODE_ROOT)/modules
 F77	= mpif90
 
+FOMP    = -fopenmp
 FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules
 FOPT	= -O2
 FDEBUG	= -O -fbounds-check
-FOMP    = -fopenmp
-FNOMP   =
 
 # System math libraries
 
