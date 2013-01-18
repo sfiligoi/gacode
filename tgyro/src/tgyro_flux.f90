@@ -220,28 +220,6 @@ subroutine tgyro_flux
 
      endif
 
-  case (4)
-
-     ! Map TGYRO parameters to QFM
-     call tgyro_qfm_map
-
-     if (gyrotest_flag == 0) call qfm_run
-
-     pflux_e_tur(i_r) = qfm_elec_pflux_out
-     eflux_e_tur(i_r) = qfm_elec_eflux_out
-
-     ! Initialize
-     pflux_i_tur(:,i_r) = 0.0 
-     eflux_i_tur(:,i_r) = 0.0 
-
-     pflux_i_tur(1,i_r) = qfm_ion1_pflux_out
-     eflux_i_tur(1,i_r) = qfm_ion1_eflux_out
-
-     if (loc_n_ion > 1) then
-        pflux_i_tur(2,i_r) = qfm_ion2_pflux_out  
-        eflux_i_tur(2,i_r) = qfm_ion2_eflux_out 
-     endif
-
   case default
 
      call tgyro_catch_error('ERROR: no matching flux method.')
