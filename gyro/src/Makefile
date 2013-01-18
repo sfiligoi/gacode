@@ -67,7 +67,6 @@ OBJECTS += gyro_globals.o \
           gyro_collision_krook.o \
           gyro_conserve_number.o \
           gyro_conserve_all.o \
-          gyro_diffusivity.o \
           gyro_entropy.o \
           gyro_field_fluxave.o \
           gyro_field_time_derivative.o \
@@ -79,7 +78,6 @@ OBJECTS += gyro_globals.o \
           gyro_fieldeigen_kernel.o \
           gyro_fieldeigen_df.o \
           gyro_fulladvance.o \
-          gyro_g_squared.o \
           gyro_geometry_arrays.o \
           gyro_get_he_implicit.o \
           gyro_get_delta_he.o \

@@ -794,7 +794,6 @@ module gyro_globals
   ! Field and field coefficients:
   !
   real, dimension(:), allocatable :: phi_squared
-  real, dimension(:,:), allocatable :: g_squared
   real, dimension(:,:), allocatable :: field_fluxave
   !
   complex, dimension(:,:,:,:), allocatable :: field_tau
@@ -945,11 +944,6 @@ module gyro_globals
   real, dimension(:,:), allocatable :: gbflux_exc
   real, dimension(:,:,:), allocatable :: gbflux_trapped
   real, dimension(:,:,:), allocatable :: gbflux_n
-  !
-  ! Additional diffusivities
-  !
-  real, dimension(1) :: phi_squared_QL_n
-  real, dimension(3) :: g_squared_QL_n
   !
   ! Nonlinear transfer and turbulent energy spectra
   !

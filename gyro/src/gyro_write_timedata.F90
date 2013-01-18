@@ -329,7 +329,7 @@ subroutine gyro_write_timedata
   call gyro_kxky_spectrum
 
 
-  if(io_method < 3) then
+  if (io_method < 3) then
   call write_distributed_real(&
        trim(path)//'out.gyro.kxkyspec',&
        10,&
@@ -370,11 +370,9 @@ subroutine gyro_write_timedata
   call gyro_field_fluxave
 
   !-------------------------------------------------------------------
-  ! Calculation of fundamental nonlinear fluxes and related 
-  ! diffusivities
+  ! Calculation of fundamental nonlinear fluxes
   !
   call gyro_nonlinear_flux
-  call gyro_diffusivity
   call gyro_gbflux
   !-------------------------------------------------------------------
 
@@ -522,11 +520,7 @@ subroutine gyro_write_timedata
      !-----------------------------------------------------------------
 
      if (i_proc == 0 .and. lindiff_method > 1) then
-        if(io_method <3) then
-          call write_local_real( &
-               trim(path)//'out.gyro.diff',10,size(diff),diff) 
-          call write_local_real( &
-               trim(path)//'out.gyro.diff_i',10,size(diff_i),diff_i)
+        if (io_method < 3) then
           call write_local_real( &
                trim(path)//'out.gyro.gbflux',10,size(gbflux),gbflux)
           call write_local_real( &
@@ -535,12 +529,6 @@ subroutine gyro_write_timedata
                trim(path)//'out.gyro.gbflux_i',10,size(gbflux_i),gbflux_i)
 
           if (trapdiff_flag == 1) then
-             call write_local_real( &
-                  trim(path)//'out.gyro.diff_trapped',&
-                  10,size(diff_trapped),diff_trapped)
-             call write_local_real( &
-                  trim(path)//'out.gyro.diff_i_trapped',&
-                  10,size(diff_i_trapped),diff_i_trapped)
              call write_local_real( &
                   trim(path)//'out.gyro.gbflux_trapped',&
                   10,size(gbflux_trapped),gbflux_trapped)
@@ -552,78 +540,18 @@ subroutine gyro_write_timedata
 #ifdef HAVE_HDF5
         if(io_method > 1 ) then 
         h5in%mesh="/t_current"
-        call add_h5(dumpTGid,'diff',diff,h5in,data_step,h5err)
-        call add_h5(dumpTGid,'diff_i',diff_i,h5in,data_step,h5err)
         call add_h5(dumpTGid,'gbflux',gbflux,h5in,data_step,h5err)
         call add_h5(dumpTGid,'gbflux_mom',gbflux_mom,h5in,data_step,h5err)
         call add_h5(dumpTGid,'gbflux_i',gbflux_i,h5in,data_step,h5err)
 
         if (trapdiff_flag == 1) then
            h5in%mesh="/t_current"
-           call add_h5(dumpTGid,'diff_trapped',diff_trapped,h5in,data_step,h5err)
-           call add_h5(dumpTGid,'diff_i_trapped',diff_i_trapped,h5in,data_step,h5err)
            call add_h5(dumpTGid,'gbflux_trapped',gbflux_trapped,h5in,data_step,h5err)
            call add_h5(dumpTGid,'gbflux_i_trapped',gbflux_i_trapped,h5in,data_step,h5err)
         endif !trapdiff_flag == 1
       endif !io_method > 1
 #endif
     endif !i_proc ==0 and lindiff >1 
-
-     if (lindiff_method >= 4) then
-       if(io_method < 3 ) then
-
-        call write_distributed_real(&
-             trim(path)//'out.gyro.diff_n',&
-             10,&
-             size(diff_n),&
-             diff_n)
-
-        call write_distributed_real(&
-             trim(path)//'out.gyro.phi_squared_QL_n',&
-             10,&
-             size(phi_squared_QL_n),&
-             phi_squared_QL_n)
-
-        call write_distributed_real(&
-             trim(path)//'out.gyro.g_squared_QL_n',&
-             10,&
-             size(g_squared_QL_n),&
-             g_squared_QL_n)
-
-        call write_distributed_real(&
-             trim(path)//'out.gyro.gbflux_n',&
-             10,&
-             size(gbflux_n),&
-             gbflux_n)
-      endif !io_method < 3
-#ifdef HAVE_HDF5
-        if(io_method > 1 ) then
-           h5in%mesh="/t_current"
-           call write_distributed_real_h5('diff_n',dumpTGid,&
-                 n_kinetic,n_field,2, &
-                 size(diff_n),&
-                 diff_n,&
-                 h5in,h5err)
-
-            call write_distributed_real_h5('phi_squared_QL_n',dumpTGid,&
-                 1,1,1,&
-                 size(phi_squared_QL_n),&
-                 phi_squared_QL_n,&
-                 h5in,h5err)
-            call write_distributed_real_h5('g_squared_QL_n',dumpTGid,&
-                 size(g_squared_QL_n),&
-                 3,1,1,&
-                 g_squared_QL_n,&
-                 h5in,h5err)
-
-            call write_distributed_real_h5("gbflux_n",dumpTGid,&
-                 n_kinetic,n_field,4,&
-                 size(gbflux_n),&
-                 gbflux_n,&
-                 h5in,h5err)
-        endif !io_method > 1
-#endif
-     endif !lindiff_method >= 4
 
      !=============
      ! END LINEAR 
@@ -635,30 +563,12 @@ subroutine gyro_write_timedata
      ! BEGIN NONLINEAR 
      !================
     if (io_method < 3) then
-     call write_distributed_real(&
-          trim(path)//'out.gyro.diff_n',&
-          10,&
-          size(diff_n),&
-          diff_n)
 
      call write_distributed_real(&
           trim(path)//'out.gyro.gbflux_n',&
           10,&
           size(gbflux_n),&
           gbflux_n)
-
-     if (lindiff_method >= 4) then
-        call write_distributed_real(&
-             trim(path)//'out.gyro.phi_squared_QL_n',&
-             10,&
-             size(phi_squared_QL_n),&
-             phi_squared_QL_n)
-        call write_distributed_real(&
-             trim(path)//'out.gyro.g_squared_QL_n',&
-             10,&
-             size(g_squared_QL_n),&
-             g_squared_QL_n)
-     endif !lindiff_method >= 4
 
      if (nonlinear_transfer_flag == 1) then
         call write_distributed_real(&
@@ -672,12 +582,6 @@ subroutine gyro_write_timedata
   if (io_method > 1 ) then
         h5in%units="diff units"
         h5in%mesh="/t_current"
-     call write_distributed_real_h5("diff_n",dumpTGid,&
-          n_kinetic,n_field,2,&
-          size(diff_n),&
-          diff_n,&
-          h5in,h5err)
-     if(h5err%errBool) write(*,*) h5err%errorMsg
 
      call write_distributed_real_h5("gbflux_n",dumpTGid,&
           n_kinetic,n_field,4,&
@@ -685,21 +589,6 @@ subroutine gyro_write_timedata
           gbflux_n,&
           h5in,h5err)
      if(h5err%errBool) write(*,*) h5err%errorMsg
-
-     if (lindiff_method >= 4) then
-        call write_distributed_real_h5('phi_squared_QL_n',dumpTGid,&
-             1,1,1,&
-             size(phi_squared_QL_n),&
-             phi_squared_QL_n,&
-             h5in,h5err)
-        if(h5err%errBool) write(*,*) h5err%errorMsg
-        call write_distributed_real_h5('g_squared_QL_n',dumpTGid,&
-             size(g_squared_QL_n),&
-             3,1,1,&
-             g_squared_QL_n,&
-             h5in,h5err)
-        if(h5err%errBool) write(*,*) h5err%errorMsg
-     endif !lindiff_method >=4
 
      if (nonlinear_transfer_flag == 1) then
         call write_distributed_real_h5('nl_transfer',dumpTGid,&
@@ -718,10 +607,6 @@ subroutine gyro_write_timedata
         call write_local_real(trim(path)//'out.gyro.field_rms',10,size(ave_phi),ave_phi)
 
         call write_local_real( &
-             trim(path)//'out.gyro.diff',10,size(diff),diff)
-        call write_local_real( &
-             trim(path)//'out.gyro.diff_i',10,size(diff_i),diff_i)
-        call write_local_real( &
              trim(path)//'out.gyro.gbflux',10,size(gbflux),gbflux)
         call write_local_real( &
              trim(path)//'out.gyro.gbflux_i',10,size(gbflux_i),gbflux_i)
@@ -732,12 +617,6 @@ subroutine gyro_write_timedata
              trim(path)//'out.gyro.gbflux_exc',10,size(gbflux_exc),gbflux_exc)
 
         if (trapdiff_flag == 1) then
-           call write_local_real( &
-                trim(path)//'out.gyro.diff_trapped',&
-                10,size(diff_trapped),diff_trapped)
-           call write_local_real( &
-                trim(path)//'out.gyro.diff_i_trapped',&
-                10,size(diff_i_trapped),diff_i_trapped)
            call write_local_real( &
                 trim(path)//'out.gyro.gbflux_trapped',10,&
                 size(gbflux_trapped),gbflux_trapped)
@@ -757,10 +636,6 @@ subroutine gyro_write_timedata
         h5in%mesh="/t_current"
         call add_h5(dumpTGid,'field_rms',ave_phi,h5in,data_step,h5err)
         if(h5err%errBool) write(*,*) h5err%errorMsg
-        call add_h5(dumpTGid,'diff',diff,h5in,data_step,h5err)
-        if(h5err%errBool) write(*,*) h5err%errorMsg
-        call add_h5(dumpTGid,'diff_i',diff_i,h5in,data_step,h5err)
-        if(h5err%errBool) write(*,*) h5err%errorMsg
         call add_h5(dumpTGid,'gbflux',gbflux,h5in,data_step,h5err)
         if(h5err%errBool) write(*,*) h5err%errorMsg
         call add_h5(dumpTGid,'gbflux_mom',gbflux_mom,h5in,data_step,h5err)
@@ -769,10 +644,6 @@ subroutine gyro_write_timedata
         if(h5err%errBool) write(*,*) h5err%errorMsg
 
         if (trapdiff_flag == 1) then
-           call add_h5(dumpTGid,'diff_trapped',diff_trapped,h5in,data_step,h5err)
-           if(h5err%errBool) write(*,*) h5err%errorMsg
-           call add_h5(dumpTGid,'diff_i_trapped',diff_i_trapped,h5in,data_step,h5err)
-           if(h5err%errBool) write(*,*) h5err%errorMsg
            call add_h5(dumpTGid,'gbflux_trapped',gbflux_trapped,h5in,data_step,h5err)
            if(h5err%errBool) write(*,*) h5err%errorMsg
            call add_h5(dumpTGid,'gbflux_i_trapped',gbflux_i_trapped,h5in,data_step,h5err)
@@ -1249,8 +1120,6 @@ subroutine write_distributed_real_h5(varName,rGid,n1,n2,n3,n_fn,fn,h5in,h5err)
   !  allocate(kxkyspec(n_x))
   !  allocate(gbflux_n(n_kinetic,n_field,p_moment))
   !  allocate(diff_n(n_kinetic,n_field,n_moment))
-  !  real, dimension(1) :: phi_squared_QL_n
-  !  real, dimension(3) :: g_squared_QL_n
 
   ! n1 = n_kinetic; n2 = n_field, n3=n_moment, n4=n_n
   if (i_proc==0) then

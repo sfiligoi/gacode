@@ -1,4 +1,4 @@
-!----------------------------------------------------
+!---------------------------------------------------\
 ! gyro_alloc_big.f90
 !
 ! PURPOSE:
@@ -47,7 +47,6 @@ subroutine gyro_alloc_big(flag)
      allocate(field_tau_old(n_stack,n_x,n_nek_loc_1,n_field))
      allocate(field_tau_old2(n_stack,n_x,n_nek_loc_1,n_field))
      allocate(phi_squared(n_x))
-     allocate(g_squared(2,n_x))
      allocate(field_fluxave(n_x,3))
      allocate(ave_phi(2,n_field))
      allocate(h_err(n_stack,n_x,n_nek_loc_1,n_kinetic))
@@ -162,7 +161,6 @@ subroutine gyro_alloc_big(flag)
      deallocate(field_tau_old)
      deallocate(field_tau_old2)
      deallocate(phi_squared)
-     deallocate(g_squared) 
      deallocate(field_fluxave)
      deallocate(ave_phi)
      deallocate(h_err)

@@ -711,26 +711,6 @@ subroutine gyro_select_methods
 
         call send_line('linear diffusivity   : RESPONSE FUNCTION')
 
-     case (4)
-
-        call send_line('linear diffusivity   : phi_squared QL weight form')
-
-     case (5)
-
-        call send_line('linear diffusivity   : local phi_squared QL weight form')
-
-     case (6)
-
-        call send_line('linear diffusivity   : local g_squared QL(1) |g|**2 weight form')
-
-     case (7)
-
-        call send_line('linear diffusivity   : local g_squared QL(2) |phi|**2 weight form')
-
-     case (8)
-
-        call send_line('linear diffusivity   : local q_squared QL(3) |g|*|phi| weight form')
-
      case default
 
         call catch_error('ERROR: (GYRO) lindiff_method')

@@ -27,11 +27,10 @@ MAKE = make
 FC      	= mpif90 -I$(GACODE_ROOT)/modules
 F77	= mpif90
 
+FOMP	= -fopenmp
 FMATH	= -fdefault-real-8 -J$(GACODE_ROOT)/modules
 FOPT	= -O3 -m64
 FDEBUG	= -Wall -ftrace=full
-FOMP	= -fopenmp
-FNOMP 	= 
 
 # System math libraries
 
