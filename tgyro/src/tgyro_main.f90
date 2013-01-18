@@ -3,7 +3,7 @@ program tgyro_main
   use mpi
   use tgyro_globals
   use gyro_globals, only : path, GYRO_COMM_WORLD
-  use omp_lib
+  use ompdata
 
   !-----------------------------------------------------------------
   implicit none
