@@ -9,6 +9,7 @@ program tgyro_main
   implicit none
   !
   integer :: supported
+  integer, external :: omp_get_max_threads, omp_get_thread_num
   !-----------------------------------------------------------------
 
   !----------------------------------------------------------------

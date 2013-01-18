@@ -2,6 +2,7 @@ subroutine gyro_init_ompdata()
 
   use gyro_globals
   use ompdata
+
   implicit none
   integer, external :: omp_get_max_threads, omp_get_thread_num
 
@@ -24,7 +25,7 @@ subroutine looplimits(mythd,nthds,i1,i2,ibeg,iend)
   implicit none
   integer, intent(in) :: mythd, nthds, i1, i2
   integer, intent(out) :: ibeg, iend
-  integer nwork, chunk, extra, ntcut  !local variables
+  integer :: nwork, chunk, extra, ntcut  
 
   nwork = i2 - i1 + 1
   chunk = nwork/nthds
