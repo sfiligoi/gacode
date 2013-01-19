@@ -117,8 +117,6 @@ subroutine gyro_read_restart
 
      endif
 
-     if (i_proc == 0) close(io)
-
      call MPI_BCAST(data_step,&
           1,MPI_INTEGER,0,GYRO_COMM_WORLD,i_err)
 
