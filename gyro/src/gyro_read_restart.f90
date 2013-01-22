@@ -24,22 +24,23 @@ subroutine gyro_read_restart
 
   io = io_restart
 
-  !-------------------------------------------
-  ! Set the step number to zero for gyro_write_master, 
-  ! even if this is a restart:
+  !---------------------------------------------------------------------
+  ! Set the step number to zero for gyro_write_timedata, even if 
+  ! this is a restart:
   !
   step = 0
-  !-------------------------------------------
+  !---------------------------------------------------------------------
 
   !---------------------------------------------------------------------
-  ! Check to see if we are asking for a restart
-  ! when there is no restart data available:
+  ! Check to see if we are asking for a restart when there is no 
+  ! restart data available:
   !
   if (i_proc == 0) then
 
      open(unit=io,&
           file=trim(path)//file_tag_restart(restart_new_flag),&
           status='old',iostat=i_err)
+     close(io)
 
      if (i_err /= 0 .and. restart_method > 0) then
         call send_message(&
@@ -128,13 +129,13 @@ subroutine gyro_read_restart
 
      ! Trap error for incorrect number of processors
      if (n_proc_old /= n_proc) then 
-        call catch_error('Processor number changed.')
+        call catch_error('ERROR: (GYRO) Processor number changed.')
      endif
 
      if (i_proc == 0) then
         open(unit=io,file=trim(path)//file_restart(i_restart),status='old')
         read(io,fmtstr2) h
-        call send_line('INFO: (gyro) Restarting.')
+        call send_line('INFO: (GYRO) Restarting.')
      endif
 
      do i_proc_w=1,n_proc-1
@@ -181,7 +182,7 @@ subroutine gyro_read_restart
 
   case default
 
-     call catch_error('ERROR: (gyro) Bad value for restart_method.')
+     call catch_error('ERROR: (GYRO) Bad value for restart_method.')
 
   end select
 
