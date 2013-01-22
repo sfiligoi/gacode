@@ -55,7 +55,7 @@ OBJECTS +=	tgyro_globals.o \
 .SUFFIXES : .o .f90 
 
 all: $(OBJECTS)
-	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS)
+	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS) $(FPETSC)
 
 .f90.o :
 	$(FC) $(FMATH) $(FFLAGS) -c $<
