@@ -110,14 +110,7 @@ SIMDIR=$SIMROOT/$LOCDIR
 #===========================================================
 # Manage start control
 # 
-case "$START" in
-  nosave) echo "-1" > $SIMDIR/restart.dat ;;
-  new)    echo  "0" > $SIMDIR/restart.dat ;;
-  cont)   echo  "1" > $SIMDIR/restart.dat ;;
-  retry)  echo  "2" > $SIMDIR/restart.dat ;;
-  init)   echo  "3" > $SIMDIR/restart.dat ;;
-  *) echo "ERROR: bad argument to -start." ; exit 1 ;;
-esac
+CODE="$CODE -start $START"
 #===========================================================
 
 # Pass control to platform-specific script
