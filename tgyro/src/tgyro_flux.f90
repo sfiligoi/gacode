@@ -12,7 +12,6 @@ subroutine tgyro_flux
   use gyro_interface
   use neo_interface
   use tglf_interface
-  use qfm_interface
 
   implicit none
 

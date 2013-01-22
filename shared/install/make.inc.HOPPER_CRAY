@@ -30,11 +30,11 @@ FOMP   =
 FMATH  = -s real64
 FOPT   = -O3 -hfp3 
 FDEBUG = -eD -Ktrap=fp -m 1
-FPETSC = ${FC_LINKER_FLAGS} ${FC_INCLUDES}
+FPETSC = ${FC_LINKER_FLAGS} ${FC_INCLUDES} ${SLEPC_LIB}
 
 # System math libraries
 
-LMATH = -ldrfftw -ldfftw ${SLEPC_LIB}
+LMATH = -ldrfftw -ldfftw
 
 # OPTIONAL: netCDF (for gyro2gkv)
 NETCDF = ${NETCDF_DIR}/lib/libnetcdf.a ${NETCDF_DIR}/lib/libnetcdf.a
