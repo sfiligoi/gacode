@@ -1,6 +1,8 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
 all:
+	cd ${GACODE_ROOT}/neo ; make
+	cd ${GACODE_ROOT}/tglf ; make
 	cd datread ; make 
 	cd misc ; make
 	cd models ;  make 

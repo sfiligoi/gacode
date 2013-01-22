@@ -7,14 +7,12 @@ all:
 	cd EXPRO ; make "OPT=${OPT}"
 	cd profiles_gen ; make "OPT=${OPT}"
 	cd vshdf5 ; make "OPT=${OPT}"
-#	cd legacyread ; make "OPT=${OPT}"
 
 clean:
 	cd math ; make clean
 	cd GEO ; make clean
 	cd UMFPACK ; make clean
 	cd EXPRO ; make clean
-	cd legacyread ; make clean
 	cd profiles_gen ; make clean
 	cd python ; rm -f *.pyc	
 	cd vshdf5 ; make clean
