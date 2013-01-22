@@ -34,7 +34,6 @@ OBJECTS +=	tgyro_globals.o \
 		tgyro_multi_driver.o \
 		tgyro_neo_map.o \
 		tgyro_profile_functions.o \
-		tgyro_qfm_map.o \
 		tgyro_quasineutral.o \
 		tgyro_quasigrad.o \
 		tgyro_read_input.o \
