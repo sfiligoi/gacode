@@ -57,4 +57,4 @@ lib: $(OBJECTS)
 	$(FC) $(FFLAGS) -c $< f77_dcomplx.h
 
 clean:
-	rm -f *.o
+	rm -f *.o *.gch

@@ -1,0 +1,1 @@
+XPTORFLAGS = --default-real-8 --default-double-8
