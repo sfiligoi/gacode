@@ -29,7 +29,7 @@ F77    = ftn
 FOMP   = 
 FMATH  = -s real64
 FOPT   = -O3 -hfp3 
-FDEBUG = -eD
+FDEBUG = -eD -Ktrap=fp -m 1
 FPETSC = ${FC_LINKER_FLAGS} ${FC_INCLUDES}
 
 # System math libraries

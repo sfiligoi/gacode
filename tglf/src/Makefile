@@ -1,9 +1,10 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
+include ../install/make.ext.${GACODE_PLATFORM}
 
 ifeq ($(OPT),debug)
-   FFLAGS=${FDEBUG}
+   FFLAGS=${FDEBUG} ${TGLFFLAGS}
 else
-   FFLAGS=${FOPT}
+   FFLAGS=${FOPT} ${TGLFFLAGS}
 endif
 
 ifeq ($(MPI),true)
