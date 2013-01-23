@@ -51,7 +51,7 @@ subroutine gyro_nl_fft
   real, dimension(0:n_fft-1,6*n_x) :: vt_fft
   !--------------------------------------------
 
-!$omp parallel do default(private) shared(h_tran)
+!$omp parallel do default(private) shared(h_tran,msplit_ssub,n_kinetic,i1_buffer,i2_buffer,n_x,n_max,m_dx,i_dx)
   do p=1,n_kinetic*msplit_SSUB
      is      = (p-1)/msplit_SSUB+1
      i_split = p-(is-1)*msplit_SSUB
