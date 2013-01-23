@@ -1487,7 +1487,6 @@
       INTEGER,INTENT(OUT) :: nmodes,nfields,nplot
       REAL,INTENT(OUT) :: angle(max_plot)
       COMPLEX,INTENT(OUT) :: wavefunction(maxmodes,3,max_plot)
-      INTEGER :: i,n,k
 !
       if(new_start)then
         write(*,*)"error: tglf must be called before get_wavefunction_out"

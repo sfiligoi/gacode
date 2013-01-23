@@ -24,8 +24,8 @@ SUBROUTINE xgrid_functions_sa
   USE tglf_xgrid
   !
   IMPLICIT NONE
-  INTEGER :: i,is
-  REAL :: thx,dthx,sn,cn,eps,Rx,Rx1,Rx2,f_gam
+  INTEGER :: i
+  REAL :: thx,dthx,sn,cn,eps,Rx,Rx1,Rx2
   REAL :: kyi,wE,a0
   !
   ! debug
@@ -163,23 +163,22 @@ SUBROUTINE xgrid_functions_geo
   USE tglf_sgrid
   IMPLICIT NONE
   !
-  INTEGER :: i,j,k,m,is
+  INTEGER :: i,m
   INTEGER :: m1,m2
-  REAL :: y_x,s_x
-  REAL :: Ly,dy
-  REAL :: norm,ww,thx
+  REAL :: y_x
+  REAL :: Ly
+  REAL :: thx
   REAL :: sign_theta,loops
   REAL :: dkxky1,dkxky2
   REAL :: wd1,wd2
   REAL :: b1,b2
   REAL :: y1,y2
-  REAL :: f_gam,freq_GQ
   REAL :: kxx1,kxx2
-  REAL :: cxtorpar1,cxtorpar2
+  REAL :: cxtorpar1
   REAL :: cxtorper1,cxtorper2
   REAL :: B2x1,B2x2,R2x1,R2x2,norm_ave,dlp
   REAL :: kyi
-  REAL :: wE,wd0,gamma_eff,a0
+  REAL :: wE,wd0,a0
   !
   !
   ! find length along magnetic field y
@@ -414,10 +413,10 @@ SUBROUTINE get_ft_sa
   USE tglf_hermite
   !
   IMPLICIT NONE
-  INTEGER :: i,is
+  INTEGER :: i
   REAL :: norm,ww
-  REAL :: eps,theta_max,theta_eff,vshear_eff
-  REAL :: sn,cn,thx,ftx,Bmax,Bmin
+  REAL :: eps,theta_max
+  REAL :: cn,thx,ftx,Bmax,Bmin
   REAL :: Rx,Bx
   !
   ! compute pitch angle at bounce average boundary
@@ -504,13 +503,12 @@ SUBROUTINE get_ft_geo
   IMPLICIT NONE
   !
   INTEGER,PARAMETER :: nb_grid=25
-  INTEGER :: i,j,k,m,is,m_max,m_min,j_max
+  INTEGER :: i,j,m,m_max,m_min,j_max
   INTEGER :: pm(2,0:nb_grid),qm
   REAL :: Bmax,Bmin,By(0:nb_grid),delta_y(0:nb_grid)
   REAL :: Ly
   REAL :: B_bounce,kpar
-  REAL :: db,test1,test2,test,bounce_y
-  REAL :: dmin
+  REAL :: db,test1,test2,bounce_y
   !
   !*************************************************************
   ! begin trapped fraction model
@@ -646,7 +644,6 @@ SUBROUTINE get_ft_geo
   !*************************************************************
   ! end of trapped fraction model
   !*************************************************************
-999 CONTINUE
 END SUBROUTINE get_ft_geo
 !
 !*************************************************************
@@ -1186,8 +1183,8 @@ SUBROUTINE miller_geo
   !
   !-------------------------------------------
   !
-  INTEGER,PARAMETER :: nzmax = 148, mts=5
-  INTEGER :: i, j, k, m, l_theta
+  INTEGER,PARAMETER :: mts=5
+  INTEGER :: m
   !-----------------------------------------------
   !
   REAL :: theta, x_delta
@@ -1197,11 +1194,6 @@ SUBROUTINE miller_geo
   REAL :: R_r, Z_r
   REAL :: l_t, grad_r, det
   REAL :: scale_max, l_t1, arclength
-  REAL :: test0, test1, test2
-  REAL :: r1,r2,z1,z2
-  REAL :: dx,theta_out,theta_in, rmaj_out, rmaj_in
-  REAL :: theta1,theta2,dtheta1,dtheta2,error
-  REAL :: arg1,arg2,save_theta2
   !
   !-------------------------------------------
   ! set global input values
@@ -1435,8 +1427,8 @@ SUBROUTINE fourier_geo
   !
   !-------------------------------------------
   !
-  INTEGER,PARAMETER :: nzmax = 148, mts=5
-  INTEGER :: i, j, k, n, m, l_theta
+  INTEGER,PARAMETER :: mts=5
+  INTEGER :: n, m
   !-----------------------------------------------
   !
   REAL :: theta, nr
@@ -1683,11 +1675,10 @@ SUBROUTINE ELITE_geo
   INTEGER :: i,j,k,imax,im,ip
   REAL :: arclength,drde,dzde,de
   REAL :: Rmax,Zmax,Bpmax,emax,Zmin,Rmin
-  REAL :: sign
   REAL :: e_length,s_length
   REAL :: da
   REAL :: a,b,c
-  REAL :: area,R0,Z0,signdZ
+  REAL :: area,R0,Z0
   !
   ! compute the arclength, area and centroid cooridinates of the flux surface
   !

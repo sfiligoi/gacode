@@ -59,8 +59,8 @@
 !
       IMPLICIT NONE
       REAL,PARAMETER :: epsilon1 = 1.E-12
-      INTEGER :: j1, j, i, jmax(maxmodes), imax, iroot
-      INTEGER :: is
+      INTEGER :: j1, j, i, jmax(maxmodes), iroot
+      INTEGER :: imax,is
       INTEGER :: di(iar),de(iar),mi,me
       REAL :: zgamax
       REAL :: particle_QL(nsm,3),energy_QL(nsm,3)
@@ -3405,18 +3405,18 @@
       USE tglf_eigen
 !
       IMPLICIT NONE
-      INTEGER :: i, j, k, ngrow,imid, iend, it, nsorted
+      INTEGER :: i, j, ngrow,imid, iend, it, nsorted
       INTEGER :: grow_index(iar),sorted_index(maxmodes)
       REAL,PARAMETER ::  epsilon1=1.0D-12
-      REAL :: growthrate(iar),frequency(iar)
+!      REAL :: growthrate(iar),frequency(iar)
 !
 !  find all of the unstable modes and the most unstable
 !
       ngrow = 0
 !      write(*,*)iur,"eigenvalues"
       do i=1,iur
-        growthrate(i)=0.0
-        frequency(i)=0.0
+!        growthrate(i)=0.0
+!        frequency(i)=0.0
         grow_index(i)=0
         if(rr(i).gt.epsilon1)then
           ngrow = ngrow + 1
@@ -3511,15 +3511,15 @@
       COMPLEX :: p_tot(nsm,nb)
       COMPLEX :: q_par(nsm,nb)
       COMPLEX :: q_tot(nsm,nb)
-      COMPLEX :: ng(nsm,nb)
-      COMPLEX :: ug_par(nsm,nb)
-      COMPLEX :: pg_par(nsm,nb)
-      COMPLEX :: pg_tot(nsm,nb)
-      COMPLEX :: qg_par(nsm,nb)
-      COMPLEX :: qg_tot(nsm,nb)
-      COMPLEX :: nt(nsm,nb)
-      COMPLEX :: pt_par(nsm,nb)
-      COMPLEX :: pt_tot(nsm,nb)
+!      COMPLEX :: ng(nsm,nb)
+!      COMPLEX :: ug_par(nsm,nb)
+!      COMPLEX :: pg_par(nsm,nb)
+!      COMPLEX :: pg_tot(nsm,nb)
+!      COMPLEX :: qg_par(nsm,nb)
+!      COMPLEX :: qg_tot(nsm,nb)
+!      COMPLEX :: nt(nsm,nb)
+!      COMPLEX :: pt_par(nsm,nb)
+!      COMPLEX :: pt_tot(nsm,nb)
       COMPLEX :: temp(nsm,nb)
       COMPLEX :: stress_par(nsm,nb,3),stress_per(nsm,nb,3)
       COMPLEX :: phi(nb),psi(nb),bsig(nb)
@@ -3528,7 +3528,7 @@
       COMPLEX :: phi_b0_phi,b0_phi
       COMPLEX :: phi_kx_phi,kx_phi
       COMPLEX :: phi_kpar_phi,kpar_phi
-      COMPLEX :: dum,freq_QL
+      COMPLEX :: freq_QL
       REAL :: betae_psi,betae_sig
       REAL :: phi_norm,vnorm
       REAL :: particle_weight(nsm,3)
@@ -3540,16 +3540,15 @@
       REAL :: wd_bar,b0_bar,kx_bar,kpar_bar
       REAL :: phi_weight,epsilon1
       REAL :: Ne_Te_phase,Ne_Te_cos,Ne_Te_sin
-      REAL :: ft2,cu,cq1,cq3
       REAL :: stress_correction,wp
 !
 !      xi=(0.0,1.0)
       epsilon1 = 1.D-12
       freq_QL = eigenvalue
-      ft2=ft*ft
-      cu = 1.0
-      cq1 = 1.0
-      cq3 = 1.0
+!      ft2=ft*ft
+!      cu = 1.0
+!      cq1 = 1.0
+!      cq3 = 1.0
 !
 !  fill the density and total pressure vectors
 !
@@ -3834,7 +3833,7 @@
       USE tglf_hermite
 !
       IMPLICIT NONE
-      REAL,PARAMETER :: eps=3.0D-14,pim4=0.7511255444649425D0
+      REAL,PARAMETER :: eps=3.0D-14
       INTEGER,PARAMETER:: maxit=100
       INTEGER :: n
       INTEGER :: i,its,j,m
@@ -3934,10 +3933,8 @@
       USE tglf_hermite
 !
       IMPLICIT NONE
-      INTEGER :: i,j,k
-      INTEGER :: nm
+      INTEGER :: i,j
       REAL :: h0
-      REAL :: h2(nb,nb)
 !
 !      write(*,*)"hermite",nbasis
       h0 = sqrt_two/pi**0.25

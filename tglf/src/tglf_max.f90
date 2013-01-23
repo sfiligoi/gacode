@@ -7,23 +7,20 @@
       USE tglf_pkg
 !
       IMPLICIT NONE
-      INTEGER,PARAMETER :: nbmax=4
       LOGICAL :: save_iflux
-      INTEGER :: nt,i,is,imax,ntm
+      INTEGER :: nt,i,is,imax
       INTEGER :: save_nbasis
-      INTEGER :: igamma,branch
+      INTEGER :: branch
       REAL :: width_max=1.65
       REAL :: width_min=0.15
-      REAL :: tp,ta,tb,dt,ga,gb,dg,fm
+      REAL :: tp,dt
       REAL :: t1,t2,tm,g1,g2,gm
       REAL :: tmax,tmin,gamma_max,gmax
       REAL :: save_width,dtmin
-      REAL :: dg1,dg2,dgmin
       REAL :: gamma_n(nt0),freq_n(nt0),width_n(nt0)
-      REAL :: save_gamma_max
       REAL :: save_vexb_shear
       REAL :: save_alpha_kx_p
-      REAL :: wkp_max,wgp_max,width_p_max 
+      REAL :: wgp_max,width_p_max 
       REAL :: kyi
 !
       CALL tglf_setup_geometry
