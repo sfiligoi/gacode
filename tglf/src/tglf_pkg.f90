@@ -1,67 +1,53 @@
       MODULE tglf_pkg
 !
       IMPLICIT NONE
-      PRIVATE
-! linear stability and transport model drivers
-      PUBLIC :: tglf,tglf_TM,tglf_TM_mpi
-! geometry setup utility
-      PUBLIC :: tglf_setup_geometry
-! input routines
-      PUBLIC :: put_species,put_kys,put_signs
-      PUBLIC :: put_gaussian_width,put_averages
-      PUBLIC :: put_gradients,put_profile_shear
-      PUBLIC :: put_switches,put_model_parameters
-      PUBLIC :: put_s_alpha_geometry,put_Miller_geometry
-      PUBLIC :: put_Fourier_geometry,put_ELITE_geometry
-      PUBLIC :: put_eikonal, put_rare_switches
 ! output routines
-      PUBLIC :: get_growthrate,get_frequency
-      PUBLIC :: get_QL_particle_flux,get_QL_energy_flux
-      PUBLIC :: get_QL_stress_par,get_QL_stress_tor 
-      PUBLIC :: get_QL_exchange 
-      PUBLIC :: get_QL_phi,get_QL_density,get_QL_temperature
-      PUBLIC :: get_gaussian_width  
-      PUBLIC :: get_R_unit
-      PUBLIC :: get_q_unit
-      PUBLIC :: get_wd_bar
-      PUBLIC :: get_b0_bar
-      PUBLIC :: get_ave_wd
-      PUBLIC :: get_ave_b0
-      PUBLIC :: get_particle_flux
-      PUBLIC :: get_energy_flux
-      PUBLIC :: get_stress_par
-      PUBLIC :: get_stress_tor
-      PUBLIC :: get_exchange
-      PUBLIC :: get_phi_bar
-      PUBLIC :: get_v_bar
-      PUBLIC :: get_n_bar
-      PUBLIC :: get_t_bar
-      PUBLIC :: get_n_bar_sum
-      PUBLIC :: get_t_bar_sum
-      PUBLIC :: get_Ne_Te_phase
-      PUBLIC :: get_phi_bar_sum
-      PUBLIC :: get_v_bar_sum
-      PUBLIC :: get_q_low
-      PUBLIC :: get_a_pol
-      PUBLIC :: get_a_tor
-      PUBLIC :: get_Bp0
-      PUBLIC :: get_R2_ave
-      PUBLIC :: get_B2_ave
-      PUBLIC :: get_RBt_ave
-      PUBLIC :: get_nky_out
-      PUBLIC :: get_eigenvalue_spectrum_out
-      PUBLIC :: get_field_spectrum_out
-      PUBLIC :: get_intensity_spectrum_out
-      PUBLIC :: get_flux_spectrum_out
-      PUBLIC :: get_ky_spectrum_out
-      PUBLIC :: get_DM
-      PUBLIC :: get_DR
-      PUBLIC :: get_DEP_parameters
-      PUBLIC :: get_wavefunction_out
-      PUBLIC :: write_tglf_input
-      PUBLIC :: write_wavefunction_out
+      REAL,EXTERNAL :: get_growthrate,get_frequency
+      REAL,EXTERNAL :: get_QL_particle_flux,get_QL_energy_flux
+      REAL,EXTERNAL :: get_QL_stress_par,get_QL_stress_tor
+      REAL,EXTERNAL :: get_QL_exchange
+      REAL,EXTERNAL :: get_QL_phi,get_QL_density,get_QL_temperature
+      REAL,EXTERNAL :: get_gaussian_width
+      REAL,EXTERNAL :: get_R_unit
+      REAL,EXTERNAL :: get_q_unit
+      REAL,EXTERNAL :: get_wd_bar
+      REAL,EXTERNAL :: get_b0_bar
+      REAL,EXTERNAL :: get_ave_wd
+      REAL,EXTERNAL :: get_ave_b0
+      REAL,EXTERNAL :: get_particle_flux
+      REAL,EXTERNAL :: get_energy_flux
+      REAL,EXTERNAL :: get_stress_par
+      REAL,EXTERNAL :: get_stress_tor
+      REAL,EXTERNAL :: get_exchange
+      REAL,EXTERNAL :: get_phi_bar
+      REAL,EXTERNAL :: get_v_bar
+      REAL,EXTERNAL :: get_n_bar
+      REAL,EXTERNAL :: get_t_bar
+      REAL,EXTERNAL :: get_n_bar_sum
+      REAL,EXTERNAL :: get_t_bar_sum
+      REAL,EXTERNAL :: get_Ne_Te_phase
+      REAL,EXTERNAL :: get_phi_bar_sum
+      REAL,EXTERNAL :: get_v_bar_sum
+      REAL,EXTERNAL :: get_q_low
+      REAL,EXTERNAL :: get_a_pol
+      REAL,EXTERNAL :: get_a_tor
+      REAL,EXTERNAL :: get_Bp0
+      REAL,EXTERNAL :: get_R2_ave
+      REAL,EXTERNAL :: get_B2_ave
+      REAL,EXTERNAL :: get_RBt_ave
+      REAL,EXTERNAL :: get_nky_out
+      REAL,EXTERNAL :: get_eigenvalue_spectrum_out
+      REAL,EXTERNAL :: get_field_spectrum_out
+      REAL,EXTERNAL :: get_intensity_spectrum_out
+      REAL,EXTERNAL :: get_flux_spectrum_out
+      REAL,EXTERNAL :: get_ky_spectrum_out
+      REAL,EXTERNAL :: get_DM
+      REAL,EXTERNAL :: get_DR
+      REAL,EXTERNAL :: get_DEP_parameters
+      REAL,EXTERNAL :: get_wavefunction_out
 !
       CONTAINS
+!
 !
       SUBROUTINE tglf
       USE tglf_global
@@ -81,10 +67,5 @@
       find_width_in=.FALSE.
 !
       END SUBROUTINE tglf
-!
-      include 'tglf_inout.f90'
-      include 'tglf_TM.f90'
-      include 'tglf_TM_mpi.f90'
-      include 'tglf_setup_geometry.f90'
 !
       END MODULE tglf_pkg

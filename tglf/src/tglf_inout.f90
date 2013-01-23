@@ -1316,6 +1316,7 @@
 !
       SUBROUTINE write_tglf_input
 !
+      USE tglf_pkg
       USE tglf_global
 !
       IMPLICIT NONE

@@ -23,6 +23,10 @@ LLIB=tglf_lib
 
 OBJECTS = tglf_modules.o   \
           tglf_pkg.o       \
+          tglf_TM.o        \
+          tglf_TM_mpi.f90  \
+          tglf_inout.o     \
+          tglf_setup_geometry.o \
           tglf_LS.o        \
           tglf_geometry.o  \
           tglf_matrix.o    \

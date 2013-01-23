@@ -58,16 +58,10 @@
       USE tglf_eigen
 !
       IMPLICIT NONE
-      REAL,PARAMETER :: epsilon1 = 1.D-12
-      INTEGER :: j1, j2, j, i, k, jmax(maxmodes), imax, iroot
-      INTEGER :: is,js
-      INTEGER :: cpucount1,cpucount2,cpurate
-      REAL :: cputime0,cputime1,cputime2
-!
-      INTEGER :: jroot(iar),di(iar),de(iar),mi,me
-      REAL :: p0
-      REAL :: xnueff,xnu_therm
-      REAL :: wd_ave,w_bounce,r_bounce
+      REAL,PARAMETER :: epsilon1 = 1.E-12
+      INTEGER :: j1, j, i, jmax(maxmodes), imax, iroot
+      INTEGER :: is
+      INTEGER :: di(iar),de(iar),mi,me
       REAL :: zgamax
       REAL :: particle_QL(nsm,3),energy_QL(nsm,3)
       REAL :: stress_par_QL(nsm,3),stress_tor_QL(nsm,3)
@@ -76,16 +70,16 @@
       REAL :: Ne_Te_phase
       REAL :: wd_bar,b0_bar,kx_bar,kpar_bar,v2_bar,kyi
       REAL :: get_intensity, get_gamma_net
-!      COMPLEX ::  v(iar)
-!      COMPLEX :: xi
 !  ZGESV storage
-      REAL :: small = 1.0D-13
+!      REAL :: small = 1.0D-13
+      REAL :: small 
       INTEGER :: info,ipiv(iar)
-      COMPLEX :: zmat(iar,iar),xv(iar,1)
+      COMPLEX :: zmat(iar,iar)
       COMPLEX :: field_weight(3,nb)
 ! 
 !      cputime0=MPI_WTIME()
 !
+      small = 1.0D-13
       if(new_start)then
 ! set up hermite basis and fill species arrays
         trace_path(2)=1
@@ -95,8 +89,6 @@
         trace_path(3)=1
         CALL get_species
       endif
-!
-!      xi = (0.0,1.0)
 !
       nbasis = nbasis_max_in
 !
@@ -328,7 +320,7 @@
         enddo           
       endif
 !
- 999  continue
+! 999  continue
 !
       END SUBROUTINE tglf_LS
 !
