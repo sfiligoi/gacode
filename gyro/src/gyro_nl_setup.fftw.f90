@@ -19,6 +19,8 @@ subroutine gyro_nl_setup
   !------------------------------------
 
   include 'fftw_f77.i'
+  integer :: ierr
+  integer, external :: fftw_threads_init
 
   !----------------------------------------------------
   do nn=-n_max,n_max
@@ -45,6 +47,9 @@ subroutine gyro_nl_setup
   n_max_d = (3*n_max)/2+1
   n_fft   = 2*n_max_d+2
   !
+
+  call fftw_f77_threads_init(ierr)
+
   call rfftw_f77_create_plan(plan_b,&
        n_fft,&
        FFTW_BACKWARD,&
