@@ -253,10 +253,10 @@ contains
     write(1,*) '# Species vectors:'
     write(1,*) '#---------------------------------------------------'
     write(1,30) 'ZS_1',tglf_zs_in(1)
-    write(1,30) 'ZS_2',tglf_zs_in(1)
-    write(1,30) 'ZS_3',tglf_zs_in(1)
-    write(1,30) 'ZS_4',tglf_zs_in(1)
-    write(1,30) 'ZS_5',tglf_zs_in(1)
+    write(1,30) 'ZS_2',tglf_zs_in(2)
+    write(1,30) 'ZS_3',tglf_zs_in(3)
+    write(1,30) 'ZS_4',tglf_zs_in(4)
+    write(1,30) 'ZS_5',tglf_zs_in(5)
     write(1,30) 'MASS_1',tglf_mass_in(1)
     write(1,30) 'MASS_2',tglf_mass_in(2)
     write(1,30) 'MASS_3',tglf_mass_in(3)
