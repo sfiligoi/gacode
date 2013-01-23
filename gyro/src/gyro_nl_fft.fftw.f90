@@ -20,6 +20,8 @@ subroutine gyro_nl_fft
   !--------------------------------------------
   implicit none
   !
+  integer :: p
+  !
   complex, dimension(-n_max:n_max,i1_buffer:i2_buffer) :: fn
   complex, dimension(-n_max:n_max,i1_buffer:i2_buffer) :: gn
   complex, dimension(0:n_max,n_x) :: nl
