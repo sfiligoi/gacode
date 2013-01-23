@@ -2,11 +2,11 @@
 ! gyro_nl_setup.fftw.f90
 !
 ! PURPOSE:
-!  Allocate (and define) selected arrays for 
-!  use with direct and FFT methods.
+! Allocate (and define) selected arrays for
+! use with direct and FFT methods.
 !
 ! NOTES:
-! ** FFTW-specific routine!  
+! ** FFTW-specific routine!
 !-------------------------------------------------------
 
 subroutine gyro_nl_setup
@@ -23,7 +23,7 @@ subroutine gyro_nl_setup
   !----------------------------------------------------
   do nn=-n_max,n_max
      i_p(nn) = abs(nn)+1
-     if (nn < 0) then 
+     if (nn < 0) then
         n_p(nn) = -n(i_p(nn))
      else
         n_p(nn) = n(i_p(nn))
@@ -43,7 +43,7 @@ subroutine gyro_nl_setup
   ! FFT stuff
   !
   n_max_d = (3*n_max)/2+1
-  n_fft   = 2*n_max_d+2
+  n_fft = 2*n_max_d+2
   !
   call rfftw_f77_create_plan(plan_b,&
        n_fft,&
