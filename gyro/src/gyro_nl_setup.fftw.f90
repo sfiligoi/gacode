@@ -6,7 +6,7 @@
 ! use with direct and FFT methods.
 !
 ! NOTES:
-! ** FFTW-specific routine!
+! FFTW2 routine.
 !-------------------------------------------------------
 
 subroutine gyro_nl_setup
@@ -40,11 +40,14 @@ subroutine gyro_nl_setup
   !----------------------------------------------------
 
   !----------------------------------------------------
-  ! FFT stuff
+  ! FFTW2 arrays and plans
   !
   n_max_d = (3*n_max)/2+1
   n_fft = 2*n_max_d+2
   !
+  allocate( v_fft(0:n_fft-1,6*n_x))
+  allocate(vt_fft(0:n_fft-1,6*n_x))
+
   call rfftw_f77_create_plan(plan_b,&
        n_fft,&
        FFTW_BACKWARD,&

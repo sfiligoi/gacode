@@ -7,7 +7,7 @@
 !  difference scheme with FFT in the toroidal direction.
 !
 ! NOTES:
-!  FFTW_specific version.
+!  FFTW3 version.
 !----------------------------------------------------------------
 
 subroutine gyro_nl_fft
@@ -81,7 +81,7 @@ subroutine gyro_nl_fft
         !
         !
         do i = ibeg, iend
-           v_fft(:,i,:) = 0.0
+           v_fft3(:,i,:) = 0.0
            do nn=0,n_max
               fn_r = (0.0,0.0)
               gn_r = (0.0,0.0)
@@ -103,19 +103,19 @@ subroutine gyro_nl_fft
               !--------------------------------------------------
               ! Supervector loading I
               !
-              v_fft(nn,i,1) = real(fn(nn,i))
-              v_fft(nn,i,2) = real(gn(nn,i))
-              v_fft(nn,i,3) = real(fn_p)
-              v_fft(nn,i,4) = real(gn_p)
-              v_fft(nn,i,5) = real(fn_r)
-              v_fft(nn,i,6) = real(gn_r)
+              v_fft3(nn,i,1) = real(fn(nn,i))
+              v_fft3(nn,i,2) = real(gn(nn,i))
+              v_fft3(nn,i,3) = real(fn_p)
+              v_fft3(nn,i,4) = real(gn_p)
+              v_fft3(nn,i,5) = real(fn_r)
+              v_fft3(nn,i,6) = real(gn_r)
               if (nn /= 0) then
-                 v_fft(n_fft-nn,i,1) = aimag(fn(nn,i))
-                 v_fft(n_fft-nn,i,2) = aimag(gn(nn,i))
-                 v_fft(n_fft-nn,i,3) = aimag(fn_p)
-                 v_fft(n_fft-nn,i,4) = aimag(gn_p)
-                 v_fft(n_fft-nn,i,5) = aimag(fn_r)
-                 v_fft(n_fft-nn,i,6) = aimag(gn_r)
+                 v_fft3(n_fft-nn,i,1) = aimag(fn(nn,i))
+                 v_fft3(n_fft-nn,i,2) = aimag(gn(nn,i))
+                 v_fft3(n_fft-nn,i,3) = aimag(fn_p)
+                 v_fft3(n_fft-nn,i,4) = aimag(gn_p)
+                 v_fft3(n_fft-nn,i,5) = aimag(fn_r)
+                 v_fft3(n_fft-nn,i,6) = aimag(gn_r)
               endif
 
            enddo ! nn
@@ -134,32 +134,32 @@ subroutine gyro_nl_fft
         do i = ibeg, iend
            do nn=0,n_fft-1
               !f dg/dr
-              fg_r   =  vt_fft(nn,i,1)*vt_fft(nn,i,6)
+              fg_r   =  vt_fft3(nn,i,1)*vt_fft3(nn,i,6)
 
               !g df/dr
-              gf_r   =  vt_fft(nn,i,2)*vt_fft(nn,i,5)
+              gf_r   =  vt_fft3(nn,i,2)*vt_fft3(nn,i,5)
 
               !g df/dp
-              gf_p   =  vt_fft(nn,i,2)*vt_fft(nn,i,3)
+              gf_p   =  vt_fft3(nn,i,2)*vt_fft3(nn,i,3)
 
               !f dg/dp
-              fg_p   =  vt_fft(nn,i,1)*vt_fft(nn,i,4)
+              fg_p   =  vt_fft3(nn,i,1)*vt_fft3(nn,i,4)
 
               ! df/dp dg/dr
-              f_pg_r =  vt_fft(nn,i,3)*vt_fft(nn,i,6)
+              f_pg_r =  vt_fft3(nn,i,3)*vt_fft3(nn,i,6)
 
               ! df/dr dg/dp
-              f_rg_p =  vt_fft(nn,i,5)*vt_fft(nn,i,4)
+              f_rg_p =  vt_fft3(nn,i,5)*vt_fft3(nn,i,4)
 
               !---------------------------------------------------------------
               ! Supervector loading II
               ! 
-              vt_fft(nn,i,1) = fg_r
-              vt_fft(nn,i,2) = gf_r
-              vt_fft(nn,i,3) = gf_p
-              vt_fft(nn,i,4) = fg_p
-              vt_fft(nn,i,5) = f_pg_r
-              vt_fft(nn,i,6) = f_rg_p   
+              vt_fft3(nn,i,1) = fg_r
+              vt_fft3(nn,i,2) = gf_r
+              vt_fft3(nn,i,3) = gf_p
+              vt_fft3(nn,i,4) = fg_p
+              vt_fft3(nn,i,5) = f_pg_r
+              vt_fft3(nn,i,6) = f_rg_p   
            enddo !nn
         enddo
 !$omp end parallel
@@ -177,11 +177,11 @@ subroutine gyro_nl_fft
         !  g df/dp - f dg/dp, 
 !$omp parallel private(fgp_r,fg_r_c,gf_r_c,f_pg_r_c,f_rg_p_c,fgr,fg2,fgr_p)
         do i = ibeg, iend
-           fgp(0,i) = (cmplx(v_fft(0,i,3),0.0) - &
-                       cmplx(v_fft(0,i,4),0.0))/n_fft
+           fgp(0,i) = (cmplx(v_fft3(0,i,3),0.0) - &
+                       cmplx(v_fft3(0,i,4),0.0))/n_fft
            do nn=1,n_max
-              fgp(nn,i) = (cmplx(v_fft(nn,i,3),v_fft(n_fft-nn,i,3))- &
-                           cmplx(v_fft(nn,i,4),v_fft(n_fft-nn,i,4)))/n_fft
+              fgp(nn,i) = (cmplx(v_fft3(nn,i,3),v_fft3(n_fft-nn,i,3))- &
+                           cmplx(v_fft3(nn,i,4),v_fft3(n_fft-nn,i,4)))/n_fft
            enddo ! nn 
         enddo ! i
 !$omp barrier   ! ensure all fgp values are available
@@ -199,15 +199,15 @@ subroutine gyro_nl_fft
               enddo ! i_diff
 
               if (nn == 0) then
-                 fg_r_c   = cmplx(v_fft(0,i,1),0.0)
-                 gf_r_c   = cmplx(v_fft(0,i,2),0.0)
-                 f_pg_r_c = cmplx(v_fft(0,i,5),0.0)
-                 f_rg_p_c = cmplx(v_fft(0,i,6),0.0)   
+                 fg_r_c   = cmplx(v_fft3(0,i,1),0.0)
+                 gf_r_c   = cmplx(v_fft3(0,i,2),0.0)
+                 f_pg_r_c = cmplx(v_fft3(0,i,5),0.0)
+                 f_rg_p_c = cmplx(v_fft3(0,i,6),0.0)   
               else
-                 fg_r_c   = cmplx(v_fft(nn,i,1),v_fft(n_fft-nn,i,1))
-                 gf_r_c   = cmplx(v_fft(nn,i,2),v_fft(n_fft-nn,i,2))
-                 f_pg_r_c = cmplx(v_fft(nn,i,5),v_fft(n_fft-nn,i,5))
-                 f_rg_p_c = cmplx(v_fft(nn,i,6),v_fft(n_fft-nn,i,6)) 
+                 fg_r_c   = cmplx(v_fft3(nn,i,1),v_fft3(n_fft-nn,i,1))
+                 gf_r_c   = cmplx(v_fft3(nn,i,2),v_fft3(n_fft-nn,i,2))
+                 f_pg_r_c = cmplx(v_fft3(nn,i,5),v_fft3(n_fft-nn,i,5))
+                 f_rg_p_c = cmplx(v_fft3(nn,i,6),v_fft3(n_fft-nn,i,6)) 
               end if
 
               !----------------------------------------------------------------
