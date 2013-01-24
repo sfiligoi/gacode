@@ -96,6 +96,7 @@ module neo_globals
   integer :: adiabatic_ele_model
   integer :: spitzer_model
   real    :: epar0_spitzer
+  integer :: coll_uncoupledei_model
   real    :: sign_q
   real    :: sign_bunit
   !---------------------------------------------------------------
@@ -184,6 +185,9 @@ module neo_globals
   real, dimension(:), allocatable :: vth_norm
   real, dimension(:), allocatable :: b_unit
   real, parameter :: mass_deuterium = 3.3452   ! (x 10-27 kg)
+
+  real, dimension(:), allocatable :: psiN_polflux
+  real :: psiN_polflux_a
 
   ! theta derivative variables
   integer, dimension(-2:2) :: cderiv

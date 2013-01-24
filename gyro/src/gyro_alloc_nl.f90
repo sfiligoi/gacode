@@ -45,17 +45,19 @@ subroutine gyro_alloc_nl(flag)
      if (allocated(i_p)) deallocate(i_p)
      if (allocated(c_nl_i)) deallocate(c_nl_i)
 
+     ! Special FFTW2 deallocations
+     if (allocated(v_fft)) deallocate(v_fft)
+     if (allocated(vt_fft)) deallocate(vt_fft)
+
+     ! Special FFTW3 deallocations
+     if (allocated(v_fft3)) deallocate(v_fft3)
+     if (allocated(vt_fft3)) deallocate(vt_fft3)
+
      ! Special ESSL deallocations
      if (allocated(aux1_dcrft)) deallocate(aux1_dcrft)
      if (allocated(aux2_dcrft)) deallocate(aux2_dcrft)
      if (allocated(aux1_drcft)) deallocate(aux1_drcft)
      if (allocated(aux2_drcft)) deallocate(aux2_drcft)
-
-     ! Special libsci deallocations
-     if (allocated(table_cs)) deallocate(table_cs)
-     if (allocated(work_cs)) deallocate(work_cs)
-     if (allocated(table_sc)) deallocate(table_sc)
-     if (allocated(work_sc)) deallocate(work_sc)
 
   endif
 

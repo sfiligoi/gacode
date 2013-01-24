@@ -12,12 +12,10 @@
       USE tglf_kyspectrum
       IMPLICIT NONE
 !
-      LOGICAL :: unstable
-      INTEGER :: i,j,k,is,imax
-      INTEGER :: save_nbasis_max
+      INTEGER :: i,j,is,imax
       REAL :: dky
-      REAL :: phi_bar,phi_bar0,phi_bar1
-      REAl :: v_bar,v_bar0,v_bar1
+      REAL :: phi_bar0,phi_bar1
+      REAl :: v_bar0,v_bar1
       REAL :: dky0,dky1,ky0,ky1
       REAL :: pflux0(nsm,3),eflux0(nsm,3)
       REAL :: stress_par0(nsm,3),stress_tor0(nsm,3)
@@ -181,15 +179,12 @@
       INTEGER :: i,j,k,is,imax,t
       REAL :: width_max
       REAL :: gmax,fmax
-      REAL :: phi_bar,phi_bar1
-      REAl :: v_bar,v_bar1
+      REAL :: phi_bar
       REAL :: gamma_cutoff,reduce,rexp
       REAL :: gamma_net_1
-      REAL :: save_vexb_shear
       REAL :: pflux1,eflux1
       REAL :: stress_tor1,stress_par1
       REAL :: exch1
-      REAL :: ns1,ts1
 !
 !
 ! setup the ky-spectrum
@@ -361,7 +356,7 @@
       REAL :: ky_min=0.05
       REAL :: ky_max=0.7
       REAL :: ky0,ky1,lnky,dky0
-      REAL :: debye_cut,ky_cut
+      REAL :: ky_cut
 
 !
 !  spectrum_type = 0 for linear GYRO spectrum

@@ -6,8 +6,7 @@
       USE tglf_coeff
 !
       IMPLICIT NONE
-      INTEGER :: i,j,k,is
-      REAL :: p0,ky2,kpar2
+      INTEGER :: i,j,k 
 !
       new_matrix=.FALSE.
 !      write(*,*)"get_matrix"
@@ -1017,7 +1016,7 @@
 !
       IMPLICIT NONE
       INTEGER :: i,j,k,is
-      REAL :: b,bb,ww,thx,eps,p0
+      REAL :: ww
       REAL :: zero_cut
       REAL :: debye,betaU
 !
@@ -1657,7 +1656,6 @@
       USE tglf_coeff
 !
       IMPLICIT NONE
-      LOGICAL :: changed
       INTEGER :: nm,i,j,k
       INTEGER :: lwork,info
       REAL :: a(nb,nb)
@@ -1696,10 +1694,8 @@
 !       enddo
 ! 
 ! regularize the eigenvalues
-       changed=.FALSE.
        do k=1,nm
            if(ABS(w(k)).lt.wd_zero_in)then
-             changed=.TRUE.
              if(w(k).ge.0.0)then
                w(k)=wd_zero_in
              else
@@ -1748,7 +1744,6 @@
       IMPLICIT NONE
       INTEGER :: nm,i,j,k,is
       INTEGER :: lwork,info
-      REAL :: check
       REAL :: w(nb)
       REAL :: rwork(3*nb-2)
       COMPLEX :: work(34*nb)
@@ -1854,7 +1849,8 @@
       IMPLICIT NONE
       INTEGER :: nm,is,i,j,k
       INTEGER :: lwork,info
-      REAL :: check,detm,zero
+      REAL :: detm,zero
+!      REAL :: check
       REAL :: a(nb,nb)
       REAL :: w(nb)
       REAL :: work(34*nb)
@@ -1959,7 +1955,8 @@
       IMPLICIT NONE
       INTEGER :: nm,i,j,k
       INTEGER :: lwork,info
-      REAL :: check,detm,zero
+      REAL :: detm,zero
+!      REAL :: check
       REAL :: a(nb,nb)
       REAL :: w(nb)
       REAL :: work(34*nb)

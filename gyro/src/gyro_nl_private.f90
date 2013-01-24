@@ -6,8 +6,8 @@
 !  routine containts control parameters for 
 !   1. Direct method
 !   2. FFTW FFT
-!   3. ESSL FFT
-!   4. LIBSC FFT
+!   3. FFTW3 FFT
+!   4. ESSL FFT
 !-------------------------------------------------------
 
 module gyro_nl_private
@@ -23,17 +23,27 @@ module gyro_nl_private
   integer, dimension(:), allocatable :: n_p
   integer, dimension(:), allocatable :: i_p  
 
+
   !-----------------------------------------------
-  ! Generic FFT parameters:
+  ! Generic FFT dimensions
+  !
   integer :: n_max_d
   integer :: n_fft
   !-----------------------------------------------
 
   !-----------------------------------------------
-  ! FFTW-specific parameters:
+  ! FFTW parameters:
   !
   integer(8) :: plan_f 
   integer(8) :: plan_b
+  !
+  ! FFTW2
+  real, allocatable :: v_fft(:,:)
+  real, allocatable :: vt_fft(:,:)
+  !
+  ! FFTW3
+  real, allocatable :: v_fft3(:,:,:)
+  real, allocatable :: vt_fft3(:,:,:)
   !-----------------------------------------------
 
   !-----------------------------------------------
@@ -44,19 +54,6 @@ module gyro_nl_private
   !
   real, dimension(:), allocatable :: aux1_drcft
   real, dimension(:), allocatable :: aux2_drcft
-  !-----------------------------------------------
-
-  !-----------------------------------------------
-  ! LIBSCI-specific parameters:
-  !
-  integer :: nx_fft
-  integer :: ny_fft
-  !
-  real, dimension(:), allocatable :: table_cs
-  real, dimension(:), allocatable :: work_cs
-  !
-  real, dimension(:), allocatable :: table_sc
-  real, dimension(:), allocatable :: work_sc
   !-----------------------------------------------
 
 end module gyro_nl_private

@@ -11,7 +11,7 @@ MAKE = make
 FC	= mpif90 -I$(GACODE_ROOT)/modules -J$(GACODE_ROOT)/modules
 F77	= mpif90
 
-FOPM    = -fopenmp
+FOMP    = -fopenmp
 FMATH	= -fdefault-real-8
 FOPT	= -O3 -m64
 #FDEBUG	= -O -Wall -Wunderflow -W -Wuninitialized -fbounds-check
