@@ -34,6 +34,8 @@ subroutine neo_read_input
   read(1,*) spitzer_model
   read(1,*) epar0_spitzer
 
+  read(1,*) coll_uncoupledei_model
+
   read(1,*) n_species
  
   read(1,*) nu_1_in

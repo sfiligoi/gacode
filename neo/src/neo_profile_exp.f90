@@ -7,7 +7,6 @@ module neo_profile_exp
   real, dimension(:), allocatable :: rhoN_torflux_exp
   real, dimension(:), allocatable :: rhoN_torflux
   real, dimension(:), allocatable :: psiN_polflux_exp
-  real, dimension(:), allocatable :: psiN_polflux
   real, dimension(:), allocatable :: rmin_exp
   real, dimension(:), allocatable :: rmaj_exp
   real, dimension(:), allocatable :: q_exp

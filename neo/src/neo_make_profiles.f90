@@ -130,6 +130,8 @@ subroutine neo_make_profiles
      b_unit(:) = 1.0
      a_meters        = 1.0
      temp_norm(:)    = 1.0
+     psiN_polflux(:) = 0.0
+     psiN_polflux_a  = 0.0
 
 
   case (2)
@@ -335,6 +337,8 @@ subroutine neo_make_profiles
      charge_norm_fac = 1.6022
      dens_norm(:) = dens(1,:)
      temp_norm(:) = temp(1,:)
+     psiN_polflux(:) = 0.0
+     psiN_polflux_a  = 0.0
 
      ! Compute vth/a (1/s) using dimensional quantities.  
      ! mass(i) is thus measured in units of deuterium mass.
@@ -397,6 +401,7 @@ subroutine neo_make_profiles
      ! phi_(0) is used only in the weak rotation limit
      dphi0dr(:) = 0.0
   endif
+
 
   ! Print the re-mapped equilibrium data
   if(silent_flag == 0 .and. i_proc == 0) then
