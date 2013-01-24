@@ -27,6 +27,8 @@ module gyro_nl_private
   ! Generic FFT parameters:
   integer :: n_max_d
   integer :: n_fft
+  real, allocatable :: v_fft(:,:,:)
+  real, allocatable :: vt_fft(:,:,:)
   !-----------------------------------------------
 
   !-----------------------------------------------
