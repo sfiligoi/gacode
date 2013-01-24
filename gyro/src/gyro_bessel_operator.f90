@@ -18,6 +18,7 @@
 !       5:  G_perp^2(x) 
 !       6:  G_perp(x)*J_0(x)
 !       7:  I_0(x^2)
+!       8:  i*k_x*rho*[ J_0(x)-J_1(x)/x ] / x^2 
 !
 ! x = rho*sqrt((2*pi*p*a+u)^2+v^2)
 !
@@ -30,7 +31,7 @@
 !  u = k_theta*Gq*Theta
 !  v = k_theta*Gq 
 !
-!  rho = v_perp/Omega_c               (itype=1,..,6)
+!  rho = v_perp/Omega_c               (itype=1-6,8)
 !  rho = rhos_unit*sqrt(T)/(mu*z*b0)  (itype=7)
 !------------------------------------------------------------------
 
