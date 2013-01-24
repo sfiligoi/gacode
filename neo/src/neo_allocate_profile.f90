@@ -51,6 +51,7 @@ contains
        allocate(vth_norm(n_radial))
        allocate(omega_rot(n_radial))
        allocate(omega_rot_deriv(n_radial))
+       allocate(psiN_polflux(n_radial))
 
        geo_numeq_flag = 0
        geo_ny = 0
@@ -95,6 +96,7 @@ contains
        deallocate(vth_norm)
        deallocate(omega_rot)
        deallocate(omega_rot_deriv)
+       deallocate(psiN_polflux)
 
        deallocate(geo_yin)
 
@@ -119,7 +121,6 @@ contains
        allocate(rhoN_torflux_exp(n_grid_exp))
        allocate(rhoN_torflux(n_radial))
        allocate(psiN_polflux_exp(n_grid_exp))
-       allocate(psiN_polflux(n_radial))
        allocate(rmin_exp(n_grid_exp))
        allocate(rmaj_exp(n_grid_exp))
        allocate(q_exp(n_grid_exp))
@@ -158,7 +159,6 @@ contains
        deallocate(rhoN_torflux_exp)
        deallocate(rhoN_torflux)
        deallocate(psiN_polflux_exp)
-       deallocate(psiN_polflux)
        deallocate(rmin_exp)
        deallocate(rmaj_exp)
        deallocate(q_exp)

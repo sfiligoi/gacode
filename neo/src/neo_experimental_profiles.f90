@@ -80,9 +80,11 @@ subroutine neo_experimental_profiles
   rhoN_torflux_exp(:) = EXPRO_rho(:)
   if(abs(EXPRO_poloidalfluxover2pi(n_grid_exp)) < epsilon(0.)) then
      psiN_polflux_exp(:) = 0.0
+     psiN_polflux_a      = 0.0
   else
      psiN_polflux_exp(:) = EXPRO_poloidalfluxover2pi(:) &
           / EXPRO_poloidalfluxover2pi(n_grid_exp)
+     psiN_polflux_a     = EXPRO_poloidalfluxover2pi(n_grid_exp)
   endif
   rmin_exp(:)         = EXPRO_rmin(:)
   rmaj_exp(:)         = EXPRO_rmaj(:)
