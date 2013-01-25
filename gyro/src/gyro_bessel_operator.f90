@@ -1,38 +1,38 @@
-!-----------------------------------------------------------------
-! gyro_bessel_operator.f08
+-----------------------------------------------------------------
+! gyro_bessel_operator.f90
 !
 ! PURPOSE:
-!  Compute all the Bessel-function kernel (averaging) stencils
-!  to the required bandwidth (m_gyro).  Truncation is accomplished
-!  by assuming functions are constant in the truncated region.
-!  
-!  In the limit of maximal m_gyro (n_x/2), these are the 
-!  pseudospectral operators.
+! Compute all the Bessel-function kernel (averaging) stencils
+! to the required bandwidth (m_gyro). Truncation is accomplished
+! by assuming functions are constant in the truncated region.
+!
+! In the limit of maximal m_gyro (n_x/2), these are the
+! pseudospectral operators.
 !
 ! NOTES:
 !
-! itype=1:  J_0(x) 
-!       2:  J_0^2(x)
-!       3:  -(i/2)*k_x*rho*[ J_0(x)+J_2(x) ]
-!       4:  G_perp = (1/2)*[ J_0(x)+J_2(x) ] 
-!       5:  G_perp^2(x) 
-!       6:  G_perp(x)*J_0(x)
-!       7:  I_0(x^2)
-!       8:  i*k_x*rho*[ J_0(x)-J_1(x)/x ] / x^2 
+! itype=1: J_0(x)
+! 2: J_0^2(x)
+! 3: -(i/2)*k_x*rho*[ J_0(x)+J_2(x) ]
+! 4: G_perp = (1/2)*[ J_0(x)+J_2(x) ]
+! 5: G_perp^2(x)
+! 6: G_perp(x)*J_0(x)
+! 7: I_0(x^2)
+! 8: i*k_x*rho*[ J_0(x)-J_1(x)/x ] / x^2
 !
 ! x = rho*sqrt((2*pi*p*a+u)^2+v^2)
 !
 ! kx -> pi_2*p*a + u
 ! ky -> v
-! 
+!
 ! INPUT:
 !
-!  a = |grad(r)|/L 
-!  u = k_theta*Gq*Theta
-!  v = k_theta*Gq 
+! a = |grad(r)|/L
+! u = k_theta*Gq*Theta
+! v = k_theta*Gq
 !
-!  rho = v_perp/Omega_c               (itype=1-6,8)
-!  rho = rhos_unit*sqrt(T)/(mu*z*b0)  (itype=7)
+! rho = v_perp/Omega_c (itype=1-6,8)
+! rho = rhos_unit*sqrt(T)/(mu*z*b0) (itype=7)
 !------------------------------------------------------------------
 
 subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
@@ -53,12 +53,15 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
   integer :: p
   integer :: p0
   integer :: m
+  integer :: ierr
   !
   real :: x
+  real :: bessel(0:2)
   real :: func(-n_x/2:n_x/2-1)
   complex :: g0
   complex :: gp
   !
+  real, external :: BESJ0
   real, external :: BESEI0
   !-----------------------------------------
 
@@ -71,7 +74,7 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
      ! J_0
      do p=-p0,p0-1
         x = rho*sqrt((pi_2*p*a+u)**2+v**2)
-        func(p)=bessel_j0(x)/n_x
+        func(p)=BESJ0(x)/n_x
      enddo
 
   case (2)
@@ -79,7 +82,7 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
      ! J_0^2
      do p=-p0,p0-1
         x = rho*sqrt((pi_2*p*a+u)**2+v**2)
-        func(p)=bessel_j0(x)**2/n_x
+        func(p)=BESJ0(x)**2/n_x
      enddo
 
   case (3)
@@ -89,23 +92,26 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
      ! The factor -(i/2) will be applied outside this loop
      do p=-p0,p0-1
         x = rho*sqrt((pi_2*p*a+u)**2+v**2)
-        func(p) = (pi_2*p*a+u)*rho*(2*bessel_j1(x)/x)/n_x
+        call RJBESL(x,0.0,3,bessel,ierr)
+        func(p) = (pi_2*p*a+u)*rho*(bessel(0)+bessel(2))/n_x
      enddo
 
   case (4)
 
-     ! G = 0.5*[ J_0(z)+J_2(z) ] 
+     ! G = (1/2)*[ J_0(z)+J_2(z) ]
      do p=-p0,p0-1
         x = rho*sqrt((pi_2*p*a+u)**2+v**2)
-        func(p) = (bessel_j1(x)/x)/n_x
+        call RJBESL(x,0.0,3,bessel,ierr)
+        func(p) = 0.5*(bessel(0)+bessel(2))/n_x
      enddo
 
   case (5)
 
-     ! G^2 
+     ! G^2
      do p=-p0,p0-1
         x = rho*sqrt((pi_2*p*a+u)**2+v**2)
-        func(p) = (bessel_j1(x)/x)**2/n_x
+        call RJBESL(x,0.0,3,bessel,ierr)
+        func(p) = (0.5*(bessel(0)+bessel(2)))**2/n_x
      enddo
 
   case (6)
@@ -113,7 +119,8 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
      ! G * J_0
      do p=-p0,p0-1
         x = rho*sqrt((pi_2*p*a+u)**2+v**2)
-        func(p) = (bessel_j1(x)/x)*bessel_j0(x)/n_x
+        call RJBESL(x,0.0,3,bessel,ierr)
+        func(p) = 0.5*(bessel(0)+bessel(2))*bessel(0)/n_x
      enddo
 
   case (7)
@@ -126,12 +133,13 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
 
   case (8)
 
-     ! i*k_x*rho*[ J_0(x)-J_1(x)/x ] / x^2 
+     ! i*k_x*rho*[ J_0(x)-J_1(x)/x ] / x^2
 
      ! The factor i will be applied outside this loop
      do p=-p0,p0-1
         x = rho*sqrt((pi_2*p*a+u)**2+v**2)
-        func(p) = (pi_2*p*a+u)*rho*(bessel_j0(x)-bessel_j1(x)/x)/x**2/n_x
+        call RJBESL(x,0.0,3,bessel,ierr)
+        func(p) = (pi_2*p*a+u)*rho*(bessel(0)-bessel(1)/x)/x**2/n_x
      enddo
 
   end select
@@ -139,10 +147,10 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
   !-----------------------------------------------------------
   ! Real-space operators:
   !
-  !  Construct real-space forms by summing over Fourier modes.
-  !  Real-space gridpoints in truncated region are ignored.
+  ! Construct real-space forms by summing over Fourier modes.
+  ! Real-space gridpoints in truncated region are ignored.
   !
-  !$omp parallel do private(g0) schedule(static)
+!$omp parallel do private(g0) schedule(static)
   do m=-m_gyro,m_gyro-i_gyro
      g0 = (0.0,0.0)
      do p=-p0,p0-1
@@ -169,9 +177,9 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
 
      ! Enforce reality if n=0:
      if (u == 0.0) then
-        if (i_gyro /= 1) then 
+        if (i_gyro /= 1) then
 
-           ! Correct truncated gyroaverage                 
+           ! Correct truncated gyroaverage
            g0 = sum(g(:))-1.0
            g(0) = g(0)-g0
 
@@ -184,9 +192,9 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
      ! ALTERNATIVE METHOD
 
      !-----------------------------------------------------------
-     !  Make end-coefficients equal to sum of neglected ones.
-     !  This is equivalent to assuming that functions are 
-     !  constant over the truncated region.
+     ! Make end-coefficients equal to sum of neglected ones.
+     ! This is equivalent to assuming that functions are
+     ! constant over the truncated region.
      !
      if (m_gyro < p0) then
         do m=-p0,-m_gyro-1
