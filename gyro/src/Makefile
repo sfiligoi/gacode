@@ -158,7 +158,7 @@ ifeq ($(HDF5),true)
 					gyro_write_h5mesh.o
 endif
 
-.SUFFIXES : .o .f90 .f08 .F90
+.SUFFIXES : .o .f90 .F90
 
 lib: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
