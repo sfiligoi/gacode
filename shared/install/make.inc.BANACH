@@ -5,7 +5,7 @@
 
 # Compilers
 
-FC	= mpif90 -std=f2008 -I $(GACODE_ROOT)/modules
+FC	= mpif90 -fall-intrinsics -std=f2008 -I $(GACODE_ROOT)/modules
 F77	= mpif90
 
 FOMP    = -fopenmp
