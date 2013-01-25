@@ -131,6 +131,17 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
         func(p) = BESEI0(x*x)/n_x
      enddo
 
+  case (8)
+
+     ! i*k_x*rho*[ J_0(x)-J_1(x)/x ] / x^2 
+
+     ! The factor i will be applied outside this loop
+     do p=-p0,p0-1
+        x = rho*sqrt((pi_2*p*a+u)**2+v**2)
+        call RJBESL(x,0.0,3,bessel,ierr)
+        func(p) = (pi_2*p*a+u)*rho*(bessel(0)-bessel(1)/x)/x**2/n_x
+     enddo
+
   end select
 
   !-----------------------------------------------------------
@@ -139,7 +150,7 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
   !  Construct real-space forms by summing over Fourier modes.
   !  Real-space gridpoints in truncated region are ignored.
   !
-!$omp parallel do private(g0) schedule(static)
+  !$omp parallel do private(g0) schedule(static)
   do m=-m_gyro,m_gyro-i_gyro
      g0 = (0.0,0.0)
      do p=-p0,p0-1
@@ -149,12 +160,20 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
   enddo
   !-----------------------------------------------------------
 
+  !-----------------------------------------------------------
+  ! Final factors
+  !
+  ! Multiply by -i/2 for case 3
+  if (itype == 3) g = -(i_c/2.0)*g
+
+  ! Multiply by i for case 8
+  if (itype == 8) g = i_c*g
+  !-----------------------------------------------------------
+
+
   if (truncation_method == 1) then
 
      ! ORIGINAL METHOD
-
-     ! Add final factor of i for case 3
-     if (itype == 3) g = -(i_c/2.0)*g
 
      ! Enforce reality if n=0:
      if (u == 0.0) then
@@ -202,9 +221,6 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
         g(m_gyro) = g(m_gyro)+gp
      endif
      !-----------------------------------------------------------
-
-     ! Add final factor of i for case 3
-     if (itype == 3) g = -(i_c/2.0)*g
 
      ! Enforce reality if n=0:
      if (u == 0.0) g = real(g)

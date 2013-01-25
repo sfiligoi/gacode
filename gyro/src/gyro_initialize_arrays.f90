@@ -27,7 +27,6 @@ subroutine gyro_initialize_arrays
   !---------------------------------------------------
   omega_linear = 0.0
   time_error   = 0.0
-  diff         = 0.0
 
   ! No field_blend
   field_blend_dot  = 0.0

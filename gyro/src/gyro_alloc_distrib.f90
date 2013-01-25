@@ -82,12 +82,16 @@ subroutine gyro_alloc_distrib(flag)
      endif
 
      ! Gyroaverage arrays
-     allocate(w_gyro(n_stack,-m_gyro:m_gyro-i_gyro,n_x,n_nek_loc_1,n_gk))
      allocate(z_gyro(-n_x/2:n_x/2,-n_x/2:n_x/2-1))
-     allocate(w_gyro_rot(n_stack,-m_gyro:m_gyro-i_gyro,n_x,n_nek_loc_1,n_gk))
+
+     ! G0a,G2a in Technical manual
+     allocate(w_gyro0(n_stack,-m_gyro:m_gyro-i_gyro,n_x,n_nek_loc_1,n_gk))
+     allocate(w_gyro2(n_stack,-m_gyro:m_gyro-i_gyro,n_x,n_nek_loc_1,n_gk))
 
      if (n_field == 3) then
-        allocate(w_gyro_aperp(n_stack,-m_gyro:m_gyro-i_gyro,n_x,n_nek_loc_1,n_gk))
+        ! G1a,G3a in Technical manual
+        allocate(w_gyro1(n_stack,-m_gyro:m_gyro-i_gyro,n_x,n_nek_loc_1,n_gk))
+        allocate(w_gyro3(n_stack,-m_gyro:m_gyro-i_gyro,n_x,n_nek_loc_1,n_gk))
      endif
 
   else 
@@ -120,10 +124,11 @@ subroutine gyro_alloc_distrib(flag)
      if (allocated(d_rbf)) deallocate(d_rbf) 
      if (allocated(d1_rbf)) deallocate(d1_rbf) 
 
-     deallocate(w_gyro)
      deallocate(z_gyro)
-     if (allocated(w_gyro_rot))   deallocate(w_gyro_rot)
-     if (allocated(w_gyro_aperp)) deallocate(w_gyro_aperp)
+     deallocate(w_gyro0)
+     deallocate(w_gyro2)
+     if (allocated(w_gyro1)) deallocate(w_gyro1)
+     if (allocated(w_gyro3)) deallocate(w_gyro3)
 
   endif
 

@@ -535,10 +535,12 @@ module gyro_globals
   real, dimension(:), allocatable :: s_d1
   real, dimension(:,:), allocatable :: gyro_trace
   !
-  complex, dimension(:,:,:,:,:), allocatable :: w_gyro
-  complex, dimension(:,:,:,:,:), allocatable :: w_gyro_rot
-  complex, dimension(:,:,:,:,:), allocatable :: w_gyro_aperp
-  !
+  ! Gyroaverage operators 
+  ! (G0a,G1a,G2a,G3a in Technical Guide)
+  complex, dimension(:,:,:,:,:), allocatable :: w_gyro0
+  complex, dimension(:,:,:,:,:), allocatable :: w_gyro1
+  complex, dimension(:,:,:,:,:), allocatable :: w_gyro2
+  complex, dimension(:,:,:,:,:), allocatable :: w_gyro3
   !---------------------------------------------------------
 
   !---------------------------------------------------------
@@ -855,7 +857,7 @@ module gyro_globals
   complex, dimension(:,:,:,:), allocatable :: p_store
   !
   complex, dimension(:,:,:,:), allocatable :: h_tran
-  complex, dimension(:,:,:), allocatable :: h_C
+  complex, dimension(:,:,:), allocatable :: h_c
   complex, dimension(:,:,:), allocatable :: f_coll
   complex, dimension(:,:,:), allocatable :: fb_coll
   !
@@ -926,14 +928,6 @@ module gyro_globals
   real, dimension(:,:,:,:), allocatable :: nonlinear_flux_trapped
   real, dimension(:,:), allocatable :: nonlinear_flux_momparts
   real, dimension(:,:), allocatable :: nonlinear_flux_excparts
-  !
-  ! Diffusivities:
-  !
-  real, dimension(:,:,:,:), allocatable :: diff_i
-  real, dimension(:,:,:,:), allocatable :: diff_i_trapped
-  real, dimension(:,:,:), allocatable :: diff
-  real, dimension(:,:,:), allocatable :: diff_trapped
-  real, dimension(:,:,:), allocatable :: diff_n
   !
   ! gyroBohm fluxes:
   !

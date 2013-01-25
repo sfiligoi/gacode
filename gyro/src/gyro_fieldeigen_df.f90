@@ -64,11 +64,11 @@ subroutine gyro_fieldeigen_df
               do i=1,n_x
                  do i_diff=-m_gyro,m_gyro-i_gyro
 
-                    fg(:,i_diff,i,mk,1) = w_gyro(m0,i_diff,i,p_nek_loc,is) &
+                    fg(:,i_diff,i,mk,1) = w_gyro0(m0,i_diff,i,p_nek_loc,is) &
                          *conjg(c_blend(:,m0,i,p_nek_loc))
 
                     if (n_field > 1) then
-                       fg(:,i_diff,i,mk,2) = w_gyro(m0,i_diff,i,p_nek_loc,is) &
+                       fg(:,i_diff,i,mk,2) = w_gyro0(m0,i_diff,i,p_nek_loc,is) &
                             *(-v_para(m,i,p_nek_loc,is))  &
                             *conjg(c_blend(:,m0,i,p_nek_loc))
                     endif
@@ -76,7 +76,7 @@ subroutine gyro_fieldeigen_df
                     if (n_field > 2) then
                        fg(:,i_diff,i,mk,3) = 2.0*energy(ie,is)*lambda(i,k) &
                             *tem_s(is,i)/z(is) &
-                            *w_gyro_aperp(m0,i_diff,i,p_nek_loc,is) &
+                            *w_gyro1(m0,i_diff,i,p_nek_loc,is) &
                             *conjg(c_blend(:,m0,i,p_nek_loc))
 
                     endif

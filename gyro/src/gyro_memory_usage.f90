@@ -68,12 +68,13 @@ subroutine gyro_memory_usage(data_file,io)
            endif
         endif
 
-        call alloc_add(io,size(w_gyro),16,'w_gyro')
         call alloc_add(io,size(z_gyro),16,'z_gyro')
-        call alloc_add(io,size(w_gyro_rot),16,'w_gyro_rot')
 
+        call alloc_add(io,size(w_gyro0),16,'w_gyro0')
+        call alloc_add(io,size(w_gyro2),16,'w_gyro2')
         if (n_field == 3) then
-           call alloc_add(io,size(w_gyro_aperp),16,'w_gyro_aperp')
+           call alloc_add(io,size(w_gyro1),16,'w_gyro1')
+           call alloc_add(io,size(w_gyro3),16,'w_gyro3')
         endif
 
         !---------------------------------------------
@@ -106,7 +107,7 @@ subroutine gyro_memory_usage(data_file,io)
         if (collision_flag == 1) then
            call alloc_add(io,size(f_coll),16,'f_coll')
            call alloc_add(io,size(fb_coll),16,'fb_coll')
-           call alloc_add(io,size(h_C),16,'h_C') 
+           call alloc_add(io,size(h_c),16,'h_c') 
         endif
 
         call alloc_add(io,size(h_tran),16,'h_tran') 
@@ -142,12 +143,6 @@ subroutine gyro_memory_usage(data_file,io)
 
         call alloc_add(io,size(nonlinear_flux_passing),8,'nonlinear_flux_passing')
         call alloc_add(io,size(nonlinear_flux_trapped),8,'nonlinear_flux_trapped')
-
-        call alloc_add(io,size(diff_i),8,'diff_i')
-        call alloc_add(io,size(diff_i_trapped),8,'diff_i_trapped')
-        call alloc_add(io,size(diff),8,'diff')
-        call alloc_add(io,size(diff_trapped),8,'diff_trapped')
-        call alloc_add(io,size(diff_n),8,'diff_n')
 
         call alloc_add(io,size(gbflux_i),8,'gbflux_i')
         call alloc_add(io,size(gbflux_i_trapped),8,'gbflux_i_trapped')

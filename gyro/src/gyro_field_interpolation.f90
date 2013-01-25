@@ -1,15 +1,23 @@
-!---------------------------------------------------------
+!-----------------------------------------------------------------
 ! gyro_field_interpolation
 !
 ! PURPOSE:
-!  Interpolate phi, A_par and B_par onto fixed 
-!  theta-grids and tau-grids.  Also compute
+!  Compute Psi_a(R) and Chi_a(R) [Sec 3.7] of Technical Guide.
 !
-!  gyro_uv(1) = < phi > 
-!  gyro_uv(2) = < -v_par A_par> 
-!  gyro_uv(3) = < -v_perp A_perp >
+!  This requires first interpolating phi, A_par and B_par onto 
+!  fixed theta-grids and tau-grids.  
 !
-!  gyro_u = sum(gyro_uv(:))
+!  Psi_a(R) -> gyro_uv
+!
+!  gyro_uv(1) = G0a [ phi ]  
+!  gyro_uv(2) = G0a [ -v_par A_par ] 
+!  gyro_uv(3) = G1a [ -v_perp A_perp ]
+!
+!  Chi_a(R) -> kyro_uv
+!
+!  kyro_uv(1) = G2a [ phi ]  
+!  kyro_uv(2) = G2a [ -v_par A_par ] 
+!  kyro_uv(3) = G3a [ -v_perp A_perp ]
 !
 !  This is valid for periodic OR nonperiodic boundary
 !  conditions. 
@@ -17,14 +25,14 @@
 !  NOTE:
 !   This routine is expensive so some coding is inelegant 
 !   for the sake of speed.
-!---------------------------------------------------------
+!-----------------------------------------------------------------
 
 subroutine gyro_field_interpolation
 
   use gyro_globals
   use gyro_pointers
 
-  !-----------------------------------------------------
+  !-----------------------------------------------------------------
   implicit none
   !
   real :: x
@@ -34,7 +42,7 @@ subroutine gyro_field_interpolation
   !
   complex, dimension(n_stack,i1_buffer:i2_buffer,n_field) :: vf
   complex, external :: BLEND_F
-  !-----------------------------------------------------
+  !-----------------------------------------------------------------
 
   call gyro_timer_in('Field-interp.a')
 !$acc kernels loop 
@@ -144,11 +152,15 @@ subroutine gyro_field_interpolation
            do i=1,n_x
               do i_diff=-m_gyro,m_gyro-i_gyro
                  do m=1,n_stack
+
+                    ! Psi_a(R) in Technical Guide
                     gyro_uv(m,i,p_nek_loc,is,1) = gyro_uv(m,i,p_nek_loc,is,1)+&
-                         w_gyro(m,i_diff,i,p_nek_loc,is)*vf(m,i+i_diff,1)
-                    kyro_uv(m,i,p_nek_loc,is,1) = kyro_uv(m,i,p_nek_loc,is,1) + &
-                         w_gyro_rot(m,i_diff,i,p_nek_loc,is)*&
-                         vf(m,i+i_diff,1)
+                         w_gyro0(m,i_diff,i,p_nek_loc,is)*vf(m,i+i_diff,1)
+
+                    ! Chi_a(R) in Technical Guide
+                    kyro_uv(m,i,p_nek_loc,is,1) = kyro_uv(m,i,p_nek_loc,is,1)+&
+                         w_gyro2(m,i_diff,i,p_nek_loc,is)*vf(m,i+i_diff,1)
+
                  enddo
               enddo
            enddo
@@ -157,23 +169,27 @@ subroutine gyro_field_interpolation
 
         case (2) 
 
-           gyro_uv(:,:,p_nek_loc,is,:) = (0.0,0.0)
-           kyro_uv(:,:,p_nek_loc,is,:) = (0.0,0.0)
+           gyro_uv(:,:,p_nek_loc,is,1:2) = (0.0,0.0)
+           kyro_uv(:,:,p_nek_loc,is,1:2) = (0.0,0.0)
 
 !$acc kernels loop
 !$omp parallel do default(shared) private(i_diff,m)
            do i=1,n_x
               do i_diff=-m_gyro,m_gyro-i_gyro
                  do m=1,n_stack
+
+                    ! Psi_a(R) in Technical Guide
                     gyro_uv(m,i,p_nek_loc,is,1) = gyro_uv(m,i,p_nek_loc,is,1)+&
-                         w_gyro(m,i_diff,i,p_nek_loc,is)*vf(m,i+i_diff,1)
+                         w_gyro0(m,i_diff,i,p_nek_loc,is)*vf(m,i+i_diff,1)
                     gyro_uv(m,i,p_nek_loc,is,2) = gyro_uv(m,i,p_nek_loc,is,2)+&
-                         vf(m,i+i_diff,2)*&
-                         (-w_gyro(m,i_diff,i,p_nek_loc,is)*v_para(m,i,p_nek_loc,is))
+                         w_gyro0(m,i_diff,i,p_nek_loc,is)* &
+                         (-v_para(m,i,p_nek_loc,is)*vf(m,i+i_diff,2))
+
+                    ! Chi_a(R) in Technical Guide
                     kyro_uv(m,i,p_nek_loc,is,1) = kyro_uv(m,i,p_nek_loc,is,1) + &
-                         w_gyro_rot(m,i_diff,i,p_nek_loc,is)*vf(m,i+i_diff,1)
+                         w_gyro2(m,i_diff,i,p_nek_loc,is)*vf(m,i+i_diff,1)
                     kyro_uv(m,i,p_nek_loc,is,2) = kyro_uv(m,i,p_nek_loc,is,2) + &
-                         w_gyro_rot(m,i_diff,i,p_nek_loc,is)*&
+                         w_gyro2(m,i_diff,i,p_nek_loc,is)*&
                          (-v_para(m,i,p_nek_loc,is)*vf(m,i+i_diff,2))
                  enddo
               enddo
@@ -183,30 +199,37 @@ subroutine gyro_field_interpolation
 
         case (3)
 
-           gyro_uv(:,:,p_nek_loc,is,:) = (0.0,0.0)
-           kyro_uv(:,:,p_nek_loc,is,:) = (0.0,0.0)
+           gyro_uv(:,:,p_nek_loc,is,1:3) = (0.0,0.0)
+           kyro_uv(:,:,p_nek_loc,is,1:3) = (0.0,0.0)
 
 !$acc kernels loop
 !$omp parallel do default(shared) private(i_diff,m)
            do i=1,n_x
               do i_diff=-m_gyro,m_gyro-i_gyro
                  do m=1,n_stack
+
+                    ! Psi_a(R) in Technical Guide
                     gyro_uv(m,i,p_nek_loc,is,1) = gyro_uv(m,i,p_nek_loc,is,1)+&
-                         w_gyro(m,i_diff,i,p_nek_loc,is)*vf(m,i+i_diff,1)
+                         w_gyro0(m,i_diff,i,p_nek_loc,is)*vf(m,i+i_diff,1)
                     gyro_uv(m,i,p_nek_loc,is,2) = gyro_uv(m,i,p_nek_loc,is,2)+&
-                         (-w_gyro(m,i_diff,i,p_nek_loc,is)*&
-                         v_para(m,i,p_nek_loc,is)*vf(m,i+i_diff,2))
+                         w_gyro0(m,i_diff,i,p_nek_loc,is)* &
+                         (-v_para(m,i,p_nek_loc,is)*vf(m,i+i_diff,2))
                     gyro_uv(m,i,p_nek_loc,is,3) = gyro_uv(m,i,p_nek_loc,is,3)+&
-                         (w_gyro_aperp(m,i_diff,i,p_nek_loc,is) &
+                         (w_gyro1(m,i_diff,i,p_nek_loc,is) &
                          *2.0*energy(ie,is)*lambda(i,k)*tem_s(is,i)/z(is))*&
                          vf(m,i+i_diff,3)
+
+                    ! Chi_a(R) in Technical Guide
                     kyro_uv(m,i,p_nek_loc,is,1) = kyro_uv(m,i,p_nek_loc,is,1) + &
-                         w_gyro_rot(m,i_diff,i,p_nek_loc,is)*&
-                         vf(m,i+i_diff,1)
+                         w_gyro2(m,i_diff,i,p_nek_loc,is)*vf(m,i+i_diff,1)
                     kyro_uv(m,i,p_nek_loc,is,2) = kyro_uv(m,i,p_nek_loc,is,2) + &
-                         w_gyro_rot(m,i_diff,i,p_nek_loc,is)*&
+                         w_gyro2(m,i_diff,i,p_nek_loc,is)*&
                          (-v_para(m,i,p_nek_loc,is)*vf(m,i+i_diff,2))
-                    ! Note missing third component!
+                    kyro_uv(m,i,p_nek_loc,is,3) = kyro_uv(m,i,p_nek_loc,is,3)+&
+                         w_gyro3(m,i_diff,i,p_nek_loc,is) &
+                         *2.0*energy(ie,is)*lambda(i,k)*tem_s(is,i)/z(is)*&
+                         vf(m,i+i_diff,3)
+                   
                  enddo
               enddo
            enddo
@@ -223,9 +246,15 @@ subroutine gyro_field_interpolation
 
   if (electron_method == 2) then
 
-     ! DK ELECTRONS:
+     ! Drift-kinetic ELECTRONS:
      ! 
-     ! gyro_u -> phi - v_par A_par + ene*lambda*temp/z*B_par
+     ! G0e   -> 1
+     ! G1e   -> 1/2
+     ! Psi_e -> phi - v_par A_par + (1/2) [2*ene*lambda*temp/z*B_par]
+     !
+     ! G2e   -> 0
+     ! G3e   -> 0
+     ! Chi_e -> 0
 
      p_nek_loc = 0
      do p_nek=1+i_proc_1,n_nek_1,n_proc_1

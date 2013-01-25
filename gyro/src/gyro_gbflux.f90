@@ -24,7 +24,7 @@ subroutine gyro_gbflux
   real, dimension(n_kinetic,n_field,p_moment,n_x) :: gbflux_i_loc
   real, dimension(n_kinetic,n_field,p_moment,n_x) :: gbflux_i_loc_trapped
   real, dimension(n_kinetic,3) :: gbflux_mom_loc
-  real, dimension(n_kinetic,4) :: gbflux_exc_loc
+  real, dimension(n_kinetic,2) :: gbflux_exc_loc
   real, dimension(n_kinetic,n_field,p_moment) :: gbflux_loc
   real, dimension(n_kinetic,n_field,p_moment) :: gbflux_loc_trapped
   real :: gbflux_norm
