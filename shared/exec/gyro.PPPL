@@ -31,7 +31,7 @@ if [ ${nmpi} -eq 1 ]  ; then
   echo "  nodes with no gigabit connection will hang here"
 fi
 
-echo "mpirun -np $nmpi $exec"
-mpirun -np $nmpi $exec
+echo "export OMP_NUM_THREADS=$nomp" ; mpirun -np $nmpi $exec"
+export OMP_NUM_THREADS=$nomp ; mpirun -np $nmpi $exec
 
 exit
