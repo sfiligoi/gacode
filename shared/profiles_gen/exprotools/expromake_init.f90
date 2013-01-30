@@ -1,22 +1,33 @@
 subroutine expromake_init
 
+  use expromake_globals
   use EXPRO_interface
 
+  implicit none
+
+  integer :: i
+  real :: x
+
+
   ! Fundamental input.profiles scalars
-  EXPRO_b_ref = 1.0
-  EXPRO_arho  = 1.0
+  EXPRO_b_ref = exm_b_ref
+  EXPRO_arho  = exm_arho
 
   ! Fundamental input.profiles arrays
 
-  EXPRO_rho = 1.0
-  EXPRO_rmin = 1.0
-  EXPRO_rmaj = 3.0
-  EXPRO_q = 2.0
-  EXPRO_kappa = 1.0
+  do i=1,nx
+     x = real(i-1)/(nx-1) 
+     EXPRO_rho(i)  = x
+     EXPRO_rmin(i) = 0.6*x 
+     EXPRO_te(i)   = exm_te_axis*exp(-x*exm_alte)
+  enddo
 
-  EXPRO_delta = 0.0
-  EXPRO_te = 1.0
-  EXPRO_ne = 1.0
+  EXPRO_rmaj = 1.7
+  EXPRO_q = 2.0
+  EXPRO_kappa = exm_kappa
+  EXPRO_delta = exm_delta
+
+  EXPRO_ne = 5.0
   EXPRO_z_eff = 1.0
   EXPRO_w0 = 0.0
 
@@ -32,8 +43,8 @@ subroutine expromake_init
   EXPRO_ptot      = 1.0
   EXPRO_poloidalfluxover2pi = 0.0
 
-  EXPRO_ni = 1.0
-  EXPRO_ti = 1.0
+  EXPRO_ni = 3.0
+  EXPRO_ti = 7.0
   EXPRO_vtor = 0.0
   EXPRO_vpol = 0.0
 

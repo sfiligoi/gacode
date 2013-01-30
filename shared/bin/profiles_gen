@@ -215,6 +215,9 @@ then
    echo "             -create help"
    echo "              Print detailed help information"
    echo
+   echo "             -i <input.profiles file>"
+   echo "              Specify a file to modify.  If unspecified, generate from scratch."
+   echo
    echo "LOCAL PARAMETER MODE"
    echo 
    echo "             -loc_rad <r/a>"
