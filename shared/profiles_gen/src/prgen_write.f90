@@ -8,6 +8,7 @@
 subroutine prgen_write
 
   use prgen_globals
+  use EXPRO_interface
 
   !---------------------------------------------------------------
   implicit none
@@ -144,7 +145,7 @@ subroutine prgen_write
   do indx=1,n_indx,5
 
      write(1,20) '# '
-     write(1,20) '#',tag(indx:indx+4)
+     write(1,20) '#',EXPRO_tag(indx:indx+4)
      do i=1,nx
         write(1,10) vec(indx:indx+4,i) 
      enddo
@@ -159,7 +160,7 @@ subroutine prgen_write
      do indx=1,n_indx2,5
 
         write(1,20) '# '
-        write(1,20) '#',tag2(indx:indx+4)
+        write(1,20) '#',EXPRO_tag2(indx:indx+4)
         do i=1,nx
            write(1,10) vec2(indx:indx+4,i)
         enddo

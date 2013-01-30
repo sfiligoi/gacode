@@ -6,7 +6,7 @@
 !  rmin and rho.
 !------------------------------------------------------------
 
-program locpargen
+program exprodump
 
   use EXPRO_interface
 
@@ -278,4 +278,4 @@ program locpargen
 
 10 format(t2,2(1pe12.5,1x))
 
-end program locpargen
+end program exprodump
