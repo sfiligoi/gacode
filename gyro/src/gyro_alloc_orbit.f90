@@ -47,20 +47,6 @@ subroutine gyro_alloc_orbit(flag)
      allocate(m_map(n_class,n_theta(2),2))
      allocate(theta_int(n_theta_int))
      allocate(theta_plot(n_theta_plot))
-     allocate(theta_r0_plot(field_r0_grid))
-
-     !theta_t=0.
-     !tau=0.
-     !m_cyc=0.
-     !p_cyc=0.
-     !m_phys=0.
-     !p_phys=0.
-     !omega=0.
-     !m_map=0.
-     !theta_int=0.
-     !theta_plot=0.
-     !theta_r0_plot=0.
-
 
      ! Geometry functions
      allocate(b0_t(n_x,n_lambda,n_stack))
@@ -88,15 +74,12 @@ subroutine gyro_alloc_orbit(flag)
      allocate(blend_plot(n_blend,n_theta_plot,n_x))
      allocate(blend_prime_plot(n_blend,n_theta_plot,n_x))
 
-     !SEK: There might be a better method here
      if (io_method > 1 .and. time_skip_wedge > 0) then
         allocate(blend_wedge(n_blend,n_theta_mult*n_theta_plot,n_x))
         allocate(blend_prime_wedge(n_blend,n_theta_mult*n_theta_plot,n_x))
         !blend_wedge=0.
         !blend_prime_wedge=0.
      endif
-     allocate(blend_r0_plot(n_blend,field_r0_grid))
-     !blend_r0_plot=0.
 
      if (collision_flag == 1) then
         ! Collision arrays
@@ -127,7 +110,6 @@ subroutine gyro_alloc_orbit(flag)
      deallocate(m_map)
      deallocate(theta_int)
      deallocate(theta_plot)
-     deallocate(theta_r0_plot)
 
      deallocate(b0_t)
      deallocate(g_theta_t)
@@ -156,7 +138,6 @@ subroutine gyro_alloc_orbit(flag)
         deallocate(blend_wedge)
         deallocate(blend_prime_wedge)
      endif
-     deallocate(blend_r0_plot)
 
      if (allocated(nu_total)) deallocate(nu_total)
      if (allocated(xi)) deallocate(xi)

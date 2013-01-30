@@ -262,22 +262,6 @@ subroutine gyro_set_blend_arrays
   endif
   !---------------------------------------------------------------  
 
-  !---------------------------------------------------------------
-  ! Store blending plot coefficients
-  ! 
-  i = ir_norm
-  !
-  do j_plot=1,field_r0_grid
-
-     x = theta_r0_plot(j_plot)/pi
-
-     do j=1,n_blend
-        blend_r0_plot(j,j_plot) = BLEND_F(j,x,phase(in_1,i))
-     enddo ! j
-
-  enddo ! j_plot
-  !---------------------------------------------------------------  
-
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[gyro_set_blend_arrays done]'
   endif

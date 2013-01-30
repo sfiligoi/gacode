@@ -165,8 +165,6 @@ subroutine gyro_input_check
   call checkintvar(funit,"nl_method",nl_method)
   call checkintvar(funit,"kill_gyro_b_flag",kill_gyro_b_flag)
   call checkintvar(funit,"velocity_output_flag",velocity_output_flag)
-  call checkintvar(funit,"field_r0_flag",field_r0_flag)
-  call checkintvar(funit,"field_r0_grid",field_r0_grid)
   call checkrealvar(funit,"q_scale",q_scale)
   call checkintvar(funit,"dist_print",dist_print)
   call checkintvar(funit,"nint_ORB_s",nint_ORB_s)

@@ -147,7 +147,6 @@ OBJECTS += gyro_globals.o \
           gyro_write_timedata.o \
           gyro_write_timers.o \
           gyro_velocity_sum.o \
-          get_field_r0_plot.o \
           gyro_dump_input.o \
           gyro_dump_interface.o
 

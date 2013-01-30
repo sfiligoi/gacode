@@ -179,8 +179,6 @@ subroutine gyro_initial_condition
   ! Generate data for moments plot
   call gyro_moments_plot
 
-  if (field_r0_flag == 1) call get_field_r0_plot 
-
   if (i_proc == 0 .and. debug_flag == 1) then
      print *,'[gyro_initial_condition done]' 
   endif

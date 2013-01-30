@@ -232,23 +232,6 @@ subroutine gyro_banana_operators
 
   endif
 
-  if (field_r0_grid > 1) then
-
-     ! Span [-pi,pi]
-
-     do j=1,field_r0_grid
-        theta_r0_plot(j) = -pi+(j-1)*pi_2/field_r0_grid
-     enddo
-
-  else
-
-     ! Special case for one point: 
-     !  only theta=0 (outboard midplane)
-
-     theta_r0_plot(1) = 0.0
-
-  endif
-
   !
   ! Print the grid to stdout:
   !

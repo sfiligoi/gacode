@@ -157,8 +157,6 @@ module gyro_interface
   integer :: gyro_nl_method_in = 1
   integer :: gyro_kill_gyro_b_flag_in = 0
   integer :: gyro_velocity_output_flag_in = 0
-  integer :: gyro_field_r0_flag_in = 0
-  integer :: gyro_field_r0_grid_in = 1
   real    :: gyro_q_scale_in = 1.0
   integer :: gyro_dist_print_flag_in = 0
   integer :: gyro_nint_orb_s_in = 64
@@ -387,8 +385,6 @@ contains
     gyro_nl_method_in = nl_method
     gyro_kill_gyro_b_flag_in = kill_gyro_b_flag
     gyro_velocity_output_flag_in = velocity_output_flag
-    gyro_field_r0_flag_in = field_r0_flag
-    gyro_field_r0_grid_in = field_r0_grid
     gyro_q_scale_in = q_scale
     gyro_dist_print_flag_in = dist_print
     gyro_nint_orb_s_in = nint_ORB_s
@@ -614,8 +610,6 @@ contains
     nl_method = gyro_nl_method_in
     kill_gyro_b_flag = gyro_kill_gyro_b_flag_in
     velocity_output_flag = gyro_velocity_output_flag_in
-    field_r0_flag = gyro_field_r0_flag_in
-    field_r0_grid = gyro_field_r0_grid_in
     q_scale = gyro_q_scale_in
     dist_print = gyro_dist_print_flag_in
     nint_ORB_s = gyro_nint_orb_s_in

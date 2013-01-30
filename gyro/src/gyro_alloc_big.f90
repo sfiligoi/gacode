@@ -95,10 +95,6 @@ subroutine gyro_alloc_big(flag)
      allocate(vel_sum_aperp(n_blend,n_x))
      allocate(phi_plot(n_theta_plot,n_x,n_field+eparallel_plot_flag))
 
-     if (field_r0_flag == 1) then
-        allocate(field_r0_plot(field_r0_grid,n_field))
-     endif
-
      allocate(moments_plot(n_theta_plot,n_x,n_kinetic,3))
 
      ! For synthetic diagnostics
@@ -194,7 +190,6 @@ subroutine gyro_alloc_big(flag)
      deallocate(vel_sum_a)
      deallocate(vel_sum_aperp)
      deallocate(phi_plot)
-     if (allocated(field_r0_plot)) deallocate(field_r0_plot)
 
      deallocate(moments_plot)
      deallocate(moments_zero_plot)

@@ -89,11 +89,6 @@ subroutine gyro_fulladvance
   !    selected OUTPUT_METHOD > 1.
   !
   call gyro_moments_plot 
-  !
-  ! 4. Compute (phi,a) at r=r0 for plotting (if user 
-  !    has selected FIELD_RO_FLAG=1).
-  !
-  if (field_r0_flag == 1) call get_field_r0_plot 
   !------------------------------------------------------
 
   !------------------------------------------------------

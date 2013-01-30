@@ -129,10 +129,6 @@ subroutine gyro_memory_usage(data_file,io)
         call alloc_add(io,size(vel_sum_aperp),16,'vel_sum_aperp')
         call alloc_add(io,size(phi_plot),16,'phi_plot')
 
-        if (field_r0_flag == 1) then
-           call alloc_add(io,size(field_r0_plot),16,'field_r0_plot')
-        endif
-
         call alloc_add(io,size(moments_plot),16,'moments_plot')
         call alloc_add(io,size(moments_zero_plot),8,'moments_zero_plot')
 
@@ -186,7 +182,6 @@ subroutine gyro_memory_usage(data_file,io)
         call alloc_add(io,size(m_map),4,'m_map')
         call alloc_add(io,size(theta_int),8,'theta_int')
         call alloc_add(io,size(theta_plot),8,'theta_plot')
-        call alloc_add(io,size(theta_r0_plot),8,'theta_r0_plot')
 
         call alloc_add(io,size(b0_t),8,'b0_t')
         call alloc_add(io,size(g_theta_t),8,'g_theta_t')
@@ -209,7 +204,6 @@ subroutine gyro_memory_usage(data_file,io)
         call alloc_add(io,size(ff2_mm_piv),4,'ff2_mm_piv')
         call alloc_add(io,size(blend_plot),16,'blend_plo')
         call alloc_add(io,size(blend_prime_plot),16,'blend_prime_plot')
-        call alloc_add(io,size(blend_r0_plot),16,'blend_r0_plot')
 
         if (collision_flag == 1) then
            call alloc_add(io,size(nu_total),8,'nu_total')

@@ -201,8 +201,6 @@ subroutine gyro_read_input
   call readbc_int(nl_method)
   call readbc_int(kill_gyro_b_flag)
   call readbc_int(velocity_output_flag)
-  call readbc_int(field_r0_flag)
-  call readbc_int(field_r0_grid)
   call readbc_real(q_scale)
   call readbc_int(dist_print)
   call readbc_int(nint_ORB_s)

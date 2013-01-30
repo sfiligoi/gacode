@@ -208,7 +208,6 @@ module gyro_globals
   integer :: velocity_output_flag
   integer :: geo_array_print_flag
   integer :: source_flag
-  integer :: field_r0_flag
   integer :: dist_print
   integer :: udsymmetry_flag
   integer :: silent_flag
@@ -320,7 +319,6 @@ module gyro_globals
   integer :: n_substep
   !
   integer :: n_lump
-  integer :: field_r0_grid
   integer :: ord_rbf
   integer :: n_coll
   integer :: n_rbf
@@ -447,7 +445,6 @@ module gyro_globals
   complex, dimension(:,:,:), allocatable :: blend_wedge
   complex, dimension(:,:,:), allocatable :: blend_prime_plot
   complex, dimension(:,:,:), allocatable :: blend_prime_wedge
-  complex, dimension(:,:), allocatable :: blend_r0_plot
   !---------------------------------------------------------
 
   !---------------------------------------------------------
@@ -804,7 +801,6 @@ module gyro_globals
   !
   complex, dimension(:,:,:), allocatable :: phi
   complex, dimension(:,:,:), allocatable :: phi_plot
-  complex, dimension(:,:), allocatable :: field_r0_plot
   real, dimension(:,:), allocatable :: ave_phi
   !
   complex, dimension(:,:,:,:), allocatable :: moments_plot

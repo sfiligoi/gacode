@@ -170,8 +170,6 @@ subroutine gyro_dump_input
      call dumpIntVar(funit,gunit,"nl_method",nl_method)
      call dumpIntVar(funit,gunit,"kill_gyro_b_flag",kill_gyro_b_flag)
      call dumpIntVar(funit,gunit,"velocity_output_flag",velocity_output_flag)
-     call dumpIntVar(funit,gunit,"field_r0_flag",field_r0_flag)
-     call dumpIntVar(funit,gunit,"field_r0_grid",field_r0_grid)
      call dumpRealVar(funit,gunit,"q_scale",q_scale)
      call dumpIntVar(funit,gunit,"dist_print",dist_print)
      call dumpIntVar(funit,gunit,"nint_ORB_s",nint_ORB_s)

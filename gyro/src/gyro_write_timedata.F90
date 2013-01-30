@@ -298,36 +298,7 @@ subroutine gyro_write_timedata
 
   !--------------------------------------------------
 
-  !--------------------------------------------------
-  ! Output of field at r=r0:
-  !
-  if (field_r0_flag == 1) then
-    if(io_method < 3) then
-     call write_distributed_complex(&
-          trim(path)//'out.gyro.field_r0',&
-          10,&
-          size(field_r0_plot),&
-          field_r0_plot)
-    endif
-!field_r0_grid,n_field  size of field_r0 (2d)
-!    if(io_method >1) then
-!     h5in%units="dimensionless"
-!     h5in%mesh="/cartMesh"
-!     call write_distributed_complex_2d_h5("field_r0",&
-!          dumpGid,gid3D,&
-!          n_theta_plot*n_x*n_kinetic,&
-!          n_theta_plot,n_x,n_kinetic,&
-!          field_r0_plot,&
-!          write_threed,&
-!          .false., &
-!          h5in,h5err)
-!    endif
-
-  endif
-  !--------------------------------------------------
-
   call gyro_kxky_spectrum
-
 
   if (io_method < 3) then
   call write_distributed_real(&
