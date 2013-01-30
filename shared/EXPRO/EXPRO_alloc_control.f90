@@ -14,7 +14,7 @@ subroutine EXPRO_alloc_control(i_proc,flag)
 
   if (flag == 1) then
 
-     if (i_proc == 0) then
+     if (i_proc == 0 .and. EXPRO_n_exp == 0) then
 
         !--------------------------------------------------------------
         ! Read number of experimental gridpoints:

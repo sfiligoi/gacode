@@ -155,7 +155,7 @@ ifeq ($(HDF5),true)
 	FFLAGS += ${FHDF5} ${HDF5_INC}
 	OBJECTS += \
           gyro_write_timedata_wedge_hdf5.o \
-					gyro_write_h5mesh.o
+	  gyro_write_h5mesh.o
 endif
 
 .SUFFIXES : .o .f90 .F90
@@ -167,6 +167,7 @@ lib: $(OBJECTS)
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:
-	rm -f *.o $(LLIB).a ${GACODE_ROOT}/modules/gyro*.mod
+	rm -f *.o $(LLIB).a 
+	rm -f ${GACODE_ROOT}/modules/gyro*.mod ${GACODE_ROOT}/modules/ompdata.mod
 
 include ../install/make.ext.${GACODE_PLATFORM}
