@@ -41,11 +41,12 @@ subroutine prgen_map_inputprofiles
   vec(20,:) = dpsi(:)
 
   ! Ion temperatures and densities
-  vec(21:25,:) = 1.0
-  vec(26:30,:) = 1.0
+  vec(21:25,:) = EXPRO_ni(1:5,:)
+  vec(26:30,:) = EXPRO_ti(1:5,:)
 
   ! Ion velocities
-  vec(31:40,:) = 0.0
+  vec(31:35,:) = EXPRO_vtor(1:5,:)
+  vec(36:40,:) = EXPRO_vpol(1:5,:)
 
 end subroutine prgen_map_inputprofiles
 

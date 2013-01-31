@@ -283,16 +283,17 @@ SIMROOT=$PWD
 
 CONFIG=.config
 
-GATO_DPSISL=0.0
-
 FILE_FLAG=0
-CER_FLAG=0
 G_FLAG=0
 NOGQ_FLAG=0
+GATO_DPSISL=0.0
 VERBOSE_FLAG=0
 ORDER_FLAG=0
 TRANSP_FLAG=0
 GMERGE_FLAG=0
+
+# CER file 
+CER_FILE=null
 
 # VGEN mode variables
 VGEN_IN=null
@@ -351,7 +352,9 @@ while [ $# -gt 0 ] ; do
 
   -n) shift ; ASTRA_ARG="$ASTRA_ARG -n $1" ;;
 
-  -cer) shift ; CER_FLAG=1 ; CER_FILE="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-cer;$1" ;;
+  -cer) shift ; 
+        echo "INFO: (profiles_gen) Will merge data from $CER_FILE" ; 
+        CER_FILE="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-cer;$1" ;;
    
   -g) shift ; G_FLAG=1 ; GFILE="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-g;$1" ;;
 
@@ -437,7 +440,7 @@ then
        TRANSP_ARGS="${TRANSP_ARGS} --iterdb $ITERDB_ARGS"
    fi
    $PYTHON_COMMAND $TRANSP $TRANSP_ARGS
-   exit
+   exit 0
 fi
 #=============================================================
 
@@ -456,7 +459,7 @@ then
    touch input.expromake
    python $GACODE_ROOT/shared/bin/expromake_parse.py input.expromake   
    $EXPROMAKE   
-   exit
+   exit 0
 fi
 #=============================================================
 
@@ -557,10 +560,10 @@ fi
 #=============================================================
 # Manage execution of vgen
 #
-NEO_DIR=$GACODE_ROOT/neo
-
 if [ $VGEN_FLAG -eq 1 ]
 then
+
+   NEO_DIR=$GACODE_ROOT/neo
 
    # Create vgen work directory
 
@@ -601,27 +604,36 @@ then
    $VGEN_EXE/vgen
 
    if [ -f "input.profiles.new" ]
-       then
+   then
        cp input.profiles.new ..
    fi
 
    exit 0
-      
-else
+fi
+#=============================================================
 
-   # last possibility for needing input.profiles
-   if [ $GMERGE_FLAG -eq 0 ]
-   then
-      # Clean old input.profiles* data.
-      echo "INFO: (profiles_gen) Removing old input.profiles* files"
-      rm -rf input.profiles input.profiles.geo input.profiles.extra
-   else
-      rm -f input.profiles.gen
-      python $GACODE_ROOT/shared/bin/profile_parse.py $FILE      
+#=============================================================
+# Manage execution of gmerge
+#
+if [ $GMERGE_FLAG -eq 1 ] 
+then
+   rm -f input.profiles.gen
+   python $GACODE_ROOT/shared/bin/profile_parse.py $FILE      
+   if [ "$FILE" != "input.profiles" ] ; then
       mv $FILE.gen input.profiles.gen
    fi
+   a=`grep IONS $FILE`
+   CER_FILE=${a:25} 
+   a=`grep INPUT $FILE`
+   FILE=${a:25}
+fi   
+#=============================================================
 
-fi 
+#=============================================================
+# If we make it here, its time for cleanup
+#
+echo "INFO: (profiles_gen) Removing old input.profiles* files"
+rm -f input.profiles input.profiles.geo input.profiles.extra
 #=============================================================
 
 #=============================================================
@@ -656,13 +668,7 @@ date > $CONFIG
 echo $FILE >> $CONFIG
 
 # Optional CER file
-if [ $CER_FLAG -eq 0 ]
-then
-   echo "null" >> $CONFIG
-else
-   echo $CER_FILE >> $CONFIG
-   echo "INFO: (profiles_gen) Will merge data from $CER_FILE"
-fi
+echo $CER_FILE >> $CONFIG
 
 # EFIT G-file
 echo $G_FLAG >> $CONFIG
