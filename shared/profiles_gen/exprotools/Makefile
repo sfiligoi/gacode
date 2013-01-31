@@ -14,8 +14,9 @@ EXTRA_LIBS = ${GACODE_ROOT}/shared/EXPRO/EXPRO_lib.a \
              ${GACODE_ROOT}/shared/math/math_lib.a 
 
 OBJECTS = expromake_globals.o \
-          expromake_init.o \
+          expromake_set.o \
           expromake_read_input.o \
+	  expromake_check.o \
           expromake_write.o 
 
 .SUFFIXES : .o .f90

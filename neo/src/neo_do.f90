@@ -21,6 +21,7 @@ subroutine neo_do
   use neo_theory
   use neo_g_velocitygrids
   use neo_allocate_profile
+  use mpi
   implicit none
 
   integer :: ir, is, ie, ix, it, jr, js, je, jx, jt, ks, ke
@@ -230,7 +231,6 @@ subroutine neo_do
      call ENERGY_coll_ints(ir)
 
      ! Set the LHS
-
      a_iindx(:) = 0
      a_jindx(:) = 0
      a(:) = 0.0
