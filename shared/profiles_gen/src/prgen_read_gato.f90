@@ -100,8 +100,8 @@ subroutine prgen_read_gato
        gato_psi(1)*gvec(:,2))/&
        (gato_psi(2)-gato_psi(1))
 
-  ! Mamage total flux variation 
-  if (format_type == 0) then
+  ! Manage total flux variation 
+  if (format_type == 0 .or. format_type == 7) then
      ! Case 1: raw gfile mode ; dpsi is undefined
      dpsi_data = gato_psi(gato_npsi)
      dpsi_gato = gato_psi(gato_npsi)

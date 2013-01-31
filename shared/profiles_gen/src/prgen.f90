@@ -38,8 +38,8 @@ program prgen
   read(1,*) nogatoq_flag
   read(1,*) verbose_flag
   read(1,*) pfile_z2
+  read(1,*) gmerge_flag
   read(1,*) reorder_vec(:)
-
   close(1)
   !--------------------------------------------------
 
@@ -51,7 +51,13 @@ program prgen
   !
   ! Note that nx will be the experimental vector length in ALL cases:
   !
-  if (trim(raw_data_file) == 'null') then
+  if (gmerge_flag == 1) then
+
+    call prgen_read_inputprofiles
+
+    format_type = 7
+
+  else if (trim(raw_data_file) == 'null') then
  
     ! Pure gfile parsing
 
@@ -115,7 +121,7 @@ program prgen
 
      call prgen_read_ufile
 
-  else
+  else 
 
      ! Old text format
      print '(a)','INFO: (prgen) Assuming old iterdb text format.'
@@ -149,6 +155,8 @@ program prgen
      call prgen_map_corsica
   case (6)
      call prgen_map_ufile
+  case (7)
+     call prgen_map_inputprofiles
 
   end select
 

@@ -139,6 +139,9 @@ subroutine prgen_write
   case (6)
      write(1,'(a,sp,1pe14.7)') 'BT_EXP=',ufile_bref
      write(1,60) 'ARHO_EXP=',ufile_arho
+  case (7)
+     write(1,'(a,sp,1pe14.7)') 'BT_EXP=',EXPRO_b_ref
+     write(1,60) 'ARHO_EXP=',EXPRO_arho
 
   end select
 

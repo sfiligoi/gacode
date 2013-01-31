@@ -22,6 +22,7 @@ module prgen_globals
   integer :: nogatoq_flag
   integer :: verbose_flag
   real :: pfile_z2
+  integer :: gmerge_flag
   character (len=70) :: efit_header
   integer, dimension(5) :: reorder_vec
   real :: dpsi_gato

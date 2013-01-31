@@ -65,7 +65,7 @@ then
    echo "              *.peq          : PEQDSK/ELITE text file"
    echo "              UFILE          : UFILE mode"
    echo "              null           : gfile only"
-   echo "              input.profiles : vgen or locpargen mode"
+   echo "              input.profiles : vgen, locpargen or gfilemerge mode"
    echo 
    echo "             -p <path>"
    echo "             Set optional path to simulation directory."
@@ -149,6 +149,7 @@ then
    echo "             -n <note text>"
    echo "             Include <note text> in the input.profiles header."
    echo
+   echo
    echo "GATO mapper control options"
    echo 
    echo "             -gato_dpsisl <dpsisl>"
@@ -160,6 +161,13 @@ then
    echo "             Default: 6 (Carbon)"
    echo "             -Z3 <ion3 charge>"
    echo "             Default: 2 (Helium)"
+   echo
+   echo
+   echo "GFILE MERGE MODE"
+   echo
+   echo "             -gmerge"
+   echo "             Toggle gmerge mode."
+   echo
    echo
    echo "VELOCITY GENERATION MODE"
    echo
@@ -206,17 +214,6 @@ then
    echo
    echo "             -trhelp"
    echo "             Detailed help message on transp2gyro."
-   echo 
-   echo "PROFILE CREATION MODE"
-   echo 
-   echo "             -create"
-   echo "              Create input.profiles using parameters in input.expromake"
-   echo 
-   echo "             -create help"
-   echo "              Print detailed help information"
-   echo
-   echo "             -i <input.profiles file>"
-   echo "              Specify a file to modify.  If unspecified, generate from scratch."
    echo
    echo "LOCAL PARAMETER MODE"
    echo 
@@ -240,6 +237,17 @@ then
    echo "             Print list of available variables."
    echo
    echo "      NOTE: control ion charges with Z1,Z2,Z3 as in GATO options"
+   echo
+   echo "PROFILE CREATION MODE"
+   echo 
+   echo "             -create"
+   echo "              Create input.profiles using parameters in input.expromake"
+   echo 
+   echo "             -create help"
+   echo "              Print detailed help information"
+   echo
+   echo "             -i <input.profiles file>"
+   echo "              Specify a file to modify.  If unspecified, generate from scratch."
    echo
    echo
    echo "EXAMPLES:"
@@ -284,6 +292,7 @@ NOGQ_FLAG=0
 VERBOSE_FLAG=0
 ORDER_FLAG=0
 TRANSP_FLAG=0
+GMERGE_FLAG=0
 
 # VGEN mode variables
 VGEN_IN=null
@@ -399,6 +408,8 @@ while [ $# -gt 0 ] ; do
   -dump) shift ; DUMP_FLAG=1 ; DUMP_VAR=$1 ;;
 
   -pZ2) shift ; PZ2=$1 ;;  
+
+  -gmerge) GMERGE_FLAG=1 ;;  
   
   esac
   shift
@@ -598,10 +609,17 @@ then
       
 else
 
-   # Clean old input.profiles* data.
-
-   echo "INFO: (profiles_gen) Removing old input.profiles* files"
-   rm -rf input.profiles input.profiles.geo input.profiles.extra
+   # last possibility for needing input.profiles
+   if [ $GMERGE_FLAG -eq 0 ]
+   then
+      # Clean old input.profiles* data.
+      echo "INFO: (profiles_gen) Removing old input.profiles* files"
+      rm -rf input.profiles input.profiles.geo input.profiles.extra
+   else
+      rm -f input.profiles.gen
+      python $GACODE_ROOT/shared/bin/profile_parse.py $FILE      
+      mv $FILE.gen input.profiles.gen
+   fi
 
 fi 
 #=============================================================
@@ -657,6 +675,11 @@ echo $VERBOSE_FLAG >> $CONFIG
 
 # PFILE Z2 value
 echo $PZ2 >> $CONFIG
+
+# GFILE MERGE
+echo $GMERGE_FLAG >> $CONFIG
+
+# NOTE: reorder flags will be appended later.
 #=============================================================
 
 #==============================================================
