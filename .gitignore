@@ -23,7 +23,8 @@ neo/tools/squeeze/squeeze
 neo/tools/vgen/vgen
 shared/profiles_gen/src/prgen
 shared/profiles_gen/locpargen/locpargen
-shared/profiles_gen/exprodump/exprodump
+shared/profiles_gen/exprotools/exprodump
+shared/profiles_gen/exprotools/expromake
 tglf/src/tglf
 tglf/src/xtglf
 tgyro/src/tgyro_main
