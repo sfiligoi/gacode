@@ -190,6 +190,7 @@ module gyro_globals
   integer :: linsolve_method 
   integer :: fieldeigen_root_method
   integer :: gkeigen_method
+  integer :: truncation_method
   !
   ! (b) flags (0 or 1)
   !
@@ -228,7 +229,8 @@ module gyro_globals
   integer :: geo_fastionbeta_flag
   integer :: fakefield_flag
   integer :: reintegrate_flag
-  integer :: truncation_method
+  integer :: coll_op_cons_flag
+  integer :: coll_op_self_flag
   !---------------------------------------------------------
 
   !-----------------------------------------------------------------------------------
