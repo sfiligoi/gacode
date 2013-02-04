@@ -93,6 +93,8 @@ subroutine gyro_collision_setup
 
            h_coll = exp(-x*x)/(x*sqrt(pi))+(1.0-1.0/(2.0*x*x))*DERF(x)
 
+           x = sqrt(energy(ie,1))
+
            nu_total(:,ie,is) = nu_total(:,ie,is)+&
                 0.5*(nu_s(is,:)/x**3)*h_coll*&
                 den_s(isp,:)/den_s(is,:)*z(isp)**2
