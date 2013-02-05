@@ -57,7 +57,7 @@
       CALL put_signs(sign_Bt_tg,sign_It_tg)
 !
       a_unit_exp = rmin_exp(mxgrid)
-      if(igeo_tg.eq.0)a_unit_exp=arho_exp
+!      if(igeo_tg.eq.0)a_unit_exp=arho_exp
 !
       do k=0,mxgrid-1
       jm = k

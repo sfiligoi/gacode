@@ -156,8 +156,9 @@ c
       q0=q_exp(0) 
       cnc =  -1.0*alpha_dia/bt_exp 
       cv=1000.0    
-      a_unit_exp=arho_exp
-      if(imodel.eq.82)a_unit_exp = rmin_exp(mxgrid)
+c      a_unit_exp=arho_exp
+c      if(imodel.eq.82)a_unit_exp = rmin_exp(mxgrid)
+      a_unit_exp = rmin_exp(mxgrid)
 c
 c Initialize profiles:
 c
@@ -259,7 +260,7 @@ c
 c
 c compute vexb_exp, vpar_exp and zptheta_exp
 c
-      a_unit_exp = rmin_exp(mxgrid)
+c      a_unit_exp = rmin_exp(mxgrid)
 c      if(igeo_tg.eq.0)a_unit_exp=arho_exp
 c
       call neo_flows(mxgrid,vneo_exp,vdia_exp)

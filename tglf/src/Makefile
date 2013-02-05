@@ -54,5 +54,5 @@ $(LLIB).a: $(OBJECTS)
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:
-	rm -f *.o $(LLIB).a xtglf xtglf_mpi tglf tglf_mpi
+	rm -f *.o *.lst $(LLIB).a xtglf xtglf_mpi tglf tglf_mpi
 	rm -f ${GACODE_ROOT}/modules/tglf*.mod 

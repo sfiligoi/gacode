@@ -730,8 +730,8 @@ c
       real*8 thetam,qm
       real*8 ctorm, grad_c_tor
 c
-      a_unit_exp = rmin_exp(mxgrid)
-      if(igeo_tg.eq.0)a_unit_exp=arho_exp
+c      a_unit_exp = rmin_exp(mxgrid)
+c      if(igeo_tg.eq.0)a_unit_exp=arho_exp
       rhom=arho_exp*(rho(jm+1)+rho(jm))/2.D0
       rminm=(rmin_exp(jm+1)+rmin_exp(jm))/2.D0
       rmajm=(rmaj_exp(jm+1)+rmaj_exp(jm))/2.0
@@ -1081,8 +1081,8 @@ c This differes from GLF23 which uses a_unit_exp = arho_exp. This does not impac
 c predicted plasma profiles since for both models the local flux does not depend
 c on a_unit_exp so it is arbitrary
 c
-      a_unit_exp = rmin_exp(mxgrid)
-      if(igeo_tg.eq.0)a_unit_exp=arho_exp
+c      a_unit_exp = rmin_exp(mxgrid)
+c      if(igeo_tg.eq.0)a_unit_exp=arho_exp
 c
       cxnu = 1.0
       mass_factor = (1.0 + 

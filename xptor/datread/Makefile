@@ -45,4 +45,4 @@ lib : $(OBJECTS)
 
 
 clean:
-	rm -f *.o
+	rm -f *.o *.lst

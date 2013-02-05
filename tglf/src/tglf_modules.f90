@@ -3,6 +3,7 @@
 ! global dimensions for shared arrays
 !
       IMPLICIT NONE
+      SAVE
 !
       INTEGER, PARAMETER :: nb=32
       INTEGER, PARAMETER :: nxm=4*nb-1

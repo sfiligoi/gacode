@@ -143,7 +143,7 @@ c
       dt_imp = DABS(dt_v)
       isave_pt1=iparam_pt(1)
 c      iparam_pt(1)=1
-c      if(nsteps_v.eq.0)iparam_pt(1)=-1
+      if(nsteps_v.eq.0)iparam_pt(1)=-1
  100  call trcoef_dv(dt_imp)
       if(imodel.eq.82)then
        new_eikonal_tg=save_new_eikonal_tg

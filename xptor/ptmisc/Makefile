@@ -46,4 +46,4 @@ write_netcdf.o:	write_netcdf.f
 	$(FC) -c $(FFLAGS) $(SPECIAL) $<
 
 clean:
-	rm -f *.o 
+	rm -f *.o *.lst 

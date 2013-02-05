@@ -27,5 +27,5 @@ lib: $(OBJECTS)
 	$(FC) $(FFLAGS) -c $<
 
 clean:
-	rm -f *.o $(LLIB).a 
+	rm -f *.o *.lst $(LLIB).a 
 	rm -f ${GACODE_ROOT}/modules/legacyread*.mod

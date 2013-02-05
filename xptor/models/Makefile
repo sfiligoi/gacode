@@ -40,4 +40,4 @@ lib: $(OBJECTS)
 	$(FC) $(FFLAGS)  -c $<
 
 clean:
-	rm -f *.o 
+	rm -f *.o *.lst

@@ -934,7 +934,7 @@ c        gradnzm = (nz_m(k+1)-nz_m(k))/dr(k,2)
         gradnzm = fzm*gradnem + nzm*gradfzm
         gradhm = (h_m(k+1)-h_m(k))/dr(k,2)
 c diagnostic output
-        a_unit_exp = rmin_exp(mxgrid)
+c        a_unit_exp = rmin_exp(mxgrid)
         zpne_m(k) = -a_unit_exp*gradnem/nem
         zpni_m(k) = -a_unit_exp*gradnim/nim
         zpnz_m(k) = -a_unit_exp*gradnzm/nzm

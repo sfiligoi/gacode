@@ -30,5 +30,5 @@ gks_analysis_lib.a: $(OBJECTS)
 	$(FC) $(FFLAGS) -I $(NETCDF_INC)  -c $<
 
 clean:
-	rm -f *.o $(LLIB).a $(EXEC)
+	rm -f *.o *.lst $(LLIB).a $(EXEC)
 	rm -f ${GACODE_ROOT}/modules/gks*.mod *mod

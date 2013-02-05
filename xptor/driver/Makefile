@@ -30,4 +30,4 @@ all:  ptor_driver.o
 	$(FC) $(FFLAGS) -c $<
 
 clean:
-	rm -f *.o $(EXEC) $(LLIB).a
+	rm -f *.o *.lst $(EXEC) $(LLIB).a
