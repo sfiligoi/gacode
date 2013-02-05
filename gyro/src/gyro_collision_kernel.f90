@@ -35,7 +35,7 @@ subroutine gyro_collision_kernel(ic)
         do m=1,n_stack
            p = m + (k - 1)*n_stack
            cphase(p) = exp(i_c*angp(i)*theta_t(i,k,m))
-           fc(p) = h_C(m,k,p_ine_loc)*cphase(p)
+           fc(p) = h_c(m,k,p_ine_loc)*cphase(p)
         enddo
      enddo
 
@@ -55,7 +55,7 @@ subroutine gyro_collision_kernel(ic)
      do k=1,n_lambda
         do m=1,n_stack
            p = m + (k - 1)*n_stack
-           h_C(m,k,p_ine_loc) = fcp(p)/cphase(p)
+           h_c(m,k,p_ine_loc) = fcp(p)/cphase(p)
         enddo
      enddo
 

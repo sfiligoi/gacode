@@ -147,7 +147,6 @@ OBJECTS += gyro_globals.o \
           gyro_write_timedata.o \
           gyro_write_timers.o \
           gyro_velocity_sum.o \
-          get_field_r0_plot.o \
           gyro_dump_input.o \
           gyro_dump_interface.o
 
@@ -155,7 +154,7 @@ ifeq ($(HDF5),true)
 	FFLAGS += ${FHDF5} ${HDF5_INC}
 	OBJECTS += \
           gyro_write_timedata_wedge_hdf5.o \
-					gyro_write_h5mesh.o
+	  gyro_write_h5mesh.o
 endif
 
 .SUFFIXES : .o .f90 .F90
@@ -163,13 +162,11 @@ endif
 lib: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
 
-.f90.o :
-	$(FC) $(FMATH) $(FFLAGS) -c $<
-
-.F90.o :
+.f90.o .f08.o .F90.o:
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:
-	rm -f *.o $(LLIB).a ${GACODE_ROOT}/modules/gyro*.mod
+	rm -f *.o $(LLIB).a 
+	rm -f ${GACODE_ROOT}/modules/gyro*.mod ${GACODE_ROOT}/modules/ompdata.mod
 
 include ../install/make.ext.${GACODE_PLATFORM}

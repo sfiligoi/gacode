@@ -23,6 +23,7 @@ OBJECTS = prgen_globals.o \
 	  prgen_map_peqdsk.o \
 	  prgen_map_corsica.o \
 	  prgen_map_ufile.o \
+	  prgen_map_inputprofiles.o \
           prgen_read_cer.o \
           prgen_read_gato.o \
           prgen_read_iterdb.o \
@@ -32,6 +33,7 @@ OBJECTS = prgen_globals.o \
 	  prgen_read_peqdsk.o \
 	  prgen_read_corsica.o \
 	  prgen_read_ufile.o \
+	  prgen_read_inputprofiles.o \
           prgen_write.o \
           fluxfit_driver.o \
           fluxfit_moments.o \

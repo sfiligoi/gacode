@@ -9,7 +9,7 @@ module neo_theory
   public :: THEORY_alloc, THEORY_do
   real :: pflux_HH, efluxi_HH, efluxe_HH, jpar_HH, kpar_HH, uparB_HH, &
        vpol_ion_HH,  efluxi_CH, efluxi_TG, &
-       jpar_S, kpar_S, uparB_S, vpol_ion_S, phi_HR
+       jpar_S, kpar_S, uparB_S, vpol_ion_S, phi_HR, jpar_K
   real, dimension(:), allocatable :: pflux_multi_HS, eflux_multi_HS
   
   real, private :: eps ! r/rmaj
@@ -148,6 +148,7 @@ contains
     call compute_vpol_ion(ir,kpar_S, vpol_ion_S)
     call compute_HR(ir,phi_HR)
     call compute_HS(ir,pflux_multi_HS, eflux_multi_HS)
+    call compute_Koh(ir,jpar_K)
 
     if(silent_flag == 0 .and. i_proc == 0) then
        open(io,file=trim(path)//runfile,status='old',position='append')
@@ -170,6 +171,7 @@ contains
           write(io,'(e16.8)',advance='no') pflux_multi_HS(is)
           write(io,'(e16.8)',advance='no') eflux_multi_HS(is)
        enddo
+       write(io,'(e16.8)',advance='no') jpar_K
        write (io,*)
        close(io)
     end if
@@ -431,16 +433,20 @@ contains
     integer, intent (in) :: ir
     real, intent (out) :: jpar, kpar, uparB
     real :: X31, L31_S, X32e, F32_ee, X32i, F32_ei, L32_S, alpha_0, alpha_S, &
-         X34, L34_S, Rpe, X33, sigma_S, sigma_spitzer
-    real :: nue_S, nue_star_S
+         X34, L34_S, X33, sigma_S, sigma_spitzer
+    real :: nue_S, nue_star_S, nui_star_S
+    integer :: is
+
+    nui_star_S = nui_star_HH / (dens(is_ion,ir) * z(is_ion)**2) &
+         * dens(is_ele,ir)*zeff
 
     alpha_0 = -1.17*(1.0-ftrap) / (1.0 - 0.22*ftrap - 0.19*ftrap*ftrap)
     
-    alpha_S = ( (alpha_0 + 0.25*(1.0-ftrap*ftrap) * sqrt(nui_star_HH)) &
-         / (1.0 + 0.5 * sqrt(nui_star_HH)) &
-         + (0.315) * nui_star_HH * nui_star_HH  &
+    alpha_S = ( (alpha_0 + 0.25*(1.0-ftrap*ftrap) * sqrt(nui_star_S)) &
+         / (1.0 + 0.5 * sqrt(nui_star_S)) &
+         + (0.315) * nui_star_S * nui_star_S  &
          * ftrap*ftrap*ftrap*ftrap*ftrap*ftrap ) &
-         / (1.0 + 0.15 *nui_star_HH*nui_star_HH &
+         / (1.0 + 0.15 *nui_star_S*nui_star_S &
          * ftrap*ftrap*ftrap*ftrap*ftrap*ftrap)
     
     kpar = -1.0 * alpha_S
@@ -512,20 +518,22 @@ contains
             + 0.59/(1.0*zeff) * X33 * X33 &
             - 0.23/(1.0*zeff) * X33 * X33 * X33)
 
-       Rpe = dens(is_ele,ir) * temp(is_ele,ir) &
-            / (dens(is_ele,ir) * temp(is_ele,ir) & 
-            + dens(is_ion,ir) * temp(is_ion,ir))
-       
-       jpar = I_div_psip * rho(ir) &
-            * (dens(is_ele,ir) * temp(is_ele,ir) &
-            + dens(is_ion,ir)*temp(is_ion,ir)) &
-            * (L31_S * dlnndr(is_ele,ir) &
-            + Rpe * (L31_S + L32_S) * dlntdr(is_ele,ir) &
-            + (1.0 - Rpe) * (L31_S + alpha_S * L34_S) * dlntdr(is_ion,ir)) &
-            + sigma_S * EparB_avg
+       jpar = sigma_S * EparB_avg &
+            + L32_S * I_div_psip * rho(ir) * &
+            dens(is_ele,ir) * temp(is_ele,ir) * dlntdr(is_ele,ir)
+
+       do is=1,n_species
+          jpar = jpar + L31_S * I_div_psip * rho(ir) &
+               * dens(is,ir) * temp(is,ir) &
+               * (dlntdr(is,ir) + dlnndr(is,ir))
+          if(is /= is_ele) then
+             jpar = jpar + L34_S * alpha_S * I_div_psip * rho(ir) &
+                  * dlntdr(is,ir) * dens(is,ir) * temp(is,ir)
+          endif
+       enddo
 
     end if
-    
+
   end subroutine compute_Sauter
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -804,5 +812,164 @@ contains
     endif
 
   end subroutine get_coll_freqs
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! Koh modification to
+  ! Sauter bootstrap current model
+  ! Phys. Plasmas, vol. 19, 072505 (2012)
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  subroutine compute_Koh(ir,jpar)
+    use neo_globals
+    use neo_equilibrium, only: I_div_psip, ftrap
+    implicit none
+    integer, intent (in) :: ir
+    real, intent (out) :: jpar
+    real :: X31, L31_S, X32e, F32_ee, X32i, F32_ei, L32_S, alpha_0, alpha_S, &
+         X34, L34_S, X33, sigma_S, sigma_spitzer
+    real :: nue_S, nue_star_S, nui_star_S
+    real :: ftrap_new, delta_param, alpha_param, beta_param, h_param, pfac
+    integer :: h_flag = 2
+    integer :: is
+
+    if(adiabatic_ele_model == 1) then
+       jpar = 0.0
+
+    else
+
+       ! alpha unchanged from Sauter
+       nui_star_S = nui_star_HH / (dens(is_ion,ir) * z(is_ion)**2) &
+            * dens(is_ele,ir)*zeff
+       
+       alpha_0 = -1.17*(1.0-ftrap) / (1.0 - 0.22*ftrap - 0.19*ftrap*ftrap)
+       
+       alpha_S = ( (alpha_0 + 0.25*(1.0-ftrap*ftrap) * sqrt(nui_star_S)) &
+            / (1.0 + 0.5 * sqrt(nui_star_S)) &
+            + (0.315) * nui_star_S * nui_star_S  &
+            * ftrap*ftrap*ftrap*ftrap*ftrap*ftrap ) &
+            / (1.0 + 0.15 *nui_star_S*nui_star_S &
+            * ftrap*ftrap*ftrap*ftrap*ftrap*ftrap)
+
+       nue_S  = nue_HH * (dens_ele/dens(is_ion,ir)) &
+            * (1.0*zeff) / (1.0* Z(is_ion))**2 
+       nue_star_S = nue_S * rmaj(ir) * abs(q(ir)) &
+            / (sqrt(eps)*sqrt(eps)*sqrt(eps) * vth(is_ele,ir))
+
+       if(zeff > 5.0) then
+          alpha_param = 0.0
+       else
+          alpha_param = (-zeff**2 + 5.998*zeff - 4.981) & 
+               / (4.294*zeff**2 - 14.07*zeff + 12.61)
+       endif
+
+       if(eps < 0.44) then
+          beta_param = (abs(eps-0.44))**0.7 * cos(pi*0.7)
+       else
+          beta_param = (eps - 0.44)**0.7
+       endif
+
+       delta_param = 0.55 * zeff**0.2 * (tanh(3.2*beta_param &
+            *(eps**1.5 * nue_star_S)**1.4 / zeff**alpha_param) &
+            + (1.0 - exp(-nue_star_S/0.1)) &
+            * tanh(2.2*beta_param &
+            * eps**2.8 * nue_star_S**0.1 / zeff**alpha_param))
+
+
+        if(profile_model < 2 .or. h_flag == 2) then
+           h_param = 1.0
+        else
+           pfac = 1.0/(rho(ir)*mass(is_ele)*vth(is_ele,ir)*sqrt(2.0)&
+                *rmaj(ir)*sqrt(eps)) &
+                * psiN_polflux_a * (1.0 - psiN_polflux(ir)) &
+                /(a_meters**2 * b_unit(ir))
+           if(h_flag == 1) then
+              ! single null
+              h_param = 1.0 - (0.2/zeff**4) &
+                   * exp(-abs(pfac/(2.7*log(eps**1.5 *nue_star_S/3.2 + 3.0))))
+           else
+              ! double null
+              h_param = 1.0 - (0.6/zeff**4) &
+                   * exp(-abs(pfac/(3.3*log(eps**1.5 *nue_star_S/3.2 + 2.0))))
+           endif
+        endif
+
+       ftrap_new = ftrap * h_param
+
+
+       X31    = ftrap_new * (1.0 + delta_param) &
+            / (1.0 + (1.0-0.1*ftrap_new) * sqrt(nue_star_S)  &
+            + 0.5*(1.0-ftrap_new) * nue_star_S / (1.0*zeff))
+       
+       L31_S  = (1.0 + 1.4/(zeff+1)) * X31 &
+            - (1.9/(zeff+1)) * X31*X31 &
+            + (0.3/(zeff+1)) * X31*X31*X31 &
+            + (0.2/(zeff+1)) * X31*X31*X31*X31
+       
+       X32e   = ftrap_new * (1.0 + delta_param) & 
+            / (1.0 + 0.26*(1-ftrap_new) * sqrt(nue_star_S) &
+            + 0.18*(1.0-0.37*ftrap_new) * nue_star_S / sqrt(1.0*zeff))
+       
+       F32_ee = (0.05 + 0.62*zeff) &
+            / (zeff*(1+0.44*zeff)) * (X32e - X32e*X32e*X32e*X32e) &
+            + 1.0/(1+0.22*zeff) * (X32e*X32e - X32e*X32e*X32e*X32e &
+            - 1.2*(X32e*X32e*X32e - X32e*X32e*X32e*X32e)) &
+            + 1.2/(1+0.5*zeff) * X32e*X32e*X32e*X32e
+       
+       X32i   = ftrap_new * (1.0 + delta_param) &
+            / (1.0 + (1+0.6*ftrap_new) * sqrt(nue_star_S)  &
+            + 0.85*(1-0.37*ftrap_new) * nue_star_S*(1.0+zeff))
+       
+       F32_ei = -(0.56 + 1.93*zeff) & 
+            /(zeff*(1+0.44*zeff)) * (X32i - X32i*X32i*X32i*X32i)  &
+            + 4.95/(1+2.48*zeff) * (X32i*X32i - X32i*X32i*X32i*X32i &
+            - 0.55*(X32i*X32i*X32i - X32i*X32i*X32i*X32i)) &
+            + (-1.2)/(1+0.5*zeff) * X32i*X32i*X32i*X32i;
+       
+       L32_S  = F32_ee + F32_ei
+       
+       X34   = ftrap_new * (1.0 + delta_param) &
+            / (1.0 + (1.0-0.1*ftrap_new) * sqrt(nue_star_S) &
+            + 0.5*(1.0-0.5*ftrap_new) * nue_star_S/(1.0*zeff))
+       
+       L34_S = (1 + 1.4/(zeff+1.0)) * X34 &
+            - (1.9/(zeff+1.0)) * X34*X34 &
+            + (0.3/(zeff+1.0)) * X34*X34*X34 &
+            + (0.2/(zeff+1.0)) * X34*X34*X34*X34
+       
+       !!!!!!!!!!!!
+       ! Epar components unchanged from Sauter
+       ! but EAB modified X33 to match other X_ modifications
+       
+       X33 = ftrap_new * (1.0 + delta_param) & 
+            / (1.0 + (0.55-0.1*ftrap_new) * sqrt(nue_star_S) &
+            + 0.45*(1.0-ftrap_new) * nue_star_S/(1.0*zeff**1.5))
+
+
+       sigma_spitzer = dens_ele / ( mass(is_ele) * nue_S ) &
+            * 0.58 * 32 / (3.0*pi) / (0.58 + 0.74/(0.76+zeff))
+
+       sigma_S = sigma_spitzer &
+            * (1.0 - (1.0+0.36/(1.0*zeff)) * X33 &
+            + 0.59/(1.0*zeff) * X33 * X33 &
+            - 0.23/(1.0*zeff) * X33 * X33 * X33)
+       !!!!!!!!!!!!
+
+       jpar = sigma_S * EparB_avg &
+            + L32_S * I_div_psip * rho(ir) * &
+            dens(is_ele,ir) * temp(is_ele,ir) * dlntdr(is_ele,ir)
+
+       do is=1,n_species
+          jpar = jpar + L31_S * I_div_psip * rho(ir) &
+               * dens(is,ir) * temp(is,ir) &
+               * (dlntdr(is,ir) + dlnndr(is,ir))
+          if(is /= is_ele) then
+             jpar = jpar + L34_S * alpha_S * I_div_psip * rho(ir) &
+                  * dlntdr(is,ir) * dens(is,ir) * temp(is,ir)
+          endif
+       enddo
+
+    end if
+    
+  end subroutine compute_Koh
+
 
 end module neo_theory

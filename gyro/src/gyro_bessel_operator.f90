@@ -2,36 +2,37 @@
 ! gyro_bessel_operator.f90
 !
 ! PURPOSE:
-!  Compute all the Bessel-function kernel (averaging) stencils
-!  to the required bandwidth (m_gyro).  Truncation is accomplished
-!  by assuming functions are constant in the truncated region.
-!  
-!  In the limit of maximal m_gyro (n_x/2), these are the 
-!  pseudospectral operators.
+! Compute all the Bessel-function kernel (averaging) stencils
+! to the required bandwidth (m_gyro). Truncation is accomplished
+! by assuming functions are constant in the truncated region.
+!
+! In the limit of maximal m_gyro (n_x/2), these are the
+! pseudospectral operators.
 !
 ! NOTES:
 !
-! itype=1:  J_0(x) 
-!       2:  J_0^2(x)
-!       3:  -(i/2)*k_x*rho*[ J_0(x)+J_2(x) ]
-!       4:  G_perp = (1/2)*[ J_0(x)+J_2(x) ] 
-!       5:  G_perp^2(x) 
-!       6:  G_perp(x)*J_0(x)
-!       7:  I_0(x^2)
+! itype=1: J_0(x)
+! 2: J_0^2(x)
+! 3: -(i/2)*k_x*rho*[ J_0(x)+J_2(x) ]
+! 4: G_perp = (1/2)*[ J_0(x)+J_2(x) ]
+! 5: G_perp^2(x)
+! 6: G_perp(x)*J_0(x)
+! 7: I_0(x^2)
+! 8: i*k_x*rho*[ J_0(x)-J_1(x)/x ] / x^2
 !
 ! x = rho*sqrt((2*pi*p*a+u)^2+v^2)
 !
 ! kx -> pi_2*p*a + u
 ! ky -> v
-! 
+!
 ! INPUT:
 !
-!  a = |grad(r)|/L 
-!  u = k_theta*Gq*Theta
-!  v = k_theta*Gq 
+! a = |grad(r)|/L
+! u = k_theta*Gq*Theta
+! v = k_theta*Gq
 !
-!  rho = v_perp/Omega_c               (itype=1,..,6)
-!  rho = rhos_unit*sqrt(T)/(mu*z*b0)  (itype=7)
+! rho = v_perp/Omega_c (itype=1-6,8)
+! rho = rhos_unit*sqrt(T)/(mu*z*b0) (itype=7)
 !------------------------------------------------------------------
 
 subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
@@ -97,7 +98,7 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
 
   case (4)
 
-     ! G = (1/2)*[ J_0(z)+J_2(z) ] 
+     ! G = (1/2)*[ J_0(z)+J_2(z) ]
      do p=-p0,p0-1
         x = rho*sqrt((pi_2*p*a+u)**2+v**2)
         call RJBESL(x,0.0,3,bessel,ierr)
@@ -106,7 +107,7 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
 
   case (5)
 
-     ! G^2 
+     ! G^2
      do p=-p0,p0-1
         x = rho*sqrt((pi_2*p*a+u)**2+v**2)
         call RJBESL(x,0.0,3,bessel,ierr)
@@ -130,13 +131,24 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
         func(p) = BESEI0(x*x)/n_x
      enddo
 
+  case (8)
+
+     ! i*k_x*rho*[ J_0(x)-J_1(x)/x ] / x^2
+
+     ! The factor i will be applied outside this loop
+     do p=-p0,p0-1
+        x = rho*sqrt((pi_2*p*a+u)**2+v**2)
+        call RJBESL(x,0.0,3,bessel,ierr)
+        func(p) = (pi_2*p*a+u)*rho*(bessel(0)-bessel(1)/x)/x**2/n_x
+     enddo
+
   end select
 
   !-----------------------------------------------------------
   ! Real-space operators:
   !
-  !  Construct real-space forms by summing over Fourier modes.
-  !  Real-space gridpoints in truncated region are ignored.
+  ! Construct real-space forms by summing over Fourier modes.
+  ! Real-space gridpoints in truncated region are ignored.
   !
 !$omp parallel do private(g0) schedule(static)
   do m=-m_gyro,m_gyro-i_gyro
@@ -148,18 +160,26 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
   enddo
   !-----------------------------------------------------------
 
+  !-----------------------------------------------------------
+  ! Final factors
+  !
+  ! Multiply by -i/2 for case 3
+  if (itype == 3) g = -(i_c/2.0)*g
+
+  ! Multiply by i for case 8
+  if (itype == 8) g = i_c*g
+  !-----------------------------------------------------------
+
+
   if (truncation_method == 1) then
 
      ! ORIGINAL METHOD
 
-     ! Add final factor of i for case 3
-     if (itype == 3) g = -(i_c/2.0)*g
-
      ! Enforce reality if n=0:
      if (u == 0.0) then
-        if (i_gyro /= 1) then 
+        if (i_gyro /= 1) then
 
-           ! Correct truncated gyroaverage                 
+           ! Correct truncated gyroaverage
            g0 = sum(g(:))-1.0
            g(0) = g(0)-g0
 
@@ -172,9 +192,9 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
      ! ALTERNATIVE METHOD
 
      !-----------------------------------------------------------
-     !  Make end-coefficients equal to sum of neglected ones.
-     !  This is equivalent to assuming that functions are 
-     !  constant over the truncated region.
+     ! Make end-coefficients equal to sum of neglected ones.
+     ! This is equivalent to assuming that functions are
+     ! constant over the truncated region.
      !
      if (m_gyro < p0) then
         do m=-p0,-m_gyro-1
@@ -201,9 +221,6 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
         g(m_gyro) = g(m_gyro)+gp
      endif
      !-----------------------------------------------------------
-
-     ! Add final factor of i for case 3
-     if (itype == 3) g = -(i_c/2.0)*g
 
      ! Enforce reality if n=0:
      if (u == 0.0) g = real(g)

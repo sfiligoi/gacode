@@ -75,7 +75,7 @@ subroutine gyro_collision_main
      call gyro_timer_in('Coll.-comm')
      !
      call rTRANSP_INIT(n_i,n_j,n_k,n_stack,NEW_COMM_1)
-     call rTRANSP_DO(f_coll,h_C)
+     call rTRANSP_DO(f_coll,h_c)
      call rTRANSP_CLEANUP
      !
      call gyro_timer_out('Coll.-comm')
@@ -95,7 +95,7 @@ subroutine gyro_collision_main
      call gyro_timer_in('Coll.-comm')
      !
      call fTRANSP_INIT(n_i,n_j,n_k,n_stack,NEW_COMM_1)
-     call fTRANSP_DO(h_C,fb_coll)
+     call fTRANSP_DO(h_c,fb_coll)
      call fTRANSP_CLEANUP
      !
      call gyro_timer_out('Coll.-comm')

@@ -68,7 +68,7 @@ subroutine gyro_nonlinear_flux_velocity
               ip = i+i_diff
 
               ave_h(i,ie,k,1:n_gk,1) = ave_h(i,ie,k,1:n_gk,1)+ &
-                   w_gyro(m0,i_diff,i,p_nek_loc,1:n_gk)*&
+                   w_gyro0(m0,i_diff,i,p_nek_loc,1:n_gk)*&
                    hh(i_loop(ip),1:n_gk)
 
            enddo ! i_diff

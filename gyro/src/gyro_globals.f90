@@ -190,6 +190,7 @@ module gyro_globals
   integer :: linsolve_method 
   integer :: fieldeigen_root_method
   integer :: gkeigen_method
+  integer :: truncation_method
   !
   ! (b) flags (0 or 1)
   !
@@ -208,7 +209,6 @@ module gyro_globals
   integer :: velocity_output_flag
   integer :: geo_array_print_flag
   integer :: source_flag
-  integer :: field_r0_flag
   integer :: dist_print
   integer :: udsymmetry_flag
   integer :: silent_flag
@@ -229,7 +229,8 @@ module gyro_globals
   integer :: geo_fastionbeta_flag
   integer :: fakefield_flag
   integer :: reintegrate_flag
-  integer :: truncation_method
+  integer :: coll_op_cons_flag
+  integer :: coll_op_self_flag
   !---------------------------------------------------------
 
   !-----------------------------------------------------------------------------------
@@ -320,7 +321,6 @@ module gyro_globals
   integer :: n_substep
   !
   integer :: n_lump
-  integer :: field_r0_grid
   integer :: ord_rbf
   integer :: n_coll
   integer :: n_rbf
@@ -447,7 +447,6 @@ module gyro_globals
   complex, dimension(:,:,:), allocatable :: blend_wedge
   complex, dimension(:,:,:), allocatable :: blend_prime_plot
   complex, dimension(:,:,:), allocatable :: blend_prime_wedge
-  complex, dimension(:,:), allocatable :: blend_r0_plot
   !---------------------------------------------------------
 
   !---------------------------------------------------------
@@ -535,10 +534,12 @@ module gyro_globals
   real, dimension(:), allocatable :: s_d1
   real, dimension(:,:), allocatable :: gyro_trace
   !
-  complex, dimension(:,:,:,:,:), allocatable :: w_gyro
-  complex, dimension(:,:,:,:,:), allocatable :: w_gyro_rot
-  complex, dimension(:,:,:,:,:), allocatable :: w_gyro_aperp
-  !
+  ! Gyroaverage operators 
+  ! (G0a,G1a,G2a,G3a in Technical Guide)
+  complex, dimension(:,:,:,:,:), allocatable :: w_gyro0
+  complex, dimension(:,:,:,:,:), allocatable :: w_gyro1
+  complex, dimension(:,:,:,:,:), allocatable :: w_gyro2
+  complex, dimension(:,:,:,:,:), allocatable :: w_gyro3
   !---------------------------------------------------------
 
   !---------------------------------------------------------
@@ -802,7 +803,6 @@ module gyro_globals
   !
   complex, dimension(:,:,:), allocatable :: phi
   complex, dimension(:,:,:), allocatable :: phi_plot
-  complex, dimension(:,:), allocatable :: field_r0_plot
   real, dimension(:,:), allocatable :: ave_phi
   !
   complex, dimension(:,:,:,:), allocatable :: moments_plot
@@ -855,7 +855,7 @@ module gyro_globals
   complex, dimension(:,:,:,:), allocatable :: p_store
   !
   complex, dimension(:,:,:,:), allocatable :: h_tran
-  complex, dimension(:,:,:), allocatable :: h_C
+  complex, dimension(:,:,:), allocatable :: h_c
   complex, dimension(:,:,:), allocatable :: f_coll
   complex, dimension(:,:,:), allocatable :: fb_coll
   !
@@ -926,14 +926,6 @@ module gyro_globals
   real, dimension(:,:,:,:), allocatable :: nonlinear_flux_trapped
   real, dimension(:,:), allocatable :: nonlinear_flux_momparts
   real, dimension(:,:), allocatable :: nonlinear_flux_excparts
-  !
-  ! Diffusivities:
-  !
-  real, dimension(:,:,:,:), allocatable :: diff_i
-  real, dimension(:,:,:,:), allocatable :: diff_i_trapped
-  real, dimension(:,:,:), allocatable :: diff
-  real, dimension(:,:,:), allocatable :: diff_trapped
-  real, dimension(:,:,:), allocatable :: diff_n
   !
   ! gyroBohm fluxes:
   !

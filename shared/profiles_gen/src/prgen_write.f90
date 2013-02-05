@@ -8,6 +8,7 @@
 subroutine prgen_write
 
   use prgen_globals
+  use EXPRO_interface
 
   !---------------------------------------------------------------
   implicit none
@@ -15,6 +16,7 @@ subroutine prgen_write
   integer :: i
   integer :: indx
   !---------------------------------------------------------------
+
 
   open(unit=1,file='input.profiles',status='replace')
 
@@ -29,6 +31,9 @@ subroutine prgen_write
   select case (format_type)
 
   case (1)
+     if (cer_file /= "null") then
+        write(1,20) '#      MERGED CER FILE : ',trim(cer_file)
+     endif
      write(1,40) '#          SHOT NUMBER : ',onetwo_ishot
      write(1,30) '#    RADIAL GRIDPOINTS : ',nx
      write(1,'(a,1pe9.2,a)') '#               Q_EDGE : ',q(nx)
@@ -60,16 +65,23 @@ subroutine prgen_write
      write(1,30) '#    RADIAL GRIDPOINTS : ',nx
      write(1,'(a,1pe9.2,a)') '#               Q_EDGE : ',q(nx)
      write(1,20) '#'
- !    write(1,20) '#                 IONS : ',&
- !         (trim(ion_name(reorder_vec(i))),i=1,ufile_nion)
+
+  case (7)
+     write(1,40) '#          SHOT NUMBER : [DATA MODIFIED WITH GMERGE]'
+     write(1,30) '#    RADIAL GRIDPOINTS : ',nx
+     write(1,'(a,1pe9.2,a)') '#               Q_EDGE : ',EXPRO_q(nx)
+     write(1,20) '#'
+     write(1,'(10(a,1x))') '#                 IONS : ',trim(cer_file)
 
   end select
 
-  write(1,20) '# '
-  if (signpsi > 0.0) then
-     write(1,30) '#         SIGN(PSI_POL): +'
-  else
-     write(1,30) '#         SIGN(PSI_POL): -'
+  if (format_type > 0 .and. format_type < 6) then
+     write(1,20) '# '
+     if (signpsi > 0.0) then
+        write(1,30) '#         SIGN(PSI_POL): +'
+     else
+        write(1,30) '#         SIGN(PSI_POL): -'
+     endif
   endif
   write(1,20) '# '
   !---------------------------------------------------------------
@@ -87,11 +99,13 @@ subroutine prgen_write
      write(1,20) '#'
      write(1,20) '#',efit_header
      write(1,20) '#'
-     if (abs(dpsi_gato/dpsi_data-1) > 0.001) then
-        write(1,'(a,1pe9.2,a)') &
-             '# ** WARNING ** Psi-shrinkage factor : ',dpsi_gato/dpsi_data-1.0  
-     else
-        write(1,'(a,1pe9.2,a)') '# Psi-shrinkage factor : ',dpsi_gato/dpsi_data-1.0 
+     if (format_type > 0 .and. format_type < 6) then
+        if (abs(dpsi_gato/dpsi_data-1) > 0.001) then
+           write(1,'(a,1pe9.2,a)') &
+                '# ** WARNING ** Psi-shrinkage factor : ',dpsi_gato/dpsi_data-1.0  
+        else
+           write(1,'(a,1pe9.2,a)') '# Psi-shrinkage factor : ',dpsi_gato/dpsi_data-1.0 
+        endif
      endif
   endif
   !---------------------------------------------------------------
@@ -101,10 +115,6 @@ subroutine prgen_write
   !
   write(1,20) '# * Additional information:'
   write(1,20) '#'
-
-  if (cer_file /= "null") then
-     write(1,20) '#      MERGED CER FILE : ',trim(cer_file)
-  endif
 
   write(1,'(a,1pe8.2,a)') '#  PLASMA MAJOR RADIUS : ',rmaj(nx),' m'
   write(1,'(a,1pe8.2,a)') '#  PLASMA MINOR RADIUS : ',rmin(nx),' m'
@@ -138,13 +148,16 @@ subroutine prgen_write
   case (6)
      write(1,'(a,sp,1pe14.7)') 'BT_EXP=',ufile_bref
      write(1,60) 'ARHO_EXP=',ufile_arho
+  case (7)
+     write(1,'(a,sp,1pe14.7)') 'BT_EXP=',EXPRO_b_ref
+     write(1,60) 'ARHO_EXP=',EXPRO_arho
 
   end select
 
   do indx=1,n_indx,5
 
      write(1,20) '# '
-     write(1,20) '#',tag(indx:indx+4)
+     write(1,20) '#',EXPRO_tag(indx:indx+4)
      do i=1,nx
         write(1,10) vec(indx:indx+4,i) 
      enddo
@@ -159,7 +172,7 @@ subroutine prgen_write
      do indx=1,n_indx2,5
 
         write(1,20) '# '
-        write(1,20) '#',tag2(indx:indx+4)
+        write(1,20) '#',EXPRO_tag2(indx:indx+4)
         do i=1,nx
            write(1,10) vec2(indx:indx+4,i)
         enddo

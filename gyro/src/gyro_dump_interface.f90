@@ -306,10 +306,6 @@ subroutine gyro_dump_interface
           "kill_gyro_b_flag",kill_gyro_b_flag)
      call dumpIntInterface(21,"    gyro_velocity_output_flag_in ",    gyro_velocity_output_flag_in , &
           "velocity_output_flag",velocity_output_flag)
-     call dumpIntInterface(21,"    gyro_field_r0_flag_in ",    gyro_field_r0_flag_in , &
-          "field_r0_flag",field_r0_flag)
-     call dumpIntInterface(21,"    gyro_field_r0_grid_in ",    gyro_field_r0_grid_in , &
-          "field_r0_grid",field_r0_grid)
      call dumpRealInterface(21,"    gyro_q_scale_in ",    gyro_q_scale_in , &
           "q_scale",q_scale)
      call dumpIntInterface(21,"    gyro_dist_print_flag_in ",    gyro_dist_print_flag_in , &

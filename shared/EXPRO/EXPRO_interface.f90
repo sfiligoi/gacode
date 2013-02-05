@@ -122,7 +122,7 @@ module EXPRO_interface
 
   integer :: EXPRO_ncol
   integer :: EXPRO_nblock
-  integer :: EXPRO_n_exp
+  integer :: EXPRO_n_exp=0
   real    :: EXPRO_b_ref
   real    :: EXPRO_arho
 
@@ -145,7 +145,7 @@ module EXPRO_interface
   real, dimension(:),allocatable :: EXPRO_pow_i
   real, dimension(:),allocatable :: EXPRO_pow_ei
   real, dimension(:),allocatable :: EXPRO_zeta
- 
+
   real, dimension(:),allocatable :: EXPRO_flow_beam
   real, dimension(:),allocatable :: EXPRO_flow_wall
   real, dimension(:),allocatable :: EXPRO_zmag
@@ -188,7 +188,7 @@ module EXPRO_interface
 
   real, dimension(:),allocatable :: EXPRO_bp0
   real, dimension(:),allocatable :: EXPRO_bt0
- 
+
   ! input.profiles.geo dimension and arrays
 
   integer :: EXPRO_nfourier
@@ -200,9 +200,9 @@ module EXPRO_interface
   real, dimension(:),allocatable :: EXPRO_gamma_e
   real, dimension(:),allocatable :: EXPRO_gamma_p
   real, dimension(:),allocatable :: EXPRO_mach
-  
+
   ! Control parameters (force nonsensical defaults for usage check)
-  
+
   integer :: EXPRO_ctrl_density_method = -1
   real, dimension(5) :: EXPRO_ctrl_z
   integer :: EXPRO_ctrl_numeq_flag=-1
@@ -210,5 +210,68 @@ module EXPRO_interface
   real :: EXPRO_ctrl_signq = -10.0
   integer :: EXPRO_ctrl_rotation_method = -1
   integer :: EXPRO_ctrl_silent_flag = 0
+
+  ! Standard variable tags
+
+  character (len=16), dimension(40) :: EXPRO_tag=(/&
+       'rho(-)          ',&
+       'rmin(m)         ',&
+       'rmaj(m)         ',&
+       'q(-)            ',&
+       'kappa(-)        ',&
+       'delta(-)        ',&
+       'Te(keV)         ',&
+       'ne(10^19/m^3)   ',&
+       'z_eff(-)        ',&
+       'omega0(rad/s)   ',&
+       'flow_mom(N-m)   ',&
+       'pow_e(MW)       ',&
+       'pow_i(MW)       ',&
+       'pow_ei(MW)      ',&
+       'zeta(-)         ',&
+       'flow_beam(kW/eV)',&
+       'flow_wall(kW/eV)',&
+       'zmag(m)         ',&
+       'ptot(Pa)        ',&
+       'polflux(Wb/rad) ',&
+       'ni_1(10^19/m^3) ',&
+       'ni_2(10^19/m^3) ',&
+       'ni_3(10^19/m^3) ',&
+       'ni_4(10^19/m^3) ',&
+       'ni_5(10^19/m^3) ',&
+       'Ti_1 (keV)      ',&
+       'Ti_2 (keV)      ',&
+       'Ti_3 (keV)      ',&
+       'Ti_4 (keV)      ',&
+       'Ti_5 (keV)      ',&
+       'vtor_1 (m/s)    ',&
+       'vtor_2 (m/s)    ',&
+       'vtor_3 (m/s)    ',&
+       'vtor_4 (m/s)    ',&
+       'vtor_5 (m/s)    ',&
+       'vpol_1 (m/s)    ',&
+       'vpol_2 (m/s)    ',&
+       'vpol_3 (m/s)    ',&
+       'vpol_4 (m/s)    ',&
+       'vpol_5 (m/s)    '/)
+
+  ! Transport power tags (currently unused)
+
+  character (len=16), dimension(15) :: EXPRO_tag2=(/&
+       'powe_beam(MW)   ',& 
+       'powe_RF(MW)     ',& 
+       'powe_oh_RF(MW)  ',& 
+       'powe_rad_RF(MW) ',& 
+       'powe_ion(MW)    ',& 
+       'powe_wdot(MW)   ',& 
+       'powe_fus(MW)    ',& 
+       '[tr-pow_e]      ',& 
+       '[ex-pow_ei_exp] ',&  
+       '[tr-pow_i]      ',& 
+       'powi_beam(MW)   ',& 
+       'powi_ion(MW)    ',& 
+       'powi_wdot(MW)   ',& 
+       'powi_fus(MW)    ',& 
+       'powi_cx(MW)     '/)
 
 end module EXPRO_interface

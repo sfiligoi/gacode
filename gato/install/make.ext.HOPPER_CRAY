@@ -1,2 +1,2 @@
-GKSFLAGS = -s real64
+GATOFLAGS = -s real64 -s int64
 

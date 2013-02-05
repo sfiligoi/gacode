@@ -107,7 +107,7 @@ subroutine gyro_nonlinear_flux
                  ! Momentum breakdown (sum over i, ix, ck)
 
                  momparts(is,:) = momparts(is,:)+momtemp(:)/n_x 
-
+ 
                  ! Moment 4: Exchange (time derivatives contain advective part)
 
                  ! 4a. H <phi_dot> [Sugama]

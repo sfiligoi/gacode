@@ -32,15 +32,15 @@ GATO=${GACODE_ROOT}/gato/gato
 # - locpargen executable
 LOCPARGEN=${GACODE_ROOT}/shared/profiles_gen/locpargen/locpargen
 # - exprodump executable
-EXPRODUMP=${GACODE_ROOT}/shared/profiles_gen/exprodump/exprodump
+EXPRODUMP=${GACODE_ROOT}/shared/profiles_gen/exprotools/exprodump
+# - expromake executable
+EXPROMAKE=${GACODE_ROOT}/shared/profiles_gen/exprotools/expromake
 # - ASTRA converter
 ASTRA=${GACODE_ROOT}/shared/profiles_gen/astra/astra2gyro.py
 # - ASTRA default map file
 ASTRAMAP=${GACODE_ROOT}/shared/profiles_gen/astra/astra_map_gyro
 # - TRANSP converter
 TRANSP=${GACODE_ROOT}/shared/profiles_gen/transp/transp2gyro.py
-# - input.profiles manipulator
-MODINPUT=${GACODE_ROOT}/shared/profiles_gen/modinput/inputmanipulate.py
 #=============================================================
 
 #=============================================================
@@ -65,7 +65,7 @@ then
    echo "              *.peq          : PEQDSK/ELITE text file"
    echo "              UFILE          : UFILE mode"
    echo "              null           : gfile only"
-   echo "              input.profiles : vgen or locpargen mode"
+   echo "              input.profiles : vgen, locpargen or gfilemerge mode"
    echo 
    echo "             -p <path>"
    echo "             Set optional path to simulation directory."
@@ -149,6 +149,7 @@ then
    echo "             -n <note text>"
    echo "             Include <note text> in the input.profiles header."
    echo
+   echo
    echo "GATO mapper control options"
    echo 
    echo "             -gato_dpsisl <dpsisl>"
@@ -160,6 +161,13 @@ then
    echo "             Default: 6 (Carbon)"
    echo "             -Z3 <ion3 charge>"
    echo "             Default: 2 (Helium)"
+   echo
+   echo
+   echo "GFILE MERGE MODE"
+   echo
+   echo "             -gmerge"
+   echo "             Toggle gmerge mode."
+   echo
    echo
    echo "VELOCITY GENERATION MODE"
    echo
@@ -206,58 +214,6 @@ then
    echo
    echo "             -trhelp"
    echo "             Detailed help message on transp2gyro."
-   echo 
-   echo "PROFILE MANIPULATION MODE"
-   echo 
-   echo "             -d [manipulate_options]"
-   echo 
-   echo "             -d -comp [plasma_composition_options]"
-   echo 
-   echo "             -modhelp"
-   echo "             Detailed help message on the input.profiles manipulation mode"
-   echo 
-   echo "  manipulate options:"
-   echo 
-   echo "             -inf1 <input file 1>"
-   echo "             Default: input.profiles"
-   echo 
-   echo "             -inf2 <input file 2>"
-   echo "             Default: input.profiles"
-   echo 
-   echo "             -outf <output file>"
-   echo "             Default: input.profiles_mod"
-   echo 
-   echo "             -scal <scaling factor>"
-   echo "             Default: 1.0 "
-   echo 
-   echo "             -pin <input profile>"
-   echo "             Name of profile, as it appears in an input.profiles file"
-   echo "             Default: ni_1"
-   echo 
-   echo "             -pout <output profile>"
-   echo "             Name of profile, as it appears in an input.profiles file"
-   echo "             Default: ni_1"
-   echo 
-   echo " compose options:"
-   echo 
-   echo "             -inf1 <input file 2>"
-   echo "             Default: input.profiles"
-   echo 
-   echo "             -outf <output file>"
-   echo "             Default: input.profiles_mod"
-   echo 
-   echo "             -Z1 <ion1 charge>"
-   echo "             Default: 1 (Hydrogen isotope)"
-   echo "             -Z2 <ion2 charge>"
-   echo "             Default: 6 (Carbon)"
-   echo "             -Z3 <ion3 charge>"
-   echo "             Default: 2 (Helium)"
-   echo 
-   echo "             -Zeff <effective ion charge>"
-   echo "             Default: 2.0"
-   echo 
-   echo "             -n3n1 <ni_3/ni_1>"
-   echo "             Default: 0.0 (No third ion species)"
    echo
    echo "LOCAL PARAMETER MODE"
    echo 
@@ -282,6 +238,17 @@ then
    echo
    echo "      NOTE: control ion charges with Z1,Z2,Z3 as in GATO options"
    echo
+   echo "PROFILE CREATION MODE"
+   echo 
+   echo "             -create"
+   echo "              Create input.profiles using parameters in input.expromake"
+   echo 
+   echo "             -create help"
+   echo "              Print detailed help information"
+   echo
+   echo "             -i <input.profiles file>"
+   echo "              Specify a file to modify.  If unspecified, generate from scratch."
+   echo
    echo
    echo "EXAMPLES:"
    echo " "
@@ -290,8 +257,6 @@ then
    echo "    profiles_gen -i myfile.cdf -r 1,3,2,5,4"
    echo "    profiles_gen -vgen -i input.profiles -vgen_e 2 -vgen_v 1 -vgen_in DC -vgen_x 2"
    echo "    profiles_gen -vgen -i input.profiles -vgen_e 2 -vgen_v 1 -vgen_in HDC -vgen_x 3"
-   echo "    profiles_gen -transp"
-   echo "    profiles_gen -tok NSTX -year 07 -shot 124948A01 -time 250 -avg 2"
    echo
    echo "(1) Typical usage for DIII-D plasmas with iterdbfile only (2 steps)"
    echo "    NEO will generate Er and all velocities:"
@@ -304,24 +269,6 @@ then
    echo 
    echo "    profiles_gen -i iterdb -g gfile -cer cerfile"
    echo "    profiles_gen -vgen -i input.profiles -vgen_e 4 -vgen_v 2 -vgen_in DC -vgen_x 2"
-   echo 
-   echo "(3) Manipulation example"
-   echo 
-   echo "    profiles_gen -d -inf1 input.profiles.1 \ "
-   echo "                    -inf2 input.profiles.2 \ " 
-   echo "                    -scal 0.85 -pin Te -pout Ti_2"
-   echo 
-   echo "    RESULT: input.profiles_mod is generated, containing the same data as" 
-   echo "    input.profiles.1 except that the Ti_2 profile is equal to 0.85*Te," 
-   echo "    where Te is from input.profiles.2"
-   echo " "
-   echo "(4) Composition example"
-   echo
-   echo "    profiles_gen -d -comp -Z2 8 -Zeff 2.2 -n3n1 0.1 -outf input.profiles.ox"
-   echo " "
-   echo "    RESULT: input.profiles.ox is generated based on the electron density" 
-   echo "    profile ni_1, ni_2 and ni_3 are generated for a plasma with"
-   echo "    Zeff=2.2, Z1=1, Z2=8, Z3=4 and ni_3/ni_1 = 0.1."
    echo 
 
    exit 1
@@ -336,23 +283,29 @@ SIMROOT=$PWD
 
 CONFIG=.config
 
-GATO_DPSISL=0.0
-
 FILE_FLAG=0
-CER_FLAG=0
 G_FLAG=0
 NOGQ_FLAG=0
+GATO_DPSISL=0.0
 VERBOSE_FLAG=0
 ORDER_FLAG=0
 TRANSP_FLAG=0
+GMERGE_FLAG=0
+
+# CER file 
+CER_FILE=null
+
+# VGEN mode variables
 VGEN_IN=null
 VGEN_E=1
 VGEN_V=2
 VGEN_X=2
 VGEN_FLAG=0
-MODINP_FLAG=0
+
+# UFILE 
 UFILETIME=null
 
+# LOCAL PARAMETER MODE variables
 LOC_RAD=0
 LOC_RHO=0
 LOC_PSI=0
@@ -360,10 +313,15 @@ Z1=1.0
 Z2=6.0
 Z3=2.0
 
+# DUMP MODE variables
 DUMP_FLAG=0
 DUMP_VAR=null
 
+# PFILE variables
 PZ2=0
+
+# CREATE MODE variables
+CREATE_FLAG=0
 #=============================================================
 
 #=============================================================
@@ -394,7 +352,9 @@ while [ $# -gt 0 ] ; do
 
   -n) shift ; ASTRA_ARG="$ASTRA_ARG -n $1" ;;
 
-  -cer) shift ; CER_FLAG=1 ; CER_FILE="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-cer;$1" ;;
+  -cer) shift ; 
+        echo "INFO: (profiles_gen) Will merge data from $CER_FILE" ; 
+        CER_FILE="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-cer;$1" ;;
    
   -g) shift ; G_FLAG=1 ; GFILE="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-g;$1" ;;
 
@@ -436,34 +396,14 @@ while [ $# -gt 0 ] ; do
 
   -trhelp) TRANSP_FLAG=1 ; TRANSP_ARGS="$TRANSP_ARGS -h" ;;
   
-  -d) MODINP_FLAG=1 ; FILE_FLAG=1 ;;
+  -create) CREATE_FLAG=1 ;;
+   
+  -Z1) shift ; Z1=$1 ;;  
   
-  -inf1) shift ; MODINP_ARGS="$MODINP_ARGS --inf1 $1" ;;
+  -Z2) shift ; Z2=$1 ;;  
   
-  -inf2) shift ; MODINP_ARGS="$MODINP_ARGS --inf2 $1" ;;
+  -Z3) shift ; Z3=$1 ;;  
   
-  -outf) shift ; MODINP_ARGS="$MODINP_ARGS --outf $1" ;;
-  
-  -scal) shift ; MODINP_ARGS="$MODINP_ARGS --scal $1" ;;
-  
-  -pin) shift ; MODINP_ARGS="$MODINP_ARGS --pin $1" ;;
-  
-  -pout) shift ; MODINP_ARGS="$MODINP_ARGS --pout $1" ;;
-  
-  -comp) MODINP_ARGS="$MODINP_ARGS --comp";; 
-  
-  -Z1) shift ; Z1=$1 ; MODINP_ARGS="$MODINP_ARGS --Z1 $1" ;;  
-  
-  -Z2) shift ; Z2=$1 ; MODINP_ARGS="$MODINP_ARGS --Z2 $1" ;;  
-  
-  -Z3) shift ; Z3=$1 ; MODINP_ARGS="$MODINP_ARGS --Z3 $1" ;;  
-  
-  -Zeff) shift ; MODINP_ARGS="$MODINP_ARGS --Zeff $1" ;;  
-  
-  -n3n1) shift ; MODINP_ARGS="$MODINP_ARGS --n3n1 $1" ;;  
-
-  -modhelp) shift ; MODINP_ARGS="$MODINP_ARGS --modhelp";;
-
   -loc_rad) shift ; LOC_RAD=$1 ;;
   -loc_rho) shift ; LOC_RHO=$1 ;;
   -loc_psi) shift ; LOC_PSI=$1 ;;
@@ -471,6 +411,8 @@ while [ $# -gt 0 ] ; do
   -dump) shift ; DUMP_FLAG=1 ; DUMP_VAR=$1 ;;
 
   -pZ2) shift ; PZ2=$1 ;;  
+
+  -gmerge) GMERGE_FLAG=1 ;;  
   
   esac
   shift
@@ -498,16 +440,26 @@ then
        TRANSP_ARGS="${TRANSP_ARGS} --iterdb $ITERDB_ARGS"
    fi
    $PYTHON_COMMAND $TRANSP $TRANSP_ARGS
-   exit
+   exit 0
 fi
 #=============================================================
 
 #=============================================================
-# Call inputmanipulate.py
-if [ $MODINP_FLAG -eq 1 ]
+# Manage CREATE MODE
+#
+if [ $CREATE_FLAG -eq 1 ]
 then
-   $PYTHON_COMMAND $MODINPUT $MODINP_ARGS
-   exit
+   if [ $FILE_FLAG -eq 1 ]
+   then
+      cp $FILE input.profiles
+      python $GACODE_ROOT/shared/bin/profile_parse.py input.profiles
+   else
+      rm -f input.profiles input.profiles.gen
+   fi
+   touch input.expromake
+   python $GACODE_ROOT/shared/bin/expromake_parse.py input.expromake   
+   $EXPROMAKE   
+   exit 0
 fi
 #=============================================================
 
@@ -608,10 +560,10 @@ fi
 #=============================================================
 # Manage execution of vgen
 #
-NEO_DIR=$GACODE_ROOT/neo
-
 if [ $VGEN_FLAG -eq 1 ]
 then
+
+   NEO_DIR=$GACODE_ROOT/neo
 
    # Create vgen work directory
 
@@ -652,20 +604,36 @@ then
    $VGEN_EXE/vgen
 
    if [ -f "input.profiles.new" ]
-       then
+   then
        cp input.profiles.new ..
    fi
 
    exit 0
-      
-else
+fi
+#=============================================================
 
-   # Clean old input.profiles* data.
+#=============================================================
+# Manage execution of gmerge
+#
+if [ $GMERGE_FLAG -eq 1 ] 
+then
+   rm -f input.profiles.gen
+   python $GACODE_ROOT/shared/bin/profile_parse.py $FILE      
+   if [ "$FILE" != "input.profiles" ] ; then
+      mv $FILE.gen input.profiles.gen
+   fi
+   a=`grep IONS $FILE`
+   CER_FILE=${a:25} 
+   a=`grep INPUT $FILE`
+   FILE=${a:25}
+fi   
+#=============================================================
 
-   echo "INFO: (profiles_gen) Removing old input.profiles* files"
-   rm -rf input.profiles input.profiles.geo input.profiles.extra
-
-fi 
+#=============================================================
+# If we make it here, its time for cleanup
+#
+echo "INFO: (profiles_gen) Removing old input.profiles* files"
+rm -f input.profiles input.profiles.geo input.profiles.extra
 #=============================================================
 
 #=============================================================
@@ -700,13 +668,7 @@ date > $CONFIG
 echo $FILE >> $CONFIG
 
 # Optional CER file
-if [ $CER_FLAG -eq 0 ]
-then
-   echo "null" >> $CONFIG
-else
-   echo $CER_FILE >> $CONFIG
-   echo "INFO: (profiles_gen) Will merge data from $CER_FILE"
-fi
+echo $CER_FILE >> $CONFIG
 
 # EFIT G-file
 echo $G_FLAG >> $CONFIG
@@ -719,6 +681,11 @@ echo $VERBOSE_FLAG >> $CONFIG
 
 # PFILE Z2 value
 echo $PZ2 >> $CONFIG
+
+# GFILE MERGE
+echo $GMERGE_FLAG >> $CONFIG
+
+# NOTE: reorder flags will be appended later.
 #=============================================================
 
 #==============================================================

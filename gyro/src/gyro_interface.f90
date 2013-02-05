@@ -157,8 +157,6 @@ module gyro_interface
   integer :: gyro_nl_method_in = 1
   integer :: gyro_kill_gyro_b_flag_in = 0
   integer :: gyro_velocity_output_flag_in = 0
-  integer :: gyro_field_r0_flag_in = 0
-  integer :: gyro_field_r0_grid_in = 1
   real    :: gyro_q_scale_in = 1.0
   integer :: gyro_dist_print_flag_in = 0
   integer :: gyro_nint_orb_s_in = 64
@@ -207,6 +205,8 @@ module gyro_interface
   real    :: gyro_fieldeigen_wr_in = -0.3
   real    :: gyro_fieldeigen_wi_in = 0.2
   real    :: gyro_fieldeigen_tol_in = 1e-6
+  integer :: gyro_coll_op_cons_flag_in = 0
+  integer :: gyro_coll_op_self_flag_in = 0
 
   ! io related to hdf5 and diagnostics  
   integer :: gyro_io_method_in = 1
@@ -387,8 +387,6 @@ contains
     gyro_nl_method_in = nl_method
     gyro_kill_gyro_b_flag_in = kill_gyro_b_flag
     gyro_velocity_output_flag_in = velocity_output_flag
-    gyro_field_r0_flag_in = field_r0_flag
-    gyro_field_r0_grid_in = field_r0_grid
     gyro_q_scale_in = q_scale
     gyro_dist_print_flag_in = dist_print
     gyro_nint_orb_s_in = nint_ORB_s
@@ -437,6 +435,8 @@ contains
     gyro_fieldeigen_wr_in = fieldeigen_wr
     gyro_fieldeigen_wi_in = fieldeigen_wi
     gyro_fieldeigen_tol_in = fieldeigen_tol
+    gyro_coll_op_cons_flag_in = coll_op_cons_flag 
+    gyro_coll_op_self_flag_in = coll_op_self_flag
 
     gyro_io_method_in = io_method
     gyro_torangle_offset_in = torangle_offset
@@ -614,8 +614,6 @@ contains
     nl_method = gyro_nl_method_in
     kill_gyro_b_flag = gyro_kill_gyro_b_flag_in
     velocity_output_flag = gyro_velocity_output_flag_in
-    field_r0_flag = gyro_field_r0_flag_in
-    field_r0_grid = gyro_field_r0_grid_in
     q_scale = gyro_q_scale_in
     dist_print = gyro_dist_print_flag_in
     nint_ORB_s = gyro_nint_orb_s_in
@@ -664,7 +662,9 @@ contains
     fieldeigen_wr = gyro_fieldeigen_wr_in
     fieldeigen_wi = gyro_fieldeigen_wi_in
     fieldeigen_tol = gyro_fieldeigen_tol_in
-    
+    coll_op_cons_flag = gyro_coll_op_cons_flag_in 
+    coll_op_self_flag = gyro_coll_op_self_flag_in
+
     io_method = gyro_io_method_in       
     torangle_offset = gyro_torangle_offset_in        
     time_skip_wedge = gyro_time_skip_wedge_in 

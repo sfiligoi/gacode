@@ -87,7 +87,7 @@ subroutine gyro_moments_plot
                  m0 = m_phys(ck,m)
                  do i_diff=-m_gyro,m_gyro-i_gyro
                     gyro_h(m,i,p_nek_loc,1) = gyro_h(m,i,p_nek_loc,1)+ &
-                         w_gyro(m0,i_diff,i,p_nek_loc,is)*cap_h(m,i_loop(i+i_diff))
+                         w_gyro0(m0,i_diff,i,p_nek_loc,is)*cap_h(m,i_loop(i+i_diff))
                  enddo ! i_diff
               enddo ! m
            enddo ! i

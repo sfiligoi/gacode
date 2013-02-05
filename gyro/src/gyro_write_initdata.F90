@@ -69,8 +69,6 @@ subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io,h5datafile)
      write(io,20) n_ion
      write(io,20) n_kinetic
      write(io,20) n_spec
-     write(io,20) field_r0_flag
-     write(io,20) field_r0_grid
      write(io,20) n_grid_exp
      write(io,20) boundary_method
 
@@ -323,8 +321,6 @@ subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io,h5datafile)
     call dump_h5(rootid,"n_ion",n_ion,h5in,h5err)
     call dump_h5(rootid,"n_kinetic",n_kinetic,h5in,h5err)
     call dump_h5(rootid,"n_spec",n_spec,h5in,h5err)
-    call dump_h5(rootid,"field_r0_flag",field_r0_flag,h5in,h5err)
-    call dump_h5(rootid,"field_r0_grid",field_r0_grid,h5in,h5err)
     call dump_h5(rootid,"n_grid_exp",n_grid_exp,h5in,h5err)
     call dump_h5(rootid,"boundary_method",boundary_method,h5in,h5err)
     call dump_h5(rootid,"r",r,h5in,h5err)

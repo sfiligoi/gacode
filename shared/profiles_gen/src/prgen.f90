@@ -21,16 +21,10 @@
 program prgen
 
   use prgen_globals
+  use EXPRO_interface
 
   !--------------------------------------------------
   implicit none
-  !--------------------------------------------------
-
-  !--------------------------------------------------
-  ! ** Define number of tags here: 
-  !
-  n_indx  = 40
-  n_indx2 = 15  
   !--------------------------------------------------
 
   !--------------------------------------------------
@@ -44,85 +38,26 @@ program prgen
   read(1,*) nogatoq_flag
   read(1,*) verbose_flag
   read(1,*) pfile_z2
+  read(1,*) gmerge_flag
   read(1,*) reorder_vec(:)
-
   close(1)
   !--------------------------------------------------
 
-  !--------------------------------------------------
-  ! Define tags
-  !
-  allocate(tag(n_indx))
-  !
-  tag(1)  = 'rho(-)'
-  tag(2)  = 'rmin(m)'
-  tag(3)  = 'rmaj(m)'
-  tag(4)  = 'q(-)'
-  tag(5)  = 'kappa(-)'
-  tag(6)  = 'delta(-)'
-  tag(7)  = 'Te(keV)'
-  tag(8)  = 'ne(10^19/m^3)'
-  tag(9)  = 'z_eff(-)'
-  tag(10) = 'omega0(rad/s)'
-  tag(11) = 'flow_mom(N-m)'
-  tag(12) = 'pow_e(MW)'
-  tag(13) = 'pow_i(MW)'
-  tag(14) = 'pow_ei(MW)'
-  tag(15) = 'zeta(-)'
-  tag(16) = 'flow_beam(kW/eV)'
-  tag(17) = 'flow_wall(kW/eV)'
-  tag(18) = 'zmag(m)'
-  tag(19) = 'ptot(Pa)'
-  tag(20) = 'polflux(Wb/rad)'
-  tag(21) = 'ni_1(10^19/m^3)'
-  tag(22) = 'ni_2(10^19/m^3)'
-  tag(23) = 'ni_3(10^19/m^3)'
-  tag(24) = 'ni_4(10^19/m^3)'
-  tag(25) = 'ni_5(10^19/m^3)'
-  tag(26) = 'Ti_1 (keV)'
-  tag(27) = 'Ti_2 (keV)'
-  tag(28) = 'Ti_3 (keV)'
-  tag(29) = 'Ti_4 (keV)'
-  tag(30) = 'Ti_5 (keV)'
-  tag(31) = 'vtor_1 (m/s)'
-  tag(32) = 'vtor_2 (m/s)'
-  tag(33) = 'vtor_3 (m/s)'
-  tag(34) = 'vtor_4 (m/s)'
-  tag(35) = 'vtor_5 (m/s)'
-  tag(36) = 'vpol_1 (m/s)'
-  tag(37) = 'vpol_2 (m/s)'
-  tag(38) = 'vpol_3 (m/s)'
-  tag(39) = 'vpol_4 (m/s)'
-  tag(40) = 'vpol_5 (m/s)'
-  !
-  ! Transport power components
-  !  
-  allocate(tag2(n_indx2))
-  !
-  tag2(1) = 'powe_beam(MW)' 
-  tag2(2) = 'powe_RF(MW)'
-  tag2(3) = 'powe_oh_RF(MW)'
-  tag2(4) = 'powe_rad_RF(MW)'
-  tag2(5) = 'powe_ion(MW)'
-  tag2(6) = 'powe_wdot(MW)'
-  tag2(7) = 'powe_fus(MW)'
-  tag2(8) = '[tr-pow_e]'
-  tag2(9) = '[ex-pow_ei_exp]' 
-  tag2(10) = '[tr-pow_i]'
-  tag2(11) = 'powi_beam(MW)'
-  tag2(12) = 'powi_ion(MW)'
-  tag2(13) = 'powi_wdot(MW)'
-  tag2(14) = 'powi_fus(MW)'
-  tag2(15) = 'powi_cx(MW)'
-  !--------------------------------------------------
-
+  n_indx  = size(EXPRO_tag)
+  n_indx2 = size(EXPRO_tag2) 
 
   !------------------------------------------------------------------
   ! Read the iterdb file and define standard variables.
   !
   ! Note that nx will be the experimental vector length in ALL cases:
   !
-  if (trim(raw_data_file) == 'null') then
+  if (gmerge_flag == 1) then
+
+    call prgen_read_inputprofiles
+
+    format_type = 7
+
+  else if (trim(raw_data_file) == 'null') then
  
     ! Pure gfile parsing
 
@@ -186,7 +121,7 @@ program prgen
 
      call prgen_read_ufile
 
-  else
+  else 
 
      ! Old text format
      print '(a)','INFO: (prgen) Assuming old iterdb text format.'
@@ -220,6 +155,8 @@ program prgen
      call prgen_map_corsica
   case (6)
      call prgen_map_ufile
+  case (7)
+     call prgen_map_inputprofiles
 
   end select
 

@@ -1,10 +1,10 @@
-!-----------------------------------------------------
+!-----------------------------------------------------------------
 ! gyro_bessel_stencils.f90 
 !
 ! PURPOSE:
 !  Driver for creation of (tau-space) gyroaverage 
-!  stencils w_gyro and w_rot_gyro (optionally).
-!---------------------------------------------
+!  stencils w_gyro*.
+!-----------------------------------------------------------------
 
 subroutine gyro_bessel_stencils
 
@@ -12,7 +12,7 @@ subroutine gyro_bessel_stencils
   use gyro_pointers
   use math_constants
 
-  !----------------------------------------------
+  !-----------------------------------------------------------------
   implicit none
   !
   integer :: p
@@ -24,13 +24,15 @@ subroutine gyro_bessel_stencils
   !
   real :: omega_c
   !
-  complex, dimension(n_theta(2),-m_gyro:m_gyro-i_gyro) :: w_temp
-  complex, dimension(n_theta(2),-m_gyro:m_gyro-i_gyro) :: w_temp_rot
-  complex, dimension(n_theta(2),-m_gyro:m_gyro-i_gyro) :: w_temp_aperp
   complex, dimension(-m_gyro:m_gyro-i_gyro) :: g
-  !----------------------------------------------
+  !
+  complex, dimension(:,:), allocatable :: w_temp0
+  complex, dimension(:,:), allocatable :: w_temp1
+  complex, dimension(:,:), allocatable :: w_temp2
+  complex, dimension(:,:), allocatable :: w_temp3
+  !-----------------------------------------------------------------
 
-  !---------------------------------------------
+  !-----------------------------------------------------------------
   ! Set dimensions and functions
   !
   do p=-n_x/2,n_x/2-1
@@ -38,11 +40,16 @@ subroutine gyro_bessel_stencils
         z_gyro(m,p) = exp(-i_c*p*m*pi/(n_x/2))
      enddo
   enddo
-  !---------------------------------------------
+  !-----------------------------------------------------------------
 
-  w_gyro(:,:,:,:,:) = (0.0,0.0)
+  allocate(w_temp0(n_theta(2),-m_gyro:m_gyro-i_gyro))
+  allocate(w_temp2(n_theta(2),-m_gyro:m_gyro-i_gyro))
+  if (n_field == 3) then
+     allocate(w_temp1(n_theta(2),-m_gyro:m_gyro-i_gyro))
+     allocate(w_temp3(n_theta(2),-m_gyro:m_gyro-i_gyro))
+  endif
 
-  !---------------------------------------------------------
+  !-----------------------------------------------------------------
   ! LOCAL gyroaverage:
   !
   do is=1,n_gk
@@ -76,11 +83,7 @@ subroutine gyro_bessel_stencils
               v_gyro = qrat_t(i,k,m0)*n_1(in_1)*q_s(i)/r_s(i)
               !----------------------------------------------------------------
 
-              !---------------------------
-              ! Standard gyroaverage:
-              !---------------------------
-
-              ! J_0
+              ! G0a = J0
               call gyro_bessel_operator(rho_gyro,&
                    a_gyro,&
                    u_gyro,&
@@ -88,13 +91,9 @@ subroutine gyro_bessel_stencils
                    g,&
                    1)
 
-              w_temp(m0,:) = g(:)
+              w_temp0(m0,:) = g(:)
 
-              !-------------------------------
-              ! Momentum gyroaverage: 
-              !-------------------------------
-
-              ! -(i/2)*k_x*rho*[ J_0(z)+J_2(z) ]
+              ! G2a = -(i/2)*k_x*rho*[ J_0(z)+J_2(z) ]
               call gyro_bessel_operator(rho_gyro,&
                    a_gyro,&
                    u_gyro,&
@@ -102,15 +101,11 @@ subroutine gyro_bessel_stencils
                    g, &
                    3)
 
-              w_temp_rot(m0,:) = g(:)
-
-              !-------------------------------
-              ! A_perp gyroaverage:
-              !-------------------------------
+              w_temp2(m0,:) = g(:)
 
               if (n_field == 3) then
 
-                 ! G_perp = (1/2)*[ J_0(z)+J_2(z) ] 
+                 ! G1a = (1/2)*[ J_0(z)+J_2(z) ] 
                  call gyro_bessel_operator(rho_gyro,&
                       a_gyro,&
                       u_gyro,&
@@ -118,7 +113,17 @@ subroutine gyro_bessel_stencils
                       g,&
                       4)
 
-                 w_temp_aperp(m0,:) = g(:)
+                 w_temp1(m0,:) = g(:)
+
+                 ! G3a = i*k_x*rho*[ J_0(z)-J_1(z)/z ] / z^2 
+                 call gyro_bessel_operator(rho_gyro,&
+                      a_gyro,&
+                      u_gyro,&
+                      v_gyro,&
+                      g,&
+                      8)
+
+                 w_temp3(m0,:) = g(:)
 
               endif
 
@@ -126,9 +131,12 @@ subroutine gyro_bessel_stencils
 
            do m=1,n_stack
               m0 = m_phys(ck,m)
-              w_gyro(m,:,i,p_nek_loc,is) = w_temp(m0,:)
-              w_gyro_rot(m,:,i,p_nek_loc,is) = w_temp_rot(m0,:)
-              if (n_field == 3) w_gyro_aperp(m,:,i,p_nek_loc,is) = w_temp_aperp(m0,:)
+              w_gyro0(m,:,i,p_nek_loc,is) = w_temp0(m0,:)
+              w_gyro2(m,:,i,p_nek_loc,is) = w_temp2(m0,:)
+              if (n_field == 3) then
+                 w_gyro1(m,:,i,p_nek_loc,is) = w_temp1(m0,:)
+                 w_gyro3(m,:,i,p_nek_loc,is) = w_temp3(m0,:)
+              endif
            enddo
 
         enddo ! i
@@ -136,6 +144,13 @@ subroutine gyro_bessel_stencils
   enddo ! is
   !
   !----------------------------------------------------------
+
+  deallocate(w_temp0)
+  deallocate(w_temp2)
+  if (n_field == 3) then
+     deallocate(w_temp1)
+     deallocate(w_temp3)
+  endif
 
   if (debug_flag == 1 .and. i_proc == 0) then
      print *,'[gyro_bessel_stencils done]'

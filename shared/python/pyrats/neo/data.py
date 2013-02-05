@@ -8,7 +8,7 @@ class NEOData:
         >>> sim1 = NEOData('example_directory')
     """
     
-    #---------------------------------------------------------------------------#
+    #-------------------------------------------------------------------------#
     # Methods
 
     def __init__(self, sim_directory):
@@ -20,12 +20,16 @@ class NEOData:
         self.read_grid()
         self.read_equil()
         self.read_theory()
+        self.read_theory_nclass()
         self.read_transport()
+        self.read_transport_gv()
+        self.read_expnorm()
         self.read_transport_exp()
+        self.read_phi()
         self.read_vel()
         self.read_rotation()
 
-    #---------------------------------------------------------------------------#
+    #-------------------------------------------------------------------------#
 
     def init_data(self):
         """Initialize object data."""
@@ -34,13 +38,17 @@ class NEOData:
         self.grid          = {}
         self.equil         = {}
         self.theory        = {}
+        self.theory_nclass = {}
         self.transport     = {}
+        self.transport_gv  = {}
+        self.expnorm       = {}
         self.transport_exp = {}
+        self.phi           = {}
         self.vel           = []
         self.veltag        = []
         self.rotation      = {}
 
-    #---------------------------------------------------------------------------#
+    #-------------------------------------------------------------------------#
 
     def set_directory(self, path):
         """Set the simulation directory."""
@@ -48,7 +56,7 @@ class NEOData:
         from os.path import expanduser, expandvars
         self.dirname = expanduser(expandvars(path))
     
-    #---------------------------------------------------------------------------#
+    #-------------------------------------------------------------------------#
 
     def read_grid(self):
         """Reads out.neo.grid"""
@@ -70,7 +78,7 @@ class NEOData:
         self.grid['n_radial']  = int(data[4+int(data[3])])
         self.grid['r_over_a']  = data[5+int(data[3]):]
 
-    #---------------------------------------------------------------------------#
+    #-------------------------------------------------------------------------#
 
     def read_equil(self):
         """Read out.neo.equil."""
@@ -93,16 +101,13 @@ class NEOData:
         self.equil['R0_over_a']     = equil[:,4]
         self.equil['omega0']        = equil[:,5]
         self.equil['domega0dr']     = equil[:,6]
-        self.equil['n_norm']        = equil[:,7]
-        self.equil['T_norm']        = equil[:,8]
-        self.equil['v_norm_over_a'] = equil[:,9]
-        self.equil['n']             = equil[:,10+0*n_spec:10+1*n_spec]
-        self.equil['T']             = equil[:,10+1*n_spec:10+2*n_spec]
-        self.equil['a_over_ln']     = equil[:,10+2*n_spec:10+3*n_spec]
-        self.equil['a_over_lt']     = equil[:,10+3*n_spec:10+4*n_spec]
-        self.equil['tauinv_norm']   = equil[:,10+4*n_spec:10+5*n_spec]
+        self.equil['n']             = equil[:,7+0*n_spec:7+1*n_spec]
+        self.equil['T']             = equil[:,7+1*n_spec:7+2*n_spec]
+        self.equil['a_over_ln']     = equil[:,7+2*n_spec:7+3*n_spec]
+        self.equil['a_over_lt']     = equil[:,7+3*n_spec:7+4*n_spec]
+        self.equil['tauinv_norm']   = equil[:,7+4*n_spec:7+5*n_spec]
 
-    #---------------------------------------------------------------------------#
+    #-------------------------------------------------------------------------#
 
     def read_theory(self):
         """Reads out.neo.theory."""
@@ -135,8 +140,9 @@ class NEOData:
         self.theory['HRphisq']  = data[:,14]
         self.theory['HSGamma']  = data[:,15+0*n_spec:15+1*n_spec]
         self.theory['HSQ']      = data[:,15+1*n_spec:15+2*n_spec]
+        self.theory['KjparB']   = data[:,15+2*n_spec]
 
-    #---------------------------------------------------------------------------#
+    #-------------------------------------------------------------------------#
 
     def read_transport(self):
         """Reads out.neo.transport."""
@@ -155,8 +161,8 @@ class NEOData:
         self.transport['r_over_a'] = data[:,0]
         self.transport['phisq']    = data[:,1]
         self.transport['jparB']    = data[:,2]
-        self.transport['vtheta']   = data[:,3]
-        self.transport['uparB']    = data[:,4]
+        self.transport['vtheta0']  = data[:,3]
+        self.transport['uparB0']   = data[:,4]
         self.transport['Gamma']    = data[:,5+0*n_spec:5+1*n_spec]
         self.transport['Q']        = data[:,5+1*n_spec:5+2*n_spec]
         self.transport['Pi']       = data[:,5+2*n_spec:5+3*n_spec]
@@ -166,10 +172,31 @@ class NEOData:
         self.transport['vtheta']   = data[:,5+6*n_spec:5+7*n_spec]
         self.transport['vphi']     = data[:,5+7*n_spec:5+8*n_spec]
 
-    #---------------------------------------------------------------------------#
+    #-------------------------------------------------------------------------#
+
+    def read_transport(self):
+        """Reads out.neo.transport_gv."""
+        
+        import sys
+        import numpy as np
+        
+        try:
+            data = np.loadtxt(self.dirname+'/out.neo.transport_gv')
+        except:
+            print "ERROR (NEOData): Fatal error!  Missing out.neo.transport_gv."
+            sys.exit()
+            
+        n_spec = self.grid['n_species']
+
+        self.transport_gv['r_over_a'] = data[:,0]
+        self.transport_gv['Gamma_gv'] = data[:,1+0*n_spec:1+1*n_spec]
+        self.transport_gv['Q_gv']     = data[:,1+1*n_spec:1+2*n_spec]
+        self.transport_gv['Pi_gv']    = data[:,1+2*n_spec:1+3*n_spec]
+        
+    #-------------------------------------------------------------------------#
 
     def read_transport_exp(self):
-        """Reads out.neo.transport.exp."""
+        """Reads out.neo.transport_exp."""
         
         import sys
         import numpy as np
@@ -177,26 +204,26 @@ class NEOData:
         try:
             data = np.loadtxt(self.dirname+'/out.neo.transport_exp')
         except:
-            print "ERROR (NEOData): Fatal error!  Missing out.neo.transport.exp."
+            print "ERROR (NEOData): Fatal error!  Missing out.neo.transport_exp."
             sys.exit()
             
         n_spec = self.grid['n_species']
 
-        self.transport_exp['r']      = data[:,0]
-        self.transport_exp['phisq']  = data[:,1]
-        self.transport_exp['jparB']  = data[:,2]
-        self.transport_exp['vtheta'] = data[:,3]
-        self.transport_exp['uparB']  = data[:,4]
-        self.transport_exp['Gamma']  = data[:,5+0*n_spec:5+1*n_spec]
-        self.transport_exp['Q']      = data[:,5+1*n_spec:5+2*n_spec]
-        self.transport_exp['Pi']     = data[:,5+2*n_spec:5+3*n_spec]
-        self.transport_exp['uparB']  = data[:,5+3*n_spec:5+4*n_spec]
-        self.transport_exp['k']      = data[:,5+4*n_spec:5+5*n_spec]
-        self.transport_exp['K']      = data[:,5+5*n_spec:5+6*n_spec]
-        self.transport_exp['vtheta'] = data[:,5+6*n_spec:5+7*n_spec]
-        self.transport_exp['vphi']   = data[:,5+7*n_spec:5+8*n_spec]
+        self.transport_exp['r']       = data[:,0]
+        self.transport_exp['phisq']   = data[:,1]
+        self.transport_exp['jparB']   = data[:,2]
+        self.transport_exp['vtheta0'] = data[:,3]
+        self.transport_exp['uparB0']  = data[:,4]
+        self.transport_exp['Gamma']   = data[:,5+0*n_spec:5+1*n_spec]
+        self.transport_exp['Q']       = data[:,5+1*n_spec:5+2*n_spec]
+        self.transport_exp['Pi']      = data[:,5+2*n_spec:5+3*n_spec]
+        self.transport_exp['uparB']   = data[:,5+3*n_spec:5+4*n_spec]
+        self.transport_exp['k']       = data[:,5+4*n_spec:5+5*n_spec]
+        self.transport_exp['K']       = data[:,5+5*n_spec:5+6*n_spec]
+        self.transport_exp['vtheta']  = data[:,5+6*n_spec:5+7*n_spec]
+        self.transport_exp['vphi']    = data[:,5+7*n_spec:5+8*n_spec]
 
-    #---------------------------------------------------------------------------#
+    #-------------------------------------------------------------------------#
 
     def read_rotation(self):
         """Reads out.neo.rotation."""
@@ -221,7 +248,7 @@ class NEOData:
             self.rotation['n_ratio']  = np.zeros([n_radial,n_spec])
             self.rotation['dphi']     = np.zeros([n_radial,n_theta])
 
-    #---------------------------------------------------------------------------#
+    #-------------------------------------------------------------------------#
 
     def read_vel(self):
         """Reads out.neo.vel."""

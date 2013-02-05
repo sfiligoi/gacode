@@ -148,8 +148,6 @@ x.add('DOPPLER_SCALE','1.0')
 x.add('NL_METHOD','1')
 x.add('KILL_GYRO_B_FLAG','0')
 x.add('VELOCITY_OUTPUT_FLAG','0')
-x.add('FIELD_R0_FLAG','0')
-x.add('FIELD_R0_GRID','1')
 x.add('Q_SCALE','1.0')
 x.add('DIST_PRINT_FLAG','0')
 x.add('NINT_ORB_S','64')
@@ -199,7 +197,10 @@ x.add('FIELDEIGEN_WR','-0.3')
 x.add('FIELDEIGEN_WI','0.2')
 x.add('FIELDEIGEN_TOL','1e-6')
 x.add('REINTEGRATE_FLAG','0')
-#addition for hdf5 io
+x.add('COLL_OP_CONS_FLAG','0')
+x.add('COLL_OP_SELF_FLAG','0')
+
+# HDF5 IO PARAMETERS
 x.add('IO_METHOD', '1')
 x.add('TIME_SKIP_WEDGE', '0')
 x.add('N_TORANGLE_WEDGE', '1')
@@ -207,7 +208,6 @@ x.add('N_TORANGLE_3D', '0')
 x.add('THETA_WEDGE_OFFSET', '0.0')
 x.add('THETA_WEDGE_ANGLE', '0.0')
 x.add('TORANGLE_OFFSET', '0.0')
-
 
 # Deprecated parameters
 
@@ -234,6 +234,8 @@ x.dep('B_SCALE','reimplement using input.profiles.')
 x.dep('P_SCALE','reimplement using input.profiles.')
 x.dep('ROTATION_METHOD','use ROTATION_THEORY_METHOD.')
 x.dep('COLLISION_METHOD','Deprecated.  You no longer have a choice of method.')
+x.dep('FIELD_R0_FLAG','Deprecated.  Functionality removed.')
+x.dep('FIELD_R0_GRID','Deprecated.  Functionality removed.')
   
 # Perform the parsing
 x.read_input('input.gyro')

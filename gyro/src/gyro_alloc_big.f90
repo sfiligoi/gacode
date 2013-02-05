@@ -26,13 +26,13 @@ subroutine gyro_alloc_big(flag)
 
   if (flag == 1 .and. allocated(field_blend)) then
      if (i_proc == 0) then
-        print *,'WARNING: already allocated arrays in gyro_alloc_big'
+        print *,'WARNING: (GYRO) already allocated arrays in gyro_alloc_big'
      endif
      return
   endif
   if (flag == 0 .and. .not.allocated(field_blend)) then
      if (i_proc == 0) then
-        print *,'WARNING: cannot deallocate arrays in gyro_alloc_big'
+        print *,'WARNING: (GYRO) cannot deallocate arrays in gyro_alloc_big'
      endif
      return
   endif
@@ -72,7 +72,7 @@ subroutine gyro_alloc_big(flag)
      if (collision_flag == 1) then
         allocate(f_coll(n_stack,n_x,n_nek_loc_1))
         allocate(fb_coll(n_stack,n_x,n_nek_loc_1))
-        allocate(h_C(n_stack,n_lambda,n_ine_loc_1)) 
+        allocate(h_c(n_stack,n_lambda,n_ine_loc_1)) 
      endif
 
      allocate(h_tran(nv1_SSUB,msplit_SSUB,n_n,n_kinetic))
@@ -95,10 +95,6 @@ subroutine gyro_alloc_big(flag)
      allocate(vel_sum_aperp(n_blend,n_x))
      allocate(phi_plot(n_theta_plot,n_x,n_field+eparallel_plot_flag))
 
-     if (field_r0_flag == 1) then
-        allocate(field_r0_plot(field_r0_grid,n_field))
-     endif
-
      allocate(moments_plot(n_theta_plot,n_x,n_kinetic,3))
 
      ! For synthetic diagnostics
@@ -113,16 +109,10 @@ subroutine gyro_alloc_big(flag)
         allocate(nonlinear_flux_velocity(n_energy,n_lambda,n_kinetic,n_field,n_moment))
      endif
 
-     allocate(diff_i(n_kinetic,n_field,n_moment,n_x))
-     allocate(diff_i_trapped(n_kinetic,n_field,n_moment,n_x))
-     allocate(diff(n_kinetic,n_field,n_moment))
-     allocate(diff_trapped(n_kinetic,n_field,n_moment))
-     allocate(diff_n(n_kinetic,n_field,n_moment))
-
      allocate(nonlinear_flux_passing(n_x,n_kinetic,n_field,p_moment))
      allocate(nonlinear_flux_trapped(n_x,n_kinetic,n_field,p_moment))
      allocate(nonlinear_flux_momparts(n_kinetic,3))
-     allocate(nonlinear_flux_excparts(n_kinetic,4))
+     allocate(nonlinear_flux_excparts(n_kinetic,2))
      allocate(gbflux_i(n_kinetic,n_field,p_moment,n_x))
      allocate(gbflux_i_trapped(n_kinetic,n_field,p_moment,n_x))
      allocate(gbflux(n_kinetic,n_field,p_moment))
@@ -182,7 +172,7 @@ subroutine gyro_alloc_big(flag)
      if (allocated(rhs_krook)) deallocate(rhs_krook)
      if (allocated(f_coll)) deallocate(f_coll)
      if (allocated(fb_coll)) deallocate(fb_coll)
-     if (allocated(h_C)) deallocate(h_C) 
+     if (allocated(h_c)) deallocate(h_c) 
 
      deallocate(h_tran)
      deallocate(gyro_h)
@@ -200,7 +190,6 @@ subroutine gyro_alloc_big(flag)
      deallocate(vel_sum_a)
      deallocate(vel_sum_aperp)
      deallocate(phi_plot)
-     if (allocated(field_r0_plot)) deallocate(field_r0_plot)
 
      deallocate(moments_plot)
      deallocate(moments_zero_plot)
@@ -211,11 +200,6 @@ subroutine gyro_alloc_big(flag)
      deallocate(kxkyspec)
      deallocate(k_perp_squared)
      if (allocated(nonlinear_flux_velocity)) deallocate(nonlinear_flux_velocity)
-     deallocate(diff_i)
-     deallocate(diff_i_trapped)
-     deallocate(diff)
-     deallocate(diff_trapped)
-     deallocate(diff_n)
 
      deallocate(nonlinear_flux_passing)  
      deallocate(nonlinear_flux_trapped)

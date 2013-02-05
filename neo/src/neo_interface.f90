@@ -40,6 +40,7 @@ module neo_interface
   real    :: neo_omega_rot_deriv_in = 0.0
   integer :: neo_spitzer_model_in = 0
   real    :: neo_epar0_spitzer_in = 1.0
+  integer :: neo_coll_uncoupledei_model_in = 0
   integer :: neo_n_species_in = 1
   real    :: neo_nu_1_in = 0.1
   integer :: neo_z_1_in = 1
@@ -171,6 +172,7 @@ contains
     neo_omega_rot_deriv_in = omega_rot_deriv_in
     neo_spitzer_model_in = spitzer_model
     neo_epar0_spitzer_in = epar0_spitzer
+    neo_coll_uncoupledei_model_in = coll_uncoupledei_model
     neo_n_species_in = n_species
     neo_nu_1_in = nu_1_in
     neo_z_1_in = z_in(1)
@@ -274,6 +276,7 @@ contains
     omega_rot_deriv_in = neo_omega_rot_deriv_in
     spitzer_model = neo_spitzer_model_in
     epar0_spitzer = neo_epar0_spitzer_in
+    coll_uncoupledei_model = neo_coll_uncoupledei_model_in
     n_species = neo_n_species_in
     nu_1_in = neo_nu_1_in
     z_in(1) = neo_z_1_in
@@ -344,6 +347,127 @@ contains
     geo_ny_in = neo_geo_ny_in
     geo_yin_in(:,:) = neo_geo_yin_in(:,:)
 
+    call interfacelocaldump
+
   end subroutine map_interface2global
 
+  subroutine interfacelocaldump
+    use neo_globals
+    implicit none
+    
+    if(neo_silent_flag_in > 0 .or. i_proc > 0) return
+
+    open(unit=1,file=trim(path)//'out.neo.localdump',status='replace')
+    
+    if(neo_n_radial_in > 1) then
+       write(1,*) 'Localdump only works with n_radial=1'
+       close(1)
+       return
+    endif
+    if(neo_profile_model_in /= 1) then
+       write(1,*) 'Localdump only works with profile_model=1'
+       close(1)
+       return
+    endif
+    if(neo_equilibrium_model_in == 3) then
+       write(1,*) 'Localdump does not work with general geometry'
+       close(1)
+       return
+    endif
+    
+    write(1,20) 'N_ENERGY=',neo_n_energy_in
+    write(1,20) 'N_XI=',neo_n_xi_in
+    write(1,20) 'N_THETA=',neo_n_theta_in
+    write(1,20) 'N_RADIAL=',neo_n_radial_in
+    write(1,20) 'MATSZ_SCALEFAC=',neo_matsz_scalefac_in
+    write(1,30) 'RMIN_OVER_A=',neo_rmin_over_a_in
+    write(1,30) 'RMAJ_OVER_A=',neo_rmaj_over_a_in
+    write(1,20) 'SILENT_FLAG=',neo_silent_flag_in
+    write(1,20) 'SIM_MODEL=',neo_sim_model_in
+    write(1,20) 'EQUILIBRIUM_MODEL=',neo_equilibrium_model_in
+    write(1,20) 'COLLISION_MODEL=',neo_collision_model_in
+    write(1,20) 'IPCCW=',neo_ipccw_in
+    write(1,20) 'BTCCW=',neo_btccw_in
+    write(1,30) 'TE_ADE=',neo_te_ade_in
+    write(1,30) 'NE_ADE=',neo_ne_ade_in
+    write(1,20) 'ROTATION_MODEL=',neo_rotation_model_in
+    write(1,30) 'OMEGA_ROT=',neo_omega_rot_in
+    write(1,30) 'OMEGA_ROT_DERIV=',neo_omega_rot_deriv_in
+    write(1,20) 'SPITZER_MODEL=',neo_spitzer_model_in
+    write(1,30) 'EPAR0_SPITZER=',neo_epar0_spitzer_in
+    write(1,20) 'COLL_UNCOUPLEDEI_MODEL=',neo_coll_uncoupledei_model_in
+    write(1,20) 'N_SPECIES=',neo_n_species_in
+    write(1,30) 'NU_1=',neo_nu_1_in
+    
+    write(1,20) 'Z_1=',neo_z_1_in
+    write(1,30) 'MASS_1=',neo_mass_1_in
+    write(1,30) 'DENS_1=',neo_dens_1_in
+    write(1,30) 'TEMP_1=',neo_temp_1_in
+    write(1,30) 'DLNNDR_1=',neo_dlnndr_1_in
+    write(1,30) 'DLNTDR_1=',neo_dlntdr_1_in
+    if (neo_n_species_in > 1) then
+       write(1,20) 'Z_2=',neo_z_2_in
+       write(1,30) 'MASS_2=',neo_mass_2_in
+       write(1,30) 'DENS_2=',neo_dens_2_in
+       write(1,30) 'TEMP_2=',neo_temp_2_in
+       write(1,30) 'DLNNDR_2=',neo_dlnndr_2_in
+       write(1,30) 'DLNTDR_2=',neo_dlntdr_2_in
+    endif
+    if (neo_n_species_in > 2) then
+       write(1,20) 'Z_3=',neo_z_3_in
+       write(1,30) 'MASS_3=',neo_mass_3_in
+       write(1,30) 'DENS_3=',neo_dens_3_in
+       write(1,30) 'TEMP_3=',neo_temp_3_in
+       write(1,30) 'DLNNDR_3=',neo_dlnndr_3_in
+       write(1,30) 'DLNTDR_3=',neo_dlntdr_3_in
+    endif
+    if (neo_n_species_in > 3) then
+       write(1,20) 'Z_4=',neo_z_4_in
+       write(1,30) 'MASS_4=',neo_mass_4_in
+       write(1,30) 'DENS_4=',neo_dens_4_in
+       write(1,30) 'TEMP_4=',neo_temp_4_in
+       write(1,30) 'DLNNDR_4=',neo_dlnndr_4_in
+       write(1,30) 'DLNTDR_4=',neo_dlntdr_4_in
+    endif
+    if (neo_n_species_in > 4) then
+       write(1,20) 'Z_5=',neo_z_5_in
+       write(1,30) 'MASS_5=',neo_mass_5_in
+       write(1,30) 'DENS_5=',neo_dens_5_in
+       write(1,30) 'TEMP_5=',neo_temp_5_in
+       write(1,30) 'DLNNDR_5=',neo_dlnndr_5_in
+       write(1,30) 'DLNTDR_5=',neo_dlntdr_5_in
+    endif
+    if (neo_n_species_in > 5) then
+       write(1,20) 'Z_6=',neo_z_6_in
+       write(1,30) 'MASS_6=',neo_mass_6_in
+       write(1,30) 'DENS_6=',neo_dens_6_in
+       write(1,30) 'TEMP_6=',neo_temp_6_in
+       write(1,30) 'DLNNDR_6=',neo_dlnndr_6_in
+       write(1,30) 'DLNTDR_6=',neo_dlntdr_6_in
+    endif
+  
+    write(1,30) 'DPHI0DR=',neo_dphi0dr_in
+    write(1,30) 'EPAR0=',neo_epar0_in
+    write(1,30) 'Q=',neo_q_in
+    write(1,30) 'RHO_STAR=',neo_rho_star_in
+    write(1,30) 'SHEAR=',neo_shear_in
+    write(1,30) 'SHIFT=',neo_shift_in
+    write(1,30) 'KAPPA=',neo_kappa_in
+    write(1,30) 'S_KAPPA=',neo_s_kappa_in
+    write(1,30) 'DELTA=',neo_delta_in
+    write(1,30) 'S_DELTA=',neo_s_delta_in
+    write(1,30) 'ZETA=',neo_zeta_in
+    write(1,30) 'S_ZETA=',neo_s_zeta_in
+    write(1,30) 'ZMAG_OVER_A=',neo_zmag_over_a_in
+    write(1,30) 'S_ZMAG=',neo_s_zmag_in
+    
+    close(1)
+    
+10  format(t2,a,l1)
+20  format(t2,a,i3)
+30  format(t2,a,1pe12.5)
+    
+  end subroutine interfacelocaldump
+  
+  
 end module neo_interface

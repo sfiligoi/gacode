@@ -70,7 +70,7 @@ subroutine gyro_operators_on_h
                  temp = (0.0,0.0)
                  do i_diff=-m_gyro,m_gyro-i_gyro
                     temp = temp+&
-                         w_gyro(m,i_diff,i,p_nek_loc,is)*hh(m,i+i_diff)
+                         w_gyro0(m,i_diff,i,p_nek_loc,is)*hh(m,i+i_diff)
                  enddo ! i_diff
                  gyro_h(m,i,p_nek_loc,is) = temp
               enddo ! m
@@ -86,9 +86,9 @@ subroutine gyro_operators_on_h
                  temp2 = (0.0,0.0)
                  do i_diff=-m_gyro,m_gyro-i_gyro
                     temp = temp+&
-                         w_gyro(m,i_diff,i,p_nek_loc,is)*hh(m,i+i_diff)
+                         w_gyro0(m,i_diff,i,p_nek_loc,is)*hh(m,i+i_diff)
                     temp2 = temp2+&
-                         w_gyro_aperp(m,i_diff,i,p_nek_loc,is)*hh(m,i+i_diff)
+                         w_gyro1(m,i_diff,i,p_nek_loc,is)*hh(m,i+i_diff)
                  enddo ! i_diff
                  gyro_h(m,i,p_nek_loc,is) = temp
                  gyro_h_aperp(m,i,p_nek_loc,is) = temp2

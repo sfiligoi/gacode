@@ -57,9 +57,10 @@ subroutine gyro_collision_setup
   real, dimension(n_rbf,n_rbf) :: d3
   real :: rcond
   real :: anorm
+  real :: i0
   !
+  real, external :: rbf,irbf
   real, external :: DERF
-  real, external :: rbf
   real, external :: DLANGE
   !-----------------------------------------------------------
 
@@ -91,6 +92,8 @@ subroutine gyro_collision_setup
            x = sqrt(energy(ie,1))*mu(is)/mu(isp)
 
            h_coll = exp(-x*x)/(x*sqrt(pi))+(1.0-1.0/(2.0*x*x))*DERF(x)
+
+           x = sqrt(energy(ie,1))
 
            nu_total(:,ie,is) = nu_total(:,ie,is)+&
                 0.5*(nu_s(is,:)/x**3)*h_coll*&
@@ -187,13 +190,27 @@ subroutine gyro_collision_setup
         call catch_error('ERROR: Inversion in gyro_collision_setup')
      endif
 
-     do p=1,n_rbf
-        do pp=1,n_rbf
-           call drbf(pi*(yp(p)-yp(pp)),xp(p)-xc(pp),ord_rbf,r1,r2)
-           ! Lorentz derivative operator 
-           a2(p,pp) = (1-xp(p)**2)*r1-2*xp(p)*r2
+     if (coll_op_cons_flag == 0) then
+        ! Original method
+        do p=1,n_rbf
+           do pp=1,n_rbf
+              call drbf(pi*(yp(p)-yp(pp)),xp(p)-xc(pp),ord_rbf,r1,r2)
+              ! Lorentz derivative  
+              a2(p,pp) = (1-xp(p)**2)*r2-2*xp(p)*r1
+           enddo
         enddo
-     enddo
+     else
+        ! Momentum self-conservation
+        do p=1,n_rbf
+           do pp=1,n_rbf
+              call drbf(pi*(yp(p)-yp(pp)),xp(p)-xc(pp),ord_rbf,r1,r2)
+              i0 = irbf(2.0-2.0*cos(pi*(yp(p)-yp(pp))),xc(pp),ord_rbf)
+              ! Lorentz derivative  
+              a2(p,pp) = (1-xp(p)**2)*r2-2*xp(p)*r1+3*xp(p)*i0
+           enddo
+        enddo
+     endif
+
 
      ! Perform matrix-matrix multiply with BLAS 
      ! to obtain derivative (Legendre) matrix: 
@@ -288,6 +305,33 @@ real function rbf(dt,dy,s)
 
 end function rbf
 
+real function irbf(a,x0,s)
+
+  implicit none
+
+  real, intent(in) :: a,x0
+  integer, intent(in) :: s
+  real :: a1,a2
+
+  if (a > 0.0) then
+     a1 = a**2*asinh((x0+1.0)/sqrt(a))  
+     a2 = a**2*asinh((x0-1.0)/sqrt(a))
+  else
+     a1 = 0.0
+     a2 = 0.0
+  endif
+
+  if (s == 3) then
+     irbf = (15*x0*a1+sqrt(x0**2+2*x0+a+1.0) &
+          *(2*x0**4-2*x0**3+(9*a-18)*x0**2+(-7*a-22)*x0-8*a**2-16*a-8))/40.0 &
+          - (sqrt(x0**2-2*x0+a+1)*(2*x0**4+2*x0**3+(9*a-18)*x0**2+(7*a+22)*x0 &
+          -8*a**2-16*a-8)+15*x0*a2)/40
+  else
+     call catch_error('s too large')
+  endif
+
+end function irbf
+
 subroutine drbf(dt,dy,s,r1,r2)
 
   implicit none
@@ -298,12 +342,13 @@ subroutine drbf(dt,dy,s,r1,r2)
   real :: rl
 
   rl = sqrt(2.0-2.0*cos(dt)+dy**2)
-  r2 = s*rl**(s-2)*dy
+
+  r1 = s*rl**(s-2)*dy
 
   if (rl > 0.0) then
-     r1 = (s*(s-2)*dy**2+s*rl**2)*rl**(s-4)
+     r2 = (s*(s-2)*dy**2+s*rl**2)*rl**(s-4)
   else
-     r1 = 0.0
+     r2 = 0.0
   endif
 
 end subroutine drbf

@@ -7,7 +7,7 @@
 ! difference scheme with FFT in the toroidal direction.
 !
 ! NOTES:
-! FFTW_specific version.
+! FFTW2 version.
 !----------------------------------------------------------------
 
 subroutine gyro_nl_fft
@@ -46,9 +46,6 @@ subroutine gyro_nl_fft
   complex :: gf_r_c
   complex :: f_pg_r_c
   complex :: f_rg_p_c
-  !
-  real, dimension(0:n_fft-1,6*n_x) :: v_fft
-  real, dimension(0:n_fft-1,6*n_x) :: vt_fft
   !--------------------------------------------
 
   do is=1,n_kinetic
@@ -108,7 +105,7 @@ subroutine gyro_nl_fft
               v_fft(nn,4*n_x+i) = real(fn_r)
               v_fft(nn,5*n_x+i) = real(gn_r)
               if (nn /= 0) then
-v_fft(n_fft-nn,i) = aimag(fn(nn,i))
+                 v_fft(n_fft-nn,i) = aimag(fn(nn,i))
                  v_fft(n_fft-nn,n_x+i) = aimag(gn(nn,i))
                  v_fft(n_fft-nn,2*n_x+i) = aimag(fn_p)
                  v_fft(n_fft-nn,3*n_x+i) = aimag(gn_p)
@@ -116,7 +113,7 @@ v_fft(n_fft-nn,i) = aimag(fn(nn,i))
                  v_fft(n_fft-nn,5*n_x+i) = aimag(gn_r)
               endif
 
-enddo ! nn
+           enddo ! nn
         enddo ! i
 
         !---------------------------------------------------
@@ -206,12 +203,12 @@ enddo ! nn
               enddo ! i_diff
 
               if (nn == 0) then
-fg_r_c = cmplx(v_fft(0,i),0.0)
+                 fg_r_c = cmplx(v_fft(0,i),0.0)
                  gf_r_c = cmplx(v_fft(0,n_x+i),0.0)
                  f_pg_r_c = cmplx(v_fft(0,4*n_x+i),0.0)
                  f_rg_p_c = cmplx(v_fft(0,5*n_x+i),0.0)
               else
-fg_r_c = cmplx(v_fft(nn,i),v_fft(n_fft-nn,i))
+                 fg_r_c = cmplx(v_fft(nn,i),v_fft(n_fft-nn,i))
                  gf_r_c = cmplx(v_fft(nn,n_x+i),v_fft(n_fft-nn,n_x+i))
                  f_pg_r_c = cmplx(v_fft(nn,4*n_x+i),v_fft(n_fft-nn,4*n_x+i))
                  f_rg_p_c = cmplx(v_fft(nn,5*n_x+i),v_fft(n_fft-nn,5*n_x+i))

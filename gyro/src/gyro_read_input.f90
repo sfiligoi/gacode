@@ -201,8 +201,6 @@ subroutine gyro_read_input
   call readbc_int(nl_method)
   call readbc_int(kill_gyro_b_flag)
   call readbc_int(velocity_output_flag)
-  call readbc_int(field_r0_flag)
-  call readbc_int(field_r0_grid)
   call readbc_real(q_scale)
   call readbc_int(dist_print)
   call readbc_int(nint_ORB_s)
@@ -257,8 +255,14 @@ subroutine gyro_read_input
   call readbc_real(fieldeigen_wi)
   call readbc_real(fieldeigen_tol)
 
+  ! Chris' profile integration option
   call readbc_int(reintegrate_flag)
-  !hdf5 output
+
+  ! New collision options
+  call readbc_int(coll_op_cons_flag)
+  call readbc_int(coll_op_self_flag)
+
+  ! hdf5 output
   call readbc_int(io_method)
   ! time intervals for hdf5 write outs
   call readbc_int(time_skip_wedge)
@@ -268,9 +272,8 @@ subroutine gyro_read_input
   ! toroidal direction
   call readbc_real(theta_wedge_offset)
   call readbc_real(theta_wedge_angle)
-  !synthetic diagnostics
+  ! synthetic diagnostics
   call readbc_real(torangle_offset)
-
   !
   ! DONE reading data.
   !--------------------------------------------------------
