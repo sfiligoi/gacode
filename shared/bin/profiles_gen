@@ -52,10 +52,7 @@ if [ $n -eq 0 ]
 then
    echo "Usage:       profiles_gen [options]"
    echo 
-   echo "Options (in any order) include: "
-   echo 
-   echo "             -i <raw_data_file>"
-   echo "             Import data from <raw_data_file> with filename conventions:"
+   echo "Recognized types of input data files:"
    echo 
    echo "              *              : ITERDB text file (default)"
    echo "              *.nc           : ITERDB NetCDF file"
@@ -79,6 +76,9 @@ then
    echo 
    echo "ITERDB Options"
    echo 
+   echo "             -i <data> or <data.nc>"
+   echo "             Specify text or NetCDF data file."
+   echo 
    echo "             -g <gfile>"
    echo "             Merge EFIT gfile for high-precision geometry data."
    echo 
@@ -93,6 +93,9 @@ then
    echo 
    echo "PLASMA STATE Options"
    echo
+   echo "             -i <data.cdf>"
+   echo "             Specify text or NetCDF data file."
+   echo
    echo "             -g <gfile>"
    echo "             Merge EFIT gfile for high-precision geometry data."
    echo 
@@ -104,6 +107,9 @@ then
    echo
    echo "CORSICA Options"
    echo
+   echo "             -i <data.corsica>"
+   echo "             Specify Corsica data file."
+   echo
    echo "             -g <gfile>"
    echo "             Merge EFIT gfile for high-precision geometry data."
    echo 
@@ -114,6 +120,9 @@ then
    echo "             Reorder ions."
    echo
    echo "UFILE Options"
+   echo
+   echo "             -i UFILE"
+   echo "             Toggle UFILE mode."
    echo
    echo "             -t <time>"
    echo "             Time for averaging."
@@ -131,6 +140,9 @@ then
    echo
    echo "PEQDSK/PFILE Options"
    echo
+   echo "             -i <data.peq>"
+   echo "             Specify ELITE pfile data file."
+   echo
    echo "             -g <gfile>"
    echo "             Merge EFIT gfile for high-precision geometry data."
    echo "             [This is required for pfiles]"
@@ -139,8 +151,10 @@ then
    echo "             Creation impurity ion with given charge to make"
    echo "             input.profile quasineutral"
    echo
-   echo
    echo "ASTRA Options"
+   echo
+   echo "             -i <data.astra>"
+   echo "             Specify ASTRA data file."
    echo
    echo "             -m <map file>"
    echo "             Use <map file> to map Astra data to GYRO input.profiles headers"
@@ -152,8 +166,12 @@ then
    echo
    echo "GATO mapper control options"
    echo 
-   echo "             -gato_dpsisl <dpsisl>"
-   echo "              DEFAULT: 0.0"
+   echo "             -gato <parameter=val,parameter=val,...>"
+   echo 
+   echo "             Important parameters and defaults"
+   echo
+   echo "              dpsidl=0.0   [DEFINE]"    
+   echo "              npfit=150    [DEFINE]"   
    echo
    echo "             -Z1 <ion1 charge>"
    echo "             Default: 1 (Hydrogen isotope)"
@@ -162,12 +180,16 @@ then
    echo "             -Z3 <ion3 charge>"
    echo "             Default: 2 (Helium)"
    echo
-   echo
    echo "GFILE MERGE MODE"
+   echo
+   echo "             -i <data>"
+   echo "             Data in input.profiles format."
+   echo
+   echo "             -g <gfile>"
+   echo "             EFIT gfile."
    echo
    echo "             -gmerge"
    echo "             Toggle gmerge mode."
-   echo
    echo
    echo "VELOCITY GENERATION MODE"
    echo
@@ -285,12 +307,15 @@ CONFIG=.config
 
 FILE_FLAG=0
 G_FLAG=0
-NOGQ_FLAG=0
 GATO_DPSISL=0.0
 VERBOSE_FLAG=0
 ORDER_FLAG=0
 TRANSP_FLAG=0
 GMERGE_FLAG=0
+
+#GATO variables
+NOGQ_FLAG=0
+GATO_ARGS=
 
 # CER file 
 CER_FILE=null
@@ -358,7 +383,7 @@ while [ $# -gt 0 ] ; do
    
   -g) shift ; G_FLAG=1 ; GFILE="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-g;$1" ;;
 
-  -gato_dpsisl) shift ; GATO_DPSISL="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-gato_dpsisl;$1" ;;
+  -gato) shift ; GATO_ARGS="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-gato_dpsisl;$1" ;;
 
   -V) shift ; VERBOSE_FLAG=1 ; ITERDB_ARGS="${ITERDB_ARGS};-V";;
 
@@ -734,8 +759,8 @@ then
    echo " pkfrac   = 0.3333333333333333" >> ingta
    echo " qpfrac   = 0.3333333333333333" >> ingta
    echo " cspak    = 0.5" >> ingta
-   echo " npfit    = 60" >> ingta
-   echo " dpsisl   = $GATO_DPSISL" >> ingta
+   echo " npfit    = 150" >> ingta
+   echo " dpsisl   = 0.0" >> ingta
    echo " dpsisd   = +0.10e-04" >> ingta
    echo " psipak   = 1.0" >> ingta
    echo " delac    = 0.10e-02" >> ingta
@@ -813,6 +838,12 @@ then
    echo " iodlbp   = -2" >> ingta
    echo " iodlap   = -2" >> ingta
    echo " iodlwp   = +2" >> ingta
+   p=0
+   for i in $(echo $GATO_ARGS | tr "," "\n")
+   do
+      echo "$i" >> ingta
+      p=$(($p+1))
+   done
    echo " &end" >> ingta
 
    $GATO >& out.gato.stdout
