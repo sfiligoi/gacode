@@ -39,7 +39,8 @@ lib : $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS) 
 
 .f.o :
-	$(FC) $(FFLAGS) -I $(NETCDF_INC)  -c $<
+	$(F77) $(FFLAGS) -I $(NETCDF_INC)  -c $<
+
 .f90.o :
 	$(FC) $(FFLAGS) -I $(NETCDF_INC)  -c $<
 

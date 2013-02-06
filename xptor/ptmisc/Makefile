@@ -37,13 +37,13 @@ lib: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS) 
 
 .f.o :
-	$(FC) $(FFLAGS) -c $<
+	$(F77) $(FFLAGS) -c $<
 
 write_netcdf.o:	write_netcdf.f
-	$(FC) $(FFLAGS)  -I $(NETCDF_INC) -c $<
+	$(F77) $(FFLAGS)  -I $(NETCDF_INC) -c $<
 
 .F.o :
-	$(FC) -c $(FFLAGS) $(SPECIAL) $<
+	$(F77) -c $(FFLAGS) $(SPECIAL) $<
 
 clean:
 	rm -f *.o *.lst 

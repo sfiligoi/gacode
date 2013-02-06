@@ -24,7 +24,7 @@ include ${SLEPC_DIR}/conf/slepc_common_variables
 # Compilers and flags
 
 FC     = ftn -e m -J ${GACODE_ROOT}/modules
-F77    = ftn
+F77    = ${FC}
 
 FOMP   =
 FMATH  = -s real64
