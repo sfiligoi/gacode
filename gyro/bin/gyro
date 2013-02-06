@@ -222,7 +222,7 @@ then
       echo "       Number of processors must be multiple of 2." 
       exit 1
    fi   
-   gyro_reg_do $NPROC $NOMP $REGRESS_RESET
+   gacode_reg_do $NPROC $NOMP $REGRESS_RESET gyro 1e-5
    exit 0
 fi
 #============================================================

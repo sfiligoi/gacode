@@ -1,0 +1,56 @@
+#!/bin/bash
+# 
+# SCRIPT:
+#  gacode_reg_do <n_proc> <n_omp> <reset_flag> <code> <tol>
+#
+# PURPOSE:
+#  Run through full suite of GYRO regression tests
+#
+# EXAMPLE:
+#  gacode_reg_do 2 1 0 gyro 1e-5
+#----------------------------------------------------
+
+n=$#
+
+if [ $n -lt 5 ] 
+then
+  echo "Usage: gacode_reg_do <n_proc> <n_omp> <reset_flag> <code> <tol>"
+  exit 1
+fi
+
+# Define list of test directories:
+
+n_proc=${1}
+n_omp=${2}
+reset=${3}
+code=${4}
+tol=${5}
+
+echo "REGRESSION TESTING: $code"
+
+testdir=$PWD/${code}_regression_test
+compdir=$GACODE_ROOT/$code/tools/input
+precfile=out.$code.prec
+
+list=`cat $compdir/reg_list`
+
+rm -rf $testdir ; mkdir $testdir
+cd $testdir
+
+for sim in $list
+do 
+   $code -g $sim -p $testdir > out
+   rm -rf $sim/out.$code.prec
+   if [ $n_omp -eq 1 ] && [ $n_proc -eq 1 ] ; then 
+      $code -e $sim -p $testdir > out
+   else
+      $code -e $sim -n $n_proc -nomp $n_omp -p $testdir > out
+   fi
+   gacode_reg $sim $compdir $precfile $tol
+   if [ $reset -eq 1 ]
+   then
+      # Overwrite regression data with current data
+      cp $sim/out.$code.prec $GACODE_ROOT/$code/tools/input/$sim
+      cp $sim/out.$code.run  $GACODE_ROOT/$code/tools/input/$sim
+   fi
+done
