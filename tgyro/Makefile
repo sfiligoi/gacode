@@ -17,9 +17,8 @@ export EXTRA_LIBS = \
        ${GACODE_ROOT}/shared/GEO/GEO_lib.a \
        ${GACODE_ROOT}/shared/UMFPACK/UMFPACK_lib.a \
        ${GACODE_ROOT}/gyro/GKEIGEN/GKEIGEN_lib.a \
-       ${GACODE_ROOT}/tgyro/math/math_lib.a \
        ${GACODE_ROOT}/shared/vshdf5/vshdf5_lib.a \
-       ${HDF5_LIBS} ${LMATH} ${LIPM}
+       ${HDF5_LIBS} ${LMATH}
 
 all:
 	gacode_getversion > .VERSION
@@ -27,11 +26,9 @@ all:
 	cd ${GACODE_ROOT}/neo ; make
 	cd ${GACODE_ROOT}/tglf ; make
 	cd ${GACODE_ROOT}/gyro ; make
-	cd math ; make
 	cd src ; make
 
 clean:
-	cd math ; make clean
 	cd src ; make clean
 	rm -rf .VERSION
 
