@@ -1,2 +1,2 @@
-GATOFLAGS = -s real64 -s int64
+GATOFLAGS = -s real64 -s integer64
 
