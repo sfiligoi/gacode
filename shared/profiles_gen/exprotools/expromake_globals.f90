@@ -61,7 +61,6 @@ module expromake_globals
   real :: exm_flow_beam = 0.0
   real :: exm_flow_wall = 0.0
   real :: exm_ptot      = 0.0
-  real :: exm_polflux   = 0.0
   real, dimension(nions_max) :: exm_vpol = 0.0
   real, dimension(nions_max) :: exm_vtor = 0.0
 
