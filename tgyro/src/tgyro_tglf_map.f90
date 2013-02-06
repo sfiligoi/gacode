@@ -157,14 +157,13 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
   ! Gamma_ExB (ExB shearing rate, units of a/cs)
   if (tgyro_rotation_flag == 1) then
-
      gamma_p0  = -r_maj(i_r)*f_rot(i_r)*w0p_norm
      gamma_eb0 = gamma_p0*r(i_r)/(q(i_r)*r_maj(i_r)) 
 
      ! Need to take out sign of q
      tglf_vexb_shear_in = tglf_sign_bt_in*gamma_eb0*r_min/c_s(i_r)  
      tglf_vpar_shear_in(:) = gamma_p0*r_min/c_s(i_r)
-
+     tglf_vpar_in(:) = tglf_sign_bt_in*r_maj(i_r)*w0(i_r)/c_s(i_r)
   endif
   !----------------------------------------------------------------
 

@@ -12,7 +12,7 @@ c
       include '../inc/ptor.m'
       include '../inc/glf.m'
 c
-      integer j, lprint, lprint_pulse
+      integer i,j, lprint, lprint_pulse
 c
       if (lprint.eq. 3) then
         open (34,file='iterdbprofs.dat',status='unknown')
@@ -123,14 +123,20 @@ c
         write(32,150) ntime_t, ngrid
         write(33,150) ntime_t, ngrid
         do j=0,ntime_t
-          write(9,310) time_t(j), ne_t(0:ngrid,j)
-          write(10,310) time_t(j), te_t(0:ngrid,j)
-          write(12,310) time_t(j), ti_t(0:ngrid,j)
-          write(15,310) time_t(j), vexb_t(0:ngrid,j)
-          write(31,310) time_t(j), vpol_t(0:ngrid,j)
-          write(11,310) time_t(j), doppler_shear_t(0:ngrid,j)
-          write(32,310) time_t(j), chie_t(0:ngrid,j)
-          write(33,310) time_t(j), chii_t(0:ngrid,j)
+          write(9,305) time_t(j)
+          write(10,305) time_t(j)
+          write(12,305) time_t(j)
+          write(15,305) time_t(j)
+          write(31,305) time_t(j)
+          write(11,305) time_t(j)
+        do i=0,ngrid
+          write(9,306) ne_t(i,j)
+          write(10,306)te_t(i,j)
+          write(12,306)ti_t(i,j)
+          write(15,306)vexb_t(i,j)
+          write(31,306)vpol_t(i,j)
+          write(11,306)doppler_shear_t(i,j)
+        enddo
         enddo
       elseif (lprint_pulse .ge. 2) then
         write(10,150) nsteps_v+1
@@ -188,10 +194,12 @@ c
  215  format(i2,2x,0p1f4.2,0p4f14.5,2x,1pf10.5)
  250  format(i4,2x,0p4f10.5)
  300  format(i4,2x,0p301f10.5)
- 310  format(0pe16.7,2x,0p301e20.11)
- 315  format(0pf10.5,2x,0p301f12.5)
- 320  format(3x,'time',3x,0p301f12.5)
- 350  format(i4,2x,0p301f14.5)
+ 305  format(2x,1pe15.4)
+ 306  format(2x,1pe16.9)
+ 310  format(0pe15.5,2x,301(0pe15.9,1x))
+ 315  format(0pe10.5,2x,0p301e12.5)
+ 320  format(3x,'time',3x,0p301e12.5)
+ 350  format(i4,2x,0p301e14.5)
  500  format(5(2x,1pe14.4))     ! iterdb format
 c
       close(7)

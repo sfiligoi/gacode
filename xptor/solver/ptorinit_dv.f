@@ -522,12 +522,20 @@ c cgms       write(6,*)"restart_pt = ", restart_pt
         read(31,150) ntime_t, ngrid
         read(11,150) ntime_t, ngrid
         do j=0,ntime_t
-         read(9,310) time_t(j), ne_t(0:ngrid,j)
-         read(10,310) time_t(j), te_t(0:ngrid,j)
-         read(12,310) time_t(j), ti_t(0:ngrid,j)
-         read(15,310) time_t(j), vexb_t(0:ngrid,j)
-         read(31,310) time_t(j), vpol_t(0:ngrid,j)
-         read(11,310) time_t(j), doppler_shear_t(0:ngrid,j)
+         read(9,305) time_t(j)
+         read(10,305) time_t(j)
+         read(12,305) time_t(j)
+         read(15,305) time_t(j)
+         read(31,305) time_t(j)
+         read(11,305) time_t(j)
+         do i=0,ngrid
+           read(9,306) ne_t(i,j)
+           read(10,306) te_t(i,j)
+           read(12,306) ti_t(i,j)
+           read(15,306) vexb_t(i,j)
+           read(31,306) vpol_t(i,j)
+           read(11,306) doppler_shear_t(i,j)
+         enddo
          if(time_t(j).ge.restart_pt) exit
         enddo
         if(j.gt.ntime_t)j=ntime_t
@@ -775,7 +783,9 @@ c
       endif
 c
  150  format(2i4)
- 310  format(0pe16.7,2x,0p301e20.11)
+ 305  format(2x,1pe15.4)
+ 306  format(2x,1pe16.9)
+c 310  format(0pe15.5,2x,301(0pe15.9,1x))
 c
       return
       end
