@@ -43,8 +43,6 @@
       REAL,EXTERNAL :: get_ky_spectrum_out
       REAL,EXTERNAL :: get_DM
       REAL,EXTERNAL :: get_DR
-      REAL,EXTERNAL :: get_DEP_parameters
-      REAL,EXTERNAL :: get_wavefunction_out
 !
       CONTAINS
 !
