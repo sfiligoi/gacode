@@ -12,13 +12,14 @@ program exprodump
 
   implicit none
 
-  character(len=20) :: var
+  character(len=20) :: var,x
   integer :: i
   real, dimension(3) :: z
 
 
   open(unit=1,file='input.exprodump',status='old')
   read(1,*) var
+  read(1,*) x
   read(1,*) z(1)
   read(1,*) z(2)
   read(1,*) z(3)
@@ -34,9 +35,7 @@ program exprodump
   call EXPRO_alloc('./',1) 
   call EXPRO_read
 
-  select case(trim(var))
-
-  case ('list')
+  if (trim(var) == 'list') then
 
      print *,'rho'
      print *,'rmin'
@@ -80,202 +79,103 @@ program exprodump
      print *,'THIS LIST IS INCOMPLETE.  PLEASE SEND EMAIL TO candy@fusion.gat.com'
      print *,'if you want me to finish the coding.'
 
-  case ('rho')
+  else   
+
+    
+
 
      do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_rho(i)
+
+        ! Column 1
+        select case (trim(x)) 
+        case ('none')
+           write(*,'(a)',advance='no') ' ' 
+        case ('r')
+           write(*,10,advance='no') EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp)
+        case ('rho')
+           write(*,10,advance='no') EXPRO_rho(i)
+        case ('psi')
+           write(*,10,advance='no') EXPRO_poloidalfluxover2pi(i)/EXPRO_poloidalfluxover2pi(EXPRO_n_exp)
+        end select
+
+        ! Column 2
+        select case (trim(var))
+
+        case ('rho')
+           print 20,EXPRO_rho(i)
+        case ('rmin')
+           print 20,EXPRO_rmin(i)
+        case ('rmaj')
+           print 20,EXPRO_rmaj(i)
+        case ('q')
+           print 20,EXPRO_q(i)
+        case ('kappa')
+           print 20,EXPRO_kappa(i)
+        case ('delta')
+           print 20,EXPRO_delta(i)
+        case ('te')
+           print 20,EXPRO_te(i)
+        case ('ne')
+           print 20,EXPRO_ne(i)
+        case ('z_eff')
+           print 20,EXPRO_z_eff(i)
+        case ('w0')
+           print 20,EXPRO_w0(i)
+        case ('flow_mom')
+           print 20,EXPRO_flow_mom(i)
+        case ('pow_e')
+           print 20,EXPRO_pow_e(i)
+        case ('pow_i')
+           print 20,EXPRO_pow_i(i)
+        case ('pow_ei')
+           print 20,EXPRO_pow_ei(i)
+        case ('zeta')
+           print 20,EXPRO_zeta(i)
+        case ('flow_beam')
+           print 20,EXPRO_flow_beam(i)
+        case ('flow_wall')
+           print 20,EXPRO_flow_wall(i)
+        case ('zmag')
+           print 20,EXPRO_zmag(i)
+        case ('ptot')
+           print 20,EXPRO_ptot(i)
+        case ('poloidalfluxover2pi')
+           print 20,EXPRO_poloidalfluxover2pi(i)
+        case ('bunit')
+           print 20,EXPRO_bunit(i)
+        case ('s')
+           print 20,EXPRO_s(i)
+        case ('drmaj')
+           print 20,EXPRO_drmaj(i)
+        case ('dzmag')
+           print 20,EXPRO_dzmag(i)
+        case ('sdelta')
+           print 20,EXPRO_sdelta(i)
+        case ('vol')
+           print 20,EXPRO_vol(i)
+        case ('volp')
+           print 20,EXPRO_volp(i)
+        case ('cs')
+           print 20,EXPRO_cs(i)
+        case ('rhos')
+           print 20,EXPRO_rhos(i)
+        case ('drdrho')
+           print 20,EXPRO_drdrho(i)
+        case ('grad_r0')
+           print 20,EXPRO_grad_r0(i)
+        case ('ave_grad_r')
+           print 20,EXPRO_ave_grad_r(i)
+        case default
+           print 20,0.0
+        end select
+
      enddo
 
-  case ('rmin')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_rmin(i)
-     enddo
-
-  case ('rmaj')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_rmaj(i)
-     enddo
-
-  case ('q')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_q(i)
-     enddo
-
-  case ('kappa')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_kappa(i)
-     enddo
-
-  case ('delta')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_delta(i)
-     enddo
-
-  case ('te')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_te(i)
-     enddo
-
-  case ('ne')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_ne(i)
-     enddo
-
-  case ('z_eff')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_z_eff(i)
-     enddo
-
-  case ('w0')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_w0(i)
-     enddo
-
-  case ('flow_mom')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_flow_mom(i)
-     enddo
-
-  case ('pow_e')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_pow_e(i)
-     enddo
-
-  case ('pow_i')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_pow_i(i)
-     enddo
-
-  case ('pow_ei')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_pow_ei(i)
-     enddo
-
-  case ('zeta')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_zeta(i)
-     enddo
-
-  case ('flow_beam')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_flow_beam(i)
-     enddo
-
-  case ('flow_wall')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_flow_wall(i)
-     enddo
-
-  case ('zmag')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_zmag(i)
-     enddo
-
-  case ('ptot')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_ptot(i)
-     enddo
-
-  case ('poloidalfluxover2pi')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_poloidalfluxover2pi(i)
-     enddo
-
-  case ('bunit')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_bunit(i)
-     enddo
-
-  case ('s')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_s(i)
-     enddo
-
-  case ('drmaj')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_drmaj(i)
-     enddo
-
-  case ('dzmag')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_dzmag(i)
-     enddo
-
-  case ('sdelta')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_sdelta(i)
-     enddo
-
-  case ('vol')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_vol(i)
-     enddo
-
-  case ('volp')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_volp(i)
-     enddo
-
-  case ('cs')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_cs(i)
-     enddo
-
-  case ('rhos')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_rhos(i)
-     enddo
-
-  case ('drdrho')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_drdrho(i)
-     enddo
-
-  case ('grad_r0')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_grad_r0(i)
-     enddo
-
-  case ('ave_grad_r')
-
-     do i=1,EXPRO_n_exp
-        print 10,EXPRO_rho(i),EXPRO_ave_grad_r(i)
-     enddo
-
-  end select
+  endif
 
   call EXPRO_alloc('./',0) 
 
-10 format(t2,2(1pe12.5,1x))
+10 format(t2,1pe12.5)
+20 format(1x,1pe12.5)
 
 end program exprodump

@@ -23,7 +23,7 @@ lib: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS) 
 
 .f.o :
-	$(FC) $(FFLAGS) -c $<
+	$(F77) $(FFLAGS) -c $<
 
 clean:
 	rm -f *.o *.lst

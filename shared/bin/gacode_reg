@@ -1,39 +1,36 @@
 #!/usr/bin/env python
 
-#-------------------------------------------------
+#----------------------------------------------------------------
 # SCRIPT:
-#  tglf_reg
+#  gacode_reg <testdir> <compdir> <precfile> <tol>
 #
 # FUNCTION:
-#  Perform regression comparison.  That is, test 
-#  data against known solution.
-#--------------------------------------------------
+#  Perform regression comparison.  That is, test data against 
+#  known solution.
+#-----------------------------------------------------------------
 
 import sys
 import os
 import string
 
 #--------------------------------------------------
-# Error tolerance
-tol = 1e-6
-#--------------------------------------------------
-
-#--------------------------------------------------
 n=len(sys.argv)
 
-if n <> 2:
-    print "Usage: tglf_reg <testdir>"
+if n <> 5:
+    print "Usage: gyro_reg <testdir> <compdir> <precfile> <tol>"
     print 
-    print "       Note that <testdir> must one of the entries"
-    print "       listed by tglf -g" 
+    print "       Note that <testdir> must match a reference directory"
+    print "       contained in <compdir>" 
     sys.exit(0)
 #--------------------------------------------------
 
-testdir=sys.argv[1]+'/'
-checkdir=os.environ.get('GACODE_ROOT')+'/tglf/tools/input/'+testdir
+testdir  = sys.argv[1]+'/'
+checkdir = sys.argv[2]+'/'+testdir
+precfile = sys.argv[3]
+tol      = float(sys.argv[4])
 
-check1='out.tglf.prec'
-regress='regress'
+check1  = precfile
+regress = 'regress'
 
 #--------------------------------------------------
 # Known data
@@ -42,11 +39,14 @@ if os.path.isfile(checkdir+check1) == 0:
 	print "Regression data does not exist for "+checkdir+check1
 	sys.exit(0)
 
-# Get regression text string
-for line in open(checkdir+regress,'r').readlines():
-    regtext = string.strip(line)
+# Get regression text string if it exists
+try:
+    for line in open(checkdir+regress,'r').readlines():
+        regtext = string.strip(line)
+except:
+    regtext = ''
 
-# Get correct checksum from out.tglf.prec:
+# Get correct checksum from precision file (out.code.prec):
 for line in open(checkdir+check1,'r').readlines():
     line = string.strip(line)
 
@@ -65,29 +65,26 @@ for line in open(testdir+check1,'r').readlines():
     line = string.strip(line)
 
 data = string.splitfields(line,' ')
-y1=eval(data[0])
+y1   = eval(data[0])
 
 #--------------------------------------------------
 
 #--------------------------------------------------
 # Perform comparison
 #
-# Test 1:
-
-p = 0
 
 if x1 == 0.0: 
    if y1 == 0.0:
       print sys.argv[1]+": PASS  "+regtext
-      p = p+1
    else:
       print sys.argv[1]+": FAIL  "+regtext
+
 else:
+
     z=abs((x1-y1))/x1
 
     if z < tol:
         print sys.argv[1]+": PASS  "+regtext
-        p = p+1
     else:
         print sys.argv[1]+": FAIL  "+regtext
 #--------------------------------------------------

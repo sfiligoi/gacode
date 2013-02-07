@@ -27,7 +27,7 @@ gks_analysis_lib.a: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
 
 .f.o :
-	$(FC) $(FFLAGS) -I $(NETCDF_INC)  -c $<
+	$(F77) $(FFLAGS) -I $(NETCDF_INC)  -c $<
 
 clean:
 	rm -f *.o *.lst $(LLIB).a $(EXEC)

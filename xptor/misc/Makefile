@@ -51,10 +51,10 @@ lib: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS) 
 
 .f.o :
-	$(FC) $(FFLAGS) -c $<
+	$(F77) $(FFLAGS) -c $<
 
 .F.o :
-	$(FC) $(FFLAGS) -c $< f77_dcomplx.h
+	$(F77) $(FFLAGS) -c $< f77_dcomplx.h
 
 clean:
 	rm -f *.o *.lst *.gch

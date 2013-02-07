@@ -9,31 +9,32 @@ endif
 LLIB=math_lib
 
 OBJECTS = math_constants.o \
-          j0y0.o \
-          i0.o \
-          erf.o \
-          proc_time.o \
-	  parallel_dim.o \
-          p32.o \
-          invert_p32.o \
-          gauss_legendre.o \
-          gauss_integ.o \
-          polydiff.o \
-          poly2diff.o \
-          pascal.o \
-          bound_extrap.o \
           bound_deriv.o \
-          remap_grid.o \
-          rjbesl.o \
-          ribesl.o \
+          bound_extrap.o \
           cub_spline.o \
           cub_spline_deriv.o \
           cub_spline_deriv2.o \
-          gamma.o \
-          energy_integral.o \
           curtis_rad.o \
+          energy_integral.o \
+          erf.o \
+          gamma.o \
+          gauss_legendre.o \
+          gauss_integ.o \
+          ifs_pppl.o \
+          invert_p32.o \
+          i0.o \
+          j0y0.o \
           linint.o \
-          logint.o
+          logint.o \
+	  parallel_dim.o \
+          pascal.o \
+          polydiff.o \
+          poly2diff.o \
+          proc_time.o \
+          p32.o \
+          remap_grid.o \
+	  rjbesl.o \
+          sigv.o 
 
 .SUFFIXES : .o .f90 .f
 

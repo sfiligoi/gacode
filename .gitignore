@@ -17,6 +17,7 @@ neo/.VERSION
 
 # Executables
 gato/gato
+gks/src/gks_analysis
 gyro/src/gyro
 neo/src/neo
 neo/tools/squeeze/squeeze
@@ -28,3 +29,4 @@ shared/profiles_gen/exprotools/expromake
 tglf/src/tglf
 tglf/src/xtglf
 tgyro/src/tgyro_main
+xptor/driver/xptor

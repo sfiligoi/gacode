@@ -27,17 +27,20 @@ OBJECTS = callglf2d.o \
 	  xptor_neo_map.o \
           weiland14.o
 
-.SUFFIXES : .o .f .F
+.SUFFIXES : .o .f .f90 .F
 
 
 lib: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS) 
 
 .f.o :
+	$(F77) $(FFLAGS) -c $<
+
+.f90.o :
 	$(FC) $(FFLAGS) -c $<
 
 .F.o :
-	$(FC) $(FFLAGS)  -c $<
+	$(F77) $(FFLAGS)  -c $<
 
 clean:
 	rm -f *.o *.lst

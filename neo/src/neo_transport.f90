@@ -46,7 +46,7 @@ module neo_transport
   character(len=80),private :: runfile_vel_fourier    = 'out.neo.vel_fourier'
   character(len=80),private :: runfile_exp    = 'out.neo.transport_exp'
   character(len=80),private :: runfile_gv     = 'out.neo.transport_gv'
-  character(len=80),private :: runfile_check  = 'out.neo.check'
+  character(len=80),private :: runfile_check  = 'out.neo.prec'
   logical, private :: initialized = .false.
   real, private :: check_sum
 

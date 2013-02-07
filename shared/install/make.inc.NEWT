@@ -6,7 +6,7 @@
 # Compilers
 
 FC	= mpif90 -I $(GACODE_ROOT)/modules
-F77	= mpif90
+F77	= ${FC}
 
 FOMP    = -fopenmp
 FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules

@@ -27,7 +27,7 @@ all:  ptor_driver.o
 	$(FC) $(FFLAGS) -o $(EXEC) ptor_driver.o  $(LLIB).a  $(EXTRA_LIBS)
 
 .f.o : 
-	$(FC) $(FFLAGS) -c $<
+	$(F77) $(FFLAGS) -c $<
 
 clean:
 	rm -f *.o *.lst $(EXEC) $(LLIB).a
