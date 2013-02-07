@@ -232,6 +232,7 @@ c
        etagb_par_m(jm)=etaparm/cgyrobohm_m(jm)
        etagb_per_m(jm)=etaperm/cgyrobohm_m(jm)
 c
+       gfac=1.D0
        chiegb_etg_m(jm)=chie_e_gf*cmodel*gfac
 c
        diff_m(jm)=diffnem
