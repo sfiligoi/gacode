@@ -7,6 +7,7 @@ subroutine expromake_set
 
   integer :: i, j
   real :: x
+  real, dimension(:), allocatable :: chi_t
 
   if(set_exm_b_ref == 1) then
      EXPRO_b_ref = exm_b_ref
@@ -115,7 +116,18 @@ subroutine expromake_set
   endif
 
   if(set_exm_polflux == 1) then
-     EXPRO_poloidalfluxover2pi = exm_polflux
+     ! d psi = 1/q * d chi_t
+     allocate(chi_t(EXPRO_n_exp))
+     do i=1,EXPRO_n_exp
+        chi_t(i) = 0.5 * EXPRO_b_ref * (EXPRO_arho*EXPRO_rho(i))**2
+     enddo
+     EXPRO_poloidalfluxover2pi(1) = 0.0
+     do i=2,EXPRO_n_exp
+        EXPRO_poloidalfluxover2pi(i) = EXPRO_poloidalfluxover2pi(i-1) &
+             + 1.0/(0.5*(EXPRO_q(i) + EXPRO_q(i+1))) &
+             * (chi_t(i) - chi_t(i-1))
+     enddo
+     deallocate(chi_t)
   endif
 
   do i=1,nions_max

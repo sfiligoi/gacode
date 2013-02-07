@@ -185,8 +185,10 @@ subroutine prgen_read_gato
   close(1)
 
   call cub_spline(gato_psi,gato_q,gato_npsi+1,dpsi,q_gato,nx)
-  if (nogatoq_flag == 0 .or. format_type == 3) q(:) = q_gato(:)
-  !-------------------------------------------------------------
+  if (nogatoq_flag == 0 .or. format_type == 3 .or. format_type == 7) then
+     q(:) = q_gato(:)
+  endif
+  !-------------------------------------------------------------  
 
   ! Clean up
   deallocate(g3vec)
