@@ -70,6 +70,9 @@ then
   echo 
   echo "REGRESSION TESTING"
   echo
+  echo "         -rc <simdir>"
+  echo "         Check <simdir> for regression pass/fail."
+  echo 
   echo "         -r"
   echo "         Auto-run the full regression suite."
   echo 
@@ -115,7 +118,7 @@ EXEC_FLAG=0
 TEST_FLAG=0
 INIT_FLAG=0
 GENERATE_FLAG=0
-REGRESS_FLAG=0
+REGRESS=0
 REGRESS_RESET=0
 SCOPY_FLAG=0
 KILL_STATUS=2
@@ -138,7 +141,9 @@ while [ $# -gt 0 ] ; do
 
   -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
 
-  -r) REGRESS_FLAG=1 ;;
+  -r) REGRESS=1 ;;
+
+  -rc) shift ; LOCDIR=$1 ; REGRESS=2 ;;
 
   -reset) REGRESS_RESET=1 ;;
 
@@ -186,9 +191,14 @@ esac
  
 #============================================================
 # Check for inconsistent flags:
-FLAG_SUM=$[ $EXEC_FLAG + $TEST_FLAG + $GENERATE_FLAG 
-                       + $REGRESS_FLAG + $INIT_FLAG]
-if [ "$FLAG_SUM" -gt 1 ]
+if [ $REGRESS -eq 0 ] ; then
+   REGRESS_FLAG=0
+else
+   REGRESS_FLAG=1
+fi
+FLAG_SUM=$[$EXEC_FLAG+$TEST_FLAG+$GENERATE_FLAG 
+                     +$REGRESS_FLAG+$INIT_FLAG]
+if [ $FLAG_SUM -gt 1 ]
 then
    echo "ERROR: Can only specify one of -e, -t, -g, -r, -i"
    exit 1
@@ -213,7 +223,7 @@ fi
 #============================================================
 # Do the regression test if -r set, then exit.
 #
-if [ $REGRESS_FLAG -eq 1 ] 
+if [ $REGRESS -eq 1 ] 
 then 
    N2=$[ NPROC / 2 ]
    if [ $[ NPROC - 2 * N2 ] -eq 1 ]
@@ -223,6 +233,11 @@ then
       exit 1
    fi   
    gacode_reg_do $NPROC $NOMP $REGRESS_RESET gyro 1e-5
+   exit 0
+fi
+if [ $REGRESS -eq 2 ] 
+then 
+   gacode_reg $LOCDIR $GACODE_ROOT/gyro/tools/input out.gyro.prec 1e-5 
    exit 0
 fi
 #============================================================
