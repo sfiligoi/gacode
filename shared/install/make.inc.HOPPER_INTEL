@@ -1,5 +1,5 @@
 #---------------------------------------------------
-# Cray XE6 (hopper.nersc.gov) [Cray ENV]
+# Cray XE6 (hopper.nersc.gov) [Intel ENV]
 #
 # HOPPER SYSTEM INFO:
 # - Cray XE6
@@ -23,13 +23,13 @@ include ${SLEPC_DIR}/conf/slepc_common_variables
 
 # Compilers and flags
 
-FC     = ftn -e m -J ${GACODE_ROOT}/modules
+FC     = ftn -mod ${GACODE_ROOT}/modules -I ${GACODE_ROOT}/modules
 F77    = ${FC}
 
-FOMP   =
-FMATH  = -s real64
-FOPT   = -O3 -hfp3
-FDEBUG = -eD -Ktrap=fp -m 1
+FOMP   = -openmp
+FMATH  = -r8
+FOPT   = -O3
+FDEBUG = -check all 
 FPETSC = ${FC_LINKER_FLAGS} ${FC_INCLUDES} ${SLEPC_LIB}
 
 # System math libraries
