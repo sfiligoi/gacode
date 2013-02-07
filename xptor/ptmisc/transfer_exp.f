@@ -22,7 +22,7 @@ c
       include '../inc/ptor.m'
       include '../inc/ut.m'
 c
-      integer i, ig, is, i2d, ierr, time_channel
+      integer i, ig, is, i2d, ierr
      &  , j, i1d, id, ifchar, ichar, ifail, k
      &  , nnexp_d, ntexp_d, ntixp_d, jj, jn, niterdb, lnblnk, ier
 c
