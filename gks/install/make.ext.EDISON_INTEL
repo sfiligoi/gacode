@@ -1,0 +1,1 @@
+GKSFLAGS=-r8
