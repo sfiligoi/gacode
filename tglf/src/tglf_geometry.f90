@@ -57,7 +57,7 @@ SUBROUTINE xgrid_functions_sa
      kyi = ky*vs(2)*mass(2)/ABS(zs(2))
      wE = MIN(kyi/0.3,1.0)*vexb_shear_s/gamma_reference_kx0(1)
      ! write(*,*)"wE=",wE
-     kx0_e = -alpha_e_in*(0.36*vexb_shear_s/gamma_reference_kx0(1) + 0.38*wE*TANH((0.69*wE)**6))
+     kx0_e = -(0.36*vexb_shear_s/gamma_reference_kx0(1) + 0.38*wE*TANH((0.69*wE)**6))
      a0 = alpha_e_in*2.0
      if(alpha_e_in.ne.0.0)then
         kx0_e = a0*TANH(kx0_e/a0)
