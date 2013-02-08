@@ -79,7 +79,7 @@ pro loadsim, input_dir
      ;; CH fix 12.20.2012
 ;;     n_exp_derived = 37
      ;; CH fix 1.3.2013- better for backwards compatibility
-     n_exp_derived = 37
+     n_exp_derived = 25
 
      exp_derived = fltarr(n_rho,n_exp_derived)
      read_array,exp_derived,'input.profiles.extra',exists_exp_derived
@@ -169,6 +169,13 @@ pro loadsim, input_dir
   
   kxkyspec = fltarr(n_r,n_n,n_time)
   read_array,kxkyspec,'out.gyro.kxkyspec',exists_kxkyspec
+  ;;-------------------------------------------------------
+
+  ;;-------------------------------------------------------
+  ;; Read fields at r=r0:
+  ;;
+;  field_r0 = fltarr(2,field_r0_grid,n_field,n_n,n_time)
+;  read_array,field_r0,'out.gyro.field_r0',exists_field_r0 
   ;;-------------------------------------------------------
 
   ;;-------------------------------------------------------
