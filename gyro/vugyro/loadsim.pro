@@ -174,8 +174,8 @@ pro loadsim, input_dir
   ;;-------------------------------------------------------
   ;; Read fields at r=r0:
   ;;
-  field_r0 = fltarr(2,field_r0_grid,n_field,n_n,n_time)
-  read_array,field_r0,'out.gyro.field_r0',exists_field_r0 
+;  field_r0 = fltarr(2,field_r0_grid,n_field,n_n,n_time)
+;  read_array,field_r0,'out.gyro.field_r0',exists_field_r0 
   ;;-------------------------------------------------------
 
   ;;-------------------------------------------------------
