@@ -14,36 +14,38 @@ subroutine EXPRO_write_derived
 
   open(unit=io,file=trim(path)//'input.profiles.extra',status='replace')
 
-  write(io,*) EXPRO_bunit(:)    ! 1
-  write(io,*) EXPRO_s(:)        ! 2
-  write(io,*) EXPRO_drmaj(:)    ! 3
-  write(io,*) EXPRO_dzmag(:)    ! 4 
-  write(io,*) EXPRO_sdelta(:)   ! 5  
-  write(io,*) EXPRO_skappa(:)   ! 6
-  write(io,*) EXPRO_szeta(:)    ! 7
-  write(io,*) EXPRO_dlnnedr(:)  ! 8
-  write(io,*) EXPRO_dlntedr(:)  ! 9 
-  write(io,*) transpose(EXPRO_dlnnidr(:,:)) ! 10-14 
-  write(io,*) transpose(EXPRO_dlntidr(:,:)) ! 15-19
-  write(io,*) EXPRO_dlnptotdr(:)! 20 
-  write(io,*) EXPRO_drdrho(:)   ! 21
-  write(io,*) EXPRO_w0(:)       ! 22
-  write(io,*) EXPRO_w0p(:)      ! 23
-  write(io,*) EXPRO_vol(:)      ! 24
-  write(io,*) EXPRO_volp(:)     ! 25
-  write(io,*) EXPRO_cs(:)       ! 26
-  write(io,*) EXPRO_rhos(:)     ! 27
-  write(io,*) EXPRO_ni_new(:)   ! 28
-  write(io,*) EXPRO_dlnnidr_new(:) ! 29 
-  write(io,*) EXPRO_grad_r0(:)     ! 30
-  write(io,*) EXPRO_ave_grad_r(:)  ! 31 
-  write(io,*) EXPRO_bp0(:)      ! 32
-  write(io,*) EXPRO_bt0(:)      ! 33
-  write(io,*) EXPRO_poloidalfluxover2pi(:) ! 34
-  write(io,*) EXPRO_gamma_e(:)  ! 35
-  write(io,*) EXPRO_gamma_p(:)  ! 36
-  write(io,*) EXPRO_mach(:)     ! 37
+  write(io,10) EXPRO_bunit(:)    ! 1
+  write(io,10) EXPRO_s(:)        ! 2
+  write(io,10) EXPRO_drmaj(:)    ! 3
+  write(io,10) EXPRO_dzmag(:)    ! 4 
+  write(io,10) EXPRO_sdelta(:)   ! 5  
+  write(io,10) EXPRO_skappa(:)   ! 6
+  write(io,10) EXPRO_szeta(:)    ! 7
+  write(io,10) EXPRO_dlnnedr(:)  ! 8
+  write(io,10) EXPRO_dlntedr(:)  ! 9 
+  write(io,10) transpose(EXPRO_dlnnidr(:,:)) ! 10-14 
+  write(io,10) transpose(EXPRO_dlntidr(:,:)) ! 15-19
+  write(io,10) EXPRO_dlnptotdr(:)! 20 
+  write(io,10) EXPRO_drdrho(:)   ! 21
+  write(io,10) EXPRO_w0(:)       ! 22
+  write(io,10) EXPRO_w0p(:)      ! 23
+  write(io,10) EXPRO_vol(:)      ! 24
+  write(io,10) EXPRO_volp(:)     ! 25
+  write(io,10) EXPRO_cs(:)       ! 26
+  write(io,10) EXPRO_rhos(:)     ! 27
+  write(io,10) EXPRO_ni_new(:)   ! 28
+  write(io,10) EXPRO_dlnnidr_new(:) ! 29 
+  write(io,10) EXPRO_grad_r0(:)     ! 30
+  write(io,10) EXPRO_ave_grad_r(:)  ! 31 
+  write(io,10) EXPRO_bp0(:)      ! 32
+  write(io,10) EXPRO_bt0(:)      ! 33
+  write(io,10) EXPRO_poloidalfluxover2pi(:) ! 34
+  write(io,10) EXPRO_gamma_e(:)  ! 35
+  write(io,10) EXPRO_gamma_p(:)  ! 36
+  write(io,10) EXPRO_mach(:)     ! 37
 
   close(io)
+
+10 format(t2,1pe14.7)
 
 end subroutine EXPRO_write_derived

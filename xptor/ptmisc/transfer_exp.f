@@ -22,7 +22,7 @@ c
       include '../inc/ptor.m'
       include '../inc/ut.m'
 c
-      integer i, ig, is, i2d, ierr, time_channel
+      integer i, ig, is, i2d, ierr
      &  , j, i1d, id, ifchar, ichar, ifail, k
      &  , nnexp_d, ntexp_d, ntixp_d, jj, jn, niterdb, lnblnk, ier
 c
@@ -1336,7 +1336,7 @@ c                 read(niterdb,'(a)')stflg
 cx                 read(niterdb,10)(zplasbdry_d(j), j=1,nplasbdry_d)
 c                 read(niterdb,10)(bblank_d(j),j=1,nplasbdry_d)           
 c
-       close(unit=niterdb,status='keep')       
+c       close(unit=niterdb,status='keep')       
 c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c      
 cmnt   It is assumed that 0:jmaxm greater than or equal 1:nj_dd
 cmnt   The volume source data is integrated to power and flows

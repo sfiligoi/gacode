@@ -361,17 +361,15 @@ class GYROData:
             self.profile['n_ion']           = int(profile[13])
             self.profile['n_kinetic']       = int(profile[14])
             self.profile['n_spec']          = int(profile[15])
-            self.profile['field_r0_flag']   = int(profile[16])
-            self.profile['field_r0_grid']   = int(profile[17])
-            self.profile['n_grid_exp']      = int(profile[18])
-            self.profile['boundary_method'] = int(profile[19])
-            self.profile['r']               = profile[20:(20+n_x)]
-            self.profile['q']               = profile[(20+n_x):(20+2*n_x)]
-            self.profile['r_s']             = profile[(20+2*n_x):(20+3*n_x)]
-            self.profile['q_s']             = profile[(20+3*n_x):(20+4*n_x)]
+            self.profile['n_grid_exp']      = int(profile[16])
+            self.profile['boundary_method'] = int(profile[17])
+            self.profile['r']               = profile[20:(18+n_x)]
+            self.profile['q']               = profile[(18+n_x):(18+2*n_x)]
+            self.profile['r_s']             = profile[(18+2*n_x):(18+3*n_x)]
+            self.profile['q_s']             = profile[(18+3*n_x):(18+4*n_x)]
             # The parameter "mark" is used to keep track of where in the file the
             # program is so that the indices don't get too complicated.
-            mark = 20 + 4*n_x
+            mark = 18 + 4*n_x
             temp = profile[mark:(mark+n_spec*n_x)]
             self.profile['dlntdr_s'] = temp.reshape((n_spec,n_x),order='F')
             mark = mark + n_spec*n_x

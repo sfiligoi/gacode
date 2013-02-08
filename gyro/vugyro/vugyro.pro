@@ -59,7 +59,6 @@ pro vugyro, quick_exit=quick_exit, _EXTRA=extra
     exists_entropy,$
     exists_exp_profile, $
     exists_exp_derived, $
-    exists_field_r0, $
     exists_gbflux, $
     exists_gbflux_n, $
     exists_gbflux_i, $
@@ -88,10 +87,6 @@ pro vugyro, quick_exit=quick_exit, _EXTRA=extra
     exp_derived, $
     exp_profile_indx, $
     exp_profile_label, $ 
-    field_r0, $
-    field_r0_grid, $
-    field_r0_wid, $
-    field_r_wid, $
     f_nek, $
     gbflux, $
     gbflux_i, $
@@ -445,10 +440,6 @@ endelse
   x1 = widget_button(x,$
                      value='radial shear',$
                      uvalue='field_shear_see')
-
-  x1 = widget_button(x,$
-                     value='theta dependence at r=r0',$
-                     uvalue='field_r0_theta_see')
 
   x1 = widget_button(x,$
                      value='time trace',$

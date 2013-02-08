@@ -251,10 +251,10 @@ c         write(*,*) i, ufile
 c
          ierr=0
          time_flag=0
-         if (i.eq.time_channel) then
-           time_flag=1
-           if(iproc.eq.0) write(6,*) 'Reading timedata for channel=',i
-         endif
+c         if (i.eq.time_channel) then
+c           time_flag=1
+c           if(iproc.eq.0) write(6,*) 'Reading timedata for channel=',i
+c         endif
          if(time_series.eq.0)then
 c          write(*,*) 'ufile = ',ufile
 c          write(*,*) 'u2d = ',u2d(1,i)

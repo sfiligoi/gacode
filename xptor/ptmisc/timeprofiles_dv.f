@@ -25,14 +25,14 @@ c
 c
        if (time_series.ne.0) then
          do j=0,jmaxm
-          te_exp_t(j,ktime)=te_exp(j)
-          ti_exp_t(j,ktime)=ti_exp(j)
-          vphi_exp_t(j,ktime)=vphi_exp(j)
+          te_exp_t(j,ntime_t)=te_exp(j)
+          ti_exp_t(j,ntime_t)=ti_exp(j)
+          vphi_exp_t(j,ntime_t)=vphi_exp(j)
          enddo
-         powe_exp_t(ktime)=powe_exp(jmaxm)
-         powi_exp_t(ktime)=powi_exp(jmaxm)
-         powewdot_exp_t(ktime)=powe_wdot_exp(jmaxm)
-         powiwdot_exp_t(ktime)=powi_wdot_exp(jmaxm)
+         powe_exp_t(ntime_t)=powe_exp(jmaxm)
+         powi_exp_t(ntime_t)=powi_exp(jmaxm)
+         powewdot_exp_t(ntime_t)=powe_wdot_exp(jmaxm)
+         powiwdot_exp_t(ntime_t)=powi_wdot_exp(jmaxm)
        endif
 c
        return
