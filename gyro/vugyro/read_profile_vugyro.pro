@@ -92,8 +92,6 @@ pro read_profile_vugyro
      readf,1,n_ion
      readf,1,n_kinetic
      readf,1,n_spec
-;     readf,1,field_r0_flag
-;     readf,1,field_r0_grid
      readf,1,n_rho
      readf,1,boundary_method
 
@@ -228,18 +226,6 @@ pro read_profile_vugyro
         thetad_plot = -1.0+2*findgen(n_theta_plot)/n_theta_plot
 
      endelse
-
-     ;; Initialize plotting vectors
-
-;     if field_r0_grid eq 1 then begin
-
-;        thetad_r0_plot = [0.0]
-
-;     endif else begin
-
-;        thetad_r0_plot = -1.0+2*findgen(field_r0_grid)/field_r0_grid
-
-;     endelse
 
      ;; Initialize counter for poloidal harmonics
 
