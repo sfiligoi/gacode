@@ -46,6 +46,6 @@ subroutine EXPRO_write_derived
 
   close(io)
 
-10 format(t2,1pe12.5)
+10 format(t2,1pe14.7)
 
 end subroutine EXPRO_write_derived
