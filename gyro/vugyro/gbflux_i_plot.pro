@@ -99,7 +99,7 @@ endcase
 
 ;CH fix 12.20.2012
 ;        y_exp[*] = exp_profile[15,*]/xunits[9]/exp_derived[22,*]
-        y_exp[*] = exp_profile[15,*]/xunits[9]/exp_derived[24,*]
+        y_exp[*] = exp_profile[15,*]/xunits[9]/exp_derived[23,*]
 
      endif
 
@@ -111,12 +111,12 @@ endcase
            ;; Qe
 ;CH fix 12.20.2012
 ;           y_exp[*] = exp_profile[11,*]/xunits[10]/exp_derived[22,*]
-           y_exp[*] = exp_profile[11,*]/xunits[10]/exp_derived[24,*]
+           y_exp[*] = exp_profile[11,*]/xunits[10]/exp_derived[23,*]
         endif else begin
            ;; Qi
 ;CH fix 12.2012
 ;           y_exp[*] = exp_profile[12,*]/xunits[10]/exp_derived[22,*]
-           y_exp[*] = exp_profile[12,*]/xunits[10]/exp_derived[24,*]
+           y_exp[*] = exp_profile[12,*]/xunits[10]/exp_derived[23,*]
         endelse
         
      endif
@@ -127,7 +127,7 @@ endcase
 
 ;CH fix 12.20.2102
 ;        y_exp[*] = exp_profile[10,*]/xunits[11]/exp_derived[22,*]
-        y_exp[*] = exp_profile[10,*]/xunits[11]/exp_derived[24,*]
+        y_exp[*] = exp_profile[10,*]/xunits[11]/exp_derived[23,*]
         
      endif
 
@@ -139,8 +139,8 @@ endcase
      ;; Multiply by V'- CH fix 12.20.2012
 ;     y_r[*]   = y_r[*]*INTERPOL(exp_derived[22,*],r_from_rho,r)
 ;     y_exp[*] = y_exp[*]*exp_derived[22,*]
-     y_r[*]   = y_r[*]*INTERPOL(exp_derived[24,*],r_from_rho,r)
-     y_exp[*] = y_exp[*]*exp_derived[24,*]
+     y_r[*]   = y_r[*]*INTERPOL(exp_derived[23,*],r_from_rho,r)
+     y_exp[*] = y_exp[*]*exp_derived[23,*]
   endif
   ;;-------------------------------------------------------
 
