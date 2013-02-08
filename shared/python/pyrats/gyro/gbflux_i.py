@@ -54,10 +54,13 @@ color = ['k','m','b','c']
 n_x = sim.profile['n_x']
 ave = np.zeros(n_x)
 
+print sim.profile['r']
+print n_x
+
 # Loop over species
 for i in range(n_kinetic):
     stag = sim.tagspec[i]
-    ave[:] = average(flux0[i,i_moment,:,:],t,window,n_x)
+    ave[:] = average_n(flux0[i,i_moment,:,:],t,window,n_x)
     ax.plot(sim.profile['r'],ave[:],label=stag,color=color[i])
 
 ax.legend()

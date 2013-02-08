@@ -45,7 +45,7 @@ class GYROData:
         self.read_geometry()
         self.read_t()
         self.read_units()
-        self.read_input_profiles()
+        #self.read_input_profiles()
         self.make_tags()
 
         # The rest of the possible read routines should NOT be done automatically.
@@ -363,7 +363,7 @@ class GYROData:
             self.profile['n_spec']          = int(profile[15])
             self.profile['n_grid_exp']      = int(profile[16])
             self.profile['boundary_method'] = int(profile[17])
-            self.profile['r']               = profile[20:(18+n_x)]
+            self.profile['r']               = profile[18:(18+n_x)]
             self.profile['q']               = profile[(18+n_x):(18+2*n_x)]
             self.profile['r_s']             = profile[(18+2*n_x):(18+3*n_x)]
             self.profile['q_s']             = profile[(18+3*n_x):(18+4*n_x)]
