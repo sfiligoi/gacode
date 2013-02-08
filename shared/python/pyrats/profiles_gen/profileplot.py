@@ -3,10 +3,8 @@
 import sys
 import string
 import numpy as np
-import matplotlib.pyplot as plt
+from gacodeplotdefs import *
 from pyrats.profiles_gen.data import profiles_genData
-
-GFONTSIZE=16
 
 rvar    = sys.argv[1]
 infiles = sys.argv[2]
@@ -59,7 +57,7 @@ for j in range(n):
         ax.grid(which="majorminor",ls=":")
         ax.grid(which="major",ls=":")
 
-    ax.plot(x,prof.data[fulltag],label=tag)
+    ax.plot(x,prof.data[fulltag],label=r'$'+tag+'$')
 
 ax.legend(loc=1)
 plt.show()

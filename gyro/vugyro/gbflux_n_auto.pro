@@ -90,7 +90,7 @@ for i_moment=0,1 do begin
   if (i_units eq 2) then begin
      ;; Multiply by V'- CH fix 12.20.12
 ;     yn[*] = yn[*]*INTERPOL(exp_derived[22,*],r_from_rho,r[n_r/2])
-     yn[*] = yn[*]*INTERPOL(exp_derived[24,*],r_from_rho,r[n_r/2])
+     yn[*] = yn[*]*INTERPOL(exp_derived[23,*],r_from_rho,r[n_r/2])
   endif
 
   plot_def_new,pname

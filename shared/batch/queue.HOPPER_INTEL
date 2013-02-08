@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 #
 # SCRIPT:
-#  queue.HOPPER2
+#  queue.HOPPER_INTEL
 #
 # FUNCTION:
 #  Batch generator for Cray XE6 (hopper.nersc.gov)  
@@ -24,7 +24,7 @@ mpinuma=${7}
 
 echo "---------------------------------"
 echo "Cray XE6 (hopper) [24 cores/node]"
-echo "--------------------------------"
+echo "---------------------------------"
 echo
 echo "Cores requested (mppwidth)   : $cores_requested"
 echo "Cores used                   : $cores_used"

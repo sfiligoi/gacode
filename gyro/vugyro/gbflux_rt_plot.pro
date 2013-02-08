@@ -37,7 +37,7 @@ PRO GBFLUX_RT_PLOT, SAVEFILE = savefile
             ;; Multiply by V'
 ;            unit_norm *= INTERPOL(exp_derived[22,*],r_from_rho,r)
 ; CH fix 12.20.2012: update for new input.profiles.extra structure
-            unit_norm *= INTERPOL(exp_derived[24,*],r_from_rho,r)
+            unit_norm *= INTERPOL(exp_derived[23,*],r_from_rho,r)
         endif
         units = units3
      end
