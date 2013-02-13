@@ -107,6 +107,7 @@ subroutine tgyro_read_input
   call tgyro_readbc_real(tgyro_input_w0_scale)
   call tgyro_readbc_real(tgyro_input_paux_scale)
   call tgyro_readbc_int(tgyro_er_bc)
+  call tgyro_readbc_int(tgyro_noturb_flag)
   ! ** END input read; ADD NEW PARAMETERS ABOVE HERE!!
   call tgyro_readbc_int(n_inst)
   !-------------------------------------------------------

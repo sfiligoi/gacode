@@ -71,6 +71,7 @@ x.add('TGYRO_INPUT_TI_SCALE','1.0')
 x.add('TGYRO_INPUT_W0_SCALE','1.0')
 x.add('TGYRO_INPUT_PAUX_SCALE','1.0')
 x.add('TGYRO_ER_BC','1')
+x.add('TGYRO_NOTURB_FLAG','0')
 
 # Deprecated parameters
 x.dep('LOC_N_FEEDBACK','new parameter is LOC_NE_FEEDBACK_FLAG')
