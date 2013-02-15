@@ -42,7 +42,7 @@ if minr == maxr:
     print "ERROR: Radius interval must be greater than zero."
     sys.exit()
 
-maxn = prof.match(maxr,prof.get('rho (-)'))-prof.match(minr,prof.get('rho (-)'))
+maxn = prof.match(maxr,prof.get('rho'))-prof.match(minr,prof.get('rho'))
 
 if maxn == 0:
     print "ERROR: No flux surfaces in given interval."
