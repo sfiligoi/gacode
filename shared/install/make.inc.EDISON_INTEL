@@ -20,7 +20,7 @@ F77    = ${FC}
 
 FOMP   = -openmp
 FMATH  = -r8
-FOPT   = -O3
+FOPT   = -fast -no-ipo
 FDEBUG = -check all 
 FPETSC = 
 
@@ -30,7 +30,7 @@ LMATH = -L/opt/fftw/3.3.0.1/x86_64/lib -Wl,-rpath=/opt/fftw/3.3.0.1/x86_64/lib \
         -lfftw3_threads -lfftw3f_threads -lfftw3 -lfftw3f -mkl=cluster
 
 # OPTIONAL: netCDF (for gyro2gkv)
-NETCDF = ${NETCDF_DIR}/lib/libnetcdf.a ${NETCDF_DIR}/lib/libnetcdf.a
+NETCDF = ${NETCDF_DIR}/lib/libnetcdff.a ${NETCDF_DIR}/lib/libnetcdf.a ${NETCDF_DIR}/lib/libnetcdf.a
 NETCDF_INC = ${NETCDF_DIR}/include
 
 # Archive 

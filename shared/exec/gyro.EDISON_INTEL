@@ -23,7 +23,7 @@ mpinuma=${6}
 
 cd $simdir
 
-export MPICH_MAX_THREAD_SAFETY=funneled
 export OMP_NUM_THREADS=$nomp
-echo "> aprun -n $nmpi -N $mpinode -d $nomp -S $mpinuma -sn $numa -cc numa_node $exec"
-aprun -n $nmpi -N $mpinode -d $nomp -S $mpinuma -sn $numa -cc numa_node $exec
+export KMP_AFFINITY=compact
+echo "> aprun -n $nmpi -N $mpinode -d $nomp -S $mpinuma -cc numa_node -ss $exec"
+aprun -n $nmpi -N $mpinode -d $nomp -S $mpinuma -cc numa_node -ss $exec
