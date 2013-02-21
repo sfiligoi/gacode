@@ -15,9 +15,4 @@ mpinuma=${6}
 
 cd $simdir
 
-if [ "$TMPDIR" = "" ]
-then
-   mpiexec -host head -env OMP_NUM_THREADS $nomp -n $nmpi $exec
-else
-   mpiexec -machinefile $TMPDIR/machines -env OMP_NUM_THREADS $nomp -n $nmpi $exec
-fi
+export OMP_NUM_THREADS=$nomp ; mpirun -n $nmpi $exec

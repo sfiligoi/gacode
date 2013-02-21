@@ -25,7 +25,7 @@ lib: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
 
 .f.o :
-	$(F77) $(FFLAGS) $(FMATH) -c $<
+	$(F77) $(FFLAGS) -c $<
  
 clean:
 	rm -rf *.o nclass_lib.a *~
