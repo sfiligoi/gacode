@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 #
 # SCRIPT:
-#  gyro.EDISON_INTEL
+#  gyro.EDISON_CRAY
 #
 # FUNCTION:
 #  Parallel execution script
@@ -25,5 +25,5 @@ cd $simdir
 
 export OMP_NUM_THREADS=$nomp
 export KMP_AFFINITY=compact
-echo "> aprun -n $nmpi -N $mpinode -d $nomp -S $mpinuma -cc numa_node -ss $exec"
-aprun -n $nmpi -N $mpinode -d $nomp -S $mpinuma -cc numa_node -ss $exec
+echo "> aprun -n $nmpi -N $mpinode -d $nomp -S $mpinuma -ss $exec"
+aprun -n $nmpi -N $mpinode -d $nomp -S $mpinuma -ss $exec

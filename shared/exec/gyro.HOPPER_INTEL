@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 #
 # SCRIPT:
-#  gyro.HOPPER2
+#  gyro.HOPPER_INTEL
 #
 # FUNCTION:
 #  Parallel execution script

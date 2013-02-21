@@ -1,10 +1,10 @@
 #! /usr/bin/env bash
 #
 # SCRIPT:
-#  queue.HOPPER_INTEL
+#  queue.EDISON_CRAY
 #
 # FUNCTION:
-#  Batch generator for Cray XE6 (hopper.nersc.gov)  
+#  Batch generator for Cray XC30 (edison.nersc.gov)  
 #---------------------------------------------------
 
 nmpi=${1}
@@ -22,9 +22,9 @@ mpinuma=${7}
 
 . $GACODE_ROOT/shared/bin/gacode_mpi_tool
 
-echo "---------------------------------"
-echo "Cray XE6 (hopper) [24 cores/node]"
-echo "---------------------------------"
+echo "----------------------------------"
+echo "Cray XC30 (edison) [16 cores/node]"
+echo "----------------------------------"
 echo
 echo "Cores requested (mppwidth)   : $cores_requested"
 echo "Cores used                   : $cores_used"
