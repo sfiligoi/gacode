@@ -77,6 +77,10 @@ c
       scalval(j)=nf_put_att_text(ncid,rhid(j),'units',len(leng_units),
      &           leng_units)
       j=j+1
+      scalval(j) = nf_def_var(ncid,'arho_exp',nf_double,0,0,rhid(j))
+      scalval(j)=nf_put_att_text(ncid,rhid(j),'units',len(leng_units),
+     &           leng_units)
+      j=j+1
       scalval(j) = nf_def_var(ncid,'bt_exp',nf_double,0,0,rhid(j))
       scalval(j)=nf_put_att_text(ncid,rhid(j),'units',len(field_units),
      &           field_units)
@@ -509,6 +513,22 @@ c
      &            rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'def',
      &           len('exp der. of a/Lti'),'exp der. of a/Lti')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'chie_exp',nf_double,1,
+     &            rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'def',
+     &           len('exp chie (m^2/s)'),'exp chie (m^2/s)')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'chii_exp',nf_double,1,
+     &            rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'def',
+     &           len('exp chii (m^2/s)'),'exp chie (m^2/s)')
+      j=j+1
+      oneval(j) = nf_def_var (ncid,'cgyrobohm_exp',nf_double,1,
+     &            rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     &          len('exp gb diffusivity m^2/s'),
+     &          'exp gb diffusivity m^2/s')
       j=j+1
       oneval(j)=nf_def_var(ncid,'flow_exp',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
@@ -1056,7 +1076,7 @@ c
      &          len('electron neo thermal diffusivity m^2/s'),
      &          'electron neo thermal diffusivity m^2/s')
       j=j+1
-      oneval(j) = nf_def_var (ncid,'chie_etg_m',nf_double,1,rdim,
+      oneval(j) = nf_def_var (ncid,'chie_e_m',nf_double,1,rdim,
      &            rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
      &          len('electron high-k thermal diffusivity m^2/s'),
@@ -1486,6 +1506,8 @@ c      write(*,*) 'txval = ',txval,txid
       j=j+1
       scalval(j) = nf_put_var_double(ncid, rhid(j), amin_d)
       j=j+1
+      scalval(j) = nf_put_var_double(ncid, rhid(j), arho_exp)
+      j=j+1
       scalval(j) = nf_put_var_double(ncid, rhid(j), bt_exp)
       j=j+1
       scalval(j) = nf_put_var_double(ncid, rhid(j), tocur_d/1.D6)
@@ -1692,6 +1714,13 @@ c
       oneval(j) = nf_put_var_double(ncid, rhid1(j), zpte2_exp)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), zpti2_exp)
+c
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), chie_exp)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), chii_exp)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), cgyrobohm_exp)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), flow_exp)
       j=j+1

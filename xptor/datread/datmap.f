@@ -221,7 +221,7 @@ c
       do j=2,nj_d    
         drm=r_d(j)-r_d(j-1)
         dvoldr_p=2.D0*pi_m*r_d(j)*2.D0*pi_m*rmajor_d*hcap_d(j)
-c        write(*,'(i2,2x,0pf10.5,1p2e12.4)')j,rho_d(j),r_d(j),hcap_d(j)
+c        write(*,'(i2,2x,0pf10.5,1p2e12.4)')j,rho_d(j),r_d(j),qbeame_d(j)
         dvoldr_m=2.D0*pi_m*r_d(j-1)*2.D0*pi_m*rmajor_d*hcap_d(j-1)
         vol_exp(j-1)=vol_exp(j-2)+
      >       0.5D0*(dvoldr_p+dvoldr_m)*drm
