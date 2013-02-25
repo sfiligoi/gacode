@@ -97,11 +97,11 @@ c      include 'mpif.h'
 c
       integer iproc,mxgrid,idat, nrmax, ntmax, n1d, n2d, n3d, nur
 c
-      parameter(nrmax=301) !max number of radial points in experimental grid
-      parameter(ntmax=3800) !max number of time points in experimental grid
-      parameter(n1d=13)   !number of 1d fields read;
+      parameter(nrmax=301)  !max number of radial points in experimental grid
+      parameter(ntmax=5800) !max number of time points in experimental grid
+      parameter(n1d=13)     !number of 1d fields read;
       parameter(n2d=48) 
-      parameter(n3d=6)   !number of fields read for experimental data
+      parameter(n3d=6)      !number of fields read for experimental data
 c      include '../inc/ut.m'  ! need ntmax defined first
 c
       character*6 u0phase
@@ -156,6 +156,8 @@ c
       real*8 pxp(nrmax),par(nrmax,501)
       real*8 u1d(n1d),u2d(nrmax,n2d),u1d_int(ntmax)
       real*8 u3dx(nrmax,n3d),u3dy(nrmax,n3d)
+c
+      save u1d, u2d
 c
       data fields1d/'AMIN   ','BT     ','DELTA  ','INDENT ',
      .	'IP     ','KAPPA  ','LI     ','Q95    ','RGEO   ',
@@ -235,6 +237,7 @@ c
       if(shot(1:is).eq.'58159') idat=0
       if(shot(1:is).eq.'58323') idat=0
       if(shot(1:is).eq.'60933') idat=0
+      if(shot(1:is).eq.'101381') idat=0
 c
 c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
 c... Loop over the 2d files first:
@@ -413,7 +416,7 @@ c interpolate to the time of interest
             enddo 
           endif
          else
-           if(i.eq.1 .and. iproc.eq.0) write(6,65)
+           if(i.eq.1 .and. iproc.eq.0) write(*,65)
            do j=1,ntmax
              u1d_t(j,i) = 0.D0
            enddo
@@ -434,14 +437,16 @@ c                 u1d(i) = u1d_t(j,i)
          endif
          if(ierr.eq.1) then
 	    continue
-            if (iproc.eq.0) write(6,57) ierr,ufile
+            if (iproc.eq.0) write(*,57) ierr,ufile
             u1d(i)=0.D0
          else if(ierr.eq.2) then
             if(iproc.eq.0) write(*,*) 'array dimensions 
      &                      incompatible, i = ',i
             stop
          endif
+         if (iproc.eq.0) write(*,*) i, u1d(i)
       enddo
+c
 c---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
 c Finally, read the 0D data:
 c
@@ -619,6 +624,35 @@ c        write(*,*) 'q95_0d = ',q95_0d
           read(u0values(157),*) wth_0d
           read(u0values(158),*) wtot_0d
         endif
+c new TFTR ufiles (Budny 3/12, e.g. 50911B01)
+        if(idatzero.eq.4) then
+          read(u0values(62),*) apgasa
+          read(u0values(63),*) apgasz
+          read(u0values(123),1010) apimpa
+          read(u0values(124),1010) apimpz
+          read(u0values(64),*) abgasa
+          read(u0values(65),*) abgasz
+          u0phase = u0values(13)
+          read(u0values(40),*) rgeo_0d
+          read(u0values(42),*) rmin_0d
+          read(u0values(15),*) bt_0d
+          read(u0values(16),*) ip_0d
+          read(u0values(52),*) kap_0d
+          read(u0values(55),*) delt_0d
+          read(u0values(109),*) nebar_0d
+          read(u0values(73),*) pnbi_0d
+          read(u0values(139),*) pich_0d
+          read(u0values(151),*) pech_0d
+          read(u0values(91),*) ti0_0d
+          read(u0values(88),*) te0_0d
+c          read(u0values(109),*) q0_0d
+          read(u0values(100),*) q95_0d
+          read(u0values(30),*) gtauth_exp
+          read(u0values(29),*) gtautot_exp
+          read(u0values(19),*) wth_0d
+          read(u0values(25),*) wtot_0d
+        endif
+c
         ip_0d=ip_0d/1.D6
         nebar_0d=nebar_0d/1.D19
         pnbi_0d=pnbi_0d/1.D6

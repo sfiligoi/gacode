@@ -70,7 +70,7 @@ c 9-14-99 added integer array mask_r(0:50)
 c   put nstk_s before mprint in common block
 c---------------------------------------------------------------------
       integer jmaxmt, kmaxmt, stkmax, icalleimx,nspecies
-      parameter (jmaxmt=300, kmaxmt=3800, stkmax=1, icalleimx=100)
+      parameter (jmaxmt=300, kmaxmt=5800, stkmax=1, icalleimx=100)
       parameter (nspecies=3)
       complex*16 xi
 c..301x2001 elements
@@ -93,7 +93,7 @@ c..301x2001 elements
       real*8 chie_t(0:jmaxmt,0:kmaxmt), chii_t(0:jmaxmt,0:kmaxmt)
       real*8 pech_t(0:jmaxmt,0:kmaxmt)
       real*8 powe_t(0:jmaxmt,0:kmaxmt), powi_t(0:jmaxmt,0:kmaxmt)
-c..3801 elements
+c..5801 elements
       real*8 time_t(0:kmaxmt), pechtot_t(0:kmaxmt)
       real*8 powe_exp_t(0:kmaxmt), powi_exp_t(0:kmaxmt)
       real*8 powewdot_exp_t(0:kmaxmt), powiwdot_exp_t(0:kmaxmt)
