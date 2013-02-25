@@ -97,11 +97,11 @@ c      include 'mpif.h'
 c
       integer iproc,mxgrid,idat, nrmax, ntmax, n1d, n2d, n3d, nur
 c
-      parameter(nrmax=301) !max number of radial points in experimental grid
-      parameter(ntmax=3800) !max number of time points in experimental grid
-      parameter(n1d=13)   !number of 1d fields read;
+      parameter(nrmax=301)  !max number of radial points in experimental grid
+      parameter(ntmax=5800) !max number of time points in experimental grid
+      parameter(n1d=13)     !number of 1d fields read;
       parameter(n2d=48) 
-      parameter(n3d=6)   !number of fields read for experimental data
+      parameter(n3d=6)      !number of fields read for experimental data
 c      include '../inc/ut.m'  ! need ntmax defined first
 c
       character*6 u0phase
