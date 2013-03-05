@@ -1016,25 +1016,38 @@ c
         kpol_m(0)=kpol_m(1)
       endif
 c
+      if(ineo.eq.-4.and.jm.le.jin_m)then
+c skip neoclassical fluxes
+        neflux_neo = 0.0
+        niflux_neo = 0.0
+        nzflux_neo = 0.0
+        teflux_neo = 0.0
+        tiflux_neo = 0.0
+        tzflux_neo = 0.0
+        vphiflux_neo = 0.0
+        vphizflux_neo = 0.0
+      else
+c
 c compute neoclassical fluxes
 c
-       neflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*
+         neflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*
      >     (neo_pflux_dke_out(1)+neo_pflux_gv_out(1))
-       niflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*
+         niflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*
      >     (neo_pflux_dke_out(2)+neo_pflux_gv_out(2))
-       teflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*T0*
+         teflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*T0*
      >     (neo_efluxtot_dke_out(1)+neo_efluxtot_gv_out(1))
-       tiflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*T0*
+         tiflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*T0*
      >     (neo_efluxtot_dke_out(2)+neo_efluxtot_gv_out(2))
-       vphiflux_neo = -sign_It_exp*drhodr(jm)*(1.6726D-8)*
+         vphiflux_neo = -sign_It_exp*drhodr(jm)*(1.6726D-8)*
      > m0*n0*a0*v0*v0*(neo_mflux_dke_out(2)+neo_mflux_gv_out(2))
-       if(neo_n_species_in.gt.2)then
-         nzflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*
+         if(neo_n_species_in.gt.2)then
+           nzflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*
      >     (neo_pflux_dke_out(3)+neo_pflux_gv_out(3))
-         tzflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*T0*
+           tzflux_neo = drhodr(jm)*(1.6022D-3)*n0*v0*T0*
      >     (neo_efluxtot_dke_out(3)+neo_efluxtot_gv_out(3))
-         vphizflux_neo = -sign_It_exp*drhodr(jm)*(1.6726D-8)*
+           vphizflux_neo = -sign_It_exp*drhodr(jm)*(1.6726D-8)*
      >   m0*n0*a0*v0*v0*(neo_mflux_dke_out(3)+neo_mflux_gv_out(3))
+        endif
       endif
 c      
       RETURN
@@ -1669,11 +1682,16 @@ c
 c
       real*8 art_diff
       real*8 ctorm,grad_c_tor,gradvphim
+      real*8 diff_adhoc,chie_adhoc,chii_adhoc,eta_tor_adhoc
 c
       diffnem = 0.0
       chietem = 0.0
       chiitim = 0.0
       etaphim = 0.0
+      diff_adhoc = ABS(diff_exp(jm))
+      chie_adhoc = ABS(chie_exp(jm))
+      chii_adhoc = ABS(chii_exp(jm))
+      eta_tor_adhoc = ABS(eta_tor_exp(jm))
 c
 c add in artificial diffusion terms
 c
@@ -1699,18 +1717,18 @@ c          chiitim = chiitim + chiineo_m(jm)
 c
       if(ineo.eq.-3.and.interchange_DR_m(jm).lt.0.0)then
 c use simple model for interchange mode fluxes
-        diffnem = diffnem + diff_exp(jm)*drhodr(jm)*drhodr(jm)
-        chietem = chietem + chie_exp(jm)*drhodr(jm)*drhodr(jm)
-        chiitim = chiitim + chii_exp(jm)*drhodr(jm)*drhodr(jm)
-        etaphim = etaphim + eta_tor_exp(jm)*drhodr(jm)*drhodr(jm)
+        diffnem = diffnem + diff_adhoc*drhodr(jm)*drhodr(jm)
+        chietem = chietem + chie_adhoc*drhodr(jm)*drhodr(jm)
+        chiitim = chiitim + chii_adhoc*drhodr(jm)*drhodr(jm)
+        etaphim = etaphim + eta_tor_adhoc*drhodr(jm)*drhodr(jm)
       endif
 c
       if(ineo.eq.-4.and.jm.le.jin_m)then
 c use experimental diffusivities near the magnetic axis
-        diffnem = diffnem + diff_exp(jm)*drhodr(jm)*drhodr(jm)
-        chietem = chietem + chie_exp(jm)*drhodr(jm)*drhodr(jm)
-        chiitim = chiitim + chii_exp(jm)*drhodr(jm)*drhodr(jm)
-        etaphim = etaphim + eta_tor_exp(jm)*drhodr(jm)*drhodr(jm)
+        diffnem = diffnem + diff_adhoc*drhodr(jm)*drhodr(jm)
+        chietem = chietem + chie_adhoc*drhodr(jm)*drhodr(jm)
+        chiitim = chiitim + chii_adhoc*drhodr(jm)*drhodr(jm)
+        etaphim = etaphim + eta_tor_adhoc*drhodr(jm)*drhodr(jm)
       endif
 c
         neflux_adhoc = -1.6022D-3*diffnem*gradnem
