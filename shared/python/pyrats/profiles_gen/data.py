@@ -184,17 +184,17 @@ class profiles_genData:
         tot = []
         theta = 0
         dtheta = 0.01
-        x = self.match(r, self.data['rho (-)'])
+        x = self.match(r, self.data['rho'])
         while theta < 2 * math.pi:
-            a = float(self.data['rmaj (m)'][x]) + float(self.data['rmin (m)'][x])*math.cos(theta + math.asin(float(self.data['delta (-)'][x])) * math.sin(theta))
+            a = float(self.data['rmaj'][x]) + float(self.data['rmin'][x])*math.cos(theta + math.asin(float(self.data['delta'][x])) * math.sin(theta))
             R.append(a)
-            b = float(self.data['zmag (m)'][x]) + float(self.data['kappa (-)'][x])*float(self.data['rmin (m)'][x])*math.sin(theta + float(self.data['zeta (-)'][x])*math.sin(2 * theta))
+            b = float(self.data['zmag'][x]) + float(self.data['kappa'][x])*float(self.data['rmin'][x])*math.sin(theta + float(self.data['zeta'][x])*math.sin(2 * theta))
             Z.append(b)
             theta = theta + dtheta
         tot.append(R)
         tot.append(Z)
-        tot.append(self.data['rmaj (m)'][x])
-        tot.append(self.data['zmag (m)'][x])
+        tot.append(self.data['rmaj'][x])
+        tot.append(self.data['zmag'][x])
         return tot
 
     def compute_fouriereq(self, r):
@@ -210,7 +210,7 @@ class profiles_genData:
         tot = []      
         theta = 0
         dtheta = 0.01
-        x = self.match(r, self.data['rho (-)'])
+        x = self.match(r, self.data['rho'])
         while theta < 2 * math.pi:
             tempr = []
             tempz = []
@@ -224,8 +224,8 @@ class profiles_genData:
             theta = theta + dtheta
         tot.append(R)
         tot.append(Z)
-        tot.append(self.data['rmaj (m)'][x])
-        tot.append(self.data['zmag (m)'][x])
+        tot.append(self.data['rmaj'][x])
+        tot.append(self.data['zmag'][x])
         return tot
 
     #-------------------------------------------- #
@@ -262,16 +262,16 @@ class profiles_genData:
         ax.axhline(c='k', ls='--')
         #Increments through from min to max and creates plots at each
         #radius.
-        inc = self.match(inner, self.data['rho (-)'])
-        step = (self.match(outer, self.data['rho (-)']) - inc)/n
+        inc = self.match(inner, self.data['rho'])
+        step = (self.match(outer, self.data['rho']) - inc)/n
         count = 0
-        while inc < self.match(outer, self.data['rho (-)']):
-            mteq.append(self.compute_mtypeeq(float(self.data['rho (-)'][inc])))
+        while inc < self.match(outer, self.data['rho']):
+            mteq.append(self.compute_mtypeeq(float(self.data['rho'][inc])))
             r = mteq[0][0]
             z = mteq[0][1]
             rmaj = float(mteq[0][2])
             zmag = float(mteq.pop()[3])
-            ax.plot(r, z, 'b', label='Miller surface at '+str(self.data['rho (-)'][inc]))
+            ax.plot(r, z, 'b', label='Miller surface at '+str(self.data['rho'][inc]))
             count = count + math.modf(step)[0]
             if count > 1:
                 count = math.modf(count)[0]
@@ -280,9 +280,9 @@ class profiles_genData:
                 inc = inc + math.modf(step)[1]
         #Sets limits, just as above.
         if n == 1:
-            ax.set_title(u'Flux Surface at \u03c1 = ' + str(self.data['rho (-)'][self.match(inner, self.data['rho (-)'])]))
-            ax.axhline(y=self.get('zmag (m)')[self.match(inner,self.get('rho (-)'))], c='m')
-            ax.axvline(x=self.get('rmaj (m)')[self.match(inner, self.get('rho (-)'))], c='m')
+            ax.set_title(u'Flux Surface at \u03c1 = ' + str(self.data['rho'][self.match(inner, self.data['rho'])]))
+            ax.axhline(y=self.get('zmag')[self.match(inner,self.get('rho'))], c='m')
+            ax.axvline(x=self.get('rmaj')[self.match(inner, self.get('rho'))], c='m')
             ax.legend( ('Midplane', 'Miller-type', 'Flux surface center'), loc=2,bbox_to_anchor=(1,1))
         elif verbose:
             ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(inner) + u' and \u03c1 = ' + str(outer) + '.')
@@ -320,16 +320,16 @@ class profiles_genData:
         ax.set_ylabel('Z (m)')
         ax.set_xlabel('R (m)')
         ax.axhline(c='k', ls='--')
-        inc = self.match(inner, self.data['rho (-)'])
-        step = (self.match(outer, self.data['rho (-)']) - inc)/n
+        inc = self.match(inner, self.data['rho'])
+        step = (self.match(outer, self.data['rho']) - inc)/n
         count = 0
-        while inc < self.match(outer, self.data['rho (-)']):
-            feq.append(self.compute_fouriereq(float(self.data['rho (-)'][inc])))
+        while inc < self.match(outer, self.data['rho']):
+            feq.append(self.compute_fouriereq(float(self.data['rho'][inc])))
             r = feq[0][0]
             z = feq[0][1]
             rmaj = float(feq[0][2])
             zmag = float(feq.pop()[3])
-            lines.append(ax.plot(r, z, 'r', label='Fourier surface at '+str(self.data['rho (-)'][inc])))
+            lines.append(ax.plot(r, z, 'r', label='Fourier surface at '+str(self.data['rho'][inc])))
             count = count + math.modf(step)[0]
             if count > 1:
                 count = math.modf(count)[0]
@@ -337,9 +337,9 @@ class profiles_genData:
             else:
                 inc = inc + math.modf(step)[1]
         if n == 1:
-            ax.set_title(u'Flux Surface at \u03c1 = ' + str(self.data['rho (-)'][self.match(inner, self.data['rho (-)'])]))
-            ax.axhline(y=self.get('zmag (m)')[self.match(inner,self.get('rho (-)'))], c='m')
-            ax.axvline(x=self.get('rmaj (m)')[self.match(inner, self.get('rho (-)'))], c='m')
+            ax.set_title(u'Flux Surface at \u03c1 = ' + str(self.data['rho'][self.match(inner, self.data['rho'])]))
+            ax.axhline(y=self.get('zmag')[self.match(inner,self.get('rho'))], c='m')
+            ax.axvline(x=self.get('rmaj')[self.match(inner, self.get('rho'))], c='m')
             ax.legend( ('Midplane', 'Fourier-type', 'Flux surface center'), loc=2,bbox_to_anchor=(1,1))
         elif verbose:
             ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(inner) + u' and \u03c1 = ' + str(outer) + '.')
@@ -379,20 +379,20 @@ class profiles_genData:
         ax.set_ylabel('Z (m)')
         ax.set_xlabel('R (m)')
         ax.axhline(c='k', ls='--')
-        inc = self.match(inner, self.data['rho (-)'])
-        step = (self.match(outer, self.data['rho (-)']) - inc)/n
+        inc = self.match(inner, self.data['rho'])
+        step = (self.match(outer, self.data['rho']) - inc)/n
         count = 0
-        while inc < self.match(outer, self.data['rho (-)']):
-            feq.append(self.compute_fouriereq(float(self.data['rho (-)'][inc])))
+        while inc < self.match(outer, self.data['rho']):
+            feq.append(self.compute_fouriereq(float(self.data['rho'][inc])))
             fr = feq[0][0]
             fz = feq.pop()[1]
-            ax.plot(fr, fz, 'r', label='Fourier surface at '+str(self.data['rho (-)'][inc]))
-            mteq.append(self.compute_mtypeeq(float(self.data['rho (-)'][inc])))
+            ax.plot(fr, fz, 'r', label='Fourier surface at '+str(self.data['rho'][inc]))
+            mteq.append(self.compute_mtypeeq(float(self.data['rho'][inc])))
             mr = mteq[0][0]
             mz = mteq[0][1]
             rmaj = float(mteq[0][2])
             zmag = float(mteq.pop()[3])
-            ax.plot(mr, mz, 'b', label='Miller surface at '+str(self.data['rho (-)'][inc]))
+            ax.plot(mr, mz, 'b', label='Miller surface at '+str(self.data['rho'][inc]))
             count = count + math.modf(step)[0]
             if count > 1:
                 count = math.modf(count)[0]
@@ -400,9 +400,9 @@ class profiles_genData:
             else:
                 inc = inc + math.modf(step)[1]
         if n == 1:
-            ax.set_title(u'Flux Surface at \u03c1 = ' + str(self.data['rho (-)'][self.match(inner, self.data['rho (-)'])]))
-            ax.axhline(y=self.get('zmag (m)')[self.match(inner,self.get('rho (-)'))], c='m')
-            ax.axvline(x=self.get('rmaj (m)')[self.match(inner, self.get('rho (-)'))], c='m')
+            ax.set_title(u'Flux Surface at \u03c1 = ' + str(self.data['rho'][self.match(inner, self.data['rho'])]))
+            ax.axhline(y=self.get('zmag')[self.match(inner,self.get('rho'))], c='m')
+            ax.axvline(x=self.get('rmaj')[self.match(inner, self.get('rho'))], c='m')
             ax.legend( ('Midplane', 'Fourier-type', 'Miller-type', 'Flux surface center'), loc=2,bbox_to_anchor=(1,1))
         elif verbose:
             ax.set_title(str(int(n)) + u' Flux Surfaces between \u03c1 = ' + str(inner) + u' and \u03c1 = ' + str(outer) + '.')

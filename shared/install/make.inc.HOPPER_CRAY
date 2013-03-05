@@ -19,7 +19,7 @@ CORES_PER_NODE=24
 NUMAS_PER_NODE=4
 
 # SLEPC_LIB and other environment variables are defined in:
-include ${SLEPC_DIR}/conf/slepc_common_variables
+#include ${SLEPC_DIR}/conf/slepc_common_variables
 
 # Compilers and flags
 
@@ -30,7 +30,8 @@ FOMP   =
 FMATH  = -s real64
 FOPT   = -O3 -hfp3
 FDEBUG = -eD -Ktrap=fp -m 1
-FPETSC = ${FC_LINKER_FLAGS} ${FC_INCLUDES} ${SLEPC_LIB}
+#FPETSC = ${FC_LINKER_FLAGS} ${FC_INCLUDES} ${SLEPC_LIB}
+FPETSC = 
 
 # System math libraries
 

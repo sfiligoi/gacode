@@ -284,6 +284,7 @@ module tgyro_globals
   real :: tgyro_input_w0_scale
   real :: tgyro_input_paux_scale
   integer :: tgyro_er_bc
+  integer :: tgyro_noturb_flag
   !
   ! Iteration variables (global)
   !

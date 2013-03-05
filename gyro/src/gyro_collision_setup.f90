@@ -313,13 +313,13 @@ real function irbf(a,x0,s)
   integer, intent(in) :: s
   real :: a1,a2
 
-  if (a > 0.0) then
-     a1 = a**2*asinh((x0+1.0)/sqrt(a))  
-     a2 = a**2*asinh((x0-1.0)/sqrt(a))
-  else
+!  if (a > 0.0) then
+!     a1 = a**2*asinh((x0+1.0)/sqrt(a))  
+!     a2 = a**2*asinh((x0-1.0)/sqrt(a))
+!  else
      a1 = 0.0
      a2 = 0.0
-  endif
+!  endif
 
   if (s == 3) then
      irbf = (15*x0*a1+sqrt(x0**2+2*x0+a+1.0) &

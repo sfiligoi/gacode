@@ -219,6 +219,10 @@ subroutine tgyro_flux
 
      endif
 
+  case (4)
+
+      ! No fluxes (tgyro_noturb_flag=1)
+
   case default
 
      call tgyro_catch_error('ERROR: no matching flux method.')

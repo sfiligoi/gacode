@@ -81,7 +81,11 @@ subroutine tgyro_iteration_driver
   !----------------------------------------------
   ! Choose flux_method based on path information.
   !
-  if (lpath(1:3) == "IFS") then
+  if (tgyro_noturb_flag == 1) then
+
+    flux_method = 4
+
+  else if (lpath(1:3) == "IFS") then
 
      ! IFS-PPPL
      flux_method = 1

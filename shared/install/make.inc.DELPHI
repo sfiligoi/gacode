@@ -4,23 +4,22 @@
 # (even in your .login file on VENUS)
 #---------------------------------------------------
 
-FC	= $(F77) -module $(GACODE_ROOT)/modules -mp
+FC	= mpif90 -module $(GACODE_ROOT)/modules
 F77	= mpif90
 
+FOMP    = -mp
 FMATH	= -r8 
 FOPT	= -fastsse
 FDEBUG	= -g -Ktrap=fp -Mbounds -Minform,inform
-FBOUND	= -Minform,inform -Mbounds
 
 # System math libraries
 
-ROOT=/u/candy/local_software
+LMATH=/opt/pgi/linux86-64/12.10/lib/liblapack.a \
+      /opt/pgi/linux86-64/12.10/lib/libblas.a
 
-LMATH=/opt/pgi/linux86-64/11.10/lib/liblapack.a \
-      /opt/pgi/linux86-64/11.10/lib/libblas.a
+# NetCDF
 
-# OPTIONAL: netCDF (for gyro2gkv)
-
+ROOT   = /u/candy/local_software
 NETCDF = $(ROOT)/netcdf/lib/libnetcdf.a
 NETCDF_INC = $(ROOT)/netcdf/include
 
