@@ -39,8 +39,6 @@ EXPROMAKE=${GACODE_ROOT}/shared/profiles_gen/exprotools/expromake
 ASTRA=${GACODE_ROOT}/shared/profiles_gen/astra/astra2gyro.py
 # - ASTRA default map file
 ASTRAMAP=${GACODE_ROOT}/shared/profiles_gen/astra/astra_map_gyro
-# - TRANSP converter
-TRANSP=${GACODE_ROOT}/shared/profiles_gen/transp/transp2gyro.py
 #=============================================================
 
 #=============================================================
@@ -211,32 +209,6 @@ then
    echo "             -vgen_x <ion index>" 
    echo "             Index of ion species to match NEO and given velocities."
    echo
-   echo "TRANSP MODE"
-   echo
-   echo "             -transp"
-   echo "             Generate data from TRANSP servers via prompt."
-   echo
-   echo "             -tok <TRANSP tokamak name>"
-   echo "             TRANSP machine identification, eg ITER."
-   echo
-   echo "             -year <shot year>"
-   echo "             Two-digit year of the experimental shot, eg 07."
-   echo
-   echo "             -shot <TRANSP shot id>"
-   echo "             Examine this TRANSP run listing, eg 123456A01."
-   echo
-   echo "             -time <time of interest>"
-   echo "             Specify time of interest in ms."
-   echo
-   echo "             -avg <smoothing time>"
-   echo "             Smooth data over interval in ms."
-   echo
-   echo "             -trout <TRANSP output directory>"
-   echo "             Specify a non-default directory name for transp2gyro output."
-   echo
-   echo "             -trhelp"
-   echo "             Detailed help message on transp2gyro."
-   echo
    echo "LOCAL PARAMETER MODE"
    echo 
    echo "             -loc_rad <r/a>"
@@ -316,7 +288,6 @@ G_FLAG=0
 GATO_DPSISL=0.0
 VERBOSE_FLAG=0
 ORDER_FLAG=0
-TRANSP_FLAG=0
 GMERGE_FLAG=0
 
 #GATO variables
@@ -385,20 +356,19 @@ while [ $# -gt 0 ] ; do
   -n) shift ; ASTRA_ARG="$ASTRA_ARG -n $1" ;;
 
   -cer) shift ; 
-        echo "INFO: (profiles_gen) Will merge data from $CER_FILE" ; 
-        CER_FILE="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-cer;$1" ;;
+        echo "INFO: (profiles_gen) Will merge data from $CER_FILE" ; CER_FILE="$1" ;;
    
-  -g) shift ; G_FLAG=1 ; GFILE="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-g;$1" ;;
+  -g) shift ; G_FLAG=1 ; GFILE="$1" ;;
 
-  -gato) shift ; GATO_ARGS="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-gato_dpsisl;$1" ;;
+  -gato) shift ; GATO_ARGS="$1" ;;
 
-  -V) shift ; VERBOSE_FLAG=1 ; ITERDB_ARGS="${ITERDB_ARGS};-V";;
+  -V) shift ; VERBOSE_FLAG=1 ;;
 
-  -nogq) shift ; NOGQ_FLAG=1 ; ITERDB_ARGS="${ITERDB_ARGS};-nogq";;
+  -nogq) shift ; NOGQ_FLAG=1 ;;
 
-  -r) shift ; ORDER="$1" ; ORDER_FLAG=1 ; ITERDB_ARGS="${ITERDB_ARGS};-r;$1";;
+  -r) shift ; ORDER="$1" ; ORDER_FLAG=1 ;;
 
-  -ver) shift ; VERSION="$1" ; ITERDB_ARGS="${ITERDB_ARGS};-ver;$1";;
+  -ver) shift ; VERSION="$1" ;;
 
   -vgen) VGEN_FLAG=1 ;;
 
@@ -411,22 +381,6 @@ while [ $# -gt 0 ] ; do
   -vgen_x) shift ; VGEN_X=$1 ;;
 
   -t) shift ; UFILETIME="$1" ;;
-
-  -transp) TRANSP_FLAG=1 ;;
-
-  -tok) shift ; TRANSP_FLAG=1 ; TRANSP_ARGS="$TRANSP_ARGS -k $1" ;;
-
-  -year) shift ; TRANSP_FLAG=1 ; TRANSP_ARGS="$TRANSP_ARGS -y $1" ;;
-
-  -shot) shift ; TRANSP_FLAG=1 ; TRANSP_ARGS="$TRANSP_ARGS --shot $1" ;;
-
-  -time) shift ; TRANSP_FLAG=1 ; TRANSP_ARGS="$TRANSP_ARGS --time $1" ;;
-
-  -avg) shift ; TRANSP_FLAG=1 ; TRANSP_ARGS="$TRANSP_ARGS -a $1" ;;
-
-  -trout) shift ; TRANSP_FLAG=1 ; TRANSP_ARGS="$TRANSP_ARGS -o $1" ;;
-
-  -trhelp) TRANSP_FLAG=1 ; TRANSP_ARGS="$TRANSP_ARGS -h" ;;
   
   -create) CREATE_FLAG=1 ;;
    
@@ -461,21 +415,6 @@ fi
 SIMDIR=$SIMROOT/$LOCDIR
 
 cd $SIMDIR
-
-#=============================================================
-# Call transp2gyro if specified and pass it the iterdb args
-# for later
-if [ $TRANSP_FLAG -eq 1 ] 
-then
-   # Run transp2gyro
-   if [ ${ITERDB_ARGS} ]
-   then
-       TRANSP_ARGS="${TRANSP_ARGS} --iterdb $ITERDB_ARGS"
-   fi
-   $PYTHON_COMMAND $TRANSP $TRANSP_ARGS
-   exit 0
-fi
-#=============================================================
 
 #=============================================================
 # Manage CREATE MODE
