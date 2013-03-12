@@ -10,7 +10,7 @@
 !  1. ONETWO iterdb text (no extenstion)  
 !  2. ONETWO iterdb NetCDF (*.nc)
 !  3. PEQDSK text (*.peq)
-!  4. PLASMA STATE NetCDF (*.cdf)
+!  4. PLASMA STATE NetCDF (*.cdf, *.CDF)
 !  5. CORSICA text (*.corsica)
 !  6. UFILE text (UFILE)
 !
@@ -76,7 +76,7 @@ program prgen
 
      call prgen_read_iterdb_nc
 
-  else if (index(raw_data_file,'.cdf') /= 0) then
+  else if (index(raw_data_file,'.cdf') /= 0 .or. index(raw_data_file,'.CDF') /= 0) then
 
      ! Plasmastate format
      print '(a)','INFO: (prgen) Assuming plasma_state format.'

@@ -67,6 +67,12 @@ subroutine tgyro_init_profiles
 
      enddo
   endif
+
+  if (tgyro_use_rho == 1) then
+     ! Using equally-spaced rho grid, not default r grid.  This is 
+     ! useful for benchmarking with other codes.
+     rho = r
+  endif
   !----------------------------------------------
 
   !----------------------------------------------
@@ -100,7 +106,13 @@ subroutine tgyro_init_profiles
   !------------------------------------------------------------------------------------------
   ! Direct input of simple profiles:
   !
-  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_rho(:),n_exp,r,rho,n_r)
+  if (tgyro_use_rho == 1) then
+     ! Equally-spaced in rho
+     call cub_spline(EXPRO_rho(:),EXPRO_rmin(:)/r_min,n_exp,rho,r,n_r)
+  else  
+     ! Equally-spaced in r (default)
+     call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_rho(:),n_exp,r,rho,n_r)
+  endif
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_q(:),n_exp,r,q,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_s(:),n_exp,r,s,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_kappa(:),n_exp,r,kappa,n_r)
