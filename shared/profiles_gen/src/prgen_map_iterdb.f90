@@ -198,31 +198,6 @@ subroutine prgen_map_iterdb
   endif
   !---------------------------------------------------
 
-  ! Additional transport power breakdown
-  if (n_indx2 == 15) then
-
-     allocate(vec2(n_indx2,onetwo_nj))
-     vec2(:,:) = 0.0
-
-     vec2(1,:) = powe_beam_exp(:)
-     vec2(2,:) = powe_RF_exp(:)
-     vec2(3,:) = powe_oh_exp(:)
-     vec2(4,:) = powe_rad_exp(:)
-     vec2(5,:) = powe_ion_exp(:)
-     vec2(6,:) = powe_wdot_exp(:)
-     vec2(7,:) = powe_fus_exp(:)
-     vec2(8,:) = pow_e(:)      !net transport power in electrons
-     vec2(9,:) = pow_ei_exp(:)    !electron to ion energy exchange
-     vec2(10,:) = pow_i(:)     !net transport power in ions
-     vec2(11,:) = powi_beam_exp(:)
-     vec2(12,:) = powi_ion_exp(:)
-     vec2(13,:) = powi_wdot_exp(:)
-     vec2(14,:) = powi_fus_exp(:)
-     vec2(15,:) = powi_cx_exp(:)
-
-  endif
-  !---------------------------------------------------------
-
   ion_name(1:onetwo_nprim) = onetwo_namep(1:onetwo_nprim)
 
   n0 = onetwo_nprim

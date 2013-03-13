@@ -104,9 +104,11 @@ class profiles_genData:
         self.data['vpol_4'] = data[7*n:8*n,3]
         self.data['vpol_5'] = data[7*n:8*n,4]
 
+        data = np.loadtxt(infile+'.extra')
+ 
         try:
-            data = np.loadtxt(infile+'.extra')
-            x = data.reshape((n,37), order='F')
+            data = np.loadtxt(infile+'.extra',comments='#')
+            x = data.reshape((n,35), order='F')
 
             self.data['bunit']     = x[0:n,0]
             self.data['s']         = x[0:n,1]

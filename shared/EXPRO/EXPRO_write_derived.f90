@@ -14,6 +14,39 @@ subroutine EXPRO_write_derived
 
   open(unit=io,file=trim(path)//'input.profiles.extra',status='replace')
 
+  write(io,*) '# input.profiles.extra'
+  write(io,*) '#'
+  write(io,*) '# 01 EXPRO_bunit(:)       B_unit (T)'
+  write(io,*) '# 02 EXPRO_s(:)           (r/q)(dq/dr)'
+  write(io,*) '# 03 EXPRO_drmaj(:)       dR_0/dr'
+  write(io,*) '# 04 EXPRO_dzmag(:)       dZ_0/dr'
+  write(io,*) '# 05 EXPRO_sdelta(:)      r d(delta)/dr'
+  write(io,*) '# 06 EXPRO_skappa(:)      (r/kappa) d(kappa)/dr'
+  write(io,*) '# 07 EXPRO_szeta(:)       r d(zeta)/dr'
+  write(io,*) '# 08 EXPRO_dlnnedr(:)     -dln(ne)/dr (1/m)'
+  write(io,*) '# 09 EXPRO_dlntedr(:)     -dln(Te)/dr (1/m)'
+  write(io,*) '# 10-14 EXPRO_dlnnidr(1:5,:) -dln(ni)/dr (1/m)'
+  write(io,*) '# 15-19 EXPRO_dlntidr(1:5,:) -dln(ti)/dr (1/m)'
+  write(io,*) '# 20  EXPR0_dlnptotdr(:)   -dln(ptot)/dr (1/m)'
+  write(io,*) '# 21  EXPRO_w0p(:)         d(w0)/dr (1/s/m)'
+  write(io,*) '# 22  EXPRO_vol(:)         V (m^3)'
+  write(io,*) '# 23  EXPRO_volp(:)        dV/dr (m^2)'
+  write(io,*) '# 24  EXPRO_cs(:)          cs (m/s)'
+  write(io,*) '# 25  EXPRO_rhos(:)        rhos (m)'
+  write(io,*) '# 26  EXPRO_ni_new(:)      ni [Corrected for quasin.]'
+  write(io,*) '# 27  EXPRO_dlnnidr_new(:) -dln(ni)/dr (1/m) [Corrected for quasin.]' 
+  write(io,*) '# 28  EXPRO_grad_r0(:)     |grad r| at theta=0 '
+  write(io,*) '# 29  EXPRO_ave_grad_r(:)  Flux-surface average <|grad r|>' 
+  write(io,*) '# 30  EXPRO_drdrho(:)      dr/d(rho) [r and rho have units of length]'
+  write(io,*) '# 31  EXPRO_bp0(:)         B_pol at theta=0 (T)'
+  write(io,*) '# 32  EXPRO_bt0(:)         B_tor at theta=0 (T)'
+  write(io,*) '# 33  EXPRO_gamma_e(:)     r/q d(w0)/dr (1/s)'
+  write(io,*) '# 34  EXPRO_gamma_p(:)     R_0 d(w0)/dr (1/s)'
+  write(io,*) '# 35  EXPRO_mach(:)        R_0 w0/cs'
+  write(io,*) '#'
+  write(io,'(t2,a,i3)') '# Each vector has length ',EXPRO_n_exp
+  write(io,*) '#'
+
   write(io,10) EXPRO_bunit(:)    ! 1
   write(io,10) EXPRO_s(:)        ! 2
   write(io,10) EXPRO_drmaj(:)    ! 3

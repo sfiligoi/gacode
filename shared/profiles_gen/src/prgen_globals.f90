@@ -15,8 +15,6 @@ module prgen_globals
   !
   integer :: nx
   integer :: n_indx
-  integer :: n_indx2
-  integer :: extra_powers_flag = 0
   integer :: format_type
   integer :: gato_flag
   integer :: nogatoq_flag

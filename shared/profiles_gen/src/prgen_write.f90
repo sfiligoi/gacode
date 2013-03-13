@@ -121,38 +121,39 @@ subroutine prgen_write
   write(1,20) '#'
   !---------------------------------------------------------------
 
-  write(1,20) '# '
-  if (nx > 99) then
-     write(1,30) 'N_EXP=',nx
-  else
-     write(1,25) 'N_EXP=',nx
-  endif
 
-  select case (format_type)
+ EXPRO_n_exp = nx
+
+ select case (format_type)
 
   case (0)
-     write(1,'(a,sp,1pe14.7)') 'BT_EXP=',null_bref
-     write(1,60) 'ARHO_EXP=',null_arho
+     EXPRO_b_ref = null_bref
+     EXPRO_arho  = null_arho
   case (1)
-     write(1,'(a,sp,1pe14.7)') 'BT_EXP=',-onetwo_Btor
-     write(1,60) 'ARHO_EXP=',onetwo_rho_grid(onetwo_nj)
+     EXPRO_b_ref = -onetwo_Btor
+     EXPRO_arho  = onetwo_rho_grid(onetwo_nj)
   case (2)
-     write(1,'(a,sp,1pe14.7)') 'BT_EXP=',plst_b_axis_vac*(-plst_kccw_bphi)
-     write(1,60) 'ARHO_EXP=',sqrt(plst_phit(nx)/plst_b_axis_vac/pi)
+     EXPRO_b_ref = plst_b_axis_vac*(-plst_kccw_bphi)
+     EXPRO_arho  = sqrt(plst_phit(nx)/plst_b_axis_vac/pi)
   case (3)
-     write(1,'(a,sp,1pe14.7)') 'BT_EXP=',peqdsk_bref
-     write(1,60) 'ARHO_EXP=',peqdsk_arho
+     EXPRO_b_ref = peqdsk_bref
+     EXPRO_arho  = peqdsk_arho
   case (5)
-     write(1,'(a,sp,1pe14.7)') 'BT_EXP=',corsica_bref
-     write(1,60) 'ARHO_EXP=',corsica_arho
+     EXPRO_b_ref = corsica_bref
+     EXPRO_arho  = corsica_arho
   case (6)
-     write(1,'(a,sp,1pe14.7)') 'BT_EXP=',ufile_bref
-     write(1,60) 'ARHO_EXP=',ufile_arho
-  case (7)
-     write(1,'(a,sp,1pe14.7)') 'BT_EXP=',EXPRO_b_ref
-     write(1,60) 'ARHO_EXP=',EXPRO_arho
-
+     EXPRO_b_ref = ufile_bref
+     EXPRO_arho  = ufile_arho
   end select
+
+  write(1,20) '# '
+  if (EXPRO_n_exp > 99) then
+     write(1,30) 'N_EXP=',EXPRO_n_exp
+  else
+     write(1,25) 'N_EXP=',EXPRO_n_exp
+  endif
+  write(1,'(a,sp,1pe14.7)') 'BT_EXP=',EXPRO_b_ref
+  write(1,60) 'ARHO_EXP=',EXPRO_arho
 
   do indx=1,n_indx,5
 
@@ -164,25 +165,60 @@ subroutine prgen_write
 
   enddo
 
-  !----------------------------------------------------------------------
-  ! Extra transport powers 
-  !
-  if (extra_powers_flag == 1) then
-
-     do indx=1,n_indx2,5
-
-        write(1,20) '# '
-        write(1,20) '#',EXPRO_tag2(indx:indx+4)
-        do i=1,nx
-           write(1,10) vec2(indx:indx+4,i)
-        enddo
-
-     enddo
-
-  endif
-  !-----------------------------------------------------------------------
-
   close(1)
+
+  !-----------------------------------------------------------------------------------
+  ! Define EXPRO interface variables, then compute and write derived quantities:
+  !
+  call EXPRO_alloc('./',1)
+
+  EXPRO_rho(:)   = vec(1,:)
+  EXPRO_rmin(:)  = vec(2,:)
+  EXPRO_rmaj(:)  = vec(3,:)
+  EXPRO_q(:)     = vec(4,:)
+  EXPRO_kappa(:) = vec(5,:)
+
+  EXPRO_delta(:) = vec(6,:)
+  EXPRO_te(:)    = vec(7,:)
+  EXPRO_ne(:)    = vec(8,:)
+  EXPRO_z_eff(:) = vec(9,:)
+  EXPRO_w0(:)    = vec(10,:)
+
+  EXPRO_flow_mom(:) = vec(11,:)
+  EXPRO_pow_e(:)    = vec(12,:)
+  EXPRO_pow_i(:)    = vec(13,:)
+  EXPRO_pow_ei(:)   = vec(14,:)
+  EXPRO_zeta(:)     = vec(15,:)
+
+  EXPRO_flow_beam(:) = vec(16,:)
+  EXPRO_flow_wall(:) = vec(17,:)
+  EXPRO_zmag(:)      = vec(18,:)
+  EXPRO_ptot(:)      = vec(19,:)
+  EXPRO_poloidalfluxover2pi(:) = vec(20,:)
+
+  EXPRO_ni(1:5,:) = vec(21:25,:)
+
+  EXPRO_ti(1:5,:) = vec(26:30,:)
+
+  EXPRO_vtor(1:5,:) = vec(31:35,:)
+
+  EXPRO_vpol(1:5,:) = vec(36:40,:)
+
+  EXPRO_ctrl_density_method=0
+  EXPRO_ctrl_z(1) = 1.0 
+  if (gato_flag == 1) then
+     EXPRO_ctrl_numeq_flag = 1
+  else
+     EXPRO_ctrl_numeq_flag = 0
+  endif
+  EXPRO_ctrl_signq = 1.0
+  EXPRO_ctrl_signb = 1.0
+  EXPRO_ctrl_rotation_method = 1
+
+  call EXPRO_compute_derived
+  call EXPRO_write_derived
+  call EXPRO_alloc('./',0)
+  !-----------------------------------------------------------------------------------
 
 10 format(5(1pe14.7,2x))
 20 format(30(a))

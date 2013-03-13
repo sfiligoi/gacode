@@ -109,6 +109,9 @@ subroutine EXPRO_compute_derived
   ! 1/L_Te = -dln(Te)/dr (1/m)
   call bound_deriv(EXPRO_dlntedr,-log(EXPRO_te),EXPRO_rmin,EXPRO_n_exp)
 
+  EXPRO_dlnnidr = 0.0
+  EXPRO_dlntidr = 0.0
+
   do is=1,nion_max
      if (minval(EXPRO_ni(is,:)) > 0.0) then
         ! 1/L_ni = -dln(ni)/dr (1/m)
@@ -291,9 +294,10 @@ subroutine EXPRO_compute_derived
   if (EXPRO_ctrl_z(4) /= 0.0) n_ion=4
   if (EXPRO_ctrl_z(5) /= 0.0) n_ion=5
 
+  EXPRO_ni_new(:) = 0.0
+
   if (EXPRO_ctrl_density_method == 2) then
 
-     EXPRO_ni_new(:) = 0.0
      do is=2,n_ion
         EXPRO_ni_new(:) = EXPRO_ni_new(:)+EXPRO_ctrl_z(is)*EXPRO_ni(is,:)
      enddo
