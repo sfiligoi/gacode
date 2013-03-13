@@ -16,7 +16,7 @@ FHDF5   = -DHAVE_HDF5
 
 # System math libraries (from Ubuntu repository)
 
-LMATH = /usr/lib64/liblapack.so.3 /usr/lib64/libblas.so.3
+LMATH = /home/SOFTWARE/OpenBLAS/libopenblas.a
 
 # OPTIONAL NetCDF:
 NETCDF=-L/usr/local/lib -lnetcdff -lnetcdf -lm -lz -lcurl
