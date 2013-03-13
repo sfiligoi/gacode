@@ -294,10 +294,9 @@ subroutine EXPRO_compute_derived
   if (EXPRO_ctrl_z(4) /= 0.0) n_ion=4
   if (EXPRO_ctrl_z(5) /= 0.0) n_ion=5
 
-  EXPRO_ni_new(:) = 0.0
-
   if (EXPRO_ctrl_density_method == 2) then
 
+     EXPRO_ni_new(:) = 0.0
      do is=2,n_ion
         EXPRO_ni_new(:) = EXPRO_ni_new(:)+EXPRO_ctrl_z(is)*EXPRO_ni(is,:)
      enddo
@@ -311,7 +310,13 @@ subroutine EXPRO_compute_derived
         EXPRO_error = 1
      endif
 
+  else
+
+     EXPRO_ni_new(:) = EXPRO_ni(1,:)
+     EXPRO_dlnnidr_new(:) = EXPRO_dlnnidr(1,:)
+
   endif
+
 
   deallocate(dummy)
 

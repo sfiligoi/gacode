@@ -17,7 +17,7 @@ subroutine EXPRO_alloc_control(i_proc,flag)
      if (i_proc == 0 .and. EXPRO_n_exp == 0) then
 
         !--------------------------------------------------------------
-        ! Read number of experimental gridpoints:
+        ! Read input.profiles.gen if it exists and EXPRO_n_exp not set
         ! 
         open(unit=io,&
              file=trim(path)//'input.profiles.gen',&
@@ -41,8 +41,12 @@ subroutine EXPRO_alloc_control(i_proc,flag)
         endif
         !--------------------------------------------------------------
 
+     endif
+
+     if (i_proc == 0) then
+
         !--------------------------------------------------------------
-        ! Read number of experimental gridpoints:
+        ! Read geometry Fourier harmonics
         ! 
         open(unit=io,&
              file=trim(path)//'input.profiles.geo',&
@@ -53,6 +57,7 @@ subroutine EXPRO_alloc_control(i_proc,flag)
            EXPRO_nfourier = -1
            close(io)
         else
+           call EXPRO_skip_header(io)
            read(io,*) EXPRO_nfourier
            close(io)
            open(unit=io,file=trim(path)//trim(runfile),status='replace')

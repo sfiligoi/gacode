@@ -161,6 +161,17 @@ subroutine prgen_read_gato
   enddo
 
   open(unit=1,file='input.profiles.geo',status='replace')
+  write(1,'(a)') '# input.profiles.geo'
+  write(1,'(a)') '#'
+  write(1,'(a)') '# See https://fusion.gat.com/theory/input.profiles.geo for complete documentation.'
+  write(1,'(a)') '#'
+  write(1,'(a)') '# File format:'
+  write(1,'(a)') '#-------------------'
+  write(1,'(a)') '# nfourier'
+  write(1,'(a)') '# a[4,0:nfourier,nx]'  
+  write(1,'(a)') '#-------------------'
+  write(1,'(a)') '#'
+  write(1,'(a)') '# NOTE: nx=EXPRO_n_exp is defined in input.profiles'
   write(1,*) nfourier
   write(1,'(1pe20.13)') g3rho(:,:,:)
   close(1)
