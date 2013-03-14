@@ -7,6 +7,7 @@ else
 endif
 
 EXEC = prgen
+EXEC2 = fluxfit_exec
 
 OBJECTS = prgen_globals.o \
           prgen_fluxfit_globals.o \
@@ -41,13 +42,17 @@ OBJECTS = prgen_globals.o \
           fluxfit_minmax.o \
           fluxfit_fourier.o \
           fluxfit_error.o \
-          fluxfit_f_model.o \
-          $(EXEC).o
+          fluxfit_f_model.o 
 
 .SUFFIXES : .o .f90
 
-exec: $(OBJECTS)
-	$(FC) $(FMATH) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS)
+all: $(EXEC) $(EXEC2)
+
+$(EXEC): $(OBJECTS) $(EXEC).o
+	$(FC) $(FMATH) $(FFLAGS) -o $(EXEC) $(EXEC).o $(OBJECTS) $(EXTRA_LIBS)
+
+$(EXEC2): $(OBJECTS) $(EXEC2).o
+	$(FC) $(FMATH) $(FFLAGS) -o $(EXEC2) $(EXEC2).o $(OBJECTS) $(EXTRA_LIBS)
 
 .f90.o :
 	$(FC) $(FMATH) $(FFLAGS) -I $(NETCDF_INC) -c $<

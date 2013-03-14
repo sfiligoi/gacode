@@ -218,7 +218,7 @@ subroutine prgen_write
   EXPRO_ctrl_signb = 1.0
   EXPRO_ctrl_rotation_method = 1
 
-  call EXPRO_read_geo
+  if (gato_flag == 1) call EXPRO_read_geo
   call EXPRO_compute_derived
   call EXPRO_write_derived
   call EXPRO_alloc('./',0)
