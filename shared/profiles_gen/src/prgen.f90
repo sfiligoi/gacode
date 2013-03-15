@@ -138,6 +138,7 @@ program prgen
   ! the output.
   !
   if (gato_flag == 1) call prgen_read_gato
+!  if (gato_flag == 1) call prgen_read_omfit
   !---------------------------------------------------
 
   select case (format_type)
