@@ -2,7 +2,8 @@
 ! prgen_read_omfit.f90
 !
 ! PURPOSE:
-!  Read data from OMFIT fitter
+!  Read data from OMFIT flux-surface mapper and fit to 
+!  geometry coefficients.
 !----------------------------------------------------------
 
 subroutine prgen_read_omfit
@@ -13,38 +14,34 @@ subroutine prgen_read_omfit
 
   integer :: i,i1,i2
   integer :: ip
-
-  !========================================
-  integer :: nsurf
-  integer, dimension(:), allocatable :: narc
+  integer :: ntot
+  character (len=1) :: a
+  integer, dimension(:), allocatable :: narcv
   real, dimension(:), allocatable :: r_raw,z_raw,l_raw
   real, dimension(:,:), allocatable :: r2,z2
   real, dimension(:), allocatable :: psi
-  character (len=1) :: a
-
-  integer :: j1,j2
-  integer :: ntot
-  !========================================
-
   real, dimension(:,:), allocatable :: gvec
   real, dimension(:,:,:), allocatable :: g3vec
   real, dimension(:,:,:), allocatable :: g3rho
 
-  open(unit=1,file='g128913.01500',status='old')
+  ! Get the gfile header
+  open(unit=1,file='gfile',status='old')
   read(1,'(a)') efit_header
   close(1) 
 
-  !=========================================================================
-  open(unit=1,file='f128913.01500')
+  ! Read the OMFIT mapper file
+  open(unit=1,file='ffile',status='old')
 
   do i=1,6
      read(1,*) a
   enddo
   read(1,*) nsurf
-  allocate(narc(nsurf))
-  read(1,*) narc(:)
+  allocate(narcv(nsurf))
+  read(1,*) narcv(:)
 
-  ntot = sum(narc)
+  ntot = sum(narcv)
+
+  narc = narcv(1)
 
   allocate(psi(nsurf))
   allocate(r_raw(ntot))
@@ -58,7 +55,6 @@ subroutine prgen_read_omfit
   close(1)
 
   psi(:) = psi(:)-psi(1)
-  !=========================================================================
 
   !----------------------------------------------------
   ! Get Miller-style (model shape) coefficients using 
@@ -71,21 +67,22 @@ subroutine prgen_read_omfit
   ! 5  delta
   ! 6  zeta
 
-  ! When verbose_flag=1, fluxfit will echo lots of data
-  allocate(r2(narc(1),nsurf))
-  allocate(z2(narc(1),nsurf))
+  allocate(r2(narc,nsurf))
+  allocate(z2(narc,nsurf))
   
   do i=1,nsurf
      if (i == 1) then
         i1 = 1
      else
-        i1 = sum(narc(1:(i-1)))+1
+        i1 = sum(narcv(1:(i-1)))+1
      endif
-     i2 = sum(narc(1:i))
+     i2 = sum(narcv(1:i))
      r2(:,i) = r_raw(i1:i2)
      z2(:,i) = z_raw(i1:i2)
   enddo
-  call fluxfit_driver(1,1,nsurf,narc(1),r2,z2,verbose_flag)
+
+  ! When verbose_flag=1, fluxfit will echo lots of data
+  call fluxfit_driver(1,1,nsurf,narc,r2,z2,verbose_flag)
 
   allocate(gvec(6,nsurf))
 
@@ -117,8 +114,13 @@ subroutine prgen_read_omfit
      dpsi(nx) = dpsi_gato 
   endif
 
+  ! Explicitly set rmin=0 at origin
+  gvec(1,1) = 0.0
+
   ! Map shape coefficients onto poloidal flux (dpsi) grid:
-  call cub_spline(psi,gvec(1,:),nsurf,dpsi,rmin,nx)
+  call cub_spline(psi,gvec(1,:)**2,nsurf,dpsi,rmin,nx)
+  ! Want to spline r^2 since its linear in psi
+  rmin = sqrt(rmin)
   call cub_spline(psi,gvec(2,:),nsurf,dpsi,zmag,nx)
   call cub_spline(psi,gvec(3,:),nsurf,dpsi,rmaj,nx)
   call cub_spline(psi,gvec(4,:),nsurf,dpsi,kappa,nx)
@@ -135,7 +137,7 @@ subroutine prgen_read_omfit
   ! Get general geometry coefficients
   !
   ! When verbose_flag=1, fluxfit will echo lots of data
-  call fluxfit_driver(2,nfourier,nsurf,narc(1),r2,z2,verbose_flag)
+  call fluxfit_driver(2,nfourier,nsurf,narc,r2,z2,verbose_flag)
 
   allocate(g3vec(4,0:nfourier,nsurf))
   allocate(g3rho(4,0:nfourier,nx))
@@ -178,5 +180,10 @@ subroutine prgen_read_omfit
   deallocate(g3rho)
   deallocate(r2)
   deallocate(z2)
+  deallocate(r_raw)
+  deallocate(z_raw)
+  deallocate(l_raw)
+  deallocate(narcv)
+  deallocate(psi)
 
 end subroutine prgen_read_omfit

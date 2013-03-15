@@ -16,7 +16,7 @@ module prgen_globals
   integer :: nx
   integer :: n_indx
   integer :: format_type
-  integer :: gato_flag
+  integer :: efit_method
   integer :: nogatoq_flag
   integer :: verbose_flag
   real :: pfile_z2
@@ -213,8 +213,8 @@ module prgen_globals
   !--------------------------------------------------------
   ! Some GATO variables
   !
-  integer :: gato_npsi
-  integer :: gato_ntheta
+  integer :: nsurf
+  integer :: narc
   !--------------------------------------------------------
 
   !---------------------------------------------------------

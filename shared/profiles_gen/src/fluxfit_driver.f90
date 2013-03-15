@@ -109,8 +109,6 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
      rd(:) = rd_in(:,j)
      zd(:) = zd_in(:,j)
 
-     print *,rd(1),rd(nd)
-
      ! Find the centroid (z_c,r_c)
 
      call fluxfit_moments(rd,zd,nd,s)

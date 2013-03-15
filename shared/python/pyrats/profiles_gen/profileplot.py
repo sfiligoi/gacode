@@ -57,7 +57,7 @@ for j in range(n):
         ax.grid(which="majorminor",ls=":")
         ax.grid(which="major",ls=":")
 
-    ax.plot(x,prof.data[fulltag],label=r'$'+tag+'$')
+    ax.plot(x,prof.data[fulltag],'o-',label=r'$'+tag+'$')
 
 ax.legend(loc=1)
 plt.show()

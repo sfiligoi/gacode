@@ -92,12 +92,12 @@ subroutine prgen_write
   !---------------------------------------------------------------
   ! High-resolution geometry
   !
-  if (gato_flag == 1) then
+  if (efit_method > 0) then
      write(1,20) '# * An associated input.profiles.geo was also generated'
      write(1,20) '#'
      write(1,40) '#             NFOURIER : ',nfourier
-     write(1,40) '#            GATO NPSI : ',gato_npsi
-     write(1,40) '#          GATO NTHETA : ',gato_ntheta
+     write(1,40) '#                NSURF : ',nsurf
+     write(1,40) '#                 NARC : ',narc
      write(1,20) '#            EFIT HEADER ... '
      write(1,20) '#'
      write(1,20) '#',efit_header
@@ -125,9 +125,9 @@ subroutine prgen_write
   !---------------------------------------------------------------
 
 
- EXPRO_n_exp = nx
+  EXPRO_n_exp = nx
 
- select case (format_type)
+  select case (format_type)
 
   case (0)
      EXPRO_b_ref = null_bref
@@ -209,16 +209,16 @@ subroutine prgen_write
 
   EXPRO_ctrl_density_method=1
   EXPRO_ctrl_z(1) = 1.0 
-  if (gato_flag == 1) then
-     EXPRO_ctrl_numeq_flag = 1
-  else
-     EXPRO_ctrl_numeq_flag = 0
-  endif
   EXPRO_ctrl_signq = 1.0
   EXPRO_ctrl_signb = 1.0
   EXPRO_ctrl_rotation_method = 1
+  if (efit_method > 0) then
+     EXPRO_ctrl_numeq_flag = 1
+     call EXPRO_read_geo
+  else
+     EXPRO_ctrl_numeq_flag = 0
+  endif
 
-  if (gato_flag == 1) call EXPRO_read_geo
   call EXPRO_compute_derived
   call EXPRO_write_derived
   call EXPRO_alloc('./',0)

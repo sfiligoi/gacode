@@ -29,6 +29,9 @@ VGEN_EXE=${GACODE_ROOT}/neo/tools/vgen
 EXEC=${GACODE_ROOT}/shared/profiles_gen/src/prgen
 # - GATO executable
 GATO=${GACODE_ROOT}/gato/gato
+# - OMFIT script
+OMFIT_ROOT=${GACODE_ROOT}/../OMFIT
+OMFIT="${OMFIT_ROOT}/src/omfit.py ${OMFIT_ROOT}/scripts/fluxSurfaceTracer.py"
 # - locpargen executable
 LOCPARGEN=${GACODE_ROOT}/shared/profiles_gen/locpargen/locpargen
 # - exprodump executable
@@ -171,12 +174,10 @@ then
    echo "              dpsidl=0.0   [DEFINE]"    
    echo "              npfit=150    [DEFINE]"   
    echo
-   echo "             -Z1 <ion1 charge>"
-   echo "             Default: 1 (Hydrogen isotope)"
-   echo "             -Z2 <ion2 charge>"
-   echo "             Default: 6 (Carbon)"
-   echo "             -Z3 <ion3 charge>"
-   echo "             Default: 2 (Helium)"
+   echo "OMFIT mapper control options"
+   echo 
+   echo "             -omfit"
+   echo "             Toggle OMFIT mapper instead of default GATO mapper."
    echo
    echo "GFILE MERGE MODE"
    echo
@@ -220,7 +221,12 @@ then
    echo "             -loc_psi <psi_N>"
    echo "             Reference psi_N=psi/psi(a)"
    echo
-   echo "      NOTE: control ion charges with Z1,Z2,Z3 as in GATO options"
+   echo "             -Z1 <ion1 charge>"
+   echo "             Default: 1 (Hydrogen isotope)"
+   echo "             -Z2 <ion2 charge>"
+   echo "             Default: 6 (Carbon)"
+   echo "             -Z3 <ion3 charge>"
+   echo "             Default: 2 (Helium)"
    echo
    echo "DUMP MODE"
    echo 
@@ -236,7 +242,7 @@ then
    echo "              <arg>=rho:  rho=sqrt[chi/chi(a)] is first column. [DEFAULT]"
    echo "              <arg>=psi:  psi_N=psi/psi(a) is first column."
    echo
-   echo "      NOTE: control ion charges with Z1,Z2,Z3 as in GATO options"
+   echo "      NOTE: control ion charges with Z1,Z2,Z3 as in LOCAL PARAMETER MODE."
    echo
    echo "PROFILE CREATION MODE"
    echo 
@@ -293,6 +299,9 @@ GMERGE_FLAG=0
 #GATO variables
 NOGQ_FLAG=0
 GATO_ARGS=
+
+#OMFIT mapper variables
+OMFIT_FLAG=0
 
 # CER file 
 CER_FILE=null
@@ -362,9 +371,11 @@ while [ $# -gt 0 ] ; do
 
   -gato) shift ; GATO_ARGS="$1" ;;
 
-  -V) shift ; VERBOSE_FLAG=1 ;;
+  -omfit) OMFIT_FLAG=1 ;;
 
-  -nogq) shift ; NOGQ_FLAG=1 ;;
+  -V) VERBOSE_FLAG=1 ;;
+
+  -nogq) NOGQ_FLAG=1 ;;
 
   -r) shift ; ORDER="$1" ; ORDER_FLAG=1 ;;
 
@@ -635,6 +646,8 @@ fi
 #=============================================================
 # Construct prgen input file ($CONFIG)
 #
+EFIT_METHOD=$(($G_FLAG+$OMFIT_FLAG+1))
+
 date > $CONFIG
 
 # Required data file (ITERDB, PLASMASTATE, etc)
@@ -643,8 +656,8 @@ echo $FILE >> $CONFIG
 # Optional CER file
 echo $CER_FILE >> $CONFIG
 
-# EFIT G-file
-echo $G_FLAG >> $CONFIG
+# EFIT method (1=none, 2=GATO, 3=OMFIT)
+echo $EFIT_METHOD >> $CONFIG
 
 # Don't use gato q (-nogq) flag
 echo $NOGQ_FLAG >> $CONFIG
@@ -662,9 +675,11 @@ echo $GMERGE_FLAG >> $CONFIG
 #=============================================================
 
 #==============================================================
-# Run GATO here
+# Run GATO/OMFIT here
 #
-if [ $G_FLAG -eq 1 ]
+
+# Use GATO:
+if [ $EFIT_METHOD -eq 2 ]
 then
    if [ ! -f $GATO ]
    then
@@ -803,6 +818,13 @@ then
       echo 'INFO: (gato) Success.'
    fi
 fi
+
+# Use OMFIT:
+if [ $EFIT_METHOD -eq 3 ]
+then
+   cp $GFILE gfile
+   python $OMFIT -l 128 -u 128 -r 0.001 gfile ffile >& out.omfit
+fi
 #==============================================================
 
 #==============================================================
@@ -836,7 +858,7 @@ if [ -f "success" ]
 then
    if [ $G_FLAG -eq 1 ]
    then
-      echo "INFO: (profiles_gen) Fluxfit used to compute shape parameters from GATO mapping."
+      echo "INFO: (profiles_gen) Fluxfit used to compute shape parameters from EFIT mapping."
       echo "DONE: (profiles_gen) Successfully wrote: input.profiles, input.profiles.geo."
    else
       echo "DONE: (profiles_gen) Successfully wrote: input.profiles." 
@@ -853,12 +875,13 @@ fi
 #  Remove configuration files, output files, etc.
 rm -f egta eqgta nova.*
 #  Remove stale files
-rm -f out.gato.* input.gato.*
+rm -f out.gato.* input.gato.* out.omfit
 
 if [ $VERBOSE_FLAG -eq 0 ]
 then
    rm -f $CONFIG fluxfit.* ingta o1gta grid.dat success
-   rm -f *.ave out.com out.dim out.ufile.log
+   rm -f *.ave out.com out.dim out.ufile.log 
+   rm -f gfile ffile out.expro.run
 else
    if [ -f "ingta" ] ; then 
       mv ingta input.gato.ingta
@@ -868,6 +891,9 @@ else
    fi
    if [ -f "grid.dat" ] ; then
       mv grid.dat out.gato.grid
+   fi
+   if [ -f "ffile" ] ; then
+      mv ffile out.omfit.mapper
    fi
 fi
 #==============================================================
