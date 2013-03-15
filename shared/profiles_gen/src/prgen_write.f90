@@ -103,11 +103,11 @@ subroutine prgen_write
      write(1,20) '#',efit_header
      write(1,20) '#'
      if (format_type > 0 .and. format_type < 6) then
-        if (abs(dpsi_gato/dpsi_data-1) > 0.001) then
+        if (abs(dpsi_efit/dpsi_data-1) > 0.001) then
            write(1,'(a,1pe9.2,a)') &
-                '# ** WARNING ** Psi-shrinkage factor : ',dpsi_gato/dpsi_data-1.0  
+                '# ** WARNING ** Psi-shrinkage factor : ',dpsi_efit/dpsi_data-1.0  
         else
-           write(1,'(a,1pe9.2,a)') '# Psi-shrinkage factor : ',dpsi_gato/dpsi_data-1.0 
+           write(1,'(a,1pe9.2,a)') '# Psi-shrinkage factor : ',dpsi_efit/dpsi_data-1.0 
         endif
      endif
   endif

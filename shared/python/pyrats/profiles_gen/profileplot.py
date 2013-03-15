@@ -9,6 +9,7 @@ from pyrats.profiles_gen.data import profiles_genData
 rvar    = sys.argv[1]
 infiles = sys.argv[2]
 plots   = sys.argv[3]
+ftype   = sys.argv[4]
 
 plotvec = string.splitfields(plots,',')
 filevec = string.splitfields(infiles,',')
@@ -57,7 +58,12 @@ for j in range(n):
         ax.grid(which="majorminor",ls=":")
         ax.grid(which="major",ls=":")
 
-    ax.plot(x,prof.data[fulltag],'o-',label=r'$'+tag+'$')
+    ax.plot(x,prof.data[fulltag],'o-',label=r'$\mathrm{'+tag+'}$')
 
 ax.legend(loc=1)
-plt.show()
+
+if ftype == 'screen':
+    plt.show()
+else:
+    outfile = key+'.'+ftype
+    plt.savefig(outfile)

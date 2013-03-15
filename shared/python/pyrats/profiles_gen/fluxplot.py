@@ -1,63 +1,73 @@
 import sys
 import string
-import matplotlib.pyplot as plt
-from math import *
+import numpy as np
+from gacodeplotdefs import *
 from pyrats.profiles_gen.data import profiles_genData
 
-verbose = False
+# Number of theta-points for plotting
+narc = 128
 
-filevec = string.splitfields(sys.argv[1],',')
-prof    = profiles_genData(filevec[0])
+infiles = sys.argv[1]
+surf    = sys.argv[2]
+n       = int(sys.argv[3])
+ftype  = sys.argv[4]
 
-try:
-    m1 = float(sys.argv[2])
-except ValueError:
-    print "ERROR: " + sys.argv[2] + " is not a valid number."
-    sys.exit()
+filevec = string.splitfields(infiles,',')
 
-if m1 > 1.0 or m1 < 0.0:
-    print u'ERROR: \u03c1 out of bounds.'
-    sys.exit()
+# Support only one input.profiles file
+prof = profiles_genData(filevec[0])
 
-try:
-    m2 = float(sys.argv[3])
-except ValueError:
-    print "ERROR: " + m2 + " is not a valid number."
-    sys.exit()
+fig = plt.figure(figsize=(8,12))
+ax = fig.add_subplot(111,aspect='equal')
+ax.set_xlabel(r'$R$')
+ax.set_ylabel(r'$Z$')
 
-if m2 > 1.0 or m2 < 0.0:
-    print u'ERROR: \u03c1 out of bounds.'
-    sys.exit()
+t = 2*np.pi*np.arange(0,narc)/float(narc-1)
 
-try:
-    n = int(sys.argv[4])
-except ValueError:
-    print "ERROR: " + n + " is not a valid number."
-    sys.exit()
+if surf == 'miller' or surf == 'both':
+    # Miller geometry flux-surfaces
+    for i in range(prof.n_exp):
+        bigr = prof.data['rmaj'][i]  
+        bigz = prof.data['zmag'][i]  
+        r    = prof.data['rmin'][i]
+        d    = prof.data['delta'][i]
+        k    = prof.data['kappa'][i]
+        z    = prof.data['zeta'][i]
 
-minr = min(m1, m2)
-maxr = max(m1, m2)
+        x = bigr+r*np.cos(t+np.arcsin(d)*np.sin(t))
+        y = bigz+k*r*np.sin(t+z*np.sin(2*t))
 
-if minr == maxr:
-    print "ERROR: Radius interval must be greater than zero."
-    sys.exit()
+        if i == 0:
+            ax.plot(x,y,'-k',linewidth=1,label=r'$\mathrm{Miller}$')
+        else:
+            ax.plot(x,y,'-k',linewidth=1)
 
-maxn = prof.match(maxr,prof.get('rho'))-prof.match(minr,prof.get('rho'))
 
-if maxn == 0:
-    print "ERROR: No flux surfaces in given interval."
-    sys.exit()
+if surf == 'fourier' or surf == 'both':
+    # Fourier geometry flux-surfaces 
+    for i in range(prof.n_exp):
+        a0r = prof.geo['ar'][0,i]
+        a0z = prof.geo['az'][0,i]
 
-if maxn < n:
-    print "Warning: Maximum number of flux surfaces for this interval"
-    print "is " + str(maxn) + ".  Changing n to " + str(maxn) + "."
-    n = maxn
+        x = a0r/2
+        y = a0z/2
 
-if int(sys.argv[5]) == 1:
-    prof.millerplot(minr, maxr, n, verbose)
-if int(sys.argv[5]) == 2:
-    prof.fourierplot(minr, maxr, n, verbose)
-if int(sys.argv[5]) == 3:
-    prof.compplot(minr, maxr, n, verbose)
+        for j in range(1,9,1):
+            ar = prof.geo['ar'][j,i]
+            br = prof.geo['br'][j,i]
+            az = prof.geo['az'][j,i]
+            bz = prof.geo['bz'][j,i]
+            x = x+ar*np.cos(j*t)+br*np.sin(j*t)
+            y = y+az*np.cos(j*t)+bz*np.sin(j*t)
 
-plt.show()
+        if i == 0:
+            ax.plot(x,y,'-b',linewidth=1,label=r'$\mathrm{Fourier}~8$')
+        else:
+            ax.plot(x,y,'-b',linewidth=1)
+
+ax.legend()
+if ftype == 'screen':
+    plt.show()
+else:
+    outfile = key+'.'+ftype
+    plt.savefig(outfile)

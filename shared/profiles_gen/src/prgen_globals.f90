@@ -23,7 +23,7 @@ module prgen_globals
   integer :: gmerge_flag
   character (len=70) :: efit_header
   integer, dimension(5) :: reorder_vec
-  real :: dpsi_gato
+  real :: dpsi_efit
   real :: dpsi_data
   real :: signpsi
   !----------------------------------------------------------

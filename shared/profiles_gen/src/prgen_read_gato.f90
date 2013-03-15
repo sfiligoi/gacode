@@ -20,6 +20,7 @@ subroutine prgen_read_gato
 
   integer :: i
   integer :: ip
+  real :: fa,fb
   real, dimension(:), allocatable :: gato_psi  
   real, dimension(:), allocatable :: gato_volume
   real, dimension(:), allocatable :: gato_dvoldpsi
@@ -74,6 +75,28 @@ subroutine prgen_read_gato
   close(1)
   !----------------------------------------------------
 
+  !----------------------------------------------------------------
+  ! Correct flux variation in profile data (ITERDB, etc) 
+  !
+  if (format_type == 0 .or. format_type == 7) then
+     ! Case 1: raw gfile mode ; dpsi is undefined
+     dpsi_data = gato_psi(nsurf)
+     dpsi_efit = gato_psi(nsurf)
+     do i=1,nx
+        dpsi(i) = (i-1)*dpsi_efit/(nx-1)
+     enddo
+  else
+     ! Case 2: typical case 
+     dpsi_data = dpsi(nx)
+     dpsi_efit = gato_psi(nsurf)
+
+     ! Ensure max(dpsi) = max(gato_psi) 
+     dpsi(:)  = dpsi(:)*dpsi_efit/dpsi_data
+     ! Extra insurance against roundoff
+     dpsi(nx) = dpsi_efit 
+  endif
+  !----------------------------------------------------------------
+
   !----------------------------------------------------
   ! Get Miller-style (model shape) coefficients using 
   ! fluxfit routines:
@@ -84,9 +107,9 @@ subroutine prgen_read_gato
   ! 4  kappa
   ! 5  delta
   ! 6  zeta
-
-  ! When verbose_flag=1, fluxfit will echo lots of data
+  !
   call fluxfit_driver(1,1,nsurf,narc,gato_bigr,gato_bigz,verbose_flag)
+  !
   allocate(gvec(6,0:nsurf))
 
   open(unit=1,file='fluxfit.profile',status='old')
@@ -94,33 +117,17 @@ subroutine prgen_read_gato
   read(1,*) gvec(:,1:nsurf)
   close(1)
 
-  ! Use linear interpolation to get values of 
-  ! shape parameters at origin
-  gvec(:,0) = (gato_psi(2)*gvec(:,1)-&
-       gato_psi(1)*gvec(:,2))/&
-       (gato_psi(2)-gato_psi(1))
+  ! Explicitly set rmin=0 at origin
+  gvec(1,0) = 0.0
 
-  ! Manage total flux variation 
-  if (format_type == 0 .or. format_type == 7) then
-     ! Case 1: raw gfile mode ; dpsi is undefined
-     dpsi_data = gato_psi(nsurf)
-     dpsi_gato = gato_psi(nsurf)
-     do i=1,nx
-        dpsi(i) = (i-1)*dpsi_gato/(nx-1)
-     enddo
-  else
-     ! Case 2: typical case 
-     dpsi_data = dpsi(nx)
-     dpsi_gato = gato_psi(nsurf)
-
-     ! Ensure max(dpsi) = max(gato_psi) 
-     dpsi(:)  = dpsi(:)*dpsi_gato/dpsi_data
-     ! Extra insurance against roundoff
-     dpsi(nx) = dpsi_gato 
-  endif
+  ! Use extrapolation to get values of shape parameters at origin
+  do i=2,6
+     call bound_extrap(fa,fb,gvec(i,:),gato_psi,nsurf+1)
+     gvec(i,0) = fa
+  enddo
 
   ! Map shape coefficients onto poloidal flux (dpsi) grid:
-  call cub_spline(gato_psi,gvec(1,:),nsurf+1,dpsi,rmin,nx)
+  call cub_spline(sqrt(gato_psi),gvec(1,:),nsurf+1,sqrt(dpsi),rmin,nx)
   call cub_spline(gato_psi,gvec(2,:),nsurf+1,dpsi,zmag,nx)
   call cub_spline(gato_psi,gvec(3,:),nsurf+1,dpsi,rmaj,nx)
   call cub_spline(gato_psi,gvec(4,:),nsurf+1,dpsi,kappa,nx)
@@ -136,7 +143,6 @@ subroutine prgen_read_gato
   !----------------------------------------------------
   ! Get general geometry coefficients
   !
-  ! When verbose_flag=1, fluxfit will echo lots of data
   call fluxfit_driver(2,nfourier,nsurf,narc,gato_bigr,gato_bigz,verbose_flag)
 
   allocate(g3vec(4,0:nfourier,0:nsurf))
@@ -147,18 +153,24 @@ subroutine prgen_read_gato
   read(1,*) g3vec(:,:,1:nsurf)
   close(1)
 
-  ! Use linear interpolation to get values of 
-  ! (general) shape parameters at origin
-  g3vec(:,:,0) = (gato_psi(2)*g3vec(:,:,1)-&
-       gato_psi(1)*g3vec(:,:,2))/(gato_psi(2)-gato_psi(1))
+  ! Explicitly set rmin=0 at origin
+  g3vec(:,1:nfourier,0) = 0.0
+
+  ! Extrapolate centers (R0,Z0) to origin
+  do i=1,4
+     call bound_extrap(fa,fb,g3vec(i,0,:),gato_psi,nsurf+1)
+     g3vec(i,0,0) = fa
+  enddo
 
   ! Map results onto poloidal flux (dpsi) grid:
   do i=1,4
      do ip=0,nfourier
-        call cub_spline(&
-             gato_psi,g3vec(i,ip,:),nsurf+1,dpsi,g3rho(i,ip,:),nx)
+        call cub_spline(gato_psi,g3vec(i,ip,:),nsurf+1,dpsi,g3rho(i,ip,:),nx)
      enddo
   enddo
+
+  ! Explicitly set rmin=0 at origin
+  g3rho(:,1:nfourier,1) = 0.0
 
   open(unit=1,file='input.profiles.geo',status='replace')
   write(1,'(a)') '# input.profiles.geo'
