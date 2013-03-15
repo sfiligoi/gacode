@@ -7,7 +7,6 @@ else
 endif
 
 EXEC = prgen
-EXEC2 = fluxfit_exec
 
 OBJECTS = prgen_globals.o \
           prgen_fluxfit_globals.o \
@@ -26,6 +25,7 @@ OBJECTS = prgen_globals.o \
 	  prgen_map_ufile.o \
 	  prgen_map_inputprofiles.o \
           prgen_read_cer.o \
+          prgen_read_omfit.o \
           prgen_read_gato.o \
           prgen_read_iterdb.o \
           prgen_read_iterdb_nc.o \
@@ -46,13 +46,10 @@ OBJECTS = prgen_globals.o \
 
 .SUFFIXES : .o .f90
 
-all: $(EXEC) $(EXEC2)
+all: $(EXEC)
 
 $(EXEC): $(OBJECTS) $(EXEC).o
 	$(FC) $(FMATH) $(FFLAGS) -o $(EXEC) $(EXEC).o $(OBJECTS) $(EXTRA_LIBS)
-
-$(EXEC2): $(OBJECTS) $(EXEC2).o
-	$(FC) $(FMATH) $(FFLAGS) -o $(EXEC2) $(EXEC2).o $(OBJECTS) $(EXTRA_LIBS)
 
 .f90.o :
 	$(FC) $(FMATH) $(FFLAGS) -I $(NETCDF_INC) -c $<
