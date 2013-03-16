@@ -85,5 +85,8 @@ subroutine prgen_map_inputprofiles
   vec(31:35,:) = EXPRO_vtor(1:5,:)
   vec(36:40,:) = EXPRO_vpol(1:5,:)
 
+  ! Deallocate arrays
+  call EXPRO_alloc('./',0)
+
 end subroutine prgen_map_inputprofiles
 

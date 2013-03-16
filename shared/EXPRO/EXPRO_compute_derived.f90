@@ -221,6 +221,12 @@ subroutine EXPRO_compute_derived
   !--------------------------------------------------------------
   ! Extrapolate some quantities to axis:
   !
+  call bound_extrap(fa,fb,EXPRO_grad_r0,EXPRO_rmin,EXPRO_n_exp)
+  EXPRO_grad_r0(1) = fa
+
+  call bound_extrap(fa,fb,EXPRO_ave_grad_r,EXPRO_rmin,EXPRO_n_exp)
+  EXPRO_ave_grad_r(1) = fa
+
   call bound_extrap(fa,fb,EXPRO_w0,EXPRO_rmin,EXPRO_n_exp)
   EXPRO_w0(1) = fa
 
@@ -316,7 +322,6 @@ subroutine EXPRO_compute_derived
      EXPRO_dlnnidr_new(:) = EXPRO_dlnnidr(1,:)
 
   endif
-
 
   deallocate(dummy)
 

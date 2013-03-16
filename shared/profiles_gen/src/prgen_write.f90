@@ -70,7 +70,7 @@ subroutine prgen_write
   case (7)
      write(1,40) '#          SHOT NUMBER : [DATA MODIFIED WITH GMERGE]'
      write(1,30) '#    RADIAL GRIDPOINTS : ',nx
-     write(1,'(a,1pe9.2,a)') '#               Q_EDGE : ',EXPRO_q(nx)
+     write(1,'(a,1pe9.2,a)') '#               Q_EDGE : ',q(nx)
      write(1,20) '#'
      write(1,'(10(a,1x))') '#                 IONS : ',trim(cer_file)
 
@@ -123,7 +123,6 @@ subroutine prgen_write
   write(1,'(a,1pe8.2,a)') '#  PLASMA MINOR RADIUS : ',rmin(nx),' m'
   write(1,20) '#'
   !---------------------------------------------------------------
-
 
   EXPRO_n_exp = nx
 
@@ -212,7 +211,7 @@ subroutine prgen_write
   EXPRO_ctrl_signq = 1.0
   EXPRO_ctrl_signb = 1.0
   EXPRO_ctrl_rotation_method = 1
-  if (efit_method > 0) then
+  if (efit_method > 1) then
      EXPRO_ctrl_numeq_flag = 1
      call EXPRO_read_geo
   else

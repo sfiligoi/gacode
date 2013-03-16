@@ -14,14 +14,13 @@ subroutine EXPRO_read_geo
 
   integer, parameter :: io=1
   integer :: i
-  integer :: ierr
 
   open(unit=io,&
        file=trim(path)//'input.profiles.geo',&
        status='old')
 
   call EXPRO_skip_header(io)
-  read(io,*) i
+  read(io,*) EXPRO_nfourier
   do i=1,EXPRO_n_exp
      read(io,*) EXPRO_geo(:,:,i)
   enddo

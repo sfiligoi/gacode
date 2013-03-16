@@ -83,7 +83,8 @@ subroutine prgen_read_gato
      dpsi_data = gato_psi(nsurf)
      dpsi_efit = gato_psi(nsurf)
      do i=1,nx
-        dpsi(i) = (i-1)*dpsi_efit/(nx-1)
+        ! Shrink slightly for safety
+        dpsi(i) = (i-1)*dpsi_efit/(nx-1+1e-12)
      enddo
   else
      ! Case 2: typical case 

@@ -356,8 +356,6 @@ while [ $# -gt 0 ] ; do
 
   -e) shift ; LOCDIR=$1 ;;
 
-  -h) echo "1" > $CONFIG ; submit ; exit 0 ;;
-
   -i) shift ; FILE_FLAG=1 ; FILE="$1" ;;
 
   -m) shift ; ASTRA_ARG="$ASTRA_ARG -m $1" ;;
