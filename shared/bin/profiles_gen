@@ -249,7 +249,7 @@ then
    echo "             -create"
    echo "              Create input.profiles using parameters in input.expromake"
    echo 
-   echo "             -create help"
+   echo "             -createhelp"
    echo "              Print detailed help information"
    echo
    echo "             -i <input.profiles file>"
@@ -334,6 +334,7 @@ PZ2=0
 
 # CREATE MODE variables
 CREATE_FLAG=0
+CREATEHELP_FLAG=0
 #=============================================================
 
 #=============================================================
@@ -392,6 +393,7 @@ while [ $# -gt 0 ] ; do
   -t) shift ; UFILETIME="$1" ;;
   
   -create) CREATE_FLAG=1 ;;
+  -createhelp) CREATEHELP_FLAG=1 ;;
    
   -Z1) shift ; Z1=$1 ;;  
   
@@ -428,6 +430,12 @@ cd $SIMDIR
 #=============================================================
 # Manage CREATE MODE
 #
+if [ $CREATEHELP_FLAG -eq 1 ]
+then
+   cat $GACODE_ROOT/shared/profiles_gen/exprotools/README.HELP
+   exit 0
+fi
+
 if [ $CREATE_FLAG -eq 1 ]
 then
    if [ $FILE_FLAG -eq 1 ]

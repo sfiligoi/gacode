@@ -5,9 +5,10 @@ subroutine expromake_set
 
   implicit none
 
-  integer :: i, j
+  integer :: i,j,is
   real :: x
   real, dimension(:), allocatable :: chi_t
+  real, dimension(EXPRO_n_exp) :: a
 
   if(set_exm_b_ref == 1) then
      EXPRO_b_ref = exm_b_ref
@@ -78,7 +79,7 @@ subroutine expromake_set
   if(set_exm_w0 == 1) then
      EXPRO_w0 = exm_w0
   endif
-  
+
   if(set_exm_flow_mom == 1) then
      EXPRO_flow_mom = exm_flow_mom
   endif
@@ -86,7 +87,7 @@ subroutine expromake_set
   if(set_exm_pow_e == 1) then
      EXPRO_pow_e = exm_pow_e
   endif
-  
+
   if(set_exm_pow_i == 1) then
      EXPRO_pow_i = exm_pow_i
   endif
@@ -98,7 +99,7 @@ subroutine expromake_set
   if(set_exm_zeta == 1) then
      EXPRO_zeta = exm_zeta
   endif
-  
+
   if(set_exm_flow_beam == 1) then
      EXPRO_flow_beam = exm_flow_beam
   endif
@@ -132,18 +133,31 @@ subroutine expromake_set
 
   do i=1,nions_max
 
-     if(set_exm_ni(i) == 1) then
-        if(exm_ni_model(i) == 1) then
-           EXPRO_ni(i,:) = exm_ni_axis(i)
-        endif
-        if(exm_ni_model(i) == 2) then
-           do j=1,EXPRO_n_exp
-              EXPRO_ni(i,j) = exm_ni_axis(i) &
-                   * exp(-EXPRO_rmin(j)/EXPRO_rmin(EXPRO_n_exp)*exm_alni(i)) 
-           enddo
-        endif
-     endif
+     if (set_exm_ni(i) == 1) then
 
+        select case(exm_ni_model(i))
+        case(1)
+           ! Constant density
+           EXPRO_ni(i,:) = exm_ni_axis(i)
+        case(2)
+           ! Fixed gradient length
+           EXPRO_ni(i,:) = exm_ni_axis(i) &
+                * exp(-EXPRO_rmin(:)/EXPRO_rmin(EXPRO_n_exp)*exm_alni(i)) 
+        case(3)
+           ! Set by quasineutrality
+           a(:) = EXPRO_ne(:)
+           do is=1,nions_max
+              if (is /= i) then
+                 a(:) = a(:)-exm_z(is)*EXPRO_ni(is,:)
+              endif
+           enddo
+           EXPRO_ni(i,:) = a(:)/exm_z(i)
+        case default
+           print *, 'ERROR: NI_MODEL must be 1 or 2.'
+           stop
+        end select
+
+     endif
 
      if(set_exm_ti(i) == 1) then
         if(exm_ti_model(i) == 1) then
@@ -166,5 +180,5 @@ subroutine expromake_set
      endif
 
   enddo
-  
+
 end subroutine expromake_set

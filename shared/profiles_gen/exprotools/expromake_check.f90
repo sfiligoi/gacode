@@ -188,13 +188,6 @@ subroutine expromake_check
   end select
 
   do i=1,nions_max
-     select case(exm_ni_model(i))
-     case(1)
-     case(2)
-     case default
-        print *, 'ERROR: NI_MODEL must be 1 or 2'
-        stop
-     end select
      select case(exm_ti_model(i))
      case(1)
      case(2)

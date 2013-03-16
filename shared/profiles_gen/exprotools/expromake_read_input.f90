@@ -43,10 +43,9 @@ subroutine expromake_read_input
   read(1,*) set_exm_w0
   read(1,*) set_exm_zeta
   read(1,*) set_exm_zmag
-  do i=1,nions_max
-     read(1,*) set_exm_ni(i)
-     read(1,*) set_exm_ti(i)
-  enddo
+  read(1,10) set_exm_ni(:)
+  read(1,10) set_exm_ti(:)
+  
 
   read(1,*) exm_te_model
   read(1,*) exm_alte
@@ -60,5 +59,7 @@ subroutine expromake_read_input
   enddo
 
   close(1)
+
+10 format(i2)
 
 end subroutine expromake_read_input
