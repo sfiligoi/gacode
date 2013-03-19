@@ -496,7 +496,7 @@ subroutine neo_do
      call TRANSP_write(ir)
 
      ! re-construct the energy dependence
-     call g_energy(ir)
+     ! call g_energy(ir)
 
      ! Write the rotation parameters
      call ROT_write(ir)
