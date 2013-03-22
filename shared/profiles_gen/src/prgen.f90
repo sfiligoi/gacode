@@ -39,6 +39,8 @@ program prgen
   read(1,*) verbose_flag
   read(1,*) pfile_z2
   read(1,*) gmerge_flag
+  read(1,*) ipccw
+  read(1,*) btccw
   read(1,*) reorder_vec(:)
   close(1)
   !--------------------------------------------------

@@ -89,8 +89,13 @@ then
    echo "             -cer <vpol>"
    echo "             Merge data Er and velocity data from Solomon's cer datafile."
    echo 
-   echo "             -ver <version>"
-   echo "             Version number (0=basic, 1=extra powers)."
+   echo "             -ipccw <val>"
+   echo "             Specify direction of current (as seen from above)"
+   echo "             (1=counter-clockwise,-1=clockwise)"
+   echo 
+   echo "             -btccw <val>"
+   echo "             Specify direction of toroidal field (as seen from above)"
+   echo "             (1=counter-clockwise,-1=clockwise)"
    echo 
    echo "PLASMA STATE Options"
    echo
@@ -296,11 +301,14 @@ VERBOSE_FLAG=0
 ORDER_FLAG=0
 GMERGE_FLAG=0
 
-#GATO variables
+IPCCW=1
+BTCCW=-1
+
+# GATO variables
 NOGQ_FLAG=0
 GATO_ARGS=
 
-#OMFIT mapper variables
+# OMFIT mapper variables
 OMFIT_FLAG=0
 
 # CER file 
@@ -366,6 +374,9 @@ while [ $# -gt 0 ] ; do
   -cer) shift ; 
         echo "INFO: (profiles_gen) Will merge data from $CER_FILE" ; CER_FILE="$1" ;;
    
+  -ipccw) shift ; IPCCW="$1" ;;
+  -btccw) shift ; BTCCW="$1" ;;
+
   -g) shift ; G_FLAG=1 ; GFILE="$1" ;;
 
   -gato) shift ; GATO_ARGS="$1" ;;
@@ -377,8 +388,6 @@ while [ $# -gt 0 ] ; do
   -nogq) NOGQ_FLAG=1 ;;
 
   -r) shift ; ORDER="$1" ; ORDER_FLAG=1 ;;
-
-  -ver) shift ; VERSION="$1" ;;
 
   -vgen) VGEN_FLAG=1 ;;
 
@@ -676,6 +685,10 @@ echo $PZ2 >> $CONFIG
 
 # GFILE MERGE
 echo $GMERGE_FLAG >> $CONFIG
+
+# FIELD ORIENTATION
+echo $IPCCW >> $CONFIG
+echo $BTCCW >> $CONFIG
 
 # NOTE: reorder flags will be appended later.
 #=============================================================

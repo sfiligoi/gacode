@@ -2,7 +2,7 @@
 ! prgen_write.f90
 !
 ! PURPOSE:
-!  Generate input.profiles.
+!  Generate input.profiles and input.profiles.extra
 !----------------------------------------------------------
 
 subroutine prgen_write
@@ -87,14 +87,23 @@ subroutine prgen_write
   write(1,20) '# '
   !---------------------------------------------------------------
 
-  write(1,20) '# * An associated input.profiles.extra was also generated'
+  write(1,20) '# * An associated input.profiles.extra was generated'
+  write(1,20) '# '
 
   !---------------------------------------------------------------
   ! High-resolution geometry
   !
-  if (efit_method > 0) then
-     write(1,20) '# * An associated input.profiles.geo was also generated'
+  if (efit_method > 1) then
+     write(1,20) '# * An associated input.profiles.geo was generated'
      write(1,20) '#'
+     if ((format_type == 1 .or. format_type == 2)) then
+        if (abs(dpsi_efit/dpsi_data-1) > 0.001) then
+           write(1,'(a,1pe9.2,a)') &
+                '#    FLUX SHRINK FACTOR : ',dpsi_efit/dpsi_data-1.0,' [WARNING]' 
+        else
+           write(1,'(a,1pe9.2,a)') '#   FLUX SHRINK FACTOR : ',dpsi_efit/dpsi_data-1.0,' [GOOD]' 
+        endif
+     endif
      write(1,40) '#             NFOURIER : ',nfourier
      write(1,40) '#                NSURF : ',nsurf
      write(1,40) '#                 NARC : ',narc
@@ -102,26 +111,21 @@ subroutine prgen_write
      write(1,20) '#'
      write(1,20) '#',efit_header
      write(1,20) '#'
-     if (format_type > 0 .and. format_type < 6) then
-        if (abs(dpsi_efit/dpsi_data-1) > 0.001) then
-           write(1,'(a,1pe9.2,a)') &
-                '# ** WARNING ** Psi-shrinkage factor : ',dpsi_efit/dpsi_data-1.0  
-        else
-           write(1,'(a,1pe9.2,a)') '# Psi-shrinkage factor : ',dpsi_efit/dpsi_data-1.0 
-        endif
-     endif
   endif
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
   ! Merged files and extra information
   !
-  write(1,20) '# * Additional information:'
+  write(1,20) '# * Plasma dimensions:'
   write(1,20) '#'
-
   write(1,'(a,1pe8.2,a)') '#  PLASMA MAJOR RADIUS : ',rmaj(nx),' m'
   write(1,'(a,1pe8.2,a)') '#  PLASMA MINOR RADIUS : ',rmin(nx),' m'
   write(1,20) '#'
+  write(1,20) '# * Field/current orientation:'
+  write(1,20) '#'
+  write(1,'(a,i2)')       '#                IPCCW : ',ipccw
+  write(1,'(a,i2)')       '#                BTCCW : ',btccw
   !---------------------------------------------------------------
 
   EXPRO_n_exp = nx
