@@ -254,23 +254,4 @@ module EXPRO_interface
        'vpol_4 (m/s)    ',&
        'vpol_5 (m/s)    '/)
 
-  ! Transport power tags (currently unused)
-
-  character (len=16), dimension(15) :: EXPRO_tag2=(/&
-       'powe_beam(MW)   ',& 
-       'powe_RF(MW)     ',& 
-       'powe_oh_RF(MW)  ',& 
-       'powe_rad_RF(MW) ',& 
-       'powe_ion(MW)    ',& 
-       'powe_wdot(MW)   ',& 
-       'powe_fus(MW)    ',& 
-       '[tr-pow_e]      ',& 
-       '[ex-pow_ei_exp] ',&  
-       '[tr-pow_i]      ',& 
-       'powi_beam(MW)   ',& 
-       'powi_ion(MW)    ',& 
-       'powi_wdot(MW)   ',& 
-       'powi_fus(MW)    ',& 
-       'powi_cx(MW)     '/)
-
 end module EXPRO_interface

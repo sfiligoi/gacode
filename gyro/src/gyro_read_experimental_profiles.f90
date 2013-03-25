@@ -39,8 +39,6 @@ subroutine gyro_read_experimental_profiles
 
   call EXPRO_palloc(GYRO_COMM_WORLD,path,1) 
   call EXPRO_pread
-
-  if (i_proc == 0) call EXPRO_write_derived
   !---------------------------------------------------------------------
 
   !---------------------------------------------------------------------

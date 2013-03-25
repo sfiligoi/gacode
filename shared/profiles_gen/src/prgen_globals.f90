@@ -15,17 +15,17 @@ module prgen_globals
   !
   integer :: nx
   integer :: n_indx
-  integer :: n_indx2
-  integer :: extra_powers_flag = 0
   integer :: format_type
-  integer :: gato_flag
+  integer :: efit_method
   integer :: nogatoq_flag
   integer :: verbose_flag
   real :: pfile_z2
   integer :: gmerge_flag
   character (len=70) :: efit_header
   integer, dimension(5) :: reorder_vec
-  real :: dpsi_gato
+  integer :: ipccw
+  integer :: btccw
+  real :: dpsi_efit
   real :: dpsi_data
   real :: signpsi
   !----------------------------------------------------------
@@ -215,8 +215,8 @@ module prgen_globals
   !--------------------------------------------------------
   ! Some GATO variables
   !
-  integer :: gato_npsi
-  integer :: gato_ntheta
+  integer :: nsurf
+  integer :: narc
   !--------------------------------------------------------
 
   !---------------------------------------------------------

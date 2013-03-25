@@ -13,7 +13,6 @@ subroutine EXPRO_read_driver
   implicit none
 
   integer, parameter :: io=1
-  integer :: i
   integer :: ierr
 
   real, dimension(:), allocatable :: dummy
@@ -102,18 +101,7 @@ subroutine EXPRO_read_driver
   ! READ general shape coefficients if they exist: 
   !
   if (EXPRO_nfourier > 0) then
-
-     open(unit=io,&
-          file=trim(path)//'input.profiles.geo',&
-          status='old')
-
-     read(io,*) i
-     do i=1,EXPRO_n_exp
-        read(io,*) EXPRO_geo(:,:,i)
-     enddo
-
-     close(io)
-
+     call EXPRO_read_geo
   endif
   !--------------------------------------------------------------
 

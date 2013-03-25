@@ -109,6 +109,9 @@ subroutine EXPRO_compute_derived
   ! 1/L_Te = -dln(Te)/dr (1/m)
   call bound_deriv(EXPRO_dlntedr,-log(EXPRO_te),EXPRO_rmin,EXPRO_n_exp)
 
+  EXPRO_dlnnidr = 0.0
+  EXPRO_dlntidr = 0.0
+
   do is=1,nion_max
      if (minval(EXPRO_ni(is,:)) > 0.0) then
         ! 1/L_ni = -dln(ni)/dr (1/m)
@@ -218,6 +221,12 @@ subroutine EXPRO_compute_derived
   !--------------------------------------------------------------
   ! Extrapolate some quantities to axis:
   !
+  call bound_extrap(fa,fb,EXPRO_grad_r0,EXPRO_rmin,EXPRO_n_exp)
+  EXPRO_grad_r0(1) = fa
+
+  call bound_extrap(fa,fb,EXPRO_ave_grad_r,EXPRO_rmin,EXPRO_n_exp)
+  EXPRO_ave_grad_r(1) = fa
+
   call bound_extrap(fa,fb,EXPRO_w0,EXPRO_rmin,EXPRO_n_exp)
   EXPRO_w0(1) = fa
 
@@ -306,6 +315,11 @@ subroutine EXPRO_compute_derived
      if (minval(EXPRO_ni_new(:)) <= 0.0) then
         EXPRO_error = 1
      endif
+
+  else
+
+     EXPRO_ni_new(:) = EXPRO_ni(1,:)
+     EXPRO_dlnnidr_new(:) = EXPRO_dlnnidr(1,:)
 
   endif
 

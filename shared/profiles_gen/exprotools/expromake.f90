@@ -13,7 +13,6 @@ program expromake
 
   integer :: ierr, i
 
-
   call expromake_read_input 
   call expromake_check
 

@@ -25,6 +25,7 @@ OBJECTS = prgen_globals.o \
 	  prgen_map_ufile.o \
 	  prgen_map_inputprofiles.o \
           prgen_read_cer.o \
+          prgen_read_omfit.o \
           prgen_read_gato.o \
           prgen_read_iterdb.o \
           prgen_read_iterdb_nc.o \
@@ -41,13 +42,14 @@ OBJECTS = prgen_globals.o \
           fluxfit_minmax.o \
           fluxfit_fourier.o \
           fluxfit_error.o \
-          fluxfit_f_model.o \
-          $(EXEC).o
+          fluxfit_f_model.o 
 
 .SUFFIXES : .o .f90
 
-exec: $(OBJECTS)
-	$(FC) $(FMATH) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS)
+all: $(EXEC)
+
+$(EXEC): $(OBJECTS) $(EXEC).o
+	$(FC) $(FMATH) $(FFLAGS) -o $(EXEC) $(EXEC).o $(OBJECTS) $(EXTRA_LIBS)
 
 .f90.o :
 	$(FC) $(FMATH) $(FFLAGS) -I $(NETCDF_INC) -c $<
