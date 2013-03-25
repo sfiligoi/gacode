@@ -21,10 +21,11 @@ subroutine neo_do
   use neo_theory
   use neo_g_velocitygrids
   use neo_allocate_profile
+  use neo_3d_driver
   use mpi
   implicit none
 
-  integer :: ir, is, ie, ix, it, jr, js, je, jx, jt, ks, ke
+  integer :: ir, is, ie, ix, it, js, je, jx, jt, ks
   integer, dimension(:,:,:,:), allocatable :: mindx  ! (ns,ne,nxi+1,nth)
   integer :: i, j, k, id
   integer :: ierr
@@ -52,6 +53,12 @@ subroutine neo_do
 
   if(spitzer_model==1) then
      call neo_spitzer
+     goto 100
+  endif
+
+  if(threed_model==1) then
+     !call ThreeD_do
+     call neo_error('ERROR: 3D not yet available.')
      goto 100
   endif
 
@@ -496,7 +503,7 @@ subroutine neo_do
      call TRANSP_write(ir)
 
      ! re-construct the energy dependence
-     call g_energy(ir)
+     ! call g_energy(ir)
 
      ! Write the rotation parameters
      call ROT_write(ir)

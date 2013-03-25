@@ -145,9 +145,7 @@ subroutine neo_check
   ! Profile model
   !
   select case (profile_model)  
-
   case (1) 
-
      if(n_radial > 1) then
         call neo_error('ERROR: (NEO) profile_model=1 must be run with n_radial = 1')
         return
@@ -223,42 +221,53 @@ subroutine neo_check
         return
      end select
 
-     if(abs(profile_dlnndr_1_scale-1.0) > epsilon(0.) ) then
-        write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNNDR_1 IS RE-SCALED'
+     if(n_species >= 1) then
+        if(abs(profile_dlnndr_scale(1)-1.0) > epsilon(0.) ) then
+           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNNDR_1 IS RE-SCALED'
+        endif
+        if(abs(profile_dlntdr_scale(1)-1.0) > epsilon(0.) ) then
+           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNTDR_1 IS RE-SCALED'
+        endif
      endif
-     if(abs(profile_dlnndr_2_scale-1.0) > epsilon(0.) ) then
-        write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNNDR_2 IS RE-SCALED'
+     if(n_species >= 2) then
+        if(abs(profile_dlnndr_scale(2)-1.0) > epsilon(0.) ) then
+           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNNDR_2 IS RE-SCALED'
+        endif
+        if(abs(profile_dlntdr_scale(2)-1.0) > epsilon(0.) ) then
+           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNTDR_2 IS RE-SCALED'
+        endif
      endif
-     if(abs(profile_dlnndr_3_scale-1.0) > epsilon(0.) ) then
-        write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNNDR_3 IS RE-SCALED'
+     if(n_species >= 3) then
+        if(abs(profile_dlnndr_scale(3)-1.0) > epsilon(0.) ) then
+           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNNDR_3 IS RE-SCALED'
+        endif
+        if(abs(profile_dlntdr_scale(3)-1.0) > epsilon(0.) ) then
+           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNTDR_3 IS RE-SCALED'
+        endif
      endif
-     if(abs(profile_dlnndr_4_scale-1.0) > epsilon(0.) ) then
-        write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNNDR_4 IS RE-SCALED'
+     if(n_species >= 4) then
+        if(abs(profile_dlnndr_scale(4)-1.0) > epsilon(0.) ) then
+           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNNDR_4 IS RE-SCALED'
+        endif
+        if(abs(profile_dlntdr_scale(4)-1.0) > epsilon(0.) ) then
+           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNTDR_4 IS RE-SCALED'
+        endif
      endif
-     if(abs(profile_dlnndr_5_scale-1.0) > epsilon(0.) ) then
-        write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNNDR_5 IS RE-SCALED'
+     if(n_species >= 5) then
+        if(abs(profile_dlnndr_scale(5)-1.0) > epsilon(0.) ) then
+           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNNDR_5 IS RE-SCALED'
+        endif
+        if(abs(profile_dlntdr_scale(5)-1.0) > epsilon(0.) ) then
+           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNTDR_5 IS RE-SCALED'
+        endif
      endif
-     if(abs(profile_dlnndr_6_scale-1.0) > epsilon(0.) ) then
-        write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNNDR_6 IS RE-SCALED'
-     endif
-
-     if(abs(profile_dlntdr_1_scale-1.0) > epsilon(0.) ) then
-        write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNTDR_1 IS RE-SCALED'
-     endif
-     if(abs(profile_dlntdr_2_scale-1.0) > epsilon(0.) ) then
-        write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNTDR_2 IS RE-SCALED'
-     endif
-     if(abs(profile_dlntdr_3_scale-1.0) > epsilon(0.) ) then
-        write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNTDR_3 IS RE-SCALED'
-     endif
-     if(abs(profile_dlntdr_4_scale-1.0) > epsilon(0.) ) then
-        write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNTDR_4 IS RE-SCALED'
-     endif
-     if(abs(profile_dlntdr_5_scale-1.0) > epsilon(0.) ) then
-        write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNTDR_5 IS RE-SCALED'
-     endif
-     if(abs(profile_dlntdr_6_scale-1.0) > epsilon(0.) ) then
-        write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNTDR_6 IS RE-SCALED'
+     if(n_species >= 6) then
+        if(abs(profile_dlnndr_scale(6)-1.0) > epsilon(0.) ) then
+           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNNDR_6 IS RE-SCALED'
+        endif
+        if(abs(profile_dlntdr_scale(6)-1.0) > epsilon(0.) ) then
+           write(io_neoout,*) 'GLOBAL PROFILE profile_equilibrium_model: DLNTDR_6 IS RE-SCALED'
+        endif
      endif
 
   case(3)
@@ -326,6 +335,20 @@ subroutine neo_check
      call neo_error('ERROR: (NEO) invalid spitzer_model')
      return
   end select
+
+  select case(threed_model)
+  case(0)
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'threed_model: AXISYMMETRIC NEOCLASSICAL TRANSPORT TEST CASE'
+     end if
+  case (1)
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,*) 'threed_model: NEOCLASSICAL TRANSPORT WITH NON-AXISYMMETRIC EFFECTS'
+     end if
+   case default
+     call neo_error('ERROR: (NEO) invalid threed_model')
+     return
+  end select  
 
   !------------------------------------------------------------
 

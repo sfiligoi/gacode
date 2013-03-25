@@ -172,7 +172,11 @@ contains
     ! Sources
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!
     ! fex_iz(3,i,z)-moments of external parallel force on i,z (T*j/m**3) 
-    fex_iz(:,:,:) = 0.0
+    do is=1,n_species
+       fex_iz(1,is,abs(z(is))) = source_nclass(is) &
+            * dens_norm(ir) * 1e19 * b_unit(ir) &
+            * (vth_norm(ir) * a_meters) * (mass_deuterium*1e-27)
+    enddo
 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!
     ! Er0
@@ -391,7 +395,7 @@ contains
              rdum(k)=upar_s(j,k,i)
           enddo
           if(j==1) then
-             uparB_nc(i) = (rdum(1)+rdum(2)) / (v_nc_norm * b_unit(ir))
+             uparB_nc(i) = (rdum(1)+rdum(2)+rdum(3)) / (v_nc_norm * b_unit(ir))
           endif
        enddo
     enddo
@@ -403,7 +407,12 @@ contains
     else
        rdum(2) = 0.0
     endif
-    jbs_nc = (rdum(1)+rdum(2)) / jbs_nc_norm
+    if(abs(p_exjb) > 0.0) then
+       rdum(3) = p_exjb/b_unit(ir)
+    else
+       rdum(3) = 0.0
+    endif
+    jbs_nc = (rdum(1)+rdum(2)+rdum(3)) / jbs_nc_norm
 
     !  Flow velocities on outside midplane (m/s)                      
     do i=1,m_s
@@ -432,7 +441,7 @@ contains
        iz=jz_s(i)
        call RARRAY_COPY(5,gfl_s(1,i),1,rdum,1)
        rdum(6)=RARRAY_SUM(5,rdum,1)
-       pflux_nc(i) = (rdum(1) + rdum(2) + rdum(4)) / pflux_nc_norm
+       pflux_nc(i) = (rdum(1) + rdum(2) + rdum(4) + rdum(5)) / pflux_nc_norm
        do k=1,5
           if(iz > 0) then
              dum(k)=dum(k)+iz*gfl_s(k,i)
@@ -481,7 +490,7 @@ contains
           rdum(k)=qfl_s(k,i)+2.5*gfl_s(k,i)*temp_i(im)*z_j7kv
        end do
        rdum(6)=RARRAY_SUM(5,rdum,1)
-       eflux_nc(i) = (rdum(1) + rdum(2) + rdum(4)) / eflux_nc_norm
+       eflux_nc(i) = (rdum(1) + rdum(2) + rdum(4) + rdum(5)) / eflux_nc_norm
     enddo
 
     

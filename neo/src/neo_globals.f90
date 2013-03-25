@@ -39,21 +39,10 @@ module neo_globals
   real :: profile_zeta_scale
   real :: profile_zmag_scale
 
-  real :: profile_dlnndr_1_scale
-  real :: profile_dlnndr_2_scale
-  real :: profile_dlnndr_3_scale
-  real :: profile_dlnndr_4_scale
-  real :: profile_dlnndr_5_scale
-  real :: profile_dlnndr_6_scale
-
-  real :: profile_dlntdr_1_scale
-  real :: profile_dlntdr_2_scale
-  real :: profile_dlntdr_3_scale
-  real :: profile_dlntdr_4_scale
-  real :: profile_dlntdr_5_scale
-  real :: profile_dlntdr_6_scale
-  real, dimension(6) :: dlnndr_scale
-  real, dimension(6) :: dlntdr_scale
+  real, dimension(6) :: profile_dlnndr_scale
+  real, dimension(6) :: profile_dlntdr_scale
+  ! 
+  real, dimension(6) :: source_nclass
   !
   integer :: ipccw_in
   integer :: btccw_in
@@ -100,6 +89,13 @@ module neo_globals
   real    :: sign_q
   real    :: sign_bunit
   !---------------------------------------------------------------
+
+  !---------------------------------------------------------------
+  ! 3D parameters
+  integer :: threed_model
+  integer :: n_varphi
+  integer :: n_tor
+  real    :: z1_mag
 
   !---------------------------------------------------------------
   ! Output mode:

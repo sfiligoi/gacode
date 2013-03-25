@@ -47,6 +47,9 @@ subroutine neo_read_input
      read(1,*) temp_in(is)
      read(1,*) dlnndr_in(is)
      read(1,*) dlntdr_in(is)
+     read(1,*) profile_dlnndr_scale(is)
+     read(1,*) profile_dlntdr_scale(is)
+     read(1,*) source_nclass(is)
   enddo
 
   read(1,*) dphi0dr_in
@@ -67,20 +70,10 @@ subroutine neo_read_input
   read(1,*) profile_zeta_scale
   read(1,*) profile_zmag_scale
 
-  read(1,*) profile_dlnndr_1_scale
-  read(1,*) profile_dlnndr_2_scale
-  read(1,*) profile_dlnndr_3_scale
-  read(1,*) profile_dlnndr_4_scale
-  read(1,*) profile_dlnndr_5_scale
-  read(1,*) profile_dlnndr_6_scale
-
-  read(1,*) profile_dlntdr_1_scale
-  read(1,*) profile_dlntdr_2_scale
-  read(1,*) profile_dlntdr_3_scale
-  read(1,*) profile_dlntdr_4_scale
-  read(1,*) profile_dlntdr_5_scale
-  read(1,*) profile_dlntdr_6_scale
-
+  read(1,*) threed_model
+  read(1,*) n_varphi
+  read(1,*) n_tor
+  read(1,*) z1_mag
 
   close(1)
 

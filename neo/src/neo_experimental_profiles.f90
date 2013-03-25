@@ -147,45 +147,39 @@ subroutine neo_experimental_profiles
   te_ade_exp(:)     = EXPRO_te(:)
   ne_ade_exp(:)     = EXPRO_ne(:)
 
-  dlnndr_scale(1) = profile_dlnndr_1_scale
-  dlnndr_scale(2) = profile_dlnndr_2_scale
-  dlnndr_scale(3) = profile_dlnndr_3_scale
-  dlnndr_scale(4) = profile_dlnndr_4_scale
-  dlnndr_scale(5) = profile_dlnndr_5_scale
-
-  dlntdr_scale(1) = profile_dlntdr_1_scale
-  dlntdr_scale(2) = profile_dlntdr_2_scale
-  dlntdr_scale(3) = profile_dlntdr_3_scale
-  dlntdr_scale(4) = profile_dlntdr_4_scale
-  dlntdr_scale(5) = profile_dlntdr_5_scale
-
   tem_exp(n_species_exp,:)  = EXPRO_te(:)
-  dlntdr_p(n_species_exp,:) = EXPRO_dlntedr(:) * a_meters * dlntdr_scale(n_species_exp)
+  dlntdr_p(n_species_exp,:) = EXPRO_dlntedr(:) * a_meters &
+       * profile_dlntdr_scale(n_species_exp)
   den_exp(n_species_exp,:)  = EXPRO_ne(:)
-  dlnndr_p(n_species_exp,:) = EXPRO_dlnnedr(:) * a_meters * dlnndr_scale(n_species_exp)
+  dlnndr_p(n_species_exp,:) = EXPRO_dlnnedr(:) * a_meters &
+       * profile_dlnndr_scale(n_species_exp)
 
   do i_ion=1,n_species_exp-1
      ! ion temps should be equal, but not enforced 
      tem_exp(i_ion,:)  = EXPRO_ti(i_ion,:)
-     dlntdr_p(i_ion,:) = EXPRO_dlntidr(i_ion,:) * a_meters * dlntdr_scale(i_ion)
+     dlntdr_p(i_ion,:) = EXPRO_dlntidr(i_ion,:) * a_meters &
+          * profile_dlntdr_scale(i_ion)
 
      ! first species density is re-set by quasi-neutrality
      if(i_ion == 1) then
         den_exp(i_ion,:)  = EXPRO_ni_new(:)
-        dlnndr_p(i_ion,:) = EXPRO_dlnnidr_new(:) * a_meters * dlnndr_scale(i_ion)
+        dlnndr_p(i_ion,:) = EXPRO_dlnnidr_new(:) * a_meters &
+             * profile_dlnndr_scale(i_ion)
      else
         den_exp(i_ion,:)  = EXPRO_ni(i_ion,:)
-        dlnndr_p(i_ion,:) = EXPRO_dlnnidr(i_ion,:) * a_meters * dlnndr_scale(i_ion)
+        dlnndr_p(i_ion,:) = EXPRO_dlnnidr(i_ion,:) * a_meters &
+             * profile_dlnndr_scale(i_ion)
 
      endif
   enddo
 
   ! If desired, reset electron density gradient to ensure quasi-neutrality
-  if (dlnndr_scale(n_species_exp) < 0.0) then
+  if (profile_dlnndr_scale(n_species_exp) < 0.0) then
      dlnndr_p(n_species_exp,:) = 0.0
      do i_ion=1,n_species_exp-1
         dlnndr_p(n_species_exp,:) = dlnndr_p(n_species_exp,:) + &
-             EXPRO_ctrl_z(i_ion)*den_exp(i_ion,:)/den_exp(n_species_exp,:)*dlnndr_p(i_ion,:)
+             EXPRO_ctrl_z(i_ion)*den_exp(i_ion,:)/den_exp(n_species_exp,:) &
+             * dlnndr_p(i_ion,:)
      enddo
   endif
 

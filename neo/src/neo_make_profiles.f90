@@ -116,10 +116,8 @@ subroutine neo_make_profiles
              * sqrt(mass(1)/mass(is)) * (temp(1,ir)/temp(is,ir))**1.5
      enddo
 
-     do ir=1,n_radial
-        do is=1, n_species
-           vth(is,ir) = sqrt(temp(is,ir)/mass(is))
-        enddo
+     do is=1, n_species
+        vth(is,ir) = sqrt(temp(is,ir)/mass(is))
      enddo
 
      ! These normalizations are arbitrary for local profiles
