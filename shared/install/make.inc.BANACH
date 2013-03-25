@@ -12,14 +12,14 @@ FOMP    = -fopenmp
 FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules
 FOPT	= -O3
 FDEBUG	= -Wall -fcheck=all -fbacktrace -O -Wall -Wunderflow -W -finit-real=nan -fbounds-check -ffpe-trap=invalid,zero,overflow
-FHDF5   = -DHAVE_HDF5
+#FHDF5   = -DHAVE_HDF5
 
 # System math libraries (from Ubuntu repository)
 
 LMATH = /home/SOFTWARE/OpenBLAS/libopenblas.a
 
 # OPTIONAL NetCDF:
-NETCDF=-L/usr/local/lib -lnetcdff -lnetcdf -lm -lz -lcurl
+NETCDF=-L/usr/local/lib -lnetcdff -lnetcdf -lm
 NETCDF_INC=/usr/local/include
 
 # Archive 
@@ -27,7 +27,7 @@ NETCDF_INC=/usr/local/include
 ARCH = ar cr
 
 # HDF5
-HDFDIR=/home/SOFTWARE/hdf5
-HDF5_LIBS=-L$(HDFDIR)/lib -lhdf5_fortran -lhdf5 -lz 
-HDF5_INC=-I$(HDFDIR)/include
-HDF5_FLAGS=-Wp,-D__MPI -fdefault-double-8
+#HDFDIR=/home/SOFTWARE/hdf5
+#HDF5_LIBS=-L$(HDFDIR)/lib -lhdf5_fortran -lhdf5 -lz 
+#HDF5_INC=-I$(HDFDIR)/include
+#HDF5_FLAGS=-Wp,-D__MPI -fdefault-double-8

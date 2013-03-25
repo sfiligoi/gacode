@@ -200,13 +200,18 @@ module EXPRO_interface
   real, dimension(:),allocatable :: EXPRO_gamma_p
   real, dimension(:),allocatable :: EXPRO_mach
 
+  ! Field orientation parameters
+
+  integer :: EXPRO_signb
+  integer :: EXPRO_signq
+
+  !------------------------------------------------------------------------
+
   ! Control parameters (force nonsensical defaults for usage check)
 
   integer :: EXPRO_ctrl_density_method = -1
   real, dimension(5) :: EXPRO_ctrl_z
   integer :: EXPRO_ctrl_numeq_flag=-1
-  real :: EXPRO_ctrl_signb = -10.0
-  real :: EXPRO_ctrl_signq = -10.0
   integer :: EXPRO_ctrl_rotation_method = -1
   integer :: EXPRO_ctrl_silent_flag = 0
 

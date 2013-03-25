@@ -60,6 +60,8 @@ subroutine prgen_map_iterdb
 
   ! Torque (TAM flow) (nt-m)
   call volint(onetwo_storqueb,flow_mom)
+  ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
+  flow_mom = -ipccw*flow_mom  
 
   ! Total transport power (MW) to electrons: pow_e
 
@@ -100,7 +102,6 @@ subroutine prgen_map_iterdb
        +pow_ei_exp(:) &
        +xfus_exp*powi_fus_exp(:)
 
-
   !---------------------------------------------------------
   ! Map profile data onto single array:
   !
@@ -110,12 +111,14 @@ subroutine prgen_map_iterdb
   vec(1,:)  = rho(:)
   vec(2,:)  = rmin(:)
   vec(3,:)  = rmaj(:)
-  vec(4,:)  = q(:)
+  ! COORDINATES: set sign of q
+  vec(4,:)  = abs(q(:))*ipccw*btccw
   vec(5,:)  = kappa(:)
   vec(6,:)  = delta(:)
   vec(7,:)  = onetwo_te(:)
   vec(8,:)  = onetwo_ene(:)*1e-19
   vec(9,:)  = onetwo_zeff(:)
+  !vec(10,:) omitted. meaning omega=0 for iterdb
   vec(11,:) = flow_mom(:)
   vec(12,:) = pow_e(:)
   vec(13,:) = pow_i(:)
@@ -125,7 +128,8 @@ subroutine prgen_map_iterdb
   vec(17,:) = flow_wall_exp(:)
   vec(18,:) = zmag(:)
   vec(19,:) = onetwo_press(:) ! Total pressure
-  vec(20,:) = dpsi(:)
+  ! COORDINATES: set sign of poloidal flux
+  vec(20,:) = abs(dpsi(:))*(-ipccw)
 
   !-----------------------------------------------------------------
   ! Construct ion densities and temperatures with reordering
@@ -161,8 +165,8 @@ subroutine prgen_map_iterdb
   allocate(vphi_carbon(nx))
 
   if (trim(onetwo_namei(1)) == 'c') then
-     ! Negative sign to account for DIII-D convention
-     vphi_carbon(:) = -onetwo_angrot(:)*(rmaj(:)+rmin(:))
+     ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
+     vphi_carbon(:) = -ipccw*onetwo_angrot(:)*(rmaj(:)+rmin(:))
   else
      vphi_carbon(:) = 0.0
   endif

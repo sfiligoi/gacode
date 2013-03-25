@@ -27,8 +27,6 @@ subroutine gyro_read_experimental_profiles
   EXPRO_ctrl_density_method = density_method 
   EXPRO_ctrl_z = z_vec(1:5)
   EXPRO_ctrl_numeq_flag = num_equil_flag 
-  EXPRO_ctrl_signq = ipccw*btccw
-  EXPRO_ctrl_signb = -btccw
   EXPRO_ctrl_rotation_method = rotation_theory_method
   !
   ! Kludge 

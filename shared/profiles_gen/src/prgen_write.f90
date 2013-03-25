@@ -122,10 +122,14 @@ subroutine prgen_write
   write(1,'(a,1pe8.2,a)') '#  PLASMA MAJOR RADIUS : ',rmaj(nx),' m'
   write(1,'(a,1pe8.2,a)') '#  PLASMA MINOR RADIUS : ',rmin(nx),' m'
   write(1,20) '#'
-  write(1,20) '# * Field/current orientation:'
+  write(1,20)    '# * Field/current orientation:'
+  write(1,'(a)') '# ' 
+  write(1,'(a)') '#   NOTE: All variables carry correct and consistent signs' 
+  write(1,'(a)') '#         in fixed gacode (r,theta,varphi) coordinates.'
   write(1,20) '#'
   write(1,'(a,i2)')       '#                IPCCW : ',ipccw
   write(1,'(a,i2)')       '#                BTCCW : ',btccw
+  write(1,*)
   !---------------------------------------------------------------
 
   EXPRO_n_exp = nx
@@ -136,10 +140,14 @@ subroutine prgen_write
      EXPRO_b_ref = null_bref
      EXPRO_arho  = null_arho
   case (1)
+     ! COORDINATES: ONETWO defines Btor as along the current, so we need to 
+     ! convert to the gacode direction
      EXPRO_b_ref = -onetwo_Btor
      EXPRO_arho  = onetwo_rho_grid(onetwo_nj)
   case (2)
-     EXPRO_b_ref = plst_b_axis_vac*(-plst_kccw_bphi)
+     ! COORDINATES: plasmastate b_axis_vac is an absolute value, so need 
+     ! to explicitly set direction of B in gacode coordinates.
+     EXPRO_b_ref = plst_b_axis_vac*(-btccw)
      EXPRO_arho  = sqrt(plst_phit(nx)/plst_b_axis_vac/pi)
   case (3)
      EXPRO_b_ref = peqdsk_bref
@@ -212,8 +220,6 @@ subroutine prgen_write
 
   EXPRO_ctrl_density_method=1
   EXPRO_ctrl_z(1) = 1.0 
-  EXPRO_ctrl_signq = 1.0
-  EXPRO_ctrl_signb = 1.0
   EXPRO_ctrl_rotation_method = 1
   if (efit_method > 1) then
      EXPRO_ctrl_numeq_flag = 1

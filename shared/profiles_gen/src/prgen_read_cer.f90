@@ -89,13 +89,13 @@ subroutine prgen_read_cer
   !-------------------------------------------------------
   ! Spline interpolation from CER grid to ITERDB rho grid.
   !
-  ! Convert vpolc to m/s (- sign for DIII-D)
+  ! COORDINATES: convert vpolc to m/s (- sign for DIII-D)
   call cub_spline(rho_in,-f_in(:,1)*1e3,n_in,rho,vpolc_exp,nx)
   !
-  ! Convert vtorc to m/s (- sign for DIII-D)
+  ! COORDINATES: convert vtorc to m/s (- sign for DIII-D)
   call cub_spline(rho_in,-f_in(:,2)*1e3,n_in,rho,vtorc_exp,nx)
   !
-  ! Convert omega to (1/s) (- sign for DIII-D)
+  ! COORDINATES: convert omega to (1/s) (- sign for DIII-D)
   call cub_spline(rho_in,-f_in(:,3)*1e3,n_in,rho,omega0,nx)
   !-------------------------------------------------------
 

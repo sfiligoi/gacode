@@ -19,8 +19,6 @@ program expromake
   EXPRO_ctrl_density_method = 1
   EXPRO_ctrl_z(1:3) = exm_z(1:3)
   EXPRO_ctrl_numeq_flag = 0 
-  EXPRO_ctrl_signq = (-1)*(-1)
-  EXPRO_ctrl_signb = -(-1)
   EXPRO_ctrl_rotation_method = 1
 
   ! We're going to see if this file exists

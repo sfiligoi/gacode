@@ -92,11 +92,6 @@ subroutine EXPRO_read_driver
   close(io)
   !--------------------------------------------------------------
 
-  ! Change signs according to orientation control parameters
-
-  EXPRO_b_ref = EXPRO_ctrl_signb*abs(EXPRO_b_ref)
-  EXPRO_q(:)  = EXPRO_ctrl_signq*abs(EXPRO_q(:))
-
   !--------------------------------------------------------------
   ! READ general shape coefficients if they exist: 
   !

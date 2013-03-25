@@ -45,18 +45,18 @@ subroutine EXPRO_compute_derived
      print *,'ERROR: (EXPRO) EXPRO_ctrl_numeq_flag not set.'
      stop
   endif
-  if (EXPRO_ctrl_signb < -1.0) then
-     print *,'ERROR: (EXPRO) EXPRO_ctrl_signb not set.'
-     stop
-  endif
-  if (EXPRO_ctrl_signq < -1.0) then
-     print *,'ERROR: (EXPRO) EXPRO_ctrl_signq not set.'
-     stop
-  endif
   if (EXPRO_ctrl_rotation_method == -1) then
      print *,'ERROR: (EXPRO) EXPRO_ctrl_rotation_method not set.'
      stop
   endif
+  !---------------------------------------------------------------------
+
+
+  !---------------------------------------------------------------------
+  ! Infer orientation
+  ! 
+  EXPRO_signb = nint(EXPRO_b_ref/abs(EXPRO_b_ref))
+  EXPRO_signq = nint(EXPRO_q(1)/abs(EXPRO_q(1)))
   !---------------------------------------------------------------------
 
   !---------------------------------------------------------------------
@@ -162,7 +162,7 @@ subroutine EXPRO_compute_derived
   ! - w0, w0p, vol, volp
   !
   GEO_nfourier_in = EXPRO_nfourier
-  GEO_signb_in    = EXPRO_ctrl_signb
+  GEO_signb_in    = EXPRO_signb
   call GEO_alloc(1)
 
   r_min = EXPRO_rmin(EXPRO_n_exp)

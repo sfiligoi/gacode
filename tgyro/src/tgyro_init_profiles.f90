@@ -231,7 +231,7 @@ subroutine tgyro_init_profiles
   !
   ! (3) Angular momentum flow -- convert to erg (dyne-cm) from N-m.
   !
-  call cub_spline(EXPRO_rmin(:)/r_min,-EXPRO_flow_mom(:)*1e7,n_exp,r,mf_in,n_r)
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_flow_mom(:)*1e7,n_exp,r,mf_in,n_r)
   !------------------------------------------------------------------------------------------
 
   ! Fourier coefficients for plasma shape
