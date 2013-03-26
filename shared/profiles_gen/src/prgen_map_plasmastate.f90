@@ -67,9 +67,6 @@ subroutine prgen_map_plasmastate
   call bound_deriv(dphidpsi,plst_epot,dpsi,nx)
   !
   omega0 = -2.9979e10*dphidpsi*(10.0/3.0)/1e8
-  !
-  ! Diagnostic 
-  signpsi = dpsi(nx)/abs(dpsi(nx))
   !--------------------------------------------------------------------
 
   !---------------------------------------------------------

@@ -27,7 +27,10 @@ subroutine prgen_write
   write(1,20) '#'
   write(1,20) '# See https://fusion.gat.com/theory/input.profiles for complete documentation.'
   write(1,20) '#'
+  write(1,20) '# * Data description:'
+  write(1,20) '#'
   write(1,20) '#           INPUT FILE : ',trim(raw_data_file)
+  write(1,30) '#    RADIAL GRIDPOINTS : ',nx
 
   select case (format_type)
 
@@ -36,8 +39,6 @@ subroutine prgen_write
         write(1,20) '#      MERGED CER FILE : ',trim(cer_file)
      endif
      write(1,40) '#          SHOT NUMBER : ',onetwo_ishot
-     write(1,30) '#    RADIAL GRIDPOINTS : ',nx
-     write(1,'(a,1pe9.2,a)') '#               Q_EDGE : ',q(nx)
      write(1,20) '#'
      write(1,'(10(a,1x))') '#                 IONS : ',&
           (trim(ion_name(reorder_vec(i))),i=1,onetwo_nion+onetwo_nbion)
@@ -45,45 +46,25 @@ subroutine prgen_write
   case (2)
      write(1,20) '#              TOKAMAK : ',trim(plst_tokamak_id)
      write(1,40) '#          SHOT NUMBER : ',plst_shot_number
-     write(1,30) '#    RADIAL GRIDPOINTS : ',nx
-     write(1,'(a,1pe9.2,a)') '#               Q_EDGE : ',q(nx)
      write(1,20) '#'
      write(1,'(10(a,1x))') '#                 IONS :',&
           (trim(plst_all_name(reorder_vec(i-1)+1)),&
           i=2,min(plst_dp1_nspec_th+1,6))
 
   case (3)
-     write(1,40) '#          SHOT NUMBER : '
-     write(1,30) '#    RADIAL GRIDPOINTS : ',nx
-     write(1,'(a,1pe9.2,a)') '#               Q_EDGE : ',q(nx)
-     write(1,20) '#'
      write(1,20) '#                 IONS : D [assumed]'
 
   case (6)
      write(1,20) '#              TOKAMAK : ',ufile_tok
      write(1,20) '#          SHOT NUMBER : ',ufile_shot
      write(1,20) '#             TIME (s) : ',ufile_time
-     write(1,30) '#    RADIAL GRIDPOINTS : ',nx
-     write(1,'(a,1pe9.2,a)') '#               Q_EDGE : ',q(nx)
-     write(1,20) '#'
 
   case (7)
      write(1,40) '#          SHOT NUMBER : [DATA MODIFIED WITH GMERGE]'
-     write(1,30) '#    RADIAL GRIDPOINTS : ',nx
-     write(1,'(a,1pe9.2,a)') '#               Q_EDGE : ',q(nx)
      write(1,20) '#'
      write(1,'(10(a,1x))') '#                 IONS : ',trim(cer_file)
 
   end select
-
-  if (format_type > 0 .and. format_type < 6) then
-     write(1,20) '# '
-     if (signpsi > 0.0) then
-        write(1,30) '#         SIGN(PSI_POL): +'
-     else
-        write(1,30) '#         SIGN(PSI_POL): -'
-     endif
-  endif
   write(1,20) '# '
   !---------------------------------------------------------------
 
@@ -129,7 +110,6 @@ subroutine prgen_write
   write(1,20) '#'
   write(1,'(a,i2)')       '#                IPCCW : ',ipccw
   write(1,'(a,i2)')       '#                BTCCW : ',btccw
-  write(1,*)
   !---------------------------------------------------------------
 
   EXPRO_n_exp = nx

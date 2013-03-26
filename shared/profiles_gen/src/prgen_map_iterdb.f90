@@ -214,11 +214,6 @@ subroutine prgen_map_iterdb
   ion_name(1+n0:onetwo_nbion+n0) = &
        onetwo_nameb(1:onetwo_nbion)
 
-  ! Sign of poloidal flux
-
-  signpsi = abs(onetwo_psi(nx)-onetwo_psi(1))/&
-       (onetwo_psi(nx)-onetwo_psi(1))
-
   ! Ion reordering diagnostics
 
   print '(a)','INFO: (prgen) Found these ion species'

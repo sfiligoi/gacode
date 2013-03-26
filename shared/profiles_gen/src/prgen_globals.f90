@@ -27,7 +27,6 @@ module prgen_globals
   integer :: btccw
   real :: dpsi_efit
   real :: dpsi_data
-  real :: signpsi
   !----------------------------------------------------------
 
   ! Internal physics variables

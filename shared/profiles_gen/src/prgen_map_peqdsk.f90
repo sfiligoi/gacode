@@ -65,9 +65,6 @@ subroutine prgen_map_peqdsk
   vec(39,:) = 0.0
   vec(40,:) = 0.0
 
-  signpsi = abs(dpsi(peqdsk_nj)-dpsi(1))/&
-       (dpsi(peqdsk_nj)-dpsi(1))
-
   ! Construct impurity temperature and density profiles assuming 
   ! Z2 given by pfile_z2:
   if (pfile_z2 > 0.0) then

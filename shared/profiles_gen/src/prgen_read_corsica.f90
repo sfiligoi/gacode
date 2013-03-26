@@ -10,7 +10,7 @@ subroutine prgen_read_corsica
   use prgen_globals
 
   implicit none
-  
+
   integer :: i
   real :: index
   character(len=16) :: buf
@@ -21,7 +21,7 @@ subroutine prgen_read_corsica
   call allocate_corsica_vars
 
   open(unit=1, file=raw_data_file, action='read', status='old')
-    
+
   ! skip header
   do 
      read(1,'(A)',err=10) buf
@@ -65,7 +65,7 @@ subroutine prgen_read_corsica
           corsica_ndt(i), corsica_nz(i), corsica_nalpha(i), &
           corsica_zeff(i), corsica_q(i), corsica_j(i), corsica_jbs(i)
   end do
-  
+
   close(1)
 
 
@@ -80,5 +80,5 @@ subroutine prgen_read_corsica
   zmag(:)   = 0.0
   zeta(:)   = 0.0
   omega0(:) = 0.0
- 
+
 end subroutine prgen_read_corsica
