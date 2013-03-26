@@ -21,7 +21,7 @@ subroutine tgyro_tglf_map
   real :: gamma_p0
 
   ! Currently TGLF uses toroidal current as reference direction
-  tglf_sign_bt_in = tgyro_btccw_in*tgyro_ipccw_in
+  tglf_sign_bt_in = signq
   tglf_sign_it_in = 1.0
 
   q_abs = abs(q(i_r))

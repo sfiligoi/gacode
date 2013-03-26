@@ -144,8 +144,6 @@ subroutine tgyro_global_iteration_driver
   EXPRO_ctrl_z = 0.0
   EXPRO_ctrl_z(1:loc_n_ion) = zi_vec(1:loc_n_ion)
   EXPRO_ctrl_numeq_flag = loc_num_equil_flag
-  EXPRO_ctrl_signq = tgyro_ipccw_in*tgyro_btccw_in
-  EXPRO_ctrl_signb = -tgyro_btccw_in
   EXPRO_ctrl_rotation_method = 1
 
   call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 

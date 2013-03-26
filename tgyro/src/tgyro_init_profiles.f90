@@ -85,8 +85,6 @@ subroutine tgyro_init_profiles
   EXPRO_ctrl_z = 0.0
   EXPRO_ctrl_z(1:loc_n_ion) = zi_vec(1:loc_n_ion)
   EXPRO_ctrl_numeq_flag = loc_num_equil_flag
-  EXPRO_ctrl_signq = tgyro_ipccw_in*tgyro_btccw_in
-  EXPRO_ctrl_signb = -tgyro_btccw_in
   EXPRO_ctrl_rotation_method = 1
 
   call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
@@ -169,6 +167,16 @@ subroutine tgyro_init_profiles
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_w0(:),n_exp,r,w0,n_r)
   ! w0p = d(w0)/dr (1/s/cm)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_w0p(:)/100.0,n_exp,r,w0p,n_r)
+  !------------------------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------------------------
+  ! Field orientation
+  !
+  ! signb = -btccw          OR     btccw = -signb  
+  ! signq = ipccw*btccw            ipccw = -signb*signq
+  !
+  signb = EXPRO_signb
+  signq = EXPRO_signq
   !------------------------------------------------------------------------------------------
 
   !------------------------------------------------------------------------------------------
