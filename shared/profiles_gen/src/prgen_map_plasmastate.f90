@@ -51,6 +51,9 @@ subroutine prgen_map_plasmastate
   !--------------------------------------------------------------------
 
   !--------------------------------------------------------------------
+  ! COORDINATES: set sign of poloidal flux 
+  dpsi(:) = abs(dpsi(:))*(-ipccw)
+  ! 
   ! Convert potential to Omega
   !
   ! omega0 = -c d(Phi)/dpsi
@@ -95,8 +98,8 @@ subroutine prgen_map_plasmastate
   vec(17,:) = 0.0 ! flow_wall
   vec(18,:) = zmag(:)
   vec(19,:) = plst_ptowb ! total pressure, thermal + fast ion
-  ! COORDINATES: set sign of poloidal flux
-  vec(20,:) = abs(dpsi(:))*(-ipccw)
+  ! COORDINATES: This poloidal flux has correct sign (see above).
+  vec(20,:) = dpsi(:)
 
   ! ni
   do i=2,min(plst_dp1_nspec_th+1,6)
