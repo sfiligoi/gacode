@@ -1,6 +1,8 @@
 from gacodeinput import *
 import sys
 
+gyro_start = sys.argv[1]
+
 x = ManagerInput()
 
 x.set_extension('.gen')
@@ -82,7 +84,7 @@ x.dep('TRANSPORT_METHOD','new parameter is TGYRO_MODE')
 x.dep('TGYRO_IPCCW','Value now inferred from input.profiles')
 x.dep('TGYRO_BTCCW','Value now inferred from input.profiles')
 
-x.read_input('input.tgyro')
+x.read_input('input.tgyro',gyro_start)
 x.write_proc('proc')
 x.printmsg()
 

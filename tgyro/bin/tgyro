@@ -75,6 +75,17 @@ then
   echo "         Create small portable copy of <simdir>."
   echo 
   echo "    tgyro_dir: Replicate TGYRO directories."
+  echo
+  echo "GYRO STARTUP CONTROL [TGYRO_MODE=3]"
+  echo
+  echo "         -start <mode>"  
+  echo "         Mode for start/restart control"
+  echo "         <mode>=nosave (start new, don't save restart data),"
+  echo "                new    (start new, save restart data) [DEFAULT],"
+  echo "                cont   (continue simulation with restart data, save restart data),"
+  echo "                retry  (continue simulation with restart data, don't save restart data),"
+  echo "                init   (continue simulation with restart data, reset time to t=0)."
+  echo
 
   exit 1
 fi
@@ -101,6 +112,7 @@ REGRESS_FLAG=0
 REGRESS_RESET=0
 SCOPY_FLAG=0
 KILL_STATUS=2
+START=new
 #=============================================================
 
 #=============================================================
@@ -138,6 +150,8 @@ while [ $# -gt 0 ] ; do
   -l) tgyro_code_lines ; exit 0 ;;
 
   -K) shift ; KILL_STATUS=1 ; LOCDIR=$1 ;;
+
+  -start) shift ; START=$1 ;;
 
   *) echo "ERROR: incorrect gyro syntax." ; exit 1 ;;
  
@@ -261,7 +275,7 @@ echo " -----------------------------------------------------------------" > $RUN
 echo " TGYRO simdir : $simdir" >> $RUNBASE
 
 rm -f $LOG_FILE
-python $TGYRO_DIR/bin/tgyro_parse.py >> $LOG_FILE
+python $TGYRO_DIR/bin/tgyro_parse.py "-start $START" >> $LOG_FILE
 
 # See if we returned with an error
 if [ $? -eq 1 ]
@@ -305,11 +319,14 @@ fi
 
 gacode_printversion TGYRO 
 
+cat $LOG_FILE
+echo "INFO: See $RUNBASE for TGYRO run summary."
+
 if [ $EXEC_FLAG -eq 1 ]
 then
    if [ $NPROC -ne $EPROC ]
    then
-       cat $LOG_FILE
+       #cat $LOG_FILE
        echo "ERROR: processor count mismatch."
        exit 1
    else

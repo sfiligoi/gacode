@@ -370,11 +370,11 @@ fi
 # Manage start control
 # 
 case "$START" in
-  nosave) echo "-1" > restart.dat ;;
-  new)    echo  "0" > restart.dat ;;
-  cont)   echo  "1" > restart.dat ;;
-  retry)  echo  "2" > restart.dat ;;
-  init)   echo  "3" > restart.dat ;;
+  nosave) echo "-1 [nosave]" > restart.dat ;;
+  new)    echo  "0 [new]" > restart.dat ;;
+  cont)   echo  "1 [continue]" > restart.dat ;;
+  retry)  echo  "2 [retry]" > restart.dat ;;
+  init)   echo  "3 [init]" > restart.dat ;;
   *) echo "ERROR: bad argument to -start." ; exit 1 ;;
 esac
 #===========================================================

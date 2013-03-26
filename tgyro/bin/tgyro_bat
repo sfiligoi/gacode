@@ -36,6 +36,16 @@ then
   echo "         -mpinuma <n>" 
   echo "         MPI tasks per active NUMA."
   echo
+  echo "GYRO STARTUP CONTROL [TGYRO_MODE=3]"
+  echo
+  echo "         -start <mode>"  
+  echo "         Mode for start/restart control"
+  echo "         <mode>=nosave (start new, don't save restart data),"
+  echo "                new    (start new, save restart data) [DEFAULT],"
+  echo "                cont   (continue simulation with restart data, save restart data),"
+  echo "                retry  (continue simulation with restart data, don't save restart data),"
+  echo "                init   (continue simulation with restart data, reset time to t=0)."
+  echo
   echo "See https://fusion.gat.com/theory/Gyroplatforms for help"
   echo " choosing -numa and -mpinuma flags."
   echo
@@ -56,6 +66,7 @@ NPROC=1
 NOMP=1
 NUMA=0
 MPINUMA=0
+START=new
 #=============================================================
 
 #=============================================================
@@ -76,6 +87,8 @@ while [ $# -gt 0 ] ; do
 
   -mpinuma) shift ; MPINUMA=$1 ;;
 
+  -start) shift ; GYRO_START=$1 ;;
+
    *) echo "ERROR: incorrect tgyro_bat syntax." ; exit 1 ;;
  
   esac
@@ -90,8 +103,14 @@ then
 fi
 SIMDIR=$SIMROOT/$LOCDIR
 
+#===========================================================
+# Manage start control
+# 
+CODE="$CODE -start $START"
+#===========================================================
+
 # Pass control to platform-specific script
 $GACODE_ROOT/shared/batch/queue.${GACODE_PLATFORM} \
- $NPROC $LOCDIR $SIMROOT $CODE $NOMP $NUMA $MPINUMA
+ $NPROC $LOCDIR $SIMROOT "$CODE" $NOMP $NUMA $MPINUMA
 
 exit 0
