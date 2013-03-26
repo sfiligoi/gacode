@@ -29,9 +29,8 @@ subroutine neo_experimental_profiles
   !
   call EXPRO_alloc(path,1)
   EXPRO_ctrl_density_method = 2  ! quasi-neutrality density flag
-  EXPRO_ctrl_signb = sign_bunit
-  EXPRO_ctrl_signq = sign_q
-  EXPRO_ctrl_rotation_method = 1 ! Standard method (Waltz=2 is not consistent with NEO).
+  EXPRO_ctrl_rotation_method = 1 ! Standard method 
+                                 ! (Waltz=2 is not consistent with NEO)
 
   if (profile_equilibrium_model == 2) then
      EXPRO_ctrl_numeq_flag = 1
@@ -70,6 +69,9 @@ subroutine neo_experimental_profiles
 
   n_grid_exp = EXPRO_n_exp
   call PROFILE_EXP_alloc(1)
+
+  sign_bunit = EXPRO_signb
+  sign_q     = EXPRO_signq
 
   !--------------------------------------------------------------
 

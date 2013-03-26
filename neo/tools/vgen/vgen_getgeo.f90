@@ -19,7 +19,7 @@ subroutine vgen_getgeo
   enddo
 
   GEO_nfourier_in = EXPRO_nfourier
-  GEO_signb_in    = EXPRO_ctrl_signb
+  GEO_signb_in    = EXPRO_signb
   call GEO_alloc(1)
 
   open(unit=1,file='out.vgen.geo',status='replace')
