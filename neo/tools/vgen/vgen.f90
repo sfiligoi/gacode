@@ -210,17 +210,8 @@ program vgen
   call EXPRO_pread
   
   ! set sign of btccw and ipccw from sign of b and q from EXPRO
-  if(EXPRO_signb < 0) then
-     neo_btccw_in = 1.0
-  else
-     neo_btccw_in = -1.0
-  endif
-
-  if(EXPRO_signq == -EXPRO_signb) then
-     neo_ipccw_in = 1.0
-  else
-     neo_ipccw_in = -1.0
-  endif
+  neo_btccw_in = -EXPRO_signb
+  neo_ipccw_in = -EXPRO_signb*EXPRO_signq
   
   if (i_proc == 0) call EXPRO_write_derived
   !---------------------------------------------------------------------
