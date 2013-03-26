@@ -18,7 +18,6 @@ subroutine gyro_timestep_error
   real :: rk_error_loc(n_kinetic,2)
   real :: rk_error(n_kinetic,2)
   real :: tol = 1e-20
-  real :: err1, err2
   !---------------------------------------------------
   rk_error_loc(:,:) = 0.0
 

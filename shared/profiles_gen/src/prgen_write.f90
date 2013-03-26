@@ -103,7 +103,7 @@ subroutine prgen_write
   write(1,'(a,1pe8.2,a)') '#  PLASMA MAJOR RADIUS : ',rmaj(nx),' m'
   write(1,'(a,1pe8.2,a)') '#  PLASMA MINOR RADIUS : ',rmin(nx),' m'
   write(1,20) '#'
-  write(1,20)    '# * Field/current orientation:'
+  write(1,20)    '# * Field/current orientationq:'
   write(1,'(a)') '# ' 
   write(1,'(a)') '#   NOTE: All variables carry correct and consistent signs' 
   write(1,'(a)') '#         in fixed gacode (r,theta,varphi) coordinates.'
@@ -114,29 +114,28 @@ subroutine prgen_write
 
   EXPRO_n_exp = nx
 
+  ! COORDINATES: For all data sources, ensure correct sign of EXPRO_b_ref 
+  !              (and thus toroidal flux)
+  !
   select case (format_type)
 
   case (0)
-     EXPRO_b_ref = null_bref
+     EXPRO_b_ref = -btccw*abs(null_bref)
      EXPRO_arho  = null_arho
   case (1)
-     ! COORDINATES: ONETWO defines Btor as along the current, so we need to 
-     ! convert to the gacode direction
-     EXPRO_b_ref = -onetwo_Btor
+     EXPRO_b_ref = -btccw*abs(onetwo_Btor)
      EXPRO_arho  = onetwo_rho_grid(onetwo_nj)
   case (2)
-     ! COORDINATES: plasmastate b_axis_vac is an absolute value, so need 
-     ! to explicitly set direction of B in gacode coordinates.
-     EXPRO_b_ref = plst_b_axis_vac*(-btccw)
+     EXPRO_b_ref = -btccw*abs(plst_b_axis_vac)
      EXPRO_arho  = sqrt(plst_phit(nx)/plst_b_axis_vac/pi)
   case (3)
-     EXPRO_b_ref = peqdsk_bref
+     EXPRO_b_ref = -btccw*abs(peqdsk_bref)
      EXPRO_arho  = peqdsk_arho
   case (5)
-     EXPRO_b_ref = corsica_bref
+     EXPRO_b_ref = -btccw*abs(corsica_bref)
      EXPRO_arho  = corsica_arho
   case (6)
-     EXPRO_b_ref = ufile_bref
+     EXPRO_b_ref = -btccw*abs(ufile_bref)
      EXPRO_arho  = ufile_arho
   end select
 

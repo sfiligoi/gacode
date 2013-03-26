@@ -67,6 +67,7 @@ OBJECTS += gyro_globals.o \
           gyro_collision_krook.o \
           gyro_conserve_number.o \
           gyro_conserve_all.o \
+          gyro_dump_input.o \
           gyro_entropy.o \
           gyro_field_fluxave.o \
           gyro_field_time_derivative.o \
@@ -85,7 +86,6 @@ OBJECTS += gyro_globals.o \
           gyro_initial_condition.o \
           gyro_initialize_arrays.o \
           gyro_initialize_timestep.o \
-          gyro_input_check.o \
           gyro_kxky_spectrum.o \
           gyro_kinetic_advance.o \
           gyro_lambda_grid.o \
@@ -146,9 +146,7 @@ OBJECTS += gyro_globals.o \
           gyro_write_step.o \
           gyro_write_timedata.o \
           gyro_write_timers.o \
-          gyro_velocity_sum.o \
-          gyro_dump_input.o \
-          gyro_dump_interface.o
+          gyro_velocity_sum.o 
 
 ifeq ($(HDF5),true)
 	FFLAGS += ${FHDF5} ${HDF5_INC}

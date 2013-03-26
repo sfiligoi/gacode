@@ -280,11 +280,11 @@ subroutine tgyro_write_input
 
      case (0)
 
-           write(1,10) 'TGYRO_EXPWD_FLAG','Turbulent exchange OFF'
-    
+        write(1,10) 'TGYRO_EXPWD_FLAG','Turbulent exchange OFF'
+
      case (1)
 
-           write(1,10) 'TGYRO_EXPWD_FLAG','Turbulent exchange ON'
+        write(1,10) 'TGYRO_EXPWD_FLAG','Turbulent exchange ON'
 
      case default
 
@@ -449,36 +449,6 @@ subroutine tgyro_write_input
      end select
      !--------------------------------------------------------
      !--------------------------------------------------------
-     select case (tgyro_rotation_theory_method)
-
-     case (1)
-
-        write(1,10) 'TGYRO_ROTATION_THEORY_METHOD','Candy method'
-
-     case (2)
-
-        write(1,10) 'TGYRO_ROTATION_THEORY_METHOD','Waltz method'
-
-        error_flag = 1
-        error_msg = 'Error: Waltz method for TGYRO_ROTATION_THEORY_METHOD not implemented.'
-
-     case default
-
-        error_flag = 1
-        error_msg = 'Error: TGYRO_ROTATION_THEORY_METHOD'
-
-     end select
-
-     if (tgyro_rotation_flag == 1) then
-        write(1,10) 'TGYRO_ROTATION_FLAG','Rotation effects ON'
-     else
-        write(1,10) 'TGYRO_ROTATION_FLAG','Rotation effects OFF'
-     endif
-     !--------------------------------------------------------
-
-
-
-     !--------------------------------------------------------
      select case (loc_quasineutral_flag)
 
      case (0)
@@ -537,6 +507,40 @@ subroutine tgyro_write_input
         write(1,20) 'ion '//trim(ion_tag(i_ion))//' charge ',zi_vec(i_ion)
      enddo
 
+     !--------------------------------------------------------
+    !--------------------------------------------------------
+     write(1,*)
+     write(1,*) 'Rotation and field orientation'
+     write(1,*) 
+     select case (tgyro_rotation_theory_method)
+
+     case (1)
+
+        write(1,10) 'TGYRO_ROTATION_THEORY_METHOD','Candy method'
+
+     case (2)
+
+        write(1,10) 'TGYRO_ROTATION_THEORY_METHOD','Waltz method'
+
+        error_flag = 1
+        error_msg = 'Error: Waltz method for TGYRO_ROTATION_THEORY_METHOD not implemented.'
+
+     case default
+
+        error_flag = 1
+        error_msg = 'Error: TGYRO_ROTATION_THEORY_METHOD'
+
+     end select
+
+     if (tgyro_rotation_flag == 1) then
+        write(1,10) 'TGYRO_ROTATION_FLAG','Rotation effects ON'
+     else
+        write(1,10) 'TGYRO_ROTATION_FLAG','Rotation effects OFF'
+     endif
+     write(1,30) 'IPCCW',-signb*signq
+     write(1,30) 'BTCCW',-signb
+     !--------------------------------------------------------
+ 
      !--------------------------------------------------------
      write(1,*)
      write(1,*) 'Input profile rescaling factors'

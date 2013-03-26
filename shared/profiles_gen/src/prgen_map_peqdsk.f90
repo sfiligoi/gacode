@@ -52,6 +52,7 @@ subroutine prgen_map_peqdsk
   vec(26,:) = peqdsk_ti(:)
 
   ! vphi
+  ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
   vec(31,:) = 0.0
   vec(32,:) = -ipccw*1e3*peqdsk_omegat(:)*(rmaj(:)+rmin(:))
   vec(33,:) = 0.0

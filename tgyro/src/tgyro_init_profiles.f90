@@ -213,7 +213,6 @@ subroutine tgyro_init_profiles
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_ei(:)*1e13,n_exp,r,p_exch_in,n_r)
   !
   if (loc_scenario == 3) then
-
      ! Assume auxiliary power is contained in pow_e and pow_i 
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e(:)*1e13,n_exp,r,p_e_aux_in,n_r)
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_i(:)*1e13,n_exp,r,p_i_aux_in,n_r)
@@ -222,7 +221,6 @@ subroutine tgyro_init_profiles
      p_e_aux_in = tgyro_input_paux_scale*p_e_aux_in
      p_i_aux_in = tgyro_input_paux_scale*p_i_aux_in
   else
-
      ! Integrated electron and ion powers
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e(:)*1e13,n_exp,r,p_e_in,n_r)
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_i(:)*1e13,n_exp,r,p_i_in,n_r)
@@ -317,7 +315,11 @@ subroutine tgyro_init_profiles
   !----------------------------------------------------------
   ! Primitive quantity to evolve for rotation/Er evolution is 
   !
-  ! f_rot = (a/c_s)*gamma_p = w0p/w0p_norm
+  ! f_rot = (a/cs)*gamma_p 
+  !       = (a/cs)*(-R0*w0p)
+  !       = w0p/w0p_norm     
+  !
+  ! where w0p_norm = -cs/(a*R0).
   !
   ! First, "bogus" unity normalization since c_s is unknown
   w0p_norm = 1.0

@@ -646,7 +646,7 @@ subroutine gyro_profile_init
   endif
   !
   ic = 0
-  c_map(:) = 0.0
+  c_map(:) = 0
   do is=1,n_spec
 
      if (is /= indx_e) then 

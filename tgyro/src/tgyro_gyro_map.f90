@@ -4,6 +4,7 @@ subroutine tgyro_gyro_map
   use gyro_interface
 
   implicit none
+  integer :: i_ion
   real :: gamma_eb0,gamma_p0,u000
 
   ! Initialize GYRO
@@ -89,18 +90,20 @@ subroutine tgyro_gyro_map
   gyro_n_fourier_geo_in = n_fourier_geo
   gyro_a_fourier_geo_in(:,:) = a_fourier_geo(:,:,i_r)
 
-  ! Note that we have to "deconvert" the rotation parameters to 
-  ! omega_0+ form, with sign controlled by gyro_ipccw_in, etc.
 
   if (tgyro_rotation_flag == 1) then
+
+     ! COORDINATES: The signs of all rotation-related quantities below are 
+     ! inherited (unchanged) from input.profiles.  In general GYRO expects 
+     ! these to be correctly signed/oriented.
 
      u000      = r_maj(i_r)*w0(i_r)
      gamma_p0  = -r_maj(i_r)*w0p(i_r)
      gamma_eb0 = gamma_p0*r(i_r)/(q(i_r)*r_maj(i_r)) 
 
      gyro_gamma_e_in = gamma_eb0*r_min/c_s(i_r)
-     gyro_pgamma_in = gamma_p0*r_min/c_s(i_r)
-     gyro_mach_in = u000/c_s(i_r)
+     gyro_pgamma_in  = gamma_p0*r_min/c_s(i_r)
+     gyro_mach_in    = u000/c_s(i_r)
 
   else
 

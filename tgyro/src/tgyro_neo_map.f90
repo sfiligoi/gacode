@@ -114,7 +114,12 @@ subroutine tgyro_neo_map
 
   endif
 
-  ! Rotation is always active
+  ! Rotation is always *on* in NEO.
+  !
+  ! COORDINATES: The signs of all rotation-related quantities below are 
+  ! inherited (unchanged) from input.profiles.  In general NEO expects 
+  ! these to be correctly signed/oriented.
+
   gamma_p0  = -r_maj(i_r)*w0p(i_r)
   u000      = r_maj(i_r)*w0(i_r)
 

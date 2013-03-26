@@ -112,12 +112,6 @@ subroutine gyro_do
      ! Dump the global input variables (read from input.gyro)
      call gyro_dump_input
 
-     ! Dump the interface variables for comparison
-     call gyro_dump_interface
-
-     ! Sanity check the interface variables
-     call gyro_input_check
-
   endif
   !----------------------------------------------------------------
 
