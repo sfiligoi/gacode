@@ -38,7 +38,7 @@ subroutine tgyro_neo_map
   neo_equilibrium_model_in = 2
   neo_rmin_over_a_in       = r(i_r)/r_min
   neo_rmaj_over_a_in       = r_maj(i_r)/r_min
-  neo_q_in                 = q(i_r)
+  neo_q_in                 = abs(q(i_r))
   neo_shear_in             = s(i_r)
   neo_shift_in             = shift(i_r)
   neo_kappa_in             = kappa(i_r)
@@ -46,8 +46,8 @@ subroutine tgyro_neo_map
   neo_delta_in             = delta(i_r)
   neo_s_delta_in           = s_delta(i_r)
 
-  neo_ipccw_in = int(tgyro_ipccw_in)
-  neo_btccw_in = int(tgyro_btccw_in)
+  neo_ipccw_in = -signb*signq
+  neo_btccw_in = -signb
 
   neo_n_species_in = loc_n_ion+1
   neo_rho_star_in  = 0.001
@@ -120,9 +120,9 @@ subroutine tgyro_neo_map
 
   neo_rotation_model_in = 2
   neo_omega_rot_in = u000 * r_min / r_maj(i_r) &
-       / (c_s(i_r) * sqrt(ti(1,i_r)/te(i_r))) * (-1.0*tgyro_ipccw_in)
+       / (c_s(i_r) * sqrt(ti(1,i_r)/te(i_r)))
   neo_omega_rot_deriv_in = -gamma_p0 * r_min**2 / r_maj(i_r) &
-       / (c_s(i_r) * sqrt(ti(1,i_r)/te(i_r))) * (-1.0*tgyro_ipccw_in)
+       / (c_s(i_r) * sqrt(ti(1,i_r)/te(i_r)))
 
   ! Parameter only used for global runs.
   neo_rmin_over_a_2_in = neo_rmin_over_a_in

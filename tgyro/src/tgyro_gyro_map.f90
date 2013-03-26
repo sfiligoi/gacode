@@ -18,7 +18,7 @@ subroutine tgyro_gyro_map
   ! Force TGYRO to handle profile parameter calculation
   gyro_radial_profile_method_in = 5
 
-  gyro_safety_factor_in = q(i_r)
+  gyro_safety_factor_in = abs(q(i_r))
   gyro_shear_in = s(i_r)
   gyro_delta_in = delta(i_r)
   gyro_s_delta_in = s_delta(i_r)
@@ -110,7 +110,7 @@ subroutine tgyro_gyro_map
 
   endif
 
-  gyro_ipccw_in = tgyro_ipccw_in
-  gyro_btccw_in = tgyro_btccw_in
+  gyro_ipccw_in = -real(signb*signq)
+  gyro_btccw_in = -real(signb)
 
 end subroutine tgyro_gyro_map

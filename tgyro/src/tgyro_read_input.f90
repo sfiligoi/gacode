@@ -84,8 +84,6 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(loc_num_equil_flag)
   call tgyro_readbc_int(neo_gv_flag)
   call tgyro_readbc_int(tglf_q_low_flag)
-  call tgyro_readbc_real(tgyro_ipccw_in)
-  call tgyro_readbc_real(tgyro_btccw_in)
   call tgyro_readbc_int(tgyro_global_newton_flag)
   call tgyro_readbc_int(tgyro_backtrack_method)
   call tgyro_readbc_int(tgyro_iteration_method)
