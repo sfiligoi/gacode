@@ -53,7 +53,7 @@ subroutine prgen_map_peqdsk
 
   ! vphi
   vec(31,:) = 0.0
-  vec(32,:) = peqdsk_omegat(:)*1000*(rmaj(:)+rmin(:))
+  vec(32,:) = -ipccw*1e3*peqdsk_omegat(:)*(rmaj(:)+rmin(:))
   vec(33,:) = 0.0
   vec(34,:) = 0.0
   vec(35,:) = 0.0
