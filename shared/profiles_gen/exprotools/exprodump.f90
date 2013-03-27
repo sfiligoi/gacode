@@ -79,9 +79,6 @@ program exprodump
 
   else   
 
-    
-
-
      do i=1,EXPRO_n_exp
 
         ! Column 1

@@ -590,7 +590,8 @@ then
        then
        cp ../$FILE.geo input.profiles.geo
    else
-       echo "Warning: $FILE.geo not found."
+       echo "WARNING: (profiles_gen) $FILE.geo not found."
+       echo "         This may cause VGEN to fail if input.neo uses numerical eq."
    fi
 
    python $NEO_DIR/bin/neo_parse.py
@@ -604,7 +605,8 @@ then
 
    if [ -f "input.profiles.new" ]
    then
-       cp input.profiles.new ..
+       mv input.profiles.new input.profiles
+       echo "INFO: (profiles_gen) VGEN created vgen/input.profiles, vgen/input.profiles.extra"
    fi
 
    exit 0
