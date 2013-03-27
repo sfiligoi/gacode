@@ -58,12 +58,14 @@ SUBROUTINE xgrid_functions_sa
      wE = MIN(kyi/0.3,1.0)*vexb_shear_s/gamma_reference_kx0(1)
      ! write(*,*)"wE=",wE
      kx0_e = -(0.36*vexb_shear_s/gamma_reference_kx0(1) + 0.38*wE*TANH((0.69*wE)**6))
-     a0 = alpha_e_in*2.0
-     if(alpha_e_in.ne.0.0)then
-        kx0_e = a0*TANH(kx0_e/a0)
-     else
-        kx0_e = 0.0
-     endif
+     a0 = alpha_e_in*1.3
+     if(ABS(kx0_e).gt.a0)kx0_e = a0*kx0_e/ABS(kx0_e)
+!     a0 = alpha_e_in*2.0
+!     if(alpha_e_in.ne.0.0)then
+!        kx0_e = a0*TANH(kx0_e/a0)
+!     else
+!        kx0_e = 0.0
+!     endif
      !
      ! EPS2011 kx0 = alpha_kx_e_in*0.19*TANH(vexb_shear_s*rmaj_sa/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
      ! EPS2011 kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*rmaj_sa/vs(2)) &
@@ -237,12 +239,14 @@ SUBROUTINE xgrid_functions_geo
      !! kx0_e = -(0.36*vexb_shear_s/gamma_reference_kx0(1) + 0.29*wE*TANH((0.71*wE)**6))
      kx0_e = -(0.36*vexb_shear_s/gamma_reference_kx0(1) + 0.38*wE*TANH((0.69*wE)**6))
      !a=3.0 kx0_e = -(0.36*vexb_shear_s/gamma_reference_kx0(1) + 0.32*wE*TANH((0.71*wE)**6))
-     a0 = alpha_e_in*2.0
-     if(alpha_e_in.ne.0.0)then
-        kx0_e = a0*TANH(kx0_e/a0)
-     else
-        kx0_e = 0.0
-     endif
+!     a0 = alpha_e_in*2.0
+!     if(alpha_e_in.ne.0.0)then
+!        kx0_e = a0*TANH(kx0_e/a0)
+!     else
+!        kx0_e = 0.0
+!     endif
+     a0 = alpha_e_in*1.3
+     if(ABS(kx0_e).gt.a0)kx0_e = a0*kx0_e/ABS(kx0_e)
      !
      !APS2010 kx0 = alpha_kx_e_in*0.19*TANH(vexb_shear_s*Rmaj_s/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky
      !EPS2011 kx0 = kx0 -alpha_kx_p_in*sign_Bt_in*TANH((0.26/3.0)*vpar_shear_in(2)*Rmaj_s/vs(2)) &

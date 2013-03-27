@@ -70,7 +70,7 @@ c 9-14-99 added integer array mask_r(0:50)
 c   put nstk_s before mprint in common block
 c---------------------------------------------------------------------
       integer jmaxmt, kmaxmt, stkmax, icalleimx,nspecies
-      parameter (jmaxmt=300, kmaxmt=5800, stkmax=1, icalleimx=100)
+      parameter (jmaxmt=300, kmaxmt=800, stkmax=1, icalleimx=100)
       parameter (nspecies=3)
       complex*16 xi
 c..301x2001 elements

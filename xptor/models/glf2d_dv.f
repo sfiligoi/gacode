@@ -1247,15 +1247,24 @@ c     >  *theta_exp(jm)*(vexb_m(jm+1)-vexb_m(jm))/dr(jm,2)
       endif
 c      if(jm.eq.ngrid-1.and.itport_pt(5).eq.0)vexb_shear_tg=0.0
 c
-      vpar_shear_tg(1) = -sign_Bt_exp*(cv/(csdam))*drhodr(jm)*
-     >  (apolm*(gradvpolm+gradvneom(1))+atorm*(gradvexbm+gradvdiam(1))) 
+c      vpar_shear_tg(1) = -sign_Bt_exp*(cv/(csdam))*drhodr(jm)*
+c     >  (apolm*(gradvpolm+gradvneom(1))+atorm*(gradvexbm+gradvdiam(1))) 
 cc     >  +(vpolm+vneom(1))*grad_a_pol+(vexbm+vdiam(1))*grad_a_tor)
-      vpar_shear_tg(2) = -sign_Bt_exp*(cv/(csdam))*drhodr(jm)*
-     >  (apolm*(gradvpolm+gradvneom(2))+atorm*(gradvexbm+gradvdiam(2))) 
+c      vpar_shear_tg(2) = -sign_Bt_exp*(cv/(csdam))*drhodr(jm)*
+c     >  (apolm*(gradvpolm+gradvneom(2))+atorm*(gradvexbm+gradvdiam(2))) 
 cc     >  +(vpolm+vneom(2))*grad_a_pol+(vexbm+vdiam(2))*grad_a_tor)
-      vpar_shear_tg(3) = -sign_Bt_exp*(cv/(csdam))*drhodr(jm)*
-     >  (apolm*(gradvpolm+gradvneom(3))+atorm*(gradvexbm+gradvdiam(3))) 
+c      vpar_shear_tg(3) = -sign_Bt_exp*(cv/(csdam))*drhodr(jm)*
+c     >  (apolm*(gradvpolm+gradvneom(3))+atorm*(gradvexbm+gradvdiam(3))) 
 cc     >  +(vpolm+vneom(3))*grad_a_pol+(vexbm+vdiam(3))*grad_a_tor)
+      vpar_shear_tg(1) = -sign_Bt_exp*(cv/csdam)*drhodr(jm)*
+     >  (rmajm/rmajor_exp)*(gradvexbm+gradvdiam(1)+
+     >  (apolm/atorm)*(gradvpolm+gradvneom(1))) 
+      vpar_shear_tg(2) = -sign_Bt_exp*(cv/csdam)*drhodr(jm)*
+     >  (rmajm/rmajor_exp)*(gradvexbm+gradvdiam(2)+
+     >  (apolm/atorm)*(gradvpolm+gradvneom(2))) 
+      vpar_shear_tg(3) = -sign_Bt_exp*(cv/csdam)*drhodr(jm)*
+     >  (rmajm/rmajor_exp)*(gradvexbm+gradvdiam(3)+
+     >  (apolm/atorm)*(gradvpolm+gradvneom(3))) 
 c
       if(ipert_gf.eq.0)gamma_p_m(jm)=sign_Bt_exp*vpar_shear_tg(2)
 c
@@ -1308,8 +1317,8 @@ c        vts_shear_tg(3) = 0.0
 c      endif
       if(vpar_shear_model_tg.eq.1)then
 c use GYRO conventions
-        gamma_p_m(jm) = -(cv/csdam)*drhodr(jm)*gradvexbm
-        vpar_shear_tg(1) = sign_Bt_exp*gamma_p_m(jm)
+        gamma_p_m(jm) =-(cv/csdam)*drhodr(jm)*gradvexbm*rmajm/rmajor_exp
+        vpar_shear_tg(1) = sign_It_exp*gamma_p_m(jm)
         vpar_shear_tg(2) = vpar_shear_tg(1)
         vpar_shear_tg(3) = vpar_shear_tg(3)
         vns_shear_tg(1) = 0.0
@@ -1373,21 +1382,25 @@ c
       xnue_tg =xnu_m(jm)
       zeff_tg=zeffm
       vexb_tg=0.0
-      vpar_tg(1) = sign_Bt_exp*cv*(a_pol(jm)*(vpolm+vneom(1))
-     >     +a_tor(jm)*(vexbm+vdiam(1)))/(a_unit_exp*csdam)
-      vpar_tg(2) = sign_Bt_exp*cv*(a_pol(jm)*(vpolm+vneom(2))
-     >     +a_tor(jm)*(vexbm+vdiam(2)))/(a_unit_exp*csdam)
-      vpar_tg(3) = sign_Bt_exp*cv*(a_pol(jm)*(vpolm+vneom(3))
-     >     +a_tor(jm)*(vexbm+vdiam(3)))/(a_unit_exp*csdam)
-c      vpar_tg(1) = sign_Bt_exp*cv*(a_pol(jm)*(vpol_m(jm)+vneo_m(1,jm))
-c     >     +a_tor(jm)*(vexb_m(jm)+vdia_m(1,jm)))/(a_unit_exp*csdam)
-c      vpar_tg(2) = sign_Bt_exp*cv*(a_pol(jm)*(vpol_m(jm)+vneo_m(2,jm))
-c     >     +a_tor(jm)*(vexb_m(jm)+vdia_m(2,jm)))/(a_unit_exp*csdam)
-c      vpar_tg(3) = sign_Bt_exp*cv*(a_pol(jm)*(vpol_m(jm)+vneo_m(3,jm))
-c     >     +a_tor(jm)*(vexb_m(jm)+vdia_m(3,jm)))/(a_unit_exp*csdam)
+c      vpar_tg(1) = sign_Bt_exp*cv*(a_pol(jm)*(vpolm+vneom(1))
+c     >     +a_tor(jm)*(vexbm+vdiam(1)))/(a_unit_exp*csdam)
+c      vpar_tg(2) = sign_Bt_exp*cv*(a_pol(jm)*(vpolm+vneom(2))
+c     >     +a_tor(jm)*(vexbm+vdiam(2)))/(a_unit_exp*csdam)
+c      vpar_tg(3) = sign_Bt_exp*cv*(a_pol(jm)*(vpolm+vneom(3))
+c     >     +a_tor(jm)*(vexbm+vdiam(3)))/(a_unit_exp*csdam)
+      vpar_tg(1) = sign_Bt_exp*cv*rmajm/rmajor_exp*
+     >   (vexbm+vdiam(1)+(apolm/atorm)*(vpolm+vneom(1)))
+     >   /(a_unit_exp*csdam)
+      vpar_tg(2) = sign_Bt_exp*cv*rmajm/rmajor_exp*
+     >   (vexbm+vdiam(2)+(apolm/atorm)*(vpolm+vneom(2)))
+     >   /(a_unit_exp*csdam)
+      vpar_tg(3) = sign_Bt_exp*cv*rmajm/rmajor_exp*
+     >  (vexbm+vdiam(3)+(apolm/atorm)*(vpolm+vneom(3)))
+     >   /(a_unit_exp*csdam)
       if(vpar_shear_model_tg.eq.1)then
 c use GYRO conventions
-        vpar_tg(1) = sign_Bt_exp*cv*a_tor(jm)*vexbm/(a_unit_exp*csdam)
+        vpar_tg(1) = sign_It_exp*cv*(rmajm/rmajor_exp)
+     >              *vexbm/(a_unit_exp*csdam)
         vpar_tg(2) = vpar_tg(1)
         vpar_tg(3) = vpar_tg(1)
       endif

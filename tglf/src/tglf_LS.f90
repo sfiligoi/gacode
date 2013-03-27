@@ -840,12 +840,13 @@
        b33 = (b1 - b3)/(3.0)
        d33 = (d1 - d3)/(3.0)
 !
-       if(vpar_shear_model_in.eq.1)then  
+!       if(vpar_shear_model_in.eq.1)then  
 ! include R(theta)/R0 factor like gyro convetions. Note that sign_Bt_in is in ave_c_tor_par
          do is=1,ns
-           vpar_shear_s(is)=sign_It_in*alpha_p_in*vpar_shear_in(is)*ave_c_tor_par(1,1)/Rmaj_input
+           vpar_shear_s(is)=sign_It_in*alpha_p_in*vpar_shear_in(is)*sign_Bt_in*ave_c_tor_par(1,1)/Rmaj_input
+           if(vpar_model_in.eq.0)vpar_s(is) = sign_It_in*vpar_in(is)*sign_Bt_in*ave_c_tor_par(1,1)/Rmaj_input
          enddo
-       endif
+!       endif
 !
 !  compute electron-ion collsion model coefficients
 !
@@ -1158,9 +1159,9 @@
          hr11 = ave_hr11p0(is,ib,jb)
          hr13 = ave_hr13p0(is,ib,jb)
          hr33 = ave_hr33p0(is,ib,jb)
-         c_tor_par_hp1 = ave_c_tor_par_hp1p0(is,ib,jb)
-         c_tor_par_hr11 = ave_c_tor_par_hr11p0(is,ib,jb)
-         c_tor_par_hr13 = ave_c_tor_par_hr13p0(is,ib,jb)
+         c_tor_par_hp1 = ave_c_tor_par_hp1p0(is,ib,jb)/Rmaj_input
+         c_tor_par_hr11 = ave_c_tor_par_hr11p0(is,ib,jb)/Rmaj_input
+         c_tor_par_hr13 = ave_c_tor_par_hr13p0(is,ib,jb)/Rmaj_input
 !        write(*,*)is,ib,jb
 !        write(*,*)hn,hp1,hp3
 !        write(*,*)hr11,hr13,hr33
@@ -1362,9 +1363,9 @@
          gr11 = ave_gr11p0(is,ib,jb)
          gr13 = ave_gr13p0(is,ib,jb)
          gr33 = ave_gr33p0(is,ib,jb)
-         c_tor_par_gp1 = ave_c_tor_par_gp1p0(is,ib,jb)
-         c_tor_par_gr11 = ave_c_tor_par_gr11p0(is,ib,jb)
-         c_tor_par_gr13 = ave_c_tor_par_gr13p0(is,ib,jb)
+         c_tor_par_gp1 = ave_c_tor_par_gp1p0(is,ib,jb)/Rmaj_input
+         c_tor_par_gr11 = ave_c_tor_par_gr11p0(is,ib,jb)/Rmaj_input
+         c_tor_par_gr13 = ave_c_tor_par_gr13p0(is,ib,jb)/Rmaj_input
 !         c_tor_par_gp1 = B2_ave_out*gp1
 !         c_tor_par_gr11 = B2_ave_out*gr11
 !         c_tor_par_gr13 = B2_ave_out*gr13
