@@ -10,7 +10,7 @@
 !  1. ONETWO iterdb text (no extenstion)  
 !  2. ONETWO iterdb NetCDF (*.nc)
 !  3. PEQDSK text (*.peq)
-!  4. PLASMA STATE NetCDF (*.cdf)
+!  4. PLASMA STATE NetCDF (*.cdf, *.CDF)
 !  5. CORSICA text (*.corsica)
 !  6. UFILE text (UFILE)
 !
@@ -34,17 +34,18 @@ program prgen
   read(1,'(a)') date
   read(1,'(a)') raw_data_file
   read(1,'(a)') cer_file
-  read(1,*) gato_flag
+  read(1,*) efit_method
   read(1,*) nogatoq_flag
   read(1,*) verbose_flag
   read(1,*) pfile_z2
   read(1,*) gmerge_flag
+  read(1,*) ipccw
+  read(1,*) btccw
   read(1,*) reorder_vec(:)
   close(1)
   !--------------------------------------------------
 
-  n_indx  = size(EXPRO_tag)
-  n_indx2 = size(EXPRO_tag2) 
+  n_indx  = size(EXPRO_tag) 
 
   !------------------------------------------------------------------
   ! Read the iterdb file and define standard variables.
@@ -53,19 +54,19 @@ program prgen
   !
   if (gmerge_flag == 1) then
 
-    call prgen_read_inputprofiles
+     call prgen_read_inputprofiles
 
-    format_type = 7
+     format_type = 7
 
   else if (trim(raw_data_file) == 'null') then
- 
-    ! Pure gfile parsing
 
-    format_type = 0
+     ! Pure gfile parsing
 
-    ! Minimal processing required to merge gfile data into otherwise
-    ! empty input.profiles output file.
-    call prgen_read_null
+     format_type = 0
+
+     ! Minimal processing required to merge gfile data into otherwise
+     ! empty input.profiles output file.
+     call prgen_read_null
 
   else if (index(raw_data_file,'.nc') /= 0) then
 
@@ -76,7 +77,7 @@ program prgen
 
      call prgen_read_iterdb_nc
 
-  else if (index(raw_data_file,'.cdf') /= 0) then
+  else if (index(raw_data_file,'.cdf') /= 0 .or. index(raw_data_file,'.CDF') /= 0) then
 
      ! Plasmastate format
      print '(a)','INFO: (prgen) Assuming plasma_state format.'
@@ -92,7 +93,7 @@ program prgen
 
      format_type = 3
 
-     if (gato_flag /= 1) then
+     if (efit_method == 0) then
         print '(a)','ERROR: (prgen) geqdsk must be provided for peqdsk format'
         stop
      endif
@@ -106,7 +107,7 @@ program prgen
 
      format_type = 5
 
-     if (gato_flag /= 1) then
+     if (efit_method == 0) then
         print '(a)','WARNING: (prgen) geqdsk must be provided for corsica format'
      endif
 
@@ -138,7 +139,16 @@ program prgen
   ! point, GATO has already run and we are just reading 
   ! the output.
   !
-  if (gato_flag == 1) call prgen_read_gato
+  select case (efit_method)
+  case (1)
+     ! Use geometry data contained in profile data 
+  case (2)
+     ! Use GATO-EFIT mapper
+     call prgen_read_gato
+  case (3)
+     ! Use OMFIT-EFIT mapper
+     call prgen_read_omfit
+  end select
   !---------------------------------------------------
 
   select case (format_type)

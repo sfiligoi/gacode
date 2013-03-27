@@ -207,20 +207,12 @@ program vgen
      EXPRO_ctrl_numeq_flag = 0
   endif
 
-  ! set sign of b and q for EXPRO
-  if(neo_btccw_in > 0) then
-     EXPRO_ctrl_signb = -1.0
-  else
-     EXPRO_ctrl_signb =  1.0
-  endif
-
-  if(neo_ipccw_in > 0) then
-     EXPRO_ctrl_signq = -EXPRO_ctrl_signb
-  else
-     EXPRO_ctrl_signq =  EXPRO_ctrl_signb
-  endif
-
   call EXPRO_pread
+  
+  ! set sign of btccw and ipccw from sign of b and q from EXPRO
+  neo_btccw_in = -EXPRO_signb
+  neo_ipccw_in = -EXPRO_signb*EXPRO_signq
+  
   if (i_proc == 0) call EXPRO_write_derived
   !---------------------------------------------------------------------
 
@@ -363,8 +355,8 @@ program vgen
 
         er_exp(i) = (vtor_diff/(vth_norm * EXPRO_rmin(EXPRO_n_exp)))  &
              / (neo_rmaj_over_a_in + neo_rmin_over_a_in) &
-             * neo_rmin_over_a_in / (abs(neo_q_in) * EXPRO_ctrl_signq) &
-             / (abs(neo_rho_star_in) * EXPRO_ctrl_signb) &
+             * neo_rmin_over_a_in / (abs(neo_q_in) * EXPRO_signq) &
+             / (abs(neo_rho_star_in) * EXPRO_signb) &
              * EXPRO_grad_r0(i) &
              * (temp_norm*temp_norm_fac / charge_norm_fac &
              / EXPRO_rmin(EXPRO_n_exp)) / 1000

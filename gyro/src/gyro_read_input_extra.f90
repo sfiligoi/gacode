@@ -24,9 +24,11 @@ subroutine gyro_read_input_extra
      !-------------------------------------------------------------------
      ! Parse restart.dat.
      ! 
-     ! -1 -> no restarts
-     !  0 -> begin simulation
-     !  1 -> restart simulation
+     ! -1=no save/restart
+     !  0=begin new simulation
+     !  1=restart, continue writing restart files
+     !  2=restart, but do not write restart files
+     !  3=restart, set t=0
      !
      if (i_proc == 0) then
         inquire(file=trim(path)//'restart.dat',exist=lfe)

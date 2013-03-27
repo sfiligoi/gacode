@@ -307,7 +307,7 @@ contains
        enddo
     endif       
 
-    ! Bootstrap current = sum <Z*n*upar Bp>
+    ! Bootstrap current = sum <Z*n*upar B>
     jpar = 0.0
     do is=1, n_species
        jpar = jpar + Z(is) * uparBN(is) 

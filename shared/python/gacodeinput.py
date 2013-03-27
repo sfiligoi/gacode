@@ -7,7 +7,7 @@
 # NOTES: 
 #  SimpleInput  : input.gyro, input.neo, input.tglf 
 #  ProfileInput : input.profiles
-#  ManagerInput : input.tgyro
+#  ManagerInput : input.tgyro [see tgyro/bin/tgyro_parse.py]
 #
 # AUTHOR(S): 
 #  Jeff Candy
@@ -153,7 +153,8 @@ class ProfileInput:
                     # Write scalar data into temp file
                     file_temp.write(line+'\n')
                 else:
-# Originally '  ' was the pattern:       data = string.splitfields(line,'   ')
+                    # Originally '  ' was the pattern:       
+                    #  data = string.splitfields(line,'   ')
                     data = string.split(line)
                     ncol = len(data)
                     for j in range (0,ncol):
@@ -270,7 +271,7 @@ class ManagerInput:
         file_input.close()
 
 
-    def read_input(self,datafile):
+    def read_input(self,datafile,gyro_start):
 
         # Eventual output file
         outfile = datafile+self.extension
@@ -363,7 +364,7 @@ class ManagerInput:
                 os.system('cat '+self.overlayfile[p]+' >> '+tempfile)
                 os.system('mv '+tempfile+' '+basefile)
 
-                os.system('gyro -i '+basedir+' -n 1 -p $PWD')
+                os.system('gyro -i '+basedir+' -n 1 -nomp 1 -p $PWD '+gyro_start)
                 cpu = self.getcpu(basedir)
                 print 'INFO: Processed input.* in '+basedir+'; CPU_max='+str(cpu)
 

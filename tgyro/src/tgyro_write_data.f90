@@ -339,7 +339,7 @@ subroutine tgyro_write_data(i_print)
           te(i)/1e3,&
           ti(1,i)/te(i),&
           betae_unit(i),&
-          u00(i)/c_s(i)/(-tgyro_ipccw_in)
+          u00(i)/c_s(i)
   enddo
 
   close(1)
@@ -357,8 +357,8 @@ subroutine tgyro_write_data(i_print)
           r_min*dlntidr(1,i),&
           r_min*dlntedr(i),&
           r_min*dlnpdr(i),&
-          r_min/c_s(i)*gamma_eb(i)/(-tgyro_btccw_in),&
-          r_min/c_s(i)*gamma_p(i)/(-tgyro_ipccw_in)
+          r_min/c_s(i)*gamma_eb(i),&
+          r_min/c_s(i)*gamma_p(i)
   enddo
 
   close(1)

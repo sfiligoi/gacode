@@ -1,16 +1,21 @@
-FUNCTION get_input_profiles, simdir, FILENAME=filename, DIRLOC=dirloc
+FUNCTION get_input_profiles, simdir, FILENAME=filename, $
+  EXTRA_FILENAME=extra_filename, DIRLOC=dirloc
 ;
 ; C. Holland, UCSD
 ;
 ; v1.0: Sept. 15,2011 stolen from get_loc_tgyro_data.pro
 ; v2.0: May 11, 2012 updated to read in input.profiles files with arbitrary names
 ;	(e.g. input.profiles.orig, old.input.prof, etc.)
+; v2.1: March 13, 2013 updated to get vprime for input.profiles.extra
 ;
 ; Reads in input.profiles from a local subdirectory
 ;
 ; KEYWORDS
 ; simdir: string containing name of valid subdirectory in local directory
-; filename: name of input.profiles file to open, defaults to input.profiles
+; filename: name of input.profiles file to open, defaults to
+; input.profiles
+; extra_filename: name of input.profiles.extra filename to open,
+; defaults to input.profiles.extra
 ; dirloc: string with pathname to directory containing simdir
 ;
   IF N_ELEMENTS(simdir) EQ 0 THEN BEGIN
@@ -23,6 +28,7 @@ FUNCTION get_input_profiles, simdir, FILENAME=filename, DIRLOC=dirloc
   dirpath = dirloc + '/' + simdir + '/'
 
   DEFAULT, filename, 'input.profiles'
+  DEFAULT, extra_filename, 'input.profiles.extra'
 
   s = STRING('#')
   OPENR, 1, dirpath + filename, ERROR=err
@@ -115,6 +121,27 @@ FUNCTION get_input_profiles, simdir, FILENAME=filename, DIRLOC=dirloc
 
   CLOSE, 1
 
+  n_exp_profile = 25            ;should be 37, but use 25 for back-compatibility
+  arr = FLTARR(exp_n_rho, n_exp_profile)
+  OPENR, 1, dirpath + extra_filename, ERR=i_err
+  IF (i_err NE 0) THEN PRINT, "Could find " + extra_filename ELSE BEGIN
+      ;need to skip over comment lines
+      s = ' '
+      n_cmt = 0
+      readf, 1, s
+      while (strpos(s,'#') EQ 0) do begin
+          n_cmt += 1
+          readf, 1, s
+      endwhile
+      close, 1
+      openr, 1, dirpath + extra_filename
+      for ii = 0, n_cmt-1 do readf, 1, s
+      
+      READF, 1, arr
+      CLOSE, 1
+  ENDELSE
+  exp_vprime = REFORM(arr[*,23])
+
  data = {simdir: simdir, $     ;simulation directory
 
           ;experimental profile info, form FLTARR[EXP_N_RHO]
@@ -128,6 +155,7 @@ FUNCTION get_input_profiles, simdir, FILENAME=filename, DIRLOC=dirloc
           exp_delta: exp_delta, $ ;triangularity
           exp_zeta: exp_zeta, $ ;squareness
           exp_zmag: exp_zmag, $ ;Z0(r)  ;m
+          exp_vprime: exp_vprime, $ ;dV/drmin m^2
           exp_omega0: exp_omega0, $     ; 1/s
           exp_Te: exp_Te, $     ; keV
           exp_ne: exp_ne, $     ; 10**19/m**3

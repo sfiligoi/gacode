@@ -13,7 +13,6 @@ subroutine EXPRO_read_driver
   implicit none
 
   integer, parameter :: io=1
-  integer :: i
   integer :: ierr
 
   real, dimension(:), allocatable :: dummy
@@ -93,27 +92,11 @@ subroutine EXPRO_read_driver
   close(io)
   !--------------------------------------------------------------
 
-  ! Change signs according to orientation control parameters
-
-  EXPRO_b_ref = EXPRO_ctrl_signb*abs(EXPRO_b_ref)
-  EXPRO_q(:)  = EXPRO_ctrl_signq*abs(EXPRO_q(:))
-
   !--------------------------------------------------------------
   ! READ general shape coefficients if they exist: 
   !
   if (EXPRO_nfourier > 0) then
-
-     open(unit=io,&
-          file=trim(path)//'input.profiles.geo',&
-          status='old')
-
-     read(io,*) i
-     do i=1,EXPRO_n_exp
-        read(io,*) EXPRO_geo(:,:,i)
-     enddo
-
-     close(io)
-
+     call EXPRO_read_geo
   endif
   !--------------------------------------------------------------
 

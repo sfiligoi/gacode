@@ -224,6 +224,11 @@ module tgyro_globals
   integer :: n_fourier_geo
   real, dimension(:,:,:), allocatable :: a_fourier_geo
   !
+  ! Orientation
+  !
+  integer :: signb
+  integer :: signq
+  !
   ! Control variables
   !
   integer :: tgyro_mode
@@ -247,8 +252,6 @@ module tgyro_globals
   integer :: loc_chang_hinton
   integer :: loc_circ_flag
   real :: loc_me_multiplier
-  real :: tgyro_ipccw_in
-  real :: tgyro_btccw_in
   integer :: loc_sawtooth_model
   integer :: loc_bc_offset
   integer :: tgyro_tglf_revision
@@ -285,6 +288,7 @@ module tgyro_globals
   real :: tgyro_input_paux_scale
   integer :: tgyro_er_bc
   integer :: tgyro_noturb_flag
+  integer :: tgyro_use_rho
   !
   ! Iteration variables (global)
   !

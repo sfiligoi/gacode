@@ -4,6 +4,8 @@ FUNCTION read_gyro_profile_data, simdir, profile_data
 ;
 ; v6.0: 8.25.2011
 ;         updated for new gacode out.gyro.profile file
+; v6.1: 3.13.2013
+;         updated for changes to out.gyro.profile
 
   dirpath = GETENV('GYRO_DIR') + '/sim/' + simdir
   filepath =  dirpath + '/out.gyro.profile'  
@@ -45,8 +47,6 @@ FUNCTION read_gyro_profile_data, simdir, profile_data
      READF,1,n_ion                     ;# ion species
      READF,1,n_kinetic                 ;# evolved species (e- + ion)
      READF,1,n_spec                    ;total # ions and e-
-     READF,1,field_r0_flag
-     READF,1,field_r0_grid
      READF,1,n_rho
      READF,1,boundary_method
 
@@ -169,7 +169,7 @@ FUNCTION read_gyro_profile_data, simdir, profile_data
      Pi_gB = array[11]
      S_gB = array[12]
 
-     ;return useful data in structure, easy to add to as needed
+      ;return useful data in structure, easy to add to as needed
      profile_data = {n_r:n_r, $ ;# of radial grid points
                      n_theta_plot:n_theta_plot, $  ;# of _saved_ theta points
                      n_n:n_n, $          ;n = n0 + n_dn*INDGEN(n_n)

@@ -45,18 +45,18 @@ subroutine EXPRO_compute_derived
      print *,'ERROR: (EXPRO) EXPRO_ctrl_numeq_flag not set.'
      stop
   endif
-  if (EXPRO_ctrl_signb < -1.0) then
-     print *,'ERROR: (EXPRO) EXPRO_ctrl_signb not set.'
-     stop
-  endif
-  if (EXPRO_ctrl_signq < -1.0) then
-     print *,'ERROR: (EXPRO) EXPRO_ctrl_signq not set.'
-     stop
-  endif
   if (EXPRO_ctrl_rotation_method == -1) then
      print *,'ERROR: (EXPRO) EXPRO_ctrl_rotation_method not set.'
      stop
   endif
+  !---------------------------------------------------------------------
+
+
+  !---------------------------------------------------------------------
+  ! Infer orientation
+  ! 
+  EXPRO_signb = nint(EXPRO_b_ref/abs(EXPRO_b_ref))
+  EXPRO_signq = nint(EXPRO_q(1)/abs(EXPRO_q(1)))
   !---------------------------------------------------------------------
 
   !---------------------------------------------------------------------
@@ -109,6 +109,9 @@ subroutine EXPRO_compute_derived
   ! 1/L_Te = -dln(Te)/dr (1/m)
   call bound_deriv(EXPRO_dlntedr,-log(EXPRO_te),EXPRO_rmin,EXPRO_n_exp)
 
+  EXPRO_dlnnidr = 0.0
+  EXPRO_dlntidr = 0.0
+
   do is=1,nion_max
      if (minval(EXPRO_ni(is,:)) > 0.0) then
         ! 1/L_ni = -dln(ni)/dr (1/m)
@@ -159,7 +162,7 @@ subroutine EXPRO_compute_derived
   ! - w0, w0p, vol, volp
   !
   GEO_nfourier_in = EXPRO_nfourier
-  GEO_signb_in    = EXPRO_ctrl_signb
+  GEO_signb_in    = EXPRO_signb
   call GEO_alloc(1)
 
   r_min = EXPRO_rmin(EXPRO_n_exp)
@@ -218,6 +221,12 @@ subroutine EXPRO_compute_derived
   !--------------------------------------------------------------
   ! Extrapolate some quantities to axis:
   !
+  call bound_extrap(fa,fb,EXPRO_grad_r0,EXPRO_rmin,EXPRO_n_exp)
+  EXPRO_grad_r0(1) = fa
+
+  call bound_extrap(fa,fb,EXPRO_ave_grad_r,EXPRO_rmin,EXPRO_n_exp)
+  EXPRO_ave_grad_r(1) = fa
+
   call bound_extrap(fa,fb,EXPRO_w0,EXPRO_rmin,EXPRO_n_exp)
   EXPRO_w0(1) = fa
 
@@ -306,6 +315,11 @@ subroutine EXPRO_compute_derived
      if (minval(EXPRO_ni_new(:)) <= 0.0) then
         EXPRO_error = 1
      endif
+
+  else
+
+     EXPRO_ni_new(:) = EXPRO_ni(1,:)
+     EXPRO_dlnnidr_new(:) = EXPRO_dlnnidr(1,:)
 
   endif
 

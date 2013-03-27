@@ -60,6 +60,8 @@ subroutine prgen_map_iterdb
 
   ! Torque (TAM flow) (nt-m)
   call volint(onetwo_storqueb,flow_mom)
+  ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
+  flow_mom = -ipccw*flow_mom  
 
   ! Total transport power (MW) to electrons: pow_e
 
@@ -100,7 +102,6 @@ subroutine prgen_map_iterdb
        +pow_ei_exp(:) &
        +xfus_exp*powi_fus_exp(:)
 
-
   !---------------------------------------------------------
   ! Map profile data onto single array:
   !
@@ -110,12 +111,14 @@ subroutine prgen_map_iterdb
   vec(1,:)  = rho(:)
   vec(2,:)  = rmin(:)
   vec(3,:)  = rmaj(:)
-  vec(4,:)  = q(:)
+  ! COORDINATES: set sign of q
+  vec(4,:)  = abs(q(:))*ipccw*btccw
   vec(5,:)  = kappa(:)
   vec(6,:)  = delta(:)
   vec(7,:)  = onetwo_te(:)
   vec(8,:)  = onetwo_ene(:)*1e-19
   vec(9,:)  = onetwo_zeff(:)
+  !vec(10,:) omitted. meaning omega=0 for iterdb
   vec(11,:) = flow_mom(:)
   vec(12,:) = pow_e(:)
   vec(13,:) = pow_i(:)
@@ -125,7 +128,8 @@ subroutine prgen_map_iterdb
   vec(17,:) = flow_wall_exp(:)
   vec(18,:) = zmag(:)
   vec(19,:) = onetwo_press(:) ! Total pressure
-  vec(20,:) = dpsi(:)
+  ! COORDINATES: set sign of poloidal flux
+  vec(20,:) = abs(dpsi(:))*(-ipccw)
 
   !-----------------------------------------------------------------
   ! Construct ion densities and temperatures with reordering
@@ -161,8 +165,8 @@ subroutine prgen_map_iterdb
   allocate(vphi_carbon(nx))
 
   if (trim(onetwo_namei(1)) == 'c') then
-     ! Negative sign to account for DIII-D convention
-     vphi_carbon(:) = -onetwo_angrot(:)*(rmaj(:)+rmin(:))
+     ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
+     vphi_carbon(:) = -ipccw*onetwo_angrot(:)*(rmaj(:)+rmin(:))
   else
      vphi_carbon(:) = 0.0
   endif
@@ -198,31 +202,6 @@ subroutine prgen_map_iterdb
   endif
   !---------------------------------------------------
 
-  ! Additional transport power breakdown
-  if (n_indx2 == 15) then
-
-     allocate(vec2(n_indx2,onetwo_nj))
-     vec2(:,:) = 0.0
-
-     vec2(1,:) = powe_beam_exp(:)
-     vec2(2,:) = powe_RF_exp(:)
-     vec2(3,:) = powe_oh_exp(:)
-     vec2(4,:) = powe_rad_exp(:)
-     vec2(5,:) = powe_ion_exp(:)
-     vec2(6,:) = powe_wdot_exp(:)
-     vec2(7,:) = powe_fus_exp(:)
-     vec2(8,:) = pow_e(:)      !net transport power in electrons
-     vec2(9,:) = pow_ei_exp(:)    !electron to ion energy exchange
-     vec2(10,:) = pow_i(:)     !net transport power in ions
-     vec2(11,:) = powi_beam_exp(:)
-     vec2(12,:) = powi_ion_exp(:)
-     vec2(13,:) = powi_wdot_exp(:)
-     vec2(14,:) = powi_fus_exp(:)
-     vec2(15,:) = powi_cx_exp(:)
-
-  endif
-  !---------------------------------------------------------
-
   ion_name(1:onetwo_nprim) = onetwo_namep(1:onetwo_nprim)
 
   n0 = onetwo_nprim
@@ -234,11 +213,6 @@ subroutine prgen_map_iterdb
 
   ion_name(1+n0:onetwo_nbion+n0) = &
        onetwo_nameb(1:onetwo_nbion)
-
-  ! Sign of poloidal flux
-
-  signpsi = abs(onetwo_psi(nx)-onetwo_psi(1))/&
-       (onetwo_psi(nx)-onetwo_psi(1))
 
   ! Ion reordering diagnostics
 

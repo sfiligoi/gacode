@@ -67,8 +67,5 @@ subroutine prgen_map_corsica
   vec(38,:) = 0.0
   vec(39,:) = 0.0
   vec(40,:) = 0.0
-
-  signpsi = abs(dpsi(nx)-dpsi(1))/&
-       (dpsi(nx)-dpsi(1))
   
 end subroutine prgen_map_corsica

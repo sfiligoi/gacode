@@ -40,8 +40,8 @@ subroutine prgen_map_plasmastate
      pow_ei_exp(i) = pow_ei_exp(i-1)-1e-6*plst_pei_trans(i-1)
 
      ! tq_trans already in Nm.
-
-     flow_mom(i) = flow_mom(i-1)+plst_tq_trans(i-1)
+     ! COORDINATES: -ipccw accounts for plasmastate toroidal angle convention
+     flow_mom(i) = flow_mom(i-1)+plst_tq_trans(i-1)*(-ipccw)
 
      ! MW/keV = 0.624e22/s
 
@@ -51,6 +51,9 @@ subroutine prgen_map_plasmastate
   !--------------------------------------------------------------------
 
   !--------------------------------------------------------------------
+  ! COORDINATES: set sign of poloidal flux 
+  dpsi(:) = abs(dpsi(:))*(-ipccw)
+  ! 
   ! Convert potential to Omega
   !
   ! omega0 = -c d(Phi)/dpsi
@@ -64,9 +67,6 @@ subroutine prgen_map_plasmastate
   call bound_deriv(dphidpsi,plst_epot,dpsi,nx)
   !
   omega0 = -2.9979e10*dphidpsi*(10.0/3.0)/1e8
-  !
-  ! Diagnostic 
-  signpsi = dpsi(nx)/abs(dpsi(nx))
   !--------------------------------------------------------------------
 
   !---------------------------------------------------------
@@ -78,7 +78,8 @@ subroutine prgen_map_plasmastate
   vec(1,:)  = plst_rho(:)
   vec(2,:)  = rmin(:)
   vec(3,:)  = rmaj(:)
-  vec(4,:)  = q(:)
+  ! COORDINATES: set sign of q
+  vec(4,:)  = abs(q(:))*ipccw*btccw
   vec(5,:)  = kappa(:)
   vec(6,:)  = delta(:)
   vec(7,:)  = plst_ts(:,1)
@@ -94,6 +95,7 @@ subroutine prgen_map_plasmastate
   vec(17,:) = 0.0 ! flow_wall
   vec(18,:) = zmag(:)
   vec(19,:) = plst_ptowb ! total pressure, thermal + fast ion
+  ! COORDINATES: This poloidal flux has correct sign (see above).
   vec(20,:) = dpsi(:)
 
   ! ni
@@ -112,7 +114,8 @@ subroutine prgen_map_plasmastate
   do i=2,min(plst_dp1_nspec_th+1,6)
      ip = reorder_vec(i-1)+1
      if (trim(plst_all_name(ip)) == 'C') then
-        vec(31+i-2,:) = -plst_omegat(:)*(rmaj(:)+rmin(:))
+        ! COORDINATES: -ipccw accounts for plasmastate toroidal angle convention
+        vec(31+i-2,:) = -ipccw*plst_omegat(:)*(rmaj(:)+rmin(:))
      endif
   enddo
 

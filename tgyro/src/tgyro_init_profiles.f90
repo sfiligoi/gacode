@@ -67,6 +67,12 @@ subroutine tgyro_init_profiles
 
      enddo
   endif
+
+  if (tgyro_use_rho == 1) then
+     ! Using equally-spaced rho grid, not default r grid.  This is 
+     ! useful for benchmarking with other codes.
+     rho = r
+  endif
   !----------------------------------------------
 
   !----------------------------------------------
@@ -79,8 +85,6 @@ subroutine tgyro_init_profiles
   EXPRO_ctrl_z = 0.0
   EXPRO_ctrl_z(1:loc_n_ion) = zi_vec(1:loc_n_ion)
   EXPRO_ctrl_numeq_flag = loc_num_equil_flag
-  EXPRO_ctrl_signq = tgyro_ipccw_in*tgyro_btccw_in
-  EXPRO_ctrl_signb = -tgyro_btccw_in
   EXPRO_ctrl_rotation_method = 1
 
   call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
@@ -100,7 +104,13 @@ subroutine tgyro_init_profiles
   !------------------------------------------------------------------------------------------
   ! Direct input of simple profiles:
   !
-  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_rho(:),n_exp,r,rho,n_r)
+  if (tgyro_use_rho == 1) then
+     ! Equally-spaced in rho
+     call cub_spline(EXPRO_rho(:),EXPRO_rmin(:)/r_min,n_exp,rho,r,n_r)
+  else  
+     ! Equally-spaced in r (default)
+     call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_rho(:),n_exp,r,rho,n_r)
+  endif
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_q(:),n_exp,r,q,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_s(:),n_exp,r,s,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_kappa(:),n_exp,r,kappa,n_r)
@@ -160,6 +170,16 @@ subroutine tgyro_init_profiles
   !------------------------------------------------------------------------------------------
 
   !------------------------------------------------------------------------------------------
+  ! Field orientation
+  !
+  ! signb = -btccw          OR     btccw = -signb  
+  ! signq = ipccw*btccw            ipccw = -signb*signq
+  !
+  signb = EXPRO_signb
+  signq = EXPRO_signq
+  !------------------------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------------------------
   ! Apply rescaling factors:
   !
   ne(:) = tgyro_input_den_scale*ne(:)
@@ -193,7 +213,6 @@ subroutine tgyro_init_profiles
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_ei(:)*1e13,n_exp,r,p_exch_in,n_r)
   !
   if (loc_scenario == 3) then
-
      ! Assume auxiliary power is contained in pow_e and pow_i 
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e(:)*1e13,n_exp,r,p_e_aux_in,n_r)
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_i(:)*1e13,n_exp,r,p_i_aux_in,n_r)
@@ -202,7 +221,6 @@ subroutine tgyro_init_profiles
      p_e_aux_in = tgyro_input_paux_scale*p_e_aux_in
      p_i_aux_in = tgyro_input_paux_scale*p_i_aux_in
   else
-
      ! Integrated electron and ion powers
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e(:)*1e13,n_exp,r,p_e_in,n_r)
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_i(:)*1e13,n_exp,r,p_i_in,n_r)
@@ -219,7 +237,7 @@ subroutine tgyro_init_profiles
   !
   ! (3) Angular momentum flow -- convert to erg (dyne-cm) from N-m.
   !
-  call cub_spline(EXPRO_rmin(:)/r_min,-EXPRO_flow_mom(:)*1e7,n_exp,r,mf_in,n_r)
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_flow_mom(:)*1e7,n_exp,r,mf_in,n_r)
   !------------------------------------------------------------------------------------------
 
   ! Fourier coefficients for plasma shape
@@ -297,7 +315,11 @@ subroutine tgyro_init_profiles
   !----------------------------------------------------------
   ! Primitive quantity to evolve for rotation/Er evolution is 
   !
-  ! f_rot = (a/c_s)*gamma_p = w0p/w0p_norm
+  ! f_rot = (a/cs)*gamma_p 
+  !       = (a/cs)*(-R0*w0p)
+  !       = w0p/w0p_norm     
+  !
+  ! where w0p_norm = -cs/(a*R0).
   !
   ! First, "bogus" unity normalization since c_s is unknown
   w0p_norm = 1.0

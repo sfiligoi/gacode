@@ -1,4 +1,4 @@
-!-----------------------------------------------------------
+!-----------------------------------------------------------------------
 ! gyro_profile_init.f90
 !
 ! PURPOSE:
@@ -16,7 +16,15 @@
 !
 !  r_e is the uniform REFERENCE grid.
 !  r is the (possibly nonuniform) PHYSICAL grid.
-!-----------------------------------------------------------
+!
+! FIELD ORIENTATION NOTES:
+!  Field orientation is accomplished by giving signs to a minimal 
+!  set of quantities:
+!  
+!  1. sign(b_unit)   = -btccw
+!  2. sign(q)        = ipccw*btccw
+!  3. sign(rho_star) = -btccw
+!-----------------------------------------------------------------------
 
 subroutine gyro_profile_init
 
@@ -638,7 +646,7 @@ subroutine gyro_profile_init
   endif
   !
   ic = 0
-  c_map(:) = 0.0
+  c_map(:) = 0
   do is=1,n_spec
 
      if (is /= indx_e) then 

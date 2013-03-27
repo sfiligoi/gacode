@@ -23,7 +23,7 @@ then
   echo "EXECUTE MODE (single core)"
   echo
   echo "         -e <simdir>" 
-  echo "         Run NEO using input.tglf data in <simdir>."
+  echo "         Run TGLF using input.tglf data in <simdir>."
   echo
   echo "INITIALIZE ONLY"
   echo

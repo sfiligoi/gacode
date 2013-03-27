@@ -24,13 +24,15 @@ subroutine prgen_map_peqdsk
   vec(1,:)  = rho(:)
   vec(2,:)  = rmin(:)
   vec(3,:)  = rmaj(:)
-  vec(4,:)  = q(:)
+  ! COORDINATES: set sign of q
+  vec(4,:)  = abs(q(:))*ipccw*btccw
   vec(5,:)  = kappa(:)
   vec(6,:)  = delta(:)
   vec(7,:)  = peqdsk_te(:)
   vec(8,:)  = peqdsk_ne(:)*10
   vec(9,:)  = 0.0      ! zeff
-  vec(10,:) = -1e3*peqdsk_omegat(:) ! Omega_tor
+  ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
+  vec(10,:) = -ipccw*1e3*peqdsk_omegat(:) ! Omega_tor
   vec(11,:) = 0.0      ! flow_mom
   vec(12,:) = 0.0      ! pow_e
   vec(13,:) = 0.0      ! pow_i 
@@ -40,7 +42,8 @@ subroutine prgen_map_peqdsk
   vec(17,:) = 0.0      ! flow_wall_exp
   vec(18,:) = zmag(:)  
   vec(19,:) = 0.0      
-  vec(20,:) = dpsi(:)
+  ! COORDINATES: set sign of poloidal flux
+  vec(20,:) = abs(dpsi(:))*(-ipccw)
 
   ! ni
   vec(21,:) = peqdsk_ni(:)*10
@@ -49,8 +52,9 @@ subroutine prgen_map_peqdsk
   vec(26,:) = peqdsk_ti(:)
 
   ! vphi
+  ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
   vec(31,:) = 0.0
-  vec(32,:) = peqdsk_omegat(:)*1000*(rmaj(:)+rmin(:))
+  vec(32,:) = -ipccw*1e3*peqdsk_omegat(:)*(rmaj(:)+rmin(:))
   vec(33,:) = 0.0
   vec(34,:) = 0.0
   vec(35,:) = 0.0
@@ -61,9 +65,6 @@ subroutine prgen_map_peqdsk
   vec(38,:) = 0.0
   vec(39,:) = 0.0
   vec(40,:) = 0.0
-
-  signpsi = abs(dpsi(peqdsk_nj)-dpsi(1))/&
-       (dpsi(peqdsk_nj)-dpsi(1))
 
   ! Construct impurity temperature and density profiles assuming 
   ! Z2 given by pfile_z2:

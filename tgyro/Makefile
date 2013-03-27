@@ -6,7 +6,7 @@ include ../shared/install/make.inc.${GACODE_PLATFORM}
 
 export EXTRA_LIBS = \
        ${GACODE_ROOT}/neo/src/neo_lib.a \
-       ${GACODE_ROOT}/neo/nclass/nclass_lib.a \
+       ${GACODE_ROOT}/shared/nclass/nclass_lib.a \
        ${GACODE_ROOT}/tglf/src/tglf_lib.a \
        ${GACODE_ROOT}/gyro/src/gyro_lib.a \
        ${GACODE_ROOT}/gyro/BLEND/BLEND_lib.a \

@@ -50,30 +50,32 @@ subroutine tgyro_iteration_driver
   !---------------------------------------
 
   ! Mapping function from radius/field to p
-  p = 0
-  do i=2,n_r
-     ip = 0
-     if (loc_ti_feedback_flag == 1) then
-        p  = p+1
-        ip = ip+1
-        pmap(i,ip) = p
-     endif
-     if (loc_te_feedback_flag == 1) then
-        p  = p+1
-        ip = ip+1
-        pmap(i,ip) = p
-     endif
-     if (loc_ne_feedback_flag == 1) then
-        p  = p+1
-        ip = ip+1
-        pmap(i,ip) = p
-     endif
-     if (loc_er_feedback_flag == 1) then
-        p  = p+1
-        ip = ip+1
-        pmap(i,ip) = p
-     endif
-  enddo
+  if (tgyro_mode /= 2) then
+     p = 0
+     do i=2,n_r
+        ip = 0
+        if (loc_ti_feedback_flag == 1) then
+           p  = p+1
+           ip = ip+1
+           pmap(i,ip) = p
+        endif
+        if (loc_te_feedback_flag == 1) then
+           p  = p+1
+           ip = ip+1
+           pmap(i,ip) = p
+        endif
+        if (loc_ne_feedback_flag == 1) then
+           p  = p+1
+           ip = ip+1
+           pmap(i,ip) = p
+        endif
+        if (loc_er_feedback_flag == 1) then
+           p  = p+1
+           ip = ip+1
+           pmap(i,ip) = p
+        endif
+     enddo
+  endif
 
   ! Generate ALL radial profiles.
   call tgyro_init_profiles
@@ -83,7 +85,7 @@ subroutine tgyro_iteration_driver
   !
   if (tgyro_noturb_flag == 1) then
 
-    flux_method = 4
+     flux_method = 4
 
   else if (lpath(1:3) == "IFS") then
 
@@ -178,7 +180,7 @@ subroutine tgyro_iteration_driver
 
      call tgyro_iteration_parallel
 
- case (6) 
+  case (6) 
 
      call tgyro_iteration_simplerelax
 

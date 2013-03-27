@@ -48,24 +48,24 @@ subroutine neo_make_profiles
      call neo_error('ERROR: (NEO) Only one electron species allowed')
      return
   end if
-  
-  if(btccw_in > 0) then
-     sign_bunit = -1.0
-  else
-     sign_bunit =  1.0
-  endif
-
-  if(ipccw_in > 0) then
-     sign_q = -sign_bunit
-  else
-     sign_q =  sign_bunit
-  endif
 
   select case (profile_model) 
 
   case (1)
 
      ! Standard local simulation (one point)
+
+     if(btccw_in > 0) then
+        sign_bunit = -1.0
+     else
+        sign_bunit =  1.0
+     endif
+     
+     if(ipccw_in > 0) then
+        sign_q = -sign_bunit
+     else
+        sign_q =  sign_bunit
+     endif
 
      ir = 1
 
@@ -116,10 +116,8 @@ subroutine neo_make_profiles
              * sqrt(mass(1)/mass(is)) * (temp(1,ir)/temp(is,ir))**1.5
      enddo
 
-     do ir=1,n_radial
-        do is=1, n_species
-           vth(is,ir) = sqrt(temp(is,ir)/mass(is))
-        enddo
+     do is=1, n_species
+        vth(is,ir) = sqrt(temp(is,ir)/mass(is))
      enddo
 
      ! These normalizations are arbitrary for local profiles
@@ -274,6 +272,18 @@ subroutine neo_make_profiles
   case(3)
      ! Test global simulation 
      ! -- based on parameters of Satake et al, Nucl. Fusion 45, 2005 (1362)
+
+     if(btccw_in > 0) then
+        sign_bunit = -1.0
+     else
+        sign_bunit =  1.0
+     endif
+     
+     if(ipccw_in > 0) then
+        sign_q = -sign_bunit
+     else
+        sign_q =  sign_bunit
+     endif
 
      do ir=1,n_radial
         ! assume the geo params are constants

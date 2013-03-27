@@ -1,6 +1,8 @@
 from gacodeinput import *
 import sys
 
+gyro_start = sys.argv[1]
+
 x = ManagerInput()
 
 x.set_extension('.gen')
@@ -48,8 +50,6 @@ x.add('LOC_RESIDUAL_METHOD','2')
 x.add('LOC_NUM_EQUIL_FLAG','0')
 x.add('NEO_GV_FLAG','0')
 x.add('TGLF_Q_LOW_FLAG','0')
-x.add('TGYRO_IPCCW','1.0')
-x.add('TGYRO_BTCCW','-1.0')
 x.add('TGYRO_GLOBAL_NEWTON_FLAG','0')
 x.add('TGYRO_BACKTRACK_METHOD','1')
 x.add('TGYRO_ITERATION_METHOD','1')
@@ -72,6 +72,7 @@ x.add('TGYRO_INPUT_W0_SCALE','1.0')
 x.add('TGYRO_INPUT_PAUX_SCALE','1.0')
 x.add('TGYRO_ER_BC','1')
 x.add('TGYRO_NOTURB_FLAG','0')
+x.add('TGYRO_USE_RHO','0')
 
 # Deprecated parameters
 x.dep('LOC_N_FEEDBACK','new parameter is LOC_NE_FEEDBACK_FLAG')
@@ -80,8 +81,10 @@ x.dep('LOC_ROTATION_METHOD','new parameter is TGYRO_ROTATION_THEORY_METHOD')
 x.dep('LOC_EBSHEAR_FLAG','new parameter is TGYRO_ROTATION_FLAG')
 x.dep('LOC_R_PED','new parameter is TGYRO_RMAX')
 x.dep('TRANSPORT_METHOD','new parameter is TGYRO_MODE')
+x.dep('TGYRO_IPCCW','Value now inferred from input.profiles')
+x.dep('TGYRO_BTCCW','Value now inferred from input.profiles')
 
-x.read_input('input.tgyro')
+x.read_input('input.tgyro',gyro_start)
 x.write_proc('proc')
 x.printmsg()
 

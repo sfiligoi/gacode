@@ -16,6 +16,8 @@ OBJECTS = EXPRO_interface.o \
           EXPRO_read.o \
           EXPRO_pread.o \
           EXPRO_read_driver.o \
+          EXPRO_read_geo.o \
+          EXPRO_skip_header.o \
           EXPRO_compute_derived.o \
           EXPRO_write_derived.o \
           EXPRO_write_original.o

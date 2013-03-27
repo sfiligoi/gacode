@@ -171,7 +171,7 @@ contains
           write(io,'(e16.8)',advance='no') pflux_multi_HS(is)
           write(io,'(e16.8)',advance='no') eflux_multi_HS(is)
        enddo
-       write(io,'(e16.8)',advance='no') jpar_K
+       !write(io,'(e16.8)',advance='no') jpar_K
        write (io,*)
        close(io)
     end if
@@ -438,7 +438,7 @@ contains
     integer :: is
 
     nui_star_S = nui_star_HH / (dens(is_ion,ir) * z(is_ion)**2) &
-         * dens(is_ele,ir)*zeff
+         * dens_ele*zeff
 
     alpha_0 = -1.17*(1.0-ftrap) / (1.0 - 0.22*ftrap - 0.19*ftrap*ftrap)
     
@@ -838,7 +838,7 @@ contains
 
        ! alpha unchanged from Sauter
        nui_star_S = nui_star_HH / (dens(is_ion,ir) * z(is_ion)**2) &
-            * dens(is_ele,ir)*zeff
+            * dens_ele*zeff
        
        alpha_0 = -1.17*(1.0-ftrap) / (1.0 - 0.22*ftrap - 0.19*ftrap*ftrap)
        
