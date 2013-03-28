@@ -1,4 +1,4 @@
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       subroutine glf2d_dv
 c
       Implicit None
@@ -380,8 +380,8 @@ c     >  *theta_exp(jm)*(vexb_m(jm+1)-vexb_m(jm))/dr(jm,2)
         gamma_e_gf = (cv/csdam)*doppler_shear_m(jm)
       endif
       gamma_p_gf = -(cv/csdam)*drhodr(jm)*
-     >  (apolm*(gradvpolm+gradvneom(2))+atorm*(gradvexbm+gradvdiam(2))
-     >  +(vpolm+vneom(2))*grad_a_pol+(vexbm+vdiam(2))*grad_a_tor)
+     > (gradvexbm+gradvdiam(2)+(apolm/atorm)*(gradvpolm+gradvneom(2)))
+c     >  +(vpolm+vneom(2))*grad_a_pol+(vexbm+vdiam(2))*grad_a_tor)
       if(jm.eq.ngrid-1.and.itport_pt(5).eq.0)gamma_e_gf=0.0
       if(ipert_gf.eq.0)gamma_p_m(jm) = gamma_p_gf
       exch_gf=0.D0
@@ -553,8 +553,7 @@ c
 c
        if(ipert_gf.eq.0)then
          anrate_m(jm)=gamma_gf(1)
-c         write(6,10)jm,anrate_m(jm)
- 10      format(2x,i3,2x,1pe12.5)
+c         write(*,*)jm,anrate_m(jm)
          dnrate_m(jm)=0.D0
          dtnrate_m(jm)=0.D0
          anfreq_m(jm)=freq_gf(1)
@@ -1579,9 +1578,11 @@ c model for impurity contributions to viscous stress
          vparflux_glf = mass_factor*vparflux_glf
          vphizflux_glf = 0.0
          vparzflux_glf = 0.0
-         nifluxm = nefluxm
-         nzfluxm = 0.0
-         tzfluxm = 0.0
+         niflux_glf = neflux_glf
+         nzflux_glf = 0.0
+c model for impurity contribution to ion energy flux
+         tiflux_glf = (1.0+nzm/nim)*tiflux_glf
+         tzflux_glf = 0.0
        endif
 c
 c      write(*,*)jm,"ipert = ",ipert_gf,"v2_bar =",v2_bar(jm)

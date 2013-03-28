@@ -169,7 +169,7 @@ c... ion density profiles via dilution_model:
 c    -1 : use ni_exp, nz_exp as set in datmap.f
 c     0 : single impurity and fast ion dilution (default)
 c     1 : fast ion dilution only
-c     2 : ni=ne, nz=0
+c     2 : no dilution  ni=ne, nz=0
 c
       do k=1,mxgrid
          nz_exp(k)=ne_exp(k)*(zeff_exp(k)-zgas_exp)/
