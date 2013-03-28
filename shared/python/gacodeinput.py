@@ -63,6 +63,7 @@ class SimpleInput:
             if len(line) > 0 and line[0] != '#':
                 x = string.splitfields(line,'=')
                 y = string.splitfields(x[1],'#')
+                y = string.splitfields(y[0],' ')
                 arg = string.strip(x[0])
                 val = string.strip(y[0])
 
