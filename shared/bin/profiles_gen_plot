@@ -20,9 +20,9 @@ then
    echo "          Sequence of input.profiles files."
    echo "          [Default is input.profiles in the current directory]"
    echo
-   echo "          -f <filetype>"
-   echo "          Output file type."
-   echo "          <filetype>=emf, eps, pdf, png, ps, raw, rgba, svg, svgz"
+   echo "          -f <plotfile.ext>"
+   echo "          Plot to plotfile.ext instead of screen." 
+   echo "          <ext>=emf, eps, pdf, png, ps, raw, rgba, svg, svgz"
    echo 
    echo "          -interactive"
    echo "          Use python in interactive mode.  Useful if matplotlibrc has interactive:True  "
