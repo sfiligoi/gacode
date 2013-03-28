@@ -181,6 +181,7 @@
       REAL :: q_input = 2.0
       REAL :: rmin_input=0.5
       REAL,DIMENSION(maxmodes) :: gamma_reference_kx0=0.0
+      REAL,DIMENSION(maxmodes) :: freq_reference_kx0=0.0
       REAL :: pol=1.0
       REAL :: U0=0.0
       REAL :: kx0=0.0

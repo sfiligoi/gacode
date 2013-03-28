@@ -263,6 +263,7 @@
 ! use spectral shift model
         do j1=1,nmodes_in
           gamma_out(j1) = gamma_reference_kx0(j1)
+          freq_out(j1) = freq_reference_kx0(j1)
         enddo 
       endif
 !      

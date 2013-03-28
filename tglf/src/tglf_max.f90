@@ -27,6 +27,7 @@
 !
       do i=1,nmodes_in
         gamma_reference_kx0(i)=0.0
+        freq_reference_kx0(i)=0.0
       enddo
       save_iflux = iflux_in
       save_nbasis = nbasis_max_in
@@ -298,6 +299,7 @@
            if(save_vexb_shear.ne.0.0.or.wgp_max.ne.0.0)then
              do i=1,nmodes_out
                gamma_reference_kx0(i) = gamma_out(i)
+               freq_reference_kx0(i) = freq_out(i)
              enddo
              vexb_shear_in = save_vexb_shear
              alpha_kx_p_in = save_alpha_kx_p
@@ -329,6 +331,7 @@
           gamma_out(i)=0.0
           freq_out(i)=0.0
           gamma_reference_kx0(i)=0.0
+          freq_reference_kx0(i)=0.0
          enddo
        endif
 !
