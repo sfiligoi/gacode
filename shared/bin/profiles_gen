@@ -439,6 +439,9 @@ cd $SIMDIR
 #=============================================================
 # Manage CREATE MODE
 #
+# -> move original inputfile to inputfile.save
+# -> save result in $FILE
+#
 if [ $CREATEHELP_FLAG -eq 1 ]
 then
    cat $GACODE_ROOT/shared/profiles_gen/exprotools/README.HELP
@@ -449,15 +452,24 @@ if [ $CREATE_FLAG -eq 1 ]
 then
    if [ $FILE_FLAG -eq 1 ]
    then
-      cp $FILE input.profiles
-      python $GACODE_ROOT/shared/bin/profile_parse.py input.profiles
+      mv $FILE $FILE.save
+      cp $FILE.save input.profiles
+      python $GACODE_ROOT/shared/bin/profile_parse.py $FILE
    else
       rm -f input.profiles input.profiles.gen
+      FILE=input.profiles
    fi
+   # Run expromake
    touch input.expromake
    python $GACODE_ROOT/shared/bin/expromake_parse.py input.expromake   
-   $EXPROMAKE   
-   exit 0
+   $EXPROMAKE  
+   # Map output files
+   mv input.profiles.create $FILE 
+   if [ $VERBOSE_FLAG -eq 0 ]
+   then
+      rm -f *.gen out.expro.run
+   fi
+   exit 0 
 fi
 #=============================================================
 

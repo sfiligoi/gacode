@@ -6,11 +6,11 @@ subroutine expromake_check
 
   integer :: i
 
-  if(nx < 0) then
-     print *, 'ERROR: NX must be > 0'
+  if (nx < 2) then
+     print *, 'ERROR: (expromake) User must set NX > 1.'
      stop
   endif
-  
+
   select case(set_exm_b_ref)
   case(0)
   case(1)
@@ -66,7 +66,7 @@ subroutine expromake_check
      stop
   end select
 
-   select case(set_exm_kappa)
+  select case(set_exm_kappa)
   case(0)
   case(1)
      if(exm_kappa < 1.0) then
@@ -91,18 +91,6 @@ subroutine expromake_check
   case(1)
      if(exm_te_axis < 0.0) then
         print *, 'ERROR: TE_AXIS must be positive'
-        stop
-     endif
-  case default  
-     print *, 'ERROR: SET parameters must be 0 or 1'
-     stop
-  end select
-  
-  select case(set_exm_ne)
-  case(0)
-  case(1)
-     if(exm_ne_axis < 0.0) then
-        print *, 'ERROR: NE_AXIS must be positive'
         stop
      endif
   case default  
@@ -147,17 +135,6 @@ subroutine expromake_check
   end select
 
   do i=1,nions_max
-     select case(set_exm_ni(i))
-     case(0)
-     case(1)
-        if(exm_ni_axis(i) < 0.0) then
-           print *, 'ERROR: NI_AXIS must be positive'
-           stop
-        endif
-     case default  
-        print *, 'ERROR: SET parameters must be 0 or 1'
-        stop
-     end select
      select case(set_exm_ti(i))
      case(0)
      case(1)
@@ -176,14 +153,6 @@ subroutine expromake_check
   case(2)
   case default
      print *, 'ERROR: TE_MODEL must be 1 or 2'
-     stop
-  end select
-  
-  select case(exm_ne_model)
-  case(1)
-  case(2)
-  case default
-     print *, 'ERROR: NE_MODEL must be 1 or 2'
      stop
   end select
 

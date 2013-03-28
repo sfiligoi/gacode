@@ -15,7 +15,7 @@ subroutine prgen_map_inputprofiles
   integer :: i
   real :: xnew(nx)
 
-  ! Compute rho, bref and arho:
+  ! Compute rho, bref and arho based on GATO dpsi and q.
   call prgen_get_chi(nx,q,kappa,rmin,dpsi,rho,EXPRO_b_ref,EXPRO_arho)
 
   ! Align with new (GATO) rho grid, not old rho grid, EXPRO_rho:

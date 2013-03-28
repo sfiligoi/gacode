@@ -75,4 +75,7 @@ module expromake_globals
   integer, dimension(nions_max) :: set_exm_vpol    
   integer, dimension(nions_max) :: set_exm_vtor    
 
+  character(len=80),dimension(nions_max) :: exm_ni_data
+  character(len=80) :: exm_ne_data
+
 end module expromake_globals

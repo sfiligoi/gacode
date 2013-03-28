@@ -7,7 +7,7 @@ subroutine expromake_read_input
   integer :: i
 
   open(unit=1,file='input.expromake.gen',status='old')
-  read(1,*) nx
+  read(1,10) nx
   read(1,*) exm_b_ref
   read(1,*) exm_arho
   read(1,*) exm_a_meters
@@ -24,11 +24,16 @@ subroutine expromake_read_input
   read(1,*) exm_zmag
   do i=1,nions_max
      read(1,*) exm_ni_axis(i)
+  enddo
+  do i=1,nions_max
      read(1,*) exm_ti_axis(i)
+  enddo
+  do i=1,nions_max
      read(1,*) exm_z(i)
+  enddo
+  do i=1,nions_max
      read(1,*) exm_mu(i)
   enddo
-
   read(1,*) set_exm_b_ref
   read(1,*) set_exm_arho
   read(1,*) set_exm_rho
@@ -43,10 +48,12 @@ subroutine expromake_read_input
   read(1,*) set_exm_w0
   read(1,*) set_exm_zeta
   read(1,*) set_exm_zmag
-  read(1,10) set_exm_ni(:)
-  read(1,10) set_exm_ti(:)
-  
-
+  do i=1,nions_max
+     read(1,10) set_exm_ni(i)
+  enddo
+  do i=1,nions_max
+     read(1,10) set_exm_ti(i)
+  enddo
   read(1,*) exm_te_model
   read(1,*) exm_alte
   read(1,*) exm_ne_model
@@ -57,9 +64,15 @@ subroutine expromake_read_input
      read(1,*) exm_ni_model(i)
      read(1,*) exm_alni(i)
   enddo
+  do i=1,nions_max
+     read(1,*) exm_ni_data(i)   
+  enddo
+  read(1,30) exm_ne_data   
 
   close(1)
 
 10 format(i2)
+20 format(e12.5)
+30 format(a)
 
 end subroutine expromake_read_input
