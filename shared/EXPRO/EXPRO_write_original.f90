@@ -26,6 +26,7 @@ subroutine EXPRO_write_original(tag)
   open(unit=2,file=trim(path)//'input.profiles.new',status='replace')
 
   write(2,'(a)') '# '//tag
+  write(2,'(a)') '# '
   do 
 
      read(1,'(a)',iostat=ierr) line

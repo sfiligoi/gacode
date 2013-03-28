@@ -2,7 +2,9 @@
 ! vgen.f90
 !
 ! PURPOSE: 
-!  Driver for the vgen (velocity-generation) capability of NEO.
+!  Driver for the vgen (velocity-generation) capability of NEO.  This 
+!  will write a new input.profiles with NEO-computer electric field 
+!  and/or velocities, and also generate a new input.profiles.extra.
 !--------------------------------------------------------------------
 
 program vgen
@@ -63,19 +65,19 @@ program vgen
   select case(er_method)
   case(1)
      if(i_proc == 0) then
-        print '(a)','INFO: Computing omega0 (Er)  from force balance'
+        print '(a)','INFO: (VGEN) Computing omega0 (Er)  from force balance'
      endif
   case(2)
      if(i_proc == 0) then
-        print '(a)', 'INFO: Computing omega0 (Er) from NEO (weak rotation limit)'
+        print '(a)', 'INFO: (VGEN) Computing omega0 (Er) from NEO (weak rotation limit)'
      endif
   case (3)
      if(i_proc == 0) then
-        print '(a)', 'INFO: Computing omega0 (Er) from NEO (strong rotation limit)'
+        print '(a)', 'INFO: (VGEN) Computing omega0 (Er) from NEO (strong rotation limit)'
      endif
   case(4)
      if(i_proc == 0) then
-        print '(a)','INFO: Returning given omega0 (Er)'
+        print '(a)','INFO: (VGEN) Returning given omega0 (Er)'
      endif
   case default
      if(i_proc == 0) then
@@ -88,15 +90,15 @@ program vgen
   select case(vel_method)
   case(1)
      if(i_proc == 0) then
-        print '(a)','INFO: Computing velocities from NEO (weak rotation limit)'
+        print '(a)','INFO: (VGEN) Computing velocities from NEO (weak rotation limit)'
      endif
   case(2)
      if(i_proc == 0) then
-        print '(a)','INFO: Computing velocities from NEO (strong rotation limit)'
+        print '(a)','INFO: (VGEN) Computing velocities from NEO (strong rotation limit)'
      endif
   case(3)
      if(i_proc == 0) then
-        print '(a)','INFO: Returning given velocities without NEO modificaiton.'
+        print '(a)','INFO: (VGEN) Returning given velocities without NEO modificaiton.'
      endif
   case default
      if(i_proc == 0) then
@@ -181,55 +183,67 @@ program vgen
   ! Read experimental profiles using EXPRO library.
   !
   call EXPRO_palloc(MPI_COMM_WORLD,path,1)
-
-  ! re-set species 1 density for quasineutrality
+  !
+  ! Reset species 1 density for quasineutrality
+  !
   EXPRO_ctrl_rotation_method = 1
   EXPRO_ctrl_density_method = 2 
   EXPRO_ctrl_z(:) = 0.0
   EXPRO_ctrl_z(1) = 1.0*neo_z_1_in
-  if(neo_n_species_in >= 2 .and. neo_z_2_in /= -1) then
+  !
+  if (neo_n_species_in >= 2 .and. neo_z_2_in /= -1) then
      EXPRO_ctrl_z(2) = 1.0*neo_z_2_in
   endif
-  if(neo_n_species_in >= 3 .and. neo_z_3_in /= -1) then
+  if (neo_n_species_in >= 3 .and. neo_z_3_in /= -1) then
      EXPRO_ctrl_z(3) = 1.0*neo_z_3_in
   endif
-  if(neo_n_species_in >= 4 .and. neo_z_4_in /= -1) then
+  if (neo_n_species_in >= 4 .and. neo_z_4_in /= -1) then
      EXPRO_ctrl_z(4) = 1.0*neo_z_4_in
   endif
-  if(neo_n_species_in >= 5 .and. neo_z_5_in /= -1) then
+  if (neo_n_species_in >= 5 .and. neo_z_5_in /= -1) then
      EXPRO_ctrl_z(5) = 1.0*neo_z_5_in
   endif
-
-  ! set equilibrium option for EXPRO
-  if(neo_equilibrium_model_in == 3) then
+  !
+  ! Set equilibrium option for EXPRO
+  !
+  if (neo_equilibrium_model_in == 3) then
      EXPRO_ctrl_numeq_flag = 1
   else
      EXPRO_ctrl_numeq_flag = 0
   endif
 
   call EXPRO_pread
-  
-  ! set sign of btccw and ipccw from sign of b and q from EXPRO
-  neo_btccw_in = -EXPRO_signb
-  neo_ipccw_in = -EXPRO_signb*EXPRO_signq
-  
+
+  ! Write the derived quantities to input.profiles.extra
+
   if (i_proc == 0) call EXPRO_write_derived
   !---------------------------------------------------------------------
 
+  !---------------------------------------------------------------------
+  ! Set sign of btccw and ipccw from sign of b and q from EXPRO
+  !
+  neo_btccw_in = -EXPRO_signb
+  neo_ipccw_in = -EXPRO_signb*EXPRO_signq
+  !---------------------------------------------------------------------
+
+  !---------------------------------------------------------------------
   ! Storage for electric field at theta=0 (er0) 
   allocate(er_exp(EXPRO_n_exp))
 
-  if(er_method /= 4) then
+  if (er_method /= 4) then
      er_exp(:) = 0.0
   endif
-  if(vel_method /= 3) then
+  !---------------------------------------------------------------------
+
+  if (vel_method /= 3) then
      do j=1,5
-        if(j /= erspecies_indx) then
+        if (j /= erspecies_indx) then
            EXPRO_vpol(j,:) = 0.0
            EXPRO_vtor(j,:) = 0.0
         endif
      enddo
   endif
+
   !======================================================================
   ! Four alternatives for Er calculation:
   !
@@ -327,7 +341,8 @@ program vgen
                    * vth_norm * EXPRO_rmin(EXPRO_n_exp)
            enddo
 
-           print 10,EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp),er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
+           print 10,EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp),&
+                er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
 
         endif
      enddo
@@ -374,12 +389,13 @@ program vgen
            enddo
         endif
 
-        print 10,EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp),er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
+        print 10,EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp),&
+             er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
 
      enddo
 
      if (vel_method == 2) then
-        print '(a)', 'INFO: vgen recomputing the flows using NEO in the strong rotation limit.'
+        print '(a)', 'INFO: (VGEN) Recomputing flows using NEO in the strong rotation limit.'
         ! Re-compute the flows using strong rotation
         ! omega and omega_deriv 
         do i=2,EXPRO_n_exp-1
@@ -407,7 +423,8 @@ program vgen
                    * vth_norm * EXPRO_rmin(EXPRO_n_exp)
            enddo
 
-           print 10,EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp),er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
+           print 10,EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp),&
+                er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
 
         enddo
      endif
@@ -457,7 +474,8 @@ program vgen
            enddo
         endif
 
-        print 10,EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp),er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
+        print 10,EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp),&
+             er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
 
      enddo
 
@@ -516,9 +534,9 @@ program vgen
   enddo
   close(1)
 
-  ! Write the new input.profiles
+  ! Write the new inputq.profiles
 
-  tag = '.new'
+  tag = '* This file regenerated by VGEN'
   call EXPRO_write_original(tag)
 
   call vgen_getgeo()

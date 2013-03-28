@@ -2,11 +2,19 @@ Help for:
 
   input.profiles -create -i input.profiles
 
+NOTES:
+
+Below, [x=1,...,5]
+
+SET_NIx=1 enables modification of ion x density:
+  NIx_MODEL=1: Constant density (NIx_AXIS) 
+  NIx_MODEL=2: Fixed gradient length (NIx_AXIS,ALNIx) 
+  NIx_MODEL=3: Quasineutrality on ion x. 
 
 EXAMPLES:
 
 -----------------------------------------------------------------
-(1) Enforce quasineutrality via second ion
+(1) Enforce quasineutrality by resetting ni_2.
 
 $ input.profiles -create -i input.profiles.create
 

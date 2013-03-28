@@ -69,5 +69,5 @@ ax.legend()
 if ftype == 'screen':
     plt.show()
 else:
-    outfile = key+'.'+ftype
+    outfile = ftype
     plt.savefig(outfile)

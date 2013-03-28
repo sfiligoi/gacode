@@ -58,12 +58,13 @@ for j in range(n):
         ax.grid(which="majorminor",ls=":")
         ax.grid(which="major",ls=":")
 
-    ax.plot(x,prof.data[fulltag],'o-',label=r'$\mathrm{'+tag+'}$')
+    ax.plot(x,prof.data[fulltag],'o-',label='\\verb|'+tag+'|')
 
 ax.legend(loc=1)
 
 if ftype == 'screen':
     plt.show()
 else:
-    outfile = key+'.'+ftype
+    print "Saving plot to "+ftype
+    outfile = ftype
     plt.savefig(outfile)
