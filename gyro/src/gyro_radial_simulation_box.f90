@@ -24,8 +24,8 @@ subroutine gyro_radial_simulation_box
   ! of TOROIDAL_REFERENCE
   !
   if (n_ref <= 0) then
-     call send_message('INFO: You are using TOROIDAL_REFERENCE=-1')
-     call send_message('INFO: TOROIDAL_REFERENCE reset to lowest nonzero mode.')
+     call send_message('INFO: (GYRO) You are using TOROIDAL_REFERENCE=-1')
+     call send_message('INFO: (GYRO) TOROIDAL_REFERENCE reset to lowest nonzero mode.')
      n_ref = n0
      if (n_ref == 0) n_ref = d_n
   endif
@@ -113,9 +113,9 @@ subroutine gyro_radial_simulation_box
   if (r(n_x) > 1.0) then
      if (radial_profile_method == 3 .and. boundary_method == 1) then
         s_grid = 4.0
-        call send_message('INFO: Setting S_GRID=4.0 to avoid domain-size error.')
+        call send_message('INFO: (GYRO) Setting S_GRID=4.0 to avoid domain-size error.')
      else
-        call catch_error('ERROR: Domain too large.')
+        call catch_error('ERROR: (GYRO) Radial domain too large (r/a > 1).')
      endif
   endif
   !------------------------------------------------------
