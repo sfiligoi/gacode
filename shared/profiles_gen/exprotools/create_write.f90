@@ -1,6 +1,6 @@
-subroutine expromake_write
+subroutine create_write
 
-  use expromake_globals
+  use create_globals
   use EXPRO_interface
 
   implicit none
@@ -14,7 +14,7 @@ subroutine expromake_write
   !---------------------------------------------------------------
   ! Basic information
   !
-  write(1,20) '# * This file was generated with expromake'
+  write(1,20) '# * This file was generated with create'
 
   write(1,20) '#'
   write(1,20) '# See https://fusion.gat.com/theory/input.profiles for complete documentation.'
@@ -86,4 +86,4 @@ subroutine expromake_write
 40 format(a,i6)
 60 format(a,1pe13.7)
 
-end subroutine expromake_write
+end subroutine create_write

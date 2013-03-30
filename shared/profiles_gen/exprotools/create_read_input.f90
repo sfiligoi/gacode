@@ -1,12 +1,12 @@
-subroutine expromake_read_input
+subroutine create_read_input
 
-  use expromake_globals
+  use create_globals
 
   implicit none
 
   integer :: i
 
-  open(unit=1,file='input.expromake.gen',status='old')
+  open(unit=1,file='input.create.gen',status='old')
   read(1,10) nx
   read(1,*) exm_b_ref
   read(1,*) exm_arho
@@ -75,4 +75,4 @@ subroutine expromake_read_input
 20 format(e12.5)
 30 format(a)
 
-end subroutine expromake_read_input
+end subroutine create_read_input

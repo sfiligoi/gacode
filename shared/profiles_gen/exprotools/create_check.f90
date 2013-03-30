@@ -1,13 +1,13 @@
-subroutine expromake_check
+subroutine create_check
 
-  use expromake_globals
+  use create_globals
 
   implicit none
 
   integer :: i
 
   if (nx < 2) then
-     print *, 'ERROR: (expromake) User must set NX > 1.'
+     print *, 'ERROR: (create) User must set NX > 1.'
      stop
   endif
 
@@ -166,4 +166,4 @@ subroutine expromake_check
      end select
   enddo
 
-end subroutine expromake_check
+end subroutine create_check

@@ -10,22 +10,51 @@ SET_NIx=1 enables modification of ion x density:
   NIx_MODEL=1: Constant density (NIx_AXIS) 
   NIx_MODEL=2: Fixed gradient length (NIx_AXIS,ALNIx) 
   NIx_MODEL=3: Quasineutrality on ion x. 
+  NIx_MODEL=4: Import data from (rho,ni) file NIx_DATA
 
+Z_EFF_MODEL allows setting ions 1,2 by Zeff and ne
+               
 EXAMPLES:
 
 -----------------------------------------------------------------
 (1) Enforce quasineutrality by resetting ni_2.
 
-$ input.profiles -create -i input.profiles.create
-
-input.expromake:
-
+$ cat input.create
 Z1=1
 Z2=12
-
 SET_NI2=1
 NI2_MODEL=3
 
+$ input.profiles -create -i input.profiles
+-----------------------------------------------------------------
+
+-----------------------------------------------------------------
+(2) Import data for ion 2
+
+$ cat data
+0.0 1.0
+0.5 0.7
+1.0 0.4
+
+$ cat input.create
+Z1=1
+Z2=12
+SET_NI2=1
+NI2_MODEL=4
+NI2_DATA=data
+
+$ input.profiles -create -i input.profiles
+-----------------------------------------------------------------
+
+-----------------------------------------------------------------
+(3) Set ions 1 and 2 using Zeff and ne:
+
+$ cat input.create
+Z1=1
+Z2=12
+Z_EFF_MODEL=2
+
+$ input.profiles -create -i input.profiles
 -----------------------------------------------------------------
 
 

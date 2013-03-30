@@ -1,6 +1,6 @@
-subroutine expromake_set
+subroutine create_set
 
-  use expromake_globals
+  use create_globals
   use EXPRO_interface
 
   implicit none
@@ -128,9 +128,9 @@ subroutine expromake_set
            EXPRO_ne(:) = a(:)
         case (4)
            ! Import data scaled by factor 
-           call expromake_importvec(exm_ne_data,EXPRO_rho(:),EXPRO_ne(:),EXPRO_n_exp)
+           call create_importvec(exm_ne_data,EXPRO_rho(:),EXPRO_ne(:),EXPRO_n_exp)
      case default
-        print *, 'ERROR: (expromake) NE_MODEL must be 1-4.'
+        print *, 'ERROR: (create) NE_MODEL must be 1-4.'
         stop
      end select
   endif
@@ -158,9 +158,9 @@ subroutine expromake_set
            EXPRO_ni(i,:) = a(:)/exm_z(i)
         case (4)
            ! Import data scaled by factor 
-           call expromake_importvec(exm_ni_data(i),EXPRO_rho(:),EXPRO_ni(i,:),EXPRO_n_exp)
+           call create_importvec(exm_ni_data(i),EXPRO_rho(:),EXPRO_ni(i,:),EXPRO_n_exp)
         case default
-           print *, 'ERROR: (expromake) NI_MODEL must be 1-4.'
+           print *, 'ERROR: (create) NI_MODEL must be 1-4.'
            stop
         end select
 
@@ -205,4 +205,4 @@ subroutine expromake_set
 
   enddo
 
-end subroutine expromake_set
+end subroutine create_set

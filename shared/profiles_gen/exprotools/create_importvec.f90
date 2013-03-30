@@ -1,6 +1,6 @@
-subroutine expromake_importvec(datafile,x,y,n)
+subroutine create_importvec(datafile,x,y,n)
 
-  use expromake_globals
+  use create_globals
 
   character (len=*), intent(in) :: datafile
   integer, intent(in) :: n
@@ -28,12 +28,12 @@ subroutine expromake_importvec(datafile,x,y,n)
      read(1,*) data(:,:)
      close(1)
   else
-     write(io,'(a)') 'ERROR: (expromake) '//datafile//' does not exist'
+     write(io,'(a)') 'ERROR: (create) '//datafile//' does not exist'
      close(1)
      stop
   endif
   call cub_spline(data(1,:),data(2,:),n_data,x,y,n)
 
-  print *, 'INFO: (expromake) Imported data from '//datafile
+  print *, 'INFO: (create) Imported data from '//datafile
 
-end subroutine expromake_importvec
+end subroutine create_importvec

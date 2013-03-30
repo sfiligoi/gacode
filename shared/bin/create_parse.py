@@ -6,7 +6,7 @@ x = SimpleInput()
 
 x.set_extension('.gen')
 
-# expromake input parameters
+# create input parameters
 x.add('NX','11')
 x.add('B_REF','2.0')
 x.add('A_RHO','1.0')
@@ -90,6 +90,7 @@ x.add('TI5_MODEL','1')
 x.add('ALTI5','0.0')
 x.add('NI5_MODEL','1')
 x.add('ALNI5','0.0')
+x.add('Z_EFF_MODEL','1')
 x.add('NI1_DATA','null')
 x.add('NI2_DATA','null')
 x.add('NI3_DATA','null')
@@ -98,7 +99,7 @@ x.add('NI5_DATA','null')
 x.add('NE_DATA','null')
 
 # Perform the parsing
-x.read_input('input.expromake')
+x.read_input('input.create')
 
 x.printmsg()        
 
