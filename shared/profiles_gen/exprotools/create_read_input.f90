@@ -64,6 +64,7 @@ subroutine create_read_input
      read(1,*) exm_ni_model(i)
      read(1,*) exm_alni(i)
   enddo
+  read(1,*) exm_z_eff_model
   do i=1,nions_max
      read(1,*) exm_ni_data(i)   
   enddo

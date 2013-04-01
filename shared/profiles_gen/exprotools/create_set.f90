@@ -119,16 +119,16 @@ subroutine create_set
         ! Fixed gradient length
         EXPRO_ne(:) = exm_ne_axis &
              * exp(-EXPRO_rmin(:)/EXPRO_rmin(EXPRO_n_exp)*exm_alne) 
-        case (3)
-           ! Set electron density by quasineutrality
-           a(:) = 0.0
-           do is=1,nions_max
-                 a(:) = a(:)-exm_z(is)*EXPRO_ni(is,:)
-           enddo
-           EXPRO_ne(:) = a(:)
-        case (4)
-           ! Import data scaled by factor 
-           call create_importvec(exm_ne_data,EXPRO_rho(:),EXPRO_ne(:),EXPRO_n_exp)
+     case (3)
+        ! Set electron density by quasineutrality
+        a(:) = 0.0
+        do is=1,nions_max
+           a(:) = a(:)-exm_z(is)*EXPRO_ni(is,:)
+        enddo
+        EXPRO_ne(:) = a(:)
+     case (4)
+        ! Import data scaled by factor 
+        call create_importvec(exm_ne_data,EXPRO_rho(:),EXPRO_ne(:),EXPRO_n_exp)
      case default
         print *, 'ERROR: (create) NE_MODEL must be 1-4.'
         stop
@@ -167,45 +167,55 @@ subroutine create_set
      endif
      !-----------------------------------------------------------------------
 
-     !-----------------------------------------------------------------------
-     ! Set electron and ion temperatures
-     !
-     if (set_exm_te == 1) then
-        if(exm_te_model == 1) then
-           EXPRO_te(:) = exm_te_axis
-        endif
-        if(exm_te_model == 2) then
-           do j=1,EXPRO_n_exp
-              EXPRO_te(j) = exm_te_axis &
-                   * exp(-EXPRO_rmin(j)/EXPRO_rmin(EXPRO_n_exp)*exm_alte) 
-           enddo
-        endif
-     endif
-
-     if(set_exm_ti(i) == 1) then
-        if(exm_ti_model(i) == 1) then
-           EXPRO_ti(i,:) = exm_ti_axis(i)
-        endif
-        if(exm_ti_model(i) == 2) then
-           do j=1,EXPRO_n_exp
-              EXPRO_ti(i,j) = exm_ti_axis(i) &
-                   * exp(-EXPRO_rmin(j)/EXPRO_rmin(EXPRO_n_exp)*exm_alti(i)) 
-           enddo
-        endif
-        if(exm_ti_model(i) == 3) then
-           EXPRO_ti(i,:) = EXPRO_ti(1,:)
-        endif
-     endif
-     !-----------------------------------------------------------------------
-
-     if(set_exm_vpol(i) == 1) then
+     if (set_exm_vpol(i) == 1) then
         EXPRO_vpol(i,:) = exm_vpol(i)
      endif
 
-     if(set_exm_vtor(i) == 1) then
+     if (set_exm_vtor(i) == 1) then
         EXPRO_vtor(i,:) = exm_vtor(i)
      endif
 
   enddo
+
+  !-----------------------------------------------------------------------
+  ! Set electron and ion temperatures
+  !
+  if (set_exm_te == 1) then
+     if (exm_te_model == 1) then
+        EXPRO_te(:) = exm_te_axis
+     endif
+     if (exm_te_model == 2) then
+        do j=1,EXPRO_n_exp
+           EXPRO_te(j) = exm_te_axis &
+                * exp(-EXPRO_rmin(j)/EXPRO_rmin(EXPRO_n_exp)*exm_alte) 
+        enddo
+     endif
+  endif
+
+  if (set_exm_ti(i) == 1) then
+     if (exm_ti_model(i) == 1) then
+        EXPRO_ti(i,:) = exm_ti_axis(i)
+     endif
+     if (exm_ti_model(i) == 2) then
+        do j=1,EXPRO_n_exp
+           EXPRO_ti(i,j) = exm_ti_axis(i) &
+                * exp(-EXPRO_rmin(j)/EXPRO_rmin(EXPRO_n_exp)*exm_alti(i)) 
+        enddo
+     endif
+     if (exm_ti_model(i) == 3) then
+        EXPRO_ti(i,:) = EXPRO_ti(1,:)
+     endif
+  endif
+  !-----------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------
+  ! Set ion-1 and ion-2 densities by ne and Zeff
+  !
+  if (exm_z_eff_model == 2) then
+     EXPRO_ni(2,:) = EXPRO_ne(:)*(EXPRO_z_eff(:)-exm_z(1))/(exm_z(2)**2-exm_z(1)*exm_z(2))
+     EXPRO_ni(1,:) = (EXPRO_ne(:)-EXPRO_ni(2,:)*exm_z(2))/exm_z(1)
+     print '(a)', 'INFO: (create) Setting ion-1 and ion-2 from ne and Zeff'
+  endif
+  !-----------------------------------------------------------------------
 
 end subroutine create_set

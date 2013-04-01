@@ -25,7 +25,7 @@ Z2=12
 SET_NI2=1
 NI2_MODEL=3
 
-$ input.profiles -create -i input.profiles
+$ profiles_gen -create -i input.profiles
 -----------------------------------------------------------------
 
 -----------------------------------------------------------------
@@ -43,7 +43,7 @@ SET_NI2=1
 NI2_MODEL=4
 NI2_DATA=data
 
-$ input.profiles -create -i input.profiles
+$ profiles_gen -create -i input.profiles
 -----------------------------------------------------------------
 
 -----------------------------------------------------------------
@@ -51,10 +51,10 @@ $ input.profiles -create -i input.profiles
 
 $ cat input.create
 Z1=1
-Z2=12
+Z2=6
 Z_EFF_MODEL=2
 
-$ input.profiles -create -i input.profiles
+$ profiles_gen -create -i input.profiles
 -----------------------------------------------------------------
 
 
