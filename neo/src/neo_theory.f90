@@ -171,7 +171,7 @@ contains
           write(io,'(e16.8)',advance='no') pflux_multi_HS(is)
           write(io,'(e16.8)',advance='no') eflux_multi_HS(is)
        enddo
-       !write(io,'(e16.8)',advance='no') jpar_K
+       write(io,'(e16.8)',advance='no') jpar_K
        write (io,*)
        close(io)
     end if

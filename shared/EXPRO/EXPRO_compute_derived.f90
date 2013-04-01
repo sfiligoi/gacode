@@ -227,9 +227,6 @@ subroutine EXPRO_compute_derived
   call bound_extrap(fa,fb,EXPRO_ave_grad_r,EXPRO_rmin,EXPRO_n_exp)
   EXPRO_ave_grad_r(1) = fa
 
-  call bound_extrap(fa,fb,EXPRO_w0,EXPRO_rmin,EXPRO_n_exp)
-  EXPRO_w0(1) = fa
-
   call bound_extrap(fa,fb,EXPRO_bp0,EXPRO_rmin,EXPRO_n_exp)
   EXPRO_bp0(1) = fa
 

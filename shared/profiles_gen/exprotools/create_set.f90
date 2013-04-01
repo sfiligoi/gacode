@@ -192,6 +192,9 @@ subroutine create_set
                    * exp(-EXPRO_rmin(j)/EXPRO_rmin(EXPRO_n_exp)*exm_alti(i)) 
            enddo
         endif
+        if(exm_ti_model(i) == 3) then
+           EXPRO_ti(i,:) = EXPRO_ti(1,:)
+        endif
      endif
      !-----------------------------------------------------------------------
 

@@ -160,8 +160,9 @@ subroutine create_check
      select case(exm_ti_model(i))
      case(1)
      case(2)
+     case(3)
      case default
-        print *, 'ERROR: TI_MODEL must be 1 or 2'
+        print *, 'ERROR: TI_MODEL must be 1-3'
         stop
      end select
   enddo
