@@ -148,23 +148,4 @@ subroutine create_check
      end select
   end do
 
-  select case(exm_te_model)
-  case(1)
-  case(2)
-  case default
-     print *, 'ERROR: TE_MODEL must be 1 or 2'
-     stop
-  end select
-
-  do i=1,nions_max
-     select case(exm_ti_model(i))
-     case(1)
-     case(2)
-     case(3)
-     case default
-        print *, 'ERROR: TI_MODEL must be 1-3'
-        stop
-     end select
-  enddo
-
 end subroutine create_check

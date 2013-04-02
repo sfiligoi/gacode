@@ -129,8 +129,11 @@ subroutine create_set
      case (4)
         ! Import data scaled by factor 
         call create_importvec(exm_ne_data,EXPRO_rho(:),EXPRO_ne(:),EXPRO_n_exp)
+     case(5)
+        ! Scale by factor exm_ne_axis
+        EXPRO_ne(:) = EXPRO_ne(:) * exm_ne_axis
      case default
-        print *, 'ERROR: (create) NE_MODEL must be 1-4.'
+        print *, 'ERROR: (create) NE_MODEL must be 1-5.'
         stop
      end select
   endif
@@ -159,8 +162,11 @@ subroutine create_set
         case (4)
            ! Import data scaled by factor 
            call create_importvec(exm_ni_data(i),EXPRO_rho(:),EXPRO_ni(i,:),EXPRO_n_exp)
+        case(5)
+           ! Scale by factor exm_ni_axis
+           EXPRO_ni(i,:) = EXPRO_ni(i,:) * exm_ni_axis(i)
         case default
-           print *, 'ERROR: (create) NI_MODEL must be 1-4.'
+           print *, 'ERROR: (create) NI_MODEL must be 1-5.'
            stop
         end select
 
@@ -181,31 +187,52 @@ subroutine create_set
   ! Set electron and ion temperatures
   !
   if (set_exm_te == 1) then
-     if (exm_te_model == 1) then
+     select case(exm_te_model)
+     case(1) 
+        ! Constant density
         EXPRO_te(:) = exm_te_axis
-     endif
-     if (exm_te_model == 2) then
+     case(2)
+        ! Fixed gradient length
         do j=1,EXPRO_n_exp
            EXPRO_te(j) = exm_te_axis &
                 * exp(-EXPRO_rmin(j)/EXPRO_rmin(EXPRO_n_exp)*exm_alte) 
         enddo
-     endif
+     case(3)
+        ! Set equal to Ti_1
+        EXPRO_te(:) = EXPRO_ti(1,:)
+     case(4)
+        ! Scale by factor exm_te_axis
+        EXPRO_te(:) = EXPRO_te(:)*exm_te_axis
+     case default
+        print *, 'ERROR: (create) TE_MODEL must be 1-3.'
+        stop
+     end select
   endif
 
-  if (set_exm_ti(i) == 1) then
-     if (exm_ti_model(i) == 1) then
-        EXPRO_ti(i,:) = exm_ti_axis(i)
+  do i=1,nions_max
+     if (set_exm_ti(i) == 1) then
+        select case(exm_ti_model(i))
+        case(1)
+           ! Constant density
+           EXPRO_ti(i,:) = exm_ti_axis(i)
+        case(2)
+           ! Fixed gradient length
+           do j=1,EXPRO_n_exp
+              EXPRO_ti(i,j) = exm_ti_axis(i) &
+                   * exp(-EXPRO_rmin(j)/EXPRO_rmin(EXPRO_n_exp)*exm_alti(i)) 
+           enddo
+        case(3)
+           ! Set equal to Ti_1
+           EXPRO_ti(i,:) = EXPRO_ti(1,:)
+        case(4)
+           ! Scale by factor exm_te_axis
+           EXPRO_ti(i,:) = EXPRO_ti(1,:)*exm_ti_axis(i)
+        case default
+           print *, 'ERROR: (create) TE_MODEL must be 1-3.'
+           stop
+        end select
      endif
-     if (exm_ti_model(i) == 2) then
-        do j=1,EXPRO_n_exp
-           EXPRO_ti(i,j) = exm_ti_axis(i) &
-                * exp(-EXPRO_rmin(j)/EXPRO_rmin(EXPRO_n_exp)*exm_alti(i)) 
-        enddo
-     endif
-     if (exm_ti_model(i) == 3) then
-        EXPRO_ti(i,:) = EXPRO_ti(1,:)
-     endif
-  endif
+  enddo
   !-----------------------------------------------------------------------
 
   !-----------------------------------------------------------------------

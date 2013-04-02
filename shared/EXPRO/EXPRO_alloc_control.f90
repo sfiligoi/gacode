@@ -70,71 +70,124 @@ subroutine EXPRO_alloc_control(i_proc,flag)
      endif
 
      allocate(EXPRO_rho(EXPRO_n_exp))
+     EXPRO_rho(:)=0.0
      allocate(EXPRO_rmin(EXPRO_n_exp))
+     EXPRO_rmin(:)=0.0
      allocate(EXPRO_rmaj(EXPRO_n_exp))
+     EXPRO_rmaj(:)=0.0
      allocate(EXPRO_q(EXPRO_n_exp))
+     EXPRO_q(:)=0.0
      allocate(EXPRO_kappa(EXPRO_n_exp))
+     EXPRO_kappa(:)=0.0
 
      allocate(EXPRO_delta(EXPRO_n_exp))
+     EXPRO_delta(:)=0.0
      allocate(EXPRO_te(EXPRO_n_exp))
+     EXPRO_te(:)=0.0
      allocate(EXPRO_ne(EXPRO_n_exp))
+     EXPRO_ne(:)=0.0
      allocate(EXPRO_z_eff(EXPRO_n_exp))
+     EXPRO_z_eff(:)=0.0
      allocate(EXPRO_w0(EXPRO_n_exp))
+     EXPRO_w0(:)=0.0
 
      allocate(EXPRO_flow_mom(EXPRO_n_exp))
+     EXPRO_flow_mom(:)=0.0
      allocate(EXPRO_pow_e(EXPRO_n_exp))
+     EXPRO_pow_e(:)=0.0
      allocate(EXPRO_pow_i(EXPRO_n_exp))
+     EXPRO_pow_i(:)=0.0
      allocate(EXPRO_pow_ei(EXPRO_n_exp))
+     EXPRO_pow_ei(:)=0.0
      allocate(EXPRO_zeta(EXPRO_n_exp))
+     EXPRO_zeta(:)=0.0
 
      allocate(EXPRO_flow_beam(EXPRO_n_exp))
+     EXPRO_flow_beam(:)=0.0
      allocate(EXPRO_flow_wall(EXPRO_n_exp))
+     EXPRO_flow_wall(:)=0.0
      allocate(EXPRO_zmag(EXPRO_n_exp))
+     EXPRO_zmag(:)=0.0
      allocate(EXPRO_ptot(EXPRO_n_exp))
+     EXPRO_ptot(:)=0.0
      allocate(EXPRO_dlnptotdr(EXPRO_n_exp))
+     EXPRO_dlnptotdr(:)=0.0
 
      allocate(EXPRO_ni(nion_max,EXPRO_n_exp))
+     EXPRO_ni(:,:)=0.0
      allocate(EXPRO_ti(nion_max,EXPRO_n_exp))
+     EXPRO_ti(:,:)=0.0
      allocate(EXPRO_vtor(nion_max,EXPRO_n_exp))
+     EXPRO_vtor(:,:)=0.0
      allocate(EXPRO_vpol(nion_max,EXPRO_n_exp))
+     EXPRO_vpol(:,:)=0.0
 
      allocate(EXPRO_bunit(EXPRO_n_exp))
+     EXPRO_bunit(:)=0.0
      allocate(EXPRO_s(EXPRO_n_exp))
+     EXPRO_s(:)=0.0
      allocate(EXPRO_drmaj(EXPRO_n_exp))
+     EXPRO_drmaj(:)=0.0
      allocate(EXPRO_dzmag(EXPRO_n_exp))
+     EXPRO_dzmag(:)=0.0
      allocate(EXPRO_sdelta(EXPRO_n_exp))
+     EXPRO_sdelta(:)=0.0
      allocate(EXPRO_skappa(EXPRO_n_exp))
+     EXPRO_skappa(:)=0.0
      allocate(EXPRO_szeta(EXPRO_n_exp))
+     EXPRO_szeta(:)=0.0
      allocate(EXPRO_dlnnedr(EXPRO_n_exp))
+     EXPRO_dlnnedr(:)=0.0
      allocate(EXPRO_dlntedr(EXPRO_n_exp))
+     EXPRO_dlntedr(:)=0.0
 
      allocate(EXPRO_dlnnidr(nion_max,EXPRO_n_exp))
+     EXPRO_dlnnidr(:,:)=0.0
      allocate(EXPRO_dlntidr(nion_max,EXPRO_n_exp))
+     EXPRO_dlntidr(:,:)=0.0
 
      allocate(EXPRO_vol(EXPRO_n_exp))
+     EXPRO_vol(:)=0.0
      allocate(EXPRO_volp(EXPRO_n_exp))
+     EXPRO_volp(:)=0.0
 
      allocate(EXPRO_cs(EXPRO_n_exp))
+     EXPRO_cs(:)=0.0
      allocate(EXPRO_rhos(EXPRO_n_exp))
+     EXPRO_rhos(:)=0.0
 
      allocate(EXPRO_w0p(EXPRO_n_exp))
+     EXPRO_w0p(:)=0.0
      allocate(EXPRO_gamma_e(EXPRO_n_exp))
+     EXPRO_gamma_e(:)=0.0
      allocate(EXPRO_gamma_p(EXPRO_n_exp))
+     EXPRO_gamma_p(:)=0.0
      allocate(EXPRO_mach(EXPRO_n_exp))
+     EXPRO_mach(:)=0.0
 
      if (EXPRO_nfourier > 0) then  
         allocate(EXPRO_geo(4,0:EXPRO_nfourier,EXPRO_n_exp))
+        EXPRO_geo(:,:,:)=0.0
         allocate(EXPRO_dgeo(4,0:EXPRO_nfourier,EXPRO_n_exp))
+        EXPRO_dgeo(:,:,:)=0.0
      endif
 
      allocate(EXPRO_ni_new(EXPRO_n_exp))
+     EXPRO_ni_new(:)=0.0
      allocate(EXPRO_dlnnidr_new(EXPRO_n_exp))
+     EXPRO_dlnnidr_new(:)=0.0
      allocate(EXPRO_grad_r0(EXPRO_n_exp))
+     EXPRO_grad_r0(:)=0.0
      allocate(EXPRO_ave_grad_r(EXPRO_n_exp))
+     EXPRO_ave_grad_r(:)=0.0
      allocate(EXPRO_drdrho(EXPRO_n_exp))
+     EXPRO_drdrho(:)=0.0
      allocate(EXPRO_bp0(EXPRO_n_exp))
+     EXPRO_bp0(:)=0.0
      allocate(EXPRO_bt0(EXPRO_n_exp))
+     EXPRO_bt0(:)=0.0
      allocate(EXPRO_poloidalfluxover2pi(EXPRO_n_exp))
+     EXPRO_poloidalfluxover2pi(:)=0.0
 
   else
 
