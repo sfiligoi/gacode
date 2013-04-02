@@ -175,7 +175,7 @@ contains
     do is=1,n_species
        fex_iz(1,is,abs(z(is))) = source_nclass(is) &
             * dens_norm(ir) * 1e19 * b_unit(ir) &
-            * (vth_norm(ir) * a_meters) * (mass_deuterium*1e-27)
+            * (vth_norm(ir) * a_meters)**2 * (mass_deuterium*1e-27)
     enddo
 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!
