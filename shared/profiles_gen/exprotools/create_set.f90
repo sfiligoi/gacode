@@ -159,6 +159,7 @@ subroutine create_set
               endif
            enddo
            EXPRO_ni(i,:) = a(:)/exm_z(i)
+           print '(a,i1,a)','INFO: (create) Setting ion-',i,' density via quasineutrality.'
         case (4)
            ! Import data scaled by factor 
            call create_importvec(exm_ni_data(i),EXPRO_rho(:),EXPRO_ni(i,:),EXPRO_n_exp)
