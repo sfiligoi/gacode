@@ -93,7 +93,7 @@ while [ $# -gt 0 ] ; do
 
   -i) shift ; LOCDIR=$1 ; INIT_FLAG=1 ;;
 
-  -r) shift ; REGRESS=1 ;;
+  -r) REGRESS=1 ;;
 
   -rc) shift ; LOCDIR=$1 ; REGRESS=2 ;;
 

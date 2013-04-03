@@ -25,8 +25,6 @@ subroutine tglf_init(path_in,mpi_comm_in)
   if (inputdat_flag .eqv. .true.) then
      print '(a,a,a)', '[tglf_init reading ',trim(path_in),'input.tglf.gen]'
      call tglf_read_input
-  else
-     !print '(a,a,a)', '[tglf_init NOT reading ',trim(path_in),'input.tglf.gen]'
   endif
 
 end subroutine tglf_init
