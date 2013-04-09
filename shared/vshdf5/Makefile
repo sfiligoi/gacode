@@ -10,7 +10,7 @@ ifeq ($(HDF5),true)
   FFLAGS += ${FHDF5} ${HDF5_FLAGS}
   OBJECTS = hdf5_fcapi.o 
 else
-  OBJECTS = dummy.o 
+  OBJECTS = hdf5_fcdummy.o 
 endif
 
 LLIB = vshdf5_lib
