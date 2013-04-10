@@ -45,3 +45,15 @@ NETCDF_INC = ${NETCDF_DIR}/include
 # Archive 
 ARCH = ar cr
 
+HDF5_LIBS = \
+      /opt/cray/hdf5/1.8.8/cray/74/lib/libhdf5hl_fortran_cray.a \
+      /opt/cray/hdf5/1.8.8/cray/74/lib/libhdf5hl_fortran.a \
+      /opt/cray/hdf5/1.8.8/cray/74/lib/libhdf5_hl_cray.a \
+      /opt/cray/hdf5/1.8.8/cray/74/lib/libhdf5_hl.a \
+      /opt/cray/hdf5/1.8.8/cray/74/lib/libhdf5_fortran_cray.a \
+      /opt/cray/hdf5/1.8.8/cray/74/lib/libhdf5_fortran.a \
+      /opt/cray/hdf5/1.8.8/cray/74/lib/libhdf5_cray.a \
+      /opt/cray/hdf5/1.8.8/cray/74/lib/libhdf5.a
+HDF5_INC =  -I${HDF5_DIR}/include -I${HDF5_DIR}/include/fortran
+
+
