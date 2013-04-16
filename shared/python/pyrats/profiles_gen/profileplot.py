@@ -6,6 +6,43 @@ import numpy as np
 from gacodeplotdefs import *
 from pyrats.profiles_gen.data import profiles_genData
 
+#---------------------------------------------------------------
+def fancytag(tag):
+ 
+    if tag == 'bunit':
+        fancy = r'$B_\mathrm{unit}$'
+    elif tag == 'rmin':
+        fancy = r'$r$'
+    elif tag == 'rmaj':
+        fancy = r'$R_0$'
+    elif tag == 'drmaj':
+        fancy = r'$dR_0/dr$'
+    elif tag == 'kappa':
+        fancy = r'$\kappa$'
+    elif tag == 'skappa':
+        fancy = r'$r \, d\kappa/dr$'
+    elif tag == 'delta':
+        fancy = r'$\delta$'
+    elif tag == 'sdelta':
+        fancy = r'$r \, d\delta/dr$'
+    elif tag == 'ne':
+        fancy = r'$n_\mathrm{e}$'
+    elif tag == 'ni_1':
+        fancy = r'$n_\mathrm{i1}$'
+    elif tag == 'ni_2':
+        fancy = r'$n_\mathrm{i2}$'
+    elif tag == 'ni_3':
+        fancy = r'$n_\mathrm{i3}$'
+    elif tag == 'ni_4':
+        fancy = r'$n_\mathrm{i4}$'
+    elif tag == 'ni_5':
+        fancy = r'$n_\mathrm{i5}$'
+    else:
+        fancy = r'$\mathrm{'+tag+'}$'
+
+    return fancy
+#---------------------------------------------------------------
+
 rvar    = sys.argv[1]
 infiles = sys.argv[2]
 plots   = sys.argv[3]
@@ -58,7 +95,8 @@ for j in range(n):
         ax.grid(which="majorminor",ls=":")
         ax.grid(which="major",ls=":")
 
-    ax.plot(x,prof.data[fulltag],'o-',label='\\verb|'+tag+'|')
+    ftag = fancytag(tag)
+    ax.plot(x,prof.data[fulltag],'o-',label=ftag)
 
 ax.legend(loc=1)
 
