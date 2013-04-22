@@ -27,7 +27,7 @@ FC     = ftn -e m -J ${GACODE_ROOT}/modules
 F77    = ${FC}
 
 FOMP   =
-FMATH  = -s real64
+FMATH  = -s real64 -I/opt/fftw/3.3.0.1/x86_64/include
 FOPT   = -O3 -hfp3
 FDEBUG = -eD -Ktrap=fp -m 1
 #FPETSC = ${FC_LINKER_FLAGS} ${FC_INCLUDES} ${SLEPC_LIB}
@@ -44,4 +44,16 @@ NETCDF_INC = ${NETCDF_DIR}/include
 
 # Archive 
 ARCH = ar cr
+
+HDF5_LIBS = \
+      /opt/cray/hdf5/1.8.8/cray/74/lib/libhdf5hl_fortran_cray.a \
+      /opt/cray/hdf5/1.8.8/cray/74/lib/libhdf5hl_fortran.a \
+      /opt/cray/hdf5/1.8.8/cray/74/lib/libhdf5_hl_cray.a \
+      /opt/cray/hdf5/1.8.8/cray/74/lib/libhdf5_hl.a \
+      /opt/cray/hdf5/1.8.8/cray/74/lib/libhdf5_fortran_cray.a \
+      /opt/cray/hdf5/1.8.8/cray/74/lib/libhdf5_fortran.a \
+      /opt/cray/hdf5/1.8.8/cray/74/lib/libhdf5_cray.a \
+      /opt/cray/hdf5/1.8.8/cray/74/lib/libhdf5.a
+HDF5_INC =  -I${HDF5_DIR}/include -I${HDF5_DIR}/include/fortran
+
 
