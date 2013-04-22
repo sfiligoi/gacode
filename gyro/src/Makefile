@@ -150,7 +150,7 @@ OBJECTS += gyro_globals.o \
           gyro_write_radial_op.o \
           gyro_write_step.o \
           gyro_write_timedata.o \
-          gyro_write_timedata_wedge_hdf5.o \
+          gyro_write_timedata_wedge_hdf5.empty.o \
           gyro_write_h5mesh.o \
           gyro_write_timers.o \
           gyro_velocity_sum.o 
