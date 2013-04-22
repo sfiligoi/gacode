@@ -16,7 +16,7 @@ endif
 
 LLIB = gyro_lib
 #ifeq ($(HDF5),debug)
-LLIB += ${HDF5_LIBS}
+#LLIB += ${HDF5_LIBS}
 #endif
 
 OBJECTS += gyro_globals.o \
