@@ -25,6 +25,11 @@
 ! kx -> pi_2*p*a + u
 ! ky -> v
 !
+!
+! WARNING:
+!  RJBESL requires non-negative argument, so we need to operate on 
+!  argument with abs().
+!
 ! INPUT:
 !
 ! a = |grad(r)|/L
@@ -74,7 +79,7 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
      ! J_0
      do p=-p0,p0-1
         x = rho*sqrt((pi_2*p*a+u)**2+v**2)
-        func(p)=BESJ0(x)/n_x
+        func(p)=BESJ0(abs(x))/n_x
      enddo
 
   case (2)
@@ -82,7 +87,7 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
      ! J_0^2
      do p=-p0,p0-1
         x = rho*sqrt((pi_2*p*a+u)**2+v**2)
-        func(p)=BESJ0(x)**2/n_x
+        func(p)=BESJ0(abs(x))**2/n_x
      enddo
 
   case (3)
@@ -92,7 +97,7 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
      ! The factor -(i/2) will be applied outside this loop
      do p=-p0,p0-1
         x = rho*sqrt((pi_2*p*a+u)**2+v**2)
-        call RJBESL(x,0.0,3,bessel,ierr)
+        call RJBESL(abs(x),0.0,3,bessel,ierr)
         func(p) = (pi_2*p*a+u)*rho*(bessel(0)+bessel(2))/n_x
      enddo
 
@@ -101,7 +106,7 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
      ! G = (1/2)*[ J_0(z)+J_2(z) ]
      do p=-p0,p0-1
         x = rho*sqrt((pi_2*p*a+u)**2+v**2)
-        call RJBESL(x,0.0,3,bessel,ierr)
+        call RJBESL(abs(x),0.0,3,bessel,ierr)
         func(p) = 0.5*(bessel(0)+bessel(2))/n_x
      enddo
 
@@ -110,7 +115,7 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
      ! G^2
      do p=-p0,p0-1
         x = rho*sqrt((pi_2*p*a+u)**2+v**2)
-        call RJBESL(x,0.0,3,bessel,ierr)
+        call RJBESL(abs(x),0.0,3,bessel,ierr)
         func(p) = (0.5*(bessel(0)+bessel(2)))**2/n_x
      enddo
 
@@ -119,7 +124,7 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
      ! G * J_0
      do p=-p0,p0-1
         x = rho*sqrt((pi_2*p*a+u)**2+v**2)
-        call RJBESL(x,0.0,3,bessel,ierr)
+        call RJBESL(abs(x),0.0,3,bessel,ierr)
         func(p) = 0.5*(bessel(0)+bessel(2))*bessel(0)/n_x
      enddo
 
@@ -138,7 +143,7 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
      ! The factor i will be applied outside this loop
      do p=-p0,p0-1
         x = rho*sqrt((pi_2*p*a+u)**2+v**2)
-        call RJBESL(x,0.0,3,bessel,ierr)
+        call RJBESL(abs(x),0.0,3,bessel,ierr)
         func(p) = (pi_2*p*a+u)*rho*(bessel(0)-bessel(1)/x)/x**2/n_x
      enddo
 
