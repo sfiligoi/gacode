@@ -706,7 +706,7 @@ contains
           endif
        enddo
        if(is_ele == -1) then
-          call neo_error('ERROR: (NEO) Must have electron species for Spitzer problem')
+          call neo_error('ERROR: (NEO) Must have electron species for uncoupled e-i problem')
           return
        endif
        

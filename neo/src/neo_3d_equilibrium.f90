@@ -32,10 +32,10 @@ module neo_3d_equilibrium
   logical, private :: initialized = .false.
   real, dimension(:), allocatable, private :: x
   real, private :: dx
-  integer, parameter, private :: nx=7
+  integer, parameter, private :: nx=201
   real, dimension(:), allocatable, private :: y
   real, private :: dy
-  integer, parameter, private :: ny=7
+  integer, parameter, private :: ny=201
   real, dimension(:), allocatable, private :: R0, Z0
   real, dimension(:,:,:), allocatable, private :: R1, Z1
   real, dimension(:), allocatable, private :: dR0dt, dZ0dt, dR0dr, dZ0dr, &
@@ -522,8 +522,8 @@ contains
     ! map the equilibrium paramters from the local theta grid to the 
     ! computational grid
     call cub_spline(x,k_par_t_0_loc,nx,theta,k_par_t_0,n_theta)
-    call cub_spline(x,k_par_p_0_loc,nx,theta,k_par_p_0_loc,n_theta)
-    call cub_spline(x,Bmag_0_loc,nx,theta,Bmag_0_loc,n_theta)
+    call cub_spline(x,k_par_p_0_loc,nx,theta,k_par_p_0,n_theta)
+    call cub_spline(x,Bmag_0_loc,nx,theta,Bmag_0,n_theta)
     call cub_spline(x,gradpar_Bmag_overB_0_loc,nx,theta,gradpar_Bmag_overB_0,n_theta)
     call cub_spline(x,w_theta_0_loc,nx,theta,w_theta_0,n_theta)
     call cub_spline(x,v_drift_x_overB2_0_loc,nx,theta,v_drift_x_overB2_0,n_theta)
@@ -734,7 +734,6 @@ contains
     enddo
     print *, 'R eqn max_sum = ', max_sum
     print *, s1, s2
-    stop
     
 
     ! clean-up
@@ -807,6 +806,22 @@ contains
        enddo
     enddo
     close(1)
+
+    open(unit=1,file=trim(path)//'out.neo.btest_3',status='replace')
+    do it=1, n_theta
+       write(1,'(e16.8)',advance='no') theta(it)
+       write(1,'(e16.8)',advance='no') theta(it)
+       write(1,'(e16.8)',advance='no') Bmag_0(it)
+       write(1,'(e16.8)',advance='no') v_drift_x_overB2_0(it)
+       write(1,'(e16.8)',advance='no') k_par_t_0(it)
+       write(1,'(e16.8)',advance='no') k_par_p_0(it)
+       write(1,'(e16.8)',advance='no') gradpar_Bmag_overB_0(it)
+       write(1,'(e16.8)',advance='no') w_theta_0(it)/sum_w_theta_0
+       write(1,*)
+    enddo
+    close(1)
+
+    stop
 
   end subroutine ThreeD_EQUIL_do
 
@@ -892,14 +907,14 @@ contains
     !stop
 
     ! enforce the constraints
-    cmat(nx,:)=0.0
-    cmat(2*nx,:)=0.0
-    do jt=1,nx
-       cmat(nx,jt)      = 1.0
-       cmat(2*nx,jt+nx) = 1.0
-    enddo
-    bvec(nx)   = 0.0
-    bvec(2*nx) = 0.0
+    !cmat(nx,:)=0.0
+    !cmat(2*nx,:)=0.0
+    !do jt=1,nx
+    !   cmat(nx,jt)      = 1.0
+    !   cmat(2*nx,jt+nx) = 1.0
+    !enddo
+    !bvec(nx)   = 0.0
+    !bvec(2*nx) = 0.0
 
     ! matrix solve
     msize=2*nx
@@ -907,11 +922,11 @@ contains
     allocate(i_piv(msize))
     call DGETRF(msize,msize,cmat(:,:),msize,i_piv,info)
 
-    call DGETRI(msize,cmat(:,:),msize,i_piv,work,msize,info)
-    do it=1,2*nx
-       print '(50(1pe12.5,1x))', cmat(it,:)
-    enddo
-    stop
+    !call DGETRI(msize,cmat(:,:),msize,i_piv,work,msize,info)
+    !do it=1,2*nx
+    !   print '(50(1pe12.5,1x))', cmat(it,:)
+    !enddo
+    !stop
 
     call DGETRS('N',msize,1,cmat(:,:),msize,i_piv,bvec(:),msize,info)
     deallocate(work)
