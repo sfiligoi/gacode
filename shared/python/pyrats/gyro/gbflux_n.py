@@ -66,8 +66,8 @@ for i in range(n_kinetic):
         print '# Moment  : '+mtag
         print '# Field   : '+ftag
         print '# Species : '+stag
-        print '# Average window: '+str(window)
-        print '# Data: (k_theta rho_s,moment)'
+        print '# Time    : '+str(t[imin])+' < (c_s/a) t < '+str(t[-1])
+        print '# Data: [ k_theta rho_s , gbflux ]'
         for j in range(len(k)):
             print k[j],ave[j]
 
