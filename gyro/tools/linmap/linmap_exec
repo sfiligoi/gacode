@@ -1,0 +1,276 @@
+#!/bin/bash
+
+#--------------------------------------------------------
+# Read input.linmap data
+#
+file=`cat input.linmap.gen` 
+
+p=0
+for x in $file
+do
+   p=$(($p+1))
+   if [ $p -eq 1 ] ; then DET_TOLERANCE=$x ; fi
+   if [ $p -eq 3 ] ; then ERROR_TOLERANCE=$x ; fi
+   if [ $p -eq 5 ] ; then WI_STABLE_LIMIT=$x ; fi
+done
+#-------------------------------------------------------
+
+#----------------------------------------
+# Capture command-line arguments
+#
+dir=$pwd
+
+cpu=${1}
+start_over=${2}
+#-------------------------------------------------------
+
+
+#----------------------------------------
+# Adjustable: Initial guess
+#
+#USER INPUT
+startWR=-3.04E-01
+startWI=2.55E-01
+
+RADIUSstart=0.8
+RADIUSmin=0.20
+RADIUSmax=0.90
+RADIUSstep=0.010
+
+L_Ystart=0.50
+L_Ymin=0.050
+L_Ymax=2.00
+L_Ystep=0.010
+
+#END OF USER INPUT
+#----------------------------------------
+NstepsR=$(echo "scale=0; ($RADIUSmax - $RADIUSmin) / $RADIUSstep;" | bc)
+NstepsL_Y=$(echo "scale=0; ($L_Ymax - $L_Ymin) / $L_Ystep;" | bc)
+echo "Steps in RADIUS = $NstepsR"
+echo "Steps in L_Y = $NstepsL_Y"
+#----------------------------------------
+
+cd $dir
+cp input.gyro.orig input.gyro
+
+echo "FIELDEIGEN_WR=$startWR" >> input.gyro
+echo "FIELDEIGEN_WI=$startWI" >> input.gyro
+#----------------------------------------
+
+if $start_over ; then
+echo "Starting from scratch!"
+rm -f radius_krho_fieldeigen_omega.out
+#rm -f fieldeigen_param.out
+rm -f fieldeigen_gbflux.out
+rm -f rho.out ; touch rho.out
+
+else
+echo "Restarting!"
+fi
+
+#----------------------------------------
+#bc can't use scientific notation so transform everything to regular notation
+DET_TOLERANCE=$(echo $DET_TOLERANCE | sed 's/\([0-9]*\(\.[0-9]*\)\?\)[eE]+\?\(-\?[0-9]*\)/(\1*10^\3)/g;s/^/scale=12;/'| bc)
+ERROR_TOLERANCE=$(echo $ERROR_TOLERANCE | sed 's/\([0-9]*\(\.[0-9]*\)\?\)[eE]+\?\(-\?[0-9]*\)/(\1*10^\3)/g;s/^/scale=12;/'| bc)
+WI_STABLE_LIMIT=$(echo $WI_STABLE_LIMIT | sed 's/\([0-9]*\(\.[0-9]*\)\?\)[eE]+\?\(-\?[0-9]*\)/(\1*10^\3)/g;s/^/scale=12;/'| bc)
+echo "Your tolerance is |det| < $DET_TOLERANCE		error < $ERROR_TOLERANCE"
+echo "An eigenmode is considered stable if gamma < $WI_STABLE_LIMIT"
+#----------------------------------------
+
+restartRadiusWR=$startWR
+restartRadiusWI=$startWI
+
+resultsWR=1
+resultsWI=1
+
+currentRADIUS=$RADIUSstart
+#Start by scanning downwards in RADIUS
+downwardsRadius=true
+radiusbreak=false
+
+while [ $(echo "$currentRADIUS >= $RADIUSmin && $currentRADIUS <= $RADIUSmax;" | bc) -eq 1 ]; do
+
+	radiusbreak=false
+	
+	currentL_Y=$L_Ystart
+	#start by scanning downwards in L_Y
+	downwardsL_Y=true
+	
+	while [ $(echo "$currentL_Y >= $L_Ymin && $currentL_Y <= $L_Ymax;" | bc) -eq 1 ]; do
+
+		
+		converged=false
+		trials=0
+		#Loop to find a solution
+		while ! $converged  ; do
+			echo "RADIUS=$currentRADIUS"
+			echo "L_Y=$currentL_Y"
+			echo "RADIUS=$currentRADIUS" >> input.gyro
+			echo "L_Y=$currentL_Y" >> input.gyro
+			gyro -e . -n $cpu
+			results=`tail -n 1 fieldeigen.out`
+			bar=( $results )
+			resultsWR=${bar[0]}
+			resultsWI=${bar[1]}
+			det=$(echo "${bar[2]}")
+			error=${bar[3]}
+
+			#bc can't use scientific notation so transform everything to regular notation
+			resultsWR=$(echo $resultsWR | sed 's/\([0-9]*\(\.[0-9]*\)\?\)[eE]+\?\(-\?[0-9]*\)/(\1*10^\3)/g;s/^/scale=12;/'| bc)
+			resultsWI=$(echo $resultsWI | sed 's/\([0-9]*\(\.[0-9]*\)\?\)[eE]+\?\(-\?[0-9]*\)/(\1*10^\3)/g;s/^/scale=12;/'| bc)
+			det=$(echo $det | sed 's/\([0-9]*\(\.[0-9]*\)\?\)[eE]+\?\(-\?[0-9]*\)/(\1*10^\3)/g;s/^/scale=15;/'| bc)
+			error=$(echo $error | sed 's/\([0-9]*\(\.[0-9]*\)\?\)[eE]+\?\(-\?[0-9]*\)/(\1*10^\3)/g;s/^/scale=15;/'| bc)
+
+
+			if [ $(echo "$det <= $DET_TOLERANCE && $error <= $ERROR_TOLERANCE;" | bc) -eq 1 ]; then
+				echo "Converged!"
+				converged=true
+				break
+			fi
+			trials=$(echo "$trials + 1;" | bc)
+			if [ $(echo "$trials >= 3;" | bc) -eq 1 ]; then #Give up searching
+				if [ $(echo "$currentL_Y == $L_Ystart;" | bc) -eq 1 ]; then
+					radiusbreak=true
+				fi
+				break
+			fi
+			
+			if [ $(echo "$currentL_Y == $L_Ystart;" | bc) -eq 1 ]; then
+
+				if [ $(echo "$trials == 1;" | bc) -eq 1 ]; then #Try reducing step in RADIUS to half
+					echo "Try reducing step length in RADIUS to half"
+					if $downwardsRadius ; then
+						currentRADIUS=$(echo "$currentRADIUS + 0.5000*$RADIUSstep;" | bc)
+					else
+						currentRADIUS=$(echo "$currentRADIUS - 0.5000*$RADIUSstep;" | bc)
+					fi
+				fi
+				if [ $(echo "$trials == 2;" | bc) -eq 1 ]; then #Try reducing step in RADIUS to 1/4th
+					echo "Try reducing step length in RADIUS to 1/4th"
+					if $downwardsRadius ; then
+						currentRADIUS=$(echo "$currentRADIUS + 0.2500*$RADIUSstep;" | bc)
+					else
+						currentRADIUS=$(echo "$currentRADIUS - 0.2500*$RADIUSstep;" | bc)
+					fi
+				fi
+
+			else
+
+				if [ $(echo "$trials == 1;" | bc) -eq 1 ]; then #Try reducing step in L_Y to half
+					echo "Try reducing step length in L_Y to half"
+					if $downwardsL_Y ; then
+						currentL_Y=$(echo "$currentL_Y + 0.5000*$L_Ystep;" | bc)
+					else
+						currentL_Y=$(echo "$currentL_Y - 0.5000*$L_Ystep;" | bc)
+					fi
+				fi
+				if [ $(echo "$trials == 2;" | bc) -eq 1 ]; then #Try reducing step in L_Y to 1/4th
+					echo "Try reducing step length in L_Y to 1/4th"
+					if $downwardsL_Y ; then
+						currentL_Y=$(echo "$currentL_Y + 0.2500*$L_Ystep;" | bc)
+					else
+						currentL_Y=$(echo "$currentL_Y - 0.2500*$L_Ystep;" | bc)
+					fi
+				fi
+
+			fi
+			
+		done
+
+		if  $converged  ; then #Write eigenvalue to output files if converged
+			if [ $(echo "$resultsWI >= $WI_STABLE_LIMIT;" | bc) -eq 1 ]; then
+				echo "Writing to output"
+				echo "$currentRADIUS	$currentL_Y	$results" >> radius_krho_fieldeigen_omega.out
+				tail -1 out.gyro.gbflux >> fieldeigen_gbflux.out
+				profiles_gen -i input.profiles -loc_rad "$currentRADIUS" | grep "rho " >> rho.out
+			fi
+		else
+			echo "Couldn't find solution! Stop following branch"
+
+			if $radiusbreak ; then
+				break
+			fi
+			if $downwardsL_Y ; then #Start scanning upwards
+				downwardsL_Y=false
+				currentL_Y=$(echo "$L_Ystart + $L_Ystep;" | bc)
+				cp input.gyro.orig input.gyro
+				echo "FIELDEIGEN_WR=$restartRadiusWR" >> input.gyro
+				echo "FIELDEIGEN_WI=$restartRadiusWI" >> input.gyro
+				continue
+			else
+				break #Can't continue on branch
+			fi
+		fi
+
+
+		if [ $(echo "$resultsWI < $WI_STABLE_LIMIT;" | bc) -eq 1 ]; then #Mode has become stable
+			echo "Branch is stable! Stop following"
+			if $downwardsL_Y ; then #Start scanning upwards
+				downwardsL_Y=false
+				currentL_Y=$(echo "$L_Ystart + $L_Ystep;" | bc)
+				cp input.gyro.orig input.gyro
+				echo "FIELDEIGEN_WR=$restartRadiusWR" >> input.gyro
+				echo "FIELDEIGEN_WI=$restartRadiusWI" >> input.gyro
+				continue
+			else
+				break #Can't continue on branch
+			fi
+		fi
+
+
+		if [ $(echo "$currentL_Y == $L_Ystart;" | bc) -eq 1 ]; then #save solution for later
+			restartRadiusWR=$resultsWR
+			restartRadiusWI=$resultsWI
+		fi
+		
+		cp input.gyro.orig input.gyro
+		echo "FIELDEIGEN_WR=$resultsWR" >> input.gyro
+		echo "FIELDEIGEN_WI=$resultsWI" >> input.gyro
+	
+		if [ $(echo "$currentL_Y - $L_Ystep < $L_Ymin;" | bc) -eq 1 ]; then #Change to scanning upwards
+			downwardsL_Y=false
+			currentL_Y=$L_Ystart
+			echo "FIELDEIGEN_WR=$restartRadiusWR" >> input.gyro
+			echo "FIELDEIGEN_WI=$restartRadiusWI" >> input.gyro
+		fi
+
+		if $downwardsL_Y ; then
+			currentL_Y=$(echo "$currentL_Y - $L_Ystep;" | bc)
+		else
+			currentL_Y=$(echo "$currentL_Y + $L_Ystep;" | bc)
+		fi
+	done
+
+	if $radiusbreak ; then
+		if $downwardsRadius ; then
+			downwardsRadius=false
+			currentRADIUS=$(echo "$RADIUSstart + $RADIUSstep;" | bc)
+			cp input.gyro.orig input.gyro
+			echo "FIELDEIGEN_WR=$startWR" >> input.gyro
+			echo "FIELDEIGEN_WI=$startWI" >> input.gyro
+			continue
+		else
+			break #Can't continue on branch, stop execution
+		fi
+	fi
+
+	cp input.gyro.orig input.gyro
+	echo "FIELDEIGEN_WR=$restartRadiusWR" >> input.gyro
+	echo "FIELDEIGEN_WI=$restartRadiusWI" >> input.gyro
+
+	if [ $(echo "$currentRADIUS - $RADIUSstep < $RADIUSmin;" | bc) -eq 1 ]; then #Change to scanning upwards
+		downwardsRadius=false
+		currentRADIUS=$RADIUSstart
+		echo "FIELDEIGEN_WR=$startWR" >> input.gyro
+		echo "FIELDEIGEN_WI=$startWI" >> input.gyro
+	fi
+
+	if $downwardsRadius ; then
+		currentRADIUS=$(echo "$currentRADIUS - $RADIUSstep;" | bc)
+	else
+		currentRADIUS=$(echo "$currentRADIUS + $RADIUSstep;" | bc)
+	fi
+done
+
+exit
+

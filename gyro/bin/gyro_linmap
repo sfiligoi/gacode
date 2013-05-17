@@ -1,0 +1,120 @@
+#!/bin/bash
+#=============================================================
+# gyro_linmap
+#
+# PURPOSE:
+#  Top-level script controlling execution of gyro_linmap
+#=============================================================
+
+#=============================================================
+# Syntax validity check and help message
+#
+n=$#
+
+if [ $n -eq 0 ]
+then
+  echo
+  echo "Usage:   gyro_linmap [options]"
+  echo
+  echo "         -p <path>"
+  echo "         Set optional path to simulation directory."
+  echo "         [The default path is the current directory]"
+  echo
+  echo "EXECUTE MODE"
+  echo
+  echo "         -e <simdir>" 
+  echo "         Run GYRO using input data in <simdir>."
+  echo
+  echo "         -n <MPI tasks>" 
+  echo "         Number of MPI tasks."
+  echo
+  echo "         -nomp <threads>" 
+  echo "         Number of OpenMP threads per MPI task."
+  echo
+  echo "         -numa <n>" 
+  echo "         NUMAs active per node."
+  echo
+  echo "         -mpinuma <n>" 
+  echo "         MPI tasks per active NUMA."
+  echo
+  echo "         -start_over" 
+  echo "         Toggle start over."
+  echo
+  echo "PLOT"
+  echo
+  echo "         -plot"  
+  echo "         Toggle plot mode"
+
+  exit 1
+fi
+#=============================================================
+
+#=============================================================
+# Define variables for flag capture
+
+SIMROOT=$PWD
+GYRO_DIR=$GACODE_ROOT/gyro
+# Parallelization parameters
+NPROC=1
+NOMP=1
+NUMA=0
+MPINUMA=0
+
+PLOT_FLAG=0
+START_OVER=false
+#=============================================================
+
+#=============================================================
+# Parse command line options
+#
+while [ $# -gt 0 ] ; do
+  case "$1" in
+
+  -p) shift ; SIMROOT=$1 ;;
+
+  -e) shift ; LOCDIR=$1 ; EXEC_FLAG=1 ;;
+
+  -i) shift ; LOCDIR=$1 ; INIT_FLAG=1 ;;
+
+  -n) shift ; NPROC=$1 ;;
+
+  -nomp) shift ; NOMP=$1 ;;
+
+  -numa) shift ; NUMA=$1 ;;
+
+  -mpinuma) shift ; MPINUMA=$1 ;;
+
+  -plot) PLOT_FLAG=1 ;;
+
+  -start_over) START_OVER=true ;;
+
+  *) echo "ERROR: (gyro_linplot) Incorrect syntax." ; exit 1 ;;
+ 
+  esac
+  shift
+done
+#=============================================================
+
+if [ "$LOCDIR" == "." ]
+then
+   LOCDIR=`basename $PWD`
+   cd .. ; SIMROOT=$PWD
+fi
+SIMDIR=$SIMROOT/$LOCDIR
+
+if [ -d $SIMDIR ]
+then
+   cd $SIMDIR
+else
+   echo "ERROR: (gyro_linplot) $SIMDIR does not exist."
+   exit 1
+fi
+
+
+if [ $PLOT_FLAG -eq 1 ]
+then
+   python $GYRO_DIR/tools/linmap/linmap_contour_plot.py
+else
+   python $GYRO_DIR/bin/gyro_linmap_parse.py input.linmap
+   $GYRO_DIR/tools/linmap/linmap_exec $NPROC $START_OVER
+fi
