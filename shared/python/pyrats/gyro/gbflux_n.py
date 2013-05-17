@@ -11,6 +11,7 @@ field     = sys.argv[2]
 i_moment  = int(sys.argv[3])
 window    = float(sys.argv[4])
 ftype     = sys.argv[5]
+dataflag  = int(sys.argv[6])
 
 n_field   = int(sim.profile['n_field'])
 n_kinetic = int(sim.profile['n_kinetic'])
@@ -60,6 +61,15 @@ for i in range(n_kinetic):
 
     ax.set_title(stag+r': $'+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'$',fontsize=GFONTSIZE)
     ax.bar(k-dk/2.0,ave,width=dk/1.1,color=color[i],alpha=0.4,edgecolor='black')
+
+    if dataflag == 1:
+        print '# Moment  : '+mtag
+        print '# Field   : '+ftag
+        print '# Species : '+stag
+        print '# Average window: '+str(window)
+        print '# Data: (k_theta rho_s,moment)'
+        for j in range(len(k)):
+            print k[j],ave[j]
 
 
 if ftype == 'screen':

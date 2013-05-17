@@ -59,8 +59,11 @@ then
   echo "                                   -moment 3 (all fields)],"
   echo "                    moment_zero"
   echo
+  echo "          -data"
+  echo "          Toggle data dump to screen."
+  echo
   echo "          -i"
-  echo "          Use python in interactive mode.  Useful if matplotlibrc has interactive:True  "
+  echo "          Use python in interactive mode.  Useful if matplotlibrc has interactive:True"
   echo
   echo "Example:"
   echo
@@ -86,6 +89,7 @@ I_MOMENT=0
 WINDOW=0.8
 FTYPE=screen
 INTERACTIVE=
+DATAFLAG=0
 #==============================================================================
 
 #==============================================================================
@@ -111,6 +115,8 @@ while [ $# -gt 0 ] ; do
   -w) shift ; WINDOW=$1 ;;
 
   -f) shift ; FTYPE=$1 ;;
+ 
+  -data) DATAFLAG=1 ;;
   
   -i) INTERACTIVE=-i ;;
 
@@ -150,19 +156,19 @@ fi
 case "$PLOT_TYPE" in
 
    moment_zero)  
-	python $INTERACTIVE  $PYROOT/moment_zero.py $SIMDIR $I_MOMENT $WINDOW $FTYPE  ;;
+	python $INTERACTIVE  $PYROOT/moment_zero.py $SIMDIR $I_MOMENT $WINDOW $FTYPE ;;
 
    fluctuation2d)  
-	python $INTERACTIVE  $PYROOT/fluctuation2d.py $SIMDIR $I_MOMENT $FTYPE  ;;
+	python $INTERACTIVE  $PYROOT/fluctuation2d.py $SIMDIR $I_MOMENT $FTYPE ;;
 
    freq)  
-	python $INTERACTIVE  $PYROOT/freq.py $SIMDIR $WINDOW $FTYPE  ;;
+	python $INTERACTIVE  $PYROOT/freq.py $SIMDIR $WINDOW $FTYPE ;;
 
    gbflux)  
-	python $INTERACTIVE  $PYROOT/gbflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE  ;;
+	python $INTERACTIVE  $PYROOT/gbflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE $DATAFLAG ;;
 
    gbflux_n) 
-        python $INTERACTIVE  $PYROOT/gbflux_n.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE  ;;
+        python $INTERACTIVE  $PYROOT/gbflux_n.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE $DATAFLAG ;;
 
    gbflux_i) 
         python $INTERACTIVE  $PYROOT/gbflux_i.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE  ;;
