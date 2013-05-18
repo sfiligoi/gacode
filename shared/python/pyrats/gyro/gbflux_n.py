@@ -11,7 +11,7 @@ field     = sys.argv[2]
 i_moment  = int(sys.argv[3])
 window    = float(sys.argv[4])
 ftype     = sys.argv[5]
-dataflag  = int(sys.argv[6])
+datafile  = sys.argv[6]
 
 n_field   = int(sim.profile['n_field'])
 n_kinetic = int(sim.profile['n_kinetic'])
@@ -40,8 +40,10 @@ fig = plt.figure(figsize=(7*n_kinetic,6))
 #=====================================
 
 color = ['k','m','b','c']
-k = sim.profile['kt_rho']
-dk = k[1]-k[0]
+
+k   = sim.profile['kt_rho']
+dk  = k[1]-k[0]
+ave = np.zeros((n_n))
 
 # Determine tmin
 imin=0
@@ -49,31 +51,45 @@ for i in range(len(t)):
     if t[i] < (1.0-window)*t[len(t)-1]:
         imin = i+1
 
-# Loop over species
-for i in range(n_kinetic):
-    ax = fig.add_subplot(1,n_kinetic,i+1)
-    ax.set_xlabel(r'$k_\theta \rho_s$',fontsize=GFONTSIZE)
-    ax.set_ylabel(r'$'+mtag+' \;('+ftag+')$',color='k',fontsize=GFONTSIZE)
-    stag = sim.tagspec[i]
-    ave  = np.zeros((n_n))
-    for j in range(n_n):
-        ave[j] = average(flux0[i,i_moment,j,:],t,window)
+if datafile == 'none':
 
-    ax.set_title(stag+r': $'+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'$',fontsize=GFONTSIZE)
-    ax.bar(k-dk/2.0,ave,width=dk/1.1,color=color[i],alpha=0.4,edgecolor='black')
+    # Plot data to screen or image file.
 
-    if dataflag == 1:
-        print '# Moment  : '+mtag
-        print '# Field   : '+ftag
-        print '# Species : '+stag
-        print '# Time    : '+str(t[imin])+' < (c_s/a) t < '+str(t[-1])
-        print '# Data: [ k_theta rho_s , gbflux ]'
-        for j in range(len(k)):
-            print k[j],ave[j]
+    for i in range(n_kinetic):
+        ax = fig.add_subplot(1,n_kinetic,i+1)
+        ax.set_xlabel(r'$k_\theta \rho_s$',fontsize=GFONTSIZE)
+        ax.set_ylabel(r'$'+mtag+' \;('+ftag+')$',color='k',fontsize=GFONTSIZE)
+        stag = sim.tagspec[i]
+        for j in range(n_n):
+            ave[j] = average(flux0[i,i_moment,j,:],t,window)
+        ax.set_title(stag+r': $'+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'$',fontsize=GFONTSIZE)
+        ax.bar(k-dk/2.0,ave,width=dk/1.1,color=color[i],alpha=0.4,edgecolor='black')
+        
+    if ftype == 'screen':
+        plt.show()
+    else:
+        outfile = 'gbflux_n.'+ftype
+        plt.savefig(outfile)
 
-
-if ftype == 'screen':
-    plt.show()
 else:
-    outfile = 'gbflux_n.'+ftype
-    plt.savefig(outfile)
+
+    # Write data to datafile
+
+    arr = np.zeros([len(k),n_kinetic+1])
+    arr[:,0] = k
+    stag = '(k_y rho_s'
+    for i in range(n_kinetic):
+        for j in range(n_n):
+            ave[j] = average(flux0[i,i_moment,j,:],t,window)
+        arr[:,i+1] = ave
+        stag = stag+' , '+sim.tagspec[i]
+            
+    comment = \
+        'Moment  : '+mtag+'\n'+ \
+        'Field   : '+ftag+'\n'+ \
+        'Time    : '+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'\n'+ \
+        stag+')'
+
+    np.savetxt(datafile,arr,fmt='%.5e',header=comment)
+
+

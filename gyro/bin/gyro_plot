@@ -23,9 +23,12 @@ then
   echo "          -e <simdir>"
   echo "          Use data in <simdir>."
   echo 
-  echo "          -f <filetype>"
-  echo "          Output file type."
-  echo "           <filetype>=emf, eps, pdf, png, ps, raw, rgba, svg, svgz"
+  echo "          -img <image.ext>"
+  echo "          Output plot image to image.ext, where the type is set by .ext."
+  echo "           <ext>=emf, eps, pdf, png, ps, raw, rgba, svg, svgz"
+  echo 
+  echo "          -dat <datafile>"
+  echo "          Toggle data dump to <datafile>."
   echo 
   echo "          -diff"
   echo "          List gyroBohm diffusivity rather than flux coefficients."
@@ -59,9 +62,6 @@ then
   echo "                                   -moment 3 (all fields)],"
   echo "                    moment_zero"
   echo
-  echo "          -data"
-  echo "          Toggle data dump to screen."
-  echo
   echo "          -i"
   echo "          Use python in interactive mode.  Useful if matplotlibrc has interactive:True"
   echo
@@ -88,8 +88,8 @@ I_FIELD="s"
 I_MOMENT=0
 WINDOW=0.8
 FTYPE=screen
+DATAFILE=none
 INTERACTIVE=
-DATAFLAG=0
 #==============================================================================
 
 #==============================================================================
@@ -114,9 +114,9 @@ while [ $# -gt 0 ] ; do
 
   -w) shift ; WINDOW=$1 ;;
 
-  -f) shift ; FTYPE=$1 ;;
+  -img) shift ; FTYPE=$1 ;;
  
-  -data) DATAFLAG=1 ;;
+  -dat) shift ; DATAFILE=$1 ;;
   
   -i) INTERACTIVE=-i ;;
 
@@ -156,31 +156,31 @@ fi
 case "$PLOT_TYPE" in
 
    moment_zero)  
-	python $INTERACTIVE  $PYROOT/moment_zero.py $SIMDIR $I_MOMENT $WINDOW $FTYPE ;;
+	python $INTERACTIVE  $PYROOT/moment_zero.py $SIMDIR $I_MOMENT $WINDOW $FTYPE $DATAFILE ;;
 
    fluctuation2d)  
-	python $INTERACTIVE  $PYROOT/fluctuation2d.py $SIMDIR $I_MOMENT $FTYPE ;;
+	python $INTERACTIVE  $PYROOT/fluctuation2d.py $SIMDIR $I_MOMENT $FTYPE $DATAFILE ;;
 
    freq)  
-	python $INTERACTIVE  $PYROOT/freq.py $SIMDIR $WINDOW $FTYPE ;;
+	python $INTERACTIVE  $PYROOT/freq.py $SIMDIR $WINDOW $FTYPE $DATAFILE ;;
 
    gbflux)  
-	python $INTERACTIVE  $PYROOT/gbflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE $DATAFLAG ;;
+	python $INTERACTIVE  $PYROOT/gbflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE $DATAFILE ;;
 
    gbflux_n) 
-        python $INTERACTIVE  $PYROOT/gbflux_n.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE $DATAFLAG ;;
+        python $INTERACTIVE  $PYROOT/gbflux_n.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE $DATAFILE ;;
 
    gbflux_i) 
-        python $INTERACTIVE  $PYROOT/gbflux_i.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE  ;;
+        python $INTERACTIVE  $PYROOT/gbflux_i.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE $DATAFILE ;;
 
    gbflux_rt) 
-        python $INTERACTIVE  $PYROOT/gbflux_rt.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE  ;;
+        python $INTERACTIVE  $PYROOT/gbflux_rt.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE $DATAFILE ;;
 
    gbflux_exc) 
-        python $PYROOT/gbflux_exc.py $SIMDIR $WINDOW $FTYPE  ;;
+        python $PYROOT/gbflux_exc.py $SIMDIR $WINDOW $FTYPE $DATAFILE ;;
 
    balloon) 
-        python $INTERACTIVE  $PYROOT/balloon.py $SIMDIR $I_MOMENT $FTYPE ;;
+        python $INTERACTIVE  $PYROOT/balloon.py $SIMDIR $I_MOMENT $FTYPE $DATAFILE ;;
    
 esac 
 
