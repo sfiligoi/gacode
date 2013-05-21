@@ -288,7 +288,7 @@
           b0_bar_out(imax)=b0_bar
           phi_QL_out(imax)=phi_QL
           kx_bar_out(imax)=kx_bar
-          kpar_bar_out(imax)=kpar_bar
+          kpar_bar_out(imax)=kpar_bar/(R_unit*q_unit*width_in)
           do i=1,nbasis
             do j=1,3
              field_weight_out(imax,j,i)=field_weight(j,i)

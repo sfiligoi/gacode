@@ -20,6 +20,7 @@
       REAL,EXTERNAL :: get_stress_tor
       REAL,EXTERNAL :: get_exchange
       REAL,EXTERNAL :: get_phi_bar
+      REAL,EXTERNAL :: get_kpar_bar
       REAL,EXTERNAL :: get_v_bar
       REAL,EXTERNAL :: get_n_bar
       REAL,EXTERNAL :: get_t_bar

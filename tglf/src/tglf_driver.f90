@@ -203,6 +203,7 @@
         write(*,*) 'freq_tg(i)  = ',get_frequency(i)
         write(*,*) 'wd_bar(i) = ',get_wd_bar(i)
         write(*,*) 'b0_bar(i) = ',get_b0_bar(i)
+        write(*,*) 'kpar_bar(i) = ',get_kpar_bar(i)
         if(iflux_tg)then
          do j=1,ns_tg
          do k=1,nfields

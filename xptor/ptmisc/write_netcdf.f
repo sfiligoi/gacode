@@ -822,6 +822,10 @@ c
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
      & len('c_tor'),'c_tor')
       j=j+1
+      oneval(j)=nf_def_var(ncid,'Bp0',nf_double,1,rdim,rhid1(j))
+      oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
+     & len('Bp0'),'Bp0')
+      j=j+1
       oneval(j)=nf_def_var(ncid,'vprime1',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',
      & len('exp vprime1'),'exp vprime1')
@@ -1831,6 +1835,8 @@ c
       oneval(j) = nf_put_var_double(ncid, rhid1(j), c_per)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), c_tor)
+      j=j+1
+      oneval(j) = nf_put_var_double(ncid, rhid1(j), Bp0)
       j=j+1
       oneval(j) = nf_put_var_double(ncid, rhid1(j), 
      &            vprime(1:mxgrid,1))

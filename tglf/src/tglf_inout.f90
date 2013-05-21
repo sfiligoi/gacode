@@ -715,6 +715,25 @@
       END FUNCTION get_phi_bar
 !-----------------------------------------------------------------
 !
+      REAL FUNCTION get_kpar_bar(i1)
+!
+      USE tglf_global
+!
+      IMPLICIT NONE
+      INTEGER,INTENT(IN) :: i1
+      INTEGER :: i3
+!
+      i3=SIZE(kpar_bar_out)
+      if(i1.gt.i3)then
+        write(*,*)"requested kpar_bar index is of bounds",i3
+        get_kpar_bar = 0.0
+      else
+        get_kpar_bar = kpar_bar_out(i1)
+      endif
+!
+      END FUNCTION get_kpar_bar
+!-----------------------------------------------------------------
+!
       REAL FUNCTION get_v_bar(i1)
 !
       USE tglf_global
