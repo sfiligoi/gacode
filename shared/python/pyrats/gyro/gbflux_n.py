@@ -77,19 +77,18 @@ else:
 
     arr = np.zeros([len(k),n_kinetic+1])
     arr[:,0] = k
-    stag = '(k_y rho_s'
+    stag = '# (k_y rho_s'
     for i in range(n_kinetic):
         for j in range(n_n):
             ave[j] = average(flux0[i,i_moment,j,:],t,window)
         arr[:,i+1] = ave
         stag = stag+' , '+sim.tagspec[i]
             
-    comment = \
-        'Moment  : '+mtag+'\n'+ \
-        'Field   : '+ftag+'\n'+ \
-        'Time    : '+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'\n'+ \
-        stag+')'
-
-    np.savetxt(datafile,arr,fmt='%.5e',header=comment)
-
+    fid = open(datafile,'w')
+    fid.write('# Moment  : '+mtag+'\n')
+    fid.write('# Field   : '+ftag+'\n')
+    fid.write('# Time    : '+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'\n')
+    fid.write(stag+')\n')
+    np.savetxt(fid,arr,fmt='%.5e')
+    fid.close()
 
