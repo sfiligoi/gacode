@@ -57,6 +57,11 @@ subroutine gyro_read_experimental_profiles
   bt_exp   = EXPRO_b_ref
   arho_exp = EXPRO_arho
   !
+  btccw = -EXPRO_signb
+  ipccw = -EXPRO_signq*EXPRO_signb
+  !
+  call send_message('INFO: (GYRO) Resetting IPCCW and BTCCW based on input.profiles.')
+  !
   rhogrid_exp(:)    = EXPRO_rho(:)
   rmin_exp(:)       = EXPRO_rmin(:)
   rmaj_exp(:)       = EXPRO_rmaj(:)
@@ -148,17 +153,17 @@ subroutine gyro_read_experimental_profiles
 
   case (1)
 
-     call send_message('INFO: Taking densities directly from input.profiles')
+     call send_message('INFO: (GYRO) Taking densities directly from input.profiles')
 
   case (2) 
 
-     call send_message('INFO: Offsetting main ions to force sum(ni) = ne')
+     call send_message('INFO: (GYRO) Offsetting main ions to force sum(ni) = ne')
      den_exp(1,:) = EXPRO_ni_new(:)
      dlnndr_p(1,:) = a_meters*EXPRO_dlnnidr_new(:)
 
   case default
 
-     call catch_error('INVALID: density_method')
+     call catch_error('ERROR: (GYRO) density_method')
 
   end select
   !--------------------------------------------------------------
@@ -170,7 +175,7 @@ subroutine gyro_read_experimental_profiles
      if (minval(den_exp(is,:)) <= 0.0) then
         print *,is,den_exp(is,:)
         call catch_error(&
-             'ERROR: Nonpositive in density profile '//achar(is-1+iachar("1")))  
+             'ERROR: (GYRO) Nonpositive in density profile '//achar(is-1+iachar("1")))  
      endif
   enddo
 
@@ -216,7 +221,7 @@ subroutine gyro_read_experimental_profiles
   enddo
 
   if (ampere_scale /= 1.0) then
-     call send_message_real('INFO: betae in Ampere Eq. scaled by ',ampere_scale)
+     call send_message_real('INFO: (GYRO) betae in Ampere Eq. scaled by ',ampere_scale)
   endif
 
   ! Deallocate EXPRO arrays

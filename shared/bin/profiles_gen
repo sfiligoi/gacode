@@ -36,8 +36,8 @@ OMFIT="${OMFIT_ROOT}/src/omfit.py ${OMFIT_ROOT}/scripts/fluxSurfaceTracer.py"
 LOCPARGEN=${GACODE_ROOT}/shared/profiles_gen/locpargen/locpargen
 # - exprodump executable
 EXPRODUMP=${GACODE_ROOT}/shared/profiles_gen/exprotools/exprodump
-# - expromake executable
-EXPROMAKE=${GACODE_ROOT}/shared/profiles_gen/exprotools/expromake
+# - create executable
+CREATE=${GACODE_ROOT}/shared/profiles_gen/exprotools/create
 # - ASTRA converter
 ASTRA=${GACODE_ROOT}/shared/profiles_gen/astra/astra2gyro.py
 # - ASTRA default map file
@@ -249,10 +249,10 @@ then
    echo
    echo "      NOTE: control ion charges with Z1,Z2,Z3 as in LOCAL PARAMETER MODE."
    echo
-   echo "PROFILE CREATION MODE"
+   echo "PROFILE CREATE MODE"
    echo 
    echo "             -create"
-   echo "              Create input.profiles using parameters in input.expromake"
+   echo "              Make input.profiles using parameters in input.create"
    echo 
    echo "             -createhelp"
    echo "              Print detailed help information"
@@ -439,6 +439,9 @@ cd $SIMDIR
 #=============================================================
 # Manage CREATE MODE
 #
+# -> move original inputfile to inputfile.save
+# -> save result in $FILE
+#
 if [ $CREATEHELP_FLAG -eq 1 ]
 then
    cat $GACODE_ROOT/shared/profiles_gen/exprotools/README.HELP
@@ -449,15 +452,25 @@ if [ $CREATE_FLAG -eq 1 ]
 then
    if [ $FILE_FLAG -eq 1 ]
    then
-      cp $FILE input.profiles
-      python $GACODE_ROOT/shared/bin/profile_parse.py input.profiles
+      mv $FILE $FILE.save
+      cp $FILE.save input.profiles
+      echo "INFO: (profiles_gen) Keeping backup of $FILE in $FILE.save"
+      python $GACODE_ROOT/shared/bin/profile_parse.py $FILE
    else
       rm -f input.profiles input.profiles.gen
+      FILE=input.profiles
    fi
-   touch input.expromake
-   python $GACODE_ROOT/shared/bin/expromake_parse.py input.expromake   
-   $EXPROMAKE   
-   exit 0
+   # Run create
+   touch input.create
+   python $GACODE_ROOT/shared/bin/create_parse.py input.create
+   $CREATE
+   # Map output files
+   mv input.profiles.create $FILE 
+   if [ $VERBOSE_FLAG -eq 0 ]
+   then
+      rm -f *.gen out.expro.run
+   fi
+   exit 0 
 fi
 #=============================================================
 

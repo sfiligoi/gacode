@@ -39,7 +39,10 @@ then
   echo "                    one."
   echo
   echo "          -func <func>"
-  echo "          <func> = any output quantity."
+  echo "          <func> = quantity to plot with -plot one."
+  echo
+  echo "          -dots"
+  echo "          Toggle dot overlay."
   echo
   echo "          -i"
   echo "          Use python in interactive mode.  Useful if matplotlibrc has interactive:True  "
@@ -61,6 +64,7 @@ LOCDIR=.
 SIMROOT=$PWD
 PLOT_TYPE=null
 UNITS=0
+DOTS=0
 FTYPE=screen
 FUNC=null
 INTERACTIVE=
@@ -83,6 +87,8 @@ while [ $# -gt 0 ] ; do
   -func) shift ; FUNC=$1 ;;
 
   -u) shift ; UNITS=$1 ;;
+
+  -dots) DOTS=1 ;;
   
   -i) INTERACTIVE=-i ;;
 
@@ -118,7 +124,7 @@ case "$PLOT_TYPE" in
 	python $INTERACTIVE $PYROOT/profile.py $SIMDIR $FTYPE  ;;
 
    profile_smooth)  
-	python $INTERACTIVE $PYROOT/profile_smooth.py $SIMDIR $FTYPE  ;;
+	python $INTERACTIVE $PYROOT/profile_smooth.py $SIMDIR $FTYPE $DOTS ;;
 
    one)  
 	python $INTERACTIVE $PYROOT/oneplot.py $SIMDIR $FUNC $FTYPE  ;;

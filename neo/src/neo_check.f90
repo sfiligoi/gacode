@@ -365,7 +365,7 @@ subroutine neo_check
         write(io_neoout,*) 
         write(io_neoout,*) 'PHYSICS PARAMETERS'
         write(io_neoout,*) '------------------'
-        write(io_neoout,20) 'r/R',r(ir)
+        write(io_neoout,20) 'r/a',r(ir)
         write(io_neoout,20) 'dphi0/dr',dphi0dr(ir)
         write(io_neoout,20) 'omega_rot',omega_rot(ir)
         write(io_neoout,20) 'omega_rot_deriv',omega_rot_deriv(ir)

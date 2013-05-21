@@ -1,20 +1,20 @@
 !------------------------------------------------------------
-! expromake.f90
+! create.f90
 !
 ! PURPOSE:
 !------------------------------------------------------------
 
-program expromake
+program create
 
-  use expromake_globals
+  use create_globals
   use EXPRO_interface
 
   implicit none
 
   integer :: ierr, i
 
-  call expromake_read_input 
-  call expromake_check
+  call create_read_input 
+  call create_check
 
   EXPRO_ctrl_density_method = 1
   EXPRO_ctrl_z(1:3) = exm_z(1:3)
@@ -75,8 +75,8 @@ program expromake
 
   endif
 
-  call expromake_set
-  call expromake_write
+  call create_set
+  call create_write
   call EXPRO_alloc('./',0) 
 
-end program expromake
+end program create

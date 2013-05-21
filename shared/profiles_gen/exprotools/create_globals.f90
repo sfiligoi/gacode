@@ -1,4 +1,4 @@
-module expromake_globals
+module create_globals
 
   integer,parameter :: nions_max=5
 
@@ -33,6 +33,7 @@ module expromake_globals
   real, dimension(nions_max) :: exm_alti
   integer, dimension(nions_max) :: exm_ni_model
   real, dimension(nions_max) :: exm_alni
+  integer :: exm_z_eff_model
 
   ! Set flags
   integer :: set_exm_b_ref
@@ -75,4 +76,7 @@ module expromake_globals
   integer, dimension(nions_max) :: set_exm_vpol    
   integer, dimension(nions_max) :: set_exm_vtor    
 
-end module expromake_globals
+  character(len=80),dimension(nions_max) :: exm_ni_data
+  character(len=80) :: exm_ne_data
+
+end module create_globals

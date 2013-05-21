@@ -7,17 +7,18 @@ else
 endif
 
 EXEC1 = exprodump
-EXEC2 = expromake
+EXEC2 = create
 
 EXTRA_LIBS = ${GACODE_ROOT}/shared/EXPRO/EXPRO_lib.a \
              ${GACODE_ROOT}/shared/GEO/GEO_lib.a  \
              ${GACODE_ROOT}/shared/math/math_lib.a 
 
-OBJECTS = expromake_globals.o \
-          expromake_set.o \
-          expromake_read_input.o \
-	  expromake_check.o \
-          expromake_write.o 
+OBJECTS = create_globals.o \
+	  create_check.o \
+          create_importvec.o \
+          create_set.o \
+          create_read_input.o \
+          create_write.o 
 
 .SUFFIXES : .o .f90
 
@@ -33,4 +34,4 @@ $(EXEC2): $(EXEC2).o $(OBJECTS)
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:
-	rm -f *.o $(EXEC1) $(EXEC2) ${GACODE_ROOT}/modules/expromake*.mod
+	rm -f *.o $(EXEC1) $(EXEC2) ${GACODE_ROOT}/modules/create*.mod

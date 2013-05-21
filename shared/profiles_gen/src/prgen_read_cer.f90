@@ -9,9 +9,11 @@
 ! col 6: Er (kV/m)
 ! col 7: omega0 (krad/s) [(c*Er)/(R*Bp)]
 !
-! NOTE also that the DIII-D toroidal angle sign convention 
-! is opposite the GYRO/NEO convention, hence the negative 
-! signs in the conversion below.
+! NOTE also that the CER toroidal angle sign convention 
+! is fixed and opposite the GACODE convention.  The CER 
+! angle is phi in the (R,phi,Z) system defined here 
+!
+! https://fusion.gat.com/theory/Gyrofieldorient 
 !--------------------------------------------------------
 
 subroutine prgen_read_cer
@@ -89,13 +91,13 @@ subroutine prgen_read_cer
   !-------------------------------------------------------
   ! Spline interpolation from CER grid to ITERDB rho grid.
   !
-  ! COORDINATES: convert vpolc to m/s (- sign for DIII-D)
+  ! COORDINATES: convert vpolc to m/s (- sign for CER phi to GACODE varphi)
   call cub_spline(rho_in,-f_in(:,1)*1e3,n_in,rho,vpolc_exp,nx)
   !
-  ! COORDINATES: convert vtorc to m/s (- sign for DIII-D)
+  ! COORDINATES: convert vtorc to m/s (- sign for CER phi to GACODE varphi)
   call cub_spline(rho_in,-f_in(:,2)*1e3,n_in,rho,vtorc_exp,nx)
   !
-  ! COORDINATES: convert omega to (1/s) (- sign for DIII-D)
+  ! COORDINATES: convert omega to (1/s) (- sign for CER phi to GACODE varphi)
   call cub_spline(rho_in,-f_in(:,3)*1e3,n_in,rho,omega0,nx)
   !-------------------------------------------------------
 

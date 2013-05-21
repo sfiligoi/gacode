@@ -67,13 +67,14 @@
 !  EXPRO_vpol(4,:)
 !  EXPRO_vpol(5,:)
 !
+!  EXPRO_signq 
+!  EXPRO_signb
+!
 !  * Control parameters (user can change these)
 ! 
 !  EXPRO_ctrl_density_method (1=do nothing, 2=force quasin.)
 !  EXPRO_ctrl_z(1:5) (ion charges)
 !  EXPRO_ctrl_numeq_flag (0=model,1=numerical)
-!  EXPRO_ctrl_signq 
-!  EXPRO_ctrl_signb
 !  EXPRO_ctrl_rotation_method (1=candy-phi,2=waltz-U_parallel)
 !
 !  * Derived quantities:

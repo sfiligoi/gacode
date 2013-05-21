@@ -656,6 +656,20 @@ subroutine gyro_select_methods
   !-------------------------------------------------------
 
   !-------------------------------------------------------
+  ! Z_EFF METHOD:
+  !
+  if (z_eff_method == 1) then
+     if (radial_profile_method == 3) then
+        call send_line('z_eff_method         : Use Z_EFF from input.profiles')
+     else
+        call send_line('z_eff_method         : Use Z_EFF from input.gyro')
+     endif
+  else
+     call send_line('z_eff_method         : Computing Z_EFF from n and Z.')
+  endif
+  !-------------------------------------------------------
+
+  !-------------------------------------------------------
   ! KROOK COLLISIONS FLAG:
   !
   if (nu_i_krook > 0.0) then

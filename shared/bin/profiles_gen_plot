@@ -51,6 +51,10 @@ then
    echo "          -msurf"
    echo "          Produce Miller flux surface plots."
    echo
+   echo "          -i0"
+   echo "          Radial index of surface to plot."
+   echo "          [Default is to plot all surface]."
+   echo
    echo "          -fsurf"
    echo "          Produce Fourier flux surface plots."
    echo
@@ -78,7 +82,7 @@ RVAR="r"
 
 # Surface options
 SURF=null
-N=16
+I0=-1
 #==============================================================================
 
 #==============================================================================
@@ -99,7 +103,7 @@ while [ $# -gt 0 ] ; do
   -msurf) SURF=miller ;;
   -fsurf) SURF=fourier ;;
 
-  -n) shift ; N=$1 ;;
+  -i0) shift ; I0=$1 ;;
   
   -f) shift ; FTYPE=$1 ;;
 
@@ -129,7 +133,7 @@ fi
 
 if [ "$SURF" != "null" ]
 then
-   python $INTERACTIVE $PYROOT/fluxplot.py $INFILES $SURF $N $FTYPE
+   python $INTERACTIVE $PYROOT/fluxplot.py $INFILES $SURF $I0 $FTYPE
    exit 0
 fi
 #==============================================================================

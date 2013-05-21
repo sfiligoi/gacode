@@ -121,15 +121,15 @@
      !
      f_bar = (0.0,0.0)
      !
-     if (shat_s(ir_norm) > 0.0) then
-        ! s > 0
+     if (q_s(ir_norm)*shat_s(ir_norm)*n_1(1) > 0.0) then
+        ! n*q*s > 0
         do i=1,n_x 
            do ip=1,n_x  
               f_bar(i-1-n_x/2,:) = f_bar(i-1-n_x/2,:)+fplot(:,ip)*cri(i,ip)
            enddo
         enddo
      else
-        ! s < 0
+        ! n*q*s < 0
         do i=1,n_x 
            do ip=1,n_x  
               f_bar(i-1-n_x/2,:) = f_bar(i-1-n_x/2,:)+fplot(:,ip)*conjg(cri(i,ip))
@@ -149,7 +149,7 @@
      !-------------------------------------------------------
      ! Sew together mode in extended angle and write to file.
      ! 
-     ALLOCATE(amp(m0*np*n_theta_plot))
+     allocate(amp(m0*np*n_theta_plot))
      ampCount = 1
      do l0=0,m0-1
         do pp=-np/2,np/2-1
@@ -163,7 +163,7 @@
               amp(ampCount) = f_bar(p,j_int)*phase(in_1,ir_norm)**(real(p)/real(m0))
               !write(io,fmtstr2) f_bar(p,j_int)*phase(in_1,ir_norm)**(real(p)/real(m0))
     
-              if(io_method <3 ) then
+              if (io_method < 3) then
                 write(io,fmtstr2) amp(ampCount)
               endif
             ampCount=ampCount+1
@@ -178,7 +178,7 @@
        if(h5err%errBool) write(*,*) h5err%errorMsg
     endif
 #endif
-     DEALLOCATE(amp)
+     deallocate(amp)
      
      !-------------------------------------------------------
 

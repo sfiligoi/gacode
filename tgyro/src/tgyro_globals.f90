@@ -264,7 +264,7 @@ module tgyro_globals
   integer :: loc_pflux_method
   integer :: loc_residual_method
   integer :: loc_num_equil_flag
-  integer :: neo_gv_flag
+  integer :: tgyro_neo_gv_flag
   integer :: tglf_q_low_flag
   integer :: tgyro_global_newton_flag
   integer :: tgyro_backtrack_method
