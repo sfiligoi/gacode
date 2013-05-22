@@ -1501,3 +1501,36 @@
 !
      END SUBROUTINE get_wavefunction_out
 
+
+
+   !-----------------------------------------------------------------
+   ! Determine internal TGLF error status and return string and integer
+   ! 
+   ! TGLF success:
+   !  string='null'
+   !  number=0
+   !
+   ! TGLF failure:
+   !  string=<error description>
+   !  number=1
+   !-----------------------------------------------------------------
+
+     subroutine get_error_status(msg,flag)
+
+       use tglf_global
+
+       implicit none
+
+       character (len=*), intent(inout) :: msg
+       integer, intent(inout) :: flag
+
+       msg = trim(error_msg)
+
+       if (msg == 'null') then
+          flag = 0
+       else
+          flag = 1
+       endif
+
+     end subroutine get_error_status
+

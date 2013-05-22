@@ -189,6 +189,11 @@ subroutine tgyro_flux
         eflux_i_tur(1:loc_n_ion,i_r) = tglf_ion_eflux_low_out(1:loc_n_ion)
      endif
 
+     if (tglf_error_flag == 1) then
+        error_flag = 1
+        error_msg = tglf_error_msg
+     endif
+
   case (3)
 
      ! Map TGYRO parameters to GYRO
@@ -221,7 +226,7 @@ subroutine tgyro_flux
 
   case (4)
 
-      ! No fluxes (tgyro_noturb_flag=1)
+     ! No fluxes (tgyro_noturb_flag=1)
 
   case default
 
