@@ -107,14 +107,13 @@ subroutine neo_compute_fcoll(m0,lambda_in,f,fb)
         !------------------------
         ! CASE 1: m even, n odd
         !------------------------
-
+       
         x = 0.0
         do i=0,(n-1)/2
-           x = x+lambda**i/(1.0+lambda)**(i+(m+1)/2.0)*&
+           x = x+(lambda/(1.0+lambda))**i/(1.0+lambda)**((m+1)/2.0)*&
                 gamma(2*i+m+1)/gamma(m+n+2)*&
                 gamma(n+1)/gamma(2*i+2)
         enddo
-
         gb(m,n) = x
 
      enddo
@@ -157,7 +156,7 @@ subroutine neo_compute_fcoll(m0,lambda_in,f,fb)
 
         x = 0.0
         do i=0,n/2-1
-           x = x+lambda**(i+0.5)/(1+lambda)**(i+1.0+m/2.0)*&
+           x = x+(lambda/(1+lambda))**(i+0.5)/(1+lambda)**(0.5+m/2.0)*&
                 gamma(2*i+2+m)/gamma(m+n+2)*&
                 gamma(n+1)/gamma(2*i+3)
         enddo
@@ -182,7 +181,7 @@ subroutine neo_compute_fcoll(m0,lambda_in,f,fb)
 
         x = 0.0
         do i=0,(n-1)/2
-           x = x+lambda**i/(1.0+lambda)**(i+(m+1)/2.0)*&
+           x = x+(lambda/(1.0+lambda))**i/(1.0+lambda)**((m+1)/2.0)*&
                 gamma(2*i+m+1)/gamma(m+n+2)*&
                 gamma(n+1)/gamma(2*i+2)
         enddo
@@ -229,7 +228,7 @@ subroutine neo_compute_fcoll(m0,lambda_in,f,fb)
 
         x = 0.0
         do i=0,n/2-1
-           x = x+lambda**(i+0.5)/(1+lambda)**(i+1.0+m/2.0)*&
+           x = x+(lambda/(1+lambda))**(i+0.5)/(1+lambda)**(0.5+m/2.0)*&
                 gamma(2*i+2+m)/gamma(m+n+2)*&
                 gamma(n+1)/gamma(2*i+3)
         enddo

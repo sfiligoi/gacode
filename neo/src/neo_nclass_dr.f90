@@ -8,7 +8,8 @@ module neo_nclass_dr
   
   integer, parameter, private :: mx_mi = 9
   integer, parameter, private :: mx_ms = 40
-  integer, parameter, private :: mx_mz = 18
+  integer, parameter, private :: mx_mz = 50  ! increased this and pamx_mz.inc
+					     ! from 18 to 50 for higher Z
   
   integer, parameter, private :: io_nc = 41
   character(len=80),private :: runfile = 'out.neo.theory_nclass'
@@ -24,7 +25,6 @@ contains
     use neo_globals
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
-
 
     if (n_species < 2) then
        ! NCLASS driver requires at least 2 species
@@ -233,15 +233,15 @@ contains
     enddo
     
     !  p_ngrth-<n.grad(Theta)> (1/m)
-    !  EAB: I think that this refers to the nclass theta
-    ! inverse of theta-avg of 1/(bhat dot grad theta)
+    !  This refers to the nclass theta
+    !  inverse of theta-avg of 1/(bhat dot grad theta)
     p_ngrth = 0.0
     do it=1,n_theta
        p_ngrth = p_ngrth + 1.0/(2.0*pi)  * 1.0 / (k_par(it) / a_meters) &
             * 2.0 * pi / n_theta
     enddo
     p_ngrth = 1.0 / p_ngrth
-    
+
     !  p_fm(3)-poloidal moments of geometric factor for PS viscosity (-)
     ! first get <B>
     fac1 = 0.0
@@ -268,7 +268,6 @@ contains
        p_fm(i) = 2.0 /  ( p_b2 * p_ngrth * fac1) &
             * (sum1 * sum2 + sum3 * sum4)
      enddo
-    
 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!
     ! Species-dependent paramters
@@ -284,7 +283,7 @@ contains
           m_z = z(is)
        endif
     enddo
-    
+
     !  amu_i(i)-atomic mass number of i
     !  EAB: Note that this presently assumes mass is relative to deuterium
     amu_i(:) = 0.0
@@ -306,7 +305,7 @@ contains
     
     !  c_den-density cutoff below which species is ignored (/m**3)
     c_den=1.0e10
-    
+
     !  den_iz(i,z)-density of i,z (/m**3) 
     den_iz(:,:) = 0.0
     if(profile_model /=2) then
@@ -337,7 +336,7 @@ contains
        grp_iz(is,abs(z(is))) = -den_iz(is,abs(z(is))) *  temp_i(is) &
             * (dlnndr(is,ir) + dlntdr(is,ir)) / a_meters
     enddo
-    
+
     ! Normalizations
     pflux_nc_norm = dens_norm(ir) * vth_norm(ir) * a_meters * 1e19
     eflux_nc_norm = dens_norm(ir)*vth_norm(ir)*a_meters &
