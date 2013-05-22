@@ -28,6 +28,7 @@ subroutine tgyro_flux
   real :: Q_neo_GB
   real :: Pi_neo_GB
   real, dimension(8) :: x_out
+  integer, dimension(n_proc_global) :: error_vec
 
   call MPI_BARRIER(MPI_COMM_WORLD,ierr)
   if (i_proc_global == 0) then
@@ -189,10 +190,15 @@ subroutine tgyro_flux
         eflux_i_tur(1:loc_n_ion,i_r) = tglf_ion_eflux_low_out(1:loc_n_ion)
      endif
 
-     if (tglf_error_flag == 1) then
-        error_flag = 1
-        error_msg = tglf_error_msg
-     endif
+     call MPI_ALLGATHER(tglf_error_flag,1,MPI_INTEGER,&
+          error_vec,1,MPI_INTEGER,MPI_COMM_WORLD,ierr)
+
+     do i1=1,n_proc_global
+        if (error_vec(i1) == 1) then
+           error_flag = 1
+           error_msg = tglf_error_msg
+        endif
+     enddo
 
   case (3)
 
@@ -269,5 +275,9 @@ subroutine tgyro_flux
 
   end select
   !----------------------------------------------------------
+
+  if (error_flag == 1) then
+     call tgyro_catch_error(trim(error_msg))
+  endif
 
 end subroutine tgyro_flux
