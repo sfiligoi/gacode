@@ -751,7 +751,13 @@
         ENDDO
       ENDDO
 !Electrical resistivity
-      p_etap=p_eb/p_ohjb
+!      p_etap=p_eb/p_ohjb
+! EAB: Modified this line to eliminate division by 0 for Epar=0 case
+      IF(p_ohjb == 0.) THEN
+         p_etap = 0.0
+      ELSE
+         p_etap=p_eb/p_ohjb
+      ENDIF
 !Convert to diffusivities and conductivities
 !  Full coefficient matrices 
       DO i=1,m_s

@@ -227,6 +227,7 @@
       REAL :: DR_out = 0.0
       INTEGER :: nmodes_out
       INTEGER :: nfields_out
+      character (len=80) :: error_msg='null' 
 !
       END MODULE tglf_global
 !------------------------------------------------- 

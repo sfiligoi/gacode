@@ -186,6 +186,10 @@ module tglf_interface
   ! LINEAR OUTPUT PARAMETERS
   complex :: tglf_eigenvalue_out(maxmodes)
 
+  ! ERROR OUTPUT
+  character (len=80) :: tglf_error_msg='null'
+  integer :: tglf_error_flag=0
+
 contains
 
   ! Dump LOCAL INTERFACE variables

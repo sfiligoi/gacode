@@ -67,7 +67,7 @@ subroutine neo_spitzer
   end if
   allocate(g(n_row))
 
-  amat_indx(:) = 0.0
+  amat_indx(:) = 0
   amat(:) = 0.0
   k = 0
   do ie=0,n_energy
