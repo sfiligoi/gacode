@@ -493,7 +493,6 @@ contains
     
     close(1)
     
-10  format(t2,a,l1)
 20  format(t2,a,i3)
 30  format(t2,a,1pe12.5)
     

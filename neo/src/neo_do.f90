@@ -57,8 +57,8 @@ subroutine neo_do
   endif
 
   if(threed_model==1) then
-     call ThreeD_do
-     !call neo_error('ERROR: 3D not yet available.')
+     !call ThreeD_do
+     call neo_error('ERROR: (NEO) 3D not yet available.')
      goto 100
   endif
 

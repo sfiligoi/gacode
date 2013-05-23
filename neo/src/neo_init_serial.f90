@@ -12,8 +12,6 @@ subroutine neo_init_serial(path_in)
 
   implicit none
 
-  integer :: ierr
-
   ! Input parameters (IN) - REQUIRED
   character(len=*), intent(in) :: path_in
 

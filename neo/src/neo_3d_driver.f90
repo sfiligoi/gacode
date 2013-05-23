@@ -619,7 +619,7 @@ contains
     implicit none
     integer, intent(in) :: ir
     real :: src_F0_Ln, src_F0_Lt, src_P0
-    integer :: i, is, ie, ix, it, ip, j, js, je, jx, jt, jp, ks, id
+    integer :: i, is, ie, ix, it, ip, j, js, je, jx, jt, jp, id
     real :: stream_t, trap
 
     ! First-Order Source Term = -L1 g0 + S1 f0

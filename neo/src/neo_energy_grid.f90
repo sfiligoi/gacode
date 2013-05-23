@@ -32,7 +32,7 @@ contains
     use neo_globals, only : n_energy, n_xi
     implicit none
     integer, intent (in) :: flag
-    integer :: ie, ix
+    integer :: ie
     integer :: xarg
     
     if(flag == 1) then
@@ -198,7 +198,6 @@ contains
     use neo_globals, only : n_species, n_energy,n_xi
     implicit none
     integer, intent (in) :: flag
-    integer :: ke
 
     if(flag == 1) then
        if(initialized_coll) return
@@ -232,7 +231,7 @@ contains
     integer :: fmarg
     integer :: is, js, ie, je, ix, jx, ke, me
     real :: zarg0, zarg1, zarg2
-    integer :: m, is_ele
+    integer :: is_ele
 
     emat_coll_test(:,:,:,:,:)  = 0.0
     emat_coll_field(:,:,:,:,:) = 0.0

@@ -1,0 +1,19 @@
+This version of NCLASS is from the NTCC Modules Library:
+http://w3.pppl.gov/rib/repositories/NTCC/catalog/Asset/nclass.html
+
+The following necessary modifications were needed:
+ 
+1) 05/20/2013, by EAB: pamx_mz.inc
+   mx_mz=18 was changed to mx_mz=50 to allow for higher Z calcuations
+
+2) 05/21/2013, by EAB: nclass_mod.f
+   The calculation of the electrical resistivity p_etap (line 753) was 
+   changed to prevent division by zero in the case that Epar=0:
+   Original: 
+      p_etap=p_eb/p_ohjb
+   Change:
+      IF(p_ohjb == 0.) THEN
+         p_etap = 0.0
+      ELSE
+         p_etap=p_eb/p_ohjb
+      ENDIF

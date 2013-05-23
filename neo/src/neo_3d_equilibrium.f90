@@ -37,10 +37,10 @@ module neo_3d_equilibrium
   real, private :: dy
   integer, parameter, private :: ny=201
   real, dimension(:), allocatable, private :: R0, Z0
-  real, dimension(:,:,:), allocatable, private :: R1, Z1
+  real, dimension(:,:), allocatable, private :: R1, Z1
   real, dimension(:), allocatable, private :: dR0dt, dZ0dt, dR0dr, dZ0dr, &
        dR0dtdt, dZ0dtdt, dR0drdt, dZ0drdt
-  real, dimension(:,:,:), allocatable, private :: dZ1dt, dZ1dr, &
+  real, dimension(:,:), allocatable, private :: dZ1dt, dZ1dr, &
        dZ1dtdt, dZ1drdt, dZ1dp, dZ1drdp, dZ1dtdp, dZ1dpdp
   real, private :: c0
   real, dimension(:), allocatable, private :: Jfac, dJfacdt 
@@ -118,20 +118,14 @@ contains
     use neo_3d_globals
     implicit none
     integer, intent(in) :: ir
-    integer :: it, ip, jt, jp, id, k
-    !
-    real, parameter :: zs=1.0
-    real, parameter :: zc=0.0
-    integer, parameter :: M_tor=1
-    !
+    integer :: it, ip, jt, jp, id
     real, dimension(:), allocatable :: g0,gtt0,gpp0
     real, dimension(:,:), allocatable :: g1,gtt1,gpp1,gtp1
-    real, dimension(:,:,:), allocatable :: dR1dt, dR1dr, &
+    real, dimension(:,:), allocatable :: dR1dt, dR1dr, &
          dR1dtdt, dR1drdt, dR1dp, dR1drdp, dR1dtdp, dR1dpdp
     real :: db0dt, db1dp, db1dt
     real :: dg0dt, dgpp0dt, dgtt0dt
     real :: dg1dp, dg1dt, dgpp1dp, dgpp1dt, dgtt1dp, dgtt1dt, dgtp1dp, dgtp1dt
-    !
     real, dimension(:,:), allocatable :: sum1, sum2
     real :: max_sum, s1, s2
     ! local equilibrium parameters (x,y)
@@ -168,16 +162,8 @@ contains
        ycyc(ip) = ip
        ycyc(ip+ny) = ip
     enddo
-    
 
-    ! coefficients for 4th order centered 2nd-derivative
-    c2deriv(-2) = -1
-    c2deriv(-1) =  16
-    c2deriv(0)  = -30
-    c2deriv(1)  =  16
-    c2deriv(2)  = -1
-
-    ! specify the axisymmetric components
+    ! axisymmetric components
     allocate(R0(nx))
     allocate(Z0(nx))
     allocate(dR0dt(nx))
@@ -202,65 +188,25 @@ contains
        dZ0drdt(it) = cos(x(it))
     enddo
 
-    ! specify the non-axisymmetric components of Z = Z1
-    ! Z1(:,:,1) = Z1(:,:,2)*cos(N*varphi) + Z1(:,:,3)*sin(N*varphi)
-    allocate(Z1(nx,ny,3))
-    allocate(dZ1dr(nx,ny,3))
-    allocate(dZ1dt(nx,ny,3))
-    allocate(dZ1dp(nx,ny,3))
-    allocate(dZ1drdt(nx,ny,3))
-    allocate(dZ1drdp(nx,ny,3))
-    allocate(dZ1dtdt(nx,ny,3))
-    allocate(dZ1dtdp(nx,ny,3))
-    allocate(dZ1dpdp(nx,ny,3))
-    do it=1,nx
-       do ip=1,ny
-          !
-          Z1(it,ip,2)      = z1_mag * r(ir) * (zs * sin(M_tor*x(it))  + zc * cos(M_tor*x(it)))
-          Z1(it,ip,3)      = z1_mag * r(ir) * (-zs * cos(M_tor*x(it)) + zc * sin(M_tor*x(it)))
-          Z1(it,ip,1)      = Z1(it,ip,2) * cos(N_tor*y(ip)) + Z1(it,ip,3) * sin(N_tor*y(ip))
-          !
-          dZ1dr(it,ip,2)   = Z1(it,ip,2)/r(ir)
-          dZ1dr(it,ip,3)   = Z1(it,ip,3)/r(ir)
-          dZ1dr(it,ip,1)   = dZ1dr(it,ip,2) * cos(N_tor*y(ip)) &
-               + dZ1dr(it,ip,3) * sin(N_tor*y(ip))
-          !
-          dZ1dp(it,ip,2)   =  N_tor * Z1(it,ip,3)
-          dZ1dp(it,ip,3)   = -N_tor * Z1(it,ip,2)
-          dZ1dp(it,ip,1)   = dZ1dp(it,ip,2) * cos(N_tor*y(ip)) &
-               + dZ1dp(it,ip,3) * sin(N_tor*y(ip))
-          !
-          dZ1dt(it,ip,2)   = -M_tor * Z1(it,ip,3)
-          dZ1dt(it,ip,3)   =  M_tor * Z1(it,ip,2)
-          dZ1dt(it,ip,1)   = dZ1dt(it,ip,2) * cos(N_tor*y(ip)) &
-               + dZ1dt(it,ip,3) * sin(N_tor*y(ip))
-          !
-          dZ1drdp(it,ip,2) = dZ1dp(it,ip,2)/r(ir)
-          dZ1drdp(it,ip,3) = dZ1dp(it,ip,3)/r(ir)
-          dZ1drdp(it,ip,1) = dZ1drdp(it,ip,2) * cos(N_tor*y(ip)) &
-               + dZ1drdp(it,ip,3) * sin(N_tor*y(ip))
-          !
-          dZ1drdt(it,ip,2) = dZ1dt(it,ip,2)/r(ir)
-          dZ1drdt(it,ip,3) = dZ1dt(it,ip,3)/r(ir)
-          dZ1drdt(it,ip,1) = dZ1drdt(it,ip,2) * cos(N_tor*y(ip)) &
-               + dZ1drdt(it,ip,3) * sin(N_tor*y(ip))
-          !
-          dZ1dpdp(it,ip,2) = -N_tor**2 * Z1(it,ip,2)
-          dZ1dpdp(it,ip,3) = -N_tor**2 * Z1(it,ip,3)
-          dZ1dpdp(it,ip,1) = dZ1dpdp(it,ip,2) * cos(N_tor*y(ip)) &
-               + dZ1dpdp(it,ip,3) * sin(N_tor*y(ip))
-          !
-          dZ1dtdt(it,ip,2) = -M_tor**2 * Z1(it,ip,2)
-          dZ1dtdt(it,ip,3) = -M_tor**2 * Z1(it,ip,3)
-          dZ1dtdt(it,ip,1) = dZ1dtdt(it,ip,2) * cos(N_tor*y(ip)) &
-               + dZ1dtdt(it,ip,3) * sin(N_tor*y(ip))
-          !
-          dZ1dtdp(it,ip,2) = N_tor * M_tor * Z1(it,ip,2)
-          dZ1dtdp(it,ip,3) = N_tor * M_tor * Z1(it,ip,3)
-          dZ1dtdp(it,ip,1) = dZ1dtdp(it,ip,2) * cos(N_tor*y(ip)) &
-               + dZ1dtdp(it,ip,3) * sin(N_tor*y(ip))
-       enddo
-    enddo
+    ! non-axisymmetric components of Z = Z1
+    allocate(Z1(nx,ny))
+    allocate(dZ1dr(nx,ny))
+    allocate(dZ1dt(nx,ny))
+    allocate(dZ1dp(nx,ny))
+    allocate(dZ1drdt(nx,ny))
+    allocate(dZ1drdp(nx,ny))
+    allocate(dZ1dtdt(nx,ny))
+    allocate(dZ1dtdp(nx,ny))
+    allocate(dZ1dpdp(nx,ny))
+    Z1(:,:)      = 0.0
+    dZ1dr(:,:)   = 0.0
+    dZ1dt(:,:)   = 0.0
+    dZ1dp(:,:)   = 0.0
+    dZ1drdt(:,:) = 0.0
+    dZ1drdp(:,:) = 0.0
+    dZ1dtdt(:,:) = 0.0
+    dZ1dtdp(:,:) = 0.0
+    dZ1dpdp(:,:) = 0.0
 
     allocate(Jfac(nx))
     allocate(dJfacdt(nx))
@@ -275,78 +221,25 @@ contains
        c0 = c0 + Jfac(it) / R0(it) /nx
     enddo
 
-    ! compute the non-axisymmetric components of R = R1
-    allocate(R1(nx,ny,3))
-    call threed_solve(ir)
-
-    allocate(dR1dr(nx,ny,3))
-    allocate(dR1dt(nx,ny,3))
-    allocate(dR1dp(nx,ny,3))
-    allocate(dR1drdt(nx,ny,3))
-    allocate(dR1drdp(nx,ny,3))
-    allocate(dR1dtdt(nx,ny,3))
-    allocate(dR1dtdp(nx,ny,3))
-    allocate(dR1dpdp(nx,ny,3))
-    dR1dr(:,:,:)   = 0.0
-    dR1dt(:,:,:)   = 0.0
-    dR1dp(:,:,:)   = 0.0
-    dR1drdt(:,:,:) = 0.0
-    dR1drdp(:,:,:) = 0.0
-    dR1dtdt(:,:,:) = 0.0
-    dR1dtdp(:,:,:) = 0.0
-    dR1dpdp(:,:,:) = 0.0
-    do it=1,nx
-       do ip=1,ny
-          !
-          dR1dr(it,ip,2) = R1(it,ip,2)/r(ir) 
-          dR1dr(it,ip,3) = R1(it,ip,3)/r(ir)
-          dR1dr(it,ip,1) = dR1dr(it,ip,2) * cos(N_tor * y(ip)) &
-               + dR1dr(it,ip,3) * sin(N_tor * y(ip))
-          !
-          dR1dp(it,ip,2) = R1(it,ip,3) * N_tor
-          dR1dp(it,ip,3) = R1(it,ip,2) * (-N_tor)
-          dR1dp(it,ip,1) = dR1dp(it,ip,2) * cos(N_tor * y(ip)) &
-               + dR1dp(it,ip,3) * sin(N_tor * y(ip))
-          !
-          dR1dpdp(it,ip,2) = R1(it,ip,2) * (-N_tor**2)
-          dR1dpdp(it,ip,3) = R1(it,ip,3) * (-N_tor**2)
-          dR1dpdp(it,ip,1) = dR1dpdp(it,ip,2) * cos(N_tor * y(ip)) &
-               + dR1dpdp(it,ip,3) * sin(N_tor * y(ip))
-          !
-          dR1drdp(it,ip,2) = R1(it,ip,3)/r(ir) * N_tor
-          dR1drdp(it,ip,3) = R1(it,ip,2)/r(ir) * (-N_tor)
-          dR1drdp(it,ip,1) = dR1drdp(it,ip,2) * cos(N_tor * y(ip)) &
-               + dR1drdp(it,ip,3) * sin(N_tor * y(ip))
-          !
-          do id=-2,2
-             jt = xcyc(it+id)
-             dR1dt(it,ip,2)   = dR1dt(it,ip,2)   + cderiv(id)  / (12.0*dx) * R1(jt,ip,2)
-             dR1dt(it,ip,3)   = dR1dt(it,ip,3)   + cderiv(id)  / (12.0*dx) * R1(jt,ip,3)
-             dR1dtdt(it,ip,2) = dR1dtdt(it,ip,2) + c2deriv(id) / (12.0*dx*dx) * R1(jt,ip,2)
-             dR1dtdt(it,ip,3) = dR1dtdt(it,ip,3) + c2deriv(id) / (12.0*dx*dx) * R1(jt,ip,3)
-          enddo
-          dR1dt(it,ip,1)   = dR1dt(it,ip,2) * cos(N_tor * y(ip)) &
-               + dR1dt(it,ip,3) * sin(N_tor * y(ip))
-          dR1dtdt(it,ip,1) = dR1dtdt(it,ip,2) * cos(N_tor * y(ip)) &
-               + dR1dtdt(it,ip,3) * sin(N_tor * y(ip))
-          !
-          dR1drdt(it,ip,2) = dR1dt(it,ip,2)/r(ir)
-          dR1drdt(it,ip,3) = dR1dt(it,ip,3)/r(ir)
-          dR1drdt(it,ip,1) = dR1drdt(it,ip,2) * cos(N_tor * y(ip)) &
-               + dR1drdt(it,ip,3) * sin(N_tor * y(ip))
-       enddo
-    enddo
-    do it=1,nx
-       do ip=1,ny
-          do id=-2,2
-             jt = xcyc(it+id)
-             dR1dtdp(it,ip,2)   = dR1dtdp(it,ip,2) + cderiv(id)  / (12.0*dx) * dR1dp(jt,ip,2)
-             dR1dtdp(it,ip,3)   = dR1dtdp(it,ip,3) + cderiv(id)  / (12.0*dx) * dR1dp(jt,ip,3)
-          enddo
-          dR1dtdp(it,ip,1) = dR1dtdp(it,ip,2) * cos(N_tor * y(ip)) &
-               + dR1dtdp(it,ip,3) * sin(N_tor * y(ip))
-       enddo
-    enddo
+    ! non-axisymmetric components of R = R1
+    allocate(R1(nx,ny))
+    allocate(dR1dr(nx,ny))
+    allocate(dR1dt(nx,ny))
+    allocate(dR1dp(nx,ny))
+    allocate(dR1drdt(nx,ny))
+    allocate(dR1drdp(nx,ny))
+    allocate(dR1dtdt(nx,ny))
+    allocate(dR1dtdp(nx,ny))
+    allocate(dR1dpdp(nx,ny))
+    R1(:,:)      = 0.0
+    dR1dr(:,:)   = 0.0
+    dR1dt(:,:)   = 0.0
+    dR1dp(:,:)   = 0.0
+    dR1drdt(:,:) = 0.0
+    dR1drdp(:,:) = 0.0
+    dR1dtdt(:,:) = 0.0
+    dR1dtdp(:,:) = 0.0
+    dR1dpdp(:,:) = 0.0
 
     ! axisymmetric metrics
     allocate(g0(nx))
@@ -365,15 +258,15 @@ contains
     allocate(gtp1(nx,ny))
     do it=1,nx
        do ip=1,ny
-          g1(it,ip) = c0 * R0(it) / r(ir) * R1(it,ip,1) &
-               + c0 * R0(it)**2 / (r(ir) *Jfac(it)) * (dZ0dt(it)*dR1dr(it,ip,1) &
-               - dZ0dr(it) * dR1dt(it,ip,1) + dR0dr(it)*dZ1dt(it,ip,1) &
-               - dR0dt(it)*dZ1dr(it,ip,1))
-          gpp1(it,ip) = 2 * R0(it) * R1(it,ip,1)
-          gtt1(it,ip) = 2 * (c0*R0(it)/Jfac(it))**2 * (dR0dt(it) * dR1dt(it,ip,1) &
-               + dZ0dt(it)*dZ1dt(it,ip,1))
-          gtp1(it,ip) = c0*R0(it)/Jfac(it) * (dR0dt(it)*dR1dp(it,ip,1) &
-               + dZ0dt(it)*dZ1dp(it,ip,1))
+          g1(it,ip) = c0 * R0(it) / r(ir) * R1(it,ip) &
+               + c0 * R0(it)**2 / (r(ir) *Jfac(it)) * (dZ0dt(it)*dR1dr(it,ip) &
+               - dZ0dr(it) * dR1dt(it,ip) + dR0dr(it)*dZ1dt(it,ip) &
+               - dR0dt(it)*dZ1dr(it,ip))
+          gpp1(it,ip) = 2 * R0(it) * R1(it,ip)
+          gtt1(it,ip) = 2 * (c0*R0(it)/Jfac(it))**2 * (dR0dt(it)*dR1dt(it,ip) &
+               + dZ0dt(it)*dZ1dt(it,ip))
+          gtp1(it,ip) = c0*R0(it)/Jfac(it) * (dR0dt(it)*dR1dp(it,ip) &
+               + dZ0dt(it)*dZ1dp(it,ip))
        enddo
     enddo
 
@@ -441,44 +334,44 @@ contains
                / Jfac(it) / q(ir)
 
           
-          dg1dp = c0/r(ir) * (R0(it)*dR1dp(it,ip,1) &
-               + 1/Jfac(it)*R0(it)**2 * (dR1drdp(it,ip,1) * dZ0dt(it) &
-               + dZ1dtdp(it,ip,1) * dR0dr(it) - dZ1drdp(it,ip,1) * dR0dt(it) &
-               - dR1dtdp(it,ip,1) * dZ0dr(it)))
+          dg1dp = c0/r(ir) * (R0(it)*dR1dp(it,ip) &
+               + 1/Jfac(it)*R0(it)**2 * (dR1drdp(it,ip) * dZ0dt(it) &
+               + dZ1dtdp(it,ip) * dR0dr(it) - dZ1drdp(it,ip) * dR0dt(it) &
+               - dR1dtdp(it,ip) * dZ0dr(it)))
           
-          dg1dt = c0/r(ir) * (R1(it,ip,1) * dR0dt(it) + R0(it)*dR1dt(it,ip,1) &
+          dg1dt = c0/r(ir) * (R1(it,ip) * dR0dt(it) + R0(it)*dR1dt(it,ip) &
                + (2.0/Jfac(it) * R0(it) * dR0dt(it) &
                - dJfacdt(it)/Jfac(it)**2 *R0(it)**2) &
-               * (dR1dr(it,ip,1)*dZ0dt(it) + dZ1dt(it,ip,1)*dR0dr(it) &
-               - dZ1dr(it,ip,1)*dR0dt(it) - dR1dt(it,ip,1)*dZ0dr(it)) &
-               + 1/Jfac(it)*R0(it)**2 * (dR1dr(it,ip,1)*dZ0dtdt(it) &
-               + dR1drdt(it,ip,1)*dZ0dt(it) + dZ1dtdt(it,ip,1)*dR0dr(it) &
-               + dZ1dt(it,ip,1)*dR0drdt(it) - dZ1drdt(it,ip,1)*dR0dt(it) &
-               - dZ1dr(it,ip,1)*dR0dtdt(it) - dR1dtdt(it,ip,1)*dZ0dr(it) &
-               - dR1dt(it,ip,1)*dZ0drdt(it)))
+               * (dR1dr(it,ip)*dZ0dt(it) + dZ1dt(it,ip)*dR0dr(it) &
+               - dZ1dr(it,ip)*dR0dt(it) - dR1dt(it,ip)*dZ0dr(it)) &
+               + 1/Jfac(it)*R0(it)**2 * (dR1dr(it,ip)*dZ0dtdt(it) &
+               + dR1drdt(it,ip)*dZ0dt(it) + dZ1dtdt(it,ip)*dR0dr(it) &
+               + dZ1dt(it,ip)*dR0drdt(it) - dZ1drdt(it,ip)*dR0dt(it) &
+               - dZ1dr(it,ip)*dR0dtdt(it) - dR1dtdt(it,ip)*dZ0dr(it) &
+               - dR1dt(it,ip)*dZ0drdt(it)))
 
-          dgpp1dp = 2.0 * R0(it) * dR1dp(it,ip,1)
-          dgpp1dt = 2.0 * (R0(it) * dR1dt(it,ip,1) + R1(it,ip,1) * dR0dt(it))
+          dgpp1dp = 2.0 * R0(it) * dR1dp(it,ip)
+          dgpp1dt = 2.0 * (R0(it) * dR1dt(it,ip) + R1(it,ip) * dR0dt(it))
 
           dgtt1dp  = 2.0 * (c0*R0(it)/Jfac(it))**2 &
-               * (dR0dt(it)*dR1dtdp(it,ip,1) + dZ0dt(it)*dZ1dtdp(it,ip,1))
+               * (dR0dt(it)*dR1dtdp(it,ip) + dZ0dt(it)*dZ1dtdp(it,ip))
 
           dgtt1dt = 2.0 * (c0*R0(it)/Jfac(it))**2 &
-               * (dR0dt(it)*dR1dtdt(it,ip,1) + dR0dtdt(it)*dR1dt(it,ip,1) &
-               + dZ0dt(it)*dZ1dtdt(it,ip,1) + dZ0dtdt(it)*dZ1dt(it,ip,1)) &
+               * (dR0dt(it)*dR1dtdt(it,ip) + dR0dtdt(it)*dR1dt(it,ip) &
+               + dZ0dt(it)*dZ1dtdt(it,ip) + dZ0dtdt(it)*dZ1dt(it,ip)) &
                + 4.0 * (c0*R0(it)/Jfac(it))**2 * (1/R0(it)*dR0dt(it) &
-               - 1/Jfac(it)*dJfacdt(it)) * (dR0dt(it)*dR1dt(it,ip,1) &
-               + dZ0dt(it)*dZ1dt(it,ip,1))
+               - 1/Jfac(it)*dJfacdt(it)) * (dR0dt(it)*dR1dt(it,ip) &
+               + dZ0dt(it)*dZ1dt(it,ip))
 
-          dgtp1dp = (c0*R0(it)/Jfac(it)) * (dR0dt(it)*dR1dpdp(it,ip,1) &
-               + dZ0dt(it) * dZ1dpdp(it,ip,1))
+          dgtp1dp = (c0*R0(it)/Jfac(it)) * (dR0dt(it)*dR1dpdp(it,ip) &
+               + dZ0dt(it) * dZ1dpdp(it,ip))
 
           dgtp1dt = (c0/Jfac(it) * dR0dt(it) &
                - dJfacdt(it)/Jfac(it)**2 * R0(it)) &
-               * (dR0dt(it)*dR1dp(it,ip,1) + dZ0dt(it)*dZ1dp(it,ip,1)) &
-               + (c0*R0(it)/Jfac(it)) * (dR0dtdt(it)*dR1dp(it,ip,1) &
-               + dR0dt(it)*dR1dtdp(it,ip,1) + dZ0dtdt(it)*dZ1dp(it,ip,1) &
-               + dZ0dt(it)*dZ1dtdp(it,ip,1))
+               * (dR0dt(it)*dR1dp(it,ip) + dZ0dt(it)*dZ1dp(it,ip)) &
+               + (c0*R0(it)/Jfac(it)) * (dR0dtdt(it)*dR1dp(it,ip) &
+               + dR0dt(it)*dR1dtdp(it,ip) + dZ0dtdt(it)*dZ1dp(it,ip) &
+               + dZ0dt(it)*dZ1dtdp(it,ip))
 
           db1dp = -dg1dp * Bmag_0_loc(it)/ g0(it) &
                + 0.5/(g0(it)**2 * Bmag_0_loc(it)) &
@@ -524,9 +417,11 @@ contains
     call cub_spline(x,k_par_t_0_loc,nx,theta,k_par_t_0,n_theta)
     call cub_spline(x,k_par_p_0_loc,nx,theta,k_par_p_0,n_theta)
     call cub_spline(x,Bmag_0_loc,nx,theta,Bmag_0,n_theta)
-    call cub_spline(x,gradpar_Bmag_overB_0_loc,nx,theta,gradpar_Bmag_overB_0,n_theta)
+    call cub_spline(x,gradpar_Bmag_overB_0_loc,nx,theta,&
+         gradpar_Bmag_overB_0,n_theta)
     call cub_spline(x,w_theta_0_loc,nx,theta,w_theta_0,n_theta)
-    call cub_spline(x,v_drift_x_overB2_0_loc,nx,theta,v_drift_x_overB2_0,n_theta)
+    call cub_spline(x,v_drift_x_overB2_0_loc,nx,theta,&
+         v_drift_x_overB2_0,n_theta)
     allocate(vec_xp(nx,n_varphi))
     vec_xp(:,:) = 0.0
     do it=1,nx
@@ -551,10 +446,12 @@ contains
     enddo
     vec_xp(:,:) = 0.0
     do it=1,nx
-       call cub_spline(y,gradpar_Bmag_overB_1_loc(it,:),ny,varphi,vec_xp(it,:),n_varphi)
+       call cub_spline(y,gradpar_Bmag_overB_1_loc(it,:),ny,varphi,&
+            vec_xp(it,:),n_varphi)
     enddo
     do ip=1,n_varphi
-       call cub_spline(x,vec_xp(:,ip),nx,theta,gradpar_Bmag_overB_1(:,ip),n_theta)
+       call cub_spline(x,vec_xp(:,ip),nx,theta,gradpar_Bmag_overB_1(:,ip),&
+            n_theta)
     enddo
     vec_xp(:,:) = 0.0
     do it=1,nx
@@ -565,10 +462,12 @@ contains
     enddo
     vec_xp(:,:) = 0.0
     do it=1,nx
-       call cub_spline(y,v_drift_x_overB2_1_loc(it,:),ny,varphi,vec_xp(it,:),n_varphi)
+       call cub_spline(y,v_drift_x_overB2_1_loc(it,:),ny,varphi,&
+            vec_xp(it,:),n_varphi)
     enddo
     do ip=1,n_varphi
-       call cub_spline(x,vec_xp(:,ip),nx,theta,v_drift_x_overB2_1(:,ip),n_theta)
+       call cub_spline(x,vec_xp(:,ip),nx,theta,v_drift_x_overB2_1(:,ip),&
+            n_theta)
     enddo
     deallocate(vec_xp)
 
@@ -616,125 +515,6 @@ contains
     enddo
     print *, 'g1 eqn max_sum = ', max_sum
     print *, s1, s2       
-
-    sum1(:,:) = 0.0
-    sum2(:,:) = 0.0
-    do it=1,nx
-       do ip=1,ny
-          !sum1(it,ip) = sum1(it,ip) &
-          !     - 2.0*dR0dt(it)*(gpp1(it,ip) + gtp1(it,ip)/q(ir)) &
-          !     + 2.0 * dR0dt(it) * g1(it,ip)/(c0/r(ir)) 
-          sum1(it,ip) = sum1(it,ip) &
-               + dR1dtdt(it,ip,1)
-          do id=-2,2
-             jt = xcyc(it+id)
-             jp = ycyc(ip+id)
-             !sum1(it,ip) = sum1(it,ip) &
-             !     + cderiv(id) / (12.0*dx) &
-             !     * c0*R0(it)/Jfac(it) / (g0(jt) + g1(jt,ip)) &
-             !     * (gpp0(jt)+gpp1(jt,ip)+gtp1(jt,ip)/q(ir))
-             !sum2(it,ip) = sum2(it,ip) &
-             !     + cderiv(id) / (12.0*dy) &
-             !     * 1.0 / (g0(it) + g1(it,jp)) &
-             !     * (gtp1(it,jp)+gtt0(it)/q(ir)+gtt1(it,jp)/q(ir))
-             !
-             !sum1(it,ip) = sum1(it,ip) &
-             !     + R0(it)*cderiv(id) / (12.0*dx)*(gpp1(jt,ip) + gtp1(jt,ip)/q(ir)) &
-             !     - R0(it)/(c0/r(ir))*cderiv(id) / (12.0*dx)*g1(jt,ip)
-             !sum2(it,ip) = sum2(it,ip) &
-             !     + Jfac(it)/c0 * cderiv(id) / (12.0*dy)*(gtp1(it,jp)+gtt1(it,jp)/q(ir)) &
-             !     - c0/Jfac(it)/q(ir) * (dR0dt(it)**2 + dZ0dt(it)**2) / (c0/r(ir)) &
-             !     * cderiv(id) / (12.0*dy) * g1(it,jp)
-             sum2(it,ip) = sum2(it,ip) &
-                  + cderiv(id) / (12.0*dx)*dR1dt(jt,ip,1)
-                 
-          enddo
-       enddo
-    enddo
-    max_sum = 1.0e-10
-    s1 = 0.0
-    s2 = 0.0
-    do it=1,nx
-       do ip=1,1
-          if(abs(sum1(it,ip)-sum2(it,ip)) > abs(max_sum)) then
-             max_sum = sum1(it,ip)-sum2(it,ip)
-             s1 = sum1(it,ip)
-             s2 = sum2(it,ip)
-          endif
-          !print *, x(it),sum1(it,ip), sum2(it,ip)
-       enddo
-    enddo
-    print *, 'g interm eqn max_sum = ', max_sum
-    print *, s1, s2
-
-    sum1(:,:) = 0.0
-    sum2(:,:) = 0.0
-    do it=1,nx
-       do ip=1,ny
-          k = 1
-          sum1(it,ip) = dZ1dt(it,ip,k) * R0(it)**2 * &
-               (-dJfacdt(it)*dR0dr(it)/Jfac(it)**2 + dR0drdt(it)/Jfac(it)) &
-               + dZ1dr(it,ip,k) * R0(it)**2 * &
-               (dJfacdt(it)*dR0dt(it)/Jfac(it)**2 - dR0dtdt(it)/Jfac(it)) &
-               + dZ1dpdp(it,ip,k) * dZ0dt(it) &
-               + dZ1dtdt(it,ip,k) * R0(it)**2 * dR0dr(it)/Jfac(it) &
-               - dZ1drdt(it,ip,k) * R0(it)**2 * dR0dt(it)/Jfac(it) &
-               - 1.0/q(ir)*dZ1dp(it,ip,k) * (-c0/Jfac(it)*dR0dt(it)*dZ0dt(it) &
-               - 1/Jfac(it)**2 * dJfacdt(it) * R0(it)*dZ0dt(it) &
-               + c0/Jfac(it)*R0(it)*dZ0dtdt(it)) &
-               + 1.0/q(ir) * dZ1drdp(it,ip,k) * c0/Jfac(it)**2 * R0(it) &
-               * dR0dt(it) &
-               * (dR0dt(it)**2 + dZ0dt(it)**2) &
-               - 1.0/q(ir) * dZ1dtdp(it,ip,k) * c0/Jfac(it) * R0(it) &
-               * (-dZ0dt(it) + 1/Jfac(it)*dR0dr(it)*dR0dt(it)**2 &
-               + 1/Jfac(it)*dR0dr(it)*dZ0dt(it)**2)
-
-          !sum2(it,ip) = (-N_tor**2 * r(ir) * cos(x(it)) &
-          !     + (1-M_tor**2)*R0(it)**2/r(ir)*cos(x(it))) &
-          !     * z1_mag*r(ir) * (zs*sin(M_tor*x(it)) + zc*cos(M_tor*x(it))) &
-          !     * cos(N_tor*y(ip)) &
-          !     - 1.0/q(ir)*c0*r(ir)*N_tor*sin(x(it))*cos(x(it)) &
-          !     * z1_mag*r(ir) * (-zs*cos(M_tor*x(it)) + zc*sin(M_tor*x(it))) &
-          !     * cos(N_tor*y(ip)) &
-          !     + (-N_tor**2 * r(ir) * cos(x(it)) &
-          !     + (1-M_tor**2)*R0(it)**2/r(ir)*cos(x(it))) &
-          !     * z1_mag*r(ir) * (-zs*cos(M_tor*x(it)) + zc*sin(M_tor*x(it))) &
-          !     * sin(N_tor*y(ip)) &
-          !     + 1.0/q(ir)*c0*r(ir)*N_tor*sin(x(it))*cos(x(it)) &
-          !     * z1_mag*r(ir) * (zs*sin(M_tor*x(it)) + zc*cos(M_tor*x(it))) &
-          !     * sin(N_tor*y(ip))
-
-          sum2(it,ip) = sum2(it,ip) - dR0dt(it)*R1(it,ip,1) &
-               + R0(it)*dR1dt(it,ip,1)*(1.0+R0(it)/r(ir)*dZ0drdt(it)) &
-               - dR1dr(it,ip,1)*R0(it)*R0(it)/r(ir)*dZ0dtdt(it) &
-               - dR1drdt(it,ip,1)*R0(it)*R0(it)/r(ir)*dZ0dt(it) &
-               + dR1dtdt(it,ip,1)*R0(it)*R0(it)/r(ir)*dZ0dr(it) &
-               + dR1dp(it,ip,1)*c0/q(ir)*(-dR0dt(it)**2/r(ir) &
-               + R0(it)/r(ir)*dR0dtdt(it) + r(ir)) &
-               - dR1dpdp(it,ip,1)*dR0dt(it) &
-               - dR1dtdp(it,ip,1)*c0*R0(it)/q(ir)*(dR0dt(it)/r(ir)+dZ0dr(it)) &
-               + dR1drdp(it,ip,1)*c0*R0(it)/q(ir)*dZ0dt(it)
-    
-       enddo
-    enddo
-    max_sum = 1.0e-10
-    s1 = 0.0
-    s2 = 0.0
-    do it=1,nx
-       do ip=1,ny
-          if(abs(sum1(it,ip)-sum2(it,ip)) > abs(max_sum)) then
-             max_sum = sum1(it,ip)-sum2(it,ip)
-             s1 = sum1(it,ip)
-             s2 = sum2(it,ip)
-          endif
-          if(ip==5) then
-             print *, x(it),sum1(it,ip),sum2(it,ip)
-          endif
-       enddo
-    enddo
-    print *, 'R eqn max_sum = ', max_sum
-    print *, s1, s2
-    
 
     ! clean-up
     deallocate(k_par_t_0_loc)
@@ -791,7 +571,7 @@ contains
     deallocate(y)
     deallocate(ycyc)
 
-    open(unit=1,file=trim(path)//'out.neo.btest_2',status='replace')
+    open(unit=1,file=trim(path)//'out.neo.btest_1',status='replace')
     do it=1, n_theta
        do ip=1,n_varphi
           write(1,'(e16.8)',advance='no') theta(it)
@@ -807,7 +587,7 @@ contains
     enddo
     close(1)
 
-    open(unit=1,file=trim(path)//'out.neo.btest_3',status='replace')
+    open(unit=1,file=trim(path)//'out.neo.btest_0',status='replace')
     do it=1, n_theta
        write(1,'(e16.8)',advance='no') theta(it)
        write(1,'(e16.8)',advance='no') theta(it)
@@ -821,152 +601,6 @@ contains
     enddo
     close(1)
 
-    stop
-
   end subroutine ThreeD_EQUIL_do
-
-  subroutine threed_solve(ir)
-    use neo_globals
-    use neo_3d_globals
-    implicit none
-    integer, intent(in) :: ir
-    integer :: it,jt,id,ip,k
-    real, dimension(:,:), allocatable :: cmat
-    real, dimension(:), allocatable   :: bvec, dvec
-    real :: fac
-    ! parameters for matrix solve
-    integer :: msize
-    integer :: info
-    integer, dimension(:), allocatable :: i_piv
-    real, dimension(:), allocatable    :: work
-
-    allocate(cmat(2*nx,2*nx))
-    allocate(bvec(2*nx))
-
-    cmat(:,:) = 0.0
-    do it=1,nx
-       jt=it
-       fac = - dR0dt(it) - (R0(it)/r(ir))**2*dZ0dtdt(it)
-       cmat(it,jt)       = cmat(it,jt) + fac
-       cmat(it+nx,jt+nx) = cmat(it+nx,jt+nx) + fac
-       !
-       fac = N_tor*N_tor * dR0dt(it)
-       cmat(it,jt)       = cmat(it,jt) + fac
-       cmat(it+nx,jt+nx) = cmat(it+nx,jt+nx) + fac
-       !
-       fac = c0/q(ir)*dZ0dt(it)*R0(it)/r(ir)
-       cmat(it,jt+nx)    = cmat(it,jt+nx) + fac*N_tor
-       cmat(it+nx,jt)    = cmat(it+nx,jt) + fac*(-N_tor)
-       !
-       fac = c0/q(ir)/r(ir)*(-dR0dt(it)**2 + R0(it)*dR0dtdt(it) + r(ir)**2)
-       cmat(it,jt+nx)    = cmat(it,jt+nx) + fac*N_tor
-       cmat(it+nx,jt)    = cmat(it+nx,jt) + fac*(-N_tor)
-       do id=-2,2
-          jt = xcyc(it+id)
-          fac = cderiv(id) / (12.0*dx) * R0(it) &
-               * (1.0 + R0(it)/r(ir)*dZ0drdt(it)) &
-               - cderiv(id) / (12.0*dx) * (R0(it)/r(ir))**2 * dZ0dt(it) &
-               + c2deriv(id) / (12.0*dx*dx) * R0(it)**2/r(ir) * dZ0dr(it)
-          cmat(it,jt)    = cmat(it,jt) + fac
-          cmat(it+nx,jt+nx) = cmat(it+nx,jt+nx) + fac
-       enddo
-    enddo
-
-    ! RHS
-    bvec(:) = 0.0
-    do it=1,nx
-       do k=2,3
-          if(k==2) then
-             ! cos(N*x) part
-             jt=0
-          else
-             ! sin(N*x) part
-             jt=nx
-          endif
-          bvec(it+jt)    = dZ1dt(it,ip,k) * R0(it)**2 * &
-               (-dJfacdt(it)*dR0dr(it)/Jfac(it)**2 + dR0drdt(it)/Jfac(it)) &
-               + dZ1dr(it,ip,k) * R0(it)**2 * &
-               (dJfacdt(it)*dR0dt(it)/Jfac(it)**2 - dR0dtdt(it)/Jfac(it)) &
-               + dZ1dpdp(it,ip,k) * dZ0dt(it) &
-               + dZ1dtdt(it,ip,k) * R0(it)**2 * dR0dr(it)/Jfac(it) &
-               - dZ1drdt(it,ip,k) * R0(it)**2 * dR0dt(it)/Jfac(it) &
-               - 1.0/q(ir)*dZ1dp(it,ip,k) * (-c0/Jfac(it)*dR0dt(it)*dZ0dt(it) &
-               - 1/Jfac(it)**2 * dJfacdt(it) * R0(it)*dZ0dt(it) &
-               + c0/Jfac(it)*R0(it)*dZ0dtdt(it)) &
-               + 1.0/q(ir) * dZ1drdp(it,ip,k) * c0/Jfac(it)**2 * R0(it) * dR0dt(it) &
-               * (dR0dt(it)**2 + dZ0dt(it)**2) &
-               - 1.0/q(ir) * dZ1dtdp(it,ip,k) * c0/Jfac(it) * R0(it) &
-               * (-dZ0dt(it) + 1/Jfac(it)*dR0dr(it)*dR0dt(it)**2 &
-               + 1/Jfac(it)*dR0dr(it)*dZ0dt(it)**2)
-       enddo
-    enddo
-
-    !do jt=1,nx
-    !   print *, cmat(nx,jt), cmat(nx,jt+nx)
-    !enddo
-    !stop
-
-    ! enforce the constraints
-    !cmat(nx,:)=0.0
-    !cmat(2*nx,:)=0.0
-    !do jt=1,nx
-    !   cmat(nx,jt)      = 1.0
-    !   cmat(2*nx,jt+nx) = 1.0
-    !enddo
-    !bvec(nx)   = 0.0
-    !bvec(2*nx) = 0.0
-
-    ! matrix solve
-    msize=2*nx
-    allocate(work(msize))
-    allocate(i_piv(msize))
-    call DGETRF(msize,msize,cmat(:,:),msize,i_piv,info)
-
-    !call DGETRI(msize,cmat(:,:),msize,i_piv,work,msize,info)
-    !do it=1,2*nx
-    !   print '(50(1pe12.5,1x))', cmat(it,:)
-    !enddo
-    !stop
-
-    call DGETRS('N',msize,1,cmat(:,:),msize,i_piv,bvec(:),msize,info)
-    deallocate(work)
-    deallocate(i_piv)
-
-    allocate(dvec(2*nx))
-    dvec(:)=0.0
-    do it=1,nx
-       do id=-2,2
-          jt = xcyc(it+id)
-          dvec(it)    = dvec(it) + cderiv(id)  / (12.0*dx) * bvec(jt)
-          dvec(it+nx) = dvec(it+nx) + cderiv(id)  / (12.0*dx) * bvec(jt+nx)
-       enddo
-    enddo
-    open(unit=1,file=trim(path)//'out.neo.btest',status='replace')
-    do it=1, nx
-       write(1,'(e16.8)',advance='no') x(it)
-       write(1,'(e16.8)',advance='no') bvec(it)
-       write(1,'(e16.8)',advance='no') bvec(it+nx)
-       write(1,'(e16.8)',advance='no') dvec(it)
-       write(1,'(e16.8)',advance='no') dvec(it+nx)
-       write(1,*)
-    enddo
-    close(1)
-    deallocate(dvec)
-    
-    do it=1,nx
-       do ip=1,ny
-          R1(it,ip,2) = bvec(it)
-          R1(it,ip,3) = bvec(it+nx)
-          R1(it,ip,1) = bvec(it) * cos(N_tor * y(ip)) &
-               + bvec(it+nx) * sin(N_tor * y(ip))
-       enddo
-    enddo
-
-
-    ! clean-up
-    deallocate(cmat)
-    deallocate(bvec)
-
-  end subroutine threed_solve
 
 end module neo_3d_equilibrium
