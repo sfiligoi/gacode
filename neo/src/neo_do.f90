@@ -29,7 +29,7 @@ subroutine neo_do
   integer, dimension(:,:,:,:), allocatable :: mindx  ! (ns,ne,nxi+1,nth)
   integer :: i, j, k, id
   integer :: ierr
-  integer :: n_elem
+  integer :: n_elem, asize
   real, dimension(:), allocatable :: a
   integer, dimension(:), allocatable :: a_iindx
   integer, dimension(:), allocatable :: a_jindx
@@ -137,6 +137,7 @@ subroutine neo_do
   ! trapping/rotation
   i = i + n_species*n_theta*(n_energy+1)**2*((n_xi-1)*2 + 2)
   n_max = i
+  asize = n_max
   allocate(a(n_max),stat=ierr)
   if(ierr /= 0) then
      call neo_error('ERROR: (NEO) Array allocation failed')
@@ -429,6 +430,12 @@ subroutine neo_do
      
      do ifac = 1, max_ifac
 
+        if(silent_flag == 0 .and. i_proc == 0) then
+           open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+                status='old',position='append')
+           write(io_neoout,*) 'Estimated memory = ', 8.0*(asize+n_max)/1.0e9
+           close(io_neoout)
+        endif
         if(allocated(amat))       deallocate(amat)
         allocate(amat(n_max),stat=ierr)
         if(ierr /= 0) then
