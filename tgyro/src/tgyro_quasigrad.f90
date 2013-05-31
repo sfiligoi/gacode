@@ -1,3 +1,14 @@
+!------------------------------------------------------------
+! tgyro_quasigrad.f90
+!
+! PURPOSE:
+!  Simple routine to enforce derivative of
+!
+!             ne = sum_i n_i z_i
+!
+! by evolving 
+!------------------------------------------------------------
+
 subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion)
 
   implicit none
@@ -17,6 +28,7 @@ subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion)
 
   else
 
+     ! Temporary storage 
      dlnnidr(1) = ne*dlnnedr 
 
      do i=2,n_ion

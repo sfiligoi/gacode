@@ -146,6 +146,7 @@ subroutine tgyro_iteration_driver
   do i=2,n_r
      if (loc_ti_feedback_flag == 1) then
         p = p+1
+        ! Assume 1 represents the thermal ion temperature
         x_vec(p) = dlntidr(1,i)
      endif
      if (loc_te_feedback_flag == 1) then

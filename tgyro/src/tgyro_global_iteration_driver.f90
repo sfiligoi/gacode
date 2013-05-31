@@ -49,7 +49,7 @@ subroutine tgyro_global_iteration_driver
   implicit none
 
   real :: time_max_save
-  integer :: n_exp
+  integer :: n_exp,i_ion
   character (len=16) :: ittag
 
   ! Copy (TGYRO copy of input.profiles) -> (GYRO copy of input.profiles)
@@ -190,10 +190,10 @@ subroutine tgyro_global_iteration_driver
           n_r,n_exp,EXPRO_rmin,EXPRO_te)
 
      ! Map Ti,zi from TGYRO variable to EXPRO interface variable
-     call tgyro_global_interpolation(r/1e2,dlntidr(1,:)*1e2,ti(1,:)/1e3,& 
-          n_r,n_exp,EXPRO_rmin,EXPRO_ti(1,:))
-
-     EXPRO_ti(2,:) = EXPRO_ti(1,:)
+     do i_ion=1,loc_n_ion
+        call tgyro_global_interpolation(r/1e2,dlntidr(i_ion,:)*1e2,ti(i_ion,:)/1e3,& 
+             n_r,n_exp,EXPRO_rmin,EXPRO_ti(i_ion,:))
+     enddo
 
      ! Map ne,zne from TGYRO variable to EXPRO interface variable
      call tgyro_global_interpolation(r/1e2,dlnnedr*1e2,ne/1e13,n_r,&
@@ -203,8 +203,10 @@ subroutine tgyro_global_iteration_driver
      if (loc_quasineutral_flag == 1) then
         call tgyro_quasineutral(ni,ne,dlnnidr,dlnnedr,zi_vec,loc_n_ion,n_r)
      endif
-     call tgyro_global_interpolation(r/1e2,dlnnidr(1,:)*1e2,ni(1,:)/1e13,n_r,&
-          n_exp,EXPRO_rmin,EXPRO_ni(1,:))
+     do i_ion=1,loc_n_ion
+        call tgyro_global_interpolation(r/1e2,dlnnidr(i_ion,:)*1e2,ni(i_ion,:)/1e13,n_r,&
+             n_exp,EXPRO_rmin,EXPRO_ni(i_ion,:))
+     enddo
      !------------------------------------------------------------------------------------------
 
      ittag = '.'//achar(i_tran_loop-1+iachar("1"))  
@@ -238,7 +240,7 @@ subroutine tgyro_global_iteration_driver
         do i=2,n_r
            p = p+1
            res(p) = (eflux_i_tot(i)-eflux_i_target(i))/eflux_i_target(i) 
-           dlntidr(1,i) = dlntidr(1,i)-loc_relax*res(p)*dlntidr(1,i)
+           dlntidr(therm_vec(:),i) = dlntidr(therm_vec(:),i)-loc_relax*res(p)*dlntidr(therm_vec(:),i)
         enddo
      endif
 
