@@ -32,7 +32,11 @@ class profiles_genData:
             if line[0:7] == '#rho(-)':
                 break
 
-        data = np.loadtxt(infile,skiprows=row)
+        try:
+            data = np.loadtxt(infile,skiprows=row)
+            print '(INFO): (profiles_gen_plot) '+infile+' found.'
+        except:
+            print '(ERROR): (profiles_gen_plot) '+infile+' not found.'
 
         n = self.n_exp
 
@@ -84,10 +88,11 @@ class profiles_genData:
         self.data['vpol_4'] = data[7*n:8*n,3]
         self.data['vpol_5'] = data[7*n:8*n,4]
 
-        data = np.loadtxt(infile+'.extra')
+        #data = np.loadtxt(infile+'.extra')
  
         try:
             data = np.loadtxt(infile+'.extra',comments='#')
+            print '(INFO): (profiles_gen_plot) '+infile+'.extra found.'
             x = data.reshape((n,35),order='F')
 
             self.data['bunit']     = x[0:n,0]
@@ -126,16 +131,16 @@ class profiles_genData:
             self.data['gamma_p']   = x[0:n,33]
             self.data['mach']      = x[0:n,34]
         except:
-            print infile+'.extra not available.'
-
-
+            print '(INFO): (profiles_gen_plot) '+infile+'.extra NOT found.'
+          
         try:
             data = np.loadtxt(infile+'.geo',skiprows=12)
             # Dimension 9 assumes nfourier=8
+            print '(INFO): (profiles_gen_plot) '+infile+'.geo found.'
             x = data.reshape((4,9,n),order='F')
             self.geo['ar']=x[0,:,:]
             self.geo['br']=x[1,:,:]
             self.geo['az']=x[2,:,:]
             self.geo['bz']=x[3,:,:]
         except:
-            print infile+'.geo not available.'
+            print '(INFO): (profiles_gen_plot) '+infile+'.geo NOT found.'
