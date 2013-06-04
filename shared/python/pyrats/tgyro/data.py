@@ -56,7 +56,7 @@ class TGYROData:
         if self.tgyro_mode == 2:
             self.read_stabilities()
         else:
-            self.loc_n_ion = self.get_tag_value("LOC_N_ION")
+            self.loc_n_ion = int(self.get_tag_value("LOC_N_ION"))
             self.read_control()
             self.fileparser('gyrobohm.out')
             self.fileparser('flux_e.out')
@@ -69,6 +69,10 @@ class TGYROData:
             self.fileparser('gradient.out')
             self.fileparser('out.tgyro.geometry.1')
             self.fileparser('out.tgyro.geometry.2')
+            for i in range(2,self.loc_n_ion+1):
+                si = '%d'%i
+                for fn in ['profile','chi_i','mflux_i','flux_i']:
+                    self.fileparser(fn+si+'.out',spec_num=i)
 
     #---------------------------------------------------------------------------#
 
@@ -105,7 +109,7 @@ class TGYROData:
 
     #---------------------------------------------------------------------------#
 
-    def fileparser(self,file):
+    def fileparser(self,file,spec_num=''):
         """
         Generic parser for standard TGYRO file format.
         """
@@ -131,7 +135,9 @@ class TGYROData:
                     numdata[ic,ib,ir] = row[ic]
 
         for ic in range(nc):
-            self.data[tags[ic]] = numdata[ic,:,:]
+            if tags[ic]=='r/a' and spec_num!='':
+                continue
+            self.data[tags[ic]+str(spec_num)] = numdata[ic,:,:]
 
     #---------------------------------------------------------------------------#
 
