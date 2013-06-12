@@ -17,9 +17,16 @@ Z_EFF_MODEL allows setting ions 1,2 by Zeff and ne
 SET_TE=1 enables modification of electron temperature:
   TE_MODEL=1: Constant temperature
           =2: Fixed gradient length (TE_AXIS, ALTE)
-          =3: Set equal to Ti(1).
+          =3: Set equal to ion 1 Temperature.
           =4: Scale Te by TE_AXIS.
           =5: Increase scale length by ALTE inside PIVOT.
+
+SET_TIx=1 enables modification of ion x temperature:
+  TIx_MODEL=1: Constant temperature
+           =2: Fixed gradient length (TIx_AXIS, ALTIx)
+           =3: Set equal to ion 1 Temperature
+           =4: Scale ion x temperature by TIx_AXIS.
+           =5: Increase scale length by ALTIx inside PIVOT.
                
 EXAMPLES:
 
