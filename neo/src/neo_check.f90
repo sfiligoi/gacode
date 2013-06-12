@@ -96,6 +96,30 @@ subroutine neo_check
 
   end select
 
+   select case (coll_uncoupledei_model) 
+
+   case (0) 
+      if(silent_flag == 0 .and. i_proc == 0) then
+         write(io_neoout,*) 'collision_model    : Full e-i collisional coupling'
+      endif
+
+   case (1)
+      if(silent_flag == 0 .and. i_proc == 0) then
+         write(io_neoout,*) 'collision_model    : Reduced e-i collisional coupling'
+      endif
+
+   case (2)
+      if(silent_flag == 0 .and. i_proc == 0) then
+         write(io_neoout,*) 'collision_model    : Reduced e-i collisional coupling'
+      endif
+
+   case default
+
+      call neo_error('ERROR: (NEO) invalid coll_uncoupledei_model')
+      return
+      
+   end select
+
   !------------------------------------------------------------
 
   !------------------------------------------------------------
