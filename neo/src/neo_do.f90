@@ -100,8 +100,8 @@ subroutine neo_do
               endif
            enddo
            neo_th_out(4)     = efluxi_CH
-           neo_th_out(5)     = jpar_HH
-           neo_th_out(6)     = jpar_S
+           neo_th_out(5)     = jpar_S
+           neo_th_out(6)     = jpar_K
            neo_thHS_out(:,:) = 0.0
            do is=1, n_species
               neo_thHS_out(is,1) = pflux_multi_HS(is) 
@@ -551,8 +551,8 @@ subroutine neo_do
            endif
         enddo
         neo_th_out(4) = efluxi_CH
-        neo_th_out(5)     = jpar_HH
-        neo_th_out(6)     = jpar_S
+        neo_th_out(5)     = jpar_S
+        neo_th_out(6)     = jpar_K
         neo_thHS_out(:,:) = 0.0
         do is=1, n_species
            neo_thHS_out(is,1) = pflux_multi_HS(is) 
