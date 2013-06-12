@@ -23,6 +23,7 @@ module create_globals
   real, dimension(nions_max) :: exm_ti_axis
   integer, dimension(nions_max) :: exm_z
   real, dimension(nions_max) :: exm_mu
+  integer :: exm_pivot
   
   ! Models
   integer :: exm_te_model

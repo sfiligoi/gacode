@@ -190,7 +190,7 @@ subroutine create_set
   if (set_exm_te == 1) then
      select case(exm_te_model)
      case(1) 
-        ! Constant density
+        ! Constant temperature
         EXPRO_te(:) = exm_te_axis
      case(2)
         ! Fixed gradient length
@@ -204,8 +204,19 @@ subroutine create_set
      case(4)
         ! Scale by factor exm_te_axis
         EXPRO_te(:) = EXPRO_te(:)*exm_te_axis
+     case(5)
+        ! Increase scale length inside of pivot
+        do j=1,EXPRO_n_exp
+           if (j < exm_pivot) then
+              a(j) = EXPRO_dlntedr(j)+exm_alte
+           else
+              a(j) = EXPRO_dlntedr(j)
+           endif
+        enddo
+        call logint(EXPRO_te(:),a(:),EXPRO_rmin(:),EXPRO_n_exp,exm_pivot)
+        print '(a)', 'INFO: (create) Increased Te gradient.'
      case default
-        print *, 'ERROR: (create) TE_MODEL must be 1-3.'
+        print '(a)', 'ERROR: (create) TE_MODEL must be 1-5.'
         stop
      end select
   endif
@@ -229,7 +240,7 @@ subroutine create_set
            ! Scale by factor exm_te_axis
            EXPRO_ti(i,:) = EXPRO_ti(1,:)*exm_ti_axis(i)
         case default
-           print *, 'ERROR: (create) TE_MODEL must be 1-3.'
+           print '(a)', 'ERROR: (create) TI_MODEL must be 1-4.'
            stop
         end select
      endif
