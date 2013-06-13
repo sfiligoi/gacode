@@ -69,6 +69,7 @@ class TGYROData:
             self.fileparser('gradient.out')
             self.fileparser('out.tgyro.geometry.1')
             self.fileparser('out.tgyro.geometry.2')
+            self.fileparser('out.tgyro.power')
             for i in range(2,self.loc_n_ion+1):
                 si = '%d'%i
                 for fn in ['profile','chi_i','mflux_i','flux_i']:
