@@ -146,7 +146,7 @@ subroutine gyro_memory_usage(data_file,io)
         call alloc_add(io,size(gbflux_trapped),8,'gbflux_trapped')
         call alloc_add(io,size(gbflux_n),8,'gbflux_n')
 
-        if (transport_method == 2) then
+        if (transport_method > 1) then
            call alloc_add(io,size(gbflux_vec),8,'gbflux_vec')
         endif
 

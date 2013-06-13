@@ -24,7 +24,7 @@ module gyro_globals
   integer :: gyrotest_flag
   ! (0=new,1=restart,2=restart-but-don't-write-restart-data)
   integer :: restart_method
-  ! (1=standard, 2=time reset for transport analysis)
+  ! (1=standard, 2=time reset for transport analysis, 3=no time reset for transport analysis)
   integer :: transport_method
   !----------------------------------------------------
 

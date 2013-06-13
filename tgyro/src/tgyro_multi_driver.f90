@@ -26,7 +26,9 @@ subroutine tgyro_multi_driver
   !---------------------------------------
 
   gyro_restart_method = 1
-  transport_method    = 1
+
+  ! See gyro/src/gyro_globals.f90 for definition of transport_method
+  transport_method = 1
 
   ! Initialize GYRO
   call gyro_init(paths(color+1), &
