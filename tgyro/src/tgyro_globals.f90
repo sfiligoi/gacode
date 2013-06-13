@@ -293,6 +293,7 @@ module tgyro_globals
   integer :: tgyro_noturb_flag
   integer :: tgyro_use_rho
   integer :: tgyro_dt_method
+  integer :: tgyro_gyro_restart_flag
   !
   ! Iteration variables (global)
   !
