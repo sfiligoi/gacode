@@ -11,7 +11,7 @@ field     = sys.argv[2]
 i_moment  = int(sys.argv[3])
 window    = float(sys.argv[4])
 ftype     = sys.argv[5]
-dataflag  = int(sys.argv[6])
+datafile  = sys.argv[6]
 
 n_field   = int(sim.profile['n_field'])
 n_kinetic = int(sim.profile['n_kinetic'])
@@ -54,21 +54,18 @@ for i in range(len(t)):
 color = ['k','m','b','c']
 
 # Loop over species
-for i in range(n_kinetic):
-    ave   = average(flux0[i,i_moment,:],t,window)
-    stag  = sim.tagspec[i]
-    label = stag+': '+str(round(ave,3))
-    y     = ave*np.ones(len(t))
-    ax.plot(t[imin:],y[imin:],'--',color=color[i])
-    ax.plot(t,flux0[i,i_moment,:],label=label,color=color[i])
-
-    if dataflag == 1:
-        print '# Moment  : '+mtag
-        print '# Field   : '+ftag
-        print '# Species : '+stag
-        print '# Data: [ (c_s/a) t , gbflux ]'
-        for j in range(len(t)):
-            print t[j],flux0[i,i_moment,j]
+if datafile == 'none':
+    # Plot data to screen or image file.
+    for i in range(n_kinetic):
+        ave   = average(flux0[i,i_moment,:],t,window)
+        stag  = sim.tagspec[i]
+        label = stag+': '+str(round(ave,3))
+        y     = ave*np.ones(len(t))
+        ax.plot(t[imin:],y[imin:],'--',color=color[i])
+        ax.plot(t,flux0[i,i_moment,:],label=label,color=color[i])
+else:
+    # Write data to datafile
+    print 'INFO: (gyro_plot) Output to datafile not supported.  Use raw out.gyro.gbflux.'
 
 ax.legend()
 if ftype == 'screen':

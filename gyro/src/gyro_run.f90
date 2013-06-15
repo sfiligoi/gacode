@@ -101,7 +101,7 @@ subroutine gyro_run(&
   !-------------------------------------------------------------------------------------- 
   ! Pack transport fluxes into interface output arrays
   !
-  if (i_proc == 0 .and. transport_method == 2) then
+  if (i_proc == 0 .and. transport_method > 1) then
 
      if (electron_method == 2) then
         do i=1,n_x

@@ -15,8 +15,7 @@ subroutine tgyro_flux_vector_dense(x_vec,f_vec)
   do i=2,n_r
      if (loc_ti_feedback_flag == 1) then
         p = p+1
-        dlntidr(1,i) = x_vec(p)
-        if (loc_n_ion == 2) dlntidr(2,i) = dlntidr(1,i)
+        dlntidr(therm_vec(:),i) = x_vec(p)
      endif
      if (loc_te_feedback_flag == 1) then
          p = p+1

@@ -15,8 +15,8 @@ subroutine tgyro_source
   integer :: i
   real, external :: sigv
   real, external :: sigvth
-
-
+  real :: n_d,n_t
+ 
   !-------------------------------------------------------
   ! Source terms (erg/cm^3/s):
   !
@@ -25,7 +25,18 @@ subroutine tgyro_source
      ! Alpha power
      !  - sigv in cm^3/s
 
-     s_alpha(i) = (ni(1,i)/2)**2*sigv(ti(1,i)/1e3)*e_alpha
+     if (tgyro_dt_method == 1) then
+        ! Assume D and T given by ion 1 and ion 2 
+        ! (order doesn't matter)
+        n_d = ni(1,i)
+        n_t = ni(2,i)
+     else
+        ! Assume ion 1 is DT hybrid.
+        n_d = 0.5*ni(1,i)
+        n_t = 0.5*ni(1,i)
+     endif
+
+     s_alpha(i) = n_d*n_t*sigv(ti(1,i)/1e3)*e_alpha
 
      ! Bremsstrahlung radiation
      ! - From NRL formulary 

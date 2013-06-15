@@ -102,8 +102,8 @@ subroutine tgyro_iteration_standard
      do i=2,n_r
         if (loc_ti_feedback_flag == 1) then
            p = p+1
-           dlntidr(1,i) = x_vec(p)
-           if (loc_n_ion == 2) dlntidr(2,i) = dlntidr(1,i)
+           dlntidr(therm_vec(:),i) = x_vec(p)
+           ! therm_vec is just list of thermal ions, for example: (1,2)
         endif
         if (loc_te_feedback_flag == 1) then
            p = p+1

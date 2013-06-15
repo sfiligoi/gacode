@@ -52,7 +52,7 @@ contains
 
     if(uinfo(1) < 0) then
        call neo_error('ERROR: (NEO) Matrix factorization failed in neo_sparse_solve')
-       write(mystr,'(A6,I5)') "unifo=", uinfo(1)
+       write(mystr,'(A6,I5)') "uinfo=", uinfo(1)
        call neo_error(mystr)
        return
     endif

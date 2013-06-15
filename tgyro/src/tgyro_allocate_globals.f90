@@ -131,6 +131,7 @@ subroutine tgyro_allocate_globals
   allocate(res(p_max))
   allocate(res0(p_max))
   allocate(relax(p_max))
+  allocate(therm_vec(sum(therm_flag)))
 
   allocate(a_fourier_geo(8,0:16,n_r))
 

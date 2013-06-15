@@ -32,7 +32,7 @@ contains
     use neo_globals, only : n_energy, n_xi
     implicit none
     integer, intent (in) :: flag
-    integer :: ie, ix
+    integer :: ie
     integer :: xarg
     
     if(flag == 1) then
@@ -198,7 +198,6 @@ contains
     use neo_globals, only : n_species, n_energy,n_xi
     implicit none
     integer, intent (in) :: flag
-    integer :: ke
 
     if(flag == 1) then
        if(initialized_coll) return
@@ -232,7 +231,7 @@ contains
     integer :: fmarg
     integer :: is, js, ie, je, ix, jx, ke, me
     real :: zarg0, zarg1, zarg2
-    integer :: m, is_ele
+    integer :: is_ele
 
     emat_coll_test(:,:,:,:,:)  = 0.0
     emat_coll_field(:,:,:,:,:) = 0.0
@@ -697,7 +696,7 @@ contains
        enddo
     endif
 
-    if(coll_uncoupledei_model == 1) then
+    if(coll_uncoupledei_model == 1 .or. coll_uncoupledei_model == 2) then
        is_ele = -1
        do is=1, n_species
           if(Z(is) == -1) then
@@ -712,10 +711,69 @@ contains
        
        do is=1,n_species
           do js=1,n_species
+
              if(is .ne. is_ele .and. js == is_ele) then
-                ! C_ie = 0
-                emat_coll_test(is,js,:,:,:) = 0.0
-                emat_coll_field(is,js,:,:,:) = 0.0
+                if(coll_uncoupledei_model == 1) then
+                   ! C_ie = 0
+                   emat_coll_test(is,js,:,:,:) = 0.0
+                   emat_coll_field(is,js,:,:,:) = 0.0
+                else
+                   ! C_ie = Connor case ma>mb
+                   emat_coll_test(is,js,:,:,:) = 0.0
+                   emat_coll_field(is,js,:,:,:) = 0.0
+                   tauinv_ab = nu(is,ir) * (1.0*Z(js))**2 / (1.0*Z(is))**2 & 
+                        * dens(js,ir)/dens(is,ir)
+                   tauinv_ba = nu(js,ir) * (1.0*Z(is))**2 / (1.0*Z(js))**2 & 
+                        * dens(is,ir)/dens(js,ir)
+                   
+                   lambda = (vth(is,ir) / vth(js,ir))**2
+                   call neo_compute_fcoll(fmarg,lambda,fcoll,fcoll_bar)
+                   call neo_compute_fcoll(fmarg,1.0/lambda,fcollinv,fcollinv_bar)
+                   do ie=0, n_energy
+                      do je=0,n_energy
+                         do ix=0, n_xi
+                            do ke=0,ie
+                               do me=0,je
+                                  jx = ix
+                                  zarg0 = (-1.0)**(ke+me)
+                                  zarg1 = (mygamma2(2 + 2*ie + e_lag(ix)) &
+                                       / mygamma2(2 + 2*(ie-ke)) &
+                                       / mygamma2(2 + 2*ke + e_lag(ix))) &
+                                       * (mygamma2(2 + 2*je + e_lag(jx)) &
+                                       / mygamma2(2 + 2*(je-me)) &
+                                       / mygamma2(2 + 2*me + e_lag(jx)))
+                                  zarg2 = mygamma2(2 + 2*ke) * mygamma2(2 + 2*me)
+                                  xarg = e_alpha*(ke+me) &
+                                       + xi_beta_l(ix) + xi_beta_l(jx)
+                                  emat_coll_test(is,js,ie,je,ix) = &
+                                       emat_coll_test(is,js,ie,je,ix) &
+                                       -tauinv_ab &
+                                       * sqrt(lambda/pi) &
+                                       * temp(is,ir)/temp(js,ir) &
+                                       * (1.0/3.0) *ix*(ix+1) &
+                                       * zarg0 * zarg1 &
+                                       * mygamma2(xarg+3) &
+                                       / zarg2
+                                  if(ix == 1) then
+                                     xarg = e_alpha*ke + xi_beta_l(ix)
+                                     yarg = e_alpha*me + xi_beta_l(jx)
+                                     emat_coll_field(is,js,ie,je,ix) = &
+                                          emat_coll_field(is,js,ie,je,ix) &
+                                          + (mass(js)*dens(js,ir)*vth(js,ir)) &
+                                          / (mass(is)*dens(is,ir)*vth(is,ir)) &
+                                          * 0.5 * tauinv_ba &
+                                          * temp(js,ir) / temp(is,ir) &
+                                          * zarg0 * zarg1 &
+                                          * mygamma2(xarg+4) / mygamma2(5) &
+                                          / zarg2 &
+                                          * mygamma2(yarg+1)
+                                  endif
+                               enddo
+                            enddo
+                         enddo
+                      enddo
+                   enddo
+                endif
              endif
              if(is == is_ele .and. js .ne. is) then
                 ! C_ei = L(fe) with Connor case ma<mb

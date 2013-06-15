@@ -18,17 +18,17 @@ then
   echo
   echo "         -p <path>"
   echo "         Set optional path to simulation directory."
-  echo "         The default path is \$NEO_DIR/sim."
+  echo "         The default path is \$PWD"
   echo
   echo "TEST MODE"
   echo
   echo "         -t <simdir>"  
-  echo "         Sanity test for INPUT data in <simdir>."
+  echo "         Sanity test for input.neo in <simdir>."
   echo
   echo "EXECUTE MODE (single core)"
   echo
   echo "         -e <simdir>" 
-  echo "         Run NEO using INPUT data in <simdir>."
+  echo "         Run NEO using input.neo in <simdir>."
   echo
   echo "REGRESSION TESTING"
   echo

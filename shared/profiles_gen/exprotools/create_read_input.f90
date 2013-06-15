@@ -69,6 +69,7 @@ subroutine create_read_input
      read(1,*) exm_ni_data(i)   
   enddo
   read(1,30) exm_ne_data   
+  read(1,*) exm_pivot
 
   close(1)
 

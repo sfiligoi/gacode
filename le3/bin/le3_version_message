@@ -1,0 +1,14 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  le3_version_message
+#
+# FUNCTION:
+#  Echo version message.
+#------------------------------
+
+VERSION=`gacode_getversion`
+
+echo "=========================================================="
+echo "LE3" `echo $VERSION` `echo $GACODE_PLATFORM` `uname -s` `uname -m`
+echo "=========================================================="

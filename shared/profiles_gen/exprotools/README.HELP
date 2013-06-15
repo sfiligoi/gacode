@@ -8,11 +8,25 @@ Below, [x=1,...,5]
 
 SET_NIx=1 enables modification of ion x density:
   NIx_MODEL=1: Constant density (NIx_AXIS) 
-  NIx_MODEL=2: Fixed gradient length (NIx_AXIS,ALNIx) 
-  NIx_MODEL=3: Quasineutrality on ion x. 
-  NIx_MODEL=4: Import data from (rho,ni) file NIx_DATA
+           =2: Fixed gradient length (NIx_AXIS,ALNIx) 
+           =3: Quasineutrality on ion x. 
+           =4: Import data from (rho,ni) file NIx_DATA
 
 Z_EFF_MODEL allows setting ions 1,2 by Zeff and ne
+
+SET_TE=1 enables modification of electron temperature:
+  TE_MODEL=1: Constant temperature
+          =2: Fixed gradient length (TE_AXIS, ALTE)
+          =3: Set equal to ion 1 Temperature.
+          =4: Scale Te by TE_AXIS.
+          =5: Increase scale length by ALTE inside PIVOT.
+
+SET_TIx=1 enables modification of ion x temperature:
+  TIx_MODEL=1: Constant temperature
+           =2: Fixed gradient length (TIx_AXIS, ALTIx)
+           =3: Set equal to ion 1 Temperature
+           =4: Scale ion x temperature by TIx_AXIS.
+           =5: Increase scale length by ALTIx inside PIVOT.
                
 EXAMPLES:
 

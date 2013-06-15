@@ -13,7 +13,8 @@ F77	= ${FC}
 FOMP    = -fopenmp
 FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules
 FOPT	= -O3
-FDEBUG	= -O2 -fbounds-check
+FDEBUG	= -O2 -Wall -fcheck=all -Wunderflow -finit-real=nan -fbounds-check -ffpe-trap=invalid,zero,overflow
+#FDEBUG	= -O2 -fbounds-check
 
 # System math libraries (from Ubuntu repository)
 

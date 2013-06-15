@@ -22,7 +22,7 @@ subroutine neo_experimental_profiles
   !---------------------------------------------------
   implicit none
 
-  integer :: i, is, i_ion, i_exp
+  integer :: i, is, i_ion
 
   !--------------------------------------------------------------
   ! use EXPRO routines to read data:

@@ -38,6 +38,22 @@ subroutine tgyro_init_profiles
   !------------------------------------------------------
 
   !------------------------------------------------------
+  ! Construct vector of thermal ions
+  !
+  ! For example, if ions 1 and 3 are thermal, we have
+  !
+  !  therm_vec = (1,3)  
+  !
+  i=0
+  do i_ion=1,loc_n_ion
+     if (therm_flag(i_ion) == 1) then
+        i = i+1
+        therm_vec(i) = i_ion
+     endif
+  enddo
+  !------------------------------------------------------
+
+  !------------------------------------------------------
   ! Initialize integrated power vectors.
   !
   p_alpha(:) = 0.0

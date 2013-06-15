@@ -200,6 +200,8 @@ module tgyro_globals
   real, dimension(:), allocatable :: res0
   real, dimension(:), allocatable :: relax
 
+  integer, dimension(:), allocatable :: therm_vec
+
   real, dimension(5) :: mi
 
   ! Physical constants
@@ -248,6 +250,7 @@ module tgyro_globals
   integer :: loc_n_ion
   real, dimension(5) :: zi_vec
   real, dimension(5) :: mi_vec
+  integer, dimension(5) :: therm_flag
   real :: loc_betae_scale
   integer :: loc_chang_hinton
   integer :: loc_circ_flag
@@ -289,6 +292,8 @@ module tgyro_globals
   integer :: tgyro_er_bc
   integer :: tgyro_noturb_flag
   integer :: tgyro_use_rho
+  integer :: tgyro_dt_method
+  integer :: tgyro_gyro_restart_flag
   !
   ! Iteration variables (global)
   !

@@ -77,7 +77,7 @@ contains
     use neo_nclass_dr
     implicit none
     integer, intent (in) :: ir
-    integer :: is, it
+    integer :: is
     real :: d_max
 
     ! inverse aspect ratio
@@ -191,7 +191,6 @@ contains
     implicit none
     integer, intent (in) :: ir
     real, intent (out) :: phi
-    integer :: it
     real :: thavg_fac=0.5        ! theta-avg factor <sin^2> = 0.5
     real ::  nu_crit, phi_1, phi_2, fac
 
@@ -386,7 +385,6 @@ contains
     implicit none
     integer, intent (in) :: ir
     real, intent (out) :: efluxi
-    integer :: it
     real :: k0, a0, b0, c0, K2, K2_star, F2, &
          CH_Bmag2inv_avg, CH_Bmag2avg_inv, CH_I_div_psip, fc
 

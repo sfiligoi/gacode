@@ -66,7 +66,6 @@ contains
     real, parameter :: squeeze_flag=0
     real, parameter :: z_protonmass=1.6726
     real, parameter :: z_coulomb=1.6022e-19
-    real, parameter :: z_electronmass=9.1095e-31
     real, parameter :: z_j7kv=1.6022e-16
     integer :: is, it, i, j, k, im, iz, iza
     real    :: ppr, uthai

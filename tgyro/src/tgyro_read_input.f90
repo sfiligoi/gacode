@@ -66,6 +66,11 @@ subroutine tgyro_read_input
   call tgyro_readbc_real(mi_vec(3)) 
   call tgyro_readbc_real(mi_vec(4)) 
   call tgyro_readbc_real(mi_vec(5)) 
+  call tgyro_readbc_int(therm_flag(1)) 
+  call tgyro_readbc_int(therm_flag(2)) 
+  call tgyro_readbc_int(therm_flag(3)) 
+  call tgyro_readbc_int(therm_flag(4)) 
+  call tgyro_readbc_int(therm_flag(5)) 
   call tgyro_readbc_real(loc_betae_scale) 
   call tgyro_readbc_int(loc_chang_hinton) 
   call tgyro_readbc_int(loc_circ_flag) 
@@ -107,6 +112,8 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(tgyro_er_bc)
   call tgyro_readbc_int(tgyro_noturb_flag)
   call tgyro_readbc_int(tgyro_use_rho)
+  call tgyro_readbc_int(tgyro_dt_method)
+  call tgyro_readbc_int(tgyro_gyro_restart_flag)
   ! ** END input read; ADD NEW PARAMETERS ABOVE HERE!!
   call tgyro_readbc_int(n_inst)
   !-------------------------------------------------------

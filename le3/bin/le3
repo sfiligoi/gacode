@@ -1,0 +1,113 @@
+#!/bin/bash
+#=============================================================
+# le3
+#
+# PURPOSE:
+#  Top-level script controlling execution of LE3.
+#=============================================================
+
+#=============================================================
+# Syntax validity check and help message
+#
+n=$#
+
+if [ $n -eq 0 ]
+then
+  echo
+  echo "Usage:   le3 [options]"
+  echo
+  echo "         -p <path>"
+  echo "         Set optional path to simulation directory."
+  echo "         The default path is \$PWD."
+  echo
+  echo "EXECUTE MODE (single core)"
+  echo
+  echo "         -e <simdir>" 
+  echo "         Run LE3 using input.le3 in <simdir>."
+  echo
+  echo "TEMPLATE GENERATION"
+  echo
+  echo "         -g"
+  echo "         List available equilibrium templates."
+  echo
+  echo "         -g <template>"
+  echo "         Copy <template> into simulation path."
+
+  exit 1
+fi
+#=============================================================
+ 
+#=============================================================
+# Define variables for flag capture
+#
+SIMROOT=$PWD
+LE3_DIR=$GACODE_ROOT/le3
+# Default number of cores
+NPROC=1
+# Execute/test mode flags
+EXEC_FLAG=0
+GENERATE_FLAG=0
+#=============================================================
+
+#=============================================================
+# Parse command line options
+#
+while [ $# -gt 0 ] ; do
+  case "$1" in
+
+  -p) shift ; SIMROOT=$1 ;;
+
+  -e) shift ; LOCDIR=$1 ; EXEC_FLAG=1 ;;
+
+  -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
+
+  *) echo "ERROR: incorrect le3 syntax." ; exit 1 ;;
+ 
+  esac
+  shift
+done
+#=============================================================
+
+if [ "$LOCDIR" == "." ]
+then
+   SIMDIR=$PWD
+   cd .. ; LOCDIR=$PWD
+else
+   SIMDIR=$SIMROOT/$LOCDIR
+fi
+
+RUN_FILE=$SIMDIR/out.le3.run
+#============================================================
+
+#============================================================
+# Generate simdir if -g set, then exit.
+#
+if [ $GENERATE_FLAG -eq 1 ]
+then
+   if [ ! -f "${LE3_DIR}/tools/input/$LOCDIR/input.le3" ]
+   then
+      cat ${LE3_DIR}/tools/input/simdir_list
+   else
+      cp -ai ${LE3_DIR}/tools/input/$LOCDIR $SIMDIR
+   fi
+   exit 0
+fi
+#============================================================
+
+#============================================================
+# Now cd to simulation directory and parse input:
+#
+cd $SIMDIR
+python $LE3_DIR/bin/le3_parse.py 
+#==========================================================
+
+le3_version_message 
+
+#===========================================================
+# Version stamp:
+cat $GACODE_ROOT/le3/.VERSION > out.le3.version 
+echo $GACODE_PLATFORM >> out.le3.version
+date >> out.le3.version
+#==========================================================
+
+$LE3_DIR/src/le3

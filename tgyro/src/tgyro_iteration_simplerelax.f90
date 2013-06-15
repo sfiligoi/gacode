@@ -2,7 +2,8 @@
 ! tgyro_iteration_simplerelax.f90
 !
 ! PURPOSE:
-! Trial simple relaxation approach to look for more robust solution method
+! Trial simple relaxation approach to look for more robust 
+! solution method.
 !----------------------------------------------------------
 
 subroutine tgyro_iteration_simplerelax
@@ -88,38 +89,38 @@ subroutine tgyro_iteration_simplerelax
         if (loc_ti_feedback_flag == 1) then
            p = p+1
            simpledz = loc_relax*(f_vec(p) - g_vec(p))/&
-                max(max(abs(f_vec(p)),abs(g_vec(p))),1.)
+                max(max(abs(f_vec(p)),abs(g_vec(p))),1.0)
            if (abs(simpledz) > loc_dx_max) then
               simpledz = loc_dx_max*(simpledz/abs(simpledz))
            endif
-           x_vec(p) = x_vec(p)*(1. - simpledz)
+           x_vec(p) = x_vec(p)*(1.0-simpledz)
         endif
         if (loc_te_feedback_flag == 1) then
            p = p+1
            simpledz = loc_relax*(f_vec(p) - g_vec(p))/&
-                max(max(abs(f_vec(p)),abs(g_vec(p))),1.)
+                max(max(abs(f_vec(p)),abs(g_vec(p))),1.0)
            if (abs(simpledz) > loc_dx_max) then
               simpledz = loc_dx_max*(simpledz/abs(simpledz))
            endif
-           x_vec(p) = x_vec(p)*(1. - simpledz)
+           x_vec(p) = x_vec(p)*(1.0-simpledz)
         endif
         if (loc_ne_feedback_flag == 1) then
            p = p+1
            simpledz = loc_relax*(f_vec(p) - g_vec(p))/&
-                max(max(abs(f_vec(p)),abs(g_vec(p))),1.)
+                max(max(abs(f_vec(p)),abs(g_vec(p))),1.0)
            if (abs(simpledz) > loc_dx_max) then
               simpledz = loc_dx_max*(simpledz/abs(simpledz))
            endif
-           x_vec(p) = x_vec(p)*(1. - simpledz)
+           x_vec(p) = x_vec(p)*(1.0-simpledz)
         endif
         if (loc_er_feedback_flag == 1) then
            p = p+1
            simpledz = loc_relax*(f_vec(p) - g_vec(p))/&
-                max(max(abs(f_vec(p)),abs(g_vec(p))),1.)
+                max(max(abs(f_vec(p)),abs(g_vec(p))),1.0)
            if (abs(simpledz) > loc_dx_max) then
               simpledz = loc_dx_max*(simpledz/abs(simpledz))
            endif
-           x_vec(p) = x_vec(p)*(1. - simpledz)
+           x_vec(p) = x_vec(p)*(1.0-simpledz)
         endif
      enddo
 
@@ -129,8 +130,7 @@ subroutine tgyro_iteration_simplerelax
      do i=2,n_r
         if (loc_ti_feedback_flag == 1) then
            p = p+1
-           dlntidr(1,i) = x_vec(p)
-           if (loc_n_ion == 2) dlntidr(2,i) = dlntidr(1,i)
+           dlntidr(therm_vec(:),i) = x_vec(p)
         endif
         if (loc_te_feedback_flag == 1) then
            p = p+1
@@ -151,14 +151,14 @@ subroutine tgyro_iteration_simplerelax
      call tgyro_profile_functions 
 
      !----------------------------------------------------- 
-     !update fluxes
+     ! Update fluxes
      call tgyro_target_vector(x_vec,g_vec)
      call tgyro_flux_vector(x_vec,f_vec,0.0,0)
      !
      ! Compute initial residual
      call tgyro_residual(f_vec,g_vec,res,p_max,loc_residual_method)
      call tgyro_write_intermediate(0,res)
-     !output results
+     ! Output results
      call tgyro_write_data(1)
 
   enddo
