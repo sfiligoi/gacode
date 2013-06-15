@@ -56,6 +56,7 @@ c
           bt_flag=0
         endif
         if (iglf.eq.1) then      ! v1.61 (retuned model)
+c          alpha_e_gf=1.35        ! Kinsey PoP Vol. 12, 052503 (2005)
           cnorm_gf=50.D0         ! ITG/TEM normalization
           xparam_gf(10)=12.D0    ! ETG normalization (cnorm*xparam(10))
           xparam_gf(13)=0.2      ! rms_theta q-dependence
@@ -214,6 +215,8 @@ c temporary: should be <R**2>
           c_per(k) = 1.0/ABS(f_exp(k))
           a_pol(k) = 1.0
           a_tor(k) = 1.0
+          Bp0(k) = bt_exp*rmin_exp(k)/(q_exp(k)*rmaj_exp(k))
+          interchange_DR_m(k) = 0.0
         endif
 c         
 c  convert velocities to km/s

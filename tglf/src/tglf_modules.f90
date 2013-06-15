@@ -5,7 +5,7 @@
       IMPLICIT NONE
       SAVE
 !
-      INTEGER, PARAMETER :: nb=32
+      INTEGER, PARAMETER :: nb=16
       INTEGER, PARAMETER :: nxm=4*nb-1
       INTEGER, PARAMETER :: nsm=6, nt0=40
       INTEGER, PARAMETER :: neq = 15*nsm,iar=neq*nb
