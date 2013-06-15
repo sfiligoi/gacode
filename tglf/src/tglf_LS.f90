@@ -3711,7 +3711,7 @@
       stress_correction = 1.0
 !
       do is=ns0,ns
-        wp = ky*ave_hp1(is,1,1)*ABS(vpar_shear_in(is))/vs(is)
+        wp = ky*ave_hp1(is,1,1)*ABS(alpha_p_in*vpar_shear_in(is))/vs(is)
 !        wp = wp*taus(is)/(ABS(zs(is))*ave_hn(is,1,1))
 !        wp = ABS(vpar_shear_in(is))*R_unit/vs(is)
 !        wp =(wp*sqrt_two*R_unit*q_unit*width_in/vs(is))/3.6
