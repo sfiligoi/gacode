@@ -73,7 +73,7 @@ class TGYROData:
                 si = '%d'%i
                 for fn in ['profile','chi_i','mflux_i','flux_i']:
                     self.fileparser(fn+si+'.out',spec_num=i)
-
+            self.get_residual()
     #---------------------------------------------------------------------------#
 
     def get_tag_value(self, tag):
@@ -147,25 +147,26 @@ class TGYROData:
         import string
         import numpy as np
 
-        data = open(self.dirname+'/'+file,'r').readlines()
+        fn = 'residual.out'
+        data = open(self.dirname+'/'+fn,'r').readlines()
         
         # Data dimensions
-        nr = self.n_radial+1
+        nr = self.n_radial
         nb = self.n_iterations+1
         nc = 1+2*self.get_tag_value("LOC_NE_FEEDBACK_FLAG") \
               +2*self.get_tag_value("LOC_TE_FEEDBACK_FLAG") \
               +2*self.get_tag_value("LOC_TI_FEEDBACK_FLAG")
-
-        numdata = np.zeros((nc,nb,nr-2))
-    
+        
+        numdata = np.zeros((nc,nb,nr-1),dtype=float)
+        
         for ib in range(nb):
-            tags=string.split(data[ib*nr])
+            tags=string.split(data[ib*nr]) # Contains overall residual
             for ir in range(nr-1):
                 row=string.split(data[ib*nr+ir+1])
                 for ic in range(nc):
                     numdata[ic,ib,ir] = row[ic]
 
-        self.data['residual'] = numdata[ic,:,:]
+        self.data['residual'] = numdata
         
     #---------------------------------------------------------------------------#
 
