@@ -200,9 +200,12 @@ then
    echo "             -vgen"
    echo "             Toggle vgen mode."
    echo
-   echo "             -vgen_in <ion string> " 
+   echo "             -vgen_in <string of ion species> " 
    echo "             Choices: DC, DC.revip, DCD, DHCD, HDC"
    echo "             If this is blank, input.vgen must exist."
+   echo "             See"
+   echo "             $VGEN_DIR/input.vgen.*"
+   echo "             for examples."
    echo
    echo "             -vgen_e <flag>" 
    echo "             Method to compute Er."
