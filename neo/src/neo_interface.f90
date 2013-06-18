@@ -130,7 +130,8 @@ module neo_interface
   real, dimension(6) :: neo_pflux_thHS_out = 0.0
   real, dimension(6) :: neo_eflux_thHS_out = 0.0
   real    :: neo_jpar_thS_out    = 0.0
-  real    :: neo_jpar_thK_out   = 0.0
+  real    :: neo_jpar_thK_out    = 0.0
+  real    :: neo_jpar_thN_out    = 0.0
   ! drift-kinetic soln
   real, dimension(6) :: neo_pflux_dke_out    = 0.0
   real, dimension(6) :: neo_efluxtot_dke_out = 0.0

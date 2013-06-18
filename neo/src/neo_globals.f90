@@ -212,8 +212,8 @@ module neo_globals
   real, dimension(6,4) :: neo_gv_out=0.0
 
   ! pure plasma theory
-  ! Gamma_HH, Qi_HH, Qe_HH, Qi_CH, jpar_HH, jpar_S
-  real, dimension(6)   :: neo_th_out=0.0
+  ! Gamma_HH, Qi_HH, Qe_HH, Qi_CH, jpar_HH, jpar_S, jpar_K, jpar_N
+  real, dimension(7)   :: neo_th_out=0.0
 
   ! (n_species_max, transport coeff)
   ! multi-species theory: 1-> gamma_HS, 2-> Q_HS
