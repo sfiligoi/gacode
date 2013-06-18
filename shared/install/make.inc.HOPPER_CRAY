@@ -39,8 +39,8 @@ LMATH = -L/opt/fftw/3.3.0.1/x86_64/lib -Wl,-rpath=/opt/fftw/3.3.0.1/x86_64/lib \
         -lfftw3_threads -lfftw3f_threads -lfftw3 -lfftw3f
 
 # OPTIONAL: netCDF (for gyro2gkv)
-NETCDF = ${NETCDF_DIR}/lib/libnetcdf.a ${NETCDF_DIR}/lib/libnetcdf.a
-NETCDF_INC = ${NETCDF_DIR}/include
+NETCDF =  /opt/cray/netcdf/default/cray/81/lib/libnetcdff.a /opt/cray/netcdf/default/cray/81/lib/libnetcdf.a
+NETCDF_INC = /opt/cray/netcdf/default/cray/81/include
 
 # Archive 
 ARCH = ar cr

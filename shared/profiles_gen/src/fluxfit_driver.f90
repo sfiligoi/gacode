@@ -30,7 +30,6 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
   real :: rm,rp
   real :: zm,zp
   real :: dl0,l_tot,dl,rs
-  real :: err
 
   real, dimension(3) :: s
 
@@ -172,7 +171,7 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
 
         if (i_print == 1) then
            print '(t3,a,i4,2x,3(a,1pe12.6,3x))',&
-                'Surface',p,'rmin = ',rmin,'error = ',err
+                'Surface',p,'rmin = ',rmin
            print 20,tag(:)
            do i=0,ns
               print 30,i,ar(i),br(i),az(i),bz(i)
@@ -229,7 +228,7 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
 
         if (i_print == 1) then
            print '(t3,a,i4,2x,3(a,1pe12.6,3x))',&
-                'Surface',p,'rmin = ',rmin,'error = ',err
+                'Surface',p,'rmin = ',rmin
            print 20,tag(:)
            print 10,c(:)
            print *
