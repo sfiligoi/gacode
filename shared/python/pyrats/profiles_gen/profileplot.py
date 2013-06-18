@@ -37,6 +37,8 @@ def fancytag(tag):
         fancy = r'$n_\mathrm{i4}$'
     elif tag == 'ni_5':
         fancy = r'$n_\mathrm{i5}$'
+    elif tag == 'omega0':
+        fancy = r'$\omega_0$'
     else:
         fancy = r'$\mathrm{'+tag+'}$'
 
@@ -47,6 +49,8 @@ rvar    = sys.argv[1]
 infiles = sys.argv[2]
 plots   = sys.argv[3]
 ftype   = sys.argv[4]
+loc     = int(sys.argv[5])
+t       = sys.argv[6]
 
 plotvec = string.splitfields(plots,',')
 filevec = string.splitfields(infiles,',')
@@ -54,6 +58,12 @@ filevec = string.splitfields(infiles,',')
 n = len(plotvec)
 
 for j in range(n):
+
+    if len(t.split(',')) == n:
+        tlabel = r'$\;\mathrm{'+t.split(',')[j]+'}$'
+    else:
+        tlabel = ''
+    
 
     if filevec[j] == '.':
         filevec[j] = filevec[j-1]
@@ -72,7 +82,7 @@ for j in range(n):
             fulltag = keys[i]
 
     if success == 0:
-        print "ERROR (profiles_gen_plot): Bad profile = "+tag
+        print "ERROR: (profiles_gen_plot) Bad profile = "+tag
         sys.exit()
 
     if j==0:
@@ -81,24 +91,28 @@ for j in range(n):
 
         if rvar == "r":
             ax.set_xlabel(r"$r \, (m)$",fontsize=GFONTSIZE)
-            x = prof.data['rmin']
-
         if rvar == "r/a":
             ax.set_xlabel(r"$r/a$",fontsize=GFONTSIZE)
-            x = prof.data['rmin']
-            x = x/max(x)
-
         if rvar == "rho":
             ax.set_xlabel(r"$\rho$",fontsize=GFONTSIZE)
-            x = prof.data['rho']
 
         ax.grid(which="majorminor",ls=":")
         ax.grid(which="major",ls=":")
 
-    ftag = fancytag(tag)
-    ax.plot(x,prof.data[fulltag],'o-',label=ftag)
+    if rvar == "r":
+        x = prof.data['rmin']
 
-ax.legend(loc=1)
+    if rvar == "r/a":
+        x = prof.data['rmin']
+        x = x/max(x)
+
+    if rvar == "rho":
+        x = prof.data['rho']
+
+    ftag = fancytag(tag)
+    ax.plot(x,prof.data[fulltag],'o-',label=ftag+tlabel)
+
+ax.legend(loc=loc)
 
 if ftype == 'screen':
     plt.show()
