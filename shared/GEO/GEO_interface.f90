@@ -56,7 +56,7 @@
 !  GEO_b        : B/B_unit (carries the sign of B_unit)
 !  GEO_bp       : B_p/B_unit
 !  GEO_bt       : B_t/B_unit
-!  GEO_dbdt2    : d(GEO_b)/dtheta
+!  GEO_dbdt     : d(GEO_b)/dtheta
 !  GEO_dbdt2    : d^2(GEO_b)/dtheta^2
 !  GEO_gsin     : generalized sine
 !  GEO_gcos1    : generalized cosine
