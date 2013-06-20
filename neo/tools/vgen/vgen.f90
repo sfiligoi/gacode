@@ -279,8 +279,6 @@ program vgen
   !    strong rotation
   ! 4. Return the given Er
 
-  print '(a)', 'INFO: (VGEN) omega0 = (c*Er)/(R*Bp)'
-
   select case (er_method) 
 
   case (1,4)
@@ -652,6 +650,7 @@ program vgen
   write(1,'(a)') '# jbs_sauter (MA/m^2)'
   write(1,'(a)') '# jbs_nclass (MA/m^2)'
   write(1,'(a)') '# jbs_koh    (MA/m^2)'
+  write(1,'(a)') '# where jbs = < j_parallel B > / B_unit'
   write(1,'(a)') '#'
   do i=1,EXPRO_n_exp
      write(1,'(6(1pe14.7,2x))') EXPRO_rho(i), pflux_sum(i), &

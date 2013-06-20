@@ -12,6 +12,7 @@ program locpargen
 
   implicit none
 
+  integer :: j1,j2
   real :: r0
   real :: rho0
   real :: psi0
@@ -20,7 +21,7 @@ program locpargen
   real, dimension(1) :: y
   real, dimension(3) :: z
   real, dimension(:), allocatable :: x_vec
-
+  real, dimension(:,:,:), allocatable :: geo_p
 
   open(unit=1,file='input.locpargen',status='old')
   read(1,*) r0
@@ -39,8 +40,8 @@ program locpargen
   call EXPRO_alloc('./',1) 
   call EXPRO_read
 
-  print *
-  print '(a)','Local input parameters'
+
+  print '(a)','INFO: (locpargen) Local input parameters:'
   print *
 
   allocate(x_vec(EXPRO_n_exp))
@@ -180,7 +181,7 @@ program locpargen
   print 10,'RHO_STAR=',y(1)
 
   print *
-  print '(a)','Additional quantities'
+  print '(a)','INFO: (locpargen) Additional quantities:'
   print *
 
   !---------------------------------------
@@ -190,7 +191,7 @@ program locpargen
   call cub_spline(x_vec,EXPRO_rmin,EXPRO_n_exp,x,y,1)
   print 10,'rmin [m]    : ',y(1)
   call cub_spline(x_vec,EXPRO_poloidalfluxover2pi,EXPRO_n_exp,x,y,1)
-  if (EXPRO_poloidalfluxover2pi(EXPRO_n_exp) > 0.0) then
+  if (abs(EXPRO_poloidalfluxover2pi(EXPRO_n_exp)) > 0.0) then
      print 10,'psi_N       : ',y(1)/EXPRO_poloidalfluxover2pi(EXPRO_n_exp)
   else
      print '(a)','psi_N       : UNAVAILABLE'
@@ -202,6 +203,47 @@ program locpargen
   call cub_spline(x_vec,EXPRO_rhos,EXPRO_n_exp,x,y,1)
   print 10,'rhos   [m]  : ',y(1)
   !---------------------------------------
+
+  !------------------------------------------------------------
+  ! Create input.geo with local parameters for general geometry
+  !
+  if (EXPRO_nfourier > 0) then  
+
+     allocate(geo_p(8,0:EXPRO_nfourier,EXPRO_n_exp))
+
+     geo_p(1:4,:,:) = EXPRO_geo(:,:,:)/EXPRO_rmin(EXPRO_n_exp)
+     geo_p(5:8,:,:) = EXPRO_dgeo(:,:,:)
+
+     open(unit=1,file='input.geo',status='replace')
+     write(1,'(a)') '# input.geo'
+     write(1,'(a)') '#'
+     write(1,'(a)') '# See https://fusion.gat.com/theory/input.geo for complete documentation.'
+     write(1,'(a)') '#'
+     write(1,'(a,f8.6)') '# NOTE: Derived from input.profiles.geo at r/a=',x
+     write(1,'(a)') '# Lengths normalized to a' 
+     write(1,'(a)') '#'
+     write(1,'(a)') '# File format:'
+     write(1,'(a)') '#-------------------'
+     write(1,'(a)') '# nfourier'
+     write(1,'(a)') '# a[8,0:nfourier]'    
+     write(1,'(a)') '#-------------------'
+     write(1,'(a)') '#'
+     write(1,*) EXPRO_nfourier
+
+     do j2=0,EXPRO_nfourier
+        do j1=1,8
+           call cub_spline(x_vec,geo_p(j1,j2,:),EXPRO_n_exp,x,y,1)
+           write(1,'(1pe20.13)') y(1)
+        enddo
+     enddo
+
+     print *
+     print '(a)','INFO: (locpargen) Wrote input.geo.'
+
+     close(1)
+
+  endif
+  !------------------------------------------------------------
 
   call EXPRO_alloc('./',0) 
 

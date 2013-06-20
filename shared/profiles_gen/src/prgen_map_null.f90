@@ -21,7 +21,8 @@ subroutine prgen_map_null
   vec(1,:)  = rho(:)
   vec(2,:)  = rmin(:)
   vec(3,:)  = rmaj(:)
-  vec(4,:)  = q(:)
+  ! COORDINATES: set sign of q
+  vec(4,:)  = abs(q(:))*ipccw*btccw
   vec(5,:)  = kappa(:)
   vec(6,:)  = delta(:)
   vec(7,:)  = 1.0
@@ -37,7 +38,8 @@ subroutine prgen_map_null
   vec(17,:) = 0.0
   vec(18,:) = zmag(:)
   vec(19,:) = 0.0
-  vec(20,:) = dpsi(:)
+  ! COORDINATES: set sign of poloidal flux
+  vec(20,:) = abs(dpsi(:))*(-ipccw)
 
   ! Ion temperatures and densities
   vec(21:25,:) = 1.0

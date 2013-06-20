@@ -83,6 +83,9 @@ then
    echo "             -g <gfile>"
    echo "             Merge EFIT gfile for high-precision geometry data."
    echo 
+   echo "             -nfourier <gfile>"
+   echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo."
+   echo
    echo "             -nogq"
    echo "             Do not use q from GATO (by default, if gfile is specified q is from GATO)."
    echo 
@@ -105,6 +108,9 @@ then
    echo "             -g <gfile>"
    echo "             Merge EFIT gfile for high-precision geometry data."
    echo 
+   echo "             -nfourier <gfile>"
+   echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo."
+   echo 
    echo "             -nogq"
    echo "             Do not use q from GATO (by default, if gfile is specified q is from GATO)."
    echo 
@@ -118,6 +124,9 @@ then
    echo
    echo "             -g <gfile>"
    echo "             Merge EFIT gfile for high-precision geometry data."
+   echo 
+   echo "             -nfourier <gfile>"
+   echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo."
    echo 
    echo "             -nogq"
    echo "             Do not use q from GATO (by default, if gfile is specified q is from GATO)."
@@ -153,6 +162,9 @@ then
    echo "             Merge EFIT gfile for high-precision geometry data."
    echo "             [This is required for pfiles]"
    echo 
+   echo "             -nfourier <gfile>"
+   echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo."
+   echo 
    echo "             -pZ2 <Z2>"
    echo "             Creation impurity ion with given charge to make"
    echo "             input.profile quasineutral"
@@ -169,6 +181,16 @@ then
    echo "             -n <note text>"
    echo "             Include <note text> in the input.profiles header."
    echo
+   echo "null Options"
+   echo
+   echo "             -i null"
+   echo "             Toggle null profile data mode."
+   echo
+   echo "             -g <gfile>"
+   echo "             Merge EFIT gfile for high-precision geometry data [required]."
+   echo 
+   echo "             -nfourier <gfile>"
+   echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo."
    echo
    echo "GATO mapper control options"
    echo 
@@ -191,6 +213,9 @@ then
    echo
    echo "             -g <gfile>"
    echo "             EFIT gfile."
+   echo 
+   echo "             -nfourier <gfile>"
+   echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo."
    echo
    echo "             -gmerge"
    echo "             Toggle gmerge mode."
@@ -303,6 +328,7 @@ GMERGE_FLAG=0
 
 IPCCW=1
 BTCCW=-1
+NFOURIER=8
 
 # GATO variables
 NOGQ_FLAG=0
@@ -378,6 +404,8 @@ while [ $# -gt 0 ] ; do
   -btccw) shift ; BTCCW="$1" ;;
 
   -g) shift ; G_FLAG=1 ; GFILE="$1" ;;
+
+  -nfourier) shift ; NFOURIER=$1 ;;
 
   -gato) shift ; GATO_ARGS="$1" ;;
 
@@ -704,6 +732,9 @@ echo $GMERGE_FLAG >> $CONFIG
 # FIELD ORIENTATION
 echo $IPCCW >> $CONFIG
 echo $BTCCW >> $CONFIG
+
+# Fourier modes
+echo $NFOURIER >> $CONFIG
 
 # NOTE: reorder flags will be appended later.
 #=============================================================
