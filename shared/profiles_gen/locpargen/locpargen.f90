@@ -22,6 +22,7 @@ program locpargen
   real, dimension(3) :: z
   real, dimension(:), allocatable :: x_vec
   real, dimension(:,:,:), allocatable :: geo_p
+  real :: ar, sf, shear
 
   open(unit=1,file='input.locpargen',status='old')
   read(1,*) r0
@@ -87,6 +88,7 @@ program locpargen
   ! ASPECT_RATIO
   call cub_spline(x_vec,EXPRO_rmaj/a,EXPRO_n_exp,x,y,1)
   print 10,'ASPECT_RATIO=',y(1)
+  ar = y(1)
 
   ! SHIFT
   call cub_spline(x_vec,EXPRO_drmaj,EXPRO_n_exp,x,y,1)
@@ -103,10 +105,12 @@ program locpargen
   ! SHEAR
   call cub_spline(x_vec,EXPRO_s,EXPRO_n_exp,x,y,1)
   print 10,'SHEAR=',y(1)
+  shear = y(1)
 
   ! SAFETY_FACTOR
   call cub_spline(x_vec,EXPRO_q,EXPRO_n_exp,x,y,1)
   print 10,'SAFETY_FACTOR=',y(1)
+  sf = y(1)
 
   ! KAPPA
   call cub_spline(x_vec,EXPRO_kappa,EXPRO_n_exp,x,y,1)
@@ -219,8 +223,13 @@ program locpargen
      write(1,'(a)') '#'
      write(1,'(a)') '# See https://fusion.gat.com/theory/input.geo for complete documentation.'
      write(1,'(a)') '#'
-     write(1,'(a,f8.6)') '# NOTE: Derived from input.profiles.geo at r/a=',x
+     write(1,'(a,f10.6)') '# NOTE: Derived from input.profiles.geo at r/a=',x
      write(1,'(a)') '# Lengths normalized to a' 
+     write(1,'(a,f10.6)') '# ASPECT_RATIO=',ar
+     write(1,'(a,f10.6)') '# SAFETY_FACTOR=',sf
+     write(1,'(a,f10.6)') '# SHEAR=',shear
+     write(1,'(a,i3)') '# BTCCW=',-EXPRO_signb
+     write(1,'(a,i3)') '# IPCCW=',-EXPRO_signb*EXPRO_signq
      write(1,'(a)') '#'
      write(1,'(a)') '# File format:'
      write(1,'(a)') '#-------------------'
