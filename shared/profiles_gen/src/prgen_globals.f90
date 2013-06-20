@@ -3,7 +3,6 @@ module prgen_globals
   ! Parameters
   real, parameter :: kevdsecpmw=1.6022e-19*1e3*1e-6
   real, parameter :: pi=3.14159265358979323846
-  integer, parameter :: nfourier=8
 
   ! List of possible data files
   character (len=70) :: date
@@ -25,6 +24,7 @@ module prgen_globals
   integer, dimension(5) :: reorder_vec
   integer :: ipccw
   integer :: btccw
+  integer :: nfourier
   real :: dpsi_efit
   real :: dpsi_data
   !----------------------------------------------------------

@@ -22,8 +22,6 @@ program locpargen
   real, dimension(3) :: z
   real, dimension(:), allocatable :: x_vec
   real, dimension(:,:,:), allocatable :: geo_p
-  real, dimension(8) :: yc
-  character(len=13), dimension(8) :: tag
 
   open(unit=1,file='input.locpargen',status='old')
   read(1,*) r0
@@ -211,38 +209,34 @@ program locpargen
   !
   if (EXPRO_nfourier > 0) then  
 
-     tag(1) = 'a_n^R'
-     tag(2) = 'b_n^R'
-     tag(3) = 'a_n^Z'
-     tag(4) = 'b_n^Z'
-     tag(5) = "a_n^R'"
-     tag(6) = "b_n^R'"
-     tag(7) = "a_n^Z'"
-     tag(8) = "b_n^Z'"
-
-     open(unit=1,file='input.geo',status='replace')
-
      allocate(geo_p(8,0:EXPRO_nfourier,EXPRO_n_exp))
 
      geo_p(1:4,:,:) = EXPRO_geo(:,:,:)/EXPRO_rmin(EXPRO_n_exp)
      geo_p(5:8,:,:) = EXPRO_dgeo(:,:,:)
 
-     write(1,'(a)')      '# input.geo'
-     write(1,'(a)')      '#'
-     write(1,'(a,f8.6)') '# Derived from input.profiles.geo at r/a=',x
-     write(1,'(a)')      '# Lengths normalized to a' 
-     write(1,'(a,i2)')   '# Rows correspond to mode number n = 0 to',EXPRO_nfourier
-     write(1,'(a)')      '#'
-     write(1,'(20(a))')  '#',tag(:)
+     open(unit=1,file='input.geo',status='replace')
+     write(1,'(a)') '# input.geo'
+     write(1,'(a)') '#'
+     write(1,'(a)') '# See https://fusion.gat.com/theory/input.geo for complete documentation.'
+     write(1,'(a)') '#'
+     write(1,'(a,f8.6)') '# NOTE: Derived from input.profiles.geo at r/a=',x
+     write(1,'(a)') '# Lengths normalized to a' 
+     write(1,'(a)') '#'
+     write(1,'(a)') '# File format:'
+     write(1,'(a)') '#-------------------'
+     write(1,'(a)') '# nfourier'
+     write(1,'(a)') '# a[8,0:nfourier]'    
+     write(1,'(a)') '#-------------------'
+     write(1,'(a)') '#'
+     write(1,*) EXPRO_nfourier
 
      do j2=0,EXPRO_nfourier
         do j1=1,8
            call cub_spline(x_vec,geo_p(j1,j2,:),EXPRO_n_exp,x,y,1)
-           yc(j1) = y(1)
+           write(1,'(1pe20.13)') y(1)
         enddo
-        write(1,'(8(1pe12.5,1x))') yc(:)
      enddo
- 
+
      print *
      print '(a)','INFO: (locpargen) Wrote input.geo.'
 
