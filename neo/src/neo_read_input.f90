@@ -4,7 +4,8 @@ subroutine neo_read_input
 
   implicit none
 
-  integer :: is
+  integer :: is, j
+  character (len=1) :: cdummy
 
   open(unit=1,file=trim(path)//'input.neo.gen',status='old')
   read(1,*) n_energy
@@ -80,5 +81,19 @@ subroutine neo_read_input
   ! GEO fourier coefficients are not yet available to read-in
   geo_ny_in = 0
   geo_yin_in(:,:) = 0.0
+  if(equilibrium_model == 3) then
+     open(unit=1,file=trim(path)//'input.geo',status='old')
+     ! header skip
+     do
+        read(1,'(a)') cdummy
+        if (cdummy /= '#') exit
+     enddo
+     backspace 1
+     ! n_fourier
+     read(1,*) geo_ny_in
+     ! fourier coefficients
+     read(1,*) geo_yin_in(:,0:geo_ny_in)
+     close(1)
+  endif
 
 end subroutine neo_read_input
