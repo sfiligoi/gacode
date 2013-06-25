@@ -71,6 +71,8 @@ subroutine neo_read_input
   read(1,*) profile_zeta_scale
   read(1,*) profile_zmag_scale
 
+  read(1,*) subroutine_flag
+
   read(1,*) threed_model
   read(1,*) n_varphi
   read(1,*) n_tor
@@ -81,7 +83,7 @@ subroutine neo_read_input
   ! GEO fourier coefficients are not yet available to read-in
   geo_ny_in = 0
   geo_yin_in(:,:) = 0.0
-  if(equilibrium_model == 3) then
+  if(subroutine_flag == 0 .and. equilibrium_model == 3) then
      open(unit=1,file=trim(path)//'input.geo',status='old')
      ! header skip
      do

@@ -88,6 +88,7 @@ module neo_globals
   integer :: coll_uncoupledei_model
   real    :: sign_q
   real    :: sign_bunit
+  integer :: subroutine_flag  ! only used for neo_read_input
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
