@@ -513,11 +513,11 @@
       do is=1,ns
         rlns(is) = rlns_in(is)
         rlts(is) = rlts_in(is)
-        vpar_shear_s(is) = alpha_p_in*vpar_shear_in(is)*sign_It_in
         taus(is) = taus_in(is)
         as(is) = as_in(is)
-        vpar_s(is) = vpar_in(is)*sign_It_in
-        if(vpar_model_in.ne.0)vpar_s(is)=0.0
+        vpar_s(is)=0.0
+        if(vpar_model_in.eq.0)vpar_s(is)=vpar_in(is)
+        vpar_shear_s(is)=alpha_p_in*vpar_shear_in(is)
         if(nbasis_min_in.eq.1.and.(vpar_shear_s(is).ne.0.0.or.vpar_s(is).ne.0.0))then
           nbasis_min_in = 2      
         endif
@@ -851,8 +851,8 @@
 !       if(vpar_shear_model_in.eq.1)then  
 ! include R(theta)/R0 factor like gyro convetions. Note that sign_Bt_in is in ave_c_tor_par
          do is=1,ns
-           vpar_shear_s(is)=sign_It_in*alpha_p_in*vpar_shear_in(is)*sign_Bt_in*ave_c_tor_par(1,1)/Rmaj_input
-           if(vpar_model_in.eq.0)vpar_s(is) = sign_It_in*vpar_in(is)*sign_Bt_in*ave_c_tor_par(1,1)/Rmaj_input
+           vpar_shear_s(is)=sign_It_in*alpha_p_in*vpar_shear_in(is)*ave_c_tor_par(1,1)/Rmaj_input
+           if(vpar_model_in.eq.0)vpar_s(is) = sign_It_in*vpar_in(is)*ave_c_tor_par(1,1)/Rmaj_input
          enddo
 !       endif
 !

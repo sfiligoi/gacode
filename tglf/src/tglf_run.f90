@@ -16,6 +16,8 @@ subroutine tglf_run()
   integer :: i_ion,n
   complex :: xi=(0.0,1.0)
 
+  call put_signs(tglf_sign_Bt_in,tglf_sign_It_in)
+
   call put_species(tglf_ns_in, &
        tglf_zs_in, &
        tglf_mass_in)

@@ -20,14 +20,15 @@ subroutine tgyro_tglf_map
   real :: gamma_eb0
   real :: gamma_p0
 
-  ! Currently TGLF uses toroidal current as reference direction
-  tglf_sign_bt_in = signq
-  tglf_sign_it_in = 1.0
-
   q_abs = abs(q(i_r))
 
   ! Initialize TGLF
   call tglf_init(paths(i_r-1), gyro_comm)
+
+  !----------------------------------------------------------------
+  ! signs of toroidal magnetic field and current 
+  tglf_sign_Bt_in = -1.0*REAL(signb)
+  tglf_sign_It_in = -1.0*REAL(signb*signq)
 
   !----------------------------------------------------------------
   ! Number of species (max=6)
@@ -159,10 +160,11 @@ subroutine tgyro_tglf_map
   if (tgyro_rotation_flag == 1) then
      gamma_p0  = -r_maj(i_r)*f_rot(i_r)*w0p_norm
      gamma_eb0 = gamma_p0*r(i_r)/(q_abs*r_maj(i_r)) 
-
-     tglf_vexb_shear_in = gamma_eb0*r_min/c_s(i_r)  
-     tglf_vpar_shear_in(:) = gamma_p0*r_min/c_s(i_r)
-     tglf_vpar_in(:) = r_maj(i_r)*w0(i_r)/c_s(i_r)
+  ! Currently TGLF uses toroidal current as reference direction
+  ! Overall minus sign is due to TGYRO toroidal angle in CW direction
+     tglf_vexb_shear_in = -tglf_sign_It_in*gamma_eb0*r_min/c_s(i_r)  
+     tglf_vpar_shear_in(:) = -tglf_sign_It_in*gamma_p0*r_min/c_s(i_r)
+     tglf_vpar_in(:) = -tglf_sign_It_in*r_maj(i_r)*w0(i_r)/c_s(i_r)
   endif
   !----------------------------------------------------------------
 
