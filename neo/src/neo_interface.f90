@@ -120,6 +120,8 @@ module neo_interface
   real    :: neo_z1_mag_in   = 1.0e-3
   integer :: neo_geo_ny_in = 0
   real, dimension(8,0:16) :: neo_geo_yin_in = 0.0
+  ! the exception of the default is subroutine_flag
+  integer :: neo_subroutine_flag = 1
 
   ! Output parameters
   ! theory
@@ -263,6 +265,7 @@ contains
     neo_z1_mag_in   = z1_mag
     neo_geo_ny_in = geo_ny_in
     neo_geo_yin_in(:,:) = geo_yin_in(:,:)
+    neo_subroutine_flag = subroutine_flag
 
   end subroutine map_global2interface
 
@@ -377,6 +380,7 @@ contains
     z1_mag   = neo_z1_mag_in
     geo_ny_in = neo_geo_ny_in
     geo_yin_in(:,:) = neo_geo_yin_in(:,:)
+    subroutine_flag = neo_subroutine_flag
 
     call interfacelocaldump
 

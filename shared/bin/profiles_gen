@@ -625,7 +625,9 @@ then
          exit 1
       fi
    fi
- 
+   # Tell NEO that its being run in subroutine mode by vgen.
+   echo "SUBROUTINE_FLAG=1" >> input.neo 
+
    cp ../$FILE input.profiles
    if [ -f "../$FILE.geo" ]
        then

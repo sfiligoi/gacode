@@ -402,6 +402,11 @@ subroutine tgyro_init_profiles
 
   p_i_aux_in(1) = 0.0
   p_e_aux_in(1) = 0.0
+
+  ! Also need to zero initial exchanges to prevent use in tgyro_source 
+  ! on iteration 0 before definition
+  expwd_i_tur(:,:) = 0.0
+  expwd_e_tur(:) = 0.0
   !----------------------------------------------------
 
 end subroutine tgyro_init_profiles
