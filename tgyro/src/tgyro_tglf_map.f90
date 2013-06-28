@@ -172,7 +172,8 @@ subroutine tgyro_tglf_map
   ! Number of high-k modes
   !  nky=12 (default to include ETG)
   !  nky=0  (low-k only)
-  tglf_nky_in = 12
+  ! JC: remove override
+  ! tglf_nky_in = 12
   !-----------------------------------
 
   !----------------------------------------------------------------
