@@ -231,6 +231,7 @@ module gyro_globals
   integer :: reintegrate_flag
   integer :: coll_op_cons_flag
   integer :: coll_op_self_flag
+  integer :: ic_method
   !---------------------------------------------------------
 
   !-----------------------------------------------------------------------------------

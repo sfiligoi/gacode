@@ -261,6 +261,7 @@ subroutine gyro_read_input
   ! New collision options
   call readbc_int(coll_op_cons_flag)
   call readbc_int(coll_op_self_flag)
+  call readbc_int(ic_method)
 
   ! hdf5 output
   call readbc_int(io_method)

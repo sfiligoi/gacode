@@ -207,6 +207,7 @@ module gyro_interface
   real    :: gyro_fieldeigen_tol_in = 1e-6
   integer :: gyro_coll_op_cons_flag_in = 0
   integer :: gyro_coll_op_self_flag_in = 0
+  integer :: gyro_ic_method_in = 1
 
   ! io related to hdf5 and diagnostics  
   integer :: gyro_io_method_in = 1
@@ -437,6 +438,7 @@ contains
     gyro_fieldeigen_tol_in = fieldeigen_tol
     gyro_coll_op_cons_flag_in = coll_op_cons_flag 
     gyro_coll_op_self_flag_in = coll_op_self_flag
+    gyro_ic_method_in = ic_method
 
     gyro_io_method_in = io_method
     gyro_torangle_offset_in = torangle_offset
@@ -664,6 +666,7 @@ contains
     fieldeigen_tol = gyro_fieldeigen_tol_in
     coll_op_cons_flag = gyro_coll_op_cons_flag_in 
     coll_op_self_flag = gyro_coll_op_self_flag_in
+    ic_method = gyro_ic_method_in
 
     io_method = gyro_io_method_in       
     torangle_offset = gyro_torangle_offset_in        
