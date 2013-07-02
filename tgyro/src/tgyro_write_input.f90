@@ -10,15 +10,23 @@ subroutine tgyro_write_input
   !----------------------------------------------------------------
   ! Trap miscellaneous errors
   !
+  ! - Bogus matching radius
+  !
   if (i_bc < 0) then
      call tgyro_catch_error('ERROR: (TGYRO) Problem with matching radius.')
   endif
   !
-  ! Advanced iteration methods cannot do zero iterations:
+  ! - Advanced iteration methods cannot do zero iterations:
   !
   if (tgyro_iteration_method >= 4 .and. tgyro_relax_iterations == 0) then
      call tgyro_catch_error('ERROR: (TGYRO) TGYRO_ITERATION_METHOD > 4 requires TGYRO_RELAX_ITERATIONS > 0.')
   endif
+  !
+  ! - Need rotation physics to evolve Er
+  !  
+  if (tgyro_rotation_flag == 0 .and. loc_er_feedback_flag == 1) then
+     call tgyro_catch_error('ERROR: (TGYRO) TGYRO_ROTATION_FLAG must be 1 to evolve Er.')
+  endif  
   !----------------------------------------------------------------
 
   if (i_proc_global == 0) then
