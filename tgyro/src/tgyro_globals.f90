@@ -143,8 +143,7 @@ module tgyro_globals
   real, dimension(:), allocatable :: gamma_eb
   real, dimension(:), allocatable :: gamma_p
   real, dimension(:), allocatable :: u00
-
-  real :: w0p_norm
+  real :: w0_norm
 
   real, dimension(:), allocatable :: pr
   real, dimension(:), allocatable :: dlnpdr

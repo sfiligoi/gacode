@@ -246,12 +246,12 @@ subroutine tgyro_iteration_standard
      !----------------------------------------------------
      ! Check to see if gradient is too negative
      !
-     do p=1,p_max
-        if (x_vec(p) < 0.0) then
-           x_vec(p) = 0.0001
-           b_flag(p) = '#'
-        endif
-     enddo
+     !do p=1,p_max
+     !   if (x_vec(p) < 0.0) then
+     !      x_vec(p) = 0.0001
+     !      b_flag(p) = '#'
+     !   endif
+     !enddo
      !----------------------------------------------------
 
      !-----------------------------------------------------

@@ -154,7 +154,7 @@ subroutine tgyro_iteration_serial
      call DGETRS('N',p_max,1,jfg,p_max,ipiv,b,p_max,ierr)
 
      if (ierr < 0) then
-        call tgyro_catch_error('ERROR: DGETRS failed in tgyro_iteration_parallel')
+        call tgyro_catch_error('ERROR: (tgyro_iteration_serial) DGETRS failed.')
      endif
 
      ! Check to see if step length exceeds maximum 
