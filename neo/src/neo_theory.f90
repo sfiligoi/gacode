@@ -434,9 +434,22 @@ contains
          X34, L34_S, X33, sigma_S, sigma_spitzer
     real :: nue_S, nue_star_S, nui_star_S
     integer :: is
+    real :: dens_sum
 
-    nui_star_S = nui_star_HH / (dens(is_ion,ir) * z(is_ion)**2) &
-         * dens_ele*zeff
+    ! EAB: 07/11/2013 changed def of Sauter nui_star_S for impurities
+    ! from (Zi**2 * Zeff * ne) to (Zi**4)*(n_all_ions) 
+    !nui_star_S = nui_star_HH / (dens(is_ion,ir) * z(is_ion)**2) &
+    !     * dens_ele*zeff
+    dens_sum = 0.0
+    do is=1,n_species
+       if(is /= is_ele) then
+          dens_sum = dens_sum + dens(is,ir)
+       endif
+    enddo
+    nui_star_S = nui_star_HH / dens(is_ion,ir) * dens_sum
+    ! Osborne's interpretation
+    !nui_star_S = nui_star_HH / (dens(is_ion,ir) * z(is_ion)**4) &
+    !     * dens_sum * zeff**4
 
     alpha_0 = -1.17*(1.0-ftrap) / (1.0 - 0.22*ftrap - 0.19*ftrap*ftrap)
     
@@ -828,6 +841,7 @@ contains
     real :: ftrap_new, delta_param, alpha_param, beta_param, h_param, pfac
     integer :: h_flag = 2
     integer :: is
+    real :: dens_sum
 
     if(adiabatic_ele_model == 1) then
        jpar = 0.0
@@ -835,8 +849,17 @@ contains
     else
 
        ! alpha unchanged from Sauter
-       nui_star_S = nui_star_HH / (dens(is_ion,ir) * z(is_ion)**2) &
-            * dens_ele*zeff
+       ! EAB: 07/11/2013 changed def of Sauter nui_star_S for impurities
+       ! from (Zi**2 * Zeff * ne) to (Zi**4)*(n_all_ions) 
+       !nui_star_S = nui_star_HH / (dens(is_ion,ir) * z(is_ion)**2) &
+       !     * dens_ele*zeff
+       dens_sum = 0.0
+       do is=1,n_species
+          if(is /= is_ele) then
+             dens_sum = dens_sum + dens(is,ir)
+          endif
+       enddo
+       nui_star_S = nui_star_HH / dens(is_ion,ir) * dens_sum
        
        alpha_0 = -1.17*(1.0-ftrap) / (1.0 - 0.22*ftrap - 0.19*ftrap*ftrap)
        
@@ -968,6 +991,5 @@ contains
     end if
     
   end subroutine compute_Koh
-
 
 end module neo_theory
