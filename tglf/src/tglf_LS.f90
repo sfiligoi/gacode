@@ -259,7 +259,7 @@
         do j1=1,nmodes_in
           gamma_out(j1) = get_gamma_net(gamma_out(j1))
         enddo
-      elseif(vexb_shear_in.ne.0.0)then
+      elseif(find_width_in.and.vexb_shear_in.ne.0.0)then
 ! use spectral shift model
         do j1=1,nmodes_in
           gamma_out(j1) = gamma_reference_kx0(j1)
