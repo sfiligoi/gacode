@@ -400,4 +400,13 @@ subroutine tgyro_init_profiles
   expwd_e_tur(:) = 0.0
   !----------------------------------------------------
 
+  !----------------------------------------------------
+  ! Density ratios 
+  !  Used when tgyro_fix_concentration_flag=1
+  !
+  do i_ion=1,loc_n_ion
+     ni_ratio(i_ion,:) = ni(i_ion,:)/ni(1,:)
+  enddo
+  !----------------------------------------------------
+
 end subroutine tgyro_init_profiles

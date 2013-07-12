@@ -1,3 +1,11 @@
+!------------------------------------------------------------
+! tgyro_quasineutral.f90
+!
+! PURPOSE:
+!  Simple routine to enforce quasineutrality.  This is only
+!  used by the tgyro_global_* mode.
+!------------------------------------------------------------
+
 subroutine tgyro_quasineutral(ni,ne,dlnnidr,dlnnedr,zi,n_ion,n_r)
 
   implicit none
@@ -12,6 +20,7 @@ subroutine tgyro_quasineutral(ni,ne,dlnnidr,dlnnedr,zi,n_ion,n_r)
 
   integer :: i
 
+ 
   if (n_ion == 1) then
 
      ! ni = ne
