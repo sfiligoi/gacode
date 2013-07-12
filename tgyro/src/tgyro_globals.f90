@@ -143,8 +143,7 @@ module tgyro_globals
   real, dimension(:), allocatable :: gamma_eb
   real, dimension(:), allocatable :: gamma_p
   real, dimension(:), allocatable :: u00
-
-  real :: w0p_norm
+  real :: w0_norm
 
   real, dimension(:), allocatable :: pr
   real, dimension(:), allocatable :: dlnpdr
@@ -201,6 +200,7 @@ module tgyro_globals
   real, dimension(:), allocatable :: relax
 
   integer, dimension(:), allocatable :: therm_vec
+  real, dimension(:,:), allocatable :: ni_ratio
 
   real, dimension(5) :: mi
 
@@ -294,6 +294,7 @@ module tgyro_globals
   integer :: tgyro_use_rho
   integer :: tgyro_dt_method
   integer :: tgyro_gyro_restart_flag
+  integer :: tgyro_fix_concentration_flag
   !
   ! Iteration variables (global)
   !

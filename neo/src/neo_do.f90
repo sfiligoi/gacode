@@ -22,7 +22,7 @@ subroutine neo_do
   use neo_nclass_dr
   use neo_g_velocitygrids
   use neo_allocate_profile
-  use neo_3d_driver
+  !use neo_3d_driver
   use mpi
   implicit none
 

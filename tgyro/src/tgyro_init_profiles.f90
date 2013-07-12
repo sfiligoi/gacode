@@ -331,22 +331,13 @@ subroutine tgyro_init_profiles
   !----------------------------------------------------------
   ! Primitive quantity to evolve for rotation/Er evolution is 
   !
-  ! f_rot = (a/cs)*gamma_p 
-  !       = (a/cs)*(-R0*w0p)
-  !       = w0p/w0p_norm     
+  ! f_rot [1/cm] = w0p/w0_norm
   !
-  ! where w0p_norm = -cs/(a*R0).
+  ! w0_norm = c_s/R_maj at r=0.
   !
-  ! First, "bogus" unity normalization since c_s is unknown
-  w0p_norm = 1.0
-  f_rot(:) = w0p(:)/w0p_norm
-
-  ! Now compute all profiles:
-  call tgyro_profile_functions
-
-  ! Proper rotation normalization
-  w0p_norm = -c_s(1)/(r_min*r_maj(1))
-  f_rot(:) = w0p(:)/w0p_norm
+  w0_norm = sqrt(k*te(1)/mi(1))/r_maj(1)
+  !
+  f_rot(:) = w0p(:)/w0_norm
   !----------------------------------------------------------
 
   !----------------------------------------------------
@@ -407,6 +398,15 @@ subroutine tgyro_init_profiles
   ! on iteration 0 before definition
   expwd_i_tur(:,:) = 0.0
   expwd_e_tur(:) = 0.0
+  !----------------------------------------------------
+
+  !----------------------------------------------------
+  ! Density ratios 
+  !  Used when tgyro_fix_concentration_flag=1
+  !
+  do i_ion=1,loc_n_ion
+     ni_ratio(i_ion,:) = ni(i_ion,:)/ni(1,:)
+  enddo
   !----------------------------------------------------
 
 end subroutine tgyro_init_profiles

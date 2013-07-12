@@ -16,9 +16,7 @@ subroutine tgyro_catch_error(message)
 
   if (i_proc_global == 0) then
      open(unit=1,file=trim(runfile),status='old',position='append')
-     write(1,10) '----------------------------------------------------------'
      write(1,10) message
-     write(1,10) '----------------------------------------------------------'
      close(1)
   endif
 

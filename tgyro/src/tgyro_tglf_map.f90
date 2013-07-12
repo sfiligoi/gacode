@@ -26,15 +26,16 @@ subroutine tgyro_tglf_map
   call tglf_init(paths(i_r-1), gyro_comm)
 
   !----------------------------------------------------------------
-  ! signs of toroidal magnetic field and current 
-  tglf_sign_Bt_in = -1.0*REAL(signb)
-  tglf_sign_It_in = -1.0*REAL(signb*signq)
+  ! Signs of toroidal magnetic field and current 
+  tglf_sign_bt_in = -1.0*signb
+  tglf_sign_it_in = -1.0*signb*signq
+  !----------------------------------------------------------------
 
   !----------------------------------------------------------------
   ! Number of species (max=6)
   tglf_ns_in = loc_n_ion+1
   if (tglf_ns_in > nsm) then
-     call tgyro_catch_error('ERROR: too many ions in TGLF')
+     call tgyro_catch_error('ERROR: (tgyro_tglf_map) Too many ions in TGLF.')
   endif
   !----------------------------------------------------------------
 
@@ -158,13 +159,13 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
   ! Gamma_ExB (ExB shearing rate, units of a/cs)
   if (tgyro_rotation_flag == 1) then
-     gamma_p0  = -r_maj(i_r)*f_rot(i_r)*w0p_norm
+     gamma_p0  = -r_maj(i_r)*f_rot(i_r)*w0_norm
      gamma_eb0 = gamma_p0*r(i_r)/(q_abs*r_maj(i_r)) 
-  ! Currently TGLF uses toroidal current as reference direction
-  ! Overall minus sign is due to TGYRO toroidal angle in CW direction
-     tglf_vexb_shear_in = -tglf_sign_It_in*gamma_eb0*r_min/c_s(i_r)  
-     tglf_vpar_shear_in(:) = -tglf_sign_It_in*gamma_p0*r_min/c_s(i_r)
-     tglf_vpar_in(:) = -tglf_sign_It_in*r_maj(i_r)*w0(i_r)/c_s(i_r)
+     ! Currently TGLF uses toroidal current as reference direction
+     ! Overall minus sign is due to TGYRO toroidal angle in CW direction
+     tglf_vexb_shear_in    = -tglf_sign_it_in*gamma_eb0*r_min/c_s(i_r)  
+     tglf_vpar_shear_in(:) = -tglf_sign_it_in*gamma_p0*r_min/c_s(i_r)
+     tglf_vpar_in(:)       = -tglf_sign_it_in*r_maj(i_r)*w0(i_r)/c_s(i_r)
   endif
   !----------------------------------------------------------------
 
@@ -172,7 +173,8 @@ subroutine tgyro_tglf_map
   ! Number of high-k modes
   !  nky=12 (default to include ETG)
   !  nky=0  (low-k only)
-  tglf_nky_in = 12
+  ! JC: remove override
+  ! tglf_nky_in = 12
   !-----------------------------------
 
   !----------------------------------------------------------------

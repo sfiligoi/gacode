@@ -21,12 +21,12 @@ subroutine gyro_initial_condition
   implicit none
   !
   real :: x
-  real :: theta_0
   real :: scale
   real :: a_spec(n_kinetic)
   real :: hs(n_x)
   real :: as_0
   real :: as_n
+  real :: fp(n_stack,n_x)
   !----------------------------------
 
   !-------------------------------------------------------------------
@@ -108,14 +108,25 @@ subroutine gyro_initial_condition
         ! n > 0
         !==========
 
+        do m=1,n_stack
+           do i=1,n_x
+              if (ic_method == 1) then
+                 ! Symmetric
+                 fp(m,i) = cos(theta_t(i,k,m)/2.0)**2
+              else
+                 ! Asymmetric, useful for MT modes as suggested by W. Guttenfelder
+                 fp(m,i) = cos(theta_t(i,k,m)/2.0)**2+sin(theta_t(i,k,m))
+              endif
+           enddo ! i
+        enddo ! m
+
         if (amp_n > 0.0) then
 
            ! Hump in theta
 
            do m=1,n_stack
               do i=1,n_x
-                 theta_0 = theta_t(i,k,m)
-                 h(m,i,p_nek_loc,:) = a_spec(:)*as_n*cos(theta_0/2.0)**2
+                 h(m,i,p_nek_loc,:) = a_spec(:)*as_n*fp(m,i)
               enddo ! i
            enddo ! m
 
@@ -125,8 +136,7 @@ subroutine gyro_initial_condition
 
            do m=1,n_stack
               do i=1,n_x
-                 theta_0 = theta_t(i,k,m)
-                 h(m,i,p_nek_loc,:) = a_spec(:)*abs(as_n)*cos(theta_0/2.0)**8
+                 h(m,i,p_nek_loc,:) = a_spec(:)*abs(as_n)*fp(m,i)**4
               enddo ! i
            enddo ! m
 
@@ -160,7 +170,7 @@ subroutine gyro_initial_condition
               enddo ! i
            enddo ! m
 
-       endif
+        endif
 
      endif
 
@@ -182,5 +192,5 @@ subroutine gyro_initial_condition
   if (i_proc == 0 .and. debug_flag == 1) then
      print *,'[gyro_initial_condition done]' 
   endif
- 
+
 end subroutine gyro_initial_condition

@@ -566,6 +566,7 @@ then
   echo $Z1 >> input.exprodump
   echo $Z2 >> input.exprodump
   echo $Z3 >> input.exprodump
+  echo "INFO: (profiles_gen) Calling $EXPRODUMP"
   $EXPRODUMP
   rm input.exprodump
   exit 0
