@@ -57,7 +57,7 @@ program exprodump
      print *,'flow_wall'
      print *,'zmag'
      print *,'ptot'
-     print *,'poloidalfluxpver2pi'
+     print *,'polflux'
 
      print *,'bunit'
      print *,'s'
