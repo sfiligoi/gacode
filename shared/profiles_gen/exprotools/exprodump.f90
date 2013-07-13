@@ -134,7 +134,7 @@ program exprodump
            print 20,EXPRO_zmag(i)
         case ('ptot')
            print 20,EXPRO_ptot(i)
-        case ('poloidalfluxover2pi')
+        case ('polflux')
            print 20,EXPRO_poloidalfluxover2pi(i)
         case ('bunit')
            print 20,EXPRO_bunit(i)
