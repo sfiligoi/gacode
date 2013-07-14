@@ -200,7 +200,7 @@ module tgyro_globals
   real, dimension(:), allocatable :: relax
 
   integer, dimension(:), allocatable :: therm_vec
-  real, dimension(:,:), allocatable :: ni_ratio
+  real, dimension(:,:), allocatable :: dlnridr
 
   real, dimension(5) :: mi
 

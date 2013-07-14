@@ -49,7 +49,7 @@ subroutine tgyro_flux_vector(x_vec,f_vec,dx,index)
            dlnnedr(i) = x_vec(p)
         endif
         ! Set dlnnidr(1,i) according to quasineutrality
-        call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(:),loc_n_ion)
+        call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(:),loc_n_ion,dlnridr(:,i))
      endif
 
      if (loc_er_feedback_flag == 1) then
