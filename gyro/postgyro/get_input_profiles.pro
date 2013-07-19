@@ -45,7 +45,7 @@ FUNCTION get_input_profiles, simdir, FILENAME=filename, $
   READF, 1, s
   BT_exp = FLOAT(STRMID(s,7))
   READF, 1, s
-  arho_exp = STRMID(s,9)
+  arho_exp = FLOAT(STRMID(s,9))
   arr = FLTARR(5,exp_n_rho)
 
   WHILE (STRPOS(s, 'rho') EQ -1) DO READF, 1, s
