@@ -43,11 +43,11 @@ FUNCTION get_input_profiles, simdir, FILENAME=filename, $
   ENDWHILE
   exp_n_rho = FIX(STRMID(s,6,3))
   READF, 1, s
-  BT_exp = FLOAT(STRMID(s,7))
+  BT_exp = DOUBLE(STRMID(s,7))
   READF, 1, s
-  arho_exp = FLOAT(STRMID(s,9))
-  arr = FLTARR(5,exp_n_rho)
+  arho_exp = DOUBLE(STRMID(s,9))
 
+  arr = DBLARR(5,exp_n_rho)
   WHILE (STRPOS(s, 'rho') EQ -1) DO READF, 1, s
   READF, 1, arr
   exp_rho = REFORM(arr[0,*])
