@@ -134,10 +134,18 @@ class profiles_genData:
             print '(INFO): (profiles_gen_plot) '+infile+'.extra NOT found.'
           
         try:
+            # First, get number of Fourier modes
+            fp = open(infile+'.geo')
+            for i, line in enumerate(fp):
+                if i == 11:
+                    self.nfourier=int(line)
+                    break
+            fp.close()
+
             data = np.loadtxt(infile+'.geo',skiprows=12)
             # Dimension 9 assumes nfourier=8
             print '(INFO): (profiles_gen_plot) '+infile+'.geo found.'
-            x = data.reshape((4,9,n),order='F')
+            x = data.reshape((4,self.nfourier+1,n),order='F')
             self.geo['ar']=x[0,:,:]
             self.geo['br']=x[1,:,:]
             self.geo['az']=x[2,:,:]

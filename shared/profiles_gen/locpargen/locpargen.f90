@@ -9,6 +9,7 @@
 program locpargen
 
   use EXPRO_interface
+  use GEO_interface
 
   implicit none
 
@@ -27,7 +28,7 @@ program locpargen
   open(unit=1,file='input.locpargen',status='old')
   read(1,*) r0
   read(1,*) rho0
-  read(1,*) psi0
+  read(1,*) psi0 
   read(1,*) z(1)
   read(1,*) z(2)
   read(1,*) z(3)
@@ -35,6 +36,7 @@ program locpargen
 
   EXPRO_ctrl_density_method = 1
   EXPRO_ctrl_z(1:3) = z(1:3)
+  ! We don't need the numerical eq. flag set for this routine.
   EXPRO_ctrl_numeq_flag = 0 
   EXPRO_ctrl_rotation_method = 1
 
@@ -71,6 +73,8 @@ program locpargen
      call cub_spline(x_vec,EXPRO_rmin/a,EXPRO_n_exp,x,y,1)
      print 10,'RADIUS=',y(1)
 
+     r0 = y(1)
+
   else 
 
      ! Use local psi_N
@@ -82,59 +86,86 @@ program locpargen
      call cub_spline(x_vec,EXPRO_rmin/a,EXPRO_n_exp,x,y,1)
      print 10,'RADIUS=',y(1)
 
+     r0 = y(1)
+
   endif
 
+  GEO_rmin_in = r0 
 
   ! ASPECT_RATIO
   call cub_spline(x_vec,EXPRO_rmaj/a,EXPRO_n_exp,x,y,1)
   print 10,'ASPECT_RATIO=',y(1)
   ar = y(1)
 
+  GEO_rmaj_in = y(1)
+
   ! SHIFT
   call cub_spline(x_vec,EXPRO_drmaj,EXPRO_n_exp,x,y,1)
   print 10,'SHIFT=',y(1)
+
+  GEO_drmaj_in = y(1)
 
   ! ZMAG
   call cub_spline(x_vec,EXPRO_zmag/a,EXPRO_n_exp,x,y,1)
   print 10,'ZMAG=',y(1)
 
+  GEO_zmag_in = y(1)
+
   ! DZMAG
   call cub_spline(x_vec,EXPRO_dzmag,EXPRO_n_exp,x,y,1)
   print 10,'DZMAG=',y(1)
+
+  GEO_dzmag_in = y(1)
 
   ! SHEAR
   call cub_spline(x_vec,EXPRO_s,EXPRO_n_exp,x,y,1)
   print 10,'SHEAR=',y(1)
   shear = y(1)
 
+  GEO_s_in = shear
+
   ! SAFETY_FACTOR
   call cub_spline(x_vec,EXPRO_q,EXPRO_n_exp,x,y,1)
   print 10,'SAFETY_FACTOR=',y(1)
   sf = y(1)
 
+  GEO_q_in = y(1)
+
   ! KAPPA
   call cub_spline(x_vec,EXPRO_kappa,EXPRO_n_exp,x,y,1)
   print 10,'KAPPA=',y(1)
+
+  GEO_kappa_in = y(1)
 
   ! S_KAPPA
   call cub_spline(x_vec,EXPRO_skappa,EXPRO_n_exp,x,y,1)
   print 10,'S_KAPPA=',y(1)
 
+  GEO_s_kappa_in = y(1)
+
   ! DELTA
   call cub_spline(x_vec,EXPRO_delta,EXPRO_n_exp,x,y,1)
   print 10,'DELTA=',y(1)
+
+  GEO_delta_in = y(1)
 
   ! S_DELTA
   call cub_spline(x_vec,EXPRO_sdelta,EXPRO_n_exp,x,y,1)
   print 10,'S_DELTA=',y(1)
 
+  GEO_s_delta_in = y(1)
+
   ! ZETA
   call cub_spline(x_vec,EXPRO_zeta,EXPRO_n_exp,x,y,1)
   print 10,'ZETA=',y(1)
 
+  GEO_zeta_in = y(1)
+
   ! S_ZETA
   call cub_spline(x_vec,EXPRO_szeta,EXPRO_n_exp,x,y,1)
   print 10,'S_ZETA=',y(1)
+
+  GEO_s_zeta_in = y(1)
 
   ! TI_OVER_TE
   call cub_spline(x_vec,EXPRO_ti(1,:)/EXPRO_te,EXPRO_n_exp,x,y,1)
@@ -183,6 +214,20 @@ program locpargen
   ! RHO_STAR
   call cub_spline(x_vec,EXPRO_rhos/a,EXPRO_n_exp,x,y,1)
   print 10,'RHO_STAR=',y(1)
+
+  !--------------------------------------------------------
+  ! Model geometry output
+  GEO_ntheta_in = 2001
+
+  GEO_signb_in=1.0 
+  GEO_beta_star_in=0.0
+
+  GEO_model_in = 0
+  call GEO_alloc(1)
+  call GEO_do()
+  call GEO_write('out.locpargen.geo',2)
+  call GEO_alloc(0)
+  !--------------------------------------------------------
 
   print *
   print '(a)','INFO: (locpargen) Additional quantities:'
@@ -239,12 +284,21 @@ program locpargen
      write(1,'(a)') '#'
      write(1,*) EXPRO_nfourier
 
+     GEO_model_in = 1
+     GEO_nfourier_in = EXPRO_nfourier
+     call GEO_alloc(1)
+
      do j2=0,EXPRO_nfourier
         do j1=1,8
            call cub_spline(x_vec,geo_p(j1,j2,:),EXPRO_n_exp,x,y,1)
            write(1,'(1pe20.13)') y(1)
+           GEO_fourier_in(j1,j2) = y(1)
         enddo
      enddo
+
+     call GEO_do()
+     call GEO_write('out.locpargen.geo.2',2)
+     call GEO_alloc(0)
 
      print *
      print '(a)','INFO: (locpargen) Wrote input.geo.'

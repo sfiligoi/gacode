@@ -19,6 +19,7 @@ subroutine GEO_do()
        gcos2 => GEOV_gcos2, &
        g_theta => GEOV_g_theta, &
        grad_r => GEOV_grad_r, &
+       jac_r => GEOV_jac_r, &
        gq => GEOV_gq, &
        dbdt => GEOV_dbdt, &
        gsin => GEOV_gsin, &
@@ -53,7 +54,6 @@ subroutine GEO_do()
   real :: bigz_tt
   real :: bigz_r
   real :: g_tt
-  real :: jac_r
   real :: f
   real :: f_prime
   real :: c 
@@ -78,7 +78,7 @@ subroutine GEO_do()
   real, dimension(:), allocatable :: a_Rp,b_Rp,a_Zp,b_Zp
   !
   !-----------------------------------------------------------
-    
+
   !-----------------------------------------------------------
   ! Check for missing value
   !
@@ -87,7 +87,7 @@ subroutine GEO_do()
      stop
   endif
   !-----------------------------------------------------------
-     
+
   !-----------------------------------------------------------
   ! If we are using the s-alpha model, just compute stuff 
   ! directly and exit:
@@ -120,7 +120,7 @@ subroutine GEO_do()
   a_Zp(:) = GEO_fourier_in(7,:)
   b_Zp(:) = GEO_fourier_in(8,:)
   !-----------------------------------------------------------
- 
+
   !-----------------------------------------------------------
   ! Allocate internal variables
   !
@@ -233,9 +233,9 @@ subroutine GEO_do()
 
      g_tt = bigr_t(i)**2+bigz_t(i)**2
 
-     jac_r = bigr(i)*(bigr_r(i)*bigz_t(i)-bigr_t(i)*bigz_r)
+     jac_r(i) = bigr(i)*(bigr_r(i)*bigz_t(i)-bigr_t(i)*bigz_r)
 
-     grad_r(i) = bigr(i)*sqrt(g_tt)/jac_r
+     grad_r(i) = bigr(i)*sqrt(g_tt)/jac_r(i)
 
      l_t(i) = sqrt(g_tt)
 

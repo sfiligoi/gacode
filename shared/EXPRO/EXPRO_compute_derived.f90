@@ -198,6 +198,9 @@ subroutine EXPRO_compute_derived
         GEO_fourier_in(1:4,:) = EXPRO_geo(:,:,i)/r_min
         GEO_fourier_in(5:8,:) = EXPRO_dgeo(:,:,i)
         call GEO_do()
+        if (minval(GEOV_jac_r) <= 0.0) then
+           print '(a,i3,a)','WARNING: (EXPRO) Negative GEO Jacobian for i =',i,' in input.profiles'
+        endif
      endif
 
      ! V and dV/dr

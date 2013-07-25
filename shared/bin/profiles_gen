@@ -369,6 +369,10 @@ PZ2=0
 # CREATE MODE variables
 CREATE_FLAG=0
 CREATEHELP_FLAG=0
+
+# Plotting in locpargen
+LOCPARGEN_PLOT=1
+
 #=============================================================
 
 #=============================================================
@@ -594,6 +598,10 @@ then
   echo $Z3 >> input.locpargen
   $LOCPARGEN
   rm input.locpargen
+  if [ $LOCPARGEN_PLOT -eq 1 ]
+  then
+     python $GACODE_ROOT/shared/bin/locpargen_plot.py
+  fi 
   exit 0
 fi   
 #=============================================================
