@@ -10,6 +10,8 @@ module vgen_globals
   integer :: er_method
   integer :: erspecies_indx
   integer :: vel_method
+  integer :: nth_min
+  integer :: nth_max
   
   real, parameter :: pi=3.1415926535897932
   real, parameter :: mass_deuterium = 3.3452   ! (x 10-27 kg)
@@ -17,5 +19,5 @@ module vgen_globals
   real, parameter :: charge_norm_fac = 1.6022
   
   real :: dens_norm, temp_norm, mass_norm, vth_norm
-  
+
 end module vgen_globals
