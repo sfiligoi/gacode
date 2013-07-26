@@ -308,7 +308,7 @@ subroutine GEO_do()
      gsin(i)  = bt(i)*GEO_rmaj_in*dbdl(i)/b(i)**2
      gcos1(i) = (bt(i)**2/bigr(i)*bigz_l(i)+bp(i)**2/r_c(i))*GEO_rmaj_in/b(i)**2
      gcos2(i) = 0.5*(GEO_rmaj_in/b(i)**2)*grad_r(i)*(-GEO_beta_star_in)
-     g_theta(i)    = bigr(i)*b(i)*l_t(i)/(GEO_rmin_in*GEO_rmaj_in*grad_r(i))
+     g_theta(i) = bigr(i)*b(i)*l_t(i)/(GEO_rmin_in*GEO_rmaj_in*grad_r(i))
      gq(i)    = GEO_rmin_in*b(i)/(GEO_q_in*bigr(i)*bp(i))
 
      usin(i)  = -bigr_t(i)/l_t(i)
@@ -406,6 +406,15 @@ subroutine GEO_do()
      GEOV_theta_nc(i) = GEOV_theta_nc(i-1)+0.5*(g_theta(i)+g_theta(i-1))*d_theta
   enddo
   GEOV_theta_nc(:) = -0.5*pi_2+pi_2*(0.5*pi_2+GEOV_theta_nc(:))/(0.5*pi_2+GEOV_theta_nc(n_theta))
+  !-----------------------------------------------------------
+
+  !-----------------------------------------------------------
+  ! Poloidal scale length (useful for code resolution choice).
+  r_c = 0.0
+  do i=2,n_theta-1
+     r_c(i) = (gsin(i+1)-gsin(i-1))/(2*d_theta)
+  enddo
+  GEO_thetascale = maxval(abs(r_c(:)))
   !-----------------------------------------------------------
 
   !-----------------------------------------------------------

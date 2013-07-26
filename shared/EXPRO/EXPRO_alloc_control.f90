@@ -164,6 +164,8 @@ subroutine EXPRO_alloc_control(i_proc,flag)
      EXPRO_gamma_p(:)=0.0
      allocate(EXPRO_mach(EXPRO_n_exp))
      EXPRO_mach(:)=0.0
+     allocate(EXPRO_thetascale(EXPRO_n_exp))
+     EXPRO_thetascale(:)=0.0
 
      if (EXPRO_nfourier > 0) then  
         allocate(EXPRO_geo(4,0:EXPRO_nfourier,EXPRO_n_exp))
@@ -243,6 +245,7 @@ subroutine EXPRO_alloc_control(i_proc,flag)
      deallocate(EXPRO_gamma_e)
      deallocate(EXPRO_gamma_p)
      deallocate(EXPRO_mach)
+     deallocate(EXPRO_thetascale)
 
      if (allocated(EXPRO_geo)) deallocate(EXPRO_geo)
      if (allocated(EXPRO_dgeo)) deallocate(EXPRO_dgeo)

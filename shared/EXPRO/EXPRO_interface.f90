@@ -106,6 +106,7 @@
 !  EXPRO_gamma_e(:)     r/q d(w0)/dr (1/s)
 !  EXPRO_gamma_p(:)     R_0 d(w0)/dr (1/s)
 !  EXPRO_mach(:)        R_0 w0/cs
+!  EXPRO_thetascale(:)  max(gsin') [measure of poloidal scale length]
 !
 !  * General geometry arrays:
 !
@@ -200,6 +201,10 @@ module EXPRO_interface
   real, dimension(:),allocatable :: EXPRO_gamma_e
   real, dimension(:),allocatable :: EXPRO_gamma_p
   real, dimension(:),allocatable :: EXPRO_mach
+
+  ! Scale length
+
+  real, dimension(:),allocatable :: EXPRO_thetascale
 
   ! Field orientation parameters
 

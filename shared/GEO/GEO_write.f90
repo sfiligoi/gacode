@@ -30,6 +30,7 @@ subroutine GEO_write(datafile,io)
           GEOV_b(i),&
           GEOV_dbdt(i),&
           GEOV_dbdt2(i),&
+          GEOV_gsin(i),&
           GEOV_bp(i),&
           GEOV_bigr(i),&
           GEOV_grad_r(i),&
@@ -41,6 +42,6 @@ subroutine GEO_write(datafile,io)
 
   close(io)
 
-10 format(10(es11.4,1x))
+10 format(20(es11.4,1x))
 
 end subroutine GEO_write

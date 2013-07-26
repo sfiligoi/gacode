@@ -219,6 +219,8 @@ subroutine EXPRO_compute_derived
      EXPRO_bp0(i) = GEO_bp*EXPRO_bunit(i)
      EXPRO_bt0(i) = GEO_bt*EXPRO_bunit(i)
 
+     EXPRO_thetascale(i) = GEO_thetascale
+
   enddo
 
   !--------------------------------------------------------------

@@ -251,6 +251,8 @@ program locpargen
   print 10,'c_s   [m/s] : ',y(1)
   call cub_spline(x_vec,EXPRO_rhos,EXPRO_n_exp,x,y,1)
   print 10,'rhos   [m]  : ',y(1)
+  call cub_spline(x_vec,sqrt(EXPRO_thetascale),EXPRO_n_exp,x,y,1)
+  print 10,'thetascale[-]: ',y(1)
   !---------------------------------------
 
   !------------------------------------------------------------

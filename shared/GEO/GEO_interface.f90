@@ -165,5 +165,6 @@ module GEO_interface
   real :: GEO_fluxsurfave_grad_r2
   real :: GEO_fluxsurfave_grad_r
   real :: GEO_grad_r0
+  real :: GEO_thetascale
 
 end module GEO_interface
