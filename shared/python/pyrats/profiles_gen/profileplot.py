@@ -39,6 +39,12 @@ def fancytag(tag):
         fancy = r'$n_\mathrm{i5}$'
     elif tag == 'omega0':
         fancy = r'$\omega_0$'
+    elif tag == 'jbs_neo':
+        fancy = r'$\mathrm{jbs}_\mathrm{neo}$'
+    elif tag == 'jbs_sauter':
+        fancy = r'$\mathrm{jbs}_\mathrm{sauter}$'
+    elif tag == 'jbs_nclass':
+        fancy = r'$\mathrm{jbs}_\mathrm{nclass}$'
     else:
         fancy = r'$\mathrm{'+tag+'}$'
 
