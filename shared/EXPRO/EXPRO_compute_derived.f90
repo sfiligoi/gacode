@@ -242,6 +242,7 @@ subroutine EXPRO_compute_derived
   !
   EXPRO_vol(1)  = 0.0
   EXPRO_volp(1) = 0.0  
+  EXPRO_thetascale(1) = EXPRO_thetascale(2)
   !--------------------------------------------------------------
 
   !-----------------------------------------------------------------

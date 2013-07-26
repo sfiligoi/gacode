@@ -37,7 +37,7 @@ program locpargen
   EXPRO_ctrl_density_method = 1
   EXPRO_ctrl_z(1:3) = z(1:3)
   ! We don't need the numerical eq. flag set for this routine.
-  EXPRO_ctrl_numeq_flag = 0 
+  EXPRO_ctrl_numeq_flag = 1
   EXPRO_ctrl_rotation_method = 1
 
   call EXPRO_alloc('./',1) 

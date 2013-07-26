@@ -165,7 +165,7 @@ subroutine EXPRO_alloc_control(i_proc,flag)
      allocate(EXPRO_mach(EXPRO_n_exp))
      EXPRO_mach(:)=0.0
      allocate(EXPRO_thetascale(EXPRO_n_exp))
-     EXPRO_thetascale(:)=0.0
+     EXPRO_thetascale(:)=1.0
 
      if (EXPRO_nfourier > 0) then  
         allocate(EXPRO_geo(4,0:EXPRO_nfourier,EXPRO_n_exp))
