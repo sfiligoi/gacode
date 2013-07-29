@@ -20,7 +20,7 @@ program locpargen
   real :: a
   real, dimension(1) :: x
   real, dimension(1) :: y
-  real, dimension(3) :: z
+  real, dimension(5) :: z
   real, dimension(:), allocatable :: x_vec
   real, dimension(:,:,:), allocatable :: geo_p
   real :: ar, sf, shear
@@ -32,10 +32,12 @@ program locpargen
   read(1,*) z(1)
   read(1,*) z(2)
   read(1,*) z(3)
+  read(1,*) z(4)
+  read(1,*) z(5)
   close(1)
 
   EXPRO_ctrl_density_method = 1
-  EXPRO_ctrl_z(1:3) = z(1:3)
+  EXPRO_ctrl_z(1:5) = z(1:5)
   ! We don't need the numerical eq. flag set for this routine.
   EXPRO_ctrl_numeq_flag = 1
   EXPRO_ctrl_rotation_method = 1

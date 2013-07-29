@@ -261,6 +261,10 @@ then
    echo "             Default: 6 (Carbon)"
    echo "             -Z3 <ion3 charge>"
    echo "             Default: 2 (Helium)"
+   echo "             -Z4 <ion4 charge>"
+   echo "             Default: 1 (Hydrogen isotope)"
+   echo "             -Z5 <ion5 charge>"
+   echo "             Default: 1 (Hydrogen isotope)"
    echo
    echo "DUMP MODE"
    echo 
@@ -276,7 +280,7 @@ then
    echo "              <arg>=rho:  rho=sqrt[chi/chi(a)] is first column. [DEFAULT]"
    echo "              <arg>=psi:  psi_N=psi/psi(a) is first column."
    echo
-   echo "      NOTE: control ion charges with Z1,Z2,Z3 as in LOCAL PARAMETER MODE."
+   echo "      NOTE: control ion charges with Z1,Z2,Z3,Z4,Z5 as in LOCAL PARAMETER MODE."
    echo
    echo "PROFILE CREATE MODE"
    echo 
@@ -357,11 +361,14 @@ LOC_PSI=0
 Z1=1.0
 Z2=6.0
 Z3=2.0
+Z4=1.0
+Z5=1.0
 
 # DUMP MODE variables
 DUMP_FLAG=0
 DUMP_VAR=null
 X=rho
+DUMP_DENS_METHOD=1
 
 # PFILE variables
 PZ2=0
@@ -444,12 +451,17 @@ while [ $# -gt 0 ] ; do
   
   -Z3) shift ; Z3=$1 ;;  
   
+  -Z4) shift ; Z4=$1 ;;  
+  
+  -Z5) shift ; Z5=$1 ;; 
+
   -loc_rad) shift ; LOC_RAD=$1 ;;
   -loc_rho) shift ; LOC_RHO=$1 ;;
   -loc_psi) shift ; LOC_PSI=$1 ;;
 
   -dump) shift ; DUMP_FLAG=1 ; DUMP_VAR=$1 ;;
   -x) shift ; X=$1 ;;
+  -dens) shift ; DUMP_DENS_METHOD=$1 ;;
 
   -pZ2) shift ; PZ2=$1 ;;  
 
@@ -572,6 +584,9 @@ then
   echo $Z1 >> input.exprodump
   echo $Z2 >> input.exprodump
   echo $Z3 >> input.exprodump
+  echo $Z4 >> input.exprodump
+  echo $Z5 >> input.exprodump
+  echo $DUMP_DENS_METHOD >> input.exprodump
   echo "INFO: (profiles_gen) Calling $EXPRODUMP"
   $EXPRODUMP
   rm input.exprodump
@@ -598,6 +613,8 @@ then
   echo $Z1 >> input.locpargen
   echo $Z2 >> input.locpargen
   echo $Z3 >> input.locpargen
+  echo $Z4 >> input.locpargen
+  echo $Z5 >> input.locpargen
   $LOCPARGEN
   rm input.locpargen
   if [ $LOCPARGEN_PLOT -eq 1 ]
