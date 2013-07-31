@@ -378,7 +378,7 @@ CREATE_FLAG=0
 CREATEHELP_FLAG=0
 
 # Plotting in locpargen
-LOCPARGEN_PLOT=1
+PLOT_FLAG=0
 
 #=============================================================
 
@@ -466,6 +466,8 @@ while [ $# -gt 0 ] ; do
   -pZ2) shift ; PZ2=$1 ;;  
 
   -gmerge) GMERGE_FLAG=1 ;;  
+
+  -plot) PLOT_FLAG=1 ;;  
   
   esac
   shift
@@ -617,7 +619,7 @@ then
   echo $Z5 >> input.locpargen
   $LOCPARGEN
   rm input.locpargen
-  if [ $LOCPARGEN_PLOT -eq 1 ]
+  if [ $PLOT_FLAG -eq 1 ]
   then
      python $GACODE_ROOT/shared/bin/locpargen_plot.py
   fi 
