@@ -134,7 +134,7 @@ subroutine tgyro_allocate_globals
   allocate(therm_vec(sum(therm_flag)))
   allocate(dlnridr(loc_n_ion,n_r))
 
-  allocate(a_fourier_geo(8,0:16,n_r))
+  allocate(a_fourier_geo(8,0:32,n_r))
 
   allocate(b_flag(p_max))
   allocate(gyro_exit_status(n_r))

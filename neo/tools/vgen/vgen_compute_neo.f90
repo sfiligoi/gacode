@@ -17,6 +17,8 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, omega_deriv
   integer :: j, n
   real :: cc, loglam
 
+  integer :: nmin, nmax, nth
+
   ! Set the local NEO input parameters
   
   neo_silent_flag_in    = 1
@@ -170,6 +172,27 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, omega_deriv
         neo_dlntdr_6_in = EXPRO_dlntedr(i) * EXPRO_rmin(EXPRO_n_exp)
      endif
   endif
+
+  nmin = (nth_min - 1)/2
+  nmax = (nth_max - 1)/2
+  nth = nint(nmin*sqrt(EXPRO_thetascale(i)/EXPRO_thetascale(2)))
+  if(nth < nmax) then
+     if(nth < nmin) then
+        neo_n_theta_in = 2*nmin + 1
+     else
+        neo_n_theta_in = 2*nth + 1
+     endif
+  else
+     neo_n_theta_in = 2*nmax + 1
+  endif
+  if(i == 2) then
+     open(unit=1,file='out.vgen.neontheta',status='replace')
+     close(1)
+  endif
+  open(unit=1,file='out.vgen.neontheta',status='old',position='append')
+  write(1,'(e16.8)',advance='no') EXPRO_rho(i)
+  write(1,'(i3)',advance='no') neo_n_theta_in
+  close(1)
 
   ! Run NEO
   call neo_run()

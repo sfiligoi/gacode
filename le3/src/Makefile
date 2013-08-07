@@ -10,6 +10,7 @@ EXEC = le3
 
 OBJECTS = le3_globals.o \
           le3_func.o \
+          le3_func2.o \
 	  le3_driver.o \
           $(EXEC).o
 

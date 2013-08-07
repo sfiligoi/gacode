@@ -1,10 +1,10 @@
-subroutine le3_func(xsize,x,fvec,iflag)
+subroutine le3_func2(xsize,x,fvec,iflag)
 
   use le3_globals
 
   implicit none
 
-  integer :: id, k, i, j
+  integer :: id, ix, i, j,its,ips
   real :: ang
   real :: iota
   integer, intent(in) :: xsize
@@ -17,22 +17,26 @@ subroutine le3_func(xsize,x,fvec,iflag)
 
   ! tb is really the periodic function thetabar-theta
 
-  k=1
-  do j=1,np
-     do i=2,nt
-        tb(i,j) = x(k)
-        k = k+1
+  ix=0
+  do ips=0,nps
+     do its=1,nts 
+        ix = ix+1           
+        as(its,ips) = x(ix)
+        if (ips > 0) then
+           ix = ix+1
+           bs(its,ips) = x(ix)
+        endif
      enddo
   enddo
 
-  !-------------------------------------------------
-  ! Compute d(tb)/dt and d(tp)/dp over [0,2pi) with 
+  !----------------------------------------------------
+  ! Compute tb, d(tb)/dt and d(tp)/dp over [0,2pi) 
 
   ! d(tb)/dt
   dtbdt(:,:) = 1.0
-  do i=1,nt
-     do id=-2,2
-        k = tcyc(i+id)
+  do its=1,nt
+     
+    
         dtbdt(i,:) = dtbdt(i,:) + tb(k,:) * cderiv(id)/dt
      enddo
   enddo
@@ -41,8 +45,8 @@ subroutine le3_func(xsize,x,fvec,iflag)
   dtbdp(:,:) = 0.0
   do j=1,np
      do id=-2,2
-        k = pcyc(j+id)
-        dtbdp(:,j) = dtbdp(:,j) + tb(:,k) * cderiv(id)/dp
+!        k = pcyc(j+id)
+!        dtbdp(:,j) = dtbdp(:,j) + tb(:,k) * cderiv(id)/dp
      enddo
   enddo
 
@@ -93,24 +97,6 @@ subroutine le3_func(xsize,x,fvec,iflag)
   fp(:,:) = (br(:,:)*rp(:,:)+bz(:,:)*zp(:,:))/jac(:,:)/dtbdt(:,:)
   ft(:,:) = (br(:,:)*rt(:,:)+bz(:,:)*zt(:,:))/jac(:,:)/dtbdt(:,:)
 
-  ! d(fp)/dt
-  fpt(:,:) = 0.0
-  do i=1,nt
-     do id=-2,2
-        k = tcyc(i+id)
-        fpt(i,:) = fpt(i,:) + fp(k,:) * cderiv(id)/dt
-     enddo
-  enddo
-
-  ! d(ft)/dp
-  ftp(:,:) = 0.0
-  do j=1,np
-     do id=-2,2
-        k = pcyc(j+id)
-        ftp(:,j) = ftp(:,j) + ft(:,k) * cderiv(id)/dp
-     enddo
-  enddo
-
   fp(:,:) = bp(:,:)*r(:,:)/jac(:,:)
   do j=1,np
      do i=1,nt
@@ -125,12 +111,12 @@ subroutine le3_func(xsize,x,fvec,iflag)
      enddo
   enddo
 
-  k=1
+  ix = 0
   do j=1,np
      do i=2,nt
-        fvec(k) = fpt(i,j)-ftp(i,j)
-        k = k+1
+        fvec(ix) = fpt(i,j)-ftp(i,j)
+        ix = ix+1
      enddo
   enddo
 
-end subroutine le3_func
+end subroutine le3_func2

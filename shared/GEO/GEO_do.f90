@@ -19,6 +19,7 @@ subroutine GEO_do()
        gcos2 => GEOV_gcos2, &
        g_theta => GEOV_g_theta, &
        grad_r => GEOV_grad_r, &
+       jac_r => GEOV_jac_r, &
        gq => GEOV_gq, &
        dbdt => GEOV_dbdt, &
        gsin => GEOV_gsin, &
@@ -53,7 +54,6 @@ subroutine GEO_do()
   real :: bigz_tt
   real :: bigz_r
   real :: g_tt
-  real :: jac_r
   real :: f
   real :: f_prime
   real :: c 
@@ -78,7 +78,7 @@ subroutine GEO_do()
   real, dimension(:), allocatable :: a_Rp,b_Rp,a_Zp,b_Zp
   !
   !-----------------------------------------------------------
-    
+
   !-----------------------------------------------------------
   ! Check for missing value
   !
@@ -87,7 +87,7 @@ subroutine GEO_do()
      stop
   endif
   !-----------------------------------------------------------
-     
+
   !-----------------------------------------------------------
   ! If we are using the s-alpha model, just compute stuff 
   ! directly and exit:
@@ -120,7 +120,7 @@ subroutine GEO_do()
   a_Zp(:) = GEO_fourier_in(7,:)
   b_Zp(:) = GEO_fourier_in(8,:)
   !-----------------------------------------------------------
- 
+
   !-----------------------------------------------------------
   ! Allocate internal variables
   !
@@ -233,9 +233,9 @@ subroutine GEO_do()
 
      g_tt = bigr_t(i)**2+bigz_t(i)**2
 
-     jac_r = bigr(i)*(bigr_r(i)*bigz_t(i)-bigr_t(i)*bigz_r)
+     jac_r(i) = bigr(i)*(bigr_r(i)*bigz_t(i)-bigr_t(i)*bigz_r)
 
-     grad_r(i) = bigr(i)*sqrt(g_tt)/jac_r
+     grad_r(i) = bigr(i)*sqrt(g_tt)/jac_r(i)
 
      l_t(i) = sqrt(g_tt)
 
@@ -308,7 +308,7 @@ subroutine GEO_do()
      gsin(i)  = bt(i)*GEO_rmaj_in*dbdl(i)/b(i)**2
      gcos1(i) = (bt(i)**2/bigr(i)*bigz_l(i)+bp(i)**2/r_c(i))*GEO_rmaj_in/b(i)**2
      gcos2(i) = 0.5*(GEO_rmaj_in/b(i)**2)*grad_r(i)*(-GEO_beta_star_in)
-     g_theta(i)    = bigr(i)*b(i)*l_t(i)/(GEO_rmin_in*GEO_rmaj_in*grad_r(i))
+     g_theta(i) = bigr(i)*b(i)*l_t(i)/(GEO_rmin_in*GEO_rmaj_in*grad_r(i))
      gq(i)    = GEO_rmin_in*b(i)/(GEO_q_in*bigr(i)*bp(i))
 
      usin(i)  = -bigr_t(i)/l_t(i)
@@ -406,6 +406,15 @@ subroutine GEO_do()
      GEOV_theta_nc(i) = GEOV_theta_nc(i-1)+0.5*(g_theta(i)+g_theta(i-1))*d_theta
   enddo
   GEOV_theta_nc(:) = -0.5*pi_2+pi_2*(0.5*pi_2+GEOV_theta_nc(:))/(0.5*pi_2+GEOV_theta_nc(n_theta))
+  !-----------------------------------------------------------
+
+  !-----------------------------------------------------------
+  ! Poloidal scale length (useful for code resolution choice).
+  r_c = 0.0
+  do i=2,n_theta-1
+     r_c(i) = (gsin(i+1)-gsin(i-1))/(2*d_theta)
+  enddo
+  GEO_thetascale = maxval(abs(r_c(:)))
   !-----------------------------------------------------------
 
   !-----------------------------------------------------------

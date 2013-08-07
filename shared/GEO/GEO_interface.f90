@@ -115,6 +115,7 @@ module GEO_interface
   real, dimension(:), allocatable :: GEOV_gcos1
   real, dimension(:), allocatable :: GEOV_gcos2
   real, dimension(:), allocatable :: GEOV_g_theta
+  real, dimension(:), allocatable :: GEOV_jac_r
   real, dimension(:), allocatable :: GEOV_grad_r
   real, dimension(:), allocatable :: GEOV_gq
   real, dimension(:), allocatable :: GEOV_captheta
@@ -164,5 +165,6 @@ module GEO_interface
   real :: GEO_fluxsurfave_grad_r2
   real :: GEO_fluxsurfave_grad_r
   real :: GEO_grad_r0
+  real :: GEO_thetascale
 
 end module GEO_interface

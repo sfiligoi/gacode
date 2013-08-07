@@ -87,9 +87,8 @@ class profiles_genData:
         self.data['vpol_3'] = data[7*n:8*n,2]
         self.data['vpol_4'] = data[7*n:8*n,3]
         self.data['vpol_5'] = data[7*n:8*n,4]
-
-        #data = np.loadtxt(infile+'.extra')
  
+        # OPTIONAL: Read input.profiles.extra if it exists
         try:
             data = np.loadtxt(infile+'.extra',comments='#')
             print '(INFO): (profiles_gen_plot) '+infile+'.extra found.'
@@ -133,14 +132,37 @@ class profiles_genData:
         except:
             print '(INFO): (profiles_gen_plot) '+infile+'.extra NOT found.'
           
+        # OPTIONAL: Read input.profiles.geo if it exists
         try:
+            # First, get number of Fourier modes
+            fp = open(infile+'.geo')
+            for i, line in enumerate(fp):
+                if i == 11:
+                    self.nfourier=int(line)
+                    break
+            fp.close()
+
             data = np.loadtxt(infile+'.geo',skiprows=12)
             # Dimension 9 assumes nfourier=8
             print '(INFO): (profiles_gen_plot) '+infile+'.geo found.'
-            x = data.reshape((4,9,n),order='F')
+            x = data.reshape((4,self.nfourier+1,n),order='F')
             self.geo['ar']=x[0,:,:]
             self.geo['br']=x[1,:,:]
             self.geo['az']=x[2,:,:]
             self.geo['bz']=x[3,:,:]
         except:
             print '(INFO): (profiles_gen_plot) '+infile+'.geo NOT found.'
+
+        # OPTIONAL: Read input.profiles.jbs if it exists
+        try:
+            data = np.loadtxt(infile+'.jbs',comments='#')
+            print '(INFO): (profiles_gen_plot) '+infile+'.jbs found.'
+            x = data.reshape((n,6),order='F')
+
+            self.data['jbs_err']    = x[0:n,1]
+            self.data['jbs_neo']    = x[0:n,2]
+            self.data['jbs_sauter'] = x[0:n,3]
+            self.data['jbs_nclass'] = x[0:n,4]
+            self.data['jbs_koh']    = x[0:n,5]
+        except:
+            print '(INFO): (profiles_gen_plot) '+infile+'.jbs NOT found.'
