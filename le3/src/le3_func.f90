@@ -12,7 +12,6 @@ subroutine le3_func(xsize,x,fvec,iflag)
   real, dimension(xsize), intent(inout) :: fvec
   real, dimension(xsize), intent(in) :: x
   real :: tb2
-  integer, parameter :: fix=1
 
   iota = 1.0/q
 
