@@ -20,7 +20,7 @@ contains
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
     integer :: it, ip
 
-    if(flag == 1) then
+    if (flag == 1) then
        if(initialized) return
 
        allocate(t(nt))
@@ -59,7 +59,7 @@ contains
           p(ip) = 2*(ip-1)*pi/(np)
        enddo
        dp = p(2)-p(1)
-       
+
        do it=1,nt
           tcyc(it-nt) = it
           tcyc(it) = it
@@ -76,7 +76,7 @@ contains
        cderiv(0)  =  0
        cderiv(1)  =  8.0/12.0
        cderiv(2)  = -1.0/12.0
-       
+
        ! matrix allocations
        msize = (nt-1)*np
        allocate(mhdfunc(msize))
@@ -146,7 +146,7 @@ contains
        enddo
     enddo
     
-    call hybrd1 (le3_func,msize,xfunc,mhdfunc,tol,info,work,nwork)
+    call hybrd1(le3_func,msize,xfunc,mhdfunc,tol,info,work,nwork)
     
     !print *, xfunc
     print '(a,1pe12.5)','INFO: (le3) Root accuracy ->',sum(abs(mhdfunc))/size(mhdfunc)
