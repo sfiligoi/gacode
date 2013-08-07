@@ -9,6 +9,8 @@ program le3
   open(unit=1,file='input.le3.gen',status='old')
   read(1,*) nt
   read(1,*) np
+  read(1,*) nts
+  read(1,*) nps
   read(1,*) rmin
   read(1,*) rmaj
   read(1,*) hmin
@@ -17,6 +19,7 @@ program le3
   read(1,*) n
   read(1,*) tol
   read(1,*) restart_flag
+  read(1,*) solve_method
   close(1)
 
   call le3_alloc(1)
@@ -31,6 +34,10 @@ program le3
      do ip=1,np
         tb(:,ip) = t(:)
      enddo
+
+     as = 0.0
+     bs = 0.0
+
   endif
 
   call le3_solver

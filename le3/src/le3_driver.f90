@@ -78,16 +78,34 @@ contains
        cderiv(2)  = -1.0/12.0
 
        ! matrix allocations
-       msize = (nt-1)*np
-       allocate(mhdfunc(msize))
-       allocate(xfunc(msize))
-       nwork = (msize*(3*msize+13))/2 * 10
-       allocate(work(nwork))
+       if (solve_method == 1) then
+
+          ! FD
+          msize = (nt-1)*np
+          allocate(mhdfunc(msize))
+          allocate(xfunc(msize))
+          nwork = (msize*(3*msize+13))/2 * 10
+          allocate(work(nwork))
+
+       else
+
+          ! Spectral
+          msize = nts*(2*nps+1)
+          allocate(mhdfunc(msize))
+          allocate(xfunc(msize))
+          nwork = (msize*(3*msize+13))/2 * 10
+          allocate(work(nwork))
+       
+          allocate(as(nts,0:nps))
+          allocate(bs(nts,nps))
+
+       endif
 
        initialized = .true.
 
     else
-       if(.NOT. initialized) return
+
+       if (.NOT. initialized) return
 
        deallocate(t)
        deallocate(p)
@@ -122,69 +140,90 @@ contains
 
        initialized = .false.
 
-    end if
+    endif
 
   end subroutine le3_alloc
 
   subroutine le3_solver
+
     use le3_globals
     implicit none
-    integer :: ir,it,ip
-    external :: le3_func
+    integer :: ix,it,ip,its,ips
+    external :: le3_func,les_func2
 
-    do it=1,nt
+    if (solve_method == 1) then
+
+       do it=1,nt
+          do ip=1,np
+             tb(it,ip) = tb(it,ip) - t(it)
+          enddo
+       enddo
+
+       ix=0
        do ip=1,np
-          tb(it,ip) = tb(it,ip) - t(it)
+          do it=2,nt
+             ix = ix+1
+             xfunc(ix) = tb(it,ip)
+          enddo
        enddo
-    enddo
 
-    ir=1
-    do ip=1,np
-       do it=2,nt
-          xfunc(ir) = tb(it,ip)
-          ir = ir+1
+       call hybrd1(le3_func,msize,xfunc,mhdfunc,tol,info,work,nwork)
+
+       !print *, xfunc
+       print '(a,1pe12.5)','INFO: (le3) Root accuracy ->',sum(abs(mhdfunc))/size(mhdfunc)
+
+       do it=1,nt
+          do ip=1,np
+             tb(it,ip) = tb(it,ip) + t(it)
+          enddo
        enddo
-    enddo
-    
-    call hybrd1(le3_func,msize,xfunc,mhdfunc,tol,info,work,nwork)
-    
-    !print *, xfunc
-    print '(a,1pe12.5)','INFO: (le3) Root accuracy ->',sum(abs(mhdfunc))/size(mhdfunc)
-    
-    do it=1,nt
+
+       open(unit=1,file='out.le3.t',status='replace')
+       do it=1,nt
+          write(1,10) t(it)
+       enddo
+       close(1)
+       open(unit=1,file='out.le3.p',status='replace')
        do ip=1,np
-          tb(it,ip) = tb(it,ip) + t(it)
+          write(1,10) p(ip)
        enddo
-    enddo
+       close(1)
+       open(unit=1,file='out.le3.tb',status='replace')
+       do it=1,nt
+          write(1,10) tb(it,:)
+       enddo
+       close(1)
+       open(unit=1,file='out.le3.r',status='replace')
+       do it=1,nt
+          write(1,10) r(it,:)
+       enddo
+       close(1)
+       open(unit=1,file='out.le3.z',status='replace')
+       do it=1,nt
+          write(1,10) z(it,:)
+       enddo
+       close(1)
 
-    open(unit=1,file='out.le3.t',status='replace')
-    do it=1,nt
-       write(1,10) t(it)
-    enddo
-    close(1)
-    open(unit=1,file='out.le3.p',status='replace')
-    do ip=1,np
-       write(1,10) p(ip)
-    enddo
-    close(1)
-    open(unit=1,file='out.le3.tb',status='replace')
-    do it=1,nt
-       write(1,10) tb(it,:)
-    enddo
-    close(1)
-    open(unit=1,file='out.le3.r',status='replace')
-    do it=1,nt
-       write(1,10) r(it,:)
-    enddo
-    close(1)
-    open(unit=1,file='out.le3.z',status='replace')
-    do it=1,nt
-       write(1,10) z(it,:)
-    enddo
-    close(1)
-    
+    else
+
+       ix=0
+       do ips=0,nps
+          do its=1,nts 
+             ix = ix+1           
+             xfunc(ix) = as(its,ips)
+             if (ips > 0) then
+                ix = ix+1
+                xfunc(ix) = bs(its,ips)
+             endif
+          enddo
+       enddo
+
+       call hybrd1(le3_func2,msize,xfunc,mhdfunc,tol,info,work,nwork)
+
+    endif
+
 10  format(200(1pe12.5,1x))
-    
+
   end subroutine le3_solver
   
 end module le3_driver
