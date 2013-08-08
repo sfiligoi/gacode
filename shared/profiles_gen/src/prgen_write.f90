@@ -15,6 +15,7 @@ subroutine prgen_write
   !
   integer :: i
   integer :: indx
+  character (len=15) :: ion_string ! Up to 5 two letter ions
   !---------------------------------------------------------------
 
 
@@ -40,8 +41,13 @@ subroutine prgen_write
      endif
      write(1,40) '#          SHOT NUMBER : ',onetwo_ishot
      write(1,20) '#'
-     write(1,'(10(a,1x))') '#                 IONS : ',&
-          (trim(onetwo_ion_name(reorder_vec(i))),i=1,min(onetwo_nion+onetwo_nbion+1,5))
+     ion_string = ''
+     do i=1,min(onetwo_nion+onetwo_nbion+1,5)
+        if (reorder_vec(i) /= 0) then
+            write(ion_string,'(a)') trim(ion_string) // ' '// trim(onetwo_ion_name(reorder_vec(i)))
+        endif
+     enddo
+     write(1,20) '#                 IONS : ',trim(ion_string)
 
   case (2)
      write(1,20) '#              TOKAMAK : ',trim(plst_tokamak_id)
