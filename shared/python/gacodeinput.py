@@ -339,7 +339,7 @@ class ManagerInput:
                 file_base.close()
                 file_temp.close()
 
-                os.system('echo "# -- Begin overlay" >> '+tempfile)
+                os.system('echo "# -- Begin overlay [Add parameters above this line]" >> '+tempfile)
                 os.system('cat '+self.overlayfile[p]+' >> '+tempfile)
                 os.system('mv '+tempfile+' '+basefile)
 
