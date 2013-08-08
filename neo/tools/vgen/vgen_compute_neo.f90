@@ -192,6 +192,69 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, omega_deriv
   open(unit=1,file='out.vgen.neontheta',status='old',position='append')
   write(1,'(e16.8)',advance='no') EXPRO_rho(i)
   write(1,'(i3)',advance='no') neo_n_theta_in
+  write(1,*)
+  close(1)
+
+  if(i == 2) then
+     open(unit=1,file='out.vgen.neoexpnorm',status='replace')
+     close(1)
+  endif
+  open(unit=1,file='out.vgen.neoexpnorm',status='old',position='append')
+  write(1,'(e16.8)',advance='no') EXPRO_rho(i)
+  write(1,'(e16.8)',advance='no') EXPRO_rmin(EXPRO_n_exp)
+  write(1,'(e16.8)',advance='no') mass_norm
+  write(1,'(e16.8)',advance='no') dens_norm
+  write(1,'(e16.8)',advance='no') temp_norm
+  write(1,'(e16.8)',advance='no') vth_norm*EXPRO_rmin(EXPRO_n_exp)
+  write(1,'(e16.8)',advance='no') EXPRO_bunit(i)
+  write(1,*)
+  close(1)
+
+  if(i == 2) then
+     open(unit=1,file='out.vgen.neoequil',status='replace')
+     close(1)
+  endif
+  open(unit=1,file='out.vgen.neoequil',status='old',position='append')
+  write(1,'(e16.8)',advance='no') EXPRO_rho(i)
+  write(1,'(e16.8)',advance='no') neo_rmin_over_a_in
+  write(1,'(e16.8)',advance='no') neo_q_in
+  write(1,'(e16.8)',advance='no') neo_rho_star_in
+  write(1,'(e16.8)',advance='no') neo_rmaj_over_a_in
+  write(1,'(e16.8)',advance='no') neo_nu_1_in
+  write(1,'(e16.8)',advance='no') neo_dens_1_in
+  write(1,'(e16.8)',advance='no') neo_temp_1_in
+  write(1,'(e16.8)',advance='no') neo_dlnndr_1_in
+  write(1,'(e16.8)',advance='no') neo_dlntdr_1_in
+  if(neo_n_species_in >= 2) then
+     write(1,'(e16.8)',advance='no') neo_dens_2_in
+     write(1,'(e16.8)',advance='no') neo_temp_2_in
+     write(1,'(e16.8)',advance='no') neo_dlnndr_2_in
+     write(1,'(e16.8)',advance='no') neo_dlntdr_2_in
+  endif
+  if(neo_n_species_in >= 3) then
+     write(1,'(e16.8)',advance='no') neo_dens_3_in
+     write(1,'(e16.8)',advance='no') neo_temp_3_in
+     write(1,'(e16.8)',advance='no') neo_dlnndr_3_in
+     write(1,'(e16.8)',advance='no') neo_dlntdr_3_in
+  endif
+  if(neo_n_species_in >= 4) then
+     write(1,'(e16.8)',advance='no') neo_dens_4_in
+     write(1,'(e16.8)',advance='no') neo_temp_4_in
+     write(1,'(e16.8)',advance='no') neo_dlnndr_4_in
+     write(1,'(e16.8)',advance='no') neo_dlntdr_4_in
+  endif
+  if(neo_n_species_in >= 5) then
+     write(1,'(e16.8)',advance='no') neo_dens_5_in
+     write(1,'(e16.8)',advance='no') neo_temp_5_in
+     write(1,'(e16.8)',advance='no') neo_dlnndr_5_in
+     write(1,'(e16.8)',advance='no') neo_dlntdr_5_in
+  endif
+  if(neo_n_species_in >= 6) then
+     write(1,'(e16.8)',advance='no') neo_dens_6_in
+     write(1,'(e16.8)',advance='no') neo_temp_6_in
+     write(1,'(e16.8)',advance='no') neo_dlnndr_6_in
+     write(1,'(e16.8)',advance='no') neo_dlntdr_6_in
+  endif
   close(1)
 
   ! Run NEO

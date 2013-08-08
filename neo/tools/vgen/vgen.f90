@@ -156,6 +156,10 @@ program vgen
      num_ele  = num_ele + 1
      indx_ele = 5
   endif
+  if(neo_n_species_in >= 6 .and. neo_z_6_in == -1) then
+     num_ele  = num_ele + 1
+     indx_ele = 6
+  endif
 
   if(num_ele == 0) then
      adiabatic_ele_model = 1
