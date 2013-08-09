@@ -306,7 +306,8 @@ program vgen
            if(erspecies_indx == 1) then
               grad_p = -(EXPRO_dlnnidr_new(i) + EXPRO_dlntidr(1,i))
            else
-              grad_p = -(EXPRO_dlnnidr(erspecies_indx,i) + EXPRO_dlntidr(1,i))
+              grad_p = -(EXPRO_dlnnidr(erspecies_indx,i) &
+                   + EXPRO_dlntidr(erspecies_indx,i))
            endif
            er_exp(i) = (grad_p * EXPRO_grad_r0(i) &
                 * EXPRO_ti(1,i)*temp_norm_fac &
