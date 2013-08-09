@@ -199,24 +199,24 @@ subroutine tgyro_tglf_map
   tglf_use_bisection_in = .true.
   !
   ! Number of Hermite functions to determine Gaussian Width (1-2)
-  tglf_nbasis_min_in = 1
+  !  tglf_nbasis_min_in = 1
   !
   ! Number of Hermite function in full expansion (4 or more, even)
-  tglf_nbasis_max_in = 4
+  !  tglf_nbasis_max_in = 4
   !
   ! Number of Hermite quadrature nodes
-  tglf_nxgrid_in = 16
+  ! tglf_nxgrid_in = 16
   !
   ! Maximum number of widths sampled (could be higher than 21)
-  tglf_nwidth_in = 21
+  !  tglf_nwidth_in = 21
   !
   ! Bisection search interval; must increase nwidth_tg if
   ! increasing this interval to maintain accuracy:
   !
   !  accuracy ~ (width_max_tg-width_min_tg)/nwidth_tg
   !
-  tglf_width_min_in = 0.3
-  tglf_width_in = 1.65
+  !  tglf_width_min_in = 0.3
+  !  tglf_width_in = 1.65
   !----------------------------------------------------------------
 
   !----------------------------------------------------------------
