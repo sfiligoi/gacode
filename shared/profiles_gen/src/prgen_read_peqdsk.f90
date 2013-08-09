@@ -62,7 +62,7 @@ subroutine prgen_read_peqdsk
      read(1,*) xv
      call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_nb,peqdsk_nj)
      deallocate(xv)
-     
+
      ! pb(KPa)
      read(1,*) i, t
      allocate(xv(ncol,i))

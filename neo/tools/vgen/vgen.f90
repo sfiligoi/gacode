@@ -156,6 +156,10 @@ program vgen
      num_ele  = num_ele + 1
      indx_ele = 5
   endif
+  if(neo_n_species_in >= 6 .and. neo_z_6_in == -1) then
+     num_ele  = num_ele + 1
+     indx_ele = 6
+  endif
 
   if(num_ele == 0) then
      adiabatic_ele_model = 1
@@ -302,10 +306,11 @@ program vgen
            if(erspecies_indx == 1) then
               grad_p = -(EXPRO_dlnnidr_new(i) + EXPRO_dlntidr(1,i))
            else
-              grad_p = -(EXPRO_dlnnidr(erspecies_indx,i) + EXPRO_dlntidr(1,i))
+              grad_p = -(EXPRO_dlnnidr(erspecies_indx,i) &
+                   + EXPRO_dlntidr(erspecies_indx,i))
            endif
            er_exp(i) = (grad_p * EXPRO_grad_r0(i) &
-                * EXPRO_ti(1,i)*temp_norm_fac &
+                * EXPRO_ti(erspecies_indx,i)*temp_norm_fac &
                 / (EXPRO_ctrl_z(erspecies_indx) * charge_norm_fac) & 
                 + EXPRO_vtor(erspecies_indx,i) * EXPRO_bp0(i) &
                 - EXPRO_vpol(erspecies_indx,i) * EXPRO_bt0(i)) &
@@ -313,7 +318,7 @@ program vgen
            open(unit=1,file='out.vgen.ercomp',status='old',position='append')
            write(1,'(e16.8)',advance='no') EXPRO_rho(i)
            write(1,'(e16.8)',advance='no') grad_p * EXPRO_grad_r0(i) &
-                * EXPRO_ti(1,i)*temp_norm_fac &
+                * EXPRO_ti(erspecies_indx,i)*temp_norm_fac &
                 / (EXPRO_ctrl_z(erspecies_indx) * charge_norm_fac) / 1000
            write(1,'(e16.8)',advance='no') EXPRO_vtor(erspecies_indx,i) * EXPRO_bp0(i)/1000
            write(1,'(e16.8)',advance='no') -EXPRO_vpol(erspecies_indx,i) * EXPRO_bt0(i)/1000

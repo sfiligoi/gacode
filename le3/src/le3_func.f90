@@ -11,6 +11,7 @@ subroutine le3_func(xsize,x,fvec,iflag)
   integer, intent(inout) :: iflag
   real, dimension(xsize), intent(inout) :: fvec
   real, dimension(xsize), intent(in) :: x
+  real :: tb2
 
   iota = 1.0/q
 
@@ -18,15 +19,17 @@ subroutine le3_func(xsize,x,fvec,iflag)
 
   k=1
   do j=1,np
-     do i=2,nt
-        tb(i,j) = x(k)
-        k = k+1
+     do i=1,nt
+        if (i+j > 2) then
+           tb(i,j) = x(k)
+           k = k+1
+        endif
      enddo
   enddo
 
   !-------------------------------------------------
   ! Compute d(tb)/dt and d(tp)/dp over [0,2pi) with 
-  
+
   ! d(tb)/dt
   dtbdt(:,:) = 1.0
   do i=1,nt
@@ -89,8 +92,7 @@ subroutine le3_func(xsize,x,fvec,iflag)
   rt(:,:) = drdtb(:,:)*dtbdt(:,:)
   zt(:,:) = dzdtb(:,:)*dtbdt(:,:)
 
-  fp(:,:) = bp(:,:)*r(:,:)/jac(:,:) &
-       + (br(:,:)*rp(:,:)+bz(:,:)*zp(:,:))/jac(:,:)/dtbdt(:,:)
+  fp(:,:) = (br(:,:)*rp(:,:)+bz(:,:)*zp(:,:))/jac(:,:)/dtbdt(:,:)
   ft(:,:) = (br(:,:)*rt(:,:)+bz(:,:)*zt(:,:))/jac(:,:)/dtbdt(:,:)
 
   ! d(fp)/dt
@@ -111,22 +113,27 @@ subroutine le3_func(xsize,x,fvec,iflag)
      enddo
   enddo
 
-  fp(:,:) = 0.0
   fp(:,:) = bp(:,:)*r(:,:)/jac(:,:)
   do j=1,np
      do i=1,nt
-        fp(i,j) = fp(i,j) * 4.0 * ( tb(tcyc(i+1),j) &
-             - 2.0*tb(i,j) + tb(tcyc(i-1),j) ) &
-             / (2*dt + tb(tcyc(i+1),j) &
-                - tb(tcyc(i-1),j))**2
+
+        ! d^2(theta_bar)/dt^2
+        tb2 = (tb(tcyc(i+1),j)-2.0*tb(i,j)+tb(tcyc(i-1),j))/dt**2
+
+        ! Add "axisymmetric term": d/dtheta ( fp / dtbdt ) 
+        fpt(i,j) = fpt(i,j) &
+             +(fp(tcyc(i+1),j)-fp(tcyc(i-1),j))/(2*dt)/dtbdt(i,j) &
+             -tb2*fp(i,j)/(dtbdt(i,j)**2)
      enddo
   enddo
 
   k=1
   do j=1,np
-     do i=2,nt
-        fvec(k) = fpt(i,j)-ftp(i,j)-fp(i,j)
-        k = k+1
+     do i=1,nt
+        if (i+j > 2) then
+           fvec(k) = fpt(i,j)-ftp(i,j)
+           k = k+1
+        endif
      enddo
   enddo
 
