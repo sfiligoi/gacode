@@ -117,16 +117,14 @@ subroutine le3_func2(xsize,x,fvec,iflag)
         ! Projections
 
         ! A 
-        if (its > 0) then
-           ix = ix+1           
-           do j=1,np
-              do i=1,nt
-                 fvec(ix) = fvec(ix)  &
-                      -its*cos(its*t(i))*cos(ips*p(j))*fp(i,j) &
-                      -ips*sin(its*t(i))*sin(ips*p(j))*ft(i,j) 
-              enddo
+        ix = ix+1           
+        do j=1,np
+           do i=1,nt
+              fvec(ix) = fvec(ix)  &
+                   -its*cos(its*t(i))*cos(ips*p(j))*fp(i,j) &
+                   -ips*sin(its*t(i))*sin(ips*p(j))*ft(i,j) 
            enddo
-        endif
+        enddo
         if (ix == xsize) exit
 
         ! B 
@@ -143,16 +141,14 @@ subroutine le3_func2(xsize,x,fvec,iflag)
         if (ix == xsize) exit
 
         ! C
-        if (its > 0) then
-           ix = ix+1
-           do j=1,np
-              do i=1,nt
-                 fvec(ix) = fvec(ix) &
-                      +its*sin(its*t(i))*cos(ips*p(j))*fp(i,j) &
-                      -ips*cos(its*t(i))*sin(ips*p(j))*ft(i,j) 
-              enddo
+        ix = ix+1
+        do j=1,np
+           do i=1,nt
+              fvec(ix) = fvec(ix) &
+                   +its*sin(its*t(i))*cos(ips*p(j))*fp(i,j) &
+                   -ips*cos(its*t(i))*sin(ips*p(j))*ft(i,j) 
            enddo
-        endif
+        enddo
         if (ix == xsize) exit
 
         ! D
