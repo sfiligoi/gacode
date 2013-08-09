@@ -19,9 +19,11 @@ subroutine le3_func(xsize,x,fvec,iflag)
 
   k=1
   do j=1,np
-     do i=2,nt
-        tb(i,j) = x(k)
-        k = k+1
+     do i=1,nt
+        if (i+j > 2) then
+           tb(i,j) = x(k)
+           k = k+1
+        endif
      enddo
   enddo
 
@@ -127,9 +129,11 @@ subroutine le3_func(xsize,x,fvec,iflag)
 
   k=1
   do j=1,np
-     do i=2,nt
-        fvec(k) = fpt(i,j)-ftp(i,j)
-        k = k+1
+     do i=1,nt
+        if (i+j > 2) then
+           fvec(k) = fpt(i,j)-ftp(i,j)
+           k = k+1
+        endif
      enddo
   enddo
 

@@ -82,27 +82,24 @@ contains
        if (solve_method == 1) then
 
           ! FD
-          msize = (nt-1)*np
-          allocate(mhdfunc(msize))
-          allocate(xfunc(msize))
-          nwork = (msize*(3*msize+13))/2 * 10
-          allocate(work(nwork))
+          msize = nt*np-1
 
        else
 
           ! Spectral
-          msize = 2*nts*(2*nps+1)
-          allocate(mhdfunc(msize))
-          allocate(xfunc(msize))
-          nwork = (msize*(3*msize+13))/2 * 10
-          allocate(work(nwork))
+          msize = 4*nts*nps+2*(nts+nps)
 
-          allocate(as(nts,0:nps))
-          allocate(bs(nts,0:nps))
-          allocate(cs(nts,0:nps))
-          allocate(ds(nts,0:nps))
+          allocate(as(0:nts,0:nps))
+          allocate(bs(0:nts,0:nps))
+          allocate(cs(0:nts,0:nps))
+          allocate(ds(0:nts,0:nps))
 
        endif
+
+       allocate(mhdfunc(msize))
+       allocate(xfunc(msize))
+       nwork = (msize*(3*msize+13))/2*10
+       allocate(work(nwork))
 
        initialized = .true.
 
@@ -164,9 +161,11 @@ contains
 
        ix=0
        do j=1,np
-          do i=2,nt
-             ix = ix+1
-             xfunc(ix) = tb(i,j)
+          do i=1,nt
+             if (i+j > 2) then
+                ix = ix+1
+                xfunc(ix) = tb(i,j)
+             endif
           enddo
        enddo
 
@@ -209,23 +208,27 @@ contains
 
     else
 
-      as(:,:) = 0.0
-      bs(:,:) = 0.0
-      cs(:,:) = 0.0
-      ds(:,:) = 0.0
-      as(1,0) = rmin/rmaj
+       as(:,:) = 0.0
+       bs(:,:) = 0.0
+       cs(:,:) = 0.0
+       ds(:,:) = 0.0
+       as(1,0) = rmin/rmaj
 
        ix=0
        do ips=0,nps
-          do its=1,nts 
-             ix = ix+1           
-             xfunc(ix) = as(its,ips)
-             if (ips > 0) then
+          do its=0,nts
+             if (its > 0) then 
+                ix = ix+1           
+                xfunc(ix) = as(its,ips)
+             endif
+             if (ips > 0 .and. its > 0) then
                 ix = ix+1
                 xfunc(ix) = bs(its,ips)
              endif
-             ix = ix+1
-             xfunc(ix) = cs(its,ips)
+             if (ips + its > 0) then
+                ix = ix+1           
+                xfunc(ix) = cs(its,ips)
+             endif
              if (ips > 0) then
                 ix = ix+1
                 xfunc(ix) = ds(its,ips)
@@ -239,22 +242,26 @@ contains
 
        ix=0
        do ips=0,nps
-          do its=1,nts 
-             ix = ix+1           
-             print *,'a',ips,its,xfunc(ix)
-             if (ips > 0) then
+          do its=0,nts
+             if (its > 0) then 
+                ix = ix+1           
+                print *,'a',ips,its,xfunc(ix)
+             endif
+             if (ips > 0 .and. its > 0) then
                 ix = ix+1
                 print *,'b',ips,its,xfunc(ix)
              endif
-             ix = ix+1           
-             print *,'c',ips,its,xfunc(ix)
+             if (ips + its > 0) then
+                ix = ix+1           
+                print *,'c',ips,its,xfunc(ix)
+             endif
              if (ips > 0) then
                 ix = ix+1
                 print *,'d',ips,its,xfunc(ix)
              endif
           enddo
        enddo
-       
+
        open(unit=1,file='out.le3.t',status='replace')
        do i=1,nt
           write(1,10) t(i)

@@ -25,10 +25,11 @@ ax.set_ylabel(r'\boldmath{$\bar\theta}-\theta$}',color='k')
 
 mt = len(t)
 mp = len(p)
-print mt,mp
+
+a=np.average(tb)-np.average(t)
 
 for j in range(mp):
-    ax.plot(t[:]/np.pi,(tb[:,j]-t[:])/np.pi)
+    ax.plot(t[:]/np.pi,(tb[:,j]-t[:]-a)/np.pi)
 
 TICKS=[0,1,2]
 LABELS=[r'\boldmath{$0$}',r'\boldmath{$\pi$}',r'\boldmath{$2\pi$}']

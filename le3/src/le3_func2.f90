@@ -16,23 +16,25 @@ subroutine le3_func2(xsize,x,fvec,iflag)
 
   ix=0
   do ips=0,nps
-     do its=1,nts 
-        ix = ix+1           
-        as(its,ips) = x(ix)
-        if (ips > 0) then
+     do its=0,nts
+        if (its > 0) then 
+           ix = ix+1           
+           as(its,ips) = x(ix)
+        endif
+        if (ips > 0 .and. its > 0) then
            ix = ix+1
            bs(its,ips) = x(ix)
         endif
-        ix = ix+1           
-        cs(its,ips) = x(ix)
+        if (ips + its > 0) then
+           ix = ix+1           
+           cs(its,ips) = x(ix)
+        endif
         if (ips > 0) then
            ix = ix+1
            ds(its,ips) = x(ix)
         endif
      enddo
   enddo
-  bs(:,0) = 0.0
-  ds(:,0) = 0.0
 
   !--------------------------------------------------------
   ! Use spectral form to compute tb, d(tb)/dt and d(tp)/dp 
@@ -45,17 +47,17 @@ subroutine le3_func2(xsize,x,fvec,iflag)
         dtbdt(i,j) = 1.0
         dtbdp(i,j) = 0.0
 
-        do its=1,nts
+        do its=0,nts
            do ips=0,nps
               tb(i,j) = tb(i,j) + &
                    sin(its*t(i))*(bs(its,ips)*sin(ips*p(j))+as(its,ips)*cos(ips*p(j))) &
-                   +(cos(its*t(i))-1)*(ds(its,ips)*sin(ips*p(j))+cs(its,ips)*cos(ips*p(j)))
+                   +cos(its*t(i))*(ds(its,ips)*sin(ips*p(j))+cs(its,ips)*cos(ips*p(j)))
               dtbdt(i,j) = dtbdt(i,j) + &
                    its*cos(its*t(i))*(bs(its,ips)*sin(ips*p(j))+as(its,ips)*cos(ips*p(j))) &
                    -its*sin(its*t(i))*(ds(its,ips)*sin(ips*p(j))+cs(its,ips)*cos(ips*p(j)))
               dtbdp(i,j) = dtbdp(i,j) + &
                    ips*sin(its*t(i))*(bs(its,ips)*cos(ips*p(j))-as(its,ips)*sin(ips*p(j))) &
-                   +ips*(cos(its*t(i))-1)*(ds(its,ips)*cos(ips*p(j))-cs(its,ips)*sin(ips*p(j)))
+                   +ips*cos(its*t(i))*(ds(its,ips)*cos(ips*p(j))-cs(its,ips)*sin(ips*p(j)))
            enddo
         enddo
 
@@ -105,30 +107,32 @@ subroutine le3_func2(xsize,x,fvec,iflag)
   rt(:,:) = drdtb(:,:)*dtbdt(:,:)
   zt(:,:) = dzdtb(:,:)*dtbdt(:,:)
 
-  fp(:,:) = (r(:,:)**2+br(:,:)*rp(:,:)+bz(:,:)*zp(:,:))/jac(:,:)/dtbdt(:,:)
+  fp(:,:) = (bp(:,:)*r(:,:)+br(:,:)*rp(:,:)+bz(:,:)*zp(:,:))/jac(:,:)/dtbdt(:,:)
   ft(:,:) = (br(:,:)*rt(:,:)+bz(:,:)*zt(:,:))/jac(:,:)/dtbdt(:,:)
 
 
   ix = 0
   fvec(:) = 0.0
   do ips=0,nps
-     do its=1,nts
+     do its=0,nts
 
         ! Projections
 
-        ! A 
-        ix = ix+1           
-        do j=1,np
-           do i=1,nt
-              fvec(ix) = fvec(ix)  &
-                   -its*cos(its*t(i))*cos(ips*p(j))*fp(i,j) &
-                   -ips*sin(its*t(i))*sin(ips*p(j))*ft(i,j) 
+        ! A: sin m cos n
+        if (its > 0) then 
+           ix = ix+1           
+           do j=1,np
+              do i=1,nt
+                 fvec(ix) = fvec(ix)  &
+                      -its*cos(its*t(i))*cos(ips*p(j))*fp(i,j) &
+                      -ips*sin(its*t(i))*sin(ips*p(j))*ft(i,j) 
+              enddo
            enddo
-        enddo
-        if (ix == xsize) exit
+           if (ix == xsize) exit
+        endif
 
-        ! B 
-        if (ips > 0) then
+        ! B: sin m sin n
+        if (ips > 0 .and. its > 0) then
            ix = ix+1
            do j=1,np
               do i=1,nt
@@ -137,21 +141,23 @@ subroutine le3_func2(xsize,x,fvec,iflag)
                       +ips*sin(its*t(i))*cos(ips*p(j))*ft(i,j) 
               enddo
            enddo
+           if (ix == xsize) exit
         endif
-        if (ix == xsize) exit
 
-        ! C
-        ix = ix+1
-        do j=1,np
-           do i=1,nt
-              fvec(ix) = fvec(ix) &
-                   +its*sin(its*t(i))*cos(ips*p(j))*fp(i,j) &
-                   -ips*cos(its*t(i))*sin(ips*p(j))*ft(i,j) 
+        ! C: cos m cos n
+        if (ips + its > 0) then
+           ix = ix+1
+           do j=1,np
+              do i=1,nt
+                 fvec(ix) = fvec(ix) &
+                      +its*sin(its*t(i))*cos(ips*p(j))*fp(i,j) &
+                      -ips*cos(its*t(i))*sin(ips*p(j))*ft(i,j) 
+              enddo
            enddo
-        enddo
-        if (ix == xsize) exit
+           if (ix == xsize) exit
+        endif
 
-        ! D
+        ! D: cos m sin n
         if (ips > 0) then
            ix = ix+1
            do j=1,np
@@ -161,8 +167,8 @@ subroutine le3_func2(xsize,x,fvec,iflag)
                       +ips*cos(its*t(i))*cos(ips*p(j))*ft(i,j) 
               enddo
            enddo
+           if (ix == xsize) exit
         endif
-        if (ix == xsize) exit
 
      enddo
   enddo
