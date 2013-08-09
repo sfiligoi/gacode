@@ -25,6 +25,9 @@ module le3_globals
   real, dimension(:,:), allocatable  :: fp,ft
   real, dimension(:,:), allocatable  :: fpt,ftp
   real, dimension(:,:), allocatable  :: as,bs,cs,ds
+  real, dimension(:,:), allocatable  :: sinm,cosm
+  real, dimension(:,:), allocatable  :: sinn,cosn
+
 
   integer, dimension(:), allocatable :: tcyc, pcyc
   real, dimension(-2:2) :: cderiv

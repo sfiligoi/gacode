@@ -14,50 +14,34 @@ subroutine le3_func2(xsize,x,fvec,iflag)
 
   iota = 1.0/q
 
-  ix=0
-  do ips=0,nps
-     do its=0,nts
-        if (its > 0) then 
-           ix = ix+1           
-           as(its,ips) = x(ix)
-        endif
-        if (ips > 0 .and. its > 0) then
-           ix = ix+1
-           bs(its,ips) = x(ix)
-        endif
-        if (ips + its > 0) then
-           ix = ix+1           
-           cs(its,ips) = x(ix)
-        endif
-        if (ips > 0) then
-           ix = ix+1
-           ds(its,ips) = x(ix)
-        endif
-     enddo
-  enddo
+  call le3_map(x,as,bs,cs,ds,nps,nts,'setc')
 
   !--------------------------------------------------------
   ! Use spectral form to compute tb, d(tb)/dt and d(tp)/dp 
   ! on finite grids over [0,2pi) 
   !
   do i=1,nt
-     do j=1,np
+     tb(i,:) = t(i)
+  enddo
+  dtbdt(:,:) = 1.0
+  dtbdp(:,:) = 0.0
 
-        tb(i,j)    = t(i)
-        dtbdt(i,j) = 1.0
-        dtbdp(i,j) = 0.0
+  do ips=0,nps
+     do its=0,nts
+        do j=1,np
+           do i=1,nt
 
-        do its=0,nts
-           do ips=0,nps
               tb(i,j) = tb(i,j) + &
-                   sin(its*t(i))*(bs(its,ips)*sin(ips*p(j))+as(its,ips)*cos(ips*p(j))) &
-                   +cos(its*t(i))*(ds(its,ips)*sin(ips*p(j))+cs(its,ips)*cos(ips*p(j)))
+                   sinm(i,its)*(bs(its,ips)*sinn(j,ips)+as(its,ips)*cosn(j,ips)) &
+                   +cosm(i,its)*(ds(its,ips)*sinn(j,ips)+cs(its,ips)*cosn(j,ips))
+
               dtbdt(i,j) = dtbdt(i,j) + &
-                   its*cos(its*t(i))*(bs(its,ips)*sin(ips*p(j))+as(its,ips)*cos(ips*p(j))) &
-                   -its*sin(its*t(i))*(ds(its,ips)*sin(ips*p(j))+cs(its,ips)*cos(ips*p(j)))
+                   its*cosm(i,its)*(bs(its,ips)*sinn(j,ips)+as(its,ips)*cosn(j,ips)) &
+                   -its*sinm(i,its)*(ds(its,ips)*sinn(j,ips)+cs(its,ips)*cosn(j,ips))
+
               dtbdp(i,j) = dtbdp(i,j) + &
-                   ips*sin(its*t(i))*(bs(its,ips)*cos(ips*p(j))-as(its,ips)*sin(ips*p(j))) &
-                   +ips*cos(its*t(i))*(ds(its,ips)*cos(ips*p(j))-cs(its,ips)*sin(ips*p(j)))
+                   ips*sinm(i,its)*(bs(its,ips)*cosn(j,ips)-as(its,ips)*sinn(j,ips)) &
+                   +ips*cosm(i,its)*(ds(its,ips)*cosn(j,ips)-cs(its,ips)*sinn(j,ips))
            enddo
         enddo
 
@@ -116,7 +100,12 @@ subroutine le3_func2(xsize,x,fvec,iflag)
   do ips=0,nps
      do its=0,nts
 
+        !-------------------------------------------------------------
         ! Projections
+        !
+        ! NOTE: each projection is a nonlinear equation to be solved 
+        !       as a nonlinear system by MINPACK.
+        !-------------------------------------------------------------
 
         ! A: sin m cos n
         if (its > 0) then 
@@ -124,8 +113,8 @@ subroutine le3_func2(xsize,x,fvec,iflag)
            do j=1,np
               do i=1,nt
                  fvec(ix) = fvec(ix)  &
-                      -its*cos(its*t(i))*cos(ips*p(j))*fp(i,j) &
-                      -ips*sin(its*t(i))*sin(ips*p(j))*ft(i,j) 
+                      -its*cosm(i,its)*cosn(j,ips)*fp(i,j) &
+                      -ips*sinm(i,its)*sinn(j,ips)*ft(i,j) 
               enddo
            enddo
            if (ix == xsize) exit
@@ -137,8 +126,8 @@ subroutine le3_func2(xsize,x,fvec,iflag)
            do j=1,np
               do i=1,nt
                  fvec(ix) = fvec(ix) &
-                      -its*cos(its*t(i))*sin(ips*p(j))*fp(i,j) &
-                      +ips*sin(its*t(i))*cos(ips*p(j))*ft(i,j) 
+                      -its*cosm(i,its)*sinn(j,ips)*fp(i,j) &
+                      +ips*sinm(i,its)*cosn(j,ips)*ft(i,j) 
               enddo
            enddo
            if (ix == xsize) exit
@@ -150,8 +139,8 @@ subroutine le3_func2(xsize,x,fvec,iflag)
            do j=1,np
               do i=1,nt
                  fvec(ix) = fvec(ix) &
-                      +its*sin(its*t(i))*cos(ips*p(j))*fp(i,j) &
-                      -ips*cos(its*t(i))*sin(ips*p(j))*ft(i,j) 
+                      +its*sinm(i,its)*cosn(j,ips)*fp(i,j) &
+                      -ips*cosm(i,its)*sinn(j,ips)*ft(i,j) 
               enddo
            enddo
            if (ix == xsize) exit
@@ -163,8 +152,8 @@ subroutine le3_func2(xsize,x,fvec,iflag)
            do j=1,np
               do i=1,nt
                  fvec(ix) = fvec(ix) &
-                      +its*sin(its*t(i))*sin(ips*p(j))*fp(i,j) &
-                      +ips*cos(its*t(i))*cos(ips*p(j))*ft(i,j) 
+                      +its*sinm(i,its)*sinn(j,ips)*fp(i,j) &
+                      +ips*cosm(i,its)*cosn(j,ips)*ft(i,j) 
               enddo
            enddo
            if (ix == xsize) exit

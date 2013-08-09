@@ -18,7 +18,7 @@ contains
     use le3_globals
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
-    integer :: i,j
+    integer :: i,j,its,ips
 
     if (flag == 1) then
 
@@ -89,10 +89,30 @@ contains
           ! Spectral
           msize = 4*nts*nps+2*(nts+nps)
 
+          ! Fourier coefficients
           allocate(as(0:nts,0:nps))
           allocate(bs(0:nts,0:nps))
           allocate(cs(0:nts,0:nps))
           allocate(ds(0:nts,0:nps))
+
+          ! Storage to eliminate direct sin/cos evaluation
+          allocate(sinm(nt,0:nts))
+          allocate(cosm(nt,0:nts))
+          allocate(sinn(np,0:nps))
+          allocate(cosn(np,0:nps))
+
+          do its=0,nts
+             do i=1,nt
+                sinm(i,its) = sin(its*t(i))
+                cosm(i,its) = cos(its*t(i))
+             enddo
+          enddo
+          do ips=0,nps
+             do j=1,np
+                sinn(j,ips) = sin(ips*p(j))
+                cosn(j,ips) = cos(ips*p(j))
+             enddo
+          enddo
 
        endif
 
@@ -171,7 +191,6 @@ contains
 
        call hybrd1(le3_func,msize,xfunc,mhdfunc,tol,info,work,nwork)
 
-       !print *, xfunc
        print '(a,1pe12.5)','INFO: (le3) Root accuracy ->',sum(abs(mhdfunc))/size(mhdfunc)
 
        do i=1,nt
@@ -214,51 +233,16 @@ contains
        ds(:,:) = 0.0
        as(1,0) = rmin/rmaj
 
-       ix=0
-       do ips=0,nps
-          do its=0,nts
-             if (its > 0) then 
-                ix = ix+1           
-                xfunc(ix) = as(its,ips)
-             endif
-             if (ips > 0 .and. its > 0) then
-                ix = ix+1
-                xfunc(ix) = bs(its,ips)
-             endif
-             if (ips + its > 0) then
-                ix = ix+1           
-                xfunc(ix) = cs(its,ips)
-             endif
-             if (ips > 0) then
-                ix = ix+1
-                xfunc(ix) = ds(its,ips)
-             endif
-          enddo
-       enddo
-
+       call le3_map(xfunc,as,bs,cs,ds,nps,nts,'setx')
        call hybrd1(le3_func2,msize,xfunc,mhdfunc,tol,info,work,nwork)
+       call le3_map(xfunc,as,bs,cs,ds,nps,nts,'setc')
 
        print '(a,1pe12.5)','INFO: (le3) Root accuracy ->',sum(abs(mhdfunc))/size(mhdfunc)
 
-       ix=0
+       print 30,'a_{mn}','b_{mn}','c_{mn}','d_{mn}'
        do ips=0,nps
           do its=0,nts
-             if (its > 0) then 
-                ix = ix+1           
-                print *,'a',ips,its,xfunc(ix)
-             endif
-             if (ips > 0 .and. its > 0) then
-                ix = ix+1
-                print *,'b',ips,its,xfunc(ix)
-             endif
-             if (ips + its > 0) then
-                ix = ix+1           
-                print *,'c',ips,its,xfunc(ix)
-             endif
-             if (ips > 0) then
-                ix = ix+1
-                print *,'d',ips,its,xfunc(ix)
-             endif
+             print 20,its,ips,as(its,ips),bs(its,ips),cs(its,ips),ds(its,ips)
           enddo
        enddo
 
@@ -290,8 +274,10 @@ contains
 
     endif
 
-10  format(200(1pe12.5,1x))
-
+10 format(200(1pe12.5,1x))
+20 format('(',i2,',',i2,'):',2x,4(1pe14.7,1x))
+30 format(t15,4(a,9x))
+ 
   end subroutine le3_solver
   
 end module le3_driver
