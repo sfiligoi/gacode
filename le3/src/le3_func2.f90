@@ -4,18 +4,15 @@ subroutine le3_func2(xsize,x,fvec,iflag)
 
   implicit none
 
-  integer :: id, ix, i, j,its,ips
+  integer :: ix,i,j,its,ips
   real :: ang
   real :: iota
   integer, intent(in) :: xsize
   integer, intent(inout) :: iflag
   real, dimension(xsize), intent(inout) :: fvec
   real, dimension(xsize), intent(in) :: x
-  real :: tb2
 
   iota = 1.0/q
-
-  ! tb is really the periodic function thetabar-theta
 
   ix=0
   do ips=0,nps
@@ -26,58 +23,72 @@ subroutine le3_func2(xsize,x,fvec,iflag)
            ix = ix+1
            bs(its,ips) = x(ix)
         endif
+        ix = ix+1           
+        cs(its,ips) = x(ix)
+        if (ips > 0) then
+           ix = ix+1
+           ds(its,ips) = x(ix)
+        endif
      enddo
   enddo
+  bs(:,0) = 0.0
+  ds(:,0) = 0.0
 
-  !----------------------------------------------------
-  ! Compute tb, d(tb)/dt and d(tp)/dp over [0,2pi) 
+  !--------------------------------------------------------
+  ! Use spectral form to compute tb, d(tb)/dt and d(tp)/dp 
+  ! on finite grids over [0,2pi) 
+  !
+  do i=1,nt
+     do j=1,np
 
-  ! d(tb)/dt
-  dtbdt(:,:) = 1.0
-  do its=1,nt
-     
-    
-        dtbdt(i,:) = dtbdt(i,:) + tb(k,:) * cderiv(id)/dt
+        tb(i,j)    = t(i)
+        dtbdt(i,j) = 1.0
+        dtbdp(i,j) = 0.0
+
+        do its=1,nts
+           do ips=0,nps
+              tb(i,j) = tb(i,j) + &
+                   sin(its*t(i))*(bs(its,ips)*sin(ips*p(j))+as(its,ips)*cos(ips*p(j))) &
+                   +(cos(its*t(i))-1)*(ds(its,ips)*sin(ips*p(j))+cs(its,ips)*cos(ips*p(j)))
+              dtbdt(i,j) = dtbdt(i,j) + &
+                   its*cos(its*t(i))*(bs(its,ips)*sin(ips*p(j))+as(its,ips)*cos(ips*p(j))) &
+                   -its*sin(its*t(i))*(ds(its,ips)*sin(ips*p(j))+cs(its,ips)*cos(ips*p(j)))
+              dtbdp(i,j) = dtbdp(i,j) + &
+                   ips*sin(its*t(i))*(bs(its,ips)*cos(ips*p(j))-as(its,ips)*sin(ips*p(j))) &
+                   +ips*(cos(its*t(i))-1)*(ds(its,ips)*cos(ips*p(j))-cs(its,ips)*sin(ips*p(j)))
+           enddo
+        enddo
+
      enddo
   enddo
-
-  ! d(tb)/dp
-  dtbdp(:,:) = 0.0
-  do j=1,np
-     do id=-2,2
-!        k = pcyc(j+id)
-!        dtbdp(:,j) = dtbdp(:,j) + tb(:,k) * cderiv(id)/dp
-     enddo
-  enddo
-
-  !-------------------------------------------------
+  !--------------------------------------------------------
 
   do i=1,nt
      do j=1,np
 
-        ang = m*(tb(i,j)+t(i))+n*p(j)
+        ang = m*tb(i,j)+n*p(j)
 
         ! R,Z
-        r(i,j) = rmaj + rmin*cos(tb(i,j)+t(i)) + hmin*cos(ang)
-        z(i,j) =         rmin*sin(tb(i,j)+t(i)) + hmin*sin(ang)
+        r(i,j) = rmaj + rmin*cos(tb(i,j)) + hmin*cos(ang)
+        z(i,j) =         rmin*sin(tb(i,j)) + hmin*sin(ang)
 
         ! dR/d(tb)
-        drdtb(i,j) = -rmin*sin(tb(i,j)+t(i)) - m*hmin*sin(ang) 
+        drdtb(i,j) = -rmin*sin(tb(i,j)) - m*hmin*sin(ang) 
 
         ! dR/d(pb)
         drdpb(i,j) =                   -n*hmin*sin(ang)
 
         ! dZ/d(tb)
-        dzdtb(i,j) =  rmin*cos(tb(i,j)+t(i)) + m*hmin*cos(ang) 
+        dzdtb(i,j) =  rmin*cos(tb(i,j)) + m*hmin*cos(ang) 
 
         ! dZ/d(pb)
         dzdpb(i,j) =                  n*hmin*cos(ang)
 
         ! dR/dr
-        drdr(i,j) = cos(tb(i,j)+t(i))
+        drdr(i,j) = cos(tb(i,j))
 
         ! dZ/dr
-        dzdr(i,j) = sin(tb(i,j)+t(i))
+        dzdr(i,j) = sin(tb(i,j))
 
         ! J [dtb/dr terms vanish]
         jac(i,j) = r(i,j)*(drdr(i,j)*dzdtb(i,j)-drdtb(i,j)*dzdr(i,j))
@@ -94,28 +105,69 @@ subroutine le3_func2(xsize,x,fvec,iflag)
   rt(:,:) = drdtb(:,:)*dtbdt(:,:)
   zt(:,:) = dzdtb(:,:)*dtbdt(:,:)
 
-  fp(:,:) = (br(:,:)*rp(:,:)+bz(:,:)*zp(:,:))/jac(:,:)/dtbdt(:,:)
+  fp(:,:) = (r(:,:)**2+br(:,:)*rp(:,:)+bz(:,:)*zp(:,:))/jac(:,:)/dtbdt(:,:)
   ft(:,:) = (br(:,:)*rt(:,:)+bz(:,:)*zt(:,:))/jac(:,:)/dtbdt(:,:)
 
-  fp(:,:) = bp(:,:)*r(:,:)/jac(:,:)
-  do j=1,np
-     do i=1,nt
-
-        ! d^2(theta_bar)/dt^2
-        tb2 = (tb(tcyc(i+1),j)-2.0*tb(i,j)+tb(tcyc(i-1),j))/dt**2
-
-        ! Add "axisymmetric term": d/dtheta ( fp / dtbdt ) 
-        fpt(i,j) = fpt(i,j) &
-             +(fp(tcyc(i+1),j)-fp(tcyc(i-1),j))/(2*dt)/dtbdt(i,j) &
-             -tb2*fp(i,j)/(dtbdt(i,j)**2)
-     enddo
-  enddo
 
   ix = 0
-  do j=1,np
-     do i=2,nt
-        fvec(ix) = fpt(i,j)-ftp(i,j)
-        ix = ix+1
+  fvec(:) = 0.0
+  do ips=0,nps
+     do its=1,nts
+
+        ! Projections
+
+        ! A 
+        if (its > 0) then
+           ix = ix+1           
+           do j=1,np
+              do i=1,nt
+                 fvec(ix) = fvec(ix)  &
+                      -its*cos(its*t(i))*cos(ips*p(j))*fp(i,j) &
+                      -ips*sin(its*t(i))*sin(ips*p(j))*ft(i,j) 
+              enddo
+           enddo
+        endif
+        if (ix == xsize) exit
+
+        ! B 
+        if (ips > 0) then
+           ix = ix+1
+           do j=1,np
+              do i=1,nt
+                 fvec(ix) = fvec(ix) &
+                      -its*cos(its*t(i))*sin(ips*p(j))*fp(i,j) &
+                      +ips*sin(its*t(i))*cos(ips*p(j))*ft(i,j) 
+              enddo
+           enddo
+        endif
+        if (ix == xsize) exit
+
+        ! C
+        if (its > 0) then
+           ix = ix+1
+           do j=1,np
+              do i=1,nt
+                 fvec(ix) = fvec(ix) &
+                      +its*sin(its*t(i))*cos(ips*p(j))*fp(i,j) &
+                      -ips*cos(its*t(i))*sin(ips*p(j))*ft(i,j) 
+              enddo
+           enddo
+        endif
+        if (ix == xsize) exit
+
+        ! D
+        if (ips > 0) then
+           ix = ix+1
+           do j=1,np
+              do i=1,nt
+                 fvec(ix) = fvec(ix) &
+                      +its*sin(its*t(i))*sin(ips*p(j))*fp(i,j) &
+                      +ips*cos(its*t(i))*cos(ips*p(j))*ft(i,j) 
+              enddo
+           enddo
+        endif
+        if (ix == xsize) exit
+
      enddo
   enddo
 

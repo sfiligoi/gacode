@@ -25,18 +25,20 @@ program le3
   call le3_alloc(1)
 
   if (restart_flag == 1) then
+
      open(unit=1,file='out.le3.tb',status='old')
      do it=1,nt
         read(1,*) tb(it,:)
      enddo
      close(1)
-  else   
-     do ip=1,np
-        tb(:,ip) = t(:)
-     enddo
 
-     as = 0.0
-     bs = 0.0
+  else   
+
+     if (solve_method == 1) then 
+        do ip=1,np
+           tb(:,ip) = t(:)
+        enddo
+     endif
 
   endif
 

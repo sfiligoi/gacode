@@ -6,9 +6,9 @@ module le3_driver
 
   real, dimension(:), allocatable, private :: mhdfunc
   real, dimension(:), allocatable, private :: xfunc
-  integer, private :: msize
   integer, private :: info
   integer, private :: nwork
+  integer, private :: msize
   real, dimension(:), allocatable, private :: work
   logical, private :: initialized = .false.
 
@@ -18,10 +18,11 @@ contains
     use le3_globals
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
-    integer :: it, ip
+    integer :: i,j
 
     if (flag == 1) then
-       if(initialized) return
+
+       if (initialized) return
 
        allocate(t(nt))
        allocate(p(np))
@@ -51,24 +52,24 @@ contains
        allocate(tcyc(1-nt:2*nt))
        allocate(pcyc(1-np:2*np))
 
-       do it=1,nt
-          t(it) = 2*(it-1)*pi/(nt)
+       do i=1,nt
+          t(i) = 2*(i-1)*pi/(nt)
        enddo
        dt = t(2)-t(1)
-       do ip=1,np
-          p(ip) = 2*(ip-1)*pi/(np)
+       do j=1,np
+          p(j) = 2*(j-1)*pi/(np)
        enddo
        dp = p(2)-p(1)
 
-       do it=1,nt
-          tcyc(it-nt) = it
-          tcyc(it) = it
-          tcyc(it+nt) = it
+       do i=1,nt
+          tcyc(i-nt) = i
+          tcyc(i) = i
+          tcyc(i+nt) = i
        enddo
-       do ip=1,np
-          pcyc(ip-np) = ip
-          pcyc(ip) = ip
-          pcyc(ip+np) = ip
+       do j=1,np
+          pcyc(j-np) = j
+          pcyc(j) = j
+          pcyc(j+np) = j
        enddo
        ! coefficients for 1st derivative
        cderiv(-2) =  1.0/12.0
@@ -90,14 +91,16 @@ contains
        else
 
           ! Spectral
-          msize = nts*(2*nps+1)
+          msize = 2*nts*(2*nps+1)
           allocate(mhdfunc(msize))
           allocate(xfunc(msize))
           nwork = (msize*(3*msize+13))/2 * 10
           allocate(work(nwork))
-       
+
           allocate(as(nts,0:nps))
-          allocate(bs(nts,nps))
+          allocate(bs(nts,0:nps))
+          allocate(cs(nts,0:nps))
+          allocate(ds(nts,0:nps))
 
        endif
 
@@ -148,22 +151,22 @@ contains
 
     use le3_globals
     implicit none
-    integer :: ix,it,ip,its,ips
-    external :: le3_func,les_func2
+    integer :: ix,i,j,its,ips
+    external :: le3_func,le3_func2
 
     if (solve_method == 1) then
 
-       do it=1,nt
-          do ip=1,np
-             tb(it,ip) = tb(it,ip) - t(it)
+       do i=1,nt
+          do j=1,np
+             tb(i,j) = tb(i,j)-t(i)
           enddo
        enddo
 
        ix=0
-       do ip=1,np
-          do it=2,nt
+       do j=1,np
+          do i=2,nt
              ix = ix+1
-             xfunc(ix) = tb(it,ip)
+             xfunc(ix) = tb(i,j)
           enddo
        enddo
 
@@ -172,39 +175,45 @@ contains
        !print *, xfunc
        print '(a,1pe12.5)','INFO: (le3) Root accuracy ->',sum(abs(mhdfunc))/size(mhdfunc)
 
-       do it=1,nt
-          do ip=1,np
-             tb(it,ip) = tb(it,ip) + t(it)
+       do i=1,nt
+          do j=1,np
+             tb(i,j) = tb(i,j)+t(i)
           enddo
        enddo
 
        open(unit=1,file='out.le3.t',status='replace')
-       do it=1,nt
-          write(1,10) t(it)
+       do i=1,nt
+          write(1,10) t(i)
        enddo
        close(1)
        open(unit=1,file='out.le3.p',status='replace')
-       do ip=1,np
-          write(1,10) p(ip)
+       do j=1,np
+          write(1,10) p(j)
        enddo
        close(1)
        open(unit=1,file='out.le3.tb',status='replace')
-       do it=1,nt
-          write(1,10) tb(it,:)
+       do i=1,nt
+          write(1,10) tb(i,:)
        enddo
        close(1)
        open(unit=1,file='out.le3.r',status='replace')
-       do it=1,nt
-          write(1,10) r(it,:)
+       do i=1,nt
+          write(1,10) r(i,:)
        enddo
        close(1)
        open(unit=1,file='out.le3.z',status='replace')
-       do it=1,nt
-          write(1,10) z(it,:)
+       do i=1,nt
+          write(1,10) z(i,:)
        enddo
        close(1)
 
     else
+
+      as(:,:) = 0.0
+      bs(:,:) = 0.0
+      cs(:,:) = 0.0
+      ds(:,:) = 0.0
+      as(1,0) = rmin/rmaj
 
        ix=0
        do ips=0,nps
@@ -215,10 +224,62 @@ contains
                 ix = ix+1
                 xfunc(ix) = bs(its,ips)
              endif
+             ix = ix+1
+             xfunc(ix) = cs(its,ips)
+             if (ips > 0) then
+                ix = ix+1
+                xfunc(ix) = ds(its,ips)
+             endif
           enddo
        enddo
 
        call hybrd1(le3_func2,msize,xfunc,mhdfunc,tol,info,work,nwork)
+
+       print '(a,1pe12.5)','INFO: (le3) Root accuracy ->',sum(abs(mhdfunc))/size(mhdfunc)
+
+       ix=0
+       do ips=0,nps
+          do its=1,nts 
+             ix = ix+1           
+             print *,'a',ips,its,xfunc(ix)
+             if (ips > 0) then
+                ix = ix+1
+                print *,'b',ips,its,xfunc(ix)
+             endif
+             ix = ix+1           
+             print *,'c',ips,its,xfunc(ix)
+             if (ips > 0) then
+                ix = ix+1
+                print *,'d',ips,its,xfunc(ix)
+             endif
+          enddo
+       enddo
+       
+       open(unit=1,file='out.le3.t',status='replace')
+       do i=1,nt
+          write(1,10) t(i)
+       enddo
+       close(1)
+       open(unit=1,file='out.le3.p',status='replace')
+       do j=1,np
+          write(1,10) p(j)
+       enddo
+       close(1)
+       open(unit=1,file='out.le3.tb',status='replace')
+       do i=1,nt
+          write(1,10) tb(i,:)
+       enddo
+       close(1)
+       open(unit=1,file='out.le3.r',status='replace')
+       do i=1,nt
+          write(1,10) r(i,:)
+       enddo
+       close(1)
+       open(unit=1,file='out.le3.z',status='replace')
+       do i=1,nt
+          write(1,10) z(i,:)
+       enddo
+       close(1)
 
     endif
 
