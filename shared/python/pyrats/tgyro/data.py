@@ -126,7 +126,6 @@ class TGYROData:
         nb = self.n_iterations+1
 
         numdata = np.zeros((nc,nb,nr-2))
-    
         for ib in range(nb):
             tags=string.split(data[ib*nr])
             null=string.split(data[ib*nr+1])
@@ -154,9 +153,9 @@ class TGYROData:
         # Data dimensions
         nr = self.n_radial
         nb = self.n_iterations+1
-        nc = 1+2*self.get_tag_value("LOC_NE_FEEDBACK_FLAG") \
+        nc = int(1+2*self.get_tag_value("LOC_NE_FEEDBACK_FLAG") \
               +2*self.get_tag_value("LOC_TE_FEEDBACK_FLAG") \
-              +2*self.get_tag_value("LOC_TI_FEEDBACK_FLAG")
+              +2*self.get_tag_value("LOC_TI_FEEDBACK_FLAG"))
         
         numdata = np.zeros((nc,nb,nr-1),dtype=float)
         
