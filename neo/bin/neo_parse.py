@@ -105,6 +105,8 @@ x.add('PROFILE_DELTA_SCALE','1.0')
 x.add('PROFILE_ZETA_SCALE','1.0')
 x.add('PROFILE_ZMAG_SCALE','1.0')
 
+x.add('SUBROUTINE_FLAG','0')
+
 x.add('THREED_MODEL','0')
 x.add('N_VARPHI','17')
 x.add('N_TOR','5')

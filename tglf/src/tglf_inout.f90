@@ -199,8 +199,8 @@
       if(nb_min.lt.0.or.nb_min.gt.nb)nb_min=nbasis_min_in
       if(nb_max.lt.nb_min)nb_max=nb_min
       if(ibranch.lt.-1.or.ibranch.gt.2)ibranch=ibranch_in
-      if(nxgrid.lt.1.or.2*nxgrid-1.gt.nxm)nxgrid=nxgrid_in
-      if(nmodes.gt.maxmodes)nmodes=nmodes_in
+      if(nxgrid.lt.1.or.2*nxgrid-1.gt.nxm)nxgrid=MIN((nxm+1)/2,nxgrid_in)
+      if(nmodes.lt.1.or.nmodes.gt.maxmodes)nmodes=nmodes_in
       if(nky.lt.2.or.nky.gt.nkym)nky=nky_in
 
 !      write(*,*)nb_max,nb_min,ibranch,nxgrid,nmodes,nky
@@ -1519,7 +1519,115 @@
      endif
 !
      END SUBROUTINE get_wavefunction_out
+!-----------------------------------------------------------------
+!
+     SUBROUTINE write_tglf_flux_spectrum
+!
+      USE tglf_dimensions
+      USE tglf_global
+      USE tglf_species
+      USE tglf_kyspectrum
+!   
+      IMPLICIT NONE
+      CHARACTER(22) :: fluxfile="out.tglf.flux_spectrum"
+      INTEGER :: i,j,is,imax,jmax
+      REAL :: dky
+      REAL :: dky0,dky1,ky0,ky1
+      REAL :: pflux0(nsm,3),eflux0(nsm,3)
+      REAL :: stress_par0(nsm,3),stress_tor0(nsm,3)
+      REAL :: exch0(nsm,3)
+      REAL :: nsum0(nsm),tsum0(nsm)
+      REAL :: pflux1(nsm,3),eflux1(nsm,3)
+      REAL :: stress_par1(nsm,3),stress_tor1(nsm,3)
+      REAL :: exch1(nsm,3)
+      REAL :: pflux_out,eflux_out,mflux_tor_out,mflux_par_out,exch_out
 
+!
+     if(new_start)then
+        write(*,*)"error: tglf_TM must be called before write_tglf_flux_spectrum"
+     endif
+!
+     OPEN(unit=33,file=fluxfile,status='replace')
+!
+!
+! initialize fluxes
+!
+      do is=ns0,ns
+        do j=1,3 
+          pflux0(is,j) = 0.0
+          eflux0(is,j) = 0.0
+          stress_par0(is,j) = 0.0
+          stress_tor0(is,j) = 0.0
+          exch0(is,j) = 0.0
+        enddo
+     enddo
+! set number of field
+     jmax = 1
+     if(use_Bper_in)jmax=2
+     if(use_Bpar_in)jmax=3
+! loop over species and fields
+    do is=ns0,ns
+      do j=1,jmax
+        write(33,*)"species = ",is,"field =",j
+        write(33,*)" ky,particle flux,energy flux,toroidal stress,parallel stress,exchange"
+
+!
+! loop over ky spectrum
+!
+        iflux_in=.TRUE. 
+        dky0=0.0
+        ky0=0.0 
+        do i=1,nky
+           ky_in = ky_spectrum(i)
+           dky = dky_spectrum(i)
+           ky1=ky_in
+           if(i.eq.1)then
+             dky1=ky1
+           else
+             dky = LOG(ky1/ky0)/(ky1-ky0)
+             dky1 = ky1*(1.0 - ky0*dky)
+             dky0 = ky0*(ky1*dky - 1.0)
+           endif
+! normalize the ky integral to make it independent of the 
+! choice of temperature and mass scales 
+           dky0 = dky0*SQRT(taus_in(1)*mass_in(2))
+           dky1 = dky1*SQRT(taus_in(1)*mass_in(2))
+!
+! compute the fluxes in the same way as tglf_TM.f90 
+!
+            pflux1(is,j) = 0.0
+            eflux1(is,j) = 0.0
+            stress_tor1(is,j) = 0.0
+            stress_par1(is,j) = 0.0
+            exch1(is,j) = 0.0
+            do imax = 1,nmodes_in
+              pflux1(is,j) = pflux1(is,j) + flux_spectrum_out(1,is,j,i,imax)
+              eflux1(is,j) = eflux1(is,j) + flux_spectrum_out(2,is,j,i,imax)
+              stress_tor1(is,j) = stress_tor1(is,j) + &
+                 flux_spectrum_out(3,is,j,i,imax)
+              stress_par1(is,j) = stress_par1(is,j) + &
+                 flux_spectrum_out(4,is,j,i,imax)
+              exch1(is,j) = exch1(is,j) + flux_spectrum_out(5,is,j,i,imax)
+            enddo !imax
+            pflux_out = dky0*pflux0(is,j) + dky1*pflux1(is,j)
+            eflux_out = dky0*eflux0(is,j) + dky1*eflux1(is,j)
+            mflux_tor_out = dky0*stress_tor0(is,j) + dky1*stress_tor1(is,j)
+            mflux_par_out = dky0*stress_par0(is,j) + dky1*stress_par1(is,j)
+            exch_out = dky0*exch0(is,j) + dky1*exch1(is,j)
+            write(33,*)ky_in,pflux_out,eflux_out,mflux_tor_out,mflux_par_out,exch_out
+             pflux0(is,j) = pflux1(is,j)
+             eflux0(is,j) = eflux1(is,j)
+             stress_par0(is,j) = stress_par1(is,j)
+             stress_tor0(is,j) = stress_tor1(is,j)
+             exch0(is,j) = exch1(is,j)
+             ky0 = ky1
+         enddo  ! i
+       enddo  ! j
+     enddo  ! is 
+!
+!    
+     END SUBROUTINE write_tglf_flux_spectrum
+!-----------------------------------------------------------------
 
 
    !-----------------------------------------------------------------

@@ -76,7 +76,7 @@ subroutine gyro_alloc_profile_sim(flag)
 
      allocate(krho_i(n_n_1,n_x))
 
-     allocate(a_fourier_geo_s(8,0:16,n_x))
+     allocate(a_fourier_geo_s(8,0:32,n_x))
 
      allocate(alpha_s(n_spec,n_x))
      allocate(dlnndr_s(n_spec,n_x))

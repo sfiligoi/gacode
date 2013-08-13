@@ -198,6 +198,9 @@ subroutine EXPRO_compute_derived
         GEO_fourier_in(1:4,:) = EXPRO_geo(:,:,i)/r_min
         GEO_fourier_in(5:8,:) = EXPRO_dgeo(:,:,i)
         call GEO_do()
+        if (minval(GEOV_jac_r) <= 0.0) then
+           print '(a,i3,a)','WARNING: (EXPRO) Negative GEO Jacobian for i =',i,' in input.profiles'
+        endif
      endif
 
      ! V and dV/dr
@@ -215,6 +218,8 @@ subroutine EXPRO_compute_derived
      ! B_poloidal and B_toroidal at theta=0
      EXPRO_bp0(i) = GEO_bp*EXPRO_bunit(i)
      EXPRO_bt0(i) = GEO_bt*EXPRO_bunit(i)
+
+     EXPRO_thetascale(i) = GEO_thetascale
 
   enddo
 
@@ -237,6 +242,7 @@ subroutine EXPRO_compute_derived
   !
   EXPRO_vol(1)  = 0.0
   EXPRO_volp(1) = 0.0  
+  EXPRO_thetascale(1) = EXPRO_thetascale(2)
   !--------------------------------------------------------------
 
   !-----------------------------------------------------------------

@@ -10,14 +10,25 @@ subroutine tgyro_write_input
   !----------------------------------------------------------------
   ! Trap miscellaneous errors
   !
+  ! - Bogus matching radius
+  !
   if (i_bc < 0) then
-     call tgyro_catch_error('ERROR: (TGYRO) Problem with matching radius.')
+     error_flag = 1
+     error_msg = 'ERROR: (TGYRO) Problem with matching radius.'
   endif
   !
-  ! Advanced iteration methods cannot do zero iterations:
+  ! - Advanced iteration methods cannot do zero iterations:
   !
   if (tgyro_iteration_method >= 4 .and. tgyro_relax_iterations == 0) then
-     call tgyro_catch_error('ERROR: (TGYRO) TGYRO_ITERATION_METHOD > 4 requires TGYRO_RELAX_ITERATIONS > 0.')
+     error_flag = 1
+     error_msg = 'ERROR: (TGYRO) TGYRO_ITERATION_METHOD > 4 requires TGYRO_RELAX_ITERATIONS > 0.'
+  endif
+  !
+  ! - Need rotation physics to evolve Er
+  !  
+  if (tgyro_rotation_flag == 0 .and. loc_er_feedback_flag == 1) then
+     error_flag = 1
+     error_msg = 'ERROR: (TGYRO) TGYRO_ROTATION_FLAG must be 1 to evolve Er.'
   endif
   !----------------------------------------------------------------
 
@@ -155,6 +166,10 @@ subroutine tgyro_write_input
      case (3)
 
         write(1,10) 'LOC_RESIDUAL_METHOD','(f-g)^2'
+
+     case (4)
+
+        write(1,10) 'LOC_RESIDUAL_METHOD','(f-g)^2/MAX(1,(f^2+g^2))'
 
      case default
 
@@ -453,16 +468,34 @@ subroutine tgyro_write_input
 
      case (0)
 
-        write(1,10) 'LOC_QUASINEUTRAL_FLAG','Densities unaltered'
+        write(1,10) 'LOC_QUASINEUTRAL_FLAG','Initial densities unaltered'
 
      case (1)
 
-        write(1,10) 'LOC_QUASINEUTRAL_FLAG','Forced quasineutrality'
+        write(1,10) 'LOC_QUASINEUTRAL_FLAG','Initial main ion density modified to enforce quasineutrality'
 
      case default
 
         error_flag = 1
         error_msg = 'Error: LOC_QUASINEUTRAL_FLAG'
+
+     end select
+     !--------------------------------------------------------
+     !--------------------------------------------------------
+     select case (tgyro_fix_concentration_flag)
+
+     case (0)
+
+        write(1,10) 'TGYRO_FIX_CONCENTRATION_FLAG','Enforce quasineutrality on main ions during iteration'
+
+     case (1)
+
+        write(1,10) 'TGYRO_FIX_CONCENTRATION_FLAG','Fix ratio of all ion densities while enforcing quasineutrality'
+
+     case default
+
+        error_flag = 1
+        error_msg = 'ERROR: (tgyro) Bad value for TGYRO_FIX_CONCENTRATION_FLAG'
 
      end select
      !--------------------------------------------------------
@@ -508,7 +541,7 @@ subroutine tgyro_write_input
      enddo
 
      !--------------------------------------------------------
-    !--------------------------------------------------------
+     !--------------------------------------------------------
      write(1,*)
      write(1,*) 'Rotation and field orientation'
      write(1,*) 
@@ -540,7 +573,7 @@ subroutine tgyro_write_input
      write(1,30) 'IPCCW',-signb*signq
      write(1,30) 'BTCCW',-signb
      !--------------------------------------------------------
- 
+
      !--------------------------------------------------------
      write(1,*)
      write(1,*) 'Input profile rescaling factors'

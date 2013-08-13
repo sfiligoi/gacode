@@ -3,7 +3,6 @@ module prgen_globals
   ! Parameters
   real, parameter :: kevdsecpmw=1.6022e-19*1e3*1e-6
   real, parameter :: pi=3.14159265358979323846
-  integer, parameter :: nfourier=8
 
   ! List of possible data files
   character (len=70) :: date
@@ -25,6 +24,7 @@ module prgen_globals
   integer, dimension(5) :: reorder_vec
   integer :: ipccw
   integer :: btccw
+  integer :: nfourier
   real :: dpsi_efit
   real :: dpsi_data
   !----------------------------------------------------------
@@ -86,6 +86,7 @@ module prgen_globals
   character (len=2), dimension(5) :: onetwo_namep
   character (len=2), dimension(5) :: onetwo_namei
   character (len=2), dimension(5) :: onetwo_nameb
+  character (len=2), dimension(16) :: onetwo_ion_name
   real :: onetwo_time
   real :: onetwo_Rgeom
   real :: onetwo_Rmag
@@ -116,10 +117,12 @@ module prgen_globals
   real, dimension(:), allocatable :: onetwo_sbeam
   real, dimension(:), allocatable :: onetwo_te
   real, dimension(:), allocatable :: onetwo_ti
+  real, dimension(:), allocatable :: onetwo_talp
   real, dimension(:), allocatable :: onetwo_q
   real, dimension(:), allocatable :: onetwo_angrot
   real, dimension(:), allocatable :: onetwo_zeff
   real, dimension(:), allocatable :: onetwo_ene
+  real, dimension(:), allocatable :: onetwo_enalp
   real, dimension(:), allocatable :: onetwo_psi
   real, dimension(:), allocatable :: onetwo_storqueb
   real, dimension(:), allocatable :: onetwo_press
@@ -142,6 +145,11 @@ module prgen_globals
   real, dimension(:), allocatable :: onetwo_elongxnpsi
   real, dimension(:), allocatable :: onetwo_triangnpsi_u
   real, dimension(:), allocatable :: onetwo_triangnpsi_l
+  !
+  ! conglomerate ion vectors
+  !
+  real, dimension(:,:), allocatable :: onetwo_enion_vec
+  real, dimension(:,:), allocatable :: onetwo_Tion_vec  
   !---------------------------------------------------------
 
   !---------------------------------------------------------
@@ -191,6 +199,7 @@ module prgen_globals
   !---------------------------------------------------------
   ! PEQDSK variables
   !
+  integer :: peqdsk_ftype
   integer :: peqdsk_nj
   real :: peqdsk_bref
   real :: peqdsk_arho
@@ -200,6 +209,8 @@ module prgen_globals
   real, dimension(:), allocatable :: peqdsk_ni
   real, dimension(:), allocatable :: peqdsk_ti
   real, dimension(:), allocatable :: peqdsk_omegat
+  real, dimension(:), allocatable :: peqdsk_nb
+  real, dimension(:), allocatable :: peqdsk_pb
   !---------------------------------------------------------
 
   !---------------------------------------------------------

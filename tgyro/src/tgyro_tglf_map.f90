@@ -20,20 +20,22 @@ subroutine tgyro_tglf_map
   real :: gamma_eb0
   real :: gamma_p0
 
-  ! Currently TGLF uses toroidal current as reference direction
-  tglf_sign_bt_in = signq
-  tglf_sign_it_in = 1.0
-
   q_abs = abs(q(i_r))
 
   ! Initialize TGLF
   call tglf_init(paths(i_r-1), gyro_comm)
 
   !----------------------------------------------------------------
+  ! Signs of toroidal magnetic field and current 
+  tglf_sign_bt_in = -1.0*signb
+  tglf_sign_it_in = -1.0*signb*signq
+  !----------------------------------------------------------------
+
+  !----------------------------------------------------------------
   ! Number of species (max=6)
   tglf_ns_in = loc_n_ion+1
   if (tglf_ns_in > nsm) then
-     call tgyro_catch_error('ERROR: too many ions in TGLF')
+     call tgyro_catch_error('ERROR: (tgyro_tglf_map) Too many ions in TGLF.')
   endif
   !----------------------------------------------------------------
 
@@ -157,12 +159,13 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
   ! Gamma_ExB (ExB shearing rate, units of a/cs)
   if (tgyro_rotation_flag == 1) then
-     gamma_p0  = -r_maj(i_r)*f_rot(i_r)*w0p_norm
+     gamma_p0  = -r_maj(i_r)*f_rot(i_r)*w0_norm
      gamma_eb0 = gamma_p0*r(i_r)/(q_abs*r_maj(i_r)) 
-
-     tglf_vexb_shear_in = gamma_eb0*r_min/c_s(i_r)  
-     tglf_vpar_shear_in(:) = gamma_p0*r_min/c_s(i_r)
-     tglf_vpar_in(:) = r_maj(i_r)*w0(i_r)/c_s(i_r)
+     ! Currently TGLF uses toroidal current as reference direction
+     ! Overall minus sign is due to TGYRO toroidal angle in CW direction
+     tglf_vexb_shear_in    = -tglf_sign_it_in*gamma_eb0*r_min/c_s(i_r)  
+     tglf_vpar_shear_in(:) = -tglf_sign_it_in*gamma_p0*r_min/c_s(i_r)
+     tglf_vpar_in(:)       = -tglf_sign_it_in*r_maj(i_r)*w0(i_r)/c_s(i_r)
   endif
   !----------------------------------------------------------------
 
@@ -170,7 +173,8 @@ subroutine tgyro_tglf_map
   ! Number of high-k modes
   !  nky=12 (default to include ETG)
   !  nky=0  (low-k only)
-  tglf_nky_in = 12
+  ! JC: remove override
+  ! tglf_nky_in = 12
   !-----------------------------------
 
   !----------------------------------------------------------------
@@ -195,24 +199,24 @@ subroutine tgyro_tglf_map
   tglf_use_bisection_in = .true.
   !
   ! Number of Hermite functions to determine Gaussian Width (1-2)
-  tglf_nbasis_min_in = 1
+  !  tglf_nbasis_min_in = 1
   !
   ! Number of Hermite function in full expansion (4 or more, even)
-  tglf_nbasis_max_in = 4
+  !  tglf_nbasis_max_in = 4
   !
   ! Number of Hermite quadrature nodes
-  tglf_nxgrid_in = 16
+  ! tglf_nxgrid_in = 16
   !
   ! Maximum number of widths sampled (could be higher than 21)
-  tglf_nwidth_in = 21
+  !  tglf_nwidth_in = 21
   !
   ! Bisection search interval; must increase nwidth_tg if
   ! increasing this interval to maintain accuracy:
   !
   !  accuracy ~ (width_max_tg-width_min_tg)/nwidth_tg
   !
-  tglf_width_min_in = 0.3
-  tglf_width_in = 1.65
+  !  tglf_width_min_in = 0.3
+  !  tglf_width_in = 1.65
   !----------------------------------------------------------------
 
   !----------------------------------------------------------------

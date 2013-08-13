@@ -56,7 +56,7 @@
 !  GEO_b        : B/B_unit (carries the sign of B_unit)
 !  GEO_bp       : B_p/B_unit
 !  GEO_bt       : B_t/B_unit
-!  GEO_dbdt2    : d(GEO_b)/dtheta
+!  GEO_dbdt     : d(GEO_b)/dtheta
 !  GEO_dbdt2    : d^2(GEO_b)/dtheta^2
 !  GEO_gsin     : generalized sine
 !  GEO_gcos1    : generalized cosine
@@ -115,6 +115,7 @@ module GEO_interface
   real, dimension(:), allocatable :: GEOV_gcos1
   real, dimension(:), allocatable :: GEOV_gcos2
   real, dimension(:), allocatable :: GEOV_g_theta
+  real, dimension(:), allocatable :: GEOV_jac_r
   real, dimension(:), allocatable :: GEOV_grad_r
   real, dimension(:), allocatable :: GEOV_gq
   real, dimension(:), allocatable :: GEOV_captheta
@@ -164,5 +165,6 @@ module GEO_interface
   real :: GEO_fluxsurfave_grad_r2
   real :: GEO_fluxsurfave_grad_r
   real :: GEO_grad_r0
+  real :: GEO_thetascale
 
 end module GEO_interface

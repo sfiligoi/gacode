@@ -116,6 +116,8 @@ subroutine tgyro_iteration_driver
 
   call tgyro_write_input
 
+  ! NOTE: See gyro/src/gyro_globals.f90 for definition of transport_method
+
   if (tgyro_mode == 2) then
      ! Branch off to stability calculation
      transport_method = 1
@@ -123,7 +125,11 @@ subroutine tgyro_iteration_driver
      return
   else
      ! Standard transport calculation
-     transport_method = 2
+     if (tgyro_gyro_restart_flag == 0) then
+        transport_method = 2
+     else
+        transport_method = 3
+     endif
   endif
 
   if (loc_restart_flag == 0) then

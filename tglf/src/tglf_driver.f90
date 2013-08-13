@@ -155,6 +155,7 @@
         enddo 
 !
         CALL write_tglf_input
+        CALL write_tglf_flux_spectrum
         STOP 
 !        
         new_eikonal_tg=.FALSE.

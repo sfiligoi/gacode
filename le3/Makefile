@@ -16,5 +16,6 @@ all:
 clean:
 	cd minpack ; make clean 
 	cd src ; make clean
+	cd ../modules ; rm -f le3*.mod
 	rm -f .VERSION
 .IGNORE:

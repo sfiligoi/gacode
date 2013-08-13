@@ -19,9 +19,10 @@ subroutine neo_do
   use neo_rotation
   use neo_transport
   use neo_theory
+  use neo_nclass_dr
   use neo_g_velocitygrids
   use neo_allocate_profile
-  use neo_3d_driver
+  !use neo_3d_driver
   use mpi
   implicit none
 
@@ -100,8 +101,8 @@ subroutine neo_do
               endif
            enddo
            neo_th_out(4)     = efluxi_CH
-           neo_th_out(5)     = jpar_HH
-           neo_th_out(6)     = jpar_S
+           neo_th_out(5)     = jpar_S
+           neo_th_out(6)     = jpar_K
            neo_thHS_out(:,:) = 0.0
            do is=1, n_species
               neo_thHS_out(is,1) = pflux_multi_HS(is) 
@@ -551,8 +552,11 @@ subroutine neo_do
            endif
         enddo
         neo_th_out(4) = efluxi_CH
-        neo_th_out(5)     = jpar_HH
-        neo_th_out(6)     = jpar_S
+        neo_th_out(5)     = jpar_S
+        neo_th_out(6)     = jpar_K
+        if(sim_model == 1) then
+           neo_th_out(7)     = jbs_nc
+        endif
         neo_thHS_out(:,:) = 0.0
         do is=1, n_species
            neo_thHS_out(is,1) = pflux_multi_HS(is) 

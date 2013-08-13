@@ -10,7 +10,9 @@ EXEC = le3
 
 OBJECTS = le3_globals.o \
           le3_func.o \
+          le3_func2.o \
 	  le3_driver.o \
+          le3_map.o \
           $(EXEC).o
 
 .SUFFIXES : .o .f90

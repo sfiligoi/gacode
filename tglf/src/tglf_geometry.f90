@@ -26,7 +26,7 @@ SUBROUTINE xgrid_functions_sa
   IMPLICIT NONE
   INTEGER :: i
   REAL :: thx,dthx,sn,cn,eps,Rx,Rx1,Rx2
-  REAL :: kyi,wE,a0
+  REAL :: kyi,wE,a0,vexb_shear_kx0
   !
   ! debug
   ! write(*,*)"shat_sa=",shat_sa,"alpha_sa=",alpha_sa
@@ -54,11 +54,12 @@ SUBROUTINE xgrid_functions_sa
   !EPS2011 sign_kx0=1.0
   kx0_e = 0.0
   if(alpha_quench_in.eq.0.0.and.gamma_reference_kx0(1).ne.0.0)then
+     vexb_shear_kx0 = alpha_e_in*vexb_shear_s
      kyi = ky*vs(2)*mass(2)/ABS(zs(2))
-     wE = MIN(kyi/0.3,1.0)*vexb_shear_s/gamma_reference_kx0(1)
+     wE = MIN(kyi/0.3,1.0)*vexb_shear_kx0/gamma_reference_kx0(1)
      ! write(*,*)"wE=",wE
-     kx0_e = -(0.36*vexb_shear_s/gamma_reference_kx0(1) + 0.38*wE*TANH((0.69*wE)**6))
-     a0 = alpha_e_in*1.3
+     kx0_e = -(0.36*vexb_shear_kx0/gamma_reference_kx0(1) + 0.38*wE*TANH((0.69*wE)**6))
+     a0 = 1.3
      if(ABS(kx0_e).gt.a0)kx0_e = a0*kx0_e/ABS(kx0_e)
 !     a0 = alpha_e_in*2.0
 !     if(alpha_e_in.ne.0.0)then
@@ -180,7 +181,7 @@ SUBROUTINE xgrid_functions_geo
   REAL :: cxtorper1,cxtorper2
   REAL :: B2x1,B2x2,R2x1,R2x2,norm_ave,dlp
   REAL :: kyi
-  REAL :: wE,wd0,a0
+  REAL :: wE,wd0,a0,vexb_shear_kx0
   !
   !
   ! find length along magnetic field y
@@ -227,17 +228,18 @@ SUBROUTINE xgrid_functions_geo
   kx0_p=0.0
   !EPS2011 sign_kx0=1.0
   if(alpha_quench_in.eq.0.0.and.gamma_reference_kx0(1).ne.0.0)then
+     vexb_shear_kx0 = alpha_e_in*vexb_shear_s
      kyi = ky*vs(2)*mass(2)/ABS(zs(2))
      wE=0.0
      wd0 = ABS(ky/Rmaj_s)
      kx0_factor = ABS(b_geo(0)/qrat_geo(0)**2)
      kx0_factor = 1.0+0.40*(kx0_factor-1.0)**2
      ! write(*,*)"kx0_factor=",kx0_factor
-     wE = kx0_factor*MIN(kyi/0.3,1.0)*vexb_shear_s/gamma_reference_kx0(1)
+     wE = kx0_factor*MIN(kyi/0.3,1.0)*vexb_shear_kx0/gamma_reference_kx0(1)
      ! write(*,*)"wE=",wE
      ! kx0_factor = alpha_kx_p_in
      !! kx0_e = -(0.36*vexb_shear_s/gamma_reference_kx0(1) + 0.29*wE*TANH((0.71*wE)**6))
-     kx0_e = -(0.36*vexb_shear_s/gamma_reference_kx0(1) + 0.38*wE*TANH((0.69*wE)**6))
+     kx0_e = -(0.36*vexb_shear_kx0/gamma_reference_kx0(1) + 0.38*wE*TANH((0.69*wE)**6))
      !a=3.0 kx0_e = -(0.36*vexb_shear_s/gamma_reference_kx0(1) + 0.32*wE*TANH((0.71*wE)**6))
 !     a0 = alpha_e_in*2.0
 !     if(alpha_e_in.ne.0.0)then
@@ -245,7 +247,7 @@ SUBROUTINE xgrid_functions_geo
 !     else
 !        kx0_e = 0.0
 !     endif
-     a0 = alpha_e_in*1.3
+     a0 = 1.3
      if(ABS(kx0_e).gt.a0)kx0_e = a0*kx0_e/ABS(kx0_e)
      !
      !APS2010 kx0 = alpha_kx_e_in*0.19*TANH(vexb_shear_s*Rmaj_s/vs(2))*kyi*kyi/(kyi*kyi+0.001)/ky

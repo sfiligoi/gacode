@@ -54,13 +54,31 @@ subroutine prgen_read_peqdsk
   call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_ti,peqdsk_nj)
   deallocate(xv)
 
+  if(peqdsk_ftype == 2) then
+
+     ! nb(10^20/m^3)
+     read(1,*) i, t
+     allocate(xv(ncol,i))
+     read(1,*) xv
+     call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_nb,peqdsk_nj)
+     deallocate(xv)
+
+     ! pb(KPa)
+     read(1,*) i, t
+     allocate(xv(ncol,i))
+     read(1,*) xv
+     call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_pb,peqdsk_nj)
+     deallocate(xv)
+     
+  endif
+
   ! omeg(kRad/s)
   read(1,*) i, t
   allocate(xv(ncol,i))
   read(1,*) xv
   call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_omegat,peqdsk_nj)
   deallocate(xv)
-
+  
   close(1)
 
   call allocate_internals

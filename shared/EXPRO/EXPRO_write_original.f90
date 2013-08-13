@@ -40,7 +40,7 @@ subroutine EXPRO_write_original(tag)
                 EXPRO_rho(i),&
                 EXPRO_rmin(i),&
                 EXPRO_rmaj(i),&
-                abs(EXPRO_q(i)),&
+                EXPRO_q(i),&
                 EXPRO_kappa(i)
         enddo
      endif

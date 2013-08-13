@@ -6,9 +6,9 @@ module le3_driver
 
   real, dimension(:), allocatable, private :: mhdfunc
   real, dimension(:), allocatable, private :: xfunc
-  integer, private :: msize
   integer, private :: info
   integer, private :: nwork
+  integer, private :: msize
   real, dimension(:), allocatable, private :: work
   logical, private :: initialized = .false.
 
@@ -18,10 +18,11 @@ contains
     use le3_globals
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
-    integer :: it, ip
+    integer :: i,j,its,ips
 
-    if(flag == 1) then
-       if(initialized) return
+    if (flag == 1) then
+
+       if (initialized) return
 
        allocate(t(nt))
        allocate(p(np))
@@ -51,24 +52,24 @@ contains
        allocate(tcyc(1-nt:2*nt))
        allocate(pcyc(1-np:2*np))
 
-       do it=1,nt
-          t(it) = 2*(it-1)*pi/(nt)
+       do i=1,nt
+          t(i) = 2*(i-1)*pi/(nt)
        enddo
        dt = t(2)-t(1)
-       do ip=1,np
-          p(ip) = 2*(ip-1)*pi/(np)
+       do j=1,np
+          p(j) = 2*(j-1)*pi/(np)
        enddo
        dp = p(2)-p(1)
-       
-       do it=1,nt
-          tcyc(it-nt) = it
-          tcyc(it) = it
-          tcyc(it+nt) = it
+
+       do i=1,nt
+          tcyc(i-nt) = i
+          tcyc(i) = i
+          tcyc(i+nt) = i
        enddo
-       do ip=1,np
-          pcyc(ip-np) = ip
-          pcyc(ip) = ip
-          pcyc(ip+np) = ip
+       do j=1,np
+          pcyc(j-np) = j
+          pcyc(j) = j
+          pcyc(j+np) = j
        enddo
        ! coefficients for 1st derivative
        cderiv(-2) =  1.0/12.0
@@ -76,18 +77,55 @@ contains
        cderiv(0)  =  0
        cderiv(1)  =  8.0/12.0
        cderiv(2)  = -1.0/12.0
-       
+
        ! matrix allocations
-       msize = (nt-1)*np
+       if (solve_method == 1) then
+
+          ! FD
+          msize = nt*np-1
+
+       else
+
+          ! Spectral
+          msize = 4*nts*nps+2*(nts+nps)
+
+          ! Fourier coefficients
+          allocate(as(0:nts,0:nps))
+          allocate(bs(0:nts,0:nps))
+          allocate(cs(0:nts,0:nps))
+          allocate(ds(0:nts,0:nps))
+
+          ! Storage to eliminate direct sin/cos evaluation
+          allocate(sinm(nt,0:nts))
+          allocate(cosm(nt,0:nts))
+          allocate(sinn(np,0:nps))
+          allocate(cosn(np,0:nps))
+
+          do its=0,nts
+             do i=1,nt
+                sinm(i,its) = sin(its*t(i))
+                cosm(i,its) = cos(its*t(i))
+             enddo
+          enddo
+          do ips=0,nps
+             do j=1,np
+                sinn(j,ips) = sin(ips*p(j))
+                cosn(j,ips) = cos(ips*p(j))
+             enddo
+          enddo
+
+       endif
+
        allocate(mhdfunc(msize))
        allocate(xfunc(msize))
-       nwork = (msize*(3*msize+13))/2 * 10
+       nwork = (msize*(3*msize+13))/2*10
        allocate(work(nwork))
 
        initialized = .true.
 
     else
-       if(.NOT. initialized) return
+
+       if (.NOT. initialized) return
 
        deallocate(t)
        deallocate(p)
@@ -122,69 +160,124 @@ contains
 
        initialized = .false.
 
-    end if
+    endif
 
   end subroutine le3_alloc
 
   subroutine le3_solver
+
     use le3_globals
     implicit none
-    integer :: ir,it,ip
-    external :: le3_func
+    integer :: ix,i,j,its,ips
+    external :: le3_func,le3_func2
 
-    do it=1,nt
-       do ip=1,np
-          tb(it,ip) = tb(it,ip) - t(it)
-       enddo
-    enddo
+    if (solve_method == 1) then
 
-    ir=1
-    do ip=1,np
-       do it=2,nt
-          xfunc(ir) = tb(it,ip)
-          ir = ir+1
+       do i=1,nt
+          do j=1,np
+             tb(i,j) = tb(i,j)-t(i)
+          enddo
        enddo
-    enddo
-    
-    call hybrd1 (le3_func,msize,xfunc,mhdfunc,tol,info,work,nwork)
-    
-    !print *, xfunc
-    print '(a,1pe12.5)','INFO: (le3) Root accuracy ->',sum(abs(mhdfunc))/size(mhdfunc)
-    
-    do it=1,nt
-       do ip=1,np
-          tb(it,ip) = tb(it,ip) + t(it)
-       enddo
-    enddo
 
-    open(unit=1,file='out.le3.t',status='replace')
-    do it=1,nt
-       write(1,10) t(it)
-    enddo
-    close(1)
-    open(unit=1,file='out.le3.p',status='replace')
-    do ip=1,np
-       write(1,10) p(ip)
-    enddo
-    close(1)
-    open(unit=1,file='out.le3.tb',status='replace')
-    do it=1,nt
-       write(1,10) tb(it,:)
-    enddo
-    close(1)
-    open(unit=1,file='out.le3.r',status='replace')
-    do it=1,nt
-       write(1,10) r(it,:)
-    enddo
-    close(1)
-    open(unit=1,file='out.le3.z',status='replace')
-    do it=1,nt
-       write(1,10) z(it,:)
-    enddo
-    close(1)
-    
-10  format(200(1pe12.5,1x))
-    
+       ix=0
+       do j=1,np
+          do i=1,nt
+             if (i+j > 2) then
+                ix = ix+1
+                xfunc(ix) = tb(i,j)
+             endif
+          enddo
+       enddo
+
+       call hybrd1(le3_func,msize,xfunc,mhdfunc,tol,info,work,nwork)
+
+       print '(a,1pe12.5)','INFO: (le3) Root accuracy ->',sum(abs(mhdfunc))/size(mhdfunc)
+
+       do i=1,nt
+          do j=1,np
+             tb(i,j) = tb(i,j)+t(i)
+          enddo
+       enddo
+
+       open(unit=1,file='out.le3.t',status='replace')
+       do i=1,nt
+          write(1,10) t(i)
+       enddo
+       close(1)
+       open(unit=1,file='out.le3.p',status='replace')
+       do j=1,np
+          write(1,10) p(j)
+       enddo
+       close(1)
+       open(unit=1,file='out.le3.tb',status='replace')
+       do i=1,nt
+          write(1,10) tb(i,:)
+       enddo
+       close(1)
+       open(unit=1,file='out.le3.r',status='replace')
+       do i=1,nt
+          write(1,10) r(i,:)
+       enddo
+       close(1)
+       open(unit=1,file='out.le3.z',status='replace')
+       do i=1,nt
+          write(1,10) z(i,:)
+       enddo
+       close(1)
+
+    else
+
+       as(:,:) = 0.0
+       bs(:,:) = 0.0
+       cs(:,:) = 0.0
+       ds(:,:) = 0.0
+       as(1,0) = rmin/rmaj
+
+       call le3_map(xfunc,as,bs,cs,ds,nps,nts,'setx')
+       call hybrd1(le3_func2,msize,xfunc,mhdfunc,tol,info,work,nwork)
+       call le3_map(xfunc,as,bs,cs,ds,nps,nts,'setc')
+
+       print '(a,1pe12.5)','INFO: (le3) Root accuracy ->',sum(abs(mhdfunc))/size(mhdfunc)
+
+       print 30,'a_{mn}','b_{mn}','c_{mn}','d_{mn}'
+       do ips=0,nps
+          do its=0,nts
+             print 20,its,ips,as(its,ips),bs(its,ips),cs(its,ips),ds(its,ips)
+          enddo
+       enddo
+
+       open(unit=1,file='out.le3.t',status='replace')
+       do i=1,nt
+          write(1,10) t(i)
+       enddo
+       close(1)
+       open(unit=1,file='out.le3.p',status='replace')
+       do j=1,np
+          write(1,10) p(j)
+       enddo
+       close(1)
+       open(unit=1,file='out.le3.tb',status='replace')
+       do i=1,nt
+          write(1,10) tb(i,:)
+       enddo
+       close(1)
+       open(unit=1,file='out.le3.r',status='replace')
+       do i=1,nt
+          write(1,10) r(i,:)
+       enddo
+       close(1)
+       open(unit=1,file='out.le3.z',status='replace')
+       do i=1,nt
+          write(1,10) z(i,:)
+       enddo
+       close(1)
+
+    endif
+
+10 format(200(1pe12.5,1x))
+20 format('(',i2,',',i2,'):',2x,4(1pe14.7,1x))
+30 format(t15,4(a,9x))
+ 
   end subroutine le3_solver
   
 end module le3_driver

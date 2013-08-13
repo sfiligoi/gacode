@@ -1255,17 +1255,17 @@ cc     >  +(vpolm+vneom(2))*grad_a_pol+(vexbm+vdiam(2))*grad_a_tor)
 c      vpar_shear_tg(3) = -sign_Bt_exp*(cv/(csdam))*drhodr(jm)*
 c     >  (apolm*(gradvpolm+gradvneom(3))+atorm*(gradvexbm+gradvdiam(3))) 
 cc     >  +(vpolm+vneom(3))*grad_a_pol+(vexbm+vdiam(3))*grad_a_tor)
-      vpar_shear_tg(1) = -sign_Bt_exp*(cv/csdam)*drhodr(jm)*
+      vpar_shear_tg(1) = -(cv/csdam)*drhodr(jm)*
      >  (rmajm/rmajor_exp)*(gradvexbm+gradvdiam(1)+
      >  (apolm/atorm)*(gradvpolm+gradvneom(1))) 
-      vpar_shear_tg(2) = -sign_Bt_exp*(cv/csdam)*drhodr(jm)*
+      vpar_shear_tg(2) = -(cv/csdam)*drhodr(jm)*
      >  (rmajm/rmajor_exp)*(gradvexbm+gradvdiam(2)+
      >  (apolm/atorm)*(gradvpolm+gradvneom(2))) 
-      vpar_shear_tg(3) = -sign_Bt_exp*(cv/csdam)*drhodr(jm)*
+      vpar_shear_tg(3) = -(cv/csdam)*drhodr(jm)*
      >  (rmajm/rmajor_exp)*(gradvexbm+gradvdiam(3)+
      >  (apolm/atorm)*(gradvpolm+gradvneom(3))) 
 c
-      if(ipert_gf.eq.0)gamma_p_m(jm)=sign_Bt_exp*vpar_shear_tg(2)
+      if(ipert_gf.eq.0)gamma_p_m(jm)=vpar_shear_tg(2)
 c
       cnc = -alpha_dia/bt_exp
       wstar0 = -(cnc/theta_exp(jm))*(te_m(jm+1)-te_m(jm-1))
@@ -1314,19 +1314,6 @@ c        vts_shear_tg(1) = 0.0
 c        vts_shear_tg(2) = 0.0
 c        vts_shear_tg(3) = 0.0
 c      endif
-      if(vpar_shear_model_tg.eq.1)then
-c use GYRO conventions
-        gamma_p_m(jm) =-(cv/csdam)*drhodr(jm)*gradvexbm*rmajm/rmajor_exp
-        vpar_shear_tg(1) = sign_It_exp*gamma_p_m(jm)
-        vpar_shear_tg(2) = vpar_shear_tg(1)
-        vpar_shear_tg(3) = vpar_shear_tg(3)
-        vns_shear_tg(1) = 0.0
-        vns_shear_tg(2) = 0.0
-        vns_shear_tg(3) = 0.0
-        vts_shear_tg(1) = 0.0
-        vts_shear_tg(2) = 0.0
-        vts_shear_tg(3) = 0.0
-      endif
       if(alpha_p_tg.eq.0.0)then
         vpar_shear_tg(1)=0.0
         vpar_shear_tg(2)=0.0
@@ -1387,22 +1374,15 @@ c      vpar_tg(2) = sign_Bt_exp*cv*(a_pol(jm)*(vpolm+vneom(2))
 c     >     +a_tor(jm)*(vexbm+vdiam(2)))/(a_unit_exp*csdam)
 c      vpar_tg(3) = sign_Bt_exp*cv*(a_pol(jm)*(vpolm+vneom(3))
 c     >     +a_tor(jm)*(vexbm+vdiam(3)))/(a_unit_exp*csdam)
-      vpar_tg(1) = sign_Bt_exp*cv*rmajm/rmajor_exp*
+      vpar_tg(1) = cv*rmajm/rmajor_exp*
      >   (vexbm+vdiam(1)+(apolm/atorm)*(vpolm+vneom(1)))
      >   /(a_unit_exp*csdam)
-      vpar_tg(2) = sign_Bt_exp*cv*rmajm/rmajor_exp*
+      vpar_tg(2) = cv*rmajm/rmajor_exp*
      >   (vexbm+vdiam(2)+(apolm/atorm)*(vpolm+vneom(2)))
      >   /(a_unit_exp*csdam)
-      vpar_tg(3) = sign_Bt_exp*cv*rmajm/rmajor_exp*
+      vpar_tg(3) = cv*rmajm/rmajor_exp*
      >  (vexbm+vdiam(3)+(apolm/atorm)*(vpolm+vneom(3)))
      >   /(a_unit_exp*csdam)
-      if(vpar_shear_model_tg.eq.1)then
-c use GYRO conventions
-        vpar_tg(1) = sign_It_exp*cv*(rmajm/rmajor_exp)
-     >              *vexbm/(a_unit_exp*csdam)
-        vpar_tg(2) = vpar_tg(1)
-        vpar_tg(3) = vpar_tg(1)
-      endif
       if(alpha_p_tg.eq.0.0)then
         vpar_tg(1)=0.0
         vpar_tg(2)=0.0

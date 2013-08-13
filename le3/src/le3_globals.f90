@@ -3,11 +3,15 @@ module le3_globals
   real, parameter :: pi=3.141592653589793
 
   integer :: nt,np
+  integer :: nts,nps
   integer :: m,n
   real :: rmin,rmaj,hmin,q
+  real :: kappa, s_kappa, delta, s_delta, zeta, s_zeta
+  real :: shift, zmag, dzmag
   real :: dt,dp
   real :: tol
   integer :: restart_flag
+  integer :: solve_method
 
   real, dimension(:), allocatable    :: t,p
   real, dimension(:,:), allocatable  :: tb
@@ -22,6 +26,10 @@ module le3_globals
   real, dimension(:,:), allocatable  :: zp,zt
   real, dimension(:,:), allocatable  :: fp,ft
   real, dimension(:,:), allocatable  :: fpt,ftp
+  real, dimension(:,:), allocatable  :: as,bs,cs,ds
+  real, dimension(:,:), allocatable  :: sinm,cosm
+  real, dimension(:,:), allocatable  :: sinn,cosn
+
 
   integer, dimension(:), allocatable :: tcyc, pcyc
   real, dimension(-2:2) :: cderiv

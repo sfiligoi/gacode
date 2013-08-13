@@ -97,6 +97,7 @@ x.add('NI3_DATA','null')
 x.add('NI4_DATA','null')
 x.add('NI5_DATA','null')
 x.add('NE_DATA','null')
+x.add('PIVOT','1')
 
 # Perform the parsing
 x.read_input('input.create')

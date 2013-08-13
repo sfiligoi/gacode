@@ -83,7 +83,7 @@ program tgyro_main
 
   case default
 
-     call tgyro_catch_error('ERROR: (tgyro) Bad value for tgyro_mode')
+     call tgyro_catch_error('ERROR: (TGYRO) Bad value for tgyro_mode')
 
   end select
 

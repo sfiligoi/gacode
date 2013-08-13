@@ -46,8 +46,8 @@ contains
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
     integer :: it
-    integer, parameter :: geo_ntheta=1001 ! num grid pts for Miller geo grid
-    
+    integer, parameter :: geo_ntheta=2001 ! num grid pts for Miller geo grid
+
     if(flag == 1) then
        if(initialized) return
        

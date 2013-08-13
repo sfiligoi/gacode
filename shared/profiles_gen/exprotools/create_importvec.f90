@@ -2,6 +2,8 @@ subroutine create_importvec(datafile,x,y,n)
 
   use create_globals
 
+  implicit none
+
   character (len=*), intent(in) :: datafile
   integer, intent(in) :: n
   real, intent(inout), dimension(n) :: x
@@ -28,12 +30,11 @@ subroutine create_importvec(datafile,x,y,n)
      read(1,*) data(:,:)
      close(1)
   else
-     write(io,'(a)') 'ERROR: (create) '//datafile//' does not exist'
-     close(1)
+     print '(a)','ERROR: (create) '//datafile//' does not exist'
      stop
   endif
   call cub_spline(data(1,:),data(2,:),n_data,x,y,n)
 
-  print *, 'INFO: (create) Imported data from '//datafile
+  print '(a)','INFO: (create) Imported data from '//datafile
 
 end subroutine create_importvec

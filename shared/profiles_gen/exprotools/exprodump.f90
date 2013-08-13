@@ -14,7 +14,8 @@ program exprodump
 
   character(len=20) :: var,x
   integer :: i
-  real, dimension(3) :: z
+  real, dimension(5) :: z
+  integer :: density_method
 
 
   open(unit=1,file='input.exprodump',status='old')
@@ -23,10 +24,13 @@ program exprodump
   read(1,*) z(1)
   read(1,*) z(2)
   read(1,*) z(3)
+  read(1,*) z(4)
+  read(1,*) z(5)
+  read(1,*) density_method
   close(1)
 
-  EXPRO_ctrl_density_method = 1
-  EXPRO_ctrl_z(1:3) = z(1:3)
+  EXPRO_ctrl_density_method = density_method
+  EXPRO_ctrl_z(1:5) = z(1:5)
   EXPRO_ctrl_numeq_flag = 0 
   EXPRO_ctrl_rotation_method = 1
 
@@ -57,7 +61,31 @@ program exprodump
      print *,'flow_wall'
      print *,'zmag'
      print *,'ptot'
-     print *,'poloidalfluxpver2pi'
+     print *,'polflux'
+
+     print *,'ni_1'
+     print *,'ni_2'
+     print *,'ni_3'
+     print *,'ni_4'
+     print *,'ni_5'
+
+     print *,'Ti_1'
+     print *,'Ti_2'
+     print *,'Ti_3'
+     print *,'Ti_4'
+     print *,'Ti_5'
+
+     print *,'vtor_1'
+     print *,'vtor_2'
+     print *,'vtor_3'
+     print *,'vtor_4'
+     print *,'vtor_5'
+
+     print *,'vpol_1'
+     print *,'vpol_2'
+     print *,'vpol_3'
+     print *,'vpol_4'
+     print *,'vpol_5'
 
      print *,'bunit'
      print *,'s'
@@ -73,9 +101,6 @@ program exprodump
 
      print *,'grad_r0'
      print *,'ave_grad_r'
-
-     print *,'THIS LIST IS INCOMPLETE.  PLEASE SEND EMAIL TO candy@fusion.gat.com'
-     print *,'if you want me to finish the coding.'
 
   else   
 
@@ -134,8 +159,52 @@ program exprodump
            print 20,EXPRO_zmag(i)
         case ('ptot')
            print 20,EXPRO_ptot(i)
-        case ('poloidalfluxover2pi')
+        case ('polflux')
            print 20,EXPRO_poloidalfluxover2pi(i)
+        case ('ni_1')
+           if(EXPRO_ctrl_density_method == 2) then
+              print 20,EXPRO_ni_new(i)
+           else
+              print 20,EXPRO_ni(1,i)
+           endif
+        case ('ni_2')
+           print 20,EXPRO_ni(2,i)
+        case ('ni_3')
+           print 20,EXPRO_ni(3,i)
+        case ('ni_4')
+           print 20,EXPRO_ni(4,i)
+        case ('ni_5')
+           print 20,EXPRO_ni(5,i)
+        case ('Ti_1')
+           print 20,EXPRO_Ti(1,i)
+        case ('Ti_2')
+           print 20,EXPRO_Ti(2,i)
+        case ('Ti_3')
+           print 20,EXPRO_Ti(3,i)
+        case ('Ti_4')
+           print 20,EXPRO_Ti(4,i)
+        case ('Ti_5')
+           print 20,EXPRO_Ti(5,i)   
+        case ('vtor_1')
+           print 20,EXPRO_vtor(1,i)
+        case ('vtor_2')
+           print 20,EXPRO_vtor(2,i)
+        case ('vtor_3')
+           print 20,EXPRO_vtor(3,i)
+        case ('vtor_4')
+           print 20,EXPRO_vtor(4,i)
+        case ('vtor_5')
+           print 20,EXPRO_vtor(5,i)   
+        case ('vpol_1')
+           print 20,EXPRO_vpol(1,i)
+        case ('vpol_2')
+           print 20,EXPRO_vpol(2,i)
+        case ('vpol_3')
+           print 20,EXPRO_vpol(3,i)
+        case ('vpol_4')
+           print 20,EXPRO_vpol(4,i)
+        case ('vpol_5')
+           print 20,EXPRO_vpol(5,i)
         case ('bunit')
            print 20,EXPRO_bunit(i)
         case ('s')

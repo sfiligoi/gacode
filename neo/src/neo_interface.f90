@@ -119,7 +119,9 @@ module neo_interface
   integer :: neo_n_tor_in    = 5
   real    :: neo_z1_mag_in   = 1.0e-3
   integer :: neo_geo_ny_in = 0
-  real, dimension(8,0:16) :: neo_geo_yin_in = 0.0
+  real, dimension(8,0:32) :: neo_geo_yin_in = 0.0
+  ! the exception of the default is subroutine_flag
+  integer :: neo_subroutine_flag = 1
 
   ! Output parameters
   ! theory
@@ -129,8 +131,9 @@ module neo_interface
   real    :: neo_eflux_thCHi_out = 0.0
   real, dimension(6) :: neo_pflux_thHS_out = 0.0
   real, dimension(6) :: neo_eflux_thHS_out = 0.0
-  real    :: neo_jpar_thHH_out   = 0.0
   real    :: neo_jpar_thS_out    = 0.0
+  real    :: neo_jpar_thK_out    = 0.0
+  real    :: neo_jpar_thN_out    = 0.0
   ! drift-kinetic soln
   real, dimension(6) :: neo_pflux_dke_out    = 0.0
   real, dimension(6) :: neo_efluxtot_dke_out = 0.0
@@ -262,6 +265,7 @@ contains
     neo_z1_mag_in   = z1_mag
     neo_geo_ny_in = geo_ny_in
     neo_geo_yin_in(:,:) = geo_yin_in(:,:)
+    neo_subroutine_flag = subroutine_flag
 
   end subroutine map_global2interface
 
@@ -376,6 +380,7 @@ contains
     z1_mag   = neo_z1_mag_in
     geo_ny_in = neo_geo_ny_in
     geo_yin_in(:,:) = neo_geo_yin_in(:,:)
+    subroutine_flag = neo_subroutine_flag
 
     call interfacelocaldump
 

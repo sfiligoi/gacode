@@ -79,6 +79,8 @@ x.add('TGYRO_ER_BC','1')
 x.add('TGYRO_NOTURB_FLAG','0')
 x.add('TGYRO_USE_RHO','0')
 x.add('TGYRO_DT_METHOD','1')
+x.add('TGYRO_GYRO_RESTART_FLAG','0')
+x.add('TGYRO_FIX_CONCENTRATION_FLAG','0')
 
 # Deprecated parameters
 x.dep('LOC_N_FEEDBACK','new parameter is LOC_NE_FEEDBACK_FLAG')

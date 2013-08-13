@@ -11,6 +11,7 @@ subroutine le3_func(xsize,x,fvec,iflag)
   integer, intent(inout) :: iflag
   real, dimension(xsize), intent(inout) :: fvec
   real, dimension(xsize), intent(in) :: x
+  real :: tb2
 
   iota = 1.0/q
 
@@ -18,15 +19,17 @@ subroutine le3_func(xsize,x,fvec,iflag)
 
   k=1
   do j=1,np
-     do i=2,nt
-        tb(i,j) = x(k)
-        k = k+1
+     do i=1,nt
+        if (i+j > 2) then
+           tb(i,j) = x(k)
+           k = k+1
+        endif
      enddo
   enddo
 
   !-------------------------------------------------
   ! Compute d(tb)/dt and d(tp)/dp over [0,2pi) with 
-  
+
   ! d(tb)/dt
   dtbdt(:,:) = 1.0
   do i=1,nt
@@ -53,26 +56,42 @@ subroutine le3_func(xsize,x,fvec,iflag)
         ang = m*(tb(i,j)+t(i))+n*p(j)
 
         ! R,Z
-        r(i,j) = rmaj + rmin*cos(tb(i,j)+t(i)) + hmin*cos(ang)
-        z(i,j) =         rmin*sin(tb(i,j)+t(i)) + hmin*sin(ang)
+        r(i,j) = rmaj + rmin*cos(tb(i,j)+t(i) + asin(delta) &
+             * sin(tb(i,j)+t(i))) + hmin*cos(ang)
+        z(i,j) =  zmag + kappa * rmin * sin(tb(i,j)+t(i) &
+             + zeta * sin(2*(tb(i,j)+t(i)))) &
+             + hmin*sin(ang)
 
         ! dR/d(tb)
-        drdtb(i,j) = -rmin*sin(tb(i,j)+t(i)) - m*hmin*sin(ang) 
+        drdtb(i,j) = -rmin * sin(tb(i,j)+t(i) + asin(delta) &
+             * sin(tb(i,j)+t(i))) &
+             * (1.0 + asin(delta) * cos(tb(i,j)+t(i))) &
+             - m*hmin*sin(ang) 
 
         ! dR/d(pb)
-        drdpb(i,j) =                   -n*hmin*sin(ang)
+        drdpb(i,j) = -n*hmin*sin(ang)
 
         ! dZ/d(tb)
-        dzdtb(i,j) =  rmin*cos(tb(i,j)+t(i)) + m*hmin*cos(ang) 
+        dzdtb(i,j) =  kappa * rmin * cos(tb(i,j)+t(i) + zeta &
+             * sin(2*(tb(i,j)+t(i)))) &
+             * (1.0 + 2*zeta * cos(2*(tb(i,j)+t(i)))) &
+             + m*hmin*cos(ang) 
 
         ! dZ/d(pb)
-        dzdpb(i,j) =                  n*hmin*cos(ang)
+        dzdpb(i,j) =  n*hmin*cos(ang)
 
         ! dR/dr
-        drdr(i,j) = cos(tb(i,j)+t(i))
+        drdr(i,j) = shift + cos(tb(i,j)+t(i) + asin(delta) &
+             * sin(tb(i,j)+t(i))) &
+             - sin(tb(i,j)+t(i) + asin(delta) * sin(tb(i,j)+t(i))) &
+             * sin(tb(i,j)+t(i)) &
+             * 1.0/sqrt(1.0-delta**2) * s_delta
 
         ! dZ/dr
-        dzdr(i,j) = sin(tb(i,j)+t(i))
+        dzdr(i,j) = dzmag + (1.0 + s_kappa) * kappa &
+             * sin(tb(i,j)+t(i) + zeta * sin(2*(tb(i,j))+t(i))) &
+             + kappa * cos(tb(i,j)+t(i) + zeta * sin(2*(tb(i,j)+t(i)))) &
+             * sin(2*(tb(i,j)+t(i))) * s_zeta
 
         ! J [dtb/dr terms vanish]
         jac(i,j) = r(i,j)*(drdr(i,j)*dzdtb(i,j)-drdtb(i,j)*dzdr(i,j))
@@ -89,8 +108,7 @@ subroutine le3_func(xsize,x,fvec,iflag)
   rt(:,:) = drdtb(:,:)*dtbdt(:,:)
   zt(:,:) = dzdtb(:,:)*dtbdt(:,:)
 
-  fp(:,:) = bp(:,:)*r(:,:)/jac(:,:) &
-       + (br(:,:)*rp(:,:)+bz(:,:)*zp(:,:))/jac(:,:)/dtbdt(:,:)
+  fp(:,:) = (br(:,:)*rp(:,:)+bz(:,:)*zp(:,:))/jac(:,:)/dtbdt(:,:)
   ft(:,:) = (br(:,:)*rt(:,:)+bz(:,:)*zt(:,:))/jac(:,:)/dtbdt(:,:)
 
   ! d(fp)/dt
@@ -111,22 +129,27 @@ subroutine le3_func(xsize,x,fvec,iflag)
      enddo
   enddo
 
-  fp(:,:) = 0.0
   fp(:,:) = bp(:,:)*r(:,:)/jac(:,:)
   do j=1,np
      do i=1,nt
-        fp(i,j) = fp(i,j) * 4.0 * ( tb(tcyc(i+1),j) &
-             - 2.0*tb(i,j) + tb(tcyc(i-1),j) ) &
-             / (2*dt + tb(tcyc(i+1),j) &
-                - tb(tcyc(i-1),j))**2
+
+        ! d^2(theta_bar)/dt^2
+        tb2 = (tb(tcyc(i+1),j)-2.0*tb(i,j)+tb(tcyc(i-1),j))/dt**2
+
+        ! Add "axisymmetric term": d/dtheta ( fp / dtbdt ) 
+        fpt(i,j) = fpt(i,j) &
+             +(fp(tcyc(i+1),j)-fp(tcyc(i-1),j))/(2*dt)/dtbdt(i,j) &
+             -tb2*fp(i,j)/(dtbdt(i,j)**2)
      enddo
   enddo
 
   k=1
   do j=1,np
-     do i=2,nt
-        fvec(k) = fpt(i,j)-ftp(i,j)-fp(i,j)
-        k = k+1
+     do i=1,nt
+        if (i+j > 2) then
+           fvec(k) = fpt(i,j)-ftp(i,j)
+           k = k+1
+        endif
      enddo
   enddo
 

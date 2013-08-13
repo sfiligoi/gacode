@@ -27,6 +27,8 @@ then
    echo "          -interactive"
    echo "          Use python in interactive mode.  Useful if matplotlibrc has interactive:True  "
    echo
+   echo "          -loc <Legend location: 1,2,3,4>"
+   echo
    echo " PROFILE PLOTTING MODE:"
    echo
    echo "          -options"
@@ -37,6 +39,8 @@ then
    echo "          Produce plots of N parameters given."  
    echo "          Default is ne,ni_1,Te,Ti_1."
    echo 
+   echo "          -t <label1>,<label2>,...,<labelN>"  
+   echo
    echo "          -r <flux-surface coordinate for plotting>"
    echo "          Choices are r,r/a,rho"
    echo
@@ -74,6 +78,7 @@ INFILES=input.profiles,.,.,.,.
 PLOTS=Te,Ti_1
 INTERACTIVE=
 FTYPE=screen
+LOC=1
 
 # Plot options
 OPTIONS_FLAG=0
@@ -107,6 +112,10 @@ while [ $# -gt 0 ] ; do
   
   -f) shift ; FTYPE=$1 ;;
 
+  -loc) shift ; LOC=$1 ;;
+
+  -t) shift ; T=$1 ;;
+
   -interactive) INTERACTIVE=-i ;;
 
    *) echo "ERROR: incorrect syntax." ; exit 1 ;;
@@ -133,7 +142,7 @@ fi
 
 if [ "$SURF" != "null" ]
 then
-   python $INTERACTIVE $PYROOT/fluxplot.py $INFILES $SURF $I0 $FTYPE
+   python $INTERACTIVE $PYROOT/fluxplot.py $INFILES $SURF $I0 $FTYPE $LOC
    exit 0
 fi
 #==============================================================================
@@ -143,7 +152,7 @@ fi
 
 if [ $PLOT_FLAG -eq 1 ]
 then
-   python $INTERACTIVE $PYROOT/profileplot.py $RVAR $INFILES $PLOTS $FTYPE 
+   python $INTERACTIVE $PYROOT/profileplot.py $RVAR $INFILES $PLOTS $FTYPE $LOC "$T" 
    exit 0
 fi
 #==============================================================================

@@ -9,7 +9,9 @@
 ! by evolving 
 !------------------------------------------------------------
 
-subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion)
+subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion,dlnridr)
+
+  use tgyro_globals, only : tgyro_fix_concentration_flag,i_r,i_proc_global
 
   implicit none
 
@@ -19,6 +21,7 @@ subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion)
   real, dimension(n_ion), intent(in) :: zi
   real, dimension(n_ion), intent(inout) :: ni
   real, dimension(n_ion), intent(inout) :: dlnnidr
+  real, dimension(n_ion), intent(in) :: dlnridr
 
   integer :: i
 
@@ -28,14 +31,31 @@ subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion)
 
   else
 
-     ! Temporary storage 
-     dlnnidr(1) = ne*dlnnedr 
+     if (tgyro_fix_concentration_flag == 0) then
 
-     do i=2,n_ion
-        dlnnidr(1) = dlnnidr(1)-zi(i)*ni(i)*dlnnidr(i)
-     enddo
+        ! Temporary storage 
+        dlnnidr(1) = ne*dlnnedr 
 
-     dlnnidr(1) = dlnnidr(1)/ni(1)
+        do i=2,n_ion
+           dlnnidr(1) = dlnnidr(1)-zi(i)*ni(i)*dlnnidr(i)
+        enddo
+
+        dlnnidr(1) = dlnnidr(1)/ni(1)
+
+     else
+
+        ! Temporary storage 
+        dlnnidr(1) = dlnnedr 
+
+        do i=2,n_ion
+           dlnnidr(1) = dlnnidr(1)-zi(i)*ni(i)*dlnridr(i)/ne
+        enddo
+
+        do i=2,n_ion
+           dlnnidr(i) = dlnridr(i)+dlnnidr(1)
+        enddo
+
+     endif
 
   endif
 

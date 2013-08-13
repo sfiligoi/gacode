@@ -24,7 +24,7 @@ module gyro_globals
   integer :: gyrotest_flag
   ! (0=new,1=restart,2=restart-but-don't-write-restart-data)
   integer :: restart_method
-  ! (1=standard, 2=time reset for transport analysis)
+  ! (1=standard, 2=time reset for transport analysis, 3=no time reset for transport analysis)
   integer :: transport_method
   !----------------------------------------------------
 
@@ -231,6 +231,7 @@ module gyro_globals
   integer :: reintegrate_flag
   integer :: coll_op_cons_flag
   integer :: coll_op_self_flag
+  integer :: ic_method
   !---------------------------------------------------------
 
   !-----------------------------------------------------------------------------------
@@ -722,7 +723,7 @@ module gyro_globals
   !
   ! Geometry Fourier coefficients
   integer :: n_fourier_geo
-  real, dimension(8,0:16) :: a_fourier_geo
+  real, dimension(8,0:32) :: a_fourier_geo
   !---------------------------------------------------------
 
   !---------------------------------------------

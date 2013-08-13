@@ -9,7 +9,7 @@
 !
 !  1. ONETWO iterdb text (no extenstion)  
 !  2. ONETWO iterdb NetCDF (*.nc)
-!  3. PEQDSK text (*.peq)
+!  3. PEQDSK text (*.peq, *.peq2)
 !  4. PLASMA STATE NetCDF (*.cdf, *.CDF)
 !  5. CORSICA text (*.corsica)
 !  6. UFILE text (UFILE)
@@ -41,6 +41,7 @@ program prgen
   read(1,*) gmerge_flag
   read(1,*) ipccw
   read(1,*) btccw
+  read(1,*) nfourier
   read(1,*) reorder_vec(:)
   close(1)
   !--------------------------------------------------
@@ -86,7 +87,7 @@ program prgen
 
      call prgen_read_plasmastate
 
-  else if (index(raw_data_file,'.peq') /= 0) then
+  else if (index(raw_data_file,'.peq') /= 0 .or. index(raw_data_file,'.peq2') /= 0) then
 
      ! peqdsk format
      print '(a)','INFO: (prgen) Assuming peqdsk format.'
@@ -96,6 +97,12 @@ program prgen
      if (efit_method == 0) then
         print '(a)','ERROR: (prgen) geqdsk must be provided for peqdsk format'
         stop
+     endif
+     
+     if (index(raw_data_file,'.peq2') /= 0) then
+        peqdsk_ftype = 2
+     else
+        peqdsk_ftype = 1
      endif
 
      call prgen_read_peqdsk

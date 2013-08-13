@@ -92,7 +92,7 @@ subroutine create_set
      EXPRO_ptot = exm_ptot
   endif
 
-  if(set_exm_polflux == 1) then
+  if (set_exm_polflux == 1) then
      ! d psi = 1/q * d chi_t
      allocate(chi_t(EXPRO_n_exp))
      do i=1,EXPRO_n_exp
@@ -172,17 +172,18 @@ subroutine create_set
         end select
 
      endif
-     !-----------------------------------------------------------------------
-
-     if (set_exm_vpol(i) == 1) then
-        EXPRO_vpol(i,:) = exm_vpol(i)
-     endif
-
-     if (set_exm_vtor(i) == 1) then
-        EXPRO_vtor(i,:) = exm_vtor(i)
-     endif
-
   enddo
+  !-----------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------
+  ! Set ion-1 and ion-2 densities by ne and Zeff
+  !
+  if (exm_z_eff_model == 2) then
+     EXPRO_ni(2,:) = EXPRO_ne(:)*(EXPRO_z_eff(:)-exm_z(1))/(exm_z(2)**2-exm_z(1)*exm_z(2))
+     EXPRO_ni(1,:) = (EXPRO_ne(:)-EXPRO_ni(2,:)*exm_z(2))/exm_z(1)
+     print '(a)', 'INFO: (create) Setting ion-1 and ion-2 from ne and Zeff'
+  endif
+  !-----------------------------------------------------------------------
 
   !-----------------------------------------------------------------------
   ! Set electron and ion temperatures
@@ -190,7 +191,7 @@ subroutine create_set
   if (set_exm_te == 1) then
      select case(exm_te_model)
      case(1) 
-        ! Constant density
+        ! Constant temperature
         EXPRO_te(:) = exm_te_axis
      case(2)
         ! Fixed gradient length
@@ -204,8 +205,19 @@ subroutine create_set
      case(4)
         ! Scale by factor exm_te_axis
         EXPRO_te(:) = EXPRO_te(:)*exm_te_axis
+     case(5)
+        ! Increase scale length inside of pivot
+        do j=1,EXPRO_n_exp
+           if (j < exm_pivot) then
+              a(j) = EXPRO_dlntedr(j)+exm_alte
+           else
+              a(j) = EXPRO_dlntedr(j)
+           endif
+        enddo
+        call logint(EXPRO_te(:),a(:),EXPRO_rmin(:),EXPRO_n_exp,exm_pivot)
+        print '(a)', 'INFO: (create) Increased Te gradient.'
      case default
-        print *, 'ERROR: (create) TE_MODEL must be 1-3.'
+        print '(a)', 'ERROR: (create) TE_MODEL must be 1-5.'
         stop
      end select
   endif
@@ -226,24 +238,42 @@ subroutine create_set
            ! Set equal to Ti_1
            EXPRO_ti(i,:) = EXPRO_ti(1,:)
         case(4)
-           ! Scale by factor exm_te_axis
+           ! Scale by factor exm_ti_axis
            EXPRO_ti(i,:) = EXPRO_ti(1,:)*exm_ti_axis(i)
+        case(5)
+           ! Increase scale length inside of pivot
+           do j=1,EXPRO_n_exp
+              if (j < exm_pivot) then
+                 a(j) = EXPRO_dlntidr(1,j)+exm_alti(i)
+              else
+                 a(j) = EXPRO_dlntidr(1,j)
+              endif
+           enddo
+           call logint(EXPRO_ti(i,:),a(:),EXPRO_rmin(:),EXPRO_n_exp,exm_pivot)
+           print '(a)', 'INFO: (create) Increased Ti gradient.'
         case default
-           print *, 'ERROR: (create) TE_MODEL must be 1-3.'
+           print '(a)', 'ERROR: (create) TI_MODEL must be 1-4.'
            stop
         end select
      endif
   enddo
   !-----------------------------------------------------------------------
 
+
   !-----------------------------------------------------------------------
-  ! Set ion-1 and ion-2 densities by ne and Zeff
+  ! Set (neoclassical) rotation velocities.
   !
-  if (exm_z_eff_model == 2) then
-     EXPRO_ni(2,:) = EXPRO_ne(:)*(EXPRO_z_eff(:)-exm_z(1))/(exm_z(2)**2-exm_z(1)*exm_z(2))
-     EXPRO_ni(1,:) = (EXPRO_ne(:)-EXPRO_ni(2,:)*exm_z(2))/exm_z(1)
-     print '(a)', 'INFO: (create) Setting ion-1 and ion-2 from ne and Zeff'
-  endif
+  do i=1,nions_max
+
+     if (set_exm_vpol(i) == 1) then
+        EXPRO_vpol(i,:) = exm_vpol(i)
+     endif
+
+     if (set_exm_vtor(i) == 1) then
+        EXPRO_vtor(i,:) = exm_vtor(i)
+     endif
+
+  enddo
   !-----------------------------------------------------------------------
 
 end subroutine create_set

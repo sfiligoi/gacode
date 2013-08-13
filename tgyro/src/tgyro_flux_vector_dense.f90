@@ -25,7 +25,7 @@ subroutine tgyro_flux_vector_dense(x_vec,f_vec)
         p = p+1
         dlnnedr(i) = x_vec(p)
         ! Set dlnnidr(1,i) according to quasineutrality
-        call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(:),loc_n_ion) 
+        call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(:),loc_n_ion,dlnridr(:,i)) 
      endif
      if (loc_er_feedback_flag == 1) then
         p = p+1

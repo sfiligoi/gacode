@@ -47,8 +47,9 @@ subroutine neo_run()
    enddo
 
    ! Hinton-Hazeltine and Sauter bootstrap current
-   neo_jpar_thHH_out   = neo_th_out(5)                ! <j B> / j_norm (HH)
-   neo_jpar_thS_out    = neo_th_out(6)                ! <j B> / j_norm (Sauter)
+   neo_jpar_thS_out    = neo_th_out(5)                ! <j B> / j_norm (Sauter)
+   neo_jpar_thK_out    = neo_th_out(6)                ! <j B> / j_norm (Koh)
+   neo_jpar_thN_out    = neo_th_out(7)                ! <j B> / j_norm (NCLASS)
 
    ! dke results
    do is=1,6
