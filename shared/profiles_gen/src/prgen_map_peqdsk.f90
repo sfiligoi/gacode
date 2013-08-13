@@ -50,6 +50,9 @@ subroutine prgen_map_peqdsk
   if(peqdsk_ftype == 2) then
      vec(22,:) = (peqdsk_ne(:)-peqdsk_ni(:)-peqdsk_nb(:))/6.0*10
      vec(23,:) = peqdsk_nb(:)*10
+  else
+     vec(22,:) = (peqdsk_ne(:)-peqdsk_ni(:))/6.0*10
+     vec(23,:) = 0.0
   endif
 
   ! ti, tc, tb
@@ -57,6 +60,9 @@ subroutine prgen_map_peqdsk
   if(peqdsk_ftype == 2) then
      vec(27,:) = peqdsk_ti(:)
      vec(28,:) = peqdsk_pb(:)/(peqdsk_nb(:)*10)/1.602
+  else
+     vec(27,:) = peqdsk_ti(:)
+     vec(28,:) = 0.0
   endif
 
   ! vphi
