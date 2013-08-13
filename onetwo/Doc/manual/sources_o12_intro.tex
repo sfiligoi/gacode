@@ -1,0 +1,83 @@
+\title{ EQUATIONS AND ASSOCIATED DEFINITIONS USED IN  ONETWO}
+\author{H.~ST.~JOHN}
+\date{   }   %make the date just some blanks
+\maketitle
+
+
+% \Large
+\boldmath\
+At this time this document is incomplete and may have errors in
+content, typos, etc. It is a preliminary working version only!
+This document was last edited (by S. Smith) on \today.
+This document describes features of the code current with
+the May '96 version of \ot. Some items described here
+may not be available in earlier versions. This file is
+called  source-o12.*  where the extension is ps for the postscript file, 
+tex for the latex file and dvi for 
+the dvi file. If you use tex you may get a copy
+of the tex file and hack out parts that you might want 
+to include in your own documents.
+
+\section{Brief Description}
+The Onetwo transport code solves a user selectable, arbitrary
+combination of flux surface average parabolic equations representing
+the radial diffusion and convection of:
+\begin{itemize}
+\item 1 or 2 thermal ion species and
+up to 2 neutral species, 
+\item the electron energy, 
+\item the ion energy, 
+\item the poloidal magnetic field, and 
+\item the toroidal momentum.  
+\end{itemize}
+The magnetic geometry may be
+self consistently maintained by solving the elliptic mhd equilibrium
+equation simultaneously with the diffusion equations.  Both free and
+fixed plasma boundary equilibrium models are supported. Auxiliary
+heating models include Monte Carlo neutral beam deposition and electron
+and ion cyclotron and fast wave r.f. heating.  Models for ohmic, bootstrap,
+beam, and r.f. driven currents are included.  Energy confinement may be
+simulated by selecting theoretical or empirical electron and/or ion
+thermal conductivity models,including Rebut-Lallia, Shay, and Waltz-Dominguez.  A unique feature of the code is its ability to substitute
+measured profiles for any of the dependent variables, solving the
+diffusion equations only for the remaining unknown profiles. A combination
+of Crank-Nicholson, predictor, and iterated corrector methods are used to
+converge the non linear diffusion equations. The elliptic equations are
+solved using variable finite difference schemes with single cyclic
+reduction.
+
+
+In the next section the actual equations solved by Onetwo are
+given explicitly. The equations are similar to the original
+ones presented in GA-A16178. However a new equation describing
+the evolution of the toroidal momentum has been added as have 
+bootstrap models and other source terms. Thus the original document
+is badly out of date. It is my intent, through online documentation,
+to fill in the gaps which have developed by making available
+``ONETWO PAGES'' to the users. The equations appearing below have
+terms separated in a manner which makes them suitable for the matrix
+finite difference representation used  in the code, to facilitate
+comparison with actual code fragments. Perhaps  more importantly,
+the terms are given  in such a manner that they can be associated
+with actual output quantities produced by the code. A consequence
+is that simple rearrangement of terms  may be necessary in
+order to see the physical conservation process being described.
+Another consequence is that I use mixed math/fortran style in
+some places. This is justifiable since the main purpose of this
+document is to connect the output of \ot with the definitions
+presented here. 
+The equations in \ot were not cast in non dimensional form
+so we specify the units of input and output terms as
+appropriate. 
+The dependent variables which are either evolved in time
+(simulation mode) or 
+are known a priori (analysis mode) are the ion densities,
+$n_i(\frac{1}{cm^3})$,
+the electron temperature $T_e(keV)$,the ion temperature
+$T(keV)$,the poloidal magnetic field taken as the compound
+quantity $FGH\rho B_{p0}(Gauss-cm) $ and the angular rotation speed
+$\omega (\frac{1}{sec})$. In order to write some equations more
+concisely we use the notation $u^i$ to refer to these dependent
+variables with the understanding that i=1 is a collective index that 
+ranges over all ion densities, i=2 implies $T_e$, i=3 implies $T$,
+i=4 implies $FGH\rho B_{P0}$, and i=5 implies $\omega$.

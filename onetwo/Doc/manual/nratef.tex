@@ -1,0 +1,154 @@
+
+   %neutron rate calculation details for d(d,n)he3 fast ion calcs1/31/95
+   %SETUP FOR LATEX2E
+
+
+  % \documentclass[12pt]{report}
+   \documentclass{slides}
+   \newcommand{\beq}{\begin{eqnarray}}
+   \newcommand{\eeq}{\end{eqnarray}}
+%   \usepackage{amssymb,amstext} 
+   \usepackage{amsmath} 
+   \newcommand{\vp}{ V^{\prime}}
+   \newcommand{\pdiff}[2]{\frac{\partial{ #1}}{\partial{ #2}}}
+   %useage \pdiff{#1}{#2}
+   \newcommand{\ddiff}[1]{\frac{\partial}{\partial #1}}
+
+
+%  \setmargins{1in}{1in}{6.5in}{10in}{0pt}{0mm}{0pt}{0mm}
+   \textwidth6.5in
+   \textheight9.5in
+  % \hoffset -1.0in
+   \voffset -1.0in
+
+    \begin{document}
+      % \large    %type size ,must be given after begin{document} large not appropriate for slides
+        \boldmath
+        %\section{$D_f(D_t,n)He^3 $ Neutron Rates } %no section comman in slides
+        \begin{center}Review of $ D_f(D_t,n)He^3 $ Neutron Rate Calculations \end{center}
+        \bigskip
+	\hrule height2pt
+        \bigskip
+	The  fast ion distribution function is azimuthally symmetric and
+        asymptotically approaches 
+          \begin{eqnarray}  %use eeqnarray for multiple line formulas
+           f_b(v,\zeta)= \frac{\dot S \tau_s}{v^3+v_c^3}
+              \left[exp\left(-\tau_s\int_{v}^{v_b}\frac{v^2dv}
+               {(v^3+v_c^3)\tau_{cx}}\right)\right] \nonumber \\
+               \sum_{l=0}^{\infty}\frac{2l+1}{2}P_l(\zeta)P_l(\zeta_b)
+               \left[\frac{v^3}{v_b^3} \left(\frac{v_b^3+v_c^3}{v^3+v_c^3}
+                \right)\right]^{\frac{1}{6}l(l+1)Z_2}
+          \end{eqnarray}
+
+	The probability against charge exchange  
+	 \beq
+           P_{cx}(v)=  exp\left(-\tau_s \int_{v}^{v_b}\frac{v^2dv}
+              {(v^3+v_c^3)\tau_{cx}}\right) 
+         \eeq
+         is neglected $(\tau_{cx} \rightarrow \infty)$  or can be included
+         in a number of ways:
+         \begin{itemize}
+          \item  constant $\tau_{cx}$ (Callen)
+            \beq
+               P_{cx}(v)=\left(\frac{v_b^3+v_c^3}{v^3+v_c^3}\right)
+                      ^{-\frac{\tau_s}{3\tau_{cx}}}
+	    \eeq
+          \item analytically integrable fit (Gaffey)
+             \begin{eqnarray*}
+                \frac{1}{\tau_{cx}}=n_n\sigma_{cx}(v)v  \\
+    \sigma_{cx}=\frac{ 21\cdot10^{-16} cm^2}{0.2(0.5Mv^2)+1} 
+              \end{eqnarray*}
+              \begin{eqnarray}
+          P_{cx}=\left[\left(\frac{v^3+v_c^3}{v_b^3+v_c^3}
+                     \right)^{\frac{1}{2}}   
+                     \left(\frac{v_b+v_c}
+                    {v+v_c}\right)^{\frac{3}{2}}\right]
+               ^{\frac{\tau_s}{3\tau_{cx}}} \hspace{2.5in}  \nonumber \\
+                   exp\left[\frac{-\tau_s}{3\tau_{cx}} \left( 
+  \sqrt{3}\arctan{\left(\frac{2v_b-v_c}{\sqrt{3v_c}}\right)}
+             \right.\right. \hspace{2.0in} \nonumber \\
+   \left.\left. -\sqrt{3}\arctan{\left(\frac{2v-v_c}{\sqrt{3v_c}}\right)}
+               \right)\right] \hspace{1.0in}
+             \end{eqnarray}
+           \item numerical quadrature with experimental $\sigma_{cx}$
+                (currently using Freeman and Jones)
+         \end{itemize}
+	The fast ion distribution function,integrated over polar and
+	azimutahl angles is 
+          \beq
+           f_b(v)v^2dv=\frac{\dot S \tau_s v^2dv}{ v^3+v_c^3}
+          \eeq
+	which is expressed in terms of energy as
+	 \beq
+             f_b(E)dE=\frac{ \dot S \tau_s dE}{2E(1+{\left(
+                        \frac{E_c}{E}\right)}^{\frac{3}{2}})}
+         \eeq
+           The thermal $D_t $ distribution has the form of a shifted
+ 	   Maxwellian:
+           \begin{eqnarray}
+	    f_t=\left({\frac {\beta}{\pi}}\right)^{\frac{3}{2}} exp\left[-\beta
+                          (\vec{v}-\vec{w})^2\right] \nonumber\\
+            f_t \stackrel{\beta \rightarrow \infty}=
+            \frac{\delta (v-w) \delta(\zeta - 1)}{2\pi v^2
+                                 \sqrt{1-\zeta^2}}  \\
+            \beta = \frac{m}{2kT} \nonumber
+           \end{eqnarray}
+	  The neutron rate density $[\frac{1}{cm^3sec}]$ is given by
+           \beq
+           R=\int \vec{dv_t}\vec{dv_b}f_t(v_t)f_b(v_b)v_{rel}\sigma({v_{rel}}) 
+           \eeq
+
+           Current approximate formulation used in ONETWO assumes $v_t=0,
+		w=0$ which allows use of Eq(7) for $f_t$,and Eq(6) for $f_b$.
+
+                The neutron rate density becomes
+                 \beq
+                         R=\frac{n_d \dot S \tau_s}{\sqrt(2m_b)}
+                           \int\frac{dE\sigma_{DD}(E)}{E^{\frac{1}{2}}
+                           (1+{(\frac{E_c}{E})}^{\frac{3}{2}})}
+                 \eeq
+                
+               Using the approximate $\left( NRL\  Formulary \right)  $ 
+               cross section
+               \beq
+                   \sigma_{DD} =\frac{ c
+                    \epsilon^{\frac{-b}{\sqrt{E}}}}{E}
+                \eeq
+	       an analytic expression for $R$ is obtained
+               by asumming that $\frac{E_c}{E}=\frac{E_c}{E_b}$ in
+	       Eq(9). 
+             
+
+               The neutron rate density becomes
+         \beq
+            R=\frac{ \dot S \tau_s c k n_D e^{\frac{-b}{\sqrt{E_b}}}}
+          {  (1+\left({\frac{E_c}{E_b}}\right)
+                     ^{\frac{3}{2}})b}
+         \eeq
+
+	 This is the form used in ONETWO and OVER ESTIMATES R 
+         (typically over compensates for zero ion temp assumption)
+
+	A more accurate calculation uses the Bosh and Hale
+        cross section and does the integral in Eq.(9)  numerically.
+    
+        The combination of larger NRL cross section coupled
+        with the approximation of the integrand results in
+        neutron rates that are too high!
+    \beq
+         \lmoustache\lgroup fdv \rgroup = \rmoustache fdv
+    \eeq
+    \end{document}
+ The cross section $\left( NRL\  Formulary \right)  $ is
+               \beq
+                   \sigma_{DD} =\frac{ 2.18\cdotp10^{-22}\cdotp
+                    \epsilon^{\frac{-47.88}{\sqrt{E}}}}{E}
+                \eeq
+           Where   rate of $D_f$ energy transfer to electrons is
+                 \beq
+                   { \nu_{\epsilon}^{\frac{d}{e}} =
+                    7.59(\frac{n_e}{10^{13}cm^3})}
+                    {{\left(\frac{T_e}{kev}\right)}^{-\frac{3}{2}}}
+                 \eeq
+                 Note that $ \nu_{\epsilon}^{\frac{d}{e}} = 
+                     \frac{2}{\tau_s} . $

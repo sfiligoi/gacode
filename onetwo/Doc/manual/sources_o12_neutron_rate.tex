@@ -1,0 +1,165 @@
+\section{Neutron Rate Calculations}
+
+\subsection{Thermonuclear Rate}
+
+\begin{figure}[hbt] %note: figure environment not available in slides
+ \centering
+ \mbox{\epsfig{file=ddnhe3.fig1,height=10cm,width=12cm}}
+ \caption{Neutron rate coefficients, $\frac{cm^3}{sec}$, for thermal 
+ $D(D,n)He^3 $. Solid line is the new Bosch-Hale rate, dashed line is the
+ ('94,'83) NRL rate.}
+ \label{Figps2}
+\end{figure}
+
+The NRL formulary parameterization of the reaction rate plotted
+in Fig. \ref{Figps2} is
+\begin{equation}
+ \langle\sigma v\rangle =\frac{2.33\cdot 10^{-14}T^{-(\frac{2}{3})}exp[-18.76
+ T^{-(\frac{1}{3})}]}{2}.
+\end{equation}
+\emph{THIS PARAMETERIZATION IS NOT ACCURATE AND SHOULD NOT BE USED.}  (It does
+not reproduce the rate tables in NRL with sufficient  accuracy).
+%\vspace{10 mm}
+
+The Bosch and Hale parameterization is
+\begin{eqnarray}
+ \langle\sigma v\rangle &  = &
+  C1\cdot\Theta\sqrt{\frac{\xi}{m_rc^2T^3}}exp(-3\xi) \\
+ \xi & = & {\biggl(\frac{B_G^2}{4\cdot\Theta}\biggr)}^{\frac{1}{3}}\\
+ \Theta & = & \frac{T}{1.-\frac{T(C2+T(C6))}{1+T(C3+T(C5+TC7))}}
+\end{eqnarray}
+This expression precisely  matches the rate tables in NRL \emph{and} in Bosch
+and Hale.
+
+\subsection{Beam-Thermal Rate}
+
+The fast ion distribution function is assumed to be the uniform magnetic field,
+azimuthally symmetric solution of the Fokker-Planck equation, which
+asymptotically approaches 
+\begin{eqnarray}  %use eeqnarray for multiple line formulas
+ f_b(v,\zeta)= \frac{\dot S \tau_s}{v^3+v_c^3} P_{cx}(v)
+ \sum_{l=0}^{\infty}\frac{2l+1}{2}P_l(\zeta)P_l(\zeta_b)
+ \left[\frac{v^3}{v_b^3} \left(\frac{v_b^3+v_c^3}{v^3+v_c^3}
+ \right)\right]^{\frac{1}{6}l(l+1)Z_2} \label{eq:1},
+\end{eqnarray}
+where the probability against charge exchange is given by 
+\beq
+ P_{cx}(v)=  exp\left(-\tau_s \int_{v}^{v_b}\frac{v^2dv}
+ {(v^3+v_c^3)\tau_{cx}}\right) \label{eq:2}.
+\eeq
+For the neutron rate calculations in \ot , either the above  integral for
+$P_{cx}$ is evaluated numerically with the mean time against charge exchange
+given by
+\beq
+ \tau_{cx}=\frac{1}{n_n\sigma_{cx}(v)v} \label{eq:3}
+\eeq
+or it is assumed that 
+$\tau_{cx}$ is constant, see \Eqref{eq:taucx}, in which case we obtain
+\beq
+ P_{cx}(v)=\left(\frac{v_b^3+v_c^3}{v^3+v_c^3}\right)
+ ^{-\frac{\tau_s}{3\tau_{cx}}} \label{eq:4}
+\eeq
+For both cases the charge exchange cross section is the original Freeman and
+Jones \cite{Freeman:1974} expression for charge exchange with hydrogen (not
+deuterium).
+
+The fast ion distribution function, integrated over polar and azimuthal angles
+is 
+\beq
+ f_b(v)v^2dv=\frac{\dot S \tau_s P_{cx}(v) v^2dv}{ v^3+v_c^3} \label{eq:5}.
+\eeq
+The density of fast ions is by definition
+\begin{eqnarray}
+ n_f=\dot S \tau_s N \label{eq:6},\\
+ N=\int \frac{P_{cx}(v)v^2dv}{v^3+v_c^3}\label{eq:7}.
+\end{eqnarray}
+In \ot an effective time dependent source rate is defined by calculating 
+$P_{cx}$ and $N$ analytically and then setting
+\beq
+ \dot S \tau_s = \frac{n_f}{N}\label{eq:8}
+\eeq
+at subsequent times. The fast ion density, $n_f$, is assumed to to build up or
+decay away with a time constant given by $\tau_f$. Initially $\dot S \tau_s $ is
+obtained from \emph{NFREYA}. The speed dependent part of the fast ion
+distribution function is then taken as independent of $P_{cx}$. Using energy as
+the independent variable the transformed fast ion distribution becomes
+\beq
+ f_b(E)dE=\frac{ \frac{n_f}{N} dE}{2E(1+{\left(
+ \frac{E_c}{E}\right)}^{\frac{3}{2}})} \label{eq:9}
+\eeq
+
+The neutron rate density $\left[\frac{1}{cm^3sec}\right]$ is given by
+\beq
+ R=\int \vec{dv_t}\vec{dv_b}f_t(v_t)f_b(v_b)v_{rel}\sigma({v_{rel}}) .
+ \label{eq:10}
+\eeq
+
+One approximate formulation available in \ot assumes that the thermal ion speed,
+$v_t=0$. The neutron rate density thus reduces to
+\beq
+ R=\frac{n_d \frac{n_f}{N}}{\sqrt{2m_b}}
+ \int\frac{dE\sigma_{DD}(E)}{E^{\frac{1}{2}}
+ \left[1+{\left(\frac{E_c}{E}\right)}^{\frac{3}{2}}\right]} \label{eq:11}
+\eeq
+
+Using the approximate (\emph{NRL Formulary}) cross section
+\beq
+ \sigma_{DD} =\frac{ c \epsilon^{\frac{-b}{\sqrt{E}}}}{E} \label{eq:12b}
+\eeq
+an analytic expression for $R$ is obtained by assuming that
+$\frac{E_c}{E}=\frac{E_c}{E_b}$ in \Eqref{eq:11}. 
+
+The neutron rate density becomes \Eqref{eq:11a}, which was originally obtained
+from \cite{Scott}
+\beq
+ R=\frac{ \frac{n_f}{N} c k n_D e^{\frac{-b}{\sqrt{E_b}}}}
+ {\left[1+\left({\frac{E_c}{E_b}}\right)^{\frac{3}{2}}\right]b} \label{eq:11a}.
+\eeq
+This is the (old) form used in \ot. To account for bulk  rotation the beam
+energy is modified to reflect its value in the rotating frame. In the rotating
+plasma frame the beam energy, $E_b^R$, is
+\beq
+ E_b^R=E_b+\frac{m_b}{m_{th}}E_{bulk}-|v_fv_{bulk}|m_f\cos(\theta)\label{eq:12},
+\eeq
+where $\cos(\theta) $ is the angle between the velocity vector of the
+injected fast ion (which has an energy of $E_b$ in the lab frame)
+and the (zero temperature) thermal ion (which has only bulk motion 
+with velocity $\vec{v}_{bulk}$ and energy $E_{bulk}=
+\frac{1}{2}m_{th}v_{bulk}^2$.) The beam-thermal neutron rate
+determined from \Eqref{eq:11a}, with $E_b$ replaced by $E_b^R $ of \Eqref{eq:12} is used in \ot when the input  \texttt{iddfusb=0} is given.
+
+A more accurate option available in \ot uses the Bosch and Hale\cite{Bosch}
+cross section, accounts for the Maxwellian nature of the thermal ion
+distribution, and does the integrals in \Eqref{eq:12c}  for the neutron rate
+density numerically: 
+\begin{eqnarray}
+ R=2\pi\alpha\dot S \tau_s \int dv_{th}v_{th}^2e^{-\beta v_{th}^2}
+ \int dv_f\frac{v_f^2P_{cx}(v)F(v_f,v_{th})}{v_f^3+v_c^3} \label{eq:12c}\\
+ F(v_f,v_{th})=\int d\zeta_f\sigma(E_{com})(v_f^2+v_{th}^2
+ -2v_fv_{th}\zeta_f)^{\frac{1}{2}} \nonumber
+\end{eqnarray}
+\Eqref{eq:12c} is selected by setting \texttt{iddfusb=1}.  The option of using
+the effective source $\frac{n_f}{N} $ together with  neglecting $P_{cx}(v) $ may
+be used in this expression as well to speed up the computations (set
+\texttt{icalc\_cxrate=0}). Otherwise, with \texttt{icalc\_cxrate=1} the
+computations are somewhat (but not significantly)  slower due to the numerical
+evaluation of $P_{cx}(v) $, \Eqref{eq:2}. The time dependence of the fast ion
+distribution function is accounted for by adjusting the lower and upper limits
+of integration over the fast ion speed to reflect the fact that after beam turn
+on no fast ions exist below speed $v_f^{lim}$ given by
+\beq
+ v_f^{lim}=[(v_b^3+v_c^3)exp(-3\frac{t}{\tau_s})-v_c^3]^{\frac{1}{3}}
+ \label{eq:13}
+\eeq
+for times $t<\frac{1}{3}\tau_s \ln\left(\frac{v_b^3+v_c^3}{v_c^3}\right)$.
+Similarly, after beam turnoff, no fast ions exist above speed $v_f^{lim}$ where
+t is  measured from beam turnoff. Only a single beam turn on and off is
+accounted for in the code. Time dependent beam power models are currently not
+included. The calculations are done in the plasma frame with the initial beam
+energy given by \Eqref{eq:12}. To eliminate rotation from the neutron rate
+calculations of \Eqref{eq:12c} (by using $E_b$ instead of $E_b^R $) set
+\texttt{iddfusb\_bulk=0}.
+
+
+\subsection{Beam-Beam Rate}
+calculations are in place in the code but documentation is not yet done.

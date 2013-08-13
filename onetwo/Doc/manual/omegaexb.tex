@@ -1,0 +1,77 @@
+\documentstyle{article}
+\begin{document}
+
+\begin{thebibliography}{99}
+\bibitem{hahm95a}
+HAHM, T.~S. and BURRELL, K.~H.,
+\newblock Physics of Plasmas {\bf 2} (1995) 1648.
+
+and the excellent review article by
+
+\bibitem{burr97a}
+BURRELL, K.~H.,
+\newblock Physics of Plasmas {\bf 4} (1997) 1499.
+\end{thebibliography}
+
+        When we take derivative with respect to the minor radius,
+we take derivatives with respect to the flux surface half-width.
+
+        The following \LaTeX fragment on the flow shear rate
+is from my review article being prepared for publication:
+
+The flow shear rate was derived by Hahm and Burrell \cite{hahm95a}
+for general toroidal geometry
+\begin{equation}
+\omega_{E \times B} = \frac{ (R B_{\rm pol})^2}{B}
+  \left( \frac{\partial}{\partial \psi} \right)
+  \frac{E_r}{R B_{\rm pol}}
+\end{equation}
+where the radial electric field can be computed from ion force balance
+\begin{equation}
+E_r = \frac{ \partial p_i / \partial r }{ Z_i e n_i }
+  - v_{{\rm pol,}i } B_{\rm tor} + v_{{\rm tor,}i } B_{\rm pol},
+\end{equation}
+where the three separate terms represent the effect of diamagnetic drift,
+poloidal ion velocity, and toroidal ion velocity.
+The toroidal velocity can be driven by unbalanced neutral beam injection
+\cite{bath97a,erba99b} 
+or, surprisingly, by radio frequency heating 
+\cite{chang98a,coppi98a}, which applies torque in the direction of the
+plasma current.
+The poloidal velocity is currently taken to be given by the neoclassical
+expression \cite{staebler97a}
+\begin{equation}
+v_{\rm pol} = \frac{0.8839 f_c}{0.3477 + 0.4058 f_c}
+\frac{B_{\rm tor}}{Z_i e B^2} \frac{\partial T_i}{\partial r}
+\end{equation}
+where
+\[ f_c = 1 - 1.46 \sqrt{\epsilon} + 0.46 \epsilon \sqrt{\epsilon}, \]
+or from more sophisticated neoclassical computations
+\cite{www-nclass,zhu99a}.
+
+        As for momentum transport, as far as I know, the only anomalous 
+transport model that currently computes the momentum transport flux is 
+the GLF23 model.  Usually, researchers estimate the poloidal velocity
+using only neoclassical momentum transport.
+
+\end{document}
+
+Ron Cohen wrote:
+> 
+> Trying to get toroidal rot. eq. wired up properly.
+> 
+> In mmm95, is the exb shearing rate just
+> d v_ExB/d rminor or something more complicated?  If the former
+> I assume I can take it as d <v_ExB>/drho * flux surf av. of |grad rho| ?
+> 
+> What would you suggest for a momentum diffusivity (and in what
+> eq. to use it?)
+> 
+> -Ron-
+
+-- 
+Glenn Bateman (Research Physicist)     Lehigh University
+Physics Department, 16 Memorial Drive East, Bethlehem, PA 18015 USA
+Phone: (610) 758 5733 (Lehigh office)  (610) 758 5730 (Lehigh FAX)
+http://www.lehigh.edu/~glb4      bateman@fusion.physics.lehigh.edu
+

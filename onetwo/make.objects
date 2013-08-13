@@ -1,0 +1,75 @@
+# $Id: make.objects,v 1.125 2013/05/08 00:45:36 stjohn Exp $
+
+OBJECTS   = cray001.o cray101.o cray102.o cray202.o cray203.o cray204.o \
+            cray205.o cray206.o cray207.o cray208.o cray209.o cray302.o \
+            cray303.o cray304.o cray306.o cray307.o cray308.o cray309_nubeam.o \
+            cray311.o cray321u.o cray331.o cray341.o cray352.o cray401.o \
+            cray402.o cray403.o cray404.o cray501.o  \
+            cray504.o cray601.o cray700.o callglf2d.o writeglf2d.o \
+	    glf2d.o r8tomsqz.o \
+	    method_lines.o com.o copy.o terminate.o allocate_err.o  \
+	    aid_newton.o  m_lines.o glf23.o nubeam_12.o transp.o \
+	    xpload_module.o string_util.o \
+	    get_nboutput.o mesh.o verbose.o adaptive.o \
+	    ename.o nub.o nub2.o fusion.o sourc.o \
+	    param.o contour.o mhdpar.o limiter.o tdem.o solcon.o ions.o \
+	    soln.o neut.o ext_prog_info.o rfmod.o xptor_sim.o io.o \
+            mhdgrid.o extra.o yoka.o numbrs.o toq_12_interface.o \
+	    machin.o nub4.o tfact.o ufiles_12.o beam_structure.o \
+	    d01bff_dat.o cpub_dat.o colrate.o flags.o nubeam_driver.o dnubeam_driver.o\
+            tordlrot.o constnts.o load_12.o nub3.o nbnamelist.o geom.o \
+	    events.o soln2d.o tcoef.o  bd_condtn.o ohacd.o \
+	    mixcom.o psig.o kin_efit.o rhog.o mhdcom.o paleocl.o \
+            ifs.o nonlin.o mcgo.o staebler.o  nbi_restart.o \
+	    toq_12.o bicube.o shapctr.o flxav.o metrics.o neo2d.o \
+	    neo2dp.o fast_ion_diffusion.o restore_12.o load_restart_12.o \
+	    iterdbmd.o nrtype.o etc.o cer.o  flx.o  monitr.o ode_pkg.o   \
+	    tmpcom.o oloss.o smthspline.o rw_iterdb.o\
+	    mmm95_ntcc.o mmm95_mod.o nubeam_sub.o periodic_table_mod.o \
+	    eq_pfprim.o confinement_factors.o rad_loss.o iterdb_v1.29.o \
+	    Statefile_proc.o  rw_iterdb_netcdf.o \
+	    vector_class.o plasma_prop.o shot_info.o grid_class.o \
+	    error_handler.o MPI_data.o  fast_ion_data_gcnmp.o neutral_data.o \
+	    curden_terms.o dep_var_gcnmp.o solcon_gcnmp.o \
+	    io_gcnmp.o ions_gcnmp.o source_terms_gcnmp.o gcnmp_version.o fdyimp.o \
+	    iterdbmd_gcnmp.o set_12_gcnmp_vars.o neo_tport.o glf_tport_gcnmp.o \
+            gcnmp_namelist.o gcnmp_interface.o glf23_gcnmp.o \
+	    bc_values_gcnmp.o gcnmp_input.o get_next_io_unit.o  getargs.o \
+	    tspline.o gpsi.o weiland.o island.o mhdbcdtn.o \
+	    zeffcom.o check_en_bc.o set_initial_profiles.o zen_state.o \
+	    pelcom.o fusion_gcnmp.o gcnmp_namelist_defaults.o tglfin.o \
+	    tglf_input_defaults.o pnpoly.o tglf_modules.o compact_schemes.o \
+	    kapisn.o rw_iterdb_netcdf_mod.o prl_mod.o file_proc.o \
+	    echdat_module.o turb_tport.o neutral_beams.o nfreya_namelist.o \
+	    nf_param.o  consts.o P_Nfreya_12_interface.o P_Nfreya_rpc_interface.o \
+	    thermalization.o Nfreya_output.o dnubeam_mod.o P_Nfreya_nubeam_namelist.o \
+	    mmm_in.o modmmm7_1.o w20mod.o plasma_contours.o bicubic_spline.o \
+	    forcebal_data_mod.o spec_kind_mod.o set_eqdsk_statefile_values.o \
+            cubic_spline_class.o line_av_den.o set_forcebal_input.o load_input.o \
+	    scale_profiles.o plasma_shape.o get_tot_pressure.o mmm_input_defaults.o \
+	    replace_imsl.o  m_refsor.o tglfv1.94_modules.o allocate_plasma_freq.o \
+	    Collect_stats.o
+#  utils.o
+
+
+
+ifdef PARALLEL_12
+OBJECTS_P = mpi12.o onetwo_parallel.o onetwo_slave.o glf_slave.o
+endif
+        
+
+
+            #nbi_dimensions_mod.o nbi_getprofiles.o  precision_mod.o
+            #eqi_frho.o eqi_binget.o eq_rgetf.o r4_eq_rgetf.o  \
+            #ezspline_mod.o ezcdf_genput.o ezcdf_inqint.o nbi_set.o 
+            #nbi_idhdr.o nbo_load.o nbo_load1.o nbfinish.o xstraln_init.o
+            #nbstart.o nbatom.o depall.o  dep.o orball.o orbit.o nbigc.o 
+            #bmzini.o   nbi_com_mod.o   neucg.o 
+#note if an f90 module contains subroutines its *.o form must be included
+#here in order to get a linkage.
+#	    eq_flxint.o	
+# nbi_datchk.o nbi_datchki.o \
+#	    nbi_datchkb.o  eqm_uaxis.o r4_eqm_uaxis.o
+
+
+

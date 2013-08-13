@@ -1,0 +1,70 @@
+\normalsize
+\section{Generating Profiles Consistent with MHD Equilibrium
+Pressure Profiles}
+Quite often the situation arises where we have an equilibrium that we would like
+to use together with profiles of densities and tempertures that are scaled to
+yield satisfactory performance. For example, scaling up of DIII-D AT scenarios
+to ITER discharges presents us with this situation.
+
+There are some basic tools available to accomplish this task. Depending on what
+one chooses as known profiles there are  some variations in the method. The
+basic idea is to consider the equations for charge neutrality, zeff, and eqdsk
+pressure together with sufficient auxiliary information to allow a unique
+determination of profiles that are then self- consistent. The basic set of
+equations we work with are 
+%\begin{gather}
+\begin{align} \label {zeff-ref}
+ n_{e} -Z_{p1}n_{p1}  -Z_{p2}n_{p2}  -Z_{imp1}n_{imp1}
+ -Z_{imp2}n_{imp2} &= Z_bn_b +Z_{\alpha}n_{\alpha}\\
+ Z_{eff} n_{e} -\left<Z_{p1}^2\right>n_{p1}-\left<Z_{p2}^2\right>n_{p2} \notag
+ \\ 
+ -\left<Z_{imp1}^2\right>n_{imp1}-\left<Z_{imp2}^2\right>n_{imp2} &=
+ Z_b^2n_b +Z_{\alpha}^2n_{\alpha} \\
+ n_{e}C_eT_e +n_{p1}C_iT_i+ n_{p2}C_iT_i \notag \\
+ +n_{imp1}C_iT_i
+ +n_{imp2}C_iT_i &= P - \frac{2}{3}(w_{beam}+w_{\alpha})\\
+ Z_{frac}n_{p1} - n_{p2} &= 0 \\
+ Z_{impfrac}n_{p1} - n_{imp2} &=0 
+\end{align}
+Here we assume two primary (i.e. hydrogenic) ions and two impurities with the
+last two equations specifying the amounts of the second species in each case. We
+assume that the beam and $\alpha$ densitites and stored energy densitites are
+given. This implies that an iterative process is required to solve the linear
+set of equations since beam deposition and fusion rates depend on the unknown
+densitites and temperatures. $P$ is the known pressure profile from the
+equilibrium calculations. Typically we assume that the electron density profile
+is known, which eliminates the first of the equations \Eqref{zeff-ref}. The
+above set of eqautions applies at each value of the minor radius grid $\rho $. 
+The parameters multiplying the electron and ion temperatures, $C_e$, $C_i$ are
+set to unity if \Eqref{zeff-ref} is included or they are automatically adjusted
+at  each radius in such a way that the error in \Eqref{zeff-ref} is minimized if
+that equation is not  included. Typically we want to fix the electron density at
+a specified value so the later case is generally the one that arises.  The
+general prodeedure is a follows:
+\begin{enumerate}
+ \item Start with an appropriate inone and eqdsk file. The inone file will
+ contain densitites and temperatures that are not consistent with the eqdsk
+ pressure profile. Run onetwo (snapshot mode perhaps) to generate the qikone 
+ file.
+ \item Use the (Python) script \emph{gnuplot\_qikone.py} to read the  relevant
+ information out of qikone. \emph{gnuplot\_qikone.py} also genrates a page of
+ graphs if possible and most importantly, the file fixbd.in is written. Fixbd.in
+ contains the informaion required by the fixbdry code so that the above set of
+ equations can be solved.
+ \item Edit fixbd.in to fill in the fields that are marked with *****. These are
+ user prefrences and determine, for example, if 4 or 5 equations are solved.
+ \item Run the fixbdry code: \\
+ \texttt{fixbdry129x129  fixbd.in} \\
+ The fixbdry code generates an output file profiles.dat which are suitable for
+ inclusion in the inone file. Python program \emph{gnuplot\_profiles.py} also
+ reads this file and generates some graphics output.
+ \item After pasting the appropriate inforamtion from profiles.dat into the
+ inone file you return to step 1 for the next iteration. Typically 2-3
+ iterations are sufficient to stabilize the solution.
+\end{enumerate}
+The graphical  output from \emph{gnuplot\_qikone.py}  and
+\emph{gnuplot\_profiles.py} for a typical case is shown in Fig.~\ref{profiles}.
+\begin{figure}
+ \includegraphics[angle=-90,width=\textwidth]{zeff_fig1_eps.eps}
+ \caption{Output from one of the .py scripts.\label{profiles}}
+\end{figure}

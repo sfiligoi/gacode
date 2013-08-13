@@ -1,0 +1,764 @@
+\renewcommand{\textfraction}{0.10}
+\renewcommand{\topfraction}{0.90}  % not greater than 1- textfraction
+\renewcommand{\bottomfraction}{0.65} % not greater than 1- textfraction
+\renewcommand{\floatpagefraction}{0.60}
+
+\section{Running Curray in \ot}
+
+ Funding provided by the National Transport Code Collaboratory 
+(NTCC) enabled us to install and review the ray tracing code \ct
+at General Atomics. The project consisted of building an interface to
+the \ct code in \ot and subsequently testing the \ct code with L and H
+mode DIII-D discharges. 
+
+  We found that there were  two  different ways
+that profile information is passed to \ct from \ot. The first method,
+exemplified by the NTCC version of the code, used input from an
+(undocumented) file onetwo.out.  The updated version \ct obtained
+from TK Mau uses files  masanori.in, bdens and ebeam\_d to pass thermal
+and fast ion profiles to \ct. Furthermore, for other transport codes (e.g.
+Transp) a different file, trxpl.out, is used for this purpose.
+Since the information that is passed to \ct from a transport code is
+not specific to a transport code we decided to use this opportunity
+to unify the transport code interface. Consequently  the interface
+described below is intended to be general enough so that other transport
+codes wishing to couple to \ct can use this method. Accordingly we
+have incorporated the existing Transp interface (using file trxpl.out)
+in our scheme. The  method of profile input using files
+masanori.in, etc.  was retained (as an option) in the version of
+\ct now installed at GA. We did not create a code to write files
+in the format required for onetwo.out. This means that the existing
+NTCC version of \ct can not currently run the DIII-D test cases
+presented below. 
+Note that other (non \ot), users  of the code will  not notice any change in
+the interface  since it was created in such a way as to be 
+transparent. 
+
+ The interface to the \ot transport code required that
+some minor changes and new features were added to the \ct code  itself. 
+The changes in \ct are clearly delineated by the ``!HSJ''
+sentinel  present in some sections of the code.
+To eliminate confusion and for easy reference we present here an itemized
+list of the changes made. 
+\begin {itemize}
+ \item \ct was moved to our CVS repository /c/cvsroot and
+ all future changes to the code should be derived from that
+ repository. As mentioned above the starting point for this repository
+ was updated version of \ct obtained directly from TK Mau. 
+ \item \ct  will now accept the name of an input file
+ on the execution line. This allows proper manipulation of the \ct run
+ while being controlled by a transport code.
+ The default input file name remains  curray\_in and hence
+ if the name is not supplied at the command prompt then the old
+ behavior is recovered.
+ \item The name of the eqdsk to read can now be supplied as
+ input in the namelist data in \texttt{input\_file}. The default name
+ of this eqdsk remains eqdsk.hb so that the old behavior is
+ recovered if no explicit name is given in the namelist input.
+ This feature was added to allow simulations where MHD evolution is
+ taking place.
+ \item The default eqdsk size was made 129x129 instead of 65x65  since the
+ larger size is what is routinely used at DIII-D for MHD coupled transport
+ calculations. The file param.f90 must be changed and the code recompiled to
+ affect this change since dynamic sizing of eqdsks is not implemented at
+ present. This also means that two versions of the \ct executable have to be
+ maintained to accommodate the MHD grids. The transport grid passed to \ct is
+ governed by namelist input parameter \texttt{nprof} and as long  as the grid
+ size is less than \texttt{nprof} (= 133) no change  is required for it. 
+ \item To allow investigation of  the sensitivity to various fast ion components,
+ the number of ions (parameter \texttt{nions} in param.f90), was increased to 12
+ to accommodate fast ion species. Each beam line and injection energy is assumed
+ to be a separate fast ion species. For the typical DIII-D modeling in \ot this
+ means that the two injectors and 3 energies give rise to six fast ion species.
+ In addition, fast alphas can be present as well.  At the present time each fast
+ species is assumed to have a density and temperature profile given by two
+ thirds of the stored energy density divided by the fast ion density. This
+ feature is available only by creating the \ct input files using the \ot code.
+ An option in \ot will collapse all the fast ion components into one effective
+ component thereby recovering the more usual mode of operation of \ct.
+ \item The new \ot interface eliminates the second eqdsk file,
+ eqdskex, and the spectrum input information file, raytrin.
+ Both of these files were intended for use only with \ot and hence
+ will not affect other users. The information that used to reside in
+ raytrin is duplicated in curray\_in 
+ and the information in eqdskex is duplicated in the TRANSP
+ interface file trxpl.out. The meaning of the namelist switch \texttt{ioread}
+ in \ct  is thus modified accordingly. \texttt{ioread=1} now means create
+ raytrout only. Its previous association with raytrin is no longer
+ meaningful. \ot  was changed to
+ create file curray\_in (including the spectrum information) instead of
+ file raytrin. File trxpl.out, also created by \ot now contains all the
+ kinetic information (e.g. Te, Ti, ne, ni, nfast, etc). The format of
+ trxpl.out was not  changed so that it will still work with Transp as
+ well. The meaning of the \ct namelist input switch \texttt{iprof} was
+ changed to accommodate the trxpl.out file input from Onetwo.
+ Previously \texttt{iprof=1} meant use Transp input file trxpl.out. Now \texttt{iprof=1}
+ means use file trxpl.out, no matter what the source of that file is
+ (e.g. Transp or \ot).
+ \item The GA version of \ct was modified to ``correctly'' handle a
+  problem with EFIT type eqdsks. An unfortunate convention in these
+  eqdsks causes a sign problem in the driven current. This modification
+  currently applies to all eqdsks and needs to be generalized for
+  NSTX and other machines.
+\end{itemize}
+
+ On the \ot side of the interface, three files, curray\_in, eqdsk, and
+ trxpl.out, are created by \ot each time \ct is run out of \ot. 
+   File curray\_in is the namelist input
+ file, required for all types of \ct runs,
+ which includes the necessary antenna spectrum information (the
+ curray\_in file is documented in file curray\_input, which is part of
+ the \ct distribution). The actual
+ name of the curray\_in file is determined at run time by \ot. 
+ File eqdsk is a standard
+ EFIT type equilibrium file whose actual name is also determined  at run
+ time.
+
+ The spectrum and power density  information for \ct is assumed to be
+ present entirely  in the  \ot input file inone. An example of this
+ input for DIII-D is given
+ in Sec.~\ref{ct_input} for 60, 83, and 117 MHz operation.  This information is
+basically identical to the information normally present in file
+curray\_in (for a single time slice, input power, and spectrum) and
+the description of the namelist parameters in curray\_in serves as
+the input description in file inone. However, the \ot input file inone
+is actually a superset of the \ct data to allow for changes in time
+in the spectrum and input power and to allow for several different
+antenna specifications simultaneously. This is the purpose of the
+extra indices that will be found in the parameters in inone (see
+Sec.~\ref{ct_input}).
+ Finally a file that contains the thermal and
+fast ions densities and temperatures, trxpl.out, is created and then
+\ct is spawned. This process may  be repeated many times as the 
+transport simulation proceeds. An  option in inone allows the saving of
+the curay\_in, eqdsk, and trxpl.out files so that a standalone \ct
+run can be repeated at a later time. Since \ot will write the
+curray\_in file it is never necessary to create that file by
+hand. Instead the information should  be placed into inone directly.
+ At any given
+time \ot will spawn \ct repeatedly until all \ct cases have
+been done. The results are accumulated internally in \ot. The \ct
+models can be freely intermixed with other heating and current drive
+models. For example in Sec.~\ref{ct_input} three \ct cases are defined
+based on frequency, power input, etc. These three cases could  be made
+active simultaneously  by specifying equal times (rfon) for which  the models
+are active. Alternatively any combination of models (fast wave,
+ech, etc.) is selected using this method. 
+
+\ct creates the files currayout and raytrout. The former is
+a standard \ct output file meant for user inspection. The latter
+file, raytrout, is read directly by \ot.
+ We note that one of the planned enhancements of \ct mentioned on
+ the NTCC web site is ``Enhance code capabilities to handle more than
+ one antenna  spectrum either by source modification or by a shell
+ script to do multiple CURRAY calls''. The \ot interface described
+ above  does this already and we expect that most other transport
+ codes (eg TRANSP) also have machinery in place to account
+ for multiple \ct cases.
+ 
+
+\subsection{\ct Benchmarking}\label{benchm}
+   We ran both the modified
+ local version of \ct and the NTCC version on  the ITER and NSTX
+ test cases  supplied with the NTCC \ct distribution. Additionally 
+ two new DIII-D test cases  were added to broaden the range over 
+ which \ct has been successfully applied.
+
+ The first two test cases examined are the ones supplied with the
+ NTCC distribution of \ct. The object of this testing was to verify
+ that the GA version of \ct yields results comparable to those
+ obtained with the NTCC version. The NSTX test case given on the 
+ NTCC web site 
+ \cite{b2}
+ has to use  the adjoint method of determining current drive
+ efficiency  (which required a change in the supplied input file).
+ It was observed that 
+ the calculations take significantly longer when this option is used.
+ Since execution  time becomes an 
+ issue when \ct is called repeatedly from  a transport code,
+ guidelines should be evolved to automatically determine when
+ the added complication of the adjoint equations is required and how
+ often the tables have to be recalculated during a transport
+ simulation. At present the \ot interface does not take these matters
+ into consideration.
+ 
+ \begin{figure} %note: figure environment not available in slides
+ \centering    
+\begin{narrow}{-.50in}{0in}  
+ \mbox{\epsfig{file=../curray/ITER_comp.eps,height=3in,width=6in}}
+    \\[20pt]
+ \mbox{\epsfig{file=../curray/NSTX_comp.eps,height=3in,width=6in}}
+ \end{narrow}
+ \caption{ (a) Electron and ion (dashed line)  absorbed power density for 20 MW of input
+  power for the example ITER discharge. The corresponding driven current profiles are
+  given in (b). Figures (c) and (d) give the same results for the NSTX
+  case with 2.1 MW of injected power. The NTCC  and GA versions of
+  \ct produce identical profiles for these cases. } 
+  \label{Figbwav1a} 
+ \end{figure}
+ The results are shown in Fig.~\ref{Figbwav1a} for both the low aspect
+ ratio NSTX case and the ITER case.  For ITER,  the driven current
+ should be calculable using  either the Karney adjoint
+ formulation of current drive efficiency or the Ehst-Karney small inverse
+ aspect ratio approximation. As indicated in
+ Fig.~\ref{Figbwav1a} (b) for the latter case, the total driven current
+ is about 51 kA. When the calculation is repeated using the adjoint
+ method this result drops to about 44 kA. This is perhaps a larger
+ discrepancy than  one would expect for this machine.  As is evident from the
+ figure  the results for the GA version of \ct and the
+ NTCC version are indistinguishable. Hence we may confidently carry
+ out further testing  using the more recent GA version only.
+
+ As previously remarked we were not able to test DIII-D cases against
+ the \ct version on the NTCC web site due to differences in the
+ way \ot data is read by these two  versions of the code.
+ This situation is independent of the new Onetwo interface and exists
+ due to the development of curray that has taken place  since
+ the NTCC version was released. To test \ct  with  DIII-D discharges an H mode
+ (shot 111221) and an L mode (shot 84293) case were examined. The
+ kinetic data for these two shots is given in Fig.~\ref{f1}. The 
+ spectrum for 60, 83, and 117 MHZ was obtained from TK Mau (H mode)  and from
+ Craig Petty (L mode). The total electron and ion absorbed power and
+ current drive values for these discharges using the six lobe antenna
+ spectra given in Sec.~\ref{ct_input} are summarized in Table~\ref{t1}. It was
+ previously established \cite{b3} that six edge reflections lead to
+ rf power absorption values greater than 90\% for high $\beta_e$
+ discharges. Thus that number has become a de-facto standard. However as
+ is seen in Table I for the L mode case 6 edge reflections are not
+ sufficient. For the L mode shot we ran a second series of cases where
+ 100 edge reflections were allowed. This boosted the absorbed power to
+ about 80\%. (A further increase in allowed reflections only slowly
+increases the absorbed power as it asymptotically approaches 100\%.) 
+
+ \begin{figure} %note: figure environment not available in slides
+ \centering 
+\begin{narrow}{-.50in}{0in}   
+ \mbox{\epsfig{file=../curray/111221_kinetics.eps,height=3in,width=6in}}
+\\[20pt]
+ \mbox{\epsfig{file=../curray/84293_kinetics.eps,height=3in,width=6in}}
+%/home/stjohn/transport_codes/onetwo_test_cases/curray_tests/onetwo_coupled/111221_tk_comp/NTCC_60/1_beam
+\end{narrow}
+ \caption{(a,b) Temperatures and densities for the H mode shot 111221
+   at 3700 msec. The beam temperature is taken as $\frac{2}{3} $ of the
+   average fast ion energy. $\beta = 3.23\%$, $B_T = 1.86 T$, $I_p = 1.18 MA$
+   , $\overline{ n} = 4.03\times 10^{13} cm^{-3}$.
+    (c,d)~The corresponding profiles for L mode shot 84293 at 2110
+    msec. $\beta = 0.7\%$, $B_T = 2.08 T$, $I_p = 1.38 MA$, $\overline{ n} = 1.95 \times 10^{13} cm^{-3}$.}
+  \label{f1}
+ \end{figure}
+
+\begin{table}
+\begin{centering}
+\begin{tabular}{ccccc}
+\multicolumn{5}{c}{\bfseries Shot 84293} \\
+\multicolumn{5}{c}{\bfseries (L mode) }  \\ 
+FW MHz& $P_e ,kW $ & $P_i, kW  $ & $ I_{CD}, kA  $ & $P_a $ \\ \hline
+60  & 501& 499 & 56& 41 \%  \\
+60  & 491& 509 & 51& 80 \%  \\
+%83  & 710/650 & 290/350&  87/80 & 0 & \\
+83  & 744/607& 256/398  &  80/71 & 31\%   \\
+83  & 728 & 272?   &  74 & 80\%   \\
+117  &950  &50 & 111 & 29\%  \\
+117  &895  &105 & 99 & 82\%  \\
+\\ \hline
+& \\
+\multicolumn{5}{c}{\bfseries Shot 111221} \\
+\multicolumn{5}{c}{\bfseries (H
+  mode)} \\ 
+FW MHz& $P_e, kW$ & $P_i ,kW $ & $ I_{CD}, kA $&  $P_a $ \\ \hline
+60  &340/287& 660/773 & 22/16 & 95\% \\
+83  & 420 & 580 & 30  & 99\% \\
+117 & 395/212 & 605/788 & 30/18 & 99\% \\ \hline
+\end{tabular}
+\caption{Heating and Current drive results for DIII-D L and H
+  mode cases. The second number for electron and ion absorbed power and
+  current drive indicates results obtained using Transp
+  profiles. $P_a$ is the percent of injected power absorbed. For the
+L mode shot results are quoted for 6  and 100 edge reflections (with
+the larger value of $P_a$ corresponding to 100 edge reflections and
+the smaller value to 6 reflections).}
+\label{t1}
+\end{centering}
+\end{table} 
+
+The cases  shown in the table and in the figures below all used 1MW of
+fast wave input power, an antenna location of 1 degree, and 66 rays in six
+spectral power lobes (see Sec.~\ref{ct_input}). 
+ It was found that allowing six edge reflections
+in the ray tracing caused most of the power to be absorbed for the H
+mode case. However as indicated in the table the absorption for
+the L mode case tends to be weak unless the number of edge reflections
+is increased significantly (maxref = 100). $P_e$, $P_i$, $I_{CD}$ are
+all quoted on the basis of 100\% power absorption. Hence $P_e + P_i = 1
+ MW $ for all cases shown.
+
+ Some of the profiles associated with the results given in Table I are
+ presented below. 
+ To begin with we examine in Fig.~\ref{Figbwav2a} results obtained
+ using Transp and \ot as the transport code drivers for \ct.  
+ \begin{figure} %note: figure environment not available in slides
+\begin{narrow}{-.50in}{0in} 
+ \mbox{\epsfig{file=../curray/transp_prof.eps,height=3in,width=6in}}
+%/home/stjohn/transport_codes/onetwo_test_cases/curray_tests/onetwo_coupled/111221_tk_comp/NTCC_60/fig2
+%/home/stjohn/transport_codes/onetwo_test_cases/curray_tests/onetwo_coupled/111221_tk_comp/NTCC_60/fig2/matches_transp
+\end{narrow}
+ \caption{ (a) Electron and ion absorbed power density for 1 MW of input
+  power at 60MHz for DIII-D discharge 111221 during  H mode phase. The blue curves are the \ct result when run out of  \ot. The red
+  curves are the results obtained from Transp coupled to the NTCC
+  version of Curray. The dashed lines represent the power density
+  given to the ions.
+(b)~The corresponding driven current profiles.
+Shot 111221 @ 3710 msec.} 
+  \label{Figbwav2a}
+ \end{figure}
+To generate these results the profiles of densities and temperatures
+obtained from Transp were used in the curves corresponding to \ot.  
+Hence we find that both the electron and ion
+heating  and current drive are very similar. The small observed
+differences  are most likely due to the difference
+in equilibrium files used. For \ot an eqdsk of size 129 x 129 was
+required. The Transp results use a 65 x 65 eqdsk.
+ As is shown below
+in practice, due to
+different transport grids, and especially treatment of the fast ions,
+the difference between Transp and \ot simulations will be larger. 
+
+ The actual heating and current drive profiles determined by using \ot
+ derived fast ion density and effective temperature profiles for the
+ case given in 
+ Fig.~\ref{Figbwav2a} is  shown in Fig.~\ref{Figbwav3a}. 
+ \begin{figure} %note: figure environment not available in slides
+ \centering 
+ \begin{narrow}{-.50in}{0in}   
+ \mbox{\epsfig{file=../curray/60MHZ_6b.eps,height=3in,width=6in}}
+ \\[20pt]
+ \mbox{\epsfig{file=../curray/60_83MHZ_1b_comp.eps,height=3in,width=6in}}
+%/home/stjohn/transport_codes/onetwo_test_cases/curray_tests/onetwo_coupled/111221_tk_comp/NTCC_60/1_beam
+ \end{narrow}
+ \caption{(a,b) The heating and current drive profiles from \ct obtained
+   using \ot. Both effective single beam and multiple beam results are
+   shown.
+    (c,d)~Comparison of the 60 and 83 MHz fast wave heating and current
+    drive profiles. The electron heating has increased
+    while the resonance absorption of the (fast) ions has moved closer to
+    the magnetic axis and become somewhat less efficient.}
+  \label{Figbwav3a}
+ \end{figure}
+ In addition to the usual
+ single effective beam model this figure also shows the results of
+ treating each individual beam component  as a separate species. Since
+ each beam component will have a different fast ion stored energy
+ distribution the effect on \ct was of interest. As shown in the
+ figure however the results are only slightly  different when the
+ multiple beam model is used. Due to the non-linear nature of the
+ dispersion relation that \ct must solve we find that there is a 10\%
+ difference in electron heating and current drive but only about a 5\%
+ difference in ion heating (which includes the fast ions). In parts
+ (c) and (d) of the figure a comparison of fast wave injection at 60
+ and 83 MHz is made. The higher injection frequency favors electrons
+ at the expense of ions and increases the driven current.  Of
+ particular interest in Fig.~\ref{Figbwav3a}(c) is the change in the ion
+ heating profile in moving from 60 to 83 MHz fast wave injection.
+ For both frequencies most of the absorption in the ion channel is
+ due to the fast ion contribution (at 60 MHz we have 543 out of 660 KW
+ of ion heating due to the fast ions and at 83 MHz the corresponding
+ numbers are 492 out of 580 KW ). The harmonics that contribute to the
+ results are shown in Fig.~\ref{h1}. 
+ \begin{figure} %note: figure environment not available in slides
+ \centering 
+\begin{narrow}{-.50in}{0in}   
+ \mbox{\epsfig{file=../curray/harmonic.eps,height=3in,width=6in}}
+%/home/stjohn/transport_codes/onetwo_test_cases/curray_tests/onetwo_coupled/111221_tk_comp/NTCC_60/1_beam
+ \end{narrow}
+ \caption{(a) Major radius location of hydrogen and  deuterium
+   resonances for H mode shot 111221.03700  at 60MHz. 
+    (b)~The same result for 83MHz. The magnetic axis is at 1.778 m}
+  \label{h1}
+ \end{figure}
+ At 83 MHz, it is the 6'th harmonic of
+ deuterium at $\rho =0.06$ (high field side) that causes the high $(\sim 0.79
+ W/cm^3)$ absorption peak. A smaller  secondary peak at $\rho = ~0.5$
+ is due to a combination of 5'th (high field) and 7'th (low field)
+ harmonics for this case.  At 60MHz the 4'th harmonic of D at $\rho =
+ 0.26$ (high field side) leads to the sharp peak in the fast ion
+ heating profile [see Fig.~\ref{Figbwav3a}(a,b)]. A second peak at $\rho =
+ 0.43$ is due to the 5'th harmonic of D (low field side).  This
+ explains the broad absorption profile compared to the 83 MHz case as
+ the waves must sample larger volumes of the plasma in order to
+ encounter both the low and high field side resonances. For the 83MHz
+ case the high fast ion beam temperature near the axis is
+ more than able to overcome this effect. In both cases there
+ is little qualitative change in the electron heating profile due to
+ Landau damping and TTMP effects. 
+ 
+  As was shown in Fig.~\ref{Figbwav2a}, the Transp and \ot results track
+   closely when identical profiles are used. In Fig.~\ref{Figbwav3b} we
+   show results when this is not the case. 
+ \begin{figure} %note: figure environment not available in slides
+ \centering 
+\begin{narrow}{-.50in}{0in}   
+ \mbox{\epsfig{file=../curray/12_transp_com_Hm_Hmode_117MHz.eps,height=3in,width=6in}}
+\\[20pt]
+ \mbox{\epsfig{file=../curray/111221_pfast.eps,height=3in,width=6in}}
+ %\mbox{\epsfig{file=../curray/jFW_r_cur_tr_nc_84293_83_n.eps,height=4in,width=4in}}
+\end{narrow}
+ \caption{Results from \ot (blue) for the H mode discharge at 117 MHz compared with
+   Transp results (red). As explained in the text the larger ion power absorption in Transp drives the observed differences.}
+  \label{Figbwav3b}
+ \end{figure}   
+   Here the fast ion 
+   distribution from Transp is sufficiently different that the ion
+  heating and current drive are significantly different. It is seen in
+  the figure that \ot puts more energy into the electrons and less into
+  the ions. This also increases the driven electron current. The ion
+  absorption in \ot is less due to the lower effective temperature of
+  the fast ions species. In Fig.~\ref{Figbwav3b}(c) the thermal ion (D and
+  minority species H) and fast (D)  ion absorption
+  for the two cases is shown. Most of the ion absorbed power in fact
+  appears in the fast ion species [dashed lines, Fig. \ref{Figbwav3b}(a)]
+  inside of $\rho = 0.2$. As seen in the figure the primary and minority
+  ion species contribute relatively little. In Fig.~\ref{Figbwav3b}(d) the
+  effective fast ion pressure is shown for the two cases. The
+  difference inside of $\rho =0.2$ is substantial and is responsible for
+  the higher ion absorbed power (788 KW) obtained using the Transp
+  derived profiles compared to the \ot result (605 KW). Due to the
+  relatively small volume over which the effective fast ion
+  temperature is significantly different in the two codes, the overall
+  fast ion energy content is almost the same. Hence we see that the
+  \ct results can be quite sensitive to details of the fast ion
+  distribution if fast wave absorption is localized.   
+
+ \begin{figure} %note: figure environment not available in slides
+ \centering  
+\begin{narrow}{-0.40in}{0in}  
+ \mbox{\epsfig{file=../curray/84293_60MHz.eps,height=3in,width=6in}}
+ %\mbox{\epsfig{file=harmonic_84293_60_83.eps,height=3in,width=6in}}
+ %\mbox{\epsfig{file=jFW_r_cur_tr_nc_84293_83_n.eps,height=4in,width=4in}}
+ \caption{(a,b) The heating and current drive results for the  L mode
+   discharge 84293.2110  at 60 MHz. In (a) the solid line represents
+   the electron heating and the dashed curve is the total ion heating.
+   In (b) the electron driven current is shown.}
+  \label{l16}
+\end{narrow}
+ \end{figure}
+\begin{figure} %note: figure environment not available in slides
+ \centering  
+\begin{narrow}{-0.40in}{0in}  
+ %\mbox{\epsfig{file=84293_60MHz.eps,height=3in,width=6in}}
+ \mbox{\epsfig{file=../curray/harmonic_84293_60_83.eps,height=3in,width=6in}}
+ %\mbox{\epsfig{file=jFW_r_cur_tr_nc_84293_83_n.eps,height=4in,width=4in}}
+ \caption{(a,b) Major radius location of hydrogen and deuterium
+   resonances for L mode shot 84293.02110 at 60 and 83 MHz. }
+  \label{l17}
+\end{narrow}
+ \end{figure}
+  Our second DIII-D test case uses the L mode discharge, shot
+  84293@2110 msec.  For 60MHz fast
+  wave injection  the results using \ot as the driver for \ct are shown
+  in Fig.~\ref{l16}. %l16
+  The corresponding resonance surfaces for this frequency as well as
+  for 83 MHz are given in Fig.~\ref{l17}. Examination of Fig.~\ref{l17}(a) shows that
+  there is a strong fourth harmonic resonance (4D) for deuterium  near the magnetic
+  axis at 60 MHz injection. This causes the sharp peak in fast ion
+  absorption observed near $\rho = 0.16 $ in Fig.~\ref{l16}(a). The 3D and 5D
+  contributions are also visible as small peaks at $\rho = .3$ and $
+  0.45 $ respectively.
+
+ \begin{figure}
+ \centering   
+\begin{narrow}{-0.40in}{0in}
+ %\mbox{\epsfig{file=qrfs_r_cur_tr_nc_84293_83_n.eps,height=4in,width=4in}}
+ %\mbox{\epsfig{file=jFW_r_cur_tr_nc_84293_83_n.eps,height=4in,width=4in}}
+ \mbox{\epsfig{file= ../curray/12_transp-84293.eps,height=3in,width=6in}}
+\end{narrow}
+ \mbox{\epsfig{file=../curray/beam_pressure_84293b01_b01.eps,height=4in,width=4in}}
+ \caption{L mode discharge results for 83 MHz, fast wave coupled
+   input power. Both the Transp and \ot results are given for the
+   heating and current drive profiles. Transp has significantly more
+   power absorption by the fast ions. The total and thermal pressures
+  determined by Transp and \ot are given in the lower figure. } 
+  \label{Figbwav3d}
+ \end{figure}
+   Our final example consists of the L mode discharge at 83
+   MHz. In Fig.~\ref{Figbwav3d}, the results between Transp and \ot
+   driven \ct are compared. The situation is quite similar to the
+   H mode case shown in Fig.~\ref{Figbwav3b}. Due to the larger
+   stored energy density for fast ions near the magnetic axis \ct 
+   predicts higher ion heating and lower electron heating using the
+   Transp Monte Carlo derived beam profiles. The 5D beam ion
+   resonance near $\rho = 0.07 $ is clearly visible but the 
+   electron heating due to Landau damping and TTMP effects is quite
+   significant and leads to a higher driven current than was observed
+   in the previous cases. The decrease in electron power absorption
+   near the magnetic axis, clearly visible in Fig.~\ref{l16}(a) has also been
+   observed in full wave calculations \cite{b1}. But the  full wave
+   calculations are preliminary in nature so we  can not include them 
+   in this report. 
+
+    When this shot is run at 117MHz the results are as indicated in 
+   Fig.~\ref{Figbwav3e}.  In this figure we have also included the
+  heating and current drive profiles allowing for a maximum of 100
+  reflections of the wave. As is seen in the figure most of the power
+  is absorbed by the electrons which increases the driven current.
+   Even though  the wave direction can change significantly
+   with 100 reflections the current drive decreased only by about 10\%.
+ \begin{figure}
+ \centering   
+\begin{narrow}{-0.40in}{0in}
+ \mbox{\epsfig{file= ../curray/117-6-100-84293.eps,height=3in,width=6in}}
+\end{narrow}
+ \caption{Results for the L mode shot with \ot used as the driver for
+   \ct. The red curves correspond to allowing 100 reflections of the
+   rays.  The blue curves are for 6 reflections.}
+  \label{Figbwav3e}
+ \end{figure}
+
+
+
+\subsection{Standards, problems and recommendations} \label{prob}
+
+\ct follows  the recommended standards given in \cite{b4}.
+ In particular we note that the necessary source code together with
+ drivers for two test cases with input and output documentation
+ are currently available.    We found that the code can be built under
+   OSF F90 5.4, HP UX11.0 f90, and Linux (RH7.2,8.0, Pgf90). 
+   However \ct will fail with
+   a floating point error on the OSF machines for some  cases  which
+   work under Linux and HPUX. Further investigation will be required to
+   determine the cause of this problem.  
+The Makefile was modified to allow building of
+the code on all local platforms. We  did not change the basic structure of
+the Makefile that allows the build to continue even when errors have
+occurred. However we find this approach makes building the code more
+obscure  than it needs to be since errors encountered during the
+build do not terminate the build process. This  forces the user to
+backtrack  through many obscure 
+lines of output generated by the makefile to find out where the
+error occurred. It is much easier to work through the build process 
+one error at a time until the build succeeds. One possible workaround
+is to at least indicate to the user  how the makefile may be used to
+write to std error piped to a disk file. Then working through the
+std error file from the top down will achieve the same result.
+ The unused ''customization '' files present in the distribution
+ should be incorporated into the mainline code
+ (and then selected through input switches) or removed from the distribution altogether. Otherwise the concept
+ of a single tested version of \ct becomes less obvious.
+ We recommend that 
+ version  numbers be attached to the code so that reference to a
+ given version is uniform across all users of the code.
+
+ A readme file (curray\_readme) together with CurrayDoc.pdf and
+ curray\_input  provides  the necessary documentation. 
+ As is required, no graphics is embedded in \ct . A  file suitable
+ for graphics generation is written (rayop)  and may be processed using
+ an open source graphics library (pgplot) together with the driver
+ curplot. The functionality of curplot was found to be adequate but no
+ extensive testing was undertaken. 
+  
+
+    In building and running \ct we encountered some minor problems.
+    Interpretation of the validity of  results and proper input
+    settings for the code also initially caused us some difficulty.
+    Below  we detail some of these issues and offer
+    remedies as appropriate. 
+  
+
+  Using the  files masanori.in, bdens
+  and ebeam\_d is awkward and error prone in our opinion.  The reading
+  of these files is initiated by the switches \texttt{gamene =0} and
+ \texttt{iprof =0}. This is confusing since \texttt{iprof =0} implies that 
+ analytic profiles will be read but then \texttt{gamene.ne.0} is used to
+ read in tables of profiles from the above files instead.  
+  The GA version of the
+  code now allows this input method to be used  optionally but we
+  recommend that the new \ot interface described above is used in the
+  future. This will require a new identification scheme for labeling
+  fast ions in file currayout. The file curray\_input which documents the namelist input
+ parameters in curray\_in should be added to the NTCC distribution.
+
+ \ct currently has a nice f90 style to it. However the modules
+  are using a mixture of f90 and f77 syntax. Not all compilers have
+  option flags to accept such a mixture. Since modules are an f90
+  construct it would appear to us that using f90 only syntax in
+  modules makes sense. We think that this should be a standard
+ that NTCC contributed codes should try to achieve for sake of cross
+ platform compatibility.
+
+  We find that the recompilation of the code for different eqdsk sizes
+  is awkward. Although this feature is present in most codes that we
+  know about, \ct is in a better position to ameliorate this
+  problem. Using the present version of \ct it is possible to 
+  specify the name of the eqdsk in the namelist of the very first file 
+  (e.g. curray\_in) that is read (or the default name eqdsk.hb is used).
+  Hence the eqdsk file can be opened
+ at that point, the size of the eqdsk extracted, and then the
+ arrays can be allocated dynamically at run time. All of this
+ can be done at the very start of the program in rfdrive.f90.
+
+
+ Limits of arrays in the curray\_in namelist inputs must be given
+in the documentation. For example, what is the maximum allowed number
+of ion species nspec? One may get the mistaken impression that dynamic
+arrays are used to accommodate user input. For most variables that is
+not the case however. Also there are subtleties involved in the input of the
+antenna spectrum. We find that most users (including ourselves) have insufficient
+experience to supply this data without further help from  a more
+detailed description of the required input variables.
+
+ Certain
+features to improve the smoothness such as ray launch randomization using a  Gaussian 
+ray generator or other appropriate means should be
+included. Importance sampling could be used to better map out regions
+of high absorption. In Fig.~\ref{Figbwav1a}(a), for example, we find
+spikes in the ion heating and current drive profiles. Such features
+become particularly troublesome when non-inductive current drive
+studies are performed using a transport code driver.
+  
+There is redundancy of information across input files. For example,  
+trxpl.out and curray\_in have variables \texttt{nprim, nimp, nspec}, etc.; either
+the redundancy should be removed or a clear indication of precedence
+rules must be given in the input instructions.
+Some switches, e.g. \texttt{icurdr}, actually are used to create files
+ (e.g. adjin). These switches and the name of the files  they create
+ should be spelled out in the input instructions.
+Finally assignment of Fortran io  unit numbers in the namelist input
+  file does not seem reasonable (its purpose is not clear).
+
+
+
+  When used within a transport code the definition of the driven
+  current as some sort of flux surface averaged quantity is
+  important  for accurate current drive calculations. The definition
+  of this quantity needs to be made precise in \ct. The electron
+  driven current in currayout is incorrectly labelled as Ma. The
+  actual value given  is in amps/watt of injected power. 
+   We should point out that for the DIII-D discharges
+   presented above  \ct is
+   quite sensitive to the initial launch conditions employed for the
+   rays (in addition to the edge reflections problem).
+   We found that both the number of poloidal starting points per
+   toroidal refractive index, \texttt{nthin}, and the radial starting location
+   of the ray in terms of poloidal flux, \texttt{psi0}, influenced the results
+   significantly. We would recommend that features are added to the
+   code to take care of these issues, perhaps by doing a preliminary
+   scan to set parameters if time dependent transport run is to be done.
+ Most of the cases run encountered some sort of (non-fatal)  error
+ during execution. For example ``no solution of dispersion close to
+   raypoint'' is one such error but there are at least several others.
+ It is not reasonable to expect a non-specialist user to cope with such
+ errors. We need to have an automatic
+   assessment and fix for such failures in the code. A code such as \ct
+   which is
+   intelligent enough to trap these errors can most likely be made to
+   take remedial action as well (e.g. perhaps a  more robust
+but more time consuming  non-linear method
+   must be invoked when an error condition is sensed).
+  Relatively simple errors such as  ``starting point too close to the
+ p-cutoff'' or ``absorbed power too small''  should be eliminated
+  altogether since checking for such errors during a transport run is
+  not feasible.
+ 
+ Although not
+explicitly shown in this report we did scan the effect that different
+equilibrium file grid sizes have on \ct. The ray tracing is found  to
+be slightly different in such cases but the effect is not great for
+DIII-D provided reasonable grid sizes are used (equilibrium 65x65 or greater).
+However we did encounter situations where changing eqdsk size caused 
+\ct to fail. We did not determine the specific cause of these failures. 
+
+
+
+ \subsection{\ct input}\label{ct_input}
+ %\chapter {\ct input}
+  In this appendix we present the actual antenna spectrum and other
+  curray related inputs  used for the 
+  cases presented in this review.  Note that 60, 83, and 117 MHz cases
+ are included. The correct case is selected by setting  the second
+ index equal to 1, 2, or 3 respectively.
+ \tiny
+\begin{verbatim}
+
+  !---------------------start curray specific input ----------------------
+
+  ! curray_path = 'SOME PATH TO YOUR FAVORITE CURRAY' DON'T SET TO USE DEFAULT
+  save_curray_input = 0 ! =1 SAVES ALL CURRAY INPUT FILES
+   psistep=0.025       !step in psi for ray tracing
+   pkexpnt=0.001
+   igraph=1            ! 0 NO GRAPHS FROM CURRAY ,1 CREATE GRAPHICAL OUTPUT FILE
+   iprint=0            ! -1 CONDENSED,0= NONE,1=NORMAL,2=MORE , 3 = WAY TOO MUCH
+   incrt = 1           ! number of harmonics in ion  damping is 2*incrt +1 
+  
+  epserr=0.02          !ERROR LIMIT FOR DISPERSION RELATION
+  epser1=0.004         !SECOND ERROR LIMIT FOR DISPERSION RELATION
+  idcur=1              !1 ANALYTIC CUR DRIVE EFFICIENCY, 3 = ADJOINT CALC,2 = DONT USE THIS
+  nminor=0             !NUMBER OF MINORIY SPECIES
+  kalfa=0              !0 IGNORE FAST ION DAMPING (APPARENTLY RELATES TO SLOWING DOWN DISTIRIBUTION)
+
+
+  !nspect=6       !NUMBER OF TOROIDAL WAVE NUMBER BINS- SET BY  POWERSRT
+  nrayptrt=6000
+
+  psi_startrt(1) =  3*0.985   !starting value of psi for rays
+  thgrilrt(1)=6*1.0   !approximate central location of antenna in degrees
+                      !w.r.t. outer equatorial plane
+  powersrt(1,1)= 4.8830e-3, 1.4940e-2, 3.7920e-2, 1.4220e-1, 3.6820e-1, 2.21852e-1
+  powersrt(1,2)= 2.2948e-1, 4.9065e-1, 2.0648e-1, 4.8111e-2, 1.8340e-2, 6.9367e-3
+  powersrt(1,3)= 2.2948e-1, 4.9065e-1, 2.0648e-1, 4.8111e-2, 1.8340e-2, 6.9367e-3
+
+  anzinfrt(1,1)=    13.488,     8.093,     2.298,    -2.360,    -4.721,    -7.081
+  anzinfrt(1,2)=   -2.1937,   -4.3875,   -6.5813,    2.4376,    7.3127,   11.7001
+  anzinfrt(1,3)=   -1.5563,   -3.1126,   -4.6689,    1.7292,    5.1876,    8.3000
+
+  anzsuprt(1,1)=    13.489,     8.094,     2.299,    -2.359,    -4.720,    -7.080
+  anzsuprt(1,2)=   -2.1938,   -4.3876,   -6.5814,    2.4375,    7.3126,   11.7000
+  anzsuprt(1,3)=   -1.5562,   -3.1125,   -4.6688,    1.7293,    5.1877,    8.3001
+
+  nnkparrt(1,1)=   6*1
+  nnkparrt(1,2)=   6*1
+  nnkparrt(1,3)=   6*1
+
+  !NUMBER OF N POLOIDALS IN EACH BIN:
+  nnkpolrt(1,1)=         1,         1,         1,         1,         1,         1
+  nnkpolrt(1,2)=         1,         1,         1,         1,         1,         1
+  nnkpolrt(1,3)=         1,         1,         1,         1,         1,         1
+
+  !UPPER LIMIT POLOIDAL REFRACTIVE INDEX:
+  anpsuprt(1,1)= 6*-1.730
+  anpsuprt(1,2)= 6*-1.250
+  anpsuprt(1,3)= 6*-0.887
+ 
+  !LOWER LIMIT POLOIDAL REFRACTIVE INDEX:
+  anpinfrt(1,1)= 6*-1.731
+  anpinfrt(1,2)= 6*-1.251
+  anpinfrt(1,3)= 6*-0.887 
+
+
+   nthinrt(1) =    11,    11,    11               ! NUMBER OF STARTING LOCATIONS 
+   maxrefrt(1) =    6,    10,    10               ! MAX NUMBER EDGE REFLECTIOSN
+   islofart(1) =   -1,    -1,    -1               ! -1 FAST WAVE, 1 SLOW WAVE
+   heightrt(1) = 120.,  120.,  120.               ! ANTENNA HEIGHT , CM
+
+
+   indvar=1     ! 1 USE TOTAL PHASE AS INDEP VARIABLE
+   ichois=2     ! 1 HIGH FREQ DISP. , 2 NO FREQ LIMIT
+   modcd=0      ! 0 EHSR KARNEY MODEL, 1 CHIU-KARNEY-MAU MODEL FOR J,P CALCS
+   igrill=-3    ! -3 READ IN SPECTRUM, -1 ANALYTIC SPECTRUM
+   bmaxrt=30    ! max Bessel function order
+   idmpsw=1     ! 0 NO ION DAMPING, ` MAGNETIZED ION DAMPING,
+                ! 2 UNMAGNETIZED ION DAMPING
+   irayiort=0   ! details of data output to file rayiop
+   beam_spec =-1,1,1,0 ! BEAM_SPEC(I) ,I =1 FULL ENERGY , 2 =HALF ,3 = THIRD 4 = FAST ALPHA
+                      ! =1 MEANS TREAT THIS COMPONENT OF THE FAST IONS AS A SEPARATE SPECIES
+                      ! =0 MEANS OMIT THIS COMPONENT. USED FOR EACH INJECTOR SEPARATELY
+                      ! THUS TO GET CUR DRIVE DUE TO FAST ALPHAS ONLY
+                      ! SET BEAM_SPEC = 0,0,0,1 FOR EXAMPLE.
+                      ! TO USE ONLY THE FIRST ENERGY COMPONENT (OF ALL INJECTORS) SET
+                      ! BEAM_SPEC = 1,0,0,0 , ETC. 
+                      ! DENSITIES AND 2/3 FAST ION STORED ENERGY
+                      ! DENSITY DIVIDED BY FAST ION DENSITY IS OUTPUT TO TRXPL.OUT
+                      ! NUMBER OF FAST SPECIES IS (NO. INJECTORS ) * (SUM FROM 1 TO 3 OF { (BEAMSPEC(I))})
+                      ! PLUS BEAM_SPEC(4)
+  !--------------------end curray specific input --------------------------------------
+
+\end{verbatim}
+\normalsize

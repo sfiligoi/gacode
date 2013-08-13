@@ -1,0 +1,92 @@
+changes made since CalTrans update
+
+
+psivol(mf) =0 line removed from prenub in cray321.f
+gauss_info.i parameter line moved after integer declaration line
+
+removed rela *8 declaration of eps from beam_plot
+removed integer ngauss declaration from subroutine beam_int (ngauss is
+declared integer in gauss_info.i)
+removed real *8 cxrat from function cxrat (duplicate declartaion since
+cxrat is declared real *8 on definition line)
+
+in nub4.i changed enbeam_tot_prev(kj) to enbeam_tot_prev
+in common /nub4/
+
+integer declaration of n_pulse removed from subroutine beam_init cray321.f
+(n_pulse is declared integer in nub4.i)
+
+integer declaration of kt removed from subroutine beam_init cray321.f
+(kt  is declared integer in nub4.i)
+
+ in subroutine beam_time_dependance removed beam_thermal_cutoff declaration
+ (declared in nub4.i)
+
+param.i changed (added notes)
+
+subroutines rf_mhd_interface and rf_mhddat changed psi_rf(nw) 
+to psi_rf(kpsi)
+ 
+subroutine rf_mhddat changed sf_rf(nw) and qpsi_rf(nw) to
+sf_rf(kpsi) and qpsi_rf(kpsi)
+
+
+all of the above was added to CalTrans code 
+and to my stand alone version 11/3/2000
+
+
+added the  following in 2 palces in cray206.f
+                       call STOP('ICSVKU fit of tdem data not available
+     . in Onetwo',0)
+
+also added the following in sub set_cdf_init
+      if(intg_tdem(7) .eq. 2 ) then
+         write (ncrt,'(" Subroutine SET_CDF_INIT detected an error:" /
+     .                 " intg_tdem(7)  in file ",a,2x,i3 /
+     .                 " The ICSVKU fitting option is not implemented",
+     .                 " in the onetwo code")
+         call STOP ('subroutine SET_CDF_INIT: method not available',241)
+      endif
+      if(intg_tdem(8) .eq. 2 ) then
+         write (ncrt,'(" Subroutine SET_CDF_INIT detected an error:" /
+     .                 " intg_tdem(7)  in file ",a,2x,i3 /
+     .                 " The ICSVKU fitting option is not implemented",
+     .                 " in the onetwo code")
+         call STOP ('subroutine SET_CDF_INIT: method not available',241)
+      endif
+
+ 
+current drive:
+switch ibcur and irfc are used in source to set source vector 
+for Faradys law
+s(kfar,1) is zero for bootstrap and driven (beam ,rf) currents at 
+rho =0, HSJ 4/30/02
+(lines that set s(kfar,1) are commented out
+NOTE that n is in common in solcon.i
+changed cray601.f so that if tot_iters > tot_iters_max then
+frozen method is seleced immediately 05/09/02
+modified curqo to use curdri instesad of curbi 5/11/02
+in subroutine source
+note that wneo(4,1),(4,2),(4,3) are not wired up to the bootstrap
+model for jhirsh = 95,96
+entry in       real*8 function tt2nhe4 (e)
+was added(05/20/02) :  3000.0,      97.0 /   !fudged 3000,97 is made up HSJ (to accomodate iter)
+but note that this value is a pure guess  to let iter_feat run
+scp *.f *.F *.f90 *.h *.i *.inc *.m make* stjohn@hydra.gat.com:/u/stjohn/onetwo/onetwo3
+
+/hdb3/onetwo_toq_test/source/CVS
+cvs -d :ext:stjohn@hydra.gat.com:/c/cvsroot status
+cp /u/leuer/efit/ctf06/run/g020000.00015
+/usr/local/cleanscape/flintgui.dir/main/flint -x -t -s  -S o12flint *.f *.f90 *.F90 *.F
+on benten
+to filter a flint tree :
+awk '/^+/' 12_flint.tre  > tport_reduced_tree.
+/usr/local/cleanscape/flintgui.dir/main/flint -x -t -s -Thead:source -S o12_source_flint *.f *.f90 *.F90 *.F
+
+
+
+changded cray4o1.f commented out
+      USE tmpcom
+c      USE fdyimp,                       ONLY : afdayi,bfdayi,cfdayi,
+c     .                                         fday2d3,f2d3mult
+which conflicts with tempcom variables
