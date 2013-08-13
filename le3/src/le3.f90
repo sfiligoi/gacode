@@ -13,6 +13,15 @@ program le3
   read(1,*) nps
   read(1,*) rmin
   read(1,*) rmaj
+  read(1,*) shift
+  read(1,*) kappa
+  read(1,*) s_kappa
+  read(1,*) delta
+  read(1,*) s_delta
+  read(1,*) zeta
+  read(1,*) s_zeta
+  read(1,*) zmag
+  read(1,*) dzmag
   read(1,*) hmin
   read(1,*) q
   read(1,*) m

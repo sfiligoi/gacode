@@ -55,26 +55,39 @@ subroutine le3_func2(xsize,x,fvec,iflag)
         ang = m*tb(i,j)+n*p(j)
 
         ! R,Z
-        r(i,j) = rmaj + rmin*cos(tb(i,j)) + hmin*cos(ang)
-        z(i,j) =         rmin*sin(tb(i,j)) + hmin*sin(ang)
+        r(i,j) = rmaj + rmin * cos(tb(i,j) + asin(delta) * sin(tb(i,j))) &
+             + hmin*cos(ang)
+
+        z(i,j) = zmag + kappa * rmin * sin(tb(i,j) + zeta * sin(2*tb(i,j))) &
+             + hmin*sin(ang)
 
         ! dR/d(tb)
-        drdtb(i,j) = -rmin*sin(tb(i,j)) - m*hmin*sin(ang) 
+        drdtb(i,j) = -rmin * sin(tb(i,j)+ asin(delta) * sin(tb(i,j))) &
+             * (1.0 + asin(delta) * cos(tb(i,j))) &
+             - m*hmin*sin(ang) 
 
         ! dR/d(pb)
-        drdpb(i,j) =                   -n*hmin*sin(ang)
+        drdpb(i,j) =  -n*hmin*sin(ang)                 
+             
 
         ! dZ/d(tb)
-        dzdtb(i,j) =  rmin*cos(tb(i,j)) + m*hmin*cos(ang) 
+        dzdtb(i,j) =  kappa * rmin * cos(tb(i,j) + zeta * sin(2*tb(i,j))) &
+             * (1.0 + 2*zeta * cos(2*tb(i,j))) &
+             + m*hmin*cos(ang) 
 
         ! dZ/d(pb)
-        dzdpb(i,j) =                  n*hmin*cos(ang)
+        dzdpb(i,j) =  n*hmin*cos(ang)
 
         ! dR/dr
-        drdr(i,j) = cos(tb(i,j))
+        drdr(i,j) = shift + cos(tb(i,j) + asin(delta) * sin(tb(i,j))) &
+             - sin(tb(i,j) + asin(delta) * sin(tb(i,j))) * sin(tb(i,j)) &
+             * 1.0/sqrt(1.0-delta**2) * s_delta
 
         ! dZ/dr
-        dzdr(i,j) = sin(tb(i,j))
+        dzdr(i,j) = dzmag + (1.0 + s_kappa) * kappa &
+             * sin(tb(i,j) + zeta * sin(2*tb(i,j))) &
+             + kappa * cos(tb(i,j) + zeta * sin(2*tb(i,j))) &
+             * sin(2*tb(i,j)) * s_zeta
 
         ! J [dtb/dr terms vanish]
         jac(i,j) = r(i,j)*(drdr(i,j)*dzdtb(i,j)-drdtb(i,j)*dzdr(i,j))

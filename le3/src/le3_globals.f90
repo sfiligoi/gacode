@@ -6,6 +6,8 @@ module le3_globals
   integer :: nts,nps
   integer :: m,n
   real :: rmin,rmaj,hmin,q
+  real :: kappa, s_kappa, delta, s_delta, zeta, s_zeta
+  real :: shift, zmag, dzmag
   real :: dt,dp
   real :: tol
   integer :: restart_flag
