@@ -434,16 +434,18 @@ contains
          X34, L34_S, X33, sigma_S, sigma_spitzer
     real :: nue_S, nue_star_S, nui_star_S
     integer :: is
-    real :: dens_sum
+    real :: dens_sum, press_sum
 
     ! EAB: 07/11/2013 changed def of Sauter nui_star_S for impurities
     ! from (Zi**2 * Zeff * ne) to (Zi**4)*(n_all_ions) 
     !nui_star_S = nui_star_HH / (dens(is_ion,ir) * z(is_ion)**2) &
     !     * dens_ele*zeff
+    press_sum = 0.0
     dens_sum = 0.0
     do is=1,n_species
        if(is /= is_ele) then
-          dens_sum = dens_sum + dens(is,ir)
+          dens_sum  = dens_sum + dens(is,ir)
+          press_sum = press_sum + dens(is,ir)*temp(is,ir)
        endif
     enddo
     nui_star_S = nui_star_HH / dens(is_ion,ir) * dens_sum
@@ -537,11 +539,15 @@ contains
           jpar = jpar + L31_S * I_div_psip * rho(ir) &
                * dens(is,ir) * temp(is,ir) &
                * (dlntdr(is,ir) + dlnndr(is,ir))
-          if(is /= is_ele) then
-             jpar = jpar + L34_S * alpha_S * I_div_psip * rho(ir) &
-                  * dlntdr(is,ir) * dens(is,ir) * temp(is,ir)
-          endif
+          !if(is /= is_ele) then
+          !   jpar = jpar + L34_S * alpha_S * I_div_psip * rho(ir) &
+          !        * dlntdr(is,ir) * dens(is,ir) * temp(is,ir)
+          !endif
        enddo
+       ! EAB: 08/15/13 changed interpretation for ions with unlike temps
+       ! from the above loop to this
+       jpar = jpar + L34_S * alpha_S * I_div_psip * rho(ir) &
+            * dlntdr(is_ion,ir) * press_sum
 
     end if
 
@@ -841,7 +847,7 @@ contains
     real :: ftrap_new, delta_param, alpha_param, beta_param, h_param, pfac
     integer :: h_flag = 2
     integer :: is
-    real :: dens_sum
+    real :: dens_sum, press_sum
 
     if(adiabatic_ele_model == 1) then
        jpar = 0.0
@@ -854,9 +860,11 @@ contains
        !nui_star_S = nui_star_HH / (dens(is_ion,ir) * z(is_ion)**2) &
        !     * dens_ele*zeff
        dens_sum = 0.0
+       press_sum = 0.0
        do is=1,n_species
           if(is /= is_ele) then
              dens_sum = dens_sum + dens(is,ir)
+             press_sum = press_sum + dens(is,ir)*temp(is,ir)
           endif
        enddo
        nui_star_S = nui_star_HH / dens(is_ion,ir) * dens_sum
@@ -982,11 +990,16 @@ contains
           jpar = jpar + L31_S * I_div_psip * rho(ir) &
                * dens(is,ir) * temp(is,ir) &
                * (dlntdr(is,ir) + dlnndr(is,ir))
-          if(is /= is_ele) then
-             jpar = jpar + L34_S * alpha_S * I_div_psip * rho(ir) &
-                  * dlntdr(is,ir) * dens(is,ir) * temp(is,ir)
-          endif
+          !if(is /= is_ele) then
+          !   jpar = jpar + L34_S * alpha_S * I_div_psip * rho(ir) &
+          !        * dlntdr(is,ir) * dens(is,ir) * temp(is,ir)
+          !endif
        enddo
+
+       ! EAB: 08/15/13 changed interpretation for ions with unlike temps
+       ! from the above loop to this
+       jpar = jpar + L34_S * alpha_S * I_div_psip * rho(ir) &
+            * dlntdr(is_ion,ir) * press_sum
 
     end if
     
