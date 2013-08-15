@@ -54,7 +54,7 @@ module neo_rotation
       use neo_equilibrium
       implicit none
       integer, intent (in) :: ir
-      integer, parameter :: nmax = 100
+      integer, parameter :: nmax = 200
       integer :: it, is, jt, id, n
       real :: x, x0, sum_zn, dsum_zn, fac
       
