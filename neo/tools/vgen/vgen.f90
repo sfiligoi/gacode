@@ -692,6 +692,6 @@ program vgen
 
   call MPI_finalize(i_err)
 
-10 format('rho=',f6.4,3x,'Er_0(kV/m)=',f9.4,3x,'vtor_1(km/s)=',f9.4,3x,'vpol_1(km/s)=',f9.4)
+10 format('rho=',f6.4,3x,'Er_0(kV/m)=',f10.4,3x,'vtor_1(km/s)=',f10.4,3x,'vpol_1(km/s)=',f10.4)
 
 end program vgen
