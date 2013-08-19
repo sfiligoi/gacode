@@ -99,8 +99,8 @@ subroutine le3_write
              dzdpbs,&
              jacs)
 
-        bt(i,j) = rmin*dtbdt(i,j)/jacs
-        bp(i,j) = iota*rmin/(rs(i,j)*jacs)*sqrt(drdtbs**2+dzdtbs**2)
+        bt(i,j) = rmin*rs(i,j)/(jacs*dtbdt(i,j))
+        bp(i,j) = iota*rmin/jacs*sqrt(drdtbs**2+dzdtbs**2)
 
      enddo
   enddo

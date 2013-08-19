@@ -11,7 +11,7 @@
 
 subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion,dlnridr)
 
-  use tgyro_globals, only : tgyro_fix_concentration_flag,i_r,i_proc_global
+  use tgyro_globals, only : tgyro_fix_concentration_flag
 
   implicit none
 
