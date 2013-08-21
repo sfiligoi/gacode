@@ -404,8 +404,14 @@ subroutine tgyro_init_profiles
   ! Density ratios 
   !  Used when tgyro_fix_concentration_flag=1
   !
+  !  ri = ni/n1, 
+  !  dlnridr = -ri'/ri
+  !          = dlnnidr-dlnn1dr
+  !  
+  ! Need only dlnridr:
+  !
   do i_ion=1,loc_n_ion
-     ni_ratio(i_ion,:) = ni(i_ion,:)/ni(1,:)
+     dlnridr(i_ion,:) = dlnnidr(i_ion,:)-dlnnidr(1,:)
   enddo
   !----------------------------------------------------
 

@@ -119,7 +119,7 @@ module neo_interface
   integer :: neo_n_tor_in    = 5
   real    :: neo_z1_mag_in   = 1.0e-3
   integer :: neo_geo_ny_in = 0
-  real, dimension(8,0:16) :: neo_geo_yin_in = 0.0
+  real, dimension(8,0:32) :: neo_geo_yin_in = 0.0
   ! the exception of the default is subroutine_flag
   integer :: neo_subroutine_flag = 1
 
@@ -147,6 +147,8 @@ module neo_interface
   real, dimension(6) :: neo_efluxtot_gv_out  = 0.0
   real, dimension(6) :: neo_efluxncv_gv_out  = 0.0
   real, dimension(6) :: neo_mflux_gv_out  = 0.0
+  ! nclass viscosities
+  real, dimension(6) :: neo_nclassvis_out  = 0.0
   ! error checking
   integer :: neo_error_status_out=0
   character(len=80) :: neo_error_message_out=''

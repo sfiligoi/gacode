@@ -68,6 +68,8 @@ program vgen
   read(1,*) er_method
   read(1,*) vel_method
   read(1,*) erspecies_indx
+  read(1,*) nth_min
+  read(1,*) nth_max
   close(1)
 
   select case(er_method)
@@ -116,6 +118,11 @@ program vgen
      stop
   end select
 
+  if(i_proc == 0) then
+     print '(a,i2,a,i2)','INFO: (VGEN) Using NEO Theta Resolution:',&
+          nth_min,',',nth_max
+  endif
+
   !---------------------------------------------------------------------
 
   call neo_init_serial(path)
@@ -148,6 +155,10 @@ program vgen
   if(neo_n_species_in >= 5 .and. neo_z_5_in == -1) then
      num_ele  = num_ele + 1
      indx_ele = 5
+  endif
+  if(neo_n_species_in >= 6 .and. neo_z_6_in == -1) then
+     num_ele  = num_ele + 1
+     indx_ele = 6
   endif
 
   if(num_ele == 0) then
@@ -295,10 +306,11 @@ program vgen
            if(erspecies_indx == 1) then
               grad_p = -(EXPRO_dlnnidr_new(i) + EXPRO_dlntidr(1,i))
            else
-              grad_p = -(EXPRO_dlnnidr(erspecies_indx,i) + EXPRO_dlntidr(1,i))
+              grad_p = -(EXPRO_dlnnidr(erspecies_indx,i) &
+                   + EXPRO_dlntidr(erspecies_indx,i))
            endif
            er_exp(i) = (grad_p * EXPRO_grad_r0(i) &
-                * EXPRO_ti(1,i)*temp_norm_fac &
+                * EXPRO_ti(erspecies_indx,i)*temp_norm_fac &
                 / (EXPRO_ctrl_z(erspecies_indx) * charge_norm_fac) & 
                 + EXPRO_vtor(erspecies_indx,i) * EXPRO_bp0(i) &
                 - EXPRO_vpol(erspecies_indx,i) * EXPRO_bt0(i)) &
@@ -306,7 +318,7 @@ program vgen
            open(unit=1,file='out.vgen.ercomp',status='old',position='append')
            write(1,'(e16.8)',advance='no') EXPRO_rho(i)
            write(1,'(e16.8)',advance='no') grad_p * EXPRO_grad_r0(i) &
-                * EXPRO_ti(1,i)*temp_norm_fac &
+                * EXPRO_ti(erspecies_indx,i)*temp_norm_fac &
                 / (EXPRO_ctrl_z(erspecies_indx) * charge_norm_fac) / 1000
            write(1,'(e16.8)',advance='no') EXPRO_vtor(erspecies_indx,i) * EXPRO_bp0(i)/1000
            write(1,'(e16.8)',advance='no') -EXPRO_vpol(erspecies_indx,i) * EXPRO_bt0(i)/1000
@@ -381,7 +393,7 @@ program vgen
            enddo
            pflux_sum(i) = pflux_sum(i) / neo_rho_star_in**2
 
-           print 10,EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp),&
+           print 10,EXPRO_rho(i),&
                 er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
 
         endif
@@ -398,6 +410,7 @@ program vgen
         er0 = 0.0
         omega = 0.0
         omega_deriv = 0.0
+
         call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
              omega_deriv)
 
@@ -446,7 +459,7 @@ program vgen
            pflux_sum(i) = pflux_sum(i) / neo_rho_star_in**2
         endif
 
-        print 10,EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp),&
+        print 10,EXPRO_rho(i),&
              er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
 
      enddo
@@ -497,7 +510,7 @@ program vgen
            enddo
            pflux_sum(i) = pflux_sum(i) / neo_rho_star_in**2
 
-           print 10,EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp),&
+           print 10,EXPRO_rho(i),&
                 er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
 
         enddo
@@ -565,7 +578,7 @@ program vgen
            pflux_sum(i) = pflux_sum(i) / neo_rho_star_in**2
         endif
 
-        print 10,EXPRO_rmin(i)/EXPRO_rmin(EXPRO_n_exp),&
+        print 10,EXPRO_rho(i),&
              er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
 
      enddo
@@ -679,6 +692,6 @@ program vgen
 
   call MPI_finalize(i_err)
 
-10 format('r/a=',f6.4,3x,'Er_0(kV/m)=',f9.4,3x,'vtor_1(km/s)=',f9.4,3x,'vpol_1(km/s)=',f9.4)
+10 format('rho=',f6.4,3x,'Er_0(kV/m)=',f10.4,3x,'vtor_1(km/s)=',f10.4,3x,'vpol_1(km/s)=',f10.4)
 
 end program vgen

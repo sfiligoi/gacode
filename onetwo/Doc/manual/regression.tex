@@ -1,0 +1,158 @@
+
+
+  \documentclass[12pt]{article} 
+   \input{abbrev} % can keep my definitions is file abbrev.tex
+   \usepackage{epsfig}
+    \begin{document} 
+      %\title{  (title gets put on separate page)
+\begin{center} \bfseries
+  Onetwo  Regression Testing Task Description \\
+  H. St.John, 04/21/05 \\
+\end{center}
+    %  }
+        %\section*{Summary}
+        %\Large \boldmath 
+        
+\normalsize \mdseries
+
+ 
+As per our conversation on April 21, here is the agreed upon project,
+to ensure that Onetwo is not compromised as we add new features.
+The project consists of two phases. In the  first phase several
+scripts will be developed that automate the process described below.
+In the second phase the scripts will be applied on an as per needed 
+basis to verify the integrity of Onetwo. We will carry out the 
+tests only on Linux based platforms. The choice of which machine to
+use depends on the availability of compilers and software libraries
+on each platform. We test Onetwo using both pgf90 and lf95
+compilers. All Linux platforms except Delphi and Zeus currently
+support Onetwo. It is my understanding that Delphi and Zeus are to be 
+upgraded to the latest version of Linux in the near future so that
+these two platforms should also be available eventually. To do
+regression tests across (Linux based) platforms we would like to
+partition the set of test cases among the available platforms.
+The partitioning should be done in such a way that each platform runs
+different sets of test cases each time the regression tests are
+performed. The exception is that if a test fails then it should be
+rerun on the same platform until it passes. (This implies that some
+information is written to log files that can be used as input
+to the regression script)
+
+The basic approach consists of running Onetwo for all or possibly
+a subset of directories stored under \\
+\begin{center} /p/linux/onetwo/regression  \end{center}
+There will be a number of versions of Onetwo that should be tested.
+These version are defined by a)compiler type (pgf90,lf95) and b) grid
+size used. The regression script should run all versions of Onetwo
+in the directories
+\begin{center}  /p/linux/onetwo/test\_version/pgf90 \\
+  /p/linux/onetwo/test\_version/lf95  \end{center}
+Typically we will concentrate on pgf90 code so the test versions in
+the ../lf95 directory will be limited.
+The regression script will know what subset of directories to run
+by reading a file,''tests\_to\_run.txt'', that specifies which directories to run. It is
+expected that after the initial creation this file will be updated
+automatically by the regression script. It should be plain text so
+that the user can edit it. A simple directive such  as ``all'' on the
+first line of this file should be used to indicate that all
+directories found under /p/linux/onetwo/regression are to be run.
+
+The general procedure is as follows:
+\begin{itemize}
+  \item For each code in /p/linux/onetwo/test\_version/pgf90 
+    \begin{itemize}
+      \item decode the Onetwo executable name to get the
+            grid size. For example a name in
+            /p/linux/onetwo/test\_version/pgf90 
+          might be onetwov3.6\_129\_51 . This implies that all
+          directories below the directory 129\_51/  in the regression
+          directory hierarchy are to be entered. Conversely it 
+         means that directories under 65\_51/ are to be ignored.
+      \item For each selected directory in ``tests\_to\_run'':
+  \item  Copy the files to a scratch area
+  \item  run the code
+  \item run summarize (this creates the file summary)
+    \item compare scratch/summary with the base summary file found the
+          original test directory. Comparison will be based on
+          comparing numbers in the summary files. 
+    \item for cases that passes 
+   \begin{itemize}
+     \item write Onetwo version used, platform name , case description
+     (which is just the full name of the test directory) 
+     to a file log\_pass.txt
+   \end{itemize}
+     \item    for cases that fail, 
+      \begin{itemize}
+     \item write the above information to a file
+        log\_fail.txt . Also write failed information to a file
+        ``tests\_to\_run\_again.txt'' . This file will be copied
+        to file ``tests\_to\_run.txt'' and used as input in subsequent
+        regression tests. Save the failed case summary file in 
+        the current regression directory as summary\_failed.
+    \end{itemize}
+    \end{itemize}
+    \item repeat the above sequence of steps  using the test codes in
+      /p/linux /onetwo/test\_version/lf95 . 
+
+\end{itemize}
+
+ \noindent Notes:  \\
+
+  None of the file or path names should be ``hard coded''. Instead the
+ regression script should, each time it is run, read a
+ file,''regress\_directives.txt'' that contains the filenames and
+ paths. For example contents of regress\_directives.txt might be : \\
+  \begin{verbatim}
+      /p/linux/onetwo/regression         
+      /p/linux/onetwo/test_version/pgf90                           
+      /p/linux/onetwo/test_version/lf95  
+      tests_to_run.txt 
+      log_pass.txt 
+      log_fail.txt 
+      tests_to_run_again.txt 
+      summary_failed  
+\end{verbatim} 
+
+  The above entries are in order: \\
+  1)root of regression tree       \\
+  2)location of  pgf90 compiled  Onetwo executable  to test  \\
+  3)location of  lf95  compiled  Onetwo executable  to test  \\
+  4)name of file that indicates which directories are to be 
+    tested. This file initially will consist of the single line
+    ``all'' meaning that all directories are to be tested.
+    After such an initialization this file will be overwritten by
+    file test\_to\_run\_again.txt or similar. \\
+  5)name of log file for runs that passed  \\
+  6)name of log file for runs that failed  \\
+  7)name of file that contains information on cases that failed.
+    Note that this file will be used as input instead of
+    tests\_to\_run.txt in some circumstances.
+  8) for cases that failed the summary file should be renamed
+    summary\_fail and saved in the current regression directory.
+
+
+   If a directory in the regression tree,/p/linux /onetwo/regression ,
+   is empty or if there are no test codes in
+   /p/linux /onetwo/test\_version/pgf90   or       
+   /p/linux /onetwo/test\_version/lf95   then it should be
+   reported as an error in file log\_fail.txt.
+
+  All scripts developed in association with this project should be 
+  CVS based. Hence create a directory called ``regression'' in the Onetwo
+  CVS repository /c/cvsroot/onetwo. Then keep all developments current
+  in this repository.
+
+ To compare summary files a script can be created that reads in each
+ line of each file and extracts the numbers to be compared.
+ Alternatively a Fortran code can be built by exchanging the 
+ write statements with read statements. See the script
+ /usr/local/bin/summarize and the Fortran subroutine 
+  /p/linux/onetwo/source/onetwo/cray309.f 
+
+ The Python language is well suited for this task. See \\
+ http://www.ifi.uio.no/in228/lecsplit/ \\
+ for a great tutorial on how to do things in Python,
+ including walking directory trees and regression testing, etc.
+
+
+  \end{document}

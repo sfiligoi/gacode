@@ -1,0 +1,317 @@
+
+
+\begin{filecontents}{abbrev.tex}
+   \newcommand{\clr} {\color{red}}
+   \newcommand{\clb} {\color{blue}}
+   \newcommand{\vp}{ V^{\prime}}
+   \newcommand{\ot}{\emph{ONETWO }}
+   \newcommand{\pdiff}[2]{\frac{\partial{ #1}}{\partial{ #2}}}
+   %useage \pdiff{#1}{#2}
+   \newcommand{\ddiff}[1]{\frac{\partial}{\partial #1}}
+   \newcommand{\strt}{\begin{eqnarray}}
+   \newcommand{\trts}{\end{eqnarray}}
+   \newcommand{\beq}{\begin{eqnarray}}
+   \newcommand{\eeq}{\end{eqnarray}}
+   \newcommand{\pdiffn}[3]{\frac{\partial^{#3}{#1}}{\partial{ #2}^{#3}}}
+   \newcommand{\pdiffz}[3]{\frac{\partial{#1}}{\partial{ #2}}\bigg \vert_{#3}}
+   \textheight8.5in
+   \endinput
+\end{filecontents}
+\documentclass{slides}  
+  %note: the landscape option above simply tells tex to
+  %  use the long dimension of the page in calculating its layout
+  % (if this is all that is done the the lines would run off the paper
+  % when printed)
+  %also need to use landscape option in dvips, which actually rotates
+  %everything so that it fits across the long side of the page.
+  %(if landscape option is used in dvips but not in tex document
+  % then the text will be too short for the long side of the page)
+ \usepackage{amsmath} 
+ %\usepackage{fancyheadings,graphics,color}
+ \usepackage{fancyheadings,graphics}
+ \usepackage[dvips]{color}
+   %\usepackage{epsfig}
+  %\usepackage[usenames]{color} seems logical but doesn't work
+   \input{abbrev}
+
+
+   %\onlyslides{6}
+
+
+%----------------------------------------------------------------------------
+      \color{blue} %\pagestyle{fancy}
+  \begin{document}        
+       \begin{center}
+           \Large\bfseries Wedn. Meeting\\ % 1
+            Time Dependent Beam and GLF23 Modeling
+           March 27,'02 \\
+           H.S.J.
+
+        \end{center}
+    
+
+%------------------------------------------------------------------
+ 
+     \begin{slide}          \setlength{\topmargin}{-0.5in}
+       \begin{center}
+           \Large\bfseries The Fast Ion Slowing Down Problem 
+        \end{center}
+        \normalsize  
+
+        \bigskip
+        \hrule height4pt
+
+         \begin{itemize} \bfseries \tiny
+           \item
+         The simplest form of fast ion slowing down on a 
+         background plasma is given by the Fokker-Plank equation:
+           \begin{eqnarray}
+             \tau_s \pdiff{f_b}{t}(v,\zeta,t) = \frac{1}{v^2} 
+             \ddiff{v}{(v^3+v_b^3)} f_b(v,\zeta,t) +\frac{Z_2v_c^3}{2 v^3}
+             \ddiff{\zeta}{(1-\zeta^2)}  \pdiff{f_b}{\zeta}(v,\zeta,t)
+            \nonumber \\  + \frac{\tau_s}{\tau_{cx}}f_b(v,\zeta,t) +
+            \frac{\tau_s}{\tau_{fus}}f_b(v,\zeta,t) +
+            \frac{\tau_s}{\tau_{terhm}}f_b(v,\zeta,t) +
+            \tau_s S^i(v,\zeta,t)
+            \label{eq:wav2}
+           \end{eqnarray}
+          \item
+           We are interested in the solution of this equation when the 
+           source term has a (repetitive) pulsed time
+           dependance of the form
+          \begin{equation} \label{eq:wav1}
+          S^i(v,\zeta,t)= \frac{\dot S_0^i}{v^2}\delta(v-v_0) \delta(\zeta
+          -\zeta_0) \biggl( H(t-t_0^i) - H(t-t_1^i) \biggr)
+                    \end{equation}
+           which is turned on and off at times  $t_0^i ,t_1^i $ (H is
+           the Heavyside step function).
+           \item 
+           The resulting fast ion distribution function due to this
+           source is
+          \begin{eqnarray}  %use eeqnarray for multiple line formulas
+           f_b^i(v,\zeta)= \frac{\dot S_0^i \tau_s}{v^3+v_c^3} P_{tot}(v)
+               \sum_{l=0}^{\infty}\frac{2l+1}{2}P_l(\zeta)P_l(\zeta_b)
+               \left[\frac{v^3}{v_b^3} \left(\frac{v_b^3+v_c^3}{v^3+v_c^3}
+                \right)\right]^{\frac{1}{6}l(l+1)Z_2} \nonumber \\  
+            \bigg[
+                   H\Bigl(t-t_0^i - \tau_0(v_b)+\tau_0(v) \Bigr)
+                   -H\Bigl(t-t_1^i - \tau_0(v_b)+\tau_0(v) \Bigr)
+            \bigg]
+              \label{eq:wav3a}
+          \end{eqnarray}
+            \item  $P_{tot}(v) $ is the total loss rate( charge
+            exchange,fusion ,orbits,thermalization). We require
+            linearity to proceed:
+            \begin{equation}
+               f_b^{tot}(v,\zeta) = \sum_{i}f_b^i(v,\zeta)
+              \label{eq:wav4a}
+            \end{equation} 
+    \end{itemize}
+    \end{slide}
+
+
+
+     \begin{slide}          \setlength{\topmargin}{-0.5in}
+       \begin{center}
+           \Large\bfseries The Fast Ion Slowing Down Problem 
+        \end{center}
+        \normalsize  
+
+        \bigskip
+        \hrule height4pt
+
+         \begin{itemize} \bfseries \tiny
+           \item
+            In order to use these results in a thermal transport code
+            we form various moments of the distribution function with 
+            the collision operators. For each individual pulse we
+            require moments such as  \\
+            The fast ion density :
+         \begin{equation}
+             n_b^i(t) \equiv \int_{v_{min}^i(t)}^{v_{max}^i(t)}
+                       \int_{-1}^{1} 
+                     f_b^i(v,\zeta)
+             v^2dvd\zeta   
+        \label{eq:wav5a}
+        \end{equation}
+           The fast ion stored energy density :
+         \begin{equation}
+             E_b^i(t) \equiv \frac{1}{2}m_b\int_{v_{min}^i(t)}^{v_{max}^i(t)}
+                       \int_{-1}^{1} 
+                      v^2 f_b^i(v,\zeta)
+             v^2dvd\zeta   
+        \label{eq:wav5b}
+        \end{equation}
+           The power desnity  delivered to the electrons:
+         \begin{equation}
+             Q_e^i(t) \equiv \frac{1}{2}m_b\int_{v_{min}^i(t)}^{v_{max}^i(t)}
+                       \int_{-1}^{1} 
+                   (\ddiff{v}{v^3 f_b^i(v,\zeta)})
+             v^2dvd\zeta   
+        \label{eq:wav5c}
+        \end{equation}
+           The energy delivered to the ions:
+         \begin{equation}
+             Q_i^i(t) 
+                    \equiv \frac{1}{2}m_b \int_{v_{min}^i(t)}^{v_{max}^i(t)}
+                       \int_{-1}^{1} 
+                    (\ddiff{v}{v_c^3 f_b^i(v,\zeta)})
+             v^2dvd\zeta   
+        \label{eq:wav5d}
+        \end{equation}
+           The fast ion momentum transfer to electrons:
+         \begin{equation}
+             M_e \equiv \frac{m_b}{\tau_s}\int_{v_{min}^i(t)}^{v_{max}^i(t)}
+                       \int_{-1}^{1} 
+                    \frac{\zeta}{v}(\ddiff{v} f_b^i(v,\zeta))
+             v^2dvd\zeta   
+        \label{eq:wav5e}
+        \end{equation}
+    \end{itemize}
+    \end{slide}
+
+
+
+
+
+     \begin{slide}          \setlength{\topmargin}{-0.5in}
+       \begin{center}
+           \Large\bfseries The Fast Ion Slowing Down Problem 
+        \end{center}
+        \normalsize  
+
+        \bigskip
+        \hrule height4pt
+
+         \begin{itemize} \bfseries \tiny
+           \item
+       In these equations  both the upper and lower limits of
+       integration are functions of time due to the transient
+       nature of the source:
+       \begin{align}
+          v_{max}(t) & = v_b^i &  t_0^i\le t \le t_1^i \\
+                     & = [((v_b^i)^3
+                     +v_c^3)\exp(\frac{-3(t-t_1^i)}{\tau_s})
+                    -v_c^3]^{\frac{1}{3}} &t_1^i \le t \le
+                    t_1^i+\tau_0(v_b) \\
+                    & = v_t & t \ge t_1^i+\tau_0(v_b) \\
+          v_{min}(t) & =  [((v_b^i)^3
+                     +v_c^3)\exp(\frac{-3(t-t_0^i)}{\tau_s})
+                     -v_c^3]^{\frac{1}{3}}  &t_0^i \le t \le
+                    t_0^i+\tau_0(v_b) \\
+                     & = v_t & t \ge t_0^i+\tau_0(v_b)
+       \end{align}
+
+       The upper limit
+       of integration remains fixed at the fast ion birth speed
+       $v_b^i$
+       until the source $ \dot S_0^i $ is shut off.  Thereafter this
+       upper limit decreases  since ions of speeds greater than $
+       v_{max} $ are not replenished by the source. 
+       The lower limit
+       starts at the same value as the upper limit and decreases as
+       time goes on until it reaches an arbitrarily defined thermal
+       cutoff value $ v_t $.
+       If the source is on long enough ($ t_1^i -t_0^i \ge
+       \tau_0(v_b)$ ) the moments 
+       become time independent when the lower limit of 
+       integration  reaches the value $ v_t $ at time $t_0^i +\tau_0(v_b)$
+       (typically $v_t$ is taken as 0.0, but in \ot it is user
+       specifiable).     
+    \end{itemize}
+    \end{slide}
+
+
+    \begin{slide}          \setlength{\topmargin}{-0.5 in}
+       \begin{center}
+           \Large\bfseries Example Interpretation of Results
+        \bigskip
+        \end{center}
+        \hrule height4pt
+         \begin{itemize} \bfseries \tiny
+          \item The relationship between the beam slowing down time and
+          the on/off switching frequency of the beam sources, coupled
+          with the superposition of sources from different beams and
+          energy components will produce complex
+          waveforms:
+
+       \rotatebox{0.}{\resizebox{10 cm}{12 cm}{
+               \includegraphics{plot1a.eps}}}
+
+        Fast ion density.
+                 The square wave,composed pulses a,b,c,etc., are the
+                 beam switching times inyes
+                 arbitray units.
+    \end{itemize}
+    \end{slide} 
+ 
+    \begin{slide}          \setlength{\topmargin}{0. in}
+       \begin{center}
+           \Large\bfseries Example Delayed Particle Source
+        \bigskip
+        \end{center}
+        \hrule height4pt
+         \begin{itemize} \bfseries \tiny
+          \item
+
+       \rotatebox{0.}{\resizebox{10 cm}{12 cm}{
+               \includegraphics{thermal_source.eps}}}
+
+         Thermal  particle source due to a
+          single beam pulse that starts at 1 msec and ends at 41
+          msec.The delayed sources are due to the different slowing
+          down times of the three beam energy components.
+    \end{itemize}
+    \end{slide}
+
+
+     \begin{slide}          \setlength{\topmargin}{-0.5in}
+       \begin{center}
+           \Large\bfseries Combined Analytic Monte Carlo Approach
+        \end{center}
+        \normalsize  
+
+        \bigskip
+        \hrule height4pt
+
+         \begin{itemize} \bfseries \tiny
+           \item Should use ADAS cross section 
+           \item Common Pulsed wavetrain interface for
+                 analytic and M.C. codes
+           \item Will use PPPL M.C. Beam package. But intend
+                 to modify for fast ion instabilities
+                 to account for anomalous fast ion diffusion???
+           \item Expect that most of the time we will use 
+             analytic method for speed. This is workable in
+             classes of discharges as was denonstrated by
+             Azumi et. al. for JT60U.
+
+    \end{itemize}
+    \end{slide}
+
+
+    \begin{slide}          \setlength{\topmargin}{0. in}
+       \begin{center}
+           \Large\bfseries GLF23 Status in Onetwo
+        \bigskip
+        \end{center}  
+        \hrule height4pt
+         \begin{itemize} \bfseries \tiny
+          \item New renormalized mode introduced into Onetwo
+            \item Sparse Jacobian with Broyden factorization
+                  under development.
+          \item Application to Iter-Feat standard and AT cases underway
+          \item steady state and timie evolution (up to 10 sec) cases
+            have been run
+
+      \setlength{\leftmargin}{10. in}
+       \rotatebox{90.}{\resizebox{10 cm}{15 cm}{
+               \includegraphics{teti_etor_iter_feat.eps}}}
+
+    \end{itemize}
+    \end{slide}
+\end{document}   
+        \rotatebox{90.}{\resizebox{10 cm}{10 cm}{
+               \includegraphics{etor_iter_feat.eps}}}
+       \rotatebox{90.}{\resizebox{10 cm}{10 cm}{
+               \includegraphics{teti_iter_feat.eps}}}

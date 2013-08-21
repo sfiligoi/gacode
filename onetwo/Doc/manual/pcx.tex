@@ -1,0 +1,94 @@
+  \documentclass[12pt]{report} 
+   \input{abbrev} % can keep my definitions is file abbrev.tex
+   \usepackage{epsfig}
+    \begin{document}
+	\section{Effect of Charge Exchange}
+        \Large \boldmath
+        The fast ion distribution function depends on the factor
+                      $ P_{cx}(v) $,defined as the 
+	probability that a fast ion survives charge exchange at least down
+        to speed v,having been born at speed $v_b$ . 
+
+	 \beq
+           P_{cx}(v)=  exp\left(-\tau_s \int_{v}^{v_b}\frac{v^2dv}
+              {(v^3+v_c^3)\tau_{cx}}\right) \label{eq1}
+         \eeq
+        Here $ \tau_{cx} $ is the mean time time between charge exchange
+	collisions,
+	\beq 
+	   \tau_{cx}=\frac{1}{n\sigma v}
+	\eeq
+	and is normally assumed to be large so that $P_{cx}\approx 1 $.
+	A somewhat better aproximation assumes that $\tau_{cx} $ is a constant,
+	evaluated at some particular value of $v=v_0 $so that eq \ref{eq1} .
+	becomes
+	\beq
+	    P_{cx}(v)=exp\left(-\frac{\tau_s}{\tau_{cx}(v_0)}\right)
+	\eeq
+	If $v_0$ is taken as the average speed that a fast ion has
+	during the slowing down process in the abscence of charge exchange,
+	\beq
+	    v_0=\frac{\int\frac{v^3dv}{v^3+v_c^3}}{\int\frac{v^2dv}{v^3+v_c^3}}
+	\eeq
+	and the Freeman-Jones cross section for charge exchange 
+	shown in Fig {\ref{Figps}} is used, the resulting survival probability
+	is given as the dashed line in Fig{\ref{Figps}}. Shown  
+	in Fig{\ref{Figps}} as the solid line is the exact result for
+        this case,which assumes that the neutral density ,n,is fixed
+         at $1 \cdot 10^8 cm^{-3} $.
+         From the figure we may conclude that at neutral densities as low
+	as $1\cdot10^8 cm^{-3} $ it is important to 
+        include a refined charge exchange factor in the fast ion
+	distribution function .
+	\begin{figure}[hbt] %note: figure environment not available in slides
+        \centering
+	\begin{tabular}{c@{\qquad what is it}c}
+           \mbox{\epsfig{file=pic1.ps,height=9cm,width=8cm}}&
+           \mbox{\epsfig{file=pic2.ps,height=9cm,width=8cm}} \\ 
+            figure 1 &    figure 2  
+	\end{tabular}
+	\caption{(a)NRL (solid) and Bosh and Hale (dashed) charge
+           exchange
+             cross sections. Corresponding probabilities 
+            against charge exchange (b)  }\label{Figps}
+        \end{figure}
+   \section{Input Description}
+
+      Effect of charge exchange of fast ions with neutrals during the slowing
+  down process is controlled by the integer valued switch $ifcx$ as follows: 
+
+   \begin{tabular}{p{3cm}p{14cm}}
+     $ ifcx \ge 0$ &          include the charge exchange effect in the fast 
+	   ion distribution function in any volume element for which the local
+	      mean time against charge exchange,$\tau_{cx}$, is related to the
+	      local slowing down time,$\tau_s$,by
+	       \beq
+	         \tau_{cx} \leq  (ifcx)\tau_s
+	       \eeq
+	To always include charge exchange set $ifcx$ to a large number .
+	(In the code any input value of  $ifcx \ge  ifcxmax (=10)$ means
+	always (ie in all volume elements) include charge exchange. Note
+	that setting $ifcx$ equal to 0 or a negative number means that
+	charge exchange will be ignored.\\
+     $ifcxmax$ &     a parameter 
+	             that controls  \\
+     $ennmin $ &     minimum neutral density,below which charge exchange will
+                     be neglected .\\
+   \end{tabular}
+
+        ennmin if the local neutral density is less than
+          $ ennmin $ then the effect of charge exchange will 
+	($ifcxmax $ can be changed by a recompile of the code only)         
+
+
+	\begin{figure}[hbt] %note: figure environment not available in slides
+        \centering
+           \mbox{\epsfig{file=pict.ddthermal,height=12cm,width=12cm}}
+	\caption{Reaction Rates,$\frac{cm^3}{sec}$ . Solid line is the
+	         new Bosch-Hale rate,dashed line is the old NRL rate}
+        \label{Figps2}
+        \end{figure}
+
+
+    \end{document}
+

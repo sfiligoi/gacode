@@ -723,7 +723,7 @@ module gyro_globals
   !
   ! Geometry Fourier coefficients
   integer :: n_fourier_geo
-  real, dimension(8,0:16) :: a_fourier_geo
+  real, dimension(8,0:32) :: a_fourier_geo
   !---------------------------------------------------------
 
   !---------------------------------------------

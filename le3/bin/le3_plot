@@ -63,6 +63,8 @@ while [ $# -gt 0 ] ; do
   -phi) shift ; PLOT_TYPE=phi ;;
 
   -theta) shift ; PLOT_TYPE=theta ;;
+
+  -b) shift ; PLOT_TYPE=b ;;
   
   *) echo "ERROR: (le3_plot) Incorrect syntax." ; exit 1 ;;
 
@@ -89,6 +91,9 @@ case "$PLOT_TYPE" in
 
    phi)  
 	python $PYROOT/le3_plot_phi.py $SIMDIR $IMGFILE ;;
+  
+   b)  
+	python $PYROOT/le3_plot_b.py $SIMDIR $IMGFILE ;;
   
 esac 
 

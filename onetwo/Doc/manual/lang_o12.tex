@@ -1,0 +1,145 @@
+   \documentclass[12pt]{article}
+   \input{abbrev} % can keep my definitions in file abbrev.tex
+   \usepackage{amsmath} 
+   \begin{document}
+
+
+   \title{BRIEF SYNOPSIS OF ONETWO}
+   \author{H.ST.JOHN}
+   \date{   }   %make the date just some blanks
+   \maketitle
+
+
+     % \Large
+       \boldmath\
+
+
+      \section{Description}
+    The Onetwo transport code solves a user selectable,arbitrary
+ combination,of flux surface average parabolic equations representing
+ the radial diffusion and convection of 1 or 2 thermal ion species and
+ up to 2 neutral species,the electron energy,the ion energy,the poloidal
+ magnetic field,and the toroidal momentum.  The magnetic geometry may be
+ self consistently maintained by solving the elliptic mhd equilibrium
+ equation simultaneously with the diffusion equations.  Both free and
+ fixed plasma boundary equilibrium models are supported. Auxilliary
+ heating models include Monte Carlo neutral beam deposition and electron
+ and ion cyclotron and fast wave r.f. heating.  Models for ohmic,bootstrap,
+ beam and r.f. driven currents are included.  Energy confinement may be
+ simulated by selecting theoretical or empirical electron and/or ion
+ thermal conductivity models,including Rebut-Lallia,Shay,and Waltz-
+ Dominguez.  A unique feature of the code is its ability to substitute
+ measured profiles for any of the dependent variables and solving the
+ diffusion equations only for the remaining unkown profiles. A combination
+ of Crank-Nicholson,predictor and iterated corrector methods are used to
+ converge the non linear diffusion equations. The elliptic equations are
+ solved using variable finite difference schemes with single cyclic
+ reduction. 
+    \ot is written in Fortran 77,it does not at the present time use
+ any Fortran 90 extensions. The code is routinely compiled and runs on
+ Cray2,C90,Cray YMP Cray J90 (all of which use the Unicos operating
+ system),Hp 9000 series 700,800 (Hp Ux operating system),Digital
+ Alpha (unix),silicon graphics (IRIS operating system) and Sun (Solaris
+ operating system). \ot actually consists of a suite of codes,onetwo,
+ gafit,toray,curray,preplt,verdi,trplot,eqplot,nubplt,xplot,ploteq,psiplt,
+ and fixbdry. 
+ 
+
+\section{Input}
+  All of the input to the \ot code is done through the fortran
+  namelist construct.
+  Basic run parameters:
+  \begin{itemize}
+  \item $time0,timmax$ the start and end times of the analysis
+  \item specification of which of the dependent variables is
+         run in analysis mode and which are run in simulation mode,
+         $itenp,itte,itti,itxj,itangrot =0,1$
+  \item the primary impurityion  and neutral species,input as 
+        ASCII characters.
+  \item the particle confinement time,$taupin $ in sec,used to set
+	the neutral density.
+  \item the $5 x 5 $ neoclassical transport matrix
+ \item the bootstrap current selection model switch
+ \item $inenez $ indicator switch,selects option of inputting primary
+	io densities or calculating them self consistently from given
+	zeff and electron density profiles. 
+  \item a number of integer switches used to control presentation
+        of the output and plots.
+  \item integer switches to select sawtooth, balloning mode and
+	confinement  models.
+  \end{itemize}
+  The code requires that profiles (ie initial conditions) be given.
+  Profile input  is done in terms of a normalized variable
+ $ \rho $ which is equal to the square root of the toroidal flux
+ inside a given flux surface divided by the total toroidal flux inside the
+ plasma.  Measured kinetic data is
+ parameterized in terms of a least squares cubic spline fit as a function
+ of $\rho $.  The input profiles required are:
+ \begin{itemize}
+  \item $n_e$,the electron density,$\frac{1}{cm^3}$
+  \item $T_e$,the electron temperature, kev
+  \item $T$,the ion temerature, kev
+  \item $\omega $ the toroidal rotation speed profile,$\frac{rad}{sec}$
+  \item $zeff $  the effective charge number,usually measured
+   \item $qrad$ the radiated power density 
+ \end{itemize}
+ The above profiles are input as function values at specific $\rho$ locations
+ commonly refered to as ``knots''. Each profile may be time dependent so
+ that for example the input for the ion temperature T takes the form
+ \beq
+          T(i,j) i=1,...no.\  knots,\ j=1... no.\  time intervals
+ \eeq
+	with the actual times specified in  $bctime(j) $ .
+ The boundary conditions used with these profiles are zero gradient
+ at the magnetic axis and derivative of the profile at the plasma edge.
+
+ Neutral beam  input.
+ \begin{itemize}
+  \item the number of beam lines
+  \item the beam line aiming parameters
+  \item the energy of each beam
+  \item the power of each beam
+  \item the cross section set (ADAS or Boley)
+  \item integer switches to control frequency of beam-beam,beam-thermal
+	neutron rate calculations and beam density iteration/convergence.
+ \end{itemize}
+ 
+
+ Basic mhd data input is in terms of the ``eqdsk'' data file format
+ described under EFIT.
+ The basic input consists of
+ \begin{itemize}
+  \item a description of the cylindrical R,Z grid
+  \item the number of flux surfaces
+  \item $ \pdiff {P}{\psi} $ the pressure gradient
+  \item $ \pdiff {F}{\psi} $ the diamagnetic flux function
+  \item $ q $ the safety factor profile
+  \item $ \psi(R,z) $ an array of psi values 
+  \item $\langle J \frac{R}{R_0} \rangle$ the flux surface average
+	toroidal current density (used the  initial condition for
+        evolution of the poloidal magnetic field)
+  \item $r(i),z(i),i=1..n$ the R,Z coordinates of the plasma surface.
+  \item $r_{lim}(i),z_{lim}(i),i=1..n_{lim}$ the R,Z coordinates of the limiter.
+  Other mhd input includes integer switches to select whether or not
+  mhd calculations will be coupled with transport simulations,selection
+ of fixed or free boundary equilibrium models,and startup options.
+ \end{itemize}
+
+\section{NetCdf Data Format}
+ Onetwo is currently being converted to use the network common data format
+ for its output. Many commercial packages,including IDL, support the netCDF
+ data format. In addition netCDF files written by C,Fortran or Perl programs
+ are interchangeable amongst themselves (so that a netCDF file created
+ in Fortran can be read by a C program for example).
+ \nocite{*}
+
+
+     \bibliographystyle{unsrt}   % list citations in order of appearance
+     \bibliography{/u/stjohn/tex/tpx_project.dir/bibliography.dir/tokamak,
+     /u/stjohn/tex/tpx_project.dir/bibliography.dir/comp_in_phys}  
+    % database file is tokamak.bib,documentstyle-article prints
+     % the bibliography with a `REFERENCES' header whereas
+     % documentstyle-report prints 'BIBLIOGRAPHY' header
+
+
+\end{document}

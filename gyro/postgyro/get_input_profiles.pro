@@ -7,6 +7,7 @@ FUNCTION get_input_profiles, simdir, FILENAME=filename, $
 ; v2.0: May 11, 2012 updated to read in input.profiles files with arbitrary names
 ;	(e.g. input.profiles.orig, old.input.prof, etc.)
 ; v2.1: March 13, 2013 updated to get vprime for input.profiles.extra
+; v2.2: July 19, 2013 added Bt_exp and arho_exp to output structure
 ;
 ; Reads in input.profiles from a local subdirectory
 ;
@@ -42,9 +43,11 @@ FUNCTION get_input_profiles, simdir, FILENAME=filename, $
   ENDWHILE
   exp_n_rho = FIX(STRMID(s,6,3))
   READF, 1, s
+  BT_exp = DOUBLE(STRMID(s,7))
   READF, 1, s
-  arr = FLTARR(5,exp_n_rho)
+  arho_exp = DOUBLE(STRMID(s,9))
 
+  arr = DBLARR(5,exp_n_rho)
   WHILE (STRPOS(s, 'rho') EQ -1) DO READF, 1, s
   READF, 1, arr
   exp_rho = REFORM(arr[0,*])
@@ -124,7 +127,7 @@ FUNCTION get_input_profiles, simdir, FILENAME=filename, $
   n_exp_profile = 25            ;should be 37, but use 25 for back-compatibility
   arr = FLTARR(exp_n_rho, n_exp_profile)
   OPENR, 1, dirpath + extra_filename, ERR=i_err
-  IF (i_err NE 0) THEN PRINT, "Could find " + extra_filename ELSE BEGIN
+  IF (i_err NE 0) THEN PRINT, "Could not find " + extra_filename ELSE BEGIN
       ;need to skip over comment lines
       s = ' '
       n_cmt = 0
@@ -146,6 +149,8 @@ FUNCTION get_input_profiles, simdir, FILENAME=filename, $
 
           ;experimental profile info, form FLTARR[EXP_N_RHO]
           exp_n_rho: exp_n_rho, $ ;# of datapoints in INPUT_profiles
+          BT_exp: BT_exp, $  ;on-axis Btor in T
+          arho_exp: arho_exp, $ ;value of rho at rmin/a = 1 in m
           exp_rho: exp_rho, $   ;normalized toroidal flux
           exp_rmin: exp_rmin, $ ;r_min/a
           a: a, $               ;value of r_min on LCFS (m)

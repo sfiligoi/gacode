@@ -1,0 +1,45 @@
+	PORTLIB = portlib_f90
+	IMSL    = 	imsl_12_f90
+	MACHINE  = hydra
+	PGCC = gcc
+	ONETWO   = /u/stjohn/onetwo_v3/onetwo
+	LIBS      = $(ONETWO)/../../onetwo/libraries/hp
+	INCPATH	  = $(ONETWO)
+	MAKE1     = makeincludes.test 
+        MAKE2     = makeobjects.test
+	NETCDF    = /d/hp/lib/libnetcdf.a
+	LAPACK    = /d/hp/lib/liblapack.a /d/hp/lib/libblas.a 
+	NUBEAM_LIBS  =  /u/stjohn/nubeam/HP/lib
+        UFILE_LIBS = 
+        NUBEAM_LIBRARIES =
+	MODULES   = /u/stjohn/nubeam/osf/ALPHA/mod
+	GCCLIB =
+	#DEBUG     = -g -C
+	#OPTIMIZE  = +O3
+	#OPTIMIZ2  = +O2
+	#OPTIMIZ1  = +O1
+
+	OPTIMIZE1 = +O1
+	#OPTIMIZE1 = -g 
+
+	OPTIMIZE2 = +O2
+	#OPTIMIZE2 = -g  
+
+	OPTIMIZE3 = +O3
+	OPTIMIZE3 = +O2
+	#OPTIMIZE3 = -g
+
+	LISTING   = 
+	SPECIAL   = +FPdiuOVZ -K -N -R8 +U77  # +Oopenmp
+	#SPECIAL    = -R8  -O +U77 -w +check=all 
+	#SPECIAL_nubeam = +FPdiuOVZ -K -N 
+	SPECIAL_nubeam =   +FPdiuOVZ -K -N +U77
+	COMPILE   = f90 -c $(OPTIMIZE3) $(LISTING) $(SPECIAL)
+	COMPIL2   = f90 -c $(OPTIMIZE2) $(LISTING) $(SPECIAL)
+	COMPIL1   = f90 -c $(OPTIMIZE1) $(LISTING) $(SPECIAL)
+	COMPILE_nubeam   = f90 -c  $(OPTIMIZE3) $(LISTING) $(SPECIAL_nubeam)
+	LOAD      = f90 -o $(NAME)                $(SPECIAL_nubeam)
+	ARCHIVE   = ar -rv
+	NUBEAM12  = nubeam_12_fake.f
+        UFILES12    = ufiles_12_fake.f90
+        #INSTALLDIR = /u/stjohn/onetwo_current/hp/$(NAME)

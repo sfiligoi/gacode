@@ -1,0 +1,354 @@
+\section{Time Dependent Beam Input}
+
+\subsection{The Fast Ion Slowing Down Problem}
+
+The simplest form of fast ion slowing down on a background plasma is given by
+the Fokker-Planck equation:
+\begin{eqnarray}
+ \tau_s \pdiff{f_b}{t}(v,\zeta,t) = \frac{1}{v^2} 
+ \ddiff{v}{(v^3+v_b^3)} f_b(v,\zeta,t) +\frac{Z_2v_c^3}{2 v^3}
+ \ddiff{\zeta}{(1-\zeta^2)}  \pdiff{f_b}{\zeta}(v,\zeta,t)\nonumber \\  
+ + \frac{\tau_s}{\tau_{cx}}f_b(v,\zeta,t) +
+ \frac{\tau_s}{\tau_{fus}}f_b(v,\zeta,t) +
+ \frac{\tau_s}{\tau_{terhm}}f_b(v,\zeta,t) +
+ \tau_s S^i(v,\zeta,t)
+ \label{eq:wav2}
+\end{eqnarray}
+where the azimutahl dependence of the fast ion velocity has been integrated out
+due to assumed symmetry in that variable. Typically the charge exchange loss
+rate detrmined by $(\tau_{cx})$, the loss rate due to fast ion fusion
+$(\tau_{fus})$, and especially the explicit loss rate due to thermalization
+$(\tau_{therm})$ are neglected Ref[]. We are interested in the solution of this
+equation when the  source term has a (possibly repetitive) pulsed time
+dependence of the form
+\begin{equation} \label{eq:wav1}
+ S^i(v,\zeta,t)= \frac{\dot S_0^i}{v^2}\delta(v-v_0) \delta(\zeta-\zeta_0) 
+ \biggl( H(t-t_0^i) - H(t-t_1^i) \biggr)
+\end{equation}
+which is turned on and off at times  $t_0^i ,t_1^i $ (H is
+the Heavyside step function).
+The resulting fast ion distribution function due to this
+source is
+\begin{eqnarray}  %use eeqnarray for multiple line formulas
+ f_b^i(v,\zeta)= \frac{\dot S_0^i \tau_s}{v^3+v_c^3} P_{tot}(v)
+ \sum_{l=0}^{\infty}\frac{2l+1}{2}P_l(\zeta)P_l(\zeta_b)
+ \left[\frac{v^3}{v_b^3} \left(\frac{v_b^3+v_c^3}{v^3+v_c^3}
+ \right)\right]^{\frac{1}{6}l(l+1)Z_2} \nonumber \\  
+ \bigg[
+ H\Bigl(t-t_0^i - \tau_0(v_b)+\tau_0(v) \Bigr)
+ -H\Bigl(t-t_1^i - \tau_0(v_b)+\tau_0(v) \Bigr)
+ \bigg]
+ \label{eq:wav3a}.
+\end{eqnarray}
+Here $\tau_0(v)$ is the time required for a fast ion of speed $v$ to thermalize
+(i.e. to reach speed $v_t$) 
+\begin{equation} 
+ \tau_0(v)=
+ \frac{1}{3}\tau_s\log\biggl(\frac{v^3+v_c^3}{v_t^3+v_c^3}\biggr) 
+ \label{eq:wav4}
+\end{equation}
+and $P_{tot}(v) $ is the total loss rate due to charge exchange, fast ion
+fusion, and thermalization. In what follows, we assume that fast ion
+interactions are negligible (however beam-beam fusion is ??)   so that we may
+use the linear superpostion of solutions from various sources to get the total
+fast ion distribution function at any given time:
+\begin{equation}
+ f_b^{tot}(v,\zeta) = \sum_{i}f_b^i(v,\zeta).
+ \label{eq:wav4a}
+\end{equation} 
+In order to use these results in a thermal transport code
+we form various moments of the distribution function with 
+the collision operators. For each individual pulse we are
+interested in the following moments. \\
+The fast ion density :
+\begin{equation}
+ n_b^i(t) \equiv \int_{v_{min}^i(t)}^{v_{max}^i(t)}
+ \int_{-1}^{1} 
+ f_b^i(v,\zeta)
+ v^2dvd\zeta   
+ \label{eq:wav5a}
+\end{equation}
+The fast ion stored energy density :
+\begin{equation}
+ E_b^i(t) \equiv \frac{1}{2}m_b\int_{v_{min}^i(t)}^{v_{max}^i(t)}
+ \int_{-1}^{1} 
+ v^2 f_b^i(v,\zeta)
+ v^2dvd\zeta   
+ \label{eq:wav5b}
+\end{equation}
+The power desnity delivered to the electrons:
+\begin{equation}
+ Q_e^i(t) \equiv \frac{1}{2}m_b\int_{v_{min}^i(t)}^{v_{max}^i(t)}
+ \int_{-1}^{1} 
+ \left[\ddiff{v}{v^3 f_b^i(v,\zeta)}\right]
+ v^2dvd\zeta   
+ \label{eq:wav5c}
+\end{equation}
+The energy delivered to the ions:
+\begin{equation}
+ Q_i^i(t) 
+ \equiv \frac{1}{2}m_b \int_{v_{min}^i(t)}^{v_{max}^i(t)}
+ \int_{-1}^{1} 
+ \left[\ddiff{v}{v_c^3 f_b^i(v,\zeta)}\right]
+ v^2dvd\zeta   
+ \label{eq:wav5d}
+\end{equation}
+%SPS Commenting out the following wrong equations
+The fast ion momentum transfer to electrons:\\
+%\begin{equation}
+% n_b^i(t) \equiv \int_{v_{min}^i(t)}^{v_{max}^i(t)}
+% \int_{-1}^{1} 
+% f_b^i(v,\zeta)
+% v^2dvd\zeta   
+% \label{eq:wav5e}
+%\end{equation}
+The fast ion momentum transfer to ions:\\
+%\begin{equation}
+% n_b^i(t) \equiv \int_{v_{min}^i(t)}^{v_{max}^i(t)}
+% \int_{-1}^{1} 
+% f_b^i(v,\zeta)
+% v^2dvd\zeta   
+% \label{eq:wav5f}
+%\end{equation}
+The fast ion fusion rates:\\
+%\begin{equation}
+% n_b^i(t) \equiv \int_{v_{min}^i(t)}^{v_{max}^i(t)}
+% \int_{-1}^{1} 
+% f_b^i(v,\zeta)
+% v^2dvd\zeta   
+% \label{eq:wav5g}
+%\end{equation}
+The fast ion charge exchange rate:\\
+%\begin{equation}
+% n_b^i(t) \equiv \int_{v_{min}^i(t)}^{v_{max}^i(t)}
+% \int_{-1}^{1} 
+% f_b^i(v,\zeta)
+% v^2dvd\zeta   
+% \label{eq:wav5h}
+%\end{equation}
+The fast ion  thermalization rate:\\
+\begin{equation}
+ \dot S_{th}^i = \dot S^i - \dot L^i -\pdiff{n_b^i}{t}
+ \label{eq:wav5i}
+\end{equation}
+Here $\dot{L}^i $ is the loss rate of fast ions due to all factors except
+thermalization:
+\begin{equation}
+ L^i(t)  =  \int_{v_{min}^i(t)}^{v_{max}^i(t)}
+ \int_{-1}^{1} 
+ f_b^i(v,\zeta) P(v)
+ v^2dvd\zeta   
+ \label{eq:wav5hh}
+\end{equation}
+The reason \Eqref{eq:wav5i} is written in this particular form rather than in
+terms of a more fundamental definition such as
+\begin{equation}
+ \dot S_{th}^i = \lim_{\Delta t \to 0}
+ \frac{\int_{v_{th}(t)}^{v(t+\Delta t)}
+ \int_{-1}^{1} 
+ f_b^i(v,\zeta)v^2dvd\zeta}{\Delta t}
+ \label{eq:wav5j}
+\end{equation}
+is that the formulation of the Fokker-Planck equation \eqref{eq:wav2} is not
+valid near thermal energies and hence the form of $f_b $ is not adequate to
+evaluate \Eqref{eq:wav5j}. On the  other hand, \Eqref{eq:wav5j} consists of
+quantities that depend on the slowing down distribution at higher energies and
+hence yields a reasonable approximation. We note that the time delay associated
+with the appearance of thermalized fast ions is properly given by this approach.
+For example, during the linear (in time) rise of the stored fast ion density
+that occurs when the loss rate is zero, the time  derivative term cancels the
+source term initially, leading to a thermalization rate of zero until the
+derivative term changes.
+
+In these equations  both the upper and lower limits of integration are functions
+of time due to the transient nature of the source:
+\begin{align}
+ v_{max}(t) & = v_b^i &  t_0^i\le t \le t_1^i \\
+ & = [((v_b^i)^3
+ +v_c^3)\exp(\frac{-3(t-t_1^i)}{\tau_s})
+ -v_c^3]^{\frac{1}{3}} &t_1^i \le t \le
+ t_1^i+\tau_0(v_b) \\
+ & = v_t & t \ge t_1^i+\tau_0(v_b) \\
+ v_{min}(t) & =  [((v_b^i)^3
+ +v_c^3)\exp(\frac{-3(t-t_0^i)}{\tau_s})
+ -v_c^3]^{\frac{1}{3}}  &t_0^i \le t \le
+ t_0^i+\tau_0(v_b) \\
+ & = v_t & t \ge t_0^i+\tau_0(v_b).
+\end{align}
+
+The upper limit of integration remains fixed at the fast ion birth speed $v_b^i$
+until the source $ \dot S_0^i $ is shut off.  Thereafter this upper limit
+decreases  since ions of speeds greater than $ v_{max} $ are not replenished by
+the source.  The lower limit starts at the same value as the upper limit and
+decreases as time goes on until it reaches an arbitrarily defined thermal cutoff
+value $ v_t $. If the source is on long enough ($ t_1^i-t_0^i \ge \tau_0(v_b)$) 
+the moments  become time independent when the lower limit of  integration 
+reaches the value $ v_t $ at time $t_0^i +\tau_0(v_b)$ (typically $v_t$ is taken
+as 0.0, but in \ot it is user specifiable). Additionally, since we are
+neglecting losses during the slowing down process, $n_b^i $ may also display a 
+time independent plateau when the pulse length, $ t_1^i -t_0^i $, is shorter
+than $ \tau_0(v_b)$. In this case both $v_{max}(t) $ and $v_{min}(t) $ are
+decreasing at the same constant rate so that the density doesn't start to change
+until $v_{min}(t) = v_t $. Thereafter the contribution to the density made by
+the integral, \Eqref{eq:wav5}  decreases steadily as $v_{max}(t) $ approaches
+$v_t$.
+
+Toroidal plasma roation is taken into account by 
+
+
+\subsection{Interpretation of results}
+By neglecting charge exchange, fusion, and explicit thermalization  losses, the
+fast ion  density has a simple solution useful for demonstration purposes:
+\begin{equation}
+ n_b^i(t) \equiv \int_{v_{min}^i(t)}^{v_{max}^i(t)}
+ \int_{-1}^{1} 
+ f_b^i(v,\zeta)
+ v^2dvd\zeta   
+ \label{eq:wav5} \qquad (?)
+\end{equation}
+The relationship between the beam slowing down time and the on/off switching
+frequency of the beam sources, coupled with the superposition of sources from
+different beams and energy components can produce complex waveforms. Furthermore
+the fundamental time step $ dt $ that  the transport equations are solved with
+is typically dynamically adjusted and could lead to innapropriate sampling times
+for the neutral beams, even if the user is careful to pick consistent times
+initially.  A final complication is that the starting time of the transport
+simulation is typically not the same as the initial startup of the beams. Thus
+an initial condition for neutral beam related quantities must be generated from
+the user input. These issues are addressed in this section and some simple
+examples are presented.
+\begin{figure}[hbt] %note: figure environment not available in slides
+ \centering
+ \mbox{\epsfig{file=plot1a.eps,height=10cm,width=12cm}}
+ \caption{Example waveform from neutral beam deposition. The square wave
+ composed pulses a, b, c, etc., are the beam switching times in arbitrary units.
+ With the given slowing down time  the resulting fast ion density waveform
+ (total) is  due to the summation of up to three individual components, aa, bb,
+ cc due to the pulses.}
+ \label{Figbwav1}
+\end{figure}
+
+The situation described above is depicted in
+Fig.~\ref{Figbwav1}. Here we show a number of individual
+pulses
+of duration 60$ms$, spaced 10$ms$ apart. The beam slowing
+down time is approximately $\tau_0(v_b) = 90 ms $. Due to the assumption
+of linearity the total fast ion density in the figure is the
+linear superpostion of the individual responses to each beam
+pulse. As shown, up to three individual pulses combine to form
+the resultant fast ion density for this hypothetical
+case. Since the pulse length is less than the slowing down
+time, individual responses  never reach the
+steady state value \Eqref{eq:wav5} ($ 90 ms \cdot 1\times 10^{20}
+\frac{1}{cm^3s} = 9\times 10^{18}\frac{1}{cm^3}$).  As a consequence, the individual responses
+(aa,bb,cc,...) have a flat top (plateau)  value because the
+density is not changing as the group of fast ions in the range
+$(v_{max}(t),v_{min}(t)) $ slow down as was explained above. The
+individual responses such as the one labeled aa in the figure
+are the result of evaluating the integral in
+\Eqref{eq:wav5} in accordance with the limits of
+integration given above:
+\begin{align}
+ n_b^i(t) &= \dot S_0^i(t-t_0^i) & t_0^i \le t \le
+ min(t_1^i,\tau_0(v_b)) \\
+ & =  \dot S_0^i  (\tau_0(v_b) - t_0^i) &  \\
+ & =  \dot S_0^i (t_1^i -  t_0^i)  &  \\
+ & =  \dot S_0^i (t_1^i -  t_0^i) & \\
+\end{align}
+
+\begin{figure}[hbt] %note: figure environment not available in slides
+ \centering
+ \mbox{\epsfig{file=plot2.eps,height=10cm,width=12cm}}
+ \caption{Example waveform from neutral beam deposition. The square wave (with
+ pulses a,b,c)  is the beam switching times in arbitrary units. The two
+ resulting fast ion density waveforms are due to different time steps used in
+ the calculations.}
+ \label{Figbwav2}
+\end{figure}
+
+When the pulse length is increased so that the fast ion density reaches its
+fully developed state before the pulse is turned off we have the situation shown
+in fig ??.
+
+It should be noted that time step control must be asserted by these
+computations. Unfortunately it is not enough to simply enforce the rule that
+each source switching time be observed exactly by the time stepping routines
+that advance the transport equations. Two additional time values must be
+explicitly enforced. The first, $ t_2^i $, is when $vmin(t_2^i) = v_t$. The
+second, $t_3^i$, is when $n_b^i(t_3^i) $ reaches zero. Unlike the beam switching
+times  $(t_0^i,t_1^i) $ the set of values $( t_2^i,t_3^i)$ is not amenable to
+prediction on an a priori basis. Instead these times are determined as the
+calculations proceed.
+
+Finally we remark that the computations are designed to accept an arbitrary time
+step dt, where the signficance of dt is that the state of the system is to be
+updated from time t to time $t_{new} = t+dt $. However, on return from the
+modules that perform the computations described above, it is not guaranteed that
+$t_{new} =  t+dt$. In fact the new time will be given by
+\begin{equation}
+ t_{new} = t + min(t_j^i -t ,dt)
+ \label{eq:wav10},
+\end{equation}
+where only those values for which $t_j^i -t >  0.0 $ are to be considered, 
+$j=0,1,2,3 $, and i ranges over all pulses of each source of each beam. Since
+there is no a priori assumed relationship between the phasing of various beam
+lines and sources it may become quite tedious to advance the transport equations
+if the time step is controlled by \Eqref{eq:wav10} rather than by other physics.
+To avoid this situation times $t_3^i $ and/or $ t_2^i $ may optionally be
+ignored. This will result in some details of the waveforms being incorrect.
+However transport results are not necessarily affected since the generated
+waveform will be correct at the times that output is requested. For example,
+consider Fig.~\ref{Figbwav2}.  This case is similar to the previous one but has
+a longer pulse length $(110 ms)$ and hence the fast ion density reaches its
+saturated value before the beam turns off. In the figure we show the exact
+solution as well as two approximate solutions where $t_3^i $ and where both
+$t_3^i and t_2^i$ are ignored.
+
+Special waveforms are possible since there is no assumption about the 
+relationship of sources for a  given beam or between beams. For example, in
+Fig.~\ref{Figbwav3},
+\begin{figure}[hbt] %note: figure environment not available in slides
+ \centering
+ \mbox{\epsfig{file=plot3.eps,height=10cm,width=12cm}}
+ \caption{Example waveform from neutral beam deposition.
+ Two independent sources produce wavetrains with pulses a
+ and b respectively. The resulting fast ion density does
+ not have a plateau value (aa-bb) due to the different
+ intensities of the sources.}
+ \label{Figbwav3}
+\end{figure}
+we have a single beam line with two sources. The first source  produces pulse
+train a and the second source pulse train b. The second source has 1.5 times the
+intensity of the first source. The resulting fast ion density has a rising
+region (aa-bb) instead of a plateau from (aa-bb) due to the difference in source
+strengths.
+
+
+\begin{figure}[hbt] %note: figure environment not available in slides
+ \centering     
+ \mbox{\epsfig{file=thermal_source.eps,height=10cm,width=12cm}}
+ \caption{Illustration of the delayed particle source due to a single beam pulse
+ that starts at 1 msec and ends at 41 msec. The delayed sources are due to the
+ different slowing down times of the three beam energy components.}
+ \label{Figbwav3c}
+\end{figure}
+
+\subsection{Beam Initial Conditions}
+Suppose that for the situation shown in Fig.~\ref{Figbwav3}
+we wish to start our analysis at time $t = 0.5 sec$. Considering 
+only the fast ion density we see that it is in fact possible to 
+assume that the beam was not on prior to $ t = 0.5 sec $
+because its influemce has decayed away. Unfortunately, the
+general situation is not so simple. Suppose instead that we
+want to start the transport analysis at time $ t = 0.28 sec $
+in Fig.~\ref{Figbwav3}. In this case the beam history must be
+taken into account for the time prior to the start of the
+analysis. Furthermore automatic corrections in the
+MHD/transport coupling of \ot  can result in arbitrary time
+rollbacks to previous solution points. Thus we are forced to 
+generate and periodically update some sort of beam history file
+as part of the solution scheme. The proper way to generate an
+intial history file depends on how the code is run
+however. For example in TDEM mode the user will expect
+that the TDEM information is used in creating the file. In a
+non-TDEM run other options have to be pursued. 

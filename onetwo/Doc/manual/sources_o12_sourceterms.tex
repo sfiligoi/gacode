@@ -1,0 +1,617 @@
+\section{Source Terms }\label{source}
+
+\subsection{Beam Related Quantities}
+
+At the present time \ot relies on the Callen \cite{Callen74:1} model of fast ion
+slowing down to generate beam related results. An initial modification of the
+fast ion deposition profile to account for prompt orbit smearing  is optional.
+Transient effects associated with beam turn on and off are accounted for as
+explained in section \ref{tbeam}. 
+
+Let the index m range over all possible beam energies (and beam lines).
+Then the beam related terms are defined as follows:
+\begin{description}
+ \item[$hibrz_m$] The normalized fast ion birth rate. This is the basic quantity
+ determined by Freya.  Hibrz is the  normalized birth distribution of fast ions
+ per unit volume per unit time and is determined by
+ \beq
+  hibrz_m= \frac{\frac{n_z}{V_z}}{\frac{n_t}{V_p}}
+ \eeq
+ where $\frac{n_z}{n_t} $ is the fraction of ions that make it
+ into the plasma and are born in poloidal flux zone z, $V_z$
+ and $V_p $ are the flux zone and total plasma volume respectively.
+ Since $n_t$ is given by
+ \beq
+  n_t=\sum_{all zones}n_z
+ \eeq
+ we see that the volume average birth rate density is unity:
+ \beq
+  \frac{1}{V_P}\sum_{all zones}hibrz_m V_z =
+  \bigg(\frac{1}{n_t}\bigg)\sum_{all zones}n_z =1
+ \eeq
+ Typically hibrz has a value greater than 1 near the magnetic axes indicating
+ beam penetration  better than average .
+ \item[$hdepz_m$] Prompt orbit averaged version of hibrz (optional).
+ \item[$hdep_m(\rho)$]  Either the birth or orbit averaged
+ deposition (hbirz or hdepz depending on what the
+ user selected) interpolated from the zone to the 
+ transport grid.
+ \item[$bke_m$] Toroidal momentum fraction transferred to electrons.
+ Identical to $K_e$ in \cite{Callen74:1}.
+ \item[$bki_m$] Toroidal momentum fraction transferred to ions 
+ Identical to $K_i$ in \cite{Callen74:1}.
+ \item[$fbe_m$] The fraction of the initial beam energy that is
+ deposited on electrons during the slowing down process.
+ Identical to $G_e$ in \cite{Callen74:1}.
+ \item[$fbi_m$] The fraction of the initial beam energy that is deposited on
+ ions during the slowing down process. Identical to $G_i$ in \cite{Callen74:1}.
+ Both $G_e $ and $G_i $ are  based on a fast ion distribution function which
+ allows for charge exchange during the slowing down process. However further
+ re-ionization of the neutral created by the fast ion is neglected. $fbe,\ fbi$
+ are output.
+ \item[$pbeam_m$] The beam power (input)
+ \item[$xloss_m$] Fraction of beam power lost due to aperture, orbit, and shine
+ through.
+ \item[$qb(\frac{w}{cm^3})$] Beam power deposited in the plasma:
+ \beq
+  qb =\sum_m qb_m
+ \eeq
+ \beq
+  qb_m(\rho)   = (1.0-xloss_m)*pbeam_m*hdep_m(\rho)/V_p
+  \label{eq:qbm}
+ \eeq
+ ($qb_m$ is printed out in the beam tables)
+ \item[$spbr\frac{g}{(cm sec^2)}$] Toroidal angular momentum source.
+ \beq
+  spbr_m(\rho)   = angmpf_m(\rho)*sb_m(rho)
+ \eeq
+ \item[$sb_m$] The source density of fast ions; it is defined in terms of the
+ beam energy, $e_m$, and $q_b$ as:
+ \beq
+ sb_m(\rho)=qb_m(rho)/e_m
+ \eeq
+ \item [$ angmpf_m (\frac{g.cm^2}{sec})$] The average momentum of a single beam
+ ion born in a flux zone. The number of flux zones (in poloidal flux space)is
+ controlled by the input value \emph{mf}. Let $n_\zeta$ be the number of ions
+ born in zone $\zeta$. The ions have toroidal speed $v_I $ and major radius $R_i
+ $ at the birth point. The average angular momentum of an ion in the zone is
+ then given by
+ \beq
+  \overline{mvR}=\frac{1}{n_\zeta} \sum_{i \in \zeta}m_bv_i R_i
+ \eeq
+ and $angmpf_m $ is this quantity interpolated onto the $\rho $ grid, for beam
+ energy component \emph{m}.
+\end{description}
+Other beam related quantities required below are:
+\begin{description}
+ \item[$\tau_s$] The
+ Spitzer momentum exchange time for electron-ion collisions
+ \beq
+  \tau_s= \left (\frac{3}{4\sqrt{2\pi}}\right )\frac{\sqrt{m_e T_e^3}}
+  {Z_f^2 n_e q_e^4\left [24.-\ln\left (\frac{\sqrt{n_e}}{T_e}\right )\right ]} 
+  \label{eq:taus}.
+ \eeq
+ \item[$\tau_f$] The fast ion lifetime, defined in terms of the critical speed,
+ $v_c$ (speed at which the fast ion slowing down rate on electrons and ions is
+ equal) and the initial fast ion speed, $v_b$:
+ \beq
+  \tau_f= \frac{\tau_s}{3}\ln\bigg({1+\frac{1}
+  {(\frac{v_c}{v_b})^3}}\bigg) .
+ \eeq
+ The fast ion lifetime against charge exchange is evaluated at the beam energy
+ (per atomic mass unit) relative to the rotating ion distribution,
+ $\frac{e_{rel}}{atw_f}$ :
+ \beq
+  \tau_{cx}= \frac{1}{n_n \Xi}.
+ %  \sigma_{cx}v(\frac{e_{rel}}{atw_f})}
+  \label{eq:taucx}
+ \eeq
+ $n_n$ is the total neutral density, and the reaction rate $\Xi
+ \frac{cm^3}{sec}$ is a function of the relative speed between the beam ions and
+ the thermal neutrals. The original version of \ot uses
+ \[
+  \Xi = \langle \sigma_{cx} v \rangle
+ \]
+ evaluated at the energy $\frac{e_{rel}}{atw_f} $, where $e_{rel} $ is the
+ relative energy accounting for bulk rotation but not thermal motion of the
+ neutrals. Furthermore the neutrals are assumed to have the same bulk rotation
+ as the ions in this expression.  A new optional form for $\Xi $ is also
+ available:
+ \[
+  \Xi = \sigma(e_{rel})v_{rel}(rtstcx).
+ \]
+ The factor $rtstcx $ is intended to allow some scoping of the sensitivity of
+ the fast ion distribution  function to  the charge exchange form assumed.
+ Setting $rtstcx < -20.$ causes the code to use the average fast ion speed in
+ determination of $\Xi $. At this time vrel neglects any thermal motion of
+ neutrals as above.  The Maxwellian charge exchange rate, $\langle \sigma_{cx}v
+ \rangle $, and the cross section $\sigma_{cx} $  are both  taken from Ref.
+ \cite{Freeman:1974}. The code assumes $\sigma_{cx}v=0$ if the energy is greater
+ than 100 keV/amu.  
+ \item[$fbth_m$] represents the fraction of the  fast ion population that
+ thermalizes. (This leads to a source of thermal energy as well as thermal
+ ions.) \ot assumes that the ratio $\frac{\tau_s}{\tau_{cx}} $ is  independent
+ of the fast ion speed. Consequently the fraction of the fast ions  that
+ thermalize without charge exchange becomes
+ \beq
+  fbth_m=exp(-\frac{\tau_f}{\tau_{cx}}).
+ \eeq
+ Note that the rate at which fast ions are  lost from the system due to charge
+ exchange with thermal neutrals is consequently
+ \beq
+  sscxl_m =(1-fbth_m)sb_m.
+ \eeq
+ Re-ionization of these fast neutrals is neglected. sscxl is neglected in the
+ particle source term $S_i$ of Eqs.~\eqref{eq:ni} and \eqref{eq:neut}, but is
+ included in the energy term qcx; see below. 
+\end{description}
+
+\subsubsection{Transient Beam Effects}\label{tbeam}
+
+\ot evolves the beam related quantities based on the rate equation with a
+constant source $s_l$ in time interval $\delta t_l$:
+\beq
+ \pdiff {x}{t} +\frac{x}{\tau_l}=s_l.
+\eeq
+Here $x$ stands for any of a number of fast ion quantities identified in this
+document as having ben aged (?). The analytic solution of this equation at the
+end of the time interval $\delta t_l$, given an initial condition $x_0$ at the
+start, is
+\beq
+ x=x_0\exp \left (-\frac{\delta t_l}{\tau_l} \right ) +
+ s_l\tau_l \left ( 1. -\exp \left (-\frac{\delta t_l}{\tau_l}
+ \right ) \right )
+\eeq
+In the code the time step $\delta t_l $ is governed by the
+predictor/corrector solution scheme (see section ? ) and is
+equal to the time interval $\theta \delta t $ during the course
+of the solution. (At the start special adjustments are made as
+discussed below.) During each time interval the source of fast ions, $s_l$, is either assumed equal to the source in the previous
+time interval
+or is replaced with a new source because a new beam deposition
+calculation was carried out, based on plasma conditions at the
+central time $t+\theta \delta t $. (No allowance for changing the
+beam power is made; $ \tau_l$ is also evaluated at that time.)
+
+%--------------------------------------------------------------------------
+\subsection{Particle Sources}
+
+\begin{description}
+ \item[$S_i$] is the source density for ions of species i in \Eqref{eq:ni}.
+ \beq
+  S_i=sbcx+scx+sbeam+sfusion+sion+srecom
+ \eeq
+ \begin{description}  % match ni
+  \item[sbcx $ \frac{\#}{cm^3sec} $] A source of fast ions (and also thermal
+  neutrals with energy $\frac{3}{2}T $) due to charge exchange of beam  neutrals
+  with thermal ions. sbcx is derived either from hbirz (no prompt orbit
+  averaging) or hdepz (with prompt orbit averaging):
+  \begin{eqnarray}
+   sbcx_i(\rho)=\sum_m sb_m hicm_m^i
+  \end{eqnarray}
+  $hicm_m^i$ is the fraction of the fast ion birth rate for beam  component m
+  that leads to neutrals of type i.
+  \item [scx $\frac{\#}{cm^3sec} $] charge exchange between thermal ions and
+  thermal neutrals. If two neutral species, corresponding to two primary ion
+  species are present, then scx will be a sink for one species and a source for
+  the other. That is, ion species a charge exchanges with neutral species b
+  producing a neutral of type a and an ion of type b. The charge exchange rate,
+  $ cx12r(\rho)$, is based on the Freeman-Jones\cite{Freeman:1974} cross
+  sections. For ion density $n_i $ and  neutral density $n_{nj}$, where $nj$ is
+  the other species, we have:
+  \begin{eqnarray}
+   scx_i(\rho)= n_i(\rho)n_{nj}(\rho)cx12r(\rho)
+  \end{eqnarray}
+  If only one neutral species is present then there is no particle source, $
+  scx=0$ . (There is an energy source however because the ion and neutral
+  temperatures are not assumed equal).
+  \item[sbeam $\frac{\#}{cm^3sec}$]  Source of thermal ions due to beam slowing
+  down. All fast ions which do not experience charge exchange during their
+  lifetime are assumed to slow down into the corresponding thermal distribution:
+  \begin{eqnarray}
+   sbeam_i(\rho)= \sum_mfbth_m(\rho) sb_m(\rho) 
+  \end{eqnarray}
+  where $sb$ and $fbth_m$ are  defined above.
+  \item[sion $\frac{\#}{cm^3sec}$] Source of ions due to electron impact
+  ionization of neutrals:
+  \beq
+   sion=\sum_{i=1}^2 n_{n_i}(\rho) * eirate(\rho)
+  \eeq
+  where $eirate$ is the electron impact ionization rate of
+  of atomic hydrogen taken from \cite{Freeman:1974} 
+  \beq
+   eirate \equiv n_e \langle \sigma v \rangle
+  \eeq
+ \end{description} %end match ni
+ \item[$S_i^{2D}$] represents a source term due to MHD evolution and is given by
+ \beq
+  S_i^{2D}=-n_i\ddiff{t} \ln H + \frac{d}{H}\ddiff{\rho}Hn_i
+ \eeq
+ This term is included in $sother $ in the table labeled ``particle sources''.
+\end{description}
+
+%--------------------------------------------------------------------------
+\subsection{Energy Sources}
+
+\subsubsection{Electrons}
+
+The energy sources and sinks ($\frac{keV}{cm^3sec} $) for  \Eqref{eq:eenergy}
+are as follows:
+\begin{description}
+ \item[$Q_e$] is given by
+ \begin{multline}
+  Q_e= -qexch + qohm -qrad-qione+qbeame \\
+  +qrfe-qpe+qfuse
+ \end{multline}
+ \begin{description} %begin 0a
+  \item [qexch] represents the electron-ion energy exchange term
+  \item [qohm] represents ohmic heating
+  \item [qrad] represents radiative losses
+  \item [qione] represents an energy sink due to recombination
+  \item [qbeame] represents electron energy source due to neutral beam heating.
+  Let m be a multi-index that ranges over beam lines and beam energy components
+  (i.e. full, half, and third). Then we may write
+  \begin{multline}
+   qbeame_m(\rho)=fbe_m(\rho)\cdot qb_m(\rho)+bke_m(\rho)\cdot
+   spbr_m(\rho)\cdot\omega(\rho) \label{eq:qbeamem}
+  \end{multline}
+  \beq
+   qbeame(\rho)=\sum_m qbeame_m.
+  \eeq
+  \item [qrfe] represents electron energy source due to rf heating. qrfe can be
+  input, obtained from simple models, or dynamic coupling of Onetwo to Toray for
+  ECH heating and current drive is available.
+  \item [qpe] represents energy loss due to pellet ablation
+  \item [qfuse] represents electron heating due to fusion.
+ \end{description}  %end 0a
+ \item[$\omega L_e $]
+ \beq
+  \omega L_e =\omega * sprbeame
+ \eeq 
+ \item [$S_{T_e}^{2D}$] represents heating of electrons due to evolution of the
+ mhd equilibrium.
+ \beq
+  S_{T_e}^{2D}=-\frac{5}{2}n_eT_e\ddiff{t}\ln H 
+  +\left (\pdiff{ \ln \rho}{t} \right )
+   \bigg [ \frac{5}{2}n_eT_e \pdiff {\ln H} {\rho} \\
+    +\frac{3}{2}T_e\sum_{i=1}^{nion}Z_I\pdiff{n_i}{\rho} 
+    +\frac{3}{2} \left (n_e+T_e\sum_{i=1}^{nion} n_z\pdiff{Z_i}{T_e}
+    \right )\pdiff{T_e}{\rho} \bigg]
+ \eeq
+ In the output of \ot the definition
+ \beq
+  qe2d\equiv S_{T_e}^{2D}
+ \eeq
+ is used.
+\end{description}    
+
+
+%-------------------------------------------------------------------------
+\subsubsection{Ions}
+
+The source terms ($\frac{kev}{cm^3sec}$) for the ion energy equation,
+\Eqref{eq:ionenergy}, are defined as follows:
+\begin{description}
+ \item [Q ] The term Q appearing on the rhs of the ion energy 
+ equation is defined as
+ \beq
+ Q(\rho)=qexch+ qioni-qcx+qbeami+qfusi+qrfi
+ \eeq
+ \begin{description}  %begin a
+  \item [qexch$\frac{keV}{cm^3sec}$] is the electron ion energy exchange term
+  due to Coulomb collisions. (See above for definition.)
+  \item [qioni] is defined as electron impact ionization of neutrals minus
+  thermal ion recombination :
+  \begin{multline}
+   qioni = \frac{3}{2}\sum_{i=1}^{nprim} \bigg ( 
+    sion_i(\rho)T_{n_i} (\rho)
+    - srecomb_i(\rho) T \bigg )
+  \end{multline}
+  \item[qcx ] qcx is the compound term  defined as 
+  \begin{multline}
+   q_{cx}(\rho)=\sum_{i=1}^2\bigg (\overbrace{1.5T(\rho)*sbcx_i(\rho)}^a \\
+   \overbrace{ -1.5*T_{n_i}(\rho)*sscxl_i(\rho)*ibcx}^b \bigg)\\ 
+   \overbrace{ +1.5*n_{n_i}(\rho)*cext_i(\rho)*n_i(\rho)*
+   (T(\rho)-T_{n_i}(\rho))}^c \\
+   \overbrace{+1.5n_i n_{n_k} r_l*cxr(\frac{T}{atw_i})*
+    (T(\rho)-T_{n_k}(\rho))}^d
+  \end{multline}
+  \begin{description}
+   \item{a} represents LOSS of average energy $\frac{3}{2}T(Kev)$  per ion due
+   to charge exchange with beam neutral
+   \item{b} represents source of energy due to fast ion thermal neutral charge
+   exchange (ibcx=0 or 1, user selectable), $sscxl_i$ is the fraction of sscxl
+   that leads to species i ions, and $T_{n_i}$ is the temperature of neutral
+   species i.
+   \item{c} represents charge exchange with thermal neutrals of the same species
+   \item{d} represents charge exchange with neutral species k, $r_l$ is a
+   correction factor for plasma elongation.
+  \end{description}
+  \item[qbeami] represents heating of ions by the beam.
+  \begin{multline}
+   qbeami_m(\rho)=fbi_m(\rho)*qb_m(\rho)+bki_m(\rho)*
+   spbr_m(\rho)*\omega(\rho)\\
+   +fbth_m*sb_m(\rho)*erot \label{eq:qbeamim}
+  \end{multline}  
+  \beq
+   qbeami(\rho)=\sum_m qbeami_m
+  \eeq  
+  \item[qfusi]  heating of ions due to fusion.
+  \item[qrfi] represents the rf ion heating term . Qrfi can be  directly input
+  into the code, some simple models are available internally in onetwo and
+  dynamic coupling to the  ray tracing code Curray is also available.
+ \end{description}   %end a
+ \item [$S_T^\omega (\frac{keV}{cm^3sec})$] Represents the source  of kinetic
+ rotational energy which is the sum of four terms:
+ \beq
+  S_T^\omega = sprcxe+sprcxree+spreimpe + \omega L_e
+ \eeq
+ \begin{description}  %begin b
+  \item[sprcxe] Gives the  source of rotational kinetic energy due to thermal
+  charge exchange . If only a single neutral species is present then the sum
+  involving k below is absent. For the two neutral (and hence also ion) case
+  charge exchange can  occur with a neutral of different mass as well as
+  different momentum as given by the second sum:
+  \begin{multline}
+   sprcxe=\sum_{i=1}^{2} \frac{\langle R\rangle}{\langle R^2\rangle} 
+    n_{n_i}cexr_in_im_i(v_n^2-v_z^2)\\
+   %    +\sum \begin{Sb}  %note: Sb environment is a amstex thingy,
+   %             i=1 \\   %doesnt work with amsmath !!
+   %           k=3-i \\
+   %           \end{Sb}
+   %          \begin{Sp}
+   %           2 \\
+   %        \end{Sp} 
+   +\sum_{\substack{i=1 \\ k = 3-i}}^{2}
+   \bigg(\frac{\langle R\rangle}{\langle R^2\rangle}\bigg)^2 
+    n_i cx12 n_k (m_kv_n^2-m_iv_z^2)
+  \end{multline}
+  \item[sprcxree ] is the ion rotational kinetic energy source due to
+  recombination; it is given in terms of sprcxre [\Eqref{eq:sprcxre}]
+  \beq
+   sprcxree= -\frac{1}{2}\omega* sprcxre
+  \eeq
+  \item[spreimpe] Gives the source of rotational kinetic energy due to electron
+  impact ionization of thermal neutrals. It is defined in terms of spreimpt
+  [\Eqref{eq:spreimpt}]:
+  \beq
+   spreimpe(\rho)=\frac{1}{2}\omega_n *spreimpt
+  \eeq
+ \end{description}  %end b
+ \item[$S_T^{2D}$ ] represents ion thermal energy sources due to time evolving
+ MHD equilibria.
+ \begin{multline}
+  S_T^{2D}= -\frac{5}{2}T\pdiff {\ln H}{t} \sum_{i=1}^{nion} n_i
+  +\pdiff{\ln \rho}{t}\bigg (  
+   \frac{5}{2}T\pdiff{\ln H}{\rho}\sum_{i=1}^{nion} n_i \\
+   +\frac{3}{2}T\sum_{i=1}^{nion}\pdiff{n_i}{\rho}
+   +\frac{3}{2}\pdiff{T}{\rho}\sum_{i=1}^{nion} n_i
+  \bigg )
+ \end{multline}
+ \item [$S_T^{2D\omega}$ ] represents ion rotational kinetic energy sources due
+ to time evolving MHD equilibria.
+ \begin{multline}
+  S_T^{2D\omega}= 
+  -\frac{1}{2}angrm2d(1)\langle R^2\rangle\omega^2\pdiff{\ln H}{t}
+   \sum_{i=1}^{nion}n_i m_i \\
+  +\frac{1}{2}angrm2d(2)\omega\left[spr2d +\omega 
+  \left(\pdiff{\langle R^2\rangle}{t}+\langle R^2\rangle\pdiff{\ln H}{t}\right)
+  \sum_{i=1}^{nion}m_in_i \right] \\
+  -\frac{1}{2}amgrm2d(3)\omega^2\pdiff{\langle R^2\rangle}{t}
+  \sum_{i=1}^{nion}n_im_i
+ \end{multline}
+ The sum of the the evolving MHD related energy sources is called qi2d in the
+ output of \ot:
+ \beq
+  qi2d \equiv S_T^{2D}+S_T^{2D\omega} \label{eq:qi2d}
+ \eeq
+ The $ angrm2d(1,2,3)$  multipliers are user selectable input to \ot, defaulted
+ to 1.0
+\end{description}
+
+%-----------------------------------------------------------------------------
+\subsection{Toroidal Momentum Sources}
+
+All source terms below are in units of  $[\frac{g}{cm \cdot sec^2}]$. The
+electrons are assumed to have negligible momentum (i.e. no separate equation for
+the electron toroidal momentum is introduced; however some momentum sources
+associated with the fast ion-electron interactions are included below as ion
+terms). At the present time sources and sinks associated with \emph{ion impact
+ionization} are neglected.
+\begin{description}
+ \item[ $S_\omega $] is defined as
+ \begin{multline}
+  S_\omega=Sprbeame+Sprbeami+Sprcxl+Spreimpt+\\
+  Sprcx+Sprcxre 
+ \end{multline}
+ where the definition of each of the individual terms follows.
+ \begin{description}  %begin 1b
+  \item[sprbeame] is the (delayed) source of angular momentum  transferred from
+  the (beam) fast ions  to the electrons during the slowing down process. This
+  angular momentum is rapidly shared with the ions and is thus a source term for
+  the thermal ion toroidal momentum equation:
+  \beq
+   sprbeame(\rho)=bke(\rho,e_b,b_j)*spbr(\rho,e_b,b_j)
+  \eeq
+  \item[sprbeami] is the (delayed) source of angular momentum transferred from
+  the (beam) fast ions to the thermal ion fluid.
+  \begin{multline}
+   sprbeami(\rho)=bki(\rho,e_b,b_j)*spbr(\rho,e_b,b_j)+ \\
+   fbth(\rho,e_b,b_j)*sb(\rho,e_b,b_j)*atw_b \\
+   *m_p*v_z(\rho)\frac{\langle R^2\rangle}{\langle R\rangle}
+  \end{multline}
+  \item[ssprcxl] represents the gain of  angular momentum due to charge exchange
+  of a fast ion with a thermal neutral (the thermal neutral adds its momentum to
+  the thermal ion distribution)
+  \begin{multline}
+   ssprcxl(\rho)=fprscxl*spbr(\rho,e_b,b_j) \\
+   +fscxl*sb(\rho,e_b,b_j)*atw_b \\
+   *m_p*v_z(\rho)*\frac{\langle R^2\rangle}{\langle R\rangle}
+  \end{multline}
+  \item[spreimpt] represents gain of momentum due to electron impact ionization
+  of thermal neutrals
+  \begin{multline}
+   spreimpt(\rho)=\sum_{i=1}^{nprim}eirate(\rho)\cdot enn_i(\rho)
+   m_i\cdot vneut_i(\rho)\cdot\langle R\rangle \label{eq:spreimpt}
+  \end{multline}
+  \item[sprcx] represents the sorce/sink of momentum due to charge exchange of a
+  thermal neutral with a thermal ion. For two ion and neutral species we have
+  \begin{multline}
+   sprcx(\rho)=\\ \sum_{i=1}^{nprim}enn_i(\rho)\cdot cexr_i(\rho)\cdot
+   en_i(\rho)\cdot atw_i\cdot m_p\cdot\langle R\rangle \cdot(vneut_i(\rho)-vionz(\rho))\\
+   +cxmix\cdot(atw_k\cdot vneut_k(\rho)-atw_i\cdot v_z(\rho))
+  \end{multline}
+  \item[sprcxre] represents the sink of thermal angular momentum due to charge
+  exchange of a thermal ion with a fast neutral and also includes radiative
+  recombination of thermal ions.
+  \beq
+   sprcxre(\rho)=\sum_{i=1}^{nprim}sbcx_i(\rho)*\langle R^2\rangle
+   \omega m_i  \label{eq:sprcxre}
+  \eeq
+ \end{description} %end 1b
+ \item[$S_\omega^{2D}$] is the source term due to evolution of the MHD
+ equilibrium. It is given by
+ \begin{multline}
+  S_\omega^{2D}=-\omega\sum_{i=1}^{nion}\bigg( m_in_i\ddiff{t}\langle R^2\rangle
+  +m_in_i\langle R^2\rangle\ddiff{t}\ln H \bigg )\\
+  +\frac{d}{H}\ddiff{\rho}\bigg(
+  H\omega\sum_{i=1}^nion m_in_i\langle R^2\rangle \bigg )
+ \end{multline}
+ spr2d  is the name of this term in the code output. At present the individual
+ contributions are not broken out. In the code this term  is multiplied by an
+ input factor $angrm2d(4)$,which is defaulted to 1.0 but the user can assign any
+ value (eq. 0.0) to gauge the effect of this term.
+\end{description}
+
+\subsection{Other Definitions used in Onetwo Output}
+
+\subsubsection{Flux Tables}
+
+\begin{description}
+ \item[angmtm] The total flux associated with toroidal rotation
+ (see  \Eqref{eq:omgam}) is given in
+ outone in the table labeled fluxes, under the column headed angmtm.
+\end{description}
+In the table labeled Energy Fluxes (ref. the ion energy equation,
+\Eqref{eq:ionenergy}): (flxangce  is  The energy flux due to particle
+convection
+\begin{description}
+ \item[omegapi] $\frac{keV}{cm^2 sec}$ The energy flux associated  with
+ ``conduction'' (really viscosity) omegapi is defined as 
+ \beq
+  omegapi\equiv \omega\Pi = \omega \Gamma_\omega^{cond}
+ \eeq
+ See the discussion of \Eqref{eq:gwcond} above regarding how this quantity is
+ obtained in analysis and simulation modes.
+ \item[cvctvrot] $\frac{kev}{cm^2 sec}$ The energy flux due to
+ momentum convection (flxangce internal to code), given by 
+ \Eqref{eq:cvct}.
+\end{description}
+
+\subsubsection{ION Power Balance Tables}
+
+The table labeled ``ion Energy Sources'' contains 
+\beq
+ qomegapi \equiv \frac{1}{H\rho}\ddiff {\rho}\bigg(
+ H\rho\omega\Pi \bigg)
+\eeq
+\beq
+ omegale  \equiv \omega L_e = \omega* sprbeame 
+\eeq
+
+The following terms are used in the table ``Ion Energy
+Sources Due to Angular Rotation'' (ref. the ion 
+energy equation, \Eqref{eq:ionenergy} )
+\beq
+ wdnidt(\rho) \equiv\sum_{i=1}^{nion} \frac{1}{2}m_i\omega^2
+  \langle R^2\rangle \pdiff{n_i}{t}
+\eeq
+\beq
+ niwdwdt(\rho)\equiv \sum_{i=1}^{nion} \frac{1}{2}m_in_i\omega 
+ \langle R^2\rangle\pdiff{\omega}{t}
+\eeq
+\beq
+ omegdgam(\rho)\equiv qomeapi+vischeat
+\eeq
+\beq
+ vischeat(\rho)\equiv -\Pi\pdiff{\omega}{\rho}
+\eeq
+\beq
+ qangce(\rho)\equiv \frac{1}{H\rho}\ddiff {\rho}H\rho \Gamma_T^\omega
+\eeq
+\beq
+ thcx(\rho)\equiv sprcxe =  
+\eeq
+\beq
+ rec+fcx(\rho)\equiv sprcxree
+\eeq
+\beq
+ e-impact(\rho)\equiv spreimpe =
+\eeq
+
+\subsubsection{Momentum Balance Tables}
+
+The table labeled ``Momentum Balance and Confinement Time'' gives
+\beq
+ qangce(\rho)\equiv 
+\eeq
+The table labeled ``Toroidal Rotation results'' gives
+
+\begin{description}
+ \item[flxangce] The energy flux due to particle convection, Eq[??] is called
+ flxangce in the code
+\end{description}
+The table labeled ``Toroidal Rotation Sources'' gives the terms that appear on
+the RHS of \Eqref{eq:omega}. These terms are covered above in Section 2.4.
+
+\subsection{Neutral Beam Injection Tables}
+The column labeled ``fast ion energy source'' is 
+the rate at which energy is instantaneously
+deposited in the plasma. This quantity is equal to $qb_m$ in the
+steady state and is larger/smaller than $qb_m$ during
+transient beam turn on/off (see aging of beam parameters).
+The column labeled ``delayed e. source'' is the quantity
+$ qb_m $, see \Eqref{eq:qbm}. (Note that $qbeame+qbeami+qcx =qb$
+at all times.) $qb_m$ is equal to the instantaneous energy deposition
+in the plasma in steady state. Otherwise $qb_m$ reflects the finite
+buildup and decay times of the fast ion density.
+The columns labeled ``energy fraction deposited in electrons
+/ions'' are the quantities $fbe_m,fbi_m$ (see Beam Related
+Quantities).
+The column labeled ``p. slowing down time'' gives the product
+$\tau_s N$ defined by Eqs.~\eqref{eq:taus} and \eqref{eq:7}.
+The column labeled ``e. slowing down time'' gives the product
+$\frac{1}{2}\tau_s G_e$ (see beam section).
+
+%---------------------------------------------------------------------
+\subsection {Items in the Summary Page}
+
+\begin{description}
+ \item[Beam power elec. $\equiv pbel $] The beam power delivered to the
+ electrons is given by:
+ \beq
+  pbel = \sum_m  fpe_m \int  qb_m  dV .
+ \eeq
+ \item[Beam power ions. $\equiv pbion $] The beam power delivered to the ions 
+ is given by:
+ \beq
+  pbion = \sum_m  fpi_m \int  qb_m  dV .
+ \eeq
+ Note that fast ion charge exchange is implicit in the terms $fpe_m$ and $fpi_m$
+ [the fast ion distribution function used to generate these quantities is given
+ in \Eqref{eq:1}], where the charge exchange factor, $P_{cx}$, \Eqref{eq:2}, is
+ calculated  using the fixed $\tau_{cx} $ given by \Eqref{eq:taucx}. 
+
+ %constant .
+ %See definitions  under the beam section and Eq.[\ref{eq:qbm}].
+ \item[Beam power cx loss $\equiv pbcx$] This value gives the beam power lost
+ due to charge exchange. It is determined by what is left over after the  beam
+ power delivered to the electrons and ions is accounted for:
+ \beq
+  pbcx = \sum_m  \int \left ( qb_m-qbeame_m-qbeami_m \right) dV .
+ \eeq
+ The sum is over beam components and energies; see Eqs.~\eqref{eq:qbm},
+ \eqref{eq:qbeamem}, and \eqref{eq:qbeamim}.
+\end{description}
+
+

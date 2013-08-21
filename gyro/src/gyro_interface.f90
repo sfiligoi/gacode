@@ -220,7 +220,7 @@ module gyro_interface
 
   ! Inputs available via interface but not by INPUT
   integer :: gyro_n_fourier_geo_in = 0
-  real, dimension(8,0:16) :: gyro_a_fourier_geo_in = 0.0
+  real, dimension(8,0:32) :: gyro_a_fourier_geo_in = 0.0
 
   ! Output parameters
   real, dimension(:), allocatable :: gyro_elec_pflux_out 

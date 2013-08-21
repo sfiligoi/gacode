@@ -6,8 +6,8 @@ from gacodeplotdefs import *
 simdir  = sys.argv[1]
 imgfile = sys.argv[2]
 
-rc('lines',linewidth=2)
-rc('mathtext',default='bf')
+rc('lines',linewidth=1)
+#rc('mathtext',default='bf')
 
 t  = np.loadtxt(simdir+'/out.le3.t')
 p  = np.loadtxt(simdir+'/out.le3.p')
@@ -26,8 +26,10 @@ ax.set_ylabel(r'\boldmath{$\bar\theta}-\theta$}',color='k')
 mt = len(t)
 mp = len(p)
 
+a=np.average(tb)-np.average(t)
+
 for j in range(mp):
-    ax.plot(t[:]/np.pi,(tb[:,j]-t[:])/np.pi)
+    ax.plot(t[:]/np.pi,(tb[:,j]-t[:]-a)/np.pi)
 
 TICKS=[0,1,2]
 LABELS=[r'\boldmath{$0$}',r'\boldmath{$\pi$}',r'\boldmath{$2\pi$}']

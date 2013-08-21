@@ -51,6 +51,11 @@ subroutine neo_run()
    neo_jpar_thK_out    = neo_th_out(6)                ! <j B> / j_norm (Koh)
    neo_jpar_thN_out    = neo_th_out(7)                ! <j B> / j_norm (NCLASS)
 
+   ! NCLASS viscosity coefficients
+   do is=1,6
+      neo_nclassvis_out(is) = neo_nclass_out(is)          ! ymu_s(1,1) / (m_norm*dens_norm*vth_norm/a_norm)
+   enddo
+
    ! dke results
    do is=1,6
       neo_pflux_dke_out(is)    = neo_dke_out(is,1)    ! Gamma_is/Gamma_norm

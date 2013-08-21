@@ -26,7 +26,23 @@ shared/profiles_gen/src/prgen
 shared/profiles_gen/locpargen/locpargen
 shared/profiles_gen/exprotools/exprodump
 shared/profiles_gen/exprotools/create
+shared/profiles_gen/exprotools/expromake
 tglf/src/tglf
 tglf/src/xtglf
 tgyro/src/tgyro_main
 xptor/driver/xptor
+
+# Onetwo cvs-committed stuff
+onetwo/Doc/*/*.pdf
+onetwo/Doc/*/*.bak
+onetwo/Doc/*/*.log
+onetwo/Doc/*/*.aux
+onetwo/Doc/*/*.dvi
+onetwo/Doc/*/*.fig
+onetwo/Doc/*/*.ps
+onetwo/Doc/*/*.bbl
+onetwo/Doc/*/*.blg
+onetwo/Doc/*/*.ddthermal
+onetwo/Doc/*/*.points
+onetwo/Doc/*/*~
+

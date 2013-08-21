@@ -25,8 +25,20 @@ def fancytag(tag):
         fancy = r'$\delta$'
     elif tag == 'sdelta':
         fancy = r'$r \, d\delta/dr$'
+    elif tag == 'Te':
+        fancy = r'$T_\mathrm{e}$'
     elif tag == 'ne':
         fancy = r'$n_\mathrm{e}$'
+    elif tag == 'Ti_1':
+        fancy = r'$T_\mathrm{i1}$'
+    elif tag == 'Ti_2':
+        fancy = r'$T_\mathrm{i2}$'
+    elif tag == 'Ti_3':
+        fancy = r'$T_\mathrm{i3}$'
+    elif tag == 'Ti_4':
+        fancy = r'$T_\mathrm{i4}$'
+    elif tag == 'Ti_5':
+        fancy = r'$T_\mathrm{i5}$'
     elif tag == 'ni_1':
         fancy = r'$n_\mathrm{i1}$'
     elif tag == 'ni_2':
@@ -39,6 +51,14 @@ def fancytag(tag):
         fancy = r'$n_\mathrm{i5}$'
     elif tag == 'omega0':
         fancy = r'$\omega_0$'
+    elif tag == 'w0p':
+        fancy = r'$d \omega_0/dr$'
+    elif tag == 'jbs_neo':
+        fancy = r'$\mathrm{jbs}_\mathrm{neo}$'
+    elif tag == 'jbs_sauter':
+        fancy = r'$\mathrm{jbs}_\mathrm{sauter}$'
+    elif tag == 'jbs_nclass':
+        fancy = r'$\mathrm{jbs}_\mathrm{nclass}$'
     else:
         fancy = r'$\mathrm{'+tag+'}$'
 

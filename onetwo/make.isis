@@ -1,0 +1,69 @@
+# Make directives isis :
+# PARALLEL_12 = YES
+                        #The following is supposed to supress unresolved references: 
+			LINK = -Wl,-noinhibit-exec -Wl,-Map,mapfilename   
+			MACHINEOK = 1
+	                MACHINE = isis
+			#ONETWO    = \
+			#	/p/linux/onetwo/source/onetwo
+		 	LIBS      = $(ONETWO)/onetwo_libs
+			NUBEAM12  = nubeam_12.f
+			NUBEAM_12_BUILD = TRUE
+                        UFILE12   = ufiles_12.f90
+			UBUILD    = TRUE
+			MAKE1     = make.includes
+			MAKE2     = make.objects
+                        DATA_LOC  = /data1/onetwo
+			MDSPLUS_LIB = 
+
+		        #this builds 64bit  onetwo,links to 64 bit libs:
+			MODULES   = ./
+			COMP      = /usr/local/pgi/linux86-64/6.2/bin/pgf90
+			PGCC      = /usr/local/pgi/linux86-64/6.2/bin/pgcc
+			DEBUG     = -g 
+ifdef PARALLEL_12
+			SPECIAL   = -Msave -byteswapio -r8 -DPARALLEL_12
+else
+		        SPECIAL   = -Msave -byteswapio -r8 
+endif		        
+		        SPECIAL_nubeam = $(SPECIAL)
+	                LAPACK    = /usr/local/pgi/linux86-64/6.2/lib/liblapack.a \
+			   /usr/local/pgi/linux86-64/6.2/lib/libblas.a
+			FTN90LIB = 
+                        CFLG = 
+			OPTIMIZE = -fast
+			NETCDF = /usr/local/netcdf-3.6.1/lib/libnetcdf.a
+			NETCDF_INC = /usr/local/netcdf-3.6.1/include
+			UFILE_LIBS =  /p/linux/nubeam/ntcc/lib
+			NUBEAM_LIBS  = 
+			CPPLF95LIB = /usr/lib/gcc/x86_64-redhat-linux/4.0.2/libstdc++.a\
+			/usr/lib/gcc/x86_64-redhat-linux/4.0.2/libgcc.a \
+			/usr/lib/gcc/x86_64-redhat-linux/4.0.2/libgcc_s.so 
+                        GCCLIB =  /usr/lib64/libstdc++.so.6.0.3
+	                CPPLF95LIB = 
+	                GCCLIB = 
+
+                        MSG = 
+			ifndef  MPI
+				FC = $(COMP) 
+				CXX = gcc 
+				INC = ./
+			else
+				# compiler specs, for Portland Group Compiler:
+				FC= /home/jbp/lib/mpich/bin/mpif90
+				CXX= /home/jbp/lib/mpich/bin/mpif90
+				INC= ./
+			endif
+			ifeq ($(OPT),debug)
+				OPTION = $(DEBUG)
+				DBG = _debug
+			else
+				OPTION = $(OPTIMIZE)
+                                DBG= 
+			endif
+			COMPILE        = $(FC) -I$(INC) $(OMP) $(PROF)\
+		  	                 $(AUTP) -c  $(OPTION) $(LISTING) $(SPECIAL)
+			COMPILE_nubeam = $(FC) -I$(INC) $(PROF)\
+			                 $(AUTP) -c  $(OPTION) $(LISTING) $(SPECIAL_nubeam)
+			COMPILE_ntcc   = $(FC) -I$(INC) $(OMP) $(PROF)\
+			                 $(AUTP) -c  $(OPTION) $(LISTING) $(SPECIAL_ntcc)
