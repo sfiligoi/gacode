@@ -106,18 +106,16 @@ subroutine le3_write
   enddo
 
   open(unit=1,file='out.le3.t',status='replace')
-  do i=1,ntp
-     write(1,10) t(i)
-  enddo
+  write(1,40) t(:)
   close(1)
+
   open(unit=1,file='out.le3.p',status='replace')
-  do j=1,npp
-     write(1,10) p(j)
-  enddo
+  write(1,40) p(:)
   close(1)
+
   open(unit=1,file='out.le3.tb',status='replace')
-  do i=1,ntp
-     write(1,10) tb(i,:)
+  do j=1,npp
+     write(1,40) tb(:,j)-t(:)
   enddo
   close(1)
   open(unit=1,file='out.le3.r',status='replace')
@@ -131,13 +129,12 @@ subroutine le3_write
   enddo
   close(1)
   open(unit=1,file='out.le3.b',status='replace')
-  do i=1,ntp
-     write(1,10) sqrt(bt(i,:)**2+bp(i,:)**2)
-  enddo
+  write(1,40) sqrt(bt(:,:)**2+bp(:,:)**2)
   close(1)
 
 10 format(200(1pe12.5,1x))
 20 format('(',i2,',',i2,'):',2x,4(1pe14.7,1x))
 30 format(t15,4(a,9x))
+40 format(1pe12.5)
 
 end subroutine le3_write

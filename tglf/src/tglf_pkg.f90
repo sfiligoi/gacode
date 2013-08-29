@@ -8,6 +8,7 @@
       REAL,EXTERNAL :: get_QL_exchange
       REAL,EXTERNAL :: get_QL_phi,get_QL_density,get_QL_temperature
       REAL,EXTERNAL :: get_gaussian_width
+      REAl,EXTERNAL :: get_ft
       REAL,EXTERNAL :: get_R_unit
       REAL,EXTERNAL :: get_q_unit
       REAL,EXTERNAL :: get_wd_bar
