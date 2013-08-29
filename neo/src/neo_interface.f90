@@ -51,7 +51,6 @@ module neo_interface
   real    :: neo_dlntdr_1_in = 1.0
   real    :: neo_profile_dlnndr_1_scale_in = 1.0
   real    :: neo_profile_dlntdr_1_scale_in = 1.0
-  real    :: neo_source_nclass_1_in = 0.0
   integer :: neo_z_2_in = 1
   real    :: neo_mass_2_in = 1.0
   real    :: neo_dens_2_in = 0.0
@@ -60,7 +59,6 @@ module neo_interface
   real    :: neo_dlntdr_2_in = 1.0
   real    :: neo_profile_dlnndr_2_scale_in = 1.0
   real    :: neo_profile_dlntdr_2_scale_in = 1.0
-  real    :: neo_source_nclass_2_in = 0.0
   integer :: neo_z_3_in = 1
   real    :: neo_mass_3_in = 1.0
   real    :: neo_dens_3_in = 0.0
@@ -69,7 +67,6 @@ module neo_interface
   real    :: neo_dlntdr_3_in = 1.0
   real    :: neo_profile_dlnndr_3_scale_in = 1.0
   real    :: neo_profile_dlntdr_3_scale_in = 1.0
-  real    :: neo_source_nclass_3_in = 0.0
   integer :: neo_z_4_in = 1
   real    :: neo_mass_4_in = 1.0
   real    :: neo_dens_4_in = 0.0
@@ -78,7 +75,6 @@ module neo_interface
   real    :: neo_dlntdr_4_in = 1.0
   real    :: neo_profile_dlnndr_4_scale_in = 1.0
   real    :: neo_profile_dlntdr_4_scale_in = 1.0
-  real    :: neo_source_nclass_4_in = 0.0
   integer :: neo_z_5_in = 1
   real    :: neo_mass_5_in = 1.0
   real    :: neo_dens_5_in = 0.0
@@ -87,7 +83,6 @@ module neo_interface
   real    :: neo_dlntdr_5_in = 1.0
   real    :: neo_profile_dlnndr_5_scale_in = 1.0
   real    :: neo_profile_dlntdr_5_scale_in = 1.0
-  real    :: neo_source_nclass_5_in = 0.0
   integer :: neo_z_6_in = 1
   real    :: neo_mass_6_in = 1.0
   real    :: neo_dens_6_in = 0.0
@@ -96,7 +91,6 @@ module neo_interface
   real    :: neo_dlntdr_6_in = 1.0
   real    :: neo_profile_dlnndr_6_scale_in = 1.0
   real    :: neo_profile_dlntdr_6_scale_in = 1.0
-  real    :: neo_source_nclass_6_in = 0.0
   real    :: neo_dphi0dr_in = 0.0
   real    :: neo_epar0_in = 0.0
   real    :: neo_q_in = 2.0
@@ -198,7 +192,6 @@ contains
     neo_dlntdr_1_in = dlntdr_in(1)
     neo_profile_dlnndr_1_scale_in = profile_dlnndr_scale(1)
     neo_profile_dlntdr_1_scale_in = profile_dlntdr_scale(1)
-    neo_source_nclass_1_in        = source_nclass(1)
     neo_z_2_in = z_in(2)
     neo_mass_2_in = mass_in(2)
     neo_dens_2_in = dens_in(2)
@@ -207,7 +200,6 @@ contains
     neo_dlntdr_2_in = dlntdr_in(2)
     neo_profile_dlnndr_2_scale_in = profile_dlnndr_scale(2)
     neo_profile_dlntdr_2_scale_in = profile_dlntdr_scale(2)
-    neo_source_nclass_2_in        = source_nclass(2)
     neo_z_3_in = z_in(3)
     neo_mass_3_in = mass_in(3)
     neo_dens_3_in = dens_in(3)
@@ -216,7 +208,6 @@ contains
     neo_dlntdr_3_in = dlntdr_in(3)
     neo_profile_dlnndr_3_scale_in = profile_dlnndr_scale(3)
     neo_profile_dlntdr_3_scale_in = profile_dlntdr_scale(3)
-    neo_source_nclass_3_in        = source_nclass(3)
     neo_z_4_in = z_in(4)
     neo_mass_4_in = mass_in(4)
     neo_dens_4_in = dens_in(4)
@@ -225,7 +216,6 @@ contains
     neo_dlntdr_4_in = dlntdr_in(4)
     neo_profile_dlnndr_4_scale_in = profile_dlnndr_scale(4)
     neo_profile_dlntdr_4_scale_in = profile_dlntdr_scale(4)
-    neo_source_nclass_4_in        = source_nclass(4)
     neo_z_5_in = z_in(5)
     neo_mass_5_in = mass_in(5)
     neo_dens_5_in = dens_in(5)
@@ -234,7 +224,6 @@ contains
     neo_dlntdr_5_in = dlntdr_in(5)
     neo_profile_dlnndr_5_scale_in = profile_dlnndr_scale(5)
     neo_profile_dlntdr_5_scale_in = profile_dlntdr_scale(5)
-    neo_source_nclass_5_in        = source_nclass(5)
     neo_z_6_in = z_in(6)
     neo_mass_6_in = mass_in(6)
     neo_dens_6_in = dens_in(6)
@@ -243,7 +232,6 @@ contains
     neo_dlntdr_6_in = dlntdr_in(6)
     neo_profile_dlnndr_6_scale_in = profile_dlnndr_scale(6)
     neo_profile_dlntdr_6_scale_in = profile_dlntdr_scale(6)
-    neo_source_nclass_6_in        = source_nclass(6)
     neo_dphi0dr_in = dphi0dr_in
     neo_epar0_in = epar0_in
     neo_q_in = q_in
@@ -313,7 +301,6 @@ contains
     dlntdr_in(1) = neo_dlntdr_1_in
     profile_dlnndr_scale(1) = neo_profile_dlnndr_1_scale_in
     profile_dlntdr_scale(1) = neo_profile_dlntdr_1_scale_in
-    source_nclass(1)        = neo_source_nclass_1_in
     z_in(2) = neo_z_2_in
     mass_in(2) = neo_mass_2_in
     dens_in(2) = neo_dens_2_in
@@ -322,7 +309,6 @@ contains
     dlntdr_in(2) = neo_dlntdr_2_in
     profile_dlnndr_scale(2) = neo_profile_dlnndr_2_scale_in
     profile_dlntdr_scale(2) = neo_profile_dlntdr_2_scale_in
-    source_nclass(2)        = neo_source_nclass_2_in
     z_in(3) = neo_z_3_in
     mass_in(3) = neo_mass_3_in
     dens_in(3) = neo_dens_3_in
@@ -331,7 +317,6 @@ contains
     dlntdr_in(3) = neo_dlntdr_3_in
     profile_dlnndr_scale(3) = neo_profile_dlnndr_3_scale_in
     profile_dlntdr_scale(3) = neo_profile_dlntdr_3_scale_in
-    source_nclass(3)        = neo_source_nclass_3_in
     z_in(4) = neo_z_4_in
     mass_in(4) = neo_mass_4_in
     dens_in(4) = neo_dens_4_in
@@ -340,7 +325,6 @@ contains
     dlntdr_in(4) = neo_dlntdr_4_in
     profile_dlnndr_scale(4) = neo_profile_dlnndr_4_scale_in
     profile_dlntdr_scale(4) = neo_profile_dlntdr_4_scale_in
-    source_nclass(4)        = neo_source_nclass_4_in
     z_in(5) = neo_z_5_in
     mass_in(5) = neo_mass_5_in
     dens_in(5) = neo_dens_5_in
@@ -349,7 +333,6 @@ contains
     dlntdr_in(5) = neo_dlntdr_5_in
     profile_dlnndr_scale(5) = neo_profile_dlnndr_5_scale_in
     profile_dlntdr_scale(5) = neo_profile_dlntdr_5_scale_in
-    source_nclass(5)        = neo_source_nclass_5_in
     z_in(6) = neo_z_6_in
     mass_in(6) = neo_mass_6_in
     dens_in(6) = neo_dens_6_in
@@ -358,7 +341,6 @@ contains
     dlntdr_in(6) = neo_dlntdr_6_in
     profile_dlnndr_scale(6) = neo_profile_dlnndr_6_scale_in
     profile_dlntdr_scale(6) = neo_profile_dlntdr_6_scale_in
-    source_nclass(6)        = neo_source_nclass_6_in
     dphi0dr_in = neo_dphi0dr_in
     epar0_in = neo_epar0_in
     q_in = neo_q_in
