@@ -21,9 +21,9 @@ subroutine gyro_do
 
   ! Begin with clean exit status
   !
-  ! gyro_exit_status=0 : unset
-  ! gyro_exit_status=1 : error
-  ! gyro_exit_status=2 : clean
+  ! gyro_exit_status=0 : success
+  ! gyro_exit_status=1 : failure
+  ! gyro_exit_status=2 : warning
   !
   gyro_exit_status  = 0
   gyro_exit_message = 'unset'
@@ -45,7 +45,7 @@ subroutine gyro_do
 !check if hdf5 methods are used but no hdf5 linked
 #ifndef HAVE_HDF5
   if(io_method > 1) then
-    gyro_exit_status = -17
+    gyro_exit_status = 1
     gyro_exit_message = 'This GYRO was not built with HDF5.  Please use io_method =1'
     return
   endif
@@ -324,7 +324,7 @@ subroutine gyro_do
   !
   if (gyrotest_flag == 1) then
      call gyro_write_efficiency(trim(path)//'out.gyro.efficiency',1)
-     call gyro_set_exit_status('test complete',2)
+     call gyro_set_exit_status('test complete',0)
      return
   endif
   !------------------------------------------------------------
@@ -391,7 +391,7 @@ subroutine gyro_do
         !-------------------------------------
 
      enddo
-     gyro_exit_status = 2
+     gyro_exit_status = 0
 
      ! end time-stepping   
      !-----------------------------------------------
