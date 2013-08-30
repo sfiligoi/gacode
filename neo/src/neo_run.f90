@@ -18,6 +18,7 @@ subroutine neo_run()
    call map_interface2global
 
    error_status = 0
+   error_message = '(NEO) completed successfully'
    neo_dke_out=0.0
    neo_dke_1d_out= 0.0
    neo_gv_out=0.0
