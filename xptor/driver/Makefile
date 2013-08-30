@@ -8,7 +8,7 @@ export EXTRA_LIBS =  \
        ${GACODE_ROOT}/shared/math/math_lib.a \
        ${GACODE_ROOT}/shared/GEO/GEO_lib.a \
        ${GACODE_ROOT}/shared/UMFPACK/UMFPACK_lib.a \
-       ${GACODE_ROOT}/neo/nclass/nclass_lib.a \
+       ${GACODE_ROOT}/shared/nclass/nclass_lib.a \
        ${LMATH} \
        ${NETCDF}
 

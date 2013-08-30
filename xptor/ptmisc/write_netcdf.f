@@ -38,7 +38,7 @@ c
       if(i_proc.eq.0) then
 c
       val = nf_create('xptor_out.nc', nf_clobber, ncid)
-      if (val .ne. nf_noerr) call handle_err(val)
+c      if (val .ne. nf_noerr) call handle_err(val)
 c
 c Define scalars and attributes
 c
@@ -275,7 +275,7 @@ c
 c Define 1d vars and attributes
 c
       stat = nf_def_dim(ncid, 'one',jmaxm+1,rdim)
-      if (stat .ne. nf_noerr) call handle_err(stat)
+c      if (stat .ne. nf_noerr) call handle_err(stat)
       j=1
       oneval(j) = nf_def_var (ncid,'rho',nf_double,1,rdim,rhid1(j))
       oneval(j)=nf_put_att_text(ncid,rhid1(j),'units',

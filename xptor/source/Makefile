@@ -9,10 +9,7 @@ endif
 
 LLIB=../driver/xptor_lib
 
-OBJECTS = neucg.o \
-          neuden.o \
-          neut.o \
-	  palpha_dv.o \
+OBJECTS = palpha_dv.o \
 	  prad_dv.o \
 	  pohmic_dv.o \
           sigvth.o  

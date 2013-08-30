@@ -90,11 +90,11 @@ c
         vparzfluxm = vparzfluxm + vparzflux_adhoc
       endif
 c
-      if(imodel.eq.2) call ifsppl_dv
+c      if(imodel.eq.2) call ifsppl_dv
 c
       if(imodel.eq.7) call mixshear_dv
 c
-      if(imodel.eq.99) call chi1_dv
+c      if(imodel.eq.99) call chi1_dv
 c
       if(imodel.eq.-1) call test_dv
 c
@@ -723,8 +723,9 @@ c
       real*8 ztau_nco, zrho_nco, rhosdam, rhom, rminm,
      >       rmajm,b_unit
       real*8 taui,rhoi,lnlamda
-      real*8 fcm,r_eps,tauim,nu_plateau
-      real*8 nu_braginski,vthi,x13
+      real*8 wthi,nu_star,d_zeff,zeffm,g_ft
+      real*8 fcm,r_eps,nu_plateau,nu_norm
+      real*8 nu_braginski,nu_banana,vthi,x13
       real*8 kpol1,kpol2,cnc
       real*8 thetam,qm
       real*8 ctorm, grad_c_tor
@@ -883,6 +884,7 @@ c
 c     compute neoclassical flows
 c
       if(ncl_flag.eq.0)then
+c Large aspect ratio formulas from Y.B. Kim Phys. FLuids B3 (1991) 2050.
         cnc = -1.0*alpha_dia/bt_exp
         thetam=theta_exp(jm)
         rmajm = rmaj_exp(jm)
@@ -890,32 +892,41 @@ c
         rminm=rmin_exp(jm)
         qm=q_exp(jm)
         r_eps = rminm/rmajm
-        fcm = 1.001D0+(0.46D0*r_eps-1.46D0)*DSQRT(r_eps)
-        kpol1=0.8839D0*fcm/(0.3477D0+0.4058D0*fcm)
+        fcm = 1.0+(0.46*r_eps-1.46)*DSQRT(r_eps)
+        g_ft = (1.0 - fcm)/fcm
+        kpol1=0.8839*fcm/(0.3477+0.4058*fcm)
         kpol2=(1.0 -fcm)/(1.0 + 1.167*fcm)
-        kpol_m(jm)=0.8839D0*fcm/(0.3477D0+0.4058D0*fcm)
-c calculate coefficient of poloidal collisional damping rate /taui added below
-        nu_pol_m(jm)=0.7538D0*(1.D0-xparam_pt(10))*(bt_exp**2)*
-     >    *(1-fcm)/(fcm*f_exp(jm)*xb2_exp(jm)*thetam)
-        lnlamda=24.D0-DLOG(DSQRT(1.D13*nem)/(1000.D0*tem))
+        kpol_m(jm)=0.8839*fcm/(0.3477+0.4058*fcm)
+c calculate coefficient of poloidal collisional damping rate
+        lnlamda=24.D0-DLOG(DSQRT(1.D13*nem)/(1000.0*tem))
         lnlamda=DMAX1(lnlamda,1.D0)
-        tauim=2.09D7*DSQRT(amassgas_exp)*
-     >   DSQRT(tim*1000.D0)**3/(1.0D13*nim*lnlamda)
-c   calculate the collisional flow damping (bannana regime) on the half grid
-        nu_pol_m(jm)=nu_pol_m(jm)/tauim
-        nu_plateau = (qm/rmajor_exp)*
-     >  1.2533D0*9.79D3*DSQRT(1000.D0*tim/amassgas_exp)
-     >  *(bt_exp**2)/(xb2_exp(jm)*f_exp(jm))
-        vthi=9.79D5*SQRT(tim/amassgas_exp)
-        nu_braginski = 0.96*tauim*0.5*
-     >  (vthi*thetam/(rmajor_exp*100.0))**2
-c       write(*,*)jm,"nu_pol_m=",nu_pol_m(jm),nu_plateau,nu_braginski
-        nu_pol_m(jm)= DMIN1(nu_pol_m(jm),DMIN1(nu_plateau,nu_braginski))
+        taui=2.09D7*DSQRT(amassgas_exp)*
+     >  ((tim*1000.0)**1.5)/(1.0D13*nim*lnlamda)  !s
+        vthi=9.79D3*DSQRT(2000.0*tim/amassgas_exp)  !m/s
+        wthi= vthi/(rmajm*qm)
+        nu_star = 1.0/(wthi*taui*r_eps**1.5)
+        zeffm = zeff_exp(jm)
+        d_zeff = 2.23 + 5.32*zeffm+2.04*zeffm**2
+        nu_norm = (nim*amassgas_exp*1.6726D-8)/taui  ! kg/m^3/s
+c   normalized mu_00 from Table 1
+c   banana regime    
+        nu_banana=nu_norm*(0.53 + zeffm)
+c   plateau regime  
+        nu_plateau = nu_norm*3.54
+c   PS regime 
+        nu_braginski = nu_norm*(3.02 + 4.25*zeffm)/d_zeff
+        if(ipert_gf.eq.0)then
+c formula C21
+          nu_pol_m(jm)= g_ft*nu_banana/
+     > ((1+2.92*nu_star*nu_banana/nu_plateau)*
+     > (1+nu_plateau/(6*wthi*taui*nu_braginski)))
+c          write(*,*)jm,"nu_pol_m=",nu_pol_m(jm)
+        endif
 c calculate vneo and vdia on the half grid
 c neoclassical poloidal velocity (km/sec)
         vneo(1) = -alpha_dia*curden_exp(jm)/(1.6022*nem*1000.0)
-        vneo(2) = (cnc/thetam)*kpol1*gradtim
-        vneo(3) = (cnc/thetam)*((kpol1+1.5*kpol2
+        vneo(2) = -(cnc/thetam)*kpol1*gradtim
+        vneo(3) = -(cnc/thetam)*((kpol1+1.5*kpol2
      >     -1.0+1.0/zimp_exp)*gradtim - gradnim+ gradnzm/zimp_exp)
       endif
 c
@@ -971,22 +982,30 @@ c
       include '../inc/ptor.m'
       include '../inc/glf.m'
 !
-      real :: n0,a0,T0,v0,m0,cnc,thetam,cvpol      
+      real :: n0,a0,T0,v0,m0,cnc,thetam,cvpol     
 !
       call xptor_neo_map
-      call neo_run
+      call neo_run     
 !
 ! neo normalizations
 !
-      m0 = amassgas_exp                                !proton mass
-      n0 = nem                                         !10^19/m^3
-      a0 = rmin_exp(mxgrid)                            !m
-      T0 = tim                                         !kev
+!      m0 = amassgas_exp                                !proton mass
+!      n0 = nem                                         !10^19/m^3
+!      a0 = rmin_exp(mxgrid)                            !m
+!      T0 = tim                                         !kev
+      m0=2.0
+      n0 =1.0
+      T0=1.0
+      a0=1.0
       v0 = 9.79D3*DSQRT(T0*1.D3)/DSQRT(m0)   !m/sec
 !     
       cnc = -1.0*alpha_dia/bt_exp
       thetam=theta_exp(jm)
-      nu_pol_m(jm) = 0.0
+      nu_pol_m(jm)=0.0
+      if(ipert_gf.eq.0)then
+        nu_pol_m(jm) = 1.6726D-8*neo_nclassvis_out(2)*m0*n0*v0/a0  ! nclass viscosity
+c        write(*,*)jm,"nu_pol_m=",nu_pol_m(jm),neo_nclassvis_out(2)
+      endif
       kpol_m(jm) = 0.0
 !
 ! neoclassical poloidal velocity (km/sec)
