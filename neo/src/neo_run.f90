@@ -17,6 +17,14 @@ subroutine neo_run()
    ! Map INTERFACE parameters -> GLOBAL variables
    call map_interface2global
 
+   error_status = 0
+   neo_dke_out=0.0
+   neo_dke_1d_out= 0.0
+   neo_gv_out=0.0
+   neo_th_out=0.0
+   neo_nclass_out=0.0
+   neo_thHS_out=0.0
+
    ! Run NEO
    call neo_do
 
