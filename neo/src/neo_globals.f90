@@ -42,8 +42,6 @@ module neo_globals
   real, dimension(6) :: profile_dlnndr_scale
   real, dimension(6) :: profile_dlntdr_scale
   ! 
-  real, dimension(6) :: source_nclass
-  !
   integer :: ipccw_in
   integer :: btccw_in
   !

@@ -590,12 +590,15 @@ subroutine tgyro_write_input
 
   endif
 
+  !--------------------------------------------------------------
+  ! Trap GYRO input data error and stop 
   call MPI_BCAST(error_flag,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(error_msg,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
-
+  !
   if (error_flag == 1) then
      call tgyro_catch_error(trim(error_msg))
   endif
+  !--------------------------------------------------------------
 
 10 format(t2,a,t33,':',t35,a)
 20 format(t2,a,t33,':',t35,f8.4)

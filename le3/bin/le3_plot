@@ -33,6 +33,12 @@ then
   echo "          -theta"
   echo "          Toggle plotting along theta-axis."
   echo
+  echo "          -b"
+  echo "          Toggle plot of B."
+  echo
+  echo "          -bsurf"
+  echo "          Toggle surface plot of B."
+  echo
 
   exit 1
 fi
@@ -60,11 +66,13 @@ while [ $# -gt 0 ] ; do
 
   -img) shift ; IMGFILE=$1 ;;
  
-  -phi) shift ; PLOT_TYPE=phi ;;
+  -phi) PLOT_TYPE=phi ;;
 
-  -theta) shift ; PLOT_TYPE=theta ;;
+  -theta) PLOT_TYPE=theta ;;
 
-  -b) shift ; PLOT_TYPE=b ;;
+  -bsurf) PLOT_TYPE=bsurf ;;
+
+  -b) PLOT_TYPE=b ;;
   
   *) echo "ERROR: (le3_plot) Incorrect syntax." ; exit 1 ;;
 
@@ -92,8 +100,8 @@ case "$PLOT_TYPE" in
    phi)  
 	python $PYROOT/le3_plot_phi.py $SIMDIR $IMGFILE ;;
   
-   b)  
-	python $PYROOT/le3_plot_b.py $SIMDIR $IMGFILE ;;
+   bsurf)  
+	python $PYROOT/le3_plot_surface.py $SIMDIR $IMGFILE ;;
   
 esac 
 

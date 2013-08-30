@@ -50,7 +50,6 @@ subroutine neo_read_input
      read(1,*) dlntdr_in(is)
      read(1,*) profile_dlnndr_scale(is)
      read(1,*) profile_dlntdr_scale(is)
-     read(1,*) source_nclass(is)
   enddo
 
   read(1,*) dphi0dr_in

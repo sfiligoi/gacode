@@ -167,15 +167,6 @@ contains
        c_potl = 0.0
     end if
        
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    ! Sources
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    ! fex_iz(3,i,z)-moments of external parallel force on i,z (T*j/m**3) 
-    do is=1,n_species
-       fex_iz(1,is,abs(z(is))) = source_nclass(is) &
-            * dens_norm(ir) * 1e19 * b_unit(ir) &
-            * (vth_norm(ir) * a_meters)**2 * (mass_deuterium*1e-27)
-    enddo
 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!
     ! Er0
@@ -335,6 +326,17 @@ contains
        grp_iz(is,abs(z(is))) = -den_iz(is,abs(z(is))) *  temp_i(is) &
             * (dlnndr(is,ir) + dlntdr(is,ir)) / a_meters
     enddo
+
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ! Sources
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ! fex_iz(3,i,z)-moments of external parallel force on i,z (T*j/m**3) 
+    !do is=1,n_species
+    !   fex_iz(1,is,abs(z(is))) = source_nclass(is) &
+    !        * dens_norm(ir) * 1e19 * b_unit(ir) &
+    !        * (vth_norm(ir) * a_meters)**2 * (mass_deuterium*1e-27)
+    !enddo
+    fex_iz(:,:,:) = 0.0
 
     ! Normalizations
     pflux_nc_norm = dens_norm(ir) * vth_norm(ir) * a_meters * 1e19

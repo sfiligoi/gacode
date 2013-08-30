@@ -74,9 +74,6 @@ subroutine tgyro_global_iteration_driver
   !
   error_flag = 0
   error_msg = 'INFO: clean exit from TGYRO'
-  !
-  gyro_exit_status(:)  = 0
-  gyro_exit_message(:) = 'N/A'
   !---------------------------------------
 
   ! Mapping function from radius/field to p
@@ -119,8 +116,7 @@ subroutine tgyro_global_iteration_driver
   transport_method    = 2
   time_max_save = gyro_time_max_in
   gyro_time_max_in    = 0.0
-  call gyro_run(gyrotest_flag, gyro_restart_method, &
-       transport_method, gyro_exit_status(1), gyro_exit_message(1))
+  call gyro_run(gyrotest_flag,gyro_restart_method,transport_method)
   gyro_time_max_in    = time_max_save
 
   ! GYRO gridpoints corresponding to simulation domain ends

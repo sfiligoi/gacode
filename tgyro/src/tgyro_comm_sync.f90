@@ -14,8 +14,6 @@ subroutine tgyro_comm_sync
   implicit none
 
   real, dimension(n_r-1) :: collect
-  integer, dimension(n_r-1) :: icollect
-  character(len=80), dimension(n_r-1) :: ccollect
   integer :: i_ion
 
   ! Only a single flux and root (gradient) was computed 
@@ -283,30 +281,5 @@ subroutine tgyro_comm_sync
        ierr)
 
   expwd_e_tur(2:n_r) = collect(:)
-
-
-  ! sync-0 GYRO status
-
-  call MPI_ALLGATHER(gyro_exit_status(i_r),&
-       1,&
-       MPI_INTEGER,&
-       icollect,&
-       1,&
-       MPI_INTEGER,&
-       gyro_adj,&
-       ierr)
-
-  gyro_exit_status(2:n_r) = icollect(:)
-
-  call MPI_ALLGATHER(gyro_exit_message(i_r),&
-       80,&
-       MPI_CHARACTER,&
-       ccollect,&
-       80,&
-       MPI_CHARACTER,&
-       gyro_adj,&
-       ierr)
-
-  gyro_exit_message(2:n_r) = ccollect(:)
 
 end subroutine tgyro_comm_sync

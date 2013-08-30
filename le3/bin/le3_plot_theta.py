@@ -6,9 +6,6 @@ from gacodeplotdefs import *
 simdir  = sys.argv[1]
 imgfile = sys.argv[2]
 
-rc('lines',linewidth=1)
-#rc('mathtext',default='bf')
-
 t  = np.loadtxt(simdir+'/out.le3.t')
 p  = np.loadtxt(simdir+'/out.le3.p')
 tb = np.loadtxt(simdir+'/out.le3.tb')
@@ -26,22 +23,22 @@ ax.set_ylabel(r'\boldmath{$\bar\theta}-\theta$}',color='k')
 mt = len(t)
 mp = len(p)
 
-a=np.average(tb)-np.average(t)
+x = np.zeros([mt+1])
+y = np.zeros([mt+1])
+
+x[0:mt] = t[0:mt]/np.pi
+x[mt] = 2.0
 
 for j in range(mp):
-    ax.plot(t[:]/np.pi,(tb[:,j]-t[:]-a)/np.pi)
+    y[0:mt] = (tb[:,j]-t[:])/np.pi
+    y[mt] = y[0]
+    ax.plot(x,y)
 
 TICKS=[0,1,2]
-LABELS=[r'\boldmath{$0$}',r'\boldmath{$\pi$}',r'\boldmath{$2\pi$}']
+LABELS=[r'$0$',r'$\pi$',r'$2\pi$']
 ax.set_xticks(TICKS)
 ax.set_xticklabels(LABELS)
 ax.set_xlim(0,2)
-
-TICKS=[-0.125,0,0.125]
-LABELS=[r'\boldmath{$\pi/8$}',r'\boldmath{$0$}',r'\boldmath{$\pi/8$}']
-ax.set_yticks(TICKS)
-ax.set_yticklabels(LABELS)
-ax.set_ylim(-0.125,0.125)
 
 if imgfile == 'screen':
     plt.show()

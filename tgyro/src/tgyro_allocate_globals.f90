@@ -137,8 +137,6 @@ subroutine tgyro_allocate_globals
   allocate(a_fourier_geo(8,0:32,n_r))
 
   allocate(b_flag(p_max))
-  allocate(gyro_exit_status(n_r))
-  allocate(gyro_exit_message(n_r))
 
   allocate(pmap(2:n_r,n_evolve))
 
