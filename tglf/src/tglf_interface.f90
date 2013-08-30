@@ -187,8 +187,8 @@ module tglf_interface
   complex :: tglf_eigenvalue_out(maxmodes)
 
   ! ERROR OUTPUT
-  character (len=80) :: tglf_error_msg='null'
-  integer :: tglf_error_flag=0
+  character (len=80) :: tglf_error_message='null'
+  integer :: tglf_error_status=0
 
 contains
 

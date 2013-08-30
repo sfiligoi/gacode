@@ -3,6 +3,9 @@
 !
 ! PURPOSE:
 !  Manage calls to obtain neoclassical and turbulent fluxes.
+!  
+! NOTE:
+!  Component errors/warnings are trapped and managed here.
 !------------------------------------------------------------
 
 subroutine tgyro_flux
@@ -15,20 +18,42 @@ subroutine tgyro_flux
 
   implicit none
 
+  integer :: i
   integer :: i_ion
   integer :: i1,i2
   integer :: n_12
-  real :: dummy1
-  real :: dummy2
+  real, dimension(8) :: x_out
+
+  !-------------------------------------------
+  ! IFS-PPPL parameters
   real :: rltcrit
   real :: rltcritz
   real :: chii0
   real :: chie0
+  real :: dummy1
+  real :: dummy2
+  !-------------------------------------------
+  !-------------------------------------------
+  ! NEO parameters
   real :: Gamma_neo_GB
   real :: Q_neo_GB
   real :: Pi_neo_GB
-  real, dimension(8) :: x_out
-  integer, dimension(n_proc_global) :: error_vec
+  !-------------------------------------------
+
+  !---------------------------------------------------------------------
+  ! Arrays of error messages
+  !
+  ! TGLF:
+  integer, dimension(n_r-1) :: tglf_error_status_vec
+  character (len=80), dimension(n_r-1) :: tglf_error_message_vec
+  ! NEO:
+  integer, dimension(n_r-1) :: neo_error_status_vec
+  character (len=80), dimension(n_r-1) :: neo_error_message_vec
+  ! GYRO:
+  integer, dimension(n_r-1) :: gyro_error_status_vec
+  character (len=80), dimension(n_r-1) :: gyro_error_message_vec
+  !---------------------------------------------------------------------
+
 
   call MPI_BARRIER(MPI_COMM_WORLD,ierr)
   if (i_proc_global == 0) then
@@ -77,7 +102,7 @@ subroutine tgyro_flux
 
   case (1)
 
-     ! analytic theory
+     ! Call NEO analtytic theory
      call neo_run
 
      pflux_i_neo(1,i_r) = neo_pflux_thHH_out/Gamma_neo_GB
@@ -92,33 +117,38 @@ subroutine tgyro_flux
 
   case (2)
 
-     ! dke solve
+     ! Call NEO kinetic calculation
      if (gyrotest_flag == 0) call neo_run
 
-     pflux_e_neo(i_r)   = (neo_pflux_dke_out(2) + tgyro_neo_gv_flag*neo_pflux_gv_out(2)) &
-          / Gamma_neo_GB 
-     eflux_e_neo(i_r)   = (neo_efluxncv_dke_out(2) + tgyro_neo_gv_flag*neo_efluxncv_gv_out(2)) &
-          / Q_neo_GB
-     mflux_e_neo(i_r)   = (neo_mflux_dke_out(2) + tgyro_neo_gv_flag*neo_mflux_gv_out(2)) &
-          / Pi_neo_GB
+     pflux_e_neo(i_r) = (neo_pflux_dke_out(2)+tgyro_neo_gv_flag*neo_pflux_gv_out(2)) &
+          /Gamma_neo_GB 
+     eflux_e_neo(i_r) = (neo_efluxncv_dke_out(2)+tgyro_neo_gv_flag*neo_efluxncv_gv_out(2)) &
+          /Q_neo_GB
+     mflux_e_neo(i_r) = (neo_mflux_dke_out(2)+tgyro_neo_gv_flag*neo_mflux_gv_out(2)) &
+          /Pi_neo_GB
 
-     pflux_i_neo(1,i_r) = (neo_pflux_dke_out(1) + tgyro_neo_gv_flag*neo_pflux_gv_out(1)) &
-          / Gamma_neo_GB 
-     eflux_i_neo(1,i_r) = (neo_efluxncv_dke_out(1) + tgyro_neo_gv_flag*neo_efluxncv_gv_out(1)) &
-          / Q_neo_GB
-     mflux_i_neo(1,i_r) = (neo_mflux_dke_out(1) + tgyro_neo_gv_flag*neo_mflux_gv_out(1)) &
-          / Pi_neo_GB
+     pflux_i_neo(1,i_r) = (neo_pflux_dke_out(1)+tgyro_neo_gv_flag*neo_pflux_gv_out(1)) &
+          /Gamma_neo_GB 
+     eflux_i_neo(1,i_r) = (neo_efluxncv_dke_out(1)+tgyro_neo_gv_flag*neo_efluxncv_gv_out(1)) &
+          /Q_neo_GB
+     mflux_i_neo(1,i_r) = (neo_mflux_dke_out(1)+tgyro_neo_gv_flag*neo_mflux_gv_out(1)) &
+          /Pi_neo_GB
 
      do i_ion=2,loc_n_ion
-        pflux_i_neo(i_ion,i_r) = (neo_pflux_dke_out(i_ion+1) + tgyro_neo_gv_flag*neo_pflux_gv_out(i_ion+1)) &
-             / Gamma_neo_GB 
-        eflux_i_neo(i_ion,i_r) = (neo_efluxncv_dke_out(i_ion+1) + tgyro_neo_gv_flag*neo_efluxncv_gv_out(i_ion+1)) &
-             / Q_neo_GB
-        mflux_i_neo(i_ion,i_r) = (neo_mflux_dke_out(i_ion+1) + tgyro_neo_gv_flag*neo_mflux_gv_out(i_ion+1)) &
-             / Pi_neo_GB
+        pflux_i_neo(i_ion,i_r) = (neo_pflux_dke_out(i_ion+1) + &
+             tgyro_neo_gv_flag*neo_pflux_gv_out(i_ion+1))/Gamma_neo_GB 
+        eflux_i_neo(i_ion,i_r) = (neo_efluxncv_dke_out(i_ion+1) + &
+             tgyro_neo_gv_flag*neo_efluxncv_gv_out(i_ion+1))/Q_neo_GB
+        mflux_i_neo(i_ion,i_r) = (neo_mflux_dke_out(i_ion+1) + &
+             tgyro_neo_gv_flag*neo_mflux_gv_out(i_ion+1))/Pi_neo_GB
      enddo
 
   end select
+
+  call MPI_ALLGATHER(neo_error_status_out,1,MPI_INTEGER,&
+       neo_error_status_vec,1,MPI_INTEGER,gyro_adj,ierr)
+  call MPI_ALLGATHER(neo_error_message_out,80,MPI_CHARACTER,&
+       neo_error_message_vec,80,MPI_CHARACTER,gyro_adj,ierr)
 
   !-----------------------------------------------------------
   ! Turbulent fluxes
@@ -175,6 +205,11 @@ subroutine tgyro_flux
 
      if (gyrotest_flag == 0) call tglf_run
 
+     call MPI_ALLGATHER(tglf_error_status,1,MPI_INTEGER,&
+          tglf_error_status_vec,1,MPI_INTEGER,gyro_adj,ierr)
+     call MPI_ALLGATHER(tglf_error_message,80,MPI_CHARACTER,&
+          tglf_error_message_vec,80,MPI_CHARACTER,gyro_adj,ierr)
+
      pflux_e_tur(i_r) = tglf_elec_pflux_out
      eflux_e_tur(i_r) = tglf_elec_eflux_out
      mflux_e_tur(i_r) = -tglf_sign_It_in*tglf_elec_mflux_out
@@ -190,23 +225,18 @@ subroutine tgyro_flux
         eflux_i_tur(1:loc_n_ion,i_r) = tglf_ion_eflux_low_out(1:loc_n_ion)
      endif
 
-     call MPI_ALLGATHER(tglf_error_flag,1,MPI_INTEGER,&
-          error_vec,1,MPI_INTEGER,MPI_COMM_WORLD,ierr)
-
-     do i1=1,n_proc_global
-        if (error_vec(i1) == 1) then
-           error_flag = 1
-           error_msg = tglf_error_msg
-        endif
-     enddo
 
   case (3)
 
      ! Map TGYRO parameters to GYRO
      call tgyro_gyro_map
 
-     call gyro_run(gyrotest_flag, gyro_restart_method, &
-          transport_method, gyro_exit_status(i_r), gyro_exit_message(i_r))
+     call gyro_run(gyrotest_flag,gyro_restart_method,transport_method)
+
+     call MPI_ALLGATHER(gyro_error_status_out,1,MPI_INTEGER,&
+          gyro_error_status_vec,1,MPI_INTEGER,gyro_adj,ierr)
+     call MPI_ALLGATHER(gyro_error_message_out,80,MPI_CHARACTER,&
+          gyro_error_message_vec,80,MPI_CHARACTER,gyro_adj,ierr)
 
      if (tgyro_mode == 1) then
 
@@ -236,7 +266,7 @@ subroutine tgyro_flux
 
   case default
 
-     call tgyro_catch_error('ERROR: no matching flux method.')
+     call tgyro_catch_error('ERROR: (TGYRO) No matching flux method in tgyro_flux.')
 
   end select
 
@@ -276,8 +306,11 @@ subroutine tgyro_flux
   end select
   !----------------------------------------------------------
 
-  if (error_flag == 1) then
-     call tgyro_catch_error(trim(error_msg))
+  if (i_proc_global == 0) then
+     do i=1,n_inst
+        print *,i,neo_error_message_vec(i)
+        print *,i,gyro_error_message_vec(i)
+     enddo
   endif
 
 end subroutine tgyro_flux

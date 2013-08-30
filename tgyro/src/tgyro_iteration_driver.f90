@@ -45,8 +45,6 @@ subroutine tgyro_iteration_driver
   error_msg = 'INFO: clean exit from TGYRO'
   !
   b_flag(:) = ' ' 
-  gyro_exit_status(:)  = 0
-  gyro_exit_message(:) = 'N/A'
   !---------------------------------------
 
   ! Mapping function from radius/field to p

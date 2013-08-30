@@ -152,8 +152,7 @@ subroutine tgyro_stab_driver
 
         ! NOTE: gyro_fieldeigen_wi_in taken from input.gyro (should be about 0.1)
 
-        call gyro_run(gyrotest_flag, gyro_restart_method, &
-             transport_method, gyro_exit_status(i_r), gyro_exit_message(i_r))
+        call gyro_run(gyrotest_flag,gyro_restart_method,transport_method)
 
         ! wr and wi are now the COMPUTED eigenvalues
 

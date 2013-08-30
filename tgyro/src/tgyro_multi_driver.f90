@@ -9,21 +9,15 @@ subroutine tgyro_multi_driver
 
   use mpi
   use tgyro_globals
+  use gyro_interface
 
   implicit none
 
   integer :: i
-  character(len=80), dimension(n_inst) :: ccollect
 
-
-  allocate(gyro_exit_status(n_inst))
-  allocate(gyro_exit_message(n_inst))
-
-  !---------------------------------------
-  ! Error monitoring variables
-  !
-  gyro_exit_message(:) = 'INFO: GYRO did not complete'
-  !---------------------------------------
+  ! GYRO ERROR STATUS:
+  integer, dimension(n_inst) :: gyro_error_status_vec
+  character (len=80), dimension(n_inst) :: gyro_error_message_vec
 
   gyro_restart_method = 1
 
@@ -31,34 +25,21 @@ subroutine tgyro_multi_driver
   transport_method = 1
 
   ! Initialize GYRO
-  call gyro_init(paths(color+1), &
-       gyro_comm)
+  call gyro_init(paths(color+1),gyro_comm)
 
   ! Run GYRO
-  call gyro_run(gyrotest_flag, &
-       gyro_restart_method, &
-       transport_method, &
-       gyro_exit_status(color+1), &
-       gyro_exit_message(color+1))
+  call gyro_run(gyrotest_flag,gyro_restart_method,transport_method)
 
-  ! Synchronize exit message
-
-  call MPI_ALLGATHER(gyro_exit_message(color+1),&
-       80,&
-       MPI_CHARACTER,&
-       ccollect,&
-       80,&
-       MPI_CHARACTER,&
-       gyro_adj,&
-       ierr)
-
-  gyro_exit_message(:) = ccollect(:)
+  call MPI_ALLGATHER(gyro_error_status_out,1,MPI_INTEGER,&
+       gyro_error_status_vec,1,MPI_INTEGER,gyro_adj,ierr)
+  call MPI_ALLGATHER(gyro_error_message_out,80,MPI_CHARACTER,&
+       gyro_error_message_vec,80,MPI_CHARACTER,gyro_adj,ierr)
 
   if (i_proc_global == 0) then
 
      open(unit=1,file=trim(runfile),position='append')
      do i=1,n_inst
-        write(1,*) trim(paths(i)),": ",trim(gyro_exit_message(i))
+        write(1,*) trim(paths(i)),": ",trim(gyro_error_message_vec(i))
      enddo
      close(1)
 

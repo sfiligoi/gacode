@@ -218,8 +218,6 @@ module tgyro_globals
   !
   integer, dimension(:,:), allocatable :: pmap
   character(len=1), dimension(:), allocatable :: b_flag
-  integer, dimension(:), allocatable :: gyro_exit_status
-  character(len=80), dimension(:), allocatable :: gyro_exit_message
   !
   ! Geometry
   !
