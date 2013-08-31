@@ -18,6 +18,7 @@ module neo_equilibrium
   real, dimension(:), allocatable :: Bmag       ! B/Bunit
   real, dimension(:), allocatable :: gradpar_Bmag ! bhat dot grad/aBmag/Bunit
   real, dimension(:), allocatable :: bigR       ! R/a (global)
+  real, dimension(:), allocatable :: bigR_rderiv       ! R/a (global)
   real, dimension(:), allocatable :: bigR_tderiv ! theta deriv of bigR
   real                            :: bigR_th0    ! R/a at theta=0
   real                            :: bigR_th0_rderiv ! dR/dr at theta=0
@@ -59,6 +60,7 @@ contains
        allocate(gradr_tderiv(n_theta))
        allocate(w_theta(n_theta))
        allocate(bigR(n_theta))
+       allocate(bigR_rderiv(n_theta))
        allocate(bigR_tderiv(n_theta))
        allocate(Btor(n_theta))
        allocate(Bpol(n_theta))
@@ -93,6 +95,7 @@ contains
        deallocate(gradr)
        deallocate(gradr_tderiv)
        deallocate(w_theta)
+       deallocate(bigR_rderiv)
        deallocate(bigR_tderiv)
        deallocate(bigR)
        deallocate(Btor)
@@ -150,6 +153,7 @@ contains
           call GEO_interp(theta(it))
           k_par(it) = 1.0 / (q(ir) * rmaj(ir) * GEO_g_theta)
           bigR(it) = GEO_bigr
+          bigR_rderiv(it) = GEO_bigr_r
           Bmag(it)  = GEO_b
           Btor(it)  = GEO_bt
           Bpol(it)  = GEO_bp
@@ -189,6 +193,7 @@ contains
        do it=1,n_theta
           k_par(it)       = 1.0 / (q(ir) * rmaj(ir)) * sign_bunit
           bigR(it)        = rmaj(ir) * (1.0 + r(ir)/rmaj(ir) * cos(theta(it)))
+          bigR_rderiv(it) = cos(theta(it))
           gradr(it)       = 1.0
           theta_nc(it)    = theta(it)
           bigR_th0        = rmaj(ir) + r(ir)

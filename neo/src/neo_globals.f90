@@ -47,6 +47,8 @@ module neo_globals
   !
   real :: te_ade_in
   real :: ne_ade_in
+  real :: dlntdre_ade_in
+  real :: dlnndre_ade_in
   !
   integer, dimension(6) :: z_in 
   real, dimension(6) :: mass_in
@@ -135,7 +137,7 @@ module neo_globals
   integer :: geo_ny
   real, dimension(:,:,:), allocatable :: geo_yin
   !
-  real, dimension(:), allocatable :: te_ade, ne_ade
+  real, dimension(:), allocatable :: te_ade, ne_ade, dlnndre_ade, dlntdre_ade
   ! ele temp and dens -- used only if ade (for Poisson calculation)
   !
   ! (species-dependent)

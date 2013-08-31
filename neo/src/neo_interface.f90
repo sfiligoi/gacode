@@ -35,6 +35,8 @@ module neo_interface
   integer :: neo_btccw_in = -1
   real    :: neo_te_ade_in = 1.0
   real    :: neo_ne_ade_in = 1.0
+  real    :: neo_dlntdre_ade_in = 1.0
+  real    :: neo_dlnndre_ade_in = 1.0
   integer :: neo_rotation_model_in = 1
   real    :: neo_omega_rot_in = 0.0
   real    :: neo_omega_rot_deriv_in = 0.0
@@ -176,6 +178,8 @@ contains
     neo_btccw_in  = btccw_in
     neo_te_ade_in = te_ade_in
     neo_ne_ade_in = ne_ade_in
+    neo_dlntdre_ade_in = dlntdre_ade_in
+    neo_dlnndre_ade_in = dlnndre_ade_in
     neo_rotation_model_in = rotation_model
     neo_omega_rot_in = omega_rot_in
     neo_omega_rot_deriv_in = omega_rot_deriv_in
@@ -285,6 +289,8 @@ contains
     btccw_in  = neo_btccw_in
     te_ade_in = neo_te_ade_in
     ne_ade_in = neo_ne_ade_in
+    dlntdre_ade_in = neo_dlntdre_ade_in
+    dlnndre_ade_in = neo_dlnndre_ade_in
     rotation_model = neo_rotation_model_in
     omega_rot_in = neo_omega_rot_in
     omega_rot_deriv_in = neo_omega_rot_deriv_in
@@ -409,6 +415,8 @@ contains
     write(1,20) 'BTCCW=',neo_btccw_in
     write(1,30) 'TE_ADE=',neo_te_ade_in
     write(1,30) 'NE_ADE=',neo_ne_ade_in
+    write(1,30) 'DLNTDRE_ADE=',neo_dlntdre_ade_in
+    write(1,30) 'DLNNDRE_ADE=',neo_dlnndre_ade_in
     write(1,20) 'ROTATION_MODEL=',neo_rotation_model_in
     write(1,30) 'OMEGA_ROT=',neo_omega_rot_in
     write(1,30) 'OMEGA_ROT_DERIV=',neo_omega_rot_deriv_in
