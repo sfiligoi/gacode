@@ -16,6 +16,7 @@ OBJECTS +=	tgyro_globals.o \
 		tgyro_catch_error.o \
 		tgyro_comm_setup.o \
 		tgyro_comm_sync.o \
+		tgyro_expro_map.o \
 		tgyro_flux.o \
 		tgyro_flux_vector.o \
 		tgyro_flux_vector_dense.o \

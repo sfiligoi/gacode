@@ -12,7 +12,6 @@ subroutine tgyro_write_data(i_print)
 
   use mpi
   use tgyro_globals
-  use EXPRO_interface
 
   implicit none
 
@@ -20,14 +19,6 @@ subroutine tgyro_write_data(i_print)
   integer :: ip
   integer :: i_print
   integer :: i_ion
-
-  !--------------------------------------------------------------------------------
-  ! Rewrite input.profiles (to input.profiles.new) if flag set
- ! if (tgyro_write_profiles_flag == 1) then
- !    EXPRO_ctrl_extension = '.new'
- !    call EXPRO_write_original('Profiles modified by TGYRO')
- ! endif
-  !--------------------------------------------------------------------------------
 
   if (i_proc_global > 0) return
 

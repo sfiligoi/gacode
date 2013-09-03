@@ -129,7 +129,7 @@ subroutine tgyro_flux
 
   end select
 
-  !call tgyro_trap_component_error(neo_error_status_out,neo_error_message_out)
+  call tgyro_trap_component_error(neo_error_status_out,neo_error_message_out)
 
   !-----------------------------------------------------------
   ! Turbulent fluxes
@@ -186,7 +186,7 @@ subroutine tgyro_flux
 
      if (gyrotest_flag == 0) call tglf_run
 
-     !call tgyro_trap_component_error(tglf_error_status,tglf_error_message)
+     call tgyro_trap_component_error(tglf_error_status,tglf_error_message)
 
      pflux_e_tur(i_r) = tglf_elec_pflux_out
      eflux_e_tur(i_r) = tglf_elec_eflux_out
@@ -211,7 +211,7 @@ subroutine tgyro_flux
 
      call gyro_run(gyrotest_flag,gyro_restart_method,transport_method)
 
-     !call tgyro_trap_component_error(gyro_error_status_out,gyro_error_message_out)
+     call tgyro_trap_component_error(gyro_error_status_out,gyro_error_message_out)
 
      if (tgyro_mode == 1) then
 
