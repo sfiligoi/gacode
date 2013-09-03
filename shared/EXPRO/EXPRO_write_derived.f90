@@ -12,7 +12,9 @@ subroutine EXPRO_write_derived
 
   integer, parameter :: io=1
 
-  open(unit=io,file=trim(path)//'input.profiles.extra',status='replace')
+  open(unit=io,&
+       file=trim(path)//'input.profiles.extra'//trim(EXPRO_ctrl_extension),&
+       status='replace')
 
   write(io,'(a)') '# input.profiles.extra'
   write(io,'(a)') '#'

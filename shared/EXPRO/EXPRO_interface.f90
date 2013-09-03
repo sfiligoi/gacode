@@ -220,6 +220,7 @@ module EXPRO_interface
   integer :: EXPRO_ctrl_numeq_flag=-1
   integer :: EXPRO_ctrl_rotation_method = -1
   integer :: EXPRO_ctrl_silent_flag = 0
+  character (len=20) :: EXPRO_ctrl_extension = ''
 
   ! Standard variable tags
 

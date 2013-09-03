@@ -293,6 +293,7 @@ module tgyro_globals
   integer :: tgyro_dt_method
   integer :: tgyro_gyro_restart_flag
   integer :: tgyro_fix_concentration_flag
+  integer :: tgyro_write_profiles_flag
   !
   ! Iteration variables (global)
   !
