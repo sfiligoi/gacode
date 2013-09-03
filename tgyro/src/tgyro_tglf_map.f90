@@ -290,4 +290,6 @@ subroutine tgyro_tglf_map
      tglf_dump_flag_in = .true.
   endif
 
+  tglf_quiet_flag_in = .true.
+
 end subroutine tgyro_tglf_map

@@ -8,7 +8,7 @@ subroutine tgyro_neo_map
   real :: gamma_p0,u000
 
   if (loc_n_ion > 5) then
-     call tgyro_catch_error('ERROR: Too many ions for NEO') 
+     call tgyro_catch_error('ERROR: (TGYRO) Too many ions for NEO') 
   endif
 
   mu1 = sqrt(mi(1)/(me*loc_me_multiplier))

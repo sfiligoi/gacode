@@ -75,11 +75,11 @@ class SimpleInput:
                 self.data_dict[x] = self.user_dict[x]
             elif self.dep_dict.has_key(x) == 1:
                 self.error=1
-                self.error_msg=self.error_msg+'ERROR: Deprecated parameter '+x+'\n'
+                self.error_msg=self.error_msg+'ERROR: (gacodeinput) Deprecated parameter '+x+'\n'
                 self.error_msg=self.error_msg+'       '+self.dep_dict[x]+'\n'
             else:
                 self.error=1
-                self.error_msg=self.error_msg+"ERROR: Bogus parameter "+x+'\n'
+                self.error_msg=self.error_msg+"ERROR: (gacodeinput) Bogus parameter "+x+'\n'
 
         if self.error == 0:
             f=open(inputfile+self.extension,'w')
@@ -306,7 +306,7 @@ class ManagerInput:
         file_outfile.write(str(n_path)+'\n')
 
         # Logging
-        print 'INFO: Number of code instances: '+str(n_path)
+        print 'INFO: (gacodeinput) Number of code instances: '+str(n_path)
 
         # Add special entries (DIR) to output file, and overlay
         # extra parameters onto GYRO or TGLF input files.
@@ -322,7 +322,7 @@ class ManagerInput:
             file_outfile.write(basedir+' '+self.slaveproc[p]+'\n') 
 
             if basedir[0:3] == 'IFS':
-                print 'INFO: Detected '+basedir+'; CPU_max=1'
+                print 'INFO: (gacodeinput) Detected '+basedir+'; CPU_max=1'
 
             elif basedir[0:4] == 'TGLF':
                 basefile = basedir+'/input.tglf' 
@@ -344,7 +344,7 @@ class ManagerInput:
                 os.system('mv '+tempfile+' '+basefile)
 
                 os.system('tglf -i '+basedir+' -p $PWD')
-                print 'INFO: Processed input.* in '+basedir+'; CPU_max=1'
+                print 'INFO: (gacodeinput) Processed input.* in '+basedir+'; CPU_max=1'
                 
             else:
                 basefile = basedir+'/input.gyro' 
@@ -367,9 +367,9 @@ class ManagerInput:
 
                 os.system('gyro -i '+basedir+' -n 1 -nomp 1 -p $PWD '+gyro_start)
                 cpu = self.getcpu(basedir)
-                print 'INFO: Processed input.* in '+basedir+'; CPU_max='+str(cpu)
+                print 'INFO: (gacodeinput) Processed input.* in '+basedir+'; CPU_max='+str(cpu)
 
             os.system('rm '+self.overlayfile[p])
 
-        print 'INFO: Required MPI tasks in TGYRO: '+str(self.sum_proc)
+        print 'INFO: (gacodeinput) Required MPI tasks in TGYRO: '+str(self.sum_proc)
         

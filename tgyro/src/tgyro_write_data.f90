@@ -499,6 +499,15 @@ subroutine tgyro_write_data(i_print)
   close(1)
   !--------------------------------------------------------------------------------
 
+  ! Write progress to screen
+  if (i_tran < 10) then
+     print '(a,i1)', 'INFO: (TGYRO) Finished iteration ',i_tran
+  else if (i_tran < 100) then
+     print '(a,i2)', 'INFO: (TGYRO) Finished iteration ',i_tran
+  else
+     print '(a,i3)', 'INFO: (TGYRO) Finished iteration ',i_tran
+  endif
+
   ! Data
 10 format(t1,11(1pe13.6,2x))
   ! Text headers

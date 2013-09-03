@@ -306,7 +306,7 @@ else
 
    if [ $ntr -lt 3 ]
    then
-      echo "ERROR: input.profiles missing."
+      echo "ERROR: (tgyro script) input.profiles missing."
       exit 1
    fi
 fi
@@ -320,14 +320,14 @@ fi
 gacode_printversion TGYRO 
 
 cat $LOG_FILE
-echo "INFO: See $RUNBASE for TGYRO run summary."
+echo "INFO: (tgyro script) See $RUNBASE for TGYRO run summary."
 
 if [ $EXEC_FLAG -eq 1 ]
 then
    if [ $NPROC -ne $EPROC ]
    then
        #cat $LOG_FILE
-       echo "ERROR: processor count mismatch."
+       echo "ERROR: (tgyro script) processor count mismatch."
        exit 1
    else
       #==========================================================
@@ -352,7 +352,7 @@ then
    if [ $NPROC -ne $TPROC ]
    then
       cat $LOG_FILE
-      echo "ERROR: processor count mismatch."
+      echo "ERROR: (tgyro script) processor count mismatch."
       exit 1
    else
       echo "1" > "$SIMDIR/gyrotest_flag"
