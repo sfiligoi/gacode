@@ -235,7 +235,7 @@ module neo_rotation
                     - bigR_th0*bigR_th0_rderiv)
             enddo
          enddo
-         
+
          !!!!!!!!!!!!!!!!!!!!!!!!!
          ! checks for pure plasma
          !!!!!!!!!!!!!!!!!!!!!!!!!
@@ -276,8 +276,8 @@ module neo_rotation
          !   endif
          !enddo
 
-      endif
-      
+      endif   
+
     end subroutine ROT_solve_phi
 
     subroutine ROT_write(ir)
@@ -291,11 +291,14 @@ module neo_rotation
          write (io_rot,'(e16.8)',advance='no') r(ir)
          write (io_rot,'(e16.8)',advance='no') phi_rot_avg
          do is=1, n_species
-            write (io_rot,'(e16.8)',advance='no') rotavg_e0(is)
-            write (io_rot,'(e16.8)',advance='no') rotavg_e1(is)
-            write (io_rot,'(e16.8)',advance='no') rotavg_e2(is)
-            write (io_rot,'(e16.8)',advance='no') rotavg_e3(is)
-            write (io_rot,'(e16.8)',advance='no') rotavg_e4(is)
+            write (io_rot,'(e16.8)',advance='no') 1.0/rotavg_e0(is)
+            write (io_rot,'(e16.8)',advance='no') ( rotavg_e2(is) &
+                 + rotavg_e3(is) * 0.5 * omega_rot(ir) / vth(is,ir)**2 &
+                 * omega_rot_deriv(ir) &
+                 + rotavg_e4(is) * 0.5 * omega_rot(ir)**2 / vth(is,ir)**2 &
+                 + rotavg_e1(is) * (-dlntdr(is,ir)) &
+                 - rotavg_e3(is) * 0.5 * omega_rot(ir)**2 / vth(is,ir)**2 &
+                 * (-dlntdr(is,ir)) ) / rotavg_e0(is)
          enddo
          do it=1, n_theta
             write (io_rot,'(e16.8)',advance='no') phi_rot(it)

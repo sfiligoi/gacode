@@ -23,7 +23,9 @@ subroutine tglf_init(path_in,mpi_comm_in)
   inquire(file=trim(path_in)//'input.tglf.gen',exist=inputdat_flag)
 
   if (inputdat_flag .eqv. .true.) then
-     print '(a,a,a)', '[tglf_init reading ',trim(path_in),'input.tglf.gen]'
+     if (tglf_quiet_flag_in .eqv. .false.) then
+        print '(a,a,a)', 'INFO: (TGLF) tglf_init reading ',trim(path_in),'input.tglf.gen'
+     endif
      call tglf_read_input
   endif
 
