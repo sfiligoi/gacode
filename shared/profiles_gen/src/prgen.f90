@@ -37,7 +37,6 @@ program prgen
   read(1,*) efit_method
   read(1,*) nogatoq_flag
   read(1,*) verbose_flag
-  read(1,*) pfile_z2
   read(1,*) gmerge_flag
   read(1,*) ipccw
   read(1,*) btccw
@@ -87,7 +86,7 @@ program prgen
 
      call prgen_read_plasmastate
 
-  else if (index(raw_data_file,'.peq') /= 0 .or. index(raw_data_file,'.peq2') /= 0) then
+  else if (index(raw_data_file,'.peq') /= 0) then
 
      ! peqdsk format
      print '(a)','INFO: (prgen) Assuming peqdsk format.'
@@ -97,12 +96,6 @@ program prgen
      if (efit_method == 0) then
         print '(a)','ERROR: (prgen) geqdsk must be provided for peqdsk format'
         stop
-     endif
-     
-     if (index(raw_data_file,'.peq2') /= 0) then
-        peqdsk_ftype = 2
-     else
-        peqdsk_ftype = 1
      endif
 
      call prgen_read_peqdsk

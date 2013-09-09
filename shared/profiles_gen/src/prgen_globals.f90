@@ -18,7 +18,6 @@ module prgen_globals
   integer :: efit_method
   integer :: nogatoq_flag
   integer :: verbose_flag
-  real :: pfile_z2
   integer :: gmerge_flag
   character (len=70) :: efit_header
   integer, dimension(5) :: reorder_vec
@@ -200,7 +199,6 @@ module prgen_globals
   !---------------------------------------------------------
   ! PEQDSK variables
   !
-  integer :: peqdsk_ftype
   integer :: peqdsk_nj
   real :: peqdsk_bref
   real :: peqdsk_arho
@@ -210,6 +208,7 @@ module prgen_globals
   real, dimension(:), allocatable :: peqdsk_ni
   real, dimension(:), allocatable :: peqdsk_ti
   real, dimension(:), allocatable :: peqdsk_omegat
+  real, dimension(:), allocatable :: peqdsk_omgeb
   real, dimension(:), allocatable :: peqdsk_nb
   real, dimension(:), allocatable :: peqdsk_pb
   !---------------------------------------------------------
