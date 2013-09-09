@@ -28,9 +28,9 @@ subroutine gyro_initialize_timestep
   !
   if (time_max < 0.0) then
 
-     ! Initialize status to unconverged.
+     ! Initialize status 'good' but unconverged.
 
-     call gyro_set_exit_status('unconverged',1)
+     call gyro_set_exit_status('unconverged',0)
 
      if (abs(time_max) > 1.0) then
 

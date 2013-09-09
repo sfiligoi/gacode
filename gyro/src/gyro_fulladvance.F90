@@ -176,13 +176,6 @@ subroutine gyro_fulladvance
   call gyro_timer_out('Diagnos.-datastep')
   !-------------------------------------------------------------------
 
-  !----------------------------------------------------
-  ! Convergence check for single-n simulation:
-  ! freq_err calculated in gyro_write_freq
-  !  
-  if (freq_err < freq_tol) call gyro_set_exit_status('converged',0)
-  !----------------------------------------------------
-
   if (debug_flag == 1 .and. i_proc == 0) then
      print '(t2,2(a,i5,3x))','-> step =',step,'data_step =',data_step
      print *,'**[gyro_fulladvance done]'

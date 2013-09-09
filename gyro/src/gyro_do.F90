@@ -42,12 +42,12 @@ subroutine gyro_do
      endif
   endif
 
-!check if hdf5 methods are used but no hdf5 linked
+  !check if hdf5 methods are used but no hdf5 linked
 #ifndef HAVE_HDF5
   if(io_method > 1) then
-    gyro_exit_status = 1
-    gyro_exit_message = 'This GYRO was not built with HDF5.  Please use io_method =1'
-    return
+     gyro_exit_status = 1
+     gyro_exit_message = 'This GYRO was not built with HDF5.  Please use io_method =1'
+     return
   endif
 #endif
 
@@ -299,21 +299,21 @@ subroutine gyro_do
   !---------------------------------------------------------------
   ! I/O control for time-independent initial data
   !
-!  if (io_method < 3) then
-     call gyro_write_initdata(&
-          trim(path)//'out.gyro.profile',&
-          trim(path)//'out.gyro.units',&
-          trim(path)//'out.gyro.geometry_arrays',1, &
-          trim(path)//'out.gyro.initdata.h5')
+  !  if (io_method < 3) then
+  call gyro_write_initdata(&
+       trim(path)//'out.gyro.profile',&
+       trim(path)//'out.gyro.units',&
+       trim(path)//'out.gyro.geometry_arrays',1, &
+       trim(path)//'out.gyro.initdata.h5')
 
-! write hdf5 grid file 
+  ! write hdf5 grid file 
 #ifdef HAVE_HDF5
-    if (i_proc ==0 .and. alltime_index ==0 .and.  io_method > 1) then 
-        call hdf5_write_coords 
-    endif
+  if (i_proc ==0 .and. alltime_index ==0 .and.  io_method > 1) then 
+     call hdf5_write_coords 
+  endif
 #endif
 
- !
+  !
   ! Close geometry (GEO) library
   call GEO_alloc(0)
   !---------------------------------------------------------------
@@ -340,7 +340,7 @@ subroutine gyro_do
      if (io_method < 3 .and. io_method > 0) call gyro_write_timedata
 #ifdef HAVE_HDF5
      if (io_method > 1) then
-         if (time_skip_wedge > 0) call gyro_write_timedata_wedge_hdf5
+        if (time_skip_wedge > 0) call gyro_write_timedata_wedge_hdf5
      endif
 #endif
   endif
@@ -382,17 +382,23 @@ subroutine gyro_do
         call gyro_fulladvance
         call gyro_timer_out('Full-step')
 
-        !-------------------------------------
+        !----------------------------------------------------
         ! Check for premature exit conditions
         ! 
         call catch_blowup
         call catch_halt_signal
         if (gyro_exit_status > 0) return
-        !-------------------------------------
+        !
+        ! Convergence check for single-n simulation:
+        ! freq_err calculated in gyro_write_freq
+        !  
+        if (freq_err < freq_tol) then
+           call gyro_set_exit_status('converged',0)
+           return
+        endif
+        !----------------------------------------------------
 
      enddo
-     gyro_exit_status = 0
-
      ! end time-stepping   
      !-----------------------------------------------
 

@@ -70,6 +70,7 @@ subroutine gyro_read_input_extra
         close(1)
      endif
   endif
+  call MPI_BCAST(lfe,1,MPI_LOGICAL,0,GYRO_COMM_WORLD,i_err)
   if (lfe .eqv. .true.) then
      call MPI_BCAST(n_fourier_geo,1,MPI_INTEGER,0,GYRO_COMM_WORLD,i_err)
      call MPI_BCAST(a_fourier_geo,size(a_fourier_geo),MPI_DOUBLE_PRECISION,0,GYRO_COMM_WORLD,i_err)
