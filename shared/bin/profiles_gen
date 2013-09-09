@@ -164,10 +164,6 @@ then
    echo 
    echo "             -nfourier <gfile>"
    echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo."
-   echo 
-   echo "             -pZ2 <Z2>"
-   echo "             Creation impurity ion with given charge to make"
-   echo "             input.profile quasineutral"
    echo
    echo "ASTRA Options"
    echo
@@ -373,9 +369,6 @@ DUMP_VAR=null
 X=rho
 DUMP_DENS_METHOD=1
 
-# PFILE variables
-PZ2=0
-
 # CREATE MODE variables
 CREATE_FLAG=0
 CREATEHELP_FLAG=0
@@ -464,9 +457,7 @@ while [ $# -gt 0 ] ; do
 
   -dump) shift ; DUMP_FLAG=1 ; DUMP_VAR=$1 ;;
   -x) shift ; X=$1 ;;
-  -dens) shift ; DUMP_DENS_METHOD=$1 ;;
-
-  -pZ2) shift ; PZ2=$1 ;;  
+  -dens) shift ; DUMP_DENS_METHOD=$1 ;; 
 
   -gmerge) GMERGE_FLAG=1 ;;  
 
@@ -568,6 +559,15 @@ else
    echo "INFO: (profiles_gen) $FILE found"
 
 fi
+
+#=============================================================
+# Parsing for p-file
+FILEEXT=${FILE##*.}
+if [ $FILEEXT = "peq" ]; then
+    rm -f pfile.*
+    python $GACODE_ROOT/shared/bin/gacode_pfile_tool.py $FILE
+fi
+
 #=============================================================
 
 #=============================================================
@@ -773,9 +773,6 @@ echo $NOGQ_FLAG >> $CONFIG
 
 # Verbosity
 echo $VERBOSE_FLAG >> $CONFIG
-
-# PFILE Z2 value
-echo $PZ2 >> $CONFIG
 
 # GFILE MERGE
 echo $GMERGE_FLAG >> $CONFIG
@@ -997,7 +994,7 @@ if [ $VERBOSE_FLAG -eq 0 ]
 then
    rm -f $CONFIG fluxfit.* ingta o1gta grid.dat success
    rm -f *.ave out.com out.dim out.ufile.log 
-   rm -f gfile ffile out.expro.run
+   rm -f gfile ffile out.expro.run pfile.*
 else
    if [ -f "ingta" ] ; then 
       mv ingta input.gato.ingta
