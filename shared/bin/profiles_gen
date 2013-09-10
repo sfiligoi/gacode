@@ -54,16 +54,16 @@ then
    echo "Usage:       profiles_gen [options]"
    echo 
    echo "Recognized types of input data files:"
-   echo 
-   echo "              *              : ITERDB text file (default)"
-   echo "              *.nc           : ITERDB NetCDF file"
-   echo "              *.cdf          : Plasma State NetCDF file"
-   echo "              *.astra        : ASTRA text file"
-   echo "              *.corsica      : CORSICA text file"
-   echo "              *.peq          : PEQDSK/ELITE text file"
-   echo "              UFILE          : UFILE mode"
-   echo "              null           : gfile only"
-   echo "              input.profiles : vgen, locpargen or gfilemerge mode"
+   echo  
+   echo "              *                : ITERDB text file (default)"
+   echo "              *.nc             : ITERDB NetCDF file"
+   echo "              *.cdf            : Plasma State NetCDF file"
+   echo "              *.astra          : ASTRA text file"
+   echo "              *.corsica        : CORSICA text file"
+   echo "              *.peq (or p###)  : PEQDSK/ELITE text file"
+   echo "              UFILE            : UFILE mode"
+   echo "              null             : gfile only"
+   echo "              input.profiles   : vgen, locpargen or gfilemerge mode"
    echo 
    echo "             -p <path>"
    echo "             Set optional path to simulation directory."
@@ -561,13 +561,21 @@ else
 fi
 
 #=============================================================
-# Parsing for p-file
-FILEEXT=${FILE##*.}
-if [ $FILEEXT = "peq" ]; then
-    rm -f pfile.*
-    python $GACODE_ROOT/shared/bin/gacode_pfile_tool.py $FILE
+# Trap a p-file and split into components 
+#
+if [[ $FILE == p[0-9][0-9][0-9]* ]]
+then
+   # First, ensure gfile exists too.
+   if [ $G_FLAG -eq 0 ] 
+   then
+     echo "ERROR: (profiles_gen) You must supplement the pfile with a gfile (use -g)."
+     exit 1
+   fi
+   # Now, strip pfile into parts.  Rename $FILE so pfile detected in prgen.
+   rm -f pfile.*
+   python $GACODE_ROOT/shared/bin/gacode_pfile_tool.py $FILE
+   FILE=dummy.peq
 fi
-
 #=============================================================
 
 #=============================================================
@@ -988,7 +996,7 @@ fi
 #  Remove configuration files, output files, etc.
 rm -f egta eqgta nova.*
 #  Remove stale files
-rm -f out.gato.* input.gato.* out.omfit
+rm -f out.gato.* input.gato.* out.omfit dummy.peq
 
 if [ $VERBOSE_FLAG -eq 0 ]
 then
