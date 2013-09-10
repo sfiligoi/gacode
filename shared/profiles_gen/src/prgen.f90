@@ -93,11 +93,6 @@ program prgen
 
      format_type = 3
 
-     if (efit_method == 0) then
-        print '(a)','ERROR: (prgen) geqdsk must be provided for peqdsk format'
-        stop
-     endif
-
      call prgen_read_peqdsk
 
   else if (index(raw_data_file,'.corsica') /= 0) then
@@ -107,7 +102,7 @@ program prgen
 
      format_type = 5
 
-     if (efit_method == 0) then
+     if (efit_method == 1) then
         print '(a)','WARNING: (prgen) geqdsk must be provided for corsica format'
      endif
 
