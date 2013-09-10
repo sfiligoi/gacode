@@ -446,20 +446,20 @@ subroutine tgyro_write_input
      end select
      !--------------------------------------------------------
      !--------------------------------------------------------
-     select case (loc_circ_flag)
+     select case (loc_num_equil_flag)
 
      case (0)
 
-        write(1,10) 'LOC_CIRC_FLAG','Use standard Miller expressions'
+        write(1,10) 'LOC_NUM_EQUIL_FLAG','Using Miller model equilibrium in TGLF/GYRO/NEO.'
 
      case (1)
 
-        write(1,10) 'LOC_CIRC_FLAG','Use Miller circle'
+        write(1,10) 'LOC_NUM_EQUIL_FLAG','Using general Fourier equilibrium in TGLF/GYRO/NEO.'
 
      case default
 
         error_flag = 1
-        error_msg = 'Error: LOC_CIRC_FLAG'
+        error_msg = 'Error: LOC_NUM_EQUIL_FLAG'
 
      end select
      !--------------------------------------------------------

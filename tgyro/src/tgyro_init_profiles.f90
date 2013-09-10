@@ -316,19 +316,6 @@ subroutine tgyro_init_profiles
   !----------------------------------------------------------
 
   !----------------------------------------------------------
-  ! Convert to circle if parameter set
-  !
-  if (loc_circ_flag == 1) then
-     delta(:) = 0.0
-     kappa(:) = 1.0
-     shift(:) = 0.0
-     s_delta(:) = 0.0
-     s_kappa(:) = 0.0
-     beta_unit(:) = 0.0
-  endif
-  !----------------------------------------------------------
-
-  !----------------------------------------------------------
   ! Primitive quantity to evolve for rotation/Er evolution is 
   !
   ! f_rot [1/cm] = w0p/w0_norm

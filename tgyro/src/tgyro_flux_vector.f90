@@ -48,7 +48,7 @@ subroutine tgyro_flux_vector(x_vec,f_vec,dx,index)
         else
            dlnnedr(i) = x_vec(p)
         endif
-        ! Set dlnnidr(1,i) according to quasineutrality
+        ! Set dlnnidr for all ions at given radius according to quasineutrality
         call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(:),loc_n_ion,dlnridr(:,i))
      endif
 

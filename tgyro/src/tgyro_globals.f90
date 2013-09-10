@@ -251,7 +251,6 @@ module tgyro_globals
   integer, dimension(5) :: therm_flag
   real :: loc_betae_scale
   integer :: loc_chang_hinton
-  integer :: loc_circ_flag
   real :: loc_me_multiplier
   integer :: loc_sawtooth_model
   integer :: loc_bc_offset

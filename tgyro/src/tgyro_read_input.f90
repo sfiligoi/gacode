@@ -73,7 +73,6 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(therm_flag(5)) 
   call tgyro_readbc_real(loc_betae_scale) 
   call tgyro_readbc_int(loc_chang_hinton) 
-  call tgyro_readbc_int(loc_circ_flag) 
   call tgyro_readbc_real(loc_me_multiplier) 
   call tgyro_readbc_int(loc_sawtooth_model) 
   call tgyro_readbc_int(loc_bc_offset)
