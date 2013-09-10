@@ -68,7 +68,6 @@ program tgyro_main
         open(unit=1,file=trim(runfile),position='append')
         write(1,*) error_msg
         close(1)
-        !call system('[ -f tgyro_osx_exec ] && chmod +x tgyro_osg_exec && tgyro_osg_exec')  
      endif
 
   case (3)

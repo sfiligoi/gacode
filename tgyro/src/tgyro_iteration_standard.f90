@@ -163,7 +163,7 @@ subroutine tgyro_iteration_standard
                  jf(p+pp,p+ip) = (f_vec(p+pp)-f_vec0(p+pp))/dx
               enddo
            enddo
-
+           call tgyro_write_jacobian
         endif
 
         if (loc_te_feedback_flag == 1) then
@@ -175,6 +175,7 @@ subroutine tgyro_iteration_standard
                  jf(p+pp,p+ip) = (f_vec(p+pp)-f_vec0(p+pp))/dx
               enddo
            enddo
+           call tgyro_write_jacobian
 
         endif
 
@@ -187,6 +188,7 @@ subroutine tgyro_iteration_standard
                  jf(p+pp,p+ip) = (f_vec(p+pp)-f_vec0(p+pp))/dx
               enddo
            enddo
+           call tgyro_write_jacobian
 
         endif
 
@@ -199,6 +201,7 @@ subroutine tgyro_iteration_standard
                  jf(p+pp,p+ip) = (f_vec(p+pp)-f_vec0(p+pp))/dx
               enddo
            enddo
+           call tgyro_write_jacobian
 
         endif
         !
