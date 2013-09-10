@@ -58,25 +58,21 @@ subroutine tgyro_iteration_driver
            p  = p+1
            ip = ip+1
            pmap(i,ip) = p
-           imap(p,ip) = i
         endif
         if (loc_te_feedback_flag == 1) then
            p  = p+1
            ip = ip+1
            pmap(i,ip) = p
-           imap(p,ip) = i
         endif
         if (loc_ne_feedback_flag == 1) then
            p  = p+1
            ip = ip+1
            pmap(i,ip) = p
-           imap(p,ip) = i
         endif
         if (loc_er_feedback_flag == 1) then
            p  = p+1
            ip = ip+1
            pmap(i,ip) = p
-           imap(p,ip) = i
         endif
      enddo
   endif

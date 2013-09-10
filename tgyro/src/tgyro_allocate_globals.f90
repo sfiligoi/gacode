@@ -139,6 +139,5 @@ subroutine tgyro_allocate_globals
   allocate(b_flag(p_max))
 
   allocate(pmap(2:n_r,n_evolve))
-  allocate(imap(p_max,n_evolve))
 
 end subroutine tgyro_allocate_globals
