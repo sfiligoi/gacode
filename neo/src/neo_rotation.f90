@@ -285,6 +285,7 @@ module neo_rotation
       implicit none
       integer, intent (in) :: ir
       integer :: is, it
+      real :: gamma_theory
 
       if(silent_flag == 0 .and. i_proc == 0 .and. rotation_model == 2) then
          open(io_rot,file=trim(path)//runfile,status='old',position='append')
@@ -292,8 +293,8 @@ module neo_rotation
          write (io_rot,'(e16.8)',advance='no') phi_rot_avg
          do is=1, n_species
             write (io_rot,'(e16.8)',advance='no') 1.0/rotavg_e0(is)
-            write (io_rot,'(e16.8)',advance='no') ( rotavg_e2(is) &
-                 + rotavg_e3(is) * 0.5 * omega_rot(ir) / vth(is,ir)**2 &
+            write (io_rot,'(e16.8)',advance='no') ( -rotavg_e2(is) &
+                 + rotavg_e3(is) * omega_rot(ir) / vth(is,ir)**2 &
                  * omega_rot_deriv(ir) &
                  + rotavg_e4(is) * 0.5 * omega_rot(ir)**2 / vth(is,ir)**2 &
                  + rotavg_e1(is) * (-dlntdr(is,ir)) &
@@ -307,7 +308,41 @@ module neo_rotation
          close(io_rot)
       endif
 
+      !call ROT_theory(ir,gamma_theory)
+      !open(io_rot,file='out.neo.rot_theory',status='replace')
+      !write (io_rot,'(e16.8)',advance='no') gamma_theory
+      !write(io_rot,*)
+      !close(io_rot)
+
     end subroutine ROT_write
+
+    subroutine ROT_theory(ir,gamma_theory)
+      use neo_globals
+      use neo_equilibrium
+      implicit none
+      integer, intent (in) :: ir
+      real, intent (inout) :: gamma_theory
+      integer :: is_ion, is_imp
+      real    :: geofac
+      integer :: it
+      
+      ! assume primary ion species is is=1
+      is_ion = 1
+      is_imp = 2
+
+      geofac = 0.0
+      do it=1,n_theta
+         geofac = geofac + w_theta(it)*dens_fac(is_imp,it)/bmag(it)**2 &
+              * (1.0-bmag(it)**2/Bmag2_avg*(1.0-ftrap))
+         print *, dens_fac(is_imp,it)/bmag(it)**2
+      enddo
+
+      gamma_theory = dens(is_ion,ir)*temp(is_ion,ir) * rho(ir)*rho(ir) &
+           * (4.0/3.0/sqrt(pi)) * (dlnndr(is_ion,ir) - 0.5*dlntdr(is_ion,ir)) &
+           * nu(is_ion,ir)*dens(is_imp,ir)*z(is_imp)**2/dens(is_ion,ir) &
+           * geofac * I_div_psip**2
+
+    end subroutine ROT_theory
 
 
 end module neo_rotation
