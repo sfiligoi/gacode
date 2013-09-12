@@ -190,7 +190,8 @@ fi
 if [ $EXEC_FLAG -eq 1 ] 
 then
 
-    rm -f out.neo.*
+   # This is dangerous!
+   #rm -f out.neo.*
 
    neo_version_message 
 
