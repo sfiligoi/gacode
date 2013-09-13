@@ -39,7 +39,7 @@ if run == 0:
 # IMPORTANT: Set working directory
 os.chdir(dir)
 
-os.system('cp input.tglf input.tglf.template')
+os.system('cp out.tglf.localdump input.tglf.template')
 
 outfile = open('out.tglf.mrun_z','w')
 
@@ -54,17 +54,15 @@ for i2 in vec2:
 
         print 'INFO: (tglf_mrun) '+a+' ; '+b
 
-        p = 0
-        for line in open('out','r').readlines():
-            p = p+1
-            if p == 3:
-                # Electron line
-                elec=line.split('elec')[1].rstrip()
-            if p == 4:
-                # ion1 line
-                ion1=line.split('ion1')[1].rstrip()
+        data = np.loadtxt('out.tglf.gbflux')
+        ns   = np.loadtxt('out.tglf.grid')
+        # Ge,Qe,Gi,Qi
+        ni = int(ns[0])
+        ovec = [0,1,ni,ni+1]
 
-        outfile.write(elec+ion1+'\n')
+        for i in ovec:
+            outfile.write(str(data[i])+' ')
+        outfile.write('\n')
 
 outfile.close()
 
