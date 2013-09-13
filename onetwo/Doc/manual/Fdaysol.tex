@@ -1,0 +1,109 @@
+\renewcommand{\textfraction}{0.10}
+\renewcommand{\topfraction}{0.90}  % not greater than 1- textfraction
+\renewcommand{\bottomfraction}{0.65} % not greater than 1- textfraction
+\renewcommand{\floatpagefraction}{0.60}
+
+\section{Solution of Faraday's Law: Some observations}
+
+The solution of Faraday's and Ohm's law places restrictions on the problem which
+may preclude a steady state solution from existing in some of the restrictred
+modeling that can be done with Onetwo.  The effect is most easily demonstrated
+when the pressure profiles and the MHD equilibirum are kept fixed in time but
+the current density is allowed to evolve to steady state. In Fig.~\ref{F1a} we
+present an example where a steady state solution (e.g. a solution with a flat
+parallel electric field)  could not be found  with the assumed  given total
+toroidal current of 10 MA. A simple test, keeping the equilibrium constant, but
+simply varying the total current, yields  the results shown in the figure.  Ssq
+represents the residual of Faraday's  law. A true solution of the equation will
+have ssq $ \approx 0 $. As is seen, the solution approaches a zero residual
+value only if the total current is increased to about 13.5 MA. From the
+smoothness of the curve it is concluded that the non-linear solver is in fact
+finding the best solution in each case (otherwise we would expect the curve to
+have a fluctuating behavior). For each value of the total current the solver is
+finding the best approximate solution in the sense that the residual of
+Faraday's law is minimized.
+
+The reason why we can not obtain a valid solution until the total current is
+increased to 13.5 MA is due to the unique nature of the bootstrap current.
+Inside of $ \rho \approx 0.25 $ the ohmic current is required to be positive 
+Near the magnetic axis the bootstrap current forces the\ldots 
+
+\begin{figure}[hbt] %note: figure environment not available in slides
+ \centering  
+ %\begin{narrow}{-.50in}{0in}
+ \centering   
+ \mbox{\epsfig{file=ssq.eps,height=3in,width=3in}} \\
+ \vspace{.5in}
+ \begin{narrow}{-.50in}{0in}
+ \mbox{\rotatebox{90.}{\epsfig{file=ohmic.eps,height=3.5in,width=3.5in}}}
+ \mbox{\rotatebox{90.}{\epsfig{file=etor.eps,height=3.5in,width=3.5in}}}
+ \end{narrow}
+ \caption{(a)Increasing the total current causes the non linear solver to
+ smoothly approach the solution with zero residual. This is indicative of the
+ fact that the solver is finding the best, approximate ``solution'' in each
+ instance. Part (b) and (c) show the corresponding ohmic current profiles and
+ electric fields.}
+ \label{F1a}
+\end{figure}
+
+The above results apply to the  \emph{ITER\_FEAT} case with 6keV pedestal
+temperature. It is interesting to note that a similar case with 5keV pedestal
+temperature does not display this behavior. In Fig.~\ref{F2a} we show the GLF23
+evolved steady state temperatures associated with these two cases. Note the 
+gradient in $T_e$ near $\rho = 0.75 $ in the 6keV case.
+
+\begin{figure}[hbt] %note: figure environment not available in slides
+ \centering  
+ %\begin{narrow}{-.50in}{0in}
+ \centering   
+ \mbox{\rotatebox{90.}{
+  \epsfig{file=te_iter_feat.eps,height=3.5in,width=3.5in}}} \\
+ \vspace{.5in}
+ \begin{narrow}{-.50in}{0in}
+ \mbox{\rotatebox{90.}{
+  \epsfig{file=etor_iter_feat.eps,height=3.5in,width=3.25in}}}
+ \mbox{\rotatebox{90.}{
+  \epsfig{file=curden_iter_feat.eps,height=3.5in,width=3.5in}}}
+ \end{narrow}
+ \caption{(a) The steady state temperatures obtained with GLF23 for the 5 and 6
+ keV pedestal cases. (b) The corresponding electric field. The electric field
+ for the 6 kev case is the one shown in Fig.~\ref{F1a} for the 10 MA case and is
+ not a true solution as explained in the  text. (c) The corresponding  current
+ density profiles. For simplicity the beam and rf  driven current are not shown.
+ The 6 keV pedestal case is the same as the 10 MA case in Fig.~\ref{F1a}.}
+ \label{F2a}
+\end{figure}
+
+\begin{table}
+ \begin{centering}
+  \begin{tabular}{ccccc}
+   \multicolumn{5}{c}{\bfseries Shot 84293} \\
+   \multicolumn{5}{c}{\bfseries (L mode) }  \\ 
+   FW MHz& $P_e ,kW $ & $P_i, kW  $ & $ I_{CD}, kA  $ & $P_a $ \\ \hline
+   60  & 501& 499 & 56& 41 \%  \\
+   60  & 491& 509 & 51& 80 \%  \\
+   %83  & 710/650 & 290/350&  87/80 & 0 & \\
+   83  & 744/607& 256/398  &  80/71 & 31\%   \\
+   83  & 728 & 272?   &  74 & 80\%   \\
+   117  &950  &50 & 111 & 29\%  \\
+   117  &895  &105 & 99 & 82\%  \\
+   \\ \hline 
+   & \\
+   \multicolumn{5}{c}{\bfseries Shot 111221} \\
+   \multicolumn{5}{c}{\bfseries (H
+   mode)} \\ 
+   FW MHz& $P_e, kW$ & $P_i ,kW $ & $ I_{CD}, kA $&  $P_a $ \\ \hline
+   60  &340/287& 660/773 & 22/16 & 95\% \\
+   83  & 420 & 580 & 30  & 99\% \\
+   117 & 395/212 & 605/788 & 30/18 & 99\% \\ \hline
+  \end{tabular}
+  \caption{Heating and Current drive results for DIII-D L and H
+  mode cases. The second number for electron and ion absorbed power and
+  current drive indicates results obtained using \emph{Transp}
+  profiles. $P_a$ is the percent of injected power absorbed. For the
+  L mode, shot results are quoted for 6  and 100 edge reflections (with
+  the larger value of $P_a$ corresponding to 100 edge reflections and
+  the smaller value to 6 reflections).}
+  \label{t1a}
+ \end{centering}
+\end{table} 

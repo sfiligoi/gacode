@@ -1,0 +1,111 @@
+\section{An Example of TDEM Results}
+
+The time dependent eqdsk mode of operation was discussed in the main part of the
+text. Here we give some examples of the results obtained with this method for
+the current drive scenario. The reader is reminded that the TDEM mode also
+applies to (and in fact was constructed for) confinement analysis. The
+application to current drive is quite subtle, however, so we present some 
+details here. 
+
+To begin with, Fig.~\ref{fig:TDEM1} shows the typical variation of the metric
+parameters $ F,G,H $ and the parallel current density, \Eqref{jpar}.
+Each curve in these figures represents a particular time during
+the MHD evolution. The situation illustrated is for a negative
+shear case (shot 87953). The curves were generated using the 
+(fortran) \emph{MEPC} code (this code can easily be modified to generate
+flux surface averages of various kinds so that the user does not
+have to start from scratch if new data is required).
+
+\begin{figure}
+ \centering
+ \includegraphics[height=.49\linewidth,angle=-90]{fcap.epsi}
+ \includegraphics[width=.49\linewidth,angle=-90]{hcap.epsi}\\[.35in]
+ \includegraphics[width=.49\linewidth,angle=-90]{gcap.epsi}
+ \includegraphics[width=.49\linewidth,angle=-90]{curden.epsi}
+ \caption{The metric parameters $F$, $G$, and $H$ and the parallel current
+ density.}
+ \label{fig:TDEM1}
+\end{figure}
+
+The variation in the metric parameters can have siginificant effects on the
+transport derived quantities. For example in Fig.~\ref{fig:TDEMneut} we show the
+neutron rate calculated using the TDEM mode and the result of the same
+calculation when a single eqdsk is used.
+\begin{figure}
+ \centering
+ \includegraphics[height=\textwidth,angle=-90]{neutron_rate.eps}
+ \caption{Comparison of neutron production rates obtained using a single
+ equilibrium slice or using a series of slices in TDEM
+ mode.\label{fig:TDEMneut}}
+\end{figure}
+
+\begin{figure}
+ \centering
+ \includegraphics[width=\textwidth]{psi_time.eps}
+ \caption{$\Psi$, the linear and a possible spline fit used for
+ $\pdiff{\Psi}{t} $.  Shown is the magnetic axis value as a function of time.
+Similar results hold for $\Psi $ at other locations.}
+\end{figure}
+
+\begin{figure}
+ \centering
+ \includegraphics[width=\linewidth]{dpsidt_time.eps}
+ \caption{$\pdiff{\Psi}{t}$ at fixed $\rho$.\label{fig:TDEMdpsidt}}
+\end{figure}
+
+A number of beam heated shots ranging from strong negative shear (87953) to
+weak negative shear (87937) to positive shear (89387,89388,89389) were examined
+using this method.  The q-profiles are shown in Fig.~\ref{fig:TDEMq}.  The
+object was to determine if this approach can be made to work in such a wide
+variety of cases.
+\begin{figure}
+ \centering
+ \includegraphics[angle=-90,width=\textwidth]{q_3casesxfig1.eps}
+ \caption{q-profiles for various shots analyzed showing strong negative shear
+ (87953), weak negative shear (87937), and positive
+ shear(89387).\label{fig:TDEMq}}
+\end{figure}
+
+%--------------------------
+As seen in Eqs. \eqref{eq:fday2_1} and \eqref{eq:fday2_4} only the product of
+resistivity and ohmic current is determined by this approach. Consequently
+additional information is required in order to  separate the product. In
+quiescent discharges the resistivity should be neoclassical. The sensitivity  to
+the form of the neoclassical model of resistivity that is used can be gauged by
+comparing the Hinton and Hirshman models of the effective resistivity . As is
+seen in Fig.~\ref{fig:TDEMweakstrong}, strong negative
+central shear can be modeled about as well as the weak shear case. Both cases
+deviate from the theoretical value of the ohmic current significantly, despite
+the fact that a ``well behaved section'' of psi was used. 
+\begin{figure}
+ \centering
+ \includegraphics[angle=90,width=.5\textwidth]{87937_1200.epsi}
+ \includegraphics[angle=90,width=.49\textwidth]{87937_1475.epsi}\\
+ \includegraphics[angle=90,width=.5\textwidth]{87953_1500.epsi}
+ \includegraphics[angle=90,width=.49\textwidth]{87953_1700.epsi}
+ \caption{Results for the weak shear case (top) and strong negative central
+  shear case (bottom). \label{fig:TDEMweakstrong}}
+\end{figure}
+
+%-------------------------------
+The comparison of experimental and theoretical current profiles for the positive shear cases is given in Fig.~\ref{fig:TDEMpositive}.
+\begin{figure}
+ \centering
+ \includegraphics[angle=90,width=.5\textwidth]{89387ohm+others.epsi}
+ \includegraphics[angle=90,width=.49\textwidth]{ohm_others89388.epsi}
+ \caption{Results for the positive shear case.\label{fig:TDEMpositive}}
+\end{figure}
+
+If we use the experimental ohmic current together with the total parallel
+current (which is derived from the pressure and poloidal current functions in
+the MHD fit),  the non-inductive current may be  estimated. If we also assume
+that the beam driven current is known, then an experimental determination of 
+the bootstrap current becomes possible.  These currents are shown in
+Fig.~\ref{TDEMboot}. 
+\begin{figure}
+ \centering
+ \includegraphics[angle=90,width=.5\textwidth]{ohmic+total89389.epsi}
+ \includegraphics[angle=90,width=.49\textwidth]{driven89389.epsi}
+ \includegraphics[angle=90,width=.5\textwidth]{bootstrap89389.epsi}
+ \caption{Ohmic, beam driven, and bootstrap current densities.\label{TDEMboot}}
+\end{figure}

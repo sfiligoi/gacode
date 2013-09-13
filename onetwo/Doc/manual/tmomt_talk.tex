@@ -1,0 +1,239 @@
+
+
+
+\begin{filecontents}{abbrev.tex}
+   \newcommand{\clr} {\color{red}}
+   \newcommand{\clb} {\color{blue}}
+   \newcommand{\vp}{ V^{\prime}}
+   \newcommand{\ot}{\emph{ONETWO }}
+   \newcommand{\pdiff}[2]{\frac{\partial{ #1}}{\partial{ #2}}}
+   %useage \pdiff{#1}{#2}
+   \newcommand{\ddiff}[1]{\frac{\partial}{\partial #1}}
+   \newcommand{\strt}{\begin{eqnarray}}
+   \newcommand{\trts}{\end{eqnarray}}
+   \newcommand{\beq}{\begin{eqnarray}}
+   \newcommand{\eeq}{\end{eqnarray}}
+   \newcommand{\pdiffn}[3]{\frac{\partial^{#3}{#1}}{\partial{ #2}^{#3}}}
+   \newcommand{\pdiffz}[3]{\frac{\partial{#1}}{\partial{ #2}}\bigg \vert_{#3}}
+   \textheight8.5in
+   \endinput
+\end{filecontents}
+\documentclass{slides}  
+  %note: the landscape option above simply tells tex to
+  %  use the long dimension of the page in calculating its layout
+  % (if this is all that is done the the lines would run off the paper
+  % when printed)
+  %also need to use landscape option in dvips, which actually rotates
+  %everything so that it fits across the long side of the page.
+  %(if landscape option is used in dvips but not in tex document
+  % then the text will be too short for the long side of the page)
+ \usepackage{amsmath} 
+ %\usepackage{fancyheadings,graphics,color}
+ \usepackage{fancyheadings,graphics}
+ \usepackage[dvips]{color}
+   %\usepackage{epsfig}
+  %\usepackage[usenames]{color} seems logical but doesn't work
+   \input{abbrev}
+
+
+   %\onlyslides{5}
+
+
+%----------------------------------------------------------------------------
+      \color{blue} %\pagestyle{fancy}
+  \begin{document}        
+       \begin{center}
+           \Large\bfseries Wedn. Meeting\\ % 1
+           July 13,'00 \\
+           H.S.J.
+
+        \end{center}
+    
+
+%------------------------------------------------------------------
+ 
+     \begin{slide}          \setlength{\topmargin}{-0.5in}
+       \begin{center}
+           \Large\bfseries Toroidal Momentum Equation % 1
+
+        \end{center}
+        \normalsize  
+
+        \bigskip
+        \hrule height4pt
+        %\bigskip
+         % \bf
+         \begin{itemize} \bfseries \tiny
+           \item
+         The equation for toroidal momentum and rotation used in
+        Onetwo assumes that all of the momentum and energy is carried by
+        the ions. All ions have the same temperature and rotation speed,
+        the associated momentum of each ion fluid depends on the mass
+        of the ion however.
+        The actual equation solved by Onetwo is
+          \begin{multline}
+             \sum_{i=1}^{nprim}m_i n_i<R^2>\pdiff{\omega}{t}
+             +\omega\sum_{i=1}^{nprim}m_i<R^2>\pdiff{n_i}{t} \\
+             +\frac{1}{ H \rho}\ddiff{\rho}\left(H\rho
+                 \Gamma_\omega\right) 
+           = S_\omega  +S_\omega ^{2D}  \label{eq:omega}
+          \end{multline}
+        The flux surface average toroidal angular momentum density
+         for ion species i 
+        is given by
+        \beq
+            m_in_i\omega<R^2>
+         \eeq
+        The total momentum flux($\frac{g}{sec^2}$) is made up of two parts as usual
+          \beq
+            \Gamma_\omega=\Gamma_\omega^{cond}+\Gamma_\omega^{conv}
+                               \label{eq:omgam}
+           \eeq
+          The ``convective'' flux is
+          \beq
+             \Gamma_\omega^{conv}=\sum_{i=1}^{nprim}m_i<R^2>\omega\Gamma_i
+          \eeq
+          The ``conductive'' momentum flux is 
+        \beq
+             \Gamma_\omega^{cond} \equiv \Pi =\sum_{k=1} \Pi_k
+               \label{eq:gwcond}
+         \eeq
+        With each $\Pi_k $ defined as
+         \beq
+                   \Pi_k=-d_k(\rho)\ddiff{\rho} u_k \label{eq:dcoef}
+          \eeq
+        At the present time \color{red} $d_k (\frac{g*cm}{sec}) $ is assumed to be \emph{diagonal} with a contribution
+        only form $k=\omega $ \color{blue}
+        Several simple models for $d_\omega $ exist in the code.
+
+        All of the above equations can be run in analysis or simulation
+        mode. Analysis mode means that the appropriate dependent variable
+        is known a priori as a function of space (and possibly time). 
+        Consequently the associated diffusion equation can be inverted
+        to yield information on the transport coefficients. The success of 
+        this inverse method depends on how well the sources are known.
+        For 
+        example if the
+        momentum equation is run in analysis mode, Eq.[\ref{eq:omega}] is
+        first solved for $\Gamma_\omega $ (assuming all other terms in
+         the equation
+        are known a priori):
+          \begin{multline}
+             \Gamma_\omega =\frac{1}{H\rho}\int_0^\rho H\rho\bigg(
+                             S_\omega +S_\omega^{2D}
+                         -\omega\sum_{i=1}^{nprim}m_i<R^2>\pdiff{n_i}{t} \\
+             - \pdiff{\omega}{t}\sum_{i=1}^{nprim}m_i n_i<R^2> \bigg)d\rho
+          \end{multline}
+           and then   $\Gamma_\omega^{cond} $ is obtained from 
+            Eq.[\ref{eq:omgam}] ( the convective part is known at this point
+            from particle balance,Eq.[\ref{eq:ni}]). The diffusion 
+            coefficient can then be obtained using Eq.[\ref{eq:dcoef}].
+
+        The equations that are run in simulation must have 
+        transport coefficients
+        and appropriate initial and boundary conditions specified a priori.
+        The profiles are then evolved from the initial condition profile as
+        usual. 
+    \end{itemize}
+    \end{slide}
+
+%-----------------------------------------------------------------------------
+ 
+     \begin{slide}          \setlength{\topmargin}{-0.5in}
+       \begin{center}
+           \Large\bfseries Toroidal Momentum Sources % 1
+
+        \end{center}
+        \normalsize  
+
+        \bigskip
+        \hrule height4pt
+        %\bigskip
+         % \bf
+         \begin{itemize} \bfseries \tiny
+     \item
+       All source terms below are in units of \color{red}  $
+       [\frac{g}{cm \cdot sec^2}]$ \color{blue}
+         \color{red} The electrons are assumed to have negligible
+         momentum  \color{blue} (ie no separate
+        equation for the electron toroidal momentum is introduced. However
+        some momentum sources associated with the fast ion electron interactions
+        are included below as ion terms). At the present time sources and sinks
+associate with \emph{ion impact ionization} are neglected.
+        \begin{description}
+        \item[\color{red} $S_\omega $ \color{blue}] is defined as
+          \color{red}  
+        \begin{multline}
+         S_\omega=Sprbeame+Sprbeami+Sprcxl+Spreimpt+\\
+             Sprcx+Sprcxre 
+        \end{multline}
+          \color{blue}
+        where the definition of each of the individual terms follows.
+         \begin{description}  %begin 1b
+        \item[\color{red} sprbeame \color{blue} ] is the (delayed ) source of angular momentum 
+                transferred from the (beam) fast ions  to the electrons
+                during the slowing down process.This angular momentum is
+                rapidly shared with the ions and is thus a source term for the
+                thermal ion toroidal momentum equation:
+         \beq \color{red}
+             sprbeame(\rho)=bke(\rho,e_b,b_j)*spbr(\rho,e_b,b_j)
+         \eeq \color{blue}
+        \item[ \color{red} sprbeami \color{blue}] is the (delayed ) source of angular momentum
+        transferred from the (beam) fast ions to the thermal ion
+        fluid.
+         \color{red}
+         \begin{multline} 
+             sprbeami(\rho)=bki(\rho,e_b,b_j)*spbr(\rho,e_b,b_j)+ \\
+                            fbth(\rho,e_b,b_j)*sb(\rho,e_b,b_j)*atw_b \\
+                        *m_p*v_z(\rho)\frac{<R^2>}{<R>}
+         \end{multline} \color{blue}
+        \item[ \color{red} ssprcxl  \color{blue}] represents the gain of  angular momentum due to charge
+                    exchange of a fast ion with a thermal neutral (the
+                    thermal neutral adds its momentum to the thermal
+                    ion distribution) \color{red}
+        \begin{multline} 
+                ssprcxl(\rho)=fprscxl*spbr(\rho,e_b,b_j) \\
+                  +fscxl*sb(\rho,e_b,b_j)*atw_b \\
+                        *m_p*v_z(\rho)*\frac{<R^2>}{<R>}
+        \end{multline}  \color{blue}
+        \item[ \color{red} spreimpt  \color{blue}] represents gain of momentum due to electron impact
+        ionization of thermal neutrals \color{red}
+                \begin{multline} 
+                spreimpt(\rho)=\sum_{i=1}^{nprim}eirate(\rho)*enn_i(\rho)
+                    m_i*vneut_i(\rho)*<R> \label{eq:spreimpt}
+        \end{multline}  \color{blue}
+        \item[ \color{red} sprcx  \color{blue}] represents the source/sink of momentum due to charge
+        exchange of thermal neutral with thermal ion. For two ion and
+        neutral species we have \color{red}
+                \begin{multline} 
+                sprcx(\rho)=\sum_{i=1}^{nprim}enn_i(\rho)*cexr_i(\rho)\\
+                    en_i(\rho)*atw_i*m_p*<R>*(vneut_i(\rho)-vionz(\rho))\\
+                   +cxmix*(atw_k*vneut_k(\rho)-atw_i*v_z(\rho))
+        \end{multline}  \color{blue}
+        \item[ \color{red} sprcxre  \color{blue}] represents the sink of thermal angular momentum due to
+        charge exchange of thermal ion with a fast neutral and also
+        includes radiative recombination of thermal ions.  \color{red}
+        \beq 
+                sprcxre(\rho)=\sum_{i=1}^{nprim}sbcx_i(\rho)*<R^2>
+                    \omega m_i  \label{eq:sprcxre}
+        \eeq  \color{blue}
+         \end{description} %end 1b
+        \item{  \color{red} $S_\omega^{2D}$  \color{blue} } is the source term due to evolution of
+             the mhd equilibrium. It is given by  \color{red}
+           \begin{multline} 
+            S_\omega^{2D}=-\omega\sum_{i=1}^{nprim}\bigg( m_in_i\ddiff{t}<R^2>
+                     -m_in_i<R^2>\omega\ddiff{t}\ln H \\
+                  +\frac{d}{H}\ddiff{\rho}H\omega m_in_i<R^2> \bigg )
+           \end{multline} 
+         \color{blue}
+        spr2d  is the name of this term in the code output. At present the
+        individual contributions are not broken out. In the code this term 
+         is multiplied by an input factor
+        $angrm2d(4)$,which is defaulted to 1.0
+        but the user can assign any value (eq. 0.0) to gauge the effect of
+        this term
+        \end{description}
+
+   \end{itemize}
+   \end{slide}
+\end{document}  

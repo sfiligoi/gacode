@@ -195,7 +195,7 @@ subroutine prgen_read_gato
   !
   allocate(gato_q(0:nsurf))
   open(unit=1,file='o1gta',status='old')
-
+ 
   do
      read(1,*) a,b,c
      if (a(1:1) == 'q') then

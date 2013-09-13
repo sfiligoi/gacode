@@ -5,7 +5,7 @@ from gacodeplotdefs import *
 from pyrats.profiles_gen.data import profiles_genData
 
 # Number of theta-points for plotting
-narc = 128
+narc = 256
 
 infiles = sys.argv[1]
 surf    = sys.argv[2]
@@ -59,7 +59,7 @@ if surf == 'fourier' or surf == 'both':
         x = a0r/2
         y = a0z/2
 
-        for j in range(1,9,1):
+        for j in range(1,1+prof.nfourier,1):
             ar = prof.geo['ar'][j,i]
             br = prof.geo['br'][j,i]
             az = prof.geo['az'][j,i]
@@ -68,7 +68,7 @@ if surf == 'fourier' or surf == 'both':
             y = y+az*np.cos(j*t)+bz*np.sin(j*t)
 
         if i == i1:
-            ax.plot(x,y,'-b',linewidth=1,label=r'$\mathrm{Fourier}~8$')
+            ax.plot(x,y,'-b',linewidth=1,label=r'$\mathrm{Fourier}~'+str(prof.nfourier)+'$')
         else:
             ax.plot(x,y,'-b',linewidth=1)
 
@@ -81,7 +81,7 @@ a0z = prof.geo['az'][0,i]
 x = a0r/2
 y = a0z/2
 
-for j in range(1,9,1):
+for j in range(1,1+prof.nfourier,1):
     ar = prof.geo['ar'][j,i]
     br = prof.geo['br'][j,i]
     az = prof.geo['az'][j,i]

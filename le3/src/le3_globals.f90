@@ -2,12 +2,21 @@ module le3_globals
 
   real, parameter :: pi=3.141592653589793
 
+  logical :: initialized = .false.
+
+  ! Resolution parameters
   integer :: nt,np
+  integer :: nts,nps
+  integer :: ntp,npp
   integer :: m,n
+
+  ! Geometry parameters
   real :: rmin,rmaj,hmin,q
+  real :: kappa, s_kappa, delta, s_delta, zeta, s_zeta
+  real :: shift, zmag, dzmag
+  real :: iota
   real :: dt,dp
-  real :: tol
-  integer :: restart_flag
+
 
   real, dimension(:), allocatable    :: t,p
   real, dimension(:,:), allocatable  :: tb
@@ -15,15 +24,24 @@ module le3_globals
   real, dimension(:,:), allocatable  :: r,z
   real, dimension(:,:), allocatable  :: drdtb,dzdtb
   real, dimension(:,:), allocatable  :: drdpb,dzdpb
-  real, dimension(:,:), allocatable  :: drdr,dzdr
   real, dimension(:,:), allocatable  :: jac
-  real, dimension(:,:), allocatable  :: bp,br,bz
   real, dimension(:,:), allocatable  :: rp,rt
   real, dimension(:,:), allocatable  :: zp,zt
   real, dimension(:,:), allocatable  :: fp,ft
-  real, dimension(:,:), allocatable  :: fpt,ftp
+  real, dimension(:,:), allocatable  :: as,bs,cs,ds
+  real, dimension(:,:), allocatable  :: sinm,cosm
+  real, dimension(:,:), allocatable  :: sinn,cosn
 
-  integer, dimension(:), allocatable :: tcyc, pcyc
-  real, dimension(-2:2) :: cderiv
+  !--------------------------------------------------------
+  ! MINPACK variables
+  integer :: info
+  integer :: nwork
+  integer :: msize
+  real, dimension(:), allocatable :: work
+  !
+  real :: tol
+  real, dimension(:), allocatable :: xfunc
+  real, dimension(:), allocatable :: yfunc
+  !--------------------------------------------------------
 
 end module le3_globals

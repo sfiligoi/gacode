@@ -208,7 +208,7 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc, N_ion=N_ion
   ;read geometry_extra.out
   s = ' '
   OPENR, 1, dirpath + 'out.tgyro.geometry.2', ERROR=err
-  arr = FLTARR(8,NX)
+  arr = FLTARR(9,NX)
   IF (err NE 0) THEN BEGIN
       PRINT, 'Using old geometry_extra.out'
       OPENR, 1, dirpath + 'geometry_extra.out'
@@ -398,20 +398,22 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc, N_ion=N_ion
   ;read nu_rho.out
   nu_ii = FLTARR(NX,N_it)       ;(a/cs)/t_ii
   nu_ee = FLTARR(NX,N_it)       ;(a/cs)/t_ee
+  nu_estar_inv = FLTARR(NX,N_it)       ;1/((a/cs)nu_e_Star)
   nu_exch = FLTARR(NX,N_it)     ;(a/cs)nu_exch
   rho_i_star = FLTARR(NX,N_it)  ;rho_i/a
   rho_star = FLTARR(NX,N_it)    ;rho_s/a
   s = ' '
-  arr = fltarr(6,NX)
-  OPENR, 1, dirpath + 'nu_rho.out'
+  arr = fltarr(7,NX)
+  OPENR, 1, dirpath + 'out.tgyro.nu_rho'
   FOR ii = 0, N_it-1 DO BEGIN
       READF, 1, s
       READF, 1, arr
       nu_ii[*,ii] = arr[1,*]
       nu_ee[*,ii] = arr[2,*]
-      nu_exch[*,ii] = arr[3,*]
-      rho_i_star[*,ii] = arr[4,*]
-      rho_star[*,ii] = arr[5,*]
+      nu_estar_inv[*,ii] = arr[3,*]
+      nu_exch[*,ii] = arr[4,*]
+      rho_i_star[*,ii] = arr[5,*]
+      rho_star[*,ii] = arr[6,*]
   ENDFOR
   CLOSE, 1
 

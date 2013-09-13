@@ -1,0 +1,26 @@
+		ONETWO   = /u/stjohn/onetwo_v3/onetwo
+		LIBS      = $(ONETWO)/../../onetwo/libraries/osf
+		INCPATH	  = $(ONETWO)
+		MAKE1     = makeincludes.test
+		MAKE2     = makeobjects.test
+		NETCDF    = /d/osf/lib/libnetcdf.a
+		LAPACK    = /d/osf/lib/liblapack.a /d/osf/lib/libblas.a 
+		NUBEAM_LIBS  =  /u/stjohn/nubeam/osf/ALPHA/lib
+                UFILE_LIBS = 
+		NUBEAM_LIBRARIES = 
+		DEBUG     = -g -check_bounds
+		OPTIMIZE  = -O4
+		LISTING   = 
+		SPECIAL   = -static -real_size 64 -convert big_endian  -fpe
+		SPECIAL_nubeam = -static -real_size 64 -convert big_endian \
+							  -fpe
+		MODULES   = /u/stjohn/nubeam/osf/ALPHA/mod
+		COMPILE   = f90 -c $(OPTIMIZE) $(LISTING) $(SPECIAL)
+		#COMPILE   = f90 -c $(DEBUG) $(LISTING) $(SPECIAL)
+		COMPILE_nubeam   = f90 -c  $(OPTIMIZE) $(LISTING) \
+							 $(SPECIAL_nubeam)
+		LOAD      = f90 -o $(NAME)
+		ARCHIVE   = ar -rv
+                NUBEAM12  = nubeam_12_fake.f
+		UFILES12    = ufiles_12_fake.f90
+                #INSTALLDIR = /u/stjohn/onetwo_current/osf/$(NAME)

@@ -434,9 +434,24 @@ contains
          X34, L34_S, X33, sigma_S, sigma_spitzer
     real :: nue_S, nue_star_S, nui_star_S
     integer :: is
+    real :: dens_sum, press_sum
 
-    nui_star_S = nui_star_HH / (dens(is_ion,ir) * z(is_ion)**2) &
-         * dens_ele*zeff
+    ! EAB: 07/11/2013 changed def of Sauter nui_star_S for impurities
+    ! from (Zi**2 * Zeff * ne) to (Zi**4)*(n_all_ions) 
+    !nui_star_S = nui_star_HH / (dens(is_ion,ir) * z(is_ion)**2) &
+    !     * dens_ele*zeff
+    press_sum = 0.0
+    dens_sum = 0.0
+    do is=1,n_species
+       if(is /= is_ele) then
+          dens_sum  = dens_sum + dens(is,ir)
+          press_sum = press_sum + dens(is,ir)*temp(is,ir)
+       endif
+    enddo
+    nui_star_S = nui_star_HH / dens(is_ion,ir) * dens_sum
+    ! Osborne's interpretation
+    !nui_star_S = nui_star_HH / (dens(is_ion,ir) * z(is_ion)**4) &
+    !     * dens_sum * zeff**4
 
     alpha_0 = -1.17*(1.0-ftrap) / (1.0 - 0.22*ftrap - 0.19*ftrap*ftrap)
     
@@ -524,11 +539,15 @@ contains
           jpar = jpar + L31_S * I_div_psip * rho(ir) &
                * dens(is,ir) * temp(is,ir) &
                * (dlntdr(is,ir) + dlnndr(is,ir))
-          if(is /= is_ele) then
-             jpar = jpar + L34_S * alpha_S * I_div_psip * rho(ir) &
-                  * dlntdr(is,ir) * dens(is,ir) * temp(is,ir)
-          endif
+          !if(is /= is_ele) then
+          !   jpar = jpar + L34_S * alpha_S * I_div_psip * rho(ir) &
+          !        * dlntdr(is,ir) * dens(is,ir) * temp(is,ir)
+          !endif
        enddo
+       ! EAB: 08/15/13 changed interpretation for ions with unlike temps
+       ! from the above loop to this
+       jpar = jpar + L34_S * alpha_S * I_div_psip * rho(ir) &
+            * dlntdr(is_ion,ir) * press_sum
 
     end if
 
@@ -828,6 +847,7 @@ contains
     real :: ftrap_new, delta_param, alpha_param, beta_param, h_param, pfac
     integer :: h_flag = 2
     integer :: is
+    real :: dens_sum, press_sum
 
     if(adiabatic_ele_model == 1) then
        jpar = 0.0
@@ -835,8 +855,19 @@ contains
     else
 
        ! alpha unchanged from Sauter
-       nui_star_S = nui_star_HH / (dens(is_ion,ir) * z(is_ion)**2) &
-            * dens_ele*zeff
+       ! EAB: 07/11/2013 changed def of Sauter nui_star_S for impurities
+       ! from (Zi**2 * Zeff * ne) to (Zi**4)*(n_all_ions) 
+       !nui_star_S = nui_star_HH / (dens(is_ion,ir) * z(is_ion)**2) &
+       !     * dens_ele*zeff
+       dens_sum = 0.0
+       press_sum = 0.0
+       do is=1,n_species
+          if(is /= is_ele) then
+             dens_sum = dens_sum + dens(is,ir)
+             press_sum = press_sum + dens(is,ir)*temp(is,ir)
+          endif
+       enddo
+       nui_star_S = nui_star_HH / dens(is_ion,ir) * dens_sum
        
        alpha_0 = -1.17*(1.0-ftrap) / (1.0 - 0.22*ftrap - 0.19*ftrap*ftrap)
        
@@ -959,15 +990,19 @@ contains
           jpar = jpar + L31_S * I_div_psip * rho(ir) &
                * dens(is,ir) * temp(is,ir) &
                * (dlntdr(is,ir) + dlnndr(is,ir))
-          if(is /= is_ele) then
-             jpar = jpar + L34_S * alpha_S * I_div_psip * rho(ir) &
-                  * dlntdr(is,ir) * dens(is,ir) * temp(is,ir)
-          endif
+          !if(is /= is_ele) then
+          !   jpar = jpar + L34_S * alpha_S * I_div_psip * rho(ir) &
+          !        * dlntdr(is,ir) * dens(is,ir) * temp(is,ir)
+          !endif
        enddo
+
+       ! EAB: 08/15/13 changed interpretation for ions with unlike temps
+       ! from the above loop to this
+       jpar = jpar + L34_S * alpha_S * I_div_psip * rho(ir) &
+            * dlntdr(is_ion,ir) * press_sum
 
     end if
     
   end subroutine compute_Koh
-
 
 end module neo_theory

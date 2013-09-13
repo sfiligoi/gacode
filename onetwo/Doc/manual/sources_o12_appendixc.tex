@@ -1,0 +1,747 @@
+\section{Stiff Confinement Modeling With \ot} 
+
+Tokamak transport analysis typically involves from 3 to 7 coupled nonlinear 
+equations and up to 200 grid points. Depending primarily on the nonlinearities
+introduced by the confinement models this set of equations can range from
+trivial to very difficult to solve efficiently. Typically specialized methods
+are needed. This involves representation of the equations suitable for 
+computational solution methods, both linear and nonlinear and direct and
+iterative for the resulting set of equations.
+
+\subsection{The Set of Transport Equations}
+
+The equation that governs the evolution of  the density of primary ion species
+$i$  is
+\beq
+ \pdiffz{n_i}{t}{\zeta}+\frac{1}{H\rho}\ddiff{\rho} \big(H\rho\Gamma_i
+ \big) =
+ S_i+ S_i^{2D} \color{blue}\label{eq:ni_app}
+\eeq
+The second term in this and other equations appearing below represents the
+azimuthally symmetric flux surface averaged divergence of the flux. Here
+$\Gamma_i $ is the particle flux $\left(\frac{\#}{cm^2sec}\right)$ of ion  species $i$.
+The 2D source term appearing on the RHS of this and  subsequent equations below
+are due to the grid motion and is given by 
+\beq
+ S_i^{2D}=-n_i\ddiff{t}\bigg \vert_{\zeta} \ln H + \frac{1}{H} \left (
+ \pdiffz{\rho}{t}{\zeta}\right )\ddiff{\rho}Hn_i .
+\eeq
+
+The equation for describing the evolution of the electron thermal energy is 
+\begin{multline} 
+ \frac{3}{2}\left[T_e\sum_{i=1}^{nion}\left(n_i\pdiffz
+ {Z_i}{T_e}{\zeta}\right) + n_e
+ \right]\pdiff{T_e}{t} 
+ +\frac{3}{2}T_e \sum_{i=1}^{nion}Z_i\pdiffz{n_i}{t}{\zeta}\\
+ +\frac{1}{H\rho}\ddiff{\rho}\left[H\rho \left(
+ q_e+\frac{5}{2}\Gamma_e T_e\right) \right]
+ =Q_e  -\omega L_e +  S^{2D}_{T_e} 
+ \label{eq:eeng}
+\end{multline}
+$S_{T_e}^{2D}$ represents heating of electrons due to grid motion:
+\beq
+ S_{T_e}^{2D}=-\frac{5}{2}n_eT_e\ddiff{t}\ln H 
+ +\left (\pdiff{ \ln \rho}{t} \right )
+ \Bigg[ \frac{5}{2}n_eT_e \pdiff {\ln H} {\rho} \\
+ +\frac{3}{2}T_e\sum_{i=1}^{nion}Z_I\pdiff{n_i}{\rho} 
+ +\frac{3}{2} \left(n_e+T_e\sum_{i=1}^{nion} n_z\pdiff{Z_i}{T_e}
+ \right)\pdiff{T_e}{\rho} \Bigg].
+\eeq
+
+The equation for describing the evolution of the ion
+thermal  and rotational kinetic energy is
+\begin{multline} 
+ \sum_{i=1}^{nion}\left\{\frac{3}{2}n_i\pdiffz {T}{t}{\zeta} + 
+ \pdiffz{n_i}{t}{\zeta}\bigg(\frac{3}{2}T+\frac{1}{2}m_i\omega^2\left<R^2\right> \bigg)\right\} 
+ + \sum_{i=1}^{nion} m_in_i\omega\left<R^2\right>\pdiffz{\omega}{t}{\zeta} \\
+ +\frac{1}{H\rho}\ddiff{\rho}\left\{H\rho\Bigg [\sum_{i=1}^{nion}\left(
+ q_i+\frac{5}{2}\Gamma_i T\right) +\Gamma_T^\omega
+ +\Pi\omega\Bigg]\right\}\\
+ = Q +S_T^\omega+ S^{2D}_{T}+S^{2D\omega}_{T}            
+ \label{eq:ione},
+\end{multline}
+with source term due to grid motion given by:
+\begin{multline}  
+ S_T^{2D}= -\frac{5}{2}T\pdiff {\ln H}{t} \sum_{i=1}^{nion} n_i\\
+ +\pdiff{\ln \rho}{t}
+ \bigg (  
+ \frac{5}{2}T\pdiff{\ln H}{\rho}\sum_{i=1}^{nion} n_i 
+ +\frac{3}{2}T\sum_{i=1}^{nion}\pdiff{n_i}{\rho}
+ +\frac{3}{2}\pdiff{T}{\rho}\sum_{i=1}^{nion} n_i
+ \bigg )   ,
+\end{multline}
+\begin{multline}  
+ S_T^{2D\omega}= -\frac{1}{2}\left<R^2\right>\omega^2\pdiff{ln H}{t}
+ \sum_{i=1}^{nion}n_i m_i \\  
+ +\frac{1}{2}\omega\left[ spr2d +\omega\left(\pdiff{\left<R^2\right>}{t}
+ +\left<R^2\right>\pdiff{\ln H}{t}\right)\sum_{i=1}^{nion}m_in_i \right] \\
+ -\frac{1}{2}\omega^2\pdiff{\left<R^2\right>}{t}\sum_{i=1}^{nion}n_im_i .
+\end{multline} 
+
+The evolution of the poloidal B field is given by Faraday's Law. In \ot this
+equation takes the form
+\begin{multline}
+ \frac {1}{ FG(H\rho)^2\alpha}\pdiff {(FGH\rho B_{p0})}{t} 
+ -\frac{1}{ H\rho}\pdiff { }{\rho}
+ \Bigg [H\rho \bigg (d_{4,1}\pdiff {n_i}{\rho} 
+ +d_{4,2}\pdiff {T_e}{\rho} +d_{4,3}\pdiff {T}{\rho} \\  
+ +d_{4,4}\pdiff {FGH\rho B_{p0}}{\rho} \bigg)\Bigg]  
+ -\frac{1}{H\rho}\ddiff{\rho} {\left (\pdiffz{\rho}{t}{\zeta}B_{p0}\right )}   
+ =-\frac{1}{ H\rho}\pdiff { }{\rho} 
+ \bigg(\eta_{\parallel} c H\left<{\vec {J}_{aux}} 
+ \cdotp \frac{\vec {B}}{ B_{t0}}\right> \bigg)\\
+ +\frac{1}{ H\rho} \pdiff { }{\rho} 
+ \left[H\rho(D_f^e +D_f^b)\pdiff{ n_f}{\rho}  \right]
+ +\frac{B_{p0}}{ H\rho } \pdiff { }{t} 
+ \bigg [ \ln \left(FGH\rho \right)\bigg]
+ -\frac{B_{p0}}{ H\rho } \ddiff {\rho}\left (
+ \pdiffz{\rho}{t}{\zeta} \right )\label{eq:fday1_3}.
+\end{multline} 
+
+The equation for toroidal momentum and rotation used in Onetwo assumes that all
+of the momentum and energy is carried by the ions. All ions have the same
+temperature and rotation speed; the associated momentum of each ion fluid
+depends on the mass of the ion however. The actual equation solved by Onetwo is
+\begin{multline}
+ \sum_{i=1}^{nprim}m_i n_i\left<R^2\right>\pdiffz{\omega}{t}{\zeta}
+ +\omega\sum_{i=1}^{nprim}m_i\left<R^2\right>\pdiffz{n_i}{t}{\zeta} \\
+ +\frac{1}{ H \rho}\ddiff{\rho}\left(H\rho
+ \Gamma_\omega\right) 
+ = S_\omega  +  S_\omega ^{2D}  \label{eq:omega_app}.
+\end{multline}
+$S_T^{2D\omega}$ represents ion rotational kinetic energy sources due to grid
+motion:
+\begin{multline}  
+ S_T^{2D\omega}= -\frac{1}{2}(1)\left<R^2\right>\omega^2\pdiff{\ln H}{t}
+ \sum_{i=1}^{nion}n_i m_i \\  
+ +\frac{1}{2}(2)\omega\left[ spr2d +\omega\left(\pdiff{\left<R^2\right>}{t}
+ +\left<R^2\right>\pdiffz{\ln H}{t}{\zeta}\right)
+ \sum_{i=1}^{nion}m_in_i \right] \\  
+ -\frac{1}{2}\omega^2\pdiffz{\left<R^2\right>}{t}{\zeta}
+ \sum_{i=1}^{nion}n_im_i .
+\end{multline}   
+
+In matrix form the set of equations \{\eqref{eq:ni_app}, \eqref{eq:eeng},
+\eqref{eq:ione}, \eqref{eq:fday1_3}, \eqref{eq:omega_app}\} is compactly written
+as
+\beq \label{m1}
+ \underline{\underline{\mathbf{M}}}\ddiff{t}
+ \bigg \vert_\zeta{\underline{u}} 
+ -\frac{1}{H\rho}\ddiff{\rho}\bigg ( H\rho \underline{
+ \underline{\mathbf{D}}}\ddiff{\rho}{\underline{u}} \bigg )
+ +\frac{1}{H\rho}\ddiff{\rho}
+ \bigg ( H\rho \underline{\underline{\mathbf{V}}}
+ \underline{u} \bigg ) 
+ +\underline{\underline{\mathbf{W}}}\underline{u} = 
+ \underline{S_{ext}}  \label{vecform}.
+\eeq
+Here the vector $\underline{u}  \equiv [n_1,..n_N,T_e,T_i,FGH \rho B_P,\omega] $
+represents the dependent variables; $\underline{\underline{M}}$ is an $N+4$ by
+$N+4$ coefficient matrix with $N$ ion species. For $ N=2 $ we have:
+{\tiny
+\[
+ \underline{\underline{\mathbf{M}}} = \left( \begin{array}{*{4}{c@{\:,\:}}c@{\;,\;}c}
+ 1 & 0 & 0 &  0 & 0 & 0  \\
+ 0 & 1 & ..&  0 & 0 & 0  \\
+ %Te eq:
+ \frac{3}{2}T_e\left < Z_1 \right > &\frac{3}{2}T_e \left < Z_N \right > & 
+ \frac{3}{2}\left ( n_e  +T_e \sum n_i\pdiff{Z_i}{T_e} \right )
+ & 0 & 0 & 0\\
+ %ion T eq:
+ \frac{3}{2}T+\frac{1}{2}\left < R^2 \right >\omega^2m_1 &
+ \frac{3}{2}T+\frac{1}{2}\left < R^2 \right >\omega^2m_N & 
+ 0&
+ \frac{3}{2}\sum\left< n_i \right> & 0 & \sum m_i\left< n_iR^2 \right> \omega \\
+ %rbp equation:
+ 0 & 0 & 0 &0& \frac{1}{FGH^2\rho^2}& 0  \\
+ %toroidal rotation equation:
+ \omega m_1\left<R^2\right> & \omega m_N\left<R^2\right> & 0 & 0 &0& 
+ \sum m_i \left< n_i R^2 \right> \\
+\end{array} \right)        \]}
+
+The matrix $\underline{\underline{\mathbf{D}}}$ has a form which depends on the confinement
+models under investigation. A simple diagonal model would be 
+\[ 
+ \underline{\underline{\mathbf{D}}} = \left( 
+ \begin{array}{*{4}{c@{\:,\:}}c@{\;,\;}c}
+  d & 0 & 0 &  0 & 0    & 0  \\
+  0 & d & ..&  0 & 0    & 0  \\
+  0 & 0 & k_e& 0 & 0    & 0  \\
+  0 & 0 & 0 & \sum k_i& 0    & 0  \\
+  0 & 0 & .0&  0 & \frac{c^2\eta}{4\pi F^{2} H\rho^{2}}   & 0  \\
+  0 & 0 & .0&  0 & 0    & \sum d_\omega  \\
+ \end{array} \right)    .
+\]
+The matrix $\underline{\underline{\mathbf{V}}}$ has a form which depends on the
+confinement models under investigation. A simple  model would be 
+\[ 
+ \underline{\underline{\mathbf{V}}} = \left( 
+ \begin{array}{*{4}{c@{\:,\:}}c@{\;,\;}c}
+  0 & 0 & 0 &  0 & 0    & 0  \\
+  0 & 0 & ..&  0 & 0    & 0  \\
+  0 & 0 & \frac{5}{2}\Gamma_e& 0 & 0    & 0  \\
+  0 & 0 & 0 &\frac{5}{2}\sum\Gamma_i & 0    & 
+  \frac{1}{2}\sum m_{i} \left < R^2 \right > \omega\Gamma_i+ \pi_i \\
+  0 & 0 & .0&  0 & 0  & 0  \\
+  0 & 0 & .0&  0 & 0    & \sum m_i \left < R^2 \right > 
+  \Gamma_i  \\
+ \end{array} \right)  .      
+\]
+The matrix $ \underline{\underline{\mathbf{W}}} $ is introduced for numerical
+stability purposes in the finite difference approximation. Its effect is to
+split the source term into explicit and implicit parts. It can be shown that
+without this splitting the finite difference solution is unstable. The simplest
+form of $ \mathbf{W} $ is
+\[ 
+ \underline{\underline{\mathbf{W}}} = 
+ \left( \begin{array}{*{4}{c@{\:,\:}}c@{\;,\;}c}
+  0 & 0 & 0 &  0 & 0    & 0  \\
+  0 & 0 & 0 &  0 & 0    & 0  \\
+  0 & 0 & c_{\Delta}&- c_{\Delta} & 0    & 0  \\
+  0 & 0 & -c_{\Delta}& c_{\Delta} & 0    & 0\\
+  0 & 0 & 0&  0 & 0     & 0  \\
+ 0 & 0 & 0&  0 & 0     & 0  \\
+ \end{array} \right)   ,     
+\] 
+where the term $c_{\Delta}  $ represents the electron
+ion energy exchange term : \\
+\begin{gather}
+ Q_{\Delta} = c_{\Delta}\left ( T_e -T_i \right ), \\
+ c_{\Delta} = \sum_i \frac{3 m_e \left < Z_{i}^2 \right > n_i}
+ {m_i Z_{eff} \tau_e} .
+\end{gather}
+
+\begin{itemize} 
+
+ \item Putting all the pieces together we get 
+ \begin{multline}
+  \underline{\underline{M}}_{j}\pdiff{\underline{u}_j}{t} 
+  %term in uj-1:
+  -\frac{1}{\left ( H\rho \right )_j \Delta\rho_j}
+  \left[ \frac{\left ( H\rho\right )_{j-\onehalf}
+  \underline{\underline{D}}_{j-\onehalf}  }
+  {\Delta\rho_{j-\onehalf}}+
+  \left ( H\rho\right )_{j-\onehalf}
+  \underline{\underline{V}}_{j-\onehalf}^+
+  \right]{\underline{u}}_{j-1} \\
+  %term in uj:
+  -\frac{1}{\left ( H\rho \right )_j \Delta\rho_j}
+  \Bigg [ -\frac{\left ( H\rho\right )_{j+\onehalf}
+  \underline{\underline{D}}_{j+\onehalf}  }
+  {\Delta\rho_{j+\onehalf}} -
+  \frac{\left ( H\rho\right )_{j-\onehalf}
+  \underline{\underline{D}}_{j-\onehalf}  }
+  {\Delta\rho_{j-\onehalf}} 
+  - \left ( H\rho \right )_{j+\onehalf}
+  \underline{\underline{V}}_{j+\onehalf}^+\\
+  +\left ( H\rho \right )_{j-\onehalf}
+  \underline{\underline{V}}_{j-\onehalf}^-
+  -\left ( H\rho \right )_{j}
+  \underline{\underline{W}}_{j}\Delta\rho_j
+  \Bigg ] {\underline{u}}_{j} \\
+  %term in uj+1
+  -\frac{1}{\left ( H\rho \right )_j \Delta\rho_j}
+  \left[\frac{\left ( H\rho\right )_{j+\onehalf}
+  \underline{\underline{D}}_{j+\onehalf}  }
+  {\Delta\rho_{j+\onehalf}}
+  - \left ( H\rho \right )_{j+\onehalf}
+  \underline{\underline{V}}_{j+\onehalf}^-
+  \right] {\underline{u}}_{j+1} = \underline{S}_{exp,j}
+ \end{multline}
+\end{itemize}
+
+\begin{itemize}
+ \item To bring out the structure we define new matrices
+ $\underline{\underline{P}}$, $\underline{\underline{Q}}$, and
+ $\underline{\underline{R}}$, and write the last equation as: 
+ \beq
+  \underline{\underline{M}}_{j}\pdiff{\underline{u}_j}{t} 
+  %term in uj-1:
+  -\underline{\underline{P}}_{j-1} {\underline{u}}_{j-1}
+  %term in uj
+  -\underline{\underline{Q}}_{j} {\underline{u}}_{j}
+  %term in uj+1
+  -\underline{\underline{R}}_{j+1}
+  {\underline{u}}_{j+1} = \underline{S}_{exp,j}
+ \eeq
+ \item The implicit time difference scheme is developed by evaluating the
+ explicitly appearing dependent  variable $\underline{u}$ at time $ t^{n+1}$ 
+ and  at time $ t^{n}$ and averaging:
+ \beq \label{m3}
+  \underline{\underline{M}}_{j}^{n+\theta}
+  \left ( \frac{\underline {u}_j^{n+1}
+  -\underline{u}_j^n}{\Delta t}\right )
+  %term in uj-1:
+  -\underline{\underline{P}}_{j-1}^{n+\theta} {\underline{u}}_{j-1}^{n+1}
+  %term in uj
+  -\underline{\underline{Q}}_{j}^{n+\theta} {\underline{u}}_{j}^{n+1}
+  %term in uj+1
+  -\underline{\underline{R}}_{j+1}^{n+\theta}
+  {\underline{u}}_{j+1}^{n+1} = \underline{S}_{exp,j}^{n+1}
+ \eeq
+ \beq \label{m4}
+  \underline{\underline{M}}_{j}^{n+\theta}
+  \left ( \frac{\underline {u}_j^{n+1}
+  -\underline{u}_j^n}{\Delta t}\right )
+  %term in uj-1:
+  -\underline{\underline{P}}_{j-1}^{n+\theta} {\underline{u}}_{j-1}^{n}
+  %term in uj
+  -\underline{\underline{Q}}_{j}^{n+\theta} {\underline{u}}_{j}^{n}
+  %term in uj+1
+  -\underline{\underline{R}}_{j+1}^{n+\theta}
+  {\underline{u}}_{j+1}^{n} = \underline{S}_{exp,j}^{n}
+ \eeq
+\end{itemize}
+
+\begin{itemize}
+ \item With some appropriate definitions :
+ \beq \notag
+  \underline{\underline{A}}_j^{n+\theta} \equiv 
+  -\underline{\underline{P}}_{j-1}^{n+\theta}\theta
+ \eeq
+ \beq \notag
+  \underline{\underline{B}}_j^{n+\theta} 
+  \equiv\frac{\underline{\underline{M}}_j^{n+\theta}}{\Delta t} 
+  -\theta\underline{\underline{Q}}_j^{n+\theta}
+ \eeq
+ \beq \notag
+  \underline{\underline{C}}_j^{n+\theta}\equiv
+  -\underline{\underline{R}}_{j+1}^{n+\theta}\theta
+ \eeq
+ \begin{multline} \notag
+  \underline{g}_j^{n+\theta}\equiv
+  \underline{\underline{P}}_{j-1}^{n+\theta}(1-\theta)
+  \underline{u}_{j-1}^n \\
+  +\left[
+  \frac{\underline{\underline{M}}_j^{n+\theta}}{\Delta t}
+  +\underline{\underline{Q}}_j^{n+\theta}(1-\theta)
+  \right]\underline{u}_{j}^n
+  \underline{\underline{R}}_{j+1}^{n+\theta}(1-\theta)
+  \underline{u}_{j+1}^n +\underline{S}_{exp,j}^{n+\theta},
+ \end{multline}
+ we can cast the last result into a compact matrix form:
+ \beq \label{m21}
+  \underline{\underline{A}}_j^{n+\theta}\underline{u}_{j-1}^{n+1}
+  +\underline{\underline{B}}_j^{n+\theta}\underline{u}_{j}^{n+1}
+  +\underline{\underline{C}}_j^{n+\theta}\underline{u}_{j+1}^{n+1}
+  - \underline{g}_j^{n+\theta} = 0
+ \eeq
+ which holds for all interior mesh point $j\ne 1,j\ne nj $.
+\end{itemize}
+
+\begin{itemize}
+ \item A similar approach is used to generate matrix equations for $j=1 $ and
+ $j=nj $ using the boundary conditions. 
+ \item Final assembly  results in a  Block tri-diagonal system :
+ \beq \label{m10}
+  \left (
+  \begin{matrix}
+   \underline{\underline{B}}_1^{n+\theta} &
+   \underline{\underline{C}}_1^{n+\theta} & 0& 0& 0\\
+   \underline{\underline{A}}_2^{n+\theta} &
+   \underline{\underline{B}}_2^{n+\theta} &
+   \underline{\underline{C}}_2^{n+\theta} & 0& 0 \\
+   0 &\underline{\underline{A}}_3^{n+\theta} &
+   \underline{\underline{B}}_3^{n+\theta} &
+   \underline{\underline{C}}_3^{n+\theta} & 0 \\
+   \vdots & \vdots &\vdots &\ddots & \vdots \\
+   0 & 0& 0& \hdots &\underline{\underline{B}}_{nj}^{n+\theta}
+  \end{matrix} \right )  
+  \left ( 
+  \begin{matrix}
+   \underline{u}_1^{n+1} \\
+   \underline{u}_2^{n+1} \\
+   \underline{u}_3^{n+1} \\
+   \vdots \\
+   \underline{u}_{nj}^{n+1} 
+  \end{matrix}
+  \right)  -
+  \left (
+  \begin{matrix}
+   \underline{g}_1^{n+\theta} \\
+   \underline{g}_2^{n+\theta} \\
+   \underline{g}_3^{n+\theta} \\
+   \vdots \\
+   \underline{g}_{nj}^{n+\theta}
+  \end{matrix}
+  \right ) = 0
+ \eeq
+ \item Each sub-matrix,$\underline{\underline{A}}$, $\underline{\underline{B}}$,
+ $\underline{\underline{C}} $ is $n+4$ by $n+4$, where $n$ is the number of ion
+ species and the 4 comes from the remaining dependent  variables
+ $(T_e,T,B_P,\omega)$.  The vector $\underline{u}_j$ contains the dependent
+ variables  at grid point $j$ and we have assumed a grid of size $nj$. 
+ \item Equation~\eqref{m10} represents the commmon set that
+ is solved using either a predictor corrector method
+ where the parameter $\theta = 0.5 $ or a fully implicit
+ method where $\theta =1 $.
+\end{itemize}
+\begin{itemize}
+ \item With $\theta = 1$, \Eqref{m10} represents a set of non-linear equations
+ of the form $F_i =0,\  i = 1\ldots(nj-1)(n+4)-1$  to be solved for ${n_i}_j$,
+ ${T_e}_j$, ${T_i}_j$, $(RBP)_j$, $\omega_j $ at each grid point $r_j,\
+ j=1\ldots nj$. Note that \Eqref{m10} represents the steady sate solution if
+ time derivative terms (associated matrices  M and g) are deleted. \item Such
+ sets of equations can be solved using a Newton type method enhanced with a
+ strategy that insures global convergence. Typically one minimizes the sum of
+ squares of residuals, $F^TF$, that result when an approximate solution is
+ substituted into \Eqref{m10}. 
+ \item We found that no single global strategy will work reliably with
+ confinement models such as GLF23 (which is part of matrix
+ $\underline{\underline{D}}$). Instead three methods are used in a round robin
+ type approach to generate the solution: %\tiny
+ \begin{itemize}
+  \item line search
+  \item and two trust region methods which change both
+  the stepsize and direction:
+  \begin{itemize}
+   \item dog leg
+   \item hook step
+  \end{itemize}
+ \end{itemize}
+\end{itemize}
+
+\begin{itemize}
+ \item Any of the three methods will satisfactorily solve the set of \Eqref{m10}
+ if  neoclassical transport is done. However for some turbulent confinement
+ models such as GLF23 none of the methods will work without help from the
+ others. This appears to be due to the fact that we encounter regions where the
+ functions $F_i $ are not well represented locally by a quadratic form which is
+ the basis of all the solution methods. 
+ \item An optimized  line search in the Newton direction is standard and is not
+ discussed here (see Nocedal et. al.)
+ \item The two trust region strategies solve the problem by limiting the length
+ of the step taken  as well as defining an intermediate direction between the
+ steepest descent and Newton directions.
+\end{itemize}
+
+\begin{itemize}
+ \item The absolute minima of the function 
+ \beq \label{nl10}
+  f(u) = \frac{1}{2}\sum{F_i(u)^2} 
+ \eeq
+ contain the solution(s) of \Eqref{m10}. The relative minima
+ also present in \Eqref{nl10} have the property that
+ at such points 
+ \beq \label{nl11}
+  \nabla f = \underline{\underline{J^T}}\ \underline{ F} = 0.
+ \eeq
+ But a  relative minimum has $\underline{F} \neq 0 $ which implies that the
+ columns of J must be linearly dependent at such points. Such singular J would
+ also cause our solution method to fail or produce poor steps. Hence the
+ Jacobian is perturbed away from such points by adding a minimal perturbation to
+ the diagonals that insures that J has an acceptable condition number.
+\end{itemize}
+
+\begin{itemize}
+ \item  The local linear representation of  the set of \Eqref{m10}:
+ \beq \label{nl20a}
+  \underline{ F(\underline{u_c}+\underline{s} )} =
+  \underline{ F(\underline{u_c})} 
+   +\underline{\underline{J(\underline{u_c})}}\ \underline{ s}
+ \eeq
+ leads to the Newton 
+ step $ \underline{s}$ to be taken from the current approximate
+ solution point $\underline{u_c}$  by solving
+ \beq \label{nl15}
+  \underline{\underline{J(\underline{u_c})}}\ \underline{ s} = 
+  - \underline{ F(\underline{u_c})}
+ \eeq
+ \item To introduce higher order terms in the global strategy that allow for a
+ deviation from the Newton direction we note that the quadratic form %\small
+ \beq \label{nl20}
+  \frac{1}{2}{\underline{ F(\underline{u_c}+\underline{x}
+  )}}^T \underline{ F(\underline{u_c}+\underline{x} )} =\frac{1}{2} 
+  \underline{ F^T}\underline{ F} +\left (
+  \underline{\underline{J^T}} \underline{ F}\right )^T 
+  \underline{x}
+  +\frac{1}{2} \underline{x^T}\underline{\underline{J^T}}
+   \underline{\underline{J}}\underline{x} 
+ \eeq
+ is positive for all $ \underline{x} $  except the Newton solution $
+ \underline{x} = \underline{s} $ where its value is zero.
+\end{itemize}
+
+\begin{itemize} 
+ \item  The quadratic form, \Eqref{nl20} is closely related to the quadratic
+ form of $f$ defined in \Eqref{nl10}
+ \beq \label{nl30}
+  f(\underline{u_c}+\underline{x}) = f(\underline{u_c}) +\left (
+  \underline{\underline{J^T}} \underline{ F}\right )^T 
+  \underline{x}
+  +\frac{1}{2}\underline{x^T}\underline{\underline{H}}\underline{x}
+ \eeq
+ where the Hessian $\underline{\underline{H}}$ is
+ $\underline{\underline{J^T}}\underline{\underline{J}} $ plus terms involving
+ the second derivative of $f$. To minimize $f$ we would look for the minimizer
+ of this local representation of $f$. \item The dogleg and hook step trust
+ region strategies are based on finding the minima in $f$ using the modified
+ form, \Eqref{nl20}, subject to the constraint that the step size is limited to
+ an a priori specified length, $\delta$. It can be shown that any such
+ constrained local minimizer of \Eqref{nl20} is in a direction that  decreases
+ the value of $f$ so long as the approximation to $\underline{\underline{H}}$ is
+ positive definite.
+ \item For the hookstep the solution is 
+ \beq \label{nl35}
+  \underline{x} = - \left (
+  \underline{\underline{J^T}} \underline{ J} + \mu
+  \underline{\underline{I}}\right )^{-1}
+  \underline{\underline{J^T}}\underline{ F},
+ \eeq
+ where $\mu_c \ge 0 $ is found iteratively so that 
+ $\left \| x  \right \| \approx  \delta $. For small $\mu $ we approach the
+ Newton direction while for large $ \mu $ the steepest decent direction  is
+ approached.
+\end{itemize}
+
+\begin{itemize} 
+ \item The dogleg method effectively  uses the  size of $\delta $ to
+ interpolate between the steepest descent and Newton
+ directions. The dogleg is less optimal than the hookstep
+ but the computations are less expensive. The Cauchy point
+ for the dogleg is defined as the minimizer of \Eqref{nl20}
+ in the steepest descent direction:
+ \beq \label{nl40}
+  \underline{x_{cp}} = \underline{u_c} + \lambda \nabla f(\underline{x_c}),
+ \eeq
+ where $\lambda = \frac{\left\|\nabla f\right\|_2^2}{\nabla f^T J^T J\nabla f}$.
+ The point N on the Newton path is some multiple 
+ $\left\|\underline{x_c}-\underline{x_{cp}} \right\| \le \alpha \le 1 $ of the Newton step
+ $ s = -J^T F $:
+ \beq
+  \underline{x_{N}} = \underline{u_c} \alpha \underline{s}.
+ \eeq
+ The value of $\alpha$ was originally set to 1. Experimentation has shown that
+ an optimal $\alpha$ is approximately $ \alpha = 0.8\gamma +0.2 $ where 
+ $\gamma \le 1 $ is the ratio of the Cauchy  step length to the Newton step
+ length.
+\end{itemize}
+
+\begin{figure}
+ \includegraphics[width=\textwidth]{dogleg.eps}
+ \caption{Diagram comparing the steepest descent and Newton step directions and lengths.}
+\end{figure}
+%\begin{itemize}
+% \item \ 
+% \resizebox{4.5 in}{4.5 in}{
+% \includegraphics{dogleg.eps}}
+
+%\end{itemize}
+
+\begin{itemize}
+ \item A major  advantage of the  fully implict approach described above is the
+ ability to generate a steady state solution directly. For the usual AT scenario
+ this involves finding quasi stationary profiles for temperatures, densities,
+ poloidal magnetic field, and toroidal momentum.  This can be done in
+ only a small fraction of the computational time that would be required in a
+ standard  approach and makes ``what if'' type investigations much more
+ accessible.  See Figs.~\ref{j_steady} and \ref{teti_steady}.
+\end{itemize}
+\begin{figure}
+ \includegraphics[angle=90,width=\textwidth]{curden.eps}
+ \caption{Comparison of starting profiles to steady-state current density profiles.\label{j_steady}}
+\end{figure}
+\begin{figure}
+ \includegraphics[angle=90,width=\textwidth]{teti.eps}
+ \caption{Comparison of starting profiles to steady-state profiles for $T_e$ and $T_i$.\label{teti_steady}}
+\end{figure}
+
+\begin{itemize}
+ \item  We have found that it is possible to solve the  nonlinear sets of
+ equations associated with stiff confinement models (that typically lead to
+ formation of internal transport barriers) using globaly convergent
+ modifications of the standard Newton method. In particular we find that ad hoc
+ modifications of the GLF23 confinement are not necessary in order to achieve
+ convergence.
+ \item Successful application of the method required that three approaches  be
+ used in a round robin type fashion to achieve convergence. In particular the
+ use of exisitng solvers that just implemented the line search method were found
+ to be unsatisfactory.
+ \item  The primary benefit of an  adaptive grid is that fewer grid points  can
+ be used. This leads to more rapid convergence of the non-linear iterations and
+ consequently can yield a significant decrease in computational time involved.
+ The dynamic adjustment  of the grid remains to be investigated.
+ \item Rapid determination of steady state results made  possible by a fully
+ implicit approach allows effeicient investigation of AT and other steady state
+ scenarios.
+ \item There are many aspects of this
+ problem which remain uninvestigated that could
+ conceivably improve the performance with a
+ minimal expenditure of code development time. 
+\end{itemize}
+
+\section{Adaptive Grid Method}
+
+\begin{itemize} 
+ \item Need a fully automatic robust method to generate a smooth radial (in $
+ \rho = \sqrt{\frac{\Phi}{\pi B_{T0}}}$ ) grid that will adapt itself to the
+ time dependent solution.
+ \item   The method used here defines the adaptation through
+ an independently specifiable positive definite
+ weight function $ W(\zeta,t) $, where $\zeta$ is a
+ normalized, uniformly spaced grid defined on $[0,1] $ 
+ and fixed for all times.
+
+ \item   We take the grid spacing in rho to be proportional to the $\zeta$ grid
+ spacing  and to the weight function $ W $.
+ \beq
+  \Delta \rho = c W \Delta \zeta   \nonumber 
+ \eeq
+ This suggests that a differential equation for the $\rho $ grid can be taken as
+ \beq
+  \ddiff{\zeta}\left (\frac{1}{W}\pdiff{\rho}{\zeta} 
+  \right ) = 0, \\   \label{weq}
+  \rho(0,t)=0, \rho(1,t)=\rho_a(t) ,
+  \rho(\zeta,0)=\rho_a(0)\zeta  \nonumber.
+ \eeq
+\end{itemize}
+
+\begin{itemize}
+ \item The actual form for $W $ used is a product of curvature and derivative
+ weightings :
+ \beq
+  W & = & (1+\beta|C_w|)D_w \label{weq2} \\
+  C_w & = & \frac{\displaystyle\pdiff{\rho}{\zeta}
+  \sum_i^n \beta_i \pdiffn {u_i(\rho,t)}{\zeta}{2}-
+  \sum_i^n \epsilon_i\left[\pdiff{u_i(\rho,t)}{\zeta}\right]^2}
+  {\displaystyle\left \{\left (\pdiff{\rho}{\zeta}\right )^2 +
+  \sum_i^n \epsilon_i\left[\pdiff{u_i(\rho,t)}
+  {\zeta}\right]^2 \right \}^{\frac{3}{2}}} \nonumber 
+ \eeq
+ \beq 
+  D_w & = & \frac{\displaystyle\pdiff{\rho}{\zeta}}
+  {\displaystyle\sqrt{\left (\pdiff{\rho}{\zeta}\right )^2
+  +\sum_i^n \epsilon_i 
+  \left[\pdiff{u_i(\rho,t)}{\zeta}\right]^2}} 
+  \nonumber
+ \eeq
+ The $\beta$, $\beta_i$, and $\epsilon_i $ are user selected weights that
+ determine the sensitivity to curvature and gradient effects in the dependent
+ variables $u_i$.  Originally only the derivative weighting was used. It was
+ found that this tended to put very small  and very large spacings adjacent in
+ the grid, which  can be problematic in calculating derivatives numerically.   
+\end{itemize}
+
+\begin{itemize}
+ \item This method fits in naturally with free boundary equilibrium and
+ transport coupled calculations where rho is generally a function of time. Thus
+ it is possible to adapt the grid not only for kinetic profile solutions but
+ also simultaneously for changes in the MHD equilibrium properties, using the
+ weight function $ W(\zeta,t) $ and the boundary condition of $\rho $,
+ \Eqref{weq}.
+ \item The sources of movement of the grid are twofold:
+ \begin{enumerate}
+  \item The solution of of \Eqref{weq} at time $t +\Delta t$ will be different
+  from the solution at time $t$ even if $ \rho_a(t) $ is constant so long as the
+  profiles, $ u_i $, evolve.
+  \item The value of the plasma radius at time t as determined from a free
+  boundary equilibrium code.
+ \end{enumerate}
+\end{itemize}
+
+\begin{figure}
+ \includegraphics[angle=90,width=\textwidth]{sh97_2.eps}
+ \caption{The $T_e $ profile which results from  localized heating for the
+ adaptive 51 pt (red) and uniform 201 pt (blue) $\rho $ grids.\label{fig1}}
+\end{figure}
+\begin{figure}
+ \includegraphics[angle=90,width=\textwidth]{sh97_1.eps}
+ \caption{The adaptive (red) and uniform (blue) rho grids and the derivatives
+ $\pdiff{\rho}{\zeta} $ (dashed) as a function of $\zeta$.\label{fig2}}
+\end{figure}
+\begin{itemize}
+ \item As an \emph{illustrative} example consider the adaptation of the $\rho$
+ grid to the electron temperature profile generated by a localized source of ECH
+ heating, see Figs.~\ref{fig1} and \ref{fig2}.
+ \item   The blue curve in Fig.~\ref{fig1} is the solution of \Eqref{weq}
+ with constant $W $:
+ \beq
+  \rho(t)=\rho_a(t)\zeta
+ \eeq
+ and represents uniform grid spacing at any time $t$ since the $\zeta$ grid is
+ uniform. The red curve represents the final solution of \Eqref{weq}, with the
+ time dependent weight function given by \Eqref{weq2}. The change in slope of
+ the $\rho $ curve represents a change in grid spacing. Thus whenever
+ $\pdiff{\rho}{\zeta} $ is greater than the constant slope of the uniform case
+ we have expansion of the grid and when  $\pdiff {\rho}{\zeta} $ is less than
+ the  constant slope of the uniform case the grid is compressed compared to the
+ original uniform starting grid.
+
+ The evolvement of the $\rho $ grid is determined by the time derivative of
+ \Eqref{weq}:
+ \beq
+  \ddiff{t} \left (
+  \ddiff{\zeta}\left (\frac{1}{W}\pdiff{\rho}{\zeta} 
+  \right )\right ) = 0  \label{weq3}
+ \eeq
+ The general solution of this equation is
+ \beq
+  \rho(\zeta,t)=h(t)\int_0^\zeta W(\zeta,t)d\zeta +F(t)  \label{eqn0},
+ \eeq
+ where $h(t)$ is independent of $\zeta $. The boundary condition at $\zeta =0$
+ implies $F(t) \equiv 0 $ and at $\zeta=1 $ we must have 
+ \beq
+  h(t)\int_0^1 W(\zeta,t)d\zeta = \rho_a(t) \label{eqnw}.
+ \eeq
+ \end{itemize}
+
+ \begin{itemize}
+ \item   In practice we use the normalized 
+ weight  function $W^* $ so that \Eqref{eqnw} is automatically
+ satisfied:
+ \beq
+  W^*(\zeta,t)=\frac{\rho_a(t)W(\zeta,t)}{\int_0^1 W(\zeta,t)d\zeta}.
+ \eeq 
+ \item To advance the $\rho$ grid in time we use the expression
+ \beq
+  \rho(\zeta,t+\Delta t)=\rho(\zeta,t)+
+  s_\rho\pdiff{\rho}{t}\bigg \vert_\zeta \Delta t,
+              \label{srhoeq}
+ \eeq
+ where the derivative is obtained from
+ \beq
+  \pdiff{\rho}{t}\bigg \vert_\zeta = 
+    \int_0^\zeta \pdiff{W^*(\zeta,t)}{t}d\zeta
+  \label{drhodt}.
+ \eeq    
+ \item The time derivative of W comes from  the original  dependent variables
+ $u_i$ where $i$ ranges over particle densities, electron and ion temperatures, Faraday's law, and toroidal rotation as well as $\rho$, see \Eqref{weq2}.
+ Hence we see that the $\rho  $ grid will adjust itself, at any fixed $\zeta$ 
+ grid point,  with a speed that depends on how rapidly the selected profiles are
+ changing in time at that same value of $\zeta$.  
+\end{itemize}
+
+\begin{itemize}
+ \item   Each of the dependent variables  must be  available on the appropriate
+ $\rho$ grid. This typically entails interpolation of  these quantities from one
+ grid to the next and adds some overhead to the calculations. This overhead is
+ generally (but not always at this time)  compensated by increased accuracy and
+ reduced iteration count required compared to a similar solution method which 
+ uses more grid points to achieve the same  accuracy and stability.
+ \item  To obtain the $\rho$ grid at any given time we have
+ the following algorithm:  
+ \begin{enumerate}
+  \item Given $u_i^n(\rho,t)$ at time point $n$ and the grid $\rho^n(\zeta,t)$
+  obtain $u_i^{n+1}(\rho,t)$ by using a predictor method (see below).
+  \item Interpolate the predicted solution onto the $\zeta$ grid.
+  \item Obtain a new $\rho $ grid by solving \Eqref{eqn0}. The time dependence 
+  is from the predictor step.
+  \item Interpolate $u_i^{n+1}(\rho,t) $ onto the new  $\rho^{n+1}$ grid.
+  \item iterate the above steps until converged.
+ \end{enumerate}     
+\end{itemize}
+
+\begin{itemize}
+ \item To account for the evolvement of $\rho$ from the initial prescribed
+ $\rho$ grid (which may or  may not be uniform) to an adaptive, moving grid the
+ time derivative of the transport quantities $u_i$ at constant $\rho$ is changed
+ to one at constant $\zeta$ using the relationship 
+ \beq
+  \pdiff{u_i}{t}\pmb{\bigg \vert_\rho} = 
+  \pdiff{u_i}{t} \pmb{\bigg \vert_\zeta} 
+  -   \bigg (  \pdiff{u_i}{\rho}\pmb{\bigg \vert_t}\bigg ) 
+  \bigg(\pdiff{\rho}{t}\pmb{\bigg \vert_\zeta} \bigg ) .
+ \eeq 
+ The transformed  diffusion equations will thus have additional source terms due
+ to the moving $\rho$ grid.
+\end{itemize}

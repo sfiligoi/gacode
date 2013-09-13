@@ -279,12 +279,6 @@ subroutine gyro_read_input
   ! DONE reading data.
   !--------------------------------------------------------
 
-  !-------------------------------------------------------- 
-  ! Set interface parameters not available via INPUT
-  n_fourier_geo = 0
-  a_fourier_geo(:,:) = 0.0
-  !--------------------------------------------------------
-
   if (i_proc == 0) close(1)
 
   if (debug_flag == 1 .and. i_proc == 0) then

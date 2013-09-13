@@ -25,6 +25,11 @@ subroutine tgyro_residual(f,g,res,n,method)
      ! SQUARE RESIDUAL
      res = 0.5*(f-g)**2
 
+  case (4)
+
+     ! BALANCED
+     res = (f-g)**2/MAX((f**2+g**2),1.0)
+
   case default
 
      print *,'Error in tgyro_residual'

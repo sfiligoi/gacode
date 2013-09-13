@@ -1,0 +1,735 @@
+\renewcommand{\textfraction}{0.15}
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\bottomfraction}{0.65}
+\renewcommand{\floatpagefraction}{0.60}
+
+\section{MHD}
+
+The flux surface average geometry dependent factors appearing in the above
+equations are defined as 
+$$  
+ F=R_0 B_{t0}/f(\psi(\rho)),\qquad  
+ G=\langle(\nabla\rho)^2R_0^2/R^2\rangle,\qquad   
+ H = F/\langle R_0^2/R^2\rangle,
+$$
+where the angle brackets denote the usual flux surface averaging, $ R_0$ is the
+major radius at which the vacuum magnetic toroidal field is given as $B_{t0}$,
+$R$ is the major radius coordinate to a a point on a flux surface (in the output
+of \ot these quantities are labeled fcap, gcap, and hcap, respectively). The
+independent radial coordinate used in the diffusion equations is defined as
+\beq
+ \rho=\sqrt{\frac{\Phi}{\pi B_{t0}}}.
+\eeq
+Here $\Phi $ is the toroidal flux inside a given flux surface.
+
+There are currently three methods of running mhd calculations in \ot: single
+cyclic reduction (used primarily in the free boundary equilibrium cases),
+successive over relaxation (used primarily in the fixed boundary cases), and the
+Green's function solution  (which is too slow for routine usage but provides a
+check on  other methods). Two other methods, the time dependent eqdsk method,
+and the static equilibrium method, do not solve the Grad-Shafranov equation at
+all.
+
+\subsection{CYCRED}
+
+CYCRED refers to the single cyclic reduction scheme used in \ot to solve the
+Grad-Shafranov equation. I designed the cycred subroutine especially with the
+idea that the FACR(l) method (i.e. Fourier Analysis combined with cyclic
+reduction to level l, which is the fastest known method if the grid is fine
+enough) would eventually be implemented. The method is usually used to determine
+the contribution to the poloidal flux due to the plasma current only.
+Contributions from external coils are added in using the Greens function method.
+Note that using single (as opposed to double) cyclic reduction eliminates the
+restriction on the grid size in the non reduced dimension (in this case R). 
+Hence 90 by 129 eqdsks have been generated on occasion. Additionally the
+solution is somewhat faster than in the double cyclic reduction case. This is
+due to the fact that after a reduction in the Z direction the resulting set of
+equations is tridiagonal and can be solved very efficiently with a standard
+(pivoting) tridiagonal solver.
+
+\subsection{SORPICRD}
+SORPICRD refers to successive over relaxation and Picard iteration. I developed
+this method to handle cases where the plasma boundary is known and fixed for all
+times. The method uses variable finite difference expressions to accommodate the
+plasma boundary. We may add the faster (algebraic) multi-grid method at some
+point in the future since subroutines are now available. Inverse methods could
+also be used advantageously here.
+
+\subsection{GREEN}
+GREEN refers to the Greens function solution method.  A fundamental solution of
+the Grad-Shafranov equation is obtained  by solving
+\beq
+ \nabla ^* G =\frac{\delta (R-R_0) \delta(Z-Z_0)} {2\Pi R} \label{eeq}
+\eeq
+\begin{equation*}
+ G(R=0,Z)=0,\ \ \  G(R,Z) @>>{R,Z \Rightarrow \infty}> 0.
+\end{equation*}
+The substitution $ G=RA(R,Z)$ yields the equation
+\[  
+ \overbrace{\frac{\partial^2 A}{\partial{ R^2}}+\frac{1}{R}\pdiff{A}{R} 
+  -\frac{A}{R^2}  }^{B_1}
+ +\frac{\partial^2 A}{\partial{ Z^2}}
+ =\frac{\delta (R-R_0) \delta(Z-Z_0)}{2\Pi R^2} .
+\]
+Here $B_1$ is Bessel's operator which can be Hankel transformed 
+$(R\Rightarrow \zeta)$. A subsequent Fourier transform $(Z \Rightarrow s)$ 
+leads to the expression
+\[
+ A(\zeta,s) = -\frac{J_1(R_0\zeta)}{R_0 (2\pi)^{\frac{3}{2}}} 
+  \frac{e^{isZ_0}}{(s^2+\zeta^2)}.
+\]
+Inversion of the Fourier and Hankel transforms then yields the fundamental
+solution
+\beq
+ G^*=\frac{1}{\pi}\sqrt{\frac{R}{R_0}}\frac{1}{k}
+ \left\{ E(k)-(1-\frac{1}{2}k^2)K(k) \right\}
+\eeq
+\[
+ x=\frac{(Z-Z_0)^2+R_0^2+R^2}{2R_0R}, \qquad
+ k^2=\frac{2}{x+1},\qquad G^*=2\pi R_0G.
+\]
+Here $E(k) $ and $K(k)$ are the incomplete  elliptic functions which are
+evaluated numerically using the rational fits in Abramowitz\cite{Abramowitz}.
+For any toroidal current density the poloidal flux (divided by $ 2\pi $) is then
+found by evaluating  the integral
+\beq
+ \Psi(R,Z)=-\mu_0\int R_0J_\phi(R_0,Z_0)G^*(R,Z;R_0,Z_0)dR_0dZ_0
+\eeq
+The finite cross sectional area of  each toroidal field coil cannot be
+neglected. Consequently the  current density $J_\phi $ is modeled as a sum of
+filaments, each with its own $(R_0,Z_0)$. For any given machine the
+contribution of the coils can be calculated a priori and this information is
+stored in the Greens Table.  The method can be used with the plasma current as
+well although in practice it is too slow. Instead we use a finite difference
+form of the Grad Shafranov equation to determine that part of the poloidal flux
+which is due to the plasma current.  
+
+\subsection{Current Hole Equilibria}
+
+The Greens function solution method, \Eqref{eeq}, lends some insight into the
+possibility of generating a current hole equilibrium. Any solution for
+$\Psi(R,Z)$, must satisfy the boundary condition that $\Psi =0 $ at the symmetry
+axis and at infinity. This condition is built into the integral equation,
+\Eqref{eeq}. The integration over $(R,Z)$ in \Eqref{eeq} can be broken up
+into three regions: 1) $\Omega_1$, the force free region, 2) $\Omega_2$, the
+region inside the plasma but outside the current hole, and 3) $\Omega_3$, the
+region outside the plasma that extends to infinity. The integral representation
+of $\Psi$ can then be written as  
+\begin{multline}
+ \Psi(R,Z)=-\mu_0\int_{\Omega_1} R_0J_\phi(R_0,Z_0)G^*(R,Z;R_0,Z_0)dR_0dZ_0 \\
+           -\mu_0\int_{\Omega_2} R_0J_\phi(R_0,Z_0)G^*(R,Z;R_0,Z_0)
+\end{multline}
+The integral over region 1 vanishes since J is zero there. The integral over
+region 3 consists of currents flowing in external coils and hence can be
+considered to be known a priori. The interesting part is the region 2 integral
+which we view as a nonlinear integral equation for $\Psi$. In this region 
+$J_\phi $ must have the well known form :
+\beq
+ J_\phi(R_0,Z_0) = R\pdiff{P}{\Psi} -\frac{F\pdiff{F}{\Psi}}{\mu_0 R}.
+\eeq
+The pressure P and toroidal flux function $F\pdiff{F}{\Psi} $ can be
+parameterized in tems of n unknown constants. For example suppose we model P and
+$F\pdiff{F}{\Psi} $ as splines with n and m knots respectively. The objext is
+then to find the value of the pressure and $F\pdiff{F}{\Psi} $ at each of the n
+and m knot locations respectively. This can be done by supllying n+m equations
+to solve for these n+m unknowns.
+
+One way to get these n+m equations is to pick n+m points on the contour of
+$\Psi$ that separates reqions $\Omega_1$ and $\Omega_2$. On this contour $ \Psi
+= \Psi_c $ and hence we have n+m equations of the form
+\begin{multline}
+ \Psi_c =-\mu_0\int_{\Omega_1} R_0J_\phi(R_0,Z_0)G^*(R_i,Z_i;R_0,Z_0)dR_0dZ_0\\ 
+         -\mu_0\int_{\Omega_2} R_0J_\phi(R_0,Z_0)G^*(R_i,Z_i;R_0,Z_0)dR_0dZ_0
+\end{multline}
+where i ranges from 1 to n+m.
+Because the spline parametrization is done  in terms of
+normalized $\Psi $ these equations are in fact nonlinear such that 
+an iterative solution is called for. But this can be done
+using existing tools available, for example, in \ot.
+
+\subsection{TDEM}\label{tdem}
+The idea behind  TDEM (i.e. Time Dependent Eqdsk Mode) is that  often a
+significant amount of effort has ben made in generating equilibria for
+confinement analysis. These equilibria are  subsequently not used in any
+transport studies. Rather, if time dependent MHD information is to be included
+in the transport model, then it is generated anew inside the transport code.
+This is a non interactive process and generally will not be able to match the
+finely tuned equilibria already available without a significant amount of
+additional effort. The TDEM mode allows us to circumvent this process by using
+the previously available  eqdsk to generate the space and time dependent
+coefficients required in the diffusion equations a priori.
+
+To use TDEM in \ot a file, \emph{shotno.tdem}, in netcdf format, containing the
+required space and time dependent information must first be created. Netcdf is
+used so that this file can be easily  read by other codes (e.g. IDL) as well as
+archived.  This file is generated outside of \ot using the FORTRAN code MEPC and
+a graphical front end, MEPC.tcl. To generate the file start up MEPC.tcl and
+click the help button which will provide all necessary information. Briefly, you
+use MEPC.tcl to generate a file, \emph{??} that contains a list of eqdsks to be
+processed. MEPC.tcl then passes this list to MEPC which does the actual
+calculations and writes the file \emph{??}. A partial third namelist for \ot is
+also created, in the file \emph{??} . You must copy this information  into the
+third namelist of your \ot input file, \emph{inone}. The TDEM mode is invoked by
+setting  \texttt{mhdmethod = `tdem', ieqdsk = 0,ifixshap = 0,} and
+\texttt{mhdmode = `no\_coils'}.
+
+\subsection{Non Uniform Grid and Fixed Boundary Calculations}
+
+Solving the Grad-Shafranov equation in cylindrical coordinates can be done
+efficiently if the edge of the plasma is approximated by a stair step type
+boundary. However this approximation is not always satisfactory and we would
+like to  have a more accurate representation of the boundary. Inverse solvers
+don not have this problem but typically need a direct solver to supply
+information to other codes  (e.g. the ray tracing codes curray and Toray and the
+neutral beam code Freya).
+
+In \ot the plasma boundary is accommodated in a direct solver by using variable
+spacing in the $(R,Z) $ grid for points adjacent to the plasma boundary. The
+boundary thus becomes part of the computational grid in much the same way as it
+does for the rectangular boundary case. In this section we document how this is
+accomplished computationally and describe some routines that are useful when
+dealing with equilibrium files (eqdsks) that were generated using this method.
+Because the number of radial grid points inside the plasma will vary as a
+function of height $Z$ (and vice versa) we lose the  regular structure that
+allows application of fast Poisson solvers (e.g. cyclic reduction). This can be
+compensated by the relative ease with which  applicable solvers, such as
+successive over relaxation, can be run in parallel however.  
+
+Consider the standard $(R,Z)$ grid with nw radial and nh vertical grid points.
+The object of a fixed boundary direct solver is to find $\psi(R,z) $ by solving
+the G.S. equation with the plasma boundary fixed and known a priori. Hence this
+becomes a simple, elliptic, boundary value problem. For computational purposes
+we define an index, $k= (i-1)*nh + j $, that will identify any grid point
+$(R_i,Z_j),\  i \in 1..nw, j \in 1,,nh $ within the computational domain. The
+first step is to define an indicator array, called \texttt{wzero} in \ot, such
+that \texttt{wzero(k)=1} if point k is inside the plasma and 
+\texttt{wzero(k)=0} if point k is outside the plasma or on the plasma
+boundary. The determination  of wzero is a standard application of concepts from
+computational geometry and is not discussed here.
+
+All points in the computational domain, but not on the rectangular boundary of
+the $(R,Z)$ grid, will be surrounded by four neighboring points. For grid point
+l these neighboring points are designated by lb, ll, lt, and lr for bottom,
+left, top, and right respectively.
+\begin{figure}[hbt] %note: figure environment not available in slides
+ \centering 
+ \begin{narrow}{-.50in}{0in}   
+  \mbox{\epsfig{file=grdi.eps,height=3in,width=6in}}
+  \caption{Irregular grid near plasma boundary. $\lambda_{ll}\Delta R$
+  is the distance that boundary point a is to the left of grid point l. Similar
+  definitions hold for the remaining $\lambda$}
+ \end{narrow} 
+ \label{mhd:f1}
+\end{figure}
+
+In terms of our single indexing scheme point ll has
+index l-nh, point lt has index l+1,point lr has index l+nh and point lb
+has index l-1. The computation thus proceeds as follows. For each
+point k with \texttt{wzero(k)==1} we check the four neighboring points. Any of
+the neighboring points that are outside(or on)  the plasma will have
+\texttt{wzero ==0}. This indicates that the grid spacing for that point,
+relative to the central point l, will have to be adjusted. There are
+in fact 16 possibilities (the number of combinations of 4 points
+taken  1, 2, 3, and 4 at a time) that need to be recognized as shown in
+the following code segment:
+
+\tiny
+\begin{verbatim}
+c  there are 16 cases to be accounted for:
+c  ll  lt  lr  lb
+c   1   1   1   1       case 15 all points inside
+c   1   1   1   0            14 lb outside
+c   1   1   0   1            13 lr outside
+c   1   1   0   0            12 lr,lb outside
+c   1   0   1   1            11 lt outside
+c   1   0   1   0            10 lt,lb outside
+c   1   0   0   1             9 lt,lr outside
+c   1   0   0   0             8 lt,lr,lb outside
+c   0   1   1   1             7 ll outside
+c   0   1   1   0             6 ll,lb outside
+c   0   1   0   1             5 ll,lr outside
+c   0   1   0   0             4 ll,lr,lb ouside
+c   0   0   1   1             3 ll,lt outside
+c   0   0   1   0             2 ll,lt,lb outside
+c   0   0   0   1             1 ll,lt,lr outside
+c   0   0   0   0             0 ll,lt,lr,lb outside
+c
+c  case 10 has no vertical extent and is pathological
+c        5        horizontal
+c        0        vertical and no horizontal 
+\end{verbatim}
+\normalsize
+%\enlargethispage{50pt}
+We find the intersection of the plasma boundary contour with the $ R,Z $ grid
+lines using computational geometry methods . From these intersections we define
+the four parameters
+${\lambda_{lb},\lambda_{ll},\lambda_{lt},\lambda_{lr}}$
+associated with each grid point l. These four parameters represent the fraction
+of the uniform $ \Delta R $ and $ \Delta Z $ grid spacing associated with each
+of the points surrounding point l. For example, if all four neighboring points
+of point l are inside the plasma then all the $\lambda $ are 1.0. If point ll is
+outside the plasma (l itself is inside of course) then the boundary contour
+crosses the radial line segment between point ll and point l and hence  the
+actual distance to the boundary will be less than $ \Delta R $ . $\lambda_{ll}$
+then gives the actual fraction of $\Delta R$ that the boundary lies from point l
+in the direction of point ll. Similar definitions hold for the other three
+values of $\lambda $. Given the distances that the neighboring grid points are
+from point l we can define a consistent set of first and second derivatives of
+$\Psi $ by expanding $\Psi $ in a Taylor series about the point l:
+\begin{multline}
+ \Psi(R_i+r,Z_j+z) = \Psi(R_i,Z_j) + \pdiff{\psi}{R}r+
+ \pdiff{\psi}{Z}z  + 0.5 \pdiffn{\Psi}{R}{2}r^2\\
+ +  0.5 \pdiffn{\Psi}{Z}{2}z^2 +\ddiff{R}\ddiff{Z}\Psi \ rz\label{e1}
+\end{multline}
+
+The coordinates $(r,z)$ are to be taken as corresponding to the four neighboring
+points relative to the central point l:
+\beq
+\Psi_{ll}(-\lambda_{ll}\Delta R,0)  \\
+\Psi_{lt}(0,\lambda_{lt}\Delta Z)         \\
+\Psi_{lr}(\lambda_{lr}\Delta R,0)  \\ 
+\Psi_{lb}(0,-\lambda_{lb}\Delta z) .
+\eeq
+Applied at the four neighboring points ${lb,ll,lt,lr}$ the mixed second
+derivative contribution  in the Taylor series  is thus  zero since either $r$ or
+$z$  is zero. The remaining derivatives in the Taylor series expansion (all
+evaluated at grid point l) are  the (4) unknowns. Hence we need to solve the 4
+by 4 system
+\beq
+ -\pdiff{\Psi}{R} \lambda_{ll} \Delta R 
+ +\frac{1}{2}\pdiffn{\Psi}{R}{2}(\lambda_{ll}\Delta R)^2 = \Psi_{ll} - \Psi_l \\
+ \pdiff{\Psi}{Z} \lambda_{lt} \Delta Z 
+ +\frac{1}{2}\pdiffn{\Psi}{Z}{2}(\lambda_{lt}\Delta Z)^2 = \Psi_{lt} - \Psi_l \\
+ \pdiff{\Psi}{R} \lambda_{lr} \Delta R 
+ +\frac{1}{2}\pdiffn{\Psi}{R}{2}(\lambda_{lr}\Delta R)^2 = \Psi_{lr} - \Psi_l \\
+ -\pdiff{\Psi}{Z} \lambda_{lb} \Delta Z 
+ +\frac{1}{2}\pdiffn{\Psi}{Z}{2}(\lambda_{lb}\Delta Z)^2 = \Psi_{lb} - \Psi_l
+\eeq
+for the derivatives
+${\pdiff{\Psi}{R},\ \pdiff{\Psi}{Z},\ 
+  \pdiffn{\Psi}{R}{2},\ \pdiffn{\Psi}{Z}{2}} $
+for each grid point l that is in the vicinity of the plasma boundary. For points
+where all $\lambda = 1$ this is not necessary since the standard diamond
+difference scheme then supplies the values for the first and second derivatives.
+The required solution is
+\beq
+ \pdiff{\Psi}{R}\pmb{\bigg \vert_l}&  = &
+ -\frac{-\Psi_{lr}\lambda_{ll}^2 + \Psi_l\left ( \lambda_{ll}^2
+  -\lambda_{lr}^2\right )+\lambda_{lr}^2\Psi_{ll}}{\lambda_R\Delta R} \\
+ \pdiff{\Psi}{Z}\pmb{\bigg \vert_l} &  = &
+ \frac{\Psi_{lt}\lambda_{lb}^2 + \Psi_l\left ( \lambda_{lt}^2
+  -\lambda_{lb}^2\right )-\lambda_{lt}^2\Psi_{lb}}{\lambda_Z \Delta z}\\
+ \pdiffn{\Psi}{Z}{2}\pmb{\bigg \vert_l}&  = & -2
+ \frac{-\Psi_{lt}\lambda_{lb} + \Psi_l\left (\lambda_{lt}+\lambda{lb}
+  \right ) -\lambda{lt}\Psi_{lb}}{\lambda_Z (\Delta Z)^2} \\
+ \pdiffn{\Psi}{R}{2}\pmb{\bigg \vert_l}&  = & -2
+ \frac{-\Psi_{lr}\lambda_{ll} + \Psi_l\left (\lambda_{ll}+\lambda{lr}
+  \right ) -\lambda{lr}\Psi_{ll}}{\lambda_R (\Delta R)^2} \\
+ \lambda_R &  = & \lambda_{ll}\lambda{_lr}(\lambda_{ll}+\lambda{lr}) \\
+ \lambda_Z &  = & \lambda_{lb}\lambda{_lt}(\lambda_{lb}+\lambda{lt}).
+\eeq
+Note that these derivatives reduce to the standard, second order, finite diamond
+difference scheme when  all the $ \lambda $ are equal to 1.  Hence we have a
+simple method for incorporating the boundary  but retaining the cylindrical
+$(R,Z)$ grid. 
+
+One additional complication is that the points inside the plasma are renumbered
+so that we generate equations only for those points that we actually will  find
+a value of $\Psi$ for. This array, called \texttt{map(m)}, m =1,..nw*nh, in \ot
+is defined so that \texttt{map(k)=j} means that the grid point numbered k in the
+rectangular computational domain is actually grid point number j when we solve
+the discretized GS equation. The solution of the resulting set of equations can
+be done most easily with an iterative technique such as SOR.
+
+Since most codes that \ot uses (e.g. Freya, Toray, Curray, etc.) routinely
+require the solution $\Psi$ in the entire rectangular domain we also need to
+find the solution outside the plasma. Thus in the region outside the plasma, but
+inside the rectangular domain, we solve the equation ${\nabla}^{*} \Psi =0.0 $
+with the known value of $\nabla\Psi$ on the plasma boundary and some known
+values of $\Psi $ on the rectangular $(R,Z)$ boundary. Typically these later
+boundary points are assumed to be time independent and given by the solution of
+the complete free boundary value problem (as determined by EFIT for example).
+
+The user can verify that the discretized GS equation now takes the
+form
+\begin{subequations}\label{mhd:eq}
+ \begin{gather}
+  F_l \equiv \Psi_{ll}\alpha_{ll} +\Psi_l\alpha_l +\Psi_{lr} \alpha_{lr} +
+   \Psi_{lt} \alpha_{lt} + \Psi_{lb}\alpha_{lb} -S_l(\Delta R)^2 = 0  
+   \label{mhd:eq1}\\
+  S_l = -\mu_0R^2\pdiff{P}{\Psi}\pmb{\bigg \vert_l}
+   -f\pdiff{f}{\Psi}\pmb{\bigg \vert_l}
+   \label{mhd:eq2}     \\
+  \alpha_{ll} =2\frac{\lambda_{lr}}{\lambda_r} + \Delta R
+   \frac{\lambda_{lr}^2}{\lambda_r R_l}
+   \label{mhd:eq3}\\
+  \alpha_{lr} = 2\frac{\lambda_{ll}}{\lambda_r} - \Delta R
+   \frac{\lambda_{ll}^2}{\lambda_r R_l} 
+   \label{mhd:eq4}\\
+  \alpha_{lt} = 2\frac{\lambda_{lb}}{\lambda_z}
+   \left (\frac{\Delta R}{\Delta z} \right)^2
+   \label{mhd:eq5}\\
+  \alpha_{lb} = 2\frac{\lambda_{lt}}{\lambda_z}
+   \left (\frac{\Delta R  }{\Delta z} \right)^2
+   \label{mhd:eq6}\\
+  \alpha_l = -2\frac{\lambda_{ll}+\lambda_{lr}}{\lambda_r} + \Delta R
+   \frac{\lambda_{ll}^2-\lambda_{lr}^2}{\lambda_r R_l} 
+   -2\frac{\lambda_{lt}+\lambda_{lb}}{\lambda_Z}
+   \left( \frac{\Delta R}{\Delta Z} \right)^2
+   \label{mhd:eq7}
+ \end{gather}
+\end{subequations}
+Here $F_l$ labels the GS equation for grid point (i,j) where $l=(i-1)*nh+ j $
+and we assume that there are nw radial and nh vertical grid points. The non
+linearity in the source term, $S_l$, in \Eqrefs{mhd:eq1}{mhd:eq2} can be handled
+using Picard (also called successive substitution) iteration and this option
+exists in \ot. However it is possible to apply a globally convergent Newton
+based  approach to these equations as follows.
+
+Let us suppose that for the usual nw (in R) by nh (in Z) grid there are n grid
+points interior to the plasma for which we wish to find a solution. Typically $
+n = \zeta*nw*nh $ where $\zeta \approx 0.8$ . Hence we have to solve an n by n
+system of equations that is both large and sparse. Each of these equations has
+the form given by \Eqref{mhd:eq1}. The n by n Jacobian of this system will have
+entries of the form
+\begin{subequations}\label{mhd:J}
+ \begin{gather}
+  J(l,l) \equiv \pdiff{F_l}{\Psi_l} = 1.-\frac{(\Delta R )^2}{\alpha_l}
+   \pdiff{S_l}{\Psi_l}              \label{mhd:J1}      \\
+  J(l,l-nh) \equiv \pdiff{F_l}{\Psi_{ll}} =
+   \frac{\alpha_{ll}}{\alpha_l}
+   -\frac{(\Delta R )^2}{\alpha_l} \pdiff{S_l}{\Psi_{ll}} \label{mhd:J2} \\
+  J(l,l+nh) \equiv \pdiff{F_l}{\Psi_{lr}} =
+   \frac{\alpha_{lr}}{\alpha_l}
+   -\frac{(\Delta R )^2}{\alpha_l} \pdiff{S_l}{\Psi_{lr}} \label{mhd:J3} \\
+  J(l,l+1) \equiv \pdiff{F_l}{\Psi_{lt}} =
+   \frac{\alpha_{lt}}{\alpha_l}
+   -\frac{(\Delta R )^2}{\alpha_l} \pdiff{S_l}{\Psi_{lt}} \label{mhd:J4} \\
+  J(l,l-1) \equiv \pdiff{F_l}{\Psi_{lb}} =
+   \frac{\alpha_{lb}}{\alpha_l}
+   -\frac{(\Delta R )^2}{\alpha_l} \pdiff{S_l}{\Psi_{lb}}  \label{mhd:J45}
+ \end{gather}
+\end{subequations}
+Because the source term $S$ is evaluated at grid point l all derivatives
+of S with respect to the other grid points vanish and hence this term
+survives only in \Eqref{mhd:J1}.  Typically the terms
+$\pdiff{P}{\Psi}$ and $f\pdiff{f}{\Psi} $ that S contains are
+parameterized in terms of a normalized $ \bar{\Psi}$ and the
+dependence of $\bar{\Psi} $ on the values of $\Psi$ distributed over
+the grid must be included in \Eqref{mhd:J1}. Hence we have
+\beq
+ \pdiffz{S_l}{\Psi_l}{total} = \pdiff{S_l}{\Psi_l} + \pdiff{S_l}{\bar{\Psi}}
+ \pdiff{\bar{\Psi}}{\Psi_l}
+\eeq
+
+Typically the magnetic axis is found by fitting a bicubic spline to the current
+estimate of $\Psi $ over the (R,Z) grid and then searching for the location
+where $\nabla \Psi =0$. This creates an analytically intractable dependence of
+$\bar{\Psi}$ on $\Psi_l $ however. Furthermore resolving this dependency
+numerically would be too costly since it leads to filling in many of the
+elements  in the otherwise sparse Jacobian.  It is in fact possible to create an
+approximation to  the true Jacobian by simply neglecting the term
+$\pdiff{S_l}{\bar{\Psi}}$. This does not destroy the positive definiteness of
+the Jacobian so that we still obtain a direction that leads to decreasing the
+residuals $F_l$.  But in practice this slows down the convergence rate of the
+outer iterations to a degree where use of the Newton method is no longer
+attractive.
+
+The alternative used in \ot is to create a 12 point stencil centered
+on the location of the magnetic axis as shown in Fig. \ref{eq:f1}.
+\begin{figure}%[hbt] %note: figure environment not available in slides
+ \centering 
+ %\begin{narrow}{-.50in}{0in}   
+ \mbox{\epsfig{file=magax.eps,height=3in,width=4in}}
+ %\end{narrow}
+ \caption{Coordinates involved in determination of magnetic axis} 
+ \label{eq:f1}
+\end{figure}
+The fiducial point $k_a \equiv (i_a-1)*nh +ja $ is found as the lower
+left point of the rectangle \mbox{\{ka, ka+1, ka+1+nh, ka+nh\}}. This rectangle is
+is found by searching for two successive R grid points where
+$\pdiff{\Psi}{R} $ changes sign and two successive z points where
+$\pdiff{\Psi}{Z} $ changes sign. These derivatives are given by \Eqref{??} and hence, in terms of $\Psi$ the twelve grid points
+{ka-nh,....ka+1+2*nh} become involved. Given this information  it is easy to find the line
+$\overline{de}$  which represents the locus of points on which
+$\pdiff{\Psi}{Z} =0 $ . Similarly the line $\overline{bc}$ represents the set of
+points where $\pdiff{\Psi}{R} =0 $. (Although shown as tilted in the figure,
+most likely these lines will turn out to be vertical and horizontal for most
+tokamak equilibria.) The intersection point \textsf{a} represents the estimated
+location of the magnetic axis. Since $\Psi $ at the magnetic axis is thus shown
+to depend on the 12 given points, it is straightforward to incorporate that
+dependency into the Jacobian. Using this approach it is possible to give an
+analytic form for the elements $\pdiff{S_l}{\bar{\Psi}}$ and
+$\pdiff{\bar{\Psi}}{\Psi_l}$, but since interpolation of the normalized
+$\bar{\Psi}$ is required anyway we use a numerical perturbative approach for
+this term.
+
+Hence the Jacobian, J, is known and determined semi analytically. To continue we
+need to solve the n by n set of equations
+\beq \label{mhd:c}
+ \underline{\underline{J}} * \underline{\psi} = - \underline{F}.
+\eeq
+Here $\underline{F} $ represents the column of residuals with elements $F_l$
+given by \Eqref{mhd:eq1}, and $\psi$ represents the incremental corrections to
+the $\Psi$ values to be made if the full Newton step is accepted. Typically a
+line search along the Newton step is required in order to avoid divergence of
+the iterations.  The near optimal method for this search used in \ot is given in
+Ref. \ref{?}. The n by n system given in \Eqref{mhd:c} is large (for a 129 by
+129 grid we will have about 13000 values of $\Psi $ to determine) but sparse.
+The bandwidth is at least 2* nh and the matrix J does not have a regular
+structure due to the fact that the number of grid points in the radial and
+vertical directions is not uniform. In \ot we currently use a sparse matrix LU
+factorization technique (y12m)  to solve the equations. Since there is some 
+fill-in encountered during the solution  we are limited by hardware memory
+requirements however. A better approach is to use an iterative solver such as a
+bi-conjugate gradient method but such software was not available to me. (A
+sparse multigrid algorithm does  not exist to my knowledge). At this time, for
+grid sizes larger than 129 by 129 the Newton method is not used. Instead the
+Picard iteration method is relied on for the outer iterations . In fact high
+resolution eqdsk are often created by running a 65 by 65 EFIT type  eqdsk
+through the code to produce eqdsk as large  as 513 by 513 using Picard
+iteration.
+
+An example of an ITER type equilibirum calculated using the SOR method
+on a 513 by 513 grid is given in Fig. \ref{fig:iter}.
+\begin{figure}[hbtp] %note: figure environment not available in slides
+ \centering 
+ %\begin{narrow}{-.50in}{0in}   
+ \mbox{\epsfig{file=resid_example.eps,height=4in,width=5in}}
+ \epsfig{file=fixbd_err.eps,height=4in,width=5in}
+ %\end{narrow}
+ \caption{(a):Absolute value of  residuals calculated using the variable grid
+ method. As is to be expected the residual is zero near the plasma boundary
+ (since that condition is built into the solver ) - (b):ignoring the fact that a
+ non uniform grid was used to generate the solution would lead one to conclude
+ that large errors exist near the plasma boundary} 
+ \label{fig:iter}
+\end{figure}
+
+\subsubsection{The Exterior Problem}
+
+The region exterior to the plasma but inside the rectangular $(R,Z)$ domain must
+also be considered in order to generate an eqdsk. In this exterior region we
+solve the GS equation with zero current density, subject to the boundary
+conditons that grad psi is given on the plasma surface and psi is given on the
+edges of the rectangular domain. The gradient of psi on the plasma surface is
+computed from the interior solution. The values of psi on the rectanglar
+boundary are assumed given. The finite difference representation of the GS
+equation for grid points outside the plasma but near the plasma boundary is
+slightly more complicated than the interior case. Consider Fig. \ref{f1e} where
+we assume that grid points lb and lr are inside the plasma. Three gradients of
+$\Psi$ at the points a, b, and c respectively are used to generate the equations
+for the required derivatives at exterior grid point l. In the figure points a
+and c are intersections of the plasma boundary with the grid lines. Point b was
+not used in the interior calculations. It is defined by the fact that the
+direction of the gradient at point b passes through grid point l. Depending on
+the particular geometry it is possible that point b coincides either with point
+a or point c. This leads to degeneracy in the equations described below.
+
+\begin{figure}[hbt] %note: figure environment not available in slides
+ \centering 
+ %\begin{narrow}{-.50in}{0in}   
+ \mbox{\epsfig{file=exterior.eps,height=4in,width=5in}}
+ %\end{narrow}
+ \caption{An example of an exterior grid point l near the plasma boundary. Three
+ gradients of psi at the points a, b, and c  are used to generate the equations
+ for the required derivatives at grid point l.} 
+ \label{f1e}
+\end{figure}
+
+We expand $\Psi$ in a Taylor series about the exterior grid point l,
+\Eqref{e1}, and differentiate the result to get
+\beq \label{e2}
+ \pdiff{\Psi(r,z)}{R} =\pdiff{\Psi}{R} \Biggr \vert_l
+  +\pdiffn{\Psi}{R}{2} \Biggr \vert_lr
+  + \ddiff{R}\ddiff{Z}\Psi  \Biggr \vert_l z
+\eeq
+A similar expression holds for the derivative in $Z$. Applied at the
+points a, b, and c in Fig. \ref{f1e} we get the five equations in the five
+unknowns $\pdiff{\Psi}{R}\vert_l$,$\pdiff{\Psi}{Z}\vert_l$,
+$\pdiffn{\Psi}{R}{2}\vert_l$, $\pdiffn{\Psi}{Z}{2}\vert_l$,
+$\ddiff{R}\ddiff{Z}\Psi \vert_l $ .
+
+The RHS of \Eqref{?} represents the assumed known gradient of $\Psi$ on the
+plasma boundary. The last two equations are obtained by applying  the Taylor
+series at the grid points ll and lt. There are 16 different cases that can
+arise, as previously dicussed for the interior solution. Equations similar to
+the above set have to be generated for each of the cases. It is always possible
+to generate 5 equations however. The details are given in subroutine ??.
+
+The remaining issue is how to generate the values of $\nabla \Psi $ on the
+plasma boundary so they can be used in solving the above equations. In \ot this
+is accomplished in an iterative manner. We first generate an exterior solution
+by replacing the  $\nabla \Psi $ boundary condition on the plasma surface with
+the condition that $\Psi = 0$ on the plasma surface. Combined with the interior
+soltuion this gives us a soltuion over th entire rectangular (R,Z) domain. We
+bicubic spline fit this solution and from the spline fit determine the value of
+$\nabla \Psi $ at all required boundary points. The exterior problem is then
+solved a second time with the  $\nabla \Psi $ boundary condition applied. The
+interior soltuion is not changed in this step. This process could be iterated
+but in practice this is not necessary.  (The boundary condition on the outer,
+rectangular boundary  is an approximation, not based on coil currents, and hence
+any refinement would be ludicrous).
+
+\subsection{Transport-MHD interface}
+
+Proper communication between the transport system of equations and the
+equilibrium (GS) equation is very important in order to get an efficient, stable
+transport/equilibrium iteration cycle. The time step used to evolve the
+transport equations, $\Delta t_t$, and the time step between equilibrium
+calculations,$\Delta t_{eq}$, are independent quantities in \ot (but $ \Delta
+t_{eq} \ge \Delta t_t$ must be observed).  We typically do not call the
+equilibrium solver at every transport time step. Instead, a number of transport
+time steps are taken before a new equilibrium is calculated. The actual number
+of transport time steps between equilibrium calculations is initially set by the
+user and is then dynamically decreased if necessary to assure convergence.
+(There are actually a number of  options for setting the intervals $t_t$ and
+$t_{eq}$ in \ot; see the input instructions in cray102.f .)
+
+Evolution of the transport quantities depends on space and time dependent
+metrics obtained from the equilibrium solution. Initially the space dependence
+is known from a start up equilibrium but the time dependence is not known at
+all. The actual method used to overcome this difficulty in \ot is as follows.
+
+Initially we have an equilibrium solution (in the form of an eqdsk) from a
+previous fixed boundary MHD calculation. The reason we must start with a fixed
+boundary eqdsk (meaning an eqdsk that was generated using the fixed boundary
+code), is that the metrics (see below), do not converge as well at the plasma
+edge  if a standard EFIT type eqdsk is used. The fixed boundary code actually
+solves a problem which is different than the problem that is solved by EFIT. The
+difference is due to the way that the plasma edge is handled. The fixed boundary
+code solves two boundary value problems, the interior problem, with the plasma
+boundary as the mathematical boundary and the exterior problem, with the plasma
+boundary as one boundary and the boundary of the rectangular grid as the outer
+boundary. For the interior problem we specify a value of psi at the plasma
+boundary. For the exterior problem the boundary condition on the plasma boundary
+is that grad psi is given. This value of grad psi is determined from the
+interior solution near the plasma boundary. On the rectangular boundary of the
+exterior problem the values of psi are specified. In \ot these values are
+assumed to be equal to the values at the initial time and do not change in time.
+Effectively this means that some pseudo  coils with appropriate, perhaps non
+physical, currents are present. One could supply actual machine dependent coils
+and use Greens function methods to refine the exterior  problem but that has not
+been done at this time.
+
+
+
+The  eqdsk is used to construct the initial geometry factors, current density
+and transport grid:
+\begin{subequations}\label{mhd:a}
+ \begin{gather}
+  \Phi\vert_{t_0}  = 2\pi\int q d\Psi \label{mhd:a1} \\
+  \rho\vert_{t_0}  = \sqrt{\frac{\Phi}{\pi B_{t0}}}   \\
+  F\vert_{t_0} = \frac{R_0 B_{t0}}{f(\Psi)}  \\
+  G\vert_{t_0} =  \left\langle
+   \vert\nabla\rho\vert^2\frac{R_0^2}{R^2}\right\rangle \\
+  H\vert_{t_0} =  \left\langle \frac{F}{\frac{R_0^2}{R^2}}\right\rangle .
+ \end{gather}
+\end{subequations}
+The profiles required in the RHS of Eqs.~\eqref{mhd:a} are  available from the
+startup eqdsk on a uniform $\Psi$ grid of length nw. Note that these quantities
+are functions of both space and time. Initially the time dependence is only
+known at the single  time point as indicated. Thus to solve the transport
+equations for the duration of the first equilibrium cycle we assume that the
+metrics and other quantities are constant in time as given by
+Eqs.~\eqref{mhd:a}.
+
+The transport equations are evolved, using time steps $\Delta t_t$, from some
+initial time $t_0$ to time $t_1 =  t_0 +\Delta t_{eq} $. At time $t_1$ the
+equilibrium solver is called with the evolved $\pdiff{P}{\Psi} $ and
+$\langle\frac{J_{\phi}R_0}{R}\rangle$. The total pressure profile normally
+includes beam and fusion contributions (using $\frac{2}{3}$ of the stored energy
+density for the fast ion contributions). These quantities are evolved on the
+$\rho\vert_{t0} $ grid and need to be mapped into the appropriate $\Psi $ grid
+for use in the equilibrium solver. The conversion factor, $\pdiff{\rho}{\Psi}$,
+is obtained from the transport results at time $t_1$. As shown in section
+\ref{sec:transport} \ot evolves the quantity $u^4 \equiv FGH  \rho B_{p0} $.
+From the definition of $B_{p0}$ we then obtain the $\Psi$ to $ \rho $ mapping:
+\begin{subequations}\label{mhd:k}
+ \begin{gather}
+  B_{p0}\vert_{t_1} = \frac{u^4\vert_{t_1}}{(FGH\rho)\vert_{t_0}} \\
+  \pdiff{\rho}{\Psi}\vert_{t_1} = \frac{1}{R_0 B_{p0}\vert_{t_1}}.
+   \label{mhd:k1}
+ \end{gather}
+\end{subequations}  
+Since the time dependence of the parameters associated with the
+evolution of $ u^4 $ during the time interval $ t_0 $ to $ t_0 + \Delta
+t_{eq} $ was neglected, these quantities are only an approximation to
+the desired results. \Eqref{mhd:k1} gives us an initial
+approximation of the $\rho$ to $\Psi $ mapping required to evaluate
+$\pdiff{P}{\Psi}$ for example. 
+
+To get a form for $f\pdiff {f}{\Psi} $ driven by transport we use
+$\left\langle\frac{J_\phi R_0}{R}\right\rangle$. This quantity is also obtained from $u^4$:
+\begin{subequations}\label{mhd:l}
+ \begin{gather}
+  \left\langle\frac{J_\phi R_0}{R}\right\rangle\vert_{t_1}
+  =  \left [ \frac{\mu_0}{H\rho} \ddiff{\rho}\left(\frac{u^4}{F}\right) \right ]
+  \Biggr \vert_{t_1}  \label{mhd:l1}
+ \end{gather}
+\end{subequations}
+We map  both  $\pdiff{P}{\Psi}$ and $\langle\frac{J_\phi R_0}{R}\rangle$ to the
+$\Psi$ grid by integrating \Eqref{mhd:k1}:
+\beq
+ \left [ \Psi(\rho_i) -\Psi(0) \right ] \vert_{t_1} =\left (
+ R_0\int_0^{\rho_i} B_{p0}\, d\rho\right ) \Biggr \vert_{t_1} \label{mhdm}
+\eeq
+where $\rho_i$ is $\rho $ at radial transport grid point i. \Eqref{mhdm} is
+evaluated in subroutine \texttt{psirho} (cray209.f) and produces a psi grid that
+corresponds to the transport rho grid (the radial transport rho grid extends
+from the magnetic axis to the plasma edge and has nj grid points). The toroidal
+current density, \Eqref{mhd:n1}, is now flux surface averaged  to produce an
+expression for $f\pdiff{f}{\Psi}$:
+\begin{subequations}\label{mhd:n}
+ \begin{gather}
+  J_\phi= -R\pdiff{P}{\Psi}-\frac{f\pdiff{f}{\Psi}}{u_0R} \label{mhd:n1}\\
+  \left (f\pdiff{f}{\Psi}\right )\Biggr\vert_{t_1} = 
+  -\frac{u_0}{\left\langle\frac{R_0}{R^2}\right\rangle}\left(R_0\pdiff{P}{\Psi} 
+  +\left\langle\frac{J_\phi R_0}{R}\right\rangle \right )\Biggr \vert_{t_1}
+  \label{mhd:n2}
+ \end{gather}
+\end{subequations}
+
+Armed with $f\pdiff{f}{\Psi} $ from \Eqref{mhd:n2}, and 
+$\pdiff{P}{\Psi} =\pdiff{P}{\rho}\pdiff{\rho}{\Psi} $ from \Eqref{mhd:k1} we are
+finally able to solve the GS equation. We note again that both of these
+quantities are known on a $\Psi$ grid which corresponds to the radial transport
+$\rho $ grid with nj (typically 51) grid points. For the initial step the radial
+transport grid and all metrics required are given by the values at time $t_0$,
+Eqs.~\eqref{mhd:a}. Note that there are additional quantities that depend on
+flux surface averages, for example the trapped particle fraction. These
+quantities are correctly handled by the MHD/transport coupling of the code but
+are not dealt with explicitly here.
+
+Having obtained a new equilibrium solution at time $t_0 +\Delta t_{eq}$  with the
+given $f\pdiff{f}{\Psi} $ and $\pdiff{P}{\Psi}$ (which still have
+dependence on parameters defined at time $t_0$) we need to check for
+convergence of the transport/equilibrium cycle. This is done by
+evaluating Eqs.~\eqref{mhd:a} with the newly calculated equilibrium.
+Comparison of the new parameter set at time $t_0 +\Delta t_{eq}$ with the
+original set at time ${t_0} $ then yields information as to whether
+or not our MHD/transport system is sufficiently converged to
+continue on with the next time interval from $t_0 + t_{eq}$ to $t_0 +
+\Delta t_{eq} + \Delta t_{eq_1}$ . Here $\Delta t_{eq_1}$ is a new equilibrium time
+interval which may be determined by the code based on how rapidly
+parameters are changing.
+A minimum maximum error criteria is used to establish if our
+assumptions
+of time independent metrics was justified. At this point, converged or
+not, we have estimates of the parameter set, Eqs.~\eqref{mhd:a}, 
+at two times, $t_0$ and $t_0 + \Delta t_{eq} $. If the system is not
+sufficiently converged then we go back to time $t_0$ and start over
+again. But this time all the parameters,including $\rho$ are linearly
+interpolated in time to give an estimate of the time
+dependence.(Section \ref{sec:?} deals with the issues of a time dependent $\rho$
+grid). Arriving in this way once again at time $t_0 + \Delta t_{eq} $ we back
+average the new estimate of the parameter set with the old one to aid
+convergence. This process is allowed to continue for a user specified
+number of times. If the mhd/transport cycle is still not converged
+then the code either quits or (default) prints a warning message and
+continues on the the next equilibrium cycle anyway. New equilibrium
+cycles are just repeats of the above process, with the profiles
+linearly extrapolated on the first attempt to span the time interval
+$t_i + \Delta t_{eq_i}$. 
+
+

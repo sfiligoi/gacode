@@ -1,0 +1,12 @@
+ idl ufile read/write see
+/home/stjohn/NTCC14/ntcdemo/utils/UFILE_write/readuf.pro
+transp stuff to be found here:
+/datb/transproot/codesys/source
+ufile description (formats etc):
+/datb/transproot/codesys/source/doc/ufiles.texi
+read 2d ufile:
+/datb/transproot/codesys/source/uflib/uf2dre.for
+ u2dre is in library libuflib.a ( which is built as part of the
+UFILES NTCC module)
+  for info on how to use see
+http://w3.pppl.gov/~pshare/help/ufiles_manual.html#SEC1

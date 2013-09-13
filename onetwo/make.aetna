@@ -1,0 +1,74 @@
+                        #compile with lf95 or pgf90:
+			#FORT can be overwritten by command line argument:
+                        #eg gmake FORT=lf95
+                        FORT = pgf90   
+                        #The following is supposed to supress unresolved references: 
+			LINK = -Wl,-noinhibit-exec -Wl,-Map,mapfilename   
+			MACHINEOK = 1
+	                MACHINE = lohan1
+			ONETWO    = \
+				/p/linux/onetwo/source/onetwo
+		 	LIBS      = $(ONETWO)/onetwo_libs
+			NUBEAM12  = nubeam_12.f
+			NUBEAM_12_BUILD = TRUE
+                        UFILE12   = ufiles_12.f90
+			UBUILD    = TRUE
+			MAKE1     = make.includes
+			MAKE2     = make.objects
+                        DATA_LOC  = /p/linux/onetwo
+			MDSPLUS_LIB = /f/mdsplus/linux/rpm_mdsplus
+			MODULES  = \
+				/home/stjohn/transport_codes/transp_beam_pgf90/LINUX/mod
+				MODULES  = \
+				/p/linux/nubeam/nubeam_lf95/transp_beam_lf95/LINUX/mod
+				COMP = /usr/local/lf9562/bin/lf95
+				PGCC  = gcc
+				DEBUG     = -g  
+		        	SPECIAL   = -byteswapio --dbl
+				SPECIALLF95 = -byteswapio
+				LAPACK    =/usr/local/lf9562/lib/liblapackmt.a \
+				/usr/local/lf9562/lib/libblasmt.a
+				CPPLF95LIB =/usr/lib/gcc-lib/i386-redhat-linux/3.2.2/libstdc++.a\
+				/usr/lib/gcc-lib/i386-redhat-linux/3.2.2/libgcc_s.so \
+				/usr/lib/gcc-lib/i386-redhat-linux/3.2.2/libgcc.a \
+				/usr/lib/gcc-lib/i386-redhat-linux/3.2.2/crtbegin.o \
+				/usr/lib/gcc-lib/i386-redhat-linux/3.2.2/crtend.o \
+				/usr/lib/crtn.o
+				CFLG = lf95
+				#staticlink because runtime libs not distributable:
+				LINK = --staticlink
+				OPTIMIZE  = -O 
+				NETCDF =/home/stjohn/netcdf_lib/lf95_compiled/netcdf-3.6.0-p1/lib/libnetcdf.a
+				NETCDF_INC =/home/stjohn/netcdf_lib/lf95_compiled/netcdf-3.6.0-p1/include
+				UFILE_LIBS = /p/linux/ufiles_lf95/ufiles_lf95/LINUX/lib
+
+				NUBEAM_LIBS  = \
+				/p/linux/nubeam/nubeam_lf95/transp_beam_lf95/LINUX/lib
+				COMPILELF95   = $(FC) -I$(INC)  $(OMP) $(PROF)\
+		  		$(AUTP)   -c  $(OPTION) $(LISTING) $(SPECIALLF95)
+		        SPECIAL_nubeam = $(SPECIAL)
+                        MSG = 
+			ifndef  MPI
+				FC = $(COMP) 
+				CXX = gcc 
+				INC = ./
+			else
+				# compiler specs, for Portland Group Compiler:
+				FC= /usr/local/mpi/bin/mpif90 
+				CXX= /usr/local/mpi/bin/mpicc 
+				INC=/usr/local/mpi/include 
+			endif
+			ifeq ($(OPT),debug)
+				OPTION = $(DEBUG)
+				DBG = _debug
+			else
+				OPTION = $(OPTIMIZE)
+                                DBG= 
+			endif
+			#COMPILE77   = pgf77 -c $(OPTIMIZE) $(LISTING) $(SPECIAL)
+			COMPILE   = $(FC) -I$(INC)  $(OMP) $(PROF)\
+		  	$(AUTP)   -c  $(OPTION) $(LISTING) $(SPECIAL)
+			COMPILE_nubeam   = $(FC) -I$(INC)   $(PROF)\
+		 	 $(AUTP)  -c  $(OPTION) $(LISTING) $(SPECIAL_nubeam)
+			#COMPILEno    = $(FC) -I$(INC)  -M$(MSG) $(OMP)\
+		 	$(PROF)  $(AUTP)  -c  $(LISTING) $(SPECIAL)

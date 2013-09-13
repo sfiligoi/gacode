@@ -1,0 +1,292 @@
+\begin{filecontents}{abbrev.tex}
+   \newcommand{\vp}{ V^{\prime}}
+   \newcommand{\ot}{\emph{ONETWO }}
+   \newcommand{\pdiff}[2]{\frac{\partial{ #1}}{\partial{ #2}}}
+   %useage \pdiff{#1}{#2}
+   \newcommand{\ddiff}[1]{\frac{\partial}{\partial #1}}
+   \newcommand{\strt}{\begin{eqnarray}}
+   \newcommand{\trts}{\end{eqnarray}}
+   \newcommand{\beq}{\begin{eqnarray}}
+   \newcommand{\eeq}{\end{eqnarray}}
+ \textheight8.5in
+\end{filecontents}
+
+
+
+
+
+
+   \documentclass[12pt]{article}
+   %\pagestyle{myheadings}\markboth{ /u/stjohn/ONETWOPAGES/code\_descr/source\_o12.ps}{ /u/stjohn/ONETWOPAGES/code\_descr/source\_o12.ps}
+   %{ /u/stjohn/tex/o12ref.dir/source\_o12.tex}
+   \input{abbrev} % can keep my definitions in file abbrev.tex
+   \usepackage{epsfig,color}
+   \usepackage{amsmath} 
+   %\usepackage{amstex} %need this package for Sb environment ??
+   \listfiles
+
+   %\includeonly{sources_o12_bib}\ref{}
+
+\begin{document}
+       \section {Summary}
+       \begin{itemize}
+         \item An AT type ITER-FEAT discharge scaled up from DIII-D
+           shot 106029 was analyzed for RWM stability.
+         \item The scaled up discharge has density $\approx n_{GW} $
+               With $\beta_NH(89p) = 8.46 $, $QDT =  20.3$, with 33Mw of
+               1Mev negative  neutral beam injection.
+         \item Primary and impurity ion densities and (equal)
+           electron and ion temperature profiles were determined in
+           such a way as to be
+           consistent with the mhd equilibrium pressure and the fast
+           alpha and neutral beam stored energy densities.
+         \item It is shown that 33Mw of neutral beam 
+               injection is sufficient to maintain the central
+               toroidal rotation speed at 2.e4 rad/sec using
+               ion power balance diffusivity for the momentum 
+               diffusivity. According to ref{2} the required central
+               rotation speed for RWM stability is about 1.5e4
+               rad/sec.
+     \end{itemize}
+         \newpage
+       \section{ Generating Profiles Consistent with Mhd Equilibrium
+         Pressure Profiles}
+       As an application of the Iter-Feat concept DIII-D H mode shot
+       106029 was used to determine an equilibrium which could
+       be used as a basis for further studies. This work is described
+       in ref[1].
+       
+       For transport analysis we would like to maintain the pressure
+       profile in this scaled up equilibrium,identified as
+       $'iter\_wrs\_d3d\_4\_129.gfile'$. Thus we have to find
+       densities and temperatures which are consistent with the
+       assumed equilibrium pressure profile and which yield
+       sufficiently attractive performance parameters. In the present
+       work this was accomplished by assuming an electron density
+       profile,see fig 1,at approximately 1.0 times the Greenwald
+       limit. To determine the primary ion and impurity densities and 
+       the electron and ion temperatures (assumed equal for this
+       study) we consider the equations for charge neutrality, zeff,
+       and equilibrium pressure together with  auxiliary 
+       information necessary to solve the following set of equations:
+
+          \begin{align} \label {zeff-ref}
+             n_{e} -Z_{p1}n_{p1}  -Z_{p2}n_{p2}  -Z_{imp1}n_{imp1}
+             -Z_{imp2}n_{imp2} &= Z_bn_b +Z_{\alpha}n_{\alpha}\\
+             Z_{eff} n_{e} -<Z_{p1}^2>n_{p1}-<Z_{p2}^2>n_{p2} \notag
+             \\ 
+              -<Z_{imp1}^2>n_{imp1}-<Z_{imp2}^2>n_{imp2} &=
+              Z_b^2n_b +Z_{\alpha}^2n_{\alpha} \\
+             n_{e}C_eT_e +n_{p1}C_iT_i+ n_{p2}C_iT_i \notag \\
+             +n_{imp1}C_iT_i
+             +n_{imp2}C_iT_i &= P - \frac{2}{3}(w_{beam}+w_{\alpha})\\
+           Z_{frac}n_{p1} - n_{p2} &= 0 \\
+           Z_{impfrac}n_{p1} - n_{imp2} &=0 
+         \end{align} 
+
+         Here we assume two primary (ie hydrogenic) ions and two
+         impurities with the last two equations specifying the amounts
+         of the second species in each case. We further assume that the beam
+         and $ \alpha $ densities and stored energy densities are
+         given. This implies that an iterative process is required to
+         solve the linear set of equations since beam deposition and
+         fusion rates depend on the unknown densities and
+         temperatures. P is the known pressure
+         profile from the equilibrium calculations. We
+         take the electron density profile is known which
+         eliminates the first of the equations EQ[\ref{zeff-ref}].
+         The above set of equations applies at each value of the minor
+         radius grid $\rho $. 
+         The parameters multiplying the electron
+         and ion temperatures, $C_e,C_i$ are set to unity if
+         the electron density is solved for as part of the above
+         equation set. Otherwise  $C_e,C_i$ are automatically adjusted at 
+         each radius in such a way that the error in
+         Eq[\ref{zeff-ref}] is minimized. Typically we want to fix
+         the electron density at a specified value so the later case 
+         is generally the one that arises.
+         
+         
+         \begin{center}
+         %\begin{minipage}[b]{.46\linewidth} 
+         \rotatebox{-90.}{\resizebox{6.0 in}{6.0 in}{
+               \includegraphics{zeff_fig1.eps}}}
+        %\end{minipage}\hfill
+          \end{center}
+        \pagebreak
+
+
+
+       \section{Neutral beam Injection}
+       Due to the large densities involved sufficient penetration for
+       neutral beam heating and current drive requires a high energy
+       beam. We have assumed a 1Mev(negative ion)  DT beam with injected power of
+       33Mw. The deposition profile for the beam is given in Fig. 2. A 
+       visual indication of the fast ion birth points in the plasma
+       in cross section and top views is given in Fig 3 and 4
+       respectively. For the tangential injection shown shinethrough
+       is essentially zero. 
+           \\
+          \\
+           \\
+           \\
+        
+         \begin{center}
+         %\begin{minipage}[b]{.46\linewidth} 
+         \rotatebox{0.}{\resizebox{4.5 in}{4.5 in}{
+               \includegraphics{cgmplot_0_12457.eps}}}
+        %\end{minipage}\hfill
+        \pagebreak
+ 
+         \rotatebox{0.}{\resizebox{4.5 in}{7.5 in}{
+               \includegraphics{cgmplot_0_12470.eps}}}
+          \end{center}
+        \pagebreak
+
+
+
+
+
+
+       \section{Transport Analysis}
+       The primary question to be addressed here is the stabilization
+       of resistive wall modes. To accomplish this stabilization we
+       need to ensure that the plasma is spinning sufficiently
+       rapidly. Analyses done by M.Chu,ref [2], indicated that a value of 15\% 
+       of the observed central toroidal rotation speed value in DIII-D
+       shot 106029 was sufficient to stabilize the largest mode
+       amplitude which occurred at the magnetic axis. The DIII-D rotation speed 
+       profile was scaled up by maintaining the same fractional
+       central Alfven 
+       speed in the scaled up discharge. This leads to a toroidal
+       rotation speed profile shown  as the solid line in Fig.(5).
+
+       To determine the balance between neutral beam torque input and
+       drag and momentum diffusion we have to solve the toroidal
+       momentum balance equation. This equation requires that we
+       specify an momentum diffusivity. Since the determination of 
+       the plasma kinematic viscosity from theoretical principles
+       does not match experimental results we are forced to use
+       alternative means to determine the momentum diffusivity. An
+       often used criterion is to assume that the toroidal momentum
+       diffusivity is equal to the ion diffusivity. We have adopted
+       this method as well and further simplified the problem by using 
+       a power balance diffusivity for the ions. With the electron and 
+       ion temperatures determined consistently with the equilibrium
+       pressure as described in section 1,we obtain the power  balance
+       diffusivity given in Fig (6). For orientation the ion
+       neoclassical diffusivity is also indicated.
+
+       With the given (fixed in time and space) power balance
+       diffusivity we find that the toroidal rotation speed profile
+       can be maintained at a level higher than required for resistive 
+       wall mode stabilization which ,in accordance with ref [2],is
+       assumed to be 15\% of  the central value.  In Fig(5) we show
+       the rotation speed profile for a  neutral 
+       beam injected power of  33Mw.  The rotation speed profile 
+       is in steady state at the time shown. The central
+       value of$ 2.0x10^4 $ is higher than the required value of
+       about $15\% (1.0x10^5) = 1.5x10^4 \frac{rad}{sec}$ for
+       stability.
+        \begin{center}
+         %\begin{minipage}[b]{.46\linewidth} 
+         \rotatebox{90.}{\resizebox{4. in}{4. in}{
+               \includegraphics{rotationss.eps}}}
+        %\end{minipage}\hfill
+          \end{center}
+        \begin{center}
+         %\begin{minipage}[b]{.46\linewidth} 
+         \rotatebox{90.}{\resizebox{4. in}{4. in}{
+               \includegraphics{chiei.eps}}}
+        %\end{minipage}\hfill
+          \end{center}
+        \pagebreak
+        
+        Table I represents a summary of the transport results.
+        It should be noted that beam-beam fusion reactions were not
+        included in the analysis.
+        \begin{verbatim}
+                               Table I             
+  Transport analysis summary:  Iter-Feat H mode (106029 extrapolation)
+ 
+  Minor radius a (cm):   187.0         b/a:                     1.98
+  Nominal Rmajor (cm):   620.0         R at geom. cent. (cm): 634.1
+  R at mag. axis (cm):   672.9         Z at mag. axis (cm):    51.9
+  Volume (cm**3):          7.88E+08    Pol. circum. (cm):    1804.9
+  surface area (cm**2):    6.89E+06    cross. sect area   :  2.04E+05
+
+  Bt (G):                  5.30E+04    Ip  (A):                 1.00E+07
+  Bt at Rgeom (G):         5.18E+04    r(q = 1)/a:                0.00
+  Line-avg den (1/cm**3):  9.09E+13    Tau-particle-dt (s):     0.200
+  nGW = 1.0e14
+
+      profiles             ucenter     uedge     ucen/uav
+  elec. den. (1/cm**3):    1.06E+14    2.11E+13    1.25
+  elec. temp. (keV):      23.53        2.34        2.20
+  ion   temp. (keV):      23.53        2.34        2.20
+  current  (A/cm**2):     52.08       51.34        1.05
+  Zeff:                    1.05        2.16        0.58
+  q:                       2.52        9.34
+  q* at edge:                          4.92
+  ang. speed (1/sec):     1.98E+04    4.30E+03    1.66E+00
+                            exper.          code
+  Surface voltage  :       0.00            0.00      Volts
+  Average voltage  :       0.00            0.01      Volts
+  Ohmic power:             0.00E+00        9.27E+04  Watts
+  Beam power-torus:        3.30E+07        3.30E+07  Watts
+  Neutron rate:            0.00E+00        7.05E+17  #/s
+ 
+      computed quantities
+  Beam power elec. (W):    2.00E+07    ke at a/2 (1/cm-s):      1.15E+18
+  Beam power ions  (W):    1.27E+07    ki at a/2 (1/cm-s):      5.66E+17
+  Beam power cx loss (W):  3.80E+03    ki/kineo at a/2:        20.72
+  Shinethrough (%):        0.02        chi electrons at a/2:    1.27E+04
+  RF power absorbed:       0.00E+00    chi ions at a/2:         7.07E+03
+  Radiated power   (W):    2.00E+07    r*/a: Te = (Te(0)+Te(a))/2 0.56
+  Poloidal B field (G):    6.96E+03    Beta-poloidal:           1.868
+  beam torque (nt-m)       4.45E+01    total torque (nt-m):    -3.25E+02
+  stored ang mtm (kg*m2/s):  3.18E+02  momt inertia (kg*m**2):  1.10E-02
+ 
+                           electrons     ions       thermal      total
+  Stored Energy (J)        1.837E+08   1.644E+08   3.480E+08   4.080E+08
+  dE/dt (W):               1.238E+04   3.576E-06   1.238E+04   1.238E+04
+  Input power (W):         1.178E+08               1.661E+08   1.661E+08
+  Energy conf. time (s):   1.5589                  2.0950      2.4561 
+  angular momentum confinement time (sec)          2.4356
+ 
+      Beta-toroidal        volume-avg       center
+  electrons:               1.451E-02       3.742E-02
+  ions:                    1.299E-02       3.498E-02
+  beam:                    1.101E-03       1.789E-02
+  alphas:                  3.638E-03       1.866E-02
+  total:                   3.224E-02       1.089E-01 H(89p) =    2.81
+  beta_N*H(89p)            8.46
+  total power input (Mw) =  3.3000E+07  time =  1.2000E+00
+  Itot =  1.00E+07  Iohm =  3.19E+06  Iboot =  4.88E+06  Ibeam =   1.93E+06 
+  Irf =   0.00E+00
+  QDD =   0.023998 QDT =  20.320179 QTT =   0.037929
+  BEAM-BEAM FUSION RATE NEGLECTED!
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ \end{verbatim}
+
+  
+\noindent  REFERENCES \\
+ Leur,J.A.,L.L.Lao DIII-D Engineering Physics
+ Memo,D3DJAL010918b,10/05/01  \\
+  Chu,M., private communication,11/28/01
+
+\end{document}

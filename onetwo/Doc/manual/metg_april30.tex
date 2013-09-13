@@ -1,0 +1,96 @@
+
+
+
+\begin{filecontents}{abbrev.tex}
+   \newcommand{\clr} {\color{red}}
+   \newcommand{\clb} {\color{blue}}
+   \newcommand{\vp}{ V^{\prime}}
+   \newcommand{\ot}{\emph{ONETWO }}
+   \newcommand{\pdiff}[2]{\frac{\partial{ #1}}{\partial{ #2}}}
+   %useage \pdiff{#1}{#2}
+   \newcommand{\ddiff}[1]{\frac{\partial}{\partial #1}}
+   \newcommand{\strt}{\begin{eqnarray}}
+   \newcommand{\trts}{\end{eqnarray}}
+   \newcommand{\beq}{\begin{eqnarray}}
+   \newcommand{\eeq}{\end{eqnarray}}
+   \newcommand{\pdiffn}[3]{\frac{\partial^{#3}{#1}}{\partial{ #2}^{#3}}}
+   \newcommand{\pdiffz}[3]{\frac{\partial{#1}}{\partial{ #2}}\bigg \vert_{#3}}
+   \textheight8.5in
+   \endinput
+\end{filecontents}
+\documentclass{slides}  
+  %note: the landscape option above simply tells tex to
+  %  use the long dimension of the page in calculating its layout
+  % (if this is all that is done the the lines would run off the paper
+  % when printed)
+  %also need to use landscape option in dvips, which actually rotates
+  %everything so that it fits across the long side of the page.
+  %(if landscape option is used in dvips but not in tex document
+  % then the text will be too short for the long side of the page)
+ \usepackage{amsmath} 
+ %\usepackage{fancyheadings,graphics,color}
+ \usepackage{fancyheadings,graphics}
+ \usepackage[dvips]{color}
+   %\usepackage{epsfig}
+  %\usepackage[usenames]{color} seems logical but doesn't work
+   \input{abbrev}
+
+
+   %\onlyslides{5}
+
+
+%----------------------------------------------------------------------------
+      \color{blue} %\pagestyle{fancy}
+  \begin{document}        
+       \begin{center}
+           \Large\bfseries Wedn. Meeting\\ % 1
+           July 13,'00 \\
+           H.S.J.
+
+        \end{center}
+    
+
+%------------------------------------------------------------------
+ 
+     \begin{slide}          \setlength{\topmargin}{-0.5in}
+       \begin{center}
+           \Large\bfseries Solution Methods% 1
+
+        \end{center}
+        \normalsize  
+
+        \bigskip
+        \hrule height4pt
+        %\bigskip
+         % \bf
+        \begin{description}
+          \bfseries \tiny
+           \item {Pred. Corrector} Fast but not suitable for stiff
+           models
+           \item[Adaptive Method Lines] very slow,for stiff
+             problems time step
+             controlled by Runge Kutta accuracy requirements.
+             \item[Globally Convergent Newton Based methods]
+               Combines 
+               steepest descent,with Newton line search and
+               or trust reqion strategies to get solution within
+               radius of convergence of pure Newton method. (Tries
+               pure Newton first at each step). Hookstep variation
+               uses an approximation to Hessian to introduce second
+               orde curvature effects.
+               \begin{enumerate}
+                 \item fast for non stif, slow for stiff problems
+                 \item ability to run time independent cases by
+                   finding solution of pdes without time derivative
+               \end{enumerate}
+             \item{two chi methods}
+               \begin{enumerate}
+                 \item pure glf23
+                 \item DV method 
+                \end{enumerate}
+    \end{description}
+    \end{slide}
+
+%-----------------------------------------------------------------------------
+ 
+\end{document}  

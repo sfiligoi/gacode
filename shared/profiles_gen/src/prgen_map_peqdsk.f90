@@ -45,11 +45,25 @@ subroutine prgen_map_peqdsk
   ! COORDINATES: set sign of poloidal flux
   vec(20,:) = abs(dpsi(:))*(-ipccw)
 
-  ! ni
+  ! ni, nc, nb
   vec(21,:) = peqdsk_ni(:)*10
+  if(peqdsk_ftype == 2) then
+     vec(22,:) = (peqdsk_ne(:)-peqdsk_ni(:)-peqdsk_nb(:))/6.0*10
+     vec(23,:) = peqdsk_nb(:)*10
+  else
+     vec(22,:) = (peqdsk_ne(:)-peqdsk_ni(:))/6.0*10
+     vec(23,:) = 0.0
+  endif
 
-  ! ti
+  ! ti, tc, tb
   vec(26,:) = peqdsk_ti(:)
+  if(peqdsk_ftype == 2) then
+     vec(27,:) = peqdsk_ti(:)
+     vec(28,:) = peqdsk_pb(:)/(peqdsk_nb(:)*10)/1.602
+  else
+     vec(27,:) = peqdsk_ti(:)
+     vec(28,:) = 0.0
+  endif
 
   ! vphi
   ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention

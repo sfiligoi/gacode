@@ -192,6 +192,7 @@
       write(*,*) 'q_unit = ',get_q_unit()
       write(*,*) 'ave_wd(1,1) = ',get_ave_wd(1,1)
       write(*,*) 'ave_b0(1,1) = ',get_ave_b0(1,1)
+      write(*,*)"ft = ",get_ft()
       if(nbasis_max_tg.gt.1)then
         write(*,*) 'ave_wd(1,2) = ',get_ave_wd(1,2)
         write(*,*) 'ave_b0(1,2) = ',get_ave_b0(1,2)

@@ -4,78 +4,64 @@ subroutine le3_func(xsize,x,fvec,iflag)
 
   implicit none
 
-  integer :: id, k, i, j
-  real :: ang
-  real :: iota
+  integer :: ix,i,j,its,ips
   integer, intent(in) :: xsize
   integer, intent(inout) :: iflag
   real, dimension(xsize), intent(inout) :: fvec
   real, dimension(xsize), intent(in) :: x
+  real, dimension(:,:), allocatable :: bp,br,bz
 
-  iota = 1.0/q
+  call le3_map(x,as,bs,cs,ds,nps,nts,'setc')
 
-  ! tb is really the periodic function thetabar-theta
+  allocate(bp(nt,np))
+  allocate(br(nt,np))
+  allocate(bz(nt,np))
 
-  k=1
-  do j=1,np
-     do i=2,nt
-        tb(i,j) = x(k)
-        k = k+1
-     enddo
-  enddo
-
-  !-------------------------------------------------
-  ! Compute d(tb)/dt and d(tp)/dp over [0,2pi) with 
-  
-  ! d(tb)/dt
-  dtbdt(:,:) = 1.0
+  !--------------------------------------------------------
+  ! Use spectral form to compute tb, d(tb)/dt and d(tp)/dp 
+  ! on finite grids over [0,2pi) 
+  !
   do i=1,nt
-     do id=-2,2
-        k = tcyc(i+id)
-        dtbdt(i,:) = dtbdt(i,:) + tb(k,:) * cderiv(id)/dt
-     enddo
+     tb(i,:) = t(i)
   enddo
-
-  ! d(tb)/dp
+  dtbdt(:,:) = 1.0
   dtbdp(:,:) = 0.0
-  do j=1,np
-     do id=-2,2
-        k = pcyc(j+id)
-        dtbdp(:,j) = dtbdp(:,j) + tb(:,k) * cderiv(id)/dp
+
+  do ips=0,nps
+     do its=0,nts
+        do j=1,np
+           do i=1,nt
+
+              tb(i,j) = tb(i,j) + &
+                   sinm(i,its)*(bs(its,ips)*sinn(j,ips)+as(its,ips)*cosn(j,ips)) &
+                   +cosm(i,its)*(ds(its,ips)*sinn(j,ips)+cs(its,ips)*cosn(j,ips))
+
+              dtbdt(i,j) = dtbdt(i,j) + &
+                   its*cosm(i,its)*(bs(its,ips)*sinn(j,ips)+as(its,ips)*cosn(j,ips)) &
+                   -its*sinm(i,its)*(ds(its,ips)*sinn(j,ips)+cs(its,ips)*cosn(j,ips))
+
+              dtbdp(i,j) = dtbdp(i,j) + &
+                   ips*sinm(i,its)*(bs(its,ips)*cosn(j,ips)-as(its,ips)*sinn(j,ips)) &
+                   +ips*cosm(i,its)*(ds(its,ips)*cosn(j,ips)-cs(its,ips)*sinn(j,ips))
+           enddo
+        enddo
+
      enddo
   enddo
-
-  !-------------------------------------------------
+  !--------------------------------------------------------
 
   do i=1,nt
      do j=1,np
 
-        ang = m*(tb(i,j)+t(i))+n*p(j)
-
-        ! R,Z
-        r(i,j) = rmaj + rmin*cos(tb(i,j)+t(i)) + hmin*cos(ang)
-        z(i,j) =         rmin*sin(tb(i,j)+t(i)) + hmin*sin(ang)
-
-        ! dR/d(tb)
-        drdtb(i,j) = -rmin*sin(tb(i,j)+t(i)) - m*hmin*sin(ang) 
-
-        ! dR/d(pb)
-        drdpb(i,j) =                   -n*hmin*sin(ang)
-
-        ! dZ/d(tb)
-        dzdtb(i,j) =  rmin*cos(tb(i,j)+t(i)) + m*hmin*cos(ang) 
-
-        ! dZ/d(pb)
-        dzdpb(i,j) =                  n*hmin*cos(ang)
-
-        ! dR/dr
-        drdr(i,j) = cos(tb(i,j)+t(i))
-
-        ! dZ/dr
-        dzdr(i,j) = sin(tb(i,j)+t(i))
-
-        ! J [dtb/dr terms vanish]
-        jac(i,j) = r(i,j)*(drdr(i,j)*dzdtb(i,j)-drdtb(i,j)*dzdr(i,j))
+        call le3_rz(tb(i,j),&
+             p(j),&
+             r(i,j),&
+             z(i,j),&
+             drdtb(i,j),&
+             drdpb(i,j),&
+             dzdtb(i,j),&
+             dzdpb(i,j),&
+             jac(i,j))
 
      enddo
   enddo
@@ -89,45 +75,79 @@ subroutine le3_func(xsize,x,fvec,iflag)
   rt(:,:) = drdtb(:,:)*dtbdt(:,:)
   zt(:,:) = dzdtb(:,:)*dtbdt(:,:)
 
-  fp(:,:) = bp(:,:)*r(:,:)/jac(:,:) &
-       + (br(:,:)*rp(:,:)+bz(:,:)*zp(:,:))/jac(:,:)/dtbdt(:,:)
+  fp(:,:) = (bp(:,:)*r(:,:)+br(:,:)*rp(:,:)+bz(:,:)*zp(:,:))/jac(:,:)/dtbdt(:,:)
   ft(:,:) = (br(:,:)*rt(:,:)+bz(:,:)*zt(:,:))/jac(:,:)/dtbdt(:,:)
 
-  ! d(fp)/dt
-  fpt(:,:) = 0.0
-  do i=1,nt
-     do id=-2,2
-        k = tcyc(i+id)
-        fpt(i,:) = fpt(i,:) + fp(k,:) * cderiv(id)/dt
+
+  ix = 0
+  fvec(:) = 0.0
+  do ips=0,nps
+     do its=0,nts
+
+        !-------------------------------------------------------------
+        ! Projections
+        !
+        ! NOTE: each projection is a nonlinear equation to be solved 
+        !       as a nonlinear system by MINPACK.
+        !-------------------------------------------------------------
+
+        ! A: sin m cos n
+        if (its > 0) then 
+           ix = ix+1           
+           do j=1,np
+              do i=1,nt
+                 fvec(ix) = fvec(ix)  &
+                      -its*cosm(i,its)*cosn(j,ips)*fp(i,j) &
+                      -ips*sinm(i,its)*sinn(j,ips)*ft(i,j) 
+              enddo
+           enddo
+           if (ix == xsize) exit
+        endif
+
+        ! B: sin m sin n
+        if (ips > 0 .and. its > 0) then
+           ix = ix+1
+           do j=1,np
+              do i=1,nt
+                 fvec(ix) = fvec(ix) &
+                      -its*cosm(i,its)*sinn(j,ips)*fp(i,j) &
+                      +ips*sinm(i,its)*cosn(j,ips)*ft(i,j) 
+              enddo
+           enddo
+           if (ix == xsize) exit
+        endif
+
+        ! C: cos m cos n
+        if (ips + its > 0) then
+           ix = ix+1
+           do j=1,np
+              do i=1,nt
+                 fvec(ix) = fvec(ix) &
+                      +its*sinm(i,its)*cosn(j,ips)*fp(i,j) &
+                      -ips*cosm(i,its)*sinn(j,ips)*ft(i,j) 
+              enddo
+           enddo
+           if (ix == xsize) exit
+        endif
+
+        ! D: cos m sin n
+        if (ips > 0) then
+           ix = ix+1
+           do j=1,np
+              do i=1,nt
+                 fvec(ix) = fvec(ix) &
+                      +its*sinm(i,its)*sinn(j,ips)*fp(i,j) &
+                      +ips*cosm(i,its)*cosn(j,ips)*ft(i,j) 
+              enddo
+           enddo
+           if (ix == xsize) exit
+        endif
+
      enddo
   enddo
 
-  ! d(ft)/dp
-  ftp(:,:) = 0.0
-  do j=1,np
-     do id=-2,2
-        k = pcyc(j+id)
-        ftp(:,j) = ftp(:,j) + ft(:,k) * cderiv(id)/dp
-     enddo
-  enddo
-
-  fp(:,:) = 0.0
-  fp(:,:) = bp(:,:)*r(:,:)/jac(:,:)
-  do j=1,np
-     do i=1,nt
-        fp(i,j) = fp(i,j) * 4.0 * ( tb(tcyc(i+1),j) &
-             - 2.0*tb(i,j) + tb(tcyc(i-1),j) ) &
-             / (2*dt + tb(tcyc(i+1),j) &
-                - tb(tcyc(i-1),j))**2
-     enddo
-  enddo
-
-  k=1
-  do j=1,np
-     do i=2,nt
-        fvec(k) = fpt(i,j)-ftp(i,j)-fp(i,j)
-        k = k+1
-     enddo
-  enddo
+  deallocate(bp)
+  deallocate(br)
+  deallocate(bz)
 
 end subroutine le3_func

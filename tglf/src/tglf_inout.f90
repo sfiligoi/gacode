@@ -812,6 +812,17 @@
 !
       END FUNCTION get_R_unit
 !-----------------------------------------------------------------
+!
+      REAL FUNCTION get_ft()
+!
+      USE tglf_global
+!
+      IMPLICIT NONE
+!
+      get_ft = ft
+!
+      END FUNCTION get_ft
+!-----------------------------------------------------------------
       REAL FUNCTION get_B_unit()
 !
       USE tglf_global

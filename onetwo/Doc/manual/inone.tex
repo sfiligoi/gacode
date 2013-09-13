@@ -1,0 +1,103 @@
+ \section{Inone guidleines}
+ Many people encounter difficulty in setting up the namelist inputs
+ for \ot. These guidelines  may ease the pain a bit. Because namelist
+ input is processed as a single block user code has no access to the
+ individual lines in a namelist. This means that user code cant check
+ for input errors. Instead we must rely on the compiler to generate
+ suitable error messages. Unfortunately different compilers react
+ differently to  namelist errors. The most user friendly is HP F90, which gives some useful
+     information when namelist read errors are encountered. LF95
+     and PGF90 are not forgiveing and basically tell you nothing.
+     So one way to discover nameis input errors is to try and run 
+     the code on HP machines.
+     But due to compiler issues the  Onetwo
+     is not up to date on HP . so if you are using new input
+     parameters (as of Feb 2004) you cant use this option.
+     
+ \ot uses three namelists, called ``namelis1'',''namelis2'' and ``namelis3''.
+ These three namelists must appear in a file called inone. Note that
+ using scripts such as run12 might give you the impression that \ot
+ reads the name of the namelist file from the cammand line. This is
+ not the case however. Onetwo always looks for a file called inone in
+ the current working directory. The inone file will be scanned from
+ top to bottom until a namelist sentinel and the name of the namelist
+ are encountered together in the form, for example, ``&namelis3''.
+ Her the ``&'' is the namelist sentinel. Scanning stops when another 
+ namelist sentinel is ecountered. This means that (a) the order of the
+ namelists in inone is arbitrary,(b) outside of each individual
+ namelist there can be arbitrary lines of code, and (c) namelists can
+ be repeated. However if a namelsit is repeated it is the first
+ occurance of the namelist that is used, NOT the last. Scanning stops
+ and control is returned to the user code once the termination
+ sentinel in the namelist is encountered.
+
+ \begin{itemize}
+   \item First of all you should be aware that although you input the
+     data in file inone the code reads a file called INONE (all caps).
+     This is the standard way to get rid of comments in namelist
+     files. INONE is a copy of inone with all comments stripped out.
+     Error messages put out by Onetwo refer to INONE not inone.
+     INONE is destroyed after a succesfull run so you may never see
+     it. The primary output file produced by \ot,called ``outone'',
+     has a full listing of inone at its top so you can alwys tell what
+     input was used to generate the output.
+
+    \item Namelist sentinels are not uniform across compilers.
+       LF95  will not accept the ``$'' namelist sentinel that is
+   normaly used in our codes (PGF90 and HP F90 dont have this problem.)
+   Hence to keep uniformity you should use ``&'' which is accepted by
+   all compilers.
+  \item Automatic generation of inone files using various tools 
+    is a start. But none of these tools are  
+    100% up to date or, as near as I can tell, bugfree.
+    None of these tools were created or even verified by me and I know that
+    there are some problems. Do not get
+    confused by the fact that your automatically generated inone file
+    doesnt run. The auto generated inone is only a skeleton.
+    It alway needs manual modifications. Instead you may want to  start with
+    an inone file that works and gradually morph it to the case you
+    want to run. Doing it gradually means you know what set of lines
+    caused the namelist to suddenly stop working. 
+   \item As mentioned above there are three namelists in inone. Each namelist is
+     processed independently. If you encounter an error the first
+     thing to do is to determine what namelist the error occured in.
+     This is most easily done  by setting the variable
+     ``namelistvb = 1 '' in the first namelist (only) of inone.
+     This will cause the message `` ... namelist X'' read to be
+     printed to the screen if namelist number X was read succesfully. 
+     Normally you will get 3 mesages, one for each namelist. The error
+     occurs in that namelist for which  the message is not printed out.
+   \item This is probably the most important point: Do not guess at
+     what the input should be !  There is no reason to guess the form
+     of an input variable. The file cray102.f contains a 100\% complete
+      listing of all variables used in the namelist. Note that you may
+      have to look at the namelists in cray102.f to see what namelist
+      a variable belongs in 
+ \item Last resort - If you still haven't found the problem there are
+     several things you can do:
+     \item You at least know what namelist the problem is in by using
+     the namelistvb switch mentioned above.  Hence start by carefully
+     perusing that namelist.
+    \if you didnt pick up on anything (some problems are quite subtle
+    and not readily visible) you can do a binary search on the
+    offending  namelist : 
+    A) go to the middle of the namelist and insert some garbage
+    characters (make sure they are not comments)
+    B) run the Onetwo code.
+    C) Does the error message change as a result of the garbage
+    characters?
+      a) if not then move the garbage charcters up  in the namelist
+         by about 1/2 the distance to the start.
+      b) if the error message changed then you encountered the garbage
+      characters before you encountered the true problem. Move the
+      garbage characters down and try again.
+    Obviously this is not a very satisfying approach but if you
+   inadvertently get into this situation it may be the only way to
+   fix the problem. (I have done this numerous times).
+
+   \item Documentation is available in the form of the original
+     report GAA-16178.  A  pdf document which concentrates on new
+     features added since the original work is avaialble online.
+
+ \end{itemize}
+ \end{section}

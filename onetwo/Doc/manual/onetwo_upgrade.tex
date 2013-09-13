@@ -1,0 +1,74 @@
+
+ \documentclass{slides}
+ \usepackage{amsmath}
+ \usepackage{fancyheadings,graphics,color}
+   %\usepackage{epsfig}
+  %\usepackage[usenames]{color} seems logical but doesnt work
+  \input{/users/stjohn/tex.dir/onetwo_docs.dir/abbrev} % can keep my definitions in f
+   %\input{/home/stjohn/tex.dir/onetwo.doc/abbrev}
+   %\onlyslides{4}
+      \color{blue} \pagestyle{fancy}
+  \begin{document}
+      \begin{slide}
+       \begin{center}
+           \Large\bfseries ONETWO UPGRADE
+
+        \end{center}
+        \normalsize  
+
+        \bigskip
+        \hrule height4pt
+        %\bigskip
+          \bf
+         \begin{itemize}
+           \item Fast Ion Physics
+	      \begin{enumerate}
+	         \item time dependent neutral beam injection
+	         \item Refined fast ion distribution
+	            \begin{itemize}
+                       \item Bounce average Fokker Planck or
+	                     Monte Carlo \color {red} MCGO,ORBIT 
+                             \color{blue}
+                        \item orbit average (Pearlstein) model
+                    \end{itemize}
+	      \end{enumerate}
+	    \item Transport Models
+		  \begin{enumerate}
+	             \item Weiland
+	             \item IFS
+	             \item sawtooth
+	          \end{enumerate}
+            \item Neutral Particle Model \color{red} NUT,FENAT 
+                  \color {blue}
+        \end{itemize}
+        \lfoot[LFeven]{lfodd}
+	\rfoot[rf even]{rfodd}
+        \end{slide}
+
+
+      \begin{slide}           \bf
+	\begin{itemize}
+           \item Coupling to edge codes \color{red}  UEDGE 
+                  \color {blue}
+	  \item MHD/Transport coupling
+	     \begin{enumerate}
+	         \item \color{red} EFIT\color{blue} Greens Table 
+	         \item refine solution methods
+		       (non linear FACR or Multigrid?)
+                 \item TDEM mode applications (RF)
+	      \end{enumerate}
+           \item Post Processing
+	       \begin{enumerate}
+		  \item  extend \color{red} PLOT12 \color {blue} 
+                        for programmable
+                          application
+                  \item  data base of input/output definitions
+	       \end{enumerate}
+           \item  Move to \textcolor{red}{ FORTRAN 90 } !!
+         \end{itemize}
+	\footrulewidth 6pt
+        \lfoot[LFeven]{lfodd}
+	\rfoot[rf even]{rfodd} 
+      \end{slide}
+
+\end{document}

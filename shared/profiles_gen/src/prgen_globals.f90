@@ -83,9 +83,11 @@ module prgen_globals
   integer :: onetwo_nimp
   integer :: onetwo_nneu
   integer :: onetwo_nbion
+  integer :: onetwo_nalp
   character (len=2), dimension(5) :: onetwo_namep
   character (len=2), dimension(5) :: onetwo_namei
   character (len=2), dimension(5) :: onetwo_nameb
+  character (len=2), dimension(16) :: onetwo_ion_name
   real :: onetwo_time
   real :: onetwo_Rgeom
   real :: onetwo_Rmag
@@ -116,10 +118,12 @@ module prgen_globals
   real, dimension(:), allocatable :: onetwo_sbeam
   real, dimension(:), allocatable :: onetwo_te
   real, dimension(:), allocatable :: onetwo_ti
+  real, dimension(:), allocatable :: onetwo_talp
   real, dimension(:), allocatable :: onetwo_q
   real, dimension(:), allocatable :: onetwo_angrot
   real, dimension(:), allocatable :: onetwo_zeff
   real, dimension(:), allocatable :: onetwo_ene
+  real, dimension(:), allocatable :: onetwo_enalp
   real, dimension(:), allocatable :: onetwo_psi
   real, dimension(:), allocatable :: onetwo_storqueb
   real, dimension(:), allocatable :: onetwo_press
@@ -142,6 +146,11 @@ module prgen_globals
   real, dimension(:), allocatable :: onetwo_elongxnpsi
   real, dimension(:), allocatable :: onetwo_triangnpsi_u
   real, dimension(:), allocatable :: onetwo_triangnpsi_l
+  !
+  ! conglomerate ion vectors
+  !
+  real, dimension(:,:), allocatable :: onetwo_enion_vec
+  real, dimension(:,:), allocatable :: onetwo_Tion_vec
   !---------------------------------------------------------
 
   !---------------------------------------------------------
@@ -191,6 +200,7 @@ module prgen_globals
   !---------------------------------------------------------
   ! PEQDSK variables
   !
+  integer :: peqdsk_ftype
   integer :: peqdsk_nj
   real :: peqdsk_bref
   real :: peqdsk_arho
@@ -200,6 +210,8 @@ module prgen_globals
   real, dimension(:), allocatable :: peqdsk_ni
   real, dimension(:), allocatable :: peqdsk_ti
   real, dimension(:), allocatable :: peqdsk_omegat
+  real, dimension(:), allocatable :: peqdsk_nb
+  real, dimension(:), allocatable :: peqdsk_pb
   !---------------------------------------------------------
 
   !---------------------------------------------------------
@@ -269,7 +281,7 @@ module prgen_globals
   real, dimension(:), allocatable :: ufile_nm1
   real, dimension(:), allocatable :: ufile_nm2
   real, dimension(:), allocatable :: ufile_nm3
-  real, dimension(:), allocatable :: ufile_te 
+  real, dimension(:), allocatable :: ufile_te
   real, dimension(:), allocatable :: ufile_ti
   real, dimension(:), allocatable :: ufile_zeff
   real, dimension(:), allocatable :: ufile_pres

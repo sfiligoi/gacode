@@ -507,6 +507,11 @@ contains
        close(io_nc)
     end if
 
+    do i=1,m_s
+       neo_nclass_out(i) = ymu_s(1,1,i) / (mass_deuterium * 1e-27 &
+            * dens_norm(ir) * 1e19 * vth_norm(ir))
+    enddo
+
   end subroutine NCLASS_DR_do
 
 end module neo_nclass_dr
