@@ -43,6 +43,7 @@ os.system('cp out.neo.localdump input.neo.template')
 
 outfile = open('out.neo.mrun_z','w')
 
+root=os.environ['GACODE_ROOT']
 for i2 in vec2:
     for i1 in vec1:
         a = var1+'='+str(i1)
@@ -50,6 +51,7 @@ for i2 in vec2:
         os.system('cp input.neo.template input.neo')
         os.system('echo '+a+' >> input.neo')
         os.system('echo '+b+' >> input.neo')
+        os.system('python '+root+'/neo/bin/neo_parse.py')
         os.system('neo -p '+dir+' -e . > out')
 
         print 'INFO: (neo_mrun) '+a+' ; '+b

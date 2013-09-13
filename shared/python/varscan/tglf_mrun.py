@@ -43,6 +43,7 @@ os.system('cp out.tglf.localdump input.tglf.template')
 
 outfile = open('out.tglf.mrun_z','w')
 
+root=os.environ['GACODE_ROOT']
 for i2 in vec2:
     for i1 in vec1:
         a = var1+'='+str(i1)
@@ -50,6 +51,7 @@ for i2 in vec2:
         os.system('cp input.tglf.template input.tglf')
         os.system('echo '+a+' >> input.tglf')
         os.system('echo '+b+' >> input.tglf')
+        os.system('python '+root+'/neo/bin/tglf_parse.py')
         os.system('tglf -p '+dir+' -e . > out')
 
         print 'INFO: (tglf_mrun) '+a+' ; '+b
