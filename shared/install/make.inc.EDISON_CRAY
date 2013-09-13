@@ -9,7 +9,9 @@
 #---------------------------------------------------
 
 #  FIXED Hardware parameters
-CORES_PER_NODE=16
+#CORES_PER_NODE=16
+#CH edit 9.12.13 for Phase 2
+CORES_PER_NODE=24
 NUMAS_PER_NODE=2
 
 # Compilers and flags
@@ -25,7 +27,8 @@ FPETSC =
 
 # System math libraries
 
-LMATH = -L/opt/fftw/3.3.0.1/x86_64/lib -Wl,-rpath=/opt/fftw/3.3.0.1/x86_64/lib \
+#CH 9.12.13 fftw/3.3.0.1-3.3.0.4
+LMATH = -L/opt/fftw/3.3.0.4/x86_64/lib -Wl,-rpath=/opt/fftw/3.3.0.4/x86_64/lib \
         -lfftw3_threads -lfftw3f_threads -lfftw3 -lfftw3f
 
 # NetCDF
