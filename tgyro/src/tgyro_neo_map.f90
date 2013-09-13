@@ -23,16 +23,10 @@ subroutine tgyro_neo_map
      neo_sim_model_in = 1
   end if
 
-  ! Resolution
-  if (loc_n_ion < 4) then
-     !     neo_n_energy_in = 10
-     neo_n_energy_in = 5
-  else
-     !     neo_n_energy_in = 6
-     neo_n_energy_in = 5
-  endif
+  ! Resolution 
+  neo_n_energy_in = 5
   neo_n_xi_in = 11
-  neo_n_theta_in = 11
+  neo_n_theta_in = 25
 
   ! Geometry
   neo_equilibrium_model_in = 2

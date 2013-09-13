@@ -39,7 +39,7 @@ if run == 0:
 # IMPORTANT: Set working directory
 os.chdir(dir)
 
-os.system('cp input.neo input.neo.template')
+os.system('cp out.neo.localdump input.neo.template')
 
 outfile = open('out.neo.mrun_z','w')
 
@@ -52,9 +52,21 @@ for i2 in vec2:
         os.system('echo '+b+' >> input.neo')
         os.system('neo -p '+dir+' -e . > out')
 
-        data = np.loadtxt('out.neo.transport')
         print 'INFO: (neo_mrun) '+a+' ; '+b
-        for i in range(len(data)):
+
+        data = np.loadtxt('out.neo.transport')
+
+        equil = np.loadtxt('out.neo.equil')
+        g_gb = equil[12]*equil[13]**1.5*equil[3]**2
+        q_gb = equil[12]*equil[13]**2.5*equil[3]**2
+
+        # Ge,Qe,Gi,Qi
+        ovec = [14,15,5,6]
+        data[14] = data[14]/g_gb
+        data[15] = data[15]/q_gb
+        data[5]  = data[5]/g_gb
+        data[6]  = data[6]/q_gb
+        for i in ovec:
             outfile.write(str(data[i])+' ')
         outfile.write('\n')
 
