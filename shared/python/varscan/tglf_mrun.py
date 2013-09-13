@@ -51,7 +51,7 @@ for i2 in vec2:
         os.system('cp input.tglf.template input.tglf')
         os.system('echo '+a+' >> input.tglf')
         os.system('echo '+b+' >> input.tglf')
-        os.system('python '+root+'/neo/bin/tglf_parse.py')
+        os.system('python '+root+'/tglf/bin/tglf_parse.py')
         os.system('tglf -p '+dir+' -e . > out')
 
         print 'INFO: (tglf_mrun) '+a+' ; '+b
