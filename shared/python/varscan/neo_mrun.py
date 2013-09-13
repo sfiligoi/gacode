@@ -61,9 +61,9 @@ for i2 in vec2:
         q_gb = equil[12]*equil[13]**2.5*equil[3]**2
 
         # Ge,Qe,Gi,Qi
-        ovec = [14,15,5,6]
-        data[14] = data[14]/g_gb
-        data[15] = data[15]/q_gb
+        ovec = [13,14,5,6]
+        data[13] = data[13]/g_gb
+        data[14] = data[14]/q_gb
         data[5]  = data[5]/g_gb
         data[6]  = data[6]/q_gb
         for i in ovec:

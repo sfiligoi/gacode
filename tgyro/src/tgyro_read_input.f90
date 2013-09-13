@@ -115,6 +115,7 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(tgyro_gyro_restart_flag)
   call tgyro_readbc_int(tgyro_fix_concentration_flag)
   call tgyro_readbc_int(tgyro_write_profiles_flag)
+  call tgyro_readbc_int(tgyro_neo_n_theta)
   ! ** END input read; ADD NEW PARAMETERS ABOVE HERE!!
   call tgyro_readbc_int(n_inst)
   !-------------------------------------------------------
