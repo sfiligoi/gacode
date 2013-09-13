@@ -1,11 +1,11 @@
 #---------------------------------------------------
-# VENUS cluster, DELPHI2 (?), BENTEN (?) at General Atomics
+# DELPHI, EOS, HESTIA, VENUS, etc. at General Atomics
+# Make sure to source /u/candy/local_software/setup 
+# (even in your .login file on VENUS)
 #---------------------------------------------------
 
-# Compilers and flags
-PGIROOT = /opt/pgi/linux86-64/2010
-F77	= $(PGIROOT)/mpi/mpich/bin/mpif90
-FC	= $(F77) -module $(GACODE_ROOT)/modules
+FC	= mpif90 -module $(GACODE_ROOT)/modules
+F77	= mpif90
 
 FOMP    = -mp
 FMATH	= -r8 
@@ -14,18 +14,13 @@ FDEBUG	= -g -Ktrap=fp -Mbounds -Minform,inform
 
 # System math libraries
 
-ROOT=/u/candy/local_software
-ROOT=/c/source
+LMATH=/opt/pgi/linux86-64/12.10/lib/liblapack.a \
+      /opt/pgi/linux86-64/12.10/lib/libblas.a
 
-LMATH = $(ROOT)/gotoblas/GotoBLAS_PGF9064/libgoto.a\
-        $(PGIROOT)/lib/liblapack.a\
-        $(PGIROOT)/lib/libblas.a
+# NetCDF
 
-# OPTIONAL: netCDF (for gyro2gkv)
-
-NETCDF = $(ROOT)/netcdf/lib/libnetcdf.a
-NETCDF = $(ROOT)/netcdf/lib64/libnetcdf.a
-NETCDF_INC = $(ROOT)/netcdf/include64
+NETCDF = -L/task/imd/local64/lib -lnetcdff -lnetcdf
+NETCDF_INC = /task/imd/local64/include
 
 # Archive 
 
