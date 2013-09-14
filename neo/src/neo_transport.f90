@@ -347,7 +347,6 @@ contains
     ! Poloidal and Toroidal Velocity
     call compute_velocity(ir)
     
-
     if(silent_flag == 0 .and. i_proc == 0) then
        open(unit=io_neoout,file=trim(path)//runfile_neoout,&
             status='old',position='append')
@@ -402,7 +401,6 @@ contains
             + 2.5 * pflux_gv(is) * temp(is,ir) &
             + omega_rot(ir) * mflux_gv(is)
     enddo
-
 
     do is=1,n_species
        check_sum = check_sum &
