@@ -19,7 +19,7 @@ LMATH=/opt/pgi/linux86-64/12.10/lib/liblapack.a \
 
 # NetCDF
 
-NETCDF = -L/task/imd/local64/lib -lnetcdff -lnetcdf
+NETCDF = -L/task/imd/local64/lib -lnetcdff -lnetcdf -Wl,-rpath,/task/imd/local64/lib
 NETCDF_INC = /task/imd/local64/include
 
 # Archive 
