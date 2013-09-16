@@ -565,6 +565,7 @@ fi
 #
 if [[ $FILE == p[0-9][0-9][0-9]* ]]
 then
+   echo "INFO: (profiles_gen) Detected pfile format."
    # First, ensure gfile exists too.
    if [ $G_FLAG -eq 0 ] 
    then

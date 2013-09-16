@@ -1,0 +1,24 @@
+#!/bin/bash
+#--------------------------------------------
+# Filetype autodetection script
+#--------------------------------------------
+
+x=`file -b $1`
+if [[ "$x" == "ASCII text" ]] ; then
+   # pfile, gfile, iterdb text
+   y=`grep psinorm $1`
+   if [[ "$y" != "" ]] ; then
+      echo "INFO: (autodetect) This is a GA pfile."
+   else
+      echo "INFO: (autodetect) This is an iterdb TEXT file." 
+   fi
+else
+   # Plasmastate or iterdb netcdf
+   y=`ncdump -c $1 | grep dim_nrho_eq`
+   if [[ "$y" == "" ]] ; then
+      echo "INFO: (autodetect) This is an iterdb netCDF file."
+   else
+      echo "INFO: (autodetect) This is a plasmastate netCDF file"
+   fi      
+fi
+
