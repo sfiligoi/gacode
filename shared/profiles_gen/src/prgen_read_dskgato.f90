@@ -12,18 +12,17 @@ subroutine prgen_read_dskgato
 
   implicit none
 
-  character (len=1) :: a
   integer :: i,ip
   integer :: neqtyp
   integer :: ntht,neqsym
   real :: fa,fb
   real :: dummy(4)
   real, dimension(:), allocatable :: psi
+  real, dimension(:), allocatable :: q_dsk
   real, dimension(:), allocatable :: pdum
   real, dimension(:), allocatable :: tdum
   real, dimension(:,:), allocatable :: xs
   real, dimension(:,:), allocatable :: zs
-  real, dimension(:), allocatable :: sqdpsi
 
   real, dimension(:,:), allocatable :: gvec
   real, dimension(:,:,:), allocatable :: g3vec
@@ -43,9 +42,15 @@ subroutine prgen_read_dskgato
      read(1,*) nsurf,ntht
      neqsym = 1
   endif
+  ! Accounting for magnetic axis
+  nsurf = nsurf-1
 
-  if (neqsym == 0) narc = ntht
-  if (neqsym == 1) narc = 2*(ntht-1) + 1
+  if (neqsym == 0) then
+     narc = ntht
+  else
+     ! Repeat point
+     narc = 2*(ntht-1)+1
+  endif
 
   read (1,10) dummy(1:4)
 
@@ -53,34 +58,39 @@ subroutine prgen_read_dskgato
   if (neqtyp == 1) read(1,10) dummy(1:3)
 
   allocate(tdum(ntht))
-  allocate(psi(nsurf))
-  allocate(pdum(nsurf))
-  allocate(xs(nsurf,narc))
-  allocate(zs(nsurf,narc))
+  allocate(psi(0:nsurf))
+  allocate(q_dsk(0:nsurf))
+  allocate(pdum(0:nsurf))
+  allocate(xs(narc,0:nsurf))
+  allocate(zs(narc,0:nsurf))
 
   read(1,10) psi(:)
   read(1,10) pdum(:) ! fval
   read(1,10) pdum(:) ! ffprime
   read(1,10) pdum(:) ! sp
   read(1,10) pdum(:) ! pprime
-  read(1,10) pdum(:) ! qsfin
+  read(1,10) q_dsk(:) ! qsfin
   read(1,10) pdum(:) ! nel
 
   read(1,10) tdum(:) ! seqdpdr
   read(1,10) tdum(:) ! seqdpdz
 
-  read(1,10) xs(:,1:ntht)
-  read(1,10) zs(:,1:ntht)
+  read(1,10) ((xs(i,ip),ip=0,nsurf),i=1,ntht)
+  read(1,10) ((zs(i,ip),ip=0,nsurf),i=1,ntht)
   close(1)
 
-  zs(:,1)    = 0.0
-  zs(:,ntht) = 0.0
+  if (neqsym == 1) then
+     zs(1,:)    = 0.0
+     zs(ntht,:) = 0.0
+     do i=ntht+1,narc
+        ip = narc+1-i
+        xs(i,:) = +xs(ip,:)
+        zs(i,:) = -zs(ip,:)
+     enddo
+  endif
 
-  do i=ntht+1,narc
-     ip = narc+1-i
-     xs(:,i) = +xs(:,ip)
-     zs(:,i) = -zs(:,ip)
-  enddo
+  ! Set psi(1) = 0
+  psi(:) = psi(:)-psi(0)
   !----------------------------------------------------
 
   !----------------------------------------------------------------
@@ -117,34 +127,31 @@ subroutine prgen_read_dskgato
   ! 5  delta
   ! 6  zeta
   !
-  call fluxfit_driver(1,1,nsurf,narc,xs,zs,verbose_flag)
+  call fluxfit_driver(1,1,nsurf,narc,xs(:,1:nsurf),zs(:,1:nsurf),verbose_flag)
   !
-  allocate(gvec(6,nsurf))
+  allocate(gvec(6,0:nsurf))
   !
   open(unit=1,file='fluxfit.profile',status='old')
-  read(1,*) a
-  read(1,*) gvec(:,:)
+  read(1,*) cdum
+  read(1,*) gvec(:,1:nsurf)
   close(1)
 
-  allocate(sqdpsi(nx))
-  sqdpsi = sqrt(dpsi)
-
   ! Explicitly set rmin=0 at origin
-  gvec(1,1) = 0.0
+  gvec(1,0) = 0.0
 
   ! Use extrapolation to get values of shape parameters at origin
   do i=2,6
-     call bound_extrap(fa,fb,gvec(i,:),psi,nsurf)
-     gvec(i,1) = fa
+     call bound_extrap(fa,fb,gvec(i,:),psi,nsurf+1)
+     gvec(i,0) = fa
   enddo
 
   ! Map shape coefficients onto poloidal flux (dpsi) grid:
-  call cub_spline(sqrt(psi),gvec(1,:),nsurf,sqdpsi,rmin,nx)
-  call cub_spline(sqrt(psi),gvec(2,:),nsurf,sqdpsi,zmag,nx)
-  call cub_spline(sqrt(psi),gvec(3,:),nsurf,sqdpsi,rmaj,nx)
-  call cub_spline(sqrt(psi),gvec(4,:),nsurf,sqdpsi,kappa,nx)
-  call cub_spline(sqrt(psi),gvec(5,:),nsurf,sqdpsi,delta,nx)
-  call cub_spline(sqrt(psi),gvec(6,:),nsurf,sqdpsi,zeta,nx)
+  call cub_spline(sqrt(psi),gvec(1,:),nsurf+1,sqrt(dpsi),rmin,nx)
+  call cub_spline(psi,gvec(2,:),nsurf+1,dpsi,zmag,nx)
+  call cub_spline(psi,gvec(3,:),nsurf+1,dpsi,rmaj,nx)
+  call cub_spline(psi,gvec(4,:),nsurf+1,dpsi,kappa,nx)
+  call cub_spline(psi,gvec(5,:),nsurf+1,dpsi,delta,nx)
+  call cub_spline(psi,gvec(6,:),nsurf+1,dpsi,zeta,nx)
 
   ! Explicitly set rmin=0 at origin
   rmin(1) = 0.0
@@ -155,29 +162,29 @@ subroutine prgen_read_dskgato
   !----------------------------------------------------------------
   ! Get general geometry coefficients
   !
-  call fluxfit_driver(2,nfourier,nsurf,narc,xs,zs,verbose_flag)
+  call fluxfit_driver(2,nfourier,nsurf,narc,xs(:,1:nsurf),zs(:,1:nsurf),verbose_flag)
 
-  allocate(g3vec(4,0:nfourier,nsurf))
+  allocate(g3vec(4,0:nfourier,0:nsurf))
   allocate(g3rho(4,0:nfourier,nx))
 
   open(unit=1,file='fluxfit.geo',status='old')
   read(1,*) ip
-  read(1,*) g3vec(:,:,:)
+  read(1,*) g3vec(:,:,1:nsurf)
   close(1)
 
   ! Explicitly set rmin=0 at origin
-  g3vec(:,1:nfourier,1) = 0.0
+  g3vec(:,1:nfourier,0) = 0.0
 
   ! Extrapolate centers (R0,Z0) to origin
   do i=1,4
-     call bound_extrap(fa,fb,g3vec(i,0,:),psi,nsurf)
-     g3vec(i,0,1) = fa
+     call bound_extrap(fa,fb,g3vec(i,0,:),psi,nsurf+1)
+     g3vec(i,0,0) = fa
   enddo
 
   ! Map Fourier coefficients onto poloidal flux (dpsi) grid 
   do i=1,4
      do ip=0,nfourier
-        call cub_spline(sqrt(psi),g3vec(i,ip,:),nsurf,sqdpsi,g3rho(i,ip,:),nx)
+        call cub_spline(psi,g3vec(i,ip,:),nsurf+1,dpsi,g3rho(i,ip,:),nx)
      enddo
   enddo
 
@@ -200,6 +207,10 @@ subroutine prgen_read_dskgato
   write(1,'(1pe20.13)') g3rho(:,:,:)
   close(1)
   !----------------------------------------------------------------
+
+  if (nogatoq_flag == 0 .or. format_type == 3 .or. format_type == 7) then
+     call cub_spline(psi,q_dsk,nsurf+1,dpsi,q,nx)
+  endif
 
   ! Cleanup
   deallocate(g3vec)

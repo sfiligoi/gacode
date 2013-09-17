@@ -34,7 +34,8 @@ subroutine fluxfit_minmax(x,y,n,x0,y_x0,mode)
   y3 = y(ip)
 
   if (x1 == x2 .and. x2 == x3) then
-     print *,'x1=x2=x3 error in fluxfit_minmax'
+     print *,x(:)
+     print '(a)','ERROR: (fluxfit_minmax) x1=x2=x3 error.'
      stop
   endif
 

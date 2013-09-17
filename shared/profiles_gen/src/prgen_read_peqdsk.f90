@@ -11,16 +11,15 @@ subroutine prgen_read_peqdsk
 
   implicit none
 
-  character (len=100) :: t
-  integer :: i
-  real, dimension(:,:), allocatable :: xv
   integer, parameter :: ncol=3
+  integer :: i
   logical :: ierr
+  real, dimension(:,:), allocatable :: xv
 
   !----------------------------------------------------
   ! Read the peqdsk file
   !
-  
+
   open(unit=1,file='pfile.ne',status='old')
   read(1,*) i
   peqdsk_nj = i
@@ -91,7 +90,7 @@ subroutine prgen_read_peqdsk
      close(1)
   else
      peqdsk_pb(:) = 0.0
-  endif   
+  endif
 
   ! omeg(kRad/s)
   inquire(file='pfile.omeg',exist=ierr)
@@ -103,9 +102,9 @@ subroutine prgen_read_peqdsk
      call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_omegat,peqdsk_nj)
      deallocate(xv)
      close(1)
-   else
+  else
      peqdsk_omegat(:) = 0.0
-  endif  
+  endif
 
   ! omgeb(kRad/s)
   inquire(file='pfile.omgeb',exist=ierr)
@@ -117,9 +116,9 @@ subroutine prgen_read_peqdsk
      call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_omgeb,peqdsk_nj)
      deallocate(xv)
      close(1)
-   else
+  else
      peqdsk_omgeb(:) = 0.0
-  endif  
+  endif
 
   call allocate_internals
 

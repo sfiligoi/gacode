@@ -7,6 +7,7 @@ module prgen_globals
   ! List of possible data files
   character (len=70) :: date
   character (len=70) :: raw_data_file
+  character (len=70) :: raw_data_type
   character (len=70) :: cer_file
 
   !----------------------------------------------------------

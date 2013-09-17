@@ -68,13 +68,12 @@ subroutine create_read_input
   do i=1,nions_max
      read(1,*) exm_ni_data(i)   
   enddo
-  read(1,30) exm_ne_data   
+  read(1,20) exm_ne_data   
   read(1,*) exm_pivot
 
   close(1)
 
 10 format(i2)
-20 format(e12.5)
-30 format(a)
+20 format(a)
 
 end subroutine create_read_input

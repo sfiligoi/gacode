@@ -18,7 +18,6 @@ subroutine prgen_write
   character (len=15) :: ion_string ! Up to 5 two letter ions
   !---------------------------------------------------------------
 
-
   open(unit=1,file='input.profiles',status='replace')
 
   !---------------------------------------------------------------
@@ -44,7 +43,7 @@ subroutine prgen_write
      ion_string = ''
      do i=1,min(onetwo_nion+onetwo_nbion+onetwo_nalp,5)
         if (reorder_vec(i) /= 0) then
-            write(ion_string,'(a)') trim(ion_string) // ' '// trim(onetwo_ion_name(reorder_vec(i)))
+           write(ion_string,'(a)') trim(ion_string) // ' '// trim(onetwo_ion_name(reorder_vec(i)))
         endif
      enddo
      write(1,20) '#                 IONS : ',trim(ion_string)
@@ -94,9 +93,11 @@ subroutine prgen_write
      write(1,40) '#             NFOURIER : ',nfourier
      write(1,40) '#                NSURF : ',nsurf
      write(1,40) '#                 NARC : ',narc
-     write(1,20) '#            EFIT HEADER ... '
-     write(1,20) '#'
-     write(1,20) '#',efit_header
+     if (efit_method /= 4) then
+        write(1,20) '#            EFIT HEADER ... '
+        write(1,20) '#'
+        write(1,20) '#',efit_header
+     endif
      write(1,20) '#'
   endif
   !---------------------------------------------------------------
@@ -109,7 +110,7 @@ subroutine prgen_write
   write(1,'(a,1pe8.2,a)') '#  PLASMA MAJOR RADIUS : ',rmaj(nx),' m'
   write(1,'(a,1pe8.2,a)') '#  PLASMA MINOR RADIUS : ',rmin(nx),' m'
   write(1,20) '#'
-  write(1,20)    '# * Field/current orientationq:'
+  write(1,20)    '# * Field/current orientation:'
   write(1,'(a)') '# '
   write(1,'(a)') '#   NOTE: All variables carry correct and consistent signs'
   write(1,'(a)') '#         in fixed gacode (r,theta,varphi) coordinates.'

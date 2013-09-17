@@ -13,7 +13,7 @@ subroutine prgen_map_peqdsk
   integer :: i
 
   ! Compute rho, bref and arho:
-  call prgen_get_chi(nx,q_gato,kappa,rmin,dpsi,rho,peqdsk_bref,peqdsk_arho)
+  call prgen_get_chi(nx,q,kappa,rmin,dpsi,rho,peqdsk_bref,peqdsk_arho)
 
   !---------------------------------------------------------
   ! Map profile data onto single array:
@@ -54,7 +54,7 @@ subroutine prgen_map_peqdsk
   vec(26,:) = peqdsk_ti(:)
   vec(27,:) = peqdsk_ti(:)
   do i=1,peqdsk_nj
-     if(peqdsk_nb(i) > epsilon(0.)) then
+     if (peqdsk_nb(i) > epsilon(0.)) then
         vec(28,i) = peqdsk_pb(i)/(peqdsk_nb(i)*10)/1.602
      else
         vec(28,i) = 0.0
