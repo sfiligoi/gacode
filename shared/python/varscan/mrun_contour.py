@@ -34,7 +34,7 @@ else:
 
 if norm > 0:
     x = TGYROData('./')
-    if index == 1 or index == 3:
+    if index == 0 or index == 2:
         gb = x.data['Gamma_GB'][0][norm]
     else:
         gb = x.data['Q_GB'][0][norm]

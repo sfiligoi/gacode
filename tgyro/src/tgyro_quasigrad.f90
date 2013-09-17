@@ -33,7 +33,7 @@ subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion,dlnridr)
 
      if (tgyro_fix_concentration_flag == 0) then
 
-        ! Adjust ion 1 gradient
+        ! Adjust ion 1 gradient to enforce quasineutrality.
 
         ! Temporary storage 
         dlnnidr(1) = ne*dlnnedr 
@@ -46,7 +46,7 @@ subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion,dlnridr)
 
      else
 
-        ! Adjust all ion gradients at fixed concentration rations (n2/n1, n3/n1, etc)
+        ! Adjust all ion gradients at fixed concentration ratios (n2/n1, n3/n1, etc)
 
         ! Temporary storage 
         dlnnidr(1) = dlnnedr 
