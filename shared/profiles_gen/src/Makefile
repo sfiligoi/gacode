@@ -25,6 +25,7 @@ OBJECTS = prgen_globals.o \
 	  prgen_map_ufile.o \
 	  prgen_map_inputprofiles.o \
           prgen_read_cer.o \
+          prgen_read_dskgato.o \
           prgen_read_omfit.o \
           prgen_read_gato.o \
           prgen_read_iterdb.o \

@@ -143,6 +143,9 @@ program prgen
   case (3)
      ! Use OMFIT-EFIT mapper
      call prgen_read_omfit
+  case (4)
+     ! Use DSKGATO data
+     call prgen_read_dskgato
   end select
   !---------------------------------------------------
 

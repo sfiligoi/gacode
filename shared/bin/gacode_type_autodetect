@@ -4,21 +4,42 @@
 #--------------------------------------------
 
 x=`file -b $1`
-if [[ "$x" == "ASCII text" ]] ; then
-   # pfile, gfile, iterdb text
-   y=`grep psinorm $1`
-   if [[ "$y" != "" ]] ; then
-      echo "INFO: (autodetect) This is a GA pfile."
-   else
-      echo "INFO: (autodetect) This is an iterdb TEXT file." 
-   fi
-else
+
+if [[ "$x" == "NetCDF Data Format data" ]] ; then
    # Plasmastate or iterdb netcdf
    y=`ncdump -c $1 | grep dim_nrho_eq`
    if [[ "$y" == "" ]] ; then
-      echo "INFO: (autodetect) This is an iterdb netCDF file."
+      echo "INFO: (autodetect) This is an ITERDB_NETCDF file."
    else
-      echo "INFO: (autodetect) This is a plasmastate netCDF file"
+      echo "INFO: (autodetect) This is a PLASMASTATE file."
    fi      
+   exit 0;
+else
+   # pfile, gfile, iterdb text
+   y1=`grep -c psinorm $1`
+   y2=`grep -c EFITD $1`
+   y3=`grep -c TRXPL $1`
+   y4=`grep -c cxareao $1`
+   if [[ $y1 -gt 0 ]] ; then
+      echo "INFO: (autodetect) This is a PFILE."
+      exit 0;
+   fi
+   if [[ $y2 -gt 0 ]] ; then
+      echo "INFO: (autodetect) This is an EFITD_GFILE."
+      exit 0;
+   fi
+   if [[ $y3 -gt 0 ]] ; then
+      echo "INFO: (autodetect) This is a TRXPL_GFILE."
+      exit 0;
+   fi
+   if [[ $y4 -gt 0 ]] ; then
+      echo "INFO: (autodetect) This is an ITERDB_TEXT file." 
+      exit 0;
+   fi 
+   if [[ "$1" == *dskgat* ]] ; then
+      echo "INFO: (autodetect) This is a DSKGATO file." 
+      exit 0;
+   fi 
+   echo "ERROR: (autodetect) Cannot determine filetype." 
 fi
 

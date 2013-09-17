@@ -323,7 +323,6 @@ CONFIG=.config
 
 FILE_FLAG=0
 G_FLAG=0
-GATO_DPSISL=0.0
 VERBOSE_FLAG=0
 ORDER_FLAG=0
 GMERGE_FLAG=0
@@ -563,7 +562,8 @@ fi
 #=============================================================
 # Trap a p-file and split into components 
 #
-if [[ $FILE == p[0-9][0-9][0-9]* ]]
+type=`gacode_type_autodetect $FILE`
+if [[ "$type" == *PFILE* ]]
 then
    echo "INFO: (profiles_gen) Detected pfile format."
    # First, ensure gfile exists too.
@@ -764,7 +764,12 @@ fi
 #=============================================================
 # Construct prgen input file ($CONFIG)
 #
-EFIT_METHOD=$(($G_FLAG+$OMFIT_FLAG+1))
+type=`gacode_type_autodetect $GFILE`
+if [[ "$type" == *DSKGATO* ]] ; then
+   EFIT_METHOD=4
+else
+   EFIT_METHOD=$(($G_FLAG+$OMFIT_FLAG+1))
+fi
 
 date > $CONFIG
 
@@ -774,7 +779,7 @@ echo $FILE >> $CONFIG
 # Optional CER file
 echo $CER_FILE >> $CONFIG
 
-# EFIT method (1=none, 2=GATO, 3=OMFIT)
+# EFIT method (1=none, 2=GATO, 3=OMFIT, 4=DSKGATO)
 echo $EFIT_METHOD >> $CONFIG
 
 # Don't use gato q (-nogq) flag
@@ -797,7 +802,7 @@ echo $NFOURIER >> $CONFIG
 #=============================================================
 
 #==============================================================
-# Run GATO/OMFIT here
+# Manage equilibrium (run GATO, OMFIT, etc) here
 #
 
 # Use GATO:
@@ -946,6 +951,12 @@ if [ $EFIT_METHOD -eq 3 ]
 then
    cp $GFILE gfile
    python $OMFIT -l 128 -u 128 -r 0.001 gfile ffile >& out.omfit
+fi
+
+# DSKGATO
+if [ $EFIT_METHOD -eq 4 ]
+then
+   cp $GFILE grid.dat
 fi
 #==============================================================
 
