@@ -51,6 +51,10 @@ else
       echo "PFILE"
       exit 0;
    fi
+   if [[ $y6 -gt 0 ]] ; then
+      echo "GACODE" 
+      exit 0;
+   fi 
    if [[ $y2 -gt 0 ]] ; then
       echo "GFILE"
       exit 0;
@@ -65,10 +69,6 @@ else
    fi 
    if [[ $y5 -gt 0 ]] ; then
       echo "ITERDB" 
-      exit 0;
-   fi 
-   if [[ $y6 -gt 0 ]] ; then
-      echo "GACODE" 
       exit 0;
    fi 
    if [[ $y7 -gt 0 ]] ; then
