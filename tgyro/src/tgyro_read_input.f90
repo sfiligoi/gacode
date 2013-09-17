@@ -53,7 +53,7 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(loc_evolve_grad_only_flag) 
   call tgyro_readbc_int(loc_restart_flag) 
   call tgyro_readbc_int(loc_scenario) 
-  call tgyro_readbc_int(loc_quasineutral_flag) 
+  call tgyro_readbc_int(tgyro_quasineutral_flag) 
   call tgyro_readbc_int(loc_neo_method) 
   call tgyro_readbc_int(loc_n_ion) 
   call tgyro_readbc_real(zi_vec(1)) 

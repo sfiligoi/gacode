@@ -243,7 +243,7 @@ module tgyro_globals
   integer :: loc_evolve_grad_only_flag
   integer :: loc_restart_flag
   integer :: loc_scenario
-  integer :: loc_quasineutral_flag
+  integer :: tgyro_quasineutral_flag
   integer :: loc_neo_method
   integer :: loc_n_ion
   real, dimension(5) :: zi_vec

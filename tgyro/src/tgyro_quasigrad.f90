@@ -11,7 +11,9 @@
 
 subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion,dlnridr)
 
-  use tgyro_globals, only : tgyro_fix_concentration_flag
+  use tgyro_globals, only : &
+       tgyro_quasineutral_flag, &
+       tgyro_fix_concentration_flag
 
   implicit none
 
@@ -24,6 +26,8 @@ subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion,dlnridr)
   real, dimension(n_ion), intent(in) :: dlnridr
 
   integer :: i
+
+  if (tgyro_quasineutral_flag == 0) return
 
   if (n_ion == 1) then
 

@@ -136,7 +136,7 @@ subroutine tgyro_global_iteration_driver
      r(i) = tgyro_rmin+dlength/2+(i-2)*dlength
   enddo
 
-  EXPRO_ctrl_density_method = loc_quasineutral_flag+1
+  EXPRO_ctrl_density_method = tgyro_quasineutral_flag+1
   EXPRO_ctrl_z = 0.0
   EXPRO_ctrl_z(1:loc_n_ion) = zi_vec(1:loc_n_ion)
   EXPRO_ctrl_numeq_flag = loc_num_equil_flag
@@ -196,7 +196,7 @@ subroutine tgyro_global_iteration_driver
           n_exp,EXPRO_rmin,EXPRO_ne)
 
      ! Map ni,zni from TGYRO variable to EXPRO interface variable, enforcing quasineutrality as appropriate
-     if (loc_quasineutral_flag == 1) then
+     if (tgyro_quasineutral_flag == 1) then
         call tgyro_quasineutral(ni,ne,dlnnidr,dlnnedr,zi_vec,loc_n_ion,n_r)
      endif
      do i_ion=1,loc_n_ion
@@ -254,7 +254,7 @@ subroutine tgyro_global_iteration_driver
            res(p) = (pflux_e_tot(i)-pflux_e_target(i))/max(abs(pflux_e_tot(i)),1.0) 
            dlnnedr(i) = dlnnedr(i)-loc_relax*res(p)*dlnnedr(i)
         enddo
-        if (loc_quasineutral_flag == 1) then
+        if (tgyro_quasineutral_flag == 1) then
            call tgyro_quasineutral(ni,ne,dlnnidr,dlnnedr,zi_vec,loc_n_ion,n_r)
         endif
      endif

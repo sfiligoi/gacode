@@ -464,20 +464,20 @@ subroutine tgyro_write_input
      end select
      !--------------------------------------------------------
      !--------------------------------------------------------
-     select case (loc_quasineutral_flag)
+     select case (tgyro_quasineutral_flag)
 
      case (0)
 
-        write(1,10) 'LOC_QUASINEUTRAL_FLAG','Initial densities unaltered'
+        write(1,10) 'TGYRO_QUASINEUTRAL_FLAG','Never change ion density to enforce quasineutrality.'
 
      case (1)
 
-        write(1,10) 'LOC_QUASINEUTRAL_FLAG','Initial main ion density modified to enforce quasineutrality'
+        write(1,10) 'TGYRO_QUASINEUTRAL_FLAG','Ion densities modified according to TGYRO_FIX_CONCENTRATION_FLAG.'
 
      case default
 
         error_flag = 1
-        error_msg = 'Error: LOC_QUASINEUTRAL_FLAG'
+        error_msg = 'Error: TGYRO_QUASINEUTRAL_FLAG'
 
      end select
      !--------------------------------------------------------
