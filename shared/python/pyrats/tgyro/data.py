@@ -62,6 +62,8 @@ class TGYROData:
             self.fileparser('flux_e.out')
             self.fileparser('flux_i.out')
             self.fileparser('flux_target.out')
+            self.fileparser('mflux_e.out')
+            self.fileparser('mflux_i.out')
             self.fileparser('mflux_target.out')
             self.fileparser('chi_e.out')
             self.fileparser('chi_i.out')
@@ -153,9 +155,12 @@ class TGYROData:
         # Data dimensions
         nr = self.n_radial
         nb = self.n_iterations+1
-        nc = int(1+2*self.get_tag_value("LOC_NE_FEEDBACK_FLAG") \
-              +2*self.get_tag_value("LOC_TE_FEEDBACK_FLAG") \
-              +2*self.get_tag_value("LOC_TI_FEEDBACK_FLAG"))
+        nc = int(1 +
+                 2*self.get_tag_value("LOC_NE_FEEDBACK_FLAG") +
+                 2*self.get_tag_value("LOC_TE_FEEDBACK_FLAG") +
+                 2*self.get_tag_value("LOC_TI_FEEDBACK_FLAG") +
+                 2*self.get_tag_value("LOC_ER_FEEDBACK_FLAG")
+                )
         
         numdata = np.zeros((nc,nb,nr-1),dtype=float)
         
