@@ -142,15 +142,15 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
 
      ! The factor i will be applied outside this loop
      if (u**2+v**2 > 1e-8) then
-     do p=-p0,p0-1
-        x = rho*sqrt((pi_2*p*a+u)**2+v**2)
-        call RJBESL(abs(x),0.0,3,bessel,ierr)
-        func(p) = (pi_2*p*a+u)*rho*(bessel(0)-bessel(1)/x)/x**2/n_x
-     enddo
+        do p=-p0,p0-1
+           x = rho*sqrt((pi_2*p*a+u)**2+v**2)
+           call RJBESL(abs(x),0.0,3,bessel,ierr)
+           func(p) = (pi_2*p*a+u)*rho*(bessel(0)-bessel(1)/x)/x**2/n_x
+        enddo
      else
         ! Case is n=0, which will ultimately give zero contribution so we 
         ! zero it here explicitly to avoid 0/0.
-        func(p) = 0.0
+        func(:) = 0.0
      endif
 
   end select

@@ -9,17 +9,7 @@ endif
 
 LLIB = ../driver/xptor_lib
 
-OBJECTS = fluxav_efit.o \
-          fluxav_vmec.o \
-          geom_circ.o \
-          geom_efit.o \
-          geom_vmec.o \
-          get_pro_xptor.o \
-	  read_eqdsk.o \
-          read_efit_eqdsk.o \
-          read_vmec_wout.o \
-	  store_efit.o \
-          track_mod.o
+OBJECTS = 
 
 .SUFFIXES : .o .f
 

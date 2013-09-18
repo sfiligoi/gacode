@@ -185,6 +185,6 @@ subroutine tglf_run()
 
   endif
 
-  call get_error_status(tglf_error_msg,tglf_error_flag)
+  call get_error_status(tglf_error_message,tglf_error_status)
 
 end subroutine tglf_run

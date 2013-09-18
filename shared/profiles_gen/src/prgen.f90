@@ -33,11 +33,11 @@ program prgen
   open(unit=1,file='.config',status='old')
   read(1,'(a)') date
   read(1,'(a)') raw_data_file
+  read(1,'(a)') raw_data_type
   read(1,'(a)') cer_file
   read(1,*) efit_method
   read(1,*) nogatoq_flag
   read(1,*) verbose_flag
-  read(1,*) pfile_z2
   read(1,*) gmerge_flag
   read(1,*) ipccw
   read(1,*) btccw
@@ -59,7 +59,7 @@ program prgen
 
      format_type = 7
 
-  else if (trim(raw_data_file) == 'null') then
+  else if (trim(raw_data_type) == 'null') then
 
      ! Pure gfile parsing
 
@@ -69,7 +69,7 @@ program prgen
      ! empty input.profiles output file.
      call prgen_read_null
 
-  else if (index(raw_data_file,'.nc') /= 0) then
+  else if (trim(raw_data_type) == 'ITERDBNC') then
 
      ! New NetCDF format
      print '(a)','INFO: (prgen) Assuming iterdb NetCDF format.'
@@ -78,49 +78,34 @@ program prgen
 
      call prgen_read_iterdb_nc
 
-  else if (index(raw_data_file,'.cdf') /= 0 .or. index(raw_data_file,'.CDF') /= 0) then
+  else if (trim(raw_data_type) == 'SWIM') then
 
      ! Plasmastate format
-     print '(a)','INFO: (prgen) Assuming plasma_state format.'
+     print '(a)','INFO: (prgen) Assuming SWIM (plasmastate) format.'
 
      format_type = 2
 
      call prgen_read_plasmastate
 
-  else if (index(raw_data_file,'.peq') /= 0 .or. index(raw_data_file,'.peq2') /= 0) then
+  else if (trim(raw_data_type) == 'PFILE') then
 
      ! peqdsk format
-     print '(a)','INFO: (prgen) Assuming peqdsk format.'
+     print '(a)','INFO: (prgen) Assuming PFILE (peqdsk) format.'
 
      format_type = 3
 
-     if (efit_method == 0) then
-        print '(a)','ERROR: (prgen) geqdsk must be provided for peqdsk format'
-        stop
-     endif
-     
-     if (index(raw_data_file,'.peq2') /= 0) then
-        peqdsk_ftype = 2
-     else
-        peqdsk_ftype = 1
-     endif
-
      call prgen_read_peqdsk
 
-  else if (index(raw_data_file,'.corsica') /= 0) then
+  else if (trim(raw_data_type) == 'CORSICA') then
 
      ! corsica format
-     print '(a)','INFO: (prgen) Assuming corsica format.'
+     print '(a)','INFO: (prgen) Assuming CORSICA format.'
 
      format_type = 5
 
-     if (efit_method == 0) then
-        print '(a)','WARNING: (prgen) geqdsk must be provided for corsica format'
-     endif
-
      call prgen_read_corsica
 
-  else if (index(raw_data_file,'UFILE') /= 0) then
+  else if (trim(raw_data_type) == 'UFILE') then
 
      ! UFILE format
      print '(a)','INFO: (prgen) Assuming UFILE format.'
@@ -129,14 +114,14 @@ program prgen
 
      call prgen_read_ufile
 
-  else 
+  else if (trim(raw_data_type) == 'ITERDB') then
 
      ! Old text format
      print '(a)','INFO: (prgen) Assuming old iterdb text format.'
 
      format_type = 1
 
-     call prgen_read_iterdb
+     call prgen_read_iterdb 
 
   endif
   !------------------------------------------------------------------
@@ -155,6 +140,9 @@ program prgen
   case (3)
      ! Use OMFIT-EFIT mapper
      call prgen_read_omfit
+  case (4)
+     ! Use DSKGATO data
+     call prgen_read_dskgato
   end select
   !---------------------------------------------------
 

@@ -10,10 +10,10 @@ subroutine prgen_map_peqdsk
   use prgen_globals
 
   implicit none
-
+  integer :: i
 
   ! Compute rho, bref and arho:
-  call prgen_get_chi(nx,q_gato,kappa,rmin,dpsi,rho,peqdsk_bref,peqdsk_arho)
+  call prgen_get_chi(nx,q,kappa,rmin,dpsi,rho,peqdsk_bref,peqdsk_arho)
 
   !---------------------------------------------------------
   ! Map profile data onto single array:
@@ -32,7 +32,7 @@ subroutine prgen_map_peqdsk
   vec(8,:)  = peqdsk_ne(:)*10
   vec(9,:)  = 0.0      ! zeff
   ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
-  vec(10,:) = -ipccw*1e3*peqdsk_omegat(:) ! Omega_tor
+  vec(10,:) = -ipccw*1e3*peqdsk_omgeb(:) 
   vec(11,:) = 0.0      ! flow_mom
   vec(12,:) = 0.0      ! pow_e
   vec(13,:) = 0.0      ! pow_i 
@@ -47,17 +47,19 @@ subroutine prgen_map_peqdsk
 
   ! ni, nc, nb
   vec(21,:) = peqdsk_ni(:)*10
-  if(peqdsk_ftype == 2) then
-     vec(22,:) = (peqdsk_ne(:)-peqdsk_ni(:)-peqdsk_nb(:))/6.0*10
-     vec(23,:) = peqdsk_nb(:)*10
-  endif
+  vec(22,:) = (peqdsk_ne(:)-peqdsk_ni(:)-peqdsk_nb(:))/6.0*10
+  vec(23,:) = peqdsk_nb(:)*10
 
   ! ti, tc, tb
   vec(26,:) = peqdsk_ti(:)
-  if(peqdsk_ftype == 2) then
-     vec(27,:) = peqdsk_ti(:)
-     vec(28,:) = peqdsk_pb(:)/(peqdsk_nb(:)*10)/1.602
-  endif
+  vec(27,:) = peqdsk_ti(:)
+  do i=1,peqdsk_nj
+     if (peqdsk_nb(i) > epsilon(0.)) then
+        vec(28,i) = peqdsk_pb(i)/(peqdsk_nb(i)*10)/1.602
+     else
+        vec(28,i) = 0.0
+     endif
+  enddo
 
   ! vphi
   ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
@@ -73,12 +75,5 @@ subroutine prgen_map_peqdsk
   vec(38,:) = 0.0
   vec(39,:) = 0.0
   vec(40,:) = 0.0
-
-  ! Construct impurity temperature and density profiles assuming 
-  ! Z2 given by pfile_z2:
-  if (pfile_z2 > 0.0) then
-     vec(27,:) = vec(26,:)
-     vec(22,:) = (vec(8,:)-vec(21,:))/pfile_z2
-  endif
 
 end subroutine prgen_map_peqdsk

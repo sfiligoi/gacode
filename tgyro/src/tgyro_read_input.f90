@@ -53,7 +53,7 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(loc_evolve_grad_only_flag) 
   call tgyro_readbc_int(loc_restart_flag) 
   call tgyro_readbc_int(loc_scenario) 
-  call tgyro_readbc_int(loc_quasineutral_flag) 
+  call tgyro_readbc_int(tgyro_quasineutral_flag) 
   call tgyro_readbc_int(loc_neo_method) 
   call tgyro_readbc_int(loc_n_ion) 
   call tgyro_readbc_real(zi_vec(1)) 
@@ -73,7 +73,6 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(therm_flag(5)) 
   call tgyro_readbc_real(loc_betae_scale) 
   call tgyro_readbc_int(loc_chang_hinton) 
-  call tgyro_readbc_int(loc_circ_flag) 
   call tgyro_readbc_real(loc_me_multiplier) 
   call tgyro_readbc_int(loc_sawtooth_model) 
   call tgyro_readbc_int(loc_bc_offset)
@@ -115,6 +114,8 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(tgyro_dt_method)
   call tgyro_readbc_int(tgyro_gyro_restart_flag)
   call tgyro_readbc_int(tgyro_fix_concentration_flag)
+  call tgyro_readbc_int(tgyro_write_profiles_flag)
+  call tgyro_readbc_int(tgyro_neo_n_theta)
   ! ** END input read; ADD NEW PARAMETERS ABOVE HERE!!
   call tgyro_readbc_int(n_inst)
   !-------------------------------------------------------

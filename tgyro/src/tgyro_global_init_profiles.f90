@@ -96,7 +96,7 @@ subroutine tgyro_global_init_profiles
   !
   ! Overwrite main ion density and gradient with corrected density and gradient 
   ! (done in EXPRO):
-  if (loc_quasineutral_flag == 1) then
+  if (tgyro_quasineutral_flag == 1) then
      call cub_spline(EXPRO_rmin(:)/r_min,1e13*EXPRO_ni_new(:),n_exp,r,ni(1,:),n_r)
      call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnnidr_new(:)/100.0,n_exp,r,dlnnidr(1,:),n_r)
   endif

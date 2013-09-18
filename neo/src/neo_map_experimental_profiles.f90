@@ -52,6 +52,8 @@ subroutine neo_map_experimental_profiles
 
   call cub_spline(r_p,te_ade_exp,n_grid_exp,r,te_ade,n_radial)
   call cub_spline(r_p,ne_ade_exp,n_grid_exp,r,ne_ade,n_radial)
+  call cub_spline(r_p,dlntdre_ade_exp,n_grid_exp,r,dlntdre_ade,n_radial)
+  call cub_spline(r_p,dlnndre_ade_exp,n_grid_exp,r,dlnndre_ade,n_radial)
 
   do i=1,n_species
      ! Note: maping is only done for n_species (not n_species_exp)

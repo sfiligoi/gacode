@@ -218,8 +218,6 @@ module tgyro_globals
   !
   integer, dimension(:,:), allocatable :: pmap
   character(len=1), dimension(:), allocatable :: b_flag
-  integer, dimension(:), allocatable :: gyro_exit_status
-  character(len=80), dimension(:), allocatable :: gyro_exit_message
   !
   ! Geometry
   !
@@ -245,7 +243,7 @@ module tgyro_globals
   integer :: loc_evolve_grad_only_flag
   integer :: loc_restart_flag
   integer :: loc_scenario
-  integer :: loc_quasineutral_flag
+  integer :: tgyro_quasineutral_flag
   integer :: loc_neo_method
   integer :: loc_n_ion
   real, dimension(5) :: zi_vec
@@ -253,7 +251,6 @@ module tgyro_globals
   integer, dimension(5) :: therm_flag
   real :: loc_betae_scale
   integer :: loc_chang_hinton
-  integer :: loc_circ_flag
   real :: loc_me_multiplier
   integer :: loc_sawtooth_model
   integer :: loc_bc_offset
@@ -295,6 +292,8 @@ module tgyro_globals
   integer :: tgyro_dt_method
   integer :: tgyro_gyro_restart_flag
   integer :: tgyro_fix_concentration_flag
+  integer :: tgyro_write_profiles_flag
+  integer :: tgyro_neo_n_theta
   !
   ! Iteration variables (global)
   !

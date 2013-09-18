@@ -17,6 +17,8 @@ module neo_profile_exp
 
   real, dimension(:), allocatable :: te_ade_exp
   real, dimension(:), allocatable :: ne_ade_exp
+  real, dimension(:), allocatable :: dlntdre_ade_exp
+  real, dimension(:), allocatable :: dlnndre_ade_exp
 
   real, dimension(:,:), allocatable :: tem_exp
   real, dimension(:,:), allocatable :: den_exp

@@ -446,38 +446,38 @@ subroutine tgyro_write_input
      end select
      !--------------------------------------------------------
      !--------------------------------------------------------
-     select case (loc_circ_flag)
+     select case (loc_num_equil_flag)
 
      case (0)
 
-        write(1,10) 'LOC_CIRC_FLAG','Use standard Miller expressions'
+        write(1,10) 'LOC_NUM_EQUIL_FLAG','Using Miller model equilibrium in TGLF/GYRO/NEO.'
 
      case (1)
 
-        write(1,10) 'LOC_CIRC_FLAG','Use Miller circle'
+        write(1,10) 'LOC_NUM_EQUIL_FLAG','Using general Fourier equilibrium in TGLF/GYRO/NEO.'
 
      case default
 
         error_flag = 1
-        error_msg = 'Error: LOC_CIRC_FLAG'
+        error_msg = 'Error: LOC_NUM_EQUIL_FLAG'
 
      end select
      !--------------------------------------------------------
      !--------------------------------------------------------
-     select case (loc_quasineutral_flag)
+     select case (tgyro_quasineutral_flag)
 
      case (0)
 
-        write(1,10) 'LOC_QUASINEUTRAL_FLAG','Initial densities unaltered'
+        write(1,10) 'TGYRO_QUASINEUTRAL_FLAG','Never change ion density to enforce quasineutrality.'
 
      case (1)
 
-        write(1,10) 'LOC_QUASINEUTRAL_FLAG','Initial main ion density modified to enforce quasineutrality'
+        write(1,10) 'TGYRO_QUASINEUTRAL_FLAG','Ion densities modified according to TGYRO_FIX_CONCENTRATION_FLAG.'
 
      case default
 
         error_flag = 1
-        error_msg = 'Error: LOC_QUASINEUTRAL_FLAG'
+        error_msg = 'Error: TGYRO_QUASINEUTRAL_FLAG'
 
      end select
      !--------------------------------------------------------
@@ -590,12 +590,15 @@ subroutine tgyro_write_input
 
   endif
 
+  !--------------------------------------------------------------
+  ! Trap GYRO input data error and stop 
   call MPI_BCAST(error_flag,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
   call MPI_BCAST(error_msg,1,MPI_INTEGER,0,MPI_COMM_WORLD,ierr)
-
+  !
   if (error_flag == 1) then
      call tgyro_catch_error(trim(error_msg))
   endif
+  !--------------------------------------------------------------
 
 10 format(t2,a,t33,':',t35,a)
 20 format(t2,a,t33,':',t35,f8.4)

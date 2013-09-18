@@ -83,7 +83,7 @@ subroutine GEO_do()
   ! Check for missing value
   !
   if (abs(GEO_signb_in) < 1e-10) then
-     print *,'bad value for GEO_signb_in'
+     print '(a)','ERROR: (GEO_do) Bad value for GEO_signb_in.'
      stop
   endif
   !-----------------------------------------------------------

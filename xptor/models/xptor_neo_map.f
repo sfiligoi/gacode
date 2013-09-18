@@ -26,8 +26,9 @@ c
       if(jm.eq.j_write_state.and.ipert_gf.eq.0)neo_silent_flag_in=0
       call neo_init("./ ",MPI_COMM_WORLD)
 
-! Simulation mode (dke solve + analytic)
-      neo_sim_model_in = 2
+! Simulation mode (dke solve + analytic + nclass)
+      neo_sim_model_in = 1
+      neo_profile_model_in=1
 
   ! Resolution
       neo_n_radial_in = 1
@@ -36,10 +37,15 @@ c
       neo_n_energy_in = 5
 
 !  units: 
-      m0 = amassgas_exp       !proton mass
-      n0 = nem                !10^19/m^3
-      a0 = rmin_exp(mxgrid)   !m
-      T0 = tim                !kev
+!      m0 = amassgas_exp       !proton mass
+!      n0 = nem                !10^19/m^3
+!      a0 = rmin_exp(mxgrid)   !m
+!      T0 = tim                !kev
+! use global norms to give MKS units for NCLASS inputs
+      m0 = 2.0
+      n0=1.0
+      T0=1.0
+      a0=1.0
       v0 = 9.79D3*DSQRT(T0*1.D3)/DSQRT(m0) !m/s
       w0 = v0/a0              !1/s
 ! electron collision frequency
@@ -72,9 +78,9 @@ c
 !      neo_n_species_in = 2
       neo_n_species_in = 3
       if(dilution_model.ne.0)neo_n_species_in=2
-      b_unit = ABS(bt_exp)*(rhom/rminm)*drhodr(jm)
-      neo_rho_star_in  = (1.02D2*DSQRT(m0*T0*1.D3)/
-     >  (b_unit*1.D4))/(a0*100.D0)
+      b_unit = ABS(bt_exp)*(rhom/rminm)*drhodr(jm)  !Tesla
+      neo_rho_star_in  = (1.02*DSQRT(m0*T0*1.D3)/
+     >  (b_unit*1.D4))/a0
 
   ! Electrons
       neo_z_1_in      = -1
@@ -130,7 +136,6 @@ c
       endif
       neo_omega_rot_deriv_in = drhodr_loc*a0*gradvexbm*cv
      > /(w0*rmajor_exp)
-!      neo_omega_rot_deriv_in = 0.0
 
   ! Parameter only used for global runs.
 !      neo_rmin_over_a_2_in = neo_rmin_over_a_in
@@ -144,7 +149,7 @@ c      endif
 c
 c      neo_geo_ny_in = n_fourier_geo
 c      neo_geo_yin_in(:,:) = a_fourier_geo(:,:,i_r)
-      if(i_proc.eq.-99)then
+      if(jm.eq.-1)then
 c debug 
        write(*,*)"neo"
        write(*,*)neo_ipccw_in

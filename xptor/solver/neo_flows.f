@@ -23,22 +23,22 @@ c
         enddo
       enddo
       do k=1+i_proc,kmax-1,n_proc
-        nem = (ne_m(k+1)+ne_m(k-1))/2.D0
-        tim = (ti_m(k+1)+ti_m(k-1))/2.D0
-        tem = (te_m(k+1)+te_m(k-1))/2.D0
-        fim = (fi_m(k+1)+fi_m(k-1))/2.D0
-        fzm = (fz_m(k+1)+fz_m(k-1))/2.D0
+        nem = (ne_m(k+1)+ne_m(k))/2.0
+        tim = (ti_m(k+1)+ti_m(k))/2.0
+        tem = (te_m(k+1)+te_m(k))/2.0
+        fim = (fi_m(k+1)+fi_m(k))/2.0
+        fzm = (fz_m(k+1)+fz_m(k))/2.0
         nim = fim*nem
         nzm = fzm*nem
         vexbm= 0.0
         vpolm= 0.0
-        gradnem = (ne_m(k+1)-ne_m(k-1))/(dr(k,1)+dr(k,2))
-        gradtim = (ti_m(k+1)-ti_m(k-1))/(dr(k,1)+dr(k,2))
-        gradtem = (te_m(k+1)-te_m(k-1))/(dr(k,1)+dr(k,2))
+        gradnem = (ne_m(k+1)-ne_m(k))/dr(k,2)
+        gradtim = (ti_m(k+1)-ti_m(k))/dr(k,2)
+        gradtem = (te_m(k+1)-te_m(k))/dr(k,2)
         gradvexbm = 0.0
         gradvpolm = 0.0
-        gradfim = (fi_m(k+1)-fi_m(k-1))/(dr(k,1)+dr(k,2))
-        gradfzm = (fz_m(k+1)-fz_m(k-1))/(dr(k,1)+dr(k,2))
+        gradfim = (fi_m(k+1)-fi_m(k))/dr(k,2)
+        gradfzm = (fz_m(k+1)-fz_m(k))/dr(k,2)
         gradnim = fim*gradnem + nem*gradfim
         gradnzm = fzm*gradnem + nem*gradfzm
         jm=k

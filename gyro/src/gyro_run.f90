@@ -18,9 +18,7 @@
 subroutine gyro_run(&
      test_flag_in,&
      restart_method_in,&
-     transport_method_in,&
-     status_out,&
-     message_out)
+     transport_method_in)
 
   use mpi
   use gyro_globals
@@ -33,10 +31,6 @@ subroutine gyro_run(&
   integer, intent(in) :: test_flag_in
   integer, intent(in) :: restart_method_in
   integer, intent(in) :: transport_method_in
-
-  ! Input parameters (OUT) - REQUIRED
-  integer,          intent(inout) :: status_out
-  character(len=*), intent(inout) :: message_out
 
   ! Local variables
   integer :: i_ion
@@ -72,10 +66,9 @@ subroutine gyro_run(&
   call gyro_do
   call send_line('STATUS: '//gyro_exit_message)
 
-  ! Get output information
-
-  status_out  = gyro_exit_status
-  message_out = gyro_exit_message
+  ! Map error message and status to interface
+  gyro_error_status_out  = gyro_exit_status
+  gyro_error_message_out = gyro_exit_message
 
   ! Running in test mode
   if (gyrotest_flag == 1) then

@@ -238,6 +238,9 @@ module gyro_interface
   complex :: gyro_fieldeigen_omega_out
   real :: gyro_fieldeigen_error_out
 
+  integer :: gyro_error_status_out
+  character(len=80) :: gyro_error_message_out
+
 contains
 
   ! Map GLOBAL variables to INTERFACE parameters

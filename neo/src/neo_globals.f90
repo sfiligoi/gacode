@@ -42,13 +42,13 @@ module neo_globals
   real, dimension(6) :: profile_dlnndr_scale
   real, dimension(6) :: profile_dlntdr_scale
   ! 
-  real, dimension(6) :: source_nclass
-  !
   integer :: ipccw_in
   integer :: btccw_in
   !
   real :: te_ade_in
   real :: ne_ade_in
+  real :: dlntdre_ade_in
+  real :: dlnndre_ade_in
   !
   integer, dimension(6) :: z_in 
   real, dimension(6) :: mass_in
@@ -137,7 +137,7 @@ module neo_globals
   integer :: geo_ny
   real, dimension(:,:,:), allocatable :: geo_yin
   !
-  real, dimension(:), allocatable :: te_ade, ne_ade
+  real, dimension(:), allocatable :: te_ade, ne_ade, dlnndre_ade, dlntdre_ade
   ! ele temp and dens -- used only if ade (for Poisson calculation)
   !
   ! (species-dependent)
@@ -215,6 +215,9 @@ module neo_globals
   ! pure plasma theory
   ! Gamma_HH, Qi_HH, Qe_HH, Qi_CH, jpar_HH, jpar_S, jpar_K, jpar_N
   real, dimension(7)   :: neo_th_out=0.0
+
+  ! nclass viscosity coefficients
+  real, dimension(6) :: neo_nclass_out=0.0
 
   ! (n_species_max, transport coeff)
   ! multi-species theory: 1-> gamma_HS, 2-> Q_HS

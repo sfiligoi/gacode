@@ -26,8 +26,10 @@ subroutine fluxfit_moments(r,z,n,s)
      ! A = Int R dZ = -Int Z dR
 
      s(1) = s(1)+dz*r0    ! Area
+     !s(1) = s(1)-dr*z0    ! Area
      s(2) = s(2)-dr*z0*r0 ! Centroid (R)
      s(3) = s(3)+dz*r0*z0 ! Centroid (Z)
+     !s(3) = s(3)-dr*z0*z0 ! Centroid (Z)
  
   enddo
 

@@ -412,10 +412,10 @@ c
 c
 c
 c read eqdsk data
-      if (ieqdsk.gt.0) then
-        eqfile = 'eqdskin'
-        call read_eqdsk(eqfile,iflag,msg)
-      endif
+c      if (ieqdsk.gt.0) then
+c        eqfile = 'eqdskin'
+c        call read_eqdsk(eqfile,iflag,msg)
+c      endif
 c
       if (idata .eq. 0) then
         if (i_proc.eq.0) then
@@ -432,12 +432,12 @@ c        if(ismooth_all.ne.0) call datavg ! smoothing in readufiles for now
         call readiterdb
         if(ismooth_all.ne.0) call datavg
         call datexch
-        if(ineutp.eq.1) call neutxp
+c        if(ineutp.eq.1) call neutxp
       elseif (idata .eq. 2) then
         if (i_proc.eq.0) then
           write(*,106)
         endif
-        call cdfread(igrid)
+c        call cdfread(igrid)
       elseif (idata .eq. 3) then
         if (i_proc.eq.0) then
           write(*,107)
@@ -471,7 +471,7 @@ c
       imyneoclass=0
       if (use_xneo_m.eq.0 .or. use_xneo_m.eq.1 .or.
      &    use_xneo_m.eq.-1) call datneo
-      if(use_xneo_m.eq.2) call datnclass
+c      if(use_xneo_m.eq.2) call datnclass
 c
 c... map to _exp variables
 c

@@ -1,0 +1,85 @@
+#!/bin/bash
+#--------------------------------------------
+# Filetype autodetection script
+#
+# Types:
+#
+#  ITERDB   (text iterdb)
+#  ITERDBNC (netCDF iterdb)
+#  SWIM     (plasmastate)
+#  PFILE    (peqdsk)
+#  CORSICA  
+#  GFILE    (geqdsk equilibrium data)
+#  DSKGATO  (dskgato flux-surface data)
+#  GACODE   (input.profiles)
+#--------------------------------------------
+
+if [ "$1" == "UFILE" ] ; then
+   echo "UFILE"
+   exit 0
+fi
+if [ "$1" == "null" ] ; then
+   echo "null"
+   exit 0
+fi
+if [ ! -f $1 ] ; then
+   echo "NOT_FOUND"
+   exit 1
+fi
+
+x=`file -b $1`
+
+if [[ "$x" == "NetCDF Data Format data" ]] ; then
+   # Plasmastate or iterdb netcdf
+   y=`ncdump -c $1 | grep dim_nrho_eq`
+   if [[ "$y" == "" ]] ; then
+      echo "ITERDBNC"
+   else
+      echo "SWIM"
+   fi      
+   exit 0;
+else
+   # pfile, gfile, iterdb text
+   y1=`grep -c psinorm $1`
+   y2=`grep -c EFITD $1`
+   y3=`grep -c TRXPL $1`
+   y4=`grep -c TEQ $1`
+   y5=`grep -c cxareao $1`
+   y6=`grep -c BT_EXP $1`
+   y7=`grep -c CORSICA $1`
+   if [[ $y1 -gt 0 ]] ; then
+      echo "PFILE"
+      exit 0;
+   fi
+   if [[ $y6 -gt 0 ]] ; then
+      echo "GACODE" 
+      exit 0;
+   fi 
+   if [[ $y2 -gt 0 ]] ; then
+      echo "GFILE"
+      exit 0;
+   fi
+   if [[ $y3 -gt 0 ]] ; then
+      echo "GFILE"
+      exit 0;
+   fi
+   if [[ $y4 -gt 0 ]] ; then
+      echo "GFILE" 
+      exit 0;
+   fi 
+   if [[ $y5 -gt 0 ]] ; then
+      echo "ITERDB" 
+      exit 0;
+   fi 
+   if [[ $y7 -gt 0 ]] ; then
+      echo "CORSICA" 
+      exit 0;
+   fi 
+   if [[ "$1" == *dskgat* ]] ; then
+      echo "DSKGATO" 
+      exit 0;
+   fi 
+   echo "UNKNOWN" 
+   exit 1;
+fi
+

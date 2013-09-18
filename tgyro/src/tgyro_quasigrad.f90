@@ -11,7 +11,9 @@
 
 subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion,dlnridr)
 
-  use tgyro_globals, only : tgyro_fix_concentration_flag,i_r,i_proc_global
+  use tgyro_globals, only : &
+       tgyro_quasineutral_flag, &
+       tgyro_fix_concentration_flag
 
   implicit none
 
@@ -25,6 +27,8 @@ subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion,dlnridr)
 
   integer :: i
 
+  if (tgyro_quasineutral_flag == 0) return
+
   if (n_ion == 1) then
 
      dlnnidr(1) = dlnnedr
@@ -32,6 +36,8 @@ subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion,dlnridr)
   else
 
      if (tgyro_fix_concentration_flag == 0) then
+
+        ! Adjust ion 1 gradient to enforce quasineutrality.
 
         ! Temporary storage 
         dlnnidr(1) = ne*dlnnedr 
@@ -43,6 +49,8 @@ subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion,dlnridr)
         dlnnidr(1) = dlnnidr(1)/ni(1)
 
      else
+
+        ! Adjust all ion gradients at fixed concentration ratios (n2/n1, n3/n1, etc)
 
         ! Temporary storage 
         dlnnidr(1) = dlnnedr 

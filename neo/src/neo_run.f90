@@ -17,6 +17,15 @@ subroutine neo_run()
    ! Map INTERFACE parameters -> GLOBAL variables
    call map_interface2global
 
+   error_status = 0
+   error_message = '(NEO) completed successfully'
+   neo_dke_out=0.0
+   neo_dke_1d_out= 0.0
+   neo_gv_out=0.0
+   neo_th_out=0.0
+   neo_nclass_out=0.0
+   neo_thHS_out=0.0
+
    ! Run NEO
    call neo_do
 
@@ -50,6 +59,11 @@ subroutine neo_run()
    neo_jpar_thS_out    = neo_th_out(5)                ! <j B> / j_norm (Sauter)
    neo_jpar_thK_out    = neo_th_out(6)                ! <j B> / j_norm (Koh)
    neo_jpar_thN_out    = neo_th_out(7)                ! <j B> / j_norm (NCLASS)
+
+   ! NCLASS viscosity coefficients
+   do is=1,6
+      neo_nclassvis_out(is) = neo_nclass_out(is)          ! ymu_s(1,1) / (m_norm*dens_norm*vth_norm/a_norm)
+   enddo
 
    ! dke results
    do is=1,6

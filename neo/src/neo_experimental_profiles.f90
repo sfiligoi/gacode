@@ -146,8 +146,12 @@ subroutine neo_experimental_profiles
      geo_yin_exp(5:8,:,:) = EXPRO_dgeo(:,:,:)
   endif
 
-  te_ade_exp(:)     = EXPRO_te(:)
-  ne_ade_exp(:)     = EXPRO_ne(:)
+  te_ade_exp(:)      = EXPRO_te(:)
+  ne_ade_exp(:)      = EXPRO_ne(:)
+  dlntdre_ade_exp(:) = EXPRO_dlntedr(:) * a_meters &
+       * profile_dlntdr_scale(n_species_exp)
+  dlnndre_ade_exp(:) = EXPRO_dlnnedr(:) * a_meters &
+       * profile_dlnndr_scale(n_species_exp)
 
   tem_exp(n_species_exp,:)  = EXPRO_te(:)
   dlntdr_p(n_species_exp,:) = EXPRO_dlntedr(:) * a_meters &

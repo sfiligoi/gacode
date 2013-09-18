@@ -6,7 +6,6 @@ all:
 	cd datread ; make 
 	cd misc ; make
 	cd models ;  make 
-	cd nclmisc ; make 
 	cd ptmisc ; make 
 	cd solver ; make 
 	cd source ; make 
@@ -16,7 +15,6 @@ clean:
 	cd datread ; make clean
 	cd misc ; make clean
 	cd models ; make clean
-	cd nclmisc ; make clean
 	cd ptmisc ; make clean
 	cd solver ; make clean
 	cd source ; make clean

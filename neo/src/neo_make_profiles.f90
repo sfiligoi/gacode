@@ -98,8 +98,10 @@ subroutine neo_make_profiles
      dphi0dr(ir)   = dphi0dr_in
      epar0(ir)     = epar0_in
 
-     te_ade(ir)    = te_ade_in
-     ne_ade(ir)    = ne_ade_in
+     te_ade(ir)      = te_ade_in
+     ne_ade(ir)      = ne_ade_in
+     dlntdre_ade(ir) = dlntdre_ade_in
+     dlnndre_ade(ir) = dlnndre_ade_in
 
      omega_rot(ir)       = omega_rot_in 
      omega_rot_deriv(ir) = omega_rot_deriv_in 
@@ -330,6 +332,7 @@ subroutine neo_make_profiles
         enddo
 
         te_ade(ir) = temp(1,ir)
+        dlntdre_ade(ir) = dlntdr(1,ir)
         ne_ade(ir) = 0.0
         do is=1, n_species
            if(z(is) < 1) then
@@ -338,7 +341,17 @@ subroutine neo_make_profiles
               ne_ade(ir) = ne_ade(ir) + z(is) * dens(is,ir)
            endif
         enddo
+        dlnndre_ade(ir) = 0.0
+        do is=1, n_species
+           if(z(is) < 1) then
+              dlnndre_ade(ir) = dens(is,ir)
+           else
+              dlnndre_ade(ir) = dlnndre_ade(ir) &
+                   + z(is)*dens(is,ir)*dlnndr(is,ir)
+           endif
+        enddo
      enddo
+     
 
      ! ** Normalizing quantities **
      a_meters        = a_meters_satake

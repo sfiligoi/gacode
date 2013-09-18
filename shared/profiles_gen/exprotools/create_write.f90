@@ -83,7 +83,6 @@ subroutine create_write
 20 format(30(a))
 25 format(a,i2)
 30 format(a,i3)
-40 format(a,i6)
 60 format(a,1pe13.7)
 
 end subroutine create_write

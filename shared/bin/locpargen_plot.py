@@ -26,7 +26,7 @@ class TabPanel(wx.Panel):
         self.ax.grid(which="major",ls=":")
         self.ax.set_xlabel(r'$\theta/\pi$',fontsize=GFONTSIZE)
         self.ax.set_ylabel(r'$'+ylabel+'$',color='k',fontsize=GFONTSIZE)
-        #self.ax.plot(data[:,0]/np.pi,data[:,i])
+        self.ax.plot(data[:,0]/np.pi,data[:,i])
         self.ax.plot(data2[:,0]/np.pi,data2[:,i],color='m')
         self.ax.set_xlim([-1,1])
         if ylabel == '\\Theta':

@@ -9,40 +9,21 @@ endif
 
 LLIB=../driver/xptor_lib
 
-OBJECTS = curvss.o \
-	  dgbtrf.o \
-	  dgbtrs.o \
-	  dpchim.o \
-	  dpchfe.o \
-	  dchfev.o \
-	  r8tomsqz.o \
+OBJECTS = r8tomsqz.o \
           inter_cspl.o \
           lspolysmooth.o \
           part.o \
-          pchmisc.o \
-          pmisc.o \
-	  iarray_max.o \
-          rarray_copy.o \
-          rarray_scale.o \
-          rarray_search.o \
-          rarray_sum.o \
-          rarray_xdoty.o \
-          rarray_zero.o \
-          u_erf.o \
-          u_lu_backsub.o \
-          u_lu_decomp.o \
-          u_zeroin.o \
-          v_bicubic.o \
           volint.o \
           volintk.o \
-          v_spline.o \
-          w_bicubic.o \
-          w_lin_integ.o \
-          w_lin_interp.o \
-          w_lin_interp_r8.o \
-          w_poly_interp.o \
-          write_mod.o \
-          w_spline.o
+          pmisc.o   \
+          pchmisc.o \
+          curvss.o  \
+          dpchfe.o \
+          dpchim.o \
+          dchfev.o \
+          dgbtrs.o \
+          dgbtrf.o \
+          w_lin_interp_r8.o 
 
 .SUFFIXES : .o .f .F
 

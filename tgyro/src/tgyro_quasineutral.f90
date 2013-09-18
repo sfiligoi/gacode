@@ -8,6 +8,8 @@
 
 subroutine tgyro_quasineutral(ni,ne,dlnnidr,dlnnedr,zi,n_ion,n_r)
 
+  use tgyro_globals, only : tgyro_quasineutral_flag
+
   implicit none
 
   integer, intent(in) :: n_ion
@@ -20,6 +22,7 @@ subroutine tgyro_quasineutral(ni,ne,dlnnidr,dlnnedr,zi,n_ion,n_r)
 
   integer :: i
 
+  if (tgyro_quasineutral_flag == 0) return
  
   if (n_ion == 1) then
 

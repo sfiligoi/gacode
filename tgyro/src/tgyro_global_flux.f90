@@ -39,8 +39,7 @@ subroutine tgyro_global_flux
   expwd_e_tur(:) = 0.0
 
   gyro_restart_method = 1
-  call gyro_run(gyrotest_flag, gyro_restart_method, &
-       transport_method, gyro_exit_status(1), gyro_exit_message(1))
+  call gyro_run(gyrotest_flag,gyro_restart_method,transport_method)
   flux_counter = flux_counter+1
 
   !------------------------------------------------------------------

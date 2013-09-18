@@ -1,8 +1,26 @@
+!---------------------------------------------------------
+! fluxfit_driver.f90
+!
+! PURPOSE:
+!  Extract contour mapping parameter for fits to
+!
+!   R(theta)
+!   Z(theta) 
+! 
+!  based in input data in rd and zd.
+!
 ! model (1=parameterized, 2=Fourier)
-! ns (=number of Fouier harmonics)
-! npsi (number of flux gridpoints)
-! nd (number of arclength datapoints)
+! ns    (number of Fouier harmonics)
+! npsi  (number of flux gridpoints)
+! nd    (number of arclength datapoints)
 ! i_print (0=quiet,1=print)
+!
+! NOTE:
+!  This routine expects repeated points:
+!
+!   rd(1) = rd(nd)
+!   zd(1) = zd(nd)
+!---------------------------------------------------------
 
 subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
 
@@ -15,8 +33,8 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
   integer, intent(in) :: ns_in 
   integer, intent(in) :: npsi_in 
   integer, intent(in) :: nd_in 
-  real, dimension(nd_in,npsi_in) :: rd_in
-  real, dimension(nd_in,npsi_in) :: zd_in
+  real, dimension(nd_in,npsi_in), intent(in) :: rd_in
+  real, dimension(nd_in,npsi_in), intent(in) :: zd_in
   integer, intent(in) :: i_print
 
   ! Internal variables
@@ -34,9 +52,9 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
   real, dimension(3) :: s
 
   model = model_in
-  ns = ns_in
-  npsi = npsi_in
-  nd = nd_in
+  ns    = ns_in
+  npsi  = npsi_in
+  nd    = nd_in
 
   !------------------------------------------------------
   ! Define fit model (1=parameterized, 2=Fourier) 
@@ -74,7 +92,7 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
 
   case default
 
-     print '(a)','ERROR: model invalid in fluxfit.'
+     print '(a)','ERROR: (fluxfit_driver) model invalid.'
      stop
 
   end select
@@ -215,10 +233,6 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
 
         c(6) = -0.25*pi+0.5*(&
              asin((zp-z_c)/(c(4)*rmin))+asin((z_c-zm)/(c(4)*rmin)))
-
-        ! Circle
-        !c(4) = 1.0
-        !c(5:6) = 0.0
 
         write(2,10) c(:)
 

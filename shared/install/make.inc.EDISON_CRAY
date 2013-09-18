@@ -8,8 +8,8 @@
 # - 2 8-core Intel "Sandy Bridge" (2.6GHz) per node 
 #---------------------------------------------------
 
-#  FIXED Hardware parameters
-CORES_PER_NODE=16
+# FIXED Hardware parameters
+CORES_PER_NODE=24
 NUMAS_PER_NODE=2
 
 # Compilers and flags
@@ -25,7 +25,7 @@ FPETSC =
 
 # System math libraries
 
-LMATH = -L/opt/fftw/3.3.0.1/x86_64/lib -Wl,-rpath=/opt/fftw/3.3.0.1/x86_64/lib \
+LMATH = -L/opt/fftw/3.3.0.4/x86_64/lib -Wl,-rpath=/opt/fftw/3.3.0.4/x86_64/lib \
         -lfftw3_threads -lfftw3f_threads -lfftw3 -lfftw3f
 
 # NetCDF

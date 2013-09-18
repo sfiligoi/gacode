@@ -16,6 +16,7 @@ OBJECTS +=	tgyro_globals.o \
 		tgyro_catch_error.o \
 		tgyro_comm_setup.o \
 		tgyro_comm_sync.o \
+		tgyro_expro_map.o \
 		tgyro_flux.o \
 		tgyro_flux_vector.o \
 		tgyro_flux_vector_dense.o \
@@ -45,6 +46,7 @@ OBJECTS +=	tgyro_globals.o \
 		tgyro_stab_driver.o \
 		tgyro_target_vector.o \
 		tgyro_tglf_map.o \
+		tgyro_trap_component_error.o \
 		tgyro_volume_int.o \
 		tgyro_write_input.o \
 		tgyro_write_intermediate.o \

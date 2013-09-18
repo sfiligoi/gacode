@@ -487,10 +487,17 @@ subroutine tgyro_write_data(i_print)
           eflux_i_tur(1,i)*q_gb(i)/q_tgb(i),&
           eflux_e_tur(i)*q_gb(i)/q_tgb(i)
   enddo
-
   close(1)
   !--------------------------------------------------------------------------------
 
+  ! Write progress to screen
+  if (i_tran < 10) then
+     print '(a,i1)', 'INFO: (TGYRO) Finished iteration ',i_tran
+  else if (i_tran < 100) then
+     print '(a,i2)', 'INFO: (TGYRO) Finished iteration ',i_tran
+  else
+     print '(a,i3)', 'INFO: (TGYRO) Finished iteration ',i_tran
+  endif
 
   ! Data
 10 format(t1,11(1pe13.6,2x))

@@ -12,7 +12,7 @@
       INTEGER, PARAMETER :: nkym=50
       INTEGER, PARAMETER :: maxmodes=4
       INTEGER, PARAMETER :: max_ELITE=700
-      INTEGER, PARAMETER :: max_fourier = 16
+      INTEGER, PARAMETER :: max_fourier = 32
       INTEGER, PARAMETER :: ms = 128  ! ms needs to be divisible by 8
       INTEGER, PARAMETER :: max_plot =6*ms/8+1
 !

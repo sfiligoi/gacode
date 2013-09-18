@@ -127,7 +127,7 @@ c
 c
 c start up TGLF 
       if(imodel.eq.82)then
-        call tglf_startup
+c        call tglf_startup
         save_new_eikonal_tg=new_eikonal_tg
         if(new_eikonal_tg.eqv. .FALSE.)new_eikonal_tg=.TRUE.
         save_nb_tg=nbasis_max_tg

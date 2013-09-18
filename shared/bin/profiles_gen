@@ -54,16 +54,16 @@ then
    echo "Usage:       profiles_gen [options]"
    echo 
    echo "Recognized types of input data files:"
-   echo 
-   echo "              *              : ITERDB text file (default)"
-   echo "              *.nc           : ITERDB NetCDF file"
-   echo "              *.cdf          : Plasma State NetCDF file"
-   echo "              *.astra        : ASTRA text file"
-   echo "              *.corsica      : CORSICA text file"
-   echo "              *.peq          : PEQDSK/ELITE text file"
-   echo "              UFILE          : UFILE mode"
-   echo "              null           : gfile only"
-   echo "              input.profiles : vgen, locpargen or gfilemerge mode"
+   echo  
+   echo "              *                : ITERDB text file (default)"
+   echo "              *.nc             : ITERDB NetCDF file"
+   echo "              *.cdf            : Plasma State NetCDF file"
+   echo "              *.astra          : ASTRA text file"
+   echo "              *.corsica        : CORSICA text file"
+   echo "              *.peq (or p###)  : PEQDSK/ELITE text file"
+   echo "              UFILE            : UFILE mode"
+   echo "              null             : gfile only"
+   echo "              input.profiles   : vgen, locpargen or gfilemerge mode"
    echo 
    echo "             -p <path>"
    echo "             Set optional path to simulation directory."
@@ -123,7 +123,7 @@ then
    echo "             Specify Corsica data file."
    echo
    echo "             -g <gfile>"
-   echo "             Merge EFIT gfile for high-precision geometry data."
+   echo "             GFILE (geqdsk) containing flux-surface data [required]."
    echo 
    echo "             -nfourier <gfile>"
    echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo."
@@ -155,23 +155,18 @@ then
    echo
    echo "PEQDSK/PFILE Options"
    echo
-   echo "             -i <data.peq>"
-   echo "             Specify ELITE pfile data file."
+   echo "             -i <PFILE>"
+   echo "             Specify PFILE (peqdsk) data file."
    echo
    echo "             -g <gfile>"
-   echo "             Merge EFIT gfile for high-precision geometry data."
-   echo "             [This is required for pfiles]"
+   echo "             GFILE (geqdsk) containing flux-surface data [required]."
    echo 
    echo "             -nfourier <gfile>"
    echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo."
-   echo 
-   echo "             -pZ2 <Z2>"
-   echo "             Creation impurity ion with given charge to make"
-   echo "             input.profile quasineutral"
    echo
    echo "ASTRA Options"
    echo
-   echo "             -i <data.astra>"
+   echo "             -i <data>"
    echo "             Specify ASTRA data file."
    echo
    echo "             -m <map file>"
@@ -186,8 +181,8 @@ then
    echo "             -i null"
    echo "             Toggle null profile data mode."
    echo
-   echo "             -g <gfile>"
-   echo "             Merge EFIT gfile for high-precision geometry data [required]."
+   echo "             -g <GFILE>"
+   echo "             GFILE (geqdsk) containing flux-surface data [required]."
    echo 
    echo "             -nfourier <gfile>"
    echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo."
@@ -212,10 +207,10 @@ then
    echo "             -i <data>"
    echo "             Data in input.profiles format."
    echo
-   echo "             -g <gfile>"
-   echo "             EFIT gfile."
+   echo "             -g <GFILE>"
+   echo "             GFILE (geqdsk) containing flux-surface data."
    echo 
-   echo "             -nfourier <gfile>"
+   echo "             -nfourier <GFILE>"
    echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo."
    echo
    echo "             -gmerge"
@@ -327,7 +322,6 @@ CONFIG=.config
 
 FILE_FLAG=0
 G_FLAG=0
-GATO_DPSISL=0.0
 VERBOSE_FLAG=0
 ORDER_FLAG=0
 GMERGE_FLAG=0
@@ -372,9 +366,6 @@ DUMP_FLAG=0
 DUMP_VAR=null
 X=rho
 DUMP_DENS_METHOD=1
-
-# PFILE variables
-PZ2=0
 
 # CREATE MODE variables
 CREATE_FLAG=0
@@ -464,9 +455,7 @@ while [ $# -gt 0 ] ; do
 
   -dump) shift ; DUMP_FLAG=1 ; DUMP_VAR=$1 ;;
   -x) shift ; X=$1 ;;
-  -dens) shift ; DUMP_DENS_METHOD=$1 ;;
-
-  -pZ2) shift ; PZ2=$1 ;;  
+  -dens) shift ; DUMP_DENS_METHOD=$1 ;; 
 
   -gmerge) GMERGE_FLAG=1 ;;  
 
@@ -475,9 +464,11 @@ while [ $# -gt 0 ] ; do
   esac
   shift
 done
-
 #=============================================================
 
+#=============================================================
+# Construct simulation directory: $SIMDIR
+#
 if [ "$LOCDIR" == "." ]
 then
    LOCDIR=`basename $PWD`
@@ -486,6 +477,50 @@ fi
 SIMDIR=$SIMROOT/$LOCDIR
 
 cd $SIMDIR
+#=============================================================
+
+#=============================================================
+# Filetype detection and management
+#
+if [ $CREATE_FLAG -eq 0 ] ; then 
+
+   if [ "$FILE" == "" ] ; then
+      echo "ERROR: (profiles_gen) Specify an input file via -i."
+      exit 1
+   fi
+
+   itype=`gacode_type_autodetect $FILE`
+
+   if [ "$itype" == "NOT_FOUND" ] ; then
+      echo "ERROR: (profiles_gen) $FILE not found."
+      exit 1
+   fi
+   if [ "$itype" == "UNKNOWN" ] ; then
+      echo "ERROR: (profiles_gen) $FILE is an unknown type."
+      exit 1 
+   fi
+
+fi
+
+if [ $G_FLAG -eq 1 ] ; then
+
+   gtype=`gacode_type_autodetect $GFILE`
+   echo "INFO: (profiles_gen) $GFILE is autodetected as $gtype."
+
+else
+
+   gtype=none
+   if [ "$itype" == "PFILE" ] ; then
+      echo "ERROR: (profiles_gen) A GFILE (-g) must be used with a PFILE."  
+      exit 1
+   fi
+   if [ "$itype" == "CORSICA" ] ; then
+      echo "ERROR: (profiles_gen) A GFILE (-g) must be used with a CORSICA file."  
+      exit 1
+   fi
+
+fi
+#=============================================================
 
 #=============================================================
 # Manage CREATE MODE
@@ -507,9 +542,11 @@ then
       cp $FILE.save input.profiles
       echo "INFO: (profiles_gen) Keeping backup of $FILE in $FILE.save"
       python $GACODE_ROOT/shared/bin/profile_parse.py $FILE
+      echo "INFO: (profiles_gen) Modifying $FILE."
    else
       rm -f input.profiles input.profiles.gen
       FILE=input.profiles
+      echo "INFO: (profiles_gen) Creating $FILE."
    fi
    # Run create
    touch input.create
@@ -528,13 +565,7 @@ fi
 #=============================================================
 # Managing input file (also catches UFILE mode)
 
-if [ $FILE_FLAG -eq 0 ] ; then
-
-  # No file!
-  echo "ERROR: (profiles_gen) Please specify an input file with -i <file>"
-  exit 1 
-
-elif [ "$FILE" == "UFILE" ] ; then
+if [ "$itype" == "UFILE" ] ; then
 
    #-----------------------------------------------
    # UFILE mode
@@ -552,21 +583,24 @@ elif [ "$FILE" == "UFILE" ] ; then
       exit 1
    fi
 
-elif [ "$FILE" == "null" ] ; then
+elif [ "$itype" == "null" ] ; then
 
    # gfile-only mode
-   echo "INFO: (profiles_gen) Parsing gfile only"
-
-elif [ ! -f $FILE ] ; then
-
-   # bad filename
-   echo "ERROR: (profiles_gen) $FILE not found"
-   exit 1 
+   echo "INFO: (profiles_gen) Parsing GFILE only."
 
 else
 
-   echo "INFO: (profiles_gen) $FILE found"
+   echo "INFO: (profiles_gen) $FILE is autodetected as $itype."
 
+fi
+
+#=============================================================
+# Trap a p-file and split into components 
+#
+if [ "$itype" == "PFILE" ] ; then
+   # Now, strip pfile into parts.  Rename $FILE so pfile detected in prgen.
+   rm -f pfile.*
+   python $GACODE_ROOT/shared/bin/gacode_pfile_tool.py $FILE
 fi
 #=============================================================
 
@@ -743,11 +777,8 @@ fi
 #=============================================================
 # Check for executable
 #
-if [ ! -f $EXEC ]
-then
-   echo "You must first build the executable:"
-   echo " "
-   echo "> cd $GYRO_DIR/tools ; make" 
+if [ ! -f $EXEC ] ; then
+   echo "ERROR: (profiles_gen) Did not find executable $EXEC."
    exit 1
 fi
 #=============================================================
@@ -755,17 +786,22 @@ fi
 #=============================================================
 # Construct prgen input file ($CONFIG)
 #
-EFIT_METHOD=$(($G_FLAG+$OMFIT_FLAG+1))
+if [[ "$gtype" == *DSKGATO* ]] ; then
+   EFIT_METHOD=4
+else
+   EFIT_METHOD=$(($G_FLAG+$OMFIT_FLAG+1))
+fi
 
 date > $CONFIG
 
 # Required data file (ITERDB, PLASMASTATE, etc)
 echo $FILE >> $CONFIG
+echo $itype >> $CONFIG
 
 # Optional CER file
 echo $CER_FILE >> $CONFIG
 
-# EFIT method (1=none, 2=GATO, 3=OMFIT)
+# EFIT method (1=none, 2=GATO, 3=OMFIT, 4=DSKGATO)
 echo $EFIT_METHOD >> $CONFIG
 
 # Don't use gato q (-nogq) flag
@@ -773,9 +809,6 @@ echo $NOGQ_FLAG >> $CONFIG
 
 # Verbosity
 echo $VERBOSE_FLAG >> $CONFIG
-
-# PFILE Z2 value
-echo $PZ2 >> $CONFIG
 
 # GFILE MERGE
 echo $GMERGE_FLAG >> $CONFIG
@@ -791,7 +824,7 @@ echo $NFOURIER >> $CONFIG
 #=============================================================
 
 #==============================================================
-# Run GATO/OMFIT here
+# Manage equilibrium (run GATO, OMFIT, etc) here
 #
 
 # Use GATO:
@@ -941,6 +974,12 @@ then
    cp $GFILE gfile
    python $OMFIT -l 128 -u 128 -r 0.001 gfile ffile >& out.omfit
 fi
+
+# DSKGATO
+if [ $EFIT_METHOD -eq 4 ]
+then
+   cp $GFILE grid.dat
+fi
 #==============================================================
 
 #==============================================================
@@ -991,13 +1030,13 @@ fi
 #  Remove configuration files, output files, etc.
 rm -f egta eqgta nova.*
 #  Remove stale files
-rm -f out.gato.* input.gato.* out.omfit
+rm -f out.gato.* input.gato.* out.omfit dummy.peq
 
 if [ $VERBOSE_FLAG -eq 0 ]
 then
    rm -f $CONFIG fluxfit.* ingta o1gta grid.dat success
    rm -f *.ave out.com out.dim out.ufile.log 
-   rm -f gfile ffile out.expro.run
+   rm -f gfile ffile out.expro.run pfile.*
 else
    if [ -f "ingta" ] ; then 
       mv ingta input.gato.ingta

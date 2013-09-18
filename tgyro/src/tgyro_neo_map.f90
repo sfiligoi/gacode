@@ -8,7 +8,7 @@ subroutine tgyro_neo_map
   real :: gamma_p0,u000
 
   if (loc_n_ion > 5) then
-     call tgyro_catch_error('ERROR: Too many ions for NEO') 
+     call tgyro_catch_error('ERROR: (TGYRO) Too many ions for NEO') 
   endif
 
   mu1 = sqrt(mi(1)/(me*loc_me_multiplier))
@@ -23,16 +23,10 @@ subroutine tgyro_neo_map
      neo_sim_model_in = 1
   end if
 
-  ! Resolution
-  if (loc_n_ion < 4) then
-     !     neo_n_energy_in = 10
-     neo_n_energy_in = 5
-  else
-     !     neo_n_energy_in = 6
-     neo_n_energy_in = 5
-  endif
+  ! Resolution 
+  neo_n_energy_in = 5
   neo_n_xi_in = 11
-  neo_n_theta_in = 11
+  neo_n_theta_in = tgyro_neo_n_theta
 
   ! Geometry
   neo_equilibrium_model_in = 2

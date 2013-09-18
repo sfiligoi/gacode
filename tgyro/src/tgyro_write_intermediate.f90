@@ -24,12 +24,6 @@ subroutine tgyro_write_intermediate(index,res_in)
   ! Reset the reset character
   b_flag(:) = ' ' 
 
-  ! Halt TGYRO on GYRO failure
-  if (maxval(gyro_exit_status) == 1) then
-     call MPI_FINALIZE(ierr)
-     stop
-  endif
-
 10 format(t2,i2,2x,1pe12.6,2x,4(2x,1pe11.5))
 
 end subroutine tgyro_write_intermediate

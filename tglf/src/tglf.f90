@@ -17,13 +17,16 @@ program tglf
   implicit none
 
   integer :: i
+  integer :: n
   character (len=4) :: tag(5)=(/'ion1','ion2','ion3','ion4','ion5'/)
   real :: prec
 
   call tglf_read_input()
   call tglf_run() 
 
-  if (tglf_use_transport_model_in)then
+  if (tglf_use_transport_model_in) then
+
+     ! Output to screen
 
      print 20,'Gam/Gam_GB','    Q/Q_GB','Q_low/Q_GB','  Pi/Pi_GB', '    S/S_GB'
      print 10,'elec',&
@@ -53,6 +56,20 @@ program tglf
              abs(tglf_ion_mflux_out(i))
      enddo
 
+     ! Output to file
+
+     n = tglf_ns_in-1
+     open(unit=1,file='out.tglf.gbflux',status='replace')
+     write(1,'(32(1pe11.4,1x))') tglf_elec_pflux_out,tglf_ion_pflux_out(1:n),&
+          tglf_elec_eflux_out,tglf_ion_eflux_out(1:n),&
+          tglf_elec_mflux_out,tglf_ion_mflux_out(1:n),&
+          tglf_elec_expwd_out,tglf_ion_expwd_out(1:n)
+     close(1)
+
+     open(unit=1,file='out.tglf.grid',status='replace')
+     write(1,'(i2)') tglf_ns_in,tglf_nxgrid_in
+     close(1)
+
   else
 
      print 10,'     ky:',tglf_ky_in
@@ -69,7 +86,7 @@ program tglf
   write(1,*) prec
   close(1)
 
-10 format(a,6(1x,1pe11.4))
+10 format(a,10(1x,1pe11.4))
 20 format(t7,a,t19,a,t31,a,t43,a,t55,a)
 
 end program tglf

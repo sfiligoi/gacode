@@ -18,11 +18,8 @@ OBJECTS = readtestprofiles.o \
           gridsetup.o \
           datexch.o \
           datneo.o \
-          datnclass.o \
           datmap.o \
           datavg.o \
-          neutxp.o \
-	  cdfread.o \
           u0read.o \
           u1read.o \
           u1tread.o \
