@@ -6,14 +6,19 @@
 #  Top-level script for conversion of raw data into GYRO 
 #  format (input.profiles).
 #
-# RECOGNIZED FORMATS:
-#  - ITERDB (legacy text)
-#  - ITERDB (NetCDF)
-#  - Plasma State (NetCDF)
-#  - Corsica
-#  - ASTRA (also requires mapping file).
-#  - PEQDSK (ELITE pfile)
-#  - ITPA UFILES
+#  Autodetected profile formats:
+#   GACODE      (input.profiles)
+#   ITERDB      (ASCII iterdb)
+#   ITERDBNC    (netCDF iterdb)
+#   SWIM        (plasmastate)
+#   CORSICA     (Corsica) 
+#   PFILE       (peqdsk)
+#   UFILE       (ITPA profile database format)
+#
+#  Autodetected geometry formats:
+#   GFILE       (geqdsk equilibrium data)
+#   DSKGATO_OLD (old-type dskgato flux-surface data)
+#   DSKGATO_NEW (new-type dskgato flux-surface data)
 #============================================================= 
 
 #=============================================================
@@ -53,17 +58,19 @@ if [ $n -eq 0 ]
 then
    echo "Usage:       profiles_gen [options]"
    echo 
-   echo "Recognized types of input data files:"
-   echo  
-   echo "              *                : ITERDB text file (default)"
-   echo "              *.nc             : ITERDB NetCDF file"
-   echo "              *.cdf            : Plasma State NetCDF file"
-   echo "              *.astra          : ASTRA text file"
-   echo "              *.corsica        : CORSICA text file"
-   echo "              *.peq (or p###)  : PEQDSK/ELITE text file"
-   echo "              UFILE            : UFILE mode"
-   echo "              null             : gfile only"
-   echo "              input.profiles   : vgen, locpargen or gfilemerge mode"
+   echo "             Autodetected profile formats:"
+   echo "               GACODE      (input.profiles)"
+   echo "               ITERDB      (text iterdb)"
+   echo "               ITERDBNC    (netCDF iterdb)"
+   echo "               SWIM        (plasmastate)"
+   echo "               PFILE       (peqdsk)"
+   echo "               CORSICA     (Corsica) "
+   echo "               U FILE       (ITPA profile database format)"
+   echo 
+   echo "             Autodetected geometry formats:"
+   echo "               GFILE       (geqdsk equilibrium data)"
+   echo "               DSKGATO_OLD (old-type dskgato flux-surface data)"
+   echo "               DSKGATO_NEW (new-type dskgato flux-surface data)"
    echo 
    echo "             -p <path>"
    echo "             Set optional path to simulation directory."
@@ -77,7 +84,7 @@ then
    echo 
    echo "ITERDB Options"
    echo 
-   echo "             -i <data> or <data.nc>"
+   echo "             -i <data>"
    echo "             Specify text or NetCDF data file."
    echo 
    echo "             -g <gfile>"
@@ -102,8 +109,8 @@ then
    echo 
    echo "PLASMA STATE Options"
    echo
-   echo "             -i <data.cdf>"
-   echo "             Specify text or NetCDF data file."
+   echo "             -i <data>"
+   echo "             Specify NetCDF data file."
    echo
    echo "             -g <gfile>"
    echo "             Merge EFIT gfile for high-precision geometry data."
@@ -786,12 +793,21 @@ fi
 #=============================================================
 # Construct prgen input file ($CONFIG)
 #
-if [[ "$gtype" == *DSKGATO* ]] ; then
+# Determine method to extract flux surfaces
+# EFIT method:
+#  1=none, 2=GATO-gfile, 3=OMFIT-gfile, 4=DSKGATO_OLD, 5=DSKGATO_NEW
+#
+if [[ "$gtype" == DSKGATO_OLD ]] ; then
    EFIT_METHOD=4
+elif [[ "$gtype" == DSKGATO_NEW ]] ; then
+   EFIT_METHOD=5
 else
    EFIT_METHOD=$(($G_FLAG+$OMFIT_FLAG+1))
 fi
+#=============================================================
 
+#=============================================================
+# Construct prgen input file ($CONFIG)
 date > $CONFIG
 
 # Required data file (ITERDB, PLASMASTATE, etc)
@@ -801,7 +817,7 @@ echo $itype >> $CONFIG
 # Optional CER file
 echo $CER_FILE >> $CONFIG
 
-# EFIT method (1=none, 2=GATO, 3=OMFIT, 4=DSKGATO)
+# EFIT method 
 echo $EFIT_METHOD >> $CONFIG
 
 # Don't use gato q (-nogq) flag
@@ -976,7 +992,7 @@ then
 fi
 
 # DSKGATO
-if [ $EFIT_METHOD -eq 4 ]
+if [[ $EFIT_METHOD -eq 4 || $EFIT_METHOD -eq 5 ]]
 then
    cp $GFILE grid.dat
 fi
@@ -1009,18 +1025,10 @@ echo ${ord_vec[0]} ${ord_vec[1]} ${ord_vec[2]} ${ord_vec[3]} ${ord_vec[4]} >> $C
 #
 $EXEC
 
-if [ -f "success" ]
-then
-   if [ $G_FLAG -eq 1 ]
-   then
-      echo "INFO: (profiles_gen) Fluxfit used to compute shape parameters from EFIT mapping."
-      echo "DONE: (profiles_gen) Successfully wrote: input.profiles, input.profiles.geo."
-   else
-      echo "DONE: (profiles_gen) Successfully wrote: input.profiles." 
-   fi
+if [ -f "success" ] ; then
+   echo "INFO: (profiles_gen) Done."
 else
-   echo "ERROR: (profiles_gen) Something went wrong in creation of input.profiles :("
-   echo "       ** Try running with -V option **"
+   echo "ERROR: (profiles_gen) *Failed*. Try running with -V option"
 fi
 #==============================================================
 

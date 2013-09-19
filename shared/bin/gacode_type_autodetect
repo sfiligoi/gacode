@@ -4,14 +4,15 @@
 #
 # Types:
 #
-#  ITERDB   (text iterdb)
-#  ITERDBNC (netCDF iterdb)
-#  SWIM     (plasmastate)
-#  PFILE    (peqdsk)
+#  GACODE      (input.profiles)
+#  ITERDB      (text iterdb)
+#  ITERDBNC    (netCDF iterdb)
+#  SWIM        (plasmastate)
+#  PFILE       (peqdsk)
 #  CORSICA  
-#  GFILE    (geqdsk equilibrium data)
-#  DSKGATO  (dskgato flux-surface data)
-#  GACODE   (input.profiles)
+#  GFILE       (geqdsk equilibrium data)
+#  DSKGATO_OLD (old-type dskgato flux-surface data)
+#  DSKGATO_NEW (new-type dskgato flux-surface data)
 #--------------------------------------------
 
 if [ "$1" == "UFILE" ] ; then
@@ -37,48 +38,51 @@ if [[ "$x" == "NetCDF Data Format data" ]] ; then
    else
       echo "SWIM"
    fi      
-   exit 0;
+   exit 0 
 else
    # pfile, gfile, iterdb text
-   y1=`grep -c psinorm $1`
-   y2=`grep -c EFITD $1`
-   y3=`grep -c TRXPL $1`
-   y4=`grep -c TEQ $1`
-   y5=`grep -c cxareao $1`
-   y6=`grep -c BT_EXP $1`
-   y7=`grep -c CORSICA $1`
-   if [[ $y1 -gt 0 ]] ; then
+
+   y=`grep -c psinorm $1`
+   if [[ $y -gt 0 ]] ; then
       echo "PFILE"
-      exit 0;
+      exit 0
    fi
-   if [[ $y6 -gt 0 ]] ; then
+
+   y=`grep -c BT_EXP $1`
+   if [[ $y -gt 0 ]] ; then
       echo "GACODE" 
-      exit 0;
+      exit 0
    fi 
-   if [[ $y2 -gt 0 ]] ; then
-      echo "GFILE"
-      exit 0;
-   fi
-   if [[ $y3 -gt 0 ]] ; then
-      echo "GFILE"
-      exit 0;
-   fi
-   if [[ $y4 -gt 0 ]] ; then
-      echo "GFILE" 
-      exit 0;
-   fi 
-   if [[ $y5 -gt 0 ]] ; then
+
+   y=`grep -c cxareao $1`
+   if [[ $y -gt 0 ]] ; then
       echo "ITERDB" 
-      exit 0;
+      exit 0
    fi 
-   if [[ $y7 -gt 0 ]] ; then
+
+   y=`grep -c CORSICA $1`
+   if [[ $y -gt 0 ]] ; then
       echo "CORSICA" 
-      exit 0;
+      exit 0
    fi 
-   if [[ "$1" == *dskgat* ]] ; then
-      echo "DSKGATO" 
-      exit 0;
+
+   # If we get to this point, we are dealing with equilibrium data
+   y=`sed -n '2p' < $1 | grep -o E | wc -l`
+   if [[ $y -eq 5 ]] ; then
+      echo "GFILE" 
+      exit 0
    fi 
+   if [[ $y -eq 4 ]] ; then
+      echo "DSKGATO_OLD" 
+      exit 0
+   fi 
+
+   y=`sed -n '4p' < $1 | grep -o E | wc -l`
+   if [[ $y -eq 4 ]] ; then
+      echo "DSKGATO_NEW" 
+      exit 0
+   fi 
+
    echo "UNKNOWN" 
    exit 1;
 fi

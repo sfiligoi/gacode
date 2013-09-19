@@ -27,7 +27,7 @@ for line in open(infile,'r').readlines():
         outfile.close()
         title = 'pfile.'+nvar
         outfile = open(title,'w')
-        print 'INFO: (gacode_pfile_tool.py) Wrote '+title
+        print 'INFO: (gacode_pfile_tool.py) Extracted '+title+'.'
         outfile.write(n+'\n')
     else:
         outfile.write(line)

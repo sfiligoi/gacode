@@ -188,15 +188,15 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
         !write(4,40) rmin,err
 
         if (i_print == 1) then
-           print '(t3,a,i4,2x,3(a,1pe12.6,3x))',&
-                'Surface',p,'rmin = ',rmin
+           print 50,'Surface',j,' of ',npsi,'rmin = ',rmin
            print 20,tag(:)
            do i=0,ns
               print 30,i,ar(i),br(i),az(i),bz(i)
            enddo
            print *
         endif
-     else
+ 
+    else
 
         !----------------------------
         ! Parameterized (see f_model)
@@ -241,8 +241,7 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
         !write(4,40) rmin,err
 
         if (i_print == 1) then
-           print '(t3,a,i4,2x,3(a,1pe12.6,3x))',&
-                'Surface',p,'rmin = ',rmin
+           print 50,'Surface ',j,' of ',npsi,'rmin = ',rmin
            print 20,tag(:)
            print 10,c(:)
            print *
@@ -265,7 +264,6 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
   close(3)
   !close(4)
 
-
   deallocate(rd)
   deallocate(zd)
   deallocate(theta)
@@ -283,5 +281,6 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
 20 format(t2,10(1x,a,4x))
 30 format((t2,i2,11x,4(1pe15.8,1x)))
 40 format(4(1pe15.8,1x))
+50 format(a,i4,a,i4,2x,a,1pe15.8)
 
 end subroutine fluxfit_driver
