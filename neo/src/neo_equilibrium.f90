@@ -272,6 +272,17 @@ contains
 
     call compute_fractrap(ftrap)
 
+    !open(unit=1,file='geo.out',status='replace')
+    !do it=1,n_theta
+    !   write (1,'(e16.8)',advance='no') theta(it)
+    !   write (1,'(e16.8)',advance='no') v_drift_x(it)
+    !   write (1,'(e16.8)',advance='no') gradpar_Bmag(it)
+    !   write (1,'(e16.8)',advance='no') Bmag(it)
+    !   write(1,*)
+    !enddo
+    !close(1)
+    !stop
+
   end subroutine EQUIL_DO
   
 

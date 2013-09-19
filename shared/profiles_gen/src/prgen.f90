@@ -5,17 +5,19 @@
 !  Generate input.profiles from prexisting data.  This executable is
 !  managed and called by gacode/shared/bin/profiles_gen.
 !
-!  Acceptable input formats:
+!  Autodetected profile formats:
+!   GACODE      (input.profiles)
+!   ITERDB      (text iterdb)
+!   ITERDBNC    (netCDF iterdb)
+!   SWIM        (plasmastate)
+!   PFILE       (peqdsk)
+!   CORSICA     (Corsica) 
+!   UFILE       (ITPA profile database format)
 !
-!  1. ONETWO iterdb text (no extenstion)  
-!  2. ONETWO iterdb NetCDF (*.nc)
-!  3. PEQDSK text (*.peq, *.peq2)
-!  4. PLASMA STATE NetCDF (*.cdf, *.CDF)
-!  5. CORSICA text (*.corsica)
-!  6. UFILE text (UFILE)
-!
-! Note that ASTRA (*.astra) format is handled by a separate python 
-! routine.
+!  Autodetected geometry formats:
+!   GFILE       (geqdsk equilibrium data)
+!   DSKGATO_OLD (old-type dskgato flux-surface data)
+!   DSKGATO_NEW (new-type dskgato flux-surface data)
 !--------------------------------------------------------------------
 
 program prgen
@@ -137,12 +139,15 @@ program prgen
   case (2)
      ! Use GATO-EFIT mapper
      call prgen_read_gato
+     print '(a)','INFO: (prgen) Wrote input.profiles.geo.'
   case (3)
      ! Use OMFIT-EFIT mapper
      call prgen_read_omfit
-  case (4)
+     print '(a)','INFO: (prgen) Wrote input.profiles.geo'
+  case (4,5)
      ! Use DSKGATO data
      call prgen_read_dskgato
+     print '(a)','INFO: (prgen) Wrote input.profiles.geo'
   end select
   !---------------------------------------------------
 

@@ -166,6 +166,7 @@ subroutine prgen_write
   enddo
 
   close(1)
+  print '(a)','INFO: (prgen) Wrote input.profiles.'
 
   !-----------------------------------------------------------------------------------
   ! Define EXPRO interface variables, then compute and write derived quantities:
@@ -216,6 +217,8 @@ subroutine prgen_write
 
   call EXPRO_compute_derived
   call EXPRO_write_derived
+  print '(a)','INFO: (prgen) Wrote input.profiles.extra.'
+
   call EXPRO_alloc('./',0)
   !-----------------------------------------------------------------------------------
 

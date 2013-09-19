@@ -3,7 +3,8 @@
 !
 ! PURPOSE:
 !  Read DSKGATO format.
-!
+!  efit_method=4: old dskgato
+!  efit_method=5: new dskgato
 !----------------------------------------------------------
 
 subroutine prgen_read_dskgato
@@ -32,15 +33,21 @@ subroutine prgen_read_dskgato
 
   !---------------------------------------------------
   ! 
-  neqtyp=1
+  if (efit_method == 4) then
+     neqtyp=1
+  else
+     neqtyp=0
+  endif
   open(unit=1,file='grid.dat',status='old')
   if (neqtyp == 0) then
      read(1,'(a)') cdum
      read(1,'(a)') cdum
      read(1,*) nsurf,ntht,neqsym
+     print '(a)','INFO: (prgen) Assuming new-type dskgato flux-surface format.'
   else
      read(1,*) nsurf,ntht
      neqsym = 1
+     print '(a)','INFO: (prgen) Assuming old-type dskgato flux-surface format.' 
   endif
   ! Accounting for magnetic axis
   nsurf = nsurf-1
@@ -54,8 +61,8 @@ subroutine prgen_read_dskgato
 
   read (1,10) dummy(1:4)
 
-  if (neqtyp == 0) read(1,10) dummy(1:2)
-  if (neqtyp == 1) read(1,10) dummy(1:3)
+  if (neqtyp == 0) read(1,10) dummy(1:2) ! totcur,axddxz
+  if (neqtyp == 1) read(1,10) dummy(1:3) ! totcur,axddxz,dnnorm
 
   allocate(tdum(ntht))
   allocate(psi(0:nsurf))
@@ -75,6 +82,7 @@ subroutine prgen_read_dskgato
   read(1,10) tdum(:) ! seqdpdr
   read(1,10) tdum(:) ! seqdpdz
 
+  ! These arrays should repeat endpoint
   read(1,10) ((xs(i,ip),ip=0,nsurf),i=1,ntht)
   read(1,10) ((zs(i,ip),ip=0,nsurf),i=1,ntht)
   close(1)
@@ -89,8 +97,21 @@ subroutine prgen_read_dskgato
      enddo
   endif
 
+  !do i=1,narc
+  !   print *,i,xs(i,nsurf/2),zs(i,nsurf/2)
+  !enddo
+
   ! Set psi(1) = 0
   psi(:) = psi(:)-psi(0)
+
+  ! COORDINATES: set sign of poloidal flux
+  if (psi(nsurf) < 0.0) then
+     ! Flux negative
+     psi(:) = -psi(:)
+     ipccw  = 1
+  else
+     ipccw = -1
+  endif
   !----------------------------------------------------
 
   !----------------------------------------------------------------
