@@ -480,49 +480,6 @@ cd $SIMDIR
 #=============================================================
 
 #=============================================================
-# Filetype detection and management
-#
-if [ $CREATE_FLAG -eq 0 ] ; then 
-
-   if [ "$FILE" == "" ] ; then
-      echo "ERROR: (profiles_gen) Specify an input file via -i."
-      exit 1
-   fi
-
-   itype=`gacode_type_autodetect $FILE`
-
-   if [ "$itype" == "NOT_FOUND" ] ; then
-      echo "ERROR: (profiles_gen) $FILE not found."
-      exit 1
-   fi
-   if [ "$itype" == "UNKNOWN" ] ; then
-      echo "ERROR: (profiles_gen) $FILE is an unknown type."
-      exit 1 
-   fi
-
-fi
-
-if [ $G_FLAG -eq 1 ] ; then
-
-   gtype=`gacode_type_autodetect $GFILE`
-   echo "INFO: (profiles_gen) $GFILE is autodetected as $gtype."
-
-else
-
-   gtype=none
-   if [ "$itype" == "PFILE" ] ; then
-      echo "ERROR: (profiles_gen) A GFILE (-g) must be used with a PFILE."  
-      exit 1
-   fi
-   if [ "$itype" == "CORSICA" ] ; then
-      echo "ERROR: (profiles_gen) A GFILE (-g) must be used with a CORSICA file."  
-      exit 1
-   fi
-
-fi
-#=============================================================
-
-#=============================================================
 # Manage CREATE MODE
 #
 # -> move original inputfile to inputfile.save
@@ -559,6 +516,45 @@ then
       rm -f *.gen out.expro.run
    fi
    exit 0 
+fi
+#=============================================================
+
+#=============================================================
+# Filetype detection and management
+#
+if [ "$FILE" == "" ] ; then
+   echo "ERROR: (profiles_gen) Specify an input file via -i."
+   exit 1
+fi
+
+itype=`gacode_type_autodetect $FILE`
+
+if [ "$itype" == "NOT_FOUND" ] ; then
+   echo "ERROR: (profiles_gen) $FILE not found."
+   exit 1
+fi
+if [ "$itype" == "UNKNOWN" ] ; then
+   echo "ERROR: (profiles_gen) $FILE is an unknown type."
+   exit 1 
+fi
+
+if [ $G_FLAG -eq 1 ] ; then
+
+   gtype=`gacode_type_autodetect $GFILE`
+   echo "INFO: (profiles_gen) $GFILE is autodetected as $gtype."
+
+else
+
+   gtype=none
+   if [ "$itype" == "PFILE" ] ; then
+      echo "ERROR: (profiles_gen) A GFILE (-g) must be used with a PFILE."  
+      exit 1
+   fi
+   if [ "$itype" == "CORSICA" ] ; then
+      echo "ERROR: (profiles_gen) A GFILE (-g) must be used with a CORSICA file."  
+      exit 1
+   fi
+
 fi
 #=============================================================
 
