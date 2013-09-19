@@ -11,10 +11,17 @@ subroutine prgen_map_peqdsk
 
   implicit none
   integer :: i
+  real, dimension(nx) :: ni_d
+  real, dimension(nx) :: ni_c
+  real, dimension(nx) :: ni_b
 
   ! Compute rho, bref and arho:
   call prgen_get_chi(nx,q,kappa,rmin,dpsi,rho,peqdsk_bref,peqdsk_arho)
 
+  ni_d(:) = 10*peqdsk_ni(:)
+  ni_c(:) = 10*(peqdsk_ne(:)-peqdsk_ni(:)-peqdsk_nb(:))/6.0
+  ni_b(:) = 10*peqdsk_nb(:)
+  
   !---------------------------------------------------------
   ! Map profile data onto single array:
   !
@@ -30,7 +37,7 @@ subroutine prgen_map_peqdsk
   vec(6,:)  = delta(:)
   vec(7,:)  = peqdsk_te(:)
   vec(8,:)  = peqdsk_ne(:)*10
-  vec(9,:)  = 0.0      ! zeff
+  vec(9,:)  = (ni_d(:)+36.0*ni_c(:)+ni_b(:))/(10*peqdsk_ne(:)) ! z_eff
   ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
   vec(10,:) = -ipccw*1e3*peqdsk_omgeb(:) 
   vec(11,:) = 0.0      ! flow_mom
@@ -46,9 +53,9 @@ subroutine prgen_map_peqdsk
   vec(20,:) = abs(dpsi(:))*(-ipccw)
 
   ! ni, nc, nb
-  vec(21,:) = peqdsk_ni(:)*10
-  vec(22,:) = (peqdsk_ne(:)-peqdsk_ni(:)-peqdsk_nb(:))/6.0*10
-  vec(23,:) = peqdsk_nb(:)*10
+  vec(21,:) = ni_d(:)
+  vec(22,:) = ni_c(:)
+  vec(23,:) = ni_b(:)
 
   ! ti, tc, tb
   vec(26,:) = peqdsk_ti(:)
