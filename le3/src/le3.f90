@@ -1,6 +1,7 @@
 program le3
 
   use le3_globals
+  use le3_write
 
   implicit none
   external :: le3_func
@@ -50,7 +51,7 @@ program le3
   ! Map x -> (a,b,c,d)
   call le3_map(xfunc,as,bs,cs,ds,nps,nts,'setc')
 
-  call le3_write
+  call le3_write_do
   call le3_alloc(0)
 
 end program le3
