@@ -7,7 +7,6 @@ module le3_globals
   ! Resolution parameters
   integer :: nt,np
   integer :: nts,nps
-  integer :: ntp,npp
   integer :: m,n
 
   ! Geometry parameters

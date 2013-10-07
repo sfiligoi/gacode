@@ -9,11 +9,12 @@ module le3_write
   real, dimension(:,:), allocatable :: mat_stream_dt, mat_stream_dp, &
        mat_trap
   real, dimension(:), allocatable :: vec_vdriftx, vec_flux, vec_upar, &
-       vec_uparB
+       vec_uparB, vec_fsa, vec_bmag
   real :: vprime
   integer, dimension(:,:), allocatable :: mat_mindx,mat_nindx,mat_mpindx,&
        mat_npindx, mat_typel, mat_typer
   integer :: matsize
+  integer :: indx_c00
 
 contains
 
@@ -40,72 +41,24 @@ contains
        enddo
     enddo
     
-    deallocate(t)
-    deallocate(tb)
-    deallocate(dtbdt)
-    deallocate(dtbdp)
-    deallocate(p)
-    deallocate(sinm)
-    deallocate(sinn)
-    deallocate(cosm)
-    deallocate(cosn)
+    allocate(rs(nt,np))
+    allocate(zs(nt,np))
+    allocate(g(nt,np))
+    allocate(gpp(nt,np))
+    allocate(gtt(nt,np))
+    allocate(gpt(nt,np))
     
-    allocate(t(ntp))  
-    allocate(tb(ntp,npp))  
-    allocate(dtbdt(ntp,npp))  
-    allocate(dtbdp(ntp,npp))
-    allocate(p(npp))  
-    allocate(sinm(ntp,0:nts))  
-    allocate(cosm(ntp,0:nts))  
-    allocate(sinn(npp,0:nts))  
-    allocate(cosn(npp,0:nts)) 
+    allocate(btor(nt,np))
+    allocate(bpol(nt,np))
+    allocate(bmag(nt,np))
+    allocate(dbdt(nt,np))
+    allocate(dbdp(nt,np))
+    allocate(bdotgrad(nt,np))
+    allocate(bdotgradB_overB(nt,np))
+    allocate(vdrift_x(nt,np))
 
-    do i=1,ntp
-       t(i) = 2*(i-1)*pi/(ntp)
-    enddo
-    dt = t(2)-t(1)
-    do j=1,npp
-       p(j) = 2*(j-1)*pi/(npp)
-    enddo
-    dp = p(2)-p(1)
-    
-    do i=1,ntp
-       tb(i,:) = t(i)
-    enddo
-    dtbdt(:,:) = 1.0
-    dtbdp(:,:) = 0.0
-    
-    do its=0,nts
-       do i=1,ntp
-          sinm(i,its) = sin(its*t(i))
-          cosm(i,its) = cos(its*t(i))
-       enddo
-    enddo
-    do ips=0,nps
-       do j=1,npp
-          sinn(j,ips) = sin(ips*p(j))
-          cosn(j,ips) = cos(ips*p(j))
-       enddo
-    enddo
-    
-    allocate(rs(ntp,npp))
-    allocate(zs(ntp,npp))
-    allocate(g(ntp,npp))
-    allocate(gpp(ntp,npp))
-    allocate(gtt(ntp,npp))
-    allocate(gpt(ntp,npp))
-    
-    allocate(btor(ntp,npp))
-    allocate(bpol(ntp,npp))
-    allocate(bmag(ntp,npp))
-    allocate(dbdt(ntp,npp))
-    allocate(dbdp(ntp,npp))
-    allocate(bdotgrad(ntp,npp))
-    allocate(bdotgradB_overB(ntp,npp))
-    allocate(vdrift_x(ntp,npp))
-
-    do j=1,npp
-       do i=1,ntp
+    do j=1,np
+       do i=1,nt
           
           do ips=0,nps
              do its=0,nts
@@ -155,17 +108,17 @@ contains
     bmag(:,:) = 1.0/g * sqrt(gpp + 2.0*iota*gpt + iota**2 * gtt)
     
     ! db/dtheta
-    allocate(derivvec(0:ntp-1))
-    do i=1,ntp-1
+    allocate(derivvec(0:nt-1))
+    do i=1,nt-1
        derivvec(i) = -0.5*(-1)**i/tan(0.5*t(i+1))
     enddo
     dbdt(:,:) = 0.0
-    do j=1,npp
-       do i=1,ntp
-          do ip=1,ntp
+    do j=1,np
+       do i=1,nt
+          do ip=1,nt
              k = ip-i
              if(k < 0) then
-                k = k + ntp
+                k = k + nt
              endif
              dbdt(i,j) = dbdt(i,j) + derivvec(k) * bmag(ip,j)
           enddo
@@ -174,17 +127,17 @@ contains
     deallocate(derivvec)
     
     ! db/dphi
-    allocate(derivvec(0:ntp-1))
-    do i=1,npp-1
+    allocate(derivvec(0:nt-1))
+    do i=1,np-1
        derivvec(i) = -0.5*(-1)**i/tan(0.5*p(i+1))
     enddo
     dbdp(:,:) = 0.0
-    do j=1,ntp
-       do i=1,npp
-          do ip=1,npp
+    do j=1,nt
+       do i=1,np
+          do ip=1,np
              k = ip-i
              if(k < 0) then
-                k = k + npp
+                k = k + np
              endif
              dbdp(j,i) = dbdp(j,i) + derivvec(k) * bmag(j,ip)
           enddo
@@ -262,9 +215,9 @@ contains
        enddo
     enddo
 
-    mat_stream_dt(:,:) = mat_stream_dt(:,:) / (ntp*npp)
-    mat_stream_dp(:,:) = mat_stream_dp(:,:) / (ntp*npp)
-    mat_trap(:,:)      = mat_trap(:,:)      / (ntp*npp)
+    mat_stream_dt(:,:) = mat_stream_dt(:,:) / (nt*np)
+    mat_stream_dp(:,:) = mat_stream_dp(:,:) / (nt*np)
+    mat_trap(:,:)      = mat_trap(:,:)      / (nt*np)
 
     print *, 'matsize', matsize, i,nps,nts, mat_trap(2,2)
     
@@ -283,28 +236,34 @@ contains
 
     ! flux-surface d volume / dr
     vprime = 0.0
-    do i=1,ntp
-       do j=1,npp
+    do i=1,nt
+       do j=1,np
           vprime = vprime + g(i,j)
        enddo
     enddo
-    vprime = vprime / (ntp*npp)
+    vprime = vprime / (nt*np)
     
     allocate(vec_vdriftx(matsize))
     allocate(vec_flux(matsize))
     allocate(vec_upar(matsize))
     allocate(vec_uparB(matsize))
+    allocate(vec_fsa(matsize))
+    allocate(vec_bmag(matsize))
     vec_vdriftx(:) = 0.0
     vec_flux(:)    = 0.0
     vec_upar(:)    = 0.0
     vec_uparB(:)   = 0.0
+    vec_fsa(:)     = 0.0
+    vec_bmag(:)    = 0.0
     int_type = 0
     its=0; ips=0; i=0    ! dummy variables
     call compute_mat(int_type,its,ips,i)
-    vec_vdriftx(:) = vec_vdriftx(:) / (ntp*npp)
-    vec_flux(:)    = vec_flux(:)  / (ntp*npp) / vprime
-    vec_uparB(:)   = vec_uparB(:) / (ntp*npp) / vprime
-    vec_upar(:)    = vec_upar(:)  / (ntp*npp) 
+    vec_vdriftx(:) = vec_vdriftx(:) / (nt*np)
+    vec_flux(:)    = vec_flux(:)  / (nt*np) / vprime
+    vec_uparB(:)   = vec_uparB(:) / (nt*np) / vprime
+    vec_upar(:)    = vec_upar(:)  / (nt*np) 
+    vec_fsa(:)     = vec_fsa (:)  / (nt*np) / vprime
+    vec_bmag(:)     = vec_bmag (:)  / (nt*np) 
 
     open(unit=1,file='out.le3.geovector',status='replace')
     do i=1,matsize
@@ -312,15 +271,17 @@ contains
        write (1,'(e16.8)',advance='no') vec_flux(i)
        write (1,'(e16.8)',advance='no') vec_uparB(i)
        write (1,'(e16.8)',advance='no') vec_upar(i)
+       write (1,'(e16.8)',advance='no') vec_fsa(i)
+       write (1,'(e16.8)',advance='no') vec_bmag(i)
        write (1,*)
     enddo
     close(1)
 
     open(unit=1,file='out.le3.geoscalar',status='replace')
-    write (1,'(i3)') ntp
+    write (1,'(i3)') nts
     write (1,'(i3)') nps
     write (1,'(i3)') matsize
-    write (1,'(e16.8)') vprime
+    write (1,'(i3)') indx_c00
     close(1)
 
     !do i=1,matsize
@@ -342,17 +303,17 @@ contains
     close(1)
     
     open(unit=1,file='out.le3.tb',status='replace')
-    do j=1,npp
+    do j=1,np
        write(1,40) tb(:,j)-t(:)
     enddo
     close(1)
     open(unit=1,file='out.le3.r',status='replace')
-    do i=1,ntp
+    do i=1,nt
        write(1,10) rs(i,:)
     enddo
     close(1)
     open(unit=1,file='out.le3.z',status='replace')
-    do i=1,ntp
+    do i=1,nt
        write(1,10) zs(i,:)
     enddo
     close(1)
@@ -387,6 +348,8 @@ contains
     deallocate(vec_flux)
     deallocate(vec_upar)
     deallocate(vec_uparB)
+    deallocate(vec_fsa)
+    deallocate(vec_bmag)
 
 10  format(200(1pe12.5,1x))
 20  format('(',i2,',',i2,'):',2x,4(1pe14.7,1x))
@@ -402,9 +365,9 @@ contains
     real, dimension(:,:), allocatable :: mat_func
     integer :: kt,kp,jps,jts,j
     
-    allocate(mat_func(ntp,npp))
-    do kt=1,ntp
-       do kp=1,npp
+    allocate(mat_func(nt,np))
+    do kt=1,nt
+       do kp=1,np
           if(int_type == 1) then
              mat_func(kt,kp) = sinm(kt,its)*cosn(kp,ips) 
           else if(int_type == 2) then
@@ -426,8 +389,8 @@ contains
           if(jts > 0) then
              ! amn right collocation
              j=j+1
-             do kt=1,ntp
-                do kp=1,npp
+             do kt=1,nt
+                do kp=1,np
                    if(int_type == 0) then
                       vec_vdriftx(j) = vec_vdriftx(j) &
                            + mat_func(kt,kp) * sinm(kt,jts)*cosn(kp,jps) &
@@ -440,6 +403,12 @@ contains
                       vec_uparB(j)   = vec_uparB(j) &
                            + mat_func(kt,kp) * sinm(kt,jts)*cosn(kp,jps) &
                            * bmag(kt,kp) * g(kt,kp)
+                      vec_fsa(j)   = vec_fsa(j) &
+                           + mat_func(kt,kp) * sinm(kt,jts)*cosn(kp,jps) &
+                           * g(kt,kp)
+                      vec_bmag(j)   = vec_bmag(j) &
+                           + mat_func(kt,kp) * sinm(kt,jts)*cosn(kp,jps) &
+                           * bmag(kt,kp) 
                    else
                       mat_mindx(i,j)=its
                       mat_nindx(i,j)=ips
@@ -464,8 +433,8 @@ contains
           if(jps > 0 .and. jts > 0) then
              ! bmn right collocation
              j=j+1
-             do kt=1,ntp
-                do kp=1,npp
+             do kt=1,nt
+                do kp=1,np
                    if(int_type == 0) then
                       vec_vdriftx(j) = vec_vdriftx(j) &
                            + mat_func(kt,kp) * sinm(kt,jts)*sinn(kp,jps) &
@@ -478,6 +447,12 @@ contains
                       vec_uparB(j)   = vec_uparB(j) &
                            + mat_func(kt,kp) * sinm(kt,jts)*sinn(kp,jps) &
                            * bmag(kt,kp) * g(kt,kp)
+                      vec_fsa(j)   = vec_fsa(j) &
+                           + mat_func(kt,kp) * sinm(kt,jts)*sinn(kp,jps) &
+                           * g(kt,kp)
+                      vec_bmag(j)   = vec_bmag(j) &
+                           + mat_func(kt,kp) * sinm(kt,jts)*sinn(kp,jps) &
+                           * bmag(kt,kp)
                    else
                       mat_mindx(i,j)=its
                       mat_nindx(i,j)=ips
@@ -501,9 +476,12 @@ contains
           
           ! cmn right collocation
           j=j+1
-          do kt=1,ntp
-             do kp=1,npp
+          do kt=1,nt
+             do kp=1,np
                 if(int_type == 0) then
+                   if(jts == 0 .and. jps == 0) then
+                      indx_c00 = j
+                   endif
                    vec_vdriftx(j) = vec_vdriftx(j) &
                         + mat_func(kt,kp) * cosm(kt,jts)*cosn(kp,jps) &
                         * vdrift_x(kt,kp)
@@ -515,6 +493,12 @@ contains
                    vec_uparB(j)   = vec_uparB(j) &
                         + mat_func(kt,kp) * cosm(kt,jts)*cosn(kp,jps) &
                         * bmag(kt,kp) * g(kt,kp)
+                   vec_fsa(j)   = vec_fsa(j) &
+                        + mat_func(kt,kp) * cosm(kt,jts)*cosn(kp,jps) &
+                        * g(kt,kp)
+                   vec_bmag(j)   = vec_bmag(j) &
+                        + mat_func(kt,kp) * cosm(kt,jts)*cosn(kp,jps) &
+                        * bmag(kt,kp)
                 else
                    mat_mindx(i,j)=its
                    mat_nindx(i,j)=ips
@@ -538,8 +522,8 @@ contains
           if(jps > 0) then
              ! dmn right collocation
              j=j+1
-             do kt=1,ntp
-                do kp=1,npp
+             do kt=1,nt
+                do kp=1,np
                    if(int_type == 0) then
                       vec_vdriftx(j) = vec_vdriftx(j) &
                            + mat_func(kt,kp) * cosm(kt,jts)*sinn(kp,jps) &
@@ -552,6 +536,12 @@ contains
                       vec_uparB(j)   = vec_uparB(j) &
                            + mat_func(kt,kp) * cosm(kt,jts)*sinn(kp,jps) &
                            * bmag(kt,kp) * g(kt,kp)
+                      vec_fsa(j)   = vec_fsa(j) &
+                           + mat_func(kt,kp) * cosm(kt,jts)*sinn(kp,jps) &
+                           * g(kt,kp)
+                      vec_bmag(j)   = vec_bmag(j) &
+                           + mat_func(kt,kp) * cosm(kt,jts)*sinn(kp,jps) &
+                           * bmag(kt,kp)
                    else
                       mat_mindx(i,j)=its
                       mat_nindx(i,j)=ips

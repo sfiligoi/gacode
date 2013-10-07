@@ -11,8 +11,6 @@ program le3
   read(1,*) np
   read(1,*) nts
   read(1,*) nps
-  read(1,*) ntp
-  read(1,*) npp
   read(1,*) rmin
   read(1,*) rmaj
   read(1,*) shift
