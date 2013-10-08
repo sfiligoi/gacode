@@ -161,6 +161,7 @@ contains
     vdrift_x(:,:) = iota/(bmag * g**2) &
          * (-dbdt * (gpp + iota * gpt) + dbdp * (gpt + iota*gtt)) / bmag**2
     
+
     ! construct the geo collocation matices
 
     matsize = 4*nts*nps+2*(nts+nps)+1
@@ -194,7 +195,6 @@ contains
              itype(i) = 1
              m_indx(i)     = its
              n_indx(i)     = ips
-             vec_thetabar(i) = as(its,ips)
           endif
           if(ips > 0 .and. its > 0) then 
              !bmn
@@ -202,14 +202,12 @@ contains
              itype(i) = 2
              m_indx(i)     = its
              n_indx(i)     = ips
-             vec_thetabar(i) = bs(its,ips)
           endif
           ! cmn
           i=i+1
           itype(i) = 3
           m_indx(i)     = its
           n_indx(i)     = ips
-          vec_thetabar(i) = cs(its,ips)
           if(its == 0 .and. ips == 0) then
              indx_c00 = i
           endif
@@ -219,7 +217,6 @@ contains
              itype(i) = 4
              m_indx(i)     = its
              n_indx(i)     = ips
-             vec_thetabar(i) = ds(its,ips)
           endif
        enddo
     enddo
@@ -234,7 +231,6 @@ contains
     vec_fsa(:)      = 0.0
     vec_bmag(:)     = 0.0
     vec_thetabar(:) = 0.0
-
  
     do i=1,matsize
        call get_basis(itype(i),m_indx(i),n_indx(i),basis)
@@ -258,6 +254,8 @@ contains
        enddo
        do kt=1,nt
           do kp=1,np
+             vec_thetabar(i) = vec_thetabar(i) &
+                  + basis(kt,kp) * (tb(kt,kp)-t(kt))
              vec_vdriftx(i) = vec_vdriftx(i) &
                   + basis(kt,kp) * vdrift_x(kt,kp)
              vec_flux(i)    = vec_flux(i) &
@@ -300,12 +298,12 @@ contains
     enddo
     vprime = vprime / (nt*np)
     
-
-    vec_vdriftx(:) = vec_vdriftx(:) / (nt*np)
-    vec_flux(:)    = vec_flux(:)  / (nt*np) / vprime
-    vec_uparB(:)   = vec_uparB(:) / (nt*np) / vprime
-    vec_upar(:)    = vec_upar(:)  / (nt*np) 
-    vec_fsa(:)     = vec_fsa (:)  / (nt*np) / vprime
+    vec_thetabar(:) = vec_thetabar(:) / (nt*np)
+    vec_vdriftx(:)  = vec_vdriftx(:) / (nt*np)
+    vec_flux(:)     = vec_flux(:)  / (nt*np) / vprime
+    vec_uparB(:)    = vec_uparB(:) / (nt*np) / vprime
+    vec_upar(:)     = vec_upar(:)  / (nt*np) 
+    vec_fsa(:)      = vec_fsa (:)  / (nt*np) / vprime
     vec_bmag(:)     = vec_bmag (:)  / (nt*np) 
 
     open(unit=1,file='out.le3.geovector',status='replace')
