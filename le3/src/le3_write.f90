@@ -9,7 +9,7 @@ module le3_write
   real, dimension(:,:), allocatable :: mat_stream_dt, mat_stream_dp, &
        mat_trap
   real, dimension(:), allocatable :: vec_vdriftx, vec_flux, vec_upar, &
-       vec_uparB, vec_fsa, vec_bmag
+       vec_uparB, vec_fsa, vec_bmag, vec_thetabar
   real :: vprime
   integer, dimension(:,:), allocatable :: mat_mindx,mat_nindx,mat_mpindx,&
        mat_npindx, mat_typel, mat_typer
@@ -255,12 +255,14 @@ contains
     allocate(vec_uparB(matsize))
     allocate(vec_fsa(matsize))
     allocate(vec_bmag(matsize))
-    vec_vdriftx(:) = 0.0
-    vec_flux(:)    = 0.0
-    vec_upar(:)    = 0.0
-    vec_uparB(:)   = 0.0
-    vec_fsa(:)     = 0.0
-    vec_bmag(:)    = 0.0
+    allocate(vec_thetabar(matsize))
+    vec_vdriftx(:)  = 0.0
+    vec_flux(:)     = 0.0
+    vec_upar(:)     = 0.0
+    vec_uparB(:)    = 0.0
+    vec_fsa(:)      = 0.0
+    vec_bmag(:)     = 0.0
+    vec_thetabar(:) = 0.0
     int_type = 0
     its=0; ips=0; i=0    ! dummy variables
     call compute_mat(int_type,its,ips,i)
@@ -273,6 +275,7 @@ contains
 
     open(unit=1,file='out.le3.geovector',status='replace')
     do i=1,matsize
+       write (1,'(e16.8)',advance='no') vec_thetabar(i)
        write (1,'(e16.8)',advance='no') vec_vdriftx(i)
        write (1,'(e16.8)',advance='no') vec_flux(i)
        write (1,'(e16.8)',advance='no') vec_uparB(i)
@@ -288,43 +291,6 @@ contains
     write (1,'(i3)') nps
     write (1,'(i3)') matsize
     write (1,'(i3)') indx_c00
-    close(1)
-
-    !do i=1,matsize
-    !   do j=1, matsize
-    !      if(abs(mat_trap(i,j)) > 1e-5) then
-    !         print *, mat_trap(i,j), mat_mindx(i,j), mat_nindx(i,j), &
-    !              mat_mpindx(i,j), mat_npindx(i,j), &
-    !              mat_typel(i,j), mat_typer(i,j)
-    !      endif
-    !   enddo
-    !enddo
-    
-    open(unit=1,file='out.le3.t',status='replace')
-    write(1,40) t(:)
-    close(1)
-    
-    open(unit=1,file='out.le3.p',status='replace')
-    write(1,40) p(:)
-    close(1)
-    
-    open(unit=1,file='out.le3.tb',status='replace')
-    do j=1,np
-       write(1,40) tb(:,j)-t(:)
-    enddo
-    close(1)
-    open(unit=1,file='out.le3.r',status='replace')
-    do i=1,nt
-       write(1,10) rs(i,:)
-    enddo
-    close(1)
-    open(unit=1,file='out.le3.z',status='replace')
-    do i=1,nt
-       write(1,10) zs(i,:)
-    enddo
-    close(1)
-    open(unit=1,file='out.le3.b',status='replace')
-    write(1,40) bmag(:,:)
     close(1)
     
     deallocate(rs)
@@ -356,11 +322,10 @@ contains
     deallocate(vec_uparB)
     deallocate(vec_fsa)
     deallocate(vec_bmag)
+    deallocate(vec_thetabar)
 
-10  format(200(1pe12.5,1x))
 20  format('(',i2,',',i2,'):',2x,4(1pe14.7,1x))
 30  format(t15,4(a,9x))
-40  format(1pe12.5)
 
   end subroutine le3_write_do
   
@@ -395,6 +360,9 @@ contains
           if(jts > 0) then
              ! amn right collocation
              j=j+1
+             if(int_type == 0) then
+                vec_thetabar(j) = as(jts,jps)
+             endif
              do kt=1,nt
                 do kp=1,np
                    if(int_type == 0) then
@@ -439,6 +407,9 @@ contains
           if(jps > 0 .and. jts > 0) then
              ! bmn right collocation
              j=j+1
+             if(int_type == 0) then
+                vec_thetabar(j) = bs(jts,jps)
+             endif
              do kt=1,nt
                 do kp=1,np
                    if(int_type == 0) then
@@ -482,6 +453,9 @@ contains
           
           ! cmn right collocation
           j=j+1
+          if(int_type == 0) then
+                vec_thetabar(j) = cs(jts,jps)
+             endif
           do kt=1,nt
              do kp=1,np
                 if(int_type == 0) then
@@ -528,6 +502,9 @@ contains
           if(jps > 0) then
              ! dmn right collocation
              j=j+1
+             if(int_type == 0) then
+                vec_thetabar(j) = ds(jts,jps)
+             endif
              do kt=1,nt
                 do kp=1,np
                    if(int_type == 0) then
