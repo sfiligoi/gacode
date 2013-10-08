@@ -22,7 +22,7 @@ subroutine neo_do
   use neo_nclass_dr
   use neo_g_velocitygrids
   use neo_allocate_profile
-  !use neo_3d_driver
+  use neo_3d_driver
   use mpi
   implicit none
 
@@ -58,8 +58,8 @@ subroutine neo_do
   endif
 
   if(threed_model==1) then
-     !call ThreeD_do
-     call neo_error('ERROR: (NEO) 3D not yet available.')
+     call ThreeD_do
+     !call neo_error('ERROR: (NEO) 3D not yet available.')
      goto 100
   endif
 
