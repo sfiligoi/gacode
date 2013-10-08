@@ -57,6 +57,12 @@ contains
     allocate(bdotgradB_overB(nt,np))
     allocate(vdrift_x(nt,np))
 
+    do i=1,nt
+       tb(i,:) = t(i)
+    enddo
+    dtbdt(:,:) = 1.0
+    dtbdp(:,:) = 0.0
+
     do j=1,np
        do i=1,nt
           
