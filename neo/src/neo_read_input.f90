@@ -75,9 +75,6 @@ subroutine neo_read_input
   read(1,*) subroutine_flag
 
   read(1,*) threed_model
-  read(1,*) n_varphi
-  read(1,*) n_tor
-  read(1,*) z1_mag
 
   close(1)
 

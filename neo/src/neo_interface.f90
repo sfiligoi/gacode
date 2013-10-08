@@ -111,9 +111,6 @@ module neo_interface
   real    :: neo_profile_zeta_scale_in = 1.0
   real    :: neo_profile_zmag_scale_in = 1.0
   integer :: neo_threed_model_in = 0
-  integer :: neo_n_varphi_in = 17
-  integer :: neo_n_tor_in    = 5
-  real    :: neo_z1_mag_in   = 1.0e-3
   integer :: neo_geo_ny_in = 0
   real, dimension(8,0:32) :: neo_geo_yin_in = 0.0
   ! the exception of the default is subroutine_flag
@@ -254,9 +251,6 @@ contains
     neo_profile_zeta_scale_in = profile_zeta_scale
     neo_profile_zmag_scale_in = profile_zmag_scale
     neo_threed_model_in = threed_model
-    neo_n_varphi_in = n_varphi
-    neo_n_tor_in    = n_tor
-    neo_z1_mag_in   = z1_mag
     neo_geo_ny_in = geo_ny_in
     neo_geo_yin_in(:,:) = geo_yin_in(:,:)
     neo_subroutine_flag = subroutine_flag
@@ -365,9 +359,6 @@ contains
     profile_zeta_scale = neo_profile_zeta_scale_in
     profile_zmag_scale = neo_profile_zmag_scale_in
     threed_model = neo_threed_model_in
-    n_varphi = neo_n_varphi_in
-    n_tor    = neo_n_tor_in
-    z1_mag   = neo_z1_mag_in
     geo_ny_in = neo_geo_ny_in
     geo_yin_in(:,:) = neo_geo_yin_in(:,:)
     subroutine_flag = neo_subroutine_flag

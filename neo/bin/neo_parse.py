@@ -104,9 +104,6 @@ x.add('PROFILE_ZMAG_SCALE','1.0')
 x.add('SUBROUTINE_FLAG','0')
 
 x.add('THREED_MODEL','0')
-x.add('N_VARPHI','17')
-x.add('N_TOR','5')
-x.add('Z1_MAG','1.0e-3')
        	
 # Deprecated parameters
 x.dep('NU_2','Only NU_1 is input now.  NU for other species is computed internally.')

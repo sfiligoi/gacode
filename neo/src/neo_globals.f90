@@ -94,9 +94,6 @@ module neo_globals
   !---------------------------------------------------------------
   ! 3D parameters
   integer :: threed_model
-  integer :: n_varphi
-  integer :: n_tor
-  real    :: z1_mag
 
   !---------------------------------------------------------------
   ! Output mode:
