@@ -11,8 +11,6 @@ module le3_write
   real, dimension(:), allocatable :: vec_vdriftx, vec_flux, vec_upar, &
        vec_uparB, vec_fsa, vec_bmag, vec_thetabar
   real :: vprime
-  integer, dimension(:,:), allocatable :: mat_mindx,mat_nindx,mat_mpindx,&
-       mat_npindx, mat_typel, mat_typer
   integer :: matsize
   integer :: indx_c00
 
@@ -21,7 +19,7 @@ contains
   subroutine le3_write_do 
     use le3_globals
     implicit none
-    integer :: i,j,k,its,ips,ip
+    integer :: i,j,k,its,ips,ip, kt, kp
     real :: jacs
     real :: drdtbs,dzdtbs
     real :: drdpbs,dzdpbs
@@ -30,7 +28,9 @@ contains
     real, dimension(:,:), allocatable :: rs,zs
     real, dimension(:,:), allocatable :: bpol, btor
     real, dimension(:,:), allocatable :: dbdt, dbdp
-    integer :: int_type
+    real, dimension(:,:), allocatable :: basis, basis_prime, &
+         basis_dt_prime, basis_dp_prime
+    integer, dimension(:), allocatable :: m_indx, n_indx, itype
  
     print '(a,1pe12.5)','INFO: (le3) Root accuracy ->',sum(abs(yfunc))/size(yfunc)
     
@@ -164,68 +164,119 @@ contains
     ! construct the geo collocation matices
 
     matsize = 4*nts*nps+2*(nts+nps)+1
+
+    allocate(m_indx(matsize))
+    allocate(n_indx(matsize))
+    allocate(itype(matsize))
+
+    allocate(basis(nt,np))
+    allocate(basis_prime(nt,np))
+    allocate(basis_dt_prime(nt,np))
+    allocate(basis_dp_prime(nt,np))
+
     allocate(mat_stream_dt(matsize,matsize))
     allocate(mat_stream_dp(matsize,matsize))
     allocate(mat_trap(matsize,matsize))
-    allocate(mat_mindx(matsize,matsize))
-    allocate(mat_nindx(matsize,matsize))
-    allocate(mat_mpindx(matsize,matsize))
-    allocate(mat_npindx(matsize,matsize))
-    allocate(mat_typel(matsize,matsize))
-    allocate(mat_typer(matsize,matsize))
-    
-    mat_stream_dt(:,:) = 0.0
-    mat_stream_dp(:,:) = 0.0
-    mat_trap(:,:)      = 0.0
+    allocate(vec_vdriftx(matsize))
+    allocate(vec_flux(matsize))
+    allocate(vec_upar(matsize))
+    allocate(vec_uparB(matsize))
+    allocate(vec_fsa(matsize))
+    allocate(vec_bmag(matsize))
+    allocate(vec_thetabar(matsize))
 
     i=0
-    ! amn left collocation: sin(mt) cos(np)
-    int_type = 1
     do ips=0,nps
        do its=0,nts
           if(its > 0) then 
+             ! amn
              i=i+1
-             call compute_mat(int_type,its,ips,i)
+             itype(i) = 1
+             m_indx(i)     = its
+             n_indx(i)     = ips
+             vec_thetabar(i) = as(its,ips)
+          endif
+          if(ips > 0 .and. its > 0) then 
+             !bmn
+             i=i+1
+             itype(i) = 2
+             m_indx(i)     = its
+             n_indx(i)     = ips
+             vec_thetabar(i) = bs(its,ips)
+          endif
+          ! cmn
+          i=i+1
+          itype(i) = 3
+          m_indx(i)     = its
+          n_indx(i)     = ips
+          vec_thetabar(i) = cs(its,ips)
+          if(its == 0 .and. ips == 0) then
+             indx_c00 = i
+          endif
+          if(ips  > 0) then
+             ! dmn
+             i=i+1
+             itype(i) = 4
+             m_indx(i)     = its
+             n_indx(i)     = ips
+             vec_thetabar(i) = ds(its,ips)
           endif
        enddo
     enddo
 
-    ! bmn left collocation: sin(mt) sin(np)
-    int_type = 2
-    do ips=0,nps
-       do its=0,nts
-          if(ips > 0 .and. its > 0) then 
-             i=i+1
-             call compute_mat(int_type,its,ips,i)
-          endif
+    mat_stream_dt(:,:) = 0.0
+    mat_stream_dp(:,:) = 0.0
+    mat_trap(:,:)      = 0.0
+    vec_vdriftx(:)  = 0.0
+    vec_flux(:)     = 0.0
+    vec_upar(:)     = 0.0
+    vec_uparB(:)    = 0.0
+    vec_fsa(:)      = 0.0
+    vec_bmag(:)     = 0.0
+    vec_thetabar(:) = 0.0
+
+ 
+    do i=1,matsize
+       call get_basis(itype(i),m_indx(i),n_indx(i),basis)
+       do j=1,matsize
+          call get_basis(itype(j),m_indx(j),n_indx(j),basis_prime(:,:))
+          call get_basis_dt(itype(j),m_indx(j),n_indx(j),basis_dt_prime(:,:))
+          call get_basis_dp(itype(j),m_indx(j),n_indx(j),basis_dp_prime(:,:))
+          do kt=1,nt
+             do kp=1,np
+                mat_trap(i,j) = mat_trap(i,j) &
+                     + basis(kt,kp) * basis_prime(kt,kp) &
+                     * bdotgradB_overB(kt,kp) 
+                mat_stream_dt(i,j) = mat_stream_dt(i,j) &
+                     + basis(kt,kp) * basis_dt_prime(kt,kp) &
+                     * bdotgrad(kt,kp) * iota
+                mat_stream_dp(i,j) = mat_stream_dp(i,j) &
+                     + basis(kt,kp) * basis_dp_prime(kt,kp) &
+                     * bdotgrad(kt,kp) 
+             enddo
+          enddo
        enddo
-    enddo
-    
-    ! cmn left collocation: cos(mt) cos(np)
-    int_type = 3
-    do ips=0,nps
-       do its=0,nts
-          i=i+1
-          call compute_mat(int_type,its,ips,i)
-       enddo
-    enddo
-    
-    ! dmn left collocation: cos(mt) sin(np)
-    int_type = 4
-    do ips=0,nps
-       do its=0,nts
-          if(ips  > 0) then
-             i=i+1
-             call compute_mat(int_type,its,ips,i)
-          endif
+       do kt=1,nt
+          do kp=1,np
+             vec_vdriftx(i) = vec_vdriftx(i) &
+                  + basis(kt,kp) * vdrift_x(kt,kp)
+             vec_flux(i)    = vec_flux(i) &
+                  + basis(kt,kp) * vdrift_x(kt,kp) * g(kt,kp)
+             vec_upar(i)    = vec_upar(i) &
+                  + basis(kt,kp) 
+             vec_uparB(i)   = vec_uparB(i) &
+                  + basis(kt,kp) * bmag(kt,kp) * g(kt,kp)
+             vec_fsa(i)   = vec_fsa(i) &
+                  + basis(kt,kp) * g(kt,kp)
+             vec_bmag(i)   = vec_bmag(i) &
+                  + basis(kt,kp) * bmag(kt,kp) 
+          enddo
        enddo
     enddo
 
     mat_stream_dt(:,:) = mat_stream_dt(:,:) / (nt*np)
     mat_stream_dp(:,:) = mat_stream_dp(:,:) / (nt*np)
     mat_trap(:,:)      = mat_trap(:,:)      / (nt*np)
-
-    print *, 'matsize', matsize, i,nps,nts, mat_trap(2,2)
     
     open(unit=1,file='out.le3.geomatrix',status='replace')
     do i=1,matsize
@@ -249,23 +300,7 @@ contains
     enddo
     vprime = vprime / (nt*np)
     
-    allocate(vec_vdriftx(matsize))
-    allocate(vec_flux(matsize))
-    allocate(vec_upar(matsize))
-    allocate(vec_uparB(matsize))
-    allocate(vec_fsa(matsize))
-    allocate(vec_bmag(matsize))
-    allocate(vec_thetabar(matsize))
-    vec_vdriftx(:)  = 0.0
-    vec_flux(:)     = 0.0
-    vec_upar(:)     = 0.0
-    vec_uparB(:)    = 0.0
-    vec_fsa(:)      = 0.0
-    vec_bmag(:)     = 0.0
-    vec_thetabar(:) = 0.0
-    int_type = 0
-    its=0; ips=0; i=0    ! dummy variables
-    call compute_mat(int_type,its,ips,i)
+
     vec_vdriftx(:) = vec_vdriftx(:) / (nt*np)
     vec_flux(:)    = vec_flux(:)  / (nt*np) / vprime
     vec_uparB(:)   = vec_uparB(:) / (nt*np) / vprime
@@ -310,12 +345,6 @@ contains
     deallocate(mat_stream_dt)
     deallocate(mat_stream_dp)
     deallocate(mat_trap)
-    deallocate(mat_mindx)
-    deallocate(mat_nindx)
-    deallocate(mat_mpindx)
-    deallocate(mat_npindx)
-    deallocate(mat_typel)
-    deallocate(mat_typer)
     deallocate(vec_vdriftx)
     deallocate(vec_flux)
     deallocate(vec_upar)
@@ -323,234 +352,86 @@ contains
     deallocate(vec_fsa)
     deallocate(vec_bmag)
     deallocate(vec_thetabar)
+    deallocate(basis)
+    deallocate(basis_prime)
+    deallocate(basis_dt_prime)
+    deallocate(basis_dp_prime)
+    deallocate(itype)
+    deallocate(m_indx)
+    deallocate(n_indx)
 
 20  format('(',i2,',',i2,'):',2x,4(1pe14.7,1x))
 30  format(t15,4(a,9x))
 
   end subroutine le3_write_do
   
-  subroutine compute_mat(int_type,its,ips,i)
+  subroutine get_basis(itype,m_indx,n_indx,basis)
     use le3_globals
     implicit none
-    integer, intent(in) :: int_type,its,ips,i
-    real, dimension(:,:), allocatable :: mat_func
-    integer :: kt,kp,jps,jts,j
+    integer, intent(in)  :: itype, m_indx, n_indx
+    real, dimension(nt,np), intent(inout) :: basis
+    integer :: kt,kp
     
-    allocate(mat_func(nt,np))
     do kt=1,nt
        do kp=1,np
-          if(int_type == 1) then
-             mat_func(kt,kp) = sinm(kt,its)*cosn(kp,ips) 
-          else if(int_type == 2) then
-             mat_func(kt,kp) = sinm(kt,its)*sinn(kp,ips)
-          else if(int_type == 3) then
-             mat_func(kt,kp) = cosm(kt,its)*cosn(kp,ips)
-          else if(int_type == 4) then
-             mat_func(kt,kp) = cosm(kt,its)*sinn(kp,ips)
-          else
-             mat_func(kt,kp) = 1.0
+          if(itype == 1) then
+             basis(kt,kp) = sinm(kt,m_indx)*cosn(kp,n_indx) 
+          else if(itype == 2) then
+             basis(kt,kp) = sinm(kt,m_indx)*sinn(kp,n_indx)
+          else if(itype == 3) then
+             basis(kt,kp) = cosm(kt,m_indx)*cosn(kp,n_indx)
+          else if(itype == 4) then
+             basis(kt,kp) = cosm(kt,m_indx)*sinn(kp,n_indx)
           endif
-       enddo
-    enddo
-    
-    j=0
-    do jps=0,nps
-       do jts=0,nts
-          
-          if(jts > 0) then
-             ! amn right collocation
-             j=j+1
-             if(int_type == 0) then
-                vec_thetabar(j) = as(jts,jps)
-             endif
-             do kt=1,nt
-                do kp=1,np
-                   if(int_type == 0) then
-                      vec_vdriftx(j) = vec_vdriftx(j) &
-                           + mat_func(kt,kp) * sinm(kt,jts)*cosn(kp,jps) &
-                           * vdrift_x(kt,kp)
-                      vec_flux(j)    = vec_flux(j) &
-                           + mat_func(kt,kp) * sinm(kt,jts)*cosn(kp,jps) &
-                           * vdrift_x(kt,kp) * g(kt,kp)
-                      vec_upar(j)    = vec_upar(j) &
-                           + mat_func(kt,kp) * sinm(kt,jts)*cosn(kp,jps) 
-                      vec_uparB(j)   = vec_uparB(j) &
-                           + mat_func(kt,kp) * sinm(kt,jts)*cosn(kp,jps) &
-                           * bmag(kt,kp) * g(kt,kp)
-                      vec_fsa(j)   = vec_fsa(j) &
-                           + mat_func(kt,kp) * sinm(kt,jts)*cosn(kp,jps) &
-                           * g(kt,kp)
-                      vec_bmag(j)   = vec_bmag(j) &
-                           + mat_func(kt,kp) * sinm(kt,jts)*cosn(kp,jps) &
-                           * bmag(kt,kp) 
-                   else
-                      mat_mindx(i,j)=its
-                      mat_nindx(i,j)=ips
-                      mat_mpindx(i,j)=jts
-                      mat_npindx(i,j)=jps
-                      mat_typel=int_type
-                      mat_typer=1
-                      mat_trap(i,j) = mat_trap(i,j) &
-                           + mat_func(kt,kp) * sinm(kt,jts)*cosn(kp,jps) &
-                           * bdotgradB_overB(kt,kp) 
-                      mat_stream_dt(i,j) = mat_stream_dt(i,j) &
-                           + mat_func(kt,kp) * jts*cosm(kt,jts)*cosn(kp,jps) &
-                           * bdotgrad(kt,kp) * iota
-                      mat_stream_dp(i,j) = mat_stream_dp(i,j) &
-                           + mat_func(kt,kp)*(-jps)*sinm(kt,jts)*sinn(kp,jps) &
-                           * bdotgrad(kt,kp) 
-                   endif
-                enddo
-             enddo
-          endif
-          
-          if(jps > 0 .and. jts > 0) then
-             ! bmn right collocation
-             j=j+1
-             if(int_type == 0) then
-                vec_thetabar(j) = bs(jts,jps)
-             endif
-             do kt=1,nt
-                do kp=1,np
-                   if(int_type == 0) then
-                      vec_vdriftx(j) = vec_vdriftx(j) &
-                           + mat_func(kt,kp) * sinm(kt,jts)*sinn(kp,jps) &
-                           * vdrift_x(kt,kp)
-                      vec_flux(j)    = vec_flux(j) &
-                           + mat_func(kt,kp) * sinm(kt,jts)*sinn(kp,jps) &
-                           * vdrift_x(kt,kp) * g(kt,kp)
-                      vec_upar(j)    = vec_upar(j) &
-                           + mat_func(kt,kp) * sinm(kt,jts)*sinn(kp,jps) 
-                      vec_uparB(j)   = vec_uparB(j) &
-                           + mat_func(kt,kp) * sinm(kt,jts)*sinn(kp,jps) &
-                           * bmag(kt,kp) * g(kt,kp)
-                      vec_fsa(j)   = vec_fsa(j) &
-                           + mat_func(kt,kp) * sinm(kt,jts)*sinn(kp,jps) &
-                           * g(kt,kp)
-                      vec_bmag(j)   = vec_bmag(j) &
-                           + mat_func(kt,kp) * sinm(kt,jts)*sinn(kp,jps) &
-                           * bmag(kt,kp)
-                   else
-                      mat_mindx(i,j)=its
-                      mat_nindx(i,j)=ips
-                      mat_mpindx(i,j)=jts
-                      mat_npindx(i,j)=jps
-                      mat_typel=int_type
-                      mat_typer=2
-                      mat_trap(i,j) = mat_trap(i,j) &
-                           + mat_func(kt,kp) * sinm(kt,jts)*sinn(kp,jps) &
-                           * bdotgradB_overB(kt,kp)  
-                      mat_stream_dt(i,j) = mat_stream_dt(i,j) &
-                           + mat_func(kt,kp) * jts*cosm(kt,jts)*sinn(kp,jps) &
-                           * bdotgrad(kt,kp) * iota
-                      mat_stream_dp(i,j) = mat_stream_dp(i,j) &
-                           + mat_func(kt,kp) * jps*sinm(kt,jts)*cosn(kp,jps) &
-                           * bdotgrad(kt,kp) 
-                   endif
-                enddo
-             enddo
-          endif
-          
-          ! cmn right collocation
-          j=j+1
-          if(int_type == 0) then
-                vec_thetabar(j) = cs(jts,jps)
-             endif
-          do kt=1,nt
-             do kp=1,np
-                if(int_type == 0) then
-                   if(jts == 0 .and. jps == 0) then
-                      indx_c00 = j
-                   endif
-                   vec_vdriftx(j) = vec_vdriftx(j) &
-                        + mat_func(kt,kp) * cosm(kt,jts)*cosn(kp,jps) &
-                        * vdrift_x(kt,kp)
-                   vec_flux(j)    = vec_flux(j) &
-                        + mat_func(kt,kp) * cosm(kt,jts)*cosn(kp,jps) &
-                        * vdrift_x(kt,kp) * g(kt,kp)
-                   vec_upar(j)    = vec_upar(j) &
-                        + mat_func(kt,kp) * cosm(kt,jts)*cosn(kp,jps) 
-                   vec_uparB(j)   = vec_uparB(j) &
-                        + mat_func(kt,kp) * cosm(kt,jts)*cosn(kp,jps) &
-                        * bmag(kt,kp) * g(kt,kp)
-                   vec_fsa(j)   = vec_fsa(j) &
-                        + mat_func(kt,kp) * cosm(kt,jts)*cosn(kp,jps) &
-                        * g(kt,kp)
-                   vec_bmag(j)   = vec_bmag(j) &
-                        + mat_func(kt,kp) * cosm(kt,jts)*cosn(kp,jps) &
-                        * bmag(kt,kp)
-                else
-                   mat_mindx(i,j)=its
-                   mat_nindx(i,j)=ips
-                   mat_mpindx(i,j)=jts
-                   mat_npindx(i,j)=jps
-                   mat_typel=int_type
-                   mat_typer=3
-                   mat_trap(i,j) = mat_trap(i,j) &
-                        + mat_func(kt,kp) * cosm(kt,jts)*cosn(kp,jps) &
-                        * bdotgradB_overB(kt,kp) 
-                   mat_stream_dt(i,j) = mat_stream_dt(i,j) &
-                        + mat_func(kt,kp) * (-jts)*sinm(kt,jts)*cosn(kp,jps) &
-                        * bdotgrad(kt,kp) * iota
-                   mat_stream_dp(i,j) = mat_stream_dp(i,j) &
-                        + mat_func(kt,kp) * (-jps)*cosm(kt,jts)*sinn(kp,jps) &
-                        * bdotgrad(kt,kp) 
-                endif
-             enddo
-          enddo
-          
-          if(jps > 0) then
-             ! dmn right collocation
-             j=j+1
-             if(int_type == 0) then
-                vec_thetabar(j) = ds(jts,jps)
-             endif
-             do kt=1,nt
-                do kp=1,np
-                   if(int_type == 0) then
-                      vec_vdriftx(j) = vec_vdriftx(j) &
-                           + mat_func(kt,kp) * cosm(kt,jts)*sinn(kp,jps) &
-                           * vdrift_x(kt,kp)
-                      vec_flux(j)    = vec_flux(j) &
-                           + mat_func(kt,kp) * cosm(kt,jts)*sinn(kp,jps) &
-                           * vdrift_x(kt,kp) * g(kt,kp)
-                      vec_upar(j)    = vec_upar(j) &
-                           + mat_func(kt,kp) * cosm(kt,jts)*sinn(kp,jps) 
-                      vec_uparB(j)   = vec_uparB(j) &
-                           + mat_func(kt,kp) * cosm(kt,jts)*sinn(kp,jps) &
-                           * bmag(kt,kp) * g(kt,kp)
-                      vec_fsa(j)   = vec_fsa(j) &
-                           + mat_func(kt,kp) * cosm(kt,jts)*sinn(kp,jps) &
-                           * g(kt,kp)
-                      vec_bmag(j)   = vec_bmag(j) &
-                           + mat_func(kt,kp) * cosm(kt,jts)*sinn(kp,jps) &
-                           * bmag(kt,kp)
-                   else
-                      mat_mindx(i,j)=its
-                      mat_nindx(i,j)=ips
-                      mat_mpindx(i,j)=jts
-                      mat_npindx(i,j)=jps
-                      mat_typel=int_type
-                      mat_typer=4
-                      mat_trap(i,j) = mat_trap(i,j) &
-                           + mat_func(kt,kp) * cosm(kt,jts)*sinn(kp,jps) & 
-                           * bdotgradB_overB(kt,kp)  
-                      mat_stream_dt(i,j) = mat_stream_dt(i,j) &
-                           + mat_func(kt,kp)*(-jts)*sinm(kt,jts)*sinn(kp,jps) &
-                           * bdotgrad(kt,kp) * iota
-                      mat_stream_dp(i,j) = mat_stream_dp(i,j) &
-                           + mat_func(kt,kp) * jps*cosm(kt,jts)*cosn(kp,jps) &
-                           * bdotgrad(kt,kp)
-                   endif
-                enddo
-             enddo
-          endif
-          
        enddo
     enddo
 
-    deallocate(mat_func)
+  end subroutine get_basis
+
+  subroutine get_basis_dt(itype,m_indx,n_indx,basis)
+    use le3_globals
+    implicit none
+    integer, intent(in)  :: itype, m_indx, n_indx
+    real, dimension(nt,np), intent(inout) :: basis
+    integer :: kt,kp
     
-  end subroutine compute_mat
+    do kt=1,nt
+       do kp=1,np
+          if(itype == 1) then
+             basis(kt,kp) = m_indx * cosm(kt,m_indx)*cosn(kp,n_indx) 
+          else if(itype == 2) then
+             basis(kt,kp) = m_indx * cosm(kt,m_indx)*sinn(kp,n_indx)
+          else if(itype == 3) then
+             basis(kt,kp) = -m_indx * sinm(kt,m_indx)*cosn(kp,n_indx)
+          else if(itype == 4) then
+             basis(kt,kp) = -m_indx * sinm(kt,m_indx)*sinn(kp,n_indx)
+          endif
+       enddo
+    enddo
+
+  end subroutine get_basis_dt
+
+  subroutine get_basis_dp(itype,m_indx,n_indx,basis)
+    use le3_globals
+    implicit none
+    integer, intent(in)  :: itype, m_indx, n_indx
+    real, dimension(nt,np), intent(inout) :: basis
+    integer :: kt,kp
+    
+    do kt=1,nt
+       do kp=1,np
+          if(itype == 1) then
+             basis(kt,kp) = -n_indx * sinm(kt,m_indx)*sinn(kp,n_indx) 
+          else if(itype == 2) then
+             basis(kt,kp) = n_indx * sinm(kt,m_indx)*cosn(kp,n_indx)
+          else if(itype == 3) then
+             basis(kt,kp) = -n_indx * cosm(kt,m_indx)*sinn(kp,n_indx)
+          else if(itype == 4) then
+             basis(kt,kp) = n_indx * cosm(kt,m_indx)*cosn(kp,n_indx)
+          endif
+       enddo
+    enddo
+
+  end subroutine get_basis_dp
 
 end module le3_write

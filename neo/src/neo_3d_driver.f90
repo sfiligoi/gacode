@@ -12,7 +12,7 @@ module neo_3d_driver
   real, dimension(:,:), allocatable, private :: tpmat_trap, tpmat_stream_dt, &
        tpmat_stream_dp
   real, dimension(:), allocatable, private :: tpvec_vdriftx, tpvec_flux, &
-       tpvec_uparB, tpvec_upar, tpvec_fsa
+       tpvec_uparB, tpvec_upar, tpvec_fsa, tpvec_thetabar
   ! transport coefficients
   real, dimension(:), allocatable, private :: pflux, eflux, uparB
   real, dimension(:,:), allocatable, private :: upar
@@ -58,6 +58,7 @@ contains
        enddo
     enddo
 
+    allocate(tpvec_thetabar(tpmatsize))
     allocate(tpvec_vdriftx(tpmatsize))
     allocate(tpvec_flux(tpmatsize))
     allocate(tpvec_uparB(tpmatsize))
@@ -69,9 +70,12 @@ contains
        goto 200
     endif
     do i=1,tpmatsize
-       read(1,*) tpvec_vdriftx(i), tpvec_flux(i), tpvec_uparB(i), &
-            tpvec_upar(i), tpvec_fsa(i)
+       read(1,*) tpvec_thetabar(i), tpvec_vdriftx(i), tpvec_flux(i), &
+            tpvec_uparB(i), tpvec_upar(i), tpvec_fsa(i)
     enddo
+
+    print *, tpvec_vdriftx(:)
+    stop
 
     if (silent_flag == 0 .and. i_proc == 0) then
        open(unit=1,file=trim(path)//'out.neo.grid_3d',status='replace')
@@ -102,6 +106,7 @@ contains
     if (allocated(tpmat_trap))           deallocate(tpmat_trap)
     if (allocated(tpmat_stream_dt))      deallocate(tpmat_stream_dt)
     if (allocated(tpmat_stream_dp))      deallocate(tpmat_stream_dp)
+    if (allocated(tpvec_thetabar))       deallocate(tpvec_thetabar) 
     if (allocated(tpvec_vdriftx))        deallocate(tpvec_vdriftx) 
     if (allocated(tpvec_flux))           deallocate(tpvec_flux)
     if (allocated(tpvec_uparB))          deallocate(tpvec_uparB) 
@@ -255,7 +260,7 @@ contains
                       a_iindx(k) = i
                       a_jindx(k) = j
                    enddo
-                   
+
                 else
                    
                    ! Collisions 
