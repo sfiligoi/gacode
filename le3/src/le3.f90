@@ -7,8 +7,6 @@ program le3
   external :: le3_func
 
   open(unit=1,file='input.le3.gen',status='old')
-  read(1,*) nt
-  read(1,*) np
   read(1,*) nts
   read(1,*) nps
   read(1,*) rmin
@@ -28,6 +26,9 @@ program le3
   read(1,*) n
   read(1,*) tol
   close(1)
+
+  nt = 2*nts+1
+  np = 2*nps+1
 
   iota = 1.0/q
 

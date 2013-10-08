@@ -6,8 +6,6 @@ x = SimpleInput()
 x.set_extension('.gen')
 
 # LE3 input parameters
-x.add('NTHETA','11')
-x.add('NPHI','11')
 x.add('NTHETAS','4')
 x.add('NPHIS','4')
 x.add('RMIN','0.1')
