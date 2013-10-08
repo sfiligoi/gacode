@@ -12,13 +12,24 @@ do
    if [ $p -eq 1 ] ; then DET_TOLERANCE=$x ; fi
    if [ $p -eq 3 ] ; then ERROR_TOLERANCE=$x ; fi
    if [ $p -eq 5 ] ; then WI_STABLE_LIMIT=$x ; fi
+if [ $p -eq 7 ] ; then startWR=$x ; fi
+if [ $p -eq 9 ] ; then startWI=$x ; fi
+if [ $p -eq 11 ] ; then RADIUSstart=$x ; fi
+if [ $p -eq 13 ] ; then RADIUSmin=$x ; fi
+if [ $p -eq 15 ] ; then RADIUSmax=$x ; fi
+if [ $p -eq 17 ] ; then RADIUSstep=$x ; fi
+if [ $p -eq 19 ] ; then L_Ystart=$x ; fi
+if [ $p -eq 21 ] ; then L_Ymin=$x ; fi
+if [ $p -eq 23 ] ; then L_Ymax=$x ; fi
+if [ $p -eq 25 ] ; then L_Ystep=$x ; fi
+
 done
 #-------------------------------------------------------
 
 #----------------------------------------
 # Capture command-line arguments
 #
-dir=$pwd
+dir=$(pwd)
 
 cpu=${1}
 start_over=${2}
@@ -29,18 +40,18 @@ start_over=${2}
 # Adjustable: Initial guess
 #
 #USER INPUT
-startWR=-3.04E-01
-startWI=2.55E-01
+#startWR=-3.04E-01
+#startWI=2.55E-01
 
-RADIUSstart=0.8
-RADIUSmin=0.20
-RADIUSmax=0.90
-RADIUSstep=0.010
+#RADIUSstart=0.8
+#RADIUSmin=0.20
+#RADIUSmax=0.90
+#RADIUSstep=0.010
 
-L_Ystart=0.50
-L_Ymin=0.050
-L_Ymax=2.00
-L_Ystep=0.010
+#L_Ystart=0.50
+#L_Ymin=0.050
+#L_Ymax=2.00
+#L_Ystep=0.010
 
 #END OF USER INPUT
 #----------------------------------------
@@ -49,7 +60,6 @@ NstepsL_Y=$(echo "scale=0; ($L_Ymax - $L_Ymin) / $L_Ystep;" | bc)
 echo "Steps in RADIUS = $NstepsR"
 echo "Steps in L_Y = $NstepsL_Y"
 #----------------------------------------
-
 cd $dir
 cp input.gyro.orig input.gyro
 
