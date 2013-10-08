@@ -372,19 +372,37 @@ contains
     real, dimension(nt,np), intent(inout) :: basis
     integer :: kt,kp
     
-    do kt=1,nt
-       do kp=1,np
-          if(itype == 1) then
+    if(itype == 1) then
+       do kt=1,nt
+          do kp=1,np
              basis(kt,kp) = sinm(kt,m_indx)*cosn(kp,n_indx) 
-          else if(itype == 2) then
-             basis(kt,kp) = sinm(kt,m_indx)*sinn(kp,n_indx)
-          else if(itype == 3) then
-             basis(kt,kp) = cosm(kt,m_indx)*cosn(kp,n_indx)
-          else if(itype == 4) then
-             basis(kt,kp) = cosm(kt,m_indx)*sinn(kp,n_indx)
-          endif
+          enddo
        enddo
-    enddo
+    endif
+
+    if(itype == 2) then
+       do kt=1,nt
+          do kp=1,np
+             basis(kt,kp) = sinm(kt,m_indx)*sinn(kp,n_indx)
+          enddo
+       enddo
+    endif
+
+    if(itype == 3) then
+       do kt=1,nt
+          do kp=1,np
+             basis(kt,kp) = cosm(kt,m_indx)*cosn(kp,n_indx)
+          enddo
+       enddo
+    endif
+
+    if(itype == 4) then
+       do kt=1,nt
+          do kp=1,np
+             basis(kt,kp) = cosm(kt,m_indx)*sinn(kp,n_indx)
+          enddo
+       enddo
+    endif
 
   end subroutine get_basis
 
@@ -395,19 +413,37 @@ contains
     real, dimension(nt,np), intent(inout) :: basis
     integer :: kt,kp
     
-    do kt=1,nt
-       do kp=1,np
-          if(itype == 1) then
+    if(itype == 1) then
+       do kt=1,nt
+          do kp=1,np
              basis(kt,kp) = m_indx * cosm(kt,m_indx)*cosn(kp,n_indx) 
-          else if(itype == 2) then
-             basis(kt,kp) = m_indx * cosm(kt,m_indx)*sinn(kp,n_indx)
-          else if(itype == 3) then
-             basis(kt,kp) = -m_indx * sinm(kt,m_indx)*cosn(kp,n_indx)
-          else if(itype == 4) then
-             basis(kt,kp) = -m_indx * sinm(kt,m_indx)*sinn(kp,n_indx)
-          endif
+          enddo
        enddo
-    enddo
+    endif
+
+    if(itype == 2) then
+       do kt=1,nt
+          do kp=1,np
+             basis(kt,kp) = m_indx * cosm(kt,m_indx)*sinn(kp,n_indx)
+          enddo
+       enddo
+    endif
+
+    if(itype == 3) then
+       do kt=1,nt
+          do kp=1,np
+             basis(kt,kp) = -m_indx * sinm(kt,m_indx)*cosn(kp,n_indx)
+          enddo
+       enddo
+    endif
+
+    if(itype == 4) then
+       do kt=1,nt
+          do kp=1,np
+             basis(kt,kp) = -m_indx * sinm(kt,m_indx)*sinn(kp,n_indx)
+          enddo
+       enddo
+    endif
 
   end subroutine get_basis_dt
 
@@ -418,19 +454,37 @@ contains
     real, dimension(nt,np), intent(inout) :: basis
     integer :: kt,kp
     
-    do kt=1,nt
-       do kp=1,np
-          if(itype == 1) then
+     if(itype == 1) then
+       do kt=1,nt
+          do kp=1,np
              basis(kt,kp) = -n_indx * sinm(kt,m_indx)*sinn(kp,n_indx) 
-          else if(itype == 2) then
-             basis(kt,kp) = n_indx * sinm(kt,m_indx)*cosn(kp,n_indx)
-          else if(itype == 3) then
-             basis(kt,kp) = -n_indx * cosm(kt,m_indx)*sinn(kp,n_indx)
-          else if(itype == 4) then
-             basis(kt,kp) = n_indx * cosm(kt,m_indx)*cosn(kp,n_indx)
-          endif
+          enddo
        enddo
-    enddo
+    endif
+
+    if(itype == 2) then
+       do kt=1,nt
+          do kp=1,np
+             basis(kt,kp) = n_indx * sinm(kt,m_indx)*cosn(kp,n_indx)
+          enddo
+       enddo
+    endif
+
+    if(itype == 3) then
+       do kt=1,nt
+          do kp=1,np
+             basis(kt,kp) = -n_indx * cosm(kt,m_indx)*sinn(kp,n_indx)
+          enddo
+       enddo
+    endif
+
+    if(itype == 4) then
+       do kt=1,nt
+          do kp=1,np
+             basis(kt,kp) = n_indx * cosm(kt,m_indx)*cosn(kp,n_indx)
+          enddo
+       enddo
+    endif
 
   end subroutine get_basis_dp
 
