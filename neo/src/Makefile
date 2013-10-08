@@ -31,6 +31,7 @@ OBJECTS = neo_globals.o \
           neo_init_serial.o \
           neo_run.o \
           neo_spitzer.o \
+	  neo_3d_driver.o \
           neo_do.o
 
 .SUFFIXES : .o .f90
