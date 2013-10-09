@@ -61,6 +61,12 @@ echo "Steps in RADIUS = $NstepsR"
 echo "Steps in L_Y = $NstepsL_Y"
 #----------------------------------------
 cd $dir
+if [ ! -f input.gyro.orig ] 
+then
+    echo "No input.gyro.orig found in $dir"
+    exit 1
+fi
+
 cp input.gyro.orig input.gyro
 
 echo "FIELDEIGEN_WR=$startWR" >> input.gyro

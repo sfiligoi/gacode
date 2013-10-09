@@ -1,0 +1,29 @@
+
+#=====================================#
+#Parameters for GYRO eigenvalues solver
+#=====================================#
+DET_TOLERANCE=1E-03
+ERROR_TOLERANCE=1E-03
+WI_STABLE_LIMIT=1E-02
+
+#============================#
+#Starting eigenvalues for GYRO
+#============================#
+startWR=-2.0E-01
+startWI=2.0E-01
+
+#=============#
+#Grid in Radius
+#=============#
+RADIUSstart=0.5
+RADIUSmin=0.4
+RADIUSmax=0.6
+RADIUSstep=0.05
+
+#==========#
+#Grid in L_Y
+#==========#
+L_Ystart=0.5
+L_Ymin=0.4
+L_Ymax=0.6
+L_Ystep=0.05

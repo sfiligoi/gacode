@@ -20,11 +20,15 @@ then
   echo "         Set optional path to simulation directory."
   echo "         [The default path is the current directory]"
   echo
+  echo "TEMPLATE GENERATION"
+  echo
+  echo "         -g"
+  echo "         Generate default template."
+  echo
   echo "EXECUTE MODE"
   echo
   echo "         -e <simdir>" 
   echo "         Run GYRO using input data in <simdir>."
-  echo
   echo "         -n <MPI tasks>" 
   echo "         Number of MPI tasks."
   echo
@@ -54,12 +58,14 @@ fi
 
 SIMROOT=$PWD
 GYRO_DIR=$GACODE_ROOT/gyro
+LINMAP_DIR=$GACODE_ROOT/gyro/tools/linmap/input/def01
 # Parallelization parameters
 NPROC=1
 NOMP=1
 NUMA=0
 MPINUMA=0
 
+GENERATE_FLAG=0
 PLOT_FLAG=0
 START_OVER=false
 #=============================================================
@@ -73,6 +79,8 @@ while [ $# -gt 0 ] ; do
   -p) shift ; SIMROOT=$1 ;;
 
   -e) shift ; LOCDIR=$1 ; EXEC_FLAG=1 ;;
+
+  -g) shift ; GENERATE_FLAG=1 ;;
 
   -i) shift ; LOCDIR=$1 ; INIT_FLAG=1 ;;
 
@@ -110,10 +118,26 @@ else
    exit 1
 fi
 
+#============================================================
+# Generate simdir if -g set, then exit.
+#
+if [ $GENERATE_FLAG -eq 1 ]
+then
+   if [ ! -d "$LINMAP_DIR" ]
+   then
+      #cat ${NEO_DIR}/tools/input/simdir_list
+       echo "Unexpected error, template missing"
+       exit 1
+   else
+      cp -ai $LINMAP_DIR $SIMDIR
+   fi
+   exit 0
+fi
+#============================================================
 
 if [ $PLOT_FLAG -eq 1 ]
 then
-   python $GYRO_DIR/tools/linmap/linmap_contour_plot.py
+   python $GYRO_DIR/tools/linmap/linmap_contour_plot.py radius_krho_fieldeigen_omega.out 64 64
 else
    python $GYRO_DIR/bin/gyro_linmap_parse.py input.linmap
    $GYRO_DIR/tools/linmap/linmap_exec $NPROC $START_OVER

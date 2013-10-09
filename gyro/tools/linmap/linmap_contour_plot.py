@@ -5,6 +5,7 @@
 #    python contour.py <file> <nx> <ny>
 
 import sys
+#import os
 import numpy as np
 import matplotlib as mpl
 from gacodeplotdefs import *
@@ -15,6 +16,8 @@ import matplotlib.pyplot as plt
 
 from matplotlib import rc
 from matplotlib import axes
+
+#os.environ['PATH'] = os.environ['PATH'] + ':/usr/bin/latex'
 
 font = {'family' : 'normal',
         'weight' : 'bold',
