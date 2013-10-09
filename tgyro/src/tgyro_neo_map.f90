@@ -18,9 +18,11 @@ subroutine tgyro_neo_map
 
   ! Simulation mode (dke solve vs. analytic)
   if (loc_neo_method == 1) then
+     ! Analytic theory
      neo_sim_model_in = 0
   else
-     neo_sim_model_in = 1
+     ! Kinetic NEO and theory (no NCLASS)
+     neo_sim_model_in = 2
   end if
 
   ! Resolution 
