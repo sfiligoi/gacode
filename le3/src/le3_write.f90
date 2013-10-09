@@ -106,7 +106,7 @@ contains
 
        enddo
     enddo
-    
+
     btor(:,:) = 1.0/(rs * g)
     
     bpol(:,:) = 1.0/g * (gpt/sqrt(gtt) + iota * sqrt(gtt))
@@ -115,6 +115,7 @@ contains
     
     ! db/dtheta
     allocate(derivvec(0:nt-1))
+    derivvec(0) = 0.0
     do i=1,nt-1
        derivvec(i) = -0.5*(-1)**i/tan(0.5*t(i+1))
     enddo
@@ -134,6 +135,7 @@ contains
     
     ! db/dphi
     allocate(derivvec(0:nt-1))
+    derivvec(0) = 0.0
     do i=1,np-1
        derivvec(i) = -0.5*(-1)**i/tan(0.5*p(i+1))
     enddo
@@ -160,7 +162,6 @@ contains
     ! bhat cross grad B dot grad psi / B^2
     vdrift_x(:,:) = iota/(bmag * g**2) &
          * (-dbdt * (gpp + iota * gpt) + dbdp * (gpt + iota*gtt)) / bmag**2
-    
 
     ! construct the geo collocation matices
 
