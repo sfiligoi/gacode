@@ -27,8 +27,8 @@ program le3
   read(1,*) tol
   close(1)
 
-  nt = 2*nts+1
-  np = 2*nps+1
+  nt = 2*nts+2
+  np = 2*nps+2
 
   iota = 1.0/q
 
