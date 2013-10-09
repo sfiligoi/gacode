@@ -6,63 +6,89 @@ from gacodeplotdefs import *
 
 simdir  = sys.argv[1]
 imgfile = sys.argv[2]
+index   = int(sys.argv[3])
 
-xm = np.loadtxt(simdir+'/out.le3.t')
-ym = np.loadtxt(simdir+'/out.le3.p')
-zm = np.loadtxt(simdir+'/out.le3.b')
+rc('lines',linewidth=1)
 
-x = xm/np.pi
-y = ym/np.pi
+dim = np.loadtxt(simdir+'/out.le3.geoscalar')
+vec = np.loadtxt(simdir+'/out.le3.geovector')
 
-nx = len(x)
-ny = len(y)
+nts = int(dim[0])
+nps = int(dim[1])
+ns  = int(dim[2])
 
-z = zm.reshape((nx,ny),order='F')
+if index == 0:
+    symbol = '\\bar{\\theta}-\\theta'
+if index == 1:
+    symbol = 'vx'
+if index == 2:
+    symbol = 'flux'
+if index == 3:
+    symbol = 'B'
+if index == 4:
+    symbol = '1'
+if index == 5:
+    symbol = 'Ave'
+if index == 6:
+    symbol = 'B'
 
+z = np.zeros(ns)
+z = vec[:,index]
+
+nx = 64
+ny = 7 
+
+t = 2*np.pi*np.arange(nx)/float(nx-1)
+p = 2*np.pi*np.arange(ny)/float(ny-1)
+
+i = 0
+f = np.zeros([nx,ny])
+
+dx = 2*np.ones(nts+1)
+dy = 2*np.ones(nps+1)
+dx[0] = 1
+dy[0] = 1
+
+for ips in range(nps+1):
+    for its in range(nts+1):
+        if its > 0:
+            # A
+            f = f+np.outer(np.sin(its*t),np.cos(ips*p))*z[i]*dx[its]*dy[ips]
+            i = i+1
+        if ips > 0 and its > 0:
+            # B
+            f = f+np.outer(np.sin(its*t),np.sin(ips*p))*z[i]*dx[its]*dy[ips]
+            i = i+1
+        if ips+its > 0:
+            # C
+            f = f+np.outer(np.cos(its*t),np.cos(ips*p))*z[i]*dx[its]*dy[ips]
+            i = i+1
+        if ips > 0:
+            # D
+            f = f+np.outer(np.cos(its*t),np.sin(ips*p))*z[i]*dx[its]*dy[ips]
+            i = i+1
+        if ips+its == 0:
+            f = f+z[i]
+            i = i+1
+
+# Plotting
 fig = plt.figure(figsize=(6,6))
 fig.subplots_adjust(left=0.15, right=0.97, top=1.05, bottom=0.0)
 
 ax = fig.add_subplot(111)
 ax.set_aspect('equal')
-ax.set_title(r'$B(\theta,\varphi)$',size=18)
+ax.set_title(r'$'+symbol+'$',size=18)
 
-dz = 0.005
-levels = np.arange(np.amin(z)-dz,np.amax(z)+dz,dz)
-ax.contourf(x,y,z,levels,cmap=cm.jet,origin='lower')
-ax.set_xlabel(r'$\varphi/\pi$')
+dz=(np.amax(f)-np.amin(f))/256
+levels = np.arange(np.amin(f)-dz,np.amax(f)+dz,dz)
+ax.contourf(p/np.pi,t/np.pi,f,levels,cmap=cm.jet,origin='lower')
 ax.set_ylabel(r'$\theta/\pi$')
+ax.set_xlabel(r'$\phi/\pi$')
 ax.set_xlim([0,2])
 ax.set_ylim([0,2])
 
 if imgfile == 'screen':
     plt.show()
 else:
-    plt.savefig('b3d.eps')
-    print "INFO: (le3_plot_surface) Wrote plot to "+imgfile+"."
-
-#-------------------------------------------------------------------
-
-zm = np.loadtxt(simdir+'/out.le3.tb')
-
-z = zm.reshape((nx,ny),order='F')
-
-fig = plt.figure(figsize=(6,6))
-fig.subplots_adjust(left=0.15, right=0.97, top=1.05, bottom=0.0)
-
-ax = fig.add_subplot(111)
-ax.set_aspect('equal')
-ax.set_title(r'$\bar{\theta}(\theta,\varphi)$',size=18)
-
-dz = 0.005
-levels = np.arange(np.amin(z)-dz,np.amax(z)+dz,dz)
-ax.contourf(x,y,z,levels,cmap=cm.jet,origin='lower')
-ax.set_xlabel(r'$\varphi/\pi$')
-ax.set_ylabel(r'$\theta/\pi$')
-ax.set_xlim([0,2])
-ax.set_ylim([0,2])
-
-if imgfile == 'screen':
-    plt.show()
-else:
-    plt.savefig('t3d.eps')
+    plt.savefig(imgfile)
     print "INFO: (le3_plot_surface) Wrote plot to "+imgfile+"."

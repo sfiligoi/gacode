@@ -5,40 +5,84 @@ from gacodeplotdefs import *
 
 simdir  = sys.argv[1]
 imgfile = sys.argv[2]
+index   = int(sys.argv[3])
 
-t  = np.loadtxt(simdir+'/out.le3.t')
-p  = np.loadtxt(simdir+'/out.le3.p')
-tb = np.loadtxt(simdir+'/out.le3.tb')
+rc('lines',linewidth=1)
 
-#======================================
-fig = plt.figure(figsize=(7,6))
-fig.subplots_adjust(left=0.17, right=0.97, top=0.95, bottom=0.12)
+dim = np.loadtxt(simdir+'/out.le3.geoscalar')
+vec = np.loadtxt(simdir+'/out.le3.geovector')
+
+nts = int(dim[0])
+nps = int(dim[1])
+ns  = int(dim[2])
+
+if index == 0:
+    symbol = '\\bar{\\theta}-\\theta'
+if index == 1:
+    symbol = 'vx'
+if index == 2:
+    symbol = 'flux'
+if index == 3:
+    symbol = 'B'
+if index == 4:
+    symbol = '1'
+if index == 5:
+    symbol = 'Ave'
+if index == 6:
+    symbol = 'B'
+
+z = np.zeros(ns)
+z = vec[:,index]
+
+nx = 64
+ny = 7 
+
+t = 2*np.pi*np.arange(nx)/float(nx-1)
+p = 2*np.pi*np.arange(ny)/float(ny-1)
+
+i = 0
+f = np.zeros([nx,ny])
+
+dx = 2*np.ones(nts+1)
+dy = 2*np.ones(nps+1)
+dx[0] = 1
+dy[0] = 1
+
+for ips in range(nps+1):
+    for its in range(nts+1):
+        if its > 0:
+            # A
+            f = f+np.outer(np.sin(its*t),np.cos(ips*p))*z[i]*dx[its]*dy[ips]
+            i = i+1
+        if ips > 0 and its > 0:
+            # B
+            f = f+np.outer(np.sin(its*t),np.sin(ips*p))*z[i]*dx[its]*dy[ips]
+            i = i+1
+        if ips+its > 0:
+            # C
+            f = f+np.outer(np.cos(its*t),np.cos(ips*p))*z[i]*dx[its]*dy[ips]
+            i = i+1
+        if ips > 0:
+            # D
+            f = f+np.outer(np.cos(its*t),np.sin(ips*p))*z[i]*dx[its]*dy[ips]
+            i = i+1
+        if ips+its == 0:
+            f = f+z[i]
+            i = i+1
+
+print f
+# Plotting
+fig = plt.figure(figsize=(8,6))
+#fig.subplots_adjust(left=0.15, right=0.97, top=1.05, bottom=0.0)
+
 ax = fig.add_subplot(111)
-ax.grid(which="majorminor",ls=":")
-ax.grid(which="major",ls=":")
-ax.set_xlabel(r'\boldmath{$\theta$}')
-ax.set_ylabel(r'\boldmath{$\bar\theta}-\theta$}',color='k')
-#=====================================
 
-mt = len(t)
-mp = len(p)
+for j in range(ny):
+    ax.plot(t/np.pi,f[:,j])
 
-x = np.zeros([mt+1])
-y = np.zeros([mt+1])
-
-x[0:mt] = t[0:mt]/np.pi
-x[mt] = 2.0
-
-for j in range(mp):
-    y[0:mt] = (tb[:,j]-t[:])/np.pi
-    y[mt] = y[0]
-    ax.plot(x,y)
-
-TICKS=[0,1,2]
-LABELS=[r'$0$',r'$\pi$',r'$2\pi$']
-ax.set_xticks(TICKS)
-ax.set_xticklabels(LABELS)
-ax.set_xlim(0,2)
+ax.set_ylabel(r'$'+symbol+'$')
+ax.set_xlabel(r'$\theta/\pi$')
+ax.set_xlim([0,2])
 
 if imgfile == 'screen':
     plt.show()
