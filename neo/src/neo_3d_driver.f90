@@ -74,9 +74,6 @@ contains
             tpvec_uparB(i), tpvec_upar(i), tpvec_fsa(i)
     enddo
 
-    print *, tpvec_vdriftx(:)
-    stop
-
     if (silent_flag == 0 .and. i_proc == 0) then
        open(unit=1,file=trim(path)//'out.neo.grid_3d',status='replace')
        write(1,*) n_species
