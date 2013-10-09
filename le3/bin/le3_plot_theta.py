@@ -70,7 +70,6 @@ for ips in range(nps+1):
             f = f+z[i]
             i = i+1
 
-print f
 # Plotting
 fig = plt.figure(figsize=(8,6))
 #fig.subplots_adjust(left=0.15, right=0.97, top=1.05, bottom=0.0)

@@ -127,14 +127,15 @@ contains
              if(k < 0) then
                 k = k + nt
              endif
-             dbdt(i,j) = dbdt(i,j) + derivvec(k) * bmag(ip,j)
+!             dbdt(i,j) = dbdt(i,j) + derivvec(k) * bmag(ip,j)
+             dbdt(i,j) = dbdt(i,j) + derivvec(k) * 1.0
           enddo
        enddo
     enddo
     deallocate(derivvec)
     
     ! db/dphi
-    allocate(derivvec(0:nt-1))
+    allocate(derivvec(0:np-1))
     derivvec(0) = 0.0
     do i=1,np-1
        derivvec(i) = -0.5*(-1)**i/tan(0.5*p(i+1))
@@ -162,6 +163,11 @@ contains
     ! bhat cross grad B dot grad psi / B^2
     vdrift_x(:,:) = iota/(bmag * g**2) &
          * (-dbdt * (gpp + iota * gpt) + dbdp * (gpt + iota*gtt)) / bmag**2
+
+    do i=1,nt
+    print *,dbdt(i,:)
+    print *
+    enddo
 
     ! construct the geo collocation matices
 

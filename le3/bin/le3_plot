@@ -36,6 +36,9 @@ then
   echo "          -surf"
   echo "          Toggle surface plots."
   echo
+  echo "          -indx"
+  echo "          Plot index (0=tb-t, 4=unity, 6=B)"
+  echo
 
   exit 1
 fi
