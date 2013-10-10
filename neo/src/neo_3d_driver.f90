@@ -10,7 +10,7 @@ module neo_3d_driver
   integer, private :: tpmatsize
   integer, private :: n_tptheta, n_tpvarphi, indx_c00
   real, dimension(:,:), allocatable, private :: tpmat_trap, tpmat_stream_dt, &
-       tpmat_stream_dp
+       tpmat_stream_dp, tpmat_coll
   real, dimension(:), allocatable, private :: tpvec_vdriftx, tpvec_flux, &
        tpvec_uparB, tpvec_upar, tpvec_fsa, tpvec_thetabar
   ! transport coefficients
@@ -47,6 +47,7 @@ contains
     allocate(tpmat_trap(tpmatsize,tpmatsize))
     allocate(tpmat_stream_dt(tpmatsize,tpmatsize))
     allocate(tpmat_stream_dp(tpmatsize,tpmatsize))
+    allocate(tpmat_coll(tpmatsize,tpmatsize))
     open(unit=1,file='out.le3.geomatrix',status='old',iostat=stat)
     if(stat .ne. 0) then
        call neo_error('ERROR: (NEO) le3 files not available')
@@ -54,7 +55,8 @@ contains
     endif
     do i=1,tpmatsize
        do j=1, tpmatsize
-          read(1,*) tpmat_trap(i,j), tpmat_stream_dt(i,j), tpmat_stream_dp(i,j)
+          read(1,*) tpmat_trap(i,j), tpmat_stream_dt(i,j), &
+               tpmat_stream_dp(i,j), tpmat_coll(i,j)
        enddo
     enddo
 
@@ -103,6 +105,7 @@ contains
     if (allocated(tpmat_trap))           deallocate(tpmat_trap)
     if (allocated(tpmat_stream_dt))      deallocate(tpmat_stream_dt)
     if (allocated(tpmat_stream_dp))      deallocate(tpmat_stream_dp)
+    if (allocated(tpmat_coll))           deallocate(tpmat_coll)
     if (allocated(tpvec_thetabar))       deallocate(tpvec_thetabar) 
     if (allocated(tpvec_vdriftx))        deallocate(tpvec_vdriftx) 
     if (allocated(tpvec_flux))           deallocate(tpvec_flux)
@@ -261,31 +264,41 @@ contains
                 else
                    
                    ! Collisions 
-                   jt = it; jx = ix
+                   jx = ix
                    
                    ! test particle
                    js = is
-                   do je=0, n_energy
-                      j = mindx(js,je,jx,jt)
-                      k = k+1
-                      a(k) = 0.0
-                      do ks=1, n_species
-                         a(k) = a(k) &
-                              - emat_coll_test(is,ks,ie,je,ix)
-                      enddo
-                      a_iindx(k) = i
-                      a_jindx(k) = j
+                   do jt=1,tpmatsize
+                      if(abs(tpmat_coll(it,jt)) > 1e-12) then
+                         do je=0, n_energy                          
+                            j = mindx(js,je,jx,jt)
+                            k = k+1
+                            a(k) = 0.0
+                            do ks=1, n_species
+                               a(k) = a(k) &
+                                    - emat_coll_test(is,ks,ie,je,ix) &
+                                    * tpmat_coll(it,jt)
+                            enddo
+                            a_iindx(k) = i
+                            a_jindx(k) = j
+                         enddo
+                      endif
                    enddo
                    
-                   ! field particle                     
-                   do je=0, n_energy
-                      do js=1,n_species
-                         j = mindx(js,je,jx,jt)
-                         k = k+1
-                         a(k) = -emat_coll_field(is,js,ie,je,ix)
-                         a_iindx(k) = i
-                         a_jindx(k) = j
-                      enddo
+                   ! field particle 
+                   do jt=1,tpmatsize
+                      if(abs(tpmat_coll(it,jt)) > 1e-12) then
+                         do je=0, n_energy
+                            do js=1,n_species
+                               j = mindx(js,je,jx,jt)
+                               k = k+1
+                               a(k) = -emat_coll_field(is,js,ie,je,ix) &
+                                    * tpmat_coll(it,jt)
+                               a_iindx(k) = i
+                               a_jindx(k) = j
+                            enddo
+                         enddo
+                      endif
                    enddo
                    
                    

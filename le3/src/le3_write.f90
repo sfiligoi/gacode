@@ -7,7 +7,7 @@ module le3_write
   real, dimension(:,:), allocatable :: bmag, bdotgrad, bdotgradB_overB, &
        vdrift_x
   real, dimension(:,:), allocatable :: mat_stream_dt, mat_stream_dp, &
-       mat_trap
+       mat_trap, mat_coll
   real, dimension(:), allocatable :: vec_vdriftx, vec_flux, vec_upar, &
        vec_uparB, vec_fsa, vec_bmag, vec_thetabar
   real :: vprime
@@ -159,8 +159,8 @@ contains
     ! (bhat dot grad B)/B
     bdotgradB_overB(:,:) = bdotgrad * (iota * dbdt + dbdp) / bmag
     
-    ! bhat cross grad B dot grad psi / B^2
-    vdrift_x(:,:) = iota/(bmag * g**2) &
+    ! bhat cross grad B dot grad r / B^2
+    vdrift_x(:,:) = 1/(rmin*bmag * g**2) &
          * (-dbdt * (gpp + iota * gpt) + dbdp * (gpt + iota*gtt)) / bmag**2
 
     ! construct the geo collocation matices
@@ -179,6 +179,7 @@ contains
     allocate(mat_stream_dt(matsize,matsize))
     allocate(mat_stream_dp(matsize,matsize))
     allocate(mat_trap(matsize,matsize))
+    allocate(mat_coll(matsize,matsize))
     allocate(vec_vdriftx(matsize))
     allocate(vec_flux(matsize))
     allocate(vec_upar(matsize))
@@ -225,6 +226,7 @@ contains
     mat_stream_dt(:,:) = 0.0
     mat_stream_dp(:,:) = 0.0
     mat_trap(:,:)      = 0.0
+    mat_coll(:,:)      = 0.0
     vec_vdriftx(:)  = 0.0
     vec_flux(:)     = 0.0
     vec_upar(:)     = 0.0
@@ -250,6 +252,8 @@ contains
                 mat_stream_dp(i,j) = mat_stream_dp(i,j) &
                      + basis(kt,kp) * basis_dp_prime(kt,kp) &
                      * bdotgrad(kt,kp) 
+                mat_coll(i,j) = mat_coll(i,j) &
+                     + basis(kt,kp) * basis_prime(kt,kp) 
              enddo
           enddo
        enddo
@@ -276,6 +280,7 @@ contains
     mat_stream_dt(:,:) = mat_stream_dt(:,:) / (nt*np)
     mat_stream_dp(:,:) = mat_stream_dp(:,:) / (nt*np)
     mat_trap(:,:)      = mat_trap(:,:)      / (nt*np)
+    mat_coll(:,:)      = mat_coll(:,:)      / (nt*np)
     
     open(unit=1,file='out.le3.geomatrix',status='replace')
     do i=1,matsize
@@ -283,6 +288,7 @@ contains
            write (1,'(e16.8)',advance='no') mat_trap(i,j)
            write (1,'(e16.8)',advance='no') mat_stream_dt(i,j)
            write (1,'(e16.8)',advance='no') mat_stream_dp(i,j)
+           write (1,'(e16.8)',advance='no') mat_coll(i,j)
            write (1,*)
        enddo
     enddo
@@ -303,7 +309,7 @@ contains
     vec_vdriftx(:)  = vec_vdriftx(:) / (nt*np)
     vec_flux(:)     = vec_flux(:)  / (nt*np) / vprime
     vec_uparB(:)    = vec_uparB(:) / (nt*np) / vprime
-    vec_upar(:)     = vec_upar(:)  / (nt*np) 
+    vec_upar(:)     = vec_upar(:)  / (nt*np) * (2*pi)**2
     vec_fsa(:)      = vec_fsa (:)  / (nt*np) / vprime
     vec_bmag(:)     = vec_bmag (:)  / (nt*np) 
 
@@ -319,6 +325,11 @@ contains
        write (1,*)
     enddo
     close(1)
+
+    !ips=1
+    !do its=1,nt
+    !   print *, t(its),vdrift_x(its,ips)*0.001
+    !enddo
 
     open(unit=1,file='out.le3.geoscalar',status='replace')
     write (1,'(i3)') nts
@@ -344,6 +355,7 @@ contains
     deallocate(mat_stream_dt)
     deallocate(mat_stream_dp)
     deallocate(mat_trap)
+    deallocate(mat_coll)
     deallocate(vec_vdriftx)
     deallocate(vec_flux)
     deallocate(vec_upar)
