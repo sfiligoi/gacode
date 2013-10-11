@@ -3,16 +3,6 @@ module le3_write
   implicit none
 
   public :: le3_write_do
-  real, dimension(:,:), allocatable :: g
-  real, dimension(:,:), allocatable :: bmag, bdotgrad, bdotgradB_overB, &
-       vdrift_x
-  real, dimension(:,:), allocatable :: mat_stream_dt, mat_stream_dp, &
-       mat_trap, mat_coll
-  real, dimension(:), allocatable :: vec_vdriftx, vec_flux, vec_upar, &
-       vec_uparB, vec_fsa, vec_bmag, vec_thetabar
-  real :: vprime
-  integer :: matsize
-  integer :: indx_c00
 
 contains
 
@@ -31,7 +21,17 @@ contains
     real, dimension(:,:), allocatable :: basis, basis_prime, &
          basis_dt_prime, basis_dp_prime
     integer, dimension(:), allocatable :: m_indx, n_indx, itype
- 
+    real, dimension(:,:), allocatable :: g
+    real, dimension(:,:), allocatable :: bmag, bdotgrad, bdotgradB_overB, &
+         vdrift_x, dgdp
+    real, dimension(:,:), allocatable :: mat_stream_dt, mat_stream_dp, &
+         mat_trap, mat_coll
+    real, dimension(:), allocatable :: vec_vdriftx, vec_flux, vec_upar, &
+         vec_uparB, vec_fsa, vec_bmag, vec_thetabar, vec_ntv
+    real :: vprime
+    integer :: matsize
+    integer :: indx_c00
+
     print '(a,1pe12.5)','INFO: (le3) Root accuracy ->',sum(abs(yfunc))/size(yfunc)
     
     print 30,'a_{mn}','b_{mn}','c_{mn}','d_{mn}'
@@ -56,6 +56,7 @@ contains
     allocate(bdotgrad(nt,np))
     allocate(bdotgradB_overB(nt,np))
     allocate(vdrift_x(nt,np))
+    allocate(dgdp(nt,np))
 
     do i=1,nt
        tb(i,:) = t(i)
@@ -133,13 +134,14 @@ contains
     enddo
     deallocate(derivvec)
     
-    ! db/dphi
+    ! db/dphi and dg/dphi
     allocate(derivvec(0:np-1))
     derivvec(0) = 0.0
     do i=1,np-1
        derivvec(i) = -0.5*(-1)**i/tan(0.5*p(i+1))
     enddo
     dbdp(:,:) = 0.0
+    dgdp(:,:) = 0.0
     do j=1,nt
        do i=1,np
           do ip=1,np
@@ -148,6 +150,7 @@ contains
                 k = k + np
              endif
              dbdp(j,i) = dbdp(j,i) + derivvec(k) * bmag(j,ip)
+             dgdp(j,i) = dgdp(j,i) + derivvec(k) * g(j,ip)
           enddo
        enddo
     enddo
@@ -187,6 +190,7 @@ contains
     allocate(vec_fsa(matsize))
     allocate(vec_bmag(matsize))
     allocate(vec_thetabar(matsize))
+    allocate(vec_ntv(matsize))
 
     i=0
     do ips=0,nps
@@ -234,6 +238,7 @@ contains
     vec_fsa(:)      = 0.0
     vec_bmag(:)     = 0.0
     vec_thetabar(:) = 0.0
+    vec_ntv(:)      = 0.0
  
     do i=1,matsize
        call get_basis(itype(i),m_indx(i),n_indx(i),basis)
@@ -273,6 +278,8 @@ contains
                   + basis(kt,kp) * g(kt,kp)
              vec_bmag(i)   = vec_bmag(i) &
                   + basis(kt,kp) * bmag(kt,kp) 
+             vec_ntv(i)   = vec_ntv(i) &
+                  + basis(kt,kp) * dgdp(kt,kp) 
           enddo
        enddo
     enddo
@@ -311,7 +318,8 @@ contains
     vec_uparB(:)    = vec_uparB(:) / (nt*np) / vprime
     vec_upar(:)     = vec_upar(:)  / (nt*np) * (2*pi)**2
     vec_fsa(:)      = vec_fsa (:)  / (nt*np) / vprime
-    vec_bmag(:)     = vec_bmag (:)  / (nt*np) 
+    vec_bmag(:)     = vec_bmag (:)  / (nt*np)
+    vec_ntv(:)      = vec_ntv(:) / (nt*np) / vprime
 
     open(unit=1,file='out.le3.geovector',status='replace')
     do i=1,matsize
@@ -322,6 +330,7 @@ contains
        write (1,'(e16.8)',advance='no') vec_upar(i)
        write (1,'(e16.8)',advance='no') vec_fsa(i)
        write (1,'(e16.8)',advance='no') vec_bmag(i)
+       write (1,'(e16.8)',advance='no') vec_ntv(i)
        write (1,*)
     enddo
     close(1)
@@ -349,6 +358,7 @@ contains
     deallocate(bmag)
     deallocate(dbdt)
     deallocate(dbdp)
+    deallocate(dgdp)
     deallocate(bdotgrad)
     deallocate(bdotgradB_overB)
     deallocate(vdrift_x)
@@ -363,6 +373,7 @@ contains
     deallocate(vec_fsa)
     deallocate(vec_bmag)
     deallocate(vec_thetabar)
+    deallocate(vec_ntv)
     deallocate(basis)
     deallocate(basis_prime)
     deallocate(basis_dt_prime)
