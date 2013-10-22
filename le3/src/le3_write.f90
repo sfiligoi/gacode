@@ -345,6 +345,10 @@ contains
     write (1,'(i3)') nps
     write (1,'(i3)') matsize
     write (1,'(i3)') indx_c00
+    write (1,'(e16.8)') rmin
+    write (1,'(e16.8)') rmaj
+    write (1,'(e16.8)') hmin
+    write (1,'(e16.8)') q
     close(1)
     
     deallocate(rs)
