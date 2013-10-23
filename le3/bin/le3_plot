@@ -36,6 +36,9 @@ then
   echo "          -surf"
   echo "          Toggle surface plots."
   echo
+  echo "          -line"
+  echo "          Toggle fieldline plots."
+  echo
   echo "          -indx"
   echo "          Plot index (0=tb-t, 4=unity, 6=B)"
   echo
@@ -73,6 +76,8 @@ while [ $# -gt 0 ] ; do
 
   -surf) PLOT_TYPE=surf ;;
 
+  -line) PLOT_TYPE=line ;;
+
   -indx) shift ; INDEX=$1 ;;
   
   *) echo "ERROR: (le3_plot) Incorrect syntax." ; exit 1 ;;
@@ -103,6 +108,9 @@ case "$PLOT_TYPE" in
   
    surf)  
 	python $PYROOT/le3_plot_surface.py $SIMDIR $IMGFILE $INDEX ;;
+
+   line)  
+	python $PYROOT/le3_plot_fieldline.py $SIMDIR $IMGFILE $INDEX ;;
   
 esac 
 

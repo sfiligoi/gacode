@@ -35,8 +35,8 @@ if index == 6:
 z = np.zeros(ns)
 z = vec[:,index]
 
-nx = 64
-ny = 7 
+nx = 128
+ny = 128
 
 t = 2*np.pi*np.arange(nx)/float(nx-1)
 p = 2*np.pi*np.arange(ny)/float(ny-1)
