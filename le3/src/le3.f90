@@ -21,6 +21,7 @@ program le3
   read(1,*) zmag
   read(1,*) dzmag
   read(1,*) hmin
+  read(1,*) dhmindr
   read(1,*) q
   read(1,*) m
   read(1,*) n

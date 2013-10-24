@@ -10,7 +10,7 @@ module le3_globals
   integer :: m,n
 
   ! Geometry parameters
-  real :: rmin,rmaj,hmin,q
+  real :: rmin,rmaj,hmin,dhmindr,q
   real :: kappa, s_kappa, delta, s_delta, zeta, s_zeta
   real :: shift, zmag, dzmag
   real :: iota

@@ -20,7 +20,7 @@ subroutine le3_rz(t0,p0,r0,z0,drdt0,drdp0,dzdt0,dzdp0,jac0)
   r0 = rmaj + rmin*cos(a) + hmin*cos(ang)
 
   ! dR/dr
-  drdr0 = shift+cos(a)-s_delta/cos(x)*sin(t0)*sin(a)
+  drdr0 = shift+cos(a)-s_delta/cos(x)*sin(t0)*sin(a) + dhmindr*cos(ang)
 
   ! dR/d(tb)
   drdt0 = -rmin*sin(a)*a_t - m*hmin*sin(ang) 
@@ -35,7 +35,8 @@ subroutine le3_rz(t0,p0,r0,z0,drdt0,drdp0,dzdt0,dzdp0,jac0)
   z0 = zmag+kappa*rmin*sin(a) + hmin*sin(ang)
 
   ! dZ/dr
-  dzdr0 = dzmag+kappa*(1.0+s_kappa)*sin(a)+kappa*s_zeta*cos(a)*sin(2*t0)
+  dzdr0 = dzmag+kappa*(1.0+s_kappa)*sin(a)+kappa*s_zeta*cos(a)*sin(2*t0) &
+       + dhmindr*sin(ang)
 
   ! dZ/d(tb)
   dzdt0 =  kappa*rmin*cos(a)*a_t + m*hmin*cos(ang) 
