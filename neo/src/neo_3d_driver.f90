@@ -10,7 +10,7 @@ module neo_3d_driver
   integer, private :: tpmatsize
   integer, private :: n_tptheta, n_tpvarphi, indx_c00
   real, dimension(:,:), allocatable, private :: tpmat_trap, tpmat_stream_dt, &
-       tpmat_stream_dp, tpmat_coll
+       tpmat_stream_dp, tpmat_coll, tpmat_vexb_dt, tpmat_vexb_dp
   real, dimension(:), allocatable, private :: tpvec_vdriftx, tpvec_flux, &
        tpvec_uparB, tpvec_upar, tpvec_fsa, tpvec_thetabar, tpvec_bmag, &
        tpvec_ntv
@@ -50,6 +50,8 @@ contains
     allocate(tpmat_stream_dt(tpmatsize,tpmatsize))
     allocate(tpmat_stream_dp(tpmatsize,tpmatsize))
     allocate(tpmat_coll(tpmatsize,tpmatsize))
+    allocate(tpmat_vexb_dt(tpmatsize,tpmatsize))
+    allocate(tpmat_vexb_dp(tpmatsize,tpmatsize))
     open(unit=1,file='out.le3.geomatrix',status='old',iostat=stat)
     if(stat .ne. 0) then
        call neo_error('ERROR: (NEO) le3 files not available')
@@ -58,7 +60,8 @@ contains
     do i=1,tpmatsize
        do j=1, tpmatsize
           read(1,*) tpmat_trap(i,j), tpmat_stream_dt(i,j), &
-               tpmat_stream_dp(i,j), tpmat_coll(i,j)
+               tpmat_stream_dp(i,j), tpmat_coll(i,j), &
+               tpmat_vexb_dt(i,j),   tpmat_vexb_dp(i,j)
        enddo
     enddo
 
@@ -111,6 +114,8 @@ contains
     if (allocated(tpmat_stream_dt))      deallocate(tpmat_stream_dt)
     if (allocated(tpmat_stream_dp))      deallocate(tpmat_stream_dp)
     if (allocated(tpmat_coll))           deallocate(tpmat_coll)
+    if (allocated(tpmat_vexb_dt))        deallocate(tpmat_vexb_dt)
+    if (allocated(tpmat_vexb_dp))        deallocate(tpmat_vexb_dp)
     if (allocated(tpvec_thetabar))       deallocate(tpvec_thetabar) 
     if (allocated(tpvec_vdriftx))        deallocate(tpvec_vdriftx) 
     if (allocated(tpvec_flux))           deallocate(tpvec_flux)
@@ -301,6 +306,17 @@ contains
                                   endif
                                endif
                    
+                               ! V_ExB term
+                               if(threed_exb_model == 1) then
+                                  if(js == is .and. jx == ix) then
+                                     a(iab,j) = a(iab,j) &
+                                          + rho(ir)*dphi0dr(ir) &
+                                          * emat_e0(ie,je,ix,1) &
+                                          * (tpmat_vexb_dt(it,jt) &
+                                          + tpmat_vexb_dp(it,jt))
+                                  endif
+                               endif
+
                             endif ! bc if/else
                          enddo 
                       enddo
@@ -311,48 +327,38 @@ contains
        enddo
     enddo
     
-    ! Factor the Matrix -- uses a(:) and a_indx(:)
+    ! Set the RHS source 
+    call threed_set_source(ir)
+
+    ! Factor the Matrix and Solve -- uses a(:) and a_indx(:)
        
     if(silent_flag == 0 .and. i_proc == 0) then
        open(unit=io_neoout,file=trim(path)//runfile_neoout,&
             status='old',position='append')
-       write(io_neoout,*) 'Begin matrix factor'
+       write(io_neoout,*) 'Begin matrix factor and solve'
        close(io_neoout)
     endif
-    call DGBTRF(n_row,n_row,2*nb-1,2*nb-1,a,n_row,ipiv,info)
+
+    !call DGBTRF(n_row,n_row,2*nb-1,2*nb-1,a,n_row,ipiv,info)
+    !call DGBTRS('N',n_row,2*nb-1,2*nb-1,1,a,n_row,ipiv,g,n_row,info)
+    
+    call DGBSV(n_row,2*nb-1,2*nb-1,1,a,n_row,ipiv,g,n_row,info)
+
+    if(info /= 0) then
+       call neo_error('ERROR: (NEO) Matrix factorization failed')
+       status=1
+       goto 100
+    endif
 
     if(silent_flag == 0 .and. i_proc == 0) then
        open(unit=io_neoout,file=trim(path)//runfile_neoout,&
             status='old',position='append')
-       write(io_neoout,*) 'Done matrix factor'
+       write(io_neoout,*) 'Done matrix factor and solve'
        close(io_neoout)
     endif
-    
-    ! Set the RHS source 
-    call threed_set_source(ir)
-    
-    ! Matrix solve -- uses g(:), a(:), and a_indx(:)
-    if(silent_flag == 0 .and. i_proc == 0) then
-       open(unit=io_neoout,file=trim(path)//runfile_neoout,&
-            status='old',position='append')
-       write(io_neoout,*) 'Begin matrix solve'
-       close(io_neoout)
-    endif
-    call DGBTRS('N',n_row,2*nb-1,2*nb-1,1,a,n_row,ipiv,g,n_row,info)
-    if(silent_flag == 0 .and. i_proc == 0) then
-       open(unit=io_neoout,file=trim(path)//runfile_neoout,&
-            status='old',position='append')
-       write(io_neoout,*) 'Done matrix solve'
-       close(io_neoout)
-    endif
-    
+
     ! Compute the neo transport coefficients
     call threed_transport(ir)
-    
-    if(error_status > 0) then
-       status=1
-       goto 100
-    endif
     
     if(silent_flag == 0 .and. i_proc == 0) then
        open(1,file=trim(path)//runfile_f,status='old',position='append')
@@ -362,14 +368,14 @@ contains
     
     
 100 continue
-    if(allocated(a))          deallocate(a)
-    if(allocated(ipiv))       deallocate(ipiv)
-    if(allocated(g))          deallocate(g)
-    if(allocated(mindx))      deallocate(mindx)
-    if(allocated(is_indx))    deallocate(is_indx)
-    if(allocated(ie_indx))    deallocate(ie_indx)
-    if(allocated(ix_indx))    deallocate(ix_indx)
-    if(allocated(it_indx))    deallocate(it_indx)
+    if(allocated(a))               deallocate(a)
+    if(allocated(ipiv))            deallocate(ipiv)
+    if(allocated(g))               deallocate(g)
+    if(allocated(mindx))           deallocate(mindx)
+    if(allocated(is_indx))         deallocate(is_indx)
+    if(allocated(ie_indx))         deallocate(ie_indx)
+    if(allocated(ix_indx))         deallocate(ix_indx)
+    if(allocated(it_indx))         deallocate(it_indx)
 
   end subroutine threed_matrix_solve
 
