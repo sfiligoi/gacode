@@ -8,7 +8,8 @@ simdir  = sys.argv[1]
 imgfile = sys.argv[2]
 index   = int(sys.argv[3])
 
-rc('lines',linewidth=1)
+#rc('lines',linewidth=1)
+rc('lines',linewidth=1.5)
 
 dim = np.loadtxt(simdir+'/out.le3.geoscalar')
 vec = np.loadtxt(simdir+'/out.le3.geovector')
@@ -46,7 +47,9 @@ dx[0] = 1
 dy[0] = 1
 
 # Plotting
-fig = plt.figure(figsize=(9,6))
+#fig = plt.figure(figsize=(9,6))
+fig = plt.figure(figsize=(9*0.7,6*0.7))
+fig.subplots_adjust(left=0.12, right=0.95, top=0.95, bottom=0.12)
 
 ax = fig.add_subplot(111)
 
@@ -80,9 +83,10 @@ for s in range(4):
 
     ax.plot(t/np.pi,f)
 
-ax.set_xlabel(r'$\theta/\pi$')
-ax.set_xlabel(r'$'+symbol+'$')
+ax.set_xlabel(r'$s/\pi$')
+ax.set_ylabel(r'$'+symbol+'$')
 ax.set_xlim([0,2])
+ax.set_ylim([0.90,1.15])
 
 if imgfile == 'screen':
     plt.show()
