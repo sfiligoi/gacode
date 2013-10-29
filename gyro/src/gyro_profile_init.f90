@@ -546,6 +546,8 @@ subroutine gyro_profile_init
         s_delta_s(i)    = s_delta_s(ir_norm)
         s_zeta_s(i)     = s_zeta_s(ir_norm)
         s_kappa_s(i)    = s_kappa_s(ir_norm)
+        zmag_s(i)       = zmag_s(ir_norm)
+        dzmag_s(i)      = dzmag_s(ir_norm)
         shat_s(i)       = shat_s(ir_norm)
         beta_unit_s(i)  = beta_unit_s(ir_norm)
         beta_star_s(i)  = beta_star_s(ir_norm)

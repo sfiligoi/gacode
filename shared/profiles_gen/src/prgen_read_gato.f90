@@ -126,8 +126,10 @@ subroutine prgen_read_gato
      call bound_extrap(fa,fb,gvec(i,:),gato_psi,nsurf+1)
      gvec(i,0) = fa
   enddo
+  
 
   ! Map shape coefficients onto poloidal flux (dpsi) grid:
+  ! NOTE: need sqrt here to get sensible behaviour as r -> 0.
   call cub_spline(sqrt(gato_psi),gvec(1,:),nsurf+1,sqrt(dpsi),rmin,nx)
   call cub_spline(gato_psi,gvec(2,:),nsurf+1,dpsi,zmag,nx)
   call cub_spline(gato_psi,gvec(3,:),nsurf+1,dpsi,rmaj,nx)
@@ -164,9 +166,10 @@ subroutine prgen_read_gato
   enddo
 
   ! Map results onto poloidal flux (dpsi) grid:
+  ! NOTE: need sqrt here to get sensible behaviour as r -> 0.
   do i=1,4
      do ip=0,nfourier
-        call cub_spline(gato_psi,g3vec(i,ip,:),nsurf+1,dpsi,g3rho(i,ip,:),nx)
+        call cub_spline(sqrt(gato_psi),g3vec(i,ip,:),nsurf+1,sqrt(dpsi),g3rho(i,ip,:),nx)
      enddo
   enddo
 
