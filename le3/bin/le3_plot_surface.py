@@ -8,7 +8,7 @@ simdir  = sys.argv[1]
 imgfile = sys.argv[2]
 index   = int(sys.argv[3])
 
-rc('lines',linewidth=1)
+rc('lines',linewidth=1.5)
 
 dim = np.loadtxt(simdir+'/out.le3.geoscalar')
 vec = np.loadtxt(simdir+'/out.le3.geovector')
@@ -72,8 +72,11 @@ for ips in range(nps+1):
             i = i+1
 
 # Plotting
-fig = plt.figure(figsize=(6,6))
-fig.subplots_adjust(left=0.15, right=0.97, top=1.05, bottom=0.0)
+#fig = plt.figure(figsize=(6,6))
+#fig.subplots_adjust(left=0.15, right=0.97, top=1.05, bottom=0.0)
+fig = plt.figure(figsize=(6*0.7,6*0.7))
+fig.subplots_adjust(left=0.16, right=0.97, top=1.05, bottom=0.0)
+
 
 ax = fig.add_subplot(111)
 ax.set_aspect('equal')

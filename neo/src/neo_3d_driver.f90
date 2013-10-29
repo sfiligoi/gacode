@@ -18,6 +18,7 @@ module neo_3d_driver
   real, dimension(:), allocatable, private :: pflux, eflux, uparB, ntv
   real, dimension(:,:), allocatable, private :: upar
   real, private :: jpar
+  
 
 contains
 
@@ -128,54 +129,31 @@ contains
     implicit none
     integer, intent(in)  :: ir
     integer, intent(out) :: status
-    integer :: is, ie, ix, it, js, je, jx, jt, ks
-    integer :: i, j, k
+    integer :: is, ie, ix, it, js, je, jx, jt, ks, iab
+    integer :: i, j, nb
     integer :: ierr
-    integer :: n_elem
-    real, dimension(:), allocatable :: a
-    integer, dimension(:), allocatable :: a_iindx
-    integer, dimension(:), allocatable :: a_jindx
-    integer :: ifac, matfac_err, max_ifac=5
+    real, dimension(:,:), allocatable :: a
+    integer, dimension(:,:), allocatable :: ipiv
+    integer :: info
     real :: fac
 
     status = 0
 
-    ! Matrix solve allocations
-    n_row = n_species*(n_energy+1)*(n_xi+1)*tpmatsize
-    ! Estimate number of elements
-    i = 0
-    ! constraint
-    if(collision_model == 1 .or. collision_model == 2) then
-       i = i + n_species*(n_energy+1)
-    else
-       i = i + n_species*2
-    endif
-    ! collisions
-    i = i + n_species*(n_xi+1)*tpmatsize*(n_energy+1)**2 &
-         * (1 + n_species)
-    ! streaming (theta and varphi derivs)
-    i = i + 2*n_species*(tpmatsize**2)*(n_energy+1)**2*((n_xi-1)*4*2 + 2*4)
-    ! trapping
-    i = i + n_species*(tpmatsize**2)*(n_energy+1)**2*((n_xi-1)*2 + 2)
-    n_max = i
-    allocate(a(n_max),stat=ierr)
+    nb    = (n_energy+1)*n_species*tpmatsize
+    n_row = (n_xi+1)*nb
+    allocate(a(n_row,n_row),stat=ierr)
     if(ierr /= 0) then
        call neo_error('ERROR: (NEO) Array allocation failed')
        status=1
        goto 100
     end if
-    allocate(a_iindx(n_max),stat=ierr)
+    allocate(ipiv(n_row,n_row),stat=ierr)
     if(ierr /= 0) then
        call neo_error('ERROR: (NEO) Array allocation failed')
        status=1
        goto 100
     end if
-    allocate(a_jindx(n_max),stat=ierr)
-    if(ierr /= 0) then
-       call neo_error('ERROR: (NEO) Array allocation failed')
-       status=1
-       goto 100
-    end if
+
     allocate(g(n_row))
     allocate(mindx(n_species,0:n_energy,0:n_xi,tpmatsize))
     allocate(is_indx(n_row))
@@ -185,9 +163,9 @@ contains
 
     ! matrix indices
     i = 0
-    do is=1,n_species
-       do ie=0,n_energy
-          do ix=0,n_xi
+    do ix=0,n_xi
+       do is=1,n_species
+          do ie=0,n_energy
              do it=1,tpmatsize
                 i = i+1
                 mindx(is,ie,ix,it) = i
@@ -199,7 +177,7 @@ contains
           enddo
        enddo
     enddo
-    
+
     ! Set-up the matrix equation: LHS radially local matrix
      
     if(silent_flag == 0 .and. i_proc == 0) then
@@ -225,239 +203,124 @@ contains
     call ENERGY_coll_ints(ir)
     
     ! Set the LHS
-    a_iindx(:) = 0
-    a_jindx(:) = 0
-    a(:) = 0.0
-    k = 0
+    a(:,:) = 0.0
 
-    do is=1,n_species
-       do ie=0,n_energy
-          do ix=0,n_xi
+    do ix=0,n_xi
+       do is=1,n_species
+          do ie=0,n_energy
              do it=1,tpmatsize
                 
-                i = mindx(is,ie,ix,it)
+                do jx=0,n_xi
+                   do js=1,n_species
+                      do je=0,n_energy
+                         do jt=1,tpmatsize
                 
-                ! Impose constant for g0
-                ! local  -> at each species and ene 
+                            i = mindx(is,ie,ix,it)
+                            j = mindx(js,je,jx,jt)
+                            iab = (2*nb-1)*2 + 1 + i - j
                 
-                if (ix==0 .and. it == indx_c00 &
-                     .and. (collision_model==1 .or. collision_model==2))&
-                     then
-                   ! <f_ie> = 0
-                   js = is; je = ie; jx=0
-                   do jt=1, tpmatsize
-                      j = mindx(js,je,jx,jt)
-                      k = k+1
-                      a(k) = tpvec_fsa(jt)
-                      a_iindx(k) = i
-                      a_jindx(k) = j
-                   enddo
-                   
-                else if(ix==0 .and. it == indx_c00 &
-                     .and. (ie==0 .or. ie==1) &
-                     .and. (collision_model==3 .or. &
-                     collision_model==4 .or. collision_model==5)) then
-                   ! <f_ie> = 0
-                   js = is; je = ie; jx=0
-                   do jt=1, tpmatsize
-                      j = mindx(js,je,jx,jt)
-                      k = k+1
-                      a(k) = tpvec_fsa(jt)
-                      a_iindx(k) = i
-                      a_jindx(k) = j
-                   enddo
+                            ! Impose constant for g0
+                            ! local  -> at each species and ene 
+                
+                            if (ix==0 .and. it == indx_c00 &
+                                 .and. (collision_model==1 .or. collision_model==2))&
+                                 then
+                               ! <f_ie> = 0
+                               if(js == is .and. je == ie .and. jx == 0) then
+                                  a(iab,j) = tpvec_fsa(jt)
+                               endif
+                                  
+                            else if(ix==0 .and. it == indx_c00 &
+                                 .and. (ie==0 .or. ie==1) &
+                                 .and. (collision_model==3 .or. &
+                                 collision_model==4 .or. collision_model==5)) then
+                               ! <f_ie> = 0
+                               if(js == is .and. je == ie .and. jx == 0) then
+                                  a(iab,j) = tpvec_fsa(jt)
+                               endif
 
-                else
+                            else
                    
-                   ! Collisions 
-                   jx = ix
+                               ! Collisions 
+                               if(jx == ix) then
+                                  
+                                  ! test particle
+                                  if(js == is) then
+                                     if(abs(tpmat_coll(it,jt)) > 1e-12) then
+                                        a(iab,j) = 0.0
+                                        do ks=1, n_species
+                                           a(iab,j) = a(iab,j) &
+                                                - emat_coll_test(is,ks,ie,je,ix) &
+                                                * tpmat_coll(it,jt)
+                                        enddo
+                                     endif
+                                  endif
                    
-                   ! test particle
-                   js = is
-                   do jt=1,tpmatsize
-                      if(abs(tpmat_coll(it,jt)) > 1e-12) then
-                         do je=0, n_energy                          
-                            j = mindx(js,je,jx,jt)
-                            k = k+1
-                            a(k) = 0.0
-                            do ks=1, n_species
-                               a(k) = a(k) &
-                                    - emat_coll_test(is,ks,ie,je,ix) &
-                                    * tpmat_coll(it,jt)
-                            enddo
-                            a_iindx(k) = i
-                            a_jindx(k) = j
-                         enddo
-                      endif
-                   enddo
-                   
-                   ! field particle 
-                   do jt=1,tpmatsize
-                      if(abs(tpmat_coll(it,jt)) > 1e-12) then
-                         do je=0, n_energy
-                            do js=1,n_species
-                               j = mindx(js,je,jx,jt)
-                               k = k+1
-                               a(k) = -emat_coll_field(is,js,ie,je,ix) &
-                                    * tpmat_coll(it,jt)
-                               a_iindx(k) = i
-                               a_jindx(k) = j
-                            enddo
-                         enddo
-                      endif
-                   enddo
+                                  ! field particle 
+                                  if(abs(tpmat_coll(it,jt)) > 1e-12) then
+                                     a(iab,j) = a(iab,j) -emat_coll_field(is,js,ie,je,ix) &
+                                          * tpmat_coll(it,jt)
+                                  endif
+                               endif
                    
                    
-                   ! Streaming -- d/dtheta
-                   fac = sqrt(2.0) * vth(is,ir)
-                   js = is
-                   do je=0, n_energy
-                      do jt=1,tpmatsize
-                         jx = ix-1
-                         if (jx >= 0) then
-                            j = mindx(js,je,jx,jt)
-                            k = k+1
-                            a(k) = fac &
-                                 * ix/(2*ix-1.0) &
-                                 * tpmat_stream_dt(it,jt) &
-                                 * emat_e05(ie,je,ix,1) 
-                            a_iindx(k) = i
-                            a_jindx(k) = j
-                         endif
-                         jx = ix+1
-                         if (jx <= n_xi) then
-                            j = mindx(js,je,jx,jt)
-                            k = k+1
-                            a(k) = fac &
-                                 * (ix+1.0)/(2*ix+3.0) &
-                                 * tpmat_stream_dt(it,jt) &
-                                 * emat_e05(ie,je,ix,2) 
-                            a_iindx(k) = i
-                            a_jindx(k) = j
-                         endif
+                               ! Streaming -- d/dtheta and d/dphi
+                               fac = sqrt(2.0) * vth(is,ir)
+                               if(js == is) then
+                                  if(jx == ix-1 .and. jx >= 0) then
+                                     a(iab,j) = a(iab,j) + fac &
+                                          * ix/(2*ix-1.0) &
+                                          * emat_e05(ie,je,ix,1) &
+                                          * (tpmat_stream_dt(it,jt) &
+                                          + tpmat_stream_dp(it,jt))  
+                                  endif
+                                  if(jx == ix+1 .and. jx <= n_xi) then
+                                     a(iab,j) = a(iab,j) + fac &
+                                          * (ix+1.0)/(2*ix+3.0) &
+                                          * emat_e05(ie,je,ix,2) &
+                                          * (tpmat_stream_dt(it,jt) &
+                                          + tpmat_stream_dp(it,jt))
+                                  endif
+                               endif
+
+                               
+                               ! Trapping 
+                               fac  = sqrt(0.5) * vth(is,ir)
+                               if(js == is) then
+                                  if(jx == ix-1 .and. jx >= 0) then
+                                     a(iab,j) = a(iab,j) + fac &
+                                          * ix*(ix-1.0)/(2*ix-1.0) &
+                                          * tpmat_trap(it,jt) &
+                                          * emat_e05(ie,je,ix,1) 
+                                  endif
+                                  if(jx == ix+1 .and. jx <= n_xi) then
+                                     a(iab,j) = a(iab,j) - fac &
+                                          * (ix+1.0)*(ix+2.0)/(2*ix+3.0) &
+                                          * tpmat_trap(it,jt) &
+                                          * emat_e05(ie,je,ix,2)
+                                  endif
+                               endif
+                   
+                            endif ! bc if/else
+                         enddo 
                       enddo
                    enddo
-                   
-                   ! Streaming -- d/dvarphi
-                   js = is
-                   do je=0, n_energy
-                      do jt=1,tpmatsize
-                         jx = ix-1
-                         if (jx >= 0) then
-                            j = mindx(js,je,jx,jt)
-                            k = k+1
-                            a(k) = fac &
-                                 * ix/(2*ix-1.0) &
-                                 * tpmat_stream_dp(it,jt) &
-                                 * emat_e05(ie,je,ix,1) 
-                            a_iindx(k) = i
-                            a_jindx(k) = j
-                         endif
-                         jx = ix+1
-                         if (jx <= n_xi) then
-                            j = mindx(js,je,jx,jt)
-                            k = k+1
-                            a(k) = fac &
-                                 * (ix+1.0)/(2*ix+3.0) &
-                                 * tpmat_stream_dp(it,jt) &
-                                 * emat_e05(ie,je,ix,2) 
-                            a_iindx(k) = i
-                            a_jindx(k) = j
-                         endif
-                      enddo
-                   enddo
-                   
-                   ! Trapping 
-                   fac  = sqrt(0.5) * vth(is,ir)
-                   js = is
-                   do je=0, n_energy
-                      do jt=1,tpmatsize
-                         jx = ix-1
-                         if (jx >= 0) then
-                            j = mindx(js,je,jx,jt)
-                            k = k+1
-                            a(k) = fac &
-                                 * ix*(ix-1.0)/(2*ix-1.0) &
-                                 * tpmat_trap(it,jt) &
-                                 * emat_e05(ie,je,ix,1) 
-                            a_iindx(k) = i
-                            a_jindx(k) = j                      
-                         endif
-                         jx = ix+1
-                         if (jx <= n_xi) then
-                            j = mindx(js,je,jx,jt)
-                            k = k+1
-                            a(k) = -fac &
-                                 * (ix+1.0)*(ix+2.0)/(2*ix+3.0) &
-                                 * tpmat_trap(it,jt) &
-                                 * emat_e05(ie,je,ix,2)
-                            a_iindx(k) = i
-                            a_jindx(k) = j
-                         endif
-                      enddo
-                   enddo
-                   
-                endif ! bc if/else
-             enddo ! it
-          enddo ! ix
-       enddo ! ie
-    enddo ! is
+                enddo
+             enddo
+          enddo
+       enddo
+    enddo
     
     ! Factor the Matrix -- uses a(:) and a_indx(:)
-
-    n_elem = k
-    n_max = n_elem*matsz_scalefac
-    matfac_err = 0
-    
-    do ifac = 1, max_ifac
        
-       if(allocated(amat))       deallocate(amat)
-       allocate(amat(n_max),stat=ierr)
-       if(ierr /= 0) then
-          call neo_error('ERROR: (NEO) Array allocation failed')
-          status=1
-          goto 100
-       end if
-       if(allocated(amat_indx))  deallocate(amat_indx)
-       allocate(amat_indx(2*n_max),stat=ierr)
-       if(ierr /= 0) then
-          call neo_error('ERROR: (NEO) Array allocation failed')
-          status=1
-          goto 100
-       end if
-       
-       amat(:) = 0.0
-       amat_indx(:) = 0
-       do k=1,n_elem
-          amat(k) = a(k)
-          amat_indx(k) = a_iindx(k)
-          amat_indx(n_elem+k) = a_jindx(k)
-       enddo
-       
-       if(silent_flag == 0 .and. i_proc == 0) then
-          open(unit=io_neoout,file=trim(path)//runfile_neoout,&
-               status='old',position='append')
-          if(ifac == 1) then
-             write(io_neoout,*) 'Begin matrix factor'
-          else
-             write(io_neoout,*) 'Re-trying matrix factorization'
-          endif
-          close(io_neoout)
-       endif
-       call SOLVE_factor(n_elem)
-       if(error_status > 0) then
-          error_status = 0
-          n_max = n_max * 2
-       else
-          matfac_err = 1
-          exit
-       endif
-    enddo
-    if(matfac_err == 0) then
-       call neo_error('ERROR: (NEO) Matrix factorization failed. Try increasing MATSZ_SCALEFAC.')
-       status=1
-       goto 100
+    if(silent_flag == 0 .and. i_proc == 0) then
+       open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+            status='old',position='append')
+       write(io_neoout,*) 'Begin matrix factor'
+       close(io_neoout)
     endif
+    call DGBTRF(n_row,n_row,2*nb-1,2*nb-1,a,n_row,ipiv,info)
+
     if(silent_flag == 0 .and. i_proc == 0) then
        open(unit=io_neoout,file=trim(path)//runfile_neoout,&
             status='old',position='append')
@@ -475,7 +338,7 @@ contains
        write(io_neoout,*) 'Begin matrix solve'
        close(io_neoout)
     endif
-    call SOLVE_do
+    call DGBTRS('N',n_row,2*nb-1,2*nb-1,1,a,n_row,ipiv,g,n_row,info)
     if(silent_flag == 0 .and. i_proc == 0) then
        open(unit=io_neoout,file=trim(path)//runfile_neoout,&
             status='old',position='append')
@@ -500,10 +363,7 @@ contains
     
 100 continue
     if(allocated(a))          deallocate(a)
-    if(allocated(a_iindx))    deallocate(a_iindx)
-    if(allocated(a_jindx))    deallocate(a_jindx)
-    if(allocated(amat))       deallocate(amat)
-    if(allocated(amat_indx))  deallocate(amat_indx)
+    if(allocated(ipiv))       deallocate(ipiv)
     if(allocated(g))          deallocate(g)
     if(allocated(mindx))      deallocate(mindx)
     if(allocated(is_indx))    deallocate(is_indx)
