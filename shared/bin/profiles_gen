@@ -35,8 +35,8 @@ EXEC=${GACODE_ROOT}/shared/profiles_gen/src/prgen
 # - GATO executable
 GATO=${GACODE_ROOT}/gato/gato
 # - OMFIT script
-OMFIT_ROOT=${GACODE_ROOT}/../OMFIT
-OMFIT="${OMFIT_ROOT}/src/omfit.py ${OMFIT_ROOT}/scripts/fluxSurfaceTracer.py"
+OMFIT_ROOT=${GACODE_ROOT}/../OMFIT-source
+OMFIT="${OMFIT_ROOT}/src/omfit.py fluxSurfaceTracer.py"
 # - locpargen executable
 LOCPARGEN=${GACODE_ROOT}/shared/profiles_gen/locpargen/locpargen
 # - exprodump executable
@@ -984,7 +984,9 @@ fi
 if [ $EFIT_METHOD -eq 3 ]
 then
    cp $GFILE gfile
-   python $OMFIT -l 128 -u 128 -r 0.001 gfile ffile >& out.omfit
+   python $OMFIT -r 4 -u 200 -l 256 -x rho -a 0 -f 1 $GFILE >& out.omfit
+   cat out.omfit
+   cp flux_* ffile
 fi
 
 # DSKGATO

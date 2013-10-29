@@ -74,8 +74,11 @@ subroutine prgen_read_omfit
         i1 = sum(narcv(1:(i-1)))+1
      endif
      i2 = sum(narcv(1:i))
-     r2(:,i) = r_raw(i1:i2)
-     z2(:,i) = z_raw(i1:i2)
+!     r2(:,i) = r_raw(i1:i2)
+!     z2(:,i) = z_raw(i1:i2)
+     ! Reverse order
+     r2(:,i) = r_raw(i2:i1:-1)
+     z2(:,i) = z_raw(i2:i1:-1)
   enddo
 
   deallocate(r_raw)
