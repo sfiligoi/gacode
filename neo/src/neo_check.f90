@@ -369,6 +369,21 @@ subroutine neo_check
      if(silent_flag == 0 .and. i_proc == 0) then
         write(io_neoout,*) 'threed_model: NEOCLASSICAL TRANSPORT WITH NON-AXISYMMETRIC EFFECTS'
      end if
+
+     select case(threed_exb_model)
+        case(0)
+           if(silent_flag == 0 .and. i_proc == 0) then
+              write(io_neoout,*) 'threed_exb_model: NO HIGHER-ORDER V_EXB DRIFT'
+           end if
+        case (1)
+            if(silent_flag == 0 .and. i_proc == 0) then
+              write(io_neoout,*) 'threed_exb_model: HIGHER-ORDER V_EXB DRIFT'
+           end if
+        case default
+           call neo_error('ERROR: (NEO) invalid threed_exb_model')
+           return
+        end select
+
    case default
      call neo_error('ERROR: (NEO) invalid threed_model')
      return

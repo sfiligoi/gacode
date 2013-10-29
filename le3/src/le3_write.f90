@@ -5,10 +5,10 @@ module le3_write
   public :: le3_write_do
 
   real, dimension(:,:), allocatable :: bmag, bdotgrad, bdotgradB_overB, &
-       vdrift_x, dgdp
+       vdrift_x, dgdp, vexb_dt, vexb_dp
   real, dimension(:,:), allocatable :: g
   real, dimension(:,:), allocatable :: mat_stream_dt, mat_stream_dp, &
-       mat_trap, mat_coll
+       mat_trap, mat_coll, mat_vexb_dt, mat_vexb_dp
   real :: vprime
   integer :: matsize
   integer :: indx_c00
@@ -57,6 +57,8 @@ contains
     allocate(bdotgrad(nt,np))
     allocate(bdotgradB_overB(nt,np))
     allocate(vdrift_x(nt,np))
+    allocate(vexb_dt(nt,np))
+    allocate(vexb_dp(nt,np))
     allocate(dgdp(nt,np))
 
     do i=1,nt
@@ -167,6 +169,12 @@ contains
     vdrift_x(:,:) = 1/(rmin*bmag * g**2) &
          * (-dbdt * (gpp + iota * gpt) + dbdp * (gpt + iota*gtt)) / bmag**2
 
+    ! -bhat cross grad f dot grad r / B 
+    vexb_dt(:,:) = -1/(rmin*bmag * g**2) &
+         * (-(gpp + iota * gpt)) 
+    vexb_dp(:,:) = -1/(rmin*bmag * g**2) & 
+         * (gpt + iota*gtt) / bmag
+
     ! construct the geo collocation matices
 
     matsize = 4*nts*nps+2*(nts+nps)+1
@@ -184,6 +192,8 @@ contains
     allocate(mat_stream_dp(matsize,matsize))
     allocate(mat_trap(matsize,matsize))
     allocate(mat_coll(matsize,matsize))
+    allocate(mat_vexb_dt(matsize,matsize))
+    allocate(mat_vexb_dp(matsize,matsize))
     allocate(vec_vdriftx(matsize))
     allocate(vec_flux(matsize))
     allocate(vec_upar(matsize))
@@ -232,6 +242,8 @@ contains
     mat_stream_dp(:,:) = 0.0
     mat_trap(:,:)      = 0.0
     mat_coll(:,:)      = 0.0
+    mat_vexb_dt(:,:)   = 0.0
+    mat_vexb_dp(:,:)   = 0.0
     vec_vdriftx(:)  = 0.0
     vec_flux(:)     = 0.0
     vec_upar(:)     = 0.0
@@ -259,7 +271,13 @@ contains
                      + basis(kt,kp) * basis_dp_prime(kt,kp) &
                      * bdotgrad(kt,kp) 
                 mat_coll(i,j) = mat_coll(i,j) &
-                     + basis(kt,kp) * basis_prime(kt,kp) 
+                     + basis(kt,kp) * basis_prime(kt,kp)
+                mat_vexb_dt(i,j) = mat_vexb_dt(i,j) &
+                     + basis(kt,kp) * basis_dt_prime(kt,kp) &
+                     * vexb_dt(kt,kp)
+                mat_vexb_dp(i,j) = mat_vexb_dp(i,j) &
+                     + basis(kt,kp) * basis_dp_prime(kt,kp) &
+                     * vexb_dp(kt,kp)
              enddo
           enddo
        enddo
@@ -289,6 +307,8 @@ contains
     mat_stream_dp(:,:) = mat_stream_dp(:,:) / (nt*np)
     mat_trap(:,:)      = mat_trap(:,:)      / (nt*np)
     mat_coll(:,:)      = mat_coll(:,:)      / (nt*np)
+    mat_vexb_dt(:,:)   = mat_vexb_dt(:,:)   / (nt*np)
+    mat_vexb_dp(:,:)   = mat_vexb_dp(:,:)   / (nt*np)
     
     open(unit=1,file='out.le3.geomatrix',status='replace')
     do i=1,matsize
@@ -297,6 +317,8 @@ contains
            write (1,'(e16.8)',advance='no') mat_stream_dt(i,j)
            write (1,'(e16.8)',advance='no') mat_stream_dp(i,j)
            write (1,'(e16.8)',advance='no') mat_coll(i,j)
+           write (1,'(e16.8)',advance='no') mat_vexb_dt(i,j)
+           write (1,'(e16.8)',advance='no') mat_vexb_dp(i,j)
            write (1,*)
        enddo
     enddo
@@ -369,10 +391,14 @@ contains
     deallocate(bdotgrad)
     deallocate(bdotgradB_overB)
     deallocate(vdrift_x)
+    deallocate(vexb_dt)
+    deallocate(vexb_dp)
     deallocate(mat_stream_dt)
     deallocate(mat_stream_dp)
     deallocate(mat_trap)
     deallocate(mat_coll)
+    deallocate(mat_vexb_dt)
+    deallocate(mat_vexb_dp)
     deallocate(vec_vdriftx)
     deallocate(vec_flux)
     deallocate(vec_upar)
