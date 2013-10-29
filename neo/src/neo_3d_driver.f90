@@ -310,7 +310,7 @@ contains
                                if(threed_exb_model == 1) then
                                   if(js == is .and. jx == ix) then
                                      a(iab,j) = a(iab,j) &
-                                          + rho(ir)*dphi0dr(ir) &
+                                          + rho(ir)*threed_exb_dphi0dr &
                                           * emat_e0(ie,je,ix,1) &
                                           * (tpmat_vexb_dt(it,jt) &
                                           + tpmat_vexb_dp(it,jt))

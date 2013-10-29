@@ -76,6 +76,7 @@ subroutine neo_read_input
 
   read(1,*) threed_model
   read(1,*) threed_exb_model
+  read(1,*) threed_exb_dphi0dr
 
   close(1)
 

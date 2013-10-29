@@ -95,6 +95,7 @@ module neo_globals
   ! 3D parameters
   integer :: threed_model
   integer :: threed_exb_model
+  real    :: threed_exb_dphi0dr
 
   !---------------------------------------------------------------
   ! Output mode:
