@@ -552,7 +552,7 @@ contains
     integer :: i, j, kt, kp
     integer, dimension(:), allocatable :: i_piv
     real :: bsq_avg, bgradbsq_avg, gfac_avg, bsqahat_avg
-    real :: g2fac, g1fac, g3fac
+    real :: g2fac, g1fac, g3fac, g1fac_ntv
 
     bsq_avg      = 0.0
     bgradbsq_avg = 0.0
@@ -668,6 +668,16 @@ contains
     enddo
     g1fac = g1fac / (nt*np) / vprime
 
+    g1fac_ntv=0.0
+    do i=1,nt
+       do j=1,np
+          g1fac_ntv = g1fac_ntv + dgdp(i,j) &
+               * (u(i,j)*bmag(i,j)/(bdotgradB_overB(i,j) * bmag(i,j)) &
+               - 2.0*uhat(i,j))
+       enddo
+    enddo
+    g1fac_ntv = g1fac_ntv / (nt*np) / vprime
+
     ! compute hhat
     allocate(h(nt,np))
     do kt=1,nt
@@ -711,6 +721,7 @@ contains
     write (1,'(e16.8)') g1fac
     write (1,'(e16.8)') g2fac
     write (1,'(e16.8)') g3fac
+    write (1,'(e16.8)') g1fac_ntv
     close(1)
 
     deallocate(bgradmat)
