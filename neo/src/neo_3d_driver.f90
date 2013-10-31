@@ -494,7 +494,7 @@ contains
 
           ntv(is) = ntv(is) + g(i) &
                * 4.0/sqrt(pi) * dens(is,ir) &
-               * (4.0/3.0) * evec_e1(ie,ix) * mass(is) &
+               * (4.0/3.0) * evec_e1(ie,ix) * temp(is,ir) &
                * (-0.5) * tpvec_ntv(it)
 
        else if(ix == 2) then
@@ -511,7 +511,7 @@ contains
 
           ntv(is) = ntv(is) + g(i) &
                * 4.0/sqrt(pi) * dens(is,ir) &
-               * (2.0/15.0) * evec_e1(ie,ix) * mass(is) &
+               * (2.0/15.0) * evec_e1(ie,ix) * temp(is,ir) &
                * (-0.5) * tpvec_ntv(it)
 
        else if(ix == 1) then
