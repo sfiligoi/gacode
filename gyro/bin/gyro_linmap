@@ -23,7 +23,10 @@ then
   echo "TEMPLATE GENERATION"
   echo
   echo "         -g"
-  echo "         Generate default template."
+  echo "         List available simulation templates."
+  echo
+  echo "         -g <template>"
+  echo "         Copy <template> into simulation path."
   echo
   echo "EXECUTE MODE"
   echo
@@ -58,7 +61,7 @@ fi
 
 SIMROOT=$PWD
 GYRO_DIR=$GACODE_ROOT/gyro
-LINMAP_DIR=$GACODE_ROOT/gyro/tools/linmap/input/def01
+LINMAP_DIR=$GACODE_ROOT/gyro/tools/linmap
 # Parallelization parameters
 NPROC=1
 NOMP=1
@@ -80,7 +83,7 @@ while [ $# -gt 0 ] ; do
 
   -e) shift ; LOCDIR=$1 ; EXEC_FLAG=1 ;;
 
-  -g) shift ; GENERATE_FLAG=1 ;;
+  -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
 
   -i) shift ; LOCDIR=$1 ; INIT_FLAG=1 ;;
 
@@ -110,35 +113,45 @@ then
 fi
 SIMDIR=$SIMROOT/$LOCDIR
 
-if [ -d $SIMDIR ]
-then
-   cd $SIMDIR
-else
-   echo "ERROR: (gyro_linplot) $SIMDIR does not exist."
-   exit 1
-fi
-
 #============================================================
 # Generate simdir if -g set, then exit.
 #
 if [ $GENERATE_FLAG -eq 1 ]
 then
-   if [ ! -d "$LINMAP_DIR" ]
+   if [ ! -f "${LINMAP_DIR}/input/$LOCDIR/input.linmap" ]
    then
-      #cat ${NEO_DIR}/tools/input/simdir_list
-       echo "Unexpected error, template missing"
-       exit 1
+       cat ${LINMAP_DIR}/input/simdir_list
+       #echo "Unexpected error, template missing"
+       #exit 1
    else
-      cp -ai $LINMAP_DIR $SIMDIR
+      cp -ai ${LINMAP_DIR}/input/$LOCDIR $SIMDIR
    fi
    exit 0
 fi
 #============================================================
 
+if [ -d $SIMDIR ]
+then
+   cd $SIMDIR
+else
+   echo "ERROR: (gyro_linmap) $SIMDIR does not exist."
+   exit 1
+fi
+
+#============================================================
+#Required to call python
+if $START_OVER ; then
+	START_OVER=1
+else
+	START_OVER=0
+fi
+
+#============================================================
 if [ $PLOT_FLAG -eq 1 ]
 then
    python $GYRO_DIR/tools/linmap/linmap_contour_plot.py radius_krho_fieldeigen_omega.out 64 64
 else
    python $GYRO_DIR/bin/gyro_linmap_parse.py input.linmap
-   $GYRO_DIR/tools/linmap/linmap_exec $NPROC $START_OVER
+   #$GYRO_DIR/tools/linmap/linmap_exec $NPROC $START_OVER
+   python $GYRO_DIR/tools/linmap/linmap_exec.py $SIMDIR $NPROC $START_OVER
 fi
