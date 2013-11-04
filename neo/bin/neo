@@ -107,8 +107,6 @@ else
    SIMDIR=$SIMROOT/$LOCDIR
 fi
 
-RUN_FILE=$SIMDIR/out.neo.run
-
 #============================================================
 # Check for inconsistent flags:
 if [ $REGRESS -eq 0 ] ; then
@@ -190,8 +188,8 @@ fi
 if [ $EXEC_FLAG -eq 1 ] 
 then
 
-   # This is dangerous!
-   #rm -f out.neo.*
+   # Empty old runfile
+   > out.neo.run 
 
    neo_version_message 
 

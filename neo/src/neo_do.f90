@@ -42,10 +42,6 @@ subroutine neo_do
   integer, parameter :: io_neo=10, io_f=11
   character(len=80)  :: runfile_f = 'out.neo.f'
 
-  if (silent_flag == 0 .and. i_proc == 0) then
-     open(unit=io_neoout,file=trim(path)//runfile_neoout,status='replace')
-     close(io_neoout)
-  endif
 
   call neo_make_profiles
   if(error_status > 0) goto 100

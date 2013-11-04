@@ -31,8 +31,8 @@ subroutine neo_check
 
   !-----------------------------------------------------------
   if(silent_flag == 0 .and. i_proc == 0) then
-     write(io_neoout,*) 'SWITCHES'
-     write(io_neoout,*) '---------------'
+     write(io_neoout,*) 'CONTROL PARAMETERS'
+     write(io_neoout,*) '------------------'
   end if
   !------------------------------------------------------------
 
@@ -40,15 +40,15 @@ subroutine neo_check
   select case (sim_model)
   case(0)
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'sim_model    : THEORY'
+        write(io_neoout,30) 'sim_model','THEORY'
      endif
   case(1)
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'sim_model    : NUMERICAL (with theory and nclass)'
+        write(io_neoout,30) 'sim_model','NUMERICAL (with theory and nclass)'
      endif
   case(2)
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'sim_model    : NUMERICAL (with theory)'
+        write(io_neoout,30) 'sim_model','NUMERICAL (with theory)'
      endif
   case default   
      call neo_error('ERROR: (NEO) invalid sim_model')
@@ -62,31 +62,31 @@ subroutine neo_check
   case (1) 
 
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'collision_model    : CONNOR'
+        write(io_neoout,30) 'collision_model','CONNOR'
      endif
 
   case (2) 
 
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'collision_model    : REDUCED HIRSHMAN-SIGMAR'
+        write(io_neoout,30) 'collision_model','REDUCED HIRSHMAN-SIGMAR'
      end if
 
   case (3) 
 
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'collision_model    : FULL HIRSHMAN-SIGMAR'
+        write(io_neoout,30) 'collision_model','FULL HIRSHMAN-SIGMAR'
      endif
 
   case (4) 
 
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'collision_model    : FULL LINEARIZED FOKKER-PLANCK'
+        write(io_neoout,30) 'collision_model','FULL LINEARIZED FOKKER-PLANCK'
      end if
 
   case (5) 
 
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'collision_model    : FULL LINEARIZED FOKKER-PLANCK WITH AD-HOC FIELD PARTICLE TERMS' 
+        write(io_neoout,30) 'collision_model','FULL LINEARIZED FOKKER-PLANCK WITH AD-HOC FIELD PARTICLE TERMS' 
      end if
 
   case default
@@ -96,29 +96,29 @@ subroutine neo_check
 
   end select
 
-   select case (coll_uncoupledei_model) 
+  select case (coll_uncoupledei_model) 
 
-   case (0) 
-      if(silent_flag == 0 .and. i_proc == 0) then
-         write(io_neoout,*) 'collision_model    : Full e-i collisional coupling'
-      endif
+  case (0) 
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,30) 'collision_model','Full e-i collisional coupling'
+     endif
 
-   case (1)
-      if(silent_flag == 0 .and. i_proc == 0) then
-         write(io_neoout,*) 'collision_model    : Reduced e-i collisional coupling'
-      endif
+  case (1)
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,30) 'collision_model','Reduced e-i collisional coupling'
+     endif
 
-   case (2)
-      if(silent_flag == 0 .and. i_proc == 0) then
-         write(io_neoout,*) 'collision_model    : Reduced e-i collisional coupling'
-      endif
+  case (2)
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,30) 'collision_model','Reduced e-i collisional coupling'
+     endif
 
-   case default
+  case default
 
-      call neo_error('ERROR: (NEO) invalid coll_uncoupledei_model')
-      return
-      
-   end select
+     call neo_error('ERROR: (NEO) invalid coll_uncoupledei_model')
+     return
+
+  end select
 
   !------------------------------------------------------------
 
@@ -131,25 +131,25 @@ subroutine neo_check
   case (0) 
 
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'equilibrium_model  : S-ALPHA'
+        write(io_neoout,30) 'equilibrium_model','S-ALPHA'
      end if
 
   case (1) 
 
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'equilibrium_model  : LARGE-ASPECT-RATIO'
+        write(io_neoout,30) 'equilibrium_model','LARGE-ASPECT-RATIO'
      end if
 
   case (2) 
 
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'equilibrium_model  : MILLER'
+        write(io_neoout,30) 'equilibrium_model','MILLER'
      end if
 
   case (3) 
 
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'equilibrium_model  : GENERAL'
+        write(io_neoout,30) 'equilibrium_model','GENERAL'
      end if
 
      if(geo_ny <= 0) then
@@ -195,13 +195,13 @@ subroutine neo_check
      enddo
 
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'profile_model      : LOCAL'
+        write(io_neoout,30) 'profile_model','LOCAL'
      end if
 
   case (2) 
 
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'profile_model      : GLOBAL PROFILE'
+        write(io_neoout,30) 'profile_model','GLOBAL PROFILE'
      end if
 
      select case (profile_erad0_model)
@@ -296,7 +296,7 @@ subroutine neo_check
 
   case(3)
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'profile_model      : GLOBAL PROFILE TEST'
+        write(io_neoout,30) 'profile_model','GLOBAL PROFILE TEST'
      end if
 
   case default
@@ -310,21 +310,21 @@ subroutine neo_check
   ! Sign of B checks
   if(sign_q > 0.0) then
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'sign_q: POSITIVE'
+        write(io_neoout,30) 'sign_q','POSITIVE'
      end if
   else
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'sign_q: NEGATIVE'
+        write(io_neoout,30) 'sign_q','NEGATIVE'
      end if
   end if
 
   if(sign_bunit > 0.0) then
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'sign_bunit: POSITIVE (BT CW)'
+        write(io_neoout,30) 'sign_bunit','POSITIVE (BT CW)'
      end if
   else
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'sign_bunit: NEGATIVE (BT CCW)'
+        write(io_neoout,30) 'sign_bunit','NEGATIVE (BT CCW)'
      end if
   end if
 
@@ -335,11 +335,11 @@ subroutine neo_check
   select case (rotation_model)     
   case (1)
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'rotation model: ROTATION EFFECTS NOT INCLUDED'
+        write(io_neoout,30) 'rotation model','ROTATION EFFECTS NOT INCLUDED'
      end if
   case (2)
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'rotation model: ROTATION EFFECTS INCLUDED'
+        write(io_neoout,30) 'rotation model','ROTATION EFFECTS INCLUDED'
      end if
   case default
      call neo_error('ERROR: (NEO) invalid rotation_model')
@@ -349,11 +349,11 @@ subroutine neo_check
   select case (spitzer_model)
   case(0)
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'spitzer_model: NEOCLASSICAL TRANSPORT TEST CASE'
+        write(io_neoout,30) 'spitzer_model:','OFF (NEOCLASSICAL TRANSPORT)'
      end if
   case (1)
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'spitzer_model: SPITZER TEST CASE'
+        write(io_neoout,30) 'spitzer_model','ON (SOLVE SPITZER PROBLEM)'
      end if
   case default
      call neo_error('ERROR: (NEO) invalid spitzer_model')
@@ -363,42 +363,49 @@ subroutine neo_check
   select case(threed_model)
   case(0)
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'threed_model: AXISYMMETRIC NEOCLASSICAL TRANSPORT TEST CASE'
+        write(io_neoout,30) 'threed_model','AXISYMMETRIC EQUILIBRIUM'
      end if
   case (1)
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,*) 'threed_model: NEOCLASSICAL TRANSPORT WITH NON-AXISYMMETRIC EFFECTS'
+        write(io_neoout,30) 'threed_model','NON-AXISYMMETRIC EQUILIBRIUM (LE3)'
      end if
 
      select case(threed_exb_model)
-        case(0)
-           if(silent_flag == 0 .and. i_proc == 0) then
-              write(io_neoout,*) 'threed_exb_model: NO HIGHER-ORDER V_EXB DRIFT'
-           end if
-        case (1)
-            if(silent_flag == 0 .and. i_proc == 0) then
-              write(io_neoout,*) 'threed_exb_model: HIGHER-ORDER V_EXB DRIFT'
-           end if
-        case default
-           call neo_error('ERROR: (NEO) invalid threed_exb_model')
-           return
-        end select
+     case(0)
+        if(silent_flag == 0 .and. i_proc == 0) then
+           write(io_neoout,30) 'threed_exb_model','NO HIGHER-ORDER V_EXB DRIFT'
+        end if
+     case (1)
+        if(silent_flag == 0 .and. i_proc == 0) then
+           write(io_neoout,30) 'threed_exb_model','HIGHER-ORDER V_EXB DRIFT'
+        end if
+     case default
+        call neo_error('ERROR: (NEO) invalid threed_exb_model')
+        return
+     end select
 
-   case default
+  case default
      call neo_error('ERROR: (NEO) invalid threed_model')
      return
-  end select  
+  end select
 
   !------------------------------------------------------------
 
-  if(silent_flag == 0 .and. i_proc == 0) then
+  if (silent_flag == 0 .and. i_proc == 0) then
+
      write(io_neoout,*)
      write(io_neoout,*) 'GRID DIMENSIONS'
      write(io_neoout,*) '---------------'
      write(io_neoout,10) 'n_radial',n_radial
      write(io_neoout,10) 'n_energy',n_energy
      write(io_neoout,10) 'n_xi',n_xi
-     write(io_neoout,10) 'n_theta',n_theta
+     if (threed_model == 0) then
+        write(io_neoout,10) 'n_theta',n_theta
+     else
+        write(io_neoout,10) 'n_theta (modes)',n_tptheta
+        write(io_neoout,10) 'n_phi   (modes)',n_tpvarphi
+        write(io_neoout,10) 'n_tp',tpmatsize
+     end if
 
      do ir=1,n_radial
         write(io_neoout,*) 
@@ -442,7 +449,8 @@ subroutine neo_check
      close(io_neoout)
   endif
 
-10 format(t2,a,':',t14,i2)
-20 format(t2,a,':',t13,1pe12.4) 
+10 format(t2,a,t19,': ',i2)
+20 format(t2,a,t19,':',1pe12.4) 
+30 format(t2,a,t22,': ',a)
 
 end subroutine neo_check

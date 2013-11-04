@@ -93,9 +93,17 @@ module neo_globals
 
   !---------------------------------------------------------------
   ! 3D parameters
+  !
   integer :: threed_model
   integer :: threed_exb_model
   real    :: threed_exb_dphi0dr
+  !
+  ! 3D grid dimensions (out.le3.geoscalar)
+  integer :: tpmatsize
+  integer :: n_tptheta
+  integer :: n_tpvarphi
+  integer :: indx_c00
+  !---------------------------------------------------------------
 
   !---------------------------------------------------------------
   ! Output mode:
@@ -191,7 +199,7 @@ module neo_globals
 
   ! error checking
   integer :: error_status = 0
-  character(len=80) :: error_message
+  character(len=80) :: error_message = '(NEO) completed successfully.'
 	
   ! output file
   character(len=80)  :: runfile_neoout = 'out.neo.run'

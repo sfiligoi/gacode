@@ -1,4 +1,5 @@
 module neo_3d_driver
+
   implicit none
 
   public :: ThreeD_do
@@ -7,8 +8,6 @@ module neo_3d_driver
   character(len=80),private  :: runfile_transp = 'out.neo.transport_3d'
   integer, dimension(:,:,:,:), allocatable, private :: mindx 
   integer, private :: stat
-  integer, private :: tpmatsize
-  integer, private :: n_tptheta, n_tpvarphi, indx_c00
   real, dimension(:,:), allocatable, private :: tpmat_trap, tpmat_stream_dt, &
        tpmat_stream_dp, tpmat_coll, tpmat_vexb_dt, tpmat_vexb_dp
   real, dimension(:), allocatable, private :: tpvec_vdriftx, tpvec_flux, &
@@ -35,17 +34,6 @@ contains
     call ENERGY_basis_ints
     call ENERGY_coll_ints_alloc(1)
 
-    ! read in the vectors and matrices
-    open(unit=1,file=trim(path)//'out.le3.geoscalar',status='old',iostat=stat)
-    if(stat .ne. 0) then
-       call neo_error('ERROR: (NEO) le3 files not available')
-       goto 200
-    endif
-    read(1,*) n_tptheta
-    read(1,*) n_tpvarphi
-    read(1,*) tpmatsize
-    read(1,*) indx_c00
-    close(1)
     allocate(tpmat_trap(tpmatsize,tpmatsize))
     allocate(tpmat_stream_dt(tpmatsize,tpmatsize))
     allocate(tpmat_stream_dp(tpmatsize,tpmatsize))
@@ -101,7 +89,7 @@ contains
        close(1)
     end if
 
-    do ir=1, n_radial
+    do ir=1,n_radial
        call threed_matrix_solve(ir,status)
        if(status == 1) goto 200
     enddo
@@ -135,7 +123,8 @@ contains
     integer, intent(in)  :: ir
     integer, intent(out) :: status
     integer :: is, ie, ix, it, js, je, jx, jt, ks, iab
-    integer :: i, j, nb
+    integer :: i, j
+    integer :: lda, nb
     integer :: ierr
     real, dimension(:,:), allocatable :: a
     integer, dimension(:,:), allocatable :: ipiv
@@ -146,18 +135,26 @@ contains
 
     nb    = (n_energy+1)*n_species*tpmatsize
     n_row = (n_xi+1)*nb
-    allocate(a(n_row,n_row),stat=ierr)
+
+    ! LAPACK PARAMETERS
+    ! KL  = 2*nb-1
+    ! KU  = 2*nb-1
+    ! LDA = 2*KL+KU+1
+    lda = 3*(2*nb-1)+1
+
+    allocate(a(lda,n_row),stat=ierr)
     if(ierr /= 0) then
        call neo_error('ERROR: (NEO) Array allocation failed')
        status=1
        goto 100
-    end if
+    endif
+
     allocate(ipiv(n_row,n_row),stat=ierr)
     if(ierr /= 0) then
        call neo_error('ERROR: (NEO) Array allocation failed')
        status=1
        goto 100
-    end if
+    endif
 
     allocate(g(n_row))
     allocate(mindx(n_species,0:n_energy,0:n_xi,tpmatsize))
@@ -187,8 +184,8 @@ contains
      
     if(silent_flag == 0 .and. i_proc == 0) then
        open(unit=io_neoout,file=trim(path)//runfile_neoout,status='old',position='append')
-       write(io_neoout,*) 'ir = ', ir
-       write(io_neoout,*) 'Begin matrix set-up'
+       write(io_neoout,'(a,i3)') 'INFO: (NEO) ir =',ir
+       write(io_neoout,'(a)') 'INFO: (NEO) Begin matrix setup'
        close(io_neoout)
     endif
     
@@ -197,7 +194,7 @@ contains
           if(abs(temp(is,ir)-temp(1,ir)) > 1e-3) then
              if(silent_flag == 0 .and. i_proc == 0) then
                 open(unit=io_neoout,file=trim(path)//runfile_neoout,status='old',position='append')
-                write(io_neoout,*) 'WARNING: (NEO) Full HS collisions with unequal temps'
+                write(io_neoout,'(a)') 'WARNING: (NEO) Full HS collisions with unequal temps'
                 close(io_neoout)
              endif
           endif
@@ -335,14 +332,12 @@ contains
     if(silent_flag == 0 .and. i_proc == 0) then
        open(unit=io_neoout,file=trim(path)//runfile_neoout,&
             status='old',position='append')
-       write(io_neoout,*) 'Begin matrix factor and solve'
+       write(io_neoout,'(a)') 'INFO: (NEO) Begin matrix factor and solve'
        close(io_neoout)
     endif
 
-    !call DGBTRF(n_row,n_row,2*nb-1,2*nb-1,a,n_row,ipiv,info)
-    !call DGBTRS('N',n_row,2*nb-1,2*nb-1,1,a,n_row,ipiv,g,n_row,info)
-    
-    call DGBSV(n_row,2*nb-1,2*nb-1,1,a,n_row,ipiv,g,n_row,info)
+    ! Factor and solve with LAPACK band-matrix routine
+    call DGBSV(n_row,2*nb-1,2*nb-1,1,a,lda,ipiv,g,n_row,info)
 
     if(info /= 0) then
        call neo_error('ERROR: (NEO) Matrix factorization failed')
@@ -353,7 +348,7 @@ contains
     if(silent_flag == 0 .and. i_proc == 0) then
        open(unit=io_neoout,file=trim(path)//runfile_neoout,&
             status='old',position='append')
-       write(io_neoout,*) 'Done matrix factor and solve'
+       write(io_neoout,'(a)') 'INFO: (NEO) Done matrix factor and solve'
        close(io_neoout)
     endif
 
