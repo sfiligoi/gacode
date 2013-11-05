@@ -245,19 +245,20 @@ subroutine tgyro_flux
 
   end select
 
-  !----------------------------------------------------------
-  ! Compute total fluxes given neoclassical and turbulent 
-  ! components:
+  !------------------------------------------------------------------
+  ! Compute total fluxes given neoclassical and turbulent components:
+  !
+  ! NOTE: therm_vec here ensures ion sum is only over thermal species
   !
   pflux_e_tot(i_r) = pflux_e_neo(i_r)+pflux_e_tur(i_r)
-  pflux_i_tot(i_r) = sum(pflux_i_neo(:,i_r)+pflux_i_tur(:,i_r))
+  pflux_i_tot(i_r) = sum(pflux_i_neo(therm_vec(:),i_r)+pflux_i_tur(therm_vec(:),i_r))
 
   eflux_e_tot(i_r) = eflux_e_neo(i_r)+eflux_e_tur(i_r)
-  eflux_i_tot(i_r) = sum(eflux_i_neo(:,i_r)+eflux_i_tur(:,i_r))
+  eflux_i_tot(i_r) = sum(eflux_i_neo(therm_vec(:),i_r)+eflux_i_tur(therm_vec(:),i_r))
 
   mflux_tot(i_r) = mflux_e_neo(i_r)+mflux_e_tur(i_r)+&
-       sum(mflux_i_neo(:,i_r)+mflux_i_tur(:,i_r))
-  !----------------------------------------------------------
+       sum(mflux_i_neo(therm_vec(:),i_r)+mflux_i_tur(therm_vec(:),i_r))
+  !-------------------------------------------------------------------
 
   !----------------------------------------------------------
   ! Some nonsensical "fudges" to account for sawteeth.  

@@ -58,20 +58,20 @@ subroutine gyro_fieldeigen
   ! Validity checks
   !
   if (boundary_method == 2) then
-     call catch_error('ERROR: BOUNDARY_METHOD=2 not supported in fieldeigen.')
+     call catch_error('ERROR: (GYRO) BOUNDARY_METHOD=2 not supported in fieldeigen.')
   endif
 
   if (n_1(in_1) == 0) then
-     call catch_error('ERROR: n=0 not supported in fieldeigen.')
+     call catch_error('ERROR: (GYRO) n=0 not supported in fieldeigen.')
   endif
 
   if (electron_method == 2) then
-     call catch_error('ERROR: ELECTRON_METHOD=2 not supported in fieldeigen.')
+     call catch_error('ERROR: (GYRO) ELECTRON_METHOD=2 not supported in fieldeigen.')
   endif
   !-------------------------------------------------------------------------
 
   if (i_proc == 0 .and. output_flag == 1) then
-     open(unit=1,file='fieldeigen.out',status='replace')
+     open(unit=1,file=trim(path)//'fieldeigen.out',status='replace')
      close(1)
   endif
   if (i_proc == 0 .and. silent_flag == 0) then
@@ -323,7 +323,7 @@ subroutine gyro_fieldeigen
         endif
         if (i_proc == 0 .and. output_flag == 1) then
 
-           open(unit=1,file='fieldeigen.out',status='old',position='append')
+           open(unit=1,file=trim(path)//'fieldeigen.out',status='old',position='append')
 
            write(1,'(t2,5(1pe14.7,1x))') &
                 real(omega_eigen), &
@@ -422,7 +422,7 @@ subroutine gyro_fieldeigen
         endif
         if (i_proc == 0 .and. output_flag == 1) then
 
-           open(unit=1,file='fieldeigen.out',status='old',position='append')
+           open(unit=1,file=trim(path)//'fieldeigen.out',status='old',position='append')
 
            write(1,'(t2,5(1pe14.7,1x))') &
                 real(omega_eigen), &

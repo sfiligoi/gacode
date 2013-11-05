@@ -53,6 +53,8 @@ subroutine tgyro_stab_driver
   wi_ion_gather(:,:)  = 0.0
   wr_ion_gather(:,:)  = 0.0
 
+  call tgyro_profile_functions
+
   select case (flux_method)
 
   case (2)
@@ -139,18 +141,21 @@ subroutine tgyro_stab_driver
         wr_ion_loc  = 0.0
         wr_elec_loc = 0.0
 
+        ! Set wavenumber
         ky(iky) = tgyro_stab_kymin + iky*tgyro_stab_deltaky
+        ! Pass to GYRO
+        gyro_l_y_in = ky(iky)
 
+        ! Set wr for initial guess
         if (n_worker == 1) then
            wr = 0.0
         else
            wr = ky(iky)*(-1.0+worker*(2.0/(n_worker-1)))
         endif
 
-        gyro_l_y_in = ky(iky)
-        gyro_fieldeigen_wr_in = wr
-
+        ! Pass initial guess to GYRO
         ! NOTE: gyro_fieldeigen_wi_in taken from input.gyro (should be about 0.1)
+        gyro_fieldeigen_wr_in = wr
 
         call gyro_run(gyrotest_flag,gyro_restart_method,transport_method)
 
