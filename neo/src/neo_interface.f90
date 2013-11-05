@@ -391,11 +391,6 @@ contains
        close(1)
        return
     endif
-    if(neo_equilibrium_model_in == 3) then
-       write(1,*) 'Localdump does not work with general geometry'
-       close(1)
-       return
-    endif
     
     write(1,20) 'N_ENERGY=',neo_n_energy_in
     write(1,20) 'N_XI=',neo_n_xi_in
@@ -487,6 +482,15 @@ contains
     
     close(1)
     
+    if(neo_equilibrium_model_in == 3) then
+       open(unit=1,file=trim(path)//'out.neo.localdump_geo',status='replace')
+       write(1,10) neo_geo_ny_in
+       write(1,40) neo_geo_yin_in(:,0:neo_geo_ny_in)
+       close(1)
+    endif
+
+10  format(i3)
+40  format(1pe12.5)
 20  format(t2,a,i3)
 30  format(t2,a,1pe12.5)
     

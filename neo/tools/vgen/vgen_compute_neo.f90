@@ -20,7 +20,6 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, omega_deriv
   integer :: nmin, nmax, nth
 
   ! Set the local NEO input parameters
-  
   neo_silent_flag_in    = 1
 
   ! Normalizations
