@@ -405,7 +405,8 @@ subroutine neo_check
         write(io_neoout,10) 'n_theta (modes)',n_tptheta
         write(io_neoout,10) 'n_phi   (modes)',n_tpvarphi
         write(io_neoout,10) 'n_tp',tpmatsize
-     end if
+        write(io_neoout,"(t2,a,t19,': ',i5)") 'n_row',n_row
+     endif
 
      do ir=1,n_radial
         write(io_neoout,*) 
@@ -449,7 +450,7 @@ subroutine neo_check
      close(io_neoout)
   endif
 
-10 format(t2,a,t19,': ',i2)
+10 format(t2,a,t19,': ',i3)
 20 format(t2,a,t19,':',1pe12.4) 
 30 format(t2,a,t22,': ',a)
 

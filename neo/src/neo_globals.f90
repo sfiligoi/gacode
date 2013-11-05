@@ -103,6 +103,17 @@ module neo_globals
   integer :: n_tptheta
   integer :: n_tpvarphi
   integer :: indx_c00
+  !
+  ! LAPACK/SCALAPACK VARIABLES
+  integer :: scalapack_flag
+  integer :: ictxt
+  integer :: bw
+  integer :: npb
+  integer :: ldab
+  integer :: nb
+  integer :: n_row
+  real, dimension(:,:), allocatable :: ab
+  integer, dimension(:), allocatable :: ipiv
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -168,10 +179,10 @@ module neo_globals
 
   ! Numerical/work arrays and dimensions
 
-  integer :: n_row
   integer :: n_max
 
   real, dimension(:), allocatable :: g
+  real, dimension(:), allocatable :: g_loc
   real, dimension(:), allocatable :: amat
   integer, dimension(:), allocatable :: amat_indx
 
@@ -200,7 +211,7 @@ module neo_globals
   ! error checking
   integer :: error_status = 0
   character(len=80) :: error_message = '(NEO) completed successfully.'
-	
+
   ! output file
   character(len=80)  :: runfile_neoout = 'out.neo.run'
   integer :: io_neoout = 12

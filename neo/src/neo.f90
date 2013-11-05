@@ -1,14 +1,14 @@
 program neo
 
   use mpi
-  use neo_globals, only : path, NEO_COMM_WORLD, i_proc, n_proc
+  use neo_globals
 
   implicit none
 
   integer :: ierr
 
   call MPI_INIT(ierr)
-  
+
   ! Path is cwd:
   path= './'
 

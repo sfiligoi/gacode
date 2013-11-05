@@ -200,7 +200,8 @@ then
   date >> out.neo.version
   #==========================================================
 
-  $NEO_DIR/src/neo
+#  mpiexec -np 4 $NEO_DIR/src/neo
+   $NEO_DIR/src/neo
 
 fi
 #===========================================================

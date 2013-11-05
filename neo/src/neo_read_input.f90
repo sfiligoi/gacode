@@ -78,6 +78,7 @@ subroutine neo_read_input
   read(1,*) threed_model
   read(1,*) threed_exb_model
   read(1,*) threed_exb_dphi0dr
+  read(1,*) scalapack_flag
 
   close(1)
 

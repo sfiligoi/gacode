@@ -42,6 +42,11 @@ subroutine neo_do
   integer, parameter :: io_neo=10, io_f=11
   character(len=80)  :: runfile_f = 'out.neo.f'
 
+  ! First, define some grid dimensions for 3D solver
+  if (threed_model == 1) then
+     nb    = (n_energy+1)*n_species*tpmatsize
+     n_row = (n_xi+1)*nb
+  endif
 
   call neo_make_profiles
   if(error_status > 0) goto 100
@@ -55,7 +60,6 @@ subroutine neo_do
 
   if(threed_model==1) then
      call ThreeD_do
-     !call neo_error('ERROR: (NEO) 3D not yet available.')
      goto 100
   endif
 
@@ -424,7 +428,7 @@ subroutine neo_do
      n_elem = k
      n_max = n_elem*matsz_scalefac
      matfac_err = 0
-     
+
      do ifac = 1, max_ifac
 
         if(silent_flag == 0 .and. i_proc == 0) then
@@ -483,7 +487,7 @@ subroutine neo_do
         write(io_neoout,*) 'Done matrix factor'
         close(io_neoout)
      endif
-     
+
      ! Set the RHS source 
      call set_RHS_source
 
