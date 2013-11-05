@@ -48,3 +48,5 @@ neo_lib.a: $(OBJECTS)
 
 clean:  
 	rm -rf *.o neo_lib.a $(EXEC) *~
+
+include ../install/make.ext.${GACODE_PLATFORM}
