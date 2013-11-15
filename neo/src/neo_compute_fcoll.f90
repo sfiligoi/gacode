@@ -24,7 +24,7 @@
 !
 !      G(m,n,lambda) + GB(m,n,lambda) = beta[(m+1)/2,(n+1)/2]
 !
-!  Results shold be good to machine precision in all cases
+!  Results should be good to machine precision in all cases
 !----------------------------------------------------------------
 
 subroutine neo_compute_fcoll(m0,lambda_in,f,fb)

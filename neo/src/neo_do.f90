@@ -568,9 +568,9 @@ subroutine neo_do
         call THEORY_alloc(0)
      end if
 
-     if(silent_flag == 0 .and. i_proc == 0) then
+     if (silent_flag == 0 .and. i_proc == 0) then
         open(io_f,file=trim(path)//runfile_f,status='old',position='append')
-        write(io_f,*) g(:)
+        write(io_f,'(1pe12.5)') g(:)
         close(io_f)
      endif
 
