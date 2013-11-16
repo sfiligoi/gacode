@@ -35,10 +35,11 @@ contains
     integer, intent (in) :: flag
     integer :: ie,ix
     integer :: xarg
-    
+    integer :: laguerre_method=1
+
     if(flag == 1) then
        if(initialized_basis) return
-       
+
        allocate(emat_e05(0:n_energy,0:n_energy,0:n_xi,2))
        allocate(emat_en05(0:n_energy,0:n_energy,0:n_xi,2)) 
        allocate(emat_e05de(0:n_energy,0:n_energy,0:n_xi,2))
@@ -53,25 +54,37 @@ contains
        allocate(e_lag(0:n_xi))
        allocate(xi_beta_l(0:n_xi))
 
-       ! Laguerre 1/2+3/2
-       e_lag(:) = 3
-       e_lag(0) = 1
-       xi_beta_l(:) = 1
-       xi_beta_l(0) = 0
+       select case (laguerre_method) 
 
-       ! Sonine
-       !do ix=0,n_xi
-       !   e_lag(ix) = 2*ix + 1
-       !   xi_beta_l(ix) = ix
-       !enddo
+       case (1)
 
-       ! Laguerre 1/2
-       !e_lag(:) = 1
-       !xi_beta_l(:) = 0
+          ! Laguerre 1/2+3/2
+          e_lag(:) = 3
+          e_lag(0) = 1
+          xi_beta_l(:) = 1
+          xi_beta_l(0) = 0
 
-       ! Laguerre 3/2
-       !e_lag(:) = 3
-       !xi_beta_l(:) = 1
+       case (2)
+
+          ! Sonine
+          do ix=0,n_xi
+             e_lag(ix) = 2*ix + 1
+             xi_beta_l(ix) = ix
+          enddo
+
+       case (3)
+
+          ! Laguerre 1/2
+          e_lag(:) = 1
+          xi_beta_l(:) = 0
+
+       case (4)
+
+          ! Laguerre 3/2
+          e_lag(:) = 3
+          xi_beta_l(:) = 1
+
+       end select
 
        xarg = 4*e_alpha * n_energy + 4*n_xi + 12
        allocate(mygamma2(1:xarg))
@@ -83,7 +96,7 @@ contains
 
     else
        if(.NOT. initialized_basis) return
-       
+
        deallocate(emat_e05)
        deallocate(emat_en05) 
        deallocate(emat_e05de)
@@ -96,11 +109,11 @@ contains
        deallocate(e_lag)
        deallocate(xi_beta_l)
        deallocate(mygamma2)
-       
+
        initialized_basis = .false.
-       
+
     endif
-    
+
   end subroutine ENERGY_basis_ints_alloc
   
   subroutine ENERGY_basis_ints
@@ -912,6 +925,8 @@ contains
              do je=0,n_energy
                 do ix=0, n_xi
 
+                   jx = ix
+
                    ! Full linearized FP op
                    xarg = e_alpha*(ie+je) &
                         + xi_beta_l(ix) + xi_beta_l(jx)
@@ -979,7 +994,7 @@ contains
        print '(a,i2)','ix =',ix
        do ie=0,n_energy
           print '(10(1pe12.5,1x))',&
-               (emat_coll_test(1,1,ie,:,ix)+emat_coll_field(1,1,ie,:,ix))/tauinv_ab
+               (test_mono(1,1,ie,:,ix)+field_mono(1,1,ie,:,ix))/tauinv_ab
        enddo
     enddo
 
