@@ -670,15 +670,6 @@ contains
        enddo
     enddo
 
-    ! JC: Print collision matix 
-    !do ix=0,n_xi
-    !   print '(a,i2)','ix =',ix
-    !   do ie=0,n_energy
-    !      print '(10(1pe12.5,1x))',&
-    !           (emat_coll_test(1,1,ie,:,ix)+emat_coll_field(1,1,ie,:,ix))/tauinv_ab
-    !   enddo
-    !enddo
-
     if(collision_model==5) then
        ! Replace actual field-particle op with ad-hoc op
        emat_coll_field(:,:,:,:,:) = 0.0
@@ -873,8 +864,126 @@ contains
     deallocate(fcollinv)
     deallocate(fcollinv_bar)
 
+    !call write_fullcoll_mono(ir)
+
   end subroutine ENERGY_coll_ints
 
+  subroutine write_fullcoll_mono(ir)
+    use neo_globals
+    implicit none
+    integer, intent(in) :: ir
+    real :: tauinv_ab, tauinv_ba, lambda
+    integer :: xarg, yarg
+    real :: rd, r1, r2, r3, r4, r5, r6, r7
+    real, dimension(:,:), allocatable :: fcoll, fcoll_bar, &
+         fcollinv, fcollinv_bar
+    integer :: fmarg
+    integer :: is, js, ie, je, ix, jx
+    real, dimension(:,:,:,:,:), allocatable :: test_mono
+    real, dimension(:,:,:,:,:), allocatable :: field_mono
+
+    allocate(test_mono(n_species,n_species,0:n_energy,0:n_energy,0:n_xi))
+    allocate(field_mono(n_species,n_species,0:n_energy,0:n_energy,0:n_xi))
+
+    test_mono(:,:,:,:,:)  = 0.0
+    field_mono(:,:,:,:,:) = 0.0
+
+    fmarg = 2*e_alpha*n_energy + (2*n_xi)+4
+    allocate(fcoll(-fmarg:fmarg,-fmarg:fmarg))
+    allocate(fcoll_bar(-fmarg:fmarg,-fmarg:fmarg))
+    allocate(fcollinv(-fmarg:fmarg,-fmarg:fmarg))
+    allocate(fcollinv_bar(-fmarg:fmarg,-fmarg:fmarg))
+
+    do is=1, n_species
+       do js=1, n_species
+
+          ! (Note: pol part of dens from rotation will be added 
+          !  in coll term in kinetic equation)
+          tauinv_ab = nu(is,ir) * (1.0*Z(js))**2 / (1.0*Z(is))**2 & 
+               * dens(js,ir)/dens(is,ir)
+          tauinv_ba = nu(js,ir) * (1.0*Z(is))**2 / (1.0*Z(js))**2 & 
+               * dens(is,ir)/dens(js,ir)
+
+          lambda = (vth(is,ir) / vth(js,ir))**2
+          call neo_compute_fcoll(fmarg,lambda,fcoll,fcoll_bar)
+          call neo_compute_fcoll(fmarg,1.0/lambda,fcollinv,fcollinv_bar)
+
+          do ie=0, n_energy
+             do je=0,n_energy
+                do ix=0, n_xi
+
+                   ! Full linearized FP op
+                   xarg = e_alpha*(ie+je) &
+                        + xi_beta_l(ix) + xi_beta_l(jx)
+                   test_mono(is,js,ie,je,ix) = &
+                        test_mono(is,js,ie,je,ix) &
+                        -tauinv_ab &
+                        * sqrt(lambda/pi) *ix*(ix+1) &
+                        * (fcoll(xarg-1,0) - fcoll(xarg-3,2)) 
+                        
+                   rd = 4.0*tauinv_ab * sqrt(lambda/pi) &
+                        * (e_alpha*ie + xi_beta_l(ix)) &
+                        * ( (1.0 - temp(is,ir)/temp(js,ir)) &
+                        * fcoll(xarg-1,2) &
+                        - 0.5 * (e_alpha*je + xi_beta_l(jx)) &
+                        * fcoll(xarg-3,2) )
+
+                   test_mono(is,js,ie,je,ix) = &
+                        test_mono(is,js,ie,je,ix) + rd
+
+                   ! Real full field-particle operator
+
+                   r1 = mass(is)/mass(js) &
+                        * (1.0 + lambda)**(-0.5*(xarg+3)) &
+                        * mygamma2(xarg + 3)
+
+                   xarg = e_alpha*ie + xi_beta_l(ix)
+                   yarg = e_alpha*je + xi_beta_l(jx)
+                   
+                   r2 = -2.0/(ix+0.5) &
+                        * (mass(is)/mass(js) &
+                        - ix*(1.0-mass(is)/mass(js))) &
+                        * fcoll(xarg-ix+1,yarg+jx+2)
+                   
+                   r3 = -2.0/(ix+0.5) &
+                        * (1.0 + ix*(1.0-mass(is)/mass(js))) &
+                        * fcoll_bar(xarg+ix+2,yarg-jx+1)
+                   
+                   r4 = -ix*(ix-1.0)/(ix*ix - 0.25) &
+                        * fcoll(xarg-ix+3,yarg+jx+2)
+                   
+                   r5 = -ix*(ix-1.0)/(ix*ix - 0.25) &
+                        * fcoll_bar(xarg+ix+2,yarg-jx+3)
+                   
+                   r6 = (ix+1.0)*(ix+2.0)/(ix+1.5)/(ix+0.5) &
+                        * fcoll(xarg-ix+1,yarg+jx+4)
+                   
+                   r7 = (ix+1.0)*(ix+2.0)/(ix+1.5)/(ix+0.5) &
+                        * fcoll_bar(xarg+ix+4,yarg-jx+1)
+                   
+                   field_mono(is,js,ie,je,ix) = &
+                        field_mono(is,js,ie,je,ix) &
+                        + tauinv_ab * 2.0/sqrt(pi) * lambda**1.5 &
+                        * lambda**(0.5*(e_alpha*je &
+                        + xi_beta_l(ix))) &
+                        * (r1 + r2 + r3 + r4 + r5 + r6 + r7)
+
+                enddo
+             enddo
+          enddo
+       enddo
+    enddo
+
+    ! JC: Print collision matix 
+    do ix=0,n_xi
+       print '(a,i2)','ix =',ix
+       do ie=0,n_energy
+          print '(10(1pe12.5,1x))',&
+               (emat_coll_test(1,1,ie,:,ix)+emat_coll_field(1,1,ie,:,ix))/tauinv_ab
+       enddo
+    enddo
+
+  end subroutine write_fullcoll_mono
 
   ! returns Gamma(n/2)
   real function gamma2(n)

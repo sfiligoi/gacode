@@ -283,6 +283,8 @@ contains
     !close(1)
     !stop
 
+    !print *, I_div_psip, Bmag2inv_avg - 1.0/Bmag2_avg
+
   end subroutine EQUIL_DO
   
 
