@@ -284,6 +284,11 @@ contains
     !stop
 
     !print *, I_div_psip, Bmag2inv_avg - 1.0/Bmag2_avg
+    !open(unit=1,file='geo.out',status='replace')
+    !do it=1,n_theta
+    !   write (1,'(e16.8)') gradpar_Bmag(it)*Bmag(it)
+    !enddo
+    !close(1)
 
   end subroutine EQUIL_DO
   
