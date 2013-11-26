@@ -1,9 +1,8 @@
-"""This file is executed by the bash script gyro_plot when a plot of the
-fluxes is requested."""
+"""This file is executed by the bash script gyro_plot"""
 
 import sys
 import numpy as np
-import matplotlib.pyplot as plt
+from gacodeplotdefs import *
 from pyrats.gyro.data import GYROData
 
 fig = plt.figure(figsize=(16,8))
