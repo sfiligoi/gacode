@@ -113,6 +113,9 @@ module neo_interface
   integer :: neo_threed_model_in = 0
   integer :: neo_threed_exb_model_in = 0
   real    :: neo_threed_exb_dphi0dr_in = 0.0
+  integer :: neo_scalapack_flag_in = 0
+  integer :: neo_laguerre_method_in = 0
+  integer :: neo_write_cmoments_flag_in = 0
   integer :: neo_geo_ny_in = 0
   real, dimension(8,0:32) :: neo_geo_yin_in = 0.0
   ! the exception of the default is subroutine_flag
@@ -255,6 +258,9 @@ contains
     neo_threed_model_in = threed_model
     neo_threed_exb_model_in = threed_exb_model
     neo_threed_exb_dphi0dr_in = threed_exb_dphi0dr
+    neo_scalapack_flag_in = scalapack_flag 
+    neo_laguerre_method_in = laguerre_method 
+    neo_write_cmoments_flag_in = write_cmoments_flag 
     neo_geo_ny_in = geo_ny_in
     neo_geo_yin_in(:,:) = geo_yin_in(:,:)
     neo_subroutine_flag = subroutine_flag
@@ -365,6 +371,9 @@ contains
     threed_model = neo_threed_model_in
     threed_exb_model = neo_threed_exb_model_in
     threed_exb_dphi0dr = neo_threed_exb_dphi0dr_in
+    scalapack_flag = neo_scalapack_flag_in 
+    laguerre_method = neo_laguerre_method_in
+    write_cmoments_flag = neo_write_cmoments_flag_in 
     geo_ny_in = neo_geo_ny_in
     geo_yin_in(:,:) = neo_geo_yin_in(:,:)
     subroutine_flag = neo_subroutine_flag
@@ -376,11 +385,11 @@ contains
   subroutine interfacelocaldump
     use neo_globals
     implicit none
-    
+
     if(neo_silent_flag_in > 0 .or. i_proc > 0) return
 
     open(unit=1,file=trim(path)//'out.neo.localdump',status='replace')
-    
+
     if(neo_n_radial_in > 1) then
        write(1,*) 'Localdump only works with n_radial=1'
        close(1)
@@ -391,7 +400,7 @@ contains
        close(1)
        return
     endif
-    
+
     write(1,20) 'N_ENERGY=',neo_n_energy_in
     write(1,20) 'N_XI=',neo_n_xi_in
     write(1,20) 'N_THETA=',neo_n_theta_in
@@ -417,7 +426,7 @@ contains
     write(1,20) 'COLL_UNCOUPLEDEI_MODEL=',neo_coll_uncoupledei_model_in
     write(1,20) 'N_SPECIES=',neo_n_species_in
     write(1,30) 'NU_1=',neo_nu_1_in
-    
+
     write(1,20) 'Z_1=',neo_z_1_in
     write(1,30) 'MASS_1=',neo_mass_1_in
     write(1,30) 'DENS_1=',neo_dens_1_in
@@ -464,7 +473,7 @@ contains
        write(1,30) 'DLNNDR_6=',neo_dlnndr_6_in
        write(1,30) 'DLNTDR_6=',neo_dlntdr_6_in
     endif
-  
+
     write(1,30) 'DPHI0DR=',neo_dphi0dr_in
     write(1,30) 'EPAR0=',neo_epar0_in
     write(1,30) 'Q=',neo_q_in
@@ -479,9 +488,13 @@ contains
     write(1,30) 'S_ZETA=',neo_s_zeta_in
     write(1,30) 'ZMAG_OVER_A=',neo_zmag_over_a_in
     write(1,30) 'S_ZMAG=',neo_s_zmag_in
-    
+
+    write(1,20) 'SCALAPACK_FLAG=',neo_scalapack_flag_in
+    write(1,20) 'LAGUERRE_METHOD=',neo_laguerre_method_in
+    write(1,20) 'WRITE_CMOMENTS_FLAG=',neo_write_cmoments_flag_in
+
     close(1)
-    
+
     if(neo_equilibrium_model_in == 3) then
        open(unit=1,file=trim(path)//'out.neo.localdump_geo',status='replace')
        write(1,10) neo_geo_ny_in
@@ -493,7 +506,7 @@ contains
 40  format(1pe12.5)
 20  format(t2,a,i3)
 30  format(t2,a,1pe12.5)
-    
+
   end subroutine interfacelocaldump
   
   
