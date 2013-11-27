@@ -264,10 +264,9 @@ contains
     Bmag2inv_avg = 0.0
     gradpar_Bmag2_avg = 0.0
     do it=1,n_theta
-       Bmag2_avg = Bmag2_avg + w_theta(it) * Bmag(it) * Bmag(it)
-       Bmag2inv_avg = Bmag2inv_avg + w_theta(it) * 1.0 / (Bmag(it) * Bmag(it))
-       gradpar_Bmag2_avg = gradpar_Bmag2_avg + w_theta(it) * gradpar_Bmag(it) &
-            * gradpar_Bmag(it)
+       Bmag2_avg    = Bmag2_avg    + w_theta(it)*Bmag(it)**2
+       Bmag2inv_avg = Bmag2inv_avg + w_theta(it)/Bmag(it)**2
+       gradpar_Bmag2_avg = gradpar_Bmag2_avg + w_theta(it)*gradpar_Bmag(it)**2
     enddo
 
     call compute_fractrap(ftrap)
@@ -283,12 +282,13 @@ contains
     !close(1)
     !stop
 
-    !print *, I_div_psip, Bmag2inv_avg - 1.0/Bmag2_avg
-    !open(unit=1,file='geo.out',status='replace')
-    !do it=1,n_theta
-    !   write (1,'(e16.8)') gradpar_Bmag(it)*Bmag(it)
-    !enddo
-    !close(1)
+    open(unit=1,file='geo.out',status='replace')
+    write(1,'(a,1pe13.6)') "# I/psi'              = ",I_div_psip
+    write(1,'(a,1pe13.6)') "# < 1/B^2 - 1/<B^2> > = ",Bmag2inv_avg-1.0/Bmag2_avg
+    do it=1,n_theta
+       write (1,'(1pe13.6)') gradpar_Bmag(it)
+    enddo
+    close(1)
 
   end subroutine EQUIL_DO
   

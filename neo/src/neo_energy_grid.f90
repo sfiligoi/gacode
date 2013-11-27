@@ -30,14 +30,14 @@ module neo_energy_grid
 contains
 
   subroutine ENERGY_basis_ints_alloc(flag)
-    use neo_globals, only : n_energy, n_xi
+
+    use neo_globals, only : n_energy, n_xi, laguerre_method
     implicit none
     integer, intent (in) :: flag
     integer :: ie,ix
     integer :: xarg
-    integer :: laguerre_method=1
 
-    if(flag == 1) then
+    if (flag == 1) then
        if(initialized_basis) return
 
        allocate(emat_e05(0:n_energy,0:n_energy,0:n_xi,2))
@@ -877,7 +877,9 @@ contains
     deallocate(fcollinv)
     deallocate(fcollinv_bar)
 
-    !call write_fullcoll_mono(ir)
+    if (write_cmoments_flag == 1) then
+       call write_fullcoll_mono(ir)
+    endif
 
   end subroutine ENERGY_coll_ints
 
@@ -993,7 +995,7 @@ contains
     do ix=0,n_xi
        print '(a,i2)','ix =',ix
        do ie=0,n_energy
-          print '(10(1pe12.5,1x))',&
+          print '(10(1pe13.6,1x))',&
                (test_mono(1,1,ie,:,ix)+field_mono(1,1,ie,:,ix))/tauinv_ab
        enddo
     enddo

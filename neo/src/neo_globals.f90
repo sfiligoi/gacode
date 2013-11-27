@@ -89,6 +89,8 @@ module neo_globals
   real    :: sign_q
   real    :: sign_bunit
   integer :: subroutine_flag  ! only used for neo_read_input
+  integer :: laguerre_method
+  integer :: write_cmoments_flag
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
