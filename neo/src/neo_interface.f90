@@ -114,7 +114,7 @@ module neo_interface
   integer :: neo_threed_exb_model_in = 0
   real    :: neo_threed_exb_dphi0dr_in = 0.0
   integer :: neo_scalapack_flag_in = 0
-  integer :: neo_laguerre_method_in = 0
+  integer :: neo_laguerre_method_in = 1
   integer :: neo_write_cmoments_flag_in = 0
   integer :: neo_geo_ny_in = 0
   real, dimension(8,0:32) :: neo_geo_yin_in = 0.0
