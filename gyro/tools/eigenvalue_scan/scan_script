@@ -1,0 +1,86 @@
+#!/bin/bash
+#
+#=============================================================
+# scan_script
+#
+# PURPOSE:
+#  Template script for GYRO eigenvalue parameter scans.
+#
+#  Checklist:
+#  - copy this script to your working directory, or just above
+#    your working directory defined in the variable "dir".
+#
+#  - this script reads input.gyro (and stores the original in
+#    input.gyro.orig). On exit, it should preserve the original,
+#    but if the script fails it may get extra symbols at the 
+#    bottom.
+#
+#  - ensure LINSOLVE_METHOD=3 (field eigenvalue mode).
+#
+#  - ensure ELECTRON_METHOD=4 (gyrokinetic electrons) or 
+#    ELECTRON_METHOD=1.
+#=============================================================
+
+
+#================================================
+# USER-SET PARAMETERS
+
+# Simulation directory and number of cores
+
+dir=.
+cpu=4
+
+# List of parameters to scan
+
+list="
+L_Y=0.3
+L_Y=0.35
+L_Y=0.4
+L_Y=0.45
+L_Y=0.5
+"
+
+# Initial guess
+
+WR=-0.3
+WI=0.1
+
+#=============================================
+
+cd $dir
+cp input.gyro input.gyro.orig
+
+# Check for correct settings
+X=`grep LINSOLVE input.gyro`
+if [ "$X" != "LINSOLVE_METHOD=3" ] ; then 
+   echo "ERROR: (scan_script) Must set LINSOLVE_METHOD=3 in input.gyro"
+   exit 1
+fi
+
+echo "FIELDEIGEN_WR=$WR" >> input.gyro
+echo "FIELDEIGEN_WI=$WI" >> input.gyro
+
+rm -f out.gyro.scan_omega
+rm -f out.gyro.scan_param
+rm -f out.gyro.scan_gbflux
+
+for x in $list
+do
+   echo "$x"
+   echo "$x" >> input.gyro
+   gyro -e . -n $cpu
+   tail -1 fieldeigen.out >> out.gyro.scan_omega
+   tail -1 out.gyro.gbflux >> out.gyro.scan_gbflux
+   z=`echo "$x" | cut -d '=' -f 2`
+   echo "$z" >> out.gyro.scan_param
+   cp input.gyro.orig input.gyro
+
+   # Update eigenvalue guess
+   foo=`tail -n 1 fieldeigen.out`
+   bar=( $foo )
+   echo "FIELDEIGEN_WR=${bar[0]}" >> input.gyro
+   echo "FIELDEIGEN_WI=${bar[1]}" >> input.gyro
+done
+
+cp input.gyro.orig input.gyro
+
