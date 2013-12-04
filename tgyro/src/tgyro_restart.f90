@@ -102,6 +102,14 @@ subroutine tgyro_restart
 
   endif
 
+  ! Reset n_evolve in case it was changed from value stored in control.out.
+
+  n_evolve = &
+       loc_ti_feedback_flag+&
+       loc_te_feedback_flag+&
+       loc_ne_feedback_flag+&
+       loc_er_feedback_flag
+
   call MPI_BCAST(loc_restart_flag,&
        1,&
        MPI_INTEGER,&
