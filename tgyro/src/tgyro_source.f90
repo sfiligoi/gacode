@@ -107,6 +107,8 @@ subroutine tgyro_source
 
      ! Reactor, with self-consistent power, radiation 
      ! and exchange; input auxiliary power.
+ 
+     ! loc_alpha_elec is fraction of alpha power to electrons
 
      p_i = (1.0-loc_alpha_elec)*p_alpha & 
           +p_i_aux_in &                      

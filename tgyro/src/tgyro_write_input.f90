@@ -339,6 +339,25 @@ subroutine tgyro_write_input
      !--------------------------------------------------------
 
      !--------------------------------------------------------
+     select case (tgyro_dt_method)
+
+     case (1)
+
+        write(1,10) 'TGYRO_DT_METHOD','Reaction cross section <n1*n2> (use with separate D and T)'
+
+     case (2)
+
+        write(1,10) 'TGYRO_DT_METHOD','Reaction cross section <n1*n1>/4 (use with single main ion)'
+
+     case default
+
+        error_flag = 1
+        error_msg = 'Error: TGYRO_DT_METHOD'
+
+     end select
+     !--------------------------------------------------------
+
+     !--------------------------------------------------------
      select case (loc_sawtooth_model)
 
      case (1)
@@ -410,7 +429,6 @@ subroutine tgyro_write_input
      end select
      !--------------------------------------------------------
 
-     write(1,20) 'Pivot radius',r(i_bc)/r_min
 
 100  continue 
 
@@ -420,8 +438,10 @@ subroutine tgyro_write_input
 
      write(1,20) 'LOC_RMIN',r(2)/r_min
      write(1,20) 'LOC_RMAX',r(n_r)/r_min
+     write(1,20) 'Pivot radius',r(i_bc)/r_min
      write(1,20) 'LOC_NU_SCALE',loc_nu_scale
      write(1,20) 'LOC_BETAE_SCALE',loc_betae_scale
+     write(1,20) 'LOC_ALPHA_ELEC',loc_alpha_elec,'{fraction of alpha power to electrons}.'
      if (loc_betae_scale > 0.0) then
         write(1,10) '-> Fluctuations','Electromagnetic'
      else
@@ -615,7 +635,7 @@ subroutine tgyro_write_input
   !--------------------------------------------------------------
 
 10 format(t2,a,t33,':',t35,a)
-20 format(t2,a,t33,':',t35,f8.4)
+20 format(t2,a,t33,':',t35,f8.4,1x,a)
 30 format(t2,a,t33,':',t35,i4)
 40 format(t2,a,t33,':',t35,f6.2,1x,f6.2,3x,a)
 
