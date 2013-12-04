@@ -6,6 +6,7 @@ subroutine tgyro_write_input
   implicit none
 
   integer :: i_ion
+  character(len=7) :: ttext
 
   !----------------------------------------------------------------
   ! Trap miscellaneous errors
@@ -534,10 +535,23 @@ subroutine tgyro_write_input
         error_msg = 'Error: LOC_LOCK_PROFILE_FLAG'
 
      end select
+
      !--------------------------------------------------------
+     write(1,*)
+     write(1,*) 'Ion parameters'
+     write(1,*) 
+
      do i_ion=1,loc_n_ion
-        write(1,20) 'ion '//trim(ion_tag(i_ion))//' mass',mi_vec(i_ion)
-        write(1,20) 'ion '//trim(ion_tag(i_ion))//' charge ',zi_vec(i_ion)
+        if (therm_flag(i_ion) == 1) then
+           ttext = 'thermal'
+        else
+           ttext = 'fast'
+        endif
+        if (i_ion == 1) then
+           write(1,40) 'ion 1 [mass,charge,type]',mi_vec(i_ion),zi_vec(i_ion),ttext
+        else
+           write(1,40) 'ion '//trim(ion_tag(i_ion))//' [mass,charge,type]',mi_vec(i_ion),zi_vec(i_ion),ttext
+        endif
      enddo
 
      !--------------------------------------------------------
@@ -603,6 +617,7 @@ subroutine tgyro_write_input
 10 format(t2,a,t33,':',t35,a)
 20 format(t2,a,t33,':',t35,f8.4)
 30 format(t2,a,t33,':',t35,i4)
+40 format(t2,a,t33,':',t35,f6.2,1x,f6.2,3x,a)
 
 end subroutine tgyro_write_input
 
