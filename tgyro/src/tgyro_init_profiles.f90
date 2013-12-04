@@ -44,6 +44,8 @@ subroutine tgyro_init_profiles
   !
   !  therm_vec = (1,3)  
   !
+  ! Size of therm_vec is number of thermal ions.
+  !
   i=0
   do i_ion=1,loc_n_ion
      if (therm_flag(i_ion) == 1) then
@@ -168,11 +170,23 @@ subroutine tgyro_init_profiles
   !------------------------------------------------------------------------------------------
   ! Quasineutrality:
   !
-  ! Overwrite main ion density and gradient with corrected density and gradient 
-  ! (done in EXPRO):
-  if (tgyro_quasineutral_flag == 1) then
-     call cub_spline(EXPRO_rmin(:)/r_min,1e13*EXPRO_ni_new(:),n_exp,r,ni(1,:),n_r)
-     call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_dlnnidr_new(:)/100.0,n_exp,r,dlnnidr(1,:),n_r)
+  if (loc_lock_profile_flag == 0) then
+
+     ! Overwrite main ion(s) density and gradient(s) with corrected values 
+     !
+     ! There are 2 options for quasineurality: see TGYRO_FIX_CONCENTRATION_FLAG
+
+     do i=1,n_r
+        call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(:),loc_n_ion,dlnridr(:,i))
+     enddo
+
+     ! Reintegrate density profiles
+
+     do i_ion=1,loc_n_ion
+        ! ni in 1/cm^3
+        call logint(ni(i_ion,:),dlnnidr(i_ion,:),r,n_r,i_bc)
+     enddo
+
   endif
   !------------------------------------------------------------------------------------------
 

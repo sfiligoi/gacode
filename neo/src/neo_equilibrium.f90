@@ -125,7 +125,7 @@ contains
     ! parameters needed for Miller equilibrium
 
     sum=0.0
-    
+
     if (equilibrium_model == 2 .or. equilibrium_model == 3) then 
 
        ! geo_numeq_flag, geo_ny, and geo_yin already set
@@ -145,7 +145,7 @@ contains
        GEO_zeta_in      = zeta(ir)
        GEO_s_zeta_in    = s_zeta(ir)
        GEO_beta_star_in = 0.0    ! EAB: set beta_star=0;not in first-order calc
-                                 ! NOTE: it is not implemented in v_drift defs
+       ! NOTE: it is not implemented in v_drift defs
        GEO_fourier_in(:,:) = geo_yin(:,:,ir)
        call GEO_do()  
 
@@ -172,7 +172,7 @@ contains
        enddo
 
        I_div_psip = GEO_f * q(ir) / r(ir)
-       
+
        ! values at theta=0
        call GEO_interp(0.0)
        bigR_th0        = GEO_bigr
@@ -182,14 +182,14 @@ contains
        Bpol_th0        = GEO_bp
 
     else
-       
+
        ! concentric circular geometry
        shift(ir)   = 0.0
        kappa(ir)   = 1.0
        s_kappa(ir) = 0.0
        delta(ir)   = 0.0
        s_delta(ir) = 0.0
-       
+
        do it=1,n_theta
           k_par(it)       = 1.0 / (q(ir) * rmaj(ir)) * sign_bunit
           bigR(it)        = rmaj(ir) * (1.0 + r(ir)/rmaj(ir) * cos(theta(it)))
@@ -199,7 +199,7 @@ contains
           bigR_th0        = rmaj(ir) + r(ir)
           bigR_th0_rderiv = 1.0 
           gradr_th0       = 1.0
-          
+
           if (equilibrium_model == 1) then
              ! large aspect ratio geometry
              Btor_th0 = 1.0 - (r(ir)/rmaj(ir))
@@ -214,7 +214,7 @@ contains
                   / (1.0 - (r(ir)/rmaj(ir)) * cos(theta(it)))**2
              v_drift_th(it) = -rho(ir)/(rmaj(ir)) * cos(theta(it)) &
                   / (1.0 - (r(ir)/rmaj(ir)) * cos(theta(it)))**2
-             
+
           else
              ! s-alpha geometry
              Btor_th0 = 1.0 / (1.0 + (r(ir)/rmaj(ir)))
@@ -231,16 +231,16 @@ contains
              v_drift_x(it)  = -rho(ir)/rmaj(ir) * sin(theta(it))
              v_drift_th(it) = -rho(ir)/rmaj(ir) * cos(theta(it))
           endif
-          
+
           ! flux-surface average weights
           w_theta(it) = 1.0 * sign_bunit / Bmag(it)
           sum = sum + w_theta(it)
        enddo
-       
+
        I_div_psip = rmaj(ir) * q(ir) / r(ir)
-       
+
     endif
-    
+
     do it=1,n_theta
        w_theta(it) = w_theta(it) / sum
        bigR_tderiv(it) = 0.0
@@ -282,12 +282,20 @@ contains
     !close(1)
     !stop
 
-    open(unit=1,file='geo.out',status='replace')
-    write(1,'(a,1pe13.6)') "# I/psi'              = ",I_div_psip
-    write(1,'(a,1pe13.6)') "# < 1/B^2 - 1/<B^2> > = ",Bmag2inv_avg-1.0/Bmag2_avg
-    do it=1,n_theta
-       write (1,'(1pe13.6)') gradpar_Bmag(it)
-    enddo
+    open(unit=1,file=trim(path)//'out.neo.diagnostic_geo',status='replace')
+    write(1,'(a,1pe16.8)') "# I/psi'              = ",I_div_psip
+    write(1,'(a,1pe16.8)') "# < 1/B^2 - 1/<B^2> > = ",Bmag2inv_avg-1.0/Bmag2_avg
+    write(1,'(a,1pe16.8)') "# f_trap              = ",ftrap
+    write(1,'(a)') "# Functions:" 
+    write(1,'(a)') "#   theta(:)" 
+    write(1,'(a)') "#   v_drift_x(:)" 
+    write(1,'(a)') "#   gradpar_Bmag(:)" 
+    write(1,'(a)') "#   Bmag(:)" 
+    write(1,'(1pe16.8)') theta(:)
+    write(1,'(1pe16.8)') v_drift_x(:)
+    write(1,'(1pe16.8)') gradpar_Bmag(:)
+    write(1,'(1pe16.8)') Bmag(:)
+
     close(1)
 
   end subroutine EQUIL_DO

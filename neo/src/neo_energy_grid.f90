@@ -896,6 +896,7 @@ contains
     integer :: is, js, ie, je, ix, jx
     real, dimension(:,:,:,:,:), allocatable :: test_mono
     real, dimension(:,:,:,:,:), allocatable :: field_mono
+    real, dimension(:,:), allocatable :: ctot
 
     allocate(test_mono(n_species,n_species,0:n_energy,0:n_energy,0:n_xi))
     allocate(field_mono(n_species,n_species,0:n_energy,0:n_energy,0:n_xi))
@@ -908,6 +909,11 @@ contains
     allocate(fcoll_bar(-fmarg:fmarg,-fmarg:fmarg))
     allocate(fcollinv(-fmarg:fmarg,-fmarg:fmarg))
     allocate(fcollinv_bar(-fmarg:fmarg,-fmarg:fmarg))
+    allocate(ctot(0:n_energy,0:n_energy))
+
+    open(unit=1,file=trim(path)//'out.neo.diagnostic_coll',status='replace')
+    write(1,'(a)') '# Collision matrix energy-element order [C00,C01,C02,C11,C12,C22,...]'
+    write(1,'(a)') '# '
 
     do is=1, n_species
        do js=1, n_species
@@ -937,7 +943,7 @@ contains
                         -tauinv_ab &
                         * sqrt(lambda/pi) *ix*(ix+1) &
                         * (fcoll(xarg-1,0) - fcoll(xarg-3,2)) 
-                        
+
                    rd = 4.0*tauinv_ab * sqrt(lambda/pi) &
                         * (e_alpha*ie + xi_beta_l(ix)) &
                         * ( (1.0 - temp(is,ir)/temp(js,ir)) &
@@ -956,28 +962,28 @@ contains
 
                    xarg = e_alpha*ie + xi_beta_l(ix)
                    yarg = e_alpha*je + xi_beta_l(jx)
-                   
+
                    r2 = -2.0/(ix+0.5) &
                         * (mass(is)/mass(js) &
                         - ix*(1.0-mass(is)/mass(js))) &
                         * fcoll(xarg-ix+1,yarg+jx+2)
-                   
+
                    r3 = -2.0/(ix+0.5) &
                         * (1.0 + ix*(1.0-mass(is)/mass(js))) &
                         * fcoll_bar(xarg+ix+2,yarg-jx+1)
-                   
+
                    r4 = -ix*(ix-1.0)/(ix*ix - 0.25) &
                         * fcoll(xarg-ix+3,yarg+jx+2)
-                   
+
                    r5 = -ix*(ix-1.0)/(ix*ix - 0.25) &
                         * fcoll_bar(xarg+ix+2,yarg-jx+3)
-                   
+
                    r6 = (ix+1.0)*(ix+2.0)/(ix+1.5)/(ix+0.5) &
                         * fcoll(xarg-ix+1,yarg+jx+4)
-                   
+
                    r7 = (ix+1.0)*(ix+2.0)/(ix+1.5)/(ix+0.5) &
                         * fcoll_bar(xarg+ix+4,yarg-jx+1)
-                   
+
                    field_mono(is,js,ie,je,ix) = &
                         field_mono(is,js,ie,je,ix) &
                         + tauinv_ab * 2.0/sqrt(pi) * lambda**1.5 &
@@ -988,17 +994,22 @@ contains
                 enddo
              enddo
           enddo
-       enddo
-    enddo
 
-    ! JC: Print collision matix 
-    do ix=0,n_xi
-       print '(a,i2)','ix =',ix
-       do ie=0,n_energy
-          print '(10(1pe13.6,1x))',&
-               (test_mono(1,1,ie,:,ix)+field_mono(1,1,ie,:,ix))/tauinv_ab
-       enddo
-    enddo
+          do ix=0,n_xi
+             ctot(:,:) = (test_mono(is,js,:,:,ix)+field_mono(is,js,:,:,ix))/tauinv_ab 
+             write(1,'(a,i2,a,i2,a,i2,a)') '# ix = ',ix,'  (is,js)=(',is,',',js,')'
+             do ie=0,n_energy
+                do je=ie,n_energy
+                   write(1,'(1pe16.8,1x)',advance='no') ctot(ie,je)
+                enddo
+             enddo
+             write(1,*)
+          enddo ! ix
+
+       enddo ! js
+    enddo ! is
+
+    close(1)
 
   end subroutine write_fullcoll_mono
 

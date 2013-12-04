@@ -8,7 +8,6 @@ subroutine tgyro_profile_functions
   real :: c_exch
   real, dimension(n_r) :: loglam
 
-
   ! Note flag to only evolve only gradients
   if (loc_evolve_grad_only_flag == 0 .and. &
        (loc_lock_profile_flag == 0 .or. i_tran > 0)) then
