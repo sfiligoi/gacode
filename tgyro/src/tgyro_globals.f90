@@ -125,6 +125,11 @@ module tgyro_globals
   ! Formulary exchange rate
   real, dimension(:), allocatable :: nu_exch
 
+  ! Alpha heating coefficients
+  real, dimension(:), allocatable :: frac_ae
+  real, dimension(:), allocatable :: frac_ai
+  
+
   ! Electron and ion temperatures
   real, dimension(:), allocatable :: te
   real, dimension(:), allocatable :: dlntedr
@@ -181,7 +186,8 @@ module tgyro_globals
   real, dimension(:), allocatable :: p_exch_in
   real, dimension(:), allocatable :: p_i
   real, dimension(:), allocatable :: p_e
-  real, dimension(:), allocatable :: p_alpha
+  real, dimension(:), allocatable :: p_alpha_i
+  real, dimension(:), allocatable :: p_alpha_e
   real, dimension(:), allocatable :: p_brem
   real, dimension(:), allocatable :: p_exch
   real, dimension(:), allocatable :: p_expwd
@@ -190,7 +196,8 @@ module tgyro_globals
   real, dimension(:), allocatable :: f_b_in
   real, dimension(:), allocatable :: f_w_in
   real, dimension(:), allocatable :: mf_in
-  real, dimension(:), allocatable :: s_alpha
+  real, dimension(:), allocatable :: s_alpha_i
+  real, dimension(:), allocatable :: s_alpha_e
   real, dimension(:), allocatable :: s_brem
   real, dimension(:), allocatable :: s_exch
   real, dimension(:), allocatable :: s_expwd
@@ -211,6 +218,7 @@ module tgyro_globals
   real :: k
   real :: me
   real :: mp
+  real :: malpha
   real :: c
   !
   real :: b_ref
@@ -233,7 +241,6 @@ module tgyro_globals
   !
   integer :: tgyro_mode
   integer :: tgyro_relax_iterations
-  real :: loc_alpha_elec
   real :: loc_nu_scale
   real :: loc_dx
   real :: loc_dx_gyro

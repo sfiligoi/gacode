@@ -34,7 +34,8 @@ OBJECTS = math_constants.o \
           p32.o \
           remap_grid.o \
 	  rjbesl.o \
-          sigv.o 
+          sigv.o \
+          sivukhin.o 
 
 .SUFFIXES : .o .f90 .f
 

@@ -38,9 +38,10 @@ subroutine tgyro_global_init_profiles
   !------------------------------------------------------
   ! Initialize integrated power vectors.
   !
-  p_alpha(:) = 0.0
-  p_exch(:)  = 0.0
-  p_brem(:)  = 0.0
+  p_alpha_i(:) = 0.0
+  p_alpha_e(:) = 0.0
+  p_exch(:)    = 0.0
+  p_brem(:)    = 0.0
   !------------------------------------------------------
 
   !----------------------------------------------

@@ -441,7 +441,6 @@ subroutine tgyro_write_input
      write(1,20) 'Pivot radius',r(i_bc)/r_min
      write(1,20) 'LOC_NU_SCALE',loc_nu_scale
      write(1,20) 'LOC_BETAE_SCALE',loc_betae_scale
-     write(1,20) 'LOC_ALPHA_ELEC',loc_alpha_elec,'{fraction of alpha power to electrons}.'
      if (loc_betae_scale > 0.0) then
         write(1,10) '-> Fluctuations','Electromagnetic'
      else

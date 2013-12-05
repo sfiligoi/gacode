@@ -4,9 +4,13 @@ subroutine tgyro_profile_functions
 
   implicit none
 
+  integer :: i
   integer :: i_ion
   real :: c_exch
   real, dimension(n_r) :: loglam
+  real, dimension(n_r) :: c_a
+  real, dimension(n_r) :: x_a
+  real, external :: sivukhin
 
   ! Note flag to only evolve only gradients
   if (loc_evolve_grad_only_flag == 0 .and. &
@@ -105,9 +109,25 @@ subroutine tgyro_profile_functions
   ! nu_exch in 1/s
   nu_exch(:) = 0.0
   do i_ion=1,loc_n_ion
-     nu_exch(:) = nu_exch(:)+c_exch*sqrt(me*mi(i_ion))*zi_vec(i_ion)**2 &
-          *ni(i_ion,:)*loglam(:)/(me*ti(i_ion,:)+mi(i_ion)*te(:))**1.5
+     if (therm_flag(i_ion) == 1) then
+        nu_exch(:) = nu_exch(:)+c_exch*sqrt(me*mi(i_ion))*zi_vec(i_ion)**2 &
+             *ni(i_ion,:)*loglam(:)/(me*ti(i_ion,:)+mi(i_ion)*te(:))**1.5
+     endif
   enddo
+
+  ! Alpha heating coefficients [Stix, Plasma Phys. 14 (1972) 367] 
+  ! See in particular Eqs. 15 and 17.
+  c_a(:) = 0.0
+  do i_ion=1,loc_n_ion
+     if (therm_flag(i_ion) == 1) then
+        c_a(:) = c_a(:)+(ni(i_ion,:)/ne(:))*zi_vec(i_ion)**2/(mi(i_ion)/malpha)
+     endif
+  enddo
+  x_a(:) = e_alpha/(k*te(:))*(4*sqrt(me/malpha)/(3*sqrt(pi)*c_a(:)))**(2.0/3.0)
+  do i=1,n_r
+     frac_ai(i) = sivukhin(x_a(i))
+  enddo
+  frac_ae(:) = 1.0-frac_ai(:)
 
   ! Total pressure and beta (dimensionless) 
   pr(:) = ne(:)*k*te(:)

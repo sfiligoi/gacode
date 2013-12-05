@@ -43,7 +43,6 @@ subroutine tgyro_read_input
   !
   call tgyro_readbc_int(tgyro_mode)
   call tgyro_readbc_int(tgyro_relax_iterations)
-  call tgyro_readbc_real(loc_alpha_elec) 
   call tgyro_readbc_real(loc_nu_scale) 
   call tgyro_readbc_real(loc_dx)  
   call tgyro_readbc_real(loc_dx_gyro) 

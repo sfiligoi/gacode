@@ -14,9 +14,9 @@ subroutine tgyro_source
 
   integer :: i
   real, external :: sigv
-  real, external :: sigvth
   real :: n_d,n_t
- 
+  real :: s_alpha
+
   !-------------------------------------------------------
   ! Source terms (erg/cm^3/s):
   !
@@ -36,7 +36,10 @@ subroutine tgyro_source
         n_t = 0.5*ni(1,i)
      endif
 
-     s_alpha(i) = n_d*n_t*sigv(ti(1,i)/1e3)*e_alpha
+     s_alpha = n_d*n_t*sigv(ti(1,i)/1e3)*e_alpha
+
+     s_alpha_i(i) = s_alpha*frac_ai(i)
+     s_alpha_e(i) = s_alpha*frac_ae(i)
 
      ! Bremsstrahlung radiation
      ! - From NRL formulary 
@@ -64,7 +67,8 @@ subroutine tgyro_source
   ! Powers in units of erg/s
 
   ! Get integrated alpha-power
-  call tgyro_volume_int(s_alpha,p_alpha)
+  call tgyro_volume_int(s_alpha_i,p_alpha_i)
+  call tgyro_volume_int(s_alpha_e,p_alpha_e)
 
   ! Get integrated Bremsstrahlung power
   call tgyro_volume_int(s_brem,p_brem)
@@ -105,19 +109,20 @@ subroutine tgyro_source
 
   case (3)
 
-     ! Reactor, with self-consistent power, radiation 
-     ! and exchange; input auxiliary power.
- 
-     ! loc_alpha_elec is fraction of alpha power to electrons
+     ! Reactor, with 
+     ! - self-consistent alpha heating power, 
+     ! - radiation, 
+     ! - both classical and turbulent exchange (optional), 
+     ! - input auxiliary power.
 
-     p_i = (1.0-loc_alpha_elec)*p_alpha & 
-          +p_i_aux_in &                      
-          +p_exch+p_expwd(:)*tgyro_expwd_flag
+     p_i(:) = p_alpha_i(:) & 
+          +p_i_aux_in(:) &                      
+          +p_exch(:)+p_expwd(:)*tgyro_expwd_flag
 
-     p_e = loc_alpha_elec*p_alpha  &
-          +p_e_aux_in &                   
-          -p_brem &                      
-          -p_exch-p_expwd(:)*tgyro_expwd_flag
+     p_e(:) = p_alpha_e(:)  &
+          +p_e_aux_in(:) &                   
+          -p_brem(:) &                      
+          -p_exch(:)-p_expwd(:)*tgyro_expwd_flag
 
   end select
   !-------------------------------------------------------

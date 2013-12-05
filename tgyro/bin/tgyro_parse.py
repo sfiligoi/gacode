@@ -9,7 +9,6 @@ x.set_extension('.gen')
 
 x.add('TGYRO_MODE','1')
 x.add('TGYRO_RELAX_ITERATIONS','0')
-x.add('LOC_ALPHA_ELEC','0.8')
 x.add('LOC_NU_SCALE','1.0')
 x.add('LOC_DX','0.1')
 x.add('LOC_DX_GYRO','0.2')

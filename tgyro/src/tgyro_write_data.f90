@@ -141,7 +141,7 @@ subroutine tgyro_write_data(i_print)
 
   open(unit=1,file='out.tgyro.nu_rho',status='old',position='append')
 
-  write(1,20) 'r/a','(a/cs)/t_ii','(a/cs)/t_ee','1/nue_star','(a/cs)nu_exch','rho_i/a','rho_s/a'
+  write(1,20) 'r/a','(a/cs)/t_ii','(a/cs)/t_ee','1/nue_star','(a/cs)nu_exch','rho_i/a','rho_s/a','frac_ae'
   do i=1,n_r
      write(1,10) r(i)/r_min,&
           nui(1,i)*r_min/c_s(i),&
@@ -149,7 +149,8 @@ subroutine tgyro_write_data(i_print)
           nue_star(i),&
           nu_exch(i)*r_min/c_s(i),&
           rho_i(i)/r_min,&
-          rho_s(i)/r_min
+          rho_s(i)/r_min,&
+          frac_ae(i)
   enddo
 
   close(1)
@@ -158,12 +159,13 @@ subroutine tgyro_write_data(i_print)
 
   open(unit=1,file='out.tgyro.power',status='old',position='append')
 
-  write(1,20) 'r/a','p_alpha','p_brem','p_exch','p_expwd','p_i_aux','p_e_aux','p_i','p_e'
-  write(1,20) '','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)'
+  write(1,20) 'r/a','p_alpha_i','p_alpha_e','p_brem','p_exch','p_expwd','p_i_aux','p_e_aux','p_i','p_e'
+  write(1,20) '','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)'
   do i=1,n_r
      write(1,10) &
           r(i)/r_min,&
-          p_alpha(i)*1e-7*1e-6,&
+          p_alpha_i(i)*1e-7*1e-6,&
+          p_alpha_e(i)*1e-7*1e-6,&
           -p_brem(i)*1e-7*1e-6,&
           p_exch(i)*1e-7*1e-6,&
           p_expwd(i)*1e-7*1e-6,&
