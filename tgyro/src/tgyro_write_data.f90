@@ -19,6 +19,7 @@ subroutine tgyro_write_data(i_print)
   integer :: ip
   integer :: i_print
   integer :: i_ion
+  integer, parameter :: trinity_flag=1
 
   if (i_proc_global > 0) return
 
@@ -36,48 +37,53 @@ subroutine tgyro_write_data(i_print)
      open(unit=1,file='out.tgyro.power',status='replace')
      close(1)
 
-     open(unit=1,file='flux_target.out',status='replace')
+     open(unit=1,file='out.tgyro.alpha',status='replace')
      close(1)
 
-     open(unit=1,file='mflux_target.out',status='replace')
+     open(unit=1,file='out.tgyro.flux_target',status='replace')
      close(1)
 
-     open(unit=1,file='gyrobohm.out',status='replace')
+     open(unit=1,file='out.tgyro.mflux_target',status='replace')
      close(1)
 
-     open(unit=1,file='gradient.out',status='replace')
+     open(unit=1,file='out.tgyro.gyrobohm',status='replace')
      close(1)
 
-     open(unit=1,file='residual.out',status='replace')
+     open(unit=1,file='out.tgyro.gradient',status='replace')
+     close(1)
+
+     open(unit=1,file='out.tgyro.residual',status='replace')
      close(1)
 
      do i_ion=1,loc_n_ion
-        open(unit=1,file='flux_i'//trim(ion_tag(i_ion))//'.out',status='replace')
+        open(unit=1,file='out.tgyro.flux_i'//trim(ion_tag(i_ion)),status='replace')
         close(1)
-        open(unit=1,file='mflux_i'//trim(ion_tag(i_ion))//'.out',status='replace')
+        open(unit=1,file='out.tgyro.mflux_i'//trim(ion_tag(i_ion)),status='replace')
         close(1)
-        open(unit=1,file='chi_i'//trim(ion_tag(i_ion))//'.out',status='replace')
-        close(1)
-        open(unit=1,file='profile'//trim(ion_tag(i_ion))//'.out',status='replace')
+        !open(unit=1,file='chi_i'//trim(ion_tag(i_ion))//'.out',status='replace')
+        !close(1)
+        open(unit=1,file='out.tgyro.profile'//trim(ion_tag(i_ion)),status='replace')
         close(1)
      enddo
 
-     open(unit=1,file='flux_e.out',status='replace')
+     open(unit=1,file='out.tgyro.flux_e',status='replace')
      close(1)
 
-     open(unit=1,file='mflux_e.out',status='replace')
+     open(unit=1,file='out.tgyro.mflux_e',status='replace')
      close(1)
 
-     open(unit=1,file='chi_e.out',status='replace')
+     !open(unit=1,file='chi_e.out',status='replace')
+     !close(1)
+
+     open(unit=1,file='out.tgyro.profile',status='replace')
      close(1)
 
-     open(unit=1,file='profile.out',status='replace')
-     close(1)
+     if (trinity_flag == 1) then
+        open(unit=1,file='out.tgyro.trinity.eflux.out',status='replace')
+        close(1)
+     endif
 
-     open(unit=1,file='out.tgyro.trinity.eflux.out',status='replace')
-     close(1)
-
-     open(unit=1,file='control.out',status='replace')
+     open(unit=1,file='out.tgyro.control',status='replace')
      write(1,*) n_r
      write(1,*) n_evolve
      write(1,*) 0
@@ -175,9 +181,25 @@ subroutine tgyro_write_data(i_print)
 
   close(1) 
 
+  ! Alpha parameters (out.tgyro.alpha) (erg/s = 1e-7 W = 1e-7*1e-6 MW)
+
+  open(unit=1,file='out.tgyro.alpha',status='old',position='append')
+
+  write(1,20) 'r/a','s_alpha','frac_ai','frac_ae'
+  write(1,20) '','(MW/cm^3)','',''
+  do i=1,n_r
+     write(1,10) &
+          r(i)/r_min,&
+          s_alpha_i(i)*1e-7*1e-6,&
+          frac_ai(i),&
+          frac_ae(i)
+  enddo
+
+  close(1) 
+
   ! Transport+target fluxes (flux_target.out)
 
-  open(unit=1,file='flux_target.out',status='old',position='append')
+  open(unit=1,file='out.tgyro.flux_target',status='old',position='append')
 
   write(1,20) 'r/a','eflux_i_tot','eflux_i_target','eflux_e_tot','eflux_e_target','pflux_e_tot','pflux_e_target'
   write(1,20) '','(GB)','(GB)','(GB)','(GB)','(GB)','(GB)'
@@ -195,7 +217,7 @@ subroutine tgyro_write_data(i_print)
 
   ! Transport+target fluxes for momentum (mflux_target.out)
 
-  open(unit=1,file='mflux_target.out',status='old',position='append')
+  open(unit=1,file='out.tgyro.mflux_target',status='old',position='append')
 
   write(1,20) 'r/a','mflux_tot','mflux_target'
   write(1,20) '','(GB)','(GB)'
@@ -209,7 +231,7 @@ subroutine tgyro_write_data(i_print)
 
   ! Ion particle and energy fluxes (flux_i.out)
 
-  open(unit=1,file='flux_i.out',status='old',position='append')
+  open(unit=1,file='out.tgyro.flux_i',status='old',position='append')
 
   write(1,20) 'r/a','pflux_i_neo','pflux_i_tur','eflux_i_neo','eflux_i_tur'
   write(1,20) '','(GB)','(GB)','(GB)','(GB)'
@@ -225,7 +247,7 @@ subroutine tgyro_write_data(i_print)
 
   ! Ion momentum fluxes and exchange powers (mflux_i.out)
 
-  open(unit=1,file='mflux_i.out',status='old',position='append')
+  open(unit=1,file='out.tgyro.mflux_i',status='old',position='append')
 
   write(1,20) 'r/a','mflux_i_neo','mflux_i_tur','expwd_i_tur'
   write(1,20) '','(GB)','(GB)','(GB)'
@@ -240,7 +262,7 @@ subroutine tgyro_write_data(i_print)
 
   ! Electron particle and energy fluxes (flux_e.out)
 
-  open(unit=1,file='flux_e.out',status='old',position='append')
+  open(unit=1,file='out.tgyro.flux_e',status='old',position='append')
 
   write(1,20) 'r/a','pflux_e_neo','pflux_e_tur','eflux_e_neo','eflux_e_tur'
   write(1,20) '','(GB)','(GB)','(GB)','(GB)'
@@ -256,7 +278,7 @@ subroutine tgyro_write_data(i_print)
 
   ! Electron momentum fluxes and exchange powers (mflux_e.out)
 
-  open(unit=1,file='mflux_e.out',status='old',position='append')
+  open(unit=1,file='out.tgyro.mflux_e',status='old',position='append')
 
   write(1,20) 'r/a','mflux_e_neo','mflux_e_tur','expwd_e_tur'
   write(1,20) '','(GB)','(GB)','(GB)'
@@ -270,48 +292,42 @@ subroutine tgyro_write_data(i_print)
   close(1)
 
   ! Chi_i (chi_i.out)
-
-  open(unit=1,file='chi_i.out',status='old',position='append')
-
-  write(1,20) 'r/a','Di_neo','Di_tur','chii_neo','chii_tur'
-  write(1,20) '','(GB)','(GB)','(GB)','(GB)'
-  do i=1,n_r
-     if (i == 1) then
-        write(1,10) 0.0,0.0,0.0,0.0,0.0
-     else
-        write(1,10) r(i)/r_min,&
-             pflux_i_neo(1,i)/(r_min*dlnnidr(1,i)*ni(1,i)/ne(i)),&
-             pflux_i_tur(1,i)/(r_min*dlnnidr(1,i)*ni(1,i)/ne(i)),&
-             eflux_i_neo(1,i)/(r_min*dlntidr(1,i)*ni(1,i)/ne(i)*ti(1,i)/te(i)),&
-             eflux_i_tur(1,i)/(r_min*dlntidr(1,i)*ni(1,i)/ne(i)*ti(1,i)/te(i))
-     endif
-  enddo
-
-  close(1)
+  !open(unit=1,file='chi_i.out',status='old',position='append')
+  !write(1,20) 'r/a','Di_neo','Di_tur','chii_neo','chii_tur'
+  !write(1,20) '','(GB)','(GB)','(GB)','(GB)'
+  !do i=1,n_r
+  !   if (i == 1) then
+  !      write(1,10) 0.0,0.0,0.0,0.0,0.0
+  !   else
+  !      write(1,10) r(i)/r_min,&
+  !           pflux_i_neo(1,i)/(r_min*dlnnidr(1,i)*ni(1,i)/ne(i)),&
+  !           pflux_i_tur(1,i)/(r_min*dlnnidr(1,i)*ni(1,i)/ne(i)),&
+  !           eflux_i_neo(1,i)/(r_min*dlntidr(1,i)*ni(1,i)/ne(i)*ti(1,i)/te(i)),&
+  !           eflux_i_tur(1,i)/(r_min*dlntidr(1,i)*ni(1,i)/ne(i)*ti(1,i)/te(i))
+  !   endif
+  !enddo
+  !close(1)
 
   ! Chi_e (chi_e.out)
+  !open(unit=1,file='chi_e.out',status='old',position='append')
+  !write(1,20) 'r/a','De_neo','De_tur','chie_neo','chie_tur'
+  !write(1,20) '','(GB)','(GB)','(GB)','(GB)'
+  !do i=1,n_r
+  !   if (i == 1) then
+  !      write(1,10) 0.0,0.0,0.0,0.0,0.0
+  !   else
+  !      write(1,10) r(i)/r_min,&
+  !           pflux_e_neo(i)/(r_min*dlnnedr(i)),&
+  !           pflux_e_tur(i)/(r_min*dlnnedr(i)),&
+  !           eflux_e_neo(i)/(r_min*dlntedr(i)),&
+  !           eflux_e_tur(i)/(r_min*dlntedr(i))
+  !   endif
+  !enddo
+  !close(1)
 
-  open(unit=1,file='chi_e.out',status='old',position='append')
+  ! gyroBohm factors in physical units
 
-  write(1,20) 'r/a','De_neo','De_tur','chie_neo','chie_tur'
-  write(1,20) '','(GB)','(GB)','(GB)','(GB)'
-  do i=1,n_r
-     if (i == 1) then
-        write(1,10) 0.0,0.0,0.0,0.0,0.0
-     else
-        write(1,10) r(i)/r_min,&
-             pflux_e_neo(i)/(r_min*dlnnedr(i)),&
-             pflux_e_tur(i)/(r_min*dlnnedr(i)),&
-             eflux_e_neo(i)/(r_min*dlntedr(i)),&
-             eflux_e_tur(i)/(r_min*dlntedr(i))
-     endif
-  enddo
-
-  close(1)
-
-  ! gyroBohm factors in physical units (gyroBohm.out)
-
-  open(unit=1,file='gyrobohm.out',status='old',position='append')
+  open(unit=1,file='out.tgyro.gyrobohm',status='old',position='append')
 
   write(1,20) 'r/a','Chi_GB','Q_GB','Gamma_GB','Pi_GB','c_s'
   write(1,20) '','m^2/s','MW/m^2','10^19/m^2/s','J/m^2','m/s'
@@ -326,9 +342,9 @@ subroutine tgyro_write_data(i_print)
 
   close(1)
 
-  ! Temperature and density profiles (profile.out)
+  ! Temperature and density profiles
 
-  open(unit=1,file='profile.out',status='old',position='append')
+  open(unit=1,file='out.tgyro.profile',status='old',position='append')
 
   write(1,20) 'r/a','ni','ne','ti','te','ti/te','betae_unit','M=wR/cs'
   write(1,20) '','(1/cm^3)','(1/cm^3)','(keV)','(keV)','','',''
@@ -345,9 +361,9 @@ subroutine tgyro_write_data(i_print)
 
   close(1)
 
-  ! Temperature and density gradient profiles (gradient.out)
+  ! Temperature and density gradient profiles
 
-  open(unit=1,file='gradient.out',status='old',position='append')
+  open(unit=1,file='out.tgyro.gradient',status='old',position='append')
 
   write(1,20) 'r/a','a/Lni','a/Lne','a/LTi','a/LTe','a/Lp','a*gamma_e/cs','a*gamma_p/cs'
   write(1,20) '','','','','',''
@@ -369,7 +385,7 @@ subroutine tgyro_write_data(i_print)
      ! Ion 2 particle and energy fluxes (flux_i*.out)
 
      open(unit=1,&
-          file='flux_i'//trim(ion_tag(i_ion))//'.out',&
+          file='out.tgyro.flux_i'//trim(ion_tag(i_ion)),&
           status='old',position='append')
 
      write(1,20) 'r/a','pflux_i_neo','pflux_i_tur','eflux_i_neo','eflux_i_tur'
@@ -387,7 +403,7 @@ subroutine tgyro_write_data(i_print)
      ! Ion 2 momentum fluxes and exchange powers (mflux_i*.out)
 
      open(unit=1,&
-          file='mflux_i'//trim(ion_tag(i_ion))//'.out',&
+          file='out.tgyro.mflux_i'//trim(ion_tag(i_ion)),&
           status='old',position='append')
 
      write(1,20) 'r/a','mflux_i_neo','mflux_i_tur','expwd_i_tur'
@@ -402,32 +418,31 @@ subroutine tgyro_write_data(i_print)
      close(1)
 
      ! Chi_i2 (chi_i2.out)
+     !open(unit=1,&
+     !     file='chi_i'//trim(ion_tag(i_ion))//'.out',&
+     !     status='old',position='append')
 
-     open(unit=1,&
-          file='chi_i'//trim(ion_tag(i_ion))//'.out',&
-          status='old',position='append')
-
-     write(1,20) 'r/a','Di_neo','Di_tur','chii_neo','chii_tur'
-     write(1,20) '','(GB)','(GB)','(GB)','(GB)'
-     do i=1,n_r
-        if (i == 1) then
-           write(1,10) 0.0,0.0,0.0,0.0,0.0
-        else
-           write(1,10) r(i)/r_min,&
-                pflux_i_neo(i_ion,i)/(r_min*dlnnidr(i_ion,i)*ni(i_ion,i)/ne(i)),&
-                pflux_i_tur(i_ion,i)/(r_min*dlnnidr(i_ion,i)*ni(i_ion,i)/ne(i)),&
-                eflux_i_neo(i_ion,i)/(r_min*dlntidr(i_ion,i)*ni(i_ion,i)/ne(i)*&
-                ti(i_ion,i)/te(i)),&
-                eflux_i_tur(i_ion,i)/(r_min*dlntidr(i_ion,i)*ni(i_ion,i)/ne(i)*&
-                ti(i_ion,i)/te(i))
-        endif
-     enddo
-     close(1)
+     !write(1,20) 'r/a','Di_neo','Di_tur','chii_neo','chii_tur'
+     !write(1,20) '','(GB)','(GB)','(GB)','(GB)'
+     !do i=1,n_r
+     !   if (i == 1) then
+     !      write(1,10) 0.0,0.0,0.0,0.0,0.0
+     !   else
+     !      write(1,10) r(i)/r_min,&
+     !           pflux_i_neo(i_ion,i)/(r_min*dlnnidr(i_ion,i)*ni(i_ion,i)/ne(i)),&
+     !           pflux_i_tur(i_ion,i)/(r_min*dlnnidr(i_ion,i)*ni(i_ion,i)/ne(i)),&
+     !           eflux_i_neo(i_ion,i)/(r_min*dlntidr(i_ion,i)*ni(i_ion,i)/ne(i)*&
+     !           ti(i_ion,i)/te(i)),&
+     !           eflux_i_tur(i_ion,i)/(r_min*dlntidr(i_ion,i)*ni(i_ion,i)/ne(i)*&
+     !           ti(i_ion,i)/te(i))
+     !   endif
+     !enddo
+     !close(1)
 
      ! Impurity profiles
 
      open(unit=1,&
-          file='profile'//trim(ion_tag(i_ion))//'.out',&
+          file='out.tgyro.profile'//trim(ion_tag(i_ion)),&
           status='old',position='append')
 
      write(1,20) 'r/a','ni','a/Lni','Ti','a/LTi'
@@ -444,9 +459,9 @@ subroutine tgyro_write_data(i_print)
 
   enddo ! i_ion
 
-  ! Residuals (residual.out)
+  ! Residuals
 
-  open(unit=1,file='residual.out',status='old',position='append')
+  open(unit=1,file='out.tgyro.residual',status='old',position='append')
 
   if (tgyro_relax_iterations == 0) then
      write(1,30) 'ITERATION*: ',i_tran,sum(res)/size(res),flux_counter*n_worker*n_inst
@@ -463,7 +478,7 @@ subroutine tgyro_write_data(i_print)
 
   ! Control (control.out)
 
-  open(unit=1,file='control.out',status='old',position='append')
+  open(unit=1,file='out.tgyro.control',status='old',position='append')
   backspace(1)
   write(1,*) i_tran
   close(1)
@@ -476,18 +491,20 @@ subroutine tgyro_write_data(i_print)
   ! Trinity-type fluxes
   ! Electron particle and energy fluxes (flux_e.out)
 
-  open(unit=1,file='out.tgyro.trinity.eflux.out',status='old',position='append')
+  if (trinity_flag == 1) then
+     open(unit=1,file='out.tgyro.trinity.eflux.out',status='old',position='append')
 
-  write(1,20) 'r/a','eflux_i_neo','eflux_e_neo','eflux_i_tur','eflux_e_tur'
-  write(1,20) '','(TGB)','(TGB)','(TGB)','(TGB)'
-  do i=1,n_r
-     write(1,10) r(i)/r_min,&
-          eflux_i_neo(1,i)*q_gb(i)/q_tgb(i),&
-          eflux_e_neo(i)*q_gb(i)/q_tgb(i),&
-          eflux_i_tur(1,i)*q_gb(i)/q_tgb(i),&
-          eflux_e_tur(i)*q_gb(i)/q_tgb(i)
-  enddo
-  close(1)
+     write(1,20) 'r/a','eflux_i_neo','eflux_e_neo','eflux_i_tur','eflux_e_tur'
+     write(1,20) '','(TGB)','(TGB)','(TGB)','(TGB)'
+     do i=1,n_r
+        write(1,10) r(i)/r_min,&
+             eflux_i_neo(1,i)*q_gb(i)/q_tgb(i),&
+             eflux_e_neo(i)*q_gb(i)/q_tgb(i),&
+             eflux_i_tur(1,i)*q_gb(i)/q_tgb(i),&
+             eflux_e_tur(i)*q_gb(i)/q_tgb(i)
+     enddo
+     close(1)
+  endif
   !--------------------------------------------------------------------------------
 
   ! Write progress to screen

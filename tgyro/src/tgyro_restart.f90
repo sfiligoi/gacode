@@ -23,7 +23,7 @@ subroutine tgyro_restart
   if (i_proc_global == 0) then
 
      open(unit=1,&
-          file='control.out',&
+          file='out.tgyro.control',&
           status='old',&
           iostat=ioerr)
 
@@ -42,7 +42,7 @@ subroutine tgyro_restart
 
         ! Need to read both gradients and relaxation values:
 
-        open(unit=1,file='gradient.out',status='old')
+        open(unit=1,file='out.tgyro.gradient',status='old')
         do j=0,i_tran
            read(1,'(a)') dummy
            read(1,'(a)') dummy
@@ -58,7 +58,7 @@ subroutine tgyro_restart
 
         if (loc_ne_feedback_flag == 0) then
 
-           open(unit=1,file='flux_target.out',status='old')
+           open(unit=1,file='out.tgyro.flux_target',status='old')
            do j=0,i_tran
               read(1,'(a)') dummy
               read(1,'(a)') dummy
@@ -72,7 +72,7 @@ subroutine tgyro_restart
 
         else
 
-           open(unit=1,file='flux_target.out',status='old')
+           open(unit=1,file='out.tgyro.flux_target',status='old')
            do j=0,i_tran
               read(1,'(a)') dummy
               read(1,'(a)') dummy
@@ -87,7 +87,7 @@ subroutine tgyro_restart
 
         endif
 
-        open(unit=1,file='residual.out',status='old')
+        open(unit=1,file='out.tgyro.residual',status='old')
         do j=0,i_tran 
            read(1,'(a)') dummy
            do i=2,n_r
