@@ -244,23 +244,13 @@ subroutine tgyro_init_profiles
   ! Classical exchange power
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_ei(:)*1e13,n_exp,r,p_exch_in,n_r)
   !
-  if (loc_scenario == 3) then
-     ! Assume auxiliary power is contained in pow_e and pow_i 
-     call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e(:)*1e13,n_exp,r,p_e_aux_in,n_r)
-     call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_i(:)*1e13,n_exp,r,p_i_aux_in,n_r)
+  ! Integrated electron and ion powers
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e(:)*1e13,n_exp,r,p_e_in,n_r)
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_i(:)*1e13,n_exp,r,p_i_in,n_r)
 
-     ! Apply rescale factor
-     p_e_aux_in = tgyro_input_paux_scale*p_e_aux_in
-     p_i_aux_in = tgyro_input_paux_scale*p_i_aux_in
-  else
-     ! Integrated electron and ion powers
-     call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e(:)*1e13,n_exp,r,p_e_in,n_r)
-     call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_i(:)*1e13,n_exp,r,p_i_in,n_r)
-
-     ! Apply auxillary power rescale
-     p_e_in = tgyro_input_paux_scale*(p_e_in + p_exch_in) - p_exch_in
-     p_i_in = tgyro_input_paux_scale*(p_i_in - p_exch_in) + p_exch_in
-  endif
+  ! Apply auxillary power rescale
+  p_e_in = tgyro_input_paux_scale*(p_e_in + p_exch_in) - p_exch_in
+  p_i_in = tgyro_input_paux_scale*(p_i_in - p_exch_in) + p_exch_in
   !
   ! (2) Particle flow -- convert to 1/s from MW/keV
   !
@@ -393,9 +383,6 @@ subroutine tgyro_init_profiles
   eflux_e_target(1) = 0.0
   pflux_e_target(1) = 0.0
   mflux_target(1)   = 0.0
-
-  p_i_aux_in(1) = 0.0
-  p_e_aux_in(1) = 0.0
 
   ! Also need to zero initial exchanges to prevent use in tgyro_source 
   ! on iteration 0 before definition

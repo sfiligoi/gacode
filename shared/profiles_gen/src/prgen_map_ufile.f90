@@ -40,7 +40,7 @@ subroutine prgen_map_ufile
   ! Convert W to MW (1e-6):
   call ufile_volint(rho,1e-6*powd_i,pow_i,ufile_volume,nx)
   call ufile_volint(rho,1e-6*powd_e,pow_e,ufile_volume,nx)
-  call ufile_volint(rho,1e-6*ufile_qei,pow_ei_exp,ufile_volume,nx)
+  call ufile_volint(rho,1e-6*ufile_qei,pow_ei,ufile_volume,nx)
 
   !---------------------------------------------------------
   ! Map profile data onto single array:
@@ -60,7 +60,7 @@ subroutine prgen_map_ufile
   vec(11,:) = 0.0
   vec(12,:) = pow_e(:)
   vec(13,:) = pow_i(:)
-  vec(14,:) = pow_ei_exp(:)
+  vec(14,:) = pow_ei(:)
   vec(15,:) = 0.0
   vec(16,:) = 0.0
   vec(17,:) = 0.0

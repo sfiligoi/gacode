@@ -30,7 +30,9 @@ subroutine allocate_plasmastate_vars
   allocate(plst_pbi(nx))
   allocate(plst_pe_trans(nx))
   allocate(plst_pi_trans(nx))
-  allocate(plst_pei_trans(nx))
+  allocate(plst_qie(nx))
+  allocate(plst_pfusi(nx))
+  allocate(plst_pfuse(nx))
   allocate(plst_tq_trans(nx))
   allocate(plst_sn_trans(nx))
 

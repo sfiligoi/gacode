@@ -175,7 +175,7 @@ subroutine prgen_read_plasmastate
   err = nf90_inq_varid(ncid,trim('ns_bdy'),varid)
   err = nf90_get_var(ncid,varid,plst_ns(nx,1:plst_dp1_nspec_th)) 
 
-  ! Bean density
+  ! Beam density
   err = nf90_inq_varid(ncid,trim('nbeami'),varid)
   err = nf90_get_var(ncid,varid,plst_nb(1:nx-1))
 
@@ -231,10 +231,20 @@ subroutine prgen_read_plasmastate
   err = nf90_get_var(ncid,varid,plst_pi_trans(1:nx-1))
   plst_pi_trans(nx) = 0.0
 
-  ! Electron-ion Coupling
+  ! Electron-ion collisional exchange Coupling
   err = nf90_inq_varid(ncid,trim('qie'),varid)
-  err = nf90_get_var(ncid,varid,plst_pei_trans(1:nx-1))
-  plst_pei_trans(nx) = 0.0
+  err = nf90_get_var(ncid,varid,plst_qie(1:nx-1))
+  plst_qie(nx) = 0.0
+
+  ! Fusion alpha power transferred to electrons
+  err = nf90_inq_varid(ncid,trim('pfuse'),varid)
+  err = nf90_get_var(ncid,varid,plst_pfuse(1:nx-1))
+  plst_pfuse(nx) = 0.0
+
+  ! Fusion alpha power transferred to thermal ions
+  err = nf90_inq_varid(ncid,trim('pfusi'),varid)
+  err = nf90_get_var(ncid,varid,plst_pfusi(1:nx-1))
+  plst_pfusi(nx) = 0.0
 
   ! Angular momentum source torque 
   err = nf90_inq_varid(ncid,trim('tq_trans'),varid)

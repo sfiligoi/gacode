@@ -73,7 +73,7 @@ subroutine tgyro_source
   ! Get integrated Bremsstrahlung power
   call tgyro_volume_int(s_brem,p_brem)
 
-  ! Get integrated anomalous exchange power
+  ! Get integrated collisional exchange power
   call tgyro_volume_int(s_exch,p_exch)
 
   ! Get integrated anomalous exchange power
@@ -86,43 +86,38 @@ subroutine tgyro_source
   case (1)
 
      ! Experimental, static exchange
-     ! 
-     ! Input power is fixed and exchange is purely 
-     ! diagnostic
 
-     p_exch(:) = p_exch_in(:)
+     p_exch(:) = p_exch_in(:) ! Diagnostic exchange
 
-     p_i(:) = p_i_in(:)
-     p_e(:) = p_e_in(:)
+     p_i(:) = p_i_in(:) ! Fixed total ion input power
+     p_e(:) = p_e_in(:) ! Fixed total electon input power
 
   case (2)
 
      ! Experimental, dynamic exchange
-     ! 
-     ! Input power is fixed but exchange is computed 
 
-     p_i(:) = p_i_in(:) & 
-          +(p_exch(:)-p_exch_in(:))+p_expwd(:)*tgyro_expwd_flag
+     p_i(:) = p_i_in(:) &              ! Total ion input power 
+          +(p_exch(:)-p_exch_in(:)) &  ! Consistent e-i exchange
+          +p_expwd(:)*tgyro_expwd_flag ! Turbulent exchange
 
-     p_e(:) = p_e_in(:) & 
-          -(p_exch(:)-p_exch_in(:))-p_expwd(:)*tgyro_expwd_flag
+     p_e(:) = p_e_in(:) &              ! Total electron input power 
+          -(p_exch(:)-p_exch_in(:)) &  ! Consistent e-i exchange
+          -p_expwd(:)*tgyro_expwd_flag ! Turbulent exchange
 
   case (3)
 
-     ! Reactor, with 
-     ! - self-consistent alpha heating power, 
-     ! - radiation, 
-     ! - both classical and turbulent exchange (optional), 
-     ! - input auxiliary power.
+     ! Reactor with consistent alpha power
 
-     p_i(:) = p_alpha_i(:) & 
-          +p_i_aux_in(:) &                      
-          +p_exch(:)+p_expwd(:)*tgyro_expwd_flag
+     p_i(:) = p_i_in(:) &                   ! Total ion input power  
+          +(p_exch(:)-p_exch_in(:)) &       ! Consistent e-i exchange
+          +p_expwd(:)*tgyro_expwd_flag &    ! Turbulent exchange
+          +(p_alpha_i(:)-p_alpha_i_in(:))   ! Consistent alpha power to ions
 
-     p_e(:) = p_alpha_e(:)  &
-          +p_e_aux_in(:) &                   
-          -p_brem(:) &                      
-          -p_exch(:)-p_expwd(:)*tgyro_expwd_flag
+     p_e(:) = p_e_in(:) &                   ! Total electron input power
+          -(p_exch(:)-p_exch_in(:)) &       ! Consistent e-i exchange
+          -p_expwd(:)*tgyro_expwd_flag &    ! Turbulent exchange
+          +(p_alpha_e(:)-p_alpha_e_in(:)) & ! Consistent alpha power to electrons
+          -p_brem(:)                        ! Electron Bremsstrahlung
 
   end select
   !-------------------------------------------------------

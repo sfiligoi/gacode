@@ -22,18 +22,10 @@ subroutine prgen_map_iterdb
   real :: xoh_exp
   real :: xrad_exp
   real :: xfus_exp
-  real :: xwdot
 
   do i=1,onetwo_nj
      rho(i) = (i-1)/(onetwo_nj-1.0)
   enddo
-
-  ! Volume integrations to obtain integrated
-  ! powers and flows
-  xoh_exp  = 1.0 !counts powe_oh_exp
-  xrad_exp = 1.0 !counts powe_rad_exp
-  xfus_exp = 1.0 !counts any non-zero powe_fus_exp and powi_fus_exp
-  xwdot    = 1.0 !discounts any non-zero wdot_exp
 
   call volint(1e-6*onetwo_qbeame,powe_beam_exp)
   call volint(1e-6*onetwo_qrfe,powe_rf_exp)
@@ -41,15 +33,15 @@ subroutine prgen_map_iterdb
   call volint(1e-6*onetwo_qrad,powe_rad_exp)
   call volint(1e-6*onetwo_qione,powe_ion_exp)
   call volint(1e-6*onetwo_dpedt,powe_wdot_exp)
-  call volint(1e-6*onetwo_qfuse,powe_fus_exp)
+  call volint(1e-6*onetwo_qfuse,pow_e_fus)
+  call volint(1e-6*onetwo_qfusi,pow_i_fus)
   call volint(1e-6*onetwo_qbeami,powi_beam_exp)
   call volint(1e-6*onetwo_qrfi,powi_rf_exp)
   call volint(1e-6*onetwo_qioni,powi_ion_exp)
   call volint(1e-6*onetwo_qcx,powi_cx_exp)
   call volint(1e-6*onetwo_dpidt,powi_wdot_exp)
-  call volint(1e-6*onetwo_qfusi,powi_fus_exp)
   ! Note sign change to keep pow_ei_exp positive for te>ti
-  call volint(-1e-6*onetwo_qdelt,pow_ei_exp)
+  call volint(-1e-6*onetwo_qdelt,pow_ei)
 
   ! Wall ion flow (scale is undefined) (MW/KeV = Kamp)
   call volint(kevdsecpmw*sion_d,flow_wall_exp)
@@ -64,42 +56,43 @@ subroutine prgen_map_iterdb
 
   ! Total transport power (MW) to electrons: pow_e
 
-  ! powe_beam_exp (MW): NBI power added to electrons
-  ! powe_rf_exp (MW)  : RF power added to electrons
-  ! powe_oh_exp (MW)  : ohmic power added to electrons
-  ! powe_rad-exp (MW) : [negative] radiation loss added to electrons
-  ! powe_ion_exp (MW) : [negative] neutral ionization loss added
-  ! powe_wdot_exp (MW): [zero] W-dot power subtracted
-  ! pow_ei_exp (MW)   : [positive for Te > Ti] power *subtracted*
-  ! powe_fus_exp (MW) : [zero] any fusion power added
+  ! powe_beam_exp (MW) : NBI power added to electrons
+  ! powe_rf_exp (MW)   : RF power added to electrons
+  ! powe_oh_exp (MW)   : ohmic power added to electrons
+  ! powe_rad-exp (MW)  : [negative] radiation loss added to electrons
+  ! powe_ion_exp (MW)  : [negative] neutral ionization loss added
+  ! powe_wdot_exp (MW) : W-dot power subtracted
+  ! pow_ei (MW)        : [positive for Te > Ti] exchange power *subtracted*
+  ! pow_e_fus (MW)     : any fusion power added
 
-  pow_e(:) = powe_beam_exp(:) &
+  pow_e(:) = &
+       powe_beam_exp(:) &
        +powe_rf_exp(:) &
-       +xoh_exp*powe_oh_exp(:) &
-       +xrad_exp*powe_rad_exp(:) &
+       +powe_oh_exp(:) &
+       +powe_rad_exp(:) &
        +powe_ion_exp(:) &
-       -(1.0-xwdot)*powe_wdot_exp(:) &
-       -pow_ei_exp(:) &
-       +xfus_exp*powe_fus_exp(:)
+       -0.0*powe_wdot_exp(:) &
+       -pow_ei(:) &
+       +pow_e_fus(:)
 
   ! Total transport power (MW) to ions: pow_i
 
-  ! powi_beam_exp (MW): NBI power added to electrons
-  ! powi_rf_exp (MW)  : RF power added to electrons
-  ! powi_ion_exp (MW) : [positive] neutral ionization loss added
-  ! pow_i (MW)        : [negative] neutral charge exch loss added
-  ! powi_wdot_exp (MW): [zero] W-dot power subtracted
-  ! pow_ei_exp (MW)   : [positive for Te > Ti] power *added*
-  ! powi_fus_exp (MW) : [zero] any fusion power added
+  ! powi_beam_exp (MW) : NBI power added to electrons
+  ! powi_rf_exp (MW)   : RF power added to electrons
+  ! powi_ion_exp (MW)  : [positive] neutral ionization loss added
+  ! powi_cx_exp (MW)   : [negative] neutral charge exch loss added
+  ! powi_wdot_exp (MW) : [zero] W-dot power subtracted
+  ! pow_ei (MW)        : [positive for Te > Ti] exchange power *added*
+  ! pow_i_fus (MW)     : [zero] any fusion power added
 
-
-  pow_i(:) = powi_beam_exp(:) &
+  pow_i(:) = &
+       powi_beam_exp(:) &
        +powi_rf_exp(:) &
        +powi_ion_exp(:) &
        +powi_cx_exp(:) &
-       -(1.0-xwdot)*powi_wdot_exp(:) &
-       +pow_ei_exp(:) &
-       +xfus_exp*powi_fus_exp(:)
+       -0.0*powi_wdot_exp(:) &
+       +pow_ei(:) &
+       +pow_i_fus(:)
 
   !---------------------------------------------------------
   ! Map profile data onto single array:
@@ -121,7 +114,7 @@ subroutine prgen_map_iterdb
   vec(11,:) = flow_mom(:)
   vec(12,:) = pow_e(:)
   vec(13,:) = pow_i(:)
-  vec(14,:) = pow_ei_exp(:)
+  vec(14,:) = pow_ei(:)
   vec(15,:) = zeta(:)
   vec(16,:) = flow_beam(:)
   vec(17,:) = flow_wall_exp(:)
@@ -148,7 +141,7 @@ subroutine prgen_map_iterdb
      if (sum(onetwo_enbeam(:,i))==0) then
         do j=1,5
            if (reorder_vec(j)==onetwo_nion+i) then
-             reorder_vec(j) = reorder_vec(j)+1
+              reorder_vec(j) = reorder_vec(j)+1
            endif
         enddo
      else
@@ -157,10 +150,10 @@ subroutine prgen_map_iterdb
         onetwo_enion_vec(i+onetwo_nion,:) = onetwo_enbeam(:,i)*1e-19
         ! Ti: T[keV] = (p/n)[J]/1.6022e-16[J/keV]
         do j=1,onetwo_nj
-            if (onetwo_enbeam(j,i)>0) then
-            onetwo_Tion_vec(i+onetwo_nion,j) = onetwo_pressb(j,i)/onetwo_enbeam(j,i)/&
-                 1.6022e-16
-            endif
+           if (onetwo_enbeam(j,i)>0) then
+              onetwo_Tion_vec(i+onetwo_nion,j) = onetwo_pressb(j,i)/onetwo_enbeam(j,i)/&
+                   1.6022e-16
+           endif
         enddo
      endif
   enddo
@@ -168,18 +161,18 @@ subroutine prgen_map_iterdb
   ! Fast alphas
   onetwo_enion_vec(1+onetwo_nion+onetwo_nbion,:) = onetwo_enalp(:)*1e-19
   if (sum(onetwo_enalp(:))==0) then
-    do j=1,5
-       if (reorder_vec(j) >= onetwo_nion+onetwo_nbion+1) then
-          reorder_vec(j) = 0
-       endif
-    enddo
+     do j=1,5
+        if (reorder_vec(j) >= onetwo_nion+onetwo_nbion+1) then
+           reorder_vec(j) = 0
+        endif
+     enddo
   else
-    print '(a)',"INFO: (prgen) Found fast alpha species"
-    print '(a)',"INFO: (prgen) Modifying fast alpha temperature to satisfy total pressure"
-    onetwo_Tion_vec(1+onetwo_nion+onetwo_nbion,:) = (onetwo_press(:)-&
-            (sum(onetwo_enion_vec(1:onetwo_nion+onetwo_nbion,:)*&
-                onetwo_Tion_vec(1:onetwo_nion+onetwo_nbion,:),dim=1)*1e19+&
-            onetwo_ene(:)*onetwo_te(:))*1.6022e-16)/(onetwo_enalp)/1.6022e-16
+     print '(a)',"INFO: (prgen) Found fast alpha species"
+     print '(a)',"INFO: (prgen) Modifying fast alpha temperature to satisfy total pressure"
+     onetwo_Tion_vec(1+onetwo_nion+onetwo_nbion,:) = (onetwo_press(:)-&
+          (sum(onetwo_enion_vec(1:onetwo_nion+onetwo_nbion,:)*&
+          onetwo_Tion_vec(1:onetwo_nion+onetwo_nbion,:),dim=1)*1e19+&
+          onetwo_ene(:)*onetwo_te(:))*1.6022e-16)/(onetwo_enalp)/1.6022e-16
   endif
   ! reorder
   do i=1,5
@@ -190,13 +183,12 @@ subroutine prgen_map_iterdb
         cycle
      endif
      if (any(reorder_vec(1:i-1)==reorder_vec(i))) then
-       reorder_vec(i) = 0
-       cycle
+        reorder_vec(i) = 0
+        cycle
      endif
      vec(20+i,:) = onetwo_enion_vec(reorder_vec(i),:)
      vec(25+i,:) = onetwo_Tion_vec(reorder_vec(i),:)
   enddo
-
 
   ! vphi
   vec(31:35,:) = 0.0
@@ -226,6 +218,10 @@ subroutine prgen_map_iterdb
   vec(38,:) = 0.0
   vec(39,:) = 0.0
   vec(40,:) = 0.0
+
+  ! Extra powers
+  vec(41,:) = pow_e_fus(:)
+  vec(42,:) = pow_i_fus(:)
 
   !---------------------------------------------------
   ! Read the cer file and overlay
@@ -258,9 +254,9 @@ subroutine prgen_map_iterdb
 
   n0 = n0+onetwo_nbion
   if ( sum (onetwo_enalp(:)) > 0) then
-    onetwo_ion_name(1+n0) = 'he'
+     onetwo_ion_name(1+n0) = 'he'
   else
-    onetwo_nalp = 0
+     onetwo_nalp = 0
   endif
 
   ! Ion reordering diagnostics
@@ -269,10 +265,10 @@ subroutine prgen_map_iterdb
   do i=1,onetwo_nion+onetwo_nbion+onetwo_nalp
      if (any(reorder_vec==i)) then
         do j=1,5
-          if (reorder_vec(j)==i) then
-            ip = j
-            exit
-          endif
+           if (reorder_vec(j)==i) then
+              ip = j
+              exit
+           endif
         enddo
         print '(t6,i2,1x,2(a),i2,a)',&
              i,trim(onetwo_ion_name(i)),' -> ',ip,trim(onetwo_ion_name(i))

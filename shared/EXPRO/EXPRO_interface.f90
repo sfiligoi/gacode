@@ -67,6 +67,9 @@
 !  EXPRO_vpol(4,:)
 !  EXPRO_vpol(5,:)
 !
+!  EXPRO_pow_e_fus(:)
+!  EXPRO_pow_i_fus(:)
+!
 !  EXPRO_signq 
 !  EXPRO_signb
 !
@@ -158,6 +161,9 @@ module EXPRO_interface
   real, dimension(:,:),allocatable :: EXPRO_vtor
   real, dimension(:,:),allocatable :: EXPRO_vpol
 
+  real, dimension(:),allocatable :: EXPRO_pow_e_fus
+  real, dimension(:),allocatable :: EXPRO_pow_i_fus
+
   ! Derived quantities
 
   real, dimension(:),allocatable :: EXPRO_bunit
@@ -224,7 +230,7 @@ module EXPRO_interface
 
   ! Standard variable tags
 
-  character (len=16), dimension(40) :: EXPRO_tag=(/&
+  character (len=16), dimension(45) :: EXPRO_tag=(/&
        'rho(-)          ',&
        'rmin(m)         ',&
        'rmaj(m)         ',&
@@ -250,20 +256,25 @@ module EXPRO_interface
        'ni_3(10^19/m^3) ',&
        'ni_4(10^19/m^3) ',&
        'ni_5(10^19/m^3) ',&
-       'Ti_1 (keV)      ',&
-       'Ti_2 (keV)      ',&
-       'Ti_3 (keV)      ',&
-       'Ti_4 (keV)      ',&
-       'Ti_5 (keV)      ',&
-       'vtor_1 (m/s)    ',&
-       'vtor_2 (m/s)    ',&
-       'vtor_3 (m/s)    ',&
-       'vtor_4 (m/s)    ',&
-       'vtor_5 (m/s)    ',&
-       'vpol_1 (m/s)    ',&
-       'vpol_2 (m/s)    ',&
-       'vpol_3 (m/s)    ',&
-       'vpol_4 (m/s)    ',&
-       'vpol_5 (m/s)    '/)
+       'Ti_1(keV)       ',&
+       'Ti_2(keV)       ',&
+       'Ti_3(keV)       ',&
+       'Ti_4(keV)       ',&
+       'Ti_5(keV)       ',&
+       'vtor_1(m/s)     ',&
+       'vtor_2(m/s)     ',&
+       'vtor_3(m/s)     ',&
+       'vtor_4(m/s)     ',&
+       'vtor_5(m/s)     ',&
+       'vpol_1(m/s)     ',&
+       'vpol_2(m/s)     ',&
+       'vpol_3(m/s)     ',&
+       'vpol_4(m/s)     ',&
+       'vpol_5(m/s)     ',&
+       'pow_e_fus(MW)   ',&
+       'pow_i_fus(MW)   ',&
+       'null            ',&
+       'null            ',&
+       'null            '/)
 
 end module EXPRO_interface

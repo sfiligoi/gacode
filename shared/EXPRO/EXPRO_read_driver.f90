@@ -89,6 +89,18 @@ subroutine EXPRO_read_driver
   read(io,*) EXPRO_vpol(4,:)
   read(io,*) EXPRO_vpol(5,:)
 
+  ! 41-42 
+  read(io,*,iostat=ierr) EXPRO_pow_e_fus(:)
+  if (ierr == 0) then
+     read(io,*) EXPRO_pow_i_fus(:)
+  else
+     close(io)
+     open(unit=io,file=trim(path)//trim(runfile),status='replace')
+     print '(a)', 'INFO: (EXPRO_read_driver) Old input.profiles detected.  Please regenerate with profiles_gen.'
+     EXPRO_pow_e_fus(:) = 0.0
+     EXPRO_pow_i_fus(:) = 0.0
+  endif
+
   close(io)
   !--------------------------------------------------------------
 

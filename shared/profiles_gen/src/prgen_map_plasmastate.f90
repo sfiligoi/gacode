@@ -20,29 +20,44 @@ subroutine prgen_map_plasmastate
   real, dimension(nx) :: dphidpsi
 
   !--------------------------------------------------------------------
-  ! Calculate transport sources:
+  ! Calculate integrated powers from input sources
   !
   pow_e(1)     = 0.0
   pow_i(1)     = 0.0
-  pow_ei_exp(1)= 0.0
+  pow_ei(1)    = 0.0
   flow_mom(1)  = 0.0
   flow_beam(1) = 0.0
 
+  pow_e_fus(1) = 0.0 
+  pow_i_fus(1) = 0.0
+
   do i=2,nx
 
-     ! pow_e(i) = pow_e(i-1)+1e-6*plst_pbe(i-1)
-     ! pow_i(i) = pow_i(i-1)+1e-6*plst_pbi(i-1)
+     ! Total powers to electrons and ions "per zone"
+     ! Integrated power is thus a partial sum.
 
      pow_e(i) = pow_e(i-1)+1e-6*plst_pe_trans(i-1)
      pow_i(i) = pow_i(i-1)+1e-6*plst_pi_trans(i-1)
 
-     ! plst_pei_trans ~ pow_ie NOT pow_ei, so minus
-     pow_ei_exp(i) = pow_ei_exp(i-1)-1e-6*plst_pei_trans(i-1)
+     pow_i_fus(i) = plst_pfusi(i)
+     pow_e_fus(i) = plst_pfuse(i)
 
+     ! Collisional exchange
+     !
+     ! plst_qie : power from ions to electrons
+     ! pow_ei   : power from electrons to ions
+     ! 
+     ! Thus, we need negative sign here:
+     pow_ei(i) = pow_ei(i-1)-1e-6*plst_qie(i-1)
+
+     ! Momentum source
+     !
      ! tq_trans already in Nm.
      ! COORDINATES: -ipccw accounts for plasmastate toroidal angle convention
      flow_mom(i) = flow_mom(i-1)+plst_tq_trans(i-1)*(-ipccw)
 
+     ! Particle source
+     !
      ! MW/keV = 0.624e22/s
 
      flow_beam(i) = flow_beam(i-1)+plst_sn_trans(i-1)/0.624e22
@@ -89,7 +104,7 @@ subroutine prgen_map_plasmastate
   vec(11,:) = flow_mom(:)
   vec(12,:) = pow_e(:)
   vec(13,:) = pow_i(:)
-  vec(14,:) = pow_ei_exp(:)
+  vec(14,:) = pow_ei(:)
   vec(15,:) = zeta(:)
   vec(16,:) = flow_beam(:)
   vec(17,:) = 0.0 ! flow_wall
@@ -121,6 +136,10 @@ subroutine prgen_map_plasmastate
 
   ! vpol
   vec(36:40,:) = 0.0
+
+  ! Extra powers
+  vec(41,:) = pow_e_fus(:)
+  vec(42,:) = pow_i_fus(:)
   !---------------------------------------------------------
 
   ! Ion reordering diagnostics

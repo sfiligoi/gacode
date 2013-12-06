@@ -122,19 +122,8 @@ subroutine tgyro_global_init_profiles
   ! Exchange power
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_ei(:)*1e13,n_exp,r,p_exch_in,n_r)
 
-  if (loc_scenario == 3) then
-
-     ! Assume auxiliary power is contained in pow_e and pow_i 
-
-     call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e(:)*1e13,n_exp,r,p_e_aux_in,n_r)
-     call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_i(:)*1e13,n_exp,r,p_i_aux_in,n_r)
-
-  else
-
-     call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e(:)*1e13,n_exp,r,p_e_in,n_r)
-     call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_i(:)*1e13,n_exp,r,p_i_in,n_r)
-
-  endif
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e(:)*1e13,n_exp,r,p_e_in,n_r)
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_i(:)*1e13,n_exp,r,p_i_in,n_r)
 
   ! Convert flows to 1/s (from MW/keV)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_flow_beam(:)*1e22/1.6022,n_exp,r,f_b_in,n_r)
@@ -196,8 +185,6 @@ subroutine tgyro_global_init_profiles
   pflux_e_target(1) = 0.0
   mflux_target(1) = 0.0
 
-  p_i_aux_in(1) = 0.0
-  p_e_aux_in(1) = 0.0
   !----------------------------------------------------
 
 end subroutine tgyro_global_init_profiles

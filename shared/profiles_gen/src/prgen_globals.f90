@@ -45,6 +45,14 @@ module prgen_globals
   real, dimension(:), allocatable :: delta
   real, dimension(:), allocatable :: zmag
   real, dimension(:), allocatable :: zeta
+  real, dimension(:), allocatable :: pow_e
+  real, dimension(:), allocatable :: pow_i
+  real, dimension(:), allocatable :: pow_ei
+  real, dimension(:), allocatable :: pow_e_fus
+  real, dimension(:), allocatable :: pow_i_fus
+  real, dimension(:), allocatable :: flow_wall_exp
+  real, dimension(:), allocatable :: flow_beam
+  real, dimension(:), allocatable :: flow_mom
   real, dimension(:), allocatable :: sion_d
   real, dimension(:), allocatable :: sbcx_d
   real, dimension(:), allocatable :: powe_beam_exp
@@ -57,15 +65,7 @@ module prgen_globals
   real, dimension(:), allocatable :: powi_ion_exp
   real, dimension(:), allocatable :: powe_wdot_exp
   real, dimension(:), allocatable :: powi_wdot_exp
-  real, dimension(:), allocatable :: powe_fus_exp
-  real, dimension(:), allocatable :: powi_fus_exp
-  real, dimension(:), allocatable :: pow_ei_exp
-  real, dimension(:), allocatable :: pow_e
-  real, dimension(:), allocatable :: pow_i
   real, dimension(:), allocatable :: powi_cx_exp
-  real, dimension(:), allocatable :: flow_wall_exp
-  real, dimension(:), allocatable :: flow_beam
-  real, dimension(:), allocatable :: flow_mom
   real, dimension(:,:), allocatable :: vec
   real, dimension(:,:), allocatable :: vec2
 
@@ -192,7 +192,9 @@ module prgen_globals
   real, dimension(:), allocatable :: plst_pbi
   real, dimension(:), allocatable :: plst_pe_trans
   real, dimension(:), allocatable :: plst_pi_trans
-  real, dimension(:), allocatable :: plst_pei_trans
+  real, dimension(:), allocatable :: plst_qie
+  real, dimension(:), allocatable :: plst_pfusi
+  real, dimension(:), allocatable :: plst_pfuse
   real, dimension(:), allocatable :: plst_tq_trans
   real, dimension(:), allocatable :: plst_sn_trans
   !---------------------------------------------------------
