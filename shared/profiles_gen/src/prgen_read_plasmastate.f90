@@ -91,7 +91,7 @@ subroutine prgen_read_plasmastate
 
   ! Flux-surface volume
   err = nf90_inq_varid(ncid,trim('vol'),varid)
-  err = nf90_get_var(ncid,varid,plst_vol)
+  err = nf90_get_var(ncid,varid,plst_vol(:))
 
   ! Normalizing B for toroidal flux
   err = nf90_inq_varid(ncid,trim('B_axis_vac'),varid)
@@ -231,7 +231,7 @@ subroutine prgen_read_plasmastate
   err = nf90_get_var(ncid,varid,plst_pi_trans(1:nx-1))
   plst_pi_trans(nx) = 0.0
 
-  ! Electron-ion collisional exchange Coupling
+  ! Electron-ion collisional exchange
   err = nf90_inq_varid(ncid,trim('qie'),varid)
   err = nf90_get_var(ncid,varid,plst_qie(1:nx-1))
   plst_qie(nx) = 0.0

@@ -33,6 +33,4 @@ subroutine tgyro_volume_int(s,p)
      p(i) = p(i-1)+0.5*(s(i-1)*volp(i-1)+s(i)*volp(i))*(r(i)-r(i-1))
   enddo
 
-  ! Integrated power in erg/s
-
 end subroutine tgyro_volume_int

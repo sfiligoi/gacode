@@ -2,12 +2,8 @@
 ! tgyro_read_input.f90
 !
 ! PURPOSE:
-!  Read input from input.dat including paths for each instance
-!  of GYRO.
-!
-! NOTES:
-!  - transp_fix_density_flag signals holding density profile 
-!    fixed
+!  Read input from input.tgyro.gen, including paths for each 
+!  radial zone.
 !----------------------------------------------------------------
 
 subroutine tgyro_read_input

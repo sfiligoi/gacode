@@ -14,8 +14,10 @@ subroutine tgyro_source
 
   integer :: i
   real, external :: sigv
+  real, external :: dtrate_dv
   real :: n_d,n_t
   real :: s_alpha
+  integer, parameter :: iprint=0
 
   !-------------------------------------------------------
   ! Source terms (erg/cm^3/s):
@@ -37,6 +39,7 @@ subroutine tgyro_source
      endif
 
      s_alpha = n_d*n_t*sigv(ti(1,i)/1e3)*e_alpha
+ !    s_alpha = n_d*n_t*dtrate_dv(ti(1,i)/1e3)*e_alpha
 
      s_alpha_i(i) = s_alpha*frac_ai(i)
      s_alpha_e(i) = s_alpha*frac_ae(i)
@@ -69,6 +72,18 @@ subroutine tgyro_source
   ! Get integrated alpha-power
   call tgyro_volume_int(s_alpha_i,p_alpha_i)
   call tgyro_volume_int(s_alpha_e,p_alpha_e)
+
+  if (i_proc_global == 0 .and. iprint == 1) then
+     print '(17(1pe11.4,1x))',r(n_r)/r_min
+     print '(17(1pe11.4,1x))',p_alpha_i(n_r)
+     print '(17(1pe11.4,1x))',p_alpha_i_in(n_r)
+     print *
+     print '(17(1pe11.4,1x))',p_alpha_e(n_r)
+     print '(17(1pe11.4,1x))',p_alpha_e_in(n_r)
+     print *
+     print '(17(1pe11.4,1x))',p_alpha_i(n_r)+p_alpha_e(n_r)
+     print '(17(1pe11.4,1x))',p_alpha_i_in(n_r)+p_alpha_e_in(n_r)
+  endif
 
   ! Get integrated Bremsstrahlung power
   call tgyro_volume_int(s_brem,p_brem)
@@ -169,3 +184,31 @@ subroutine tgyro_source
   !------------------------------------------------
 
 end subroutine tgyro_source
+
+real function dtrate_dv(ti)
+
+  implicit none
+  !\
+  ! --------- 11/20/95 --- HSJ ---------------------------
+  !  returns rate(cm**3/sec) of t(d,n)he4 reaction
+  !  New Bosch & Hale rate coefficient:
+  !  Bosch & Hale, Nuc. Fus., vol32, no.4 (1992) 611
+  ! -------------------------------------------------------
+  ! data for t(d,n)he4:
+  !/
+  real :: C1,C2,C3,C4,C5,C6,C7, B_gsq, mrcsq
+  data  C1,C2,C3,C4,C5,C6,C7, B_gsq, mrcsq &
+       / 1.17302e-9,1.51361e-2,7.51886e-2,4.60643e-3,1.3500e-2, &
+       -1.06750e-4,1.36600e-5,1.182170e3,1124656.0/
+  real :: theta,xsi
+  real, intent(in) :: ti
+  !\-------------------------------------------------
+  ! neutrons produced by bulk plasma d-t fusion:
+  !/
+  theta  = ti*(C2+ti*(C4+ti*C6))
+  theta  = theta/(1.0+ti*(C3+ti*(C5+ti*C7)))
+  theta  = ti/(1.0-theta)
+  xsi    = (B_gsq/(4.0*theta))**(1.0/3.0)
+  dtrate_dv = C1*theta*sqrt(xsi/(mrcsq*ti**3))*exp(-3.0*xsi)
+ 
+end function dtrate_dv

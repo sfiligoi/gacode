@@ -248,9 +248,13 @@ subroutine tgyro_init_profiles
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e(:)*1e13,n_exp,r,p_e_in,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_i(:)*1e13,n_exp,r,p_i_in,n_r)
 
-  ! Apply auxillary power rescale
-  p_e_in = tgyro_input_paux_scale*(p_e_in + p_exch_in) - p_exch_in
-  p_i_in = tgyro_input_paux_scale*(p_i_in - p_exch_in) + p_exch_in
+  ! Integrated fusion powers
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e_fus(:)*1e13,n_exp,r,p_alpha_e_in,n_r)
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_i_fus(:)*1e13,n_exp,r,p_alpha_i_in,n_r)
+
+  ! Apply auxiliary power rescale
+  p_e_in = tgyro_input_paux_scale*(p_e_in+p_exch_in-p_alpha_e_in)+p_alpha_e_in-p_exch_in
+  p_i_in = tgyro_input_paux_scale*(p_i_in-p_exch_in-p_alpha_i_in)+p_alpha_i_in+p_exch_in
   !
   ! (2) Particle flow -- convert to 1/s from MW/keV
   !

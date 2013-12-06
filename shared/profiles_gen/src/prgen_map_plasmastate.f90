@@ -35,12 +35,13 @@ subroutine prgen_map_plasmastate
 
      ! Total powers to electrons and ions "per zone"
      ! Integrated power is thus a partial sum.
+     ! Factor of 1e-6 converts plasmastate (W) to input.profiles (MW).
 
      pow_e(i) = pow_e(i-1)+1e-6*plst_pe_trans(i-1)
      pow_i(i) = pow_i(i-1)+1e-6*plst_pi_trans(i-1)
 
-     pow_i_fus(i) = plst_pfusi(i)
-     pow_e_fus(i) = plst_pfuse(i)
+     pow_i_fus(i) = pow_i_fus(i-1)+1e-6*plst_pfusi(i-1)
+     pow_e_fus(i) = pow_e_fus(i-1)+1e-6*plst_pfuse(i-1)
 
      ! Collisional exchange
      !
