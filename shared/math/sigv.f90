@@ -1,16 +1,65 @@
-real function sigv(ti)
+!-----------------------------------------------------------
+! sigv.f90
+!
+! PURPOSE:
+!  Compute D-T fusion reactivity <sigma*v> in cm^3/s.
+!----------------------------------------------------------
+
+real function sigv(ti,type)
+
+  implicit none
 
   real, intent(in) :: ti
-  real :: r0,a1,a2,a3,a4,a5,a6
+  character(len=*), intent(in) :: type
 
-  r0  = 0.2935
-  a1 = -21.378
-  a2 = -25.204
-  a3 = -7.101e-2
-  a4 = 1.938e-4
-  a5 = 4.925e-6
-  a6 = -3.984e-8
+  real :: c1,c2,c3,c4,c5,c6,c7
+  real :: r0,theta,xi,bg,er
 
-  sigv = exp(a1/ti**r0+a2+ti*(a3+ti*(a4+ti*(a5+ti*a6))))
+  select case (trim(type))
+
+  case ('hively')
+
+     ! L.M. Hively, Nucl. Fusion 17 (1977) 873.
+
+     ! Table 1: (S5)
+     r0  = 0.2935
+     c1 = -21.377692
+     c2 = -25.204054
+     c3 = -7.1013427e-2
+     c4 = 1.9375451e-4
+     c5 = 4.9246592e-6
+     c6 = -3.9836572e-8
+
+     ! Eq. (5)
+     sigv = exp(c1/ti**r0+c2+ti*(c3+ti*(c4+ti*(c5+ti*c6))))
+
+  case ('bosch')
+
+     ! H.-S. Bosch and G.M. Hale, Nucl. Fusion 32 (1992) 611.
+
+     ! Table VII:
+     c1 = 1.17302e-9
+     c2 = 1.51361e-2
+     c3 = 7.51886e-2
+     c4 = 4.60643e-3
+     c5 = 1.3500e-2
+     c6 = -1.06750e-4
+     c7 = 1.36600e-5
+     bg = 34.3827
+     er = 1.124656e6
+
+     ! Eq. (12) 
+     r0    = ti*(c2+ti*(c4+ti*c6))/(1.0+ti*(c3+ti*(c5+ti*c7)))
+     theta = ti/(1.0-r0)
+     xi    = (bg**2/(4.0*theta))**(1.0/3.0)
+
+     sigv = c1*theta*sqrt(xi/(er*ti**3))*exp(-3.0*xi)
+
+  case default
+
+     print '(a)','ERROR: (sigv) Unknown reactivity type.'
+
+  end select
+
 
 end function sigv

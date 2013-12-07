@@ -61,6 +61,7 @@ subroutine tgyro_allocate_globals
   ! Alpha heating parameters
   allocate(frac_ai(n_r))
   allocate(frac_ae(n_r))
+  allocate(e_cross(n_r))
 
   ! Electron and ion temperatures
   allocate(te(n_r))

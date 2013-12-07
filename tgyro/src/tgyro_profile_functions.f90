@@ -123,7 +123,8 @@ subroutine tgyro_profile_functions
         c_a(:) = c_a(:)+(ni(i_ion,:)/ne(:))*zi_vec(i_ion)**2/(mi(i_ion)/malpha)
      endif
   enddo
-  x_a(:) = e_alpha/(k*te(:))*(4*sqrt(me/malpha)/(3*sqrt(pi)*c_a(:)))**(2.0/3.0)
+  e_cross(:) = k*te(:)*(4*sqrt(me/malpha)/(3*sqrt(pi)*c_a(:)))**(-2.0/3.0)
+  x_a(:) = e_alpha/e_cross(:)
   do i=1,n_r
      frac_ai(i) = sivukhin(x_a(i))
   enddo

@@ -128,7 +128,7 @@ module tgyro_globals
   ! Alpha heating coefficients
   real, dimension(:), allocatable :: frac_ae
   real, dimension(:), allocatable :: frac_ai
-  
+  real, dimension(:), allocatable :: e_cross
 
   ! Electron and ion temperatures
   real, dimension(:), allocatable :: te

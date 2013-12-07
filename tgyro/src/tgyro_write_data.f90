@@ -185,14 +185,17 @@ subroutine tgyro_write_data(i_print)
 
   open(unit=1,file='out.tgyro.alpha',status='old',position='append')
 
-  write(1,20) 'r/a','s_alpha','frac_ai','frac_ae'
-  write(1,20) '','(MW/cm^3)','',''
+  write(1,20) 'r/a','s_alpha','s_alpha_i','s_alpha_e','frac_ai','frac_ae','E_alpha/E_c'
+  write(1,20) '','(MW/cm^3)','(MW/cm^3)','(MW/cm^3)','','',''
   do i=1,n_r
      write(1,10) &
           r(i)/r_min,&
+          (s_alpha_i(i)+s_alpha_e(i))*1e-7*1e-6,&
           s_alpha_i(i)*1e-7*1e-6,&
+          s_alpha_e(i)*1e-7*1e-6,&
           frac_ai(i),&
-          frac_ae(i)
+          frac_ae(i),&
+          e_alpha/e_cross(i)
   enddo
 
   close(1) 
