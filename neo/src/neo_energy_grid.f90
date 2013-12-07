@@ -914,6 +914,15 @@ contains
     open(unit=1,file=trim(path)//'out.neo.diagnostic_coll',status='replace')
     write(1,'(a)') '# Collision matrix energy-element order [C00,C01,C02,C11,C12,C22,...]'
     write(1,'(a)') '# '
+    close(1)
+    open(unit=1,file=trim(path)//'out.neo.diagnostic_colltest',status='replace')
+    write(1,'(a)') '# Collision matrix energy-element order [C00,C01,C02,C10,C11,C12,C20,C21,C22,...]'
+    write(1,'(a)') '# '
+    close(1)
+    open(unit=1,file=trim(path)//'out.neo.diagnostic_collfield',status='replace')
+    write(1,'(a)') '# Collision matrix energy-element order [C00,C01,C02,C10,C11,C12,C20,C21,C22,...]'
+    write(1,'(a)') '# '
+    close(1)
 
     do is=1, n_species
        do js=1, n_species
@@ -995,6 +1004,7 @@ contains
              enddo
           enddo
 
+          open(unit=1,file=trim(path)//'out.neo.diagnostic_coll',status='old',position='append')
           do ix=0,n_xi
              ctot(:,:) = (test_mono(is,js,:,:,ix)+field_mono(is,js,:,:,ix))/tauinv_ab 
              write(1,'(a,i2,a,i2,a,i2,a)') '# ix = ',ix,'  (is,js)=(',is,',',js,')'
@@ -1004,7 +1014,29 @@ contains
                 enddo
              enddo
              write(1,*)
-          enddo ! ix
+          enddo
+          open(unit=1,file=trim(path)//'out.neo.diagnostic_colltest',status='old',position='append')
+          do ix=0,n_xi
+             ctot(:,:) = (test_mono(is,js,:,:,ix))/tauinv_ab 
+             write(1,'(a,i2,a,i2,a,i2,a)') '# ix = ',ix,'  (is,js)=(',is,',',js,')'
+             do ie=0,n_energy
+                do je=0,n_energy
+                   write(1,'(1pe16.8,1x)',advance='no') ctot(ie,je)
+                enddo
+             enddo
+             write(1,*)
+          enddo
+          open(unit=1,file=trim(path)//'out.neo.diagnostic_collfield',status='old',position='append')
+          do ix=0,n_xi
+             ctot(:,:) = (field_mono(is,js,:,:,ix))/tauinv_ab
+             write(1,'(a,i2,a,i2,a,i2,a)') '# ix = ',ix,'  (is,js)=(',is,',',js,')'
+             do ie=0,n_energy
+                do je=0,n_energy
+                   write(1,'(1pe16.8,1x)',advance='no') ctot(ie,je)
+                enddo
+             enddo
+             write(1,*)
+          enddo
 
        enddo ! js
     enddo ! is
