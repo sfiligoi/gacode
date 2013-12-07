@@ -39,8 +39,6 @@ subroutine tgyro_source
 
      s_alpha = n_d*n_t*sigv(ti(1,i)/1e3,'bosch')*e_alpha
 
-!     if (i_proc_global == 0) print *,sigv(ti(1,i)/1e3,'bosch')*n_d*n_t
-
      s_alpha_i(i) = s_alpha*frac_ai(i)
      s_alpha_e(i) = s_alpha*frac_ae(i)
 
