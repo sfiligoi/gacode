@@ -59,24 +59,22 @@ class TGYROData:
         else:
             self.loc_n_ion = int(self.get_tag_value("LOC_N_ION"))
             self.read_control()
-            self.fileparser('gyrobohm.out')
-            self.fileparser('flux_e.out')
-            self.fileparser('flux_i.out')
-            self.fileparser('flux_target.out')
-            self.fileparser('mflux_e.out')
-            self.fileparser('mflux_i.out')
-            self.fileparser('mflux_target.out')
-            self.fileparser('chi_e.out')
-            self.fileparser('chi_i.out')
-            self.fileparser('profile.out')
-            self.fileparser('gradient.out')
+            self.fileparser('out.tgyro.gyrobohm')
+            self.fileparser('out.tgyro.flux_e')
+            self.fileparser('out.tgyro.flux_i')
+            self.fileparser('out.tgyro.flux_target')
+            self.fileparser('out.tgyro.mflux_e')
+            self.fileparser('out.tgyro.mflux_i')
+            self.fileparser('out.tgyro.mflux_target')
+            self.fileparser('out.tgyro.profile')
+            self.fileparser('out.tgyro.gradient')
             self.fileparser('out.tgyro.geometry.1')
             self.fileparser('out.tgyro.geometry.2')
             self.fileparser('out.tgyro.power')
             for i in range(2,self.loc_n_ion+1):
                 si = '%d'%i
-                for fn in ['profile','chi_i','mflux_i','flux_i']:
-                    self.fileparser(fn+si+'.out',spec_num=i)
+                for fn in ['profile','mflux_i','flux_i']:
+                    self.fileparser('out.tgyro.'+fn+si,spec_num=i)
             self.get_residual()
     #---------------------------------------------------------------------------#
 
@@ -105,7 +103,7 @@ class TGYROData:
 
         import numpy as np
     
-        data = np.loadtxt(self.dirname+'/control.out')
+        data = np.loadtxt(self.dirname+'/out.tgyro.control')
 
         self.n_radial     = int(data[0])
         self.n_fields     = int(data[1])
@@ -145,12 +143,12 @@ class TGYROData:
     #---------------------------------------------------------------------------#
 
     def get_residual(self):
-        """Read residual.out
+        """Read out.tgyro.residual
         """
         import string
         import numpy as np
 
-        fn = 'residual.out'
+        fn = 'out.tgyro.residual'
         data = open(self.dirname+'/'+fn,'r').readlines()
         
         # Data dimensions

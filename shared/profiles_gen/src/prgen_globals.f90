@@ -168,6 +168,8 @@ module prgen_globals
   character (len=32), dimension(:), allocatable :: plst_all_name
   character (len=32), dimension(:), allocatable :: plst_alla_name
   real :: plst_b_axis_vac
+  real, dimension(:), allocatable :: plst_q_all
+  real, dimension(:), allocatable :: plst_m_all
   real, dimension(:,:), allocatable :: plst_ts
   real, dimension(:,:), allocatable :: plst_ns
   real, dimension(:), allocatable :: plst_ptowb

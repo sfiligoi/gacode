@@ -89,6 +89,20 @@ subroutine prgen_read_plasmastate
   err = nf90_inq_varid(ncid,trim(plst_tag),varid)
   err = nf90_get_var(ncid,varid,plst_all_name(1:plst_dp1_nspec_all))
 
+  ! Species charges
+  plst_tag = 'q_ALL'
+  err = nf90_inq_varid(ncid,trim(plst_tag),varid)
+  err = nf90_get_var(ncid,varid,plst_q_all(1:plst_dp1_nspec_all))
+
+  ! Species mass
+  plst_tag = 'm_ALL'
+  err = nf90_inq_varid(ncid,trim(plst_tag),varid)
+  err = nf90_get_var(ncid,varid,plst_m_all(1:plst_dp1_nspec_all))
+
+!  do i=1,plst_dp1_nspec_all
+!     print *,i,plst_all_name(i),nint(plst_q_all(i)/1.6022e-19),nint(plst_m_all(i)/1.6726e-27)
+!  enddo
+
   ! Flux-surface volume
   err = nf90_inq_varid(ncid,trim('vol'),varid)
   err = nf90_get_var(ncid,varid,plst_vol(:))
