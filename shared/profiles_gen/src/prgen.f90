@@ -45,6 +45,9 @@ program prgen
   read(1,*) btccw
   read(1,*) nfourier
   read(1,*) reorder_vec(:)
+  read(1,*) n_lump
+  allocate(lump_vec(n_lump))
+  read(1,*) lump_vec(:)
   close(1)
   !--------------------------------------------------
 

@@ -19,9 +19,6 @@ subroutine prgen_map_iterdb
   integer :: i, j
   integer :: ip
   integer :: n0
-  real :: xoh_exp
-  real :: xrad_exp
-  real :: xfus_exp
 
   do i=1,onetwo_nj
      rho(i) = (i-1)/(onetwo_nj-1.0)
@@ -136,7 +133,7 @@ subroutine prgen_map_iterdb
      onetwo_Tion_vec(i,:) = onetwo_ti(:)
   enddo
 
-  !Beam ions
+  ! Beam ions
   do i=1,onetwo_nbion
      if (sum(onetwo_enbeam(:,i))==0) then
         do j=1,5

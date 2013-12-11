@@ -13,11 +13,13 @@ subroutine prgen_read_plasmastate
   implicit none
 
   ! NetCDF variables
-  integer :: i
+  integer :: i,j
   integer :: ncid
   integer :: varid
   integer :: err
   real :: dummy
+  real, dimension(:), allocatable :: f_lump
+  integer :: imin,ibeam,ifus
 
   ! Open the file (NF90_NOWRITE means read-only)
   err = nf90_open(raw_data_file,NF90_NOWRITE,ncid)
@@ -99,10 +101,6 @@ subroutine prgen_read_plasmastate
   err = nf90_inq_varid(ncid,trim(plst_tag),varid)
   err = nf90_get_var(ncid,varid,plst_m_all(1:plst_dp1_nspec_all))
 
-!  do i=1,plst_dp1_nspec_all
-!     print *,i,plst_all_name(i),nint(plst_q_all(i)/1.6022e-19),nint(plst_m_all(i)/1.6726e-27)
-!  enddo
-
   ! Flux-surface volume
   err = nf90_inq_varid(ncid,trim('vol'),varid)
   err = nf90_get_var(ncid,varid,plst_vol(:))
@@ -181,7 +179,7 @@ subroutine prgen_read_plasmastate
 
   plst_ts(nx,2:plst_dp1_nspec_th) = dummy
 
-  ! Densities
+  ! Thermal species densities
   err = nf90_inq_varid(ncid,trim('ns'),varid)
   err = nf90_get_var(ncid,varid,plst_ns(1:nx-1,1:plst_dp1_nspec_th)) 
 
@@ -191,7 +189,27 @@ subroutine prgen_read_plasmastate
 
   ! Beam density
   err = nf90_inq_varid(ncid,trim('nbeami'),varid)
-  err = nf90_get_var(ncid,varid,plst_nb(1:nx-1))
+  if (err == 0) then
+     err = nf90_get_var(ncid,varid,plst_nb(1:nx-1))
+  else
+     plst_nb = 0.0
+  endif
+
+  ! Minority ion density
+  err = nf90_inq_varid(ncid,trim('nmini'),varid)
+  if (err == 0) then
+     err = nf90_get_var(ncid,varid,plst_nmini(1:nx-1))
+  else
+     plst_nmini = 0.0
+  endif
+
+  ! Fusion ion (alpha) density
+  err = nf90_inq_varid(ncid,trim('nfusi'),varid)
+  if (err == 0) then
+     err = nf90_get_var(ncid,varid,plst_nfusi(1:nx-1))
+  else
+     plst_nfusi = 0.0
+  endif
 
   ! Beam perpendicular energy
   err = nf90_inq_varid(ncid,trim('eperp_beami'),varid)
@@ -201,8 +219,9 @@ subroutine prgen_read_plasmastate
   err = nf90_inq_varid(ncid,trim('epll_beami'),varid)
   err = nf90_get_var(ncid,varid,plst_eparb(1:nx-1))
 
-  plst_ns(1:nx-1,plst_dp1_nspec_th+1) = plst_nb
-  plst_ts(1:nx-1,plst_dp1_nspec_th+1) = 2.0/3.0*(plst_eparb + plst_eperpb)
+  ! Set the n+1 density/temperature to the beam values
+  plst_ns(1:nx-1,plst_dp1_nspec_th+1) = plst_nb(1:nx-1)
+  plst_ts(1:nx-1,plst_dp1_nspec_th+1) = 2.0/3.0*(plst_eparb(1:nx-1) + plst_eperpb(1:nx-1))
 
   plst_ns(nx,plst_dp1_nspec_th+1) = plst_ns(nx-1,plst_dp1_nspec_th+1)
   plst_ts(nx,plst_dp1_nspec_th+1) = plst_ts(nx-1,plst_dp1_nspec_th+1)
@@ -297,6 +316,58 @@ subroutine prgen_read_plasmastate
 
   ! No squareness 
   zeta(:) = 0.0
+
+
+  allocate(f_lump(nx))
+  f_lump(:) = 0.0
+
+  ! Lump fast ions
+  imin  = 0
+  ifus  = 0
+  ibeam = 0
+  z_ave_fast = 0.0
+  do i=1,plst_dp1_nspec_all
+     if (index(plst_all_name(i),'mi') > 0) then
+        imin = i
+        f_lump(:) = f_lump(:)+plst_nmini(:)*plst_q_all(i)
+        z_ave_fast = z_ave_fast+sum(plst_nmini(:))*plst_q_all(i)**2
+     endif
+     if (index(plst_all_name(i),'beam') > 0) then
+        ibeam=i
+        f_lump(:) = f_lump(:)+plst_nb(:)*plst_q_all(i)
+        z_ave_fast = z_ave_fast+sum(plst_nb(:))*plst_q_all(i)**2
+     endif
+     if (index(plst_all_name(i),'fusn') > 0) then
+        ifus=i
+        f_lump(:) = f_lump(:)+plst_nfusi(:)*plst_q_all(ifus)
+        z_ave_fast = z_ave_fast+sum(plst_nfusi(:))*plst_q_all(i)**2
+     endif
+  enddo
+
+  if (imin+ifus+ibeam > 0) then
+     z_ave_fast = nint(z_ave_fast/sum(f_lump(:))/1.6022e-19)
+     n_lump_fast(:) = f_lump(:)/z_ave_fast
+  else
+     n_lump_fast(:) = 0.0
+  endif
+
+  ! Lump main ions
+  if (n_lump > 1) then
+
+     f_lump(:) = 0.0
+     z_ave_therm = 0.0
+     do j=1,n_lump
+        i = lump_vec(j)
+        f_lump(:) = f_lump(:)+plst_ns(:,i)*plst_q_all(i)
+        z_ave_therm = z_ave_therm + sum(plst_ns(:,i))*plst_q_all(i)**2
+     enddo
+     z_ave_therm  = nint(z_ave_therm/sum(f_lump(:))/1.6022e-19)
+     n_lump_therm(:) = f_lump(:)/z_ave_therm
+
+     ! Replace earliest lumped species with lumped density
+     plst_ns(:,minval(lump_vec)) = n_lump_therm(:)  
+
+  endif
 
 end subroutine prgen_read_plasmastate
 

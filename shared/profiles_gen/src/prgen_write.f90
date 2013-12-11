@@ -13,7 +13,7 @@ subroutine prgen_write
   !---------------------------------------------------------------
   implicit none
   !
-  integer :: i
+  integer :: i,ip
   integer :: indx
   character (len=15) :: ion_string ! Up to 5 two letter ions
   !---------------------------------------------------------------
@@ -35,6 +35,7 @@ subroutine prgen_write
   select case (format_type)
 
   case (1)
+
      if (cer_file /= "null") then
         write(1,20) '#      MERGED CER FILE : ',trim(cer_file)
      endif
@@ -49,22 +50,34 @@ subroutine prgen_write
      write(1,20) '#                 IONS : ',trim(ion_string)
 
   case (2)
+
      write(1,20) '#              TOKAMAK : ',trim(plst_tokamak_id)
      write(1,40) '#          SHOT NUMBER : ',plst_shot_number
      write(1,20) '#'
-     write(1,'(10(a,1x))') '#                 IONS :',&
-          (trim(plst_all_name(reorder_vec(i-1)+1)),&
-          i=2,min(plst_dp1_nspec_th+1,6))
+     write(1,20) '#                 IONS :  Name    Z   Mass'
+     do i=1,5
+        ip = reorder_vec(i)
+        if (ip < plst_dp1_nspec_all) then
+           write(1,'(a,a,t33,i3,t40,i3)') '#                         ',&
+                trim(plst_all_name(ip+1)),&
+                nint(plst_q_all(ip+1)/1.6022e-19),&
+                nint(plst_m_all(ip+1)/1.6726e-27)
+
+        endif
+     enddo
 
   case (3)
+
      write(1,20) '#                 IONS : D [assumed]'
 
   case (6)
+
      write(1,20) '#              TOKAMAK : ',ufile_tok
      write(1,20) '#          SHOT NUMBER : ',ufile_shot
      write(1,20) '#             TIME (s) : ',ufile_time
 
   case (7)
+
      write(1,40) '#          SHOT NUMBER : [DATA MODIFIED WITH GMERGE]'
      write(1,20) '#'
      write(1,'(10(a,1x))') '#                 IONS : ',trim(cer_file)

@@ -114,24 +114,25 @@ subroutine prgen_map_plasmastate
   ! COORDINATES: This poloidal flux has correct sign (see above).
   vec(20,:) = dpsi(:)
 
-  ! ni
-  do i=2,min(plst_dp1_nspec_th+1,6)
-     ip = reorder_vec(i-1)+1
-     vec(21+i-2,:) = plst_ns(:,ip)*1e-19
-  enddo
+  print *,plst_dp1_nspec_th+1
 
-  ! ti
-  do i=2,min(plst_dp1_nspec_th+1,6)
-     ip = reorder_vec(i-1)+1
-     vec(26+i-2,:) = plst_ts(:,ip)
+  ! ni,ti
+  do i=1,5
+     ip = reorder_vec(i)
+     if (ip < plst_dp1_nspec_th+1) then
+        vec(21+i-1,:) = plst_ns(:,ip+1)*1e-19
+        vec(26+i-1,:) = plst_ts(:,ip+1)
+     endif
   enddo
 
   ! vphi
-  do i=2,min(plst_dp1_nspec_th+1,6)
-     ip = reorder_vec(i-1)+1
-     if (trim(plst_all_name(ip)) == 'C') then
-        ! COORDINATES: -ipccw accounts for plasmastate toroidal angle convention
-        vec(31+i-2,:) = -ipccw*plst_omegat(:)*(rmaj(:)+rmin(:))
+  do i=1,5
+     ip = reorder_vec(i)+1
+     if (ip <= plst_dp1_nspec_th) then
+        if (trim(plst_all_name(ip)) == 'C') then
+           ! COORDINATES: -ipccw accounts for plasmastate toroidal angle convention
+           vec(31+i-1,:) = -ipccw*plst_omegat(:)*(rmaj(:)+rmin(:))
+        endif
      endif
   enddo
 
@@ -145,15 +146,17 @@ subroutine prgen_map_plasmastate
 
   ! Ion reordering diagnostics
 
-  print '(a)','INFO: (prgen) Found these ion species'
+  print '(a)','INFO: (prgen) Found these ion species:'
   do i=2,plst_dp1_nspec_all
-     ip = reorder_vec(i-1)+1
-     if (i <= 6) then
-        print '(t6,i2,1x,3(a))',&
-             i-1,trim(plst_all_name(i)),' -> ',trim(plst_all_name(ip))
+     print '(t6,i2,1x,3(a))', i-1,trim(plst_all_name(i))
+  enddo
+  print '(a)','INFO: (prgen) Created these species:'
+  do i=1,5
+     ip = reorder_vec(i)
+     if (ip >= plst_dp1_nspec_all) then
+        print '(t6,i2,1x,3(a))',i,'[null]'
      else
-        print '(t6,i2,1x,3(a))',&
-             i-1,trim(plst_all_name(i)),' [unmapped]'
+        print '(t6,i2,1x,3(a))',i,trim(plst_all_name(ip+1))
      endif
   enddo
 

@@ -21,12 +21,15 @@ module prgen_globals
   integer :: verbose_flag
   integer :: gmerge_flag
   character (len=70) :: efit_header
-  integer, dimension(5) :: reorder_vec
   integer :: ipccw
   integer :: btccw
   integer :: nfourier
   real :: dpsi_efit
   real :: dpsi_data
+  integer :: n_reorder
+  integer, dimension(5) :: reorder_vec
+  integer :: n_lump
+  integer, dimension(:), allocatable :: lump_vec
   !----------------------------------------------------------
 
   ! Internal physics variables
@@ -71,6 +74,10 @@ module prgen_globals
 
   character (len=70), dimension(5) :: ion_name
 
+  real, dimension(:), allocatable :: n_lump_therm
+  real, dimension(:), allocatable :: n_lump_fast
+  real :: z_ave_therm
+  real :: z_ave_fast
   !---------------------------------------------------------
   ! ONETWO variables
   !
@@ -174,6 +181,8 @@ module prgen_globals
   real, dimension(:,:), allocatable :: plst_ns
   real, dimension(:), allocatable :: plst_ptowb
   real, dimension(:), allocatable :: plst_nb
+  real, dimension(:), allocatable :: plst_nmini
+  real, dimension(:), allocatable :: plst_nfusi
   real, dimension(:), allocatable :: plst_eperpb
   real, dimension(:), allocatable :: plst_eparb
   real, dimension(:), allocatable :: plst_vol
