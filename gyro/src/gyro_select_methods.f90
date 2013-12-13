@@ -518,51 +518,55 @@ subroutine gyro_select_methods
   !----------------------------------------------------
 
   !----------------------------------------------------
-  ! INTEGRATOR:
+  ! INTEGRATOR (for initial-value method only)
   !
-  if (electron_method == 2) then
+  if (linsolve_method == 1) then
 
-     select case (integrator_method) 
+     if (electron_method == 2) then
 
-     case (1)
+        select case (integrator_method) 
 
-        call send_line('integrator_method    : IMEX2')
+        case (1)
 
-     case (2)
+           call send_line('integrator_method    : IMEX2')
 
-        call send_line('integrator_method    : IMEX2+RK4')
+        case (2)
 
-     case (3)
+           call send_line('integrator_method    : IMEX2+RK4')
 
-        call send_line('integrator_method    : IMEX2+2(RK4)')
+        case (3)
 
-     case (4)
+           call send_line('integrator_method    : IMEX2+2(RK4)')
 
-        call send_line('integrator_method    : IMEX2+3(RK4)')
+        case (4)
 
-     case default
+           call send_line('integrator_method    : IMEX2+3(RK4)')
 
-        call catch_error('ERROR: (GYRO) integrator_method')
+        case default
 
-     end select
+           call catch_error('ERROR: (GYRO) integrator_method')
 
-  else
+        end select
 
-     select case (integrator_method) 
+     else
 
-     case (1)
+        select case (integrator_method) 
 
-        call send_line('integrator_method    : RK2')
+        case (1)
 
-     case (2)
+           call send_line('integrator_method    : RK2')
 
-        call send_line('integrator_method    : RK4')
+        case (2)
 
-     case default
+           call send_line('integrator_method    : RK4')
 
-        call catch_error('ERROR: (GYRO) integrator_method')
+        case default
 
-     end select
+           call catch_error('ERROR: (GYRO) integrator_method')
+
+        end select
+
+     endif
 
   endif
   !----------------------------------------------------

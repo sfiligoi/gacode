@@ -24,6 +24,7 @@ module prgen_globals
   integer :: ipccw
   integer :: btccw
   integer :: nfourier
+  integer :: lump_fast_flag
   real :: dpsi_efit
   real :: dpsi_data
   integer :: n_reorder
@@ -74,10 +75,8 @@ module prgen_globals
 
   character (len=70), dimension(5) :: ion_name
 
-  real, dimension(:), allocatable :: n_lump_therm
-  real, dimension(:), allocatable :: n_lump_fast
-  real :: z_ave_therm
-  real :: z_ave_fast
+  real :: quasi_err
+
   !---------------------------------------------------------
   ! ONETWO variables
   !

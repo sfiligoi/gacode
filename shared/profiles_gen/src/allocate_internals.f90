@@ -41,8 +41,4 @@ subroutine allocate_internals
   allocate(flow_beam(nx))
   allocate(flow_mom(nx))
  
-  ! Lumped species
-  allocate(n_lump_therm(nx))
-  allocate(n_lump_fast(nx))
-
 end subroutine allocate_internals

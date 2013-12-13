@@ -15,9 +15,16 @@ subroutine prgen_map_plasmastate
 
   implicit none
 
-  integer :: i
-  integer :: ip
+  integer :: i,j
+  integer :: ip,ix
   real, dimension(nx) :: dphidpsi
+  real, dimension(:), allocatable :: f1_therm
+  real, dimension(:), allocatable :: f1_fast
+  real, dimension(:), allocatable :: f1_lump
+  real, dimension(:), allocatable :: f2_therm
+  real, dimension(:), allocatable :: f2_fast
+  real, dimension(:), allocatable :: f2_lump
+  real :: z_eff_lump
 
   !--------------------------------------------------------------------
   ! Calculate integrated powers from input sources
@@ -85,6 +92,117 @@ subroutine prgen_map_plasmastate
   omega0 = -2.9979e10*dphidpsi*(10.0/3.0)/1e8
   !--------------------------------------------------------------------
 
+  !-------------------------------------------------------------------------------
+  ! Lump main ions and/or fast ions
+  !
+  allocate(f1_therm(nx))
+  allocate(f1_fast(nx))
+  allocate(f1_lump(nx))
+  allocate(f2_therm(nx))
+  allocate(f2_fast(nx))
+  allocate(f2_lump(nx))
+  !
+  f1_therm(:) = 0.0
+  f2_therm(:) = 0.0
+  do i=2,plst_dp1_nspec_th
+     f1_therm(:) = f1_therm(:)+plst_ns(:,i)*plst_q_all(i)/1.6022e-19  
+     f2_therm(:) = f2_therm(:)+plst_ns(:,i)*(plst_q_all(i)/1.6022e-19)**2   
+  enddo
+
+  print '(a)','INFO: (prgen) Found these ion species:'
+  f1_fast(:) = 0.0
+  f2_fast(:) = 0.0
+  do i=2,plst_dp1_nspec_all
+
+     print '(t6,i2,1x,3(a))', i-1,trim(plst_all_name(i))
+
+     if (index(plst_all_name(i),'mi') > 0) then
+        f1_fast(:) = f1_fast(:)+plst_nmini(:)*plst_q_all(i)/1.6022e-19 
+        f2_fast(:) = f2_fast(:)+plst_nmini(:)*(plst_q_all(i)/1.6022e-19)**2
+     endif
+     if (index(plst_all_name(i),'beam') > 0) then
+        f1_fast(:) = f1_fast(:)+plst_nb(:)*plst_q_all(i)/1.6022e-19 
+        f2_fast(:) = f2_fast(:)+plst_nb(:)*(plst_q_all(i)/1.6022e-19)**2
+     endif
+     if (index(plst_all_name(i),'fusn') > 0) then
+        f1_fast(:) = f1_fast(:)+plst_nfusi(:)*plst_q_all(i)/1.6022e-19 
+        f2_fast(:) = f2_fast(:)+plst_nfusi(:)*(plst_q_all(i)/1.6022e-19)**2
+     endif
+  enddo
+
+  ! Lump main ions
+  if (n_lump > 1) then
+
+     f1_lump(:) = 0.0
+     f2_lump(:) = 0.0
+
+     ! Add 1 to account for electrons at index 1
+     lump_vec(:) = lump_vec(:)+1
+     do j=1,n_lump
+        i = lump_vec(j)
+        f1_lump(:) = f1_lump(:)+plst_ns(:,i)*plst_q_all(i)/1.6022e-19
+        f2_lump(:) = f2_lump(:)+plst_ns(:,i)*(plst_q_all(i)/1.6022e-19)**2
+     enddo
+     z_eff_lump = nint(sum(f2_lump(:)/f1_lump(:))/nx)
+
+     ! Replace first lumped species with lumped density
+     plst_ns(:,lump_vec(1))     = f1_lump(:)/z_eff_lump 
+     plst_q_all(lump_vec(1))    = z_eff_lump*1.6022e-19  
+     plst_all_name(lump_vec(1)) = '[lumped]'
+
+     ! Remove others and restack 
+     do j=2,n_lump
+        ix = lump_vec(j)-j+2
+        do i=ix+1,plst_dp1_nspec_all
+           if (i <= plst_dp1_nspec_th) then 
+              plst_ns(:,i-1)  = plst_ns(:,i)
+              plst_ts(:,i-1)  = plst_ts(:,i)
+           endif
+           plst_q_all(i-1) = plst_q_all(i)
+           plst_m_all(i-1) = plst_m_all(i)
+           plst_all_name(i-1) = plst_all_name(i)
+        enddo
+        plst_dp1_nspec_all = plst_dp1_nspec_all-1
+        plst_dp1_nspec_th = plst_dp1_nspec_th-1
+     enddo
+
+  endif
+
+  ! Recompute thermal fractions after lumping
+  f1_therm(:) = 0.0
+  f2_therm(:) = 0.0
+  do i=2,plst_dp1_nspec_th
+     f1_therm(:) = f1_therm(:)+plst_ns(:,i)*(plst_q_all(i)/1.6022e-19) 
+     f2_therm(:) = f2_therm(:)+plst_ns(:,i)*(plst_q_all(i)/1.6022e-19)**2  
+  enddo
+
+  ! Lump fast ions
+  if (lump_fast_flag == 1) then
+
+     z_eff_lump = nint(sum(f2_fast(:)/f1_fast(:))/nx)
+
+     ! Replace first lumped species with lumped density
+     ix = plst_dp1_nspec_th+1 
+     plst_ns(:,ix)     = f1_fast(:)/z_eff_lump 
+     plst_q_all(ix)    = z_eff_lump*1.6022e-19  
+     plst_all_name(ix) = '[fast]'
+
+     plst_dp1_nspec_all = plst_dp1_nspec_th+1
+
+  endif
+
+  plst_zeff(:) = (f2_therm(:)+f2_fast(:))/(f1_therm(:)+f1_fast(:))
+
+  ! Compute the quasineutrality error with max 5 ions:
+
+  quasi_err = 0.0
+  ix = min(plst_dp1_nspec_th+1,6)
+  do i=1,nx
+     quasi_err = quasi_err+sum(plst_ns(i,2:ix)*plst_q_all(2:ix))
+  enddo
+  quasi_err = abs(quasi_err/sum(-plst_ns(:,1)*plst_q_all(1))-1.0)
+  !-------------------------------------------------------------------------------
+
   !---------------------------------------------------------
   ! Map profile data onto single array:
   !
@@ -113,8 +231,6 @@ subroutine prgen_map_plasmastate
   vec(19,:) = plst_ptowb ! total pressure, thermal + fast ion
   ! COORDINATES: This poloidal flux has correct sign (see above).
   vec(20,:) = dpsi(:)
-
-  print *,plst_dp1_nspec_th+1
 
   ! ni,ti
   do i=1,5
@@ -146,10 +262,6 @@ subroutine prgen_map_plasmastate
 
   ! Ion reordering diagnostics
 
-  print '(a)','INFO: (prgen) Found these ion species:'
-  do i=2,plst_dp1_nspec_all
-     print '(t6,i2,1x,3(a))', i-1,trim(plst_all_name(i))
-  enddo
   print '(a)','INFO: (prgen) Created these species:'
   do i=1,5
      ip = reorder_vec(i)

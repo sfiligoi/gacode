@@ -54,17 +54,19 @@ subroutine prgen_write
      write(1,20) '#              TOKAMAK : ',trim(plst_tokamak_id)
      write(1,40) '#          SHOT NUMBER : ',plst_shot_number
      write(1,20) '#'
-     write(1,20) '#                 IONS :  Name    Z   Mass'
+     write(1,20) '#                 IONS :  Name       Z   Mass'
      do i=1,5
         ip = reorder_vec(i)
         if (ip < plst_dp1_nspec_all) then
-           write(1,'(a,a,t33,i3,t40,i3)') '#                         ',&
+           write(1,'(a,a,t36,i3,t43,i3)') '#                         ',&
                 trim(plst_all_name(ip+1)),&
                 nint(plst_q_all(ip+1)/1.6022e-19),&
                 nint(plst_m_all(ip+1)/1.6726e-27)
 
         endif
      enddo
+     write(1,20) '#'
+     write(1,'(a,f6.2)') '#       Quasineutrality error (%) ',quasi_err*100.0
 
   case (3)
 

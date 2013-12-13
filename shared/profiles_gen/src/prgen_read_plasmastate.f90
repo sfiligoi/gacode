@@ -13,13 +13,12 @@ subroutine prgen_read_plasmastate
   implicit none
 
   ! NetCDF variables
-  integer :: i,j
+  integer :: i
   integer :: ncid
   integer :: varid
   integer :: err
   real :: dummy
-  real, dimension(:), allocatable :: f_lump
-  integer :: imin,ibeam,ifus
+
 
   ! Open the file (NF90_NOWRITE means read-only)
   err = nf90_open(raw_data_file,NF90_NOWRITE,ncid)
@@ -161,7 +160,7 @@ subroutine prgen_read_plasmastate
   ! Z_eff
   err = nf90_inq_varid(ncid,trim('Zeff'),varid)
   err = nf90_get_var(ncid,varid,plst_zeff(1:nx-1))
-  plst_zeff(nx) = 0.0
+  plst_zeff(nx) = plst_zeff(nx-1)
 
   ! Temperatures
   err = nf90_inq_varid(ncid,trim('Ts'),varid)
@@ -191,6 +190,7 @@ subroutine prgen_read_plasmastate
   err = nf90_inq_varid(ncid,trim('nbeami'),varid)
   if (err == 0) then
      err = nf90_get_var(ncid,varid,plst_nb(1:nx-1))
+     plst_nb(nx) = plst_nb(nx-1)
   else
      plst_nb = 0.0
   endif
@@ -199,6 +199,7 @@ subroutine prgen_read_plasmastate
   err = nf90_inq_varid(ncid,trim('nmini'),varid)
   if (err == 0) then
      err = nf90_get_var(ncid,varid,plst_nmini(1:nx-1))
+     plst_nmini(nx) = plst_nmini(nx-1)
   else
      plst_nmini = 0.0
   endif
@@ -207,6 +208,7 @@ subroutine prgen_read_plasmastate
   err = nf90_inq_varid(ncid,trim('nfusi'),varid)
   if (err == 0) then
      err = nf90_get_var(ncid,varid,plst_nfusi(1:nx-1))
+     plst_nfusi(nx) = plst_nfusi(nx-1)
   else
      plst_nfusi = 0.0
   endif
@@ -229,6 +231,12 @@ subroutine prgen_read_plasmastate
   ! Total plasma pressure, thermal + fast ions
   err = nf90_inq_varid(ncid,trim('P_eq'),varid)
   err = nf90_get_var(ncid,varid,plst_ptowb(:))
+
+  ! NOTE: Fast-ion handling: 
+  !
+  ! Historically, we retained the beams as the n_thermal+1 species.  Now, we have
+  ! the option to lump all the fast ions into an effective fast ion population and
+  ! put that in the N+1 slot.
 
   ! Radial electrostatic (equilibrium) potential (kV not keV!) 
   err = nf90_inq_varid(ncid,trim('Epot'),varid)
@@ -316,58 +324,6 @@ subroutine prgen_read_plasmastate
 
   ! No squareness 
   zeta(:) = 0.0
-
-
-  allocate(f_lump(nx))
-  f_lump(:) = 0.0
-
-  ! Lump fast ions
-  imin  = 0
-  ifus  = 0
-  ibeam = 0
-  z_ave_fast = 0.0
-  do i=1,plst_dp1_nspec_all
-     if (index(plst_all_name(i),'mi') > 0) then
-        imin = i
-        f_lump(:) = f_lump(:)+plst_nmini(:)*plst_q_all(i)
-        z_ave_fast = z_ave_fast+sum(plst_nmini(:))*plst_q_all(i)**2
-     endif
-     if (index(plst_all_name(i),'beam') > 0) then
-        ibeam=i
-        f_lump(:) = f_lump(:)+plst_nb(:)*plst_q_all(i)
-        z_ave_fast = z_ave_fast+sum(plst_nb(:))*plst_q_all(i)**2
-     endif
-     if (index(plst_all_name(i),'fusn') > 0) then
-        ifus=i
-        f_lump(:) = f_lump(:)+plst_nfusi(:)*plst_q_all(ifus)
-        z_ave_fast = z_ave_fast+sum(plst_nfusi(:))*plst_q_all(i)**2
-     endif
-  enddo
-
-  if (imin+ifus+ibeam > 0) then
-     z_ave_fast = nint(z_ave_fast/sum(f_lump(:))/1.6022e-19)
-     n_lump_fast(:) = f_lump(:)/z_ave_fast
-  else
-     n_lump_fast(:) = 0.0
-  endif
-
-  ! Lump main ions
-  if (n_lump > 1) then
-
-     f_lump(:) = 0.0
-     z_ave_therm = 0.0
-     do j=1,n_lump
-        i = lump_vec(j)
-        f_lump(:) = f_lump(:)+plst_ns(:,i)*plst_q_all(i)
-        z_ave_therm = z_ave_therm + sum(plst_ns(:,i))*plst_q_all(i)**2
-     enddo
-     z_ave_therm  = nint(z_ave_therm/sum(f_lump(:))/1.6022e-19)
-     n_lump_therm(:) = f_lump(:)/z_ave_therm
-
-     ! Replace earliest lumped species with lumped density
-     plst_ns(:,minval(lump_vec)) = n_lump_therm(:)  
-
-  endif
 
 end subroutine prgen_read_plasmastate
 
