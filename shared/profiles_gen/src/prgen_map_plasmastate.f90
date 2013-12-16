@@ -255,6 +255,24 @@ subroutine prgen_map_plasmastate
   ! vpol
   vec(36:40,:) = 0.0
 
+  !---------------------------------------------------
+  ! Read the cer file and overlay
+  !
+  if (cer_file /= "null") then
+     rho = plst_rho
+     allocate(vpolc_exp(nx))
+     allocate(vtorc_exp(nx))
+     call prgen_read_cer
+     vec(10,:) = omega0(:)
+     do i=1,5
+        if (reorder_vec(i) == onetwo_nprim+1) then
+           vec(30+i,:) = vtorc_exp(:)
+           vec(35+i,:) = vpolc_exp(:)
+        endif
+     enddo
+  endif
+  !---------------------------------------------------
+
   ! Extra powers
   vec(41,:) = pow_e_fus(:)
   vec(42,:) = pow_i_fus(:)
