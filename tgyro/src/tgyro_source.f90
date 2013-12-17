@@ -17,6 +17,7 @@ subroutine tgyro_source
   real, external :: dtrate_dv
   real :: n_d,n_t
   real :: s_alpha
+  real :: g
 
   !-------------------------------------------------------
   ! Source terms (erg/cm^3/s):
@@ -37,6 +38,8 @@ subroutine tgyro_source
         n_t = 0.5*ni(1,i)
      endif
 
+     ! Alpha power 
+     ! - Can use 'hively' or 'bosch' formulae.
      s_alpha = n_d*n_t*sigv(ti(1,i)/1e3,'bosch')*e_alpha
 
      s_alpha_i(i) = s_alpha*frac_ai(i)
@@ -47,6 +50,14 @@ subroutine tgyro_source
      ! - 1 W/cm^3 = 1e7 erg/cm^3/s
 
      s_brem(i) = 1e7*1.69e-32*ne(i)**2*sqrt(te(i))*z_eff(i)
+
+     ! Synchrotron radiation
+     ! - Can use 'trubnikov' or 'yang' correction factors
+     !g = 0.16*(te(i)/1e4)**1.5*sqrt(1.0+5.7/(r_maj(i)/r(i))/sqrt(te(i)/1e4))
+     ! Now g is Phi
+     !g = g/(77.7*sqrt((ne(i)/1e14)*(r(i)/1e2)/(b_ref/1e4)))*sqrt(1.0-0.8)
+     !s_sync(i) = 6.2e-2*(ne(i)/1e14)*(te(i)/1e4)*(b_ref/1e4)**2*g
+     s_sync(i) = 0.0
 
      ! Classical electron-ion energy exchange
      ! - Positive as defined on RHS of ion equation
@@ -73,6 +84,9 @@ subroutine tgyro_source
 
   ! Get integrated Bremsstrahlung power
   call tgyro_volume_int(s_brem,p_brem)
+
+  ! Get integrated Synchrotron power
+  call tgyro_volume_int(s_sync,p_sync)
 
   ! Get integrated collisional exchange power
   call tgyro_volume_int(s_exch,p_exch)
@@ -118,7 +132,8 @@ subroutine tgyro_source
           -(p_exch(:)-p_exch_in(:)) &       ! Consistent e-i exchange
           -p_expwd(:)*tgyro_expwd_flag &    ! Turbulent exchange
           +(p_alpha_e(:)-p_alpha_e_in(:)) & ! Consistent alpha power to electrons
-          -p_brem(:)                        ! Electron Bremsstrahlung
+          -p_brem(:) &                      ! Electron Bremsstrahlung
+          -p_sync(:)                        ! Electron Synchrotron
 
   end select
   !-------------------------------------------------------

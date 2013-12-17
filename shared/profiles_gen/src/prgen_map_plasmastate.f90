@@ -23,8 +23,11 @@ subroutine prgen_map_plasmastate
   real, dimension(:), allocatable :: f1_lump
   real, dimension(:), allocatable :: f2_therm
   real, dimension(:), allocatable :: f2_fast
+  real, dimension(:), allocatable :: f3_fast
   real, dimension(:), allocatable :: f2_lump
+  real, dimension(:), allocatable :: f3_lump
   real :: z_eff_lump
+  real :: m_eff_lump
 
   !--------------------------------------------------------------------
   ! Calculate integrated powers from input sources
@@ -101,6 +104,8 @@ subroutine prgen_map_plasmastate
   allocate(f2_therm(nx))
   allocate(f2_fast(nx))
   allocate(f2_lump(nx))
+  allocate(f3_fast(nx))
+  allocate(f3_lump(nx))
   !
   f1_therm(:) = 0.0
   f2_therm(:) = 0.0
@@ -112,6 +117,7 @@ subroutine prgen_map_plasmastate
   print '(a)','INFO: (prgen) Found these ion species:'
   f1_fast(:) = 0.0
   f2_fast(:) = 0.0
+  f3_fast(:) = 0.0
   do i=2,plst_dp1_nspec_all
 
      print '(t6,i2,1x,3(a))', i-1,trim(plst_all_name(i))
@@ -119,14 +125,17 @@ subroutine prgen_map_plasmastate
      if (index(plst_all_name(i),'mi') > 0) then
         f1_fast(:) = f1_fast(:)+plst_nmini(:)*plst_q_all(i)/1.6022e-19 
         f2_fast(:) = f2_fast(:)+plst_nmini(:)*(plst_q_all(i)/1.6022e-19)**2
+        f3_fast(:) = f3_fast(:)+plst_nmini(:)*plst_m_all(i)*plst_q_all(i)/1.6022e-19
      endif
      if (index(plst_all_name(i),'beam') > 0) then
         f1_fast(:) = f1_fast(:)+plst_nb(:)*plst_q_all(i)/1.6022e-19 
         f2_fast(:) = f2_fast(:)+plst_nb(:)*(plst_q_all(i)/1.6022e-19)**2
+        f3_fast(:) = f3_fast(:)+plst_nb(:)*plst_m_all(i)*plst_q_all(i)/1.6022e-19
      endif
      if (index(plst_all_name(i),'fusn') > 0) then
         f1_fast(:) = f1_fast(:)+plst_nfusi(:)*plst_q_all(i)/1.6022e-19 
         f2_fast(:) = f2_fast(:)+plst_nfusi(:)*(plst_q_all(i)/1.6022e-19)**2
+        f3_fast(:) = f3_fast(:)+plst_nfusi(:)*plst_m_all(i)*plst_q_all(i)/1.6022e-19
      endif
   enddo
 
@@ -135,20 +144,30 @@ subroutine prgen_map_plasmastate
 
      f1_lump(:) = 0.0
      f2_lump(:) = 0.0
+     f3_lump(:) = 0.0
 
      ! Add 1 to account for electrons at index 1
      lump_vec(:) = lump_vec(:)+1
      do j=1,n_lump
         i = lump_vec(j)
+        ! f1 = sum_i ni*Zi
         f1_lump(:) = f1_lump(:)+plst_ns(:,i)*plst_q_all(i)/1.6022e-19
+        ! f2 = sum_i ni*Zi^2
         f2_lump(:) = f2_lump(:)+plst_ns(:,i)*(plst_q_all(i)/1.6022e-19)**2
+        ! f2 = sum_i ni*mi
+        f3_lump(:) = f3_lump(:)+plst_ns(:,i)*plst_m_all(i)*plst_q_all(i)/1.6022e-19
      enddo
      z_eff_lump = nint(sum(f2_lump(:)/f1_lump(:))/nx)
+     m_eff_lump = sum(f3_lump(:)/f1_lump(:))/nx
 
      ! Replace first lumped species with lumped density
      plst_ns(:,lump_vec(1))     = f1_lump(:)/z_eff_lump 
      plst_q_all(lump_vec(1))    = z_eff_lump*1.6022e-19  
+     plst_m_all(lump_vec(1))    = m_eff_lump  
      plst_all_name(lump_vec(1)) = '[lumped]'
+
+     ! Definition of effective mass (is this sensible?)
+     ! sum_i (ni*mi)/(ni*Zi)
 
      ! Remove others and restack 
      do j=2,n_lump
@@ -180,11 +199,13 @@ subroutine prgen_map_plasmastate
   if (lump_fast_flag == 1) then
 
      z_eff_lump = nint(sum(f2_fast(:)/f1_fast(:))/nx)
+     m_eff_lump = sum(f3_fast(:)/f1_fast(:))/nx
 
      ! Replace first lumped species with lumped density
      ix = plst_dp1_nspec_th+1 
      plst_ns(:,ix)     = f1_fast(:)/z_eff_lump 
      plst_q_all(ix)    = z_eff_lump*1.6022e-19  
+     plst_m_all(ix)    = m_eff_lump
      plst_all_name(ix) = '[fast]'
 
      plst_dp1_nspec_all = plst_dp1_nspec_th+1

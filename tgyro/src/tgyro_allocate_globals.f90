@@ -125,6 +125,8 @@ subroutine tgyro_allocate_globals
   allocate(s_alpha_e(n_r))
   allocate(s_brem(n_r))
   allocate(p_brem(n_r))
+  allocate(s_sync(n_r))
+  allocate(p_sync(n_r))
   allocate(s_exch(n_r))
   allocate(p_exch(n_r))
   allocate(s_expwd(n_r))

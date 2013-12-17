@@ -165,14 +165,17 @@ subroutine tgyro_write_data(i_print)
 
   open(unit=1,file='out.tgyro.power',status='old',position='append')
 
-  write(1,20) 'r/a','p_alpha_i','p_alpha_e','p_brem','p_exch','p_expwd','p_i','p_e'
-  write(1,20) '','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)'
+  write(1,20) 'r/a','p_alpha_i','p_alpha_e','p_aux_i','p_aux_e','p_brem','p_sync','p_exch','p_expwd','p_i','p_e'
+  write(1,20) '','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)','(MW)'
   do i=1,n_r
      write(1,10) &
           r(i)/r_min,&
           p_alpha_i(i)*1e-7*1e-6,&
           p_alpha_e(i)*1e-7*1e-6,&
+          (p_i_in(i)-p_alpha_i_in(i)-p_exch_in(i))*1e-7*1e-6,&
+          (p_e_in(i)-p_alpha_e_in(i)+p_exch_in(i)+p_brem(i))*1e-7*1e-6,&
           -p_brem(i)*1e-7*1e-6,&
+          -p_sync(i)*1e-7*1e-6,&
           p_exch(i)*1e-7*1e-6,&
           p_expwd(i)*1e-7*1e-6,&
           p_i(i)*1e-7*1e-6,&

@@ -191,11 +191,13 @@ module tgyro_globals
   real, dimension(:), allocatable :: p_alpha_i_in
   real, dimension(:), allocatable :: p_alpha_e_in
   real, dimension(:), allocatable :: p_brem
+  real, dimension(:), allocatable :: p_sync
   real, dimension(:), allocatable :: p_exch
   real, dimension(:), allocatable :: p_expwd
   real, dimension(:), allocatable :: s_alpha_i
   real, dimension(:), allocatable :: s_alpha_e
   real, dimension(:), allocatable :: s_brem
+  real, dimension(:), allocatable :: s_sync
   real, dimension(:), allocatable :: s_exch
   real, dimension(:), allocatable :: s_expwd
   real, dimension(:), allocatable :: f_b_in
