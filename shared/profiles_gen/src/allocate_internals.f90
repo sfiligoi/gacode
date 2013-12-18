@@ -6,7 +6,7 @@ subroutine allocate_internals
 
 
   ! Profiles
- 
+
   allocate(rmin(nx))
   allocate(rmaj(nx))
   allocate(q(nx))
@@ -19,7 +19,7 @@ subroutine allocate_internals
   allocate(omega0(nx))
   allocate(q_gato(nx))
 
-   ! Powers
+  ! Powers
 
   allocate(powe_beam_exp(nx))
   allocate(powi_beam_exp(nx))
@@ -36,9 +36,12 @@ subroutine allocate_internals
   allocate(pow_ei(nx))
   allocate(pow_e(nx))
   allocate(pow_i(nx))
+  allocate(pow_e_sync(nx))
+  allocate(pow_e_brem(nx))
+  allocate(pow_e_line(nx))
   allocate(powi_cx_exp(nx))
   allocate(flow_wall_exp(nx))
   allocate(flow_beam(nx))
   allocate(flow_mom(nx))
- 
+
 end subroutine allocate_internals

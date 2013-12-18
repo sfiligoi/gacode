@@ -69,6 +69,9 @@
 !
 !  EXPRO_pow_e_fus(:)
 !  EXPRO_pow_i_fus(:)
+!  EXPRO_pow_e_sync(:)
+!  EXPRO_pow_e_brem(:)
+!  EXPRO_pow_e_line(:)
 !
 !  EXPRO_signq 
 !  EXPRO_signb
@@ -163,6 +166,9 @@ module EXPRO_interface
 
   real, dimension(:),allocatable :: EXPRO_pow_e_fus
   real, dimension(:),allocatable :: EXPRO_pow_i_fus
+  real, dimension(:),allocatable :: EXPRO_pow_e_sync
+  real, dimension(:),allocatable :: EXPRO_pow_e_brem
+  real, dimension(:),allocatable :: EXPRO_pow_e_line
 
   ! Derived quantities
 
@@ -273,8 +279,8 @@ module EXPRO_interface
        'vpol_5(m/s)     ',&
        'pow_e_fus(MW)   ',&
        'pow_i_fus(MW)   ',&
-       'null            ',&
-       'null            ',&
-       'null            '/)
+       'pow_e_sync(MW)  ',&
+       'pow_e_brem(MW)  ',&
+       'pow_e_line(MW)  '/)
 
 end module EXPRO_interface

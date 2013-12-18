@@ -40,6 +40,9 @@ subroutine prgen_map_plasmastate
 
   pow_e_fus(1) = 0.0 
   pow_i_fus(1) = 0.0
+  pow_e_sync(1) = 0.0
+  pow_e_brem(1) = 0.0
+  pow_e_line(1) = 0.0
 
   do i=2,nx
 
@@ -52,6 +55,10 @@ subroutine prgen_map_plasmastate
 
      pow_i_fus(i) = pow_i_fus(i-1)+1e-6*plst_pfusi(i-1)
      pow_e_fus(i) = pow_e_fus(i-1)+1e-6*plst_pfuse(i-1)
+
+     pow_e_sync(i) = pow_e_sync(i-1)+1e-6*plst_prad_cy(i-1)
+     pow_e_brem(i) = pow_e_brem(i-1)+1e-6*plst_prad_br(i-1)
+     pow_e_line(i) = pow_e_line(i-1)+1e-6*plst_prad_li(i-1)
 
      ! Collisional exchange
      !
@@ -294,9 +301,12 @@ subroutine prgen_map_plasmastate
   endif
   !---------------------------------------------------
 
-  ! Extra powers
+  ! Additional powers
   vec(41,:) = pow_e_fus(:)
   vec(42,:) = pow_i_fus(:)
+  vec(43,:) = pow_e_sync(:)
+  vec(44,:) = pow_e_brem(:)
+  vec(45,:) = pow_e_line(:)
   !---------------------------------------------------------
 
   ! Ion reordering diagnostics

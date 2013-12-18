@@ -17,7 +17,8 @@ subroutine tgyro_source
   real, external :: dtrate_dv
   real :: n_d,n_t
   real :: s_alpha
-  real :: g
+  real :: g,phi,wpe,wce
+  real, parameter :: r_coeff=0.8
 
   !-------------------------------------------------------
   ! Source terms (erg/cm^3/s):
@@ -52,12 +53,13 @@ subroutine tgyro_source
      s_brem(i) = 1e7*1.69e-32*ne(i)**2*sqrt(te(i))*z_eff(i)
 
      ! Synchrotron radiation
-     ! - Can use 'trubnikov' or 'yang' correction factors
-     !g = 0.16*(te(i)/1e4)**1.5*sqrt(1.0+5.7/(r_maj(i)/r(i))/sqrt(te(i)/1e4))
-     ! Now g is Phi
-     !g = g/(77.7*sqrt((ne(i)/1e14)*(r(i)/1e2)/(b_ref/1e4)))*sqrt(1.0-0.8)
-     !s_sync(i) = 6.2e-2*(ne(i)/1e14)*(te(i)/1e4)*(b_ref/1e4)**2*g
-     s_sync(i) = 0.0
+     ! - Trubnikov, JETP Lett. 16 (1972) 25.
+     wpe = sqrt(4*pi*ne(i)*e**2/me)
+     wce = e*b_ref/(me*c)
+     g   = k*te(i)/(me*c**2)
+     phi = 60*g**1.5*sqrt((1.0-r_coeff)*(1+1/aspect_rat/sqrt(g))/(r_min*wpe**2/c/wce))
+ 
+     s_sync(i) = me/(3*pi*c)*g*(wpe*wce)**2*phi
 
      ! Classical electron-ion energy exchange
      ! - Positive as defined on RHS of ion equation

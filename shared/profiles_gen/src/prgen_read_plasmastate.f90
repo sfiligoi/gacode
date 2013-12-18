@@ -287,6 +287,21 @@ subroutine prgen_read_plasmastate
   err = nf90_get_var(ncid,varid,plst_pfusi(1:nx-1))
   plst_pfusi(nx) = 0.0
 
+  ! Radiated power: synchrotron
+  err = nf90_inq_varid(ncid,trim('prad_cy'),varid)
+  err = nf90_get_var(ncid,varid,plst_prad_cy(1:nx-1))
+  plst_prad_cy(nx) = 0.0
+
+  ! Radiated power: bremsstrahlung
+  err = nf90_inq_varid(ncid,trim('prad_br'),varid)
+  err = nf90_get_var(ncid,varid,plst_prad_br(1:nx-1))
+  plst_prad_br(nx) = 0.0
+
+  ! Radiated power: line
+  err = nf90_inq_varid(ncid,trim('prad_li'),varid)
+  err = nf90_get_var(ncid,varid,plst_prad_li(1:nx-1))
+  plst_prad_li(nx) = 0.0
+
   ! Angular momentum source torque 
   err = nf90_inq_varid(ncid,trim('tq_trans'),varid)
   err = nf90_get_var(ncid,varid,plst_tq_trans(1:nx-1))

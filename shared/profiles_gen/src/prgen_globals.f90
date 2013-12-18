@@ -54,6 +54,9 @@ module prgen_globals
   real, dimension(:), allocatable :: pow_ei
   real, dimension(:), allocatable :: pow_e_fus
   real, dimension(:), allocatable :: pow_i_fus
+  real, dimension(:), allocatable :: pow_e_sync
+  real, dimension(:), allocatable :: pow_e_brem
+  real, dimension(:), allocatable :: pow_e_line
   real, dimension(:), allocatable :: flow_wall_exp
   real, dimension(:), allocatable :: flow_beam
   real, dimension(:), allocatable :: flow_mom
@@ -205,6 +208,9 @@ module prgen_globals
   real, dimension(:), allocatable :: plst_qie
   real, dimension(:), allocatable :: plst_pfusi
   real, dimension(:), allocatable :: plst_pfuse
+  real, dimension(:), allocatable :: plst_prad_br
+  real, dimension(:), allocatable :: plst_prad_cy
+  real, dimension(:), allocatable :: plst_prad_li
   real, dimension(:), allocatable :: plst_tq_trans
   real, dimension(:), allocatable :: plst_sn_trans
   !---------------------------------------------------------

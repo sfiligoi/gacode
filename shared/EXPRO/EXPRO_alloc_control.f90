@@ -121,10 +121,17 @@ subroutine EXPRO_alloc_control(i_proc,flag)
      EXPRO_vtor(:,:)=0.0
      allocate(EXPRO_vpol(nion_max,EXPRO_n_exp))
      EXPRO_vpol(:,:)=0.0
+
      allocate(EXPRO_pow_e_fus(EXPRO_n_exp))
      EXPRO_pow_e_fus(:)=0.0
      allocate(EXPRO_pow_i_fus(EXPRO_n_exp))
      EXPRO_pow_i_fus(:)=0.0
+     allocate(EXPRO_pow_e_sync(EXPRO_n_exp))
+     EXPRO_pow_e_sync(:)=0.0
+     allocate(EXPRO_pow_e_brem(EXPRO_n_exp))
+     EXPRO_pow_e_brem(:)=0.0
+     allocate(EXPRO_pow_e_line(EXPRO_n_exp))
+     EXPRO_pow_e_line(:)=0.0
 
      allocate(EXPRO_bunit(EXPRO_n_exp))
      EXPRO_bunit(:)=0.0
@@ -228,6 +235,9 @@ subroutine EXPRO_alloc_control(i_proc,flag)
 
      deallocate(EXPRO_pow_e_fus)
      deallocate(EXPRO_pow_i_fus)
+     deallocate(EXPRO_pow_e_sync)
+     deallocate(EXPRO_pow_e_brem)
+     deallocate(EXPRO_pow_e_line)
 
      deallocate(EXPRO_bunit)
      deallocate(EXPRO_s)

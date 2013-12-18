@@ -121,6 +121,9 @@ subroutine tgyro_init_profiles
   ! b_ref in Gauss
   b_ref = 1e4*EXPRO_b_ref
 
+  ! Aspect ratio
+  aspect_rat = EXPRO_rmaj(n_exp)/EXPRO_rmin(n_exp)
+
   !------------------------------------------------------------------------------------------
   ! Direct input of simple profiles:
   !
@@ -251,6 +254,11 @@ subroutine tgyro_init_profiles
   ! Integrated fusion powers
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e_fus(:)*1e13,n_exp,r,p_alpha_e_in,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_i_fus(:)*1e13,n_exp,r,p_alpha_i_in,n_r)
+
+  ! Integrated radiated powers 
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e_sync(:)*1e13,n_exp,r,p_sync_in,n_r)
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e_brem(:)*1e13,n_exp,r,p_brem_in,n_r)
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e_line(:)*1e13,n_exp,r,p_line_in,n_r)
 
   ! Apply auxiliary power rescale
   p_e_in = tgyro_input_paux_scale*(p_e_in+p_exch_in-p_alpha_e_in)+p_alpha_e_in-p_exch_in

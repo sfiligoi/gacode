@@ -56,7 +56,7 @@ subroutine prgen_map_iterdb
   ! powe_beam_exp (MW) : NBI power added to electrons
   ! powe_rf_exp (MW)   : RF power added to electrons
   ! powe_oh_exp (MW)   : ohmic power added to electrons
-  ! powe_rad-exp (MW)  : [negative] radiation loss added to electrons
+  ! powe_rad_exp (MW)  : [negative] radiation loss added to electrons
   ! powe_ion_exp (MW)  : [negative] neutral ionization loss added
   ! powe_wdot_exp (MW) : W-dot power subtracted
   ! pow_ei (MW)        : [positive for Te > Ti] exchange power *subtracted*
