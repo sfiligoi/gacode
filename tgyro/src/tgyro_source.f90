@@ -58,7 +58,7 @@ subroutine tgyro_source
      wce = e*b_ref/(me*c)
      g   = k*te(i)/(me*c**2)
      phi = 60*g**1.5*sqrt((1.0-r_coeff)*(1+1/aspect_rat/sqrt(g))/(r_min*wpe**2/c/wce))
- 
+
      s_sync(i) = me/(3*pi*c)*g*(wpe*wce)**2*phi
 
      ! Classical electron-ion energy exchange
@@ -81,15 +81,15 @@ subroutine tgyro_source
   ! Powers in units of erg/s
 
   ! Get integrated alpha-power
-  call tgyro_volume_int(s_alpha_i,p_alpha_i)
-  call tgyro_volume_int(s_alpha_e,p_alpha_e)
+  call tgyro_volume_int(s_alpha_i,p_i_fus)
+  call tgyro_volume_int(s_alpha_e,p_e_fus)
 
   ! Get integrated collisional exchange power
   call tgyro_volume_int(s_exch,p_exch)
 
   ! Get integrated anomalous exchange power
   call tgyro_volume_int(s_expwd,p_expwd)
-  
+
   ! Get integrated Bremsstrahlung power
   call tgyro_volume_int(s_brem,p_brem)
 
@@ -123,20 +123,22 @@ subroutine tgyro_source
 
   case (3)
 
-     ! Reactor with consistent alpha power
+     ! Reactor with consistent alpha power, exchange and radiation.
 
-     p_i(:) = p_i_in(:) &                   ! Total ion input power  
-          +(p_exch(:)-p_exch_in(:)) &       ! Consistent e-i exchange
-          +p_expwd(:)*tgyro_expwd_flag &    ! Turbulent exchange
-          +(p_alpha_i(:)-p_alpha_i_in(:))   ! Consistent alpha power to ions
+     p_i(:) = &
+          +p_i_fus(:) &                ! Fusion power to ions
+          +p_i_aux_in(:) &             ! Auxiliary ion heating [fixed]
+          +p_exch(:) &                 ! Collisional exchange
+          +p_expwd(:)*tgyro_expwd_flag ! Turbulent exchange
 
-     p_e(:) = p_e_in(:) &                   ! Total electron input power
-          -(p_exch(:)-p_exch_in(:)) &       ! Consistent e-i exchange
-          -p_expwd(:)*tgyro_expwd_flag &    ! Turbulent exchange
-          +(p_alpha_e(:)-p_alpha_e_in(:)) & ! Consistent alpha power to electrons
-          -p_brem(:) &                      ! Electron Bremsstrahlung
-          -p_sync(:)                        ! Electron Synchrotron
-          -p_line_in(:)                        ! Line radiation 
+     p_e(:) = &
+          +p_e_fus(:) &                ! Fusion power to electrons
+          +p_e_aux_in(:) &             ! Auxiliary electron heating [fixed]
+          -p_exch(:)   &               ! Collisional exchange
+          -p_brem(:) &                 ! Bremsstrahlung radiation
+          -p_sync(:) &                 ! Synchrotron radiation
+          -p_line_in(:) &              ! Line radiation [fixed] 
+          -p_expwd(:)*tgyro_expwd_flag ! Turbulent exchange
 
   end select
   !-------------------------------------------------------

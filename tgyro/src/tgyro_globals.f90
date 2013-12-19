@@ -186,10 +186,12 @@ module tgyro_globals
   real, dimension(:), allocatable :: p_exch_in
   real, dimension(:), allocatable :: p_i
   real, dimension(:), allocatable :: p_e
-  real, dimension(:), allocatable :: p_alpha_i
-  real, dimension(:), allocatable :: p_alpha_e
-  real, dimension(:), allocatable :: p_alpha_i_in
-  real, dimension(:), allocatable :: p_alpha_e_in
+  real, dimension(:), allocatable :: p_e_fus
+  real, dimension(:), allocatable :: p_i_fus
+  real, dimension(:), allocatable :: p_e_fus_in
+  real, dimension(:), allocatable :: p_i_fus_in
+  real, dimension(:), allocatable :: p_e_aux_in
+  real, dimension(:), allocatable :: p_i_aux_in
   real, dimension(:), allocatable :: p_brem
   real, dimension(:), allocatable :: p_sync
   real, dimension(:), allocatable :: p_line
