@@ -84,17 +84,17 @@ subroutine tgyro_source
   call tgyro_volume_int(s_alpha_i,p_alpha_i)
   call tgyro_volume_int(s_alpha_e,p_alpha_e)
 
-  ! Get integrated Bremsstrahlung power
-  call tgyro_volume_int(s_brem,p_brem)
-
-  ! Get integrated Synchrotron power
-  call tgyro_volume_int(s_sync,p_sync)
-
   ! Get integrated collisional exchange power
   call tgyro_volume_int(s_exch,p_exch)
 
   ! Get integrated anomalous exchange power
   call tgyro_volume_int(s_expwd,p_expwd)
+  
+  ! Get integrated Bremsstrahlung power
+  call tgyro_volume_int(s_brem,p_brem)
+
+  ! Get integrated Synchrotron power
+  call tgyro_volume_int(s_sync,p_sync)
   !-------------------------------------------------------
 
   !-------------------------------------------------------
@@ -136,6 +136,7 @@ subroutine tgyro_source
           +(p_alpha_e(:)-p_alpha_e_in(:)) & ! Consistent alpha power to electrons
           -p_brem(:) &                      ! Electron Bremsstrahlung
           -p_sync(:)                        ! Electron Synchrotron
+          -p_line_in(:)                        ! Line radiation 
 
   end select
   !-------------------------------------------------------

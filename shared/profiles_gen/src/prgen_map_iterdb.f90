@@ -24,16 +24,16 @@ subroutine prgen_map_iterdb
      rho(i) = (i-1)/(onetwo_nj-1.0)
   enddo
 
-  call volint(1e-6*onetwo_qbeame,powe_beam_exp)
-  call volint(1e-6*onetwo_qrfe,powe_rf_exp)
-  call volint(1e-6*onetwo_qohm,powe_oh_exp)
-  call volint(1e-6*onetwo_qrad,powe_rad_exp)
+  call volint(1e-6*onetwo_qbeame,pow_e_nb)
+  call volint(1e-6*onetwo_qrfe,pow_e_rf)
+  call volint(1e-6*onetwo_qohm,pow_e_ohm)
+  call volint(1e-6*onetwo_qrad,pow_e_rad)
   call volint(1e-6*onetwo_qione,powe_ion_exp)
   call volint(1e-6*onetwo_dpedt,powe_wdot_exp)
   call volint(1e-6*onetwo_qfuse,pow_e_fus)
   call volint(1e-6*onetwo_qfusi,pow_i_fus)
-  call volint(1e-6*onetwo_qbeami,powi_beam_exp)
-  call volint(1e-6*onetwo_qrfi,powi_rf_exp)
+  call volint(1e-6*onetwo_qbeami,pow_i_nb)
+  call volint(1e-6*onetwo_qrfi,pow_i_rf)
   call volint(1e-6*onetwo_qioni,powi_ion_exp)
   call volint(1e-6*onetwo_qcx,powi_cx_exp)
   call volint(1e-6*onetwo_dpidt,powi_wdot_exp)
@@ -53,41 +53,47 @@ subroutine prgen_map_iterdb
 
   ! Total transport power (MW) to electrons: pow_e
 
-  ! powe_beam_exp (MW) : NBI power added to electrons
-  ! powe_rf_exp (MW)   : RF power added to electrons
-  ! powe_oh_exp (MW)   : ohmic power added to electrons
-  ! powe_rad_exp (MW)  : [negative] radiation loss added to electrons
-  ! powe_ion_exp (MW)  : [negative] neutral ionization loss added
-  ! powe_wdot_exp (MW) : W-dot power subtracted
-  ! pow_ei (MW)        : [positive for Te > Ti] exchange power *subtracted*
-  ! pow_e_fus (MW)     : any fusion power added
+  ! pow_e_nb  (MW)     : NBI power to electrons
+  ! pow_e_rf  (MW)     : RF power to electrons
+  ! pow_e_ohm (MW)     : Ohmic power to electrons
+  ! pow_e_rad (MW)     : [negative] Radiated power to electrons
+  ! powe_ion_exp (MW)  : [negative] Neutral ionization power to electrons
+  ! powe_wdot_exp (MW) : 
+  ! pow_ei    (MW)     : Exchange power from electrons to ions 
+  ! pow_e_fus (MW)     : Fusion power to electrons
+
+  pow_e_aux(:) = &
+       +pow_e_nb(:) &
+       +pow_e_rf(:) &
+       +pow_e_ohm(:) &
+       +powe_ion_exp(:) 
 
   pow_e(:) = &
-       powe_beam_exp(:) &
-       +powe_rf_exp(:) &
-       +powe_oh_exp(:) &
-       +powe_rad_exp(:) &
-       +powe_ion_exp(:) &
        -0.0*powe_wdot_exp(:) &
+       +pow_e_aux(:) &
+       +pow_e_rad(:) &
        -pow_ei(:) &
        +pow_e_fus(:)
 
   ! Total transport power (MW) to ions: pow_i
 
-  ! powi_beam_exp (MW) : NBI power added to electrons
-  ! powi_rf_exp (MW)   : RF power added to electrons
-  ! powi_ion_exp (MW)  : [positive] neutral ionization loss added
-  ! powi_cx_exp (MW)   : [negative] neutral charge exch loss added
-  ! powi_wdot_exp (MW) : [zero] W-dot power subtracted
-  ! pow_ei (MW)        : [positive for Te > Ti] exchange power *added*
-  ! pow_i_fus (MW)     : [zero] any fusion power added
+  ! pow_i_nb (MW)      : NBI power to ions
+  ! pow_i_rf (MW)      : RF power to ions
+  ! powi_ion_exp (MW)  : [positive] Neutral ionization power to ions
+  ! powi_cx_exp (MW)   : [negative] Neutral charge exch power to ions
+  ! powi_wdot_exp (MW) 
+  ! pow_ei (MW)        : Exchange power to ions
+  ! pow_i_fus (MW)     : Fusion power to ions
+
+  pow_i_aux(:) = &
+       +pow_i_nb(:) &
+       +pow_i_rf(:) &
+       +powi_ion_exp(:) &
+       +powi_cx_exp(:) 
 
   pow_i(:) = &
-       powi_beam_exp(:) &
-       +powi_rf_exp(:) &
-       +powi_ion_exp(:) &
-       +powi_cx_exp(:) &
        -0.0*powi_wdot_exp(:) &
+       +pow_i_aux(:) &
        +pow_ei(:) &
        +pow_i_fus(:)
 
@@ -171,6 +177,7 @@ subroutine prgen_map_iterdb
           onetwo_Tion_vec(1:onetwo_nion+onetwo_nbion,:),dim=1)*1e19+&
           onetwo_ene(:)*onetwo_te(:))*1.6022e-16)/(onetwo_enalp)/1.6022e-16
   endif
+
   ! reorder
   do i=1,5
      if (reorder_vec(i) > onetwo_nion+onetwo_nbion+1) then
@@ -216,9 +223,18 @@ subroutine prgen_map_iterdb
   vec(39,:) = 0.0
   vec(40,:) = 0.0
 
-  ! Extra powers
+  ! Additional powers (fusion and radiation)
+  ! * for iterdb, put all radiated power in pow_e_line
   vec(41,:) = pow_e_fus(:)
   vec(42,:) = pow_i_fus(:)
+  vec(43,:) = 0.0
+  vec(44,:) = 0.0
+  vec(45,:) = pow_e_rad(:)
+
+  ! Additional powers (external heating)
+  vec(46,:) = pow_e_aux(:)
+  vec(47,:) = pow_i_aux(:)
+  !---------------------------------------------------------
 
   !---------------------------------------------------
   ! Read the cer file and overlay

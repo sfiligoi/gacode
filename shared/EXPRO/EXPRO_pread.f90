@@ -82,6 +82,10 @@ subroutine EXPRO_pread
   call MPI_BCAST(EXPRO_pow_e_brem,size(EXPRO_pow_e_brem),MPI_DOUBLE_PRECISION,0,comm,ierr)
   call MPI_BCAST(EXPRO_pow_e_line,size(EXPRO_pow_e_line),MPI_DOUBLE_PRECISION,0,comm,ierr)
 
+  ! 46-50
+  call MPI_BCAST(EXPRO_pow_e_aux,size(EXPRO_pow_e_aux),MPI_DOUBLE_PRECISION,0,comm,ierr)
+  call MPI_BCAST(EXPRO_pow_i_aux,size(EXPRO_pow_i_aux),MPI_DOUBLE_PRECISION,0,comm,ierr)
+
   if (EXPRO_nfourier > 0) then
 
      call MPI_BCAST(EXPRO_geo,&

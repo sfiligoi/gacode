@@ -44,6 +44,12 @@ subroutine prgen_map_plasmastate
   pow_e_brem(1) = 0.0
   pow_e_line(1) = 0.0
 
+  pow_e_ohm(1) = 0.0
+  pow_e_nb(1)  = 0.0
+  pow_i_nb(1)  = 0.0
+  pow_e_rf(1)  = 0.0
+  pow_i_rf(1)  = 0.0
+
   do i=2,nx
 
      ! Total powers to electrons and ions "per zone"
@@ -53,13 +59,6 @@ subroutine prgen_map_plasmastate
      pow_e(i) = pow_e(i-1)+1e-6*plst_pe_trans(i-1)
      pow_i(i) = pow_i(i-1)+1e-6*plst_pi_trans(i-1)
 
-     pow_i_fus(i) = pow_i_fus(i-1)+1e-6*plst_pfusi(i-1)
-     pow_e_fus(i) = pow_e_fus(i-1)+1e-6*plst_pfuse(i-1)
-
-     pow_e_sync(i) = pow_e_sync(i-1)+1e-6*plst_prad_cy(i-1)
-     pow_e_brem(i) = pow_e_brem(i-1)+1e-6*plst_prad_br(i-1)
-     pow_e_line(i) = pow_e_line(i-1)+1e-6*plst_prad_li(i-1)
-
      ! Collisional exchange
      !
      ! plst_qie : power from ions to electrons
@@ -67,6 +66,21 @@ subroutine prgen_map_plasmastate
      ! 
      ! Thus, we need negative sign here:
      pow_ei(i) = pow_ei(i-1)-1e-6*plst_qie(i-1)
+
+     ! Reactor power breakdown
+
+     pow_e_fus(i) = pow_e_fus(i-1)+1e-6*plst_pfuse(i-1)
+     pow_i_fus(i) = pow_i_fus(i-1)+1e-6*(plst_pfusi(i-1)+plst_pfusth(i-1))
+
+     pow_e_ohm(i) = pow_e_ohm(i)+1e-6*plst_pohme(i-1)
+     pow_e_nb(i)  = pow_e_nb(i)+1e-6*plst_pbe(i-1)
+     pow_i_nb(i)  = pow_i_nb(i)+1e-6*(plst_pbi(i-1)+plst_pbth(i-1))
+     pow_e_rf(i)  = pow_e_rf(i)+1e-6*plst_peech(i-1)
+     pow_i_rf(i)  = pow_i_rf(i)+1e-6*(plst_pmini(i-1)+plst_pminth(i-1)+plst_picth(i-1))
+
+     pow_e_sync(i) = pow_e_sync(i-1)+1e-6*plst_prad_cy(i-1)
+     pow_e_brem(i) = pow_e_brem(i-1)+1e-6*plst_prad_br(i-1)
+     pow_e_line(i) = pow_e_line(i-1)+1e-6*plst_prad_li(i-1)
 
      ! Momentum source
      !
@@ -81,6 +95,14 @@ subroutine prgen_map_plasmastate
      flow_beam(i) = flow_beam(i-1)+plst_sn_trans(i-1)/0.624e22
 
   enddo
+  !
+  pow_e_aux(:) = pow_e_ohm+pow_e_nb+pow_e_rf
+  pow_i_aux(:) =          +pow_i_nb+pow_i_rf
+  !
+  pow_e_err = abs(1.0-(pow_e_fus(nx)+pow_e_aux(nx)-pow_ei(nx)- &
+       pow_e_sync(nx)-pow_e_brem(nx)-pow_e_line(nx))/pow_e(nx))
+  pow_i_err = abs(1.0-(pow_i_fus(nx)+pow_i_aux(nx)+pow_ei(nx))/pow_i(nx))
+
   !--------------------------------------------------------------------
 
   !--------------------------------------------------------------------
@@ -301,12 +323,16 @@ subroutine prgen_map_plasmastate
   endif
   !---------------------------------------------------
 
-  ! Additional powers
+  ! Additional powers (fusion and radiation)
   vec(41,:) = pow_e_fus(:)
   vec(42,:) = pow_i_fus(:)
   vec(43,:) = pow_e_sync(:)
   vec(44,:) = pow_e_brem(:)
   vec(45,:) = pow_e_line(:)
+
+  ! Additional powers (external heating)
+  vec(46,:) = pow_e_aux(:)
+  vec(47,:) = pow_i_aux(:)
   !---------------------------------------------------------
 
   ! Ion reordering diagnostics

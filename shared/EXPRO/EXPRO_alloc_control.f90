@@ -133,6 +133,11 @@ subroutine EXPRO_alloc_control(i_proc,flag)
      allocate(EXPRO_pow_e_line(EXPRO_n_exp))
      EXPRO_pow_e_line(:)=0.0
 
+     allocate(EXPRO_pow_e_aux(EXPRO_n_exp))
+     EXPRO_pow_e_aux(:)=0.0
+     allocate(EXPRO_pow_i_aux(EXPRO_n_exp))
+     EXPRO_pow_i_aux(:)=0.0
+
      allocate(EXPRO_bunit(EXPRO_n_exp))
      EXPRO_bunit(:)=0.0
      allocate(EXPRO_s(EXPRO_n_exp))
@@ -238,6 +243,9 @@ subroutine EXPRO_alloc_control(i_proc,flag)
      deallocate(EXPRO_pow_e_sync)
      deallocate(EXPRO_pow_e_brem)
      deallocate(EXPRO_pow_e_line)
+
+     deallocate(EXPRO_pow_e_aux)
+     deallocate(EXPRO_pow_i_aux)
 
      deallocate(EXPRO_bunit)
      deallocate(EXPRO_s)

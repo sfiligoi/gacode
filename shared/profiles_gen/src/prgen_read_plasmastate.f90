@@ -252,55 +252,145 @@ subroutine prgen_read_plasmastate
 
   plst_omegat(nx) = dummy
 
-  ! Electron power
-  err = nf90_inq_varid(ncid,trim('pbe'),varid)
-  err = nf90_get_var(ncid,varid,plst_pbe(1:nx-1))
-  plst_pbe(nx) = 0.0
+  ! SOURCES
 
-  ! Ion power
-  err = nf90_inq_varid(ncid,trim('pbi'),varid)
-  err = nf90_get_var(ncid,varid,plst_pbi(1:nx-1))
-  plst_pbi(nx) = 0.0
-
-  ! Electron source power
+  ! Total power to electrons 
   err = nf90_inq_varid(ncid,trim('pe_trans'),varid)
   err = nf90_get_var(ncid,varid,plst_pe_trans(1:nx-1))
   plst_pe_trans(nx) = 0.0
 
-  ! Ion source power
+  ! Total power to ions 
   err = nf90_inq_varid(ncid,trim('pi_trans'),varid)
   err = nf90_get_var(ncid,varid,plst_pi_trans(1:nx-1))
   plst_pi_trans(nx) = 0.0
 
-  ! Electron-ion collisional exchange
+  ! Collisional exchange from ions to electrons
   err = nf90_inq_varid(ncid,trim('qie'),varid)
   err = nf90_get_var(ncid,varid,plst_qie(1:nx-1))
   plst_qie(nx) = 0.0
 
+  ! Beam power to electrons
+  err = nf90_inq_varid(ncid,trim('pbe'),varid)
+  if (err == 0) then
+     err = nf90_get_var(ncid,varid,plst_pbe(1:nx-1))
+  else
+     plst_pbe(:) = 0.0
+  endif
+
+  ! Beam power to ions
+  err = nf90_inq_varid(ncid,trim('pbi'),varid)
+  if (err == 0) then
+     err = nf90_get_var(ncid,varid,plst_pbi(1:nx-1))
+  else
+     plst_pbi(:) = 0.0 
+  endif
+  ! ... thermalization 
+  err = nf90_inq_varid(ncid,trim('pbth'),varid)
+  if (err == 0) then
+     err = nf90_get_var(ncid,varid,plst_pbth(1:nx-1))
+  else
+     plst_pbth(:) = 0.0
+  endif
+
+  ! ECH power to electrons
+  err = nf90_inq_varid(ncid,trim('peech'),varid)
+  if (err == 0) then
+     err = nf90_get_var(ncid,varid,plst_peech(1:nx-1))
+  else
+     plst_peech(:) = 0.0
+  endif
+
+  ! Ohmic heating power to electrons
+  err = nf90_inq_varid(ncid,trim('pohme'),varid)
+  if (err == 0) then
+     err = nf90_get_var(ncid,varid,plst_pohme(1:nx-1))
+  else
+     plst_pohme(:) = 0.0
+  endif
+
+  ! Electron heating power by minority ions
+  err = nf90_inq_varid(ncid,trim('pmine'),varid)
+  if (err == 0) then
+     err = nf90_get_var(ncid,varid,plst_pmine(1:nx-1))
+  else
+     plst_pmine(:) = 0.0
+  endif
+
+  ! Ion heating power by minority ions
+  err = nf90_inq_varid(ncid,trim('pmini'),varid)
+  if (err == 0) then
+     err = nf90_get_var(ncid,varid,plst_pmini(1:nx-1))
+  else
+     plst_pmini(:) = 0.0
+  endif
+  ! + thermalization
+  err = nf90_inq_varid(ncid,trim('pminth'),varid)
+  if (err == 0) then
+     err = nf90_get_var(ncid,varid,plst_pminth(1:nx-1))
+  else
+     plst_pminth(:) = 0.0
+  endif
+
+  ! Direct ion heating power by ICRF
+  err = nf90_inq_varid(ncid,trim('picth'),varid)
+  if (err == 0) then
+     err = nf90_get_var(ncid,varid,plst_picth(1:nx-1))
+  else
+     plst_picth(:) = 0.0
+  endif
+
   ! Fusion alpha power transferred to electrons
   err = nf90_inq_varid(ncid,trim('pfuse'),varid)
-  err = nf90_get_var(ncid,varid,plst_pfuse(1:nx-1))
-  plst_pfuse(nx) = 0.0
+  if (err == 0) then
+     err = nf90_get_var(ncid,varid,plst_pfuse(1:nx-1))
+  else
+     plst_pfuse(:) = 0.0
+  endif
 
   ! Fusion alpha power transferred to thermal ions
   err = nf90_inq_varid(ncid,trim('pfusi'),varid)
-  err = nf90_get_var(ncid,varid,plst_pfusi(1:nx-1))
-  plst_pfusi(nx) = 0.0
+  if (err == 0) then
+     err = nf90_get_var(ncid,varid,plst_pfusi(1:nx-1))
+  else
+     plst_pfusi(:) = 0.0
+  endif
+  ! + thermalization
+  err = nf90_inq_varid(ncid,trim('pfusth'),varid)
+  if (err == 0) then
+     err = nf90_get_var(ncid,varid,plst_pfusth(1:nx-1))
+  else
+     plst_pfusth(:) = 0.0
+  endif
 
   ! Radiated power: synchrotron
   err = nf90_inq_varid(ncid,trim('prad_cy'),varid)
-  err = nf90_get_var(ncid,varid,plst_prad_cy(1:nx-1))
-  plst_prad_cy(nx) = 0.0
+  if (err == 0) then
+     err = nf90_get_var(ncid,varid,plst_prad_cy(1:nx-1))
+  else
+     plst_prad_cy(:) = 0.0
+  endif
 
   ! Radiated power: bremsstrahlung
   err = nf90_inq_varid(ncid,trim('prad_br'),varid)
-  err = nf90_get_var(ncid,varid,plst_prad_br(1:nx-1))
-  plst_prad_br(nx) = 0.0
+  if (err == 0) then
+     err = nf90_get_var(ncid,varid,plst_prad_br(1:nx-1))
+  else
+     plst_prad_br(:) = 0.0
+  endif
 
   ! Radiated power: line
   err = nf90_inq_varid(ncid,trim('prad_li'),varid)
-  err = nf90_get_var(ncid,varid,plst_prad_li(1:nx-1))
-  plst_prad_li(nx) = 0.0
+  if (err == 0) then
+     err = nf90_get_var(ncid,varid,plst_prad_li(1:nx-1))
+  else
+     plst_prad_li(:) = 0.0
+  endif
+  !do i=1,nx-1
+  !   print '(4(1pe12.5,2x))',plst_pe_trans(i),(plst_pe_trans(i)-( &
+  !        plst_pfuse(i)+plst_qie(i)-plst_prad_cy(i)-plst_prad_br(i)-plst_prad_li(i)+plst_pbe(i) &
+  !        +plst_peech(i)+plst_pmine(i)+plst_pohme(i) &
+  !        ))/plst_pe_trans(i)
+  !enddo
 
   ! Angular momentum source torque 
   err = nf90_inq_varid(ncid,trim('tq_trans'),varid)

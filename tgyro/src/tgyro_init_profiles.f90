@@ -244,25 +244,31 @@ subroutine tgyro_init_profiles
   !
   ! (1) Power -- convert powers to erg/s from MW:
   !
-  ! Classical exchange power
-  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_ei(:)*1e13,n_exp,r,p_exch_in,n_r)
-  !
-  ! Integrated electron and ion powers
+  ! Integrated TOTAL electron and ion powers
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e(:)*1e13,n_exp,r,p_e_in,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_i(:)*1e13,n_exp,r,p_i_in,n_r)
-
+  !
+  ! Collisional exchange power
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_ei(:)*1e13,n_exp,r,p_exch_in,n_r)
+  !
+  ! (1a) Detailed powers for reactor simulation
+  !
   ! Integrated fusion powers
-  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e_fus(:)*1e13,n_exp,r,p_alpha_e_in,n_r)
-  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_i_fus(:)*1e13,n_exp,r,p_alpha_i_in,n_r)
-
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e_fus(:)*1e13,n_exp,r,p_e_fus_in,n_r)
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_i_fus(:)*1e13,n_exp,r,p_i_fus_in,n_r)
+  !
   ! Integrated radiated powers 
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e_sync(:)*1e13,n_exp,r,p_sync_in,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e_brem(:)*1e13,n_exp,r,p_brem_in,n_r)
   call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e_line(:)*1e13,n_exp,r,p_line_in,n_r)
+  !  
+  ! Integrated auxiliary heating powers (NB + RF + Ohmic)
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_e_aux(:)*1e13,n_exp,r,p_e_aux_in,n_r)
+  call cub_spline(EXPRO_rmin(:)/r_min,EXPRO_pow_i_aux(:)*1e13,n_exp,r,p_i_aux_in,n_r)
 
   ! Apply auxiliary power rescale
-  p_e_in = tgyro_input_paux_scale*(p_e_in+p_exch_in-p_alpha_e_in)+p_alpha_e_in-p_exch_in
-  p_i_in = tgyro_input_paux_scale*(p_i_in-p_exch_in-p_alpha_i_in)+p_alpha_i_in+p_exch_in
+  p_e_in = tgyro_input_paux_scale*p_e_aux_in + (p_e_in-p_e_aux_in)
+  p_i_in = tgyro_input_paux_scale*p_i_aux_in + (p_i_in-p_i_aux_in)
   !
   ! (2) Particle flow -- convert to 1/s from MW/keV
   !

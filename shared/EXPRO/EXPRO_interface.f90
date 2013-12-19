@@ -73,6 +73,12 @@
 !  EXPRO_pow_e_brem(:)
 !  EXPRO_pow_e_line(:)
 !
+!  EXPRO_pow_e_aux(:)
+!  EXPRO_pow_i_aux(:)
+!  [null]
+!  [null]
+!  [null]
+!
 !  EXPRO_signq 
 !  EXPRO_signb
 !
@@ -170,6 +176,9 @@ module EXPRO_interface
   real, dimension(:),allocatable :: EXPRO_pow_e_brem
   real, dimension(:),allocatable :: EXPRO_pow_e_line
 
+  real, dimension(:),allocatable :: EXPRO_pow_e_aux
+  real, dimension(:),allocatable :: EXPRO_pow_i_aux
+
   ! Derived quantities
 
   real, dimension(:),allocatable :: EXPRO_bunit
@@ -236,7 +245,7 @@ module EXPRO_interface
 
   ! Standard variable tags
 
-  character (len=16), dimension(45) :: EXPRO_tag=(/&
+  character (len=16), dimension(50) :: EXPRO_tag=(/&
        'rho(-)          ',&
        'rmin(m)         ',&
        'rmaj(m)         ',&
@@ -281,6 +290,11 @@ module EXPRO_interface
        'pow_i_fus(MW)   ',&
        'pow_e_sync(MW)  ',&
        'pow_e_brem(MW)  ',&
-       'pow_e_line(MW)  '/)
+       'pow_e_line(MW)  ',&
+       'pow_e_aux(MW)   ',&
+       'pow_i_aux(MW)   ',&
+       '[null]          ',&
+       '[null]          ',&
+       '[null]          '/)
 
 end module EXPRO_interface

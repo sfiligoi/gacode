@@ -57,28 +57,32 @@ module prgen_globals
   real, dimension(:), allocatable :: pow_e_sync
   real, dimension(:), allocatable :: pow_e_brem
   real, dimension(:), allocatable :: pow_e_line
-  real, dimension(:), allocatable :: flow_wall_exp
-  real, dimension(:), allocatable :: flow_beam
-  real, dimension(:), allocatable :: flow_mom
-  real, dimension(:), allocatable :: sion_d
-  real, dimension(:), allocatable :: sbcx_d
-  real, dimension(:), allocatable :: powe_beam_exp
-  real, dimension(:), allocatable :: powi_beam_exp
-  real, dimension(:), allocatable :: powe_rf_exp
-  real, dimension(:), allocatable :: powi_rf_exp
-  real, dimension(:), allocatable :: powe_oh_exp
-  real, dimension(:), allocatable :: powe_rad_exp
+  real, dimension(:), allocatable :: pow_e_rad
+  real, dimension(:), allocatable :: pow_e_nb
+  real, dimension(:), allocatable :: pow_i_nb
+  real, dimension(:), allocatable :: pow_e_rf
+  real, dimension(:), allocatable :: pow_i_rf
+  real, dimension(:), allocatable :: pow_e_ohm
+  real, dimension(:), allocatable :: pow_e_aux
+  real, dimension(:), allocatable :: pow_i_aux
   real, dimension(:), allocatable :: powe_ion_exp
   real, dimension(:), allocatable :: powi_ion_exp
   real, dimension(:), allocatable :: powe_wdot_exp
   real, dimension(:), allocatable :: powi_wdot_exp
   real, dimension(:), allocatable :: powi_cx_exp
+  real, dimension(:), allocatable :: flow_wall_exp
+  real, dimension(:), allocatable :: flow_beam
+  real, dimension(:), allocatable :: flow_mom
+  real, dimension(:), allocatable :: sion_d
+  real, dimension(:), allocatable :: sbcx_d
   real, dimension(:,:), allocatable :: vec
   real, dimension(:,:), allocatable :: vec2
 
   character (len=70), dimension(5) :: ion_name
 
   real :: quasi_err
+  real :: pow_e_err
+  real :: pow_i_err
 
   !---------------------------------------------------------
   ! ONETWO variables
@@ -201,12 +205,20 @@ module prgen_globals
   real, dimension(:), allocatable :: plst_zeff
   real, dimension(:), allocatable :: plst_epot
   real, dimension(:), allocatable :: plst_omegat
-  real, dimension(:), allocatable :: plst_pbe
-  real, dimension(:), allocatable :: plst_pbi
   real, dimension(:), allocatable :: plst_pe_trans
   real, dimension(:), allocatable :: plst_pi_trans
+  real, dimension(:), allocatable :: plst_pbe
+  real, dimension(:), allocatable :: plst_pbi
+  real, dimension(:), allocatable :: plst_pbth
   real, dimension(:), allocatable :: plst_qie
+  real, dimension(:), allocatable :: plst_peech
+  real, dimension(:), allocatable :: plst_pohme
+  real, dimension(:), allocatable :: plst_pmine
+  real, dimension(:), allocatable :: plst_pmini
+  real, dimension(:), allocatable :: plst_pminth
+  real, dimension(:), allocatable :: plst_picth
   real, dimension(:), allocatable :: plst_pfusi
+  real, dimension(:), allocatable :: plst_pfusth
   real, dimension(:), allocatable :: plst_pfuse
   real, dimension(:), allocatable :: plst_prad_br
   real, dimension(:), allocatable :: plst_prad_cy
