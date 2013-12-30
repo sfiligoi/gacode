@@ -32,6 +32,13 @@ x=`file -b $1`
 
 if [[ "$x" == "NetCDF Data Format data" ]] ; then
    # Plasmastate or iterdb netcdf
+   y=`which ncdump >& /dev/null`
+   result="$?"
+   if [[ "$result" == "1" ]] ; then
+       echo "ERROR: (gacode_type_autodetect) ncdump must be in your path to use profiles_gen on a netcdf file" > /dev/stderr
+       echo "UNKNOWN"
+       exit 1
+   fi
    y=`ncdump -c $1 | grep dim_nrho_eq`
    if [[ "$y" == "" ]] ; then
       echo "ITERDBNC"
