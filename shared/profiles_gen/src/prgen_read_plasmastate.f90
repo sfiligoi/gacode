@@ -18,7 +18,7 @@ subroutine prgen_read_plasmastate
   integer :: varid
   integer :: err
   real :: dummy
-
+  real, parameter :: idiag=1
 
   ! Open the file (NF90_NOWRITE means read-only)
   err = nf90_open(raw_data_file,NF90_NOWRITE,ncid)
@@ -385,12 +385,26 @@ subroutine prgen_read_plasmastate
   else
      plst_prad_li(:) = 0.0
   endif
-  !do i=1,nx-1
-  !   print '(4(1pe12.5,2x))',plst_pe_trans(i),(plst_pe_trans(i)-( &
-  !        plst_pfuse(i)+plst_qie(i)-plst_prad_cy(i)-plst_prad_br(i)-plst_prad_li(i)+plst_pbe(i) &
-  !        +plst_peech(i)+plst_pmine(i)+plst_pohme(i) &
-  !        ))/plst_pe_trans(i)
-  !enddo
+
+  ! Electron power balance diagnostic
+  if (idiag == 1) then
+     open(unit=11,file='out.prgen.power_e',status='replace')
+     do i=1,nx-1
+        write(11,'(14(1pe12.5,2x))') plst_rho(i),& ! 0
+             plst_pe_trans(i), &     ! 1
+             plst_pfuse(i), &        ! 2
+             plst_qie(i), &          ! 3
+             plst_prad_cy(i), &      ! 4
+             plst_prad_br(i), &      ! 5
+             plst_prad_li(i), &      ! 6
+             plst_pbe(i), &          ! 7
+             plst_peech(i), &        ! 8
+             plst_pmine(i), &        ! 9
+             plst_pohme(i), &        ! 10
+             plst_vol(i+1)           ! 11
+     enddo
+     close(11)
+  endif
 
   ! Angular momentum source torque 
   err = nf90_inq_varid(ncid,trim('tq_trans'),varid)
