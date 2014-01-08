@@ -70,7 +70,8 @@ class TGYROData:
             self.fileparser('out.tgyro.gradient')
             self.fileparser('out.tgyro.geometry.1')
             self.fileparser('out.tgyro.geometry.2')
-            self.fileparser('out.tgyro.power')
+            self.fileparser('out.tgyro.power_e')
+            self.fileparser('out.tgyro.power_i')
             for i in range(2,self.loc_n_ion+1):
                 si = '%d'%i
                 for fn in ['profile','mflux_i','flux_i']:
@@ -114,6 +115,7 @@ class TGYROData:
     def fileparser(self,file,spec_num=''):
         """
         Generic parser for standard TGYRO file format.
+        NOTE: spec_num refers to ion species index
         """
 
         import string
@@ -129,12 +131,19 @@ class TGYROData:
         numdata = np.zeros((nc,nb,nr-2))
         for ib in range(nb):
             tags=string.split(data[ib*nr])
-            null=string.split(data[ib*nr+1])
+
+            try:
+                null=string.split(data[ib*nr+1])
+            except:
+                print "WARNING: (data.py) "+file+" is damaged."
+                return 0
+
             for ir in range(nr-2):
                 row=string.split(data[ib*nr+ir+2])
                 for ic in range(nc):
                     numdata[ic,ib,ir] = row[ic]
 
+        # Append ion tags with ion species index
         for ic in range(nc):
             if tags[ic]=='r/a' and spec_num!='':
                 continue
