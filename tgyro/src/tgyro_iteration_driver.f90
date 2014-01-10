@@ -36,6 +36,7 @@ subroutine tgyro_iteration_driver
   allocate(x_vec0(p_max)) 
   allocate(f_vec0(p_max))
   allocate(g_vec0(p_max))
+  allocate(quant(p_max))
   allocate(b(p_max))
 
   call tgyro_allocate_globals
@@ -58,21 +59,25 @@ subroutine tgyro_iteration_driver
            p  = p+1
            ip = ip+1
            pmap(i,ip) = p
+           quant(p) = 'ti'
         endif
         if (loc_te_feedback_flag == 1) then
            p  = p+1
            ip = ip+1
            pmap(i,ip) = p
+           quant(p) = 'te'
         endif
         if (loc_ne_feedback_flag == 1) then
            p  = p+1
            ip = ip+1
            pmap(i,ip) = p
+           quant(p) = 'ne'
         endif
         if (loc_er_feedback_flag == 1) then
            p  = p+1
            ip = ip+1
            pmap(i,ip) = p
+           quant(p) = 'er'
         endif
      enddo
   endif

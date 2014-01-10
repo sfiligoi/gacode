@@ -1,5 +1,7 @@
 subroutine tgyro_residual(f,g,res,n,method)
 
+  use tgyro_iteration_variables
+
   implicit none
 
   integer, intent(in) :: n
@@ -29,6 +31,17 @@ subroutine tgyro_residual(f,g,res,n,method)
 
      ! BALANCED
      res = (f-g)**2/MAX((f**2+g**2),1.0)
+
+  case (5)
+
+     ! WEIGHTED
+     do i=1,n
+        if (quant(i) == 'ne') then 
+           res = (f-g)**2/MAX((f**2+g**2),1.0)
+        else
+           res = 0.1*(f-g)**2/MAX((f**2+g**2),1.0)
+        endif
+     enddo
 
   case default
 
