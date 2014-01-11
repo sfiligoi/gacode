@@ -35,11 +35,12 @@ subroutine tgyro_residual(f,g,res,n,method)
   case (5)
 
      ! WEIGHTED
+     res(:) = 0.0
      do i=1,n
         if (quant(i) == 'ne') then 
-           res = (f-g)**2/MAX((f**2+g**2),1.0)
+           res(i) = 0.005*(f(i)-g(i))**2
         else
-           res = 0.1*(f-g)**2/MAX((f**2+g**2),1.0)
+           res(i) = 0.5*(f(i)-g(i))**2
         endif
      enddo
 
