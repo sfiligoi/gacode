@@ -248,17 +248,6 @@ subroutine tgyro_iteration_standard
      x_vec(:) = x_vec0(:)+b(:)
      !----------------------------------------------------
 
-     !----------------------------------------------------
-     ! Check to see if gradient is too negative
-     !
-     !do p=1,p_max
-     !   if (x_vec(p) < 0.0) then
-     !      x_vec(p) = 0.0001
-     !      b_flag(p) = '#'
-     !   endif
-     !enddo
-     !----------------------------------------------------
-
      !-----------------------------------------------------
      ! Correction step:
      !  strategy to cope with an increasing residual.

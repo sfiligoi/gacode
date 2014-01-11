@@ -348,6 +348,10 @@ subroutine tgyro_write_input
      case (1)
 
         write(1,10) 'TGYRO_DT_METHOD','Reaction cross section <n1*n2> (use with separate D and T)'
+        if (loc_n_ion == 1) then
+           error_flag = 1
+           error_msg = 'ERROR: (tgyro) Need LOC_N_ION > 1 for D-T reaction cross-section'
+        endif
 
      case (2)
 
