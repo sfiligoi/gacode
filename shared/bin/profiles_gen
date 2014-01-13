@@ -575,8 +575,8 @@ if [ "$itype" == "UFILE" ] ; then
    # UFILE mode
    #-----------------------------------------------
 
-   echo "INFO: (profiles_gen) Extracting UFILE com data."
-   python ${GACODE_ROOT}/shared/bin/gacode_ufile_tool.py *com.dat $UFILETIME > out.ufile.log
+   echo "INFO: (profiles_gen) Extracting UFILE 0d data."
+   python ${GACODE_ROOT}/shared/bin/gacode_ufile_tool.py *0d.dat $UFILETIME >> out.ufile.log
    echo "INFO: (profiles_gen) Extracting and averaging UFILE 1d data."
    python ${GACODE_ROOT}/shared/bin/gacode_ufile_tool.py *1d.dat $UFILETIME >> out.ufile.log
    echo "INFO: (profiles_gen) Extracting and averaging UFILE 2d data."
@@ -705,8 +705,8 @@ then
        then
        cp ../$FILE.geo input.profiles.geo
    else
-       echo "WARNING: (profiles_gen) $FILE.geo not found."
-       echo "         This may cause VGEN to fail if input.neo uses numerical eq."
+       echo "INFO: (profiles_gen) $FILE.geo not found -- using EQUILIBRIUM_MODEL=2"
+       echo "EQUILIBRIUM_MODEL=2" >> input.neo
    fi
 
    python $NEO_DIR/bin/neo_parse.py

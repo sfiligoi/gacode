@@ -11,38 +11,46 @@
 import sys
 import numpy as np
 
-def extractcom(infile,t0):
+def extract0d(infile):
 
-    # Write the following strings:
-    # <file rootname>
-    # <tokamak>
-    # <shot/pulse number>
-    # <time>
+    p=0
+    for line in open(infile,'r').readlines():
+        x = line.split()
+        p = p+1
+        if p == 1:
+            tok    = x[0]
+            update = x[1]
+            date   = x[2]
+            shot   = x[3]
+            time   = x[4]
+        if p == 2:
+            phase  = x[0]
+        if p == 14:
+            z1 = x[5]
+            m1 = x[6]
+        if p == 15:
+            z2 = x[0]
+            m2 = x[1]
+            z3 = x[2]
+            m3 = x[3]
+            z4 = x[4]
+            m4 = x[5]
 
     f=open('out.com','w')
-    f.write(infile.split('_com')[0]+'\n')
-
-    run   = ''
-    pulse = ''
-
-    for line in open(infile,'r').readlines():
-        if line.count("Tokamak:") == 1:
-            tok=line.split(":")[1].strip()
-        if line.count("Run number:") == 1:
-            run=line.split(":")[1].strip()
-        if line.count("Pulse") == 1:
-            pulse=line.split(":")[1].strip()
-
+    f.write(infile.split('_0d')[0]+'\n')
     f.write(tok+'\n')
-    if len(run) == 0:
-        f.write(pulse+'\n')
-    else:
-        f.write(run+'\n')
-
-    # Also write the time 
-    f.write(t0+'\n')
+    f.write(update+'\n')
+    f.write(date+'\n')
+    f.write(shot+'\n')
+    f.write(time+'\n')
+    f.write(phase+'\n')
+    f.write(z1+'\n')
+    f.write(m1+'\n')
+    f.write(z2+'\n')
+    f.write(m2+'\n')
+    f.write(z3+'\n')
+    f.write(m3+'\n')
     f.close()
-
 
 def extract1d(infile,t0):
 
@@ -111,6 +119,7 @@ def extract2d(infile,t0):
                 for i in range(nx):
                     yave[i] = np.interp(t0,vt,fxt[i,:])
                     # Write the averaged data for current profile (var)
+                    # Output filename: "out.TAG.ave"
                     np.savetxt('out.'+var+'.ave',np.transpose((vx,yave)),fmt='%1.6e')
             else:
                 print 'INFO: (ufile_tool) Time window: '+'t=['+str(vt[0])+','+str(vt[-1])+']'
@@ -181,8 +190,8 @@ except:
     print 'Usage: python split.py <datafile> <time>'
     sys.exit()
 
-if infile.split("_")[-1]=='com.dat':
-    extractcom(infile,sys.argv[2])
+if infile.split("_")[-1]=='0d.dat':
+    extract0d(infile)
     sys.exit()
 
 # <time> Time-point for desired radial output

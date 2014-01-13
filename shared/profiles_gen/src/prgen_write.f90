@@ -80,6 +80,15 @@ subroutine prgen_write
      write(1,20) '#          SHOT NUMBER : ',ufile_shot
      write(1,20) '#             TIME (s) : ',ufile_time
 
+     write(1,20) '#                 IONS :  Name       Z   Mass'
+     do i=1,ufile_nion
+        ip = reorder_vec(i)
+        write(1,'(a,a,t36,i3,t43,i3)') '#                         ',&
+             'name',&
+             nint(ufile_z(ip)),&
+             nint(ufile_m(ip))
+     enddo
+
   case (7)
 
      write(1,40) '#          SHOT NUMBER : [DATA MODIFIED WITH GMERGE]'

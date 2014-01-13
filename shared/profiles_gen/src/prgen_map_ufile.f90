@@ -17,17 +17,21 @@ subroutine prgen_map_ufile
   real, dimension(:), allocatable :: powd_i
   real, dimension(:), allocatable :: powd_e
 
-  integer :: i
+  integer :: i,j
 
 
   allocate(powd_i(nx))
   allocate(powd_e(nx))
+
+  print '(a,i2)','INFO: (prgen) Number of ions: ',ufile_nion
 
   powd_i(:) = ufile_qnbii(:) &
        +ufile_qicrhi(:) &
        +ufile_qei(:) &
        +ufile_qechi(:) &
        -ufile_qwalli(:)
+
+  print '(a)','INFO: (prgen) i-power: QICHRI+QEI+QECHI+QWALLI'
 
   powd_e(:) = ufile_qnbie(:) &
        +ufile_qicrhe(:) &
@@ -36,6 +40,8 @@ subroutine prgen_map_ufile
        +ufile_qeche(:) &
        +ufile_qohm(:) &
        -ufile_qwalle(:) 
+
+  print '(a)','INFO: (prgen) e-power: QICHRE-QEI+QRAD+QECHE+QOHM-QWALLE'
 
   ! Convert W to MW (1e-6):
   call ufile_volint(rho,1e-6*powd_i,pow_i,ufile_volume,nx)
@@ -91,7 +97,9 @@ subroutine prgen_map_ufile
 
   ! Insert carbon toroidal velocity
   do i=1,5
-     if (reorder_vec(i) == 2) then
+     j = reorder_vec(i)
+     if (ufile_m(j) == 12.0) then
+        print '(a)', 'INFO: (prgen) Assuming VROT is the carbon toroidal rotation.'
         vec(30+i,:) = -ufile_vrot(:)*(rmaj(:)+rmin(:))
      endif
   enddo

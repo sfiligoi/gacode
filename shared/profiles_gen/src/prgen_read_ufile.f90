@@ -15,6 +15,7 @@ subroutine prgen_read_ufile
   integer :: i
   real :: chi_ta
   real, dimension(:), allocatable :: chi_t
+  character(len=16) :: a
 
   open(unit=1,file='out.BT.ave',status='old') 
   read(1,*) ufile_bref
@@ -29,8 +30,17 @@ subroutine prgen_read_ufile
   open(unit=1,file='out.com',status='old') 
   read(1,*) raw_data_file
   read(1,*) ufile_tok
+  read(1,*) a
+  read(1,*) a
   read(1,*) ufile_shot
   read(1,*) ufile_time
+  read(1,*) a
+  read(1,*) ufile_z(1)
+  read(1,*) ufile_m(1)
+  read(1,*) ufile_z(2)
+  read(1,*) ufile_m(2)
+  read(1,*) ufile_z(3)
+  read(1,*) ufile_m(3)
   close(1)
 
   nx = ufile_nx
@@ -58,6 +68,7 @@ subroutine prgen_read_ufile
   call ufile_mapper('out.DELTAR.ave',rho,delta,nx,0)
   call ufile_mapper('out.PRES.ave',rho,ufile_pres,nx,1)
   call ufile_mapper('out.VROT.ave',rho,ufile_vrot,nx,1)
+  call ufile_mapper('out.VROTM.ave',rho,ufile_vrotm,nx,1)
   call ufile_mapper('out.VOLUME.ave',rho,ufile_volume,nx,1)
   call ufile_mapper('out.QNBII.ave',rho,ufile_qnbii,nx,0)
   call ufile_mapper('out.QNBIE.ave',rho,ufile_qnbie,nx,0)

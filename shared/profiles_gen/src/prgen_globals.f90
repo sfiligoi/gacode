@@ -304,6 +304,8 @@ module prgen_globals
   integer :: ufile_nion
   real :: ufile_bref
   real :: ufile_arho
+  real :: ufile_z(4)
+  real :: ufile_m(4)
   character (len=10) :: ufile_tok
   character (len=40) :: ufile_shot
   character (len=10) :: ufile_time
@@ -316,6 +318,7 @@ module prgen_globals
   real, dimension(:), allocatable :: ufile_zeff
   real, dimension(:), allocatable :: ufile_pres
   real, dimension(:), allocatable :: ufile_vrot
+  real, dimension(:), allocatable :: ufile_vrotm
   real, dimension(:), allocatable :: ufile_volume
   real, dimension(:), allocatable :: ufile_qnbii
   real, dimension(:), allocatable :: ufile_qnbie

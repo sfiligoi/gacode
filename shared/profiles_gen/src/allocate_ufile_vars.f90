@@ -13,6 +13,7 @@ subroutine allocate_ufile_vars
   allocate(ufile_zeff(nx))
   allocate(ufile_pres(nx))
   allocate(ufile_vrot(nx))
+  allocate(ufile_vrotm(nx))
   allocate(ufile_volume(nx))
   allocate(ufile_qnbii(nx))
   allocate(ufile_qnbie(nx))
