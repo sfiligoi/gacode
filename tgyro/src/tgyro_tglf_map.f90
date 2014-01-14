@@ -48,7 +48,9 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
 
   !----------------------------------------------------------------
-  ! Mass ratios: me/mi,mi/mi,mz/mi
+  ! Assuming mi(1) is normalizing mass
+  !
+  ! Mass ratios: me/mi(1),mi(1)/mi(1),m(2)/mi(1),...
   tglf_mass_in(1) = (me*loc_me_multiplier)/mi(1)
   do i_ion=1,loc_n_ion 
      tglf_mass_in(i_ion+1) = mi(i_ion)/mi(1)
@@ -56,7 +58,7 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
 
   !----------------------------------------------------------------
-  ! ne/ne,ni/ne,nz/ne
+  ! ne/ne,ni(1)/ne,ni(2)/ne,...
   tglf_as_in(1) = 1.0
   do i_ion=1,loc_n_ion
      tglf_as_in(i_ion+1) = ni(i_ion,i_r)/ne(i_r) 

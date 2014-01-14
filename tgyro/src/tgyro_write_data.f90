@@ -63,8 +63,6 @@ subroutine tgyro_write_data(i_print)
         close(1)
         open(unit=1,file='out.tgyro.mflux_i'//trim(ion_tag(i_ion)),status='replace')
         close(1)
-        !open(unit=1,file='chi_i'//trim(ion_tag(i_ion))//'.out',status='replace')
-        !close(1)
         open(unit=1,file='out.tgyro.profile'//trim(ion_tag(i_ion)),status='replace')
         close(1)
      enddo
@@ -74,9 +72,6 @@ subroutine tgyro_write_data(i_print)
 
      open(unit=1,file='out.tgyro.mflux_e',status='replace')
      close(1)
-
-     !open(unit=1,file='chi_e.out',status='replace')
-     !close(1)
 
      open(unit=1,file='out.tgyro.profile',status='replace')
      close(1)
@@ -315,40 +310,6 @@ subroutine tgyro_write_data(i_print)
   enddo
 
   close(1)
-
-  ! Chi_i (chi_i.out)
-  !open(unit=1,file='chi_i.out',status='old',position='append')
-  !write(1,20) 'r/a','Di_neo','Di_tur','chii_neo','chii_tur'
-  !write(1,20) '','(GB)','(GB)','(GB)','(GB)'
-  !do i=1,n_r
-  !   if (i == 1) then
-  !      write(1,10) 0.0,0.0,0.0,0.0,0.0
-  !   else
-  !      write(1,10) r(i)/r_min,&
-  !           pflux_i_neo(1,i)/(r_min*dlnnidr(1,i)*ni(1,i)/ne(i)),&
-  !           pflux_i_tur(1,i)/(r_min*dlnnidr(1,i)*ni(1,i)/ne(i)),&
-  !           eflux_i_neo(1,i)/(r_min*dlntidr(1,i)*ni(1,i)/ne(i)*ti(1,i)/te(i)),&
-  !           eflux_i_tur(1,i)/(r_min*dlntidr(1,i)*ni(1,i)/ne(i)*ti(1,i)/te(i))
-  !   endif
-  !enddo
-  !close(1)
-
-  ! Chi_e (chi_e.out)
-  !open(unit=1,file='chi_e.out',status='old',position='append')
-  !write(1,20) 'r/a','De_neo','De_tur','chie_neo','chie_tur'
-  !write(1,20) '','(GB)','(GB)','(GB)','(GB)'
-  !do i=1,n_r
-  !   if (i == 1) then
-  !      write(1,10) 0.0,0.0,0.0,0.0,0.0
-  !   else
-  !      write(1,10) r(i)/r_min,&
-  !           pflux_e_neo(i)/(r_min*dlnnedr(i)),&
-  !           pflux_e_tur(i)/(r_min*dlnnedr(i)),&
-  !           eflux_e_neo(i)/(r_min*dlntedr(i)),&
-  !           eflux_e_tur(i)/(r_min*dlntedr(i))
-  !   endif
-  !enddo
-  !close(1)
 
   ! gyroBohm factors in physical units
 

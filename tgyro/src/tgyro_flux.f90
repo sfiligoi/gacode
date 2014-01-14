@@ -220,17 +220,18 @@ subroutine tgyro_flux
         n_12 = gyro_radial_grid_in-2*gyro_explicit_damp_grid_in
 
         ! Map GYRO (local simulation) output to TGYRO
+        ! Need to convert from GBD units to GB1 units:
 
-        pflux_e_tur(i_r) = sum(gyro_elec_pflux_out(i1:i2))/n_12
-        eflux_e_tur(i_r) = sum(gyro_elec_eflux_out(i1:i2))/n_12
-        mflux_e_tur(i_r) = sum(gyro_elec_mflux_out(i1:i2))/n_12
-        expwd_e_tur(i_r) = sum(gyro_elec_expwd_out(i1:i2))/n_12
+        pflux_e_tur(i_r) = sum(gyro_elec_pflux_out(i1:i2))/n_12*(2*mp/mi(1))**1.5
+        eflux_e_tur(i_r) = sum(gyro_elec_eflux_out(i1:i2))/n_12*(2*mp/mi(1))**1.5
+        mflux_e_tur(i_r) = sum(gyro_elec_mflux_out(i1:i2))/n_12*(2*mp/mi(1))**2
+        expwd_e_tur(i_r) = sum(gyro_elec_expwd_out(i1:i2))/n_12*(2*mp/mi(1))**1.5
 
         do i_ion=1,loc_n_ion
-           pflux_i_tur(i_ion,i_r) = sum(gyro_ion_pflux_out(i1:i2,i_ion))/n_12
-           eflux_i_tur(i_ion,i_r) = sum(gyro_ion_eflux_out(i1:i2,i_ion))/n_12
-           mflux_i_tur(i_ion,i_r) = sum(gyro_ion_mflux_out(i1:i2,i_ion))/n_12
-           expwd_i_tur(i_ion,i_r) = sum(gyro_ion_expwd_out(i1:i2,i_ion))/n_12
+           pflux_i_tur(i_ion,i_r) = sum(gyro_ion_pflux_out(i1:i2,i_ion))/n_12*(2*mp/mi(1))**1.5
+           eflux_i_tur(i_ion,i_r) = sum(gyro_ion_eflux_out(i1:i2,i_ion))/n_12*(2*mp/mi(1))**1.5
+           mflux_i_tur(i_ion,i_r) = sum(gyro_ion_mflux_out(i1:i2,i_ion))/n_12*(2*mp/mi(1))**2
+           expwd_i_tur(i_ion,i_r) = sum(gyro_ion_expwd_out(i1:i2,i_ion))/n_12*(2*mp/mi(1))**1.5
         enddo
 
      endif

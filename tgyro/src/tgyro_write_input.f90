@@ -579,8 +579,11 @@ subroutine tgyro_write_input
            write(1,40) 'ion '//trim(ion_tag(i_ion))//' [mass,charge,type]',mi_vec(i_ion),zi_vec(i_ion),ttext
         endif
      enddo
-
+     write(1,*) 
+     write(1,10) 'INFO: (tgyro)','GyroBohm factors defined by ion 1 mass.'
+     write(1,*)
      !--------------------------------------------------------
+
      !--------------------------------------------------------
      write(1,*)
      write(1,*) 'Rotation and field orientation'
