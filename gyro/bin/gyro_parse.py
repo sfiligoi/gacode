@@ -191,8 +191,6 @@ x.add('FIELDEIGEN_WR','-0.3')
 x.add('FIELDEIGEN_WI','0.2')
 x.add('FIELDEIGEN_TOL','1e-6')
 x.add('REINTEGRATE_FLAG','0')
-x.add('COLL_OP_CONS_FLAG','0')
-x.add('COLL_OP_SELF_FLAG','0')
 x.add('IC_METHOD','1')
 
 # HDF5 IO PARAMETERS

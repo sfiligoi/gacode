@@ -53,6 +53,7 @@ subroutine gyro_do
 #endif
 
   ! Dump interface variables to record exact state of GYRO.
+  call map_global2interface
   call interfacelocaldump
 
   !--------------------------------------------------------------

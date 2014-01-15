@@ -250,9 +250,6 @@ subroutine gyro_read_input
   ! Chris' profile integration option
   call readbc_int(reintegrate_flag)
 
-  ! New collision options
-  call readbc_int(coll_op_cons_flag)
-  call readbc_int(coll_op_self_flag)
   call readbc_int(ic_method)
 
   ! hdf5 output
