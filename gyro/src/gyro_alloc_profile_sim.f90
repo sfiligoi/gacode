@@ -97,9 +97,8 @@ subroutine gyro_alloc_profile_sim(flag)
      allocate(c_map(n_spec))
 
      ! Energy grid
-     allocate(energy_max(n_kinetic))
-     allocate(energy(n_energy,n_kinetic))
-     allocate(w_energy(n_energy,n_kinetic))
+     allocate(energy(n_energy))
+     allocate(w_energy(n_energy))
 
      ! Fourier coefficients
      allocate(cr(n_x,n_x))
@@ -194,7 +193,6 @@ subroutine gyro_alloc_profile_sim(flag)
      deallocate(krho_collect)
      deallocate(c_map)
 
-     deallocate(energy_max)
      deallocate(energy)
      deallocate(w_energy)
 

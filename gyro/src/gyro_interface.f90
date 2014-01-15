@@ -21,7 +21,6 @@ module gyro_interface
   integer :: gyro_pass_grid_in = 4
   integer :: gyro_trap_grid_in = 4
   integer :: gyro_energy_grid_in = 8
-  integer :: gyro_variable_egrid_flag_in = 0
   integer :: gyro_blend_grid_in = 6
   integer :: gyro_blend_fit_order_in = 3
   integer :: gyro_theta_plot_in = 1
@@ -83,12 +82,7 @@ module gyro_interface
   integer :: gyro_flat_profile_flag_in = 0
   integer :: gyro_density_method_in = 1
   integer :: gyro_integrator_method_in = 1
-  real    :: gyro_energy_max_1_in = 5.0
-  real    :: gyro_energy_max_2_in = 5.0
-  real    :: gyro_energy_max_3_in = 5.0
-  real    :: gyro_energy_max_4_in = 5.0
-  real    :: gyro_energy_max_5_in = 5.0
-  real    :: gyro_energy_max_electron_in = 5.0
+  real    :: gyro_energy_max_in = 5.0
   real    :: gyro_mu_1_in = 1.0
   real    :: gyro_mu_2_in = 1.0
   real    :: gyro_mu_3_in = 1.0
@@ -255,7 +249,6 @@ contains
     gyro_pass_grid_in = n_pass
     gyro_trap_grid_in = n_trap
     gyro_energy_grid_in = n_energy
-    gyro_variable_egrid_flag_in = variable_egrid_flag
     gyro_blend_grid_in = n_blend
     gyro_blend_fit_order_in = blend_fit_order
     gyro_theta_plot_in = n_theta_plot
@@ -317,12 +310,7 @@ contains
     gyro_flat_profile_flag_in = flat_profile_flag
     gyro_density_method_in = density_method
     gyro_integrator_method_in = integrator_method
-    gyro_energy_max_1_in = energy_max_vec(1)
-    gyro_energy_max_2_in = energy_max_vec(2)
-    gyro_energy_max_3_in = energy_max_vec(3)
-    gyro_energy_max_4_in = energy_max_vec(4)
-    gyro_energy_max_5_in = energy_max_vec(5)
-    gyro_energy_max_electron_in = energy_max_vec(0)
+    gyro_energy_max_in = energy_max
     gyro_mu_1_in = mu_vec(1)
     gyro_mu_2_in = mu_vec(2)
     gyro_mu_3_in = mu_vec(3)
@@ -483,7 +471,6 @@ contains
     n_pass = gyro_pass_grid_in
     n_trap = gyro_trap_grid_in
     n_energy = gyro_energy_grid_in
-    variable_egrid_flag = gyro_variable_egrid_flag_in
     n_blend = gyro_blend_grid_in
     blend_fit_order = gyro_blend_fit_order_in
     n_theta_plot = gyro_theta_plot_in
@@ -545,12 +532,7 @@ contains
     flat_profile_flag = gyro_flat_profile_flag_in
     density_method = gyro_density_method_in
     integrator_method = gyro_integrator_method_in
-    energy_max_vec(1) = gyro_energy_max_1_in
-    energy_max_vec(2) = gyro_energy_max_2_in
-    energy_max_vec(3) = gyro_energy_max_3_in
-    energy_max_vec(4) = gyro_energy_max_4_in
-    energy_max_vec(5) = gyro_energy_max_5_in
-    energy_max_vec(0) = gyro_energy_max_electron_in
+    energy_max = gyro_energy_max_in
     mu_vec(1) = gyro_mu_1_in
     mu_vec(2) = gyro_mu_2_in
     mu_vec(3) = gyro_mu_3_in
@@ -687,5 +669,26 @@ contains
     endif
 
   end subroutine map_interface2global
+
+  subroutine interfacelocaldump
+
+    use gyro_globals 
+
+    implicit none
+
+    if (i_proc > 0) return
+
+    open(unit=1,file=trim(path)//'out.gyro.localdump',status='replace')
+    write(1,20) 'RADIAL_GRID',gyro_radial_grid_in
+    write(1,20) 'ORBIT_GRID',gyro_orbit_grid_in
+    write(1,20) 'PASS_GRID',gyro_pass_grid_in
+    write(1,20) 'TRAP_GRID',gyro_trap_grid_in
+    write(1,20) 'ENERGY_GRID',gyro_energy_grid_in
+    close(1)
+
+20  format(t2,a,i3)
+30  format(t2,a,1pe12.5)
+
+  end subroutine interfacelocaldump
 
 end module gyro_interface

@@ -73,18 +73,18 @@ subroutine gyro_set_blend_arrays
               f_b = BLEND_F(j,x,phase(in_1,i))
 
               c_blend(j,m,i,p_nek_loc)  = f_b
-              cs_blend(j,m0,i,p_nek_loc) = conjg(f_b)*w_p(ie,i,k,1)
+              cs_blend(j,m0,i,p_nek_loc) = conjg(f_b)*w_p(ie,i,k)
 
               f_bp = BLEND_Fp(j,x,phase(in_1,i))/pi
 
               cs_blend_prime(j,m0,i,p_nek_loc) = &
-                   conjg(f_bp)*w_p(ie,i,k,1)            
+                   conjg(f_bp)*w_p(ie,i,k)            
 
               ! This is meant only for n=0, so take real part:
 
               if (n_1(in_1) == 0) then
                  c_fluxave_loc(j,i) = &
-                      c_fluxave_loc(j,i)+real(f_b*w_p(ie,i,k,1))
+                      c_fluxave_loc(j,i)+real(f_b*w_p(ie,i,k))
               endif
 
            enddo ! j
@@ -161,15 +161,15 @@ subroutine gyro_set_blend_arrays
 
                  ff2_sum_loc(j,jp+n_blend) = &
                       ff2_sum_loc(j,jp+n_blend)+&
-                      fmm*energy(ie,is)
+                      fmm*energy(ie)
 
                  ff2_sum_loc(j+n_blend,jp) = &
                       ff2_sum_loc(j+n_blend,jp)+&
-                      fmm*energy(ie,is)
+                      fmm*energy(ie)
 
                  ff2_sum_loc(j+n_blend,jp+n_blend) = &
                       ff2_sum_loc(j+n_blend,jp+n_blend)+&
-                      fmm*energy(ie,is)**2
+                      fmm*energy(ie)**2
 
 
               enddo ! jp

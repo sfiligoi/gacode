@@ -72,7 +72,6 @@ OBJECTS += gyro_globals.o \
           gyro_collision_krook.o \
           gyro_conserve_number.o \
           gyro_conserve_all.o \
-          gyro_dump_input.o \
           gyro_entropy.o \
           gyro_field_fluxave.o \
           gyro_field_time_derivative.o \

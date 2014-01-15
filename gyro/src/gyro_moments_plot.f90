@@ -125,7 +125,7 @@ subroutine gyro_moments_plot
 
                  ! 2: energy moment
                  vel_sum_loc(j,i,2) = vel_sum_loc(j,i,2)+&
-                      energy(ie,is)*tem_s(is,i)*&
+                      energy(ie)*tem_s(is,i)*&
                       gyro_h(m,i,p_nek_loc,1)*cs_blend(j,m0,i,p_nek_loc)
 
                  ! 3: v_parallel moment

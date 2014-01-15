@@ -113,7 +113,7 @@ subroutine gyro_blend_ampereperp
 
                     vel_sum_loc1(i_diff,j,jp) = vel_sum_loc1(i_diff,j,jp)+&
                          fakefield_flag*(sum(2.0*den_s(1:n_gk,i)*tem_s(1:n_gk,i)&
-                         * f_x1(1:n_gk,i_diff)*energy(ie,1:n_gk)**2)) &
+                         * f_x1(1:n_gk,i_diff)*energy(ie)**2)) &
                          * lambda(i,k)**2 &
                          * cs_blend(j,m0,i,p_nek_loc) &
                          * c_blend(jp,m0,ip,p_nek_loc) &
@@ -127,7 +127,7 @@ subroutine gyro_blend_ampereperp
 
                     vel_sum_loc2(i_diff,j,jp) = vel_sum_loc2(i_diff,j,jp)+&
                          fakefield_flag*(sum(z(1:n_gk)*den_s(1:n_gk,i)&
-                         * f_x2(1:n_gk,i_diff)*energy(ie,1:n_gk))) &
+                         * f_x2(1:n_gk,i_diff)*energy(ie))) &
                          * lambda(i,k) &
                          * cs_blend(j,m0,i,p_nek_loc) &
                          * c_blend(jp,m0,ip,p_nek_loc)

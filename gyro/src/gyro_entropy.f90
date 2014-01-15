@@ -78,13 +78,13 @@ subroutine gyro_entropy
               h_cap_dot_0 = h_cap_dot(m,i,p_nek_loc,is) &
                    -i_c*omega_eb_s(i)*h_cap(m,i,p_nek_loc,is)
 
-              entropy_loc(is,2) = entropy_loc(is,2)-w_p(ie,i,k,is) &
+              entropy_loc(is,2) = entropy_loc(is,2)-w_p(ie,i,k) &
                    *real(conjg(h_cap(m,i,p_nek_loc,is))*h_cap_dot_0)
 
               ! 3: collisional dissipation
 
               if (collision_flag == 1 .and. is == indx_e) then
-                 entropy_loc(is,3) = entropy_loc(is,3)+w_p(ie,i,k,is) &
+                 entropy_loc(is,3) = entropy_loc(is,3)+w_p(ie,i,k) &
                       *real(conjg(h_cap(m,i,p_nek_loc,is))* &
                       (fb_coll(m,i,p_nek_loc)-f_coll(m,i,p_nek_loc))/dt)
               endif
@@ -92,12 +92,12 @@ subroutine gyro_entropy
               ! 4: orbit dissipation
 
               entropy_loc(is,4) = entropy_loc(is,4)+&
-                   w_p(ie,i,k,is)*rhs_dt(m,i,p_nek_loc,is) 
+                   w_p(ie,i,k)*rhs_dt(m,i,p_nek_loc,is) 
 
               ! 5: radial dissipation
 
               entropy_loc(is,5) = entropy_loc(is,5)+&
-                   w_p(ie,i,k,is)*rhs_dr(m,i,p_nek_loc,is) 
+                   w_p(ie,i,k)*rhs_dr(m,i,p_nek_loc,is) 
 
            enddo ! m
         enddo ! i

@@ -79,7 +79,7 @@ subroutine gyro_get_he_implicit
                       field_blend(j,i,1)-&
                       (c_blend(j,m,i,p_nek_loc)*v_para(m,i,p_nek_loc,n_spec)- &
                       o_fv(j,m,i,p_nek_loc))*field_blend(j,i,2)+&
-                      energy(nek_e(p_nek),indx_e)*lambda(i,nek_k(p_nek))*&
+                      energy(nek_e(p_nek))*lambda(i,nek_k(p_nek))*&
                       tem_s(n_spec,i)/z(n_spec)*&
                       (c_blend(j,m,i,p_nek_loc)-o_f(j,m,i,p_nek_loc))*field_blend(j,i,3)
               enddo ! j  

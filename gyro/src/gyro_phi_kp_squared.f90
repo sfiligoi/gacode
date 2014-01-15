@@ -74,8 +74,8 @@ subroutine gyro_phi_kp_squared
                    k0phi(i_loop(ip),m)
            enddo
 
-           moment(i,1) = moment(i,1)+w_p(ie,i,k,1)*k0phi(i,m)*conjg(k0phi(i,m))
-           moment(i,2) = moment(i,2)+w_p(ie,i,k,1)*k2phi*conjg(k0phi(i,m))
+           moment(i,1) = moment(i,1)+w_p(ie,i,k)*k0phi(i,m)*conjg(k0phi(i,m))
+           moment(i,2) = moment(i,2)+w_p(ie,i,k)*k2phi*conjg(k0phi(i,m))
         enddo
      enddo
 

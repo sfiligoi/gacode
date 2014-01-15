@@ -25,7 +25,7 @@ subroutine gyro_set_phase_space(datafile,io)
      do i=1,n_x
         do k=1,n_lambda
            ck = class(k)
-           w_p(ie,i,k,:) = w_energy(ie,:)*w_lambda(i,k)*d_tau(ck)
+           w_p(ie,i,k) = w_energy(ie)*w_lambda(i,k)*d_tau(ck)
         enddo
      enddo
   enddo
@@ -36,28 +36,11 @@ subroutine gyro_set_phase_space(datafile,io)
 
      ! Energy grid output
 
-     if (variable_egrid_flag == 0) then
-        write(io,'(a)') ' i    energy(i)    w_energy(i) '
-        write(io,'(a)') '--- ------------  ------------ '
-        do ie=1,n_energy
-           write(io,'(i2,3(2x,f12.10))') ie,energy(ie,1),w_energy(ie,1)
-        enddo
-     else
-        write(io,'(a)') 'Variable energy grid in effect'
-        do is = 1, n_kinetic
-           if (is == indx_e) then
-              species_tag = 'ELECTRON'
-           else
-              write(species_tag,'(a,i1)') 'ION_', is
-           endif
-           write(io,'(a)') species_tag
-           write(io,'(a)') ' i    energy(i)    w_energy(i) '
-           write(io,'(a)') '--- ------------  ------------ '
-           do ie=1,n_energy
-              write(io,'(i2,3(2x,f12.10))') ie,energy(ie,is),w_energy(ie,is)
-           enddo
-        enddo
-     endif
+     write(io,'(a)') ' i    energy(i)    w_energy(i) '
+     write(io,'(a)') '--- ------------  ------------ '
+     do ie=1,n_energy
+        write(io,'(i2,3(2x,f12.10))') ie,energy(ie),w_energy(ie)
+     enddo
 
      ! Lambda-grid output
 

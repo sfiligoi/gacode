@@ -23,9 +23,7 @@
     integer(HID_T) :: coarseGridID, threeDGridID, wedgeGridID 
     type(hdf5InOpts) :: h5in
     type(hdf5ErrorType) :: h5err
-    integer :: number_label
     logical :: write_threed
-    logical :: h5_rewind=.false.
     
     real :: pi=3.141592653589793
 

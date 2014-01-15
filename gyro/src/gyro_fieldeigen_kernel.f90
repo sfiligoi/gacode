@@ -69,11 +69,10 @@ subroutine gyro_fieldeigen_kernel
                     endif
 
                     if (n_field > 2) then
-                       fg(:,i_diff,i,mk,3) = 2.0*energy(ie,is)*lambda(i,k) &
+                       fg(:,i_diff,i,mk,3) = 2.0*energy(ie)*lambda(i,k) &
                             *tem_s(is,i)/z(is) &
                             *w_gyro1(m0,i_diff,i,p_nek_loc,is) &
                             *conjg(c_blend(:,m0,i,p_nek_loc))
-
                     endif
                  enddo
               enddo
@@ -191,7 +190,7 @@ subroutine gyro_fieldeigen_kernel
                              imk  = ippp+n_x*(m-1)+n_x*n_stack*(k-1)
 
                              gk_leftk(ij,imk) = gk_leftk(ij,imk) &
-                                  +z(is)*w_p(ie,i,k,is)  &
+                                  +z(is)*w_p(ie,i,k)  &
                                   *fg(j,idiff_ippp,i,mk,ix) 
 
                           enddo
@@ -271,7 +270,7 @@ subroutine gyro_fieldeigen_kernel
                              im  = ippp + n_x*(m-1)
 
                              gk_left(ij,im) = gk_left(ij,im) &
-                                  +z(is)*w_p(ie,i,k,is)  &
+                                  +z(is)*w_p(ie,i,k)  &
                                   *fg(j,idiff_ippp,i,mk,ix) 
 
                           enddo

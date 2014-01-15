@@ -79,18 +79,6 @@ subroutine gyro_profile_init
   !---------------------------------------------------
 
   !---------------------------------------------------
-  ! Set species-specific energy_max or default to
-  ! one energy_max for all species.
-  !
-  if (variable_egrid_flag == 1) then
-     energy_max(1:n_ion) = energy_max_vec(1:n_ion)
-     energy_max(indx_e) = energy_max_vec(0)
-  else
-     energy_max(:) = energy_max_vec(1)
-  endif
-  !---------------------------------------------------
-
-  !---------------------------------------------------
   ! Defaults and initializations.
   !
   if (radial_profile_method /= 3) then

@@ -39,7 +39,6 @@ subroutine gyro_read_input
   call readbc_int(n_pass)
   call readbc_int(n_trap)
   call readbc_int(n_energy)
-  call readbc_int(variable_egrid_flag)
   call readbc_int(n_blend)
   call readbc_int(blend_fit_order)
   call readbc_int(n_theta_plot)
@@ -101,16 +100,9 @@ subroutine gyro_read_input
   call readbc_int(flat_profile_flag)
   call readbc_int(density_method)
   call readbc_int(integrator_method)
+  call readbc_real(energy_max)
 
   ! Species: (1-3) ions and electrons.
-
-  energy_max_vec = 0.0
-  call readbc_real(x) ; energy_max_vec(1) = x
-  call readbc_real(x) ; energy_max_vec(2) = x
-  call readbc_real(x) ; energy_max_vec(3) = x
-  call readbc_real(x) ; energy_max_vec(4) = x
-  call readbc_real(x) ; energy_max_vec(5) = x
-  call readbc_real(x) ; energy_max_vec(0) = x
 
   mu_vec = 0.0
   call readbc_real(x) ; mu_vec(1) = x

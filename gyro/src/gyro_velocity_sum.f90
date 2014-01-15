@@ -116,7 +116,7 @@ subroutine gyro_velocity_sum(field)
            gz(:) = (0.0,0.0)
            do is=1,n_kinetic 
               gz(:) = gz(:)-gyro_h_aperp(:,i,p_nek_loc,is)*&
-                   tem_s(is,i)*energy(ie,is)*lambda(i,k)
+                   tem_s(is,i)*energy(ie)*lambda(i,k)
            enddo
 
            do m=1,n_stack

@@ -73,8 +73,8 @@ subroutine gyro_adaptive_source
   !
   do is = 1, n_kinetic
     do ie=1,n_energy
-       h0_n(is,:) = h0_n(is,:)+h0_mod(is,ie,:)*w_energy(ie,is)
-       h0_e(is,:) = h0_e(is,:)+h0_mod(is,ie,:)*w_energy(ie,is)*energy(ie,is)
+       h0_n(is,:) = h0_n(is,:)+h0_mod(is,ie,:)*w_energy(ie)
+       h0_e(is,:) = h0_e(is,:)+h0_mod(is,ie,:)*w_energy(ie)*energy(ie)
     enddo
   enddo
   !----------------------------------------------------------------
@@ -127,9 +127,9 @@ subroutine gyro_adaptive_source
      do is=1,n_kinetic
        do ie=1,n_energy
           source_n(is,:) = source_n(is,:)-nu_source*h0_eq(is,ie,:)* &
-               w_energy(ie,is)
+               w_energy(ie)
           source_e(is,:) = source_e(is,:)-nu_source*h0_eq(is,ie,:)* &
-               w_energy(ie,is)*energy(ie,is)
+               w_energy(ie)*energy(ie)
        enddo
      enddo
 

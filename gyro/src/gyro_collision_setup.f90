@@ -72,7 +72,7 @@ subroutine gyro_collision_setup
   !
   do ie=1,n_energy
 
-     x = sqrt(energy(ie,1))
+     x = sqrt(energy(ie))
 
      h_coll = exp(-x*x)/(x*sqrt(pi))+(1.0-1.0/(2.0*x*x))*DERF(x)
 
@@ -88,11 +88,11 @@ subroutine gyro_collision_setup
 
         do ie=1,n_energy
 
-           x = sqrt(energy(ie,1))*mu(is)/mu(isp)
+           x = sqrt(energy(ie))*mu(is)/mu(isp)
 
            h_coll = exp(-x*x)/(x*sqrt(pi))+(1.0-1.0/(2.0*x*x))*DERF(x)
 
-           x = sqrt(energy(ie,1))
+           x = sqrt(energy(ie))
 
            nu_total(:,ie,is) = nu_total(:,ie,is)+&
                 0.5*(nu_s(is,:)/x**3)*h_coll*&

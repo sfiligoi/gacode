@@ -10,6 +10,7 @@ subroutine gyro_do
   use mpi
   use gyro_globals
   use gyro_pointers
+  use gyro_interface
   use math_constants
   use GEO_interface
 
@@ -51,6 +52,8 @@ subroutine gyro_do
   endif
 #endif
 
+  ! Dump interface variables to record exact state of GYRO.
+  call interfacelocaldump
 
   !--------------------------------------------------------------
   ! Early initializations:
@@ -88,12 +91,12 @@ subroutine gyro_do
   if (linsolve_method == 2) then
      if (nonlinear_flag == 1) then
         if (i_proc==0 .and. gkeigen_j_set==0) then
-           print *, "Eigensolver unavailable in nonlinear mode."
+           print '(a)','INFO: (gyro) Eigensolver unavailable in nonlinear mode.'
         endif
         stop 
      else
         if (i_proc==0 .and. gkeigen_j_set==0) then
-           print *, "GYRO is running in eigensolve mode."
+           print '(a)', 'INFO: (gyro) GYRO is running in eigensolve mode.'
         endif
         eigensolve_restart_flag = restart_method
         restart_method = 0
@@ -101,17 +104,6 @@ subroutine gyro_do
            electron_method = 4
         endif
      endif
-  endif
-  !----------------------------------------------------------------
-
-  !----------------------------------------------------------------
-  ! Checking of input and interface data:
-  !
-  if (debug_flag == 1) then
-
-     ! Dump the global input variables (read from input.gyro)
-     call gyro_dump_input
-
   endif
   !----------------------------------------------------------------
 
@@ -167,7 +159,7 @@ subroutine gyro_do
   !
   ! Energy weights
   !
-  call energy_integral(n_energy,energy_max,n_kinetic,energy,w_energy)
+  call energy_integral(n_energy,energy_max,energy,w_energy)
   !
   ! Compute myriad arrays (for example, map between poloidal
   ! angle and orbit time) for poloidal discretization.

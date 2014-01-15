@@ -93,7 +93,7 @@ subroutine gyro_nonlinear_transfer
         ie = nek_e(p_nek)  
         k  = nek_k(p_nek)   
 
-        dw = w_p(ie,ir_norm,k,is)
+        dw = w_p(ie,ir_norm,k)
 
         do m=1,n_stack
            nl_transfer_loc(:,1) = nl_transfer_loc(:,1)+nl1(m,:,p_nek_loc)*dw

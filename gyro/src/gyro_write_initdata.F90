@@ -105,7 +105,7 @@ subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io,h5datafile)
      write(io,10) box_multiplier
 
      write(io,10) lambda(ir_norm,:)
-     write(io,10) energy(:,1)
+     write(io,10) energy(:)
      write(io,10) lambda_tp(ir_norm)
      write(io,10) krho_collect(:)
      write(io,10) rhos_norm

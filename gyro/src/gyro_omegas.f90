@@ -17,7 +17,7 @@ subroutine gyro_omegas
   !
   integer :: p
   !
-  real, dimension(n_kinetic) :: temp
+  real :: temp
   real :: e_temp
   real :: e_temp_mach
   real :: e_temp_p
@@ -48,7 +48,7 @@ subroutine gyro_omegas
         do k=1,n_lambda    
            do is=1,n_kinetic
               v_theta(i,ie,k,is) = & 
-                   omega(i,k)*sqrt(2.0*energy(ie,is))/(q_s(i)*rmaj_s(i))
+                   omega(i,k)*sqrt(2.0*energy(ie))/(q_s(i)*rmaj_s(i))
            enddo ! is
         enddo ! k
      enddo ! ie
@@ -82,7 +82,7 @@ subroutine gyro_omegas
            do is=1,n_kinetic
 
               e_temp = (1.0/z(is))*(2.0*tem_s(is,i)/rmaj_s(i))*&
-                   energy(ie,is)*(1.0-0.5*lambda(i,k)*b0_t(i,k,m0))/b0_t(i,k,m0)
+                   energy(ie)*(1.0-0.5*lambda(i,k)*b0_t(i,k,m0))/b0_t(i,k,m0)
 
               e_temp_p = e_temp*(1.0-lambda(i,k)*b0_t(i,k,m0))/ &
                    (1.0-0.5*lambda(i,k)*b0_t(i,k,m0))
@@ -107,18 +107,18 @@ subroutine gyro_omegas
            m0 = m_phys(ck,m)
            p  = p_phys(ck,m)
 
-           temp(:) = sigma(ck,p)* &
-                sqrt(abs(energy(ie,:)*(1.0-lambda(i,k)*b0_t(i,k,m))))
+           temp = sigma(ck,p)* &
+                sqrt(abs(energy(ie)*(1.0-lambda(i,k)*b0_t(i,k,m))))
 
            !-------------------------------------------------
            ! Parallel and perp. velocity for each species:
            !
            do is=1,n_kinetic
               v_para(m,i,p_nek_loc,is) = &
-                   mu(is)*sqrt(2.0*tem_s(is,i))*temp(is)
+                   mu(is)*sqrt(2.0*tem_s(is,i))*temp
               v_perp(m,i,p_nek_loc,is) = &
                    mu(is)*sqrt(2.0*tem_s(is,i)*&
-                   energy(ie,is)*lambda(i,k)*b0_t(i,k,m))
+                   energy(ie)*lambda(i,k)*b0_t(i,k,m))
            enddo
            !-------------------------------------------------
 
@@ -127,7 +127,7 @@ subroutine gyro_omegas
            !
            do is=1,n_kinetic
               omega_star(m,i,p_nek_loc,is) = krho_i(in_1,i)*&
-                   (dlnndr_s(is,i)+(energy(ie,is)-1.5)*dlntdr_s(is,i))*&
+                   (dlnndr_s(is,i)+(energy(ie)-1.5)*dlntdr_s(is,i))*&
                    den_s(is,i)
            enddo
            !--------------------------------------------------------

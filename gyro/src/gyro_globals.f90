@@ -224,7 +224,6 @@ module gyro_globals
   integer :: plot_v_flag
   integer :: poisson_z_eff_flag
   integer :: z_eff_method
-  integer :: variable_egrid_flag
   integer :: geo_gradbcurv_flag
   integer :: geo_fastionbeta_flag
   integer :: fakefield_flag
@@ -301,8 +300,7 @@ module gyro_globals
   integer :: n_mumps_max
   integer :: n_study
   !
-  real, dimension(:), allocatable :: energy_max
-  real, dimension(0:10) :: energy_max_vec
+  real :: energy_max
   real :: box_multiplier
   real :: l_x
   real :: l_y
@@ -609,14 +607,14 @@ module gyro_globals
   !---------------------------------------------------------
   ! Lambda/energy grid variables:
   !
-  real, allocatable, dimension(:,:) :: energy
-  real, allocatable, dimension(:,:) :: w_energy
+  real, allocatable, dimension(:) :: energy
+  real, allocatable, dimension(:) :: w_energy
   !
   real, allocatable, dimension(:,:) :: lambda
   real, allocatable, dimension(:) :: s_lambda
   real, allocatable, dimension(:,:) :: w_lambda
   !
-  real, allocatable, dimension(:,:,:,:) :: w_p
+  real, allocatable, dimension(:,:,:) :: w_p
   !
   real, allocatable, dimension(:) :: lambda_tp
   real, allocatable, dimension(:) :: lambda_max

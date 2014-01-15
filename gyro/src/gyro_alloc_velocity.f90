@@ -39,7 +39,7 @@ subroutine gyro_alloc_velocity(flag)
      allocate(lambda_max(n_x))
 
      ! Weights
-     allocate(w_p(n_energy,n_x,n_lambda,n_kinetic))
+     allocate(w_p(n_energy,n_x,n_lambda))
 
      allocate(class(n_lambda))
 
