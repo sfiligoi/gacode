@@ -1,16 +1,13 @@
 #---------------------------------------------------
-# Cray XC30 (edison.nersc.gov) [Intel ENV]
+# Intel MIC (bababge.nersc.gov) 
 #
-# HOPPER SYSTEM INFO:
-# - Cray XC30
-# - 10,624 processor cores
-# - 664 compute nodes
-# - 2 8-core Intel "Sandy Bridge" (2.6GHz) per node 
-#   
+# Babbage SYSTEM INFO:
+# - Intel MIC
+# - 2 MICs/node, with 60 cores/mic.
 #---------------------------------------------------
 
 #  FIXED Hardware parameters
-CORES_PER_NODE=16
+CORES_PER_NODE=120
 NUMAS_PER_NODE=2
 
 # Compilers and flags
