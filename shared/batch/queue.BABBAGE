@@ -75,6 +75,7 @@ echo "#PBS -l walltime=$limit" >> $bfile
 echo "#PBS -l nodes=$nodes_requested" >> $bfile
 echo " " >> $bfile
 
+echo "cd \$PBS_O_WORKDIR" >> $bfile 
 echo "get_micfile" >> $bfile
 
 gyro_opts="-e $sim -n $nmpi -nomp $nomp -numa $numa -mpinuma $mpinuma -p $simpath"
