@@ -25,7 +25,7 @@ mpinuma=${7}
 
 echo "------------------------------------"
 echo "Intel MIC (babbage) [120 cores/node]"
-echo" INFO: numa=2, max(mpipnuma)=60
+echo" INFO: numa=2, max(mpipnuma)=60"
 echo "------------------------------------"
 echo
 echo "Cores requested (mppwidth)   : $cores_requested"
