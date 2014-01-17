@@ -27,5 +27,5 @@ export OMP_NUM_THREADS=$nomp
 export KMP_AFFINITY=balanced
 export I_MPI_MPIRUN_CLEANUP=1
 
-echo "> mpirun.mic -n $nmpi -hostfile micfile.$PBS_JOBID -ppn $mpinuma $exe"
+echo "> mpirun.mic -n $nmpi -hostfile micfile.$PBS_JOBID -ppn $mpinuma $exec"
 mpirun.mic -n $nmpi -hostfile micfile.$PBS_JOBID -ppn $mpinuma $exec
