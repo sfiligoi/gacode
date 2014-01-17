@@ -61,3 +61,4 @@ fi
 # Final core counts
 cores_requested=$(($nodes*$CORES_PER_NODE))
 cores_used=$(($nomp*$nmpi))
+nodes_requested=$nodes
