@@ -7,7 +7,6 @@ all:
 	cd EXPRO ; make "OPT=${OPT}"
 	cd profiles_gen ; make "OPT=${OPT}"
 	cd nclass ; make "OPT=${OPT}"
-	cd vshdf5 ; make "OPT=${OPT}"
 
 clean:
 	cd math ; make clean
@@ -17,4 +16,3 @@ clean:
 	cd profiles_gen ; make clean
 	cd nclass ; make clean
 	cd python ; rm -f *.pyc	
-	cd vshdf5 ; make clean

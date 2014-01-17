@@ -7,19 +7,11 @@
 !  together the full ballooning mode f_*(theta_*) from 
 !  these p-harmonics, and then writes to disk.
 !------------------------------------------------------
-#ifndef HAVE_HDF5
-  subroutine gyro_ballooning_mode(datafile,io,index,is_in)
-#else
-  subroutine gyro_ballooning_mode(datafile,io,index,is_in, &
-          modeName,dumpTGid,h5in,h5err)
-#endif
+
+subroutine gyro_ballooning_mode(datafile,io,index,is_in)
 
   use gyro_globals
   use math_constants
-#ifdef HAVE_HDF5
-  use hdf5_api
-#endif
-
 
   !--------------------------------------------------
   implicit none
@@ -42,14 +34,6 @@
   complex, dimension(n_theta_plot,n_x) :: fplot
   complex, allocatable                 :: amp(:)
   complex :: dummy
-
-#ifdef HAVE_HDF5
-  character (len=*)         :: modeName
-  integer(HID_T)            :: dumpTGid
-  type(hdf5InOpts)          :: h5in
-  type(hdf5ErrorType)       :: h5err 
-#endif
-
   !--------------------------------------------------
 
   !------------------------------------------------------
@@ -77,8 +61,8 @@
   select case (io_control)
 
   case(0)
-  
-  return
+
+     return
 
   case(1)
 
@@ -162,24 +146,16 @@
 
               amp(ampCount) = f_bar(p,j_int)*phase(in_1,ir_norm)**(real(p)/real(m0))
               !write(io,fmtstr2) f_bar(p,j_int)*phase(in_1,ir_norm)**(real(p)/real(m0))
-    
+
               if (io_method < 3) then
-                write(io,fmtstr2) amp(ampCount)
+                 write(io,fmtstr2) amp(ampCount)
               endif
-            ampCount=ampCount+1
+              ampCount=ampCount+1
            enddo
         enddo
      enddo
-#ifdef HAVE_HDF5
-    if(io_method >1 ) then
-       call add_h5(dumpTGid,TRIM(modeName)//"_real",REAL(amp),h5in,data_step,h5err) 
-      if(h5err%errBool) write(*,*) h5err%errorMsg
-       call add_h5(dumpTGid,TRIM(modeName)//"_imag",AIMAG(amp),h5in,data_step,h5err) 
-       if(h5err%errBool) write(*,*) h5err%errorMsg
-    endif
-#endif
      deallocate(amp)
-     
+
      !-------------------------------------------------------
 
   case(3)

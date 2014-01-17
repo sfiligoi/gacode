@@ -43,15 +43,6 @@ subroutine gyro_do
      endif
   endif
 
-  !check if hdf5 methods are used but no hdf5 linked
-#ifndef HAVE_HDF5
-  if(io_method > 1) then
-     gyro_exit_status = 1
-     gyro_exit_message = 'This GYRO was not built with HDF5.  Please use io_method =1'
-     return
-  endif
-#endif
-
   ! Dump interface variables to record exact state of GYRO.
   call map_global2interface
   call interfacelocaldump
@@ -292,20 +283,10 @@ subroutine gyro_do
   !---------------------------------------------------------------
   ! I/O control for time-independent initial data
   !
-  !  if (io_method < 3) then
   call gyro_write_initdata(&
        trim(path)//'out.gyro.profile',&
        trim(path)//'out.gyro.units',&
-       trim(path)//'out.gyro.geometry_arrays',1, &
-       trim(path)//'out.gyro.initdata.h5')
-
-  ! write hdf5 grid file 
-#ifdef HAVE_HDF5
-  if (i_proc ==0 .and. alltime_index ==0 .and.  io_method > 1) then 
-     call hdf5_write_coords 
-  endif
-#endif
-
+       trim(path)//'out.gyro.geometry_arrays',1)
   !
   ! Close geometry (GEO) library
   call GEO_alloc(0)
@@ -330,12 +311,7 @@ subroutine gyro_do
      io_control = output_flag*3
   endif
   if (gkeigen_j_set == 0) then
-     if (io_method < 3 .and. io_method > 0) call gyro_write_timedata
-#ifdef HAVE_HDF5
-     if (io_method > 1) then
-        if (time_skip_wedge > 0) call gyro_write_timedata_wedge_hdf5
-     endif
-#endif
+     call gyro_write_timedata
   endif
 
   !-------------------------------------------------
@@ -345,16 +321,9 @@ subroutine gyro_do
   if (restart_method /= 1) then
      ! Write to output files.
      io_control = output_flag*2
-     hdf5_skip=.true.
      if (gkeigen_j_set == 0) then
-        if (io_method < 3.and. io_method > 0) call gyro_write_timedata
-#ifdef HAVE_HDF5
-        if (io_method > 1 ) then
-           if (time_skip_wedge > 0) call gyro_write_timedata_wedge_hdf5
-        endif
-#endif
+        call gyro_write_timedata
      endif
-     hdf5_skip=.false.
   endif
   !--------------------------------------------
 

@@ -147,16 +147,10 @@ subroutine gyro_fulladvance
      ! Main data I/O handler
 
      io_control = 2*output_flag
-        
-      if (modulo(step,time_skip) == 0) then
-         if (io_method < 3 .and. io_method > 0) call gyro_write_timedata
-      endif
 
-#ifdef HAVE_HDF5
-      if (wedge_flag == 1) then
-            if (io_method > 1) call gyro_write_timedata_wedge_hdf5
-      endif
-#endif      
+     if (modulo(step,time_skip) == 0) then
+        if (io_method < 3 .and. io_method > 0) call gyro_write_timedata
+     endif
 
      !--------------------------------------------------
      ! Update diffusivity and flux time-record for TGYRO 

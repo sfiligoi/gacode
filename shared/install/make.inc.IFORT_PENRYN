@@ -20,9 +20,3 @@ NETCDF_INC=/usr/local/include
 # Archive 
 
 ARCH = xiar cr
-
-# HDF5
-HROOT=$(HOME)/SOFTWARE/hdf5-1.8.7/hdf5
-HDF5_LIBS = -L$(HROOT)/lib -lhdf5_fortran -lhdf5 -lz
-HDF5_INC = -I $(HROOT)/include/
-VSHDF5_MAKECMD=vshdf5
