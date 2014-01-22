@@ -5,7 +5,7 @@
 # - Cray XC30
 # - 10,624 processor cores
 # - 664 compute nodes
-# - 2 8-core Intel "Sandy Bridge" (2.6GHz) per node 
+# - 2 12-core Intel "Ivy Bridge" (2.4GHz) per node 
 #---------------------------------------------------
 
 # FIXED Hardware parameters
