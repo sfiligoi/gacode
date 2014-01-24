@@ -294,11 +294,6 @@ subroutine neo_check
         endif
      endif
 
-  case(3)
-     if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,30) 'profile_model','GLOBAL PROFILE TEST'
-     end if
-
   case default
 
      call neo_error('ERROR: (NEO) invalid profile_model')
