@@ -13,28 +13,111 @@ import numpy as np
 
 def extract0d(infile):
 
-    p=0
-    for line in open(infile,'r').readlines():
-        x = line.split()
-        p = p+1
-        if p == 1:
-            tok    = x[0]
-            update = x[1]
-            date   = x[2]
-            shot   = x[3]
-            time   = x[4]
-        if p == 2:
-            phase  = x[0]
-        if p == 14:
-            z1 = x[5]
-            m1 = x[6]
-        if p == 15:
-            z2 = x[0]
-            m2 = x[1]
-            z3 = x[2]
-            m3 = x[3]
-            z4 = x[4]
-            m4 = x[5]
+    # Test for csv or block format
+    f = open(infile,'r')  
+    line = f.readline()
+    if line[0] == 'A':
+        csv = 1
+    else:
+        csv = 0
+ 
+
+    if csv == 1:
+        
+        print 'INFO: (ufile_tool) Detected CSV format for '+infile
+
+        # CSV format for 0d file.
+        data = np.loadtxt(infile,delimiter=',',dtype=str)
+
+        tag = data[0]
+        val = data[1]
+
+        n_tag = len(tag)
+
+        for i in range(n_tag):
+            if tag[i] == 'TOK':
+                tok = val[i]
+            if tag[i] == 'UPDATE':
+                update = val[i]
+            if tag[i] == 'DATE':
+                date = val[i]
+            if tag[i] == 'SHOT':
+                shot = val[i]
+            if tag[i] == 'TIME':
+                time = val[i]
+            if tag[i] == 'PHASE':
+                phase = val[i]
+            if tag[i] == 'NM1Z':
+                z1 = val[i]
+            if tag[i] == 'NM1A':
+                m1 = val[i]
+            if tag[i] == 'NM2Z':
+                z2 = val[i]
+            if tag[i] == 'NM2A':
+                m2 = val[i]
+            if tag[i] == 'NM3Z':
+                z3 = val[i]
+            if tag[i] == 'NM3A':
+                m3 = val[i]
+            if tag[i] == 'NM4Z':
+                z4 = val[i]
+            if tag[i] == 'NM4A':
+                m4 = val[i]
+            if tag[i] == 'NM5Z':
+                z5 = val[i]
+            if tag[i] == 'NM5A':
+                m5 = val[i]
+            if tag[i] == 'NFAST1Z':
+                zf1 = val[i]
+            if tag[i] == 'NFAST1A':
+                mf1 = val[i]
+            if tag[i] == 'NFAST2Z':
+                zf2 = val[i]
+            if tag[i] == 'NFAST2A':
+                mf2 = val[i]
+            if tag[i] == 'NFAST3Z':
+                zf3 = val[i]
+            if tag[i] == 'NFAST3A':
+                mf3 = val[i]
+
+    else:
+
+        print 'INFO: (ufile_tool) Detected block format for '+infile
+
+        # Block format for 0d file
+        p=0
+        for line in open(infile,'r').readlines():
+            x = line.split()
+            p = p+1
+            if p == 1:
+                tok    = x[0]
+                update = x[1]
+                date   = x[2]
+                shot   = x[3]
+                time   = x[4]
+            if p == 2:
+                phase  = x[0]
+            if p == 14:
+                z1 = x[5]
+                m1 = x[6]
+            if p == 15:
+                z2 = x[0]
+                m2 = x[1]
+                z3 = x[2]
+                m3 = x[3]
+                z4 = x[4]
+                m4 = x[5]
+                z5 = x[5]
+            if p == 16:
+                m5 = x[0]
+                zf1 = x[1]
+                mf1 = x[2]
+                zf2 = x[3]
+                mf2 = x[4]
+                zf3 = x[5]
+                mf3 = x[6]
+
+    # Now write the tags to "out.com"
 
     f=open('out.com','w')
     f.write(infile.split('_0d')[0]+'\n')
@@ -50,6 +133,16 @@ def extract0d(infile):
     f.write(m2+'\n')
     f.write(z3+'\n')
     f.write(m3+'\n')
+    f.write(z4+'\n')
+    f.write(m4+'\n')
+    f.write(z5+'\n')
+    f.write(m5+'\n')
+    f.write(zf1+'\n')
+    f.write(mf1+'\n')
+    f.write(zf2+'\n')
+    f.write(mf2+'\n')
+    f.write(zf3+'\n')
+    f.write(mf3+'\n')
     f.close()
 
 def extract1d(infile,t0):

@@ -12,7 +12,7 @@ subroutine prgen_read_ufile
 
   implicit none
 
-  integer :: i
+  integer :: i,ix,j
   real :: chi_ta
   real, dimension(:), allocatable :: chi_t
   character(len=16) :: a
@@ -35,12 +35,10 @@ subroutine prgen_read_ufile
   read(1,*) ufile_shot
   read(1,*) ufile_time
   read(1,*) a
-  read(1,*) ufile_z(1)
-  read(1,*) ufile_m(1)
-  read(1,*) ufile_z(2)
-  read(1,*) ufile_m(2)
-  read(1,*) ufile_z(3)
-  read(1,*) ufile_m(3)
+  do i=1,8
+     read(1,*) ufile_z(i)
+     read(1,*) ufile_m(i)
+  enddo
   close(1)
 
   nx = ufile_nx
@@ -54,10 +52,10 @@ subroutine prgen_read_ufile
   do i=1,nx
      rho(i) = (i-1)/(nx-1.0)
   enddo
- 
+
   call ufile_mapper('out.NE.ave',rho,ufile_ne,nx,1)
   call ufile_mapper('out.TE.ave',rho,ufile_te,nx,1)
-  call ufile_mapper('out.TI.ave',rho,ufile_ti,nx,1)
+  call ufile_mapper('out.TI.ave',rho,ufile_ti(:,1),nx,1)
   call ufile_mapper('out.ZEFFR.ave',rho,ufile_zeff,nx,0)
   call ufile_mapper('out.RMAJOR.ave',rho,rmaj,nx,0)
   call ufile_mapper('out.RMINOR.ave',rho,rmin,nx,0)
@@ -67,9 +65,11 @@ subroutine prgen_read_ufile
   call ufile_mapper('out.KAPPAR.ave',rho,kappa,nx,0)
   call ufile_mapper('out.DELTAR.ave',rho,delta,nx,0)
   call ufile_mapper('out.PRES.ave',rho,ufile_pres,nx,1)
-  call ufile_mapper('out.VROT.ave',rho,ufile_vrot,nx,1)
-  call ufile_mapper('out.VROTM.ave',rho,ufile_vrotm,nx,1)
+  call ufile_mapper('out.VROT.ave',rho,ufile_vrot,nx,0)
+  call ufile_mapper('out.VROTM.ave',rho,ufile_vrotm,nx,0)
   call ufile_mapper('out.VOLUME.ave',rho,ufile_volume,nx,1)
+  call ufile_mapper('out.QFUSI.ave',rho,ufile_qfusi,nx,0)
+  call ufile_mapper('out.QFUSE.ave',rho,ufile_qfuse,nx,0)
   call ufile_mapper('out.QNBII.ave',rho,ufile_qnbii,nx,0)
   call ufile_mapper('out.QNBIE.ave',rho,ufile_qnbie,nx,0)
   call ufile_mapper('out.QICRHI.ave',rho,ufile_qicrhi,nx,0)
@@ -78,17 +78,93 @@ subroutine prgen_read_ufile
   call ufile_mapper('out.QRAD.ave',rho,ufile_qrad,nx,0)
   call ufile_mapper('out.QECHE.ave',rho,ufile_qeche,nx,0)
   call ufile_mapper('out.QECHI.ave',rho,ufile_qechi,nx,0)
+  call ufile_mapper('out.QLHE.ave',rho,ufile_qlhe,nx,0)
+  call ufile_mapper('out.QLHI.ave',rho,ufile_qlhi,nx,0)
   call ufile_mapper('out.QOHM.ave',rho,ufile_qohm,nx,0)
   call ufile_mapper('out.QWALLI.ave',rho,ufile_qwalli,nx,0)
   call ufile_mapper('out.QWALLE.ave',rho,ufile_qwalle,nx,0)
+  call ufile_mapper('out.TORQ.ave',rho,ufile_torq,nx,0)
+  call ufile_mapper('out.SWALL.ave',rho,ufile_swall,nx,0)
+  call ufile_mapper('out.SNBII.ave',rho,ufile_snbii,nx,0)
+  call ufile_mapper('out.SNBIE.ave',rho,ufile_snbie,nx,0)
 
-  call ufile_mapper('out.NM1.ave',rho,ufile_nm1,nx,1)
-  ufile_nion=1
-  call ufile_mapper('out.NM2.ave',rho,ufile_nm2,nx,1)
-  if (ufile_nm2(1) > 0.0) ufile_nion=2 
-  call ufile_mapper('out.NM3.ave',rho,ufile_nm3,nx,1)
-  if (ufile_nm3(1) > 0.0) ufile_nion=3
-  
+  i=0
+
+  if (ufile_m(1) > 0.0) then
+     i = i+1
+     call ufile_mapper('out.NM1.ave',rho,ufile_ni(:,i),nx,1)
+     ufile_type(i)='therm'
+  endif
+  if (ufile_m(2) > 0.0) then
+     i = i+1
+     call ufile_mapper('out.NM2.ave',rho,ufile_ni(:,i),nx,1)
+     ufile_type(i)='therm'
+  endif
+  if (ufile_m(3) > 0.0) then
+     i = i+1
+     call ufile_mapper('out.NM3.ave',rho,ufile_ni(:,i),nx,1)
+     ufile_type(i)='therm'
+  endif
+  if (ufile_m(4) > 0.0) then
+     i = i+1
+     call ufile_mapper('out.NM4.ave',rho,ufile_ni(:,i),nx,1)
+     ufile_type(i)='therm'
+  endif
+  if (ufile_m(5) > 0.0) then
+     i = i+1
+     call ufile_mapper('out.NM5.ave',rho,ufile_ni(:,i),nx,1)
+     ufile_type(i)='therm'
+  endif
+  if (ufile_m(6) > 0.0) then
+     i = i+1
+     call ufile_mapper('out.NFAST1.ave',rho,ufile_ni(:,i),nx,1)
+     ufile_type(i)='fast'
+  endif
+  if (ufile_m(7) > 0.0) then
+     i = i+1
+     call ufile_mapper('out.NFAST2.ave',rho,ufile_ni(:,i),nx,1)
+     ufile_type(i)='fast'
+  endif
+  if (ufile_m(8) > 0.0) then
+     i = i+1
+     call ufile_mapper('out.NFAST3.ave',rho,ufile_ni(:,i),nx,1)
+     ufile_type(i)='fast'
+  endif
+
+  ufile_nion=i
+
+  ! Now compress m/z
+  i=1
+  do ix=1,8
+     if (ufile_m(i) == 0) then
+        do j=i+1,8
+           ufile_m(j-1) = ufile_m(j)
+           ufile_z(j-1) = ufile_z(j)
+        enddo
+     else
+        i = i+1
+     endif
+  enddo
+
+  ! Set ion temperatures
+  do i=2,ufile_nion
+     if (ufile_type(i) == 'therm') then
+        ufile_ti(:,i) = ufile_ti(:,1) 
+     else
+        ufile_ti(:,i) = 5*ufile_ti(:,1)
+        print '(a)','WARNING: (prgen_read_ufile) Setting bogus fast-ion temperature.'
+     endif
+  enddo
+
+  ! Compute the quasineutrality error with max 5 ions:
+
+  quasi_err = 0.0
+  ix = min(ufile_nion,5)
+  do i=1,nx
+     quasi_err = quasi_err+sum(ufile_ni(i,1:ix)*ufile_z(1:ix))
+  enddo
+  quasi_err = abs(quasi_err/sum(ufile_ne(:))-1.0)
+
   !------------------------------------------------------------------------
   ! Use classic parameterization chi_t = B_ref/2 rho^2
   ! where chi_t is toroidal flux over 2pi.

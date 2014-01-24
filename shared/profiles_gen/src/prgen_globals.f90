@@ -79,6 +79,7 @@ module prgen_globals
   real, dimension(:,:), allocatable :: vec2
 
   character (len=70), dimension(5) :: ion_name
+  character (len=3), dimension(100) :: ion_lookup
 
   real :: quasi_err
   real :: pow_e_err
@@ -304,17 +305,16 @@ module prgen_globals
   integer :: ufile_nion
   real :: ufile_bref
   real :: ufile_arho
-  real :: ufile_z(4)
-  real :: ufile_m(4)
+  real :: ufile_z(8)
+  real :: ufile_m(8)
   character (len=10) :: ufile_tok
   character (len=40) :: ufile_shot
   character (len=10) :: ufile_time
+  character (len=5), dimension(8)  :: ufile_type
   real, dimension(:), allocatable :: ufile_ne
-  real, dimension(:), allocatable :: ufile_nm1
-  real, dimension(:), allocatable :: ufile_nm2
-  real, dimension(:), allocatable :: ufile_nm3
+  real, dimension(:,:), allocatable :: ufile_ni
   real, dimension(:), allocatable :: ufile_te
-  real, dimension(:), allocatable :: ufile_ti
+  real, dimension(:,:), allocatable :: ufile_ti
   real, dimension(:), allocatable :: ufile_zeff
   real, dimension(:), allocatable :: ufile_pres
   real, dimension(:), allocatable :: ufile_vrot
@@ -331,6 +331,15 @@ module prgen_globals
   real, dimension(:), allocatable :: ufile_qohm
   real, dimension(:), allocatable :: ufile_qwalli
   real, dimension(:), allocatable :: ufile_qwalle
+
+  real, dimension(:), allocatable :: ufile_qfuse
+  real, dimension(:), allocatable :: ufile_qfusi
+  real, dimension(:), allocatable :: ufile_qlhe
+  real, dimension(:), allocatable :: ufile_qlhi
+  real, dimension(:), allocatable :: ufile_snbie
+  real, dimension(:), allocatable :: ufile_snbii
+  real, dimension(:), allocatable :: ufile_swall
+  real, dimension(:), allocatable :: ufile_torq
   !---------------------------------------------------------
 
 end module prgen_globals

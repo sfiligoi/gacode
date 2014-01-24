@@ -83,11 +83,15 @@ subroutine prgen_write
      write(1,20) '#                 IONS :  Name       Z   Mass'
      do i=1,ufile_nion
         ip = reorder_vec(i)
-        write(1,'(a,a,t36,i3,t43,i3)') '#                         ',&
-             'name',&
+        write(1,'(a,a,t36,i3,t43,i3,t48,"[",a,"]")') '#                         ',&
+             ion_lookup(nint(ufile_m(ip))),&
              nint(ufile_z(ip)),&
-             nint(ufile_m(ip))
+             nint(ufile_m(ip)),&
+             ufile_type(ip)
      enddo
+
+     write(1,20) '#'
+     write(1,'(a,f6.2)') '#       Quasineutrality error (%) ',quasi_err*100.0
 
   case (7)
 

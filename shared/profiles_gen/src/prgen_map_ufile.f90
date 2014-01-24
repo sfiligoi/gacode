@@ -78,13 +78,10 @@ subroutine prgen_map_ufile
   ! Construct ion densities and temperatures with reordering
   ! in general case.  Use vphi and vpol as temporary arrays.
   !
-  vec(31,:) = ufile_nm1(:)*1e-19
-  if (ufile_nion > 1) vec(32,:) = ufile_nm2(:)*1e-19
-  if (ufile_nion > 2) vec(33,:) = ufile_nm3(:)*1e-19
-
-  vec(36,:) = ufile_ti(:)*1e-3
-  if (ufile_nion > 1) vec(37,:) = ufile_ti(:)*1e-3
-  if (ufile_nion > 2) vec(38,:) = ufile_ti(:)*1e-3
+  do i=1,ufile_nion
+     vec(30+i,:) = ufile_ni(:,i)*1e-19
+     vec(35+i,:) = ufile_ti(:,i)*1e-3
+  enddo
 
   ! reorder
   do i=1,5 
