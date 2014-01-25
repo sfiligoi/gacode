@@ -50,6 +50,13 @@ module neo_globals
   real :: dlntdre_ade_in
   real :: dlnndre_ade_in
   !
+  integer :: aniso_model
+  integer :: z_aniso
+  real    :: mass_aniso
+  real    :: dens_aniso
+  real    :: temp_para_aniso
+  real    :: temp_perp_aniso
+  !
   integer, dimension(6) :: z_in 
   real, dimension(6) :: mass_in
   real, dimension(6) :: dens_in

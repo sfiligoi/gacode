@@ -25,6 +25,7 @@ module neo_equilibrium
   real                            :: gradr_th0   ! | grad r| at theta=0
   real                            :: Btor_th0    ! b_t/Bunit at theta=0
   real                            :: Bpol_th0    ! b_t/Bunit at theta=0
+  real                            :: Bmag_th0    ! B/Bunit   at theta=0
   real                            :: ftrap       ! frac of trapped particles
   real, dimension(:), allocatable :: theta_nc    ! NCLASS theta grid
 
@@ -180,6 +181,7 @@ contains
        gradr_th0       = GEO_grad_r
        Btor_th0        = GEO_bt
        Bpol_th0        = GEO_bp
+       Bmag_th0        = GEO_b
 
     else
 
@@ -204,6 +206,7 @@ contains
              ! large aspect ratio geometry
              Btor_th0 = 1.0 - (r(ir)/rmaj(ir))
              Bpol_th0 = r(ir) / (q(ir)*rmaj(ir)) * (1.0 - (r(ir)/rmaj(ir)))
+             Bmag_th0 = (1.0 - (r(ir)/rmaj(ir))) * sign_bunit
              Bmag(it) = (1.0 - (r(ir)/rmaj(ir)) * cos(theta(it))) * sign_bunit
              Btor(it) = 1.0 - (r(ir)/rmaj(ir)) * cos(theta(it))
              Bpol(it) = r(ir) / (q(ir)*rmaj(ir)) &
@@ -220,6 +223,8 @@ contains
              Btor_th0 = 1.0 / (1.0 + (r(ir)/rmaj(ir)))
              Bpol_th0 = r(ir) / (q(ir)*rmaj(ir)) &
                   / (1.0 + (r(ir)/rmaj(ir)))
+             Bmag_th0 = (1.0 / (1.0 + (r(ir)/rmaj(ir)))) &
+                  * sign_bunit
              Bmag(it) = (1.0 / (1.0 + (r(ir)/rmaj(ir)) * cos(theta(it)))) &
                   * sign_bunit
              Btor(it) = 1.0 / (1.0 + (r(ir)/rmaj(ir)) * cos(theta(it)))

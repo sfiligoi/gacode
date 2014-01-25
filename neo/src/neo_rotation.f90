@@ -71,7 +71,7 @@ module neo_rotation
       integer, intent (in) :: ir
       integer, parameter :: nmax = 200
       integer :: it, is, jt, id, n
-      real :: x, x0, sum_zn, dsum_zn, fac
+      real :: x, x0, sum_zn, dsum_zn, fac, eta
       
       if(rotation_model == 1 .or. spitzer_model==1) then
          do it=1, n_theta
@@ -111,7 +111,7 @@ module neo_rotation
                dsum_zn = 0.0
                do is=1, n_species
                   fac = z(is) * dens(is,ir) * &
-                       exp(  omega_rot(ir)**2 * 0.5 / vth(is,ir)**2 &
+                       exp(omega_rot(ir)**2 * 0.5 / vth(is,ir)**2 &
                        * (bigR(it)**2 - bigR_th0**2) &
                        - z(is) / temp(is,ir) * x)
                   sum_zn  = sum_zn  + fac
@@ -122,6 +122,18 @@ module neo_rotation
                   fac = -ne_ade(ir) * exp(1.0/te_ade(ir) * x)
                   sum_zn  = sum_zn  + fac
                   dsum_zn = dsum_zn + 1.0 / te_ade(ir) * fac
+               endif
+
+               if(aniso_model == 2) then
+                  eta = temp_perp_aniso/temp_para_aniso - 1.0
+                  fac = z_aniso * dens_aniso * &
+                       exp(omega_rot(ir)**2 * 0.5 * mass_aniso &
+                       / temp_para_aniso &
+                       * (bigR(it)**2 - bigR_th0**2) &
+                       - z_aniso / temp_para_aniso * x) &
+                       * (Bmag(it)/Bmag_th0)**eta
+                  sum_zn  = sum_zn  + fac
+                  dsum_zn = dsum_zn - z(is) / temp(is,ir) * fac
                endif
 
                x0 = x

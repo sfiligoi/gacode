@@ -31,6 +31,13 @@ subroutine neo_read_input
   read(1,*) dlntdre_ade_in
   read(1,*) dlnndre_ade_in
 
+  read(1,*) aniso_model
+  read(1,*) z_aniso
+  read(1,*) mass_aniso
+  read(1,*) dens_aniso
+  read(1,*) temp_para_aniso
+  read(1,*) temp_perp_aniso
+
   read(1,*) rotation_model
   read(1,*) omega_rot_in
   read(1,*) omega_rot_deriv_in
