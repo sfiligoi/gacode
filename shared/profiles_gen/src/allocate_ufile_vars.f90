@@ -5,11 +5,9 @@ subroutine allocate_ufile_vars
   implicit none
 
   allocate(ufile_ne(nx))
-  allocate(ufile_nm1(nx))
-  allocate(ufile_nm2(nx))
-  allocate(ufile_nm3(nx))
+  allocate(ufile_ni(nx,5))
   allocate(ufile_te(nx))
-  allocate(ufile_ti(nx))
+  allocate(ufile_ti(nx,5))
   allocate(ufile_zeff(nx))
   allocate(ufile_pres(nx))
   allocate(ufile_vrot(nx))
@@ -26,5 +24,14 @@ subroutine allocate_ufile_vars
   allocate(ufile_qohm(nx))
   allocate(ufile_qwalli(nx))
   allocate(ufile_qwalle(nx))
+
+  allocate(ufile_qfuse(nx))
+  allocate(ufile_qfusi(nx))
+  allocate(ufile_qlhe(nx))
+  allocate(ufile_qlhi(nx))
+  allocate(ufile_snbie(nx))
+  allocate(ufile_snbii(nx))
+  allocate(ufile_swall(nx))
+  allocate(ufile_torq(nx))
 
 end subroutine allocate_ufile_vars
