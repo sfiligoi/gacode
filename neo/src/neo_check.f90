@@ -384,6 +384,26 @@ subroutine neo_check
      return
   end select
 
+  !-----------------------------------------------------------
+  ! Anisotropic species checks
+  !
+  select case (aniso_model)     
+  case (1)
+  case (2)
+     if(profile_model == 2) then
+        call neo_error('ERROR: (NEO) aniso_model not available with global profiles')
+     endif
+     if(rotation_model == 1) then
+        call neo_error('ERROR: (NEO) aniso_model requires rotation_method=2')
+     endif
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,30) 'aniso model','ANISOTROPIC SPECIES INCLUDED'
+     end if
+  case default
+     call neo_error('ERROR: (NEO) invalid aniso_model')
+     return
+  end select
+
   !------------------------------------------------------------
 
   if (silent_flag == 0 .and. i_proc == 0) then
@@ -436,6 +456,15 @@ subroutine neo_check
            write(io_neoout,20) 'nu',nu(is,ir)
         enddo
      enddo
+
+     if (aniso_model == 2) then
+        write(io_neoout,*) 
+        write(io_neoout,10) 'Z_aniso',z_aniso
+        write(io_neoout,20) 'dens',dens_aniso
+        write(io_neoout,20) 'temp_parallel',temp_para_aniso
+        write(io_neoout,20) 'temp_perp',temp_perp_aniso
+        write(io_neoout,20) 'mass',mass_aniso
+     endif
 
      write(io_neoout,*)
 
