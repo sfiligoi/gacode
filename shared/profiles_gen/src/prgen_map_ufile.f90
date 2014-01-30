@@ -16,36 +16,61 @@ subroutine prgen_map_ufile
   implicit none
   real, dimension(:), allocatable :: powd_i
   real, dimension(:), allocatable :: powd_e
+  real, dimension(:), allocatable :: powd_i_aux
+  real, dimension(:), allocatable :: powd_e_aux
+  real, dimension(:), allocatable :: powd_i_fus
+  real, dimension(:), allocatable :: powd_e_fus
+  real, dimension(:), allocatable :: powd_e_rad
 
   integer :: i,j
 
-
   allocate(powd_i(nx))
   allocate(powd_e(nx))
+  allocate(powd_i_aux(nx))
+  allocate(powd_e_aux(nx))
+  allocate(powd_i_fus(nx))
+  allocate(powd_e_fus(nx))
+  allocate(powd_e_rad(nx))
 
   print '(a,i2)','INFO: (prgen) Number of ions: ',ufile_nion
 
-  powd_i(:) = ufile_qnbii(:) &
+  powd_i_aux(:) = ufile_qnbii(:) &
        +ufile_qicrhi(:) &
-       +ufile_qei(:) &
        +ufile_qechi(:) &
+       +ufile_qlhi(:) 
+
+  powd_e_aux(:) = ufile_qnbie(:) &
+       +ufile_qicrhe(:)  &
+       +ufile_qeche(:) &
+       +ufile_qlhe(:) &
+       +ufile_qohm(:) 
+
+  powd_e_rad(:) = ufile_qrad(:)
+
+  powd_e_fus(:) = ufile_qfuse(:)
+  powd_i_fus(:) = ufile_qfusi(:)
+
+  powd_i(:) = powd_i_aux(:) &
+       +ufile_qei(:) &
        -ufile_qwalli(:)
 
-  print '(a)','INFO: (prgen) i-power: QICHRI+QEI+QECHI+QWALLI'
+  print '(a)','INFO: (prgen) i-power: QNBII+QICHRI+QLHI+QEI+QECHI-QWALLI'
 
-  powd_e(:) = ufile_qnbie(:) &
-       +ufile_qicrhe(:) &
+  powd_e(:) = powd_e_aux(:) &
        -ufile_qei(:) &
-       +ufile_qrad(:) &
-       +ufile_qeche(:) &
-       +ufile_qohm(:) &
+       -ufile_qrad(:) &
        -ufile_qwalle(:) 
 
-  print '(a)','INFO: (prgen) e-power: QICHRE-QEI+QRAD+QECHE+QOHM-QWALLE'
+  print '(a)','INFO: (prgen) e-power: QNBIE+QICHRE+QLHE-QEI-QRAD+QECHE+QOHM-QWALLE'
 
   ! Convert W to MW (1e-6):
   call ufile_volint(rho,1e-6*powd_i,pow_i,ufile_volume,nx)
   call ufile_volint(rho,1e-6*powd_e,pow_e,ufile_volume,nx)
+  call ufile_volint(rho,1e-6*powd_i_aux,pow_i_aux,ufile_volume,nx)
+  call ufile_volint(rho,1e-6*powd_e_aux,pow_e_aux,ufile_volume,nx)
+  call ufile_volint(rho,1e-6*powd_i_fus,pow_i_fus,ufile_volume,nx)
+  call ufile_volint(rho,1e-6*powd_e_fus,pow_e_fus,ufile_volume,nx)
+  call ufile_volint(rho,1e-6*powd_e_rad,pow_e_rad,ufile_volume,nx)
   call ufile_volint(rho,1e-6*ufile_qei,pow_ei,ufile_volume,nx)
 
   !---------------------------------------------------------
@@ -103,6 +128,18 @@ subroutine prgen_map_ufile
 
   ! vpol
   vec(36:40,:) = 0.0
+
+  ! Additional powers (fusion and radiation)
+  ! * for iterdb, put all radiated power in pow_e_line
+  vec(41,:) = pow_e_fus(:)
+  vec(42,:) = pow_i_fus(:)
+  vec(43,:) = 0.0
+  vec(44,:) = 0.0
+  vec(45,:) = pow_e_rad(:)
+
+  ! Additional powers (external heating)
+  vec(46,:) = pow_e_aux(:)
+  vec(47,:) = pow_i_aux(:)
 
 end subroutine prgen_map_ufile
 
