@@ -88,6 +88,17 @@ class profiles_genData:
         self.data['vpol_4'] = data[7*n:8*n,3]
         self.data['vpol_5'] = data[7*n:8*n,4]
  
+        if n > 40:    
+            self.data['pow_e_fus'] = data[8*n:9*n,0]
+            self.data['pow_i_fus'] = data[8*n:9*n,1]
+            self.data['pow_e_sync'] = data[8*n:9*n,2]
+            self.data['pow_e_brem'] = data[8*n:9*n,3]
+            self.data['pow_e_line'] = data[8*n:9*n,4]
+ 
+            self.data['pow_e_aux'] = data[9*n:10*n,0]
+            self.data['pow_i_aux'] = data[9*n:10*n,1]
+ 
+
         # OPTIONAL: Read input.profiles.extra if it exists
         try:
             data = np.loadtxt(infile+'.extra',comments='#')

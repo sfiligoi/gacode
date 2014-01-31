@@ -29,6 +29,8 @@ then
    echo
    echo "          -loc <Legend location: 1,2,3,4>"
    echo
+   echo "          -title <Optional title for top of plot>"  
+   echo
    echo " PROFILE PLOTTING MODE:"
    echo
    echo "          -options"
@@ -79,6 +81,7 @@ PLOTS=Te,Ti_1
 INTERACTIVE=
 FTYPE=screen
 LOC=1
+TOPTITLE=null
 
 # Plot options
 OPTIONS_FLAG=0
@@ -116,6 +119,8 @@ while [ $# -gt 0 ] ; do
 
   -t) shift ; T=$1 ;;
 
+  -title) shift ; TOPTITLE=$1 ;;
+
   -interactive) INTERACTIVE=-i ;;
 
    *) echo "ERROR: incorrect syntax." ; exit 1 ;;
@@ -152,7 +157,7 @@ fi
 
 if [ $PLOT_FLAG -eq 1 ]
 then
-   python $INTERACTIVE $PYROOT/profileplot.py $RVAR $INFILES $PLOTS $FTYPE $LOC "$T" 
+   python $INTERACTIVE $PYROOT/profileplot.py $RVAR $INFILES $PLOTS $FTYPE $LOC "$T" "$TOPTITLE"
    exit 0
 fi
 #==============================================================================

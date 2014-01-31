@@ -54,24 +54,24 @@ subroutine prgen_map_ufile
        +ufile_qei(:) &
        -ufile_qwalli(:)
 
-  print '(a)','INFO: (prgen) i-power: QNBII+QICHRI+QLHI+QEI+QECHI-QWALLI'
+  print '(a)','INFO: (prgen) i-power: (QNBII+QICHRI+QLHI+QECHI)+QEI-QWALLI'
 
   powd_e(:) = powd_e_aux(:) &
        -ufile_qei(:) &
        -ufile_qrad(:) &
        -ufile_qwalle(:) 
 
-  print '(a)','INFO: (prgen) e-power: QNBIE+QICHRE+QLHE-QEI-QRAD+QECHE+QOHM-QWALLE'
+  print '(a)','INFO: (prgen) e-power: (QNBIE+QICHRE+QLHE+QECHE+QOHM)-QE-QRAD-QWALLE'
 
-  ! Convert W to MW (1e-6):
-  call ufile_volint(rho,1e-6*powd_i,pow_i,ufile_volume,nx)
-  call ufile_volint(rho,1e-6*powd_e,pow_e,ufile_volume,nx)
-  call ufile_volint(rho,1e-6*powd_i_aux,pow_i_aux,ufile_volume,nx)
-  call ufile_volint(rho,1e-6*powd_e_aux,pow_e_aux,ufile_volume,nx)
-  call ufile_volint(rho,1e-6*powd_i_fus,pow_i_fus,ufile_volume,nx)
-  call ufile_volint(rho,1e-6*powd_e_fus,pow_e_fus,ufile_volume,nx)
-  call ufile_volint(rho,1e-6*powd_e_rad,pow_e_rad,ufile_volume,nx)
-  call ufile_volint(rho,1e-6*ufile_qei,pow_ei,ufile_volume,nx)
+  ! Integrate these profiles (W/m^3) times 1e-6 to obtain MW
+  call ufile_volint(1e-6*powd_i,pow_i,ufile_volume,nx)
+  call ufile_volint(1e-6*powd_e,pow_e,ufile_volume,nx)
+  call ufile_volint(1e-6*powd_i_aux,pow_i_aux,ufile_volume,nx)
+  call ufile_volint(1e-6*powd_e_aux,pow_e_aux,ufile_volume,nx)
+  call ufile_volint(1e-6*powd_i_fus,pow_i_fus,ufile_volume,nx)
+  call ufile_volint(1e-6*powd_e_fus,pow_e_fus,ufile_volume,nx)
+  call ufile_volint(1e-6*powd_e_rad,pow_e_rad,ufile_volume,nx)
+  call ufile_volint(1e-6*ufile_qei,pow_ei,ufile_volume,nx)
 
   !---------------------------------------------------------
   ! Map profile data onto single array:
@@ -143,22 +143,23 @@ subroutine prgen_map_ufile
 
 end subroutine prgen_map_ufile
 
-subroutine ufile_volint(x,f,fi,v,n)
+!---------------------------------------------------------
+! Simple routine to obtain volume integral of the UFILE 
+! power densities by trapezoidal integration.
+!---------------------------------------------------------
+subroutine ufile_volint(f,fi,v,n)
 
   implicit none 
 
   integer, intent(in) :: n 
-  real, intent(in) :: x(n),f(n),v(n)
+  real, intent(in) :: f(n),v(n)
   real, intent(inout) :: fi(n)
   real, dimension(n) :: vp
   integer :: i
 
-  ! dv/dx
-  call bound_deriv(vp,v,x,n)
-
   fi(1) = 0.0
   do i=2,n
-     fi(i) = fi(i-1)+0.5*(vp(i-1)*f(i-1)+vp(i)*f(i))*(x(i)-x(i-1))
+     fi(i) = fi(i-1)+0.5*(f(i-1)+f(i))*(v(i)-v(i-1))
   enddo
 
 end subroutine ufile_volint
