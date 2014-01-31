@@ -12,7 +12,7 @@ subroutine tgyro_source
 
   implicit none
 
-  integer :: i
+  integer :: i,i_ion
   real, external :: sigv
   real, external :: dtrate_dv
   real :: n_d,n_t
