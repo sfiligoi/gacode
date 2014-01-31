@@ -69,10 +69,14 @@ subroutine tgyro_source
 
      ! Anomalous electron-ion energy exchange
      ! - Positive as defined on RHS of ion equation
-     ! - Average ion and -electron results to obtain best estimate  
-     !   of ion value.
+     ! - Skip exchange with fast ions
 
-     s_expwd(i) = 0.5*(sum(expwd_i_tur(1:loc_n_ion,i))-expwd_e_tur(i))*s_gb(i)
+     s_expwd(i) = 0.0
+     do i_ion=1,loc_n_ion
+        if (therm_flag(i_ion) == 1) then
+           s_expwd(i) = s_expwd(i)+expwd_i_tur(i_ion,i)*s_gb(i)
+        endif
+     enddo
 
   enddo
   !-------------------------------------------------------
