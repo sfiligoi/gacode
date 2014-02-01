@@ -16,6 +16,7 @@ subroutine prgen_write
   integer :: i,ip
   integer :: indx
   character (len=15) :: ion_string ! Up to 5 two letter ions
+  character (len=3) :: iname ! 3 character ion string
   !---------------------------------------------------------------
 
   open(unit=1,file='input.profiles',status='replace')
@@ -83,8 +84,9 @@ subroutine prgen_write
      write(1,20) '#                 IONS :  Name       Z   Mass'
      do i=1,ufile_nion
         ip = reorder_vec(i)
+        call prgen_ion_name(nint(ufile_m(ip)),nint(ufile_z(ip)),iname)
         write(1,'(a,a,t36,i3,t43,i3,t48,"[",a,"]")') '#                         ',&
-             ion_lookup(nint(ufile_m(ip))),&
+             iname,&
              nint(ufile_z(ip)),&
              nint(ufile_m(ip)),&
              ufile_type(ip)

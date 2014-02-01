@@ -17,6 +17,7 @@ OBJECTS = prgen_globals.o \
 	  allocate_corsica_vars.o \
 	  allocate_ufile_vars.o \
           prgen_get_chi.o \
+          prgen_ion_name.o \
           prgen_map_iterdb.o \
           prgen_map_null.o \
           prgen_map_plasmastate.o \

@@ -46,13 +46,4 @@ subroutine allocate_internals
   allocate(flow_beam(nx))
   allocate(flow_mom(nx))
 
-  ion_lookup(:) = '?'
-  ion_lookup(1) = 'H'
-  ion_lookup(2) = 'D'
-  ion_lookup(3) = 'T'
-  ion_lookup(4) = 'He4'
-  ion_lookup(9) = 'Be'
-  ion_lookup(12) = 'C'
-  ion_lookup(40) = 'Ar'
-
 end subroutine allocate_internals

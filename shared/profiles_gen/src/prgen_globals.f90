@@ -79,8 +79,7 @@ module prgen_globals
   real, dimension(:,:), allocatable :: vec2
 
   character (len=70), dimension(5) :: ion_name
-  character (len=3), dimension(100) :: ion_lookup
-
+  
   real :: quasi_err
   real :: pow_e_err
   real :: pow_i_err
