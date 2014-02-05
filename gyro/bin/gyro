@@ -388,9 +388,8 @@ then
     $SIMDIR $NPROC $GYRO_DIR/src/gyro $NOMP $NUMA $MPINUMA
 fi
 
-if [ $TEST_FLAG -eq 1 ] 
-then
-   cat $RUNBASE
+if [ $TEST_FLAG -eq 1 ] ; then
+   cat $RUNBASE 
    cat out.expro.run
 fi
 #===========================================================

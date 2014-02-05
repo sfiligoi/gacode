@@ -112,8 +112,12 @@ subroutine gyro_radial_simulation_box
   !
   if (r(n_x) > 1.0) then
      if (radial_profile_method == 3 .and. boundary_method == 1) then
-        s_grid = 4.0
-        call send_message('INFO: (GYRO) Setting S_GRID=4.0 to avoid domain-size error.')
+        x_length = x_length/10.0
+        d_x = x_length/n_x
+        do i=1,n_x
+           r(i) = r0-0.5*x_length+d_x*(i-1.0+n_x_offset)
+        enddo
+        call send_message('INFO: (GYRO) Shrinking domain by factor 10 avoid domain-size error.')
      else
         call catch_error('ERROR: (GYRO) Radial domain too large (r/a > 1).')
      endif
