@@ -75,8 +75,7 @@ module neo_rotation
       integer, intent (in) :: ir
       integer, parameter :: nmax = 200
       integer :: it, is, jt, id, n, is_ele
-      real :: x, x0, sum_zn, dsum_zn, fac, fac_add, sum, sump, eta
-      real, dimension(:), allocatable :: fac_aniso
+      real :: x, x0, sum_zn, dsum_zn, fac, fac_add, sum, sump, eta, fac_aniso
       
       if(rotation_model == 1 .or. spitzer_model==1) then
          do it=1, n_theta
@@ -140,16 +139,6 @@ module neo_rotation
             endif
          enddo
 
-         allocate(fac_aniso(n_species))
-         do is=1, n_species
-            if(aniso_model(is) == 2) then
-               eta           = temp_perp(is,ir)/temp_para(is,ir) - 1.0
-               fac_aniso(is) = (Bmag(it)/Bmag_th0)**(-eta)
-            else
-               fac_aniso(is) = 1.0
-            endif
-         enddo
-
          phi_rot_avg = 0.0
          dens_avg    = 0.0
          x = 0.05          ! initial guess for phi_rot(1)
@@ -200,7 +189,13 @@ module neo_rotation
                  + w_theta(it) * phi_rot(it)  
             
             do is=1, n_species
-               dens_fac(is,it) = fac_aniso(is) &
+               if(aniso_model(is) == 2) then
+                  eta       = temp_perp(is,ir)/temp_para(is,ir) - 1.0
+                  fac_aniso = (Bmag(it)/Bmag_th0)**(-eta)
+               else
+                  fac_aniso = 1.0
+               endif
+               dens_fac(is,it) = fac_aniso &
                     * exp(somega_rot(is)**2 * 0.5/vth_para(is,ir)**2 &
                     * (bigR(it)**2 - bigR_th0**2) &
                     - z(is) / temp_para(is,ir) * phi_rot(it))
@@ -215,7 +210,13 @@ module neo_rotation
             phi_rot_rderiv(it) = 0.0
             sum_zn  = 0.0
             do is=1, n_species
-               fac = fac_aniso(is) * z(is) * dens(is,ir) &
+               if(aniso_model(is) == 2) then
+                  eta       = temp_perp(is,ir)/temp_para(is,ir) - 1.0
+                  fac_aniso = (Bmag(it)/Bmag_th0)**(-eta)
+               else
+                  fac_aniso = 1.0
+               endif
+               fac = fac_aniso * z(is) * dens(is,ir) &
                     * exp(somega_rot(is)**2 * 0.5 / vth_para(is,ir)**2 &
                     * (bigR(it)**2 - bigR_th0**2) &
                     - z(is) / temp_para(is,ir) * phi_rot(it))
@@ -312,7 +313,13 @@ module neo_rotation
             rotavg_e3(is) = 0.0
             rotavg_e4(is) = 0.0
             do it=1,n_theta
-               fac = fac_aniso(is) &
+               if(aniso_model(is) == 2) then
+                  eta       = temp_perp(is,ir)/temp_para(is,ir) - 1.0
+                  fac_aniso = (Bmag(it)/Bmag_th0)**(-eta)
+               else
+                  fac_aniso = 1.0
+               endif
+               fac = fac_aniso &
                     * exp(somega_rot(is)**2 * 0.5 / vth_para(is,ir)**2 &
                     * (bigR(it)**2 - bigR_th0**2) &
                     - z(is) / temp_para(is,ir) * phi_rot(it))
@@ -375,8 +382,6 @@ module neo_rotation
          !           - bigR_th0*bigR_th0_rderiv)
          !   endif
          !enddo
-
-         deallocate(fac_aniso)
 
       endif
 

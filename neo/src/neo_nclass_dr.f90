@@ -292,9 +292,6 @@ contains
     do is=1,n_species
        grt_i(is) = -dlntdr(is,ir) * temp_i(is) / a_meters
     enddo
-    
-    !  c_den-density cutoff below which species is ignored (/m**3)
-    c_den=1.0e10
 
     !  den_iz(i,z)-density of i,z (/m**3) 
     den_iz(:,:) = 0.0
@@ -319,6 +316,15 @@ contains
           den_iz(is,abs(z(is))) = dens(is,ir) * dens_norm(ir) * 1e19
        enddo
     endif
+
+    !  c_den-density cutoff below which species is ignored (/m**3)
+    c_den=1.0e10
+    do is=1,n_species
+       if(den_iz(is,abs(z(is))) < c_den) then
+          c_den = den_iz(is,abs(z(is))) 
+       endif
+    enddo
+    c_den = c_den - 1.0
 
     !  grp_iz(i,z)-pressure gradient of i,z (keV/m**3/rho)
     grp_iz(:,:) = 0.0

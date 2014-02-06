@@ -531,6 +531,7 @@ subroutine neo_do
      call  THEORY_do(ir)
      if(error_status > 0) goto 100
 
+
      ! Store the local neo transport values at ir=1 in neo_x_out
      ! (n_species_max, transport coeff)
      ! transport coeff: 1-> gamma, 2-> Q, 3->Pi, 4-> upar

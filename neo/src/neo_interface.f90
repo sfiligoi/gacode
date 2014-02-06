@@ -25,7 +25,7 @@ module neo_interface
   real    :: neo_rmin_over_a_2_in = 0.6
   real    :: neo_rmaj_over_a_in = 3.0
   integer :: neo_silent_flag_in = 0
-  integer :: neo_sim_model_in = 1
+  integer :: neo_sim_model_in = 2
   integer :: neo_equilibrium_model_in = 0
   integer :: neo_collision_model_in = 4
   integer :: neo_profile_model_in = 1

@@ -1405,6 +1405,6 @@
           amnt_ii(im,jm)=amnt_ii(im,jm)+amu_i(im)*z_protonmass
      #                   *den_iz(im,iza)/tau_ss(i,j)
         ENDDO          
-      ENDDO   
+      ENDDO
       RETURN
       END
