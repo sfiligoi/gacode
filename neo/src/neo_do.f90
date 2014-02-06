@@ -275,12 +275,12 @@ subroutine neo_do
                       * bigR_tderiv(it))
                  if(aniso_model(is) == 2) then
                     rotkin = rotkin - 0.5 * sqrt(2.0) * vth(is,ir) &
-                         * gradpar_Bmag(it) &
+                         * gradpar_Bmag(it) / Bmag(it) &
                          * (temp_perp(is,ir)/temp_para(is,ir) - 1.0)
                     driftxrot1(is,it) = driftxrot1(is,it) - I_div_psip &
                          * mass(is)/(1.0*Z(is)) * rho(ir) / Bmag(it) &
                          * (vth(is,ir))**2 &
-                         * gradpar_Bmag(it) &
+                         * gradpar_Bmag(it) / Bmag(it) &
                          * (temp_perp(is,ir)/temp_para(is,ir) - 1.0)
                  endif
                  driftxrot2(is,it) = I_div_psip* k_par(it) / Btor(it) &
