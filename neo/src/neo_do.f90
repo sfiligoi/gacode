@@ -264,21 +264,29 @@ subroutine neo_do
                       * mass(is)/(1.0*Z(is)) * (vth(is,ir))**2 
                  ! rotation
                  rotkin = 0.5 * sqrt(2.0) * vth(is,ir) *  k_par(it) &
-                      * (-Z(is)/temp(is,ir)*phi_rot_deriv(it) &
-                      + omega_rot(ir)**2 * bigR(it) &
-                      / vth(is,ir)**2 &
+                      * (-Z(is)/temp_para(is,ir)*phi_rot_deriv(it) &
+                      + somega_rot(is)**2 * bigR(it) / vth(is,ir)**2 &
                       * bigR_tderiv(it))
-                 driftxrot1(is,it) = I_div_psip* k_par(it) &
+                 driftxrot1(is,it) = I_div_psip * k_par(it) &
                       * mass(is)/(1.0*Z(is)) * rho(ir) / Bmag(it) &
                       * (vth(is,ir))**2 &
-                      * (-Z(is)/temp(is,ir)*phi_rot_deriv(it) &
-                      + omega_rot(ir)**2 * bigR(it)/ vth(is,ir)**2 &
+                      * (-Z(is)/temp_para(is,ir)*phi_rot_deriv(it) &
+                      + somega_rot(is)**2 * bigR(it)/ vth(is,ir)**2 &
                       * bigR_tderiv(it))
-                 driftxrot2(is,it) = I_div_psip* k_par(it) &
-                      / Btor(it) &
+                 if(aniso_model(is) == 2) then
+                    rotkin = rotkin - 0.5 * sqrt(2.0) * vth(is,ir) &
+                         * gradpar_Bmag(it) &
+                         * (temp_perp(is,ir)/temp_para(is,ir) - 1.0)
+                    driftxrot1(is,it) = driftxrot1(is,it) - I_div_psip &
+                         * mass(is)/(1.0*Z(is)) * rho(ir) / Bmag(it) &
+                         * (vth(is,ir))**2 &
+                         * gradpar_Bmag(it) &
+                         * (temp_perp(is,ir)/temp_para(is,ir) - 1.0)
+                 endif
+                 driftxrot2(is,it) = I_div_psip* k_par(it) / Btor(it) &
                       * mass(is)/(1.0*Z(is)) * rho(ir) &
                       * vth(is,ir) * 2.0 * sqrt(2.0) &
-                      * bigR_tderiv(it) * omega_rot(ir)
+                      * bigR_tderiv(it) * somega_rot(is)
                  driftxrot3(is,it) = 1.0/sqrt(2.0) &
                       * vth(is,ir)**2 * mass(is)/(1.0*Z(is)) &
                       * rho(ir) / Bmag(it) &
@@ -534,13 +542,13 @@ subroutine neo_do
            neo_dke_out(is,1) = pflux(is)
            neo_dke_out(is,2) = eflux(is)
            neo_dke_out(is,3) = mflux(is)
-           neo_dke_out(is,4) = eflux(is) - omega_rot(ir)*mflux(is)
+           neo_dke_out(is,4) = eflux(is) - somega_rot(is)*mflux(is) 
            neo_dke_out(is,5) = vpol_th0(is)
            neo_dke_out(is,6) = vtor_th0(is) + vtor_0order_th0
            neo_gv_out(is,1)  = pflux_gv(is)
            neo_gv_out(is,2)  = eflux_gv(is)
            neo_gv_out(is,3)  = mflux_gv(is)
-           neo_gv_out(is,4)  = eflux_gv(is) - omega_rot(ir)*mflux_gv(is)
+           neo_gv_out(is,4)  = eflux_gv(is) - somega_rot(is)*mflux_gv(is)
         enddo
         neo_dke_1d_out    = jpar
         neo_th_out(:) = 0.0
@@ -622,15 +630,25 @@ contains
 
                 i = mindx(is,ie,ix,it) 
 
-                src_Rot1   = -omega_rot(ir) * bigR_th0**2 &
-                     / vth(is,ir)**2 * omega_rot_deriv(ir) &
-                     - dlntdr(is,ir) * Z(is) / temp(is,ir) * phi_rot(it) &
-                     + dlntdr(is,ir) * (omega_rot(ir)/vth(is,ir))**2 * 0.5 &
-                     * (bigR(it)**2 - bigR_th0**2) &
-                     - omega_rot(ir)**2 * bigR_th0 &
+                src_Rot1   = -somega_rot(is) * bigR_th0**2 &
+                     / vth(is,ir)**2 * somega_rot_deriv(is) &
+                     - dlntdr(is,ir) * Z(is) / temp_para(is,ir) * phi_rot(it) &
+                     + dlntdr(is,ir) * (somega_rot(is)/vth(is,ir))**2 &
+                     * 0.5 * (bigR(it)**2 - bigR_th0**2) &
+                     - somega_rot(is)**2 * bigR_th0 &
                      / vth(is,ir)**2 * bigR_th0_rderiv
 
-                src_Rot2 = omega_rot_deriv(ir) * bigR(it) / vth(is,ir)
+                if(aniso_model(is) == 2) then
+                   src_Rot1 = src_Rot1 - dlntdr(is,ir) &
+                        * (temp_perp(is,ir)/temp_para(is,ir) - 1.0) &
+                        * log(Bmag(it)/Bmag_th0) &
+                        + (1.0*Z(is))/temp(is,ir) * phi_rot_avg_rderiv &
+                        * (1.0 - temp(is,ir)/temp_para(is,ir)) &
+                        + (1.0*Z(is))/temp_para(is,ir) * phi_rot_avg &
+                        * (-dlntdr_para(is,ir) + dlntdr(is,ir))
+                endif
+
+                src_Rot2 = somega_rot_deriv(is) * bigR(it) / vth(is,ir)
 
                 ! Impose constant for g0
 
@@ -662,10 +680,10 @@ contains
                            * sqrt(2.0) * Btor(it)/Bmag(it) &
                            * evec_e1(ie,ix) &
                            - src_Rot2 * 4.0/3.0 * driftx(is,it) &
-                           * omega_rot(ir) * bigR(it)/vth(is,ir) &
+                           * somega_rot(is) * bigR(it)/vth(is,ir) &
                            * evec_e1(ie,ix) &
                            - src_Rot2 * driftxrot1(is,it) &
-                           * omega_rot(ir) * bigR(it)/vth(is,ir) &
+                           * somega_rot(is) * bigR(it)/vth(is,ir) &
                            * evec_e0(ie,ix)
 
                    else if(ix == 1) then
@@ -682,7 +700,7 @@ contains
                            * sqrt(2.0) * Btor(it)/Bmag(it) &
                            * evec_e05(ie,ix) &
                            - src_Rot2 * driftxrot2(is,it) &
-                           * omega_rot(ir) * bigR(it)/vth(is,ir) &
+                           * somega_rot(is) * bigR(it)/vth(is,ir) &
                            * evec_e05(ie,ix) &
                            - src_Rot2 * 2.0/5.0* driftxrot3(is,it) &
                            * evec_e105(ie,ix)
@@ -696,7 +714,7 @@ contains
                            * sqrt(2.0) * Btor(it)/Bmag(it) &
                            * evec_e1(ie,ix) &
                            - src_Rot2 * 2.0/3.0 * driftx(is,it) &
-                           * omega_rot(ir) * bigR(it)/vth(is,ir) &
+                           * somega_rot(is) * bigR(it)/vth(is,ir) &
                            * evec_e1(ie,ix)
 
                    else if(ix == 3) then

@@ -4,7 +4,7 @@ subroutine neo_check
 
   implicit none
 
-  integer :: ir, is
+  integer :: ir, is, flag
 
   if(silent_flag == 0 .and. i_proc == 0) then
      open(unit=io_neoout,file=trim(path)//runfile_neoout,&
@@ -348,7 +348,7 @@ subroutine neo_check
      end if
   case (1)
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,30) 'spitzer_model','ON (SOLVE SPITZER PROBLEM)'
+        write(io_neoout,30) 'spitzer_model:','ON (SOLVE SPITZER PROBLEM)'
      end if
   case default
      call neo_error('ERROR: (NEO) invalid spitzer_model')
@@ -358,21 +358,21 @@ subroutine neo_check
   select case(threed_model)
   case(0)
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,30) 'threed_model','AXISYMMETRIC EQUILIBRIUM'
+        write(io_neoout,30) 'threed_model:','AXISYMMETRIC EQUILIBRIUM'
      end if
   case (1)
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,30) 'threed_model','NON-AXISYMMETRIC EQUILIBRIUM (LE3)'
+        write(io_neoout,30) 'threed_model:','NON-AXISYMMETRIC EQUILIBRIUM (LE3)'
      end if
 
      select case(threed_exb_model)
      case(0)
         if(silent_flag == 0 .and. i_proc == 0) then
-           write(io_neoout,30) 'threed_exb_model','NO HIGHER-ORDER V_EXB DRIFT'
+           write(io_neoout,30) 'threed_exb_model:','NO HIGHER-ORDER V_EXB DRIFT'
         end if
      case (1)
         if(silent_flag == 0 .and. i_proc == 0) then
-           write(io_neoout,30) 'threed_exb_model','HIGHER-ORDER V_EXB DRIFT'
+           write(io_neoout,30) 'threed_exb_model:','HIGHER-ORDER V_EXB DRIFT'
         end if
      case default
         call neo_error('ERROR: (NEO) invalid threed_exb_model')
@@ -387,23 +387,30 @@ subroutine neo_check
   !-----------------------------------------------------------
   ! Anisotropic species checks
   !
-  select case (aniso_model)     
-  case (1)
-  case (2)
+  flag = 0
+  do is=1,n_species
+     select case (aniso_model(is))     
+     case (1)
+     case (2)
+        flag=1
+     case default
+        call neo_error('ERROR: (NEO) invalid aniso_model')
+        return
+     end select
+  enddo
+  if(flag == 1) then
      if(profile_model == 2) then
         call neo_error('ERROR: (NEO) aniso_model not available with global profiles')
      endif
-     if(rotation_model == 1) then
-        call neo_error('ERROR: (NEO) aniso_model requires rotation_method=2')
-     endif
      if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,30) 'aniso model','ANISOTROPIC SPECIES INCLUDED'
-     end if
-  case default
-     call neo_error('ERROR: (NEO) invalid aniso_model')
-     return
-  end select
-
+        if(rotation_model == 2) then
+           write(io_neoout,30) 'aniso model:','ANISOTROPIC SPECIES INCLUDED (with poloidal asymmetry)'
+        else
+           write(io_neoout,30) 'aniso model:','ANISOTROPIC SPECIES INCLUDED (without poloidal asymmetry)'
+        endif
+     endif
+  endif
+  
   !------------------------------------------------------------
 
   if (silent_flag == 0 .and. i_proc == 0) then
@@ -432,7 +439,7 @@ subroutine neo_check
         write(io_neoout,20) 'omega_rot',omega_rot(ir)
         write(io_neoout,20) 'omega_rot_deriv',omega_rot_deriv(ir)
         write(io_neoout,20) 'q',q(ir)
-        write(io_neoout,20) 's',shat(ir)
+        write(io_neoout,20) 's',shear(ir)
         write(io_neoout,20) 'shift',shift(ir)
         write(io_neoout,20) 'kappa',kappa(ir)
         write(io_neoout,20) 's_kappa',s_kappa(ir)
@@ -454,17 +461,15 @@ subroutine neo_check
            write(io_neoout,20) 'a/Ln',dlnndr(is,ir)
            write(io_neoout,20) 'a/LT',dlntdr(is,ir)
            write(io_neoout,20) 'nu',nu(is,ir)
+           if (aniso_model(is) == 2) then
+              write(io_neoout,'(t2,a)') 'this species is anisotropic'
+              write(io_neoout,20) 'temp_para', temp_para(is,ir)
+              write(io_neoout,20) 'a/LTpara',  dlntdr_para(is,ir)
+              write(io_neoout,20) 'temp_perp', temp_perp(is,ir)
+              write(io_neoout,20) 'a/LTperp',  dlntdr_perp(is,ir)
+           endif
         enddo
      enddo
-
-     if (aniso_model == 2) then
-        write(io_neoout,*) 
-        write(io_neoout,10) 'Z_aniso',z_aniso
-        write(io_neoout,20) 'dens',dens_aniso
-        write(io_neoout,20) 'temp_parallel',temp_para_aniso
-        write(io_neoout,20) 'temp_perp',temp_perp_aniso
-        write(io_neoout,20) 'mass',mass_aniso
-     endif
 
      write(io_neoout,*)
 

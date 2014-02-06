@@ -32,7 +32,7 @@ module neo_profile_exp
   real, dimension(:), allocatable :: s_delta_p
   real, dimension(:), allocatable :: s_zeta_p
   real, dimension(:), allocatable :: s_zmag_p
-  real, dimension(:), allocatable :: shat_p
+  real, dimension(:), allocatable :: shear_p
 
   real, dimension(:,:), allocatable :: dlnndr_p
   real, dimension(:,:), allocatable :: dlntdr_p

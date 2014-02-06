@@ -28,7 +28,7 @@ subroutine neo_map_experimental_profiles
   call cub_spline(r_p,omega_rot_p,n_grid_exp,r,omega_rot,n_radial)
   call cub_spline(r_p,omega_rot_deriv_p,n_grid_exp,r,omega_rot_deriv,n_radial)
   call cub_spline(r_p,q_exp,n_grid_exp,r,q,n_radial)
-  call cub_spline(r_p,shat_p,n_grid_exp,r,shat,n_radial)
+  call cub_spline(r_p,shear_p,n_grid_exp,r,shear,n_radial)
   call cub_spline(r_p,shift_p,n_grid_exp,r,shift,n_radial)
   call cub_spline(r_p,kappa_exp,n_grid_exp,r,kappa,n_radial)
   call cub_spline(r_p,s_kappa_p,n_grid_exp,r,s_kappa,n_radial)

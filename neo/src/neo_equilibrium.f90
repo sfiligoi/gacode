@@ -12,20 +12,24 @@ module neo_equilibrium
   real, dimension(:), allocatable :: v_drift_th   ! theta  curvature drift vel
   real, dimension(:), allocatable :: gradr        ! | grad r|
   real, dimension(:), allocatable :: gradr_tderiv ! th deriv of grad r
-  real, dimension(:), allocatable :: w_theta    ! flux surface avg weights
-  real, dimension(:), allocatable :: Btor       ! b_t / Bunit
-  real, dimension(:), allocatable :: Bpol       ! b_p / Bunit
-  real, dimension(:), allocatable :: Bmag       ! B/Bunit
+  real, dimension(:), allocatable :: w_theta      ! flux surface avg weights
+  real, dimension(:), allocatable :: Btor         ! B_t / Bunit
+  real, dimension(:), allocatable :: Bpol         ! B_p / Bunit
+  real, dimension(:), allocatable :: Bmag         ! B/Bunit
+  real, dimension(:), allocatable :: Bmag_rderiv  ! (dB/dr) (a/Bunit)
   real, dimension(:), allocatable :: gradpar_Bmag ! bhat dot grad/aBmag/Bunit
   real, dimension(:), allocatable :: bigR       ! R/a (global)
   real, dimension(:), allocatable :: bigR_rderiv       ! R/a (global)
   real, dimension(:), allocatable :: bigR_tderiv ! theta deriv of bigR
+  real, dimension(:), allocatable :: jacobln_rderiv ! 1/sqrt(g) dsqrt(g)/dr
   real                            :: bigR_th0    ! R/a at theta=0
   real                            :: bigR_th0_rderiv ! dR/dr at theta=0
   real                            :: gradr_th0   ! | grad r| at theta=0
   real                            :: Btor_th0    ! b_t/Bunit at theta=0
   real                            :: Bpol_th0    ! b_t/Bunit at theta=0
   real                            :: Bmag_th0    ! B/Bunit   at theta=0
+  real                            :: Bmag_th0_rderiv  ! (dB/dr) (a/Bunit) th=0
+  real                            :: Bmaglog_avg ! <ln(B/B(theta=0))>
   real                            :: ftrap       ! frac of trapped particles
   real, dimension(:), allocatable :: theta_nc    ! NCLASS theta grid
 
@@ -66,10 +70,11 @@ contains
        allocate(Btor(n_theta))
        allocate(Bpol(n_theta))
        allocate(Bmag(n_theta))
+       allocate(Bmag_rderiv(n_theta))
        allocate(gradpar_Bmag(n_theta))
        allocate(theta_nc(n_theta))
+       allocate(jacobln_rderiv(n_theta))
        allocate(v_prime_g(n_radial))
-       
 
        d_theta = 2*pi/n_theta
        do it=1,n_theta
@@ -102,8 +107,10 @@ contains
        deallocate(Btor)
        deallocate(Bpol)
        deallocate(Bmag)
+       deallocate(Bmag_rderiv)
        deallocate(gradpar_Bmag)
        deallocate(theta_nc)
+       deallocate(jacobln_rderiv)
        deallocate(v_prime_g)
 
        if (equilibrium_model == 2 .or. equilibrium_model == 3) then
@@ -121,7 +128,7 @@ contains
     use GEO_interface
     implicit none
     integer, intent(in) :: ir
-    integer :: it, jt, id
+    integer :: it, jt, id, is
     real :: sum
     ! parameters needed for Miller equilibrium
 
@@ -138,15 +145,24 @@ contains
        GEO_zmag_in      = zmag(ir)
        GEO_dzmag_in     = s_zmag(ir)
        GEO_q_in         = q(ir)
-       GEO_s_in         = shat(ir)
+       GEO_s_in         = shear(ir)
        GEO_kappa_in     = kappa(ir)
        GEO_s_kappa_in   = s_kappa(ir)
        GEO_delta_in     = delta(ir)
        GEO_s_delta_in   = s_delta(ir)
        GEO_zeta_in      = zeta(ir)
        GEO_s_zeta_in    = s_zeta(ir)
-       GEO_beta_star_in = 0.0    ! EAB: set beta_star=0;not in first-order calc
+       !!!!! beta_star !!!!!
+       ! EAB: does not enter in the first-order calc
        ! NOTE: it is not implemented in v_drift defs
+       ! This input param is then only used in anisotropic species mode
+       ! which currently only works in local profile mode
+       GEO_beta_star_in = 0.0
+       do is=1,n_species
+          if(aniso_model(is) == 2) then
+             GEO_beta_star_in = beta_star(ir)
+          endif
+       enddo
        GEO_fourier_in(:,:) = geo_yin(:,:,ir)
        call GEO_do()  
 
@@ -158,6 +174,8 @@ contains
           Bmag(it)  = GEO_b
           Btor(it)  = GEO_bt
           Bpol(it)  = GEO_bp
+          Bmag_rderiv(it)  = -GEO_b/(rmaj(ir)*GEO_grad_r) &
+               * (GEO_gcos1 + GEO_gcos2)
           gradpar_Bmag(it) = k_par(it) * GEO_dbdt
           gradr(it)        = GEO_grad_r
           v_drift_x(it)  = -rho(ir)/(rmaj(ir) * Bmag(it)) * &
@@ -167,6 +185,8 @@ contains
                -  GEO_gsin * GEO_nsin * GEO_grad_r) &
                * r(ir)
           theta_nc(it) = GEO_theta_nc
+          jacobln_rderiv(it) = 2.0/bigR(it)*bigR_rderiv(it) &
+               - 1.0/Btor(it) * r(ir)/(q(ir)*bigR(it)) * GEO_ffprime/GEO_f
           ! flux-surface average weights
           w_theta(it) = GEO_g_theta / Bmag(it)
           sum = sum + w_theta(it)
@@ -182,6 +202,8 @@ contains
        Btor_th0        = GEO_bt
        Bpol_th0        = GEO_bp
        Bmag_th0        = GEO_b
+       Bmag_th0_rderiv = -GEO_b/(rmaj(ir)*GEO_grad_r) &
+               * (GEO_gcos1 + GEO_gcos2)
 
     else
 
@@ -196,6 +218,7 @@ contains
           k_par(it)       = 1.0 / (q(ir) * rmaj(ir)) * sign_bunit
           bigR(it)        = rmaj(ir) * (1.0 + r(ir)/rmaj(ir) * cos(theta(it)))
           bigR_rderiv(it) = cos(theta(it))
+          jacobln_rderiv(it) = 2.0/bigR(it) * bigR_rderiv(it)
           gradr(it)       = 1.0
           theta_nc(it)    = theta(it)
           bigR_th0        = rmaj(ir) + r(ir)
@@ -207,10 +230,12 @@ contains
              Btor_th0 = 1.0 - (r(ir)/rmaj(ir))
              Bpol_th0 = r(ir) / (q(ir)*rmaj(ir)) * (1.0 - (r(ir)/rmaj(ir)))
              Bmag_th0 = (1.0 - (r(ir)/rmaj(ir))) * sign_bunit
+             Bmag_th0_rderiv = - 1.0/rmaj(ir) * sign_bunit
              Bmag(it) = (1.0 - (r(ir)/rmaj(ir)) * cos(theta(it))) * sign_bunit
              Btor(it) = 1.0 - (r(ir)/rmaj(ir)) * cos(theta(it))
              Bpol(it) = r(ir) / (q(ir)*rmaj(ir)) &
                   * (1.0 - (r(ir)/rmaj(ir)) * cos(theta(it)))
+             Bmag_rderiv(it) = - 1.0/rmaj(ir) * cos(theta(it)) * sign_bunit
              gradpar_Bmag(it) = k_par(it) * (r(ir)/rmaj(ir)) &
                   * sin(theta(it)) * sign_bunit
              v_drift_x(it) = -rho(ir)/rmaj(ir) * sin(theta(it)) &
@@ -225,11 +250,16 @@ contains
                   / (1.0 + (r(ir)/rmaj(ir)))
              Bmag_th0 = (1.0 / (1.0 + (r(ir)/rmaj(ir)))) &
                   * sign_bunit
+             Bmag_th0_rderiv = (1.0 / (1.0 + (r(ir)/rmaj(ir)))**2) &
+                  * sign_bunit * (-1.0/rmaj(ir))
              Bmag(it) = (1.0 / (1.0 + (r(ir)/rmaj(ir)) * cos(theta(it)))) &
                   * sign_bunit
              Btor(it) = 1.0 / (1.0 + (r(ir)/rmaj(ir)) * cos(theta(it)))
              Bpol(it) = r(ir) / (q(ir)*rmaj(ir)) &
                   / (1.0 + (r(ir)/rmaj(ir)) * cos(theta(it)))
+             Bmag_rderiv(it) = (1.0 / (1.0 &
+                  + (r(ir)/rmaj(ir))* cos(theta(it)))**2) &
+                  * sign_bunit * (-1.0/rmaj(ir) * cos(theta(it)))
              gradpar_Bmag(it) = k_par(it) * (r(ir)/rmaj(ir)) &
                   * sin(theta(it)) / (1.0 + (r(ir)/rmaj(ir)) &
                   * cos(theta(it)))**2 * sign_bunit
@@ -268,10 +298,12 @@ contains
     Bmag2_avg = 0.0
     Bmag2inv_avg = 0.0
     gradpar_Bmag2_avg = 0.0
+    Bmaglog_avg = 0.0
     do it=1,n_theta
        Bmag2_avg    = Bmag2_avg    + w_theta(it)*Bmag(it)**2
        Bmag2inv_avg = Bmag2inv_avg + w_theta(it)/Bmag(it)**2
        gradpar_Bmag2_avg = gradpar_Bmag2_avg + w_theta(it)*gradpar_Bmag(it)**2
+       Bmaglog_avg =Bmaglog_avg +  w_theta(it) * log(Bmag(it)/Bmag_th0)
     enddo
 
     call compute_fractrap(ftrap)
@@ -288,9 +320,9 @@ contains
     !stop
 
     open(unit=1,file=trim(path)//'out.neo.diagnostic_geo',status='replace')
-    write(1,'(a,1pe16.8)') "# I/psi'              = ",I_div_psip
-    write(1,'(a,1pe16.8)') "# < 1/B^2 - 1/<B^2> > = ",Bmag2inv_avg-1.0/Bmag2_avg
-    write(1,'(a,1pe16.8)') "# f_trap              = ",ftrap
+    write(1,'(a,1pe16.8)') "# I/psi'            = ",I_div_psip
+    write(1,'(a,1pe16.8)') "# <1/B^2>-1/<B^2>   = ",Bmag2inv_avg-1.0/Bmag2_avg
+    write(1,'(a,1pe16.8)') "# f_trap            = ",ftrap
     write(1,'(a)') "# Functions:" 
     write(1,'(a)') "#   theta(:)" 
     write(1,'(a)') "#   v_drift_x(:)" 
@@ -300,7 +332,6 @@ contains
     write(1,'(1pe16.8)') v_drift_x(:)
     write(1,'(1pe16.8)') gradpar_Bmag(:)
     write(1,'(1pe16.8)') Bmag(:)
-
     close(1)
 
   end subroutine EQUIL_DO
