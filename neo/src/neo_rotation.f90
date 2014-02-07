@@ -100,6 +100,20 @@ module neo_rotation
          rotavg_e3(:) = 0.0
          rotavg_e4(:) = 0.0
 
+         do is=1, n_species
+            if(aniso_model(is) == 2) then
+               do it=1,n_theta
+                  eta             = temp_perp(is,ir)/temp_para(is,ir) - 1.0
+                  dens_fac(is,it) = (Bmag(it)/Bmag_th0)**(-eta)
+               enddo
+               dens_avg(is) = 0.0
+               do it=1,n_theta
+                  dens_avg(is) = dens_avg(is) + &
+                       w_theta(it) * dens(is,ir) * dens_fac(is,it)
+               enddo
+            endif
+         enddo
+
       else 
          
          ! check for equilibrium-scale QN at theta=0
