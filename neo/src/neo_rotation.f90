@@ -21,7 +21,6 @@ module neo_rotation
   character(len=80),private :: runfile = 'out.neo.rotation'
 
   contains
-
     subroutine ROT_alloc(flag)
       use neo_globals
       implicit none
@@ -166,8 +165,14 @@ module neo_rotation
                sum_zn  = 0.0
                dsum_zn = 0.0
                do is=1, n_species
-                  fac = z(is) * dens(is,ir) * &
-                       exp(somega_rot(is)**2 * 0.5 / vth_para(is,ir)**2 &
+                  if(aniso_model(is) == 2) then
+                     eta       = temp_perp(is,ir)/temp_para(is,ir) - 1.0
+                     fac_aniso = (Bmag(it)/Bmag_th0)**(-eta)
+                  else
+                     fac_aniso = 1.0
+                  endif
+                  fac = z(is) * dens(is,ir) * fac_aniso &
+                       * exp(somega_rot(is)**2 * 0.5 / vth_para(is,ir)**2 &
                        * (bigR(it)**2 - bigR_th0**2) &
                        - z(is) / temp_para(is,ir) * x)
                   sum_zn  = sum_zn  + fac
@@ -420,6 +425,11 @@ module neo_rotation
          do it=1, n_theta
             write (io_rot,'(e16.8)',advance='no') phi_rot(it)
          enddo
+         do is=1, n_species
+            do it=1, n_theta
+                write (io_rot,'(e16.8)',advance='no') dens_fac(is,it)
+             enddo
+          enddo
          write(io_rot,*)
          close(io_rot)
       endif
