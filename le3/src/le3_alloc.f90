@@ -29,14 +29,15 @@ subroutine le3_alloc(flag)
      allocate(fp(nt,np))
      allocate(ft(nt,np))
 
+     dt = 2*pi/nt
      do i=1,nt
-        t(i) = 2*(i-1)*pi/(nt)
+        t(i) = (i-1)*dt
      enddo
-     dt = t(2)-t(1)
+
+     dp = 2*pi/np
      do j=1,np
-        p(j) = 2*(j-1)*pi/(np)
+        p(j) = (j-1)*dp
      enddo
-     dp = p(2)-p(1)
 
      ! Spectral
      msize = 4*nts*nps+2*(nts+nps)
@@ -59,6 +60,8 @@ subroutine le3_alloc(flag)
            cosm(i,its) = cos(its*t(i))
         enddo
      enddo
+
+     ! This coding is valid for 2D case (nps=0,j=1=np)
      do ips=0,nps
         do j=1,np
            sinn(j,ips) = sin(ips*p(j))

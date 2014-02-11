@@ -1,7 +1,6 @@
 program le3
 
   use le3_globals
-  use le3_write
 
   implicit none
   external :: le3_func
@@ -23,15 +22,21 @@ program le3
   read(1,*) hmin
   read(1,*) dhmindr
   read(1,*) q
+  read(1,*) s
   read(1,*) m
   read(1,*) n
   read(1,*) tol
   close(1)
 
   nt = 2*nts+2
-  np = 2*nps+2
+  if (nps > 0) then
+     np = 2*nps+2
+  else
+     np = 1
+  endif
 
-  iota = 1.0/q
+  iota   = 1.0/q
+  iota_p = s
 
   call le3_alloc(1)
 
@@ -51,7 +56,9 @@ program le3
   ! Map x -> (a,b,c,d)
   call le3_map(xfunc,as,bs,cs,ds,nps,nts,'setc')
 
-  call le3_write_do
+  call le3_geometry
+  call le3_geometry_rho
+
   call le3_alloc(0)
 
 end program le3

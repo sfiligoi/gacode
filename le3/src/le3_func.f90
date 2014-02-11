@@ -1,4 +1,4 @@
-subroutine le3_func(xsize,x,fvec,iflag)
+subroutine le3_func(xsize,x,fvec)
 
   use le3_globals
 
@@ -6,7 +6,7 @@ subroutine le3_func(xsize,x,fvec,iflag)
 
   integer :: ix,i,j,its,ips
   integer, intent(in) :: xsize
-  integer, intent(inout) :: iflag
+  real :: drdttb,dzdttb
   real, dimension(xsize), intent(inout) :: fvec
   real, dimension(xsize), intent(in) :: x
   real, dimension(:,:), allocatable :: bp,br,bz
@@ -61,7 +61,9 @@ subroutine le3_func(xsize,x,fvec,iflag)
              drdpb(i,j),&
              dzdtb(i,j),&
              dzdpb(i,j),&
-             jac(i,j))
+             jac(i,j),&
+             drdttb,&
+             dzdttb)
 
      enddo
   enddo

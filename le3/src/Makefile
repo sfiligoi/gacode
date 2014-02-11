@@ -11,9 +11,12 @@ EXEC = le3
 OBJECTS = le3_globals.o \
           le3_func.o \
 	  le3_alloc.o \
+          le3_basis.o \
+          le3_compute_theory.o \
           le3_map.o \
           le3_rz.o \
-          le3_write.o \
+          le3_geometry.o \
+          le3_geometry_rho.o \
           $(EXEC).o
 
 .SUFFIXES : .o .f90
