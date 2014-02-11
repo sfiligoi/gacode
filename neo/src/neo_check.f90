@@ -393,18 +393,26 @@ subroutine neo_check
      case (1)
      case (2)
         flag=1
+     case (3)
+        flag=2
      case default
         call neo_error('ERROR: (NEO) invalid aniso_model')
         return
      end select
   enddo
-  if(flag == 1) then
+  if(flag == 1 .or. flag == 2) then
      if(profile_model == 2) then
         call neo_error('ERROR: (NEO) aniso_model not available with global profiles')
      endif
      if(silent_flag == 0 .and. i_proc == 0) then
         if(rotation_model == 2) then
            write(io_neoout,30) 'aniso model:','ANISOTROPIC SPECIES INCLUDED (with poloidal asymmetry)'
+           if(flag==1) then
+              write(io_neoout,30) 'aniso model:', 'WARNING: This model neglects omega for the aniso species'
+           endif
+           if(flag==2) then
+              write(io_neoout,30) 'aniso model:', 'WARNING: This model is only valid for temp=temp_para and a/LT=a/LTpara'
+           endif
         else
            write(io_neoout,30) 'aniso model:','ANISOTROPIC SPECIES INCLUDED (without poloidal asymmetry)'
         endif
@@ -461,7 +469,7 @@ subroutine neo_check
            write(io_neoout,20) 'a/Ln',dlnndr(is,ir)
            write(io_neoout,20) 'a/LT',dlntdr(is,ir)
            write(io_neoout,20) 'nu',nu(is,ir)
-           if (aniso_model(is) == 2) then
+           if (aniso_model(is) >= 2) then
               write(io_neoout,'(t2,a)') 'this species is anisotropic'
               write(io_neoout,20) 'temp_para', temp_para(is,ir)
               write(io_neoout,20) 'a/LTpara',  dlntdr_para(is,ir)

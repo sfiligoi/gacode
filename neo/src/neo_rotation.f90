@@ -100,7 +100,7 @@ module neo_rotation
          rotavg_e4(:) = 0.0
 
          do is=1, n_species
-            if(aniso_model(is) == 2) then
+            if(aniso_model(is) >= 2) then
                do it=1,n_theta
                   eta             = temp_perp(is,ir)/temp_para(is,ir) - 1.0
                   dens_fac(is,it) = (Bmag(it)/Bmag_th0)**(-eta)
@@ -146,6 +146,13 @@ module neo_rotation
             if(aniso_model(is)==2) then
                somega_rot(is)       = 0.0
                somega_rot_deriv(is) = 0.0
+            else if(aniso_model(is)==3) then
+               ! EAB: for rotation in aniso species, 
+               ! be aware that this model
+               ! is only consistent with the current implementation of 
+               ! the DKE if Teff=Tpara
+               somega_rot(is)       = omega_rot(ir) 
+               somega_rot_deriv(is) = omega_rot_deriv(ir)
             else
                somega_rot(is)       = omega_rot(ir) 
                somega_rot_deriv(is) = omega_rot_deriv(ir)
@@ -165,7 +172,7 @@ module neo_rotation
                sum_zn  = 0.0
                dsum_zn = 0.0
                do is=1, n_species
-                  if(aniso_model(is) == 2) then
+                  if(aniso_model(is) >= 2) then
                      eta       = temp_perp(is,ir)/temp_para(is,ir) - 1.0
                      fac_aniso = (Bmag(it)/Bmag_th0)**(-eta)
                   else
@@ -207,8 +214,9 @@ module neo_rotation
             phi_rot_avg = phi_rot_avg &
                  + w_theta(it) * phi_rot(it)  
             
+
             do is=1, n_species
-               if(aniso_model(is) == 2) then
+               if(aniso_model(is) >= 2) then
                   eta       = temp_perp(is,ir)/temp_para(is,ir) - 1.0
                   fac_aniso = (Bmag(it)/Bmag_th0)**(-eta)
                else
@@ -229,7 +237,7 @@ module neo_rotation
             phi_rot_rderiv(it) = 0.0
             sum_zn  = 0.0
             do is=1, n_species
-               if(aniso_model(is) == 2) then
+               if(aniso_model(is) >= 2) then
                   eta       = temp_perp(is,ir)/temp_para(is,ir) - 1.0
                   fac_aniso = (Bmag(it)/Bmag_th0)**(-eta)
                else
@@ -247,7 +255,7 @@ module neo_rotation
             endif
             
             do is=1,n_species
-               if(aniso_model(is) == 2) then
+               if(aniso_model(is) >= 2) then
                   eta       = temp_perp(is,ir)/temp_para(is,ir) - 1.0
                   fac_add   = -log(Bmag(it)/Bmag_th0) &
                        * temp_perp(is,ir)/temp_para(is,ir) &
@@ -332,7 +340,7 @@ module neo_rotation
             rotavg_e3(is) = 0.0
             rotavg_e4(is) = 0.0
             do it=1,n_theta
-               if(aniso_model(is) == 2) then
+               if(aniso_model(is) >= 2) then
                   eta       = temp_perp(is,ir)/temp_para(is,ir) - 1.0
                   fac_aniso = (Bmag(it)/Bmag_th0)**(-eta)
                else
@@ -411,6 +419,7 @@ module neo_rotation
       implicit none
       integer, intent (in) :: ir
       integer :: is, it
+      real :: sum1,sum2,sum3
 
       if(silent_flag == 0 .and. i_proc == 0 .and. rotation_model == 2) then
          open(io_rot,file=trim(path)//runfile,status='old',position='append')

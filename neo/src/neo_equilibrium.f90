@@ -159,7 +159,7 @@ contains
        ! which currently only works in local profile mode
        GEO_beta_star_in = 0.0
        do is=1,n_species
-          if(aniso_model(is) == 2) then
+          if(aniso_model(is) >= 2) then
              GEO_beta_star_in = beta_star(ir)
           endif
        enddo
@@ -308,30 +308,22 @@ contains
 
     call compute_fractrap(ftrap)
 
-    !open(unit=1,file='geo.out',status='replace')
-    !do it=1,n_theta
-    !   write (1,'(e16.8)',advance='no') theta(it)
-    !   write (1,'(e16.8)',advance='no') v_drift_x(it)
-    !   write (1,'(e16.8)',advance='no') gradpar_Bmag(it)
-    !   write (1,'(e16.8)',advance='no') Bmag(it)
-    !   write(1,*)
-    !enddo
-    !close(1)
-    !stop
-
     open(unit=1,file=trim(path)//'out.neo.diagnostic_geo',status='replace')
     write(1,'(a,1pe16.8)') "# I/psi'            = ",I_div_psip
     write(1,'(a,1pe16.8)') "# <1/B^2>-1/<B^2>   = ",Bmag2inv_avg-1.0/Bmag2_avg
     write(1,'(a,1pe16.8)') "# f_trap            = ",ftrap
+    write(1,'(a,i3)')      "# n_theta           = ",n_theta
     write(1,'(a)') "# Functions:" 
     write(1,'(a)') "#   theta(:)" 
     write(1,'(a)') "#   v_drift_x(:)" 
     write(1,'(a)') "#   gradpar_Bmag(:)" 
     write(1,'(a)') "#   Bmag(:)" 
+    write(1,'(a)') "#   w_theta(:)" 
     write(1,'(1pe16.8)') theta(:)
     write(1,'(1pe16.8)') v_drift_x(:)
     write(1,'(1pe16.8)') gradpar_Bmag(:)
     write(1,'(1pe16.8)') Bmag(:)
+    write(1,'(1pe16.8)') w_theta(:)
     close(1)
 
   end subroutine EQUIL_DO

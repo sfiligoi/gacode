@@ -106,7 +106,7 @@ subroutine neo_make_profiles
         dens(is,ir)     = dens_in(is)
         dlnndr(is,ir)   = dlnndr_in(is)
         aniso_model(is) = aniso_model_in(is)
-        if(aniso_model(is) == 2) then
+        if(aniso_model(is) >= 2) then
            ! for anisotropic species, define a Teff = 1/3 Tpar + 2/3 Tperp
            !temp(is,ir)   = 1.0/3.0*temp_para(is,ir) + 2.0/3.0*temp_perp(is,ir)
            !dlntdr(is,ir) = 1.0/3.0*temp_para(is,ir)/temp(is,ir) &

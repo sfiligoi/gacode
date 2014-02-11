@@ -177,7 +177,7 @@ contains
        ! This is lambda_a (the effective potential energy)
        rfac = Z(is)/temp_para(is,ir) * (phi_rot(it) - phi_rot_avg) &
             - (somega_rot(is) * bigR(it) / vth(is,ir))**2 * 0.5
-       if(aniso_model(is) == 2) then
+       if(aniso_model(is) >= 2) then
           rfac = rfac + (temp_perp(is,ir)/temp_para(is,ir) - 1.0) &
                * log(Bmag(it)/Bmag_th0)
        endif
@@ -340,7 +340,7 @@ contains
             + somega_rot_deriv(is) &
             * somega_rot(is)/vth(is,ir)**2 * (bigR_th0**2 - bigR2_avg) &
             + somega_rot(is)**2 * bigR_th0 / vth(is,ir)**2 * bigR_th0_rderiv))
-       if(aniso_model(is) == 2) then
+       if(aniso_model(is) >= 2) then
           kbig_upar(is) = kbig_upar(is) &
                - (I_div_psip * rho(ir) * temp(is,ir) / (z(is)*1.0)) &
                * (dlntdr(is,ir) &
@@ -389,7 +389,7 @@ contains
        do it=1,n_theta
           rfac = Z(is)/temp_para(is,ir) * (phi_rot(it) - phi_rot_avg) &
                - (somega_rot(is) * bigR(it) / vth(is,ir))**2 * 0.5
-          if(aniso_model(is) == 2) then
+          if(aniso_model(is) >= 2) then
              rfac = rfac + (temp_perp(is,ir)/temp_para(is,ir) - 1.0) &
                   * log(Bmag(it)/Bmag_th0)
           endif
@@ -418,7 +418,7 @@ contains
             + dlntdr(is,ir) * (1.0 + 0.5 * somega_rot(is)**2 * bigR_th0**2  &
             / vth(is,ir)**2) &
             + dlntdr_para(is,ir) * z(is)/temp_para(is,ir) * phi_rot_avg) )
-       if(aniso_model(is) == 2) then
+       if(aniso_model(is) >= 2) then
           mflux_gv(is) = mflux_gv(is) &
                -0.5 * temp(is,ir) * rho(ir)**2 * mass(is) &
                * temp(is,ir) / (Z(is)*1.0)**2 * I_div_psip * r(ir) / q(ir) &
@@ -476,7 +476,7 @@ contains
                      / vth(is,ir)**2 * bigR_th0_rderiv &
                + somega_rot_deriv(is) * somega_rot(is)/vth(is,ir)**2 &
                * (bigR_th0**2 - bigR(it)**2))
-          if(aniso_model(is) == 2) then
+          if(aniso_model(is) >= 2) then
              vtor(is,it) = vtor(is,it) &
                   + (I_div_psip * rho(ir) * temp(is,ir) / (z(is)*1.0)) &
                   * (1.0 / Btor(it)) &

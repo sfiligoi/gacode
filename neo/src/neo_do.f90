@@ -273,10 +273,10 @@ subroutine neo_do
                       * (-Z(is)/temp_para(is,ir)*phi_rot_deriv(it) &
                       + somega_rot(is)**2 * bigR(it)/ vth(is,ir)**2 &
                       * bigR_tderiv(it))
-                 if(aniso_model(is) == 2) then
+                 if(aniso_model(is) >= 2) then
                     rotkin = rotkin - 0.5 * sqrt(2.0) * vth(is,ir) &
                          * gradpar_Bmag(it) / Bmag(it) &
-                         * (temp_perp(is,ir)/temp_para(is,ir) - 1.0)
+                         * (temp_perp(is,ir)/temp_para(is,ir) - 1.0) 
                     driftxrot1(is,it) = driftxrot1(is,it) - I_div_psip &
                          * mass(is)/(1.0*Z(is)) * rho(ir) / Bmag(it) &
                          * (vth(is,ir))**2 &
@@ -639,7 +639,7 @@ contains
                      - somega_rot(is)**2 * bigR_th0 &
                      / vth(is,ir)**2 * bigR_th0_rderiv
 
-                if(aniso_model(is) == 2) then
+                if(aniso_model(is) >= 2) then
                    src_Rot1 = src_Rot1 - dlntdr(is,ir) &
                         * (temp_perp(is,ir)/temp_para(is,ir) - 1.0) &
                         * log(Bmag(it)/Bmag_th0) &
