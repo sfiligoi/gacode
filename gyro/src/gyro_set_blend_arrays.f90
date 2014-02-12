@@ -244,22 +244,6 @@ subroutine gyro_set_blend_arrays
 
      enddo ! j_plot
   enddo ! i
-  if (io_method > 1 .and. time_skip_wedge > 0) then
-     do i=1,n_x
-        do j_plot=1,n_theta_plot*n_theta_mult
-
-           x = theta_wedge_offset+&
-                (j_plot-1)*theta_wedge_angle/(n_theta_plot*n_theta_mult-1)
-           x = x/pi
-
-           do j=1,n_blend
-              blend_wedge(j,j_plot,i) = BLEND_F(j,x,phase(in_1,i))
-              blend_prime_wedge(j,j_plot,i) = BLEND_Fp(j,x,phase(in_1,i))/pi
-           enddo ! j
-
-        enddo ! j_plot
-     enddo ! i
-  endif
   !---------------------------------------------------------------  
 
   if (debug_flag == 1 .and. i_proc == 0) then

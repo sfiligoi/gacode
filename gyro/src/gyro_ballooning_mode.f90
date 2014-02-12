@@ -145,11 +145,7 @@ subroutine gyro_ballooning_mode(datafile,io,index,is_in)
               !   theta_extended = theta_plot(j_int)+2*pi*pp
 
               amp(ampCount) = f_bar(p,j_int)*phase(in_1,ir_norm)**(real(p)/real(m0))
-              !write(io,fmtstr2) f_bar(p,j_int)*phase(in_1,ir_norm)**(real(p)/real(m0))
-
-              if (io_method < 3) then
-                 write(io,fmtstr2) amp(ampCount)
-              endif
+              write(io,fmtstr2) amp(ampCount)
               ampCount=ampCount+1
            enddo
         enddo

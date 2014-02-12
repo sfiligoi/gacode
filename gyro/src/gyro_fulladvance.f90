@@ -12,7 +12,6 @@ subroutine gyro_fulladvance
 
   !----------------------------------------
   implicit none
-  integer :: wedge_flag 
   !----------------------------------------
 
   h_old(:,:,:,:) = h(:,:,:,:)
@@ -112,15 +111,8 @@ subroutine gyro_fulladvance
   call gyro_timer_out('Diagnos.-allstep')
   call gyro_timer_in('Diagnos.-datastep')
 
-  wedge_flag = 0
-  if (time_skip_wedge > 0) then
-     if (modulo(step,time_skip_wedge) == 0) then
-        wedge_flag = 1
-     endif
-  endif
 
-
-  if (modulo(step,time_skip) == 0 .or. wedge_flag == 1) then
+  if (modulo(step,time_skip) == 0) then
 
      ! Counter for number of data output events.
      if (modulo(step,time_skip) == 0) then
@@ -149,7 +141,7 @@ subroutine gyro_fulladvance
      io_control = 2*output_flag
 
      if (modulo(step,time_skip) == 0) then
-        if (io_method < 3 .and. io_method > 0) call gyro_write_timedata
+        call gyro_write_timedata
      endif
 
      !--------------------------------------------------

@@ -192,15 +192,7 @@ x.add('FIELDEIGEN_WI','0.2')
 x.add('FIELDEIGEN_TOL','1e-6')
 x.add('REINTEGRATE_FLAG','0')
 x.add('IC_METHOD','1')
-
-# HDF5 IO PARAMETERS
-x.add('IO_METHOD', '1')
-x.add('TIME_SKIP_WEDGE', '0')
-x.add('N_TORANGLE_WEDGE', '1')
-x.add('N_TORANGLE_3D', '0')
-x.add('THETA_WEDGE_OFFSET', '0.0')
-x.add('THETA_WEDGE_ANGLE', '0.0')
-x.add('TORANGLE_OFFSET', '0.0')
+x.add('ZF_TEST_FLAG','0')
 
 # Deprecated parameters
 

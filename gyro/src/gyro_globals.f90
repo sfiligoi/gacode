@@ -105,28 +105,6 @@ module gyro_globals
   !---------------------------------------------------------
 
   !---------------------------------------------------------
-  ! Files for vshdf5 i/o control
-  !
-  integer :: io_method = 1
-  integer :: time_skip_wedge = 0    ! Wedge files for synthetic diagnostics
-  integer :: n_torangle_wedge = 1    ! Number of toroidal planes to use in wedge plots
-  integer :: n_torangle_3d = 0
-  real :: torangle_offset = 0.0
-  logical :: hdf5_skip=.false.
-  !
-  ! This defines a wedge in the poloidal plane 
-  ! To recover the normal global plot, set 
-  ! theta_wedge_offset=-pi and theta_wedge_angle=2*pi
-  real  :: theta_wedge_offset = 0.0
-  real  :: theta_wedge_angle = 0.0
-
-  !
-  real, dimension(:,:,:), allocatable :: alpha_phi
-  real, dimension(:,:,:), allocatable :: alpha_phi_wedge
-
-  !---------------------------------------------------------
-
-  !---------------------------------------------------------
   ! Newline characters:
   !
   character(len=*), parameter :: new_line = char(13)//char(10)
@@ -228,9 +206,8 @@ module gyro_globals
   integer :: geo_fastionbeta_flag
   integer :: fakefield_flag
   integer :: reintegrate_flag
-  integer :: coll_op_cons_flag
-  integer :: coll_op_self_flag
   integer :: ic_method
+  integer :: zf_test_flag
   !---------------------------------------------------------
 
   !-----------------------------------------------------------------------------------
@@ -443,9 +420,7 @@ module gyro_globals
   complex, dimension(:,:,:,:), allocatable :: cs_blend_prime
   !
   complex, dimension(:,:,:), allocatable :: blend_plot
-  complex, dimension(:,:,:), allocatable :: blend_wedge
   complex, dimension(:,:,:), allocatable :: blend_prime_plot
-  complex, dimension(:,:,:), allocatable :: blend_prime_wedge
   !---------------------------------------------------------
 
   !---------------------------------------------------------
@@ -469,7 +444,6 @@ module gyro_globals
   real :: t_current
   !
   real, dimension(:), allocatable :: w_time
-  real, dimension(:), allocatable :: w_time_wedge
   !
   complex, dimension(:,:), allocatable :: omega_linear
   ! 
@@ -805,9 +779,6 @@ module gyro_globals
   real, dimension(:,:), allocatable :: ave_phi
   !
   complex, dimension(:,:,:,:), allocatable :: moments_plot
-  complex, dimension(:,:,:,:), allocatable :: moments_plot_wedge
-  real, dimension(:,:), allocatable :: nu_coarse
-  real, dimension(:,:), allocatable :: nu_wedge
   real, dimension(:,:,:), allocatable :: moments_zero_plot
   !
   real, dimension(:,:), allocatable :: b0_plot

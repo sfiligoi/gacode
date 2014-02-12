@@ -47,13 +47,11 @@ subroutine gyro_write_timedata
 
      ! POTENTIALS
 
-     if(io_method < 3) then
-        call write_distributed_complex(&
-             trim(path)//'out.gyro.moment_u',&
-             10,&
-             size(phi_plot(:,:,1:n_field)),&
-             phi_plot(:,:,1:n_field))
-     endif
+     call write_distributed_complex(&
+          trim(path)//'out.gyro.moment_u',&
+          10,&
+          size(phi_plot(:,:,1:n_field)),&
+          phi_plot(:,:,1:n_field))
 
   endif !u_flag==1
 
@@ -61,13 +59,11 @@ subroutine gyro_write_timedata
 
      ! PARALLEL ELECTRIC FIELD
 
-     if(io_method < 3) then
-        call write_distributed_complex(&
-             trim(path)//'out.gyro.moment_epar',&
-             10,&
-             size(phi_plot(:,:,n_field+1)),&
-             phi_plot(:,:,n_field+1))
-     endif
+     call write_distributed_complex(&
+          trim(path)//'out.gyro.moment_epar',&
+          10,&
+          size(phi_plot(:,:,n_field+1)),&
+          phi_plot(:,:,n_field+1))
 
   endif !epar_flag==1
 
@@ -75,13 +71,11 @@ subroutine gyro_write_timedata
 
      ! DENSITY
 
-     if(io_method < 3) then
-        call write_distributed_complex(&
-             trim(path)//'out.gyro.moment_n',&
-             10,&
-             size(n_plot),&
-             n_plot)
-     endif
+     call write_distributed_complex(&
+          trim(path)//'out.gyro.moment_n',&
+          10,&
+          size(n_plot),&
+          n_plot)
 
   endif !n_flag ==1 
 
@@ -89,13 +83,11 @@ subroutine gyro_write_timedata
 
      ! ENERGY
 
-     if(io_method < 3) then
-        call write_distributed_complex(&
-             trim(path)//'out.gyro.moment_e',&
-             10,&
-             size(e_plot),&
-             e_plot)
-     endif
+     call write_distributed_complex(&
+          trim(path)//'out.gyro.moment_e',&
+          10,&
+          size(e_plot),&
+          e_plot)
 
   endif !e_flag==1
 
@@ -103,13 +95,11 @@ subroutine gyro_write_timedata
 
      ! PARALLEL VELOCITY
 
-     if(io_method < 3) then
-        call write_distributed_complex(&
-             trim(path)//'out.gyro.moment_v',&
-             10,&
-             size(v_plot),&
-             v_plot)
-     endif
+     call write_distributed_complex(&
+          trim(path)//'out.gyro.moment_v',&
+          10,&
+          size(v_plot),&
+          v_plot)
 
   endif !v_flag==1
 

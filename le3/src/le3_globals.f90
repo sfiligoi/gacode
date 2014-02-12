@@ -13,6 +13,7 @@ module le3_globals
   real :: rmin,rmaj,hmin,dhmindr,q,s
   real :: kappa, s_kappa, delta, s_delta, zeta, s_zeta
   real :: shift, zmag, dzmag
+  real :: beta_star
   real :: iota,iota_p
   real :: dt,dp
 
@@ -35,6 +36,9 @@ module le3_globals
   real, dimension(:,:), allocatable :: rs,zs
   real, dimension(:,:), allocatable :: bpol, btor
   real, dimension(:,:), allocatable :: dbdt, dbdp
+
+  real, dimension(:), allocatable :: deriv_t
+  real, dimension(:), allocatable :: deriv_p
 
   !--------------------------------------------------------
   ! MINPACK variables
@@ -61,8 +65,11 @@ module le3_globals
   real :: vprime
   integer :: matsize
   integer :: indx_c00
-  real, dimension(:,:), allocatable :: basis, basis_prime, &
-       basis_dt_prime, basis_dp_prime
+  real, dimension(:,:), allocatable :: basis
+  real, dimension(:,:), allocatable :: basis_dt
+  real, dimension(:,:), allocatable :: basis_prime
+  real, dimension(:,:), allocatable :: basis_dt_prime
+  real, dimension(:,:), allocatable :: basis_dp_prime
   integer, dimension(:), allocatable :: m_indx, n_indx, itype
 
 end module le3_globals

@@ -1,4 +1,4 @@
-subroutine le3_rz(t0,p0,r0,z0,drdt0,drdp0,dzdt0,dzdp0,jac0,drdtt0,dzdtt0)
+subroutine le3_rz(t0,p0,r0,z0,drdt0,drdp0,dzdt0,dzdp0,jac0,rc0)
 
   use le3_globals
 
@@ -8,8 +8,9 @@ subroutine le3_rz(t0,p0,r0,z0,drdt0,drdp0,dzdt0,dzdp0,jac0,drdtt0,dzdtt0)
   real, intent(inout) :: r0,z0,jac0
   real, intent(inout) :: drdt0,dzdt0
   real, intent(inout) :: drdp0,dzdp0
-  real, intent(inout) :: drdtt0,dzdtt0
+  real, intent(inout) :: rc0
   real :: drdr0,dzdr0
+  real :: drdtt0,dzdtt0
   real :: ang,x,a,a_t,a_tt
 
   ang = m*t0+n*p0
@@ -57,4 +58,7 @@ subroutine le3_rz(t0,p0,r0,z0,drdt0,drdp0,dzdt0,dzdp0,jac0,drdtt0,dzdtt0)
   ! J [dtb/dr terms vanish]
   jac0 = r0*(drdr0*dzdt0-drdt0*dzdr0)
 
+  ! radius of curvature r_c (this is independent of theta coordinates).
+  rc0 = (drdt0**2+dzdt0**2)**1.5/(drdt0*dzdtt0-dzdt0*drdtt0)  
+ 
 end subroutine le3_rz

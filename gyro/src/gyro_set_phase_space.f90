@@ -19,8 +19,6 @@ subroutine gyro_set_phase_space(datafile,io)
   integer, intent(in) :: io
   character (len=*), intent(in) :: datafile
 
-  character (len=8) :: species_tag
-
   do ie=1,n_energy
      do i=1,n_x
         do k=1,n_lambda

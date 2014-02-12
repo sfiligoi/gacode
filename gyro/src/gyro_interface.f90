@@ -201,15 +201,6 @@ module gyro_interface
   integer :: gyro_reintegrate_flag_in = 0
   integer :: gyro_ic_method_in = 1
 
-  ! io related to hdf5 and diagnostics  
-  integer :: gyro_io_method_in = 1
-  real    :: gyro_torangle_offset_in = 0.0
-  integer :: gyro_time_skip_wedge_in = 0
-  integer :: gyro_n_torangle_wedge_in = 0
-  integer :: gyro_n_torangle_3d_in = 0
-  real    :: gyro_theta_wedge_offset_in = 0.0
-  real    :: gyro_theta_wedge_angle_in = 0.0
-
   ! Inputs available via interface but not by INPUT
   integer :: gyro_n_fourier_geo_in = 0
   real, dimension(8,0:32) :: gyro_a_fourier_geo_in = 0.0
@@ -427,14 +418,6 @@ contains
     gyro_reintegrate_flag_in = reintegrate_flag
     gyro_ic_method_in = ic_method
 
-    gyro_io_method_in = io_method
-    gyro_torangle_offset_in = torangle_offset
-    gyro_time_skip_wedge_in = time_skip_wedge
-    gyro_n_torangle_wedge_in = n_torangle_wedge
-    gyro_n_torangle_3d_in  = n_torangle_3d 
-    gyro_theta_wedge_offset_in  = theta_wedge_offset
-    gyro_theta_wedge_angle_in = theta_wedge_angle 
-
     gyro_n_fourier_geo_in = n_fourier_geo
     gyro_a_fourier_geo_in(:,:) = a_fourier_geo(:,:)
 
@@ -646,14 +629,6 @@ contains
     fieldeigen_tol = gyro_fieldeigen_tol_in
     reintegrate_flag = gyro_reintegrate_flag_in
     ic_method = gyro_ic_method_in
-
-    io_method = gyro_io_method_in       
-    torangle_offset = gyro_torangle_offset_in        
-    time_skip_wedge = gyro_time_skip_wedge_in 
-    n_torangle_wedge = gyro_n_torangle_wedge_in 
-    n_torangle_3d = gyro_n_torangle_3d_in  
-    theta_wedge_offset = gyro_theta_wedge_offset_in   
-    theta_wedge_angle = gyro_theta_wedge_angle_in  
 
     n_fourier_geo = gyro_n_fourier_geo_in
     a_fourier_geo(:,:) = gyro_a_fourier_geo_in(:,:)

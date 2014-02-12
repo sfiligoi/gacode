@@ -6,7 +6,6 @@ subroutine le3_func(xsize,x,fvec)
 
   integer :: ix,i,j,its,ips
   integer, intent(in) :: xsize
-  real :: drdttb,dzdttb
   real, dimension(xsize), intent(inout) :: fvec
   real, dimension(xsize), intent(in) :: x
   real, dimension(:,:), allocatable :: bp,br,bz
@@ -62,8 +61,7 @@ subroutine le3_func(xsize,x,fvec)
              dzdtb(i,j),&
              dzdpb(i,j),&
              jac(i,j),&
-             drdttb,&
-             dzdttb)
+             rc(i,j))
 
      enddo
   enddo

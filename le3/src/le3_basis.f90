@@ -3,6 +3,10 @@
 ! C: cos m cos n
 ! D: cos m sin n
 
+! btype='d0': basis function
+! btype='dt': theta-derivative of basis function
+! btype='dp': phi-derivative of basis function
+
 subroutine le3_basis(i0,m0,n0,basis0,btype)
 
   use le3_globals

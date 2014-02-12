@@ -6,9 +6,8 @@ subroutine le3_geometry
   integer :: i,j,k,its,ips,ip, kt, kp
   real :: jacs
   real :: drdtbs,dzdtbs
-  real :: drdttbs,dzdttbs
   real :: drdpbs,dzdpbs
-  real, dimension(:), allocatable :: derivvec
+  real :: rcs
   real, dimension(:), allocatable :: vec_vdriftx, vec_flux, vec_upar, &
        vec_uparB, vec_fsa, vec_bmag, vec_thetabar, vec_ntv
 
@@ -36,7 +35,6 @@ subroutine le3_geometry
   allocate(gtt(nt,np))
   allocate(gpt(nt,np))
   allocate(cosu(nt,np))
-  allocate(rc(nt,np))
 
   allocate(btor(nt,np))
   allocate(bpol(nt,np))
@@ -86,8 +84,7 @@ subroutine le3_geometry
              dzdtbs,&
              dzdpbs,&
              jacs,&
-             drdttbs,&
-             dzdttbs)
+             rcs)
 
         ! sqrt(g)*B_unit
         g(i,j)   = 1.0/rmin * dtbdt(i,j) * jacs
@@ -102,8 +99,8 @@ subroutine le3_geometry
 
         cosu(i,j) = dzdtbs*dtbdt(i,j)/sqrt(gtt(i,j))
  
-        ! JC: Need to fix this.
-        rc(i,j) = rmin
+        ! Radius of curvature (coordinate independent)
+        rc(i,j) = rcs
 
      enddo
   enddo
@@ -115,10 +112,10 @@ subroutine le3_geometry
   bmag(:,:) = 1.0/g * sqrt(gpp + 2.0*iota*gpt + iota**2 * gtt)
 
   ! db/dtheta
-  allocate(derivvec(0:nt-1))
-  derivvec(0) = 0.0
+  allocate(deriv_t(0:nt-1))
+  deriv_t(0) = 0.0
   do i=1,nt-1
-     derivvec(i) = -0.5*(-1)**i/tan(0.5*t(i+1))
+     deriv_t(i) = -0.5*(-1)**i/tan(0.5*t(i+1))
   enddo
   dbdt(:,:) = 0.0
   do j=1,np
@@ -128,17 +125,16 @@ subroutine le3_geometry
            if(k < 0) then
               k = k + nt
            endif
-           dbdt(i,j) = dbdt(i,j)+derivvec(k)*bmag(ip,j)
+           dbdt(i,j) = dbdt(i,j)+deriv_t(k)*bmag(ip,j)
         enddo
      enddo
   enddo
-  deallocate(derivvec)
 
   ! db/dphi and dg/dphi
-  allocate(derivvec(0:np-1))
-  derivvec(0) = 0.0
+  allocate(deriv_p(0:np-1))
+  deriv_p(0) = 0.0
   do i=1,np-1
-     derivvec(i) = -0.5*(-1)**i/tan(0.5*p(i+1))
+     deriv_p(i) = -0.5*(-1)**i/tan(0.5*p(i+1))
   enddo
   dbdp(:,:) = 0.0
   dgdp(:,:) = 0.0
@@ -149,12 +145,11 @@ subroutine le3_geometry
            if(k < 0) then
               k = k + np
            endif
-           dbdp(j,i) = dbdp(j,i) + derivvec(k) * bmag(j,ip)
-           dgdp(j,i) = dgdp(j,i) + derivvec(k) * g(j,ip)
+           dbdp(j,i) = dbdp(j,i) + deriv_p(k) * bmag(j,ip)
+           dgdp(j,i) = dgdp(j,i) + deriv_p(k) * g(j,ip)
         enddo
      enddo
   enddo
-  deallocate(derivvec)
 
   ! bhat dot grad = bdotgrad * (iota d/dt + d/dp)  
   bdotgrad(:,:) = 1.0/(bmag * g)
@@ -181,6 +176,7 @@ subroutine le3_geometry
   allocate(itype(matsize))
 
   allocate(basis(nt,np))
+  allocate(basis_dt(nt,np))
   allocate(basis_prime(nt,np))
   allocate(basis_dt_prime(nt,np))
   allocate(basis_dp_prime(nt,np))

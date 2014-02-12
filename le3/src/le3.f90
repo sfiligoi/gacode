@@ -19,6 +19,7 @@ program le3
   read(1,*) s_zeta
   read(1,*) zmag
   read(1,*) dzmag
+  read(1,*) beta_star
   read(1,*) hmin
   read(1,*) dhmindr
   read(1,*) q
@@ -35,8 +36,11 @@ program le3
      np = 1
   endif
 
+  ! i = 1/q
   iota   = 1.0/q
-  iota_p = s
+
+  ! i' = B_unit*di/d(chi)
+  iota_p = -s/(q*rmin**2)
 
   call le3_alloc(1)
 

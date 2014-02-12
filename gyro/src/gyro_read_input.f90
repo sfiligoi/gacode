@@ -238,7 +238,6 @@ subroutine gyro_read_input
   call readbc_real(gkeigen_tol)
   call readbc_real(gkeigen_omega_target)
   call readbc_real(gkeigen_gamma_target)
-
   call readbc_int(linsolve_method)
 
   ! Field eigenvalue solver inputs
@@ -247,24 +246,9 @@ subroutine gyro_read_input
   call readbc_real(fieldeigen_wi)
   call readbc_real(fieldeigen_tol)
 
-  ! Chris' profile integration option
   call readbc_int(reintegrate_flag)
-
   call readbc_int(ic_method)
-
-  ! hdf5 output
-  call readbc_int(io_method)
-  ! time intervals for hdf5 write outs
-  call readbc_int(time_skip_wedge)
-  ! pie-slice alpha ??
-  call readbc_int(n_torangle_wedge) 
-  call readbc_int(n_torangle_3d) 
-  ! toroidal direction
-  call readbc_real(theta_wedge_offset)
-  call readbc_real(theta_wedge_angle)
-  ! synthetic diagnostics
-  call readbc_real(torangle_offset)
-  !
+  call readbc_int(zf_test_flag)
   ! DONE reading data.
   !--------------------------------------------------------
 

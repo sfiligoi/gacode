@@ -154,7 +154,6 @@ subroutine ufile_volint(f,fi,v,n)
   integer, intent(in) :: n 
   real, intent(in) :: f(n),v(n)
   real, intent(inout) :: fi(n)
-  real, dimension(n) :: vp
   integer :: i
 
   fi(1) = 0.0

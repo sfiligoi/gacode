@@ -32,7 +32,6 @@ subroutine gyro_field_plot
      ! Special case: t = 0
 
      w_time(:) = 1.0
-     w_time_wedge(:) = 1.0
 
   else
 
@@ -50,12 +49,8 @@ subroutine gyro_field_plot
         do i=1,time_skip
            w_time(i) = exp(-abs(i-time_skip)/plot_filter)
         enddo
-         do i=1,time_skip_wedge
-           w_time_wedge(i) = exp(-abs(i-time_skip_wedge)/plot_filter)
-        enddo
 
         w_time(:) = w_time(:)/sum(w_time(:))
-        w_time_wedge(:) = w_time_wedge(:)/sum(w_time_wedge(:))
 
      else
 
@@ -63,15 +58,11 @@ subroutine gyro_field_plot
         ! limit:
 
         w_time(:) = 0.0
-        w_time_wedge(:) = 0.0
         w_time(time_skip) = 1.0
-        w_time_wedge(time_skip_wedge) = 1.0
 
      endif
 
   endif
-
-!NEED to create a phi_plot_wedge
 
   !---------------------------------------------------------
   ! Phi, A_parallel, B_parallel

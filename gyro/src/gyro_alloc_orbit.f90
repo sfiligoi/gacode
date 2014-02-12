@@ -74,19 +74,10 @@ subroutine gyro_alloc_orbit(flag)
      allocate(blend_plot(n_blend,n_theta_plot,n_x))
      allocate(blend_prime_plot(n_blend,n_theta_plot,n_x))
 
-     if (io_method > 1 .and. time_skip_wedge > 0) then
-        allocate(blend_wedge(n_blend,n_theta_mult*n_theta_plot,n_x))
-        allocate(blend_prime_wedge(n_blend,n_theta_mult*n_theta_plot,n_x))
-        !blend_wedge=0.
-        !blend_prime_wedge=0.
-     endif
-
      if (collision_flag == 1) then
         ! Collision arrays
         allocate(nu_total(n_x,n_energy,indx_e))
         allocate(xi(n_x,n_lambda,n_stack))
-        !nu_total=0.
-        !xi=0.
      endif
 
      if (n_field > 1) then
@@ -134,10 +125,6 @@ subroutine gyro_alloc_orbit(flag)
      deallocate(ff2_mm_piv)
      deallocate(blend_plot)
      deallocate(blend_prime_plot)
-     if (io_method > 1 .and. time_skip_wedge > 0) then
-        deallocate(blend_wedge)
-        deallocate(blend_prime_wedge)
-     endif
 
      if (allocated(nu_total)) deallocate(nu_total)
      if (allocated(xi)) deallocate(xi)
