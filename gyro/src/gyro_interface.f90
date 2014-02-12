@@ -200,6 +200,7 @@ module gyro_interface
   real    :: gyro_fieldeigen_tol_in = 1e-6
   integer :: gyro_reintegrate_flag_in = 0
   integer :: gyro_ic_method_in = 1
+  integer :: gyro_zf_test_flag_in = 1
 
   ! Inputs available via interface but not by INPUT
   integer :: gyro_n_fourier_geo_in = 0
@@ -417,6 +418,7 @@ contains
     gyro_fieldeigen_tol_in = fieldeigen_tol
     gyro_reintegrate_flag_in = reintegrate_flag
     gyro_ic_method_in = ic_method
+    gyro_zf_test_flag_in = zf_test_flag
 
     gyro_n_fourier_geo_in = n_fourier_geo
     gyro_a_fourier_geo_in(:,:) = a_fourier_geo(:,:)
@@ -629,6 +631,7 @@ contains
     fieldeigen_tol = gyro_fieldeigen_tol_in
     reintegrate_flag = gyro_reintegrate_flag_in
     ic_method = gyro_ic_method_in
+    zf_test_flag = gyro_zf_test_flag_in
 
     n_fourier_geo = gyro_n_fourier_geo_in
     a_fourier_geo(:,:) = gyro_a_fourier_geo_in(:,:)
@@ -822,6 +825,7 @@ contains
     write(1,30) 'FIELDEIGEN_TOL',gyro_fieldeigen_tol_in
     write(1,20) 'REINTEGRATE_FLAG',gyro_reintegrate_flag_in
     write(1,20) 'IC_METHOD',gyro_ic_method_in
+    write(1,20) 'ZF_TEST_FLAG',gyro_zf_test_flag_in
     close(1)
 
 20  format(a,'=',i3)
