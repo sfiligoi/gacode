@@ -200,7 +200,7 @@ module gyro_interface
   real    :: gyro_fieldeigen_tol_in = 1e-6
   integer :: gyro_reintegrate_flag_in = 0
   integer :: gyro_ic_method_in = 1
-  integer :: gyro_zf_test_flag_in = 1
+  integer :: gyro_zf_test_flag_in = 0
 
   ! Inputs available via interface but not by INPUT
   integer :: gyro_n_fourier_geo_in = 0
