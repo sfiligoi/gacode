@@ -6,6 +6,7 @@ include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
 export EXTRA_LIBS = \
        ${GACODE_ROOT}/le3/minpack/minpack_lib.a \
+       ${GACODE_ROOT}/shared/GEO/GEO_lib.a \
        ${LMATH}
 
 all:

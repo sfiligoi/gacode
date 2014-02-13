@@ -42,6 +42,8 @@ program le3
   ! i' = B_unit*di/d(chi)
   iota_p = -s/(q*rmin**2)
 
+  print *,iota,iota_p
+
   call le3_alloc(1)
 
   ! Set initial conditions

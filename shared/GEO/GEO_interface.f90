@@ -73,7 +73,8 @@
 !  GEO_bigr     : R
 !  GEO_bigr_r   : dR/dr
 !  GEO_bigr_t   : dR/dtheta
-!  GEO_theta_nc : theta_nc (constant fieldline angle)
+!  GEO_theta_nc : theta_nc (GS2/NCLASS fieldline angle)
+!  GEO_theta_s  : theta_s (straight fieldline angle)
 !-----------------------------------------------------
 
 module GEO_interface
@@ -128,6 +129,8 @@ module GEO_interface
   real, dimension(:), allocatable :: GEOV_bigr_r
   real, dimension(:), allocatable :: GEOV_bigr_t
   real, dimension(:), allocatable :: GEOV_theta_nc
+  real, dimension(:), allocatable :: GEOV_theta_s
+  real, dimension(:), allocatable :: GEOV_psi2
 
   ! Scalar-valued functions:
   !
@@ -154,6 +157,8 @@ module GEO_interface
   real :: GEO_bigr_r
   real :: GEO_bigr_t
   real :: GEO_theta_nc
+  real :: GEO_theta_s
+  real :: GEO_psi2
 
   ! Flux-surface averages:
 

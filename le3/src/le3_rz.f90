@@ -53,7 +53,7 @@ subroutine le3_rz(t0,p0,r0,z0,drdt0,drdp0,dzdt0,dzdp0,jac0,rc0)
   dzdp0 = n*hmin*cos(ang)
 
   ! d^2Z/d(tb)^2
-  dzdtt0 = -kappa*rmin*sin(a)*a_t**2+kappa*rmin*cos(a)*a_tt
+  dzdtt0 = -kappa*rmin*sin(a)*a_t**2+kappa*rmin*cos(a)*a_tt-m**2*hmin*sin(ang)
 
   ! J [dtb/dr terms vanish]
   jac0 = r0*(drdr0*dzdt0-drdt0*dzdr0)

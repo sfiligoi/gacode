@@ -56,6 +56,8 @@ subroutine GEO_alloc(flag)
      allocate(GEOV_bigr_r(GEO_ntheta_in))
      allocate(GEOV_bigr_t(GEO_ntheta_in))
      allocate(GEOV_theta_nc(GEO_ntheta_in))
+     allocate(GEOV_theta_s(GEO_ntheta_in))
+     allocate(GEOV_psi2(GEO_ntheta_in))
 
      allocate(GEO_fourier_in(8,0:GEO_nfourier_in))
 
@@ -83,6 +85,8 @@ subroutine GEO_alloc(flag)
      deallocate(GEOV_bigr_r)
      deallocate(GEOV_bigr_t)
      deallocate(GEOV_theta_nc)
+     deallocate(GEOV_theta_s)
+     deallocate(GEOV_psi2)
 
      deallocate(GEO_fourier_in)
 

@@ -76,6 +76,7 @@ subroutine GEO_do()
   real, dimension(:), allocatable :: loop
   real, dimension(:), allocatable :: a_R,b_R,a_Z,b_Z
   real, dimension(:), allocatable :: a_Rp,b_Rp,a_Zp,b_Zp
+  real, dimension(:), allocatable :: r_sc
   !
   !-----------------------------------------------------------
 
@@ -135,6 +136,7 @@ subroutine GEO_do()
   allocate(ic(2-n_theta:2*n_theta-2))
   allocate(ei(n_theta,4))
   allocate(loop(4))
+  allocate(r_sc(n_theta))
   !-----------------------------------------------------------
 
   pi_2 = 8.0*atan(1.0)
@@ -395,11 +397,11 @@ subroutine GEO_do()
   ! pre-factor of 0.5 comes from triangular element in phi-direction:
   ! dV = (0.5*R*dphi)*(R*dZ) 
   !
-  GEO_volume    = 0.5*pi_2*sum(bigz_t(1:n_theta-1)*bigr(1:n_theta-1)**2)*d_theta
+  GEO_volume = 0.5*pi_2*sum(bigz_t(1:n_theta-1)*bigr(1:n_theta-1)**2)*d_theta
   !-----------------------------------------------------------
 
   !-----------------------------------------------------------
-  ! Straight field-line angle
+  ! GS2/NCLASS angle
   !
   GEOV_theta_nc(1) = thetav(1)
   do i=2,n_theta
@@ -409,13 +411,28 @@ subroutine GEO_do()
   !-----------------------------------------------------------
 
   !-----------------------------------------------------------
-  ! Poloidal scale length (useful for code resolution choice).
-  r_c = 0.0
-  do i=2,n_theta-1
-     r_c(i) = (gsin(i+1)-gsin(i-1))/(2*d_theta)
+  ! Straight angle
+  !
+  GEOV_theta_s(1) = thetav(1)
+  r_sc(:) = g_theta(:)/bigr(:)**2/b(:)
+  do i=2,n_theta
+     GEOV_theta_s(i) = GEOV_theta_s(i-1)+0.5*(r_sc(i)+r_sc(i-1))*d_theta
   enddo
-  GEO_thetascale = maxval(abs(r_c(:)))
+  GEOV_theta_s(:) = -0.5*pi_2+pi_2*(0.5*pi_2+GEOV_theta_s(:))/(0.5*pi_2+GEOV_theta_s(n_theta))
   !-----------------------------------------------------------
+
+  !-----------------------------------------------------------
+  ! Poloidal scale length (useful for code resolution choice).
+  r_sc = 0.0
+  do i=2,n_theta-1
+     r_sc(i) = (gsin(i+1)-gsin(i-1))/(2*d_theta)
+  enddo
+  GEO_thetascale = maxval(abs(r_sc(:)))
+  !-----------------------------------------------------------
+
+  !-----------------------------------------------------------
+  ! Psi_2: 2*psi2/psi1^2
+  GEOV_psi2(:) = (bp(:)*bigz_l(:)-bp(:)*bigr(:)/r_c(:)-GEO_ffprime)/(bigr(:)*bp(:))**2
 
   !-----------------------------------------------------------
   ! Deallocate internal variables
@@ -423,6 +440,7 @@ subroutine GEO_do()
   deallocate(bigz)
   deallocate(bigz_t)
   deallocate(r_c)
+  deallocate(r_sc)
   deallocate(dbdl)
   deallocate(bigz_l)
   deallocate(e)
