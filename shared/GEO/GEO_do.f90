@@ -411,10 +411,10 @@ subroutine GEO_do()
   !-----------------------------------------------------------
 
   !-----------------------------------------------------------
-  ! Straight angle
+  ! Straight fieldline angle
   !
   GEOV_theta_s(1) = thetav(1)
-  r_sc(:) = g_theta(:)/bigr(:)**2/b(:)
+  r_sc(:) = jac_r(:)/bigr(:)**2
   do i=2,n_theta
      GEOV_theta_s(i) = GEOV_theta_s(i-1)+0.5*(r_sc(i)+r_sc(i-1))*d_theta
   enddo
@@ -432,7 +432,10 @@ subroutine GEO_do()
 
   !-----------------------------------------------------------
   ! Psi_2: 2*psi2/psi1^2
-  GEOV_psi2(:) = (bp(:)*bigz_l(:)-bp(:)*bigr(:)/r_c(:)-GEO_ffprime)/(bigr(:)*bp(:))**2
+  GEOV_psi2(:) = (bp(:)*bigz_l(:)-bp(:)*bigr(:)/r_c(:)+ &
+       0.5*GEO_q_in/GEO_rmin_in*GEO_beta_star_in*bigr(:)**2 &
+       -GEO_ffprime)/(bigr(:)*bp(:))**2
+  !-----------------------------------------------------------
 
   !-----------------------------------------------------------
   ! Deallocate internal variables

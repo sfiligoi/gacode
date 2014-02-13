@@ -148,10 +148,17 @@ subroutine le3_geometry_rho
   GEO_model_in = 0
   GEO_rmin_in = rmin
   GEO_rmaj_in = rmaj
-  GEO_drmaj_in = 0.0
+  GEO_drmaj_in = shift
+  GEO_zmag_in = 0.0
+  GEO_dzmag_in = 0.0
   GEO_q_in = q
   GEO_s_in = s
   GEO_kappa_in = kappa
+  GEO_s_kappa_in = 0.0
+  GEO_delta_in = delta
+  GEO_s_delta_in = 0.0
+  GEO_zeta_in = zeta
+  GEO_s_zeta_in = 0.0
   GEO_beta_star_in = beta_star
   call GEO_alloc(1)
   call GEO_do()
@@ -160,7 +167,8 @@ subroutine le3_geometry_rho
      theta = (i-1)*2*pi/(n_theta-1)-pi
      call GEO_interp(theta)
      write(1,*) GEO_theta_s,GEO_psi2
-  enddo
+     !write(1,*) theta,GEO_psi2
+   enddo
   close(1)
   call GEO_alloc(0)
 
