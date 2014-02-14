@@ -118,6 +118,19 @@ subroutine neo_make_profiles
            temp_perp(is,ir)   = temp_perp_in(is)
            dlntdr_para(is,ir) =  dlntdr_para_in(is)
            dlntdr_perp(is,ir) =  dlntdr_perp_in(is)
+           eta_perp(is,ir)    = (temp_perp(is,ir)/temp_para(is,ir) - 1.0) 
+           eta_perp_rderiv(is,ir) = -temp_perp(is,ir)/temp_para(is,ir) &
+                 * (dlntdr_perp(is,ir) - dlntdr_para(is,ir))
+           !if(temp_perp(is,ir)/temp_para(is,ir) <= 1.0) then
+           !   eta_perp(is,ir) = 0.0
+           !   eta_perp_rderiv(is,ir) = 0.0
+           !else
+           !   eta_perp(is,ir)    = (temp_perp(is,ir)/temp_para(is,ir) &
+           !        - 1.0)**0.75
+           !   eta_perp_rderiv(is,ir) = 0.75 * eta_perp(is,ir)**(-0.25) &
+           !        * (-temp_perp(is,ir)/temp_para(is,ir) &
+           !        * (dlntdr_perp(is,ir) - dlntdr_para(is,ir)))
+           !endif
         else
            temp(is,ir)        = temp_in(is)
            dlntdr(is,ir)      = dlntdr_in(is)
@@ -125,6 +138,8 @@ subroutine neo_make_profiles
            temp_perp(is,ir)   = temp(is,ir)
            dlntdr_para(is,ir) = dlntdr(is,ir)
            dlntdr_perp(is,ir) = dlntdr(is,ir)
+           eta_perp(is,ir)    = 0.0
+           eta_perp_rderiv(is,ir) = 0.0
         endif
         nu(is,ir)     = nu_1_in *(1.0*z(is))**4/(1.0*z(1))**4 &
              * dens(is,ir) / dens(1,ir) &
@@ -296,6 +311,8 @@ subroutine neo_make_profiles
      dlntdr_perp(:,:) = dlntdr(:,:)
      dlntdr_para(:,:) = dlntdr(:,:)
      vth_para(:,:)    = vth(:,:)
+     eta_perp(:,:)    = 0.0
+     eta_perp_rderiv(:,:) = 0.0
 
      call PROFILE_EXP_alloc(0)
      

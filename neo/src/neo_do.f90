@@ -275,13 +275,11 @@ subroutine neo_do
                       * bigR_tderiv(it))
                  if(aniso_model(is) >= 2) then
                     rotkin = rotkin - 0.5 * sqrt(2.0) * vth(is,ir) &
-                         * gradpar_Bmag(it) / Bmag(it) &
-                         * (temp_perp(is,ir)/temp_para(is,ir) - 1.0) 
+                         * gradpar_Bmag(it) / Bmag(it) * eta_perp(is,ir)
                     driftxrot1(is,it) = driftxrot1(is,it) - I_div_psip &
                          * mass(is)/(1.0*Z(is)) * rho(ir) / Bmag(it) &
                          * (vth(is,ir))**2 &
-                         * gradpar_Bmag(it) / Bmag(it) &
-                         * (temp_perp(is,ir)/temp_para(is,ir) - 1.0)
+                         * gradpar_Bmag(it) / Bmag(it) * eta_perp(is,ir)
                  endif
                  driftxrot2(is,it) = I_div_psip* k_par(it) / Btor(it) &
                       * mass(is)/(1.0*Z(is)) * rho(ir) &
@@ -339,8 +337,16 @@ subroutine neo_do
                        a(k) = 0.0
                        do ks=1, n_species
                           a(k) = a(k) &
-                               - emat_coll_test(is,ks,ie,je,ix) &
-                               * dens_fac(ks,it)
+                                  - emat_coll_test(is,ks,ie,je,ix) &
+                                  * dens_fac(ks,it)
+                          ! EAB test
+                          !if(is/= ks .and. aniso_model(ks) >= 2) then
+                          !   a(k) = a(k) + 0.0
+                          !else
+                          !   a(k) = a(k) &
+                          !        - emat_coll_test(is,ks,ie,je,ix) &
+                          !        * dens_fac(ks,it)
+                          !endif
                        enddo
                        a_iindx(k) = i
                        a_jindx(k) = j
@@ -353,6 +359,10 @@ subroutine neo_do
                           k = k+1
                           a(k) = -emat_coll_field(is,js,ie,je,ix) &
                                * dens_fac(js,it)
+                          ! EAB test
+                          !if (is/= js .and. aniso_model(js) >= 2) then
+                          !   a(k) = 0.0
+                          !endif
                           a_iindx(k) = i
                           a_jindx(k) = j
                        enddo
@@ -641,7 +651,7 @@ contains
 
                 if(aniso_model(is) >= 2) then
                    src_Rot1 = src_Rot1 - dlntdr(is,ir) &
-                        * (temp_perp(is,ir)/temp_para(is,ir) - 1.0) &
+                        * eta_perp(is,ir) &
                         * log(Bmag(it)/Bmag_th0) &
                         + (1.0*Z(is))/temp(is,ir) * phi_rot_avg_rderiv &
                         * (1.0 - temp(is,ir)/temp_para(is,ir)) &
