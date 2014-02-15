@@ -159,7 +159,7 @@ contains
        ! which currently only works in local profile mode
        GEO_beta_star_in = 0.0
        do is=1,n_species
-          if(aniso_model(is) >= 2) then
+          if(aniso_model(is) == 2) then
              GEO_beta_star_in = beta_star(ir)
           endif
        enddo

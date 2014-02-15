@@ -175,9 +175,9 @@ contains
        it = it_indx(i)
 
        ! This is lambda_a (the effective potential energy)
-       rfac = Z(is)/temp_para(is,ir) * (phi_rot(it) - phi_rot_avg) &
-            - (somega_rot(is) * bigR(it) / vth(is,ir))**2 * 0.5
-       if(aniso_model(is) >= 2) then
+       rfac = Z(is)/temp(is,ir) * (phi_rot(it) - phi_rot_avg) &
+            - (omega_rot(ir) * bigR(it) / vth(is,ir))**2 * 0.5
+       if(aniso_model(is) == 2) then
           rfac = rfac + eta_perp(is,ir) * log(Bmag(it)/Bmag_th0)
        endif
 
@@ -201,10 +201,10 @@ contains
                * sqrt(2.0) * Btor(it)/Bmag(it) &
                * evec_e1(ie,ix) &
                + 4.0/3.0 * driftx(is,it) &
-               * somega_rot(is) * bigR(it) / vth(is,ir) &
+               * omega_rot(ir) * bigR(it) / vth(is,ir) &
                * evec_e1(ie,ix) &
                + driftxrot1(is,it) &
-               * somega_rot(is) * bigR(it) / vth(is,ir) &
+               * omega_rot(ir) * bigR(it) / vth(is,ir) &
                * evec_e0(ie,ix))
 
           d_phi(it) = d_phi(it) + Z(is) *  dens(is,ir) &
@@ -232,7 +232,7 @@ contains
                + 1.0/3.0 * driftxrot1(is,it) &
                * sqrt(2.0) * Btor(it)/Bmag(it) * evec_e05(ie,ix) &
                + 1.0/3.0 * driftxrot2(is,it) &
-               * somega_rot(is) * bigR(it) / vth(is,ir) * evec_e05(ie,ix) &
+               * omega_rot(ir) * bigR(it) / vth(is,ir) * evec_e05(ie,ix) &
                + 2.0/15.0 * driftxrot3(is,it)* evec_e105(ie,ix))
 
           ! uparB = < B * 1/n * int vpar * (F0 g)>
@@ -269,7 +269,7 @@ contains
                * sqrt(2.0) * Btor(it)/Bmag(it) &
                * evec_e1(ie,ix) &
                + 2.0/15.0 * driftx(is,it) &
-               * somega_rot(is) * bigR(it) / vth(is,ir) &
+               * omega_rot(ir) * bigR(it) / vth(is,ir) &
                * evec_e1(ie,ix))
 
        else if (ix == 3) then
@@ -284,7 +284,7 @@ contains
     enddo
 
     do is=1, n_species
-       eflux(is) = eflux(is) + somega_rot(is) * mflux(is)
+       eflux(is) = eflux(is) + omega_rot(ir) * mflux(is)
     enddo
 
     ! d_phi: sum_s Z_s e int f_s = 0
@@ -333,20 +333,16 @@ contains
             * (dlnndr(is,ir) &
             - (z(is)*1.0)/temp(is,ir) * dphi0dr(ir) &
             + dlntdr(is,ir) & 
-            * (1.0 + z(is) / temp_para(is,ir) * phi_rot_avg &
-            + somega_rot(is)**2 * 0.5/vth(is,ir)**2 &
+            * (1.0 + z(is) / temp(is,ir) * phi_rot_avg &
+            + omega_rot(ir)**2 * 0.5/vth(is,ir)**2 &
             * (bigR_th0**2 - bigR2_avg)) &
-            + somega_rot_deriv(is) &
-            * somega_rot(is)/vth(is,ir)**2 * (bigR_th0**2 - bigR2_avg) &
-            + somega_rot(is)**2 * bigR_th0 / vth(is,ir)**2 * bigR_th0_rderiv))
-       if(aniso_model(is) >= 2) then
+            + omega_rot_deriv(ir) &
+            * omega_rot(ir)/vth(is,ir)**2 * (bigR_th0**2 - bigR2_avg) &
+            + omega_rot(ir)**2 * bigR_th0 / vth(is,ir)**2 * bigR_th0_rderiv))
+       if(aniso_model(is) == 2) then
           kbig_upar(is) = kbig_upar(is) &
                - (I_div_psip * rho(ir) * temp(is,ir) / (z(is)*1.0)) &
-               * (dlntdr(is,ir) * eta_perp(is,ir) * Bmaglog_avg &
-               - (1.0*Z(is))/temp(is,ir) * phi_rot_avg_rderiv &
-               * (1.0 - temp(is,ir)/temp_para(is,ir)) &
-               - (1.0*Z(is))/temp_para(is,ir) * phi_rot_avg &
-               * (-dlntdr_para(is,ir) + dlntdr(is,ir)))
+               * (dlntdr(is,ir) * eta_perp(is,ir) * Bmaglog_avg)
        endif
        if(abs(dlntdr(is,ir)) > epsilon(0.)) then
           klittle_upar(is) = -kbig_upar(is) *  B2_div_dens &
@@ -384,9 +380,9 @@ contains
        fac1 = 0.0
        fac2 = 0.0
        do it=1,n_theta
-          rfac = Z(is)/temp_para(is,ir) * (phi_rot(it) - phi_rot_avg) &
-               - (somega_rot(is) * bigR(it) / vth(is,ir))**2 * 0.5
-          if(aniso_model(is) >= 2) then
+          rfac = Z(is)/temp(is,ir) * (phi_rot(it) - phi_rot_avg) &
+               - (omega_rot(ir) * bigR(it) / vth(is,ir))**2 * 0.5
+          if(aniso_model(is) == 2) then
              rfac = rfac + eta_perp(is,ir) * log(Bmag(it)/Bmag_th0)
           endif
           fac1 = fac1 + w_theta(it) * dens(is,ir)  * dens_fac(is,it) &
@@ -400,32 +396,25 @@ contains
        enddo
        pflux_gv(is) = -0.5 * rho(ir)**2 * mass(is) &
             * temp(is,ir) / (Z(is)*1.0)**2 * I_div_psip * r(ir) / q(ir) &
-            * fac1 * somega_rot_deriv(is)
+            * fac1 * omega_rot_deriv(ir)
        ! EAB: 02/05/14 fixed bug in mflux_gv -- dlntdr bigR_th0**2 term
        ! had wrong sign
        mflux_gv(is) =  -0.5 * temp(is,ir) * rho(ir)**2 * mass(is) &
             * temp(is,ir) / (Z(is)*1.0)**2 * I_div_psip * r(ir) / q(ir) &
             * (fac2 * dlntdr(is,ir) + fac1 * (dlnndr(is,ir) &
             - z(is)/temp(is,ir) * dphi0dr(ir) &
-            + somega_rot(is) * bigR_th0**2 / vth(is,ir)**2 &
-            * somega_rot_deriv(is) &
-            + somega_rot(is)**2 * bigR_th0 / vth(is,ir)**2 &
+            + omega_rot(ir) * bigR_th0**2 / vth(is,ir)**2 &
+            * omega_rot_deriv(ir) &
+            + omega_rot(ir)**2 * bigR_th0 / vth(is,ir)**2 &
             * bigR_th0_rderiv &
-            + dlntdr(is,ir) * (1.0 + 0.5 * somega_rot(is)**2 * bigR_th0**2  &
+            + dlntdr(is,ir) * (1.0 + 0.5 * omega_rot(ir)**2 * bigR_th0**2  &
             / vth(is,ir)**2) &
-            + dlntdr_para(is,ir) * z(is)/temp_para(is,ir) * phi_rot_avg) )
-       if(aniso_model(is) >= 2) then
-          mflux_gv(is) = mflux_gv(is) &
-               -0.5 * temp(is,ir) * rho(ir)**2 * mass(is) &
-               * temp(is,ir) / (Z(is)*1.0)**2 * I_div_psip * r(ir) / q(ir) &
-               * fac1 * (1.0*Z(is))/temp(is,ir) * (-phi_rot_avg_rderiv) &
-               * (1.0 - temp(is,ir)/temp_para(is,ir))
-       endif
+            + dlntdr(is,ir) * z(is)/temp(is,ir) * phi_rot_avg) )
        eflux_gv(is) = -0.5  * temp(is,ir) * rho(ir)**2 * mass(is) &
             * temp(is,ir) / (Z(is)*1.0)**2 * I_div_psip * r(ir) / q(ir) &
-            * fac2 * somega_rot_deriv(is) &
+            * fac2 * omega_rot_deriv(ir) &
             + 2.5 * pflux_gv(is) * temp(is,ir) &
-            + somega_rot(is) * mflux_gv(is)
+            + omega_rot(ir) * mflux_gv(is)
     enddo
 
     do is=1,n_species
@@ -465,22 +454,18 @@ contains
                * (dlnndr(is,ir) &
                - (1.0*z(is))/temp(is,ir) * dphi0dr(ir) &
                + dlntdr(is,ir) & 
-               * (1.0 + z(is) / temp_para(is,ir) * phi_rot(it) &
-               + somega_rot(is)**2 * 0.5/vth(is,ir)**2 &
+               * (1.0 + z(is) / temp(is,ir) * phi_rot(it) &
+               + omega_rot(ir)**2 * 0.5/vth(is,ir)**2 &
                * (bigR_th0**2 - bigR(it)**2)) &
-               + somega_rot(is)**2 * bigR_th0 &
+               + omega_rot(ir)**2 * bigR_th0 &
                      / vth(is,ir)**2 * bigR_th0_rderiv &
-               + somega_rot_deriv(is) * somega_rot(is)/vth(is,ir)**2 &
+               + omega_rot_deriv(ir) * omega_rot(ir)/vth(is,ir)**2 &
                * (bigR_th0**2 - bigR(it)**2))
-          if(aniso_model(is) >= 2) then
+          if(aniso_model(is) == 2) then
              vtor(is,it) = vtor(is,it) &
                   + (I_div_psip * rho(ir) * temp(is,ir) / (z(is)*1.0)) &
                   * (1.0 / Btor(it)) &
-                  * (dlntdr(is,ir) * eta_perp(is,ir) * log(Bmag(it)/Bmag_th0) &
-                  - (1.0*Z(is))/temp(is,ir) * phi_rot_avg_rderiv &
-                  * (1.0 - temp(is,ir)/temp_para(is,ir)) &
-                  - (1.0*Z(is))/temp_para(is,ir) * phi_rot_avg &
-                  * (-dlntdr_para(is,ir) + dlntdr(is,ir)))
+                  * (dlntdr(is,ir) * eta_perp(is,ir) * log(Bmag(it)/Bmag_th0))
           endif
        end do
 

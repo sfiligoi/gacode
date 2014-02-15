@@ -106,31 +106,31 @@ subroutine neo_make_profiles
         dens(is,ir)     = dens_in(is)
         dlnndr(is,ir)   = dlnndr_in(is)
         aniso_model(is) = aniso_model_in(is)
-        if(aniso_model(is) >= 2) then
-           ! for anisotropic species, define a Teff = 1/3 Tpar + 2/3 Tperp
-           !temp(is,ir)   = 1.0/3.0*temp_para(is,ir) + 2.0/3.0*temp_perp(is,ir)
-           !dlntdr(is,ir) = 1.0/3.0*temp_para(is,ir)/temp(is,ir) &
-           !     *dlntdr_para(is,ir) + 2.0/3.0*temp_perp(is,ir) &
-           !     /temp(is,ir) *dlntdr_perp(is,ir)
-           temp(is,ir)        = temp_in(is)
-           dlntdr(is,ir)      = dlntdr_in(is)
+        if(aniso_model(is) == 2) then
+           !temp(is,ir)        = temp_in(is)
+           !dlntdr(is,ir)      = dlntdr_in(is)
            temp_para(is,ir)   = temp_para_in(is)
            temp_perp(is,ir)   = temp_perp_in(is)
            dlntdr_para(is,ir) =  dlntdr_para_in(is)
            dlntdr_perp(is,ir) =  dlntdr_perp_in(is)
-           eta_perp(is,ir)    = (temp_perp(is,ir)/temp_para(is,ir) - 1.0) 
-           eta_perp_rderiv(is,ir) = -temp_perp(is,ir)/temp_para(is,ir) &
-                 * (dlntdr_perp(is,ir) - dlntdr_para(is,ir))
-           !if(temp_perp(is,ir)/temp_para(is,ir) <= 1.0) then
-           !   eta_perp(is,ir) = 0.0
-           !   eta_perp_rderiv(is,ir) = 0.0
-           !else
-           !   eta_perp(is,ir)    = (temp_perp(is,ir)/temp_para(is,ir) &
-           !        - 1.0)**0.75
-           !   eta_perp_rderiv(is,ir) = 0.75 * eta_perp(is,ir)**(-0.25) &
-           !        * (-temp_perp(is,ir)/temp_para(is,ir) &
-           !        * (dlntdr_perp(is,ir) - dlntdr_para(is,ir)))
-           !endif
+           ! for anisotropic species, define a Teff = 1/3 Tpar + 2/3 Tperp
+           temp(is,ir)   = 1.0/3.0*temp_para(is,ir) + 2.0/3.0*temp_perp(is,ir)
+           dlntdr(is,ir) = 1.0/3.0*temp_para(is,ir)/temp(is,ir) &
+                *dlntdr_para(is,ir) + 2.0/3.0*temp_perp(is,ir) &
+                /temp(is,ir) *dlntdr_perp(is,ir)
+           !eta_perp(is,ir)    = (temp_perp(is,ir)/temp_para(is,ir) - 1.0) 
+           !eta_perp_rderiv(is,ir) = -temp_perp(is,ir)/temp_para(is,ir) &
+           !      * (dlntdr_perp(is,ir) - dlntdr_para(is,ir))
+           if(temp_perp(is,ir)/temp_para(is,ir) <= 1.0) then
+              eta_perp(is,ir) = 0.0
+              eta_perp_rderiv(is,ir) = 0.0
+           else
+              eta_perp(is,ir)    = (temp_perp(is,ir)/temp_para(is,ir) &
+                   - 1.0)**0.75
+              eta_perp_rderiv(is,ir) = 0.75 * eta_perp(is,ir)**(-0.25) &
+                   * (-temp_perp(is,ir)/temp_para(is,ir) &
+                   * (dlntdr_perp(is,ir) - dlntdr_para(is,ir)))
+           endif
         else
            temp(is,ir)        = temp_in(is)
            dlntdr(is,ir)      = dlntdr_in(is)
