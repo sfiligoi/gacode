@@ -11,6 +11,7 @@ export EXTRA_LIBS = \
 
 all:
 	gacode_getversion > .VERSION
+	cd ${GACODE_ROOT}/shared/GEO ; make
 	cd minpack ; make
 	cd src ; make
 

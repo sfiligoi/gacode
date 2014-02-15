@@ -145,6 +145,6 @@ subroutine GEO_interp(theta_0)
   GEO_bigr_t   = GEOV_bigr_t(i1)+(GEOV_bigr_t(i2)-GEOV_bigr_t(i1))*z
   GEO_theta_nc = GEOV_theta_nc(i1)+(GEOV_theta_nc(i2)-GEOV_theta_nc(i1))*z
   GEO_theta_s  = GEOV_theta_s(i1)+(GEOV_theta_s(i2)-GEOV_theta_s(i1))*z
-  GEO_psi2     = GEOV_psi2(i1)+(GEOV_psi2(i2)-GEOV_psi2(i1))*z
+  GEO_chi2     = GEOV_chi2(i1)+(GEOV_chi2(i2)-GEOV_chi2(i1))*z
 
 end subroutine GEO_interp

@@ -42,10 +42,10 @@ subroutine le3_compute_theory
   enddo
   vec(:) = 0.0
   do i=1,matsize
-     call le3_basis(itype(i),m_indx(i),n_indx(i),basis,'d0')
+     call le3_basis(itype(i),m_indx(i),n_indx(i),bk,'d0')
      do kt=1,nt
         do kp=1,np
-           vec(i) = vec(i) + basis(kt,kp) * a(kt,kp)
+           vec(i) = vec(i) + bk(kt,kp) * a(kt,kp)
         enddo
      enddo
   enddo
@@ -55,10 +55,10 @@ subroutine le3_compute_theory
   allocate(ahat(nt,np))
   ahat(:,:) = 0.0
   do i=1,matsize
-     call le3_basis(itype(i),m_indx(i),n_indx(i),basis,'d0')
+     call le3_basis(itype(i),m_indx(i),n_indx(i),bk,'d0')
      do kt=1,nt
         do kp=1,np
-           ahat(kt,kp) = ahat(kt,kp) + basis(kt,kp) * vec(i)
+           ahat(kt,kp) = ahat(kt,kp) + bk(kt,kp) * vec(i)
         enddo
      enddo
   enddo
@@ -95,10 +95,10 @@ subroutine le3_compute_theory
   enddo
   vec(:) = 0.0
   do i=1,matsize
-     call le3_basis(itype(i),m_indx(i),n_indx(i),basis,'d0')
+     call le3_basis(itype(i),m_indx(i),n_indx(i),bk,'d0')
      do kt=1,nt
         do kp=1,np
-           vec(i) = vec(i) + basis(kt,kp) * u(kt,kp)
+           vec(i) = vec(i) + bk(kt,kp) * u(kt,kp)
         enddo
      enddo
   enddo
@@ -108,10 +108,10 @@ subroutine le3_compute_theory
   allocate(uhat(nt,np))
   uhat(:,:) = 0.0
   do i=1,matsize
-     call le3_basis(itype(i),m_indx(i),n_indx(i),basis,'d0')
+     call le3_basis(itype(i),m_indx(i),n_indx(i),bk,'d0')
      do kt=1,nt
         do kp=1,np
-           uhat(kt,kp) = uhat(kt,kp) + basis(kt,kp) * vec(i)
+           uhat(kt,kp) = uhat(kt,kp) + bk(kt,kp) * vec(i)
         enddo
      enddo
   enddo
@@ -146,10 +146,10 @@ subroutine le3_compute_theory
   enddo
   vec(:) = 0.0
   do i=1,matsize
-     call le3_basis(itype(i),m_indx(i),n_indx(i),basis,'d0')
+     call le3_basis(itype(i),m_indx(i),n_indx(i),bk,'d0')
      do kt=1,nt
         do kp=1,np
-           vec(i) = vec(i) + basis(kt,kp) * h(kt,kp)
+           vec(i) = vec(i) + bk(kt,kp) * h(kt,kp)
         enddo
      enddo
   enddo
@@ -159,10 +159,10 @@ subroutine le3_compute_theory
   allocate(hhat(nt,np))
   hhat(:,:) = 0.0
   do i=1,matsize
-     call le3_basis(itype(i),m_indx(i),n_indx(i),basis,'d0')
+     call le3_basis(itype(i),m_indx(i),n_indx(i),bk,'d0')
      do kt=1,nt
         do kp=1,np
-           hhat(kt,kp) = hhat(kt,kp) + basis(kt,kp) * vec(i)
+           hhat(kt,kp) = hhat(kt,kp) + bk(kt,kp) * vec(i)
         enddo
      enddo
   enddo

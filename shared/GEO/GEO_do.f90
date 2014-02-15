@@ -423,6 +423,7 @@ subroutine GEO_do()
 
   !-----------------------------------------------------------
   ! Poloidal scale length (useful for code resolution choice).
+  !
   r_sc = 0.0
   do i=2,n_theta-1
      r_sc(i) = (gsin(i+1)-gsin(i-1))/(2*d_theta)
@@ -431,10 +432,14 @@ subroutine GEO_do()
   !-----------------------------------------------------------
 
   !-----------------------------------------------------------
-  ! Psi_2: 2*psi2/psi1^2
-  GEOV_psi2(:) = (bp(:)*bigz_l(:)-bp(:)*bigr(:)/r_c(:)+ &
+  ! chi2 for comparison with le3:
+  ! 
+  ! GEOV_chi2 -> 2*chi2/chi1^2 = (2/q) psi2/psi1^2 + s/r^2
+  !
+  GEOV_chi2(:) = (1.0/geo_q_in)*(bp(:)*bigz_l(:)-bp(:)*bigr(:)/r_c(:)+ &
        0.5*GEO_q_in/GEO_rmin_in*GEO_beta_star_in*bigr(:)**2 &
-       -GEO_ffprime)/(bigr(:)*bp(:))**2
+       -GEO_ffprime)/(bigr(:)*bp(:))**2 &
+       +GEO_s_in/GEO_rmin_in**2
   !-----------------------------------------------------------
 
   !-----------------------------------------------------------

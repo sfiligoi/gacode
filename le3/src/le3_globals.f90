@@ -23,6 +23,8 @@ module le3_globals
   real, dimension(:,:), allocatable  :: r,z
   real, dimension(:,:), allocatable  :: drdtb,dzdtb
   real, dimension(:,:), allocatable  :: drdpb,dzdpb
+  real, dimension(:,:), allocatable  :: drdt,dzdt
+  real, dimension(:,:), allocatable  :: drdp,dzdp
   real, dimension(:,:), allocatable  :: jac
   real, dimension(:,:), allocatable  :: rp,rt
   real, dimension(:,:), allocatable  :: zp,zt
@@ -33,9 +35,11 @@ module le3_globals
 
   real, dimension(:,:), allocatable :: gpp,gtt,gpt
   real, dimension(:,:), allocatable :: cosu,rc
-  real, dimension(:,:), allocatable :: rs,zs
-  real, dimension(:,:), allocatable :: bpol, btor
-  real, dimension(:,:), allocatable :: dbdt, dbdp
+  real, dimension(:,:), allocatable :: bpol,btor
+  real, dimension(:,:), allocatable :: chi1
+  real, dimension(:,:), allocatable :: chi1p,chi1t
+  real, dimension(:,:), allocatable :: drdpt,dzdpt
+  real, dimension(:,:), allocatable :: dbdt,dbdp
 
   real, dimension(:), allocatable :: deriv_t
   real, dimension(:), allocatable :: deriv_p
@@ -65,11 +69,9 @@ module le3_globals
   real :: vprime
   integer :: matsize
   integer :: indx_c00
-  real, dimension(:,:), allocatable :: basis
-  real, dimension(:,:), allocatable :: basis_dt
-  real, dimension(:,:), allocatable :: basis_prime
-  real, dimension(:,:), allocatable :: basis_dt_prime
-  real, dimension(:,:), allocatable :: basis_dp_prime
+  real, dimension(:,:), allocatable :: bk,bkp
+  real, dimension(:,:), allocatable :: bk_t,bkp_t
+  real, dimension(:,:), allocatable :: bk_p,bkp_p
   integer, dimension(:), allocatable :: m_indx, n_indx, itype
 
 end module le3_globals

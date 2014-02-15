@@ -130,7 +130,7 @@ module GEO_interface
   real, dimension(:), allocatable :: GEOV_bigr_t
   real, dimension(:), allocatable :: GEOV_theta_nc
   real, dimension(:), allocatable :: GEOV_theta_s
-  real, dimension(:), allocatable :: GEOV_psi2
+  real, dimension(:), allocatable :: GEOV_chi2
 
   ! Scalar-valued functions:
   !
@@ -158,7 +158,7 @@ module GEO_interface
   real :: GEO_bigr_t
   real :: GEO_theta_nc
   real :: GEO_theta_s
-  real :: GEO_psi2
+  real :: GEO_chi2
 
   ! Flux-surface averages:
 
