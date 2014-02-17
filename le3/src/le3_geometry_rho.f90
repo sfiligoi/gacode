@@ -46,7 +46,7 @@ subroutine le3_geometry_rho
      do j=1,np
 
         x = sqrt(gtt(i,j))
-        y = sqrt(gpp(i,j)-r(i,j)**2)
+        y = sqrt(drdp(i,j)**2+dzdp(i,j)**2)
 
         ycosuv = gpt(i,j)/x
         ysinuv = (dzdt(i,j)*drdp(i,j)-drdt(i,j)*dzdp(i,j))/x
@@ -151,15 +151,10 @@ subroutine le3_geometry_rho
      enddo
   enddo
 
-
   ! Replace zero-row (due to zero theta-average) with c00=0 for delta_theta.
   sys_m(matsize+1,:) = 0.0
   sys_m(matsize+1,1) = 1.0
   sys_b(matsize) = 0.0
-
-  do k=1,nrow
-     print('(20(1pe11.4,1x))'), sys_m(k,:)
-  enddo
 
   call DGESV(nrow,1,sys_m,nrow,i_piv,sys_b,nrow,info)
 
@@ -170,7 +165,7 @@ subroutine le3_geometry_rho
 
   open(unit=1,file='out.le3.rho',status='replace')
   do k=1,matsize
-     write(1,'(2(1pe12.5,2x),3(i2,1x))') sys_b(k),sys_b(k+matsize),itype(k),m_indx(k),n_indx(k)
+     write(1,'(2(1pe13.6,1x))') sys_b(k),sys_b(k+matsize)
   enddo
   close(1)
 

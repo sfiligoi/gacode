@@ -17,6 +17,7 @@ subroutine le3_basis(i0,m0,n0,basis0,btype)
   real, dimension(nt,np), intent(inout) :: basis0
   integer :: kt,kp
 
+
   select case (btype)
 
   case ('d0')
