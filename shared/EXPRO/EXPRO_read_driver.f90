@@ -106,7 +106,7 @@ subroutine EXPRO_read_driver
 
      close(io)
      open(unit=io,file=trim(path)//trim(runfile),status='replace')
-     print '(a)', 'INFO: (EXPRO_read_driver) Old input.profiles found; please regenerate with profiles_gen.'
+     !print '(a)', 'INFO: (EXPRO_read_driver) Old input.profiles found; please regenerate with profiles_gen.'
      EXPRO_pow_e_fus(:) = 0.0
      EXPRO_pow_i_fus(:) = 0.0
      EXPRO_pow_e_sync(:) = 0.0
