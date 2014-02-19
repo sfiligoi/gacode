@@ -29,7 +29,6 @@ module neo_equilibrium
   real                            :: Bpol_th0    ! b_t/Bunit at theta=0
   real                            :: Bmag_th0    ! B/Bunit   at theta=0
   real                            :: Bmag_th0_rderiv  ! (dB/dr) (a/Bunit) th=0
-  real                            :: Bmaglog_avg ! <ln(B/B(theta=0))>
   real                            :: ftrap       ! frac of trapped particles
   real, dimension(:), allocatable :: theta_nc    ! NCLASS theta grid
 
@@ -298,12 +297,10 @@ contains
     Bmag2_avg = 0.0
     Bmag2inv_avg = 0.0
     gradpar_Bmag2_avg = 0.0
-    Bmaglog_avg = 0.0
     do it=1,n_theta
        Bmag2_avg    = Bmag2_avg    + w_theta(it)*Bmag(it)**2
        Bmag2inv_avg = Bmag2inv_avg + w_theta(it)/Bmag(it)**2
        gradpar_Bmag2_avg = gradpar_Bmag2_avg + w_theta(it)*gradpar_Bmag(it)**2
-       Bmaglog_avg =Bmaglog_avg +  w_theta(it) * log(Bmag(it)/Bmag_th0)
     enddo
 
     call compute_fractrap(ftrap)

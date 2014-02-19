@@ -9,6 +9,9 @@ module neo_rotation
   real                              :: phi_rot_avg    ! flux surface avg
   real, dimension(:,:), allocatable :: dens_fac       ! (ns,nth):
                                                       ! n=n(th0)*dens_fac
+  real, dimension(:,:), allocatable :: lam_rot_aniso  ! lambda_aniso
+  real, dimension(:,:), allocatable :: lam_rot_kpar_aniso ! bhatdotgrad lam
+  real, dimension(:), allocatable   :: lam_rot_avg_aniso ! <lambda_aniso>
   real, dimension(:), allocatable   :: rotavg_e0, rotavg_e1, &
        rotavg_e2, rotavg_e3, rotavg_e4
 
@@ -28,6 +31,9 @@ module neo_rotation
          allocate(phi_rot_deriv(n_theta))
          allocate(phi_rot_rderiv(n_theta))
          allocate(dens_fac(n_species,n_theta))
+         allocate(lam_rot_aniso(n_species,n_theta))
+         allocate(lam_rot_kpar_aniso(n_species,n_theta))
+         allocate(lam_rot_avg_aniso(n_species))
          allocate(rotavg_e0(n_species))
          allocate(rotavg_e1(n_species))
          allocate(rotavg_e2(n_species))
@@ -45,6 +51,9 @@ module neo_rotation
          deallocate(phi_rot_deriv)
          deallocate(phi_rot_rderiv)
          deallocate(dens_fac)
+         deallocate(lam_rot_aniso)
+         deallocate(lam_rot_kpar_aniso)
+         deallocate(lam_rot_avg_aniso)
          deallocate(rotavg_e0)
          deallocate(rotavg_e1)
          deallocate(rotavg_e2)
@@ -64,21 +73,21 @@ module neo_rotation
       integer, intent (in) :: ir
       integer, parameter :: nmax = 200
       integer :: it, is, jt, id, n, is_ele
-      real :: x, x0, sum_zn, dsum_zn, fac, fac_add
-      real, dimension(:,:), allocatable :: fac_aniso, dlnndr_fac, dens_fac_new
-      real, dimension(:), allocatable :: dens_avg, dlnndr_avg, dens_avg_new
+      real :: x, x0, sum_zn, dsum_zn, fac
+      real, dimension(:,:), allocatable :: dlnndr_fac, dens_fac_new, &
+           lam_rot_rderiv_aniso
+      real, dimension(:), allocatable :: dens_avg, dens_avg_new
       real :: dens_new
       integer :: test_flag
 
       if(rotation_model == 1 .or. spitzer_model==1) then
-         do it=1, n_theta
-            phi_rot(it) = 0.0
-            phi_rot_deriv(it) = 0.0
-            phi_rot_rderiv(it) = 0.0
-            do is=1, n_species
-               dens_fac(is,it) = 1.0
-            enddo
-         enddo
+         phi_rot(:) = 0.0
+         phi_rot_deriv(:) = 0.0
+         phi_rot_rderiv(:) = 0.0
+         dens_fac(:,:) = 1.0
+         lam_rot_aniso(:,:) = 0.0
+         lam_rot_kpar_aniso(:,:) = 0.0
+         lam_rot_avg_aniso(:) = 0.0
          phi_rot_avg = 0.0
          omega_rot(ir) = 0.0
          omega_rot_deriv(ir) = 0.0
@@ -123,29 +132,71 @@ module neo_rotation
             endif
          endif
 
-         allocate(fac_aniso(n_species,n_theta))
-         do is=1,n_species
-            if(aniso_model(is) == 2) then
-               do it=1,n_theta
-                  fac_aniso(is,it) = (Bmag(it)/Bmag_th0)**(-eta_perp(is,ir))
-               enddo
-            else
-               fac_aniso(is,:) = 1.0
-            endif
-         enddo
-
          allocate(dens_avg(n_species))
          allocate(dlnndr_fac(n_species,n_theta))
          allocate(dens_avg_new(n_species))
          allocate(dens_fac_new(n_species,n_theta))
+         allocate(lam_rot_rderiv_aniso(n_species,n_theta))
+
+         lam_rot_aniso(:,:) = 0.0
+         lam_rot_kpar_aniso(:,:) = 0.0
+         lam_rot_avg_aniso(:) = 0.0
+         lam_rot_rderiv_aniso(:,:) = 0.0
+         do is=1,n_species
+            if(aniso_model(is) == 2) then
+               lam_rot_avg_aniso(is) = 0.0
+               do it=1,n_theta
+                  !!!!! first model
+                  !lam_rot_aniso(is,it) = &
+                  !     (temp_perp(is,ir)/temp_para(is,ir) - 1.0)**0.75 &
+                  !     * log(Bmag(it)/Bmag_th0)
+                  !lam_rot_kpar_aniso(is,it) = &
+                  !     (temp_perp(is,ir)/temp_para(is,ir) - 1.0)**0.75 &
+                  !     * gradpar_Bmag(it) / Bmag(it)
+                  !lam_rot_rderiv_aniso(is,it) = log(Bmag(it)/Bmag_th0) &
+                  !     * 0.75 &
+                  !     / (temp_perp(is,ir)/temp_para(is,ir) - 1.0)**0.25 &
+                  !     * temp_perp(is,ir)/temp_para(is,ir) &
+                  !     * (-dlntdr_perp(is,ir) + dlntdr_para(is,ir)) &
+                  !     + (temp_perp(is,ir)/temp_para(is,ir) - 1.0)**0.75 &
+                  !     * (1.0/Bmag(it) * Bmag_rderiv(it) &
+                  !     - 1.0/Bmag_th0 * Bmag_th0_rderiv)
+
+                  !!!!! second model
+                  lam_rot_aniso(is,it) = &
+                       log(temp_perp(is,ir)/temp_para(is,ir) &
+                       - Bmag_th0/Bmag(it) &
+                       * (temp_perp(is,ir)/temp_para(is,ir) - 1.0))
+                  lam_rot_kpar_aniso(is,it) = &
+                       1.0/(temp_perp(is,ir)/temp_para(is,ir) &
+                       - Bmag_th0/Bmag(it) &
+                       * (temp_perp(is,ir)/temp_para(is,ir) - 1.0)) &
+                       * (temp_perp(is,ir)/temp_para(is,ir) - 1.0) &
+                       *  Bmag_th0/Bmag(it)**2 * gradpar_Bmag(it)
+                  lam_rot_rderiv_aniso(is,it) = &
+                       1.0/(temp_perp(is,ir)/temp_para(is,ir) &
+                       - Bmag_th0/Bmag(it) &
+                       * (temp_perp(is,ir)/temp_para(is,ir) - 1.0)) &
+                       * ( (1.0 - Bmag_th0/Bmag(it)) &
+                       * temp_perp(is,ir)/temp_para(is,ir) &
+                       * (-dlntdr_perp(is,ir) + dlntdr_para(is,ir)) &
+                       - (temp_perp(is,ir)/temp_para(is,ir) - 1.0) &
+                       * (1.0/Bmag_th0 * Bmag_th0_rderiv &
+                       - Bmag_th0/Bmag(it)**2 * Bmag_rderiv(it)) )
+
+                  lam_rot_avg_aniso(is) = lam_rot_avg_aniso(is) &
+                       + w_theta(it) * lam_rot_aniso(is,it)
+               enddo
+            endif
+         enddo
 
          ! partial component of n/n(theta0) 
          ! -- will add the phi_rot component after the QN solve
          do is=1, n_species
             do it=1,n_theta
-               dens_fac(is,it) = fac_aniso(is,it) &
-                    * exp(omega_rot(ir)**2 * 0.5/vth_para(is,ir)**2 &
-                    * (bigR(it)**2 - bigR_th0**2)) 
+               dens_fac(is,it) = &
+                    exp(omega_rot(ir)**2 * 0.5/vth_para(is,ir)**2 &
+                    * (bigR(it)**2 - bigR_th0**2) - lam_rot_aniso(is,it)) 
             enddo
          enddo
 
@@ -218,15 +269,6 @@ module neo_rotation
          ! dln n(theta)/dr
          do is=1, n_species
             do it=1,n_theta
-               if(aniso_model(is) == 2) then
-                  fac_add   = -log(Bmag(it)/Bmag_th0) &
-                       * eta_perp_rderiv(is,ir) &
-                       - eta_perp(is,ir)/Bmag(it) * Bmag_rderiv(it) &
-                       + eta_perp(is,ir)/Bmag_th0 * Bmag_th0_rderiv
-                  
-               else
-                  fac_add   = 0.0
-               endif
                dlnndr_fac(is,it) = -(-dlnndr(is,ir) + omega_rot_deriv(ir) &
                     * omega_rot(ir)/vth_para(is,ir)**2 &
                     * (bigR(it)**2 - bigR_th0**2) &
@@ -237,7 +279,7 @@ module neo_rotation
                     * dlntdr_para(is,ir) &
                     + 0.5 * omega_rot(ir)**2 / vth_para(is,ir)**2 &
                     * dlntdr_para(is,ir) * (bigR(it)**2 - bigR_th0**2) &
-                    + fac_add)
+                    - lam_rot_rderiv_aniso(is,it))
             enddo
          enddo
 
@@ -287,10 +329,10 @@ module neo_rotation
             rotavg_e3(is) = 0.0
             rotavg_e4(is) = 0.0
             do it=1,n_theta
-               fac = fac_aniso(is,it) &
-                    * exp(omega_rot(ir)**2 * 0.5 / vth_para(is,ir)**2 &
+               fac = exp(omega_rot(ir)**2 * 0.5 / vth_para(is,ir)**2 &
                     * (bigR(it)**2 - bigR_th0**2) &
-                    - z(is) / temp_para(is,ir) * phi_rot(it))
+                    - z(is) / temp_para(is,ir) * phi_rot(it) &
+                    - lam_rot_aniso(is,it))
                rotavg_e0(is) = rotavg_e0(is) + w_theta(it) * fac
                rotavg_e1(is) = rotavg_e1(is) + w_theta(it) * fac &
                     * z(is)/temp_para(is,ir) * phi_rot(it)
@@ -315,10 +357,10 @@ module neo_rotation
          do is=1,n_species
             if(aniso_model(is) == 2) then
                dens_new = dens(is,ir)
-               dens_fac_new(is,:) = fac_aniso(is,:) &
-                    * exp(omega_rot(ir)**2 * 0.5/vth(is,ir)**2 &
+               dens_fac_new(is,:) = exp(omega_rot(ir)**2 * 0.5/vth(is,ir)**2 &
                     * (bigR(:)**2 - bigR_th0**2) &
-                    - z(is) / temp(is,ir) * phi_rot(:))
+                    - z(is) / temp(is,ir) * phi_rot(:) &
+                    - lam_rot_aniso(is,:))
                dens_avg_new(is)   = 0.0
                do it=1,n_theta
                   dens_avg_new(is) = dens_avg_new(is) &
@@ -362,16 +404,18 @@ module neo_rotation
                   ! test case b and d -- keep eta
                   if(test_flag == 1 .or. test_flag == 3) then
                      dens_new = dens(is,ir)
-                     dens_fac_new(is,:) = fac_aniso(is,:) &
-                          * exp(omega_rot(ir)**2 * 0.5/vth(is,ir)**2 &
+                     dens_fac_new(is,:) = &
+                          exp(omega_rot(ir)**2 * 0.5/vth(is,ir)**2 &
                           * (bigR(:)**2 - bigR_th0**2) &
-                          - z(is) / temp(is,ir) * phi_rot(:))
+                          - z(is) / temp(is,ir) * phi_rot(:) &
+                          - lam_rot_aniso(is,:))
                   endif
 
                   ! test case c and e -- no eta terms in n or DKE
                   if(test_flag == 2 .or. test_flag == 4) then
-                     eta_perp(is,ir)    = 0.0
-                     eta_perp_rderiv(is,ir) = 0.0
+                     lam_rot_aniso(is,:)      = 0.0
+                     lam_rot_kpar_aniso(is,:) = 0.0
+                     lam_rot_avg_aniso(is)    = 0.0
                      dens_new = dens(is,ir)
                      dens_fac_new(is,:) = &
                           exp(omega_rot(ir)**2 * 0.5/vth(is,ir)**2 &
@@ -410,11 +454,11 @@ module neo_rotation
             enddo
          endif
          
-         deallocate(fac_aniso)
          deallocate(dens_avg)
          deallocate(dlnndr_fac)
          deallocate(dens_avg_new)
          deallocate(dens_fac_new)
+         deallocate(lam_rot_rderiv_aniso)
 
       endif
 

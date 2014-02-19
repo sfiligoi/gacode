@@ -189,8 +189,6 @@ module neo_globals
   real, dimension(:,:), allocatable :: temp_perp       ! Tperp/T_0  (ns,nr)
   real, dimension(:,:), allocatable :: dlntdr_perp     ! a/LTperp   (ns,nr)
   real, dimension(:,:), allocatable :: vth_para        ! vthpara/vth_0=sqrt(temp_para/mass)
-  real, dimension(:,:), allocatable :: eta_perp        ! aniso fac (B/B0)^-eta
-  real, dimension(:,:), allocatable :: eta_perp_rderiv ! d eta_perp / dr
 
   !---------------------------------------------------------------
 

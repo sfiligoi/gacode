@@ -399,16 +399,6 @@ subroutine neo_check
      end select
   enddo
 
-  do is=1,n_species
-     if(aniso_model(is) == 2) then
-        do ir=1,n_radial
-           if(temp_perp(is,ir)/temp_para(is,ir) < 1.0) then
-              call neo_error('ERROR: (NEO) aniso_model requires temp_perp >= temp_para')
-           endif
-        enddo
-     endif
-  enddo
-
   if(flag == 1) then
      if(profile_model == 2) then
         call neo_error('ERROR: (NEO) aniso_model not available with global profiles')

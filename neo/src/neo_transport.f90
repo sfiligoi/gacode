@@ -178,7 +178,7 @@ contains
        rfac = Z(is)/temp(is,ir) * (phi_rot(it) - phi_rot_avg) &
             - (omega_rot(ir) * bigR(it) / vth(is,ir))**2 * 0.5
        if(aniso_model(is) == 2) then
-          rfac = rfac + eta_perp(is,ir) * log(Bmag(it)/Bmag_th0)
+          rfac = rfac + lam_rot_aniso(is,it)
        endif
 
        if (ix == 0) then  
@@ -342,7 +342,7 @@ contains
        if(aniso_model(is) == 2) then
           kbig_upar(is) = kbig_upar(is) &
                - (I_div_psip * rho(ir) * temp(is,ir) / (z(is)*1.0)) &
-               * (dlntdr(is,ir) * eta_perp(is,ir) * Bmaglog_avg)
+               * (dlntdr(is,ir) * lam_rot_avg_aniso(is))
        endif
        if(abs(dlntdr(is,ir)) > epsilon(0.)) then
           klittle_upar(is) = -kbig_upar(is) *  B2_div_dens &
@@ -383,7 +383,7 @@ contains
           rfac = Z(is)/temp(is,ir) * (phi_rot(it) - phi_rot_avg) &
                - (omega_rot(ir) * bigR(it) / vth(is,ir))**2 * 0.5
           if(aniso_model(is) == 2) then
-             rfac = rfac + eta_perp(is,ir) * log(Bmag(it)/Bmag_th0)
+             rfac = rfac + lam_rot_aniso(is,it)
           endif
           fac1 = fac1 + w_theta(it) * dens(is,ir)  * dens_fac(is,it) &
                / Bmag(it)**3 * (2.0*gradr(it) * k_par(it) * gradr_tderiv(it) &
@@ -465,7 +465,7 @@ contains
              vtor(is,it) = vtor(is,it) &
                   + (I_div_psip * rho(ir) * temp(is,ir) / (z(is)*1.0)) &
                   * (1.0 / Btor(it)) &
-                  * (dlntdr(is,ir) * eta_perp(is,ir) * log(Bmag(it)/Bmag_th0))
+                  * (dlntdr(is,ir) * lam_rot_aniso(is,it))
           endif
        end do
 
