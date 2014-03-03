@@ -336,8 +336,8 @@ subroutine neo_do
                        a(k) = 0.0
                        do ks=1, n_species
                           a(k) = a(k) &
-                                  - emat_coll_test(is,ks,ie,je,ix) &
-                                  * dens_fac(ks,it)
+                               - emat_coll_test(is,ks,ie,je,ix) &
+                               * dens_fac(ks,it)
                           ! EAB test
                           !if(is/= ks .and. aniso_model(ks) == 2) then
                           !   a(k) = a(k) + 0.0
@@ -361,7 +361,7 @@ subroutine neo_do
                           ! EAB test
                           !if (is/= js .and. aniso_model(js) == 2) then
                           !   a(k) = 0.0
-                          !endif
+                          !endif                         
                           a_iindx(k) = i
                           a_jindx(k) = j
                        enddo

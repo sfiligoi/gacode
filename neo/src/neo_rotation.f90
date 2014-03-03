@@ -13,7 +13,7 @@ module neo_rotation
   real, dimension(:,:), allocatable :: lam_rot_kpar_aniso ! bhatdotgrad lam
   real, dimension(:), allocatable   :: lam_rot_avg_aniso ! <lambda_aniso>
   real, dimension(:), allocatable   :: rotavg_e0, rotavg_e1, &
-       rotavg_e2, rotavg_e3, rotavg_e4
+       rotavg_e2, rotavg_e3, rotavg_e4, rotavg_e5a, rotavg_e5b, rotavg_e6
 
   logical, private :: initialized = .false.
   integer, private :: io_rot=50
@@ -39,6 +39,9 @@ module neo_rotation
          allocate(rotavg_e2(n_species))
          allocate(rotavg_e3(n_species))
          allocate(rotavg_e4(n_species))
+         allocate(rotavg_e5a(n_species))
+         allocate(rotavg_e5b(n_species))
+         allocate(rotavg_e6(n_species))
          if(silent_flag == 0 .and. i_proc == 0 .and. rotation_model == 2) then
             open(unit=io_rot,file=trim(path)//runfile,status='replace')
             close(io_rot)
@@ -59,6 +62,9 @@ module neo_rotation
          deallocate(rotavg_e2)
          deallocate(rotavg_e3)
          deallocate(rotavg_e4)
+         deallocate(rotavg_e5a)
+         deallocate(rotavg_e5b)
+         deallocate(rotavg_e6)
          initialized = .false.
 
       endif
@@ -91,11 +97,14 @@ module neo_rotation
          phi_rot_avg = 0.0
          omega_rot(ir) = 0.0
          omega_rot_deriv(ir) = 0.0
-         rotavg_e0(:) = 0.0
-         rotavg_e1(:) = 0.0
-         rotavg_e2(:) = 0.0
-         rotavg_e3(:) = 0.0
-         rotavg_e4(:) = 0.0
+         rotavg_e0(:)  = 0.0
+         rotavg_e1(:)  = 0.0
+         rotavg_e2(:)  = 0.0
+         rotavg_e3(:)  = 0.0
+         rotavg_e4(:)  = 0.0
+         rotavg_e5a(:) = 0.0
+         rotavg_e5b(:) = 0.0
+         rotavg_e6(:)  = 0.0
 
       else 
          
@@ -323,11 +332,14 @@ module neo_rotation
          enddo
 
          do is=1,n_species
-            rotavg_e0(is) = 0.0
-            rotavg_e1(is) = 0.0
-            rotavg_e2(is) = 0.0
-            rotavg_e3(is) = 0.0
-            rotavg_e4(is) = 0.0
+            rotavg_e0(is)  = 0.0
+            rotavg_e1(is)  = 0.0
+            rotavg_e2(is)  = 0.0
+            rotavg_e3(is)  = 0.0
+            rotavg_e4(is)  = 0.0
+            rotavg_e5a(is) = 0.0
+            rotavg_e5b(is) = 0.0
+            rotavg_e6(is)  = 0.0
             do it=1,n_theta
                fac = exp(omega_rot(ir)**2 * 0.5 / vth_para(is,ir)**2 &
                     * (bigR(it)**2 - bigR_th0**2) &
@@ -343,6 +355,14 @@ module neo_rotation
                rotavg_e4(is) = rotavg_e4(is) + w_theta(it) * fac &
                     * 2.0*(bigR(it)*bigR_rderiv(it) &
                     - bigR_th0*bigR_th0_rderiv)
+               rotavg_e5a(is) = rotavg_e5a(is) + w_theta(it) &
+                    * jacobln_rderiv(it)
+               rotavg_e5b(is) = rotavg_e5b(is) + w_theta(it) * fac &
+                    * jacobln_rderiv(it)
+               if(aniso_model(is) == 2) then
+                  rotavg_e6(is) = rotavg_e6(is) + w_theta(it) * fac &
+                       * (-lam_rot_rderiv_aniso(is,it))
+               endif
             enddo
             rotavg_e3(is) = rotavg_e3(is) &
                  * (omega_rot(ir)/vth_para(is,ir)**2 &
@@ -351,6 +371,7 @@ module neo_rotation
             rotavg_e4(is) = rotavg_e4(is) * 0.5 * omega_rot(ir)**2 &
                  / vth_para(is,ir)**2
             rotavg_e1(is) = rotavg_e1(is) * (-dlntdr_para(is,ir))
+            rotavg_e5a(is) = -rotavg_e5a(is) * rotavg_e0(is)
          enddo
          
          ! redefine nm wrt Teff and keeping <nm> fixed
@@ -477,7 +498,8 @@ module neo_rotation
          do is=1, n_species
             write (io_rot,'(e16.8)',advance='no') 1.0/rotavg_e0(is)
             write (io_rot,'(e16.8)',advance='no') ( -rotavg_e2(is) &
-                 + rotavg_e3(is) + rotavg_e4(is) + rotavg_e1(is)) &
+                 + rotavg_e3(is) + rotavg_e4(is) + rotavg_e1(is) &
+                 + rotavg_e5a(is) + rotavg_e5b(is) + rotavg_e6(is)) &
                  / rotavg_e0(is) 
          enddo
          do it=1, n_theta
