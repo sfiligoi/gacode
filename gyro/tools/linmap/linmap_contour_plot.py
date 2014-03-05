@@ -8,6 +8,7 @@ import sys
 #import os
 import numpy as np
 import matplotlib as mpl
+mpl.use('Agg')
 from gacodeplotdefs import *
 from pylab import *
 from scipy.interpolate import griddata
@@ -18,6 +19,8 @@ from matplotlib import rc
 from matplotlib import axes
 
 #os.environ['PATH'] = os.environ['PATH'] + ':/usr/bin/latex'
+ioff()
+#matplotlib.use('Agg')
 
 font = {'family' : 'normal',
         'weight' : 'bold',
