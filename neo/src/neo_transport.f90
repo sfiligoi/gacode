@@ -36,7 +36,7 @@ module neo_transport
   ! potential: delta_phi(theta)
   ! NOTE: defined by sum_s Z_s e int f_s = 0
   ! -- i.e. really only valid for first-order potential
-  real, dimension(:), allocatable :: d_phi         ! (ntheta)
+  real, dimension(:), allocatable :: d_phi       ! (ntheta)
   real                            :: d_phi_sqavg ! <d_phi^2>_theta 
 
   integer, parameter, private :: io=1
@@ -540,9 +540,10 @@ contains
   subroutine TRANSP_write(ir)
     use neo_globals
     use neo_equilibrium, only: bigR_th0, Btor_th0, I_div_psip
+    use neo_rotation
     implicit none
     integer, intent (in) :: ir
-    integer :: is, jt
+    integer :: is, jt, it
 
     if(silent_flag > 0 .or. i_proc > 0) return
 
