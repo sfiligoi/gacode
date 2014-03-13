@@ -43,7 +43,7 @@ ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
 ax.set_xlabel(r'$(c_s/a) t$',fontsize=GFONTSIZE)
 ax.set_ylabel(r'$'+mtag+' \;('+ftag+')$',color='k',fontsize=GFONTSIZE)
-ax.set_title(r'$\mathtt{'+sys.argv[1]+'}$')
+#ax.set_title(r'$\mathtt{'+sys.argv[1]+'}$')
 #=====================================
 
 # Determine tmin
