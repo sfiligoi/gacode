@@ -65,7 +65,8 @@ subroutine tgyro_neo_map
   neo_dlnndr_1_in = r_min*dlnnidr(1,i_r)
   neo_dlntdr_1_in = r_min*dlntidr(1,i_r)
   neo_nu_1_in     = ((nue(i_r)*r_min/c_s(i_r))/&
-       sqrt(ti(1,i_r)/te(i_r)))/(mu1*(ti(1,i_r)/te(i_r))**1.5)
+       sqrt(ti(1,i_r)/te(i_r)))/(mu1*(ti(1,i_r)/te(i_r))**1.5) &
+       * ni(1,i_r)/ne(i_r) * zi_vec(1)**4
 
   ! Ion #2
   if (neo_n_species_in > 2) then
