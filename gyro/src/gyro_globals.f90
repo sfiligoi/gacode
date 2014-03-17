@@ -208,6 +208,7 @@ module gyro_globals
   integer :: reintegrate_flag
   integer :: ic_method
   integer :: zf_test_flag
+  integer :: lock_ti_flag
   !---------------------------------------------------------
 
   !-----------------------------------------------------------------------------------

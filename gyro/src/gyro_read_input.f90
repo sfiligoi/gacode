@@ -249,6 +249,7 @@ subroutine gyro_read_input
   call readbc_int(reintegrate_flag)
   call readbc_int(ic_method)
   call readbc_int(zf_test_flag)
+  call readbc_int(lock_ti_flag)
   ! DONE reading data.
   !--------------------------------------------------------
 

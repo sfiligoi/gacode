@@ -145,6 +145,11 @@ subroutine gyro_profile_init
 
   rhosda_s(:) = rho_star
 
+  if (lock_ti_flag == 1) then
+     t_vec(1:10) = t_vec(1)
+     dlntdr_vec(1:10) = dlntdr_vec(1)
+  endif
+
   select case (radial_profile_method)
 
   case (1,5)
@@ -303,9 +308,9 @@ subroutine gyro_profile_init
      endif
      !
      if ((sum(abs(eps_dlntdr_vec(:))+abs(eps_dlnndr_vec(:))) > 0.0)  .and. &
-         (reintegrate_flag == 1)) then
+          (reintegrate_flag == 1)) then
         call send_message('INFO: (GYRO) profiles changed, recalculating beta_unit')
-        
+
         ! den_s  -> 1/m^3
         ! tem_s  -> keV
         ! b_unit -> T

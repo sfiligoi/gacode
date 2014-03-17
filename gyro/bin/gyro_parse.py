@@ -193,6 +193,7 @@ x.add('FIELDEIGEN_TOL','1e-6')
 x.add('REINTEGRATE_FLAG','0')
 x.add('IC_METHOD','1')
 x.add('ZF_TEST_FLAG','0')
+x.add('LOCK_TI_FLAG','0')
 
 # Deprecated parameters
 
