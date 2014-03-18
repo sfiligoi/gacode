@@ -20,4 +20,7 @@ module vgen_globals
   
   real :: dens_norm, temp_norm, mass_norm, vth_norm
 
+  character(len=8) :: fmt='(I2.2)' 
+  character(len=2), dimension(100) :: tag
+
 end module vgen_globals

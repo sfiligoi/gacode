@@ -17,10 +17,11 @@ program vgen
   !---------------------------------------------------
   implicit none
 
-  character(len=80) :: tag
+  character(len=80) :: vtag
 
   integer :: i
   integer :: j
+  integer :: ix
   integer :: ia,ib
   integer :: adiabatic_ele_model
   integer :: num_ele
@@ -44,7 +45,8 @@ program vgen
   real :: jbs_norm_fac
   real, dimension(:), allocatable :: pflux_sum
   integer :: zfac
-  
+  real, dimension(:), allocatable :: er_glob
+
   !---------------------------------------------------
 
   !-----------------------------------------------------------------
@@ -60,6 +62,13 @@ program vgen
   !
   path= './'
   !-----------------------------------------------------------------
+
+  !-------------------------------------------------
+  ! Obscure definition of number tags 
+  do ix=1,100
+     write (tag(ix),fmt) ix-1
+  enddo
+  !-------------------------------------------------
 
   !---------------------------------------------------------------------
   ! Read vgen control parameters
@@ -290,6 +299,9 @@ program vgen
   !    strong rotation
   ! 4. Return the given Er
 
+  allocate(er_glob(EXPRO_n_exp-2))
+  er_glob = 0.0
+
   select case (er_method) 
 
   case (1,4)
@@ -300,10 +312,10 @@ program vgen
 
         ! Er calculation first
 
-        open(unit=1,file='out.vgen.ercomp',status='replace')
+        open(unit=1,file='out.vgen.ercomp'//tag(i_proc+1),status='replace')
         close(1)
-        do i=2,EXPRO_n_exp-1
-           if(erspecies_indx == 1) then
+        do i=2+i_proc,EXPRO_n_exp-1,n_proc
+           if (erspecies_indx == 1) then
               grad_p = -(EXPRO_dlnnidr_new(i) + EXPRO_dlntidr(1,i))
            else
               grad_p = -(EXPRO_dlnnidr(erspecies_indx,i) &
@@ -315,7 +327,7 @@ program vgen
                 + EXPRO_vtor(erspecies_indx,i) * EXPRO_bp0(i) &
                 - EXPRO_vpol(erspecies_indx,i) * EXPRO_bt0(i)) &
                 / 1000
-           open(unit=1,file='out.vgen.ercomp',status='old',position='append')
+           open(unit=1,file='out.vgen.ercomp'//tag(i_proc+1),status='old',position='append')
            write(1,'(e16.8)',advance='no') EXPRO_rho(i)
            write(1,'(e16.8)',advance='no') grad_p * EXPRO_grad_r0(i) &
                 * EXPRO_ti(erspecies_indx,i)*temp_norm_fac &
@@ -326,12 +338,18 @@ program vgen
            close(1)
         enddo
 
+        call MPI_ALLREDUCE(er_exp(2:EXPRO_n_exp-1),er_glob,size(er_glob), &
+             MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
+
+        er_exp(2:EXPRO_n_exp-1) = er_glob
+
         ! Compute omega and omega_deriv from newly-generated Er:
 
-        do i=2,EXPRO_n_exp-1
+        do i=2+i_proc,EXPRO_n_exp-1,n_proc
            EXPRO_w0(i) = 2.9979e10*EXPRO_q(i)*(er_exp(i)/30.0)/ &
                 ((1e4*EXPRO_bunit(i))*(1e2*EXPRO_rmin(i))*EXPRO_grad_r0(i))
         enddo
+
         ! Compute w0p
         call bound_deriv(EXPRO_w0p(2:EXPRO_n_exp-1),EXPRO_w0(2:EXPRO_n_exp-1),&
              EXPRO_rmin,EXPRO_n_exp-2)
@@ -349,7 +367,7 @@ program vgen
 
      ! Flow calculation based on existing EXPRO_w0 and EXPRO_w0p
 
-     do i=2,EXPRO_n_exp-1
+     do i=2+i_proc,EXPRO_n_exp-1,n_proc
 
         if (vel_method /= 3) then
            if (vel_method == 1) then
@@ -399,12 +417,26 @@ program vgen
         endif
      enddo
 
+     ! Reduce vpol,vtor
+     do j=1,n_ions
+        er_glob = 0.0
+        call MPI_ALLREDUCE(EXPRO_vpol(j,2:EXPRO_n_exp-1),er_glob,size(er_glob), &
+             MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
+
+        EXPRO_vpol(j,2:EXPRO_n_exp-1) = er_glob
+        er_glob = 0.0
+        call MPI_ALLREDUCE(EXPRO_vtor(j,2:EXPRO_n_exp-1),er_glob,size(er_glob), &
+             MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
+
+        EXPRO_vtor(j,2:EXPRO_n_exp-1) = er_glob
+     enddo
+
   case (2)
 
      ! Compute Er using NEO (weak rotation limit) 
      ! by matching vtor_measured with vtor_neo at theta=0 
 
-     do i=2,EXPRO_n_exp-1
+     do i=2+i_proc,EXPRO_n_exp-1,n_proc
 
         rotation_model = 1
         er0 = 0.0
@@ -464,8 +496,29 @@ program vgen
 
      enddo
 
+     ! Reduce er,vpol,vtor
+     er_glob = 0.0
+     call MPI_ALLREDUCE(er_exp(2:EXPRO_n_exp-1),er_glob,size(er_glob), &
+          MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
+     
+     er_exp(2:EXPRO_n_exp-1) = er_glob
+     do j=1,n_ions
+        er_glob = 0.0
+        call MPI_ALLREDUCE(EXPRO_vpol(j,2:EXPRO_n_exp-1),er_glob,size(er_glob), &
+             MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
+
+        EXPRO_vpol(j,2:EXPRO_n_exp-1) = er_glob
+        er_glob = 0.0
+        call MPI_ALLREDUCE(EXPRO_vtor(j,2:EXPRO_n_exp-1),er_glob,size(er_glob), &
+             MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
+
+        EXPRO_vtor(j,2:EXPRO_n_exp-1) = er_glob
+     enddo
+
      if (vel_method == 2) then
+
         print '(a)', 'INFO: (VGEN) Recomputing flows using NEO in the strong rotation limit.'
+
         ! Re-compute the flows using strong rotation
         ! omega and omega_deriv 
         do i=2,EXPRO_n_exp-1
@@ -475,7 +528,8 @@ program vgen
         ! Compute w0p
         call bound_deriv(EXPRO_w0p(2:EXPRO_n_exp-1),EXPRO_w0(2:EXPRO_n_exp-1),&
              EXPRO_rmin,EXPRO_n_exp-2)
-        do i=2,EXPRO_n_exp-1
+
+        do i=2+i_proc,EXPRO_n_exp-1,n_proc
            rotation_model = 2  
            er0 = er_exp(i)
            omega = EXPRO_w0(i) 
@@ -514,6 +568,21 @@ program vgen
                 er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
 
         enddo
+
+        ! Reduce vpol,vtor
+        do j=1,n_ions
+           er_glob = 0.0
+           call MPI_ALLREDUCE(EXPRO_vpol(j,2:EXPRO_n_exp-1),er_glob,size(er_glob), &
+                MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
+
+           EXPRO_vpol(j,2:EXPRO_n_exp-1) = er_glob
+           er_glob = 0.0
+           call MPI_ALLREDUCE(EXPRO_vtor(j,2:EXPRO_n_exp-1),er_glob,size(er_glob), &
+                MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
+
+           EXPRO_vtor(j,2:EXPRO_n_exp-1) = er_glob
+        enddo
+
      endif
 
   case (3)
@@ -637,49 +706,56 @@ program vgen
      EXPRO_w0p(1) = ya
      EXPRO_w0p(EXPRO_n_exp) = yb
   endif
-  open(unit=1,file='out.vgen.out',status='replace')
-  do i=1,EXPRO_n_exp
-     write(1,'(e16.8)',advance='no') EXPRO_rho(i)
-     write(1,'(e16.8)',advance='no') er_exp(i)
-     write(1,'(e16.8)',advance='no') EXPRO_w0(i)
-     write(1,'(e16.8)',advance='no') EXPRO_w0p(i)
-     do j=1,n_ions
-        write(1,'(e16.8)',advance='no') EXPRO_vpol(j,i)
-        write(1,'(e16.8)',advance='no') EXPRO_vtor(j,i)
-        write(1,'(e16.8)',advance='no') EXPRO_vpol(j,i) / EXPRO_bp0(i)
-        write(1,'(e16.8)',advance='no') (EXPRO_vtor(j,i) &
-             - EXPRO_vpol(j,i)*EXPRO_bt0(i)/ EXPRO_bp0(i)) &
-             / (EXPRO_rmaj(i)+EXPRO_rmin(i))
+
+  ! Write output on processor 0
+
+  if (i_proc == 0) then
+
+     open(unit=1,file='out.vgen.out',status='replace')
+     do i=1,EXPRO_n_exp
+        write(1,'(e16.8)',advance='no') EXPRO_rho(i)
+        write(1,'(e16.8)',advance='no') er_exp(i)
+        write(1,'(e16.8)',advance='no') EXPRO_w0(i)
+        write(1,'(e16.8)',advance='no') EXPRO_w0p(i)
+        do j=1,n_ions
+           write(1,'(e16.8)',advance='no') EXPRO_vpol(j,i)
+           write(1,'(e16.8)',advance='no') EXPRO_vtor(j,i)
+           write(1,'(e16.8)',advance='no') EXPRO_vpol(j,i) / EXPRO_bp0(i)
+           write(1,'(e16.8)',advance='no') (EXPRO_vtor(j,i) &
+                - EXPRO_vpol(j,i)*EXPRO_bt0(i)/ EXPRO_bp0(i)) &
+                / (EXPRO_rmaj(i)+EXPRO_rmin(i))
+        enddo
+        write(1,*)
      enddo
-     write(1,*)
-  enddo
-  close(1)
+     close(1)
 
-  open(unit=1,file='input.profiles.jbs',status='replace')
-  write(1,'(a)') '#'
-  write(1,'(a)') '# expro_rho'
-  write(1,'(a)') '# sum z*pflux_neo/(c_s n_e) /(rho_s/a_norm)**2'
-  write(1,'(a)') '# jbs_neo    (MA/m^2)'
-  write(1,'(a)') '# jbs_sauter (MA/m^2)'
-  write(1,'(a)') '# jbs_nclass (MA/m^2)'
-  write(1,'(a)') '# jbs_koh    (MA/m^2)'
-  write(1,'(a)') '# where jbs = < j_parallel B > / B_unit'
-  write(1,'(a)') '#'
-  do i=1,EXPRO_n_exp
-     write(1,'(6(1pe14.7,2x))') EXPRO_rho(i), pflux_sum(i), &
-          jbs_neo(i), jbs_sauter(i), jbs_nclass(i), jbs_koh(i)
-  enddo
-  close(1)
+     open(unit=1,file='input.profiles.jbs',status='replace')
+     write(1,'(a)') '#'
+     write(1,'(a)') '# expro_rho'
+     write(1,'(a)') '# sum z*pflux_neo/(c_s n_e) /(rho_s/a_norm)**2'
+     write(1,'(a)') '# jbs_neo    (MA/m^2)'
+     write(1,'(a)') '# jbs_sauter (MA/m^2)'
+     write(1,'(a)') '# jbs_nclass (MA/m^2)'
+     write(1,'(a)') '# jbs_koh    (MA/m^2)'
+     write(1,'(a)') '# where jbs = < j_parallel B > / B_unit'
+     write(1,'(a)') '#'
+     do i=1,EXPRO_n_exp
+        write(1,'(6(1pe14.7,2x))') EXPRO_rho(i), pflux_sum(i), &
+             jbs_neo(i), jbs_sauter(i), jbs_nclass(i), jbs_koh(i)
+     enddo
+     close(1)
 
-  ! Write the new input.profiles
-  tag = '* This file regenerated by VGEN'
-  call EXPRO_write_original(tag)
+     ! Write the new input.profiles
+     vtag = '* This file regenerated by VGEN'
+     call EXPRO_write_original(tag)
 
-  ! Compute and write the new input.profiles.extra
-  call EXPRO_compute_derived
-  call EXPRO_write_derived
+     ! Compute and write the new input.profiles.extra
+     call EXPRO_compute_derived
+     call EXPRO_write_derived
 
-  call vgen_getgeo()
+     call vgen_getgeo()
+
+  endif
 
   deallocate(er_exp)
   deallocate(jbs_neo)
@@ -687,7 +763,7 @@ program vgen
   deallocate(jbs_koh)
   deallocate(jbs_nclass)
   deallocate(pflux_sum)
-  
+
   call EXPRO_palloc(MPI_COMM_WORLD,path,0)
 
   call MPI_finalize(i_err)

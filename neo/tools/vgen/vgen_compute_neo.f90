@@ -20,7 +20,7 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, omega_deriv
   integer :: nmin, nmax, nth
 
   ! Set the local NEO input parameters
-  neo_silent_flag_in    = 1
+  neo_silent_flag_in = 1
 
   ! Normalizations
   
@@ -184,21 +184,22 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, omega_deriv
   else
      neo_n_theta_in = 2*nmax + 1
   endif
-  if(i == 2) then
-     open(unit=1,file='out.vgen.neontheta',status='replace')
+
+  if (i == 2+i_proc) then
+     open(unit=1,file='out.vgen.neontheta'//tag(i_proc+1),status='replace')
      close(1)
   endif
-  open(unit=1,file='out.vgen.neontheta',status='old',position='append')
+  open(unit=1,file='out.vgen.neontheta'//tag(i_proc+1),status='old',position='append')
   write(1,'(e16.8)',advance='no') EXPRO_rho(i)
   write(1,'(i3)',advance='no') neo_n_theta_in
   write(1,*)
   close(1)
 
-  if(i == 2) then
-     open(unit=1,file='out.vgen.neoexpnorm',status='replace')
+  if(i == 2+i_proc) then
+     open(unit=1,file='out.vgen.neoexpnorm'//tag(i_proc+1),status='replace')
      close(1)
   endif
-  open(unit=1,file='out.vgen.neoexpnorm',status='old',position='append')
+  open(unit=1,file='out.vgen.neoexpnorm'//tag(i_proc+1),status='old',position='append')
   write(1,'(e16.8)',advance='no') EXPRO_rho(i)
   write(1,'(e16.8)',advance='no') EXPRO_rmin(EXPRO_n_exp)
   write(1,'(e16.8)',advance='no') mass_norm
@@ -209,11 +210,11 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, omega_deriv
   write(1,*)
   close(1)
 
-  if(i == 2) then
-     open(unit=1,file='out.vgen.neoequil',status='replace')
+  if(i == 2+i_proc) then
+     open(unit=1,file='out.vgen.neoequil'//tag(i_proc+1),status='replace')
      close(1)
   endif
-  open(unit=1,file='out.vgen.neoequil',status='old',position='append')
+  open(unit=1,file='out.vgen.neoequil'//tag(i_proc+1),status='old',position='append')
   write(1,'(e16.8)',advance='no') EXPRO_rho(i)
   write(1,'(e16.8)',advance='no') neo_rmin_over_a_in
   write(1,'(e16.8)',advance='no') neo_q_in

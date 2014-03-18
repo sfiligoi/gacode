@@ -186,7 +186,7 @@ then
    echo "             Use <map file> to map Astra data to GYRO input.profiles headers"
    echo "             NOTE: uses 'astra_map_gyro' in current directory by default."
    echo
-   echo "             -n <note text>"
+   echo "             -note <note text>"
    echo "             Include <note text> in the input.profiles header."
    echo
    echo "null Options"
@@ -254,6 +254,8 @@ then
    echo
    echo "             -nth <min,max>" 
    echo "             Minimum and maximum theta resolutions.  Default -nth 17,39"
+   echo
+   echo "             -n <mpi tasks>"
    echo
    echo "LOCAL PARAMETER MODE"
    echo 
@@ -362,6 +364,10 @@ VGEN_VEL=2
 VGEN_IX=2
 VGEN_NTH=17,39
 VGEN_FLAG=0
+NPROC=1
+NOMP=1
+NUMA=0
+MPINUMA=0
 
 # UFILE 
 UFILETIME=null
@@ -405,7 +411,7 @@ while [ $# -gt 0 ] ; do
 
   -m) shift ; ASTRA_ARG="$ASTRA_ARG -m $1" ;;
 
-  -n) shift ; ASTRA_ARG="$ASTRA_ARG -n $1" ;;
+  -note) shift ; ASTRA_ARG="$ASTRA_ARG -note $1" ;;
 
   -cer) shift ; 
         echo "INFO: (profiles_gen) Will merge data from $CER_FILE" ; CER_FILE="$1" ;;
@@ -431,6 +437,8 @@ while [ $# -gt 0 ] ; do
   -lf) LUMP_FAST_FLAG=1 ;;
 
   -vgen) VGEN_FLAG=1 ;;
+
+  -n) shift ; NPROC=$1 ;;
 
   -in) shift ; VGEN_IN=$1 ;;
 
@@ -728,10 +736,9 @@ then
       echo $i >> vgen.dat
    fi
 
-   # Call vgen
-   #echo `pwd`
-   #echo `ls $VGEN_EXE/vgen`
-   $VGEN_EXE/vgen
+   # Launch parallel vgen executable
+   $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM \
+    $SIMDIR/vgen $NPROC $VGEN_EXE/vgen $NOMP $NUMA $MPINUMA
 
    if [ -f "input.profiles.new" ]
    then
