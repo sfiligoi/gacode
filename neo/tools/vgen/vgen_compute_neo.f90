@@ -1,5 +1,5 @@
-
-subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, omega_deriv)
+subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
+     omega, omega_deriv)
 
   use vgen_globals
   use neo_interface
@@ -260,7 +260,32 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, omega_deriv
   ! Run NEO
   call neo_run()
 
+  if (neo_error_status_out > 0) then
+     print *,neo_error_message_out
+     stop
+  endif
+
+  ! Assign output flows and bootstrap current
+
   vtor_diff = vtor_measured(i) &
        - neo_vtor_dke_out(erspecies_indx) * vth_norm * EXPRO_rmin(EXPRO_n_exp)
-
+  
+  do j=1,n_ions
+     EXPRO_vpol(j,i) = neo_vpol_dke_out(j) &
+          * vth_norm * EXPRO_rmin(EXPRO_n_exp)
+     EXPRO_vtor(j,i) = neo_vtor_dke_out(j) &
+          * vth_norm * EXPRO_rmin(EXPRO_n_exp)
+  enddo
+  jbs_norm = charge_norm_fac*dens_norm*vth_norm &
+       *EXPRO_rmin(EXPRO_n_exp)/1e6
+  jbs_neo(i)    = neo_jpar_dke_out*jbs_norm
+  jbs_sauter(i) = neo_jpar_thS_out*jbs_norm
+  jbs_koh(i)    = neo_jpar_thK_out*jbs_norm
+  jbs_nclass(i) = neo_jpar_thN_out*jbs_norm
+  pflux_sum(i)  = 0.0
+  do j=1,neo_n_species_in
+     pflux_sum(i) = pflux_sum(i) + zfac(j)*neo_pflux_dke_out(j)
+  enddo
+  pflux_sum(i) = pflux_sum(i) / neo_rho_star_in**2
+  
 end subroutine vgen_compute_neo

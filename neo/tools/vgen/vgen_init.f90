@@ -1,0 +1,130 @@
+  subroutine vgen_init
+    use mpi
+    use vgen_globals
+    use neo_interface
+    use EXPRO_interface
+
+    implicit none
+    integer :: num_ele
+    integer :: indx_ele
+    integer :: j
+    
+    call neo_init_serial(path)
+    call neo_read_input()
+    call map_global2interface()
+    
+    neo_n_radial_in = 1
+    neo_profile_model_in = 1
+    neo_sim_model_in = 1
+    
+    zfac(:) = 0
+    do j=1,neo_n_species_in
+       if(j==1) zfac(1)=neo_z_1_in
+       if(j==2) zfac(2)=neo_z_2_in
+       if(j==3) zfac(3)=neo_z_3_in
+       if(j==4) zfac(4)=neo_z_4_in
+       if(j==5) zfac(5)=neo_z_5_in
+       if(j==6) zfac(6)=neo_z_6_in
+    enddo
+    
+    
+    ! Species checks
+    num_ele = 0
+    indx_ele = 0
+    do j=1,neo_n_species_in
+       if(zfac(j) == -1) then
+          num_ele  = num_ele + 1
+          indx_ele = j
+       endif
+    enddo
+    
+    if(num_ele == 0) then
+       n_ions = neo_n_species_in
+    else if(num_ele == 1) then
+       n_ions = neo_n_species_in - 1
+       if(indx_ele /= neo_n_species_in) then
+          if(i_proc == 0) then
+             print '(a)','ERROR: (VGEN) Electron species must be n_species'
+          endif
+          call MPI_finalize(i_err)
+          stop
+       endif
+    else
+       if(i_proc == 0) then
+          print '(a)', 'ERROR: (VGEN) Only one electron species allowed'
+       endif
+       call MPI_finalize(i_err)
+       stop
+    end if
+    
+    if(n_ions < 1) then
+       if(i_proc == 0) then
+          print '(a)', 'ERROR: (VGEN) There must be at least one ion species'
+       endif
+       call MPI_finalize(i_err)
+       stop
+    endif
+    
+    if(erspecies_indx > n_ions) then
+       if(i_proc == 0) then
+          print '(a)', 'ERROR: (VGEN) Invalid species index'
+       endif
+       call MPI_finalize(i_err)
+       stop
+    endif
+
+      ! Read experimental profiles using EXPRO library.
+
+  call EXPRO_palloc(MPI_COMM_WORLD,path,1)
+
+  ! Reset species 1 density for quasineutrality
+ 
+  EXPRO_ctrl_rotation_method = 1
+  EXPRO_ctrl_density_method = 2 
+  EXPRO_ctrl_z(:) = 0.0
+  do j=1,neo_n_species_in
+     if(zfac(j) /= -1) then
+        EXPRO_ctrl_z(j) = 1.0*zfac(j)
+     endif
+  enddo
+  
+  ! Set equilibrium option for EXPRO
+  
+  if (neo_equilibrium_model_in == 3) then
+     EXPRO_ctrl_numeq_flag = 1
+  else
+     EXPRO_ctrl_numeq_flag = 0
+  endif
+
+  call EXPRO_pread
+
+  ! Write the derived quantities to input.profiles.extra
+
+  if (i_proc == 0) call EXPRO_write_derived
+
+  ! Set sign of btccw and ipccw from sign of b and q from EXPRO
+  neo_btccw_in = -EXPRO_signb
+  neo_ipccw_in = -EXPRO_signb*EXPRO_signq
+ 
+  ! Storage 
+  allocate(vtor_measured(EXPRO_n_exp))
+  allocate(jbs_neo(EXPRO_n_exp))
+  allocate(jbs_sauter(EXPRO_n_exp))
+  allocate(jbs_koh(EXPRO_n_exp))
+  allocate(jbs_nclass(EXPRO_n_exp))
+  allocate(pflux_sum(EXPRO_n_exp))
+  jbs_neo(:)    = 0.0
+  jbs_sauter(:) = 0.0
+  jbs_koh(:)    = 0.0
+  jbs_nclass(:) = 0.0
+  pflux_sum(:)  = 0.0
+  
+  do j=1,5
+     if (j == erspecies_indx) then
+        vtor_measured(:) = EXPRO_vtor(j,:)
+     endif
+     EXPRO_vpol(j,:) = 0.0
+     EXPRO_vtor(j,:) = 0.0
+  enddo
+  
+end subroutine vgen_init

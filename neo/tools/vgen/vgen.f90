@@ -14,7 +14,6 @@ program vgen
   use neo_interface
   use EXPRO_interface
 
-  !---------------------------------------------------
   implicit none
 
   character(len=80) :: vtag
@@ -23,13 +22,8 @@ program vgen
   integer :: j
   integer :: ix
   integer :: ia,ib
-  integer :: adiabatic_ele_model
-  integer :: num_ele
-  integer :: indx_ele
-  integer :: n_ions
   integer :: rotation_model 
   real :: grad_p
-  real :: vtor_er
   real :: ya
   real :: yb
   real :: vtor_diff
@@ -38,40 +32,23 @@ program vgen
   real :: omega_deriv
 
   real, dimension(:), allocatable :: er_exp
-  real, dimension(:), allocatable :: jbs_neo
-  real, dimension(:), allocatable :: jbs_sauter
-  real, dimension(:), allocatable :: jbs_koh
-  real, dimension(:), allocatable :: jbs_nclass
-  real :: jbs_norm_fac
-  real, dimension(:), allocatable :: pflux_sum
-  integer :: zfac
 
-  !---------------------------------------------------
-
-  !-----------------------------------------------------------------
   ! Initialize MPI_COMM_WORLD communicator.
-  !
+
   call MPI_INIT(i_err)
   call MPI_COMM_RANK(MPI_COMM_WORLD,i_proc,i_err)
   call MPI_COMM_SIZE(MPI_COMM_WORLD,n_proc,i_err)
-  !-----------------------------------------------------------------
 
-  !-----------------------------------------------------------------
   ! Path is cwd:
-  !
   path= './'
-  !-----------------------------------------------------------------
 
-  !-------------------------------------------------
   ! Obscure definition of number tags 
   do ix=1,100
      write (tag(ix),fmt) ix-1
   enddo
-  !-------------------------------------------------
 
-  !---------------------------------------------------------------------
   ! Read vgen control parameters
-  !
+
   open(unit=1,file='vgen.dat',status='old')
   read(1,*) er_method
   read(1,*) vel_method
@@ -123,164 +100,16 @@ program vgen
           nth_min,',',nth_max
   endif
 
-  !---------------------------------------------------------------------
+  ! initialize vgen parameters
 
-  call neo_init_serial(path)
-  call neo_read_input()
-  call map_global2interface()
-
-  neo_n_radial_in = 1
-  neo_profile_model_in = 1
-
-  ! Species checks
-
-  num_ele = 0
-  indx_ele = 0
-  if(neo_n_species_in >= 1 .and. neo_z_1_in == -1) then
-     num_ele  = num_ele + 1
-     indx_ele = 1
-  endif
-  if(neo_n_species_in >= 2 .and. neo_z_2_in == -1) then
-     num_ele  = num_ele + 1
-     indx_ele = 2
-  endif
-  if(neo_n_species_in >= 3 .and. neo_z_3_in == -1) then
-     num_ele  = num_ele + 1
-     indx_ele = 3
-  endif
-  if(neo_n_species_in >= 4 .and. neo_z_4_in == -1) then
-     num_ele  = num_ele + 1
-     indx_ele = 4
-  endif
-  if(neo_n_species_in >= 5 .and. neo_z_5_in == -1) then
-     num_ele  = num_ele + 1
-     indx_ele = 5
-  endif
-  if(neo_n_species_in >= 6 .and. neo_z_6_in == -1) then
-     num_ele  = num_ele + 1
-     indx_ele = 6
-  endif
-
-  if(num_ele == 0) then
-     adiabatic_ele_model = 1
-     n_ions = neo_n_species_in
-  else if(num_ele == 1) then
-     adiabatic_ele_model = 0
-     n_ions = neo_n_species_in - 1
-     if(indx_ele /= neo_n_species_in) then
-        if(i_proc == 0) then
-           print '(a)','ERROR: (VGEN) Electron species must be n_species'
-        endif
-        call MPI_finalize(i_err)
-        stop
-     endif
-  else
-     if(i_proc == 0) then
-        print '(a)', 'ERROR: (VGEN) Only one electron species allowed'
-     endif
-     call MPI_finalize(i_err)
-     stop
-  end if
-
-  if(n_ions < 1) then
-     if(i_proc == 0) then
-        print '(a)', 'ERROR: (VGEN) There must be at least one ion species'
-     endif
-     call MPI_finalize(i_err)
-     stop
-  endif
-
-  if(erspecies_indx > n_ions) then
-     if(i_proc == 0) then
-        print '(a)', 'ERROR: (VGEN) Invalid species index'
-     endif
-     call MPI_finalize(i_err)
-     stop
-  endif
-
-  !---------------------------------------------------------------------
-  ! Read experimental profiles using EXPRO library.
-  !
-  call EXPRO_palloc(MPI_COMM_WORLD,path,1)
-  !
-  ! Reset species 1 density for quasineutrality
-  !
-  EXPRO_ctrl_rotation_method = 1
-  EXPRO_ctrl_density_method = 2 
-  EXPRO_ctrl_z(:) = 0.0
-  EXPRO_ctrl_z(1) = 1.0*neo_z_1_in
-  !
-  if (neo_n_species_in >= 2 .and. neo_z_2_in /= -1) then
-     EXPRO_ctrl_z(2) = 1.0*neo_z_2_in
-  endif
-  if (neo_n_species_in >= 3 .and. neo_z_3_in /= -1) then
-     EXPRO_ctrl_z(3) = 1.0*neo_z_3_in
-  endif
-  if (neo_n_species_in >= 4 .and. neo_z_4_in /= -1) then
-     EXPRO_ctrl_z(4) = 1.0*neo_z_4_in
-  endif
-  if (neo_n_species_in >= 5 .and. neo_z_5_in /= -1) then
-     EXPRO_ctrl_z(5) = 1.0*neo_z_5_in
-  endif
-  !
-  ! Set equilibrium option for EXPRO
-  !
-  if (neo_equilibrium_model_in == 3) then
-     EXPRO_ctrl_numeq_flag = 1
-  else
-     EXPRO_ctrl_numeq_flag = 0
-  endif
-
-  call EXPRO_pread
-
-  ! Write the derived quantities to input.profiles.extra
-
-  if (i_proc == 0) call EXPRO_write_derived
-  !---------------------------------------------------------------------
-
-  !---------------------------------------------------------------------
-  ! Set sign of btccw and ipccw from sign of b and q from EXPRO
-  !
-  neo_btccw_in = -EXPRO_signb
-  neo_ipccw_in = -EXPRO_signb*EXPRO_signq
-  !---------------------------------------------------------------------
-
-  !---------------------------------------------------------------------
-  ! Storage for electric field at theta=0 (er0) 
+  call vgen_init
   allocate(er_exp(EXPRO_n_exp))
-  allocate(vtor_measured(EXPRO_n_exp))
-
-  ! Storage for bootstrap current calculations
-  allocate(jbs_neo(EXPRO_n_exp))
-  allocate(jbs_sauter(EXPRO_n_exp))
-  allocate(jbs_koh(EXPRO_n_exp))
-  allocate(jbs_nclass(EXPRO_n_exp))
-  allocate(pflux_sum(EXPRO_n_exp))
-  jbs_neo(:)    = 0.0
-  jbs_sauter(:) = 0.0
-  jbs_koh(:)    = 0.0
-  jbs_nclass(:) = 0.0
-  pflux_sum(:)  = 0.0
-
   if (er_method /= 4) then
      er_exp(:) = 0.0
      EXPRO_w0(:) = 0.0
      EXPRO_w0p(:) = 0.0
   endif
-  !---------------------------------------------------------------------
 
-  do j=1,5
-     if (j == erspecies_indx) then
-        vtor_measured(:) = EXPRO_vtor(j,:)
-     endif
-     EXPRO_vpol(j,:) = 0.0
-     EXPRO_vtor(j,:) = 0.0
-  enddo
-  jbs_neo(:)    = 0.0
-  jbs_sauter(:) = 0.0
-  jbs_koh(:)    = 0.0
-  jbs_nclass(:) = 0.0
-  pflux_sum(:)  = 0.0
   !======================================================================
   ! Four alternatives for Er calculation:
   !
@@ -366,35 +195,6 @@ program vgen
 
         call vgen_compute_neo(i,vtor_diff,rotation_model,er0,omega,omega_deriv)
 
-        if (neo_error_status_out > 0) then
-           print *,neo_error_message_out
-           stop
-        endif
-
-        do j=1,n_ions
-           EXPRO_vpol(j,i) = neo_vpol_dke_out(j) &
-                * vth_norm * EXPRO_rmin(EXPRO_n_exp)
-           EXPRO_vtor(j,i) = neo_vtor_dke_out(j) &
-                * vth_norm * EXPRO_rmin(EXPRO_n_exp)
-        enddo
-        jbs_norm_fac = charge_norm_fac*dens_norm*vth_norm &
-             *EXPRO_rmin(EXPRO_n_exp)/1e6
-        jbs_neo(i)    = neo_jpar_dke_out*jbs_norm_fac
-        jbs_sauter(i) = neo_jpar_thS_out*jbs_norm_fac
-        jbs_koh(i)    = neo_jpar_thK_out*jbs_norm_fac
-        jbs_nclass(i) = neo_jpar_thN_out*jbs_norm_fac
-        pflux_sum(i)  = 0.0
-        do j=1,neo_n_species_in
-           if(j==1) zfac=neo_z_1_in
-           if(j==2) zfac=neo_z_2_in
-           if(j==3) zfac=neo_z_3_in
-           if(j==4) zfac=neo_z_4_in
-           if(j==5) zfac=neo_z_5_in
-           if(j==6) zfac=neo_z_6_in
-           pflux_sum(i) = pflux_sum(i) + zfac*neo_pflux_dke_out(j)
-        enddo
-        pflux_sum(i) = pflux_sum(i) / neo_rho_star_in**2
-
         print 10,EXPRO_rho(i),&
              er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
 
@@ -421,11 +221,6 @@ program vgen
         call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
              omega_deriv)
 
-        if (neo_error_status_out > 0) then
-           print *,neo_error_message_out
-           stop
-        endif
-
         ! omega = (vtor_measured - vtor_neo_ater0) / R
 
         er_exp(i) = (vtor_diff/(vth_norm * EXPRO_rmin(EXPRO_n_exp)))  &
@@ -437,32 +232,9 @@ program vgen
              / EXPRO_rmin(EXPRO_n_exp)) / 1000
 
         ! Part of vtor due to Er
-        vtor_er = vtor_diff
-
-        ! Store the new flows
         do j=1,n_ions
-           EXPRO_vpol(j,i) = neo_vpol_dke_out(j) &
-                * vth_norm * EXPRO_rmin(EXPRO_n_exp)
-           EXPRO_vtor(j,i) = neo_vtor_dke_out(j) &
-                * vth_norm * EXPRO_rmin(EXPRO_n_exp) + vtor_er
+           EXPRO_vtor(j,i) = EXPRO_vtor(j,i) + vtor_diff
         enddo
-        jbs_norm_fac = charge_norm_fac*dens_norm*vth_norm &
-             *EXPRO_rmin(EXPRO_n_exp)/1e6
-        jbs_neo(i)    = neo_jpar_dke_out*jbs_norm_fac
-        jbs_sauter(i) = neo_jpar_thS_out*jbs_norm_fac
-        jbs_koh(i)    = neo_jpar_thK_out*jbs_norm_fac
-        jbs_nclass(i) = neo_jpar_thN_out*jbs_norm_fac
-        pflux_sum(i)  = 0.0
-        do j=1,neo_n_species_in
-           if(j==1) zfac=neo_z_1_in
-           if(j==2) zfac=neo_z_2_in
-           if(j==3) zfac=neo_z_3_in
-           if(j==4) zfac=neo_z_4_in
-           if(j==5) zfac=neo_z_5_in
-           if(j==6) zfac=neo_z_6_in
-           pflux_sum(i) = pflux_sum(i) + zfac*neo_pflux_dke_out(j)
-        enddo
-        pflux_sum(i) = pflux_sum(i) / neo_rho_star_in**2
 
         print 10,EXPRO_rho(i),&
              er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
@@ -503,33 +275,6 @@ program vgen
            omega_deriv = EXPRO_w0p(i) 
            call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
                 omega_deriv)
-           if (neo_error_status_out > 0) then
-              print *,neo_error_message_out
-              stop
-           endif
-           do j=1,n_ions
-              EXPRO_vpol(j,i) = neo_vpol_dke_out(j) &
-                   * vth_norm * EXPRO_rmin(EXPRO_n_exp)
-              EXPRO_vtor(j,i) = neo_vtor_dke_out(j) &
-                   * vth_norm * EXPRO_rmin(EXPRO_n_exp)
-           enddo
-           jbs_norm_fac = charge_norm_fac*dens_norm*vth_norm &
-                *EXPRO_rmin(EXPRO_n_exp)/1e6
-           jbs_neo(i)    = neo_jpar_dke_out*jbs_norm_fac
-           jbs_sauter(i) = neo_jpar_thS_out*jbs_norm_fac
-           jbs_koh(i)    = neo_jpar_thK_out*jbs_norm_fac
-           jbs_nclass(i) = neo_jpar_thN_out*jbs_norm_fac
-           pflux_sum(i)  = 0.0
-           do j=1,neo_n_species_in
-              if(j==1) zfac=neo_z_1_in
-              if(j==2) zfac=neo_z_2_in
-              if(j==3) zfac=neo_z_3_in
-              if(j==4) zfac=neo_z_4_in
-              if(j==5) zfac=neo_z_5_in
-              if(j==6) zfac=neo_z_6_in
-              pflux_sum(i) = pflux_sum(i) + zfac*neo_pflux_dke_out(j)
-           enddo
-           pflux_sum(i) = pflux_sum(i) / neo_rho_star_in**2
 
            print 10,EXPRO_rho(i),&
                 er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
@@ -644,7 +389,7 @@ program vgen
 
      ! Write the new input.profiles
      vtag = '* This file regenerated by VGEN'
-     call EXPRO_write_original(tag)
+     call EXPRO_write_original(vtag)
 
      ! Compute and write the new input.profiles.extra
      call EXPRO_compute_derived
