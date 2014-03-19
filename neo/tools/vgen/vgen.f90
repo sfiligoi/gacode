@@ -45,7 +45,6 @@ program vgen
   real :: jbs_norm_fac
   real, dimension(:), allocatable :: pflux_sum
   integer :: zfac
-  real, dimension(:), allocatable :: er_glob
 
   !---------------------------------------------------
 
@@ -265,6 +264,8 @@ program vgen
 
   if (er_method /= 4) then
      er_exp(:) = 0.0
+     EXPRO_w0(:) = 0.0
+     EXPRO_w0p(:) = 0.0
   endif
   !---------------------------------------------------------------------
 
@@ -280,7 +281,6 @@ program vgen
   jbs_koh(:)    = 0.0
   jbs_nclass(:) = 0.0
   pflux_sum(:)  = 0.0
-
   !======================================================================
   ! Four alternatives for Er calculation:
   !
@@ -290,9 +290,6 @@ program vgen
   ! 3. Compute Er by matching vtor_measured with vtor_neo at theta=0 assuming
   !    strong rotation
   ! 4. Return the given Er
-
-  allocate(er_glob(EXPRO_n_exp-2))
-  er_glob = 0.0
 
   select case (er_method) 
 
@@ -330,14 +327,11 @@ program vgen
            close(1)
         enddo
 
-        call MPI_ALLREDUCE(er_exp(2:EXPRO_n_exp-1),er_glob,size(er_glob), &
-             MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
-
-        er_exp(2:EXPRO_n_exp-1) = er_glob
+        call vgen_reduce(er_exp(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
 
         ! Compute omega and omega_deriv from newly-generated Er:
 
-        do i=2+i_proc,EXPRO_n_exp-1,n_proc
+        do i=2,EXPRO_n_exp-1
            EXPRO_w0(i) = 2.9979e10*EXPRO_q(i)*(er_exp(i)/30.0)/ &
                 ((1e4*EXPRO_bunit(i))*(1e2*EXPRO_rmin(i))*EXPRO_grad_r0(i))
         enddo
@@ -369,15 +363,14 @@ program vgen
         er0 = er_exp(i)
         omega = EXPRO_w0(i) 
         omega_deriv = EXPRO_w0p(i) 
-        
-        call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
-             omega_deriv)
-        
+
+        call vgen_compute_neo(i,vtor_diff,rotation_model,er0,omega,omega_deriv)
+
         if (neo_error_status_out > 0) then
            print *,neo_error_message_out
            stop
         endif
-        
+
         do j=1,n_ions
            EXPRO_vpol(j,i) = neo_vpol_dke_out(j) &
                 * vth_norm * EXPRO_rmin(EXPRO_n_exp)
@@ -401,24 +394,16 @@ program vgen
            pflux_sum(i) = pflux_sum(i) + zfac*neo_pflux_dke_out(j)
         enddo
         pflux_sum(i) = pflux_sum(i) / neo_rho_star_in**2
-        
+
         print 10,EXPRO_rho(i),&
              er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
-        
+
      enddo
 
      ! Reduce vpol,vtor
      do j=1,n_ions
-        er_glob = 0.0
-        call MPI_ALLREDUCE(EXPRO_vpol(j,2:EXPRO_n_exp-1),er_glob,size(er_glob), &
-             MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
-
-        EXPRO_vpol(j,2:EXPRO_n_exp-1) = er_glob
-        er_glob = 0.0
-        call MPI_ALLREDUCE(EXPRO_vtor(j,2:EXPRO_n_exp-1),er_glob,size(er_glob), &
-             MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
-
-        EXPRO_vtor(j,2:EXPRO_n_exp-1) = er_glob
+        call vgen_reduce(EXPRO_vpol(j,2:EXPRO_n_exp-1),EXPRO_n_exp-2)
+        call vgen_reduce(EXPRO_vtor(j,2:EXPRO_n_exp-1),EXPRO_n_exp-2)
      enddo
 
   case (2)
@@ -481,31 +466,25 @@ program vgen
 
         print 10,EXPRO_rho(i),&
              er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
-        
+
      enddo
-     
+
      ! Reduce er,vpol,vtor
-     er_glob = 0.0
-     call MPI_ALLREDUCE(er_exp(2:EXPRO_n_exp-1),er_glob,size(er_glob), &
-          MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
-     
-     er_exp(2:EXPRO_n_exp-1) = er_glob
-     do j=1,n_ions
-        er_glob = 0.0
-        call MPI_ALLREDUCE(EXPRO_vpol(j,2:EXPRO_n_exp-1),er_glob,size(er_glob), &
-             MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
+     call vgen_reduce(er_exp(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
 
-        EXPRO_vpol(j,2:EXPRO_n_exp-1) = er_glob
-        er_glob = 0.0
-        call MPI_ALLREDUCE(EXPRO_vtor(j,2:EXPRO_n_exp-1),er_glob,size(er_glob), &
-             MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
+     if (vel_method == 1) then
 
-        EXPRO_vtor(j,2:EXPRO_n_exp-1) = er_glob
-     enddo
+        do j=1,n_ions
+           call vgen_reduce(EXPRO_vpol(j,2:EXPRO_n_exp-1),EXPRO_n_exp-2)
+           call vgen_reduce(EXPRO_vtor(j,2:EXPRO_n_exp-1),EXPRO_n_exp-2)
+        enddo
 
-     if (vel_method == 2) then
+     else
 
-        print '(a)', 'INFO: (VGEN) Recomputing flows using NEO in the strong rotation limit.'
+        EXPRO_vpol(:,:) = 0.0
+        EXPRO_vtor(:,:) = 0.0
+
+        if (i_proc == 0) print '(a)', 'INFO: (VGEN) Recomputing flows using NEO in the strong rotation limit.'
 
         ! Re-compute the flows using strong rotation
         ! omega and omega_deriv 
@@ -559,22 +538,21 @@ program vgen
 
         ! Reduce vpol,vtor
         do j=1,n_ions
-           er_glob = 0.0
-           call MPI_ALLREDUCE(EXPRO_vpol(j,2:EXPRO_n_exp-1),er_glob,size(er_glob), &
-                MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
-
-           EXPRO_vpol(j,2:EXPRO_n_exp-1) = er_glob
-           er_glob = 0.0
-           call MPI_ALLREDUCE(EXPRO_vtor(j,2:EXPRO_n_exp-1),er_glob,size(er_glob), &
-                MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,i_err)
-
-           EXPRO_vtor(j,2:EXPRO_n_exp-1) = er_glob
+           call vgen_reduce(EXPRO_vpol(j,2:EXPRO_n_exp-1),EXPRO_n_exp-2)
+           call vgen_reduce(EXPRO_vtor(j,2:EXPRO_n_exp-1),EXPRO_n_exp-2)
         enddo
 
      endif
 
   end select
   !======================================================================
+
+  ! Additional reductions
+  call vgen_reduce(pflux_sum(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
+  call vgen_reduce(jbs_neo(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
+  call vgen_reduce(jbs_sauter(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
+  call vgen_reduce(jbs_nclass(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
+  call vgen_reduce(jbs_koh(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
 
   ! extrapolation for r=0 and r=n_exp boundary points
 
@@ -630,7 +608,7 @@ program vgen
 
   if (i_proc == 0) then
 
-     open(unit=1,file='out.vgen.out',status='replace')
+     open(unit=1,file='out.vgen.vel',status='replace')
      do i=1,EXPRO_n_exp
         write(1,'(e16.8)',advance='no') EXPRO_rho(i)
         write(1,'(e16.8)',advance='no') er_exp(i)
