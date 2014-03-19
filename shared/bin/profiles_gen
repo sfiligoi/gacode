@@ -684,11 +684,9 @@ then
 
    NEO_DIR=$GACODE_ROOT/neo
 
-   # Create vgen work directory
+   # Create/recreate vgen work directory
 
-   rm -rf vgen
-   mkdir vgen
-   cd vgen
+   rm -rf vgen ; mkdir vgen ; cd vgen
 
    # Check for input.vgen file
 
@@ -740,10 +738,35 @@ then
    $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM \
     $SIMDIR/vgen $NPROC $VGEN_EXE/vgen $NOMP $NUMA $MPINUMA
 
+
    if [ -f "input.profiles.new" ]
    then
-       mv input.profiles.new input.profiles
-       echo "INFO: (profiles_gen) VGEN created vgen/input.profiles, vgen/input.profiles.extra"
+       > input.profiles
+       DATESTAMP=`date`
+       # Manage generated input.profiles and print diagnistics
+       
+       echo "# VGEN: The file modified by VGEN on $DATESTAMP" >> input.profiles
+       if [ "$VGEN_ER" == "1" ] ; then 
+          echo "# VGEN: omega0 computed by force balance (-er 1)" >> input.profiles 
+       fi
+       if [ "$VGEN_ER" == "2" ] ; then 
+          echo "# VGEN: omega0 computed by NEO with weak rotation (-er 2)" >> input.profiles
+          echo "# VGEN: matched toroidal velocity of species $VGEN_IX" >> input.profiles
+       fi
+       if [ "$VGEN_ER" == "4" ] ; then 
+          echo "# VGEN: omega0 unchanged (-er 4)" >> input.profiles
+       fi
+       if [ "$VGEN_VEL" == "1" ] ; then 
+          echo "# VGEN: velocities computed by NEO with weak rotation (-vel 1)" >> input.profiles
+       fi
+       if [ "$VGEN_VEL" == "2" ] ; then 
+          echo "# VGEN: velocities computed by NEO with strong rotation (-vel 2)" >> input.profiles
+       fi
+
+       cat input.profiles.new >> input.profiles
+       echo "INFO: (profiles_gen) VGEN created vgen/input.profiles [new data]"
+       echo "INFO: (profiles_gen) VGEN created vgen/input.extra    [diagnostics]"
+       echo "INFO: (profiles_gen) VGEN created vgen/input.jbs      [boostrap current]"
    fi
 
    exit 0
