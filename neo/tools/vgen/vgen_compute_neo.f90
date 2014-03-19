@@ -260,7 +260,7 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, omega_deriv
   ! Run NEO
   call neo_run()
 
-  vtor_diff = EXPRO_vtor(erspecies_indx,i) &
+  vtor_diff = vtor_measured(i) &
        - neo_vtor_dke_out(erspecies_indx) * vth_norm * EXPRO_rmin(EXPRO_n_exp)
 
 end subroutine vgen_compute_neo

@@ -90,10 +90,6 @@ program vgen
      if(i_proc == 0) then
         print '(a)', 'INFO: (VGEN) Computing omega0 (Er) from NEO (weak rotation limit)'
      endif
-  case (3)
-     if(i_proc == 0) then
-        print '(a)', 'INFO: (VGEN) Computing omega0 (Er) from NEO (strong rotation limit)'
-     endif
   case(4)
      if(i_proc == 0) then
         print '(a)','INFO: (VGEN) Returning given omega0 (Er)'
@@ -114,10 +110,6 @@ program vgen
   case(2)
      if(i_proc == 0) then
         print '(a)','INFO: (VGEN) Computing velocities from NEO (strong rotation limit)'
-     endif
-  case(3)
-     if(i_proc == 0) then
-        print '(a)','INFO: (VGEN) Returning given velocities without NEO modificaiton.'
      endif
   case default
      if(i_proc == 0) then
@@ -257,6 +249,7 @@ program vgen
   !---------------------------------------------------------------------
   ! Storage for electric field at theta=0 (er0) 
   allocate(er_exp(EXPRO_n_exp))
+  allocate(vtor_measured(EXPRO_n_exp))
 
   ! Storage for bootstrap current calculations
   allocate(jbs_neo(EXPRO_n_exp))
@@ -275,19 +268,18 @@ program vgen
   endif
   !---------------------------------------------------------------------
 
-  if (vel_method /= 3) then
-     do j=1,5
-        if (j /= erspecies_indx) then
-           EXPRO_vpol(j,:) = 0.0
-           EXPRO_vtor(j,:) = 0.0
-        endif
-     enddo
-     jbs_neo(:)    = 0.0
-     jbs_sauter(:) = 0.0
-     jbs_koh(:)    = 0.0
-     jbs_nclass(:) = 0.0
-     pflux_sum(:)  = 0.0
-  endif
+  do j=1,5
+     if (j == erspecies_indx) then
+        vtor_measured(:) = EXPRO_vtor(j,:)
+     endif
+     EXPRO_vpol(j,:) = 0.0
+     EXPRO_vtor(j,:) = 0.0
+  enddo
+  jbs_neo(:)    = 0.0
+  jbs_sauter(:) = 0.0
+  jbs_koh(:)    = 0.0
+  jbs_nclass(:) = 0.0
+  pflux_sum(:)  = 0.0
 
   !======================================================================
   ! Four alternatives for Er calculation:
@@ -369,52 +361,50 @@ program vgen
 
      do i=2+i_proc,EXPRO_n_exp-1,n_proc
 
-        if (vel_method /= 3) then
-           if (vel_method == 1) then
-              rotation_model = 1   ! weak rotation
-           else
-              rotation_model = 2   ! strong rotation
-           endif
-           er0 = er_exp(i)
-           omega = EXPRO_w0(i) 
-           omega_deriv = EXPRO_w0p(i) 
-
-           call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
-                omega_deriv)
-
-           if (neo_error_status_out > 0) then
-              print *,neo_error_message_out
-              stop
-           endif
-
-           do j=1,n_ions
-              EXPRO_vpol(j,i) = neo_vpol_dke_out(j) &
-                   * vth_norm * EXPRO_rmin(EXPRO_n_exp)
-              EXPRO_vtor(j,i) = neo_vtor_dke_out(j) &
-                   * vth_norm * EXPRO_rmin(EXPRO_n_exp)
-           enddo
-           jbs_norm_fac = charge_norm_fac*dens_norm*vth_norm &
-                *EXPRO_rmin(EXPRO_n_exp)/1e6
-           jbs_neo(i)    = neo_jpar_dke_out*jbs_norm_fac
-           jbs_sauter(i) = neo_jpar_thS_out*jbs_norm_fac
-           jbs_koh(i)    = neo_jpar_thK_out*jbs_norm_fac
-           jbs_nclass(i) = neo_jpar_thN_out*jbs_norm_fac
-           pflux_sum(i)  = 0.0
-           do j=1,neo_n_species_in
-              if(j==1) zfac=neo_z_1_in
-              if(j==2) zfac=neo_z_2_in
-              if(j==3) zfac=neo_z_3_in
-              if(j==4) zfac=neo_z_4_in
-              if(j==5) zfac=neo_z_5_in
-              if(j==6) zfac=neo_z_6_in
-              pflux_sum(i) = pflux_sum(i) + zfac*neo_pflux_dke_out(j)
-           enddo
-           pflux_sum(i) = pflux_sum(i) / neo_rho_star_in**2
-
-           print 10,EXPRO_rho(i),&
-                er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
-
+        if (vel_method == 1) then
+           rotation_model = 1   ! weak rotation
+        else
+           rotation_model = 2   ! strong rotation
         endif
+        er0 = er_exp(i)
+        omega = EXPRO_w0(i) 
+        omega_deriv = EXPRO_w0p(i) 
+        
+        call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
+             omega_deriv)
+        
+        if (neo_error_status_out > 0) then
+           print *,neo_error_message_out
+           stop
+        endif
+        
+        do j=1,n_ions
+           EXPRO_vpol(j,i) = neo_vpol_dke_out(j) &
+                * vth_norm * EXPRO_rmin(EXPRO_n_exp)
+           EXPRO_vtor(j,i) = neo_vtor_dke_out(j) &
+                * vth_norm * EXPRO_rmin(EXPRO_n_exp)
+        enddo
+        jbs_norm_fac = charge_norm_fac*dens_norm*vth_norm &
+             *EXPRO_rmin(EXPRO_n_exp)/1e6
+        jbs_neo(i)    = neo_jpar_dke_out*jbs_norm_fac
+        jbs_sauter(i) = neo_jpar_thS_out*jbs_norm_fac
+        jbs_koh(i)    = neo_jpar_thK_out*jbs_norm_fac
+        jbs_nclass(i) = neo_jpar_thN_out*jbs_norm_fac
+        pflux_sum(i)  = 0.0
+        do j=1,neo_n_species_in
+           if(j==1) zfac=neo_z_1_in
+           if(j==2) zfac=neo_z_2_in
+           if(j==3) zfac=neo_z_3_in
+           if(j==4) zfac=neo_z_4_in
+           if(j==5) zfac=neo_z_5_in
+           if(j==6) zfac=neo_z_6_in
+           pflux_sum(i) = pflux_sum(i) + zfac*neo_pflux_dke_out(j)
+        enddo
+        pflux_sum(i) = pflux_sum(i) / neo_rho_star_in**2
+        
+        print 10,EXPRO_rho(i),&
+             er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
+        
      enddo
 
      ! Reduce vpol,vtor
@@ -465,37 +455,35 @@ program vgen
         vtor_er = vtor_diff
 
         ! Store the new flows
-        if(vel_method /= 3) then
-           do j=1,n_ions
-              EXPRO_vpol(j,i) = neo_vpol_dke_out(j) &
-                   * vth_norm * EXPRO_rmin(EXPRO_n_exp)
-              EXPRO_vtor(j,i) = neo_vtor_dke_out(j) &
-                   * vth_norm * EXPRO_rmin(EXPRO_n_exp) + vtor_er
-           enddo
-           jbs_norm_fac = charge_norm_fac*dens_norm*vth_norm &
-                *EXPRO_rmin(EXPRO_n_exp)/1e6
-           jbs_neo(i)    = neo_jpar_dke_out*jbs_norm_fac
-           jbs_sauter(i) = neo_jpar_thS_out*jbs_norm_fac
-           jbs_koh(i)    = neo_jpar_thK_out*jbs_norm_fac
-           jbs_nclass(i) = neo_jpar_thN_out*jbs_norm_fac
-           pflux_sum(i)  = 0.0
-           do j=1,neo_n_species_in
-              if(j==1) zfac=neo_z_1_in
-              if(j==2) zfac=neo_z_2_in
-              if(j==3) zfac=neo_z_3_in
-              if(j==4) zfac=neo_z_4_in
-              if(j==5) zfac=neo_z_5_in
-              if(j==6) zfac=neo_z_6_in
-              pflux_sum(i) = pflux_sum(i) + zfac*neo_pflux_dke_out(j)
-           enddo
-           pflux_sum(i) = pflux_sum(i) / neo_rho_star_in**2
-        endif
+        do j=1,n_ions
+           EXPRO_vpol(j,i) = neo_vpol_dke_out(j) &
+                * vth_norm * EXPRO_rmin(EXPRO_n_exp)
+           EXPRO_vtor(j,i) = neo_vtor_dke_out(j) &
+                * vth_norm * EXPRO_rmin(EXPRO_n_exp) + vtor_er
+        enddo
+        jbs_norm_fac = charge_norm_fac*dens_norm*vth_norm &
+             *EXPRO_rmin(EXPRO_n_exp)/1e6
+        jbs_neo(i)    = neo_jpar_dke_out*jbs_norm_fac
+        jbs_sauter(i) = neo_jpar_thS_out*jbs_norm_fac
+        jbs_koh(i)    = neo_jpar_thK_out*jbs_norm_fac
+        jbs_nclass(i) = neo_jpar_thN_out*jbs_norm_fac
+        pflux_sum(i)  = 0.0
+        do j=1,neo_n_species_in
+           if(j==1) zfac=neo_z_1_in
+           if(j==2) zfac=neo_z_2_in
+           if(j==3) zfac=neo_z_3_in
+           if(j==4) zfac=neo_z_4_in
+           if(j==5) zfac=neo_z_5_in
+           if(j==6) zfac=neo_z_6_in
+           pflux_sum(i) = pflux_sum(i) + zfac*neo_pflux_dke_out(j)
+        enddo
+        pflux_sum(i) = pflux_sum(i) / neo_rho_star_in**2
 
         print 10,EXPRO_rho(i),&
              er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
-
+        
      enddo
-
+     
      ! Reduce er,vpol,vtor
      er_glob = 0.0
      call MPI_ALLREDUCE(er_exp(2:EXPRO_n_exp-1),er_glob,size(er_glob), &
@@ -585,73 +573,6 @@ program vgen
 
      endif
 
-  case (3)
-
-     ! Compute Er using NEO (strong rotation limit) 
-     ! by matching vtor_measured with vtor_neo at theta=0 
-
-     ia = 2  
-     ib = EXPRO_n_exp-1  ! EAB: should be EXPRO_n_exp-1 in final version
-     call vgen_newton(ia,ib,EXPRO_w0(ia:ib))
-
-     ! Compute w0p
-     call bound_deriv(EXPRO_w0p(ia:ib),EXPRO_w0(ia:ib),&
-          EXPRO_rmin,ib-ia+1)
-
-     do i=ia,ib
-
-        er_exp(i) = EXPRO_w0(i) * 30.0 &
-             * ((1e4*EXPRO_bunit(i))*(1e2*EXPRO_rmin(i))*EXPRO_grad_r0(i)) &
-             / (2.9979e10*EXPRO_q(i))
-
-        ! flow calculation
-        if(vel_method /= 3) then
-           if(vel_method == 1) then
-              rotation_model = 1  ! weak limit
-           else
-              rotation_model = 2  ! strong limit
-           endif
-           er0 = er_exp(i)
-           omega = EXPRO_w0(i)
-           omega_deriv = EXPRO_w0p(i)
-           call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
-                omega_deriv)
-
-           if (neo_error_status_out > 0) then
-              print *,neo_error_message_out
-              stop
-           endif
-
-           do j=1,n_ions
-              EXPRO_vpol(j,i) = neo_vpol_dke_out(j) &
-                   * vth_norm * EXPRO_rmin(EXPRO_n_exp)
-              EXPRO_vtor(j,i) = neo_vtor_dke_out(j) &
-                   * vth_norm * EXPRO_rmin(EXPRO_n_exp)
-           enddo
-           jbs_norm_fac = charge_norm_fac*dens_norm*vth_norm &
-                *EXPRO_rmin(EXPRO_n_exp)/1e6
-           jbs_neo(i)    = neo_jpar_dke_out*jbs_norm_fac
-           jbs_sauter(i) = neo_jpar_thS_out*jbs_norm_fac
-           jbs_koh(i)    = neo_jpar_thK_out*jbs_norm_fac
-           jbs_nclass(i) = neo_jpar_thN_out*jbs_norm_fac
-           pflux_sum(i)  = 0.0
-           do j=1,neo_n_species_in
-              if(j==1) zfac=neo_z_1_in
-              if(j==2) zfac=neo_z_2_in
-              if(j==3) zfac=neo_z_3_in
-              if(j==4) zfac=neo_z_4_in
-              if(j==5) zfac=neo_z_5_in
-              if(j==6) zfac=neo_z_6_in
-              pflux_sum(i) = pflux_sum(i) + zfac*neo_pflux_dke_out(j)
-           enddo
-           pflux_sum(i) = pflux_sum(i) / neo_rho_star_in**2
-        endif
-
-        print 10,EXPRO_rho(i),&
-             er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3
-
-     enddo
-
   end select
   !======================================================================
 
@@ -663,31 +584,29 @@ program vgen
      er_exp(EXPRO_n_exp) = yb
   endif
 
-  if(vel_method /= 3) then
-     do j=1,n_ions
-        call bound_extrap(ya,yb,EXPRO_vpol(j,:),EXPRO_rmin,EXPRO_n_exp)
-        EXPRO_vpol(j,1) = ya
-        EXPRO_vpol(j,EXPRO_n_exp) = yb
-        call bound_extrap(ya,yb,EXPRO_vtor(j,:),EXPRO_rmin,EXPRO_n_exp)
-        EXPRO_vtor(j,1) = ya
-        EXPRO_vtor(j,EXPRO_n_exp) = yb
-     enddo
-     call bound_extrap(ya,yb,jbs_neo,EXPRO_rmin,EXPRO_n_exp)
-     jbs_neo(1)           = ya
-     jbs_neo(EXPRO_n_exp) = yb
-     call bound_extrap(ya,yb,jbs_sauter,EXPRO_rmin,EXPRO_n_exp)
-     jbs_sauter(1)           = ya
-     jbs_sauter(EXPRO_n_exp) = yb
-     call bound_extrap(ya,yb,jbs_koh,EXPRO_rmin,EXPRO_n_exp)
-     jbs_koh(1)           = ya
-     jbs_koh(EXPRO_n_exp) = yb
-     call bound_extrap(ya,yb,jbs_nclass,EXPRO_rmin,EXPRO_n_exp)
-     jbs_nclass(1)           = ya
-     jbs_nclass(EXPRO_n_exp) = yb
-     call bound_extrap(ya,yb,pflux_sum,EXPRO_rmin,EXPRO_n_exp)
-     pflux_sum(1)           = ya
-     pflux_sum(EXPRO_n_exp) = yb
-  endif
+  do j=1,n_ions
+     call bound_extrap(ya,yb,EXPRO_vpol(j,:),EXPRO_rmin,EXPRO_n_exp)
+     EXPRO_vpol(j,1) = ya
+     EXPRO_vpol(j,EXPRO_n_exp) = yb
+     call bound_extrap(ya,yb,EXPRO_vtor(j,:),EXPRO_rmin,EXPRO_n_exp)
+     EXPRO_vtor(j,1) = ya
+     EXPRO_vtor(j,EXPRO_n_exp) = yb
+  enddo
+  call bound_extrap(ya,yb,jbs_neo,EXPRO_rmin,EXPRO_n_exp)
+  jbs_neo(1)           = ya
+  jbs_neo(EXPRO_n_exp) = yb
+  call bound_extrap(ya,yb,jbs_sauter,EXPRO_rmin,EXPRO_n_exp)
+  jbs_sauter(1)           = ya
+  jbs_sauter(EXPRO_n_exp) = yb
+  call bound_extrap(ya,yb,jbs_koh,EXPRO_rmin,EXPRO_n_exp)
+  jbs_koh(1)           = ya
+  jbs_koh(EXPRO_n_exp) = yb
+  call bound_extrap(ya,yb,jbs_nclass,EXPRO_rmin,EXPRO_n_exp)
+  jbs_nclass(1)           = ya
+  jbs_nclass(EXPRO_n_exp) = yb
+  call bound_extrap(ya,yb,pflux_sum,EXPRO_rmin,EXPRO_n_exp)
+  pflux_sum(1)           = ya
+  pflux_sum(EXPRO_n_exp) = yb
 
   ! output omega_E, vtor_1 
   ! omega
@@ -758,6 +677,7 @@ program vgen
   endif
 
   deallocate(er_exp)
+  deallocate(vtor_measured)
   deallocate(jbs_neo)
   deallocate(jbs_sauter)
   deallocate(jbs_koh)

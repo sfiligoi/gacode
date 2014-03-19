@@ -20,6 +20,8 @@ module vgen_globals
   
   real :: dens_norm, temp_norm, mass_norm, vth_norm
 
+  real, dimension(:), allocatable :: vtor_measured
+
   character(len=8) :: fmt='(I2.2)' 
   character(len=2), dimension(100) :: tag
 
