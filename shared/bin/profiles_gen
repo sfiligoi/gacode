@@ -765,8 +765,8 @@ then
 
        cat input.profiles.new >> input.profiles
        echo "INFO: (profiles_gen) VGEN created vgen/input.profiles [new data]"
-       echo "INFO: (profiles_gen) VGEN created vgen/input.extra    [diagnostics]"
-       echo "INFO: (profiles_gen) VGEN created vgen/input.jbs      [boostrap current]"
+       echo "INFO: (profiles_gen) VGEN created vgen/input.profiles.extra    [diagnostics]"
+       echo "INFO: (profiles_gen) VGEN created vgen/input.profiles.jbs      [boostrap current]"
    fi
 
    exit 0
