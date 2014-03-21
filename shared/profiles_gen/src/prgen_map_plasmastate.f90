@@ -102,7 +102,6 @@ subroutine prgen_map_plasmastate
   pow_e_err = abs(1.0-(pow_e_fus(nx)+pow_e_aux(nx)-pow_ei(nx)- &
        pow_e_sync(nx)-pow_e_brem(nx)-pow_e_line(nx))/pow_e(nx))
   pow_i_err = abs(1.0-(pow_i_fus(nx)+pow_i_aux(nx)+pow_ei(nx))/pow_i(nx))
-
   !--------------------------------------------------------------------
 
   !--------------------------------------------------------------------
