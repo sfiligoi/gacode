@@ -67,9 +67,9 @@ subroutine prgen_write
         endif
      enddo
      write(1,20) '#'
-     write(1,'(a,f6.2)') '#       Quasineutrality error (%) ',quasi_err*100.0
-     write(1,'(a,f6.2)') '#       e power balance error (%) ',pow_e_err*100.0
-     write(1,'(a,f6.2)') '#       i power balance error (%) ',pow_i_err*100.0
+     write(1,'(a,f7.2)') '#       Quasineutrality error (%) ',quasi_err*100.0
+     write(1,'(a,f7.2)') '#       e power balance error (%) ',pow_e_err*100.0
+     write(1,'(a,f7.2)') '#       i power balance error (%) ',pow_i_err*100.0
 
   case (3)
 

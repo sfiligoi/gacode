@@ -208,6 +208,11 @@ subroutine prgen_read_iterdb_nc
 
   call reorder(work,onetwo_rho_mhd_gridnpsi,onetwo_npsi)
 
+  ! shrink flux
+  onetwo_rho_mhd_gridnpsi = onetwo_rho_mhd_gridnpsi &
+       * onetwo_rho_grid(onetwo_nj) &
+       / onetwo_rho_mhd_gridnpsi(onetwo_npsi)
+
   err = nf90_inq_varid(ncid,trim('rmajavnpsi'),varid)
   err = nf90_get_var(ncid,varid,work)
 
