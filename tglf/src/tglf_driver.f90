@@ -87,8 +87,8 @@
       write(*,*)"R2_ave = ",get_R2_ave()
       write(*,*)"B2_ave =",get_B2_ave()*drmindx_tg**2
       write(*,*)"Rbt_ave = ",get_Rbt_ave()*drmindx_tg
-      write(*,*)"a_pol=",get_a_pol()
-      write(*,*)"a_tor=",get_a_tor()
+      write(*,*)"B_ave=",get_B_ave()
+      write(*,*)"Bt_ave=",get_Bt_ave()
 !
       if(use_TM_tg)then
         CALL put_eikonal(new_eikonal_tg)

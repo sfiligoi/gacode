@@ -321,7 +321,7 @@ SUBROUTINE put_s_alpha_geometry(rmin,rmaj,q,shat,alpha,xwell, &
   rmin_sa = rmin
   rmaj_sa = rmaj
   q_sa = ABS(q)
-  q_unit = q_sa   ! needed for kygrid_model_in = 3
+  q_in = q_sa   ! needed for kygrid_model_in = 3
   shat_sa = shat
   alpha_sa = alpha
   xwell_sa = xwell
@@ -369,7 +369,7 @@ SUBROUTINE put_Miller_geometry(rmin,rmaj,zmaj,drmindx,drmajdx,dzmajdx, &
   rmaj_loc = rmaj
   zmaj_loc = zmaj
   q_loc = ABS(q)
-  q_unit = q_loc   ! needed for kygrid_model_in = 3
+  q_in = q_loc   ! needed for kygrid_model_in = 3
   p_prime_loc = p_prime
   q_prime_loc = q_prime
   drmindx_loc = drmindx
@@ -413,7 +413,7 @@ SUBROUTINE put_Fourier_geometry(q,q_prime,p_prime,nf,f)
   ! transfer values
   !
   q_fourier_in = ABS(q)
-  q_unit = q_loc   ! needed for kygrid_model_in = 3
+  q_in = q_loc   ! needed for kygrid_model_in = 3
   p_prime_fourier_in = p_prime
   q_prime_fourier_in = q_prime
   nfourier_in = nf
@@ -464,6 +464,7 @@ SUBROUTINE put_ELITE_geometry(nc,q,q_prime,p_prime,r_c,z_c,bp_c)
   !
   n_ELITE = nc
   q_ELITE = q
+  q_in = q   ! needed for kygrid=3
   q_prime_ELITE = q_prime
   p_prime_ELITE = p_prime
   ! note direction change for contour angle
@@ -867,26 +868,26 @@ REAL FUNCTION get_R2_ave()
 END FUNCTION get_R2_ave
 !-----------------------------------------------------------------
 !
-REAL FUNCTION get_a_pol()
+REAL FUNCTION get_B_ave()
   !
   USE tglf_global
   !
   IMPLICIT NONE
   !
-  get_a_pol = a_pol_out
+  get_B_ave = B_ave_out
   !
-END FUNCTION get_a_pol
+END FUNCTION get_B_ave
 !-----------------------------------------------------------------
 !
-REAL FUNCTION get_a_tor()
+REAL FUNCTION get_Bt_ave()
   !
   USE tglf_global
   !
   IMPLICIT NONE
   !
-  get_a_tor = a_tor_out
+  get_Bt_ave = Bt_ave_out
   !
-END FUNCTION get_a_tor
+END FUNCTION get_Bt_ave
 !-----------------------------------------------------------------
 !
 REAL FUNCTION get_Bp0()
@@ -1339,7 +1340,7 @@ SUBROUTINE get_DEP_parameters(r_dep,rmaj_dep,q_dep,taui_dep,rlni_dep,rlti_dep,ni
   ! note that rmin_input,Rmaj_input,q_input are set the different geometry routines 
   r_dep = rmin_input
   rmaj_dep = Rmaj_input
-  q_dep = q_input
+  q_dep = q_in
   !
 END SUBROUTINE get_DEP_parameters
 !-----------------------------------------------------------------

@@ -12,7 +12,7 @@
       INTEGER, PARAMETER :: nkym=50
       INTEGER, PARAMETER :: maxmodes=4
       INTEGER, PARAMETER :: max_ELITE=700
-      INTEGER, PARAMETER :: max_fourier = 32
+      INTEGER, PARAMETER :: max_fourier = 16
       INTEGER, PARAMETER :: ms = 128  ! ms needs to be divisible by 8
       INTEGER, PARAMETER :: max_plot =6*ms/8+1
 !
@@ -178,7 +178,7 @@
       REAL :: q_unit=2.0
       REAL :: B_unit=1.0
       REAL :: Rmaj_input = 3.0
-      REAL :: q_input = 2.0
+      REAL :: q_in = 2.0
       REAL :: rmin_input=0.5
       REAL,DIMENSION(maxmodes) :: gamma_reference_kx0=0.0
       REAL,DIMENSION(maxmodes) :: freq_reference_kx0=0.0
@@ -219,8 +219,8 @@
       REAL :: gamma_nb_min_out=0.0
       REAL :: B2_ave_out=1.0
       REAL :: R2_ave_out=1.0
-      REAL :: a_pol_out=1.0
-      REAL :: a_tor_out=1.0
+      REAL :: B_ave_out=1.0
+      REAL :: Bt_ave_out=1.0
       REAL :: Bp0_out = 1.0
       REAL :: RBt_ave_out=1.0
       REAL :: DM_out = 0.25

@@ -3749,13 +3749,13 @@
           energy_weight(is,1) = energy_weight(is,1) &
           + REAL(xi*CONJG(phi(i))*p_tot(is,i))
           do j=1,nbasis
-!              stress_par_weight(is,1) = stress_par_weight(is,1)  &
-!            + REAL(xi*CONJG(phi(i))*ave_c_par_par(i,j)*stress_par(is,j,1))           
+              stress_par_weight(is,1) = stress_par_weight(is,1)  &
+            + REAL(xi*CONJG(phi(i))*ave_c_par_par(i,j)*stress_par(is,j,1))           
               stress_tor_weight(is,1) = stress_tor_weight(is,1)  &
             + REAL(xi*CONJG(phi(i))*(ave_c_tor_par(i,j)*stress_par(is,j,1)+ave_c_tor_per(i,j)*stress_per(is,j,1)))
           enddo
-          stress_par_weight(is,1) = stress_par_weight(is,1)  &
-           + REAL(xi*CONJG(phi(i))*u_par(is,i))
+!          stress_par_weight(is,1) = stress_par_weight(is,1)  &
+!           + REAL(xi*CONJG(phi(i))*u_par(is,i))
 !          stress_par_weight(is,1) = stress_par_weight(is,1)  &
 !            + REAL(xi*CONJG(phi(i))*stress_par(is,i,1)*ave_c_par_par(1,1))           
 !          stress_tor_weight(is,1) = stress_tor_weight(is,1)  &
