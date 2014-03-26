@@ -31,8 +31,8 @@
       REAL,EXTERNAL :: get_phi_bar_sum
       REAL,EXTERNAL :: get_v_bar_sum
       REAL,EXTERNAL :: get_q_low
-      REAL,EXTERNAL :: get_a_pol
-      REAL,EXTERNAL :: get_a_tor
+      REAL,EXTERNAL :: get_B_ave
+      REAL,EXTERNAL :: get_Bt_ave
       REAL,EXTERNAL :: get_Bp0
       REAL,EXTERNAL :: get_R2_ave
       REAL,EXTERNAL :: get_B2_ave
