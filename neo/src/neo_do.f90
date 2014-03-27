@@ -451,7 +451,7 @@ subroutine neo_do
         if(silent_flag == 0 .and. i_proc == 0) then
            open(unit=io_neoout,file=trim(path)//runfile_neoout,&
                 status='old',position='append')
-           write(io_neoout,*) 'Estimated memory (GB) = ', 8.0*(asize+n_max)/1.0e9
+           write(io_neoout,*) 'Estimated memory (GB) = ', 2*8.0*(asize+n_max)/1.0e9
            close(io_neoout)
         endif
         if(allocated(amat))       deallocate(amat)
