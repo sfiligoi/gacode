@@ -54,6 +54,8 @@
       INTEGER :: igeo=1
       LOGICAL :: use_default_species=.TRUE.
       INTEGER,DIMENSION(8) :: trace_path=0
+      LOGICAL,EXTERNAL :: tglf_isnan
+      LOGICAL,EXTERNAL :: tglf_isinf
 ! Input global variables
       LOGICAL :: find_width_in=.TRUE.
       INTEGER :: nwidth_in=21

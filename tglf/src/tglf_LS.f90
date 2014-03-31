@@ -3375,8 +3375,7 @@
 !      write(*,*)"work(1)",work(1)
 
       if (info /= 0) then
-         error_msg = "ERROR: (tglf) ZGGEV failed in tglf_ls.f90."
-         write(*,*) error_msg,info
+         call tglf_error(1,"ERROR: ZGGEV failed in tglf_LS.f90")
       endif
 
 !      cputime2=MPI_WTIME()

@@ -33,6 +33,8 @@ OBJECTS = tglf_modules.o   \
           tglf_max.o       \
           tglf_interface.o \
           tglf_init.o      \
+          tglf_error.o    \
+          tglf_shutdown.o  \
           tglf_run.o       \
           tglf_run_mpi.o   \
           tglf_read_input.o 
