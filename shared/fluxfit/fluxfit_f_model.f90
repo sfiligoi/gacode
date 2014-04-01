@@ -1,6 +1,6 @@
 subroutine fluxfit_f_model(t,r,z)
 
-  use prgen_fluxfit_globals
+  use fluxfit_globals
 
   implicit none
 

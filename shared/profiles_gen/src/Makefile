@@ -6,10 +6,17 @@ else
    FFLAGS=${FOPT}
 endif
 
+export EXTRA_LIBS = \
+	${GACODE_ROOT}/shared/math/math_lib.a \
+	${GACODE_ROOT}/shared/EXPRO/EXPRO_lib.a \
+	${GACODE_ROOT}/shared/GEO/GEO_lib.a \
+	${GACODE_ROOT}/shared/fluxfit/fluxfit_lib.a \
+	${LMATH} \
+	${NETCDF}
+
 EXEC = prgen
 
 OBJECTS = prgen_globals.o \
-          prgen_fluxfit_globals.o \
           allocate_internals.o \
           allocate_iterdb_vars.o \
           allocate_plasmastate_vars.o \
@@ -37,14 +44,7 @@ OBJECTS = prgen_globals.o \
 	  prgen_read_corsica.o \
 	  prgen_read_ufile.o \
 	  prgen_read_inputprofiles.o \
-          prgen_write.o \
-          fluxfit_driver.o \
-          fluxfit_moments.o \
-          fluxfit_intersect.o \
-          fluxfit_minmax.o \
-          fluxfit_fourier.o \
-          fluxfit_error.o \
-          fluxfit_f_model.o 
+          prgen_write.o 
 
 .SUFFIXES : .o .f90
 

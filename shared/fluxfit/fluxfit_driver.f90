@@ -24,7 +24,7 @@
 
 subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
 
-  use prgen_fluxfit_globals
+  use fluxfit_globals
 
   implicit none
 

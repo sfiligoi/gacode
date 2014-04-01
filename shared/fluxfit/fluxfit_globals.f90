@@ -1,4 +1,4 @@
-module prgen_fluxfit_globals
+module fluxfit_globals
 
   integer :: model
   integer :: nd
@@ -25,4 +25,4 @@ module prgen_fluxfit_globals
   real, dimension(:), allocatable :: ar,br
   real, dimension(:), allocatable :: az,bz
   
-end module prgen_fluxfit_globals
+end module fluxfit_globals

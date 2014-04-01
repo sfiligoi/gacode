@@ -1,6 +1,6 @@
 subroutine fluxfit_error(err)
 
-  use prgen_fluxfit_globals
+  use fluxfit_globals
 
   implicit none
 

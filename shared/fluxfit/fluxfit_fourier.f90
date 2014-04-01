@@ -1,6 +1,6 @@
 subroutine fluxfit_fourier
 
-  use prgen_fluxfit_globals
+  use fluxfit_globals
 
   implicit none
 
