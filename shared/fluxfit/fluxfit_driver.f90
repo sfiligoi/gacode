@@ -51,6 +51,8 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
 
   real, dimension(3) :: s
 
+  real, parameter :: tol = 1e-12
+
   model = model_in
   ns    = ns_in
   npsi  = npsi_in
@@ -126,6 +128,11 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
      rd(:) = rd_in(:,j)
      zd(:) = zd_in(:,j)
 
+     if ( abs(rd(nd)-rd(1))+abs(zd(nd)-zd(1)) > tol ) then
+        print '(a)','ERROR: (fluxfit_driver) R,Z contour must have repeated point.'
+        stop
+     endif
+
      ! Find the centroid (z_c,r_c)
 
      call fluxfit_moments(rd,zd,nd,s)
@@ -195,8 +202,8 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
            enddo
            print *
         endif
- 
-    else
+
+     else
 
         !----------------------------
         ! Parameterized (see f_model)
