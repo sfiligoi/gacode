@@ -1,4 +1,5 @@
 subroutine tglf_error(itype,error_message)
+
   
   ! error handeling routine for TGLF
   ! simply writes the error or informatin message
@@ -18,25 +19,22 @@ logical function tglf_isnan(x)
   ! 
   ! test real variables for NAN 
   !
+  use ieee_arithmetic, only: ieee_is_nan
   implicit none
   real, intent(in) :: x
 
-  tglf_isnan = .false.
-
-  if (ISNAN(x)) tglf_isnan = .true.
+  tglf_isnan  = ieee_is_nan(x)
 
 end function tglf_isnan
 
 logical function tglf_isinf(x)
   ! 
-  ! test real variables for NAN 
+  ! test real variables for Inf
   !
   implicit none
   real, intent(in) :: x
 
-  tglf_isinf = .false.
-
-  if (ABS(x) > HUGE(x)) tglf_isinf = .true.
+  tglf_isinf = (ABS(x) > HUGE(x))
 
 end function tglf_isinf
    
