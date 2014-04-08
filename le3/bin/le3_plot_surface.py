@@ -93,7 +93,7 @@ dz=(np.amax(f)-np.amin(f))/256
 levels = np.arange(np.amin(f)-dz,np.amax(f)+dz,dz)
 ax.contourf(p/np.pi,t/np.pi,f,levels,cmap=cm.jet,origin='lower')
 ax.set_ylabel(r'$\theta/\pi$')
-ax.set_xlabel(r'$\phi/\pi$')
+ax.set_xlabel(r'$\varphi/\pi$')
 ax.set_xlim([0,2])
 ax.set_ylim([0,2])
 
