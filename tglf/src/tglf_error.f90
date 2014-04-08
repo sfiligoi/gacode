@@ -1,9 +1,8 @@
 subroutine tglf_error(itype,error_message)
 
-  
-  ! error handeling routine for TGLF
-  ! simply writes the error or informatin message
-  ! if itype = 1 the error was fatal so TGLF is shutdown
+  ! error handling routine for TGLF
+  ! simply writes the error or information message
+  ! if itype = 1 the error was fatal so TGLF is shut down
   
   implicit none
   integer, intent(in):: itype
@@ -19,11 +18,12 @@ logical function tglf_isnan(x)
   ! 
   ! test real variables for NAN 
   !
-  use ieee_arithmetic, only: ieee_is_nan
   implicit none
   real, intent(in) :: x
 
-  tglf_isnan  = ieee_is_nan(x)
+  tglf_isnan = .false.
+
+  if (x /= x) tglf_isnan = .true.
 
 end function tglf_isnan
 
