@@ -29,7 +29,7 @@ subroutine EXPRO_write_derived
   write(io,'(a)') '# 09 EXPRO_dlntedr(:)     -dln(Te)/dr (1/m)'
   write(io,'(a)') '# 10-14 EXPRO_dlnnidr(1:5,:) -dln(ni)/dr (1/m)'
   write(io,'(a)') '# 15-19 EXPRO_dlntidr(1:5,:) -dln(ti)/dr (1/m)'
-  write(io,'(a)') '# 20  EXPR0_dlnptotdr(:)   -dln(ptot)/dr (1/m)'
+  write(io,'(a)') '# 20  EXPRO_dlnptotdr(:)   -dln(ptot)/dr (1/m)'
   write(io,'(a)') '# 21  EXPRO_drdrho(:)      dr/d(rho) [r and rho have units of length]'
   write(io,'(a)') '# 22  EXPRO_w0p(:)         d(w0)/dr (1/s/m)'
   write(io,'(a)') '# 23  EXPRO_vol(:)         V (m^3)'
