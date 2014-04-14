@@ -15,11 +15,13 @@ ifeq ($(MPI),true)
    EXEC2=tglf_mpi
    SRC1=tglf_driver_mpi
    SRC2=tglf_mpi
+   TGLFMPI=tglf_TM_mpi.o tglf_run_mpi.o tglf_init_mpi.o
 else
    EXEC1=xtglf
    EXEC2=tglf
    SRC1=tglf_driver
    SRC2=tglf
+   TGLFMPI= 
 endif
 
 LLIB=tglf_lib
@@ -32,7 +34,6 @@ OBJECTS = ${TGLFISNAN}        \
           tglf_startup.o   \
           tglf_hermite.o   \
           tglf_TM.o        \
-          tglf_TM_mpi.o  \
           tglf_inout.o     \
           tglf_setup_geometry.o \
           tglf_LS.o        \
@@ -41,13 +42,12 @@ OBJECTS = ${TGLFISNAN}        \
           tglf_matrix.o    \
           tglf_max.o       \
           tglf_interface.o \
-          tglf_init.o      \
           tglf_error.o    \
           tglf_isinf.o    \
           tglf_shutdown.o  \
           tglf_run.o       \
-          tglf_run_mpi.o   \
-          tglf_read_input.o 
+          tglf_read_input.o \
+          ${TGLFMPI}
 
 .SUFFIXES : .o .f90
 

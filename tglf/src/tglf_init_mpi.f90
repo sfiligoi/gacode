@@ -1,3 +1,24 @@
+!\
+! module for MPI version of TGLF
+!/
+
+      MODULE tglf_mpi
+
+        use mpi
+
+        IMPLICIT NONE
+
+        ! local communicator
+        integer :: iCommTglf    = -1
+        integer :: iProcTglf    = -1
+        integer :: nProcTglf    = -1
+        integer :: iProc0Tglf   = 0
+        integer :: iGroupIDTglf = 1
+
+      END MODULE tglf_mpi
+!
+!______________________________________________________
+!
 !--------------------------------------------------------------
 ! tglf_init.f90
 !
