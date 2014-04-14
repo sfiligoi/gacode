@@ -2,7 +2,7 @@
   ! 
   ! test real variables for NAN 
   !
-  use ieee_arithmatic, only : ieee_is_nan
+  use ieee_arithmetic, only : ieee_is_nan
   implicit none
   real, intent(in) :: x
 
