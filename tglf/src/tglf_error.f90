@@ -15,32 +15,5 @@
      STOP
   endif
  
-  END SUBROUTINE tglf_error
-
-  logical function tglf_isnan(x)
-  ! 
-  ! test real variables for NAN 
-  !
-  implicit none
-  real, intent(in) :: x
-
-  tglf_isnan = .false.
-
-  if (ISNAN(x)) tglf_isnan = .true.
-
-  end function tglf_isnan
-
-  logical function tglf_isinf(x)
-  ! 
-  ! test real variables for NAN 
-  !
-  implicit none
-  real, intent(in) :: x
-
-  tglf_isinf = .false.
-
-  if (ABS(x) > HUGE(x)) tglf_isinf = .true.
-
-  end function tglf_isinf
-   
+  END SUBROUTINE tglf_error   
       

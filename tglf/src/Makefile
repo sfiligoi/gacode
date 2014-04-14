@@ -1,4 +1,7 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
+
+TGLFISNAN = tglf_isnan_generic.o
+
 include ../install/make.ext.${GACODE_PLATFORM}
 
 ifeq ($(OPT),debug)
@@ -21,7 +24,8 @@ endif
 
 LLIB=tglf_lib
 
-OBJECTS = tglf_modules.o   \
+OBJECTS = ${TGLFISNAN}        \
+          tglf_modules.o   \
           tglf_pkg.o       \
           tglf_allocate.o  \
           tglf_deallocate.o \
@@ -39,6 +43,7 @@ OBJECTS = tglf_modules.o   \
           tglf_interface.o \
           tglf_init.o      \
           tglf_error.o    \
+          tglf_isinf.o    \
           tglf_shutdown.o  \
           tglf_run.o       \
           tglf_run_mpi.o   \
@@ -63,3 +68,4 @@ $(LLIB).a: $(OBJECTS)
 clean:
 	rm -f *.o *.lst $(LLIB).a xtglf xtglf_mpi tglf tglf_mpi
 	rm -f ${GACODE_ROOT}/modules/tglf*.mod 
+
