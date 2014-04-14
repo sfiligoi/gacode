@@ -8,7 +8,6 @@
 subroutine tglf_run_mpi()
   USE tglf_pkg
   USE tglf_interface
-  USE tglf_mpi
 
   implicit none
 
@@ -165,7 +164,7 @@ subroutine tglf_run_mpi()
 
   else
      ! run single ky linear stability
-     call tglf_LS
+     call tglf
 
      !collect linear eigenvalues
      do n=1,tglf_nmodes_in

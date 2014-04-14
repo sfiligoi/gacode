@@ -13,9 +13,9 @@
       INTEGER :: time_array(8)
       REAL :: cpu1,cpu2 
 !
-
 !      CALL tglf
 !      write(*,*)"gamma=",get_growthrate(1)
+!      STOP
       OPEN (unit=3,file='./tglfin',status='old')
       READ(3,nml=tglfin)
       CLOSE(3)
@@ -179,9 +179,9 @@
       CALL put_gaussian_width(width_max_tg,width_min_tg,nwidth_tg &
       ,find_width_tg)
 !
-      CALL tglf
+      CALL tglf_ky
 !
-      CALL write_wavefunction_out('out.tglf.wavefunction')
+!      CALL write_wavefunction_out('out.tglf.wavefunction')
 !
       nfields=1
       if(use_bper_tg)nfields=2
@@ -190,16 +190,8 @@
       write(*,*) 'gaussian width = ',get_gaussian_width()
       write(*,*) 'R_unit = ',get_R_unit()
       write(*,*) 'q_unit = ',get_q_unit()
-      write(*,*) 'ave_wd(1,1) = ',get_ave_wd(1,1)
-      write(*,*) 'ave_b0(1,1) = ',get_ave_b0(1,1)
       write(*,*)"ft = ",get_ft()
-      if(nbasis_max_tg.gt.1)then
-        write(*,*) 'ave_wd(1,2) = ',get_ave_wd(1,2)
-        write(*,*) 'ave_b0(1,2) = ',get_ave_b0(1,2)
-        write(*,*) 'ave_wd(2,2) = ',get_ave_wd(2,2)
-        write(*,*) 'ave_b0(2,2) = ',get_ave_b0(2,2)
-      endif
-      do i=1,nmodes_tg 
+      do i=1,nmodes_tg
         write(*,*) 'mode number i =',i  
         write(*,*) 'gamma_tg(i) = ',get_growthrate(i)
         write(*,*) 'freq_tg(i)  = ',get_frequency(i)

@@ -34,7 +34,8 @@
        return
     end if
 
-    CALL get_ky_spectrum
+    nky = nky_in
+    if(kygird_model_in.eq.1)nky = nky_in+9
 
     ! initialize nkyProc
     nkyProc(:) = 0

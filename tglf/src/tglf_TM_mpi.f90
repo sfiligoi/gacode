@@ -28,7 +28,7 @@
       REAL :: exch1(nsm,3)
       REAL :: nsum1(nsm),tsum1(nsm)
 !
-      if(new_start)CALL tglf_start
+      CALL tglf_startup
 !
 ! initialize fluxes
 !
@@ -159,6 +159,8 @@
 !
         ky0 = ky1
       enddo  ! i
+!
+      CALL tglf_shutdown
 !
       END SUBROUTINE tglf_TM_mpi
 !
@@ -413,7 +415,6 @@
 !
       new_kyspectrum=.FALSE.
 !
-      if(new_start)CALL tglf_start
 !
       spectrum_type = kygrid_model_in
 !

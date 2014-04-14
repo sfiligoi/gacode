@@ -14,15 +14,19 @@
 !
       new_geometry = .TRUE.
 !
-      if(new_start)then
-! set up hermite basis and fill species arrays
-        CALL tglf_start
-      else
-! fill the species arrays  
-        CALL get_species
-      endif
 !
-      nbasis = nbasis_max_in
+! set global constants
+!
+      pi = atan2( 0.0, -1.0 )
+      pi_2 = 2.0*pi
+      sqrt_pi = SQRT(pi)
+      sqrt_two = SQRT(2.0)
+!
+      new_width=.TRUE.
+!
+!   load the xgrid and gauss-hermite weights
+!
+       if(gauher_uncalled)CALL gauher
 !
 ! set ky in units of k_theta*rho_s  rho_s=C_s/omega_s
 ! C_s=sqrt(Te/mi), omega_s=eB/(mi c)
@@ -32,7 +36,7 @@
 !
 ! check co-dependencies 
 !
-      if(new_start .or. new_geometry)new_width=.TRUE.
+      if(new_geometry)new_width=.TRUE.
       if(new_width)new_matrix=.TRUE.
 !      write(*,*)"new_start=",new_start
 !      write(*,*)"new_geometry=",new_geometry

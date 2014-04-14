@@ -69,9 +69,9 @@
       if(ibranch_in.eq.-1)branch = 1
       iflux_in=.FALSE.
       if(nbasis_min_in.ne.0)then
-        nbasis_max_in = nbasis_min_in
+        nbasis = nbasis_min_in
       endif
-!       write(*,*)"nbasis_max_in = ",nbasis_max_in
+!       write(*,*)"nbasis = ",nbasis
       tmin=LOG10(width_min)
       tmax=LOG10(width_max)
       nt=nwidth_in
@@ -290,8 +290,8 @@
 !
        if(gamma_max.ne.0.0)then
 ! refine eigenvalue with more basis functions
-         nbasis_max_in=save_nbasis
-!         write(*,*)"nbasis=",nbasis_max_in
+         nbasis = save_nbasis
+!         write(*,*)"nbasis=",nbasis
          iflux_in=save_iflux
          new_width=.TRUE.
          call tglf_LS
@@ -335,7 +335,7 @@
          enddo
        endif
 !
-       nbasis_max_in=save_nbasis
+       nbasis=save_nbasis
        iflux_in=save_iflux
        vexb_shear_in = save_vexb_shear
        alpha_kx_p_in = save_alpha_kx_p

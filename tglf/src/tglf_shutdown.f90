@@ -1,9 +1,9 @@
       SUBROUTINE tglf_shutdown
 !
-! dealocate memory and STOP
+! save output and dealocate memory 
 !
       IMPLICIT NONE
 
-      STOP
+      CALL tglf_deallocate
  
       END SUBROUTINE tglf_shutdown

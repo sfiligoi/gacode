@@ -13,8 +13,6 @@
       REAL,EXTERNAL :: get_q_unit
       REAL,EXTERNAL :: get_wd_bar
       REAL,EXTERNAL :: get_b0_bar
-      REAL,EXTERNAL :: get_ave_wd
-      REAL,EXTERNAL :: get_ave_b0
       REAL,EXTERNAL :: get_particle_flux
       REAL,EXTERNAL :: get_energy_flux
       REAL,EXTERNAL :: get_stress_par
@@ -49,14 +47,13 @@
       CONTAINS
 !
 !
-      SUBROUTINE tglf
+      SUBROUTINE tglf_ky
+      USE tglf_dimensions
       USE tglf_global
       IMPLICIT NONE
-      INTEGER :: i
 !
-      do i=1,7
-        trace_path(i)=0
-      enddo
+      call tglf_startup
+!      write(*,*)"startup done"
 !
       if(find_width_in)then
         trace_path(1)=1
@@ -64,8 +61,12 @@
       else
         call tglf_LS
       endif
+!      write(*,*)"tglf done"
       find_width_in=.FALSE.
 !
-      END SUBROUTINE tglf
+      call tglf_shutdown
+!      write(*,*)"shutdown done"
+!
+      END SUBROUTINE tglf_ky
 !
       END MODULE tglf_pkg

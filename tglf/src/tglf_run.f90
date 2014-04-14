@@ -171,7 +171,7 @@ subroutine tglf_run()
   else
 
      ! Run single-ky linear stability
-     call tglf_ls
+     call tglf_ky
 
      ! Collect linear eigenvalues
      do n=1,tglf_nmodes_in

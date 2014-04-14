@@ -240,7 +240,7 @@ END SUBROUTINE put_averages
 !-----------------------------------------------------------------
 !
 SUBROUTINE put_switches(iflux,use_bper,use_bpar,use_mhd_rule,use_bisection, &
-     ibranch,nmodes,nb_max,nb_min,nxgrid,nky)
+     ibranch,nmodes,nb_max,nb_min,nxgrid,nkys)
   !
   USE tglf_global
   USE tglf_dimensions
@@ -248,7 +248,7 @@ SUBROUTINE put_switches(iflux,use_bper,use_bpar,use_mhd_rule,use_bisection, &
   IMPLICIT NONE
   LOGICAL :: iflux,use_bper,use_bpar,use_mhd_rule,use_bisection
   INTEGER :: ibranch,nmodes,nb_max,nb_min
-  INTEGER :: nxgrid,nky
+  INTEGER :: nxgrid,nkys
   !
   ! validaty checks
   ! reset to defaults if invlaid
@@ -259,9 +259,9 @@ SUBROUTINE put_switches(iflux,use_bper,use_bpar,use_mhd_rule,use_bisection, &
   if(ibranch.lt.-1.or.ibranch.gt.2)ibranch=ibranch_in
   if(nxgrid.lt.1.or.2*nxgrid-1.gt.nxm)nxgrid=MIN((nxm+1)/2,nxgrid_in)
   if(nmodes.lt.1.or.nmodes.gt.maxmodes)nmodes=nmodes_in
-  if(nky.lt.2.or.nky.gt.nkym)nky=nky_in
+  if(nkys.lt.2.or.nkys.gt.nkym)nkys=nky_in
 
-  !      write(*,*)nb_max,nb_min,ibranch,nxgrid,nmodes,nky
+  !      write(*,*)nb_max,nb_min,ibranch,nxgrid,nmodes,nkys
   !
   ! check for changes and update flow controls
   !
@@ -280,7 +280,7 @@ SUBROUTINE put_switches(iflux,use_bper,use_bpar,use_mhd_rule,use_bisection, &
   nbasis_max_in = nb_max
   nbasis_min_in = nb_min
   nxgrid_in = nxgrid
-  nky_in = nky
+  nky_in = nkys
   !
 END SUBROUTINE put_switches
 !
@@ -1034,20 +1034,6 @@ REAL FUNCTION get_RBt_ave()
 END FUNCTION get_RBt_ave
 !-----------------------------------------------------------------
 !
-REAL FUNCTION get_ave_wd(n1,n2)
-  !
-  USE tglf_global
-  USE tglf_coeff
-  !
-  IMPLICIT NONE
-  ! 
-  INTEGER,INTENT(IN):: n1,n2
-  !
-  get_ave_wd = ave_wd(n1,n2)
-  !
-END FUNCTION get_ave_wd
-!-----------------------------------------------------------------
-!
 REAL FUNCTION get_b0_bar(n1)
   !
   USE tglf_global
@@ -1074,20 +1060,6 @@ REAL FUNCTION get_wd_bar(n1)
   get_wd_bar = wd_bar_out(n1)
   !
 END FUNCTION get_wd_bar
-!-----------------------------------------------------------------
-!
-REAL FUNCTION get_ave_b0(n1,n2)
-  !
-  USE tglf_global
-  USE tglf_coeff
-  !
-  IMPLICIT NONE
-  ! 
-  INTEGER,INTENT(IN):: n1,n2
-  !
-  get_ave_b0 = ave_b0(n1,n2)
-  !
-END FUNCTION get_ave_b0
 !-----------------------------------------------------------------
 !
 REAL FUNCTION get_particle_flux(i1,i2)
@@ -1670,7 +1642,6 @@ SUBROUTINE write_tglf_flux_spectrum
   REAL :: pflux0(nsm,3),eflux0(nsm,3)
   REAL :: stress_par0(nsm,3),stress_tor0(nsm,3)
   REAL :: exch0(nsm,3)
-  REAL :: nsum0(nsm),tsum0(nsm)
   REAL :: pflux1(nsm,3),eflux1(nsm,3)
   REAL :: stress_par1(nsm,3),stress_tor1(nsm,3)
   REAL :: exch1(nsm,3)
@@ -1686,6 +1657,8 @@ SUBROUTINE write_tglf_flux_spectrum
   !
   ! initialize fluxes
   !
+!  write(*,*)"ns0,ns,nky,nmodes",ns0,ns,nky,nmodes_in
+!
   do is=ns0,ns
      do j=1,3 
         pflux0(is,j) = 0.0

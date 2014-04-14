@@ -1030,7 +1030,7 @@
         p0x(i) = debye + pol
       enddo
 !debug
-!      write(*,*)"check p0"
+!      write(*,*)"check p0",nx
 !      do i=1,nx
 !        write(*,*)i,p0x(i)
 !      enddo
@@ -1149,7 +1149,6 @@
          enddo
        endif
 ! 
-       kx_shear = ave_kx(1,2)
 !
 !  debug
 !       write(*,*)"check ave_p0inv"
@@ -1658,9 +1657,9 @@
       IMPLICIT NONE
       INTEGER :: nm,i,j,k
       INTEGER :: lwork,info
-      REAL :: a(nb,nb)
-      REAL :: w(nb)
-      REAL :: work(34*nb)
+      REAL :: a(nbasis,nbasis)
+      REAL :: w(nbasis)
+      REAL :: work(34*nbasis)
 !
       nm = nbasis
 !
@@ -1678,8 +1677,8 @@
        enddo
        lwork=34*nm
 ! call LAPACK routine for symmetric real eigenvalue problem DSYEV
-       call DSYEV('V','U',nm,a,nb,w,work,lwork,info)
-       if(info.ne.0)write(*,*)"modwd info =",info
+       call DSYEV('V','U',nm,a,nm,w,work,lwork,info)
+       if(info.ne.0)CALL tglf_error(1,"DSYEV failed in modwd")
 ! debug
 !       write(*,*)"ave_wd eigenvalues"
 !       do i=1,nm
@@ -1744,10 +1743,10 @@
       IMPLICIT NONE
       INTEGER :: nm,i,j,k,is
       INTEGER :: lwork,info
-      REAL :: w(nb)
-      REAL :: rwork(3*nb-2)
-      COMPLEX :: work(34*nb)
-      COMPLEX :: a(nb,nb),b(nb,nb)
+      REAL :: w(nbasis)
+      REAL :: rwork(3*nbasis-2)
+      COMPLEX :: work(34*nbasis)
+      COMPLEX :: a(nbasis,nbasis),b(nbasis,nbasis)
 !      COMPLEX :: xi
 !
       nm = nbasis
@@ -1766,8 +1765,8 @@
         enddo
         enddo
         lwork=34*nm
-        call ZHEEV('V','U',nm,a,nb,w,work,lwork,rwork,info)
-        if(info.ne.0)write(*,*)"modkpar info =",info
+        call ZHEEV('V','U',nm,a,nm,w,work,lwork,rwork,info)
+        if(info.ne.0)CALL tglf_error(1,"ZHEEV failed in modkpar")
 !       write(*,*)"kpar eigenvalues"
 !       do i=1,nm
 !       write(*,*)i,w(i)
@@ -1805,8 +1804,8 @@
            enddo
            enddo
            lwork=34*nm
-           call ZHEEV('V','U',nm,a,nb,w,work,lwork,rwork,info)
-           if(info.ne.0)write(*,*)"modkpar info =",info
+           call ZHEEV('V','U',nm,a,nm,w,work,lwork,rwork,info)
+           if(info.ne.0)CALL tglf_error(1,"ZHEEV failed in modkpar_eff")
            do i=1,nm
 !            write(*,*)i,"w = ",w(i)
            do j=1,nm
@@ -1844,18 +1843,20 @@
 !   of the symmetric real matrix ave_m
 !
 !***************************************************************
-      USE tglf_dimensions
 !
+      USE tglf_dimensions
+! 
       IMPLICIT NONE
       INTEGER :: nm,is,i,j,k
       INTEGER :: lwork,info
+      REAL,INTENT(IN),DIMENSION(ns,nbasis_max,nbasis_max) :: ave_m
+      REAL,INTENT(OUT),DIMENSION(ns,nbasis_max,nbasis_max) :: ave_minv
       REAL :: detm,zero
 !      REAL :: check
-      REAL :: a(nb,nb)
-      REAL :: w(nb)
-      REAL :: work(34*nb)
-      REAL :: ave_m(nsm,nb,nb),ave_minv(nsm,nb,nb)
-!
+      REAL,DIMENSION(nbasis,nbasis) :: a
+      REAL,DIMENSION(nbasis) :: w
+      REAL,DIMENSION(34*nbasis) :: work
+
       nm = nbasis
 !
       if(nm.eq.1)then
@@ -1890,8 +1891,8 @@
        enddo
        lwork=34*nm
 ! call LAPACK routine for symmetric real eigenvalue problem DSYEV
-       call DSYEV('V','U',nm,a,nb,w,work,lwork,info)
-       if(info.ne.0)write(*,*)"modwd info =",info
+       call DSYEV('V','U',nm,a,nbasis_max,w,work,lwork,info)
+       if(info.ne.0)CALL tglf_error(1,"DSYEV failed in ave_inv")
 !
 ! debug
 !       write(*,*)"ave_m eigenvalues"
@@ -1957,10 +1958,11 @@
       INTEGER :: lwork,info
       REAL :: detm,zero
 !      REAL :: check
-      REAL :: a(nb,nb)
-      REAL :: w(nb)
-      REAL :: work(34*nb)
-      REAL :: ave_m(nb,nb),ave_minv(nb,nb)
+      REAL :: a(nbasis,nbasis)
+      REAL :: w(nbasis)
+      REAL :: work(34*nbasis)
+      REAL,INTENT(IN),DIMENSION(nbasis_max,nbasis_max) :: ave_m
+      REAL,INTENT(OUT),DIMENSION(nbasis_max,nbasis_max) :: ave_minv
 !
       nm = nbasis
       zero = 1.0D-12
@@ -1992,8 +1994,8 @@
        enddo
        lwork=34*nm
 ! call LAPACK routine for symmetric real eigenvalue problem DSYEV
-       call DSYEV('V','U',nm,a,nb,w,work,lwork,info)
-       if(info.ne.0)write(*,*)"modwd info =",info
+       call DSYEV('V','U',nm,a,nbasis_max,w,work,lwork,info)
+       if(info.ne.0)CALL tglf_error(1,"DSYEV failed in ave_inv0")
 !
 ! debug
 !       write(*,*)"ave_m eigenvalues"
@@ -2074,7 +2076,7 @@
 !        write(*,*)"dhw113= ",FLR_dHw113(ft,b)
 !        write(*,*)"dhw133= ",FLR_dHw133(ft,b)
 !        write(*,*)"dhw333= ",FLR_dHw333(ft,b)
-!         write(*,*)"FLR ft=",ft,ft_min
+!        write(*,*)"FLR ft=",ft,ft_min
 
 ! debug
 !

@@ -6,7 +6,7 @@
       SAVE
 !
       INTEGER, PARAMETER :: nb=16
-      INTEGER, PARAMETER :: nxm=4*nb-1
+      INTEGER, PARAMETER :: nxm=4*16-1
       INTEGER, PARAMETER :: nsm=6, nt0=40
       INTEGER, PARAMETER :: neq = 15*nsm,iar=neq*nb
       INTEGER, PARAMETER :: nkym=50
@@ -26,7 +26,7 @@
       IMPLICIT NONE
       SAVE
 !
-      INTEGER nx,nbasis,ns0,ns
+      INTEGER nx,nbasis,nbasis_max,ns0,ns,nky,iur
 !
       END MODULE tglf_dimensions
 !
@@ -50,6 +50,8 @@
       LOGICAL :: new_geometry=.TRUE.
       LOGICAL :: new_width=.TRUE.
       LOGICAL :: new_kyspectrum=.TRUE.
+      LOGICAL :: gauher_uncalled=.TRUE.
+      LOGICAL :: gauss_hermite_uncalled=.TRUE.
       LOGICAL :: eikonal_unsaved=.TRUE.
       INTEGER :: igeo=1
       LOGICAL :: use_default_species=.TRUE.
@@ -189,7 +191,7 @@
       REAL :: kx0=0.0
       REAL :: kx0_e=0.0
       REAL :: kx0_p = 0.0
-      REAL :: midplane_shear=1.0,kx_shear=0.0
+      REAL :: midplane_shear=1.0
       REAL :: kx0_factor=1.0
 ! output
       COMPLEX,DIMENSION(maxmodes,3,nb) :: field_weight_out=0.0
@@ -272,20 +274,19 @@
       IMPLICIT NONE
       SAVE
 !
-      REAL :: x(nxm),wx(nxm),h(nb,nxm)
+      REAL :: x(nxm),wx(nxm),h(nxm,nxm)
 !
       END MODULE tglf_hermite  
 !
       MODULE tglf_species
 ! species parameters
-      USE tglf_max_dimensions
+!      USE tglf_max_dimensions
       IMPLICIT NONE
-      SAVE
 !
-      REAL :: ei_exch(nsm,nsm),resist(nsm,nsm)
-      REAL :: zs(nsm),mass(nsm),vs(nsm)
-      REAL :: rlts(nsm),rlns(nsm),vpar_shear_s(nsm)
-      REAL :: as(nsm),taus(nsm),vpar_s(nsm)
+      REAL,ALLOCATABLE,DIMENSION(:,:) :: ei_exch, resist
+      REAL,ALLOCATABLE,DIMENSION(:) :: zs, mass, vs
+      REAL,ALLOCATABLE,DIMENSION(:) :: rlts, rlns, vpar_shear_s
+      REAL,ALLOCATABLE,DIMENSION(:) :: as, taus, vpar_s
       REAL :: vexb_shear_s
 ! 
       END MODULE tglf_species  
@@ -294,14 +295,13 @@
 !
 ! ky spectrum for computing total fluxes and intensities
 !
-      USE tglf_max_dimensions
+      USE tglf_dimensions
       IMPLICIT NONE
       SAVE
+
 !
-      INTEGER nky
-!
-      REAL :: ky_spectrum(nkym)
-      REAL :: dky_spectrum(nkym)
+      REAL,DIMENSION(nkym) :: ky_spectrum
+      REAL,DIMENSION(nkym) :: dky_spectrum
 !
       END MODULE tglf_kyspectrum
 !
@@ -310,18 +310,17 @@
 !
 ! eigenvalues, eigenvectors and fluxes
 !
-      USE tglf_max_dimensions
+!      USE tglf_dimensions
       IMPLICIT NONE
-      SAVE
 !
-      INTEGER matz,iur,nroot
-      REAL :: fv1(iar),fv2(iar),fv3(iar)
-      REAL :: rr(iar), ri(iar)
-      REAL :: ar(iar,iar), ai(iar,iar)
-      REAL :: vr(iar,iar), vi(iar,iar)
-      COMPLEX :: v(iar),eigenvalue
-      COMPLEX :: amat(iar,iar),bmat(iar,iar)
-      COMPLEX :: alpha(iar),beta(iar)
+      INTEGER matz,nroot
+      REAL,ALLOCATABLE,DIMENSION(:) :: fv1, fv2, fv3
+      REAL,ALLOCATABLE,DIMENSION(:) :: rr, ri
+      REAL,ALLOCATABLE,DIMENSION(:,:) :: ar, ai
+      REAL,ALLOCATABLE,DIMENSION(:,:) :: vr, vi
+      COMPLEX :: eigenvalue
+      COMPLEX,ALLOCATABLE,DIMENSION(:,:) :: amat, bmat
+      COMPLEX,ALLOCATABLE,DIMENSION(:) :: v, alpha, beta
 !
       END MODULE tglf_eigen
 !
@@ -335,25 +334,25 @@
       IMPLICIT NONE
       SAVE
 !
-      REAL :: hxn(nsm,nxm),hxp1(nsm,nxm),hxp3(nsm,nxm)
-      REAL :: hxr11(nsm,nxm),hxr13(nsm,nxm),hxr33(nsm,nxm)
-      REAL :: hxw113(nsm,nxm),hxw133(nsm,nxm),hxw333(nsm,nxm)
-      REAL :: gxn(nsm,nxm),gxp1(nsm,nxm),gxp3(nsm,nxm)
-      REAL :: gxr11(nsm,nxm),gxr13(nsm,nxm),gxr33(nsm,nxm)
-      REAL :: gxw113(nsm,nxm),gxw133(nsm,nxm),gxw333(nsm,nxm)
-      INTEGER :: mask_save(nkym)
-      REAL :: wdx(nxm),b0x(nxm),kxx(nxm)
-      REAL :: cx_tor_par(nxm),cx_tor_per(nxm)
-      REAL :: cx_par_par(nxm)
-      REAL :: p0x(nxm),Bx(nxm)
-      REAL :: gamma_nb_min_save(nkym)
-      REAL :: width_save(nkym),ft_save(nkym)
-      REAL :: R_unit_save(nkym),q_unit_save(nkym)
-      REAL :: wdx_save(nkym,nxm),b0x_save(nkym,nxm)
-      REAL :: cx_par_par_save(nkym,nxm)
-      REAL :: cx_tor_par_save(nkym,nxm)
-      REAL :: cx_tor_per_save(nkym,nxm)
-      REAL :: kxx_save(nkym,nxm)
+      REAL,DIMENSION(nsm,nxm) :: hxn, hxp1, hxp3
+      REAL,DIMENSION(nsm,nxm) :: hxr11, hxr13, hxr33
+      REAL,DIMENSION(nsm,nxm) :: hxw113, hxw133, hxw333
+      REAL,DIMENSION(nsm,nxm) :: gxn, gxp1, gxp3
+      REAL,DIMENSION(nsm,nxm) :: gxr11, gxr13, gxr33
+      REAL,DIMENSION(nsm,nxm) :: gxw113, gxw133, gxw333
+      REAL,DIMENSION(nxm) :: wdx, b0x, kxx
+      REAL,DIMENSION(nxm) :: cx_tor_par, cx_tor_per
+      REAL,DIMENSION(nxm) :: cx_par_par
+      REAL,DIMENSION(nxm) :: p0x, Bx
+      INTEGER,DIMENSION(nkym) :: mask_save
+      REAL,DIMENSION(nkym) :: gamma_nb_min_save
+      REAL,DIMENSION(nkym) :: width_save, ft_save
+      REAL,DIMENSION(nkym) :: R_unit_save, q_unit_save
+      REAL,DIMENSION(nkym,nxm) :: wdx_save, b0x_save
+      REAL,DIMENSION(nkym,nxm) :: cx_par_par_save
+      REAL,DIMENSION(nkym,nxm) :: cx_tor_par_save
+      REAL,DIMENSION(nkym,nxm) :: cx_tor_per_save
+      REAL,DIMENSION(nkym,nxm) :: kxx_save
 !
       END MODULE tglf_xgrid
 !
@@ -391,17 +390,17 @@
 !  in GKS and GYRO versions
 !---------------------------------------------------------------
 ! INPUT
-      REAL :: R(0:ms), Z(0:ms), Bp(0:ms)
+      REAL,DIMENSION(0:ms) :: R, Z, Bp
       REAL :: ds, Ls
       REAL :: Rmaj_s, Zmaj_s,rmin_s, q_s
       REAL :: p_prime_s, q_prime_s
       REAL :: p_prime_zero_s
 ! OUTPUT
-      REAL :: costheta_geo(0:ms),sintheta_geo(0:ms)
-      REAL :: costheta_p_geo(0:ms),s_p(0:ms)
-      REAL :: pk_geo(0:ms),epsl_geo(0:ms),qrat_geo(0:ms)
-      REAL :: kxoky_geo(0:ms), b_geo(0:ms),t_s(0:ms)
-      REAL :: S_prime(0:ms),kx_factor(0:ms),y(0:ms)
+      REAL,DIMENSION(0:ms) :: costheta_geo, sintheta_geo
+      REAL,DIMENSION(0:ms) :: costheta_p_geo, s_p
+      REAL,DIMENSION(0:ms) :: pk_geo, epsl_geo, qrat_geo
+      REAL,DIMENSION(0:ms) :: kxoky_geo, b_geo, t_s
+      REAL,DIMENSION(0:ms) :: S_prime, kx_factor, y
       REAL :: f,ff_prime
 !
       END MODULE tglf_sgrid  
@@ -412,12 +411,11 @@
 !
 ! store the hermite basis matrix coefficients
 !
-      USE tglf_max_dimensions
+!      USE tglf_max_dimensions
       IMPLICIT NONE
-      SAVE
 ! ave_h
       REAL :: hn,hp1,hp3,hr11,hr13,hr33
-      REAl :: hw113,hw133,hw333
+      REAL :: hw113,hw133,hw333
       REAL :: hu1,hu3,hu33,ht1,ht3
       REAL :: hu3ht1,hu3ht3,hu33ht1,hu33ht3
       REAL :: hb1,hb3,hb33,hb1ht1,hb3ht3,hb33ht1
@@ -432,52 +430,52 @@
       REAL :: hv6ihu1,hv7ihu3,hv9ihu1,hv10ihu3
       REAL :: gradhp1,gradhr11,gradhr13
       REAL :: gradhp1p1,gradhr11p1,gradhr13p1
-      REAl :: grad_hu1,grad_hu3
+      REAL :: grad_hu1,grad_hu3
       REAL :: wdhu3ht1,wdhu3ht3,wdhu33ht1,wdhu33ht3
       REAL :: modwdhu3,modwdhu33
-      REAL :: modwdhu3ht1,modwdhu3ht3,modwdhu33ht1,modwdhu33ht3
-      REAL :: ave_hn(nsm,nb,nb)
-      REAL :: ave_hp1(nsm,nb,nb),ave_hp3(nsm,nb,nb)
-      REAL :: ave_hr11(nsm,nb,nb),ave_hr13(nsm,nb,nb),ave_hr33(nsm,nb,nb)
-      REAL :: ave_hw113(nsm,nb,nb),ave_hw133(nsm,nb,nb),ave_hw333(nsm,nb,nb)
-      REAL :: ave_ht1(nsm,nb,nb),ave_ht3(nsm,nb,nb)
-      REAL :: ave_hu1(nsm,nb,nb),ave_hu3(nsm,nb,nb),ave_hu33(nsm,nb,nb)
-      REAL :: ave_hu3ht1(nsm,nb,nb),ave_hu3ht3(nsm,nb,nb)
-      REAL :: ave_hu33ht1(nsm,nb,nb),ave_hu33ht3(nsm,nb,nb)
-      REAL :: ave_hninv(nsm,nb,nb),ave_hp1inv(nsm,nb,nb)
-      REAL :: ave_hp3inv(nsm,nb,nb)
-      REAL :: ave_gradhp1(nsm,nb,nb),ave_gradhr11(nsm,nb,nb)
-      REAL :: ave_gradhr13(nsm,nb,nb)
-      REAL :: ave_gradhp1p1(nsm,nb,nb),ave_gradhr11p1(nsm,nb,nb)
-      REAL :: ave_gradhr13p1(nsm,nb,nb)
-      REAL :: ave_gradhu1(nsm,nb,nb),ave_gradhu3(nsm,nb,nb)
-      REAL :: ave_hnp0(nsm,nb,nb)
-      REAL :: ave_hp1p0(nsm,nb,nb),ave_hp3p0(nsm,nb,nb)
-      REAL :: ave_hr11p0(nsm,nb,nb),ave_hr13p0(nsm,nb,nb)
-      REAL :: ave_hr33p0(nsm,nb,nb)
-      REAL :: ave_hnb0(nsm,nb,nb)
-      REAL :: ave_hp1b0(nsm,nb,nb),ave_hp3b0(nsm,nb,nb)
-      REAL :: ave_hr11b0(nsm,nb,nb),ave_hr13b0(nsm,nb,nb)
-      REAL :: ave_hr33b0(nsm,nb,nb)
-      REAL :: ave_hw113b0(nsm,nb,nb),ave_hw133b0(nsm,nb,nb)
-      REAl :: ave_hw333b0(nsm,nb,nb)
-      REAL :: ave_hnbp(nsm,nb,nb)
-      REAL :: ave_hp1bp(nsm,nb,nb),ave_hp3bp(nsm,nb,nb)
-      REAL :: ave_hr11bp(nsm,nb,nb),ave_hr13bp(nsm,nb,nb)
-      REAL :: ave_hr33bp(nsm,nb,nb)
-      REAL :: ave_hw113bp(nsm,nb,nb),ave_hw133bp(nsm,nb,nb)
-      REAl :: ave_hw333bp(nsm,nb,nb)
-      REAL :: ave_hnp0b0(nsm,nb,nb)
-      REAL :: ave_gradhp1p0(nsm,nb,nb),ave_gradhr11p0(nsm,nb,nb)
-      REAL :: ave_gradhr13p0(nsm,nb,nb)
-      REAL :: ave_wdhu3ht1(nsm,nb,nb),ave_wdhu3ht3(nsm,nb,nb)
-      REAL :: ave_wdhu33ht1(nsm,nb,nb),ave_wdhu33ht3(nsm,nb,nb)
-      REAL :: ave_modwdhu3(nsm,nb,nb),ave_modwdhu33(nsm,nb,nb)
-      REAL :: ave_modwdhu3ht1(nsm,nb,nb),ave_modwdhu3ht3(nsm,nb,nb)
-      REAL :: ave_modwdhu33ht1(nsm,nb,nb),ave_modwdhu33ht3(nsm,nb,nb)
-      REAL :: ave_c_tor_par_hp1p0(nsm,nb,nb)
-      REAL :: ave_c_tor_par_hr11p0(nsm,nb,nb)
-      REAL :: ave_c_tor_par_hr13p0(nsm,nb,nb)
+      REAl :: modwdhu3ht1,modwdhu3ht3,modwdhu33ht1,modwdhu33ht3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hn
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hp1, ave_hp3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hr11, ave_hr13,ave_hr33
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hw113, ave_hw133, ave_hw333
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_ht1, ave_ht3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hu1, ave_hu3, ave_hu33
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hu3ht1, ave_hu3ht3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hu33ht1, ave_hu33ht3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hninv, ave_hp1inv
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hp3inv
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradhp1, ave_gradhr11
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradhr13
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradhp1p1, ave_gradhr11p1
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradhr13p1
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradhu1, ave_gradhu3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hnp0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hp1p0, ave_hp3p0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hr11p0, ave_hr13p0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hr33p0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hnb0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hp1b0, ave_hp3b0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hr11b0, ave_hr13b0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hr33b0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hw113b0, ave_hw133b0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hw333b0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hnbp
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hp1bp, ave_hp3bp
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hr11bp, ave_hr13bp
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hr33bp
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hw113bp, ave_hw133bp
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hw333bp
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_hnp0b0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradhp1p0, ave_gradhr11p0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradhr13p0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_wdhu3ht1, ave_wdhu3ht3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_wdhu33ht1, ave_wdhu33ht3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_modwdhu3, ave_modwdhu33
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_modwdhu3ht1, ave_modwdhu3ht3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_modwdhu33ht1, ave_modwdhu33ht3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_c_tor_par_hp1p0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_c_tor_par_hr11p0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_c_tor_par_hr13p0
 ! ave_g
       REAL :: gn,gp1,gp3,gr11,gr13,gr33
       REAL :: gw113,gw133,gw333
@@ -500,81 +498,81 @@
       REAL :: wdgu3gt1,wdgu3gt3,wdgu33gt1,wdgu33gt3
       REAL :: modwdgu3,modwdgu33
       REAL :: modwdgu3gt1,modwdgu3gt3,modwdgu33gt1,modwdgu33gt3
-      REAL :: ave_gn(nsm,nb,nb)
-      REAL :: ave_gp1(nsm,nb,nb),ave_gp3(nsm,nb,nb)
-      REAL :: ave_gr11(nsm,nb,nb),ave_gr13(nsm,nb,nb),ave_gr33(nsm,nb,nb)
-      REAL :: ave_gw113(nsm,nb,nb),ave_gw133(nsm,nb,nb),ave_gw333(nsm,nb,nb)
-      REAL :: ave_gt1(nsm,nb,nb),ave_gt3(nsm,nb,nb)
-      REAL :: ave_gu1(nsm,nb,nb),ave_gu3(nsm,nb,nb),ave_gu33(nsm,nb,nb)
-      REAL :: ave_gu3gt1(nsm,nb,nb),ave_gu3gt3(nsm,nb,nb)
-      REAL :: ave_gu33gt1(nsm,nb,nb),ave_gu33gt3(nsm,nb,nb)
-      REAL :: ave_gninv(nsm,nb,nb),ave_gp1inv(nsm,nb,nb)
-      REAL :: ave_gp3inv(nsm,nb,nb)
-      REAL :: ave_gradgp1(nsm,nb,nb),ave_gradgr11(nsm,nb,nb)
-      REAL :: ave_gradgr13(nsm,nb,nb)
-      REAL :: ave_gradgp1p1(nsm,nb,nb),ave_gradgr11p1(nsm,nb,nb)
-      REAL :: ave_gradgr13p1(nsm,nb,nb)
-      REAL :: ave_gradgu1(nsm,nb,nb),ave_gradgu3(nsm,nb,nb)
-      REAL :: ave_gnp0(nsm,nb,nb)
-      REAL :: ave_gp1p0(nsm,nb,nb),ave_gp3p0(nsm,nb,nb)
-      REAL :: ave_gr11p0(nsm,nb,nb),ave_gr13p0(nsm,nb,nb)
-      REAL :: ave_gr33p0(nsm,nb,nb)
-      REAL :: ave_gnb0(nsm,nb,nb)
-      REAL :: ave_gp1b0(nsm,nb,nb),ave_gp3b0(nsm,nb,nb)
-      REAL :: ave_gr11b0(nsm,nb,nb),ave_gr13b0(nsm,nb,nb)
-      REAL :: ave_gr33b0(nsm,nb,nb)
-      REAL :: ave_gw113b0(nsm,nb,nb),ave_gw133b0(nsm,nb,nb)
-      REAL :: ave_gw333b0(nsm,nb,nb)
-      REAL :: ave_gnbp(nsm,nb,nb)
-      REAL :: ave_gp1bp(nsm,nb,nb),ave_gp3bp(nsm,nb,nb)
-      REAL :: ave_gr11bp(nsm,nb,nb),ave_gr13bp(nsm,nb,nb)
-      REAL :: ave_gr33bp(nsm,nb,nb)
-      REAL :: ave_gw113bp(nsm,nb,nb),ave_gw133bp(nsm,nb,nb)
-      REAL :: ave_gw333bp(nsm,nb,nb)
-      REAL :: ave_gradgp1p0(nsm,nb,nb),ave_gradgr11p0(nsm,nb,nb)
-      REAL :: ave_gradgr13p0(nsm,nb,nb)
-      REAL :: ave_wdgu3gt1(nsm,nb,nb),ave_wdgu3gt3(nsm,nb,nb)
-      REAL :: ave_wdgu33gt1(nsm,nb,nb),ave_wdgu33gt3(nsm,nb,nb)
-      REAL :: ave_modwdgu3(nsm,nb,nb),ave_modwdgu33(nsm,nb,nb)
-      REAL :: ave_modwdgu3gt1(nsm,nb,nb),ave_modwdgu3gt3(nsm,nb,nb)
-      REAL :: ave_modwdgu33gt1(nsm,nb,nb),ave_modwdgu33gt3(nsm,nb,nb)
-      REAL :: ave_c_tor_par_gp1p0(nsm,nb,nb)
-      REAL :: ave_c_tor_par_gr11p0(nsm,nb,nb)
-      REAL :: ave_c_tor_par_gr13p0(nsm,nb,nb)
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gn
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gp1, ave_gp3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gr11, ave_gr13, ave_gr33
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gw113, ave_gw133, ave_gw333
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gt1, ave_gt3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gu1, ave_gu3, ave_gu33
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gu3gt1, ave_gu3gt3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gu33gt1, ave_gu33gt3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gninv, ave_gp1inv
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gp3inv
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradgp1, ave_gradgr11
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradgr13
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradgp1p1, ave_gradgr11p1
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradgr13p1
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradgu1, ave_gradgu3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gnp0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gp1p0, ave_gp3p0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gr11p0, ave_gr13p0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gr33p0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gnb0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gp1b0, ave_gp3b0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gr11b0, ave_gr13b0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gr33b0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gw113b0, ave_gw133b0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gw333b0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gnbp
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gp1bp, ave_gp3bp
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gr11bp, ave_gr13bp
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gr33bp
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gw113bp,ave_gw133bp
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gw333bp
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradgp1p0, ave_gradgr11p0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradgr13p0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_wdgu3gt1, ave_wdgu3gt3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_wdgu33gt1, ave_wdgu33gt3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_modwdgu3, ave_modwdgu33
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_modwdgu3gt1, ave_modwdgu3gt3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_modwdgu33gt1, ave_modwdgu33gt3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_c_tor_par_gp1p0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_c_tor_par_gr11p0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_c_tor_par_gr13p0
 ! ave_wd_h
       REAL :: wdhp1p0,wdhr11p0,wdhr13p0
       REAL :: wdhp1b0,wdhr11b0,wdhr13b0
       REAL :: wdhp1bp,wdhr11bp,wdhr13bp
       REAL :: wdhu1,wdhu3,wdhu33,modwdhu1
       REAL :: wdht1,wdht3,modwdht1,modwdht3
-      REAL :: ave_wdhp1p0(nsm,nb,nb)
-      REAL :: ave_wdhr11p0(nsm,nb,nb),ave_wdhr13p0(nsm,nb,nb)
-      REAL :: ave_wdhp1b0(nsm,nb,nb)
-      REAL :: ave_wdhr11b0(nsm,nb,nb),ave_wdhr13b0(nsm,nb,nb)
-      REAL :: ave_wdhp1bp(nsm,nb,nb)
-      REAL :: ave_wdhr11bp(nsm,nb,nb),ave_wdhr13bp(nsm,nb,nb)
-      REAL :: ave_wdhu1(nsm,nb,nb),ave_wdhu3(nsm,nb,nb)
-      REAL :: ave_wdhu33(nsm,nb,nb)
-      REAL :: ave_modwdhu1(nsm,nb,nb)
-      REAL :: ave_wdht1(nsm,nb,nb),ave_wdht3(nsm,nb,nb)
-      REAL :: ave_modwdht1(nsm,nb,nb),ave_modwdht3(nsm,nb,nb)
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_wdhp1p0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_wdhr11p0, ave_wdhr13p0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_wdhp1b0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_wdhr11b0, ave_wdhr13b0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_wdhp1bp
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_wdhr11bp, ave_wdhr13bp
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_wdhu1, ave_wdhu3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_wdhu33
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_modwdhu1
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_wdht1, ave_wdht3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_modwdht1, ave_modwdht3
 ! ave_wd_g
       REAL :: wdgp1p0,wdgr11p0,wdgr13p0
       REAL :: wdgp1b0,wdgr11b0,wdgr13b0
       REAL :: wdgp1bp,wdgr11bp,wdgr13bp
       REAL :: wdgu1,wdgu3,wdgu33,modwdgu1
       REAL :: wdgt1,wdgt3,modwdgt1,modwdgt3
-      REAL :: ave_wdgp1p0(nsm,nb,nb)
-      REAL :: ave_wdgr11p0(nsm,nb,nb),ave_wdgr13p0(nsm,nb,nb)
-      REAL :: ave_wdgp1b0(nsm,nb,nb)
-      REAL :: ave_wdgr11b0(nsm,nb,nb),ave_wdgr13b0(nsm,nb,nb)
-      REAL :: ave_wdgp1bp(nsm,nb,nb)
-      REAL :: ave_wdgr11bp(nsm,nb,nb),ave_wdgr13bp(nsm,nb,nb)
-      REAL :: ave_wdgu1(nsm,nb,nb),ave_wdgu3(nsm,nb,nb)
-      REAL :: ave_wdgu33(nsm,nb,nb)
-      REAL :: ave_modwdgu1(nsm,nb,nb)
-      REAL :: ave_wdgt1(nsm,nb,nb),ave_wdgt3(nsm,nb,nb)
-      REAL :: ave_modwdgt1(nsm,nb,nb),ave_modwdgt3(nsm,nb,nb)
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_wdgp1p0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_wdgr11p0, ave_wdgr13p0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_wdgp1b0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_wdgr11b0, ave_wdgr13b0
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_wdgp1bp
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_wdgr11bp, ave_wdgr13bp
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_wdgu1, ave_wdgu3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_wdgu33
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_modwdgu1
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_wdgt1, ave_wdgt3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_modwdgt1, ave_modwdgt3
 ! kpar_h
       COMPLEX :: kpar_hnp0,kpar_hp1p0,kpar_hp3p0
       COMPLEX :: kpar_hp1b0,kpar_hr11b0,kpar_hr13b0
@@ -586,16 +584,16 @@
       COMPLEX :: modkpar_hd1,modkpar_hd3,modkpar_hd33
       COMPLEX :: modkpar_hd1hu1,modkpar_hd3hu3,modkpar_hd33hu1
       COMPLEX :: modkpar_hu1,modkpar_hu3
-      COMPLEX :: ave_kparhnp0(nsm,nb,nb),ave_kparhp1p0(nsm,nb,nb)
-      COMPLEX :: ave_kparhp3p0(nsm,nb,nb)
-      COMPLEX :: ave_kparhp1b0(nsm,nb,nb),ave_kparhr11b0(nsm,nb,nb)
-      COMPLEX :: ave_kparhr13b0(nsm,nb,nb)
-      COMPLEX :: ave_kparhnbp(nsm,nb,nb),ave_kparhp3bp(nsm,nb,nb)
-      COMPLEX :: ave_kparhp1bp(nsm,nb,nb),ave_kparhr11bp(nsm,nb,nb)
-      COMPLEX :: ave_kparhr13bp(nsm,nb,nb)
-      COMPLEX :: ave_kparhu1(nsm,nb,nb),ave_kparhu3(nsm,nb,nb)
-      COMPLEX :: ave_kparht1(nsm,nb,nb),ave_kparht3(nsm,nb,nb)
-      COMPLEX :: ave_modkparhu1(nsm,nb,nb),ave_modkparhu3(nsm,nb,nb)
+      COMPLEX,ALLOCATABLE,DIMENSION(:,:,:) :: ave_kparhnp0, ave_kparhp1p0
+      COMPLEX,ALLOCATABLE,DIMENSION(:,:,:) :: ave_kparhp3p0
+      COMPLEX,ALLOCATABLE,DIMENSION(:,:,:) :: ave_kparhp1b0, ave_kparhr11b0
+      COMPLEX,ALLOCATABLE,DIMENSION(:,:,:) :: ave_kparhr13b0
+      COMPLEX,ALLOCATABLE,DIMENSION(:,:,:) :: ave_kparhnbp, ave_kparhp3bp
+      COMPLEX,ALLOCATABLE,DIMENSION(:,:,:) :: ave_kparhp1bp, ave_kparhr11bp
+      COMPLEX,ALLOCATABLE,DIMENSION(:,:,:) :: ave_kparhr13bp
+      COMPLEX,ALLOCATABLE,DIMENSION(:,:,:) :: ave_kparhu1, ave_kparhu3
+      COMPLEX,ALLOCATABLE,DIMENSION(:,:,:) :: ave_kparht1, ave_kparht3
+      COMPLEX,ALLOCATABLE,DIMENSION(:,:,:) :: ave_modkparhu1, ave_modkparhu3
 ! kpar_g
       COMPLEX :: kpar_gnp0,kpar_gp1p0,kpar_gp3p0
       COMPLEX :: kpar_gp1b0,kpar_gr11b0,kpar_gr13b0
@@ -607,46 +605,46 @@
       COMPLEX :: modkpar_gd1,modkpar_gd3,modkpar_gd33
       COMPLEX :: modkpar_gd1gu1,modkpar_gd3gu3,modkpar_gd33gu1
       COMPLEX :: modkpar_gu1,modkpar_gu3
-      COMPLEX :: ave_kpargnp0(nsm,nb,nb),ave_kpargp1p0(nsm,nb,nb)
-      COMPLEX :: ave_kpargp3p0(nsm,nb,nb)
-      COMPLEX :: ave_kpargp1b0(nsm,nb,nb),ave_kpargr11b0(nsm,nb,nb)
-      COMPLEX :: ave_kpargr13b0(nsm,nb,nb)
-      COMPLEX :: ave_kpargnbp(nsm,nb,nb),ave_kpargp3bp(nsm,nb,nb)
-      COMPLEX :: ave_kpargp1bp(nsm,nb,nb),ave_kpargr11bp(nsm,nb,nb)
-      COMPLEX :: ave_kpargr13bp(nsm,nb,nb)
-      COMPLEX :: ave_kpargu1(nsm,nb,nb),ave_kpargu3(nsm,nb,nb)
-      COMPLEX :: ave_kpargt1(nsm,nb,nb),ave_kpargt3(nsm,nb,nb)
-      COMPLEX :: ave_modkpargu1(nsm,nb,nb),ave_modkpargu3(nsm,nb,nb)
+      COMPLEX,ALLOCATABLE,DIMENSION(:,:,:) :: ave_kpargnp0, ave_kpargp1p0
+      COMPLEX,ALLOCATABLE,DIMENSION(:,:,:) :: ave_kpargp3p0
+      COMPLEX,ALLOCATABLE,DIMENSION(:,:,:) :: ave_kpargp1b0, ave_kpargr11b0
+      COMPLEX,ALLOCATABLE,DIMENSION(:,:,:) :: ave_kpargr13b0
+      COMPLEX,ALLOCATABLE,DIMENSION(:,:,:) :: ave_kpargnbp, ave_kpargp3bp
+      COMPLEX,ALLOCATABLE,DIMENSION(:,:,:) :: ave_kpargp1bp, ave_kpargr11bp
+      COMPLEX,ALLOCATABLE,DIMENSION(:,:,:) :: ave_kpargr13bp
+      COMPLEX,ALLOCATABLE,DIMENSION(:,:,:) :: ave_kpargu1, ave_kpargu3
+      COMPLEX,ALLOCATABLE,DIMENSION(:,:,:) :: ave_kpargt1, ave_kpargt3
+      COMPLEX,ALLOCATABLE,DIMENSION(:,:,:) :: ave_modkpargu1, ave_modkpargu3
 ! gradB_h
       REAL :: gradBhp1,gradBhp3
       REAL :: gradBhr11,gradBhr13,gradBhr33
       REAL :: gradBhu1,gradBhu3,gradBhu33
-      REAL :: ave_gradBhp1(nsm,nb,nb),ave_gradBhp3(nsm,nb,nb)
-      REAL :: ave_gradBhr11(nsm,nb,nb),ave_gradBhr13(nsm,nb,nb)
-      REAL :: ave_gradBhr33(nsm,nb,nb)
-      REAL :: ave_gradBhu1(nsm,nb,nb),ave_gradBhu3(nsm,nb,nb)
-      REAL :: ave_gradBhu33(nsm,nb,nb)
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradBhp1, ave_gradBhp3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradBhr11, ave_gradBhr13
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradBhr33
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradBhu1, ave_gradBhu3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradBhu33
 ! gradB_g
       REAL :: gradBgp1,gradBgp3
       REAL :: gradBgr11,gradBgr13,gradBgr33
       REAL :: gradBgu1,gradBgu3,gradBgu33
-      REAL :: ave_gradBgp1(nsm,nb,nb),ave_gradBgp3(nsm,nb,nb)
-      REAL :: ave_gradBgr11(nsm,nb,nb),ave_gradBgr13(nsm,nb,nb)
-      REAL :: ave_gradBgr33(nsm,nb,nb)
-      REAL :: ave_gradBgu1(nsm,nb,nb),ave_gradBgu3(nsm,nb,nb)
-      REAL :: ave_gradBgu33(nsm,nb,nb)
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradBgp1, ave_gradBgp3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradBgr11, ave_gradBgr13
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradBgr33
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradBgu1, ave_gradBgu3
+      REAL,ALLOCATABLE,DIMENSION(:,:,:) :: ave_gradBgu33
 !  ave_theta
       REAL :: gradB
-      REAL :: ave_kx(nb,nb)
-      REAL :: ave_c_tor_par(nb,nb),ave_c_tor_per(nb,nb)
-      REAL :: ave_c_par_par(nb,nb)
-      REAL :: ave_wd(nb,nb),ave_modwd(nb,nb)
-      REAL :: ave_gradB(nb,nb),ave_lnB(nb,nb)
-      REAL :: ave_b0(nb,nb),ave_b0inv(nb,nb)
-      REAL :: ave_kpar(nb,nb),ave_modkpar(nb,nb)
-      REAL :: ave_p0(nb,nb),ave_p0inv(nb,nb)
-      REAL :: ave_bp(nb,nb),ave_bpinv(nb,nb)
-      COMPLEX :: ave_kpar_eff(nsm,nb,nb),ave_modkpar_eff(nsm,nb,nb)
+      REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_kx
+      REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_c_tor_par, ave_c_tor_per
+      REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_c_par_par
+      REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_wd, ave_modwd
+      REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_gradB, ave_lnB
+      REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_b0, ave_b0inv
+      REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_kpar, ave_modkpar
+      REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_p0, ave_p0inv
+      REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_bp, ave_bpinv
+      COMPLEX,ALLOCATABLE,DIMENSION(:,:,:) :: ave_kpar_eff, ave_modkpar_eff
 !
       END MODULE tglf_coeff
 !

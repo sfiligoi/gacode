@@ -177,7 +177,6 @@ SUBROUTINE xgrid_functions_geo
   REAL :: b1,b2
   REAL :: y1,y2
   REAL :: kxx1,kxx2
-  REAL :: cxtorpar1
   REAL :: cxtorper1,cxtorper2
   REAL :: B2x1,B2x2,R2x1,R2x2,norm_ave,dlp
   REAL :: kyi
