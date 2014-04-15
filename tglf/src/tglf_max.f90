@@ -21,7 +21,7 @@
       REAL :: save_vexb_shear
       REAL :: save_alpha_kx_p
       REAL :: wgp_max,width_p_max 
-      REAL :: kyi
+      REAL :: kyi,ft2
 !
       CALL tglf_setup_geometry
 !
@@ -295,6 +295,22 @@
          iflux_in=save_iflux
          new_width=.TRUE.
          call tglf_LS
+! check for inward ballooning modes
+!         write(*,*)"modB_test = ",modB_test
+         if(inboard_detrapped_in.ne.0.and.ft_test.gt.modB_test)then
+           ft2 = 1.0-ft_test*(1.0-ft*ft)
+           if(ft2.lt.0.0)then
+             ft = 0.0
+           else
+!             ft = SQRT(ft2)
+             ft =  0.0
+           endif
+!           write(*,*)"changed ft",ft
+           new_geometry = .FALSE.
+           new_width = .FALSE.
+           new_matrix = .TRUE.
+           call tglf_LS
+         endif
          if(alpha_quench_in.eq.0.0)then
            if(save_vexb_shear.ne.0.0.or.wgp_max.ne.0.0)then
              do i=1,nmodes_out

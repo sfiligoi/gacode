@@ -103,6 +103,7 @@
       REAL :: alpha_n_in =0.0
       REAL :: alpha_t_in =0.0
       REAL :: theta_trapped_in=0.7
+      REAL :: inboard_detrapped_in=0.0
       REAL :: xnu_factor_in=1.0
       REAL :: debye_factor_in=1.0
       REAL :: etg_factor_in=1.25
@@ -177,6 +178,9 @@
 ! global variables
       REAL :: ft=0.5
       REAL :: ft_min=0.01
+      REAL :: ft_test
+      REAL :: modB_test
+      REAL :: modB_min
       REAL :: ky=0.3
       REAL :: R_unit=3.0
       REAL :: q_unit=2.0
@@ -212,6 +216,7 @@
       REAL,DIMENSION(maxmodes) :: phi_bar_out=0.0,v_bar_out=0.0
       REAL,DIMENSION(maxmodes) :: b0_bar_out=0.0,ne_te_phase_out=0.0
       REAL,DIMENSION(maxmodes) :: kx_bar_out=0.0,kpar_bar_out=0.0
+      REAL,DIMENSION(maxmodes) :: modB_bar_out=0.0
       REAL,DIMENSION(nsm) :: n_bar_sum_out=0.0,t_bar_sum_out=0.0
       REAL,DIMENSION(nsm) :: q_low_out=0.0
       REAL,DIMENSION(2,nkym,maxmodes) :: field_spectrum_out=0.0

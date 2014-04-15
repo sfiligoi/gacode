@@ -114,7 +114,7 @@ SUBROUTINE xgrid_functions_sa
      !
      cx_tor_par(i) = rmaj_sa*Rx*sign_Bt_in
      cx_tor_per(i) = -rmin_sa/q_sa
-     cx_par_par(i) = 1.0/Bx(i)
+     cx_par_par(i) = Bx(i)
   enddo
   !
   ! compute the effective trapped fraction
@@ -435,6 +435,8 @@ SUBROUTINE get_ft_sa
   Bmax = 1.0/(1.0 + eps*COS(theta_max))
   ! write(*,*)"theta_max = ",theta_max," Bmax = ",Bmax
   Bmin = 1.0/(1.0 + eps)
+  modB_min = Bmin
+  modB_test = 0.5*(Bmax + Bmin)/Bmin
   !
   if(ft_model_sa.eq.0)then
      ! Gauss-Chebyshev integration of trappped fraction
@@ -645,6 +647,8 @@ SUBROUTINE get_ft_geo
      ! write(*,*)i,"B_bounce =",B_bounce,Bmax
   endif
   ft = SQRT(1.0 - Bmin/B_bounce)
+  modB_min = ABS(Bmin)
+  modB_test = 0.5*(Bmax + Bmin)/Bmin
   ! write(*,*)"ft = ",ft
   !*************************************************************
   ! end of trapped fraction model

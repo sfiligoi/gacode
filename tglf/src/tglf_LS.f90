@@ -28,7 +28,9 @@
       REAL :: exchange_QL(nsm,3)
       REAL :: phi_QL,N_QL(nsm),T_QL(nsm)
       REAL :: Ne_Te_phase
-      REAL :: wd_bar,b0_bar,kx_bar,kpar_bar,v2_bar,kyi
+      REAL :: wd_bar,b0_bar,modB_bar
+      REAL :: kx_bar,kpar_bar,v2_bar,kyi
+      REAL :: sum_v_bar, sum_modB_bar
       REAL :: get_intensity, get_gamma_net
 !  ZGESV storage
       REAL :: small = 1.0E-13
@@ -273,9 +275,11 @@
           eigenvalue = xi*alpha(jmax(imax))/beta(jmax(imax))  
 !          write(*,*)"eigenvalue=",eigenvalue,imax
           call get_QL_weights(particle_QL,energy_QL,stress_par_QL,stress_tor_QL, &
-               exchange_QL,phi_QL,N_QL,T_QL,wd_bar,b0_bar,kx_bar,kpar_bar,NE_Te_phase,field_weight)
+               exchange_QL,phi_QL,N_QL,T_QL,wd_bar,b0_bar,modB_bar,    &
+               kx_bar,kpar_bar,NE_Te_phase,field_weight)
           wd_bar_out(imax)=wd_bar
           b0_bar_out(imax)=b0_bar
+          modB_bar_out(imax)=modB_bar
           phi_QL_out(imax)=phi_QL
           kx_bar_out(imax)=kx_bar
           kpar_bar_out(imax)=kpar_bar/(R_unit*q_unit*width_in)
@@ -308,8 +312,21 @@
             t_bar_out(imax,is)=v2_bar*T_QL_out(imax,is)
           enddo
          endif
-        enddo           
-      endif
+        enddo
+! check for inward ballooing 
+     ft_test = 0.0
+     sum_modB_bar=0.0
+     sum_v_bar = 0.0
+     do i=1,nmodes_out
+       sum_modB_bar = sum_modB_bar + v_bar_out(i)*modB_bar_out(i)
+       sum_v_bar = sum_v_bar + v_bar_out(i)
+     enddo
+     if(sum_v_bar.gt.epsilon1)ft_test = sum_modB_bar/sum_v_bar
+     ft_test = ft_test/modB_min
+!     write(*,*)ky,"ft_test=",ft_test
+!           
+      endif  ! iflux_in
+!
 !
 !
 ! dealocate eigenvalues, eigenvectors 
@@ -534,7 +551,7 @@
 !
       SUBROUTINE get_QL_weights(particle_weight,energy_weight, &
         stress_par_weight,stress_tor_weight,exchange_weight, &
-        phi_weight,N_weight,T_weight,wd_bar,b0_bar,kx_bar,kpar_bar, &
+        phi_weight,N_weight,T_weight,wd_bar,b0_bar,modB_bar,kx_bar,kpar_bar, &
         Ne_Te_phase,field_weight)
 ! **************************************************************
 !
@@ -574,6 +591,7 @@
       COMPLEX :: field_weight(3,nb)
       COMPLEX :: phi_wd_phi,wd_phi
       COMPLEX :: phi_b0_phi,b0_phi
+      COMPLEX :: phi_modB_phi,modB_phi
       COMPLEX :: phi_kx_phi,kx_phi
       COMPLEX :: phi_kpar_phi,kpar_phi
       COMPLEX :: freq_QL
@@ -585,7 +603,7 @@
       REAL :: stress_tor_weight(nsm,3)
       REAL :: exchange_weight(nsm,3)
       REAL :: N_weight(nsm),T_weight(nsm)
-      REAL :: wd_bar,b0_bar,kx_bar,kpar_bar
+      REAL :: wd_bar,b0_bar,modB_bar,kx_bar,kpar_bar
       REAL :: phi_weight,epsilon1
       REAL :: Ne_Te_phase,Ne_Te_cos,Ne_Te_sin
       REAL :: stress_correction,wp
@@ -710,33 +728,39 @@
       if(phi_norm.lt.epsilon1)phi_norm = epsilon1
 !      write(*,*)"phi_norm =",phi_norm
 !
-! compute <phi|wd|phi> and <phi|b0|phi>
+! compute <phi|*|phi> averages
       phi_wd_phi = 0.0
       phi_b0_phi = 0.0
+      phi_modB_phi = 0.0
       phi_kx_phi = 0.0
       phi_kpar_phi = 0.0
       do i=1,nbasis
          wd_phi = 0.0
          b0_phi = 0.0
+         modB_phi = 0.0
          kx_phi = 0.0
          kpar_phi = 0.0
          do j=1,nbasis
            wd_phi = wd_phi +ave_wd(i,j)*phi(j)
            b0_phi = b0_phi +ave_b0(i,j)*phi(j)
+           modB_phi = modB_phi +ave_c_par_par(i,j)*phi(j)
            kx_phi = kx_phi +ave_kx(i,j)*phi(j)
            kpar_phi = kpar_phi +xi*ave_kpar(i,j)*phi(j)
          enddo
          phi_wd_phi = phi_wd_phi + CONJG(phi(i))*wd_phi
          phi_b0_phi = phi_b0_phi + CONJG(phi(i))*b0_phi
+         phi_modB_phi = phi_modB_phi + CONJG(phi(i))*modB_phi
          phi_kx_phi = phi_kx_phi + CONJG(phi(i))*kx_phi
          phi_kpar_phi = phi_kpar_phi + CONJG(phi(i))*kpar_phi
       enddo
       wd_bar = REAL(phi_wd_phi)/phi_norm
       b0_bar = REAL(phi_b0_phi)/phi_norm
+      modB_bar = ABS(REAL(phi_modB_phi)/phi_norm)
       kx_bar = REAL(phi_kx_phi)/phi_norm
       kpar_bar = REAL(phi_kpar_phi)/phi_norm
 !      write(*,*)"wd_bar = ",wd_bar
 !      write(*,*)"b0_bar = ",b0_bar
+!       write(*,*)"modB_bar = ",modB_bar
 !      write(*,*)"kx_bar = ",kx_bar
 !      write(*,*)"kpar_bar = ",kpar_bar
 !
