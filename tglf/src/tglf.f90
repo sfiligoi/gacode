@@ -70,6 +70,10 @@ program tglf
      write(1,'(i2)') tglf_ns_in,tglf_nxgrid_in
      close(1)
 
+     ! write flux spectrum to file
+
+     CALL write_tglf_flux_spectrum
+
   else
 
      print 10,'     ky:',tglf_ky_in
@@ -79,6 +83,9 @@ program tglf
      enddo
 
      prec = sum(abs(tglf_eigenvalue_out))
+
+    ! write single ky-eigenmode wavefunction to file
+    CALL write_wavefunction_out('out.tglf.wavefunction')
 
   endif
 
