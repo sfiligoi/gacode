@@ -5,10 +5,9 @@
       IMPLICIT NONE
       SAVE
 !
-      INTEGER, PARAMETER :: nb=16
-      INTEGER, PARAMETER :: nxm=4*16-1
-      INTEGER, PARAMETER :: nsm=6, nt0=40
-      INTEGER, PARAMETER :: neq = 15*nsm,iar=neq*nb
+      INTEGER, PARAMETER :: nb=32
+      INTEGER, PARAMETER :: nxm=2*32-1
+      INTEGER, PARAMETER :: nsm=12, nt0=40
       INTEGER, PARAMETER :: nkym=50
       INTEGER, PARAMETER :: maxmodes=4
       INTEGER, PARAMETER :: max_ELITE=700

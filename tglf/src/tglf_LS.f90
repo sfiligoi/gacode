@@ -472,7 +472,8 @@
 !
       IMPLICIT NONE
       INTEGER :: i, j, ngrow,imid, iend, it, nsorted
-      INTEGER :: grow_index(iar),sorted_index(maxmodes)
+      INTEGER :: grow_index(iur)
+      INTEGER :: sorted_index(maxmodes)
       REAL,PARAMETER ::  epsilon1=1.0E-12
 !
 !  find all of the unstable modes and the most unstable
