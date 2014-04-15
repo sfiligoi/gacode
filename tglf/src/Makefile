@@ -10,18 +10,17 @@ else
    FFLAGS=${FOPT} ${TGLFFLAGS}
 endif
 
-ifeq ($(MPI),true)
-   EXEC1=xtglf_mpi
-   EXEC2=tglf_mpi
-   SRC1=tglf_driver_mpi
-   SRC2=tglf_mpi
-   TGLFMPI=tglf_TM_mpi.o tglf_run_mpi.o tglf_init_mpi.o
-else
+ifeq ($(MPI),false)
    EXEC1=xtglf
    EXEC2=tglf
    SRC1=tglf_driver
    SRC2=tglf
-   TGLFMPI= 
+else
+   EXEC1=xtglf_mpi
+   EXEC2=tglf_mpi
+   SRC1=tglf_driver_mpi
+   SRC2=tglf_mpi
+   TGLFMPI= tglf_init_mpi.o tglf_TM_mpi.o tglf_run_mpi.o 
 endif
 
 LLIB=tglf_lib
