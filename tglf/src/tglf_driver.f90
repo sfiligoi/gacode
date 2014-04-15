@@ -181,7 +181,7 @@
 !
       CALL tglf_ky
 !
-!      CALL write_wavefunction_out('out.tglf.wavefunction')
+      CALL write_wavefunction_out('out.tglf.wavefunction')
 !
       nfields=1
       if(use_bper_tg)nfields=2
