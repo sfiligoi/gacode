@@ -10,12 +10,16 @@ module le3_globals
   integer :: m,n
 
   ! Geometry parameters
+  integer :: equilibrium_model
   real :: rmin,rmaj,hmin,dhmindr,q,s
   real :: kappa, s_kappa, delta, s_delta, zeta, s_zeta
   real :: shift, zmag, dzmag
   real :: beta_star
   real :: iota,iota_p
   real :: dt,dp
+
+  integer :: nts_geo, nps_geo
+  real, dimension(:,:,:), allocatable :: r_geo, z_geo, rd_geo, zd_geo
 
   real, dimension(:), allocatable    :: t,p
   real, dimension(:,:), allocatable  :: tb
