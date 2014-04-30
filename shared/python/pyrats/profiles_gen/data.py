@@ -36,7 +36,7 @@ class profiles_genData:
             data = np.loadtxt(infile,skiprows=row)
             print '(INFO): (profiles_gen_plot) '+infile+' found.'
         except:
-            print '(ERROR): (profiles_gen_plot) '+infile+' not found.'
+            raise IOError('(ERROR): (profiles_gen_plot) '+infile+' not found.')
 
         n = self.n_exp
 
