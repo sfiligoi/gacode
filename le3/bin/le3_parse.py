@@ -8,6 +8,7 @@ x.set_extension('.gen')
 # LE3 input parameters
 x.add('NTHETAS','4')
 x.add('NPHIS','4')
+x.add('EQUILIBRIUM_MODEL','0')
 x.add('RMIN','0.1')
 x.add('RMAJ','1.0')
 x.add('SHIFT','0.0')
