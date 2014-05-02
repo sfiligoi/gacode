@@ -4,6 +4,7 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
   use vgen_globals
   use neo_interface
   use EXPRO_interface
+  use mpi
 
   implicit none
 
@@ -18,6 +19,7 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
   real :: cc, loglam
 
   integer :: nmin, nmax, nth
+  real :: cpu_in, cpu_out
 
   ! Set the local NEO input parameters
   neo_silent_flag_in = 1
@@ -258,7 +260,21 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
   close(1)
 
   ! Run NEO
+  cpu_in = MPI_Wtime()
   call neo_run()
+  cpu_out = MPI_Wtime()
+
+  if(timing_flag == 1) then
+     if (i == 2+i_proc) then
+        open(unit=1,file='out.vgen.neotime'//tag(i_proc+1),status='replace')
+        close(1)
+     endif
+     open(unit=1,file='out.vgen.neotime'//tag(i_proc+1),status='old',position='append')
+     write(1,'(e16.8)',advance='no') EXPRO_rho(i)
+     write(1,'(e16.8)',advance='no') cpu_out-cpu_in
+     write(1,*)
+     close(1)
+  endif
 
   if (neo_error_status_out > 0) then
      print *,neo_error_message_out

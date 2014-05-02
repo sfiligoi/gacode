@@ -235,7 +235,7 @@ then
    echo "             Toggle vgen mode."
    echo
    echo "             -in <string of ion species> " 
-   echo "             Choices: DC, DC.revip, DCD, DHCD, HDC"
+   echo "             Choices: DC, DC_lowres, DC.revip, DCD, DHCD, HDC"
    echo "             If this is blank, input.vgen must exist."
    echo "             See"
    echo "             $VGEN_DIR/input.vgen.*"
@@ -315,6 +315,9 @@ then
    echo 
    echo "    profiles_gen -i iterdb -g gfile"
    echo "    profiles_gen -vgen -i input.profiles -er 2 -vel 1 -in DC -ix 2"
+   echo
+   echo "    or for fast calculations"
+   echo "    profiles_gen -vgen -i input.profiles -er 2 -vel 1 -in DC_lowres -ix 2"
    echo
    echo "(2) Typical usage for DIII-D plasmas with CER file available (2 steps)"
    echo "    NEO will take Er from CER file and generate all velocities:"

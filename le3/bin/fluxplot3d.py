@@ -7,7 +7,7 @@ from gacodeplotdefs import *
 narc = 128
 ntarc = 5
 
-infile = 'out.m3d.geo.a'
+infile = 'out.m3d.geo'
 ftype  = 'screen'
 
 data=np.loadtxt(infile)

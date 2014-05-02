@@ -305,23 +305,25 @@ contains
 
     call compute_fractrap(ftrap)
 
-    open(unit=1,file=trim(path)//'out.neo.diagnostic_geo',status='replace')
-    write(1,'(a,1pe16.8)') "# I/psi'            = ",I_div_psip
-    write(1,'(a,1pe16.8)') "# <1/B^2>-1/<B^2>   = ",Bmag2inv_avg-1.0/Bmag2_avg
-    write(1,'(a,1pe16.8)') "# f_trap            = ",ftrap
-    write(1,'(a,i3)')      "# n_theta           = ",n_theta
-    write(1,'(a)') "# Functions:" 
-    write(1,'(a)') "#   theta(:)" 
-    write(1,'(a)') "#   v_drift_x(:)" 
-    write(1,'(a)') "#   gradpar_Bmag(:)" 
-    write(1,'(a)') "#   Bmag(:)" 
-    write(1,'(a)') "#   w_theta(:)" 
-    write(1,'(1pe16.8)') theta(:)
-    write(1,'(1pe16.8)') v_drift_x(:)
-    write(1,'(1pe16.8)') gradpar_Bmag(:)
-    write(1,'(1pe16.8)') Bmag(:)
-    write(1,'(1pe16.8)') w_theta(:)
-    close(1)
+    if(silent_flag == 0 .and. i_proc == 0) then
+       open(unit=1,file=trim(path)//'out.neo.diagnostic_geo',status='replace')
+       write(1,'(a,1pe16.8)') "# I/psi'            = ",I_div_psip
+       write(1,'(a,1pe16.8)') "# <1/B^2>-1/<B^2>   = ",Bmag2inv_avg-1.0/Bmag2_avg
+       write(1,'(a,1pe16.8)') "# f_trap            = ",ftrap
+       write(1,'(a,i3)')      "# n_theta           = ",n_theta
+       write(1,'(a)') "# Functions:" 
+       write(1,'(a)') "#   theta(:)" 
+       write(1,'(a)') "#   v_drift_x(:)" 
+       write(1,'(a)') "#   gradpar_Bmag(:)" 
+       write(1,'(a)') "#   Bmag(:)" 
+       write(1,'(a)') "#   w_theta(:)" 
+       write(1,'(1pe16.8)') theta(:)
+       write(1,'(1pe16.8)') v_drift_x(:)
+       write(1,'(1pe16.8)') gradpar_Bmag(:)
+       write(1,'(1pe16.8)') Bmag(:)
+       write(1,'(1pe16.8)') w_theta(:)
+       close(1)
+    endif
 
   end subroutine EQUIL_DO
   

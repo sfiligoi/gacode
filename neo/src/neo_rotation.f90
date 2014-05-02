@@ -388,103 +388,23 @@ module neo_rotation
                        + w_theta(it) * dens_fac_new(is,it)
                enddo
                dens_new   = dens_avg(is) / dens_avg_new(is)
-               open(unit=1,file=trim(path)//'out.neo.diagnostic_rot',&
-                    status='replace')
-               do it=1,n_theta
-                  write (1,'(e16.8)',advance='no') theta(it)
-                  write (1,'(e16.8)',advance='no') dens(is,ir) &
-                       * dens_fac(is,it)
-                  write (1,'(e16.8)',advance='no') dens_new &
-                       * dens_fac_new(is,it)
-                  write(1,*)
-               enddo
-               close(1)
                nu(is,ir)  = nu(is,ir) / dens(is,ir)
                dens(is,ir) = dens_new
                dens_fac(is,:) = dens_fac_new(is,:)
                nu(is,ir)  = nu(is,ir) * dens(is,ir)
             endif
          enddo
-
-
-         ! EAB test cases
-         ! Teff=2/3Tperp + 1/3 Tpara
-         test_flag = 0
-         if(test_flag /= 0) then
-            do is=1,n_species
-               if(aniso_model(is) == 2) then
-                  nu(is,ir)  = nu(is,ir) * temp(is,ir)**1.5 
-                  temp(is,ir)   = 1.0/3.0*temp_para(is,ir) &
-                       + 2.0/3.0*temp_perp(is,ir)
-                  nu(is,ir)  = nu(is,ir) / temp(is,ir)**1.5
-                  dlntdr(is,ir) = 1.0/3.0*temp_para(is,ir)/temp(is,ir) &
-                       *dlntdr_para(is,ir) + 2.0/3.0*temp_perp(is,ir) &
-                       /temp(is,ir) *dlntdr_perp(is,ir)
-                  vth(is,ir) = sqrt(temp(is,ir)/mass(is))
-
-                  ! test case b and d -- keep eta
-                  if(test_flag == 1 .or. test_flag == 3) then
-                     dens_new = dens(is,ir)
-                     dens_fac_new(is,:) = &
-                          exp(omega_rot(ir)**2 * 0.5/vth(is,ir)**2 &
-                          * (bigR(:)**2 - bigR_th0**2) &
-                          - z(is) / temp(is,ir) * phi_rot(:) &
-                          - lam_rot_aniso(is,:))
-                  endif
-
-                  ! test case c and e -- no eta terms in n or DKE
-                  if(test_flag == 2 .or. test_flag == 4) then
-                     lam_rot_aniso(is,:)      = 0.0
-                     lam_rot_kpar_aniso(is,:) = 0.0
-                     lam_rot_avg_aniso(is)    = 0.0
-                     dens_new = dens(is,ir)
-                     dens_fac_new(is,:) = &
-                          exp(omega_rot(ir)**2 * 0.5/vth(is,ir)**2 &
-                          * (bigR(:)**2 - bigR_th0**2) &
-                          - z(is) / temp(is,ir) * phi_rot(:))
-                  endif
-                  
-                  ! test cases d and e redefine n 
-                  if(test_flag == 3 .or. test_flag == 4) then
-                     dens_avg_new(is)   = 0.0
-                     do it=1,n_theta
-                        dens_avg_new(is) = dens_avg_new(is) &
-                             + w_theta(it) * dens_fac_new(is,it)
-                     enddo
-                     dens_new   = dens_avg(is) / dens_avg_new(is)
-                  endif
-
-                  open(unit=1,file=trim(path)//'out.neo.diagnostic_rot',&
-                       status='replace')
-                  do it=1,n_theta
-                     write (1,'(e16.8)',advance='no') theta(it)
-                     write (1,'(e16.8)',advance='no') dens(is,ir) &
-                          * dens_fac(is,it)
-                     write (1,'(e16.8)',advance='no') dens_new &
-                          * dens_fac_new(is,it)
-                     write(1,*)
-                  enddo
-                  close(1)
-
-                  nu(is,ir)  = nu(is,ir) / dens(is,ir)
-                  dens(is,ir) = dens_new
-                  dens_fac(is,:) = dens_fac_new(is,:)
-                  nu(is,ir)  = nu(is,ir) * dens(is,ir)
-                  
-               endif
-            enddo
-         endif
          
          deallocate(dens_avg)
          deallocate(dlnndr_fac)
          deallocate(dens_avg_new)
          deallocate(dens_fac_new)
          deallocate(lam_rot_rderiv_aniso)
-
+         
       endif
-
+      
     end subroutine ROT_solve_phi
-
+    
     subroutine ROT_write(ir)
       use neo_globals
       implicit none

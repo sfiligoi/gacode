@@ -28,6 +28,7 @@ program vgen
   real :: er0
   real :: omega
   real :: omega_deriv
+  real :: cpu_tot_in, cpu_tot_out
 
   real, dimension(:), allocatable :: er_exp
 
@@ -36,6 +37,8 @@ program vgen
   call MPI_INIT(i_err)
   call MPI_COMM_RANK(MPI_COMM_WORLD,i_proc,i_err)
   call MPI_COMM_SIZE(MPI_COMM_WORLD,n_proc,i_err)
+
+  cpu_tot_in = MPI_Wtime()
 
   ! Path is cwd:
   path= './'
@@ -410,6 +413,12 @@ program vgen
   deallocate(pflux_sum)
 
   call EXPRO_palloc(MPI_COMM_WORLD,path,0)
+
+  cpu_tot_out = MPI_Wtime()
+
+  if(timing_flag == 1) then
+     print *, 'total cpu time=', cpu_tot_out-cpu_tot_in
+  endif
 
   call MPI_finalize(i_err)
 

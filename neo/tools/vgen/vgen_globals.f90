@@ -35,4 +35,6 @@ module vgen_globals
 
   integer :: n_ions
 
+  integer, parameter :: timing_flag=0
+
 end module vgen_globals
