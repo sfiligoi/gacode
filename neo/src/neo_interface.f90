@@ -43,6 +43,7 @@ module neo_interface
   integer :: neo_spitzer_model_in = 0
   real    :: neo_epar0_spitzer_in = 1.0
   integer :: neo_coll_uncoupledei_model_in = 0
+  integer :: neo_coll_uncoupledaniso_model_in = 0
   integer :: neo_n_species_in = 1
   real    :: neo_nu_1_in = 0.1
   integer :: neo_z_1_in = 1
@@ -218,6 +219,7 @@ contains
     neo_spitzer_model_in = spitzer_model
     neo_epar0_spitzer_in = epar0_spitzer
     neo_coll_uncoupledei_model_in = coll_uncoupledei_model
+    neo_coll_uncoupledaniso_model_in = coll_uncoupledaniso_model
     neo_n_species_in = n_species
     neo_nu_1_in = nu_1_in
     neo_z_1_in = z_in(1)
@@ -362,6 +364,7 @@ contains
     spitzer_model = neo_spitzer_model_in
     epar0_spitzer = neo_epar0_spitzer_in
     coll_uncoupledei_model = neo_coll_uncoupledei_model_in
+    coll_uncoupledaniso_model = neo_coll_uncoupledaniso_model_in
     n_species = neo_n_species_in
     nu_1_in = neo_nu_1_in
     z_in(1) = neo_z_1_in
@@ -516,6 +519,7 @@ contains
     write(1,20) 'SPITZER_MODEL=',neo_spitzer_model_in
     write(1,30) 'EPAR0_SPITZER=',neo_epar0_spitzer_in
     write(1,20) 'COLL_UNCOUPLEDEI_MODEL=',neo_coll_uncoupledei_model_in
+    write(1,20) 'COLL_UNCOUPLEDANISO_MODEL=',neo_coll_uncoupledaniso_model_in
     write(1,20) 'N_SPECIES=',neo_n_species_in
     write(1,30) 'NU_1=',neo_nu_1_in
 

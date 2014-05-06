@@ -39,6 +39,7 @@ subroutine neo_read_input
   read(1,*) epar0_spitzer
 
   read(1,*) coll_uncoupledei_model
+  read(1,*) coll_uncoupledaniso_model
 
   read(1,*) n_species
 

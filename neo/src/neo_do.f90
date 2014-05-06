@@ -335,17 +335,19 @@ subroutine neo_do
                        k = k+1
                        a(k) = 0.0
                        do ks=1, n_species
-                          a(k) = a(k) &
+                          if (coll_uncoupledaniso_model == 1) then
+                             if(is/= ks .and. aniso_model(ks) == 2) then
+                                a(k) = a(k) + 0.0
+                             else
+                                a(k) = a(k) &
+                                     - emat_coll_test(is,ks,ie,je,ix) &
+                                     * dens_fac(ks,it)
+                             endif
+                          else
+                             a(k) = a(k) &
                                - emat_coll_test(is,ks,ie,je,ix) &
                                * dens_fac(ks,it)
-                          ! EAB test
-                          !if(is/= ks .and. aniso_model(ks) == 2) then
-                          !   a(k) = a(k) + 0.0
-                          !else
-                          !   a(k) = a(k) &
-                          !        - emat_coll_test(is,ks,ie,je,ix) &
-                          !        * dens_fac(ks,it)
-                          !endif
+                          endif
                        enddo
                        a_iindx(k) = i
                        a_jindx(k) = j
@@ -358,10 +360,11 @@ subroutine neo_do
                           k = k+1
                           a(k) = -emat_coll_field(is,js,ie,je,ix) &
                                * dens_fac(js,it)
-                          ! EAB test
-                          !if (is/= js .and. aniso_model(js) == 2) then
-                          !   a(k) = 0.0
-                          !endif                         
+                          if (coll_uncoupledaniso_model == 1) then
+                             if (is/= js .and. aniso_model(js) == 2) then
+                                a(k) = 0.0
+                             endif
+                          endif
                           a_iindx(k) = i
                           a_jindx(k) = j
                        enddo

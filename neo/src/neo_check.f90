@@ -99,9 +99,7 @@ subroutine neo_check
   select case (coll_uncoupledei_model) 
 
   case (0) 
-     if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_neoout,30) 'collision_model','Full e-i collisional coupling'
-     endif
+     ! full e-i coupling
 
   case (1)
      if(silent_flag == 0 .and. i_proc == 0) then
@@ -114,8 +112,23 @@ subroutine neo_check
      endif
 
   case default
-
      call neo_error('ERROR: (NEO) invalid coll_uncoupledei_model')
+     return
+
+  end select
+
+  select case (coll_uncoupledaniso_model) 
+
+  case (0) 
+     ! full aniso collision coupling
+
+  case (1)
+     if(silent_flag == 0 .and. i_proc == 0) then
+        write(io_neoout,30) 'collision_model','Uncoupled aniso collisions'
+     endif
+
+  case default
+     call neo_error('ERROR: (NEO) invalid coll_uncoupledaniso_model')
      return
 
   end select
