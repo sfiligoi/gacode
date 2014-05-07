@@ -434,6 +434,32 @@ module neo_rotation
          close(io_rot)
       endif
 
+      if(silent_flag == 0 .and. i_proc == 0 .and. rotation_model == 2) then
+            open(unit=io_rot,file=trim(path)//'out.neo.diagnostic_rot',&
+                 status='replace')
+            write(io_rot,'(a,i3)') "# n_theta           = ",n_theta
+            write(io_rot,'(a,i3)') "# n_species         = ",n_species
+            write(io_rot,'(a)') "# Functions:"
+            write(io_rot,'(a)') "#   theta(:)"
+            write(io_rot,'(a)') "#   phi_rot (theta)"
+            write(io_rot,'(a)') "#   dphi_rot/dr (theta)"
+            write(io_rot,'(a)') "#   do is=1,n_species: total e0,e1,e2,e3,e4,e5,eeta terms"
+            write(io_rot,'(1pe16.8)') theta(:)
+            write(io_rot,'(1pe16.8)') phi_rot(:)
+            write(io_rot,'(1pe16.8)') phi_rot_rderiv(:)
+            do is=1,n_species
+               write(io_rot,'(1pe16.8)') rotavg_e0(is)
+               write(io_rot,'(1pe16.8)') rotavg_e1(is)
+               write(io_rot,'(1pe16.8)') rotavg_e2(is)
+               write(io_rot,'(1pe16.8)') rotavg_e3(is)
+               write(io_rot,'(1pe16.8)') rotavg_e4(is)
+               write(io_rot,'(1pe16.8)') rotavg_e5a(is)+rotavg_e5b(is)
+               write(io_rot,'(1pe16.8)') rotavg_e6(is)
+            enddo
+            close(io_rot)
+         end if
+
+
     end subroutine ROT_write
 
 end module neo_rotation
