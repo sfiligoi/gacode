@@ -28,6 +28,7 @@ program vgen
   real :: er0
   real :: omega
   real :: omega_deriv
+  integer :: simntheta
   real :: cpu_tot_in, cpu_tot_out
 
   real, dimension(:), allocatable :: er_exp
@@ -194,10 +195,10 @@ program vgen
         omega = EXPRO_w0(i) 
         omega_deriv = EXPRO_w0p(i) 
 
-        call vgen_compute_neo(i,vtor_diff,rotation_model,er0,omega,omega_deriv)
+        call vgen_compute_neo(i,vtor_diff,rotation_model,er0,omega,omega_deriv, simntheta)
 
         print 10,EXPRO_rho(i),&
-             er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3,i_proc
+             er_exp(i),EXPRO_vpol(1,i)/1e3,simntheta,i_proc
 
      enddo
 
@@ -220,7 +221,7 @@ program vgen
         omega_deriv = 0.0
 
         call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
-             omega_deriv)
+             omega_deriv, simntheta)
 
         ! omega = (vtor_measured - vtor_neo_ater0) / R
 
@@ -238,7 +239,7 @@ program vgen
         enddo
 
         print 10,EXPRO_rho(i),&
-             er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3,i_proc
+             er_exp(i),EXPRO_vpol(1,i)/1e3,simntheta, i_proc
 
      enddo
 
@@ -275,10 +276,10 @@ program vgen
            omega = EXPRO_w0(i) 
            omega_deriv = EXPRO_w0p(i) 
            call vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, &
-                omega_deriv)
+                omega_deriv, simntheta)
 
            print 10,EXPRO_rho(i),&
-                er_exp(i),EXPRO_vtor(1,i)/1e3,EXPRO_vpol(1,i)/1e3,i_proc
+                er_exp(i),EXPRO_vpol(1,i)/1e3,simntheta,i_proc
 
         enddo
 
@@ -422,6 +423,7 @@ program vgen
 
   call MPI_finalize(i_err)
 
-10 format('rho=',f6.4,2x,'Er_0(kV/m)=',1pe9.2,2x,'vtor_1(km/s)=',1pe9.2,2x,'vpol_1(km/s)=',1pe9.2,2x,'[',i2,']')
+10 format('rho=',f6.4,2x,'Er_0(kV/m)=',1pe9.2,2x,'vpol_1(km/s)=',1pe9.2,2x,&
+'nth=',i2,2x,'[',i2,']')
 
 end program vgen

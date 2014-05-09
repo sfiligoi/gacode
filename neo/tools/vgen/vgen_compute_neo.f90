@@ -1,5 +1,5 @@
 subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
-     omega, omega_deriv)
+     omega, omega_deriv, simntheta)
 
   use vgen_globals
   use neo_interface
@@ -14,6 +14,7 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
   real, intent(in)    :: omega          ! 1/s
   real, intent(in)    :: omega_deriv    ! 1/(m s)
   real, intent(out)   :: vtor_diff      ! vtor_exp - vtor_neo (m/s) 
+  integer, intent(out) :: simntheta
 
   integer :: j, n
   real :: cc, loglam
@@ -196,6 +197,7 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
   write(1,'(i3)',advance='no') neo_n_theta_in
   write(1,*)
   close(1)
+  simntheta=neo_n_theta_in
 
   if(i == 2+i_proc) then
      open(unit=1,file='out.vgen.neoexpnorm'//tag(i_proc+1),status='replace')
