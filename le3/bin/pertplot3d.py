@@ -1,0 +1,45 @@
+import sys
+import string
+import numpy as np
+from gacodeplotdefs import *
+
+infile = 'out.m3d.geo'
+ftype  = 'screen'
+
+data=np.loadtxt(infile)
+n_t = int(data[0])+1
+n_p = int(data[1])+1
+n = len(data)-2
+vec = data[2:len(data)]
+
+print 'Sanity check: ',n-n_t*n_p*4*4
+
+vec = np.reshape(vec,(4,4,n_p,n_t),order='F')
+
+d = np.zeros([n_p,n_t])
+vp = np.arange(n_p)
+vt = np.arange(n_t)
+
+for i in range(2):
+    for j in range(4):
+        d = d+vec[i,j,:,:]**2
+
+d = np.sqrt(d)
+
+fig = plt.figure(figsize=(14,14))
+ax = fig.add_subplot(111)
+ax.set_xlabel(r'$n$')
+ax.set_ylabel(r'$\delta$')
+ax.set_yscale('log')
+
+for i in vt:
+    ax.plot(vp[1:],d[1:,i],'o',markersize=8,label='m='+str(i))
+    ax.plot(vp[1:],d[1:,i],'k',linewidth=1,alpha=0.4)
+
+
+ax.legend()
+if ftype == 'screen':
+    plt.show()
+else:
+    outfile = ftype
+    plt.savefig(outfile)

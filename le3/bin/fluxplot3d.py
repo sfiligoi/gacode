@@ -5,7 +5,7 @@ from gacodeplotdefs import *
 
 # Number of theta-points for plotting
 narc = 128
-ntarc = 5
+ntarc = 11
 
 infile = 'out.m3d.geo'
 ftype  = 'screen'
@@ -55,7 +55,7 @@ for p in range(ntarc):
                 cz[n,m]*np.cos(m*t)*np.cos(n*tt[p])+\
                 dz[n,m]*np.cos(m*t)*np.sin(n*tt[p]) 
 
-    ax.plot(x,y,'-m',linewidth=2)
+    ax.plot(x,y,linewidth=1)
 
 for i in range(narc):
     print t[i],x[i],y[i]
