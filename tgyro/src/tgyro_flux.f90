@@ -213,7 +213,7 @@ subroutine tgyro_flux
 
      call tgyro_trap_component_error(gyro_error_status_out,gyro_error_message_out)
 
-     if (tgyro_mode == 1) then
+     if (tgyro_mode == 1 .and. gyrotest_flag == 0) then
 
         i1 = 1+gyro_explicit_damp_grid_in
         i2 = gyro_radial_grid_in-gyro_explicit_damp_grid_in

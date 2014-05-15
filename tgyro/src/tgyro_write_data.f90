@@ -495,11 +495,11 @@ subroutine tgyro_write_data(i_print)
 
   ! Write progress to screen
   if (i_tran < 10) then
-     print '(a,i1)', 'INFO: (TGYRO) Finished iteration ',i_tran
+     print '(a,i1,a,1pe10.3,a)', 'INFO: (TGYRO) Finished iteration ',i_tran,' [',sum(res)/size(res),']'
   else if (i_tran < 100) then
-     print '(a,i2)', 'INFO: (TGYRO) Finished iteration ',i_tran
+     print '(a,i2,a,1pe10.3,a)', 'INFO: (TGYRO) Finished iteration ',i_tran,' [',sum(res)/size(res),']'
   else
-     print '(a,i3)', 'INFO: (TGYRO) Finished iteration ',i_tran
+     print '(a,i3,a,1pe10.3,a)', 'INFO: (TGYRO) Finished iteration ',i_tran,' [',sum(res)/size(res),']'
   endif
 
   ! Data

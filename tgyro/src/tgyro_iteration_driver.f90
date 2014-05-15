@@ -174,6 +174,13 @@ subroutine tgyro_iteration_driver
      endif
   enddo
 
+  ! Make some resets if we are in test mode
+  if (gyrotest_flag == 1) then
+     tgyro_iteration_method = 1
+     tgyro_relax_iterations = 0
+  endif
+
+
   select case (tgyro_iteration_method) 
 
   case (1) 
