@@ -201,7 +201,7 @@ then
    echo $GACODE_PLATFORM >> $VERBASE
    date >> $VERBASE
 
-   $TGLF_DIR/src/tglf >> $RUNBASE
+   $TGLF_DIR/src/tglf_mpi >> $RUNBASE
  
    #gacode_printversion TGLF
 
