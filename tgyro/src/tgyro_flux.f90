@@ -184,7 +184,7 @@ subroutine tgyro_flux
      ! Map TGYRO parameters to TGLF
      call tgyro_tglf_map
 
-     if (gyrotest_flag == 0) call tglf_run
+     if (gyrotest_flag == 0) call tglf_run_mpi
 
      call tgyro_trap_component_error(tglf_error_status,tglf_error_message)
 

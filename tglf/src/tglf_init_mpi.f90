@@ -29,17 +29,23 @@
 subroutine tglf_init(path_in,mpi_comm_in)
 
   use tglf_interface
+  use tglf_mpi
 
   implicit none
 
   ! Input parameters (IN) - REQUIRED
   character(len=*), intent(in) :: path_in
   integer,          intent(in) :: mpi_comm_in
+  integer :: ierr
 
   ! Local variable
   logical :: inputdat_flag
 
   tglf_path_in = path_in
+  iCommTglf    = mpi_comm_in
+
+  call MPI_COMM_RANK(iCommTglf,iProcTglf,ierr)
+  call MPI_COMM_SIZE(iCommTglf,nProcTglf,ierr)
 
   inquire(file=trim(path_in)//'input.tglf.gen',exist=inputdat_flag)
 
