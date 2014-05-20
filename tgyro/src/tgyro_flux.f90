@@ -15,13 +15,14 @@ subroutine tgyro_flux
   use gyro_interface
   use neo_interface
   use tglf_interface
-
+  
   implicit none
 
   integer :: i_ion
   integer :: i1,i2
   integer :: n_12
   real, dimension(8) :: x_out
+  real, external :: tgyro_funflux
 
   !-------------------------------------------
   ! IFS-PPPL parameters
@@ -239,6 +240,18 @@ subroutine tgyro_flux
   case (4)
 
      ! No fluxes (tgyro_noturb_flag=1)
+
+  case (5)
+
+     ! User-provided function (FUN*)
+
+     pflux_e_tur(i_r) = tgyro_funflux(r(i_r)/r_min,r_min*dlntidr(1,i_r),r_min*dlntedr(i_r),1,0)
+     eflux_e_tur(i_r) = tgyro_funflux(r(i_r)/r_min,r_min*dlntidr(1,i_r),r_min*dlntedr(i_r),2,0)
+
+     do i_ion=1,loc_n_ion
+        pflux_i_tur(i_ion,i_r) = tgyro_funflux(r(i_r)/r_min,r_min*dlntidr(1,i_r),r_min*dlntedr(i_r),1,i_ion)
+        eflux_i_tur(i_ion,i_r) = tgyro_funflux(r(i_r)/r_min,r_min*dlntidr(1,i_r),r_min*dlntedr(i_r),2,i_ion)
+     enddo
 
   case default
 
