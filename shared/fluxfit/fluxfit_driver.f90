@@ -123,6 +123,8 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
 
   !open(unit=4,file='fluxfit.error',status='replace')
 
+  open(unit=5,file='fluxfit.theta',status='replace')
+
   do j=1,npsi
 
      rd(:) = rd_in(:,j)
@@ -184,6 +186,8 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
            theta(ip) = theta(im) + 2*pi*dl/l_tot
         enddo
 
+        write(5,'(1pe12.5)') theta(:)       
+ 
         call fluxfit_fourier()
 
         do i=0,ns
@@ -270,6 +274,7 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
   close(2)
   close(3)
   !close(4)
+  close(5)
 
   deallocate(rd)
   deallocate(zd)
