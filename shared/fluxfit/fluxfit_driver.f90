@@ -53,6 +53,8 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
 
   real, parameter :: tol = 1e-12
 
+  real :: err
+
   model = model_in
   ns    = ns_in
   npsi  = npsi_in
@@ -121,8 +123,7 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
   write(3,*) nd
   write(3,*) npsi
 
-  !open(unit=4,file='fluxfit.error',status='replace')
-
+  open(unit=4,file='fluxfit.error',status='replace')
   open(unit=5,file='fluxfit.theta',status='replace')
 
   do j=1,npsi
@@ -195,8 +196,8 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
         enddo
 
         ! Get fit error
-        !call fluxfit_error(err)
-        !write(4,40) rmin,err
+        call fluxfit_error(err)
+        write(4,40) rmin,err
 
         if (i_print == 1) then
            print 50,'Surface',j,' of ',npsi,'rmin = ',rmin
@@ -248,8 +249,8 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
         write(2,10) c(:)
 
         ! Get fit error
-        !call fluxfit_error(err)
-        !write(4,40) rmin,err
+        call fluxfit_error(err)
+        write(4,40) rmin,err
 
         if (i_print == 1) then
            print 50,'Surface ',j,' of ',npsi,'rmin = ',rmin
@@ -273,7 +274,7 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
   close(1)
   close(2)
   close(3)
-  !close(4)
+  close(4)
   close(5)
 
   deallocate(rd)
