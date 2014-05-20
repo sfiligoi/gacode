@@ -210,13 +210,11 @@ then
    date >> $VERBASE
 
    $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM \
-    $SIMDIR $NPROC $TGLF_DIR/src/tglf_mpi $NOMP $NUMA $MPINUMA 
-
-   #$TGLF_DIR/src/tglf_mpi >> $RUNBASE
+    $SIMDIR $NPROC $TGLF_DIR/src/tglf_mpi $NOMP $NUMA $MPINUMA >> $RUNBASE
  
    #gacode_printversion TGLF
 
-   #cat $RUNBASE
+   cat $RUNBASE
 
 fi
 #===========================================================

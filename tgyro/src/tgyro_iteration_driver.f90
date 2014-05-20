@@ -92,6 +92,10 @@ subroutine tgyro_iteration_driver
 
      flux_method = 4
 
+  else if (lpath(1:3) == "FUN") then
+
+     flux_method = 5
+
   else if (lpath(1:3) == "IFS") then
 
      ! IFS-PPPL
