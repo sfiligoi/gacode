@@ -31,6 +31,14 @@ subroutine tgyro_write_input
      error_flag = 1
      error_msg = 'ERROR: (TGYRO) TGYRO_ROTATION_FLAG must be 1 to evolve Er.'
   endif
+  !
+  ! - Need to set at least one profile to evolve, even for zero iterations, just to 
+  !   define a residual error.
+  !  
+  if (loc_er_feedback_flag+loc_ne_feedback_flag+loc_te_feedback_flag+loc_ti_feedback_flag == 0) then
+     error_flag = 1
+     error_msg = 'ERROR: (TGYRO) Must set one profile to evolve, even if running for 0 iterations.'
+  endif
   !----------------------------------------------------------------
 
   if (i_proc_global == 0) then
