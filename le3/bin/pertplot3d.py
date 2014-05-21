@@ -3,7 +3,7 @@ import string
 import numpy as np
 from gacodeplotdefs import *
 
-infile = 'out.m3d.geo'
+infile = 'out.m3d.geoall'
 ftype  = 'screen'
 
 data=np.loadtxt(infile)
@@ -26,7 +26,7 @@ for i in range(2):
 
 d = np.sqrt(d)
 
-fig = plt.figure(figsize=(14,14))
+fig = plt.figure(figsize=(10,10))
 ax = fig.add_subplot(111)
 ax.set_xlabel(r'$n$')
 ax.set_ylabel(r'$\delta$')
