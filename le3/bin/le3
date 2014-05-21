@@ -120,8 +120,8 @@ then
    python $LE3_DIR/bin/profiles_3d_parse.py 
    cp $FILE input.profiles_3d.rz.nc
    $LE3_DIR/profiles_3d/profiles_3d
-   rm input.profiles_3d.rz.nc
-   echo "not yet working"
+   rm -f input.profiles_3d.rz.nc
+   rm -f fluxfit.*
    exit 0
 fi
 #============================================================

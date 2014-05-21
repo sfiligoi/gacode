@@ -160,7 +160,7 @@ program read_m3dc1
      do ip=1,np
         call fluxfit_driver(1,1,1,nt+1,&
              m3d_bigr(ir,ip,:),m3d_bigz(ir,ip,:),verbose_flag)
-        open(unit=1,file='fluxfit.profile',status='old')
+        open(unit=1,file=trim(path)//'fluxfit.profile',status='old')
         read(1,*) cdum
         read(1,*) gvec_miller(:,1,ir,ip)
         close(1)
@@ -222,16 +222,16 @@ program read_m3dc1
   do ir=1,nr
      call fluxfit_driver(2,nt_fourier,1,nt+1,&
           bigr_2d(ir,:),bigz_2d(ir,:),verbose_flag)
-     open(unit=1,file='fluxfit.geo',status='old')
+     open(unit=1,file=trim(path)//'fluxfit.geo',status='old')
      read(1,*) it
      read(1,*) gvec_2d(:,:,ir)
      close(1)
-     open(unit=1,file='fluxfit.theta',status='old')
+     open(unit=1,file=trim(path)//'fluxfit.theta',status='old')
      read(1,*) theta(ir,:)
      close(1)
   enddo
   
-  open(unit=1,file='out.bigr',status='replace')
+  open(unit=1,file=trim(path)//'out.profiles_3d.bigr',status='replace')
   do ip=1,np
      do it=1,nt+1
         write(1,*) m3d_bigr(1,ip,it)
@@ -474,7 +474,7 @@ program read_m3dc1
   err = nf90_close(ncid)
 
   ! make a pfile
-  open(unit=1,file='out.m3d.peq',status='replace')
+  open(unit=1,file=trim(path)//'out.profiles_3d.peq',status='replace')
   write(1,*)  nr_prof, 'psinorm  ne(10^20/m^3) dne/dpsiN'
   write(1,*)  psi_norm_prof(1)*0.0, m3d_ne(1)/10, 0.0
   do ir=1,nr_prof
@@ -568,7 +568,7 @@ program read_m3dc1
   nu_loc = cc * loglam * ni_loc / (ti_loc**1.5)
   nu_loc = nu_loc/vth_norm
 
-  open(unit=1,file='out.m3d.geoall',status='replace')
+  open(unit=1,file=trim(path)//'out.profiles_3d.geoall',status='replace')
   write(1,*) nt_fourier
   write(1,*) np_fourier
   do it=0,nt_fourier
@@ -583,7 +583,7 @@ program read_m3dc1
   enddo
   close(1)
 
-    open(unit=1,file='out.m3d.geo',status='replace')
+  open(unit=1,file=trim(path)//'out.profiles_3d.geo',status='replace')
   write(1,*) nt_fourier
   write(1,*) np_fourier
   do it=0,nt_fourier
@@ -598,7 +598,7 @@ program read_m3dc1
   enddo
   close(1)
 
-  open(unit=1,file='out.m3d.prof',status='replace')
+  open(unit=1,file=trim(path)//'out.profiles_3d.prof',status='replace')
   write (1,*)  'Data'
   write (1,20) 'psi_norm=', psi_norm_loc(1)
   write (1,20) 'rmin (m)=',   rmin_avg_loc(1)

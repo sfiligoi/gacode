@@ -32,7 +32,7 @@ program le3
   close(1)
 
   if(equilibrium_model == 1) then
-     open(unit=1,file='out.m3d.geo',status='old')
+     open(unit=1,file='out.profiles_3d.geo',status='old')
      read(1,*) nts_geo
      read(1,*) nps_geo
      allocate(r_geo(0:nts_geo,0:nts_geo,4))
