@@ -35,10 +35,10 @@ program le3
      open(unit=1,file='out.profiles_3d.geo',status='old')
      read(1,*) nts_geo
      read(1,*) nps_geo
-     allocate(r_geo(0:nts_geo,0:nts_geo,4))
-     allocate(z_geo(0:nts_geo,0:nts_geo,4))
-     allocate(rd_geo(0:nts_geo,0:nts_geo,4))
-     allocate(zd_geo(0:nts_geo,0:nts_geo,4))
+     allocate(r_geo(0:nts_geo,0:nps_geo,4))
+     allocate(z_geo(0:nts_geo,0:nps_geo,4))
+     allocate(rd_geo(0:nts_geo,0:nps_geo,4))
+     allocate(zd_geo(0:nts_geo,0:nps_geo,4))
      do it=0,nts_geo
         do ip=0,nps_geo
            do im=1,4

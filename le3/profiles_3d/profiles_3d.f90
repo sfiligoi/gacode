@@ -121,7 +121,8 @@ program read_m3dc1
   allocate(psi_norm(nr))
   psi_norm(:) = (m3d_psi(:)-m3d_psi0)/(m3d_psi1-m3d_psi0)
   if(psi_norm_loc(1) > psi_norm(nr) .or. psi_norm_loc(1) < psi_norm(1)) then
-     print *, "Error: must chose psi_norm in domain"
+     print *, "Error: must chose psi_norm in domain: ", psi_norm(1),",", &
+          psi_norm(nr)
      stop
   endif
 
@@ -599,7 +600,9 @@ program read_m3dc1
 
   open(unit=1,file=trim(path)//'out.profiles_3d.prof',status='replace')
   write (1,*)  'Data'
-  write (1,20) 'psi_norm=', psi_norm_loc(1)
+  write (1,20) 'geo psi_norm min=', psi_norm(1)
+  write (1,20) 'geo psi_norm max=', psi_norm(nr)
+  write (1,20) 'local psi_norm=', psi_norm_loc(1)
   write (1,20) 'rmin (m)=',   rmin_avg_loc(1)
   write (1,20) 'q=',      q_loc(1)
   write (1,20) 'bunit (T)=',  bunit_loc
@@ -622,13 +625,8 @@ program read_m3dc1
   write (1,20) 'Q=', abs(q_loc(1))
   write (1,*)
   write (1,*)  'Parameters for NEO'
-  write (1,30) 'N_ENERGY=',4
-  write (1,30) 'N_XI=',16
-  write (1,30) 'N_RADIAL=',1
-  write (1,30) 'THREED_MODEL=',1
   write (1,20) 'RMIN_OVER_A=', rmin_avg_loc(1)/a_meters
   write (1,20) 'RHO_STAR=', abs(rho_loc(1))
-  write (1,20) 'DPHI0DR=',0.0
   write (1,*)
   write (1,30) 'N_SPECIES=', 2+impurity_flag
   write (1,30) 'Z_1=',1
