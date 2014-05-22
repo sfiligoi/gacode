@@ -160,7 +160,6 @@ subroutine le3_rz(t0,p0,r0,z0,drdt0,drdp0,dzdt0,dzdp0,jac0,rc0)
      deallocate(sint_geo)
      deallocate(cosp_geo)
      deallocate(sinp_geo)
-    
 
   case default
      print *, 'ERROR: (LE3) Invalid equilibrium_model'
@@ -173,5 +172,5 @@ subroutine le3_rz(t0,p0,r0,z0,drdt0,drdp0,dzdt0,dzdp0,jac0,rc0)
   
   ! radius of curvature r_c (this is independent of theta coordinates).
   rc0 = (drdt0**2+dzdt0**2)**1.5/(drdt0*dzdtt0-dzdt0*drdtt0)  
- 
+
 end subroutine le3_rz

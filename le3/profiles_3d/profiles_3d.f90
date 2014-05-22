@@ -12,12 +12,8 @@ program read_m3dc1
   integer :: zimp
   integer :: rztest_model
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  integer, parameter :: np_fourier=16
-  integer :: np_mask(0:np_fourier) = 1
-  integer :: np_mask0=0,np_mask1=0, np_mask2=0, np_mask3=0, np_mask4=0, &
-       np_mask5=0, np_mask6=0, np_mask7=0, np_mask8=0, np_mask9=0, &
-       np_mask10=0, np_mask11=0,np_mask12=0, np_mask13=0, np_mask14=0, &
-       np_mask15=0, np_mask16=0
+  integer, parameter :: np_fourier=16 
+  integer :: np_mask(0:np_fourier)
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   real, parameter :: pi=3.1415926535897932
   real, parameter :: temp_norm_fac   = 1602.2
@@ -68,6 +64,9 @@ program read_m3dc1
   read(1,*) impurity_flag
   read(1,*) zimp
   read(1,*) rztest_model
+  do ip=0, np_fourier
+     read(1,*) np_mask(ip)
+  enddo
   close(1)
 
   data_file=trim(path)//data_file_in
