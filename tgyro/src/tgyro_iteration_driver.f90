@@ -95,6 +95,7 @@ subroutine tgyro_iteration_driver
   else if (lpath(1:3) == "FUN") then
 
      flux_method = 5
+     dx = loc_dx/r_min
 
   else if (lpath(1:3) == "IFS") then
 

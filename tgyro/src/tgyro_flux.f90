@@ -15,7 +15,7 @@ subroutine tgyro_flux
   use gyro_interface
   use neo_interface
   use tglf_interface
-  
+
   implicit none
 
   integer :: i_ion
@@ -180,6 +180,8 @@ subroutine tgyro_flux
      eflux_i_tur(1,i_r) = x_out(4)*r_min*dlntidr(1,i_r)*&
           ni(1,i_r)/ne(i_r)*ti(1,i_r)/te(i_r)
 
+     call tgyro_trap_component_error(0,'null')
+
   case (2)
 
      ! Map TGYRO parameters to TGLF
@@ -245,19 +247,21 @@ subroutine tgyro_flux
 
      ! User-provided function (FUN*)
 
-     pflux_e_tur(i_r) = tgyro_funflux(r(i_r)/r_min,r_min*dlntidr(1,i_r),r_min*dlntedr(i_r),1,0)
      eflux_e_tur(i_r) = tgyro_funflux(r(i_r)/r_min,r_min*dlntidr(1,i_r),r_min*dlntedr(i_r),2,0)
 
      do i_ion=1,loc_n_ion
-        pflux_i_tur(i_ion,i_r) = tgyro_funflux(r(i_r)/r_min,r_min*dlntidr(1,i_r),r_min*dlntedr(i_r),1,i_ion)
         eflux_i_tur(i_ion,i_r) = tgyro_funflux(r(i_r)/r_min,r_min*dlntidr(1,i_r),r_min*dlntedr(i_r),2,i_ion)
      enddo
+
+     call tgyro_trap_component_error(0,'null')
 
   case default
 
      call tgyro_catch_error('ERROR: (TGYRO) No matching flux method in tgyro_flux.')
 
   end select
+
+  call MPI_BARRIER(MPI_COMM_WORLD,ierr)
 
   !------------------------------------------------------------------
   ! Compute total fluxes given neoclassical and turbulent components:
