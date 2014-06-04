@@ -13,6 +13,12 @@ subroutine le3_geometry
   real, dimension(:), allocatable :: vec_thetabar
   real, dimension(:), allocatable :: vec_ntv
 
+  real :: J_boozer, I_boozer
+  real, dimension(:), allocatable :: vec_boozer_p, vec_boozer_t, vec_boozer
+  real, dimension(:,:), allocatable :: mat_boozer, t_boozer, p_boozer
+  real :: xsum
+  integer, dimension(:), allocatable :: i_piv
+
   print '(a,1pe12.5)','INFO: (le3) Root accuracy ->',sum(abs(yfunc))/size(yfunc)
 
   if (nps > 0) then
@@ -377,11 +383,6 @@ subroutine le3_geometry
   enddo
   close(1)
 
-  !ips=1
-  !do its=1,nt
-  !   print *, t(its),vdrift_x(its,ips)*0.001
-  !enddo
-
   open(unit=1,file='out.le3.geoscalar',status='replace')
   write (1,'(i3)') nts
   write (1,'(i3)') nps
@@ -389,7 +390,204 @@ subroutine le3_geometry
   write (1,'(i3)') indx_c00
   close(1)
 
-  call le3_compute_theory
+  ! Map to Boozer coordinates
+
+  ! J: B ~ J(psi) grad phi
+  J_boozer = 0.0
+  do its=1,nt
+     do ips=1,np
+        J_boozer = J_boozer + 1/g(its,ips)*(gpp(its,ips)+iota*gpt(its,ips)) 
+     enddo
+  enddo
+  J_boozer = J_boozer/(nt*np)
+
+  ! I: B ~ I(psi) grad theta
+  I_boozer = 0.0
+  do ips=1,np
+     do its=1,nt
+        I_boozer = I_boozer + 1/g(its,ips)*(gpt(its,ips)+iota*gtt(its,ips)) 
+     enddo
+  enddo
+  I_boozer = I_boozer/(nt*np)
+
+  ! Compute omega: Solve domega/dphi and domega/dtheta equations for omega
+  ! using fourier expansion
+
+  allocate(vec_boozer_p(matsize))
+  vec_boozer_p(:) = 0.0
+  do i=1,matsize
+     call le3_basis(itype(i),m_indx(i),n_indx(i),bk,'dp')
+     do kt=1,nt
+        do kp=1,np
+           if(n_indx(i) /= 0) then
+              vec_boozer_p(i) = vec_boozer_p(i) &
+                   + bk(kt,kp) * 1.0/(J_boozer + iota*I_boozer) * (J_boozer &
+                   - 1/g(kt,kp)*(gpp(kt,kp)+iota*gpt(kt,kp))) &
+                   / n_indx(i)**2
+           endif
+        enddo
+     enddo
+  enddo
+  vec_boozer_p(:) = vec_boozer_p(:)/(nt*np)
+
+  allocate(vec_boozer_t(matsize))
+  vec_boozer_t(:) = 0.0
+  do i=1,matsize
+     call le3_basis(itype(i),m_indx(i),n_indx(i),bk,'dt')
+     do kt=1,nt
+        do kp=1,np
+           if(m_indx(i) /= 0) then
+              vec_boozer_t(i) = vec_boozer_t(i) &
+                   + bk(kt,kp) * 1.0/(J_boozer + iota*I_boozer) * (I_boozer &
+                   - 1/g(kt,kp)*(gpt(kt,kp)+iota*gtt(kt,kp))) &
+                   / m_indx(i)**2
+           endif
+        enddo
+     enddo
+  enddo
+  vec_boozer_t(:) = vec_boozer_t(:)/(nt*np)
+
+  allocate(vec_boozer(matsize))
+  do i=1,matsize
+     if(itype(i) == 1 .and. n_indx(i) == 0) then
+        vec_boozer(i) = vec_boozer_t(i)
+     else if(itype(i) == 3 .and. n_indx(i) == 0) then
+        vec_boozer(i) = vec_boozer_t(i)
+     else if(itype(i) == 3 .and. m_indx(i) == 0) then
+        vec_boozer(i) = vec_boozer_p(i)
+     else if(itype(i) == 4 .and. m_indx(i) == 0) then
+        vec_boozer(i) = vec_boozer_p(i)
+     else
+        vec_boozer(i) = 0.5*(vec_boozer_p(i)+vec_boozer_t(i))
+     endif
+  enddo
+
+  ! Form theta_b = theta - iota*omega and phi_b = phi - omega
+
+  allocate(t_boozer(nt,np))
+  allocate(p_boozer(nt,np))
+  do kt=1,nt
+     do kp=1,np
+        xsum=0.0
+        do i=1, matsize
+           call le3_basis(itype(i),m_indx(i),n_indx(i),bk,'d0')
+           xsum = xsum + bk(kt,kp)*vec_boozer(i)
+        enddo
+        t_boozer(kt,kp) = t(kt) - iota*xsum
+        p_boozer(kt,kp) = p(kp) - xsum
+     enddo
+  enddo
+
+  ! Map B(theta,phi) fourier coeffs to B(theta_b,phi_b)
+
+  allocate(mat_boozer(matsize,matsize))
+
+  ! RHS
+  mat_boozer(:,:) = 0.0
+  do i=1,matsize
+     call le3_basis(itype(i),m_indx(i),n_indx(i),bk,'d0')
+     do j=1,matsize
+        call le3_basis(itype(j),m_indx(j),n_indx(j),bkp,'d0')
+        do kt=1,nt
+           do kp=1,np
+              mat_boozer(i,j) = mat_boozer(i,j) + bk(kt,kp) * bkp(kt,kp)
+           enddo
+        enddo
+     enddo
+  enddo
+  mat_boozer(:,:) = mat_boozer(:,:)/(nt*np)
+  vec_boozer_t(:) = vec_bmag(:)
+  call DGEMV ('N', matsize, matsize,1.0,mat_boozer(:,:),matsize, &
+       vec_boozer_t,1,0.0,vec_boozer,1)
+
+  mat_boozer(:,:) = 0.0
+  do i=1,matsize
+     call le3_basis(itype(i),m_indx(i),n_indx(i),bk,'d0')
+     do j=1,matsize
+        ! EAB not yet implemented
+        bkp(:,:) = 0.0
+        if(itype(j) == 1) then
+           do kt=1,nt
+              do kp=1,np
+                 bkp(kt,kp) = sin(m_indx(j)*t_boozer(kt,kp)) &
+                      * cos(n_indx(j)*p_boozer(kt,kp))
+              enddo
+           enddo
+        else if(itype(j) == 2) then
+           do kt=1,nt
+              do kp=1,np
+                 bkp(kt,kp) = sin(m_indx(j)*t_boozer(kt,kp)) &
+                      * sin(n_indx(j)*p_boozer(kt,kp))
+              enddo
+           enddo
+        else if(itype(j) == 3) then
+           do kt=1,nt
+              do kp=1,np
+                 bkp(kt,kp) = cos(m_indx(j)*t_boozer(kt,kp)) &
+                      * cos(n_indx(j)*p_boozer(kt,kp))
+              enddo
+           enddo
+        else if(itype(j) == 4) then
+           do kt=1,nt
+              do kp=1,np
+                 bkp(kt,kp) = cos(m_indx(j)*t_boozer(kt,kp)) &
+                      * sin(n_indx(j)*p_boozer(kt,kp))
+              enddo
+           enddo
+        endif
+        !
+        do kt=1,nt
+           do kp=1,np
+              mat_boozer(i,j) = mat_boozer(i,j) + bk(kt,kp) * bkp(kt,kp)
+           enddo
+        enddo
+        !
+     enddo
+  enddo
+  mat_boozer(:,:) = mat_boozer(:,:)/(nt*np)
+  
+  ! Solve the matrix problem
+  allocate(i_piv(matsize))
+  call DGETRF(matsize,matsize,mat_boozer(:,:),matsize,i_piv,info)
+  call DGETRS('N',matsize,1,mat_boozer(:,:),matsize,i_piv,vec_boozer(:),&
+       matsize,info)
+  deallocate(i_piv)
+
+  open(unit=1,file='out.le3.geoboozer',status='replace')
+  write (1,'(e16.8)') J_boozer
+  write (1,'(e16.8)') I_boozer
+  do i=1,matsize
+     if(itype(i) == 1) then
+        write (1,'(e16.8,e16.8,i2,i2,i2)') vec_boozer(i), vec_bmag(i), &
+          itype(i),m_indx(i), n_indx(i)
+     endif
+  enddo
+  do i=1,matsize
+     if(itype(i) == 2) then
+        write (1,'(e16.8,e16.8,i2,i2,i2)') vec_boozer(i), vec_bmag(i), &
+          itype(i),m_indx(i), n_indx(i)
+     endif
+  enddo
+  do i=1,matsize
+     if(itype(i) == 3) then
+        write (1,'(e16.8,e16.8,i2,i2,i2)') vec_boozer(i), vec_bmag(i), &
+          itype(i),m_indx(i), n_indx(i)
+     endif
+  enddo
+  do i=1,matsize
+     if(itype(i) == 4) then
+        write (1,'(e16.8,e16.8,i2,i2,i2)') vec_boozer(i), vec_bmag(i), &
+          itype(i),m_indx(i), n_indx(i)
+     endif
+  enddo
+  close(1)
+
+  deallocate(mat_boozer)
+  deallocate(vec_boozer)
+  deallocate(vec_boozer_p)
+  deallocate(vec_boozer_t)
+
+  !call le3_compute_theory
 
   deallocate(bdotgrad)
   deallocate(bdotgradB_overB)
