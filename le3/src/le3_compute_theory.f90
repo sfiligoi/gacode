@@ -11,6 +11,8 @@ subroutine le3_compute_theory
   integer, dimension(:), allocatable :: i_piv
   real :: bsq_avg, bgradbsq_avg, gfac_avg, bsqahat_avg
   real :: g2fac, g1fac, g3fac, g1fac_ntv
+  real :: gs1, gs2, gs3, gs4, gs5, gs6
+  real, dimension(:,:), allocatable :: ubfac
 
   bsq_avg      = 0.0
   bgradbsq_avg = 0.0
@@ -32,6 +34,8 @@ subroutine le3_compute_theory
   bgradmat(indx_c00,:) = 0.0 
   bgradmat(indx_c00,indx_c00) = 1.0
   call DGETRF(matsize,matsize,bgradmat(:,:),matsize,i_piv,info)
+
+  ! Parameters for our PS theory
 
   ! compute ahat
   allocate(a(nt,np))
@@ -175,11 +179,75 @@ subroutine le3_compute_theory
   enddo
   g3fac = g3fac / (nt*np) / vprime
 
+  ! Parameters for Simikov PoP 2009 PS theory
+  ! u = 2*ahat
+
+  ! <u B^2>
+  gs1 = 2.0*bsqahat_avg
+
+  ! <u^2 B^2>
+  gs2 = 0.0
+  do i=1,nt
+     do j=1,np
+        gs2 = gs2  + g(i,j) * bmag(i,j)**2 * ahat(i,j)**2 * 4.0
+     enddo
+  enddo
+  gs2 = gs2 / (nt*np) / vprime
+
+  ! <u ((bdotgradB)/B)^2>
+  gs3 = 0.0
+  do i=1,nt
+     do j=1,np
+        gs3 = gs3  + g(i,j) * bdotgradB_overB(i,j)**2 * ahat(i,j) * 2.0
+     enddo
+  enddo
+  gs3 = gs3 / (nt*np) / vprime
+
+  ! bdotgrad(uB^2)
+  allocate(ubfac(nt,np))
+  ubfac = 2.0 * a * bmag**2 + 4.0 * ahat * bmag * (bdotgradB_overB*bmag)
+  
+  ! < ((bdotgradB)/B) bdotgrad(uB^2)>
+  gs4 = 0.0
+  do i=1,nt
+     do j=1,np
+        gs4 = gs4  + g(i,j) * ubfac(i,j) * bdotgradB_overB(i,j)
+     enddo
+  enddo
+  gs4 = gs4 / (nt*np) / vprime
+
+  ! < (bdotgrad(uB^2) / B)^2 >
+  gs5 = 0.0
+  do i=1,nt
+     do j=1,np
+        gs5 = gs5  + g(i,j) * ubfac(i,j)**2 / bmag(i,j)**2
+     enddo
+  enddo
+  gs5 = gs5 / (nt*np) / vprime
+
+  ! < u ((bdotgradB)/B) bdotgrad(uB^2)>
+  gs6 = 0.0
+  do i=1,nt
+     do j=1,np
+        gs6 = gs6  + g(i,j) * ubfac(i,j) * bdotgradB_overB(i,j) &
+             * ahat(i,j) * 2.0
+     enddo
+  enddo
+  gs6 = gs6 / (nt*np) / vprime
+
   open(unit=1,file='out.le3.theory',status='replace')
   write (1,'(e16.8)') g1fac
   write (1,'(e16.8)') g2fac
   write (1,'(e16.8)') g3fac
   write (1,'(e16.8)') g1fac_ntv
+  write (1,'(e16.8)') bsq_avg
+  write (1,'(e16.8)') bgradbsq_avg
+  write (1,'(e16.8)') gs1
+  write (1,'(e16.8)') gs2
+  write (1,'(e16.8)') gs3
+  write (1,'(e16.8)') gs4
+  write (1,'(e16.8)') gs5
+  write (1,'(e16.8)') gs6
   close(1)
 
   deallocate(bgradmat)
@@ -192,5 +260,6 @@ subroutine le3_compute_theory
   deallocate(hhat)
   deallocate(gfac)
   deallocate(i_piv)
+  deallocate(ubfac)
 
 end subroutine le3_compute_theory

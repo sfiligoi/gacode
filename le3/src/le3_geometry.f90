@@ -587,7 +587,7 @@ subroutine le3_geometry
   deallocate(vec_boozer_p)
   deallocate(vec_boozer_t)
 
-  !call le3_compute_theory
+  call le3_compute_theory
 
   deallocate(bdotgrad)
   deallocate(bdotgradB_overB)
