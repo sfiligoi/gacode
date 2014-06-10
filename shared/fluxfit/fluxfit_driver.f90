@@ -196,8 +196,8 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
         enddo
 
         ! Get fit error
-        call fluxfit_error(err)
-        write(4,40) rmin,err
+        !call fluxfit_error(err)
+        !write(4,40) rmin,err
 
         if (i_print == 1) then
            print 50,'Surface',j,' of ',npsi,'rmin = ',rmin
@@ -249,8 +249,8 @@ subroutine fluxfit_driver(model_in,ns_in,npsi_in,nd_in,rd_in,zd_in,i_print)
         write(2,10) c(:)
 
         ! Get fit error
-        call fluxfit_error(err)
-        write(4,40) rmin,err
+        !call fluxfit_error(err)
+        !write(4,40) rmin,err
 
         if (i_print == 1) then
            print 50,'Surface ',j,' of ',npsi,'rmin = ',rmin

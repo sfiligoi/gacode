@@ -529,8 +529,14 @@ program read_m3dc1
   call bound_deriv(dlnnidr,ni,rmin_avg,nr)
   dlnnidr(:) = -1.0*dlnnidr(:)/ni(:)
   call bound_deriv(dlnncdr,nc,rmin_avg,nr)
-  dlnncdr(:) = -1.0*dlnncdr(:)/nc(:)
-
+  do ir=1,nr
+     if(abs(nc(ir)) > 0.0) then
+        dlnncdr(:) = -1.0*dlnncdr(:)/nc(:)
+     else
+        dlnncdr(:) = 0.0
+     endif
+  enddo
+        
   ! obtain local values of profile quantities
 
   call cub_spline(psi_norm,te,nr,psi_norm_loc,te_loc,nr_loc)

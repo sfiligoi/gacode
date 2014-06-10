@@ -206,7 +206,7 @@ subroutine le3_compute_theory
   ! bdotgrad(uB^2)
   allocate(ubfac(nt,np))
   ubfac = 2.0 * a * bmag**2 + 4.0 * ahat * bmag * (bdotgradB_overB*bmag)
-  
+
   ! < ((bdotgradB)/B) bdotgrad(uB^2)>
   gs4 = 0.0
   do i=1,nt
