@@ -12,6 +12,7 @@ export EXTRA_LIBS = \
 
 all:
 	gacode_getversion > .VERSION
+	cd ${GACODE_ROOT}/shared/math ; make
 	cd ${GACODE_ROOT}/shared/GEO ; make
 	cd ${GACODE_ROOT}/shared/fluxfit ; make
 	cd minpack ; make
@@ -21,7 +22,7 @@ all:
 clean:
 	cd minpack ; make clean 
 	cd src ; make clean
+	cd profiles_3d ; make clean
 	cd ../modules ; rm -f le3*.mod
 	rm -f .VERSION
-	cd profiles_3d ; make clean
 .IGNORE:

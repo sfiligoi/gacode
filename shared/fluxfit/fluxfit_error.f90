@@ -8,7 +8,7 @@ subroutine fluxfit_error(err)
   real, intent(inout) :: err
 
   ! Number of points in search arc
-  integer, parameter :: nt=16
+  integer, parameter :: nt=9
 
   ! Iteration tolerance
   real, parameter :: tol=1e-9
@@ -25,6 +25,12 @@ subroutine fluxfit_error(err)
 
   err = 0.0
   do i=1,nd-1
+  
+     ! For given flux-surface datapoint, find minimum distance from 
+     ! continuous model curve.
+
+     ! 1. First, get an initial guess by looping around the contour
+
      if (i < nd/2) then
         do k=1,nt 
            tt(k) = -0.5*pi+(k-1)*2.0*pi/(nt-1)
@@ -38,8 +44,10 @@ subroutine fluxfit_error(err)
            d(k) = sqrt((r-rd(i))**2+(z-zd(i))**2)
         enddo
      endif
-
+   
      call fluxfit_minmax(d,tt,nt,dmin,t,"min")
+
+     ! 2. Now refine the guess
 
      dmin0 = 0.0
      p = 0
@@ -47,13 +55,15 @@ subroutine fluxfit_error(err)
      do while (abs(dmin-dmin0) > tol)
         dmin0 = dmin
         p = p+1
-        do k=1,nt 
+        do k=1,nt
            q = (nt*1.0)**p
-           tt(k) = t-pi/q+(k-1.0)*2*pi/(nt-1)/q
+           tt(k) = t-pi/q+(k-1.0)*pi/(nt-1)/q
            call fluxfit_f_model(tt(k),r,z)
            d(k) = sqrt((r-rd(i))**2+(z-zd(i))**2)
         enddo
-        call fluxfit_minmax(d,tt,nt,dmin,t,"min")
+        k = minloc(d,1)
+        t    = tt(k)
+        dmin = d(k)
      enddo
      err = err+dmin/(nd-1)/rmin
   enddo

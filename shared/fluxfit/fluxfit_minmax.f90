@@ -1,3 +1,6 @@
+! High accuracy estimate of minimum x given initial guess as 
+! minimum of array x.
+
 subroutine fluxfit_minmax(x,y,n,x0,y_x0,mode)
 
   implicit none
@@ -34,7 +37,7 @@ subroutine fluxfit_minmax(x,y,n,x0,y_x0,mode)
   y3 = y(ip)
 
   if (x1 == x2 .and. x2 == x3) then
-     print *,x(:)
+     print '(10(1pe13.6,1x))',x(:)
      print '(a)','ERROR: (fluxfit_minmax) x1=x2=x3 error.'
      stop
   endif

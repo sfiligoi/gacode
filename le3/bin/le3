@@ -37,7 +37,9 @@ then
   echo
   echo "         -profile -i <rz and profile netcdf file>"
   echo "         Run PROFILES_3D using input.profiles_3d in <simdir>."
-  echo           
+  echo
+  echo "         -V"
+  echo "          Verbose option ; do not delete some output files."          
 
   exit 1
 fi
@@ -55,6 +57,7 @@ EXEC_FLAG=0
 GENERATE_FLAG=0
 PROFILE_FLAG=0
 FILE_FLAG=0
+VERBOSE_FLAG=0
 #=============================================================
 
 #=============================================================
@@ -66,6 +69,8 @@ while [ $# -gt 0 ] ; do
   -p) shift ; SIMROOT=$1 ;;
 
   -e) shift ; LOCDIR=$1 ; EXEC_FLAG=1 ;;
+
+  -V) VERBOSE_FLAG=1 ;;
 
   -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
 
@@ -121,7 +126,10 @@ then
    cp $FILE input.profiles_3d.rz.nc
    $LE3_DIR/profiles_3d/profiles_3d
    rm -f input.profiles_3d.rz.nc
-   rm -f fluxfit.*
+   if [ $VERBOSE_FLAG -eq 0 ]
+   then
+      rm -f fluxfit.*
+   fi
    exit 0
 fi
 #============================================================
