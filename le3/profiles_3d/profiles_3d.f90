@@ -77,6 +77,8 @@ program read_m3dc1
 
   psi_norm_loc(1) = my_psi_norm
 
+  print 20, 'Computing geometry coefficients and profile data for psinorm=', psi_norm_loc(1)
+
   ! Read the data from the netcdf file
  
   err = nf90_open(data_file,NF90_NOWRITE,ncid)
@@ -125,8 +127,6 @@ program read_m3dc1
           psi_norm(nr)
      stop
   endif
-
-  print *, nr, nt, np
 
   ! for fluxfit, the first and last theta points must be the same
   do ir=1,nr
@@ -230,14 +230,6 @@ program read_m3dc1
      read(1,*) theta(ir,:)
      close(1)
   enddo
-  
-  open(unit=1,file=trim(path)//'out.profiles_3d.bigr',status='replace')
-  do ip=1,np
-     do it=1,nt+1
-        write(1,*) m3d_bigr(1,ip,it)
-     enddo
-  enddo
-  close(1)
 
   ! compute decomposition for non-axisymmetic components
 
@@ -664,6 +656,9 @@ program read_m3dc1
   write (1,20) 'vth_norm=', vth_norm*a_meters
   write (1,20) 'b_unit=', bunit(1)
   close(1)
+
+  print *, 'Global geometry and profile data written in out.profiles_3d.geoall and out.profiles_3d.peq'
+  print *, 'Local geometry and profile data written in out.profiles_3d.geo and out.profiles_3d.prof'
 
 20  format(t2,a,1pe12.5)
 30  format(t2,a,i3)
