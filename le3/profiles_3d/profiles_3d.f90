@@ -657,8 +657,9 @@ program read_m3dc1
   write (1,20) 'b_unit=', bunit(1)
   close(1)
 
-  print *, 'Global geometry and profile data written in out.profiles_3d.geoall and out.profiles_3d.peq'
-  print *, 'Local geometry and profile data written in out.profiles_3d.geo and out.profiles_3d.prof'
+  print *, 'Global profile info written in out.profiles_3d.peq'
+  print *, 'Local profile info written in out.profiles_3d.prof'
+  print *, 'Local geometry coefficients written in out.profiles_3d.geo'
 
 20  format(t2,a,1pe12.5)
 30  format(t2,a,i3)

@@ -3,7 +3,7 @@ import string
 import numpy as np
 from gacodeplotdefs import *
 
-infile = 'out.m3d.geoall'
+infile = 'out.profiles_3d.geoall'
 ftype  = 'screen'
 
 data=np.loadtxt(infile)
