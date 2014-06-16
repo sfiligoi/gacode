@@ -33,8 +33,8 @@ ax.set_ylabel(r'$\delta$')
 ax.set_yscale('log')
 
 for i in vt:
-    ax.plot(vp[1:],d[1:,i],'o',markersize=8,label='m='+str(i))
-    ax.plot(vp[1:],d[1:,i],'k',linewidth=1,alpha=0.4)
+    ax.plot(vp[0:],d[0:,i],'o',markersize=8,label='m='+str(i))
+    ax.plot(vp[0:],d[0:,i],'k',linewidth=1,alpha=0.4)
 
 
 ax.legend()
