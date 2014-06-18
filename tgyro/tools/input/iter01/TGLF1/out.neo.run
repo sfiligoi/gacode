@@ -1,0 +1,97 @@
+ CONTROL PARAMETERS
+ ------------------
+ sim_model           : NUMERICAL (with theory)
+ collision_model     : FULL LINEARIZED FOKKER-PLANCK
+ equilibrium_model   : MILLER
+ profile_model       : LOCAL
+ sign_q              : POSITIVE
+ sign_bunit          : POSITIVE (BT CW)
+ rotation model      : ROTATION EFFECTS INCLUDED
+ spitzer_model:      : OFF (NEOCLASSICAL TRANSPORT)
+ threed_model:       : AXISYMMETRIC EQUILIBRIUM
+ 
+ GRID DIMENSIONS
+ ---------------
+ n_radial         :   1
+ n_energy         :   5
+ n_xi             :  11
+ n_theta          :  11
+ 
+ PHYSICS PARAMETERS
+ ------------------
+ r/R              :  3.0594E-02
+ dphi0/dr         :  0.0000E+00
+ omega_rot        :  2.2747E-02
+ omega_rot_deriv  : -8.5002E-03
+ q                :  1.7917E+00
+ s                : -1.0839E-01
+ shift            : -5.8940E-02
+ kappa            :  1.5639E+00
+ s_kappa          : -1.1623E-02
+ delta            :  2.3908E-02
+ s_delta          :  1.9414E-02
+ zeta             :  0.0000E+00
+ s_zeta           :  0.0000E+00
+ zmag             :  0.0000E+00
+ s_zmag           :  0.0000E+00
+ 
+ Species 1
+ ----------
+ Z                :   1
+ dens             :  4.1531E-01
+ temp             :  1.0000E+00
+ mass             :  1.0000E+00
+ a/Ln             :  4.2864E-01
+ a/LT             :  1.0121E+00
+ nu               :  5.9767E-05
+ 
+ Species 2
+ ----------
+ Z                :  -1
+ dens             :  1.0000E+00
+ temp             :  1.1407E+00
+ mass             :  2.7231E-04
+ a/Ln             :  4.2864E-01
+ a/LT             :  2.1330E+00
+ nu               :  7.1583E-03
+ 
+ Species 3
+ ----------
+ Z                :   1
+ dens             :  4.1338E-01
+ temp             :  1.0000E+00
+ mass             :  1.5000E+00
+ a/Ln             :  4.2864E-01
+ a/LT             :  1.0121E+00
+ nu               :  4.8573E-05
+ 
+ Species 4
+ ----------
+ Z                :   2
+ dens             :  1.3645E-02
+ temp             :  1.0000E+00
+ mass             :  2.0000E+00
+ a/Ln             :  4.2864E-01
+ a/LT             :  1.0121E+00
+ nu               :  2.2217E-05
+ 
+ ir =            1
+ Begin matrix set-up
+ WARNING: (NEO) ROTATION IS BEING RUN WITHOUT QN DENSITIES
+ Estimated memory (GB) =   0.219420288000000     
+ Begin matrix factor
+ Done matrix factor
+ Begin matrix solve
+ Done matrix solve
+ ****************************************
+ir =    1
+pflux =  -0.25311865E-09
+eflux =   0.13790403E-07
+pflux =   0.15934595E-09
+eflux =   0.24855252E-08
+pflux =   0.47888837E-09
+eflux =   0.17292122E-07
+pflux =  -0.33212450E-10
+eflux =   0.52275285E-09
+ sum Z_s * Gamma_s =  -0.11318036E-14
+ ****************************************
