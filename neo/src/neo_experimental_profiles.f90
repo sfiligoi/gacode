@@ -100,7 +100,7 @@ subroutine neo_experimental_profiles
   s_delta_p(:)        = EXPRO_sdelta(:) * profile_delta_scale
   s_zeta_p(:)         = EXPRO_szeta(:)  * profile_zeta_scale
   s_zmag_p(:)         = EXPRO_dzmag(:)  * profile_zmag_scale
-  shat_p(:)           = EXPRO_s(:)
+  shear_p(:)           = EXPRO_s(:)
 
   r_p(:)    = rmin_exp(:)/rmin_exp(n_grid_exp)
   rmaj_p(:) = rmaj_exp(:)/rmin_exp(n_grid_exp)

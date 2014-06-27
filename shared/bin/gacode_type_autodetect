@@ -32,13 +32,38 @@ x=`file -b $1`
 
 if [[ "$x" == "NetCDF Data Format data" ]] ; then
    # Plasmastate or iterdb netcdf
-   y=`ncdump -c $1 | grep dim_nrho_eq`
-   if [[ "$y" == "" ]] ; then
+
+   # Test for exsitence of NetCDF
+   y=`which ncdump >& /dev/null`
+   result="$?"
+   if [[ "$result" == "1" ]] ; then
+       echo "ERROR: (gacode_type_autodetect) ncdump must be in your path to handle NetCDF files." > /dev/stderr
+       echo "UNKNOWN"
+       exit 1
+   fi
+
+   # See if this is an unsupported TRANSP file
+   y=`ncdump -c $1 | grep -m 1 -c RMJSYM`
+   if [[ $y -gt 0 ]] ; then
+      echo "ERROR: (gacode_type_autodetect) This is an unsupported TRANSP NetCDF file." > /dev/stderr
+      echo "UNKNOWN"
+      exit 1
+   fi
+
+   # See if this is an iterdb NetCDF file
+   y=`ncdump -c $1 | grep -c hcap`
+   if [[ $y -gt 0 ]] ; then
       echo "ITERDBNC"
-   else
+      exit 0
+   fi
+
+   # See if this is a Swim plasmastate file
+   y=`ncdump -c $1 | grep -c dim_nrho_eq`
+   if [[ $y -gt 0 ]] ; then
       echo "SWIM"
    fi      
    exit 0 
+
 else
    # pfile, gfile, iterdb text
 

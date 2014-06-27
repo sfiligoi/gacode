@@ -12,9 +12,10 @@ endif
 EXEC = vgen
 
 OBJECTS = vgen_globals.o \
+	  vgen_init.o \
 	  vgen_compute_neo.o \
-	  vgen_newton.o \
 	  vgen_getgeo.o \
+          vgen_reduce.o \
 	  $(EXEC).o 
 
 .SUFFIXES : .o .f90

@@ -32,6 +32,14 @@ then
   echo
   echo "         -g <template>"
   echo "         Copy <template> into simulation path."
+  echo
+  echo "3D GEOMETRY AND PROFILE GENERATION"
+  echo
+  echo "         -profile -i <rz and profile netcdf file>"
+  echo "         Run PROFILES_3D using input.profiles_3d in <simdir>."
+  echo
+  echo "         -V"
+  echo "          Verbose option ; do not delete some output files."          
 
   exit 1
 fi
@@ -47,6 +55,9 @@ NPROC=1
 # Execute/test mode flags
 EXEC_FLAG=0
 GENERATE_FLAG=0
+PROFILE_FLAG=0
+FILE_FLAG=0
+VERBOSE_FLAG=0
 #=============================================================
 
 #=============================================================
@@ -59,7 +70,13 @@ while [ $# -gt 0 ] ; do
 
   -e) shift ; LOCDIR=$1 ; EXEC_FLAG=1 ;;
 
+  -V) VERBOSE_FLAG=1 ;;
+
   -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
+
+  -profile) PROFILE_FLAG=1 ;;
+
+  -i) shift ; FILE_FLAG=1 ; FILE=$1 ;;
 
   *) echo "ERROR: incorrect le3 syntax." ; exit 1 ;;
  
@@ -89,6 +106,29 @@ then
       cat ${LE3_DIR}/tools/input/simdir_list
    else
       cp -ai ${LE3_DIR}/tools/input/$LOCDIR $SIMDIR
+   fi
+   exit 0
+fi
+#============================================================
+
+#============================================================
+# Generate 3d profiles -profile set, then exit.
+#
+if [ $PROFILE_FLAG -eq 1 ]
+then
+   cd $SIMDIR
+   if [ "$FILE" == "" ] ; then
+   echo "ERROR: (profiles_3d) Specify an input file via -i."
+   exit 1
+   fi
+
+   python $LE3_DIR/bin/profiles_3d_parse.py 
+   cp $FILE input.profiles_3d.rz.nc
+   $LE3_DIR/profiles_3d/profiles_3d
+   rm -f input.profiles_3d.rz.nc
+   if [ $VERBOSE_FLAG -eq 0 ]
+   then
+      rm -f fluxfit.*
    fi
    exit 0
 fi

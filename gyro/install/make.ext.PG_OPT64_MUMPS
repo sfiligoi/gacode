@@ -1,5 +1,3 @@
-gyro_nl_fft.o : gyro_nl_fft.stub.f90
-	$(FC) $(FMATH) $(FFLAGS) -o gyro_nl_fft.o -c gyro_nl_fft.stub.f90
 mumps_private.o : mumps_private.mumps.f90
 	$(FC) $(FMATH) $(FFLAGS) -I/opt/MUMPS_4.3/include -o mumps_private.o -c mumps_private.mumps.f90
 gyro_sparse_solve_mumps.o : gyro_sparse_solve_mumps.mumps.f90

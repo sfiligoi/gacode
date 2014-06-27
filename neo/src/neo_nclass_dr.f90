@@ -292,9 +292,6 @@ contains
     do is=1,n_species
        grt_i(is) = -dlntdr(is,ir) * temp_i(is) / a_meters
     enddo
-    
-    !  c_den-density cutoff below which species is ignored (/m**3)
-    c_den=1.0e10
 
     !  den_iz(i,z)-density of i,z (/m**3) 
     den_iz(:,:) = 0.0
@@ -319,6 +316,15 @@ contains
           den_iz(is,abs(z(is))) = dens(is,ir) * dens_norm(ir) * 1e19
        enddo
     endif
+
+    !  c_den-density cutoff below which species is ignored (/m**3)
+    c_den=1.0e10
+    do is=1,n_species
+       if(den_iz(is,abs(z(is))) < c_den) then
+          c_den = den_iz(is,abs(z(is))) 
+       endif
+    enddo
+    c_den = c_den - 1.0
 
     !  grp_iz(i,z)-pressure gradient of i,z (keV/m**3/rho)
     grp_iz(:,:) = 0.0
@@ -359,31 +365,36 @@ contains
        open(unit=io_neoout,file=trim(path)//runfile_neoout,&
             status='old',position='append')
        if(iflag == -1) then
-          ! write(io_neoout,*)  'WARNING: NCLASS - no potato orbit viscosity'
+          ! write(io_neoout,*)  'WARNING: (NEO) NCLASS - no potato orbit viscosity'
        else if(iflag == -2) then
-          write(io_neoout,*) 'WARNING: NCLASS - no Pfirsch-Schluter viscosity'
+          write(io_neoout,*) 'WARNING: (NEO) NCLASS - no Pfirsch-Schluter viscosity'
        else if(iflag == -3) then
-          write(io_neoout,*)  'WARNING: NCLASS - no banana viscosity'
+          write(io_neoout,*)  'WARNING: (NEO) NCLASS - no banana viscosity'
        else if(iflag == -4) then
-          write(io_neoout,*)  'WARNING: NCLASS - no viscosity'
+          write(io_neoout,*)  'WARNING: (NEO) NCLASS - no viscosity'
        end if
        close(io_neoout)
     end if
 
     ! check error flags
     if(iflag > 0) then
-       if(iflag == 1) then
-          call neo_error('ERROR: (NEO) NCLASS - k_order must be 2 or 3')
-       elseif(iflag == 2) then
-          call neo_error('ERROR: (NEO) NCLASS - require 1<m_i<mx_mi')
-       else if(iflag == 3) then
-          call neo_error('ERROR: (NEO) NCLASS - require 0<m_z<mx_mz')
-       else if(iflag == 4) then
-          call neo_error('ERROR: (NEO) NCLASS - require 0<m_s<mx_ms')
-       else if(iflag == 5) then
-          call neo_error('ERROR: (NEO) NCLASS - inversion of flow matrix failed')
-       else if(iflag == 6) then
-          call neo_error('ERROR: (NEO) NCLASS - invalid trapped fraction')
+       if(silent_flag == 0 .and. i_proc == 0) then
+          open(unit=io_neoout,file=trim(path)//runfile_neoout,&
+               status='old',position='append')
+          if(iflag == 1) then
+             write(io_neoout,*) 'WARNING: (NEO) NCLASS - k_order must be 2 or 3'
+          elseif(iflag == 2) then
+             write(io_neoout,*) 'WARNING: (NEO) NCLASS - require 1<m_i<mx_mi'
+          else if(iflag == 3) then
+             write(io_neoout,*) 'WARNING: (NEO) NCLASS - require 0<m_z<mx_mz'
+          else if(iflag == 4) then
+             write(io_neoout,*) 'WARNING: (NEO) NCLASS - require 0<m_s<mx_ms'
+          else if(iflag == 5) then
+             write(io_neoout,*) 'WARNING: (NEO) NCLASS - inversion of flow matrix failed'
+          else if(iflag == 6) then
+             write(io_neoout,*) 'WARNING: (NEO) NCLASS - invalid trapped fraction'
+          endif
+          close(io_neoout)
        endif
        return
     endif

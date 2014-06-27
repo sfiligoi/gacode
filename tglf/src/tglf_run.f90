@@ -2,7 +2,7 @@
 ! tglf_run.f90
 !
 ! PURPOSE:
-!  Manage call to TGLF simulation for both standalone and 
+!  Manage call to TGLF simulation for both standalone and
 !  TGYRO usage.
 !---------------------------------------------------------
 
@@ -39,7 +39,7 @@ subroutine tglf_run()
   call put_averages(tglf_taus_in, &
        tglf_as_in, &
        tglf_vpar_in, &
-       tglf_vexb_in,  &
+       tglf_vexb_in, &
        tglf_betae_in, &
        tglf_xnue_in, &
        tglf_zeff_in, &
@@ -171,7 +171,7 @@ subroutine tglf_run()
   else
 
      ! Run single-ky linear stability
-     call tglf_ls
+     call tglf_ky
 
      ! Collect linear eigenvalues
      do n=1,tglf_nmodes_in

@@ -26,7 +26,7 @@
       REAL :: exch1(nsm,3)
       REAL :: nsum1(nsm),tsum1(nsm)
 !
-      if(new_start)CALL tglf_start
+      CALL tglf_startup
 !
 ! initialize fluxes
 !
@@ -157,6 +157,8 @@
 !
         ky0 = ky1
       enddo  ! i
+!
+      CALL tglf_shutdown
 !
       END SUBROUTINE tglf_TM
 !
@@ -362,11 +364,9 @@
 !  spectrum_type = 0 for linear GYRO spectrum
 !  spectrum_type = 1 for APS07 spectrum
 !  spectrum_type = 2 for IAEA08 spectrum
-!  spectrum_type = 3 for spectrum with ky_min = ky_cut
+!  spectrum_type = 3 for spectrum with ky_min = 0.1*MIN(1,2/q)
 !
       new_kyspectrum=.FALSE.
-!
-      if(new_start)CALL tglf_start
 !
       spectrum_type = kygrid_model_in
 !
@@ -448,30 +448,36 @@
           nky = nky + nky_in
         endif
       endif
-      if(spectrum_type.eq.3)then   ! ky_min spectrum similar to APS07
-        nky=9
-        ky_cut = 1.0/(sqrt_two*R_unit*q_unit*width_in)
-!        write(*,*)"ky_cut = ",ky_cut
-!        ky_min = MIN(0.1,0.25/q_unit)
-        ky_min = ky_cut
-        ky_min = ky_min/SQRT(taus_in(2)*mass_in(2))
-        ky_max = 0.9/SQRT(taus_in(2)*mass_in(2))  !k_theta*rho_ion = 0.9
-        dky0 = (ky_max-ky_min)/REAL(nky-1)
+      if(spectrum_type.eq.3)then   ! APS07 spectrum with ky_min=0.05
+        nky=11
+        ky_min = 0.05/SQRT(taus_in(2)*mass_in(2))
         ky_spectrum(1) = ky_min
         dky_spectrum(1) = ky_min
-        do i=2,nky
-          ky_spectrum(i) = ky_spectrum(i-1) + dky0
+        ky_spectrum(2) = 2.0*ky_min
+        dky_spectrum(2) = ky_min
+        ky_spectrum(3) = 3.0*ky_min
+        dky_spectrum(3) = ky_min
+        ky_spectrum(4) = 4.0*ky_min
+        dky_spectrum(4) = ky_min
+        ky_min = ky_spectrum(4)
+        ky_max = 1.0/SQRT(taus_in(2)*mass_in(2))
+        dky0 = 0.1/SQRT(taus_in(2)*mass_in(2))
+        do i=5,nky
+          ky_spectrum(i) = ky_min + REAL(i-4)*dky0
           dky_spectrum(i) = dky0
         enddo
-        ky0 = ky_max+dky0
+        ky0 = 1.0/SQRT(taus_in(2)*mass_in(2))
         ky1 = 0.4/SQRT(taus_in(1)*mass_in(1))  !k_theta*rho_e = 0.4    
         dky0 = LOG(ky1/ky0)/REAL(nky_in-1)
         lnky = LOG(ky0)
-        do i=nky+1,nky+nky_in     
-          ky_spectrum(i) = EXP(lnky)
-          dky_spectrum(i) = ky_spectrum(i)*dky0
-          lnky = lnky + dky0
-        enddo
+        if(nky_in.gt.0)then
+          dky_spectrum(nky)=ky0-ky_spectrum(nky)
+          do i=nky+1,nky+nky_in     
+            ky_spectrum(i) = EXP(lnky)
+            dky_spectrum(i) = ky_spectrum(i)*dky0
+            lnky = lnky + dky0
+          enddo
+        endif
         nky = nky + nky_in
       endif
 ! debug

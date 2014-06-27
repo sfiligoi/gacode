@@ -10,7 +10,6 @@
 
 MAKE = make
 
-HDF5_PATH=/Users/srinath/software/hdf5-1.8.8-par-pgfort
 NETCDF_PATH=/Users/srinath/software/netcdf-4.1.2-par-pgfort
 MF90 = /Users/srinath/software/openmpi-1.6-pgfortran/bin/mpif90
 
@@ -26,37 +25,15 @@ FOMP	= -mp=nonuma
 FMATH	= -r8
 FOPT	= -fast -Mcache_align  
 FDEBUG	= -gopt -Mchkfpstk -Mchkptr -Mchkstk -Mdwarf2 -Mnodwarf -traceback
-FHDF5 = -DHAVE_HDF5
 
 # System math libraries
 
-#LMATH = /System/Library/Frameworks/vecLib.framework/Versions/A/vecLib \
-       -lSystemStubs -lSystem
-
 LMATH = -Wl,/System/Library/Frameworks/Accelerate.framework/Versions/Current/Frameworks/vecLib.framework/Versions/Current/libBLAS.dylib -Wl,/System/Library/Frameworks/Accelerate.framework/Versions/Current/Frameworks/vecLib.framework/Versions/Current/libLAPACK.dylib
 
-# OPTIONAL: netCDF (for gyro2gkv)
-
-
-
-# OPTIONAL: HDF5 (for vshdf5)
-HDF5_LIBS = \
-  ${HDF5_PATH}/lib/libhdf5_hl_fortran.a \
-  ${HDF5_PATH}/lib/libhdf5_hl_f90cstub.a \
-  ${HDF5_PATH}/lib/libhdf5_hl.a \
-  ${HDF5_PATH}/lib/libhdf5_fortran.a \
-  ${HDF5_PATH}/lib/libhdf5_f90cstub.a\
-  ${HDF5_PATH}/lib/libhdf5.a
-
-
-HDF5_INC =  -I${HDF5_PATH}/include -I${HDF5_PATH}/include/fortran
-VSHDF5_MAKECMD=vshdf5
-MPI_FLAG=-Wl,-D__MPI
-
-
 NETCDF = \
-    -L/Users/srinath/software/netcdf-4.1.2-par-pgfort/lib -lnetcdff -lnetcdf ${HDF5_LIBS}
-NETCDF_INC =${NETCDF_PATH}/include ${HDF5_INC}
+    -L/Users/srinath/software/netcdf-4.1.2-par-pgfort/lib -lnetcdff -lnetcdf
+NETCDF_INC =${NETCDF_PATH}/include
+
 # Archive
 
 ARCH = ar cr

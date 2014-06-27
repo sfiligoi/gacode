@@ -61,7 +61,7 @@ subroutine tgyro_iteration_standard
      gyro_restart_method = 2
   endif
   res0 = 0.0
-  call tgyro_residual(f_vec,g_vec,res,p_max,loc_residual_method)
+  if (gyrotest_flag == 0) call tgyro_residual(f_vec,g_vec,res,p_max,loc_residual_method)
 
   if (loc_restart_flag == 0 .or. tgyro_relax_iterations == 0) then
      call tgyro_write_data(1)
@@ -246,17 +246,6 @@ subroutine tgyro_iteration_standard
      ! Update gradient using Newton-step.
      !
      x_vec(:) = x_vec0(:)+b(:)
-     !----------------------------------------------------
-
-     !----------------------------------------------------
-     ! Check to see if gradient is too negative
-     !
-     !do p=1,p_max
-     !   if (x_vec(p) < 0.0) then
-     !      x_vec(p) = 0.0001
-     !      b_flag(p) = '#'
-     !   endif
-     !enddo
      !----------------------------------------------------
 
      !-----------------------------------------------------

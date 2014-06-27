@@ -521,9 +521,21 @@ subroutine gyro_fieldeigen
   call gyro_fieldeigen_df
   call gyro_field_fluxave
 
-  ! In lieu of calling gyro_field_time_derivative, compute field_blend_dot
-  ! for use in gyro_moments_plot (needed for E_par)
+  ! In lieu of calling gyro_field_time_derivative, compute time 
+  ! derivatives for use in gyro_moments_plot
+  do is=1,n_kinetic
+     do i=1,n_x
+        do m=1,n_stack
+
+           h_cap(m,i,:,is) = h(m,i,:,is) &
+                +z(is)*alpha_s(is,i)*gyro_u(m,i,:,is)
+
+        enddo ! m
+     enddo ! i
+  enddo ! is
   field_blend_dot(:,:,:) = -i_c*omega_eigen*field_blend(:,:,:)
+  gyro_uv_dot(:,:,:,:,:) = -i_c*omega_eigen*gyro_uv(:,:,:,:,:)
+  h_cap_dot(:,:,:,:)     = -i_c*omega_eigen*h_cap(:,:,:,:)
 
   call gyro_field_plot
   call gyro_moments_plot

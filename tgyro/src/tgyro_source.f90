@@ -12,7 +12,7 @@ subroutine tgyro_source
 
   implicit none
 
-  integer :: i
+  integer :: i,i_ion
   real, external :: sigv
   real, external :: dtrate_dv
   real :: n_d,n_t
@@ -25,6 +25,7 @@ subroutine tgyro_source
   !
   do i=1,n_r
 
+     !-------------------------------------------------------
      ! Alpha power
      !  - sigv in cm^3/s
 
@@ -39,19 +40,28 @@ subroutine tgyro_source
         n_t = 0.5*ni(1,i)
      endif
 
-     ! Alpha power 
-     ! - Can use 'hively' or 'bosch' formulae.
-     s_alpha = n_d*n_t*sigv(ti(1,i)/1e3,'bosch')*e_alpha
+     if (loc_scenario == 3) then
+        ! Alpha power 
+        ! - Can use 'hively' or 'bosch' formulae.
+        s_alpha = n_d*n_t*sigv(ti(1,i)/1e3,'bosch')*e_alpha
 
-     s_alpha_i(i) = s_alpha*frac_ai(i)
-     s_alpha_e(i) = s_alpha*frac_ae(i)
+        s_alpha_i(i) = s_alpha*frac_ai(i)
+        s_alpha_e(i) = s_alpha*frac_ae(i)
+     else
+        s_alpha_i(i) = 0.0
+        s_alpha_e(i) = 0.0
+     endif
+     !-------------------------------------------------------
 
+     !-------------------------------------------------------
      ! Bremsstrahlung radiation
      ! - From NRL formulary 
      ! - 1 W/cm^3 = 1e7 erg/cm^3/s
 
      s_brem(i) = 1e7*1.69e-32*ne(i)**2*sqrt(te(i))*z_eff(i)
+     !-------------------------------------------------------
 
+     !-------------------------------------------------------
      ! Synchrotron radiation
      ! - Trubnikov, JETP Lett. 16 (1972) 25.
      wpe = sqrt(4*pi*ne(i)*e**2/me)
@@ -60,19 +70,28 @@ subroutine tgyro_source
      phi = 60*g**1.5*sqrt((1.0-r_coeff)*(1+1/aspect_rat/sqrt(g))/(r_min*wpe**2/c/wce))
 
      s_sync(i) = me/(3*pi*c)*g*(wpe*wce)**2*phi
+     !-------------------------------------------------------
 
+     !-------------------------------------------------------
      ! Classical electron-ion energy exchange
      ! - Positive as defined on RHS of ion equation
      ! - Multiply formulary expression by (3/2)ne:
 
      s_exch(i) = 1.5*nu_exch(i)*ne(i)*k*(te(i)-ti(1,i))
+     !-------------------------------------------------------
 
+     !-------------------------------------------------------
      ! Anomalous electron-ion energy exchange
      ! - Positive as defined on RHS of ion equation
-     ! - Average ion and -electron results to obtain best estimate  
-     !   of ion value.
+     ! - Skip exchange with fast ions
 
-     s_expwd(i) = 0.5*(sum(expwd_i_tur(1:loc_n_ion,i))-expwd_e_tur(i))*s_gb(i)
+     s_expwd(i) = 0.0
+     do i_ion=1,loc_n_ion
+        if (therm_flag(i_ion) == 1) then
+           s_expwd(i) = s_expwd(i)+expwd_i_tur(i_ion,i)*s_gb(i)
+        endif
+     enddo
+     !-------------------------------------------------------
 
   enddo
   !-------------------------------------------------------
@@ -104,10 +123,8 @@ subroutine tgyro_source
 
      ! Experimental, static exchange
 
-     p_exch(:) = p_exch_in(:) ! Diagnostic exchange
-
-     p_i(:) = p_i_in(:) ! Fixed total ion input power
-     p_e(:) = p_e_in(:) ! Fixed total electon input power
+     p_i(:) = p_i_in(:) ! Total ion input power (including exchange)
+     p_e(:) = p_e_in(:) ! Total electon input power (including exchange)
 
   case (2)
 

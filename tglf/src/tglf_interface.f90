@@ -38,8 +38,8 @@ module tglf_interface
 
   ! CONTROL PARAMETERS
   character (len=256)  :: tglf_path_in        = ''
-  logical :: tglf_dump_flag_in   = .false.
-  logical :: tglf_quiet_flag_in  = .false.
+  logical              :: tglf_dump_flag_in   = .false.
+  logical              :: tglf_quiet_flag_in  = .true.
 
   ! INPUT PARAMETERS
 

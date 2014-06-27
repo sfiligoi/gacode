@@ -315,6 +315,7 @@ class ManagerInput:
         #  - GYRO directories must be of the form GYRO*
         #  - IFS directories must be of the form IFS*
         #  - TGLF directories must be of the form TGLF*
+        #  - FUN directories must be of the form FUN*
 
         for p in range(len(self.slavepath)):
             self.sum_proc = self.sum_proc + int(self.slaveproc[p])
@@ -324,6 +325,9 @@ class ManagerInput:
             if basedir[0:3] == 'IFS':
                 print 'INFO: (gacodeinput) Detected '+basedir+'; CPU_max=1'
 
+            elif basedir[0:3] == 'FUN':
+                 print 'INFO: (gacodeinput) Detected '+basedir+'; CPU_max=1'
+               
             elif basedir[0:4] == 'TGLF':
                 basefile = basedir+'/input.tglf' 
                 tempfile = basedir+'/input.tglf.temp' 

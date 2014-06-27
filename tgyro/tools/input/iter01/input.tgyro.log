@@ -1,0 +1,10 @@
+INFO: (gacodeinput) Number of code instances: 8
+INFO: (gacodeinput) Processed input.* in TGLF1; CPU_max=1
+INFO: (gacodeinput) Processed input.* in TGLF2; CPU_max=1
+INFO: (gacodeinput) Processed input.* in TGLF3; CPU_max=1
+INFO: (gacodeinput) Processed input.* in TGLF4; CPU_max=1
+INFO: (gacodeinput) Processed input.* in TGLF5; CPU_max=1
+INFO: (gacodeinput) Processed input.* in TGLF6; CPU_max=1
+INFO: (gacodeinput) Processed input.* in TGLF7; CPU_max=1
+INFO: (gacodeinput) Processed input.* in TGLF8; CPU_max=1
+INFO: (gacodeinput) Required MPI tasks in TGYRO: 8

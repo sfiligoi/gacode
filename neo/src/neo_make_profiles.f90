@@ -7,24 +7,17 @@ subroutine neo_make_profiles
        q_exp,&
        n_grid_exp
   use neo_allocate_profile
-
+  
   implicit none
-
+  
   integer :: ir, is, ip, num_ele, j
   integer, parameter :: io=20
-
+  
   real :: cc
   real :: loglam
-
-  ! Parameters of Satake et al, Nucl. Fusion 45, 2005 (1362)
-  real, parameter :: alpha1_satake=0.02, alpha2_satake=2.427, alpha3_satake=3.0
-  real, parameter :: n0_satake=2.5       ! 10^19/m^3
-  real, parameter :: T0_satake=3.0       ! keV
-  real, parameter :: B0_satake=4.0       ! Tesla -- original Satake is B0=2T
-  real, parameter :: a_meters_satake=1.0 ! m
-
+  
   call PROFILE_SIM_alloc(1)
-
+  
   ! equally-spaced radial grid if only first-order (local) problem
   if(n_radial == 1) then
      r(1) = rmin_1_in
@@ -33,7 +26,7 @@ subroutine neo_make_profiles
         r(ir) = rmin_1_in+(rmin_2_in-rmin_1_in)*(ir-1.0)/(n_radial-1)
      enddo
   endif
-
+  
   num_ele = 0
   do is=1, n_species
      if(z_in(is) == -1) then
@@ -48,13 +41,13 @@ subroutine neo_make_profiles
      call neo_error('ERROR: (NEO) Only one electron species allowed')
      return
   end if
-
+  
   select case (profile_model) 
-
+     
   case (1)
-
+     
      ! Standard local simulation (one point)
-
+     
      if(btccw_in > 0) then
         sign_bunit = -1.0
      else
@@ -66,13 +59,13 @@ subroutine neo_make_profiles
      else
         sign_q =  sign_bunit
      endif
-
+     
      ir = 1
-
+     
      rmaj(ir)      = rmaj_in
      q(ir)         = abs(q_in) * sign_q
      rho(ir)       = abs(rho_in) * sign_bunit
-     shat(ir)      = shat_in      
+     shear(ir)     = shear_in      
      shift(ir)     = shift_in     
      kappa(ir)     = kappa_in     
      s_kappa(ir)   = s_kappa_in   
@@ -82,7 +75,8 @@ subroutine neo_make_profiles
      s_zeta(ir)    = s_zeta_in
      zmag(ir)      = zmag_in    
      s_zmag(ir)    = s_zmag_in
-
+     beta_star(ir) = beta_star_in
+     
      ! general geometry -- accessible only from interface 
      ! via parameters geo_ny_in and geo_yin_in
      if(equilibrium_model == 3) then
@@ -107,12 +101,31 @@ subroutine neo_make_profiles
      omega_rot_deriv(ir) = omega_rot_deriv_in 
 
      do is=1,n_species
-        z(is)         = z_in(is)
-        mass(is)      = mass_in(is)
-        dens(is,ir)   = dens_in(is)
-        temp(is,ir)   = temp_in(is)
-        dlnndr(is,ir) = dlnndr_in(is)
-        dlntdr(is,ir) = dlntdr_in(is)
+        z(is)           = z_in(is)
+        mass(is)        = mass_in(is)
+        dens(is,ir)     = dens_in(is)
+        dlnndr(is,ir)   = dlnndr_in(is)
+        aniso_model(is) = aniso_model_in(is)
+        if(aniso_model(is) == 2) then
+           !temp(is,ir)        = temp_in(is)
+           !dlntdr(is,ir)      = dlntdr_in(is)
+           temp_para(is,ir)   = temp_para_in(is)
+           temp_perp(is,ir)   = temp_perp_in(is)
+           dlntdr_para(is,ir) =  dlntdr_para_in(is)
+           dlntdr_perp(is,ir) =  dlntdr_perp_in(is)
+           ! for anisotropic species, define a Teff = 1/3 Tpar + 2/3 Tperp
+           temp(is,ir)   = 1.0/3.0*temp_para(is,ir) + 2.0/3.0*temp_perp(is,ir)
+           dlntdr(is,ir) = 1.0/3.0*temp_para(is,ir)/temp(is,ir) &
+                *dlntdr_para(is,ir) + 2.0/3.0*temp_perp(is,ir) &
+                /temp(is,ir) *dlntdr_perp(is,ir)
+        else
+           temp(is,ir)        = temp_in(is)
+           dlntdr(is,ir)      = dlntdr_in(is)
+           temp_para(is,ir)   = temp(is,ir)
+           temp_perp(is,ir)   = temp(is,ir)
+           dlntdr_para(is,ir) = dlntdr(is,ir)
+           dlntdr_perp(is,ir) = dlntdr(is,ir)
+        endif
         nu(is,ir)     = nu_1_in *(1.0*z(is))**4/(1.0*z(1))**4 &
              * dens(is,ir) / dens(1,ir) &
              * sqrt(mass(1)/mass(is)) * (temp(1,ir)/temp(is,ir))**1.5
@@ -120,6 +133,7 @@ subroutine neo_make_profiles
 
      do is=1, n_species
         vth(is,ir) = sqrt(temp(is,ir)/mass(is))
+        vth_para(is,ir) = sqrt(temp_para(is,ir)/mass(is))
      enddo
 
      ! These normalizations are arbitrary for local profiles
@@ -135,20 +149,21 @@ subroutine neo_make_profiles
 
 
   case (2)
-
+     
      ! Standard simulation with experimental profiles
-
+     
      ! EAB: Epar is not in INPUT_profiles -- use INPUT val and assume
      ! radially constant
      do ir=1, n_radial
         epar0(ir) = epar0_in
      enddo
-
+     
      do is=1,n_species
         z(is)    = z_in(is)
         mass(is) = mass_in(is)
+        aniso_model(is) = aniso_model_in(is)
      enddo
-
+     
      call neo_experimental_profiles
      if(error_status > 0) return
      call neo_map_experimental_profiles
@@ -158,7 +173,7 @@ subroutine neo_make_profiles
      charge_norm_fac = 1.6022
      dens_norm(:) = dens(1,:)
      temp_norm(:) = temp(1,:)
-
+     
      ! Compute vth/a (1/s) using dimensional quantities.  
      ! mass(i) is thus measured in units of deuterium mass.
      do is=1,n_species
@@ -167,7 +182,7 @@ subroutine neo_make_profiles
              * 1.0e4 / a_meters
      enddo
      vth_norm(:)  = vth(1,:) * sqrt(mass(1))
-
+     
      ! Determine the equilibrium parameters
      select case (profile_equilibrium_model) 
      case (0)
@@ -187,17 +202,22 @@ subroutine neo_make_profiles
            q(ir)      = q(ir)      / (1.0 * n_grid_exp)
            b_unit(ir) = b_unit(ir) / (1.0 * n_grid_exp)
         enddo
-
+        
      case(1)
         ! use the input equilibrium parameters (miller)
         equilibrium_model = 2
-
+        
      case(2)
         ! use the input equilibrium parameters (general)
         equilibrium_model = 3
- 
-    end select
+        
+     end select
 
+     ! EAB: note about beta_star
+     ! This is presently only used for anisotropic species, which currently
+     ! only works in local profile mode
+     beta_star(:) = 0.0
+     
      ! Compute the rotation parameters
      select case (rotation_model)     
      case (1)
@@ -208,9 +228,9 @@ subroutine neo_make_profiles
         ! normalize
         omega_rot(:) = omega_rot(:) / vth_norm(:)
         omega_rot_deriv(:) = omega_rot_deriv(:) / vth_norm(:) * a_meters
-
+        
      end select
-
+     
      ! Compute the equilibrium radial electric field
      select case (profile_erad0_model) 
      case (0)
@@ -221,40 +241,40 @@ subroutine neo_make_profiles
         ! Normalize erad0 from exp profiles
         dphi0dr(:) = dphi0dr(:) * a_meters / temp_norm(:) / 1000
      end select
-
+     
      ! Compute rho/a for species 1 using dimensional quantities
      ! mass(i) is thus measured in units of deuterium mass.
      rho(:) = sqrt(temp(1,:) * temp_norm_fac &
-             * mass(1) * mass_deuterium) &
-             / (charge_norm_fac * b_unit(:)) &
-             * 1.0e-4 / a_meters
-
+          * mass(1) * mass_deuterium) &
+          / (charge_norm_fac * b_unit(:)) &
+          * 1.0e-4 / a_meters
+     
      ! Compute collision frequency
-
+     
      ! Numerical coefficient (relative to M_D)
      cc = sqrt(2.0) * pi * charge_norm_fac**4 &
           * 1.0 / (4.0 * pi * 8.8542)**2 &
           * 1.0 / (sqrt(mass_deuterium) * temp_norm_fac**1.5) &
           * 1e9
-
+     
      do is=1,n_species
         do ir=1, n_radial
-
+           
            ! Coulomb logarithm
            ! EAB: 03/22/09 redefined this wrt electron species
            ! (was previously defined wrt species 1)
            loglam = 24.0 - log(sqrt(ne_ade(ir)*1e13)/(te_ade(ir)*1000))
-
+           
            ! Collision rate (1/sec)
            nu(is,ir) = cc * loglam * dens(is,ir) * z(is)**4 &
                 / (sqrt(mass(is)) * temp(is,ir)**1.5)
-
+           
            ! Express in local dimensionless NEO units:
            nu(is,ir) = nu(is,ir)/vth_norm(ir) 
-
+           
         enddo
      enddo
-
+     
      do is=1,n_species
         do ir=1, n_radial
            ! Normalize N and T to value at r for species 1.
@@ -268,167 +288,29 @@ subroutine neo_make_profiles
            vth(is,ir) = vth(is,ir)/vth_norm(ir)
         enddo
      enddo
+     
+     ! Anisotropic mode is currently not available for global profiles
+     aniso_model(:)   = 1
+     temp_perp(:,:)   = temp(:,:)
+     temp_para(:,:)   = temp(:,:)
+     dlntdr_perp(:,:) = dlntdr(:,:)
+     dlntdr_para(:,:) = dlntdr(:,:)
+     vth_para(:,:)    = vth(:,:)
 
      call PROFILE_EXP_alloc(0)
-
-  case(3)
-     ! Test global simulation 
-     ! -- based on parameters of Satake et al, Nucl. Fusion 45, 2005 (1362)
-
-     if(btccw_in > 0) then
-        sign_bunit = -1.0
-     else
-        sign_bunit =  1.0
-     endif
-     
-     if(ipccw_in > 0) then
-        sign_q = -sign_bunit
-     else
-        sign_q =  sign_bunit
-     endif
-
-     do ir=1,n_radial
-        ! assume the geo params are constants
-        rmaj(ir)      = rmaj_in
-        q(ir)         = q_in * sign_q
-        shat(ir)      = shat_in
-        shift(ir)     = shift_in     
-        kappa(ir)     = kappa_in     
-        s_kappa(ir)   = s_kappa_in   
-        delta(ir)     = delta_in    
-        s_delta(ir)   = s_delta_in
-        zeta(ir)      = zeta_in    
-        s_zeta(ir)    = s_zeta_in
-        zmag(ir)      = zmag_in    
-        s_zmag(ir)    = s_zmag_in
-
-        dphi0dr(ir)   = dphi0dr_in
-        epar0(ir)     = epar0_in
-
-        ! assume the rotation params are constants
-        omega_rot(ir)       = omega_rot_in 
-        omega_rot_deriv(ir) = omega_rot_deriv_in 
-
-        ! radially-dependent quantities are temp and dens
-        do is=1,n_species
-           z(is)         = z_in(is)
-           mass(is)      = mass_in(is)
-           dens(is,ir)   = n0_satake * (alpha1_satake + (1.0-alpha1_satake) &
-                * exp(-alpha2_satake * r(ir)**alpha3_satake))
-           dlnndr(is,ir) = n0_satake &
-                * ((1.0-alpha1_satake)*alpha2_satake*alpha3_satake) &
-                * exp(-alpha2_satake * r(ir)**alpha3_satake) &
-                * (r(ir)**(alpha3_satake-1)) / dens(is,ir)
-           temp(is,ir)   = T0_satake * (alpha1_satake + (1.0-alpha1_satake) &
-                * exp(-alpha2_satake * r(ir)**alpha3_satake))
-           dlntdr(is,ir) = T0_satake &
-                * ((1.0-alpha1_satake)*alpha2_satake*alpha3_satake) &
-                * exp(-alpha2_satake * r(ir)**alpha3_satake) &
-                * (r(ir)**(alpha3_satake-1)) / temp(is,ir)
-        enddo
-
-        do is=1,n_species
-           dens(:,ir) = dens(:,ir) * dens_in(is)
-        enddo
-
-        te_ade(ir) = temp(1,ir)
-        dlntdre_ade(ir) = dlntdr(1,ir)
-        ne_ade(ir) = 0.0
-        do is=1, n_species
-           if(z(is) < 1) then
-              ne_ade(ir) = dens(is,ir)
-           else
-              ne_ade(ir) = ne_ade(ir) + z(is) * dens(is,ir)
-           endif
-        enddo
-        dlnndre_ade(ir) = 0.0
-        do is=1, n_species
-           if(z(is) < 1) then
-              dlnndre_ade(ir) = dens(is,ir)
-           else
-              dlnndre_ade(ir) = dlnndre_ade(ir) &
-                   + z(is)*dens(is,ir)*dlnndr(is,ir)
-           endif
-        enddo
-     enddo
-     
-
-     ! ** Normalizing quantities **
-     a_meters        = a_meters_satake
-     b_unit(:)       = B0_satake * sign_bunit
-     temp_norm_fac   = 1.6022*1000
-     charge_norm_fac = 1.6022
-     dens_norm(:) = dens(1,:)
-     temp_norm(:) = temp(1,:)
-     psiN_polflux(:) = 0.0
-     psiN_polflux_a  = 0.0
-
-     ! Compute vth/a (1/s) using dimensional quantities.  
-     ! mass(i) is thus measured in units of deuterium mass.
-     do is=1,n_species
-        vth(is,:) = sqrt(temp(is,:) * temp_norm_fac &
-             / (mass(is) * mass_deuterium)) &
-             * 1.0e4 / a_meters
-     enddo
-     vth_norm(:)  = vth(1,:) * sqrt(mass(1))
-
-     ! Compute rho/a for species 1 using dimensional quantities
-     ! mass(i) is thus measured in units of deuterium mass.
-     rho(:) = sqrt(temp(1,:) * temp_norm_fac &
-             * mass(1) * mass_deuterium) &
-             / (charge_norm_fac * b_unit(:)) &
-             * 1.0e-4 / a_meters
-
-     ! Compute collision frequency
-     
-     ! Numerical coefficient (relative to M_D)
-     cc = sqrt(2.0) * pi * charge_norm_fac**4 &
-          * 1.0 / (4.0 * pi * 8.8542)**2 &
-          * 1.0 / (sqrt(mass_deuterium) * temp_norm_fac**1.5) &
-          * 1e9
-
-     do is=1,n_species
-        do ir=1, n_radial
-
-           ! Coulomb logarithm
-           loglam = 24.0 - log(sqrt(ne_ade(ir)*1e13)/(te_ade(ir)*1000))
-           
-           ! Collision rate (1/sec)
-           nu(is,ir) = cc * loglam * dens(is,ir) * z(is)**4 &
-                / (sqrt(mass(is)) * temp(is,ir)**1.5)
-           
-           ! Express in local dimensionless NEO units:
-           nu(is,ir) = nu(is,ir)/vth_norm(ir)
-           
-        enddo
-     enddo
-
-     do is=1,n_species
-        do ir=1, n_radial
-           ! Normalize N and T to value at r for species 1.
-           dens(is,ir) = dens(is,ir)/dens_norm(ir)
-           temp(is,ir) = temp(is,ir)/temp_norm(ir)
-           if(is == 1) then
-              te_ade(ir) = te_ade(ir) / temp_norm(ir)
-              ne_ade(ir) = ne_ade(ir) / dens_norm(ir)
-           endif
-           ! Normalize vth/a
-           vth(is,ir) = vth(is,ir)/vth_norm(ir)
-        enddo
-     enddo
      
   end select
-
+  
   if(rotation_model == 2) then
      ! In the strong rotation limit, only use phi_(-1) (set by omega_rot)
      ! phi_(0) is used only in the weak rotation limit
      dphi0dr(:) = 0.0
   endif
-
-
+  
+  
   ! Print the re-mapped equilibrium data
   if(silent_flag == 0 .and. i_proc == 0) then
-
+     
      open(unit=io,file=trim(path)//'out.neo.equil',status='replace')
      do ir=1,n_radial
         write (io,'(e16.8)',advance='no') r(ir)
@@ -448,7 +330,7 @@ subroutine neo_make_profiles
         write (io,*)
      enddo
      close(io)
-
+     
      if(profile_model >= 2) then
         open(unit=io,file=trim(path)//'out.neo.expnorm',status='replace')
         do ir=1,n_radial
@@ -465,5 +347,5 @@ subroutine neo_make_profiles
      end if
 
   endif
-
+  
 end subroutine neo_make_profiles

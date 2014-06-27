@@ -23,12 +23,7 @@ fi
 if [ ! -f "$1/restart.dat" ]
   then
   cp $GACODE_ROOT/gyro/tools/input/reg01/restart.dat $1 
-  echo "****************************************************"
-  echo "*                                                  *"
-  echo "*  A restart.dat file was not found. One has been  *"
-  echo "*  created for you.                                *"
-  echo "*                                                  *"
-  echo "****************************************************"
+  echo "INFO: (gyro_sim_warn) A restart.dat file was created."
 fi
 
 exit 0

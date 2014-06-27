@@ -64,6 +64,9 @@ subroutine gyro_initial_condition
   ! point here is to weight h by the fractional density.
   ! 
   a_spec(1:n_kinetic) = den_s(1:n_kinetic,ir_norm)/den_s(n_spec,ir_norm)
+  if (zf_test_flag == 1) then
+     a_spec(indx_e) = 0.0
+  endif
   !-------------------------------------------------------------------
 
   select case (boundary_method)

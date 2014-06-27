@@ -121,7 +121,7 @@ subroutine gyro_nonlinear_flux_velocity
               ! Moment 2: energy
               moment(ie,k,is,ix,2) = moment(ie,k,is,ix,2)+&
                    sum(real(ikrho(:)*f_w(:,ie,k,ix)*&
-                   ave_h(:,ie,k,is,ix))*energy(ie,is)*tem_s(is,:))
+                   ave_h(:,ie,k,is,ix))*energy(ie)*tem_s(is,:))
 
            enddo ! is
         enddo ! ix
@@ -138,7 +138,7 @@ subroutine gyro_nonlinear_flux_velocity
      do k=1,n_lambda
         do is=1,n_kinetic
            moment(ie,k,is,:,:) = moment(ie,k,is,:,:)*&
-                sqrt(energy(ie,is))*exp(-energy(ie,is))/w_energy(ie,is)*&
+                sqrt(energy(ie))*exp(-energy(ie))/w_energy(ie)*&
                 (1.0/omega(ir_norm,k))/w_lambda(ir_norm,k)
         enddo
      enddo

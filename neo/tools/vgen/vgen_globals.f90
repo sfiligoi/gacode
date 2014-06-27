@@ -18,6 +18,23 @@ module vgen_globals
   real, parameter :: temp_norm_fac   = 1602.2
   real, parameter :: charge_norm_fac = 1.6022
   
-  real :: dens_norm, temp_norm, mass_norm, vth_norm
+  real :: dens_norm, temp_norm, mass_norm, vth_norm, jbs_norm
+
+  integer, dimension(6) :: zfac
+
+  real, dimension(:), allocatable :: vtor_measured
+
+  character(len=8) :: fmt='(I2.2)' 
+  character(len=2), dimension(100) :: tag
+
+  real, dimension(:), allocatable :: jbs_neo
+  real, dimension(:), allocatable :: jbs_sauter
+  real, dimension(:), allocatable :: jbs_koh
+  real, dimension(:), allocatable :: jbs_nclass
+  real, dimension(:), allocatable :: pflux_sum
+
+  integer :: n_ions
+
+  integer, parameter :: timing_flag=0
 
 end module vgen_globals

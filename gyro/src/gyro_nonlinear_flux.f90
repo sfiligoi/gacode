@@ -72,33 +72,33 @@ subroutine gyro_nonlinear_flux
 
                  ! Moment 1: density
                  moment(i,is,ix,1,ck) = moment(i,is,ix,1,ck)+real(-ikrho(i)* &
-                      conjg(cap_h(i,is))*gyro_uv(m,i,p_nek_loc,is,ix)*w_p(ie,i,k,is))
+                      conjg(cap_h(i,is))*gyro_uv(m,i,p_nek_loc,is,ix)*w_p(ie,i,k))
 
                  ! Moment 2: energy
                  moment(i,is,ix,2,ck) = moment(i,is,ix,2,ck)+real(-ikrho(i)* &
-                      conjg(cap_h(i,is))*gyro_uv(m,i,p_nek_loc,is,ix)*w_p(ie,i,k,is))* &
-                      energy(ie,is)*tem_s(is,i)
+                      conjg(cap_h(i,is))*gyro_uv(m,i,p_nek_loc,is,ix)*w_p(ie,i,k))* &
+                      energy(ie)*tem_s(is,i)
 
                  ! Moment 3: momentum
 
                  ! - 1. parallel part
 
                  momtemp(1) = real(-ikrho(i)* &
-                      conjg(cap_h(i,is))*gyro_uv(m,i,p_nek_loc,is,ix)*w_p(ie,i,k,is))* &
+                      conjg(cap_h(i,is))*gyro_uv(m,i,p_nek_loc,is,ix)*w_p(ie,i,k))* &
                       v_para(m,i,p_nek_loc,is)/mu(is)**2*&
                       bigr_t(i,k,m)*bt_t(i,k,m)/b0_t(i,k,m)
 
                  ! - 2. perpendicular part
 
                  momtemp(2) = -real(-ikrho(i)* &
-                      conjg(cap_h(i,is))*kyro_uv(m,i,p_nek_loc,is,ix)*w_p(ie,i,k,is))* &
+                      conjg(cap_h(i,is))*kyro_uv(m,i,p_nek_loc,is,ix)*w_p(ie,i,k))* &
                       v_perp(m,i,p_nek_loc,is)/mu(is)**2*&
                       bigr_t(i,k,m)*bp_t(i,k,m)/b0_t(i,k,m)
 
                  ! - 3. convective_part
 
                  momtemp(3) = real(-ikrho(i)* &
-                      conjg(cap_h(i,is))*gyro_uv(m,i,p_nek_loc,is,ix)*w_p(ie,i,k,is))* &
+                      conjg(cap_h(i,is))*gyro_uv(m,i,p_nek_loc,is,ix)*w_p(ie,i,k))* &
                       mach_s(i)*bigr_t(i,k,m)/rmaj_s(i)/mu(is)**2*&
                       sqrt(tem_s(indx_e,i))
 
@@ -112,11 +112,11 @@ subroutine gyro_nonlinear_flux
 
                  ! 4a. H <phi_dot> [Sugama]
                  exctemp(1) = z(is)*real( &
-                      conjg(cap_h(i,is))*gyro_uv_dot(m,i,p_nek_loc,is,ix)*w_p(ie,i,k,is))
+                      conjg(cap_h(i,is))*gyro_uv_dot(m,i,p_nek_loc,is,ix)*w_p(ie,i,k))
 
                  ! 4b. -H_dot <phi>
                  exctemp(2) = -z(is)*real( &
-                      conjg(h_cap_dot(m,i,p_nek_loc,is))*gyro_uv(m,i,p_nek_loc,is,ix)*w_p(ie,i,k,is))
+                      conjg(h_cap_dot(m,i,p_nek_loc,is))*gyro_uv(m,i,p_nek_loc,is,ix)*w_p(ie,i,k))
 
                  moment(i,is,ix,4,ck) = moment(i,is,ix,4,ck)+0.5*sum(exctemp(:))
 

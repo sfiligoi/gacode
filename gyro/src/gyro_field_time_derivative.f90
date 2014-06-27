@@ -34,8 +34,7 @@ subroutine gyro_field_time_derivative
      enddo ! i
   enddo ! is
 
-
-  do i = ibeg, iend
+  do i=ibeg,iend
 
      ! Use 3-point rule for time derivative
 

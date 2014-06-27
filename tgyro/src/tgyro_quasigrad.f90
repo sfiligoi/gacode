@@ -6,7 +6,7 @@
 !
 !             ne = sum_i n_i z_i
 !
-! by evolving 
+! according to different rules.
 !------------------------------------------------------------
 
 subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion,dlnridr)
@@ -52,16 +52,9 @@ subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion,dlnridr)
 
         ! Adjust all ion gradients at fixed concentration ratios (n2/n1, n3/n1, etc)
 
-        ! Temporary storage 
-        dlnnidr(1) = dlnnedr 
+        ! Some algebra shows that this implies all gradient scale lengths are equal
 
-        do i=2,n_ion
-           dlnnidr(1) = dlnnidr(1)-zi(i)*ni(i)*dlnridr(i)/ne
-        enddo
-
-        do i=2,n_ion
-           dlnnidr(i) = dlnridr(i)+dlnnidr(1)
-        enddo
+        dlnnidr(1:n_ion) = dlnnedr 
 
      endif
 

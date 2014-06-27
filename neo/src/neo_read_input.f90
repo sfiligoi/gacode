@@ -39,6 +39,7 @@ subroutine neo_read_input
   read(1,*) epar0_spitzer
 
   read(1,*) coll_uncoupledei_model
+  read(1,*) coll_uncoupledaniso_model
 
   read(1,*) n_species
 
@@ -51,6 +52,11 @@ subroutine neo_read_input
      read(1,*) temp_in(is)
      read(1,*) dlnndr_in(is)
      read(1,*) dlntdr_in(is)
+     read(1,*) aniso_model_in(is)
+     read(1,*) temp_para_in(is)
+     read(1,*) dlntdr_para_in(is)
+     read(1,*) temp_perp_in(is)
+     read(1,*) dlntdr_perp_in(is)
      read(1,*) profile_dlnndr_scale(is)
      read(1,*) profile_dlntdr_scale(is)
   enddo
@@ -59,7 +65,7 @@ subroutine neo_read_input
   read(1,*) epar0_in
   read(1,*) q_in
   read(1,*) rho_in
-  read(1,*) shat_in
+  read(1,*) shear_in
   read(1,*) shift_in     
   read(1,*) kappa_in    
   read(1,*) s_kappa_in   
@@ -69,6 +75,7 @@ subroutine neo_read_input
   read(1,*) s_zeta_in
   read(1,*) zmag_in        
   read(1,*) s_zmag_in
+  read(1,*) beta_star_in
   read(1,*) profile_delta_scale
   read(1,*) profile_zeta_scale
   read(1,*) profile_zmag_scale

@@ -16,31 +16,62 @@ subroutine prgen_map_ufile
   implicit none
   real, dimension(:), allocatable :: powd_i
   real, dimension(:), allocatable :: powd_e
+  real, dimension(:), allocatable :: powd_i_aux
+  real, dimension(:), allocatable :: powd_e_aux
+  real, dimension(:), allocatable :: powd_i_fus
+  real, dimension(:), allocatable :: powd_e_fus
+  real, dimension(:), allocatable :: powd_e_rad
 
-  integer :: i
-
+  integer :: i,j
 
   allocate(powd_i(nx))
   allocate(powd_e(nx))
+  allocate(powd_i_aux(nx))
+  allocate(powd_e_aux(nx))
+  allocate(powd_i_fus(nx))
+  allocate(powd_e_fus(nx))
+  allocate(powd_e_rad(nx))
 
-  powd_i(:) = ufile_qnbii(:) &
+  print '(a,i2)','INFO: (prgen) Number of ions: ',ufile_nion
+
+  powd_i_aux(:) = ufile_qnbii(:) &
        +ufile_qicrhi(:) &
-       +ufile_qei(:) &
        +ufile_qechi(:) &
+       +ufile_qlhi(:) 
+
+  powd_e_aux(:) = ufile_qnbie(:) &
+       +ufile_qicrhe(:)  &
+       +ufile_qeche(:) &
+       +ufile_qlhe(:) &
+       +ufile_qohm(:) 
+
+  powd_e_rad(:) = ufile_qrad(:)
+
+  powd_e_fus(:) = ufile_qfuse(:)
+  powd_i_fus(:) = ufile_qfusi(:)
+
+  powd_i(:) = powd_i_aux(:) &
+       +ufile_qei(:) &
        -ufile_qwalli(:)
 
-  powd_e(:) = ufile_qnbie(:) &
-       +ufile_qicrhe(:) &
+  print '(a)','INFO: (prgen) i-power: (QNBII+QICHRI+QLHI+QECHI)+QEI-QWALLI'
+
+  powd_e(:) = powd_e_aux(:) &
        -ufile_qei(:) &
-       +ufile_qrad(:) &
-       +ufile_qeche(:) &
-       +ufile_qohm(:) &
+       -ufile_qrad(:) &
        -ufile_qwalle(:) 
 
-  ! Convert W to MW (1e-6):
-  call ufile_volint(rho,1e-6*powd_i,pow_i,ufile_volume,nx)
-  call ufile_volint(rho,1e-6*powd_e,pow_e,ufile_volume,nx)
-  call ufile_volint(rho,1e-6*ufile_qei,pow_ei,ufile_volume,nx)
+  print '(a)','INFO: (prgen) e-power: (QNBIE+QICHRE+QLHE+QECHE+QOHM)-QE-QRAD-QWALLE'
+
+  ! Integrate these profiles (W/m^3) times 1e-6 to obtain MW
+  call ufile_volint(1e-6*powd_i,pow_i,ufile_volume,nx)
+  call ufile_volint(1e-6*powd_e,pow_e,ufile_volume,nx)
+  call ufile_volint(1e-6*powd_i_aux,pow_i_aux,ufile_volume,nx)
+  call ufile_volint(1e-6*powd_e_aux,pow_e_aux,ufile_volume,nx)
+  call ufile_volint(1e-6*powd_i_fus,pow_i_fus,ufile_volume,nx)
+  call ufile_volint(1e-6*powd_e_fus,pow_e_fus,ufile_volume,nx)
+  call ufile_volint(1e-6*powd_e_rad,pow_e_rad,ufile_volume,nx)
+  call ufile_volint(1e-6*ufile_qei,pow_ei,ufile_volume,nx)
 
   !---------------------------------------------------------
   ! Map profile data onto single array:
@@ -72,13 +103,10 @@ subroutine prgen_map_ufile
   ! Construct ion densities and temperatures with reordering
   ! in general case.  Use vphi and vpol as temporary arrays.
   !
-  vec(31,:) = ufile_nm1(:)*1e-19
-  if (ufile_nion > 1) vec(32,:) = ufile_nm2(:)*1e-19
-  if (ufile_nion > 2) vec(33,:) = ufile_nm3(:)*1e-19
-
-  vec(36,:) = ufile_ti(:)*1e-3
-  if (ufile_nion > 1) vec(37,:) = ufile_ti(:)*1e-3
-  if (ufile_nion > 2) vec(38,:) = ufile_ti(:)*1e-3
+  do i=1,ufile_nion
+     vec(30+i,:) = ufile_ni(:,i)*1e-19
+     vec(35+i,:) = ufile_ti(:,i)*1e-3
+  enddo
 
   ! reorder
   do i=1,5 
@@ -91,7 +119,9 @@ subroutine prgen_map_ufile
 
   ! Insert carbon toroidal velocity
   do i=1,5
-     if (reorder_vec(i) == 2) then
+     j = reorder_vec(i)
+     if (ufile_m(j) == 12.0) then
+        print '(a)', 'INFO: (prgen) Assuming VROT is the carbon toroidal rotation.'
         vec(30+i,:) = -ufile_vrot(:)*(rmaj(:)+rmin(:))
      endif
   enddo
@@ -99,24 +129,36 @@ subroutine prgen_map_ufile
   ! vpol
   vec(36:40,:) = 0.0
 
+  ! Additional powers (fusion and radiation)
+  ! * for iterdb, put all radiated power in pow_e_line
+  vec(41,:) = pow_e_fus(:)
+  vec(42,:) = pow_i_fus(:)
+  vec(43,:) = 0.0
+  vec(44,:) = 0.0
+  vec(45,:) = pow_e_rad(:)
+
+  ! Additional powers (external heating)
+  vec(46,:) = pow_e_aux(:)
+  vec(47,:) = pow_i_aux(:)
+
 end subroutine prgen_map_ufile
 
-subroutine ufile_volint(x,f,fi,v,n)
+!---------------------------------------------------------
+! Simple routine to obtain volume integral of the UFILE 
+! power densities by trapezoidal integration.
+!---------------------------------------------------------
+subroutine ufile_volint(f,fi,v,n)
 
   implicit none 
 
   integer, intent(in) :: n 
-  real, intent(in) :: x(n),f(n),v(n)
+  real, intent(in) :: f(n),v(n)
   real, intent(inout) :: fi(n)
-  real, dimension(n) :: vp
   integer :: i
-
-  ! dv/dx
-  call bound_deriv(vp,v,x,n)
 
   fi(1) = 0.0
   do i=2,n
-     fi(i) = fi(i-1)+0.5*(vp(i-1)*f(i-1)+vp(i)*f(i))*(x(i)-x(i-1))
+     fi(i) = fi(i-1)+0.5*(f(i-1)+f(i))*(v(i)-v(i-1))
   enddo
 
 end subroutine ufile_volint

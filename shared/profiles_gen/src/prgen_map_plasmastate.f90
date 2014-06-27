@@ -72,11 +72,11 @@ subroutine prgen_map_plasmastate
      pow_e_fus(i) = pow_e_fus(i-1)+1e-6*plst_pfuse(i-1)
      pow_i_fus(i) = pow_i_fus(i-1)+1e-6*(plst_pfusi(i-1)+plst_pfusth(i-1))
 
-     pow_e_ohm(i) = pow_e_ohm(i)+1e-6*plst_pohme(i-1)
-     pow_e_nb(i)  = pow_e_nb(i)+1e-6*plst_pbe(i-1)
-     pow_i_nb(i)  = pow_i_nb(i)+1e-6*(plst_pbi(i-1)+plst_pbth(i-1))
-     pow_e_rf(i)  = pow_e_rf(i)+1e-6*plst_peech(i-1)
-     pow_i_rf(i)  = pow_i_rf(i)+1e-6*(plst_pmini(i-1)+plst_pminth(i-1)+plst_picth(i-1))
+     pow_e_ohm(i) = pow_e_ohm(i-1)+1e-6*plst_pohme(i-1)
+     pow_e_nb(i)  = pow_e_nb(i-1)+1e-6*plst_pbe(i-1)
+     pow_i_nb(i)  = pow_i_nb(i-1)+1e-6*(plst_pbi(i-1)+plst_pbth(i-1))
+     pow_e_rf(i)  = pow_e_rf(i-1)+1e-6*(plst_peech(i-1)+plst_pmine(i-1))
+     pow_i_rf(i)  = pow_i_rf(i-1)+1e-6*(plst_pmini(i-1)+plst_pminth(i-1)+plst_picth(i-1))
 
      pow_e_sync(i) = pow_e_sync(i-1)+1e-6*plst_prad_cy(i-1)
      pow_e_brem(i) = pow_e_brem(i-1)+1e-6*plst_prad_br(i-1)
@@ -102,7 +102,6 @@ subroutine prgen_map_plasmastate
   pow_e_err = abs(1.0-(pow_e_fus(nx)+pow_e_aux(nx)-pow_ei(nx)- &
        pow_e_sync(nx)-pow_e_brem(nx)-pow_e_line(nx))/pow_e(nx))
   pow_i_err = abs(1.0-(pow_i_fus(nx)+pow_i_aux(nx)+pow_ei(nx))/pow_i(nx))
-
   !--------------------------------------------------------------------
 
   !--------------------------------------------------------------------

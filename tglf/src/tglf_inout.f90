@@ -11,17 +11,23 @@ SUBROUTINE put_species(nsp,zsp,msp)
   INTEGER :: is
   !
   use_default_species=.FALSE.
+! check for valid input
+  if(nsp.lt.2.or.nsp.gt.nsm)call tglf_error(1,"input number of species invlaid")
+  do is=1,nsp
+    if(tglf_isnan(zsp(is)))call tglf_error(1,"input zs_in is NAN")
+    if(tglf_isinf(zsp(is)))call tglf_error(1,"input zs_in is INF") 
+    if(tglf_isnan(msp(is)))call tglf_error(1,"input mass_in is NAN")
+    if(tglf_isinf(msp(is)))call tglf_error(1,"input mass_in is INF")
+    if(zsp(is).eq.0.0)call tglf_error(1,"input zs_in is = 0")
+    if(msp(is).le.0.0)call tglf_error(1,"input mass_in is <= 0") 
+  enddo
+  ! transfer values
   ns_in = nsp
-  if(ns_in.lt.2.or.ns_in.gt.nsm)then
-     write(*,*)"number of species must be >=2 or <=",nsm
-  else
-     ! transfer values
-     do is=1,nsp
-        zs_in(is)=zsp(is)
-        mass_in(is)=msp(is)
-     enddo
-     new_matrix = .TRUE.
-  endif
+  do is=1,nsp
+      zs_in(is)=zsp(is)
+      mass_in(is)=msp(is)
+  enddo
+  new_matrix = .TRUE.
   !
 END SUBROUTINE put_species
 !
@@ -33,6 +39,10 @@ SUBROUTINE put_kys(kys)
   !
   IMPLICIT NONE
   REAL,INTENT(IN) :: kys
+
+  if(tglf_isnan(kys))call tglf_error(1,"input ky_in is NAN")
+  if(tglf_isinf(kys))call tglf_error(1,"input ky_in is INF")
+  if(kys.le.0)call tglf_error(1,"input kys is <= 0")
   !
   ! check for changes and update flow controls
   ! 
@@ -52,6 +62,9 @@ SUBROUTINE put_signs(sign_Bt,sign_It)
   !
   IMPLICIT NONE
   REAL,INTENT(IN) :: sign_Bt,sign_It
+
+  if(tglf_isnan(sign_Bt))call tglf_error(1,"input sign_Bt_in is NAN")
+  if(tglf_isnan(sign_It))call tglf_error(1,"input sign_It_in is NAN")
   !
   ! transfer values
   !
@@ -70,6 +83,13 @@ SUBROUTINE put_gaussian_width(width,width_min,nwidth,find_width)
   LOGICAL,INTENT(IN) :: find_width
   INTEGER,INTENT(IN) :: nwidth
   REAL,INTENT(IN) :: width,width_min
+
+  if(tglf_isnan(width))call tglf_error(1,"input width_in is NAN")
+  if(tglf_isinf(width))call tglf_error(1,"input width_in is INF")
+  if(tglf_isnan(width_min))call tglf_error(1,"input width_min_in is NAN")
+  if(tglf_isinf(width_min))call tglf_error(1,"input width_min_in is INF")
+  if(nwidth.le.0)call tglf_error(1,"input nwidth_in <= 0")
+
   !
   ! check for changes and update flow controls
   ! 
@@ -120,6 +140,18 @@ SUBROUTINE put_gradients(rln,rlt,vpar_shear,vexb_shear)
   REAL,INTENT(IN) :: rln(nsm),rlt(nsm),vpar_shear(nsm)
   REAL,INTENT(IN) :: vexb_shear
   INTEGER :: is
+
+  do is=1,nsm
+   if(tglf_isnan(rln(is)))call tglf_error(1,"input rlns_in is NAN")
+   if(tglf_isinf(rln(is)))call tglf_error(1,"input rlns_in is INF")
+   if(tglf_isnan(rlt(is)))call tglf_error(1,"input rlts_in is NAN")
+   if(tglf_isnan(rlt(is)))call tglf_error(1,"input rlts_in is INF")
+   if(tglf_isnan(vpar_shear(is)))call tglf_error(1,"input vpar_shear_in is NAN")
+   if(tglf_isnan(vpar_shear(is)))call tglf_error(1,"input vpar_shear_in is INF")
+  enddo
+  if(tglf_isnan(vexb_shear))call tglf_error(1,"input vexb_shear_in is NAN")
+  if(tglf_isinf(vexb_shear))call tglf_error(1,"input vexb_shear_in is INF")
+
   !
   ! transfer values
   !
@@ -162,6 +194,32 @@ SUBROUTINE put_averages(tsp,asp,vpar,vexb,betae,xnue,zeff,debye)
   REAL,INTENT(IN) :: tsp(nsm),asp(nsm),vpar(nsm)
   REAL,INTENT(IN) :: vexb,betae,xnue,zeff,debye
   INTEGER :: is
+
+  do is=1,nsm
+    if(tglf_isnan(tsp(is)))call tglf_error(1,"input taus_in is NAN")
+    if(tglf_isinf(tsp(is)))call tglf_error(1,"input taus_in is INF")
+    if(tsp(is).lt.0.0)call tglf_error(1,"input taus_in is < 0")
+    if(tglf_isnan(asp(is)))call tglf_error(1,"input as_in is NAN")
+    if(tglf_isinf(asp(is)))call tglf_error(1,"input as_in is INF")
+    if(asp(is).lt.0.0)call tglf_error(1,"input as_in is < 0")
+    if(tglf_isnan(vpar(is)))call tglf_error(1,"input vpar_in is NAN")
+    if(tglf_isinf(vpar(is)))call tglf_error(1,"input vpar_in is INF")
+  enddo
+    if(tglf_isnan(vexb))call tglf_error(1,"input vexb_in is NAN")
+    if(tglf_isinf(vexb))call tglf_error(1,"input vexb_in is INF")
+    if(tglf_isnan(betae))call tglf_error(1,"input betae_in is NAN")
+    if(tglf_isinf(betae))call tglf_error(1,"input betae_in is INF")
+    if(betae.lt.0.0)call tglf_error(1,"input betae_in is < 0")
+    if(tglf_isnan(xnue))call tglf_error(1,"input xnue_in is NAN")
+    if(tglf_isinf(xnue))call tglf_error(1,"input xnue_in is INF")
+    if(xnue.lt.0.0)call tglf_error(1,"input xnue_in is < 0")
+    if(tglf_isnan(zeff))call tglf_error(1,"input zeff_in is NAN")
+    if(tglf_isinf(zeff))call tglf_error(1,"input zeff_in is INF")
+    if(zeff.lt.0.0)call tglf_error(1,"input zeff_in is < 0")
+    if(tglf_isnan(debye))call tglf_error(1,"input debye_in is NAN")
+    if(tglf_isinf(debye))call tglf_error(1,"input debye_in is INF")
+    if(debye.lt.0.0)call tglf_error(1,"input debye_in is < 0")
+
   !
   ! set flow control switch
   new_matrix = .TRUE.
@@ -182,7 +240,7 @@ END SUBROUTINE put_averages
 !-----------------------------------------------------------------
 !
 SUBROUTINE put_switches(iflux,use_bper,use_bpar,use_mhd_rule,use_bisection, &
-     ibranch,nmodes,nb_max,nb_min,nxgrid,nky)
+     ibranch,nmodes,nb_max,nb_min,nxgrid,nkys)
   !
   USE tglf_global
   USE tglf_dimensions
@@ -190,7 +248,7 @@ SUBROUTINE put_switches(iflux,use_bper,use_bpar,use_mhd_rule,use_bisection, &
   IMPLICIT NONE
   LOGICAL :: iflux,use_bper,use_bpar,use_mhd_rule,use_bisection
   INTEGER :: ibranch,nmodes,nb_max,nb_min
-  INTEGER :: nxgrid,nky
+  INTEGER :: nxgrid,nkys
   !
   ! validaty checks
   ! reset to defaults if invlaid
@@ -201,9 +259,9 @@ SUBROUTINE put_switches(iflux,use_bper,use_bpar,use_mhd_rule,use_bisection, &
   if(ibranch.lt.-1.or.ibranch.gt.2)ibranch=ibranch_in
   if(nxgrid.lt.1.or.2*nxgrid-1.gt.nxm)nxgrid=MIN((nxm+1)/2,nxgrid_in)
   if(nmodes.lt.1.or.nmodes.gt.maxmodes)nmodes=nmodes_in
-  if(nky.lt.2.or.nky.gt.nkym)nky=nky_in
+  if(nkys.lt.2.or.nkys.gt.nkym)nkys=nky_in
 
-  !      write(*,*)nb_max,nb_min,ibranch,nxgrid,nmodes,nky
+  !      write(*,*)nb_max,nb_min,ibranch,nxgrid,nmodes,nkys
   !
   ! check for changes and update flow controls
   !
@@ -222,7 +280,7 @@ SUBROUTINE put_switches(iflux,use_bper,use_bpar,use_mhd_rule,use_bisection, &
   nbasis_max_in = nb_max
   nbasis_min_in = nb_min
   nxgrid_in = nxgrid
-  nky_in = nky
+  nky_in = nkys
   !
 END SUBROUTINE put_switches
 !
@@ -310,6 +368,21 @@ SUBROUTINE put_s_alpha_geometry(rmin,rmaj,q,shat,alpha,xwell, &
   IMPLICIT NONE
   INTEGER:: b_model,ft_model
   REAL,INTENT(IN) :: rmin,rmaj,q,shat,alpha,theta0,xwell
+
+  if(tglf_isnan(rmin))call tglf_error(1,"input rmin_sa is NAN")
+  if(tglf_isinf(rmin))call tglf_error(1,"input rmin_sa is INF")
+  if(tglf_isnan(rmaj))call tglf_error(1,"input rmaj_sa is NAN")
+  if(tglf_isinf(rmaj))call tglf_error(1,"input rmaj_sa is INF")
+  if(tglf_isnan(q))call tglf_error(1,"input q_sa is NAN")
+  if(tglf_isinf(q))call tglf_error(1,"input q_sa is INF")
+  if(tglf_isnan(shat))call tglf_error(1,"input shat_sa is NAN")
+  if(tglf_isinf(shat))call tglf_error(1,"input shat_sa is INF")
+  if(tglf_isnan(alpha))call tglf_error(1,"input alpha_sa is NAN")
+  if(tglf_isinf(alpha))call tglf_error(1,"input alpha_sa is INF")
+  if(tglf_isnan(xwell))call tglf_error(1,"input xwell_sa is NAN")
+  if(tglf_isinf(xwell))call tglf_error(1,"input xwell_sa is INF")
+  if(tglf_isnan(theta0))call tglf_error(1,"input theta0_sa is NAN")
+  if(tglf_isinf(theta0))call tglf_error(1,"input theta0_sa is INF")
   !
   ! set geometry type flag for shifted circle
   igeo = 0
@@ -321,7 +394,7 @@ SUBROUTINE put_s_alpha_geometry(rmin,rmaj,q,shat,alpha,xwell, &
   rmin_sa = rmin
   rmaj_sa = rmaj
   q_sa = ABS(q)
-  q_unit = q_sa   ! needed for kygrid_model_in = 3
+  q_in = q_sa   ! needed for kygrid_model_in = 3
   shat_sa = shat
   alpha_sa = alpha
   xwell_sa = xwell
@@ -354,6 +427,38 @@ SUBROUTINE put_Miller_geometry(rmin,rmaj,zmaj,drmindx,drmajdx,dzmajdx, &
   REAL,INTENT(IN) :: rmin,rmaj,zmaj,q,q_prime,p_prime,kx0_m
   REAL,INTENT(IN) :: drmindx,drmajdx,dzmajdx
   REAL,INTENT(IN) :: kappa,s_kappa,delta,s_delta,zeta,s_zeta
+
+  if(tglf_isnan(rmin))call tglf_error(1,"input rmin_loc is NAN")
+  if(tglf_isinf(rmin))call tglf_error(1,"input rmin_loc is INF")
+  if(tglf_isnan(rmaj))call tglf_error(1,"input rmaj_loc is NAN")
+  if(tglf_isinf(rmaj))call tglf_error(1,"input rmaj_loc is INF")
+  if(tglf_isnan(drmindx))call tglf_error(1,"input drmindx_loc is NAN")
+  if(tglf_isinf(drmindx))call tglf_error(1,"input drmindx_loc is INF")
+  if(tglf_isnan(drmajdx))call tglf_error(1,"input drmajdx_loc is NAN")
+  if(tglf_isinf(drmajdx))call tglf_error(1,"input drmajdx_loc is INF")
+  if(tglf_isnan(dzmajdx))call tglf_error(1,"input dzmajdx_loc is NAN")
+  if(tglf_isinf(dzmajdx))call tglf_error(1,"input dzmajdx_loc is INF")
+  if(tglf_isnan(kappa))call tglf_error(1,"input kappa_loc is NAN")
+  if(tglf_isinf(kappa))call tglf_error(1,"input kappa_loc is INF")
+  if(tglf_isnan(s_kappa))call tglf_error(1,"input s_kappa_loc is NAN")
+  if(tglf_isinf(s_kappa))call tglf_error(1,"input s_kappa_loc is INF")
+  if(tglf_isnan(delta))call tglf_error(1,"input delta_loc is NAN")
+  if(tglf_isinf(delta))call tglf_error(1,"input delta_loc is INF")
+  if(tglf_isnan(s_delta))call tglf_error(1,"input s_delta_loc is NAN")
+  if(tglf_isinf(s_delta))call tglf_error(1,"input s_delta_loc is INF")
+  if(tglf_isnan(zeta))call tglf_error(1,"input zeta_loc is NAN")
+  if(tglf_isinf(zeta))call tglf_error(1,"input zeta_loc is INF")
+  if(tglf_isnan(s_zeta))call tglf_error(1,"input s_zeta_loc is NAN")
+  if(tglf_isinf(s_zeta))call tglf_error(1,"input s_zeta_loc is INF")
+  if(tglf_isnan(q))call tglf_error(1,"input q_loc is NAN")
+  if(tglf_isinf(q))call tglf_error(1,"input q_loc is INF")
+  if(tglf_isnan(q_prime))call tglf_error(1,"input q_prime_loc is NAN")
+  if(tglf_isinf(q_prime))call tglf_error(1,"input q_prime_loc is INF")
+  if(tglf_isnan(p_prime))call tglf_error(1,"input p_prime_loc is NAN")
+  if(tglf_isinf(p_prime))call tglf_error(1,"input p_prime_loc is INF")
+  if(tglf_isnan(kx0_m))call tglf_error(1,"input kx0_loc is NAN")
+  if(tglf_isinf(kx0_m))call tglf_error(1,"input kx0_loc is INF")
+
   !
   ! set geometry type flag for Miller
   !
@@ -369,7 +474,7 @@ SUBROUTINE put_Miller_geometry(rmin,rmaj,zmaj,drmindx,drmajdx,dzmajdx, &
   rmaj_loc = rmaj
   zmaj_loc = zmaj
   q_loc = ABS(q)
-  q_unit = q_loc   ! needed for kygrid_model_in = 3
+  q_in = q_loc   ! needed for kygrid_model_in = 3
   p_prime_loc = p_prime
   q_prime_loc = q_prime
   drmindx_loc = drmindx
@@ -401,6 +506,23 @@ SUBROUTINE put_Fourier_geometry(q,q_prime,p_prime,nf,f)
   INTEGER,INTENT(IN) :: nf
   REAL,INTENT(IN) :: q,q_prime,p_prime
   REAL,INTENT(IN) :: f(8,0:max_fourier)
+  INTEGER :: i,j
+  !
+  ! validatiy checks
+  !
+  if(nf.gt.max_fourier)call tglf_error(1,"input nfourier_in exceeds maximum")
+  if(tglf_isnan(q))call tglf_error(1,"input q_fourier_in is NAN")
+  if(tglf_isinf(q))call tglf_error(1,"input q_fourier_in is INF")
+  if(tglf_isnan(q_prime))call tglf_error(1,"input q_prime_fourier_in is NAN")
+  if(tglf_isinf(q_prime))call tglf_error(1,"input q_prime_fourier_in is INF")
+  if(tglf_isnan(p_prime))call tglf_error(1,"input p_prime_fourier_in is NAN")
+  if(tglf_isinf(p_prime))call tglf_error(1,"input p_prime_fourier_in is INF")
+  do i=1,nf
+    do j=1,8
+      if(tglf_isnan(f(j,i)))call tglf_error(1,"input fourrier_in is NAN")
+      if(tglf_isinf(f(j,i)))call tglf_error(1,"input fourrier_in is INF")
+    enddo
+  enddo
   !
   ! set geometry type flag for Fourier
   !
@@ -413,15 +535,11 @@ SUBROUTINE put_Fourier_geometry(q,q_prime,p_prime,nf,f)
   ! transfer values
   !
   q_fourier_in = ABS(q)
-  q_unit = q_loc   ! needed for kygrid_model_in = 3
+  q_in = q_loc   ! needed for kygrid_model_in = 3
   p_prime_fourier_in = p_prime
   q_prime_fourier_in = q_prime
   nfourier_in = nf
   fourier_in(:,:)=f(:,:)
-  !
-  ! validatiy checks
-  !
-  !
 END SUBROUTINE put_Fourier_geometry
 !
 !-----------------------------------------------------------------
@@ -451,19 +569,24 @@ SUBROUTINE put_ELITE_geometry(nc,q,q_prime,p_prime,r_c,z_c,bp_c)
   !
   ! validatiy checks
   !
-  if(nc.gt.max_ELITE)then
-     write(*,*)"error in put_ELITE: number of points exceeds ",max_ELITE
-     STOP
-  endif
-  if(nc.lt.ms)then
-     write(*,*)"error in put_ELITE: number of points less than ",ms
-     STOP
-  endif
+  if(nc.gt.max_ELITE)call tglf_error(1,"input n_ELITE exceeds limit")
+  if(nc.lt.ms)call tglf_error(1,"input n_ELITE is too small")
+  if(tglf_isnan(q_prime))call tglf_error(1,"input q_ELITE is NAN")
+  if(tglf_isinf(q_prime))call tglf_error(1,"input q_ELITE is INF")
+  do i=0,nc
+    if(tglf_isnan(r_c(i)))call tglf_error(1,"input R_ELITE is NAN")
+    if(tglf_isinf(r_c(i)))call tglf_error(1,"input R_ELITE is INF")
+    if(tglf_isnan(z_c(i)))call tglf_error(1,"input Z_ELITE is NAN")
+    if(tglf_isinf(z_c(i)))call tglf_error(1,"input Z_ELITE is INF")
+    if(tglf_isnan(bp_c(i)))call tglf_error(1,"input Bp_ELITE is NAN")
+    if(tglf_isinf(bp_c(i)))call tglf_error(1,"input Bp_ELITE is INF")
+  enddo
   !
   ! transfer values
   !
   n_ELITE = nc
   q_ELITE = q
+  q_in = q   ! needed for kygrid=3
   q_prime_ELITE = q_prime
   p_prime_ELITE = p_prime
   ! note direction change for contour angle
@@ -867,26 +990,26 @@ REAL FUNCTION get_R2_ave()
 END FUNCTION get_R2_ave
 !-----------------------------------------------------------------
 !
-REAL FUNCTION get_a_pol()
+REAL FUNCTION get_B_ave()
   !
   USE tglf_global
   !
   IMPLICIT NONE
   !
-  get_a_pol = a_pol_out
+  get_B_ave = B_ave_out
   !
-END FUNCTION get_a_pol
+END FUNCTION get_B_ave
 !-----------------------------------------------------------------
 !
-REAL FUNCTION get_a_tor()
+REAL FUNCTION get_Bt_ave()
   !
   USE tglf_global
   !
   IMPLICIT NONE
   !
-  get_a_tor = a_tor_out
+  get_Bt_ave = Bt_ave_out
   !
-END FUNCTION get_a_tor
+END FUNCTION get_Bt_ave
 !-----------------------------------------------------------------
 !
 REAL FUNCTION get_Bp0()
@@ -909,20 +1032,6 @@ REAL FUNCTION get_RBt_ave()
   get_RBt_ave = RBt_ave_out
   !
 END FUNCTION get_RBt_ave
-!-----------------------------------------------------------------
-!
-REAL FUNCTION get_ave_wd(n1,n2)
-  !
-  USE tglf_global
-  USE tglf_coeff
-  !
-  IMPLICIT NONE
-  ! 
-  INTEGER,INTENT(IN):: n1,n2
-  !
-  get_ave_wd = ave_wd(n1,n2)
-  !
-END FUNCTION get_ave_wd
 !-----------------------------------------------------------------
 !
 REAL FUNCTION get_b0_bar(n1)
@@ -951,20 +1060,6 @@ REAL FUNCTION get_wd_bar(n1)
   get_wd_bar = wd_bar_out(n1)
   !
 END FUNCTION get_wd_bar
-!-----------------------------------------------------------------
-!
-REAL FUNCTION get_ave_b0(n1,n2)
-  !
-  USE tglf_global
-  USE tglf_coeff
-  !
-  IMPLICIT NONE
-  ! 
-  INTEGER,INTENT(IN):: n1,n2
-  !
-  get_ave_b0 = ave_b0(n1,n2)
-  !
-END FUNCTION get_ave_b0
 !-----------------------------------------------------------------
 !
 REAL FUNCTION get_particle_flux(i1,i2)
@@ -1339,7 +1434,7 @@ SUBROUTINE get_DEP_parameters(r_dep,rmaj_dep,q_dep,taui_dep,rlni_dep,rlti_dep,ni
   ! note that rmin_input,Rmaj_input,q_input are set the different geometry routines 
   r_dep = rmin_input
   rmaj_dep = Rmaj_input
-  q_dep = q_input
+  q_dep = q_in
   !
 END SUBROUTINE get_DEP_parameters
 !-----------------------------------------------------------------
@@ -1547,7 +1642,6 @@ SUBROUTINE write_tglf_flux_spectrum
   REAL :: pflux0(nsm,3),eflux0(nsm,3)
   REAL :: stress_par0(nsm,3),stress_tor0(nsm,3)
   REAL :: exch0(nsm,3)
-  REAL :: nsum0(nsm),tsum0(nsm)
   REAL :: pflux1(nsm,3),eflux1(nsm,3)
   REAL :: stress_par1(nsm,3),stress_tor1(nsm,3)
   REAL :: exch1(nsm,3)
@@ -1563,6 +1657,8 @@ SUBROUTINE write_tglf_flux_spectrum
   !
   ! initialize fluxes
   !
+!  write(*,*)"ns0,ns,nky,nmodes",ns0,ns,nky,nmodes_in
+!
   do is=ns0,ns
      do j=1,3 
         pflux0(is,j) = 0.0

@@ -186,7 +186,7 @@ then
    echo "             Use <map file> to map Astra data to GYRO input.profiles headers"
    echo "             NOTE: uses 'astra_map_gyro' in current directory by default."
    echo
-   echo "             -n <note text>"
+   echo "             -note <note text>"
    echo "             Include <note text> in the input.profiles header."
    echo
    echo "null Options"
@@ -235,7 +235,7 @@ then
    echo "             Toggle vgen mode."
    echo
    echo "             -in <string of ion species> " 
-   echo "             Choices: DC, DC.revip, DCD, DHCD, HDC"
+   echo "             Choices: DC, DC_lowres, DC.revip, DCD, DHCD, HDC"
    echo "             If this is blank, input.vgen must exist."
    echo "             See"
    echo "             $VGEN_DIR/input.vgen.*"
@@ -254,6 +254,8 @@ then
    echo
    echo "             -nth <min,max>" 
    echo "             Minimum and maximum theta resolutions.  Default -nth 17,39"
+   echo
+   echo "             -n <mpi tasks>"
    echo
    echo "LOCAL PARAMETER MODE"
    echo 
@@ -314,6 +316,9 @@ then
    echo "    profiles_gen -i iterdb -g gfile"
    echo "    profiles_gen -vgen -i input.profiles -er 2 -vel 1 -in DC -ix 2"
    echo
+   echo "    or for fast calculations"
+   echo "    profiles_gen -vgen -i input.profiles -er 2 -vel 1 -in DC_lowres -ix 2"
+   echo
    echo "(2) Typical usage for DIII-D plasmas with CER file available (2 steps)"
    echo "    NEO will take Er from CER file and generate all velocities:"
    echo 
@@ -362,6 +367,10 @@ VGEN_VEL=2
 VGEN_IX=2
 VGEN_NTH=17,39
 VGEN_FLAG=0
+NPROC=1
+NOMP=1
+NUMA=0
+MPINUMA=0
 
 # UFILE 
 UFILETIME=null
@@ -405,7 +414,7 @@ while [ $# -gt 0 ] ; do
 
   -m) shift ; ASTRA_ARG="$ASTRA_ARG -m $1" ;;
 
-  -n) shift ; ASTRA_ARG="$ASTRA_ARG -n $1" ;;
+  -note) shift ; ASTRA_ARG="$ASTRA_ARG -note $1" ;;
 
   -cer) shift ; 
         echo "INFO: (profiles_gen) Will merge data from $CER_FILE" ; CER_FILE="$1" ;;
@@ -431,6 +440,8 @@ while [ $# -gt 0 ] ; do
   -lf) LUMP_FAST_FLAG=1 ;;
 
   -vgen) VGEN_FLAG=1 ;;
+
+  -n) shift ; NPROC=$1 ;;
 
   -in) shift ; VGEN_IN=$1 ;;
 
@@ -575,8 +586,8 @@ if [ "$itype" == "UFILE" ] ; then
    # UFILE mode
    #-----------------------------------------------
 
-   echo "INFO: (profiles_gen) Extracting UFILE com data."
-   python ${GACODE_ROOT}/shared/bin/gacode_ufile_tool.py *com.dat $UFILETIME > out.ufile.log
+   echo "INFO: (profiles_gen) Extracting UFILE 0d data."
+   python ${GACODE_ROOT}/shared/bin/gacode_ufile_tool.py *0d.dat $UFILETIME >> out.ufile.log
    echo "INFO: (profiles_gen) Extracting and averaging UFILE 1d data."
    python ${GACODE_ROOT}/shared/bin/gacode_ufile_tool.py *1d.dat $UFILETIME >> out.ufile.log
    echo "INFO: (profiles_gen) Extracting and averaging UFILE 2d data."
@@ -676,11 +687,9 @@ then
 
    NEO_DIR=$GACODE_ROOT/neo
 
-   # Create vgen work directory
+   # Create/recreate vgen work directory
 
-   rm -rf vgen
-   mkdir vgen
-   cd vgen
+   rm -rf vgen ; mkdir vgen ; cd vgen
 
    # Check for input.vgen file
 
@@ -705,8 +714,8 @@ then
        then
        cp ../$FILE.geo input.profiles.geo
    else
-       echo "WARNING: (profiles_gen) $FILE.geo not found."
-       echo "         This may cause VGEN to fail if input.neo uses numerical eq."
+       echo "INFO: (profiles_gen) $FILE.geo not found -- using EQUILIBRIUM_MODEL=2"
+       echo "EQUILIBRIUM_MODEL=2" >> input.neo
    fi
 
    python $NEO_DIR/bin/neo_parse.py
@@ -728,15 +737,39 @@ then
       echo $i >> vgen.dat
    fi
 
-   # Call vgen
-   #echo `pwd`
-   #echo `ls $VGEN_EXE/vgen`
-   $VGEN_EXE/vgen
+   # Launch parallel vgen executable
+   $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM \
+    $SIMDIR/vgen $NPROC $VGEN_EXE/vgen $NOMP $NUMA $MPINUMA
+
 
    if [ -f "input.profiles.new" ]
    then
-       mv input.profiles.new input.profiles
-       echo "INFO: (profiles_gen) VGEN created vgen/input.profiles, vgen/input.profiles.extra"
+       > input.profiles
+       DATESTAMP=`date`
+       # Manage generated input.profiles and print diagnistics
+       
+       echo "# VGEN: The file modified by VGEN on $DATESTAMP" >> input.profiles
+       if [ "$VGEN_ER" == "1" ] ; then 
+          echo "# VGEN: omega0 computed by force balance (-er 1)" >> input.profiles 
+       fi
+       if [ "$VGEN_ER" == "2" ] ; then 
+          echo "# VGEN: omega0 computed by NEO with weak rotation (-er 2)" >> input.profiles
+          echo "# VGEN: matched toroidal velocity of species $VGEN_IX" >> input.profiles
+       fi
+       if [ "$VGEN_ER" == "4" ] ; then 
+          echo "# VGEN: omega0 unchanged (-er 4)" >> input.profiles
+       fi
+       if [ "$VGEN_VEL" == "1" ] ; then 
+          echo "# VGEN: velocities computed by NEO with weak rotation (-vel 1)" >> input.profiles
+       fi
+       if [ "$VGEN_VEL" == "2" ] ; then 
+          echo "# VGEN: velocities computed by NEO with strong rotation (-vel 2)" >> input.profiles
+       fi
+
+       cat input.profiles.new >> input.profiles
+       echo "INFO: (profiles_gen) VGEN created vgen/input.profiles [new data]"
+       echo "INFO: (profiles_gen) VGEN created vgen/input.profiles.extra    [diagnostics]"
+       echo "INFO: (profiles_gen) VGEN created vgen/input.profiles.jbs      [boostrap current]"
    fi
 
    exit 0

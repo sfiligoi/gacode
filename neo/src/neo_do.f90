@@ -265,17 +265,22 @@ subroutine neo_do
                  ! rotation
                  rotkin = 0.5 * sqrt(2.0) * vth(is,ir) *  k_par(it) &
                       * (-Z(is)/temp(is,ir)*phi_rot_deriv(it) &
-                      + omega_rot(ir)**2 * bigR(it) &
-                      / vth(is,ir)**2 &
+                      + omega_rot(ir)**2 * bigR(it) / vth(is,ir)**2 &
                       * bigR_tderiv(it))
-                 driftxrot1(is,it) = I_div_psip* k_par(it) &
+                 driftxrot1(is,it) = I_div_psip * k_par(it) &
                       * mass(is)/(1.0*Z(is)) * rho(ir) / Bmag(it) &
                       * (vth(is,ir))**2 &
                       * (-Z(is)/temp(is,ir)*phi_rot_deriv(it) &
                       + omega_rot(ir)**2 * bigR(it)/ vth(is,ir)**2 &
                       * bigR_tderiv(it))
-                 driftxrot2(is,it) = I_div_psip* k_par(it) &
-                      / Btor(it) &
+                 if(aniso_model(is) == 2) then
+                    rotkin = rotkin - 0.5 * sqrt(2.0) * vth(is,ir) &
+                         * lam_rot_kpar_aniso(is,it)
+                    driftxrot1(is,it) = driftxrot1(is,it) - I_div_psip &
+                         * mass(is)/(1.0*Z(is)) * rho(ir) / Bmag(it) &
+                         * (vth(is,ir))**2 * lam_rot_kpar_aniso(is,it)
+                 endif
+                 driftxrot2(is,it) = I_div_psip* k_par(it) / Btor(it) &
                       * mass(is)/(1.0*Z(is)) * rho(ir) &
                       * vth(is,ir) * 2.0 * sqrt(2.0) &
                       * bigR_tderiv(it) * omega_rot(ir)
@@ -330,9 +335,19 @@ subroutine neo_do
                        k = k+1
                        a(k) = 0.0
                        do ks=1, n_species
-                          a(k) = a(k) &
+                          if (coll_uncoupledaniso_model == 1) then
+                             if(is/= ks .and. aniso_model(ks) == 2) then
+                                a(k) = a(k) + 0.0
+                             else
+                                a(k) = a(k) &
+                                     - emat_coll_test(is,ks,ie,je,ix) &
+                                     * dens_fac(ks,it)
+                             endif
+                          else
+                             a(k) = a(k) &
                                - emat_coll_test(is,ks,ie,je,ix) &
                                * dens_fac(ks,it)
+                          endif
                        enddo
                        a_iindx(k) = i
                        a_jindx(k) = j
@@ -345,6 +360,11 @@ subroutine neo_do
                           k = k+1
                           a(k) = -emat_coll_field(is,js,ie,je,ix) &
                                * dens_fac(js,it)
+                          if (coll_uncoupledaniso_model == 1) then
+                             if (is/= js .and. aniso_model(js) == 2) then
+                                a(k) = 0.0
+                             endif
+                          endif
                           a_iindx(k) = i
                           a_jindx(k) = j
                        enddo
@@ -434,7 +454,7 @@ subroutine neo_do
         if(silent_flag == 0 .and. i_proc == 0) then
            open(unit=io_neoout,file=trim(path)//runfile_neoout,&
                 status='old',position='append')
-           write(io_neoout,*) 'Estimated memory (GB) = ', 8.0*(asize+n_max)/1.0e9
+           write(io_neoout,*) 'Estimated memory (GB) = ', 2*8.0*(asize+n_max)/1.0e9
            close(io_neoout)
         endif
         if(allocated(amat))       deallocate(amat)
@@ -523,6 +543,7 @@ subroutine neo_do
      call  THEORY_do(ir)
      if(error_status > 0) goto 100
 
+
      ! Store the local neo transport values at ir=1 in neo_x_out
      ! (n_species_max, transport coeff)
      ! transport coeff: 1-> gamma, 2-> Q, 3->Pi, 4-> upar
@@ -534,7 +555,7 @@ subroutine neo_do
            neo_dke_out(is,1) = pflux(is)
            neo_dke_out(is,2) = eflux(is)
            neo_dke_out(is,3) = mflux(is)
-           neo_dke_out(is,4) = eflux(is) - omega_rot(ir)*mflux(is)
+           neo_dke_out(is,4) = eflux(is) - omega_rot(ir)*mflux(is) 
            neo_dke_out(is,5) = vpol_th0(is)
            neo_dke_out(is,6) = vtor_th0(is) + vtor_0order_th0
            neo_gv_out(is,1)  = pflux_gv(is)
@@ -625,10 +646,14 @@ contains
                 src_Rot1   = -omega_rot(ir) * bigR_th0**2 &
                      / vth(is,ir)**2 * omega_rot_deriv(ir) &
                      - dlntdr(is,ir) * Z(is) / temp(is,ir) * phi_rot(it) &
-                     + dlntdr(is,ir) * (omega_rot(ir)/vth(is,ir))**2 * 0.5 &
-                     * (bigR(it)**2 - bigR_th0**2) &
+                     + dlntdr(is,ir) * (omega_rot(ir)/vth(is,ir))**2 &
+                     * 0.5 * (bigR(it)**2 - bigR_th0**2) &
                      - omega_rot(ir)**2 * bigR_th0 &
                      / vth(is,ir)**2 * bigR_th0_rderiv
+
+                if(aniso_model(is) == 2) then
+                   src_Rot1 = src_Rot1 - dlntdr(is,ir) * lam_rot_aniso(is,it)
+                endif
 
                 src_Rot2 = omega_rot_deriv(ir) * bigR(it) / vth(is,ir)
 
@@ -670,7 +695,8 @@ contains
 
                    else if(ix == 1) then
                       g(i) = sqrt(2.0) * vth(is,ir) * evec_e05(ie,ix) &
-                           * (1.0*Z(is))/temp(is,ir) * epar0(ir) / Bmag(it) &
+                           * (1.0*Z(is))/temp(is,ir) * epar0(ir) * Bmag(it) &
+                           / Bmag2_avg &
                            - driftxrot2(is,it) &
                            * ( (src_F0_Ln + src_P0 + src_Rot1) &
                            * evec_e05(ie,ix) &

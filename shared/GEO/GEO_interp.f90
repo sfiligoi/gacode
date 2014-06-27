@@ -55,7 +55,7 @@ subroutine GEO_interp(theta_0)
 
      GEO_gsin   = sin(theta_0)*GEO_b 
      GEO_gcos1  = cos(theta_0)*GEO_b
-     GEO_gcos2  = 0.0
+     GEO_gcos2  = -GEO_rmaj_in*GEO_beta_star_in
      GEO_usin   = sin(theta_0)*GEO_b
      GEO_ucos   = cos(theta_0)*GEO_b
 
@@ -144,5 +144,7 @@ subroutine GEO_interp(theta_0)
   GEO_bigr_r   = GEOV_bigr_r(i1)+(GEOV_bigr_r(i2)-GEOV_bigr_r(i1))*z
   GEO_bigr_t   = GEOV_bigr_t(i1)+(GEOV_bigr_t(i2)-GEOV_bigr_t(i1))*z
   GEO_theta_nc = GEOV_theta_nc(i1)+(GEOV_theta_nc(i2)-GEOV_theta_nc(i1))*z
+  GEO_theta_s  = GEOV_theta_s(i1)+(GEOV_theta_s(i2)-GEOV_theta_s(i1))*z
+  GEO_chi2     = GEOV_chi2(i1)+(GEOV_chi2(i2)-GEOV_chi2(i1))*z
 
 end subroutine GEO_interp

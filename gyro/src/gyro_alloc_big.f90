@@ -1,4 +1,4 @@
-!---------------------------------------------------\
+!----------------------------------------------------
 ! gyro_alloc_big.f90
 !
 ! PURPOSE:
@@ -13,7 +13,7 @@
 !
 !  j         m         i     p_nek_loc   is
 !  n_blend   n_stack   n_x   n_nek_loc   n_spec
-!------------------------------------------------
+!------------------------------------------------------
 
 subroutine gyro_alloc_big(flag)
 
@@ -96,11 +96,6 @@ subroutine gyro_alloc_big(flag)
      allocate(phi_plot(n_theta_plot,n_x,n_field+eparallel_plot_flag))
 
      allocate(moments_plot(n_theta_plot,n_x,n_kinetic,3))
-
-     ! For synthetic diagnostics
-     if (io_method > 1 .and. time_skip_wedge > 0) then
-        allocate(moments_plot_wedge(n_theta_plot*n_theta_mult,n_x,n_kinetic,3))
-     endif
      allocate(moments_zero_plot(n_x,n_kinetic,n_moment))
 
      allocate(kxkyspec(n_x))
@@ -126,7 +121,6 @@ subroutine gyro_alloc_big(flag)
 
      allocate(time_error(n_kinetic))
      allocate(w_time(time_skip))
-     allocate(w_time_wedge(time_skip_wedge))
      allocate(omega_linear(n_n,2))
 
      !------------------------------------------------------------
@@ -193,9 +187,6 @@ subroutine gyro_alloc_big(flag)
 
      deallocate(moments_plot)
      deallocate(moments_zero_plot)
-     if (io_method > 1 .and. time_skip_wedge > 0) then
-        deallocate(moments_plot_wedge)
-     endif
 
      deallocate(kxkyspec)
      deallocate(k_perp_squared)
@@ -219,7 +210,6 @@ subroutine gyro_alloc_big(flag)
 
      deallocate(time_error)
      deallocate(w_time)
-     deallocate(w_time_wedge)
      deallocate(omega_linear)
      deallocate(h0_eq)
      deallocate(h0_mod)

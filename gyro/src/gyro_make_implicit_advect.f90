@@ -321,22 +321,22 @@ subroutine gyro_make_implicit_advect(i_print)
               imp_loc(i,:,5) = imp_loc(i,:,5)-&
                    alpha_s(n_spec,i)*cs_blend(:,m0,i,p_nek_loc)*&
                    tem_s(n_spec,i)*o_f(jp,m,i,p_nek_loc)*&
-                   v_para(m,i,p_nek_loc,n_spec)*energy(ie,indx_e)*lambda(i,k)
+                   v_para(m,i,p_nek_loc,n_spec)*energy(ie)*lambda(i,k)
               
               imp_loc(i,:,6) = imp_loc(i,:,6)+&
                    0.5*alpha_s(n_spec,i)*cs_blend(:,m0,i,p_nek_loc)*&
                    tem_s(n_spec,i)*o_f(jp,m,i,p_nek_loc)*&
-                   energy(ie,indx_e)*lambda(i,k)
+                   energy(ie)*lambda(i,k)
               
               imp_loc(i,:,7) = imp_loc(i,:,7)-&
                    0.5*alpha_s(n_spec,i)*cs_blend(:,m0,i,p_nek_loc)*&
                    tem_s(n_spec,i)*o_fv(jp,m,i,p_nek_loc)*&
-                   energy(ie,indx_e)*lambda(i,k)
+                   energy(ie)*lambda(i,k)
               
               imp_loc(i,:,8) = imp_loc(i,:,8)-&
                    0.5*alpha_s(n_spec,i)*cs_blend(:,m0,i,p_nek_loc)*&
                    tem_s(n_spec,i)**2 *o_f(jp,m,i,p_nek_loc)*&
-                   energy(ie,indx_e)**2 * lambda(i,k)**2
+                   energy(ie)**2 * lambda(i,k)**2
               
 
            enddo ! m

@@ -148,14 +148,7 @@ subroutine gyro_write_input
      write(1,30) 'FIELD POINTS:',n_n*n_x*n_blend*n_field
      write(1,30) 'DIST. POINTS:',n_n*n_x*n_stack*(n_pass+n_trap)*n_energy*n_kinetic
      write(1,*) '--'
-     if (variable_egrid_flag == 1) then
-        write(1,*) 'Variable energy grid in use'
-        do is = 1, n_kinetic
-           write(1,20) emax_tag(is), energy_max
-        enddo
-     else
-        write(1,20) 'energy_max',energy_max(1)
-     endif
+     write(1,20) 'energy_max',energy_max
      write(1,20) 'dt',dt
 
      write(1,*) '--------------- LOCAL PARAMETERS ---------------'

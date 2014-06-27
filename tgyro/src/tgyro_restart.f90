@@ -95,7 +95,7 @@ subroutine tgyro_restart
                    x_read(1),(res(pmap(i,ip)),relax(pmap(i,ip)),ip=1,n_evolve)
            enddo
         enddo
-        res = res*size(res)
+        !res = res*size(res)
         close(1)
 
      endif
@@ -177,6 +177,13 @@ subroutine tgyro_restart
 
      call MPI_BCAST(relax,&
           size(relax),&
+          MPI_DOUBLE_PRECISION,&
+          0,&
+          MPI_COMM_WORLD,&
+          ierr)
+
+     call MPI_BCAST(res,&
+          size(res),&
           MPI_DOUBLE_PRECISION,&
           0,&
           MPI_COMM_WORLD,&

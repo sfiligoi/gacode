@@ -25,7 +25,7 @@ module neo_interface
   real    :: neo_rmin_over_a_2_in = 0.6
   real    :: neo_rmaj_over_a_in = 3.0
   integer :: neo_silent_flag_in = 0
-  integer :: neo_sim_model_in = 1
+  integer :: neo_sim_model_in = 2
   integer :: neo_equilibrium_model_in = 0
   integer :: neo_collision_model_in = 4
   integer :: neo_profile_model_in = 1
@@ -35,14 +35,15 @@ module neo_interface
   integer :: neo_btccw_in = -1
   real    :: neo_te_ade_in = 1.0
   real    :: neo_ne_ade_in = 1.0
-  real    :: neo_dlntdre_ade_in = 1.0
-  real    :: neo_dlnndre_ade_in = 1.0
+  real    :: neo_dlntdre_ade_in  = 1.0
+  real    :: neo_dlnndre_ade_in  = 1.0
   integer :: neo_rotation_model_in = 1
   real    :: neo_omega_rot_in = 0.0
   real    :: neo_omega_rot_deriv_in = 0.0
   integer :: neo_spitzer_model_in = 0
   real    :: neo_epar0_spitzer_in = 1.0
   integer :: neo_coll_uncoupledei_model_in = 0
+  integer :: neo_coll_uncoupledaniso_model_in = 0
   integer :: neo_n_species_in = 1
   real    :: neo_nu_1_in = 0.1
   integer :: neo_z_1_in = 1
@@ -51,6 +52,11 @@ module neo_interface
   real    :: neo_temp_1_in = 1.0
   real    :: neo_dlnndr_1_in = 1.0
   real    :: neo_dlntdr_1_in = 1.0
+  integer :: neo_aniso_model_1_in  = 1
+  real    :: neo_temp_para_1_in    = 1.0
+  real    :: neo_dlntdr_para_1_in  = 1.0
+  real    :: neo_temp_perp_1_in    = 1.0
+  real    :: neo_dlntdr_perp_1_in  = 1.0
   real    :: neo_profile_dlnndr_1_scale_in = 1.0
   real    :: neo_profile_dlntdr_1_scale_in = 1.0
   integer :: neo_z_2_in = 1
@@ -59,6 +65,11 @@ module neo_interface
   real    :: neo_temp_2_in = 1.0
   real    :: neo_dlnndr_2_in = 1.0
   real    :: neo_dlntdr_2_in = 1.0
+  integer :: neo_aniso_model_2_in  = 1
+  real    :: neo_temp_para_2_in    = 1.0
+  real    :: neo_dlntdr_para_2_in  = 1.0
+  real    :: neo_temp_perp_2_in    = 1.0
+  real    :: neo_dlntdr_perp_2_in  = 1.0
   real    :: neo_profile_dlnndr_2_scale_in = 1.0
   real    :: neo_profile_dlntdr_2_scale_in = 1.0
   integer :: neo_z_3_in = 1
@@ -67,6 +78,11 @@ module neo_interface
   real    :: neo_temp_3_in = 1.0
   real    :: neo_dlnndr_3_in = 1.0
   real    :: neo_dlntdr_3_in = 1.0
+  integer :: neo_aniso_model_3_in  = 1
+  real    :: neo_temp_para_3_in    = 1.0
+  real    :: neo_dlntdr_para_3_in  = 1.0
+  real    :: neo_temp_perp_3_in    = 1.0
+  real    :: neo_dlntdr_perp_3_in  = 1.0
   real    :: neo_profile_dlnndr_3_scale_in = 1.0
   real    :: neo_profile_dlntdr_3_scale_in = 1.0
   integer :: neo_z_4_in = 1
@@ -75,6 +91,11 @@ module neo_interface
   real    :: neo_temp_4_in = 1.0
   real    :: neo_dlnndr_4_in = 1.0
   real    :: neo_dlntdr_4_in = 1.0
+  integer :: neo_aniso_model_4_in  = 1
+  real    :: neo_temp_para_4_in    = 1.0
+  real    :: neo_dlntdr_para_4_in  = 1.0
+  real    :: neo_temp_perp_4_in    = 1.0
+  real    :: neo_dlntdr_perp_4_in  = 1.0
   real    :: neo_profile_dlnndr_4_scale_in = 1.0
   real    :: neo_profile_dlntdr_4_scale_in = 1.0
   integer :: neo_z_5_in = 1
@@ -83,6 +104,11 @@ module neo_interface
   real    :: neo_temp_5_in = 1.0
   real    :: neo_dlnndr_5_in = 1.0
   real    :: neo_dlntdr_5_in = 1.0
+  integer :: neo_aniso_model_5_in  = 1
+  real    :: neo_temp_para_5_in    = 1.0
+  real    :: neo_dlntdr_para_5_in  = 1.0
+  real    :: neo_temp_perp_5_in    = 1.0
+  real    :: neo_dlntdr_perp_5_in  = 1.0
   real    :: neo_profile_dlnndr_5_scale_in = 1.0
   real    :: neo_profile_dlntdr_5_scale_in = 1.0
   integer :: neo_z_6_in = 1
@@ -91,6 +117,11 @@ module neo_interface
   real    :: neo_temp_6_in = 1.0
   real    :: neo_dlnndr_6_in = 1.0
   real    :: neo_dlntdr_6_in = 1.0
+  integer :: neo_aniso_model_6_in  = 1
+  real    :: neo_temp_para_6_in    = 1.0
+  real    :: neo_dlntdr_para_6_in  = 1.0
+  real    :: neo_temp_perp_6_in    = 1.0
+  real    :: neo_dlntdr_perp_6_in  = 1.0
   real    :: neo_profile_dlnndr_6_scale_in = 1.0
   real    :: neo_profile_dlntdr_6_scale_in = 1.0
   real    :: neo_dphi0dr_in = 0.0
@@ -107,6 +138,7 @@ module neo_interface
   real    :: neo_s_zeta_in = 0.0
   real    :: neo_zmag_over_a_in = 0.0
   real    :: neo_s_zmag_in = 0.0
+  real    :: neo_beta_star_in = 0.0
   real    :: neo_profile_delta_scale_in = 1.0
   real    :: neo_profile_zeta_scale_in = 1.0
   real    :: neo_profile_zmag_scale_in = 1.0
@@ -166,7 +198,6 @@ contains
     neo_n_radial_in = n_radial
     neo_matsz_scalefac_in = matsz_scalefac
     neo_rmin_over_a_in = rmin_1_in
-    neo_rmin_over_a_in = rmin_1_in
     neo_rmin_over_a_2_in = rmin_2_in
     neo_rmaj_over_a_in = rmaj_in
     neo_silent_flag_in = silent_flag
@@ -188,6 +219,7 @@ contains
     neo_spitzer_model_in = spitzer_model
     neo_epar0_spitzer_in = epar0_spitzer
     neo_coll_uncoupledei_model_in = coll_uncoupledei_model
+    neo_coll_uncoupledaniso_model_in = coll_uncoupledaniso_model
     neo_n_species_in = n_species
     neo_nu_1_in = nu_1_in
     neo_z_1_in = z_in(1)
@@ -196,6 +228,11 @@ contains
     neo_temp_1_in = temp_in(1)
     neo_dlnndr_1_in = dlnndr_in(1)
     neo_dlntdr_1_in = dlntdr_in(1)
+    neo_aniso_model_1_in = aniso_model_in(1)
+    neo_temp_para_1_in   = temp_para_in(1)
+    neo_dlntdr_para_1_in = dlntdr_para_in(1)
+    neo_temp_perp_1_in   = temp_perp_in(1)
+    neo_dlntdr_perp_1_in = dlntdr_perp_in(1)
     neo_profile_dlnndr_1_scale_in = profile_dlnndr_scale(1)
     neo_profile_dlntdr_1_scale_in = profile_dlntdr_scale(1)
     neo_z_2_in = z_in(2)
@@ -204,6 +241,11 @@ contains
     neo_temp_2_in = temp_in(2)
     neo_dlnndr_2_in = dlnndr_in(2)
     neo_dlntdr_2_in = dlntdr_in(2)
+    neo_aniso_model_2_in = aniso_model_in(2)
+    neo_temp_para_2_in   = temp_para_in(2)
+    neo_dlntdr_para_2_in = dlntdr_para_in(2)
+    neo_temp_perp_2_in   = temp_perp_in(2)
+    neo_dlntdr_perp_2_in = dlntdr_perp_in(2)
     neo_profile_dlnndr_2_scale_in = profile_dlnndr_scale(2)
     neo_profile_dlntdr_2_scale_in = profile_dlntdr_scale(2)
     neo_z_3_in = z_in(3)
@@ -212,6 +254,11 @@ contains
     neo_temp_3_in = temp_in(3)
     neo_dlnndr_3_in = dlnndr_in(3)
     neo_dlntdr_3_in = dlntdr_in(3)
+    neo_aniso_model_3_in = aniso_model_in(3)
+    neo_temp_para_3_in   = temp_para_in(3)
+    neo_dlntdr_para_3_in = dlntdr_para_in(3)
+    neo_temp_perp_3_in   = temp_perp_in(3)
+    neo_dlntdr_perp_3_in = dlntdr_perp_in(3)
     neo_profile_dlnndr_3_scale_in = profile_dlnndr_scale(3)
     neo_profile_dlntdr_3_scale_in = profile_dlntdr_scale(3)
     neo_z_4_in = z_in(4)
@@ -220,6 +267,11 @@ contains
     neo_temp_4_in = temp_in(4)
     neo_dlnndr_4_in = dlnndr_in(4)
     neo_dlntdr_4_in = dlntdr_in(4)
+    neo_aniso_model_4_in = aniso_model_in(4)
+    neo_temp_para_4_in   = temp_para_in(4)
+    neo_dlntdr_para_4_in = dlntdr_para_in(4)
+    neo_temp_perp_4_in   = temp_perp_in(4)
+    neo_dlntdr_perp_4_in = dlntdr_perp_in(4)
     neo_profile_dlnndr_4_scale_in = profile_dlnndr_scale(4)
     neo_profile_dlntdr_4_scale_in = profile_dlntdr_scale(4)
     neo_z_5_in = z_in(5)
@@ -228,12 +280,22 @@ contains
     neo_temp_5_in = temp_in(5)
     neo_dlnndr_5_in = dlnndr_in(5)
     neo_dlntdr_5_in = dlntdr_in(5)
+    neo_aniso_model_5_in = aniso_model_in(5)
+    neo_temp_para_5_in   = temp_para_in(5)
+    neo_dlntdr_para_5_in = dlntdr_para_in(5)
+    neo_temp_perp_5_in   = temp_perp_in(5)
+    neo_dlntdr_perp_5_in = dlntdr_perp_in(5)
     neo_profile_dlnndr_5_scale_in = profile_dlnndr_scale(5)
     neo_profile_dlntdr_5_scale_in = profile_dlntdr_scale(5)
     neo_z_6_in = z_in(6)
     neo_mass_6_in = mass_in(6)
     neo_dens_6_in = dens_in(6)
     neo_temp_6_in = temp_in(6)
+    neo_aniso_model_6_in = aniso_model_in(6)
+    neo_temp_para_6_in   = temp_para_in(6)
+    neo_dlntdr_para_6_in = dlntdr_para_in(6)
+    neo_temp_perp_6_in   = temp_perp_in(6)
+    neo_dlntdr_perp_6_in = dlntdr_perp_in(6)
     neo_dlnndr_6_in = dlnndr_in(6)
     neo_dlntdr_6_in = dlntdr_in(6)
     neo_profile_dlnndr_6_scale_in = profile_dlnndr_scale(6)
@@ -242,7 +304,7 @@ contains
     neo_epar0_in = epar0_in
     neo_q_in = q_in
     neo_rho_star_in = rho_in
-    neo_shear_in = shat_in
+    neo_shear_in = shear_in
     neo_shift_in = shift_in
     neo_kappa_in = kappa_in
     neo_s_kappa_in = s_kappa_in
@@ -252,6 +314,7 @@ contains
     neo_s_zeta_in = s_zeta_in
     neo_zmag_over_a_in = zmag_in
     neo_s_zmag_in = s_zmag_in
+    neo_beta_star_in = beta_star_in
     neo_profile_delta_scale_in = profile_delta_scale
     neo_profile_zeta_scale_in = profile_zeta_scale
     neo_profile_zmag_scale_in = profile_zmag_scale
@@ -294,13 +357,14 @@ contains
     te_ade_in = neo_te_ade_in
     ne_ade_in = neo_ne_ade_in
     dlntdre_ade_in = neo_dlntdre_ade_in
-    dlnndre_ade_in = neo_dlnndre_ade_in
+    dlnndre_ade_in = neo_dlnndre_ade_in   
     rotation_model = neo_rotation_model_in
     omega_rot_in = neo_omega_rot_in
     omega_rot_deriv_in = neo_omega_rot_deriv_in
     spitzer_model = neo_spitzer_model_in
     epar0_spitzer = neo_epar0_spitzer_in
     coll_uncoupledei_model = neo_coll_uncoupledei_model_in
+    coll_uncoupledaniso_model = neo_coll_uncoupledaniso_model_in
     n_species = neo_n_species_in
     nu_1_in = neo_nu_1_in
     z_in(1) = neo_z_1_in
@@ -309,6 +373,11 @@ contains
     temp_in(1) = neo_temp_1_in
     dlnndr_in(1) = neo_dlnndr_1_in
     dlntdr_in(1) = neo_dlntdr_1_in
+    aniso_model_in(1) = neo_aniso_model_1_in 
+    temp_para_in(1)   = neo_temp_para_1_in   
+    dlntdr_para_in(1) = neo_dlntdr_para_1_in 
+    temp_perp_in(1)   = neo_temp_perp_1_in   
+    dlntdr_perp_in(1) = neo_dlntdr_perp_1_in 
     profile_dlnndr_scale(1) = neo_profile_dlnndr_1_scale_in
     profile_dlntdr_scale(1) = neo_profile_dlntdr_1_scale_in
     z_in(2) = neo_z_2_in
@@ -317,6 +386,11 @@ contains
     temp_in(2) = neo_temp_2_in
     dlnndr_in(2) = neo_dlnndr_2_in
     dlntdr_in(2) = neo_dlntdr_2_in
+    aniso_model_in(2) = neo_aniso_model_2_in 
+    temp_para_in(2)   = neo_temp_para_2_in   
+    dlntdr_para_in(2) = neo_dlntdr_para_2_in 
+    temp_perp_in(2)   = neo_temp_perp_2_in   
+    dlntdr_perp_in(2) = neo_dlntdr_perp_2_in 
     profile_dlnndr_scale(2) = neo_profile_dlnndr_2_scale_in
     profile_dlntdr_scale(2) = neo_profile_dlntdr_2_scale_in
     z_in(3) = neo_z_3_in
@@ -325,6 +399,11 @@ contains
     temp_in(3) = neo_temp_3_in
     dlnndr_in(3) = neo_dlnndr_3_in
     dlntdr_in(3) = neo_dlntdr_3_in
+    aniso_model_in(3) = neo_aniso_model_3_in
+    temp_para_in(3)   = neo_temp_para_3_in   
+    dlntdr_para_in(3) = neo_dlntdr_para_3_in 
+    temp_perp_in(3)   = neo_temp_perp_3_in   
+    dlntdr_perp_in(3) = neo_dlntdr_perp_3_in 
     profile_dlnndr_scale(3) = neo_profile_dlnndr_3_scale_in
     profile_dlntdr_scale(3) = neo_profile_dlntdr_3_scale_in
     z_in(4) = neo_z_4_in
@@ -333,6 +412,11 @@ contains
     temp_in(4) = neo_temp_4_in
     dlnndr_in(4) = neo_dlnndr_4_in
     dlntdr_in(4) = neo_dlntdr_4_in
+    aniso_model_in(4) = neo_aniso_model_4_in
+    temp_para_in(4)   = neo_temp_para_4_in   
+    dlntdr_para_in(4) = neo_dlntdr_para_4_in 
+    temp_perp_in(4)   = neo_temp_perp_4_in   
+    dlntdr_perp_in(4) = neo_dlntdr_perp_4_in 
     profile_dlnndr_scale(4) = neo_profile_dlnndr_4_scale_in
     profile_dlntdr_scale(4) = neo_profile_dlntdr_4_scale_in
     z_in(5) = neo_z_5_in
@@ -341,6 +425,11 @@ contains
     temp_in(5) = neo_temp_5_in
     dlnndr_in(5) = neo_dlnndr_5_in
     dlntdr_in(5) = neo_dlntdr_5_in
+    aniso_model_in(5) = neo_aniso_model_5_in
+    temp_para_in(5)   = neo_temp_para_5_in   
+    dlntdr_para_in(5) = neo_dlntdr_para_5_in 
+    temp_perp_in(5)   = neo_temp_perp_5_in   
+    dlntdr_perp_in(5) = neo_dlntdr_perp_5_in 
     profile_dlnndr_scale(5) = neo_profile_dlnndr_5_scale_in
     profile_dlntdr_scale(5) = neo_profile_dlntdr_5_scale_in
     z_in(6) = neo_z_6_in
@@ -349,13 +438,18 @@ contains
     temp_in(6) = neo_temp_6_in
     dlnndr_in(6) = neo_dlnndr_6_in
     dlntdr_in(6) = neo_dlntdr_6_in
+    aniso_model_in(6) = neo_aniso_model_6_in
+    temp_para_in(6)   = neo_temp_para_6_in   
+    dlntdr_para_in(6) = neo_dlntdr_para_6_in 
+    temp_perp_in(6)   = neo_temp_perp_6_in   
+    dlntdr_perp_in(6) = neo_dlntdr_perp_6_in 
     profile_dlnndr_scale(6) = neo_profile_dlnndr_6_scale_in
     profile_dlntdr_scale(6) = neo_profile_dlntdr_6_scale_in
     dphi0dr_in = neo_dphi0dr_in
     epar0_in = neo_epar0_in
     q_in = neo_q_in
     rho_in = neo_rho_star_in
-    shat_in = neo_shear_in
+    shear_in = neo_shear_in
     shift_in = neo_shift_in
     kappa_in = neo_kappa_in
     s_kappa_in = neo_s_kappa_in
@@ -365,6 +459,7 @@ contains
     s_zeta_in = neo_s_zeta_in
     zmag_in = neo_zmag_over_a_in
     s_zmag_in = neo_s_zmag_in
+    beta_star_in = neo_beta_star_in
     profile_delta_scale = neo_profile_delta_scale_in
     profile_zeta_scale = neo_profile_zeta_scale_in
     profile_zmag_scale = neo_profile_zmag_scale_in
@@ -424,6 +519,7 @@ contains
     write(1,20) 'SPITZER_MODEL=',neo_spitzer_model_in
     write(1,30) 'EPAR0_SPITZER=',neo_epar0_spitzer_in
     write(1,20) 'COLL_UNCOUPLEDEI_MODEL=',neo_coll_uncoupledei_model_in
+    write(1,20) 'COLL_UNCOUPLEDANISO_MODEL=',neo_coll_uncoupledaniso_model_in
     write(1,20) 'N_SPECIES=',neo_n_species_in
     write(1,30) 'NU_1=',neo_nu_1_in
 
@@ -433,6 +529,13 @@ contains
     write(1,30) 'TEMP_1=',neo_temp_1_in
     write(1,30) 'DLNNDR_1=',neo_dlnndr_1_in
     write(1,30) 'DLNTDR_1=',neo_dlntdr_1_in
+    write(1,20) 'ANISO_MODEL_1=', neo_aniso_model_1_in  
+    if(neo_aniso_model_1_in == 2) then
+       write(1,30) 'TEMP_PARA_1=', neo_temp_para_1_in 
+       write(1,30) 'DLNTDR_PARA_1=', neo_dlntdr_para_1_in 
+       write(1,30) 'TEMP_PERP_1=', neo_temp_perp_1_in 
+       write(1,30) 'DLNTDR_PERP_1=', neo_dlntdr_perp_1_in 
+    endif
     if (neo_n_species_in > 1) then
        write(1,20) 'Z_2=',neo_z_2_in
        write(1,30) 'MASS_2=',neo_mass_2_in
@@ -440,6 +543,13 @@ contains
        write(1,30) 'TEMP_2=',neo_temp_2_in
        write(1,30) 'DLNNDR_2=',neo_dlnndr_2_in
        write(1,30) 'DLNTDR_2=',neo_dlntdr_2_in
+       write(1,20) 'ANISO_MODEL_2=', neo_aniso_model_2_in  
+       if(neo_aniso_model_2_in == 2) then 
+          write(1,30) 'TEMP_PARA_2=', neo_temp_para_2_in 
+          write(1,30) 'DLNTDR_PARA_2=', neo_dlntdr_para_2_in
+          write(1,30) 'TEMP_PERP_2=', neo_temp_perp_2_in 
+          write(1,30) 'DLNTDR_PERP_2=', neo_dlntdr_perp_2_in 
+       endif
     endif
     if (neo_n_species_in > 2) then
        write(1,20) 'Z_3=',neo_z_3_in
@@ -448,6 +558,13 @@ contains
        write(1,30) 'TEMP_3=',neo_temp_3_in
        write(1,30) 'DLNNDR_3=',neo_dlnndr_3_in
        write(1,30) 'DLNTDR_3=',neo_dlntdr_3_in
+       write(1,20) 'ANISO_MODEL_3=', neo_aniso_model_3_in  
+       if(neo_aniso_model_3_in == 2) then              
+          write(1,30) 'TEMP_PARA_3=', neo_temp_para_3_in 
+          write(1,30) 'DLNTDR_PARA_3=', neo_dlntdr_para_3_in
+          write(1,30) 'TEMP_PERP_3=', neo_temp_perp_3_in 
+          write(1,30) 'DLNTDR_PERP_3=', neo_dlntdr_perp_3_in 
+       endif
     endif
     if (neo_n_species_in > 3) then
        write(1,20) 'Z_4=',neo_z_4_in
@@ -456,6 +573,13 @@ contains
        write(1,30) 'TEMP_4=',neo_temp_4_in
        write(1,30) 'DLNNDR_4=',neo_dlnndr_4_in
        write(1,30) 'DLNTDR_4=',neo_dlntdr_4_in
+       write(1,20) 'ANISO_MODEL_4=', neo_aniso_model_4_in  
+       if(neo_aniso_model_4_in == 2) then              
+          write(1,30) 'TEMP_PARA_4=', neo_temp_para_4_in 
+          write(1,30) 'DLNTDR_PARA_4=', neo_dlntdr_para_4_in
+          write(1,30) 'TEMP_PERP_4=', neo_temp_perp_4_in 
+          write(1,30) 'DLNTDR_PERP_4=', neo_dlntdr_perp_4_in 
+       endif
     endif
     if (neo_n_species_in > 4) then
        write(1,20) 'Z_5=',neo_z_5_in
@@ -464,6 +588,13 @@ contains
        write(1,30) 'TEMP_5=',neo_temp_5_in
        write(1,30) 'DLNNDR_5=',neo_dlnndr_5_in
        write(1,30) 'DLNTDR_5=',neo_dlntdr_5_in
+       write(1,20) 'ANISO_MODEL_5=', neo_aniso_model_5_in  
+       if(neo_aniso_model_5_in == 2) then              
+          write(1,30) 'TEMP_PARA_5=', neo_temp_para_5_in 
+          write(1,30) 'DLNTDR_PARA_5=', neo_dlntdr_para_5_in
+          write(1,30) 'TEMP_PERP_5=', neo_temp_perp_5_in 
+          write(1,30) 'DLNTDR_PERP_5=', neo_dlntdr_perp_5_in 
+       endif
     endif
     if (neo_n_species_in > 5) then
        write(1,20) 'Z_6=',neo_z_6_in
@@ -472,6 +603,13 @@ contains
        write(1,30) 'TEMP_6=',neo_temp_6_in
        write(1,30) 'DLNNDR_6=',neo_dlnndr_6_in
        write(1,30) 'DLNTDR_6=',neo_dlntdr_6_in
+       write(1,20) 'ANISO_MODEL_6=', neo_aniso_model_6_in  
+       if(neo_aniso_model_6_in == 2) then              
+          write(1,30) 'TEMP_PARA_6=', neo_temp_para_6_in 
+          write(1,30) 'DLNTDR_PARA_6=', neo_dlntdr_para_6_in
+          write(1,30) 'TEMP_PERP_6=', neo_temp_perp_6_in 
+          write(1,30) 'DLNTDR_PERP_6=', neo_dlntdr_perp_6_in 
+       endif
     endif
 
     write(1,30) 'DPHI0DR=',neo_dphi0dr_in
@@ -488,6 +626,7 @@ contains
     write(1,30) 'S_ZETA=',neo_s_zeta_in
     write(1,30) 'ZMAG_OVER_A=',neo_zmag_over_a_in
     write(1,30) 'S_ZMAG=',neo_s_zmag_in
+    write(1,30) 'BETA_STAR=',neo_beta_star_in
 
     write(1,20) 'SCALAPACK_FLAG=',neo_scalapack_flag_in
     write(1,20) 'LAGUERRE_METHOD=',neo_laguerre_method_in

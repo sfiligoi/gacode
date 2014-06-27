@@ -21,7 +21,7 @@
       REAL :: save_vexb_shear
       REAL :: save_alpha_kx_p
       REAL :: wgp_max,width_p_max 
-      REAL :: kyi
+      REAL :: kyi,ft2
 !
       CALL tglf_setup_geometry
 !
@@ -69,9 +69,9 @@
       if(ibranch_in.eq.-1)branch = 1
       iflux_in=.FALSE.
       if(nbasis_min_in.ne.0)then
-        nbasis_max_in = nbasis_min_in
+        nbasis = nbasis_min_in
       endif
-!       write(*,*)"nbasis_max_in = ",nbasis_max_in
+!       write(*,*)"nbasis = ",nbasis
       tmin=LOG10(width_min)
       tmax=LOG10(width_max)
       nt=nwidth_in
@@ -290,11 +290,27 @@
 !
        if(gamma_max.ne.0.0)then
 ! refine eigenvalue with more basis functions
-         nbasis_max_in=save_nbasis
-!         write(*,*)"nbasis=",nbasis_max_in
+         nbasis = save_nbasis
+!         write(*,*)"nbasis=",nbasis
          iflux_in=save_iflux
          new_width=.TRUE.
          call tglf_LS
+! check for inward ballooning modes
+!         write(*,*)"modB_test = ",modB_test
+         if(inboard_detrapped_in.ne.0.and.ft_test.gt.modB_test)then
+           ft2 = 1.0-ft_test*(1.0-ft*ft)
+           if(ft2.lt.0.0)then
+             ft = 0.0
+           else
+!             ft = SQRT(ft2)
+             ft =  0.0
+           endif
+!           write(*,*)"changed ft",ft
+           new_geometry = .FALSE.
+           new_width = .FALSE.
+           new_matrix = .TRUE.
+           call tglf_LS
+         endif
          if(alpha_quench_in.eq.0.0)then
            if(save_vexb_shear.ne.0.0.or.wgp_max.ne.0.0)then
              do i=1,nmodes_out
@@ -335,7 +351,7 @@
          enddo
        endif
 !
-       nbasis_max_in=save_nbasis
+       nbasis=save_nbasis
        iflux_in=save_iflux
        vexb_shear_in = save_vexb_shear
        alpha_kx_p_in = save_alpha_kx_p

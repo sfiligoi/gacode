@@ -59,6 +59,18 @@ def fancytag(tag):
         fancy = r'$\mathrm{jbs}_\mathrm{sauter}$'
     elif tag == 'jbs_nclass':
         fancy = r'$\mathrm{jbs}_\mathrm{nclass}$'
+    elif tag == 'pow_e':
+        fancy = r'$\mathrm{P}_\mathrm{e}\;\mathrm(MW)$'
+    elif tag == 'pow_i':
+        fancy = r'$\mathrm{P}_\mathrm{i}\;\mathrm(MW)$'
+    elif tag == 'pow_e_aux':
+        fancy = r'$\mathrm{P}_\mathrm{e,aux}\;\mathrm(MW)$'
+    elif tag == 'pow_i_aux':
+        fancy = r'$\mathrm{P}_\mathrm{i,aux}\;\mathrm(MW)$'
+    elif tag == 'pow_ei':
+        fancy = r'$\mathrm{P}_\mathrm{ei}\;\mathrm(MW)$'
+    elif tag == 'pow_e_line':
+        fancy = r'$\mathrm{P}_\mathrm{e,rad}\;\mathrm(MW)$'
     else:
         fancy = r'$\mathrm{'+tag+'}$'
 
@@ -71,6 +83,7 @@ plots   = sys.argv[3]
 ftype   = sys.argv[4]
 loc     = int(sys.argv[5])
 t       = sys.argv[6]
+title   = sys.argv[7]
 
 plotvec = string.splitfields(plots,',')
 filevec = string.splitfields(infiles,',')
@@ -109,8 +122,11 @@ for j in range(n):
         fig = plt.figure(figsize=(12,7))
         ax  = fig.add_subplot(111)
 
+        if title != 'null':
+            ax.set_title(r'$'+title+'$',size=18)
+
         if rvar == "r":
-            ax.set_xlabel(r"$r \, (m)$",fontsize=GFONTSIZE)
+            ax.set_xlabel(r"$r \, \mathrm{(m)}$",fontsize=GFONTSIZE)
         if rvar == "r/a":
             ax.set_xlabel(r"$r/a$",fontsize=GFONTSIZE)
         if rvar == "rho":

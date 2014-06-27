@@ -1,23 +1,18 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
 ifeq ($(OPT),debug)
-   FFLAGS=${FDEBUG} ${HDF5_FLAGS}
+   FFLAGS=${FDEBUG}
 else
-   FFLAGS=${FOPT} ${HDF5_FLAGS}
+   FFLAGS=${FOPT}
 endif
 
 FC += ${FOMP}
-FFLAGS += ${FHDF5} ${HDF5_INC}
-
 
 ifeq ($(ACC),true)
    FC += ${FACC}
 endif
 
 LLIB = gyro_lib
-#ifeq ($(HDF5),debug)
-#LLIB += ${HDF5_LIBS}
-#endif
 
 OBJECTS += gyro_globals.o \
           gyro_profile_exp.o \
@@ -72,7 +67,6 @@ OBJECTS += gyro_globals.o \
           gyro_collision_krook.o \
           gyro_conserve_number.o \
           gyro_conserve_all.o \
-          gyro_dump_input.o \
           gyro_entropy.o \
           gyro_field_fluxave.o \
           gyro_field_time_derivative.o \
@@ -150,13 +144,11 @@ OBJECTS += gyro_globals.o \
           gyro_write_radial_op.o \
           gyro_write_step.o \
           gyro_write_timedata.o \
-          gyro_write_timedata_wedge_hdf5.empty.o \
-          gyro_write_h5mesh.o \
           gyro_write_timers.o \
           gyro_velocity_sum.o 
 
 
-.SUFFIXES : .o .f90 .F90
+.SUFFIXES : .o .f90
 
 lib: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)

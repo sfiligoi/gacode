@@ -248,11 +248,6 @@ subroutine gyro_select_methods
              'ERROR: (GYRO) N_PASS >= 4 required for collisions.')
      endif
 
-     if (variable_egrid_flag == 1) then
-        call catch_error(&
-             'ERROR: (GYRO) Collisions not supported with variable energy grid')
-     endif
-
   endif
   !---------------------------------------------------
 

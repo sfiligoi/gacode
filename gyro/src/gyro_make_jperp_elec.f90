@@ -63,7 +63,7 @@ subroutine gyro_make_jperp_elec
 
               vel_sum_loc1(:,i) = vel_sum_loc1(:,i) +&
                    2.0*den_s(n_spec,i)*tem_s(n_spec,i) * 0.5**2 &
-                   * energy(ie,indx_e)**2 * lambda(i,k)**2 &
+                   * energy(ie)**2 * lambda(i,k)**2 &
                    * cs_blend(:,m0,i,p_nek_loc) &
                    * c_blend(jp,m0,i,p_nek_loc)
 
@@ -73,7 +73,7 @@ subroutine gyro_make_jperp_elec
 
               vel_sum_loc2(:,i) = vel_sum_loc2(:,i)+&
                    z(n_spec)*den_s(n_spec,i) * 0.5 &
-                   * energy(ie,indx_e) * lambda(i,k) &
+                   * energy(ie) * lambda(i,k) &
                    * cs_blend(:,m0,i,p_nek_loc) &
                    * c_blend(jp,m0,i,p_nek_loc)
 

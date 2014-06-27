@@ -339,7 +339,7 @@ then
 
       echo "0" > "$SIMDIR/gyrotest_flag"
       # Call platform-specific exec file:
-      echo " Passing control to TGYRO executable ..." >> $RUNBASE
+      echo " INFO: (tgyro script) Passing control to TGYRO executable" >> $RUNBASE
       $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM \
        $SIMDIR $NPROC $TGYRO_DIR/src/tgyro_main $NOMP $NUMA $MPINUMA
       exit 0

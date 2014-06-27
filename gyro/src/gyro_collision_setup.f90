@@ -72,7 +72,7 @@ subroutine gyro_collision_setup
   !
   do ie=1,n_energy
 
-     x = sqrt(energy(ie,1))
+     x = sqrt(energy(ie))
 
      h_coll = exp(-x*x)/(x*sqrt(pi))+(1.0-1.0/(2.0*x*x))*DERF(x)
 
@@ -88,11 +88,11 @@ subroutine gyro_collision_setup
 
         do ie=1,n_energy
 
-           x = sqrt(energy(ie,1))*mu(is)/mu(isp)
+           x = sqrt(energy(ie))*mu(is)/mu(isp)
 
            h_coll = exp(-x*x)/(x*sqrt(pi))+(1.0-1.0/(2.0*x*x))*DERF(x)
 
-           x = sqrt(energy(ie,1))
+           x = sqrt(energy(ie))
 
            nu_total(:,ie,is) = nu_total(:,ie,is)+&
                 0.5*(nu_s(is,:)/x**3)*h_coll*&
@@ -189,18 +189,14 @@ subroutine gyro_collision_setup
         call catch_error('ERROR: Inversion in gyro_collision_setup')
      endif
 
-     if (coll_op_cons_flag == 0) then
-        ! Original method
-        do p=1,n_rbf
-           do pp=1,n_rbf
-              call drbf(pi*(yp(p)-yp(pp)),xp(p)-xc(pp),ord_rbf,r1,r2)
-              ! Lorentz derivative  
-              a2(p,pp) = (1-xp(p)**2)*r2-2*xp(p)*r1
-           enddo
+     ! Original method
+     do p=1,n_rbf
+        do pp=1,n_rbf
+           call drbf(pi*(yp(p)-yp(pp)),xp(p)-xc(pp),ord_rbf,r1,r2)
+           ! Lorentz derivative  
+           a2(p,pp) = (1-xp(p)**2)*r2-2*xp(p)*r1
         enddo
-     else
-        call catch_error('ERROR: Conservative scheme not implemented.')
-     endif
+     enddo
 
      ! Perform matrix-matrix multiply with BLAS 
      ! to obtain derivative (Legendre) matrix: 

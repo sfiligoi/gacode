@@ -216,7 +216,7 @@ subroutine gyro_field_interpolation
                          (-v_para(m,i,p_nek_loc,is)*vf(m,i+i_diff,2))
                     gyro_uv(m,i,p_nek_loc,is,3) = gyro_uv(m,i,p_nek_loc,is,3)+&
                          (w_gyro1(m,i_diff,i,p_nek_loc,is) &
-                         *2.0*energy(ie,is)*lambda(i,k)*tem_s(is,i)/z(is))*&
+                         *2.0*energy(ie)*lambda(i,k)*tem_s(is,i)/z(is))*&
                          vf(m,i+i_diff,3)
 
                     ! Chi_a(R) in Technical Guide
@@ -227,7 +227,7 @@ subroutine gyro_field_interpolation
                          (-v_para(m,i,p_nek_loc,is)*vf(m,i+i_diff,2))
                     kyro_uv(m,i,p_nek_loc,is,3) = kyro_uv(m,i,p_nek_loc,is,3)+&
                          w_gyro3(m,i_diff,i,p_nek_loc,is) &
-                         *2.0*energy(ie,is)*lambda(i,k)*tem_s(is,i)/z(is)*&
+                         *2.0*energy(ie)*lambda(i,k)*tem_s(is,i)/z(is)*&
                          vf(m,i+i_diff,3)
                    
                  enddo
@@ -292,7 +292,7 @@ subroutine gyro_field_interpolation
                  gyro_uv(m,i,p_nek_loc,n_spec,2) = &
                       -v_para(m,i,p_nek_loc,n_spec)*field_tau(m,i,p_nek_loc,2)
                  gyro_uv(m,i,p_nek_loc,n_spec,3) = &
-                      energy(ie,n_spec)*lambda(i,k)*tem_s(n_spec,i)/z(n_spec) &
+                      energy(ie)*lambda(i,k)*tem_s(n_spec,i)/z(n_spec) &
                       *field_tau(m,i,p_nek_loc,3)
               enddo
            enddo

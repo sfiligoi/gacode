@@ -34,6 +34,8 @@ subroutine tgyro_gyro_map
   gyro_dlnndr_electron_in = r_min*dlnnedr(i_r)
   gyro_dlntdr_electron_in = r_min*dlntedr(i_r)
 
+  ! Note that GYRO normalizing mass is mD = 2*mp.
+
   gyro_z_in          = zi_vec(1)
   gyro_ni_over_ne_in = ni(1,i_r)/ne(i_r)
   gyro_ti_over_te_in = ti(1,i_r)/te(i_r)

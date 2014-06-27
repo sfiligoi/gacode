@@ -22,6 +22,7 @@ subroutine tgyro_flux
   integer :: i1,i2
   integer :: n_12
   real, dimension(8) :: x_out
+  real, external :: tgyro_funflux
 
   !-------------------------------------------
   ! IFS-PPPL parameters
@@ -179,12 +180,14 @@ subroutine tgyro_flux
      eflux_i_tur(1,i_r) = x_out(4)*r_min*dlntidr(1,i_r)*&
           ni(1,i_r)/ne(i_r)*ti(1,i_r)/te(i_r)
 
+     call tgyro_trap_component_error(0,'null')
+
   case (2)
 
      ! Map TGYRO parameters to TGLF
      call tgyro_tglf_map
 
-     if (gyrotest_flag == 0) call tglf_run
+     if (gyrotest_flag == 0) call tglf_run_mpi
 
      call tgyro_trap_component_error(tglf_error_status,tglf_error_message)
 
@@ -213,24 +216,25 @@ subroutine tgyro_flux
 
      call tgyro_trap_component_error(gyro_error_status_out,gyro_error_message_out)
 
-     if (tgyro_mode == 1) then
+     if (tgyro_mode == 1 .and. gyrotest_flag == 0) then
 
         i1 = 1+gyro_explicit_damp_grid_in
         i2 = gyro_radial_grid_in-gyro_explicit_damp_grid_in
         n_12 = gyro_radial_grid_in-2*gyro_explicit_damp_grid_in
 
         ! Map GYRO (local simulation) output to TGYRO
+        ! Need to convert from GBD units to GB1 units:
 
-        pflux_e_tur(i_r) = sum(gyro_elec_pflux_out(i1:i2))/n_12
-        eflux_e_tur(i_r) = sum(gyro_elec_eflux_out(i1:i2))/n_12
-        mflux_e_tur(i_r) = sum(gyro_elec_mflux_out(i1:i2))/n_12
-        expwd_e_tur(i_r) = sum(gyro_elec_expwd_out(i1:i2))/n_12
+        pflux_e_tur(i_r) = sum(gyro_elec_pflux_out(i1:i2))/n_12*(2*mp/mi(1))**1.5
+        eflux_e_tur(i_r) = sum(gyro_elec_eflux_out(i1:i2))/n_12*(2*mp/mi(1))**1.5
+        mflux_e_tur(i_r) = sum(gyro_elec_mflux_out(i1:i2))/n_12*(2*mp/mi(1))**2
+        expwd_e_tur(i_r) = sum(gyro_elec_expwd_out(i1:i2))/n_12*(2*mp/mi(1))**1.5
 
         do i_ion=1,loc_n_ion
-           pflux_i_tur(i_ion,i_r) = sum(gyro_ion_pflux_out(i1:i2,i_ion))/n_12
-           eflux_i_tur(i_ion,i_r) = sum(gyro_ion_eflux_out(i1:i2,i_ion))/n_12
-           mflux_i_tur(i_ion,i_r) = sum(gyro_ion_mflux_out(i1:i2,i_ion))/n_12
-           expwd_i_tur(i_ion,i_r) = sum(gyro_ion_expwd_out(i1:i2,i_ion))/n_12
+           pflux_i_tur(i_ion,i_r) = sum(gyro_ion_pflux_out(i1:i2,i_ion))/n_12*(2*mp/mi(1))**1.5
+           eflux_i_tur(i_ion,i_r) = sum(gyro_ion_eflux_out(i1:i2,i_ion))/n_12*(2*mp/mi(1))**1.5
+           mflux_i_tur(i_ion,i_r) = sum(gyro_ion_mflux_out(i1:i2,i_ion))/n_12*(2*mp/mi(1))**2
+           expwd_i_tur(i_ion,i_r) = sum(gyro_ion_expwd_out(i1:i2,i_ion))/n_12*(2*mp/mi(1))**1.5
         enddo
 
      endif
@@ -239,11 +243,25 @@ subroutine tgyro_flux
 
      ! No fluxes (tgyro_noturb_flag=1)
 
+  case (5)
+
+     ! User-provided function (FUN*)
+
+     eflux_e_tur(i_r) = tgyro_funflux(r(i_r)/r_min,r_min*dlntidr(1,i_r),r_min*dlntedr(i_r),2,0)
+
+     do i_ion=1,loc_n_ion
+        eflux_i_tur(i_ion,i_r) = tgyro_funflux(r(i_r)/r_min,r_min*dlntidr(1,i_r),r_min*dlntedr(i_r),2,i_ion)
+     enddo
+
+     call tgyro_trap_component_error(0,'null')
+
   case default
 
      call tgyro_catch_error('ERROR: (TGYRO) No matching flux method in tgyro_flux.')
 
   end select
+
+  call MPI_BARRIER(MPI_COMM_WORLD,ierr)
 
   !------------------------------------------------------------------
   ! Compute total fluxes given neoclassical and turbulent components:

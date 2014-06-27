@@ -53,7 +53,7 @@
 !   The weight is just 1-s0.
 !---------------------------------------------------------
 
-subroutine energy_integral(n_energy,energy_max,n_kinetic,energy,w_energy)
+subroutine energy_integral(n_energy,energy_max,energy,w_energy)
 
   use math_constants
 
@@ -61,11 +61,10 @@ subroutine energy_integral(n_energy,energy_max,n_kinetic,energy,w_energy)
   implicit none
   !
   integer, intent(in) :: n_energy
-  integer, intent(in) :: n_kinetic
-  real, intent(in) :: energy_max(n_kinetic)
+  real, intent(in) :: energy_max
   ! 
-  real, intent(inout) :: energy(n_energy,n_kinetic)
-  real, intent(inout) :: w_energy(n_energy,n_kinetic)
+  real, intent(inout) :: energy(n_energy)
+  real, intent(inout) :: w_energy(n_energy)
   !
   integer :: i
   integer :: is
@@ -83,40 +82,36 @@ subroutine energy_integral(n_energy,energy_max,n_kinetic,energy,w_energy)
   allocate(sn(n_energy-1))
   allocate(wn(n_energy-1))
 
-  do is = 1, n_kinetic
+  d_e = energy_max/n_energy
 
-     d_e = energy_max(is)/n_energy
+  if (n_energy == 1) then
 
-     if (n_energy == 1) then
+     energy(1)   = energy_max
+     w_energy(1) = 1.0
 
-        energy(1,is)   = energy_max(is)
-        w_energy(1,is) = 1.0
+  else 
 
-     else 
+     ! p32(x) == P(3/2,x)
 
-        ! p32(x) == P(3/2,x)
+     s_max = p32(energy_max)
+     s1 = 1.0-s_max
 
-        s_max = p32(energy_max(is))
-        s1 = 1.0-s_max
+     call gauss_legendre(0.0,s_max,sn,wn,n_energy-1)
 
-        call gauss_legendre(0.0,s_max,sn,wn,n_energy-1)
+     ! Map abscissae to energy:
 
-        ! Map abscissae to energy:
+     do i=1,n_energy-1
+        w_energy(i) = wn(i)
+        call invert_p32(sn(i),energy(i),energy_max)
+     enddo
 
-        do i=1,n_energy-1
-           w_energy(i,is) = wn(i)
-           call invert_p32(sn(i),energy(i,is),energy_max(is))
-        enddo
+     ! Add remainder
 
-        ! Add remainder
+     energy(n_energy) = energy_max
 
-        energy(n_energy,is) = energy_max(is)
+     w_energy(n_energy) = s1 
 
-        w_energy(n_energy,is) = s1 
-
-     endif
-
-  enddo  ! Kinetic species loop
+  endif
 
   deallocate(sn)
   deallocate(wn)

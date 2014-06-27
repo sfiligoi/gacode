@@ -17,7 +17,6 @@ export EXTRA_LIBS = \
        ${GACODE_ROOT}/shared/GEO/GEO_lib.a \
        ${GACODE_ROOT}/shared/UMFPACK/UMFPACK_lib.a \
        ${GACODE_ROOT}/gyro/GKEIGEN/GKEIGEN_lib.a \
-       ${GACODE_ROOT}/shared/vshdf5/vshdf5_lib.a \
        ${HDF5_LIBS} ${LMATH}
 
 all:

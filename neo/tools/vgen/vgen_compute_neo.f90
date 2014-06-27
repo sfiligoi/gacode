@@ -1,9 +1,10 @@
-
-subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, omega_deriv)
+subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, &
+     omega, omega_deriv, simntheta)
 
   use vgen_globals
   use neo_interface
   use EXPRO_interface
+  use mpi
 
   implicit none
 
@@ -13,14 +14,16 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, omega_deriv
   real, intent(in)    :: omega          ! 1/s
   real, intent(in)    :: omega_deriv    ! 1/(m s)
   real, intent(out)   :: vtor_diff      ! vtor_exp - vtor_neo (m/s) 
+  integer, intent(out) :: simntheta
 
   integer :: j, n
   real :: cc, loglam
 
   integer :: nmin, nmax, nth
+  real :: cpu_in, cpu_out
 
   ! Set the local NEO input parameters
-  neo_silent_flag_in    = 1
+  neo_silent_flag_in = 1
 
   ! Normalizations
   
@@ -184,21 +187,23 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, omega_deriv
   else
      neo_n_theta_in = 2*nmax + 1
   endif
-  if(i == 2) then
-     open(unit=1,file='out.vgen.neontheta',status='replace')
+
+  if (i == 2+i_proc) then
+     open(unit=1,file='out.vgen.neontheta'//tag(i_proc+1),status='replace')
      close(1)
   endif
-  open(unit=1,file='out.vgen.neontheta',status='old',position='append')
+  open(unit=1,file='out.vgen.neontheta'//tag(i_proc+1),status='old',position='append')
   write(1,'(e16.8)',advance='no') EXPRO_rho(i)
   write(1,'(i3)',advance='no') neo_n_theta_in
   write(1,*)
   close(1)
+  simntheta=neo_n_theta_in
 
-  if(i == 2) then
-     open(unit=1,file='out.vgen.neoexpnorm',status='replace')
+  if(i == 2+i_proc) then
+     open(unit=1,file='out.vgen.neoexpnorm'//tag(i_proc+1),status='replace')
      close(1)
   endif
-  open(unit=1,file='out.vgen.neoexpnorm',status='old',position='append')
+  open(unit=1,file='out.vgen.neoexpnorm'//tag(i_proc+1),status='old',position='append')
   write(1,'(e16.8)',advance='no') EXPRO_rho(i)
   write(1,'(e16.8)',advance='no') EXPRO_rmin(EXPRO_n_exp)
   write(1,'(e16.8)',advance='no') mass_norm
@@ -209,11 +214,11 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, omega_deriv
   write(1,*)
   close(1)
 
-  if(i == 2) then
-     open(unit=1,file='out.vgen.neoequil',status='replace')
+  if(i == 2+i_proc) then
+     open(unit=1,file='out.vgen.neoequil'//tag(i_proc+1),status='replace')
      close(1)
   endif
-  open(unit=1,file='out.vgen.neoequil',status='old',position='append')
+  open(unit=1,file='out.vgen.neoequil'//tag(i_proc+1),status='old',position='append')
   write(1,'(e16.8)',advance='no') EXPRO_rho(i)
   write(1,'(e16.8)',advance='no') neo_rmin_over_a_in
   write(1,'(e16.8)',advance='no') neo_q_in
@@ -257,9 +262,48 @@ subroutine vgen_compute_neo(i,vtor_diff, rotation_model, er0, omega, omega_deriv
   close(1)
 
   ! Run NEO
+  cpu_in = MPI_Wtime()
   call neo_run()
+  cpu_out = MPI_Wtime()
 
-  vtor_diff = EXPRO_vtor(erspecies_indx,i) &
+  if(timing_flag == 1) then
+     if (i == 2+i_proc) then
+        open(unit=1,file='out.vgen.neotime'//tag(i_proc+1),status='replace')
+        close(1)
+     endif
+     open(unit=1,file='out.vgen.neotime'//tag(i_proc+1),status='old',position='append')
+     write(1,'(e16.8)',advance='no') EXPRO_rho(i)
+     write(1,'(e16.8)',advance='no') cpu_out-cpu_in
+     write(1,*)
+     close(1)
+  endif
+
+  if (neo_error_status_out > 0) then
+     print *,neo_error_message_out
+     stop
+  endif
+
+  ! Assign output flows and bootstrap current
+
+  vtor_diff = vtor_measured(i) &
        - neo_vtor_dke_out(erspecies_indx) * vth_norm * EXPRO_rmin(EXPRO_n_exp)
-
+  
+  do j=1,n_ions
+     EXPRO_vpol(j,i) = neo_vpol_dke_out(j) &
+          * vth_norm * EXPRO_rmin(EXPRO_n_exp)
+     EXPRO_vtor(j,i) = neo_vtor_dke_out(j) &
+          * vth_norm * EXPRO_rmin(EXPRO_n_exp)
+  enddo
+  jbs_norm = charge_norm_fac*dens_norm*vth_norm &
+       *EXPRO_rmin(EXPRO_n_exp)/1e6
+  jbs_neo(i)    = neo_jpar_dke_out*jbs_norm
+  jbs_sauter(i) = neo_jpar_thS_out*jbs_norm
+  jbs_koh(i)    = neo_jpar_thK_out*jbs_norm
+  jbs_nclass(i) = neo_jpar_thN_out*jbs_norm
+  pflux_sum(i)  = 0.0
+  do j=1,neo_n_species_in
+     pflux_sum(i) = pflux_sum(i) + zfac(j)*neo_pflux_dke_out(j)
+  enddo
+  pflux_sum(i) = pflux_sum(i) / neo_rho_star_in**2
+  
 end subroutine vgen_compute_neo

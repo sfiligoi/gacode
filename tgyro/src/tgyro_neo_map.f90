@@ -11,6 +11,7 @@ subroutine tgyro_neo_map
      call tgyro_catch_error('ERROR: (TGYRO) Too many ions for NEO') 
   endif
 
+  ! Assuming NEO m_norm = mi(1) (first ion)
   mu1 = sqrt(mi(1)/(me*loc_me_multiplier))
 
   ! Initialize NEO
@@ -63,8 +64,7 @@ subroutine tgyro_neo_map
   neo_temp_1_in   = 1.0
   neo_dlnndr_1_in = r_min*dlnnidr(1,i_r)
   neo_dlntdr_1_in = r_min*dlntidr(1,i_r)
-  neo_nu_1_in     = ((nue(i_r)*r_min/c_s(i_r))/&
-       sqrt(ti(1,i_r)/te(i_r)))/(mu1*(ti(1,i_r)/te(i_r))**1.5)
+  neo_nu_1_in     = nui(1,i_r)*r_min/c_s(i_r)/sqrt(ti(1,i_r)/te(i_r))
 
   ! Ion #2
   if (neo_n_species_in > 2) then

@@ -97,9 +97,8 @@ subroutine gyro_alloc_profile_sim(flag)
      allocate(c_map(n_spec))
 
      ! Energy grid
-     allocate(energy_max(n_kinetic))
-     allocate(energy(n_energy,n_kinetic))
-     allocate(w_energy(n_energy,n_kinetic))
+     allocate(energy(n_energy))
+     allocate(w_energy(n_energy))
 
      ! Fourier coefficients
      allocate(cr(n_x,n_x))
@@ -122,12 +121,6 @@ subroutine gyro_alloc_profile_sim(flag)
         allocate(b_src(n_x,n_lump))
         allocate(m_src(n_lump,n_lump))
         allocate(src_piv(n_lump))
-     endif
-
-     if (io_method > 1) then
-        allocate(nu_coarse(0:n_theta_plot,n_x))
-        allocate(nu_wedge(n_theta_plot*n_theta_mult,n_x))
-        nu_coarse=0.; nu_wedge=0.
      endif
 
      ! Required in MPI_RECV
@@ -194,7 +187,6 @@ subroutine gyro_alloc_profile_sim(flag)
      deallocate(krho_collect)
      deallocate(c_map)
 
-     deallocate(energy_max)
      deallocate(energy)
      deallocate(w_energy)
 
@@ -215,11 +207,6 @@ subroutine gyro_alloc_profile_sim(flag)
      if (allocated(b_src)) deallocate(b_src)
      if (allocated(m_src)) deallocate(m_src)
      if (allocated(src_piv)) deallocate(src_piv)
-
-     if (io_method > 1) then
-        deallocate(nu_coarse)
-        deallocate(nu_wedge)
-     endif
 
      deallocate(recv_status)
 

@@ -14,7 +14,6 @@ FOMP    = -fopenmp
 FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules
 FOPT	= -O3
 FDEBUG	= -O2 -Wall -fcheck=all -Wunderflow -finit-real=nan -fbounds-check -ffpe-trap=invalid,zero,overflow
-#FDEBUG	= -O2 -fbounds-check
 
 # System math libraries (from Ubuntu repository)
 
@@ -27,10 +26,3 @@ NETCDF_INC=/usr/local/include
 # Archive 
 
 ARCH = ar cr
-
-# HDF5
-HDFDIR=${ROOT}/hdf5
-HDF5_LIBS=-L$(HDFDIR)/lib -lhdf5_fortran -lhdf5
-HDF5_INC=-I$(HDFDIR)/include
-HDF5_FLAGS=-Wp,-D__MPI -fdefault-double-8
-VSHDF5_MAKECMD=vshdf5

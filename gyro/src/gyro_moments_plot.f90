@@ -34,14 +34,10 @@ subroutine gyro_moments_plot
   !
   complex, dimension(n_stack,i1_buffer:i2_buffer) :: cap_h
   complex, dimension(n_theta_plot,n_x,3) :: mom_tmp
-  complex, dimension(n_theta_plot*n_theta_mult,n_x,3) :: mom_tmp_wedge
   !---------------------------------------------------
 
   if (alltime_index == 0) then
      moments_plot(:,:,:,:) = (0.0,0.0)
-     if (io_method > 1 .and. time_skip_wedge > 0) then
-         moments_plot_wedge(:,:,:,:) = (0.0,0.0)
-     endif
   endif
   moments_zero_plot(:,:,:) = 0.0
 
@@ -125,7 +121,7 @@ subroutine gyro_moments_plot
 
                  ! 2: energy moment
                  vel_sum_loc(j,i,2) = vel_sum_loc(j,i,2)+&
-                      energy(ie,is)*tem_s(is,i)*&
+                      energy(ie)*tem_s(is,i)*&
                       gyro_h(m,i,p_nek_loc,1)*cs_blend(j,m0,i,p_nek_loc)
 
                  ! 3: v_parallel moment
@@ -174,11 +170,6 @@ subroutine gyro_moments_plot
            do j_plot=1,n_theta_plot
               mom_tmp(j_plot,i,ix) = sum(vel_sum(:,i,ix)*blend_plot(:,j_plot,i))
            enddo ! j_plot
-           if (io_method > 1 .and. time_skip_wedge > 0) then
-              do j_plot=1,n_theta_plot*n_theta_mult
-                 mom_tmp_wedge(j_plot,i,ix) = sum(vel_sum(:,i,ix)*blend_wedge(:,j_plot,i))
-              enddo ! j_plot
-           endif
         enddo ! i
      enddo ! ix
      !----------------------------------------------------------------
@@ -201,10 +192,6 @@ subroutine gyro_moments_plot
      !
      moments_plot(:,:,is,:) = moments_plot(:,:,is,:)+&
           w_time(alltime_index+1)*mom_tmp(:,:,:)
-     if (io_method > 1 .and. time_skip_wedge > 0) then
-        moments_plot_wedge(:,:,is,:) = moments_plot_wedge(:,:,is,:)+&
-             w_time_wedge(alltime_index+1)*mom_tmp_wedge(:,:,:)
-     endif
      !----------------------------------------------------------------
 
   enddo ! is

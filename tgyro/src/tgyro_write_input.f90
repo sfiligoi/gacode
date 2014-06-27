@@ -31,6 +31,14 @@ subroutine tgyro_write_input
      error_flag = 1
      error_msg = 'ERROR: (TGYRO) TGYRO_ROTATION_FLAG must be 1 to evolve Er.'
   endif
+  !
+  ! - Need to set at least one profile to evolve, even for zero iterations, just to 
+  !   define a residual error.
+  !  
+  if (loc_er_feedback_flag+loc_ne_feedback_flag+loc_te_feedback_flag+loc_ti_feedback_flag == 0) then
+     error_flag = 1
+     error_msg = 'ERROR: (TGYRO) Must set one profile to evolve, even if running for 0 iterations.'
+  endif
   !----------------------------------------------------------------
 
   if (i_proc_global == 0) then
@@ -171,6 +179,10 @@ subroutine tgyro_write_input
      case (4)
 
         write(1,10) 'LOC_RESIDUAL_METHOD','(f-g)^2/MAX(1,(f^2+g^2))'
+
+     case (5)
+
+        write(1,10) 'LOC_RESIDUAL_METHOD','WEIGHTED'
 
      case default
 
@@ -344,6 +356,10 @@ subroutine tgyro_write_input
      case (1)
 
         write(1,10) 'TGYRO_DT_METHOD','Reaction cross section <n1*n2> (use with separate D and T)'
+        if (loc_n_ion == 1) then
+           error_flag = 1
+           error_msg = 'ERROR: (tgyro) Need LOC_N_ION > 1 for D-T reaction cross-section'
+        endif
 
      case (2)
 
@@ -571,8 +587,11 @@ subroutine tgyro_write_input
            write(1,40) 'ion '//trim(ion_tag(i_ion))//' [mass,charge,type]',mi_vec(i_ion),zi_vec(i_ion),ttext
         endif
      enddo
-
+     write(1,*) 
+     write(1,10) 'INFO: (tgyro)','GyroBohm factors defined by ion 1 mass.'
+     write(1,*)
      !--------------------------------------------------------
+
      !--------------------------------------------------------
      write(1,*)
      write(1,*) 'Rotation and field orientation'

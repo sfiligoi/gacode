@@ -22,7 +22,7 @@ module neo_globals
   real :: omega_rot_deriv_in
   real :: q_in
   real :: rho_in
-  real :: shat_in
+  real :: shear_in
   real :: shift_in
   real :: kappa_in
   real :: s_kappa_in
@@ -32,6 +32,7 @@ module neo_globals
   real :: s_zeta_in
   real :: zmag_in
   real :: s_zmag_in
+  real :: beta_star_in
   integer :: geo_ny_in
   real, dimension(8,0:32) :: geo_yin_in
   !
@@ -56,6 +57,12 @@ module neo_globals
   real, dimension(6) :: temp_in
   real, dimension(6) :: dlnndr_in
   real, dimension(6) :: dlntdr_in
+  !
+  integer, dimension(6) :: aniso_model_in
+  real, dimension(6)    :: temp_para_in
+  real, dimension(6)    :: dlntdr_para_in
+  real, dimension(6)    :: temp_perp_in
+  real, dimension(6)    :: dlntdr_perp_in
   !
   real :: nu_1_in
   !---------------------------------------------------------------
@@ -86,6 +93,7 @@ module neo_globals
   integer :: spitzer_model
   real    :: epar0_spitzer
   integer :: coll_uncoupledei_model
+  integer :: coll_uncoupledaniso_model
   real    :: sign_q
   real    :: sign_bunit
   integer :: subroutine_flag  ! only used for neo_read_input
@@ -143,7 +151,7 @@ module neo_globals
   real, dimension(:), allocatable :: rmaj
   real, dimension(:), allocatable :: q
   real, dimension(:), allocatable :: rho
-  real, dimension(:), allocatable :: shat
+  real, dimension(:), allocatable :: shear
   real, dimension(:), allocatable :: shift
   real, dimension(:), allocatable :: kappa
   real, dimension(:), allocatable :: s_kappa
@@ -153,6 +161,7 @@ module neo_globals
   real, dimension(:), allocatable :: s_zeta
   real, dimension(:), allocatable :: zmag
   real, dimension(:), allocatable :: s_zmag
+  real, dimension(:), allocatable :: beta_star
   integer :: geo_numeq_flag
   integer :: geo_ny
   real, dimension(:,:,:), allocatable :: geo_yin
@@ -174,6 +183,13 @@ module neo_globals
   real, dimension(:), allocatable :: epar0    ! inductive Efield (e/T_0)*a (nr)
   real, dimension(:), allocatable :: omega_rot  ! omega_rot / (vth_0/a) (nr)
   real, dimension(:), allocatable :: omega_rot_deriv ! domega_rot/d(r/a) (nr)
+  
+  integer, dimension(:), allocatable :: aniso_model    ! 1=isotropic,2=aniso
+  real, dimension(:,:), allocatable :: temp_para       ! Tpara/T_0  (ns,nr)
+  real, dimension(:,:), allocatable :: dlntdr_para     ! a/LTpara   (ns,nr)
+  real, dimension(:,:), allocatable :: temp_perp       ! Tperp/T_0  (ns,nr)
+  real, dimension(:,:), allocatable :: dlntdr_perp     ! a/LTperp   (ns,nr)
+  real, dimension(:,:), allocatable :: vth_para        ! vthpara/vth_0=sqrt(temp_para/mass)
 
   !---------------------------------------------------------------
 

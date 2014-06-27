@@ -166,6 +166,7 @@ subroutine create_set
         case(5)
            ! Scale by factor exm_ni_axis
            EXPRO_ni(i,:) = EXPRO_ni(i,:) * exm_ni_axis(i)
+           print '(a,i1,a,f6.4)','INFO: (create) Scaling ion-',i,' by ',exm_ni_axis(i)
         case default
            print *, 'ERROR: (create) NI_MODEL must be 1-5.'
            stop

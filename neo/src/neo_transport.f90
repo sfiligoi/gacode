@@ -36,7 +36,7 @@ module neo_transport
   ! potential: delta_phi(theta)
   ! NOTE: defined by sum_s Z_s e int f_s = 0
   ! -- i.e. really only valid for first-order potential
-  real, dimension(:), allocatable :: d_phi         ! (ntheta)
+  real, dimension(:), allocatable :: d_phi       ! (ntheta)
   real                            :: d_phi_sqavg ! <d_phi^2>_theta 
 
   integer, parameter, private :: io=1
@@ -174,8 +174,12 @@ contains
        ix = ix_indx(i)
        it = it_indx(i)
 
+       ! This is lambda_a (the effective potential energy)
        rfac = Z(is)/temp(is,ir) * (phi_rot(it) - phi_rot_avg) &
             - (omega_rot(ir) * bigR(it) / vth(is,ir))**2 * 0.5
+       if(aniso_model(is) == 2) then
+          rfac = rfac + lam_rot_aniso(is,it)
+       endif
 
        if (ix == 0) then  
           pflux(is) = pflux(is) + w_theta(it) &
@@ -335,6 +339,11 @@ contains
             + omega_rot_deriv(ir) &
             * omega_rot(ir)/vth(is,ir)**2 * (bigR_th0**2 - bigR2_avg) &
             + omega_rot(ir)**2 * bigR_th0 / vth(is,ir)**2 * bigR_th0_rderiv))
+       if(aniso_model(is) == 2) then
+          kbig_upar(is) = kbig_upar(is) &
+               - (I_div_psip * rho(ir) * temp(is,ir) / (z(is)*1.0)) &
+               * (dlntdr(is,ir) * lam_rot_avg_aniso(is))
+       endif
        if(abs(dlntdr(is,ir)) > epsilon(0.)) then
           klittle_upar(is) = -kbig_upar(is) *  B2_div_dens &
                / (dlntdr(is,ir) * &
@@ -373,8 +382,11 @@ contains
        do it=1,n_theta
           rfac = Z(is)/temp(is,ir) * (phi_rot(it) - phi_rot_avg) &
                - (omega_rot(ir) * bigR(it) / vth(is,ir))**2 * 0.5
+          if(aniso_model(is) == 2) then
+             rfac = rfac + lam_rot_aniso(is,it)
+          endif
           fac1 = fac1 + w_theta(it) * dens(is,ir)  * dens_fac(is,it) &
-               / Bmag(it)**3 * (2.0 * gradr(it) * k_par(it) * gradr_tderiv(it) &
+               / Bmag(it)**3 * (2.0*gradr(it) * k_par(it) * gradr_tderiv(it) &
                - 1.0/Bmag(it) * gradr(it)**2 * gradpar_Bmag(it))
           fac2 = fac2 + w_theta(it) * dens(is,ir)  * dens_fac(is,it) &
                / Bmag(it)**3 * (2.0 * gradr(it) * k_par(it) &
@@ -385,6 +397,8 @@ contains
        pflux_gv(is) = -0.5 * rho(ir)**2 * mass(is) &
             * temp(is,ir) / (Z(is)*1.0)**2 * I_div_psip * r(ir) / q(ir) &
             * fac1 * omega_rot_deriv(ir)
+       ! EAB: 02/05/14 fixed bug in mflux_gv -- dlntdr bigR_th0**2 term
+       ! had wrong sign
        mflux_gv(is) =  -0.5 * temp(is,ir) * rho(ir)**2 * mass(is) &
             * temp(is,ir) / (Z(is)*1.0)**2 * I_div_psip * r(ir) / q(ir) &
             * (fac2 * dlntdr(is,ir) + fac1 * (dlnndr(is,ir) &
@@ -393,8 +407,9 @@ contains
             * omega_rot_deriv(ir) &
             + omega_rot(ir)**2 * bigR_th0 / vth(is,ir)**2 &
             * bigR_th0_rderiv &
-            + dlntdr(is,ir) * (1.0 - 0.5 * omega_rot(ir)**2 * bigR_th0**2  &
-            / vth(is,ir)**2 - z(is)/temp(is,ir) * phi_rot_avg) ) )
+            + dlntdr(is,ir) * (1.0 + 0.5 * omega_rot(ir)**2 * bigR_th0**2  &
+            / vth(is,ir)**2) &
+            + dlntdr(is,ir) * z(is)/temp(is,ir) * phi_rot_avg) )
        eflux_gv(is) = -0.5  * temp(is,ir) * rho(ir)**2 * mass(is) &
             * temp(is,ir) / (Z(is)*1.0)**2 * I_div_psip * r(ir) / q(ir) &
             * fac2 * omega_rot_deriv(ir) &
@@ -431,6 +446,7 @@ contains
        do it=1, n_theta
           vpol(is,it) = kbig_upar(is) &
                * Bpol(it) / (dens(is,ir) * dens_fac(is,it))
+          ! EAB: 02/05/14 -- fixed bug in vtor -- missing bigR_th0_rderiv term
           vtor(is,it) = kbig_upar(is) &
                * Btor(it) / (dens(is,ir) * dens_fac(is,it)) &
                + (I_div_psip * rho(ir) * temp(is,ir) / (z(is)*1.0)) &
@@ -441,8 +457,16 @@ contains
                * (1.0 + z(is) / temp(is,ir) * phi_rot(it) &
                + omega_rot(ir)**2 * 0.5/vth(is,ir)**2 &
                * (bigR_th0**2 - bigR(it)**2)) &
+               + omega_rot(ir)**2 * bigR_th0 &
+                     / vth(is,ir)**2 * bigR_th0_rderiv &
                + omega_rot_deriv(ir) * omega_rot(ir)/vth(is,ir)**2 &
                * (bigR_th0**2 - bigR(it)**2))
+          if(aniso_model(is) == 2) then
+             vtor(is,it) = vtor(is,it) &
+                  + (I_div_psip * rho(ir) * temp(is,ir) / (z(is)*1.0)) &
+                  * (1.0 / Btor(it)) &
+                  * (dlntdr(is,ir) * lam_rot_aniso(is,it))
+          endif
        end do
 
        vpol_th0(is) = 0.0
@@ -516,9 +540,10 @@ contains
   subroutine TRANSP_write(ir)
     use neo_globals
     use neo_equilibrium, only: bigR_th0, Btor_th0, I_div_psip
+    use neo_rotation
     implicit none
     integer, intent (in) :: ir
-    integer :: is, jt
+    integer :: is, jt, it
 
     if(silent_flag > 0 .or. i_proc > 0) return
 

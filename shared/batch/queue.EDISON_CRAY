@@ -23,7 +23,8 @@ mpinuma=${7}
 . $GACODE_ROOT/shared/bin/gacode_mpi_tool
 
 echo "----------------------------------"
-echo "Cray XC30 (edison) [24 cores/node]"
+echo "Cray XC30 (edison) [16 cores/node]"   
+echo "NOTE: numa=2, max(mpinuma)=8      "   
 echo "----------------------------------"
 echo
 echo "Cores requested (mppwidth)   : $cores_requested"

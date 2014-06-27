@@ -39,7 +39,6 @@ subroutine gyro_read_input
   call readbc_int(n_pass)
   call readbc_int(n_trap)
   call readbc_int(n_energy)
-  call readbc_int(variable_egrid_flag)
   call readbc_int(n_blend)
   call readbc_int(blend_fit_order)
   call readbc_int(n_theta_plot)
@@ -101,16 +100,9 @@ subroutine gyro_read_input
   call readbc_int(flat_profile_flag)
   call readbc_int(density_method)
   call readbc_int(integrator_method)
+  call readbc_real(energy_max)
 
   ! Species: (1-3) ions and electrons.
-
-  energy_max_vec = 0.0
-  call readbc_real(x) ; energy_max_vec(1) = x
-  call readbc_real(x) ; energy_max_vec(2) = x
-  call readbc_real(x) ; energy_max_vec(3) = x
-  call readbc_real(x) ; energy_max_vec(4) = x
-  call readbc_real(x) ; energy_max_vec(5) = x
-  call readbc_real(x) ; energy_max_vec(0) = x
 
   mu_vec = 0.0
   call readbc_real(x) ; mu_vec(1) = x
@@ -246,7 +238,6 @@ subroutine gyro_read_input
   call readbc_real(gkeigen_tol)
   call readbc_real(gkeigen_omega_target)
   call readbc_real(gkeigen_gamma_target)
-
   call readbc_int(linsolve_method)
 
   ! Field eigenvalue solver inputs
@@ -255,27 +246,10 @@ subroutine gyro_read_input
   call readbc_real(fieldeigen_wi)
   call readbc_real(fieldeigen_tol)
 
-  ! Chris' profile integration option
   call readbc_int(reintegrate_flag)
-
-  ! New collision options
-  call readbc_int(coll_op_cons_flag)
-  call readbc_int(coll_op_self_flag)
   call readbc_int(ic_method)
-
-  ! hdf5 output
-  call readbc_int(io_method)
-  ! time intervals for hdf5 write outs
-  call readbc_int(time_skip_wedge)
-  ! pie-slice alpha ??
-  call readbc_int(n_torangle_wedge) 
-  call readbc_int(n_torangle_3d) 
-  ! toroidal direction
-  call readbc_real(theta_wedge_offset)
-  call readbc_real(theta_wedge_angle)
-  ! synthetic diagnostics
-  call readbc_real(torangle_offset)
-  !
+  call readbc_int(zf_test_flag)
+  call readbc_int(lock_ti_flag)
   ! DONE reading data.
   !--------------------------------------------------------
 

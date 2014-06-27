@@ -36,11 +36,6 @@ LMATH = $(LAPACK) \
 NETCDF = ${NETCDFHOME}/lib/libnetcdff.a ${NETCDFHOME}/lib/libnetcdf.a
 NETCDF_INC = ${NETCDFHOME}/include
 
-# HDF5
-HDF5_LIBS = -L$(HDF5_HOME)/lib -lhdf5_fortran -lhdf5 -lz
-HDF5_INC = -I$(HDF5_HOME)/include/
-VSHDF5_MAKECMD=vshdf5
-
 # Archive
 
 ARCH = ar cr

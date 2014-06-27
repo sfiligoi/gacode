@@ -12,30 +12,37 @@ index   = int(sys.argv[3])
 rc('lines',linewidth=1.5)
 
 dim = np.loadtxt(simdir+'/out.le3.geoscalar')
-vec = np.loadtxt(simdir+'/out.le3.geovector')
-
 nts = int(dim[0])
 nps = int(dim[1])
 ns  = int(dim[2])
 q   = float(dim[7])
 
-if index == 0:
-    symbol = '\\bar{\\theta}-\\theta'
-if index == 1:
-    symbol = 'vx'
-if index == 2:
-    symbol = 'flux'
-if index == 3:
-    symbol = 'B'
-if index == 4:
-    symbol = '1'
-if index == 5:
-    symbol = 'Ave'
-if index == 6:
-    symbol = 'B'
-
 z = np.zeros(ns)
-z = vec[:,index]
+
+if index < 7:
+    vec = np.loadtxt(simdir+'/out.le3.geovector')
+    z = vec[:,index]
+    if index == 0:
+        symbol = '\\bar{\\theta}-\\theta'
+    if index == 1:
+        symbol = 'vx'
+    if index == 2:
+        symbol = 'flux'
+    if index == 3:
+        symbol = 'B'
+    if index == 4:
+        symbol = '1'
+    if index == 5:
+        symbol = 'Ave'
+    if index == 6:
+        symbol = 'B'
+else:
+    vec = np.loadtxt(simdir+'/out.le3.rho')
+    z = vec[:,index-7]
+    if index == 7:
+        symbol = '\\delta\\theta'
+    if index == 8:
+        symbol = '\\delta\chi'
 
 nx = 256
 
@@ -86,7 +93,7 @@ for s in range(4):
 ax.set_xlabel(r'$s/\pi$')
 ax.set_ylabel(r'$'+symbol+'$')
 ax.set_xlim([0,2])
-ax.set_ylim([0.90,1.15])
+#ax.set_ylim([0.90,1.15])
 
 if imgfile == 'screen':
     plt.show()

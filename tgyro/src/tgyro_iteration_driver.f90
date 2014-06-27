@@ -36,6 +36,7 @@ subroutine tgyro_iteration_driver
   allocate(x_vec0(p_max)) 
   allocate(f_vec0(p_max))
   allocate(g_vec0(p_max))
+  allocate(quant(p_max))
   allocate(b(p_max))
 
   call tgyro_allocate_globals
@@ -58,21 +59,25 @@ subroutine tgyro_iteration_driver
            p  = p+1
            ip = ip+1
            pmap(i,ip) = p
+           quant(p) = 'ti'
         endif
         if (loc_te_feedback_flag == 1) then
            p  = p+1
            ip = ip+1
            pmap(i,ip) = p
+           quant(p) = 'te'
         endif
         if (loc_ne_feedback_flag == 1) then
            p  = p+1
            ip = ip+1
            pmap(i,ip) = p
+           quant(p) = 'ne'
         endif
         if (loc_er_feedback_flag == 1) then
            p  = p+1
            ip = ip+1
            pmap(i,ip) = p
+           quant(p) = 'er'
         endif
      enddo
   endif
@@ -86,6 +91,11 @@ subroutine tgyro_iteration_driver
   if (tgyro_noturb_flag == 1) then
 
      flux_method = 4
+
+  else if (lpath(1:3) == "FUN") then
+
+     flux_method = 5
+     dx = loc_dx/r_min
 
   else if (lpath(1:3) == "IFS") then
 
@@ -168,6 +178,13 @@ subroutine tgyro_iteration_driver
         x_vec(p) = f_rot(i)
      endif
   enddo
+
+  ! Make some resets if we are in test mode
+  if (gyrotest_flag == 1) then
+     tgyro_iteration_method = 1
+     tgyro_relax_iterations = 0
+  endif
+
 
   select case (tgyro_iteration_method) 
 

@@ -74,7 +74,7 @@ subroutine gyro_fieldeigen_df
                     endif
 
                     if (n_field > 2) then
-                       fg(:,i_diff,i,mk,3) = 2.0*energy(ie,is)*lambda(i,k) &
+                       fg(:,i_diff,i,mk,3) = 2.0*energy(ie)*lambda(i,k) &
                             *tem_s(is,i)/z(is) &
                             *w_gyro1(m0,i_diff,i,p_nek_loc,is) &
                             *conjg(c_blend(:,m0,i,p_nek_loc))

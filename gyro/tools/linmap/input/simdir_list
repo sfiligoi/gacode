@@ -5,3 +5,14 @@ Local templates:
                      - No collisions
  
 
+ exp01              Experimental DIII-D case
+                    ITG branch
+                     - Miller geometry
+                     - electron-ion collisions
+
+
+ exp02              Experimental DIII-D case
+                    TEM branch
+                     - Miller geometry
+                     - electron-ion collisions
+

@@ -68,7 +68,7 @@ subroutine gyro_collision_krook
               ! Moment: energy
 
               sum2_loc(j+n_blend,i) = sum2_loc(j+n_blend,i)+ &
-                   h_tmp(m,i)*energy(ie,1)*&
+                   h_tmp(m,i)*energy(ie)*&
                    cs_blend(j,m0,i,p_nek_loc)
 
            enddo ! j
@@ -152,7 +152,7 @@ subroutine gyro_collision_krook
                    rhs_krook(m,i,p_nek_loc)+ &
                    (sum2_glob(j,i)+ &
                    sum_glob(j,i)*v_para(m,i,p_nek_loc,1)+ &
-                   sum2_glob(j+n_blend,i)*energy(ie,1))*c_blend(j,m0,i,p_nek_loc)
+                   sum2_glob(j+n_blend,i)*energy(ie))*c_blend(j,m0,i,p_nek_loc)
 
            enddo ! j
 

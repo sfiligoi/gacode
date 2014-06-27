@@ -43,7 +43,6 @@ SUBROUTINE xgrid_functions_sa
   !
   rmin_input = rmin_sa
   Rmaj_input = rmaj_sa
-  q_input = q_sa
   !
   ! fill the x-grid eikonal function arrays wdx and b0x
   eps = rmin_sa/rmaj_sa
@@ -52,6 +51,7 @@ SUBROUTINE xgrid_functions_sa
   !
   !EPS2011 midplane_shear = shat_sa - alpha_sa
   !EPS2011 sign_kx0=1.0
+  kx0 = 0.0
   kx0_e = 0.0
   if(alpha_quench_in.eq.0.0.and.gamma_reference_kx0(1).ne.0.0)then
      vexb_shear_kx0 = alpha_e_in*vexb_shear_s
@@ -114,7 +114,7 @@ SUBROUTINE xgrid_functions_sa
      !
      cx_tor_par(i) = rmaj_sa*Rx*sign_Bt_in
      cx_tor_per(i) = -rmin_sa/q_sa
-     cx_par_par(i) = 1.0/Bx(i)
+     cx_par_par(i) = Bx(i)
   enddo
   !
   ! compute the effective trapped fraction
@@ -126,8 +126,8 @@ SUBROUTINE xgrid_functions_sa
   B2_ave_out = 0.0
   R2_ave_out = 0.0
   RBt_ave_out = rmaj_sa
-  a_pol_out = 0.0
-  a_tor_out = 0.0
+  B_ave_out = 0.0
+  Bt_ave_out = 0.0
   dthx = pi_2/REAL(2*nx)
   thx = 0.0
   do i=1,2*nx
@@ -136,13 +136,13 @@ SUBROUTINE xgrid_functions_sa
      Rx2 = 1.0 + eps*COS(thx)
      R2_ave_out = R2_ave_out + dthx*(Rx1**2 + Rx2**2)/2.0
      B2_ave_out = B2_ave_out + dthx*(0.5/Rx1**2 + 0.5/Rx2**2)
-     a_pol_out = a_pol_out + dthx*(0.5/Rx1 +0.5/Rx2)
-     a_tor_out = a_tor_out + dthx*(0.5*Rx1 + 0.5*Rx2)
+     B_ave_out = B_ave_out + dthx*(0.5/Rx1 +0.5/Rx2)
+     Bt_ave_out = Bt_ave_out + dthx*(0.5*Rx1 + 0.5*Rx2)
   enddo
   R2_ave_out = (R2_ave_out*rmaj_sa**2)/pi_2
   B2_ave_out = B2_ave_out/pi_2
-  a_pol_out = a_pol_out/pi_2
-  a_tor_out = a_tor_out/pi_2
+  B_ave_out = B_ave_out/pi_2
+  Bt_ave_out = Bt_ave_out/pi_2
   !
   ! poloidal magnetic field at outboard midplane
   !
@@ -177,7 +177,6 @@ SUBROUTINE xgrid_functions_geo
   REAL :: b1,b2
   REAL :: y1,y2
   REAL :: kxx1,kxx2
-  REAL :: cxtorpar1
   REAL :: cxtorper1,cxtorper2
   REAL :: B2x1,B2x2,R2x1,R2x2,norm_ave,dlp
   REAL :: kyi
@@ -366,8 +365,8 @@ SUBROUTINE xgrid_functions_geo
   !
   B2_ave_out = 0.0
   R2_ave_out = 0.0
-  a_pol_out = 0.0
-  a_tor_out = 0.0
+  B_ave_out = 0.0
+  Bt_ave_out = 0.0
   norm_ave=0.0
   do i=1,ms
      dlp = s_p(i)*ds*(0.5/Bp(i)+0.5/Bp(i-1))
@@ -378,14 +377,14 @@ SUBROUTINE xgrid_functions_geo
      R2x1 = R(i-1)**2
      R2x2 = R(i)**2
      R2_ave_out = R2_ave_out + dlp*(R2x1+R2x2)/2.0
-     a_pol_out = a_pol_out + dlp*(b_geo(i-1)+b_geo(i))/2.0
-     a_tor_out = a_tor_out + dlp*(f/b_geo(i-1)+f/b_geo(i))/(2.0*Rmaj_s)
+     B_ave_out = B_ave_out + dlp*(b_geo(i-1)+b_geo(i))/2.0
+     Bt_ave_out = Bt_ave_out + dlp*(f/b_geo(i-1)+f/b_geo(i))/(2.0*Rmaj_s)
   enddo
   R2_ave_out = R2_ave_out/norm_ave
   B2_ave_out = B2_ave_out/norm_ave
   B2_ave_out = B2_ave_out/B_unit**2
-  a_pol_out = a_pol_out/norm_ave
-  a_tor_out = a_tor_out/norm_ave
+  B_ave_out = B_ave_out/norm_ave
+  Bt_ave_out = Bt_ave_out/norm_ave
   !
   ! poloidal magnetic field on outboard midplane
   !
@@ -393,8 +392,8 @@ SUBROUTINE xgrid_functions_geo
   !
   ! write(*,*)"R2_ave_out=",R2_ave_out
   ! write(*,*)"B2_ave_out=",B2_ave_out
-  ! write(*,*)"a_pol_out=",a_pol_out
-  ! write(*,*)"a_tor_out=",a_tor_out
+  ! write(*,*)"B_ave_out=",B_ave_out
+  ! write(*,*)"Bt_ave_out=",Bt_ave_out
   !
   ! do m=0,ms
   ! write(*,*)m,s_prime(ms-m),s_prime(ms)-s_prime(m)
@@ -436,6 +435,8 @@ SUBROUTINE get_ft_sa
   Bmax = 1.0/(1.0 + eps*COS(theta_max))
   ! write(*,*)"theta_max = ",theta_max," Bmax = ",Bmax
   Bmin = 1.0/(1.0 + eps)
+  modB_min = Bmin
+  modB_test = 0.5*(Bmax + Bmin)/Bmin
   !
   if(ft_model_sa.eq.0)then
      ! Gauss-Chebyshev integration of trappped fraction
@@ -646,6 +647,8 @@ SUBROUTINE get_ft_geo
      ! write(*,*)i,"B_bounce =",B_bounce,Bmax
   endif
   ft = SQRT(1.0 - Bmin/B_bounce)
+  modB_min = ABS(Bmin)
+  modB_test = 0.5*(Bmax + Bmin)/Bmin
   ! write(*,*)"ft = ",ft
   !*************************************************************
   ! end of trapped fraction model
@@ -1206,7 +1209,6 @@ SUBROUTINE miller_geo
   !
   rmin_input = rmin_loc
   Rmaj_input = rmaj_loc
-  q_input = q_loc
 
   ! write(*,*)"miller_geo"
   x_delta = ASIN(delta_loc)
@@ -1462,7 +1464,6 @@ SUBROUTINE fourier_geo
   !
   rmin_input = rmin_s
   Rmaj_input = Rmaj_s
-  q_input = q_s
   !
   ! compute the arclength around the flux surface
   !
@@ -1732,7 +1733,6 @@ SUBROUTINE ELITE_geo
   !
   rmin_input = (Rmax-Rmin)/2.0
   Rmaj_input = (Rmax+Rmin)/2.0
-  q_input = q_s
 
   !
   ! find the major and minor radius at Z0

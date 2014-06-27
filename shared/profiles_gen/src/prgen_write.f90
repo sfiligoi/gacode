@@ -16,6 +16,7 @@ subroutine prgen_write
   integer :: i,ip
   integer :: indx
   character (len=15) :: ion_string ! Up to 5 two letter ions
+  character (len=3) :: iname ! 3 character ion string
   !---------------------------------------------------------------
 
   open(unit=1,file='input.profiles',status='replace')
@@ -66,9 +67,9 @@ subroutine prgen_write
         endif
      enddo
      write(1,20) '#'
-     write(1,'(a,f6.2)') '#       Quasineutrality error (%) ',quasi_err*100.0
-     write(1,'(a,f6.2)') '#       e power balance error (%) ',pow_e_err*100.0
-     write(1,'(a,f6.2)') '#       i power balance error (%) ',pow_i_err*100.0
+     write(1,'(a,f7.2)') '#       Quasineutrality error (%) ',quasi_err*100.0
+     write(1,'(a,f7.2)') '#       e power balance error (%) ',pow_e_err*100.0
+     write(1,'(a,f7.2)') '#       i power balance error (%) ',pow_i_err*100.0
 
   case (3)
 
@@ -79,6 +80,20 @@ subroutine prgen_write
      write(1,20) '#              TOKAMAK : ',ufile_tok
      write(1,20) '#          SHOT NUMBER : ',ufile_shot
      write(1,20) '#             TIME (s) : ',ufile_time
+
+     write(1,20) '#                 IONS :  Name       Z   Mass'
+     do i=1,ufile_nion
+        ip = reorder_vec(i)
+        call prgen_ion_name(nint(ufile_m(ip)),nint(ufile_z(ip)),iname)
+        write(1,'(a,a,t36,i3,t43,i3,t48,"[",a,"]")') '#                         ',&
+             iname,&
+             nint(ufile_z(ip)),&
+             nint(ufile_m(ip)),&
+             ufile_type(ip)
+     enddo
+
+     write(1,20) '#'
+     write(1,'(a,f6.2)') '#       Quasineutrality error (%) ',quasi_err*100.0
 
   case (7)
 
