@@ -1,9 +1,0 @@
-/home/stjohn/NTCC14/ntcdemo/utils/UFILE_write
-  1 transp stuff to be found here:
-  2 /datb/transproot/codesys/source
-  3 ufile description (formats etc):
-  4 /datb/transproot/codesys/source/doc/ufiles.texi
-  5 read 2d ufile:
-  6 /datb/transproot/codesys/source/uflib/uf2dre.for
-
-  UFILE is also in the nTCC repository

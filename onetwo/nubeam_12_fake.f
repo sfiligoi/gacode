@@ -1,3 +1,0 @@
-      subroutine nubeam
-      return
-      end
