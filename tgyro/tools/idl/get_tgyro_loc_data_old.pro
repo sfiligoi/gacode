@@ -1,4 +1,4 @@
-FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc
+FUNCTION get_tgyro_loc_data_old, simdir, DIRLOC=dirloc, N_ion=N_ion
 ;
 ; C. Holland, UCSD
 ;
@@ -24,6 +24,7 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc
 ; KEYWORDS
 ; simdir: string containing name of valid directory in local directory
 ; dirloc: string with pathname to directory containing simdir
+; N_ion: number of dynamic ion species to load.  Defaults to 1.
 ;
 ; v1.1: Apr. 15, 2009
 ; Added support for gamma_p in gradients.out, no_gammap_flag for
@@ -54,18 +55,16 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc
 ; updated to read in expt. data points from files name, ne_data.txt,
 ; te_data.txt, ti_data.txt in TGYRO dir and pass along- no problem if
 ;                                                       not available
-;
-; v4.0: July 6, 2014
-; updated to be consistent with current TGYRO naming schemes, removed
-; much "cruft".  Can use get_tgyro_loc_data_old.pro to load older
-; sims.  Now reads in loc_n_ion from input.tgyro.gen
-;
+
   IF N_ELEMENTS(simdir) EQ 0 THEN BEGIN
       MESSAGE, 'Need to specify a directory!', /INFO
       RETURN, 0
   ENDIF
 
-  IF N_ELEMENTS(dirloc) EQ 0 THEN dirloc = '.'
+
+;  IF N_ELEMENTS(dirloc) EQ 0 THEN dirpath = simdir + '/' $
+;  ELSE dirpath = dirloc + '/' + simdir + '/'
+  DEFAULT, dirloc, '.'
   dirpath = dirloc + '/' + simdir + '/'
 
   ;first read input.profiles to get inital info on fine grid
@@ -161,6 +160,7 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc
   CLOSE, 1
 
   ;get NX and N_it = # of iterations
+;  OPENR, 1, dirpath + 'control.out'
   OPENR, 1, dirpath + 'out.tgyro.control'
   NX = 0  ;force to be integer
   READF, 1, NX
@@ -210,6 +210,11 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc
   s = ' '
   OPENR, 1, dirpath + 'out.tgyro.geometry.2', ERROR=err
   arr = FLTARR(9,NX)
+  IF (err NE 0) THEN BEGIN
+      PRINT, 'Using old geometry_extra.out'
+      OPENR, 1, dirpath + 'geometry_extra.out'
+      arr = FLTARR(7,NX)
+  ENDIF
   READF, 1, s
   READF, 1, s
   READF, 1, arr
@@ -221,81 +226,43 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc
   vol = REFORM(arr[5,*])
   dvoldr = REFORM(arr[6,*])
 
-  ;read in n_ion from input.tgyro.gen
-  s = STRING('TGYRO_MODE')
-  OPENR, 1, dirpath + 'input.tgyro.gen'
-  WHILE (STRPOS(s,'LOC_N_ION') EQ -1) DO READF, 1, s
-  CLOSE, 1
-  n_ion = 0
-  READS, s, n_ion
-  PRINT, 'N_ion = ', n_ion
-
-  ;read flux_i.out
-  Gi_neo = FLTARR(N_ion,NX,N_it)
-  Gi_tur = FLTARR(N_ion,NX,N_it)
-  Qi_neo = FLTARR(N_ion,NX,N_it)
-  Qi_tur = FLTARR(N_ion,NX,N_it)
+  ;read chi_e.out
+  De_neo = FLTARR(NX,N_it)
+  De_tur = FLTARR(NX,N_it)
+  chie_neo = FLTARR(NX,N_it)
+  chie_tur = FLTARR(NX,N_it)
   s = ' '
-  arr = FLTARR(5,NX)
-  OPENR, 1, dirpath + 'out.tgyro.flux_i'
-  FOR ii = 0, N_it-1 DO BEGIN
-      READF, 1, s
-      READF, 1, s
-      READF, 1, arr
-      Gi_neo[0,*,ii] = arr[1,*]
-      Gi_tur[0,*,ii] = arr[2,*]
-      Qi_neo[0,*,ii] = arr[3,*]
-      Qi_tur[0,*,ii] = arr[4,*]
-  ENDFOR
+  arr = fltarr(5,NX)
+;  OPENR, 1, dirpath + 'chi_e.out'
+;  FOR ii = 0, N_it-1 DO BEGIN
+;      READF, 1, s
+;      READF, 1, s
+;      READF, 1, arr
+;      De_neo[*,ii] = arr[1,*]
+;      De_tur[*,ii] = arr[2,*]
+;      chie_neo[*,ii] = arr[3,*]
+;      chie_tur[*,ii] = arr[4,*]
+;  ENDFOR
   CLOSE, 1
 
-  ;read mflux_i.out
-  Mflux_i_neo = FLTARR(N_ion,NX,N_it)
-  Mflux_i_tur = FLTARR(N_ion,NX,N_it)
-  Expwd_i_tur = FLTARR(N_ion,NX,N_it) ;turbulent exchange
+  ;read chi_i.out
+  Di_neo = FLTARR(NX,N_it)
+  Di_tur = FLTARR(NX,N_it)
+  chii_neo = FLTARR(NX,N_it)
+  chii_tur = FLTARR(NX,N_it)
   s = ' '
-  arr = fltarr(4,NX)
-  OPENR, 1, dirpath + 'out.tgyro.mflux_i'
-  FOR ii = 0, N_it-1 DO BEGIN
-      READF, 1, s
-      READF, 1, s
-      READF, 1, arr
-      Mflux_i_neo[0,*,ii] = arr[1,*]
-      Mflux_i_tur[0,*,ii] = arr[2,*]
-      Expwd_i_tur[0,*,ii] = arr[3,*]
-  ENDFOR
-  CLOSE, 1
-
-  IF (n_ion GT 1) THEN FOR i_ion=1,n_ion-1 DO BEGIN
-      s = ' '
-      arr = FLTARR(5,NX)
-      OPENR, 1, dirpath + 'out.tgyro.flux_i' + $
-             STRCOMPRESS(STRING(i_ion+1), /REMOVE_ALL)
-      FOR ii = 0, N_it-1 DO BEGIN
-          READF, 1, s
-          READF, 1, s
-          READF, 1, arr
-          Gi_neo[i_ion,*,ii] = arr[1,*]
-          Gi_tur[i_ion,*,ii] = arr[2,*]
-          Qi_neo[i_ion,*,ii] = arr[3,*]
-          Qi_tur[i_ion,*,ii] = arr[4,*]
-      ENDFOR
-      CLOSE, 1
-
-      s = ' '
-      arr = fltarr(4,NX)
-      OPENR, 1, dirpath + 'out.tgyro.mflux_i'+ $
-             STRCOMPRESS(STRING(i_ion+1), /REMOVE_ALL)
-      FOR ii = 0, N_it-1 DO BEGIN
-          READF, 1, s
-          READF, 1, s
-          READF, 1, arr
-          Mflux_i_neo[i_ion,*,ii] = arr[1,*]
-          Mflux_i_tur[i_ion,*,ii] = arr[2,*]
-          Expwd_i_tur[i_ion,*,ii] = arr[3,*]
-      ENDFOR
-      CLOSE, 1
-  ENDFOR
+  arr = fltarr(5,NX)
+;  OPENR, 1, dirpath + 'chi_i.out'
+;  FOR ii = 0, N_it-1 DO BEGIN
+;      READF, 1, s
+;      READF, 1, s
+;      READF, 1, arr
+;      Di_neo[*,ii] = arr[1,*]
+;      Di_tur[*,ii] = arr[2,*]
+;      chii_neo[*,ii] = arr[3,*]
+;      chii_tur[*,ii] = arr[4,*]
+;  ENDFOR
+;  CLOSE, 1
 
   ;read flux_e.out
   Ge_neo = FLTARR(NX,N_it)
@@ -304,6 +271,7 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc
   Qe_tur = FLTARR(NX,N_it)
   s = ' '
   arr = fltarr(5,NX)
+;  OPENR, 1, dirpath + 'flux_e.out'
   OPENR, 1, dirpath + 'out.tgyro.flux_e'
   FOR ii = 0, N_it-1 DO BEGIN
       READF, 1, s
@@ -316,20 +284,23 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc
   ENDFOR
   CLOSE, 1
 
-  ;read mflux_e.out
-  Mflux_e_neo = FLTARR(NX,N_it)
-  Mflux_e_tur = FLTARR(NX,N_it)
-  Expwd_e_tur = FLTARR(NX,N_it) ;turbulent exchange
+  ;read flux_i.out
+  Gi_neo = FLTARR(NX,N_it)
+  Gi_tur = FLTARR(NX,N_it)
+  Qi_neo = FLTARR(NX,N_it)
+  Qi_tur = FLTARR(NX,N_it)
   s = ' '
-  arr = fltarr(4,NX)
-  OPENR, 1, dirpath + 'out.tgyro.mflux_e'
+  arr = FLTARR(5,NX)
+;  OPENR, 1, dirpath + 'flux_i.out'
+  OPENR, 1, dirpath + 'out.tgyro.flux_i'
   FOR ii = 0, N_it-1 DO BEGIN
       READF, 1, s
       READF, 1, s
       READF, 1, arr
-      Mflux_e_neo[*,ii] = arr[1,*]
-      Mflux_e_tur[*,ii] = arr[2,*]
-      Expwd_e_tur[*,ii] = arr[3,*]
+      Gi_neo[*,ii] = arr[1,*]
+      Gi_tur[*,ii] = arr[2,*]
+      Qi_neo[*,ii] = arr[3,*]
+      Qi_tur[*,ii] = arr[4,*]
   ENDFOR
   CLOSE, 1
 
@@ -342,6 +313,7 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc
   Ge_target = FLTARR(NX, N_it)
   s = ' '
   arr = fltarr(7,NX)
+;  OPENR, 1, dirpath + 'flux_target.out'
   OPENR, 1, dirpath + 'out.tgyro.flux_target'
   FOR ii = 0, N_it-1 DO BEGIN
       READF, 1, s
@@ -356,11 +328,48 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc
   ENDFOR
   CLOSE, 1
 
+  ;read mflux_e.out
+  Mflux_e_neo = FLTARR(NX,N_it)
+  Mflux_e_tur = FLTARR(NX,N_it)
+  Expwd_e_tur = FLTARR(NX,N_it) ;turbulent exchange
+  s = ' '
+  arr = fltarr(4,NX)
+;  OPENR, 1, dirpath + 'mflux_e.out'
+  OPENR, 1, dirpath + 'out.tgyro.mflux_e'
+  FOR ii = 0, N_it-1 DO BEGIN
+      READF, 1, s
+      READF, 1, s
+      READF, 1, arr
+      Mflux_e_neo[*,ii] = arr[1,*]
+      Mflux_e_tur[*,ii] = arr[2,*]
+      Expwd_e_tur[*,ii] = arr[3,*]
+  ENDFOR
+  CLOSE, 1
+
+  ;read mflux_i.out
+  Mflux_i_neo = FLTARR(NX,N_it)
+  Mflux_i_tur = FLTARR(NX,N_it)
+  Expwd_i_tur = FLTARR(NX,N_it) ;turbulent exchange
+  s = ' '
+  arr = fltarr(4,NX)
+;  OPENR, 1, dirpath + 'mflux_i.out'
+  OPENR, 1, dirpath + 'out.tgyro.mflux_i'
+  FOR ii = 0, N_it-1 DO BEGIN
+      READF, 1, s
+      READF, 1, s
+      READF, 1, arr
+      Mflux_i_neo[*,ii] = arr[1,*]
+      Mflux_i_tur[*,ii] = arr[2,*]
+      Expwd_i_tur[*,ii] = arr[3,*]
+  ENDFOR
+  CLOSE, 1
+
   ;read mflux_target.out
   Mflux_tot = FLTARR(NX,N_it)
   Mflux_target = FLTARR(NX,N_it)
   s = ' '
   arr = fltarr(3,NX)
+;  OPENR, 1, dirpath + 'mflux_target.out'
   OPENR, 1, dirpath + 'out.tgyro.mflux_target'
   FOR ii = 0, N_it-1 DO BEGIN
       READF, 1, s
@@ -380,6 +389,7 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc
   s = ' '
   arr=FLTARR(6,NX)
 
+;  OPENR, 1, dirpath + 'gyrobohm.out'
   OPENR, 1, dirpath + 'out.tgyro.gyrobohm'
   FOR ii = 0, N_it-1 DO BEGIN
       READF, 1, s
@@ -425,6 +435,7 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc
   gamma_p = FLTARR(NX,N_it)   ;a*gamma_e/c_s
   s = ' '
   arr = fltarr(8,NX)
+;  OPENR, 1, dirpath + 'gradient.out'
   OPENR, 1, dirpath + 'out.tgyro.gradient'
   FOR ii = 0, N_it-1 DO BEGIN
       READF, 1, s
@@ -449,6 +460,7 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc
   M = FLTARR(NX,N_it)
   s = ' '
   arr = fltarr(8,NX)
+;  OPENR, 1, dirpath + 'profile.out'
   OPENR, 1, dirpath + 'out.tgyro.profile'
   FOR ii = 0, N_it-1 DO BEGIN
       READF, 1, s
@@ -466,42 +478,99 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc
   ;read power.out
   p_alpha = FLTARR(NX,N_it)
   p_brem = FLTARR(NX,N_it)
-  p_sync = FLTARR(NX,N_it)
-  p_line = FLTARR(NX,N_it)
-  p_exch = FLTARR(NX,N_it) ;energy to electrons from ions
-  p_expwd = FLTARR(NX,N_it) ;energy to electrons from ions
+  p_exch = FLTARR(NX,N_it)
+  p_expwd = FLTARR(NX,N_it)
   p_i_aux = FLTARR(NX,N_it)
   p_e_aux = FLTARR(NX,N_it)
   p_i = FLTARR(NX,N_it)
   p_e = FLTARR(NX,N_it)
   s = ' '
-  arr = FLTARR(6,NX)
-  OPENR, 1, dirpath + 'out.tgyro.power_i', ERROR=err
-  FOR it=0, N_it-1 DO BEGIN
-      READF, 1, s
-      READF, 1, s
-      READF, 1, arr
-      p_i_aux[*,it] = arr[2,*]
-      p_i[*,it] = arr[5,*]
-  ENDFOR
-  CLOSE,1
-  arr = FLTARR(9,NX)
-  OPENR, 1, dirpath + 'out.tgyro.power_e', ERROR=err
-  FOR it=0, N_it-1 DO BEGIN
-      READF, 1, s
-      READF, 1, s
-      READF, 1, arr
-      p_alpha[*,it] = arr[1,*]
-      p_brem[*,it] = arr[3,*]
-      p_sync[*,it] = arr[4,*]
-      p_line[*,it] = arr[5,*]
-      p_e_aux[*,it] = arr[2,*]
-      p_exch[*,it] = arr[6,*]
-      p_expwd[*,it] = arr[7,*]
-      p_i[*,it] = arr[8,*]
-  ENDFOR
+  OPENR, 1, dirpath + 'out.tgyro.power', ERROR=err
+  IF (err EQ 0 ) THEN BEGIN
+;      arr = fltarr(9,NX)
+;      FOR ii = 0, N_it-1 DO BEGIN
+;          READF, 1, s
+;          READF, 1, s
+;          READF, 1, arr
+;          p_alpha[*,ii] = arr[1,*]
+;          p_brem[*,ii] = arr[2,*]
+;          p_exch[*,ii] = arr[3,*]
+;          p_expwd[*,ii] =arr[4,*]
+;          p_i_aux[*,ii] = arr[5,*]
+;          p_e_aux[*,ii] = arr[6,*]
+;          p_i[*,ii] = arr[7,*]
+;          p_e[*,ii] = arr[8,*]
+;      ENDFOR
+  ENDIF ELSE BEGIN
+;      arr = fltarr(8,NX)      
+;      PRINT, 'Using old power.out file'
+;      OPENR, 1, dirpath + 'power.out'
+;      FOR ii = 0, N_it-1 DO BEGIN
+;          READF, 1, s
+;          READF, 1, s
+;          READF, 1, arr
+;          p_alpha[*,ii] = arr[1,*]
+;          p_brem[*,ii] = arr[2,*]
+;          p_exch[*,ii] = arr[3,*]
+;          p_i_aux[*,ii] = arr[4,*]
+;          p_e_aux[*,ii] = arr[5,*]
+;          p_i[*,ii] = arr[6,*]
+;          p_e[*,ii] = arr[7,*]
+;      ENDFOR
+  ENDELSE
   CLOSE, 1
 
+  DEFAULT, N_ion, 1
+  Di2_neo = FLTARR(NX,N_it)
+  Di2_tur = FLTARR(NX,N_it)
+  chii2_neo = FLTARR(NX,N_it)
+  chii2_tur = FLTARR(NX,N_it)
+  Gi2_neo = FLTARR(NX,N_it)
+  Gi2_tur = FLTARR(NX,N_it)
+  Qi2_neo = FLTARR(NX,N_it)
+  Qi2_tur = FLTARR(NX,N_it)
+
+  IF (N_ion GE 2) THEN BEGIN
+
+     ;read chi_i2.out
+     Di2_neo = FLTARR(NX,N_it)
+     Di2_tur = FLTARR(NX,N_it)
+     chii2_neo = FLTARR(NX,N_it)
+     chii2_tur = FLTARR(NX,N_it)
+     s = ' '
+     arr = fltarr(5,NX)
+;     OPENR, 1, dirpath + 'chi_i2.out'
+;     FOR ii = 0, N_it-1 DO BEGIN
+;        READF, 1, s
+;        READF, 1, s
+;        READF, 1, arr
+;        Di2_neo[*,ii] = arr[1,*]
+;        Di2_tur[*,ii] = arr[2,*]
+;        chii2_neo[*,ii] = arr[3,*]
+;        chii2_tur[*,ii] = arr[4,*]
+;     ENDFOR
+;     CLOSE, 1
+
+     ;read flux_i2.out
+     Gi2_neo = FLTARR(NX,N_it)
+     Gi2_tur = FLTARR(NX,N_it)
+     Qi2_neo = FLTARR(NX,N_it)
+     Qi2_tur = FLTARR(NX,N_it)
+     s = ' '
+     arr = FLTARR(5,NX)
+;     OPENR, 1, dirpath + 'flux_i2.out'
+     OPENR, 1, dirpath + 'out.tgyro.flux_i2'
+     FOR ii = 0, N_it-1 DO BEGIN
+        READF, 1, s
+        READF, 1, s
+        READF, 1, arr
+        Gi2_neo[*,ii] = arr[1,*]
+        Gi2_tur[*,ii] = arr[2,*]
+        Qi2_neo[*,ii] = arr[3,*]
+        Qi2_tur[*,ii] = arr[4,*]
+     ENDFOR
+     CLOSE, 1
+  ENDIF
 
  ne_data_rho = -1
  ne_data = 0
@@ -608,30 +677,36 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc
 	  vol: vol, $           ;volume (m**3)
           Vprime: dvoldr, $     ;dV/dr_min, m**2
 
-          N_ion: N_ion, $
           ;following are arrays of form FLTARR[NX,N_it]
+          Di_neo: Di_neo, $     ;Di_neo/chi_gB
+          Di_tur: Di_tur, $     ;Di_turb/chi_gB
+          De_neo: De_neo, $     ;De_neo/chi_gB
+          De_tur: De_tur, $     ;De_turb/chi_gB
+          chii_neo: chii_neo, $ ;chii_neo/chi_gB
+          chii_tur: chii_tur, $ ;chii_turb/chi_gB
+          chie_neo: chie_neo, $ ;chie_neo/chi_gB
+          chie_tur: chie_tur, $ ;chie_turb/chi_gB
           Gi_neo: Gi_neo, $     ;particle fluxes in
           Gi_tur: Gi_tur, $     ;gB units
-          Qi_neo: Qi_neo, $     ;energy fluxes in
-          Qi_tur: Qi_tur, $     ;gB units
-          Mflux_i_neo: Mflux_i_neo, $  ;momentum fluxes in
-          Mflux_i_tur: Mflux_i_tur, $  ;gB units
-          Expwd_i_tur: Expwd_i_tur, $ ;ion turbulent exchange
-          ;following are arrays of form FLTARR[NX,N_it]
-          Qi_tot: Qi_tot, $
-          Qi_target: Qi_target, $
-          Mflux_tot: Mflux_tot, $
-          Mflux_target: Mflux_target, $
           Ge_neo: Ge_neo, $
           Ge_tur: Ge_tur, $
           Ge_tot: Ge_tot, $
           Ge_target: Ge_target, $
+          Qi_neo: Qi_neo, $     ;energy fluxes in
+          Qi_tur: Qi_tur, $     ;gB units
+          Qi_tot: Qi_tot, $
+          Qi_target: Qi_target, $
           Qe_neo: Qe_neo, $
           Qe_tur: Qe_tur, $
           Qe_tot: Qe_tot, $
           Qe_target: Qe_target, $
-          Mflux_e_neo: Mflux_e_neo, $
-          Mflux_e_tur: Mflux_e_tur, $
+          Mflux_i_neo: Mflux_i_neo, $  ;momentum fluxes in
+          Mflux_i_tur: Mflux_i_tur, $  ;gB units
+          Mflux_e_neo: Mflux_i_neo, $
+          Mflux_e_tur: Mflux_i_tur, $
+          Mflux_tot: Mflux_tot, $
+          Mflux_target: Mflux_target, $
+          Expwd_i_tur: Expwd_i_tur, $ ;ion turbulent exchange
           Expwd_e_tur: Expwd_e_tur, $ ;elec turbulent exchange
           chi_gB: chi_gB, $      ;chi_gB in m**/s
           G_gB: G_gB, $          ;G_gB in 10**19/m**2/s
@@ -658,14 +733,21 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc
           M: M, $                ;Mach number R*omega/c_s
           P_alpha: p_alpha, $    ;all powers in MW
           P_brem: p_brem, $
-          P_sync: p_sync, $
-          P_line: p_line, $
-          P_exch: p_exch, $ ;positive = to electrons from ions, coll. exchange
-          P_expwd: p_exch, $ ;positive = to electrons from ions, turb. exchange
+          P_exch: p_exch, $
           P_i_aux: p_i_aux, $
           P_e_aux: p_e_aux, $
           P_i: p_i, $
           P_e: p_e, $
+
+          N_ion: N_ion, $
+          Di2_neo: Di2_neo, $
+          Di2_tur: Di2_tur, $
+          chii2_neo: chii2_neo, $
+          chii2_tur: chii2_tur, $
+          Gi2_neo: Gi2_neo, $
+          Gi2_tur: Gi2_tur, $
+          Qi2_neo: Qi2_neo, $
+          Qi2_tur: Qi2_tur, $
 
           ;expt. data points
          ne_data_rho: ne_data_rho, $

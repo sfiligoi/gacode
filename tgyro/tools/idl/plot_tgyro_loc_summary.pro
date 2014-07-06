@@ -1,7 +1,7 @@
 PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks,$
   WCM2 = wcm2, DATA2 = data2, Nit2=N_it2, PS = ps, SUMMARY=summary, $
   PLOT_GRADIENTS=plot_gradients, PLOT_ROT=plot_rot, $
-  DATA_PSYM=data_psym, _EXTRA=extra
+  DATA_PSYM=data_psym, OLD=old, _EXTRA=extra
 ;
 ; C. Holland, UCSD
 ;
@@ -59,6 +59,7 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
 ; PLOT_ROT: plot rotation profiles and fluxes
 ; DATA_PSYM: set equal to value of symbol desired to plot expt. data
 ; if loaded (DEFAULT of 0 means no expt. data point plot even if loaded)
+; OLD: set =1 to use get_tgyro_loc_data_old.pro
 ;
 ; v1.0.1: Nov. 11, 2008
 ; Added SUMMARY flag.  Set equal to 1 to make a file called
@@ -97,7 +98,8 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
 
   DEFAULT, data_psym, 0
 
-  data = GET_TGYRO_LOC_DATA(simdir, DIRLOC=dirloc)
+  IF KEYWORD_SET(old) THEN data = GET_TGYRO_LOC_DATA_OLD(simdir, DIRLOC=dirloc) $
+  ELSE data = GET_TGYRO_LOC_DATA(simdir, DIRLOC=dirloc)
   IF (N_ELEMENTS(data2) GT 0) THEN d2flag = 1 ELSE d2flag = 0
   DEFAULT, N_it, data.N_it-1
   DEFAULT, N_it2, N_it
@@ -114,9 +116,16 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
       IF (d2flag) THEN x2 = data2.rmin
   ENDELSE
 
+  IF KEYWORD_SET(old) THEN  BEGIN
+      Qi_neo = data.Qi_neo[*,N_it]
+      Mflux_neo = data.Mflux_i_neo[*,N_it] + data.Mflux_e_neo[*,N_it]
+  ENDIF ELSE BEGIN
+      Qi_neo = REFORM(TOTAL(data.Qi_neo[*,*,N_it],1))
+      Mflux_neo = REFORM(TOTAL(data.Mflux_i_neo[*,*,N_it],1)) + $
+                  REFORM(data.Mflux_e_neo[*,N_it])
+  ENDELSE
   Qi_target = data.Qi_target[*,N_it]
   Qi_tot = data.Qi_tot[*,N_it]
-  Qi_neo = data.Qi_neo[*,N_it]
   Qi0 = data.Qi_target[*,0]
   Qe_target = data.Qe_target[*,N_it]
   Qe_tot = data.Qe_tot[*,N_it]
@@ -127,7 +136,6 @@ PRO plot_tgyro_loc_summary, simdir, DIRLOC=dirloc, N_it = N_it, RHO=rho, MKS=mks
   Ge_neo = data.Ge_neo[*,N_it]
   Mflux_target = data.Mflux_target[*,N_it]
   Mflux_tot = data.Mflux_tot[*,N_it]
-  Mflux_neo = data.Mflux_i_neo[*,N_it] + data.Mflux_e_neo[*,N_it]
   Mflux0 = data.Mflux_target[*,N_it]
   units = '(gB)'
   ge_units = ' (gB)'
