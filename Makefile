@@ -6,6 +6,7 @@ all:
 	cd gato ; make 
 	cd tglf ; make
 	cd tgyro ; make
+	cd le3 ; make
 
 clean:
 	cd shared ; make clean
