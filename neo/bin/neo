@@ -30,6 +30,9 @@ then
   echo "         -e <simdir>" 
   echo "         Run NEO using input.neo in <simdir>."
   echo
+  echo "         -n <MPI tasks>" 
+  echo "         Number of MPI tasks."
+  echo
   echo "REGRESSION TESTING"
   echo
   echo "         -rc <simdir>"
@@ -65,6 +68,9 @@ SIMROOT=$PWD
 NEO_DIR=$GACODE_ROOT/neo
 # Default number of cores
 NPROC=1
+NOMP=1
+NUMA=0
+MPINUMA=0
 # Execute/test mode flags
 EXEC_FLAG=0
 GENERATE_FLAG=0
@@ -81,6 +87,8 @@ while [ $# -gt 0 ] ; do
   -p) shift ; SIMROOT=$1 ;;
 
   -e) shift ; LOCDIR=$1 ; EXEC_FLAG=1 ;;
+
+  -n) shift ; NPROC=$1 ;;
 
   -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
 
@@ -200,8 +208,8 @@ then
   date >> out.neo.version
   #==========================================================
 
-#  mpiexec -np 4 $NEO_DIR/src/neo
-   $NEO_DIR/src/neo
+  $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM \
+    $SIMDIR $NPROC $NEO_DIR/src/neo $NOMP $NUMA $MPINUMA
 
 fi
 #===========================================================
