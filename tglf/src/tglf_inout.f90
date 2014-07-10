@@ -1563,7 +1563,7 @@ SUBROUTINE write_wavefunction_out(datafile)
 
   INTEGER :: i,n,k,noff
   REAL :: wave(maxmodes*6)
-  CHARACTER(len=80) :: header
+  CHARACTER(len=81) :: header
   CHARACTER(len=11) :: theta="    theta  "
   CHARACTER(len=22) :: phi="  RE(phi)    IM(phi)  "
   CHARACTER(len=24) :: Bper="  RE(Bper)    IM(Bper)  "

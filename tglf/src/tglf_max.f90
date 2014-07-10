@@ -82,6 +82,9 @@
       dt = (tmax-tmin)/REAL(nt-1)
       tp = tmin
       do i=1,nt
+       gamma_n(i)=0.0
+       freq_n(i)=0.0
+       width_n(i)=0.0
        tp = tmin + REAL(i-1)*dt
        width_in = 10.0**tp
 !       write(*,*)"width_in = ",width_in

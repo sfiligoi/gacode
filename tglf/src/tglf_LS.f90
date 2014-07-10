@@ -374,6 +374,7 @@
       REAL :: wd0,gnet
       REAL :: c1,pols,ks
       REAL :: get_GAM_freq
+      REAL :: intensity
 !
       pols = (ave_p0(1,1)/ABS(as(1)*zs(1)*zs(1)))**2 ! scale invariant pol
       ks = kp*SQRT(taus(1)*mass(2))   ! scale invariant gyroradius * poloidal wavenumber
@@ -406,7 +407,7 @@
        endif
        wd0 =ks*SQRT(taus(1)/mass(2))/R_unit  ! renomalized for scale invariance
        gnet = gp/wd0
-       get_intensity = cnorm*(wd0**2)*(gnet**exponent1 &
+       intensity = cnorm*(wd0**2)*(gnet**exponent1 &
         + c1*gnet)/(kp**4)
       elseif(sat_rule_in.eq.1)then
 !
@@ -417,17 +418,17 @@
 !       exponent1 = 1.22
        exponent1 = 1.208
        gnet = gp
-!       get_intensity = 9.09*pols*(gnet**exponent1)*(gnet**2+0.3935*wd0**2)**(1.0-exponent/2.0)
-       get_intensity = 8.347*pols*(gnet**exponent1)*(gnet**2+wd0**2)**(1.0-exponent1/2.0)
+!       intensity = 9.09*pols*(gnet**exponent1)*(gnet**2+0.3935*wd0**2)**(1.0-exponent/2.0)
+       intensity = 8.347*pols*(gnet**exponent1)*(gnet**2+wd0**2)**(1.0-exponent1/2.0)
 !       exponent1 = 1.53
-!       get_intensity = 15.29*pols*(gnet**exponent1)*get_GAM_freq()**(2.0-exponent1)
-       get_intensity = get_intensity/(kp**4)
+!       intensity = 15.29*pols*(gnet**exponent1)*get_GAM_freq()**(2.0-exponent1)
+       intensity = intensity/(kp**4)
       endif
-      if(alpha_quench_in.eq.0.0.and.kx0_e.ne.0.0)then
-        get_intensity = get_intensity/(1.0+0.56*kx0_e**2)**2
-        get_intensity = get_intensity/(1.0+(1.15*kx0_e)**4)**2
+      if(alpha_quench_in.eq.0.0.and.ABS(kx0_e).gt.0.0)then
+        intensity = intensity/(1.0+0.56*kx0_e**2)**2
+        intensity = intensity/(1.0+(1.15*kx0_e)**4)**2
       endif
-      get_intensity = get_intensity/B_unit**2
+      get_intensity = intensity/B_unit**2
 !
       END FUNCTION get_intensity
 !
@@ -610,7 +611,7 @@
       REAL :: stress_correction,wp
 !
 !      xi=(0.0,1.0)
-      epsilon1 = 1.D-12
+      epsilon1 = 1.E-12
       freq_QL = eigenvalue
 !      ft2=ft*ft
 !      cu = 1.0

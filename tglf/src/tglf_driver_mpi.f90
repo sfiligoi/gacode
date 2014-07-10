@@ -7,12 +7,8 @@
 !
       IMPLICIT NONE
 ! local variables
-      INTEGER :: i,j,k,nfields,ierr
+      INTEGER :: i,j,ierr
       REAL :: cmult,a_unit=100.0,B_unit=10000.0
-      REAL :: t,dt
-! timing test
-      INTEGER :: time_array(8)
-      REAL :: cpu1,cpu2 
 !
   ! initialize MPI
       call MPI_INIT(ierr)
