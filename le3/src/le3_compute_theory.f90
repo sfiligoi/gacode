@@ -180,10 +180,10 @@ subroutine le3_compute_theory
   g3fac = g3fac / (nt*np) / vprime
 
   ! Parameters for Simikov PoP 2009 PS theory
-  ! u = 2*ahat
+  ! u = -2*ahat
 
   ! <u B^2>
-  gs1 = 2.0*bsqahat_avg
+  gs1 = -2.0*bsqahat_avg
 
   ! <u^2 B^2>
   gs2 = 0.0
@@ -198,14 +198,14 @@ subroutine le3_compute_theory
   gs3 = 0.0
   do i=1,nt
      do j=1,np
-        gs3 = gs3  + g(i,j) * bdotgradB_overB(i,j)**2 * ahat(i,j) * 2.0
+        gs3 = gs3  - g(i,j) * bdotgradB_overB(i,j)**2 * ahat(i,j) * 2.0
      enddo
   enddo
   gs3 = gs3 / (nt*np) / vprime
 
   ! bdotgrad(uB^2)
   allocate(ubfac(nt,np))
-  ubfac = 2.0 * a * bmag**2 + 4.0 * ahat * bmag * (bdotgradB_overB*bmag)
+  ubfac = -(2.0 * a * bmag**2 + 4.0 * ahat * bmag * (bdotgradB_overB*bmag))
 
   ! < ((bdotgradB)/B) bdotgrad(uB^2)>
   gs4 = 0.0
@@ -229,7 +229,7 @@ subroutine le3_compute_theory
   gs6 = 0.0
   do i=1,nt
      do j=1,np
-        gs6 = gs6  + g(i,j) * ubfac(i,j) * bdotgradB_overB(i,j) &
+        gs6 = gs6  - g(i,j) * ubfac(i,j) * bdotgradB_overB(i,j) &
              * ahat(i,j) * 2.0
      enddo
   enddo

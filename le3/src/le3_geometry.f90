@@ -4,6 +4,7 @@ subroutine le3_geometry
 
   implicit none
   integer :: i,j,k,its,ips,ip,kt,kp
+  real :: bsq_avg
   real, dimension(:), allocatable :: vec_vdriftx
   real, dimension(:), allocatable :: vec_flux
   real, dimension(:), allocatable :: vec_upar
@@ -197,11 +198,29 @@ subroutine le3_geometry
   vdrift_x(:,:) = 1/(rmin*bmag * g**2) &
        * (-dbdt * (gpp + iota * gpt) + dbdp * (gpt + iota*gtt)) / bmag**2
 
+  ! flux-surface d volume / dr
+  vprime = 0.0
+  do i=1,nt
+     do j=1,np
+        vprime = vprime + g(i,j)
+     enddo
+  enddo
+  vprime = vprime / (nt*np)
+
   ! -bhat cross grad f dot grad r / B 
+  ! in the "DKES" formulation, replace 1/B with B/<B^2>
+  ! < B^2>
+  bsq_avg      = 0.0
+  do i=1,nt
+     do j=1,np
+        bsq_avg = bsq_avg + g(i,j) * bmag(i,j)**2
+     enddo
+  enddo
+  bsq_avg      = bsq_avg / (nt*np) / vprime
   vexb_dt(:,:) = -1/(rmin*bmag * g**2) &
-       * (-(gpp + iota * gpt)) 
+       * (-(gpp + iota * gpt)) * bmag/bsq_avg
   vexb_dp(:,:) = -1/(rmin*bmag * g**2) & 
-       * (gpt + iota*gtt) / bmag
+       * (gpt + iota*gtt) * bmag/bsq_avg
 
   ! construct the geo collocation matices
 
@@ -350,15 +369,6 @@ subroutine le3_geometry
   close(1)
 
   ! Construct the geo vectors
-
-  ! flux-surface d volume / dr
-  vprime = 0.0
-  do i=1,nt
-     do j=1,np
-        vprime = vprime + g(i,j)
-     enddo
-  enddo
-  vprime = vprime / (nt*np)
 
   vec_thetabar(:) = vec_thetabar(:) / (nt*np)
   vec_vdriftx(:)  = vec_vdriftx(:) / (nt*np)
