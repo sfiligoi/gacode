@@ -358,8 +358,6 @@
       REAL :: ky_min=0.05
       REAL :: ky_max=0.7
       REAL :: ky0,ky1,lnky,dky0
-      REAL :: ky_cut
-
 !
 !  spectrum_type = 0 for linear GYRO spectrum
 !  spectrum_type = 1 for APS07 spectrum

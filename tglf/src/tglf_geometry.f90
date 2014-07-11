@@ -561,6 +561,7 @@ SUBROUTINE get_ft_geo
   !
   pm(1,0)=m_min
   pm(2,0)=m_min
+  qm=0
   do i=1,nb_grid-1
      ! go clockwise
      j_max = m_max - m_min
@@ -588,6 +589,7 @@ SUBROUTINE get_ft_geo
      else
         j_max=ms-j_max
      endif
+     qm=0
      do m=1,j_max
         ! find the farthest gridpoint where b_geo=By
         j=m_min-m

@@ -14,7 +14,7 @@
       USE tglf_hermite
 !
       IMPLICIT NONE
-      REAL,PARAMETER :: eps=3.0D-14
+      REAL,PARAMETER :: eps=3.0E-14
       INTEGER,PARAMETER:: maxit=100
       INTEGER :: n
       INTEGER :: i,its,j,m
