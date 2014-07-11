@@ -13,6 +13,7 @@ subroutine gyro_write_input
   use gyro_profile_exp
   use gyro_pointers
   use math_constants
+  use GEO_interface
   use ompdata
 
   !--------------------------------------------------
@@ -106,7 +107,7 @@ subroutine gyro_write_input
   nu_tag(n_spec) = '(NU_EI)'
   !--------------------------------------------------
 
-  call send_line('----------- UTILITY PARAMETERS ----------------')
+  call send_line('----------------- UTILITY PARAMETERS ----------------------')
   if (kill_i_parallel_flag == 0) then
      call send_line('Ion parallel motion     : ON')
   else
@@ -126,10 +127,10 @@ subroutine gyro_write_input
   if (i_proc == 0 .and. output_flag == 1 .and. gkeigen_j_set == 0) then
      open(unit=1,file=trim(runfile),status='old',position='append')
 
-     write(1,*) '---------- PARLLELISM DIMENSIONS --------------'
+     write(1,*) '---------------- PARLLELISM DIMENSIONS --------------------'
      write(1,10) 'MPI tasks',n_proc
      write(1,10) 'OpenMP threads',n_omp
-     write(1,*) '----------- GRID DIMENSIONS -------------------'
+     write(1,*) '----------------- GRID DIMENSIONS -------------------------'
      write(1,10) 'n_n',n_n
      write(1,10) 'n_x',n_x
      write(1,10) 'n_stack',n_stack
@@ -151,7 +152,7 @@ subroutine gyro_write_input
      write(1,20) 'energy_max',energy_max
      write(1,20) 'dt',dt
 
-     write(1,*) '--------------- LOCAL PARAMETERS ---------------'
+     write(1,*) '--------------------- LOCAL PARAMETERS --------------------'
      write(1,*) ' NOTE: use abs(SAFETY_FACTOR) as input'
      write(1,20) '# RADIUS [INPUT]',r0
      write(1,20) '.RADIUS',r_norm
@@ -213,11 +214,18 @@ subroutine gyro_write_input
      enddo
      !--------------------------------------------
 
-     write(1,*) '--------------- TGLF PARAMETERS ---------------'
+     write(1,*) '--------------------- TGLF PARAMETERS ---------------------'
      write(1,20) 'Q_PRIME',(q_norm/r_norm)**2*shat_norm
      write(1,20) 'P_PRIME',(q_norm/r_norm)*beta_unit_s(ir_norm)/(8*pi)*dlnpdr_s(ir_norm)
-
-     write(1,*) '-------- LOCAL PARAMETERS (diagnostic) ----------'
+     write(1,*) '---------------------- GS2 PARAMETERS ---------------------'
+     write(1,*) '        [User must set R_geo=Rmaj in GS2 namelist]'
+     write(1,20) 'B_unit/B_T0',rmaj_s(ir_norm)/GEO_f
+     write(1,20) 'tri',asin(delta_s(ir_norm))
+     write(1,20) 'akappri',s_kappa_s(ir_norm)*kappa_s(ir_norm)/r_norm
+     write(1,20) 'tripri',s_delta_s(ir_norm)/sqrt(1-delta_s(ir_norm)**2)/r_norm
+     write(1,20) 'beta',betae_unit_norm*(rmaj_s(ir_norm)/GEO_f)**2
+     write(1,20) 'beta_prime_input',-beta_star_s(ir_norm)*(rmaj_s(ir_norm)/GEO_f)**2
+     write(1,*) '------------- LOCAL PARAMETERS (diagnostic) ---------------'
      write(1,20) 'n_i*z_i - n_e: ',neutral
      write(1,20) 'r/R0',r(ir_norm)/rmaj_s(ir_norm)
      if (radial_profile_method == 3) write(1,20) 'rho_norm',rhogrid_s(ir_norm)
@@ -244,12 +252,12 @@ subroutine gyro_write_input
         den_total = sum(den_s(1:n_ion,ir_norm)/den_s(indx_e,ir_norm)/mu(1:n_ion)**2)
         v_alfven  = sqrt(2.0/(betae_unit_norm*den_total))
 
-        write(1,*) '-------- ALFVEN WAVE PARAMETERS (diagnostic) ----------'
+        write(1,*) '----------- ALFVEN WAVE PARAMETERS (diagnostic) -----------'
         write(1,20) '(v_A/c_s)',v_alfven
         write(1,20) 'Omega_TAE',v_alfven/(2*q_norm*rmaj_s(ir_norm))
         write(1,20) 'Omega_A',v_alfven/(q_norm*rmaj_s(ir_norm))
      endif
-     write(1,*) '----------- UPWIND PARAMETERS -----------------'
+     write(1,*) '------------------- UPWIND PARAMETERS ---------------------'
      write(1,20) 'radial_upwind',radial_upwind
      do i_ion=1,n_spec-1
         write(1,20) 'orbit_upwind'//e_tag(i_ion),orbit_upwind_vec(i_ion)
@@ -262,7 +270,7 @@ subroutine gyro_write_input
         write(1,20) 'nu_source',nu_source
         write(1,10) 'n_source',n_source
      endif
-     write(1,*) '----------- RADIAL DOMAIN PARAMETERS ----------'
+     write(1,*) '--------------- RADIAL DOMAIN PARAMETERS ------------------'
      write(1,20) 's_grid',s_grid
      write(1,20) 'box_multiplier',box_multiplier
      write(1,20) 'L/a',x_length
@@ -322,7 +330,7 @@ subroutine gyro_write_input
   endif
 
   if (i_proc == 0 .and. output_flag == 1) then
-     write(1,*) '-------- CENTRAL WAVENUMBERS SIMULATED -----------'
+     write(1,*) '------------- CENTRAL WAVENUMBERS SIMULATED ---------------'
      write(1,*) '    (k_y = nq/r, rho = rho_sD_unit)'
   endif
 
