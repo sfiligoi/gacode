@@ -38,7 +38,12 @@ subroutine prgen_read_peqdsk
   close(1)
 
   ! te(KeV)
-  open(unit=1,file='pfile.te',status='old')
+  inquire(file='pfile.te',exist=ierr)
+  if (ierr) then
+     open(unit=1,file='pfile.te',status='old')
+  else
+     open(unit=1,file='pfile.Te',status='old')
+  endif
   read(1,*) i
   allocate(xv(ncol,i))
   read(1,*) xv
@@ -56,7 +61,12 @@ subroutine prgen_read_peqdsk
   close(1)
 
   ! ti(KeV)
-  open(unit=1,file='pfile.ti',status='old')
+  inquire(file='pfile.ti',exist=ierr)
+  if (ierr) then
+     open(unit=1,file='pfile.ti',status='old')
+  else
+     open(unit=1,file='pfile.Ti',status='old')
+  endif
   read(1,*) i
   allocate(xv(ncol,i))
   read(1,*) xv
