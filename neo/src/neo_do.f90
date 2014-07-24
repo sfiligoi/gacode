@@ -42,9 +42,12 @@ subroutine neo_do
   integer, parameter :: io_neo=10, io_f=11
   character(len=80)  :: runfile_f = 'out.neo.f'
 
-  ! First, define some grid dimensions for 3D solver
+  ! First, define some grid dimensions for band-diagonal LAPACK
   if (threed_model == 1) then
      nb    = (n_energy+1)*n_species*tpmatsize
+     n_row = (n_xi+1)*nb
+  else
+     nb    = (n_energy+1)*n_species*n_theta
      n_row = (n_xi+1)*nb
   endif
 
@@ -594,6 +597,8 @@ subroutine neo_do
         write(io_f,'(1pe12.5)') g(:)
         close(io_f)
      endif
+
+     call g_xi
 
   end do ! ir
 

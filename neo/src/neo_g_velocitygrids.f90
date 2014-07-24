@@ -86,7 +86,7 @@ contains
     real :: xval1
     integer :: i, is, ie, ix, it, jx
     real, dimension(:), allocatable :: xi
-    real, dimension(:,:,:), allocatable :: g0, g1, gall
+    real, dimension(:,:,:,:), allocatable :: gall
     integer, parameter :: nxi=100
     integer, parameter :: io=51
     
@@ -104,12 +104,8 @@ contains
        enddo
     enddo
 
-    allocate(gall(n_species,n_theta,nxi))
-    gall(:,:,:) = 0.0
-    allocate(g0(n_species,n_theta,nxi))
-    g0(:,:,:) = 0.0
-    allocate(g1(n_species,n_theta,nxi))
-    g1(:,:,:) = 0.0
+    allocate(gall(n_species,0:n_energy,n_theta,nxi))
+    gall(:,:,:,:) = 0.0
 
     do jx=1,nxi
        do i=1,n_row      
@@ -117,38 +113,38 @@ contains
           ie = ie_indx(i)
           ix = ix_indx(i)
           it = it_indx(i)
-          if(ie == 1) then
-             gall(is,it,jx) = gall(is,it,jx) + xval(ix,jx) * g(i)
-             if(mod(ix,2) == 0) then
-                g0(is,it,jx) = g0(is,it,jx) + xval(ix,jx) * g(i)
-             else
-                g1(is,it,jx) = g1(is,it,jx) + xval(ix,jx) * g(i)
-             endif
-          endif
+          gall(is,ie,it,jx) = gall(is,ie,it,jx) + xval(ix,jx) * g(i)
        enddo
     enddo
 
     if(silent_flag == 0 .and. i_proc == 0) then
-       open(unit=io,file=trim(path)//'out.neo.g_xi',status='replace')
+       open(unit=io,file=trim(path)//'out.neo.gxi',status='replace')
        do is=1, n_species
-          do it=1, n_theta
-             do jx=1, nxi
-                write (io,'(e16.8)',advance='no') xi(jx)
-                write (io,'(e16.8)',advance='no') gall(is,it,jx)
-                write (io,'(e16.8)',advance='no') g0(is,it,jx)
-                write (io,'(e16.8)',advance='no') g1(is,it,jx)
-                write (io,*)
+          do ie=0, n_energy
+             do it=1, n_theta+1
+                do jx=1, nxi
+                   if(it == n_theta+1) then
+                      write (io,'(1pe12.5)') gall(is,ie,1,jx)
+                   else
+                      write (io,'(1pe12.5)') gall(is,ie,it,jx)
+                   endif
+                enddo
              enddo
           enddo
        enddo
+       close(io)
+       open(unit=io,file=trim(path)//'out.neo.gxi_t',status='replace')
+       write(io,'(1pe12.5)') theta(:)
+       write(io,'(1pe12.5)') -theta(1)
+       close(io)
+       open(unit=io,file=trim(path)//'out.neo.gxi_x',status='replace')
+       write(io,'(1pe12.5)') xi(:) 
        close(io)
     end if
     
     deallocate(xi)
     deallocate(xval)
     deallocate(gall)
-    deallocate(g0)
-    deallocate(g1)
     
   end subroutine g_xi
 
