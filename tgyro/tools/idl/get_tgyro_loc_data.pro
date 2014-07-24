@@ -477,7 +477,7 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc
   s = ' '
   arr = FLTARR(6,NX)
   OPENR, 1, dirpath + 'out.tgyro.power_i', ERROR=err
-  FOR it=0, N_it-1 DO BEGIN
+  IF (err EQ 0) THEN FOR it=0, N_it-1 DO BEGIN
       READF, 1, s
       READF, 1, s
       READF, 1, arr
@@ -487,7 +487,7 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc
   CLOSE,1
   arr = FLTARR(9,NX)
   OPENR, 1, dirpath + 'out.tgyro.power_e', ERROR=err
-  FOR it=0, N_it-1 DO BEGIN
+  IF (err EQ 0) THEN FOR it=0, N_it-1 DO BEGIN
       READF, 1, s
       READF, 1, s
       READF, 1, arr
