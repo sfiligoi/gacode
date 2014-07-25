@@ -23,27 +23,17 @@ then
   echo "          -e <simdir>"
   echo "          Use data in <simdir>."
   echo 
-  echo "          -f <filetype>"
-  echo "          Output file type."
-  echo "           <filetype>=emf, eps, pdf, png, ps, raw, rgba, svg, svgz"
-  echo
-  echo "          -kinetic <value>"
-  echo "          Specify species to be plotted: [0,n_kinetic-1]."
-  echo
-  echo "          -moment <value>"
-  echo "          Specify moment to be plotted: [0,3] (default=1)"
-  echo
   echo "          -plot <type>"
   echo "          Generate plot of given type."
   echo "          If this keyword is omitted, data will be listed to the screen."
-  echo "           <type> = flux"
+  echo "           <type> = xtsurf"
   echo
   echo "          -i"
   echo "          Use python in interactive mode.  Useful if matplotlibrc has interactive:True  "
   echo
   echo "Example:"
   echo
-  echo "   neo_plot -e . -plot flux"
+  echo "   neo_plot -e . -plot xtsurf"
 
   exit 1
 fi
@@ -55,9 +45,7 @@ fi
 # Default simulation directory
 LOCDIR=.
 SIMROOT=$PWD
-PLOT_TYPE=flux
-KINETIC=0
-MOMENT=0
+PLOT_TYPE=xtsurf
 FTYPE=screen
 INTERACTIVE=
 #==============================================================================
@@ -74,11 +62,7 @@ while [ $# -gt 0 ] ; do
 
   -p) shift ; SIMROOT=$1 ;;
 
-  -kinetic) shift ; KINETIC=$1 ;;
-
-  -moment) shift ; MOMENT=$1 ;;
-
-  -f) shift ; FTYPE=$1 ;;
+  -img) shift ; FTYPE=$1 ;;
   
   -i) INTERACTIVE=-i ;;
 
@@ -97,13 +81,11 @@ fi
 SIMDIR=$SIMROOT/$LOCDIR
 cd $SIMDIR
 
-PYROOT=$GACODE_ROOT/shared/python/pyrats/neo
-
 #==============================================================================
 case "$PLOT_TYPE" in
 
-   flux)  
-	python $INTERACTIVE $PYROOT/flux.py $SIMDIR $MOMENT $FTYPE  ;;
+   xtsurf)  
+	python $INTERACTIVE $GACODE_ROOT/neo/bin/neo_plot_xtsurf.py $SIMDIR $FTYPE  ;;
    
 esac 
 
