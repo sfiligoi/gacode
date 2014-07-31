@@ -29,6 +29,7 @@ module prgen_globals
   real :: dpsi_data
   integer :: n_reorder
   integer, dimension(5) :: reorder_vec
+  integer :: n_null
   integer :: n_lump
   integer, dimension(:), allocatable :: lump_vec
   !----------------------------------------------------------
