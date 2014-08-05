@@ -42,6 +42,10 @@ subroutine tgyro_neo_map
   neo_s_kappa_in           = s_kappa(i_r)
   neo_delta_in             = delta(i_r)
   neo_s_delta_in           = s_delta(i_r)
+  neo_zeta_in              = zeta(i_r)
+  neo_s_zeta_in            = s_zeta(i_r)
+  neo_zmag_over_a_in       = zmag(i_r)
+  neo_s_zmag_in            = dzmag(i_r)
 
   neo_ipccw_in = -signb*signq
   neo_btccw_in = -signb

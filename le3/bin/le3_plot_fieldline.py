@@ -15,7 +15,7 @@ dim = np.loadtxt(simdir+'/out.le3.geoscalar')
 nts = int(dim[0])
 nps = int(dim[1])
 ns  = int(dim[2])
-q   = float(dim[7])
+q   = float(dim[4])
 
 z = np.zeros(ns)
 

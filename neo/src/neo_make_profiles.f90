@@ -265,6 +265,7 @@ subroutine neo_make_profiles
            ! (was previously defined wrt species 1)
            loglam = 24.0 - log(sqrt(ne_ade(ir)*1e13)/(te_ade(ir)*1000))
 
+
            ! Collision rate (1/sec)
            nu(is,ir) = cc * loglam * dens(is,ir) * z(is)**4 &
                 / (sqrt(mass(is)) * temp(is,ir)**1.5)
