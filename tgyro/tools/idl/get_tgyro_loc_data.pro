@@ -516,9 +516,10 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc
      x = 0.
      y = 0.
      z = 0.
-     l = ' '
+     s = ' '
      FOR ii=0, n_data_pts-1 DO BEGIN
-         READF, 1, x, y, z, l
+         READF, 1, s
+         READS, s, x, y, z
          arr[0,ii] = x
          arr[1,ii] = y
          arr[2,ii] = z
@@ -540,9 +541,10 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc
      x = 0.
      y = 0.
      z = 0.
-     l = ' '
+     s = ' '
      FOR ii=0, n_data_pts-1 DO BEGIN
-         READF, 1, x, y, z, l
+         READF, 1, s
+         READS, s, x, y, z
          arr[0,ii] = x
          arr[1,ii] = y
          arr[2,ii] = z
