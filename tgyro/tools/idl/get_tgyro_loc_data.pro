@@ -60,6 +60,9 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc
 ; much "cruft".  Can use get_tgyro_loc_data_old.pro to load older
 ; sims.  Now reads in loc_n_ion from input.tgyro.gen
 ;
+; v4.1: Aug 18, 2014
+; updated to allow for 'cdbox' label tags on ne_data.txt and te_data.txt
+;
   IF N_ELEMENTS(simdir) EQ 0 THEN BEGIN
       MESSAGE, 'Need to specify a directory!', /INFO
       RETURN, 0
@@ -510,7 +513,16 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc
  IF (err EQ 0) THEN BEGIN
      READF, 1, n_data_pts
      arr = FLTARR(3,n_data_pts)
-     READF, 1, arr
+     x = 0.
+     y = 0.
+     z = 0.
+     l = ' '
+     FOR ii=0, n_data_pts-1 DO BEGIN
+         READF, 1, x, y, z, l
+         arr[0,ii] = x
+         arr[1,ii] = y
+         arr[2,ii] = z
+     ENDFOR
      CLOSE, 1
 
      ne_data_rho = REFORM(arr[0,*])
@@ -525,7 +537,16 @@ FUNCTION get_tgyro_loc_data, simdir, DIRLOC=dirloc
  IF (err EQ 0) THEN BEGIN
      READF, 1, n_data_pts
      arr = FLTARR(3,n_data_pts)
-     READF, 1, arr
+     x = 0.
+     y = 0.
+     z = 0.
+     l = ' '
+     FOR ii=0, n_data_pts-1 DO BEGIN
+         READF, 1, x, y, z, l
+         arr[0,ii] = x
+         arr[1,ii] = y
+         arr[2,ii] = z
+     ENDFOR
      CLOSE, 1
 
      te_data_rho = REFORM(arr[0,*])
