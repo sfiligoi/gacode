@@ -1891,7 +1891,7 @@
        enddo
        lwork=34*nm
 ! call LAPACK routine for symmetric real eigenvalue problem DSYEV
-       call DSYEV('V','U',nm,a,nbasis_max,w,work,lwork,info)
+       call DSYEV('V','U',nm,a,nm,w,work,lwork,info)
        if(info.ne.0)CALL tglf_error(1,"DSYEV failed in ave_inv")
 !
 ! debug
@@ -1994,7 +1994,7 @@
        enddo
        lwork=34*nm
 ! call LAPACK routine for symmetric real eigenvalue problem DSYEV
-       call DSYEV('V','U',nm,a,nbasis_max,w,work,lwork,info)
+       call DSYEV('V','U',nm,a,nm,w,work,lwork,info)
        if(info.ne.0)CALL tglf_error(1,"DSYEV failed in ave_inv0")
 !
 ! debug
