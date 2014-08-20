@@ -467,7 +467,8 @@
        bp1 = ft3
       cb3=0.0
       cb5 =0.0
-      cb1 = 0.114*SQRT(kparvthe*cnuei*(1.0 + 0.82*zeff_in))
+!recalibrated 8/20/14      cb1 = 0.114*SQRT(kparvthe*cnuei*(1.0 + 0.82*zeff_in))
+      cb1 = 0.163*SQRT(kparvthe*cnuei*(1.0 + 0.82*zeff_in))
       cb1 = cb1*xnu_factor_in
       cb2 = cb1
       cb4 = cb1
