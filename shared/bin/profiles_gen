@@ -90,8 +90,8 @@ then
    echo "             -g <gfile>"
    echo "             Merge EFIT gfile for high-precision geometry data."
    echo 
-   echo "             -nfourier <gfile>"
-   echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo."
+   echo "             -nfourier <int>"
+   echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo. (default: 24)"
    echo
    echo "             -nogq"
    echo "             Do not use q from GATO (by default, if gfile is specified q is from GATO)."
@@ -115,8 +115,8 @@ then
    echo "             -g <gfile>"
    echo "             Merge EFIT gfile for high-precision geometry data."
    echo 
-   echo "             -nfourier <gfile>"
-   echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo."
+   echo "             -nfourier <int>"
+   echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo. (default: 24)"
    echo 
    echo "             -nogq"
    echo "             Do not use q from GATO (by default, if gfile is specified q is from GATO)."
@@ -138,8 +138,8 @@ then
    echo "             -g <gfile>"
    echo "             GFILE (geqdsk) containing flux-surface data [required]."
    echo 
-   echo "             -nfourier <gfile>"
-   echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo."
+   echo "             -nfourier <int>"
+   echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo. (default: 24)"
    echo 
    echo "             -nogq"
    echo "             Do not use q from GATO (by default, if gfile is specified q is from GATO)."
@@ -174,8 +174,8 @@ then
    echo "             -g <gfile>"
    echo "             GFILE (geqdsk) containing flux-surface data [required]."
    echo 
-   echo "             -nfourier <gfile>"
-   echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo."
+   echo "             -nfourier <int>"
+   echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo. (default 24)"
    echo
    echo "ASTRA Options"
    echo
@@ -197,9 +197,11 @@ then
    echo "             -g <GFILE>"
    echo "             GFILE (geqdsk) containing flux-surface data [required]."
    echo 
-   echo "             -nfourier <gfile>"
-   echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo."
-   echo "             Default: -nfourier 24"
+   echo "             -nfourier <int>"
+   echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo. (default: 24)"
+   echo
+   echo "             -n_null <int>"
+   echo "             Number of radial gridpoints (default: 40)"
    echo
    echo "GATO mapper control options"
    echo 
@@ -223,8 +225,8 @@ then
    echo "             -g <GFILE>"
    echo "             GFILE (geqdsk) containing flux-surface data."
    echo 
-   echo "             -nfourier <GFILE>"
-   echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo."
+   echo "             -nfourier <int>"
+   echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo. (default: 24)"
    echo
    echo "             -gmerge"
    echo "             Toggle gmerge mode."
@@ -346,6 +348,9 @@ GMERGE_FLAG=0
 LUMP_FLAG=0
 LUMP_FAST_FLAG=0
 
+# Number of points for -i null option
+N_NULL=40
+
 IPCCW=1
 BTCCW=-1
 NFOURIER=24
@@ -425,6 +430,8 @@ while [ $# -gt 0 ] ; do
   -g) shift ; G_FLAG=1 ; GFILE="$1" ;;
 
   -nfourier) shift ; NFOURIER=$1 ;;
+
+  -n_null) shift ; N_NULL=$1 ;;
 
   -gato) shift ; GATO_ARGS="$1" ;;
 
@@ -865,6 +872,7 @@ echo $BTCCW >> $CONFIG
 
 # Fourier modes
 echo $NFOURIER >> $CONFIG
+echo $N_NULL >> $CONFIG
 echo $LUMP_FAST_FLAG >> $CONFIG
 
 # NOTE: reorder flags will be appended later.

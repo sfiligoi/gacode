@@ -42,6 +42,10 @@ subroutine tgyro_neo_map
   neo_s_kappa_in           = s_kappa(i_r)
   neo_delta_in             = delta(i_r)
   neo_s_delta_in           = s_delta(i_r)
+  neo_zeta_in              = zeta(i_r)
+  neo_s_zeta_in            = s_zeta(i_r)
+  neo_zmag_over_a_in       = zmag(i_r)
+  neo_s_zmag_in            = dzmag(i_r)
 
   neo_ipccw_in = -signb*signq
   neo_btccw_in = -signb
@@ -72,6 +76,7 @@ subroutine tgyro_neo_map
      neo_z_3_in      = int(zi_vec(2))
      neo_mass_3_in   = 1.0/sqrt(mi(1)/mi(2))**2
      neo_dens_3_in   = ni(2,i_r)/ne(i_r)
+     neo_temp_3_in   = ti(2,i_r)/ti(1,i_r)
      neo_dlnndr_3_in = r_min*dlnnidr(2,i_r)
      neo_dlntdr_3_in = r_min*dlntidr(2,i_r)
 
@@ -83,6 +88,7 @@ subroutine tgyro_neo_map
      neo_z_4_in      = int(zi_vec(3))
      neo_mass_4_in   = 1.0/sqrt(mi(1)/mi(3))**2
      neo_dens_4_in   = ni(3,i_r)/ne(i_r)
+     neo_temp_4_in   = ti(3,i_r)/ti(1,i_r)
      neo_dlnndr_4_in = r_min*dlnnidr(3,i_r)
      neo_dlntdr_4_in = r_min*dlntidr(3,i_r)
 
@@ -94,6 +100,7 @@ subroutine tgyro_neo_map
      neo_z_5_in      = int(zi_vec(4))
      neo_mass_5_in   = 1.0/sqrt(mi(1)/mi(4))**2
      neo_dens_5_in   = ni(4,i_r)/ne(i_r)
+     neo_temp_5_in   = ti(4,i_r)/ti(1,i_r)
      neo_dlnndr_5_in = r_min*dlnnidr(4,i_r)
      neo_dlntdr_5_in = r_min*dlntidr(4,i_r)
 
@@ -105,6 +112,7 @@ subroutine tgyro_neo_map
      neo_z_6_in      = int(zi_vec(5))
      neo_mass_6_in   = 1.0/sqrt(mi(1)/mi(5))**2
      neo_dens_6_in   = ni(5,i_r)/ne(i_r)
+     neo_temp_6_in   = ti(5,i_r)/ti(1,i_r)
      neo_dlnndr_6_in = r_min*dlnnidr(5,i_r)
      neo_dlntdr_6_in = r_min*dlntidr(5,i_r)
 

@@ -256,7 +256,7 @@ subroutine neo_make_profiles
           * 1.0 / (4.0 * pi * 8.8542)**2 &
           * 1.0 / (sqrt(mass_deuterium) * temp_norm_fac**1.5) &
           * 1e9
-     
+
      do is=1,n_species
         do ir=1, n_radial
            
@@ -264,7 +264,8 @@ subroutine neo_make_profiles
            ! EAB: 03/22/09 redefined this wrt electron species
            ! (was previously defined wrt species 1)
            loglam = 24.0 - log(sqrt(ne_ade(ir)*1e13)/(te_ade(ir)*1000))
-           
+
+
            ! Collision rate (1/sec)
            nu(is,ir) = cc * loglam * dens(is,ir) * z(is)**4 &
                 / (sqrt(mass(is)) * temp(is,ir)**1.5)

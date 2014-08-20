@@ -143,6 +143,7 @@ FUNCTION get_input_profiles, simdir, FILENAME=filename, $
       READF, 1, arr
       CLOSE, 1
   ENDELSE
+  exp_Bunit = REFORM(arr[*,0])
   exp_vprime = REFORM(arr[*,23])
 
  data = {simdir: simdir, $     ;simulation directory
@@ -161,6 +162,7 @@ FUNCTION get_input_profiles, simdir, FILENAME=filename, $
           exp_zeta: exp_zeta, $ ;squareness
           exp_zmag: exp_zmag, $ ;Z0(r)  ;m
           exp_vprime: exp_vprime, $ ;dV/drmin m^2
+          exp_Bunit: exp_Bunit, $ ;T
           exp_omega0: exp_omega0, $     ; 1/s
           exp_Te: exp_Te, $     ; keV
           exp_ne: exp_ne, $     ; 10**19/m**3
@@ -176,7 +178,9 @@ FUNCTION get_input_profiles, simdir, FILENAME=filename, $
           exp_polflux: exp_polflux, $ ;poloidal flux (Wb/rad)
           exp_ni: exp_ni, $     ;main ion density, 10**19/m**3
           exp_ni2: exp_ni2, $   ;1st impurity density
-	  exp_ni3: exp_ni3, $
+          exp_ni3: exp_ni3, $
+          exp_ni4: exp_ni4, $
+          exp_ni5: exp_ni5, $
           exp_Ti: exp_Ti, $     ;keV
           exp_Ti2: exp_Ti2, $
           exp_Ti3: exp_Ti3, $
