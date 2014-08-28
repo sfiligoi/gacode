@@ -1,4 +1,4 @@
 [Parsing data in input.tglf]
-      Gam/Gam_GB      Q/Q_GB  Q_low/Q_GB    Pi/Pi_GB      S/S_GB
-elec -2.2952E+00  8.0800E+00  7.0246E+00 -1.7563E-14  5.3174E+00
-ion1 -2.2952E+00  2.4768E+01  2.4815E+01 -2.4618E-13 -5.3174E+00
+      Gam/Gam_GB   Q/Q_GB     Q_low/Q_GB   Pi/Pi_GB    S/S_GB
+elec -2.2952E+00  8.0800E+00  7.0246E+00 -2.0805E-14  5.3174E+00
+ion1 -2.2952E+00  2.4768E+01  2.4815E+01 -7.5263E-13 -5.3174E+00
