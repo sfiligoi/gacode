@@ -246,6 +246,7 @@ subroutine gyro_write_input
      write(1,20) 'betae_unit_norm',betae_unit_norm
      write(1,20) 'beta_*',beta_star_s(ir_norm)
      write(1,20) 'alpha_MHD',q_norm**2*rmaj_s(ir_norm)*beta_star_s(ir_norm)
+     write(1,20) 'volume (1/a^3)',GEO_volume
      write(1,20) 'omega_00 (c_s/a)',w0_s(ir_norm)
      write(1,*) '* Note that f = f_sim exp(i n omega0[r0] t)'
      if (betae_unit_norm > 0.0) then
