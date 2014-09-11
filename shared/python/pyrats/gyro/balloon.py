@@ -9,6 +9,7 @@ from pyrats.gyro.data import GYROData
 sim    = GYROData(sys.argv[1])
 index  = int(sys.argv[2])
 ftype  = sys.argv[3]
+tmax   = float(sys.argv[5])
 
 sim.read_balloon()
 print sim.balloon.keys()
@@ -43,7 +44,10 @@ x = -(1.0+n_p)+2.0*n_p*np.arange(n_ang)/float(n_ang)
 ax.plot(x,np.real(sim.balloon[key][:,0,-1]),color='k',label='Re')
 ax.plot(x,np.imag(sim.balloon[key][:,0,-1]),color='m',label='Im')
 
-ax.set_xlim([1-n_p,-1+n_p])
+if tmax < 0.0:
+    ax.set_xlim([1-n_p,-1+n_p])
+else:
+    ax.set_xlim([-tmax,tmax])
 
 ax.legend()
 if ftype == 'screen':
