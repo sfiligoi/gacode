@@ -21,6 +21,12 @@ subroutine tgyro_write_data(i_print)
   integer :: i_ion
   integer, parameter :: trinity_flag=1
 
+  !--------------------------------------------------------------------------------
+  ! First, generate and write TGLF linear growth rates
+  !
+  call tgyro_stab_driver
+  !--------------------------------------------------------------------------------
+
   if (i_proc_global > 0) return
 
   if (i_print == 0) then
