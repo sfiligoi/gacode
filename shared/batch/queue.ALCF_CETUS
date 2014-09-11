@@ -1,0 +1,56 @@
+#! /usr/bin/env bash
+#
+# SCRIPT:
+#  queue.ALCF_CETUS
+#
+# FUNCTION:
+#  Batch generator for ALCF IBM BG/Q
+#---------------------------------------------------
+
+nmpi=${1}
+sim=${2}
+simpath=${3}
+code=${4}
+nomp=${5}
+numa=${6}
+mpinuma=${7}
+
+# nmpi = MPI tasks
+# nomp = OpenMP threads per MPI task
+# numa = NUMAs active per node
+# mpinuma = MPI tasks per active NUMA 
+
+. $GACODE_ROOT/shared/bin/gacode_mpi_tool
+
+echo "----------------------------------"
+echo "cetus.alcf.anl.gov [16 cores/node]"   
+echo "NOTE: numa=1, max(mpinuma)=16     "   
+echo "----------------------------------"
+echo
+echo "Cores requested (mppwidth)   : $cores_requested"
+echo "Cores used                   : $cores_used"
+echo "Total MPI tasks (-n)         : $nmpi"
+echo "MPI tasks/node (-N)          : $mpinode"
+echo "OpenMP threads/MPI task(-d)  : $nomp"
+echo "MPI tasks per numa node (-S) : $mpinuma"
+echo
+echo "[0] debug   (10 min)   up to N nodes"
+
+read -p "Select a queue [0-9] " queue_num
+
+case "$queue_num" in
+  0) queue="debug"   ; maxtime=10 ;;
+esac
+
+bfile=$simpath/$sim/batch.src
+echo "$code -e $sim -n $nmpi -nomp $nomp -numa $numa -mpinuma $mpinuma -p $simpath" > $bfile
+
+read -p "Submit you job [y/n] " submit
+
+if [ "$submit" == "y" ] ; then 
+   chmod +x $bfile
+   echo "Executing -> qsub -A TokamakPlasma -t $maxtime -n $nodes_requested --mode script $bfile"
+   qsub -A TokamakPlasma -t $maxtime -n $nodes_requested --mode script $bfile
+fi
+
+exit 0

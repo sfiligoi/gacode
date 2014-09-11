@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  gyro.ALCF_CETUS
+#
+# FUNCTION:
+#  Parallel execution script
+
+simdir=${1}
+nmpi=${2}
+exec=${3}
+nomp=${4}
+numa=${5}
+mpinuma=${6}
+  
+cd $simdir
+
+echo "runjob --block $COBALT_PARTNAME --np $(($COBALT_JOBSIZE*16)) --ranks-per-node 16 --verbose 4 : $exec" > out.exec
+runjob --block $COBALT_PARTNAME --np $(($COBALT_JOBSIZE*16)) --ranks-per-node 16 --verbose 4 : $exec

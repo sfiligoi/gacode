@@ -1,0 +1,31 @@
+#---------------------------------------------------
+# ALCF IBM BG/P 
+#---------------------------------------------------
+
+CORES_PER_NODE=16
+NUMAS_PER_NODE=1
+
+# Compiler flags:
+
+FC	= mpixlf90_r -qsuffix=f=f90 -qmoddir=$(GACODE_ROOT)/modules -I$(GACODE_ROOT)/modules 
+F77	= mpixlf90_r -qfixed
+
+FMATH	= -qrealsize=8 
+FOPT	= -O3 
+FDEBUG	= -C -qflag=I:I -qflttrap=overflow:underflow:zerodivide:invalid 
+
+# System math libraries
+
+MATH_DIR = /soft/libraries/alcf/current/xl
+LMATH = -L $(MATH_DIR)/LAPACK/lib -llapack -L $(MATH_DIR)/BLAS/lib -lblas 
+
+# OPTIONAL netCDF
+
+NETCDF_DIR = /soft/libraries/netcdf/4.3.0-f4.2/fen-xl/current
+NETCDF = $(NETCDF_DIR)/lib/libnetcdff.a  $(NETCDF_DIR)/lib/libnetcdf.a
+NETCDF_INC = $(NETCDF_DIR)/include
+
+# Archive
+
+ARCH = ar cr
+
