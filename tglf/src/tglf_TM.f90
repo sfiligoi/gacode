@@ -212,6 +212,7 @@
             enddo
           enddo ! j
         enddo ! is
+        ne_te_phase_spectrum_out(i,k)=0.0
        enddo  !i
       enddo  !k
 !
@@ -328,6 +329,10 @@
             enddo !imax
            enddo ! j
          enddo  ! is 
+! save ne_te crossphase
+         do imax=1,nmodes_out
+           ne_te_phase_spectrum_out(i,imax) = ne_te_phase_out(imax)
+         enddo  !imax
         endif !unstable .T.
 !
 ! reset width to maximum if used tglf_max

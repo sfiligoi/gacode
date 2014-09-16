@@ -1732,6 +1732,7 @@ SUBROUTINE write_tglf_flux_spectrum
      enddo  ! j
   enddo  ! is 
   !
+  CLOSE(33)
   !    
 END SUBROUTINE write_tglf_flux_spectrum
 !-----------------------------------------------------------------
@@ -1753,7 +1754,7 @@ END SUBROUTINE write_tglf_flux_spectrum
 !  message=<warning description>
 !-------------------------------------------------------------------
 
-subroutine get_error_status(message,status)
+SUBROUTINE get_error_status(message,status)
 
   use tglf_global
 
@@ -1770,5 +1771,168 @@ subroutine get_error_status(message,status)
      status = 1
   endif
 
-end subroutine get_error_status
+END SUBROUTINE get_error_status
+!-----------------------------------------------------------------
+
+SUBROUTINE write_tglf_density_spectrum
+  !
+  USE tglf_dimensions
+  USE tglf_global
+  USE tglf_species
+  USE tglf_kyspectrum
+  !   
+  IMPLICIT NONE
+  CHARACTER(25) :: fluxfile="out.tglf.density_spectrum"
+  INTEGER :: i,is,n
+  REAL :: density(nsm)
+  !
+  if(new_start)then
+     write(*,*)"error: tglf_TM must be called before write_tglf_density_spectrum"
+  endif
+  !
+  OPEN(unit=33,file=fluxfile,status='replace')
+!
+  write(33,*)"gyro-bohm normalized density fluctuation amplitude spectra"
+  write(33,*)"ky,(density(is),is=1,ns_in)"
+  do i=1,nky
+    do is=1,ns
+      density(is) = 0.0
+      do n = 1,nmodes_out
+        density(is) = density(is) + intensity_spectrum_out(1,is,i,n)
+      enddo
+      density(is) = SQRT(density(is))
+    enddo
+    write(33,*)ky_spectrum(i),(density(is),is=1,ns)
+  enddo
+!
+  CLOSE(33)
+!
+END SUBROUTINE write_tglf_density_spectrum
+!-----------------------------------------------------------------
+
+SUBROUTINE write_tglf_temperature_spectrum
+  !
+  USE tglf_dimensions
+  USE tglf_global
+  USE tglf_species
+  USE tglf_kyspectrum
+  !   
+  IMPLICIT NONE
+  CHARACTER(29) :: fluxfile="out.tglf.temperature_spectrum"
+  INTEGER :: i,is,n
+  REAL :: temp(nsm)
+  !
+  if(new_start)then
+     write(*,*)"error: tglf_TM must be called before write_tglf_temperature_spectrum"
+  endif
+  !
+  OPEN(unit=33,file=fluxfile,status='replace')
+!
+  write(33,*)"gyro-bohm normalized temperature fluctuation amplitude spectra"
+  write(33,*)"ky,(temperature(is),is=1,ns_in)"
+  do i=1,nky
+    do is=1,ns
+      temp(is) = 0.0
+      do n = 1,nmodes_out
+        temp(is) = temp(is) + intensity_spectrum_out(2,is,i,n)
+      enddo
+      temp(is) = SQRT(temp(is))
+    enddo
+    write(33,*)ky_spectrum(i),(temp(is),is=1,ns)
+  enddo
+!
+  CLOSE(33)
+!
+END SUBROUTINE write_tglf_temperature_spectrum
+!-----------------------------------------------------------------
+
+SUBROUTINE write_tglf_potential_spectrum
+  !
+  USE tglf_dimensions
+  USE tglf_global
+  USE tglf_species
+  USE tglf_kyspectrum
+  !   
+  IMPLICIT NONE
+  CHARACTER(27) :: fluxfile="out.tglf.potential_spectrum"
+  INTEGER :: i,n
+  REAL :: phi
+  !
+  if(new_start)then
+     write(*,*)"error: tglf_TM must be called before write_tglf_potential_spectrum"
+  endif
+  !
+  OPEN(unit=33,file=fluxfile,status='replace')
+!
+  write(33,*)"gyro-bohm normalized potential fluctuation amplitude spectra"
+  write(33,*)"ky,potential"
+  do i=1,nky
+    phi = 0.0
+    do n = 1,nmodes_out
+      phi = phi + field_spectrum_out(2,i,n)
+    enddo
+    phi = SQRT(phi)
+    write(33,*)ky_spectrum(i),phi
+  enddo
+!
+  CLOSE(33)
+!
+END SUBROUTINE write_tglf_potential_spectrum
+!-----------------------------------------------------------------
+
+SUBROUTINE write_tglf_eigenvalue_spectrum
+  !
+  USE tglf_dimensions
+  USE tglf_global
+  USE tglf_species
+  USE tglf_kyspectrum
+  !   
+  IMPLICIT NONE
+  CHARACTER(28) :: fluxfile="out.tglf.eigenvalue_spectrum"
+  INTEGER :: i,n
+  !
+  if(new_start)then
+     write(*,*)"error: tglf_TM must be called before write_tglf_eigenvalue_spectrum"
+  endif
+  !
+  OPEN(unit=33,file=fluxfile,status='replace')
+!
+  write(33,*)"gyro-bohm normalized eigenvalue spectra"
+  write(33,*)"ky,(gamma(n),freq(n),n=1,nmodes_in)"
+  do i=1,nky
+    write(33,*)ky_spectrum(i),(eigenvalue_spectrum_out(1,i,n),eigenvalue_spectrum_out(2,i,n),n=1,nmodes_out)
+  enddo
+!
+  CLOSE(33)
+!
+END SUBROUTINE write_tglf_eigenvalue_spectrum
+!-----------------------------------------------------------------
+
+SUBROUTINE write_tglf_nete_crossphase_spectrum
+  !
+  USE tglf_dimensions
+  USE tglf_global
+  USE tglf_species
+  USE tglf_kyspectrum
+  !   
+  IMPLICIT NONE
+  CHARACTER(33) :: fluxfile="out.tglf.nete_crossphase_spectrum"
+  INTEGER :: i,n
+  !
+  if(new_start)then
+     write(*,*)"error: tglf_TM must be called before write_tglf_nete_crossphase_spectrum"
+  endif
+  !
+  OPEN(unit=33,file=fluxfile,status='replace')
+!
+  write(33,*)"electron density-temperature cross phase spectra per mode"
+  write(33,*)"ky,(ne_te_phase,n=1,nmodes_in)"
+  do i=1,nky
+    write(33,*)ky_spectrum(i),(ne_te_phase_spectrum_out(i,n),n=1,nmodes_out)
+  enddo
+!
+  CLOSE(33)
+!
+END SUBROUTINE write_tglf_nete_crossphase_spectrum
+
 

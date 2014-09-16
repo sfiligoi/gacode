@@ -70,9 +70,24 @@ program tglf
      write(1,'(i2)') tglf_ns_in,tglf_nxgrid_in
      close(1)
 
-     ! write flux spectrum to file
+     ! write flux spectrum to file out.tglf.flux_spectrum
 
      CALL write_tglf_flux_spectrum
+
+     ! write density fluctuation amplitude spectrum to file out.tglf.density_spectrum
+     CALL write_tglf_density_spectrum
+
+     ! write temperature fluctuation amplitude spectrum to file out.tglf.temperature_spectrum
+     CALL write_tglf_temperature_spectrum
+
+     ! write potential fluctuation amplitude spectrum to file out.tglf.potential_spectrum
+     CALL write_tglf_potential_spectrum
+
+     ! write eigenvalue spectrum to file out.tglf.eigenvalue_spectrum
+     CALL write_tglf_eigenvalue_spectrum
+
+     ! write ne-te crossphase spectrum to file out.tglf.nete_crossphase_spectrum
+     CALL write_tglf_nete_crossphase_spectrum
 
   else
 
