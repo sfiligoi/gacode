@@ -19,7 +19,9 @@ subroutine tgyro_iteration_driver
   use EXPRO_interface
 
   implicit none
+
   integer :: i_ion
+  integer :: iky
 
   n_r   = n_inst+1
   p_max = n_evolve*(n_r-1)

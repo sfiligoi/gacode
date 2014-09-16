@@ -25,6 +25,9 @@ subroutine tgyro_tglf_map
   ! Initialize TGLF
   call tglf_init(paths(i_r-1), gyro_comm)
 
+  ! Want fluxes from TGLF
+  tglf_use_transport_model_in = .true.
+
   !----------------------------------------------------------------
   ! Signs of toroidal magnetic field and current 
   tglf_sign_bt_in = -1.0*signb

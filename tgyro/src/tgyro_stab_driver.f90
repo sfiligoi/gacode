@@ -40,9 +40,8 @@ subroutine tgyro_stab_driver
   real :: wr_elec_vec(n_worker) 
 
   real, dimension(0:tgyro_stab_nky-1) :: ky
- 
-  integer, parameter :: i_print = 0
 
+  integer, parameter :: i_print = 0
 
   wi_elec(:,:) = 0.0
   wr_elec(:,:) = 0.0
@@ -76,8 +75,6 @@ subroutine tgyro_stab_driver
         ky(iky) = tgyro_stab_kymin + iky*tgyro_stab_deltaky
 
         tglf_ky_in = ky(iky)
-
-        ! NOTE: gyro_fieldeigen_wi_in taken from input.gyro (should be about 0.1)
 
         call tglf_run()
 
@@ -133,7 +130,7 @@ subroutine tgyro_stab_driver
 
      ! Silent running
      gyro_silent_flag_in = 1
-     
+
      do iky=0,tgyro_stab_nky-1
 
         wi_ion_loc  = 0.0
@@ -245,13 +242,15 @@ subroutine tgyro_stab_driver
        gyro_adj,&
        ierr)
 
-  print *
-
   if (i_proc_global == 0) then
 
-     open(unit=1,file='wi_elec.out',status='replace')
+     if (i_tran == 0) then
+        open(unit=1,file='out.tgyro.wi_elec',status='replace')
+     else
+        open(unit=1,file='out.tgyro.wi_elec',position='append')
+     endif
 
-     write(1,'(t10,a)') 'ky rho'
+     write(1,'(t11,a)') 'ky rho'
      write(1,20) 'r/a',ky(:)
      do i=1,n_inst
         write(1,10) r(i+1)/r_min,wi_elec_gather(:,i)
@@ -259,9 +258,13 @@ subroutine tgyro_stab_driver
 
      close(1)
 
-     open(unit=1,file='wi_ion.out',status='replace')
+     if (i_tran == 0) then
+        open(unit=1,file='out.tgyro.wi_ion',status='replace')
+     else
+        open(unit=1,file='out.tgyro.wi_ion',position='append')
+     endif
 
-     write(1,'(t10,a)') 'ky rho'
+     write(1,'(t11,a)') 'ky rho'
      write(1,20) 'r/a',ky(:)
      do i=1,n_inst
         write(1,10) r(i+1)/r_min,wi_ion_gather(:,i)
@@ -269,9 +272,13 @@ subroutine tgyro_stab_driver
 
      close(1)
 
-     open(unit=1,file='wr_elec.out',status='replace')
+     if (i_tran == 0) then
+        open(unit=1,file='out.tgyro.wr_elec',status='replace')
+     else
+        open(unit=1,file='out.tgyro.wr_elec',position='append')
+     endif
 
-     write(1,'(t10,a)') 'ky rho'
+     write(1,'(t11,a)') 'ky rho'
      write(1,20) 'r/a',ky(:)
      do i=1,n_inst
         write(1,10) r(i+1)/r_min,wr_elec_gather(:,i)
@@ -279,9 +286,13 @@ subroutine tgyro_stab_driver
 
      close(1)
 
-     open(unit=1,file='wr_ion.out',status='replace')
+     if (i_tran == 0) then
+        open(unit=1,file='out.tgyro.wr_ion',status='replace')
+     else
+        open(unit=1,file='out.tgyro.wr_ion',position='append')
+     endif
 
-     write(1,'(t10,a)') 'ky rho'
+     write(1,'(t11,a)') 'ky rho'
      write(1,20) 'r/a',ky(:)
      do i=1,n_inst
         write(1,10) r(i+1)/r_min,wr_ion_gather(:,i)

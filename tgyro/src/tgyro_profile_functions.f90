@@ -166,5 +166,4 @@ subroutine tgyro_profile_functions
        (sqrt(2.0)*rho_i(:)*b_unit(:)/b_ref/r_min)**2
   !----------------------------------------------------------------------
 
-
 end subroutine tgyro_profile_functions
