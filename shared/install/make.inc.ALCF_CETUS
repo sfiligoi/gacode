@@ -12,7 +12,7 @@ F77	= mpixlf77_r -qfixed
 
 FOMP    = -qsmp=omp:noauto
 FMATH	= -qrealsize=8
-FOPT	= -O3 
+FOPT	= -O2
 FDEBUG	= -C -qflag=I:I
 
 # System math libraries
