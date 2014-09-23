@@ -1,3 +1,4 @@
+#!/bin/bash 
 # Calculator for task/thread layout for hybrid MPI - OpemMP jobs.
 #
 # nmpi = MPI tasks

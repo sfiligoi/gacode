@@ -189,6 +189,7 @@
       REAL :: stress_tor1,stress_par1
       REAL :: exch1
       ! mpi 
+      REAL :: ne_te_phase_spectrum_save(nkym,maxmodes)
       REAL :: eigenvalue_spectrum_save(2,nkym,maxmodes)
       REAL :: field_spectrum_save(2,nkym,maxmodes)
       REAL :: intensity_spectrum_save(2,nsm,nkym,maxmodes)
@@ -218,6 +219,7 @@
             enddo
           enddo ! j
         enddo ! is
+        ne_te_phase_spectrum_save(i,k)=0.0
        enddo  !i
       enddo  !k
 !
@@ -335,6 +337,10 @@
             enddo !imax
            enddo ! j
          enddo  ! is 
+! save ne_te crossphase
+         do imax=1,nmodes_out
+           ne_te_phase_spectrum_save(i,imax) = ne_te_phase_out(imax)
+         enddo  !imax
         endif !unstable .T.
 !
 ! reset width to maximum if used tglf_max
@@ -345,6 +351,13 @@
 ! collect and broadcast the results 
       call MPI_BARRIER(iCommTglf,ierr)
 
+      call MPI_ALLREDUCE(ne_te_phase_spectrum_save     &
+                        ,ne_te_phase_spectrum_out          &
+                        ,nkym*maxmodes                      &
+                        ,MPI_DOUBLE_PRECISION        &
+                        ,MPI_SUM                     &
+                        ,iCommTglf                   &
+                        ,ierr)
       call MPI_ALLREDUCE(eigenvalue_spectrum_save     &
                         ,eigenvalue_spectrum_out          &
                         ,2*nkym*maxmodes                      &
