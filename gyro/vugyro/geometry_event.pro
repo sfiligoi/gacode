@@ -80,6 +80,7 @@ pro geometry_event, geometry_obj
      8: y0 = 1.0+0.0*x ; grad_r
      9: y0 = 1.0+0.0*x ; g_q
     10: y0 = shat_s(i_c)*(x*!pi) ; captheta
+    11: y0 = x*!pi ; theta_nc
 
   endcase
 
