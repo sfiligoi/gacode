@@ -7,12 +7,24 @@ from gacodeplotdefs import *
 from pyrats.gyro.data import GYROData
 
 sim    = GYROData(sys.argv[1])
-index  = int(sys.argv[2])
+index  = sys.argv[2]
 ftype  = sys.argv[3]
 tmax   = float(sys.argv[5])
 
 sim.read_balloon()
 print sim.balloon.keys()
+
+if index == 'phi':
+    key = 'balloon_phi'
+    index = sim.balloon.keys().index(key)
+elif index == 'a':
+    key = 'balloon_a'
+    index = sim.balloon.keys().index(key)
+elif index == 'aperp':
+    key = 'balloon_aperp'
+    index = sim.balloon.keys().index(key)
+else:
+    index = int(index)
 
 key = sim.balloon.keys()[index]
 

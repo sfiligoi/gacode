@@ -14,6 +14,7 @@ modules/*.mod
 gyro/.VERSION
 tgyro/.VERSION
 neo/.VERSION
+le3/.VERSION
 
 # Executables
 gato/gato
@@ -33,6 +34,8 @@ tglf/src/xtglf
 tglf/src/xtglf_mpi
 tgyro/src/tgyro_main
 xptor/driver/xptor
+le3/src/le3
+le3/profiles_3d/profiles_3d
 
 # Onetwo cvs-committed stuff
 onetwo/Doc/*/*.pdf
