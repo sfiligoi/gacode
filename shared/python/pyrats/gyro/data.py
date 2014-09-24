@@ -459,7 +459,7 @@ class GYROData:
             except IOError:
                 raise IOError("ERROR (GYROData): out.gyro.geometry_arrays not found.")
 
-            temp = geometry.reshape((11, self.profile['n_fine'], self.profile['n_x']), order='F')
+            temp = geometry.reshape((12, self.profile['n_fine'], self.profile['n_x']), order='F')
 
             self.geometry['v']       = temp[0,:,:]
             self.geometry['gsin']    = temp[1,:,:]
@@ -472,6 +472,7 @@ class GYROData:
             self.geometry['grad_r']  = temp[8,:,:]
             self.geometry['G_q']     = temp[9,:,:]
             self.geometry['THETA']   = temp[10,:,:]
+            self.geometry['theta_nc'] = temp[11,:,:]
 
         # Common
         self.loaded.append('geometry')
