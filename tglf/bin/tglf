@@ -25,6 +25,9 @@ then
   echo "         -e <simdir>" 
   echo "         Run TGLF using input.tglf data in <simdir>."
   echo
+  echo "         -n <MPI tasks>" 
+  echo "         Number of MPI tasks."
+  echo
   echo "INITIALIZE ONLY"
   echo
   echo "         -i <simdir>" 
@@ -69,8 +72,11 @@ VERBASE='out.tglf.version'
 #
 SIMROOT=$PWD
 TGLF_DIR=$GACODE_ROOT/tglf
-# Default number of cores
+# Parallelization parameters
 NPROC=1
+NOMP=1
+NUMA=0
+MPINUMA=0
 # Execute/test mode flags
 EXEC_FLAG=0
 INIT_FLAG=0
@@ -88,6 +94,8 @@ while [ $# -gt 0 ] ; do
   -p) shift ; SIMROOT=$1 ;;
 
   -e) shift ; LOCDIR=$1 ; EXEC_FLAG=1 ;;
+
+  -n) shift ; NPROC=$1 ;;
 
   -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
 
@@ -201,7 +209,8 @@ then
    echo $GACODE_PLATFORM >> $VERBASE
    date >> $VERBASE
 
-   $TGLF_DIR/src/tglf >> $RUNBASE
+   $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM \
+    $SIMDIR $NPROC $TGLF_DIR/src/tglf_mpi $NOMP $NUMA $MPINUMA >> $RUNBASE
  
    #gacode_printversion TGLF
 

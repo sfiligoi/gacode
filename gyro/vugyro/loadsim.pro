@@ -107,7 +107,8 @@ pro loadsim, input_dir
                     'GEO_g_theta',$
                     'GEO_grad_r',$
                     'GEO_g_q',$
-                    'GEO_captheta']
+                    'GEO_captheta',$
+                    'GEO_theta_nc']
 
   n_geometry = n_elements(geometry_label)
 
