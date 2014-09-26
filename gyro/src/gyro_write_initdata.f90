@@ -209,6 +209,7 @@ subroutine gyro_write_initdata(datafile1,datafile2,datafile3,io)
         write(io,10) GEO_grad_r
         write(io,10) GEO_gq
         write(io,10) GEO_captheta
+        write(io,10) GEO_theta_nc
 
      enddo ! j
   enddo ! i

@@ -8,6 +8,7 @@ export PATH=${PATH}:$GACODE_ROOT/gyro/bin
 export PATH=${PATH}:$GACODE_ROOT/neo/bin
 export PATH=${PATH}:$GACODE_ROOT/tglf/bin
 export PATH=${PATH}:$GACODE_ROOT/le3/bin
+export PATH=${PATH}:$GACODE_ROOT/glf23/bin
 export PATH=${PATH}:$GACODE_ROOT/shared/bin
 
 export PYTHONPATH=${PYTHONPATH}:$GACODE_ROOT/shared/python

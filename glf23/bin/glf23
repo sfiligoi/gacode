@@ -1,9 +1,9 @@
 #!/bin/bash
 #=============================================================
-# tglf
+# glf23
 #
 # PURPOSE:
-#  Top-level script controlling execution of TGLF.
+#  Top-level script controlling execution of GLF23.
 #=============================================================
 
 #=============================================================
@@ -14,7 +14,7 @@ n=$#
 if [ $n -eq 0 ]
 then
   echo
-  echo "Usage:   tglf [options]"
+  echo "Usage:   glf23 [options]"
   echo
   echo "         -p <path>"
   echo "         Set optional path to simulation directory."
@@ -23,15 +23,12 @@ then
   echo "EXECUTE MODE (single core)"
   echo
   echo "         -e <simdir>" 
-  echo "         Run TGLF using input.tglf data in <simdir>."
-  echo
-  echo "         -n <MPI tasks>" 
-  echo "         Number of MPI tasks."
+  echo "         Run GLF23 using input.glf23 data in <simdir>."
   echo
   echo "INITIALIZE ONLY"
   echo
   echo "         -i <simdir>" 
-  echo "         Process input.tglf only."
+  echo "         Process input.glf23 only."
   echo
   echo "REGRESSION TESTING"
   echo
@@ -67,16 +64,13 @@ fi
 #=============================================================
 # Define variables for flag capture
 #
-RUNBASE='out.tglf.run'
-VERBASE='out.tglf.version'
+RUNBASE='out.glf23.run'
+VERBASE='out.glf23.version'
 #
 SIMROOT=$PWD
-TGLF_DIR=$GACODE_ROOT/tglf
-# Parallelization parameters
+GLF23_DIR=$GACODE_ROOT/glf23
+# Default number of cores
 NPROC=1
-NOMP=1
-NUMA=0
-MPINUMA=0
 # Execute/test mode flags
 EXEC_FLAG=0
 INIT_FLAG=0
@@ -95,8 +89,6 @@ while [ $# -gt 0 ] ; do
 
   -e) shift ; LOCDIR=$1 ; EXEC_FLAG=1 ;;
 
-  -n) shift ; NPROC=$1 ;;
-
   -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
 
   -i) shift ; LOCDIR=$1 ; INIT_FLAG=1 ;;
@@ -109,9 +101,9 @@ while [ $# -gt 0 ] ; do
 
   -c) rm -f out.* ; exit 0 ;;
 
-  -h) tglf_version_message ; exit 0 ;;
+  -h) glf23_version_message ; exit 0 ;;
 
-  *) echo "ERROR: incorrect tglf syntax." ; exit 1 ;;
+  *) echo "ERROR: incorrect glf23 syntax." ; exit 1 ;;
  
   esac
   shift
@@ -146,11 +138,11 @@ fi
 #
 if [ $GENERATE_FLAG -eq 1 ]
 then
-   if [ ! -f "${TGLF_DIR}/tools/input/$LOCDIR/input.tglf" ]
+   if [ ! -f "${GLF23_DIR}/tools/input/$LOCDIR/input.glf23" ]
    then
-      cat ${TGLF_DIR}/tools/input/simdir_list
+      cat ${GLF23_DIR}/tools/input/simdir_list
    else
-      cp -ai ${TGLF_DIR}/tools/input/$LOCDIR $SIMDIR
+      cp -ai ${GLF23_DIR}/tools/input/$LOCDIR $SIMDIR
    fi
    exit 0
 fi
@@ -161,12 +153,12 @@ fi
 #
 if [ $REGRESS -eq 1 ] 
 then 
-   gacode_reg_do 1 1 $REGRESS_RESET tglf 1e-5
+   gacode_reg_do 1 1 $REGRESS_RESET glf23 1e-5
    exit 0
 fi
 if [ $REGRESS -eq 2 ] 
 then 
-   gacode_reg $LOCDIR $GACODE_ROOT/tglf/tools/input out.tglf.prec 1e-6 
+   gacode_reg $LOCDIR $GACODE_ROOT/tglf/tools/input out.glf23.prec 1e-6 
    exit 0
 fi
 #============================================================
@@ -175,7 +167,7 @@ fi
 # Everything else must be done in $SIMDIR; so ensure existence 
 # of $SIMDIR (needed at this point) and go there: 
 #
-if ! tglf_sim_warn $SIMDIR
+if ! glf23_sim_warn $SIMDIR
 then
    exit 1 
 fi 
@@ -188,7 +180,7 @@ cd $SIMDIR
 #
 echo "[Parsing data in input.tglf]" > $RUNBASE
 
-python $TGLF_DIR/bin/tglf_parse.py >> $RUNBASE
+python $GLF23_DIR/bin/glf23_parse.py >> $RUNBASE
 if [ $? -eq 1 ] 
 then
    cat $RUNBASE
@@ -197,7 +189,7 @@ fi
 #==========================================================
 
 #===========================================================
-# RUN TGLF
+# RUN GLF23
 #
 
 # Execute:
@@ -209,10 +201,9 @@ then
    echo $GACODE_PLATFORM >> $VERBASE
    date >> $VERBASE
 
-   $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM \
-    $SIMDIR $NPROC $TGLF_DIR/src/tglf_mpi $NOMP $NUMA $MPINUMA >> $RUNBASE
+   $GLF23_DIR/src/glf23 >> $RUNBASE
  
-   #gacode_printversion TGLF
+   #gacode_printversion GLF23
 
    cat $RUNBASE
 

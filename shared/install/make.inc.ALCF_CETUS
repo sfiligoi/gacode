@@ -2,17 +2,18 @@
 # ALCF IBM BG/P 
 #---------------------------------------------------
 
-CORES_PER_NODE=16
+CORES_PER_NODE=64
 NUMAS_PER_NODE=1
 
 # Compiler flags:
 
 FC	= mpixlf90_r -qsuffix=f=f90 -qmoddir=$(GACODE_ROOT)/modules -I$(GACODE_ROOT)/modules 
-F77	= mpixlf90_r -qfixed
+F77	= mpixlf77_r -qfixed
 
-FMATH	= -qrealsize=8 
-FOPT	= -O3 
-FDEBUG	= -C -qflag=I:I -qflttrap=overflow:underflow:zerodivide:invalid 
+FOMP    = -qsmp=omp:noauto
+FMATH	= -qrealsize=8
+FOPT	= -O2
+FDEBUG	= -C -qflag=I:I
 
 # System math libraries
 
