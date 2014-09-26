@@ -8,8 +8,11 @@
 !
       LOGICAL,EXTERNAL :: glf23_isnan
       LOGICAL,EXTERNAL :: glf23_isinf
+      LOGICAL :: use_transport_model_gf = .true.
+      LOGICAL :: use_adiabatic_electrons_gf = .false.
       INTEGER,PARAMETER :: nsm=3
 !
+      INTEGER :: version_gf=2  !re-tuned v1.61
       INTEGER,PARAMETER :: nmode=20
       INTEGER,DIMENSION(30) ::  iflagin_gf=0
       INTEGER,DIMENSION(0:nmode) :: ngrow_k_gf=0
@@ -86,10 +89,12 @@
       REAL :: alpha_star_gf = 0.0
       REAL :: gamma_star_gf = 0.0
       REAL :: alpha_e_gf = 1.0
+      REAL :: alpha_e_mult_gf = 1.0
       REAL :: gamma_e_gf = 0.0
       REAL :: alpha_mode_gf = 0.0
       REAL :: gamma_mode_gf = 0.0
       REAL :: alpha_p_gf = 1.0
+      REAL :: alpha_p_mult_gf=1.0
       REAL :: gamma_p_gf = 0.0
       REAL :: gamma_r_gf=0.0
       REAL :: xkdamp_gf=0.0

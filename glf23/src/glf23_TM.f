@@ -303,8 +303,21 @@ cgms      if(ipert_gf.eq.1.and.ngrow_k_gf(0).eq.0)go to 888
 c
 c...initialize variables
 c
-      nroot_gf=8  ! 8 for pure plasma, 12 for full impurity dynamics
-      if(ns_gf.gt.2)nroot_gf=12
+      diff_gf=0.D0
+      diff_im_gf=0.D0
+      chii_gf=0.D0
+      chie_gf=0.D0
+      exch_gf=0.D0
+      eta_par_gf=0.D0
+      eta_per_gf=0.D0
+      eta_phi_gf=0.D0
+      chie_e_gf=0.D0
+      do j1=1,4
+        gamma_gf(j1)=0.D0
+        freq_gf(j1)=0.D0
+        xky_gf(j1)=0.D0
+      enddo
+c
       iflagin_gf(1)=0
       iflagin_gf(2)=1
       iflagin_gf(3)=1
@@ -362,12 +375,6 @@ c     cbetae=1.D0 !  full electromagetic
 c
       cnorm_gf=50.D0   ! normalization factor
       cnorm_p_gf=50.D0 ! normalization factor for Di
-c 
-c ky spectrum parameters
-c
-      ikymax_gf=10
-      xkymin_gf=.02D0
-      xkymax_gf=.5D0
 c
 c non glf23 parameter
 c
@@ -397,7 +404,7 @@ c
           cnorm_gf=50.D0         ! ITG/TEM normalization
           xparam_gf(10)=12.D0    ! ETG normalization (cnorm*xparam(10))
           xparam_gf(13)=0.15      ! rms_theta q-dependence
-          xparam_gf(15)=-0.1     ! trapped ptcle fraction reduction
+          xparam_gf(15)=-0.1     ! trapped particle fraction reduction
           xparam_gf(16)=0.15     ! rms_theta shat dependence
           xparam_gf(17)=0.25     ! rms_theta shat dependence
           xparam_gf(19)=1.0      ! rms_theta alpha-dependence
@@ -418,11 +425,11 @@ c
           xparam_gf(16)=0.20D0
 !          bt_flag=2              ! real geometry in diffusion
         endif
-        if (iglf.eq.99) then      ! renormalization only
-          xparam_gf(10)=0
-          xky0_gf=0.3D0
-          ikymax_gf=1
-        endif
+c        if (iglf.eq.99) then      ! renormalization only
+c          xparam_gf(10)=0
+c          xky0_gf=0.3D0
+c          ikymax_gf=1
+c        endif
 c        cnorm_gf=27.D0         ! ITG/TEM normalization
 c        xparam_gf(10)=17.8D0    ! ETG normalization
 c        xpparam_gf(10)=0.D0   ! ETG normalization
@@ -439,8 +446,8 @@ c inputs.........................................................
        xparam(i)=xparam_gf(i)
       enddo
  
-      ilhmax=1
-      ikymaxtot=ikymax_gf
+c      ilhmax=1
+c      ikymaxtot=ikymax_gf
 c     if (xparam_gf(10).gt.0.) ilhmax=2
 c
 c If ETG modes included, then double ky spectrum
@@ -451,11 +458,39 @@ c transport in gyrobohm electron units with T_i.
 c chie_e_gf converted back to c_s*rho_s**2/a units and added 
 c to chie_gf after ky loop
 c
-      if (xparam_gf(10).gt.0.) then
-        ilhmax=2
-        ikymaxtot=2*ikymax_gf
+c  transfer values from inputs
+c 
+c ky spectrum parameters
+c
+      if(use_transport_model_gf)then 
+        ikymax_gf=10
+        xkymin_gf=.02D0
+        xkymax_gf=.5D0
+      else !single ky linear stability
+        ikymax_gf=1
+        xkymin_gf=xky0_gf
+        xkymax_gf=xky0_gf       
       endif
 c
+      if(use_adiabatic_electrons_gf)then
+         nroot_gf=6
+         ns_gf=2
+         apwt_gf = 1.0
+         aiwt_gf = 0.0
+         betae_gf = 1.0E-12 ! turn off EM 
+         xnu_gf = 0.0       !  turn off electron collisions
+         rlnimp_gf = epsilon
+         rmin_gf = epsilon  ! remove trapped electrons
+         ilhmax=1
+         ikymaxtot=ikymax_gf
+      else  !kinetic electrons
+         nroot_gf=8
+         if(ns_gf.gt.2)nroot_gf=12 !for full impurity dynamics
+         if (xparam_gf(10).gt.0.) then
+           ilhmax=2
+           ikymaxtot=2*ikymax_gf
+         endif
+      endif
       nroot=nroot_gf
       ky0=xky0_gf
       rms_theta=rms_theta_gf
@@ -483,11 +518,11 @@ c
       adamp=adamp_gf
       alpha_star=alpha_star_gf
       gamma_star=gamma_star_gf
-      alpha_e=alpha_e_gf
+      alpha_e=alpha_e_gf*alpha_e_mult_gf
       gamma_e=gamma_e_gf
       alpha_mode=alpha_mode_gf
       gamma_mode=gamma_mode_gf
-      alpha_p=alpha_p_gf
+      alpha_p=alpha_p_gf*alpha_p_mult_gf
       gamma_p=ABS(gamma_p_gf)
       kdamp=xkdamp_gf
       lprint=lprint_gf
@@ -505,7 +540,9 @@ c     if(ilh.eq.1) idelta=xi*xparam(1)+xparam(2)
  
 c.................................................................
 c
-      if (lprint.gt.0) open(1)
+      if (lprint.gt.0)then
+         open(unit=1,file='./out.glf23.debug',status='replace')
+      endif
       ieq  = nroot
 c
       if (lprint.eq.99) then

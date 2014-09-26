@@ -15,12 +15,13 @@ subroutine glf23_read_input
 
   open(unit=1,file=trim(glf23_path_in)//'input.glf23.gen',status='old')
 
-  read(1,*) glf23_use_transport_model_in
-
   ! Data passed to: put_model_parameters
-  read(1,*) glf23_alpha_p_in
-  read(1,*) glf23_alpha_quench_in
+  read(1,*) glf23_use_transport_model_in
+  read(1,*) glf23_use_adiabatic_electrons_in
+  read(1,*) glf23_alpha_p_mult_in
+  read(1,*) glf23_alpha_quench_mult_in
   read(1,*) glf23_version_in
+  read(1,*) glf23_lprint_in
 
   ! Data passed to: put_species
   read(1,*) glf23_ns_in

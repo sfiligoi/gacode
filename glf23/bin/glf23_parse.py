@@ -8,10 +8,11 @@ x.set_extension('.gen')
 
 # GLF23 input parameters
 x.add('USE_TRANSPORT_MODEL','.true.')
-
-x.add('ALPHA_P','1.0')
-x.add('ALPHA_QUENCH','1.0')
-x.add('VERSION','3')
+x.add('USE_ADIABATIC_ELECTRONS','.false.')
+x.add('ALPHA_P_MULT','1.0')
+x.add('ALPHA_QUENCH_MULT','1.0')
+x.add('VERSION','2')
+x.add('LPRINT','0')
 
 x.add('NS','2')
 x.add('MASS_1','2.723e-4')

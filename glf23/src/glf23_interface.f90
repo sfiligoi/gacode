@@ -40,11 +40,13 @@ module glf23_interface
 
   ! INPUT PARAMETERS
 
-  logical :: glf23_use_transport_model_in = .true.
   !  Data passed to: put_model_parameters
-  real    :: glf23_alpha_p_in        = 1.0
-  real    :: glf23_alpha_quench_in   = 1.0
-  integer :: glf23_version_in = 3
+  logical :: glf23_use_transport_model_in = .true.
+  logical :: glf23_use_adiabatic_electrons_in = .false.
+  real    :: glf23_alpha_p_mult_in        = 1.0
+  real    :: glf23_alpha_quench_mult_in   = 1.0
+  integer :: glf23_version_in = 2
+  integer :: glf23_lprint_in = 0
 
   ! Data passed to: put_species
   integer :: glf23_ns_in             = 2
@@ -123,9 +125,11 @@ contains
     write(1,*) '# Control parameters:'
     write(1,*) '#---------------------------------------------------'
     write(1,10) 'USE_TRANSPORT_MODEL',glf23_use_transport_model_in
-    write(1,30) 'ALPHA_P',glf23_alpha_p_in
-    write(1,30) 'ALPHA_QUENCH',glf23_alpha_quench_in
+    write(1,10) 'USE_ADIABATIC_ELECTRONS',glf23_use_adiabatic_electrons_in
+    write(1,30) 'ALPHA_P_MULT',glf23_alpha_p_mult_in
+    write(1,30) 'ALPHA_QUENCH_MULT',glf23_alpha_quench_mult_in
     write(1,20) 'VERSION',glf23_version_in
+    write(1,20) 'LPRINT',glf23_lprint_in
 !
     write(1,30) 'KY',glf23_ky_in
     write(1,30) 'VEXB_SHEAR',glf23_vexb_shear_in
@@ -191,6 +195,13 @@ contains
     open(unit=1,file=trim(glf23_path_in)//'out.glf23.moduledump',&
          status='replace',iostat=ierr)
 
+    write(1,*) 'use_transport_model_gf = ', use_transport_model_gf
+    write(1,*) 'use_adaibatic_electrons = ',use_adiabatic_electrons_gf
+    write(1,*) 'alpha_p_mult_gf = ',alpha_p_mult_gf
+    write(1,*) 'alpha_e_mult_gf = ',alpha_e_mult_gf
+    write(1,*) 'version_gf = ',version_gf
+    write(1,*) 'lprint_gf = ',lprint_gf
+    write(1,*) 'nroot_gf = ', nroot_gf
     write(1,*) 'ky = ', xky0_gf
     write(1,*) 'ns = ', ns_gf
     write(1,*) 'park = ', park_gf

@@ -16,9 +16,12 @@ subroutine glf23_run()
   complex :: xi=(0.0,1.0)
 
 
-  call put_model_parameters(glf23_alpha_p_in, &
-       glf23_alpha_quench_in, &
-       glf23_version_in)
+  call put_model_parameters(glf23_use_transport_model_in, &
+       glf23_use_adiabatic_electrons_in, &
+       glf23_alpha_p_mult_in, &
+       glf23_alpha_quench_mult_in, &
+       glf23_version_in, &
+       glf23_lprint_in)
 
   call put_species(glf23_ns_in, &
        glf23_zs_in, &

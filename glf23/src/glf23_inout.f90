@@ -1,6 +1,39 @@
 !-----------------------------------------------------------------
 !  input routines
 !-----------------------------------------------------------------
+SUBROUTINE put_model_parameters(use_tm, adiabatic, alpha_p, &
+           alpha_quench,version,lprint)
+  !
+  USE glf23_gf
+  !
+  IMPLICIT NONE
+  LOGICAL,INTENT(IN) :: use_tm,adiabatic
+  REAL,INTENT(IN) :: alpha_p,alpha_quench
+  INTEGER,INTENT(IN) :: version,lprint
+  !
+  ! transfer values
+  ! 
+  use_transport_model_gf = use_tm
+  use_adiabatic_electrons_gf = adiabatic
+  alpha_p_mult_gf = alpha_p
+  alpha_e_mult_gf = alpha_quench
+  version_gf = version
+  if(version.eq.1)then
+     iglf = 0   !original glf23
+  elseif(version.eq.2)then
+     iglf = 1   !retuned version v1.61
+  elseif(version.eq.3)then
+     iglf = 98  !renormed + real geometry version 
+  else
+    write(*,*)"version specified does not exist",version,"reverting to version 3"
+    iglf = 3
+  endif
+  lprint_gf = lprint
+  !
+END SUBROUTINE put_model_parameters
+!
+!-----------------------------------------------------------------
+!
 SUBROUTINE put_species(nsp,zsp,msp)
   !
   USE glf23_gf
@@ -120,33 +153,6 @@ SUBROUTINE put_averages(tsp,asp,betae,xnue)
    xnu_gf = xnue
   !      
 END SUBROUTINE put_averages
-!
-!-----------------------------------------------------------------
-!
-SUBROUTINE put_model_parameters(alpha_p,alpha_quench,version)
-  !
-  USE glf23_gf
-  !
-  IMPLICIT NONE
-  REAL,INTENT(IN) :: alpha_p,alpha_quench
-  INTEGER,INTENT(IN) :: version
-  !
-  ! transfer values
-  !  
-  alpha_p_gf = alpha_p
-  alpha_e_gf = alpha_quench
-  if(version.eq.1)then
-     iglf = 0   !original glf23
-  elseif(version.eq.2)then
-     iglf = 1   !retuned version v1.61
-  elseif(version.eq.3)then
-     iglf = 98  !renormed + real geometry version 
-  else
-    write(*,*)"version specified does not exist",version,"reverting to version 3"
-    iglf = 3
-  endif
-  !
-END SUBROUTINE put_model_parameters
 !
 !-----------------------------------------------------------------
 !
