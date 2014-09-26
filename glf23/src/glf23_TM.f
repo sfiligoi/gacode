@@ -350,7 +350,7 @@ c
       adamp_gf=0.7D0
       alpha_star_gf=0.D0
       alpha_mode_gf=0.D0
-      gamma_e_gf =-.000000000001D0
+c      gamma_e_gf =-.000000000001D0
       xkdamp_gf=0.D0
       alpha_p_gf=0.35D0
 c 
