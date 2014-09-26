@@ -377,6 +377,9 @@ subroutine neo_check
      if(silent_flag == 0 .and. i_proc == 0) then
         write(io_neoout,30) 'threed_model:','NON-AXISYMMETRIC EQUILIBRIUM (LE3)'
      end if
+     if(profile_model == 2) then
+        call neo_error('ERROR: (NEO) threed_model not available with global profiles')
+     endif
 
      select case(threed_exb_model)
      case(0)
