@@ -214,15 +214,15 @@ cgms      include '../inc/glf.m'
 c
 c Glf is common block, which must contain all the _gf inputs and outputs
 c
-      character*1 jobvr, jobvl
-      integer neq, iflagin(30), ilhmax, ilh, ikymaxtot,
+c      character*1 jobvr, jobvl
+      integer neq, nroot,iflagin(30), ilhmax, ilh, ikymaxtot,
      >  lprint, ieq, j1, j2, j, i, jmax,
      >  iar, ifail, jroot(4), itheta, iky, iky0, iroot
       real*8 epsilon
       parameter ( neq = 12, epsilon = 1.D-34 )
 c
       real*8 pi, xparam(30),yparam(2*nmode),
-     >  nroot,ky0,rms_theta,rlti,rlte,rlne,rlni,dil,taui,
+     >  ky0,rms_theta,rlti,rlte,rlne,rlni,dil,taui,
      >  rmin,rmaj,q,rlnimp,amassimp,zimp,mimp,
      >  aikymax, aiky, apwt, aiwt,
      >  alpha_mode, gamma_mode, alpha_p, gamma_p,
@@ -269,7 +269,7 @@ c     integer iai, ivr, ivi, intger(neq) ! if NAG solver f02ake used
 c     parameter ( iai=neq, ivr=neq, ivi=neq )
       real*8 ar(iar,neq), ai(iar,neq), rr(neq), ri(neq)
      &  , vr(iar,neq), vi(iar,neq)
-      real*8 br(iar,neq), bi(iar,neq), beta_tom(neq), ztemp1
+c      real*8 br(iar,neq), bi(iar,neq), betat_tom(neq),ztemp1
  
       integer matz
       real*8 fv1(neq),fv2(neq),fv3(neq)
@@ -277,11 +277,11 @@ c
 c amat(i,j) = complex matrix A
 c zevec(j) = complex eigenvector
 c
-      integer lwork
-      parameter ( lwork=198 )
-      complex*16 mata(iar,neq),cvr(iar,neq),cvl(iar,neq),w(neq)
-      complex*16 work(lwork)
-      double precision rwork(2*neq)
+c      integer lwork
+c      parameter ( lwork=198 )
+c      complex*16 mata(iar,neq),cvr(iar,neq),cvl(iar,neq),w(neq)
+c      complex*16 work(lwork)
+c      double precision rwork(2*neq)
       COMPLEX*16 zevec(neq,neq), zomega(neq)
       real*8 gammaroot(4),freqroot(4),phi_normroot(4)
 c
@@ -1439,7 +1439,7 @@ c
           write (1,192) (ai(j1,j2),j2=1,neq)
         enddo
  192    format (1p8e10.2)
- 193    format (1p8e12.4)
+c 193    format (1p8e12.4)
       endif
 c
 c..find the eigenvalues and eigenvectors 
@@ -1780,7 +1780,7 @@ c
        endif
        endif
       enddo
- 777  continue
+c 777  continue
 c
       if(ilh.eq.1) then
 c 
@@ -1938,8 +1938,8 @@ c       write(*,*) gamma_gf(1), gamma_gf(2), xky_gf(1), xky_gf(2)
 c
 c print to file log
 c      write(*,66)chii_gf,(gamma_gf(j),j=1,4)
- 66    format(f14.9,4f14.9)
- 67    format(2i2,f14.9)
+c 66    format(f14.9,4f14.9)
+c 67    format(2i2,f14.9)
 c
       if(xparam(22).gt.0.) then
        phi_renorm=1.D0
@@ -1991,7 +1991,7 @@ c
           write(1,*) 'freq_gf=',  freq_gf
           write(1,*) 'ph_m=',  ph_m
           write(1,*) 'diff_gf=',   diff_gf
-	  write(1,*) 'diff_im_gf=',   diff_im_gf
+          write(1,*) 'diff_im_gf=',   diff_im_gf
           write(1,*) 'chii_gf=', chii_gf
           write(1,*) 'chie_gf=', chie_gf
           write(1,*) 'exch_gf=', exch_gf
@@ -2039,14 +2039,14 @@ c
 c 
       endif
 c 
- 999  continue
+c 999  continue
       if (lprint.gt.0) close(1)
 c
       return
 c
 c return for case with  no unstable modes
 c
- 888  continue  
+c 888  continue  
       diff_gf=0.D0
       diff_im_gf=0.D0
       chii_gf=0.D0
@@ -2199,7 +2199,7 @@ c                igh+1 step 1 until n do -- ..........
          i = ii
          if (i .ge. low .and. i .le. igh) go to 140
          if (i .lt. low) i = low - ii
-         k = scale(i)
+         k = INT(scale(i))
          if (k .eq. i) go to 140
 
          do 130 j = 1, m
@@ -2417,7 +2417,7 @@ c     complex division, (cr,ci) = (ar,ai)/(br,bi)
       integer i,j,l,n,en,ll,nm,igh,itn,its,low,lp1,enm1,ierr
       real*8 hr(nm,n),hi(nm,n),wr(n),wi(n)
       real*8 si,sr,ti,tr,xi,xr,yi,yr,zzi,zzr,norm,tst1,tst2,
-     x       pythag,dlapy3gf
+     x       dlapy3gf
 
 c     this subroutine is a translation of a unitary analogue of the
 c     algol procedure  comlr, num. math. 12, 369-376(1968) by martin
@@ -2646,7 +2646,7 @@ C  MESHED overflow control WITH triangular multiply (10/30/89 BSG)
       real*8 hr(nm,n),hi(nm,n),wr(n),wi(n),zr(nm,n),zi(nm,n),
      x       ortr(igh),orti(igh)
       real*8 si,sr,ti,tr,xi,xr,yi,yr,zzi,zzr,norm,tst1,tst2,
-     x       pythag, dlapy3gf
+     x       dlapy3gf
 
 c     this subroutine is a translation of a unitary analogue of the
 c     algol procedure  comlr2, num. math. 16, 181-204(1970) by peters
@@ -3053,7 +3053,7 @@ c                converged after 30*n iterations ..........
 
       integer i,j,m,n,ii,jj,la,mp,nm,igh,kp1,low
       real*8 ar(nm,n),ai(nm,n),ortr(igh),orti(igh)
-      real*8 f,g,h,fi,fr,scale,pythag,dlapy3gf
+      real*8 f,g,h,fi,fr,scale,dlapy3gf
 
 c     this subroutine is a translation of a complex analogue of
 c     the algol procedure orthes, num. math. 12, 349-368(1968)
@@ -3189,7 +3189,7 @@ c     .......... for j=igh step -1 until m do -- ..........
 c     (yr,yi) = complex sqrt(xr,xi)
 c     branch chosen so that yr .ge. 0.0 and sign(yi) .eq. sign(xi)
 
-      real*8 s,tr,ti,pythag,dlapy3gf
+      real*8 s,tr,ti,dlapy3gf
       tr = xr
       ti = xi
       s = sqrt(0.5d0*(dlapy3gf(tr,ti) + abs(tr)))
