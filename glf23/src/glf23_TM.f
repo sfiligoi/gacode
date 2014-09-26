@@ -309,7 +309,7 @@ c
       iflagin_gf(2)=1
       iflagin_gf(3)=1
       iflagin_gf(4)=0
-      iflagin_gf(5)=6
+      iflagin_gf(5)=3
 c 
       xparam_gf(1)=0.D0
       xparam_gf(2)=0
@@ -323,13 +323,13 @@ c      xparam_gf(6)=-0.25D0
       xparam_gf(10)=0.D0
       xparam_gf(11)=0.D0
       xparam_gf(12)=0.D0
-      xparam_gf(13)=0.15D0
+      xparam_gf(13)=0.2D0
       xparam_gf(14)=1.D0
       xparam_gf(15)=-0.1D0
       xparam_gf(16)=0.15D0
-      xparam_gf(17)=0.25D0
+      xparam_gf(17)=0.1D0
       xparam_gf(18)=.0D0
-      xparam_gf(19)=1.D0
+      xparam_gf(19)=0.D0
       xparam_gf(20)=0.D0
       xparam_gf(21)=0.D0
       xparam_gf(22)=0.D0
@@ -343,16 +343,16 @@ c      xparam_gf(6)=-0.25D0
       xparam_gf(30)=0.D0
 c
 c      rms_theta_gf=zpi/3.D0
-      park_gf  =0.8D0
+      park_gf  =0.7D0
       ghat_gf  =1.D0
       gchat_gf =1.D0
 c
-      adamp_gf=0.7D0
+      adamp_gf=0.5D0
       alpha_star_gf=0.D0
       alpha_mode_gf=0.D0
 c      gamma_e_gf =-.000000000001D0
       xkdamp_gf=0.D0
-      alpha_p_gf=0.35D0
+      alpha_p_gf=0.5D0
 c 
 c betae and collisionality multipliers
 c
@@ -379,11 +379,12 @@ c for original model (iglf=0,2)
          cnorm_gf=100.D0
          cnorm_p_gf=100.D0
          iflagin_gf(5)=3
-         park_gf=1.D0
+         park_gf=0.7
          adamp_gf=0.5D0
          alpha_p_gf=0.50D0
          xparam_gf(10)=1.D0
          xparam_gf(13)=0.2D0
+         xparam_gf(15)=-0.1
          xparam_gf(16)=0.D0
          xparam_gf(17)=0.1D0
          xparam_gf(19)=0.D0
@@ -400,10 +401,12 @@ c
           xparam_gf(16)=0.15     ! rms_theta shat dependence
           xparam_gf(17)=0.25     ! rms_theta shat dependence
           xparam_gf(19)=1.0      ! rms_theta alpha-dependence
+          iflagin_gf(5)=5        ! rms_theta w/ tau**0.25
           park_gf=0.8
           adamp_gf=0.7
           alpha_p_gf=0.35
-          iflagin_gf(5)=5        ! rms_theta w/ tau**0.25
+          alpha_e_gf=1.35
+c          bt_flag=1
         endif
 c
         if (iglf.eq.98) then      ! renorm + real geometry fit
@@ -585,7 +588,7 @@ c
      >  xparam(19)*alpha)**2-0.5D0)+xparam(17)*
      >  (shat_gf-xparam(19)*alpha-0.5D0)**2)/
      >  taui_gf**0.25D0
-       if(lprint.eq.3) write(*,'(1x,a12,1p3e11.5)')
+       if(lprint.eq.3) write(*,'(1x,a12,1p3e13.5)')
      >                 'rms_theta = ', rms_theta
 c along the field line physics with wave function
 c phi=exp(-theta**2/(4.*rms_theta**2))=W_even
@@ -792,7 +795,7 @@ c primary ions
 c 
       b0=taui*k_per**2
       b0=(1.D0+xparam_gf(20))*b0
-      if(lprint.eq.2) write(*,'(1x,a5,1p3e11.5)') 'b0 = ',b0
+      if(lprint.eq.2) write(*,'(1x,a5,1p3e13.5)') 'b0 = ',b0
 c 
 c     Pade aproximates...may use gamma functions later
       g0=1.D0
