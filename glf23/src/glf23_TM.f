@@ -238,7 +238,7 @@ c
      >  park,ghat,gchat,kdamp,
      >  adamp,alpha_star,gamma_star,alpha_e,gamma_e,
      >  kyf,gamma,freq,ph_m,d_hat,d_im_hat,
-     >  chii_hat,chie_hat,exch_hat
+     >  chii_hat,chi_im_hat,chie_hat,exch_hat
       COMPLEX*16 xi, idelta,
      >  v(1:12), amat(1:12,1:12),
      >  n_i,p_par,p_per,n_t,p_t,u_par,n_u,a_par,ph,t_u,n_e,
@@ -306,6 +306,7 @@ c
       diff_gf=0.D0
       diff_im_gf=0.D0
       chii_gf=0.D0
+      chi_im_gf=0.0
       chie_gf=0.D0
       exch_gf=0.D0
       eta_par_gf=0.D0
@@ -345,6 +346,7 @@ c      xparam_gf(6)=-0.25D0
       xparam_gf(19)=0.D0
       xparam_gf(20)=0.D0
       xparam_gf(21)=0.D0
+      if(ns_gf.eq.3)xparam_gf(21)=1.0  ! turn of impurity energy flux
       xparam_gf(22)=0.D0
       xparam_gf(23)=1.D0
       xparam_gf(24)=0.D0
@@ -381,8 +383,8 @@ c
 !       cmodel=1.D0
 !       xalpha=x_alpha
  
-c for original model (iglf=0,2)
-       if(iglf.eq.0) then
+c for original model
+       if(version_gf.eq.1) then
          cnorm_gf=100.D0
          cnorm_p_gf=100.D0
          iflagin_gf(5)=3
@@ -400,7 +402,7 @@ c
 c
 c... parameters for revised GLF23 models
 c
-        if (iglf.eq.1) then      ! retuned model v1.61
+        if (version_gf.eq.2) then   ! retuned model v1.61
           cnorm_gf=50.D0         ! ITG/TEM normalization
           xparam_gf(10)=12.D0    ! ETG normalization (cnorm*xparam(10))
           xparam_gf(13)=0.15      ! rms_theta q-dependence
@@ -416,7 +418,7 @@ c
 c          bt_flag=1
         endif
 c
-        if (iglf.eq.98) then      ! renorm + real geometry fit
+        if (version_gf.eq.3) then      ! renorm + real geometry fit
           cnorm_gf=27.D0         ! ITG/TEM normalization
           xparam_gf(10)=17.8D0   ! ETG normalization
           xparam_gf(15)=0.10D0   ! trapped ptcle fraction enhancement
@@ -815,6 +817,7 @@ c
         d_im_hat=0.D0
         chie_hat=0.D0
         chii_hat=0.D0
+        chi_im_hat=0.0
         exch_hat=0.D0
         eta_par_hat=0.D0
         eta_per_hat=0.D0
@@ -1707,7 +1710,7 @@ c
 c non linear saturation rule
 c 
       gamma_r= 0.2D0*3.D0/2.D0*abs(w_d)*taui   !only scaling important
-      if(iglf.eq.1) gamma_r= 0.2D0*3.D0/2.D0*abs(w_d0)*taui
+      if(version_gf.eq.2) gamma_r= 0.2D0*3.D0/2.D0*abs(w_d0)*taui
       if(lprint.eq.3) write(*,'(1x,a17,i3,1p3e12.4)')
      >   'ilh,gamma_r    = ',ilh,gamma_r
 c 
@@ -1759,22 +1762,22 @@ c note only real part survives in diffusivities
 c    ...units are c_s*rho_s**2/a
 c magnetic futter component is too small to worry about
 c 
-      d_hat  = phi_norm*REAL(conjg(n_i)*(-xi*ky*ph))/rlni
+      d_hat  = phi_norm*REAL(conjg(n_i)*(-xi*ky*ph))
      >         +d_hat
 c 
-      d_im_hat = phi_norm*REAL(conjg(n_im)*(-xi*ky*ph))/(rlnimp+
-     >           epsilon)+d_im_hat
+      d_im_hat = phi_norm*REAL(conjg(n_im)*(-xi*ky*ph))
+     >           +d_im_hat
 c 
       chii_hat = phi_norm*3.D0/2.D0*
      >           REAL(conjg((1.D0/3.D0)*p_par+
-     >           (2.D0/3.D0)*p_per)*(-xi*ky*ph))/rlti
+     >           (2.D0/3.D0)*p_per)*(-xi*ky*ph))
      >           +chii_hat
-      chii_hat=chii_hat + aiwt/apwt*xparam(21)*phi_norm*3.D0/2.D0*
+      chi_im_hat= aiwt/apwt*xparam(21)*phi_norm*3.D0/2.D0*
      >         REAL(conjg((1.D0/3.D0)*p_im_par+(2.D0/3.D0)*p_im_per)*
-     >         (-xi*ky*ph))/rlti
+     >         (-xi*ky*ph)) + chi_im_hat
 c 
       chie_hat = phi_norm*3.D0/2.D0*
-     >           REAL(conjg(p_t+n_u+t_u)*(-xi*ky*ph))/rlte
+     >           REAL(conjg(p_t+n_u+t_u)*(-xi*ky*ph))
      >           +chie_hat
 c
       if(lprint.eq.3) then
@@ -1807,14 +1810,13 @@ c
      >            +xparam(14)*phi_norm*REAL(conjg(
      >            -xi*ky*gamma_p*(-gamma_p*alpha_n)*g1*ph/
      >            (-xi*freq+gamma))
-     >            *(-xi*ky*ph))/(gamma_p+epsilon)*(-gamma_p*alpha_n)
+     >            *(-xi*ky*ph))*(-gamma_p*alpha_n)
      >            +eta_par_hat
 c
       eta_per_hat = phi_norm*
      >              REAL(conjg(-ky*(ky*shat*rms_theta)*ph)*
      >              (ph+taui*((1.D0/3.D0)*p_par+(2.D0/3.D0)*p_per)))*
      >              (-gamma_p*alpha_n)
-     >              /(gamma_p+epsilon)
      >              +eta_per_hat
 c 
        endif
@@ -1838,6 +1840,7 @@ c
        diff_k_gf(iky)=d_hat
        diff_im_k_gf(iky)=d_im_hat
        chii_k_gf(iky)=chii_hat
+       chi_im_k_gf(iky)=chi_im_hat
        chie_k_gf(iky)=chie_hat
        exch_k_gf(iky)=exch_hat
 c  
@@ -1887,6 +1890,7 @@ c
       diff_gf=0.D0
       diff_im_gf=0.D0
       chii_gf=0.D0
+      chi_im_gf=0.0
       chie_gf=0.D0
       exch_gf=0.D0
       eta_par_gf=0.D0
@@ -1914,6 +1918,7 @@ c
        diff_gf=diff_gf+diff_k_gf(iky)*del_k
        diff_im_gf=diff_im_gf+diff_im_k_gf(iky)*del_k
        chii_gf=chii_gf+chii_k_gf(iky)*del_k
+       chi_im_gf=chi_im_gf+chi_im_k_gf(iky)*del_k
        chie_gf=chie_gf+chie_k_gf(iky)*del_k
        exch_gf=exch_gf+exch_k_gf(iky)*del_k
        eta_par_gf=eta_par_gf+eta_par_k_gf(iky)*del_k
@@ -1938,6 +1943,7 @@ c
       diff_gf=diff_gf/anorm_k
       diff_im_gf=diff_im_gf/anorm_k
       chii_gf=chii_gf/anorm_k
+      chi_im_gf=chi_im_gf/anorm_k
       chie_gf=chie_gf/anorm_k
       exch_gf=exch_gf/anorm_k
       eta_par_gf=eta_par_gf/anorm_k
@@ -1992,6 +1998,7 @@ c
       diff_gf=diff_gf*phi_renorm
       diff_im_gf=diff_im_gf*phi_renorm
       chii_gf=chii_gf*phi_renorm
+      chi_im_gf=chi_im_gf*phi_renorm
       chie_gf=chie_gf*phi_renorm
       exch_gf=exch_gf*phi_renorm
       eta_par_gf=eta_par_gf*phi_renorm
@@ -2006,6 +2013,7 @@ c
       diff_gf=cnorm_p_gf*diff_gf
       diff_im_gf=cnorm_gf*diff_im_gf
       chii_gf=cnorm_gf*chii_gf
+      chi_im_gf=cnorm_gf*chi_im_gf
       chie_gf=cnorm_gf*chie_gf
       exch_gf=cnorm_gf*exch_gf
       eta_par_gf=cnorm_gf*eta_par_gf
@@ -2021,6 +2029,7 @@ c
        chie_k_gf(iky)=chie_k_gf(iky)*del_k/anorm_k*cnorm_gf
        chie_e_k_gf(iky)=chie_e_k_gf(iky)*del_k/anorm_k*cnorm_gf
        chii_k_gf(iky)=chii_k_gf(iky)*del_k/anorm_k*cnorm_gf
+       chi_im_k_gf(iky)=chi_im_k_gf(iky)*del_k/anorm_k*cnorm_gf
        eta_phi_k_gf(iky)=eta_phi_k_gf(iky)*del_k/anorm_k*cnorm_gf
 c      write(*,'(2x,i3,1p8e11.3)') iky, xkyf_k_gf(iky),
 c    >      chii_k_gf(iky), del_k, anorm_k
@@ -2033,6 +2042,7 @@ c
           write(1,*) 'diff_gf=',   diff_gf
           write(1,*) 'diff_im_gf=',   diff_im_gf
           write(1,*) 'chii_gf=', chii_gf
+          write(1,*) 'chi_im_gf=', chi_im_gf
           write(1,*) 'chie_gf=', chie_gf
           write(1,*) 'exch_gf=', exch_gf
       endif
@@ -2090,6 +2100,7 @@ c 888  continue
       diff_gf=0.D0
       diff_im_gf=0.D0
       chii_gf=0.D0
+      chi_im_gf=0.0
       chie_gf=0.D0
       exch_gf=0.D0
       eta_par_gf=0.D0

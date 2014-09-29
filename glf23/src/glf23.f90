@@ -22,15 +22,13 @@ program glf23
   real :: prec
 
   call glf23_read_input()
-  call glf23_dump_local()
   call glf23_run()
-  call glf23_dump_module() 
 
   if (glf23_use_transport_model_in) then
 
      ! Output to screen
 
-     print 20,'Gam/Gam_GB','    Q/Q_GB','  Pi/Pi_GB', '    S/S_GB'
+     print 20,'Gam/Gam_GB','    Q/Q_GB','    Pi/Pi_GB', '    S/S_GB'
      print 10,'elec',&
           glf23_elec_pflux_out,&
           glf23_elec_eflux_out,&
@@ -84,6 +82,11 @@ program glf23
   open(unit=1,file=trim(glf23_path_in)//'out.glf23.prec')
   write(1,*) prec
   close(1)
+
+! diagnostic output state files 
+  call glf23_dump_local()
+  call glf23_dump_module() 
+
 
 10 format(a,10(1x,1pe11.4))
 20 format(t7,a,t19,a,t31,a,t43,a,t55,a)

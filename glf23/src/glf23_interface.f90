@@ -196,42 +196,44 @@ contains
          status='replace',iostat=ierr)
 
     write(1,*) 'use_transport_model_gf = ', use_transport_model_gf
-    write(1,*) 'use_adaibatic_electrons = ',use_adiabatic_electrons_gf
+    write(1,*) 'use_adaibatic_electrons_gf = ',use_adiabatic_electrons_gf
     write(1,*) 'alpha_p_mult_gf = ',alpha_p_mult_gf
     write(1,*) 'alpha_e_mult_gf = ',alpha_e_mult_gf
     write(1,*) 'version_gf = ',version_gf
     write(1,*) 'lprint_gf = ',lprint_gf
     write(1,*) 'nroot_gf = ', nroot_gf
-    write(1,*) 'ky = ', xky0_gf
-    write(1,*) 'ns = ', ns_gf
-    write(1,*) 'park = ', park_gf
-    write(1,*) 'ghat = ', ghat_gf
-    write(1,*) 'gchat = ', gchat_gf
-    write(1,*) 'alpha_quench = ', alpha_e_gf
-    write(1,*) 'alpha_p = ', alpha_p_gf
-    write(1,*) 'betae = ', betae_gf
-    write(1,*) 'xnuei = ', xnu_gf
+    write(1,*) 'ky_gf = ', xky0_gf
+    write(1,*) 'ns_gf = ', ns_gf
+    write(1,*) 'park_gf = ', park_gf
+    write(1,*) 'ghat_gf = ', ghat_gf
+    write(1,*) 'gchat_gf = ', gchat_gf
+    write(1,*) 'alpha_e_gf = ', alpha_e_gf
+    write(1,*) 'alpha_p_gf = ', alpha_p_gf
+    write(1,*) 'betae_gf = ', betae_gf
+    write(1,*) 'xnu_gf = ', xnu_gf
 
-    write(1,*)'mass_ion', amassgas_gf
-    write(1,*) 'mass_imp = ', amassimp_gf
-    write(1,*) 'zimp = ', zimp_gf
-    write(1,*) 'rlne = ', rlne_gf
-    write(1,*) 'rlte = ', rlte_gf
-    write(1,*) 'rlni = ', rlni_gf
-    write(1,*) 'rlti = ', rlti_gf
-    write(1,*) 'vpar_shear = ', gamma_p_gf
-    write(1,*) 'vexb_shear = ', gamma_e_gf
-    write(1,*) 'awt = ', apwt_gf
-    write(1,*) 'aiwt = ',aiwt_gf
-    write(1,*) 'taui = ', taui_gf
+    write(1,*) 'amassgas_gf =', amassgas_gf
+    write(1,*) 'amassimp_gf = ', amassimp_gf
+    write(1,*) 'zimp_gf = ', zimp_gf
+    write(1,*) 'rlne_gf = ', rlne_gf
+    write(1,*) 'rlte_gf = ', rlte_gf
+    write(1,*) 'rlni_gf = ', rlni_gf
+    write(1,*) 'rlti_gf = ', rlti_gf
+    write(1,*) 'rlnimp_gf = ',rlnimp_gf
+    write(1,*) 'dil_gf = ',dil_gf
+    write(1,*) 'gamma_p_gf = ', gamma_p_gf
+    write(1,*) 'gamma_e_gf = ', gamma_e_gf
+    write(1,*) 'awt_gf = ', apwt_gf
+    write(1,*) 'aiwt_gf = ',aiwt_gf
+    write(1,*) 'taui_gf = ', taui_gf
 
-    write(1,*) 'rmin_sa = ', rmin_gf
-    write(1,*) 'rmaj_sa = ', rmaj_gf
-    write(1,*) 'q_sa = ', q_gf
-    write(1,*) 'shat_sa = ', shat_gf
-    write(1,*) 'alpha_sa = ', alpha_gf
-    write(1,*) 'xwell_sa = ', xwell_gf
-    write(1,*) 'theta0_sa = ', theta0_gf
+    write(1,*) 'rmin_gf = ', rmin_gf
+    write(1,*) 'rmaj_gf = ', rmaj_gf
+    write(1,*) 'q_gf = ', q_gf
+    write(1,*) 'shat_gf = ', shat_gf
+    write(1,*) 'alpha_gf = ', alpha_gf
+    write(1,*) 'xwell_gf = ', xwell_gf
+    write(1,*) 'theta0_gf = ', theta0_gf
 
     close(1)
 

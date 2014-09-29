@@ -28,7 +28,7 @@
       INTEGER :: i_err=0
 !      INTEGER :: first_order_gf
 !      INTEGER :: ipert_gf=0
-      INTEGER :: iglf=98
+!      INTEGER :: iglf=98
 !      INTEGER :: ipade_gf=0
 !      INTEGER :: ibranch_gf=0
 !      INTEGER :: igauss_gf
@@ -46,6 +46,7 @@
       REAL :: diff_k_gf(nmode)
       REAL :: diff_im_k_gf(nmode)
       REAL :: chii_k_gf(nmode)
+      REAL :: chi_im_k_gf(nmode)
       REAL :: chie_k_gf(nmode)
       REAL :: exch_k_gf(nmode)
       REAL :: eta_par_k_gf(nmode)
@@ -102,6 +103,7 @@
       REAL :: diff_gf
       REAL :: diff_im_gf
       REAL :: chii_gf
+      REAL :: chi_im_gf
       REAL :: chie_gf
 !      REAL :: diff_ib_gf
 !      REAL :: diff_eb_gf

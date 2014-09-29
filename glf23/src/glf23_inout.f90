@@ -17,16 +17,11 @@ SUBROUTINE put_model_parameters(use_tm, adiabatic, alpha_p, &
   use_adiabatic_electrons_gf = adiabatic
   alpha_p_mult_gf = alpha_p
   alpha_e_mult_gf = alpha_quench
-  version_gf = version
-  if(version.eq.1)then
-     iglf = 0   !original glf23
-  elseif(version.eq.2)then
-     iglf = 1   !retuned version v1.61
-  elseif(version.eq.3)then
-     iglf = 98  !renormed + real geometry version 
-  else
-    write(*,*)"version specified does not exist",version,"reverting to version 3"
-    iglf = 3
+  if(version.lt.1.or.version.gt.3)then
+    write(*,*)"version specified does not exist",version,"reverting to version 2"
+    version_gf = 2
+  else  
+    version_gf = version
   endif
   lprint_gf = lprint
   !
@@ -257,11 +252,11 @@ REAL FUNCTION get_particle_flux(i1,i2)
      write(*,*)"requested particle flux index is of bounds",i3
   elseif(i2.eq.1)then
      if(i1.eq.1)then
-       get_particle_flux = rlne_gf*diff_gf
+       get_particle_flux = diff_gf+zimp_gf*diff_im_gf
      elseif(i1.eq.2)then
-       get_particle_flux = rlne_gf*diff_gf-rlnimp_gf*diff_im_gf
+       get_particle_flux = diff_gf
      elseif(i1.eq.3)then
-       get_particle_flux = rlnimp_gf*diff_im_gf
+       get_particle_flux = diff_im_gf
      endif
   endif
   !
@@ -286,11 +281,11 @@ REAL FUNCTION get_energy_flux(i1,i2)
      write(*,*)"requested energy flux index is of bounds",i3
   elseif(i2.eq.1)then
      if(i1.eq.1)then
-       get_energy_flux = rlte_gf*chie_gf
+       get_energy_flux = chie_gf
      elseif(i1.eq.2)then
-       get_energy_flux = rlti_gf*chii_gf
-     elseif(i1.eq.3)then ! impurity energy transport is in chii_gf
-       get_energy_flux = 0.0
+       get_energy_flux = chii_gf
+     elseif(i1.eq.3)then 
+       get_energy_flux = chi_im_gf
      endif
   endif
   !
@@ -316,7 +311,7 @@ REAL FUNCTION get_stress_par(i1,i2)
      if(i1.eq.1)then
        get_stress_par = 0.0
      elseif(i1.eq.2)then
-       get_stress_par = gamma_p_gf*eta_par_gf
+       get_stress_par = eta_par_gf
      elseif(i1.eq.3)then 
        get_stress_par = 0.0
      endif
@@ -344,7 +339,7 @@ REAL FUNCTION get_stress_tor(i1,i2)
      if(i1.eq.1)then
        get_stress_tor = 0.0
      elseif(i1.eq.2)then
-       get_stress_tor = gamma_p_gf*eta_phi_gf
+       get_stress_tor = eta_phi_gf
      elseif(i1.eq.3)then 
        get_stress_tor = 0.0
      endif
