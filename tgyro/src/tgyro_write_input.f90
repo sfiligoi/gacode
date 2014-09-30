@@ -445,6 +445,25 @@ subroutine tgyro_write_input
      end select
      !--------------------------------------------------------
 
+     select case(tgyro_glf23_revision)
+     case (1)
+ 
+         write(1,10) 'TGYRO_GLF23_REVISION','Original GLF23'
+
+     case (2)
+
+         write(1,10) 'TGYRO_GLF23_REVISION','retuned GLF23 v1.61'
+
+     case(3)
+
+         write(1,10) 'TGYRO_GLF23_REVISION','renormed GLF23'
+     case default
+
+        error_flag = 1
+        error_msg = 'Error: TGYRO_GLF23_REVISION'
+
+     end select
+     !--------------------------------------------------------
 
 100  continue 
 

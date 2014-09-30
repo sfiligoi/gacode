@@ -272,6 +272,8 @@ module tgyro_globals
   integer :: loc_bc_offset
   integer :: tgyro_tglf_revision
   integer :: tgyro_tglf_dump_flag
+  integer :: tgyro_glf23_revision
+  integer :: tgyro_glf23_dump_flag
   integer :: loc_ti_feedback_flag
   integer :: loc_te_feedback_flag
   integer :: loc_ne_feedback_flag

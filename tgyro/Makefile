@@ -8,6 +8,7 @@ export EXTRA_LIBS = \
        ${GACODE_ROOT}/neo/src/neo_lib.a \
        ${GACODE_ROOT}/shared/nclass/nclass_lib.a \
        ${GACODE_ROOT}/tglf/src/tglf_lib.a \
+       ${GACODE_ROOT}/glf23/src/glf23_lib.a \
        ${GACODE_ROOT}/gyro/src/gyro_lib.a \
        ${GACODE_ROOT}/gyro/BLEND/BLEND_lib.a \
        ${GACODE_ROOT}/shared/EXPRO/EXPRO_lib.a \
@@ -24,6 +25,7 @@ all:
 	cd ${GACODE_ROOT}/shared ; make
 	cd ${GACODE_ROOT}/neo ; make
 	cd ${GACODE_ROOT}/tglf ; make
+	cd ${GACODE_ROOT}/glf23 ; make
 	cd ${GACODE_ROOT}/gyro ; make
 	cd src ; make
 

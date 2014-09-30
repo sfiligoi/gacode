@@ -15,31 +15,30 @@ subroutine glf23_run()
   integer :: i_ion,n
   complex :: xi=(0.0,1.0)
 
-
-  call put_model_parameters(glf23_use_transport_model_in, &
+  call put_glf23_model_parameters(glf23_use_transport_model_in, &
        glf23_use_adiabatic_electrons_in, &
        glf23_alpha_p_mult_in, &
        glf23_alpha_quench_mult_in, &
        glf23_version_in, &
        glf23_lprint_in)
 
-  call put_species(glf23_ns_in, &
+  call put_glf23_species(glf23_ns_in, &
        glf23_zs_in, &
        glf23_mass_in)
 
-  call put_kys(glf23_ky_in)
+  call put_glf23_kys(glf23_ky_in)
 
-  call put_gradients(glf23_rlns_in, &
+  call put_glf23_gradients(glf23_rlns_in, &
        glf23_rlts_in, &
        glf23_vpar_shear_in, &
        glf23_vexb_shear_in)
 
-  call put_averages(glf23_taus_in, &
+  call put_glf23_averages(glf23_taus_in, &
        glf23_as_in, &
        glf23_betae_in, &
        glf23_xnue_in)
 
-  call put_s_alpha_geometry(glf23_rmin_sa_in, &
+  call put_glf23_geometry(glf23_rmin_sa_in, &
        glf23_rmaj_sa_in, &
        glf23_q_sa_in, &
        glf23_shat_sa_in, &
@@ -62,32 +61,32 @@ subroutine glf23_run()
      ! Electrons
 
      ! Gammae/Gamma_GB
-     glf23_elec_pflux_out = get_particle_flux(1,1)
+     glf23_elec_pflux_out = get_glf23_particle_flux(1,1)
 
      ! Qe/Q_GB
-     glf23_elec_eflux_out     = get_energy_flux(1,1)
+     glf23_elec_eflux_out     = get_glf23_energy_flux(1,1)
 
      ! Pi_e/Pi_GB
-     glf23_elec_mflux_out = get_stress_tor(1,1)
+     glf23_elec_mflux_out = get_glf23_stress_tor(1,1)
 
      ! S_e/S_GB
-     glf23_elec_expwd_out = get_exchange(1,1)
+     glf23_elec_expwd_out = get_glf23_exchange(1,1)
 
      ! Ions
 
      do i_ion=1,2
 
         ! Gammai/Gamma_GB
-        glf23_ion_pflux_out(i_ion) = get_particle_flux(i_ion+1,1)
+        glf23_ion_pflux_out(i_ion) = get_glf23_particle_flux(i_ion+1,1)
 
         ! Qi/Q_GB
-        glf23_ion_eflux_out(i_ion)     = get_energy_flux(i_ion+1,1)
+        glf23_ion_eflux_out(i_ion)     = get_glf23_energy_flux(i_ion+1,1)
 
         ! Pi_i/Pi_GB
-        glf23_ion_mflux_out(i_ion) = get_stress_tor(i_ion+1,1)
+        glf23_ion_mflux_out(i_ion) = get_glf23_stress_tor(i_ion+1,1)
 
         ! S_i/S_GB
-        glf23_ion_expwd_out(i_ion) = get_exchange(i_ion+1,1)
+        glf23_ion_expwd_out(i_ion) = get_glf23_exchange(i_ion+1,1)
 
      enddo
 
@@ -98,7 +97,7 @@ subroutine glf23_run()
 
      ! Collect linear eigenvalues
      do n=1,2
-        glf23_eigenvalue_out(n) = get_frequency(n) + xi*get_growthrate(n)
+        glf23_eigenvalue_out(n) = get_glf23_frequency(n) + xi*get_glf23_growthrate(n)
      enddo
 
   endif

@@ -1,7 +1,7 @@
 !-----------------------------------------------------------------
 !  input routines
 !-----------------------------------------------------------------
-SUBROUTINE put_model_parameters(use_tm, adiabatic, alpha_p, &
+SUBROUTINE put_glf23_model_parameters(use_tm, adiabatic, alpha_p, &
            alpha_quench,version,lprint)
   !
   USE glf23_gf
@@ -25,11 +25,11 @@ SUBROUTINE put_model_parameters(use_tm, adiabatic, alpha_p, &
   endif
   lprint_gf = lprint
   !
-END SUBROUTINE put_model_parameters
+END SUBROUTINE put_glf23_model_parameters
 !
 !-----------------------------------------------------------------
 !
-SUBROUTINE put_species(nsp,zsp,msp)
+SUBROUTINE put_glf23_species(nsp,zsp,msp)
   !
   USE glf23_gf
   !
@@ -56,11 +56,11 @@ SUBROUTINE put_species(nsp,zsp,msp)
     zimp_gf = zsp(3)
   endif
   !
-END SUBROUTINE put_species
+END SUBROUTINE put_glf23_species
 !
 !-----------------------------------------------------------------
 !
-SUBROUTINE put_kys(kys)
+SUBROUTINE put_glf23_kys(kys)
   !
   USE glf23_gf
   !
@@ -75,11 +75,11 @@ SUBROUTINE put_kys(kys)
   !
   xky0_gf = kys
   !
-END SUBROUTINE put_kys
+END SUBROUTINE put_glf23_kys
 !
 !-----------------------------------------------------------------
 !
-SUBROUTINE put_gradients(rln,rlt,vpar_shear,vexb_shear)
+SUBROUTINE put_glf23_gradients(rln,rlt,vpar_shear,vexb_shear)
   !
   USE glf23_gf
   !
@@ -110,11 +110,11 @@ SUBROUTINE put_gradients(rln,rlt,vpar_shear,vexb_shear)
     gamma_p_gf = vpar_shear(2)
     gamma_e_gf = vexb_shear   
   !    
-END SUBROUTINE put_gradients
+END SUBROUTINE put_glf23_gradients
 !
 !-----------------------------------------------------------------
 !
-SUBROUTINE put_averages(tsp,asp,betae,xnue)
+SUBROUTINE put_glf23_averages(tsp,asp,betae,xnue)
   !
   USE glf23_gf
   !
@@ -147,11 +147,11 @@ SUBROUTINE put_averages(tsp,asp,betae,xnue)
    if(betae_gf.eq.0.0)betae_gf = 1.0E-12
    xnu_gf = xnue
   !      
-END SUBROUTINE put_averages
+END SUBROUTINE put_glf23_averages
 !
 !-----------------------------------------------------------------
 !
-SUBROUTINE put_s_alpha_geometry(rmin,rmaj,q,shat,alpha,xwell,theta0)
+SUBROUTINE put_glf23_geometry(rmin,rmaj,q,shat,alpha,xwell,theta0)
   !
   USE glf23_gf
   !
@@ -187,13 +187,13 @@ SUBROUTINE put_s_alpha_geometry(rmin,rmaj,q,shat,alpha,xwell,theta0)
   !
   if(rmin_gf.ge.rmaj_gf)rmin_gf=0.999*rmaj_gf  
   !
-END SUBROUTINE put_s_alpha_geometry
+END SUBROUTINE put_glf23_geometry
 !
 !-----------------------------------------------------------------
 !  output routines
 !-----------------------------------------------------------------
 !
-REAL FUNCTION get_growthrate(index1)
+REAL FUNCTION get_glf23_growthrate(index1)
   !
   USE glf23_gf
   !
@@ -204,16 +204,16 @@ REAL FUNCTION get_growthrate(index1)
   i3 = SIZE(gamma_gf)
   if(index1.gt.i3)then
      write(*,*)"requested growthrate index out of bounds",i3
-     get_growthrate = 0.0
+     get_glf23_growthrate = 0.0
   else
-     get_growthrate = gamma_gf(index1)
+     get_glf23_growthrate = gamma_gf(index1)
   endif
   !
-END FUNCTION get_growthrate
+END FUNCTION get_glf23_growthrate
 !
 !-----------------------------------------------------------------
 !
-REAL FUNCTION get_frequency(index1)
+REAL FUNCTION get_glf23_frequency(index1)
   !
   USE glf23_gf
   !
@@ -224,18 +224,18 @@ REAL FUNCTION get_frequency(index1)
   i3 = SIZE(freq_gf)
   if(index1.gt.i3)then
      write(*,*)"requested frequency index is of bounds",i3
-     get_frequency = 0.0
+     get_glf23_frequency = 0.0
   else
-     get_frequency = freq_gf(index1)
+     get_glf23_frequency = freq_gf(index1)
   endif
   !
-END FUNCTION get_frequency
+END FUNCTION get_glf23_frequency
 !
 !-----------------------------------------------------------------
 !
 !-----------------------------------------------------------------
 !
-REAL FUNCTION get_particle_flux(i1,i2)
+REAL FUNCTION get_glf23_particle_flux(i1,i2)
   !
   USE glf23_gf
   !
@@ -245,26 +245,26 @@ REAL FUNCTION get_particle_flux(i1,i2)
   !
   ! note that only electrostatic part of the transport is computed in glf23
   !
-   get_particle_flux = 0.0
+   get_glf23_particle_flux = 0.0
   !
   i3=6
   if(i1*i2.gt.i3)then
      write(*,*)"requested particle flux index is of bounds",i3
   elseif(i2.eq.1)then
      if(i1.eq.1)then
-       get_particle_flux = diff_gf+zimp_gf*diff_im_gf
+       get_glf23_particle_flux = diff_gf+zimp_gf*diff_im_gf
      elseif(i1.eq.2)then
-       get_particle_flux = diff_gf
+       get_glf23_particle_flux = diff_gf
      elseif(i1.eq.3)then
-       get_particle_flux = diff_im_gf
+       get_glf23_particle_flux = diff_im_gf
      endif
   endif
   !
-END FUNCTION get_particle_flux
+END FUNCTION get_glf23_particle_flux
 !
 !-----------------------------------------------------------------
 !
-REAL FUNCTION get_energy_flux(i1,i2)
+REAL FUNCTION get_glf23_energy_flux(i1,i2)
   !
   USE glf23_gf
   !
@@ -274,25 +274,25 @@ REAL FUNCTION get_energy_flux(i1,i2)
   !
   ! note that only electrostatic part of the transport is computed in glf23
   !
-  get_energy_flux = 0.0
+  get_glf23_energy_flux = 0.0
   !
   i3=6
   if(i1*i2.gt.i3)then
      write(*,*)"requested energy flux index is of bounds",i3
   elseif(i2.eq.1)then
      if(i1.eq.1)then
-       get_energy_flux = chie_gf
+       get_glf23_energy_flux = chie_gf
      elseif(i1.eq.2)then
-       get_energy_flux = chii_gf
+       get_glf23_energy_flux = chii_gf
      elseif(i1.eq.3)then 
-       get_energy_flux = chi_im_gf
+       get_glf23_energy_flux = chi_im_gf
      endif
   endif
   !
-END FUNCTION get_energy_flux
+END FUNCTION get_glf23_energy_flux
 !-----------------------------------------------------------------
 !
-REAL FUNCTION get_stress_par(i1,i2)
+REAL FUNCTION get_glf23_stress_par(i1,i2)
   !
   USE glf23_gf
   !
@@ -302,25 +302,25 @@ REAL FUNCTION get_stress_par(i1,i2)
   !
   ! note that only electrostatic part of the transport is computed in glf23
   !
-  get_stress_par = 0.0
+  get_glf23_stress_par = 0.0
   !
   i3=6
   if(i1*i2.gt.i3)then
      write(*,*)"requested stress_par index is of bounds",i3
   elseif(i2.eq.1)then
      if(i1.eq.1)then
-       get_stress_par = 0.0
+       get_glf23_stress_par = 0.0
      elseif(i1.eq.2)then
-       get_stress_par = eta_par_gf
+       get_glf23_stress_par = eta_par_gf
      elseif(i1.eq.3)then 
-       get_stress_par = 0.0
+       get_glf23_stress_par = 0.0
      endif
   endif
   !
-END FUNCTION get_stress_par
+END FUNCTION get_glf23_stress_par
 !!-----------------------------------------------------------------
 !
-REAL FUNCTION get_stress_tor(i1,i2)
+REAL FUNCTION get_glf23_stress_tor(i1,i2)
   !
   USE glf23_gf
   !
@@ -330,25 +330,25 @@ REAL FUNCTION get_stress_tor(i1,i2)
   !
   ! note that only electrostatic part of the transport is computed in glf23
   !
-  get_stress_tor = 0.0
+  get_glf23_stress_tor = 0.0
   !
   i3=6
   if(i1*i2.gt.i3)then
      write(*,*)"requested stress_tor index is of bounds",i3
   elseif(i2.eq.1)then
      if(i1.eq.1)then
-       get_stress_tor = 0.0
+       get_glf23_stress_tor = 0.0
      elseif(i1.eq.2)then
-       get_stress_tor = eta_phi_gf
+       get_glf23_stress_tor = eta_phi_gf
      elseif(i1.eq.3)then 
-       get_stress_tor = 0.0
+       get_glf23_stress_tor = 0.0
      endif
   endif
   !
-END FUNCTION get_stress_tor
+END FUNCTION get_glf23_stress_tor
 !-----------------------------------------------------------------
 !
-REAL FUNCTION get_exchange(i1,i2)
+REAL FUNCTION get_glf23_exchange(i1,i2)
   !
   USE glf23_gf
   !
@@ -358,22 +358,22 @@ REAL FUNCTION get_exchange(i1,i2)
   !
   ! note that only electrostatic part of the transport is computed in glf23
   !
-  get_exchange = 0.0
+  get_glf23_exchange = 0.0
   !
   i3=6
   if(i1*i2.gt.i3)then
      write(*,*)"requested exchange index is of bounds",i3
   elseif(i2.eq.1)then
      if(i1.eq.1)then
-       get_exchange = exch_gf
+       get_glf23_exchange = exch_gf
      elseif(i1.eq.2)then
-       get_exchange = -exch_gf
+       get_glf23_exchange = -exch_gf
      elseif(i1.eq.3)then 
-       get_exchange = 0.0
+       get_glf23_exchange = 0.0
      endif
   endif
   !
-END FUNCTION get_exchange
+END FUNCTION get_glf23_exchange
 !
 !---------------------------------------------
 !

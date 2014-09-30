@@ -30,13 +30,14 @@ module glf23_interface
 
   implicit none
 ! maximum dimensions
-  integer,parameter :: nsm=6
+  integer,parameter :: nsm=3
   integer,parameter :: maxmodes=4
 
   ! CONTROL PARAMETERS
   character (len=256)  :: glf23_path_in        = ''
   logical              :: glf23_dump_flag_in   = .false.
   logical              :: glf23_quiet_flag_in  = .true.
+  integer              :: glf23_nmodes_in = 2
 
   ! INPUT PARAMETERS
 
@@ -93,13 +94,13 @@ module glf23_interface
   
   ! LINEAR OUTPUT PARAMETERS
   complex :: glf23_eigenvalue_out(maxmodes)
-  REAL,EXTERNAL :: get_growthrate
-  REAL,EXTERNAL :: get_frequency
-  REAL,EXTERNAL :: get_particle_flux
-  REAL,EXTERNAL :: get_energy_flux
-  REAL,EXTERNAL :: get_stress_tor
-  REAL,EXTERNAL :: get_stress_par
-  REAL,EXTERNAL :: get_exchange
+  REAL,EXTERNAL :: get_glf23_growthrate
+  REAL,EXTERNAL :: get_glf23_frequency
+  REAL,EXTERNAL :: get_glf23_particle_flux
+  REAL,EXTERNAL :: get_glf23_energy_flux
+  REAL,EXTERNAL :: get_glf23_stress_tor
+  REAL,EXTERNAL :: get_glf23_stress_par
+  REAL,EXTERNAL :: get_glf23_exchange
   
   ! ERROR OUTPUT
   character (len=80) :: glf23_error_message='null'

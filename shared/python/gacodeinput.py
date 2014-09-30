@@ -5,7 +5,7 @@
 #  Collection of classes for parsing of GACODE free-format input files.
 #
 # NOTES: 
-#  SimpleInput  : input.gyro, input.neo, input.tglf 
+#  SimpleInput  : input.gyro, input.neo, input.tglf input.glf23
 #  ProfileInput : input.profiles
 #  ManagerInput : input.tgyro [see tgyro/bin/tgyro_parse.py]
 #
@@ -309,12 +309,13 @@ class ManagerInput:
         print 'INFO: (gacodeinput) Number of code instances: '+str(n_path)
 
         # Add special entries (DIR) to output file, and overlay
-        # extra parameters onto GYRO or TGLF input files.
+        # extra parameters onto GYRO, TGLF or GLF23 input files.
         #
         # NOTE:
         #  - GYRO directories must be of the form GYRO*
         #  - IFS directories must be of the form IFS*
         #  - TGLF directories must be of the form TGLF*
+        #  - GLF23 directories must be of the form GLF*
         #  - FUN directories must be of the form FUN*
 
         for p in range(len(self.slavepath)):
@@ -348,6 +349,28 @@ class ManagerInput:
                 os.system('mv '+tempfile+' '+basefile)
 
                 os.system('tglf -i '+basedir+' -p $PWD')
+                print 'INFO: (gacodeinput) Processed input.* in '+basedir+'; CPU_max=1'
+                
+            elif basedir[0:3] == 'GLF':
+                basefile = basedir+'/input.glf23' 
+                tempfile = basedir+'/input.glf23.temp' 
+                file_base = open(basefile,'r')
+                file_temp = open(tempfile,'w')
+
+                for line in file_base.readlines():
+                    if line[0:18] <> "# -- Begin overlay":
+                        file_temp.write(line)
+                    else:
+                        break
+
+                file_base.close()
+                file_temp.close()
+
+                os.system('echo "# -- Begin overlay [Add parameters above this line]" >> '+tempfile)
+                os.system('cat '+self.overlayfile[p]+' >> '+tempfile)
+                os.system('mv '+tempfile+' '+basefile)
+
+                os.system('glf23 -i '+basedir+' -p $PWD')
                 print 'INFO: (gacodeinput) Processed input.* in '+basedir+'; CPU_max=1'
                 
             else:
