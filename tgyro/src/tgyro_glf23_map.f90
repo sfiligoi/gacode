@@ -20,6 +20,9 @@ subroutine tgyro_glf23_map
 
   q_abs = abs(q(i_r))
 
+  ! Initialize GLF23
+  call glf23_init(paths(i_r-1),gyro_comm)
+
   ! put_model_parameters 
   !----------------------------------------------------------------
   ! Want fluxes from GLF23
@@ -93,8 +96,8 @@ subroutine tgyro_glf23_map
   glf23_rmin_sa_in     = r(i_r)/r_min
   glf23_rmaj_sa_in     = r_maj(i_r)/r_min
   glf23_q_sa_in        = q_abs
-  glf23_shat_sa_in     = 1.0
-  glf23_alpha_sa_in    = 0.0
+  glf23_shat_sa_in     = s(i_r)
+  glf23_alpha_sa_in    = r_maj(i_r)*beta_unit(i_r)*dlnpdr(i_r)*q_abs**2
   glf23_xwell_sa_in    = 0.0
   glf23_theta0_sa_in   = 0.0
   !----------------------------------------------------------------
