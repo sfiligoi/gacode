@@ -11,6 +11,7 @@ subroutine tgyro_stab_driver
   use tgyro_globals
   use gyro_interface
   use tglf_interface
+  use glf23_interface
 
   implicit none
 
@@ -114,7 +115,64 @@ subroutine tgyro_stab_driver
 
      enddo
 
-  case (3)
+   case (3)
+     ! Map TGYRO parameters to GLF23
+     call tgyro_glf23_map
+     ! Set use to linear stability, not transport
+     glf23_use_transport_model_in = .false.
+
+     glf23_nmodes_in = 2
+
+     do iky=0,tgyro_stab_nky-1
+
+        wi_ion_loc  = 0.0
+        wi_elec_loc = 0.0
+        wr_ion_loc  = 0.0
+        wr_elec_loc = 0.0
+
+        ky(iky) = tgyro_stab_kymin + iky*tgyro_stab_deltaky
+
+        glf23_ky_in = ky(iky)
+ 
+        call glf23_run()
+
+        ! wr and wi are now the COMPUTED eigenvalues
+
+        do i=1,glf23_nmodes_in
+
+           wr = real(tglf_eigenvalue_out(i))
+           wi = aimag(tglf_eigenvalue_out(i))
+
+           ! electron mode
+           if (wr > 0.0 .and. wi > wi_elec_loc) then
+              wi_elec_loc = wi
+              wr_elec_loc = wr
+           endif
+
+           ! ion mode
+           if (wr < 0.0 .and. wi > wi_ion_loc) then
+              wi_ion_loc = wi
+              wr_ion_loc = wr
+           endif
+
+        enddo
+
+        wi_elec(iky,i_r-1) = wi_elec_loc
+        wr_elec(iky,i_r-1) = wr_elec_loc
+
+        wi_ion(iky,i_r-1) = wi_ion_loc     
+        wr_ion(iky,i_r-1) = wr_ion_loc
+
+        if (worker == 0 .and. i_print == 1) then
+           print '(2(f4.2,1x),2(1pe13.5,1x))', &
+                r(i_r)/r_min,ky(iky),wr_elec(iky,i_r-1),wi_elec(iky,i_r-1)
+           print '(2(f4.2,1x),2(1pe13.5,1x))', &
+                r(i_r)/r_min,ky(iky),wr_ion(iky,i_r-1),wi_ion(iky,i_r-1)
+        endif
+
+     enddo
+
+  case (4)
 
      ! Map TGYRO parameters to GYRO
      call tgyro_gyro_map

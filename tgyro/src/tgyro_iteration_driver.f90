@@ -92,11 +92,11 @@ subroutine tgyro_iteration_driver
   !
   if (tgyro_noturb_flag == 1) then
 
-     flux_method = 4
+     flux_method = 5
 
   else if (lpath(1:3) == "FUN") then
 
-     flux_method = 5
+     flux_method = 6
      dx = loc_dx/r_min
 
   else if (lpath(1:3) == "IFS") then
@@ -115,10 +115,18 @@ subroutine tgyro_iteration_driver
      ! Step-length for Jacobian
      dx = loc_dx/r_min
 
+  else if (lpath(1:3) == "GLF") then
+
+     ! GLF23
+     flux_method = 3
+
+     ! Step-length for Jacobian
+     dx = loc_dx/r_min
+
   else
 
      ! GYRO
-     flux_method = 3
+     flux_method = 4
 
      ! Step-length for Jacobian
      dx = loc_dx_gyro/r_min

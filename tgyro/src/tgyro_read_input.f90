@@ -73,6 +73,8 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(loc_bc_offset)
   call tgyro_readbc_int(tgyro_tglf_revision)
   call tgyro_readbc_int(tgyro_tglf_dump_flag)
+  call tgyro_readbc_int(tgyro_glf23_revision)
+  call tgyro_readbc_int(tgyro_glf23_dump_flag)
   call tgyro_readbc_int(loc_ti_feedback_flag)
   call tgyro_readbc_int(loc_te_feedback_flag)
   call tgyro_readbc_int(loc_ne_feedback_flag)

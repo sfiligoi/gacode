@@ -15,6 +15,7 @@ subroutine tgyro_flux
   use gyro_interface
   use neo_interface
   use tglf_interface
+  use glf23_interface
 
   implicit none
 
@@ -207,7 +208,30 @@ subroutine tgyro_flux
      endif
 
 
-  case (3)
+  case(3)  ! Map TGYRO parameters to GLF23
+
+     call tgyro_glf23_map
+
+     if (gyrotest_flag == 0) call glf23_run
+
+!     call tgyro_trap_component_error(glf23_error_status,glf23_error_message)
+
+     pflux_e_tur(i_r) = glf23_elec_pflux_out
+     eflux_e_tur(i_r) = glf23_elec_eflux_out
+     mflux_e_tur(i_r) = glf23_elec_mflux_out
+     expwd_e_tur(i_r) = glf23_elec_expwd_out
+
+     pflux_i_tur(1:loc_n_ion,i_r) = glf23_ion_pflux_out(1:loc_n_ion)
+     eflux_i_tur(1:loc_n_ion,i_r) = glf23_ion_eflux_out(1:loc_n_ion)
+     mflux_i_tur(1:loc_n_ion,i_r) = glf23_ion_mflux_out(1:loc_n_ion)
+     expwd_i_tur(1:loc_n_ion,i_r) = glf23_ion_expwd_out(1:loc_n_ion)
+
+!     if (tglf_q_low_flag == 1) then
+!        eflux_e_tur(i_r) = glf23_elec_eflux_low_out
+!        eflux_i_tur(1:loc_n_ion,i_r) = glf23_ion_eflux_low_out(1:loc_n_ion)
+!     endif
+
+  case (4)
 
      ! Map TGYRO parameters to GYRO
      call tgyro_gyro_map
@@ -239,11 +263,11 @@ subroutine tgyro_flux
 
      endif
 
-  case (4)
+  case (5)
 
      ! No fluxes (tgyro_noturb_flag=1)
 
-  case (5)
+  case (6)
 
      ! User-provided function (FUN*)
 
