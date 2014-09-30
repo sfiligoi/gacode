@@ -25,18 +25,7 @@ subroutine tgyro_glf23_map
   ! Want fluxes from GLF23
   glf23_use_transport_model_in = .true.
   !
-  ! Use adiabatic electrons
-  glf23_use_adiabatic_electrons_in = .false.
-  ! parallel velocity shear multiplier
-  glf23_alpha_p_mult_in = 1.0
-  ! quench rule multiplier
-  glf23_alpha_quench_mult_in = 1.0
-  !
   glf23_version_in = tgyro_glf23_revision
-  !
-  ! turn off diagnostic output: lrpint=100 for full output
-  !
-  glf23_lprint_in = 0
   !
   !----------------------------------------------------------------
   ! put_species 
@@ -59,9 +48,6 @@ subroutine tgyro_glf23_map
      glf23_mass_in(i_ion+1) = mi(i_ion)/mi(1)
   enddo
   !
-  !---------------------------------------------------------------
-  ! put_kys
-    glf23_ky_in = 0.3  ! need to hook this up in TGYRO
   !----------------------------------------------------------------
   ! put_gradients
   !-----------------------------------
