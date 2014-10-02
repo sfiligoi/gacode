@@ -8,15 +8,8 @@ subroutine vgen_getgeo
 
   integer :: i, j
   real :: r_min
-  !integer :: n_theta=2
-  !real, dimension(2) :: theta=(/ 0.0, -1.8325957/)
-  integer :: n_theta=20
-  real, dimension(:), allocatable :: theta
-
-  allocate(theta(n_theta))
-  do j=1,n_theta
-     theta(j) = -pi + (j-1)*2*pi/n_theta
-  enddo
+  integer :: n_theta=4
+  real, dimension(4) :: theta=(/ 0.0, 1.57079632, 3.14159265, -1.57079632/)
 
   GEO_nfourier_in = EXPRO_nfourier
   GEO_signb_in    = EXPRO_signb
@@ -68,12 +61,10 @@ subroutine vgen_getgeo
         write(1,'(e16.8)',advance='no') GEO_bigr * r_min
      enddo
      write(1,*)
-     
   enddo
-  
+
   ! Clean up
   close(1)
-  deallocate(theta)
   call GEO_alloc(0)
 
 end subroutine vgen_getgeo
