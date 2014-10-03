@@ -213,6 +213,8 @@ subroutine prgen_read_iterdb_nc
        * onetwo_rho_grid(onetwo_nj) &
        / onetwo_rho_mhd_gridnpsi(onetwo_npsi)
 
+  onetwo_rho_mhd_gridnpsi(onetwo_npsi) = onetwo_rho_grid(onetwo_nj)
+
   err = nf90_inq_varid(ncid,trim('rmajavnpsi'),varid)
   err = nf90_get_var(ncid,varid,work)
 
