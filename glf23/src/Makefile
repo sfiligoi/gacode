@@ -15,6 +15,7 @@ LLIB=glf23_lib
 
 OBJECTS = glf23_module.o   \
           glf23_interface.o \
+          glf23_init_mpi.o \
           glf23_isinf.o    \
           glf23_isnan_generic.o  \
           glf23_inout.o     \

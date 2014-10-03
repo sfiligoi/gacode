@@ -20,23 +20,15 @@ subroutine tgyro_glf23_map
 
   q_abs = abs(q(i_r))
 
+  ! Initialize GLF23
+  call glf23_init(paths(i_r-1),gyro_comm)
+
   ! put_model_parameters 
   !----------------------------------------------------------------
   ! Want fluxes from GLF23
   glf23_use_transport_model_in = .true.
   !
-  ! Use adiabatic electrons
-  glf23_use_adiabatic_electrons_in = .false.
-  ! parallel velocity shear multiplier
-  glf23_alpha_p_mult_in = 1.0
-  ! quench rule multiplier
-  glf23_alpha_quench_mult_in = 1.0
-  !
   glf23_version_in = tgyro_glf23_revision
-  !
-  ! turn off diagnostic output: lrpint=100 for full output
-  !
-  glf23_lprint_in = 0
   !
   !----------------------------------------------------------------
   ! put_species 
@@ -59,9 +51,6 @@ subroutine tgyro_glf23_map
      glf23_mass_in(i_ion+1) = mi(i_ion)/mi(1)
   enddo
   !
-  !---------------------------------------------------------------
-  ! put_kys
-    glf23_ky_in = 0.3  ! need to hook this up in TGYRO
   !----------------------------------------------------------------
   ! put_gradients
   !-----------------------------------
@@ -107,8 +96,8 @@ subroutine tgyro_glf23_map
   glf23_rmin_sa_in     = r(i_r)/r_min
   glf23_rmaj_sa_in     = r_maj(i_r)/r_min
   glf23_q_sa_in        = q_abs
-  glf23_shat_sa_in     = 1.0
-  glf23_alpha_sa_in    = 0.0
+  glf23_shat_sa_in     = s(i_r)
+  glf23_alpha_sa_in    = r_maj(i_r)*beta_unit(i_r)*dlnpdr(i_r)*q_abs**2
   glf23_xwell_sa_in    = 0.0
   glf23_theta0_sa_in   = 0.0
   !----------------------------------------------------------------

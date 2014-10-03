@@ -81,8 +81,8 @@ subroutine tgyro_tglf_map
   tglf_rmin_sa_in     = r(i_r)/r_min
   tglf_rmaj_sa_in     = r_maj(i_r)/r_min
   tglf_q_sa_in        = q_abs
-  tglf_shat_sa_in     = 1.0
-  tglf_alpha_sa_in    = 0.0
+  tglf_shat_sa_in     = s(i_r)
+  tglf_alpha_sa_in    = r_maj(i_r)*beta_unit(i_r)*dlnpdr(i_r)*q_abs**2
   tglf_xwell_sa_in    = 0.0
   tglf_theta0_sa_in   = 0.0
   tglf_b_model_sa_in  = 0
