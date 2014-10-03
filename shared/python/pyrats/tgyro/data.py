@@ -160,15 +160,11 @@ class TGYROData:
         fn = 'out.tgyro.residual'
         data = open(self.dirname+'/'+fn,'r').readlines()
         
-        # Data dimensions
+        # Data dimensions 
         nr = self.n_radial
         nb = self.n_iterations+1
-        nc = int(1 +
-                 2*self.get_tag_value("LOC_NE_FEEDBACK_FLAG") +
-                 2*self.get_tag_value("LOC_TE_FEEDBACK_FLAG") +
-                 2*self.get_tag_value("LOC_TI_FEEDBACK_FLAG") +
-                 2*self.get_tag_value("LOC_ER_FEEDBACK_FLAG")
-                )
+        # 9 = 1+2*n_evolve, where n_evolve=4 (ti,te,ne,er)
+        nc = 9
         
         numdata = np.zeros((nc,nb,nr-1),dtype=float)
         

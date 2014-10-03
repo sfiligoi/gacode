@@ -19,7 +19,9 @@ subroutine tgyro_write_data(i_print)
   integer :: ip
   integer :: i_print
   integer :: i_ion
-  integer, parameter :: trinity_flag=1
+  integer :: p
+  integer, parameter :: trinity_flag=0
+  real, dimension(2:n_r,4) :: res2,relax2
 
   !--------------------------------------------------------------------------------
   ! First, generate and write TGLF linear growth rates
@@ -409,28 +411,6 @@ subroutine tgyro_write_data(i_print)
 
      close(1)
 
-     ! Chi_i2 (chi_i2.out)
-     !open(unit=1,&
-     !     file='chi_i'//trim(ion_tag(i_ion))//'.out',&
-     !     status='old',position='append')
-
-     !write(1,20) 'r/a','Di_neo','Di_tur','chii_neo','chii_tur'
-     !write(1,20) '','(GB)','(GB)','(GB)','(GB)'
-     !do i=1,n_r
-     !   if (i == 1) then
-     !      write(1,10) 0.0,0.0,0.0,0.0,0.0
-     !   else
-     !      write(1,10) r(i)/r_min,&
-     !           pflux_i_neo(i_ion,i)/(r_min*dlnnidr(i_ion,i)*ni(i_ion,i)/ne(i)),&
-     !           pflux_i_tur(i_ion,i)/(r_min*dlnnidr(i_ion,i)*ni(i_ion,i)/ne(i)),&
-     !           eflux_i_neo(i_ion,i)/(r_min*dlntidr(i_ion,i)*ni(i_ion,i)/ne(i)*&
-     !           ti(i_ion,i)/te(i)),&
-     !           eflux_i_tur(i_ion,i)/(r_min*dlntidr(i_ion,i)*ni(i_ion,i)/ne(i)*&
-     !           ti(i_ion,i)/te(i))
-     !   endif
-     !enddo
-     !close(1)
-
      ! Impurity profiles
 
      open(unit=1,&
@@ -461,9 +441,33 @@ subroutine tgyro_write_data(i_print)
      write(1,30) 'ITERATION : ',i_tran,sum(res)/size(res),flux_counter*n_worker*n_inst
   endif
 
+  res2(:,:)   = 0.0
+  relax2(:,:) = 0.0 
+
+  p = 0
   do i=2,n_r
+     if (loc_ti_feedback_flag == 1) then
+        p  = p+1
+        res2(i,1) = res(p)
+        relax2(i,1) = relax(p)
+     endif
+     if (loc_te_feedback_flag == 1) then
+        p  = p+1
+        res2(i,2) = res(p)
+        relax2(i,2) = relax(p)
+     endif
+     if (loc_ne_feedback_flag == 1) then
+        p  = p+1
+        res2(i,3) = res(p)
+        relax2(i,3) = relax(p)
+     endif
+     if (loc_er_feedback_flag == 1) then
+        p  = p+1
+        res2(i,4) = res(p)
+        relax2(i,4) = relax(p)
+     endif
      write(1,40) &
-          r(i)/r_min,(res(pmap(i,ip)),relax(pmap(i,ip)),ip=1,n_evolve)
+          r(i)/r_min,(res2(i,ip),relax2(i,ip),ip=1,4)
   enddo
 
   close(1)

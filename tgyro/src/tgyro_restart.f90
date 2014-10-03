@@ -16,8 +16,10 @@ subroutine tgyro_restart
   integer :: ip
   integer :: j
   integer :: ioerr
+  integer :: p
   real, dimension(9) :: x_read
   character(len=1) :: dummy
+  real, dimension(2:n_r,4) :: res2,relax2
 
 
   if (i_proc_global == 0) then
@@ -90,12 +92,32 @@ subroutine tgyro_restart
         open(unit=1,file='out.tgyro.residual',status='old')
         do j=0,i_tran 
            read(1,'(a)') dummy
+           p = 0
            do i=2,n_r
               read(1,*) &
-                   x_read(1),(res(pmap(i,ip)),relax(pmap(i,ip)),ip=1,n_evolve)
+                   x_read(1),(res2(i,ip),relax2(i,ip),ip=1,4)
+              if (loc_ti_feedback_flag == 1) then
+                 p = p+1
+                 res(p) = res2(i,1) 
+                 relax(p) = relax2(i,1)
+              endif
+              if (loc_te_feedback_flag == 1) then
+                 p = p+1
+                 res(p) = res2(i,2) 
+                 relax(p) = relax2(i,2)
+              endif
+              if (loc_ne_feedback_flag == 1) then
+                 p = p+1
+                 res(p) = res2(i,3) 
+                 relax(p) = relax2(i,3) 
+              endif
+              if (loc_er_feedback_flag == 1) then
+                 p = p+1
+                 res(p) = res2(i,4) 
+                 relax(p) = relax2(i,4)
+              endif
            enddo
         enddo
-        !res = res*size(res)
         close(1)
 
      endif
