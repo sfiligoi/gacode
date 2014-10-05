@@ -20,6 +20,7 @@ subroutine tgyro_restart
   real, dimension(9) :: x_read
   character(len=1) :: dummy
   real, dimension(2:n_r,4) :: res2,relax2
+  real :: gamma_p0
 
 
   if (i_proc_global == 0) then
@@ -54,40 +55,24 @@ subroutine tgyro_restart
               dlnnedr(i)   = x_read(3)/r_min
               dlntidr(1,i) = x_read(4)/r_min
               dlntedr(i)   = x_read(5)/r_min
+              f_rot(i)     = x_read(6)/r_min
            enddo
         enddo
         close(1)
 
-        if (loc_ne_feedback_flag == 0) then
-
-           open(unit=1,file='out.tgyro.flux_target',status='old')
-           do j=0,i_tran
-              read(1,'(a)') dummy
-              read(1,'(a)') dummy
-              do i=1,n_r
-                 read(1,*) x_read(1:5)
-                 eflux_i_tot(i) = x_read(2)
-                 eflux_e_tot(i) = x_read(4)
-              enddo
+        open(unit=1,file='out.tgyro.flux_target',status='old')
+        do j=0,i_tran
+           read(1,'(a)') dummy
+           read(1,'(a)') dummy
+           do i=1,n_r
+              read(1,*) x_read(1:9)
+              eflux_i_tot(i) = x_read(2)
+              eflux_e_tot(i) = x_read(4)
+              pflux_e_tot(i) = x_read(6)
+              mflux_tot(i)   = x_read(8)
            enddo
-           close(1)
-
-        else
-
-           open(unit=1,file='out.tgyro.flux_target',status='old')
-           do j=0,i_tran
-              read(1,'(a)') dummy
-              read(1,'(a)') dummy
-              do i=1,n_r
-                 read(1,*) x_read(1:7)
-                 eflux_i_tot(i) = x_read(2)
-                 eflux_e_tot(i) = x_read(4)
-                 pflux_e_tot(i) = x_read(6)
-              enddo
-           enddo
-           close(1)
-
-        endif
+        enddo
+        close(1)
 
         open(unit=1,file='out.tgyro.residual',status='old')
         do j=0,i_tran 
@@ -176,6 +161,13 @@ subroutine tgyro_restart
           MPI_COMM_WORLD,&
           ierr)
 
+     call MPI_BCAST(f_rot,&
+          size(f_rot),&
+          MPI_DOUBLE_PRECISION,&
+          0,&
+          MPI_COMM_WORLD,&
+          ierr)
+
      call MPI_BCAST(eflux_i_tot,&
           size(eflux_i_tot),&
           MPI_DOUBLE_PRECISION,&
@@ -192,6 +184,13 @@ subroutine tgyro_restart
 
      call MPI_BCAST(pflux_e_tot,&
           size(pflux_e_tot),&
+          MPI_DOUBLE_PRECISION,&
+          0,&
+          MPI_COMM_WORLD,&
+          ierr)
+
+     call MPI_BCAST(mflux_tot,&
+          size(mflux_tot),&
           MPI_DOUBLE_PRECISION,&
           0,&
           MPI_COMM_WORLD,&

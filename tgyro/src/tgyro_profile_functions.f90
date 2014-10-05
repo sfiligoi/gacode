@@ -50,7 +50,7 @@ subroutine tgyro_profile_functions
      ! NOTE (see tgyro_init_profiles)
      ! f_rot [1/cm] = w0p/w0_norm
      !
-     ! w0_norm = c_s/R_maj at r=0.
+     ! w0_norm = c_s/R_maj at r=r_bc (pivot).
 
      w0p(:) = f_rot(:)*w0_norm
      call linint(w0,w0p,r,n_r,i_bc)

@@ -229,8 +229,9 @@ subroutine tgyro_write_data(i_print)
 
   open(unit=1,file='out.tgyro.flux_target',status='old',position='append')
 
-  write(1,20) 'r/a','eflux_i_tot','eflux_i_target','eflux_e_tot','eflux_e_target','pflux_e_tot','pflux_e_target'
-  write(1,20) '','(GB)','(GB)','(GB)','(GB)','(GB)','(GB)'
+  write(1,20) 'r/a','eflux_i_tot','eflux_i_target','eflux_e_tot',&
+       'eflux_e_target','pflux_e_tot','pflux_e_target','mflux_tot','mflux_target'
+  write(1,20) '','(GB)','(GB)','(GB)','(GB)','(GB)','(GB)','(GB)','(GB)'
   do i=1,n_r
      write(1,10) r(i)/r_min,&
           eflux_i_tot(i),&
@@ -238,19 +239,7 @@ subroutine tgyro_write_data(i_print)
           eflux_e_tot(i),&
           eflux_e_target(i),&
           pflux_e_tot(i),&
-          pflux_e_target(i)
-  enddo
-
-  close(1)
-
-  ! Transport+target fluxes for momentum (mflux_target.out)
-
-  open(unit=1,file='out.tgyro.mflux_target',status='old',position='append')
-
-  write(1,20) 'r/a','mflux_tot','mflux_target'
-  write(1,20) '','(GB)','(GB)'
-  do i=1,n_r
-     write(1,10) r(i)/r_min,&
+          pflux_e_target(i),&
           mflux_tot(i),&
           mflux_target(i)
   enddo
@@ -273,7 +262,7 @@ subroutine tgyro_write_data(i_print)
 
   close(1)
 
-  ! Ion momentum fluxes and exchange powers (mflux_i.out)
+  ! Ion momentum fluxes and exchange powers (out.tgyro.mflux_i)
 
   open(unit=1,file='out.tgyro.mflux_i',status='old',position='append')
 
@@ -288,7 +277,7 @@ subroutine tgyro_write_data(i_print)
 
   close(1)
 
-  ! Electron particle and energy fluxes (flux_e.out)
+  ! Electron particle and energy fluxes (out.tgyro.flux_e)
 
   open(unit=1,file='out.tgyro.flux_e',status='old',position='append')
 
@@ -304,7 +293,7 @@ subroutine tgyro_write_data(i_print)
 
   close(1)
 
-  ! Electron momentum fluxes and exchange powers (mflux_e.out)
+  ! Electron momentum fluxes and exchange powers (out.tgyro.mflux_e)
 
   open(unit=1,file='out.tgyro.mflux_e',status='old',position='append')
 
@@ -359,7 +348,7 @@ subroutine tgyro_write_data(i_print)
 
   open(unit=1,file='out.tgyro.gradient',status='old',position='append')
 
-  write(1,20) 'r/a','a/Lni','a/Lne','a/LTi','a/LTe','a/Lp','a*gamma_e/cs','a*gamma_p/cs'
+  write(1,20) 'r/a','a/Lni','a/Lne','a/LTi','a/LTe','a*f_rot'
   write(1,20) '','','','','',''
   do i=1,n_r
      write(1,10) r(i)/r_min,&
@@ -367,9 +356,7 @@ subroutine tgyro_write_data(i_print)
           r_min*dlnnedr(i),&
           r_min*dlntidr(1,i),&
           r_min*dlntedr(i),&
-          r_min*dlnpdr(i),&
-          r_min/c_s(i)*gamma_eb(i),&
-          r_min/c_s(i)*gamma_p(i)
+          r_min*f_rot(i)
   enddo
 
   close(1)
