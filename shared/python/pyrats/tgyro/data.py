@@ -65,7 +65,6 @@ class TGYROData:
             self.fileparser('out.tgyro.flux_target')
             self.fileparser('out.tgyro.mflux_e')
             self.fileparser('out.tgyro.mflux_i')
-            self.fileparser('out.tgyro.mflux_target')
             self.fileparser('out.tgyro.profile')
             self.fileparser('out.tgyro.gradient')
             self.fileparser('out.tgyro.geometry.1')
