@@ -10,7 +10,7 @@ MATH_DIR = /soft/libraries/alcf/current/xl
 # Compiler flags:
 
 FC	= mpixlf90_r -qsuffix=f=f90 -qmoddir=$(GACODE_ROOT)/modules -I$(GACODE_ROOT)/modules 
-F77	= mpixlf77_r -qfixed
+F77	= mpixlf77_r -qfixed -qmoddir=$(GACODE_ROOT)/modules -I$(GACODE_ROOT)/modules
 
 FOMP    = -qsmp=omp:noauto
 FMATH	= -qrealsize=8 -I $(MATH_DIR)/FFTW3/include
