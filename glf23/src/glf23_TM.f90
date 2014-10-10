@@ -17,7 +17,7 @@
 !---:----1----:----2----:----3----:----4----:----5----:----6----:----7-c
 !
  
-           subroutine glf2d
+          subroutine glf2d
  
 ! version 3.3
 !
@@ -216,12 +216,11 @@
 ! Glf is common block, which must contain all the _gf inputs and outputs
 !
 !      character*1 jobvr, jobvl
-      integer :: neq, nroot,iflagin(30), ilhmax, ilh, ikymaxtot
+      integer :: nroot,iflagin(30), ilhmax, ilh, ikymaxtot
       integer :: lprint, ieq, j1, j2, j, i, jmax
-      integer :: iar, ifail, jroot(4), itheta, iky, iky0, iroot
-      real :: epsilon
-      integer,parameter :: neq = 12 
-      real,parameter :: epsilon = 1.D-34 
+      integer :: ifail, jroot(4), itheta, iky, iky0, iroot
+      integer,parameter :: neq = 12
+      real,parameter :: epsilon = 1.E-34 
 !
       real::  pi, xparam(30),yparam(2*nmode)
       real :: ky0,rms_theta,rlti,rlte,rlne,rlni,dil,taui
@@ -246,7 +245,7 @@
       complex :: n_i,p_par,p_per,n_t,p_t,u_par,n_u,a_par,ph,t_u,n_e
       complex ::  n_im,p_im_par,p_im_per
 !     complex u_im_par
-      real :: b0,g0,g1,g2,g3,g12,g23,
+      real :: b0,g0,g1,g2,g3,g12,g23
       real ::   b0i,g0i,g1i,g2i,g3i,g12i,g23i
       complex :: f0,f1
       real :: k_par,ky,kx,k_per,k_m
@@ -266,7 +265,7 @@
 !
 !... solver varaibles
 !
-      integer,parameter :: iar=neq 
+      integer,parameter :: iar=neq
 !     integer iai, ivr, ivi, intger(neq) ! if NAG solver f02ake used
 !     parameter ( iai=neq, ivr=neq, ivi=neq )
       real :: ar(iar,neq), ai(iar,neq), rr(neq), ri(neq)
@@ -305,20 +304,20 @@
 !
 !...initialize variables
 !
-      diff_gf=0.D0
-      diff_im_gf=0.D0
-      chii_gf=0.D0
+      diff_gf=0.0
+      diff_im_gf=0.0
+      chii_gf=0.0
       chi_im_gf=0.0
-      chie_gf=0.D0
-      exch_gf=0.D0
-      eta_par_gf=0.D0
-      eta_per_gf=0.D0
-      eta_phi_gf=0.D0
-      chie_e_gf=0.D0
+      chie_gf=0.0
+      exch_gf=0.0
+      eta_par_gf=0.0
+      eta_per_gf=0.0
+      eta_phi_gf=0.0
+      chie_e_gf=0.0
       do j1=1,4
-        gamma_gf(j1)=0.D0
-        freq_gf(j1)=0.D0
-        xky_gf(j1)=0.D0
+        gamma_gf(j1)=0.0
+        freq_gf(j1)=0.0
+        xky_gf(j1)=0.0
       enddo
 !
       iflagin_gf(1)=0
@@ -327,86 +326,86 @@
       iflagin_gf(4)=0
       iflagin_gf(5)=3
 !
-      xparam_gf(1)=0.D0
+      xparam_gf(1)=0.0
       xparam_gf(2)=0
-      xparam_gf(3)=.7D0
-      xparam_gf(4)=0.D0
-      xparam_gf(6)=0.D0
-!      xparam_gf(6)=-0.25D0
-      xparam_gf(7)=1.D0
-      xparam_gf(8)=0.D0
-      xparam_gf(9)=1.D0
-      xparam_gf(10)=0.D0
-      xparam_gf(11)=0.D0
-      xparam_gf(12)=0.D0
-      xparam_gf(13)=0.2D0
-      xparam_gf(14)=1.D0
-      xparam_gf(15)=-0.1D0
-      xparam_gf(16)=0.15D0
-      xparam_gf(17)=0.1D0
-      xparam_gf(18)=.0D0
-      xparam_gf(19)=0.D0
-      xparam_gf(20)=0.D0
-      xparam_gf(21)=0.D0
+      xparam_gf(3)=.70
+      xparam_gf(4)=0.0
+      xparam_gf(6)=0.0
+!      xparam_gf(6)=-0.250
+      xparam_gf(7)=1.0
+      xparam_gf(8)=0.0
+      xparam_gf(9)=1.0
+      xparam_gf(10)=0.0
+      xparam_gf(11)=0.0
+      xparam_gf(12)=0.0
+      xparam_gf(13)=0.20
+      xparam_gf(14)=1.0
+      xparam_gf(15)=-0.10
+      xparam_gf(16)=0.150
+      xparam_gf(17)=0.10
+      xparam_gf(18)=.00
+      xparam_gf(19)=0.0
+      xparam_gf(20)=0.0
+      xparam_gf(21)=0.0
       if(ns_gf.eq.3)xparam_gf(21)=1.0  ! turn of impurity energy flux
-      xparam_gf(22)=0.D0
-      xparam_gf(23)=1.D0
-      xparam_gf(24)=0.D0
-      xparam_gf(25)=0.D0
-      xparam_gf(26)=0.D0
-      xparam_gf(27)=0.D0
-      xparam_gf(28)=0.D0
-      xparam_gf(29)=0.D0
-      xparam_gf(30)=0.D0
+      xparam_gf(22)=0.0
+      xparam_gf(23)=1.0
+      xparam_gf(24)=0.0
+      xparam_gf(25)=0.0
+      xparam_gf(26)=0.0
+      xparam_gf(27)=0.0
+      xparam_gf(28)=0.0
+      xparam_gf(29)=0.0
+      xparam_gf(30)=0.0
 !
-!      rms_theta_gf=zpi/3.D0
-      park_gf  =0.7D0
-      ghat_gf  =1.D0
-      gchat_gf =1.D0
+!      rms_theta_gf=zpi/3.0
+      park_gf  =0.70
+      ghat_gf  =1.0
+      gchat_gf =1.0
 !
-      adamp_gf=0.5D0
-      alpha_star_gf=0.D0
-      alpha_mode_gf=0.D0
-!      gamma_e_gf =-.000000000001D0
-      xkdamp_gf=0.D0
-      alpha_p_gf=0.5D0
+      adamp_gf=0.50
+      alpha_star_gf=0.0
+      alpha_mode_gf=0.0
+!      gamma_e_gf =-.0000000000010
+      xkdamp_gf=0.0
+      alpha_p_gf=0.50
 !
 ! betae and collisionality multipliers
 !
-!      cbetae=1.D-6
-!     cbetae=1.D0 !  full electromagetic
-!      cxnu=1.D0   !  full collisionality
+!      cbetae=1.E-6
+!     cbetae=1.0 !  full electromagetic
+!      cxnu=1.0   !  full collisionality
 !
-      cnorm_gf=50.D0   ! normalization factor
-      cnorm_p_gf=50.D0 ! normalization factor for Di
+      cnorm_gf=50.0   ! normalization factor
+      cnorm_p_gf=50.0 ! normalization factor for Di
 !
 ! non glf23 parameter
 !
-!       cmodel=1.D0
+!       cmodel=1.0
 !       xalpha=x_alpha
  
 ! for original model
        if(version_gf.eq.1) then
-         cnorm_gf=100.D0
-         cnorm_p_gf=100.D0
+         cnorm_gf=100.0
+         cnorm_p_gf=100.0
          iflagin_gf(5)=3
          park_gf=0.7
-         adamp_gf=0.5D0
-         alpha_p_gf=0.50D0
-         xparam_gf(10)=1.D0
-         xparam_gf(13)=0.2D0
+         adamp_gf=0.50
+         alpha_p_gf=0.500
+         xparam_gf(10)=1.0
+         xparam_gf(13)=0.20
          xparam_gf(15)=-0.1
-         xparam_gf(16)=0.D0
-         xparam_gf(17)=0.1D0
-         xparam_gf(19)=0.D0
+         xparam_gf(16)=0.0
+         xparam_gf(17)=0.10
+         xparam_gf(19)=0.0
        endif
 !
 !
 !... parameters for revised GLF23 models
 !
         if (version_gf.eq.2) then   ! retuned model v1.61
-          cnorm_gf=50.D0         ! ITG/TEM normalization
-          xparam_gf(10)=12.D0    ! ETG normalization (cnorm*xparam(10))
+          cnorm_gf=50.0         ! ITG/TEM normalization
+          xparam_gf(10)=12.0    ! ETG normalization (cnorm*xparam(10))
           xparam_gf(13)=0.15      ! rms_theta q-dependence
           xparam_gf(15)=-0.1     ! trapped particle fraction reduction
           xparam_gf(16)=0.15     ! rms_theta shat dependence
@@ -421,26 +420,26 @@
         endif
 !
         if (version_gf.eq.3) then      ! renorm + real geometry fit
-          cnorm_gf=27.D0         ! ITG/TEM normalization
-          xparam_gf(10)=17.8D0   ! ETG normalization
-          xparam_gf(15)=0.10D0   ! trapped ptcle fraction enhancement
-          xparam_gf(6)=-0.25D0   ! xnueff enhancement
-          xparam_gf(13)=0.95D0
-          xparam_gf(16)=0.20D0
+          cnorm_gf=27.0         ! ITG/TEM normalization
+          xparam_gf(10)=17.80   ! ETG normalization
+          xparam_gf(15)=0.100   ! trapped ptcle fraction enhancement
+          xparam_gf(6)=-0.250   ! xnueff enhancement
+          xparam_gf(13)=0.950
+          xparam_gf(16)=0.200
 !          bt_flag=2              ! real geometry in diffusion
         endif
 !        if (iglf.eq.99) then      ! renormalization only
 !          xparam_gf(10)=0
-!          xky0_gf=0.3D0
+!          xky0_gf=0.30
 !          ikymax_gf=1
 !        endif
-!        cnorm_gf=27.D0         ! ITG/TEM normalization
-!        xparam_gf(10)=17.8D0    ! ETG normalization
-!        xpparam_gf(10)=0.D0   ! ETG normalization
-!        xparam_gf(15)=0.15D0   ! trapped ptcle fraction enhancement
+!        cnorm_gf=27.0         ! ITG/TEM normalization
+!        xparam_gf(10)=17.80    ! ETG normalization
+!        xpparam_gf(10)=0.0   ! ETG normalization
+!        xparam_gf(15)=0.150   ! trapped ptcle fraction enhancement
 !
 !    relaxation can be turned on for one call per step
-!       relx=0.D0   ! relaxation off
+!       relx=0.0   ! relaxation off
 !
 
 ! inputs.........................................................
@@ -449,7 +448,6 @@
        iflagin(i)=iflagin_gf(i)
        xparam(i)=xparam_gf(i)
       enddo
- 
 !      ilhmax=1
 !      ikymaxtot=ikymax_gf
 !     if (xparam_gf(10).gt.0.) ilhmax=2
@@ -468,8 +466,8 @@
 !
       if(use_transport_model_gf)then 
         ikymax_gf=10
-        xkymin_gf=.02D0
-        xkymax_gf=.5D0
+        xkymin_gf=.020
+        xkymax_gf=.50
       else !single ky linear stability
         ikymax_gf=1
         xkymin_gf=xky0_gf
@@ -490,9 +488,11 @@
       else  !kinetic electrons
          nroot_gf=8
          if(ns_gf.gt.2)nroot_gf=12 !for full impurity dynamics
-         if (xparam_gf(10).gt.0.) then
-           ilhmax=2
-           ikymaxtot=2*ikymax_gf
+         ilhmax = 2
+         ikymaxtot = 2*ikymax_gf
+         if (xparam_gf(10).eq.0.0) then
+           ilhmax=1
+           ikymaxtot=ikymax_gf
          endif
       endif
       nroot=nroot_gf
@@ -539,7 +539,7 @@
        enddo
 !gms      endif
 !
-      idelta=0.D0
+      idelta=0.0
 !     if(ilh.eq.1) idelta=xi*xparam(1)+xparam(2)
  
 !.................................................................
@@ -572,71 +572,71 @@
  
       endif
 !
-      xi=(0.D0,1.D0)
-      pi=atan2 ( 0.0D0, -1.0D0 )
+      xi=(0.0,1.0)
+      pi=atan2 ( 0.00, -1.00 )
  
 ! GLF model coefficients
  
-      chi_par_1=2.D0*sqrt(2.D0/pi)
-      chi_per_1=sqrt(2.D0/pi)
+      chi_par_1=2.0*sqrt(2.0/pi)
+      chi_per_1=sqrt(2.0/pi)
  
-      gam_par=3.D0
-      gam_per=1.D0
-      x_par=2.D0
-      x_per=3.D0/2.D0
+      gam_par=3.0
+      gam_per=1.0
+      x_par=2.0
+      x_per=3.0/2.0
  
-      xmu=(0.80D0+.57D0*xi)
+      xmu=(0.800+.570*xi)
  
-      xnu_par_par=(1.D0+xi)
-      xnu_par_per=0.D0
-      xnu_per_par=0.D0
-      xnu_per_per=(1.D0+xi)
+      xnu_par_par=(1.0+xi)
+      xnu_par_per=0.0
+      xnu_per_par=0.0
+      xnu_per_per=(1.0+xi)
  
-      lamda_d=(-0.7D0-0.80D0*xi)
+      lamda_d=(-0.70-0.800*xi)
       if(xparam(11).ne.0..or.xparam(12).ne.0.)then
         lamda_d=xparam(11)-xi*xparam(12)
       endif
-      x43=1.D0
+      x43=1.0
       if (iflagin(4).eq.1) then
-       lamda_d=5.D0/3.D0
-       x43=4.D0/3.D0
+       lamda_d=5.0/3.0
+       x43=4.0/3.0
       endif
 !
 ! 3d trial wave function analysis
 !
       if(iflagin(2).ge.1) then
-       if(rms_theta.eq.0.) rms_theta=pi/3.D0
-       if(iflagin(5).eq.1) rms_theta=rms_theta_gf*(2.D0/q_gf)
-       if(iflagin(5).eq.2) rms_theta=rms_theta_gf*(2.D0/q_gf)**0.5D0
+       if(rms_theta.eq.0.) rms_theta=pi/3.0
+       if(iflagin(5).eq.1) rms_theta=rms_theta_gf*(2.0/q_gf)
+       if(iflagin(5).eq.2) rms_theta=rms_theta_gf*(2.0/q_gf)**0.50
        if(iflagin(5).eq.3) then
          rms_theta=rms_theta_gf/  &
-           (xparam(13)*(q_gf/2.D0-1.D0)+1.D0)  &
-          /sqrt(1.D0+xparam(16)*(shat_gf**2-1.D0)+xparam(17)*  &
-          (shat_gf-1.D0)**2)   &
-          /(1.D0+xparam(18)*sqrt(betae/.006D0))
+           (xparam(13)*(q_gf/2.0-1.0)+1.0)  &
+          /sqrt(1.0+xparam(16)*(shat_gf**2-1.0)+xparam(17)*  &
+          (shat_gf-1.0)**2)   &
+          /(1.0+xparam(18)*sqrt(betae/.0060))
        endif
        if(iflagin(5).eq.4)then
          rms_theta=rms_theta_gf/  &
-           (xparam(13)*(q_gf/2.D0-1.D0)+1.D0)  &
-       /sqrt(1.D0+xparam(16)*(shat_gf**2-1.0D0)+xparam(17)*  &
-         (shat_gf-1.D0)**2+xparam(19)*(alpha-0.5D0)**2.D0)  &
-       /(1.D0+xparam(18)*sqrt(betae/.006D0))
+           (xparam(13)*(q_gf/2.0-1.0)+1.0)  &
+       /sqrt(1.0+xparam(16)*(shat_gf**2-1.00)+xparam(17)*  &
+         (shat_gf-1.0)**2+xparam(19)*(alpha-0.50)**2.0)  &
+       /(1.0+xparam(18)*sqrt(betae/.0060))
        endif
        if(iflagin(5).eq.5)then
           rms_theta=rms_theta_gf/  &
-          (xparam(13)*((q_gf/2.D0)-1.D0)+1.D0)  &
-         /sqrt(1.D0+xparam(16)*((shat_gf-  &
-         xparam(19)*alpha)**2-0.5D0)+xparam(17)*  &
-         (shat_gf-xparam(19)*alpha-0.5D0)**2)  &
-         /(1.D0+xparam(18)*sqrt(betae/.006D0))
+          (xparam(13)*((q_gf/2.0)-1.0)+1.0)  &
+         /sqrt(1.0+xparam(16)*((shat_gf-  &
+         xparam(19)*alpha)**2-0.50)+xparam(17)*  &
+         (shat_gf-xparam(19)*alpha-0.50)**2)  &
+         /(1.0+xparam(18)*sqrt(betae/.0060))
        endif
        if(iflagin(5).eq.6)then
          rms_theta=rms_theta_gf/  &
-         (xparam(13)*((q_gf/2.D0)-1.D0)+1.D0)  &
-         /sqrt(1.D0+xparam(16)*((shat_gf-  &
-         xparam(19)*alpha)**2-0.5D0)+xparam(17)*  &
-         (shat_gf-xparam(19)*alpha-0.5D0)**2)/  &
-         taui_gf**0.25D0
+         (xparam(13)*((q_gf/2.0)-1.0)+1.0)  &
+         /sqrt(1.0+xparam(16)*((shat_gf-  &
+         xparam(19)*alpha)**2-0.50)+xparam(17)*  &
+         (shat_gf-xparam(19)*alpha-0.50)**2)/  &
+         taui_gf**0.250
        endif
        if(lprint.eq.3) then
          write(*,'(1x,a12,1p3e13.5)')'rms_theta = ', rms_theta
@@ -691,22 +691,22 @@
 !
 !      ave_theta2=rms_theta**2
 !
-      anorm=0.D0
-      ave_g=0.D0
-      ave_g0=0.D0
-      ave_cos=0.D0
-      ave_theta2=0.D0
-      ave_kxdky2=0.D0
+      anorm=0.0
+      ave_g=0.0
+      ave_g0=0.0
+      ave_cos=0.0
+      ave_theta2=0.0
+      ave_kxdky2=0.0
 !
-      dtheta=4.D0*rms_theta/100.D0
-      theta=0.D0
+      dtheta=4.0*rms_theta/100.0
+      theta=0.0
 !
       do itheta=1,100
        theta=theta+dtheta
-       phi2=exp(-theta**2/(2.D0*rms_theta**2))
+       phi2=exp(-theta**2/(2.0*rms_theta**2))
        anorm=anorm+phi2*dtheta
        ave_theta2=ave_theta2+ theta**2*phi2*dtheta
-       ave_g=ave_g + (-xwell*min(1.D0,alpha)+cos(theta)+  &
+       ave_g=ave_g + (-xwell*min(1.0,alpha)+cos(theta)+  &
         (shat*theta-alpha*sin(theta))*sin(theta))*phi2*dtheta
        ave_g0=ave_g0 + phi2*dtheta
        ave_kxdky2=ave_kxdky2+  &
@@ -721,12 +721,12 @@
       ave_kxdky2=ave_kxdky2/anorm
       ave_cos=ave_cos/anorm
 !
-      ave_k_par=1/(2.D0*rms_theta)
+      ave_k_par=1/(2.0*rms_theta)
  
       chk=abs(ave_theta2-rms_theta**2)/rms_theta**2
       if (chk.gt..02) write (6,*) 'chk:', chk
  
-      alpha_n=(rmaj/3.D0)*(q/2.D0)*alpha_p
+      alpha_n=(rmaj/3.0)*(q/2.0)*alpha_p
  
       if(lprint.eq.2) then
        write(6,*) 'rms_theta,chk :', rms_theta, chk
@@ -735,13 +735,13 @@
       endif
       endif
       if(iflagin(2).eq.0) then
-       shat=1.D0
-       ave_theta2=1.D0
-       ave_g=1.D0
-       ave_g0=1.D0
-       ave_kxdky2=1.D0
-       ave_k_par=1.D0
-       ave_cos=1.D0
+       shat=1.0
+       ave_theta2=1.0
+       ave_g=1.0
+       ave_g0=1.0
+       ave_kxdky2=1.0
+       ave_k_par=1.0
+       ave_cos=1.0
       endif
 !
 ! start ky loop
@@ -765,30 +765,30 @@
       if (ilh.eq.2) then
        nroot=6
        ieq=nroot
-       xnu=0.D0
-       betae=1.D-6
+       xnu=0.0
+       betae=1.E-6
        rlte=rlti_gf
        rlti=rlte_gf
        rlne=rlni_gf
        rlni=rlne_gf
        rlnimp=epsilon
-       dil=1.D0-1.D0/(1.D0-dil_gf)
-       apwt=1.D0
-       aiwt=0.D0
-       taui=1.D0/taui_gf
+       dil=1.0-1.0/(1.0-dil_gf)
+       apwt=1.0
+       aiwt=0.0
+       taui=1.0/taui_gf
        rmin=epsilon
-       xparam(7)=0.D0
-       xparam(6)=-1.D0
-       alpha_star=0.D0
-       alpha_e=0.D0
-       alpha_p=0.D0
-       alpha_n=0.D0
-       alpha_mode=0.D0
-!       alpha_gf=0.D0
+       xparam(7)=0.0
+       xparam(6)=-1.0
+       alpha_star=0.0
+       alpha_e=0.0
+       alpha_p=0.0
+       alpha_n=0.0
+       alpha_mode=0.0
+!       alpha_gf=0.0
 ! check this for current driven mode
       endif
 !
-      idelta=0.D0
+      idelta=0.0
       if (ilh.eq.1) idelta=xi*xparam(1)+xparam(2)
 !
 ! logarithmic ky grid
@@ -797,8 +797,8 @@
        aikymax=ikymax_gf
        aiky=iky
        yk=aiky/aikymax
-       byk=log(xkymax_gf/xkymin_gf)/(1.D0-1.D0/aikymax)
-       ky=xkymax_gf*exp(byk*(yk-1.D0))
+       byk=log(xkymax_gf/xkymin_gf)/(1.0-1.0/aikymax)
+       ky=xkymax_gf*exp(byk*(yk-1.0))
       endif
       if(ikymax_gf.eq.1) then
 !     ky=sqrt(2.*taui)/rlti/(rmaj*q)
@@ -806,10 +806,10 @@
 !  possible physics basis of q (ie current) scaling ..to be determined
        if(iflagin(1).eq.0) ky=ky0
        if(iflagin(1).eq.1)then
-         ky=ky0*sqrt(taui)*(3.D0/rlti)*(3.D0*2.D0/rmaj/q)
+         ky=ky0*sqrt(taui)*(3.0/rlti)*(3.0*2.0/rmaj/q)
        endif
-       if(iflagin(1).eq.2) ky=ky0*(2.D0/q)
-       if(ky0.eq.0.) ky=0.3D0
+       if(iflagin(1).eq.2) ky=ky0*(2.0/q)
+       if(ky0.eq.0.) ky=0.30
       endif
 !
 !
@@ -817,21 +817,21 @@
 !
       kx=ky*sqrt(ave_kxdky2)
       k_per=sqrt(ky**2+kx**2)
-      k_m=sqrt(ky**2+(1.D0-xparam(23))*kx**2) ! inverse mixing length model
+      k_m=sqrt(ky**2+(1.0-xparam(23))*kx**2) ! inverse mixing length model
 !
        do iroot=1,4
-        gammaroot(iroot)=0.D0
-        freqroot(iroot)=0.D0
-        phi_normroot(iroot)=0.D0
+        gammaroot(iroot)=0.0
+        freqroot(iroot)=0.0
+        phi_normroot(iroot)=0.0
        enddo
-        d_hat=0.D0
-        d_im_hat=0.D0
-        chie_hat=0.D0
-        chii_hat=0.D0
+        d_hat=0.0
+        d_im_hat=0.0
+        chie_hat=0.0
+        chii_hat=0.0
         chi_im_hat=0.0
-        exch_hat=0.D0
-        eta_par_hat=0.D0
-        eta_per_hat=0.D0
+        exch_hat=0.0
+        eta_par_hat=0.0
+        eta_per_hat=0.0
         jroot(1)=0
         jroot(2)=0
         jroot(3)=0
@@ -845,28 +845,28 @@
 ! primary ions
 !
       b0=taui*k_per**2
-      b0=(1.D0+xparam_gf(20))*b0
+      b0=(1.0+xparam_gf(20))*b0
       if(lprint.eq.2) write(*,'(1x,a5,1p3e13.5)') 'b0 = ',b0
 !
 !     Pade aproximates...may use gamma functions later
-      g0=1.D0
-      g1=1.D0/(1+b0)
-      g2=1.D0/(1+b0)*g1
-      g3=1.D0/(1+b0)*g2
-      g12=(g1+g2)/2.D0
-      g23=(g2+g3)/2.D0
+      g0=1.0
+      g1=1.0/(1+b0)
+      g2=1.0/(1+b0)*g1
+      g3=1.0/(1+b0)*g2
+      g12=(g1+g2)/2.0
+      g23=(g2+g3)/2.0
 !
 ! impurity ions
 !
       b0i=taui*k_per**2*amassimp/amassgas/zimp**2
 !
 !     Pade aproximates...may use gamma functions later
-      g0i=1.D0
-      g1i=1.D0/(1+b0i)
-      g2i=1.D0/(1+b0i)*g1i
-      g3i=1.D0/(1+b0i)*g2i
-      g12i=(g1i+g2i)/2.D0
-      g23i=(g2i+g3i)/2.D0
+      g0i=1.0
+      g1i=1.0/(1+b0i)
+      g2i=1.0/(1+b0i)*g1i
+      g3i=1.0/(1+b0i)*g2i
+      g12i=(g1i+g2i)/2.0
+      g23i=(g2i+g3i)/2.0
 !
       mimp=amassimp/amassgas
 !
@@ -875,25 +875,25 @@
 !     if(ilh.eq.1 .and. iky0.eq.2) write(*,*) 'ave_g = ',ave_g,ky
 !
       w_s=ky
-      w_d=(ghat*2.D0/rmaj)*ky*ave_g
-      w_d0=(ghat*2.D0/rmaj)*ky*ave_g0
-      w_cd=(gchat*2.D0/rmaj)*ky*ave_g
+      w_d=(ghat*2.0/rmaj)*ky*ave_g
+      w_d0=(ghat*2.0/rmaj)*ky*ave_g0
+      w_cd=(gchat*2.0/rmaj)*ky*ave_g
       if(lprint.eq.3) write(*,*) 'ilh,w_d = ',ilh,w_d,w_d0
 !
-      k_par=park/(rmaj*q)*ave_k_par*sqrt((1.D0+elong**2)/2.D0)
+      k_par=park/(rmaj*q)*ave_k_par*sqrt((1.0+elong**2)/2.0)
 !
 !     sqrt((1.+elong**2)/2.) to get higher beta_crit prop to k_par**2
 !     roughly same as betae-> betae/((1.+elong**2)/2.)
 !     physically like shortening the connection length to good curv.
 !
       if (iflagin(3).eq.2) then
-       betae=betae_gf/(1.D0+xparam(3))**2/(1.D0+xparam(9))
+       betae=betae_gf/(1.0+xparam(3))**2/(1.0+xparam(9))
       endif
 !
       if (iflagin(3).eq.1) then
        k_par=park/(rmaj*q)*ave_k_par
-       betae=betae_gf/(1.D0+xparam(3))**2/(1.D0+xparam(9))  &
-            /((1.D0+elong**2)/2.D0)
+       betae=betae_gf/(1.0+xparam(3))**2/(1.0+xparam(9))  &
+            /((1.0+elong**2)/2.0)
       endif
 !
 !     we put the park enhancement directy into betae
@@ -918,65 +918,65 @@
        xnu_per_per=-conjg(xnu_par_per)
       endif
 !
-      reps=(1.D0+xparam(15))*  &
-         sqrt((rmin/rmaj)*(1.D0+ave_cos)/(1.D0+(rmin/rmaj)*ave_cos))
+      reps=(1.0+xparam(15))*  &
+         sqrt((rmin/rmaj)*(1.0+ave_cos)/(1.0+(rmin/rmaj)*ave_cos))
 !      if(iky0.eq.1 .and. ilh.eq.1) write(*,*) reps
 !
-      if(nroot.le.3) reps=0.D0
+      if(nroot.le.3) reps=0.0
 !
 ! fix trapped eletron MHD limit
 ! 3/4*reps*(1+rlte) + xt_mhd*(1-reps)+yt_mhd*rlte=1+rlte
 ! solve for xt_mhd and yt_mhd
 ! 3/4*reps+yt_mhd=1; 3/4*reps+xt_mhd*(1-reps)=1
 !
-      yt_mhd=(1-x43*(3.D0/4.D0)*reps)
-      xt_mhd=(1.D0-x43*(3.D0/4.D0)*reps)/(1.D0-reps)
+      yt_mhd=(1-x43*(3.0/4.0)*reps)
+      xt_mhd=(1.0-x43*(3.0/4.0)*reps)/(1.0-reps)
 !
 ! collision detrapping retrapping model
 !
-      xnueff=(1.D0+xparam(6))*xnu/(reps**2+1.D-6)
+      xnueff=(1.0+xparam(6))*xnu/(reps**2+1.E-6)
 !
 ! very difficult get xnueff correct hince add enhancement factor
 ! and fit to Beer or GKS
 !
-      th=4.08D0
-      tc=0.918D0
-      fh=0.184D0
-      fc=0.816D0
+      th=4.080
+      tc=0.9180
+      fh=0.1840
+      fc=0.8160
 !
-      fnn=xnueff*((th/tc**(3.D0/2.D0))-(tc/th**(3.D0/2.D0)))/(th-tc)
-      fnp=xnueff*(3.D0/2.D0)*  &
-         ((1.D0/th)**(3.D0/2.D0)-(1.D0/tc)**(3.D0/2.D0))/(th-tc)
-      fnf=xnueff*((fh/th**(3.D0/2.D0))+(fc/tc**(3.D0/2.D0)))
+      fnn=xnueff*((th/tc**(3.0/2.0))-(tc/th**(3.0/2.0)))/(th-tc)
+      fnp=xnueff*(3.0/2.0)*  &
+         ((1.0/th)**(3.0/2.0)-(1.0/tc)**(3.0/2.0))/(th-tc)
+      fnf=xnueff*((fh/th**(3.0/2.0))+(fc/tc**(3.0/2.0)))
 !
-      fpn=xnueff*(2.D0/3.D0)*  &
-         ((th/tc**(1.D0/2.D0))-(tc/th**(1.D0/2.D0)))/(th-tc)
-      fpp=xnueff*((1.D0/th)**(1.D0/2.D0)-(1.D0/tc)**(1.D0/2.D0))/(th-tc)
-      fpf=xnueff*(2.D0/3.D0)*((fh/th**(1.D0/2.D0))+(fc/tc**(1.D0/2.D0)))
+      fpn=xnueff*(2.0/3.0)*  &
+         ((th/tc**(1.0/2.0))-(tc/th**(1.0/2.0)))/(th-tc)
+      fpp=xnueff*((1.0/th)**(1.0/2.0)-(1.0/tc)**(1.0/2.0))/(th-tc)
+      fpf=xnueff*(2.0/3.0)*((fh/th**(1.0/2.0))+(fc/tc**(1.0/2.0)))
 !
 !  collisional modes added with xnu_col
 !  must fix for atomic mass dependence other than deuterium
       xnu_col=xparam(7)
-      amass_e=2.7D-4*(2.D0/amassgas)
+      amass_e=2.7E-4*(2.0/amassgas)
 !
 ! check adiabatic property that chkf should be 1.0  (finite xnu)
 !
       chkf=(fnn*fpp-fpn*fnp)/((fnf*fpp-fpf*fnp)+epsilon)
       if (lprint.eq.2) write(6,*) 'chkf:', chkf
 !
-      if(neq.le.3) reps=0.D0
+      if(neq.le.3) reps=0.0
 !
-      f0=-idelta+(1.D0-dil)*apwt*(1/taui)*(1.D0-g1)  &
-                +zimp**2*aiwt*(1/taui)*(1.D0-g1i)
-      f1=1.D0-reps + f0
+      f0=-idelta+(1.0-dil)*apwt*(1/taui)*(1.0-g1)  &
+                +zimp**2*aiwt*(1/taui)*(1.0-g1i)
+      f1=1.0-reps + f0
 !
-      xadiabat=0.D0
+      xadiabat=0.0
       if(nroot.le.6) then
-        betae=0.D0
+        betae=0.0
         f0=f1
-        xadiabat=1.D0
+        xadiabat=1.0
       endif
-      if(nroot.le.5) k_par=0.D0
+      if(nroot.le.5) k_par=0.0
 !
       betae0=betae+epsilon
       k_par0=k_par+epsilon
@@ -1003,72 +1003,72 @@
 !
 ! n_i equ #1
 !
-      amat(1,1)= (1.D0-dil)*apwt*  &
+      amat(1,1)= (1.0-dil)*apwt*  &
         (-xi*w_s*((rlni-rlti)*g1+rlti*g2)+xi*w_cd*g12)/f0
 !
-      amat(1,2)=  +xi*w_d*taui*0.5D0
+      amat(1,2)=  +xi*w_d*taui*0.50
 !
-      amat(1,3)=  +xi*w_d*taui*0.5D0
+      amat(1,3)=  +xi*w_d*taui*0.50
 !
       amat(1,4)= -(-xi*w_s*((rlni-rlti)*g1+rlti*g2)+xi*w_cd*g12)/f0
 !
-      amat(1,5)= 0.D0
+      amat(1,5)= 0.0
 !
       amat(1,6)=  -xi*k_par
 !
       amat(1,7)= -(-xi*w_s*((rlni-rlti)*g1+rlti*g2)+xi*w_cd*g12)/f0
 !
-      amat(1,8)= 0.D0
+      amat(1,8)= 0.0
 !
-      amat(1,9)= aiwt*zimp*
-     >  (-xi*w_s*((rlni-rlti)*g1+rlti*g2)+xi*w_cd*g12)/f0
+      amat(1,9)= aiwt*zimp*  &
+        (-xi*w_s*((rlni-rlti)*g1+rlti*g2)+xi*w_cd*g12)/f0
 !
-      amat(1,10)=0.D0
+      amat(1,10)=0.0
 !
-      amat(1,11)=0.D0
+      amat(1,11)=0.0
 !
-      amat(1,12)=0.D0
+      amat(1,12)=0.0
 !
 ! p_par equ #2
 !
-      amat(2,1)= (1.D0-dil)*apwt*  &
+      amat(2,1)= (1.0-dil)*apwt*  &
         (-xi*w_s*(rlni*g1+rlti*g2)+xi*x_par*w_cd*g12)/f0  &
         +k_par*chi_par_1  &
-        -(xi*w_d*taui*3.D0/2.D0-w_d*taui*xnu_par_par)  &
-        -(xi*w_d*taui*1.D0/2.D0-w_d*taui*xnu_par_per)
+        -(xi*w_d*taui*3.0/2.0-w_d*taui*xnu_par_par)  &
+        -(xi*w_d*taui*1.0/2.0-w_d*taui*xnu_par_per)
 !
       amat(2,2)=  -k_par*chi_par_1  &
         +xi*w_d*taui*x_par +  &
-        (xi*w_d*taui*3.D0/2.D0-w_d*taui*xnu_par_par)
+        (xi*w_d*taui*3.0/2.0-w_d*taui*xnu_par_par)
 !
-      amat(2,3)=(xi*w_d*taui*1.D0/2.D0-w_d*taui*xnu_par_per)
+      amat(2,3)=(xi*w_d*taui*1.0/2.0-w_d*taui*xnu_par_per)
 !
       amat(2,4)= -(-xi*w_s*(rlni*g1+rlti*g2)+xi*x_par*w_cd*g12)/f0
 !
-      amat(2,5)=0.D0
+      amat(2,5)=0.0
 !
       amat(2,6)= -xi*gam_par*k_par
 !
       amat(2,7)= -(-xi*w_s*(rlni*g1+rlti*g2)+xi*x_par*w_cd*g12)/f0
 !
-      amat(2,8)=0.D0
+      amat(2,8)=0.0
 !
       amat(2,9)= aiwt*zimp*  &
         (-xi*w_s*(rlni*g1+rlti*g2)+xi*x_par*w_cd*g12)/f0
 !
-      amat(2,10)=0.D0
+      amat(2,10)=0.0
 !
-      amat(2,11)=0.D0
+      amat(2,11)=0.0
 !
-      amat(2,12)=0.D0
+      amat(2,12)=0.0
 !
 ! p_per equ #3
 !
-      amat(3,1)= (1.D0-dil)*apwt*  &
-        (-xi*w_s*((rlni-rlti)*g2+2.D0*rlti*g3)+xi*x_per*w_cd*g23)/f0  &
+      amat(3,1)= (1.0-dil)*apwt*  &
+        (-xi*w_s*((rlni-rlti)*g2+2.0*rlti*g3)+xi*x_per*w_cd*g23)/f0  &
         +k_par*chi_per_1  &
         -(xi*w_d*taui-w_d*taui*xnu_per_per)  &
-        -(xi*w_d*taui*1.D0/2.D0-w_d*taui*xnu_per_par)
+        -(xi*w_d*taui*1.0/2.0-w_d*taui*xnu_per_par)
 !
       amat(3,2)= +(xi*w_d*taui*1/2-w_d*taui*xnu_per_par)
 !
@@ -1076,296 +1076,296 @@
         +xi*w_d*taui*x_per   +(xi*w_d*taui-w_d*taui*xnu_per_per)
 !
       amat(3,4)=   &
-       -(-xi*w_s*((rlni-rlti)*g2+2.D0*rlti*g3)+xi*x_per*w_cd*g23)/f0
+       -(-xi*w_s*((rlni-rlti)*g2+2.0*rlti*g3)+xi*x_per*w_cd*g23)/f0
 !
-      amat(3,5)=0.D0
+      amat(3,5)=0.0
 !
       amat(3,6)= -xi*gam_per*k_par
 !
       amat(3,7)=  &
-        -(-xi*w_s*((rlni-rlti)*g2+2.D0*rlti*g3)+xi*x_per*w_cd*g23)/f0
+        -(-xi*w_s*((rlni-rlti)*g2+2.0*rlti*g3)+xi*x_per*w_cd*g23)/f0
 !
-      amat(3,8)=0.D0
+      amat(3,8)=0.0
 !
       amat(3,9)= aiwt*zimp*  &
-         (-xi*w_s*((rlni-rlti)*g2+2.D0*rlti*g3)+xi*x_per*w_cd*g23)/f0
+         (-xi*w_s*((rlni-rlti)*g2+2.0*rlti*g3)+xi*x_per*w_cd*g23)/f0
 !
-      amat(3,10)=0.D0
+      amat(3,10)=0.0
 !
-      amat(3,11)=0.D0
+      amat(3,11)=0.0
 !
-      amat(3,12)=0.D0
+      amat(3,12)=0.0
 !
 ! n_t equ #4
 !
-      amat(4,1)=(1.D0-dil)*apwt*  &
-        (-xi*w_s*rlne*reps*g0+xi*x43*3.D0/4*w_cd*reps*g0)/f0  &
-        -(1.D0-dil)*apwt*(-reps*fnf*(1.D0-reps)*g0/f0*xadiabat)
+      amat(4,1)=(1.0-dil)*apwt*  &
+        (-xi*w_s*rlne*reps*g0+xi*x43*3.0/4*w_cd*reps*g0)/f0  &
+        -(1.0-dil)*apwt*(-reps*fnf*(1.0-reps)*g0/f0*xadiabat)
 !
-      amat(4,2)=0.D0
+      amat(4,2)=0.0
 !
-      amat(4,3)=0.D0
+      amat(4,3)=0.0
 !
-      amat(4,4)=-(-xi*w_s*rlne*reps*g0+xi*x43*3.D0/4*w_cd*reps*g0)/f0 &
-        -((1.D0-reps)*fnn)  &
-        -(-(-reps*fnf*(1.D0-reps)*g0/f0*xadiabat))
+      amat(4,4)=-(-xi*w_s*rlne*reps*g0+xi*x43*3.0/4*w_cd*reps*g0)/f0 &
+        -((1.0-reps)*fnn)  &
+        -(-(-reps*fnf*(1.0-reps)*g0/f0*xadiabat))
 !
-      amat(4,5)= -xi*w_d*x43*3.D0/4.D0  &
-       -((1.D0-reps)*fnp)
+      amat(4,5)= -xi*w_d*x43*3.0/4.0  &
+       -((1.0-reps)*fnp)
 !
-      amat(4,6)=0.D0
+      amat(4,6)=0.0
 !
-      amat(4,7)=-(-xi*w_s*rlne*reps*g0+xi*x43*3.D0/4*w_cd*reps*g0)/f0  &
+      amat(4,7)=-(-xi*w_s*rlne*reps*g0+xi*x43*3.0/4*w_cd*reps*g0)/f0  &
          -(-reps*fnf)
 !
-      amat(4,8)=0.D0
+      amat(4,8)=0.0
 !
       amat(4,9)=aiwt*zimp*  &
-         (-xi*w_s*rlne*reps*g0+xi*x43*3.D0/4*w_cd*reps*g0)/f0  &
-         -aiwt*zimp*(-reps*fnf*(1.D0-reps)*g0/f0*xadiabat)
+         (-xi*w_s*rlne*reps*g0+xi*x43*3.0/4*w_cd*reps*g0)/f0  &
+         -aiwt*zimp*(-reps*fnf*(1.0-reps)*g0/f0*xadiabat)
 !
-      amat(4,10)=0.D0
+      amat(4,10)=0.0
 !
-      amat(4,11)=0.D0
+      amat(4,11)=0.0
 !
-      amat(4,12)=0.D0
+      amat(4,12)=0.0
 !
 ! p_t equ #5
 !
-      amat(5,1)= (1.D0-dil)*apwt*  &
-        (-xi*w_s*(rlni+rlte)*reps*g0+xi*x43*5.D0/4*w_cd*reps*g0)/f0  &
-        -(1.D0-dil)*apwt*(-reps*fpf*(1.D0-reps)*g0/f0*xadiabat)
+      amat(5,1)= (1.0-dil)*apwt*  &
+        (-xi*w_s*(rlni+rlte)*reps*g0+xi*x43*5.0/4*w_cd*reps*g0)/f0  &
+        -(1.0-dil)*apwt*(-reps*fpf*(1.0-reps)*g0/f0*xadiabat)
 !
-      amat(5,2)=0.D0
+      amat(5,2)=0.0
 !
-      amat(5,3)=0.D0
+      amat(5,3)=0.0
 !
       amat(5,4)=  &
-        -(-xi*w_s*(rlni+rlte)*reps*g0+xi*x43*5.D0/4*w_cd*reps*g0)/f0  &
+        -(-xi*w_s*(rlni+rlte)*reps*g0+xi*x43*5.0/4*w_cd*reps*g0)/f0  &
                   +xi*w_d*lamda_d  &
-        -((1.D0-reps)*fpn)  &
-        -(-(-reps*fpf*(1.D0-reps)*g0/f0*xadiabat))
+        -((1.0-reps)*fpn)  &
+        -(-(-reps*fpf*(1.0-reps)*g0/f0*xadiabat))
 !
-      amat(5,5)= -xi*w_d*x43*5.D0/4.D0-xi*w_d*lamda_d  &
-        -((1.D0-reps)*fpp)
+      amat(5,5)= -xi*w_d*x43*5.0/4.0-xi*w_d*lamda_d  &
+        -((1.0-reps)*fpp)
 !
-      amat(5,6)=0.D0
+      amat(5,6)=0.0
 !
       amat(5,7)=  &
-        -(-xi*w_s*(rlni+rlte)*reps*g0+xi*x43*5.D0/4*w_cd*reps*g0)/f0  &
+        -(-xi*w_s*(rlni+rlte)*reps*g0+xi*x43*5.0/4*w_cd*reps*g0)/f0  &
         -(-reps*fpf)
 !
-      amat(5,8)=0.D0
+      amat(5,8)=0.0
 !
       amat(5,9)= aiwt*zimp*  &
-        (-xi*w_s*(rlni+rlte)*reps*g0+xi*x43*5.D0/4*w_cd*reps*g0)/f0  &
-        -aiwt*zimp*(-reps*fpf*(1.D0-reps)*g0/f0*xadiabat)
+        (-xi*w_s*(rlni+rlte)*reps*g0+xi*x43*5.0/4*w_cd*reps*g0)/f0  &
+        -aiwt*zimp*(-reps*fpf*(1.0-reps)*g0/f0*xadiabat)
 !
-      amat(5,10)=0.D0
+      amat(5,10)=0.0
 !
-      amat(5,11)=0.D0
+      amat(5,11)=0.0
 !
-      amat(5,12)=0.D0
+      amat(5,12)=0.0
 !
 ! u_par equ #6
 !
-      amat(6,1)=(1.D0-dil)*apwt*  &
+      amat(6,1)=(1.0-dil)*apwt*  &
          (-xi*k_par*g1/f0-xi*ky*gamma_p*(-gamma_p*alpha_n)*g1/f0  &
-         -(betae/2.D0)*(-xi*k_par*(2.D0/betae0)*g0)/f0)
+         -(betae/2.0)*(-xi*k_par*(2.0/betae0)*g0)/f0)
 !
       amat(6,2)=-xi*k_par*taui
 !
-      amat(6,3)=0.D0
+      amat(6,3)=0.0
 !
       amat(6,4)=  &
         -(-xi*k_par*g1/f0-xi*ky*gamma_p*(-gamma_p*alpha_n)*g1/f0)  &
-        -(-(betae/2.D0)*(-xi*k_par*(2.D0/betae0)*g0)/f0)
+        -(-(betae/2.0)*(-xi*k_par*(2.0/betae0)*g0)/f0)
 !
-      amat(6,5)=0.D0
+      amat(6,5)=0.0
 !
       amat(6,6)=  &
-       +xi*w_d*(gam_par+gam_per)/2.D0 -w_d*xmu
+       +xi*w_d*(gam_par+gam_per)/2.0 -w_d*xmu
 !
       amat(6,7)=  &
         -(-xi*k_par*g1/f0-xi*ky*gamma_p*(-gamma_p*alpha_n)*g1/f0)  &
-        -(-(betae/2.D0)*(-xi*k_par*(2.D0/betae0)*g0)/f0)  &
-       -(betae/2.D0)*xi*k_par*(2.D0/betae0)/(1.D0-reps)
+        -(-(betae/2.0)*(-xi*k_par*(2.0/betae0)*g0)/f0)  &
+       -(betae/2.0)*xi*k_par*(2.0/betae0)/(1.0-reps)
 !
       amat(6,8)=  &
-        -(betae/2.D0)*(-xi*w_s*(rlni*g1+rlti*g2))  &
-        -(betae/2.D0)*(-xi*w_s*rlne)  &
+        -(betae/2.0)*(-xi*w_s*(rlni*g1+rlti*g2))  &
+        -(betae/2.0)*(-xi*w_s*rlne)  &
         +amass_e*xnu*xnu_col*k_per**2  &
-        -(betae/2.D0)*(-2.D0/betae0*amass_e*xnu*xnu_col*k_per**2)
+        -(betae/2.0)*(-2.0/betae0*amass_e*xnu*xnu_col*k_per**2)
 ! note there is no double counting in last two terms
 !
       amat(6,9)=aiwt*zimp*  &
         (-xi*k_par*g1/f0-xi*ky*gamma_p*(-gamma_p*alpha_n)*g1/f0  &
-        -(betae/2.D0)*(-xi*k_par*(2.D0/betae0)*g0)/f0)
+        -(betae/2.0)*(-xi*k_par*(2.0/betae0)*g0)/f0)
 !
-      amat(6,10)=0.D0
+      amat(6,10)=0.0
 !
-      amat(6,11)=0.D0
+      amat(6,11)=0.0
 !
-      amat(6,12)=0.D0
+      amat(6,12)=0.0
 !
 ! n_u equ #7
 !
-      amat(7,1)=(1.D0-dil)*apwt*  &
-        (-xi*w_s*rlne*(1.D0-reps)*g0+xi*w_cd*  &
-        (1.D0-x43*(3.D0/4.D0)*reps)*g0)/f0  &
-        +(1.D0-dil)*apwt*(-reps*fnf*(1.D0-reps)*g0/f0*xadiabat)
+      amat(7,1)=(1.0-dil)*apwt*  &
+        (-xi*w_s*rlne*(1.0-reps)*g0+xi*w_cd*  &
+        (1.0-x43*(3.0/4.0)*reps)*g0)/f0  &
+        +(1.0-dil)*apwt*(-reps*fnf*(1.0-reps)*g0/f0*xadiabat)
 !
-      amat(7,2)=0.D0
+      amat(7,2)=0.0
 !
-      amat(7,3)=0.D0
+      amat(7,3)=0.0
 !
       amat(7,4)=  &
-        -(-xi*w_s*rlne*(1.D0-reps)*g0+xi*w_cd*  &
-        (1.D0-x43*(3.D0/4.D0)*reps)*g0)/f0  &
-        +((1.D0-reps)*fnn)  &
-        +(-(-reps*fnf*(1.D0-reps)*g0/f0*xadiabat))
+        -(-xi*w_s*rlne*(1.0-reps)*g0+xi*w_cd*  &
+        (1.0-x43*(3.0/4.0)*reps)*g0)/f0  &
+        +((1.0-reps)*fnn)  &
+        +(-(-reps*fnf*(1.0-reps)*g0/f0*xadiabat))
 !
-      amat(7,5)= +((1.D0-reps)*fnp)
+      amat(7,5)= +((1.0-reps)*fnp)
 !
       amat(7,6)=-xi*k_par
 !
       amat(7,7)=  &
-        -(-xi*w_s*rlne*(1.D0-reps)*g0+xi*w_cd*  &
-        (1.D0-x43*(3.D0/4.D0)*reps)*g0)/f0  &
+        -(-xi*w_s*rlne*(1.0-reps)*g0+xi*w_cd*  &
+        (1.0-x43*(3.0/4.0)*reps)*g0)/f0  &
         -xi*w_d*xt_mhd  &
         +(-reps*fnf)
 !
       amat(7,8)= -xi*k_par*(-k_per**2)  &
-        -xi*w_d*yt_mhd*(w_s*(betae/2.D0)/k_par0*rlte)
+        -xi*w_d*yt_mhd*(w_s*(betae/2.0)/k_par0*rlte)
 !
       amat(7,9)=aiwt*zimp*  &
-        (-xi*w_s*rlne*(1.D0-reps)*g0+xi*w_cd*  &
-        (1.D0-x43*(3.D0/4.D0)*reps)*g0)/f0  &
-        +aiwt*zimp*(-reps*fnf*(1.D0-reps)*g0/f0*xadiabat)
+        (-xi*w_s*rlne*(1.0-reps)*g0+xi*w_cd*  &
+        (1.0-x43*(3.0/4.0)*reps)*g0)/f0  &
+        +aiwt*zimp*(-reps*fnf*(1.0-reps)*g0/f0*xadiabat)
 !
-      amat(7,10)=0.D0
+      amat(7,10)=0.0
 !
-      amat(7,11)=0.D0
+      amat(7,11)=0.0
 !
-      amat(7,12)=0.D0
+      amat(7,12)=0.0
 !
 ! a_par equ #8
 !
-      amat(8,1)=(1.D0-dil)*apwt*(-xi*k_par*(2.D0/betae0)*g0/f0)
+      amat(8,1)=(1.0-dil)*apwt*(-xi*k_par*(2.0/betae0)*g0/f0)
 !
-      amat(8,2)=0.D0
+      amat(8,2)=0.0
 !
-      amat(8,3)=0.D0
+      amat(8,3)=0.0
 !
-      amat(8,4)=-(-xi*k_par*(2.D0/betae0)*g0/f0)
+      amat(8,4)=-(-xi*k_par*(2.0/betae0)*g0/f0)
 !
-      amat(8,5)=0.D0
+      amat(8,5)=0.0
 !
-      amat(8,6)=0.D0
+      amat(8,6)=0.0
 !
-      amat(8,7)=-(-xi*k_par*(2.D0/betae0)*g0/f0)  &
-        +xi*k_par*(2.D0/betae0)/(1.D0-reps)
+      amat(8,7)=-(-xi*k_par*(2.0/betae0)*g0/f0)  &
+        +xi*k_par*(2.0/betae0)/(1.0-reps)
 !
       amat(8,8)=-xi*w_s*rlne  &
-        -(2.D0/betae0)*amass_e*xnu*xnu_col*(k_per**2)
+        -(2.0/betae0)*amass_e*xnu*xnu_col*(k_per**2)
 !
-      amat(8,9)=aiwt*zimp*(-xi*k_par*(2.D0/betae0)*g0/f0)
+      amat(8,9)=aiwt*zimp*(-xi*k_par*(2.0/betae0)*g0/f0)
 !
-      amat(8,10)=0.D0
+      amat(8,10)=0.0
 !
-      amat(8,11)=0.D0
+      amat(8,11)=0.0
 !
-      amat(8,12)=0.D0
+      amat(8,12)=0.0
 !
 ! n_im equ #9
 !
-      amat(9,1)= (1.D0-dil)*apwt*  &
+      amat(9,1)= (1.0-dil)*apwt*  &
         (-xi*w_s*((rlnimp-rlti)*g1i+rlti*g2i)+xi*w_cd*g12i)/f0
 !
-      amat(9,2)=0.D0
+      amat(9,2)=0.0
 !
-      amat(9,3)=0.D0
+      amat(9,3)=0.0
 !
       amat(9,4)= -(-xi*w_s*((rlnimp-rlti)*g1i+rlti*g2i)+xi*w_cd*g12i)/f0
 !
-      amat(9,5)= 0.D0
+      amat(9,5)= 0.0
 !
-      amat(9,6)= 0.D0
+      amat(9,6)= 0.0
 !
       amat(9,7)= -(-xi*w_s*((rlnimp-rlti)*g1i+rlti*g2i)+xi*w_cd*g12i)/f0
 !
-      amat(9,8)= 0.D0
+      amat(9,8)= 0.0
 !
       amat(9,9) = aiwt*zimp*  &
         (-xi*w_s*((rlnimp-rlti)*g1i+rlti*g2i)+xi*w_cd*g12i)/f0
 !
-      amat(9,10)= +xi*w_d*taui*0.5D0/zimp
+      amat(9,10)= +xi*w_d*taui*0.50/zimp
 !
-      amat(9,11)= +xi*w_d*taui*0.5D0/zimp
+      amat(9,11)= +xi*w_d*taui*0.50/zimp
 !
       amat(9,12)= -xi*k_par
 !
 ! pim_par equ #10
 !
-      amat(10,1)= (1.D0-dil)*apwt*  &
+      amat(10,1)= (1.0-dil)*apwt*  &
         (-xi*w_s*(rlnimp*g1i+rlti*g2i)+xi*x_par*w_cd*g12i)/f0
 !
-      amat(10,2)=0.D0
+      amat(10,2)=0.0
 !
-      amat(10,3)=0.D0
+      amat(10,3)=0.0
 !
       amat(10,4)= -(-xi*w_s*(rlnimp*g1i+rlti*g2i)+xi*x_par*w_cd*g12i)/f0
 !
-      amat(10,5)=0.D0
+      amat(10,5)=0.0
 !
-      amat(10,6)=0.D0
+      amat(10,6)=0.0
 !
       amat(10,7)= -(-xi*w_s*(rlnimp*g1i+rlti*g2i)+xi*x_par*w_cd*g12i)/f0
 !
-      amat(10,8)=0.D0
+      amat(10,8)=0.0
 !
       amat(10,9)= aiwt*zimp* &
          (-xi*w_s*(rlnimp*g1i+rlti*g2i)+xi*x_par*w_cd*g12i)/f0  &
          +k_par*chi_par_1/sqrt(mimp)  &
-         -(xi*w_d*taui*3.D0/2.D0-w_d*taui*xnu_par_par)/zimp  &
-         -(xi*w_d*taui*1.D0/2.D0-w_d*taui*xnu_par_per)/zimp 
+         -(xi*w_d*taui*3.0/2.0-w_d*taui*xnu_par_par)/zimp  &
+         -(xi*w_d*taui*1.0/2.0-w_d*taui*xnu_par_per)/zimp
 !
       amat(10,10)= -k_par*chi_par_1/sqrt(mimp)  &
-        +xi*w_d*taui*x_par/zimp +(xi*w_d*taui*3.D0/2.D0  &
+        +xi*w_d*taui*x_par/zimp +(xi*w_d*taui*3.0/2.0  &
         -w_d*taui*xnu_par_par)/zimp
 !
-      amat(10,11)= (xi*w_d*taui*1.D0/2.D0-w_d*taui*xnu_par_per)/zimp
+      amat(10,11)= (xi*w_d*taui*1.0/2.0-w_d*taui*xnu_par_per)/zimp
 !
       amat(10,12)= -xi*gam_par*k_par
 !
 ! pim_per equ #11
 !
-      amat(11,1)= (1.D0-dil)*apwt*  &
-        (-xi*w_s*((rlnimp-rlti)*g2i+2.D0*rlti*g3i)+  &
+      amat(11,1)= (1.0-dil)*apwt*  &
+        (-xi*w_s*((rlnimp-rlti)*g2i+2.0*rlti*g3i)+  &
         xi*x_per*w_cd*g23i)/f0
 !
-      amat(11,2)= 0.D0
+      amat(11,2)= 0.0
 !
-      amat(11,3)= 0.D0
+      amat(11,3)= 0.0
 !
-      amat(11,4)= -(-xi*w_s*((rlnimp-rlti)*g2i+2.D0*rlti*g3i)+  &
+      amat(11,4)= -(-xi*w_s*((rlnimp-rlti)*g2i+2.0*rlti*g3i)+  &
         xi*x_per*w_cd*g23i)/f0
 !
-      amat(11,5)=0.D0
+      amat(11,5)=0.0
 !
-      amat(11,6)=0.D0
+      amat(11,6)=0.0
 !
-      amat(11,7)= -(-xi*w_s*((rlnimp-rlti)*g2i+2.D0*rlti*g3i)+  &
+      amat(11,7)= -(-xi*w_s*((rlnimp-rlti)*g2i+2.0*rlti*g3i)+  &
         xi*x_per*w_cd*g23i)/f0
 !
-      amat(11,8)=0.D0
+      amat(11,8)=0.0
 !
       amat(11,9)= aiwt*zimp*  &
-        (-xi*w_s*((rlnimp-rlti)*g2i+2.D0*rlti*g3i)+  &
+        (-xi*w_s*((rlnimp-rlti)*g2i+2.0*rlti*g3i)+  &
         xi*x_per*w_cd*g23i)/f0  &
         +k_par*chi_per_1/sqrt(mimp)  &
         -(xi*w_d*taui-w_d*taui*xnu_per_per)/zimp  &
-        -(xi*w_d*taui*1.D0/2.D0-w_d*taui*xnu_per_par)/zimp
+        -(xi*w_d*taui*1.0/2.0-w_d*taui*xnu_per_par)/zimp
 !
       amat(11,10)= +(xi*w_d*taui*1/2-w_d*taui*xnu_per_par)/zimp
 !
@@ -1380,51 +1380,51 @@
 !    added xnu_col term to amat(12,8)
 !    fixed mimp factor in amat(12,12)
 !
-      amat(12,1)=(1.D0/mimp)*(1.D0-dil)*apwt*  &
+      amat(12,1)=(1.0/mimp)*(1.0-dil)*apwt*  &
         ((-xi*k_par*g1i/f0)*zimp  &
         -xi*ky*gamma_p*(-gamma_p*alpha_n)*g1i/f0  &
-        -(betae/2.D0)*zimp*(-xi*k_par*(2.D0/betae0)*g0i)/f0)
+        -(betae/2.0)*zimp*(-xi*k_par*(2.0/betae0)*g0i)/f0)
 !
-      amat(12,2)=0.D0
+      amat(12,2)=0.0
 !
-      amat(12,3)=0.D0
+      amat(12,3)=0.0
 !
       amat(12,4)=  &
-       -(1.D0/mimp)*(-xi*k_par*g1i/f0)*zimp  &
-       -(1.D0/mimp)*(-xi*ky*gamma_p*(-gamma_p*alpha_n)*g1i/f0)  &
-       -(1.D0/mimp)*(-(betae/2.D0)*(-xi*k_par
-       *(2.D0/betae0)*g0i)/f0)*zimp
+       -(1.0/mimp)*(-xi*k_par*g1i/f0)*zimp  &
+       -(1.0/mimp)*(-xi*ky*gamma_p*(-gamma_p*alpha_n)*g1i/f0)  &
+       -(1.0/mimp)*(-(betae/2.0)*(-xi*k_par  &
+       *(2.0/betae0)*g0i)/f0)*zimp
 !
-      amat(12,5)=0.D0
+      amat(12,5)=0.0
 !
-      amat(12,6)=0.D0
+      amat(12,6)=0.0
 !
        amat(12,7)=  &
-       -(1.D0/mimp)*(-xi*k_par*g1i/f0)*zimp  &
-       -(1.D0/mimp)*(-xi*ky*gamma_p*(-gamma_p*alpha_n)*g1i/f0)  &
-       -(1.D0/mimp)*(-(betae/2.D0)*  &
-        (-xi*k_par*(2.D0/betae0)*g0i)/f0)*zimp  &
-       -(1.D0/mimp)*(betae/2.D0)*xi*  &
-        k_par*(2.D0/betae0)/(1.D0-reps)*zimp
+       -(1.0/mimp)*(-xi*k_par*g1i/f0)*zimp  &
+       -(1.0/mimp)*(-xi*ky*gamma_p*(-gamma_p*alpha_n)*g1i/f0)  &
+       -(1.0/mimp)*(-(betae/2.0)*  &
+        (-xi*k_par*(2.0/betae0)*g0i)/f0)*zimp  &
+       -(1.0/mimp)*(betae/2.0)*xi*  &
+        k_par*(2.0/betae0)/(1.0-reps)*zimp
 !
       amat(12,8)=  &
-        -(1.D0/mimp)*(betae/2.D0)*(-xi*w_s*(rlnimp*g1i+rlti*g2i))  &
-        -(1.D0/mimp)*(betae/2.D0)*(-xi*w_s*rlne)*zimp  &
-        +(1.D0/mimp)*zimp*amass_e*xnu*xnu_col*k_per**2  &
-        -(1.D0/mimp)*(betae/2.D0)*  &
-         (-2.D0/betae0*amass_e*xnu*xnu_col*k_per**2)*zimp  
+        -(1.0/mimp)*(betae/2.0)*(-xi*w_s*(rlnimp*g1i+rlti*g2i))  &
+        -(1.0/mimp)*(betae/2.0)*(-xi*w_s*rlne)*zimp  &
+        +(1.0/mimp)*zimp*amass_e*xnu*xnu_col*k_per**2  &
+        -(1.0/mimp)*(betae/2.0)*  &
+         (-2.0/betae0*amass_e*xnu*xnu_col*k_per**2)*zimp
 !
-      amat(12,9)=(1.D0/mimp)*aiwt*zimp*  &
+      amat(12,9)=(1.0/mimp)*aiwt*zimp*  &
          ((-xi*k_par*g1i/f0)*zimp  &
         -xi*ky*gamma_p*(-gamma_p*alpha_n)*g1i/f0  &
-        -(betae/2.D0)*zimp*(-xi*k_par*(2.D0/betae0)*g0i)/f0)
+        -(betae/2.0)*zimp*(-xi*k_par*(2.0/betae0)*g0i)/f0)
 !
-      amat(12,10)=-(1.D0/mimp)*xi*k_par*taui
+      amat(12,10)=-(1.0/mimp)*xi*k_par*taui
 !
-      amat(12,11)=0.D0
+      amat(12,11)=0.0
 !
-      amat(12,12)= (1.D0/mimp)*(xi*w_d*(gam_par+gam_per)  &
-        /2.D0/zimp -w_d*xmu/zimp)
+      amat(12,12)= (1.0/mimp)*(xi*w_d*(gam_par+gam_per)  &
+        /2.0/zimp -w_d*xmu/zimp)
 !
 ! put in rot shear stabilization and possible source of gyrobohm breaking
 ! and model damping kdamp
@@ -1439,18 +1439,18 @@
 !...Fill matricies for eigenvalue equation
 !
       do j1=1,neq
-        rr(j1) = 0.0D0
-        ri(j1) = 0.0D0
+        rr(j1) = 0.00
+        ri(j1) = 0.00
         do j2=1,neq
           ar(j1,j2) = REAL(  amat(j1,j2) )
-          ai(j1,j2) = dimag( amat(j1,j2) )
+          ai(j1,j2) = IMAG( amat(j1,j2) )
 !...test tmp
 !         ai(j1,j2) = 0.0
 !         ar(j1,j2) = 0.0
 !         if (j1.eq.j2) ar(j1,j2)=j1
 !
-          vr(j1,j2) = 0.0D0
-          vi(j1,j2) = 0.0D0
+          vr(j1,j2) = 0.00
+          vi(j1,j2) = 0.00
         enddo
       enddo
 !
@@ -1497,10 +1497,10 @@
 !gms     &             neq,work,lwork,rwork,ifail)
 !gms        do j1=1,neq
 !gms         rr(j1) = real(w(j1))
-!gms         ri(j1) = dimag(w(j1))
+!gms         ri(j1) = imag(w(j1))
 !gms         do j2=1,ieq
 !gms           vr(j1,j2) = real(cvr(j1,j2))
-!gms           vi(j1,j2) = dimag(cvr(j1,j2))
+!gms           vi(j1,j2) = imag(cvr(j1,j2))
 !gms         enddo
 !gms        enddo
 !gms
@@ -1508,11 +1508,11 @@
 !gms
 !gms        do j2=1,neq
 !gms           do j1=1,neq
-!gms              bi(j1,j2)=0.0D0
+!gms              bi(j1,j2)=0.00
 !gms              if(j1.eq.j2) then
-!gms                 br(j1,j2)=1.0D0
+!gms                 br(j1,j2)=1.00
 !gms              else
-!gms                 br(j1,j2)=0.0D0
+!gms                 br(j1,j2)=0.00
 !gms              endif
 !gms           enddo
 !gms        enddo
@@ -1589,7 +1589,7 @@
         if ( lprint .gt. 6 ) then
           write (6,123)
           do j=1,ieq
-            write (6,122) real(zomega(j)), dimag(zomega(j))
+            write (6,122) real(zomega(j)), imag(zomega(j))
           enddo
  123      format (/' Multiplied by i: '  &
            /t4,'zomegar',t18,'zomegai')
@@ -1599,27 +1599,27 @@
 !
 !..save growth rates and frequencies in real variables
 !
-        zgamax = 0.0D0
+        zgamax = 0.00
 !temp
-        zgamax = -1.D10
+        zgamax = -1.E10
         jmax=0
-        gamma=0.D0
+        gamma=0.0
         do j=1,ieq
          if(j.ne.jroot(1).and.j.ne.jroot(2).and.j.ne.jroot(3)) then
-          if (dimag(zomega(j)).gt. zgamax) then
-            zgamax = dimag(zomega(j))
+          if (imag(zomega(j)).gt. zgamax) then
+            zgamax = imag(zomega(j))
             jmax=j
           endif
          endif
         enddo
 !
         freq = REAL( zomega(jmax) )
-        gamma = dimag( zomega(jmax) )
+        gamma = imag( zomega(jmax) )
         if(lprint.eq.3) write(*,'(1x,a17,i3,1p3e12.4)') &
           'ilh,gamma,freq = ',ilh,gamma,freq
 !
 ! skip stable modes
-!        if(gamma.lt.0.D0)go to 775
+!        if(gamma.lt.0.0)go to 775
 !
          jroot(iroot)=jmax
 !
@@ -1630,7 +1630,7 @@
          freqroot(iroot)=freq
 !
         do j=1,12
-         v(j)=0.D0
+         v(j)=0.0
         enddo
         do j=1,ieq
           v(j) = zevec(j,jmax)
@@ -1638,20 +1638,20 @@
 !
 !***********************************************************************
 !
-      n_i=0.D0
-      p_par=0.D0
-      p_per=0.D0
-      n_t=0.D0
-      p_t=0.D0
-      u_par=0.D0
-      n_u=0.D0
-      a_par=0.D0
-      n_im=0.D0
-      p_im_par=0.D0
-      p_im_per=0.D0
-!     u_im_par=0.D0
+      n_i=0.0
+      p_par=0.0
+      p_per=0.0
+      n_t=0.0
+      p_t=0.0
+      u_par=0.0
+      n_u=0.0
+      a_par=0.0
+      n_im=0.0
+      p_im_par=0.0
+      p_im_per=0.0
+!     u_im_par=0.0
 !
-      t_u=0.D0
+      t_u=0.0
 !
       n_i=v(1)
       p_par=v(2)
@@ -1666,18 +1666,18 @@
       if(ieq.eq.12) p_im_per=v(11)
 !     if(ieq.eq.12) u_im_par=v(12)
  
-      if (ieq.ge.8) ph=((1.D0-dil)*apwt*n_i+aiwt*zimp*n_im-n_t-n_u)/f0
-      if (ieq.lt.8) ph= ((1.D0-dil)*apwt*n_i-n_t)/f0
-      if (ieq.le.3) ph= ((1.D0-dil)*apwt*n_i)/f0
-      t_u=(betae/2.D0)*w_s/k_par0*rlte*a_par
+      if (ieq.ge.8) ph=((1.0-dil)*apwt*n_i+aiwt*zimp*n_im-n_t-n_u)/f0
+      if (ieq.lt.8) ph= ((1.0-dil)*apwt*n_i-n_t)/f0
+      if (ieq.le.3) ph= ((1.0-dil)*apwt*n_i)/f0
+      t_u=(betae/2.0)*w_s/k_par0*rlte*a_par
 !
-      n_e=(1.D0-dil)*apwt*(n_i-(g0-g1)/taui*ph)  &
+      n_e=(1.0-dil)*apwt*(n_i-(g0-g1)/taui*ph)  &
            +aiwt*zimp*(n_im-zimp*(g0i-g1i)/taui*ph)
 !
 ! impurity trace convective limit
 !
       if (aiwt.lt.-epsilon) then
-       n_im=0.D0
+       n_im=0.0
        do j=1,8
         n_im=n_im+amat(9,j)*v(j)/(-xi*freq+gamma)
        enddo
@@ -1685,19 +1685,19 @@
 !
 ! idelta=xi*yparam(1)+yparam(2)   for trapped electrons
 !
-      yparam(1)=dimag(-(n_t-reps*ph)/ph)
+      yparam(1)=imag(-(n_t-reps*ph)/ph)
       yparam(2)=REAL(-(n_t-reps*ph)/ph)
 !
-      chknu=n_u/(1.D0-reps)/ph
+      chknu=n_u/(1.0-reps)/ph
       chknt=n_t/reps/ph
-      chknt2=n_t*(f0+reps)/(reps*((1.D0-dil)*apwt*n_i+aiwt*zimp*n_im))
+      chknt2=n_t*(f0+reps)/(reps*((1.0-dil)*apwt*n_i+aiwt*zimp*n_im))
       if (lprint.eq.2) write (6,*) 'chknu,chknt,chknt2:',  &
           chknu,chknt,chknt2
 !
 ! non linear saturation rule
 !
-      gamma_r= 0.2D0*3.D0/2.D0*abs(w_d)*taui   !only scaling important
-      if(version_gf.eq.2) gamma_r= 0.2D0*3.D0/2.D0*abs(w_d0)*taui
+      gamma_r= 0.20*3.0/2.0*abs(w_d)*taui   !only scaling important
+      if(version_gf.eq.2) gamma_r= 0.20*3.0/2.0*abs(w_d0)*taui
       if(lprint.eq.3) write(*,'(1x,a17,i3,1p3e12.4)')  &
          'ilh,gamma_r    = ',ilh,gamma_r
 !
@@ -1705,39 +1705,39 @@
                +alpha_e*gamma_e+alpha_mode*gamma_mode)-kdamp
 !
       gamma_net=max(gamma_net,xparam(8)*gamma)
-      if( gamma_net.gt.0.D0)then
-       ph_m=gamma_net**(1.D0-adamp)*gamma_r**adamp/(k_m*ky)
-       if(xparam(26).gt.0.D0) then
+      if( gamma_net.gt.0.0)then
+       ph_m=gamma_net**(1.0-adamp)*gamma_r**adamp/(k_m*ky)
+       if(xparam(26).gt.0.0) then
         ph_m=ph_m*((xparam(26)*gamma_net/gamma_r)**xparam(27))  &
-        /(1.D0+(xparam(26)*gamma_net/gamma_r)**xparam(27))
+        /(1.0+(xparam(26)*gamma_net/gamma_r)**xparam(27))
        endif
 ! set flag ngrow_k_gf: found at least one unstable mode for this k
 !gms       if(ipert_gf.eq.0)ngrow_k_gf(iky0)=1
       endif
 !
-      if( gamma_net.le.0.) ph_m=0.D0
+      if( gamma_net.le.0.) ph_m=0.0
 !
-      if(xparam(24).gt.0.D0) then
-        if(gamma.gt.0.D0)then
-          ph_m=dabs(gamma)**(1.D0-adamp)*gamma_r**adamp/(k_m*ky)/  &
-               dsqrt(1.D0+(dabs(alpha_star*gamma_star+  &
+      if(xparam(24).gt.0.0) then
+        if(gamma.gt.0.0)then
+          ph_m=abs(gamma)**(1.0-adamp)*gamma_r**adamp/(k_m*ky)/  &
+               sqrt(1.0+(abs(alpha_star*gamma_star+  &
                alpha_e*gamma_e+alpha_mode*gamma_mode)/  &
-               (dabs(gamma)+.00001D0))**xparam(24))
+               (abs(gamma)+.000010))**xparam(24))
 !gms          if(ipert_gf.eq.0)ngrow_k_gf(iky0)=1
         else
-           ph_m=0.D0 
+           ph_m=0.0
         endif
       endif
 !
 ! 7.17.96
       if(xparam(22).gt.0) then
-        if(gamma.gt.0.) ph_m=gamma**(1.D0-adamp-xparam(22))  &
+        if(gamma.gt.0.) ph_m=gamma**(1.0-adamp-xparam(22))  &
                              *gamma_r**adamp/(k_m*ky)
-        if(gamma.le.0.) ph_m=0.D0
+        if(gamma.le.0.) ph_m=0.0
       endif
 !
          phi_norm=0
-         phi_normroot(iroot)=0.D0
+         phi_normroot(iroot)=0.0
 !
        if( ph_m.gt.0.) then
 !
@@ -1755,15 +1755,15 @@
       d_im_hat = phi_norm*REAL(conjg(n_im)*(-xi*ky*ph))  &
                  +d_im_hat
 !
-      chii_hat = phi_norm*3.D0/2.D0*  &
-                 REAL(conjg((1.D0/3.D0)*p_par+  &
-                 (2.D0/3.D0)*p_per)*(-xi*ky*ph))  &
+      chii_hat = phi_norm*3.0/2.0*  &
+                 REAL(conjg((1.0/3.0)*p_par+  &
+                 (2.0/3.0)*p_per)*(-xi*ky*ph))  &
                  +chii_hat
-      chi_im_hat= aiwt/apwt*xparam(21)*phi_norm*3.D0/2.D0*  &
-               REAL(conjg((1.D0/3.D0)*p_im_par+(2.D0/3.D0)*p_im_per)*  &
+      chi_im_hat= aiwt/apwt*xparam(21)*phi_norm*3.0/2.0*  &
+               REAL(conjg((1.0/3.0)*p_im_par+(2.0/3.0)*p_im_per)*  &
                (-xi*ky*ph)) + chi_im_hat
 !
-      chie_hat = phi_norm*3.D0/2.D0*  &
+      chie_hat = phi_norm*3.0/2.0*  &
                  REAL(conjg(p_t+n_u+t_u)*(-xi*ky*ph))  &
                  +chie_hat
 !
@@ -1787,11 +1787,11 @@
 ! note  (-1) means exch_hat is electron to ion rate or
 ! ion heating rate, ie positive exch_hat cools electrons and heats ions
 !
-      exch_hat = phi_norm*(-1.D0)*  &
+      exch_hat = phi_norm*(-1.0)*  &
                  REAL(conjg(-xi*freq*n_e)*ph)  &
                  +exch_hat
 !
-      eta_par_hat=(1.D0-xparam(14))*phi_norm*  &
+      eta_par_hat=(1.0-xparam(14))*phi_norm*  &
                   REAL(conjg(u_par)  &
                   *(-xi*ky*ph))/(gamma_p+epsilon)*(-gamma_p*alpha_n)  &
                   +xparam(14)*phi_norm*REAL(conjg(  &
@@ -1802,7 +1802,7 @@
 !
       eta_per_hat = phi_norm*  &
                     REAL(conjg(-ky*(ky*shat*rms_theta)*ph)*  &
-                    (ph+taui*((1.D0/3.D0)*p_par+(2.D0/3.D0)*p_per)))*  &
+                    (ph+taui*((1.0/3.0)*p_par+(2.0/3.0)*p_per)))*  &
                     (-gamma_p*alpha_n)  &
                     +eta_per_hat
 !
@@ -1845,11 +1845,11 @@
 !
 ! computed high-k ETG electron transport at each ky
 ! Note: not added to ITG chi-e here ... done after ky loop
-      chie_e_k_gf(iky)=0.D0
+      chie_e_k_gf(iky)=0.0
       if(ilh.eq.2) then
         chie_e_k_gf(iky)=xparam(10)*chii_hat*  &
-                         taui_gf**(3.D0/2.D0)/  &
-                         (1836.D0*amassgas_gf)**.5D0
+                         taui_gf**(3.0/2.0)/  &
+                         (1836.0*amassgas_gf)**.50
       endif
       if(lprint.eq.3) write(*,'(1x,a27,i3,1p3e12.4)')  &
           'ilh,chie_e_k_gf,chii_k_gf =',  &
@@ -1873,28 +1873,28 @@
 !***********************************************************************
 ! initializations for summations over ky
 !
-      anorm_k=0.D0
-      diff_gf=0.D0
-      diff_im_gf=0.D0
-      chii_gf=0.D0
+      anorm_k=0.0
+      diff_gf=0.0
+      diff_im_gf=0.0
+      chii_gf=0.0
       chi_im_gf=0.0
-      chie_gf=0.D0
-      exch_gf=0.D0
-      eta_par_gf=0.D0
-      eta_per_gf=0.D0
-      eta_phi_gf=0.D0
-      chie_e_gf=0.D0
+      chie_gf=0.0
+      exch_gf=0.0
+      eta_par_gf=0.0
+      eta_per_gf=0.0
+      eta_phi_gf=0.0
+      chie_e_gf=0.0
 !
-!      anorm_glob=0.D0
-!      diff_glob=0.D0
-!      diff_im_glob=0.D0
-!      chii_glob=0.D0
-!      chie_glob=0.D0
-!      exch_glob=0.D0
-!      eta_par_glob=0.D0
-!      eta_per_glob=0.D0
-!      eta_phi_glob=0.D0
-!      chie_e_glob=0.D0
+!      anorm_glob=0.0
+!      diff_glob=0.0
+!      diff_im_glob=0.0
+!      chii_glob=0.0
+!      chie_glob=0.0
+!      exch_glob=0.0
+!      eta_par_glob=0.0
+!      eta_per_glob=0.0
+!      eta_phi_glob=0.0
+!      chie_e_glob=0.0
 !
 ! Sum ITG and ETG transport
 ! over logarithmic ky grid (d ky=ky*d yk)
@@ -1925,7 +1925,7 @@
 !
 ! Add ITG and ETG electron transport
 !
-      chie_gf=chie_gf + 1.D0*chie_e_gf
+      chie_gf=chie_gf + 1.0*chie_e_gf
 !
       diff_gf=diff_gf/anorm_k
       diff_im_gf=diff_im_gf/anorm_k
@@ -1941,7 +1941,7 @@
 ! pick off maximum gamma
 !
       do iroot=1,4
-       gamma_k_max=-1.D6
+       gamma_k_max=-1.E6
        do iky=1,ikymax_gf
         if(gamma_k_gf(iroot,iky).gt.gamma_k_max) then
          gamma_k_max=gamma_k_gf(iroot,iky)
@@ -1954,7 +1954,7 @@
 !
 ! pick off 2nd maximum gamma
 !
-       gamma_k_max=-1.D6
+       gamma_k_max=-1.E6
        do iky=1,ikymax_gf
         if( (gamma_k_gf(1,iky).gt.gamma_k_max) .and.  &
             (gamma_k_gf(1,iky).lt.gamma_gf(1)) ) then
@@ -1975,12 +1975,12 @@
 ! 67    format(2i2,f14.9)
 !
       if(xparam(22).gt.0.) then
-       phi_renorm=1.D0
+       phi_renorm=1.0
        gamma_gross_net=gamma_gf(1)-abs(alpha_star*gamma_star  &
                +alpha_e*gamma_e+alpha_mode*gamma_mode)-kdamp
        if(gamma_gross_net.gt.0.)  &
-        phi_renorm=gamma_gross_net**(xparam(22)*2.D0)
-       if(gamma_gross_net.le.0.) phi_renorm=0.D0
+        phi_renorm=gamma_gross_net**(xparam(22)*2.0)
+       if(gamma_gross_net.le.0.) phi_renorm=0.0
 !
       diff_gf=diff_gf*phi_renorm
       diff_im_gf=diff_im_gf*phi_renorm
@@ -1991,7 +1991,7 @@
       eta_par_gf=eta_par_gf*phi_renorm
       eta_per_gf=eta_per_gf*phi_renorm
       eta_phi_gf=eta_phi_gf*phi_renorm
-      chie_e_gf=chie_e_gf*1.0D0
+      chie_e_gf=chie_e_gf*1.00
 !
       endif
 !
@@ -2084,20 +2084,20 @@
 ! return for case with  no unstable modes
 !
 ! 888  continue
-      diff_gf=0.D0
-      diff_im_gf=0.D0
-      chii_gf=0.D0
+      diff_gf=0.0
+      diff_im_gf=0.0
+      chii_gf=0.0
       chi_im_gf=0.0
-      chie_gf=0.D0
-      exch_gf=0.D0
-      eta_par_gf=0.D0
-      eta_per_gf=0.D0
-      eta_phi_gf=0.D0
-      chie_e_gf=0.D0
+      chie_gf=0.0
+      exch_gf=0.0
+      eta_par_gf=0.0
+      eta_per_gf=0.0
+      eta_phi_gf=0.0
+      chie_e_gf=0.0
       do j1=1,4
-        gamma_gf(j1)=0.D0
-        freq_gf(j1)=0.D0
-        xky_gf(j1)=0.D0
+        gamma_gf(j1)=0.0
+        freq_gf(j1)=0.0
+        xky_gf(j1)=0.0
       enddo
       return
 !
@@ -2354,7 +2354,12 @@
          ai(m,i) = f
    40 continue
 
-   50 go to (80,130), iexc
+   50 if(iexc.eq.1)then
+         go to 80
+      else if(iexc.eq.2)then
+         go to 130
+      endif
+!  50  go to (80,130), iexc
 !     .......... search for rows isolating an eigenvalue
 !                and push them down ..........
    80 if (l .eq. 1) go to 280
@@ -2529,6 +2534,7 @@
 !     ------------------------------------------------------------------
 
       ierr = 0
+      l = 0  ! added to satisfy compiler gms
       if (low .eq. igh) go to 180
 !     .......... create real subdiagonal elements ..........
       l = low + 1
@@ -2538,8 +2544,8 @@
          if (hi(i,i-1) .eq. 0.000) go to 170
          norm = dlapy3gf(hr(i,i-1),hi(i,i-1))
 !rew inserted norm+1.d-100
-         yr = hr(i,i-1) / (norm+1.d-100)
-         yi = hi(i,i-1) / (norm+1.d-100)
+         yr = hr(i,i-1) / (norm+1.E-100)
+         yi = hi(i,i-1) / (norm+1.E-100)
          hr(i,i-1) = norm
          hi(i,i-1) = 0.000
 
@@ -2621,13 +2627,13 @@
          hr(i,i-1) = 0.000
          norm = dlapy3gf(dlapy3gf(hr(i-1,i-1),hi(i-1,i-1)),sr)
 !rew inserted norm+1.d-100
-         xr = hr(i-1,i-1) / (norm+1.d-100)
+         xr = hr(i-1,i-1) / (norm+1.E-100)
          wr(i-1) = xr
-         xi = hi(i-1,i-1) / (norm+1.d-100)
+         xi = hi(i-1,i-1) / (norm+1.E-100)
          wi(i-1) = xi
          hr(i-1,i-1) = norm
          hi(i-1,i-1) = 0.000
-         hi(i,i-1) = sr / (norm+1.d-100)
+         hi(i,i-1) = sr / (norm+1.E-100)
 
          do 490 j = i, en
             yr = hr(i-1,j)
@@ -2646,8 +2652,8 @@
       if (si .eq. 0.000) go to 540
       norm = dlapy3gf(hr(en,en),si)
 !rew inserted norm+1.d-100
-      sr = hr(en,en) / (norm+1.d-100)
-      si = si / (norm+1.d-100)
+      sr = hr(en,en) / (norm+1.E-100)
+      si = si / (norm+1.E-100)
       hr(en,en) = norm
       hi(en,en) = 0.000
 !     .......... inverse operation (columns) ..........
@@ -2774,6 +2780,7 @@
 !     ------------------------------------------------------------------
 
       ierr = 0
+      l = 0  ! added to satisfy compiler gms
 !     .......... initialize eigenvector matrix ..........
       do 101 j = 1, n
 
@@ -2786,7 +2793,14 @@
 !     .......... form the matrix of accumulated transformations
 !                from the information left by corth ..........
       iend = igh - low - 1
-      if (iend) 180, 150, 105
+!      if (iend) 180, 150, 105
+      if(iend.eq.1)then
+        go to 180
+      elseif(iend.eq.2)then
+        go to 150
+      elseif(iend.eq.3)then
+        go to 105
+      endif
 !     .......... for i=igh-1 step -1 until low+1 do -- ..........
   105 do 140 ii = 1, iend
          i = igh - ii
@@ -2810,8 +2824,8 @@
   115       continue
 !
 !rew inserted norm+1.d-100
-            sr = sr / (norm+1.d-100)
-            si = si / (norm+1.d-100)
+            sr = sr / (norm+1.E-100)
+            si = si / (norm+1.E-100)
 
             do 120 k = i, igh
                zr(k,j) = zr(k,j) + sr * ortr(k) - si * orti(k)
@@ -2829,8 +2843,8 @@
          if (hi(i,i-1) .eq. 0.000) go to 170
          norm = dlapy3gf(hr(i,i-1),hi(i,i-1))
 !rew     inserted norm+1.d-100
-         yr = hr(i,i-1) / (norm+1.d-100)
-         yi = hi(i,i-1) / (norm+1.d-100)
+         yr = hr(i,i-1) / (norm+1.E-100)
+         yi = hi(i,i-1) / (norm+1.E-100)
          hr(i,i-1) = norm
          hi(i,i-1) = 0.000
 
@@ -2918,13 +2932,13 @@
          hr(i,i-1) = 0.000
          norm = dlapy3gf(dlapy3gf(hr(i-1,i-1),hi(i-1,i-1)),sr)
 !rew inserted norm+1.d-100
-         xr = hr(i-1,i-1) / (norm+1.d-100)
+         xr = hr(i-1,i-1) / (norm+1.E-100)
          wr(i-1) = xr
-         xi = hi(i-1,i-1) / (norm+1.d-100)
+         xi = hi(i-1,i-1) / (norm+1.E-100)
          wi(i-1) = xi
          hr(i-1,i-1) = norm
-         hi(i-1,i-1) = 0.000
-         hi(i,i-1) = sr / (norm+1.d-100)
+         hi(i-1,i-1) = 0.0
+         hi(i,i-1) = sr / (norm+1.E-100)
 
          do 490 j = i, n
             yr = hr(i-1,j)
@@ -2943,8 +2957,8 @@
       if (si .eq. 0.000) go to 540
       norm = dlapy3gf(hr(en,en),si)
 !rew inserted norm+1.d-100
-      sr = hr(en,en) / (norm+1.d-100)
-      si = si / (norm+1.d-100)
+      sr = hr(en,en) / (norm+1.E-100)
+      si = si / (norm+1.E-100)
       hr(en,en) = norm
       hi(en,en) = 0.000
       if (en .eq. n) go to 540
@@ -3048,7 +3062,7 @@
             if (yr .ne. 0.000 .or. yi .ne. 0.000) go to 765
                tst1 = norm
                yr = tst1
-  760          yr = 0.01d0 * yr
+  760          yr = 0.0 * yr
                tst2 = norm + yr
                if (tst2 .gt. tst1) go to 760
   765       continue
@@ -3254,12 +3268,12 @@
       real :: s,tr,ti,dlapy3gf
       tr = xr
       ti = xi
-      s = sqrt(0.5d0*(dlapy3gf(tr,ti) + abs(tr)))
+      s = sqrt(0.50*(dlapy3gf(tr,ti) + abs(tr)))
       if (tr .ge. 0.000) yr = s
       if (ti .lt. 0.000) s = -s
       if (tr .le. 0.000) yi = s
-      if (tr .lt. 0.000) yr = 0.5d0*(ti/yi)
-      if (tr .gt. 0.000) yi = 0.5d0*(ti/yr)
+      if (tr .lt. 0.000) yr = 0.50*(ti/yi)
+      if (tr .gt. 0.000) yi = 0.50*(ti/yr)
       return
       end subroutine csroot
 !
@@ -3287,7 +3301,7 @@
          r = (s/u)**2 * r
       go to 10
    20 pythag = p
-      return pythag
+!
       end function pythag
 !
       REAL FUNCTION DLAPY3GF( X, Y )
@@ -3321,8 +3335,7 @@
 !  =====================================================================
 !
 !     .. Parameters ..
-      REAL ::   ZERO
-      REAL,PARAMETER  :: ZERO = 0.0D0
+      REAL,PARAMETER  :: ZERO = 0.00
 !     ..
 !     .. Local Scalars ..
       REAL ::  W, XABS, YABS, ZABS
@@ -3343,7 +3356,6 @@
          DLAPY3GF = W*SQRT( ( XABS / W )**2+( YABS / W )**2+  &
                   ( ZABS / W )**2 )
       END IF
-      RETURN  DLAPY3GF
 !
 !     End of DLAPY3GF
 !
