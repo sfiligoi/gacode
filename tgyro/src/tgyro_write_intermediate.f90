@@ -1,3 +1,13 @@
+!-----------------------------------------------------------
+! tgyro_write_intermediate.f90
+!
+! PURPOSE:
+!  Write matrix of residuals.
+!
+! NOTES:
+!  Files are opened and closed at each iteration.
+!----------------------------------------------------------
+
 subroutine tgyro_write_intermediate(index,res_in)
 
   use mpi
