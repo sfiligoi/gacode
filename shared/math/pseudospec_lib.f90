@@ -109,7 +109,7 @@ subroutine pseudo_maxwell(n,emax,e,w,d1,d2)
   implicit none
 
   integer, intent(in) :: n
-  real, intent(in) :: emax
+  integer, intent(in) :: emax
 
   real, intent(out) :: e(n)
   real, intent(out) :: w(n)
@@ -163,9 +163,23 @@ subroutine pseudo_maxwell(n,emax,e,w,d1,d2)
   allocate(pn(0:n-1))
   allocate(pnp(0:n-1))
 
+  !----------------------------------------------------------------------------
   ! Get high-precision Maxima-generated moments
-  call pseudo_load(nint(emax),2*n,mu,nu)
+  !
+  !         1                2
+  !         /            -a x
+  !  nu_j = | dx p_j(x) e    
+  !         /
+  !         0
+  !
+  !  p_j(x) are monic, shifted Legendre polynomials
+  !
+  call pseudo_load(emax,2*n,mu,nu)
+  !----------------------------------------------------------------------------
 
+  !----------------------------------------------------------------------------
+  ! Follow approach in Press, Teukolsky, CPC 4, 423 (1990).
+  !
   alpha(0) = 0.5
   beta(0)  = 0.0
   do j=1,2*n-2
@@ -176,6 +190,7 @@ subroutine pseudo_maxwell(n,emax,e,w,d1,d2)
   call pseudo_orthog(n,nu,alpha,beta,am,bm)
 
   ! Compute eigenvalues of (symmetric, tridiagonal) Jacobi matrix
+
   bm0 = bm
   am0 = am
   allocate(work(2*n-2))
@@ -194,8 +209,11 @@ subroutine pseudo_maxwell(n,emax,e,w,d1,d2)
   ! Energy nodes and weights
   e(:) = emax*x0(:)**2
   w(:) = w0(:)*emax**1.5*4/sqrt(pi)*x0(:)**2
+  !----------------------------------------------------------------------------
 
+  !----------------------------------------------------------------------------
   ! Pseudo-spectral derivative weights
+
   allocate(c(n,n))
 
   do j=1,n
@@ -215,7 +233,9 @@ subroutine pseudo_maxwell(n,emax,e,w,d1,d2)
   ! d -> (Cp C^(-1))
   call DGEMM('N','N',n,n,n,1.0,cpp,n,c,n,0.0,d2,n)
   ! d2 -> (Cpp C^(-1))
+  !----------------------------------------------------------------------------
 
+  !----------------------------------------------------------------------------
   ! Extensive diagnostics
 
   if (print_flag == 1) then
@@ -275,6 +295,7 @@ subroutine pseudo_maxwell(n,emax,e,w,d1,d2)
         print '(i2,2x,10(1pe14.7,1x))',i,sum(d2(i,:)*exp(-x0(:)))/(exp(-x0(i)))-1.0
      enddo
   endif
+  !----------------------------------------------------------------------------
 
 end subroutine pseudo_maxwell
 
