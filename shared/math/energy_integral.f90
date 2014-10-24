@@ -67,7 +67,6 @@ subroutine energy_integral(n_energy,energy_max,energy,w_energy)
   real, intent(inout) :: w_energy(n_energy)
   !
   integer :: i
-  integer :: is
   !
   real :: s_max
   real :: s1

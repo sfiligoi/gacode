@@ -13,7 +13,7 @@
 !      -1
 !---------------------------------------------------
 
-subroutine pseudospec_legendre(n,x,w,d1,dl)
+subroutine pseudo_legendre(n,x,w,d1,dl)
 
   implicit none
 
@@ -32,17 +32,9 @@ subroutine pseudospec_legendre(n,x,w,d1,dl)
   real, dimension(:,:), allocatable :: cp
   real, dimension(:,:), allocatable :: cl
 
+  integer, parameter :: print_flag=0
+
   call gauss_legendre(-1.0,1.0,x,w,n)
-
-  print *
-  print *,'Integration weights (x,w,e,w_e)'
-  print *
-
-  do i=1,n
-     print '(i2,2x,10(1pe14.7,1x))',i,x(i),w(i)
-  enddo
-  print *
-  print *,'Sum(w) = ',sum(w)
 
   lwork = 2*n
   allocate(ipiv(n))
@@ -54,7 +46,7 @@ subroutine pseudospec_legendre(n,x,w,d1,dl)
 
   do i=1,n
      do j=1,n
-        call legendre(j-1,x(i),c(i,j),cp(i,j))
+        call pseudo_rec_legendre(j-1,x(i),c(i,j),cp(i,j))
         cl(i,j) = -(j-1)*j*c(i,j)
      enddo
   enddo
@@ -67,21 +59,31 @@ subroutine pseudospec_legendre(n,x,w,d1,dl)
   call DGEMM('N','N',n,n,n,1.0,cl,n,c,n,0.0,dl,n)
   ! dl -> (L C^(-1))
 
-  print *
-  print *,'Pseudospectral 1st derivative error on exp(-x)' 
-  print *
-  do i=1,n
-     print '(i2,2x,10(1pe14.7,1x))',i,sum(d1(i,:)*exp(-x(:)))/(-exp(-x(i)))-1
-  enddo
-  print *
-  print *,'Pseudospectral L error on exp(-x)' 
-  print *
-  do i=1,n
-     print '(i2,2x,10(1pe14.7,1x))',i,sum(dl(i,:)*exp(-x(:)))/(exp(-x(i))*(1.0+2.0*x(i)-x(i)**2))-1
-  enddo
+  if (print_flag == 1) then
+     print *
+     print *,'Integration weights (x,w,e,w_e)'
+     print *
+     do i=1,n
+        print '(i2,2x,10(1pe14.7,1x))',i,x(i),w(i)
+     enddo
+     print *
+     print *,'Sum(w) = ',sum(w)
+     print *
+     print *,'Pseudospectral 1st derivative error on exp(-x)' 
+     print *
+     do i=1,n
+        print '(i2,2x,10(1pe14.7,1x))',i,sum(d1(i,:)*exp(-x(:)))/(-exp(-x(i)))-1
+     enddo
+     print *
+     print *,'Pseudospectral L-derivative error on exp(-x)' 
+     print *
+     do i=1,n
+        print '(i2,2x,10(1pe14.7,1x))',i,sum(dl(i,:)*exp(-x(:)))/(exp(-x(i))*(1.0+2.0*x(i)-x(i)**2))-1
+     enddo
 
-end subroutine pseudospec_legendre
+  endif
 
+end subroutine pseudo_legendre
 
 !---------------------------------------------------
 ! Generate Maxwell pseudospectral data on e=(0,emax) 
@@ -100,7 +102,9 @@ end subroutine pseudospec_legendre
 !                0
 !----------------------------------------------------
 
-subroutine pseudospec_maxwell(n,emax,e,w,d1,d2)
+subroutine pseudo_maxwell(n,emax,e,w,d1,d2)
+
+  use math_constants
 
   implicit none
 
@@ -135,19 +139,16 @@ subroutine pseudospec_maxwell(n,emax,e,w,d1,d2)
   real, dimension(:,:), allocatable :: cpp
 
   real, external :: pythag
-  real :: pi,s,xp,dum
+  real :: xp,dum
 
   integer :: n_plot=256
 
-  pi = 3.14159265358979323846264338
+  integer, parameter :: print_flag=0
 
   allocate(x0(n))
   allocate(w0(n))
 
-  lwork = 2*n
   allocate(ipiv(n))
-  allocate(work(lwork))
-  allocate(c(n,n))
   allocate(cp(n,n))
   allocate(cpp(n,n))
 
@@ -162,10 +163,7 @@ subroutine pseudospec_maxwell(n,emax,e,w,d1,d2)
   allocate(pn(0:n-1))
   allocate(pnp(0:n-1))
 
-  print *,'Pseudospectral Node-Weight-Derivative Generator'
-  print *
-  print '(t2,a,f3.1)','emax = ',emax
-
+  ! Get high-precision Maxima-generated moments
   call pseudo_load(nint(emax),2*n,mu,nu)
 
   alpha(0) = 0.5
@@ -175,98 +173,112 @@ subroutine pseudospec_maxwell(n,emax,e,w,d1,d2)
      beta(j) = 1.0/(4.0*(4.0-1.0/j**2))
   enddo
 
-  print *
-  print *,'Modified moments from Maxima (nu)'
-  print *
+  call pseudo_orthog(n,nu,alpha,beta,am,bm)
 
-  do j=0,2*n-1
-     print '(i2,2x,10(1pe23.16,1x))',j,nu(j)
-  enddo
-
-  print *
-  print *,'Recursion Coefficients (a,b)'
-  print *
-
-  call orthog(n,nu,alpha,beta,am,bm)
-
-  do j=1,n
-     print '(i2,2x,10(1pe23.16,1x))',j-1,am(j),bm(j)
-  enddo
-
+  ! Compute eigenvalues of (symmetric, tridiagonal) Jacobi matrix
   bm0 = bm
   am0 = am
-  call gaucof(n,am0,bm0,nu(0),x0,w0)
+  allocate(work(2*n-2))
+  allocate(c(n,n))
+  call DSTEQR('I',n,am0,sqrt(bm0(2:n)),c,n,work,info)  
 
-  print *
-  print *,'Integration weights (x,w,e,w_e)'
-  print *
+  ! Assign nodes and weights from solution
+  do i=1,n  
+     x0(i) = am0(i)  
+     w0(i) = nu(0)*c(1,i)**2  
+  enddo
+
+  deallocate(c)
+  deallocate(work)
 
   ! Energy nodes and weights
-  e = emax*x0(i)**2
-  w = w0*emax**1.5*4/sqrt(pi)*x0**2
+  e(:) = emax*x0(:)**2
+  w(:) = w0(:)*emax**1.5*4/sqrt(pi)*x0(:)**2
 
-  do i=1,n
-     print '(i2,2x,10(1pe14.7,1x))',i,x0(i),w0(i),e(i),w(i)
-  enddo
-  print *
-  print *,'Sum(w) = ',sum(w)
-
-  print *
-  print *,'Discrete sum error check (integrals of monomials)'
-  print *
-  do j=0,2*n-2
-     print '(i2,2x,1pe14.7)',j,sum(w0*x0**j)/mu(j)-1.0
-  enddo
-
-  open(unit=1,file='out',status='replace')
-  open(unit=2,file='outp',status='replace')
-  do i=1,n_plot
-     xp = (i-1.0)/(n_plot-1.0)
-     !s = nu(0)     
-     do j=0,n-1
-        call newpoly(j,xp,pn(j),pnp(j),dum,am,bm,n)
-        !pn(j) = pn(j)/sqrt(s)/(j+1)
-        !if (j < n-1) s = bm(j+2)*s
-     enddo
-     write(1,"(16(1pe14.7,1x))") xp,pn(:)
-     write(2,"(16(1pe14.7,1x))") xp,pnp(:)
-  enddo
-  close(1)
-  close(2)
-
-  ! Derivative weights
+  ! Pseudo-spectral derivative weights
+  allocate(c(n,n))
 
   do j=1,n
      do i=1,n
-        call newpoly(j-1,x0(i),c(i,j),cp(i,j),cpp(i,j),am,bm,n)
+        call pseudo_rec_maxwell(j-1,x0(i),c(i,j),cp(i,j),cpp(i,j),am,bm,n)
      enddo
   enddo
 
+  lwork = 2*n
+  allocate(work(lwork))
   call DGETRF(n,n,c,n,ipiv,info)
   call DGETRI(n,c,n,ipiv,work,lwork,info)
+  deallocate(work)
+
   ! c -> C^(-1)
   call DGEMM('N','N',n,n,n,1.0,cp,n,c,n,0.0,d1,n)
   ! d -> (Cp C^(-1))
   call DGEMM('N','N',n,n,n,1.0,cpp,n,c,n,0.0,d2,n)
   ! d2 -> (Cpp C^(-1))
 
-  ! First derivative
-  print *
-  print *,'Pseudospectral 1st derivative error on exp(-x)' 
-  print *
-  do i=1,n
-     print '(i2,2x,10(1pe14.7,1x))',i,sum(d1(i,:)*exp(-x0(:)))/(-exp(-x0(i)))-1
-  enddo
-  print *
-  print *,'Pseudospectral 2nd derivative error on exp(-x)' 
-  print *
-  do i=1,n
-     print '(i2,2x,10(1pe14.7,1x))',i,sum(d2(i,:)*exp(-x0(:)))/(exp(-x0(i)))-1
-  enddo
+  ! Extensive diagnostics
 
-end subroutine pseudospec_maxwell
+  if (print_flag == 1) then
+     print *,'Pseudospectral Node-Weight-Derivative Generator'
+     print *
+     print '(t2,a,f3.1)','emax = ',emax
+     print *
+     print *
+     print *,'Modified moments from Maxima (nu)'
+     print *
+     do j=0,2*n-1
+        print '(i2,2x,10(1pe23.16,1x))',j,nu(j)
+     enddo
+     print *
+     print *,'Recursion Coefficients (a,b)'
+     print *
+     do j=1,n
+        print '(i2,2x,10(1pe23.16,1x))',j-1,am(j),bm(j)
+     enddo
+     print *
+     print *,'Integration weights (x,w,e,w_e)'
+     print *
+     do i=1,n
+        print '(i2,2x,10(1pe14.7,1x))',i,x0(i),w0(i),e(i),w(i)
+     enddo
+     print *
+     print *,'Sum(w) = ',sum(w)
 
-subroutine orthog(n,nu,alpha,beta,a,b)  
+     print *
+     print *,'Discrete sum error check (integrals of monomials)'
+     print *
+     do j=0,2*n-2
+        print '(i2,2x,1pe14.7)',j,sum(w0*x0**j)/mu(j)-1.0
+     enddo
+
+     open(unit=1,file='out',status='replace')
+     open(unit=2,file='outp',status='replace')
+     do i=1,n_plot
+        xp = (i-1.0)/(n_plot-1.0)   
+        do j=0,n-1
+           call pseudo_rec_maxwell(j,xp,pn(j),pnp(j),dum,am,bm,n)
+        enddo
+        write(1,"(16(1pe14.7,1x))") xp,pn(:)
+        write(2,"(16(1pe14.7,1x))") xp,pnp(:)
+     enddo
+     close(1)
+     close(2)
+     print *,'Pseudospectral 1st derivative error on exp(-x)' 
+     print *
+     do i=1,n
+        print '(i2,2x,10(1pe14.7,1x))',i,sum(d1(i,:)*exp(-x0(:)))/(-exp(-x0(i)))-1.0
+     enddo
+     print *
+     print *,'Pseudospectral 2nd derivative error on exp(-x)' 
+     print *
+     do i=1,n
+        print '(i2,2x,10(1pe14.7,1x))',i,sum(d2(i,:)*exp(-x0(:)))/(exp(-x0(i)))-1.0
+     enddo
+  endif
+
+end subroutine pseudo_maxwell
+
+subroutine pseudo_orthog(n,nu,alpha,beta,a,b)  
 
   implicit none
 
@@ -297,172 +309,14 @@ subroutine orthog(n,nu,alpha,beta,a,b)
 
   deallocate(sig)
 
-end subroutine orthog
-
-subroutine gaucof(n,a,b,mu0,x,w)  
-
-  implicit none
-
-  integer, intent(in) :: n
-  real, intent(in) :: mu0
-  real, intent(inout) :: a(n),b(n),w(n),x(n)  
-  real, dimension(:,:), allocatable :: z
-
-  integer :: i,j  
-
-  allocate(z(n,n))
-
-  do i=1,n  
-     if (i /= 1) b(i) = sqrt(b(i))  
-     do j=1,n  
-        if (i == j)then  
-           z(i,j) = 1.0  
-        else  
-           z(i,j) = 0.0  
-        endif
-     enddo
-  enddo
-
-  call tqli(a,b,n,z)  
-  call eigsrt(a,z,n)  
-
-  do i=1,n  
-     x(i) = a(i)  
-     w(i) = mu0*z(1,i)**2  
-  enddo
-
-  deallocate(z)
-
-end subroutine gaucof
-
-real function pythag(a,b)  
-
-  implicit none
-
-  real a,b  
-  real absa,absb  
-  absa=abs(a)  
-  absb=abs(b)  
-  if(absa.gt.absb)then  
-     pythag=absa*sqrt(1.0+(absb/absa)**2)  
-  else  
-     if(absb.eq.0.)then  
-        pythag=0.  
-     else  
-        pythag=absb*sqrt(1.0+(absa/absb)**2)  
-     endif
-  endif
-
-end function pythag
-
-subroutine eigsrt(d,v,n)  
-
-  implicit none
-
-  integer, intent(in) :: n
-  real, intent(inout) :: d(n)
-  real, intent(inout) :: v(n,n)  
-  integer :: i,j,k  
-  real :: p
-
-  do i=1,n-1  
-     k = i  
-     p = d(i)  
-     do j=i+1,n  
-        if (d(j) <= p)then  
-!        if (d(j) >= p)then  
-           k = j  
-           p = d(j)  
-        endif
-     enddo
-     if (k /= i) then  
-        d(k) = d(i)  
-        d(i) = p  
-        do j=1,n  
-           p      = v(j,i)  
-           v(j,i) = v(j,k)  
-           v(j,k) = p  
-        enddo
-     endif
-  enddo
-
-end subroutine eigsrt
-
-subroutine tqli(d,e,n,z) 
-
-  implicit none
-
-  integer, intent(in) :: n  
-  real, intent(inout) :: d(n),e(n)
-  real, intent(inout) :: z(n,n) 
-   
-  integer :: i,iter,k,l,m  
-  real :: b,c,dd,f,g,p,r,s,pythag
-
-  do i=2,n  
-     e(i-1)=e(i)  
-  enddo
-  e(n)=0.0  
-  do l=1,n  
-     iter=0  
-1    do m=l,n-1  
-        dd=abs(d(m))+abs(d(m+1))  
-        if (abs(e(m))+dd.eq.dd) goto 2  
-     enddo
-     m=n  
-
-2    if (m /= l) then  
-        if (iter == 30) then
-           print *,'too many iterations in tqli'
-           stop
-        endif
-        iter=iter+1  
-        g=(d(l+1)-d(l))/(2.0*e(l))  
-        r=pythag(g,1.)  
-        g=d(m)-d(l)+e(l)/(g+sign(r,g))  
-        s=1.  
-        c=1.  
-        p=0.  
-        do i=m-1,l,-1  
-           f=s*e(i)  
-           b=c*e(i)  
-           r=pythag(f,g)  
-           e(i+1)=r  
-           if(r.eq.0.)then  
-              d(i+1)=d(i+1)-p  
-              e(m)=0.  
-              goto 1  
-           endif
-           s=f/r  
-           c=g/r  
-           g=d(i+1)-p  
-           r=(d(i)-g)*s+2.0*c*b  
-           p=s*r  
-           d(i+1)=g+p  
-           g=c*r-b  
-           !     Omit lines from here ...  
-           do k=1,n  
-              f=z(k,i+1)  
-              z(k,i+1)=s*z(k,i)+c*f  
-              z(k,i)=c*z(k,i)-s*f  
-           enddo
-           !     ... to here when finding only eigenvalues.  
-        enddo
-        d(l) = d(l)-p  
-        e(l) = g  
-        e(m) = 0.0  
-        goto 1  
-     endif
-  enddo
-
-end subroutine tqli
+end subroutine pseudo_orthog
 
 !-------------------------------------------------------
 ! p -> P(n,x)
 ! q -> P(n,x)'
 !-------------------------------------------------------
 
-subroutine legendre(n,x,p,q)
+subroutine pseudo_rec_legendre(n,x,p,q)
 
   implicit none
 
@@ -501,7 +355,7 @@ subroutine legendre(n,x,p,q)
      enddo
   endif
 
-end subroutine legendre
+end subroutine pseudo_rec_legendre
 
 
 !-------------------------------------------------------
@@ -509,7 +363,7 @@ end subroutine legendre
 ! q -> Poly(n,x)'
 ! r -> Poly(n,x)''
 !-------------------------------------------------------
-subroutine newpoly(n,x,p,q,r,am,bm,nm)
+subroutine pseudo_rec_maxwell(n,x,p,q,r,am,bm,nm)
 
   implicit none
 
@@ -555,7 +409,7 @@ subroutine newpoly(n,x,p,q,r,am,bm,nm)
      enddo
   endif
 
-end subroutine newpoly
+end subroutine pseudo_rec_maxwell
 
 subroutine pseudo_load(m,n,mu0,nu0)
 
