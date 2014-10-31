@@ -250,8 +250,6 @@ subroutine prgen_write
   call EXPRO_compute_derived
   call EXPRO_write_derived
   print '(a)','INFO: (prgen) Wrote input.profiles.extra.'
-
-  call EXPRO_alloc('./',0)
   !-----------------------------------------------------------------------------------
 
 10 format(5(1pe14.7,2x))

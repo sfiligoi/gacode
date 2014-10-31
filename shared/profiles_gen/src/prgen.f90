@@ -60,7 +60,10 @@ program prgen
   !
   ! Note that nx will be the experimental vector length in ALL cases:
   !
-  if (gmerge_flag == 1) then
+  if (trim(raw_data_type) == 'GACODE') then
+
+     ! Note (we may or may not have gmerge_flag == 1
+     print '(a)','INFO: (prgen) Assuming input.profiles (GACODE) format.'
 
      call prgen_read_inputprofiles
 
@@ -130,6 +133,13 @@ program prgen
 
      call prgen_read_iterdb 
 
+  else
+
+     ! No case matched
+
+     print '(a)','ERROR: (prgen) Unmatched options.'
+     stop
+
   endif
   !------------------------------------------------------------------
 
@@ -171,11 +181,20 @@ program prgen
   case (6)
      call prgen_map_ufile
   case (7)
-     call prgen_map_inputprofiles
+     if (gmerge_flag == 1) then
+        call prgen_map_inputprofiles
+     endif
 
   end select
 
-  call prgen_write
+  ! Handle special case of generating input.profiles.extra
+  if (format_type == 7 .and. gmerge_flag == 0) then
+     call EXPRO_write_derived
+     print '(a)','INFO: (prgen) Wrote input.profiles.extra.'
+  else
+     call prgen_write
+  endif
+  call EXPRO_alloc('./',0)
 
   ! Successful completion
   open(unit=1,file='success',status='replace')
