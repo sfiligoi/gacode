@@ -25,7 +25,7 @@ subroutine cgyro_do
 
   implicit none
 
-  integer :: ix, ir, it, jr, p, is, ie
+  integer :: ix, ir, it, jr, is, ie
   character(len=80)  :: runfile_phi   = 'out.cgyro.phi'
   character(len=80)  :: runfile_phiB  = 'out.cgyro.phiB'
   character(len=80)  :: runfile_hx    = 'out.cgyro.hx'
@@ -36,16 +36,17 @@ subroutine cgyro_do
   integer :: myio = 20
   integer :: print_step=10
   complex, dimension(:,:), allocatable :: f_balloon
-  
+
   integer :: signal
   logical :: lfe
-
-  complex :: sum1, sum2, sum3
 
   if (silent_flag == 0 .and. i_proc == 0) then
      open(unit=io_cgyroout,file=trim(path)//runfile,status='replace')
      close(io_cgyroout)
   endif
+
+  ! MPI setup
+  call cgyro_mpi_grid
 
   call cgyro_make_profiles
   if(error_status > 0) goto 100
@@ -86,9 +87,11 @@ subroutine cgyro_do
   call pseudo_legendre(n_xi,xi,w_xi,xi_deriv_mat,xi_lor_mat)
 
   ! allocate distribution function and field arrays
-  allocate(h_x(n_species,n_radial,n_theta,n_energy,n_xi))
-  allocate(cap_h_x(n_species,n_radial,n_theta,n_energy,n_xi))
+  allocate(h_x(nc,nv_loc))
+  allocate(cap_h_c(nc,nv_loc))
+  allocate(cap_h_v(nv,nc_loc))
   allocate(phi(n_radial,n_theta))
+  allocate(phi_loc(n_radial,n_theta))
   allocate(phi_old(n_radial,n_theta))
   allocate(f_balloon(n_radial,n_theta))
 
@@ -150,7 +153,7 @@ subroutine cgyro_do
 
         ! Compute frequency and print
         call FREQ_do
-        
+
         ! Print phi
         if(silent_flag == 0 .and. i_proc == 0) then
            open(unit=myio,file=trim(path)//runfile_time,status='old',&
@@ -204,29 +207,22 @@ subroutine cgyro_do
 
   enddo
 
-  if(silent_flag == 0 .and. i_proc == 0) then
+  if (silent_flag == 0 .and. i_proc == 0) then
      open(unit=myio,file=trim(path)//runfile_hx,status='old',&
           position='append')
 
-     do is=1,n_species
-        do ie=1,n_energy
-           do ix=1,n_xi
-
-              ! Construct ballooning-space form of h_x
-              do ir=1,n_radial
-                 do it=1,n_theta
-                    f_balloon(ir,it) = h_x(is,ir,it,ie,ix) &
-                         *exp(-2*pi*i_c*indx_r(ir)*k_theta*rmin)
-                 enddo
-              enddo
-
-              write(myio,'(1pe13.5e3)') transpose(f_balloon(:,:))
-
-           enddo
+     iv_loc = 0
+     do iv=1+i_proc,nv,n_proc_1
+        iv_loc = iv_loc+1
+        do ic=1,nc
+           f_balloon(ir_c(ic),it_c(ic)) = h_x(ic,iv_loc) &
+                *exp(-2*pi*i_c*indx_r(ir_c(ic))*k_theta*rmin)
         enddo
+        write(myio,'(1pe13.5e3)') transpose(f_balloon(:,:))
      enddo
 
      close(myio)
+
   endif
 
   if(restart_write == 1) then
@@ -261,8 +257,10 @@ subroutine cgyro_do
   if(allocated(xi_lor_mat))    deallocate(xi_lor_mat)
   if(allocated(xi_deriv_mat))  deallocate(xi_deriv_mat)
   if(allocated(h_x))           deallocate(h_x)
-  if(allocated(cap_h_x))       deallocate(cap_h_x)
+  if(allocated(cap_h_c))       deallocate(cap_h_c)
+  if(allocated(cap_h_v))       deallocate(cap_h_v)
   if(allocated(phi))           deallocate(phi)
+  if(allocated(phi_loc))       deallocate(phi_loc)
   if(allocated(phi_old))       deallocate(phi_old)
   if(allocated(f_balloon))     deallocate(f_balloon)
 

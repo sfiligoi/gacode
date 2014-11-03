@@ -14,11 +14,7 @@ subroutine cgyro_mpi_grid
 
   implicit none
 
-  integer :: lc,lv,iv,ic,nc,nv
   integer :: ie,ix,is,ir,it
-  complex, dimension(:,:,:), allocatable :: h
-  complex, dimension(:,:,:), allocatable :: hc
-  real :: error
 
   integer :: n_n
   integer :: splitkey
@@ -35,6 +31,8 @@ subroutine cgyro_mpi_grid
 
   allocate(ir_c(nc))
   allocate(it_c(nc))
+
+  allocate(ic_c(n_radial,n_theta))
 
   !------------------------------------------------
   ! Check for grid validity
@@ -90,25 +88,26 @@ subroutine cgyro_mpi_grid
   !-----------------------------------------------------------
 
   ! Velocity pointers
-  lv = 0
+  iv = 0
   do ie=1,n_energy
      do ix=1,n_xi
         do is=1,n_species
-           lv = lv+1
-           ie_v(lv) = ie
-           ix_v(lv) = ix
-           is_v(lv) = is
+           iv = iv+1
+           ie_v(iv) = ie
+           ix_v(iv) = ix
+           is_v(iv) = is
         enddo
      enddo
   enddo
 
   ! Configuration pointers
-  lc = 0
+  ic = 0
   do ir=1,n_radial
      do it=1,n_theta
-        lc = lc+1
-        ir_c(lc) = ir
-        it_c(lc) = it
+        ic = ic+1
+        ir_c(ic) = ir
+        it_c(ic) = it
+        ic_c(ir,it) = ic
      enddo
   enddo
 
@@ -116,32 +115,6 @@ subroutine cgyro_mpi_grid
   !
   ! h(1,ic,iv_loc) -> hc(1,iv,ic_loc)
   nv_loc = parallel_dim(nv,n_proc_1)
-  allocate(h(1,nc,nv_loc))
   nc_loc = parallel_dim(nc,n_proc_1)
-  allocate(hc(1,nv,nc_loc))
-
-  ! Distributed-in-v loop
-  !
-  !iv_loc = 0
-  !do iv=1+i_proc,nv,n_proc_1
-  !   iv_loc = iv_loc+1
-  !   do ic=1,nc
-  !      h(1,ic,iv_loc) = &
-  !   enddo
-  !enddo
-
-  !call rTRANSP_INIT(1,nv,nc,1,NEW_COMM_1)
-  !call rTRANSP_DO(h,hc)
-  !call rTRANSP_CLEANUP
-
-  ! Distributed-in-c loop
-  !
-  !ic_loc = 0
-  !do ic=1+i_proc,nc,n_proc_1
-  !   ic_loc = ic_loc+1
-  !   do iv=1,nv
-  !       hc(1,iv,ic_loc) = &
-  !   enddo
-  !enddo
 
 end subroutine cgyro_mpi_grid

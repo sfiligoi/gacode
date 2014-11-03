@@ -18,14 +18,17 @@ module cgyro_globals
   !
   ! Pointers
   !
+  integer :: nv,iv
   integer :: nv_loc,iv_loc
+  integer :: nc,ic
   integer :: nc_loc,ic_loc
   integer, dimension(:), allocatable :: ie_v
   integer, dimension(:), allocatable :: ix_v
   integer, dimension(:), allocatable :: is_v
   integer, dimension(:), allocatable :: ir_c
   integer, dimension(:), allocatable :: it_c
-
+  integer, dimension(:,:), allocatable :: ic_c
+  !
   !---------------------------------------------------------------
 
   real, parameter    :: pi   = 3.1415926535897932
@@ -143,9 +146,11 @@ module cgyro_globals
   real, dimension(:), allocatable :: theta
 
   ! Numerical/work arrays and dimensions
-  complex, dimension(:,:,:,:,:), allocatable :: h_x
-  complex, dimension(:,:,:,:,:), allocatable :: cap_h_x
+  complex, dimension(:,:), allocatable :: h_x
+  complex, dimension(:,:), allocatable :: cap_h_c
+  complex, dimension(:,:), allocatable :: cap_h_v
   complex, dimension(:,:) , allocatable :: phi
+  complex, dimension(:,:) , allocatable :: phi_loc
   complex, dimension(:,:) , allocatable :: phi_old
 
   integer, dimension(:), allocatable :: indx_xi, indx_r

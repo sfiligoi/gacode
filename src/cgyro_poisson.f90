@@ -21,10 +21,10 @@ contains
     integer :: info
     integer, dimension(:), allocatable :: i_piv
     real, dimension(:), allocatable :: work
-    
-    if(flag == 1) then
-       if(initialized) return
-       
+
+    if (flag == 1) then
+       if (initialized) return
+
        sum_den_h = (0.0,0.0)
        do is=1,n_species
           do ie=1,n_energy
@@ -38,7 +38,7 @@ contains
        if(adiabatic_ele_model == 1) then
           sum_den_h = sum_den_h + dens_ele / temp_ele
        endif
-       
+
        allocate(sum_den_x(n_radial,n_theta))
        do ir=1,n_radial
           do it=1,n_theta
@@ -60,7 +60,7 @@ contains
        enddo
 
        if(toroidal_model == 2 .and. adiabatic_ele_model == 1) then
-          
+
           allocate(hzf(n_radial,n_theta,n_theta))
           hzf(:,:,:) = (0.0,0.0)      
           do ir=1,n_radial
@@ -81,7 +81,7 @@ contains
           enddo
           deallocate(i_piv)
           deallocate(work)
-          
+
           allocate(xzf(n_radial,n_theta,n_theta))
           xzf(:,:,:) = (0.0,0.0)      
           do ir=1,n_radial
@@ -102,7 +102,7 @@ contains
           enddo
           deallocate(i_piv)
           deallocate(work)
-          
+
           allocate(pvec_in(n_theta))
           allocate(pvec_outr(n_theta))
           allocate(pvec_outi(n_theta))
@@ -130,28 +130,50 @@ contains
   end subroutine POISSON_alloc
 
   subroutine POISSONh_do
+
+    use mpi
+
     use cgyro_globals
     use cgyro_gyro
     use cgyro_equilibrium
+
     implicit none
+
     integer :: is, ie, ix, ir, it
 
-    do ir=1,n_radial
-       do it=1,n_theta
-          phi(ir,it) = (0.0,0.0)
-          do is=1,n_species
-             do ie=1,n_energy
-                do ix=1,n_xi
-                   phi(ir,it) = phi(ir,it) &
-                        + gyrox_J0(is,ir,it,ie,ix) &
-                        * z(is)*dens(is) * w_e(ie) &
-                        * cap_h_x(is,ir,it,ie,ix) * 0.5 * w_xi(ix)
-                enddo
-             enddo
-          enddo
-       enddo
+    phi_loc(:,:) = (0.0,0.0)
 
-       if(toroidal_model == 2 .and. adiabatic_ele_model == 1) then
+    ic_loc = 0
+    do ic=1+i_proc_1,nc,n_proc_1
+       ic_loc = ic_loc+1
+
+       it = it_c(ic)
+       ir = ir_c(ic)
+
+       do iv=1,nv
+
+          is = is_v(iv)
+          ix = ix_v(iv)
+          ie = ie_v(iv)
+
+          phi_loc(ir,it) = phi_loc(ir,it) &
+               + gyrox_J0(is,ir,it,ie,ix) &
+               * z(is)*dens(is) * w_e(ie) &
+               * cap_h_v(iv,ic_loc) * 0.5 * w_xi(ix)
+       enddo
+    enddo
+
+    call MPI_ALLREDUCE(phi_loc,&
+         phi,&
+         size(phi),&
+         MPI_DOUBLE_COMPLEX,&
+         MPI_SUM,&
+         NEW_COMM_1,&
+         i_err)
+
+    if (toroidal_model == 2 .and. adiabatic_ele_model == 1) then
+
+       do ir=1,n_radial
           pvec_in(:) = real(phi(ir,:))
           call DGEMV('N',n_theta,n_theta,num1,hzf(ir,:,:),&
                n_theta,pvec_in(:),1,num0,pvec_outr(:),1)
@@ -159,78 +181,109 @@ contains
           call DGEMV('N',n_theta,n_theta,num1,hzf(ir,:,:),&
                n_theta,pvec_in(:),1,num0,pvec_outi(:),1)
           phi(ir,:) = pvec_outr(:) + i_c * pvec_outi(:)
-       else
+       enddo
+
+    else
+
+       do ir=1,n_radial
           do it=1,n_theta
              phi(ir,it) = phi(ir,it) / (-k_perp(it,ir)**2 * lambda_debye**2 &
                   * dens_ele / temp_ele + sum_den_h)
           enddo
-       endif
-    enddo
+       enddo
 
-  end subroutine POISSONh_do
+    endif
+
+end subroutine POISSONh_do
   
-  subroutine POISSONx_do
+subroutine POISSONx_do
 
-    use timer_lib
+  use timer_lib
+  use mpi
 
-    use cgyro_globals
-    use cgyro_gyro
-    use cgyro_equilibrium
+  use cgyro_globals
+  use cgyro_gyro
+  use cgyro_equilibrium
 
-    implicit none
-    integer :: is, ie, ix, ir, it
+  implicit none
+  integer :: is, ie, ix, ir, it
 
-    call timer_lib_in('poissonx')
+  call timer_lib_in('poissonx')
 
-    do ir=1,n_radial
-       do it=1,n_theta
-          phi(ir,it) = (0.0,0.0)
-          do is=1,n_species
-             do ie=1,n_energy
-                do ix=1,n_xi
-                   phi(ir,it) = phi(ir,it) &
-                        + 0.5 * w_xi(ix) &
-                        * gyrox_J0(is,ir,it,ie,ix) &
-                        * z(is)*dens(is) * w_e(ie) &
-                        * h_x(is,ir,it,ie,ix)
-                enddo
-             enddo
-          enddo
-       enddo
+  phi_loc(:,:) = (0.0,0.0)
 
-       if (toroidal_model == 2 .and. adiabatic_ele_model == 1) then
-          pvec_in(:) = real(phi(ir,:))
-          call DGEMV('N',n_theta,n_theta,num1,xzf(ir,:,:),&
-               n_theta,pvec_in(:),1,num0,pvec_outr(:),1)
-          pvec_in(:) = imag(phi(ir,:))
-          call DGEMV('N',n_theta,n_theta,num1,xzf(ir,:,:),&
-               n_theta,pvec_in(:),1,num0,pvec_outi(:),1)
-          phi(ir,:) = pvec_outr(:) + i_c * pvec_outi(:)
-       else
-          do it=1,n_theta
-             phi(ir,it) = phi(ir,it) / (-k_perp(it,ir)**2 * lambda_debye**2 &
-                  * dens_ele / temp_ele + sum_den_x(ir,it))
-          enddo
-       endif
-    enddo
+  iv_loc = 0
+  do iv=1+i_proc_1,nv,n_proc_1
 
-    ! Compute H given h and phi(h).
-    do is=1,n_species
-       do ir=1,n_radial
-          do it=1,n_theta
-             do ie=1,n_energy
-                do ix=1,n_xi
-                   cap_h_x(is,ir,it,ie,ix) = h_x(is,ir,it,ie,ix) &
-                        + z(is)/temp(is) * gyrox_J0(is,ir,it,ie,ix) &
-                        * phi(ir,it)
-                enddo
-             enddo
-          enddo
-       enddo
-    enddo
+     iv_loc = iv_loc+1
 
-    call timer_lib_out('poissonx')
+     is = is_v(iv)
+     ix = ix_v(iv)
+     ie = ie_v(iv)
 
-  end subroutine POISSONx_do
+     do ic=1,nc
+
+        ir = ir_c(ic) 
+        it = it_c(ic)
+
+        phi_loc(ir,it) = phi_loc(ir,it) &
+             + 0.5 * w_xi(ix) &
+             * gyrox_J0(is,ir,it,ie,ix) &
+             * z(is)*dens(is) * w_e(ie) &
+             * h_x(ic,iv_loc)
+     enddo
+  enddo
+
+  call MPI_ALLREDUCE(phi_loc,&
+       phi,&
+       size(phi),&
+       MPI_DOUBLE_COMPLEX,&
+       MPI_SUM,&
+       NEW_COMM_1,&
+       i_err)
+
+  if (toroidal_model == 2 .and. adiabatic_ele_model == 1) then
+     do ir=1,n_radial
+        pvec_in(:) = real(phi(ir,:))
+        call DGEMV('N',n_theta,n_theta,num1,xzf(ir,:,:),&
+             n_theta,pvec_in(:),1,num0,pvec_outr(:),1)
+        pvec_in(:) = imag(phi(ir,:))
+        call DGEMV('N',n_theta,n_theta,num1,xzf(ir,:,:),&
+             n_theta,pvec_in(:),1,num0,pvec_outi(:),1)
+        phi(ir,:) = pvec_outr(:) + i_c * pvec_outi(:)
+     enddo
+  else
+     do ir=1,n_radial
+        do it=1,n_theta
+           phi(ir,it) = phi(ir,it) / (-k_perp(it,ir)**2 * lambda_debye**2 &
+                * dens_ele / temp_ele + sum_den_x(ir,it))
+        enddo
+     enddo
+  endif
+
+  ! Compute H given h and phi(h).
+  iv_loc = 0
+  do iv=1+i_proc_1,nv,n_proc_1
+
+     iv_loc = iv_loc+1
+
+     is = is_v(iv)
+     ix = ix_v(iv)
+     ie = ie_v(iv)
+
+     do ic=1,nc
+
+        ir = ir_c(ic) 
+        it = it_c(ic)
+
+        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc) &
+             + z(is)/temp(is) * gyrox_J0(is,ir,it,ie,ix) &
+             * phi(ir,it)
+     enddo
+  enddo
+
+  call timer_lib_out('poissonx')
+
+end subroutine POISSONx_do
 
 end module cgyro_poisson

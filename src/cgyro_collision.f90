@@ -5,7 +5,7 @@ module cgyro_collision
   public :: COLLISION_alloc, COLLISION_do
   logical, private :: initialized = .false.
 
-  real, dimension(:,:,:,:), allocatable, private :: cmat
+  real, dimension(:,:,:), allocatable, private :: cmat
   real, dimension(:,:), allocatable, private :: cvec,bvec
   integer, dimension(:,:,:), allocatable, private :: indx_coll 
   integer, private :: msize
@@ -13,18 +13,21 @@ module cgyro_collision
 contains
 
   subroutine COLLISION_alloc(flag)
+
     use cgyro_globals
     use cgyro_gyro
     use cgyro_equilibrium, only : omega_trap, k_perp
-    !use cgyro_gk
+
     implicit none
+
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
     real, dimension(:,:,:), allocatable :: nu_d, nu_s
     real, dimension(:,:), allocatable :: rs
     real, external :: derf
     real :: xa, xb, tauinv_ab
     real :: sum_nu, sum_nud, sum_den
-    integer :: is,ir,it,ix,ie,js,je,jx,kx,ks,p,pp
+    integer :: jv
+    integer :: is,ir,it,ix,ie,js,je,jx,kx,ks
     ! parameters for matrix solve
     integer :: info
     integer, dimension(:), allocatable :: i_piv
@@ -37,7 +40,7 @@ contains
 
     if(flag == 1) then
        if(initialized) return
-       
+
        if(collision_model == 0 .and. adiabatic_ele_model == 1) then
           call cgyro_error('ERROR: (GKCOLL) collision_model=0 requires kinetic electrons')
           return
@@ -57,15 +60,15 @@ contains
                 xb = xa * vth(is)**2 / vth(js)**2
                 tauinv_ab = nu(is) * (1.0*Z(js))**2 / (1.0*Z(is))**2 &
                      * dens(js)/dens(is)
-                
+
                 if(collision_model == 0) then
                    ! Only ee,ei Connor-like Lorentz
                    if(is == is_ele) then
                       if(is == js) then
                          ! e-e
                          nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
-                           * (exp(-xb*xb)/(xb*sqrt(pi)) &
-                           + (1.0-1.0/(2.0*xb*xb)) * DERF(xb))
+                              * (exp(-xb*xb)/(xb*sqrt(pi)) &
+                              + (1.0-1.0/(2.0*xb*xb)) * DERF(xb))
                       else
                          ! e-i
                          nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3)
@@ -80,20 +83,20 @@ contains
                       nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
                            * (exp(-xb*xb)/(xb*sqrt(pi)) &
                            + (1.0-1.0/(2.0*xb*xb)) * DERF(xb))
-                      
+
                    else if(mass(is) < mass(js)) then
                       ! case 2: ele-ion and ion-imp(heavy) collisions
                       nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3)
-                      
+
                    else
                       ! case 3: ion-ele and imp(heavy)-ion collisions
-                      
+
                       nu_d(ie,is,js) = tauinv_ab * 4.0/(3.0*sqrt(pi)) &
                            * sqrt(mass(js)/mass(is)) &
                            * (temp(is)/temp(js))**1.5
                    endif
                    nu_s(ie,is,js) = nu_d(ie,is,js)
-                   
+
                 else
                    ! Reduced Hirshman-Sigmar model
                    nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
@@ -104,7 +107,7 @@ contains
                         + (1.0/(2.0*xb*xb)) * DERF(xb)) &
                         * (2.0*temp(is)/temp(js))*(1.0+mass(js)/mass(is))
                 endif
-                
+
              enddo
           enddo
        enddo
@@ -119,22 +122,10 @@ contains
           enddo
        enddo
 
-       msize = n_species*n_energy*n_xi
-       allocate(cmat(n_radial,n_theta,msize,msize))
-       allocate(cvec(msize,2))
-       allocate(bvec(msize,2))
-       allocate(indx_coll(n_species,n_energy,n_xi))
+       allocate(cmat(nc_loc,nv,nv))
+       allocate(cvec(nv,2))
+       allocate(bvec(nv,2))
 
-       p = 0
-       do is=1,n_species
-          do ie=1,n_energy
-             do ix=1,n_xi
-                p = p+1
-                indx_coll(is,ie,ix) = p
-             enddo
-          enddo
-       enddo
-       
        ! set-up the collision matrix
        sum_den = 0.0
        do is=1,n_species
@@ -143,14 +134,15 @@ contains
        if(adiabatic_ele_model == 1) then
           sum_den = sum_den + dens_ele / temp_ele
        endif
-       
+
        ! matrix solve parameters
-       allocate(work(msize))
-       allocate(i_piv(msize))
-       allocate(amat(msize,msize))
-       allocate(bmat(msize,msize))
-       
-       if(collision_model == 3) then
+       allocate(work(nv))
+       allocate(i_piv(nv))
+       allocate(amat(nv,nv))
+       allocate(bmat(nv,nv))
+
+       if (collision_model == 3) then
+
           allocate(rs_lor(n_species,n_species))
           allocate(vecin_xi(n_xi))
           allocate(vecout_xi(n_xi))
@@ -176,170 +168,158 @@ contains
                vecout_xi,1,num0,vecin_xi,1)
        endif
 
-       do ir=1,n_radial
-          do it=1,n_theta
-             
-             cmat(ir,it,:,:) = (0.0,0.0)
-             amat(:,:)       = (0.0,0.0)
+       ic_loc = 0
+       do ic=1+i_proc_1,nc,n_proc_1
+          ic_loc = ic_loc+1
 
-             do is=1,n_species     
-                do ie=1,n_energy
-                   do ix=1,n_xi
-                      p  = indx_coll(is,ie,ix)
+          it = it_c(ic)
+          ir = ir_c(ic)
 
-                      sum_nud = 0.0
-                      do ks=1,n_species
-                         sum_nud = sum_nud + nu_d(ie,is,ks)
-                      enddo
+          cmat(ic_loc,:,:) = (0.0,0.0)
+          amat(:,:)       = (0.0,0.0)
 
-                      do js=1,n_species
-                         do je=1,n_energy
-                            do jx=1,n_xi
-                               pp = indx_coll(js,je,jx)
-                               
-                               ! constant part
-                               if(is==js .and. ie==je .and. ix==jx) then
-                                  cmat(ir,it,p,pp) =  cmat(ir,it,p,pp) + 1.0
-                                  amat(p,pp) = amat(p,pp) + 1.0
-                               endif
+          do iv=1,nv
 
-                               ! Trapping term
-                               if(trap_method == 1) then
-                                  if(is==js .and. ie==je) then
-                                     cmat(ir,it,p,pp) =  cmat(ir,it,p,pp) &
-                                          + (0.5*delta_t) * omega_trap(it,is) &
-                                          * sqrt(energy(ie)) &
-                                          * (1.0 - xi(ix)**2) &
-                                          * xi_deriv_mat(ix,jx)
-                                     amat(p,pp) =  amat(p,pp) &
-                                          - (0.5*delta_t) * omega_trap(it,is) &
-                                          * sqrt(energy(ie)) &
-                                          * (1.0 - xi(ix)**2) &
-                                          * xi_deriv_mat(ix,jx)
-                                  endif
-                               endif
+             is = is_v(iv)
+             ix = ix_v(iv)
+             ie = ie_v(iv)
 
-                               ! Collision component: Lorentz
-                               if(is==js .and. ie==je) then
-                                 cmat(ir,it,p,pp)  &
-                                       =  cmat(ir,it,p,pp) &
-                                       - (0.5*delta_t) * xi_lor_mat(ix,jx) &
-                                       *0.5*sum_nud
-                                  
-                                  amat(p,pp) &
-                                       = amat(p,pp) &
-                                       + (0.5*delta_t) * xi_lor_mat(ix,jx) &
-                                       *0.5*sum_nud
-                               endif
-
-                               ! Collision component: Restoring
-                               if(collision_model == 3) then
-                                  ! EAB: NEED to recheck 0.5 with Lorentz
-                                  cmat(ir,it,p,pp)  &
-                                       =  cmat(ir,it,p,pp) &
-                                       - (0.5*delta_t) &
-                                       * (-mass(js)/mass(is)) &
-                                       * (dens(js)/dens(is)) &
-                                       * (vth(js)/vth(is)) &
-                                       * nu_d(ie,is,js) * sqrt(energy(ie)) &
-                                       * 0.5*vecout_xi(ix) &
-                                       * nu_d(je,js,is) * sqrt(energy(je)) &
-                                       * 0.5*vecin_xi(jx) * w_e(je)*w_xi(jx) &
-                                       / rs_lor(is,js)
-                                  amat(p,pp)  &
-                                       =  amat(p,pp) &
-                                       + (0.5*delta_t) &
-                                       * (-mass(js)/mass(is)) &
-                                       * (dens(js)/dens(is)) &
-                                       * (vth(js)/vth(is)) &
-                                       * nu_d(ie,is,js) * sqrt(energy(ie)) &
-                                       * 0.5*vecout_xi(ix) &
-                                       * nu_d(je,js,is) * sqrt(energy(je)) &
-                                       * 0.5*vecin_xi(jx) * w_e(je)*w_xi(jx) &
-                                       / rs_lor(is,js)
-
-                               else if(abs(rs(is,js)) > epsilon(0.)) then
-                                  cmat(ir,it,p,pp)  &
-                                       =  cmat(ir,it,p,pp) &
-                                       - (0.5*delta_t) &
-                                       * 1.5 * (mass(js)/mass(is)) &
-                                       * (dens(js)/dens(is)) &
-                                       * (vth(js)/vth(is)) &
-                                       * nu_s(ie,is,js) * sqrt(energy(ie)) &
-                                       * xi(ix) &
-                                       * nu_s(je,js,is) * sqrt(energy(je)) &
-                                       * xi(jx) * w_e(je) * w_xi(jx) &
-                                       / rs(is,js)
-                                  amat(p,pp)  &
-                                       =  amat(p,pp) &
-                                       + (0.5*delta_t) &
-                                       * 1.5 * (mass(js)/mass(is)) &
-                                       * (dens(js)/dens(is)) &
-                                       * (vth(js)/vth(is)) &
-                                       * nu_s(ie,is,js) * sqrt(energy(ie)) &
-                                       * xi(ix) &
-                                       * nu_s(je,js,is) * sqrt(energy(je)) &
-                                       * xi(jx) * w_e(je) * w_xi(jx) &
-                                       / rs(is,js)
-                               endif
-
-                               if(collision_model == 2) then
-                                  if(is==js .and. ie==je) then
-                                     sum_nu = 0.0
-                                     do ks=1,n_species
-                                        sum_nu = sum_nu &
-                                             + (nu_d(ie,is,ks) &
-                                             -nu_s(ie,is,ks))
-                                     enddo
-                                     cmat(ir,it,p,pp)  &
-                                          =  cmat(ir,it,p,pp) &
-                                          - (0.5*delta_t) * sum_nu &
-                                          * 1.5 * xi(ix) * xi(jx) * w_xi(jx)
-                                     amat(p,pp)  &
-                                          =  amat(p,pp) &
-                                          + (0.5*delta_t) * sum_nu &
-                                          * 1.5 * xi(ix) * xi(jx) * w_xi(jx)
-                                  endif
-                               endif
-
-                               ! Poisson component 
-                               cmat(ir,it,p,pp)  &
-                                    =  cmat(ir,it,p,pp) &
-                                    - z(is)/temp(is) / &
-                                    (-k_perp(it,ir)**2 * lambda_debye**2 &
-                                    * dens_ele / temp_ele &
-                                     + sum_den) &
-                                    * gyrox_J0(is,ir,it,ie,ix) &
-                                    * z(js)*dens(js) &
-                                    * gyrox_J0(js,ir,it,je,jx) * w_e(je) &
-                                    * 0.5 * w_xi(jx)
-                               amat(p,pp)  &
-                                    =  amat(p,pp) &
-                                    - z(is)/temp(is) / &
-                                    (-k_perp(it,ir)**2 * lambda_debye**2 &
-                                    * dens_ele / temp_ele &
-                                     + sum_den) &
-                                    * gyrox_J0(is,ir,it,ie,ix) &
-                                    * z(js)*dens(js) &
-                                    * gyrox_J0(js,ir,it,je,jx) * w_e(je) &
-                                    * 0.5 * w_xi(jx)
-                            enddo
-                         enddo
-                      enddo
-                   enddo
-                enddo
+             sum_nud = 0.0
+             do ks=1,n_species
+                sum_nud = sum_nud + nu_d(ie,is,ks)
              enddo
 
-             ! H_bar = (1 - dt/2 C - Poisson)^(-1) * (1 + dt/2 C + Poisson) H
-             ! Lapack factorization and inverse of LHS
-             call DGETRF(msize,msize,cmat(ir,it,:,:),msize,i_piv,info)
-             call DGETRI(msize,cmat(ir,it,:,:),msize,i_piv,work,msize,info)
-             ! Matrix multiply
-             call DGEMM('N','N',msize,msize,msize,num1,cmat(ir,it,:,:),&
-                  msize,amat,msize,num0,bmat,msize)
-             cmat(ir,it,:,:) = bmat(:,:)
-      
+             do jv=1,nv
+
+             js = is_v(jv)
+             jx = ix_v(jv)
+             je = ie_v(jv)
+
+                ! constant part
+                if (iv == jv) then
+                   cmat(ic_loc,iv,jv) =  cmat(ic_loc,iv,jv) + 1.0
+                   amat(iv,jv) = amat(iv,jv) + 1.0
+                endif
+
+                ! Trapping term
+                if (is == js .and. ie == je) then
+                   cmat(ic_loc,iv,jv) = cmat(ic_loc,iv,jv) &
+                        + (0.5*delta_t) * omega_trap(it,is) &
+                        * sqrt(energy(ie)) &
+                        * (1.0 - xi(ix)**2) &
+                        * xi_deriv_mat(ix,jx)
+                   amat(iv,jv) = amat(iv,jv) &
+                        - (0.5*delta_t) * omega_trap(it,is) &
+                        * sqrt(energy(ie)) &
+                        * (1.0 - xi(ix)**2) &
+                        * xi_deriv_mat(ix,jx)
+                endif
+
+                ! Collision component: Lorentz
+                if (is==js .and. ie==je) then
+                   cmat(ic_loc,iv,jv) = cmat(ic_loc,iv,jv) &
+                        - (0.5*delta_t) * xi_lor_mat(ix,jx) &
+                        *0.5*sum_nud
+
+                   amat(iv,jv) = amat(iv,jv) &
+                        + (0.5*delta_t) * xi_lor_mat(ix,jx) &
+                        *0.5*sum_nud
+                endif
+
+                ! Collision component: Restoring
+                if (collision_model == 3) then
+                   ! EAB: NEED to recheck 0.5 with Lorentz
+                   cmat(ic_loc,iv,jv) = cmat(ic_loc,iv,jv) &
+                        - (0.5*delta_t) &
+                        * (-mass(js)/mass(is)) &
+                        * (dens(js)/dens(is)) &
+                        * (vth(js)/vth(is)) &
+                        * nu_d(ie,is,js) * sqrt(energy(ie)) &
+                        * 0.5*vecout_xi(ix) &
+                        * nu_d(je,js,is) * sqrt(energy(je)) &
+                        * 0.5*vecin_xi(jx) * w_e(je)*w_xi(jx) &
+                        / rs_lor(is,js)
+                   amat(iv,jv) = amat(iv,jv) &
+                        + (0.5*delta_t) &
+                        * (-mass(js)/mass(is)) &
+                        * (dens(js)/dens(is)) &
+                        * (vth(js)/vth(is)) &
+                        * nu_d(ie,is,js) * sqrt(energy(ie)) &
+                        * 0.5*vecout_xi(ix) &
+                        * nu_d(je,js,is) * sqrt(energy(je)) &
+                        * 0.5*vecin_xi(jx) * w_e(je)*w_xi(jx) &
+                        / rs_lor(is,js)
+
+                else if (abs(rs(is,js)) > epsilon(0.)) then
+                   cmat(ic_loc,iv,jv) = cmat(ic_loc,iv,jv) &
+                        - (0.5*delta_t) &
+                        * 1.5 * (mass(js)/mass(is)) &
+                        * (dens(js)/dens(is)) &
+                        * (vth(js)/vth(is)) &
+                        * nu_s(ie,is,js) * sqrt(energy(ie)) &
+                        * xi(ix) &
+                        * nu_s(je,js,is) * sqrt(energy(je)) &
+                        * xi(jx) * w_e(je) * w_xi(jx) &
+                        / rs(is,js)
+                   amat(iv,jv) = amat(iv,jv) &
+                        + (0.5*delta_t) &
+                        * 1.5 * (mass(js)/mass(is)) &
+                        * (dens(js)/dens(is)) &
+                        * (vth(js)/vth(is)) &
+                        * nu_s(ie,is,js) * sqrt(energy(ie)) &
+                        * xi(ix) &
+                        * nu_s(je,js,is) * sqrt(energy(je)) &
+                        * xi(jx) * w_e(je) * w_xi(jx) &
+                        / rs(is,js)
+                endif
+
+                if (collision_model == 2) then
+                   if (is==js .and. ie==je) then
+                      sum_nu = 0.0
+                      do ks=1,n_species
+                         sum_nu = sum_nu &
+                              + (nu_d(ie,is,ks)-nu_s(ie,is,ks))
+                      enddo
+                      cmat(ic_loc,iv,jv) = cmat(ic_loc,iv,jv) &
+                           - (0.5*delta_t) * sum_nu &
+                           * 1.5 * xi(ix) * xi(jx) * w_xi(jx)
+                      amat(iv,jv) = amat(iv,jv) &
+                           + (0.5*delta_t) * sum_nu &
+                           * 1.5 * xi(ix) * xi(jx) * w_xi(jx)
+                   endif
+                endif
+
+                ! Poisson component 
+                cmat(ic_loc,iv,jv) = cmat(ic_loc,iv,jv) &
+                     - z(is)/temp(is) / &
+                     (-k_perp(it,ir)**2 * lambda_debye**2 &
+                     * dens_ele / temp_ele &
+                     + sum_den) &
+                     * gyrox_J0(is,ir,it,ie,ix) &
+                     * z(js)*dens(js) &
+                     * gyrox_J0(js,ir,it,je,jx) * w_e(je) &
+                     * 0.5 * w_xi(jx)
+                amat(iv,jv) = amat(iv,jv) &
+                     - z(is)/temp(is) / &
+                     (-k_perp(it,ir)**2 * lambda_debye**2 &
+                     * dens_ele / temp_ele &
+                     + sum_den) &
+                     * gyrox_J0(is,ir,it,ie,ix) &
+                     * z(js)*dens(js) &
+                     * gyrox_J0(js,ir,it,je,jx) * w_e(je) &
+                     * 0.5 * w_xi(jx)
+             enddo
           enddo
+
+          ! H_bar = (1 - dt/2 C - Poisson)^(-1) * (1 + dt/2 C + Poisson) H
+          ! Lapack factorization and inverse of LHS
+          call DGETRF(nv,nv,cmat(ic_loc,:,:),nv,i_piv,info)
+          call DGETRI(msize,cmat(ic_loc,:,:),nv,i_piv,work,nv,info)
+          ! Matrix multiply
+          call DGEMM('N','N',nv,nv,nv,num1,cmat(ic_loc,:,:),&
+               nv,amat,nv,num0,bmat,nv)
+          cmat(ic_loc,:,:) = bmat(:,:)
+
        enddo
 
        deallocate(amat)
@@ -358,14 +338,16 @@ contains
        initialized = .true.
 
     else
+
        if(.NOT. initialized) return
        deallocate(cmat)
        deallocate(cvec)
        deallocate(bvec)
        deallocate(indx_coll)
        initialized = .false.
+
     endif
-    
+
   end subroutine COLLISION_alloc
   
   subroutine COLLISION_do
@@ -379,64 +361,73 @@ contains
     implicit none
 
     integer :: is,ir,it,ie,ix
-    integer :: p
 
     if (collision_model == -1) return
 
     ! compute new collisional cap_H: H = h + ze/T G phi
     ! assumes have cap_h_x
 
-   call timer_lib_in('collision')
-  
-    do ir=1,n_radial
-       do it=1,n_theta
-          
-          ! Set-up the RHS: H = f + ze/T G phi
-          ! 
-          ! Pack Re(H) and Im(H) into two-column matrix for use with DGEMM
-          do is=1,n_species
-             do ie=1,n_energy
-                do ix=1,n_xi
-                   p = indx_coll(is,ie,ix)
-                   cvec(p,1) = real(cap_h_x(is,ir,it,ie,ix))
-                   cvec(p,2) = imag(cap_h_x(is,ir,it,ie,ix))
-                enddo
-             enddo
-          enddo
- 
-          
-          ! Solve for H
-           call DGEMM('N','N',msize,2,msize,num1,cmat(ir,it,:,:),&
-               msize,cvec,msize,num0,bvec,msize)
-          
-          do is=1,n_species
-             do ie=1,n_energy
-                do ix=1,n_xi
-                   p = indx_coll(is,ie,ix)
-                   cap_h_x(is,ir,it,ie,ix) = bvec(p,1) + i_c * bvec(p,2)
-                enddo
-             enddo
-          enddo
+    call rTRANSP_INIT(1,nv,nc,1,NEW_COMM_1)
+    call rTRANSP_DO(cap_h_c,cap_h_v)
+    call rTRANSP_CLEANUP
 
-          ! Compute the new phi
-          call POISSONh_do
-          
-          ! Compute the new h_x
-          do is=1,n_species
-             do ie=1,n_energy
-                do ix=1,n_xi
-                   h_x(is,ir,it,ie,ix) = cap_h_x(is,ir,it,ie,ix) &
-                        - z(is)/temp(is) * gyrox_J0(is,ir,it,ie,ix) &
-                        * phi(ir,it)
-                enddo
-             enddo
-          enddo
+    call timer_lib_in('collision')
 
+    ic_loc = 0
+    do ic=1+i_proc_1,nc,n_proc_1
+       ic_loc = ic_loc+1
+
+       it = it_c(ic)
+       ir = ir_c(ic)
+
+       ! Set-up the RHS: H = f + ze/T G phi
+       ! 
+       ! Pack Re(H) and Im(H) into two-column matrix for use with DGEMM
+       do iv=1,nv
+          cvec(iv,1) = real(cap_h_v(iv,ic_loc))
+          cvec(iv,2) = imag(cap_h_v(iv,ic_loc))
+       enddo
+
+       ! Solve for H
+       call DGEMM('N','N',nv,2,nv,num1,cmat(ic_loc,:,:),&
+            nv,cvec,nv,num0,bvec,nv)
+
+       do iv=1,nv
+          cap_h_v(iv,ic_loc) = bvec(iv,1) + i_c * bvec(iv,2)
+       enddo
+
+       ! Compute the new phi
+       call POISSONh_do
+
+    enddo
+
+    call fTRANSP_INIT(nc,1,nv,1,NEW_COMM_1)
+    call rTRANSP_DO(cap_h_v,cap_h_c)
+    call rTRANSP_CLEANUP
+
+    ! Compute the new h_x
+    iv_loc = 0
+    do iv=1+i_proc_1,nv,n_proc_1
+
+       iv_loc = iv_loc+1
+
+       is = is_v(iv)
+       ix = ix_v(iv)
+       ie = ie_v(iv)
+
+       do ic=1,nc
+
+          ir = ir_c(ic) 
+          it = it_c(ic)
+
+          h_x(ic,iv_loc) = cap_h_c(ic,iv_loc) &
+               - z(is)/temp(is) * gyrox_J0(is,ir,it,ie,ix) &
+               * phi(ir,it)
        enddo
     enddo
 
-  call timer_lib_out('collision')
-   
+    call timer_lib_out('collision')
+
   end subroutine COLLISION_do
   
 end module cgyro_collision

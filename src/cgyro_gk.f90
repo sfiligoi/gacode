@@ -5,9 +5,8 @@ module cgyro_gk
 
   logical, private :: initialized = .false.
 
-  complex, dimension(:,:,:,:,:,:), allocatable, private :: rhs
-  complex, dimension(:,:,:,:,:), allocatable, private :: h0_x
-  complex, dimension(:,:,:,:,:), allocatable, private :: cap_h_x_deriv
+  complex, dimension(:,:,:), allocatable, private :: rhs
+  complex, dimension(:,:), allocatable, private :: h0_x
 
   ! theta derivative variables
   integer, dimension(:), allocatable, private :: thcyc
@@ -36,9 +35,8 @@ contains
 
        if (initialized) return
 
-       allocate(rhs(4,n_species,n_radial,n_theta,n_energy,n_xi))
-       allocate(h0_x(n_species,n_radial,n_theta,n_energy,n_xi))
-       allocate(cap_h_x_deriv(n_species,n_radial,n_theta,n_energy,n_xi))
+       allocate(rhs(4,nc,nv_loc))
+       allocate(h0_x(nc,nv_loc))
 
        ! cyclic index (for theta-periodicity)
        allocate(thcyc(1-n_theta:2*n_theta))
@@ -108,7 +106,6 @@ contains
 
        deallocate(rhs)
        deallocate(h0_x)
-       deallocate(cap_h_x_deriv)
        deallocate(thcyc)
        deallocate(rcyc)
        deallocate(dtheta)
@@ -127,28 +124,46 @@ contains
     use cgyro_globals
     use cgyro_poisson
     use cgyro_gyro
+
     implicit none
-    integer :: is,ir,it,ie,ix
+
     integer :: myio = 21
     logical :: lfe
 
     phi_old(:,:) = (0.0,0.0)
-    h_x(:,:,:,:,:) = (0.0,0.0)
-    if(restart_mode == 1) then
+    h_x(:,:)     = (0.0,0.0)
+
+    if (restart_mode == 1) then
        inquire(file=trim(path)//runfile_restart,exist=lfe)
        if (lfe .eqv. .false.) then
-          call cgyro_error('ERROR: (GKCOLL) Missing restart file')
+          call cgyro_error('ERROR: (CGYRO) Missing restart file')
           return
        endif
        open(unit=io_cgyroout,file=trim(path)//runfile_restart,status='old')
        read(io_cgyroout,*) h_x
        close(io_cgyroout)
     else
-       if(toroidal_model == 2) then
-          h_x(1,:,:,:,:) = 1.0
+       if (toroidal_model == 2) then
+          iv_loc = 0
+          do iv=1+i_proc_1,nv,n_proc_1
+             iv_loc = iv_loc+1
+             if (is_v(iv) == 1) then
+                h_x(:,iv_loc) = 1.0
+             else
+                h_x(:,iv_loc) = 0.0
+             endif
+          enddo
        else
-          do it=1,n_theta
-             h_x(1,n_radial/2+1,it,:,:) = (1.0e-3) * (cos(theta(it)/2.0))**2
+          iv_loc = 0
+          do iv=1+i_proc_1,nv,n_proc_1
+             iv_loc = iv_loc+1
+             if (is_v(iv) == 1) then
+                do ic=1,nc
+                   if (ir_c(ic) == n_radial/2+1) then
+                      h_x(ic,iv_loc) = (1.0e-3) * (cos(theta(it_c(ic))/2.0))**2
+                   endif
+                enddo
+             endif
           enddo
        endif
     endif
@@ -164,33 +179,31 @@ contains
 
     implicit none
 
-    integer :: is,ir,it,ie,ix
-
     ! compute new collisionless little_h: h = H - ze/T G phi
     ! assumes have h_x, cap_h_x, and phi
     ! RK4
 
     h0_x = h_x
-    
+
     ! Stage 1
     call get_gkRHS(1)
-    h_x = h0_x + 0.5 * delta_t * rhs(1,:,:,:,:,:)
+    h_x = h0_x + 0.5 * delta_t * rhs(1,:,:)
     call POISSONx_do
 
     ! Stage 2
     call get_gkRHS(2)
-    h_x = h0_x + 0.5 * delta_t * rhs(2,:,:,:,:,:)
+    h_x = h0_x + 0.5 * delta_t * rhs(2,:,:)
     call POISSONx_do
 
     ! Stage 3
     call get_gkRHS(3)
-    h_x = h0_x + delta_t * rhs(3,:,:,:,:,:)
+    h_x = h0_x + delta_t * rhs(3,:,:)
     call POISSONx_do
 
     ! Stage 4
     call get_gkRHS(4)
-    h_x = h0_x + delta_t/6.0 * (rhs(1,:,:,:,:,:) + 2.0*rhs(2,:,:,:,:,:) &
-         + 2.0*rhs(3,:,:,:,:,:) + rhs(4,:,:,:,:,:))  
+    h_x = h0_x + delta_t/6.0 * &
+         (rhs(1,:,:)+2.0*rhs(2,:,:)+2.0*rhs(3,:,:)+rhs(4,:,:))  
     call POISSONx_do
 
   end subroutine GK_do
@@ -207,110 +220,80 @@ contains
 
     integer, intent(in) :: ij
     integer :: is, ir, it, ie, ix
-    integer :: id, jt, jr
+    integer :: id, jt, jr, jc
     real    :: rval
     complex :: val
 
     call timer_lib_in('gkrhs')
 
     ! Get the RHS collisionless GK little_h: h = H - ze/T G phi
-    rhs(ij,:,:,:,:,:) = (0.0,0.0)
+    rhs(ij,:,:) = (0.0,0.0)
 
-    ! Compute the xi-derivatives of H.
-    do is=1,n_species
-       do ir=1,n_radial
-          do it=1,n_theta
-             do ie=1,n_energy
-                vec_in(:) = real(cap_h_x(is,ir,it,ie,:))
-                call DGEMV('N',n_xi,n_xi,num1,xi_deriv_mat,n_xi,&
-                     vec_in(:),1,num0,&
-                     vec_outr(:),1)
-                vec_in(:) = imag(cap_h_x(is,ir,it,ie,:))
-                call DGEMV('N',n_xi,n_xi,num1,xi_deriv_mat,n_xi,&
-                     vec_in(:),1,num0,&
-                     vec_outi(:),1)
-                cap_h_x_deriv(is,ir,it,ie,:) = vec_outr(:) + i_c*vec_outi(:)
-             enddo
+    iv_loc = 0
+    do iv=1+i_proc_1,nv,n_proc_1
+
+       iv_loc = iv_loc+1
+
+       is = is_v(iv)
+       ix = ix_v(iv)
+       ie = ie_v(iv)
+
+       do ic=1,nc
+
+          ir = ir_c(ic) 
+          it = it_c(ic)
+
+          ! parallel streaming with upwinding
+          do id=-2,2
+             jt = thcyc(it+id)
+             jr = rcyc(ir,it+id)
+             jc = ic_c(jr,jt)
+             rval = omega_stream(it,is) * sqrt(energy(ie)) * xi(ix) 
+             rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc) &
+                  - rval*dtheta(it,id)*cap_h_c(jc,iv_loc)  &
+                  - abs(rval)*dtheta_up(it,id)*h_x(jc,iv_loc)
           enddo
-       enddo
-    enddo
 
-    ! parallel streaming with upwinding
-    do is=1,n_species
-       do ir=1,n_radial
-          do it=1,n_theta
-             do id=-2,2
-                jt = thcyc(it+id)
-                jr = rcyc(ir,it+id)
-                do ie=1,n_energy
-                   do ix=1,n_xi
-                      rval = omega_stream(it,is) * sqrt(energy(ie)) * xi(ix) 
-                      rhs(ij,is,ir,it,ie,ix) = rhs(ij,is,ir,it,ie,ix) &
-                           - rval*dtheta(it,id)*cap_h_x(is,jr,jt,ie,ix)  &
-                           - abs(rval)*dtheta_up(it,id)*h_x(is,jr,jt,ie,ix)
-                   enddo
-                enddo
-             enddo
-          enddo
-       enddo
-    enddo
+          ! omega_rdrift
+          val = omega_rdrift(it,is) &
+               * energy(ie) * (1.0 + xi(ix)**2) &
+               * (2.0*pi*i_c*indx_r(ir)*r_length_inv) 
+          rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc) &
+               - val * cap_h_c(ic,iv_loc)
 
-    ! The rest of the explicit terms
-    do is=1,n_species
-       do ir=1,n_radial
-          do it=1,n_theta
-             do ie=1,n_energy
-                do ix=1,n_xi
+          ! radial upwind
+          val = omega_rdrift(it,is) &
+               * energy(ie) * (1.0 + xi(ix)**2)
+          val = abs(val) * rupwind_eps & 
+               * (2.0*indx_r(ir)/(1.0*n_radial))**(rupwind_n-1.0) &
+               * (2.0*pi*indx_r(ir)*r_length_inv)
+          rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc) &
+               - val * h_x(ic,iv_loc)
 
-                   ! trapping
-                   if(trap_method /= 1) then
-                      val = omega_trap(it,is) &
-                           * sqrt(energy(ie)) * (1.0 - xi(ix)**2)
-                      rhs(ij,is,ir,it,ie,ix) = rhs(ij,is,ir,it,ie,ix) &
-                           - val  * cap_h_x_deriv(is,ir,it,ie,ix)
-                   endif
+          ! omega_dalpha
+          val = omega_adrift(it,is) &
+               * energy(ie) * (1.0 + xi(ix)**2) &
+               * (i_c * k_theta)
+          rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc) &
+               - val * cap_h_c(ic,iv_loc)
 
-                   ! omega_rdrift
-                   val = omega_rdrift(it,is) &
-                        * energy(ie) * (1.0 + xi(ix)**2) &
-                        * (2.0*pi*i_c*indx_r(ir)*r_length_inv) 
-                   rhs(ij,is,ir,it,ie,ix) = rhs(ij,is,ir,it,ie,ix) &
-                        - val * cap_h_x(is,ir,it,ie,ix)
+          ! omega_dalpha - pressure component
+          val = omega_aprdrift(it,is) &
+               * energy(ie) * xi(ix)**2 &
+               * (i_c * k_theta)
+          rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc) &
+               - val * cap_h_c(ic,iv_loc)
 
-                   ! radial upwind
-                   val = omega_rdrift(it,is) &
-                        * energy(ie) * (1.0 + xi(ix)**2)
-                   val = abs(val) * rupwind_eps & 
-                        * (2.0*indx_r(ir)/(1.0*n_radial))**(rupwind_n-1.0) &
-                        * (2.0*pi*indx_r(ir)*r_length_inv)
-                   rhs(ij,is,ir,it,ie,ix) = rhs(ij,is,ir,it,ie,ix) &
-                        - val * h_x(is,ir,it,ie,ix)
+          ! omega_star
+          val = i_c * k_theta &
+               * rho *sqrt(temp(is)*mass(is))/(1.0*z(is)) * vth(is) &
+               * (dlnndr(is) + dlntdr(is) * (energy(ie)-1.5))
+          rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc) &
+               - val * z(is)/temp(is) &
+               * gyrox_J0(is,ir,it,ie,ix) * phi(ir,it)
 
-                   ! omega_dalpha
-                   val = omega_adrift(it,is) &
-                        * energy(ie) * (1.0 + xi(ix)**2) &
-                        * (i_c * k_theta)
-                   rhs(ij,is,ir,it,ie,ix) = rhs(ij,is,ir,it,ie,ix) &
-                        - val * cap_h_x(is,ir,it,ie,ix)
+          !print *,ir,it,is,ie,ix,rhs(ij,ic,iv_loc)
 
-                   ! omega_dalpha - pressure component
-                   val = omega_aprdrift(it,is) &
-                        * energy(ie) * xi(ix)**2 &
-                        * (i_c * k_theta)
-                   rhs(ij,is,ir,it,ie,ix) = rhs(ij,is,ir,it,ie,ix) &
-                        - val * cap_h_x(is,ir,it,ie,ix)
-
-                   ! omega_star
-                   val = i_c * k_theta &
-                        * rho *sqrt(temp(is)*mass(is))/(1.0*z(is)) * vth(is) &
-                        * (dlnndr(is) + dlntdr(is) * (energy(ie)-1.5))
-                   rhs(ij,is,ir,it,ie,ix) = rhs(ij,is,ir,it,ie,ix) &
-                        - val * z(is)/temp(is) &
-                        * gyrox_J0(is,ir,it,ie,ix) * phi(ir,it)
-
-                enddo
-             enddo
-          enddo
        enddo
     enddo
 
