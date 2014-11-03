@@ -3,15 +3,37 @@ module cgyro_globals
   !---------------------------------------------------------------
   ! local MPI variables
   ! 
+  integer :: i_err
   integer :: i_proc
+  integer :: i_proc_1
+  integer :: i_proc_2
   integer :: n_proc
+  integer :: n_proc_1
+  integer :: n_proc_2
+  integer :: i_group_1
+  integer :: i_group_2
   integer :: CGYRO_COMM_WORLD
+  integer :: NEW_COMM_1
+  integer :: NEW_COMM_2
+  !
+  ! Pointers
+  !
+  integer :: nv_loc,iv_loc
+  integer :: nc_loc,ic_loc
+  integer, dimension(:), allocatable :: ie_v
+  integer, dimension(:), allocatable :: ix_v
+  integer, dimension(:), allocatable :: is_v
+  integer, dimension(:), allocatable :: ir_c
+  integer, dimension(:), allocatable :: it_c
+
   !---------------------------------------------------------------
 
   real, parameter    :: pi   = 3.1415926535897932
   complex, parameter :: i_c  = (0.0,1.0)
   real, parameter    :: num1 = 1.0
   real, parameter    :: num0 = 0.0
+
+  integer, parameter :: trap_method = 0
 
   !---------------------------------------------------------------
   ! Input parameters:
@@ -111,7 +133,7 @@ module cgyro_globals
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
-  ! Path to INPUT, read in the get_inputpath subroutine
+  ! Path to input.cgyr, read in the get_inputpath subroutine
   character(len=80) :: path
   !---------------------------------------------------------------
 
@@ -146,8 +168,8 @@ module cgyro_globals
   character(len=80) :: error_message
 
   ! output file
-  character(len=80)  :: runfile_cgyroout = 'out.cgyro.run'
+  integer :: output_flag=1
+  character(len=80)  :: runfile = 'out.cgyro.run'
   integer :: io_cgyroout = 12
-
 
 end module cgyro_globals

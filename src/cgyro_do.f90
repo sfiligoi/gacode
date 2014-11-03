@@ -3,82 +3,267 @@
 !
 ! PURPOSE:
 !  Subroutinized main cgyro program.  
+!
+! NOTES:
+!  This can be called directly using the driver routine cgyro 
+!  (in which case input data will read from input.dat) or called 
+!  as a subroutine using cgyro_sub.
 !-----------------------------------------------------------------
 
 subroutine cgyro_do
 
   use timer_lib
-  use mpi
 
   use cgyro_globals
+  use cgyro_equilibrium
+  use cgyro_gyro
+  use cgyro_gk
+  use cgyro_poisson
+  use cgyro_collision
+  use cgyro_freq
+  use cgyro_allocate_profile
 
   implicit none
 
-  integer :: lc,lv,iv,ic,nc,nv
-  integer :: ie,ix,is,ir,it
-  integer, dimension(:), allocatable :: ie_v
-  integer, dimension(:), allocatable :: ix_v
-  integer, dimension(:), allocatable :: is_v
-  integer, dimension(:), allocatable :: ir_c
-  integer, dimension(:), allocatable :: it_c
-  real, dimension(:,:), allocatable :: h
+  integer :: ix, ir, it, jr, p, is, ie
+  character(len=80)  :: runfile_phi   = 'out.cgyro.phi'
+  character(len=80)  :: runfile_phiB  = 'out.cgyro.phiB'
+  character(len=80)  :: runfile_hx    = 'out.cgyro.hx'
+  character(len=80)  :: runfile_grids = 'out.cgyro.grids'
+  character(len=80)  :: runfile_time  = 'out.cgyro.time'
+  character(len=80)  :: runfile_test  = 'out.cgyro.test'
+  character(len=80)  :: runfile_test2 = 'out.cgyro.test2'
+  integer :: myio = 20
+  integer :: print_step=10
+  complex, dimension(:,:), allocatable :: f_balloon
+  
+  integer :: signal
+  logical :: lfe
 
-  n_energy  = 3
-  n_xi      = 3
-  n_species = 2
-  n_radial  = 1
-  n_theta   = 2
+  complex :: sum1, sum2, sum3
 
-  nv = n_energy*n_xi*n_species
-  nc = n_radial*n_theta
+  if (silent_flag == 0 .and. i_proc == 0) then
+     open(unit=io_cgyroout,file=trim(path)//runfile,status='replace')
+     close(io_cgyroout)
+  endif
 
-  allocate(ie_v(nv))
-  allocate(ix_v(nv))
-  allocate(is_v(nv))
+  call cgyro_make_profiles
+  if(error_status > 0) goto 100
+  call cgyro_check
+  if(error_status > 0) goto 100
 
-  allocate(ir_c(nc))
-  allocate(it_c(nc))
+  allocate(indx_xi(n_xi))
+  do ix=1,n_xi
+     indx_xi(ix) = ix-1
+  enddo
+  allocate(indx_r(n_radial))
+  do ir=1,n_radial
+     indx_r(ir) = -n_radial/2 + (ir-1)
+  enddo
+  if(toroidal_model == 2) then
+     if(n_radial /= 1) then
+        print *, 'Error: For zf test, n_radial must be 1'
+        stop
+     endif
+     indx_r(1) = 1
+  endif
 
-  lv = 0
-  do ie=1,n_energy
-     do ix=1,n_xi
-        do is=1,n_species
-           lv = lv+1
-           ie_v(lv) = ie
-           ix_v(lv) = ix
-           is_v(lv) = is
+  ! set-up energy grid and weights
+  allocate(energy(n_energy))
+  allocate(w_e(n_energy))
+  allocate(e_deriv1_mat(n_energy,n_energy))
+  allocate(e_deriv2_mat(n_energy,n_energy))
+  call pseudo_maxwell(n_energy,e_max,energy,w_e,e_deriv1_mat,e_deriv2_mat)
+  ! for old calls, e_max is real; now e_max is an int
+  !call energy_integral(n_energy,e_max,energy,w_e)
+  !call cgyro_energy_mesh(n_energy,e_max,energy,w_e)
+
+  ! set-up xi-grid, weights
+  allocate(xi(n_xi))
+  allocate(w_xi(n_xi))
+  allocate(xi_lor_mat(n_xi,n_xi))
+  allocate(xi_deriv_mat(n_xi,n_xi))
+  call pseudo_legendre(n_xi,xi,w_xi,xi_deriv_mat,xi_lor_mat)
+
+  ! allocate distribution function and field arrays
+  allocate(h_x(n_species,n_radial,n_theta,n_energy,n_xi))
+  allocate(cap_h_x(n_species,n_radial,n_theta,n_energy,n_xi))
+  allocate(phi(n_radial,n_theta))
+  allocate(phi_old(n_radial,n_theta))
+  allocate(f_balloon(n_radial,n_theta))
+
+  call EQUIL_alloc(1)
+  call EQUIL_do
+  call GYRO_alloc(1)
+  call POISSON_alloc(1)
+  call GK_alloc(1)
+  call COLLISION_alloc(1)
+  call FREQ_alloc(1)
+
+  ! Timer initialization
+  call timer_lib_init('gk_init')
+  call timer_lib_init('poissonx')
+  call timer_lib_init('gkrhs')
+  call timer_lib_init('collision')
+
+  call timer_lib_in('gk_init')
+  call GK_init
+  call timer_lib_out('gk_init')
+
+  if(silent_flag == 0 .and. i_proc == 0) then
+     open(unit=myio,file=trim(path)//runfile_phi,status='replace')
+     close(myio)
+     open(unit=myio,file=trim(path)//runfile_phiB,status='replace')
+     close(myio)
+     open(unit=myio,file=trim(path)//runfile_hx,status='replace')
+     close(myio)
+     open(unit=myio,file=trim(path)//runfile_time,status='replace')
+     close(myio)
+     open(unit=myio,file=trim(path)//runfile_grids,status='replace')
+     write(myio,'(i4)') n_species
+     write(myio,'(i4)') n_radial
+     write(myio,'(i4)') n_theta
+     write(myio,'(i4)') n_energy
+     write(myio,'(i4)') n_xi
+     write(myio,'(i4)') indx_r(:)
+     write(myio,'(1pe12.5)') theta(:)
+     write(myio,'(1pe12.5)') energy(:)
+     write(myio,'(1pe12.5)') xi(:)
+     write(myio,'(1pe12.5)') transpose(theta_B(:,:))
+     close(myio)
+  endif
+
+  ! Time-stepping
+  nt_step = nint(max_time/delta_t)
+
+  do itime = 1, nt_step
+
+     ! Collisionless gyrokinetic equation
+     ! Returns new h_x, cap_h_x, and phi 
+     call GK_do
+
+     ! Collision step
+     ! Returns new h_x, cap_h_x, and phi
+     call COLLISION_do
+
+     if(mod(itime,print_step) == 0) then
+
+        ! Compute frequency and print
+        call FREQ_do
+        
+        ! Print phi
+        if(silent_flag == 0 .and. i_proc == 0) then
+           open(unit=myio,file=trim(path)//runfile_time,status='old',&
+                position='append')
+           write(myio,'(1pe13.5e3)') (itime * delta_t)
+           close(myio)
+           open(unit=myio,file=trim(path)//runfile_phi,status='old',&
+                position='append')
+           write(myio,'(1pe13.5e3)') transpose(phi(:,:))
+           close(myio)
+
+           ! Construct ballooning-space form of phi
+           do ir=1,n_radial
+              do it=1,n_theta
+                 f_balloon(ir,it) = phi(ir,it) &
+                      *exp(-2*pi*i_c*indx_r(ir)*k_theta*rmin)
+              enddo
+           enddo
+           open(unit=myio,file=trim(path)//runfile_phiB,status='old',&
+                position='append')
+           write(myio,'(1pe13.5e3)') transpose(f_balloon(:,:))
+           close(myio)
+        endif
+
+        ! Check for convergence
+        if(abs(freq_err) < freq_tol) then
+           if(silent_flag == 0 .and. i_proc == 0) then
+              print *, 'Converged'
+           endif
+           exit
+        endif
+
+        ! Check for manual halt signal
+        if(i_proc == 0) then
+           inquire(file='halt',exist=lfe)
+           if (lfe .eqv. .true.) then
+              open(unit=1,file='halt',status='old')
+              read(1,*) signal
+              close(1)
+           else
+              signal = 0
+           endif
+        endif
+        if (abs(signal) == 1) then
+           exit
+        endif
+
+     endif
+
+     phi_old = phi
+
+  enddo
+
+  if(silent_flag == 0 .and. i_proc == 0) then
+     open(unit=myio,file=trim(path)//runfile_hx,status='old',&
+          position='append')
+
+     do is=1,n_species
+        do ie=1,n_energy
+           do ix=1,n_xi
+
+              ! Construct ballooning-space form of h_x
+              do ir=1,n_radial
+                 do it=1,n_theta
+                    f_balloon(ir,it) = h_x(is,ir,it,ie,ix) &
+                         *exp(-2*pi*i_c*indx_r(ir)*k_theta*rmin)
+                 enddo
+              enddo
+
+              write(myio,'(1pe13.5e3)') transpose(f_balloon(:,:))
+
+           enddo
         enddo
      enddo
-  enddo
 
-  lc = 0
-  do ir=1,n_radial
-     do it=1,n_theta
-        lc = lc+1
-        ir_c(lc) = ir
-        it_c(lc) = it
-     enddo
-  enddo
+     close(myio)
+  endif
 
-  nv_loc = 
+  if(restart_write == 1) then
+     open(unit=io_cgyroout,file=trim(path)//runfile_restart,status='replace')
+     write(io_cgyroout,*) h_x
+     close(io_cgyroout)
+  endif
 
-  allocate(h(nv,nc))
-
-  do iv=1+i_proc,nvmn_proc
-     do ic=1,nc
-
-        h(iv,ic) = ie_v(iv)*10*0 + &
-             ie_v(iv)*10**0 + &
-             ix_v(iv)*10**1 + &
-             is_v(iv)*10**2 + &
-             ir_c(ic)*10**3 + &
-             it_c(ic)*10**4
-
-     enddo
-  enddo
+  ! Print timers
+  print '(a,1x,1pe11.4)','gk_init   ',timer_lib_time('gk_init')
+  print '(a,1x,1pe11.4)','poissonx  ',timer_lib_time('poissonx')
+  print '(a,1x,1pe11.4)','gkrhs     ',timer_lib_time('gkrhs')
+  print '(a,1x,1pe11.4)','collision ',timer_lib_time('collision')
 
 
+100 continue
+  call EQUIL_alloc(0)
+  call GYRO_alloc(0)
+  call GK_alloc(0)
+  call POISSON_alloc(0)
+  call COLLISION_alloc(0)
+  call FREQ_alloc(0)
 
-  print *,h
+  if(allocated(indx_xi))       deallocate(indx_xi)
+  if(allocated(indx_r))        deallocate(indx_r)
+  if(allocated(energy))        deallocate(energy)
+  if(allocated(w_e))           deallocate(w_e)
+  if(allocated(e_deriv1_mat))  deallocate(e_deriv1_mat)
+  if(allocated(e_deriv2_mat))  deallocate(e_deriv2_mat)
+  if(allocated(xi))            deallocate(xi)
+  if(allocated(w_xi))          deallocate(w_xi)
+  if(allocated(xi_lor_mat))    deallocate(xi_lor_mat)
+  if(allocated(xi_deriv_mat))  deallocate(xi_deriv_mat)
+  if(allocated(h_x))           deallocate(h_x)
+  if(allocated(cap_h_x))       deallocate(cap_h_x)
+  if(allocated(phi))           deallocate(phi)
+  if(allocated(phi_old))       deallocate(phi_old)
+  if(allocated(f_balloon))     deallocate(f_balloon)
 
 end subroutine cgyro_do
