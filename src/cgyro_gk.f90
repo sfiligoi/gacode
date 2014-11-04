@@ -292,8 +292,6 @@ contains
                - val * z(is)/temp(is) &
                * gyrox_J0(is,ir,it,ie,ix) * phi(ir,it)
 
-          !print *,ir,it,is,ie,ix,rhs(ij,ic,iv_loc)
-
        enddo
     enddo
 

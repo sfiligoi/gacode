@@ -7,8 +7,6 @@ module cgyro_collision
 
   real, dimension(:,:,:), allocatable, private :: cmat
   real, dimension(:,:), allocatable, private :: cvec,bvec
-  integer, dimension(:,:,:), allocatable, private :: indx_coll 
-  integer, private :: msize
 
 contains
 
@@ -191,9 +189,9 @@ contains
 
              do jv=1,nv
 
-             js = is_v(jv)
-             jx = ix_v(jv)
-             je = ie_v(jv)
+                js = is_v(jv)
+                jx = ix_v(jv)
+                je = ie_v(jv)
 
                 ! constant part
                 if (iv == jv) then
@@ -314,7 +312,7 @@ contains
           ! H_bar = (1 - dt/2 C - Poisson)^(-1) * (1 + dt/2 C + Poisson) H
           ! Lapack factorization and inverse of LHS
           call DGETRF(nv,nv,cmat(ic_loc,:,:),nv,i_piv,info)
-          call DGETRI(msize,cmat(ic_loc,:,:),nv,i_piv,work,nv,info)
+          call DGETRI(nv,cmat(ic_loc,:,:),nv,i_piv,work,nv,info)
           ! Matrix multiply
           call DGEMM('N','N',nv,nv,nv,num1,cmat(ic_loc,:,:),&
                nv,amat,nv,num0,bmat,nv)
@@ -343,7 +341,6 @@ contains
        deallocate(cmat)
        deallocate(cvec)
        deallocate(bvec)
-       deallocate(indx_coll)
        initialized = .false.
 
     endif
@@ -396,15 +393,15 @@ contains
           cap_h_v(iv,ic_loc) = bvec(iv,1) + i_c * bvec(iv,2)
        enddo
 
-       ! Compute the new phi
-       call POISSONh_do
-
     enddo
 
-    call fTRANSP_INIT(nc,1,nv,1,NEW_COMM_1)
-    call rTRANSP_DO(cap_h_v,cap_h_c)
-    call rTRANSP_CLEANUP
+    ! Compute the new phi
+    call POISSONh_do
 
+    call fTRANSP_INIT(nc,1,nv,1,NEW_COMM_1)
+    call fTRANSP_DO(cap_h_v,cap_h_c)
+    call fTRANSP_CLEANUP
+ 
     ! Compute the new h_x
     iv_loc = 0
     do iv=1+i_proc_1,nv,n_proc_1

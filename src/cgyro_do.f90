@@ -232,10 +232,12 @@ subroutine cgyro_do
   endif
 
   ! Print timers
-  print '(a,1x,1pe11.4)','gk_init   ',timer_lib_time('gk_init')
-  print '(a,1x,1pe11.4)','poissonx  ',timer_lib_time('poissonx')
-  print '(a,1x,1pe11.4)','gkrhs     ',timer_lib_time('gkrhs')
-  print '(a,1x,1pe11.4)','collision ',timer_lib_time('collision')
+  if (i_proc == 0) then
+     print '(a,1x,1pe11.4)','gk_init   ',timer_lib_time('gk_init')
+     print '(a,1x,1pe11.4)','poissonx  ',timer_lib_time('poissonx')
+     print '(a,1x,1pe11.4)','gkrhs     ',timer_lib_time('gkrhs')
+     print '(a,1x,1pe11.4)','collision ',timer_lib_time('collision')
+  endif
 
 
 100 continue
