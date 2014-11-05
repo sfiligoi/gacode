@@ -25,7 +25,7 @@ contains
     real :: xa, xb, tauinv_ab
     real :: sum_nu, sum_nud, sum_den
     integer :: jv
-    integer :: is,ir,it,ix,ie,js,je,jx,kx,ks
+    integer :: is,ir,it,ix,ie,js,je,jx,ks
     ! parameters for matrix solve
     integer :: info
     integer, dimension(:), allocatable :: i_piv
@@ -40,7 +40,7 @@ contains
        if(initialized) return
 
        if(collision_model == 0 .and. adiabatic_ele_model == 1) then
-          call cgyro_error('ERROR: (GKCOLL) collision_model=0 requires kinetic electrons')
+          call cgyro_error('ERROR: (CGYRO) collision_model=0 requires kinetic electrons')
           return
        endif
 

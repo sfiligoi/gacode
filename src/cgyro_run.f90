@@ -2,7 +2,7 @@
 ! cgyro_run.f90
 !
 ! PURPOSE:
-!  Manage call to local GKCOLL simulation.
+!  Manage call to local CGYRO simulation.
 !---------------------------------------------------------
 
 subroutine cgyro_run()
@@ -17,7 +17,7 @@ subroutine cgyro_run()
    ! Map INTERFACE parameters -> GLOBAL variables
    call map_interface2global
 
-   ! Run GKCOLL
+   ! Run CGYRO
    call cgyro_do
 
    cgyro_error_status_out  = error_status

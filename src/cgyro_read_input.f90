@@ -30,15 +30,13 @@ subroutine cgyro_read_input
   read(1,*) silent_flag
   read(1,*) equilibrium_model
   read(1,*) collision_model
-  read(1,*) profile_model
-  read(1,*) ipccw
-  read(1,*) btccw
   read(1,*) te_ade
   read(1,*) ne_ade
   read(1,*) lambda_debye
-  read(1,*) profile_lambda_debye_scale
 
   read(1,*) n_species
+
+  read(1,*) nu_1_in
 
   do is=1,6
      read(1,*) z(is)
@@ -47,7 +45,6 @@ subroutine cgyro_read_input
      read(1,*) temp(is)
      read(1,*) dlnndr(is)
      read(1,*) dlntdr(is)
-     read(1,*) nu(is)
   enddo
 
   read(1,*) q
@@ -62,6 +59,8 @@ subroutine cgyro_read_input
   read(1,*) zmag       
   read(1,*) s_zmag
   read(1,*) beta_star
+  read(1,*) n_field
+  read(1,*) betae_unit
 
   close(1)
 

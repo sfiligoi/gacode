@@ -1,23 +1,12 @@
 subroutine cgyro_make_profiles
 
   use cgyro_globals
-  use cgyro_profile_exp, only : &
-       rmaj_p,&
-       b_unit_p,& 
-       q_exp,&
-       n_grid_exp
-  use cgyro_allocate_profile
 
   implicit none
 
   integer :: is, num_ele, j
   integer, parameter :: io=20
-
-  real :: cc
-  real :: loglam
-
-  call PROFILE_SIM_alloc(1)
-
+  
   num_ele = 0
   do is=1, n_species
      if(z(is) == -1) then
@@ -29,156 +18,62 @@ subroutine cgyro_make_profiles
   else if(num_ele == 1) then
      adiabatic_ele_model = 0
   else
-     call cgyro_error('ERROR: (GKCOLL) Only one electron species allowed')
+     call cgyro_error('ERROR: (CGYRO) Only one electron species allowed')
      return
   end if
   
-  if(btccw > 0) then
-     sign_bunit = -1.0
-  else
-     sign_bunit =  1.0
-  endif
+  do is=1,n_species
+     nu(is)     = nu_1_in *(1.0*z(is))**4/(1.0*z(1))**4 &
+          * dens(is) / dens(1) &
+          * sqrt(mass(1)/mass(is)) * (temp(1)/temp(is))**1.5
+  enddo
 
-  if(ipccw > 0) then
-     sign_q = -sign_bunit
-  else
-     sign_q =  sign_bunit
-  endif
-
-  select case (profile_model) 
-
-  case (1)
-
-     ! Standard local simulation (one point)
-
-     q    = abs(q) * sign_q
-
-     if(toroidal_model == 2) then
-        ! n=0 test
-        ! specify rho and r_length_inv
-        toroidal_num = 0
-        k_theta      = 0.0
-        k_theta_rho  = 0.0
-        rho  = abs(rho) * sign_bunit
-        r_length_inv = 1.0 / (r_length_rho) / rho
-     else if(toroidal_model == 0) then
-        ! k_theta_rho and n are specified; compute rho
-        k_theta_rho = abs(k_theta_rho)
-        rho = k_theta_rho * rmin / (q * toroidal_num)
-        k_theta = k_theta_rho / rho
-        r_length_inv =  q * toroidal_num * shat / rmin
-     else if(toroidal_model == 1) then
-        ! rho and n are specified; compute k_theta
-        rho  = abs(rho) * sign_bunit
-        k_theta = (q * toroidal_num) / rmin
-        k_theta_rho = (q * toroidal_num) / rmin * rho
-        k_theta_rho = abs(k_theta_rho)
-        r_length_inv =  q * toroidal_num * shat / rmin
-     endif
-
-     ! general geometry -- accessible only from interface 
-     ! via parameters geo_ny_in and geo_yin_in
-     if(equilibrium_model == 3) then
-        geo_numeq_flag = 1
-        deallocate(geo_yin)
-        geo_ny = geo_ny_in   
-        allocate(geo_yin(8,0:geo_ny))
-        do j=0,geo_ny
-           geo_yin(:,j) = geo_yin_in(:,j)
-        enddo
-     endif
-
-     do is=1, n_species
-        vth(is) = sqrt(temp(is)/mass(is))
-     enddo
-
-     ! These normalizations are arbitrary for local profiles
-     temp_norm_fac   = 1.0
-     charge_norm_fac = 1.0
-     a_norm          = 1.0
-     dens_norm       = 1.0
-     temp_norm       = 1.0
-     vth_norm        = 1.0
-     b_norm          = 1.0
-
-  case (2)
-
-     ! Standard simulation with experimental profiles
-
-     call cgyro_experimental_profiles
-     if(error_status > 0) return
-     call cgyro_map_experimental_profiles
-           
-     ! Normalizing quantities
-     ! a_norm and b_norm are set in map_experimental_profiles
-     temp_norm_fac   = 1.6022*1000
-     charge_norm_fac = 1.6022
-     dens_norm       = dens(1)
-     temp_norm       = temp(1)
-
-     ! Compute vth/a (1/s) using dimensional quantities.  
-     ! mass(i) is thus measured in units of deuterium mass.
-     do is=1,n_species
-        vth(is) = sqrt(temp(is) * temp_norm_fac &
-             / (mass(is) * mass_deuterium)) &
-             * 1.0e4 / a_norm
-     enddo
-     vth_norm  = vth(1) * sqrt(mass(1))
-
-     ! Compute rho/a for species 1 using dimensional quantities
-     ! mass(i) is thus measured in units of deuterium mass.
-     rho = sqrt(temp(1) * temp_norm_fac &
-             * mass(1) * mass_deuterium) &
-             / (charge_norm_fac * b_norm) &
-             * 1.0e-4 / a_norm
-
+  ! Standard local simulation (one point)
+  
+  q    = abs(q) 
+  
+  if(toroidal_model == 2) then
+     ! n=0 test
+     ! specify rho and r_length_inv
+     toroidal_num = 0
+     k_theta      = 0.0
+     k_theta_rho  = 0.0
+     rho  = abs(rho) 
+     r_length_inv = 1.0 / (r_length_rho) / rho
+  else if(toroidal_model == 0) then
+     ! k_theta_rho and n are specified; compute rho
+     k_theta_rho = abs(k_theta_rho)
+     rho = k_theta_rho * rmin / (q * toroidal_num)
+     k_theta = k_theta_rho / rho
+     r_length_inv =  q * toroidal_num * shat / rmin
+  else if(toroidal_model == 1) then
      ! rho and n are specified; compute k_theta
+     rho  = abs(rho) 
      k_theta = (q * toroidal_num) / rmin
      k_theta_rho = (q * toroidal_num) / rmin * rho
      k_theta_rho = abs(k_theta_rho)
-     ! compute r_length
-      r_length_inv =  q * toroidal_num * shat / rmin
+     r_length_inv =  q * toroidal_num * shat / rmin
+  endif
 
-     ! Debye length
-     lambda_debye = profile_lambda_debye_scale*7.43* &
-          sqrt((1e3*te_ade)/(1e13*ne_ade))/a_norm
-
-     ! Compute collision frequency
-
-     ! Numerical coefficient (relative to M_D)
-     cc = sqrt(2.0) * pi * charge_norm_fac**4 &
-          * 1.0 / (4.0 * pi * 8.8542)**2 &
-          * 1.0 / (sqrt(mass_deuterium) * temp_norm_fac**1.5) &
-          * 1e9
-
-     do is=1,n_species
-
-        loglam = 24.0 - log(sqrt(ne_ade*1e13)/(te_ade*1000))
-
-        ! Collision rate (1/sec)
-        nu(is) = cc * loglam * dens(is) * z(is)**4 &
-             / (sqrt(mass(is)) * temp(is)**1.5)
-        
-        ! Express in local dimensionless GKCOLL units:
-        nu(is) = nu(is)/vth_norm
-
+  ! general geometry -- accessible only from interface 
+  ! via parameters geo_ny_in and geo_yin_in
+  geo_numeq_flag = 0
+  geo_ny = 0
+  allocate(geo_yin(8,0:geo_ny))
+  geo_yin(:,:) = 0.0
+  if(equilibrium_model == 3) then
+     geo_numeq_flag = 1
+     geo_ny = geo_ny_in  
+     deallocate(geo_yin)
+     allocate(geo_yin(8,0:geo_ny))
+     do j=0,geo_ny
+        geo_yin(:,j) = geo_yin_in(:,j)
      enddo
-
-     do is=1,n_species
-        ! Normalize n and t to value at r for species 1.
-        dens(is) = dens(is)/dens_norm
-        temp(is) = temp(is)/temp_norm
-        if(is == 1) then
-           te_ade = te_ade / temp_norm
-           ne_ade = ne_ade / dens_norm
-        endif
-        ! Normalize vth/a
-        vth(is) = vth(is)/vth_norm
-     enddo
-     
-     call PROFILE_EXP_alloc(0)
-     
-  end select
+  endif
+  
+  do is=1, n_species
+     vth(is) = sqrt(temp(is)/mass(is))
+  enddo
 
   if(adiabatic_ele_model == 0) then
      do is=1, n_species
@@ -205,11 +100,6 @@ subroutine cgyro_make_profiles
      write (io,'(e16.8)',advance='no') shat
      write (io,'(e16.8)',advance='no') rho
      write (io,'(e16.8)',advance='no') k_theta_rho
-     write (io,'(e16.8)',advance='no') dens_norm
-     write (io,'(e16.8)',advance='no') temp_norm
-     write (io,'(e16.8)',advance='no') vth_norm
-     write (io,'(e16.8)',advance='no') a_norm
-     write (io,'(e16.8)',advance='no') b_norm
      do is=1,n_species
         write (io,'(e16.8)',advance='no') dens(is)
         write (io,'(e16.8)',advance='no') temp(is)

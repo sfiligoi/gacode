@@ -127,7 +127,6 @@ contains
 
     implicit none
 
-    integer :: myio = 21
     logical :: lfe
 
     phi_old(:,:) = (0.0,0.0)

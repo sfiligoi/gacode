@@ -2,7 +2,7 @@
 ! cgyro_interface.f90
 !
 ! PURPOSE:
-!  Provides interface description for GKCOLL.
+!  Provides interface description for CGYRO
 !
 ! CALLING SEQUENCE:
 !  call cgyro_init(...)
@@ -17,17 +17,17 @@ module cgyro_interface
 
   ! Input parameters (set to default values from python/cgyro_dict.py)
   integer :: cgyro_n_energy_in = 6
-  integer :: cgyro_n_xi_in     = 17
-  integer :: cgyro_n_theta_in  = 17
+  integer :: cgyro_n_xi_in     = 16
+  integer :: cgyro_n_theta_in  = 31
   integer :: cgyro_n_radial_in = 4
-  integer :: cgyro_e_max_in    = 6
+  integer :: cgyro_e_max_in    = 7
   real    :: cgyro_delta_t_in  = 0.01
   real    :: cgyro_max_time_in = 100.0
   real    :: cgyro_freq_tol_in = 0.001
   integer :: cgyro_restart_write_in = 0
   integer :: cgyro_restart_mode_in  = 0
-  real    :: cgyro_rupwind_eps_in = 0.0
-  integer :: cgyro_rupwind_n_in = 0
+  real    :: cgyro_rupwind_eps_in = 1.0
+  integer :: cgyro_rupwind_n_in = 4
   real    :: cgyro_tupwind_eps_in = 1.0
   integer :: cgyro_toroidal_model_in = 1
   integer :: cgyro_toroidal_num_in  = 1
@@ -37,15 +37,11 @@ module cgyro_interface
   real    :: cgyro_rmin_in     = 0.5
   real    :: cgyro_rmaj_in     = 3.0
   integer :: cgyro_silent_flag_in = 0
-  integer :: cgyro_equilibrium_model_in = 0
-  integer :: cgyro_collision_model_in   = 4
-  integer :: cgyro_profile_model_in     = 1
-  integer :: cgyro_ipccw_in  = -1
-  integer :: cgyro_btccw_in  = -1
+  integer :: cgyro_equilibrium_model_in = 2
+  integer :: cgyro_collision_model_in   = 1
   real    :: cgyro_te_ade_in = 1.0
   real    :: cgyro_ne_ade_in = 1.0
   real    :: cgyro_lambda_debye_in = 0.0
-  real    :: cgyro_profile_lambda_debye_scale_in = 0.0
   integer :: cgyro_n_species_in = 1
   integer :: cgyro_z_1_in      = 1
   real    :: cgyro_mass_1_in   = 1.0
@@ -100,7 +96,9 @@ module cgyro_interface
   real    :: cgyro_s_zeta_in   = 0.0
   real    :: cgyro_zmag_in     = 0.0
   real    :: cgyro_s_zmag_in   = 0.0
-  real    :: cgyro_beta_star_in = 0.0
+  real    :: cgyro_beta_star_in  = 0.0
+  integer :: cgyro_n_field_in    = 1
+  real    :: cgyro_betae_unit_in = 0.0
   integer :: cgyro_geo_ny_in   = 0
   real, dimension(8,0:16) :: cgyro_geo_yin_in = 0.0
 
@@ -148,13 +146,9 @@ contains
     cgyro_silent_flag_in       = silent_flag
     cgyro_equilibrium_model_in = equilibrium_model
     cgyro_collision_model_in   = collision_model
-    cgyro_profile_model_in     = profile_model
-    cgyro_ipccw_in  = ipccw
-    cgyro_btccw_in  = btccw
     cgyro_te_ade_in = te_ade
     cgyro_ne_ade_in = ne_ade
     cgyro_lambda_debye_in = lambda_debye
-    cgyro_profile_lambda_debye_scale_in = profile_lambda_debye_scale
     cgyro_n_species_in = n_species
     cgyro_z_1_in      = z(1)
     cgyro_mass_1_in   = mass(1)
@@ -209,7 +203,9 @@ contains
     cgyro_s_zeta_in   = s_zeta
     cgyro_zmag_in     = zmag
     cgyro_s_zmag_in   = s_zmag
-    cgyro_beta_star_in = beta_star
+    cgyro_beta_star_in  = beta_star
+    cgyro_n_field_in    = n_field
+    cgyro_betae_unit_in = betae_unit
     cgyro_geo_ny_in   = geo_ny_in
     cgyro_geo_yin_in(:,:) = geo_yin_in(:,:)
 
@@ -245,13 +241,9 @@ contains
     silent_flag       = cgyro_silent_flag_in
     equilibrium_model = cgyro_equilibrium_model_in
     collision_model   = cgyro_collision_model_in
-    profile_model     = cgyro_profile_model_in
-    ipccw     = cgyro_ipccw_in
-    btccw     = cgyro_btccw_in
     te_ade    = cgyro_te_ade_in
     ne_ade    = cgyro_ne_ade_in
     lambda_debye = cgyro_lambda_debye_in
-    profile_lambda_debye_scale = cgyro_profile_lambda_debye_scale_in
     n_species = cgyro_n_species_in
     z(1)      = cgyro_z_1_in
     mass(1)   = cgyro_mass_1_in
@@ -306,8 +298,10 @@ contains
     s_zeta    = cgyro_s_zeta_in
     zmag      = cgyro_zmag_in
     s_zmag    = cgyro_s_zmag_in
-    beta_star = cgyro_beta_star_in
-    geo_ny_in    = cgyro_geo_ny_in
+    beta_star  = cgyro_beta_star_in
+    n_field    = cgyro_n_field_in
+    betae_unit = cgyro_betae_unit_in
+    geo_ny_in  = cgyro_geo_ny_in
     geo_yin_in(:,:) = cgyro_geo_yin_in(:,:)
 
   end subroutine map_interface2global

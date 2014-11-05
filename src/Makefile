@@ -12,14 +12,10 @@ OBJECTS = cgyro_globals.o \
           cgyro_mpi_grid.o \
           cgyro_catch_error_routines.o \
           cgyro_error.o \
-	  cgyro_profile_exp.o \
           cgyro_check.o \
-	  cgyro_allocate_profile.o \
 	  cgyro_make_profiles.o \
           cgyro_read_input.o \
           cgyro_equilibrium.o \
-          cgyro_experimental_profiles.o \
-          cgyro_map_experimental_profiles.o \
           cgyro_interface.o \
           cgyro_init.o \
           cgyro_run.o \

@@ -56,6 +56,9 @@ module cgyro_globals
   real :: s_zmag
   real :: beta_star
 
+  integer :: n_field
+  real    :: betae_unit
+
   integer :: toroidal_model
   integer :: toroidal_num
   real :: rho
@@ -74,14 +77,10 @@ module cgyro_globals
   !---------------------------------------------------------------
 
   !
-  integer :: ipccw
-  integer :: btccw
-  !
   real :: te_ade
   real :: ne_ade
   !
   real :: lambda_debye
-  real :: profile_lambda_debye_scale
   !
   integer, dimension(6) :: z
   real, dimension(6) :: mass
@@ -90,7 +89,9 @@ module cgyro_globals
   real, dimension(6) :: dlnndr
   real, dimension(6) :: dlntdr
   real, dimension(6) :: nu
-  ! 
+  !
+  real :: nu_1_in
+  !
   real, dimension(6) :: vth  
   !---------------------------------------------------------------
 
@@ -123,10 +124,7 @@ module cgyro_globals
   !
   integer :: equilibrium_model
   integer :: collision_model 
-  integer :: profile_model
   integer :: adiabatic_ele_model
-  real    :: sign_q
-  real    :: sign_bunit
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -158,15 +156,6 @@ module cgyro_globals
   real, dimension(:), allocatable :: xi, w_xi
   real, dimension(:,:), allocatable :: xi_deriv_mat, xi_lor_mat
   real, dimension(:,:), allocatable :: e_deriv1_mat, e_deriv2_mat
-
-  ! normalizations for experimental profiles
-  real  :: temp_norm_fac, charge_norm_fac
-  real  :: a_norm
-  real  :: dens_norm
-  real  :: temp_norm
-  real  :: vth_norm
-  real  :: b_norm
-  real, parameter :: mass_deuterium = 3.3452   ! (x 10-27 kg)
 
   ! error checking
   integer :: error_status = 0

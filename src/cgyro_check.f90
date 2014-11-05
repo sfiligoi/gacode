@@ -14,13 +14,13 @@ subroutine cgyro_check
   !-----------------------------------------------------------
   ! Grid parameter checks
   !
-  !if (modulo(n_theta,2) == 0) then 
-  !   call cgyro_error('ERROR: (GKCOLL) n_theta must be odd')
-  !   return
-  !endif
-  !
+  if (modulo(n_xi,2) /= 0) then 
+     call cgyro_error('ERROR: (CGYRO) n_xi must be even')
+     return
+  endif
+  
   if(n_species > 6) then
-     call cgyro_error('ERROR: (GKCOLL) max n_species is 6')
+     call cgyro_error('ERROR: (CGYRO) max n_species is 6')
      return
   endif
 
@@ -67,7 +67,7 @@ subroutine cgyro_check
 
   case default
 
-     call cgyro_error('ERROR: (GKCOLL) invalid collision_model')
+     call cgyro_error('ERROR: (CGYRO) invalid collision_model')
      return
 
   end select
@@ -91,7 +91,7 @@ subroutine cgyro_check
      !if(silent_flag == 0 .and. i_proc == 0) then
      !   write(io_cgyroout,*) 'equilibrium_model  : LARGE-ASPECT-RATIO'
      !end if
-     call cgyro_error('ERROR: (GKCOLL) equilibrium_model invalid')
+     call cgyro_error('ERROR: (CGYRO) equilibrium_model invalid')
      return
 
   case (2) 
@@ -107,82 +107,39 @@ subroutine cgyro_check
      end if
 
      if(geo_ny <= 0) then
-        call cgyro_error('ERROR: (GKCOLL) geometry coefficients missing')
+        call cgyro_error('ERROR: (CGYRO) geometry coefficients missing')
         return
      endif
 
   case default
 
-     call cgyro_error('ERROR: (GKCOLL) equilibrium_model invalid')
+     call cgyro_error('ERROR: (CGYRO) equilibrium_model invalid')
      return
 
   end select
   !------------------------------------------------------------
 
   !------------------------------------------------------------
-  ! Profile model
-  !
-  select case (profile_model)  
+  ! Check local profile params
 
-  case (1) 
-
-     do is=1,n_species
-        if(dens(is) <= 0.0) then
-           call cgyro_error('ERROR: (GKCOLL) density must be positive')
-           return
-        end if
-        if(temp(is) <= 0.0) then
-           call cgyro_error('ERROR: (GKCOLL) temperature must be positive')
-           return
-        end if
-        !if(nu(is) <= 0.0) then
-        !   call cgyro_error('ERROR: (GKCOLL) collision frequency must be positive')
-        !   return
-        !end if
-        if(z(is) == 0.0) then
-           call cgyro_error('ERROR: (GKCOLL) charge must be non-zero')
-           return
-        end if
-     enddo
-
-     if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_cgyroout,*) 'profile_model      : LOCAL'
+  do is=1,n_species
+     if(dens(is) <= 0.0) then
+        call cgyro_error('ERROR: (CGYRO) density must be positive')
+        return
      end if
-
-  case (2) 
-     
-     if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_cgyroout,*) 'profile_model      : EXPERIMENTAL PROFILE'
+     if(temp(is) <= 0.0) then
+        call cgyro_error('ERROR: (CGYRO) temperature must be positive')
+        return
      end if
-     
-  case default
-     
-     call cgyro_error('ERROR: (GKCOLL) invalid profile_model')
-     return
-     
-  end select
-  
-  !-----------------------------------------------------------
-  ! Sign of B checks
-  if(sign_q > 0.0) then
-     if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_cgyroout,*) 'sign_q: POSITIVE'
+     if(nu(is) < 0.0) then
+        call cgyro_error('ERROR: (CGYRO) collision frequency must be positive')
+        return
      end if
-  else
-     if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_cgyroout,*) 'sign_q: NEGATIVE'
+     if(z(is) == 0.0) then
+        call cgyro_error('ERROR: (CGYRO) charge must be non-zero')
+        return
      end if
-  end if
-
-  if(sign_bunit > 0.0) then
-     if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_cgyroout,*) 'sign_bunit: POSITIVE (BT CW)'
-     end if
-  else
-     if(silent_flag == 0 .and. i_proc == 0) then
-        write(io_cgyroout,*) 'sign_bunit: NEGATIVE (BT CCW)'
-     end if
-  end if
+  enddo
 
   !------------------------------------------------------------
   ! Toroidal mode number model
@@ -190,15 +147,11 @@ subroutine cgyro_check
   select case (toroidal_model)  
 
   case(0)
-     if(profile_model == 2) then
-        call cgyro_error('ERROR: (GKCOLL) toroidal_model=0 not valid with experimental profiles')
-        return
-     endif
      if(silent_flag == 0 .and. i_proc == 0) then
         write(io_cgyroout,*) 'toroidal_model: Specify k_theta'
      endif
      if(k_theta_rho < 0) then
-        call cgyro_error('ERROR: (GKCOLL) k_theta must be positive')
+        call cgyro_error('ERROR: (CGYRO) k_theta must be positive')
         return
      endif
      
@@ -206,23 +159,15 @@ subroutine cgyro_check
      if(silent_flag == 0 .and. i_proc == 0) then
         write(io_cgyroout,*) 'toroidal_model: Specify rho'
      endif
-     if(profile_model == 1 .and. rho < 0) then
-        call cgyro_error('ERROR: (GKCOLL) rho_unit must be positive')
-        return
-     endif
 
   case(2)
-     if(profile_model == 2) then
-        call cgyro_error('ERROR: (GKCOLL) toroidal_model=2 not valid with experimental profiles')
-        return
-     endif
      if(silent_flag == 0 .and. i_proc == 0) then
         write(io_cgyroout,*) 'toroidal_model: n=0 test; Specify rho and r_length_rho'
      endif
      
   case default
      
-     call cgyro_error('ERROR: (GKCOLL) invalid toroidal_model')
+     call cgyro_error('ERROR: (CGYRO) invalid toroidal_model')
      return
      
   end select

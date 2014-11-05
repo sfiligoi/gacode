@@ -21,18 +21,15 @@ subroutine cgyro_do
   use cgyro_poisson
   use cgyro_collision
   use cgyro_freq
-  use cgyro_allocate_profile
 
   implicit none
 
-  integer :: ix, ir, it, jr, is, ie
+  integer :: ix, ir, it
   character(len=80)  :: runfile_phi   = 'out.cgyro.phi'
   character(len=80)  :: runfile_phiB  = 'out.cgyro.phiB'
   character(len=80)  :: runfile_hx    = 'out.cgyro.hx'
   character(len=80)  :: runfile_grids = 'out.cgyro.grids'
   character(len=80)  :: runfile_time  = 'out.cgyro.time'
-  character(len=80)  :: runfile_test  = 'out.cgyro.test'
-  character(len=80)  :: runfile_test2 = 'out.cgyro.test2'
   integer :: myio = 20
   integer :: print_step=10
   complex, dimension(:,:), allocatable :: f_balloon
