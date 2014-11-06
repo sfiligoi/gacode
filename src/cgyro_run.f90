@@ -12,8 +12,6 @@ subroutine cgyro_run()
 
    implicit none
 
-   integer :: is
-
    ! Map INTERFACE parameters -> GLOBAL variables
    call map_interface2global
 

@@ -13,8 +13,8 @@ contains
     implicit none
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
     real, external :: BESJ0
-    integer :: is,ir,it,ie,ix,jx
-    real :: arg, val
+    integer :: is,ir,it,ie,ix
+    real :: arg
 
     if(flag == 1) then
        if(initialized) return

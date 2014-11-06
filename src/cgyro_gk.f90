@@ -122,15 +122,15 @@ contains
   
   subroutine GK_init
     use cgyro_globals
-    use cgyro_poisson
+    use cgyro_field
     use cgyro_gyro
 
     implicit none
 
     logical :: lfe
 
-    phi_old(:,:) = (0.0,0.0)
-    h_x(:,:)     = (0.0,0.0)
+    field_old(:,:,:)  = (0.0,0.0)
+    h_x(:,:)      = (0.0,0.0)
 
     if (restart_mode == 1) then
        inquire(file=trim(path)//runfile_restart,exist=lfe)
@@ -166,20 +166,21 @@ contains
           enddo
        endif
     endif
-    call POISSONx_do
+
+    call FIELDx_do
 
   end subroutine GK_init
 
   subroutine GK_do
 
     use cgyro_globals
-    use cgyro_poisson
+    use cgyro_field
     use cgyro_gyro
 
     implicit none
 
-    ! compute new collisionless little_h: h = H - ze/T G phi
-    ! assumes have h_x, cap_h_x, and phi
+    ! compute new collisionless little_h: h = H - ze/T (G phi - G vpar/c apar)
+    ! assumes have h_x, cap_h_x, and fields
     ! RK4
 
     h0_x = h_x
@@ -187,23 +188,23 @@ contains
     ! Stage 1
     call get_gkRHS(1)
     h_x = h0_x + 0.5 * delta_t * rhs(1,:,:)
-    call POISSONx_do
+    call FIELDx_do
 
     ! Stage 2
     call get_gkRHS(2)
     h_x = h0_x + 0.5 * delta_t * rhs(2,:,:)
-    call POISSONx_do
+    call FIELDx_do
 
     ! Stage 3
     call get_gkRHS(3)
     h_x = h0_x + delta_t * rhs(3,:,:)
-    call POISSONx_do
+    call FIELDx_do
 
     ! Stage 4
     call get_gkRHS(4)
     h_x = h0_x + delta_t/6.0 * &
          (rhs(1,:,:)+2.0*rhs(2,:,:)+2.0*rhs(3,:,:)+rhs(4,:,:))  
-    call POISSONx_do
+    call FIELDx_do
 
   end subroutine GK_do
   
@@ -225,7 +226,7 @@ contains
 
     call timer_lib_in('gkrhs')
 
-    ! Get the RHS collisionless GK little_h: h = H - ze/T G phi
+    ! Get the RHS collisionless GK little_h: h = H-ze/T (G phi - G vpar/c apar)
     rhs(ij,:,:) = (0.0,0.0)
 
     iv_loc = 0
@@ -289,7 +290,14 @@ contains
                * (dlnndr(is) + dlntdr(is) * (energy(ie)-1.5))
           rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc) &
                - val * z(is)/temp(is) &
-               * gyrox_J0(is,ir,it,ie,ix) * phi(ir,it)
+               * gyrox_J0(is,ir,it,ie,ix) * field(ir,it,1)
+          if(n_field > 1) then
+             rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc) &
+                  - val * z(is)/temp(is) &
+                  * gyrox_J0(is,ir,it,ie,ix) * field(ir,it,2) &
+                  * (-xi(ix) *sqrt(2.0*energy(ie)))
+          endif
+          
 
        enddo
     enddo

@@ -53,15 +53,16 @@ contains
     ! Frequency
     total_weight = 0.0
     freq = (0.0,0.0)
-    if(minval(abs(phi_old)) == 0.0) then
+    if(minval(abs(field_old(:,:,1))) == 0.0) then
        freq     = 0.0
        freq_err = 1.0
     else
        do ir=1,n_radial
           do it=1,n_theta
-             mode_weight(ir,it) = abs(phi(ir,it))
+             mode_weight(ir,it) = abs(field(ir,it,1))
              total_weight = total_weight + mode_weight(ir,it)
-             freq_loc(ir,it) = (i_c/delta_t)*log(phi(ir,it)/phi_old(ir,it))
+             freq_loc(ir,it) = (i_c/delta_t) &
+                  * log(field(ir,it,1)/field_old(ir,it,1))
              freq = freq + freq_loc(ir,it) * mode_weight(ir,it)
           enddo
        enddo

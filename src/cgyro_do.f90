@@ -18,7 +18,7 @@ subroutine cgyro_do
   use cgyro_equilibrium
   use cgyro_gyro
   use cgyro_gk
-  use cgyro_poisson
+  use cgyro_field
   use cgyro_collision
   use cgyro_freq
 
@@ -27,6 +27,8 @@ subroutine cgyro_do
   integer :: ix, ir, it
   character(len=80)  :: runfile_phi   = 'out.cgyro.phi'
   character(len=80)  :: runfile_phiB  = 'out.cgyro.phiB'
+  character(len=80)  :: runfile_apar   = 'out.cgyro.apar'
+  character(len=80)  :: runfile_aparB  = 'out.cgyro.aparB'
   character(len=80)  :: runfile_hx    = 'out.cgyro.hx'
   character(len=80)  :: runfile_grids = 'out.cgyro.grids'
   character(len=80)  :: runfile_time  = 'out.cgyro.time'
@@ -87,22 +89,22 @@ subroutine cgyro_do
   allocate(h_x(nc,nv_loc))
   allocate(cap_h_c(nc,nv_loc))
   allocate(cap_h_v(nv,nc_loc))
-  allocate(phi(n_radial,n_theta))
-  allocate(phi_loc(n_radial,n_theta))
-  allocate(phi_old(n_radial,n_theta))
+  allocate(field(n_radial,n_theta,n_field))
+  allocate(field_loc(n_radial,n_theta,n_field))
+  allocate(field_old(n_radial,n_theta,n_field))
   allocate(f_balloon(n_radial,n_theta))
 
   call EQUIL_alloc(1)
   call EQUIL_do
   call GYRO_alloc(1)
-  call POISSON_alloc(1)
+  call FIELD_alloc(1)
   call GK_alloc(1)
   call COLLISION_alloc(1)
   call FREQ_alloc(1)
 
   ! Timer initialization
   call timer_lib_init('gk_init')
-  call timer_lib_init('poissonx')
+  call timer_lib_init('fieldx')
   call timer_lib_init('gkrhs')
   call timer_lib_init('collision')
 
@@ -115,6 +117,12 @@ subroutine cgyro_do
      close(myio)
      open(unit=myio,file=trim(path)//runfile_phiB,status='replace')
      close(myio)
+     if(n_field > 1) then
+        open(unit=myio,file=trim(path)//runfile_apar,status='replace')
+        close(myio)
+        open(unit=myio,file=trim(path)//runfile_aparB,status='replace')
+        close(myio)
+     endif
      open(unit=myio,file=trim(path)//runfile_hx,status='replace')
      close(myio)
      open(unit=myio,file=trim(path)//runfile_time,status='replace')
@@ -139,11 +147,11 @@ subroutine cgyro_do
   do itime = 1, nt_step
 
      ! Collisionless gyrokinetic equation
-     ! Returns new h_x, cap_h_x, and phi 
+     ! Returns new h_x, cap_h_x, and fields 
      call GK_do
 
      ! Collision step
-     ! Returns new h_x, cap_h_x, and phi
+     ! Returns new h_x, cap_h_x, and fields
      call COLLISION_do
 
      if(mod(itime,print_step) == 0) then
@@ -151,21 +159,25 @@ subroutine cgyro_do
         ! Compute frequency and print
         call FREQ_do
 
-        ! Print phi
+        ! Print fields
         if(silent_flag == 0 .and. i_proc == 0) then
+
+           ! time
            open(unit=myio,file=trim(path)//runfile_time,status='old',&
                 position='append')
            write(myio,'(1pe13.5e3)') (itime * delta_t)
            close(myio)
+
+           ! phi
            open(unit=myio,file=trim(path)//runfile_phi,status='old',&
                 position='append')
-           write(myio,'(1pe13.5e3)') transpose(phi(:,:))
+           write(myio,'(1pe13.5e3)') transpose(field(:,:,1))
            close(myio)
 
            ! Construct ballooning-space form of phi
            do ir=1,n_radial
               do it=1,n_theta
-                 f_balloon(ir,it) = phi(ir,it) &
+                 f_balloon(ir,it) = field(ir,it,1) &
                       *exp(-2*pi*i_c*indx_r(ir)*k_theta*rmin)
               enddo
            enddo
@@ -173,6 +185,27 @@ subroutine cgyro_do
                 position='append')
            write(myio,'(1pe13.5e3)') transpose(f_balloon(:,:))
            close(myio)
+
+           if(n_field > 1) then
+              ! apar
+              open(unit=myio,file=trim(path)//runfile_apar,status='old',&
+                   position='append')
+              write(myio,'(1pe13.5e3)') transpose(field(:,:,2))
+              close(myio)
+
+              ! Construct ballooning-space form of apar
+              do ir=1,n_radial
+                 do it=1,n_theta
+                    f_balloon(ir,it) = field(ir,it,2) &
+                         *exp(-2*pi*i_c*indx_r(ir)*k_theta*rmin)
+                 enddo
+              enddo
+              open(unit=myio,file=trim(path)//runfile_aparB,status='old',&
+                   position='append')
+              write(myio,'(1pe13.5e3)') transpose(f_balloon(:,:))
+              close(myio)
+           endif
+           
         endif
 
         ! Check for convergence
@@ -200,7 +233,7 @@ subroutine cgyro_do
 
      endif
 
-     phi_old = phi
+     field_old  = field
 
   enddo
 
@@ -231,7 +264,7 @@ subroutine cgyro_do
   ! Print timers
   if (i_proc == 0) then
      print '(a,1x,1pe11.4)','gk_init   ',timer_lib_time('gk_init')
-     print '(a,1x,1pe11.4)','poissonx  ',timer_lib_time('poissonx')
+     print '(a,1x,1pe11.4)','fieldx  ',timer_lib_time('fieldx')
      print '(a,1x,1pe11.4)','gkrhs     ',timer_lib_time('gkrhs')
      print '(a,1x,1pe11.4)','collision ',timer_lib_time('collision')
   endif
@@ -241,7 +274,7 @@ subroutine cgyro_do
   call EQUIL_alloc(0)
   call GYRO_alloc(0)
   call GK_alloc(0)
-  call POISSON_alloc(0)
+  call FIELD_alloc(0)
   call COLLISION_alloc(0)
   call FREQ_alloc(0)
 
@@ -258,9 +291,9 @@ subroutine cgyro_do
   if(allocated(h_x))           deallocate(h_x)
   if(allocated(cap_h_c))       deallocate(cap_h_c)
   if(allocated(cap_h_v))       deallocate(cap_h_v)
-  if(allocated(phi))           deallocate(phi)
-  if(allocated(phi_loc))       deallocate(phi_loc)
-  if(allocated(phi_old))       deallocate(phi_old)
+  if(allocated(field))         deallocate(field)
+  if(allocated(field_loc))     deallocate(field_loc)
+  if(allocated(field_old))      deallocate(field_old)
   if(allocated(f_balloon))     deallocate(f_balloon)
 
 end subroutine cgyro_do

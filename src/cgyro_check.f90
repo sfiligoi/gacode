@@ -31,6 +31,35 @@ subroutine cgyro_check
   end if
   !------------------------------------------------------------
 
+  ! Fields
+  select case(n_field)
+
+     case(1)
+        if(silent_flag == 0 .and. i_proc == 0) then
+           write(io_cgyroout,*) 'field    : ELECTROSTATIC (PHI)'
+        endif
+
+     case(2)
+        if(silent_flag == 0 .and. i_proc == 0) then
+           write(io_cgyroout,*) 'field    : ELECTROMAGNETIC (PHI + APAR)'
+        endif
+
+        if(abs(betae_unit) < epsilon(0.0)) then
+           call cgyro_error('ERROR: (CGYRO) for electromagnetic, BETAE_UNIT must be nonzero')
+           return
+        endif
+        if(adiabatic_ele_model == 1) then
+           call cgyro_error('ERROR: (CGYRO) for electromagnetic, must have electron species')
+           return
+        endif
+
+     case default
+        
+        call cgyro_error('ERROR: (CGYRO) invalid n_field')
+        return
+        
+     end select
+
   ! Collision model
   !
   select case (collision_model)  

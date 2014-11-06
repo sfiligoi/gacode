@@ -147,9 +147,9 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: h_x
   complex, dimension(:,:), allocatable :: cap_h_c
   complex, dimension(:,:), allocatable :: cap_h_v
-  complex, dimension(:,:) , allocatable :: phi
-  complex, dimension(:,:) , allocatable :: phi_loc
-  complex, dimension(:,:) , allocatable :: phi_old
+  complex, dimension(:,:,:) , allocatable :: field
+  complex, dimension(:,:,:) , allocatable :: field_loc
+  complex, dimension(:,:,:) , allocatable :: field_old
 
   integer, dimension(:), allocatable :: indx_xi, indx_r
   real, dimension(:), allocatable :: energy, w_e

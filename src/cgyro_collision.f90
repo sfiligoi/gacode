@@ -352,7 +352,7 @@ contains
     use timer_lib
 
     use cgyro_globals
-    use cgyro_poisson
+    use cgyro_field
     use cgyro_gyro
 
     implicit none
@@ -396,7 +396,7 @@ contains
     enddo
 
     ! Compute the new phi
-    call POISSONh_do
+    call FIELDh_do
 
     call fTRANSP_INIT(nc,1,nv,1,NEW_COMM_1)
     call fTRANSP_DO(cap_h_v,cap_h_c)
@@ -419,7 +419,12 @@ contains
 
           h_x(ic,iv_loc) = cap_h_c(ic,iv_loc) &
                - z(is)/temp(is) * gyrox_J0(is,ir,it,ie,ix) &
-               * phi(ir,it)
+               * field(ir,it,1)
+          if(n_field > 1) then
+             h_x(ic,iv_loc) = h_x(ic,iv_loc) &
+                  + z(is)/temp(is) * gyrox_J0(is,ir,it,ie,ix) &
+               * field(ir,it,2) * xi(ix) * sqrt(2.0*energy(ie))
+          endif
        enddo
     enddo
 
