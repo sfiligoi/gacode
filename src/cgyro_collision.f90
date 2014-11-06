@@ -127,7 +127,12 @@ contains
        ! set-up the collision matrix
        sum_den = 0.0
        do is=1,n_species
-          sum_den = sum_den + z(is)**2 * dens(is) / temp(is)
+          do ie=1,n_energy
+             do ix=1,n_xi
+                sum_den = sum_den + 0.5 * w_xi(ix) &
+                     * z(is)**2/temp(is) *dens(is) * w_e(ie)
+             enddo
+          enddo
        enddo
        if(adiabatic_ele_model == 1) then
           sum_den = sum_den + dens_ele / temp_ele
@@ -306,6 +311,29 @@ contains
                      * z(js)*dens(js) &
                      * gyrox_J0(js,ir,it,je,jx) * w_e(je) &
                      * 0.5 * w_xi(jx)
+
+                ! Ampere component
+                if(n_field > 1) then
+                   cmat(ic_loc,iv,jv) = cmat(ic_loc,iv,jv) &
+                        - z(is)/temp(is) / &
+                        (-k_perp(it,ir)**2 * lambda_debye**2 &
+                        * dens_ele / temp_ele &
+                        + sum_den) &
+                        * gyrox_J0(is,ir,it,ie,ix) &
+                        * z(js)*dens(js) &
+                        * gyrox_J0(js,ir,it,je,jx) * w_e(je) &
+                        * 0.5 * w_xi(jx)
+                   amat(iv,jv) = amat(iv,jv) &
+                        - z(is)/temp(is) / &
+                        (-k_perp(it,ir)**2 * lambda_debye**2 &
+                        * dens_ele / temp_ele &
+                        + sum_den) &
+                        * gyrox_J0(is,ir,it,ie,ix) &
+                        * z(js)*dens(js) &
+                        * gyrox_J0(js,ir,it,je,jx) * w_e(je) &
+                        * 0.5 * w_xi(jx)
+                endif
+                
              enddo
           enddo
 
