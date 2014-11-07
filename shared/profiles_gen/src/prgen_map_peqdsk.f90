@@ -12,16 +12,43 @@ subroutine prgen_map_peqdsk
   implicit none
   integer :: i
   real, dimension(nx) :: ni_d
-  real, dimension(nx) :: ni_c
+  real, dimension(3,nx) :: ni_imp
   real, dimension(nx) :: ni_b
+  real, dimension(nx) :: z_eff
 
   ! Compute rho, bref and arho:
   call prgen_get_chi(nx,q,kappa,rmin,dpsi,rho,peqdsk_bref,peqdsk_arho)
 
   ni_d(:) = 10*peqdsk_ni(:)
-  ni_c(:) = 10*(peqdsk_ne(:)-peqdsk_ni(:)-peqdsk_nb(:))/6.0
+  if(peqdsk_type == 0) then
+     ! old p-file, assume missing density is carbon
+     ni_imp(1,:) = 10*(peqdsk_ne(:)-peqdsk_ni(:)-peqdsk_nb(:))/6.0
+     peqdsk_nimp  = 1
+     peqdsk_z(1)  = 1.0
+     peqdsk_m(1)  = 2.0
+     peqdsk_z(2)  = 6.0
+     peqdsk_m(2)  = 12.0
+     if(peqdsk_nbeams == 1) then
+        peqdsk_z(3)  = 1.0
+        peqdsk_m(3)  = 2.0
+     endif
+  else
+     ! new p-file
+     do i=1,peqdsk_nimp
+        ni_imp(i,:) = 10*peqdsk_nz(i,:)
+     enddo
+  endif
   ni_b(:) = 10*peqdsk_nb(:)
-  
+  z_eff(:) = peqdsk_z(1)**2 * ni_d(:)
+  do i=1,peqdsk_nimp
+     z_eff(:) = peqdsk_z(1+i)**2 * ni_imp(1,:)
+  enddo
+  z_eff(:) = peqdsk_z(1+peqdsk_nimp+1)**2 * ni_b(:)
+  z_eff(:) = z_eff(:)/(10*peqdsk_ne(:))
+
+  print *, peqdsk_z(:)
+  print *, peqdsk_m
+
   !---------------------------------------------------------
   ! Map profile data onto single array:
   !
@@ -37,7 +64,7 @@ subroutine prgen_map_peqdsk
   vec(6,:)  = delta(:)
   vec(7,:)  = peqdsk_te(:)
   vec(8,:)  = peqdsk_ne(:)*10
-  vec(9,:)  = (ni_d(:)+36.0*ni_c(:)+ni_b(:))/(10*peqdsk_ne(:)) ! z_eff
+  vec(9,:)  = z_eff(:)
   ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
   vec(10,:) = -ipccw*1e3*peqdsk_omgeb(:) 
   vec(11,:) = 0.0      ! flow_mom
@@ -54,17 +81,21 @@ subroutine prgen_map_peqdsk
 
   ! ni, nc, nb
   vec(21,:) = ni_d(:)
-  vec(22,:) = ni_c(:)
-  vec(23,:) = ni_b(:)
+  do i=1,peqdsk_nimp
+     vec(21+i,:) = ni_imp(i,:)
+  enddo
+  vec(21+peqdsk_nimp+1,:) = ni_b(:)
 
   ! ti, tc, tb
   vec(26,:) = peqdsk_ti(:)
-  vec(27,:) = peqdsk_ti(:)
+  do i=1,peqdsk_nimp
+     vec(26+i,:) = peqdsk_ti(:)
+  enddo
   do i=1,peqdsk_nj
      if (peqdsk_nb(i) > epsilon(0.)) then
-        vec(28,i) = peqdsk_pb(i)/(peqdsk_nb(i)*10)/1.602
+        vec(26+peqdsk_nimp+1,i) = peqdsk_pb(i)/(peqdsk_nb(i)*10)/1.602
      else
-        vec(28,i) = 0.0
+        vec(26+peqdsk_nimp+1,i) = 0.0
      endif
   enddo
 

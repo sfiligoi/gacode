@@ -12,7 +12,8 @@ subroutine prgen_read_peqdsk
   implicit none
 
   integer, parameter :: ncol=3
-  integer :: i
+  integer :: i, num
+  real    :: y1, y2, y3
   logical :: ierr
   real, dimension(:,:), allocatable :: xv
 
@@ -84,10 +85,12 @@ subroutine prgen_read_peqdsk
      call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_nb,peqdsk_nj)
      deallocate(xv)
      close(1)
+     peqdsk_nbeams = 1
   else
      peqdsk_nb(:) = 0.0
+     peqdsk_nbeams = 0
   endif
-
+     
   ! pb(KPa)
   inquire(file='pfile.pb',exist=ierr)
   if(ierr) then
@@ -100,6 +103,75 @@ subroutine prgen_read_peqdsk
      close(1)
   else
      peqdsk_pb(:) = 0.0
+  endif
+
+  peqdsk_nimp = 0
+  peqdsk_nz(:,:) = 0.0
+  inquire(file='pfile.nz1',exist=ierr)
+  if(ierr) then
+     open(unit=1,file='pfile.nz1',status='old')
+     read(1,*) i
+     allocate(xv(ncol,i))
+     read(1,*) xv
+     call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_nz(1,:),peqdsk_nj)
+     deallocate(xv)
+     close(1)
+     peqdsk_nimp = peqdsk_nimp + 1
+     inquire(file='pfile.nz2',exist=ierr)
+     if(ierr) then
+        open(unit=1,file='pfile.nz2',status='old')
+        read(1,*) i
+        allocate(xv(ncol,i))
+        read(1,*) xv
+        call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_nz(2,:),peqdsk_nj)
+        deallocate(xv)
+        close(1)
+        peqdsk_nimp = peqdsk_nimp + 1
+        inquire(file='pfile.nz3',exist=ierr)
+        if(ierr) then
+           open(unit=1,file='pfile.nz3',status='old')
+           read(1,*) i
+           allocate(xv(ncol,i))
+           read(1,*) xv
+           call cub_spline(xv(1,:),xv(2,:),i,peqdsk_psi,peqdsk_nz(3,:),peqdsk_nj)
+           deallocate(xv)
+           close(1)
+           peqdsk_nimp = peqdsk_nimp + 1 
+           inquire(file='pfile.nz4',exist=ierr)
+           if(ierr) then
+              print *, '(PROFILES_GEN) ERROR: Too many impurity species in pfile'
+              stop
+           endif
+        endif
+     endif
+  endif
+  
+  peqdsk_z(:) = 0.0
+  peqdsk_m(:) = 0.0
+  inquire(file='pfile.species',exist=ierr)
+  if(ierr) then
+     peqdsk_type = 1
+     open(unit=1,file='pfile.species',status='old')
+     read(1,*) num
+     if(num > (1 + peqdsk_nimp + peqdsk_nbeams)) then
+        print *, '(PROFILES_GEN) ERROR: Species number in pfile incorrect'
+        stop
+     endif
+     do i=1,peqdsk_nimp
+        read(1,*) y1, y2, y3
+        peqdsk_z(1+i) = y2
+        peqdsk_m(1+i) = y3
+     enddo
+     read(1,*) y1, y2, y3
+     peqdsk_z(1) = y2
+     peqdsk_m(1) = y3
+     if(peqdsk_nbeams == 1) then
+        read(1,*) y1, y2, y3
+        peqdsk_z(1+peqdsk_nimp+1) = y2
+        peqdsk_m(1+peqdsk_nimp+1) = y3
+     endif
+  else
+     peqdsk_type = 0
   endif
 
   ! omeg(kRad/s)
