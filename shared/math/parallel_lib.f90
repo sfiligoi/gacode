@@ -32,15 +32,15 @@ contains
     integer :: ierr
 
     transp_comm = comm
- 
+
     call MPI_COMM_RANK(TRANSP_COMM,iproc,ierr)
     call MPI_COMM_SIZE(TRANSP_COMM,nproc,ierr)
 
     ni = ni_in
     nj = nj_in
 
-    ni_loc = ni/nproc
-    nj_loc = nj/nproc
+    ni_loc = parallel_dim(ni,nproc)
+    nj_loc = parallel_dim(nj,nproc)
 
     ni_loc_out = ni_loc
     nj_loc_out = nj_loc
@@ -48,7 +48,7 @@ contains
     nsend = ni*nj/nproc**2
 
     allocate(fsendf(nj_loc,ni_loc,nproc))
-   allocate(fsendr(ni_loc,nj_loc,nproc))
+    allocate(fsendr(ni_loc,nj_loc,nproc))
 
   end subroutine parallel_lib_init
 

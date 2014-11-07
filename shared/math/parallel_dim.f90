@@ -21,12 +21,14 @@ integer function parallel_dim(n_grid,n_proc)
   !-------------------------------
 
   if (n_grid < n_proc) then
-     print *,'More processors than gridpoints.'
+     print '(a)','ERROR: (parallel_dim) More processors than gridpoints.'
      stop
   endif
 
   i = n_grid/n_proc
-  if (modulo(n_grid,n_proc) > 0) i = i+1
+  if (modulo(n_grid,n_proc) > 0) then
+     i = i+1
+  endif
 
   parallel_dim = i
 
