@@ -75,15 +75,15 @@ subroutine prgen_write
 
     peqdsk_nion = 1+peqdsk_nimp+peqdsk_nbeams
 
-     write(1,20) '#                 IONS :  Name       Z   Mass'
+     write(1,20) '#                 IONS :  Name       Z    Mass'
 
      do i=1,peqdsk_nion
         ip = reorder_vec(i)
         call prgen_ion_name(nint(peqdsk_m(ip)),nint(peqdsk_z(ip)),iname)
-        write(1,'(a,a,t36,i3,t43,i3,t48,"[",a,"]")') '#                         ',&
+        write(1,'(a,a,t36,i3,t43,f4.1,t48,"[",a,"]")') '#                         ',&
              iname,&
              nint(peqdsk_z(ip)),&
-             nint(peqdsk_m(ip)),&
+             peqdsk_m(ip),&
              peqdsk_type(ip)
      enddo
 
@@ -93,14 +93,14 @@ subroutine prgen_write
      write(1,20) '#          SHOT NUMBER : ',ufile_shot
      write(1,20) '#             TIME (s) : ',ufile_time
 
-     write(1,20) '#                 IONS :  Name       Z   Mass'
+     write(1,20) '#                 IONS :  Name       Z    Mass'
      do i=1,ufile_nion
         ip = reorder_vec(i)
         call prgen_ion_name(nint(ufile_m(ip)),nint(ufile_z(ip)),iname)
-        write(1,'(a,a,t36,i3,t43,i3,t48,"[",a,"]")') '#                         ',&
+        write(1,'(a,a,t36,i3,t43,f4.1,t48,"[",a,"]")') '#                         ',&
              iname,&
              nint(ufile_z(ip)),&
-             nint(ufile_m(ip)),&
+             ufile_m(ip),&
              ufile_type(ip)
      enddo
 
