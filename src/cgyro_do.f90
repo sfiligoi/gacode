@@ -298,7 +298,7 @@ subroutine cgyro_do
   if(allocated(cap_h_v))       deallocate(cap_h_v)
   if(allocated(field))         deallocate(field)
   if(allocated(field_loc))     deallocate(field_loc)
-  if(allocated(field_old))      deallocate(field_old)
+  if(allocated(field_old))     deallocate(field_old)
   if(allocated(f_balloon))     deallocate(f_balloon)
 
 end subroutine cgyro_do

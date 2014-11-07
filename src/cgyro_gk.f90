@@ -301,7 +301,7 @@ contains
           rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc) &
                - val * z(is)/temp(is) &
                * gyrox_J0(is,ir,it,ie,ix) * field(ir,it,1)
-          if(n_field > 1) then
+          if (n_field > 1) then
              rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc) &
                   - val * z(is)/temp(is) &
                   * gyrox_J0(is,ir,it,ie,ix) * field(ir,it,2) &
