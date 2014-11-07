@@ -174,7 +174,7 @@ contains
      ! Poisson and Ampere RHS integrals of H
 
      ic_loc = 0
-     do ic=1+i_proc_1,nc,n_proc_1
+     do ic=nc1,nc2
         ic_loc = ic_loc+1
         
         it = it_c(ic)
@@ -187,7 +187,7 @@ contains
            ie = ie_v(iv)
            
            fac = gyrox_J0(is,ir,it,ie,ix) &
-                * z(is)*dens(is) * w_e(ie) * 0.5 * w_xi(ix)*cap_h_v(iv,ic_loc)
+                * z(is)*dens(is) * w_e(ie) * 0.5 * w_xi(ix)*cap_h_v(ic_loc,iv)
 
            field_loc(ir,it,1) = field_loc(ir,it,1) + fac 
 
@@ -264,7 +264,7 @@ contains
     ! Poisson and Ampere RHS integrals of h
     
     iv_loc = 0
-    do iv=1+i_proc_1,nv,n_proc_1
+    do iv=nv1,nv2
        
        iv_loc = iv_loc+1
        
@@ -336,8 +336,8 @@ contains
     ! Compute H given h and phi(h) apar(h)
 
     iv_loc = 0
-    do iv=1+i_proc_1,nv,n_proc_1
-       
+    do iv=nv1,nv2
+ 
        iv_loc = iv_loc+1
 
        is = is_v(iv)

@@ -120,7 +120,7 @@ contains
           enddo
        enddo
 
-       allocate(cmat(nc_loc,nv,nv))
+       allocate(cmat(nv,nv,nc_loc))
        allocate(cvec(nv,2))
        allocate(bvec(nv,2))
 
@@ -172,13 +172,13 @@ contains
        endif
 
        ic_loc = 0
-       do ic=1+i_proc_1,nc,n_proc_1
+       do ic=nc1,nc2
           ic_loc = ic_loc+1
 
           it = it_c(ic)
           ir = ir_c(ic)
 
-          cmat(ic_loc,:,:) = (0.0,0.0)
+          cmat(:,:,ic_loc) = (0.0,0.0)
           amat(:,:)       = (0.0,0.0)
 
           do iv=1,nv
@@ -200,13 +200,13 @@ contains
 
                 ! constant part
                 if (iv == jv) then
-                   cmat(ic_loc,iv,jv) =  cmat(ic_loc,iv,jv) + 1.0
+                   cmat(iv,jv,ic_loc) =  cmat(iv,jv,ic_loc) + 1.0
                    amat(iv,jv) = amat(iv,jv) + 1.0
                 endif
 
                 ! Trapping term
                 if (is == js .and. ie == je) then
-                   cmat(ic_loc,iv,jv) = cmat(ic_loc,iv,jv) &
+                   cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                         + (0.5*delta_t) * omega_trap(it,is) &
                         * sqrt(energy(ie)) &
                         * (1.0 - xi(ix)**2) &
@@ -220,7 +220,7 @@ contains
 
                 ! Collision component: Lorentz
                 if (is==js .and. ie==je) then
-                   cmat(ic_loc,iv,jv) = cmat(ic_loc,iv,jv) &
+                   cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                         - (0.5*delta_t) * xi_lor_mat(ix,jx) &
                         *0.5*sum_nud
 
@@ -232,7 +232,7 @@ contains
                 ! Collision component: Restoring
                 if (collision_model == 3) then
                    ! EAB: NEED to recheck 0.5 with Lorentz
-                   cmat(ic_loc,iv,jv) = cmat(ic_loc,iv,jv) &
+                   cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                         - (0.5*delta_t) &
                         * (-mass(js)/mass(is)) &
                         * (dens(js)/dens(is)) &
@@ -254,7 +254,7 @@ contains
                         / rs_lor(is,js)
 
                 else if (abs(rs(is,js)) > epsilon(0.)) then
-                   cmat(ic_loc,iv,jv) = cmat(ic_loc,iv,jv) &
+                   cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                         - (0.5*delta_t) &
                         * 1.5 * (mass(js)/mass(is)) &
                         * (dens(js)/dens(is)) &
@@ -283,7 +283,7 @@ contains
                          sum_nu = sum_nu &
                               + (nu_d(ie,is,ks)-nu_s(ie,is,ks))
                       enddo
-                      cmat(ic_loc,iv,jv) = cmat(ic_loc,iv,jv) &
+                      cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                            - (0.5*delta_t) * sum_nu &
                            * 1.5 * xi(ix) * xi(jx) * w_xi(jx)
                       amat(iv,jv) = amat(iv,jv) &
@@ -293,7 +293,7 @@ contains
                 endif
 
                 ! Poisson component 
-                cmat(ic_loc,iv,jv) = cmat(ic_loc,iv,jv) &
+                cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                      - z(is)/temp(is) / &
                      (-k_perp(it,ir)**2 * lambda_debye**2 &
                      * dens_ele / temp_ele &
@@ -314,7 +314,7 @@ contains
 
                 ! Ampere component
                 if(n_field > 1) then
-                   cmat(ic_loc,iv,jv) = cmat(ic_loc,iv,jv) &
+                   cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                         - z(is)/temp(is) / &
                         (-k_perp(it,ir)**2 * lambda_debye**2 &
                         * dens_ele / temp_ele &
@@ -339,12 +339,12 @@ contains
 
           ! H_bar = (1 - dt/2 C - Poisson)^(-1) * (1 + dt/2 C + Poisson) H
           ! Lapack factorization and inverse of LHS
-          call DGETRF(nv,nv,cmat(ic_loc,:,:),nv,i_piv,info)
-          call DGETRI(nv,cmat(ic_loc,:,:),nv,i_piv,work,nv,info)
+          call DGETRF(nv,nv,cmat(:,:,ic_loc),nv,i_piv,info)
+          call DGETRI(nv,cmat(:,:,ic_loc),nv,i_piv,work,nv,info)
           ! Matrix multiply
-          call DGEMM('N','N',nv,nv,nv,num1,cmat(ic_loc,:,:),&
+          call DGEMM('N','N',nv,nv,nv,num1,cmat(:,:,ic_loc),&
                nv,amat,nv,num0,bmat,nv)
-          cmat(ic_loc,:,:) = bmat(:,:)
+          cmat(:,:,ic_loc) = bmat(:,:)
 
        enddo
 
@@ -377,6 +377,7 @@ contains
   
   subroutine COLLISION_do
 
+    use parallel_lib
     use timer_lib
 
     use cgyro_globals
@@ -386,20 +387,26 @@ contains
     implicit none
 
     integer :: is,ir,it,ie,ix
+    integer :: ivp
 
     if (collision_model == -1) return
 
     ! compute new collisional cap_H: H = h + ze/T G phi
     ! assumes have cap_h_x
 
-    call rTRANSP_INIT(1,nv,nc,1,NEW_COMM_1)
-    call rTRANSP_DO(cap_h_c,cap_h_v)
-    call rTRANSP_CLEANUP
+    ! allocate(cap_h_c(nc,nv_loc))
+    ! allocate(cap_h_ct(nv_loc,nc))
+    ! allocate(cap_h_v(nc_loc,nv))
+
+    call timer_lib_in('comm')
+    call parallel_lib_r(transpose(cap_h_c),cap_h_v)
+    call timer_lib_out('comm')
+
 
     call timer_lib_in('collision')
 
     ic_loc = 0
-    do ic=1+i_proc_1,nc,n_proc_1
+    do ic=nc1,nc2
        ic_loc = ic_loc+1
 
        it = it_c(ic)
@@ -409,16 +416,25 @@ contains
        ! 
        ! Pack Re(H) and Im(H) into two-column matrix for use with DGEMM
        do iv=1,nv
-          cvec(iv,1) = real(cap_h_v(iv,ic_loc))
-          cvec(iv,2) = imag(cap_h_v(iv,ic_loc))
+          cvec(iv,1) = real(cap_h_v(ic_loc,iv))
+          cvec(iv,2) = imag(cap_h_v(ic_loc,iv))
        enddo
 
        ! Solve for H
-       call DGEMM('N','N',nv,2,nv,num1,cmat(ic_loc,:,:),&
-            nv,cvec,nv,num0,bvec,nv)
+       !call DGEMM('N','N',nv,2,nv,num1,cmat(ic_loc,:,:),&
+       !      nv,cvec,nv,num0,bvec,nv)
+
+       bvec = 0.0
+       do iv=1,nv
+          do ivp=1,nv
+             bvec(iv,1) = bvec(iv,1)+cmat(iv,ivp,ic_loc)*cvec(ivp,1)
+             bvec(iv,2) = bvec(iv,2)+cmat(iv,ivp,ic_loc)*cvec(ivp,2)
+          enddo
+       enddo
+
 
        do iv=1,nv
-          cap_h_v(iv,ic_loc) = bvec(iv,1) + i_c * bvec(iv,2)
+          cap_h_v(ic_loc,iv) = bvec(iv,1) + i_c * bvec(iv,2)
        enddo
 
     enddo
@@ -426,13 +442,17 @@ contains
     ! Compute the new phi
     call FIELDh_do
 
-    call fTRANSP_INIT(nc,1,nv,1,NEW_COMM_1)
-    call fTRANSP_DO(cap_h_v,cap_h_c)
-    call fTRANSP_CLEANUP
- 
+    call timer_lib_out('collision')
+
+    call timer_lib_in('comm')
+    call parallel_lib_f(cap_h_v,cap_h_ct)
+    cap_h_c = transpose(cap_h_ct)
+    call timer_lib_out('comm')
+
+    call timer_lib_in('collision')
     ! Compute the new h_x
     iv_loc = 0
-    do iv=1+i_proc_1,nv,n_proc_1
+    do iv=nv1,nv2
 
        iv_loc = iv_loc+1
 
@@ -451,7 +471,7 @@ contains
           if(n_field > 1) then
              h_x(ic,iv_loc) = h_x(ic,iv_loc) &
                   + z(is)/temp(is) * gyrox_J0(is,ir,it,ie,ix) &
-               * field(ir,it,2) * xi(ix) * sqrt(2.0*energy(ie))
+                  * field(ir,it,2) * xi(ix) * sqrt(2.0*energy(ie))
           endif
        enddo
     enddo

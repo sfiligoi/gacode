@@ -144,7 +144,7 @@ contains
     else
        if (toroidal_model == 2) then
           iv_loc = 0
-          do iv=1+i_proc_1,nv,n_proc_1
+          do iv=nv1,nv2
              iv_loc = iv_loc+1
              if (is_v(iv) == 1) then
                 h_x(:,iv_loc) = 1.0
@@ -154,7 +154,7 @@ contains
           enddo
        else
           iv_loc = 0
-          do iv=1+i_proc_1,nv,n_proc_1
+          do iv=nv1,nv2
              iv_loc = iv_loc+1
              if (is_v(iv) == 1) then
                 do ic=1,nc
@@ -230,7 +230,7 @@ contains
     rhs(ij,:,:) = (0.0,0.0)
 
     iv_loc = 0
-    do iv=1+i_proc_1,nv,n_proc_1
+    do iv=nv1,nv2
 
        iv_loc = iv_loc+1
 

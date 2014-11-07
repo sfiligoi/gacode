@@ -8,6 +8,7 @@
 subroutine cgyro_mpi_grid
 
   use timer_lib
+  use parallel_lib
   use mpi
 
   use cgyro_globals
@@ -112,9 +113,15 @@ subroutine cgyro_mpi_grid
   enddo
 
   ! Parallelization dimensions
-  !
-  ! h(1,ic,iv_loc) -> hc(1,iv,ic_loc)
-  nv_loc = parallel_dim(nv,n_proc_1)
-  nc_loc = parallel_dim(nc,n_proc_1)
+
+  ! ni -> nc
+  ! nj -> nv  
+  call parallel_lib_init(nc,nv,nc_loc,nv_loc,NEW_COMM_1)
+
+  nv1 = 1+i_proc_1*nv_loc
+  nv2 = (1+i_proc_1)*nv_loc
+
+  nc1 = 1+i_proc_1*nc_loc
+  nc2 = (1+i_proc_1)*nc_loc
 
 end subroutine cgyro_mpi_grid

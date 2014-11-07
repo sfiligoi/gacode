@@ -88,7 +88,8 @@ subroutine cgyro_do
   ! allocate distribution function and field arrays
   allocate(h_x(nc,nv_loc))
   allocate(cap_h_c(nc,nv_loc))
-  allocate(cap_h_v(nv,nc_loc))
+  allocate(cap_h_ct(nv_loc,nc))
+  allocate(cap_h_v(nc_loc,nv))
   allocate(field(n_radial,n_theta,n_field))
   allocate(field_loc(n_radial,n_theta,n_field))
   allocate(field_old(n_radial,n_theta,n_field))
@@ -107,6 +108,7 @@ subroutine cgyro_do
   call timer_lib_init('fieldx')
   call timer_lib_init('gkrhs')
   call timer_lib_init('collision')
+  call timer_lib_init('comm')
 
   call timer_lib_in('gk_init')
   call GK_init
@@ -242,7 +244,7 @@ subroutine cgyro_do
           position='append')
 
      iv_loc = 0
-     do iv=1+i_proc,nv,n_proc_1
+     do iv=nv1,nv2
         iv_loc = iv_loc+1
         do ic=1,nc
            f_balloon(ir_c(ic),it_c(ic)) = h_x(ic,iv_loc) &
@@ -267,6 +269,7 @@ subroutine cgyro_do
      print '(a,1x,1pe11.4)','fieldx  ',timer_lib_time('fieldx')
      print '(a,1x,1pe11.4)','gkrhs     ',timer_lib_time('gkrhs')
      print '(a,1x,1pe11.4)','collision ',timer_lib_time('collision')
+     print '(a,1x,1pe11.4)','comm      ',timer_lib_time('comm')
   endif
 
 

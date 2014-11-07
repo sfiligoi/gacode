@@ -15,6 +15,7 @@ module cgyro_globals
   integer :: CGYRO_COMM_WORLD
   integer :: NEW_COMM_1
   integer :: NEW_COMM_2
+  integer :: nv1,nv2,nc1,nc2
   !
   ! Pointers
   !
@@ -146,6 +147,7 @@ module cgyro_globals
   ! Numerical/work arrays and dimensions
   complex, dimension(:,:), allocatable :: h_x
   complex, dimension(:,:), allocatable :: cap_h_c
+  complex, dimension(:,:), allocatable :: cap_h_ct
   complex, dimension(:,:), allocatable :: cap_h_v
   complex, dimension(:,:,:) , allocatable :: field
   complex, dimension(:,:,:) , allocatable :: field_loc
