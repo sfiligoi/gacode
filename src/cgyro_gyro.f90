@@ -16,8 +16,8 @@ contains
     integer :: is,ir,it,ie,ix
     real :: arg
 
-    if(flag == 1) then
-       if(initialized) return
+    if (flag == 1) then
+       if (initialized) return
 
        allocate(gyrox_J0(n_species,n_radial,n_theta,n_energy,n_xi))
        do is=1,n_species

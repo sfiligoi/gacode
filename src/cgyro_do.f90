@@ -265,11 +265,13 @@ subroutine cgyro_do
 
   ! Print timers
   if (i_proc == 0) then
-     print '(a,1x,1pe11.4)','gk_init   ',timer_lib_time('gk_init')
-     print '(a,1x,1pe11.4)','fieldx  ',timer_lib_time('fieldx')
-     print '(a,1x,1pe11.4)','gkrhs     ',timer_lib_time('gkrhs')
-     print '(a,1x,1pe11.4)','collision ',timer_lib_time('collision')
-     print '(a,1x,1pe11.4)','comm      ',timer_lib_time('comm')
+     print *
+     print '(a)', 'Timing Summary'
+     print '(a,1x,1pe11.4)',' gk_init   ',timer_lib_time('gk_init')
+     print '(a,1x,1pe11.4)',' fieldx    ',timer_lib_time('fieldx')
+     print '(a,1x,1pe11.4)',' gkrhs     ',timer_lib_time('gkrhs')
+     print '(a,1x,1pe11.4)',' collision ',timer_lib_time('collision')
+     print '(a,1x,1pe11.4)',' comm      ',timer_lib_time('comm')
   endif
 
 

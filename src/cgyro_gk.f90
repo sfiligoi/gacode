@@ -127,10 +127,10 @@ contains
 
     implicit none
 
+    real :: ang
     logical :: lfe
 
-    field_old(:,:,:)  = (0.0,0.0)
-    h_x(:,:)      = (0.0,0.0)
+    h_x(:,:) = (0.0,0.0)
 
     if (restart_mode == 1) then
        inquire(file=trim(path)//runfile_restart,exist=lfe)
@@ -142,7 +142,11 @@ contains
        read(io_cgyroout,*) h_x
        close(io_cgyroout)
     else
+
        if (toroidal_model == 2) then
+
+          ! Zonal-flow initial condition
+
           iv_loc = 0
           do iv=nv1,nv2
              iv_loc = iv_loc+1
@@ -152,22 +156,28 @@ contains
                 h_x(:,iv_loc) = 0.0
              endif
           enddo
+
        else
+
+          ! Initial condition exponential in ballooning angle.
+
           iv_loc = 0
           do iv=nv1,nv2
              iv_loc = iv_loc+1
              if (is_v(iv) == 1) then
                 do ic=1,nc
-                   if (ir_c(ic) == n_radial/2+1) then
-                      h_x(ic,iv_loc) = (1.0e-3) * (cos(theta(it_c(ic))/2.0))**2
-                   endif
+                   ang = theta(it_c(ic))+2*pi*(ir_c(ic)-n_radial/2-1)
+                   h_x(ic,iv_loc) = rho*exp(-(ang/2)**2)
                 enddo
              endif
           enddo
+
        endif
     endif
 
     call FIELDx_do
+
+    field_old = field
 
   end subroutine GK_init
 

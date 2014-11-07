@@ -38,6 +38,9 @@ subroutine cgyro_mpi_grid
   !------------------------------------------------
   ! Check for grid validity
   !
+  if (modulo(nv,n_proc) /= 0 .or. modulo(nc,n_proc) /= 0) then
+     call catch_error('ERROR: (CGYRO) bad processor count.')
+  endif
   if (modulo(n_proc,n_n) /= 0) then
      call catch_error('ERROR: (CGYRO) bad processor count.')
   endif

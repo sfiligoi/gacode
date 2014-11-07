@@ -45,40 +45,28 @@ contains
   end subroutine FREQ_alloc
 
   subroutine FREQ_do
+
     use cgyro_globals
+
     implicit none
-    integer :: ir, it
+  
     real :: df_r, df_i, total_weight
-    
-    ! Frequency
-    total_weight = 0.0
-    freq = (0.0,0.0)
-    if(minval(abs(field_old(:,:,1))) == 0.0) then
-       freq     = 0.0
-       freq_err = 1.0
-    else
-       do ir=1,n_radial
-          do it=1,n_theta
-             mode_weight(ir,it) = abs(field(ir,it,1))
-             total_weight = total_weight + mode_weight(ir,it)
-             freq_loc(ir,it) = (i_c/delta_t) &
-                  * log(field(ir,it,1)/field_old(ir,it,1))
-             freq = freq + freq_loc(ir,it) * mode_weight(ir,it)
-          enddo
-       enddo
-       freq = freq / total_weight
-       
-       ! Fractional Frequency Error
-       df_r = 0.0
-       df_i = 0.0
-       do ir=1,n_radial
-          do it=1,n_theta
-             df_r = df_r + abs(real(freq_loc(ir,it)-freq)) * mode_weight(ir,it)
-             df_i = df_i + abs(imag(freq_loc(ir,it)-freq)) * mode_weight(ir,it)
-          enddo
-       enddo
-       freq_err = (df_r + i_c * df_i) / total_weight / abs(freq)
-    endif
+
+    ! Use potential as gauge for frequency
+    mode_weight(:,:) = abs(field(:,:,1))
+
+    ! Define local frequencies
+    freq_loc(:,:) = (i_c/delta_t)*log(field(:,:,1)/field_old(:,:,1))
+
+    total_weight = sum(mode_weight(:,:))
+
+    freq = sum(freq_loc(:,:)*mode_weight(:,:))/total_weight
+
+    ! Fractional Frequency Error
+    df_r = sum(abs(real(freq_loc(:,:)-freq))*mode_weight(:,:))
+    df_i = sum(abs(imag(freq_loc(:,:)-freq))*mode_weight(:,:))
+
+    freq_err = (df_r + i_c*df_i)/total_weight/abs(freq)
 
     if(silent_flag == 0 .and. i_proc == 0) then
        open(unit=io_freq,file=trim(path)//runfile_freq,status='old',&
