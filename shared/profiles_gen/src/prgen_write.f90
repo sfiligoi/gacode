@@ -73,7 +73,19 @@ subroutine prgen_write
 
   case (3)
 
-     write(1,20) '#                 IONS : D [assumed]'
+    peqdsk_nion = 1+peqdsk_nimp+peqdsk_nbeams
+
+     write(1,20) '#                 IONS :  Name       Z   Mass'
+
+     do i=1,peqdsk_nion
+        ip = reorder_vec(i)
+        call prgen_ion_name(nint(peqdsk_m(ip)),nint(peqdsk_z(ip)),iname)
+        write(1,'(a,a,t36,i3,t43,i3,t48,"[",a,"]")') '#                         ',&
+             iname,&
+             nint(peqdsk_z(ip)),&
+             nint(peqdsk_m(ip)),&
+             peqdsk_type(ip)
+     enddo
 
   case (6)
 

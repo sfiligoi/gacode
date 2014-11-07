@@ -244,9 +244,10 @@ module prgen_globals
   real, dimension(:), allocatable :: peqdsk_omgeb
   real, dimension(:), allocatable :: peqdsk_nb
   real, dimension(:), allocatable :: peqdsk_pb
-  integer :: peqdsk_type, peqdsk_nimp, peqdsk_nbeams
+  integer :: peqdsk_fmt, peqdsk_nion, peqdsk_nimp, peqdsk_nbeams
   real, dimension(:), allocatable :: peqdsk_z
   real, dimension(:), allocatable :: peqdsk_m
+  character (len=5), dimension(5)  :: peqdsk_type
   !---------------------------------------------------------
 
   !---------------------------------------------------------

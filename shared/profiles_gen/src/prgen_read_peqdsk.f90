@@ -146,11 +146,13 @@ subroutine prgen_read_peqdsk
      endif
   endif
   
-  peqdsk_z(:) = 0.0
-  peqdsk_m(:) = 0.0
+  peqdsk_type(:) = 'therm'
+  peqdsk_z(:)    = 0.0
+  peqdsk_m(:)    = 0.0
+
   inquire(file='pfile.species',exist=ierr)
   if(ierr) then
-     peqdsk_type = 1
+     peqdsk_fmt = 1
      open(unit=1,file='pfile.species',status='old')
      read(1,*) num
      if(num > (1 + peqdsk_nimp + peqdsk_nbeams)) then
@@ -169,9 +171,10 @@ subroutine prgen_read_peqdsk
         read(1,*) y1, y2, y3
         peqdsk_z(1+peqdsk_nimp+1) = y2
         peqdsk_m(1+peqdsk_nimp+1) = y3
+        peqdsk_type(1+peqdsk_nimp+1) = 'fast'
      endif
   else
-     peqdsk_type = 0
+     peqdsk_fmt = 0
   endif
 
   ! omeg(kRad/s)

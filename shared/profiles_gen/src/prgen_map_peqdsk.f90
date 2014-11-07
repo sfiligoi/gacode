@@ -20,7 +20,7 @@ subroutine prgen_map_peqdsk
   call prgen_get_chi(nx,q,kappa,rmin,dpsi,rho,peqdsk_bref,peqdsk_arho)
 
   ni_d(:) = 10*peqdsk_ni(:)
-  if(peqdsk_type == 0) then
+  if(peqdsk_fmt == 0) then
      ! old p-file, assume missing density is carbon
      ni_imp(1,:) = 10*(peqdsk_ne(:)-peqdsk_ni(:)-peqdsk_nb(:))/6.0
      peqdsk_nimp  = 1
@@ -39,15 +39,14 @@ subroutine prgen_map_peqdsk
      enddo
   endif
   ni_b(:) = 10*peqdsk_nb(:)
+
+  ! Compute Z_eff
   z_eff(:) = peqdsk_z(1)**2 * ni_d(:)
   do i=1,peqdsk_nimp
-     z_eff(:) = peqdsk_z(1+i)**2 * ni_imp(1,:)
+     z_eff(:) = z_eff(:)+peqdsk_z(1+i)**2 * ni_imp(i,:)
   enddo
-  z_eff(:) = peqdsk_z(1+peqdsk_nimp+1)**2 * ni_b(:)
+  z_eff(:) = z_eff(:)+peqdsk_z(1+peqdsk_nimp+1)**2 * ni_b(:)
   z_eff(:) = z_eff(:)/(10*peqdsk_ne(:))
-
-  print *, peqdsk_z(:)
-  print *, peqdsk_m
 
   !---------------------------------------------------------
   ! Map profile data onto single array:
