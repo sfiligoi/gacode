@@ -293,27 +293,13 @@ contains
                 endif
 
                 ! Poisson component 
-                cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                     - z(is)/temp(is) / &
-                     (-k_perp(it,ir)**2 * lambda_debye**2 &
-                     * dens_ele / temp_ele &
-                     + sum_den) &
-                     * gyrox_J0(is,ir,it,ie,ix) &
-                     * z(js)*dens(js) &
-                     * gyrox_J0(js,ir,it,je,jx) * w_e(je) &
-                     * 0.5 * w_xi(jx)
-                amat(iv,jv) = amat(iv,jv) &
-                     - z(is)/temp(is) / &
-                     (-k_perp(it,ir)**2 * lambda_debye**2 &
-                     * dens_ele / temp_ele &
-                     + sum_den) &
-                     * gyrox_J0(is,ir,it,ie,ix) &
-                     * z(js)*dens(js) &
-                     * gyrox_J0(js,ir,it,je,jx) * w_e(je) &
-                     * 0.5 * w_xi(jx)
-
-                ! Ampere component
-                if(n_field > 1) then
+                if(toroidal_model == 2 .and. adiabatic_ele_model == 1) then
+                   ! Cannot include Poisson in collision matrix
+                   ! for n=0 with ade because depends on theta
+                   ! i.e. ne0 ~ phi - <phi>
+                   cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) + 0.0
+                   amat(iv,jv)        = amat(iv,jv) + 0.0
+                else
                    cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                         - z(is)/temp(is) / &
                         (-k_perp(it,ir)**2 * lambda_debye**2 &
@@ -332,6 +318,30 @@ contains
                         * z(js)*dens(js) &
                         * gyrox_J0(js,ir,it,je,jx) * w_e(je) &
                         * 0.5 * w_xi(jx)
+                endif
+
+                ! Ampere component
+                if(n_field > 1) then
+                   cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
+                        - z(is)/temp(is) / &
+                        (-2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
+                        * dens_ele * temp_ele) &
+                        * (-gyrox_J0(is,ir,it,ie,ix)) &
+                        * z(js)*dens(js) &
+                        * xi(ix) * sqrt(2.0*energy(ie)) &
+                        * gyrox_J0(js,ir,it,je,jx) * w_e(je) &
+                        * 0.5 * w_xi(jx) &
+                        * xi(jx) * sqrt(2.0*energy(je))
+                   amat(iv,jv) = amat(iv,jv) &
+                        - z(is)/temp(is) / &
+                        (-2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
+                        * dens_ele * temp_ele) &
+                        * (-gyrox_J0(is,ir,it,ie,ix)) &
+                        * z(js)*dens(js) &
+                        * xi(ix) * sqrt(2.0*energy(ie)) &
+                        * gyrox_J0(js,ir,it,je,jx) * w_e(je) &
+                        * 0.5 * w_xi(jx) &
+                        * xi(jx) * sqrt(2.0*energy(je))
                 endif
                 
              enddo
