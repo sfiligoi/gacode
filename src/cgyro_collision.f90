@@ -302,7 +302,7 @@ contains
                 else
                    cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                         - z(is)/temp(is) / &
-                        (-k_perp(it,ir)**2 * lambda_debye**2 &
+                        (k_perp(it,ir)**2 * lambda_debye**2 &
                         * dens_ele / temp_ele &
                         + sum_den) &
                         * gyrox_J0(is,ir,it,ie,ix) &
@@ -311,7 +311,7 @@ contains
                         * 0.5 * w_xi(jx)
                    amat(iv,jv) = amat(iv,jv) &
                         - z(is)/temp(is) / &
-                        (-k_perp(it,ir)**2 * lambda_debye**2 &
+                        (k_perp(it,ir)**2 * lambda_debye**2 &
                         * dens_ele / temp_ele &
                         + sum_den) &
                         * gyrox_J0(is,ir,it,ie,ix) &
@@ -324,7 +324,7 @@ contains
                 if(n_field > 1) then
                    cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                         - z(is)/temp(is) / &
-                        (-2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
+                        (2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
                         * dens_ele * temp_ele) &
                         * (-gyrox_J0(is,ir,it,ie,ix)) &
                         * z(js)*dens(js) &
@@ -334,7 +334,7 @@ contains
                         * xi(jx) * sqrt(2.0*energy(je))
                    amat(iv,jv) = amat(iv,jv) &
                         - z(is)/temp(is) / &
-                        (-2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
+                        (2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
                         * dens_ele * temp_ele) &
                         * (-gyrox_J0(is,ir,it,ie,ix)) &
                         * z(js)*dens(js) &

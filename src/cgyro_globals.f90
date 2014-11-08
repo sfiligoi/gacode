@@ -29,6 +29,7 @@ module cgyro_globals
   integer, dimension(:), allocatable :: ir_c
   integer, dimension(:), allocatable :: it_c
   integer, dimension(:,:), allocatable :: ic_c
+  integer, dimension(:,:,:), allocatable :: iv_v
   !
   !---------------------------------------------------------------
 
@@ -149,6 +150,7 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: cap_h_c
   complex, dimension(:,:), allocatable :: cap_h_ct
   complex, dimension(:,:), allocatable :: cap_h_v
+  complex, dimension(:,:), allocatable :: cap_h_v_prime
   complex, dimension(:,:,:) , allocatable :: field
   complex, dimension(:,:,:) , allocatable :: field_loc
   complex, dimension(:,:,:) , allocatable :: field_old

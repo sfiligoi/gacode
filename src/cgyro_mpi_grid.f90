@@ -34,6 +34,7 @@ subroutine cgyro_mpi_grid
   allocate(it_c(nc))
 
   allocate(ic_c(n_radial,n_theta))
+  allocate(iv_v(n_energy,n_xi,n_species))
 
   !------------------------------------------------
   ! Check for grid validity
@@ -100,6 +101,7 @@ subroutine cgyro_mpi_grid
            ie_v(iv) = ie
            ix_v(iv) = ix
            is_v(iv) = is
+           iv_v(ie,ix,is) = iv
         enddo
      enddo
   enddo

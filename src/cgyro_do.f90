@@ -90,6 +90,7 @@ subroutine cgyro_do
   allocate(cap_h_c(nc,nv_loc))
   allocate(cap_h_ct(nv_loc,nc))
   allocate(cap_h_v(nc_loc,nv))
+  allocate(cap_h_v_prime(nc_loc,nv))
   allocate(field(n_radial,n_theta,n_field))
   allocate(field_loc(n_radial,n_theta,n_field))
   allocate(field_old(n_radial,n_theta,n_field))
