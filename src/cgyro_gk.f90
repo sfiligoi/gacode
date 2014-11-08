@@ -312,6 +312,15 @@ contains
        enddo
     enddo
 
+    ! TRAPPING TERM
+
+    call parallel_lib_r(transpose(cap_h_c),cap_h_v)
+
+    ! Now have cap_h_v(ic_loc,iv)   
+    
+    call parallel_lib_f(cap_h_v,cap_h_ct)
+    cap_h_c = transpose(cap_h_ct)
+
     call timer_lib_out('gkrhs')
 
   end subroutine get_gkRHS

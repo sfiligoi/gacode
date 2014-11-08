@@ -235,6 +235,8 @@ contains
 
      ! Ampere LHS factors
 
+     print *,dens_ele, temp_ele
+
      if(n_field > 1) then
         do ir=1,n_radial
            do it=1,n_theta
