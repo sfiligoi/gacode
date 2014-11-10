@@ -69,7 +69,7 @@ contains
           hzf(:,:,:) = 0.0      
           do ir=1,n_radial
              do it=1,n_theta
-                hzf(ir,it,it) = -k_perp(it,ir)**2 * lambda_debye**2 &
+                hzf(ir,it,it) = k_perp(it,ir)**2 * lambda_debye**2 &
                      * dens_ele / temp_ele + sum_den_h
                 do jt=1,n_theta
                    hzf(ir,it,jt) = hzf(ir,it,jt) &
@@ -90,7 +90,7 @@ contains
           xzf(:,:,:) = 0.0     
           do ir=1,n_radial
              do it=1,n_theta
-                xzf(ir,it,it) = -k_perp(it,ir)**2 * lambda_debye**2 &
+                xzf(ir,it,it) = k_perp(it,ir)**2 * lambda_debye**2 &
                      * dens_ele / temp_ele + sum_den_x(ir,it)
                 do jt=1,n_theta
                    xzf(ir,it,jt) = xzf(ir,it,jt) &
@@ -226,7 +226,7 @@ contains
         do ir=1,n_radial
            do it=1,n_theta
               field(ir,it,1) = field(ir,it,1) &
-                   / (-k_perp(it,ir)**2 * lambda_debye**2 &
+                   / (k_perp(it,ir)**2 * lambda_debye**2 &
                    * dens_ele / temp_ele + sum_den_h)
            enddo
         enddo
@@ -241,7 +241,7 @@ contains
         do ir=1,n_radial
            do it=1,n_theta
               field(ir,it,2) = field(ir,it,2) &
-                   / (-2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
+                   / (2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
                    * dens_ele * temp_ele)
            enddo
         enddo
@@ -317,7 +317,7 @@ contains
        do ir=1,n_radial
           do it=1,n_theta
              field(ir,it,1) = field(ir,it,1) &
-                  / (-k_perp(it,ir)**2 * lambda_debye**2 &
+                  / (k_perp(it,ir)**2 * lambda_debye**2 &
                   * dens_ele / temp_ele + sum_den_x(ir,it))
           enddo
        enddo
@@ -329,7 +329,7 @@ contains
        do ir=1,n_radial
           do it=1,n_theta
              field(ir,it,2) = field(ir,it,2) &
-                  / (-2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
+                  / (2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
                   * dens_ele * temp_ele + sum_cur_x(ir,it))
           enddo
        enddo
