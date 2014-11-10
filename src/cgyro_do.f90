@@ -35,6 +35,7 @@ subroutine cgyro_do
   integer :: myio = 20
   integer :: print_step=10
   complex, dimension(:,:), allocatable :: f_balloon
+  complex :: a_norm
 
   integer :: signal
   logical :: lfe
@@ -178,6 +179,8 @@ subroutine cgyro_do
            close(myio)
 
            ! Construct ballooning-space form of phi
+
+           a_norm = field(n_radial/2+1,n_theta/2+1,1) 
            do ir=1,n_radial
               do it=1,n_theta
                  f_balloon(ir,it) = field(ir,it,1) &
@@ -186,7 +189,7 @@ subroutine cgyro_do
            enddo
            open(unit=myio,file=trim(path)//runfile_phiB,status='old',&
                 position='append')
-           write(myio,'(1pe13.5e3)') transpose(f_balloon(:,:))
+           write(myio,'(1pe13.5e3)') transpose(f_balloon(:,:)/a_norm)
            close(myio)
 
            if(n_field > 1) then
@@ -205,7 +208,7 @@ subroutine cgyro_do
               enddo
               open(unit=myio,file=trim(path)//runfile_aparB,status='old',&
                    position='append')
-              write(myio,'(1pe13.5e3)') transpose(f_balloon(:,:))
+              write(myio,'(1pe13.5e3)') transpose(f_balloon(:,:)/a_norm)
               close(myio)
            endif
            
