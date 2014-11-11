@@ -52,37 +52,9 @@ if ifield == 1:
 phib = np.reshape(data,(2,n_theta*n_radial,n_time),'F')
 # Construct complex eigenfunction at selected time
 phic = phib[0,:,itime]+1j*phib[1,:,itime]
-
-# Pick out the central point assuming n_radial is even:    
-if n_theta%2 == 0 : 
-    i0 = n_theta*(n_radial/2)+n_theta/2
-    phic = phic/phic[i0]
-else:
-    # interpolate to get theta=0 by expanding function between -pi..pi as fourier series
-    phic0 = 0.0
-    m_theta = (n_theta-1)/2-1
-    phifouriercosr = np.zeros(m_theta+1)
-    phifouriercosi = np.zeros(m_theta+1)
-    itstart = n_theta*(n_radial/2)
-    for jt in range(0,m_theta):
-        for it in range(0,n_theta-1):
-            phifouriercosr[jt] = phifouriercosr[jt] + np.real(phic[itstart+it]) * np.cos(jt * thetab[itstart+it])
-            phifouriercosi[jt] = phifouriercosi[jt] + np.imag(phic[itstart+it]) * np.cos(jt * thetab[itstart+it])
-        if jt == 0:
-            phifouriercosr[jt] = phifouriercosr[jt] / (1.0*n_theta)
-            phifouriercosi[jt] = phifouriercosi[jt] / (1.0*n_theta)
-        else :
-            phifouriercosr[jt] = phifouriercosr[jt] / (0.5*n_theta)
-            phifouriercosi[jt] = phifouriercosi[jt] / (0.5*n_theta)
-
-        # theta=0 is sum of fourier cos coefficients
-        phic0 = phic0 + phifouriercosr[jt] + 1j*phifouriercosi[jt]
-
-    phic = phic/phic0
-
 #-------------------------------------------------------
 
-fig = plt.figure(figsize=(8,8))
+fig = plt.figure(figsize=(10,6))
 
 #======================================
 ax = fig.add_subplot(111)
