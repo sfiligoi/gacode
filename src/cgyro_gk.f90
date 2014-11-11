@@ -167,7 +167,7 @@ contains
              if (is_v(iv) == 1) then
                 do ic=1,nc
                    ang = theta(it_c(ic))+2*pi*(ir_c(ic)-n_radial/2-1)
-                   h_x(ic,iv_loc) = rho*exp(-(ang/2)**2)
+                   h_x(ic,iv_loc) = rho*exp(-(ang/2)**2) 
                 enddo
              endif
           enddo
@@ -306,7 +306,7 @@ contains
              rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc) &
                   - val * z(is)/temp(is) &
                   * gyrox_J0(is,ir,it,ie,ix) * field(ir,it,2) &
-                  * (-xi(ix) *sqrt(2.0*energy(ie)))
+                  * (-xi(ix) * sqrt(2.0*energy(ie)) * vth(is))
           endif
           
 

@@ -29,7 +29,7 @@ contains
                            * mass(is) / (z(is) * Bmag(it)) &
                            * sqrt(2.0* energy(ie)) &
                            * sqrt(1-xi(ix)**2)
-                      gyrox_J0(is,ir,it,ie,ix) = BESJ0(arg)
+                      gyrox_J0(is,ir,it,ie,ix) = BESJ0(abs(arg))
                    enddo
                 enddo
              enddo

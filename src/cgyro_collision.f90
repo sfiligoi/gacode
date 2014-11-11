@@ -328,20 +328,20 @@ contains
                         * dens_ele * temp_ele) &
                         * (-gyrox_J0(is,ir,it,ie,ix)) &
                         * z(js)*dens(js) &
-                        * xi(ix) * sqrt(2.0*energy(ie)) &
+                        * xi(ix) * sqrt(2.0*energy(ie)) *vth(is) &
                         * gyrox_J0(js,ir,it,je,jx) * w_e(je) &
                         * 0.5 * w_xi(jx) &
-                        * xi(jx) * sqrt(2.0*energy(je))
+                        * xi(jx) * sqrt(2.0*energy(je)) * vth(is)
                    amat(iv,jv) = amat(iv,jv) &
                         - z(is)/temp(is) / &
                         (2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
                         * dens_ele * temp_ele) &
                         * (-gyrox_J0(is,ir,it,ie,ix)) &
                         * z(js)*dens(js) &
-                        * xi(ix) * sqrt(2.0*energy(ie)) &
+                        * xi(ix) * sqrt(2.0*energy(ie)) * vth(is) &
                         * gyrox_J0(js,ir,it,je,jx) * w_e(je) &
                         * 0.5 * w_xi(jx) &
-                        * xi(jx) * sqrt(2.0*energy(je))
+                        * xi(jx) * sqrt(2.0*energy(je)) * vth(is)
                 endif
                 
              enddo
@@ -481,7 +481,7 @@ contains
           if(n_field > 1) then
              h_x(ic,iv_loc) = h_x(ic,iv_loc) &
                   + z(is)/temp(is) * gyrox_J0(is,ir,it,ie,ix) &
-                  * field(ir,it,2) * xi(ix) * sqrt(2.0*energy(ie))
+                  * field(ir,it,2) * xi(ix) * sqrt(2.0*energy(ie)) * vth(is)
           endif
        enddo
     enddo

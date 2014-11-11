@@ -126,7 +126,7 @@ contains
                          sum_cur_x(ir,it) = sum_cur_x(ir,it) &
                               + 0.5 * w_xi(ix) * w_e(ie) &
                               * gyrox_J0(is,ir,it,ie,ix)**2 &
-                              * xi(ix)**2 * 2.0 * energy(ie) &
+                              * xi(ix)**2 * 2.0 * energy(ie) * vth(is)**2 &
                               * z(is)**2/temp(is) *dens(is) 
                       enddo
                    enddo
@@ -193,7 +193,7 @@ contains
 
            if(n_field > 1) then
               field_loc(ir,it,2) = field_loc(ir,it,2) + fac &
-                   * xi(ix) * sqrt(2.0 * energy(ie))
+                   * xi(ix) * sqrt(2.0 * energy(ie)) * vth(is)
            endif
            
         enddo
@@ -284,7 +284,7 @@ contains
 
           if (n_field > 1) then
              field_loc(ir,it,2) = field_loc(ir,it,2) + &
-                  fac*xi(ix)*sqrt(2.0*energy(ie))
+                  fac*xi(ix)*sqrt(2.0*energy(ie))*vth(is)
           endif
 
        enddo
@@ -355,7 +355,7 @@ contains
           if(n_field > 1) then
              cap_h_c(ic,iv_loc) = cap_h_c(ic,iv_loc) &
                   - z(is)/temp(is) * gyrox_J0(is,ir,it,ie,ix) &
-                  * xi(ix)*sqrt(2.0*energy(ie))*field(ir,it,2)
+                  * xi(ix)*sqrt(2.0*energy(ie))*vth(is)*field(ir,it,2)
           endif
 
        enddo
