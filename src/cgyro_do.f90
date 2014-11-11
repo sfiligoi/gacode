@@ -189,7 +189,7 @@ subroutine cgyro_do
 
               ! Construct ballooning-space form of field
 
-              a_norm = field(n_radial/2+1,n_theta/2+1,i_field) 
+              a_norm = field(n_radial/2+1,n_theta/2+1,1) 
               do ir=1,n_radial
                  do it=1,n_theta
                     f_balloon(ir,it) = field(ir,it,i_field) &
