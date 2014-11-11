@@ -125,8 +125,12 @@ subroutine gyro_ballooning_mode(datafile,io,index,is_in)
      !-------------------------------------------------------
      ! Renormalize function:
      !
-     j_renorm = maxloc(abs(phi_plot(:,ir_norm,1)))
-     balloon_renorm = 1.0/phi_plot(j_renorm(1),ir_norm,1)
+     !j_renorm = maxloc(abs(phi_plot(:,ir_norm,1)))
+     !balloon_renorm = 1.0/phi_plot(j_renorm(1),ir_norm,1)
+     if (index == 1) then
+        j_renorm = maxloc(abs(f_bar(0,:)))
+        balloon_renorm = 1.0/f_bar(0,j_renorm(1))
+     endif
      f_bar(:,:) = balloon_renorm*f_bar(:,:)
      !-------------------------------------------------------
 
