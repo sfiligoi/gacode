@@ -13,6 +13,7 @@
 subroutine cgyro_do
 
   use timer_lib
+  use mpi
 
   use cgyro_globals
   use cgyro_equilibrium
@@ -25,20 +26,22 @@ subroutine cgyro_do
   implicit none
 
   integer :: ix, ir, it
-  character(len=80)  :: runfile_phi   = 'out.cgyro.phi'
-  character(len=80)  :: runfile_phiB  = 'out.cgyro.phiB'
-  character(len=80)  :: runfile_apar   = 'out.cgyro.apar'
-  character(len=80)  :: runfile_aparB  = 'out.cgyro.aparB'
+  character(len=14), dimension(3)  :: runfile_field = &
+       (/'out.cgyro.phi ','out.cgyro.apar','out.cgyro.bpar'/)
+  character(len=15), dimension(3)  :: runfile_fieldb = &
+       (/'out.cgyro.phiB ','out.cgyro.aparB','out.cgyro.bparB'/)
   character(len=80)  :: runfile_hx    = 'out.cgyro.hx'
   character(len=80)  :: runfile_grids = 'out.cgyro.grids'
   character(len=80)  :: runfile_time  = 'out.cgyro.time'
   integer :: myio = 20
   integer :: print_step=10
   complex, dimension(:,:), allocatable :: f_balloon
+  complex, dimension(:,:), allocatable :: h_x_glob
   complex :: a_norm
 
-  integer :: signal
+  integer :: signal,i_field
   logical :: lfe
+  integer, dimension(:), allocatable :: recv_status
 
   if (silent_flag == 0 .and. i_proc == 0) then
      open(unit=io_cgyroout,file=trim(path)//runfile,status='replace')
@@ -116,21 +119,24 @@ subroutine cgyro_do
   call GK_init
   call timer_lib_out('gk_init')
 
-  if(silent_flag == 0 .and. i_proc == 0) then
-     open(unit=myio,file=trim(path)//runfile_phi,status='replace')
-     close(myio)
-     open(unit=myio,file=trim(path)//runfile_phiB,status='replace')
-     close(myio)
-     if(n_field > 1) then
-        open(unit=myio,file=trim(path)//runfile_apar,status='replace')
+  if (silent_flag == 0 .and. i_proc == 0) then
+
+     do i_field=1,n_field 
+
+        open(unit=myio,file=trim(path)//runfile_field(i_field),status='replace')
         close(myio)
-        open(unit=myio,file=trim(path)//runfile_aparB,status='replace')
+
+        open(unit=myio,file=trim(path)//runfile_fieldb(i_field),status='replace')
         close(myio)
-     endif
+
+     enddo
+
      open(unit=myio,file=trim(path)//runfile_hx,status='replace')
      close(myio)
+
      open(unit=myio,file=trim(path)//runfile_time,status='replace')
      close(myio)
+
      open(unit=myio,file=trim(path)//runfile_grids,status='replace')
      write(myio,'(i4)') n_species
      write(myio,'(i4)') n_radial
@@ -143,6 +149,7 @@ subroutine cgyro_do
      write(myio,'(1pe12.5)') xi(:)
      write(myio,'(1pe12.5)') transpose(theta_B(:,:))
      close(myio)
+
   endif
 
   ! Time-stepping
@@ -158,60 +165,45 @@ subroutine cgyro_do
      ! Returns new h_x, cap_h_x, and fields
      call COLLISION_do
 
-     if(mod(itime,print_step) == 0) then
+     if (mod(itime,print_step) == 0) then
 
         ! Compute frequency and print
         call FREQ_do
 
         ! Print fields
-        if(silent_flag == 0 .and. i_proc == 0) then
+        if (silent_flag == 0 .and. i_proc == 0) then
 
            ! time
            open(unit=myio,file=trim(path)//runfile_time,status='old',&
                 position='append')
-           write(myio,'(1pe13.5e3)') (itime * delta_t)
+           write(myio,'(1pe13.5e3)') itime*delta_t
            close(myio)
 
-           ! phi
-           open(unit=myio,file=trim(path)//runfile_phi,status='old',&
-                position='append')
-           write(myio,'(1pe13.5e3)') transpose(field(:,:,1))
-           close(myio)
+           ! Fields: (phi,A_parallel)
+           do i_field=1,n_field
 
-           ! Construct ballooning-space form of phi
-
-           a_norm = field(n_radial/2+1,n_theta/2+1,1) 
-           do ir=1,n_radial
-              do it=1,n_theta
-                 f_balloon(ir,it) = field(ir,it,1) &
-                      *exp(-2*pi*i_c*indx_r(ir)*k_theta*rmin)
-              enddo
-           enddo
-           open(unit=myio,file=trim(path)//runfile_phiB,status='old',&
-                position='append')
-           write(myio,'(1pe13.5e3)') transpose(f_balloon(:,:)/a_norm)
-           close(myio)
-
-           if(n_field > 1) then
-              ! apar
-              open(unit=myio,file=trim(path)//runfile_apar,status='old',&
+              open(unit=myio,file=trim(path)//runfile_field(i_field),status='old',&
                    position='append')
-              write(myio,'(1pe13.5e3)') transpose(field(:,:,2))
+              write(myio,'(1pe13.5e3)') transpose(field(:,:,i_field))
               close(myio)
 
-              ! Construct ballooning-space form of apar
+              ! Construct ballooning-space form of field
+
+              a_norm = field(n_radial/2+1,n_theta/2+1,i_field) 
               do ir=1,n_radial
                  do it=1,n_theta
-                    f_balloon(ir,it) = field(ir,it,2) &
+                    f_balloon(ir,it) = field(ir,it,i_field) &
                          *exp(-2*pi*i_c*indx_r(ir)*k_theta*rmin)
                  enddo
               enddo
-              open(unit=myio,file=trim(path)//runfile_aparB,status='old',&
+
+              open(unit=myio,file=trim(path)//runfile_fieldb(i_field),status='old',&
                    position='append')
               write(myio,'(1pe13.5e3)') transpose(f_balloon(:,:)/a_norm)
               close(myio)
-           endif
-           
+
+           enddo
+
         endif
 
         ! Check for convergence
@@ -243,25 +235,44 @@ subroutine cgyro_do
 
   enddo
 
-  if (silent_flag == 0 .and. i_proc == 0) then
-     open(unit=myio,file=trim(path)//runfile_hx,status='old',&
-          position='append')
+  ! Print final distribution
+  if (silent_flag == 0) then
 
-     iv_loc = 0
-     do iv=nv1,nv2
-        iv_loc = iv_loc+1
-        do ic=1,nc
-           f_balloon(ir_c(ic),it_c(ic)) = h_x(ic,iv_loc) &
-                *exp(-2*pi*i_c*indx_r(ir_c(ic))*k_theta*rmin)
+     if (i_proc_1 == 0) then
+        open(unit=myio,file=trim(path)//runfile_hx,status='old',&
+             position='append')
+     endif
+
+     allocate(recv_status(MPI_STATUS_SIZE))
+     allocate(h_x_glob(nc,nv))
+
+     ! Collect distribution onto process 0
+     call MPI_GATHER(h_x(:,:),&
+          size(h_x),&
+          MPI_DOUBLE_COMPLEX,&
+          h_x_glob(:,:),&
+          size(h_x),&
+          MPI_DOUBLE_COMPLEX,&
+          0,&
+          NEW_COMM_1,&
+          i_err)
+
+     if (i_proc_1 == 0) then
+        do iv=1,nv
+           do ic=1,nc
+              f_balloon(ir_c(ic),it_c(ic)) = h_x_glob(ic,iv) &
+                   *exp(-2*pi*i_c*indx_r(ir_c(ic))*k_theta*rmin)
+           enddo
+           write(myio,'(1pe13.5e3)') transpose(f_balloon(:,:))
         enddo
-        write(myio,'(1pe13.5e3)') transpose(f_balloon(:,:))
-     enddo
+     endif
+     deallocate(h_x_glob)
 
-     close(myio)
+     if (i_proc_1 == 0) close(myio)
 
   endif
 
-  if(restart_write == 1) then
+  if (restart_write == 1) then
      open(unit=io_cgyroout,file=trim(path)//runfile_restart,status='replace')
      write(io_cgyroout,*) h_x
      close(io_cgyroout)

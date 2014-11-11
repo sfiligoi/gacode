@@ -262,12 +262,12 @@ contains
     field_loc(:,:,:) = (0.0,0.0)
 
     ! Poisson and Ampere RHS integrals of h
-    
+
     iv_loc = 0
     do iv=nv1,nv2
-       
+
        iv_loc = iv_loc+1
-       
+
        is = is_v(iv)
        ix = ix_v(iv)
        ie = ie_v(iv)
@@ -277,27 +277,26 @@ contains
           ir = ir_c(ic)
           it = it_c(ic)
 
-          
-          fac = gyrox_J0(is,ir,it,ie,ix) &
-               * z(is)*dens(is) * w_e(ie) * 0.5 * w_xi(ix)*h_x(ic,iv_loc)
-          
+          fac = gyrox_J0(is,ir,it,ie,ix) * &
+               z(is)*dens(is)*w_e(ie)*0.5*w_xi(ix)*h_x(ic,iv_loc)
+
           field_loc(ir,it,1) = field_loc(ir,it,1) + fac 
 
-          if(n_field > 1) then
-             field_loc(ir,it,2) = field_loc(ir,it,2) + fac &
-                  * xi(ix) * sqrt(2.0 * energy(ie))
+          if (n_field > 1) then
+             field_loc(ir,it,2) = field_loc(ir,it,2) + &
+                  fac*xi(ix)*sqrt(2.0*energy(ie))
           endif
-          
+
        enddo
     enddo
 
-     call MPI_ALLREDUCE(field_loc(:,:,:),&
-          field(:,:,:),&
-          size(field(:,:,:)),&
-          MPI_DOUBLE_COMPLEX,&
-          MPI_SUM,&
-          NEW_COMM_1,&
-          i_err)
+    call MPI_ALLREDUCE(field_loc(:,:,:),&
+         field(:,:,:),&
+         size(field(:,:,:)),&
+         MPI_DOUBLE_COMPLEX,&
+         MPI_SUM,&
+         NEW_COMM_1,&
+         i_err)
 
     ! Poisson LHS factors
 
@@ -337,25 +336,25 @@ contains
 
     iv_loc = 0
     do iv=nv1,nv2
- 
+
        iv_loc = iv_loc+1
 
        is = is_v(iv)
        ix = ix_v(iv)
        ie = ie_v(iv)
-       
+
        do ic=1,nc
-          
+
           ir = ir_c(ic)
           it = it_c(ic)
-          
+
           cap_h_c(ic,iv_loc) = h_x(ic,iv_loc) &
                + z(is)/temp(is) * gyrox_J0(is,ir,it,ie,ix) &
                * field(ir,it,1)
-          
+
           if(n_field > 1) then
              cap_h_c(ic,iv_loc) = cap_h_c(ic,iv_loc) &
-             - z(is)/temp(is) * gyrox_J0(is,ir,it,ie,ix) &
+                  - z(is)/temp(is) * gyrox_J0(is,ir,it,ie,ix) &
                   * xi(ix)*sqrt(2.0*energy(ie))*field(ir,it,2)
           endif
 
@@ -363,7 +362,7 @@ contains
     enddo
 
 
-  call timer_lib_out('fieldx')
+    call timer_lib_out('fieldx')
 
   end subroutine FIELDx_do
 

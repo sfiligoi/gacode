@@ -143,6 +143,8 @@ contains
        w_theta(it) = GEO_g_theta / GEO_b
        sum = sum + w_theta(it)
        
+       print *,it,theta(it),GEO_captheta,GEO_gq
+
        do ir=1,n_radial
           k_perp(it,ir) = sqrt((2.0*pi*indx_r(ir)*GEO_grad_r*r_length_inv &
                + k_theta*GEO_gq*GEO_captheta)**2 &

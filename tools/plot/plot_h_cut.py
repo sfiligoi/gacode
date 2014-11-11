@@ -37,7 +37,7 @@ thetab = np.array(data[mark:mark+n_theta*n_radial])
 # Read H
 #
 data = np.loadtxt('out.cgyro.hx')
-hx = np.reshape(data,(2,n_radial*n_theta,n_xi,n_energy,n_species),'F')
+hx = np.reshape(data,(2,n_radial*n_theta,n_species,n_xi,n_energy),'F')
 hx = hx/np.max(hx)
 #-------------------------------------------------------
 
@@ -69,9 +69,9 @@ for row in range(3):
     ax.set_xlabel(r'$\theta/\pi$')
 
     if n_xi%2 == 0:
-        hp = np.array(hx[:,:,n_xi/2,ie,ispec]+hx[:,:,n_xi/2-1,ie,ispec])*0.5
+        hp = np.array(hx[:,:,ispec,n_xi/2,ie]+hx[:,:,ispec,n_xi/2-1,ie])*0.5
     else:
-        hp = np.array(hx[:,:,n_xi/2,ie,ispec])
+        hp = np.array(hx[:,:,ispec,n_xi/2,ie])
  
     ax.plot(thetab/np.pi,hp[0,:],'-o',color='black',markersize=2)
     ax.plot(thetab/np.pi,hp[1,:],'-o',color='blue',markersize=2)
@@ -90,9 +90,9 @@ for row in range(3):
 
     n0 = (n_radial/2)*n_theta+n_theta/2 
 
-    hp = np.array(hx[0,:,:,ie,ispec])
+    hp = np.array(hx[0,:,ispec,:,ie])
     ax.plot(xi,hp[n0,:],'-o',color='black',markersize=2)
-    hp = np.array(hx[1,:,:,ie,ispec])
+    hp = np.array(hx[1,:,ispec,:,ie])
     ax.plot(xi,hp[n0,:],'-o',color='blue',markersize=2)
     ax.set_xlim([-1,1])
     #======================================
@@ -109,10 +109,10 @@ for row in range(3):
 
     n0 = (n_radial/2)*n_theta+n_theta/2
 
-    hp = np.array(hx[0,:,ix,:,ispec])
+    hp = np.array(hx[0,:,ispec,ix,:])
     ax.plot(np.sqrt(energy),hp[n0,:],'-o',color='black',markersize=2)
     #ax.plot(np.sqrt(energy),hp[n0,:]*np.exp(-energy),'-o',color='black',markersize=2)
-    hp = np.array(hx[1,:,ix,:,ispec])
+    hp = np.array(hx[1,:,ispec,ix,:])
     ax.plot(np.sqrt(energy),hp[n0,:],'-o',color='blue',markersize=2)
     #ax.plot(np.sqrt(energy),hp[n0,:]*np.exp(-energy),'-o',color='blue',markersize=2)
     #======================================

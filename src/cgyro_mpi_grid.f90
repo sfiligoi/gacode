@@ -36,7 +36,7 @@ subroutine cgyro_mpi_grid
   allocate(ic_c(n_radial,n_theta))
   allocate(iv_v(n_energy,n_xi,n_species))
 
-  !------------------------------------------------
+  !-------------------------------------------------------------
   ! Check for grid validity
   !
   if (modulo(nv,n_proc) /= 0 .or. modulo(nc,n_proc) /= 0) then
@@ -45,7 +45,7 @@ subroutine cgyro_mpi_grid
   if (modulo(n_proc,n_n) /= 0) then
      call catch_error('ERROR: (CGYRO) bad processor count.')
   endif
-  !------------------------------------------------
+  !-------------------------------------------------------------
 
   !-------------------------------
   ! Assign subgroup dimensions:
