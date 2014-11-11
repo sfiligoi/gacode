@@ -5,6 +5,7 @@ from gacodeplotdefs import *
 ftype  = sys.argv[1]
 itime  = int(sys.argv[2])
 ifield = int(sys.argv[3])
+tmax   = float(sys.argv[4])
 
 #-------------------------------------------------------
 # Read grid dimension and axes
@@ -92,8 +93,11 @@ ax.set_xlabel(r'$\theta_*/\pi$')
 ax.plot(thetab/np.pi,np.real(phic),'-o',color='black',markersize=2,label='Re')
 ax.plot(thetab/np.pi,np.imag(phic),'-o',color='blue',markersize=2,label='Im')
 
-#ax.set_xlim([1-n_radial,-1+n_radial])
-#ax.set_xlim([-1,1])
+if tmax < 0.0:
+    ax.set_xlim([1-n_radial,-1+n_radial])
+else:
+    ax.set_xlim([-tmax,tmax])
+
 ax.legend()
 #======================================
 
