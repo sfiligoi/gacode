@@ -53,8 +53,14 @@ n_ang = sim.profile['n_theta_plot']*n_p
 
 x = -(1.0+n_p)+2.0*n_p*np.arange(n_ang)/float(n_ang)
 
-ax.plot(x,np.real(sim.balloon[key][:,0,-1]),color='k',label='Re')
-ax.plot(x,np.imag(sim.balloon[key][:,0,-1]),color='m',label='Im')
+for i in np.arange(n_ang):
+    if abs(x[i]) < 1e-6:
+        j = i
+
+c_norm = sim.balloon[key][j,0,-1]
+
+ax.plot(x,np.real(sim.balloon[key][:,0,-1]/c_norm),color='k',label='Re')
+ax.plot(x,np.imag(sim.balloon[key][:,0,-1]/c_norm),color='m',label='Im')
 
 if tmax < 0.0:
     ax.set_xlim([1-n_p,-1+n_p])
