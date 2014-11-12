@@ -25,7 +25,7 @@ subroutine cgyro_do
 
   implicit none
 
-  integer :: ix, ir, it
+  integer :: ir, it
   character(len=14), dimension(3)  :: runfile_field = &
        (/'out.cgyro.phi ','out.cgyro.apar','out.cgyro.bpar'/)
   character(len=15), dimension(3)  :: runfile_fieldb = &
@@ -44,52 +44,37 @@ subroutine cgyro_do
   integer, dimension(:), allocatable :: recv_status
 
   if (silent_flag == 0 .and. i_proc == 0) then
-     open(unit=io_cgyroout,file=trim(path)//runfile,status='replace')
-     close(io_cgyroout)
+     open(unit=io_run,file=trim(path)//runfile,status='replace')
+     close(io_run)
   endif
 
-  ! MPI setup
+  ! 1. MPI setup
   call cgyro_mpi_grid
+  if (error_status > 0) goto 100
 
+  ! 2. Profile setup
   call cgyro_make_profiles
-  if(error_status > 0) goto 100
+  if (error_status > 0) goto 100
+
+  ! 3. Parameter consistency checks
   call cgyro_check
-  if(error_status > 0) goto 100
+  if (error_status > 0) goto 100
 
-  allocate(indx_xi(n_xi))
-  do ix=1,n_xi
-     indx_xi(ix) = ix-1
-  enddo
-  allocate(indx_r(n_radial))
-  do ir=1,n_radial
-     indx_r(ir) = -n_radial/2 + (ir-1)
-  enddo
-  if(toroidal_model == 2) then
-     if(n_radial /= 1) then
-        print *, 'Error: For zf test, n_radial must be 1'
-        stop
-     endif
-     indx_r(1) = 1
-  endif
-
-  ! set-up energy grid and weights
+  ! Construct energy nodes and weights
   allocate(energy(n_energy))
   allocate(w_e(n_energy))
   allocate(e_deriv1_mat(n_energy,n_energy))
   allocate(e_deriv2_mat(n_energy,n_energy))
   call pseudo_maxwell(n_energy,e_max,energy,w_e,e_deriv1_mat,e_deriv2_mat)
-  ! for old calls, e_max is real; now e_max is an int
-  !call energy_integral(n_energy,e_max,energy,w_e)
-  !call cgyro_energy_mesh(n_energy,e_max,energy,w_e)
 
-  ! set-up xi-grid, weights
+  ! Construct xi (pitch-angle) nodes and weights
   allocate(xi(n_xi))
   allocate(w_xi(n_xi))
   allocate(xi_lor_mat(n_xi,n_xi))
   allocate(xi_deriv_mat(n_xi,n_xi))
   call pseudo_legendre(n_xi,xi,w_xi,xi_deriv_mat,xi_lor_mat)
 
-  ! allocate distribution function and field arrays
+  ! Allocate distribution function and field arrays
   allocate(h_x(nc,nv_loc))
   allocate(cap_h_c(nc,nv_loc))
   allocate(cap_h_ct(nv_loc,nc))
@@ -273,9 +258,9 @@ subroutine cgyro_do
   endif
 
   if (restart_write == 1) then
-     open(unit=io_cgyroout,file=trim(path)//runfile_restart,status='replace')
-     write(io_cgyroout,*) h_x
-     close(io_cgyroout)
+     open(unit=io_run,file=trim(path)//runfile_restart,status='replace')
+     write(io_run,*) h_x
+     close(io_run)
   endif
 
   ! Print timers

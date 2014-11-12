@@ -34,15 +34,11 @@ contains
     real, dimension(:,:), allocatable :: rs_lor
     real, dimension(:), allocatable :: vecin_xi, vecout_xi
 
-    if(collision_model == -1) return
+    if (collision_model == 0) return
 
-    if(flag == 1) then
+    if (flag == 1) then
+
        if(initialized) return
-
-       if(collision_model == 0 .and. adiabatic_ele_model == 1) then
-          call cgyro_error('ERROR: (CGYRO) collision_model=0 requires kinetic electrons')
-          return
-       endif
 
        allocate(nu_d(n_energy,n_species,n_species))
        allocate(nu_s(n_energy,n_species,n_species))
@@ -54,12 +50,16 @@ contains
        do ie=1,n_energy
           do is=1,n_species
              do js=1,n_species
+
                 xa = sqrt(energy(ie))
                 xb = xa * vth(is)**2 / vth(js)**2
                 tauinv_ab = nu(is) * (1.0*Z(js))**2 / (1.0*Z(is))**2 &
                      * dens(js)/dens(is)
 
-                if(collision_model == 0) then
+                select case (collision_model)
+
+                case (1)
+
                    ! Only ee,ei Connor-like Lorentz
                    if(is == is_ele) then
                       if(is == js) then
@@ -73,7 +73,8 @@ contains
                       endif
                    endif
 
-                else if(collision_model == 1) then
+                case (2)
+
                    ! Connor model
                    if(is == js .or. &
                         (abs(mass(is) - mass(js)) < epsilon(0.))) then
@@ -82,7 +83,7 @@ contains
                            * (exp(-xb*xb)/(xb*sqrt(pi)) &
                            + (1.0-1.0/(2.0*xb*xb)) * DERF(xb))
 
-                   else if(mass(is) < mass(js)) then
+                   else if (mass(is) < mass(js)) then
                       ! case 2: ele-ion and ion-imp(heavy) collisions
                       nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3)
 
@@ -95,7 +96,8 @@ contains
                    endif
                    nu_s(ie,is,js) = nu_d(ie,is,js)
 
-                else
+                case (3)
+
                    ! Reduced Hirshman-Sigmar model
                    nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
                         * (exp(-xb*xb)/(xb*sqrt(pi)) &
@@ -104,7 +106,8 @@ contains
                         * (-exp(-xb*xb)/(xb*sqrt(pi)) &
                         + (1.0/(2.0*xb*xb)) * DERF(xb)) &
                         * (2.0*temp(is)/temp(js))*(1.0+mass(js)/mass(is))
-                endif
+
+                end select
 
              enddo
           enddo
@@ -114,8 +117,7 @@ contains
           do js=1,n_species
              rs(is,js) = 0.0
              do ie=1,n_energy
-                rs(is,js) = rs(is,js) + w_e(ie) * nu_s(ie,is,js) &
-                     * energy(ie)
+                rs(is,js) = rs(is,js)+w_e(ie)*nu_s(ie,is,js)*energy(ie)
              enddo
           enddo
        enddo
@@ -134,7 +136,7 @@ contains
              enddo
           enddo
        enddo
-       if(adiabatic_ele_model == 1) then
+       if (ae_flag == 1) then
           sum_den = sum_den + dens_ele / temp_ele
        endif
 
@@ -144,7 +146,7 @@ contains
        allocate(amat(nv,nv))
        allocate(bmat(nv,nv))
 
-       if (collision_model == 3) then
+       if (collision_model == 4) then
 
           allocate(rs_lor(n_species,n_species))
           allocate(vecin_xi(n_xi))
@@ -178,8 +180,8 @@ contains
           it = it_c(ic)
           ir = ir_c(ic)
 
-          cmat(:,:,ic_loc) = (0.0,0.0)
-          amat(:,:)       = (0.0,0.0)
+          cmat(:,:,ic_loc) = 0.0
+          amat(:,:)        = 0.0
 
           do iv=1,nv
 
@@ -293,7 +295,7 @@ contains
                 endif
 
                 ! Poisson component 
-                if(toroidal_model == 2 .and. adiabatic_ele_model == 1) then
+                if (zf_test_flag == 1 .and. ae_flag == 1) then
                    ! Cannot include Poisson in collision matrix
                    ! for n=0 with ade because depends on theta
                    ! i.e. ne0 ~ phi - <phi>
@@ -321,7 +323,7 @@ contains
                 endif
 
                 ! Ampere component
-                if(n_field > 1) then
+                if (n_field > 1) then
                    cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                         - z(is)/temp(is) / &
                         (2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
@@ -343,7 +345,7 @@ contains
                         * 0.5 * w_xi(jx) &
                         * xi(jx) * sqrt(2.0*energy(je)) * vth(is)
                 endif
-                
+
              enddo
           enddo
 
@@ -399,7 +401,7 @@ contains
     integer :: is,ir,it,ie,ix
     integer :: ivp
 
-    if (collision_model == -1) return
+    if (collision_model == 0) return
 
     ! compute new collisional cap_H: H = h + ze/T G phi
     ! assumes have cap_h_x

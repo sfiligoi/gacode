@@ -9,7 +9,7 @@ subroutine cgyro_init(path_in,mpi_comm_in)
 
   use mpi
   use cgyro_globals
-  use cgyro_interface
+  !use gkcoll_interface
 
   implicit none
 

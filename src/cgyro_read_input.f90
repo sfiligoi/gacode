@@ -27,7 +27,6 @@ subroutine cgyro_read_input
   read(1,*) silent_flag
   read(1,*) equilibrium_model
   read(1,*) collision_model
-  read(1,*) ae_flag
   read(1,*) zf_test_flag
   read(1,*) te_ade
   read(1,*) ne_ade

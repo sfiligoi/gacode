@@ -128,22 +128,18 @@ contains
     implicit none
 
     real :: ang
-    logical :: lfe
 
     h_x(:,:) = (0.0,0.0)
 
     if (restart_mode == 1) then
-       inquire(file=trim(path)//runfile_restart,exist=lfe)
-       if (lfe .eqv. .false.) then
-          call cgyro_error('ERROR: (CGYRO) Missing restart file')
-          return
-       endif
-       open(unit=io_cgyroout,file=trim(path)//runfile_restart,status='old')
-       read(io_cgyroout,*) h_x
-       close(io_cgyroout)
+
+       open(unit=io_run,file=trim(path)//runfile_restart,status='old')
+       read(io_run,*) h_x
+       close(io_run)
+
     else
 
-       if (toroidal_model == 2) then
+       if (zf_test_flag == 1) then
 
           ! Zonal-flow initial condition
 
@@ -315,7 +311,8 @@ contains
 
     ! TRAPPING TERM
 
-    if(collision_model == -1) then
+    if (collision_model == 0) then
+
        call parallel_lib_r(transpose(cap_h_c),cap_h_v)
        cap_h_v_prime(:,:) = (0.0,0.0)
        ic_loc = 0

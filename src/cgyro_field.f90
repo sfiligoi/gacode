@@ -37,7 +37,7 @@ contains
              enddo
           enddo
        enddo
-       if(adiabatic_ele_model == 1) then
+       if(ae_flag == 1) then
           sum_den_h = sum_den_h + dens_ele / temp_ele
        endif
 
@@ -55,15 +55,16 @@ contains
                    enddo
                 enddo
              enddo
-             if(adiabatic_ele_model == 1) then
+             if (ae_flag == 1) then
                 sum_den_x(ir,it) = sum_den_x(ir,it) + dens_ele / temp_ele
              endif
           enddo
        enddo
 
-       ! Special factors in zf n=0 Poisson eqn if adiabatic electrons
 
-       if(toroidal_model == 2 .and. adiabatic_ele_model == 1) then
+       if (zf_test_flag == 1 .and. ae_flag == 1) then
+
+        ! Zonal flow with adiabatic electrons:
 
           allocate(hzf(n_radial,n_theta,n_theta))
           hzf(:,:,:) = 0.0      
@@ -115,7 +116,7 @@ contains
 
        ! Pre-factors for Ampere eqn
 
-       if(n_field > 1) then
+       if (n_field > 1) then
           allocate(sum_cur_x(n_radial,n_theta))
           do ir=1,n_radial
              do it=1,n_theta
@@ -142,7 +143,7 @@ contains
 
        deallocate(sum_den_x)
 
-       if(toroidal_model == 2 .and. adiabatic_ele_model == 1) then
+       if (zf_test_flag == 2 .and. ae_flag == 1) then
           deallocate(hzf)
           deallocate(xzf)
           deallocate(pvec_in)
@@ -209,7 +210,7 @@ contains
 
      ! Poisson LHS factors
 
-     if (toroidal_model == 2 .and. adiabatic_ele_model == 1) then
+     if (zf_test_flag == 1 .and. ae_flag == 1) then
         
         do ir=1,n_radial
            pvec_in(:) = real(field(ir,:,1))
@@ -235,7 +236,7 @@ contains
 
      ! Ampere LHS factors
 
-     if(n_field > 1) then
+     if (n_field > 1) then
         do ir=1,n_radial
            do it=1,n_theta
               field(ir,it,2) = field(ir,it,2) &
@@ -248,12 +249,16 @@ contains
   end subroutine FIELDh_do
 
   subroutine FIELDx_do
+
     use mpi
     use timer_lib
+
     use cgyro_globals
     use cgyro_gyro
     use cgyro_equilibrium
+
     implicit none
+
     integer :: is, ie, ix, ir, it
     complex :: fac
 
@@ -300,7 +305,7 @@ contains
 
     ! Poisson LHS factors
 
-    if (toroidal_model == 2 .and. adiabatic_ele_model == 1) then
+    if (zf_test_flag == 1 .and. ae_flag == 1) then
        do ir=1,n_radial
           pvec_in(:) = real(field(ir,:,1))
           call DGEMV('N',n_theta,n_theta,num1,xzf(ir,:,:),&
@@ -322,7 +327,7 @@ contains
 
     ! Ampere LHS factors
 
-    if(n_field > 1) then
+    if (n_field > 1) then
        do ir=1,n_radial
           do it=1,n_theta
              field(ir,it,2) = field(ir,it,2) &
@@ -352,7 +357,7 @@ contains
                + z(is)/temp(is) * gyrox_J0(is,ir,it,ie,ix) &
                * field(ir,it,1)
 
-          if(n_field > 1) then
+          if (n_field > 1) then
              cap_h_c(ic,iv_loc) = cap_h_c(ic,iv_loc) &
                   - z(is)/temp(is) * gyrox_J0(is,ir,it,ie,ix) &
                   * xi(ix)*sqrt(2.0*energy(ie))*vth(is)*field(ir,it,2)

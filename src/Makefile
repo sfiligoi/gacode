@@ -9,9 +9,8 @@ endif
 EXEC = cgyro
 
 OBJECTS = cgyro_globals.o \
+          cgyro_io.o \
           cgyro_mpi_grid.o \
-          cgyro_catch_error_routines.o \
-          cgyro_error.o \
           cgyro_check.o \
 	  cgyro_make_profiles.o \
           cgyro_read_input.o \

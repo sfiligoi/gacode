@@ -1,60 +1,90 @@
 subroutine cgyro_make_profiles
 
   use cgyro_globals
+  use cgyro_io
 
   implicit none
 
-  integer :: is, num_ele, j
+  integer :: is,ir,ix 
+  integer :: j
+  integer :: num_ele
   integer, parameter :: io=20
-  
+
+  !---------------------------------------------------
+  ! Manage electrons
+  !
   num_ele = 0
   do is=1,n_species
      if (z(is) == -1) then
         num_ele = num_ele + 1
+        is_ele = is
      endif
   enddo
+
   if (num_ele == 0) then
+
+     ! Adiabatic electrons
+
      ae_flag = 1
+     call cgyro_info('Using adiabatic electron model.')
+
+     dens_ele = ne_ade
+     temp_ele = te_ade
+
   else if (num_ele == 1) then
+
+     ! GK electrons
+
      ae_flag = 0
+     call cgyro_info('Using gyrokinetic electrons.')
+
+     dens_ele = dens(is_ele)
+     temp_ele = temp(is_ele)
+
   else
-     call cgyro_error('ERROR: (CGYRO) Only one electron species allowed.')
+
+     call cgyro_error('Only one electron species allowed.')
      return
+
   endif
-  
-  do is=1,n_species
-     nu(is) = nu_1_in *(1.0*z(is))**4/(1.0*z(1))**4 &
-          * dens(is) / dens(1) &
-          * sqrt(mass(1)/mass(is)) * (temp(1)/temp(is))**1.5
-  enddo
+  !---------------------------------------------------
 
   ! Standard local simulation (one point)
-  
-  q   = abs(q) 
-  rho = abs(rho)
-  
+
+  q = abs(q) 
+
   if (zf_test_flag == 1) then
 
      ! Zonal flow (n=0) test
-  
-     toroidal_num = 0
-     k_theta      = 0.0
-     k_theta_rho  = ky
-     r_length_inv = ky
 
-  else if(toroidal_model == 0) then
-     ! k_theta_rho and n are specified; compute rho
-     k_theta_rho = abs(k_theta_rho)
-     rho = k_theta_rho * rmin / (q * toroidal_num)
-     k_theta = k_theta_rho / rho
-     r_length_inv =  q * toroidal_num * shat / rmin
-  else if(toroidal_model == 1) then
-     ! rho and n are specified; compute k_theta
-     rho  = abs(rho) 
-     k_theta = (q * toroidal_num) / rmin
-     k_theta_rho = (q * toroidal_num) / rmin * rho
-     k_theta_rho = abs(k_theta_rho)
-     r_length_inv =  q * toroidal_num * shat / rmin
+     k_theta      = 0.0
+     rho          = ky/(q/rmin)
+     r_length_inv = s*ky/box_size
+
+     call cgyro_info('Triggered zonal flow test.')
+
+     if (n_radial /= 1) then
+        call cgyro_error('For zonal flow test, set n_radial=1.')
+        return
+     endif
+
+  else if (n_toroidal == 1) then
+
+     ! Single linear mode (assume n=1, compute rho)
+
+     k_theta      = q/rmin
+     rho          = ky/k_theta
+     r_length_inv = s*ky/box_size
+
+     print *,rho
+
+     call cgyro_info('Single-mode linear analysis.')
+
+  else
+
+     call cgyro_error('Nonlinear not implemented')
+     return
+
   endif
 
   ! general geometry -- accessible only from interface 
@@ -63,7 +93,7 @@ subroutine cgyro_make_profiles
   geo_ny = 0
   allocate(geo_yin(8,0:geo_ny))
   geo_yin(:,:) = 0.0
-  if(equilibrium_model == 3) then
+  if (equilibrium_model == 3) then
      geo_numeq_flag = 1
      geo_ny = geo_ny_in  
      deallocate(geo_yin)
@@ -72,36 +102,40 @@ subroutine cgyro_make_profiles
         geo_yin(:,j) = geo_yin_in(:,j)
      enddo
   endif
-  
-  do is=1, n_species
+
+  ! Species-dependent quantities
+  do is=1,n_species
+
+     ! thermal velocity
      vth(is) = sqrt(temp(is)/mass(is))
+
+     ! collision frequency
+     nu(is) = nu_1_in *(1.0*z(is))**4/(1.0*z(1))**4 &
+          * dens(is) / dens(1) &
+          * sqrt(mass(1)/mass(is)) * (temp(1)/temp(is))**1.5
+
   enddo
 
-  if(adiabatic_ele_model == 0) then
-     do is=1, n_species
-        if(Z(is) == -1) then
-           is_ele = is
-           exit
-        endif
-     enddo
-  endif
-  if(adiabatic_ele_model == 0) then
-     dens_ele = dens(is_ele)
-     temp_ele = temp(is_ele)
-  else
-     dens_ele = ne_ade
-     temp_ele = te_ade
-  endif
+  ! Fourier index mapping
+  allocate(indx_xi(n_xi))
+  do ix=1,n_xi
+     indx_xi(ix) = ix-1
+  enddo
+  allocate(indx_r(n_radial))
+  do ir=1,n_radial
+     indx_r(ir) = -n_radial/2 + (ir-1)
+  enddo
+  if (zf_test_flag == 1) indx_r(1) = 1
 
   ! Print the re-mapped equilibrium data
-  if(silent_flag == 0 .and. i_proc == 0) then
+  if (silent_flag == 0 .and. i_proc == 0) then
      open(unit=io,file=trim(path)//'out.cgyro.equil',status='replace')
      write (io,'(e16.8)',advance='no') rmin
      write (io,'(e16.8)',advance='no') rmaj
      write (io,'(e16.8)',advance='no') q
-     write (io,'(e16.8)',advance='no') shat
+     write (io,'(e16.8)',advance='no') s
      write (io,'(e16.8)',advance='no') rho
-     write (io,'(e16.8)',advance='no') k_theta_rho
+     write (io,'(e16.8)',advance='no') ky
      do is=1,n_species
         write (io,'(e16.8)',advance='no') dens(is)
         write (io,'(e16.8)',advance='no') temp(is)
@@ -111,6 +145,6 @@ subroutine cgyro_make_profiles
      enddo
      write (io,*)
      close(io)
-  end if
+  endif
 
 end subroutine cgyro_make_profiles

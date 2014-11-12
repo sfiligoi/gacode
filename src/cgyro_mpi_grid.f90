@@ -12,17 +12,16 @@ subroutine cgyro_mpi_grid
   use mpi
 
   use cgyro_globals
+  use cgyro_io
 
   implicit none
 
   integer :: ie,ix,is,ir,it
 
-  integer :: n_n
   integer :: splitkey
   integer, external :: parallel_dim
 
-  n_n = 1
-
+  ! Velocity-space (v) and configuration-space (c) dimensions
   nv = n_energy*n_xi*n_species
   nc = n_radial*n_theta
 
@@ -40,18 +39,20 @@ subroutine cgyro_mpi_grid
   ! Check for grid validity
   !
   if (modulo(nv,n_proc) /= 0 .or. modulo(nc,n_proc) /= 0) then
-     call catch_error('ERROR: (CGYRO) bad processor count.')
+     call cgyro_error('ERROR: (CGYRO) bad processor count.')
+     return
   endif
-  if (modulo(n_proc,n_n) /= 0) then
-     call catch_error('ERROR: (CGYRO) bad processor count.')
+  if (modulo(n_proc,n_toroidal) /= 0) then
+     call cgyro_error('ERROR: (CGYRO) bad processor count.')
+     return
   endif
   !-------------------------------------------------------------
 
   !-------------------------------
   ! Assign subgroup dimensions:
   !
-  n_proc_2 = n_n
-  n_proc_1 = n_proc/n_n
+  n_proc_2 = n_toroidal
+  n_proc_1 = n_proc/n_toroidal
   !-------------------------------
 
   !------------------------------------------------
@@ -73,7 +74,8 @@ subroutine cgyro_mpi_grid
        NEW_COMM_1, &
        i_err)
   if (i_err /= 0) then
-     call CATCH_ERROR('ERROR: (CGYRO) NEW_COMM_1 not created')
+     call cgyro_error('ERROR: (CGYRO) NEW_COMM_1 not created')
+     return
   endif
 
   ! Local adjoint Group number
@@ -84,7 +86,8 @@ subroutine cgyro_mpi_grid
        NEW_COMM_2, &
        i_err)
   if (i_err /= 0) then
-     call CATCH_ERROR('ERROR: (CGYRO) NEW_COMM_2 not created')
+     call cgyro_error('ERROR: (CGYRO) NEW_COMM_2 not created')
+     return
   endif
   !
   call MPI_COMM_RANK(NEW_COMM_1,i_proc_1,i_err)
