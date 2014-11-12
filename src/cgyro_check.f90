@@ -144,16 +144,13 @@ subroutine cgyro_check
   if (silent_flag == 0 .and. i_proc == 0) then
      open(unit=io_run,file=trim(path)//runfile,status='old',position='append')
      write(io_run,*)
-     write(io_run,*) 'GRID DIMENSIONS'
-     write(io_run,*) '---------------'
-     write(io_run,10) 'n_radial',n_radial
-     write(io_run,10) 'n_energy',n_energy
-     write(io_run,10) 'n_xi',n_xi
-     write(io_run,10) 'n_theta',n_theta
+     write(io_run,'(a)') 'n_radial  n_theta   n_species n_energy  n_xi'
+     write(io_run,'(t1,5(i4,6x))') n_radial,n_theta,n_species,n_energy,n_xi
 
      write(io_run,*) 
      write(io_run,*) 'PHYSICS PARAMETERS'
      write(io_run,*) '------------------'
+     write(io_run,20) 'k_theta rho',k_theta*rho
      write(io_run,20) 'r/R',rmin
      write(io_run,20) 'q',q
      write(io_run,20) 's',s
@@ -167,17 +164,10 @@ subroutine cgyro_check
      write(io_run,20) 'zmag',zmag
      write(io_run,20) 's_zmag',s_zmag
 
+     write(io_run,*)
+     write(io_run,'(a)') 'indx  z    n/n_norm    T/T_norm    m/m_norm     a/Ln        a/Lt        nu'
      do is=1,n_species
-        write(io_run,*) 
-        write(io_run,'(t2,a,i1)') 'Species ',is
-        write(io_run,*) '----------'
-        write(io_run,10) 'Z',z(is)
-        write(io_run,20) 'dens',dens(is)
-        write(io_run,20) 'temp',temp(is)
-        write(io_run,20) 'mass',mass(is)
-        write(io_run,20) 'a/Ln',dlnndr(is)
-        write(io_run,20) 'a/LT',dlntdr(is)
-        write(io_run,20) 'nu',nu(is)
+        write(io_run,'(t2,i2,2x,i2,2x,6(1pe10.4,2x))') is,z(is),dens(is),temp(is),mass(is),dlnndr(is),dlntdr(is),nu(is)
      enddo
 
      write(io_run,*)

@@ -57,9 +57,11 @@ subroutine cgyro_make_profiles
 
      ! Zonal flow (n=0) test
 
-     k_theta      = 0.0
-     rho          = ky/(q/rmin)
-     r_length_inv = s*ky/box_size
+     k_theta      = q/rmin
+     rho          = ky/k_theta
+     r_length_inv = s*k_theta/box_size
+     
+     k_theta = 0
 
      call cgyro_info('Triggered zonal flow test.')
 
@@ -74,9 +76,7 @@ subroutine cgyro_make_profiles
 
      k_theta      = q/rmin
      rho          = ky/k_theta
-     r_length_inv = s*ky/box_size
-
-     print *,rho
+     r_length_inv = s*k_theta/box_size
 
      call cgyro_info('Single-mode linear analysis.')
 
