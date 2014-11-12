@@ -8,38 +8,40 @@ subroutine cgyro_make_profiles
   integer, parameter :: io=20
   
   num_ele = 0
-  do is=1, n_species
-     if(z(is) == -1) then
+  do is=1,n_species
+     if (z(is) == -1) then
         num_ele = num_ele + 1
      endif
   enddo
-  if(num_ele == 0) then
-     adiabatic_ele_model = 1
-  else if(num_ele == 1) then
-     adiabatic_ele_model = 0
+  if (num_ele == 0) then
+     ae_flag = 1
+  else if (num_ele == 1) then
+     ae_flag = 0
   else
-     call cgyro_error('ERROR: (CGYRO) Only one electron species allowed')
+     call cgyro_error('ERROR: (CGYRO) Only one electron species allowed.')
      return
-  end if
+  endif
   
   do is=1,n_species
-     nu(is)     = nu_1_in *(1.0*z(is))**4/(1.0*z(1))**4 &
+     nu(is) = nu_1_in *(1.0*z(is))**4/(1.0*z(1))**4 &
           * dens(is) / dens(1) &
           * sqrt(mass(1)/mass(is)) * (temp(1)/temp(is))**1.5
   enddo
 
   ! Standard local simulation (one point)
   
-  q    = abs(q) 
+  q   = abs(q) 
+  rho = abs(rho)
   
-  if(toroidal_model == 2) then
-     ! n=0 test
-     ! specify rho and r_length_inv
+  if (zf_test_flag == 1) then
+
+     ! Zonal flow (n=0) test
+  
      toroidal_num = 0
      k_theta      = 0.0
-     k_theta_rho  = 0.0
-     rho  = abs(rho) 
-     r_length_inv = 1.0 / (r_length_rho) / rho
+     k_theta_rho  = ky
+     r_length_inv = ky
+
   else if(toroidal_model == 0) then
      ! k_theta_rho and n are specified; compute rho
      k_theta_rho = abs(k_theta_rho)

@@ -218,7 +218,7 @@ subroutine cgyro_check
      write(io_cgyroout,*) 'toroidal_num', toroidal_num
      write(io_cgyroout,20) 'r/R',rmin
      write(io_cgyroout,20) 'q',q
-     write(io_cgyroout,20) 's',shat
+     write(io_cgyroout,20) 's',s
      write(io_cgyroout,20) 'shift',shift
      write(io_cgyroout,20) 'kappa',kappa
      write(io_cgyroout,20) 's_kappa',s_kappa

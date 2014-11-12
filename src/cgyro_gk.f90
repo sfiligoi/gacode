@@ -275,8 +275,8 @@ contains
           ! radial upwind
           val = omega_rdrift(it,is) &
                * energy(ie) * (1.0 + xi(ix)**2)
-          val = abs(val) * rupwind_eps & 
-               * (2.0*indx_r(ir)/(1.0*n_radial))**(rupwind_n-1.0) &
+          val = abs(val) * up_radial & 
+               * (2.0*indx_r(ir)/(1.0*n_radial))**(up_radial_n-1.0) &
                * (2.0*pi*indx_r(ir)*r_length_inv)
           rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc) &
                - val * h_x(ic,iv_loc)

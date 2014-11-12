@@ -38,15 +38,41 @@ module cgyro_globals
   real, parameter    :: num1 = 1.0
   real, parameter    :: num0 = 0.0
 
-  integer, parameter :: trap_method = 0
-
   !---------------------------------------------------------------
   ! Input parameters:
   !
+  integer :: n_energy
+  integer :: n_xi
+  integer :: n_theta
+  integer :: n_radial
+  integer :: n_toroidal
+  integer :: n_field
+  integer :: e_max
+  real    :: delta_t
+  real    :: max_time
+  real    :: freq_tol
+  integer :: restart_write
+  integer :: restart_mode
+  real    :: up_radial
+  integer :: up_radial_n
+  real    :: up_theta
+  real    :: ky
+  real    :: box_size
+  integer :: silent_flag
+  integer :: equilibrium_model
+  integer :: collision_model 
+  integer :: ae_flag
+  integer :: zf_test_flag 
+  real :: te_ade
+  real :: ne_ade
+  real :: lambda_debye
+
+  ! Geometry input
+
   real :: rmin
   real :: rmaj
   real :: q
-  real :: shat
+  real :: s
   real :: shift
   real :: kappa
   real :: s_kappa
@@ -57,17 +83,30 @@ module cgyro_globals
   real :: zmag
   real :: s_zmag
   real :: beta_star
+  real :: betae_unit
 
-  integer :: n_field
-  real    :: betae_unit
+  ! Species parameters
 
-  integer :: toroidal_model
-  integer :: toroidal_num
+  integer :: n_species
+  real :: nu_1_in
+  integer, dimension(6) :: z
+  real, dimension(6) :: mass
+  real, dimension(6) :: dens
+  real, dimension(6) :: temp
+  real, dimension(6) :: dlnndr
+  real, dimension(6) :: dlntdr
+
+  !---------------------------------------------------------------
+
+  real, dimension(6) :: vth  
+  real, dimension(6) :: nu
   real :: rho
   real :: k_theta_rho
   real :: k_theta
   real :: r_length_rho
   real :: r_length_inv
+
+  character(len=80)  :: runfile_restart = 'out.cgyro.restart'
 
   !---------------------------------------------------------------
   integer :: geo_ny_in
@@ -78,65 +117,13 @@ module cgyro_globals
   real, dimension(:,:), allocatable :: geo_yin
   !---------------------------------------------------------------
 
-  !
-  real :: te_ade
-  real :: ne_ade
-  !
-  real :: lambda_debye
-  !
-  integer, dimension(6) :: z
-  real, dimension(6) :: mass
-  real, dimension(6) :: dens
-  real, dimension(6) :: temp
-  real, dimension(6) :: dlnndr
-  real, dimension(6) :: dlntdr
-  real, dimension(6) :: nu
-  !
-  real :: nu_1_in
-  !
-  real, dimension(6) :: vth  
   !---------------------------------------------------------------
-
-  !---------------------------------------------------------------
-  ! Grid dimensions:
-  !
-  integer :: n_species
-  integer :: n_energy
-  integer :: n_xi
-  integer :: n_theta
-  integer :: n_radial
-  integer :: e_max
-  real    :: delta_t
-  real    :: max_time
-  real    :: freq_tol
-  integer :: restart_write
-  integer :: restart_mode
-  character(len=80)  :: runfile_restart = 'out.cgyro.restart'
-
-  real    :: rupwind_eps
-  integer :: rupwind_n
-  real    :: tupwind_eps
-
   ! Time stepping
   integer :: itime, nt_step
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
-  ! Models:
-  !
-  integer :: equilibrium_model
-  integer :: collision_model 
-  integer :: adiabatic_ele_model
-  !---------------------------------------------------------------
-
-  !---------------------------------------------------------------
-  ! Output mode:
-  !
-  integer :: silent_flag
-  !---------------------------------------------------------------
-
-  !---------------------------------------------------------------
-  ! Path to input.cgyr, read in the get_inputpath subroutine
+  ! Path to input.cgyro, read in the get_inputpath subroutine
   character(len=80) :: path
   !---------------------------------------------------------------
 

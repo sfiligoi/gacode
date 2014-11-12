@@ -26,8 +26,8 @@ module cgyro_interface
   real    :: cgyro_freq_tol_in = 0.001
   integer :: cgyro_restart_write_in = 0
   integer :: cgyro_restart_mode_in  = 0
-  real    :: cgyro_rupwind_eps_in = 1.0
-  integer :: cgyro_rupwind_n_in = 4
+  real    :: cgyro_up_radial_in = 1.0
+  integer :: cgyro_up_radial_n_in = 4
   real    :: cgyro_tupwind_eps_in = 1.0
   integer :: cgyro_toroidal_model_in = 1
   integer :: cgyro_toroidal_num_in  = 1
@@ -86,7 +86,7 @@ module cgyro_interface
   real    :: cgyro_dlntdr_6_in = 1.0
   real    :: cgyro_nu_6_in     = 0.0
   real    :: cgyro_q_in        = 2.0
-  real    :: cgyro_shat_in     = 1.0
+  real    :: cgyro_s_in     = 1.0
   real    :: cgyro_shift_in    = 0.0
   real    :: cgyro_kappa_in    = 1.0
   real    :: cgyro_s_kappa_in  = 0.0
@@ -133,8 +133,8 @@ contains
     cgyro_freq_tol_in = freq_tol
     cgyro_restart_write_in = restart_write
     cgyro_restart_mode_in  = restart_mode
-    cgyro_rupwind_eps_in = rupwind_eps
-    cgyro_rupwind_n_in = rupwind_n
+    cgyro_up_radial_in = up_radial
+    cgyro_up_radial_n_in = up_radial_n
     cgyro_tupwind_eps_in = tupwind_eps
     cgyro_toroidal_model_in = toroidal_model
     cgyro_toroidal_num_in = toroidal_num
@@ -193,7 +193,7 @@ contains
     cgyro_dlntdr_6_in = dlntdr(6)
     cgyro_nu_6_in     = nu(6)
     cgyro_q_in        = q
-    cgyro_shat_in     = shat
+    cgyro_s_in     = s
     cgyro_shift_in    = shift
     cgyro_kappa_in    = kappa
     cgyro_s_kappa_in  = s_kappa
@@ -228,8 +228,8 @@ contains
     freq_tol = cgyro_freq_tol_in
     restart_write = cgyro_restart_write_in
     restart_mode  = cgyro_restart_mode_in  
-    rupwind_eps = cgyro_rupwind_eps_in
-    rupwind_n = cgyro_rupwind_n_in
+    up_radial = cgyro_up_radial_in
+    up_radial_n = cgyro_up_radial_n_in
     tupwind_eps = cgyro_tupwind_eps_in
     toroidal_model = cgyro_toroidal_model_in
     toroidal_num   = cgyro_toroidal_num_in
@@ -288,7 +288,7 @@ contains
     dlntdr(6) = cgyro_dlntdr_6_in
     nu(6)     = cgyro_nu_6_in
     q         = cgyro_q_in
-    shat      = cgyro_shat_in
+    s      = cgyro_s_in
     shift     = cgyro_shift_in
     kappa     = cgyro_kappa_in
     s_kappa   = cgyro_s_kappa_in

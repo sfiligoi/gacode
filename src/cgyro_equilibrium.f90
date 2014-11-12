@@ -101,7 +101,7 @@ contains
     GEO_zmag_in      = zmag
     GEO_dzmag_in     = s_zmag
     GEO_q_in         = q
-    GEO_s_in         = shat
+    GEO_s_in         = s
     GEO_kappa_in     = kappa
     GEO_s_kappa_in   = s_kappa
     GEO_delta_in     = delta
