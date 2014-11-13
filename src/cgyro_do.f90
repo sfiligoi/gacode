@@ -59,7 +59,6 @@ subroutine cgyro_do
   call pseudo_legendre(n_xi,xi,w_xi,xi_deriv_mat,xi_lor_mat)
 
   ! Allocate distribution function and field arrays
-  allocate(gyrox_J0(n_species,n_radial,n_theta,n_energy,n_xi))
   allocate(j0_c(nc,nv_loc))
   allocate(j0_v(nc_loc,nv))
   allocate(h_x(nc,nv_loc))

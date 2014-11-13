@@ -42,9 +42,7 @@ subroutine cgyro_write_timedata
         open(unit=myio,file='halt',status='old')
         read(myio,*) signal
         close(myio)
-     else
-        signal = 0
-     endif
+      endif
   endif
 
   call MPI_BCAST(signal,1,MPI_INTEGER,0,CGYRO_COMM_WORLD,i_err)

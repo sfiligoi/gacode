@@ -9,22 +9,6 @@ subroutine cgyro_init_arrays
   real :: arg
   integer :: is,ir,it,ie,ix
 
-  do is=1,n_species
-     do ir=1,n_radial
-        do it=1,n_theta
-           do ie=1,n_energy
-              do ix=1,n_xi
-                 arg = k_perp(it,ir) * rho * vth(is) &
-                      * mass(is) / (z(is) * Bmag(it)) &
-                      * sqrt(2.0* energy(ie)) &
-                      * sqrt(1-xi(ix)**2)
-                 gyrox_J0(is,ir,it,ie,ix) = BESJ0(abs(arg))
-              enddo
-           enddo
-        enddo
-     enddo
-  enddo
-
   iv_loc = 0
   do iv=nv1,nv2
 
@@ -40,7 +24,7 @@ subroutine cgyro_init_arrays
         it = it_c(ic)
 
         arg = k_perp(it,ir)*rho*vth(is)*mass(is)/(z(is)*Bmag(it)) &
-             *sqrt(2.0* energy(ie))*sqrt(1.0-xi(ix)**2)
+             *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
 
         j0_c(ic,iv_loc) = BESJ0(abs(arg))
 
@@ -61,7 +45,7 @@ subroutine cgyro_init_arrays
         ie = ie_v(iv)
 
         arg = k_perp(it,ir)*rho*vth(is)*mass(is)/(z(is)*Bmag(it)) &
-             *sqrt(2.0* energy(ie))*sqrt(1.0-xi(ix)**2)
+             *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
 
         j0_v(ic_loc,iv) = BESJ0(abs(arg))
 

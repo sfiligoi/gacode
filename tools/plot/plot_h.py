@@ -1,14 +1,11 @@
 import sys
 import numpy as np
+from gacodeplotdefs import *
 import matplotlib.cm as cm
 
-import matplotlib.pyplot as plt
-
-GFONTSIZE=18
 ftype = sys.argv[1]
 itime = int(sys.argv[2])
 ispec = int(sys.argv[3])
-
 
 #-------------------------------------------------------
 # Read grid dimension and axes
@@ -41,10 +38,12 @@ thetab = np.array(data[mark:mark+n_theta*n_radial])
 # Read H
 #
 data = np.loadtxt('out.cgyro.hx')
-hx = np.reshape(data,(2,n_radial*n_theta,n_xi,n_energy,n_species),'F')
+hx = np.reshape(data,(2,n_radial*n_theta,n_species,n_xi,n_energy),'F')
 #-------------------------------------------------------
 
-fig = plt.figure(figsize=(12,12),dpi=100)
+fig = plt.figure(figsize=(14,12))
+fig.subplots_adjust(left=0.1,right=0.95,top=0.94,bottom=0.06,wspace=0.25,hspace=0.32)
+fig.suptitle(r'${\rm species}='+str(ispec)+'$')
 
 p = 0
 for row in range(3):
@@ -61,12 +60,11 @@ for row in range(3):
     #======================================
     ax = fig.add_subplot(3,2,p)
 
-    if row == 0:
-        ax.set_title(r'${\rm Re}(h), \, {\rm spec}='+str(ispec)+'$')
+    ax.set_title(r'${\rm Re}(h) \quad {\rm ie}='+str(ie)+'$')
     ax.set_xlabel(r'$\theta/\pi$')
     ax.set_ylabel(r'$\xi = v_\parallel/v$')
 
-    hp = np.transpose(np.array(hx[0,:,:,ie,ispec]))
+    hp = np.transpose(np.array(hx[0,:,ispec,:,ie]))
     hmin = hp.min()
     hmax = hp.max()
     dh = (hmax-hmin)/100.0
@@ -75,6 +73,13 @@ for row in range(3):
 
     ax.contourf(thetab/np.pi,xi,hp,levels,cmap=cm.jet,origin='lower')
     ax.set_xlim([1-n_radial,-1+n_radial])
+
+    # Plot dots for mesh points
+    if (row == 1):
+        for i in range(n_theta*n_radial):
+            for j in range(n_xi):
+                ax.plot([thetab[i]/np.pi],[xi[j]],marker='.',color='k',markersize=4)
+
     #======================================
 
     p = p+1
@@ -82,12 +87,12 @@ for row in range(3):
     #======================================
     ax = fig.add_subplot(3,2,p)
 
-    if row == 0:
-         ax.set_title(r'${\rm Im}(h), \, {\rm spec}='+str(ispec)+'$')
+    
+    ax.set_title(r'${\rm Im}(h) \quad {\rm ie}='+str(ie)+'$')
     ax.set_xlabel(r'$\theta/\pi$')
     ax.set_ylabel(r'$\xi = v_\parallel/v$')
 
-    hp = np.transpose(np.array(hx[1,:,:,ie,ispec]))
+    hp = np.transpose(np.array(hx[1,:,ispec,:,ie]))
     hmin = hp.min()
     hmax = hp.max()
     dh = (hmax-hmin)/100.0

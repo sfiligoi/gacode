@@ -138,29 +138,46 @@ contains
        ! Pre-factors for Ampere eqn
 
        if (n_field > 1) then
+
           allocate(sum_cur_x(n_radial,n_theta))
-          do ir=1,n_radial
-             do it=1,n_theta
-                sum_cur_x(ir,it) = 0.0
-                do is=1,n_species
-                   do ie=1,n_energy
-                      do ix=1,n_xi
-                         sum_cur_x(ir,it) = sum_cur_x(ir,it) &
-                              + 0.5 * w_xi(ix) * w_e(ie) &
-                              * gyrox_J0(is,ir,it,ie,ix)**2 &
-                              * xi(ix)**2 * 2.0 * energy(ie) * vth(is)**2 &
-                              * z(is)**2/temp(is) *dens(is) 
-                      enddo
-                   enddo
-                enddo
+          sum_loc(:,:)  = 0.0
+
+          iv_loc = 0
+          do iv=nv1,nv2
+
+             iv_loc = iv_loc+1
+
+             is = is_v(iv)
+             ix = ix_v(iv)
+             ie = ie_v(iv)
+
+             do ic=1,nc
+
+                ir = ir_c(ic) 
+                it = it_c(ic)
+
+                sum_loc(ir,it) = sum_loc(ir,it) &
+                     +0.5*w_xi(ix)*w_e(ie)*xi(ix)**2*2.0*energy(ie) &
+                     *vth(is)**2*z(is)**2/temp(is)*dens(is) & 
+                     *j0_c(ic,iv_loc)**2 
              enddo
           enddo
+
+          call MPI_ALLREDUCE(sum_loc,&
+               sum_cur_x,&
+               size(sum_cur_x),&
+               MPI_DOUBLE_PRECISION,&
+               MPI_SUM,&
+               NEW_COMM_1,&
+               i_err)
+
        endif
 
        initialized = .true.
 
     else
-       if(.NOT. initialized) return
+
+       if (.not. initialized) return
 
        deallocate(sum_den_x)
 

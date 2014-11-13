@@ -297,11 +297,11 @@ contains
                * (dlnndr(is) + dlntdr(is) * (energy(ie)-1.5))
           rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc) &
                - val * z(is)/temp(is) &
-               * gyrox_J0(is,ir,it,ie,ix) * field(ir,it,1)
+               * j0_c(ic,iv_loc) * field(ir,it,1)
           if (n_field > 1) then
              rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc) &
                   - val * z(is)/temp(is) &
-                  * gyrox_J0(is,ir,it,ie,ix) * field(ir,it,2) &
+                  * j0_c(ic,iv_loc) * field(ir,it,2) &
                   * (-xi(ix) * sqrt(2.0*energy(ie)) * vth(is))
           endif
           
