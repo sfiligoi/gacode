@@ -601,6 +601,14 @@ else
 fi
 
 #=============================================================
+# If file is GACODE, parse it.
+if [ "$itype" == "GACODE" ] ; then
+  python $GACODE_ROOT/shared/bin/profile_parse.py $FILE
+fi
+#=============================================================
+
+
+#=============================================================
 # Trap a p-file and split into components 
 #
 if [ "$itype" == "PFILE" ] ; then

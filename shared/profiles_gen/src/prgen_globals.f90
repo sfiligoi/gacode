@@ -93,6 +93,7 @@ module prgen_globals
   integer :: onetwo_nb
   integer :: onetwo_npsi
   integer :: onetwo_nion
+  integer :: onetwo_nion_tot
   integer :: onetwo_nprim
   integer :: onetwo_nimp
   integer :: onetwo_nneu
@@ -102,6 +103,9 @@ module prgen_globals
   character (len=2), dimension(5) :: onetwo_namei
   character (len=2), dimension(5) :: onetwo_nameb
   character (len=2), dimension(16) :: onetwo_ion_name
+  real, dimension(16) :: onetwo_z
+  real, dimension(16) :: onetwo_m
+  character (len=5), dimension(16)  :: onetwo_type
   real :: onetwo_time
   real :: onetwo_Rgeom
   real :: onetwo_Rmag

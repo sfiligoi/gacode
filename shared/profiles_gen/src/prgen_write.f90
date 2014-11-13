@@ -42,13 +42,17 @@ subroutine prgen_write
      endif
      write(1,40) '#          SHOT NUMBER : ',onetwo_ishot
      write(1,20) '#'
-     ion_string = ''
-     do i=1,min(onetwo_nion+onetwo_nbion+onetwo_nalp,5)
-        if (reorder_vec(i) /= 0) then
-           write(ion_string,'(a)') trim(ion_string) // ' '// trim(onetwo_ion_name(reorder_vec(i)))
-        endif
+     write(1,20) '#                 IONS :  Name       Z    Mass'
+
+     do i=1,min(onetwo_nion_tot,5)
+        ip = reorder_vec(i)
+        call prgen_ion_name(nint(onetwo_m(ip)),nint(onetwo_z(ip)),iname)
+        write(1,'(a,a,t36,i3,t43,f4.1,t48,"[",a,"]")') '#                         ',&
+             iname,&
+             nint(onetwo_z(ip)),&
+             onetwo_m(ip),&
+             onetwo_type(ip)
      enddo
-     write(1,20) '#                 IONS : ',trim(ion_string)
 
   case (2)
 
@@ -73,7 +77,7 @@ subroutine prgen_write
 
   case (3)
 
-    peqdsk_nion = 1+peqdsk_nimp+peqdsk_nbeams
+     peqdsk_nion = 1+peqdsk_nimp+peqdsk_nbeams
 
      write(1,20) '#                 IONS :  Name       Z    Mass'
 

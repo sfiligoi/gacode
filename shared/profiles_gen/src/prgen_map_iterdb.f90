@@ -268,14 +268,16 @@ subroutine prgen_map_iterdb
   n0 = n0+onetwo_nbion
   if ( sum (onetwo_enalp(:)) > 0) then
      onetwo_ion_name(1+n0) = 'he'
+     onetwo_nion_tot = n0+1
   else
      onetwo_nalp = 0
+     onetwo_nion_tot = n0
   endif
 
   ! Ion reordering diagnostics
 
   print '(a)','INFO: (prgen) Found these ion species'
-  do i=1,onetwo_nion+onetwo_nbion+onetwo_nalp
+  do i=1,onetwo_nion_tot
      if (any(reorder_vec==i)) then
         do j=1,5
            if (reorder_vec(j)==i) then
@@ -290,6 +292,35 @@ subroutine prgen_map_iterdb
         print '(t6,i2,1x,3(a))',&
              i,trim(onetwo_ion_name(i)),' [unmapped]'
      endif
+  enddo
+
+  ! Name association
+  onetwo_type(:) = 'thermal'
+  do i=1,onetwo_nion_tot
+
+     select case(onetwo_ion_name(i))
+     case ('h')
+        onetwo_z(i) = 1
+        onetwo_m(i) = 1.0
+     case ('d')
+        onetwo_z(i) = 1
+        onetwo_m(i) = 2.0
+     case ('t')
+        onetwo_z(i) = 1
+        onetwo_m(i) = 3.0
+     case ('he')
+        onetwo_z(i) = 2
+        onetwo_m(i) = 4.0
+     case ('c')
+        onetwo_z(i) = 6
+        onetwo_m(i) = 12.0
+     case default
+        onetwo_z(i) = 0
+        onetwo_m(i) = 0.0
+     end select
+
+     if (i > onetwo_nion) onetwo_type(i) = 'fast'
+
   enddo
 
 end subroutine prgen_map_iterdb
