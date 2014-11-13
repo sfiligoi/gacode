@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  gyro.HPC-LOGIN4
+#
+# FUNCTION:
+#  Parallel execution script
+
+simdir=${1}
+nmpi=${2}
+exec=${3}
+nomp=${4}
+numa=${5}
+mpinuma=${6}
+
+cd $simdir
+
+#mpiexec -env OMP_NUM_THREADS $nomp -env MV2_ENABLE_AFFINITY 0 -np $nmpi $exec
+$exec
