@@ -1,12 +1,8 @@
 import sys
 import numpy as np
+from gacodeplotdefs import *
 
-import matplotlib.pyplot as plt
-
-import math
-
-GFONTSIZE=18
-ftype  = sys.argv[1]
+ftype = sys.argv[1]
 
 #-------------------------------------------------------
 # Read grid dimension and axes
@@ -55,7 +51,7 @@ print y_ave
 y_th = 1.0/(1.0+1.6*2.0**2/np.sqrt(0.5/3.0))
 #-------------------------------------------------------
 
-fig = plt.figure(figsize=(6,6))
+fig = plt.figure(figsize=(10,6))
 
 #======================================
 ax = fig.add_subplot(111)
@@ -67,7 +63,6 @@ ax.plot(t,y,color='k',label='Re')
 ax.plot([0,max(t)],[y_ave,y_ave],color='r',label='ave')
 #ax.plot([0,max(t)],[y_th,y_th],color='b',label='RH theory')
 
-#ax.set_xlim([1-n_radial,-1+n_radial])
 ax.legend()
 #======================================
 

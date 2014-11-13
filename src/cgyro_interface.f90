@@ -28,6 +28,7 @@ module cgyro_interface
   integer :: cgyro_e_max_in    = 7
   real    :: cgyro_delta_t_in  = 0.01
   real    :: cgyro_max_time_in = 10.0
+  integer :: cgyro_print_step_in = 50
   real    :: cgyro_freq_tol_in = 0.005
   integer :: cgyro_restart_write_in = 1
   integer :: cgyro_restart_mode_in  = 0

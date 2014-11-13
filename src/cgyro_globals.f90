@@ -12,6 +12,7 @@ module cgyro_globals
   integer :: e_max
   real    :: delta_t
   real    :: max_time
+  integer :: print_step
   real    :: freq_tol
   integer :: restart_write
   integer :: restart_mode

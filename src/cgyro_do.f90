@@ -34,7 +34,6 @@ subroutine cgyro_do
   character(len=80)  :: runfile_grids = 'out.cgyro.grids'
   character(len=80)  :: runfile_time  = 'out.cgyro.time'
   integer :: myio = 20
-  integer :: print_step=10
   complex, dimension(:,:), allocatable :: f_balloon
   complex, dimension(:,:), allocatable :: h_x_glob
   complex :: a_norm

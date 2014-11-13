@@ -75,7 +75,12 @@ for row in range(3):
  
     ax.plot(thetab/np.pi,hp[0,:],'-o',color='black',markersize=2)
     ax.plot(thetab/np.pi,hp[1,:],'-o',color='blue',markersize=2)
-    ax.set_xlim([1-n_radial,-1+n_radial])
+
+    if n_radial > 1:
+        ax.set_xlim([1-n_radial,-1+n_radial])
+    else:
+        ax.set_xlim([1,3])
+
     #======================================
 
     p = p+1
@@ -105,7 +110,7 @@ for row in range(3):
     ax.grid(which="major",ls=":")
 
     ax.set_title(r'$\theta=0 \quad {\rm ix}='+str(ix)+'$')
-    ax.set_xlabel(r'x')
+    ax.set_xlabel(r'$x=\sqrt{\varepsilon}$')
 
     n0 = (n_radial/2)*n_theta+n_theta/2
 

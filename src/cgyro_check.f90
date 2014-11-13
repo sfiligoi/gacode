@@ -55,8 +55,8 @@ subroutine cgyro_check
      return
   end select
 
-  if (collision_model == 0 .and. ae_flag == 1) then
-     call cgyro_error('ERROR: (CGYRO) collision_model=0 requires kinetic electrons')
+  if (collision_model == 1 .and. ae_flag == 1) then
+     call cgyro_error('ERROR: (CGYRO) collision_model=1 requires kinetic electrons')
      return
   endif
 
@@ -148,9 +148,10 @@ subroutine cgyro_check
      write(io_run,'(t1,5(i4,6x))') n_radial,n_theta,n_species,n_energy,n_xi
 
      write(io_run,*) 
-     write(io_run,*) 'PHYSICS PARAMETERS'
-     write(io_run,*) '------------------'
      write(io_run,20) 'k_theta rho',k_theta*rho
+     write(io_run,20) 'Lx/rho',1/r_length_inv/rho
+     write(io_run,20) 'k_x rho',2*pi*r_length_inv*rho
+     write(io_run,*) 
      write(io_run,20) 'r/R',rmin
      write(io_run,20) 'q',q
      write(io_run,20) 's',s
