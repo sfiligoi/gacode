@@ -184,6 +184,20 @@ module cgyro_globals
   ! Work arrays
   !
   complex, dimension(:,:), allocatable :: f_balloon
+  !
+  ! LAPACK work arrays 
+  !
+  real, dimension(:), allocatable :: work  
+  integer, dimension(:), allocatable :: i_piv
+  integer :: info
+  !
+  real :: sum_den_h
+  real, dimension(:,:), allocatable :: sum_den_x, sum_cur_x
+  !
+  ! n=0 test variables
+  !
+  real, dimension(:,:,:), allocatable :: hzf, xzf 
+  real, dimension(:), allocatable :: pvec_in, pvec_outr, pvec_outi
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------

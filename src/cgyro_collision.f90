@@ -26,9 +26,6 @@ contains
     integer :: jv
     integer :: is,ir,it,ix,ie,js,je,jx,ks
     ! parameters for matrix solve
-    integer :: info
-    integer, dimension(:), allocatable :: i_piv
-    real, dimension(:), allocatable :: work 
     real, dimension(:,:), allocatable :: amat, bmat
     real, dimension(:,:), allocatable :: rs_lor
     real, dimension(:), allocatable :: vecin_xi, vecout_xi
@@ -366,6 +363,7 @@ contains
        deallocate(nu_d)
        deallocate(nu_s)
        deallocate(rs)
+
        if(collision_model == 3) then
           deallocate(rs_lor)
           deallocate(vecin_xi)
@@ -450,7 +448,7 @@ contains
     enddo
 
     ! Compute the new phi
-    call FIELDh_do
+    call cgyro_field_v
 
     call timer_lib_out('collision')
 

@@ -19,7 +19,6 @@ subroutine cgyro_do
   use cgyro_io
   use cgyro_equilibrium
   use cgyro_gk
-  use cgyro_field
   use cgyro_collision
 
   implicit none
@@ -78,7 +77,6 @@ subroutine cgyro_do
   !4. Array initialization
   call cgyro_init_arrays
 
-  call FIELD_alloc(1)
   call GK_alloc(1)
   call COLLISION_alloc(1)
 
@@ -120,6 +118,8 @@ subroutine cgyro_do
   ! Time-stepping
   nt_step = nint(max_time/delta_t)
 
+  itime = 0
+
   io_control = 1*(1-silent_flag)
   call cgyro_write_timedata
   io_control = 2*(1-silent_flag)
@@ -140,7 +140,7 @@ subroutine cgyro_do
 
      if (abs(signal) == 1) exit
 
-     field_old  = field
+     field_old = field
 
   enddo
 
@@ -180,12 +180,6 @@ subroutine cgyro_do
 
   endif
 
-  !if (restart_write == 1) then
-  !   open(unit=io_run,file=trim(path)//runfile_restart,status='replace')
-  !   write(io_run,*) h_x
-  !   close(io_run)
-  !endif
-
   ! Print timers
   if (i_proc == 0) then
      print *
@@ -202,7 +196,6 @@ subroutine cgyro_do
 
   call EQUIL_alloc(0)
   call GK_alloc(0)
-  call FIELD_alloc(0)
   call COLLISION_alloc(0)
 
   if(allocated(indx_xi))       deallocate(indx_xi)
@@ -222,5 +215,13 @@ subroutine cgyro_do
   if(allocated(field_loc))     deallocate(field_loc)
   if(allocated(field_old))     deallocate(field_old)
   if(allocated(f_balloon))     deallocate(f_balloon)
+       
+  if (zf_test_flag == 2 .and. ae_flag == 1) then
+     deallocate(hzf)
+     deallocate(xzf)
+     deallocate(pvec_in)
+     deallocate(pvec_outr)
+     deallocate(pvec_outi)
+  endif
 
 end subroutine cgyro_do

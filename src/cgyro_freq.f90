@@ -8,6 +8,7 @@ subroutine cgyro_freq
   real, dimension(n_radial,n_theta) :: mode_weight
   complex, dimension(n_radial,n_theta) :: freq_loc
 
+  if (itime == 0) return
 
   ! Use potential as gauge for frequency
   mode_weight(:,:) = abs(field(:,:,1))

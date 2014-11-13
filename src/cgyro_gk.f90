@@ -173,7 +173,7 @@ contains
        endif
     endif
 
-    call FIELDx_do
+    call cgyro_field_c
 
     field_old = field
 
@@ -195,23 +195,23 @@ contains
     ! Stage 1
     call get_gkRHS(1)
     h_x = h0_x + 0.5 * delta_t * rhs(1,:,:)
-    call FIELDx_do
+    call cgyro_field_c
 
     ! Stage 2
     call get_gkRHS(2)
     h_x = h0_x + 0.5 * delta_t * rhs(2,:,:)
-    call FIELDx_do
+    call cgyro_field_c
 
     ! Stage 3
     call get_gkRHS(3)
     h_x = h0_x + delta_t * rhs(3,:,:)
-    call FIELDx_do
+    call cgyro_field_c
 
     ! Stage 4
     call get_gkRHS(4)
     h_x = h0_x + delta_t/6.0 * &
          (rhs(1,:,:)+2.0*rhs(2,:,:)+2.0*rhs(3,:,:)+rhs(4,:,:))  
-    call FIELDx_do
+    call cgyro_field_c
 
   end subroutine GK_do
   
