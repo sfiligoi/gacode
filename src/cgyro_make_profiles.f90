@@ -82,8 +82,15 @@ subroutine cgyro_make_profiles
 
   else
 
-     call cgyro_error('Nonlinear not implemented')
-     return
+     ! Multiple modes (n=0,1,2,...,n_toroidal-1)
+
+     k_theta      = q/rmin
+     rho          = ky/k_theta
+     r_length_inv = s*k_theta/box_size
+
+     ! Now define individual k_thetas
+
+     k_theta = n*k_theta
 
   endif
 

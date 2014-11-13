@@ -41,6 +41,7 @@ module cgyro_interface
   integer :: cgyro_equilibrium_model_in = 2
   integer :: cgyro_collision_model_in   = 1
   integer :: cgyro_zf_test_flag_in = 0
+  integer :: cgyro_nonlinear_flag_in = 0
   real    :: cgyro_te_ade_in = 1.0
   real    :: cgyro_ne_ade_in = 1.0
   real    :: cgyro_lambda_debye_in = 0.0

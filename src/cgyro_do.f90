@@ -16,6 +16,7 @@ subroutine cgyro_do
   use mpi
 
   use cgyro_globals
+  use cgyro_io
   use cgyro_equilibrium
   use cgyro_gyro
   use cgyro_gk
@@ -26,17 +27,7 @@ subroutine cgyro_do
   implicit none
 
   integer :: ir, it
-  character(len=14), dimension(3)  :: runfile_field = &
-       (/'out.cgyro.phi ','out.cgyro.apar','out.cgyro.bpar'/)
-  character(len=15), dimension(3)  :: runfile_fieldb = &
-       (/'out.cgyro.phiB ','out.cgyro.aparB','out.cgyro.bparB'/)
-  character(len=80)  :: runfile_hx    = 'out.cgyro.hx'
-  character(len=80)  :: runfile_grids = 'out.cgyro.grids'
-  character(len=80)  :: runfile_time  = 'out.cgyro.time'
-  integer :: myio = 20
-  complex, dimension(:,:), allocatable :: f_balloon
   complex, dimension(:,:), allocatable :: h_x_glob
-  complex :: a_norm
 
   integer :: signal,i_field
   logical :: lfe
@@ -105,15 +96,6 @@ subroutine cgyro_do
 
   if (silent_flag == 0 .and. i_proc == 0) then
 
-     do i_field=1,n_field 
-
-        open(unit=myio,file=trim(path)//runfile_field(i_field),status='replace')
-        close(myio)
-
-        open(unit=myio,file=trim(path)//runfile_fieldb(i_field),status='replace')
-        close(myio)
-
-     enddo
 
      open(unit=myio,file=trim(path)//runfile_hx,status='replace')
      close(myio)
@@ -139,9 +121,13 @@ subroutine cgyro_do
   ! Time-stepping
   nt_step = nint(max_time/delta_t)
 
-  do itime = 1, nt_step
+  io_control = 1*(1-silent_flag)
+  call cgyro_write_timedata
+  io_control = 2*(1-silent_flag)
 
-     ! Collisionless gyrokinetic equation
+  do itime=1,nt_step
+
+    ! Collisionless gyrokinetic equation
      ! Returns new h_x, cap_h_x, and fields 
      call GK_do
 
@@ -151,55 +137,21 @@ subroutine cgyro_do
 
      if (mod(itime,print_step) == 0) then
 
-        ! Compute frequency and print
-        call FREQ_do
-
-        ! Print fields
-        if (silent_flag == 0 .and. i_proc == 0) then
-
-           ! time
-           open(unit=myio,file=trim(path)//runfile_time,status='old',&
-                position='append')
-           write(myio,'(1pe13.5e3)') itime*delta_t
-           close(myio)
-
-           ! Fields: (phi,A_parallel)
-           do i_field=1,n_field
-
-              open(unit=myio,file=trim(path)//runfile_field(i_field),status='old',&
-                   position='append')
-              write(myio,'(1pe13.5e3)') transpose(field(:,:,i_field))
-              close(myio)
-
-              ! Construct ballooning-space form of field
-
-              a_norm = field(n_radial/2+1,n_theta/2+1,1) 
-              do ir=1,n_radial
-                 do it=1,n_theta
-                    f_balloon(ir,it) = field(ir,it,i_field) &
-                         *exp(-2*pi*i_c*indx_r(ir)*k_theta*rmin)
-                 enddo
-              enddo
-
-              open(unit=myio,file=trim(path)//runfile_fieldb(i_field),status='old',&
-                   position='append')
-              write(myio,'(1pe13.5e3)') transpose(f_balloon(:,:)/a_norm)
-              close(myio)
-
-           enddo
-
-        endif
+        call cgyro_write_timedata
 
         ! Check for convergence
-        if(abs(freq_err) < freq_tol) then
-           if(silent_flag == 0 .and. i_proc == 0) then
-              print *, 'Converged'
+        if (n_toroidal == 1) then
+
+           call FREQ_do
+           if (abs(freq_err) < freq_tol) then
+              call cgyro_info('Converged')
+              exit
            endif
-           exit
+
         endif
 
         ! Check for manual halt signal
-        if(i_proc == 0) then
+        if (i_proc == 0) then
            inquire(file='halt',exist=lfe)
            if (lfe .eqv. .true.) then
               open(unit=1,file='halt',status='old')
@@ -220,9 +172,9 @@ subroutine cgyro_do
   enddo
 
   ! Print final distribution
-  if (silent_flag == 0) then
+  if (silent_flag == 0 .and. n_toroidal == 1) then
 
-     if (i_proc_1 == 0) then
+     if (i_proc == 0) then
         open(unit=myio,file=trim(path)//runfile_hx,status='old',&
              position='append')
      endif
@@ -241,7 +193,7 @@ subroutine cgyro_do
           NEW_COMM_1,&
           i_err)
 
-     if (i_proc_1 == 0) then
+     if (i_proc == 0) then
         do iv=1,nv
            do ic=1,nc
               f_balloon(ir_c(ic),it_c(ic)) = h_x_glob(ic,iv) &
@@ -252,15 +204,15 @@ subroutine cgyro_do
      endif
      deallocate(h_x_glob)
 
-     if (i_proc_1 == 0) close(myio)
+     if (i_proc == 0) close(myio)
 
   endif
 
-  if (restart_write == 1) then
-     open(unit=io_run,file=trim(path)//runfile_restart,status='replace')
-     write(io_run,*) h_x
-     close(io_run)
-  endif
+  !if (restart_write == 1) then
+  !   open(unit=io_run,file=trim(path)//runfile_restart,status='replace')
+  !   write(io_run,*) h_x
+  !   close(io_run)
+  !endif
 
   ! Print timers
   if (i_proc == 0) then
@@ -275,6 +227,7 @@ subroutine cgyro_do
 
 
 100 continue
+
   call EQUIL_alloc(0)
   call GYRO_alloc(0)
   call GK_alloc(0)

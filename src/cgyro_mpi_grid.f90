@@ -136,6 +136,4 @@ subroutine cgyro_mpi_grid
 
   n = i_group_1
 
-  !print *,n
-
 end subroutine cgyro_mpi_grid

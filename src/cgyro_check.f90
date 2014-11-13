@@ -17,23 +17,23 @@ subroutine cgyro_check
   ! Grid parameter checks
   !
   if (modulo(n_xi,2) /= 0) then 
-     call cgyro_error('ERROR: (CGYRO) n_xi must be even')
+     call cgyro_error('n_xi must be even.')
      return
   endif
 
   if (n_species > 6) then
-     call cgyro_error('ERROR: (CGYRO) max n_species is 6')
+     call cgyro_error('n_species <= 6.')
      return
   endif
 
   ! Field consistency checks
   if (n_field > 1) then
      if (abs(betae_unit) < epsilon(0.0)) then
-        call cgyro_error('ERROR: (CGYRO) BETAE_UNIT must be nonzero for electromagnetic simulation.')
+        call cgyro_error('BETAE_UNIT must be nonzero for electromagnetic simulation.')
         return
      endif
      if (ae_flag == 1) then
-        call cgyro_error('ERROR: (CGYRO) Electrons must be gyrokinetic for electromagnetic simulation.')
+        call cgyro_error('Electrons must be gyrokinetic for electromagnetic simulation.')
         return
      endif
   endif
@@ -51,17 +51,17 @@ subroutine cgyro_check
      call cgyro_info('Compressional electromagnetic fluctuations (Phi,A_par,B_par)')
      stop
   case default
-     call cgyro_error('ERROR: (CGYRO) invalid n_field')
+     call cgyro_error('Invalid value for n_field.')
      return
   end select
 
   if (collision_model == 1 .and. ae_flag == 1) then
-     call cgyro_error('ERROR: (CGYRO) collision_model=1 requires kinetic electrons')
+     call cgyro_error('collision_model=1 requires kinetic electrons')
      return
   endif
 
   ! Collision model
-  !
+  
   select case (collision_model)  
 
   case(0)
@@ -81,7 +81,7 @@ subroutine cgyro_check
 
   case default
 
-     call cgyro_error('ERROR: (CGYRO) invalid collision_model')
+     call cgyro_error('Invalid value for collision_model')
      return
 
   end select
@@ -97,7 +97,7 @@ subroutine cgyro_check
      call cgyro_info('Equlibrium model = s-alpha')
 
   case (1) 
-     call cgyro_error('ERROR: (CGYRO) equilibrium_model invalid')
+     call cgyro_error('Invalid value for equilibrium_model.')
      return
 
   case (2) 
@@ -107,7 +107,7 @@ subroutine cgyro_check
      call cgyro_info('Equlibrium model = General (Fourier)')
 
      if (geo_ny <= 0) then
-        call cgyro_error('ERROR: (CGYRO) geometry coefficients missing')
+        call cgyro_error('Fourier geometry coefficients missing.')
         return
      endif
 
@@ -120,25 +120,25 @@ subroutine cgyro_check
   !------------------------------------------------------------
 
   !------------------------------------------------------------
-  ! Check local profile params
-
+  ! Check profile parameters
+  !
   do is=1,n_species
-     if(dens(is) <= 0.0) then
-        call cgyro_error('ERROR: (CGYRO) density must be positive')
+     if (dens(is) <= 0.0) then
+        call cgyro_error('Densities must be positive.')
         return
-     end if
-     if(temp(is) <= 0.0) then
-        call cgyro_error('ERROR: (CGYRO) temperature must be positive')
+     endif
+     if (temp(is) <= 0.0) then
+        call cgyro_error('Temperatures must be positive.')
         return
-     end if
-     if(nu(is) < 0.0) then
-        call cgyro_error('ERROR: (CGYRO) collision frequency must be positive')
+     endif
+     if (nu(is) < 0.0) then
+        call cgyro_error('Collision frequencies must be non-negative.')
         return
-     end if
-     if(z(is) == 0.0) then
-        call cgyro_error('ERROR: (CGYRO) charge must be non-zero')
+     endif
+     if (z(is) == 0) then
+        call cgyro_error('Charge must be non-zero.')
         return
-     end if
+     endif
   enddo
 
   if (silent_flag == 0 .and. i_proc == 0) then
@@ -148,9 +148,12 @@ subroutine cgyro_check
      write(io_run,'(t1,5(i4,6x))') n_radial,n_theta,n_species,n_energy,n_xi
 
      write(io_run,*) 
-     write(io_run,20) 'k_theta rho',k_theta*rho
      write(io_run,20) 'Lx/rho',1/r_length_inv/rho
-     write(io_run,20) 'k_x rho',2*pi*r_length_inv*rho
+     write(io_run,20) 'Ly/rho',2*pi/(q/rmin)
+     write(io_run,20) 'min(ky*rho)',(q/rmin)*rho
+     write(io_run,20) 'max(ky*rho)',(n_toroidal-1)*(q/rmin)*rho
+     write(io_run,20) 'min(kx*rho)',2*pi*r_length_inv*rho
+     write(io_run,20) 'max(kx*rho)',2*pi*r_length_inv*rho*(n_radial/2-1)
      write(io_run,*) 
      write(io_run,20) 'r/R',rmin
      write(io_run,20) 'q',q

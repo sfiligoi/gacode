@@ -23,7 +23,8 @@ OBJECTS = cgyro_globals.o \
           cgyro_freq.o \
           cgyro_collision.o \
 	  cgyro_gk.o \
-          cgyro_do.o
+          cgyro_do.o \
+          cgyro_write_timedata.o 
 
 .SUFFIXES : .o .f90
 

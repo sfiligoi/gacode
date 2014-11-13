@@ -68,7 +68,7 @@ contains
 
     freq_err = (df_r + i_c*df_i)/total_weight/abs(freq)
 
-    if(silent_flag == 0 .and. i_proc == 0) then
+    if (silent_flag == 0 .and. i_proc == 0) then
        open(unit=io_freq,file=trim(path)//runfile_freq,status='old',&
             position='append')
        write(io_freq,20) freq,freq_err

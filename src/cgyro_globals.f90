@@ -25,6 +25,7 @@ module cgyro_globals
   integer :: equilibrium_model
   integer :: collision_model 
   integer :: zf_test_flag 
+  integer :: nonlinear_flag 
   real :: te_ade
   real :: ne_ade
   real :: lambda_debye
@@ -106,14 +107,27 @@ module cgyro_globals
   ! I/O and error management variables
   !
   character(len=80) :: path
-  character(len=80) :: runfile_restart = 'out.cgyro.restart'
-  character(len=80) :: runfile = 'out.cgyro.run'
+  character(len=18) :: runfile_restart = 'out.cgyro.restart'
+  character(len=18) :: runfile    = 'out.cgyro.run'
+  character(len=18) :: runfile_hx = 'out.cgyro.hx'
+  character(len=18) :: runfile_grids = 'out.cgyro.grids'
+  character(len=18) :: runfile_time  = 'out.cgyro.time'
+  character(len=14), dimension(3)  :: runfile_field = &
+       (/'out.cgyro.phi ','out.cgyro.apar','out.cgyro.bpar'/)
+  character(len=15), dimension(3)  :: runfile_fieldb = &
+       (/'out.cgyro.phiB ','out.cgyro.aparB','out.cgyro.bparB'/)
   integer :: io_run = 12
   !
   ! error checking
   integer :: error_status = 0
   character(len=80) :: error_message
-  !---------------------------------------------------------------
+  !
+  integer :: myio = 20
+  integer :: io_control
+  !
+  ! Standard precision for IO 
+  character(len=8) :: fmtstr='(es11.4)'
+  !----------------------------------------------------
 
   !---------------------------------------------------------------
   ! Time stepping
@@ -159,6 +173,10 @@ module cgyro_globals
   complex, dimension(:,:,:) , allocatable :: field
   complex, dimension(:,:,:) , allocatable :: field_loc
   complex, dimension(:,:,:) , allocatable :: field_old
+  !
+  ! Work arrays
+  !
+  complex, dimension(:,:), allocatable :: f_balloon
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
