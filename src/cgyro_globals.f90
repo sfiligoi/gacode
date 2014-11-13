@@ -76,6 +76,7 @@ module cgyro_globals
   integer :: NEW_COMM_1
   integer :: NEW_COMM_2
   integer :: nv1,nv2,nc1,nc2
+  integer, dimension(:), allocatable :: recv_status
   !
   ! Pointers
   !
@@ -112,6 +113,7 @@ module cgyro_globals
   character(len=18) :: runfile_hx = 'out.cgyro.hx'
   character(len=18) :: runfile_grids = 'out.cgyro.grids'
   character(len=18) :: runfile_time  = 'out.cgyro.time'
+  character(len=18) :: runfile_freq = 'out.gkcoll.freq'
   character(len=14), dimension(3)  :: runfile_field = &
        (/'out.cgyro.phi ','out.cgyro.apar','out.cgyro.bpar'/)
   character(len=15), dimension(3)  :: runfile_fieldb = &
@@ -124,6 +126,7 @@ module cgyro_globals
   !
   integer :: myio = 20
   integer :: io_control
+  integer :: signal
   !
   ! Standard precision for IO 
   character(len=8) :: fmtstr='(es11.4)'
@@ -133,6 +136,8 @@ module cgyro_globals
   ! Time stepping
   integer :: itime
   integer :: nt_step
+  complex :: freq
+  complex :: freq_err
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -167,6 +172,9 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: cap_h_ct
   complex, dimension(:,:), allocatable :: cap_h_v
   complex, dimension(:,:), allocatable :: cap_h_v_prime
+  real, dimension(:,:,:,:,:), allocatable :: gyrox_J0
+  real, dimension(:,:), allocatable :: j0_c
+  real, dimension(:,:), allocatable :: j0_v
   !
   ! Fields
   !

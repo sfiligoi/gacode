@@ -134,6 +134,4 @@ subroutine cgyro_mpi_grid
 
   ! Nonlinear parallelization dimensions
 
-  n = i_group_1
-
 end subroutine cgyro_mpi_grid

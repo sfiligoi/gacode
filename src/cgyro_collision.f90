@@ -13,7 +13,6 @@ contains
   subroutine COLLISION_alloc(flag)
 
     use cgyro_globals
-    use cgyro_gyro
     use cgyro_equilibrium, only : omega_trap, k_perp
 
     implicit none
@@ -394,7 +393,6 @@ contains
 
     use cgyro_globals
     use cgyro_field
-    use cgyro_gyro
 
     implicit none
 

@@ -17,8 +17,8 @@ OBJECTS = cgyro_globals.o \
           cgyro_equilibrium.o \
           cgyro_interface.o \
           cgyro_init.o \
+          cgyro_init_arrays.o \
           cgyro_run.o \
-          cgyro_gyro.o \
           cgyro_field.o \
           cgyro_freq.o \
           cgyro_collision.o \

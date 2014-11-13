@@ -12,19 +12,24 @@ module cgyro_field
 contains
   
   subroutine FIELD_alloc(flag)
+
+    use mpi
     use cgyro_globals
-    use cgyro_gyro
     use cgyro_equilibrium
+
     implicit none
+
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
     integer :: is, ie, ix, ir, it, jt
     integer :: info
     integer, dimension(:), allocatable :: i_piv
     real, dimension(:), allocatable :: work
+    real, dimension(n_radial,n_theta) :: sum_loc
 
     if (flag == 1) then
+
        if (initialized) return
-    
+
        ! Pre-factors for Poisson eqn
 
        sum_den_h = 0.0
@@ -37,34 +42,50 @@ contains
              enddo
           enddo
        enddo
-       if(ae_flag == 1) then
+
+       if (ae_flag == 1) then
           sum_den_h = sum_den_h + dens_ele / temp_ele
        endif
 
        allocate(sum_den_x(n_radial,n_theta))
-       do ir=1,n_radial
-          do it=1,n_theta
-             sum_den_x(ir,it) = 0.0
-             do is=1,n_species
-                do ie=1,n_energy
-                   do ix=1,n_xi
-                      sum_den_x(ir,it) = sum_den_x(ir,it) &
-                           + 0.5 * w_xi(ix) &
-                           * (1.0 - gyrox_J0(is,ir,it,ie,ix)**2) &
-                           * z(is)**2/temp(is) *dens(is) * w_e(ie)
-                   enddo
-                enddo
-             enddo
-             if (ae_flag == 1) then
-                sum_den_x(ir,it) = sum_den_x(ir,it) + dens_ele / temp_ele
-             endif
+       sum_loc(:,:) = 0.0
+
+       iv_loc = 0
+       do iv=nv1,nv2
+
+          iv_loc = iv_loc+1
+
+          is = is_v(iv)
+          ix = ix_v(iv)
+          ie = ie_v(iv)
+
+          do ic=1,nc
+
+             ir = ir_c(ic) 
+             it = it_c(ic)
+
+             sum_loc(ir,it) = sum_loc(ir,it) &
+                  +0.5*w_xi(ix)*w_e(ie)*z(is)**2/temp(is)*dens(is) &
+                  *(1.0-j0_c(ic,iv_loc)**2) 
+
           enddo
        enddo
 
+       call MPI_ALLREDUCE(sum_loc,&
+            sum_den_x,&
+            size(sum_den_x),&
+            MPI_DOUBLE_PRECISION,&
+            MPI_SUM,&
+            NEW_COMM_1,&
+            i_err)
+
+       if (ae_flag == 1) then
+          sum_den_x(:,:) = sum_den_x(:,:) + dens_ele / temp_ele
+       endif
 
        if (zf_test_flag == 1 .and. ae_flag == 1) then
 
-        ! Zonal flow with adiabatic electrons:
+          ! Zonal flow with adiabatic electrons:
 
           allocate(hzf(n_radial,n_theta,n_theta))
           hzf(:,:,:) = 0.0      
@@ -137,7 +158,7 @@ contains
        endif
 
        initialized = .true.
-       
+
     else
        if(.NOT. initialized) return
 
@@ -161,90 +182,93 @@ contains
   end subroutine FIELD_alloc
 
   subroutine FIELDh_do
-     use mpi
-     use timer_lib
-     use cgyro_globals
-     use cgyro_gyro
-     use cgyro_equilibrium
-     implicit none
-     integer :: is, ie, ix, ir, it
-     complex :: fac
 
-     field_loc(:,:,:) = (0.0,0.0)
+    use mpi
+    use timer_lib
 
-     ! Poisson and Ampere RHS integrals of H
+    use cgyro_globals
+    use cgyro_equilibrium
 
-     ic_loc = 0
-     do ic=nc1,nc2
-        ic_loc = ic_loc+1
-        
-        it = it_c(ic)
-        ir = ir_c(ic)
-        
-        do iv=1,nv
-           
-           is = is_v(iv)
-           ix = ix_v(iv)
-           ie = ie_v(iv)
-           
-           fac = gyrox_J0(is,ir,it,ie,ix) &
-                * z(is)*dens(is) * w_e(ie) * 0.5 * w_xi(ix)*cap_h_v(ic_loc,iv)
+    implicit none
 
-           field_loc(ir,it,1) = field_loc(ir,it,1) + fac 
+    integer :: is, ie, ix, ir, it
+    complex :: fac
 
-           if(n_field > 1) then
-              field_loc(ir,it,2) = field_loc(ir,it,2) + fac &
-                   * xi(ix) * sqrt(2.0 * energy(ie)) * vth(is)
-           endif
-           
-        enddo
-     enddo
+    field_loc(:,:,:) = (0.0,0.0)
 
-     call MPI_ALLREDUCE(field_loc(:,:,:),&
-          field(:,:,:),&
-          size(field(:,:,:)),&
-          MPI_DOUBLE_COMPLEX,&
-          MPI_SUM,&
-          NEW_COMM_1,&
-          i_err)
+    ! Poisson and Ampere RHS integrals of H
 
-     ! Poisson LHS factors
+    ic_loc = 0
+    do ic=nc1,nc2
+       ic_loc = ic_loc+1
 
-     if (zf_test_flag == 1 .and. ae_flag == 1) then
-        
-        do ir=1,n_radial
-           pvec_in(:) = real(field(ir,:,1))
-           call DGEMV('N',n_theta,n_theta,num1,hzf(ir,:,:),&
-                n_theta,pvec_in(:),1,num0,pvec_outr(:),1)
-           pvec_in(:) = imag(field(ir,:,1))
-           call DGEMV('N',n_theta,n_theta,num1,hzf(ir,:,:),&
-                n_theta,pvec_in(:),1,num0,pvec_outi(:),1)
-           field(ir,:,1) = pvec_outr(:) + i_c * pvec_outi(:)
-        enddo
-        
-     else
-        
-        do ir=1,n_radial
-           do it=1,n_theta
-              field(ir,it,1) = field(ir,it,1) &
-                   / (k_perp(it,ir)**2 * lambda_debye**2 &
-                   * dens_ele / temp_ele + sum_den_h)
-           enddo
-        enddo
-        
-     endif
+       it = it_c(ic)
+       ir = ir_c(ic)
 
-     ! Ampere LHS factors
+       do iv=1,nv
 
-     if (n_field > 1) then
-        do ir=1,n_radial
-           do it=1,n_theta
-              field(ir,it,2) = field(ir,it,2) &
-                   / (2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
-                   * dens_ele * temp_ele)
-           enddo
-        enddo
-     endif
+          is = is_v(iv)
+          ix = ix_v(iv)
+          ie = ie_v(iv)
+
+          fac = w_e(ie)*0.5*w_xi(ix)*z(is)*dens(is)*&
+               j0_v(ic_loc,iv)*cap_h_v(ic_loc,iv)
+
+          field_loc(ir,it,1) = field_loc(ir,it,1)+fac 
+
+          if (n_field > 1) then
+             field_loc(ir,it,2) = field_loc(ir,it,2) + fac &
+                  *xi(ix)*sqrt(2.0*energy(ie))*vth(is)
+          endif
+
+       enddo
+    enddo
+
+    call MPI_ALLREDUCE(field_loc(:,:,:),&
+         field(:,:,:),&
+         size(field(:,:,:)),&
+         MPI_DOUBLE_COMPLEX,&
+         MPI_SUM,&
+         NEW_COMM_1,&
+         i_err)
+
+    ! Poisson LHS factors
+
+    if (zf_test_flag == 1 .and. ae_flag == 1) then
+
+       do ir=1,n_radial
+          pvec_in(:) = real(field(ir,:,1))
+          call DGEMV('N',n_theta,n_theta,num1,hzf(ir,:,:),&
+               n_theta,pvec_in(:),1,num0,pvec_outr(:),1)
+          pvec_in(:) = imag(field(ir,:,1))
+          call DGEMV('N',n_theta,n_theta,num1,hzf(ir,:,:),&
+               n_theta,pvec_in(:),1,num0,pvec_outi(:),1)
+          field(ir,:,1) = pvec_outr(:) + i_c * pvec_outi(:)
+       enddo
+
+    else
+
+       do ir=1,n_radial
+          do it=1,n_theta
+             field(ir,it,1) = field(ir,it,1) &
+                  / (k_perp(it,ir)**2 * lambda_debye**2 &
+                  * dens_ele / temp_ele + sum_den_h)
+          enddo
+       enddo
+
+    endif
+
+    ! Ampere LHS factors
+
+    if (n_field > 1) then
+       do ir=1,n_radial
+          do it=1,n_theta
+             field(ir,it,2) = field(ir,it,2) &
+                  / (2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
+                  * dens_ele * temp_ele)
+          enddo
+       enddo
+    endif
 
   end subroutine FIELDh_do
 
@@ -254,7 +278,6 @@ contains
     use timer_lib
 
     use cgyro_globals
-    use cgyro_gyro
     use cgyro_equilibrium
 
     implicit none
@@ -282,10 +305,10 @@ contains
           ir = ir_c(ic)
           it = it_c(ic)
 
-          fac = gyrox_J0(is,ir,it,ie,ix) * &
-               z(is)*dens(is)*w_e(ie)*0.5*w_xi(ix)*h_x(ic,iv_loc)
+          fac = w_e(ie)*0.5*w_xi(ix)*z(is)*dens(is)* &
+               j0_c(ic,iv_loc)*h_x(ic,iv_loc)
 
-          field_loc(ir,it,1) = field_loc(ir,it,1) + fac 
+          field_loc(ir,it,1) = field_loc(ir,it,1)+fac 
 
           if (n_field > 1) then
              field_loc(ir,it,2) = field_loc(ir,it,2) + &
@@ -354,13 +377,12 @@ contains
           it = it_c(ic)
 
           cap_h_c(ic,iv_loc) = h_x(ic,iv_loc) &
-               + z(is)/temp(is) * gyrox_J0(is,ir,it,ie,ix) &
-               * field(ir,it,1)
+               +z(is)/temp(is)*j0_c(ic,iv_loc)*field(ir,it,1)
 
           if (n_field > 1) then
              cap_h_c(ic,iv_loc) = cap_h_c(ic,iv_loc) &
-                  - z(is)/temp(is) * gyrox_J0(is,ir,it,ie,ix) &
-                  * xi(ix)*sqrt(2.0*energy(ie))*vth(is)*field(ir,it,2)
+                  -z(is)/temp(is)*xi(ix)*sqrt(2.0*energy(ie))*vth(is)* &
+                  j0_c(ic,iv_loc)*field(ir,it,2)
           endif
 
        enddo

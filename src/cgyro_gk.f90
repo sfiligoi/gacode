@@ -1,4 +1,5 @@
 module cgyro_gk
+
   implicit none
 
   public :: GK_alloc, GK_init, GK_do
@@ -121,15 +122,16 @@ contains
   end subroutine GK_alloc
   
   subroutine GK_init
+
     use cgyro_globals
     use cgyro_field
-    use cgyro_gyro
 
     implicit none
 
     real :: ang
 
     h_x(:,:) = (0.0,0.0)
+
 
     if (restart_mode == 1) then
 
@@ -181,7 +183,6 @@ contains
 
     use cgyro_globals
     use cgyro_field
-    use cgyro_gyro
 
     implicit none
 
@@ -221,7 +222,6 @@ contains
 
     use cgyro_globals
     use cgyro_equilibrium
-    use cgyro_gyro
 
     implicit none
 

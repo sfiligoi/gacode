@@ -18,20 +18,14 @@ subroutine cgyro_do
   use cgyro_globals
   use cgyro_io
   use cgyro_equilibrium
-  use cgyro_gyro
   use cgyro_gk
   use cgyro_field
   use cgyro_collision
-  use cgyro_freq
 
   implicit none
 
-  integer :: ir, it
   complex, dimension(:,:), allocatable :: h_x_glob
 
-  integer :: signal,i_field
-  logical :: lfe
-  integer, dimension(:), allocatable :: recv_status
 
   if (silent_flag == 0 .and. i_proc == 0) then
      open(unit=io_run,file=trim(path)//runfile,status='replace')
@@ -65,6 +59,9 @@ subroutine cgyro_do
   call pseudo_legendre(n_xi,xi,w_xi,xi_deriv_mat,xi_lor_mat)
 
   ! Allocate distribution function and field arrays
+  allocate(gyrox_J0(n_species,n_radial,n_theta,n_energy,n_xi))
+  allocate(j0_c(nc,nv_loc))
+  allocate(j0_v(nc_loc,nv))
   allocate(h_x(nc,nv_loc))
   allocate(cap_h_c(nc,nv_loc))
   allocate(cap_h_ct(nv_loc,nc))
@@ -74,14 +71,17 @@ subroutine cgyro_do
   allocate(field_loc(n_radial,n_theta,n_field))
   allocate(field_old(n_radial,n_theta,n_field))
   allocate(f_balloon(n_radial,n_theta))
+  allocate(recv_status(MPI_STATUS_SIZE))
 
   call EQUIL_alloc(1)
   call EQUIL_do
-  call GYRO_alloc(1)
+
+  !4. Array initialization
+  call cgyro_init_arrays
+
   call FIELD_alloc(1)
   call GK_alloc(1)
   call COLLISION_alloc(1)
-  call FREQ_alloc(1)
 
   ! Timer initialization
   call timer_lib_init('gk_init')
@@ -127,7 +127,7 @@ subroutine cgyro_do
 
   do itime=1,nt_step
 
-    ! Collisionless gyrokinetic equation
+     ! Collisionless gyrokinetic equation
      ! Returns new h_x, cap_h_x, and fields 
      call GK_do
 
@@ -136,36 +136,10 @@ subroutine cgyro_do
      call COLLISION_do
 
      if (mod(itime,print_step) == 0) then
-
         call cgyro_write_timedata
-
-        ! Check for convergence
-        if (n_toroidal == 1) then
-
-           call FREQ_do
-           if (abs(freq_err) < freq_tol) then
-              call cgyro_info('Converged')
-              exit
-           endif
-
-        endif
-
-        ! Check for manual halt signal
-        if (i_proc == 0) then
-           inquire(file='halt',exist=lfe)
-           if (lfe .eqv. .true.) then
-              open(unit=1,file='halt',status='old')
-              read(1,*) signal
-              close(1)
-           else
-              signal = 0
-           endif
-        endif
-        if (abs(signal) == 1) then
-           exit
-        endif
-
      endif
+
+     if (abs(signal) == 1) exit
 
      field_old  = field
 
@@ -179,7 +153,6 @@ subroutine cgyro_do
              position='append')
      endif
 
-     allocate(recv_status(MPI_STATUS_SIZE))
      allocate(h_x_glob(nc,nv))
 
      ! Collect distribution onto process 0
@@ -229,11 +202,9 @@ subroutine cgyro_do
 100 continue
 
   call EQUIL_alloc(0)
-  call GYRO_alloc(0)
   call GK_alloc(0)
   call FIELD_alloc(0)
   call COLLISION_alloc(0)
-  call FREQ_alloc(0)
 
   if(allocated(indx_xi))       deallocate(indx_xi)
   if(allocated(indx_r))        deallocate(indx_r)

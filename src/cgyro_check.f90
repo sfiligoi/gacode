@@ -61,7 +61,7 @@ subroutine cgyro_check
   endif
 
   ! Collision model
-  
+
   select case (collision_model)  
 
   case(0)
@@ -148,10 +148,15 @@ subroutine cgyro_check
      write(io_run,'(t1,5(i4,6x))') n_radial,n_theta,n_species,n_energy,n_xi
 
      write(io_run,*) 
-     write(io_run,20) 'Lx/rho',1/r_length_inv/rho
-     write(io_run,20) 'Ly/rho',2*pi/(q/rmin)
-     write(io_run,20) 'min(ky*rho)',(q/rmin)*rho
-     write(io_run,20) 'max(ky*rho)',(n_toroidal-1)*(q/rmin)*rho
+     write(io_run,'(a,f6.2,a,f6.2)') '(Lx,Ly)/rho',1/r_length_inv/rho,',',2*pi/(q/rmin)
+     write(io_run,*) 
+     if (n_toroidal == 1) then
+        write(io_run,20) 'ky*rho',ky
+     else
+        write(io_run,20) 'min(ky*rho)',(q/rmin)*rho
+        write(io_run,20) 'max(ky*rho)',(n_toroidal-1)*(q/rmin)*rho
+     endif
+     write(io_run,*) 
      write(io_run,20) 'min(kx*rho)',2*pi*r_length_inv*rho
      write(io_run,20) 'max(kx*rho)',2*pi*r_length_inv*rho*(n_radial/2-1)
      write(io_run,*) 
@@ -190,7 +195,6 @@ subroutine cgyro_check
 
   endif
 
-10 format(t2,a,':',t14,i2)
 20 format(t2,a,':',t13,1pe12.4) 
 
 end subroutine cgyro_check
