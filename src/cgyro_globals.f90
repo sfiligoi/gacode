@@ -90,6 +90,7 @@ module cgyro_globals
   integer, dimension(:,:), allocatable :: ic_c
   integer, dimension(:,:,:), allocatable :: iv_v
   !
+  integer :: n
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------

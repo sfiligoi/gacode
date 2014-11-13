@@ -120,7 +120,7 @@ subroutine cgyro_mpi_grid
      enddo
   enddo
 
-  ! Parallelization dimensions
+  ! Linear parallelization dimensions
 
   ! ni -> nc
   ! nj -> nv  
@@ -131,5 +131,11 @@ subroutine cgyro_mpi_grid
 
   nc1 = 1+i_proc_1*nc_loc
   nc2 = (1+i_proc_1)*nc_loc
+
+  ! Nonlinear parallelization dimensions
+
+  n = i_group_1
+
+  !print *,n
 
 end subroutine cgyro_mpi_grid
