@@ -14,6 +14,8 @@ subroutine cgyro_field_v
   integer :: is, ie, ix, ir, it
   complex :: fac
 
+  call timer_lib_in('field_v')
+
   field_loc(:,:,:) = (0.0,0.0)
 
   ! Poisson and Ampere RHS integrals of H
@@ -90,6 +92,8 @@ subroutine cgyro_field_v
      enddo
   endif
 
+  call timer_lib_out('field_v')
+
 end subroutine cgyro_field_v
 
 !============================================================================================
@@ -107,8 +111,9 @@ subroutine cgyro_field_c
 
   integer :: is, ie, ix, ir, it
   complex :: fac
+  complex :: efac(n_field)
 
-  call timer_lib_in('fieldx')
+  call timer_lib_in('field_c')
 
   field_loc(:,:,:) = (0.0,0.0)
 
@@ -194,24 +199,22 @@ subroutine cgyro_field_c
      ix = ix_v(iv)
      ie = ie_v(iv)
 
+     efac(1) = z(is)/temp(is)
+     if (n_field > 1) then
+        efac(2) = -z(is)/temp(is)*xi(ix)*sqrt(2.0*energy(ie))*vth(is)
+     endif
+
      do ic=1,nc
 
         ir = ir_c(ic)
         it = it_c(ic)
 
-        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc) &
-             +z(is)/temp(is)*j0_c(ic,iv_loc)*field(ir,it,1)
-
-        if (n_field > 1) then
-           cap_h_c(ic,iv_loc) = cap_h_c(ic,iv_loc) &
-                -z(is)/temp(is)*xi(ix)*sqrt(2.0*energy(ie))*vth(is)* &
-                j0_c(ic,iv_loc)*field(ir,it,2)
-        endif
+        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+&
+             j0_c(ic,iv_loc)*sum(efac(:)*field(ir,it,:))
 
      enddo
   enddo
 
-
-  call timer_lib_out('fieldx')
+  call timer_lib_out('field_c')
 
 end subroutine cgyro_field_c

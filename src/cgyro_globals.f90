@@ -158,16 +158,32 @@ module cgyro_globals
   !---------------------------------------------------------------
   ! Numerical/work arrays and dimensions
   !
+  ! Velocity space
+  ! 
   integer, dimension(:), allocatable :: indx_xi, indx_r
-  real, dimension(:), allocatable :: theta
   real, dimension(:), allocatable :: energy, w_e
   real, dimension(:), allocatable :: xi, w_xi
   real, dimension(:,:), allocatable :: xi_deriv_mat, xi_lor_mat
   real, dimension(:,:), allocatable :: e_deriv1_mat, e_deriv2_mat
   !
+  ! Parallel streaming
+  !
+  real, dimension(:), allocatable :: theta
+  real, dimension(-2:2) :: uderiv
+  real, dimension(-2:2) :: cderiv
+  integer, dimension(:), allocatable :: thcyc
+  integer, dimension(:,:), allocatable :: rcyc
+  complex, dimension(:,:), allocatable :: dtheta
+  complex, dimension(:,:), allocatable :: dtheta_up
+  !
   ! Distributions
   !
+  complex, dimension(:,:,:), allocatable :: rhs
   complex, dimension(:,:), allocatable :: h_x
+  complex, dimension(:,:), allocatable :: h0_x
+  complex, dimension(:,:), allocatable :: omega_cap_h
+  complex, dimension(:,:), allocatable :: omega_h
+  complex, dimension(:,:,:), allocatable :: omega_s
   complex, dimension(:,:), allocatable :: cap_h_c
   complex, dimension(:,:), allocatable :: cap_h_ct
   complex, dimension(:,:), allocatable :: cap_h_v

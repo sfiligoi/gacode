@@ -24,7 +24,7 @@ program cgyro
   !-----------------------------------------------------------------
 
   call cgyro_read_input
-  call cgyro_do
+  call cgyro_kernel
 
   call MPI_FINALIZE(ierr)
 

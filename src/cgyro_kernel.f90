@@ -1,5 +1,5 @@
 !-----------------------------------------------------------------
-! cgyro_do.f90
+! cgyro_kernel.f90
 !
 ! PURPOSE:
 !  Subroutinized main cgyro program.  
@@ -10,7 +10,7 @@
 !  as a subroutine using cgyro_sub.
 !-----------------------------------------------------------------
 
-subroutine cgyro_do
+subroutine cgyro_kernel
 
   use timer_lib
   use mpi
@@ -18,18 +18,24 @@ subroutine cgyro_do
   use cgyro_globals
   use cgyro_io
   use cgyro_equilibrium
-  use cgyro_gk
   use cgyro_collision
 
   implicit none
 
   complex, dimension(:,:), allocatable :: h_x_glob
 
-
   if (silent_flag == 0 .and. i_proc == 0) then
      open(unit=io_run,file=trim(path)//runfile,status='replace')
      close(io_run)
   endif
+
+  ! Timer initialization
+  call timer_lib_init('init_arrays')
+  call timer_lib_init('field_v')
+  call timer_lib_init('field_c')
+  call timer_lib_init('rhs')
+  call timer_lib_init('collision')
+  call timer_lib_init('comm')
 
   ! 1. MPI setup
   call cgyro_mpi_grid
@@ -61,15 +67,25 @@ subroutine cgyro_do
   allocate(j0_c(nc,nv_loc))
   allocate(j0_v(nc_loc,nv))
   allocate(h_x(nc,nv_loc))
+  allocate(rhs(4,nc,nv_loc))
+  allocate(h0_x(nc,nv_loc))
   allocate(cap_h_c(nc,nv_loc))
   allocate(cap_h_ct(nv_loc,nc))
   allocate(cap_h_v(nc_loc,nv))
   allocate(cap_h_v_prime(nc_loc,nv))
+  allocate(omega_cap_h(nc,nv_loc))
+  allocate(omega_h(nc,nv_loc))
+  allocate(omega_s(n_field,nc,nv_loc))
   allocate(field(n_radial,n_theta,n_field))
   allocate(field_loc(n_radial,n_theta,n_field))
   allocate(field_old(n_radial,n_theta,n_field))
   allocate(f_balloon(n_radial,n_theta))
   allocate(recv_status(MPI_STATUS_SIZE))
+
+  allocate(thcyc(1-n_theta:2*n_theta))
+  allocate(rcyc(n_radial,1-n_theta:2*n_theta))
+  allocate(dtheta(n_theta,-2:2))
+  allocate(dtheta_up(n_theta,-2:2))
 
   call EQUIL_alloc(1)
   call EQUIL_do
@@ -77,27 +93,11 @@ subroutine cgyro_do
   !4. Array initialization
   call cgyro_init_arrays
 
-  call GK_alloc(1)
   call COLLISION_alloc(1)
-
-  ! Timer initialization
-  call timer_lib_init('gk_init')
-  call timer_lib_init('fieldx')
-  call timer_lib_init('gkrhs')
-  call timer_lib_init('collision')
-  call timer_lib_init('comm')
-
-  call timer_lib_in('gk_init')
-  call GK_init
-  call timer_lib_out('gk_init')
 
   if (silent_flag == 0 .and. i_proc == 0) then
 
-
      open(unit=myio,file=trim(path)//runfile_hx,status='replace')
-     close(myio)
-
-     open(unit=myio,file=trim(path)//runfile_time,status='replace')
      close(myio)
 
      open(unit=myio,file=trim(path)//runfile_grids,status='replace')
@@ -126,13 +126,11 @@ subroutine cgyro_do
 
   do itime=1,nt_step
 
-     ! Collisionless gyrokinetic equation
-     ! Returns new h_x, cap_h_x, and fields 
-     call GK_do
+     ! Collisionless step: returns new h_x, cap_h_x, fields 
+     call cgyro_step_gk
 
-     ! Collision step
-     ! Returns new h_x, cap_h_x, and fields
-     call COLLISION_do
+     ! Collision step: returns new h_x, cap_h_x, fields
+     call cgyro_step_collision
 
      if (mod(itime,print_step) == 0) then
         call cgyro_write_timedata
@@ -184,18 +182,18 @@ subroutine cgyro_do
   if (i_proc == 0) then
      print *
      print '(a)', 'Timing Summary'
-     print '(a,1x,1pe11.4)',' gk_init   ',timer_lib_time('gk_init')
-     print '(a,1x,1pe11.4)',' fieldx    ',timer_lib_time('fieldx')
-     print '(a,1x,1pe11.4)',' gkrhs     ',timer_lib_time('gkrhs')
-     print '(a,1x,1pe11.4)',' collision ',timer_lib_time('collision')
-     print '(a,1x,1pe11.4)',' comm      ',timer_lib_time('comm')
+     print '(a,1x,1pe11.4)',' init_arrays ',timer_lib_time('init_arrays')
+     print '(a,1x,1pe11.4)',' field_v     ',timer_lib_time('field_v')
+     print '(a,1x,1pe11.4)',' field_c     ',timer_lib_time('field_c')
+     print '(a,1x,1pe11.4)',' rhs         ',timer_lib_time('rhs')
+     print '(a,1x,1pe11.4)',' collision   ',timer_lib_time('collision')
+     print '(a,1x,1pe11.4)',' comm        ',timer_lib_time('comm')
   endif
 
 
 100 continue
 
   call EQUIL_alloc(0)
-  call GK_alloc(0)
   call COLLISION_alloc(0)
 
   if(allocated(indx_xi))       deallocate(indx_xi)
@@ -215,7 +213,7 @@ subroutine cgyro_do
   if(allocated(field_loc))     deallocate(field_loc)
   if(allocated(field_old))     deallocate(field_old)
   if(allocated(f_balloon))     deallocate(f_balloon)
-       
+
   if (zf_test_flag == 2 .and. ae_flag == 1) then
      deallocate(hzf)
      deallocate(xzf)
@@ -224,4 +222,4 @@ subroutine cgyro_do
      deallocate(pvec_outi)
   endif
 
-end subroutine cgyro_do
+end subroutine cgyro_kernel

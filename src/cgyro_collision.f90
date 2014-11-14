@@ -1,12 +1,12 @@
 module cgyro_collision
-  
+
   implicit none
-  
-  public :: COLLISION_alloc, COLLISION_do
+
+  public :: COLLISION_alloc, cgyro_step_collision
   logical, private :: initialized = .false.
 
   real, dimension(:,:,:), allocatable, private :: cmat
-  real, dimension(:,:), allocatable, private :: cvec,bvec
+  complex, dimension(:), allocatable, private :: cvec,bvec
 
 contains
 
@@ -119,8 +119,8 @@ contains
        enddo
 
        allocate(cmat(nv,nv,nc_loc))
-       allocate(cvec(nv,2))
-       allocate(bvec(nv,2))
+       allocate(cvec(nv))
+       allocate(bvec(nv))
 
        ! set-up the collision matrix
        sum_den = 0.0
@@ -383,8 +383,8 @@ contains
     endif
 
   end subroutine COLLISION_alloc
-  
-  subroutine COLLISION_do
+
+  subroutine cgyro_step_collision
 
     use parallel_lib
     use timer_lib
@@ -402,14 +402,9 @@ contains
     ! compute new collisional cap_H: H = h + ze/T G phi
     ! assumes have cap_h_x
 
-    ! allocate(cap_h_c(nc,nv_loc))
-    ! allocate(cap_h_ct(nv_loc,nc))
-    ! allocate(cap_h_v(nc_loc,nv))
-
     call timer_lib_in('comm')
     call parallel_lib_r(transpose(cap_h_c),cap_h_v)
     call timer_lib_out('comm')
-
 
     call timer_lib_in('collision')
 
@@ -417,40 +412,26 @@ contains
     do ic=nc1,nc2
        ic_loc = ic_loc+1
 
-       it = it_c(ic)
-       ir = ir_c(ic)
-
        ! Set-up the RHS: H = f + ze/T G phi
-       ! 
-       ! Pack Re(H) and Im(H) into two-column matrix for use with DGEMM
-       do iv=1,nv
-          cvec(iv,1) = real(cap_h_v(ic_loc,iv))
-          cvec(iv,2) = imag(cap_h_v(ic_loc,iv))
-       enddo
 
-       ! Solve for H
-       !call DGEMM('N','N',nv,2,nv,num1,cmat(ic_loc,:,:),&
-       !      nv,cvec,nv,num0,bvec,nv)
+       cvec(:) = cap_h_v(ic_loc,:)
 
-       bvec = 0.0
-       do iv=1,nv
-          do ivp=1,nv
-             bvec(iv,1) = bvec(iv,1)+cmat(iv,ivp,ic_loc)*cvec(ivp,1)
-             bvec(iv,2) = bvec(iv,2)+cmat(iv,ivp,ic_loc)*cvec(ivp,2)
+       ! This is a key loop for performance
+       bvec = (0.0,0.0)
+       do ivp=1,nv
+          do iv=1,nv
+             bvec(iv) = bvec(iv)+cmat(iv,ivp,ic_loc)*cvec(ivp)
           enddo
        enddo
 
-
-       do iv=1,nv
-          cap_h_v(ic_loc,iv) = bvec(iv,1) + i_c * bvec(iv,2)
-       enddo
+       cap_h_v(ic_loc,:) = bvec(:)
 
     enddo
 
+    call timer_lib_out('collision')
+
     ! Compute the new phi
     call cgyro_field_v
-
-    call timer_lib_out('collision')
 
     call timer_lib_in('comm')
     call parallel_lib_f(cap_h_v,cap_h_ct)
@@ -487,6 +468,6 @@ contains
 
     call timer_lib_out('collision')
 
-  end subroutine COLLISION_do
+  end subroutine cgyro_step_collision
   
 end module cgyro_collision

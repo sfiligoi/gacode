@@ -1,5 +1,6 @@
 subroutine cgyro_init_arrays
 
+  use timer_lib
   use mpi
 
   use cgyro_globals
@@ -8,12 +9,16 @@ subroutine cgyro_init_arrays
   implicit none
 
   real, external :: BESJ0
-  real :: arg
-  integer :: is,ir,it,ie,ix
-  integer :: jt
+  real :: arg,ang
+  integer :: ir,it,is,ie,ix
+  integer :: jr,jt,id
+  complex :: thfac
   real, dimension(n_radial,n_theta) :: sum_loc
+  real, dimension(nv_loc) :: vfac
 
+  call timer_lib_in('init_arrays')
 
+  !-------------------------------------------------------------------------
   ! Distributed Bessel-function Gyroaverages
 
   iv_loc = 0
@@ -58,20 +63,34 @@ subroutine cgyro_init_arrays
 
      enddo
   enddo
+  !-------------------------------------------------------------------------
+
+  !-------------------------------------------------------------------------
+  ! Field equation prefactors, sums.
+  !
+  iv_loc = 0
+  do iv=nv1,nv2
+
+     iv_loc = iv_loc+1
+     is = is_v(iv)
+     ix = ix_v(iv)
+     ie = ie_v(iv)
+
+     vfac(iv_loc) = 0.5*w_xi(ix)*w_e(ie)*z(is)**2/temp(is)*dens(is)
+
+  enddo
 
   sum_den_h = 0.0
   do is=1,n_species
      do ie=1,n_energy
         do ix=1,n_xi
-           sum_den_h = sum_den_h &
-                + 0.5 * w_xi(ix) &
-                * z(is)**2/temp(is) *dens(is) * w_e(ie)
+           sum_den_h = sum_den_h+0.5*w_xi(ix)*w_e(ie)*z(is)**2/temp(is)*dens(is)
         enddo
      enddo
   enddo
 
   if (ae_flag == 1) then
-     sum_den_h = sum_den_h + dens_ele / temp_ele
+     sum_den_h = sum_den_h+dens_ele/temp_ele
   endif
 
   allocate(sum_den_x(n_radial,n_theta))
@@ -91,9 +110,7 @@ subroutine cgyro_init_arrays
         ir = ir_c(ic) 
         it = it_c(ic)
 
-        sum_loc(ir,it) = sum_loc(ir,it) &
-             +0.5*w_xi(ix)*w_e(ie)*z(is)**2/temp(is)*dens(is) &
-             *(1.0-j0_c(ic,iv_loc)**2) 
+        sum_loc(ir,it) = sum_loc(ir,it)+vfac(iv_loc)*(1.0-j0_c(ic,iv_loc)**2) 
 
      enddo
   enddo
@@ -108,58 +125,6 @@ subroutine cgyro_init_arrays
 
   if (ae_flag == 1) then
      sum_den_x(:,:) = sum_den_x(:,:) + dens_ele / temp_ele
-  endif
-
-  if (zf_test_flag == 1 .and. ae_flag == 1) then
-
-     ! Zonal flow with adiabatic electrons:
-
-     allocate(hzf(n_radial,n_theta,n_theta))
-     hzf(:,:,:) = 0.0      
-     do ir=1,n_radial
-        do it=1,n_theta
-           hzf(ir,it,it) = k_perp(it,ir)**2 * lambda_debye**2 &
-                * dens_ele / temp_ele + sum_den_h
-           do jt=1,n_theta
-              hzf(ir,it,jt) = hzf(ir,it,jt) &
-                   - dens_ele / temp_ele * w_theta(jt)
-           enddo
-        enddo
-     enddo
-     allocate(work(n_theta))
-     allocate(i_piv(n_theta))
-     do ir=1,n_radial
-        call DGETRF(n_theta,n_theta,hzf(ir,:,:),n_theta,i_piv,info)
-        call DGETRI(n_theta,hzf(ir,:,:),n_theta,i_piv,work,n_theta,info)
-     enddo
-     deallocate(i_piv)
-     deallocate(work)
-
-     allocate(xzf(n_radial,n_theta,n_theta))
-     xzf(:,:,:) = 0.0     
-     do ir=1,n_radial
-        do it=1,n_theta
-           xzf(ir,it,it) = k_perp(it,ir)**2 * lambda_debye**2 &
-                * dens_ele / temp_ele + sum_den_x(ir,it)
-           do jt=1,n_theta
-              xzf(ir,it,jt) = xzf(ir,it,jt) &
-                   - dens_ele / temp_ele * w_theta(jt)
-           enddo
-        enddo
-     enddo
-     allocate(work(n_theta))
-     allocate(i_piv(n_theta))
-     do ir=1,n_radial
-        call DGETRF(n_theta,n_theta,xzf(ir,:,:),n_theta,i_piv,info)
-        call DGETRI(n_theta,xzf(ir,:,:),n_theta,i_piv,work,n_theta,info)
-     enddo
-     deallocate(i_piv)
-     deallocate(work)
-
-     allocate(pvec_in(n_theta))
-     allocate(pvec_outr(n_theta))
-     allocate(pvec_outi(n_theta))
-
   endif
 
   ! Pre-factors for Ampere eqn
@@ -183,10 +148,8 @@ subroutine cgyro_init_arrays
            ir = ir_c(ic) 
            it = it_c(ic)
 
-           sum_loc(ir,it) = sum_loc(ir,it) &
-                +0.5*w_xi(ix)*w_e(ie)*xi(ix)**2*2.0*energy(ie) &
-                *vth(is)**2*z(is)**2/temp(is)*dens(is) & 
-                *j0_c(ic,iv_loc)**2 
+           sum_loc(ir,it) = sum_loc(ir,it)+vfac(iv_loc) &
+                *xi(ix)**2*2.0*energy(ie)*vth(is)**2*j0_c(ic,iv_loc)**2 
         enddo
      enddo
 
@@ -199,5 +162,212 @@ subroutine cgyro_init_arrays
           i_err)
 
   endif
+  !-------------------------------------------------------------------------
+
+  !-------------------------------------------------------------------------
+  ! Zonal flow with adiabatic electrons:
+  !
+  if (zf_test_flag == 1 .and. ae_flag == 1) then
+
+     allocate(hzf(n_radial,n_theta,n_theta))
+     hzf(:,:,:) = 0.0      
+     do ir=1,n_radial
+        do it=1,n_theta
+           hzf(ir,it,it) = k_perp(it,ir)**2 * lambda_debye**2 &
+                * dens_ele / temp_ele + sum_den_h
+           do jt=1,n_theta
+              hzf(ir,it,jt) = hzf(ir,it,jt) &
+                   - dens_ele / temp_ele * w_theta(jt)
+           enddo
+        enddo
+     enddo
+
+     allocate(work(n_theta))
+     allocate(i_piv(n_theta))
+     do ir=1,n_radial
+        call DGETRF(n_theta,n_theta,hzf(ir,:,:),n_theta,i_piv,info)
+        call DGETRI(n_theta,hzf(ir,:,:),n_theta,i_piv,work,n_theta,info)
+     enddo
+     deallocate(i_piv)
+     deallocate(work)
+
+     allocate(xzf(n_radial,n_theta,n_theta))
+     xzf(:,:,:) = 0.0     
+     do ir=1,n_radial
+        do it=1,n_theta
+           xzf(ir,it,it) = k_perp(it,ir)**2 * lambda_debye**2 &
+                * dens_ele / temp_ele + sum_den_x(ir,it)
+           do jt=1,n_theta
+              xzf(ir,it,jt) = xzf(ir,it,jt) &
+                   - dens_ele / temp_ele * w_theta(jt)
+           enddo
+        enddo
+     enddo
+
+     allocate(work(n_theta))
+     allocate(i_piv(n_theta))
+     do ir=1,n_radial
+        call DGETRF(n_theta,n_theta,xzf(ir,:,:),n_theta,i_piv,info)
+        call DGETRI(n_theta,xzf(ir,:,:),n_theta,i_piv,work,n_theta,info)
+     enddo
+     deallocate(i_piv)
+     deallocate(work)
+
+     allocate(pvec_in(n_theta))
+     allocate(pvec_outr(n_theta))
+     allocate(pvec_outi(n_theta))
+
+  endif
+  !-------------------------------------------------------------------------
+
+  !-------------------------------------------------------------------------
+  ! Streaming arrays
+  !
+  ! cyclic index (for theta-periodicity)
+  do it=1,n_theta
+     thcyc(it-n_theta) = it
+     thcyc(it) = it
+     thcyc(it+n_theta) = it
+  enddo
+  ! coefficients for 4th order centered derivative
+  cderiv(-2) =  1.0 / (12.0 * d_theta)
+  cderiv(-1) = -8.0 / (12.0 * d_theta)
+  cderiv(0)  =  0.0 / (12.0 * d_theta)
+  cderiv(1)  =  8.0 / (12.0 * d_theta)
+  cderiv(2)  = -1.0 / (12.0 * d_theta)
+  ! coefficients for 4th order filter for 3rd order upwinded derivative
+  uderiv(-2) =  1.0 / (12.0 * d_theta)
+  uderiv(-1) = -4.0 / (12.0 * d_theta)
+  uderiv(0)  =  6.0 / (12.0 * d_theta)
+  uderiv(1)  = -4.0 / (12.0 * d_theta)
+  uderiv(2)  =  1.0 / (12.0 * d_theta)
+
+  ! Indices for parallel streaming with upwinding
+  do ir=1,n_radial
+     do it=1,n_theta
+        do id=-2,2
+           jt = thcyc(it+id)
+           if (it+id < 1) then
+              thfac = cos(2*pi*k_theta*rmin) &
+                   + i_c * sin(2*pi*k_theta*rmin)
+              if (ir-1 >= 1) then
+                 jr = ir-1
+              else
+                 jr = n_radial
+              endif
+           else if (it+id > n_theta) then
+              thfac = cos(2*pi*k_theta*rmin) &
+                   - i_c * sin(2*pi*k_theta*rmin)
+              if (ir+1 <= n_radial) then
+                 jr = ir+1
+              else
+                 jr = 1
+              endif
+           else
+              thfac = (1.0,0.0)
+              jr = ir
+           endif
+           dtheta(it,id)    = cderiv(id)*thfac
+           dtheta_up(it,id) = uderiv(id)*thfac
+           rcyc(ir,it+id)   = jr
+
+        enddo
+     enddo
+  enddo
+
+  ! Streaming coefficients (for speed optimization)
+
+  iv_loc = 0
+  do iv=nv1,nv2
+
+     iv_loc = iv_loc+1
+
+     is = is_v(iv)
+     ix = ix_v(iv)
+     ie = ie_v(iv)
+
+     do ic=1,nc
+
+        ir = ir_c(ic) 
+        it = it_c(ic)
+
+
+        ! omega_rdrift
+        omega_cap_h(ic,iv_loc) = -omega_rdrift(it,is)*energy(ie)*(1.0 + xi(ix)**2) &
+             *(2.0*pi*i_c*indx_r(ir)*r_length_inv) 
+
+        ! omega_dalpha
+        omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
+             -omega_adrift(it,is)*energy(ie)*(1.0 + xi(ix)**2)*i_c*k_theta
+
+        ! omega_dalpha - pressure component
+        omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
+             -omega_aprdrift(it,is)*energy(ie)*xi(ix)**2*i_c*k_theta
+
+        ! radial upwind
+        omega_h(ic,iv_loc) = &
+             -abs(omega_rdrift(it,is))*energy(ie)*(1.0 + xi(ix)**2)*up_radial & 
+             *(2.0*indx_r(ir)/(1.0*n_radial))**(up_radial_n-1.0) &
+             *(2.0*pi*indx_r(ir)*r_length_inv)
+
+        ! omega_star
+        omega_s(1,ic,iv_loc) = &
+             -i_c*k_theta*rho*sqrt(temp(is)*mass(is))/(1.0*z(is))*vth(is) &
+             *(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
+             *z(is)/temp(is)*j0_c(ic,iv_loc)
+
+        if (n_field > 1) then
+           omega_s(2,ic,iv_loc) = -omega_s(1,ic,iv_loc)* &
+                xi(ix)*sqrt(2.0*energy(ie))*vth(is)
+        endif
+
+     enddo
+  enddo
+
+  !-------------------------------------------------------------------------
+
+  !-------------------------------------------------------------------------
+  ! Initial conditions
+  !
+  h_x(:,:) = (0.0,0.0)
+
+
+  if (zf_test_flag == 1) then
+
+     ! Zonal-flow initial condition
+
+     iv_loc = 0
+     do iv=nv1,nv2
+        iv_loc = iv_loc+1
+        if (is_v(iv) == 1) then
+           h_x(:,iv_loc) = 1.0
+        else
+           h_x(:,iv_loc) = 0.0
+        endif
+     enddo
+
+  else
+
+     ! Initial condition exponential in ballooning angle.
+
+     iv_loc = 0
+     do iv=nv1,nv2
+        iv_loc = iv_loc+1
+        if (is_v(iv) == 1) then
+           do ic=1,nc
+              ang = theta(it_c(ic))+2*pi*(ir_c(ic)-n_radial/2-1)
+              h_x(ic,iv_loc) = rho*exp(-(ang/2)**2) 
+           enddo
+        endif
+     enddo
+
+  endif
+
+  call cgyro_field_c
+
+  field_old = field
+  !-------------------------------------------------------------------------
+
+  call timer_lib_out('init_arrays')
 
 end subroutine cgyro_init_arrays
