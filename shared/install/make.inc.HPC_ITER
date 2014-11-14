@@ -4,8 +4,8 @@
 
 #FFTWDIR=/opt/fftw-3.3.3-intel
 #NCDIR=/opt/netcdf-4.1.3-intel
-FFTWDIR=$(HOME)
-NCDIR=$(HOME)
+#FFTWDIR=$(HOME)
+#NCDIR=$(HOME)
 
 # Compilers
 
