@@ -12,7 +12,7 @@ module cgyro_globals
   integer :: e_max
   real    :: delta_t
   real    :: max_time
-  integer :: print_step
+  integer :: prin_time
   real    :: freq_tol
   integer :: restart_write
   integer :: restart_mode
@@ -108,23 +108,23 @@ module cgyro_globals
   ! I/O and error management variables
   !
   character(len=80) :: path
+  character(len=18) :: runfile         = 'out.cgyro.run'
   character(len=18) :: runfile_restart = 'out.cgyro.restart'
-  character(len=18) :: runfile    = 'out.cgyro.run'
-  character(len=18) :: runfile_hx = 'out.cgyro.hx'
-  character(len=18) :: runfile_grids = 'out.cgyro.grids'
-  character(len=18) :: runfile_time  = 'out.cgyro.time'
-  character(len=18) :: runfile_freq = 'out.gkcoll.freq'
+  character(len=18) :: runfile_hx      = 'out.cgyro.hx'
+  character(len=18) :: runfile_grids   = 'out.cgyro.grids'
+  character(len=18) :: runfile_time    = 'out.cgyro.time'
+  character(len=18) :: runfile_freq    = 'out.cgyro.freq'
   character(len=14), dimension(3)  :: runfile_field = &
        (/'out.cgyro.phi ','out.cgyro.apar','out.cgyro.bpar'/)
   character(len=15), dimension(3)  :: runfile_fieldb = &
        (/'out.cgyro.phiB ','out.cgyro.aparB','out.cgyro.bparB'/)
+  integer :: io_data = 20
   integer :: io_run = 12
   !
   ! error checking
   integer :: error_status = 0
   character(len=80) :: error_message
   !
-  integer :: myio = 20
   integer :: io_control
   integer :: signal
   !
@@ -134,8 +134,8 @@ module cgyro_globals
 
   !---------------------------------------------------------------
   ! Time stepping
-  integer :: itime
-  integer :: nt_step
+  integer :: i_time
+  integer :: n_time
   complex :: freq
   complex :: freq_err
   !---------------------------------------------------------------

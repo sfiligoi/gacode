@@ -248,16 +248,14 @@ subroutine cgyro_init_arrays
         do id=-2,2
            jt = thcyc(it+id)
            if (it+id < 1) then
-              thfac = cos(2*pi*k_theta*rmin) &
-                   + i_c * sin(2*pi*k_theta*rmin)
+              thfac = exp(2*pi*i_c*k_theta*rmin)
               if (ir-1 >= 1) then
                  jr = ir-1
               else
                  jr = n_radial
               endif
            else if (it+id > n_theta) then
-              thfac = cos(2*pi*k_theta*rmin) &
-                   - i_c * sin(2*pi*k_theta*rmin)
+              thfac = exp(-2*pi*i_c*k_theta*rmin)
               if (ir+1 <= n_radial) then
                  jr = ir+1
               else
@@ -268,7 +266,7 @@ subroutine cgyro_init_arrays
               jr = ir
            endif
            dtheta(it,id)    = cderiv(id)*thfac
-           dtheta_up(it,id) = uderiv(id)*thfac
+           dtheta_up(it,id) = uderiv(id)*thfac*up_theta
            rcyc(ir,it+id)   = jr
 
         enddo

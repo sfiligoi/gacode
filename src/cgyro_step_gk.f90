@@ -86,8 +86,8 @@ subroutine cgyro_rhs(ij)
            jr = rcyc(ir,it+id)
            jc = ic_c(jr,jt)
            rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc) &
-                - rval*dtheta(it,id)*cap_h_c(jc,iv_loc)  &
-                - abs(rval)*dtheta_up(it,id)*h_x(jc,iv_loc)
+                -rval*dtheta(it,id)*cap_h_c(jc,iv_loc)  &
+                -abs(rval)*dtheta_up(it,id)*h_x(jc,iv_loc)
         enddo
 
         rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc)+&

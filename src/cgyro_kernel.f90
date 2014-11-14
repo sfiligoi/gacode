@@ -22,8 +22,6 @@ subroutine cgyro_kernel
 
   implicit none
 
-  complex, dimension(:,:), allocatable :: h_x_glob
-
   if (silent_flag == 0 .and. i_proc == 0) then
      open(unit=io_run,file=trim(path)//runfile,status='replace')
      close(io_run)
@@ -97,34 +95,31 @@ subroutine cgyro_kernel
 
   if (silent_flag == 0 .and. i_proc == 0) then
 
-     open(unit=myio,file=trim(path)//runfile_hx,status='replace')
-     close(myio)
-
-     open(unit=myio,file=trim(path)//runfile_grids,status='replace')
-     write(myio,'(i4)') n_species
-     write(myio,'(i4)') n_radial
-     write(myio,'(i4)') n_theta
-     write(myio,'(i4)') n_energy
-     write(myio,'(i4)') n_xi
-     write(myio,'(i4)') indx_r(:)
-     write(myio,'(1pe12.5)') theta(:)
-     write(myio,'(1pe12.5)') energy(:)
-     write(myio,'(1pe12.5)') xi(:)
-     write(myio,'(1pe12.5)') transpose(theta_B(:,:))
-     close(myio)
+     open(unit=io_data,file=trim(path)//runfile_grids,status='replace')
+     write(io_data,'(i4)') n_species
+     write(io_data,'(i4)') n_radial
+     write(io_data,'(i4)') n_theta
+     write(io_data,'(i4)') n_energy
+     write(io_data,'(i4)') n_xi
+     write(io_data,'(i4)') indx_r(:)
+     write(io_data,'(1pe12.5)') theta(:)
+     write(io_data,'(1pe12.5)') energy(:)
+     write(io_data,'(1pe12.5)') xi(:)
+     write(io_data,'(1pe12.5)') transpose(theta_B(:,:))
+     close(io_data)
 
   endif
 
   ! Time-stepping
-  nt_step = nint(max_time/delta_t)
+  n_time = nint(max_time/delta_t)
 
-  itime = 0
+  i_time = 0
 
   io_control = 1*(1-silent_flag)
   call cgyro_write_timedata
   io_control = 2*(1-silent_flag)
 
-  do itime=1,nt_step
+  do i_time=1,n_time
 
      ! Collisionless step: returns new h_x, cap_h_x, fields 
      call cgyro_step_gk
@@ -132,9 +127,8 @@ subroutine cgyro_kernel
      ! Collision step: returns new h_x, cap_h_x, fields
      call cgyro_step_collision
 
-     if (mod(itime,print_step) == 0) then
-        call cgyro_write_timedata
-     endif
+     ! Print results
+     call cgyro_write_timedata
 
      if (abs(signal) == 1) exit
 
@@ -143,39 +137,11 @@ subroutine cgyro_kernel
   enddo
 
   ! Print final distribution
-  if (silent_flag == 0 .and. n_toroidal == 1) then
-
-     if (i_proc == 0) then
-        open(unit=myio,file=trim(path)//runfile_hx,status='old',&
-             position='append')
-     endif
-
-     allocate(h_x_glob(nc,nv))
-
-     ! Collect distribution onto process 0
-     call MPI_GATHER(h_x(:,:),&
-          size(h_x),&
-          MPI_DOUBLE_COMPLEX,&
-          h_x_glob(:,:),&
-          size(h_x),&
-          MPI_DOUBLE_COMPLEX,&
-          0,&
-          NEW_COMM_1,&
-          i_err)
-
-     if (i_proc == 0) then
-        do iv=1,nv
-           do ic=1,nc
-              f_balloon(ir_c(ic),it_c(ic)) = h_x_glob(ic,iv) &
-                   *exp(-2*pi*i_c*indx_r(ir_c(ic))*k_theta*rmin)
-           enddo
-           write(myio,'(1pe13.5e3)') transpose(f_balloon(:,:))
-        enddo
-     endif
-     deallocate(h_x_glob)
-
-     if (i_proc == 0) close(myio)
-
+  if (n_toroidal == 1) then
+     io_control = 1*(1-silent_flag)
+     call write_distribution(trim(path)//runfile_hx,io_data)
+     io_control = 2*(1-silent_flag)
+     call write_distribution(trim(path)//runfile_hx,io_data)
   endif
 
   ! Print timers
@@ -189,7 +155,6 @@ subroutine cgyro_kernel
      print '(a,1x,1pe11.4)',' collision   ',timer_lib_time('collision')
      print '(a,1x,1pe11.4)',' comm        ',timer_lib_time('comm')
   endif
-
 
 100 continue
 
