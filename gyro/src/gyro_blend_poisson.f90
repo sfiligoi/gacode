@@ -39,13 +39,20 @@ subroutine gyro_blend_poisson(i_elec)
   real, dimension(n_gk,-m_gyro:m_gyro-i_gyro) :: trace_2_glob
   !
   complex :: cprod 
+  integer :: nx_fast
   !---------------------------------------------------
 
+ 
+  if (flat_profile_flag == 1) then
+  nx_fast = 1
+  else
+  nx_fast = n_x
+  endif
 
   !------------------------------------------------------------------
   ! Now, compute matrix of blending projections:
   !
-  do i=1,n_x
+  do i=1,nx_fast
 
      vel_sum_loc = (0.0,0.0)
 
@@ -223,6 +230,13 @@ subroutine gyro_blend_poisson(i_elec)
      endif
 
   enddo ! i 
+
+  ! JC fast option
+  if (nx_fast == 1) then
+  do i=1,n_x
+  ap_mm(i,:,:,:) = ap_mm(1,:,:,:)
+  enddo
+  endif
 
   !---------------------------------------------------------------------------
   ! Compute measure of quality of double-gyroaverage truncation:

@@ -42,7 +42,7 @@ echo "[0] debug   (10 min)   up to N nodes"
 read -p "Select a queue [0-9] " queue_num
 
 case "$queue_num" in
-  0) queue="debug"   ; maxtime=10 ;;
+  0) queue="debug"   ; maxtime=30 ;;
 esac
 
 bfile=$simpath/$sim/batch.src
