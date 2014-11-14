@@ -32,6 +32,7 @@ subroutine gyro_blend_poisson(i_elec)
   complex, dimension(-m_gyro:m_gyro-i_gyro,n_blend,n_blend) :: vel_sum_glob
   complex, dimension(n_gk,-m_gyro:m_gyro-i_gyro) :: f_x
   complex, dimension(-m_dx:m_dx-i_dx) :: grad_perp_phi
+  complex, dimension(n_gk,-m_gyro:m_gyro-i_gyro,n_stack,n_nek_loc_1) :: f_save
   !
   real, dimension(-m_gyro:m_gyro-i_gyro) :: trace_1
   real, dimension(n_gk,-m_gyro:m_gyro-i_gyro) :: trace_2
@@ -76,67 +77,73 @@ subroutine gyro_blend_poisson(i_elec)
 
            ! Fast option for flat profiles
 
-           do is=1,n_gk
+           if (i == 1 .or. flat_profile_flag == 0) then
 
-              if (gyro_method == 1) then
+              do is=1,n_gk
 
-                 !---------------------------------------------------------------
-                 ! Prepare argument of Bessel function
-                 !  
-                 omega_c = abs(z(is))*b_unit_s(i)*mu(is)**2
+                 if (gyro_method == 1) then
 
-                 if (kill_gyro_b_flag == 0) then
-                    omega_c = omega_c*b0_t(i,k,m)
+                    !---------------------------------------------------------------
+                    ! Prepare argument of Bessel function
+                    !  
+                    omega_c = abs(z(is))*b_unit_s(i)*mu(is)**2
+
+                    if (kill_gyro_b_flag == 0) then
+                       omega_c = omega_c*b0_t(i,k,m)
+                    endif
+
+                    rho_gyro = rhos_norm*mu(is)*sqrt(tem_s(is,i))/omega_c
+                    !
+                    a_gyro = grad_r_t(i,k,m)/x_length*dr_eodr(i)
+                    v_gyro = qrat_t(i,k,m)*n_1(in_1)*q_s(i)/r_s(i)
+                    u_gyro = v_gyro*captheta_t(i,k,m)
+                    !---------------------------------------------------------------
+
+                    f_x(is,:) = (0.0,0.0) 
+
+                    ! I_0
+                    call gyro_bessel_operator(rho_gyro,&
+                         a_gyro,&
+                         u_gyro,&
+                         v_gyro,&
+                         f_x(is,:),&
+                         7)
+
+                 else 
+
+                    !---------------------------------------------------------------
+                    ! Prepare argument of Bessel function
+                    !  
+                    omega_c = abs(z(is))*b_unit_s(i)*mu(is)**2
+
+                    if (kill_gyro_b_flag == 0) then
+                       omega_c = omega_c*b0_t(i,k,m)
+                    endif
+
+                    rho_gyro = rhos_norm*v_perp(m,i,p_nek_loc,is)/omega_c
+                    !
+                    a_gyro = grad_r_t(i,k,m)/x_length*dr_eodr(i)
+                    v_gyro = qrat_t(i,k,m)*n_1(in_1)*q_s(i)/r_s(i)
+                    u_gyro = v_gyro*captheta_t(i,k,m)
+                    !---------------------------------------------------------------
+
+                    f_x(is,:) = (0.0,0.0) 
+
+                    ! J_0^2
+                    call gyro_bessel_operator(rho_gyro,&
+                         a_gyro,&
+                         u_gyro,&
+                         v_gyro,&
+                         f_x(is,:),&
+                         2)
+
                  endif
 
-                 rho_gyro = rhos_norm*mu(is)*sqrt(tem_s(is,i))/omega_c
-                 !
-                 a_gyro = grad_r_t(i,k,m)/x_length*dr_eodr(i)
-                 v_gyro = qrat_t(i,k,m)*n_1(in_1)*q_s(i)/r_s(i)
-                 u_gyro = v_gyro*captheta_t(i,k,m)
-                 !---------------------------------------------------------------
-
-                 f_x(is,:) = (0.0,0.0) 
-
-                 ! I_0
-                 call gyro_bessel_operator(rho_gyro,&
-                      a_gyro,&
-                      u_gyro,&
-                      v_gyro,&
-                      f_x(is,:),&
-                      7)
-
-              else 
-
-                 !---------------------------------------------------------------
-                 ! Prepare argument of Bessel function
-                 !  
-                 omega_c = abs(z(is))*b_unit_s(i)*mu(is)**2
-
-                 if (kill_gyro_b_flag == 0) then
-                    omega_c = omega_c*b0_t(i,k,m)
-                 endif
-
-                 rho_gyro = rhos_norm*v_perp(m,i,p_nek_loc,is)/omega_c
-                 !
-                 a_gyro = grad_r_t(i,k,m)/x_length*dr_eodr(i)
-                 v_gyro = qrat_t(i,k,m)*n_1(in_1)*q_s(i)/r_s(i)
-                 u_gyro = v_gyro*captheta_t(i,k,m)
-                 !---------------------------------------------------------------
-
-                 f_x(is,:) = (0.0,0.0) 
-
-                 ! J_0^2
-                 call gyro_bessel_operator(rho_gyro,&
-                      a_gyro,&
-                      u_gyro,&
-                      v_gyro,&
-                      f_x(is,:),&
-                      2)
-
-              endif
-
-           enddo ! is
+              enddo ! is
+              f_save(:,:,m,p_nek_loc) = f_x(:,:)
+           else
+              f_x(:,:) = f_save(:,:,m,p_nek_loc)
+           endif
 
            do j=1,n_blend
               do jp=1,n_blend
