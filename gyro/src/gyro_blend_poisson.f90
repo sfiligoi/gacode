@@ -39,20 +39,12 @@ subroutine gyro_blend_poisson(i_elec)
   real, dimension(n_gk,-m_gyro:m_gyro-i_gyro) :: trace_2_glob
   !
   complex :: cprod 
-  integer :: nx_fast
   !---------------------------------------------------
-
- 
-  if (flat_profile_flag == 1) then
-  nx_fast = 1
-  else
-  nx_fast = n_x
-  endif
 
   !------------------------------------------------------------------
   ! Now, compute matrix of blending projections:
   !
-  do i=1,nx_fast
+  do i=1,n_x
 
      vel_sum_loc = (0.0,0.0)
 
@@ -81,6 +73,8 @@ subroutine gyro_blend_poisson(i_elec)
                 2.0*inqr*qrat_t(i,k,m)*captheta_t(i,k,m)* &
                 grad_r_t(i,k,m)*dr_eodr(i)*w_d1(:)+ &
                 (grad_r_t(i,k,m)*dr_eodr(i))**2*w_d2(:))
+
+           ! Fast option for flat profiles
 
            do is=1,n_gk
 
@@ -230,13 +224,6 @@ subroutine gyro_blend_poisson(i_elec)
      endif
 
   enddo ! i 
-
-  ! JC fast option
-  if (nx_fast == 1) then
-  do i=1,n_x
-  ap_mm(i,:,:,:) = ap_mm(1,:,:,:)
-  enddo
-  endif
 
   !---------------------------------------------------------------------------
   ! Compute measure of quality of double-gyroaverage truncation:

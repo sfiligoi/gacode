@@ -28,7 +28,6 @@ subroutine gyro_blend_ampereperp
   complex, dimension(-m_gyro:m_gyro-i_gyro,n_blend,n_blend) :: vel_sum_loc2
   complex, dimension(n_gk,-m_gyro:m_gyro-i_gyro) :: f_x2
   complex, dimension(-m_gyro:m_gyro-i_gyro,n_blend,n_blend) :: vel_sum_glob
-
   !---------------------------------------------------
 
 
