@@ -253,19 +253,18 @@ subroutine prgen_map_iterdb
   endif
   !---------------------------------------------------
 
+  ! Primary ions
   onetwo_ion_name(1:onetwo_nprim) = onetwo_namep(1:onetwo_nprim)
-
   n0 = onetwo_nprim
 
-  onetwo_ion_name(1+n0:onetwo_nimp+n0) = &
-       onetwo_namei(1:onetwo_nimp)
-
+  ! Impurities
+  onetwo_ion_name(1+n0:onetwo_nimp+n0) = onetwo_namei(1:onetwo_nimp)
   n0 = n0+onetwo_nimp
 
-  onetwo_ion_name(1+n0:onetwo_nbion+n0) = &
-       onetwo_nameb(1:onetwo_nbion)
-
+  ! Beams
+  onetwo_ion_name(1+n0:onetwo_nbion+n0) = onetwo_nameb(1:onetwo_nbion)
   n0 = n0+onetwo_nbion
+
   if ( sum (onetwo_enalp(:)) > 0) then
      onetwo_ion_name(1+n0) = 'he'
      onetwo_nion_tot = n0+1

@@ -46,12 +46,14 @@ subroutine prgen_write
 
      do i=1,min(onetwo_nion_tot,5)
         ip = reorder_vec(i)
-        call prgen_ion_name(nint(onetwo_m(ip)),nint(onetwo_z(ip)),iname)
-        write(1,'(a,a,t36,i3,t43,f4.1,t48,"[",a,"]")') '#                         ',&
-             iname,&
-             nint(onetwo_z(ip)),&
-             onetwo_m(ip),&
-             onetwo_type(ip)
+        if (ip > 0) then
+           call prgen_ion_name(nint(onetwo_m(ip)),nint(onetwo_z(ip)),iname)
+           write(1,'(a,a,t36,i3,t43,f4.1,t48,"[",a,"]")') '#                         ',&
+                iname,&
+                nint(onetwo_z(ip)),&
+                onetwo_m(ip),&
+                onetwo_type(ip)
+        endif
      enddo
 
   case (2)
