@@ -65,79 +65,90 @@ subroutine gyro_bessel_stencils
 
         do i=1,n_x
 
-           do m0=1,n_theta(ck)
+           if (i == 1 .or. flat_profile_flag == 0) then
 
-              !---------------------------------------------------------------
-              ! Prepare argument of Bessel function
-              !  
-              omega_c = abs(z(is))*b_unit_s(i)*mu(is)**2
+              do m0=1,n_theta(ck)
 
-              if (kill_gyro_b_flag == 0) then
-                 omega_c = omega_c*b0_t(i,k,m0)
-              endif
+                 !---------------------------------------------------------------
+                 ! Prepare argument of Bessel function
+                 !  
+                 omega_c = abs(z(is))*b_unit_s(i)*mu(is)**2
 
-              rho_gyro = rhos_norm*v_perp(m0,i,p_nek_loc,is)/omega_c
-              !
-              a_gyro = grad_r_t(i,k,m0)/x_length*dr_eodr(i)
-              u_gyro = qrat_t(i,k,m0)*n_1(in_1)*q_s(i)/r_s(i)*captheta_t(i,k,m0)
-              v_gyro = qrat_t(i,k,m0)*n_1(in_1)*q_s(i)/r_s(i)
-              !----------------------------------------------------------------
+                 if (kill_gyro_b_flag == 0) then
+                    omega_c = omega_c*b0_t(i,k,m0)
+                 endif
 
-              ! G0a = J0
-              call gyro_bessel_operator(rho_gyro,&
-                   a_gyro,&
-                   u_gyro,&
-                   v_gyro,&
-                   g,&
-                   1)
+                 rho_gyro = rhos_norm*v_perp(m0,i,p_nek_loc,is)/omega_c
+                 !
+                 a_gyro = grad_r_t(i,k,m0)/x_length*dr_eodr(i)
+                 u_gyro = qrat_t(i,k,m0)*n_1(in_1)*q_s(i)/r_s(i)*captheta_t(i,k,m0)
+                 v_gyro = qrat_t(i,k,m0)*n_1(in_1)*q_s(i)/r_s(i)
+                 !----------------------------------------------------------------
 
-              w_temp0(m0,:) = g(:)
-
-              ! G2a = -(i/2)*k_x*rho*[ J_0(z)+J_2(z) ]
-              call gyro_bessel_operator(rho_gyro,&
-                   a_gyro,&
-                   u_gyro,&
-                   v_gyro,&
-                   g, &
-                   3)
-
-              w_temp2(m0,:) = g(:)
-
-              if (n_field == 3) then
-
-                 ! G1a = (1/2)*[ J_0(z)+J_2(z) ] 
+                 ! G0a = J0
                  call gyro_bessel_operator(rho_gyro,&
                       a_gyro,&
                       u_gyro,&
                       v_gyro,&
                       g,&
-                      4)
+                      1)
 
-                 w_temp1(m0,:) = g(:)
+                 w_temp0(m0,:) = g(:)
 
-                 ! G3a = i*k_x*rho*[ J_0(z)-J_1(z)/z ] / z^2 
+                 ! G2a = -(i/2)*k_x*rho*[ J_0(z)+J_2(z) ]
                  call gyro_bessel_operator(rho_gyro,&
                       a_gyro,&
                       u_gyro,&
                       v_gyro,&
-                      g,&
-                      8)
+                      g, &
+                      3)
 
-                 w_temp3(m0,:) = g(:)
+                 w_temp2(m0,:) = g(:)
 
-              endif
+                 if (n_field == 3) then
 
-           enddo ! m0
+                    ! G1a = (1/2)*[ J_0(z)+J_2(z) ] 
+                    call gyro_bessel_operator(rho_gyro,&
+                         a_gyro,&
+                         u_gyro,&
+                         v_gyro,&
+                         g,&
+                         4)
 
-           do m=1,n_stack
-              m0 = m_phys(ck,m)
-              w_gyro0(m,:,i,p_nek_loc,is) = w_temp0(m0,:)
-              w_gyro2(m,:,i,p_nek_loc,is) = w_temp2(m0,:)
+                    w_temp1(m0,:) = g(:)
+
+                    ! G3a = i*k_x*rho*[ J_0(z)-J_1(z)/z ] / z^2 
+                    call gyro_bessel_operator(rho_gyro,&
+                         a_gyro,&
+                         u_gyro,&
+                         v_gyro,&
+                         g,&
+                         8)
+
+                    w_temp3(m0,:) = g(:)
+
+                 endif
+
+              enddo ! m0
+
+              do m=1,n_stack
+                 m0 = m_phys(ck,m)
+                 w_gyro0(m,:,i,p_nek_loc,is) = w_temp0(m0,:)
+                 w_gyro2(m,:,i,p_nek_loc,is) = w_temp2(m0,:)
+                 if (n_field == 3) then
+                    w_gyro1(m,:,i,p_nek_loc,is) = w_temp1(m0,:)
+                    w_gyro3(m,:,i,p_nek_loc,is) = w_temp3(m0,:)
+                 endif
+              enddo
+
+           else
+              w_gyro0(:,:,i,p_nek_loc,is) = w_gyro0(:,:,1,p_nek_loc,is)
+              w_gyro2(:,:,i,p_nek_loc,is) = w_gyro2(:,:,1,p_nek_loc,is)
               if (n_field == 3) then
-                 w_gyro1(m,:,i,p_nek_loc,is) = w_temp1(m0,:)
-                 w_gyro3(m,:,i,p_nek_loc,is) = w_temp3(m0,:)
+                 w_gyro1(:,:,i,p_nek_loc,is) = w_gyro1(:,:,1,p_nek_loc,is)
+                 w_gyro3(:,:,i,p_nek_loc,is) = w_gyro3(:,:,1,p_nek_loc,is)
               endif
-           enddo
+           endif
 
         enddo ! i
      enddo ! p_nek
