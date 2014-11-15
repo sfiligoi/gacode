@@ -37,12 +37,26 @@ echo "MPI tasks/node            : $mpinode"
 echo "OpenMP threads/MPI task   : $nomp"
 echo "MPI tasks per numa node   : $mpinuma"
 echo
-echo "[0] debug   (10 min)   up to N nodes"
+echo "[0] debug   (10 min)   up to 4096 nodes"
+echo "[1] debug   (30 min)   up to 4096 nodes"
+echo "[2] debug   (60 min)   up to 4096 nodes"
+echo "[3] prod-short   (2 hours)   up to 4096 nodes"
+echo "[4] prod-short   (4 hours)   up to 4096 nodes"
+echo "[5] prod-short   (6 hours)   up to 4096 nodes"
+echo "[6] prod-long   (12 hours)   up to 4096 nodes"
+echo "[7] prod-capability   (24 hours)   up to 49152 nodes (4097 min)"
 
 read -p "Select a queue [0-9] " queue_num
 
 case "$queue_num" in
-  0) queue="debug"   ; maxtime=30 ;;
+  0) queue="debug"   ; maxtime=10 ;;
+  1) queue="debug"   ; maxtime=30 ;;
+  2) queue="debug"   ; maxtime=60 ;;
+  3) queue="prod-short"   ; maxtime=120 ;;
+  4) queue="prod-short"   ; maxtime=240 ;;
+  5) queue="prod-short"   ; maxtime=360 ;;
+  6) queue="prod-long"   ; maxtime=720 ;;
+  7) queue="prod-capability"   ; maxtime=1440 ;;
 esac
 
 bfile=$simpath/$sim/batch.src
