@@ -107,24 +107,17 @@ contains
                    nu_par(ie,is,js) = tauinv_ab * (2.0/xa**3) &
                         * (-exp(-xb*xb)/(xb*sqrt(pi)) &
                         + (1.0/(2.0*xb*xb)) * DERF(xb))
+                   nu_par_deriv(ie,is,js) = tauinv_ab * (2.0/xa**3) &
+                        * (-3/xa * (-exp(-xb*xb)/(xb*sqrt(pi)) &
+                        + (1.0/(2.0*xb*xb)) * DERF(xb)) &
+                        + vth(is)/vth(js) * (2.0*exp(-xb*xb)/(xb**2*sqrt(pi)) &
+                        + 2.0*exp(-xb*xb)/sqrt(pi) - DERF(xb)/xb**3))
 
                 end select
 
              enddo
           enddo
        enddo
-
-       ! d nu_par / dx
-       if (collision_model == 4) then
-          nu_par_deriv(:,:,:) = 0.0
-          do is=1,n_species
-             do js=1,n_species
-                call DGEMV('N',n_energy,n_energy,num1,e_deriv1_mat(:,:),&
-                     n_energy,nu_par(:,is,js),1,num0,nu_par_deriv(:,is,js),1)
-             enddo
-          enddo
-          nu_par_deriv(:,:,:) = nu_par_deriv(:,:,:) / sqrt(1.0*e_max)
-       endif
 
        allocate(ctest(n_species,n_species,n_xi,n_xi,n_energy,n_energy))
        allocate(cfield(n_species,n_species,n_xi,n_xi,n_energy,n_energy))
