@@ -161,7 +161,7 @@ subroutine gyro_bessel_operator(rho,a,u,v,g,itype)
   ! Construct real-space forms by summing over Fourier modes.
   ! Real-space gridpoints in truncated region are ignored.
   !
-!!$omp parallel do private(g0) schedule(static)
+!$omp parallel do private(g0) schedule(static)
   do m=-m_gyro,m_gyro-i_gyro
      g0 = (0.0,0.0)
      do p=-p0,p0-1

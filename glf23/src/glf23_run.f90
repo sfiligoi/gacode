@@ -53,7 +53,7 @@ subroutine glf23_run()
 
   if (glf23_use_transport_model_in) then
 
-     call glf2d
+     call glf23_TM
 
      !---------------------------------------------
      ! Output (normalized to Q_GB)
@@ -93,7 +93,7 @@ subroutine glf23_run()
   else
 
      ! Run single-ky linear stability
-     call glf2d
+     call glf23_TM
 
      ! Collect linear eigenvalues
      do n=1,2
