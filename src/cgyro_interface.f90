@@ -40,6 +40,9 @@ module cgyro_interface
   integer :: cgyro_silent_flag_in = 0
   integer :: cgyro_equilibrium_model_in = 2
   integer :: cgyro_collision_model_in   = 1
+  integer :: cgyro_collision_mom_restore_in = 1
+  integer :: cgyro_collision_ene_restore_in = 1
+  integer :: cgyro_collision_ene_diffusion_in = 1
   integer :: cgyro_zf_test_flag_in = 0
   integer :: cgyro_nonlinear_flag_in = 0
   real    :: cgyro_te_ade_in = 1.0
@@ -107,6 +110,9 @@ contains
     cgyro_silent_flag_in       = silent_flag
     cgyro_equilibrium_model_in = equilibrium_model
     cgyro_collision_model_in   = collision_model
+    cgyro_collision_mom_restore_in = collision_mom_restore
+    cgyro_collision_ene_restore_in = collision_ene_restore
+    cgyro_collision_ene_diffusion_in = collision_ene_diffusion
     cgyro_te_ade_in = te_ade
     cgyro_ne_ade_in = ne_ade
     cgyro_lambda_debye_in = lambda_debye
@@ -161,6 +167,9 @@ contains
     silent_flag       = cgyro_silent_flag_in
     equilibrium_model = cgyro_equilibrium_model_in
     collision_model   = cgyro_collision_model_in
+    collision_mom_restore = cgyro_collision_mom_restore_in
+    collision_ene_restore = cgyro_collision_ene_restore_in
+    collision_ene_diffusion = cgyro_collision_ene_diffusion_in
     te_ade    = cgyro_te_ade_in
     ne_ade    = cgyro_ne_ade_in
     lambda_debye = cgyro_lambda_debye_in

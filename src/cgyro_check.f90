@@ -86,6 +86,38 @@ subroutine cgyro_check
 
   end select
 
+  select case (collision_mom_restore)
+     case(0)
+        call cgyro_info('Collision momentum restoring = not included')
+     case(1)
+        call cgyro_info('Collision momentum restoring = included')
+     case default
+        call cgyro_error('Invalid value for collision_mom_restore')
+        return
+     end select
+
+  if(collision_model == 4) then
+     select case (collision_ene_diffusion)
+     case(0)
+        call cgyro_info('Collision energy diffusion = not included')
+     case(1)
+        call cgyro_info('Collision energy diffusion = included')
+     case default
+        call cgyro_error('Invalid value for collision_ene_diffusion')
+        return
+     end select
+     select case (collision_ene_restore)
+     case(0)
+        call cgyro_info('Collision energy restoring = not included')
+     case(1)
+        call cgyro_info('Collision energy restoring = included')
+     case default
+        call cgyro_error('Invalid value for collision_ene_restore')
+        return
+     end select
+  endif
+
+
   !------------------------------------------------------------
 
   !------------------------------------------------------------

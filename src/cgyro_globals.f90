@@ -23,7 +23,10 @@ module cgyro_globals
   real    :: box_size
   integer :: silent_flag
   integer :: equilibrium_model
-  integer :: collision_model 
+  integer :: collision_model
+  integer :: collision_mom_restore
+  integer :: collision_ene_restore
+  integer :: collision_ene_diffusion
   integer :: zf_test_flag 
   integer :: nonlinear_flag 
   real :: te_ade

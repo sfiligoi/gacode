@@ -77,7 +77,6 @@ subroutine write_distributed_complex(datafile,io,n_fn,fn)
   integer, intent(in) :: n_fn
   complex, intent(in) :: fn(n_fn)
   !
-  integer :: data_loop
   integer :: i_group_send
   integer :: i_send
   integer :: in
