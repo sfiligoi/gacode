@@ -22,6 +22,7 @@ subroutine cgyro_kernel
 
   implicit none
 
+ 
   if (silent_flag == 0 .and. i_proc == 0) then
      open(unit=io_run,file=trim(path)//runfile,status='replace')
      close(io_run)
@@ -77,6 +78,9 @@ subroutine cgyro_kernel
   allocate(field(n_radial,n_theta,n_field))
   allocate(field_loc(n_radial,n_theta,n_field))
   allocate(field_old(n_radial,n_theta,n_field))
+  allocate(field_old2(n_radial,n_theta,n_field))
+  allocate(field_old3(n_radial,n_theta,n_field))
+  allocate(field_est(n_radial,n_theta,n_field))
   allocate(f_balloon(n_radial,n_theta))
   allocate(recv_status(MPI_STATUS_SIZE))
 
@@ -180,6 +184,7 @@ subroutine cgyro_kernel
   if(allocated(field))         deallocate(field)
   if(allocated(field_loc))     deallocate(field_loc)
   if(allocated(field_old))     deallocate(field_old)
+  if(allocated(field_est))     deallocate(field_est)
   if(allocated(f_balloon))     deallocate(f_balloon)
 
   if (zf_test_flag == 2 .and. ae_flag == 1) then
@@ -192,24 +197,31 @@ subroutine cgyro_kernel
 
 end subroutine cgyro_kernel
 
+!==================================================================================
+! Provide integration error estimate via quadratic interpolation.
+!==================================================================================
+
 subroutine cgyro_error_estimate
 
   use cgyro_globals
 
-!  if (i_time == 1) then
+  implicit none
 
-!  field_error(:,:) = 0.0
-!  field
-  
-!  else if (i_time == 2) then
+  if (i_time == 1) then
 
-!  field_tt(:,:) = field(:,:,1)
+     field_old2 = field_old
+     field_old3 = 0.0
 
-!  else
+  else 
 
-!  field_t(:,:) = field(:,:,1)
+     ! Estimate of field via quadratic interpolation
+     field_est = 3.0*field_old-3.0*field_old2+field_old3
 
-!  endif
+     field_error = sum(abs(field-field_est))/sum(abs(field))
 
+     field_old3 = field_old2
+     field_old2 = field_old
+
+  endif
 
 end subroutine cgyro_error_estimate

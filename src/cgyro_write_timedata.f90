@@ -270,7 +270,9 @@ subroutine write_time(datafile,io)
      ! Append
 
      if (n_toroidal > 1 .and. i_proc == 0) then
-        print '(t2,1pe10.3,2x,2(1pe13.6,1x),2x,2(1pe10.3,1x))',i_time*delta_t
+         print '(a,1pe9.3,a,5(1pe9.3,1x))',&
+                '[t = ',i_time*delta_t,&
+                '] t_err: ',field_error
      endif
 
      open(unit=io,file=datafile,status='old',position='append')
@@ -331,7 +333,11 @@ subroutine write_freq(datafile,io)
      ! Construct ballooning-space form of field
 
      write(io,fmtstr) freq
-     print '(t2,1pe10.3,2x,2(1pe13.6,1x),2x,2(1pe10.3,1x))',i_time*delta_t,freq,freq_err
+     print '(a,1pe9.3,a,1pe10.3,1pe10.3,a,1pe9.3,a,5(1pe9.3,1x))',&
+                '[t = ',i_time*delta_t,&
+                '][w = ',freq,&
+                '][dw = ',abs(freq_err),&
+                '] t_err: ',field_error
      close(io)
 
      !-------------------------------------------------------

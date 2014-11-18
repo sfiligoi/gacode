@@ -193,13 +193,17 @@ module cgyro_globals
   !
   ! Fields
   !
-  complex, dimension(:,:,:) , allocatable :: field
-  complex, dimension(:,:,:) , allocatable :: field_loc
-  complex, dimension(:,:,:) , allocatable :: field_old
+  complex, dimension(:,:,:), allocatable :: field
+  complex, dimension(:,:,:), allocatable :: field_loc
+  complex, dimension(:,:,:), allocatable :: field_old
+  complex, dimension(:,:,:), allocatable :: field_old2
+  complex, dimension(:,:,:), allocatable :: field_old3
+  complex, dimension(:,:,:), allocatable :: field_est
   !
   ! Work arrays
   !
   complex, dimension(:,:), allocatable :: f_balloon
+  real :: field_error
   !
   ! LAPACK work arrays 
   !
