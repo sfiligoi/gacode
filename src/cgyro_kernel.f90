@@ -22,7 +22,7 @@ subroutine cgyro_kernel
 
   implicit none
 
- 
+
   if (silent_flag == 0 .and. i_proc == 0) then
      open(unit=io_run,file=trim(path)//runfile,status='replace')
      close(io_run)
@@ -67,6 +67,7 @@ subroutine cgyro_kernel
   allocate(j0_c(nc,nv_loc))
   allocate(j0_v(nc_loc,nv))
   allocate(h_x(nc,nv_loc))
+  allocate(h_nl(nc,nsplit,n_toroidal))
   allocate(rhs(4,nc,nv_loc))
   allocate(h0_x(nc,nv_loc))
   allocate(cap_h_c(nc,nv_loc))

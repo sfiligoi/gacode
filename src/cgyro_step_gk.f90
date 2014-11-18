@@ -46,7 +46,6 @@ end subroutine cgyro_step_gk
 
 subroutine cgyro_rhs(ij)
 
-  use parallel_lib
   use timer_lib
 
   use cgyro_globals
@@ -58,8 +57,6 @@ subroutine cgyro_rhs(ij)
   integer :: is, ir, it, ie, ix, jx
   integer :: id, jt, jr, jc
   real    :: rval
-  complex :: val
-  integer :: nsplit
 
   call timer_lib_in('rhs')
 
@@ -101,53 +98,7 @@ subroutine cgyro_rhs(ij)
 
   ! TRAPPING TERM
 
-  if (collision_model == 0) then
-
-     call parallel_lib_r(transpose(cap_h_c),cap_h_v)
-     cap_h_v_prime(:,:) = (0.0,0.0)
-     ic_loc = 0
-     do ic=nc1,nc2
-        ic_loc = ic_loc+1
-        it = it_c(ic)
-        ir = ir_c(ic)
-        do iv=1,nv
-           is = is_v(iv)
-           ix = ix_v(iv)
-           ie = ie_v(iv)
-
-           do jx=1,n_xi
-              cap_h_v_prime(ic_loc,iv) = cap_h_v_prime(ic_loc,iv) &
-                   +xi_deriv_mat(ix,jx)*cap_h_v(ic_loc,iv_v(ie,jx,is))
-           enddo
-        enddo
-     enddo
-
-     ! Now have cap_h_v(ic_loc,iv)   
-
-     call parallel_lib_f(cap_h_v_prime,cap_h_ct)
-     cap_h_c = transpose(cap_h_ct)
-
-     iv_loc = 0
-     do iv=nv1,nv2
-
-        iv_loc = iv_loc+1
-
-        is = is_v(iv)
-        ix = ix_v(iv)
-        ie = ie_v(iv)
-
-        do ic=1,nc
-
-           ir = ir_c(ic) 
-           it = it_c(ic)
-
-           val = omega_trap(it,is)*sqrt(energy(ie))*(1.0-xi(ix)**2) 
-
-           rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc) &
-                -val*cap_h_c(ic,iv_loc)
-        enddo
-     enddo
-  endif
+  if (collision_model == 0) call cgyro_rhs_trap(ij)
 
   call timer_lib_out('rhs')
 
@@ -155,20 +106,88 @@ subroutine cgyro_rhs(ij)
 
   call timer_lib_in('rhs_nl')
 
-  if (i_time+ij == 2) then
-     ! nn = n_toroidal
-     ! nj = nv_loc
-     ! nv1 = nc
-     ! nv2 = 1  
-
-     nsplit = 1+(nv_loc-1)/n_toroidal
-     call SSUB_init(n_toroidal,nv_loc,nc,1,NEW_COMM_2)
-     allocate(h_nl(nc,nsplit,n_toroidal))
-  endif
-
-  !call fSSUB(h_x,h_nl)
-  !call rSSUB(h_nl,h_x)
+  !call parallel_slib_f(h_x,h_nl)
+  ! if (nonlinear_flag == 1) call cgyro_rhs_nl(ij)
+  !call parallel_slib_r(h_nl,h_x)
 
   call timer_lib_out('rhs_nl')
 
 end subroutine cgyro_rhs
+
+!==========================================================================
+
+subroutine cgyro_rhs_trap(ij)
+
+  use parallel_lib
+
+  use cgyro_globals
+  use cgyro_equilibrium
+
+  implicit none
+
+  integer, intent(in) :: ij
+  integer :: is,ir,it,ie,ix,jx
+  complex :: val
+
+  call parallel_lib_r(transpose(cap_h_c),cap_h_v)
+  cap_h_v_prime(:,:) = (0.0,0.0)
+  ic_loc = 0
+  do ic=nc1,nc2
+     ic_loc = ic_loc+1
+     it = it_c(ic)
+     ir = ir_c(ic)
+     do iv=1,nv
+        is = is_v(iv)
+        ix = ix_v(iv)
+        ie = ie_v(iv)
+
+        do jx=1,n_xi
+           cap_h_v_prime(ic_loc,iv) = cap_h_v_prime(ic_loc,iv) &
+                +xi_deriv_mat(ix,jx)*cap_h_v(ic_loc,iv_v(ie,jx,is))
+        enddo
+     enddo
+  enddo
+
+  ! Now have cap_h_v(ic_loc,iv)   
+
+  call parallel_lib_f(cap_h_v_prime,cap_h_ct)
+  cap_h_c = transpose(cap_h_ct)
+
+  iv_loc = 0
+  do iv=nv1,nv2
+
+     iv_loc = iv_loc+1
+
+     is = is_v(iv)
+     ix = ix_v(iv)
+     ie = ie_v(iv)
+
+     do ic=1,nc
+
+        ir = ir_c(ic) 
+        it = it_c(ic)
+
+        val = omega_trap(it,is)*sqrt(energy(ie))*(1.0-xi(ix)**2) 
+
+        rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc) &
+             -val*cap_h_c(ic,iv_loc)
+     enddo
+  enddo
+
+end subroutine cgyro_rhs_trap
+
+!==========================================================================
+
+subroutine cgyro_rhs_nl(ij)
+
+  use parallel_lib
+
+  use cgyro_globals
+  use cgyro_equilibrium
+
+  implicit none
+
+  integer, intent(in) :: ij
+
+
+end subroutine cgyro_rhs_nl

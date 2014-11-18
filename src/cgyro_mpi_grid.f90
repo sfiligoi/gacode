@@ -132,4 +132,8 @@ subroutine cgyro_mpi_grid
   nc1 = 1+i_proc_1*nc_loc
   nc2 = (1+i_proc_1)*nc_loc
 
+  ! Nonlinear parallelization dimensions (returns nsplit)
+
+  call parallel_slib_init(n_toroidal,nv_loc,nc,nsplit,NEW_COMM_2)
+
 end subroutine cgyro_mpi_grid

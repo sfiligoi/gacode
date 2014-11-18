@@ -79,6 +79,7 @@ module cgyro_globals
   integer :: NEW_COMM_1
   integer :: NEW_COMM_2
   integer :: nv1,nv2,nc1,nc2
+  integer :: nsplit
   integer, dimension(:), allocatable :: recv_status
   !
   ! Pointers
