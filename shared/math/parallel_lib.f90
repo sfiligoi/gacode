@@ -1,23 +1,34 @@
-
-!  parallel_lib_f -> f(ni_loc,nj) -> g(nj_loc,ni) 
-!  parallel_lib_r -> g(nj_loc,ni) -> f(ni_loc,nj)
-
 module parallel_lib
 
   implicit none
 
+  ! lib
+
   integer, private :: nproc,iproc
   integer, private :: ni,nj
-  integer, private :: ni_loc,nj_loc
-  integer, private :: transp_comm
+  integer, private :: ni_loc
+  integer, private :: nj_loc
+  integer, private :: lib_comm
   integer, private :: nsend
 
   complex, dimension(:,:,:), allocatable, private :: fsendf
   complex, dimension(:,:,:), allocatable, private :: fsendr
 
+  ! slib
+
+  integer, private :: nsproc,isproc
+  integer, private :: nn
+  integer, private :: nexch
+  integer, private :: nkeep
+  integer, private :: nsplit
+  integer, private :: slib_comm
+
 contains
 
   !=========================================================
+
+  !  parallel_lib_f -> f(ni_loc,nj) -> g(nj_loc,ni) 
+  !  parallel_lib_r -> g(nj_loc,ni) -> f(ni_loc,nj)
 
   subroutine parallel_lib_init(ni_in,nj_in,ni_loc_out,nj_loc_out,comm)
 
@@ -31,10 +42,10 @@ contains
     integer, external :: parallel_dim
     integer :: ierr
 
-    transp_comm = comm
+    lib_comm = comm
 
-    call MPI_COMM_RANK(TRANSP_COMM,iproc,ierr)
-    call MPI_COMM_SIZE(TRANSP_COMM,nproc,ierr)
+    call MPI_COMM_RANK(lib_comm,iproc,ierr)
+    call MPI_COMM_SIZE(lib_comm,nproc,ierr)
 
     ni = ni_in
     nj = nj_in
@@ -81,7 +92,7 @@ contains
          ft, &
          nsend, &
          MPI_DOUBLE_COMPLEX, &
-         transp_comm, &
+         lib_comm, &
          ierr)
 
   end subroutine parallel_lib_f
@@ -114,11 +125,117 @@ contains
          f, &
          nsend, &
          MPI_DOUBLE_COMPLEX, &
-         transp_comm, &
+         lib_comm, &
          ierr)
 
   end subroutine parallel_lib_r
 
   !=========================================================
+
+  !  parallel_slib_f -> f(ni_loc,nj) -> g(nj_loc,ni) 
+  !  parallel_slib_r -> g(nj_loc,ni) -> f(ni_loc,nj)
+
+  subroutine parallel_slib_init(nn_in,nexch_in,nkeep_in,nsplit_out,comm)
+
+    use mpi
+
+    !-------------------------------------------
+    implicit none
+    !
+    integer, intent(in) :: nn_in
+    integer, intent(in) :: nexch_in
+    integer, intent(in) :: nkeep_in
+    integer, intent(inout) :: nsplit_out
+    integer, intent(in) :: comm
+    integer :: ierr
+    !-------------------------------------------
+
+
+    slib_comm = comm
+
+    !-------------------------------------------------
+    ! Get rank and number of processors from slib_comm 
+    ! (which is assumed to already exist).
+    !
+    call MPI_COMM_RANK(slib_comm,isproc,ierr)
+    call MPI_COMM_SIZE(slib_comm,nsproc,ierr)
+    !-----------------------------------------------
+
+    nn  = nn_in
+    nexch = nexch_in
+    nkeep = nkeep_in
+
+    nsplit = 1+(nexch-1)/nn
+
+    nsplit_out = nsplit
+
+  end subroutine parallel_slib_init
+
+!=========================================================
+
+  subroutine parallel_slib_f(x_in,xt)
+
+    use mpi
+
+    !-------------------------------------------------------
+    implicit none
+    !
+    complex, intent(in), dimension(nkeep,nexch) :: x_in
+    complex, dimension(nkeep,nsplit*nn) :: x
+    complex, intent(inout), dimension(nkeep,nsplit,nn) :: xt
+    !
+    integer :: j
+    integer :: ierr
+    !-------------------------------------------------------
+
+    do j=1,nexch
+       x(:,j) = x_in(:,j)
+    enddo
+    do j=nexch+1,nsplit*nn
+       x(:,j) = (0.0,0.0)
+    enddo
+
+    call MPI_ALLTOALL(x, &
+         nkeep*nsplit, &
+         MPI_DOUBLE_COMPLEX, &
+         xt, &
+         nkeep*nsplit, &
+         MPI_DOUBLE_COMPLEX, &
+         slib_comm, &
+         ierr)
+
+  end subroutine parallel_slib_f
+
+ !=========================================================
+
+  subroutine parallel_slib_r(xt,x_out)
+
+    use mpi
+
+    !-------------------------------------------------------
+    implicit none
+    !
+    complex, intent(in), dimension(nkeep,nsplit,nn) :: xt
+    complex, intent(inout), dimension(nkeep,nexch) :: x_out
+    complex, dimension(nkeep,nsplit*nn) :: x
+    !
+    integer :: j
+    integer :: ierr
+    !-------------------------------------------------------
+
+    call MPI_ALLTOALL(xt, &
+         nkeep*nsplit, &
+         MPI_DOUBLE_COMPLEX, &
+         x, &
+         nkeep*nsplit, &
+         MPI_DOUBLE_COMPLEX, &
+         slib_comm, &
+         ierr)
+
+    do j=1,nexch
+       x_out(:,j) = x(:,j)
+    enddo
+
+  end subroutine parallel_slib_r
 
 end module parallel_lib
