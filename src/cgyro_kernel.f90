@@ -33,6 +33,7 @@ subroutine cgyro_kernel
   call timer_lib_init('field_v')
   call timer_lib_init('field_c')
   call timer_lib_init('rhs')
+  call timer_lib_init('rhs_nl')
   call timer_lib_init('collision')
   call timer_lib_init('comm')
 
@@ -139,8 +140,6 @@ subroutine cgyro_kernel
 
      if (abs(signal) == 1) exit
 
-     field_old = field
-
   enddo
 
   ! Print final distribution
@@ -159,6 +158,7 @@ subroutine cgyro_kernel
      print '(a,1x,1pe11.4)',' field_v     ',timer_lib_time('field_v')
      print '(a,1x,1pe11.4)',' field_c     ',timer_lib_time('field_c')
      print '(a,1x,1pe11.4)',' rhs         ',timer_lib_time('rhs')
+     print '(a,1x,1pe11.4)',' rhs_nl      ',timer_lib_time('rhs_nl')
      print '(a,1x,1pe11.4)',' collision   ',timer_lib_time('collision')
      print '(a,1x,1pe11.4)',' comm        ',timer_lib_time('comm')
   endif
@@ -209,8 +209,7 @@ subroutine cgyro_error_estimate
 
   if (i_time == 1) then
 
-     field_old2 = field_old
-     field_old3 = 0.0
+     field_old2 = 0.0
 
   else 
 
@@ -219,9 +218,10 @@ subroutine cgyro_error_estimate
 
      field_error = sum(abs(field-field_est))/sum(abs(field))
 
-     field_old3 = field_old2
-     field_old2 = field_old
-
   endif
+
+  field_old3 = field_old2
+  field_old2 = field_old
+  field_old  = field
 
 end subroutine cgyro_error_estimate

@@ -1,12 +1,13 @@
-#---------------------------
-# Toplevel makefile for gkcoll
-#---------------------------
+#----------------------------
+# Toplevel makefile for cgyro
+#----------------------------
 
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
 export EXTRA_LIBS = \
        ${GACODE_ROOT}/shared/GEO/GEO_lib.a \
        ${GACODE_ROOT}/shared/math/math_lib.a \
+       ${GACODE_ROOT}/gyro/SSUB/SSUB_lib.a \
        ${LMATH}
 
 all:

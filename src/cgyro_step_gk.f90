@@ -59,6 +59,7 @@ subroutine cgyro_rhs(ij)
   integer :: id, jt, jr, jc
   real    :: rval
   complex :: val
+  integer :: nsplit
 
   call timer_lib_in('rhs')
 
@@ -78,7 +79,7 @@ subroutine cgyro_rhs(ij)
         ir = ir_c(ic) 
         it = it_c(ic)
 
-        ! parallel streaming with upwind dissipation
+        ! Parallel streaming with upwind dissipation
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
         do id=-2,2
            jt = thcyc(it+id)
@@ -89,6 +90,7 @@ subroutine cgyro_rhs(ij)
                 -abs(rval)*dtheta_up(it,id)*h_x(jc,iv_loc)
         enddo
 
+        ! Diagonal terms
         rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc)+&
              omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+& 
              omega_h(ic,iv_loc)*h_x(ic,iv_loc)+&
@@ -148,5 +150,25 @@ subroutine cgyro_rhs(ij)
   endif
 
   call timer_lib_out('rhs')
+
+  ! Nonlinear evaluation [f,g]
+
+  call timer_lib_in('rhs_nl')
+
+  if (i_time+ij == 2) then
+     ! nn = n_toroidal
+     ! nj = nv_loc
+     ! nv1 = nc
+     ! nv2 = 1  
+
+     nsplit = 1+(nv_loc-1)/n_toroidal
+     call SSUB_init(n_toroidal,nv_loc,nc,1,NEW_COMM_2)
+     allocate(h_nl(nc,nsplit,n_toroidal))
+  endif
+
+  !call fSSUB(h_x,h_nl)
+  !call rSSUB(h_nl,h_x)
+
+  call timer_lib_out('rhs_nl')
 
 end subroutine cgyro_rhs
