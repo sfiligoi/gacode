@@ -24,6 +24,9 @@ subroutine prgen_ion_name(m,z,name)
   case (4)
      name = 'He4'
 
+  case (7)
+     name = 'Li'
+
   case (9)
      name = 'Be'
 

@@ -29,6 +29,12 @@ for line in open(infile,'r').readlines():
         outfile = open(title,'w')
         print 'INFO: (gacode_pfile_tool.py) Extracted '+title+'.'
         outfile.write(n+'\n')
+    elif 'SPECIES' in line:
+        outfile.close()
+        outfile = open('pfile.species','w')
+        print 'INFO: (gacode_pfile_tool.py) Found ion species header.'
+        n = line[0]
+        outfile.write(n+'\n')
     else:
         outfile.write(line)
 

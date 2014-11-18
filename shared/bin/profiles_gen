@@ -177,18 +177,6 @@ then
    echo "             -nfourier <int>"
    echo "             Number of Fourier modes to retain in input.profiles.geo/input.geo. (default 24)"
    echo
-   echo "ASTRA Options"
-   echo
-   echo "             -i <data>"
-   echo "             Specify ASTRA data file."
-   echo
-   echo "             -m <map file>"
-   echo "             Use <map file> to map Astra data to GYRO input.profiles headers"
-   echo "             NOTE: uses 'astra_map_gyro' in current directory by default."
-   echo
-   echo "             -note <note text>"
-   echo "             Include <note text> in the input.profiles header."
-   echo
    echo "null Options"
    echo
    echo "             -i null"
@@ -417,10 +405,6 @@ while [ $# -gt 0 ] ; do
 
   -i) shift ; FILE_FLAG=1 ; FILE="$1" ;;
 
-  -m) shift ; ASTRA_ARG="$ASTRA_ARG -m $1" ;;
-
-  -note) shift ; ASTRA_ARG="$ASTRA_ARG -note $1" ;;
-
   -cer) shift ; 
         echo "INFO: (profiles_gen) Will merge data from $CER_FILE" ; CER_FILE="$1" ;;
    
@@ -617,6 +601,14 @@ else
 fi
 
 #=============================================================
+# If file is GACODE, parse it.
+if [ "$itype" == "GACODE" ] ; then
+  python $GACODE_ROOT/shared/bin/profile_parse.py $FILE
+fi
+#=============================================================
+
+
+#=============================================================
 # Trap a p-file and split into components 
 #
 if [ "$itype" == "PFILE" ] ; then
@@ -804,18 +796,7 @@ fi
 # If we make it here, its time for cleanup
 #
 echo "INFO: (profiles_gen) Removing old input.profiles* files"
-rm -f input.profiles input.profiles.geo input.profiles.extra
-#=============================================================
-
-#=============================================================
-# Jump to ASTRA parsing if *.astra is specified
-# 
-if [ "${FILE: -6}" == ".astra" ] 
-then
-   # Only last occurrence of "-m" option is used
-   $ASTRA -o input.profiles -m $ASTRAMAP $ASTRA_ARG $FILE
-   exit
-fi
+rm -f input.profiles.geo input.profiles.extra
 #=============================================================
 
 #=============================================================

@@ -32,10 +32,13 @@ OBJECTS = math_constants.o \
           poly2diff.o \
           proc_time.o \
           p32.o \
+          parallel_lib.o \
+          pseudospec_lib.o \
           remap_grid.o \
 	  rjbesl.o \
           sigv.o \
-          sivukhin.o 
+          sivukhin.o \
+          timer_lib.o
 
 .SUFFIXES : .o .f90 .f
 

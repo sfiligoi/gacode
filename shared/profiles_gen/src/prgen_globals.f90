@@ -93,6 +93,7 @@ module prgen_globals
   integer :: onetwo_nb
   integer :: onetwo_npsi
   integer :: onetwo_nion
+  integer :: onetwo_nion_tot
   integer :: onetwo_nprim
   integer :: onetwo_nimp
   integer :: onetwo_nneu
@@ -102,6 +103,9 @@ module prgen_globals
   character (len=2), dimension(5) :: onetwo_namei
   character (len=2), dimension(5) :: onetwo_nameb
   character (len=2), dimension(16) :: onetwo_ion_name
+  real, dimension(16) :: onetwo_z
+  real, dimension(16) :: onetwo_m
+  character (len=5), dimension(16)  :: onetwo_type
   real :: onetwo_time
   real :: onetwo_Rgeom
   real :: onetwo_Rmag
@@ -239,10 +243,15 @@ module prgen_globals
   real, dimension(:), allocatable :: peqdsk_te
   real, dimension(:), allocatable :: peqdsk_ni
   real, dimension(:), allocatable :: peqdsk_ti
+  real, dimension(:,:), allocatable :: peqdsk_nz
   real, dimension(:), allocatable :: peqdsk_omegat
   real, dimension(:), allocatable :: peqdsk_omgeb
   real, dimension(:), allocatable :: peqdsk_nb
   real, dimension(:), allocatable :: peqdsk_pb
+  integer :: peqdsk_fmt, peqdsk_nion, peqdsk_nimp, peqdsk_nbeams
+  real, dimension(:), allocatable :: peqdsk_z
+  real, dimension(:), allocatable :: peqdsk_m
+  character (len=5), dimension(5)  :: peqdsk_type
   !---------------------------------------------------------
 
   !---------------------------------------------------------

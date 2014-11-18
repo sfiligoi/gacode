@@ -42,13 +42,19 @@ subroutine prgen_write
      endif
      write(1,40) '#          SHOT NUMBER : ',onetwo_ishot
      write(1,20) '#'
-     ion_string = ''
-     do i=1,min(onetwo_nion+onetwo_nbion+onetwo_nalp,5)
-        if (reorder_vec(i) /= 0) then
-           write(ion_string,'(a)') trim(ion_string) // ' '// trim(onetwo_ion_name(reorder_vec(i)))
+     write(1,20) '#                 IONS :  Name       Z    Mass'
+
+     do i=1,min(onetwo_nion_tot,5)
+        ip = reorder_vec(i)
+        if (ip > 0) then
+           call prgen_ion_name(nint(onetwo_m(ip)),nint(onetwo_z(ip)),iname)
+           write(1,'(a,a,t36,i3,t43,f4.1,t48,"[",a,"]")') '#                         ',&
+                iname,&
+                nint(onetwo_z(ip)),&
+                onetwo_m(ip),&
+                onetwo_type(ip)
         endif
      enddo
-     write(1,20) '#                 IONS : ',trim(ion_string)
 
   case (2)
 
@@ -73,7 +79,19 @@ subroutine prgen_write
 
   case (3)
 
-     write(1,20) '#                 IONS : D [assumed]'
+     peqdsk_nion = 1+peqdsk_nimp+peqdsk_nbeams
+
+     write(1,20) '#                 IONS :  Name       Z    Mass'
+
+     do i=1,peqdsk_nion
+        ip = reorder_vec(i)
+        call prgen_ion_name(nint(peqdsk_m(ip)),nint(peqdsk_z(ip)),iname)
+        write(1,'(a,a,t36,i3,t43,f4.1,t48,"[",a,"]")') '#                         ',&
+             iname,&
+             nint(peqdsk_z(ip)),&
+             peqdsk_m(ip),&
+             peqdsk_type(ip)
+     enddo
 
   case (6)
 
@@ -81,14 +99,14 @@ subroutine prgen_write
      write(1,20) '#          SHOT NUMBER : ',ufile_shot
      write(1,20) '#             TIME (s) : ',ufile_time
 
-     write(1,20) '#                 IONS :  Name       Z   Mass'
+     write(1,20) '#                 IONS :  Name       Z    Mass'
      do i=1,ufile_nion
         ip = reorder_vec(i)
         call prgen_ion_name(nint(ufile_m(ip)),nint(ufile_z(ip)),iname)
-        write(1,'(a,a,t36,i3,t43,i3,t48,"[",a,"]")') '#                         ',&
+        write(1,'(a,a,t36,i3,t43,f4.1,t48,"[",a,"]")') '#                         ',&
              iname,&
              nint(ufile_z(ip)),&
-             nint(ufile_m(ip)),&
+             ufile_m(ip),&
              ufile_type(ip)
      enddo
 
@@ -250,8 +268,6 @@ subroutine prgen_write
   call EXPRO_compute_derived
   call EXPRO_write_derived
   print '(a)','INFO: (prgen) Wrote input.profiles.extra.'
-
-  call EXPRO_alloc('./',0)
   !-----------------------------------------------------------------------------------
 
 10 format(5(1pe14.7,2x))

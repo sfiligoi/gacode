@@ -31,6 +31,7 @@ subroutine gyro_blend_ampere
   complex, dimension(n_gk,-mg_dx:mg_dx-ig_dx) :: f_x
   complex, dimension(-m_dx:m_dx-i_dx) :: grad_perp_ap
   complex, dimension(n_gk,-mg_dx:mg_dx-ig_dx) :: ion_current
+  complex, dimension(n_gk,-mg_dx:mg_dx-ig_dx,n_stack,n_nek_loc_1) :: f_save
   !---------------------------------------------------
 
   betae_eff = betae_unit_norm*ampere_scale
@@ -65,49 +66,57 @@ subroutine gyro_blend_ampere
                 grad_r_t(i,k,m)*dr_eodr(i)*w_d1(:)+ &
                 (grad_r_t(i,k,m)*dr_eodr(i))**2*w_d2(:))
 
-           do is=1,n_gk       
+           ! Fast option for flat profiles
 
-              if (gyro_method == 1) then 
+           if (i == 1 .or. flat_profile_flag == 0) then
 
-                 ion_current(is,:) = &
-                      v_para(m,i,p_nek_loc,is)**2* &
-                      alpha_s(is,i)*z(is)**2*w_gd0(:)
+              do is=1,n_gk       
 
-              else
+                 if (gyro_method == 1) then 
 
-                 !--------------------------------------------
-                 ! Prepare argument of Bessel function
-                 !
-                 omega_c = abs(z(is))*b_unit_s(i)*mu(is)**2
-                 !
-                 if (kill_gyro_b_flag == 0) then
-                    omega_c = omega_c*b0_t(i,k,m)
+                    ion_current(is,:) = &
+                         v_para(m,i,p_nek_loc,is)**2* &
+                         alpha_s(is,i)*z(is)**2*w_gd0(:)
+
+                 else
+
+                    !--------------------------------------------
+                    ! Prepare argument of Bessel function
+                    !
+                    omega_c = abs(z(is))*b_unit_s(i)*mu(is)**2
+                    !
+                    if (kill_gyro_b_flag == 0) then
+                       omega_c = omega_c*b0_t(i,k,m)
+                    endif
+                    !
+                    rho_gyro = rhos_norm*v_perp(m,i,p_nek_loc,is)/omega_c
+                    !
+                    a_gyro = grad_r_t(i,k,m)/x_length*dr_eodr(i)
+                    v_gyro = qrat_t(i,k,m)*n_1(in_1)*q_s(i)/r_s(i)
+                    u_gyro = v_gyro*captheta_t(i,k,m)
+                    !--------------------------------------------
+
+                    f_x(is,:) = (0.0,0.0) 
+
+                    ! J_0^2
+                    call gyro_bessel_operator(rho_gyro,&
+                         a_gyro,&
+                         u_gyro,&
+                         v_gyro,&
+                         f_x(is,:),&
+                         2)
+
+                    ion_current(is,:) = &
+                         v_para(m,i,p_nek_loc,is)**2* &
+                         alpha_s(is,i)*z(is)**2*f_x(is,:)
+
                  endif
-                 !
-                 rho_gyro = rhos_norm*v_perp(m,i,p_nek_loc,is)/omega_c
-                 !
-                 a_gyro = grad_r_t(i,k,m)/x_length*dr_eodr(i)
-                 v_gyro = qrat_t(i,k,m)*n_1(in_1)*q_s(i)/r_s(i)
-                 u_gyro = v_gyro*captheta_t(i,k,m)
-                 !--------------------------------------------
 
-                 f_x(is,:) = (0.0,0.0) 
-
-                 ! J_0^2
-                 call gyro_bessel_operator(rho_gyro,&
-                      a_gyro,&
-                      u_gyro,&
-                      v_gyro,&
-                      f_x(is,:),&
-                      2)
-
-                 ion_current(is,:) = &
-                      v_para(m,i,p_nek_loc,is)**2* &
-                      alpha_s(is,i)*z(is)**2*f_x(is,:)
-
-              endif
-
-           enddo ! is
+              enddo ! is
+              f_save(:,:,m,p_nek_loc) = ion_current(:,:)
+           else
+              ion_current(:,:) = f_save(:,:,m,p_nek_loc)
+           endif
 
            do j=1,n_blend 
               do jp=1,n_blend
