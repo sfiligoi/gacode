@@ -134,6 +134,7 @@ module cgyro_globals
   !
   ! Standard precision for IO 
   character(len=8) :: fmtstr='(es11.4)'
+  character(len=14) :: fmtstr2='(2(es11.4,1x))'
   !----------------------------------------------------
 
   !---------------------------------------------------------------

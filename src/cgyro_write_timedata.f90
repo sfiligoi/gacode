@@ -331,7 +331,7 @@ subroutine write_freq(datafile,io)
 
      ! Construct ballooning-space form of field
 
-     write(io,fmtstr) freq
+     write(io,fmtstr2) freq
      print '(a,1pe9.3,a,1pe10.3,1pe10.3,a,1pe9.3,a,5(1pe9.3,1x))',&
                 '[t = ',i_time*delta_t,&
                 '][w = ',freq,&
