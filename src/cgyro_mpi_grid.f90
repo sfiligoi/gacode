@@ -132,6 +132,4 @@ subroutine cgyro_mpi_grid
   nc1 = 1+i_proc_1*nc_loc
   nc2 = (1+i_proc_1)*nc_loc
 
-  ! Nonlinear parallelization dimensions
-
 end subroutine cgyro_mpi_grid

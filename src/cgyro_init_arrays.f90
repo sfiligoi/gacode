@@ -329,8 +329,7 @@ subroutine cgyro_init_arrays
   !
   h_x(:,:) = (0.0,0.0)
 
-
-  if (zf_test_flag == 1) then
+  if (n == 0) then
 
      ! Zonal-flow initial condition
 
@@ -346,7 +345,7 @@ subroutine cgyro_init_arrays
 
   else
 
-     ! Initial condition exponential in ballooning angle.
+     ! Exponential in ballooning angle.
 
      iv_loc = 0
      do iv=nv1,nv2

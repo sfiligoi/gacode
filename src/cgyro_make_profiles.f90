@@ -60,7 +60,7 @@ subroutine cgyro_make_profiles
      k_theta      = q/rmin
      rho          = ky/k_theta
      r_length_inv = s*k_theta/box_size
-     
+
      k_theta = 0
 
      call cgyro_info('Triggered zonal flow test.')
@@ -78,6 +78,8 @@ subroutine cgyro_make_profiles
      rho          = ky/k_theta
      r_length_inv = s*k_theta/box_size
 
+     n = 0
+
      call cgyro_info('Single-mode linear analysis.')
 
   else
@@ -90,7 +92,11 @@ subroutine cgyro_make_profiles
 
      ! Now define individual k_thetas
 
+     n = i_group_1
+
      k_theta = n*k_theta
+
+     call cgyro_info('Multiple toroidal harmonics.')
 
   endif
 

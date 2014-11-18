@@ -127,6 +127,9 @@ subroutine cgyro_kernel
      ! Collision step: returns new h_x, cap_h_x, fields
      call cgyro_step_collision
 
+     ! Error estimate
+     call cgyro_error_estimate
+
      ! Print results
      call cgyro_write_timedata
 
@@ -188,3 +191,25 @@ subroutine cgyro_kernel
   endif
 
 end subroutine cgyro_kernel
+
+subroutine cgyro_error_estimate
+
+  use cgyro_globals
+
+!  if (i_time == 1) then
+
+!  field_error(:,:) = 0.0
+!  field
+  
+!  else if (i_time == 2) then
+
+!  field_tt(:,:) = field(:,:,1)
+
+!  else
+
+!  field_t(:,:) = field(:,:,1)
+
+!  endif
+
+
+end subroutine cgyro_error_estimate

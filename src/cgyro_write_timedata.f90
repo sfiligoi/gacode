@@ -269,6 +269,10 @@ subroutine write_time(datafile,io)
 
      ! Append
 
+     if (n_toroidal > 1 .and. i_proc == 0) then
+        print '(t2,1pe10.3,2x,2(1pe13.6,1x),2x,2(1pe10.3,1x))',i_time*delta_t
+     endif
+
      open(unit=io,file=datafile,status='old',position='append')
      write(io,fmtstr) i_time*delta_t
      close(io)

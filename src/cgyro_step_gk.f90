@@ -1,7 +1,6 @@
 subroutine cgyro_step_gk
 
   use cgyro_globals
-  use cgyro_field
 
   implicit none
 
@@ -19,7 +18,7 @@ subroutine cgyro_step_gk
   ! Apar -> field(2)
 
   h0_x = h_x
-
+  
   ! Stage 1
   call cgyro_rhs(1)
   h_x = h0_x + 0.5 * delta_t * rhs(1,:,:)

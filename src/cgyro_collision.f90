@@ -390,7 +390,6 @@ contains
     use timer_lib
 
     use cgyro_globals
-    use cgyro_field
 
     implicit none
 
