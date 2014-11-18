@@ -27,8 +27,6 @@ contains
     integer :: is,ir,it,ix,ie,js,je,jx,ks
     ! parameters for matrix solve
     real, dimension(:,:), allocatable :: amat, bmat
-    real, dimension(:,:), allocatable :: rs_lor
-    real, dimension(:), allocatable :: vecin_xi, vecout_xi
 
     if (collision_model == 0) return
 
@@ -142,33 +140,6 @@ contains
        allocate(amat(nv,nv))
        allocate(bmat(nv,nv))
 
-       if (collision_model == 4) then
-
-          allocate(rs_lor(n_species,n_species))
-          allocate(vecin_xi(n_xi))
-          allocate(vecout_xi(n_xi))
-          do ix=1,n_xi
-             vecin_xi(ix) = xi(ix)
-          enddo
-          call DGEMV('N',n_xi,n_xi,num1,xi_lor_mat(:,:),n_xi,&
-               vecin_xi,1,num0,vecout_xi,1)
-          rs_lor(:,:) = 0.0
-          do is=1,n_species
-             do js=1,n_species
-                do ie=1,n_energy
-                   do ix=1,n_xi
-                      rs_lor(is,js) = rs_lor(is,js) &
-                           + w_e(ie) * energy(ie) &
-                           * w_xi(ix) * 0.5*vecout_xi(ix) &
-                           * nu_d(ie,is,js)
-                   enddo
-                enddo
-             enddo
-          enddo
-          call DGEMV('T',n_xi,n_xi,num1,xi_lor_mat(:,:),n_xi,&
-               vecout_xi,1,num0,vecin_xi,1)
-       endif
-
        ic_loc = 0
        do ic=nc1,nc2
           ic_loc = ic_loc+1
@@ -228,30 +199,7 @@ contains
                 endif
 
                 ! Collision component: Restoring
-                if (collision_model == 3) then
-                   ! EAB: NEED to recheck 0.5 with Lorentz
-                   cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                        - (0.5*delta_t) &
-                        * (-mass(js)/mass(is)) &
-                        * (dens(js)/dens(is)) &
-                        * (vth(js)/vth(is)) &
-                        * nu_d(ie,is,js) * sqrt(energy(ie)) &
-                        * 0.5*vecout_xi(ix) &
-                        * nu_d(je,js,is) * sqrt(energy(je)) &
-                        * 0.5*vecin_xi(jx) * w_e(je)*w_xi(jx) &
-                        / rs_lor(is,js)
-                   amat(iv,jv) = amat(iv,jv) &
-                        + (0.5*delta_t) &
-                        * (-mass(js)/mass(is)) &
-                        * (dens(js)/dens(is)) &
-                        * (vth(js)/vth(is)) &
-                        * nu_d(ie,is,js) * sqrt(energy(ie)) &
-                        * 0.5*vecout_xi(ix) &
-                        * nu_d(je,js,is) * sqrt(energy(je)) &
-                        * 0.5*vecin_xi(jx) * w_e(je)*w_xi(jx) &
-                        / rs_lor(is,js)
-
-                else if (abs(rs(is,js)) > epsilon(0.)) then
+                if (abs(rs(is,js)) > epsilon(0.)) then
                    cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                         - (0.5*delta_t) &
                         * 1.5 * (mass(js)/mass(is)) &
@@ -274,7 +222,7 @@ contains
                         / rs(is,js)
                 endif
 
-                if (collision_model == 2) then
+                if (collision_model == 3) then
                    if (is==js .and. ie==je) then
                       sum_nu = 0.0
                       do ks=1,n_species
@@ -363,12 +311,6 @@ contains
        deallocate(nu_d)
        deallocate(nu_s)
        deallocate(rs)
-
-       if(collision_model == 3) then
-          deallocate(rs_lor)
-          deallocate(vecin_xi)
-          deallocate(vecout_xi)
-       endif
 
        initialized = .true.
 
