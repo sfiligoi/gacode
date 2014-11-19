@@ -186,7 +186,9 @@ module cgyro_globals
   complex, dimension(:,:,:), allocatable :: rhs
   complex, dimension(:,:), allocatable :: h_x
   complex, dimension(:,:), allocatable :: h0_x
-  complex, dimension(:,:,:), allocatable :: h_nl
+  complex, dimension(:,:), allocatable :: psi
+  complex, dimension(:,:,:), allocatable :: f_nl
+  complex, dimension(:,:,:), allocatable :: g_nl
   complex, dimension(:,:), allocatable :: omega_cap_h
   complex, dimension(:,:), allocatable :: omega_h
   complex, dimension(:,:,:), allocatable :: omega_s

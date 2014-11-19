@@ -93,6 +93,9 @@ subroutine cgyro_rhs(ij)
              omega_h(ic,iv_loc)*h_x(ic,iv_loc)+&
              sum(omega_s(:,ic,iv_loc)*field(ir,it,:)) 
 
+        ! Define psi = (H-h)*T/z for use in nonlinear term
+        psi(ic,iv_loc) = (cap_h_c(ic,iv_loc)-h_x(ic,iv_loc))*temp(is)/z(is)
+
      enddo
   enddo
 
@@ -105,12 +108,12 @@ subroutine cgyro_rhs(ij)
   ! Nonlinear evaluation [f,g]
 
   call timer_lib_in('rhs_nl')
-
-  !call parallel_slib_f(h_x,h_nl)
-  ! if (nonlinear_flag == 1) call cgyro_rhs_nl(ij)
-  !call parallel_slib_r(h_nl,h_x)
-
+  if (nonlinear_flag == 1) then
+     call cgyro_rhs_nl(ij)
+     rhs(ij,:,:) = rhs(ij,:,:)+q*rho/rmin*psi(:,:)
+  endif
   call timer_lib_out('rhs_nl')
+
 
 end subroutine cgyro_rhs
 
@@ -188,6 +191,70 @@ subroutine cgyro_rhs_nl(ij)
   implicit none
 
   integer, intent(in) :: ij
+  integer :: nx,ny
+  integer :: ix,ixp,iy,iyp
+  integer :: ir,it,j,in
+  complex, dimension(:,:), allocatable :: f
+  complex, dimension(:,:), allocatable :: g
+  complex, dimension(:,:), allocatable :: fg
 
+
+  ny = n_toroidal-1
+  nx = n_radial/2
+
+  allocate( f(-ny:ny,-nx:nx-1) )
+  allocate( g(-ny:ny,-nx:nx-1) )
+  allocate(fg(-ny:ny,-nx:nx-1) )
+
+  call parallel_slib_f(h_x,f_nl)
+  call parallel_slib_f(psi,g_nl)
+
+  do j=1,nsplit
+     do it=1,n_theta
+
+        ! Array mapping
+        do ir=1,n_radial
+           ic_c(ir,it) = ic 
+           ix = ir-1-nx
+           do in=1,n_toroidal
+              iy = in-1
+              f(ix,iy) = f_nl(ic,j,in)
+              g(ix,iy) = g_nl(ic,j,in)
+           enddo
+           do iy=1,ny
+              f(ix,-iy) = conjg(f(ix,iy))
+              g(ix,-iy) = conjg(g(ix,iy))
+           enddo
+        enddo
+
+        fg = (0.0,0.0)
+        do ix=-nx,nx-1
+           do iy=0,ny
+              do ixp=-nx,nx-1
+                 do iyp=-ny+iy,ny
+                    fg(ix,iy) = fg(ix,iy)+f(ix-ixp,iy-iyp)*g(ixp,iyp)* &
+                         (iy*ixp-iyp*ix)
+                 enddo
+              enddo
+           enddo
+        enddo
+
+        do ir=1,n_radial
+           ic_c(ir,it) = ic 
+           ix = ir-1-nx
+           do in=1,n_toroidal
+              iy = in-1
+              g_nl(ic,j,in) = fg(ix,iy)
+           enddo
+        enddo
+
+     enddo ! it
+  enddo ! j
+
+  call parallel_slib_f(g_nl,psi)
+
+  deallocate( f)
+  deallocate( g)
+  deallocate(fg)
 
 end subroutine cgyro_rhs_nl

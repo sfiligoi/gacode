@@ -192,7 +192,8 @@ subroutine cgyro_check
      write(io_run,20) 'min(kx*rho)',2*pi*r_length_inv*rho
      write(io_run,20) 'max(kx*rho)',2*pi*r_length_inv*rho*(n_radial/2-1)
      write(io_run,*) 
-     write(io_run,20) 'r/R',rmin
+     write(io_run,20) 'r/a',rmin
+     write(io_run,20) 'R/a',rmaj
      write(io_run,20) 'q',q
      write(io_run,20) 's',s
      write(io_run,20) 'shift',shift
