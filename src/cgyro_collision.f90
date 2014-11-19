@@ -273,13 +273,15 @@ contains
                       do jx=1, n_xi
                          do ie=1,n_energy
                             do je=1, n_energy
-                               
-                               cfield(is,js,ix,jx,ie,je) &
-                                    = cfield(is,js,ix,jx,ie,je) &
-                                    - mass(js)/mass(is) * rsvec(is,js,ix,ie) &
-                                    / rs(is,js) &
-                                    * 0.5*w_e(je)*w_xi(jx) &
-                                    * dens(js) * rsvec_t(js,is,jx,je)
+                               if (abs(rs(is,js)) > epsilon(0.)) then
+                                  cfield(is,js,ix,jx,ie,je) &
+                                       = cfield(is,js,ix,jx,ie,je) &
+                                       - mass(js)/mass(is) &
+                                       * rsvec(is,js,ix,ie) &
+                                       / rs(is,js) &
+                                       * 0.5*w_e(je)*w_xi(jx) &
+                                       * dens(js) * rsvec_t(js,is,jx,je)
+                               endif
                             enddo
                          enddo
                       enddo
@@ -311,31 +313,33 @@ contains
                       enddo
                    enddo
                    
-                   ! int v^2 C_test_ab(v_par f0a,f0b)
+                   ! int v^2 C_test_ab(v^2 f0a,f0b)
                    rs(is,js) = 0.0
                    do ix=1,n_xi
                       do ie=1,n_energy
                          rs(is,js) = rs(is,js) + 0.5*w_e(ie)*w_xi(ix) &
                               * rsvec(is,js,ix,ie) * dens(is) &
-                              * 2.0*energy(ie) * xi(ix) * vth(is)**2 
+                              * 2.0*energy(ie) * vth(is)**2 
                       enddo
                    enddo
                 enddo
              enddo
-             
+
              do is=1,n_species
                 do js=1, n_species         
                    do ix=1,n_xi
                       do jx=1, n_xi
                          do ie=1,n_energy
                             do je=1, n_energy
-                               
-                               cfield(is,js,ix,jx,ie,je) &
-                                    = cfield(is,js,ix,jx,ie,je) &
-                                    - mass(js)/mass(is) * rsvec(is,js,ix,ie) &
-                                    / rs(is,js) &
-                                    * 0.5*w_e(je)*w_xi(jx) &
-                                    * dens(js) * rsvec_t(js,is,jx,je)
+                               if (abs(rs(is,js)) > epsilon(0.)) then
+                                  cfield(is,js,ix,jx,ie,je) &
+                                       = cfield(is,js,ix,jx,ie,je) &
+                                       - mass(js)/mass(is) &
+                                       * rsvec(is,js,ix,ie) &
+                                       / rs(is,js) &
+                                       * 0.5*w_e(je)*w_xi(jx) &
+                                       * dens(js) * rsvec_t(js,is,jx,je)
+                               endif
                             enddo
                          enddo
                       enddo
