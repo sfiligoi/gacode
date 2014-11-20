@@ -310,9 +310,8 @@ subroutine cgyro_init_arrays
 
         ! omega_star
         omega_s(1,ic,iv_loc) = &
-             -i_c*k_theta*rho*sqrt(temp(is)*mass(is))/(1.0*z(is))*vth(is) &
-             *(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
-             *z(is)/temp(is)*j0_c(ic,iv_loc)
+             -i_c*k_theta*rho*(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
+             *j0_c(ic,iv_loc)
 
         if (n_field > 1) then
            omega_s(2,ic,iv_loc) = -omega_s(1,ic,iv_loc)* &
