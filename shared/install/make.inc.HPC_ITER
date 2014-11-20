@@ -26,6 +26,4 @@ NETCDF_INC=$(NCDIR)/include
 
 # Archive 
 
-ARCH = ar cr
-
-
+ARCH = xiar cr
