@@ -35,6 +35,7 @@ subroutine cgyro_read_input
   read(1,*) nonlinear_flag
   read(1,*) te_ade
   read(1,*) ne_ade
+  read(1,*) masse_ade
   read(1,*) lambda_debye
 
   read(1,*) rmin
@@ -55,7 +56,7 @@ subroutine cgyro_read_input
 
   read(1,*) n_species
 
-  read(1,*) nu_1_in
+  read(1,*) nu_ee_in
 
   do is=1,6
      read(1,*) z(is)

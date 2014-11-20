@@ -31,6 +31,7 @@ module cgyro_globals
   integer :: nonlinear_flag 
   real :: te_ade
   real :: ne_ade
+  real :: masse_ade
   real :: lambda_debye
   !
   ! Geometry input
@@ -54,7 +55,7 @@ module cgyro_globals
   ! Species parameters
   !
   integer :: n_species
-  real :: nu_1_in
+  real :: nu_ee_in
   integer, dimension(6) :: z
   real, dimension(6) :: mass
   real, dimension(6) :: dens
@@ -152,6 +153,7 @@ module cgyro_globals
   integer :: is_ele
   real :: dens_ele
   real :: temp_ele
+  real :: mass_ele
   !
   real, dimension(6) :: vth  
   real, dimension(6) :: nu

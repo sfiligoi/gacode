@@ -30,6 +30,7 @@ subroutine cgyro_make_profiles
 
      dens_ele = ne_ade
      temp_ele = te_ade
+     mass_ele = masse_ade
 
   else if (num_ele == 1) then
 
@@ -40,6 +41,7 @@ subroutine cgyro_make_profiles
 
      dens_ele = dens(is_ele)
      temp_ele = temp(is_ele)
+     mass_ele = mass(is_ele)
 
   else
 
@@ -123,9 +125,9 @@ subroutine cgyro_make_profiles
      vth(is) = sqrt(temp(is)/mass(is))
 
      ! collision frequency
-     nu(is) = nu_1_in *(1.0*z(is))**4/(1.0*z(1))**4 &
-          * dens(is) / dens(1) &
-          * sqrt(mass(1)/mass(is)) * (temp(1)/temp(is))**1.5
+     nu(is) = nu_ee_in *(1.0*z(is))**4 &
+          * dens(is) / dens_ele &
+          * sqrt(mass_ele/mass(is)) * (temp_ele/temp(is))**1.5
 
   enddo
 

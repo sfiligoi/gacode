@@ -34,6 +34,7 @@ x.add('ZF_TEST_FLAG','0')
 x.add('NONLINEAR_FLAG','0')
 x.add('TE_ADE','1.0')
 x.add('NE_ADE','1.0')
+x.add('MASSE_ADE','0.0002724486');
 x.add('LAMBDA_DEBYE','0.0')
 
 x.add('RMIN','0.5')
@@ -53,7 +54,7 @@ x.add('BETA_STAR','0.0')
 x.add('BETAE_UNIT','0.0')
 
 x.add('N_SPECIES','1')
-x.add('NU_1','0.1')
+x.add('NU_EE','0.1')
 x.add('Z_1','1')
 x.add('MASS_1','1.0')
 x.add('DENS_1','1.0')

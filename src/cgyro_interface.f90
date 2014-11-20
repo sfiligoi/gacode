@@ -47,6 +47,7 @@ module cgyro_interface
   integer :: cgyro_nonlinear_flag_in = 0
   real    :: cgyro_te_ade_in = 1.0
   real    :: cgyro_ne_ade_in = 1.0
+  real    :: cgyro_masse_ade_in = 0.0002724486
   real    :: cgyro_lambda_debye_in = 0.0
 
   real    :: cgyro_rmin_in    = 0.5
@@ -66,7 +67,7 @@ module cgyro_interface
   real    :: cgyro_betae_unit_in = 0.0
 
   integer :: cgyro_n_species_in = 1
-  real    :: cgyro_nu_1_in      = 0.1
+  real    :: cgyro_nu_ee_in      = 0.1
   integer, dimension(6) :: cgyro_z_in = 1
   real, dimension(6)    :: cgyro_mass_in = 1.0
   real, dimension(6)    :: cgyro_dens_in = 1.0
@@ -115,6 +116,7 @@ contains
     cgyro_collision_ene_diffusion_in = collision_ene_diffusion
     cgyro_te_ade_in = te_ade
     cgyro_ne_ade_in = ne_ade
+    cgyro_masse_ade_in = masse_ade
     cgyro_lambda_debye_in = lambda_debye
     cgyro_n_species_in = n_species
     cgyro_z_in(:)    = z(:)
@@ -172,6 +174,7 @@ contains
     collision_ene_diffusion = cgyro_collision_ene_diffusion_in
     te_ade    = cgyro_te_ade_in
     ne_ade    = cgyro_ne_ade_in
+    masse_ade = cgyro_masse_ade_in
     lambda_debye = cgyro_lambda_debye_in
     n_species = cgyro_n_species_in
     z(:)      = cgyro_z_in(:)
