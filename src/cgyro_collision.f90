@@ -173,7 +173,7 @@ contains
                                        = ctest(is,js,ix,jx,ie,je) &
                                        + (nu_par(ie,is,js) * 0.5 * energy(ie) &
                                        * e_deriv2_mat(ie,je) / e_max &
-                                       + e_deriv1_mat(ie,je) / sqrt(1.0*e_max) &
+                                       + e_deriv1_mat(ie,je)/sqrt(1.0*e_max) &
                                        * (nu_par_deriv(ie,is,js) &
                                        * 0.5*energy(ie) &
                                        + nu_par(ie,is,js) &
@@ -229,7 +229,7 @@ contains
                 enddo
              enddo
           endif
-          
+
        case(4)
           
           ! Momentum Restoring
@@ -247,14 +247,14 @@ contains
                                rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
                                     + ctest(is,js,ix,jx,ie,je) &
                                     * sqrt(2.0*energy(je)) * xi(jx) * vth(is)
-                               rsvec_t(is,js,ix,ie) = rsvec_t(is,js,ix,ie) &
+                               rsvec_t(is,js,jx,je) = rsvec_t(is,js,jx,je) &
                                     + ctest(is,js,ix,jx,ie,je) &
                                     * sqrt(2.0*energy(ie)) * xi(ix) * vth(is)
                             enddo
                          enddo
                       enddo
                    enddo
-                   
+
                    ! int v_par C_test_ab(v_par f0a,f0b)
                    rs(is,js) = 0.0
                    do ix=1,n_xi
@@ -266,7 +266,7 @@ contains
                    enddo
                 enddo
              enddo
-             
+
              do is=1,n_species
                 do js=1, n_species         
                    do ix=1,n_xi
@@ -305,7 +305,7 @@ contains
                                rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
                                     + ctest(is,js,ix,jx,ie,je) &
                                     * 2.0*energy(je) * vth(is)**2
-                               rsvec_t(is,js,ix,ie) = rsvec_t(is,js,ix,ie) &
+                               rsvec_t(is,js,jx,je) = rsvec_t(is,js,jx,je) &
                                     + ctest(is,js,ix,jx,ie,je) &
                                     * 2.0*energy(ie) * vth(is)**2
                             enddo
@@ -348,8 +348,8 @@ contains
              enddo
           endif
 
-       end select
-       
+       end select             
+
        allocate(cmat(nv,nv,nc_loc))
        allocate(cvec(nv))
        allocate(bvec(nv))
