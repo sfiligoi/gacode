@@ -159,7 +159,7 @@ module cgyro_globals
   real, dimension(6) :: nu
   real :: rho
   real :: k_theta
-  real :: r_length_inv
+  real :: length
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------

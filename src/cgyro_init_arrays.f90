@@ -289,7 +289,7 @@ subroutine cgyro_init_arrays
 
         ! omega_rdrift
         omega_cap_h(ic,iv_loc) = -omega_rdrift(it,is)*energy(ie)*(1.0 + xi(ix)**2) &
-             *(2.0*pi*i_c*indx_r(ir)*r_length_inv) 
+             *(2.0*pi*i_c*indx_r(ir)/length) 
 
         ! omega_dalpha
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
@@ -303,7 +303,7 @@ subroutine cgyro_init_arrays
         omega_h(ic,iv_loc) = &
              -abs(omega_rdrift(it,is))*energy(ie)*(1.0 + xi(ix)**2)*up_radial & 
              *(2.0*indx_r(ir)/(1.0*n_radial))**(up_radial_n-1.0) &
-             *(2.0*pi*indx_r(ir)*r_length_inv)
+             *(2.0*pi*indx_r(ir)/length)
 
         ! omega_star
         omega_s(1,ic,iv_loc) = &
