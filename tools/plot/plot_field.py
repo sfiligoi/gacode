@@ -17,10 +17,11 @@ n_radial  = int(data[1])
 n_theta   = int(data[2])
 n_energy  = int(data[3])
 n_xi      = int(data[4])
+m_box     = int(data[5])
 
-indx_r = np.array(data[5:5+n_radial],dtype=int)
+indx_r = np.array(data[6:6+n_radial],dtype=int)
 
-mark  = 5+n_radial
+mark  = 6+n_radial
 theta = np.array(data[mark:mark+n_theta])
 
 mark   = mark+n_theta
@@ -30,7 +31,7 @@ mark = mark+n_energy
 xi   = np.array(data[mark:mark+n_xi])
 
 mark = mark+n_xi
-thetab = np.array(data[mark:mark+n_theta*n_radial])
+thetab = np.array(data[mark:mark+n_theta*n_radial/m_box])
 #-------------------------------------------------------
 
 #-------------------------------------------------------
@@ -49,7 +50,7 @@ if ifield == 0:
     data = np.loadtxt('out.cgyro.phiB')
 if ifield == 1:
     data = np.loadtxt('out.cgyro.aparB')
-phib = np.reshape(data,(2,n_theta*n_radial,n_time),'F')
+phib = np.reshape(data,(2,n_theta*n_radial/m_box,n_time),'F')
 # Construct complex eigenfunction at selected time
 phic = phib[0,:,itime]+1j*phib[1,:,itime]
 #-------------------------------------------------------

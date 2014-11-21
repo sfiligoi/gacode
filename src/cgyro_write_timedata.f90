@@ -186,7 +186,7 @@ subroutine write_balloon(datafile,io,fn)
   integer, intent(in) :: io
   complex, intent(in) :: fn(n_radial,n_theta)
   !
-  integer :: ir,it
+  integer :: ir,jr,it,np
   !------------------------------------------------------
 
   if (i_proc > 0) return
@@ -212,10 +212,13 @@ subroutine write_balloon(datafile,io,fn)
 
      ! Construct ballooning-space form of field
 
-     do ir=1,n_radial
+     np = n_radial/2/box_size
+
+     do ir=-np,np-1
         do it=1,n_theta
-           f_balloon(ir,it) = fn(ir,it) &
-                *exp(-2*pi*i_c*indx_r(ir)*k_theta*rmin)
+           jr = box_size*ir+n_radial/2+1
+           f_balloon(ir+np+1,it) = fn(jr,it) &
+                *exp(-2*pi*i_c*ir*k_theta*rmin)
         enddo
      enddo
 
@@ -406,10 +409,14 @@ subroutine write_distribution(datafile,io)
 
      if (i_proc == 0) then
         do iv=1,nv
-           do ic=1,nc
-              f_balloon(ir_c(ic),it_c(ic)) = h_x_glob(ic,iv) &
-                   *exp(-2*pi*i_c*indx_r(ir_c(ic))*k_theta*rmin)
-           enddo
+           if (box_size == 1) then 
+              do ic=1,nc
+                 f_balloon(ir_c(ic),it_c(ic)) = h_x_glob(ic,iv) &
+                      *exp(-2*pi*i_c*indx_r(ir_c(ic))*k_theta*rmin)
+              enddo
+           else
+              f_balloon(:,:) = 0.0
+           endif
            write(io_data,fmtstr) transpose(f_balloon(:,:))
         enddo
         close(io_data)

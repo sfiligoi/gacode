@@ -20,7 +20,7 @@ module cgyro_globals
   integer :: up_radial_n
   real    :: up_theta
   real    :: ky
-  real    :: box_size
+  integer :: box_size
   integer :: silent_flag
   integer :: equilibrium_model
   integer :: collision_model
@@ -179,9 +179,9 @@ module cgyro_globals
   real, dimension(-2:2) :: uderiv
   real, dimension(-2:2) :: cderiv
   integer, dimension(:), allocatable :: thcyc
-  integer, dimension(:,:), allocatable :: rcyc
-  complex, dimension(:,:), allocatable :: dtheta
-  complex, dimension(:,:), allocatable :: dtheta_up
+  integer, dimension(:,:,:), allocatable :: rcyc
+  complex, dimension(:,:,:), allocatable :: dtheta
+  complex, dimension(:,:,:), allocatable :: dtheta_up
   !
   ! Distributions
   !

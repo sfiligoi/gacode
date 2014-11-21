@@ -32,7 +32,7 @@ contains
        if(initialized) return
        
        allocate(theta(n_theta))
-       allocate(theta_B(n_radial,n_theta))
+       allocate(theta_B(n_radial/box_size,n_theta))
        allocate(w_theta(n_theta))
        allocate(Bmag(n_theta))
        allocate(k_perp(n_theta,n_radial))
@@ -47,9 +47,9 @@ contains
           theta(it) = -pi+(it-1)*d_theta
        enddo
 
-       do ir=1,n_radial
+       do ir=1,n_radial/box_size
           do it=1,n_theta
-             theta_B(ir,it) = theta(it)+2*pi*indx_r(ir)
+             theta_B(ir,it) = theta(it)+2*pi*(ir-1-n_radial/2/box_size)
           enddo
        enddo
        
