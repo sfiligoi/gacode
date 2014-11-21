@@ -288,8 +288,8 @@ subroutine cgyro_init_arrays
 
 
         ! omega_rdrift
-        omega_cap_h(ic,iv_loc) = -omega_rdrift(it,is)*energy(ie)*(1.0 + xi(ix)**2) &
-             *(2.0*pi*i_c*px(ir)/length) 
+        omega_cap_h(ic,iv_loc) = -omega_rdrift(it,is)*energy(ie)*&
+             (1.0 + xi(ix)**2)*(2.0*pi*i_c*px(ir)/length) 
 
         ! omega_dalpha
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
@@ -354,16 +354,10 @@ subroutine cgyro_init_arrays
 
            ! Exponential in ballooning angle.
 
-           iv_loc = 0
-           do iv=nv1,nv2
-              iv_loc = iv_loc+1
-              if (is_v(iv) == 1) then
-                 do ic=1,nc
-                    ang = theta(it_c(ic))+2*pi*(ir_c(ic)-n_radial/2-1)
-                    h_x(ic,iv_loc) = rho*exp(-(ang/2)**2) 
-                 enddo
-              endif
-           enddo
+           if (is == 1) then
+              ang = theta(it)+2*pi*(ir-n_radial/2-1)
+              h_x(ic,iv_loc) = rho*exp(-(ang/2)**2) 
+           endif
 
         endif
 
