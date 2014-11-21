@@ -110,7 +110,7 @@ subroutine cgyro_rhs(ij)
   call timer_lib_in('rhs_nl')
   if (nonlinear_flag == 1) then
      call cgyro_rhs_nl(ij)
-     rhs(ij,:,:) = rhs(ij,:,:)+q*rho/rmin*psi(:,:)
+     rhs(ij,:,:) = rhs(ij,:,:)+(q*rho/rmin)*(2*pi/length)*psi(:,:)
   endif
   call timer_lib_out('rhs_nl')
 
