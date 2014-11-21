@@ -136,11 +136,11 @@ subroutine cgyro_make_profiles
   do ix=1,n_xi
      indx_xi(ix) = ix-1
   enddo
-  allocate(indx_r(n_radial))
+  allocate(px(n_radial))
   do ir=1,n_radial
-     indx_r(ir) = -n_radial/2 + (ir-1)
+     px(ir) = -n_radial/2 + (ir-1)
   enddo
-  if (zf_test_flag == 1) indx_r(1) = 1
+  if (zf_test_flag == 1) px(1) = 1
 
   ! Print the re-mapped equilibrium data
   if (silent_flag == 0 .and. i_proc == 0) then

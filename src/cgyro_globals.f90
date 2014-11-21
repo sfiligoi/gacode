@@ -167,7 +167,7 @@ module cgyro_globals
   !
   ! Velocity space
   ! 
-  integer, dimension(:), allocatable :: indx_xi, indx_r
+  integer, dimension(:), allocatable :: indx_xi, px
   real, dimension(:), allocatable :: energy, w_e
   real, dimension(:), allocatable :: xi, w_xi
   real, dimension(:,:), allocatable :: xi_deriv_mat, xi_lor_mat

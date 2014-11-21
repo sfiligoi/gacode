@@ -111,7 +111,7 @@ subroutine cgyro_kernel
      write(io_data,'(i4)') n_energy
      write(io_data,'(i4)') n_xi
      write(io_data,'(i4)') box_size
-     write(io_data,'(i4)') indx_r(:)
+     write(io_data,'(i4)') px(:)
      write(io_data,'(1pe12.5)') theta(:)
      write(io_data,'(1pe12.5)') energy(:)
      write(io_data,'(1pe12.5)') xi(:)
@@ -175,7 +175,7 @@ subroutine cgyro_kernel
   call COLLISION_alloc(0)
 
   if(allocated(indx_xi))       deallocate(indx_xi)
-  if(allocated(indx_r))        deallocate(indx_r)
+  if(allocated(px))        deallocate(px)
   if(allocated(energy))        deallocate(energy)
   if(allocated(w_e))           deallocate(w_e)
   if(allocated(e_deriv1_mat))  deallocate(e_deriv1_mat)

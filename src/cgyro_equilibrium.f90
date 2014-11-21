@@ -144,7 +144,7 @@ contains
        sum = sum + w_theta(it)
        
        do ir=1,n_radial
-          k_perp(it,ir) = sqrt((2.0*pi*indx_r(ir)*GEO_grad_r/length &
+          k_perp(it,ir) = sqrt((2.0*pi*px(ir)*GEO_grad_r/length &
                + k_theta*GEO_gq*GEO_captheta)**2 &
                + (k_theta*GEO_gq)**2) 
        enddo

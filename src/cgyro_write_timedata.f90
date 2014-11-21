@@ -412,7 +412,7 @@ subroutine write_distribution(datafile,io)
            if (box_size == 1) then 
               do ic=1,nc
                  f_balloon(ir_c(ic),it_c(ic)) = h_x_glob(ic,iv) &
-                      *exp(-2*pi*i_c*indx_r(ir_c(ic))*k_theta*rmin)
+                      *exp(-2*pi*i_c*px(ir_c(ic))*k_theta*rmin)
               enddo
            else
               f_balloon(:,:) = 0.0
