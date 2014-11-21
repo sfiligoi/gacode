@@ -107,12 +107,7 @@ subroutine cgyro_rhs(ij)
 
   ! Nonlinear evaluation [f,g]
 
-  call timer_lib_in('rhs_nl')
-  if (nonlinear_flag == 1) then
-     call cgyro_rhs_nl(ij)
-     rhs(ij,:,:) = rhs(ij,:,:)+(q*rho/rmin)*(2*pi/length)*psi(:,:)
-  endif
-  call timer_lib_out('rhs_nl')
+  if (nonlinear_flag == 1) call cgyro_rhs_nl(ij)
 
 
 end subroutine cgyro_rhs
@@ -183,6 +178,7 @@ end subroutine cgyro_rhs_trap
 
 subroutine cgyro_rhs_nl(ij)
 
+  use timer_lib
   use parallel_lib
 
   use cgyro_globals
@@ -202,19 +198,22 @@ subroutine cgyro_rhs_nl(ij)
   ny = n_toroidal-1
   nx = n_radial/2
 
-  allocate( f(-ny:ny,-nx:nx-1) )
-  allocate( g(-ny:ny,-nx:nx-1) )
-  allocate(fg(-ny:ny,-nx:nx-1) )
+  allocate( f(-nx:nx-1,-ny:ny) )
+  allocate( g(-nx:nx-1,-ny:ny) )
+  allocate(fg(-nx:nx-1,-ny:ny) )
 
+  call timer_lib_in('comm_nl')
   call parallel_slib_f(h_x,f_nl)
   call parallel_slib_f(psi,g_nl)
+  call timer_lib_out('comm_nl')
 
+  call timer_lib_in('rhs_nl')
   do j=1,nsplit
      do it=1,n_theta
 
         ! Array mapping
         do ir=1,n_radial
-           ic_c(ir,it) = ic 
+           ic = ic_c(ir,it) 
            ix = ir-1-nx
            do in=1,n_toroidal
               iy = in-1
@@ -229,9 +228,9 @@ subroutine cgyro_rhs_nl(ij)
 
         fg = (0.0,0.0)
         do ix=-nx,nx-1
-           do iy=0,ny
-              do ixp=-nx,nx-1
-                 do iyp=-ny+iy,ny
+           do ixp=max(ix-nx+1,-nx),min(ix+nx,nx-1)
+              do iy=0,ny
+                 do iyp=-ny+iy,ny 
                     fg(ix,iy) = fg(ix,iy)+f(ix-ixp,iy-iyp)*g(ixp,iyp)* &
                          (iy*ixp-iyp*ix)
                  enddo
@@ -240,7 +239,7 @@ subroutine cgyro_rhs_nl(ij)
         enddo
 
         do ir=1,n_radial
-           ic_c(ir,it) = ic 
+           ic = ic_c(ir,it) 
            ix = ir-1-nx
            do in=1,n_toroidal
               iy = in-1
@@ -250,11 +249,16 @@ subroutine cgyro_rhs_nl(ij)
 
      enddo ! it
   enddo ! j
+  call timer_lib_out('rhs_nl')
 
-  call parallel_slib_f(g_nl,psi)
+  call timer_lib_in('comm_nl')
+  call parallel_slib_r(g_nl,psi)
+  call timer_lib_out('comm_nl')
 
   deallocate( f)
   deallocate( g)
   deallocate(fg)
+
+  rhs(ij,:,:) = rhs(ij,:,:)+0*(q*rho/rmin)*(2*pi/length)*psi(:,:)
 
 end subroutine cgyro_rhs_nl

@@ -180,7 +180,7 @@ subroutine cgyro_check
      write(io_run,'(t1,5(i4,6x))') n_radial,n_theta,n_species,n_energy,n_xi
 
      write(io_run,*) 
-     write(io_run,'(a,f6.2,a,f6.2)') '(Lx,Ly)/rho',length/rho,',',2*pi/(q/rmin)
+     write(io_run,'(a,f6.2,a,f6.2)') '(Lx,Ly)/rho',length/rho,',',2*pi/ky
      write(io_run,*) 
      if (n_toroidal == 1) then
         write(io_run,20) 'ky*rho',ky

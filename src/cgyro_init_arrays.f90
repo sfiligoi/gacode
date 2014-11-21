@@ -333,13 +333,13 @@ subroutine cgyro_init_arrays
      do iv=nv1,nv2
         iv_loc = iv_loc+1
         if (is_v(iv) == 1) then
-           h_x(:,iv_loc) = 1.0
+           h_x(:,iv_loc) = 1e-4
         else
            h_x(:,iv_loc) = 0.0
         endif
      enddo
 
-  else
+  else 
 
      ! Exponential in ballooning angle.
 

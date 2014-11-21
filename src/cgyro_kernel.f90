@@ -36,6 +36,7 @@ subroutine cgyro_kernel
   call timer_lib_init('rhs_nl')
   call timer_lib_init('collision')
   call timer_lib_init('comm')
+  call timer_lib_init('comm_nl')
 
   ! 1. MPI setup
   call cgyro_mpi_grid
@@ -165,6 +166,7 @@ subroutine cgyro_kernel
      print '(a,1x,1pe11.4)',' rhs_nl      ',timer_lib_time('rhs_nl')
      print '(a,1x,1pe11.4)',' collision   ',timer_lib_time('collision')
      print '(a,1x,1pe11.4)',' comm        ',timer_lib_time('comm')
+     print '(a,1x,1pe11.4)',' comm_nl     ',timer_lib_time('comm_nl')
   endif
 
 100 continue
