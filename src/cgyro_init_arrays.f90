@@ -249,26 +249,23 @@ subroutine cgyro_init_arrays
            jt = thcyc(it+id)
            if (it+id < 1) then
               thfac = exp(2*pi*i_c*k_theta*rmin)
-              if (ir-1 >= 1) then
-                 jr = ir-1
-              else
-                 jr = n_radial
+              jr = ir-box_size
+              if (jr < 1) then
+                 jr = jr+n_radial
               endif
            else if (it+id > n_theta) then
               thfac = exp(-2*pi*i_c*k_theta*rmin)
-              if (ir+1 <= n_radial) then
-                 jr = ir+1
-              else
-                 jr = 1
+              jr = ir+box_size
+              if (jr > n_radial) then
+                 jr = jr-n_radial
               endif
            else
               thfac = (1.0,0.0)
               jr = ir
            endif
-           dtheta(it,id)    = cderiv(id)*thfac
-           dtheta_up(it,id) = uderiv(id)*thfac*up_theta
-           rcyc(ir,it+id)   = jr
-
+           dtheta(ir,it,id)    = cderiv(id)*thfac
+           dtheta_up(ir,it,id) = uderiv(id)*thfac*up_theta
+           rcyc(ir,it,id)      = jr
         enddo
      enddo
   enddo
@@ -292,7 +289,7 @@ subroutine cgyro_init_arrays
 
         ! omega_rdrift
         omega_cap_h(ic,iv_loc) = -omega_rdrift(it,is)*energy(ie)*(1.0 + xi(ix)**2) &
-             *(2.0*pi*i_c*indx_r(ir)*r_length_inv) 
+             *(2.0*pi*i_c*indx_r(ir)/length) 
 
         ! omega_dalpha
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
@@ -306,7 +303,7 @@ subroutine cgyro_init_arrays
         omega_h(ic,iv_loc) = &
              -abs(omega_rdrift(it,is))*energy(ie)*(1.0 + xi(ix)**2)*up_radial & 
              *(2.0*indx_r(ir)/(1.0*n_radial))**(up_radial_n-1.0) &
-             *(2.0*pi*indx_r(ir)*r_length_inv)
+             *(2.0*pi*indx_r(ir)/length)
 
         ! omega_star
         omega_s(1,ic,iv_loc) = &

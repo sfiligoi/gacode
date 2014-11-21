@@ -32,7 +32,7 @@ contains
        if(initialized) return
        
        allocate(theta(n_theta))
-       allocate(theta_B(n_radial,n_theta))
+       allocate(theta_B(n_radial/box_size,n_theta))
        allocate(w_theta(n_theta))
        allocate(Bmag(n_theta))
        allocate(k_perp(n_theta,n_radial))
@@ -47,16 +47,16 @@ contains
           theta(it) = -pi+(it-1)*d_theta
        enddo
 
-       do ir=1,n_radial
+       do ir=1,n_radial/box_size
           do it=1,n_theta
-             theta_B(ir,it) = theta(it)+2*pi*indx_r(ir)
+             theta_B(ir,it) = theta(it)+2*pi*(ir-1-n_radial/2/box_size)
           enddo
        enddo
        
        if(equilibrium_model == 0) then
           GEO_model_in = 0
        else if (equilibrium_model == 2 .or. equilibrium_model == 3) then
-          GEO_model_in    = geo_numeq_flag
+          GEO_model_in = geo_numeq_flag
        endif
        GEO_ntheta_in   = geo_ntheta
        GEO_nfourier_in = geo_ny
@@ -144,7 +144,7 @@ contains
        sum = sum + w_theta(it)
        
        do ir=1,n_radial
-          k_perp(it,ir) = sqrt((2.0*pi*indx_r(ir)*GEO_grad_r*r_length_inv &
+          k_perp(it,ir) = sqrt((2.0*pi*indx_r(ir)*GEO_grad_r/length &
                + k_theta*GEO_gq*GEO_captheta)**2 &
                + (k_theta*GEO_gq)**2) 
        enddo

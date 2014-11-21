@@ -80,11 +80,11 @@ subroutine cgyro_rhs(ij)
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
         do id=-2,2
            jt = thcyc(it+id)
-           jr = rcyc(ir,it+id)
+           jr = rcyc(ir,it,id)
            jc = ic_c(jr,jt)
            rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc) &
-                -rval*dtheta(it,id)*cap_h_c(jc,iv_loc)  &
-                -abs(rval)*dtheta_up(it,id)*h_x(jc,iv_loc)
+                -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)  &
+                -abs(rval)*dtheta_up(ir,it,id)*h_x(jc,iv_loc)
         enddo
 
         ! Diagonal terms
@@ -110,7 +110,7 @@ subroutine cgyro_rhs(ij)
   call timer_lib_in('rhs_nl')
   if (nonlinear_flag == 1) then
      call cgyro_rhs_nl(ij)
-     rhs(ij,:,:) = rhs(ij,:,:)+q*rho/rmin*psi(:,:)
+     rhs(ij,:,:) = rhs(ij,:,:)+(q*rho/rmin)*(2*pi/length)*psi(:,:)
   endif
   call timer_lib_out('rhs_nl')
 

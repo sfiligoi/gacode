@@ -59,9 +59,9 @@ subroutine cgyro_make_profiles
 
      ! Zonal flow (n=0) test
 
-     k_theta      = q/rmin
-     rho          = ky/k_theta
-     r_length_inv = s*k_theta/box_size
+     k_theta = q/rmin
+     rho     = ky/k_theta
+     length  = box_size/(s*k_theta)
 
      k_theta = 0
 
@@ -76,9 +76,9 @@ subroutine cgyro_make_profiles
 
      ! Single linear mode (assume n=1, compute rho)
 
-     k_theta      = q/rmin
-     rho          = ky/k_theta
-     r_length_inv = s*k_theta/box_size
+     k_theta = q/rmin
+     rho     = ky/k_theta
+     length  = box_size/(s*k_theta)
 
      n = 0
 
@@ -88,9 +88,9 @@ subroutine cgyro_make_profiles
 
      ! Multiple modes (n=0,1,2,...,n_toroidal-1)
 
-     k_theta      = q/rmin
-     rho          = ky/k_theta
-     r_length_inv = s*k_theta/box_size
+     k_theta = q/rmin
+     rho     = ky/k_theta
+     length  = box_size/(s*k_theta)
 
      ! Now define individual k_thetas
 

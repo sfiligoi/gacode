@@ -85,13 +85,13 @@ subroutine cgyro_kernel
   allocate(field_old2(n_radial,n_theta,n_field))
   allocate(field_old3(n_radial,n_theta,n_field))
   allocate(field_est(n_radial,n_theta,n_field))
-  allocate(f_balloon(n_radial,n_theta))
+  allocate(f_balloon(n_radial/box_size,n_theta))
   allocate(recv_status(MPI_STATUS_SIZE))
 
   allocate(thcyc(1-n_theta:2*n_theta))
-  allocate(rcyc(n_radial,1-n_theta:2*n_theta))
-  allocate(dtheta(n_theta,-2:2))
-  allocate(dtheta_up(n_theta,-2:2))
+  allocate(rcyc(n_radial,n_theta,-2:2))
+  allocate(dtheta(n_radial,n_theta,-2:2))
+  allocate(dtheta_up(n_radial,n_theta,-2:2))
 
   call EQUIL_alloc(1)
   call EQUIL_do
@@ -109,6 +109,7 @@ subroutine cgyro_kernel
      write(io_data,'(i4)') n_theta
      write(io_data,'(i4)') n_energy
      write(io_data,'(i4)') n_xi
+     write(io_data,'(i4)') box_size
      write(io_data,'(i4)') indx_r(:)
      write(io_data,'(1pe12.5)') theta(:)
      write(io_data,'(1pe12.5)') energy(:)
