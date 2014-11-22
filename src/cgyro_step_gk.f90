@@ -193,6 +193,7 @@ subroutine cgyro_rhs_nl(ij)
   complex, dimension(:,:), allocatable :: f
   complex, dimension(:,:), allocatable :: g
   complex, dimension(:,:), allocatable :: fg
+  complex :: inv
 
 
   ny = n_toroidal-1
@@ -233,10 +234,20 @@ subroutine cgyro_rhs_nl(ij)
                  do iyp=-ny+iy,ny 
                     fg(ix,iy) = fg(ix,iy)+f(ix-ixp,iy-iyp)*g(ixp,iyp)* &
                          (iy*ixp-iyp*ix)
+                    fg(ix,-iy) = conjg(fg(ix,iy))
                  enddo
               enddo
            enddo
         enddo
+
+        inv = 0.0       
+        do ix=-nx+1,nx-1
+           do iy=-ny,ny
+              inv = inv+f(ix,iy)*fg(-ix,-iy)
+           enddo
+        enddo
+
+       print *,abs(inv)
 
         do ir=1,n_radial
            ic = ic_c(ir,it) 
@@ -259,6 +270,6 @@ subroutine cgyro_rhs_nl(ij)
   deallocate( g)
   deallocate(fg)
 
-  rhs(ij,:,:) = rhs(ij,:,:)+0*(q*rho/rmin)*(2*pi/length)*psi(:,:)
+  rhs(ij,:,:) = rhs(ij,:,:)+(q*rho/rmin)*(2*pi/length)*psi(:,:)
 
 end subroutine cgyro_rhs_nl

@@ -71,11 +71,15 @@ subroutine cgyro_field_v
   else
 
      do ir=1,n_radial
-        do it=1,n_theta
-           field(ir,it,1) = field(ir,it,1) &
-                / (k_perp(it,ir)**2 * lambda_debye**2 &
-                * dens_ele / temp_ele + sum_den_h)
-        enddo
+        if (n == 0 .and. px(ir) == 0) then
+           field(ir,:,1) = 0.0
+        else
+           do it=1,n_theta
+              field(ir,it,1) = field(ir,it,1) &
+                   /(k_perp(it,ir)**2*lambda_debye**2* &
+                   dens_ele/temp_ele+sum_den_h)
+           enddo
+        endif
      enddo
 
   endif
@@ -84,11 +88,15 @@ subroutine cgyro_field_v
 
   if (n_field > 1) then
      do ir=1,n_radial
-        do it=1,n_theta
-           field(ir,it,2) = field(ir,it,2) &
-                / (2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
-                * dens_ele * temp_ele)
-        enddo
+        if (n == 0 .and. px(ir) == 0) then
+           field(ir,:,2) = 0.0
+        else
+           do it=1,n_theta
+              field(ir,it,2) = field(ir,it,2) &
+                   /(2.0*k_perp(it,ir)**2*rho**2 &
+                   /betae_unit*dens_ele*temp_ele)
+           enddo
+        endif
      enddo
   endif
 
@@ -168,11 +176,15 @@ subroutine cgyro_field_c
      enddo
   else
      do ir=1,n_radial
-        do it=1,n_theta
-           field(ir,it,1) = field(ir,it,1) &
-                / (k_perp(it,ir)**2 * lambda_debye**2 &
-                * dens_ele / temp_ele + sum_den_x(ir,it))
-        enddo
+        if (n == 0 .and. px(ir) == 0) then
+           field(ir,:,1) = 0.0
+        else
+           do it=1,n_theta
+              field(ir,it,1) = field(ir,it,1) &
+                   /(k_perp(it,ir)**2*lambda_debye**2* &
+                   dens_ele/temp_ele+sum_den_x(ir,it))
+           enddo
+        endif
      enddo
   endif
 
@@ -180,11 +192,15 @@ subroutine cgyro_field_c
 
   if (n_field > 1) then
      do ir=1,n_radial
-        do it=1,n_theta
-           field(ir,it,2) = field(ir,it,2) &
-                / (2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
-                * dens_ele * temp_ele + sum_cur_x(ir,it))
-        enddo
+        if (n == 0 .and. px(ir) == 0) then
+           field(ir,:,2) = 0.0
+        else
+           do it=1,n_theta
+              field(ir,it,2) = field(ir,it,2) &
+                   /(2.0*k_perp(it,ir)**2*rho**2/betae_unit & 
+                   *dens_ele*temp_ele+sum_cur_x(ir,it))
+           enddo
+        endif
      enddo
   endif
 

@@ -324,8 +324,7 @@ subroutine cgyro_init_arrays
   ! Initial conditions
   !
   h_x(:,:) = (0.0,0.0)
-
-
+  !
   iv_loc = 0
   do iv=nv1,nv2
 
@@ -344,10 +343,8 @@ subroutine cgyro_init_arrays
 
            ! Zonal-flow initial condition
 
-           if (is == 1) then
-              h_x(ic,iv_loc) = 1e-4
-           else
-              h_x(ic,iv_loc) = 0.0
+           if (is == 1 .and. abs(px(ir)) == 1) then
+              h_x(ic,iv_loc) = 1e-6
            endif
 
         else 
