@@ -180,6 +180,7 @@ module cgyro_globals
   real, dimension(-2:2) :: cderiv
   integer, dimension(:), allocatable :: thcyc
   integer, dimension(:,:,:), allocatable :: rcyc
+  integer, dimension(:), allocatable :: pcyc
   complex, dimension(:,:,:), allocatable :: dtheta
   complex, dimension(:,:,:), allocatable :: dtheta_up
   !

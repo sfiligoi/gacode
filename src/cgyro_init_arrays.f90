@@ -229,6 +229,11 @@ subroutine cgyro_init_arrays
      thcyc(it) = it
      thcyc(it+n_theta) = it
   enddo
+  do ix=-n_radial/2,n_radial/2-1
+     pcyc(ix-n_radial) = ix
+     pcyc(ix) = ix
+     pcyc(ix+n_radial) = ix
+  enddo
   ! coefficients for 4th order centered derivative
   cderiv(-2) =  1.0 / (12.0 * d_theta)
   cderiv(-1) = -8.0 / (12.0 * d_theta)

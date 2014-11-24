@@ -72,6 +72,8 @@ subroutine cgyro_make_profiles
         return
      endif
 
+     n = 0
+
   else if (n_toroidal == 1) then
 
      ! Single linear mode (assume n=1, compute rho)
@@ -80,7 +82,7 @@ subroutine cgyro_make_profiles
      rho     = ky/k_theta
      length  = box_size/(s*k_theta)
 
-     n = 0
+     n = 1
 
      call cgyro_info('Single-mode linear analysis.')
 

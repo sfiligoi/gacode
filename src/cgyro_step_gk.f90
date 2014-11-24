@@ -54,7 +54,7 @@ subroutine cgyro_rhs(ij)
   implicit none
 
   integer, intent(in) :: ij
-  integer :: is, ir, it, ie, ix, jx
+  integer :: is, ir, it, ie, ix
   integer :: id, jt, jr, jc
   real    :: rval
 
@@ -187,8 +187,9 @@ subroutine cgyro_rhs_nl(ij)
   implicit none
 
   integer, intent(in) :: ij
-  integer :: nx,ny
+  integer :: nx,ny,nx0,ny0
   integer :: ix,ixp,iy,iyp
+  integer :: ixpp,iypp
   integer :: ir,it,j,in
   complex, dimension(:,:), allocatable :: f
   complex, dimension(:,:), allocatable :: g
@@ -196,58 +197,127 @@ subroutine cgyro_rhs_nl(ij)
   complex :: inv
 
 
-  ny = n_toroidal-1
-  nx = n_radial/2
+  ny0 = n_toroidal-1
+  nx0 = n_radial/2
+  ny = int(3*ny0/2.0)+1
+  nx = int(3*nx0/2.0)+1
 
-  allocate( f(-nx:nx-1,-ny:ny) )
-  allocate( g(-nx:nx-1,-ny:ny) )
-  allocate(fg(-nx:nx-1,-ny:ny) )
+  print *,nx
+  print *,ny
+
+  allocate( f(-nx:nx,-ny:ny) )
+  allocate( g(-nx:nx,-ny:ny) )
+  allocate(fg(-nx:nx,-ny:ny) )
 
   call timer_lib_in('comm_nl')
   call parallel_slib_f(h_x,f_nl)
   call parallel_slib_f(psi,g_nl)
   call timer_lib_out('comm_nl')
 
+  if (i_proc > 0) stop
+
   call timer_lib_in('rhs_nl')
   do j=1,nsplit
-     do it=1,n_theta
+     do it=1,n_theta 
+
+        f = 0.0
+        g = 0.0
 
         ! Array mapping
-        do ir=1,n_radial
-           ic = ic_c(ir,it) 
-           ix = ir-1-nx
-           do in=1,n_toroidal
-              iy = in-1
-              f(ix,iy) = f_nl(ic,j,in)
-              g(ix,iy) = g_nl(ic,j,in)
+        do in=1,n_toroidal
+           iy = in-1
+           do ir=1,n_radial
+              ic = ic_c(ir,it) 
+              ix = ir-1-nx0
+              !              f(ix,iy) = f_nl(ic,j,in)
+              !              g(ix,iy) = g_nl(ic,j,in)
+              f(ix,iy) = rand()+i_c*rand()
+              g(ix,iy) = rand()-i_c*rand()
+              f(-ix,-iy) = conjg(f(ix,iy))
+              g(-ix,-iy) = conjg(g(ix,iy)) 
            enddo
+        enddo
+
+        ! Zero average
+        f(0,0)=0.0
+        g(0,0)=0.0
+
+        ! n=0 reality
+        f(nx0,0)  = 0.0
+        g(nx0,0)  = 0.0
+        !f(-nx,0) = 0.0
+        !g(-nx,0) = 0.0
+        do ix=1,nx0
+           f(-ix,0) = conjg(f(ix,0))
+           g(-ix,0) = conjg(g(ix,0))
+        enddo
+
+        ! Reality
+        do ix=-nx0,nx0
            do iy=1,ny
-              f(ix,-iy) = conjg(f(ix,iy))
-              g(ix,-iy) = conjg(g(ix,iy))
+              f(-ix,-iy) = conjg(f(ix,iy))
+              g(-ix,-iy) = conjg(g(ix,iy))
            enddo
         enddo
 
         fg = (0.0,0.0)
         do ix=-nx,nx-1
-           do ixp=max(ix-nx+1,-nx),min(ix+nx,nx-1)
-              do iy=0,ny
-                 do iyp=-ny+iy,ny 
-                    fg(ix,iy) = fg(ix,iy)+f(ix-ixp,iy-iyp)*g(ixp,iyp)* &
-                         (iy*ixp-iyp*ix)
-                    fg(ix,-iy) = conjg(fg(ix,iy))
-                 enddo
+           do ixp=-nx,nx-1
+              do ixpp=-nx,nx-1
+                 if (modulo(ixp+ixpp-ix,2*nx) == 0) then
+
+                    do iy=-ny,ny
+                       do iyp=-ny,ny
+                          do iypp=-ny,ny
+
+                             if (modulo(iyp+iypp-iy,2*ny+1) == 0) then
+                                fg(ix,iy) = fg(ix,iy)-f(ixpp,iypp)*g(ixp,iyp)*(iypp*ixp-iyp*ixpp)
+                             endif
+
+                          enddo
+                       enddo
+                    enddo
+
+                 endif
               enddo
            enddo
         enddo
 
+
+        fg(nx,:) = fg(-nx,:)
+
+        !do ix=-nx,nx
+        !  do iy=1,ny
+        !     fg(-ix,-iy) = conjg(fg(ix,iy))
+        !  enddo
+        !enddo
+
+        print *,'         n=-2                        n=-1                   n=0                         n=1               n=2 '
+
+        do ix=-nx,nx
+           print '(8(2(1pe11.4,1x),2x))',f(ix,:)
+        enddo
+        print *
+        do ix=-nx,nx
+           print '(8(2(1pe11.4,1x),2x))',g(ix,:)
+        enddo
+
+        print *
+        do ix=-nx,nx
+           print '(8(2(1pe11.4,1x),2x))',fg(ix,:)
+        enddo
+
         inv = 0.0       
-        do ix=-nx+1,nx-1
+        do ix=-nx,nx-1
            do iy=-ny,ny
-              inv = inv+f(ix,iy)*fg(-ix,-iy)
+              inv = inv+g(ix,iy)*fg(-ix,-iy)
            enddo
         enddo
 
-       print *,abs(inv)
+        print *
+        print *,i_proc,abs(inv)
+
+        stop
 
         do ir=1,n_radial
            ic = ic_c(ir,it) 
