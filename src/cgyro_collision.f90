@@ -210,7 +210,7 @@ contains
                       do jx=1, n_xi
                          do ie=1,n_energy
                             do je=1, n_energy
-                               if (abs(rs(is,js)) > epsilon(0.)) then
+                               if (abs(rs(is,js)) > 1.0e-12) then
                                   cfield(is,js,ix,jx,ie,je) = &
                                        cfield(is,js,ix,jx,ie,je) &
                                        + 1.5 * (mass(js)/mass(is)) &
@@ -235,7 +235,7 @@ contains
           ! Momentum Restoring
 
           if(collision_mom_restore == 1) then
-             ! C_test_ab(v_par f0a,f0b)
+             ! C_test_ab(v_par f0a,f0b) / vth_a
              rsvec = 0.0
              rsvec_t = 0.0
              do is=1,n_species
@@ -246,22 +246,22 @@ contains
                             do je=1,n_energy
                                rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
                                     + ctest(is,js,ix,jx,ie,je) &
-                                    * sqrt(2.0*energy(je)) * xi(jx) * vth(is)
+                                    * sqrt(2.0*energy(je)) * xi(jx) 
                                rsvec_t(is,js,jx,je) = rsvec_t(is,js,jx,je) &
                                     + ctest(is,js,ix,jx,ie,je) &
-                                    * sqrt(2.0*energy(ie)) * xi(ix) * vth(is)
+                                    * sqrt(2.0*energy(ie)) * xi(ix) 
                             enddo
                          enddo
                       enddo
                    enddo
 
-                   ! int v_par C_test_ab(v_par f0a,f0b)
+                   ! int v_par C_test_ab(v_par f0a,f0b) / (n_0a vth_a^2)
                    rs(is,js) = 0.0
                    do ix=1,n_xi
                       do ie=1,n_energy
                          rs(is,js) = rs(is,js) + 0.5*w_e(ie)*w_xi(ix) &
-                              * rsvec(is,js,ix,ie) * dens(is) &
-                              * sqrt(2.0*energy(ie)) * xi(ix) * vth(is) 
+                              * rsvec(is,js,ix,ie) &
+                              * sqrt(2.0*energy(ie)) * xi(ix) 
                       enddo
                    enddo
                 enddo
@@ -273,14 +273,16 @@ contains
                       do jx=1, n_xi
                          do ie=1,n_energy
                             do je=1, n_energy
-                               if (abs(rs(is,js)) > epsilon(0.)) then
+                               if (abs(rs(is,js)) > 1.0e-12) then
                                   cfield(is,js,ix,jx,ie,je) &
                                        = cfield(is,js,ix,jx,ie,je) &
                                        - mass(js)/mass(is) &
+                                       * (dens(js)/dens(is)) &
+                                       * (vth(js)/vth(is)) &
                                        * rsvec(is,js,ix,ie) &
                                        / rs(is,js) &
                                        * 0.5*w_e(je)*w_xi(jx) &
-                                       * dens(js) * rsvec_t(js,is,jx,je)
+                                       * rsvec_t(js,is,jx,je)
                                endif
                             enddo
                          enddo
@@ -293,7 +295,7 @@ contains
           ! Energy Restoring
 
           if(collision_ene_restore == 1) then
-             ! C_test_ab(v^2 f0a,f0b)
+             ! C_test_ab(v^2 f0a,f0b) / vth_a^2
              rsvec = 0.0
              rsvec_t = 0.0
              do is=1,n_species
@@ -304,24 +306,39 @@ contains
                             do je=1,n_energy
                                rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
                                     + ctest(is,js,ix,jx,ie,je) &
-                                    * 2.0*energy(je) * vth(is)**2
+                                    * 2.0*energy(je)
                                rsvec_t(is,js,jx,je) = rsvec_t(is,js,jx,je) &
                                     + ctest(is,js,ix,jx,ie,je) &
-                                    * 2.0*energy(ie) * vth(is)**2
+                                    * 2.0*energy(ie) 
                             enddo
                          enddo
                       enddo
                    enddo
                    
-                   ! int v^2 C_test_ab(v^2 f0a,f0b)
+                   ! int v^2 C_test_ab(v^2 f0a,f0b) / (n_0a vth_a^4)
                    rs(is,js) = 0.0
                    do ix=1,n_xi
                       do ie=1,n_energy
                          rs(is,js) = rs(is,js) + 0.5*w_e(ie)*w_xi(ix) &
-                              * rsvec(is,js,ix,ie) * dens(is) &
-                              * 2.0*energy(ie) * vth(is)**2 
+                              * rsvec(is,js,ix,ie) &
+                              * 2.0*energy(ie) 
                       enddo
                    enddo
+                   !print *, 'rs', rs(is,js)
+                enddo
+             enddo
+
+             do is=1,n_species
+                do js=1, n_species  
+                   sum_den = 0.0
+                   do ix=1,n_xi
+                      do ie=1,n_energy
+                         if(abs(rsvec(is,js,ix,ie)) > sum_den) then
+                            sum_den = rsvec(is,js,ix,ie)
+                         endif
+                      enddo
+                   enddo
+                   !print *, sum_den
                 enddo
              enddo
 
@@ -331,14 +348,16 @@ contains
                       do jx=1, n_xi
                          do ie=1,n_energy
                             do je=1, n_energy
-                               if (abs(rs(is,js)) > epsilon(0.)) then
+                               if (abs(rs(is,js)) > 1.0e-12) then
                                   cfield(is,js,ix,jx,ie,je) &
                                        = cfield(is,js,ix,jx,ie,je) &
                                        - mass(js)/mass(is) &
+                                       * (dens(js)/dens(is)) &
+                                       * (vth(js)/vth(is))**2 &
                                        * rsvec(is,js,ix,ie) &
                                        / rs(is,js) &
                                        * 0.5*w_e(je)*w_xi(jx) &
-                                       * dens(js) * rsvec_t(js,is,jx,je)
+                                       * rsvec_t(js,is,jx,je)
                                endif
                             enddo
                          enddo
@@ -349,6 +368,43 @@ contains
           endif
 
        end select             
+
+       do is=1,n_species
+          do js=1, n_species
+             sum_den=0.0
+             do ix=1,n_xi
+                do jx=1, n_xi
+                   do ie=1,n_energy
+                      do je=1, n_energy
+                         if(abs(ctest(is,js,ix,jx,ie,je)) > abs(sum_den)) then
+                            sum_den = ctest(is,js,ix,jx,ie,je)
+                         endif
+                      enddo
+                   enddo
+                enddo
+             enddo
+             !print *, 'test', sum_den
+          enddo
+       enddo
+
+       do is=1,n_species
+          do js=1, n_species
+             sum_den=0.0
+             do ix=1,n_xi
+                do jx=1, n_xi
+                   do ie=1,n_energy
+                      do je=1, n_energy
+                         if(abs(cfield(is,js,ix,jx,ie,je)) > abs(sum_den)) then
+                            sum_den = cfield(is,js,ix,jx,ie,je)
+                         endif
+                      enddo
+                   enddo
+                enddo
+             enddo
+             !print *, 'field', sum_den
+          enddo
+       enddo
+
 
        allocate(cmat(nv,nv,nc_loc))
        allocate(cvec(nv))
