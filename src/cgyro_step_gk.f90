@@ -93,9 +93,6 @@ subroutine cgyro_rhs(ij)
              omega_h(ic,iv_loc)*h_x(ic,iv_loc)+&
              sum(omega_s(:,ic,iv_loc)*field(ir,it,:)) 
 
-        ! Define psi = (H-h)*T/z for use in nonlinear term
-        psi(ic,iv_loc) = (cap_h_c(ic,iv_loc)-h_x(ic,iv_loc))*temp(is)/z(is)
-
      enddo
   enddo
 
@@ -194,16 +191,27 @@ subroutine cgyro_rhs_nl(ij)
   complex, dimension(:,:), allocatable :: f
   complex, dimension(:,:), allocatable :: g
   complex, dimension(:,:), allocatable :: fg
-  complex :: inv
 
 
   ny0 = n_toroidal-1
   nx0 = n_radial/2
-  ny = int(3*ny0/2.0)+1
-  nx = int(3*nx0/2.0)+1
+  ny = int(1.5*ny0)+1
+  nx = int(1.5*nx0)+1
 
-  !print *,nx
-  !print *,ny
+  if (.not.allocated(pcyc)) then
+     allocate(pcyc(-3*nx:3*nx-1))
+     allocate(ncyc(-3*ny:3*ny))
+     do ix=-nx,nx-1
+        pcyc(ix-2*nx) = ix
+        pcyc(ix) = ix
+        pcyc(ix+2*nx) = ix
+     enddo
+     do iy=-ny,ny
+        ncyc(iy-2*ny) = iy
+        ncyc(iy) = iy
+        ncyc(iy+2*ny) = iy
+     enddo
+  endif
 
   allocate( f(-nx:nx,-ny:ny) )
   allocate( g(-nx:nx,-ny:ny) )
@@ -213,8 +221,6 @@ subroutine cgyro_rhs_nl(ij)
   call parallel_slib_f(h_x,f_nl)
   call parallel_slib_f(psi,g_nl)
   call timer_lib_out('comm_nl')
-
-  !if (i_proc > 0) stop
 
   call timer_lib_in('rhs_nl')
   do j=1,nsplit
@@ -236,18 +242,6 @@ subroutine cgyro_rhs_nl(ij)
            enddo
         enddo
 
-        ! Zero average
-        !f(0,0)=0.0
-        !g(0,0)=0.0
-
-        ! n=0 reality
-        !f(nx0,0)  = 0.0
-        !g(nx0,0)  = 0.0
-        !do ix=1,nx0
-        !   f(-ix,0) = conjg(f(ix,0))
-        !   g(-ix,0) = conjg(g(ix,0))
-        !enddo
-
         ! Reality
         do ix=-nx0,nx0
            do iy=1,ny0
@@ -259,53 +253,20 @@ subroutine cgyro_rhs_nl(ij)
         fg = (0.0,0.0)
         do ix=-nx0,nx0-1
            do ixp=-nx,nx-1
-!              do ixpp=-nx,nx-1
-!                 if (modulo(ixp+ixpp-ix,2*nx) == 0) then
-                    ixpp = ix-ixp
-                    do iy=0,ny0
-                       do iyp=-ny,ny
-!                          do iypp=-ny,ny
-
-!                             if (modulo(iyp+iypp-iy,2*ny+1) == 0) then
-                                iypp = iy-iyp
-                                fg(ix,iy) = fg(ix,iy)-f(ixpp,iypp)*g(ixp,iyp)*(iypp*ixp-iyp*ixpp)
-!                             endif
-
-!                          enddo
-                       enddo
-                    enddo
-
-!                 endif
-!              enddo
+              ixpp = pcyc(ix-ixp)
+              do iy=0,ny0
+                 do iyp=-ny+iy,ny
+                    iypp = ncyc(iy-iyp)
+                    fg(ix,iy) = fg(ix,iy)+f(ixpp,iypp)*g(ixp,iyp)*(iypp*ixp-iyp*ixpp)
+                 enddo
+              enddo
            enddo
         enddo
-
-        !print *,'         n=-2                        n=-1                   n=0                         n=1               n=2 '
-
-        !do ix=-nx,nx
-        !   print '(8(2(1pe11.4,1x),2x))',f(ix,:)
-        !enddo
-        !print *
-        !do ix=-nx,nx
-        !   print '(8(2(1pe11.4,1x),2x))',g(ix,:)
-        !enddo
 
         !print *
         !do ix=-nx0,nx0-1
         !   print '(8(2(1pe11.4,1x),2x))',fg(ix,0:ny0)
         !enddo
-
-        !inv = 0.0       
-        !do ix=-nx,nx-1
-        !   do iy=-ny,ny
-        !      inv = inv+g(ix,iy)*fg(-ix,-iy)
-        !   enddo
-        !enddo
-
-        !print *
-        !print *,i_proc,abs(inv)
-
-        !stop
 
         do ir=1,n_radial
            ic = ic_c(ir,it) 

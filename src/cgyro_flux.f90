@@ -27,16 +27,16 @@ subroutine cgyro_flux
  
         it = it_c(ic)
 
-        ! Define psi = (H-h)*T/z 
-        psi(ic,iv_loc) = (cap_h_c(ic,iv_loc)-h_x(ic,iv_loc))*temp(is)/z(is)
-
         flux_loc(is,1) = flux_loc(is,1)-c_n*aimag(2.0*cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc)))*w_theta(it)
         flux_loc(is,2) = flux_loc(is,2)-c_t*aimag(2.0*cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc)))*w_theta(it)
 
      enddo
   enddo
 
-  ! Here, flux is stil distributed over n
+  ! GyroBohm normalization
+  flux_loc = flux_loc/rho**2
+
+  ! Here, flux is still distributed over n
 
   call MPI_ALLREDUCE(flux_loc(:,:), &
        flux(:,:), &
@@ -45,8 +45,6 @@ subroutine cgyro_flux
        MPI_SUM, &
        NEW_COMM_1, &
        i_err)
-
-  print *,i_proc,flux
 
 end subroutine cgyro_flux
 

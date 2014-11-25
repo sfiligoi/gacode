@@ -215,9 +215,9 @@ subroutine cgyro_field_c
      ix = ix_v(iv)
      ie = ie_v(iv)
 
-     efac(1) = z(is)/temp(is)
+     efac(1) = 1.0
      if (n_field > 1) then
-        efac(2) = -z(is)/temp(is)*xi(ix)*sqrt(2.0*energy(ie))*vth(is)
+        efac(2) = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
      endif
 
      do ic=1,nc
@@ -225,8 +225,9 @@ subroutine cgyro_field_c
         ir = ir_c(ic)
         it = it_c(ic)
 
-        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+&
-             j0_c(ic,iv_loc)*sum(efac(:)*field(ir,it,:))
+        psi(ic,iv_loc) = j0_c(ic,iv_loc)*sum(efac(:)*field(ir,it,:))
+
+        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+z(is)*psi(ic,iv_loc)/temp(is)              
 
      enddo
   enddo

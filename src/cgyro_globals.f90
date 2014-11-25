@@ -183,6 +183,7 @@ module cgyro_globals
   integer, dimension(:), allocatable :: thcyc
   integer, dimension(:,:,:), allocatable :: rcyc
   integer, dimension(:), allocatable :: pcyc
+  integer, dimension(:), allocatable :: ncyc
   complex, dimension(:,:,:), allocatable :: dtheta
   complex, dimension(:,:,:), allocatable :: dtheta_up
   !

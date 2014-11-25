@@ -93,7 +93,6 @@ subroutine cgyro_kernel
 
   allocate(thcyc(1-n_theta:2*n_theta))
   allocate(rcyc(n_radial,n_theta,-2:2))
-  allocate(pcyc(-n_radial/2-n_radial:n_radial/2-1+n_radial))
   allocate(dtheta(n_radial,n_theta,-2:2))
   allocate(dtheta_up(n_radial,n_theta,-2:2))
 

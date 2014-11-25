@@ -128,7 +128,7 @@ subroutine write_distributed_complex(datafile,io,n_fn,fn)
         !-----------------------------------------
         ! Subgroup collector:
         !
-        i_group_send = (in-1)/n_toroidal
+        i_group_send = in-1
 
         if (i_group_send /= 0) then
 
@@ -218,7 +218,6 @@ subroutine write_distributed_real(datafile,io,n_fn,fn)
   real :: fn_recv(n_fn)
   !------------------------------------------------------
 
-
   select case (io_control)
 
   case(0)
@@ -246,7 +245,7 @@ subroutine write_distributed_real(datafile,io,n_fn,fn)
         !-----------------------------------------
         ! Subgroup collector:
         !
-        i_group_send = (in-1)/n_toroidal
+        i_group_send = in-1
 
         if (i_group_send /= 0) then
 
