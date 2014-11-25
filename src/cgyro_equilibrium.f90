@@ -21,9 +21,12 @@ module cgyro_equilibrium
 contains
   
   subroutine EQUIL_alloc(flag)
+
     use cgyro_globals
     use GEO_interface
+
     implicit none
+
     integer, intent (in) :: flag  ! flag=1: allocate; else deallocate
     integer :: it, ir
     integer, parameter :: geo_ntheta=1001 ! num grid pts for Miller geo grid
@@ -87,11 +90,14 @@ contains
   end subroutine EQUIL_alloc
   
   subroutine EQUIL_do
+
     use cgyro_globals
     use GEO_interface
+
     implicit none
+
     integer :: it, ir, is
-    real :: sum
+  
 
     ! parameters needed for Miller equilibrium
     ! geo_numeq_flag, geo_ny, and geo_yin already set    
@@ -113,7 +119,6 @@ contains
 
     call GEO_do()  
     
-    sum=0.0
     do it=1,n_theta
 
        call GEO_interp(theta(it))
@@ -141,7 +146,6 @@ contains
 
        ! flux-surface average weights
        w_theta(it) = GEO_g_theta / GEO_b
-       sum = sum + w_theta(it)
        
        do ir=1,n_radial
           k_perp(it,ir) = sqrt((2.0*pi*px(ir)*GEO_grad_r/length &
@@ -151,10 +155,8 @@ contains
        
     enddo
     
-    do it=1,n_theta
-       w_theta(it) = w_theta(it) / sum
-    enddo
-    
+    w_theta(:) = w_theta(:)/sum(w_theta) 
+ 
   end subroutine EQUIL_DO
 
 

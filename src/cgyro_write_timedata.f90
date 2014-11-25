@@ -22,6 +22,22 @@ subroutine cgyro_write_timedata
           size(field(:,:,i_field)),&
           field(:,:,i_field))
 
+     if (nonlinear_flag == 1) then
+
+        ! Density flux
+        call write_distributed_real(&
+             trim(path)//runfile_flux(1),&
+             io_data,&
+             size(flux(:,1)),&
+             flux(:,1))
+        ! Energy flux
+        call write_distributed_real(&
+             trim(path)//runfile_flux(2),&
+             io_data,&
+             size(flux(:,2)),&
+             flux(:,2))
+     endif
+
      if (n_toroidal == 1) then
 
         a_norm = field(n_radial/2+1,n_theta/2+1,1) 
@@ -174,6 +190,123 @@ subroutine write_distributed_complex(datafile,io,n_fn,fn)
 
 end subroutine write_distributed_complex
 
+
+!------------------------------------------------------
+! write_distributed_real.f90
+!
+! PURPOSE:
+!  Control merged output of real distributed array.
+!------------------------------------------------------
+
+subroutine write_distributed_real(datafile,io,n_fn,fn)
+
+  use mpi
+  use cgyro_globals
+
+  !------------------------------------------------------
+  implicit none
+  !
+  character (len=*), intent(in) :: datafile
+  integer, intent(in) :: io
+  integer, intent(in) :: n_fn
+  real, intent(in) :: fn(n_fn)
+  !
+  integer :: i_group_send
+  integer :: i_send
+  integer :: in
+  !
+  real :: fn_recv(n_fn)
+  !------------------------------------------------------
+
+
+  select case (io_control)
+
+  case(0)
+
+     return
+
+  case(1)
+
+     ! Open
+
+     if (i_proc == 0) then
+        open(unit=io,file=datafile,status='replace')
+        close(io)
+     endif
+
+  case(2)
+
+     ! Append
+
+     if (i_proc == 0) &
+          open(unit=io,file=datafile,status='old',position='append')
+
+     do in=1,n_toroidal
+
+        !-----------------------------------------
+        ! Subgroup collector:
+        !
+        i_group_send = (in-1)/n_toroidal
+
+        if (i_group_send /= 0) then
+
+           i_send = i_group_send*n_proc_1
+
+           if (i_proc == 0) then
+
+              call MPI_RECV(fn_recv,&
+                   n_fn,&
+                   MPI_DOUBLE_PRECISION,&
+                   i_send,&
+                   in,&
+                   CGYRO_COMM_WORLD,&
+                   recv_status,&
+                   i_err)
+
+           else if (i_proc == i_send) then
+
+              call MPI_SEND(fn,&
+                   n_fn,&
+                   MPI_DOUBLE_PRECISION,&
+                   0,&
+                   in,&
+                   CGYRO_COMM_WORLD,&
+                   i_err)
+
+           endif
+
+        else
+
+           fn_recv(:) = fn(:)
+
+        endif
+        !
+        !-----------------------------------------
+
+        if (i_proc == 0) then
+
+           write(io,fmtstr) fn_recv(:)
+
+        endif
+
+     enddo ! in
+
+     if (i_proc == 0) close(io)
+
+  case(3)
+
+     ! Rewind
+
+     if (i_proc == 0) then
+
+        open(unit=io,file=datafile,status='old')
+        close(io)
+
+     endif
+
+  end select
+
+end subroutine write_distributed_real
 
 subroutine write_balloon(datafile,io,fn)
 

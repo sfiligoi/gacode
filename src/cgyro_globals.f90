@@ -121,6 +121,8 @@ module cgyro_globals
   character(len=18) :: runfile_freq    = 'out.cgyro.freq'
   character(len=14), dimension(3)  :: runfile_field = &
        (/'out.cgyro.phi ','out.cgyro.apar','out.cgyro.bpar'/)
+  character(len=16), dimension(2)  :: runfile_flux = &
+       (/'out.cgyro.flux_n','out.cgyro.flux_e'/)
   character(len=15), dimension(3)  :: runfile_fieldb = &
        (/'out.cgyro.phiB ','out.cgyro.aparB','out.cgyro.bparB'/)
   integer :: io_data = 20
@@ -211,6 +213,10 @@ module cgyro_globals
   complex, dimension(:,:,:), allocatable :: field_old3
   complex, dimension(:,:,:), allocatable :: field_est
   !
+  ! Nonlinear fluxes
+  real, dimension(:,:), allocatable :: flux_loc
+  real, dimension(:,:), allocatable :: flux
+  !  
   ! Work arrays
   !
   complex, dimension(:,:), allocatable :: f_balloon

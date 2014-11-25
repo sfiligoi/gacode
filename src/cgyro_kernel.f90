@@ -87,6 +87,8 @@ subroutine cgyro_kernel
   allocate(field_old3(n_radial,n_theta,n_field))
   allocate(field_est(n_radial,n_theta,n_field))
   allocate(f_balloon(n_radial/box_size,n_theta))
+  allocate(    flux(n_species,2))
+  allocate(flux_loc(n_species,2))
   allocate(recv_status(MPI_STATUS_SIZE))
 
   allocate(thcyc(1-n_theta:2*n_theta))
@@ -138,6 +140,9 @@ subroutine cgyro_kernel
      ! Collision step: returns new h_x, cap_h_x, fields
      call cgyro_step_collision
 
+     ! Compute fluxes
+     call cgyro_flux
+    
      ! Error estimate
      call cgyro_error_estimate
 

@@ -204,7 +204,7 @@ subroutine cgyro_field_c
      enddo
   endif
 
-  ! Compute H given h and phi(h) apar(h)
+  ! Compute H given h and [phi(h), apar(h)]
 
   iv_loc = 0
   do iv=nv1,nv2

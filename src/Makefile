@@ -20,6 +20,7 @@ OBJECTS = cgyro_globals.o \
           cgyro_init_arrays.o \
           cgyro_run.o \
           cgyro_field.o \
+          cgyro_flux.o \
           cgyro_freq.o \
           cgyro_collision.o \
 	  cgyro_step_gk.o \
