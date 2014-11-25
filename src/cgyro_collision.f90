@@ -210,7 +210,7 @@ contains
                       do jx=1, n_xi
                          do ie=1,n_energy
                             do je=1, n_energy
-                               if (abs(rs(is,js)) > 1.0e-12) then
+                               if (abs(rs(is,js)) > epsilon(0.)) then
                                   cfield(is,js,ix,jx,ie,je) = &
                                        cfield(is,js,ix,jx,ie,je) &
                                        + 1.5 * (mass(js)/mass(is)) &
@@ -273,7 +273,7 @@ contains
                       do jx=1, n_xi
                          do ie=1,n_energy
                             do je=1, n_energy
-                               if (abs(rs(is,js)) > 1.0e-12) then
+                               if (abs(rs(is,js)) > epsilon(0.0)) then
                                   cfield(is,js,ix,jx,ie,je) &
                                        = cfield(is,js,ix,jx,ie,je) &
                                        - mass(js)/mass(is) &
@@ -348,7 +348,7 @@ contains
                       do jx=1, n_xi
                          do ie=1,n_energy
                             do je=1, n_energy
-                               if (abs(rs(is,js)) > 1.0e-12) then
+                               if (abs(rs(is,js)) > epsilon(0.)) then
                                   cfield(is,js,ix,jx,ie,je) &
                                        = cfield(is,js,ix,jx,ie,je) &
                                        - mass(js)/mass(is) &
