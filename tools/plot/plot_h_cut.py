@@ -16,10 +16,11 @@ n_radial  = int(data[1])
 n_theta   = int(data[2])
 n_energy  = int(data[3])
 n_xi      = int(data[4])
+m_box     = int(data[5])
 
-indx_r = np.array(data[5:5+n_radial],dtype=int)
+indx_r = np.array(data[6:6+n_radial],dtype=int)
 
-mark  = 5+n_radial
+mark  = 6+n_radial
 theta = np.array(data[mark:mark+n_theta])
 
 mark   = mark+n_theta

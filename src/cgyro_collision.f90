@@ -50,7 +50,7 @@ contains
              do js=1,n_species
 
                 xa = sqrt(energy(ie))
-                xb = xa * vth(is)**2 / vth(js)**2
+                xb = xa * vth(is) / vth(js)
                 tauinv_ab = nu(is) * (1.0*Z(js))**2 / (1.0*Z(is))**2 &
                      * dens(js)/dens(is)
 
@@ -324,7 +324,14 @@ contains
                               * 2.0*energy(ie) 
                       enddo
                    enddo
-                   !print *, 'rs', rs(is,js)
+                   print *, 'rs', rs(is,js), &
+                        -dens(is)*temp(is)*3.0*(vth(is)/vth(js)) &
+                        /(1+ (vth(is)/vth(js))**2)**2.5 &
+                        * (temp(is)/temp(js) + (vth(is)/vth(js))**2) &
+                        * 4.0/(3.0*sqrt(pi)) &
+                        * nu(is) * (1.0*Z(js))**2 / (1.0*Z(is))**2 &
+                        * dens(js)/dens(is) &
+                        * 4.0/ temp(is)
                 enddo
              enddo
 
