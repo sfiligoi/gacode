@@ -23,7 +23,7 @@ contains
     real, dimension(:,:,:,:), allocatable :: rsvec, rsvec_t
     real, external :: derf
     real :: xa, xb, tauinv_ab
-    real :: sum_den
+    real :: sum_den, fac
     integer :: jv
     integer :: is,ir,it,ix,ie,js,je,jx,ks
     ! parameters for matrix solve
@@ -112,7 +112,6 @@ contains
                         + (1.0/(2.0*xb*xb)) * DERF(xb)) &
                         + vth(is)/vth(js) * (2.0*exp(-xb*xb)/(xb**2*sqrt(pi)) &
                         + 2.0*exp(-xb*xb)/sqrt(pi) - DERF(xb)/xb**3))
-
                 end select
 
              enddo
@@ -158,28 +157,38 @@ contains
                          ! Diffusion
                          if(collision_model == 4) then
                             if(collision_ene_diffusion == 1) then
+                               ! only for like-species
+                               if(is == js) then
+                                  fac = 1.0
+                               else
+                                  fac = 0.0
+                               endif
                                if (ix==jx) then
                                   if(ie == je) then
                                      ctest(is,js,ix,jx,ie,je) &
                                           = ctest(is,js,ix,jx,ie,je) &
-                                          + (1.0-temp(is)/temp(js)) &
+                                          + fac*((1.0-temp(is)/temp(js)) &
                                           * (-nu_par_deriv(ie,is,js) &
                                           * energy(ie)**1.5 & 
                                           + nu_par(ie,is,js) & 
                                           * (2.0*energy(ie)**2 &
-                                          - 5.0*energy(ie)))
+                                          - 5.0*energy(ie))))
                                   endif
                                   ctest(is,js,ix,jx,ie,je) &
                                        = ctest(is,js,ix,jx,ie,je) &
-                                       + (nu_par(ie,is,js) * 0.5 * energy(ie) &
-                                       * e_deriv2_mat(ie,je) / e_max &
-                                       + e_deriv1_mat(ie,je)/sqrt(1.0*e_max) &
+                                       + fac &
+                                       * nu_par(ie,is,js) * 0.5 *energy(ie) &
+                                       * e_deriv2_mat(ie,je) / e_max
+                                  ctest(is,js,ix,jx,ie,je) &
+                                       = ctest(is,js,ix,jx,ie,je) &
+                                       + fac &
+                                       * e_deriv1_mat(ie,je)/sqrt(1.0*e_max) &
                                        * (nu_par_deriv(ie,is,js) &
                                        * 0.5*energy(ie) &
                                        + nu_par(ie,is,js) &
                                        * (2.0*sqrt(energy(ie)) &
                                        + (temp(is)/temp(js)-2.0) &
-                                       * energy(ie)**1.5))) 
+                                       * energy(ie)**1.5))
                                endif
                             endif
                          endif
@@ -314,6 +323,7 @@ contains
                          enddo
                       enddo
                    enddo
+                   rsvec(is,js,:,:)=1.0
                    
                    ! int v^2 C_test_ab(v^2 f0a,f0b) / (n_0a vth_a^4)
                    rs(is,js) = 0.0
@@ -324,28 +334,14 @@ contains
                               * 2.0*energy(ie) 
                       enddo
                    enddo
-                   print *, 'rs', rs(is,js), &
-                        -dens(is)*temp(is)*3.0*(vth(is)/vth(js)) &
-                        /(1+ (vth(is)/vth(js))**2)**2.5 &
-                        * (temp(is)/temp(js) + (vth(is)/vth(js))**2) &
-                        * 4.0/(3.0*sqrt(pi)) &
-                        * nu(is) * (1.0*Z(js))**2 / (1.0*Z(is))**2 &
-                        * dens(js)/dens(is) &
-                        * 4.0/ temp(is)
-                enddo
-             enddo
-
-             do is=1,n_species
-                do js=1, n_species  
-                   sum_den = 0.0
-                   do ix=1,n_xi
-                      do ie=1,n_energy
-                         if(abs(rsvec(is,js,ix,ie)) > sum_den) then
-                            sum_den = rsvec(is,js,ix,ie)
-                         endif
-                      enddo
-                   enddo
-                   !print *, sum_den
+                   !sum_den = -dens(is)*temp(is)*3.0*(vth(is)/vth(js)) &
+                   !     /(1+ (vth(is)/vth(js))**2)**2.5 &
+                   !     * (temp(is)/temp(js) + (vth(is)/vth(js))**2) &
+                   !     * 4.0/(3.0*sqrt(pi)) &
+                   !     * nu(is) * (1.0*Z(js))**2 / (1.0*Z(is))**2 &
+                   !     * dens(js)/dens(is) &
+                   !     * 4.0/ temp(is)
+                   !print *, is, js, 1-rs(is,js)/sum_den                       
                 enddo
              enddo
 
@@ -375,43 +371,6 @@ contains
           endif
 
        end select             
-
-       do is=1,n_species
-          do js=1, n_species
-             sum_den=0.0
-             do ix=1,n_xi
-                do jx=1, n_xi
-                   do ie=1,n_energy
-                      do je=1, n_energy
-                         if(abs(ctest(is,js,ix,jx,ie,je)) > abs(sum_den)) then
-                            sum_den = ctest(is,js,ix,jx,ie,je)
-                         endif
-                      enddo
-                   enddo
-                enddo
-             enddo
-             !print *, 'test', sum_den
-          enddo
-       enddo
-
-       do is=1,n_species
-          do js=1, n_species
-             sum_den=0.0
-             do ix=1,n_xi
-                do jx=1, n_xi
-                   do ie=1,n_energy
-                      do je=1, n_energy
-                         if(abs(cfield(is,js,ix,jx,ie,je)) > abs(sum_den)) then
-                            sum_den = cfield(is,js,ix,jx,ie,je)
-                         endif
-                      enddo
-                   enddo
-                enddo
-             enddo
-             !print *, 'field', sum_den
-          enddo
-       enddo
-
 
        allocate(cmat(nv,nv,nc_loc))
        allocate(cvec(nv))
