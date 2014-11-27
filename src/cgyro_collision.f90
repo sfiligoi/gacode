@@ -12,6 +12,8 @@ contains
 
   subroutine COLLISION_alloc(flag)
 
+    use timer_lib
+
     use cgyro_globals
     use cgyro_equilibrium, only : omega_trap, k_perp
 
@@ -44,6 +46,8 @@ contains
        nu_s(:,:,:) = 0.0
        nu_par(:,:,:) = 0.0
        nu_par_deriv(:,:,:) = 0.0
+
+       call timer_lib_in('coll_set1')
 
        do ie=1,n_energy
           do is=1,n_species
@@ -122,7 +126,7 @@ contains
        allocate(cfield(n_species,n_species,n_xi,n_xi,n_energy,n_energy))
        ctest  = 0.0
        cfield = 0.0
-       
+
        allocate(rs(n_species,n_species))
        allocate(rsvec(n_species,n_species,n_xi,n_energy))
        allocate(rsvec_t(n_species,n_species,n_xi,n_energy))
@@ -134,9 +138,9 @@ contains
                 do jx=1, n_xi
                    do ie=1,n_energy
                       do je=1, n_energy
-                                           
+
                          if (ie==je) then
-                            
+
                             ! Lorentz
                             ctest(is,js,ix,jx,ie,je) &
                                  = ctest(is,js,ix,jx,ie,je) &
@@ -202,7 +206,7 @@ contains
 
        ! Collision field particle component
        select case (collision_model)
-          
+
        case(1,2,3)
           if(collision_mom_restore == 1) then
              do is=1,n_species
@@ -240,7 +244,7 @@ contains
           endif
 
        case(4)
-          
+
           ! Momentum Restoring
 
           if(collision_mom_restore == 1) then
@@ -324,7 +328,7 @@ contains
                       enddo
                    enddo
                    rsvec(is,js,:,:)=1.0
-                   
+
                    ! int v^2 C_test_ab(v^2 f0a,f0b) / (n_0a vth_a^4)
                    rs(is,js) = 0.0
                    do ix=1,n_xi
@@ -370,7 +374,7 @@ contains
              enddo
           endif
 
-       end select             
+       end select
 
        allocate(cmat(nv,nv,nc_loc))
        allocate(cvec(nv))
@@ -389,11 +393,15 @@ contains
           sum_den = sum_den + dens_ele / temp_ele
        endif
 
+       call timer_lib_out('coll_set1')
+
        ! matrix solve parameters
        allocate(work(nv))
        allocate(i_piv(nv))
        allocate(amat(nv,nv))
        allocate(bmat(nv,nv))
+
+       call timer_lib_in('coll_set2')
 
        ! set-up the collision matrix
        ic_loc = 0
@@ -519,6 +527,8 @@ contains
           cmat(:,:,ic_loc) = bmat(:,:)
 
        enddo
+
+       call timer_lib_out('coll_set2')
 
        deallocate(amat)
        deallocate(bmat)
