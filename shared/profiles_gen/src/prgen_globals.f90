@@ -79,8 +79,14 @@ module prgen_globals
   real, dimension(:,:), allocatable :: vec
   real, dimension(:,:), allocatable :: vec2
 
-  character (len=70), dimension(5) :: ion_name
-  
+  ! Ion name,type,mass,charge
+  character (len=6), dimension(5) :: ion_name
+  character (len=7), dimension(5) :: ion_type
+  real, dimension(5) :: ion_mass
+  integer, dimension(5) :: ion_z
+  character (len=7) :: type_therm = '[therm]'
+  character (len=7) :: type_fast  = '[fast] '
+
   real :: quasi_err
   real :: pow_e_err
   real :: pow_i_err
@@ -102,10 +108,9 @@ module prgen_globals
   character (len=2), dimension(5) :: onetwo_namep
   character (len=2), dimension(5) :: onetwo_namei
   character (len=2), dimension(5) :: onetwo_nameb
-  character (len=2), dimension(16) :: onetwo_ion_name
-  real, dimension(16) :: onetwo_z
-  real, dimension(16) :: onetwo_m
-  character (len=5), dimension(16)  :: onetwo_type
+  character (len=2), dimension(15) :: onetwo_ion_name
+  real, dimension(5) :: onetwo_m
+  integer, dimension(5) :: onetwo_z
   real :: onetwo_time
   real :: onetwo_Rgeom
   real :: onetwo_Rmag
@@ -249,9 +254,9 @@ module prgen_globals
   real, dimension(:), allocatable :: peqdsk_nb
   real, dimension(:), allocatable :: peqdsk_pb
   integer :: peqdsk_fmt, peqdsk_nion, peqdsk_nimp, peqdsk_nbeams
-  real, dimension(:), allocatable :: peqdsk_z
-  real, dimension(:), allocatable :: peqdsk_m
-  character (len=5), dimension(5)  :: peqdsk_type
+  real, dimension(5) :: peqdsk_z
+  real, dimension(5) :: peqdsk_m
+  character (len=7), dimension(5)  :: peqdsk_type
   !---------------------------------------------------------
 
   !---------------------------------------------------------

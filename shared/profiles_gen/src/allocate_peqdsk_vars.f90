@@ -14,7 +14,5 @@ subroutine allocate_peqdsk_vars
   allocate(peqdsk_pb(peqdsk_nj))
   allocate(peqdsk_omegat(peqdsk_nj))
   allocate(peqdsk_omgeb(peqdsk_nj))
-  allocate(peqdsk_z(5))
-  allocate(peqdsk_m(5))
 
 end subroutine allocate_peqdsk_vars

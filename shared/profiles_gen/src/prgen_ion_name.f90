@@ -2,7 +2,7 @@ subroutine prgen_ion_name(m,z,name)
 
   integer, intent(in) :: m
   integer, intent(in) :: z
-  character (len=3), intent(inout) :: name
+  character (len=6), intent(inout) :: name
 
   select case (m)
 
@@ -18,7 +18,7 @@ subroutine prgen_ion_name(m,z,name)
      else if (z == 2) then
         name = 'He3'
      else
-        name = '?'
+        name = 'LUMPED'
      endif
 
   case (4)
@@ -33,11 +33,23 @@ subroutine prgen_ion_name(m,z,name)
   case (12)
      name = 'C'
 
+  case (14)
+     name = 'N'
+
+  case (16)
+     name = 'O'
+
+  case (20)
+     name = 'Ne'
+
   case (40)
      name = 'Ar'
 
+  case (180:188)
+     name = 'W'
+
   case default
-     name ='?'
+     name = 'LUMPED'
 
   end select
 

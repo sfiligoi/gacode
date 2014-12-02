@@ -16,7 +16,7 @@ subroutine prgen_map_iterdb
 
   implicit none
 
-  integer :: i, j
+  integer :: i
   integer :: ip
   integer :: n0
 
@@ -126,79 +126,78 @@ subroutine prgen_map_iterdb
   ! COORDINATES: set sign of poloidal flux
   vec(20,:) = abs(dpsi(:))*(-ipccw)
 
-  !-----------------------------------------------------------------
-  ! Construct ion densities and temperatures with reordering
-  ! in general case.
+  !----------------------------------------------------------------------
+  ! Construct ion densities and temperatures, manage naming and numbering
   !
   onetwo_enion_vec(:,:) = 0.0
-  onetwo_Tion_vec(:,:) = 0.0
+  onetwo_tion_vec(:,:) = 0.0
   do i=1,onetwo_nion
      ! ni
      onetwo_enion_vec(i,:) = onetwo_enion(:,i)*1e-19
      ! Ti
-     onetwo_Tion_vec(i,:) = onetwo_ti(:)
+     onetwo_tion_vec(i,:) = onetwo_ti(:)
   enddo
 
-  ! Beam ions
+  ! Primary ions
+  onetwo_ion_name(1:onetwo_nprim) = onetwo_namep(1:onetwo_nprim)
+  n0 = onetwo_nprim
+
+  ! Impurities
+  onetwo_ion_name(1+n0:onetwo_nimp+n0) = onetwo_namei(1:onetwo_nimp)
+  n0 = n0+onetwo_nimp
+
+  ! Beams
   do i=1,onetwo_nbion
-     if (sum(onetwo_enbeam(:,i))==0) then
-        do j=1,5
-           if (reorder_vec(j)==onetwo_nion+i) then
-              reorder_vec(j) = reorder_vec(j)+1
-           endif
-        enddo
-     else
+     ! Only accept beams of density is everywhere positive
+     if (minval(onetwo_enbeam(:,i)) > epsilon(0.0)) then
+
         print '(a)',"INFO: (prgen) Found fast ion beam species"
         print '(a)',"INFO: (prgen) Modifying fast ion beam temperature to satisfy beam pressure"
-        onetwo_enion_vec(i+onetwo_nion,:) = onetwo_enbeam(:,i)*1e-19
+
+        n0 = n0+1
+
+        onetwo_enion_vec(n0,:) = onetwo_enbeam(:,i)*1e-19
+
         ! Ti: T[keV] = (p/n)[J]/1.6022e-16[J/keV]
-        do j=1,onetwo_nj
-           if (onetwo_enbeam(j,i)>0) then
-              onetwo_Tion_vec(i+onetwo_nion,j) = onetwo_pressb(j,i)/onetwo_enbeam(j,i)/&
-                   1.6022e-16
-           endif
-        enddo
+        onetwo_tion_vec(n0,:) = onetwo_pressb(:,i)/onetwo_enbeam(:,i)/1.6022e-16
+
+        onetwo_ion_name(n0) = onetwo_nameb(i)
+
      endif
   enddo
 
   ! Fast alphas
-  onetwo_enion_vec(1+onetwo_nion+onetwo_nbion,:) = onetwo_enalp(:)*1e-19
-  if (sum(onetwo_enalp(:))==0) then
-     do j=1,5
-        if (reorder_vec(j) >= onetwo_nion+onetwo_nbion+1) then
-           reorder_vec(j) = 0
-        endif
-     enddo
-  else
+  if (minval(onetwo_enalp(:)) > epsilon(0.0)) then
+
      print '(a)',"INFO: (prgen) Found fast alpha species"
      print '(a)',"INFO: (prgen) Modifying fast alpha temperature to satisfy total pressure"
-     onetwo_Tion_vec(1+onetwo_nion+onetwo_nbion,:) = (onetwo_press(:)-&
-          (sum(onetwo_enion_vec(1:onetwo_nion+onetwo_nbion,:)*&
-          onetwo_Tion_vec(1:onetwo_nion+onetwo_nbion,:),dim=1)*1e19+&
-          onetwo_ene(:)*onetwo_te(:))*1.6022e-16)/(onetwo_enalp)/1.6022e-16
+
+     n0 = n0+1
+
+     onetwo_enion_vec(n0,:) = onetwo_enalp(:)*1e-19
+
+     onetwo_tion_vec(n0,:) = (onetwo_press(:)-&
+          (sum(onetwo_enion_vec(1:n0-1,:)*&
+          onetwo_tion_vec(1:n0-1,:),dim=1)*1e19+&
+          onetwo_ene(:)*onetwo_te(:))*1.6022e-16)/(onetwo_enalp(:))/1.6022e-16
+
+     onetwo_ion_name(n0) = 'he'
+
   endif
+
+  onetwo_nion_tot = n0
 
   ! reorder
   do i=1,5
-     if (reorder_vec(i) > onetwo_nion+onetwo_nbion+1) then
-        cycle
-     endif
-     if (reorder_vec(i) == 0) then
-        cycle
-     endif
-     if (any(reorder_vec(1:i-1)==reorder_vec(i))) then
-        reorder_vec(i) = 0
-        cycle
-     endif
-     vec(20+i,:) = onetwo_enion_vec(reorder_vec(i),:)
-     vec(25+i,:) = onetwo_Tion_vec(reorder_vec(i),:)
+     ip = reorder_vec(i)
+     vec(20+i,:) = onetwo_enion_vec(ip,:)
+     vec(25+i,:) = onetwo_tion_vec(ip,:)
   enddo
 
   ! vphi
   vec(31:35,:) = 0.0
 
-  ! Carbon velocity at theta=0 ONLY in typical case
-  ! of one main ion with Carbon impurity
+  ! Look for carbon as first impurity, and insert toroidal velocity at theta=0
 
   allocate(vphi_carbon(nx))
 
@@ -236,7 +235,7 @@ subroutine prgen_map_iterdb
   vec(47,:) = pow_i_aux(:)
   !---------------------------------------------------------
 
-  !---------------------------------------------------
+  !---------------------------------------------------------
   ! Read the cer file and overlay
   !
   if (cer_file /= "null") then
@@ -251,50 +250,12 @@ subroutine prgen_map_iterdb
         endif
      enddo
   endif
-  !---------------------------------------------------
+  !---------------------------------------------------------
 
-  ! Primary ions
-  onetwo_ion_name(1:onetwo_nprim) = onetwo_namep(1:onetwo_nprim)
-  n0 = onetwo_nprim
-
-  ! Impurities
-  onetwo_ion_name(1+n0:onetwo_nimp+n0) = onetwo_namei(1:onetwo_nimp)
-  n0 = n0+onetwo_nimp
-
-  ! Beams
-  onetwo_ion_name(1+n0:onetwo_nbion+n0) = onetwo_nameb(1:onetwo_nbion)
-  n0 = n0+onetwo_nbion
-
-  if ( sum (onetwo_enalp(:)) > 0) then
-     onetwo_ion_name(1+n0) = 'he'
-     onetwo_nion_tot = n0+1
-  else
-     onetwo_nalp = 0
-     onetwo_nion_tot = n0
-  endif
-
-  ! Ion reordering diagnostics
-
-  print '(a)','INFO: (prgen) Found these ion species'
-  do i=1,onetwo_nion_tot
-     if (any(reorder_vec==i)) then
-        do j=1,5
-           if (reorder_vec(j)==i) then
-              ip = j
-              exit
-           endif
-        enddo
-        print '(t6,i2,1x,2(a),i2,a)',&
-             i,trim(onetwo_ion_name(i)),' -> ',ip,trim(onetwo_ion_name(i))
-        ion_name(ip) = onetwo_ion_name(i)
-     else
-        print '(t6,i2,1x,3(a))',&
-             i,trim(onetwo_ion_name(i)),' [unmapped]'
-     endif
-  enddo
-
-  ! Name association
-  onetwo_type(:) = 'thermal'
+  !---------------------------------------------------------
+  ! Ion name association
+  !
+  print '(a)','INFO: (prgen) Found these ion species:'
   do i=1,onetwo_nion_tot
 
      select case(onetwo_ion_name(i))
@@ -318,9 +279,36 @@ subroutine prgen_map_iterdb
         onetwo_m(i) = 0.0
      end select
 
-     if (i > onetwo_nion) onetwo_type(i) = 'fast'
+     print '(t6,i2,1x,a)',i,trim(onetwo_ion_name(i))
 
   enddo
+
+  !
+  ! Reordering
+  !
+
+  print '(a)','INFO: (prgen) Created these species'
+  do i=1,5
+
+     ip = reorder_vec(i)
+
+     if (ip > onetwo_nion_tot) then
+        print '(t6,i2,1x,a)',i,'[null]'
+     else
+        if (ip > onetwo_nion) then
+           ion_type(i) = type_fast
+        else
+           ion_type(i) = type_therm
+        endif
+        print '(t6,i2,1x,a,1x,a)',i,trim(onetwo_ion_name(ip)),ion_type(i)
+        ion_mass(i) = onetwo_m(ip)             
+        ion_z(i)    = onetwo_z(ip)             
+
+        call prgen_ion_name(nint(ion_mass(i)),ion_z(i),ion_name(i))     
+
+     endif
+  enddo
+  !---------------------------------------------------------
 
 end subroutine prgen_map_iterdb
 
