@@ -48,6 +48,13 @@ module le3_globals
   real, dimension(:), allocatable :: deriv_t
   real, dimension(:), allocatable :: deriv_p
 
+  ! "Second order" quantities
+  real, dimension(:,:), allocatable :: dtheta
+  real, dimension(:,:), allocatable :: dchi
+  real, dimension(:,:), allocatable :: dthetap
+  real, dimension(:,:), allocatable :: b1
+  real, dimension(:,:), allocatable :: gc
+
   !--------------------------------------------------------
   ! MINPACK variables
   integer :: info
