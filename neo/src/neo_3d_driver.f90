@@ -9,7 +9,8 @@ module neo_3d_driver
   integer, dimension(:,:,:,:), allocatable, private :: mindx 
   integer, private :: stat
   real, dimension(:,:), allocatable, private :: tpmat_trap, tpmat_stream_dt, &
-       tpmat_stream_dp, tpmat_coll, tpmat_vexb_dt, tpmat_vexb_dp
+       tpmat_stream_dp, tpmat_coll, tpmat_vexb_dt, tpmat_vexb_dp, &
+       tpmat_vdrift_dt, tpmat_vdrift_dp
   real, dimension(:), allocatable, private :: tpvec_vdriftx, tpvec_flux, &
        tpvec_uparB, tpvec_upar, tpvec_fsa, tpvec_thetabar, tpvec_bmag, &
        tpvec_ntv
@@ -40,6 +41,8 @@ contains
     allocate(tpmat_coll(tpmatsize,tpmatsize))
     allocate(tpmat_vexb_dt(tpmatsize,tpmatsize))
     allocate(tpmat_vexb_dp(tpmatsize,tpmatsize))
+    allocate(tpmat_vdrift_dt(tpmatsize,tpmatsize))
+    allocate(tpmat_vdrift_dp(tpmatsize,tpmatsize))
     open(unit=1,file='out.le3.geomatrix',status='old',iostat=stat)
     if(stat .ne. 0) then
        call neo_error('ERROR: (NEO) le3 files not available')
@@ -49,7 +52,8 @@ contains
        do j=1, tpmatsize
           read(1,*) tpmat_trap(i,j), tpmat_stream_dt(i,j), &
                tpmat_stream_dp(i,j), tpmat_coll(i,j), &
-               tpmat_vexb_dt(i,j),   tpmat_vexb_dp(i,j)
+               tpmat_vexb_dt(i,j),   tpmat_vexb_dp(i,j), &
+               tpmat_vdrift_dt(i,j), tpmat_vdrift_dp(i,j)
        enddo
     enddo
 
@@ -104,6 +108,8 @@ contains
     if (allocated(tpmat_coll))           deallocate(tpmat_coll)
     if (allocated(tpmat_vexb_dt))        deallocate(tpmat_vexb_dt)
     if (allocated(tpmat_vexb_dp))        deallocate(tpmat_vexb_dp)
+    if (allocated(tpmat_vdrift_dt))      deallocate(tpmat_vdrift_dt)
+    if (allocated(tpmat_vdrift_dp))      deallocate(tpmat_vdrift_dp)
     if (allocated(tpvec_thetabar))       deallocate(tpvec_thetabar) 
     if (allocated(tpvec_vdriftx))        deallocate(tpvec_vdriftx) 
     if (allocated(tpvec_flux))           deallocate(tpvec_flux)
@@ -299,8 +305,8 @@ contains
              endif
 
              ! Streaming -- d/dtheta and d/dphi
-             fac = sqrt(2.0) * vth(is,ir)
              if(js == is) then
+                fac = sqrt(2.0) * vth(is,ir)
                 if(jx == ix-1 .and. jx >= 0) then
                    ab(iab,j_loc) = ab(iab,j_loc) + fac &
                         * ix/(2*ix-1.0) &
@@ -318,8 +324,8 @@ contains
              endif
 
              ! Trapping 
-             fac  = sqrt(0.5) * vth(is,ir)
              if(js == is) then
+                fac  = sqrt(0.5) * vth(is,ir)
                 if(jx == ix-1 .and. jx >= 0) then
                    ab(iab,j_loc) = ab(iab,j_loc) + fac &
                         * ix*(ix-1.0)/(2*ix-1.0) &
@@ -342,6 +348,31 @@ contains
                         * emat_e0(ie,je,ix,1) &
                         * (tpmat_vexb_dt(it,jt) &
                         + tpmat_vexb_dp(it,jt))
+                endif
+             endif
+
+             if(threed_drift_model == 1) then
+                if(js == is) then
+                   fac = rho(ir)*mass(is)/(1.0*Z(is)) * (vth(is,ir))**2
+                   if(jx == ix-2 .and. jx >= 0) then
+                      ab(iab,j_loc) = ab(iab,j_loc) + fac &
+                           * (ix)*(ix-1.0)/((2*ix-3.0)*(2*ix-1.0)) &
+                           * (tpmat_vdrift_dt(it,jt) + tpmat_vdrift_dp(it,jt))&
+                           * emat_e1(ie,je,ix,1)
+                   endif
+                   if(jx == ix) then
+                      ab(iab,j_loc) = ab(iab,j_loc) + fac &
+                           * (1.0 + (ix+1.0)**2/((2*ix+1.0)*(2*ix+3.0)) &
+                           + ix**2/((2*ix+1.0)*(2*ix-1.0))) &
+                           * (tpmat_vdrift_dt(it,jt) + tpmat_vdrift_dp(it,jt))&
+                           * emat_e1(ie,je,ix,2)
+                   endif
+                   if(jx == ix+2 .and. jx <= n_xi) then
+                      ab(iab,j_loc) = ab(iab,j_loc) + fac &
+                           * (ix+1.0)*(ix+2.0)/((2*ix+3.0)*(2*ix+5.0)) &
+                           * (tpmat_vdrift_dt(it,jt) + tpmat_vdrift_dp(it,jt))&
+                           * emat_e1(ie,je,ix,3)
+                   endif
                 endif
              endif
 
