@@ -83,6 +83,7 @@ program le3
 
   call le3_geometry
   call le3_geometry_rho
+  call le3_geometry_matrix
 
   call le3_alloc(0)
   if(equilibrium_model == 1) then

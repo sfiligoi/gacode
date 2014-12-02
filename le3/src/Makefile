@@ -17,6 +17,7 @@ OBJECTS = le3_globals.o \
           le3_rz.o \
           le3_geometry.o \
           le3_geometry_rho.o \
+	  le3_geometry_matrix.o \
           $(EXEC).o
 
 .SUFFIXES : .o .f90

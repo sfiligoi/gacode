@@ -204,22 +204,5 @@ subroutine le3_geometry_rho
   deallocate(sys_m)
   deallocate(sys_b)
   deallocate(i_piv)
-  deallocate(itype)
-  deallocate(m_indx)
-  deallocate(n_indx)
-
-  deallocate(g)
-  deallocate(gpp)
-  deallocate(gtt)
-  deallocate(gpt)
-  deallocate(cosu)
-  deallocate(btor)
-  deallocate(bpol)
-  deallocate(bmag)
-  deallocate(dbdt)
-  deallocate(dbdp)
-  deallocate(dgdp)
-  deallocate(deriv_t)
-  deallocate(deriv_p)
 
 end subroutine le3_geometry_rho

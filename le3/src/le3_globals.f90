@@ -63,13 +63,15 @@ module le3_globals
   real, dimension(:,:), allocatable :: bmag
   real, dimension(:,:), allocatable :: bdotgrad
   real, dimension(:,:), allocatable :: bdotgradB_overB
-  real, dimension(:,:), allocatable :: vdrift_x,dgdp,vexb_dt,vexb_dp
+  real, dimension(:,:), allocatable :: dgdp,vexb_dt,vexb_dp
+  real, dimension(:,:), allocatable :: vdrift_x, vdrift_dt, vdrift_dp
   real, dimension(:,:), allocatable :: g
   real, dimension(:,:), allocatable :: mat_stream_dt
   real, dimension(:,:), allocatable :: mat_stream_dp
   real, dimension(:,:), allocatable :: mat_trap
   real, dimension(:,:), allocatable :: mat_coll
   real, dimension(:,:), allocatable :: mat_vexb_dt, mat_vexb_dp
+  real, dimension(:,:), allocatable :: mat_vdrift_dt, mat_vdrift_dp
   real :: vprime
   integer :: matsize
   integer :: indx_c00
