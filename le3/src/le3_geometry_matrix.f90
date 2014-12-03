@@ -207,6 +207,12 @@ subroutine le3_geometry_matrix
   write (1,'(e16.8)') q
   close(1)
 
+  open(unit=1,file='out.le3.geoindx',status='replace')
+  do i=1,matsize
+     write (1,'(i2,i2)') m_indx(i), n_indx(i)
+  enddo
+  close(1)
+
   ! Map to Boozer coordinates
 
   ! J: B ~ J(psi) grad phi
