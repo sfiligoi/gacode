@@ -81,12 +81,7 @@ contains
        write(1,*) n_species
        write(1,*) n_energy
        write(1,*) n_xi
-       write(1,*) n_tptheta
-       write(1,*) n_tpvarphi
-       write(1,*) n_radial
-       do ir=1, n_radial
-          write(1,*) r(ir)
-       enddo
+       write(1,*) tpmatsize
        close(1)
        
        open(unit=1,file=trim(path)//runfile_f,status='replace')
