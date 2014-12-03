@@ -104,7 +104,11 @@ contains
        enddo
     enddo
 
-    allocate(gall(n_species,0:n_energy,n_theta,nxi))
+    if(threed_model == 1) then
+       allocate(gall(n_species,0:n_energy,tpmatsize,nxi))
+    else
+       allocate(gall(n_species,0:n_energy,n_theta,nxi))
+    endif
     gall(:,:,:,:) = 0.0
 
     do jx=1,nxi
