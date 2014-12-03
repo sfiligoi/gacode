@@ -420,7 +420,7 @@ contains
 
     if(silent_flag == 0 .and. i_proc == 0) then
        open(1,file=trim(path)//runfile_f,status='old',position='append')
-       write(1,*) g(:)
+       write(1,'(1pe12.5)') g(:)
        close(1)
     endif
 
