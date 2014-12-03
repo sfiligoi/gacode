@@ -357,20 +357,20 @@ contains
                    if(jx == ix-2 .and. jx >= 0) then
                       ab(iab,j_loc) = ab(iab,j_loc) + fac &
                            * (ix)*(ix-1.0)/((2*ix-3.0)*(2*ix-1.0)) &
-                           * (tpmat_vdrift_dt(it,jt) + tpmat_vdrift_dp(it,jt))&
+                           * (0.0*tpmat_vdrift_dt(it,jt) + tpmat_vdrift_dp(it,jt))&
                            * emat_e1(ie,je,ix,1)
                    endif
                    if(jx == ix) then
                       ab(iab,j_loc) = ab(iab,j_loc) + fac &
                            * (1.0 + (ix+1.0)**2/((2*ix+1.0)*(2*ix+3.0)) &
                            + ix**2/((2*ix+1.0)*(2*ix-1.0))) &
-                           * (tpmat_vdrift_dt(it,jt) + tpmat_vdrift_dp(it,jt))&
+                           * (0.0*tpmat_vdrift_dt(it,jt) + tpmat_vdrift_dp(it,jt))&
                            * emat_e1(ie,je,ix,2)
                    endif
                    if(jx == ix+2 .and. jx <= n_xi) then
                       ab(iab,j_loc) = ab(iab,j_loc) + fac &
                            * (ix+1.0)*(ix+2.0)/((2*ix+3.0)*(2*ix+5.0)) &
-                           * (tpmat_vdrift_dt(it,jt) + tpmat_vdrift_dp(it,jt))&
+                           * (0.0*tpmat_vdrift_dt(it,jt) + tpmat_vdrift_dp(it,jt))&
                            * emat_e1(ie,je,ix,3)
                    endif
                 endif
