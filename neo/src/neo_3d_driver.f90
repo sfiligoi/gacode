@@ -120,6 +120,7 @@ contains
 
     use neo_globals
     use neo_energy_grid
+    use neo_g_velocitygrids
 
     implicit none
     integer, intent(in)  :: ir
@@ -418,6 +419,8 @@ contains
        write(1,'(1pe12.5)') g(:)
        close(1)
     endif
+
+    call g_xi
 
 
 100 continue
