@@ -89,10 +89,11 @@ contains
     real, dimension(:,:,:,:), allocatable :: gall
     integer, parameter :: nxi=100
     integer, parameter :: io=51
+    real :: eps=0.001
     
     allocate(xi(nxi))
     do jx=1, nxi
-       xi(jx) = -1.0 + (jx-1)*2.0/(nxi-1)
+       xi(jx) = (-1.0+eps) + (jx-1)*(2.0-2.0*eps)/(nxi-1)
     enddo
     
     allocate(xval(0:n_xi,nxi))

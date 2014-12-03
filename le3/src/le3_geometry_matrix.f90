@@ -209,7 +209,7 @@ subroutine le3_geometry_matrix
 
   open(unit=1,file='out.le3.geoindx',status='replace')
   do i=1,matsize
-     write (1,'(i2,i2)') m_indx(i), n_indx(i)
+     write (1,'(i2,i2,i2)') itype(i),m_indx(i), n_indx(i)
   enddo
   close(1)
 
