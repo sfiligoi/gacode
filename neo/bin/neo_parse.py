@@ -142,7 +142,7 @@ x.add('THREED_DRIFT_MODEL','0')
 x.add('SCALAPACK_FLAG','0')
 x.add('LAGUERRE_METHOD','1')
 x.add('WRITE_CMOMENTS_FLAG','0')
-x.add('THREED_ALPHA','0')
+x.add('THREED_HYPERXI','0')
        	
 # Deprecated parameters
 x.dep('NU_2','Only NU_1 is input now.  NU for other species is computed internally.')

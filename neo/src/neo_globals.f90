@@ -108,7 +108,7 @@ module neo_globals
   integer :: threed_exb_model
   real    :: threed_exb_dphi0dr
   integer :: threed_drift_model
-  real    :: threed_alpha
+  real    :: threed_hyperxi
   !
   ! 3D grid dimensions (out.le3.geoscalar)
   integer :: tpmatsize

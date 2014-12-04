@@ -301,9 +301,12 @@ contains
              endif
 
              ! hypervisc term
-             if(is==js .and. ix==jx .and. ie==je .and. it==jt) then
-                ab(iab,j_loc) = ab(iab,j_loc) &
-                     + threed_alpha*(1.0*ix/(1.0*n_xi))**n_xi
+             if(is==js .and. ix==jx) then
+                if(abs(tpmat_coll(it,jt)) > 1e-12) then
+                   ab(iab,j_loc) = ab(iab,j_loc) &
+                        + threed_hyperxi*(1.0*ix/(1.0*n_xi))**n_xi &
+                        * tpmat_coll(it,jt) * emat_e0(ie,je,ix,1)
+                endif
              endif
 
              ! Streaming -- d/dtheta and d/dphi

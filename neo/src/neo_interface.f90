@@ -146,6 +146,7 @@ module neo_interface
   integer :: neo_threed_exb_model_in = 0
   real    :: neo_threed_exb_dphi0dr_in = 0.0
   integer :: neo_threed_drift_model_in = 0
+  real    :: neo_threed_hyperxi_in = 0.0
   integer :: neo_scalapack_flag_in = 0
   integer :: neo_laguerre_method_in = 1
   integer :: neo_write_cmoments_flag_in = 0
@@ -323,6 +324,7 @@ contains
     neo_threed_exb_model_in = threed_exb_model
     neo_threed_exb_dphi0dr_in = threed_exb_dphi0dr
     neo_threed_drift_model_in = threed_drift_model
+    neo_threed_hyperxi_in = threed_hyperxi
     neo_scalapack_flag_in = scalapack_flag 
     neo_laguerre_method_in = laguerre_method 
     neo_write_cmoments_flag_in = write_cmoments_flag 
@@ -469,6 +471,7 @@ contains
     threed_exb_model = neo_threed_exb_model_in
     threed_exb_dphi0dr = neo_threed_exb_dphi0dr_in
     threed_drift_model = neo_threed_drift_model_in
+    threed_hyperxi = neo_threed_hyperxi_in
     scalapack_flag = neo_scalapack_flag_in 
     laguerre_method = neo_laguerre_method_in
     write_cmoments_flag = neo_write_cmoments_flag_in 
