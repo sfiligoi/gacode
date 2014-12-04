@@ -89,7 +89,7 @@ subroutine neo_read_input
   read(1,*) scalapack_flag
   read(1,*) laguerre_method
   read(1,*) write_cmoments_flag
-  read(1,*) alpha
+  read(1,*) threed_alpha
 
   close(1)
 

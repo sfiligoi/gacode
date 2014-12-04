@@ -302,7 +302,8 @@ contains
 
              ! hypervisc term
              if(is==js .and. ix==jx .and. ie==je .and. it==jt) then
-                ab(iab,j_loc) = ab(iab,j_loc) + alpha*(1.0*ix/(1.0*n_xi))**n_xi
+                ab(iab,j_loc) = ab(iab,j_loc) &
+                     + threed_alpha*(1.0*ix/(1.0*n_xi))**n_xi
              endif
 
              ! Streaming -- d/dtheta and d/dphi
