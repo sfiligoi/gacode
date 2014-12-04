@@ -289,6 +289,8 @@ subroutine cgyro_rhs_nl(ij)
   deallocate( g)
   deallocate(fg)
 
+  ! RHS -> -[f,g] = (n'' p' - n' p'') f'' g' 
+
   rhs(ij,:,:) = rhs(ij,:,:)+(q*rho/rmin)*(2*pi/length)*psi(:,:)
 
 end subroutine cgyro_rhs_nl

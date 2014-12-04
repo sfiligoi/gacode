@@ -181,6 +181,7 @@ subroutine cgyro_check
 
      write(io_run,*) 
      write(io_run,'(a,f6.2,a,f6.2)') '(Lx,Ly)/rho',length/rho,',',2*pi/ky
+     write(io_run,'(a,1pe12.5)') 'rho = ',rho
      write(io_run,*) 
      if (n_toroidal == 1) then
         write(io_run,20) 'ky*rho',ky
