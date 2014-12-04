@@ -3,8 +3,9 @@ import numpy as np
 from gacodeplotdefs import *
 
 ftype = sys.argv[1]
-itime = int(sys.argv[2])
-ispec = int(sys.argv[3])
+ie    = int(sys.argv[2])
+n0    = int(sys.argv[3])
+dir   = sys.argv[4]
 
 #-------------------------------------------------------
 # Read grid dimension and axes
@@ -12,99 +13,64 @@ ispec = int(sys.argv[3])
 data = np.loadtxt('out.neo.grid_3d')
 
 n_species = int(data[0])
-n_energy  = int(data[1])
-n_xi      = int(data[2])
-tpmatsize = int(data[3])
+n_energy  = int(data[1])+1
+nxi       = 100
+msize     = int(data[3])
+#-------------------------------------------------------
+
+#-------------------------------------------------------
+# (m,n) indices
+#
+indx = np.loadtxt('out.le3.geoindx',dtype=int)
 #-------------------------------------------------------
 
 #-------------------------------------------------------
 # Read H
 #
-data = np.loadtxt('out.cgyro.hx')
-hx = np.reshape(data,(2,n_radial*n_theta,n_species,n_xi,n_energy),'F')
-hx = hx/np.max(hx)
+data = np.loadtxt('out.neo.gxi_3d')
+fx = np.reshape(data,(nxi,msize,n_energy,n_species),'F')
+fx = fx/np.max(fx)
 #-------------------------------------------------------
 
-fig = plt.figure(figsize=(12,12))
+#-------------------------------------------------------
+# Read xi grid
+#
+xi = np.loadtxt('out.neo.gxi_3d_x')
+#-------------------------------------------------------
+
+fig = plt.figure(figsize=(14,14))
 fig.subplots_adjust(left=0.07,right=0.95,top=0.94,bottom=0.06,wspace=0.25,hspace=0.32)
-fig.suptitle(r'${\rm species}='+str(ispec)+'$')
+fig.suptitle(r'$\mathbf{dir}$')
 
-p = 0
-for row in range(3):
+nm = int(max(indx[:,1]))+1
+nn = int(max(indx[:,2]))+1
 
-    p = p+1
+if nm <= 4:
+    k=2
+elif nm <= 9:
+    k=3
+elif nm <= 16:
+    k=4
 
-    if row == 0:
-        ie = 0
-        ix = 0
-    if row == 1:
-        ie = n_energy/2
-        ix = n_xi/2
-    if row == 2:
-        ie = n_energy-1
-        ix = n_xi-1
+colors = ['black','red','magenta','blue']
 
-    #======================================
-    ax = fig.add_subplot(3,3,p)
-    ax.grid(which="majorminor",ls=":")
-    ax.grid(which="major",ls=":")
+init = np.zeros([nm],dtype=int)
 
-    ax.set_title(r'$\xi=0 \quad {\rm ie}='+str(ie)+'$')
-    ax.set_xlabel(r'$\theta/\pi$')
+for p in range(msize):
+    i = indx[p,0]
+    m = indx[p,1]
+    n = indx[p,2]
+    if n == n0:
+        if init[m] == 0:
+            ax = fig.add_subplot(k,k,m+1)
+            ax.grid(which="majorminor",ls=":")
+            ax.grid(which="major",ls=":")
+            ax.set_title(r'$(m,n)=('+str(m)+','+str(n)+')$')
+            ax.set_xlabel(r'$\xi = v_\parallel/v$')
+            init[m] = 1
 
-    if n_xi%2 == 0:
-        hp = np.array(hx[:,:,ispec,n_xi/2,ie]+hx[:,:,ispec,n_xi/2-1,ie])*0.5
-    else:
-        hp = np.array(hx[:,:,ispec,n_xi/2,ie])
- 
-    ax.plot(thetab/np.pi,hp[0,:],'-o',color='black',markersize=2)
-    ax.plot(thetab/np.pi,hp[1,:],'-o',color='blue',markersize=2)
-
-    if n_radial > 1:
-        ax.set_xlim([1-n_radial,-1+n_radial])
-    else:
-        ax.set_xlim([1,3])
-
-    #======================================
-
-    p = p+1
-
-    #======================================
-    ax = fig.add_subplot(3,3,p)
-    ax.grid(which="majorminor",ls=":")
-    ax.grid(which="major",ls=":")
-
-    ax.set_title(r'$\theta=0 \quad {\rm ie}='+str(ie)+'$')
-    ax.set_xlabel(r'$\xi = v_\parallel/v$')
-
-    n0 = (n_radial/2)*n_theta+n_theta/2 
-
-    hp = np.array(hx[0,:,ispec,:,ie])
-    ax.plot(xi,hp[n0,:],'-o',color='black',markersize=2)
-    hp = np.array(hx[1,:,ispec,:,ie])
-    ax.plot(xi,hp[n0,:],'-o',color='blue',markersize=2)
-    ax.set_xlim([-1,1])
-    #======================================
-
-    p = p+1
-
-    #======================================
-    ax = fig.add_subplot(3,3,p)
-    ax.grid(which="majorminor",ls=":")
-    ax.grid(which="major",ls=":")
-
-    ax.set_title(r'$\theta=0 \quad {\rm ix}='+str(ix)+'$')
-    ax.set_xlabel(r'$x=\sqrt{\varepsilon}$')
-
-    n0 = (n_radial/2)*n_theta+n_theta/2
-
-    hp = np.array(hx[0,:,ispec,ix,:])
-    ax.plot(np.sqrt(energy),hp[n0,:],'-o',color='black',markersize=2)
-    #ax.plot(np.sqrt(energy),hp[n0,:]*np.exp(-energy),'-o',color='black',markersize=2)
-    hp = np.array(hx[1,:,ispec,ix,:])
-    ax.plot(np.sqrt(energy),hp[n0,:],'-o',color='blue',markersize=2)
-    #ax.plot(np.sqrt(energy),hp[n0,:]*np.exp(-energy),'-o',color='blue',markersize=2)
-    #======================================
+        fp = np.array(fx[:,p,ie,0])
+        ax.plot(xi,fp,'-',color=colors[i-1],markersize=2)
 
 if ftype == 'screen':
     plt.show()

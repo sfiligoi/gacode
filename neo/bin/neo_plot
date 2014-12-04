@@ -23,14 +23,14 @@ then
   echo "          -e <simdir>"
   echo "          Use data in <simdir>."
   echo 
+  echo "          -ie <n>"
+  echo "          Energy index (if applicable)"
+  echo 
   echo "          -plot <type>"
   echo "          Generate plot of given type."
   echo "          If this keyword is omitted, data will be listed to the screen."
   echo "           <type> = xtsurf"
   echo "                  = f3x (plots of pitch-angle dependence in 3D NEO)."
-  echo
-  echo "          -i"
-  echo "          Use python in interactive mode.  Useful if matplotlibrc has interactive:True  "
   echo
   echo "Example:"
   echo
@@ -48,7 +48,8 @@ LOCDIR=.
 SIMROOT=$PWD
 PLOT_TYPE=xtsurf
 FTYPE=screen
-INTERACTIVE=
+IE=0
+N=0
 #==============================================================================
 
 #==============================================================================
@@ -65,7 +66,9 @@ while [ $# -gt 0 ] ; do
 
   -img) shift ; FTYPE=$1 ;;
   
-  -i) INTERACTIVE=-i ;;
+  -ie) shift ; IE=$1 ;;
+
+  -n) shift ; N=$1 ;;
 
   *) echo "ERROR: incorrect neo_plot syntax." ; exit 1 ;;
 
@@ -86,9 +89,10 @@ cd $SIMDIR
 case "$PLOT_TYPE" in
 
    xtsurf)  
-	python $INTERACTIVE $GACODE_ROOT/neo/bin/neo_plot_xtsurf.py $SIMDIR $FTYPE  ;;
+	python $GACODE_ROOT/neo/bin/neo_plot_xtsurf.py $SIMDIR $FTYPE  ;;
+
    f3x)  
-	python $INTERACTIVE $GACODE_ROOT/neo/bin/neo_plot_f3x.py $SIMDIR $FTYPE  ;;
+	python $GACODE_ROOT/neo/bin/neo_plot_f3x.py $FTYPE $IE $N $LOCDIR ;;
    
 esac 
 
