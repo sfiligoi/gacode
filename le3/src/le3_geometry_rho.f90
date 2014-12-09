@@ -202,7 +202,7 @@ subroutine le3_geometry_rho
   ! Compute additional quantities required for GK drifts:
   !
   ! b1   -> B1/Bs
-  ! g_cp -> g_cp + i g_ct
+  ! g_c -> g_cp + i g_ct
 
   do j=1,np
      do i=1,nt
@@ -259,17 +259,17 @@ subroutine le3_geometry_rho
      GEO_zeta_in = zeta
      GEO_s_zeta_in = s_zeta
      GEO_beta_star_in = beta_star
-     call GEO_alloc(1)
-     call GEO_do()
-     open(unit=1,file='out.miller',status='replace')
-     do i=1,n_theta
-        theta = (i-1)*2*pi/(n_theta-1)-pi
-        call GEO_interp(theta)
-        print '(2(1pe12.5,1x))', GEO_theta_s,GEO_chi2
-        write(1,*) GEO_theta_s,GEO_chi2
-     enddo
-     close(1)
-     call GEO_alloc(0)
+     !call GEO_alloc(1)
+     !call GEO_do()
+     !open(unit=1,file='out.miller',status='replace')
+     !do i=1,n_theta
+     !   theta = (i-1)*2*pi/(n_theta-1)-pi
+     !   call GEO_interp(theta)
+     !   print '(2(1pe12.5,1x))', GEO_theta_s,GEO_chi2
+     !   write(1,*) GEO_theta_s,GEO_chi2
+     !enddo
+     !close(1)
+     !call GEO_alloc(0)
 
   endif
   !--------------------------------------------------------------------

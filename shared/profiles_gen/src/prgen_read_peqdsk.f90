@@ -146,7 +146,7 @@ subroutine prgen_read_peqdsk
      endif
   endif
   
-  peqdsk_type(:) = 'therm'
+  peqdsk_type(:) = type_therm
   peqdsk_z(:)    = 0.0
   peqdsk_m(:)    = 0.0
 
@@ -171,7 +171,7 @@ subroutine prgen_read_peqdsk
         read(1,*) y1, y2, y3
         peqdsk_z(1+peqdsk_nimp+1) = y2
         peqdsk_m(1+peqdsk_nimp+1) = y3
-        peqdsk_type(1+peqdsk_nimp+1) = 'fast'
+        peqdsk_type(1+peqdsk_nimp+1) = type_fast
      endif
   else
      peqdsk_fmt = 0

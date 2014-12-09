@@ -7,6 +7,7 @@ from gacodeplotdefs import *
 simdir  = sys.argv[1]
 imgfile = sys.argv[2]
 index   = int(sys.argv[3])
+loop   = int(sys.argv[4])
 
 #rc('lines',linewidth=1)
 rc('lines',linewidth=1.5)
@@ -60,8 +61,14 @@ fig.subplots_adjust(left=0.12, right=0.95, top=0.95, bottom=0.12)
 
 ax = fig.add_subplot(111)
 
-for s in range(4):
-    p = q*(t+2*np.pi*s)
+for s in range(loop):
+    if loop > 1:
+        # Follow fieldline
+        p = q*(t+2*np.pi*s)
+    else:
+        # phi=0
+        p = 0.0
+        
     f = np.zeros(nx)
 
     i = 0

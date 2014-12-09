@@ -395,6 +395,20 @@ subroutine neo_check
         return
      end select
 
+     select case(threed_drift_model)
+     case(0)
+        if(silent_flag == 0 .and. i_proc == 0) then
+           write(io_neoout,30) 'threed_drift_model:','NO HIGHER-ORDER V_DRIFT'
+        end if
+     case (1)
+        if(silent_flag == 0 .and. i_proc == 0) then
+           write(io_neoout,30) 'threed_drift_model:','HIGHER-ORDER V_DRIFT'
+        end if
+     case default
+        call neo_error('ERROR: (NEO) invalid threed_drift_model')
+        return
+     end select
+
   case default
      call neo_error('ERROR: (NEO) invalid threed_model')
      return

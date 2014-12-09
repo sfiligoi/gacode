@@ -31,14 +31,14 @@ subroutine le3_geometry_matrix
        * (-dbdt * (gpp + iota * gpt) + dbdp * (gpt + iota*gtt)) / bmag**2
 
   ! bhat cross grad B dot grad theta / B^2
-  ! NOT YET DONE
   vdrift_dt(:,:) = 1/g**2 &
-       * (0.0) / bmag**2
+       * ((b1*bmag/chi1 - dtheta*dbdt)*(gpp + iota * gpt) &
+       - dbdp*gc) / bmag**2
 
   ! bhat cross grad B dot grad phi / B^2
-  ! NOT YET DONE
   vdrift_dp(:,:) = 1/g**2 &
-       * (0.0) / bmag**2
+       * (-(b1*bmag/chi1 - dtheta*dbdt)*(gpt + iota * gtt) &
+       + dbdt*gc) / bmag**2
 
   ! flux-surface d volume / dr
   vprime = 0.0
@@ -205,6 +205,12 @@ subroutine le3_geometry_matrix
   write (1,'(i3)') matsize
   write (1,'(i3)') indx_c00
   write (1,'(e16.8)') q
+  close(1)
+
+  open(unit=1,file='out.le3.geoindx',status='replace')
+  do i=1,matsize
+     write (1,'(i2,i2,i2)') itype(i),m_indx(i), n_indx(i)
+  enddo
   close(1)
 
   ! Map to Boozer coordinates
@@ -409,6 +415,9 @@ subroutine le3_geometry_matrix
   deallocate(itype)
   deallocate(m_indx)
   deallocate(n_indx)
+
+  deallocate(gc)
+  deallocate(b1)
 
   deallocate(g)
   deallocate(gpp)

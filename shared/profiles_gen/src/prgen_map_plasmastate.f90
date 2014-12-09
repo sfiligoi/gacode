@@ -148,7 +148,7 @@ subroutine prgen_map_plasmastate
   f3_fast(:) = 0.0
   do i=2,plst_dp1_nspec_all
 
-     print '(t6,i2,1x,3(a))', i-1,trim(plst_all_name(i))
+     print '(t6,i2,1x,a)', i-1,trim(plst_all_name(i))
 
      if (index(plst_all_name(i),'mi') > 0) then
         f1_fast(:) = f1_fast(:)+plst_nmini(:)*plst_q_all(i)/1.6022e-19 
@@ -250,6 +250,7 @@ subroutine prgen_map_plasmastate
      quasi_err = quasi_err+sum(plst_ns(i,2:ix)*plst_q_all(2:ix))
   enddo
   quasi_err = abs(quasi_err/sum(-plst_ns(:,1)*plst_q_all(1))-1.0)
+
   !-------------------------------------------------------------------------------
 
   !---------------------------------------------------------
@@ -342,7 +343,15 @@ subroutine prgen_map_plasmastate
      if (ip >= plst_dp1_nspec_all) then
         print '(t6,i2,1x,3(a))',i,'[null]'
      else
-        print '(t6,i2,1x,3(a))',i,trim(plst_all_name(ip+1))
+        if (ip+1 > plst_dp1_nspec_th) then
+           ion_type(i) = type_fast
+        else
+           ion_type(i) = type_therm
+        endif 
+        print '(t6,i2,1x,a,1x,a)',i,trim(plst_all_name(ip+1)),ion_type(i)
+        ion_mass(i) = plst_m_all(ip+1)/1.66e-27
+        ion_z(i)    = nint(plst_q_all(ip+1)/1.6022e-19)
+        call prgen_ion_name(nint(ion_mass(i)),ion_z(i),ion_name(i))     
      endif
   enddo
 

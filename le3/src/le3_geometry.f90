@@ -187,7 +187,7 @@ subroutine le3_geometry
   allocate(bk_p(nt,np))
   allocate(bkp_p(nt,np))
 
-    i=0
+  i=0
   do ips=0,nps
      do its=0,nts
         if(its > 0) then 
