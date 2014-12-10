@@ -316,10 +316,12 @@ contains
                    do ix=1,n_xi
                       do jx=1,n_xi
                          do ie=1,n_energy
+                            rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
+                                 * 2.0*energy(ie)
                             do je=1,n_energy
-                               rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
-                                    + ctest(is,js,ix,jx,ie,je) &
-                                    * 2.0*energy(je)
+                               !rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
+                               !     + ctest(is,js,ix,jx,ie,je) &
+                               !     * 2.0*energy(je)
                                rsvec_t(is,js,jx,je) = rsvec_t(is,js,jx,je) &
                                     + ctest(is,js,ix,jx,ie,je) &
                                     * 2.0*energy(ie) 
@@ -327,7 +329,6 @@ contains
                          enddo
                       enddo
                    enddo
-                   rsvec(is,js,:,:)=1.0
 
                    ! int v^2 C_test_ab(v^2 f0a,f0b) / (n_0a vth_a^4)
                    rs(is,js) = 0.0
