@@ -35,19 +35,6 @@ subroutine cgyro_mpi_grid
   allocate(ic_c(n_radial,n_theta))
   allocate(iv_v(n_energy,n_xi,n_species))
 
-  !-------------------------------------------------------------
-  ! Check for grid validity
-  !
-  if (modulo(nv,n_proc) /= 0 .or. modulo(nc,n_proc) /= 0) then
-     call cgyro_error('ERROR: (CGYRO) bad processor count.')
-     return
-  endif
-  if (modulo(n_proc,n_toroidal) /= 0) then
-     call cgyro_error('ERROR: (CGYRO) bad processor count.')
-     return
-  endif
-  !-------------------------------------------------------------
-
   !-------------------------------
   ! Assign subgroup dimensions:
   !
@@ -61,6 +48,19 @@ subroutine cgyro_mpi_grid
   i_group_1 = i_proc/n_proc_1
   i_group_2 = modulo(i_proc,n_proc_1)
   !------------------------------------------------
+
+  !-------------------------------------------------------------
+  ! Check for grid validity
+  !
+  if (modulo(n_proc,n_toroidal) /= 0) then
+     call cgyro_error('ERROR: (CGYRO) bad processor count.')
+     return
+  endif
+  if (modulo(nv,n_proc_1) /= 0 .or. modulo(nc,n_proc_1) /= 0) then
+     call cgyro_error('ERROR: (CGYRO) bad processor count.')
+     return
+  endif
+  !-------------------------------------------------------------
 
   !-----------------------------------------------------------
   ! Split up GYRO_COMM_WORLD into groups and adjoint:
