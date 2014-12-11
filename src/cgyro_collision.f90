@@ -316,9 +316,11 @@ contains
                    do ix=1,n_xi
                       do jx=1,n_xi
                          do ie=1,n_energy
-                            rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
-                                 * 2.0*energy(ie)
                             do je=1,n_energy
+                               if(ix==jx .and. ie==je) then
+                                  rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
+                                       + 2.0*energy(ie)
+                               endif
                                !rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
                                !     + ctest(is,js,ix,jx,ie,je) &
                                !     * 2.0*energy(je)
