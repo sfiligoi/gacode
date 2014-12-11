@@ -1,4 +1,9 @@
-! Print fields
+!-----------------------------------------------------------------
+! cgyro_write_timedata.f90
+!
+! PURPOSE:
+!  Output of time-dependent data 
+!-----------------------------------------------------------------
 
 subroutine cgyro_write_timedata
 
@@ -11,56 +16,61 @@ subroutine cgyro_write_timedata
   integer :: i_field
   logical :: lfe
 
-  ! Print this data on print steps
+  ! Print this data on print steps only; otherwise exit now
   if (mod(i_time,prin_time) /= 0) return
+
+  if (nonlinear_flag == 1) then
+
+     ! Density flux
+     call write_distributed_real(&
+          trim(path)//runfile_flux(1),&
+          size(flux(:,1)),&
+          flux(:,1))
+     ! Energy flux
+     call write_distributed_real(&
+          trim(path)//runfile_flux(2),&
+          size(flux(:,2)),&
+          flux(:,2))
+  endif
 
   do i_field=1,n_field
 
+     ! Complete field output 
      call write_distributed_complex(&
           trim(path)//runfile_field(i_field),&
-          io_data,&
           size(field(:,:,i_field)),&
           field(:,:,i_field))
 
-     if (nonlinear_flag == 1) then
-
-        ! Density flux
-        call write_distributed_real(&
-             trim(path)//runfile_flux(1),&
-             io_data,&
-             size(flux(:,1)),&
-             flux(:,1))
-        ! Energy flux
-        call write_distributed_real(&
-             trim(path)//runfile_flux(2),&
-             io_data,&
-             size(flux(:,2)),&
-             flux(:,2))
-     endif
+     ! Field intensity
+     call write_distributed_real(&
+          trim(path)//runfile_power(i_field),&
+          size(power(:,i_field)),&
+          power(:,i_field))
 
      if (n_toroidal == 1) then
+
+        ! Ballooning mode output for linear runs with a single mode
 
         a_norm = field(n_radial/2+1,n_theta/2+1,1) 
 
         call write_balloon(&
              trim(path)//runfile_fieldb(i_field),&
-             io_data,&
              field(:,:,i_field)/a_norm)
      endif
 
   enddo
 
-  if (n_toroidal == 1) call write_freq(trim(path)//runfile_freq,io_data)
+  if (n_toroidal == 1) call write_freq(trim(path)//runfile_freq)
 
-  call write_time(trim(path)//runfile_time,io_data)
+  call write_time(trim(path)//runfile_time)
 
   ! Check for manual halt signal
   if (i_proc == 0) then
      inquire(file=trim(path)//'halt',exist=lfe)
      if (lfe .eqv. .true.) then
-        open(unit=io_data,file='halt',status='old')
-        read(io_data,*) signal
-        close(io_data)
+        open(unit=io,file='halt',status='old')
+        read(io,*) signal
+        close(io)
      endif
   endif
 
@@ -80,7 +90,7 @@ end subroutine cgyro_write_timedata
 !  Control merged output of complex distributed array.
 !------------------------------------------------------
 
-subroutine write_distributed_complex(datafile,io,n_fn,fn)
+subroutine write_distributed_complex(datafile,n_fn,fn)
 
   use mpi
   use cgyro_globals
@@ -89,7 +99,6 @@ subroutine write_distributed_complex(datafile,io,n_fn,fn)
   implicit none
   !
   character (len=*), intent(in) :: datafile
-  integer, intent(in) :: io
   integer, intent(in) :: n_fn
   complex, intent(in) :: fn(n_fn)
   !
@@ -198,7 +207,7 @@ end subroutine write_distributed_complex
 !  Control merged output of real distributed array.
 !------------------------------------------------------
 
-subroutine write_distributed_real(datafile,io,n_fn,fn)
+subroutine write_distributed_real(datafile,n_fn,fn)
 
   use mpi
   use cgyro_globals
@@ -207,7 +216,6 @@ subroutine write_distributed_real(datafile,io,n_fn,fn)
   implicit none
   !
   character (len=*), intent(in) :: datafile
-  integer, intent(in) :: io
   integer, intent(in) :: n_fn
   real, intent(in) :: fn(n_fn)
   !
@@ -307,7 +315,7 @@ subroutine write_distributed_real(datafile,io,n_fn,fn)
 
 end subroutine write_distributed_real
 
-subroutine write_balloon(datafile,io,fn)
+subroutine write_balloon(datafile,fn)
 
   use cgyro_globals
 
@@ -315,7 +323,6 @@ subroutine write_balloon(datafile,io,fn)
   implicit none
   !
   character (len=*), intent(in) :: datafile
-  integer, intent(in) :: io
   complex, intent(in) :: fn(n_radial,n_theta)
   !
   integer :: ir,jr,it,np
@@ -373,7 +380,7 @@ end subroutine write_balloon
 
 !=========================================================================================
 
-subroutine write_time(datafile,io)
+subroutine write_time(datafile)
 
   use cgyro_globals
 
@@ -381,7 +388,6 @@ subroutine write_time(datafile,io)
   implicit none
   !
   character (len=*), intent(in) :: datafile
-  integer, intent(in) :: io
   !------------------------------------------------------
 
   if (i_proc > 0) return
@@ -429,7 +435,7 @@ end subroutine write_time
 
 !====================================================================================
 
-subroutine write_freq(datafile,io)
+subroutine write_freq(datafile)
 
   use cgyro_globals
 
@@ -437,7 +443,6 @@ subroutine write_freq(datafile,io)
   implicit none
   !
   character (len=*), intent(in) :: datafile
-  integer, intent(in) :: io
   !------------------------------------------------------
 
   ! Compute frequencies on all cores
@@ -490,7 +495,7 @@ end subroutine write_freq
 
 !====================================================================================
 
-subroutine write_distribution(datafile,io)
+subroutine write_distribution(datafile)
 
   use mpi
 
@@ -500,7 +505,6 @@ subroutine write_distribution(datafile,io)
   implicit none
   !
   character (len=*), intent(in) :: datafile
-  integer, intent(in) :: io
   complex, dimension(:,:), allocatable :: h_x_glob
   !------------------------------------------------------
 
@@ -549,9 +553,9 @@ subroutine write_distribution(datafile,io)
            else
               f_balloon(:,:) = 0.0
            endif
-           write(io_data,fmtstr) transpose(f_balloon(:,:))
+           write(io,fmtstr) transpose(f_balloon(:,:))
         enddo
-        close(io_data)
+        close(io)
      endif
 
      deallocate(h_x_glob)

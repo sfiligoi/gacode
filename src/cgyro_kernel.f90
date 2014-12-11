@@ -22,12 +22,6 @@ subroutine cgyro_kernel
 
   implicit none
 
-
-  if (silent_flag == 0 .and. i_proc == 0) then
-     open(unit=io_run,file=trim(path)//runfile,status='replace')
-     close(io_run)
-  endif
-
   ! Timer initialization
   call timer_lib_init('init_arrays')
   call timer_lib_init('field_v')
@@ -87,10 +81,10 @@ subroutine cgyro_kernel
   allocate(field_old(n_radial,n_theta,n_field))
   allocate(field_old2(n_radial,n_theta,n_field))
   allocate(field_old3(n_radial,n_theta,n_field))
-  allocate(field_est(n_radial,n_theta,n_field))
   allocate(f_balloon(n_radial/box_size,n_theta))
   allocate(    flux(n_species,2))
   allocate(flux_loc(n_species,2))
+  allocate(power(n_radial,n_field))
   allocate(recv_status(MPI_STATUS_SIZE))
 
   allocate(thcyc(1-n_theta:2*n_theta))
@@ -101,29 +95,16 @@ subroutine cgyro_kernel
   call EQUIL_alloc(1)
   call EQUIL_do
 
-  !4. Array initialization
+  ! 4. Array initialization
   call cgyro_init_arrays
 
   call COLLISION_alloc(1)
 
-  if (silent_flag == 0 .and. i_proc == 0) then
+  ! 5. Write initial data
+  call cgyro_write_initdata
 
-     open(unit=io_data,file=trim(path)//runfile_grids,status='replace')
-     write(io_data,'(i4)') n_species
-     write(io_data,'(i4)') n_radial
-     write(io_data,'(i4)') n_theta
-     write(io_data,'(i4)') n_energy
-     write(io_data,'(i4)') n_xi
-     write(io_data,'(i4)') box_size
-     write(io_data,'(i4)') px(:)
-     write(io_data,'(1pe12.5)') theta(:)
-     write(io_data,'(1pe12.5)') energy(:)
-     write(io_data,'(1pe12.5)') xi(:)
-     write(io_data,'(1pe12.5)') transpose(theta_B(:,:))
-     close(io_data)
-
-  endif
-
+  !---------------------------------------------------------------------------
+  !
   ! Time-stepping
   n_time = nint(max_time/delta_t)
 
@@ -143,7 +124,7 @@ subroutine cgyro_kernel
 
      ! Compute fluxes
      call cgyro_flux
-    
+
      ! Error estimate
      call cgyro_error_estimate
 
@@ -153,15 +134,19 @@ subroutine cgyro_kernel
      if (abs(signal) == 1) exit
 
   enddo
+  !---------------------------------------------------------------------------
 
+  !---------------------------------------------------------------------------
   ! Print final distribution
   if (n_toroidal == 1) then
      io_control = 1*(1-silent_flag)
-     call write_distribution(trim(path)//runfile_hx,io_data)
+     call write_distribution(trim(path)//runfile_hx)
      io_control = 2*(1-silent_flag)
-     call write_distribution(trim(path)//runfile_hx,io_data)
+     call write_distribution(trim(path)//runfile_hx)
   endif
+  !---------------------------------------------------------------------------
 
+  !---------------------------------------------------------------------------
   ! Print timers
   if (i_proc == 0) then
      print *
@@ -177,6 +162,7 @@ subroutine cgyro_kernel
      print '(a,1x,1pe11.4)',' comm        ',timer_lib_time('comm')
      print '(a,1x,1pe11.4)',' comm_nl     ',timer_lib_time('comm_nl')
   endif
+  !---------------------------------------------------------------------------
 
 100 continue
 
@@ -199,7 +185,6 @@ subroutine cgyro_kernel
   if(allocated(field))         deallocate(field)
   if(allocated(field_loc))     deallocate(field_loc)
   if(allocated(field_old))     deallocate(field_old)
-  if(allocated(field_est))     deallocate(field_est)
   if(allocated(f_balloon))     deallocate(f_balloon)
 
   if (zf_test_flag == 2 .and. ae_flag == 1) then
@@ -229,9 +214,8 @@ subroutine cgyro_error_estimate
   else 
 
      ! Estimate of field via quadratic interpolation
-     field_est = 3.0*field_old-3.0*field_old2+field_old3
-
-     field_error = sum(abs(field-field_est))/sum(abs(field))
+     field_loc   = 3.0*field_old-3.0*field_old2+field_old3
+     field_error = sum(abs(field-field_loc))/sum(abs(field))
 
   endif
 

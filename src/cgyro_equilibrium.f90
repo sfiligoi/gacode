@@ -6,7 +6,7 @@ module cgyro_equilibrium
   
   ! equilibrium parameters (theta)
   real :: d_theta
-  real, dimension(:,:), allocatable   :: theta_B
+  real, dimension(:,:), allocatable   :: thetab
   real, dimension(:), allocatable   :: w_theta
   real, dimension(:,:), allocatable :: k_perp    
   real, dimension(:), allocatable   :: Bmag
@@ -31,11 +31,11 @@ contains
     integer :: it, ir
     integer, parameter :: geo_ntheta=1001 ! num grid pts for Miller geo grid
     
-    if(flag == 1) then
+    if (flag == 1) then
        if(initialized) return
        
        allocate(theta(n_theta))
-       allocate(theta_B(n_radial/box_size,n_theta))
+       allocate(thetab(n_radial/box_size,n_theta))
        allocate(w_theta(n_theta))
        allocate(Bmag(n_theta))
        allocate(k_perp(n_theta,n_radial))
@@ -52,7 +52,7 @@ contains
 
        do ir=1,n_radial/box_size
           do it=1,n_theta
-             theta_B(ir,it) = theta(it)+2*pi*(ir-1-n_radial/2/box_size)
+             thetab(ir,it) = theta(it)+2*pi*(ir-1-n_radial/2/box_size)
           enddo
        enddo
        
@@ -71,7 +71,7 @@ contains
        if(.NOT. initialized) return
        
        deallocate(theta)
-       deallocate(theta_B)
+       deallocate(thetab)
        deallocate(w_theta)
        deallocate(Bmag)
        deallocate(k_perp)

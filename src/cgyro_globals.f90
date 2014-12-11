@@ -121,12 +121,13 @@ module cgyro_globals
   character(len=18) :: runfile_freq    = 'out.cgyro.freq'
   character(len=14), dimension(3)  :: runfile_field = &
        (/'out.cgyro.phi ','out.cgyro.apar','out.cgyro.bpar'/)
+  character(len=15), dimension(3)  :: runfile_fieldb = &
+       (/'out.cgyro.phib ','out.cgyro.aparb','out.cgyro.bparb'/)
   character(len=16), dimension(2)  :: runfile_flux = &
        (/'out.cgyro.flux_n','out.cgyro.flux_e'/)
-  character(len=15), dimension(3)  :: runfile_fieldb = &
-       (/'out.cgyro.phiB ','out.cgyro.aparB','out.cgyro.bparB'/)
-  integer :: io_data = 20
-  integer :: io_run = 12
+  character(len=17), dimension(3)  :: runfile_power = &
+       (/'out.cgyro.phi_np ','out.cgyro.apar_np','out.cgyro.bpar_np'/)
+  integer, parameter :: io=1
   !
   ! error checking
   integer :: error_status = 0
@@ -212,11 +213,11 @@ module cgyro_globals
   complex, dimension(:,:,:), allocatable :: field_old
   complex, dimension(:,:,:), allocatable :: field_old2
   complex, dimension(:,:,:), allocatable :: field_old3
-  complex, dimension(:,:,:), allocatable :: field_est
   !
   ! Nonlinear fluxes
   real, dimension(:,:), allocatable :: flux_loc
   real, dimension(:,:), allocatable :: flux
+  real, dimension(:,:), allocatable :: power
   !  
   ! Work arrays
   !

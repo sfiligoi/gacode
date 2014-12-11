@@ -37,16 +37,22 @@ then
   echo "          Specify integer time index (-1 is last time)."
   echo
   echo "          -tmax <float>"
-  echo "          Maximum value of ballooning angle is applicable."
+  echo "          Maximum value of ballooning angle."
+  echo
+  echo "          -w <float>"
+  echo "          Width of time-average window (1.0 is entire time history)."
   echo
   echo "          -plot <type>"
-  echo "          Generate plot of given type."
-  echo "          <type> = field,"
-  echo "                 = h,"
-  echo "                 = h_cut,"
-  echo "                 = freq,"
-  echo "                 = zf (zonal flow potential plot),"
-  echo "                 = zffield"
+  echo 
+  echo "              <type> = field,"
+  echo "                     = h      (2D distribution)"
+  echo "                     = hcut   (1D distribution line plots),"
+  echo "                     = freq   (frequency versus time),"
+  echo "                     = zf     (zonal flow potential plot),"
+  echo "                     = zf0    (?)"
+  echo "                     = text   (text summary of fluxes)"
+  echo "                     = fluxn  (bar plot of flux versus n)"
+  echo "                     = pwr    (time dependent field intensities)"
 
   exit 1
 fi
@@ -64,6 +70,7 @@ FTYPE=screen
 PLOT_TYPE=field
 TIME=-1
 TMAX=-1.0
+W=0.5
 #==============================================================================
 
 #==============================================================================
@@ -88,6 +95,8 @@ while [ $# -gt 0 ] ; do
 
   -tmax) shift ; TMAX=$1 ;;
 
+  -w) shift ; W=$1 ;;
+
   *) echo "ERROR: incorrect syntax." ; exit 1 ;;
 
   esac
@@ -103,7 +112,7 @@ fi
 SIMDIR=$SIMROOT/$LOCDIR
 cd $SIMDIR
 
-PYROOT=$GACODE_ROOT/../gacode_add/cgyro/tools/plot
+PYROOT=$GACODE_ROOT/shared/python/cgyro
 
 #==============================================================================
 case "$PLOT_TYPE" in
@@ -114,7 +123,7 @@ case "$PLOT_TYPE" in
    h)  
 	python $PYROOT/plot_h.py $FTYPE $TIME $SPECIES & ;;
 
-   h_cut)  
+   hcut)  
 	python $PYROOT/plot_h_cut.py $FTYPE $TIME $SPECIES & ;;
 
    freq)  
@@ -123,8 +132,11 @@ case "$PLOT_TYPE" in
    zf)  
 	python $PYROOT/plot_zf.py $FTYPE & ;;
 
-   zffield)
+   zf0)
    	python $PYROOT/plot_zffield.py $FTYPE $TIME $FIELD & ;;
+
+   text)
+   	python $PYROOT/text.py './' $W & ;;
 
    *)
         echo "Unrecognized argument to -plot" ; exit 1 ;;

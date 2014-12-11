@@ -8,9 +8,8 @@ subroutine cgyro_make_profiles
   integer :: is,ir,ix 
   integer :: j
   integer :: num_ele
-  integer, parameter :: io=20
 
-  !---------------------------------------------------
+  !-------------------------------------------------------------
   ! Manage electrons
   !
   num_ele = 0
@@ -49,10 +48,12 @@ subroutine cgyro_make_profiles
      return
 
   endif
-  !---------------------------------------------------
+  !-------------------------------------------------------------
 
-  ! Standard local simulation (one point)
 
+  !-------------------------------------------------------------
+  ! Manage simulation type (n=0,linear,nonlinear)
+  !
   q = abs(q) 
 
   if (zf_test_flag == 1) then
@@ -103,9 +104,42 @@ subroutine cgyro_make_profiles
      call cgyro_info('Multiple toroidal harmonics.')
 
   endif
+  !-------------------------------------------------------------
 
-  ! general geometry -- accessible only from interface 
+  !-------------------------------------------------------------
+  ! Species-dependent quantities
+  !
+  do is=1,n_species
+
+     ! thermal velocity
+     vth(is) = sqrt(temp(is)/mass(is))
+
+     ! collision frequency
+     nu(is) = nu_ee_in *(1.0*z(is))**4 &
+          * dens(is) / dens_ele &
+          * sqrt(mass_ele/mass(is)) * (temp_ele/temp(is))**1.5
+
+  enddo
+  !-------------------------------------------------------------
+
+  !-------------------------------------------------------------
+  ! Fourier index mapping
+  !
+  allocate(indx_xi(n_xi))
+  do ix=1,n_xi
+     indx_xi(ix) = ix-1
+  enddo
+  allocate(px(n_radial))
+  do ir=1,n_radial
+     px(ir) = -n_radial/2 + (ir-1)
+  enddo
+  if (zf_test_flag == 1) px(1) = 1
+  !-------------------------------------------------------------
+
+  !-------------------------------------------------------------
+  ! General geometry -- accessible only from interface 
   ! via parameters geo_ny_in and geo_yin_in
+  !
   geo_numeq_flag = 0
   geo_ny = 0
   allocate(geo_yin(8,0:geo_ny))
@@ -119,49 +153,6 @@ subroutine cgyro_make_profiles
         geo_yin(:,j) = geo_yin_in(:,j)
      enddo
   endif
-
-  ! Species-dependent quantities
-  do is=1,n_species
-
-     ! thermal velocity
-     vth(is) = sqrt(temp(is)/mass(is))
-
-     ! collision frequency
-     nu(is) = nu_ee_in *(1.0*z(is))**4 &
-          * dens(is) / dens_ele &
-          * sqrt(mass_ele/mass(is)) * (temp_ele/temp(is))**1.5
-
-  enddo
-
-  ! Fourier index mapping
-  allocate(indx_xi(n_xi))
-  do ix=1,n_xi
-     indx_xi(ix) = ix-1
-  enddo
-  allocate(px(n_radial))
-  do ir=1,n_radial
-     px(ir) = -n_radial/2 + (ir-1)
-  enddo
-  if (zf_test_flag == 1) px(1) = 1
-
-  ! Print the re-mapped equilibrium data
-  if (silent_flag == 0 .and. i_proc == 0) then
-     open(unit=io,file=trim(path)//'out.cgyro.equil',status='replace')
-     write (io,'(e16.8)',advance='no') rmin
-     write (io,'(e16.8)',advance='no') rmaj
-     write (io,'(e16.8)',advance='no') q
-     write (io,'(e16.8)',advance='no') s
-     write (io,'(e16.8)',advance='no') rho
-     write (io,'(e16.8)',advance='no') ky
-     do is=1,n_species
-        write (io,'(e16.8)',advance='no') dens(is)
-        write (io,'(e16.8)',advance='no') temp(is)
-        write (io,'(e16.8)',advance='no') dlnndr(is)
-        write (io,'(e16.8)',advance='no') dlntdr(is)
-        write (io,'(e16.8)',advance='no') nu(is)
-     enddo
-     write (io,*)
-     close(io)
-  endif
+  !-------------------------------------------------------------
 
 end subroutine cgyro_make_profiles

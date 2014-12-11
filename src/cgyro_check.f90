@@ -8,12 +8,7 @@ subroutine cgyro_check
   integer :: is
   logical :: lfe
 
-  if (silent_flag == 0 .and. i_proc == 0) then
-     open(unit=io_run,file=trim(path)//runfile,&
-          status='old',position='append')
-  endif
-
-  !-----------------------------------------------------------
+  !-----------------------------------------------------------------------
   ! Grid parameter checks
   !
   if (modulo(n_xi,2) /= 0) then 
@@ -25,7 +20,9 @@ subroutine cgyro_check
      call cgyro_error('n_species <= 6.')
      return
   endif
+  !------------------------------------------------------------------------
 
+  !------------------------------------------------------------------------
   ! Field consistency checks
   if (n_field > 1) then
      if (abs(betae_unit) < epsilon(0.0)) then
@@ -37,7 +34,9 @@ subroutine cgyro_check
         return
      endif
   endif
+  !------------------------------------------------------------------------
 
+  !------------------------------------------------------------------------
   ! Fields
   select case(n_field)
 
@@ -59,7 +58,9 @@ subroutine cgyro_check
      call cgyro_error('collision_model=1 requires kinetic electrons')
      return
   endif
+  !------------------------------------------------------------------------
 
+  !------------------------------------------------------------------------
   ! Collision model
 
   select case (collision_model)  
@@ -87,14 +88,14 @@ subroutine cgyro_check
   end select
 
   select case (collision_mom_restore)
-     case(0)
-        call cgyro_info('Collision momentum restoring = not included')
-     case(1)
-        call cgyro_info('Collision momentum restoring = included')
-     case default
-        call cgyro_error('Invalid value for collision_mom_restore')
-        return
-     end select
+  case(0)
+     call cgyro_info('Collision momentum restoring = not included')
+  case(1)
+     call cgyro_info('Collision momentum restoring = included')
+  case default
+     call cgyro_error('Invalid value for collision_mom_restore')
+     return
+  end select
 
   if(collision_model == 4) then
      select case (collision_ene_diffusion)
@@ -116,11 +117,9 @@ subroutine cgyro_check
         return
      end select
   endif
+  !------------------------------------------------------------------------
 
-
-  !------------------------------------------------------------
-
-  !------------------------------------------------------------
+  !------------------------------------------------------------------------
   ! Equilibrium model
   !
   select case (equilibrium_model)  
@@ -149,9 +148,9 @@ subroutine cgyro_check
      return
 
   end select
-  !------------------------------------------------------------
+  !------------------------------------------------------------------------
 
-  !------------------------------------------------------------
+  !------------------------------------------------------------------------
   ! Check profile parameters
   !
   do is=1,n_species
@@ -172,53 +171,11 @@ subroutine cgyro_check
         return
      endif
   enddo
+  !------------------------------------------------------------------------
 
-  if (silent_flag == 0 .and. i_proc == 0) then
-     open(unit=io_run,file=trim(path)//runfile,status='old',position='append')
-     write(io_run,*)
-     write(io_run,'(a)') 'n_radial  n_theta   n_species n_energy  n_xi'
-     write(io_run,'(t1,5(i4,6x))') n_radial,n_theta,n_species,n_energy,n_xi
-
-     write(io_run,*) 
-     write(io_run,'(a,f6.2,a,f6.2)') '(Lx,Ly)/rho',length/rho,',',2*pi/ky
-     write(io_run,'(a,1pe12.5)') 'rho = ',rho
-     write(io_run,*) 
-     if (n_toroidal == 1) then
-        write(io_run,20) 'ky*rho',ky
-     else
-        write(io_run,20) 'min(ky*rho)',(q/rmin)*rho
-        write(io_run,20) 'max(ky*rho)',(n_toroidal-1)*(q/rmin)*rho
-     endif
-     write(io_run,*) 
-     write(io_run,20) 'min(kx*rho)',2*pi*rho/length
-     write(io_run,20) 'max(kx*rho)',2*pi*rho*(n_radial/2-1)/length
-     write(io_run,*) 
-     write(io_run,20) 'r/a',rmin
-     write(io_run,20) 'R/a',rmaj
-     write(io_run,20) 'q',q
-     write(io_run,20) 's',s
-     write(io_run,20) 'shift',shift
-     write(io_run,20) 'kappa',kappa
-     write(io_run,20) 's_kappa',s_kappa
-     write(io_run,20) 'delta',delta
-     write(io_run,20) 's_delta',s_delta
-     write(io_run,20) 'zeta',zeta
-     write(io_run,20) 's_zeta',s_zeta
-     write(io_run,20) 'zmag',zmag
-     write(io_run,20) 's_zmag',s_zmag
-
-     write(io_run,*)
-     write(io_run,'(a)') 'indx  z    n/n_norm    T/T_norm    m/m_norm     a/Ln        a/Lt        nu'
-     do is=1,n_species
-        write(io_run,'(t2,i2,2x,i2,2x,6(1pe10.4,2x))') is,z(is),dens(is),temp(is),mass(is),dlnndr(is),dlntdr(is),nu(is)
-     enddo
-
-     write(io_run,*)
-
-     close(io_run)
-  endif
-
+  !------------------------------------------------------------------------
   ! Check for existence of restart file
+  !
   if (restart_mode == 1) then
 
      inquire(file=trim(path)//runfile_restart,exist=lfe)
@@ -228,7 +185,6 @@ subroutine cgyro_check
      endif
 
   endif
-
-20 format(t2,a,':',t13,1pe12.4) 
+  !------------------------------------------------------------------------
 
 end subroutine cgyro_check

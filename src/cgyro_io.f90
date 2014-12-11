@@ -11,16 +11,16 @@ contains
 
   subroutine cgyro_info(message)
 
-    use cgyro_globals, only : silent_flag, io_run, runfile, i_proc, path
+    use cgyro_globals, only : silent_flag, io, runfile, i_proc, path
 
     implicit none
 
     character (len=*), intent(in) :: message
 
     if (silent_flag == 0 .and. i_proc == 0) then
-       open(unit=io_run,file=trim(path)//runfile,status='old',position='append')
-       write(io_run,'(a)') 'INFO: (CGYRO) '//message
-       close(io_run)
+       open(unit=io,file=trim(path)//runfile,status='old',position='append')
+       write(io,'(a)') 'INFO: (CGYRO) '//message
+       close(io)
     endif
 
   end subroutine cgyro_info
@@ -28,7 +28,7 @@ contains
   subroutine cgyro_error(message)
 
     use cgyro_globals, only : error_status, error_message, &
-         silent_flag, io_run, runfile, i_proc, path
+         silent_flag, io, runfile, i_proc, path
 
     implicit none
 
@@ -38,9 +38,9 @@ contains
     error_message = message
 
     if (silent_flag == 0 .and. i_proc == 0) then
-       open(unit=io_run,file=trim(path)//runfile,status='old',position='append')
-       write(io_run,'(a)') 'ERROR: (CGYRO) '//message
-       close(io_run)
+       open(unit=io,file=trim(path)//runfile,status='old',position='append')
+       write(io,'(a)') 'ERROR: (CGYRO) '//message
+       close(io)
     endif
 
   end subroutine cgyro_error

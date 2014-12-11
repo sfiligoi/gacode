@@ -25,6 +25,7 @@ OBJECTS = cgyro_globals.o \
           cgyro_collision.o \
 	  cgyro_step_gk.o \
           cgyro_kernel.o \
+          cgyro_write_initdata.o \
           cgyro_write_timedata.o 
 
 .SUFFIXES : .o .f90
