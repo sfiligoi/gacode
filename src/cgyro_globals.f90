@@ -125,8 +125,8 @@ module cgyro_globals
        (/'out.cgyro.phib ','out.cgyro.aparb','out.cgyro.bparb'/)
   character(len=16), dimension(2)  :: runfile_flux = &
        (/'out.cgyro.flux_n','out.cgyro.flux_e'/)
-  character(len=17), dimension(3)  :: runfile_power = &
-       (/'out.cgyro.phi_np ','out.cgyro.apar_np','out.cgyro.bpar_np'/)
+  character(len=18), dimension(3)  :: runfile_power = &
+       (/'out.cgyro.pwr_phi ','out.cgyro.pwr_apar','out.cgyro.pwr_bpar'/)
   integer, parameter :: io=1
   !
   ! error checking

@@ -13,7 +13,7 @@ subroutine cgyro_write_initdata
 
   implicit none
 
-  integer :: is
+  integer :: in,is
 
   !----------------------------------------------------------------------------
   ! Runfile to give complete summary to user
@@ -125,6 +125,7 @@ subroutine cgyro_write_initdata
      write(io,'(1pe12.5)') energy(:)
      write(io,'(1pe12.5)') xi(:)
      write(io,'(1pe12.5)') transpose(thetab(:,:))
+     write(io,'(1pe12.5)') (rho*q/rmin*in,in=0,n_toroidal-1)
      close(io)
 
   endif

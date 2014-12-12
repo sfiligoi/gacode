@@ -33,6 +33,9 @@ then
   echo "          -field <value>"
   echo "          Specify field to be plotted: [0,n_field-1]."
   echo
+  echo "          -moment <value>"
+  echo "          Specify moment to be plotted [n,e,m,s]."
+  echo
   echo "          -t <value>"
   echo "          Specify integer time index (-1 is last time)."
   echo
@@ -71,6 +74,7 @@ PLOT_TYPE=field
 TIME=-1
 TMAX=-1.0
 W=0.5
+MOMENT=e
 #==============================================================================
 
 #==============================================================================
@@ -88,6 +92,8 @@ while [ $# -gt 0 ] ; do
   -species) shift ; SPECIES=$1 ;;
 
   -field) shift ; FIELD=$1 ;;
+
+  -moment) shift ; MOMENT=$1 ;;
 
   -f) shift ; FTYPE=$1 ;;
 
@@ -128,6 +134,9 @@ case "$PLOT_TYPE" in
 
    freq)  
 	python $PYROOT/plot_freq.py $FTYPE & ;;
+
+   fluxn)  
+	python $PYROOT/plot_flux_n.py $FTYPE $W $MOMENT & ;;
 
    zf)  
 	python $PYROOT/plot_zf.py $FTYPE $FIELD & ;;

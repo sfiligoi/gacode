@@ -16,6 +16,11 @@ subroutine cgyro_check
      return
   endif
 
+  if (modulo(n_radial,m_box) /= 0) then 
+     call cgyro_error('n_radial must be a multiple of m_box.')
+     return
+  endif
+
   if (n_species > 6) then
      call cgyro_error('n_species <= 6.')
      return
