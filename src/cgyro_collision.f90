@@ -262,7 +262,8 @@ contains
                                     * sqrt(2.0*energy(je)) * xi(jx) 
                                rsvec_t(is,js,jx,je) = rsvec_t(is,js,jx,je) &
                                     + ctest(is,js,ix,jx,ie,je) &
-                                    * sqrt(2.0*energy(ie)) * xi(ix) 
+                                    * sqrt(2.0*energy(ie)) * xi(ix) &
+                                    *0.5*w_xi(ix)*w_e(ie)
                             enddo
                          enddo
                       enddo
@@ -294,7 +295,6 @@ contains
                                        * (vth(js)/vth(is)) &
                                        * rsvec(is,js,ix,ie) &
                                        / rs(is,js) &
-                                       * 0.5*w_e(je)*w_xi(jx) &
                                        * rsvec_t(js,is,jx,je)
                                endif
                             enddo
@@ -317,21 +317,21 @@ contains
                       do jx=1,n_xi
                          do ie=1,n_energy
                             do je=1,n_energy
-                               if(ix==jx .and. ie==je) then
-                                  rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
-                                       + 2.0*energy(ie)
-                               endif
-                               !rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
-                               !     + ctest(is,js,ix,jx,ie,je) &
-                               !     * 2.0*energy(je)
+                               !if(ix==jx .and. ie==je) then
+                               !   rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
+                               !        + 2.0*energy(ie)
+                               !endif
+                               rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
+                                    + ctest(is,js,ix,jx,ie,je) &
+                                    * 2.0*energy(je)
                                rsvec_t(is,js,jx,je) = rsvec_t(is,js,jx,je) &
                                     + ctest(is,js,ix,jx,ie,je) &
-                                    * 2.0*energy(ie) 
+                                    * 2.0*energy(ie)*0.5*w_xi(ix)*w_e(ie)
                             enddo
                          enddo
                       enddo
                    enddo
-
+                   
                    ! int v^2 C_test_ab(v^2 f0a,f0b) / (n_0a vth_a^4)
                    rs(is,js) = 0.0
                    do ix=1,n_xi
@@ -340,20 +340,12 @@ contains
                               * rsvec(is,js,ix,ie) &
                               * 2.0*energy(ie) 
                       enddo
-                   enddo
-                   !sum_den = -dens(is)*temp(is)*3.0*(vth(is)/vth(js)) &
-                   !     /(1+ (vth(is)/vth(js))**2)**2.5 &
-                   !     * (temp(is)/temp(js) + (vth(is)/vth(js))**2) &
-                   !     * 4.0/(3.0*sqrt(pi)) &
-                   !     * nu(is) * (1.0*Z(js))**2 / (1.0*Z(is))**2 &
-                   !     * dens(js)/dens(is) &
-                   !     * 4.0/ temp(is)
-                   !print *, is, js, 1-rs(is,js)/sum_den                       
+                   enddo                    
                 enddo
              enddo
 
              do is=1,n_species
-                do js=1, n_species         
+                do js=1, n_species   
                    do ix=1,n_xi
                       do jx=1, n_xi
                          do ie=1,n_energy
@@ -366,7 +358,6 @@ contains
                                        * (vth(js)/vth(is))**2 &
                                        * rsvec(is,js,ix,ie) &
                                        / rs(is,js) &
-                                       * 0.5*w_e(je)*w_xi(jx) &
                                        * rsvec_t(js,is,jx,je)
                                endif
                             enddo
