@@ -66,6 +66,18 @@ class cgyrodata:
         nt = self.n_time
 
         #-----------------------------------------------------------------
+        # Linear frequency
+        #
+        try:
+            data = np.loadtxt(self.dir+'out.cgyro.freq')
+            self.freq = data
+            print "INFO: (data.py) Read grid data in out.cgyro.freq."
+        except:
+            pass
+
+        #-----------------------------------------------------------------
+
+        #-----------------------------------------------------------------
         # Read ballooning potentials
         #
         try:
@@ -89,22 +101,35 @@ class cgyrodata:
         #-----------------------------------------------------------------
 
         #-----------------------------------------------------------------
+        # Ballooning distribution
+        #
+        try:
+            data = np.loadtxt(self.dir+'out.cgyro.hb')
+            self.hb = np.reshape(data,(2,self.n_radial*self.n_theta/self.m_box,
+                                       self.n_species,self.n_xi,self.n_energy),'F')
+            self.hb = self.hb/np.max(self.hb)
+            print "INFO: (data.py) Read grid data in out.cgyro.hb."
+        except:
+            pass
+        #-----------------------------------------------------------------
+
+        #-----------------------------------------------------------------
         # Read standard potentials
         #
         try:
-            data = np.loadtxt('out.cgyro.phi')
+            data = np.loadtxt(self.dir+'out.cgyro.phi')
             self.phi = np.reshape(data,(2,self.n_theta,self.n_radial,nt),'F')
             print "INFO: (data.py) Read grid data in out.cgyro.phi."
         except:
             pass
         try:
-            data = np.loadtxt('out.cgyro.apar')
+            data = np.loadtxt(self.dir+'out.cgyro.apar')
             self.apar = np.reshape(data,(2,self.n_theta,self.n_radial,nt),'F')
             print "INFO: (data.py) Read grid data in out.cgyro.apar."
         except:
             pass
         try:
-            data = np.loadtxt('out.cgyro.bpar')
+            data = np.loadtxt(self.dir+'out.cgyro.bpar')
             self.bpar = np.reshape(data,(2,self.n_theta,self.n_radial,nt),'F')
             print "INFO: (data.py) Read grid data in out.cgyro.bpar."
         except:
@@ -129,13 +154,4 @@ class cgyrodata:
             pass
         #-----------------------------------------------------------------
 
-        #-----------------------------------------------------------------
-        # Linear frequency
-        #
-        try:
-            data = np.loadtxt(self.dir+'out.cgyro.freq')
-            self.freq = data
-            print "INFO: (data.py) Read grid data in out.cgyro.freq."
-        except:
-            pass
-        #-----------------------------------------------------------------
+
