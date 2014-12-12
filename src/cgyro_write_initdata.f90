@@ -22,26 +22,36 @@ subroutine cgyro_write_initdata
   !
   if (silent_flag == 0 .and. i_proc == 0) then
 
-     open(unit=io,file=trim(path)//runfile,status='replace')
+     open(unit=io,file=trim(path)//runfile,status='old',position='append')
 
      write(io,*)
      write(io,'(a)') 'n_radial  n_theta   n_species n_energy  n_xi'
      write(io,'(t1,5(i4,6x))') n_radial,n_theta,n_species,n_energy,n_xi
 
      write(io,*) 
-     write(io,'(a,f6.2,a,f6.2)') '(Lx,Ly)/rho',length/rho,',',2*pi/ky
-     write(io,'(a,1pe12.5)') 'rho = ',rho
+     write(io,'(a,f7.2,a,f7.2)') '(Lx,Ly)/rho',length/rho,',',2*pi/ky
      write(io,*) 
-     if (n_toroidal == 1) then
+
+     if (zf_test_flag == 1) then
+        write(io,20) 'ky*rho',0.0
+     else if (n_toroidal == 1) then
         write(io,20) 'ky*rho',ky
      else
         write(io,20) 'min(ky*rho)',(q/rmin)*rho
         write(io,20) 'max(ky*rho)',(n_toroidal-1)*(q/rmin)*rho
      endif
+
      write(io,*) 
-     write(io,20) 'min(kx*rho)',2*pi*rho/length
-     write(io,20) 'max(kx*rho)',2*pi*rho*(n_radial/2-1)/length
+
+     if (zf_test_flag == 1) then
+        write(io,20) 'kx*rho',2*pi*rho/length
+     else
+        write(io,20) 'min(kx*rho)',2*pi*rho/length
+        write(io,20) 'max(kx*rho)',2*pi*rho*(n_radial/2-1)/length
+     endif
+
      write(io,*) 
+     write(io,20) 'rho',rho
      write(io,20) 'r/a',rmin
      write(io,20) 'R/a',rmaj
      write(io,20) 'q',q
@@ -104,6 +114,7 @@ subroutine cgyro_write_initdata
      open(unit=io,file=trim(path)//runfile_grids,status='replace')
      write(io,'(i4)') n_toroidal
      write(io,'(i4)') n_species
+     write(io,'(i4)') n_field
      write(io,'(i4)') n_radial
      write(io,'(i4)') n_theta
      write(io,'(i4)') n_energy

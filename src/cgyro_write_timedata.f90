@@ -47,7 +47,7 @@ subroutine cgyro_write_timedata
           size(power(:,i_field)),&
           power(:,i_field))
 
-     if (n_toroidal == 1) then
+     if (n_toroidal == 1 .and. n > 0) then
 
         ! Ballooning mode output for linear runs with a single mode
 

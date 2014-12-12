@@ -22,6 +22,11 @@ subroutine cgyro_kernel
 
   implicit none
 
+  ! Need to initialize the runfile very early
+  if (silent_flag == 0 .and. i_proc == 0) then
+     open(unit=io,file=trim(path)//runfile,status='replace')
+  endif
+
   ! Timer initialization
   call timer_lib_init('init_arrays')
   call timer_lib_init('field_v')

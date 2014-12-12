@@ -44,7 +44,7 @@ then
   echo
   echo "          -plot <type>"
   echo 
-  echo "              <type> = field,"
+  echo "              <type> = ball   (ballooning modes)"
   echo "                     = h      (2D distribution)"
   echo "                     = hcut   (1D distribution line plots),"
   echo "                     = freq   (frequency versus time),"
@@ -117,8 +117,8 @@ PYROOT=$GACODE_ROOT/shared/python/cgyro
 #==============================================================================
 case "$PLOT_TYPE" in
 
-   field)  
-	python $PYROOT/plot_field.py $FTYPE $TIME $FIELD $TMAX & ;;
+   ball)  
+	python $PYROOT/plot_ball.py $FTYPE $TIME $FIELD $TMAX & ;;
 
    h)  
 	python $PYROOT/plot_h.py $FTYPE $TIME $SPECIES & ;;
@@ -130,7 +130,7 @@ case "$PLOT_TYPE" in
 	python $PYROOT/plot_freq.py $FTYPE & ;;
 
    zf)  
-	python $PYROOT/plot_zf.py $FTYPE & ;;
+	python $PYROOT/plot_zf.py $FTYPE $FIELD & ;;
 
    zf0)
    	python $PYROOT/plot_zffield.py $FTYPE $TIME $FIELD & ;;
