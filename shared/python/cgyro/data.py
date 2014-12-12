@@ -25,6 +25,7 @@ class cgyrodata:
         #
         self.t      = np.loadtxt(self.dir+'out.cgyro.time')
         self.n_time = len(self.t)   
+        print
         print "INFO: (data.py) Read time vector in out.cgyro.time."
         #-----------------------------------------------------------------
 
@@ -48,10 +49,10 @@ class cgyrodata:
 
         self.p = np.array(data[l:l+self.n_radial],dtype=int)
         
-        mark  = l+self.n_radial
+        mark = l+self.n_radial
         self.theta = np.array(data[mark:mark+self.n_theta])
         
-        mark   = mark+self.n_theta
+        mark = mark+self.n_theta
         self.energy = np.array(data[mark:mark+self.n_energy])
 
         mark = mark+self.n_energy
@@ -59,6 +60,10 @@ class cgyrodata:
 
         mark = mark+self.n_xi
         self.thetab = np.array(data[mark:mark+self.n_theta*self.n_radial/self.m_box])        
+         
+        mark = mark+self.n_theta*self.n_radial/self.m_box
+        self.ky = np.array(data[mark:mark+self.n_n])
+
         print "INFO: (data.py) Read grid data in out.cgyro.grids."
         #-----------------------------------------------------------------
 
@@ -71,7 +76,7 @@ class cgyrodata:
         try:
             data = np.loadtxt(self.dir+'out.cgyro.freq')
             self.freq = data
-            print "INFO: (data.py) Read grid data in out.cgyro.freq."
+            print "INFO: (data.py) Read data in out.cgyro.freq."
         except:
             pass
 
@@ -83,19 +88,19 @@ class cgyrodata:
         try:
             data = np.loadtxt('out.cgyro.phib')
             self.phib = np.reshape(data,(2,self.n_theta*self.n_radial/self.m_box,nt),'F')
-            print "INFO: (data.py) Read grid data in out.cgyro.phib."
+            print "INFO: (data.py) Read data in out.cgyro.phib."
         except:
             pass
         try:
             data = np.loadtxt('out.cgyro.aparb')
             self.aparb = np.reshape(data,(2,self.n_theta*self.n_radial/self.m_box,nt),'F')
-            print "INFO: (data.py) Read grid data in out.cgyro.aparb."
+            print "INFO: (data.py) Read data in out.cgyro.aparb."
         except:
             pass
         try:
             data = np.loadtxt('out.cgyro.bparb')
             self.bparb = np.reshape(data,(2,self.n_theta*self.n_radial/self.m_box,nt),'F')
-            print "INFO: (data.py) Read grid data in out.cgyro.bparb."
+            print "INFO: (data.py) Read data in out.cgyro.bparb."
         except:
             pass
         #-----------------------------------------------------------------
@@ -108,7 +113,7 @@ class cgyrodata:
             self.hb = np.reshape(data,(2,self.n_radial*self.n_theta/self.m_box,
                                        self.n_species,self.n_xi,self.n_energy),'F')
             self.hb = self.hb/np.max(self.hb)
-            print "INFO: (data.py) Read grid data in out.cgyro.hb."
+            print "INFO: (data.py) Read data in out.cgyro.hb."
         except:
             pass
         #-----------------------------------------------------------------
@@ -118,20 +123,43 @@ class cgyrodata:
         #
         try:
             data = np.loadtxt(self.dir+'out.cgyro.phi')
-            self.phi = np.reshape(data,(2,self.n_theta,self.n_radial,nt),'F')
-            print "INFO: (data.py) Read grid data in out.cgyro.phi."
+            self.phi = np.reshape(data,(2,self.n_theta,self.n_radial,self.n_n,nt),'F')
+            print "INFO: (data.py) Read data in out.cgyro.phi."
         except:
             pass
         try:
             data = np.loadtxt(self.dir+'out.cgyro.apar')
-            self.apar = np.reshape(data,(2,self.n_theta,self.n_radial,nt),'F')
-            print "INFO: (data.py) Read grid data in out.cgyro.apar."
+            self.apar = np.reshape(data,(2,self.n_theta,self.n_radial,self.n_n,nt),'F')
+            print "INFO: (data.py) Read data in out.cgyro.apar."
         except:
             pass
         try:
             data = np.loadtxt(self.dir+'out.cgyro.bpar')
-            self.bpar = np.reshape(data,(2,self.n_theta,self.n_radial,nt),'F')
-            print "INFO: (data.py) Read grid data in out.cgyro.bpar."
+            self.bpar = np.reshape(data,(2,self.n_theta,self.n_radial,self.n_n,nt),'F')
+            print "INFO: (data.py) Read data in out.cgyro.bpar."
+        except:
+            pass
+        #-----------------------------------------------------------------
+
+        #-----------------------------------------------------------------
+        # Read powers
+        #
+        try:
+            data = np.loadtxt(self.dir+'out.cgyro.pwr_phi')
+            self.pwr_phi = np.reshape(data,(self.n_radial,self.n_n,nt),'F')
+            print "INFO: (data.py) Read data in out.cgyro.pwr_phi."
+        except:
+            pass
+        try:
+            data = np.loadtxt(self.dir+'out.cgyro.pwr_apar')
+            self.pwr_apar = np.reshape(data,(self.n_radial,self.n_n,nt),'F')
+            print "INFO: (data.py) Read data in out.cgyro.pwr_apar."
+        except:
+            pass
+        try:
+            data = np.loadtxt(self.dir+'out.cgyro.pwr_bpar')
+            self.pwr_bpar = np.reshape(data,(self.n_radial,self.n_n,nt),'F')
+            print "INFO: (data.py) Read data in out.cgyro.pwr_bpar."
         except:
             pass
         #-----------------------------------------------------------------
@@ -141,17 +169,17 @@ class cgyrodata:
         #
         try:
             data = np.loadtxt(self.dir+'out.cgyro.flux_n')
-            self.flux_n = np.reshape(data,(self.n_n,nt),'F')
-            print "INFO: (data.py) Read grid data in out.cgyro.flux_n."
+            self.flux_n = np.reshape(data,(self.n_species,self.n_n,nt),'F')
+            print "INFO: (data.py) Read data in out.cgyro.flux_n."
         except:
             pass
 
         try:
             data = np.loadtxt(self.dir+'out.cgyro.flux_e')
-            self.flux_e = np.reshape(data,(self.n_n,nt),'F')
-            print "INFO: (data.py) Read grid data in out.cgyro.flux_e."
+            self.flux_e = np.reshape(data,(self.n_species,self.n_n,nt),'F')
+            print "INFO: (data.py) Read data in out.cgyro.flux_e."
         except:
             pass
-        #-----------------------------------------------------------------
+      #-----------------------------------------------------------------
 
 
