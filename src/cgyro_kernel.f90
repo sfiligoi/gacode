@@ -145,9 +145,9 @@ subroutine cgyro_kernel
   ! Print final distribution
   if (n_toroidal == 1) then
      io_control = 1*(1-silent_flag)
-     call write_distribution(trim(path)//runfile_hx)
+     call write_distribution(trim(path)//runfile_hb)
      io_control = 2*(1-silent_flag)
-     call write_distribution(trim(path)//runfile_hx)
+     call write_distribution(trim(path)//runfile_hb)
   endif
   !---------------------------------------------------------------------------
 
