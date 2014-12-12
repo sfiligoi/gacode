@@ -20,26 +20,35 @@ class cgyrodata:
 
         import numpy as np
 
+        #-----------------------------------------------------------------
+        # Read time vector.
+        #
         self.t      = np.loadtxt(self.dir+'out.cgyro.time')
         self.n_time = len(self.t)   
         print "INFO: (data.py) Read time vector in out.cgyro.time."
+        #-----------------------------------------------------------------
 
         #-----------------------------------------------------------------
-        # Grid data is packed.  We need to unpack into sensible bits
+        # Read grid data.
+        # 
+        # NOTE: Grid data is packed, so unpack into sensible bits
         #
         data = np.loadtxt(self.dir+'out.cgyro.grids')
 
-        self.n_n = int(data[0])
+        self.n_n       = int(data[0])
         self.n_species = int(data[1])
-        self.n_radial  = int(data[2])
-        self.n_theta   = int(data[3])
-        self.n_energy  = int(data[4])
-        self.n_xi      = int(data[5])
-        self.m_box     = int(data[6])
+        self.n_field   = int(data[2])
+        self.n_radial  = int(data[3])
+        self.n_theta   = int(data[4])
+        self.n_energy  = int(data[5])
+        self.n_xi      = int(data[6])
+        self.m_box     = int(data[7])
+        # Set l to last data index plus one.
+        l=8
 
-        self.p = np.array(data[7:7+self.n_radial],dtype=int)
+        self.p = np.array(data[l:l+self.n_radial],dtype=int)
         
-        mark  = 7+self.n_radial
+        mark  = l+self.n_radial
         self.theta = np.array(data[mark:mark+self.n_theta])
         
         mark   = mark+self.n_theta
@@ -53,11 +62,80 @@ class cgyrodata:
         print "INFO: (data.py) Read grid data in out.cgyro.grids."
         #-----------------------------------------------------------------
 
+        # Convenience definition
+        nt = self.n_time
+
+        #-----------------------------------------------------------------
+        # Read ballooning potentials
+        #
+        try:
+            data = np.loadtxt('out.cgyro.phib')
+            self.phib = np.reshape(data,(2,self.n_theta*self.n_radial/self.m_box,nt),'F')
+            print "INFO: (data.py) Read grid data in out.cgyro.phib."
+        except:
+            pass
+        try:
+            data = np.loadtxt('out.cgyro.aparb')
+            self.aparb = np.reshape(data,(2,self.n_theta*self.n_radial/self.m_box,nt),'F')
+            print "INFO: (data.py) Read grid data in out.cgyro.aparb."
+        except:
+            pass
+        try:
+            data = np.loadtxt('out.cgyro.bparb')
+            self.bparb = np.reshape(data,(2,self.n_theta*self.n_radial/self.m_box,nt),'F')
+            print "INFO: (data.py) Read grid data in out.cgyro.bparb."
+        except:
+            pass
+        #-----------------------------------------------------------------
+
+        #-----------------------------------------------------------------
+        # Read standard potentials
+        #
+        try:
+            data = np.loadtxt('out.cgyro.phi')
+            self.phi = np.reshape(data,(2,self.n_theta,self.n_radial,nt),'F')
+            print "INFO: (data.py) Read grid data in out.cgyro.phi."
+        except:
+            pass
+        try:
+            data = np.loadtxt('out.cgyro.apar')
+            self.apar = np.reshape(data,(2,self.n_theta,self.n_radial,nt),'F')
+            print "INFO: (data.py) Read grid data in out.cgyro.apar."
+        except:
+            pass
+        try:
+            data = np.loadtxt('out.cgyro.bpar')
+            self.bpar = np.reshape(data,(2,self.n_theta,self.n_radial,nt),'F')
+            print "INFO: (data.py) Read grid data in out.cgyro.bpar."
+        except:
+            pass
+        #-----------------------------------------------------------------
+
         #-----------------------------------------------------------------
         # Particle and energy fluxes
         #
-        data = np.loadtxt(self.dir+'out.cgyro.flux_n')
-        self.flux_n = np.reshape(data,(self.n_n,self.n_time),'F')
-        
-        data = np.loadtxt(self.dir+'out.cgyro.flux_e')
-        self.flux_e = np.reshape(data,(self.n_n,self.n_time),'F')
+        try:
+            data = np.loadtxt(self.dir+'out.cgyro.flux_n')
+            self.flux_n = np.reshape(data,(self.n_n,nt),'F')
+            print "INFO: (data.py) Read grid data in out.cgyro.flux_n."
+        except:
+            pass
+
+        try:
+            data = np.loadtxt(self.dir+'out.cgyro.flux_e')
+            self.flux_e = np.reshape(data,(self.n_n,nt),'F')
+            print "INFO: (data.py) Read grid data in out.cgyro.flux_e."
+        except:
+            pass
+        #-----------------------------------------------------------------
+
+        #-----------------------------------------------------------------
+        # Linear frequency
+        #
+        try:
+            data = np.loadtxt(self.dir+'out.cgyro.freq')
+            self.freq = data
+            print "INFO: (data.py) Read grid data in out.cgyro.freq."
+        except:
+            pass
+        #-----------------------------------------------------------------
