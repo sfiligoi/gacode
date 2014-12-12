@@ -16,7 +16,7 @@ subroutine cgyro_check
      return
   endif
 
-  if (modulo(n_radial,m_box) /= 0) then 
+  if (modulo(n_radial,box_size) /= 0) then 
      call cgyro_error('n_radial must be a multiple of m_box.')
      return
   endif
