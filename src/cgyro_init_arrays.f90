@@ -359,8 +359,12 @@ subroutine cgyro_init_arrays
 
            ! Zonal-flow initial condition
 
-           if (is == 1 .and. abs(px(ir)) == 1) then
-              h_x(ic,iv_loc) = 1e-6
+           if (zf_test_flag == 1) then
+              if (is == 1 .and. abs(px(ir)) == 1) then
+                 h_x(ic,iv_loc) = 1e-6
+              endif
+           else
+              h_x = rho*exp(-px(ir)*4.0/n_radial)
            endif
 
         else 
@@ -368,7 +372,7 @@ subroutine cgyro_init_arrays
            ! Exponential in ballooning angle.
 
            if (is == 1) then
-              ang = theta(it)+2*pi*(ir-n_radial/2-1)
+              ang = theta(it)+2*pi*px(ir)
               h_x(ic,iv_loc) = rho*exp(-(ang/2)**2) 
            endif
 

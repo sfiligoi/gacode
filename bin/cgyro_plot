@@ -138,6 +138,9 @@ case "$PLOT_TYPE" in
    fluxn)  
 	python $PYROOT/plot_flux_n.py $FTYPE $W $MOMENT & ;;
 
+   pwr)  
+	python $PYROOT/plot_pwr.py $FTYPE $FIELD & ;;
+
    zf)  
 	python $PYROOT/plot_zf.py $FTYPE $FIELD & ;;
 
@@ -145,7 +148,7 @@ case "$PLOT_TYPE" in
    	python $PYROOT/plot_zffield.py $FTYPE $TIME $FIELD & ;;
 
    text)
-   	python $PYROOT/text.py './' $W & ;;
+   	python $PYROOT/text.py $W & ;;
 
    *)
         echo "Unrecognized argument to -plot" ; exit 1 ;;
