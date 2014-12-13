@@ -119,29 +119,6 @@ class cgyrodata:
         #-----------------------------------------------------------------
 
         #-----------------------------------------------------------------
-        # Read standard potentials
-        #
-        try:
-            data = np.loadtxt(self.dir+'out.cgyro.phi')
-            self.phi = np.reshape(data,(2,self.n_theta,self.n_radial,self.n_n,nt),'F')
-            print "INFO: (data.py) Read data in out.cgyro.phi."
-        except:
-            pass
-        try:
-            data = np.loadtxt(self.dir+'out.cgyro.apar')
-            self.apar = np.reshape(data,(2,self.n_theta,self.n_radial,self.n_n,nt),'F')
-            print "INFO: (data.py) Read data in out.cgyro.apar."
-        except:
-            pass
-        try:
-            data = np.loadtxt(self.dir+'out.cgyro.bpar')
-            self.bpar = np.reshape(data,(2,self.n_theta,self.n_radial,self.n_n,nt),'F')
-            print "INFO: (data.py) Read data in out.cgyro.bpar."
-        except:
-            pass
-        #-----------------------------------------------------------------
-
-        #-----------------------------------------------------------------
         # Read powers
         #
         try:
@@ -183,3 +160,31 @@ class cgyrodata:
       #-----------------------------------------------------------------
 
 
+    def getbig(self):
+
+        """Get large files"""
+
+        import numpy as np
+
+        #-----------------------------------------------------------------
+        # Read standard potentials
+        #
+        try:
+            data = np.loadtxt(self.dir+'out.cgyro.phi')
+            self.phi = np.reshape(data,(2,self.n_theta,self.n_radial,self.n_n,nt),'F')
+            print "INFO: (data.py) Read data in out.cgyro.phi."
+        except:
+            pass
+        try:
+            data = np.loadtxt(self.dir+'out.cgyro.apar')
+            self.apar = np.reshape(data,(2,self.n_theta,self.n_radial,self.n_n,nt),'F')
+            print "INFO: (data.py) Read data in out.cgyro.apar."
+        except:
+            pass
+        try:
+            data = np.loadtxt(self.dir+'out.cgyro.bpar')
+            self.bpar = np.reshape(data,(2,self.n_theta,self.n_radial,self.n_n,nt),'F')
+            print "INFO: (data.py) Read data in out.cgyro.bpar."
+        except:
+            pass
+        #-----------------------------------------------------------------

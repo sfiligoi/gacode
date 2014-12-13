@@ -38,5 +38,5 @@ ax.set_xlim([0,max(sim.t)])
 if ftype == 'screen':
     plt.show()
 else:
-    outfile = key+'.'+ftype
+    outfile = 'freq.'+ftype
     plt.savefig(outfile)
