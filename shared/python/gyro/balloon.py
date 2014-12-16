@@ -1,10 +1,7 @@
-"""This file is executed by the bash script gyro_plot when a plot of the
-fluxes is requested."""
-
 import sys
 import numpy as np
 from gacodeplotdefs import *
-from pyrats.gyro.data import GYROData
+from gyro.data import GYROData
 
 sim    = GYROData(sys.argv[1])
 index  = sys.argv[2]

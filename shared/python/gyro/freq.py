@@ -1,9 +1,7 @@
-"""This file is executed by the bash script gyro_plot"""
-
 import sys
 import numpy as np
 from gacodeplotdefs import *
-from pyrats.gyro.data import GYROData
+from gyro.data import GYROData
 
 fig = plt.figure(figsize=(16,8))
 

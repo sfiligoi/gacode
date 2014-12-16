@@ -1,10 +1,7 @@
-"""This file is executed by the bash script gyro_plot when a listing of the
-diffusivities is requested."""
-
-from pyrats.gyro.data import GYROData
 import sys
 import string
 import numpy as np
+from gyro.data import GYROData
 
 #---------------------------------------------------------------
 def average(f,t,window):
@@ -17,7 +14,7 @@ def average(f,t,window):
         tmax = tmin
         ave  = f[n_time-1]
         return ave
-
+    
     tmin = (1.0-window)*t[n_time-1]
     tmax = t[n_time-1]
 
@@ -32,7 +29,7 @@ def average(f,t,window):
 
     return ave
 #---------------------------------------------------------------
-
+ 
 sim       = GYROData(sys.argv[1])
 field     = sys.argv[2]
 i_moment  = int(sys.argv[3])
@@ -43,11 +40,11 @@ n_kinetic = int(sim.profile['n_kinetic'])
 
 t    = sim.t['(c_s/a)t']
 
-# Read data in gbflux_i and make diffusivity
+# Read data in gbflux_i and make gbflux
 sim.read_gbflux_i()
-sim.make_diff()
+sim.make_gbflux()
 
-flux = sim.diff
+flux = sim.gbflux
 
 # b is collection of all arrays to be plotted
 b = np.zeros((len(t),n_kinetic+1))
@@ -70,9 +67,13 @@ else:
 
 # Manage moment
 if i_moment == 0: 
-    mtag = 'D [GB]      '
+    mtag = 'GAMMA [GB]  '
 if i_moment == 1: 
-    mtag = 'CHI [GB]    '
+    mtag = 'Q [GB]      '
+if i_moment == 2: 
+    mtag = 'PI [GB]     '
+if i_moment == 3: 
+    mtag = 'S [GB]      '
 
 ul = '----------  '
 
@@ -84,6 +85,7 @@ tag = []
 
 # Manage species
 for i in range(n_kinetic):
+
     b[:,i+1] = flux0[i,i_moment,:]
 
     if sim.profile['electron_method'] == 2 or  sim.profile['electron_method'] == 4:
@@ -107,7 +109,9 @@ print line1
 print line2
 print line3
 print b
+
 # Determine tmin
+imin=0
 for i in range(len(t)):
     if t[i] < (1.0-window)*t[len(t)-1]:
         imin = i+1
@@ -122,3 +126,6 @@ else:
     for i in range(n_kinetic):
         print tag[i],average(b[:,i+1],t,window)
 
+if sim.profile['boundary_method'] == 2:
+    print
+    print 'Buffers have been properly omitted from average.'

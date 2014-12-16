@@ -27,7 +27,7 @@ class GYROData:
     k_perp_squared = []
 
     Example Usage:
-        >>> from pyrats.gyro.data import GYROData
+        >>> from gyro.data import GYROData
         >>> sim = GYROData('example_directory')
         >>> sim.make_gbflux()
     """

@@ -1,10 +1,7 @@
-"""This file is executed by the bash script gyro_plot when a plot of the
-fluxes is requested."""
-
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-from pyrats.gyro.data import GYROData
+from gyro.data import GYROData
 
 #---------------------------------------------------------------
 def average(f,t,window):

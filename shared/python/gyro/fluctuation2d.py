@@ -1,10 +1,8 @@
-"""Generate fluctuation plots.  This is called by gyro_plot."""
-
 import sys
 import numpy as np
 import scipy.interpolate
 from gacodeplotdefs import *
-from pyrats.gyro.data import GYROData
+from gyro.data import GYROData
 
 GFONTSIZE=18
 
