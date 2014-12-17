@@ -56,16 +56,20 @@ subroutine cgyro_field_v
 
   ! Poisson LHS factors
 
-  if (zf_test_flag == 1 .and. ae_flag == 1) then
+  if (n == 0 .and. ae_flag == 1) then
 
      do ir=1,n_radial
-        pvec_in(:) = real(field(ir,:,1))
-        call DGEMV('N',n_theta,n_theta,num1,hzf(ir,:,:),&
-             n_theta,pvec_in(:),1,num0,pvec_outr(:),1)
-        pvec_in(:) = imag(field(ir,:,1))
-        call DGEMV('N',n_theta,n_theta,num1,hzf(ir,:,:),&
-             n_theta,pvec_in(:),1,num0,pvec_outi(:),1)
-        field(ir,:,1) = pvec_outr(:) + i_c * pvec_outi(:)
+        if (px(ir) == 0) then
+           field(ir,:,1) = 0.0
+        else
+           pvec_in(:) = real(field(ir,:,1))
+           call DGEMV('N',n_theta,n_theta,num1,hzf(ir,:,:),&
+                n_theta,pvec_in(:),1,num0,pvec_outr(:),1)
+           pvec_in(:) = imag(field(ir,:,1))
+           call DGEMV('N',n_theta,n_theta,num1,hzf(ir,:,:),&
+                n_theta,pvec_in(:),1,num0,pvec_outi(:),1)
+           field(ir,:,1) = pvec_outr(:) + i_c * pvec_outi(:)
+        endif
      enddo
 
   else

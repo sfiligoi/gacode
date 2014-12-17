@@ -258,7 +258,7 @@ subroutine cgyro_rhs_nl(ij)
                  do iyp=-ny+iy,ny
                     iypp = ncyc(iy-iyp)
                     fg(ix,iy) = fg(ix,iy)+f(ixpp,iypp)*g(ixp,iyp)*(iypp*ixp-iyp*ixpp)
-                enddo
+                 enddo
               enddo
            enddo
         enddo
