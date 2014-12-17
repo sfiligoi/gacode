@@ -75,7 +75,7 @@ class cgyrodata:
         #
         try:
             data = np.loadtxt(self.dir+'out.cgyro.freq')
-            self.freq = data
+            self.freq = np.reshape(data,(2,self.n_n,nt),'F')
             print "INFO: (data.py) Read data in out.cgyro.freq."
         except:
             pass

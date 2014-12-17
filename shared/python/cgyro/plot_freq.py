@@ -17,7 +17,8 @@ ax.grid(which="major",ls=":")
 ax.set_xlabel(r'$(c_s/a)\, t$',fontsize=GFONTSIZE)
 ax.set_ylabel(r'$(a/c_s)\, \omega$',fontsize=GFONTSIZE)
 
-ax.plot(sim.t,sim.freq[:,0],color='k')
+for i in range(sim.n_n):
+    ax.plot(sim.t,sim.freq[0,i,:])
 
 ax.set_xlim([0,max(sim.t)])
 #======================================
@@ -30,7 +31,8 @@ ax.grid(which="major",ls=":")
 ax.set_xlabel(r'$(c_s/a)\, t$',fontsize=GFONTSIZE)
 ax.set_ylabel(r'$(a/c_s)\, \gamma$',fontsize=GFONTSIZE)
 
-ax.plot(sim.t,sim.freq[:,1],color='k')
+for i in range(sim.n_n):
+    ax.plot(sim.t,sim.freq[1,i,:])
 
 ax.set_xlim([0,max(sim.t)])
 #======================================
