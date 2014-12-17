@@ -25,7 +25,7 @@ contains
     real, dimension(:,:,:,:), allocatable :: rsvec, rsvec_t
     real, external :: derf
     real :: xa, xb, tauinv_ab
-    real :: sum_den, fac
+    real :: sum_den
     integer :: jv
     integer :: is,ir,it,ix,ie,js,je,jx,ks
     ! parameters for matrix solve
@@ -98,7 +98,7 @@ contains
                    endif
                    nu_s(ie,is,js) = nu_d(ie,is,js)
 
-                case (3,4)
+                case (3)
 
                    ! Reduced Hirshman-Sigmar model
                    nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
@@ -108,14 +108,31 @@ contains
                         * (-exp(-xb*xb)/(xb*sqrt(pi)) &
                         + (1.0/(2.0*xb*xb)) * DERF(xb)) &
                         * (2.0*temp(is)/temp(js))*(1.0+mass(js)/mass(is))
-                   nu_par(ie,is,js) = tauinv_ab * (2.0/xa**3) &
-                        * (-exp(-xb*xb)/(xb*sqrt(pi)) &
-                        + (1.0/(2.0*xb*xb)) * DERF(xb))
-                   nu_par_deriv(ie,is,js) = tauinv_ab * (2.0/xa**3) &
-                        * (-3/xa * (-exp(-xb*xb)/(xb*sqrt(pi)) &
-                        + (1.0/(2.0*xb*xb)) * DERF(xb)) &
-                        + vth(is)/vth(js) * (2.0*exp(-xb*xb)/(xb**2*sqrt(pi)) &
-                        + 2.0*exp(-xb*xb)/sqrt(pi) - DERF(xb)/xb**3))
+
+                case(4)
+                   
+                   ! Ad hoc op
+                   nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
+                        * (exp(-xb*xb)/(xb*sqrt(pi)) &
+                        + (1.0-1.0/(2.0*xb*xb)) * DERF(xb))
+                   ! No i-e Lorentz
+                   if(is /= is_ele .and. js == is_ele) then
+                      nu_d(ie,is,js) = 0.0
+                   endif
+
+                   ! Only ii, ee Diffusion
+                   if(is == js) then
+                      nu_par(ie,is,js) = tauinv_ab * (2.0/xa**3) &
+                           * (-exp(-xb*xb)/(xb*sqrt(pi)) &
+                           + (1.0/(2.0*xb*xb)) * DERF(xb))
+                      nu_par_deriv(ie,is,js) = tauinv_ab * (2.0/xa**3) &
+                           * (-3/xa * (-exp(-xb*xb)/(xb*sqrt(pi)) &
+                           + (1.0/(2.0*xb*xb)) * DERF(xb)) &
+                           + vth(is)/vth(js) &
+                           * (2.0*exp(-xb*xb)/(xb**2*sqrt(pi)) &
+                           + 2.0*exp(-xb*xb)/sqrt(pi) - DERF(xb)/xb**3))
+                   endif
+
                 end select
 
              enddo
@@ -161,32 +178,24 @@ contains
                          ! Diffusion
                          if(collision_model == 4) then
                             if(collision_ene_diffusion == 1) then
-                               ! only for like-species
-                               if(is == js) then
-                                  fac = 1.0
-                               else
-                                  fac = 0.0
-                               endif
                                if (ix==jx) then
                                   if(ie == je) then
                                      ctest(is,js,ix,jx,ie,je) &
                                           = ctest(is,js,ix,jx,ie,je) &
-                                          + fac*((1.0-temp(is)/temp(js)) &
+                                          + (1.0-temp(is)/temp(js)) &
                                           * (-nu_par_deriv(ie,is,js) &
                                           * energy(ie)**1.5 & 
                                           + nu_par(ie,is,js) & 
                                           * (2.0*energy(ie)**2 &
-                                          - 5.0*energy(ie))))
+                                          - 5.0*energy(ie)))
                                   endif
                                   ctest(is,js,ix,jx,ie,je) &
                                        = ctest(is,js,ix,jx,ie,je) &
-                                       + fac &
-                                       * nu_par(ie,is,js) * 0.5 *energy(ie) &
+                                       + nu_par(ie,is,js) * 0.5 *energy(ie) &
                                        * e_deriv2_mat(ie,je) / e_max
                                   ctest(is,js,ix,jx,ie,je) &
                                        = ctest(is,js,ix,jx,ie,je) &
-                                       + fac &
-                                       * e_deriv1_mat(ie,je)/sqrt(1.0*e_max) &
+                                       + e_deriv1_mat(ie,je)/sqrt(1.0*e_max) &
                                        * (nu_par_deriv(ie,is,js) &
                                        * 0.5*energy(ie) &
                                        + nu_par(ie,is,js) &
@@ -317,10 +326,6 @@ contains
                       do jx=1,n_xi
                          do ie=1,n_energy
                             do je=1,n_energy
-                               !if(ix==jx .and. ie==je) then
-                               !   rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
-                               !        + 2.0*energy(ie)
-                               !endif
                                rsvec(is,js,ix,ie) = rsvec(is,js,ix,ie) &
                                     + ctest(is,js,ix,jx,ie,je) &
                                     * 2.0*energy(je)
