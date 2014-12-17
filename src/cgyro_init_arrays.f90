@@ -287,6 +287,7 @@ subroutine cgyro_init_arrays
      enddo
   endif
 
+
   ! Streaming coefficients (for speed optimization)
 
   iv_loc = 0
@@ -371,10 +372,15 @@ subroutine cgyro_init_arrays
 
            ! Exponential in ballooning angle.
 
-           if (is == 1) then
-              ang = theta(it)+2*pi*px(ir)
-              h_x(ic,iv_loc) = rho*exp(-(ang/2)**2) 
+           if (n_toroidal == 1) then
+              if (is == 1) then
+                 ang = theta(it)+2*pi*px(ir)
+                 h_x(ic,iv_loc) = rho*exp(-(ang/2)**2) 
+              endif
+           else
+              h_x(ic,iv_loc) = 0.1*rho*exp(-px(ir)*4.0/n_radial) 
            endif
+
 
         endif
 
