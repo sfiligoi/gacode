@@ -43,6 +43,7 @@ module cgyro_interface
   integer :: cgyro_collision_mom_restore_in = 1
   integer :: cgyro_collision_ene_restore_in = 1
   integer :: cgyro_collision_ene_diffusion_in = 1
+  integer :: cgyro_collision_kperp_in = 1
   integer :: cgyro_zf_test_flag_in = 0
   integer :: cgyro_nonlinear_flag_in = 0
   real    :: cgyro_te_ade_in = 1.0
@@ -114,6 +115,7 @@ contains
     cgyro_collision_mom_restore_in = collision_mom_restore
     cgyro_collision_ene_restore_in = collision_ene_restore
     cgyro_collision_ene_diffusion_in = collision_ene_diffusion
+    cgyro_collision_kperp_in = collision_kperp
     cgyro_te_ade_in = te_ade
     cgyro_ne_ade_in = ne_ade
     cgyro_masse_ade_in = masse_ade
@@ -172,6 +174,7 @@ contains
     collision_mom_restore = cgyro_collision_mom_restore_in
     collision_ene_restore = cgyro_collision_ene_restore_in
     collision_ene_diffusion = cgyro_collision_ene_diffusion_in
+    collision_kperp = cgyro_collision_kperp_in
     te_ade    = cgyro_te_ade_in
     ne_ade    = cgyro_ne_ade_in
     masse_ade = cgyro_masse_ade_in

@@ -15,7 +15,7 @@ contains
     use timer_lib
 
     use cgyro_globals
-    use cgyro_equilibrium, only : omega_trap, k_perp
+    use cgyro_equilibrium, only : omega_trap, k_perp, bmag
 
     implicit none
 
@@ -31,6 +31,7 @@ contains
     ! parameters for matrix solve
     real, dimension(:,:), allocatable :: amat, bmat
     real, dimension(:,:,:,:,:,:), allocatable :: ctest, cfield
+    real, dimension(:,:,:,:,:,:,:), allocatable :: ctest_k
 
     if (collision_model == 0) return
 
@@ -138,82 +139,122 @@ contains
              enddo
           enddo
        enddo
-
+ 
        allocate(ctest(n_species,n_species,n_xi,n_xi,n_energy,n_energy))
        allocate(cfield(n_species,n_species,n_xi,n_xi,n_energy,n_energy))
-       ctest  = 0.0
-       cfield = 0.0
-
        allocate(rs(n_species,n_species))
        allocate(rsvec(n_species,n_species,n_xi,n_energy))
        allocate(rsvec_t(n_species,n_species,n_xi,n_energy))
 
+       allocate(ctest_k(n_species,n_species,n_xi,n_xi,n_energy,n_energy,ic_loc))
+
        ! Collision test particle component
+       ctest  = 0.0
+
+       ! Lorentz
        do is=1,n_species
-          do js=1, n_species   
-             do ix=1,n_xi
-                do jx=1, n_xi
-                   do ie=1,n_energy
-                      do je=1, n_energy
-
-                         if (ie==je) then
-
-                            ! Lorentz
-                            ctest(is,js,ix,jx,ie,je) &
-                                 = ctest(is,js,ix,jx,ie,je) &
-                                 + xi_lor_mat(ix,jx) *0.5*nu_d(ie,is,js)
-
-                            ! U factor for HS0
-                            if (collision_model == 3) then
-                               if(collision_mom_restore == 1) then
-                                  ctest(is,js,ix,jx,ie,je) &
-                                       = ctest(is,js,ix,jx,ie,je) &
-                                       + (nu_d(ie,is,js)-nu_s(ie,is,js)) &
-                                       * 1.5 * xi(ix) * xi(jx) * w_xi(jx)
-                               endif
-                            endif
-
-                         endif
-
-                         ! Diffusion
-                         if(collision_model == 4) then
-                            if(collision_ene_diffusion == 1) then
-                               if (ix==jx) then
-                                  if(ie == je) then
-                                     ctest(is,js,ix,jx,ie,je) &
-                                          = ctest(is,js,ix,jx,ie,je) &
-                                          + (1.0-temp(is)/temp(js)) &
-                                          * (-nu_par_deriv(ie,is,js) &
-                                          * energy(ie)**1.5 & 
-                                          + nu_par(ie,is,js) & 
-                                          * (2.0*energy(ie)**2 &
-                                          - 5.0*energy(ie)))
-                                  endif
-                                  ctest(is,js,ix,jx,ie,je) &
-                                       = ctest(is,js,ix,jx,ie,je) &
-                                       + nu_par(ie,is,js) * 0.5 *energy(ie) &
-                                       * e_deriv2_mat(ie,je) / e_max
-                                  ctest(is,js,ix,jx,ie,je) &
-                                       = ctest(is,js,ix,jx,ie,je) &
-                                       + e_deriv1_mat(ie,je)/sqrt(1.0*e_max) &
-                                       * (nu_par_deriv(ie,is,js) &
-                                       * 0.5*energy(ie) &
-                                       + nu_par(ie,is,js) &
-                                       * (2.0*sqrt(energy(ie)) &
-                                       + (temp(is)/temp(js)-2.0) &
-                                       * energy(ie)**1.5))
-                               endif
-                            endif
-                         endif
-
-                      enddo
+          do ix=1,n_xi
+             do ie=1,n_energy
+                do js=1, n_species
+                   do jx=1, n_xi
+                      je = ie
+                      ctest(is,js,ix,jx,ie,je) &
+                           = ctest(is,js,ix,jx,ie,je) &
+                           + xi_lor_mat(ix,jx) *0.5*nu_d(ie,is,js)
                    enddo
                 enddo
              enddo
           enddo
        enddo
 
+       ! U factor for HS0
+       if (collision_model == 3 .and. collision_mom_restore == 1) then
+          do is=1,n_species
+             do ix=1,n_xi
+                do ie=1,n_energy
+                   do js=1, n_species
+                      do jx=1, n_xi
+                         je = ie
+                         ctest(is,js,ix,jx,ie,je) &
+                              = ctest(is,js,ix,jx,ie,je) &
+                              + (nu_d(ie,is,js)-nu_s(ie,is,js)) &
+                              * 1.5 * xi(ix) * xi(jx) * w_xi(jx)
+                      enddo
+                   enddo
+                enddo
+             enddo
+          enddo
+       endif
+
+       ! Diffusion
+       if(collision_model == 4 .and. collision_ene_diffusion == 1) then
+          do is=1,n_species 
+             do ix=1,n_xi
+                do ie=1,n_energy
+                   do js=1, n_species
+                      do je=1, n_energy
+                         jx=ix                       
+                         if(ie == je) then
+                            ctest(is,js,ix,jx,ie,je) &
+                                 = ctest(is,js,ix,jx,ie,je) &
+                                 + (1.0-temp(is)/temp(js)) &
+                                 * (-nu_par_deriv(ie,is,js) &
+                                 * energy(ie)**1.5 & 
+                                 + nu_par(ie,is,js) & 
+                                 * (2.0*energy(ie)**2 &
+                                 - 5.0*energy(ie)))
+                         endif
+                         ctest(is,js,ix,jx,ie,je) &
+                              = ctest(is,js,ix,jx,ie,je) &
+                              + nu_par(ie,is,js) * 0.5 *energy(ie) &
+                              * e_deriv2_mat(ie,je) / e_max
+                         ctest(is,js,ix,jx,ie,je) &
+                              = ctest(is,js,ix,jx,ie,je) &
+                              + e_deriv1_mat(ie,je)/sqrt(1.0*e_max) &
+                              * (nu_par_deriv(ie,is,js) &
+                              * 0.5*energy(ie) &
+                              + nu_par(ie,is,js) &
+                              * (2.0*sqrt(energy(ie)) &
+                              + (temp(is)/temp(js)-2.0) &
+                              * energy(ie)**1.5))
+                      enddo
+                   enddo
+                enddo
+             enddo
+          enddo
+       endif
+
+       ! Finite-kperp corrections
+       ctest_k = 0.0
+       if(collision_model == 4 .and. collision_kperp == 1) then
+          ic_loc = 0
+          do ic=nc1,nc2
+             ic_loc = ic_loc+1
+             it = it_c(ic)
+             ir = ir_c(ic)
+             do is=1,n_species   
+                do ix=1,n_xi
+                   do ie=1,n_energy
+                      do js=1, n_species
+                         jx=ix
+                         je=ie
+                         ctest_k(is,js,ix,jx,ie,je,ic_loc) &
+                              = ctest_k(is,js,ix,jx,ie,je,ic_loc) &
+                              - 0.25*(k_perp(it,ir)*rho*vth(is)*mass(is) &
+                              / (z(is)*Bmag(it)))**2 &
+                              * 2.0*energy(ie) &
+                              * (nu_d(ie,is,js) * (1+xi(ix)**2) &
+                              + nu_par(ie,is,js) * (1-xi(ix)**2))
+                      enddo
+                   enddo
+                enddo
+             enddo
+          enddo
+       endif
+       
        ! Collision field particle component
+       cfield = 0.0
+
        select case (collision_model)
 
        case(1,2,3)
@@ -222,7 +263,8 @@ contains
                 do js=1,n_species
                    rs(is,js) = 0.0
                    do ie=1,n_energy
-                      rs(is,js) = rs(is,js)+w_e(ie)*nu_s(ie,is,js)*energy(ie)
+                      rs(is,js) = rs(is,js) &
+                           + w_e(ie)*nu_s(ie,is,js)*energy(ie)
                    enddo
                 enddo
              enddo
@@ -296,7 +338,7 @@ contains
                       do jx=1, n_xi
                          do ie=1,n_energy
                             do je=1, n_energy
-                               if (abs(rs(is,js)) > epsilon(0.0)) then
+                               if (abs(rs(is,js))>epsilon(0.0)) then
                                   cfield(is,js,ix,jx,ie,je) &
                                        = cfield(is,js,ix,jx,ie,je) &
                                        - mass(js)/mass(is) &
@@ -374,7 +416,7 @@ contains
           endif
 
        end select
-
+       
        allocate(cmat(nv,nv,nc_loc))
        allocate(cvec(nv))
        allocate(bvec(nv))
@@ -449,9 +491,11 @@ contains
                 if(is == js) then
                    do ks=1,n_species
                       cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                           - (0.5*delta_t) * ctest(is,ks,ix,jx,ie,je)
+                           - (0.5*delta_t) * (ctest(is,ks,ix,jx,ie,je) &
+                           + ctest_k(is,ks,ix,jx,ie,je,ic_loc))
                       amat(iv,jv) = amat(iv,jv) &
-                           + (0.5*delta_t) * ctest(is,ks,ix,jx,ie,je)
+                           + (0.5*delta_t) * (ctest(is,ks,ix,jx,ie,je) &
+                           + ctest_k(is,ks,ix,jx,ie,je,ic_loc))
                    enddo
                 endif
 
@@ -462,7 +506,7 @@ contains
                      + (0.5*delta_t) * cfield(is,js,ix,jx,ie,je)
 
                 ! Poisson component 
-                if (zf_test_flag == 1 .and. ae_flag == 1) then
+                if (n == 0 .and. ae_flag == 1) then
                    ! Cannot include Poisson in collision matrix
                    ! for n=0 with ade because depends on theta
                    ! i.e. ne0 ~ phi - <phi>
@@ -542,6 +586,7 @@ contains
        deallocate(rsvec_t)
        deallocate(ctest)
        deallocate(cfield)
+       deallocate(ctest_k)
 
        initialized = .true.
 

@@ -27,6 +27,7 @@ module cgyro_globals
   integer :: collision_mom_restore
   integer :: collision_ene_restore
   integer :: collision_ene_diffusion
+  integer :: collision_kperp
   integer :: zf_test_flag 
   integer :: nonlinear_flag 
   real :: te_ade

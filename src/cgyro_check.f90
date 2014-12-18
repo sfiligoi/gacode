@@ -121,6 +121,15 @@ subroutine cgyro_check
         call cgyro_error('Invalid value for collision_ene_restore')
         return
      end select
+     select case (collision_kperp)
+     case(0)
+        call cgyro_info('Collision kperp corrections = not included')
+     case(1)
+        call cgyro_info('Collision kperp corrections = included')
+     case default
+        call cgyro_error('Invalid value for collision_kperp')
+        return
+     end select
   endif
   !------------------------------------------------------------------------
 

@@ -31,6 +31,7 @@ subroutine cgyro_read_input
   read(1,*) collision_mom_restore
   read(1,*) collision_ene_restore
   read(1,*) collision_ene_diffusion
+  read(1,*) collision_kperp
   read(1,*) zf_test_flag
   read(1,*) nonlinear_flag
   read(1,*) te_ade
