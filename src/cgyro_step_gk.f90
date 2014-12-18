@@ -116,11 +116,11 @@ subroutine cgyro_rhs(ij)
 
   if (nonlinear_flag == 1) call cgyro_rhs_nl(ij)
 
-  do ic=1,nc
-     ir = ir_c(ic) 
-     it = it_c(ic)
-     if (ir == 1+n_radial/2 .and. n == 0) print *,rhs(ij,ic,:)  
-  enddo
+!  do ic=1,nc
+!     ir = ir_c(ic) 
+!     it = it_c(ic)
+!     if (ir == 1+n_radial/2 .and. n == 0) print *,rhs(ij,ic,:)  
+!  enddo
 
 end subroutine cgyro_rhs
 
