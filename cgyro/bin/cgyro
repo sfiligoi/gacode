@@ -59,7 +59,7 @@ fi
 # Define variables for flag capture
 #
 SIMROOT=$PWD
-CGYRO_DIR=$GACODE_ROOT/../gacode_add/cgyro
+CGYRO_DIR=$GACODE_ROOT/cgyro
 # Default number of cores
 NPROC=1
 NOMP=1
