@@ -14,6 +14,7 @@ modules/*.mod
 
 # Version tags
 gyro/.VERSION
+cgyro/.VERSION
 le3/.VERSION
 tgyro/.VERSION
 neo/.VERSION
@@ -24,6 +25,7 @@ gato/gato
 glf23/src/glf23
 gks/src/gks_analysis
 gyro/src/gyro
+cgyro/src/cgyro
 le3/src/le3
 le3/profiles_3d/profiles_3d
 neo/src/neo
