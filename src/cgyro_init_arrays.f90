@@ -167,7 +167,7 @@ subroutine cgyro_init_arrays
   !-------------------------------------------------------------------------
   ! Zonal flow with adiabatic electrons:
   !
-  if (zf_test_flag == 1 .and. ae_flag == 1) then
+  if (ae_flag == 1) then
 
      allocate(hzf(n_radial,n_theta,n_theta))
      hzf(:,:,:) = 0.0      
@@ -265,13 +265,13 @@ subroutine cgyro_init_arrays
               jt = thcyc(it+id)
               if (it+id < 1) then
                  thfac = exp(2*pi*i_c*k_theta*rmin)
-                 jr = ir-box_size
+                 jr = ir-n*box_size
                  if (jr < 1) then
                     jr = jr+n_radial
                  endif
               else if (it+id > n_theta) then
                  thfac = exp(-2*pi*i_c*k_theta*rmin)
-                 jr = ir+box_size
+                 jr = ir+n*box_size
                  if (jr > n_radial) then
                     jr = jr-n_radial
                  endif
@@ -365,7 +365,8 @@ subroutine cgyro_init_arrays
                  h_x(ic,iv_loc) = 1e-6
               endif
            else
-              h_x = rho*exp(-px(ir)*4.0/n_radial)
+              arg = px(ir)/real(n_radial)
+              h_x = arg*rho*exp(-4.0*arg)
            endif
 
         else 

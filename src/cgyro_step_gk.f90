@@ -96,6 +96,16 @@ subroutine cgyro_rhs(ij)
      enddo
   enddo
 
+!  if (n == 0) then
+!     do ic=1,nc
+!        ir = ir_c(ic) 
+!        it = it_c(ic)
+!        if (px(ir) == 0) print *,rhs(ij,ic,:)
+!     enddo
+!  endif
+!  call MPI_FINALIZE(i_err)
+!  stop
+
   ! TRAPPING TERM
 
   if (collision_model == 0) call cgyro_rhs_trap(ij)
@@ -106,6 +116,11 @@ subroutine cgyro_rhs(ij)
 
   if (nonlinear_flag == 1) call cgyro_rhs_nl(ij)
 
+  do ic=1,nc
+     ir = ir_c(ic) 
+     it = it_c(ic)
+     if (ir == 1+n_radial/2 .and. n == 0) print *,rhs(ij,ic,:)  
+  enddo
 
 end subroutine cgyro_rhs
 

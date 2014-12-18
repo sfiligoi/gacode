@@ -192,7 +192,7 @@ subroutine cgyro_kernel
   if(allocated(field_old))     deallocate(field_old)
   if(allocated(f_balloon))     deallocate(f_balloon)
 
-  if (zf_test_flag == 2 .and. ae_flag == 1) then
+  if (ae_flag == 1) then
      deallocate(hzf)
      deallocate(xzf)
      deallocate(pvec_in)
