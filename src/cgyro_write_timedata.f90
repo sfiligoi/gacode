@@ -15,9 +15,10 @@ subroutine cgyro_write_timedata
   complex :: a_norm
   integer :: i_field
   logical :: lfe
+  real :: vfreq(2)
 
   ! Print this data on print steps only; otherwise exit now
-  if (mod(i_time,prin_time) /= 0) return
+  if (mod(i_time,print_step) /= 0) return
 
   if (nonlinear_flag == 1) then
 
@@ -59,8 +60,13 @@ subroutine cgyro_write_timedata
      endif
 
   enddo
-
-  if (n_toroidal == 1) call write_freq(trim(path)//runfile_freq)
+ 
+  ! Linear frequency diagnostics for every value of n
+  call cgyro_freq
+  vfreq(1) = real(freq) 
+  vfreq(2) = aimag(freq)
+  call write_distributed_real(trim(path)//runfile_freq,size(vfreq),vfreq)
+  if (n_toroidal == 1) call write_freq()
 
   call write_time(trim(path)//runfile_time)
 
@@ -435,59 +441,31 @@ end subroutine write_time
 
 !====================================================================================
 
-subroutine write_freq(datafile)
+subroutine write_freq()
 
   use cgyro_globals
 
   !------------------------------------------------------
   implicit none
-  !
-  character (len=*), intent(in) :: datafile
   !------------------------------------------------------
-
-  ! Compute frequencies on all cores
-  call cgyro_freq
-
-  if (i_proc > 0) return
-
+ 
   select case (io_control)
 
-  case(0)
+  case(0,1,3)
 
      return
-
-  case(1)
-
-     ! Open
-
-     open(unit=io,file=datafile,status='replace')
-     close(io)
 
   case(2)
 
      ! Append
 
-     open(unit=io,file=datafile,status='old',position='append')
-
-     ! Construct ballooning-space form of field
-
-     write(io,fmtstr2) freq
-     print '(a,1pe9.3,a,1pe10.3,1pe10.3,a,1pe9.3,a,5(1pe9.3,1x))',&
-                '[t = ',i_time*delta_t,&
-                '][w = ',freq,&
-                '][dw = ',abs(freq_err),&
-                '] t_err: ',field_error
-     close(io)
-
-     !-------------------------------------------------------
-
-  case(3)
-
-     ! Rewind
-
-     open(unit=io,file=datafile,status='old')
-     endfile(io)
-     close(io)
+     if (i_proc == 0) then
+        print '(a,1pe9.3,a,1pe10.3,1pe10.3,a,1pe9.3,a,5(1pe9.3,1x))',&
+             '[t = ',i_time*delta_t,&
+             '][w = ',freq,&
+             '][dw = ',abs(freq_err),&
+             '] t_err: ',field_error
+     endif
 
   end select
 
