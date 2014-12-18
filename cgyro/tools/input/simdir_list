@@ -1,0 +1,7 @@
+Local gyrokinetic templates:
+
+reg_i      adiabatic electrons
+reg_ie     ions, electrons
+reg_iez    ions, electrons, carbon
+reg_zf_i   n=0 ZF with ions
+reg_zf_ie  n=0 ZF with ions, electrons
