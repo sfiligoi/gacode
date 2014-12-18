@@ -141,7 +141,7 @@ fi
 SIMDIR=$SIMROOT/$LOCDIR
 cd $SIMDIR
 
-PYROOT=$GACODE_ROOT/shared/python/pyrats/gyro
+PYROOT=$GACODE_ROOT/shared/python/gyro
 
 #==============================================================================
 # Display diff if -ldiff set, then exit.
