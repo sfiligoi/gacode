@@ -34,6 +34,7 @@ subroutine cgyro_read_input
   read(1,*) collision_kperp
   read(1,*) zf_test_flag
   read(1,*) nonlinear_flag
+  read(1,*) nonlinear_method
   read(1,*) te_ade
   read(1,*) ne_ade
   read(1,*) masse_ade

@@ -30,6 +30,7 @@ module cgyro_globals
   integer :: collision_kperp
   integer :: zf_test_flag 
   integer :: nonlinear_flag 
+  integer :: nonlinear_method
   real :: te_ade
   real :: ne_ade
   real :: masse_ade

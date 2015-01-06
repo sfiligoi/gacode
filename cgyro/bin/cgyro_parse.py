@@ -33,6 +33,7 @@ x.add('COLLISION_ENE_DIFFUSION','1')
 x.add('COLLISION_KPERP','0')
 x.add('ZF_TEST_FLAG','0')
 x.add('NONLINEAR_FLAG','0')
+x.add('NONLINEAR_METHOD','1')
 x.add('TE_ADE','1.0')
 x.add('NE_ADE','1.0')
 x.add('MASSE_ADE','0.0002724486');
