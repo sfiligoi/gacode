@@ -145,10 +145,10 @@ subroutine cgyro_nl_fftw(ij)
   real, dimension(:,:), allocatable :: vx
   real, dimension(:,:), allocatable :: vy
   real, dimension(:,:), allocatable :: uv
-  complex(C_DOUBLE_COMPLEX), dimension(:,:),allocatable :: fx
-  complex(C_DOUBLE_COMPLEX), dimension(:,:),allocatable :: fy
-  complex(C_DOUBLE_COMPLEX), dimension(:,:),allocatable :: gx
-  complex(C_DOUBLE_COMPLEX), dimension(:,:),allocatable :: gy
+  complex, dimension(:,:),allocatable :: fx
+  complex, dimension(:,:),allocatable :: fy
+  complex, dimension(:,:),allocatable :: gx
+  complex, dimension(:,:),allocatable :: gy
 
   include 'fftw3.f03'
 
@@ -159,8 +159,8 @@ subroutine cgyro_nl_fftw(ij)
   nx0 = n_radial
   ny0 = 2*n_toroidal-1
   ! 3/2-rule for dealiasing
-  nx = (3*nx0)/2
-  ny = (3*ny0)/2
+  nx = (3*nx0)/2+1
+  ny = (3*ny0)/2+2
 
   allocate(fx(0:nx-1,0:ny-1))
   allocate(gx(0:nx-1,0:ny-1))
@@ -194,18 +194,18 @@ subroutine cgyro_nl_fftw(ij)
            iy = in-1
            do ir=1,n_radial
               ic = ic_c(ir,it) 
-              ix = ir-1-nx0
-              p = ix
-              if (ix < 0) ix = ix+nx0  
+              p  = ir-1-nx0
+              ix = p
+              if (ix < 0) ix = ix+nx  
               f0 = f_nl(ic,j,in)
               g0 = g_nl(ic,j,in)
- 
+
               fx(ix,iy) =  i_c*p*f0
               gx(ix,iy) =  i_c*p*g0
               fy(ix,iy) = -i_c*iy*f0
               gy(ix,iy) = -i_c*iy*g0
 
-          enddo
+           enddo
         enddo
 
         !do i=1,nx
@@ -218,17 +218,33 @@ subroutine cgyro_nl_fftw(ij)
         call fftw_execute_dft_c2r(plan_c2r,gy,vy)
 
         ! Poisson bracket in real space
+
         uv = ux*vy-uy*vx
+
+        !do i=1,nx
+        !   if (i_proc == 0) then
+        !      print '(10(1pe11.4,3x))', uv(i,:)
+        !   endif
+        !enddo
 
         call fftw_execute_dft_r2c(plan_r2c,uv,fx)
 
-        do ir=1,n_radial
-           ic = ic_c(ir,it) 
-           ix = ir-1-nx0
-           if (ix < 0) ix=ix+nx
-           do in=1,n_toroidal
-              iy = in-1
-              g_nl(ic,j,in) = uv(ix,iy)
+        do i=1,nx
+           if (i_proc == 0) then
+              !print '(10(1pe11.4,1x,1pe11.4,3x))', sum(fx(i,:))
+           endif
+        enddo
+
+        !stop
+
+        do in=1,n_toroidal
+           iy = in-1
+           do ir=1,n_radial
+              ic = ic_c(ir,it) 
+              p = ir-1-nx0
+              ix = p
+              if (ix < 0) ix = ix+nx
+              g_nl(ic,j,in) = fx(ix,iy)
            enddo
         enddo
 
@@ -239,14 +255,6 @@ subroutine cgyro_nl_fftw(ij)
   call timer_lib_in('comm_nl')
   call parallel_slib_r(g_nl,psi)
   call timer_lib_out('comm_nl')
-
-  !do i=1,nx
-  !   print '(10(1pe12.5,1x,1pe12.5,2x))', fc(i,:)
-  !enddo
-
-  !do i=0,nx-1
-  !   print '(10(1pe11.4,2x))', fx(i,:)/(nx*ny)
-  !enddo
 
   call fftw_destroy_plan(plan_c2r)
   call fftw_destroy_plan(plan_r2c)

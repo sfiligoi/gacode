@@ -1,25 +1,27 @@
 #---------------------------------------------------
 # banach.gat.com (quad-core workstation)
-# gfortran,blas,lapack,hdf5 from Ubuntu repository
 #---------------------------------------------------
+
+FFTWDIR=/usr/local
+ROOT=/home/SOFTWARE
 
 # Compilers
 
-FC	= mpif90 -fall-intrinsics -std=f2008 -I $(GACODE_ROOT)/modules
+FC	= mpif90 -fall-intrinsics -std=f2008 -I $(GACODE_ROOT)/modules -I /usr/local/include
 F77	= mpif77 -I $(GACODE_ROOT)/modules
 
 FOMP    = -fopenmp
 FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules
 FOPT	= -O3
-FDEBUG	= -Wall -fcheck=all -fbacktrace -O -Wall -Wunderflow -W -finit-real=nan -fbounds-check -ffpe-trap=invalid,zero,overflow
+FDEBUG	= -Wall -fcheck=all -O -W -finit-real=nan -fbounds-check -ffpe-trap=invalid,zero,overflow
 
 # System math libraries
 
-LMATH = /home/SOFTWARE/scalapack-2.0.2/libscalapack.a \
-        /home/SOFTWARE/OpenBLAS/libopenblas.a 
+LMATH = $(ROOT)/scalapack-2.0.2/libscalapack.a \
+        $(ROOT)/OpenBLAS/libopenblas.a \
+        $(FFTWDIR)/lib/libfftw3_omp.a $(FFTWDIR)/lib/libfftw3.a 
         
-
-# OPTIONAL NetCDF:
+# NetCDF:
 NETCDF=-L/usr/local/lib -lnetcdff -lnetcdf -lm
 NETCDF_INC=/usr/local/include
 

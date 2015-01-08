@@ -18,7 +18,8 @@ FDEBUG	= -O2 -Wall -fcheck=all -Wunderflow -finit-real=nan -fbounds-check -ffpe-
 
 # System math libraries (from Ubuntu repository)
 
-LMATH = ${ROOT}/OpenBLAS/libopenblas.a $(FFTWDIR)/lib/libfftw3_omp.a $(FFTWDIR)/lib/libfftw3.a
+LMATH = ${ROOT}/OpenBLAS/libopenblas.a \
+        $(FFTWDIR)/lib/libfftw3_omp.a $(FFTWDIR)/lib/libfftw3.a 
 
 # OPTIONAL NetCDF:
 NETCDF=-L/usr/local/lib -lnetcdff -lnetcdf -lm
