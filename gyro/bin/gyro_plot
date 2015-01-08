@@ -139,7 +139,7 @@ then
    cd .. ; SIMROOT=$PWD
 fi
 SIMDIR=$SIMROOT/$LOCDIR
-cd $SIMDIR
+#cd $SIMDIR
 
 PYROOT=$GACODE_ROOT/shared/python/gyro
 

@@ -7,7 +7,7 @@ sim       = GYROData(sys.argv[1])
 field     = sys.argv[2]
 i_moment  = int(sys.argv[3])
 window    = float(sys.argv[4])
-ftype     = sys.argv[5]
+plotfile  = sys.argv[5]
 datafile  = sys.argv[6]
 
 n_field   = int(sim.profile['n_field'])
@@ -65,8 +65,8 @@ else:
     print 'INFO: (gyro_plot) Output to datafile not supported.  Use raw out.gyro.gbflux.'
 
 ax.legend()
-if ftype == 'screen':
+if plotfile == 'screen':
     plt.show()
 else:
-    outfile = 'gbflux.'+ftype
-    plt.savefig(outfile)
+    plt.savefig(plotfile)
+    print "INFO: (gyro_plot) Wrote plot to " + plotfile + "."
