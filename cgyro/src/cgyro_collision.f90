@@ -32,9 +32,8 @@ contains
     real, dimension(:,:), allocatable :: amat, bmat
     real, dimension(:,:,:,:,:,:), allocatable :: ctest, cfield
     real, dimension(:,:,:,:,:,:,:), allocatable :: ctest_k, cfield_k
-    real, external :: BESJ0
     real :: arg1, arg2
-    real :: bessel(0:2)
+    real :: bessel_1(0:1), bessel_2(0:1)
     integer :: ierr
 
     if (collision_model == 0) return
@@ -379,7 +378,8 @@ contains
                                              /(z(js)*Bmag(it)) &
                                              *sqrt(2.0*energy(je))&
                                              *sqrt(1.0-xi(jx)**2)
-                                        call RJBESL(abs(arg2),0.0,2,bessel,ierr)
+                                        call RJBESL(abs(arg1),0.0,2,bessel_1,ierr)
+                                        call RJBESL(abs(arg2),0.0,2,bessel_2,ierr)
 
                                         cfield_k(is,js,ix,jx,ie,je,ic_loc) &
                                              = cfield_k(is,js,ix,jx,ie,je,ic_loc) &
@@ -387,10 +387,10 @@ contains
                                              * (dens(js)/dens(is)) &
                                              * (vth(js)/vth(is))**2 &
                                              * rsvec(is,js,ix,ie) &
-                                             * BESJ0(abs(arg1)) &
+                                             * bessel_1(0) &
                                              / rs(is,js) &
                                              * rsvec(js,is,jx,je) &
-                                             * bessel(1) &
+                                             * bessel_2(0) &
                                              * 0.5*w_xi(jx)*w_e(je)
                                         cfield_k(is,js,ix,jx,ie,je,ic_loc) &
                                              = cfield_k(is,js,ix,jx,ie,je,ic_loc) &
@@ -398,11 +398,11 @@ contains
                                              * (dens(js)/dens(is)) &
                                              * (vth(js)/vth(is))**2 &
                                              * rsvec(is,js,ix,ie) &
-                                             * BESJ1(abs(arg1)) &
+                                             * bessel_1(1) &
                                              * sqrt(1.0-xi(ix)**2)/xi(ix) &
                                              / rs(is,js) &
                                              * rsvec(js,is,jx,je) &
-                                             * bessel(1) &
+                                             * bessel_2(1) &
                                              * sqrt(1.0-xi(jx)**2)/xi(jx) &
                                              * 0.5*w_xi(jx)*w_e(je)
                                      endif
@@ -495,17 +495,19 @@ contains
                                              /(z(js)*Bmag(it)) &
                                              *sqrt(2.0*energy(je))&
                                              *sqrt(1.0-xi(jx)**2)
-                                        call RJBESL(abs(arg2),0.0,2,bessel,ierr)
+                                        call RJBESL(abs(arg1),0.0,2,bessel_1,ierr)
+                                        call RJBESL(abs(arg2),0.0,2,bessel_2,ierr)
+
                                         cfield_k(is,js,ix,jx,ie,je,ic_loc) &
                                              = cfield_k(is,js,ix,jx,ie,je,ic_loc) &
                                              - mass(js)/mass(is) &
                                              * (dens(js)/dens(is)) &
                                              * (vth(js)/vth(is))**2 &
                                              * rsvec(is,js,ix,ie) &
-                                             * BESJ0(abs(arg1)) &
+                                             * bessel_1(0) &
                                              / rs(is,js) &
                                              * rsvec(js,is,jx,je) &
-                                             * bessel(1) &
+                                             * bessel_2(0) &
                                              * 0.5*w_xi(jx)*w_e(je)
                                      endif
                                   enddo
