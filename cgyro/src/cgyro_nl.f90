@@ -101,8 +101,16 @@ subroutine cgyro_nl_direct(ij)
            enddo
         enddo
 
+        if (it == 7 .and. j == 2 .and. i_proc == 0) then
+           do ir=1,n_radial
+              ix = ir-1-nx0
+              print '(10(1pe11.4,1x,1pe11.4,3x))',fg(ix,0:ny0)
+           enddo
+        endif
+
      enddo ! it
   enddo ! j
+  stop
   call timer_lib_out('rhs_nl')
 
   call timer_lib_in('comm_nl')
@@ -140,40 +148,48 @@ subroutine cgyro_nl_fftw(ij)
 
   complex :: f0,g0
 
-  real, dimension(:,:), allocatable :: ux
-  real, dimension(:,:), allocatable :: uy
-  real, dimension(:,:), allocatable :: vx
-  real, dimension(:,:), allocatable :: vy
-  real, dimension(:,:), allocatable :: uv
-  complex, dimension(:,:),allocatable :: fx
-  complex, dimension(:,:),allocatable :: fy
-  complex, dimension(:,:),allocatable :: gx
-  complex, dimension(:,:),allocatable :: gy
+  real(C_DOUBLE), dimension(:,:), allocatable :: ux
+  real(C_DOUBLE), dimension(:,:), allocatable :: uy
+  real(C_DOUBLE), dimension(:,:), allocatable :: vx
+  real(C_DOUBLE), dimension(:,:), allocatable :: vy
+  real(C_DOUBLE), dimension(:,:), allocatable :: uv
+  complex(C_DOUBLE_COMPLEX), dimension(:,:),allocatable :: fx
+  complex(C_DOUBLE_COMPLEX), dimension(:,:),allocatable :: fy
+  complex(C_DOUBLE_COMPLEX), dimension(:,:),allocatable :: gx
+  complex(C_DOUBLE_COMPLEX), dimension(:,:),allocatable :: gy
 
   include 'fftw3.f03'
 
   type(C_PTR) :: plan_r2c
-  type(C_PTR) :: plan_c2r
-
+  type(C_PTR) :: plan_c2r1
+  type(C_PTR) :: plan_c2r2
+  type(C_PTR) :: plan_c2r3
+  type(C_PTR) :: plan_c2r4
 
   nx0 = n_radial
   ny0 = 2*n_toroidal-1
   ! 3/2-rule for dealiasing
-  nx = (3*nx0)/2+1
+  nx = (3*nx0)/2+2
   ny = (3*ny0)/2+2
 
-  allocate(fx(0:nx-1,0:ny-1))
-  allocate(gx(0:nx-1,0:ny-1))
-  allocate(fy(0:nx-1,0:ny-1))
-  allocate(gy(0:nx-1,0:ny-1))
-  allocate(ux(0:nx-1,0:ny-1))
-  allocate(vx(0:nx-1,0:ny-1))
-  allocate(uy(0:nx-1,0:ny-1))
-  allocate(vy(0:nx-1,0:ny-1))
-  allocate(uv(0:nx-1,0:ny-1))
+  allocate(fx(0:ny/2,0:nx-1))
+  allocate(gx(0:ny/2,0:nx-1))
+  allocate(fy(0:ny/2,0:nx-1))
+  allocate(gy(0:ny/2,0:nx-1))
 
-  plan_c2r = fftw_plan_dft_c2r_2d(nx,ny,fx,ux,FFTW_ESTIMATE)
-  plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,ux,fx,FFTW_ESTIMATE)
+  allocate(ux(0:ny-1,0:nx-1))
+  allocate(vx(0:ny-1,0:nx-1))
+  allocate(uy(0:ny-1,0:nx-1))
+  allocate(vy(0:ny-1,0:nx-1))
+
+  allocate(uv(0:ny-1,0:nx-1))
+
+  plan_c2r1 = fftw_plan_dft_c2r_2d(nx,ny,fx,ux,FFTW_UNALIGNED)
+  plan_c2r2 = fftw_plan_dft_c2r_2d(nx,ny,fy,uy,FFTW_UNALIGNED)
+  plan_c2r3 = fftw_plan_dft_c2r_2d(nx,ny,gx,vx,FFTW_UNALIGNED)
+  plan_c2r4 = fftw_plan_dft_c2r_2d(nx,ny,gy,vy,FFTW_UNALIGNED)
+
+  plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,uv,fx,FFTW_UNALIGNED)
 
   call timer_lib_in('comm_nl')
   call parallel_slib_f(h_x,f_nl)
@@ -195,16 +211,15 @@ subroutine cgyro_nl_fftw(ij)
            do ir=1,n_radial
               ic = ic_c(ir,it) 
               p  = ir-1-nx0
-              ix = p
+              ix = -p
               if (ix < 0) ix = ix+nx  
-              f0 = f_nl(ic,j,in)
-              g0 = g_nl(ic,j,in)
+              f0 = conjg(f_nl(ic,j,in))
+              g0 = conjg(g_nl(ic,j,in))
 
-              fx(ix,iy) =  i_c*p*f0
-              gx(ix,iy) =  i_c*p*g0
-              fy(ix,iy) = -i_c*iy*f0
-              gy(ix,iy) = -i_c*iy*g0
-
+              fx(iy,ix) = i_c*p*f0
+              gx(iy,ix) = i_c*p*g0
+              fy(iy,ix) = i_c*iy*f0
+              gy(iy,ix) = i_c*iy*g0
            enddo
         enddo
 
@@ -212,51 +227,60 @@ subroutine cgyro_nl_fftw(ij)
         !   print '(10(1pe12.5,2x))', fr(i,:)
         !enddo
 
-        call fftw_execute_dft_c2r(plan_c2r,fx,ux)
-        call fftw_execute_dft_c2r(plan_c2r,fy,uy)
-        call fftw_execute_dft_c2r(plan_c2r,gx,vx)
-        call fftw_execute_dft_c2r(plan_c2r,gy,vy)
+        call fftw_execute_dft_c2r(plan_c2r1,fx,ux)
+        call fftw_execute_dft_c2r(plan_c2r2,fy,uy)
+        call fftw_execute_dft_c2r(plan_c2r3,gx,vx)
+        call fftw_execute_dft_c2r(plan_c2r4,gy,vy)
 
         ! Poisson bracket in real space
 
-        uv = ux*vy-uy*vx
+        uv = -(ux*vy-uy*vx)/(nx*ny)
 
-        !do i=1,nx
-        !   if (i_proc == 0) then
-        !      print '(10(1pe11.4,3x))', uv(i,:)
-        !   endif
-        !enddo
+        if (it == 7 .and. j == 2 .and. i_proc == 0) then
+           print *,sum(uv)
+           print *
+           do i=0,nx-1
+              !         print '(10(1pe11.4,3x))', uv(i,:)
+           enddo
+        endif
 
+        fx = 0.0
         call fftw_execute_dft_r2c(plan_r2c,uv,fx)
 
-        do i=1,nx
-           if (i_proc == 0) then
-              !print '(10(1pe11.4,1x,1pe11.4,3x))', sum(fx(i,:))
-           endif
-        enddo
 
-        !stop
-
-        do in=1,n_toroidal
-           iy = in-1
+        if (it == 7 .and. j == 2 .and. i_proc == 0) then
+           print *
            do ir=1,n_radial
-              ic = ic_c(ir,it) 
-              p = ir-1-nx0
-              ix = p
-              if (ix < 0) ix = ix+nx
-              g_nl(ic,j,in) = fx(ix,iy)
+              ix = -(ir-1-nx0)
+              if (ix < 0) ix=ix+nx
+              print '(10(1pe11.4,1x,1pe11.4,3x))',conjg(fx(0:ny0/2,ix))
+           enddo
+        endif
+
+        do ir=1,n_radial
+           ic = ic_c(ir,it) 
+           p = ir-1-nx0
+           ix = p
+           if (ix < 0) ix = ix+nx
+           do in=1,n_toroidal
+              iy = in-1
+              g_nl(ic,j,in) = fx(iy,ix)
            enddo
         enddo
 
      enddo ! it
   enddo ! j
+  stop
   call timer_lib_out('rhs_nl')
 
   call timer_lib_in('comm_nl')
   call parallel_slib_r(g_nl,psi)
   call timer_lib_out('comm_nl')
 
-  call fftw_destroy_plan(plan_c2r)
+  call fftw_destroy_plan(plan_c2r1)
+  call fftw_destroy_plan(plan_c2r2)
+  call fftw_destroy_plan(plan_c2r3)
+  call fftw_destroy_plan(plan_c2r4)
   call fftw_destroy_plan(plan_r2c)
 
   deallocate(fx)
