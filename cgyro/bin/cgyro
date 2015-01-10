@@ -66,7 +66,6 @@ NOMP=1
 NUMA=0
 MPINUMA=0
 # Execute/test mode flags
-EXEC_FLAG=0
 TEST_FLAG=0
 GENERATE_FLAG=0
 REGRESS_FLAG=0
@@ -82,7 +81,7 @@ while [ $# -gt 0 ] ; do
 
   -start) shift ; START=$1 ;;
 
-  -e) shift ; LOCDIR=$1 ; EXEC_FLAG=1 ;;
+  -e) shift ; LOCDIR=$1 ;;
 
   -t) shift ; LOCDIR=$1 ; TEST_FLAG=1 ;;
 
@@ -199,25 +198,17 @@ fi
 #===========================================================
 # RUN CGYRO
 #
+# Version stamp:
+echo `gacode_getversion` > out.cgyro.version 
+echo $GACODE_PLATFORM >> out.cgyro.version
+date >> out.cgyro.version
 
-# Standalone mode
-if [ $EXEC_FLAG -eq 1 ] 
-then
+gacode_printversion CGYRO
+  
+$GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM \
+  $SIMDIR $NPROC $CGYRO_DIR/src/cgyro $NOMP $NUMA $MPINUMA
 
-  #==========================================================
-  # Version stamp:
-  echo `gacode_getversion` > out.cgyro.version 
-  echo $GACODE_PLATFORM >> out.cgyro.version
-  date >> out.cgyro.version
-
-  gacode_printversion CGYRO
-  #==========================================================
-
-  $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM \
-   $SIMDIR $NPROC $CGYRO_DIR/src/cgyro $NOMP $NUMA $MPINUMA
-
-   cat out.cgyro.err
-fi
+cat out.cgyro.err
 #===========================================================
 
 #============================================================

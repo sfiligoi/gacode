@@ -52,65 +52,68 @@ subroutine cgyro_kernel
   call cgyro_check
   if (error_status > 0) goto 100
 
-  ! [Exit is test flag set]
-  if (test_flag == 1) goto 100
-  
-  ! Construct energy nodes and weights
-  allocate(energy(n_energy))
-  allocate(w_e(n_energy))
-  allocate(e_deriv1_mat(n_energy,n_energy))
-  allocate(e_deriv2_mat(n_energy,n_energy))
-  call pseudo_maxwell(n_energy,e_max,energy,w_e,e_deriv1_mat,e_deriv2_mat)
+  if (test_flag  == 0) then
 
-  ! Construct xi (pitch-angle) nodes and weights
-  allocate(xi(n_xi))
-  allocate(w_xi(n_xi))
-  allocate(xi_lor_mat(n_xi,n_xi))
-  allocate(xi_deriv_mat(n_xi,n_xi))
-  call pseudo_legendre(n_xi,xi,w_xi,xi_deriv_mat,xi_lor_mat)
+     ! Construct energy nodes and weights
+     allocate(energy(n_energy))
+     allocate(w_e(n_energy))
+     allocate(e_deriv1_mat(n_energy,n_energy))
+     allocate(e_deriv2_mat(n_energy,n_energy))
+     call pseudo_maxwell(n_energy,e_max,energy,w_e,e_deriv1_mat,e_deriv2_mat)
 
-  ! Allocate distribution function and field arrays
-  allocate(j0_c(nc,nv_loc))
-  allocate(j0_v(nc_loc,nv))
-  allocate(h_x(nc,nv_loc))
-  allocate(psi(nc,nv_loc))
-  allocate(f_nl(nc,nsplit,n_toroidal))
-  allocate(g_nl(nc,nsplit,n_toroidal))
-  allocate(rhs(4,nc,nv_loc))
-  allocate(h0_x(nc,nv_loc))
-  allocate(cap_h_c(nc,nv_loc))
-  allocate(cap_h_ct(nv_loc,nc))
-  allocate(cap_h_v(nc_loc,nv))
-  allocate(cap_h_v_prime(nc_loc,nv))
-  allocate(omega_cap_h(nc,nv_loc))
-  allocate(omega_h(nc,nv_loc))
-  allocate(omega_s(n_field,nc,nv_loc))
-  allocate(field(n_radial,n_theta,n_field))
-  allocate(field_loc(n_radial,n_theta,n_field))
-  allocate(field_old(n_radial,n_theta,n_field))
-  allocate(field_old2(n_radial,n_theta,n_field))
-  allocate(field_old3(n_radial,n_theta,n_field))
-  allocate(f_balloon(n_radial/box_size,n_theta))
-  allocate(    flux(n_species,2))
-  allocate(flux_loc(n_species,2))
-  allocate(power(n_radial,n_field))
-  allocate(recv_status(MPI_STATUS_SIZE))
+     ! Construct xi (pitch-angle) nodes and weights
+     allocate(xi(n_xi))
+     allocate(w_xi(n_xi))
+     allocate(xi_lor_mat(n_xi,n_xi))
+     allocate(xi_deriv_mat(n_xi,n_xi))
+     call pseudo_legendre(n_xi,xi,w_xi,xi_deriv_mat,xi_lor_mat)
 
-  allocate(thcyc(1-n_theta:2*n_theta))
-  allocate(rcyc(n_radial,n_theta,-2:2))
-  allocate(dtheta(n_radial,n_theta,-2:2))
-  allocate(dtheta_up(n_radial,n_theta,-2:2))
+     ! Allocate distribution function and field arrays
+     allocate(j0_c(nc,nv_loc))
+     allocate(j0_v(nc_loc,nv))
+     allocate(h_x(nc,nv_loc))
+     allocate(psi(nc,nv_loc))
+     allocate(f_nl(nc,nsplit,n_toroidal))
+     allocate(g_nl(nc,nsplit,n_toroidal))
+     allocate(rhs(4,nc,nv_loc))
+     allocate(h0_x(nc,nv_loc))
+     allocate(cap_h_c(nc,nv_loc))
+     allocate(cap_h_ct(nv_loc,nc))
+     allocate(cap_h_v(nc_loc,nv))
+     allocate(cap_h_v_prime(nc_loc,nv))
+     allocate(omega_cap_h(nc,nv_loc))
+     allocate(omega_h(nc,nv_loc))
+     allocate(omega_s(n_field,nc,nv_loc))
+     allocate(field(n_radial,n_theta,n_field))
+     allocate(field_loc(n_radial,n_theta,n_field))
+     allocate(field_old(n_radial,n_theta,n_field))
+     allocate(field_old2(n_radial,n_theta,n_field))
+     allocate(field_old3(n_radial,n_theta,n_field))
+     allocate(f_balloon(n_radial/box_size,n_theta))
+     allocate(    flux(n_species,2))
+     allocate(flux_loc(n_species,2))
+     allocate(power(n_radial,n_field))
+     allocate(recv_status(MPI_STATUS_SIZE))
 
-  call EQUIL_alloc(1)
-  call EQUIL_do
+     allocate(thcyc(1-n_theta:2*n_theta))
+     allocate(rcyc(n_radial,n_theta,-2:2))
+     allocate(dtheta(n_radial,n_theta,-2:2))
+     allocate(dtheta_up(n_radial,n_theta,-2:2))
 
-  ! 4. Array initialization
-  call cgyro_init_arrays
+     call EQUIL_alloc(1)
+     call EQUIL_do
 
-  call COLLISION_alloc(1)
+     ! 4. Array initialization
+     call cgyro_init_arrays
+
+     call COLLISION_alloc(1)
+
+  endif
 
   ! 5. Write initial data
   call cgyro_write_initdata
+
+  if (test_flag == 1) return
 
   !---------------------------------------------------------------------------
   !

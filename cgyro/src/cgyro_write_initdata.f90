@@ -81,6 +81,8 @@ subroutine cgyro_write_initdata
   endif
   !----------------------------------------------------------------------------
 
+  if (test_flag == 1) return
+
   !----------------------------------------------------------------------------
   ! Write the initial equilibrium data
   !
