@@ -6,7 +6,6 @@ all:
 	cd glf23 ; make
 	cd tglf ; make
 	cd gyro ; make 
-	cd cgyro ; make 
 	cd tgyro ; make
 
 clean:
