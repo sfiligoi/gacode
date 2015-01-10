@@ -79,9 +79,6 @@ subroutine cgyro_nl_direct(ij)
               f(-ix,-iy) = conjg(f(ix,iy))
               g(-ix,-iy) = conjg(g(ix,iy))
            enddo
-           if (it == 7 .and. j == 2 .and. i_proc == 0) then
-              print '(10(1pe10.3,1x,1pe10.3,2x))',f(ix,-ny0:ny0)
-           endif
         enddo
 
         fg = (0.0,0.0)
@@ -106,7 +103,7 @@ subroutine cgyro_nl_direct(ij)
            enddo
         enddo
 
-        if (it == 7 .and. j == 2 .and. i_proc == 0) then
+        if (it == 7 .and. j == 2 .and. i_proc == 1) then
            do ir=1,n_radial
               ix = ir-1-nx0
               print '(10(1pe11.4,1x,1pe11.4,3x))',fg(ix,0:ny0)
@@ -183,11 +180,10 @@ subroutine cgyro_nl_fftw(ij)
   allocate(vx(0:ny-1,0:nx-1))
   allocate(uy(0:ny-1,0:nx-1))
   allocate(vy(0:ny-1,0:nx-1))
-
   allocate(uv(0:ny-1,0:nx-1))
 
   plan_c2r = fftw_plan_dft_c2r_2d(nx,ny,fx,ux,FFTW_ESTIMATE)
-  plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,uv,fx,FFTW_ESTIMATE)
+  plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,ux,fx,FFTW_ESTIMATE)
 
   call timer_lib_in('comm_nl')
   call parallel_slib_f(h_x,f_nl)
@@ -196,7 +192,7 @@ subroutine cgyro_nl_fftw(ij)
 
   call timer_lib_in('rhs_nl')
   do j=1,nsplit
-     do it=1,n_theta 
+     do it=1,n_theta
 
         fx = 0.0
         gx = 0.0
@@ -209,13 +205,10 @@ subroutine cgyro_nl_fftw(ij)
            do ir=1,n_radial
               ic = ic_c(ir,it) 
               p  = ir-1-nx0/2
-              ix = -p
+              ix = p
               if (ix < 0) ix = ix+nx  
-              f0 = conjg(f_nl(ic,j,in))
-              g0 = conjg(g_nl(ic,j,in))
-              if (it == 7 .and. j == 2 .and. i_proc == 0) then
-                 if (iy == 0 .and. p == 0) print *,f0
-              endif
+              f0 = f_nl(ic,j,in)
+              g0 = g_nl(ic,j,in)
               fx(iy,ix) = i_c*p*f0
               gx(iy,ix) = i_c*p*g0
               fy(iy,ix) = i_c*iy*f0
@@ -234,32 +227,28 @@ subroutine cgyro_nl_fftw(ij)
 
         ! Poisson bracket in real space
 
-        uv = -(ux*vy-uy*vx)/(nx*ny)
+        uv = (ux*vy-uy*vx)/(nx*ny)
 
-        fx = 0.0
         call fftw_execute_dft_r2c(plan_r2c,uv,fx)
 
-
-        if (it == 7 .and. j == 2 .and. i_proc == 0) then
+        if (it == 7 .and. j == 2 .and. i_proc == 1) then
            print *
            do ir=1,n_radial
-              ix = -(ir-1-nx0/2)
+              ix = ir-1-nx0/2
               if (ix < 0) ix=ix+nx
-              print '(10(1pe11.4,1x,1pe11.4,3x))',conjg(fx(0:ny0/2,ix))
+              print '(10(1pe11.4,1x,1pe11.4,3x))',fx(0:ny0/2,ix)
            enddo
         endif
 
         do ir=1,n_radial
            ic = ic_c(ir,it) 
-           p = ir-1-nx0/2
-           ix = p
+           ix = ir-1-nx0/2
            if (ix < 0) ix = ix+nx
            do in=1,n_toroidal
               iy = in-1
               g_nl(ic,j,in) = fx(iy,ix)
            enddo
         enddo
-
 
      enddo ! it
   enddo ! j

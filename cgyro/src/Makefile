@@ -9,13 +9,13 @@ endif
 EXEC = cgyro
 
 OBJECTS = cgyro_globals.o \
+          cgyro_io.o \
+          cgyro_equilibrium.o \
           cgyro_check.o \
           cgyro_collision.o \
-          cgyro_equilibrium.o \
           cgyro_field.o \
           cgyro_flux.o \
           cgyro_freq.o \
-          cgyro_io.o \
           cgyro_interface.o \
           cgyro_init.o \
           cgyro_init_arrays.o \
