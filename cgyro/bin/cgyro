@@ -79,9 +79,13 @@ while [ $# -gt 0 ] ; do
 
   -p) shift ; SIMROOT=$1 ;;
 
+  -start) shift ; START=$1 ;;
+
   -e) shift ; LOCDIR=$1 ; EXEC_FLAG=1 ;;
 
   -n) shift ; NPROC=$1 ;;
+  -nomp) shift ; NOMP=$1 ;;
+  -numa) shift ; NUMA=$1 ;;
 
   -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
 
