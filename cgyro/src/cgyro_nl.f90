@@ -1,6 +1,10 @@
-!--------------------------------------------------------------
-! Evaluate nonlinear bracket with direct dealiased convolution
-!--------------------------------------------------------------
+!-----------------------------------------------------------------
+! cgyro_nl_direct.f90
+!
+! PURPOSE:
+!  Evaluate nonlinear bracket with direct dealiased convolution.
+!  Need to be careful with (p=-nr/2,n=0) component.
+!-----------------------------------------------------------------
 
 subroutine cgyro_nl_direct(ij)
 
@@ -120,9 +124,17 @@ subroutine cgyro_nl_direct(ij)
 
 end subroutine cgyro_nl_direct
 
-!--------------------------------------------------------------
-! Evaluate nonlinear bracket with dealiased FFT 
-!--------------------------------------------------------------
+!-----------------------------------------------------------------
+! cgyro_nl_fftw.f90
+!
+! PURPOSE:
+!  Evaluate nonlinear bracket with dealiased FFT.  It is natural 
+!  to use the FFTW complex-to-real (c2r) transform to move to real 
+!  space, compute the convolution (uv), and transform back to the 
+!  spectral form using a real-to-complex transform (r2c).
+!  
+!  NOTE: Need to be careful with (p=-nr/2,n=0) component.
+!-----------------------------------------------------------------
 
 subroutine cgyro_nl_fftw(ij)
 
