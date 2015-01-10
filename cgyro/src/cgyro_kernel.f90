@@ -22,9 +22,10 @@ subroutine cgyro_kernel
 
   implicit none
 
-  ! Need to initialize the runfile very early
+  ! Need to initialize the info and error runfiles very early
   if (silent_flag == 0 .and. i_proc == 0) then
-     open(unit=io,file=trim(path)//runfile,status='replace')
+     open(unit=io,file=trim(path)//runfile_info,status='replace')
+     open(unit=io,file=trim(path)//runfile_err,status='replace')
   endif
 
   ! Timer initialization
@@ -191,14 +192,11 @@ subroutine cgyro_kernel
   if(allocated(field_loc))     deallocate(field_loc)
   if(allocated(field_old))     deallocate(field_old)
   if(allocated(f_balloon))     deallocate(f_balloon)
-
-  if (ae_flag == 1) then
-     deallocate(hzf)
-     deallocate(xzf)
-     deallocate(pvec_in)
-     deallocate(pvec_outr)
-     deallocate(pvec_outi)
-  endif
+  if(allocated(hzf))           deallocate(hzf)
+  if(allocated(xzf))           deallocate(xzf)
+  if(allocated(pvec_in))       deallocate(pvec_in)
+  if(allocated(pvec_outr))     deallocate(pvec_outr)
+  if(allocated(pvec_outi))     deallocate(pvec_outi)
 
 end subroutine cgyro_kernel
 

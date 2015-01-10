@@ -37,6 +37,7 @@ module cgyro_globals
   real :: ne_ade
   real :: masse_ade
   real :: lambda_debye
+  integer :: test_flag
   !
   ! Geometry input
   !
@@ -117,7 +118,8 @@ module cgyro_globals
   ! I/O and error management variables
   !
   character(len=80) :: path
-  character(len=18) :: runfile         = 'out.cgyro.run'
+  character(len=18) :: runfile_err     = 'out.cgyro.err'
+  character(len=18) :: runfile_info    = 'out.cgyro.info'
   character(len=18) :: runfile_restart = 'out.cgyro.restart'
   character(len=18) :: runfile_hb      = 'out.cgyro.hb'
   character(len=18) :: runfile_grids   = 'out.cgyro.grids'
