@@ -52,6 +52,9 @@ subroutine cgyro_kernel
   call cgyro_check
   if (error_status > 0) goto 100
 
+  ! [Exit is test flag set]
+  if (test_flag == 1) goto 100
+  
   ! Construct energy nodes and weights
   allocate(energy(n_energy))
   allocate(w_e(n_energy))

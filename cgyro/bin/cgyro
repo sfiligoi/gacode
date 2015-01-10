@@ -163,11 +163,29 @@ fi
 cd $SIMDIR
 #============================================================
 
+#============================================================
+# Test mode
+if [ $TEST_FLAG -eq 1 ]
+then
+   NUMA=1
+   MPINUMA=1 
+   echo "TEST_FLAG=1" >> input.cgyro
+fi
+#============================================================
+
 #==========================================================
-# echo number of tasks, then parse INPUT
+# echo number of tasks, then parse input.cgyro
 #
 python $CGYRO_DIR/bin/cgyro_parse.py 
 #==========================================================
+
+#============================================================
+# Now remove test flag if it was added
+if [ $TEST_FLAG -eq 1 ]
+then
+   sed -i '$d' input.cgyro 
+fi
+#============================================================
 
 #==========================================================
 # See if we are using experimental profiles
@@ -194,19 +212,18 @@ then
 
   gacode_printversion CGYRO
   #==========================================================
-fi
 
-# Test mode
+  $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM \
+   $SIMDIR $NPROC $CGYRO_DIR/src/cgyro $NOMP $NUMA $MPINUMA
+
+   cat out.cgyro.err
+fi
+#===========================================================
+
+#============================================================
+# Print runfile if test case
 if [ $TEST_FLAG -eq 1 ]
 then
-   NUMA=1
-   MPINUMA=1
+   cat out.cgyro.info
 fi
-
-
-$GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM \
-  $SIMDIR $NPROC $CGYRO_DIR/src/cgyro $NOMP $NUMA $MPINUMA
-
-cat out.cgyro.run
-cat out.cgyro.err
-#===========================================================
+#============================================================
