@@ -166,6 +166,7 @@ cd $SIMDIR
 # Test mode
 if [ $TEST_FLAG -eq 1 ]
 then
+   NPROC=1
    NUMA=1
    MPINUMA=1 
    echo "TEST_FLAG=1" >> input.cgyro

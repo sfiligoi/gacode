@@ -35,6 +35,8 @@ subroutine cgyro_mpi_grid
   allocate(ic_c(n_radial,n_theta))
   allocate(iv_v(n_energy,n_xi,n_species))
 
+  if (test_flag == 1) return
+
   !-------------------------------------------------------------
   ! Check that n_proc is a multiple of n_toroidal
   !
@@ -60,8 +62,6 @@ subroutine cgyro_mpi_grid
   i_group_1 = i_proc/n_proc_1
   i_group_2 = modulo(i_proc,n_proc_1)
   !------------------------------------------------
-
-  if (test_flag == 1) return
   
   !-----------------------------------------------------------
   ! Split up GYRO_COMM_WORLD into groups and adjoint:
