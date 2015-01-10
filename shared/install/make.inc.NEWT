@@ -8,7 +8,7 @@ ROOT=/home/candy/SOFTWARE
 
 # Compilers
 
-FC	= mpif90 -I $(GACODE_ROOT)/modules -I /usr/local/include
+FC	= mpif90 -I $(GACODE_ROOT)/modules
 F77	= ${FC}
 
 FOMP    = -fopenmp
@@ -18,8 +18,7 @@ FDEBUG	= -O2 -Wall -fcheck=all -Wunderflow -finit-real=nan -fbounds-check -ffpe-
 
 # System math libraries (from Ubuntu repository)
 
-LMATH = ${ROOT}/OpenBLAS/libopenblas.a \
-        $(FFTWDIR)/lib/libfftw3_omp.a $(FFTWDIR)/lib/libfftw3.a 
+LMATH = ${ROOT}/OpenBLAS/libopenblas.a -lfftw3
 
 # OPTIONAL NetCDF:
 NETCDF=-L/usr/local/lib -lnetcdff -lnetcdf -lm

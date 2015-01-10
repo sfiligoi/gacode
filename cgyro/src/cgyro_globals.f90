@@ -1,5 +1,7 @@
 module cgyro_globals
 
+  use, intrinsic :: iso_c_binding
+
   !---------------------------------------------------------------
   ! Input parameters:
   !
@@ -220,6 +222,9 @@ module cgyro_globals
   real, dimension(:,:), allocatable :: flux_loc
   real, dimension(:,:), allocatable :: flux
   real, dimension(:,:), allocatable :: power
+  !
+  type(C_PTR) :: plan_r2c
+  type(C_PTR) :: plan_c2r
   !  
   ! Work arrays
   !

@@ -170,9 +170,8 @@ subroutine cgyro_field_c
 
   if (n == 0 .and. ae_flag == 1) then
 
-
      do ir=1,n_radial
-        if (px(ir) == 0) then
+        if (px(ir) == 0 .or. ir == 1) then
            field(ir,:,1) = 0.0
         else
            pvec_in(:) = real(field(ir,:,1))

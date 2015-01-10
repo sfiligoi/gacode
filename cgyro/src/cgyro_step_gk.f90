@@ -97,7 +97,6 @@ subroutine cgyro_rhs(ij)
   enddo
 
   ! TRAPPING TERM
-
   if (collision_model == 0) call cgyro_rhs_trap(ij)
 
   call timer_lib_out('rhs')
@@ -177,3 +176,43 @@ subroutine cgyro_rhs_trap(ij)
 end subroutine cgyro_rhs_trap
 
 !==========================================================================
+
+subroutine filter(f)
+
+  use cgyro_globals
+  use cgyro_equilibrium
+
+  implicit none
+
+  integer :: ie,ir,is,it,ix
+
+  complex, dimension(nc,nv_loc), intent(in) :: f
+  complex, dimension(n_radial):: fs
+
+  fs = (0.0,0.0)
+
+  iv_loc = 0
+  do iv=nv1,nv2
+
+     iv_loc = iv_loc+1
+
+     is = is_v(iv)
+     ix = ix_v(iv)
+     ie = ie_v(iv)
+
+     do ic=1,nc
+
+        ir = ir_c(ic) 
+        it = it_c(ic)
+
+        fs(ir) = fs(ir)+f(ic,iv_loc)
+
+     enddo
+  enddo
+
+  if (n==0) print *
+  do ir=1,n_radial
+     if (n == 0) print *,px(ir),fs(ir)
+  enddo
+
+end subroutine filter
