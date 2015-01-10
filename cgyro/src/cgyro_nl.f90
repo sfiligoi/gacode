@@ -29,16 +29,16 @@ subroutine cgyro_nl_direct(ij)
 
   if (.not.allocated(pcyc)) then
      allocate(pcyc(-3*nx:3*nx-1))
-     allocate(ncyc(-3*ny:3*ny))
+     allocate(ncyc(-3*ny-1:3*ny+1))
      do ix=-nx,nx-1
         pcyc(ix-2*nx) = ix
         pcyc(ix) = ix
         pcyc(ix+2*nx) = ix
      enddo
      do iy=-ny,ny
-        ncyc(iy-2*ny) = iy
+        ncyc(iy-(2*ny+1)) = iy
         ncyc(iy) = iy
-        ncyc(iy+2*ny) = iy
+        ncyc(iy+(2*ny+1)) = iy
      enddo
   endif
 
@@ -69,6 +69,8 @@ subroutine cgyro_nl_direct(ij)
               f(-ix,-iy) = conjg(f(ix,iy))
               g(-ix,-iy) = conjg(g(ix,iy)) 
            enddo
+           f(nx0,-iy) = f(-nx0,iy)
+           g(nx0,-iy) = g(-nx0,iy) 
         enddo
 
         ! Reality
@@ -77,6 +79,9 @@ subroutine cgyro_nl_direct(ij)
               f(-ix,-iy) = conjg(f(ix,iy))
               g(-ix,-iy) = conjg(g(ix,iy))
            enddo
+           if (it == 7 .and. j == 2 .and. i_proc == 0) then
+              print '(10(1pe10.3,1x,1pe10.3,2x))',f(ix,-ny0:ny0)
+           endif
         enddo
 
         fg = (0.0,0.0)
@@ -161,16 +166,13 @@ subroutine cgyro_nl_fftw(ij)
   include 'fftw3.f03'
 
   type(C_PTR) :: plan_r2c
-  type(C_PTR) :: plan_c2r1
-  type(C_PTR) :: plan_c2r2
-  type(C_PTR) :: plan_c2r3
-  type(C_PTR) :: plan_c2r4
+  type(C_PTR) :: plan_c2r
 
   nx0 = n_radial
   ny0 = 2*n_toroidal-1
   ! 3/2-rule for dealiasing
-  nx = (3*nx0)/2+2
-  ny = (3*ny0)/2+2
+  nx = (3*nx0)/2+3
+  ny = (3*ny0)/2+3
 
   allocate(fx(0:ny/2,0:nx-1))
   allocate(gx(0:ny/2,0:nx-1))
@@ -184,12 +186,8 @@ subroutine cgyro_nl_fftw(ij)
 
   allocate(uv(0:ny-1,0:nx-1))
 
-  plan_c2r1 = fftw_plan_dft_c2r_2d(nx,ny,fx,ux,FFTW_UNALIGNED)
-  plan_c2r2 = fftw_plan_dft_c2r_2d(nx,ny,fy,uy,FFTW_UNALIGNED)
-  plan_c2r3 = fftw_plan_dft_c2r_2d(nx,ny,gx,vx,FFTW_UNALIGNED)
-  plan_c2r4 = fftw_plan_dft_c2r_2d(nx,ny,gy,vy,FFTW_UNALIGNED)
-
-  plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,uv,fx,FFTW_UNALIGNED)
+  plan_c2r = fftw_plan_dft_c2r_2d(nx,ny,fx,ux,FFTW_ESTIMATE)
+  plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,uv,fx,FFTW_ESTIMATE)
 
   call timer_lib_in('comm_nl')
   call parallel_slib_f(h_x,f_nl)
@@ -210,12 +208,14 @@ subroutine cgyro_nl_fftw(ij)
            iy = in-1
            do ir=1,n_radial
               ic = ic_c(ir,it) 
-              p  = ir-1-nx0
+              p  = ir-1-nx0/2
               ix = -p
               if (ix < 0) ix = ix+nx  
               f0 = conjg(f_nl(ic,j,in))
               g0 = conjg(g_nl(ic,j,in))
-
+              if (it == 7 .and. j == 2 .and. i_proc == 0) then
+                 if (iy == 0 .and. p == 0) print *,f0
+              endif
               fx(iy,ix) = i_c*p*f0
               gx(iy,ix) = i_c*p*g0
               fy(iy,ix) = i_c*iy*f0
@@ -227,22 +227,14 @@ subroutine cgyro_nl_fftw(ij)
         !   print '(10(1pe12.5,2x))', fr(i,:)
         !enddo
 
-        call fftw_execute_dft_c2r(plan_c2r1,fx,ux)
-        call fftw_execute_dft_c2r(plan_c2r2,fy,uy)
-        call fftw_execute_dft_c2r(plan_c2r3,gx,vx)
-        call fftw_execute_dft_c2r(plan_c2r4,gy,vy)
+        call fftw_execute_dft_c2r(plan_c2r,fx,ux)
+        call fftw_execute_dft_c2r(plan_c2r,fy,uy)
+        call fftw_execute_dft_c2r(plan_c2r,gx,vx)
+        call fftw_execute_dft_c2r(plan_c2r,gy,vy)
 
         ! Poisson bracket in real space
 
         uv = -(ux*vy-uy*vx)/(nx*ny)
-
-        if (it == 7 .and. j == 2 .and. i_proc == 0) then
-           print *,sum(uv)
-           print *
-           do i=0,nx-1
-              !         print '(10(1pe11.4,3x))', uv(i,:)
-           enddo
-        endif
 
         fx = 0.0
         call fftw_execute_dft_r2c(plan_r2c,uv,fx)
@@ -251,7 +243,7 @@ subroutine cgyro_nl_fftw(ij)
         if (it == 7 .and. j == 2 .and. i_proc == 0) then
            print *
            do ir=1,n_radial
-              ix = -(ir-1-nx0)
+              ix = -(ir-1-nx0/2)
               if (ix < 0) ix=ix+nx
               print '(10(1pe11.4,1x,1pe11.4,3x))',conjg(fx(0:ny0/2,ix))
            enddo
@@ -259,7 +251,7 @@ subroutine cgyro_nl_fftw(ij)
 
         do ir=1,n_radial
            ic = ic_c(ir,it) 
-           p = ir-1-nx0
+           p = ir-1-nx0/2
            ix = p
            if (ix < 0) ix = ix+nx
            do in=1,n_toroidal
@@ -267,6 +259,7 @@ subroutine cgyro_nl_fftw(ij)
               g_nl(ic,j,in) = fx(iy,ix)
            enddo
         enddo
+
 
      enddo ! it
   enddo ! j
@@ -277,10 +270,7 @@ subroutine cgyro_nl_fftw(ij)
   call parallel_slib_r(g_nl,psi)
   call timer_lib_out('comm_nl')
 
-  call fftw_destroy_plan(plan_c2r1)
-  call fftw_destroy_plan(plan_c2r2)
-  call fftw_destroy_plan(plan_c2r3)
-  call fftw_destroy_plan(plan_c2r4)
+  call fftw_destroy_plan(plan_c2r)
   call fftw_destroy_plan(plan_r2c)
 
   deallocate(fx)
