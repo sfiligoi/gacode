@@ -32,8 +32,8 @@ contains
     real, dimension(:,:), allocatable :: amat, bmat
     real, dimension(:,:,:,:,:,:), allocatable :: ctest, cfield
     real, dimension(:,:,:,:,:,:,:), allocatable :: ctest_k, cfield_k
-    real :: arg1, arg2
-    real :: bessel_1(0:1), bessel_2(0:1)
+    real :: arg
+    real, dimension(:,:,:,:,:), allocatable :: bessel
     integer :: ierr
 
     if (collision_model == 0) return
@@ -143,12 +143,35 @@ contains
           enddo
        enddo
 
+       if(collision_model == 4 .and. collision_kperp == 1 .and. &
+            (collision_mom_restore == 1 .or. collision_ene_restore == 1)) then
+          allocate(bessel(n_species,n_xi,n_energy,nc_loc,0:1))
+          ic_loc = 0
+          do ic=nc1,nc2
+             ic_loc = ic_loc+1
+             it = it_c(ic)
+             ir = ir_c(ic)
+             do is=1,n_species   
+                do ix=1,n_xi
+                   do ie=1,n_energy
+                      arg = k_perp(it,ir)*rho*vth(is)*mass(is)&
+                           /(z(is)*Bmag(it)) &
+                           *sqrt(2.0*energy(ie))&
+                           *sqrt(1.0-xi(ix)**2)
+                      call RJBESL(abs(arg),0.0,2,bessel(is,ix,ie,ic_loc,:),&
+                           ierr)
+                   enddo
+                enddo
+             enddo
+          enddo
+       endif
+
        allocate(ctest(n_species,n_species,n_xi,n_xi,n_energy,n_energy))
        allocate(cfield(n_species,n_species,n_xi,n_xi,n_energy,n_energy))
        allocate(ctest_k(n_species,n_species,n_xi,n_xi,n_energy,n_energy,&
-            ic_loc))
+            nc_loc))
        allocate(cfield_k(n_species,n_species,n_xi,n_xi,n_energy,n_energy,&
-            ic_loc))
+            nc_loc))
        allocate(rs(n_species,n_species))
        allocate(rsvec(n_species,n_species,n_xi,n_energy))
 
@@ -370,27 +393,16 @@ contains
                                do ie=1,n_energy
                                   do je=1, n_energy
                                      if (abs(rs(is,js)) > epsilon(0.)) then
-                                        arg1 = k_perp(it,ir)*rho*vth(is)*mass(is)&
-                                             /(z(is)*Bmag(it)) &
-                                             *sqrt(2.0*energy(ie))&
-                                             *sqrt(1.0-xi(ix)**2)
-                                        arg2 = k_perp(it,ir)*rho*vth(js)*mass(js)&
-                                             /(z(js)*Bmag(it)) &
-                                             *sqrt(2.0*energy(je))&
-                                             *sqrt(1.0-xi(jx)**2)
-                                        call RJBESL(abs(arg1),0.0,2,bessel_1,ierr)
-                                        call RJBESL(abs(arg2),0.0,2,bessel_2,ierr)
-
                                         cfield_k(is,js,ix,jx,ie,je,ic_loc) &
                                              = cfield_k(is,js,ix,jx,ie,je,ic_loc) &
                                              - mass(js)/mass(is) &
                                              * (dens(js)/dens(is)) &
                                              * (vth(js)/vth(is))**2 &
                                              * rsvec(is,js,ix,ie) &
-                                             * bessel_1(0) &
+                                             * bessel(is,ix,ie,ic_loc,0) &
                                              / rs(is,js) &
                                              * rsvec(js,is,jx,je) &
-                                             * bessel_2(0) &
+                                             * bessel(js,jx,je,ic_loc,0) &
                                              * 0.5*w_xi(jx)*w_e(je)
                                         cfield_k(is,js,ix,jx,ie,je,ic_loc) &
                                              = cfield_k(is,js,ix,jx,ie,je,ic_loc) &
@@ -398,11 +410,11 @@ contains
                                              * (dens(js)/dens(is)) &
                                              * (vth(js)/vth(is))**2 &
                                              * rsvec(is,js,ix,ie) &
-                                             * bessel_1(1) &
+                                             * bessel(is,ix,ie,ic_loc,1) &
                                              * sqrt(1.0-xi(ix)**2)/xi(ix) &
                                              / rs(is,js) &
                                              * rsvec(js,is,jx,je) &
-                                             * bessel_2(1) &
+                                             * bessel(js,jx,je,ic_loc,1) &
                                              * sqrt(1.0-xi(jx)**2)/xi(jx) &
                                              * 0.5*w_xi(jx)*w_e(je)
                                      endif
@@ -487,27 +499,16 @@ contains
                                do ie=1,n_energy
                                   do je=1, n_energy
                                      if (abs(rs(is,js)) > epsilon(0.)) then
-                                        arg1 = k_perp(it,ir)*rho*vth(is)*mass(is)&
-                                             /(z(is)*Bmag(it)) &
-                                             *sqrt(2.0*energy(ie))&
-                                             *sqrt(1.0-xi(ix)**2)
-                                        arg2 = k_perp(it,ir)*rho*vth(js)*mass(js)&
-                                             /(z(js)*Bmag(it)) &
-                                             *sqrt(2.0*energy(je))&
-                                             *sqrt(1.0-xi(jx)**2)
-                                        call RJBESL(abs(arg1),0.0,2,bessel_1,ierr)
-                                        call RJBESL(abs(arg2),0.0,2,bessel_2,ierr)
-
                                         cfield_k(is,js,ix,jx,ie,je,ic_loc) &
                                              = cfield_k(is,js,ix,jx,ie,je,ic_loc) &
                                              - mass(js)/mass(is) &
                                              * (dens(js)/dens(is)) &
                                              * (vth(js)/vth(is))**2 &
                                              * rsvec(is,js,ix,ie) &
-                                             * bessel_1(0) &
+                                             * bessel(is,ix,ie,ic_loc,0) &
                                              / rs(is,js) &
                                              * rsvec(js,is,jx,je) &
-                                             * bessel_2(0) &
+                                             * bessel(js,jx,je,ic_loc,0) &
                                              * 0.5*w_xi(jx)*w_e(je)
                                      endif
                                   enddo
@@ -524,6 +525,11 @@ contains
 
        end select
        
+       if(collision_model == 4 .and. collision_kperp == 1 .and. &
+            (collision_mom_restore == 1 .or. collision_ene_restore == 1)) then
+          deallocate(bessel)
+       end if
+
        allocate(cmat(nv,nv,nc_loc))
        allocate(cvec(nv))
        allocate(bvec(nv))
