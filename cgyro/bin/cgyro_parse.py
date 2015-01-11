@@ -39,6 +39,7 @@ x.add('NE_ADE','1.0')
 x.add('MASSE_ADE','0.0002724486');
 x.add('LAMBDA_DEBYE','0.0')
 x.add('TEST_FLAG','0')
+x.add('AMP','0.1')
 
 x.add('RMIN','0.5')
 x.add('RMAJ','3.0')

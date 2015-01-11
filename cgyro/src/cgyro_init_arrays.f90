@@ -221,9 +221,6 @@ subroutine cgyro_init_arrays
   !-------------------------------------------------------------------------
 
   !-------------------------------------------------------------------------
-  !-------------------------------------------------------------------------
-
-  !-------------------------------------------------------------------------
   ! Streaming arrays
   !
   ! cyclic index (for theta-periodicity)
@@ -381,7 +378,7 @@ subroutine cgyro_init_arrays
                  h_x(ic,iv_loc) = rho*exp(-(ang/2)**2) 
               endif
            else
-              h_x(ic,iv_loc) = 0.1*rho*exp(-px(ir)*4.0/n_radial)/n 
+              h_x(ic,iv_loc) = amp*rho*exp(-px(ir)*4.0/n_radial)/n 
            endif
 
         endif
