@@ -362,7 +362,7 @@ subroutine cgyro_init_arrays
                  h_x(ic,iv_loc) = 1e-6
               endif
            else
-              ! CAUTION: Need f(p) = f(-p) for n=0
+              ! CAUTION: Need f(p) = conjg[ f(-p) ] for n=0
               arg = abs(px(ir))/real(n_radial)
               h_x(ic,iv_loc) = arg*rho*exp(-4.0*arg)
               if (ir == 1) h_x(ic,iv_loc) = (0.0,0.0)
@@ -378,7 +378,7 @@ subroutine cgyro_init_arrays
                  h_x(ic,iv_loc) = rho*exp(-(ang/2)**2) 
               endif
            else
-              h_x(ic,iv_loc) = amp*rho*exp(-px(ir)*4.0/n_radial)/n 
+              h_x(ic,iv_loc) = amp*rho*exp(-px(ir)*4.0/n_radial) 
            endif
 
         endif
