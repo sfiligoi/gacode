@@ -92,7 +92,7 @@ subroutine cgyro_field_v
 
   if (n_field > 1) then
      do ir=1,n_radial
-        if (n == 0 .and. (px(ir) == 0 .or ir == 1)) then
+        if (n == 0 .and. (px(ir) == 0 .or. ir == 1)) then
            field(ir,:,2) = 0.0
         else
            do it=1,n_theta
