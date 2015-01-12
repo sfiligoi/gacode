@@ -186,6 +186,10 @@ subroutine prgen_map_iterdb
   endif
 
   onetwo_nion_tot = n0
+  if (n0 > 5) then
+      print '(a)',"ERROR: (prgen) Too many ions; report to GACODE developers."
+      stop
+  endif 
 
   ! reorder
   do i=1,5
