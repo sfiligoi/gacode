@@ -13,9 +13,9 @@ setenv PATH ${PATH}:$GACODE_ROOT/le3/bin
 setenv PATH ${PATH}:$GACODE_ROOT/shared/bin
 
 if ( $?PYTHONPATH ) then
- setenv PYTHONPATH ${PYTHONPATH}:$GACODE_ROOT/shared/python
+ setenv PYTHONPATH ${PYTHONPATH}:$GACODE_ROOT/python
 else
- setenv PYTHONPATH $GACODE_ROOT/shared/python
+ setenv PYTHONPATH $GACODE_ROOT/python
 endif
 
 if ( $?IDL_PATH ) then

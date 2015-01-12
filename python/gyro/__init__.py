@@ -1,4 +1,4 @@
 #! /usr/bin/env python
 # gyro:
 
-__all__ = ["data"]
+__all__ = ["gyro"]
