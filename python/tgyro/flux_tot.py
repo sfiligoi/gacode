@@ -1,8 +1,8 @@
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-from pyrats.tgyro.data import TGYROData
 from matplotlib import rc
+from tgyro.data import TGYROData
        
 sim   = TGYROData(sys.argv[1])
 units = int(sys.argv[2])

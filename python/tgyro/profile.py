@@ -1,7 +1,7 @@
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-from pyrats.tgyro.data import TGYROData
+from tgyro.data import TGYROData
          
 sim   = TGYROData(sys.argv[1])
 ftype = sys.argv[2]

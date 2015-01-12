@@ -13,7 +13,7 @@ class TGYROData:
     data
 
     Example Usage:
-    >>> from pyrats.tgyro.data import TGYROData
+    >>> from tgyro.data import TGYROData
     >>> sim = TGYROData('examples')
     """
 
