@@ -348,7 +348,7 @@ then
 
    #==========================================================
    # Version stamp:  
-   cat `gacode_getversion` > $VERBASE
+   echo `gacode_getversion` > $VERBASE
    echo $GACODE_PLATFORM >> $VERBASE
    date >> $VERBASE
 
