@@ -39,6 +39,7 @@ module cgyro_globals
   real :: lambda_debye
   integer :: test_flag
   real :: amp
+  integer :: weno_flag
   !
   ! Geometry input
   !
@@ -186,8 +187,8 @@ module cgyro_globals
   ! Parallel streaming
   !
   real, dimension(:), allocatable :: theta
-  real, dimension(-2:2) :: uderiv
-  real, dimension(-2:2) :: cderiv
+  real, dimension(-3:3) :: uderiv
+  real, dimension(-3:3) :: cderiv
   integer, dimension(:), allocatable :: thcyc
   integer, dimension(:,:,:), allocatable :: rcyc
   integer, dimension(:), allocatable :: pcyc

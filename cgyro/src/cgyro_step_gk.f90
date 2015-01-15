@@ -78,7 +78,7 @@ subroutine cgyro_rhs(ij)
 
         ! Parallel streaming with upwind dissipation
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
-        do id=-2,2
+        do id=-3,3
            jt = thcyc(it+id)
            jr = rcyc(ir,it,id)
            jc = ic_c(jr,jt)

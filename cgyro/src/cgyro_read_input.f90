@@ -41,6 +41,7 @@ subroutine cgyro_read_input
   read(1,*) lambda_debye
   read(1,*) test_flag
   read(1,*) amp
+  read(1,*) weno_flag
 
   read(1,*) rmin
   read(1,*) rmaj
