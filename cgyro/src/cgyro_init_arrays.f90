@@ -13,7 +13,6 @@ subroutine cgyro_init_arrays
   integer :: ir,it,is,ie,ix
   integer :: jr,jt,id
   complex :: thfac
-  real :: g1,g2,g3
   real, dimension(n_radial,n_theta) :: sum_loc
   real, dimension(nv_loc) :: vfac
 
@@ -250,6 +249,8 @@ subroutine cgyro_init_arrays
   ! Indices for parallel streaming with upwinding
   if (zf_test_flag == 1) then
 
+     ! 4th order upwind for zonal flow test
+
      do ir=1,n_radial
         do it=1,n_theta
            do id=-3,3
@@ -260,56 +261,66 @@ subroutine cgyro_init_arrays
         enddo
      enddo
 
+  else if (weno_flag == 0) then
+
+     ! 4th order upwind 
+
+     do ir=1,n_radial
+        do it=1,n_theta
+           do id=-3,3
+              jt = thcyc(it+id)
+              if (it+id < 1) then
+                 thfac = exp(2*pi*i_c*k_theta*rmin)
+                 jr = ir-n*box_size
+                 if (jr < 1) then
+                    jr = jr+n_radial
+                 endif
+              else if (it+id > n_theta) then
+                 thfac = exp(-2*pi*i_c*k_theta*rmin)
+                 jr = ir+n*box_size
+                 if (jr > n_radial) then
+                    jr = jr-n_radial
+                 endif
+              else
+                 thfac = (1.0,0.0)
+                 jr = ir
+              endif
+              dtheta(ir,it,id)    = cderiv(id)*thfac
+              dtheta_up(ir,it,id) = uderiv(id)*thfac*up_theta
+              rcyc(ir,it,id)      = jr
+           enddo
+        enddo
+     enddo
+
   else
 
-     if (weno_flag == 0) then
+     ! 5th order WENO
 
-        ! 4th order upwind 
-
-        do ir=1,n_radial
-           do it=1,n_theta
-              do id=-3,3
-                 jt = thcyc(it+id)
-                 if (it+id < 1) then
-                    thfac = exp(2*pi*i_c*k_theta*rmin)
-                    jr = ir-n*box_size
-                    if (jr < 1) then
-                       jr = jr+n_radial
-                    endif
-                 else if (it+id > n_theta) then
-                    thfac = exp(-2*pi*i_c*k_theta*rmin)
-                    jr = ir+n*box_size
-                    if (jr > n_radial) then
-                       jr = jr-n_radial
-                    endif
-                 else
-                    thfac = (1.0,0.0)
-                    jr = ir
+     do ir=1,n_radial
+        do it=1,n_theta
+           do id=-3,3
+              jt = thcyc(it+id)
+              if (it+id < 1) then
+                 thfac = exp(2*pi*i_c*k_theta*rmin)
+                 jr = ir-n*box_size
+                 if (jr < 1) then
+                    jr = jr+n_radial
                  endif
-                 dtheta(ir,it,id)    = cderiv(id)*thfac
-                 dtheta_up(ir,it,id) = uderiv(id)*thfac*up_theta
-                 rcyc(ir,it,id)      = jr
-              enddo
+              else if (it+id > n_theta) then
+                 thfac = exp(-2*pi*i_c*k_theta*rmin)
+                 jr = ir+n*box_size
+                 if (jr > n_radial) then
+                    jr = jr-n_radial
+                 endif
+              else
+                 thfac = (1.0,0.0)
+                 jr = ir
+              endif
+              dtheta(ir,it,id) = thfac
+              rcyc(ir,it,id)   = jr
            enddo
         enddo
-
-     else
-
-        ! 5th order WENO
-
-        g1 = 0.1
-        g2 = 0.6
-        g3 = 0.3
-
-        do ir=1,n_radial
-           do it=1,n_theta
-
-
-
-           enddo
-        enddo
-
-     endif
+     enddo
 
   endif
 
