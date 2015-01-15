@@ -107,11 +107,8 @@ subroutine cgyro_rhs(ij)
               jr = rcyc(ir,it,id)
               jc = ic_c(jr,jt)
               ! Multiply by appropriate phase factor
-              f(id) = h_x(jc,iv_loc)*dtheta(ir,it,id)
-              ! 5-point centered theta-derivative of fields
-              rhs_stream = rhs_stream-rval*cderiv(id)*dtheta(ir,it,id)* &
-                   (cap_h_c(jc,iv_loc)-h_x(jc,iv_loc))
-           enddo
+              f(id) = cap_h_c(jc,iv_loc)*dtheta(ir,it,id)
+            enddo
 
           if (rval > 0.0) then
 
