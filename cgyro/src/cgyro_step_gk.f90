@@ -93,9 +93,18 @@ subroutine cgyro_rhs(ij)
               jt = thcyc(it+id)
               jr = rcyc(ir,it,id)
               jc = ic_c(jr,jt)
-              rhs_stream = rhs_stream &
-                   -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)  &
-                   -abs(rval)*dtheta_up(ir,it,id)*h_x(jc,iv_loc)
+              if (n_field > 3) then
+                 rhs_stream = rhs_stream &
+                      -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)  &
+                      -abs(rval)*dtheta_up(ir,it,id)*( &
+                      h_x(jc,iv_loc)-z(is)/temp(is)*j0_c(jc,iv_loc)* &
+                      field(jr,jt,2)*xi(ix)*sqrt(2.0*energy(ie))*vth(is))
+              else
+                 rhs_stream = rhs_stream &
+                      -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)  &
+                      -abs(rval)*dtheta_up(ir,it,id)*( &
+                      h_x(jc,iv_loc))
+              endif
            enddo
 
         else
