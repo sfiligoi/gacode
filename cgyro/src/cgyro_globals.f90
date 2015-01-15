@@ -40,6 +40,7 @@ module cgyro_globals
   integer :: test_flag
   real :: amp
   integer :: weno_flag
+  integer :: ns
   !
   ! Geometry input
   !

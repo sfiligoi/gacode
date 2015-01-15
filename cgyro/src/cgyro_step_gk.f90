@@ -87,9 +87,9 @@ subroutine cgyro_rhs(ij)
 
         if (weno_flag == 0) then
 
-           ! Upwind3
+           ! Upwind
 
-           do id=-2,2
+           do id=-ns,ns
               jt = thcyc(it+id)
               jr = rcyc(ir,it,id)
               jc = ic_c(jr,jt)
@@ -108,9 +108,9 @@ subroutine cgyro_rhs(ij)
               jc = ic_c(jr,jt)
               ! Multiply by appropriate phase factor
               f(id) = cap_h_c(jc,iv_loc)*dtheta(ir,it,id)
-            enddo
+           enddo
 
-          if (rval > 0.0) then
+           if (rval > 0.0) then
 
               fp(1) = ( 2*f(-2)-7*f(-1)+11*f(0))/6.0           
               fp(2) = (-1*f(-1)+5*f( 0)+ 2*f(1))/6.0           

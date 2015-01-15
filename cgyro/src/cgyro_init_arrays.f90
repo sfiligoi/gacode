@@ -229,22 +229,42 @@ subroutine cgyro_init_arrays
      thcyc(it) = it
      thcyc(it+n_theta) = it
   enddo
-  ! coefficients for 4th order centered derivative
-  cderiv(-3) =  0.0
-  cderiv(-2) =  1.0 / (12.0 * d_theta)
-  cderiv(-1) = -8.0 / (12.0 * d_theta)
-  cderiv(0)  =  0.0 / (12.0 * d_theta)
-  cderiv(1)  =  8.0 / (12.0 * d_theta)
-  cderiv(2)  = -1.0 / (12.0 * d_theta)
-  cderiv(3)  = 0.0
-  ! coefficients for 4th order filter for 3rd order upwinded derivative
-  uderiv(-3) = 0.0
-  uderiv(-2) =  1.0 / (12.0 * d_theta)
-  uderiv(-1) = -4.0 / (12.0 * d_theta)
-  uderiv(0)  =  6.0 / (12.0 * d_theta)
-  uderiv(1)  = -4.0 / (12.0 * d_theta)
-  uderiv(2)  =  1.0 / (12.0 * d_theta)
-  uderiv(3)  = 0.0
+
+  if (ns == 2) then
+     ! coefficients for 4th order centered derivative
+     cderiv(-3) =  0.0
+     cderiv(-2) =  1.0 / (12.0 * d_theta)
+     cderiv(-1) = -8.0 / (12.0 * d_theta)
+     cderiv(0)  =  0.0 / (12.0 * d_theta)
+     cderiv(1)  =  8.0 / (12.0 * d_theta)
+     cderiv(2)  = -1.0 / (12.0 * d_theta)
+     cderiv(3)  = 0.0
+     ! coefficients for 4th order filter for 3rd order upwinded derivative
+     uderiv(-3) = 0.0
+     uderiv(-2) =  1.0 / (12.0 * d_theta)
+     uderiv(-1) = -4.0 / (12.0 * d_theta)
+     uderiv(0)  =  6.0 / (12.0 * d_theta)
+     uderiv(1)  = -4.0 / (12.0 * d_theta)
+     uderiv(2)  =  1.0 / (12.0 * d_theta)
+     uderiv(3)  = 0.0
+  else
+     ! coefficients for 2nd order centered derivative
+     cderiv(-3) =  0.0
+     cderiv(-2) =  0.0 
+     cderiv(-1) = -1.0/(2.0 * d_theta)
+     cderiv(0)  =  0.0
+     cderiv(1)  =  1.0/(2.0 * d_theta)
+     cderiv(2)  = 0.0
+     cderiv(3)  = 0.0
+     ! coefficients for 2nd order filter 
+     uderiv(-3) = 0.0
+     uderiv(-2) = 0.0
+     uderiv(-1) = -1.0 /(2.0 * d_theta)
+     uderiv(0)  = 2.0 /(2.0 * d_theta)
+     uderiv(1)  = -1.0 /(2.0 * d_theta)
+     uderiv(2)  = 0.0
+     uderiv(3)  = 0.0
+  endif
 
   ! Indices for parallel streaming with upwinding
   if (zf_test_flag == 1) then
@@ -253,7 +273,7 @@ subroutine cgyro_init_arrays
 
      do ir=1,n_radial
         do it=1,n_theta
-           do id=-3,3
+           do id=-2,2
               dtheta(ir,it,id)    = cderiv(id)
               dtheta_up(ir,it,id) = uderiv(id)*up_theta
               rcyc(ir,it,id)      = ir
@@ -267,7 +287,7 @@ subroutine cgyro_init_arrays
 
      do ir=1,n_radial
         do it=1,n_theta
-           do id=-3,3
+           do id=-ns,ns
               jt = thcyc(it+id)
               if (it+id < 1) then
                  thfac = exp(2*pi*i_c*k_theta*rmin)
