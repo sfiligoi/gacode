@@ -113,7 +113,7 @@ subroutine cgyro_rhs(ij)
                    (cap_h_c(jc,iv_loc)-h_x(jc,iv_loc))
            enddo
 
-          if (rval < 0.0) then
+          if (rval > 0.0) then
 
               fp(1) = ( 2*f(-2)-7*f(-1)+11*f(0))/6.0           
               fp(2) = (-1*f(-1)+5*f( 0)+ 2*f(1))/6.0           
