@@ -10,11 +10,21 @@ subroutine cgyro_freq
 
   if (i_time == 0) return
 
+  if (n == 0) then
+     freq = 0.0
+     freq_err = 0.0
+     return
+  endif
+
   ! Use potential as gauge for frequency
   mode_weight(:,:) = abs(field_old(:,:,1))
 
   ! Define local frequencies
-  freq_loc(:,:) = (i_c/delta_t)*log(field_old(:,:,1)/field_old2(:,:,1))
+  if (n > 0) then
+     freq_loc(:,:) = (i_c/delta_t)*log(field_old(:,:,1)/field_old2(:,:,1))
+  else
+     freq_loc = 0.0
+  endif
 
   total_weight = sum(mode_weight(:,:))
 
