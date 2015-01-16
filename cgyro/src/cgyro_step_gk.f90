@@ -57,10 +57,7 @@ subroutine cgyro_rhs(ij)
   integer :: is, ir, it, ie, ix
   integer :: id, jt, jr, jc
   real :: rval
-  complex :: rhs_stream,fhp,fhm
-  real, dimension(3) :: gamma=(/0.1,0.6,0.3/),beta,w,wt
-  complex, dimension(3) :: fp,fm
-  complex, dimension(-3:3) :: f
+  complex :: rhs_stream
 
   call timer_lib_in('rhs')
 
@@ -85,122 +82,24 @@ subroutine cgyro_rhs(ij)
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
         rhs_stream = 0.0
 
-        if (weno_flag == 0) then
+        ! Upwind
 
-           ! Upwind
-
-           do id=-ns,ns
-              jt = thcyc(it+id)
-              jr = rcyc(ir,it,id)
-              jc = ic_c(jr,jt)
-              if (n_field > 3) then
-                 rhs_stream = rhs_stream &
-                      -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)  &
-                      -abs(rval)*dtheta_up(ir,it,id)*( &
-                      h_x(jc,iv_loc)-z(is)/temp(is)*j0_c(jc,iv_loc)* &
-                      field(jr,jt,2)*xi(ix)*sqrt(2.0*energy(ie))*vth(is))
-              else
-                 rhs_stream = rhs_stream &
-                      -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)  &
-                      -abs(rval)*dtheta_up(ir,it,id)*( &
-                      h_x(jc,iv_loc))
-              endif
-           enddo
-
-        else
-
-           ! WENO5
-
-           do id=-3,3
-              jt = thcyc(it+id)
-              jr = rcyc(ir,it,id)
-              jc = ic_c(jr,jt)
-              ! Multiply by appropriate phase factor
-              f(id) = cap_h_c(jc,iv_loc)*dtheta(ir,it,id)
-           enddo
-
-           if (rval > 0.0) then
-
-              fp(1) = ( 2*f(-2)-7*f(-1)+11*f(0))/6.0           
-              fp(2) = (-1*f(-1)+5*f( 0)+ 2*f(1))/6.0           
-              fp(3) = ( 2*f( 0)+5*f( 1)- 1*f(2))/6.0           
-
-              beta(1) = 13.0/12.0*abs(f(-2)-2*f(-1)+f(0))**2 &
-                   +0.25*abs(f(-2)-4*f(-1)+3*f(0))**2
-              beta(2) = 13.0/12.0*abs(f(-1)-2*f(0)+f(1))**2 &
-                   +0.25*abs(f(-1)-f(1))**2
-              beta(3) = 13.0/12.0*abs(f(0)-2*f(1)+f(2))**2 &
-                   +0.25*abs(3*f(0)-4*f(1)+f(2))**2
-
-              wt(:) = gamma(:)/(1e-6+beta(:))**2
-              w(:)  = wt(:)/sum(wt)         
-
-              fhp = sum(w(:)*fp(:))
-
-              fm(1) = ( 2*f(-3)-7*f(-2)+11*f(-1))/6.0           
-              fm(2) = (-1*f(-2)+5*f(-1)+ 2*f( 0))/6.0           
-              fm(3) = ( 2*f(-1)+5*f( 0)- 1*f( 1))/6.0           
-
-              beta(1) = 13.0/12.0*abs(f(-3)-2*f(-2)+f(-1))**2 &
-                   +0.25*abs(f(-3)-4*f(-2)+3*f(-1))**2
-              beta(2) = 13.0/12.0*abs(f(-2)-2*f(-1)+f(0))**2 &
-                   +0.25*abs(f(-2)-f(0))**2
-              beta(3) = 13.0/12.0*abs(f(-1)-2*f(0)+f(1))**2 &
-                   +0.25*abs(3*f(-1)-4*f(0)+f(1))**2
-
-              wt(:) = gamma(:)/(1e-6+beta(:))**2
-              w(:)  = wt(:)/sum(wt)         
-
-              fhm = sum(w(:)*fm(:))
-
-           else
-
-              ! fm(i) -> fp(-i) , fp(i) -> fm(-i)
-
-              fm(1) = ( 2*f(+2)-7*f(+1)+11*f( 0))/6.0           
-              fm(2) = (-1*f(+1)+5*f( 0)+ 2*f(-1))/6.0           
-              fm(3) = ( 2*f( 0)+5*f(-1)- 1*f(-2))/6.0           
-
-              beta(1) = 13.0/12.0*abs(f( 2)-2*f( 1)+f(0))**2 &
-                   +0.25*abs(f( 2)-4*f( 1)+3*f(0))**2
-              beta(2) = 13.0/12.0*abs(f( 1)-2*f(0)+f(-1))**2 &
-                   +0.25*abs(f(1)-f(-1))**2
-              beta(3) = 13.0/12.0*abs(f(0)-2*f(-1)+f(-2))**2 &
-                   +0.25*abs(3*f(0)-4*f(-1)+f(-2))**2
-
-              wt(:) = gamma(:)/(1e-6+beta(:))**2
-              w(:)  = wt(:)/sum(wt)         
-
-              fhm = sum(w(:)*fm(:))
-
-              fp(1) = ( 2*f( 3)-7*f( 2)+11*f( 1))/6.0           
-              fp(2) = (-1*f( 2)+5*f( 1)+ 2*f( 0))/6.0           
-              fp(3) = ( 2*f( 1)+5*f( 0)- 1*f(-1))/6.0           
-
-              beta(1) = 13.0/12.0*abs(f( 3)-2*f( 2)+f( 1))**2 &
-                   +0.25*abs(f( 3)-4*f( 2)+3*f( 1))**2
-              beta(2) = 13.0/12.0*abs(f( 2)-2*f( 1)+f(0))**2 &
-                   +0.25*abs(f(2)-f(0))**2
-              beta(3) = 13.0/12.0*abs(f(1)-2*f(0)+f(-1))**2 &
-                   +0.25*abs(3*f(1)-4*f(0)+f(-1))**2
-
-              wt(:) = gamma(:)/(1e-6+beta(:))**2
-              w(:)  = wt(:)/sum(wt)         
-
-              fhp = sum(w(:)*fp(:))
-
-           endif
-
-           rhs_stream = rhs_stream-rval*(fhp-fhm)/d_theta
-
-        endif
+        do id=-2,2
+           jt = thcyc(it+id)
+           jr = rcyc(ir,it,id)
+           jc = ic_c(jr,jt)
+           rhs_stream = rhs_stream &
+                -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)  &
+                -abs(rval)*dtheta_up(ir,it,id)*( &
+                cap_h_c(jc,iv_loc)-z(is)/temp(is)*j0_c(jc,iv_loc)*field(jr,jt,1))
+        enddo
 
         ! Diagonal terms
         rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc)+&
              rhs_stream+&
-             omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+& 
+             omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+&
              omega_h(ic,iv_loc)*h_x(ic,iv_loc)+&
-             sum(omega_s(:,ic,iv_loc)*field(ir,it,:)) 
+             sum(omega_s(:,ic,iv_loc)*field(ir,it,:))
 
      enddo
   enddo

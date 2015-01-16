@@ -230,41 +230,18 @@ subroutine cgyro_init_arrays
      thcyc(it+n_theta) = it
   enddo
 
-  if (ns == 2) then
-     ! coefficients for 4th order centered derivative
-     cderiv(-3) =  0.0
-     cderiv(-2) =  1.0 / (12.0 * d_theta)
-     cderiv(-1) = -8.0 / (12.0 * d_theta)
-     cderiv(0)  =  0.0 / (12.0 * d_theta)
-     cderiv(1)  =  8.0 / (12.0 * d_theta)
-     cderiv(2)  = -1.0 / (12.0 * d_theta)
-     cderiv(3)  = 0.0
-     ! coefficients for 4th order filter for 3rd order upwinded derivative
-     uderiv(-3) = 0.0
-     uderiv(-2) =  1.0 / (12.0 * d_theta)
-     uderiv(-1) = -4.0 / (12.0 * d_theta)
-     uderiv(0)  =  6.0 / (12.0 * d_theta)
-     uderiv(1)  = -4.0 / (12.0 * d_theta)
-     uderiv(2)  =  1.0 / (12.0 * d_theta)
-     uderiv(3)  = 0.0
-  else
-     ! coefficients for 2nd order centered derivative
-     cderiv(-3) =  0.0
-     cderiv(-2) =  0.0 
-     cderiv(-1) = -1.0/(2.0 * d_theta)
-     cderiv(0)  =  0.0
-     cderiv(1)  =  1.0/(2.0 * d_theta)
-     cderiv(2)  = 0.0
-     cderiv(3)  = 0.0
-     ! coefficients for 2nd order filter 
-     uderiv(-3) = 0.0
-     uderiv(-2) = 0.0
-     uderiv(-1) = -1.0 /(2.0 * d_theta)
-     uderiv(0)  = 2.0 /(2.0 * d_theta)
-     uderiv(1)  = -1.0 /(2.0 * d_theta)
-     uderiv(2)  = 0.0
-     uderiv(3)  = 0.0
-  endif
+  ! coefficients for 4th order centered derivative
+  cderiv(-2) =  1.0 / (12.0 * d_theta)
+  cderiv(-1) = -8.0 / (12.0 * d_theta)
+  cderiv(0)  =  0.0 / (12.0 * d_theta)
+  cderiv(1)  =  8.0 / (12.0 * d_theta)
+  cderiv(2)  = -1.0 / (12.0 * d_theta)
+  ! coefficients for 4th order filter for 3rd order upwinded derivative
+  uderiv(-2) =  1.0 / (12.0 * d_theta)
+  uderiv(-1) = -4.0 / (12.0 * d_theta)
+  uderiv(0)  =  6.0 / (12.0 * d_theta)
+  uderiv(1)  = -4.0 / (12.0 * d_theta)
+  uderiv(2)  =  1.0 / (12.0 * d_theta)
 
   ! Indices for parallel streaming with upwinding
   if (zf_test_flag == 1) then
@@ -281,13 +258,13 @@ subroutine cgyro_init_arrays
         enddo
      enddo
 
-  else if (weno_flag == 0) then
+  else
 
      ! 4th order upwind 
 
      do ir=1,n_radial
         do it=1,n_theta
-           do id=-ns,ns
+           do id=-2,2
               jt = thcyc(it+id)
               if (it+id < 1) then
                  thfac = exp(2*pi*i_c*k_theta*rmin)
@@ -312,38 +289,7 @@ subroutine cgyro_init_arrays
         enddo
      enddo
 
-  else
-
-     ! 5th order WENO
-
-     do ir=1,n_radial
-        do it=1,n_theta
-           do id=-3,3
-              jt = thcyc(it+id)
-              if (it+id < 1) then
-                 thfac = exp(2*pi*i_c*k_theta*rmin)
-                 jr = ir-n*box_size
-                 if (jr < 1) then
-                    jr = jr+n_radial
-                 endif
-              else if (it+id > n_theta) then
-                 thfac = exp(-2*pi*i_c*k_theta*rmin)
-                 jr = ir+n*box_size
-                 if (jr > n_radial) then
-                    jr = jr-n_radial
-                 endif
-              else
-                 thfac = (1.0,0.0)
-                 jr = ir
-              endif
-              dtheta(ir,it,id) = thfac
-              rcyc(ir,it,id)   = jr
-           enddo
-        enddo
-     enddo
-
   endif
-
 
   ! Streaming coefficients (for speed optimization)
 
