@@ -7,6 +7,7 @@ ftype  = sys.argv[1]
 ifield = sys.argv[2]
 
 sim = cgyrodata('./')
+sim.getbig()
 
 phic = sim.phi[0,sim.n_theta/3,0,:]
 
