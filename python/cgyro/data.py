@@ -16,7 +16,7 @@ class cgyrodata:
 
     def getdata(self):
 
-        """Initialize data objects"""
+        """Initialize smaller data objects (don't load larger ones)"""
 
         import numpy as np
 
@@ -165,6 +165,9 @@ class cgyrodata:
         """Get large files"""
 
         import numpy as np
+
+        # Convenience definition
+        nt = self.n_time
 
         #-----------------------------------------------------------------
         # Read standard potentials

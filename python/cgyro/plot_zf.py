@@ -9,12 +9,10 @@ ifield = sys.argv[2]
 sim = cgyrodata('./')
 sim.getbig()
 
-phic = sim.phi[0,sim.n_theta/3,0,:]
+phic = sim.phi[0,sim.n_theta/3,0,0,:]
 
 y     = np.real(phic)/np.real(phic[0])
 y_ave = np.sum(y)/len(y)
-
-print len(y)
 
 print 'INFO: (plot_zf) Average =',y_ave
 
