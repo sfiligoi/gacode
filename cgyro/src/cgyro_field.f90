@@ -187,7 +187,7 @@ subroutine cgyro_field_c
   else
 
      do ir=1,n_radial
-        if (n == 0 .and. (px(ir) == 0 .or. ir == 1)) then
+        if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
            field(ir,:,1) = 0.0
         else
            do it=1,n_theta
@@ -204,7 +204,7 @@ subroutine cgyro_field_c
 
   if (n_field > 1) then
      do ir=1,n_radial
-        if (n == 0 .and. (px(ir) == 0 .or. ir == 1)) then
+        if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag ==0) then
            field(ir,:,2) = 0.0
         else
            do it=1,n_theta
