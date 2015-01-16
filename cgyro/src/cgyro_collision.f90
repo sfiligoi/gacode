@@ -592,12 +592,12 @@ contains
                         + (0.5*delta_t) * omega_trap(it,is) &
                         * sqrt(energy(ie)) &
                         * (1.0 - xi(ix)**2) &
-                        * xi_deriv_mat(ix,jx)
+                        * xi_deriv_mat(ix,jx) 
                    amat(iv,jv) = amat(iv,jv) &
                         - (0.5*delta_t) * omega_trap(it,is) &
                         * sqrt(energy(ie)) &
                         * (1.0 - xi(ix)**2) &
-                        * xi_deriv_mat(ix,jx)
+                        * xi_deriv_mat(ix,jx) 
                 endif
 
                 ! Collision component: Test particle
@@ -636,7 +636,7 @@ contains
                         * j0_v(ic_loc,iv) &
                         * z(js)*dens(js) &
                         * j0_v(ic_loc,jv) * w_e(je) &
-                        * 0.5 * w_xi(jx)
+                        * 0.5 * w_xi(jx) 
                    amat(iv,jv) = amat(iv,jv) &
                         - z(is)/temp(is) / &
                         (k_perp(it,ir)**2 * lambda_debye**2 &
@@ -645,7 +645,7 @@ contains
                         * j0_v(ic_loc,iv) &
                         * z(js)*dens(js) &
                         * j0_v(ic_loc,jv) * w_e(je) &
-                        * 0.5 * w_xi(jx)
+                        * 0.5 * w_xi(jx) 
                 endif
 
                 ! Ampere component
@@ -659,7 +659,7 @@ contains
                         * xi(ix) * sqrt(2.0*energy(ie)) *vth(is) &
                         * j0_v(ic_loc,jv) * w_e(je) &
                         * 0.5 * w_xi(jx) &
-                        * xi(jx) * sqrt(2.0*energy(je)) * vth(is)
+                        * xi(jx) * sqrt(2.0*energy(je)) * vth(is) 
                    amat(iv,jv) = amat(iv,jv) &
                         - z(is)/temp(is) / &
                         (2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
@@ -669,7 +669,7 @@ contains
                         * xi(ix) * sqrt(2.0*energy(ie)) * vth(is) &
                         * j0_v(ic_loc,jv) * w_e(je) &
                         * 0.5 * w_xi(jx) &
-                        * xi(jx) * sqrt(2.0*energy(je)) * vth(is)
+                        * xi(jx) * sqrt(2.0*energy(je)) * vth(is) 
                 endif
 
              enddo
@@ -787,12 +787,12 @@ contains
           it = it_c(ic)
 
           h_x(ic,iv_loc) = cap_h_c(ic,iv_loc) &
-               -z(is)/temp(is)*j0_c(ic,iv_loc)*field(ir,it,1)
+               -z(is)/temp(is)*j0_c(ic,iv_loc)*field(ir,it,1) 
 
           if (n_field > 1) then
              h_x(ic,iv_loc) = h_x(ic,iv_loc) &
                   +z(is)/temp(is)*j0_c(ic,iv_loc)*field(ir,it,2) &
-                  *xi(ix)*sqrt(2.0*energy(ie))*vth(is)
+                  *xi(ix)*sqrt(2.0*energy(ie))*vth(is) 
           endif
 
        enddo
