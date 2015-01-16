@@ -40,7 +40,7 @@ contains
 
     if (flag == 1) then
 
-       if(initialized) return
+       if (initialized) return
 
        allocate(nu_d(n_energy,n_species,n_species))
        allocate(nu_s(n_energy,n_species,n_species))
@@ -567,6 +567,9 @@ contains
 
           cmat(:,:,ic_loc) = 0.0
           amat(:,:)        = 0.0
+
+          ! Avoid singularity of n=0,p=0:
+          if (px(ir) == 0 .and. n == 0) exit
 
           do iv=1,nv
 
