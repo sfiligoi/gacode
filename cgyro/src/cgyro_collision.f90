@@ -569,115 +569,122 @@ contains
           amat(:,:)        = 0.0
 
           ! Avoid singularity of n=0,p=0:
-          if (px(ir) == 0 .and. n == 0) exit
-
-          do iv=1,nv
-
-             is = is_v(iv)
-             ix = ix_v(iv)
-             ie = ie_v(iv)
-
-             do jv=1,nv
-
-                js = is_v(jv)
-                jx = ix_v(jv)
-                je = ie_v(jv)
-
-                ! constant part
-                if (iv == jv) then
-                   cmat(iv,jv,ic_loc) =  cmat(iv,jv,ic_loc) + 1.0
-                   amat(iv,jv) = amat(iv,jv) + 1.0
-                endif
-
-                ! Trapping term
-                if (is == js .and. ie == je) then
-                   cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                        + (0.5*delta_t) * omega_trap(it,is) &
-                        * sqrt(energy(ie)) &
-                        * (1.0 - xi(ix)**2) &
-                        * xi_deriv_mat(ix,jx) 
-                   amat(iv,jv) = amat(iv,jv) &
-                        - (0.5*delta_t) * omega_trap(it,is) &
-                        * sqrt(energy(ie)) &
-                        * (1.0 - xi(ix)**2) &
-                        * xi_deriv_mat(ix,jx) 
-                endif
-
-                ! Collision component: Test particle
-                if(is == js) then
-                   do ks=1,n_species
-                      cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                           - (0.5*delta_t) * (ctest(is,ks,ix,jx,ie,je) &
-                           + ctest_k(is,ks,ix,jx,ie,je,ic_loc))
-                      amat(iv,jv) = amat(iv,jv) &
-                           + (0.5*delta_t) * (ctest(is,ks,ix,jx,ie,je) &
-                           + ctest_k(is,ks,ix,jx,ie,je,ic_loc))
-                   enddo
-                endif
-
-                ! Collision component: Field particle
-                cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                     - (0.5*delta_t) * (cfield(is,js,ix,jx,ie,je) &
-                     + cfield_k(is,js,ix,jx,ie,je,ic_loc))
-                amat(iv,jv) = amat(iv,jv) &
-                     + (0.5*delta_t) * (cfield(is,js,ix,jx,ie,je) &
-                     + cfield_k(is,js,ix,jx,ie,je,ic_loc))
-
-                ! Poisson component 
-                if (n == 0 .and. ae_flag == 1) then
-                   ! Cannot include Poisson in collision matrix
-                   ! for n=0 with ade because depends on theta
-                   ! i.e. ne0 ~ phi - <phi>
-                   cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) + 0.0
-                   amat(iv,jv)        = amat(iv,jv) + 0.0
-                else
-                   cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                        - z(is)/temp(is) / &
-                        (k_perp(it,ir)**2 * lambda_debye**2 &
-                        * dens_ele / temp_ele &
-                        + sum_den) &
-                        * j0_v(ic_loc,iv) &
-                        * z(js)*dens(js) &
-                        * j0_v(ic_loc,jv) * w_e(je) &
-                        * 0.5 * w_xi(jx) 
-                   amat(iv,jv) = amat(iv,jv) &
-                        - z(is)/temp(is) / &
-                        (k_perp(it,ir)**2 * lambda_debye**2 &
-                        * dens_ele / temp_ele &
-                        + sum_den) &
-                        * j0_v(ic_loc,iv) &
-                        * z(js)*dens(js) &
-                        * j0_v(ic_loc,jv) * w_e(je) &
-                        * 0.5 * w_xi(jx) 
-                endif
-
-                ! Ampere component
-                if (n_field > 1) then
-                   cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                        - z(is)/temp(is) / &
-                        (2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
-                        * dens_ele * temp_ele) &
-                        * (-j0_v(ic_loc,iv)) &
-                        * z(js)*dens(js) &
-                        * xi(ix) * sqrt(2.0*energy(ie)) *vth(is) &
-                        * j0_v(ic_loc,jv) * w_e(je) &
-                        * 0.5 * w_xi(jx) &
-                        * xi(jx) * sqrt(2.0*energy(je)) * vth(is) 
-                   amat(iv,jv) = amat(iv,jv) &
-                        - z(is)/temp(is) / &
-                        (2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
-                        * dens_ele * temp_ele) &
-                        * (-j0_v(ic_loc,iv)) &
-                        * z(js)*dens(js) &
-                        * xi(ix) * sqrt(2.0*energy(ie)) * vth(is) &
-                        * j0_v(ic_loc,jv) * w_e(je) &
-                        * 0.5 * w_xi(jx) &
-                        * xi(jx) * sqrt(2.0*energy(je)) * vth(is) 
-                endif
-
+          if (px(ir) == 0 .and. n == 0) then
+             do iv=1,nv
+                cmat(iv,iv,ic_loc) =  1.0
+                amat(iv,iv) = 1.0
              enddo
-          enddo
+             
+          else
 
+             do iv=1,nv
+                
+                is = is_v(iv)
+                ix = ix_v(iv)
+                ie = ie_v(iv)
+                
+                do jv=1,nv
+                   
+                   js = is_v(jv)
+                   jx = ix_v(jv)
+                   je = ie_v(jv)
+                   
+                   ! constant part
+                   if (iv == jv) then
+                      cmat(iv,jv,ic_loc) =  cmat(iv,jv,ic_loc) + 1.0
+                      amat(iv,jv) = amat(iv,jv) + 1.0
+                   endif
+                   
+                   ! Trapping term
+                   if (is == js .and. ie == je) then
+                      cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
+                           + (0.5*delta_t) * omega_trap(it,is) &
+                           * sqrt(energy(ie)) &
+                           * (1.0 - xi(ix)**2) &
+                           * xi_deriv_mat(ix,jx) 
+                      amat(iv,jv) = amat(iv,jv) &
+                           - (0.5*delta_t) * omega_trap(it,is) &
+                           * sqrt(energy(ie)) &
+                           * (1.0 - xi(ix)**2) &
+                           * xi_deriv_mat(ix,jx) 
+                   endif
+                   
+                   ! Collision component: Test particle
+                   if(is == js) then
+                      do ks=1,n_species
+                         cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
+                              - (0.5*delta_t) * (ctest(is,ks,ix,jx,ie,je) &
+                              + ctest_k(is,ks,ix,jx,ie,je,ic_loc))
+                         amat(iv,jv) = amat(iv,jv) &
+                              + (0.5*delta_t) * (ctest(is,ks,ix,jx,ie,je) &
+                              + ctest_k(is,ks,ix,jx,ie,je,ic_loc))
+                      enddo
+                   endif
+                   
+                   ! Collision component: Field particle
+                   cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
+                        - (0.5*delta_t) * (cfield(is,js,ix,jx,ie,je) &
+                        + cfield_k(is,js,ix,jx,ie,je,ic_loc))
+                   amat(iv,jv) = amat(iv,jv) &
+                        + (0.5*delta_t) * (cfield(is,js,ix,jx,ie,je) &
+                        + cfield_k(is,js,ix,jx,ie,je,ic_loc))
+                   
+                   ! Poisson component 
+                   if (n == 0 .and. ae_flag == 1) then
+                      ! Cannot include Poisson in collision matrix
+                      ! for n=0 with ade because depends on theta
+                      ! i.e. ne0 ~ phi - <phi>
+                      cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) + 0.0
+                      amat(iv,jv)        = amat(iv,jv) + 0.0
+                   else
+                      cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
+                           - z(is)/temp(is) / &
+                           (k_perp(it,ir)**2 * lambda_debye**2 &
+                           * dens_ele / temp_ele &
+                           + sum_den) &
+                           * j0_v(ic_loc,iv) &
+                           * z(js)*dens(js) &
+                           * j0_v(ic_loc,jv) * w_e(je) &
+                           * 0.5 * w_xi(jx) 
+                      amat(iv,jv) = amat(iv,jv) &
+                           - z(is)/temp(is) / &
+                           (k_perp(it,ir)**2 * lambda_debye**2 &
+                           * dens_ele / temp_ele &
+                           + sum_den) &
+                           * j0_v(ic_loc,iv) &
+                           * z(js)*dens(js) &
+                           * j0_v(ic_loc,jv) * w_e(je) &
+                           * 0.5 * w_xi(jx) 
+                   endif
+                   
+                   ! Ampere component
+                   if (n_field > 1) then
+                      cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
+                           - z(is)/temp(is) / &
+                           (2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
+                           * dens_ele * temp_ele) &
+                           * (-j0_v(ic_loc,iv)) &
+                           * z(js)*dens(js) &
+                           * xi(ix) * sqrt(2.0*energy(ie)) *vth(is) &
+                           * j0_v(ic_loc,jv) * w_e(je) &
+                           * 0.5 * w_xi(jx) &
+                           * xi(jx) * sqrt(2.0*energy(je)) * vth(is) 
+                      amat(iv,jv) = amat(iv,jv) &
+                           - z(is)/temp(is) / &
+                           (2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
+                           * dens_ele * temp_ele) &
+                           * (-j0_v(ic_loc,iv)) &
+                           * z(js)*dens(js) &
+                           * xi(ix) * sqrt(2.0*energy(ie)) * vth(is) &
+                           * j0_v(ic_loc,jv) * w_e(je) &
+                           * 0.5 * w_xi(jx) &
+                           * xi(jx) * sqrt(2.0*energy(je)) * vth(is) 
+                   endif
+                   
+                enddo
+             enddo
+          endif
+             
           ! H_bar = (1 - dt/2 C - Poisson)^(-1) * (1 + dt/2 C + Poisson) H
           ! Lapack factorization and inverse of LHS
           call DGETRF(nv,nv,cmat(:,:,ic_loc),nv,i_piv,info)
@@ -686,9 +693,9 @@ contains
           call DGEMM('N','N',nv,nv,nv,num1,cmat(:,:,ic_loc),&
                nv,amat,nv,num0,bmat,nv)
           cmat(:,:,ic_loc) = bmat(:,:)
-
+          
        enddo
-
+       
        call timer_lib_out('coll_set2')
 
        deallocate(amat)
