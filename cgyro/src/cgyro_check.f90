@@ -131,6 +131,17 @@ subroutine cgyro_check
         return
      end select
   endif
+
+  select case (collision_field_model)
+     case(0)
+        call cgyro_info('Collision field corrections = not included')
+     case (1)
+        call cgyro_info('Collision field corrections = included')
+     case default
+        call cgyro_error('Invalid value for collision_kperp')
+        return
+     end select
+
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------

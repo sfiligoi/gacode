@@ -20,7 +20,7 @@ module cgyro_interface
   ! Defaults should agree with values in cgyro_parse.py
   !
   integer :: cgyro_n_energy_in = 6
-  integer :: cgyro_n_xi_in     = 8
+  integer :: cgyro_n_xi_in     = 16
   integer :: cgyro_n_theta_in  = 16
   integer :: cgyro_n_radial_in = 4
   integer :: cgyro_n_toroidal_in = 1
@@ -34,16 +34,17 @@ module cgyro_interface
   integer :: cgyro_restart_mode_in  = 0
   real    :: cgyro_up_radial_in = 1.0
   integer :: cgyro_up_radial_n_in = 4
-  real    :: cgyro_up_theta_in = 1.0
+  real    :: cgyro_up_theta_in = 2.0
   real    :: cgyro_ky_in = 0.3
   real    :: cgyro_box_size_in  = 1.0
   integer :: cgyro_silent_flag_in = 0
   integer :: cgyro_equilibrium_model_in = 2
-  integer :: cgyro_collision_model_in   = 1
+  integer :: cgyro_collision_model_in   = 4
   integer :: cgyro_collision_mom_restore_in = 1
   integer :: cgyro_collision_ene_restore_in = 1
   integer :: cgyro_collision_ene_diffusion_in = 1
   integer :: cgyro_collision_kperp_in = 1
+  integer :: cgyro_collision_field_model_in = 1
   integer :: cgyro_zf_test_flag_in = 0
   integer :: cgyro_nonlinear_flag_in = 0
   real    :: cgyro_te_ade_in = 1.0
@@ -116,6 +117,7 @@ contains
     cgyro_collision_ene_restore_in = collision_ene_restore
     cgyro_collision_ene_diffusion_in = collision_ene_diffusion
     cgyro_collision_kperp_in = collision_kperp
+    cgyro_collision_field_model_in = collision_field_model
     cgyro_te_ade_in = te_ade
     cgyro_ne_ade_in = ne_ade
     cgyro_masse_ade_in = masse_ade
@@ -175,6 +177,7 @@ contains
     collision_ene_restore = cgyro_collision_ene_restore_in
     collision_ene_diffusion = cgyro_collision_ene_diffusion_in
     collision_kperp = cgyro_collision_kperp_in
+    collision_field_model = cgyro_collision_field_model_in
     te_ade    = cgyro_te_ade_in
     ne_ade    = cgyro_ne_ade_in
     masse_ade = cgyro_masse_ade_in
