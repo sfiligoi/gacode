@@ -105,7 +105,7 @@ subroutine cgyro_rhs(ij)
   enddo
 
   ! TRAPPING TERM
-  if (collision_model == 0) call cgyro_rhs_trap(ij)
+  if (collision_model == 0 .or. collision_field_model == 0) call cgyro_rhs_trap(ij)
 
   call timer_lib_out('rhs')
 
