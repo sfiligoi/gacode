@@ -131,6 +131,9 @@ subroutine cgyro_kernel
      ! Collisionless step: returns new h_x, cap_h_x, fields 
      call cgyro_step_gk
 
+     ! Spectral ExB shear
+     if (gamma_e > 0.0) call cgyro_shear
+
      ! Collision step: returns new h_x, cap_h_x, fields
      call cgyro_step_collision
 

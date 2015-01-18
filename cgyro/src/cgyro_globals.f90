@@ -40,6 +40,7 @@ module cgyro_globals
   real :: lambda_debye
   integer :: test_flag
   real :: amp
+  real :: gamma_e
   !
   ! Geometry input
   !
@@ -155,6 +156,7 @@ module cgyro_globals
   integer :: n_time
   complex :: freq
   complex :: freq_err
+  real :: gtime
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -171,6 +173,7 @@ module cgyro_globals
   real :: rho
   real :: k_theta
   real :: length
+  real :: omega_eb
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------

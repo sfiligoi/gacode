@@ -106,6 +106,15 @@ subroutine cgyro_make_profiles
   endif
   !-------------------------------------------------------------
 
+  !------------------------------------------------------------------------
+  ! ExB shear
+  !
+  if (abs(gamma_e) > 1e-10) then
+     call cgyro_info('Triggered ExB shear.') 
+     omega_eb = k_theta*length*gamma_e/(2*pi)
+  endif
+  !------------------------------------------------------------------------
+
   !-------------------------------------------------------------
   ! Species-dependent quantities
   !

@@ -25,6 +25,7 @@ OBJECTS = cgyro_globals.o \
 	  cgyro_nl.o \
           cgyro_read_input.o \
           cgyro_run.o \
+          cgyro_shear.o \
 	  cgyro_step_gk.o \
           cgyro_write_initdata.o \
           cgyro_write_timedata.o
