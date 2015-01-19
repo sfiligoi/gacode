@@ -127,12 +127,12 @@ subroutine cgyro_kernel
   io_control = 2*(1-silent_flag)
 
   do i_time=1,n_time
-
+  
      ! Collisionless step: returns new h_x, cap_h_x, fields 
      call cgyro_step_gk
 
      ! Spectral ExB shear
-     if (gamma_e > 0.0) call cgyro_shear
+     if (abs(gamma_e) > 1e-10) call cgyro_shear
 
      ! Collision step: returns new h_x, cap_h_x, fields
      call cgyro_step_collision
