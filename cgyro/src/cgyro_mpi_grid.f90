@@ -18,6 +18,7 @@ subroutine cgyro_mpi_grid
 
   integer :: ie,ix,is,ir,it
 
+
   integer :: splitkey
   integer, external :: parallel_dim
 

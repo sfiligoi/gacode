@@ -34,11 +34,9 @@ subroutine cgyro_write_initdata
 
      if (zf_test_flag == 1) then
         write(io,20) 'ky*rho',0.0
-     else if (n_toroidal == 1) then
-        write(io,20) 'ky*rho',ky
-     else
-        write(io,20) 'min(ky*rho)',(q/rmin)*rho
-        write(io,20) 'max(ky*rho)',(n_toroidal-1)*(q/rmin)*rho
+     else 
+        write(io,20) 'ky*rho'
+        write(io,'(8f6.3,1x)') (in*q/rmin*rho,in=0,n_toroidal-1)
      endif
 
      write(io,*) 
@@ -75,6 +73,9 @@ subroutine cgyro_write_initdata
      enddo
 
      write(io,*)
+
+     write(io,*) 'nc',nc
+     write(io,*) 'nv',nv
 
      close(io)
 
