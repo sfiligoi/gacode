@@ -91,13 +91,15 @@ while [ $# -gt 0 ] ; do
 
   -numa) shift ; NUMA=$1 ;;
 
+  -mpinuma) shift ; MPINUMA=$1 ;;
+
   -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
 
   -r) shift ; REGRESS_FLAG=1 ;;
 
   -h) cgyro_version_message ; exit 0 ;;
 
-  *) echo "ERROR: incorrect cgyro syntax." ; exit 1 ;;
+  *) echo "ERROR (cgyro script): incorrect cgyro syntax." ; exit 1 ;;
  
   esac
   shift
