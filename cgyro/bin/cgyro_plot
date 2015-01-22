@@ -53,7 +53,7 @@ then
   echo "                     = hbcut  (1D ballooning distribution line plots),"
   echo "                     = freq   (frequency versus time),"
   echo "                     = zf     (zonal flow potential plot),"
-  echo "                     = zf0    (?)"
+  echo "                     = fluxt  (time-trace of fluxes for all species)"
   echo "                     = fluxn  (bar plot of flux versus n)"
   echo "                     = pwr    (time dependent field intensities)"
   echo "                     = pwr_np (n-p spectra at final time)"
@@ -139,6 +139,9 @@ case "$PLOT_TYPE" in
    fluxn)  
 	python $PYROOT/plot_flux_n.py $FTYPE $W $MOMENT & ;;
 
+   fluxt)  
+	python $PYROOT/plot_flux_t.py $FTYPE $W $MOMENT & ;;
+
    pwr)  
 	python $PYROOT/plot_pwr.py $FTYPE $FIELD & ;;
 
@@ -147,9 +150,6 @@ case "$PLOT_TYPE" in
 
    zf)  
 	python $PYROOT/plot_zf.py $FTYPE $FIELD & ;;
-
-   zf0)
-   	python $PYROOT/plot_zffield.py $FTYPE $TIME $FIELD & ;;
 
    text)
    	python $PYROOT/text.py $W & ;;
