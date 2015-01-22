@@ -8,7 +8,7 @@ field = sys.argv[2]
 
 sim = cgyrodata('./')
 
-fig = plt.figure(figsize=(12,6))
+fig = plt.figure(figsize=(10,8))
 
 ax = fig.add_subplot(111)
 ax.grid(which="majorminor",ls=":")
@@ -19,13 +19,23 @@ ax.set_ylabel(r'$p$',fontsize=GFONTSIZE)
 p = np.arange(sim.n_radial)
 
 f = sim.pwr_phi[:,:,-1]
+fmax = f.max()
+
+# Zero wavenumebrs
+f[0,0] = 1.0
+f[sim.n_radial/2,0] = 1.0
+
+f = np.log(f)
 
 fmin = f.min()
-fmax = f.max()
+fmax = np.log(fmax)
+
 d = (fmax-fmin)/100.0
 levels = np.arange(fmin-d,fmax+d,d)
 
-ax.contourf(sim.ky,p,f,levels,cmap=cm.jet,origin='lower')
+kx = (p-sim.n_radial/2)
+
+ax.contourf(sim.ky,kx,f,levels,origin='lower')
 
 if ftype == 'screen':
     plt.show()

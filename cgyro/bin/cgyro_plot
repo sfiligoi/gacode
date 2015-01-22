@@ -56,6 +56,7 @@ then
   echo "                     = zf0    (?)"
   echo "                     = fluxn  (bar plot of flux versus n)"
   echo "                     = pwr    (time dependent field intensities)"
+  echo "                     = pwr_np (n-p spectra at final time)"
 
   exit 1
 fi
@@ -140,6 +141,9 @@ case "$PLOT_TYPE" in
 
    pwr)  
 	python $PYROOT/plot_pwr.py $FTYPE $FIELD & ;;
+
+   pwr_np)  
+	python $PYROOT/plot_pwr_np.py $FTYPE $FIELD & ;;
 
    zf)  
 	python $PYROOT/plot_zf.py $FTYPE $FIELD & ;;
