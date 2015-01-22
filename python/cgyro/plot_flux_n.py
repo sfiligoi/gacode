@@ -57,5 +57,5 @@ for ispec in range(ns):
 if ftype == 'screen':
    plt.show()
 else:
-   outfile = 'flux.'+ftype
+   outfile = 'flux_n.'+ftype
    plt.savefig(outfile)

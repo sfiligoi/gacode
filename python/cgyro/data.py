@@ -119,6 +119,34 @@ class cgyrodata:
         #-----------------------------------------------------------------
 
         #-----------------------------------------------------------------
+        # Particle and energy fluxes
+        #
+        try:
+            data = np.loadtxt(self.dir+'out.cgyro.flux_n')
+            self.flux_n = np.reshape(data,(self.n_species,self.n_n,nt),'F')
+            print "INFO: (data.py) Read data in out.cgyro.flux_n."
+        except:
+            pass
+
+        try:
+            data = np.loadtxt(self.dir+'out.cgyro.flux_e')
+            self.flux_e = np.reshape(data,(self.n_species,self.n_n,nt),'F')
+            print "INFO: (data.py) Read data in out.cgyro.flux_e."
+        except:
+            pass
+      #-----------------------------------------------------------------
+
+
+    def getmedium(self):
+
+        """Get medium-sized files"""
+
+        import numpy as np
+
+        # Convenience definition
+        nt = self.n_time
+
+        #-----------------------------------------------------------------
         # Read powers
         #
         try:
@@ -141,23 +169,6 @@ class cgyrodata:
             pass
         #-----------------------------------------------------------------
 
-        #-----------------------------------------------------------------
-        # Particle and energy fluxes
-        #
-        try:
-            data = np.loadtxt(self.dir+'out.cgyro.flux_n')
-            self.flux_n = np.reshape(data,(self.n_species,self.n_n,nt),'F')
-            print "INFO: (data.py) Read data in out.cgyro.flux_n."
-        except:
-            pass
-
-        try:
-            data = np.loadtxt(self.dir+'out.cgyro.flux_e')
-            self.flux_e = np.reshape(data,(self.n_species,self.n_n,nt),'F')
-            print "INFO: (data.py) Read data in out.cgyro.flux_e."
-        except:
-            pass
-      #-----------------------------------------------------------------
 
 
     def getbig(self):

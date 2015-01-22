@@ -7,14 +7,15 @@ ftype = sys.argv[1]
 field = sys.argv[2]
 
 sim = cgyrodata('./')
+sim.getmedium()
 
 fig = plt.figure(figsize=(12,6))
 
 ax = fig.add_subplot(111)
 ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
-ax.set_xlabel(r'$(c_s/a)\, t$',fontsize=GFONTSIZE)
-ax.set_ylabel(r'$\Phi$',fontsize=GFONTSIZE)
+ax.set_xlabel(r'$(c_s/a)\, t$')
+ax.set_ylabel(r'$\Phi$')
 
 y = np.sum(sim.pwr_phi,axis=0)
 
@@ -28,7 +29,7 @@ for n in range(sim.n_n):
 ax.set_xlim([0,max(sim.t)])
 #======================================
 
-ax.legend(loc=2, ncol=3,prop={'size':11})
+ax.legend(loc=2, ncol=3, fontsize=11, borderpad=2,frameon=False)
 
 if ftype == 'screen':
     plt.show()
