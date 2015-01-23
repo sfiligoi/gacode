@@ -29,7 +29,7 @@ for n in range(sim.n_n):
 ax.set_xlim([0,max(sim.t)])
 #======================================
 
-ax.legend(loc=2, ncol=3, fontsize=11, borderpad=2,frameon=False)
+ax.legend(loc=2, ncol=3, prop={'size':11})
 
 if ftype == 'screen':
     plt.show()
