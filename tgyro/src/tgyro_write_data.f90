@@ -349,7 +349,7 @@ subroutine tgyro_write_data(i_print)
 
   open(unit=1,file='out.tgyro.gradient',status='old',position='append')
 
-  write(1,20) 'r/a','a/Lni','a/Lne','a/LTi','a/LTe','a*beta_*','a*gamma_p/cs','a*f_rot'
+  write(1,20) 'r/a','a/Lni','a/Lne','a/LTi','a/LTe','a*beta_*','a*gamma_p/cs','a*gamma_e/cs','a*f_rot'
   write(1,20) '','','','','',''
   do i=1,n_r
      write(1,10) r(i)/r_min,&
@@ -359,6 +359,7 @@ subroutine tgyro_write_data(i_print)
           r_min*dlntedr(i),&
           r_min*beta_unit(i)*dlnpdr(i),&
           r_min/c_s(i)*gamma_p(i),&
+          r_min/c_s(i)*gamma_p(i)*r(i)/(q(i)*r_maj(i)),&
           r_min*f_rot(i)
   enddo
 
