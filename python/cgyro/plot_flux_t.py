@@ -10,12 +10,16 @@ moment = sys.argv[3]
 sim = cgyrodata('./')
 
 ns = sim.n_species
+t = sim.t
 
+#======================================
+# Set figure size and axes
 fig = plt.figure(figsize=(12,6))
 ax = fig.add_subplot(111)
 ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
 ax.set_xlabel(r'$(c_s/a)\, t$')
+#======================================
 
 color = ['m','k','b','c']
 
@@ -37,11 +41,21 @@ else:
     print 'ERROR (plot_flux_t.py) Invalid moment.'
     sys.exit()
 
-for ispec in range(ns):
-    stag = str(ispec)
-    ax.plot(sim.t,y[ispec,:],label=r'$'+mtag+'_'+stag+'$')
+# Determine tmin
+for i in range(len(t)):
+    if t[i] < (1.0-w)*t[len(t)-1]:
+        imin = i
 
-ax.legend(loc=2, fontsize=12, borderpad=2, frameon=False)
+for ispec in range(ns):
+    ave = average(y[ispec,:],t,w)
+    y_ave = ave*np.ones(len(t))
+    label = r'$'+mtag+'_'+str(ispec)+': '+str(round(ave,3))+'$'
+    # Average
+    ax.plot(t[imin:],y_ave[imin:],'--',color=color[ispec])
+    # Time trace
+    ax.plot(sim.t,y[ispec,:],label=label,color=color[ispec])
+
+ax.legend(loc=2)
 
 if ftype == 'screen':
    plt.show()
