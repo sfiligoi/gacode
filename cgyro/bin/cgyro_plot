@@ -52,7 +52,8 @@ then
   echo "                     = hb     (2D ballooning distribution)"
   echo "                     = hbcut  (1D ballooning distribution line plots),"
   echo "                     = freq   (frequency versus time),"
-  echo "                     = zf     (zonal flow potential plot),"
+  echo "                     = zf     (zonal flow potential plot vs. time),"
+  echo "                     = zffield(zonal flow potential plot vs. theta),"
   echo "                     = fluxt  (time-trace of fluxes for all species)"
   echo "                     = fluxn  (bar plot of flux versus n)"
   echo "                     = pwr    (time dependent field intensities)"
@@ -150,6 +151,9 @@ case "$PLOT_TYPE" in
 
    zf)  
 	python $PYROOT/plot_zf.py $FTYPE $FIELD & ;;
+
+   zffield)
+	python $PYROOT/plot_zffield.py $FTYPE $TIME $FIELD $TMAX & ;;
 
    text)
    	python $PYROOT/text.py $W & ;;
