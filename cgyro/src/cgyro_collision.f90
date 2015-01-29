@@ -671,7 +671,7 @@ contains
                               * xi(ix) * sqrt(2.0*energy(ie)) *vth(is) &
                               * j0_v(ic_loc,jv) * w_e(je) &
                               * 0.5 * w_xi(jx) &
-                              * xi(jx) * sqrt(2.0*energy(je)) * vth(is) 
+                              * xi(jx) * sqrt(2.0*energy(je)) * vth(js) 
                          amat(iv,jv) = amat(iv,jv) &
                               - z(is)/temp(is) / &
                               (2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
@@ -681,7 +681,7 @@ contains
                               * xi(ix) * sqrt(2.0*energy(ie)) * vth(is) &
                               * j0_v(ic_loc,jv) * w_e(je) &
                               * 0.5 * w_xi(jx) &
-                              * xi(jx) * sqrt(2.0*energy(je)) * vth(is) 
+                              * xi(jx) * sqrt(2.0*energy(je)) * vth(js) 
                       endif
 
                    endif
