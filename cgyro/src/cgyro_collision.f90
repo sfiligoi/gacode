@@ -616,8 +616,7 @@ contains
                         + (0.5*delta_t) * (cfield(is,js,ix,jx,ie,je) &
                         + cfield_k(is,js,ix,jx,ie,je,ic_loc))
                    
-                   if(collision_field_model == 1) then
-
+                   if(collision_trap_model == 1) then
                       ! Trapping term
                       if (is == js .and. ie == je) then
                          cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
@@ -631,6 +630,9 @@ contains
                               * (1.0 - xi(ix)**2) &
                               * xi_deriv_mat(ix,jx) 
                       endif
+                   endif
+
+                   if(collision_field_model == 1) then
                    
                       ! Poisson component 
                       if (n == 0 .and. ae_flag == 1) then

@@ -133,14 +133,26 @@ subroutine cgyro_check
   endif
 
   select case (collision_field_model)
-     case(0)
-        call cgyro_info('Collision field corrections = not included')
-     case (1)
-        call cgyro_info('Collision field corrections = included')
-     case default
-        call cgyro_error('Invalid value for collision_kperp')
-        return
-     end select
+  case(0)
+     call cgyro_info('Collision field corrections = not included')
+  case (1)
+     call cgyro_info('Collision field corrections = included')
+  case default
+     call cgyro_error('Invalid value for collision_kperp')
+     return
+  end select
+
+  select case (collision_trap_model)
+  case(0)
+     call cgyro_info('Trapping term in collisionless step')
+  case (1)
+     if(collision_model /= 0) then
+        call cgyro_info('Trapping term in collisional step')
+     endif
+  case default
+     call cgyro_error('Invalid value for collision_trap_model')
+     return
+  end select
 
   !------------------------------------------------------------------------
 
