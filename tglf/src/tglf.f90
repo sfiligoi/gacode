@@ -24,6 +24,9 @@ program tglf
   call tglf_read_input()
   call tglf_run() 
 
+! write interchange stability criteria with ELITE conventions
+  Print 30,'  D(R) = ',-interchange_DR,'  D(I) = ',0.25-interchange_DM
+
   if (tglf_use_transport_model_in) then
 
      ! Output to screen
@@ -110,5 +113,6 @@ program tglf
 
 10 format(a,10(1x,1pe11.4))
 20 format(t7,a,t19,a,t31,a,t43,a,t55,a)
+30 format(a,1pe11.4,a,1pe11.4)
 
 end program tglf

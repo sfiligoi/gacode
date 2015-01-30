@@ -186,6 +186,10 @@ subroutine tglf_run_mpi()
 
   endif
 
+  ! Diagnostic output
+  interchange_DR = get_DR()
+  interchange_DM = get_DM()
+
   call get_error_status(tglf_error_message,tglf_error_status)
 
 end subroutine tglf_run_mpi

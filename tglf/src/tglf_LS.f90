@@ -613,10 +613,6 @@
 !      xi=(0.0,1.0)
       epsilon1 = 1.E-12
       freq_QL = eigenvalue
-!      ft2=ft*ft
-!      cu = 1.0
-!      cq1 = 1.0
-!      cq3 = 1.0
 !
 !  fill the density and total pressure vectors
 !
@@ -712,7 +708,7 @@
         do is=ns0,ns
         do j=1,nbasis
           n(is,j) = n(is,j) + vpar_in(is)*(zs(is)/taus(is))*psi(j)
-          u_par(is,j) = u_par(is,j) - (vpar_in(is)/vs(is))*(zs(is)/taus(is))*phi(j)
+          u_par(is,j) = u_par(is,j) -(vpar_in(is)/vs(is))*(zs(is)/taus(is))*phi(j)
           p_par(is,j) = p_par(is,j) + vpar_in(is)*(zs(is)/taus(is))*psi(j)
           p_tot(is,j) = p_tot(is,j) + vpar_in(is)*(zs(is)/taus(is))*psi(j)
           q_par(is,j) = q_par(is,j) - 3.0*(vpar_in(is)/vs(is))*(zs(is)/taus(is))*phi(j)

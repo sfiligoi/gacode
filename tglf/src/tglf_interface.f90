@@ -187,6 +187,10 @@ module tglf_interface
   ! LINEAR OUTPUT PARAMETERS
   complex :: tglf_eigenvalue_out(maxmodes)
 
+  ! DIAGNOSTIC OUTPUT PARAMETERS
+  real :: interchange_DR = 0.0
+  real :: interchange_DM = 0.0
+
   ! ERROR OUTPUT
   character (len=80) :: tglf_error_message='null'
   integer :: tglf_error_status=0
