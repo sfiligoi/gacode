@@ -30,8 +30,7 @@ contains
     integer :: is,ir,it,ix,ie,js,je,jx,ks
     ! parameters for matrix solve
     real, dimension(:,:), allocatable :: amat, bmat
-    real, dimension(:,:,:,:,:,:), allocatable :: ctest, cfield
-    real, dimension(:,:,:,:,:,:,:), allocatable :: cfield_k
+    real, dimension(:,:,:,:,:,:), allocatable :: ctest
     real :: arg
     real, dimension(:,:,:,:,:), allocatable :: bessel
     integer :: ierr
@@ -169,14 +168,8 @@ contains
        allocate(ctest(n_species,n_species,n_xi,n_xi,n_energy,n_energy))
        allocate(rs(n_species,n_species))
        allocate(rsvec(n_species,n_species,n_xi,n_energy))
-       if(collision_kperp == 1) then
-          allocate(cfield_k(n_species,n_species,n_xi,n_xi,n_energy,n_energy,&
-            nc_loc))
-          cfield_k = 0.0
-       else
-          allocate(cfield(n_species,n_species,n_xi,n_xi,n_energy,n_energy))
-          cfield   = 0.0
-       endif
+       allocate(cmat(nv,nv,nc_loc))
+       allocate(amat(nv,nv))
 
        ! Collision test particle component
        ctest   = 0.0
@@ -255,6 +248,8 @@ contains
        endif
        
        ! Collision field particle component
+       amat(:,:)   = 0.0
+       cmat(:,:,:) = 0.0
 
        select case (collision_model)
 
@@ -269,30 +264,37 @@ contains
                    enddo
                 enddo
              enddo
-             do is=1,n_species
-                do js=1, n_species   
-                   do ix=1,n_xi
-                      do jx=1, n_xi
-                         do ie=1,n_energy
-                            do je=1, n_energy
-                               if (abs(rs(is,js)) > epsilon(0.)) then
-                                  cfield(is,js,ix,jx,ie,je) = &
-                                       cfield(is,js,ix,jx,ie,je) &
-                                       + 1.5 * (mass(js)/mass(is)) &
-                                       * (dens(js)/dens(is)) &
-                                       * (vth(js)/vth(is)) &
-                                       * nu_s(ie,is,js) * sqrt(energy(ie)) &
-                                       * xi(ix) &
-                                       * nu_s(je,js,is) * sqrt(energy(je)) &
-                                       * xi(jx) * w_e(je) * w_xi(jx) &
-                                       / rs(is,js)
-                               endif
-                            enddo
-                         enddo
-                      enddo
+
+             ic_loc = 0
+             do ic=nc1,nc2
+                ic_loc = ic_loc+1
+
+                do iv=1,nv  
+                   is = is_v(iv)
+                   ix = ix_v(iv)
+                   ie = ie_v(iv)
+                   
+                   do jv=1,nv
+                      js = is_v(jv)
+                      jx = ix_v(jv)
+                      je = ie_v(jv)
+                      
+                      if (abs(rs(is,js)) > epsilon(0.)) then
+                         cmat(iv,jv,ic_loc) = &
+                              cmat(iv,jv,ic_loc) &
+                              + 1.5 * (mass(js)/mass(is)) &
+                              * (dens(js)/dens(is)) &
+                              * (vth(js)/vth(is)) &
+                              * nu_s(ie,is,js) * sqrt(energy(ie)) &
+                              * xi(ix) &
+                              * nu_s(je,js,is) * sqrt(energy(je)) &
+                              * xi(jx) * w_e(je) * w_xi(jx) &
+                              / rs(is,js)
+                      endif
                    enddo
                 enddo
              enddo
+ 
           endif
 
        case(4)
@@ -329,76 +331,82 @@ contains
              enddo
 
              if(collision_kperp == 0) then
-                do is=1,n_species
-                   do js=1, n_species         
-                      do ix=1,n_xi
-                         do jx=1, n_xi
-                            do ie=1,n_energy
-                               do je=1, n_energy
-                                  if (abs(rs(is,js))>epsilon(0.0)) then
-                                     cfield(is,js,ix,jx,ie,je) &
-                                          = cfield(is,js,ix,jx,ie,je) &
-                                          - mass(js)/mass(is) &
-                                          * (dens(js)/dens(is)) &
-                                          * (vth(js)/vth(is)) &
-                                          * rsvec(is,js,ix,ie) &
-                                          / rs(is,js) &
-                                          * rsvec(js,is,jx,je) &
-                                          * 0.5*w_e(je)*w_xi(jx)
-                                  endif
-                               enddo
-                            enddo
-                         enddo
+                ic_loc = 0
+                do ic=nc1,nc2
+                   ic_loc = ic_loc+1
+                   
+                   do iv=1,nv  
+                      is = is_v(iv)
+                      ix = ix_v(iv)
+                      ie = ie_v(iv)
+                      
+                      do jv=1,nv
+                         js = is_v(jv)
+                         jx = ix_v(jv)
+                         je = ie_v(jv)
+                         
+                         if (abs(rs(is,js))>epsilon(0.0)) then
+                            cmat(iv,jv,ic_loc) &
+                                 = cmat(iv,jv,ic_loc) &
+                                 - mass(js)/mass(is) &
+                                 * (dens(js)/dens(is)) &
+                                 * (vth(js)/vth(is)) &
+                                 * rsvec(is,js,ix,ie) &
+                                 / rs(is,js) &
+                                 * rsvec(js,is,jx,je) &
+                                 * 0.5*w_e(je)*w_xi(jx)
+                         endif
                       enddo
                    enddo
                 enddo
-                
+
              else
                 ic_loc = 0
                 do ic=nc1,nc2
                    ic_loc = ic_loc+1
                    it = it_c(ic)
                    ir = ir_c(ic)
-                   do is=1,n_species  
-                      do js=1, n_species   
-                         do ix=1,n_xi
-                            do jx=1, n_xi
-                               do ie=1,n_energy
-                                  do je=1, n_energy
-                                     if (abs(rs(is,js)) > epsilon(0.)) then
-                                        cfield_k(is,js,ix,jx,ie,je,ic_loc) &
-                                             = cfield_k(is,js,ix,jx,ie,je,ic_loc) &
-                                             - mass(js)/mass(is) &
-                                             * (dens(js)/dens(is)) &
-                                             * (vth(js)/vth(is))**2 &
-                                             * rsvec(is,js,ix,ie) &
-                                             * bessel(is,ix,ie,ic_loc,0) &
-                                             / rs(is,js) &
-                                             * rsvec(js,is,jx,je) &
-                                             * bessel(js,jx,je,ic_loc,0) &
-                                             * 0.5*w_xi(jx)*w_e(je)
-                                        cfield_k(is,js,ix,jx,ie,je,ic_loc) &
-                                             = cfield_k(is,js,ix,jx,ie,je,ic_loc) &
-                                             - mass(js)/mass(is) &
-                                             * (dens(js)/dens(is)) &
-                                             * (vth(js)/vth(is))**2 &
-                                             * rsvec(is,js,ix,ie) &
-                                             * bessel(is,ix,ie,ic_loc,1) &
-                                             * sqrt(1.0-xi(ix)**2)/xi(ix) &
-                                             / rs(is,js) &
-                                             * rsvec(js,is,jx,je) &
-                                             * bessel(js,jx,je,ic_loc,1) &
-                                             * sqrt(1.0-xi(jx)**2)/xi(jx) &
-                                             * 0.5*w_xi(jx)*w_e(je)
-                                     endif
-                                  enddo
-                               enddo
-                            enddo
-                         enddo
+
+                   do iv=1,nv  
+                      is = is_v(iv)
+                      ix = ix_v(iv)
+                      ie = ie_v(iv)
+                      
+                      do jv=1,nv
+                         js = is_v(jv)
+                         jx = ix_v(jv)
+                         je = ie_v(jv)
+                         
+                         if (abs(rs(is,js)) > epsilon(0.)) then
+                            cmat(iv,jv,ic_loc) &
+                                 = cmat(iv,jv,ic_loc) &
+                                 - mass(js)/mass(is) &
+                                 * (dens(js)/dens(is)) &
+                                 * (vth(js)/vth(is))**2 &
+                                 * rsvec(is,js,ix,ie) &
+                                 * bessel(is,ix,ie,ic_loc,0) &
+                                 / rs(is,js) &
+                                 * rsvec(js,is,jx,je) &
+                                 * bessel(js,jx,je,ic_loc,0) &
+                                 * 0.5*w_xi(jx)*w_e(je)
+                            cmat(iv,jv,ic_loc) &
+                                 = cmat(iv,jv,ic_loc) &
+                                 - mass(js)/mass(is) &
+                                 * (dens(js)/dens(is)) &
+                                 * (vth(js)/vth(is))**2 &
+                                 * rsvec(is,js,ix,ie) &
+                                 * bessel(is,ix,ie,ic_loc,1) &
+                                 * sqrt(1.0-xi(ix)**2)/xi(ix) &
+                                 / rs(is,js) &
+                                 * rsvec(js,is,jx,je) &
+                                 * bessel(js,jx,je,ic_loc,1) &
+                                 * sqrt(1.0-xi(jx)**2)/xi(jx) &
+                                 * 0.5*w_xi(jx)*w_e(je)
+                         endif
                       enddo
                    enddo
                 enddo
-                
+
              endif
 
           endif
@@ -435,26 +443,31 @@ contains
              enddo
 
              if(collision_kperp == 0) then
-                do is=1,n_species
-                   do js=1, n_species   
-                      do ix=1,n_xi
-                         do jx=1, n_xi
-                            do ie=1,n_energy
-                               do je=1, n_energy
-                                  if (abs(rs(is,js)) > epsilon(0.)) then
-                                     cfield(is,js,ix,jx,ie,je) &
-                                          = cfield(is,js,ix,jx,ie,je) &
-                                          - mass(js)/mass(is) &
-                                          * (dens(js)/dens(is)) &
-                                          * (vth(js)/vth(is))**2 &
-                                          * rsvec(is,js,ix,ie) &
-                                          / rs(is,js) &
-                                          * rsvec(js,is,jx,je) &
-                                          * 0.5*w_xi(jx)*w_e(je)
-                                  endif
-                               enddo
-                            enddo
-                         enddo
+                ic_loc = 0
+                do ic=nc1,nc2
+                   ic_loc = ic_loc+1
+
+                   do iv=1,nv  
+                      is = is_v(iv)
+                      ix = ix_v(iv)
+                      ie = ie_v(iv)
+                   
+                      do jv=1,nv
+                         js = is_v(jv)
+                         jx = ix_v(jv)
+                         je = ie_v(jv)
+
+                         if (abs(rs(is,js)) > epsilon(0.)) then
+                            cmat(iv,jv,ic_loc) &
+                                 = cmat(iv,jv,ic_loc) &
+                                 - mass(js)/mass(is) &
+                                 * (dens(js)/dens(is)) &
+                                 * (vth(js)/vth(is))**2 &
+                                 * rsvec(is,js,ix,ie) &
+                                 / rs(is,js) &
+                                 * rsvec(js,is,jx,je) &
+                                 * 0.5*w_xi(jx)*w_e(je)
+                         endif
                       enddo
                    enddo
                 enddo
@@ -465,35 +478,35 @@ contains
                    ic_loc = ic_loc+1
                    it = it_c(ic)
                    ir = ir_c(ic)
-                   do is=1,n_species  
-                      do js=1, n_species   
-                         do ix=1,n_xi
-                            do jx=1, n_xi
-                               do ie=1,n_energy
-                                  do je=1, n_energy
-                                     if (abs(rs(is,js)) > epsilon(0.)) then
-                                        cfield_k(is,js,ix,jx,ie,je,ic_loc) &
-                                             = cfield_k(is,js,ix,jx,ie,je,ic_loc) &
-                                             - mass(js)/mass(is) &
-                                             * (dens(js)/dens(is)) &
-                                             * (vth(js)/vth(is))**2 &
-                                             * rsvec(is,js,ix,ie) &
-                                             * bessel(is,ix,ie,ic_loc,0) &
-                                             / rs(is,js) &
-                                             * rsvec(js,is,jx,je) &
-                                             * bessel(js,jx,je,ic_loc,0) &
-                                             * 0.5*w_xi(jx)*w_e(je)
-                                     endif
-                                  enddo
-                               enddo
-                            enddo
-                         enddo
+
+                   do iv=1,nv  
+                      is = is_v(iv)
+                      ix = ix_v(iv)
+                      ie = ie_v(iv)
+                      
+                      do jv=1,nv
+                         js = is_v(jv)
+                         jx = ix_v(jv)
+                         je = ie_v(jv)
+                         
+                         if (abs(rs(is,js)) > epsilon(0.)) then
+                            cmat(iv,jv,ic_loc) &
+                                 = cmat(iv,jv,ic_loc) &
+                                 - mass(js)/mass(is) &
+                                 * (dens(js)/dens(is)) &
+                                 * (vth(js)/vth(is))**2 &
+                                 * rsvec(is,js,ix,ie) &
+                                 * bessel(is,ix,ie,ic_loc,0) &
+                                 / rs(is,js) &
+                                 * rsvec(js,is,jx,je) &
+                                 * bessel(js,jx,je,ic_loc,0) &
+                                 * 0.5*w_xi(jx)*w_e(je)
+                         endif
                       enddo
                    enddo
                 enddo
-                
              endif
-             
+
           endif
 
        end select
@@ -503,9 +516,12 @@ contains
           deallocate(bessel)
        end if
 
-       allocate(cmat(nv,nv,nc_loc))
        allocate(cvec(nv))
        allocate(bvec(nv))
+       ! matrix solve parameters
+       allocate(work(nv))
+       allocate(i_piv(nv))
+       allocate(bmat(nv,nv))
 
        sum_den = 0.0
        do is=1,n_species
@@ -522,12 +538,6 @@ contains
 
        call timer_lib_out('coll_set1')
 
-       ! matrix solve parameters
-       allocate(work(nv))
-       allocate(i_piv(nv))
-       allocate(amat(nv,nv))
-       allocate(bmat(nv,nv))
-
        call timer_lib_in('coll_set2')
 
        ! set-up the collision matrix
@@ -538,9 +548,6 @@ contains
           it = it_c(ic)
           ir = ir_c(ic)
 
-          cmat(:,:,ic_loc) = 0.0
-          amat(:,:)        = 0.0
-
           ! Avoid singularity of n=0,p=0:
           if (px(ir) == 0 .and. n == 0) then
              do iv=1,nv
@@ -549,6 +556,11 @@ contains
              enddo
              
           else
+
+             
+             ! Already has field particle collisions
+             amat(:,:)        = (0.5*delta_t)  * cmat(:,:,ic_loc)
+             cmat(:,:,ic_loc) = -(0.5*delta_t) * cmat(:,:,ic_loc)
 
              do iv=1,nv
                 
@@ -592,19 +604,6 @@ contains
                                  + nu_par(ie,is,ks) * (1-xi(ix)**2)) )
                          enddo
                       endif
-                   endif
-                   
-                   ! Collision component: Field particle
-                   if(collision_kperp == 1) then
-                      cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                           - (0.5*delta_t) * cfield_k(is,js,ix,jx,ie,je,ic_loc)
-                      amat(iv,jv) = amat(iv,jv) &
-                           + (0.5*delta_t) * cfield_k(is,js,ix,jx,ie,je,ic_loc)
-                   else
-                      cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                           - (0.5*delta_t) * cfield(is,js,ix,jx,ie,je)
-                      amat(iv,jv) = amat(iv,jv) &
-                           + (0.5*delta_t) * cfield(is,js,ix,jx,ie,je)
                    endif
                    
                    if(collision_trap_model == 1) then
@@ -714,11 +713,6 @@ contains
        deallocate(rs)
        deallocate(rsvec)
        deallocate(ctest)
-       if(collision_kperp == 1) then
-          deallocate(cfield_k)
-       else
-          deallocate(cfield)
-       endif
 
        initialized = .true.
 
