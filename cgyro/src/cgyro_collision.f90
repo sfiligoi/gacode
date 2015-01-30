@@ -31,7 +31,7 @@ contains
     ! parameters for matrix solve
     real, dimension(:,:), allocatable :: amat, bmat
     real, dimension(:,:,:,:,:,:), allocatable :: ctest, cfield
-    real, dimension(:,:,:,:,:,:,:), allocatable :: ctest_k, cfield_k
+    real, dimension(:,:,:,:,:,:,:), allocatable :: cfield_k
     real :: arg
     real, dimension(:,:,:,:,:), allocatable :: bessel
     integer :: ierr
@@ -167,17 +167,19 @@ contains
        endif
 
        allocate(ctest(n_species,n_species,n_xi,n_xi,n_energy,n_energy))
-       allocate(cfield(n_species,n_species,n_xi,n_xi,n_energy,n_energy))
-       allocate(ctest_k(n_species,n_species,n_xi,n_xi,n_energy,n_energy,&
-            nc_loc))
-       allocate(cfield_k(n_species,n_species,n_xi,n_xi,n_energy,n_energy,&
-            nc_loc))
        allocate(rs(n_species,n_species))
        allocate(rsvec(n_species,n_species,n_xi,n_energy))
+       if(collision_kperp == 1) then
+          allocate(cfield_k(n_species,n_species,n_xi,n_xi,n_energy,n_energy,&
+            nc_loc))
+          cfield_k = 0.0
+       else
+          allocate(cfield(n_species,n_species,n_xi,n_xi,n_energy,n_energy))
+          cfield   = 0.0
+       endif
 
        ! Collision test particle component
        ctest   = 0.0
-       ctest_k = 0.0
 
        ! Lorentz
        do is=1,n_species
@@ -251,37 +253,8 @@ contains
              enddo
           enddo
        endif
-
-       ! Finite-kperp corrections
-       if(collision_model == 4 .and. collision_kperp == 1) then
-          ic_loc = 0
-          do ic=nc1,nc2
-             ic_loc = ic_loc+1
-             it = it_c(ic)
-             ir = ir_c(ic)
-             do is=1,n_species   
-                do ix=1,n_xi
-                   do ie=1,n_energy
-                      do js=1, n_species
-                         jx=ix
-                         je=ie
-                         ctest_k(is,js,ix,jx,ie,je,ic_loc) &
-                              = ctest_k(is,js,ix,jx,ie,je,ic_loc) &
-                              - 0.25*(k_perp(it,ir)*rho*vth(is)*mass(is) &
-                              / (z(is)*Bmag(it)))**2 &
-                              * 2.0*energy(ie) &
-                              * (nu_d(ie,is,js) * (1+xi(ix)**2) &
-                              + nu_par(ie,is,js) * (1-xi(ix)**2))
-                      enddo
-                   enddo
-                enddo
-             enddo
-          enddo
-       endif
        
        ! Collision field particle component
-       cfield   = 0.0
-       cfield_k = 0.0
 
        select case (collision_model)
 
@@ -589,32 +562,50 @@ contains
                    jx = ix_v(jv)
                    je = ie_v(jv)
                    
-                   ! constant part
-                   if (iv == jv) then
-                      cmat(iv,jv,ic_loc) =  cmat(iv,jv,ic_loc) + 1.0
-                      amat(iv,jv) = amat(iv,jv) + 1.0
-                   endif
-                   
-                   
                    ! Collision component: Test particle
                    if(is == js) then
                       do ks=1,n_species
                          cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                              - (0.5*delta_t) * (ctest(is,ks,ix,jx,ie,je) &
-                              + ctest_k(is,ks,ix,jx,ie,je,ic_loc))
+                              - (0.5*delta_t) * ctest(is,ks,ix,jx,ie,je)
                          amat(iv,jv) = amat(iv,jv) &
-                              + (0.5*delta_t) * (ctest(is,ks,ix,jx,ie,je) &
-                              + ctest_k(is,ks,ix,jx,ie,je,ic_loc))
+                              + (0.5*delta_t) * ctest(is,ks,ix,jx,ie,je)
                       enddo
+                   endif
+
+                   ! Finite-kperp test particle corrections
+                   if(collision_model == 4 .and. collision_kperp == 1) then
+                      if(is == js .and. jx == ix .and. je == ie) then
+                         do ks=1,n_species
+                            cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
+                                 - (0.5*delta_t) &
+                                 * (-0.25*(k_perp(it,ir)*rho*vth(is)*mass(is) &
+                                 / (z(is)*Bmag(it)))**2 &
+                                 * 2.0*energy(ie) &
+                                 * (nu_d(ie,is,ks) * (1+xi(ix)**2) &
+                                 + nu_par(ie,is,ks) * (1-xi(ix)**2)) )
+                            amat(iv,jv) = amat(iv,jv) &
+                                 + (0.5*delta_t) &
+                                 * (-0.25*(k_perp(it,ir)*rho*vth(is)*mass(is) &
+                                 / (z(is)*Bmag(it)))**2 &
+                                 * 2.0*energy(ie) &
+                                 * (nu_d(ie,is,ks) * (1+xi(ix)**2) &
+                                 + nu_par(ie,is,ks) * (1-xi(ix)**2)) )
+                         enddo
+                      endif
                    endif
                    
                    ! Collision component: Field particle
-                   cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                        - (0.5*delta_t) * (cfield(is,js,ix,jx,ie,je) &
-                        + cfield_k(is,js,ix,jx,ie,je,ic_loc))
-                   amat(iv,jv) = amat(iv,jv) &
-                        + (0.5*delta_t) * (cfield(is,js,ix,jx,ie,je) &
-                        + cfield_k(is,js,ix,jx,ie,je,ic_loc))
+                   if(collision_kperp == 1) then
+                      cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
+                           - (0.5*delta_t) * cfield_k(is,js,ix,jx,ie,je,ic_loc)
+                      amat(iv,jv) = amat(iv,jv) &
+                           + (0.5*delta_t) * cfield_k(is,js,ix,jx,ie,je,ic_loc)
+                   else
+                      cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
+                           - (0.5*delta_t) * cfield(is,js,ix,jx,ie,je)
+                      amat(iv,jv) = amat(iv,jv) &
+                           + (0.5*delta_t) * cfield(is,js,ix,jx,ie,je)
+                   endif
                    
                    if(collision_trap_model == 1) then
                       ! Trapping term
@@ -690,6 +681,13 @@ contains
 
                 enddo
              enddo
+
+             ! constant part
+             do iv=1,nv
+                cmat(iv,iv,ic_loc) =  cmat(iv,iv,ic_loc) + 1.0
+                amat(iv,iv) = amat(iv,iv) + 1.0
+             enddo
+
           endif
              
           ! H_bar = (1 - dt/2 C - Poisson)^(-1) * (1 + dt/2 C + Poisson) H
@@ -716,9 +714,11 @@ contains
        deallocate(rs)
        deallocate(rsvec)
        deallocate(ctest)
-       deallocate(cfield)
-       deallocate(ctest_k)
-       deallocate(cfield_k)
+       if(collision_kperp == 1) then
+          deallocate(cfield_k)
+       else
+          deallocate(cfield)
+       endif
 
        initialized = .true.
 
