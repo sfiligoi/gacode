@@ -76,6 +76,7 @@ subroutine gyro_lambda_grid
         w_lambda(i,:) = w_lambda(1,:)
         lambda(i,:)   = lambda(1,:)
         lambda_max(i) = lambda_max(1)
+        lambda_tp(i)  = lambda_tp(1)
 
      endif
 

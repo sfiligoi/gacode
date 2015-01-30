@@ -107,7 +107,7 @@ fi
 SIMDIR=$SIMROOT/$LOCDIR
 cd $SIMDIR
 
-PYROOT=$GACODE_ROOT/shared/python/pyrats/tgyro
+PYROOT=$GACODE_ROOT/python/tgyro
 
 #==============================================================================
 # Display diff if -ldiff set, then exit.

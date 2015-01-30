@@ -8,7 +8,7 @@ module neo_energy_grid
   ! energy matrices
   ! (energy, xi, left/right diagonal in xi)
   real, dimension(:,:,:,:), allocatable :: emat_e05, emat_en05, emat_e05de, &
-       emat_e0
+       emat_e0, emat_e1
 
   ! energy vectors
   real, dimension(:,:), allocatable :: evec_e0, evec_e1, evec_e2, evec_e05, evec_e105
@@ -44,6 +44,7 @@ contains
        allocate(emat_en05(0:n_energy,0:n_energy,0:n_xi,2)) 
        allocate(emat_e05de(0:n_energy,0:n_energy,0:n_xi,2))
        allocate(emat_e0(0:n_energy,0:n_energy,0:n_xi,1))
+       allocate(emat_e1(0:n_energy,0:n_energy,0:n_xi,3))
 
        allocate(evec_e0(0:n_energy,0:n_xi))
        allocate(evec_e1(0:n_energy,0:n_xi))
@@ -101,6 +102,7 @@ contains
        deallocate(emat_en05) 
        deallocate(emat_e05de)
        deallocate(emat_e0)
+       deallocate(emat_e1)
        deallocate(evec_e0)
        deallocate(evec_e1)
        deallocate(evec_e2)
@@ -167,7 +169,8 @@ contains
              emat_e05(ie,je,ix,:)   = 0.0
              emat_en05(ie,je,ix,:)  = 0.0
              emat_e05de(ie,je,ix,:) = 0.0
-             emat_e0(ie,je,ix,:)   = 0.0
+             emat_e0(ie,je,ix,:)    = 0.0
+             emat_e1(ie,je,ix,:)    = 0.0
 
              do ke=0,ie
                 do me=0,je
@@ -218,10 +221,38 @@ contains
                               + 0.5*zarg0 * zarg1 * (mygamma2(xarg) / zarg2) &
                               * (e_alpha*me + xi_beta_l(jx))
 
+                      endif
+                   enddo
 
+                   do kx=1,3
+                      if(kx == 1) then 
+                         jx = ix-2
+                      else if(kx == 2) then
+                         jx = ix
+                      else 
+                         jx = ix+2
                       endif
 
+                      if (jx >= 0 .and. jx <= n_xi) then
+
+                         zarg0 = (-1.0)**(ke+me)
+                         zarg1 = (mygamma2(2 + 2*ie + e_lag(ix)) &
+                              / mygamma2(2 + 2*(ie-ke)) &
+                              / mygamma2(2 + 2*ke + e_lag(ix))) &
+                              * (mygamma2(2 + 2*je + e_lag(jx)) &
+                              / mygamma2(2 + 2*(je-me)) &
+                              / mygamma2(2 + 2*me + e_lag(jx)))
+                         zarg2 = mygamma2(2 + 2*ke) * mygamma2(2 + 2*me)
+
+                         xarg = e_alpha*(ke+me) + xi_beta_l(ix) &
+                              + xi_beta_l(jx) + 5
+                         emat_e1(ie,je,ix,kx) = emat_e1(ie,je,ix,kx) &
+                              + 0.5*zarg0 * zarg1 * (mygamma2(xarg) / zarg2)
+                         
+                      endif
                    enddo
+
+
                 enddo
              enddo
           enddo

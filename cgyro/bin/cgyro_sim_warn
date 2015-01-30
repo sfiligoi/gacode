@@ -1,0 +1,34 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  cgyro_sim_warn
+#
+# FUNCTION:
+#  Check for existence of sim directory
+#-------------------------------------------------------------
+
+if [ $1 = $PWD ]
+  then
+  echo "ERROR: missing simdir"
+  exit 1
+fi
+
+if [ ! -d "$1" ]
+  then
+  echo "$1 is not a valid simulation directory."
+  echo "Please create the directory first, or use [cgyro -g]."
+  exit 1
+fi
+
+if [ ! -f "$1/input.cgyro" ]
+  then
+  cp $GACODE_ROOT/../gacode_add/cgyro/tools/input/ade_c1/input.cgyro $1
+  echo "********************************************************"
+  echo "*                                                      *"
+  echo "*  An input.cgyro file was not found.  One has been   *"
+  echo "*  created for you using the template in ade_c1.       *"
+  echo "*                                                      *"
+  echo "********************************************************"
+  exit 0
+fi
+

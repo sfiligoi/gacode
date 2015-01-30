@@ -89,10 +89,11 @@ contains
     real, dimension(:,:,:,:), allocatable :: gall
     integer, parameter :: nxi=100
     integer, parameter :: io=51
+    real :: eps=0.001
     
     allocate(xi(nxi))
     do jx=1, nxi
-       xi(jx) = -1.0 + (jx-1)*2.0/(nxi-1)
+       xi(jx) = (-1.0+eps) + (jx-1)*(2.0-2.0*eps)/(nxi-1)
     enddo
     
     allocate(xval(0:n_xi,nxi))
@@ -104,7 +105,11 @@ contains
        enddo
     enddo
 
-    allocate(gall(n_species,0:n_energy,n_theta,nxi))
+    if(threed_model == 1) then
+       allocate(gall(n_species,0:n_energy,tpmatsize,nxi))
+    else
+       allocate(gall(n_species,0:n_energy,n_theta,nxi))
+    endif
     gall(:,:,:,:) = 0.0
 
     do jx=1,nxi
@@ -116,32 +121,55 @@ contains
           gall(is,ie,it,jx) = gall(is,ie,it,jx) + xval(ix,jx) * g(i)
        enddo
     enddo
-
-    if(silent_flag == 0 .and. i_proc == 0) then
-       open(unit=io,file=trim(path)//'out.neo.gxi',status='replace')
-       do is=1, n_species
-          do ie=0, n_energy
-             do it=1, n_theta+1
-                do jx=1, nxi
-                   if(it == n_theta+1) then
-                      write (io,'(1pe12.5)') gall(is,ie,1,jx)
-                   else
+    
+    if(threed_model == 1) then
+    
+       if(silent_flag == 0 .and. i_proc == 0) then
+          open(unit=io,file=trim(path)//'out.neo.gxi_3d',status='replace')
+          do is=1, n_species
+             do ie=0, n_energy
+                do it=1,tpmatsize
+                   do jx=1, nxi
                       write (io,'(1pe12.5)') gall(is,ie,it,jx)
-                   endif
+                   enddo
                 enddo
              enddo
           enddo
-       enddo
-       close(io)
-       open(unit=io,file=trim(path)//'out.neo.gxi_t',status='replace')
-       write(io,'(1pe12.5)') theta(:)
-       write(io,'(1pe12.5)') -theta(1)
-       close(io)
-       open(unit=io,file=trim(path)//'out.neo.gxi_x',status='replace')
-       write(io,'(1pe12.5)') xi(:) 
-       close(io)
-    end if
-    
+          close(io)
+          open(unit=io,file=trim(path)//'out.neo.gxi_3d_x',status='replace')
+          write(io,'(1pe12.5)') xi(:) 
+          close(io)
+       end if
+
+    else
+
+       if(silent_flag == 0 .and. i_proc == 0) then
+          open(unit=io,file=trim(path)//'out.neo.gxi',status='replace')
+          do is=1, n_species
+             do ie=0, n_energy
+                do it=1, n_theta+1
+                   do jx=1, nxi
+                      if(it == n_theta+1) then
+                         write (io,'(1pe12.5)') gall(is,ie,1,jx)
+                      else
+                         write (io,'(1pe12.5)') gall(is,ie,it,jx)
+                      endif
+                   enddo
+                enddo
+             enddo
+          enddo
+          close(io)
+          open(unit=io,file=trim(path)//'out.neo.gxi_t',status='replace')
+          write(io,'(1pe12.5)') theta(:)
+          write(io,'(1pe12.5)') -theta(1)
+          close(io)
+          open(unit=io,file=trim(path)//'out.neo.gxi_x',status='replace')
+          write(io,'(1pe12.5)') xi(:) 
+          close(io)
+       end if
+
+    endif
+
     deallocate(xi)
     deallocate(xval)
     deallocate(gall)

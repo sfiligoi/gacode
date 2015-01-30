@@ -348,12 +348,13 @@ then
 
    #==========================================================
    # Version stamp:  
-   cat $GACODE_ROOT/gyro/.VERSION > $VERBASE
+   echo `gacode_getversion` > $VERBASE
    echo $GACODE_PLATFORM >> $VERBASE
    date >> $VERBASE
-   #==========================================================
 
    gacode_printversion GYRO 
+   #==========================================================
+
    echo "0" > "$SIMDIR/gyrotest_flag"
 fi
 

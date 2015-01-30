@@ -87,7 +87,7 @@ while [ $# -gt 0 ] ; do
 
   -mpinuma) shift ; MPINUMA=$1 ;;
 
-  -start) shift ; GYRO_START=$1 ;;
+  -start) shift ; START=$1 ;;
 
    *) echo "ERROR: incorrect tgyro_bat syntax." ; exit 1 ;;
  

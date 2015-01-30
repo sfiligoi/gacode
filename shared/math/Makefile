@@ -17,6 +17,7 @@ OBJECTS = math_constants.o \
           curtis_rad.o \
           energy_integral.o \
           erf.o \
+	  fftwpp.o \
           gamma.o \
           gauss_legendre.o \
           gauss_integ.o \

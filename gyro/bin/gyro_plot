@@ -139,9 +139,9 @@ then
    cd .. ; SIMROOT=$PWD
 fi
 SIMDIR=$SIMROOT/$LOCDIR
-cd $SIMDIR
+#cd $SIMDIR
 
-PYROOT=$GACODE_ROOT/shared/python/pyrats/gyro
+PYROOT=$GACODE_ROOT/python/gyro
 
 #==============================================================================
 # Display diff if -ldiff set, then exit.

@@ -3,11 +3,12 @@
 # gfortran,blas,lapack,hdf5 from Ubuntu repository
 #---------------------------------------------------
 
+FFTWDIR=/usr/local
 ROOT=/home/candy/SOFTWARE
 
 # Compilers
 
-FC	= mpif90 -I $(GACODE_ROOT)/modules
+FC	= mpif90 -I $(GACODE_ROOT)/modules -I/usr/local/include
 F77	= ${FC}
 
 FOMP    = -fopenmp
@@ -17,7 +18,7 @@ FDEBUG	= -O2 -Wall -fcheck=all -Wunderflow -finit-real=nan -fbounds-check -ffpe-
 
 # System math libraries (from Ubuntu repository)
 
-LMATH = ${ROOT}/OpenBLAS/libopenblas.a
+LMATH = ${ROOT}/OpenBLAS/libopenblas.a -lfftw3
 
 # OPTIONAL NetCDF:
 NETCDF=-L/usr/local/lib -lnetcdff -lnetcdf -lm

@@ -329,8 +329,8 @@ subroutine tgyro_write_data(i_print)
 
   open(unit=1,file='out.tgyro.profile',status='old',position='append')
 
-  write(1,20) 'r/a','ni','ne','ti','te','ti/te','betae_unit','M=wR/cs'
-  write(1,20) '','(1/cm^3)','(1/cm^3)','(keV)','(keV)','','',''
+  write(1,20) 'r/a','ni','ne','ti','te','ti/te','betae_unit','beta_unit','M=wR/cs'
+  write(1,20) '','(1/cm^3)','(1/cm^3)','(keV)','(keV)','','','',''
   do i=1,n_r
      write(1,10) r(i)/r_min,&
           ni(1,i),&
@@ -339,6 +339,7 @@ subroutine tgyro_write_data(i_print)
           te(i)/1e3,&
           ti(1,i)/te(i),&
           betae_unit(i),&
+          beta_unit(i),&
           u00(i)/c_s(i)
   enddo
 
@@ -348,7 +349,7 @@ subroutine tgyro_write_data(i_print)
 
   open(unit=1,file='out.tgyro.gradient',status='old',position='append')
 
-  write(1,20) 'r/a','a/Lni','a/Lne','a/LTi','a/LTe','a*f_rot'
+  write(1,20) 'r/a','a/Lni','a/Lne','a/LTi','a/LTe','a*beta_*','a*gamma_p/cs','a*gamma_e/cs','a*f_rot'
   write(1,20) '','','','','',''
   do i=1,n_r
      write(1,10) r(i)/r_min,&
@@ -356,6 +357,9 @@ subroutine tgyro_write_data(i_print)
           r_min*dlnnedr(i),&
           r_min*dlntidr(1,i),&
           r_min*dlntedr(i),&
+          r_min*beta_unit(i)*dlnpdr(i),&
+          r_min/c_s(i)*gamma_p(i),&
+          r_min/c_s(i)*gamma_p(i)*r(i)/(q(i)*r_maj(i)),&
           r_min*f_rot(i)
   enddo
 
@@ -404,14 +408,15 @@ subroutine tgyro_write_data(i_print)
           file='out.tgyro.profile'//trim(ion_tag(i_ion)),&
           status='old',position='append')
 
-     write(1,20) 'r/a','ni','a/Lni','Ti','a/LTi'
-     write(1,20) '','(1/cm^3)','','(keV)',''
+     write(1,20) 'r/a','ni','a/Lni','Ti','a/LTi','betai_unit'
+     write(1,20) '','(1/cm^3)','','(keV)','',''
      do i=1,n_r
         write(1,10) r(i)/r_min,&
              ni(i_ion,i),&
              r_min*dlnnidr(i_ion,i),&
              ti(i_ion,i)/1e3,&
-             r_min*dlntidr(i_ion,i)
+             r_min*dlntidr(i_ion,i),&
+             beta_unit(i)*ni(i_ion,i)*k*ti(i_ion,i)/pr(i)
      enddo
 
      close(1)

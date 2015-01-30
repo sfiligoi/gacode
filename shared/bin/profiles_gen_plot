@@ -130,7 +130,7 @@ while [ $# -gt 0 ] ; do
 done
 #==============================================================================
 
-PYROOT=$GACODE_ROOT/shared/python/pyrats/profiles_gen
+PYROOT=$GACODE_ROOT/python/profiles_gen
 
 #==============================================================================
 # Give possible data to be plotted
