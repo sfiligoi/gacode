@@ -256,6 +256,8 @@ subroutine cgyro_init_arrays
   !uderiv(1)  =  -1.0 / (2.0 * d_theta)
   !uderiv(2)  =  0.0 / (2.0 * d_theta)
 
+  up_theta = up_theta * n_theta/2.0
+
   ! Indices for parallel streaming with upwinding
   if (zf_test_flag == 1) then
 
