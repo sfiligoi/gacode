@@ -50,12 +50,12 @@ subroutine tgyro_restart
            read(1,'(a)') dummy
            read(1,'(a)') dummy
            do i=1,n_r
-              read(1,*) x_read(1:6)
+              read(1,*) x_read(1:9)
               dlnnidr(1,i) = x_read(2)/r_min
               dlnnedr(i)   = x_read(3)/r_min
               dlntidr(1,i) = x_read(4)/r_min
               dlntedr(i)   = x_read(5)/r_min
-              f_rot(i)     = x_read(6)/r_min
+              f_rot(i)     = x_read(9)/r_min
            enddo
         enddo
         close(1)
