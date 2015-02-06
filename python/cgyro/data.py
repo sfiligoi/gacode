@@ -189,7 +189,7 @@ class cgyrodata:
             self.geo = np.reshape(data,(self.n_theta,9),'F')
             print "INFO: (data.py) Read data in out.cgyro.geo."
             self.geotag.append('\theta')
-            self.geotag.append('w_\theta')
+            self.geotag.append('w_\\theta')
             self.geotag.append('|B|')
             self.geotag.append('\omega_\mathrm{stream}')
             self.geotag.append('\omega_\mathrm{trap}')
