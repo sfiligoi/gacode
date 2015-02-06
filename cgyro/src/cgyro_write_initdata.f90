@@ -13,7 +13,7 @@ subroutine cgyro_write_initdata
 
   implicit none
 
-  integer :: in,is
+  integer :: in,is, it
 
   !----------------------------------------------------------------------------
   ! Runfile to give complete summary to user
@@ -105,6 +105,44 @@ subroutine cgyro_write_initdata
      enddo
      write (io,*)
      close(io)
+
+  endif
+  !----------------------------------------------------------------------------
+
+  !----------------------------------------------------------------------------
+  ! Write the initial equilibrium geometry data
+  !
+  if (silent_flag == 0 .and. i_proc == 0) then
+
+     open(unit=io,file=trim(path)//'out.cgyro.geo',status='replace')
+     do it=1,n_theta
+          write(io,fmtstr) theta(it)
+       enddo
+       do it=1,n_theta
+          write(io,fmtstr) w_theta(it)
+       enddo
+       do it=1,n_theta
+          write(io,fmtstr) Bmag(it)
+       enddo
+       do it=1,n_theta
+          write(io,fmtstr) omega_stream(it,1)
+       enddo
+       do it=1,n_theta
+          write(io,fmtstr) omega_trap(it,1)
+       enddo
+       do it=1,n_theta
+          write(io,fmtstr) omega_rdrift(it,1)
+       enddo
+       do it=1,n_theta
+          write(io,fmtstr) omega_adrift(it,1)
+       enddo
+       do it=1,n_theta
+          write(io,fmtstr) omega_aprdrift(it,1)
+       enddo
+       do it=1,n_theta
+          write(io,fmtstr) k_perp(it,n_radial/2+1)
+       enddo
+       close(io)
 
   endif
   !----------------------------------------------------------------------------

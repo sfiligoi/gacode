@@ -80,6 +80,7 @@ subroutine cgyro_rhs(ij)
         ! Parallel streaming with upwind dissipation
 
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
+        !rval = omega_stream(it,is)*sqrt(energy(ie))
         rhs_stream = 0.0
 
         ! Upwind
@@ -93,9 +94,9 @@ subroutine cgyro_rhs(ij)
                 -abs(rval)*dtheta_up(ir,it,id)*( &
                 cap_h_c(jc,iv_loc)-z(is)/temp(is)*j0_c(jc,iv_loc)*field(jr,jt,1))
            !rhs_stream = rhs_stream &
-           !     -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)  &
+           !     -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)*xi(ix)  &
            !     -abs(rval)*dtheta_up(ir,it,id)*( &
-           !      h_x(jc,iv_loc))
+           !     cap_h_c(jc,iv_loc)-z(is)/temp(is)*j0_c(jc,iv_loc)*field(jr,jt,1))
            
         enddo
 
