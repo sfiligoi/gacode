@@ -58,6 +58,7 @@ then
   echo "                     = fluxn  (bar plot of flux versus n)"
   echo "                     = pwr    (time dependent field intensities)"
   echo "                     = pwr_np (n-p spectra at final time)"
+  echo "                     = geo    (geometry arrays)"
 
   exit 1
 fi
@@ -154,6 +155,9 @@ case "$PLOT_TYPE" in
 
    zffield)
 	python $PYROOT/plot_zffield.py $FTYPE $TIME $FIELD $TMAX & ;;
+
+   geo)
+	python $PYROOT/plot_geo.py $FTYPE & ;;
 
    text)
    	python $PYROOT/text.py $W & ;;
