@@ -12,6 +12,7 @@
 
 program tglf
 
+  use tglf_pkg
   use tglf_interface
 
   implicit none
@@ -95,6 +96,7 @@ program tglf
   else
 
      print 10,'     ky:',tglf_ky_in
+     print 10,'Guassian width = ',get_gaussian_width()
      ! Collect linear eigenvalues
      do i=1,tglf_nmodes_in
         print 10,'(wr,wi):',tglf_eigenvalue_out(i)

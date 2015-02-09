@@ -97,6 +97,7 @@ SUBROUTINE xgrid_functions_sa
      wdx(i) = -xwell_sa*MIN(1.0,alpha_sa)+ cn - sn*kxx(i)
      ! b0x(i) = 1.0+(shat_sa*(thx-theta0_sa) - alpha_sa*sn)**2
      b0x(i) = 1.0+(kxx(i))**2
+     wdpx(i) = 0.0   ! not used for s-alpha
      if(b_model_sa.eq.1)then
         ! put B dependence into k_per**2
         b0x(i) = b0x(i)/Bx(i)**2
@@ -173,7 +174,7 @@ SUBROUTINE xgrid_functions_geo
   REAL :: thx
   REAL :: sign_theta,loops
   REAL :: dkxky1,dkxky2
-  REAL :: wd1,wd2
+  REAL :: wd1,wd2,wdp1,wdp2
   REAL :: b1,b2
   REAL :: y1,y2
   REAL :: kxx1,kxx2
@@ -333,6 +334,11 @@ SUBROUTINE xgrid_functions_geo
      wdx(i) = wd1 +(wd2-wd1)*(y_x-y1)/(y2-y1)
      wdx(i) = (R_unit/Rmaj_s)*wdx(i)
      ! write(*,*)i,"wdx = ",wdx(i),y_x,x(i),y1,y2
+     ! interpolate wdpx
+     wdp1 = (qrat_geo(m1)/b_geo(m1))*costheta_p_geo(m1)
+     wdp2 = (qrat_geo(m2)/b_geo(m2))*costheta_p_geo(m2)
+     wdpx(i) = wdp1 + (wdp1-wdp2)*(y_x-y1)/(y2-y1)
+     wdpx(i) = (R_unit/Rmaj_s)*wdpx(i)
      ! interpolate b0x
      b1 = (1.0+(kx_factor(m1)*(S_prime(m1)+dkxky1)-kx0*b_geo(m1)/qrat_geo(m1)**2)**2) &
           *(qrat_geo(m1)/b_geo(m1))**2
@@ -947,17 +953,15 @@ SUBROUTINE mercier_luc
 
      epsl_geo(m) = 2.0/rmaj_s*qrat_geo(m)/b_geo(m)
 
-     ! Waltz/Miller [[cos_p]]
+     ! Waltz/Miller [[cos_p]] 
 
-     costheta_p_geo(m) = -p_prime_zero_s* &
-          rmaj_s*(Bp(m)/B(m)**2)*(4.0*pi*R(m)*p_prime_s)
+     costheta_p_geo(m) = p_prime_zero_s*rmaj_s*(Bp(m)/B(m)**2)*(4.0*pi*R(m)*p_prime_s)
 
-     ! Waltz/Miller [[cos]
+     ! Waltz/Miller [[cos]] 
 
      costheta_geo(m) = &
           -rmaj_s*(Bp(m)/B(m)**2)*(Bp(m)/r_curv(m) &
-          -(f**2/(Bp(m)*R(m)**3))*sin_u(m)) &
-          -costheta_p_geo(m)
+          -(f**2/(Bp(m)*R(m)**3))*sin_u(m)) 
 
   enddo
 

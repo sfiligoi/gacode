@@ -22,7 +22,7 @@
       INTEGER :: idum=0
       REAL :: ft2,ft3,ft4,ft5
       REAL :: Linsker,am,bm
-      REAL :: w_s, w_d, w_d1, modw_d1,w_d0, w_cd
+      REAL :: w_s, w_dh, w_dg, w_d1, modw_d1,w_d0, w_cd
       REAl :: wd_psi,modwd_psi
       REAL :: E_i,M_i,N_j,J_j
       REAL :: k_par0,k_par1,modk_par0,modk_par1
@@ -206,7 +206,7 @@
 !       write(*,*)"betae_psi = ",betae_psi
          damp_psi = damp_psi_in/MAX(betae_psi*vs(1)*vs(1),0.001)
        endif
-       max_freq=2.0*ABS(ave_wd(1,1))/R_unit
+       max_freq=2.0*ABS(ave_wdh(1,1))/R_unit
 !       if(filter_in.gt.0.0)then
          do is=ns0,ns
            test = ABS(as(is)*zs(is)*(ave_hp3p0(is,1,1)*rlns(is)  &
@@ -663,16 +663,16 @@
          modwdhu33 = ave_modwdhu33(is,ib,jb)
          modwdhu33ht1 = ave_modwdhu33ht1(is,ib,jb)
          modwdhu33ht3 = ave_modwdhu33ht3(is,ib,jb)
-         hv1r = (v1_r-vb1_r)*ave_modwd(ib,jb)+vb1_r*modwdhu3*c35
-         hv2r = (v2_r-vb2_r)*ave_modwd(ib,jb)+vb2_r*modwdhu3*c35
-         hv3r = (v3_r-vb3_r)*ave_modwd(ib,jb)+vb3_r*modwdhu33*c35
-         hv4r = (v4_r-vb4_r)*ave_modwd(ib,jb)+vb4_r*modwdhu33*c35
-         hv5r = (v5_r-vb5_r)*ave_modwd(ib,jb)+vb5_r*modwdhu3*c35
-         hv6r = (v6_r-vb6_r)*ave_modwd(ib,jb)+vb6_r*modwdhu3*c35
-         hv7r = (v7_r-vb7_r)*ave_modwd(ib,jb)+vb7_r*modwdhu3*c35
-         hv8r = (v8_r-vb8_r)*ave_modwd(ib,jb)+vb8_r*modwdhu33*c35
-         hv9r = (v9_r-vb9_r)*ave_modwd(ib,jb)+vb9_r*modwdhu33*c35
-         hv10r = (v10_r-vb10_r)*ave_modwd(ib,jb) &
+         hv1r = (v1_r-vb1_r)*ave_modwdh(ib,jb)+vb1_r*modwdhu3*c35
+         hv2r = (v2_r-vb2_r)*ave_modwdh(ib,jb)+vb2_r*modwdhu3*c35
+         hv3r = (v3_r-vb3_r)*ave_modwdh(ib,jb)+vb3_r*modwdhu33*c35
+         hv4r = (v4_r-vb4_r)*ave_modwdh(ib,jb)+vb4_r*modwdhu33*c35
+         hv5r = (v5_r-vb5_r)*ave_modwdh(ib,jb)+vb5_r*modwdhu3*c35
+         hv6r = (v6_r-vb6_r)*ave_modwdh(ib,jb)+vb6_r*modwdhu3*c35
+         hv7r = (v7_r-vb7_r)*ave_modwdh(ib,jb)+vb7_r*modwdhu3*c35
+         hv8r = (v8_r-vb8_r)*ave_modwdh(ib,jb)+vb8_r*modwdhu33*c35
+         hv9r = (v9_r-vb9_r)*ave_modwdh(ib,jb)+vb9_r*modwdhu33*c35
+         hv10r = (v10_r-vb10_r)*ave_modwdh(ib,jb) &
           +vb10_r*modwdhu33*c35
          hv1rht1 = (v1_r-vb1_r)*ave_modwdht1(is,ib,jb) &
           +vb1_r*modwdhu3ht1*c35
@@ -686,16 +686,16 @@
          hv7rhu3 = (v7_r*modwdhu3)
          hv9rhu1 = (v9_r*modwdhu1)
          hv10rhu3= (v10_r*modwdhu3)
-         hv1i = (v1_i-vb1_i)*ave_wd(ib,jb)+vb1_i*wdhu3*c35
-         hv2i = (v2_i-vb2_i)*ave_wd(ib,jb)+vb2_i*wdhu3*c35
-         hv3i = (v3_i-vb3_i)*ave_wd(ib,jb)+vb3_i*wdhu33*c35
-         hv4i = (v4_i-vb4_i)*ave_wd(ib,jb)+vb4_i*wdhu33*c35
-         hv5i = (v5_i-vb5_i)*ave_wd(ib,jb)+vb5_i*wdhu3*c35
-         hv6i = (v6_i-vb6_i)*ave_wd(ib,jb)+vb6_i*wdhu3*c35
-         hv7i = (v7_i-vb7_i)*ave_wd(ib,jb)+vb7_i*wdhu3*c35
-         hv8i = (v8_i-vb8_i)*ave_wd(ib,jb)+vb8_i*wdhu33*c35
-         hv9i = (v9_i-vb9_i)*ave_wd(ib,jb)+vb9_i*wdhu33*c35
-         hv10i = (v10_i-vb10_i)*ave_wd(ib,jb)+vb10_i*wdhu33*c35
+         hv1i = (v1_i-vb1_i)*ave_wdh(ib,jb)+vb1_i*wdhu3*c35
+         hv2i = (v2_i-vb2_i)*ave_wdh(ib,jb)+vb2_i*wdhu3*c35
+         hv3i = (v3_i-vb3_i)*ave_wdh(ib,jb)+vb3_i*wdhu33*c35
+         hv4i = (v4_i-vb4_i)*ave_wdh(ib,jb)+vb4_i*wdhu33*c35
+         hv5i = (v5_i-vb5_i)*ave_wdh(ib,jb)+vb5_i*wdhu3*c35
+         hv6i = (v6_i-vb6_i)*ave_wdh(ib,jb)+vb6_i*wdhu3*c35
+         hv7i = (v7_i-vb7_i)*ave_wdh(ib,jb)+vb7_i*wdhu3*c35
+         hv8i = (v8_i-vb8_i)*ave_wdh(ib,jb)+vb8_i*wdhu33*c35
+         hv9i = (v9_i-vb9_i)*ave_wdh(ib,jb)+vb9_i*wdhu33*c35
+         hv10i = (v10_i-vb10_i)*ave_wdh(ib,jb)+vb10_i*wdhu33*c35
          hv1iht1 = (v1_i-vb1_i)*ave_wdht1(is,ib,jb) &
           +vb1_i*wdhu3ht1*c35
          hv2iht3 = (v2_i-vb2_i)*ave_wdht3(is,ib,jb) &
@@ -874,16 +874,16 @@
          modwdgu3gt3 = ave_modwdgu3gt3(is,ib,jb)
          modwdgu33gt1 = ave_modwdgu33gt1(is,ib,jb)
          modwdgu33gt3 = ave_modwdgu33gt3(is,ib,jb)
-         gu1r = (u1_r-ub1_r)*ave_modwd(ib,jb)+ub1_r*modwdgu3*c35
-         gu2r = (u2_r-ub2_r)*ave_modwd(ib,jb)+ub2_r*modwdgu3*c35
-         gu3r = (u3_r-ub3_r)*ave_modwd(ib,jb)+ub3_r*modwdgu33*c35
-         gu4r = (u4_r-ub4_r)*ave_modwd(ib,jb)+ub4_r*modwdgu33*c35
-         gu5r = (u5_r-ub5_r)*ave_modwd(ib,jb)+ub5_r*modwdgu3*c35
-         gu6r = (u6_r-ub6_r)*ave_modwd(ib,jb)+ub6_r*modwdgu3*c35
-         gu7r = (u7_r-ub7_r)*ave_modwd(ib,jb)+ub7_r*modwdgu3*c35
-         gu8r = (u8_r-ub8_r)*ave_modwd(ib,jb)+ub8_r*modwdgu33*c35
-         gu9r = (u9_r-ub9_r)*ave_modwd(ib,jb)+ub9_r*modwdgu33*c35
-         gu10r = (u10_r-ub10_r)*ave_modwd(ib,jb) &
+         gu1r = (u1_r-ub1_r)*ave_modwdg(ib,jb)+ub1_r*modwdgu3*c35
+         gu2r = (u2_r-ub2_r)*ave_modwdg(ib,jb)+ub2_r*modwdgu3*c35
+         gu3r = (u3_r-ub3_r)*ave_modwdg(ib,jb)+ub3_r*modwdgu33*c35
+         gu4r = (u4_r-ub4_r)*ave_modwdg(ib,jb)+ub4_r*modwdgu33*c35
+         gu5r = (u5_r-ub5_r)*ave_modwdg(ib,jb)+ub5_r*modwdgu3*c35
+         gu6r = (u6_r-ub6_r)*ave_modwdg(ib,jb)+ub6_r*modwdgu3*c35
+         gu7r = (u7_r-ub7_r)*ave_modwdg(ib,jb)+ub7_r*modwdgu3*c35
+         gu8r = (u8_r-ub8_r)*ave_modwdg(ib,jb)+ub8_r*modwdgu33*c35
+         gu9r = (u9_r-ub9_r)*ave_modwdg(ib,jb)+ub9_r*modwdgu33*c35
+         gu10r = (u10_r-ub10_r)*ave_modwdg(ib,jb) &
                  +ub10_r*modwdgu33*c35
          gu1rgt1 = (u1_r-ub1_r)*ave_modwdgt1(is,ib,jb) &
                  +ub1_r*modwdgu3gt1*c35
@@ -897,16 +897,16 @@
          gu7rgu3 = (u7_r*modwdgu3)
          gu9rgu1 = (u9_r*modwdgu1)
          gu10rgu3= (u10_r*modwdgu3)
-         gu1i = (u1_i-ub1_i)*ave_wd(ib,jb)+ub1_i*wdgu3*c35
-         gu2i = (u2_i-ub2_i)*ave_wd(ib,jb)+ub2_i*wdgu3*c35
-         gu3i = (u3_i-ub3_i)*ave_wd(ib,jb)+ub3_i*wdgu33*c35
-         gu4i = (u4_i-ub4_i)*ave_wd(ib,jb)+ub4_i*wdgu33*c35
-         gu5i = (u5_i-ub5_i)*ave_wd(ib,jb)+ub5_i*wdgu3*c35
-         gu6i = (u6_i-ub6_i)*ave_wd(ib,jb)+ub6_i*wdgu3*c35
-         gu7i = (u7_i-ub7_i)*ave_wd(ib,jb)+ub7_i*wdgu3*c35
-         gu8i = (u8_i-ub8_i)*ave_wd(ib,jb)+ub8_i*wdgu33*c35
-         gu9i = (u9_i-ub9_i)*ave_wd(ib,jb)+ub9_i*wdgu33*c35
-         gu10i = (u10_i-ub10_i)*ave_wd(ib,jb) &
+         gu1i = (u1_i-ub1_i)*ave_wdg(ib,jb)+ub1_i*wdgu3*c35
+         gu2i = (u2_i-ub2_i)*ave_wdg(ib,jb)+ub2_i*wdgu3*c35
+         gu3i = (u3_i-ub3_i)*ave_wdg(ib,jb)+ub3_i*wdgu33*c35
+         gu4i = (u4_i-ub4_i)*ave_wdg(ib,jb)+ub4_i*wdgu33*c35
+         gu5i = (u5_i-ub5_i)*ave_wdg(ib,jb)+ub5_i*wdgu3*c35
+         gu6i = (u6_i-ub6_i)*ave_wdg(ib,jb)+ub6_i*wdgu3*c35
+         gu7i = (u7_i-ub7_i)*ave_wdg(ib,jb)+ub7_i*wdgu3*c35
+         gu8i = (u8_i-ub8_i)*ave_wdg(ib,jb)+ub8_i*wdgu33*c35
+         gu9i = (u9_i-ub9_i)*ave_wdg(ib,jb)+ub9_i*wdgu33*c35
+         gu10i = (u10_i-ub10_i)*ave_wdg(ib,jb) &
                  +ub10_i*wdgu33*c35
          gu1igt1 = (u1_i-ub1_i)*ave_wdgt1(is,ib,jb) &
                  +ub1_i*wdgu3gt1*c35
@@ -921,8 +921,8 @@
          gu9igu1 = (u9_i*wdgu1)
          gu10igu3= (u10_i*wdgu3)
 ! debug
-!         write(*,*)"c35*wdgu3-wd",c35*wdgu3-ave_wd(ib,jb)
-!         write(*,*)"c35*wdgu33-wd",c35*wdgu33-ave_wd(ib,jb)
+!         write(*,*)"c35*wdgu3-wd",c35*wdgu3-ave_wdg(ib,jb)
+!         write(*,*)"c35*wdgu33-wd",c35*wdgu33-ave_wdg(ib,jb)
 !         write(*,*)"c35*modwdgu3-modwd",c35*modwdgu3-ave_modwd(ib,jb)
 !         write(*,*)"c35*modwdgu33-modwd",c35*modwdgu33-ave_modwd(ib,jb)
 !         write(*,*)"ave_modwd(1,1)=",ave_modwd(1,1)
@@ -1014,7 +1014,8 @@
         modw_d1 = ABS(w_d1)
         modk_par1 = ABS(k_par1)
         modk_par0 = ABS(k_par0)
-        w_d= w_d1*ave_wd(ib,jb)
+        w_dh= w_d1*ave_wdh(ib,jb)
+        w_dg= w_d1*ave_wdg(ib,jb)
         k_par = k_par1*ave_kpar_eff(is,ib,jb)
         k_par_psi = k_par0*ave_kpar_eff(is,ib,jb)
         gradB1=k_par1*gradB_factor_in
@@ -1105,7 +1106,7 @@
 !        xnu_therm=0.0
 !        write(*,*)is,js,ib,jb,xnuei,d_ab
 !        write(*,*)is,js,ib,jb,gradB,mod_kpar
-!        write(*,*)is,js,ib,jb,w_s,w_cd,w_d,modw_d
+!        write(*,*)is,js,ib,jb,w_s,w_cd,w_dh,modw_dh
 !         write(*,*)is,js,ib,jb,d_ee
 !
 ! matrix in order n, u, p1, p3, q1,q3
@@ -1163,11 +1164,11 @@
       bmat(ia,ja) = psi_B + phi_BU
 !
       ja = 2*nbasis+jb + ja0
-      amat(ia,ja) = -0.5*sig_A -0.5*xi*w_d*taus(is)/zs(is)
+      amat(ia,ja) = -0.5*sig_A -0.5*xi*w_dh*taus(is)/zs(is)
       bmat(ia,ja) = -0.5*sig_B
 !
       ja = 3*nbasis+jb + ja0
-      amat(ia,ja) = 1.5*sig_A -1.5*xi*w_d*taus(is)/zs(is)
+      amat(ia,ja) = 1.5*sig_A -1.5*xi*w_dh*taus(is)/zs(is)
       bmat(ia,ja) = 1.5*sig_B
 !
       ja = 4*nbasis+jb + ja0
@@ -1280,11 +1281,11 @@
       bmat(ia,ja) = 0.0
 !
       ja = 4*nbasis+jb + ja0
-      amat(ia,ja) = -0.5*xi*w_d*taus(is)/zs(is)
+      amat(ia,ja) = -0.5*xi*w_dh*taus(is)/zs(is)
       bmat(ia,ja) = 0.0
 !
       ja = 5*nbasis+jb + ja0
-      amat(ia,ja) = -1.5*xi*w_d*taus(is)/zs(is) &
+      amat(ia,ja) = -1.5*xi*w_dh*taus(is)/zs(is) &
        -d_ee*nuei_u_q3_1 &
        +xnuei*d_ab*xnu_u_q3_1
       bmat(ia,ja) = 0.0
@@ -1879,13 +1880,13 @@
 !
       ja = 8*nbasis+jb + ja0
       amat(ia,ja) = -0.5*(-1.0*sig_A) &
-        -0.5*xi*w_d*taus(is)/zs(is)   &
+        -0.5*xi*w_dg*taus(is)/zs(is)   &
         -d_ee*nuei_n_p1
       bmat(ia,ja) = -0.5*(-1.0*sig_B)
 !
       ja = 9*nbasis+jb + ja0
       amat(ia,ja) = 1.5*(-1.0*sig_A) &
-        -1.5*xi*w_d*taus(is)/zs(is)  &
+        -1.5*xi*w_dg*taus(is)/zs(is)  &
         -d_ee*nuei_n_p3
       bmat(ia,ja) = 1.5*(-1.0*sig_B)
 !
@@ -1997,12 +1998,12 @@
       bmat(ia,ja) = 0.0
 !
       ja = 10*nbasis+jb + ja0
-      amat(ia,ja) = -0.5*xi*w_d*taus(is)/zs(is)  &
+      amat(ia,ja) = -0.5*xi*w_dg*taus(is)/zs(is)  &
         -d_ee*nuei_u_q1
       bmat(ia,ja) = 0.0
 !
       ja = 11*nbasis+jb + ja0
-      amat(ia,ja) = -1.5*xi*w_d*taus(is)/zs(is) &
+      amat(ia,ja) = -1.5*xi*w_dg*taus(is)/zs(is) &
        -d_ee*nuei_u_q3_t -d_ee*nuei_u_q3  &
        +xnuei*d_ab*xnu_u_q3_1
       bmat(ia,ja) = 0.0
@@ -2573,12 +2574,12 @@
       bmat(ia,ja) = d_ab + phi_B + psi_BN
 !
       ja = 13*nbasis+jb + ja0
-      amat(ia,ja) = -0.5*sig_A -0.5*xi*w_d*taus(is)/zs(is)  &
+      amat(ia,ja) = -0.5*sig_A -0.5*xi*w_dg*taus(is)/zs(is)  &
         -d_ee*nuei_n_p1
       bmat(ia,ja) = -0.5*sig_B
 !
       ja = 14*nbasis+jb + ja0
-      amat(ia,ja) = 1.5*sig_A -1.5*xi*w_d*taus(is)/zs(is)  &
+      amat(ia,ja) = 1.5*sig_A -1.5*xi*w_dg*taus(is)/zs(is)  &
        -d_ee*nuei_n_p3
       bmat(ia,ja) = 1.5*sig_B
 !

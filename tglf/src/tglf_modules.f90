@@ -345,7 +345,7 @@
       REAL,DIMENSION(nsm,nxm) :: gxn, gxp1, gxp3
       REAL,DIMENSION(nsm,nxm) :: gxr11, gxr13, gxr33
       REAL,DIMENSION(nsm,nxm) :: gxw113, gxw133, gxw333
-      REAL,DIMENSION(nxm) :: wdx, b0x, kxx
+      REAL,DIMENSION(nxm) :: wdx, wdpx, b0x, kxx
       REAL,DIMENSION(nxm) :: cx_tor_par, cx_tor_per
       REAL,DIMENSION(nxm) :: cx_par_par
       REAL,DIMENSION(nxm) :: p0x, Bx
@@ -643,7 +643,8 @@
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_kx
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_c_tor_par, ave_c_tor_per
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_c_par_par
-      REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_wd, ave_modwd
+      REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_wdh, ave_modwdh
+      REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_wdg, ave_modwdg
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_gradB, ave_lnB
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_b0, ave_b0inv
       REAL,ALLOCATABLE,DIMENSION(:,:) :: ave_kpar, ave_modkpar

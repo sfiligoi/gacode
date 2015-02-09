@@ -1928,7 +1928,7 @@ SUBROUTINE write_tglf_nete_crossphase_spectrum
   write(33,*)"electron density-temperature cross phase spectra per mode"
   write(33,*)"ky,(ne_te_phase,n=1,nmodes_in)"
   do i=1,nky
-    write(33,*)ky_spectrum(i),(ne_te_phase_spectrum_out(i,n),n=1,nmodes_out)
+    write(33,*)ky_spectrum(i),(ne_te_phase_spectrum_out(i,n),n=1,nmodes_in)
   enddo
 !
   CLOSE(33)

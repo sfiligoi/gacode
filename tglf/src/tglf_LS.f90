@@ -739,7 +739,7 @@
          kx_phi = 0.0
          kpar_phi = 0.0
          do j=1,nbasis
-           wd_phi = wd_phi +ave_wd(i,j)*phi(j)
+           wd_phi = wd_phi +ave_wdh(i,j)*phi(j)
            b0_phi = b0_phi +ave_b0(i,j)*phi(j)
            modB_phi = modB_phi +ave_c_par_par(i,j)*phi(j)
            kx_phi = kx_phi +ave_kx(i,j)*phi(j)

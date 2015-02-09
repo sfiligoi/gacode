@@ -1019,8 +1019,10 @@
       REAL :: ww
       REAL :: zero_cut
       REAL :: debye,betaU
+      REAL :: ft2
 !
       zero_cut = 1.E-12
+      ft2 = ft*ft
 !
 ! fill the Poisson equation phi multiplier px0 x-grid array
 ! note that pol is set in get_species
@@ -1051,7 +1053,8 @@
         endif
        do j=i,nbasis
 !   initialize the averages
-        ave_wd(i,j) = 0.0
+        ave_wdh(i,j) = 0.0
+        ave_wdg(i,j)=0.0
         ave_b0(i,j) = 0.0
         ave_lnB(i,j) = 0.0
         ave_p0inv(i,j) = 0.0
@@ -1063,7 +1066,8 @@
 !
         do k=1,nx
          ww=wx(k)*h(i,k)*h(j,k)     
-         ave_wd(i,j)    = ave_wd(i,j)  + ww*wdx(k)
+         ave_wdh(i,j)    = ave_wdh(i,j)  + ww*(wdx(k)+wdpx(k))
+         ave_wdg(i,j)   = ave_wdg(i,j) + ww*(wdx(k)+ft2*wdpx(k)*2.0/(1.0 +ft2))
          ave_b0(i,j)    = ave_b0(i,j)  + ww*b0x(k)
 !         ave_lnB(i,j)   = ave_lnB(i,j) + ww*DLOG(Bx(k))
          ave_p0inv(i,j) = ave_p0inv(i,j) + ww/p0x(k)
@@ -1073,7 +1077,8 @@
          ave_c_tor_per(i,j) = ave_c_tor_per(i,j) + ww*cx_tor_per(k)
          ave_c_par_par(i,j) = ave_c_par_par(i,j) + ww*cx_par_par(k)
         enddo
-        if(ABS(ave_wd(i,j)).lt.zero_cut)ave_wd(i,j) = 0.0
+        if(ABS(ave_wdh(i,j)).lt.zero_cut)ave_wdh(i,j) = 0.0
+        if(ABS(ave_wdg(i,j)).lt.zero_cut)ave_wdg(i,j) = 0.0
         if(ABS(ave_b0(i,j)).lt.zero_cut)ave_b0(i,j) = 0.0
         if(ABS(ave_lnB(i,j)).lt.zero_cut)ave_lnB(i,j) = 0.0
         if(ABS(ave_p0inv(i,j)).lt.zero_cut)ave_p0inv(i,j) = 0.0
@@ -1083,7 +1088,8 @@
         if(ABS(ave_c_tor_per(i,j)).lt.zero_cut)ave_c_tor_per(i,j) = 0.0
         if(ABS(ave_c_par_par(i,j)).lt.zero_cut)ave_c_par_par(i,j) = 0.0
 ! symmetrize
-        ave_wd(j,i)    = ave_wd(i,j)
+        ave_wdh(j,i)    = ave_wdh(i,j)
+        ave_wdg(j,i)    = ave_wdg(i,j)
         ave_b0(j,i)    = ave_b0(i,j)
         ave_lnB(j,i)   = ave_lnB(i,j)
         ave_p0inv(j,i) = ave_p0inv(i,j)
@@ -1169,10 +1175,16 @@
 !       enddo
 !       enddo
 !       enddo
-!       write(*,*)"check ave_wd "
+!       write(*,*)"check ave_wdh "
 !       do i=1,nbasis
 !       do j=1,nbasis
-!        write(*,*)i,j,ave_wd(i,j)
+!        write(*,*)i,j,ave_wdh(i,j)
+!       enddo
+!       enddo
+!       write(*,*)"check ave_wdg "
+!       do i=1,nbasis
+!       do j=1,nbasis
+!        write(*,*)i,j,ave_wdg(i,j)
 !       enddo
 !       enddo
 !       write(*,*)"check ave_gradB "
@@ -1228,48 +1240,48 @@
        modwdhu33ht1 = 0.0
        modwdhu33ht3 = 0.0
        do k=1,nbasis
-        wdhp1p0   = wdhp1p0   + ave_wd(ib,k)*ave_hp1p0(is,k,jb)
-        wdhr11p0  = wdhr11p0  + ave_wd(ib,k)*ave_hr11p0(is,k,jb)
-        wdhr13p0  = wdhr13p0  + ave_wd(ib,k)*ave_hr13p0(is,k,jb)
-        wdht1  = wdht1  + ave_wd(ib,k)*ave_ht1(is,k,jb)
-        wdht3  = wdht3  + ave_wd(ib,k)*ave_ht3(is,k,jb)
-        wdhu1   = wdhu1   + ave_wd(ib,k)*ave_hu1(is,k,jb)
-        wdhu3   = wdhu3   + ave_wd(ib,k)*ave_hu3(is,k,jb)
+        wdhp1p0   = wdhp1p0   + ave_wdh(ib,k)*ave_hp1p0(is,k,jb)
+        wdhr11p0  = wdhr11p0  + ave_wdh(ib,k)*ave_hr11p0(is,k,jb)
+        wdhr13p0  = wdhr13p0  + ave_wdh(ib,k)*ave_hr13p0(is,k,jb)
+        wdht1  = wdht1  + ave_wdh(ib,k)*ave_ht1(is,k,jb)
+        wdht3  = wdht3  + ave_wdh(ib,k)*ave_ht3(is,k,jb)
+        wdhu1   = wdhu1   + ave_wdh(ib,k)*ave_hu1(is,k,jb)
+        wdhu3   = wdhu3   + ave_wdh(ib,k)*ave_hu3(is,k,jb)
         wdhu3ht1   = wdhu3ht1 &
-          + ave_wd(ib,k)*ave_hu3ht1(is,k,jb)
+          + ave_wdh(ib,k)*ave_hu3ht1(is,k,jb)
         wdhu3ht3   = wdhu3ht3 &
-          + ave_wd(ib,k)*ave_hu3ht3(is,k,jb)
-        wdhu33  = wdhu33  + ave_wd(ib,k)*ave_hu33(is,k,jb)
+          + ave_wdh(ib,k)*ave_hu3ht3(is,k,jb)
+        wdhu33  = wdhu33  + ave_wdh(ib,k)*ave_hu33(is,k,jb)
         wdhu33ht1   = wdhu33ht1 &
-          + ave_wd(ib,k)*ave_hu33ht1(is,k,jb)
+          + ave_wdh(ib,k)*ave_hu33ht1(is,k,jb)
         wdhu33ht3   = wdhu33ht3 &
-          + ave_wd(ib,k)*ave_hu33ht3(is,k,jb)
-        modwdht1  = modwdht1  + ave_modwd(ib,k)*ave_ht1(is,k,jb)
-        modwdht3  = modwdht3  + ave_modwd(ib,k)*ave_ht3(is,k,jb)
-        modwdhu1  = modwdhu1  + ave_modwd(ib,k)*ave_hu1(is,k,jb)
-        modwdhu3  = modwdhu3  + ave_modwd(ib,k)*ave_hu3(is,k,jb)
+          + ave_wdh(ib,k)*ave_hu33ht3(is,k,jb)
+        modwdht1  = modwdht1  + ave_modwdh(ib,k)*ave_ht1(is,k,jb)
+        modwdht3  = modwdht3  + ave_modwdh(ib,k)*ave_ht3(is,k,jb)
+        modwdhu1  = modwdhu1  + ave_modwdh(ib,k)*ave_hu1(is,k,jb)
+        modwdhu3  = modwdhu3  + ave_modwdh(ib,k)*ave_hu3(is,k,jb)
         modwdhu3ht1  = modwdhu3ht1 &
-          + ave_modwd(ib,k)*ave_hu3ht1(is,k,jb)
+          + ave_modwdh(ib,k)*ave_hu3ht1(is,k,jb)
         modwdhu3ht3  = modwdhu3ht3 & 
-          + ave_modwd(ib,k)*ave_hu3ht3(is,k,jb)
+          + ave_modwdh(ib,k)*ave_hu3ht3(is,k,jb)
         modwdhu33  = modwdhu33 & 
-          + ave_modwd(ib,k)*ave_hu33(is,k,jb)
+          + ave_modwdh(ib,k)*ave_hu33(is,k,jb)
         modwdhu33ht1  = modwdhu33ht1 & 
-          + ave_modwd(ib,k)*ave_hu33ht1(is,k,jb)
+          + ave_modwdh(ib,k)*ave_hu33ht1(is,k,jb)
         modwdhu33ht3  = modwdhu33ht3 & 
-          + ave_modwd(ib,k)*ave_hu33ht3(is,k,jb)
+          + ave_modwdh(ib,k)*ave_hu33ht3(is,k,jb)
        enddo
        if(use_bper_in)then
          do k=1,nbasis
-           wdhp1b0   = wdhp1b0   + ave_wd(ib,k)*ave_hp1b0(is,k,jb)
-           wdhr11b0  = wdhr11b0  + ave_wd(ib,k)*ave_hr11b0(is,k,jb)
-           wdhr13b0  = wdhr13b0  + ave_wd(ib,k)*ave_hr13b0(is,k,jb)
+           wdhp1b0   = wdhp1b0   + ave_wdh(ib,k)*ave_hp1b0(is,k,jb)
+           wdhr11b0  = wdhr11b0  + ave_wdh(ib,k)*ave_hr11b0(is,k,jb)
+           wdhr13b0  = wdhr13b0  + ave_wdh(ib,k)*ave_hr13b0(is,k,jb)
          enddo
          if(vpar_model_in.eq.0)then
            do k=1,nbasis
-             wdhp1bp   = wdhp1bp   + ave_wd(ib,k)*ave_hp1bp(is,k,jb)
-             wdhr11bp  = wdhr11bp  + ave_wd(ib,k)*ave_hr11bp(is,k,jb)
-             wdhr13bp  = wdhr13bp  + ave_wd(ib,k)*ave_hr13bp(is,k,jb)
+             wdhp1bp   = wdhp1bp   + ave_wdh(ib,k)*ave_hp1bp(is,k,jb)
+             wdhr11bp  = wdhr11bp  + ave_wdh(ib,k)*ave_hr11bp(is,k,jb)
+             wdhr13bp  = wdhr13bp  + ave_wdh(ib,k)*ave_hr13bp(is,k,jb)
            enddo
          endif
        endif
@@ -1350,52 +1362,52 @@
        modwdgu33gt1 = 0.0
        modwdgu33gt3 = 0.0
        do k=1,nbasis
-         wdgp1p0   = wdgp1p0   + ave_wd(ib,k)*ave_gp1p0(is,k,jb)
-         wdgr11p0  = wdgr11p0  + ave_wd(ib,k)*ave_gr11p0(is,k,jb)
-         wdgr13p0  = wdgr13p0  + ave_wd(ib,k)*ave_gr13p0(is,k,jb)
-         wdgu1   = wdgu1   + ave_wd(ib,k)*ave_gu1(is,k,jb)
-         wdgu3   = wdgu3   + ave_wd(ib,k)*ave_gu3(is,k,jb)
-         wdgu33  = wdgu33  + ave_wd(ib,k)*ave_gu33(is,k,jb)
-         wdgt1  = wdgt1  + ave_wd(ib,k)*ave_gt1(is,k,jb)
-         wdgt3  = wdgt3  + ave_wd(ib,k)*ave_gt3(is,k,jb)
+         wdgp1p0   = wdgp1p0   + ave_wdg(ib,k)*ave_gp1p0(is,k,jb)
+         wdgr11p0  = wdgr11p0  + ave_wdg(ib,k)*ave_gr11p0(is,k,jb)
+         wdgr13p0  = wdgr13p0  + ave_wdg(ib,k)*ave_gr13p0(is,k,jb)
+         wdgu1   = wdgu1   + ave_wdg(ib,k)*ave_gu1(is,k,jb)
+         wdgu3   = wdgu3   + ave_wdg(ib,k)*ave_gu3(is,k,jb)
+         wdgu33  = wdgu33  + ave_wdg(ib,k)*ave_gu33(is,k,jb)
+         wdgt1  = wdgt1  + ave_wdg(ib,k)*ave_gt1(is,k,jb)
+         wdgt3  = wdgt3  + ave_wdg(ib,k)*ave_gt3(is,k,jb)
          wdgu3gt1   = wdgu3gt1 &  
-          + ave_wd(ib,k)*ave_gu3gt1(is,k,jb)
+          + ave_wdg(ib,k)*ave_gu3gt1(is,k,jb)
          wdgu33gt1  = wdgu33gt1 &
-          + ave_wd(ib,k)*ave_gu33gt1(is,k,jb)
+          + ave_wdg(ib,k)*ave_gu33gt1(is,k,jb)
          wdgu3gt3   = wdgu3gt3 & 
-          + ave_wd(ib,k)*ave_gu3gt3(is,k,jb)
+          + ave_wdg(ib,k)*ave_gu3gt3(is,k,jb)
          wdgu33gt3  = wdgu33gt3 &  
-          + ave_wd(ib,k)*ave_gu33gt3(is,k,jb)
+          + ave_wdg(ib,k)*ave_gu33gt3(is,k,jb)
          modwdgu1  = modwdgu1 & 
-          + ave_modwd(ib,k)*ave_gu1(is,k,jb)
+          + ave_modwdg(ib,k)*ave_gu1(is,k,jb)
          modwdgu3  = modwdgu3 &  
-          + ave_modwd(ib,k)*ave_gu3(is,k,jb)
+          + ave_modwdg(ib,k)*ave_gu3(is,k,jb)
          modwdgu33  = modwdgu33 & 
-          + ave_modwd(ib,k)*ave_gu33(is,k,jb)
+          + ave_modwdg(ib,k)*ave_gu33(is,k,jb)
          modwdgt1  = modwdgt1 & 
-          + ave_modwd(ib,k)*ave_gt1(is,k,jb)
+          + ave_modwdg(ib,k)*ave_gt1(is,k,jb)
          modwdgt3  = modwdgt3 & 
-          + ave_modwd(ib,k)*ave_gt3(is,k,jb)
+          + ave_modwdg(ib,k)*ave_gt3(is,k,jb)
          modwdgu3gt1  = modwdgu3gt1 & 
-          + ave_modwd(ib,k)*ave_gu3gt1(is,k,jb)
+          + ave_modwdg(ib,k)*ave_gu3gt1(is,k,jb)
          modwdgu33gt1  = modwdgu33gt1 &  
-          + ave_modwd(ib,k)*ave_gu33gt1(is,k,jb)
+          + ave_modwdg(ib,k)*ave_gu33gt1(is,k,jb)
          modwdgu3gt3  = modwdgu3gt3 &
-          + ave_modwd(ib,k)*ave_gu3gt3(is,k,jb)
+          + ave_modwdg(ib,k)*ave_gu3gt3(is,k,jb)
          modwdgu33gt3  = modwdgu33gt3 &  
-          + ave_modwd(ib,k)*ave_gu33gt3(is,k,jb)
+          + ave_modwdg(ib,k)*ave_gu33gt3(is,k,jb)
        enddo
        if(use_bper_in)then
          do k=1,nbasis
-           wdgp1b0   = wdgp1b0   + ave_wd(ib,k)*ave_gp1b0(is,k,jb)
-           wdgr11b0  = wdgr11b0  + ave_wd(ib,k)*ave_gr11b0(is,k,jb)
-           wdgr13b0  = wdgr13b0  + ave_wd(ib,k)*ave_gr13b0(is,k,jb)
+           wdgp1b0   = wdgp1b0   + ave_wdg(ib,k)*ave_gp1b0(is,k,jb)
+           wdgr11b0  = wdgr11b0  + ave_wdg(ib,k)*ave_gr11b0(is,k,jb)
+           wdgr13b0  = wdgr13b0  + ave_wdg(ib,k)*ave_gr13b0(is,k,jb)
          enddo
          if(vpar_model_in.eq.0)then
            do k=1,nbasis
-             wdgp1bp   = wdgp1bp   + ave_wd(ib,k)*ave_gp1bp(is,k,jb)
-             wdgr11bp  = wdgr11bp  + ave_wd(ib,k)*ave_gr11bp(is,k,jb)
-             wdgr13bp  = wdgr13bp  + ave_wd(ib,k)*ave_gr13bp(is,k,jb)
+             wdgp1bp   = wdgp1bp   + ave_wdg(ib,k)*ave_gp1bp(is,k,jb)
+             wdgr11bp  = wdgr11bp  + ave_wdg(ib,k)*ave_gr11bp(is,k,jb)
+             wdgr13bp  = wdgr13bp  + ave_wdg(ib,k)*ave_gr13bp(is,k,jb)
            enddo
          endif
        endif
@@ -1647,7 +1659,7 @@
       SUBROUTINE modwd
 !***************************************************************
 !
-!   compute the matrix modwd
+!   compute the matricies modwdh and modwdg
 !
 !***************************************************************
       USE tglf_dimensions
@@ -1664,15 +1676,76 @@
       nm = nbasis
 !
       if(nm.eq.1)then
-        ave_modwd(1,1) = ABS(ave_wd(1,1))
+        ave_modwdh(1,1) = ABS(ave_wdh(1,1))
+        ave_modwdg(1,1) = ABS(ave_wdg(1,1))
         RETURN
       endif
 !
-!  find the eigenvalues of ave_wd
+!  find the eigenvalues of ave_wdh
 !
        do i=1,nm
        do j=i,nm
-         a(i,j) = ave_wd(i,j)
+         a(i,j) = ave_wdh(i,j)
+       enddo
+       enddo
+       lwork=34*nm
+! call LAPACK routine for symmetric real eigenvalue problem DSYEV
+       call DSYEV('V','U',nm,a,nm,w,work,lwork,info)
+       if(info.ne.0)CALL tglf_error(1,"DSYEV failed in modwd")
+! debug
+!       write(*,*)"ave_wdh eigenvalues"
+!       do i=1,nm
+!       write(*,*)i,w(i)
+!       enddo
+!       write(*,*)"ave_wdh eigenvectors"
+!       do i=1,nm
+!       write(*,*)"******",i
+!       do j=1,nm
+!       write(*,*)j,a(j,i)
+!       enddo
+!       enddo
+! 
+! regularize the eigenvalues
+       do k=1,nm
+           if(ABS(w(k)).lt.wd_zero_in)then
+             if(w(k).ge.0.0)then
+               w(k)=wd_zero_in
+             else
+               w(k)=-wd_zero_in
+             endif
+           endif
+       enddo
+! compute ave_modwd and recompute ave_wd with regularized eigenvalues
+! note that the DSYEV normalized eigenvectors are now in a(i,j)
+       do i=1,nm
+       do j=1,nm
+         ave_modwdh(i,j) = 0.0
+         ave_wdh(i,j) = 0.0
+         do k=1,nm
+           ave_modwdh(i,j) = ave_modwdh(i,j) + ABS(w(k))*a(i,k)*a(j,k)
+           ave_wdh(i,j) = ave_wdh(i,j) + w(k)*a(i,k)*a(j,k)
+         enddo
+       enddo
+       enddo
+!
+! debug check modwdh eigenvalues
+!       do i=1,nm
+!       do j=i,nm
+!         a(i,j) = ave_modwdh(i,j)
+!       enddo
+!       enddo
+!       call DSYEV('V','U',nm,a,nb,w,work,lwork,info)
+!       write(*,*)"modwdh eigenvalues"
+!       do i=1,nm
+!       write(*,*)i,w(i)
+!       enddo
+!
+!
+!  find the eigenvalues of ave_wdh
+!
+       do i=1,nm
+       do j=i,nm
+         a(i,j) = ave_wdg(i,j)
        enddo
        enddo
        lwork=34*nm
@@ -1706,23 +1779,23 @@
 ! note that the DSYEV normalized eigenvectors are now in a(i,j)
        do i=1,nm
        do j=1,nm
-         ave_modwd(i,j) = 0.0
-         ave_wd(i,j) = 0.0
+         ave_modwdg(i,j) = 0.0
+         ave_wdg(i,j) = 0.0
          do k=1,nm
-           ave_modwd(i,j) = ave_modwd(i,j) + ABS(w(k))*a(i,k)*a(j,k)
-           ave_wd(i,j) = ave_wd(i,j) + w(k)*a(i,k)*a(j,k)
+           ave_modwdg(i,j) = ave_modwdg(i,j) + ABS(w(k))*a(i,k)*a(j,k)
+           ave_wdg(i,j) = ave_wdg(i,j) + w(k)*a(i,k)*a(j,k)
          enddo
        enddo
        enddo
 !
-! debug check modwd eigenvalues
+! debug check modwdg eigenvalues
 !       do i=1,nm
 !       do j=i,nm
-!         a(i,j) = ave_modwd(i,j)
+!         a(i,j) = ave_modwdg(i,j)
 !       enddo
 !       enddo
 !       call DSYEV('V','U',nm,a,nb,w,work,lwork,info)
-!       write(*,*)"modwd eigenvalues"
+!       write(*,*)"modwdg eigenvalues"
 !       do i=1,nm
 !       write(*,*)i,w(i)
 !       enddo
