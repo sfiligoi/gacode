@@ -170,6 +170,39 @@ class cgyrodata:
         #-----------------------------------------------------------------
 
 
+    def getgeo(self):
+
+        """Get geometry arrays files"""
+
+        import numpy as np
+
+        # Convenience definition
+        nt = self.n_time
+
+        self.geotag = []
+
+        #-----------------------------------------------------------------
+        # Read powers
+        #
+        try:
+            data = np.loadtxt(self.dir+'out.cgyro.geo')
+            self.geo = np.reshape(data,(self.n_theta,9),'F')
+            print "INFO: (data.py) Read data in out.cgyro.geo."
+            self.geotag.append('\theta')
+            self.geotag.append('w_\\theta')
+            self.geotag.append('|B|')
+            self.geotag.append('\omega_\mathrm{stream}')
+            self.geotag.append('\omega_\mathrm{trap}')
+            self.geotag.append('\omega_\mathrm{rdrift}')
+            self.geotag.append('\omega_\mathrm{adrift}')
+            self.geotag.append('\omega_\mathrm{aprdrift}')
+            self.geotag.append('k_\perp')
+        except:
+            print "INFO: (data.py) Missing out.cgyro.geo."
+            pass
+        #-----------------------------------------------------------------
+
+
 
     def getbig(self):
 

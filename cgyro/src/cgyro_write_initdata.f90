@@ -13,7 +13,7 @@ subroutine cgyro_write_initdata
 
   implicit none
 
-  integer :: in,is
+  integer :: in,is, it
 
   !----------------------------------------------------------------------------
   ! Runfile to give complete summary to user
@@ -90,20 +90,58 @@ subroutine cgyro_write_initdata
   if (silent_flag == 0 .and. i_proc == 0) then
 
      open(unit=io,file=trim(path)//'out.cgyro.equil',status='replace')
-     write (io,'(e16.8)',advance='no') rmin
-     write (io,'(e16.8)',advance='no') rmaj
-     write (io,'(e16.8)',advance='no') q
-     write (io,'(e16.8)',advance='no') s
-     write (io,'(e16.8)',advance='no') rho
-     write (io,'(e16.8)',advance='no') ky
+     write (io,fmtstr,advance='no') rmin
+     write (io,fmtstr,advance='no') rmaj
+     write (io,fmtstr,advance='no') q
+     write (io,fmtstr,advance='no') s
+     write (io,fmtstr,advance='no') rho
+     write (io,fmtstr,advance='no') ky
      do is=1,n_species
-        write (io,'(e16.8)',advance='no') dens(is)
-        write (io,'(e16.8)',advance='no') temp(is)
-        write (io,'(e16.8)',advance='no') dlnndr(is)
-        write (io,'(e16.8)',advance='no') dlntdr(is)
-        write (io,'(e16.8)',advance='no') nu(is)
+        write (io,fmtstr,advance='no') dens(is)
+        write (io,fmtstr,advance='no') temp(is)
+        write (io,fmtstr,advance='no') dlnndr(is)
+        write (io,fmtstr,advance='no') dlntdr(is)
+        write (io,fmtstr,advance='no') nu(is)
      enddo
      write (io,*)
+     close(io)
+
+  endif
+  !----------------------------------------------------------------------------
+
+  !----------------------------------------------------------------------------
+  ! Write the initial equilibrium geometry data
+  !
+  if (silent_flag == 0 .and. i_proc == 0) then
+
+     open(unit=io,file=trim(path)//'out.cgyro.geo',status='replace')
+     do it=1,n_theta
+        write(io,fmtstr) theta(it)
+     enddo
+     do it=1,n_theta
+        write(io,fmtstr) w_theta(it)
+     enddo
+     do it=1,n_theta
+        write(io,fmtstr) Bmag(it)
+     enddo
+     do it=1,n_theta
+        write(io,fmtstr) omega_stream(it,1)
+     enddo
+     do it=1,n_theta
+        write(io,fmtstr) omega_trap(it,1)
+     enddo
+     do it=1,n_theta
+        write(io,fmtstr) omega_rdrift(it,1)
+     enddo
+     do it=1,n_theta
+        write(io,fmtstr) omega_adrift(it,1)
+     enddo
+     do it=1,n_theta
+        write(io,fmtstr) omega_aprdrift(it,1)
+     enddo
+     do it=1,n_theta
+        write(io,fmtstr) k_perp(it,n_radial/2+1)
+     enddo
      close(io)
 
   endif

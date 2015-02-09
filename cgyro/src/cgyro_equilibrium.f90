@@ -156,7 +156,7 @@ contains
     enddo
     
     w_theta(:) = w_theta(:)/sum(w_theta) 
- 
+
   end subroutine EQUIL_DO
 
 

@@ -243,6 +243,21 @@ subroutine cgyro_init_arrays
   uderiv(1)  = -4.0 / (12.0 * d_theta)
   uderiv(2)  =  1.0 / (12.0 * d_theta)
 
+  ! coefficients for 2nd order centered derivative
+  !cderiv(-2) =  0.0 / (2.0 * d_theta)
+  !cderiv(-1) = -1.0 / (2.0 * d_theta)
+  !cderiv(0)  =  0.0 / (2.0 * d_theta)
+  !cderiv(1)  =  1.0 / (2.0 * d_theta)
+  !cderiv(2)  =  0.0 / (2.0 * d_theta)
+  ! coefficients for 2nd order filter for 2nd order upwinded derivative
+  !uderiv(-2) =  0.0 / (2.0 * d_theta)
+  !uderiv(-1) =  -1.0 / (2.0 * d_theta)
+  !uderiv(0)  =  2.0 / (2.0 * d_theta)
+  !uderiv(1)  =  -1.0 / (2.0 * d_theta)
+  !uderiv(2)  =  0.0 / (2.0 * d_theta)
+
+  up_theta = up_theta * n_theta/2.0
+
   ! Indices for parallel streaming with upwinding
   if (zf_test_flag == 1) then
 
