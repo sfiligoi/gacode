@@ -97,6 +97,7 @@
       REAL :: alpha_kx_t_in=0.0
 ! Input model paramaters
       LOGICAL :: adiabatic_elec_in=.FALSE.
+      REAL :: alpha_mach_in=1.0
       REAL :: alpha_p_in=1.0
       REAL :: alpha_e_in=1.0
       REAL :: alpha_n_in =0.0
@@ -731,6 +732,7 @@
       REAL :: vexb_shear_tg=0.0
       REAL :: vexb_tg
       REAL :: alpha_quench_tg=0.0
+      REAL :: alpha_mach_tg=1.0
       REAL :: alpha_p_tg=1.0
       REAL :: alpha_e_tg=1.0
       REAL :: alpha_n_tg=0.0
@@ -794,7 +796,7 @@
         nbasis_max_tg, nbasis_min_tg, nxgrid_tg, ibranch_tg, ns_tg, &
         nmodes_tg, iflux_tg, ky_tg, width_max_tg, width_min_tg, &
         nwidth_tg, park_tg, ghat_tg, gchat_tg, &
-        alpha_e_tg, alpha_n_tg, alpha_t_tg, alpha_p_tg, &
+        alpha_e_tg, alpha_n_tg, alpha_t_tg, alpha_p_tg, alpha_mach_tg, &
         vexb_shear_tg, vpar_shear_tg, alpha_quench_tg, igeo_tg, theta_trapped_tg, &
         theta0_tg,taus_tg,as_tg,rlns_tg,rlts_tg,mass_tg,zs_tg, &
         rmin_tg, rmaj_tg, zmaj_tg,use_bisection_tg,vpar_tg, &

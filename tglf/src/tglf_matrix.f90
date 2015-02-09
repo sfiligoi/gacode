@@ -1125,7 +1125,7 @@
            ave_kpar_eff(is,1,1) = -xi/sqrt_two
            if(vpar_model_in.eq.1)then
              ave_kpar_eff(is,1,1) = ave_kpar_eff(is,1,1)   &
-             +xi*ABS(vpar_in(is))*ky*R_unit*q_unit*width_in*mass(is)/zs(is)
+             +xi*ABS(alpha_mach_in*vpar_in(is))*ky*R_unit*q_unit*width_in*mass(is)/zs(is)
            endif
          else
            do i=1,nbasis
@@ -1133,7 +1133,7 @@
              ave_kpar_eff(is,i,j) = ave_kpar(i,j)     
              if(vpar_model_in.eq.1.and.i.eq.j)then
                ave_kpar_eff(is,i,j) = ave_kpar_eff(is,i,j)  &
-               -xi*vpar_in(is)*ky*R_unit*q_unit*width_in*mass(is)/zs(is)
+               -xi*alpha_mach_in*vpar_in(is)*ky*R_unit*q_unit*width_in*mass(is)/zs(is)
              endif
            enddo
            enddo

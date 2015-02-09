@@ -38,6 +38,7 @@ x.add('NXGRID','16')
 x.add('NKY','12')
 
 x.add('ADIABATIC_ELEC','.false.')
+x.add('ALPHA_MACH',1.0)
 x.add('ALPHA_E','1.0')
 x.add('ALPHA_P','1.0')
 x.add('ALPHA_QUENCH','0.0')
