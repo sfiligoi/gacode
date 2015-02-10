@@ -707,12 +707,12 @@
       if(vpar_model_in.eq.0)then
         do is=ns0,ns
         do j=1,nbasis
-          n(is,j) = n(is,j) + vpar_in(is)*(zs(is)/taus(is))*psi(j)
-          u_par(is,j) = u_par(is,j) -(vpar_in(is)/vs(is))*(zs(is)/taus(is))*phi(j)
-          p_par(is,j) = p_par(is,j) + vpar_in(is)*(zs(is)/taus(is))*psi(j)
-          p_tot(is,j) = p_tot(is,j) + vpar_in(is)*(zs(is)/taus(is))*psi(j)
-          q_par(is,j) = q_par(is,j) - 3.0*(vpar_in(is)/vs(is))*(zs(is)/taus(is))*phi(j)
-          q_tot(is,j) = q_tot(is,j) -(5.0/3.0)*(vpar_in(is)/vs(is))*(zs(is)/taus(is))*phi(j)
+          n(is,j) = n(is,j) + vpar_s(is)*(zs(is)/taus(is))*psi(j)
+          u_par(is,j) = u_par(is,j) -(vpar_s(is)/vs(is))*(zs(is)/taus(is))*phi(j)
+          p_par(is,j) = p_par(is,j) + vpar_s(is)*(zs(is)/taus(is))*psi(j)
+          p_tot(is,j) = p_tot(is,j) + vpar_s(is)*(zs(is)/taus(is))*psi(j)
+          q_par(is,j) = q_par(is,j) - 3.0*(vpar_s(is)/vs(is))*(zs(is)/taus(is))*phi(j)
+          q_tot(is,j) = q_tot(is,j) -(5.0/3.0)*(vpar_s(is)/vs(is))*(zs(is)/taus(is))*phi(j)
         enddo
         enddo
       endif

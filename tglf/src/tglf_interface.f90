@@ -78,6 +78,7 @@ module tglf_interface
 
   ! Data passed to: put_model_parameters
   logical :: tglf_adiabatic_elec_in = .false.
+  real    :: tglf_alpha_mach_in     = 1.0
   real    :: tglf_alpha_e_in        = 1.0
   real    :: tglf_alpha_p_in        = 1.0
   real    :: tglf_alpha_quench_in   = 0.0
@@ -250,6 +251,7 @@ contains
     write(1,20) 'NXGRID',tglf_nxgrid_in
     write(1,20) 'NKY',tglf_nky_in
     write(1,10) 'ADIABATIC_ELEC',tglf_adiabatic_elec_in
+    write(1,30) 'ALPHA_MACH',tglf_alpha_mach_in
     write(1,30) 'ALPHA_E',tglf_alpha_e_in
     write(1,30) 'ALPHA_P',tglf_alpha_p_in
     write(1,30) 'ALPHA_QUENCH',tglf_alpha_quench_in
@@ -402,6 +404,7 @@ contains
     write(1,*) 'alpha_quench = ', alpha_quench_in
     write(1,*) 'alpha_e = ', alpha_e_in
     write(1,*) 'alpha_p = ', alpha_p_in
+    write(1,*) 'alpha_mach = ',alpha_mach_in
     write(1,*) 'theta_trapped = ', theta_trapped_in
     write(1,*) 'xnu_factor = ', xnu_factor_in
     write(1,*) 'debye_factor = ', debye_factor_in

@@ -116,7 +116,7 @@
         taus(is) = taus_in(is)
         as(is) = as_in(is)
         vpar_s(is)=0.0
-        if(vpar_model_in.eq.0)vpar_s(is)=vpar_in(is)
+        if(vpar_model_in.eq.0)vpar_s(is)=alpha_mach_in*vpar_in(is)
         vpar_shear_s(is)=alpha_p_in*vpar_shear_in(is)
         if(nbasis_min_in.eq.1.and.(vpar_shear_s(is).ne.0.0.or.vpar_s(is).ne.0.0))then
           nbasis_min_in = 2      

@@ -283,7 +283,7 @@
 ! include R(theta)/R0 factor like gyro convetions. Note that sign_Bt_in is in ave_c_tor_par
          do is=1,ns
            vpar_shear_s(is)=sign_It_in*alpha_p_in*vpar_shear_in(is)*ave_c_tor_par(1,1)/Rmaj_input
-           if(vpar_model_in.eq.0)vpar_s(is) = sign_It_in*vpar_in(is)*ave_c_tor_par(1,1)/Rmaj_input
+           if(vpar_model_in.eq.0)vpar_s(is) = alpha_mach_in*sign_It_in*vpar_in(is)*ave_c_tor_par(1,1)/Rmaj_input
          enddo
 !       endif
 !

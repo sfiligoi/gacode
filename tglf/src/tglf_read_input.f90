@@ -51,6 +51,7 @@ subroutine tglf_read_input
 
   ! Data passed to: put_model_parameters
   read(1,*) tglf_adiabatic_elec_in
+  read(1,*) tglf_alpha_mach_in
   read(1,*) tglf_alpha_e_in
   read(1,*) tglf_alpha_p_in
   read(1,*) tglf_alpha_quench_in

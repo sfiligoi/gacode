@@ -314,7 +314,7 @@ END SUBROUTINE put_rare_switches
 !
 !-----------------------------------------------------------------
 !
-SUBROUTINE put_model_parameters(adi_elec,alpha_e,alpha_p,  &
+SUBROUTINE put_model_parameters(adi_elec,alpha_e,alpha_p,alpha_mach,  &
      alpha_quench,xnu_fac,debye_fac,etg_fac, &
      sat_rule,kygrid_model,xnu_model,vpar_model,vpar_shear_model)
   !
@@ -324,7 +324,7 @@ SUBROUTINE put_model_parameters(adi_elec,alpha_e,alpha_p,  &
   LOGICAL,INTENT(IN) :: adi_elec
   INTEGER :: sat_rule,xnu_model,kygrid_model
   INTEGER :: vpar_model,vpar_shear_model
-  REAL,INTENT(IN) :: alpha_e,alpha_p
+  REAL,INTENT(IN) :: alpha_e,alpha_p,alpha_mach
   REAL,INTENT(IN) :: alpha_quench,xnu_fac,debye_fac,etg_fac
   !
   ! check for changes and update flow controls
@@ -339,6 +339,7 @@ SUBROUTINE put_model_parameters(adi_elec,alpha_e,alpha_p,  &
   ! transfer values
   !
   adiabatic_elec_in = adi_elec
+  alpha_mach_in = alpha_mach
   alpha_p_in = alpha_p
   alpha_e_in = alpha_e
   alpha_quench_in = alpha_quench
@@ -1519,6 +1520,7 @@ SUBROUTINE write_tglf_input
   write(11,*)"      vexb_shear_tg = ",vexb_shear_in
   write(11,*)"      alpha_e_tg= ",alpha_e_in
   write(11,*)"      alpha_p_tg= ",alpha_p_in
+  write(11,*)"      alpha_mach_tg= ",alpha_mach_in
   write(11,*)"      alpha_n_tg= ",alpha_n_in
   write(11,*)"      alpha_t_tg= ",alpha_t_in
   write(11,*)"      alpha_kx_e_tg= ",alpha_kx_e_in
