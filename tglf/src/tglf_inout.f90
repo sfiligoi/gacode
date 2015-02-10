@@ -1902,7 +1902,7 @@ SUBROUTINE write_tglf_eigenvalue_spectrum
   write(33,*)"gyro-bohm normalized eigenvalue spectra"
   write(33,*)"ky,(gamma(n),freq(n),n=1,nmodes_in)"
   do i=1,nky
-    write(33,*)ky_spectrum(i),(eigenvalue_spectrum_out(1,i,n),eigenvalue_spectrum_out(2,i,n),n=1,nmodes_out)
+    write(33,*)ky_spectrum(i),(eigenvalue_spectrum_out(1,i,n),eigenvalue_spectrum_out(2,i,n),n=1,nmodes_in)
   enddo
 !
   CLOSE(33)
