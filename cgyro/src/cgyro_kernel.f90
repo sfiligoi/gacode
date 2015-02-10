@@ -66,7 +66,8 @@ subroutine cgyro_kernel
      allocate(w_xi(n_xi))
      allocate(xi_lor_mat(n_xi,n_xi))
      allocate(xi_deriv_mat(n_xi,n_xi))
-     call pseudo_legendre(n_xi,xi,w_xi,xi_deriv_mat,xi_lor_mat)
+     allocate(xi_upderiv_mat(n_xi,n_xi))
+     call pseudo_legendre(n_xi,xi,w_xi,xi_deriv_mat,xi_lor_mat,xi_upderiv_mat)
 
      ! Allocate distribution function and field arrays
      allocate(j0_c(nc,nv_loc))
@@ -194,6 +195,7 @@ subroutine cgyro_kernel
   if(allocated(w_xi))          deallocate(w_xi)
   if(allocated(xi_lor_mat))    deallocate(xi_lor_mat)
   if(allocated(xi_deriv_mat))  deallocate(xi_deriv_mat)
+  if(allocated(xi_upderiv_mat)) deallocate(xi_upderiv_mat)
   if(allocated(h_x))           deallocate(h_x)
   if(allocated(cap_h_c))       deallocate(cap_h_c)
   if(allocated(cap_h_v))       deallocate(cap_h_v)
