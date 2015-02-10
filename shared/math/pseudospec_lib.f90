@@ -45,6 +45,7 @@ subroutine pseudo_legendre(n,x,w,d1,dl,dd)
   allocate(c(n,n))
   allocate(cp(n,n))
   allocate(cl(n,n))
+  allocate(cd(n,n))
 
   do i=1,n
      do j=1,n
