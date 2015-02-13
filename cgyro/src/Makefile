@@ -19,6 +19,7 @@ OBJECTS = cgyro_globals.o \
           cgyro_interface.o \
           cgyro_init.o \
           cgyro_init_arrays.o \
+	  cgyro_implicit_gk.o \
           cgyro_kernel.o \
           cgyro_mpi_grid.o \
 	  cgyro_make_profiles.o \

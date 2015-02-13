@@ -22,6 +22,7 @@ module cgyro_globals
   integer :: up_radial_n
   real    :: up_theta
   real    :: up_xi
+  integer :: implicit_flag
   real    :: ky
   integer :: box_size
   integer :: silent_flag
@@ -245,6 +246,13 @@ module cgyro_globals
   real, dimension(:), allocatable :: work  
   integer, dimension(:), allocatable :: i_piv
   integer :: info
+  !
+  ! Implicit gk/field matrices
+  complex, dimension(:,:,:), allocatable :: gkhmat, akmat
+  complex, dimension(:,:), allocatable   ::  gk11mat, gk12mat, gk22mat, gkmat
+  complex, dimension(:), allocatable :: gkrhsvec, gkhvec_loc
+  complex, dimension(:,:), allocatable :: gkhvec
+  integer, dimension(:), allocatable :: i_piv_gk
   !
   real :: sum_den_h
   real, dimension(:,:), allocatable :: sum_den_x, sum_cur_x

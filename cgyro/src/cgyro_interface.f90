@@ -36,6 +36,7 @@ module cgyro_interface
   integer :: cgyro_up_radial_n_in = 4
   real    :: cgyro_up_theta_in = 1.0
   real    :: cgyro_up_xi_in = 1.0
+  integer :: cgyro_implicit_flag_in = 0
   real    :: cgyro_ky_in = 0.3
   real    :: cgyro_box_size_in  = 1.0
   integer :: cgyro_silent_flag_in = 0
@@ -111,6 +112,7 @@ contains
     cgyro_up_radial_n_in = up_radial_n
     cgyro_up_theta_in = up_theta
     cgyro_up_xi_in = up_xi
+    cgyro_implicit_flag_in = implicit_flag
     cgyro_rmin_in     = rmin
     cgyro_rmaj_in     = rmaj
     cgyro_silent_flag_in       = silent_flag
@@ -173,6 +175,7 @@ contains
     up_radial_n = cgyro_up_radial_n_in
     up_theta = cgyro_up_theta_in
     up_xi = cgyro_up_xi_in
+    implicit_flag = cgyro_implicit_flag_in
     rmin     = cgyro_rmin_in
     rmaj     = cgyro_rmaj_in
     silent_flag       = cgyro_silent_flag_in

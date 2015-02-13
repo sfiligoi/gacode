@@ -84,16 +84,19 @@ subroutine cgyro_rhs(ij)
 
         ! Upwind
 
-        do id=-2,2
-           jt = thcyc(it+id)
-           jr = rcyc(ir,it,id)
-           jc = ic_c(jr,jt)
-           rhs_stream = rhs_stream &
-                -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)  &
-                -abs(rval)*dtheta_up(ir,it,id)*( &
-                cap_h_c(jc,iv_loc)-z(is)/temp(is)*j0_c(jc,iv_loc)*field(jr,jt,1))
+        if(implicit_flag == 0) then
+           do id=-2,2
+              jt = thcyc(it+id)
+              jr = rcyc(ir,it,id)
+              jc = ic_c(jr,jt)
+              rhs_stream = rhs_stream &
+                   -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)  &
+                   -abs(rval)*dtheta_up(ir,it,id)*( &
+                   cap_h_c(jc,iv_loc) &
+                   - z(is)/temp(is)*j0_c(jc,iv_loc)*field(jr,jt,1))
            
-        enddo
+           enddo
+        endif
 
         ! Diagonal terms
         rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc)+&

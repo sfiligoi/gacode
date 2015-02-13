@@ -107,6 +107,8 @@ subroutine cgyro_kernel
      ! 4. Array initialization
      call cgyro_init_arrays
 
+     call cgyro_init_implicit_gk
+
      call COLLISION_alloc(1)
 
   endif
@@ -134,6 +136,10 @@ subroutine cgyro_kernel
 
      ! Spectral ExB shear
      if (abs(gamma_e) > 1e-10) call cgyro_shear
+
+     ! Collisionless implicit streaming term step
+     ! : returns new h_x, cap_h_x, fields 
+     call cgyro_step_implicit_gk
 
      ! Collision step: returns new h_x, cap_h_x, fields
      call cgyro_step_collision
@@ -208,6 +214,8 @@ subroutine cgyro_kernel
   if(allocated(pvec_in))       deallocate(pvec_in)
   if(allocated(pvec_outr))     deallocate(pvec_outr)
   if(allocated(pvec_outi))     deallocate(pvec_outi)
+
+  call cgyro_clean_implicit_gk
 
 end subroutine cgyro_kernel
 

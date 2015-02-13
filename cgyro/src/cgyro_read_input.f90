@@ -24,6 +24,7 @@ subroutine cgyro_read_input
   read(1,*) up_radial_n
   read(1,*) up_theta
   read(1,*) up_xi
+  read(1,*) implicit_flag
   read(1,*) ky
   read(1,*) box_size
   read(1,*) silent_flag
