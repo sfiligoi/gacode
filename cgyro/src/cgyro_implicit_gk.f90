@@ -217,7 +217,7 @@ subroutine cgyro_init_implicit_gk
   enddo
   
   ! Lapack factorization of field LHS
-  call ZGETRF(nc*n_field,nc*n_field,gkmat(:,:),nc,i_piv_gk,info)
+  call ZGETRF(nc*n_field,nc*n_field,gkmat(:,:),nc*n_field,i_piv_gk,info)
 
   ! clean-up
   deallocate(akmat_temp)
