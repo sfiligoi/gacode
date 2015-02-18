@@ -66,7 +66,8 @@ subroutine cgyro_init_implicit_gk
            jc = ic_c(jr,jt)
 
            akmat(ic,jc,iv_loc) = akmat(ic,jc,iv_loc) &
-                + rval*dtheta(ir,it,id) * 0.5 * delta_t
+                + (rval*dtheta(ir,it,id) &
+                + abs(rval)*dtheta_up(ir,it,id)) * 0.5 * delta_t
            
         enddo
 
