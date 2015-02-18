@@ -73,7 +73,7 @@ subroutine cgyro_init_implicit_gk
      enddo
 
      ! (1 - delta_t/2 * stream)
-     akmat_temp(:,:)   = -akmat(:,:,iv_loc)
+     akmat_temp(:,:)   = -akmat(:,:,iv_loc) 
      do ic=1,nc
         akmat_temp(ic,ic) = akmat_temp(ic,ic) + 1.0
      enddo
@@ -98,7 +98,6 @@ subroutine cgyro_init_implicit_gk
      do ic=1,nc
         do jc=1,nc
            akmat(ic,jc,iv_loc) = akmat(ic,jc,iv_loc) &
-                ! * z(is)*j0_c(ic,iv_loc) &
                 * z(is)/temp(is)*j0_c(jc,iv_loc)
         enddo
      enddo
@@ -186,7 +185,7 @@ subroutine cgyro_init_implicit_gk
            do jc=1,nc
               
               if(ifield==1 .and. jfield ==1) then
-                 gkmat(id,jd) = gk11mat(ic,jc)
+                 gkmat(id,jd) = -gk11mat(ic,jc)
                  if(ic == jc) then
                     gkmat(id,jd) = gkmat(id,jd) &
                          + (k_perp(it,ir)**2*lambda_debye**2* &
