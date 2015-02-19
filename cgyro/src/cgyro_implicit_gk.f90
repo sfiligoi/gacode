@@ -263,6 +263,7 @@ subroutine cgyro_step_implicit_gk
   integer :: is, ir, it, ie, ix
   integer :: id, jt, jr, jc, ifield
   complex :: efac(n_field)
+  real :: rfac
 
   if(implicit_flag == 0) return
 
@@ -277,17 +278,18 @@ subroutine cgyro_step_implicit_gk
 
   ! first integrate the old H
   gkhvec_loc(:) = (0.0,0.0)
-  do ic=1,nc
+  iv_loc = 0
+  do iv=nv1,nv2
+     iv_loc = iv_loc+1
+     is = is_v(iv)
+     ix = ix_v(iv)
+     ie = ie_v(iv)
+     rfac = z(is) * 0.5*w_xi(ix)*w_e(ie)*dens(is)
      do jc=1,nc
-        iv_loc = 0
-        do iv=nv1,nv2
-           iv_loc = iv_loc+1
-           is = is_v(iv)
-           ix = ix_v(iv)
-           ie = ie_v(iv)
+        do ic=1,nc
            gkhvec_loc(ic) = gkhvec_loc(ic) &
-                + gkhmat(ic,jc,iv_loc) * z(is)*j0_c(ic,iv_loc) &
-                * 0.5*w_xi(ix)*w_e(ie)*dens(is) * cap_h_c(jc,iv_loc)
+                + gkhmat(ic,jc,iv_loc) *j0_c(ic,iv_loc) &
+                * cap_h_c(jc,iv_loc) * rfac
         enddo
      enddo
   enddo
@@ -303,18 +305,19 @@ subroutine cgyro_step_implicit_gk
   ! integrate old H * vpar
   if (n_field > 1) then
      gkhvec_loc(:) = (0.0,0.0)
-     do ic=1,nc
+     iv_loc = 0
+     do iv=nv1,nv2
+        iv_loc = iv_loc+1
+        is = is_v(iv)
+        ix = ix_v(iv)
+        ie = ie_v(iv)
+        rfac = z(is) * 0.5*w_xi(ix)*w_e(ie)*dens(is) &
+             * xi(ix) * sqrt(2.0*energy(ie)) * vth(is)
         do jc=1,nc
-           iv_loc = 0
-           do iv=nv1,nv2
-              iv_loc = iv_loc+1
-              is = is_v(iv)
-              ix = ix_v(iv)
-              ie = ie_v(iv)
+           do ic=1,nc
               gkhvec_loc(ic) = gkhvec_loc(ic) &
-                   + gkhmat(ic,jc,iv_loc)  * z(is)*j0_c(ic,iv_loc) &
-                   * 0.5*w_xi(ix)*w_e(ie)*dens(is) * cap_h_c(jc,iv_loc) &
-                   * xi(ix) * sqrt(2.0*energy(ie)) * vth(is)
+                   + gkhmat(ic,jc,iv_loc) *j0_c(ic,iv_loc) &
+                   * cap_h_c(jc,iv_loc) * rfac   
            enddo
         enddo
 
@@ -340,6 +343,7 @@ subroutine cgyro_step_implicit_gk
 
   id=1
   do ifield=1,n_field
+
      do ic=1,nc
         ir = ir_c(ic) 
         it = it_c(ic)
@@ -371,7 +375,6 @@ subroutine cgyro_step_implicit_gk
   enddo
 
   ! Solve the matrix system for the new fields
-
   call ZGETRS('N',nc*n_field,1,gkmat(:,:),nc*n_field,i_piv_gk,&
        gkrhsvec(:),nc*n_field,info)
 
@@ -390,6 +393,7 @@ subroutine cgyro_step_implicit_gk
   enddo
 
   ! Now solve for the new capital H
+  !call timer_lib_in('rhs_imp')
   cap_h_c(:,:) = 0.0
   iv_loc = 0
   do iv=nv1,nv2
@@ -399,12 +403,12 @@ subroutine cgyro_step_implicit_gk
      ix = ix_v(iv)
      ie = ie_v(iv)
 
-     do ic=1,nc
+     do jc=1,nc
 
-        do jc=1,nc
+        jr = ir_c(jc)
+        jt = it_c(jc)
 
-           jr = ir_c(jc)
-           jt = it_c(jc)
+        do ic=1,nc
 
            cap_h_c(ic,iv_loc) = cap_h_c(ic,iv_loc) &
                 + gkhmat(ic,jc,iv_loc)*h0_x(jc,iv_loc) &
