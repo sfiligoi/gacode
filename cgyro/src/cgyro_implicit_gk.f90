@@ -86,14 +86,20 @@ subroutine cgyro_init_implicit_gk
 
      ! Lapack factorization and inverse of LHS
      ! (1 + delta_t/2 * stream)^-1
+     !do ic=1,nc
+     !   do jc=1,nc
+     !      if(real(akmat(ic,jc,iv_loc)) /= 0.0) then
+     !         print *, iv, akmat(ic,jc,iv_loc)
+     !      endif
+     !   enddo
+     !enddo
      call ZGETRF(nc,nc,akmat(:,:,iv_loc),nc,i_piv,info)
      call ZGETRI(nc,akmat(:,:,iv_loc),nc,i_piv,zwork,nc,info)
-
+     
      ! Matrix multiply
      ! gkhmat = 1 + delta_t/2 * stream)^-1 * (1 - delta_t/2 * stream)
      call ZGEMM('N','N',nc,nc,nc,znum1,akmat(:,:,iv_loc),&
           nc,akmat_temp(:,:),nc,znum0,gkhmat(:,:,iv_loc),nc)
-           
 
      ! akmat = (1 + delta_t/2 * stream)^-1 * (Ze/T) G
      do ic=1,nc
@@ -111,6 +117,7 @@ subroutine cgyro_init_implicit_gk
                 * 0.5*w_xi(ix)*w_e(ie)*dens(is)
         enddo
      enddo
+
   enddo
 
   deallocate(zwork)
@@ -215,7 +222,7 @@ subroutine cgyro_init_implicit_gk
         id=id+1
      enddo
   enddo
-  
+
   ! Lapack factorization of field LHS
   call ZGETRF(nc*n_field,nc*n_field,gkmat(:,:),nc*n_field,i_piv_gk,info)
 
@@ -302,8 +309,8 @@ subroutine cgyro_step_implicit_gk
               ix = ix_v(iv)
               ie = ie_v(iv)
               gkhvec_loc(ic) = gkhvec_loc(ic) &
-                   + gkhmat(ic,jc,iv_loc) * cap_h_c(jc,iv_loc) &
-                   * 0.5*w_xi(ix)*w_e(ie)*dens(is) &
+                   + gkhmat(ic,jc,iv_loc)  * z(is)*j0_c(ic,iv_loc) &
+                   * 0.5*w_xi(ix)*w_e(ie)*dens(is) * cap_h_c(jc,iv_loc) &
                    * xi(ix) * sqrt(2.0*energy(ie)) * vth(is)
            enddo
         enddo
