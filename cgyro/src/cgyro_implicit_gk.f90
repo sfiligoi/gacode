@@ -274,7 +274,7 @@ subroutine cgyro_step_implicit_gk
 
   ! form the rhs
   gkhvec(:,:) = (0.0,0.0)
-  
+
   ! first integrate the old H
   gkhvec_loc(:) = (0.0,0.0)
   do ic=1,nc
@@ -290,18 +290,18 @@ subroutine cgyro_step_implicit_gk
                 * 0.5*w_xi(ix)*w_e(ie)*dens(is) * cap_h_c(jc,iv_loc)
         enddo
      enddo
-        
-     call MPI_ALLREDUCE(gkhvec_loc(:),&
-          gkhvec(:,1),&
-          size(gkhvec(:,1)),&
-          MPI_DOUBLE_COMPLEX,&
-          MPI_SUM,&
-          NEW_COMM_1,&
-          i_err)
   enddo
 
+  call MPI_ALLREDUCE(gkhvec_loc(:),&
+       gkhvec(:,1),&
+       size(gkhvec(:,1)),&
+       MPI_DOUBLE_COMPLEX,&
+       MPI_SUM,&
+       NEW_COMM_1,&
+       i_err)
+
   ! integrate old H * vpar
-  if(n_field > 1) then
+  if (n_field > 1) then
      gkhvec_loc(:) = (0.0,0.0)
      do ic=1,nc
         do jc=1,nc
@@ -317,20 +317,19 @@ subroutine cgyro_step_implicit_gk
                    * xi(ix) * sqrt(2.0*energy(ie)) * vth(is)
            enddo
         enddo
-        
-        call MPI_ALLREDUCE(gkhvec_loc(:),&
-             gkhvec(:,2),&
-             size(gkhvec(:,2)),&
-             MPI_DOUBLE_COMPLEX,&
-             MPI_SUM,&
-             NEW_COMM_1,&
-             i_err)
+
      enddo
+     call MPI_ALLREDUCE(gkhvec_loc(:),&
+          gkhvec(:,2),&
+          size(gkhvec(:,2)),&
+          MPI_DOUBLE_COMPLEX,&
+          MPI_SUM,&
+          NEW_COMM_1,&
+          i_err)
   endif
-  
 
   gkrhsvec(:) = (0.0,0.0)
-  
+
   id=1
   do ifield=1,n_field
      do ic=1,nc
@@ -348,10 +347,10 @@ subroutine cgyro_step_implicit_gk
         do jc=1,nc
            jr = ir_c(jc) 
            jt = it_c(jc)
-           
+
            if(ifield == 1) then
               gkrhsvec(id) = gkrhsvec(id) - gk11mat(ic,jc)*field(jr,jt,1)
-                   
+
               if(n_field > 1) then
                  gkrhsvec(id) = gkrhsvec(id) + gk12mat(ic,jc)*field(jr,jt,2)
               endif
@@ -440,7 +439,7 @@ subroutine cgyro_step_implicit_gk
 
         ir = ir_c(ic)
         it = it_c(ic)
-        
+
         psi(ic,iv_loc) = j0_c(ic,iv_loc)*sum(efac(:)*field(ir,it,:))
 
         h_x(ic,iv_loc) = cap_h_c(ic,iv_loc) - z(is)*psi(ic,iv_loc)/temp(is)
