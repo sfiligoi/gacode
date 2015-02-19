@@ -255,6 +255,7 @@ end subroutine cgyro_clean_implicit_gk
 subroutine cgyro_step_implicit_gk
 
   use mpi
+  use timer_lib
   use cgyro_globals
 
   implicit none
@@ -264,6 +265,8 @@ subroutine cgyro_step_implicit_gk
   complex :: efac(n_field)
 
   if(implicit_flag == 0) return
+
+  call timer_lib_in('rhs_imp')
 
   ! Store the old H and fields
   h0_x(:,:)        = cap_h_c(:,:)
@@ -444,5 +447,7 @@ subroutine cgyro_step_implicit_gk
 
      enddo
   enddo
+
+  call timer_lib_out('rhs_imp')
 
 end subroutine cgyro_step_implicit_gk
