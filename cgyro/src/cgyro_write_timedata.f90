@@ -473,7 +473,7 @@ end subroutine write_freq
 
 !====================================================================================
 
-subroutine write_distribution(datafile)
+subroutine write_distribution(datafile,indx)
 
   use mpi
 
@@ -482,6 +482,7 @@ subroutine write_distribution(datafile)
   !------------------------------------------------------
   implicit none
   !
+  integer, intent(in) :: indx
   character (len=*), intent(in) :: datafile
   complex, dimension(:,:), allocatable :: h_x_glob
   !------------------------------------------------------
@@ -511,15 +512,27 @@ subroutine write_distribution(datafile)
      allocate(h_x_glob(nc,nv))
 
      ! Collect distribution onto process 0
-     call MPI_GATHER(h_x(:,:),&
-          size(h_x),&
-          MPI_DOUBLE_COMPLEX,&
-          h_x_glob(:,:),&
-          size(h_x),&
-          MPI_DOUBLE_COMPLEX,&
-          0,&
-          NEW_COMM_1,&
-          i_err)
+     if (indx == 1) then
+        call MPI_GATHER(h_x(:,:),&
+             size(h_x),&
+             MPI_DOUBLE_COMPLEX,&
+             h_x_glob(:,:),&
+             size(h_x),&
+             MPI_DOUBLE_COMPLEX,&
+             0,&
+             NEW_COMM_1,&
+             i_err)
+     else
+        call MPI_GATHER(cap_h_c(:,:),&
+             size(cap_h_c),&
+             MPI_DOUBLE_COMPLEX,&
+             h_x_glob(:,:),&
+             size(h_x),&
+             MPI_DOUBLE_COMPLEX,&
+             0,&
+             NEW_COMM_1,&
+             i_err)
+     endif
 
      if (i_proc == 0) then
         do iv=1,nv

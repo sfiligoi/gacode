@@ -264,6 +264,7 @@ subroutine cgyro_step_implicit_gk
   integer :: id, jt, jr, jc, ifield
   complex :: efac(n_field)
   real :: rfac
+  complex :: field_ic(nc,n_field)
 
   if(implicit_flag == 0) return
 
@@ -394,6 +395,13 @@ subroutine cgyro_step_implicit_gk
 
   ! Now solve for the new capital H
   !call timer_lib_in('rhs_imp')
+
+  do ic=1,nc
+     ir = ir_c(ic)
+     it = it_c(ic)
+     field_ic(ic,:) = field(ir,it,:) - field_loc(ir,it,:)
+  enddo
+
   cap_h_c(:,:) = 0.0
   iv_loc = 0
   do iv=nv1,nv2
@@ -404,26 +412,31 @@ subroutine cgyro_step_implicit_gk
      ie = ie_v(iv)
 
      do jc=1,nc
-
-        jr = ir_c(jc)
-        jt = it_c(jc)
-
         do ic=1,nc
 
            cap_h_c(ic,iv_loc) = cap_h_c(ic,iv_loc) &
                 + gkhmat(ic,jc,iv_loc)*h0_x(jc,iv_loc) &
-                + akmat(ic,jc,iv_loc)*(field(jr,jt,1)-field_loc(jr,jt,1))
-
-           if(n_field > 1) then
-              cap_h_c(ic,iv_loc) = cap_h_c(ic,iv_loc) &
-                   + akmat(ic,jc,iv_loc)*(field(jr,jt,2)-field_loc(jr,jt,2)) &
-                   * (-xi(ix)*sqrt(2.0*energy(ie))*vth(is))
-           endif
+                + akmat(ic,jc,iv_loc)*field_ic(jc,1)
 
         enddo
      enddo
-  enddo
 
+     if (n_field > 1) then
+        rfac = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
+
+        do jc=1,nc
+           do ic=1,nc
+
+              cap_h_c(ic,iv_loc) = cap_h_c(ic,iv_loc) &
+                   + akmat(ic,jc,iv_loc)*field_ic(jc,2) &
+                   *rfac
+
+           enddo
+        enddo
+
+     endif
+
+  enddo
 
   ! Reform little h and psi
   iv_loc = 0

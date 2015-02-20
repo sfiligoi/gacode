@@ -6,12 +6,20 @@ from cgyro.data import cgyrodata
 ftype = sys.argv[1]
 itime = int(sys.argv[2])
 ispec = int(sys.argv[3])
+indx  = int(sys.argv[4])
 
 sim = cgyrodata('./')
 
 fig = plt.figure(figsize=(12,12))
 fig.subplots_adjust(left=0.07,right=0.95,top=0.94,bottom=0.06,wspace=0.25,hspace=0.32)
 fig.suptitle(r'${\rm species}='+str(ispec)+'$')
+
+if indx == 1:
+    func = sim.hb
+else:
+    print 'CAP_HB'
+    func = sim.caphb
+
 
 p = 0
 for row in range(3):
@@ -37,10 +45,10 @@ for row in range(3):
     ax.set_xlabel(r'$\theta/\pi$')
 
     if sim.n_xi%2 == 0:
-        hp = np.array(sim.hb[:,:,ispec,sim.n_xi/2,ie]+
-                      sim.hb[:,:,ispec,sim.n_xi/2-1,ie])*0.5
+        hp = np.array(func[:,:,ispec,sim.n_xi/2,ie]+
+                      func[:,:,ispec,sim.n_xi/2-1,ie])*0.5
     else:
-        hp = np.array(sim.hb[:,:,ispec,sim.n_xi/2,ie])
+        hp = np.array(func[:,:,ispec,sim.n_xi/2,ie])
  
     ax.plot(sim.thetab/np.pi,hp[0,:],'-o',color='black',markersize=2)
     ax.plot(sim.thetab/np.pi,hp[1,:],'-o',color='blue',markersize=2)
@@ -64,9 +72,9 @@ for row in range(3):
 
     n0 = (sim.n_radial/2)*sim.n_theta+sim.n_theta/2 
 
-    hp = np.array(sim.hb[0,:,ispec,:,ie])
+    hp = np.array(func[0,:,ispec,:,ie])
     ax.plot(sim.xi,hp[n0,:],'-o',color='black',markersize=2)
-    hp = np.array(sim.hb[1,:,ispec,:,ie])
+    hp = np.array(func[1,:,ispec,:,ie])
     ax.plot(sim.xi,hp[n0,:],'-o',color='blue',markersize=2)
     ax.set_xlim([-1,1])
     #========================================================
@@ -83,9 +91,9 @@ for row in range(3):
 
     n0 = (sim.n_radial/2)*sim.n_theta+sim.n_theta/2
 
-    hp = np.array(sim.hb[0,:,ispec,ix,:])
+    hp = np.array(func[0,:,ispec,ix,:])
     ax.plot(np.sqrt(sim.energy),hp[n0,:],'-o',color='black',markersize=2)
-    hp = np.array(sim.hb[1,:,ispec,ix,:])
+    hp = np.array(func[1,:,ispec,ix,:])
     ax.plot(np.sqrt(sim.energy),hp[n0,:],'-o',color='blue',markersize=2)
     #========================================================
 

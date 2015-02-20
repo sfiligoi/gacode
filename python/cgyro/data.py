@@ -116,6 +116,14 @@ class cgyrodata:
             print "INFO: (data.py) Read data in out.cgyro.hb."
         except:
             pass
+        try:
+            data = np.loadtxt(self.dir+'out.cgyro.caphb')
+            self.caphb = np.reshape(data,(2,self.n_radial*self.n_theta/self.m_box,
+                                       self.n_species,self.n_xi,self.n_energy),'F')
+            self.caphb = self.hb/np.max(self.caphb)
+            print "INFO: (data.py) Read data in out.cgyro.caphb."
+        except:
+            pass
         #-----------------------------------------------------------------
 
         #-----------------------------------------------------------------

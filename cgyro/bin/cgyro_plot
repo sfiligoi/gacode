@@ -36,6 +36,9 @@ then
   echo "          -moment <value>"
   echo "          Specify moment to be plotted [n,e,m,s]."
   echo
+  echo "          -indx <value>"
+  echo "          1=h,2=H"
+  echo
   echo "          -t <value>"
   echo "          Specify integer time index (-1 is last time)."
   echo
@@ -78,6 +81,7 @@ TIME=-1
 TMAX=-1.0
 W=0.5
 MOMENT=e
+INDX=1
 #==============================================================================
 
 #==============================================================================
@@ -97,6 +101,8 @@ while [ $# -gt 0 ] ; do
   -field) shift ; FIELD=$1 ;;
 
   -moment) shift ; MOMENT=$1 ;;
+
+  -indx) shift ; INDX=$1 ;;
 
   -f) shift ; FTYPE=$1 ;;
 
@@ -133,7 +139,7 @@ case "$PLOT_TYPE" in
 	python $PYROOT/plot_hb.py $FTYPE $TIME $SPECIES & ;;
 
    hbcut)  
-	python $PYROOT/plot_hbcut.py $FTYPE $TIME $SPECIES & ;;
+	python $PYROOT/plot_hbcut.py $FTYPE $TIME $SPECIES $INDX & ;;
 
    freq)  
 	python $PYROOT/plot_freq.py $FTYPE & ;;
