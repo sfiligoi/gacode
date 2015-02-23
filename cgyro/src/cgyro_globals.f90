@@ -249,11 +249,12 @@ module cgyro_globals
   integer :: info
   !
   ! Implicit gk/field matrices
-  complex, dimension(:,:,:), allocatable :: gkhmat, akmat
-  complex, dimension(:,:), allocatable   ::  gk11mat, gk12mat, gk22mat, gkmat
+  complex, dimension(:,:,:), allocatable :: ak0mat, ak1mat, ak2mat
+  complex, dimension(:,:), allocatable   :: gk11mat, gk12mat, gk22mat, gkmat
   complex, dimension(:), allocatable :: gkrhsvec, gkhvec_loc
   complex, dimension(:,:), allocatable :: gkhvec
   integer, dimension(:), allocatable :: i_piv_gk
+  integer, dimension(:,:), allocatable :: i_piv_ak
   !
   real :: sum_den_h
   real, dimension(:,:), allocatable :: sum_den_x, sum_cur_x

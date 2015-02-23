@@ -18,9 +18,11 @@ subroutine cgyro_init_implicit_gk
   if(implicit_flag == 0) return
 
   ! Set-up arrays for implicit time-stepping of streaming terms
-  allocate(akmat(nc,nc,nv_loc))
+  allocate(ak0mat(nc,nc,nv_loc))
+  allocate(ak1mat(nc,nc,nv_loc))
+  allocate(ak2mat(nc,nc,nv_loc))
+  allocate(i_piv_ak(nc,nv_loc))
   allocate(akmat_temp(nc,nc))
-  allocate(gkhmat(nc,nc,nv_loc))
   allocate(gkmat_loc(nc,nc))
   allocate(gk11mat(nc,nc))
   allocate(gk12mat(nc,nc))
@@ -35,9 +37,9 @@ subroutine cgyro_init_implicit_gk
   allocate(zwork(nc))
   allocate(i_piv(nc))
 
-  akmat(:,:,:)    = (0.0,0.0)
-  akmat_temp(:,:) = (0.0,0.0)
-  gkhmat(:,:,:)   = (0.0,0.0)
+  ak0mat(:,:,:)   = (0.0,0.0)
+  ak1mat(:,:,:)   = (0.0,0.0)
+  ak2mat(:,:,:)   = (0.0,0.0)
   gkmat_loc(:,:)  = (0.0,0.0)
   gk11mat(:,:)    = (0.0,0.0)
   gk12mat(:,:)    = (0.0,0.0)
@@ -65,7 +67,7 @@ subroutine cgyro_init_implicit_gk
            jr = rcyc(ir,it,id)
            jc = ic_c(jr,jt)
 
-           akmat(ic,jc,iv_loc) = akmat(ic,jc,iv_loc) &
+           ak0mat(ic,jc,iv_loc) = ak0mat(ic,jc,iv_loc) &
                 + (rval*dtheta(ir,it,id) &
                 + abs(rval)*dtheta_up(ir,it,id)) * 0.5 * delta_t
            
@@ -73,38 +75,33 @@ subroutine cgyro_init_implicit_gk
 
      enddo
 
-     ! (1 - delta_t/2 * stream)
-     akmat_temp(:,:)   = -akmat(:,:,iv_loc) 
-     do ic=1,nc
-        akmat_temp(ic,ic) = akmat_temp(ic,ic) + 1.0
-     enddo
-
+     ! store ak1mat = (delta_t/2 * stream)
+     ak1mat(:,:,iv_loc) = ak0mat(:,:,iv_loc)
+     
      ! (1 + delta_t/2 * stream)
      do ic=1,nc
-        akmat(ic,ic,iv_loc) = akmat(ic,ic,iv_loc) + 1.0
+        ak0mat(ic,ic,iv_loc) = ak0mat(ic,ic,iv_loc) + 1.0
      enddo
 
      ! Lapack factorization and inverse of LHS
      ! (1 + delta_t/2 * stream)^-1
-     !do ic=1,nc
-     !   do jc=1,nc
-     !      if(real(akmat(ic,jc,iv_loc)) /= 0.0) then
-     !         print *, iv, akmat(ic,jc,iv_loc)
-     !      endif
-     !   enddo
-     !enddo
-     call ZGETRF(nc,nc,akmat(:,:,iv_loc),nc,i_piv,info)
-     call ZGETRI(nc,akmat(:,:,iv_loc),nc,i_piv,zwork,nc,info)
-     
-     ! Matrix multiply
-     ! gkhmat = 1 + delta_t/2 * stream)^-1 * (1 - delta_t/2 * stream)
-     call ZGEMM('N','N',nc,nc,nc,znum1,akmat(:,:,iv_loc),&
-          nc,akmat_temp(:,:),nc,znum0,gkhmat(:,:,iv_loc),nc)
+     call ZGETRF(nc,nc,ak0mat(:,:,iv_loc),nc,i_piv,info)
+     call ZGETRI(nc,ak0mat(:,:,iv_loc),nc,i_piv,zwork,nc,info)
 
-     ! akmat = (1 + delta_t/2 * stream)^-1 * (Ze/T) G
+     ! store ak2mat = (1 + delta_t/2 * stream)^-1 * (1 - delta_t/2 * stream)
+     akmat_temp(:,:)   = -ak1mat(:,:,iv_loc)
+     do ic=1,nc
+        akmat_temp(ic,ic) = akmat_temp(ic,ic) + 1.0
+     enddo
+     call ZGEMM('N','N',nc,nc,nc,znum1,ak0mat(:,:,iv_loc),&
+          nc,akmat_temp(:,:),nc,znum0,ak2mat(:,:,iv_loc),nc)
+
+     ! Matrix multiply
+
+     ! ak0mat = (1 + delta_t/2 * stream)^-1 * (Ze/T) G
      do ic=1,nc
         do jc=1,nc
-           akmat(ic,jc,iv_loc) = akmat(ic,jc,iv_loc) &
+           ak0mat(ic,jc,iv_loc) = ak0mat(ic,jc,iv_loc) &
                 * z(is)/temp(is)*j0_c(jc,iv_loc)
         enddo
      enddo
@@ -113,7 +110,7 @@ subroutine cgyro_init_implicit_gk
      do ic=1,nc
         do jc=1,nc
            gkmat_loc(ic,jc) = gkmat_loc(ic,jc) &
-                + akmat(ic,jc,iv_loc) * z(is)*j0_c(ic,iv_loc) &
+                + ak0mat(ic,jc,iv_loc) * z(is)*j0_c(ic,iv_loc) &
                 * 0.5*w_xi(ix)*w_e(ie)*dens(is)
         enddo
      enddo
@@ -123,7 +120,7 @@ subroutine cgyro_init_implicit_gk
   deallocate(zwork)
   deallocate(i_piv)
         
-  ! int d^3v (Ze) G  akmat 
+  ! int d^3v (Ze) G  ak0mat 
   call MPI_ALLREDUCE(gkmat_loc(:,:),&
        gk11mat(:,:),&
        size(gk11mat(:,:)),&
@@ -132,7 +129,7 @@ subroutine cgyro_init_implicit_gk
        NEW_COMM_1,&
        i_err)
 
-  ! int d^3v (Ze) G akmat vpar
+  ! int d^3v (Ze) G ak0mat vpar
   gkmat_loc(:,:) = (0.0,0.0)
   iv_loc = 0
   do iv=nv1,nv2
@@ -143,7 +140,7 @@ subroutine cgyro_init_implicit_gk
      do ic=1,nc
         do jc=1,nc
            gkmat_loc(ic,jc) = gkmat_loc(ic,jc) &
-                + akmat(ic,jc,iv_loc) * z(is)*j0_c(ic,iv_loc) &
+                + ak0mat(ic,jc,iv_loc) * z(is)*j0_c(ic,iv_loc) &
                 * 0.5*w_xi(ix)*w_e(ie)*dens(is) &
                 * xi(ix) * sqrt(2.0*energy(ie)) * vth(is)
         enddo
@@ -157,7 +154,7 @@ subroutine cgyro_init_implicit_gk
        NEW_COMM_1,&
        i_err)
 
-   ! int d^3v (Ze) G akmat vpar^2
+   ! int d^3v (Ze) G ak0mat vpar^2
   gkmat_loc(:,:) = (0.0,0.0)
   iv_loc = 0
   do iv=nv1,nv2
@@ -168,7 +165,7 @@ subroutine cgyro_init_implicit_gk
      do ic=1,nc
         do jc=1,nc
            gkmat_loc(ic,jc) = gkmat_loc(ic,jc) &
-                + akmat(ic,jc,iv_loc) * z(is)*j0_c(ic,iv_loc) &
+                + ak0mat(ic,jc,iv_loc) * z(is)*j0_c(ic,iv_loc) &
                 * 0.5*w_xi(ix)*w_e(ie)*dens(is) &
                 * xi(ix)**2 * 2.0*energy(ie) * vth(is)**2
         enddo
@@ -226,9 +223,31 @@ subroutine cgyro_init_implicit_gk
   ! Lapack factorization of field LHS
   call ZGETRF(nc*n_field,nc*n_field,gkmat(:,:),nc*n_field,i_piv_gk,info)
 
+  ! ak0mat = (1 + delta t/2 * stream) LHS
+  ak0mat(:,:,:)   = ak1mat(:,:,:) 
+  iv_loc = 0
+  do iv=nv1,nv2
+     iv_loc = iv_loc+1
+     do ic=1,nc
+        ak0mat(ic,ic,iv_loc) = ak0mat(ic,ic,iv_loc) + 1.0
+     enddo
+     ! Lapack factorization
+     call ZGETRF(nc,nc,ak0mat(:,:,iv_loc),nc,i_piv_ak(:,iv_loc),info)
+  enddo
+
+  ! ak1mat = (1 - delta t/2 * stream) 
+  ak1mat(:,:,:)   = -ak1mat(:,:,:) 
+  iv_loc = 0
+  do iv=nv1,nv2
+     iv_loc = iv_loc+1
+     do ic=1,nc
+        ak1mat(ic,ic,iv_loc) = ak1mat(ic,ic,iv_loc) + 1.0
+     enddo
+  enddo
+
   ! clean-up
-  deallocate(akmat_temp)
   deallocate(gkmat_loc)
+  deallocate(akmat_temp)
 
 end subroutine cgyro_init_implicit_gk
 
@@ -239,13 +258,15 @@ subroutine cgyro_clean_implicit_gk
 
   if(implicit_flag == 0) return
 
-  if(allocated(gkhmat))     deallocate(gkhmat)
-  if(allocated(akmat))      deallocate(akmat)
+  if(allocated(ak0mat))     deallocate(ak0mat)
+  if(allocated(ak1mat))     deallocate(ak1mat)
+  if(allocated(ak2mat))     deallocate(ak2mat)
   if(allocated(gk11mat))    deallocate(gk11mat)
   if(allocated(gk12mat))    deallocate(gk12mat)
   if(allocated(gk22mat))    deallocate(gk22mat)
   if(allocated(gkmat))      deallocate(gkmat)
   if(allocated(i_piv_gk))   deallocate(i_piv_gk)
+  if(allocated(i_piv_ak))   deallocate(i_piv_ak)
   if(allocated(gkrhsvec))   deallocate(gkrhsvec)
   if(allocated(gkhvec))     deallocate(gkhvec)
   if(allocated(gkhvec_loc)) deallocate(gkhvec_loc)
@@ -289,7 +310,7 @@ subroutine cgyro_step_implicit_gk
      do jc=1,nc
         do ic=1,nc
            gkhvec_loc(ic) = gkhvec_loc(ic) &
-                + gkhmat(ic,jc,iv_loc) *j0_c(ic,iv_loc) &
+                + ak2mat(ic,jc,iv_loc) *j0_c(ic,iv_loc) &
                 * cap_h_c(jc,iv_loc) * rfac
         enddo
      enddo
@@ -317,7 +338,7 @@ subroutine cgyro_step_implicit_gk
         do jc=1,nc
            do ic=1,nc
               gkhvec_loc(ic) = gkhvec_loc(ic) &
-                   + gkhmat(ic,jc,iv_loc) *j0_c(ic,iv_loc) &
+                   + ak2mat(ic,jc,iv_loc) *j0_c(ic,iv_loc) &
                    * cap_h_c(jc,iv_loc) * rfac   
            enddo
         enddo
@@ -413,35 +434,34 @@ subroutine cgyro_step_implicit_gk
 
      do jc=1,nc
         do ic=1,nc
-
            cap_h_c(ic,iv_loc) = cap_h_c(ic,iv_loc) &
-                + gkhmat(ic,jc,iv_loc)*h0_x(jc,iv_loc) &
-                + akmat(ic,jc,iv_loc)*field_ic(jc,1)
-
+                + ak1mat(ic,jc,iv_loc)*h0_x(jc,iv_loc)
         enddo
      enddo
 
-     if (n_field > 1) then
+     do ic=1,nc
+        cap_h_c(ic,iv_loc) = cap_h_c(ic,iv_loc) &
+             + z(is)/temp(is)*j0_c(ic,iv_loc)*field_ic(ic,1)
+     enddo
+
+     if(n_field > 1) then
         rfac = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
-
-        do jc=1,nc
-           do ic=1,nc
-
-              cap_h_c(ic,iv_loc) = cap_h_c(ic,iv_loc) &
-                   + akmat(ic,jc,iv_loc)*field_ic(jc,2) &
-                   *rfac
-
-           enddo
-        enddo
-
+        do ic=1,nc
+           cap_h_c(ic,iv_loc) = cap_h_c(ic,iv_loc) &
+                + z(is)/temp(is)*j0_c(ic,iv_loc)*field_ic(ic,2)*rfac         
+        enddo 
      endif
 
+     call ZGETRS('N',nc,1,ak0mat(:,:,iv_loc),nc,i_piv_ak(:,iv_loc),&
+          cap_h_c(:,iv_loc),nc,info)
+     
   enddo
-
+  
+  
   ! Reform little h and psi
   iv_loc = 0
   do iv=nv1,nv2
-
+     
      iv_loc = iv_loc+1
 
      is = is_v(iv)
