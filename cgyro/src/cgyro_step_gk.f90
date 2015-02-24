@@ -54,10 +54,12 @@ subroutine cgyro_rhs(ij)
   implicit none
 
   integer, intent(in) :: ij
-  integer :: is, ir, it, ie, ix
+  integer :: is, ir, it, ie, ix, il, ip, k, ifield, jk
   integer :: id, jt, jr, jc
   real :: rval
   complex :: rhs_stream
+  complex :: thfac
+  integer :: kb_flag=0
 
   call timer_lib_in('rhs')
 
@@ -77,27 +79,6 @@ subroutine cgyro_rhs(ij)
         ir = ir_c(ic) 
         it = it_c(ic)
 
-        ! Parallel streaming with upwind dissipation
-
-        rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
-        rhs_stream = 0.0
-
-        ! Upwind
-
-        if(implicit_flag == 0) then
-           do id=-2,2
-              jt = thcyc(it+id)
-              jr = rcyc(ir,it,id)
-              jc = ic_c(jr,jt)
-              rhs_stream = rhs_stream &
-                   -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)  &
-                   -abs(rval)*dtheta_up(ir,it,id)*( &
-                   cap_h_c(jc,iv_loc) &
-                   - z(is)/temp(is)*j0_c(jc,iv_loc)*field(jr,jt,1))
-           
-           enddo
-        endif
-
         ! Diagonal terms
         rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc)+&
              rhs_stream+&
@@ -106,6 +87,82 @@ subroutine cgyro_rhs(ij)
              sum(omega_s(:,ic,iv_loc)*field(ir,it,:))
 
      enddo
+
+     if(kb_flag == 1) then
+
+        thfac = exp(-2*pi*i_c*k_theta*rmin)
+
+        do il=1,box_size
+
+           do ip=-(n_radial/box_size)/2,(n_radial/box_size)/2-1
+              do it=1,n_theta
+                 
+                 k  = (it-1) + n_theta * (ip + (n_radial/box_size)/2-1)
+                 
+                 ir = box_size * ip + (il-1)
+                 ic = ic_c(ir,it)
+
+                 cap_h_kb(k) = cap_h_c(ic,iv_loc) * thfac
+                 do ifield=1,n_field
+                    field_kb(k,ifield) = field(ir,it,ifield) * thfac
+                 enddo
+                 omega_stream_kb(k) = omega_stream(it,is)
+                 j0_c_kb(k)         = j0_c(ic,iv_loc)
+
+              enddo
+           enddo
+
+           do k=1,n_theta*(n_radial/box_size)
+
+              rval = omega_stream_kb(k)*sqrt(energy(ie))*xi(ix) 
+              rhs_stream = 0.0
+              
+              do id=-2,2
+                 jk = thcyc_kb(k+id)
+                 
+                 rhs_stream = rhs_stream &
+                      -rval*dtheta_kb(k,id)*cap_h_kb(jk)  &
+                      -abs(rval)*dtheta_up_kb(k,id)*( &
+                      cap_h_kb(jk) &
+                      - z(is)/temp(is)*j0_c_kb(jk)*field_kb(jk,1))
+                 
+              enddo
+
+
+           enddo
+           
+        enddo
+
+
+     else
+
+        do ic=1,nc
+
+           ir = ir_c(ic) 
+           it = it_c(ic)
+           
+           ! Parallel streaming with upwind dissipation
+           
+           rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
+           rhs_stream = 0.0
+           
+           if(implicit_flag == 0) then
+              do id=-2,2
+                 jt = thcyc(it+id)
+                 jr = rcyc(ir,it,id)
+                 jc = ic_c(jr,jt)
+                 rhs_stream = rhs_stream &
+                      -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)  &
+                      -abs(rval)*dtheta_up(ir,it,id)*( &
+                      cap_h_c(jc,iv_loc) &
+                      - z(is)/temp(is)*j0_c(jc,iv_loc)*field(jr,jt,1))
+                 
+              enddo
+           endif
+        enddo
+
+     endif
+
   enddo
 
   ! TRAPPING TERM

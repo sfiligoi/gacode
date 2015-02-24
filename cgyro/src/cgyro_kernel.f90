@@ -102,6 +102,15 @@ subroutine cgyro_kernel
      allocate(dtheta(n_radial,n_theta,-3:3))
      allocate(dtheta_up(n_radial,n_theta,-3:3))
 
+     ! ballooning angle space
+     allocate(cap_h_kb(n_theta*(n_radial/box_size)))
+     allocate(field_kb(n_theta*(n_radial/box_size),n_field))
+     allocate(j0_c_kb(n_theta*(n_radial/box_size)))
+     allocate(omega_stream_kb(n_theta*(n_radial/box_size)))
+     allocate(dtheta_kb(n_theta*(n_radial/box_size),-3:3))
+     allocate(dtheta_up_kb(n_theta*(n_radial/box_size),-3:3))
+     allocate(thcyc(1-n_theta*(n_radial/box_size):2*n_theta*(n_radial/box_size)))
+
      call EQUIL_alloc(1)
      call EQUIL_do
 
@@ -221,6 +230,14 @@ subroutine cgyro_kernel
   if(allocated(pvec_in))       deallocate(pvec_in)
   if(allocated(pvec_outr))     deallocate(pvec_outr)
   if(allocated(pvec_outi))     deallocate(pvec_outi)
+  
+  if(allocated(cap_h_kb))        deallocate(cap_h_kb)
+  if(allocated(field_kb))        deallocate(field_kb)
+  if(allocated(j0_c_kb))         deallocate(j0_c_kb)
+  if(allocated(omega_stream_kb)) deallocate(omega_stream_kb)
+  if(allocated(dtheta_kb))       deallocate(dtheta_kb)
+  if(allocated(dtheta_up_kb))    deallocate(dtheta_up_kb)
+  if(allocated(thcyc_kb))        deallocate(thcyc_kb)
 
   call cgyro_clean_implicit_gk
 

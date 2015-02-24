@@ -229,6 +229,16 @@ module cgyro_globals
   complex, dimension(:,:,:), allocatable :: field_old2
   complex, dimension(:,:,:), allocatable :: field_old3
   !
+  ! Ballooning space
+  !
+  complex, dimension(:), allocatable :: cap_h_kb
+  complex, dimension(:,:), allocatable :: field_kb
+  real, dimension(:), allocatable :: j0_c_kb
+  real, dimension(:), allocatable :: omega_stream_kb
+  real, dimension(:,:), allocatable :: dtheta_kb
+  real, dimension(:,:), allocatable :: dtheta_up_kb
+  integer, dimension(:), allocatable :: thcyc_kb
+  !
   ! Nonlinear fluxes
   real, dimension(:,:), allocatable :: flux_loc
   real, dimension(:,:), allocatable :: flux
