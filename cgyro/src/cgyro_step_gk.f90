@@ -59,7 +59,7 @@ subroutine cgyro_rhs(ij)
   real :: rval
   complex :: rhs_stream
   complex :: thfac
-  integer :: kb_flag=0
+  integer :: kb_flag=1
 
   call timer_lib_in('rhs')
 
@@ -81,7 +81,6 @@ subroutine cgyro_rhs(ij)
 
         ! Diagonal terms
         rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc)+&
-             rhs_stream+&
              omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+&
              omega_h(ic,iv_loc)*h_x(ic,iv_loc)+&
              sum(omega_s(:,ic,iv_loc)*field(ir,it,:))
@@ -97,17 +96,19 @@ subroutine cgyro_rhs(ij)
            do ip=-(n_radial/box_size)/2,(n_radial/box_size)/2-1
               do it=1,n_theta
                  
-                 k  = (it-1) + n_theta * (ip + (n_radial/box_size)/2-1)
+                 k  = it + n_theta*(ip + (n_radial/box_size)/2)
+         
+                 ir = box_size * ip + (il-1) + (n_radial/2) + 1
                  
-                 ir = box_size * ip + (il-1)
                  ic = ic_c(ir,it)
+
+                 ic_kb(k) = ic
 
                  cap_h_kb(k) = cap_h_c(ic,iv_loc) * thfac
                  do ifield=1,n_field
                     field_kb(k,ifield) = field(ir,it,ifield) * thfac
                  enddo
                  omega_stream_kb(k) = omega_stream(it,is)
-                 j0_c_kb(k)         = j0_c(ic,iv_loc)
 
               enddo
            enddo
@@ -124,10 +125,11 @@ subroutine cgyro_rhs(ij)
                       -rval*dtheta_kb(k,id)*cap_h_kb(jk)  &
                       -abs(rval)*dtheta_up_kb(k,id)*( &
                       cap_h_kb(jk) &
-                      - z(is)/temp(is)*j0_c_kb(jk)*field_kb(jk,1))
+                      - z(is)/temp(is)*j0_c(ic_kb(jk),iv_loc)*field_kb(jk,1))
                  
               enddo
-
+              
+              rhs(ij,ic_kb(k),iv_loc) = rhs(ij,ic_kb(k),iv_loc)+rhs_stream
 
            enddo
            
@@ -159,6 +161,9 @@ subroutine cgyro_rhs(ij)
                  
               enddo
            endif
+
+           rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc)+rhs_stream
+
         enddo
 
      endif

@@ -11,7 +11,7 @@ subroutine cgyro_init_arrays
   real, external :: BESJ0
   real :: arg,ang
   integer :: ir,it,is,ie,ix
-  integer :: jr,jt,id
+  integer :: jr,jt,id, k
   complex :: thfac
   real, dimension(n_radial,n_theta) :: sum_loc
   real, dimension(nv_loc) :: vfac
@@ -305,6 +305,21 @@ subroutine cgyro_init_arrays
      enddo
 
   endif
+
+  ! Streaming arrays in ballooning angle
+
+  do k=1,n_theta*(n_radial/box_size)
+     thcyc_kb(k-n_theta*(n_radial/box_size)) = k
+     thcyc_kb(k) = k
+     thcyc_kb(k+n_theta*(n_radial/box_size)) = k
+  enddo
+
+  do k=1,n_theta*(n_radial/box_size)
+     do id=-2,2
+        dtheta_kb(k,id)    = cderiv(id)
+        dtheta_up_kb(k,id) = uderiv(id)*up_theta
+     enddo
+  enddo
 
   ! Streaming coefficients (for speed optimization)
 
