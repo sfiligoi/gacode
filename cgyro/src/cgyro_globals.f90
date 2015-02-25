@@ -238,6 +238,7 @@ module cgyro_globals
   real, dimension(:,:), allocatable :: dtheta_up_kb
   integer, dimension(:), allocatable :: thcyc_kb
   integer, dimension(:), allocatable :: ic_kb
+  integer :: n_kb
   !
   ! Nonlinear fluxes
   real, dimension(:,:), allocatable :: flux_loc

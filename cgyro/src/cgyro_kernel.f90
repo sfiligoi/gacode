@@ -103,13 +103,14 @@ subroutine cgyro_kernel
      allocate(dtheta_up(n_radial,n_theta,-3:3))
 
      ! ballooning angle space
-     allocate(cap_h_kb(n_theta*(n_radial/box_size)))
-     allocate(field_kb(n_theta*(n_radial/box_size),n_field))
-     allocate(omega_stream_kb(n_theta*(n_radial/box_size)))
-     allocate(dtheta_kb(n_theta*(n_radial/box_size),-3:3))
-     allocate(dtheta_up_kb(n_theta*(n_radial/box_size),-3:3))
-     allocate(thcyc_kb(1-n_theta*(n_radial/box_size):2*n_theta*(n_radial/box_size)))
-     allocate(ic_kb(n_theta*(n_radial/box_size)))
+     n_kb = n_theta*(n_radial/box_size)
+     allocate(cap_h_kb(n_kb))
+     allocate(field_kb(n_kb,n_field))
+     allocate(omega_stream_kb(n_kb))
+     allocate(dtheta_kb(n_kb,-3:3))
+     allocate(dtheta_up_kb(n_kb,-3:3))
+     allocate(thcyc_kb(1-n_kb:2*n_kb))
+     allocate(ic_kb(n_kb))
 
      call EQUIL_alloc(1)
      call EQUIL_do

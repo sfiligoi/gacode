@@ -113,7 +113,7 @@ subroutine cgyro_rhs(ij)
               enddo
            enddo
 
-           do k=1,n_theta*(n_radial/box_size)
+           do k=1,n_kb
 
               rval = omega_stream_kb(k)*sqrt(energy(ie))*xi(ix) 
               rhs_stream = 0.0

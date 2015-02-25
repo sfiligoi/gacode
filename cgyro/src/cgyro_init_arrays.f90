@@ -308,13 +308,13 @@ subroutine cgyro_init_arrays
 
   ! Streaming arrays in ballooning angle
 
-  do k=1,n_theta*(n_radial/box_size)
-     thcyc_kb(k-n_theta*(n_radial/box_size)) = k
+  do k=1,n_kb
+     thcyc_kb(k-n_kb) = k
      thcyc_kb(k) = k
-     thcyc_kb(k+n_theta*(n_radial/box_size)) = k
+     thcyc_kb(k+n_kb) = k
   enddo
 
-  do k=1,n_theta*(n_radial/box_size)
+  do k=1,n_kb
      do id=-2,2
         dtheta_kb(k,id)    = cderiv(id)
         dtheta_up_kb(k,id) = uderiv(id)*up_theta
