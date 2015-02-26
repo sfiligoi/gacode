@@ -58,7 +58,7 @@ subroutine cgyro_rhs(ij)
   integer :: id, jt, jr, jc
   real :: rval
   complex :: rhs_stream
-  complex :: thfac
+  complex, dimension(n_kb) :: thfac
   integer :: kb_flag=1
 
   call timer_lib_in('rhs')
@@ -88,9 +88,7 @@ subroutine cgyro_rhs(ij)
      enddo
 
      if(kb_flag == 1) then
-
-        thfac = exp(-2*pi*i_c*k_theta*rmin)
-
+        
         do il=1,box_size
 
            do ip=-(n_radial/box_size)/2,(n_radial/box_size)/2-1
@@ -104,9 +102,13 @@ subroutine cgyro_rhs(ij)
 
                  ic_kb(k) = ic
 
-                 cap_h_kb(k) = cap_h_c(ic,iv_loc) * thfac
+                 thfac(k) = exp(-2*pi*i_c*k_theta*rmin/box_size&
+                      *(ir-n_radial/2-1))
+                 
+                
+                 cap_h_kb(k) = cap_h_c(ic,iv_loc) * thfac(k)
                  do ifield=1,n_field
-                    field_kb(k,ifield) = field(ir,it,ifield) * thfac
+                    field_kb(k,ifield) = field(ir,it,ifield) * thfac(k)
                  enddo
                  omega_stream_kb(k) = omega_stream(it,is)
 
@@ -129,7 +131,8 @@ subroutine cgyro_rhs(ij)
                  
               enddo
               
-              rhs(ij,ic_kb(k),iv_loc) = rhs(ij,ic_kb(k),iv_loc)+rhs_stream
+              rhs(ij,ic_kb(k),iv_loc) = rhs(ij,ic_kb(k),iv_loc)+&
+                   rhs_stream / thfac(k)
 
            enddo
            
