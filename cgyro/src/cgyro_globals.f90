@@ -248,13 +248,18 @@ module cgyro_globals
   integer, dimension(:), allocatable :: i_piv
   integer :: info
   !
-  ! Implicit gk/field matrices
-  complex, dimension(:,:,:), allocatable :: ak0mat, ak1mat, ak2mat
-  complex, dimension(:,:), allocatable   :: gk11mat, gk12mat, gk22mat, gkmat
-  complex, dimension(:), allocatable :: gkrhsvec, gkhvec_loc
-  complex, dimension(:,:), allocatable :: gkhvec
-  integer, dimension(:), allocatable :: i_piv_gk
-  integer, dimension(:,:), allocatable :: i_piv_ak
+  ! Implicit streaminggk/field matrices
+  !
+  complex, dimension(:,:,:), allocatable :: gkmat
+  integer, dimension(:,:), allocatable   :: i_piv_gk
+  complex, dimension(:,:), allocatable   :: gkvec
+  complex, dimension(:,:), allocatable   :: fieldmat
+  integer, dimension(:,:), allocatable   :: idfield
+  integer, dimension(:),   allocatable   :: i_piv_field
+  complex, dimension(:),   allocatable   :: fieldvec, fieldvec_loc
+  !
+  !
+  ! Some field solve parameters
   !
   real :: sum_den_h
   real, dimension(:,:), allocatable :: sum_den_x, sum_cur_x
