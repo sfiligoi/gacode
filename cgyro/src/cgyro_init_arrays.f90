@@ -335,6 +335,7 @@ subroutine cgyro_init_arrays
              -omega_aprdrift(it,is)*energy(ie)*xi(ix)**2*i_c*k_theta
 
         ! radial upwind
+        up_radial_n=n_radial
         omega_h(ic,iv_loc) = &
              -abs(omega_rdrift(it,is))*energy(ie)*(1.0 + xi(ix)**2)*up_radial & 
              *(2.0*px(ir)/(1.0*n_radial))**(up_radial_n-1.0) &

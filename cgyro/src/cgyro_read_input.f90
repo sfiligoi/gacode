@@ -21,7 +21,6 @@ subroutine cgyro_read_input
   read(1,*) restart_write
   read(1,*) restart_mode
   read(1,*) up_radial
-  read(1,*) up_radial_n
   read(1,*) up_theta
   read(1,*) up_xi
   read(1,*) implicit_flag

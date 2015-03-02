@@ -257,6 +257,16 @@ module cgyro_globals
   integer, dimension(:,:), allocatable   :: idfield
   integer, dimension(:),   allocatable   :: i_piv_field
   complex, dimension(:),   allocatable   :: fieldvec, fieldvec_loc
+  ! umfpack
+  integer, parameter :: gkmatsolve_flag=1
+  real,    dimension(:,:), allocatable :: gksp_cntl
+  integer, dimension(:,:), allocatable :: gksp_icntl, gksp_keep
+  real,    dimension(20) ::  gksp_rinfo
+  integer, dimension(40) ::  gksp_uinfo
+  complex, dimension(:,:), allocatable :: gksp_mat
+  integer, dimension(:,:), allocatable :: gksp_indx
+  complex, dimension(:), allocatable   :: gksvec, gkwvec 
+  integer :: gksp_nelem, gksp_nmax
   !
   !
   ! Some field solve parameters
