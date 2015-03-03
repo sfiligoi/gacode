@@ -112,7 +112,7 @@ subroutine cgyro_rhs(ij)
   if (collision_model == 0 .or. collision_trap_model == 0) call cgyro_rhs_trap(ij)
 
   ! TRAPPING UPWIND TERM
-  call cgyro_rhs_trap_upwind(ij)
+  ! call cgyro_rhs_trap_upwind(ij)
 
   call timer_lib_out('rhs')
 
