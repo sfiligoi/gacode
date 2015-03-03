@@ -355,7 +355,7 @@ subroutine cgyro_step_implicit_gk
 
   if(implicit_flag == 0) return
 
-  call timer_lib_in('rhs_imp')
+  call timer_lib_in('rhs_impgk')
 
   ! Solve the gk eqn for the part of RHS depending on old H,fields
   ! RHS = (1 - delta_t/2 * stream)*H_old - (Z f0/T)G field_old
@@ -415,6 +415,8 @@ subroutine cgyro_step_implicit_gk
   enddo
 
   ! Field solve
+  call timer_lib_out('rhs_impgk')
+  call timer_lib_in('rhs_impphi')
 
   ! form the rhs
 
@@ -478,6 +480,8 @@ subroutine cgyro_step_implicit_gk
      enddo
   enddo
 
+  call timer_lib_out('rhs_impphi')
+  call timer_lib_in('rhs_impgk')
 
   ! Solve the gk eqn for the part of RHS depending on new fields
   ! RHS = (Z f0/T)G field_new
@@ -550,6 +554,6 @@ subroutine cgyro_step_implicit_gk
      enddo
   enddo
 
-  call timer_lib_out('rhs_imp')
+  call timer_lib_out('rhs_impgk')
 
 end subroutine cgyro_step_implicit_gk
