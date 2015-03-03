@@ -351,7 +351,7 @@ subroutine cgyro_step_implicit_gk
   integer :: is, ir, it, ie, ix
   integer :: id, jt, jr, jc, ifield
   complex :: efac(n_field)
-  real    :: rval, rfac, vfac
+  real    :: rval, rfac(nc), vfac
 
   if(implicit_flag == 0) return
 
@@ -369,7 +369,7 @@ subroutine cgyro_step_implicit_gk
      is = is_v(iv)
      ix = ix_v(iv)
      ie = ie_v(iv)
-  
+
      efac(1) = 1.0
      if (n_field > 1) then
         efac(2) = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
@@ -380,7 +380,7 @@ subroutine cgyro_step_implicit_gk
         it = it_c(ic)
 
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
-        
+
         do id=-2,2
            jt = thcyc(it+id)
            jr = rcyc(ir,it,id)
@@ -390,7 +390,7 @@ subroutine cgyro_step_implicit_gk
                 + (rval*dtheta(ir,it,id) &
                 + abs(rval)*dtheta_up(ir,it,id)) &
                 * (-0.5 * delta_t) * cap_h_c(jc,iv_loc)
-           
+
         enddo
 
         gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &
@@ -399,7 +399,7 @@ subroutine cgyro_step_implicit_gk
      enddo
 
      ! matrix solve
-     
+
      if(gkmatsolve_flag == 0) then
         call ZGETRS('N',nc,1,gkmat(:,:,iv_loc),nc,i_piv_gk(:,iv_loc),&
              gkvec(:,iv_loc),nc,info)
@@ -425,34 +425,28 @@ subroutine cgyro_step_implicit_gk
   do iv=nv1,nv2
 
      iv_loc = iv_loc+1
-     
+
      is = is_v(iv)
      ix = ix_v(iv)
      ie = ie_v(iv)
 
-     rfac = z(is) * 0.5*w_xi(ix)*w_e(ie)*dens(is)
-     vfac = xi(ix) * sqrt(2.0*energy(ie)) * vth(is)
-
+     rfac(:) = z(is) * 0.5*w_xi(ix)*w_e(ie)*dens(is)*j0_c(:,iv_loc)
      ifield = 1
+     
      do ic=1,nc
         id = idfield(ic,ifield)
-        ir = ir_c(ic) 
-        it = it_c(ic)
-        fieldvec_loc(id) = fieldvec_loc(id) + gkvec(ic,iv_loc) &
-             * rfac * j0_c(ic,iv_loc)
+        fieldvec_loc(id) = fieldvec_loc(id) + gkvec(ic,iv_loc) * rfac(ic)
      enddo
 
      if(n_field > 1) then
+        rfac(:) = rfac(:) * xi(ix) * sqrt(2.0*energy(ie)) * vth(is) 
         ifield = 2
         do ic=1,nc
            id = idfield(ic,ifield)
-           ir = ir_c(ic) 
-           it = it_c(ic)
-           fieldvec_loc(id) = fieldvec_loc(id) + gkvec(ic,iv_loc) &
-                * rfac * j0_c(ic,iv_loc) * vfac
+           fieldvec_loc(id) = fieldvec_loc(id) + gkvec(ic,iv_loc) * rfac(ic)
         enddo
      endif
-  
+
   enddo
 
   call MPI_ALLREDUCE(fieldvec_loc(:),&
@@ -465,7 +459,7 @@ subroutine cgyro_step_implicit_gk
 
   ! matrix solve
   call ZGETRS('N',nc*n_field,1,fieldmat(:,:),nc*n_field,i_piv_field(:),&
-      fieldvec(:),nc*n_field,info)
+       fieldvec(:),nc*n_field,info)
 
   ! map back into field(ir,it)
   do ic=1,nc
@@ -476,7 +470,7 @@ subroutine cgyro_step_implicit_gk
         it = it_c(ic)
 
         field(ir,it,ifield) = fieldvec(id)
-        
+
      enddo
   enddo
 
@@ -495,7 +489,7 @@ subroutine cgyro_step_implicit_gk
      is = is_v(iv)
      ix = ix_v(iv)
      ie = ie_v(iv)
-  
+
      efac(1) = 1.0
      if (n_field > 1) then
         efac(2) = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
@@ -511,7 +505,7 @@ subroutine cgyro_step_implicit_gk
      enddo
 
      ! matrix solve
-      if(gkmatsolve_flag == 0) then
+     if(gkmatsolve_flag == 0) then
         call ZGETRS('N',nc,1,gkmat(:,:,iv_loc),nc,i_piv_gk(:,iv_loc),&
              gkvec(:,iv_loc),nc,info)
      else
@@ -531,7 +525,7 @@ subroutine cgyro_step_implicit_gk
 
   iv_loc = 0
   do iv=nv1,nv2
-     
+
      iv_loc = iv_loc+1
 
      is = is_v(iv)
