@@ -126,6 +126,7 @@ module cgyro_globals
   character(len=80) :: path
   character(len=18) :: runfile_err     = 'out.cgyro.err'
   character(len=18) :: runfile_info    = 'out.cgyro.info'
+  character(len=18) :: runfile_mpi     = 'out.cgyro.mpi'
   character(len=18) :: runfile_restart = 'out.cgyro.restart'
   character(len=18) :: runfile_hb      = 'out.cgyro.hb'
   character(len=18) :: runfile_caphb   = 'out.cgyro.caphb'
