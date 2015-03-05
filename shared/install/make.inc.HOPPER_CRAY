@@ -14,27 +14,23 @@
 #   torus network topology
 #---------------------------------------------------
 
-#  FIXED Hardware parameters
+# Hardware features
+IDENTITY="hopper.nersc.gov Cray XE6"
 CORES_PER_NODE=24
 NUMAS_PER_NODE=4
-
-# SLEPC_LIB and other environment variables are defined in:
-#include ${SLEPC_DIR}/conf/slepc_common_variables
 
 # Compilers and flags
 
 FC     = ftn -e m -J ${GACODE_ROOT}/modules
 F77    = ${FC}
-
 FOMP   =
-FMATH  = -s real64 -I/opt/fftw/3.3.0.1/x86_64/include
+FMATH  = -s real64 -I ${FFTW_DIR}/x86_64/include
 FOPT   = -O3 -hfp3
 FDEBUG = -eD -Ktrap=fp -m 1
-FPETSC = 
 
 # System math libraries
 
-LMATH = -L/opt/fftw/3.3.0.1/x86_64/lib -Wl,-rpath=/opt/fftw/3.3.0.1/x86_64/lib \
+LMATH = -L ${FFTW_DIR}/x86_64/lib -Wl,-rpath=${FFTW_DIR}/x86_64/lib \
         -lfftw3_threads -lfftw3f_threads -lfftw3 -lfftw3f
 
 # OPTIONAL: netCDF (for gyro2gkv)

@@ -1,6 +1,11 @@
 #---------------------------------------------------
-# banach.gat.com (quad-core workstation)
+# banach.gat.com (12-core workstation)
 #---------------------------------------------------
+
+# Platform characteristics
+IDENTITY="banach.gat.com 12 core workstation"
+CORES_PER_NODE=12
+NUMAS_PER_NODE=1
 
 FFTWDIR=/usr/local
 ROOT=/home/SOFTWARE
