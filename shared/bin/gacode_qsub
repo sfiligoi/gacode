@@ -149,6 +149,7 @@ if [ $INFO_FLAG -eq 1 ] ; then
 
     # Query NERSC repositories
     if hash getnim 2> /dev/null; then
+	echo
 	echo "Your repositories"
         getnim -U `whoami`
     fi
