@@ -11,4 +11,4 @@ echo "#PBS -q $QUEUE" >> $bfile
 echo "#PBS -l walltime=$WALLTIME" >> $bfile
 echo "#PBS -l mppwidth=$cores_requested" >> $bfile
 echo "module load python" >> $bfile
-
+echo "$CODE -e $LOCDIR -n $nmpi -nomp $nomp -numa $numa -mpinuma $mpinuma -p $SIMROOT" >> $bfile
