@@ -81,7 +81,7 @@ START=new
 while [ $# -gt 0 ] ; do
   case "$1" in
 
-  -x) SUB_FLAG=1 ;;
+  -s) SUB_FLAG=1 ;;
 
   -p) shift ; SIMROOT=$1 ;;
 
