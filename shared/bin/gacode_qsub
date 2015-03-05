@@ -159,7 +159,7 @@ if [ $SUB_FLAG -eq 0 ] ; then
     
 else
     # Submit batch file
-    qsub batch.src
+    qsub $bfile
 fi
     
 
