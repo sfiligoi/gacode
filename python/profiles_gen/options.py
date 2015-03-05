@@ -1,6 +1,6 @@
 import sys
 import string
-from pyrats.profiles_gen.data import profiles_genData
+from profiles_gen.data import profiles_genData
 
 filevec = string.splitfields(sys.argv[1],',')
 

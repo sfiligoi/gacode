@@ -2,7 +2,7 @@ import sys
 import string
 import numpy as np
 from gacodeplotdefs import *
-from pyrats.profiles_gen.data import profiles_genData
+from profiles_gen.data import profiles_genData
 
 # Number of theta-points for plotting
 narc = 256
