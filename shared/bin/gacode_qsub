@@ -59,13 +59,20 @@ fi
 #=============================================================
 
 #=============================================================
-# Define variables for flag capture
+# Define variables for flag capture with defaults
 #
+user=`whoami`
 CODE=null_code
 INFO_FLAG=0
 QUEUE=null_queue
 WALLTIME=1:00:00
-REPO=null_repo
+if hash getnim 2> /dev/null; then
+   x=`getnim -U $user -D`
+   set $x
+   REPO=$1
+else
+   REPO=null_repo
+fi
 
 # Default simulation root and gyro directory
 LOCDIR=.
@@ -151,7 +158,7 @@ if [ $INFO_FLAG -eq 1 ] ; then
     if hash getnim 2> /dev/null; then
 	echo
 	echo "Your repositories"
-        getnim -U `whoami`
+        getnim -U $user
     fi
 
     echo
