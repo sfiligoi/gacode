@@ -38,6 +38,7 @@ subroutine gyro_initialize_arrays
   field_tau_old2 = 0.0
 
   ! No cap_h 
+  h_cap      = 0.0
   h_cap_dot  = 0.0
   h_cap_old  = 0.0
   h_cap_old2 = 0.0

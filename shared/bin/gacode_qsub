@@ -16,18 +16,18 @@ then
    echo
   echo "Usage:   gacode_qsub [options]"
   echo
-  echo "         -i"
-  echo "         Print helpful information about current system"
+  echo "         -s"
+  echo "         Submit generated batch script.  Otherwise just print diagnostics."
   echo
   echo "         -p <path>"
   echo "         Set optional path to simulation directory."
   echo "         [The default path is the current directory]"
   echo
-  echo "         -code <code>"
-  echo "         <code>=NEO,GYRO,TGYRO"
-  echo
   echo "         -e <simdir>" 
   echo "         Run <code> using input.<code> in <simdir>."
+  echo
+  echo "         -code <code>"
+  echo "         <code>=tgyro,gyro,neo"
   echo
   echo "         -n <MPI tasks>" 
   echo "         Number of MPI tasks."
@@ -50,9 +50,6 @@ then
   echo "         -repo"
   echo "         Repository name"
   echo
-  echo "See https://fusion.gat.com/theory/Gyroplatforms for help"
-  echo " choosing -numa and -mpinuma flags."
-  echo
 
   exit 1
 fi
@@ -63,7 +60,7 @@ fi
 #
 user=`whoami`
 CODE=null_code
-INFO_FLAG=0
+SUB_FLAG=0
 QUEUE=null_queue
 WALLTIME=1:00:00
 if hash getnim 2> /dev/null; then
@@ -91,7 +88,7 @@ START=new
 while [ $# -gt 0 ] ; do
   case "$1" in
 
-  -i) INFO_FLAG=1 ;;
+  -s) SUB_FLAG=1 ;;
 
   -p) shift ; SIMROOT=$1 ;;
 
@@ -133,39 +130,45 @@ fi
 SIMDIR=$SIMROOT/$LOCDIR
 #=============================================================
 
-if [ $INFO_FLAG -eq 1 ] ; then
-    
-    # Extract CORES_PER_NODE and NUMAS_PER_NODE
-    export `grep _NODE $GACODE_ROOT/shared/install/make.inc.$GACODE_PLATFORM`
-    export "`grep IDENT $GACODE_ROOT/shared/install/make.inc.$GACODE_PLATFORM`"
-    echo "INFO: (gacode_qsub) Job layout diagnostics"
-    echo
-    echo "       identity: $IDENTITY"
-    echo " cores per node: $CORES_PER_NODE"
-    echo " numas per node: $NUMAS_PER_NODE"
-    echo
-    . $GACODE_ROOT/shared/bin/gacode_mpi_tool
-    echo " cores requested         : $cores_requested"
-    echo " cores used              : $cores_used"
-    echo " total MPI tasks         : $nmpi"
-    echo " MPI tasks/node          : $mpinode"
-    echo " OpenMP threads/MPI task : $nomp"
-    echo " MPI tasks per numa node : $mpinuma"
-    echo
-    . $GACODE_ROOT/shared/qsub/qsub.$GACODE_PLATFORM
+# Extract CORES_PER_NODE and NUMAS_PER_NODE
+export `grep _NODE $GACODE_ROOT/shared/install/make.inc.$GACODE_PLATFORM`
+export "`grep IDENT $GACODE_ROOT/shared/install/make.inc.$GACODE_PLATFORM`"
+echo "INFO: (gacode_qsub) Job layout diagnostics"
+echo
+echo "       identity: $IDENTITY"
+echo " cores per node: $CORES_PER_NODE"
+echo " numas per node: $NUMAS_PER_NODE"
+echo
+. $GACODE_ROOT/shared/bin/gacode_mpi_tool
+echo " cores requested         : $cores_requested"
+echo " cores used              : $cores_used"
+echo " total MPI tasks         : $nmpi"
+echo " MPI tasks/node          : $mpinode"
+echo " OpenMP threads/MPI task : $nomp"
+echo " MPI tasks per numa node : $mpinuma"
+echo
+. $GACODE_ROOT/shared/qsub/qsub.$GACODE_PLATFORM
 
-    # Query NERSC repositories
+if [ $SUB_FLAG -eq 0 ] ; then
+   # Query NERSC repositories
     if hash getnim 2> /dev/null; then
 	echo
 	echo "Your repositories"
         getnim -U $user
     fi
-
+    
+    # Print proposed batch file 
     echo
     echo " batch file:"
     echo "-----------------------------------------------"
     cat $bfile
     echo "-----------------------------------------------"
-
+    
+else
+    # Submit batch file
+    qsub $bfile
 fi
+    
+
+    
 
