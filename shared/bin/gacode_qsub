@@ -65,8 +65,8 @@ QUEUE=null_queue
 WALLTIME=1:00:00
 if hash getnim 2> /dev/null; then
    x=`getnim -U $user -D`
-   set $x
-   REPO=$1
+   y=($x)
+   REPO=${y[0]}
 else
    REPO=null_repo
 fi
