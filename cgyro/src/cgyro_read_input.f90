@@ -43,6 +43,7 @@ subroutine cgyro_read_input
   read(1,*) masse_ade
   read(1,*) lambda_debye
   read(1,*) test_flag
+  read(1,*) h_print_flag
   read(1,*) amp
   read(1,*) gamma_e
 

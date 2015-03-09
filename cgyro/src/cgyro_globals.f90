@@ -42,6 +42,7 @@ module cgyro_globals
   real :: masse_ade
   real :: lambda_debye
   integer :: test_flag
+  integer :: h_print_flag
   real :: amp
   real :: gamma_e
   !

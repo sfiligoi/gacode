@@ -20,6 +20,13 @@ subroutine cgyro_write_timedata
   ! Print this data on print steps only; otherwise exit now
   if (mod(i_time,print_step) /= 0) return
 
+  !---------------------------------------------------------------------------
+  if (n_toroidal == 1 .and. h_print_flag == 1) then
+     call write_distribution(trim(path)//runfile_hb,1)
+     call write_distribution(trim(path)//runfile_caphb,2)
+  endif
+  !---------------------------------------------------------------------------
+
   if (nonlinear_flag == 1) then
 
      ! Density flux
