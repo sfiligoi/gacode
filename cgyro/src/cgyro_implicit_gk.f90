@@ -16,6 +16,11 @@ subroutine cgyro_init_implicit_gk
 
   if(implicit_flag == 0) return
 
+  if(zf_test_flag == 1 .and. ae_flag == 1) then
+     print *, 'ZF test with adiabatic electrons not implemented for implicit'
+     stop
+  endif
+
   ! Kinetic eqn solve matrix(ic,ic,nv_loc) 
   ! gkmat = (1 + delta_t/2 * stream)
 
@@ -42,7 +47,7 @@ subroutine cgyro_init_implicit_gk
            it = it_c(ic)
            
            rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
-           
+
            do id=-2,2
               jt = thcyc(it+id)
               jr = rcyc(ir,it,id)
@@ -110,7 +115,7 @@ subroutine cgyro_init_implicit_gk
               jt = thcyc(it+id)
               jr = rcyc(ir,it,id)
               jc = ic_c(jr,jt)
-           
+  
               k=k+1
               gksp_mat(k,iv_loc) = (rval*dtheta(ir,it,id) &
                    + abs(rval)*dtheta_up(ir,it,id)) * 0.5 * delta_t
@@ -142,6 +147,7 @@ subroutine cgyro_init_implicit_gk
   allocate(akmat(nc,nc))
   allocate(i_piv_field(nc))
   allocate(work_field(nc))
+  fieldmat_loc(:,:) = (0.0,0.0)
 
   id=0
   do ifield=1,n_field
