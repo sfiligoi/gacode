@@ -130,7 +130,6 @@ module cgyro_globals
   character(len=18) :: runfile_mpi     = 'out.cgyro.mpi'
   character(len=18) :: runfile_restart = 'out.cgyro.restart'
   character(len=18) :: runfile_hb      = 'out.cgyro.hb'
-  character(len=18) :: runfile_caphb   = 'out.cgyro.caphb'
   character(len=18) :: runfile_grids   = 'out.cgyro.grids'
   character(len=18) :: runfile_time    = 'out.cgyro.time'
   character(len=18) :: runfile_freq    = 'out.cgyro.freq'
