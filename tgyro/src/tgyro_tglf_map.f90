@@ -178,8 +178,7 @@ subroutine tgyro_tglf_map
   ! Number of high-k modes
   !  nky=12 (default to include ETG)
   !  nky=0  (low-k only)
-  ! JC: remove override
-  ! tglf_nky_in = 12
+  !  tglf_nky_in = 12
   !-----------------------------------
 
   !----------------------------------------------------------------
@@ -201,7 +200,7 @@ subroutine tgyro_tglf_map
   !
   ! Use bisection method to determine Gaussian width;
   ! bisection is better, faster.
-  tglf_use_bisection_in = .true.
+  !  tglf_use_bisection_in = .true.
   !
   ! Number of Hermite functions to determine Gaussian Width (1-2)
   !  tglf_nbasis_min_in = 1
@@ -245,10 +244,10 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
 
   !----------------------------------------------------------------
-  ! OTHER PARAMETERS
+  ! OTHER DEFAULT PARAMETERS
   !
-  tglf_find_width_in    = .true.
-  tglf_iflux_in         = .true.
+  !  tglf_find_width_in    = .true.
+  !  tglf_iflux_in         = .true.
   !  tglf_theta_trapped_in = 0.7
   !  tglf_xnu_factor_in    = 1.0
   !  tglf_debye_factor_in  = 1.0

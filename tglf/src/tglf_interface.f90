@@ -59,7 +59,7 @@ module tglf_interface
   real    :: tglf_wd_zero_in        = 0.1
   real    :: tglf_linsker_factor_in = 0.0
   real    :: tglf_gradb_factor_in   = 0.0
-  real    :: tglf_filter_in         = 0.0
+  real    :: tglf_filter_in         = 2.0
   real    :: tglf_damp_psi_in       = 0.0
   real    :: tglf_damp_sig_in       = 0.0
 
