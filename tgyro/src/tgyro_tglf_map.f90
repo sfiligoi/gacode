@@ -249,17 +249,21 @@ subroutine tgyro_tglf_map
   !
   tglf_find_width_in    = .true.
   tglf_iflux_in         = .true.
-  tglf_theta_trapped_in = 0.7
-  tglf_xnu_factor_in    = 1.0
-  tglf_debye_factor_in  = 1.0
-  tglf_filter_in        = 2.0
-  tglf_debye_in         = 0.0
+  !  tglf_theta_trapped_in = 0.7
+  !  tglf_xnu_factor_in    = 1.0
+  !  tglf_debye_factor_in  = 1.0
+  !  tglf_filter_in        = 2.0
+  !  tglf_debye_in         = 0.0
   !----------------------------------------------------------------
 
   !----------------------------------------------------------------
   ! New TGLF settings
   !
   select case (tgyro_tglf_revision)
+
+  case(0)
+
+! use defaults and overwrites
 
   case (1)
 

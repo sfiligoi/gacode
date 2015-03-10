@@ -424,6 +424,10 @@ subroutine tgyro_write_input
 
      !--------------------------------------------------------
      select case (tgyro_tglf_revision)
+ 
+     case(0)
+
+        write(1,10) 'TGYRO_TGLF_REVISION', 'DEFAULTS + OVERWRITES'
 
      case (1)
 
