@@ -1,7 +1,10 @@
 #---------------------------------------------------
-# banach.gat.com (quad-core workstation)
-# gfortran,blas,lapack,hdf5 from Ubuntu repository
+# AMD A8 4-core Workstation (fedora)
 #---------------------------------------------------
+
+IDENTITY="newt 4-core Fedora workstation"
+CORES_PER_NODE=4
+NUMAS_PER_NODE=1
 
 FFTWDIR=/usr/local
 ROOT=/home/candy/SOFTWARE
@@ -10,14 +13,12 @@ ROOT=/home/candy/SOFTWARE
 
 FC	= mpif90 -I $(GACODE_ROOT)/modules -I/usr/local/include
 F77	= ${FC}
-
 FOMP    = -fopenmp
 FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules
 FOPT	= -O3
 FDEBUG	= -O2 -Wall -fcheck=all -Wunderflow -finit-real=nan -fbounds-check -ffpe-trap=invalid,zero,overflow
 
-# System math libraries (from Ubuntu repository)
-
+# System math libraries
 LMATH = ${ROOT}/OpenBLAS/libopenblas.a -lfftw3
 
 # OPTIONAL NetCDF:

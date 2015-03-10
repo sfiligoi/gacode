@@ -111,7 +111,7 @@ class cgyrodata:
         try:
             data = np.loadtxt(self.dir+'out.cgyro.hb')
             self.hb = np.reshape(data,(2,self.n_radial*self.n_theta/self.m_box,
-                                       self.n_species,self.n_xi,self.n_energy),'F')
+                                       self.n_species,self.n_xi,self.n_energy,nt),'F')
             self.hb = self.hb/np.max(self.hb)
             print "INFO: (data.py) Read data in out.cgyro.hb."
         except:

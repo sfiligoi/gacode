@@ -42,6 +42,7 @@ module cgyro_globals
   real :: masse_ade
   real :: lambda_debye
   integer :: test_flag
+  integer :: h_print_flag
   real :: amp
   real :: gamma_e
   !
@@ -126,6 +127,7 @@ module cgyro_globals
   character(len=80) :: path
   character(len=18) :: runfile_err     = 'out.cgyro.err'
   character(len=18) :: runfile_info    = 'out.cgyro.info'
+  character(len=18) :: runfile_mpi     = 'out.cgyro.mpi'
   character(len=18) :: runfile_restart = 'out.cgyro.restart'
   character(len=18) :: runfile_hb      = 'out.cgyro.hb'
   character(len=18) :: runfile_grids   = 'out.cgyro.grids'
@@ -247,12 +249,28 @@ module cgyro_globals
   integer, dimension(:), allocatable :: i_piv
   integer :: info
   !
-  ! Implicit gk/field matrices
-  complex, dimension(:,:,:), allocatable :: gkhmat, akmat
-  complex, dimension(:,:), allocatable   ::  gk11mat, gk12mat, gk22mat, gkmat
-  complex, dimension(:), allocatable :: gkrhsvec, gkhvec_loc
-  complex, dimension(:,:), allocatable :: gkhvec
-  integer, dimension(:), allocatable :: i_piv_gk
+  ! Implicit streaminggk/field matrices
+  !
+  complex, dimension(:,:,:), allocatable :: gkmat
+  integer, dimension(:,:), allocatable   :: i_piv_gk
+  complex, dimension(:,:), allocatable   :: gkvec
+  complex, dimension(:,:), allocatable   :: fieldmat
+  integer, dimension(:,:), allocatable   :: idfield
+  integer, dimension(:),   allocatable   :: i_piv_field
+  complex, dimension(:),   allocatable   :: fieldvec, fieldvec_loc
+  ! umfpack
+  integer, parameter :: gkmatsolve_flag=1
+  real,    dimension(:,:), allocatable :: gksp_cntl
+  integer, dimension(:,:), allocatable :: gksp_icntl, gksp_keep
+  real,    dimension(20) ::  gksp_rinfo
+  integer, dimension(40) ::  gksp_uinfo
+  complex, dimension(:,:), allocatable :: gksp_mat
+  integer, dimension(:,:), allocatable :: gksp_indx
+  complex, dimension(:), allocatable   :: gksvec, gkwvec 
+  integer :: gksp_nelem, gksp_nmax
+  !
+  !
+  ! Some field solve parameters
   !
   real :: sum_den_h
   real, dimension(:,:), allocatable :: sum_den_x, sum_cur_x

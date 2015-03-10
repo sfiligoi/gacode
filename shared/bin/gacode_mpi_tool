@@ -17,12 +17,13 @@ fi
 if [ $mpinuma -eq 0 ]
 then
    mpinuma=$(($CORES_PER_NODE/$NUMAS_PER_NODE))
+   mpinuma=$(($mpinuma/$nomp))
 fi
 
 # See if we are asking for too many NUMAs
 if [ $numa -gt $NUMAS_PER_NODE ] 
 then
-  echo 'Too many NUMAs per node requested'
+  echo 'ERROR: (gacode_mpi_tool) Too many NUMAs per node requested'
   exit 1
 fi
 
@@ -31,8 +32,7 @@ i1=$(($nomp*$mpinuma))
 i2=$(($CORES_PER_NODE/$NUMAS_PER_NODE)) 
 if [ $i1 -gt $i2 ] 
 then
-   echo 'Too many OpenMP tasks per MPI process'
-   exit 1
+   echo 'ERROR: (gacode_mpi_tool) Too many OpenMP tasks per MPI process'
 fi
 
 # MPI tasks per node

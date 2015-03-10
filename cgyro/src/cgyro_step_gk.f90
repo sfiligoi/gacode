@@ -77,13 +77,17 @@ subroutine cgyro_rhs(ij)
         ir = ir_c(ic) 
         it = it_c(ic)
 
+        ! Diagonal terms
+        rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc)+&
+             omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+&
+             omega_h(ic,iv_loc)*h_x(ic,iv_loc)+&
+             sum(omega_s(:,ic,iv_loc)*field(ir,it,:))
+           
         ! Parallel streaming with upwind dissipation
-
+        
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
         rhs_stream = 0.0
-
-        ! Upwind
-
+        
         if(implicit_flag == 0) then
            do id=-2,2
               jt = thcyc(it+id)
@@ -94,25 +98,21 @@ subroutine cgyro_rhs(ij)
                    -abs(rval)*dtheta_up(ir,it,id)*( &
                    cap_h_c(jc,iv_loc) &
                    - z(is)/temp(is)*j0_c(jc,iv_loc)*field(jr,jt,1))
-           
+              
            enddo
         endif
 
-        ! Diagonal terms
-        rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc)+&
-             rhs_stream+&
-             omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+&
-             omega_h(ic,iv_loc)*h_x(ic,iv_loc)+&
-             sum(omega_s(:,ic,iv_loc)*field(ir,it,:))
-
+        rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc)+rhs_stream
+        
      enddo
+
   enddo
 
   ! TRAPPING TERM
   if (collision_model == 0 .or. collision_trap_model == 0) call cgyro_rhs_trap(ij)
 
   ! TRAPPING UPWIND TERM
-  call cgyro_rhs_trap_upwind(ij)
+  ! call cgyro_rhs_trap_upwind(ij)
 
   call timer_lib_out('rhs')
 

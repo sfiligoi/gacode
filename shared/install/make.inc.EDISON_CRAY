@@ -1,22 +1,11 @@
-#---------------------------------------------------
-# Cray XC30 (edison.nersc.gov) [Cray ENV]
-#
-# HOPPER SYSTEM INFO:
-# - Cray XC30
-# - 10,624 processor cores
-# - 664 compute nodes
-# - 2 12-core Intel "Ivy Bridge" (2.4GHz) per node 
-#---------------------------------------------------
-
 # FIXED Hardware parameters
+IDENTITY="Cray XC30 (edison)"
 CORES_PER_NODE=24
 NUMAS_PER_NODE=2
 
 # Compilers and flags
-
 FC     = ftn -e m -J ${GACODE_ROOT}/modules
 F77    = ${FC}
-
 FOMP   =
 FMATH  = -s real64
 FOPT   = -O3 -hfp3
@@ -24,7 +13,6 @@ FDEBUG = -eD -Ktrap=fp -m 1
 FPETSC =
 
 # System math libraries
-
 LMATH = -L/opt/fftw/3.3.0.4/x86_64/lib -Wl,-rpath=/opt/fftw/3.3.0.4/x86_64/lib \
         -lfftw3_threads -lfftw3f_threads -lfftw3 -lfftw3f
 

@@ -7,221 +7,312 @@ subroutine cgyro_init_implicit_gk
 
   implicit none
 
-  integer :: is, ir, it, ie, ix
-  integer :: id, jd, jt, jr, jc, ifield, jfield
+  integer :: is, ir, it, ie, ix, k
+  integer :: id, jd, idp, jdp, jt, jr, jc, ifield, jfield
   real :: rval
-  complex, dimension(:,:), allocatable   :: gkmat_loc, akmat_temp
-  complex, dimension(:), allocatable :: zwork
-  complex, parameter    :: znum1 = (1.0,0.0)
-  complex, parameter    :: znum0 = (0.0,0.0)
+  real :: rfac, vfac, vfac2
+  complex, dimension(:,:), allocatable   :: akmat, fieldmat_loc
+  complex, dimension(:), allocatable     :: work_field
 
   if(implicit_flag == 0) return
 
-  ! Set-up arrays for implicit time-stepping of streaming terms
-  allocate(akmat(nc,nc,nv_loc))
-  allocate(akmat_temp(nc,nc))
-  allocate(gkhmat(nc,nc,nv_loc))
-  allocate(gkmat_loc(nc,nc))
-  allocate(gk11mat(nc,nc))
-  allocate(gk12mat(nc,nc))
-  allocate(gk22mat(nc,nc))
-  allocate(gkmat(nc*n_field,nc*n_field))
-  allocate(i_piv_gk(nc*n_field))
-  allocate(gkrhsvec(nc*n_field))
-  allocate(gkhvec_loc(nc))
-  allocate(gkhvec(nc,n_field))
+  if(zf_test_flag == 1 .and. ae_flag == 1) then
+     print *, 'ZF test with adiabatic electrons not implemented for implicit'
+     stop
+  endif
 
-  ! matrix solve parameters
-  allocate(zwork(nc))
-  allocate(i_piv(nc))
+  ! Kinetic eqn solve matrix(ic,ic,nv_loc) 
+  ! gkmat = (1 + delta_t/2 * stream)
 
-  akmat(:,:,:)    = (0.0,0.0)
-  akmat_temp(:,:) = (0.0,0.0)
-  gkhmat(:,:,:)   = (0.0,0.0)
-  gkmat_loc(:,:)  = (0.0,0.0)
-  gk11mat(:,:)    = (0.0,0.0)
-  gk12mat(:,:)    = (0.0,0.0)
-  gk22mat(:,:)    = (0.0,0.0)
-  gkmat(:,:)      = (0.0,0.0)
+  if(gkmatsolve_flag == 0) then
+
+     ! Dense solve with Lapack
+
+     allocate(gkmat(nc,nc,nv_loc))
+     allocate(i_piv_gk(nc,nv_loc))
+     gkmat(:,:,:) = (0.0,0.0)
+     
+     iv_loc = 0
+     do iv=nv1,nv2
+        
+        iv_loc = iv_loc+1
+        
+        is = is_v(iv)
+        ix = ix_v(iv)
+        ie = ie_v(iv)
+        
+        do ic=1,nc
+           
+           ir = ir_c(ic) 
+           it = it_c(ic)
+           
+           rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
+
+           do id=-2,2
+              jt = thcyc(it+id)
+              jr = rcyc(ir,it,id)
+              jc = ic_c(jr,jt)
+              
+              gkmat(ic,jc,iv_loc) = gkmat(ic,jc,iv_loc) &
+                   + (rval*dtheta(ir,it,id) &
+                   + abs(rval)*dtheta_up(ir,it,id)) * 0.5 * delta_t
+
+           enddo
+
+           gkmat(ic,ic,iv_loc) = gkmat(ic,ic,iv_loc) + 1.0
+
+        enddo
+
+        ! Lapack factorization 
+        call ZGETRF(nc,nc,gkmat(:,:,iv_loc),nc,i_piv_gk(:,iv_loc),info)
+        
+     enddo
+
+  else
+     
+     ! Sparse solve with Umfpack
+
+     ! initialization for umfpack
+     allocate(gksp_cntl(10,nv_loc))
+     allocate(gksp_icntl(20,nv_loc))
+     allocate(gksp_keep(20,nv_loc))
+     gksp_icntl(1,:) = 6
+     gksp_icntl(2,:) = 6
+     gksp_icntl(3,:) = 1
+     gksp_icntl(8,:) = 0
+     iv_loc = 0
+     do iv=nv1,nv2
+        iv_loc = iv_loc+1
+        call UMZ21I(gksp_keep(:,iv_loc),gksp_cntl(:,iv_loc),&
+             gksp_icntl(:,iv_loc))
+     enddo
+     
+     gksp_nelem=5*nc
+     gksp_nmax=gksp_nelem*10
+     allocate(gksp_mat(gksp_nmax,nv_loc))
+     allocate(gksp_indx(2*gksp_nmax,nv_loc))
+     gksp_mat(:,:) = (0.0,0.0)
+     gksp_indx(:,:) = 0
+
+     iv_loc = 0
+     do iv=nv1,nv2
+        
+        iv_loc = iv_loc+1
+        
+        is = is_v(iv)
+        ix = ix_v(iv)
+        ie = ie_v(iv)
+        
+        k=0
+        do ic=1,nc
+           
+           ir = ir_c(ic) 
+           it = it_c(ic)
+           
+           rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
+           
+           do id=-2,2
+              jt = thcyc(it+id)
+              jr = rcyc(ir,it,id)
+              jc = ic_c(jr,jt)
+  
+              k=k+1
+              gksp_mat(k,iv_loc) = (rval*dtheta(ir,it,id) &
+                   + abs(rval)*dtheta_up(ir,it,id)) * 0.5 * delta_t
+              gksp_indx(k,iv_loc) = ic
+              gksp_indx(k+gksp_nelem,iv_loc) = jc 
+              if(ic == jc) then
+                 gksp_mat(k,iv_loc) = gksp_mat(k,iv_loc) + 1.0
+              endif
+           enddo
+
+        enddo
+
+        ! Umfpack factorization 
+        call UMZ2FA(nc,gksp_nelem,0,.false.,gksp_nmax,2*gksp_nmax,&
+             gksp_mat(:,iv_loc),gksp_indx(:,iv_loc),&
+             gksp_keep(:,iv_loc),gksp_cntl(:,iv_loc),gksp_icntl(:,iv_loc),&
+             gksp_uinfo,gksp_rinfo)
+        if(gksp_uinfo(1) < 0) then
+           print *, 'umfpack error', gksp_uinfo(1)
+           stop
+        endif
+        
+     enddo
+  endif
+
+  ! Field eqn matrix (ic*ifield,ic*ifield) (dense)
+  allocate(idfield(nc,n_field))
+  allocate(fieldmat_loc(nc*n_field,nc*n_field))
+  allocate(akmat(nc,nc))
+  allocate(i_piv_field(nc))
+  allocate(work_field(nc))
+  fieldmat_loc(:,:) = (0.0,0.0)
+
+  id=0
+  do ifield=1,n_field
+     do ic=1,nc
+        id = id + 1
+        idfield(ic,ifield) = id
+     enddo
+  enddo
 
   iv_loc = 0
   do iv=nv1,nv2
 
      iv_loc = iv_loc+1
-
+     
      is = is_v(iv)
      ix = ix_v(iv)
      ie = ie_v(iv)
 
-     do ic=1,nc
+     rfac  = 0.5*w_xi(ix)*w_e(ie)*dens(is) * z(is)**2/temp(is)
+     vfac  = xi(ix) * sqrt(2.0*energy(ie)) * vth(is)
+     vfac2 = xi(ix)**2 * 2.0*energy(ie) * vth(is)**2
 
+     akmat(:,:) = (0.0,0.0)
+     do ic=1,nc
+        
         ir = ir_c(ic) 
         it = it_c(ic)
 
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
-
+        
         do id=-2,2
            jt = thcyc(it+id)
            jr = rcyc(ir,it,id)
            jc = ic_c(jr,jt)
 
-           akmat(ic,jc,iv_loc) = akmat(ic,jc,iv_loc) &
-                + rval*dtheta(ir,it,id) * 0.5 * delta_t
+           akmat(ic,jc) = akmat(ic,jc) &
+                + (rval*dtheta(ir,it,id) &
+                + abs(rval)*dtheta_up(ir,it,id)) * 0.5 * delta_t
            
         enddo
 
+        akmat(ic,ic) = akmat(ic,ic) + 1.0
+
      enddo
 
-     ! (1 - delta_t/2 * stream)
-     akmat_temp(:,:)   = -akmat(:,:,iv_loc)
+     ! Lapack factorization and inverse
+     ! akmat = (1 + delta_t/2 * stream)^-1
+     call ZGETRF(nc,nc,akmat(:,:),nc,i_piv_field,info)
+     call ZGETRI(nc,akmat(:,:),nc,i_piv_field,work_field,nc,info)
+  
+     ! int d^3 v (z G) akmat (z/T f0 G)
+     ifield=1
+     jfield=1
      do ic=1,nc
-        akmat_temp(ic,ic) = akmat_temp(ic,ic) + 1.0
-     enddo
-
-     ! (1 + delta_t/2 * stream)
-     do ic=1,nc
-        akmat(ic,ic,iv_loc) = akmat(ic,ic,iv_loc) + 1.0
-     enddo
-
-     ! Lapack factorization and inverse of LHS
-     ! (1 + delta_t/2 * stream)^-1
-     call ZGETRF(nc,nc,akmat(:,:,iv_loc),nc,i_piv,info)
-     call ZGETRI(nc,akmat(:,:,iv_loc),nc,i_piv,zwork,nc,info)
-
-     ! Matrix multiply
-     ! gkhmat = 1 + delta_t/2 * stream)^-1 * (1 - delta_t/2 * stream)
-     call ZGEMM('N','N',nc,nc,nc,znum1,akmat(:,:,iv_loc),&
-          nc,akmat_temp(:,:),nc,znum0,gkhmat(:,:,iv_loc),nc)
-           
-
-     ! akmat = (1 + delta_t/2 * stream)^-1 * (Ze/T) G
-     do ic=1,nc
+        id = idfield(ic,ifield)
         do jc=1,nc
-           akmat(ic,jc,iv_loc) = akmat(ic,jc,iv_loc) &
-                ! * z(is)*j0_c(ic,iv_loc) &
-                * z(is)/temp(is)*j0_c(jc,iv_loc)
+           jd = idfield(jc,jfield)
+           fieldmat_loc(id,jd) = fieldmat_loc(id,jd) &
+                - j0_c(ic,iv_loc) * akmat(ic,jc) * j0_c(jc,iv_loc) &
+                * rfac
         enddo
      enddo
 
-     ! (Ze) G and integration factors 
-     do ic=1,nc
-        do jc=1,nc
-           gkmat_loc(ic,jc) = gkmat_loc(ic,jc) &
-                + akmat(ic,jc,iv_loc) * z(is)*j0_c(ic,iv_loc) &
-                * 0.5*w_xi(ix)*w_e(ie)*dens(is)
-        enddo
-     enddo
-  enddo
+     if(n_field > 1) then
 
-  deallocate(zwork)
-  deallocate(i_piv)
-        
-  ! int d^3v (Ze) G  akmat 
-  call MPI_ALLREDUCE(gkmat_loc(:,:),&
-       gk11mat(:,:),&
-       size(gk11mat(:,:)),&
-       MPI_DOUBLE_COMPLEX,&
-       MPI_SUM,&
-       NEW_COMM_1,&
-       i_err)
-
-  ! int d^3v (Ze) G akmat vpar
-  gkmat_loc(:,:) = (0.0,0.0)
-  iv_loc = 0
-  do iv=nv1,nv2
-     iv_loc = iv_loc+1
-     is = is_v(iv)
-     ix = ix_v(iv)
-     ie = ie_v(iv)
-     do ic=1,nc
-        do jc=1,nc
-           gkmat_loc(ic,jc) = gkmat_loc(ic,jc) &
-                + akmat(ic,jc,iv_loc) * z(is)*j0_c(ic,iv_loc) &
-                * 0.5*w_xi(ix)*w_e(ie)*dens(is) &
-                * xi(ix) * sqrt(2.0*energy(ie)) * vth(is)
-        enddo
-     enddo
-  enddo
-  call MPI_ALLREDUCE(gkmat_loc(:,:),&
-       gk12mat(:,:),&
-       size(gk12mat(:,:)),&
-       MPI_DOUBLE_COMPLEX,&
-       MPI_SUM,&
-       NEW_COMM_1,&
-       i_err)
-
-   ! int d^3v (Ze) G akmat vpar^2
-  gkmat_loc(:,:) = (0.0,0.0)
-  iv_loc = 0
-  do iv=nv1,nv2
-     iv_loc = iv_loc+1
-     is = is_v(iv)
-     ix = ix_v(iv)
-     ie = ie_v(iv)
-     do ic=1,nc
-        do jc=1,nc
-           gkmat_loc(ic,jc) = gkmat_loc(ic,jc) &
-                + akmat(ic,jc,iv_loc) * z(is)*j0_c(ic,iv_loc) &
-                * 0.5*w_xi(ix)*w_e(ie)*dens(is) &
-                * xi(ix)**2 * 2.0*energy(ie) * vth(is)**2
-        enddo
-     enddo
-  enddo
-  call MPI_ALLREDUCE(gkmat_loc(:,:),&
-       gk22mat(:,:),&
-       size(gk22mat(:,:)),&
-       MPI_DOUBLE_COMPLEX,&
-       MPI_SUM,&
-       NEW_COMM_1,&
-       i_err)
-
-  ! form field implicit matrix
-  id=1
-  do ifield=1,n_field
-     do ic=1,nc
-        ir = ir_c(ic) 
-        it = it_c(ic)
-        jd=1
-        do jfield=1,n_field
+        ! int d^3 v vpar (z G) akmat (z/T f0 G)
+        ifield=1
+        jfield=2
+        do ic=1,nc
+           id = idfield(ic,ifield)
            do jc=1,nc
-              
-              if(ifield==1 .and. jfield ==1) then
-                 gkmat(id,jd) = gk11mat(ic,jc)
-                 if(ic == jc) then
-                    gkmat(id,jd) = gkmat(id,jd) &
-                         + (k_perp(it,ir)**2*lambda_debye**2* &
-                         dens_ele/temp_ele+sum_den_h)
-                 endif
-
-              else if(ifield==1 .and. jfield ==2) then
-                 gkmat(id,jd) = gk12mat(ic,jc)
-              
-              
-              else if(ifield==2 .and. jfield ==1) then
-                 gkmat(id,jd) = -gk12mat(ic,jc)
-              
-              else if(ifield==2 .and. jfield ==2) then
-                 gkmat(id,jd) = gk22mat(ic,jc)
-                 if(ic == jc) then
-                    gkmat(id,jd) = gkmat(id,jd) &
-                         + (2.0*k_perp(it,ir)**2*rho**2 &
-                         /betae_unit*dens_ele*temp_ele)
-                 endif
-
-              endif
-              jd=jd+1
+              jd = idfield(jc,jfield)
+              fieldmat_loc(id,jd) = fieldmat_loc(id,jd) &
+                   + j0_c(ic,iv_loc) * akmat(ic,jc) *j0_c(jc,iv_loc) &
+                   * rfac * vfac
            enddo
         enddo
-        id=id+1
-     enddo
-  enddo
-  
-  ! Lapack factorization of field LHS
-  call ZGETRF(nc*n_field,nc*n_field,gkmat(:,:),nc,i_piv_gk,info)
 
-  ! clean-up
-  deallocate(akmat_temp)
-  deallocate(gkmat_loc)
+        ! int d^3 v vpar^2 (z G) akmat (z/T f0 G)
+        ifield=2
+        jfield=2
+        do ic=1,nc
+           id = idfield(ic,ifield)
+           do jc=1,nc
+              jd = idfield(jc,jfield)
+              fieldmat_loc(id,jd) = fieldmat_loc(id,jd) &
+                   + j0_c(ic,iv_loc) * akmat(ic,jc) *j0_c(jc,iv_loc) &
+                   * rfac * vfac2
+           enddo
+        enddo
+
+     endif
+
+  enddo
+
+  if(n_field > 1) then
+     do ic=1,nc
+        id  = idfield(ic,2)
+        idp = idfield(ic,1)
+        do jc=1,nc
+           jd  = idfield(jc,1)
+           jdp = idfield(jc,2)
+           fieldmat_loc(id,jd) = -fieldmat_loc(idp,jdp)
+        enddo
+     enddo
+  endif
+
+  deallocate(akmat)
+  deallocate(i_piv_field)
+  deallocate(work_field)
+
+  allocate(fieldmat(nc*n_field,nc*n_field))
+
+  ! Velocity space reduce
+
+  call MPI_ALLREDUCE(fieldmat_loc(:,:),&
+       fieldmat(:,:),&
+       size(fieldmat(:,:)),&
+       MPI_DOUBLE_COMPLEX,&
+       MPI_SUM,&
+       NEW_COMM_1,&
+       i_err)
+
+  deallocate(fieldmat_loc)
+
+  ! Add Poisson/Ampere factors 
+
+  ifield=1
+  do ic=1,nc
+     id = idfield(ic,ifield)
+     ir = ir_c(ic) 
+     it = it_c(ic)
+     fieldmat(id,id) = fieldmat(id,id) &
+          + (k_perp(it,ir)**2*lambda_debye**2* &
+          dens_ele/temp_ele+sum_den_h)
+  enddo
+
+  if(n_field > 1) then
+
+     ifield=2
+     jfield=2
+     do ic=1,nc
+        id = idfield(ic,ifield)
+        ir = ir_c(ic) 
+        it = it_c(ic)
+        fieldmat(id,id) = fieldmat(id,id) &
+             + (2.0*k_perp(it,ir)**2*rho**2 &
+             /betae_unit*dens_ele*temp_ele)
+     enddo
+
+  endif
+
+  ! Lapack factorization
+  allocate(i_piv_field(nc*n_field))
+  call ZGETRF(nc*n_field,nc*n_field,fieldmat(:,:),nc*n_field,i_piv_field,info)
+
+  ! Extra allocations needed for solve
+  allocate(gkvec(nc,nv_loc))
+  allocate(fieldvec(nc*n_field))
+  allocate(fieldvec_loc(nc*n_field))
+
+  if(gkmatsolve_flag == 1) then
+     allocate(gksvec(nc))
+     allocate(gkwvec(2*nc))
+  endif
 
 end subroutine cgyro_init_implicit_gk
 
@@ -232,187 +323,212 @@ subroutine cgyro_clean_implicit_gk
 
   if(implicit_flag == 0) return
 
-  if(allocated(gkhmat))     deallocate(gkhmat)
-  if(allocated(akmat))      deallocate(akmat)
-  if(allocated(gk11mat))    deallocate(gk11mat)
-  if(allocated(gk12mat))    deallocate(gk12mat)
-  if(allocated(gk22mat))    deallocate(gk22mat)
-  if(allocated(gkmat))      deallocate(gkmat)
-  if(allocated(i_piv_gk))   deallocate(i_piv_gk)
-  if(allocated(gkrhsvec))   deallocate(gkrhsvec)
-  if(allocated(gkhvec))     deallocate(gkhvec)
-  if(allocated(gkhvec_loc)) deallocate(gkhvec_loc)
+  if(allocated(gkvec))        deallocate(gkvec)
+  if(allocated(fieldmat))     deallocate(fieldmat)
+  if(allocated(idfield))      deallocate(idfield)
+  if(allocated(i_piv_field))  deallocate(i_piv_field)
+  if(allocated(fieldvec))     deallocate(fieldvec)
+  if(allocated(fieldvec_loc)) deallocate(fieldvec_loc)
+
+  if(gkmatsolve_flag == 0) then
+     if(allocated(gkmat))        deallocate(gkmat)
+     if(allocated(i_piv_gk))     deallocate(i_piv_gk)
+  else
+     if(allocated(gksp_mat))     deallocate(gksp_mat)
+     if(allocated(gksp_indx))    deallocate(gksp_indx)
+     if(allocated(gksp_cntl))    deallocate(gksp_cntl)
+     if(allocated(gksp_icntl))   deallocate(gksp_icntl)
+     if(allocated(gksp_keep))    deallocate(gksp_keep)
+     if(allocated(gksvec))       deallocate(gksvec)
+     if(allocated(gkwvec))       deallocate(gkwvec)
+  endif
 
 end subroutine cgyro_clean_implicit_gk
 
 subroutine cgyro_step_implicit_gk
 
   use mpi
+  use timer_lib
   use cgyro_globals
+  use cgyro_equilibrium
 
   implicit none
 
   integer :: is, ir, it, ie, ix
   integer :: id, jt, jr, jc, ifield
   complex :: efac(n_field)
+  real    :: rval, rfac(nc), vfac
 
   if(implicit_flag == 0) return
 
-  ! Store the old H and fields
-  h0_x(:,:)        = cap_h_c(:,:)
-  field_loc(:,:,:) = field(:,:,:)
+  call timer_lib_in('rhs_impgk')
+
+  ! Solve the gk eqn for the part of RHS depending on old H,fields
+  ! RHS = (1 - delta_t/2 * stream)*H_old - (Z f0/T)G field_old
 
   ! form the rhs
-  gkhvec(:,:) = (0.0,0.0)
-  
-  ! first integrate the old H
-  gkhvec_loc(:) = (0.0,0.0)
-  do ic=1,nc
-     do jc=1,nc
-        iv_loc = 0
-        do iv=nv1,nv2
-           iv_loc = iv_loc+1
-           is = is_v(iv)
-           ix = ix_v(iv)
-           ie = ie_v(iv)
-           gkhvec_loc(ic) = gkhvec_loc(ic) &
-                + gkhmat(ic,jc,iv_loc) * z(is)*j0_c(ic,iv_loc) &
-                * 0.5*w_xi(ix)*w_e(ie)*dens(is) * cap_h_c(jc,iv_loc)
-        enddo
-     enddo
-        
-     call MPI_ALLREDUCE(gkhvec_loc(:),&
-          gkhvec(:,1),&
-          size(gkhvec(:,1)),&
-          MPI_DOUBLE_COMPLEX,&
-          MPI_SUM,&
-          NEW_COMM_1,&
-          i_err)
-  enddo
 
-  ! integrate old H * vpar
-  if(n_field > 1) then
-     gkhvec_loc(:) = (0.0,0.0)
-     do ic=1,nc
-        do jc=1,nc
-           iv_loc = 0
-           do iv=nv1,nv2
-              iv_loc = iv_loc+1
-              is = is_v(iv)
-              ix = ix_v(iv)
-              ie = ie_v(iv)
-              gkhvec_loc(ic) = gkhvec_loc(ic) &
-                   + gkhmat(ic,jc,iv_loc) * cap_h_c(jc,iv_loc) &
-                   * 0.5*w_xi(ix)*w_e(ie)*dens(is) &
-                   * xi(ix) * sqrt(2.0*energy(ie)) * vth(is)
-           enddo
-        enddo
-        
-        call MPI_ALLREDUCE(gkhvec_loc(:),&
-             gkhvec(:,2),&
-             size(gkhvec(:,2)),&
-             MPI_DOUBLE_COMPLEX,&
-             MPI_SUM,&
-             NEW_COMM_1,&
-             i_err)
-     enddo
-  endif
-  
-
-  gkrhsvec(:) = (0.0,0.0)
-  
-  id=1
-  do ifield=1,n_field
-     do ic=1,nc
-        gkrhsvec(id) = gkrhsvec(id) + gkhvec(ic,ifield)
-        id = id + 1
-     enddo
-  enddo
-
-  id=1
-  do ifield=1,n_field
-     do ic=1,nc
-        ir = ir_c(ic) 
-        it = it_c(ic)
-
-        do jc=1,nc
-           jr = ir_c(jc) 
-           jt = it_c(jc)
-           
-           if(ifield == 1) then
-              gkrhsvec(id) = gkrhsvec(id) - gk11mat(ic,jc)*field(jr,jt,1)
-                   
-              if(n_field > 1) then
-                 gkrhsvec(id) = gkrhsvec(id) + gk12mat(ic,jc)*field(jr,jt,2)
-              endif
-
-           else if(ifield ==2) then
-              gkrhsvec(id) = gkrhsvec(id) - gk12mat(ic,jc)*field(jr,jt,1)
-              if(n_field > 1) then
-                 gkrhsvec(id) = gkrhsvec(id) + gk22mat(ic,jc)*field(jr,jt,2)
-              endif
-
-           endif
-
-        enddo
-
-        id = id + 1
-
-     enddo
-  enddo
-
-  ! Solve the matrix system for the new fields
-
-  call ZGETRS('N',nc*n_field,1,gkmat(:,:),nc*n_field,i_piv_gk,&
-       gkrhsvec(:),nc*n_field,info)
-
-  id=1
-  do ifield=1,n_field
-     do ic=1,nc
-        ir = ir_c(ic) 
-        it = it_c(ic)
-        if(ifield == 1) then
-           field(ir,it,1) = gkrhsvec(id)
-        else if(ifield == 2) then
-           field(ir,it,2) = gkrhsvec(id)
-        endif
-        id = id + 1
-     enddo
-  enddo
-
-  ! Now solve for the new capital H
-  cap_h_c(:,:) = 0.0
+  gkvec(:,:) = cap_h_c(:,:)
   iv_loc = 0
   do iv=nv1,nv2
+     iv_loc = iv_loc+1
+     is = is_v(iv)
+     ix = ix_v(iv)
+     ie = ie_v(iv)
+
+     efac(1) = 1.0
+     if (n_field > 1) then
+        efac(2) = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
+     endif
+
+     do ic=1,nc
+        ir = ir_c(ic)
+        it = it_c(ic)
+
+        rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
+
+        do id=-2,2
+           jt = thcyc(it+id)
+           jr = rcyc(ir,it,id)
+           jc = ic_c(jr,jt)
+
+           gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &
+                + (rval*dtheta(ir,it,id) &
+                + abs(rval)*dtheta_up(ir,it,id)) &
+                * (-0.5 * delta_t) * cap_h_c(jc,iv_loc)
+
+        enddo
+
+        gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &
+             - z(is)/temp(is)*j0_c(ic,iv_loc)*sum(efac(:)*field(ir,it,:))
+
+     enddo
+
+     ! matrix solve
+
+     if(gkmatsolve_flag == 0) then
+        call ZGETRS('N',nc,1,gkmat(:,:,iv_loc),nc,i_piv_gk(:,iv_loc),&
+             gkvec(:,iv_loc),nc,info)
+     else
+        call UMZ2SO(nc,0,.false.,gksp_nmax,2*gksp_nmax,&
+             gksp_mat(:,iv_loc),gksp_indx(:,iv_loc),gksp_keep(:,iv_loc),&
+             gkvec(:,iv_loc),gksvec,gkwvec,&
+             gksp_cntl(:,iv_loc),gksp_icntl(:,iv_loc),&
+             gksp_uinfo,gksp_rinfo)
+        gkvec(:,iv_loc) = gksvec(:)
+     endif
+
+  enddo
+
+  ! Field solve
+  call timer_lib_out('rhs_impgk')
+  call timer_lib_in('rhs_impphi')
+
+  ! form the rhs
+
+  fieldvec_loc(:) = (0.0,0.0)
+  iv_loc = 0
+  do iv=nv1,nv2
+
      iv_loc = iv_loc+1
 
      is = is_v(iv)
      ix = ix_v(iv)
      ie = ie_v(iv)
 
+     rfac(:) = z(is) * 0.5*w_xi(ix)*w_e(ie)*dens(is)*j0_c(:,iv_loc)
+     ifield = 1
+     
      do ic=1,nc
+        id = idfield(ic,ifield)
+        fieldvec_loc(id) = fieldvec_loc(id) + gkvec(ic,iv_loc) * rfac(ic)
+     enddo
 
-        do jc=1,nc
-
-           jr = ir_c(jc)
-           jt = it_c(jc)
-
-           cap_h_c(ic,iv_loc) = cap_h_c(ic,iv_loc) &
-                + gkhmat(ic,jc,iv_loc)*h0_x(jc,iv_loc) &
-                + akmat(ic,jc,iv_loc)*(field(jr,jt,1)-field_loc(jr,jt,1))
-
-           if(n_field > 1) then
-              cap_h_c(ic,iv_loc) = cap_h_c(ic,iv_loc) &
-                   + akmat(ic,jc,iv_loc)*(field(jr,jt,2)-field_loc(jr,jt,2)) &
-                   * (-xi(ix)*sqrt(2.0*energy(ie))*vth(is))
-           endif
-
+     if(n_field > 1) then
+        rfac(:) = rfac(:) * xi(ix) * sqrt(2.0*energy(ie)) * vth(is) 
+        ifield = 2
+        do ic=1,nc
+           id = idfield(ic,ifield)
+           fieldvec_loc(id) = fieldvec_loc(id) + gkvec(ic,iv_loc) * rfac(ic)
         enddo
+     endif
+
+  enddo
+
+  call MPI_ALLREDUCE(fieldvec_loc(:),&
+       fieldvec(:),&
+       size(fieldvec(:)),&
+       MPI_DOUBLE_COMPLEX,&
+       MPI_SUM,&
+       NEW_COMM_1,&
+       i_err)
+
+  ! matrix solve
+  call ZGETRS('N',nc*n_field,1,fieldmat(:,:),nc*n_field,i_piv_field(:),&
+       fieldvec(:),nc*n_field,info)
+
+  ! map back into field(ir,it)
+  do ic=1,nc
+     do ifield=1,n_field
+
+        id = idfield(ic,ifield)
+        ir = ir_c(ic) 
+        it = it_c(ic)
+
+        field(ir,it,ifield) = fieldvec(id)
+
      enddo
   enddo
 
+  call timer_lib_out('rhs_impphi')
+  call timer_lib_in('rhs_impgk')
+
+  ! Solve the gk eqn for the part of RHS depending on new fields
+  ! RHS = (Z f0/T)G field_new
+
+  cap_h_c(:,:) = gkvec(:,:)
+
+  gkvec(:,:) = (0.0,0.0)
+  iv_loc = 0
+  do iv=nv1,nv2
+     iv_loc = iv_loc+1
+     is = is_v(iv)
+     ix = ix_v(iv)
+     ie = ie_v(iv)
+
+     efac(1) = 1.0
+     if (n_field > 1) then
+        efac(2) = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
+     endif
+
+     do ic=1,nc
+        ir = ir_c(ic)
+        it = it_c(ic)
+
+        gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &
+             + z(is)/temp(is)*j0_c(ic,iv_loc)*sum(efac(:)*field(ir,it,:))
+
+     enddo
+
+     ! matrix solve
+     if(gkmatsolve_flag == 0) then
+        call ZGETRS('N',nc,1,gkmat(:,:,iv_loc),nc,i_piv_gk(:,iv_loc),&
+             gkvec(:,iv_loc),nc,info)
+     else
+        call UMZ2SO(nc,0,.false.,gksp_nmax,2*gksp_nmax,&
+             gksp_mat(:,iv_loc),gksp_indx(:,iv_loc),gksp_keep(:,iv_loc),&
+             gkvec(:,iv_loc),gksvec,gkwvec,&
+             gksp_cntl(:,iv_loc),gksp_icntl(:,iv_loc),&
+             gksp_uinfo,gksp_rinfo)
+        gkvec(:,iv_loc) = gksvec(:)
+     endif
+
+  enddo
+
+  cap_h_c(:,:) = cap_h_c(:,:) + gkvec(:,:)
 
   ! Reform little h and psi
+
   iv_loc = 0
   do iv=nv1,nv2
 
@@ -430,12 +546,14 @@ subroutine cgyro_step_implicit_gk
 
         ir = ir_c(ic)
         it = it_c(ic)
-        
+
         psi(ic,iv_loc) = j0_c(ic,iv_loc)*sum(efac(:)*field(ir,it,:))
 
         h_x(ic,iv_loc) = cap_h_c(ic,iv_loc) - z(is)*psi(ic,iv_loc)/temp(is)
 
      enddo
   enddo
+
+  call timer_lib_out('rhs_impgk')
 
 end subroutine cgyro_step_implicit_gk

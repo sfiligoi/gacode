@@ -20,6 +20,12 @@ subroutine cgyro_write_timedata
   ! Print this data on print steps only; otherwise exit now
   if (mod(i_time,print_step) /= 0) return
 
+  !---------------------------------------------------------------------------
+  if (n_toroidal == 1 .and. h_print_flag == 1) then
+     call write_distribution(trim(path)//runfile_hb,1)
+  endif
+  !---------------------------------------------------------------------------
+
   if (nonlinear_flag == 1) then
 
      ! Density flux
@@ -473,7 +479,7 @@ end subroutine write_freq
 
 !====================================================================================
 
-subroutine write_distribution(datafile)
+subroutine write_distribution(datafile,indx)
 
   use mpi
 
@@ -482,6 +488,7 @@ subroutine write_distribution(datafile)
   !------------------------------------------------------
   implicit none
   !
+  integer, intent(in) :: indx
   character (len=*), intent(in) :: datafile
   complex, dimension(:,:), allocatable :: h_x_glob
   !------------------------------------------------------

@@ -74,9 +74,6 @@ subroutine cgyro_write_initdata
 
      write(io,*)
 
-     write(io,*) 'nc',nc
-     write(io,*) 'nv',nv
-
      close(io)
 
   endif
