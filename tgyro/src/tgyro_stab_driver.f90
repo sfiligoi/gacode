@@ -77,7 +77,7 @@ subroutine tgyro_stab_driver
 
         tglf_ky_in = ky(iky)
 
-        call tglf_run()
+        call tglf_run_mpi()
 
         ! wr and wi are now the COMPUTED eigenvalues
 

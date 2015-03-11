@@ -17,6 +17,8 @@ subroutine tgyro_neo_map
   ! Initialize NEO
   call neo_init(paths(i_r-1),gyro_comm)
 
+  neo_test_flag_in = gyrotest_flag
+  
   ! Simulation mode (dke solve vs. analytic)
   if (loc_neo_method == 1) then
      ! Analytic theory
