@@ -1,0 +1,2 @@
+TGLFISNAN=tglf_isnan_ieee.o 
+F77 = $(FC)
