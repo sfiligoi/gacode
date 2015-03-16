@@ -1,11 +1,12 @@
 #---------------------------------------------------
 # Generic {Intel OSX,gfortran} 
+# sudo port install openmpi netcdf-fortran
 #---------------------------------------------------
 
 MAKE = make
 
 NETCDF_PATH=/opt/local
-MF90 = openmpif90
+MF90 = mpif90
 
 # Compilers and flags
 #
