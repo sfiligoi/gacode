@@ -1,5 +1,5 @@
 #---------------------------------------------------
-# Generic {Intel OSX,gfortran} 
+# OSX,gfortran+openmpi from MacPorts
 # sudo port install openmpi netcdf-fortran
 #---------------------------------------------------
 
