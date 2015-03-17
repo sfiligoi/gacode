@@ -25,6 +25,9 @@ subroutine tgyro_tglf_map
   ! Initialize TGLF
   call tglf_init(paths(i_r-1), gyro_comm)
 
+  ! Are we just testing (to get dump file, for example)?
+  tglf_test_flag_in = gyrotest_flag
+
   ! Want fluxes from TGLF
   tglf_use_transport_model_in = .true.
 

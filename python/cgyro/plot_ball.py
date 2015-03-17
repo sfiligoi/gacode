@@ -29,8 +29,12 @@ ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
 ax.set_xlabel(r'$\theta_*/\pi$')
 
-ax.plot(sim.thetab/np.pi,np.real(f),'-o',color='black',markersize=2,label='Re')
-ax.plot(sim.thetab/np.pi,np.imag(f),'-o',color='blue',markersize=2,label='Im')
+x = sim.thetab/np.pi
+y1 = np.real(f)
+y2 = np.imag(f)
+
+ax.plot(x,y1,'-o',color='black',markersize=2,label='Re')
+ax.plot(x,y2,'-o',color='blue',markersize=2,label='Im')
 
 if tmax < 0.0:
     ax.set_xlim([1-sim.n_radial,-1+sim.n_radial])
@@ -42,6 +46,10 @@ ax.legend()
 
 if ftype == 'screen':
     plt.show()
+elif ftype == 'dump':
+    data = np.column_stack((x,y1,y2))
+    np.savetxt('out.cgyro.dump',data,fmt='%.8e')
+    print 'INFO: (plot_ball) Created out.cgyro.dump'
 else:
     outfile = 'ball.'+str(ifield)+'.'+ftype
     plt.savefig(outfile)

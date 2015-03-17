@@ -154,7 +154,8 @@ module neo_interface
   real, dimension(8,0:32) :: neo_geo_yin_in = 0.0
   ! the exception of the default is subroutine_flag
   integer :: neo_subroutine_flag = 1
-
+  integer :: neo_test_flag_in = 0
+  
   ! Output parameters
   ! theory
   real    :: neo_pflux_thHH_out  = 0.0

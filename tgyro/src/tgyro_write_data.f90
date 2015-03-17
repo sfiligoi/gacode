@@ -423,8 +423,11 @@ subroutine tgyro_write_data(i_print)
 
   enddo ! i_ion
 
-  ! Residuals
+  ! If we are in test mode, there is no point in going further
+  if (gyrotest_flag == 1) return
 
+  ! Residuals
+  
   open(unit=1,file='out.tgyro.residual',status='old',position='append')
 
   if (tgyro_relax_iterations == 0) then

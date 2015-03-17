@@ -17,6 +17,9 @@ subroutine neo_run()
   ! Map INTERFACE parameters -> GLOBAL variables
   call map_interface2global
 
+  ! Can exit if we are in test mode
+  if (neo_test_flag_in == 1) return
+  
   !----------------------------------------------------------------------
   ! Initialize error status
   error_status = 0
