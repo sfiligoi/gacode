@@ -25,7 +25,7 @@ FC     = ftn -e m -J ${GACODE_ROOT}/modules
 F77    = ${FC}
 FOMP   =
 FMATH  = -s real64 -I ${FFTW_DIR}/x86_64/include
-FOPT   = -O3 -hfp3
+FOPT   = -O2 -hfp3
 FDEBUG = -eD -Ktrap=fp -m 1
 
 # System math libraries
@@ -34,8 +34,8 @@ LMATH = -L ${FFTW_DIR}/x86_64/lib -Wl,-rpath=${FFTW_DIR}/x86_64/lib \
         -lfftw3_threads -lfftw3f_threads -lfftw3 -lfftw3f
 
 # OPTIONAL: netCDF (for gyro2gkv)
-NETCDF =  /opt/cray/netcdf/default/cray/81/lib/libnetcdff.a /opt/cray/netcdf/default/cray/81/lib/libnetcdf.a
-NETCDF_INC = /opt/cray/netcdf/default/cray/81/include
+NETCDF =  /opt/cray/netcdf/default/cray/83/lib/libnetcdff.a /opt/cray/netcdf/default/cray/83/lib/libnetcdf.a
+NETCDF_INC = /opt/cray/netcdf/default/cray/83/include
 
 # Archive 
 ARCH = ar cr
