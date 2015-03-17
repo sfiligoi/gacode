@@ -25,7 +25,7 @@ then
   echo 
   echo "          -f <filetype>"
   echo "          Output file type."
-  echo "           <filetype>=emf, eps, pdf, png, ps, raw, rgba, svg, svgz"
+  echo "           <filetype>=emf, eps, pdf, png, ps, raw, rgba, svg, svgz, dump"
   echo 
   echo "          -species <value>"
   echo "          Specify species to be plotted: [0,n_species-1]."

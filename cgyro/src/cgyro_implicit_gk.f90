@@ -359,8 +359,8 @@ subroutine cgyro_step_implicit_gk
   complex :: efac(n_field)
   real    :: rval, rfac(nc), vfac
 
-  if(implicit_flag == 0) return
-
+  if (implicit_flag == 0) return
+  
   call timer_lib_in('rhs_impgk')
 
   ! Solve the gk eqn for the part of RHS depending on old H,fields
