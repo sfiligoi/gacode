@@ -21,7 +21,7 @@ x.add('GCHAT','1.0')
 x.add('WD_ZERO','0.1')
 x.add('LINSKER_FACTOR','0.0')
 x.add('GRADB_FACTOR','0.0')
-x.add('FILTER','0.0')
+x.add('FILTER','2.0')
 x.add('DAMP_PSI','0.0')
 x.add('DAMP_SIG','0.0')
 

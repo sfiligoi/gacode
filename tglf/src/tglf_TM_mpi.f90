@@ -405,7 +405,7 @@
       USE tglf_kyspectrum
       IMPLICIT NONE
 !
-      integer :: nk_zones,nky1,nky2 
+      integer :: nk_zones,nky0,nky1,nky2 
       INTEGER :: spectrum_type=0
       INTEGER :: i
       REAL :: ky_min=0.05
@@ -502,31 +502,41 @@
           nky = nky + nky_in
         endif
       endif
-      if(spectrum_type.eq.3)then   ! ky_min spectrum similar to APS07
-        nky=9
-        ky_cut = 1.0/(sqrt_two*R_unit*q_unit*width_in)
-!        write(*,*)"ky_cut = ",ky_cut
-!        ky_min = MIN(0.1,0.25/q_unit)
-        ky_min = ky_cut
-        ky_min = ky_min/SQRT(taus_in(2)*mass_in(2))
-        ky_max = 0.9/SQRT(taus_in(2)*mass_in(2))  !k_theta*rho_ion = 0.9
-        dky0 = (ky_max-ky_min)/REAL(nky-1)
+      if(spectrum_type.eq.3)then   ! ky_min=ky_in spectrum similar to APS07
+!      the value of ky_in must be set externally e.g. ky_in = rhos*q/r
+        ky_max = 6.0*ky_min  ! n=6
+        nky0=6
+        ky_min = ky_in
+        dky0 = ky_min
         ky_spectrum(1) = ky_min
         dky_spectrum(1) = ky_min
-        do i=2,nky
+        do i=2,nky0
           ky_spectrum(i) = ky_spectrum(i-1) + dky0
           dky_spectrum(i) = dky0
         enddo
-        ky0 = ky_max+dky0
+        ky_max = 1.0/SQRT(taus_in(2)*mass_in(2))  !k_theta*rho_ion = 1.0
+        if(ky_spectrum(nky0).lt.ky_max)then
+          nky1 = 8
+          ky_min = ky_spectrum(nky0)
+          dky0 = (ky_max-ky_min)/REAL(nky1)
+          do i=1,nky1
+            ky_spectrum(nky0+i) = ky_spectrum(nky0+i-1) + dky0
+            dky_spectrum(nky0+i) = dky0
+          enddo 
+        else
+          nky1=0
+          ky_max = ky_spectrum(nky0)
+        endif       
+        ky0 = ky_max
         ky1 = 0.4/SQRT(taus_in(1)*mass_in(1))  !k_theta*rho_e = 0.4    
-        dky0 = LOG(ky1/ky0)/REAL(nky_in-1)
-        lnky = LOG(ky0)
-        do i=nky+1,nky+nky_in     
-          ky_spectrum(i) = EXP(lnky)
-          dky_spectrum(i) = ky_spectrum(i)*dky0
+        dky0 = LOG(ky1/ky0)/REAL(nky_in)
+        lnky = LOG(ky0+dky0)
+        do i=1,nky_in     
+          ky_spectrum(nky0+nky1+i) = EXP(lnky)
+          dky_spectrum(nky0+nky1+i) = ky_spectrum(nky0+nky1+i)*dky0
           lnky = lnky + dky0
         enddo
-        nky = nky + nky_in
+        nky = nky0 + nky1 + nky_in
       endif
 ! debug
 !      write(*,*)"ky_min=",ky_min,"ky_max=",ky_max
