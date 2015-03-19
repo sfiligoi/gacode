@@ -75,7 +75,8 @@ subroutine tgyro_tglf_map
   ! TGLF-specific quantities
   q_prime = (q_abs/(r(i_r)/r_min))**2*s(i_r)
   p_prime = (q_abs/(r(i_r)/r_min))*(beta_unit(i_r)/(8*pi))*(-r_min*dlnpdr(i_r))
-  !----------------------------------------------------------------
+  p_prime = loc_betae_scale*p_prime
+!----------------------------------------------------------------
 
   !----------------------------------------------------------------
   ! Geometry parameters:
@@ -176,7 +177,8 @@ subroutine tgyro_tglf_map
      tglf_vpar_in(:)       = -tglf_sign_it_in*r_maj(i_r)*w0(i_r)/c_s(i_r)
   endif
   !----------------------------------------------------------------
-
+  ! set ky_in to value for n=1
+  tglf_ky_in = ABS(rho_s(i_r)*q(i_r)/r(i_r))
   !-----------------------------------
   ! Number of high-k modes
   !  nky=12 (default to include ETG)
