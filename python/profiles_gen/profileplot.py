@@ -97,7 +97,6 @@ for j in range(n):
     else:
         tlabel = ''
     
-
     if filevec[j] == '.':
         filevec[j] = filevec[j-1]
 

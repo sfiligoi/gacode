@@ -14,7 +14,8 @@ subroutine cgyro_write_initdata
   implicit none
 
   integer :: in,is, it
-
+  real :: z_eff
+  
   !----------------------------------------------------------------------------
   ! Runfile to give complete summary to user
   ! 
@@ -27,7 +28,6 @@ subroutine cgyro_write_initdata
      write(io,*)
      write(io,'(a)') 'n_radial  n_theta   n_species n_energy  n_xi'
      write(io,'(t1,5(i4,6x))') n_radial,n_theta,n_species,n_energy,n_xi
-
      write(io,*) 
      write(io,'(a,f7.2,a,f7.2)') '(Lx,Ly)/rho',length/rho,',',2*pi/ky
      write(io,*) 
@@ -35,8 +35,12 @@ subroutine cgyro_write_initdata
      if (zf_test_flag == 1) then
         write(io,20) 'ky*rho',0.0
      else 
-        write(io,20) 'ky*rho'
-        write(io,'(8f6.3,1x)') (in*q/rmin*rho,in=0,n_toroidal-1)
+        if (n_toroidal > 1) then
+           write(io,20) 'ky*rho'
+           write(io,'(8f6.3,1x)') (in*q/rmin*rho,in=0,n_toroidal-1)
+        else
+           write(io,'(a,f6.3)') 'ky*rho ',q/rmin*rho
+        endif
      endif
 
      write(io,*) 
@@ -47,6 +51,16 @@ subroutine cgyro_write_initdata
         write(io,20) 'min(kx*rho)',2*pi*rho/length
         write(io,20) 'max(kx*rho)',2*pi*rho*(n_radial/2-1)/length
      endif
+
+     write(io,*)
+
+     z_eff = 0.0
+     do is=1,n_species
+        if (z(is) > 0.0) then 
+           z_eff = z_eff+dens(is)*z(is)**2/dens_ele
+        endif
+     enddo
+     write(io,20) 'z_eff',z_eff
 
      write(io,*) 
      write(io,20) 'rho',rho
