@@ -21,7 +21,6 @@ module cgyro_globals
   real    :: up_radial
   integer :: up_radial_n
   real    :: up_theta
-  real    :: up_xi
   integer :: implicit_flag
   real    :: ky
   integer :: box_size
