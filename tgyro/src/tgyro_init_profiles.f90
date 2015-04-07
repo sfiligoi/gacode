@@ -91,6 +91,11 @@ subroutine tgyro_init_profiles
      enddo
   endif
 
+  ! Overwrite radii with special values
+  do i=2,n_r
+     if (inputrads(i-1) > 0.0) r(i) = inputrads(i-1)
+  enddo
+  
   if (tgyro_use_rho == 1) then
      ! Using equally-spaced rho grid, not default r grid.  This is 
      ! useful for benchmarking with other codes.
