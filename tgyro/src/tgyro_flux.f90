@@ -88,7 +88,7 @@ subroutine tgyro_flux
 
   case (1)
 
-     ! Call NEO analtytic theory
+     ! Call NEO analytic theory
      call neo_run
 
      pflux_i_neo(1,i_r) = neo_pflux_thHH_out/Gamma_neo_GB
@@ -226,11 +226,6 @@ subroutine tgyro_flux
      mflux_i_tur(1:loc_n_ion,i_r) = glf23_ion_mflux_out(1:loc_n_ion)
      expwd_i_tur(1:loc_n_ion,i_r) = glf23_ion_expwd_out(1:loc_n_ion)
 
-!     if (tglf_q_low_flag == 1) then
-!        eflux_e_tur(i_r) = glf23_elec_eflux_low_out
-!        eflux_i_tur(1:loc_n_ion,i_r) = glf23_ion_eflux_low_out(1:loc_n_ion)
-!     endif
-
   case (4)
 
      ! Map TGYRO parameters to GYRO
@@ -266,18 +261,6 @@ subroutine tgyro_flux
   case (5)
 
      ! No fluxes (tgyro_noturb_flag=1)
-
-  case (6)
-
-     ! User-provided function (FUN*)
-
-     eflux_e_tur(i_r) = tgyro_funflux(r(i_r)/r_min,r_min*dlntidr(1,i_r),r_min*dlntedr(i_r),2,0)
-
-     do i_ion=1,loc_n_ion
-        eflux_i_tur(i_ion,i_r) = tgyro_funflux(r(i_r)/r_min,r_min*dlntidr(1,i_r),r_min*dlntedr(i_r),2,i_ion)
-     enddo
-
-     call tgyro_trap_component_error(0,'null')
 
   case default
 
