@@ -41,7 +41,7 @@ subroutine cgyro_mpi_grid
      write(io,*) 'Acceptable core counts.'
      write(io,*)
      do it=1,d*n_toroidal
-        if (mod(d*n_toroidal,it) == 0) then
+        if (mod(d*n_toroidal,it) == 0 .and. mod(it,n_toroidal) == 0) then
            write(io,*) it
         endif
      enddo
