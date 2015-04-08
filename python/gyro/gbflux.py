@@ -9,6 +9,9 @@ i_moment  = int(sys.argv[3])
 window    = float(sys.argv[4])
 plotfile  = sys.argv[5]
 datafile  = sys.argv[6]
+width     = float(sys.argv[7])
+title     = sys.argv[8]
+ymax      = float(sys.argv[9])
 
 n_field   = int(sim.profile['n_field'])
 n_kinetic = int(sim.profile['n_kinetic'])
@@ -34,13 +37,13 @@ else:
 mtag = sim.tagmom[i_moment]
 
 #======================================
-fig = plt.figure(figsize=(12,8))
+fig = plt.figure(figsize=(8*width,8))
 ax = fig.add_subplot(111)
 ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
 ax.set_xlabel(r'$(c_s/a) t$',fontsize=GFONTSIZE)
 ax.set_ylabel(r'$'+mtag+' \;('+ftag+')$',color='k',fontsize=GFONTSIZE)
-#ax.set_title(r'$\mathtt{'+sys.argv[1]+'}$')
+ax.set_title(r''+title)
 #=====================================
 
 # Determine tmin
@@ -64,7 +67,11 @@ else:
     # Write data to datafile
     print 'INFO: (gyro_plot) Output to datafile not supported.  Use raw out.gyro.gbflux.'
 
+if ymax > 0:
+    ax.set_ylim([0,ymax])
+        
 ax.legend()
+
 if plotfile == 'screen':
     plt.show()
 else:

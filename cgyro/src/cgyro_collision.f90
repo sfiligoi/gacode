@@ -774,7 +774,9 @@ contains
     call timer_lib_out('collision')
 
     ! Compute the new phi
-    call cgyro_field_v
+    if(collision_field_model == 1) then
+       call cgyro_field_v
+    endif
 
     call timer_lib_in('comm')
     call parallel_lib_f(cap_h_v,cap_h_ct)

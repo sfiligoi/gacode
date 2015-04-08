@@ -44,6 +44,7 @@ module tgyro_globals
   !
   character(len=80), dimension(:), allocatable :: paths
   integer, dimension(:), allocatable :: procs
+  real, dimension(:), allocatable :: inputrads
   !
   character(80) :: lpath, linput
   integer :: lproc

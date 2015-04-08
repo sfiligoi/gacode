@@ -198,9 +198,9 @@ class ManagerInput:
         self.error = 0
         self.error_msg = ""
         self.extension = ".gen"
-        self.tag = 'DIR'
         self.slavepath = []
         self.slaveproc = []
+        self.slaveradius = []
         self.overlayfile = []
         self.sum_proc = 0
 
@@ -250,18 +250,32 @@ class ManagerInput:
             line_s = string.strip(line)
 
             # Look for occurence of tag and put item in list.
-            if (line_s[0:3] == self.tag):   
+            if (line_s[0:3] == 'DIR'):   
                 n = n+1
                 data = string.splitfields(line_s,' ')
+                # slavepath stores directory
                 self.slavepath.append(data[1])
-                self.slaveproc.append(data[2]) 
+                # slaveproc stores number of cores
+                self.slaveproc.append(data[2])
+                # Optional simulation radius
+                if (len(data) > 3):
+                    if data[3][0:1] == 'X':
+                        self.slaveradius.append(string.splitfields(data[3],'=')[1])
+                        nover = len(data)-4
+                        nj    = 4
+                else:
+                    nover = len(data)-3
+                    nj    = 3
+                    self.slaveradius.append("-1")
+                    
+                # Overlay parameters reside in data[3], ... 
                 self.overlayfile.append('overlay.'+str(n))
                 file_overlay = open('overlay.'+str(n),'w')
 
                 #----------------------------------------------------------
                 # This loop writes each overlay parameter list to overlay.*
-                for j in range(len(data)-3):
-                    file_overlay.write(data[j+3]+'\n')
+                for j in range(nover):
+                    file_overlay.write(data[j+nj]+'\n')
                 file_overlay.close()
                 #----------------------------------------------------------
  
@@ -320,7 +334,7 @@ class ManagerInput:
         for p in range(len(self.slavepath)):
             self.sum_proc = self.sum_proc + int(self.slaveproc[p])
             basedir = self.slavepath[p]
-            file_outfile.write(basedir+' '+self.slaveproc[p]+'\n') 
+            file_outfile.write(basedir+' '+self.slaveproc[p]+' '+self.slaveradius[p]+'\n') 
 
             if basedir[0:3] == 'IFS':
                 print 'INFO: (gacodeinput) Detected '+basedir+'; CPU_max=1'
