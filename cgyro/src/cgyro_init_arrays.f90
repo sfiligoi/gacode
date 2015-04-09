@@ -167,7 +167,7 @@ subroutine cgyro_init_arrays
   !-------------------------------------------------------------------------
   ! Zonal flow with adiabatic electrons:
   !
-  if (ae_flag == 1) then
+  if (n == 0 .and. ae_flag == 1) then
 
      allocate(hzf(n_radial,n_theta,n_theta))
      hzf(:,:,:) = 0.0      
