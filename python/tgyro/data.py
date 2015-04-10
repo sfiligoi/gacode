@@ -129,12 +129,11 @@ class TGYROData:
 
         numdata = np.zeros((nc,nb,nr-2))
         for ib in range(nb):
-            tags=string.split(data[ib*nr])
-
             try:
+                tags=string.split(data[ib*nr])
                 null=string.split(data[ib*nr+1])
             except:
-                print "WARNING: (data.py) "+file+" is damaged."
+                print "WARNING: (data.py) "+file+" shorter than expected."
                 return 0
 
             for ir in range(nr-2):
@@ -168,7 +167,12 @@ class TGYROData:
         numdata = np.zeros((nc,nb,nr-1),dtype=float)
         
         for ib in range(nb):
-            tags=string.split(data[ib*nr]) # Contains overall residual
+            try:
+                tags=string.split(data[ib*nr]) # Contains overall residual
+            except:
+                print "WARNING: (data.py) out.tgyro.residual shorter than expected."
+                return 0
+               
             for ir in range(nr-1):
                 row=string.split(data[ib*nr+ir+1])
                 for ic in range(nc):
