@@ -36,7 +36,8 @@ OBJECTS = ${TGLFISNAN}      \
           tglf_read_input.o \
           tglf_init_mpi.o   \
           tglf_run_mpi.o    \
-          tglf_TM_mpi.o 
+          tglf_TM_mpi.o \
+          tglf_harvest.o
 
 
 .SUFFIXES : .o .f90
