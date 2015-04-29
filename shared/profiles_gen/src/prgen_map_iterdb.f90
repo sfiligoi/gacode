@@ -148,7 +148,7 @@ subroutine prgen_map_iterdb
 
   ! Beams
   do i=1,onetwo_nbion
-     ! Only accept beams of density is everywhere positive
+     ! Only accept beams if density is everywhere positive
      if (minval(onetwo_enbeam(:,i)) > epsilon(0.0)) then
 
         print '(a)',"INFO: (prgen) Found fast ion beam species"
