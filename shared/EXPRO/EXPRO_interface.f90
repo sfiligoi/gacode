@@ -129,7 +129,7 @@
 module EXPRO_interface
 
   integer :: EXPRO_error=0
-  integer, parameter :: nion_max=5
+  integer, parameter :: nion_max=10
 
   ! Fundamental input.profiles scalars
 
@@ -237,7 +237,7 @@ module EXPRO_interface
   ! Control parameters (force nonsensical defaults for usage check)
 
   integer :: EXPRO_ctrl_density_method = -1
-  real, dimension(5) :: EXPRO_ctrl_z
+  real, dimension(n_ion_max) :: EXPRO_ctrl_z
   integer :: EXPRO_ctrl_numeq_flag=-1
   integer :: EXPRO_ctrl_rotation_method = -1
   integer :: EXPRO_ctrl_silent_flag = 0
