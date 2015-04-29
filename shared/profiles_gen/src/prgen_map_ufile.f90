@@ -120,7 +120,7 @@ subroutine prgen_map_ufile
   ! Insert carbon toroidal velocity
   do i=1,5
      j = reorder_vec(i)
-     if (ufile_m(j) == 12.0) then
+     if (nint(ufile_m(j)) == 12) then
         print '(a)', 'INFO: (prgen) Assuming VROT is the carbon toroidal rotation.'
         vec(30+i,:) = -ufile_vrot(:)*(rmaj(:)+rmin(:))
      endif

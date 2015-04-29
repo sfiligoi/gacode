@@ -76,8 +76,8 @@ subroutine tgyro_tglf_map
   q_prime = (q_abs/(r(i_r)/r_min))**2*s(i_r)
   p_prime = (q_abs/(r(i_r)/r_min))*(beta_unit(i_r)/(8*pi))*(-r_min*dlnpdr(i_r))
   p_prime = loc_betae_scale*p_prime
-!----------------------------------------------------------------
-
+  !----------------------------------------------------------------
+  
   !----------------------------------------------------------------
   ! Geometry parameters:
   !
@@ -267,7 +267,7 @@ subroutine tgyro_tglf_map
 
   case(0)
 
-! use defaults and overwrites
+     ! use defaults and overwrites
 
   case (1)
 

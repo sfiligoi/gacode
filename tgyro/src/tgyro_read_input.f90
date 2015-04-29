@@ -179,4 +179,25 @@ subroutine tgyro_read_input
   endif
   !------------------------------------------------------------------
 
+  call MPI_BCAST(paths,&
+       n_inst*80,&
+       MPI_CHARACTER,&
+       0,&
+       MPI_COMM_WORLD,&
+       ierr)
+
+  call MPI_BCAST(procs,&
+       n_inst,&
+       MPI_INTEGER,&
+       0,&
+       MPI_COMM_WORLD,&
+       ierr)
+
+  call MPI_BCAST(inputrads,&
+       n_inst,&
+       MPI_DOUBLE_PRECISION,&
+       0,&
+       MPI_COMM_WORLD,&
+       ierr)
+
 end subroutine tgyro_read_input
