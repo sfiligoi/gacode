@@ -14,7 +14,6 @@ module prgen_globals
   ! Internal control variables
   !
   integer :: nx
-  integer :: n_indx
   integer :: format_type
   integer :: efit_method
   integer :: nogatoq_flag

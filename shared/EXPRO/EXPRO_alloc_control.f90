@@ -203,8 +203,8 @@ subroutine EXPRO_alloc_control(i_proc,flag)
      EXPRO_bp0(:)=0.0
      allocate(EXPRO_bt0(EXPRO_n_exp))
      EXPRO_bt0(:)=0.0
-     allocate(EXPRO_poloidalfluxover2pi(EXPRO_n_exp))
-     EXPRO_poloidalfluxover2pi(:)=0.0
+     allocate(EXPRO_polflux(EXPRO_n_exp))
+     EXPRO_polflux(:)=0.0
 
   else
 
@@ -230,7 +230,7 @@ subroutine EXPRO_alloc_control(i_proc,flag)
      deallocate(EXPRO_flow_wall)
      deallocate(EXPRO_zmag)
      deallocate(EXPRO_ptot)
-     deallocate(EXPRO_poloidalfluxover2pi)
+     deallocate(EXPRO_polflux)
 
      deallocate(EXPRO_ni)
      deallocate(EXPRO_ti)

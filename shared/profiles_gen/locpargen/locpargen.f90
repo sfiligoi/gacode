@@ -80,8 +80,8 @@ program locpargen
 
      ! Use local psi_N
 
-     x(1)  = psi0*EXPRO_poloidalfluxover2pi(EXPRO_n_exp)
-     x_vec = EXPRO_poloidalfluxover2pi
+     x(1)  = psi0*EXPRO_polflux(EXPRO_n_exp)
+     x_vec = EXPRO_polflux
 
      ! RADIUS
      call cub_spline(x_vec,EXPRO_rmin/a,EXPRO_n_exp,x,y,1)
@@ -240,9 +240,9 @@ program locpargen
   print 10,'rho         : ',y(1)
   call cub_spline(x_vec,EXPRO_rmin,EXPRO_n_exp,x,y,1)
   print 10,'rmin [m]    : ',y(1)
-  call cub_spline(x_vec,EXPRO_poloidalfluxover2pi,EXPRO_n_exp,x,y,1)
-  if (abs(EXPRO_poloidalfluxover2pi(EXPRO_n_exp)) > 0.0) then
-     print 10,'psi_N       : ',y(1)/EXPRO_poloidalfluxover2pi(EXPRO_n_exp)
+  call cub_spline(x_vec,EXPRO_polflux,EXPRO_n_exp,x,y,1)
+  if (abs(EXPRO_polflux(EXPRO_n_exp)) > 0.0) then
+     print 10,'psi_N       : ',y(1)/EXPRO_polflux(EXPRO_n_exp)
   else
      print '(a)','psi_N       : UNAVAILABLE'
   endif

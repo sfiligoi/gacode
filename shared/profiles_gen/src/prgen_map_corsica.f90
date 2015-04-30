@@ -8,7 +8,8 @@
 subroutine prgen_map_corsica
 
   use prgen_globals
-
+  use EXPRO_interface
+  
   implicit none
 
   ! Compute rho, bref and arho:
@@ -41,7 +42,7 @@ subroutine prgen_map_corsica
   EXPRO_flow_wall(:) = 0.0      ! flow_wall_exp
   EXPRO_zmag(:)      = zmag(:)  
   EXPRO_ptot(:)      = 0.0      ! ptot
-  EXPRO_poloidalfluxover2pi(,:) = dpsi(:)
+  EXPRO_polflux(:)   = dpsi(:)
 
   ! Construct ion densities and temperatures assuming corsica ion species
   ! (n D+T) is two species, each with 1/2 n_corsica and same temperature
