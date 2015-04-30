@@ -79,6 +79,11 @@ subroutine EXPRO_write(io)
      write(io,10) EXPRO_flow_beam(i),EXPRO_flow_wall(i),EXPRO_flow_mom(i),0.0,0.0
   enddo
   write(io,20) '# '
+  write(io,20) '#',EXPRO_pow_e_tag,EXPRO_pow_i_tag,EXPRO_pow_ei_tag,EXPRO_pow_e_aux_tag,EXPRO_pow_i_aux_tag
+  do i=1,nx
+     write(io,10) EXPRO_pow_e(i),EXPRO_pow_i(i),EXPRO_pow_ei(i),EXPRO_pow_e_aux(i),EXPRO_pow_i_aux(i)
+  enddo
+  write(io,20) '# '
   write(io,20) '#',EXPRO_pow_e_fus_tag,EXPRO_pow_i_fus_tag,EXPRO_pow_e_sync_tag,EXPRO_pow_e_brem_tag,EXPRO_pow_e_line_tag
   do i=1,nx
      write(io,10) EXPRO_pow_e_fus(i),EXPRO_pow_i_fus(i),EXPRO_pow_e_sync(i),EXPRO_pow_e_brem(i),EXPRO_pow_e_line(i)

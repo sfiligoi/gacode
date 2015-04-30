@@ -16,12 +16,12 @@ subroutine EXPRO_write_original(tag)
 
   implicit none
 
-  integer :: i
   integer :: ierr
 
   character(len=*), intent(in) :: tag
   character (len=80) :: line
 
+  
   open(unit=1,file=trim(path)//'input.profiles',status='old')
   open(unit=2,file=trim(path)//'input.profiles.new',status='replace')
 

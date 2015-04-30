@@ -24,7 +24,6 @@ subroutine EXPRO_compute_derived
 
   real, dimension(:), allocatable :: rho
   real, dimension(:), allocatable :: dummy
-  real, dimension(:), allocatable :: u_par
 
   real :: r_min
   real :: fa,fb
