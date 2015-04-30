@@ -67,6 +67,8 @@ module EXPRO_interface
 
   ! Fundamental input.profiles arrays
 
+  character (len=16) :: EXPRO_null_tag = '[null]'
+
   real, dimension(:),allocatable :: EXPRO_rho
   character (len=16) :: EXPRO_rho_tag = 'rho(-)'
 
@@ -118,8 +120,8 @@ module EXPRO_interface
   real, dimension(:),allocatable :: EXPRO_ptot
   character (len=16) :: EXPRO_ptot_tag = 'ptot(Pa)'
 
-  real, dimension(:),allocatable :: EXPRO_poloidalfluxover2pi
-  character (len=16) :: EXPRO_poloidalfluxuover2pi_tag = 'polflux(Wb/rad)'
+  real, dimension(:),allocatable :: EXPRO_polflux
+  character (len=16) :: EXPRO_polflux_tag = 'polflux(Wb/rad)'
 
   real, dimension(:),allocatable :: EXPRO_pow_e_fus
   character (len=16) :: EXPRO_pow_e_fus_tag = 'pow_e_fus(MW)'
