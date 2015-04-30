@@ -134,7 +134,7 @@ module EXPRO_interface
   character (len=16) :: EXPRO_pow_e_brem_tag = 'pow_e_brem(MW)'
 
   real, dimension(:),allocatable :: EXPRO_pow_e_line
-  character (len=16) :: EXPRO_pow_eLine_tag = 'pow_e_line(MW)'
+  character (len=16) :: EXPRO_pow_e_line_tag = 'pow_e_line(MW)'
 
   real, dimension(:),allocatable :: EXPRO_pow_e_aux
   character (len=16) :: EXPRO_pow_e_aux_tag = 'pow_e_aux(MW)'
@@ -148,15 +148,15 @@ module EXPRO_interface
 
   real, dimension(:,:),allocatable :: EXPRO_ni
   character (len=16), dimension(EXPRO_n_ion_max) :: EXPRO_ni_tag = (/ &
-       'ni_1(10^19/m^3)',&
-       'ni_2(10^19/m^3)',&
-       'ni_3(10^19/m^3)',&
-       'ni_4(10^19/m^3)',&
-       'ni_5(10^19/m^3)',&
-       'ni_6(10^19/m^3)',&
-       'ni_7(10^19/m^3)',&
-       'ni_8(10^19/m^3)',&
-       'ni_9(10^19/m^3)',&
+       'ni_1(10^19/m^3) ',&
+       'ni_2(10^19/m^3) ',&
+       'ni_3(10^19/m^3) ',&
+       'ni_4(10^19/m^3) ',&
+       'ni_5(10^19/m^3) ',&
+       'ni_6(10^19/m^3) ',&
+       'ni_7(10^19/m^3) ',&
+       'ni_8(10^19/m^3) ',&
+       'ni_9(10^19/m^3) ',&
        'ni_10(10^19/m^3)'/)
 
   real, dimension(:),allocatable :: EXPRO_te
@@ -164,42 +164,42 @@ module EXPRO_interface
 
   real, dimension(:,:),allocatable :: EXPRO_ti
   character (len=16), dimension(EXPRO_n_ion_max) :: EXPRO_ti_tag = (/ &
-       'Ti_1(keV)',&
-       'Ti_2(keV)',&
-       'Ti_3(keV)',&
-       'Ti_4(keV)',&
-       'Ti_5(keV)',&
-       'Ti_6(keV)',&
-       'Ti_7(keV)',&
-       'Ti_8(keV)',&
-       'Ti_9(keV)',&
-       'Ti_10(keV)'/)
+       'Ti_1(keV)       ',&
+       'Ti_2(keV)       ',&
+       'Ti_3(keV)       ',&
+       'Ti_4(keV)       ',&
+       'Ti_5(keV)       ',&
+       'Ti_6(keV)       ',&
+       'Ti_7(keV)       ',&
+       'Ti_8(keV)       ',&
+       'Ti_9(keV)       ',&
+       'Ti_10(keV)      '/)
 
   real, dimension(:,:),allocatable :: EXPRO_vtor
   character (len=16), dimension(EXPRO_n_ion_max) :: EXPRO_vtor_tag = (/ &
-       'vtor_1(m/s)',&
-       'vtor_2(m/s)',&
-       'vtor_3(m/s)',&
-       'vtor_4(m/s)',&
-       'vtor_5(m/s)',&
-       'vtor_6(m/s)',&
-       'vtor_7(m/s)',&
-       'vtor_8(m/s)',&
-       'vtor_9(m/s)',&
-       'vtor_10(m/s)'/)
+       'vtor_1(m/s)     ',&
+       'vtor_2(m/s)     ',&
+       'vtor_3(m/s)     ',&
+       'vtor_4(m/s)     ',&
+       'vtor_5(m/s)     ',&
+       'vtor_6(m/s)     ',&
+       'vtor_7(m/s)     ',&
+       'vtor_8(m/s)     ',&
+       'vtor_9(m/s)     ',&
+       'vtor_10(m/s)    '/)
 
   real, dimension(:,:),allocatable :: EXPRO_vpol
   character (len=16), dimension(EXPRO_n_ion_max) :: EXPRO_vpol_tag = (/ &
-       'vpol_1(m/s)',&
-       'vpol_2(m/s)',&
-       'vpol_3(m/s)',&
-       'vpol_4(m/s)',&
-       'vpol_5(m/s)',&
-       'vpol_6(m/s)',&
-       'vpol_7(m/s)',&
-       'vpol_8(m/s)',&
-       'vpol_9(m/s)',&
-       'vpol_10(m/s)'/)
+       'vpol_1(m/s)     ',&
+       'vpol_2(m/s)     ',&
+       'vpol_3(m/s)     ',&
+       'vpol_4(m/s)     ',&
+       'vpol_5(m/s)     ',&
+       'vpol_6(m/s)     ',&
+       'vpol_7(m/s)     ',&
+       'vpol_8(m/s)     ',&
+       'vpol_9(m/s)     ',&
+       'vpol_10(m/s)    '/)
 
   ! Derived quantities
 

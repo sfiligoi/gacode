@@ -13,6 +13,7 @@
 subroutine prgen_map_iterdb
 
   use prgen_globals
+  use EXPRO_interface
 
   implicit none
 
@@ -98,33 +99,32 @@ subroutine prgen_map_iterdb
        +pow_i_fus(:)
 
   !---------------------------------------------------------
-  ! Map profile data onto single array:
+  ! Map profile data into EXPRO interface variables
   !
-  allocate(vec(n_indx,onetwo_nj))
-  vec(:,:) = 0.0
+  EXPRO_n_exp = onetwo_nj
+  call EXPRO_alloc('./',1)
   !
-  vec(1,:)  = rho(:)
-  vec(2,:)  = rmin(:)
-  vec(3,:)  = rmaj(:)
+  EXPRO_rho  = rho
+  EXPRO_rmin = rmin(:)
+  EXPRO_rmaj = rmaj(:)
   ! COORDINATES: set sign of q
-  vec(4,:)  = abs(q(:))*ipccw*btccw
-  vec(5,:)  = kappa(:)
-  vec(6,:)  = delta(:)
-  vec(7,:)  = onetwo_te(:)
-  vec(8,:)  = onetwo_ene(:)*1e-19
-  vec(9,:)  = onetwo_zeff(:)
-  !vec(10,:) omitted. meaning omega=0 for iterdb
-  vec(11,:) = flow_mom(:)
-  vec(12,:) = pow_e(:)
-  vec(13,:) = pow_i(:)
-  vec(14,:) = pow_ei(:)
-  vec(15,:) = zeta(:)
-  vec(16,:) = flow_beam(:)
-  vec(17,:) = flow_wall_exp(:)
-  vec(18,:) = zmag(:)
-  vec(19,:) = onetwo_press(:) ! Total pressure
+  EXPRO_q = abs(q(:))*ipccw*btccw
+  EXPRO_kappa = kappa(:)
+  EXPRO_delta = delta(:)
+  EXPRO_te = onetwo_te(:)
+  EXPRO_ne = onetwo_ene(:)*1e-19
+  EXPRO_z_eff = onetwo_zeff(:)
+  EXPRO_flow_mom = flow_mom(:)
+  EXPRO_pow_e = pow_e(:)
+  EXPRO_pow_i = pow_i(:)
+  EXPRO_pow_ei = pow_ei(:)
+  EXPRO_zeta = zeta(:)
+  EXPRO_flow_beam = flow_beam(:)
+  EXPRO_flow_wall = flow_wall_exp(:)
+  EXPRO_zmag = zmag(:)
+  EXPRO_ptot = onetwo_press(:) ! Total pressure
   ! COORDINATES: set sign of poloidal flux
-  vec(20,:) = abs(dpsi(:))*(-ipccw)
+  EXPRO_poloidalfluxover2pi = abs(dpsi(:))*(-ipccw)
 
   !----------------------------------------------------------------------
   ! Construct ion densities and temperatures, manage naming and numbering
@@ -186,20 +186,21 @@ subroutine prgen_map_iterdb
   endif
 
   onetwo_nion_tot = n0
-  if (n0 > 5) then
-      print '(a)',"ERROR: (prgen) Too many ions; report to GACODE developers."
-      stop
-  endif 
+  if (n0 > 10) then
+     print '(a)',"ERROR: (prgen) Too many ions; report to GACODE developers."
+     stop
+  endif
 
   ! reorder
-  do i=1,5
+  do i=1,10
      ip = reorder_vec(i)
-     vec(20+i,:) = onetwo_enion_vec(ip,:)
-     vec(25+i,:) = onetwo_tion_vec(ip,:)
+     EXPRO_ni(i,:) = onetwo_enion_vec(ip,:)
+     EXPRO_ti(i,:) = onetwo_tion_vec(ip,:)
   enddo
 
-  ! vphi
-  vec(31:35,:) = 0.0
+  ! velocities
+  EXPRO_vpol = 0.0
+  EXPRO_vtor = 0.0
 
   ! Look for carbon as first impurity, and insert toroidal velocity at theta=0
 
@@ -213,30 +214,21 @@ subroutine prgen_map_iterdb
   endif
 
   ! Insert carbon toroidal velocity
-  do i=1,5
+  do i=1,10
      if (reorder_vec(i) == onetwo_nprim+1) then
-        vec(30+i,:) = vphi_carbon(:)
+        EXPRO_vtor(i,:) = vphi_carbon(:)
      endif
   enddo
 
-  ! vpol
-  vec(36,:) = 0.0
-  vec(37,:) = 0.0
-  vec(38,:) = 0.0
-  vec(39,:) = 0.0
-  vec(40,:) = 0.0
-
   ! Additional powers (fusion and radiation)
   ! * for iterdb, put all radiated power in pow_e_line
-  vec(41,:) = pow_e_fus(:)
-  vec(42,:) = pow_i_fus(:)
-  vec(43,:) = 0.0
-  vec(44,:) = 0.0
-  vec(45,:) = pow_e_rad(:)
+  EXPRO_pow_e_fus  = pow_e_fus(:)
+  EXPRO_pow_i_fus  = pow_i_fus(:)
+  EXPRO_pow_e_line = pow_e_rad(:)
 
   ! Additional powers (external heating)
-  vec(46,:) = pow_e_aux(:)
-  vec(47,:) = pow_i_aux(:)
+  EXPRO_pow_e_aux = pow_e_aux(:)
+  EXPRO_pow_i_aux = pow_i_aux(:)
   !---------------------------------------------------------
 
   !---------------------------------------------------------
@@ -246,11 +238,11 @@ subroutine prgen_map_iterdb
      allocate(vpolc_exp(nx))
      allocate(vtorc_exp(nx))
      call prgen_read_cer
-     vec(10,:) = omega0(:)
-     do i=1,5
+     EXPRO_w0 = omega0(:)
+     do i=1,10
         if (reorder_vec(i) == onetwo_nprim+1) then
-           vec(30+i,:) = vtorc_exp(:)
-           vec(35+i,:) = vpolc_exp(:)
+           EXPRO_vtor(i,:) = vtorc_exp(:)
+           EXPRO_vpol(i,:) = vpolc_exp(:)
         endif
      enddo
   endif

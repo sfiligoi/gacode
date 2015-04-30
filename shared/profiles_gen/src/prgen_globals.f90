@@ -28,7 +28,7 @@ module prgen_globals
   real :: dpsi_efit
   real :: dpsi_data
   integer :: n_reorder
-  integer, dimension(5) :: reorder_vec
+  integer, dimension(10) :: reorder_vec
   integer :: n_null
   integer :: n_lump
   integer, dimension(:), allocatable :: lump_vec
@@ -76,8 +76,6 @@ module prgen_globals
   real, dimension(:), allocatable :: flow_mom
   real, dimension(:), allocatable :: sion_d
   real, dimension(:), allocatable :: sbcx_d
-  real, dimension(:,:), allocatable :: vec
-  real, dimension(:,:), allocatable :: vec2
 
   ! Ion name,type,mass,charge
   integer :: n_ion
@@ -106,12 +104,12 @@ module prgen_globals
   integer :: onetwo_nneu
   integer :: onetwo_nbion
   integer :: onetwo_nalp
-  character (len=2), dimension(5) :: onetwo_namep
-  character (len=2), dimension(5) :: onetwo_namei
-  character (len=2), dimension(5) :: onetwo_nameb
+  character (len=2), dimension(10) :: onetwo_namep
+  character (len=2), dimension(10) :: onetwo_namei
+  character (len=2), dimension(10) :: onetwo_nameb
   character (len=2), dimension(15) :: onetwo_ion_name
-  real, dimension(5) :: onetwo_m
-  integer, dimension(5) :: onetwo_z
+  real, dimension(10) :: onetwo_m
+  integer, dimension(10) :: onetwo_z
   real :: onetwo_time
   real :: onetwo_Rgeom
   real :: onetwo_Rmag
@@ -255,8 +253,8 @@ module prgen_globals
   real, dimension(:), allocatable :: peqdsk_nb
   real, dimension(:), allocatable :: peqdsk_pb
   integer :: peqdsk_fmt, peqdsk_nion, peqdsk_nimp, peqdsk_nbeams
-  real, dimension(5) :: peqdsk_z
-  real, dimension(5) :: peqdsk_m
+  real, dimension(10) :: peqdsk_z
+  real, dimension(10) :: peqdsk_m
   character (len=7), dimension(5)  :: peqdsk_type
   !---------------------------------------------------------
 
