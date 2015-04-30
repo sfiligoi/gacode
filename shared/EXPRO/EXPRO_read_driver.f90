@@ -25,8 +25,7 @@ subroutine EXPRO_read_driver
        status='old',&
        iostat=ierr)
 
-  read(io,*) EXPRO_ncol
-  read(io,*) EXPRO_nblock
+  read(io,*) EXPRO_n_ion
   read(io,*) EXPRO_n_exp
   read(io,*) EXPRO_b_ref
   read(io,*) EXPRO_arho
@@ -36,37 +35,37 @@ subroutine EXPRO_read_driver
   ! 1-5
   read(io,*) EXPRO_rho(:)
   read(io,*) EXPRO_rmin(:)
-  read(io,*) EXPRO_rmaj(:)
+  read(io,*) EXPRO_poloidalfluxover2pi(:)
   read(io,*) EXPRO_q(:)    
-  read(io,*) EXPRO_kappa(:)
+  read(io,*) EXPRO_w0(:) 
 
   ! 6-10
+  read(io,*) EXPRO_rmaj(:)
+  read(io,*) EXPRO_zmag(:)
+  read(io,*) EXPRO_kappa(:)
   read(io,*) EXPRO_delta(:)
-  read(io,*) EXPRO_te(:)
-  read(io,*) EXPRO_ne(:)
-  read(io,*) EXPRO_z_eff(:)
-  read(io,*) EXPRO_w0(:)     ! Note that EXPRO_w0 has GYRO/NEO sign
-
-  ! 11-15
-  read(io,*) EXPRO_flow_mom(:)
-  read(io,*) EXPRO_pow_e(:)
-  read(io,*) EXPRO_pow_i(:)
-  read(io,*) EXPRO_pow_ei(:)
   read(io,*) EXPRO_zeta(:)
 
-  ! 16-20
-  read(io,*) EXPRO_flow_beam(:)
-  read(io,*) EXPRO_flow_wall(:)
-  read(io,*) EXPRO_zmag(:)
+  ! 11-15
+  read(io,*) EXPRO_ne(:)
+  read(io,*) EXPRO_te(:)
   read(io,*) EXPRO_ptot(:)
-  read(io,*) EXPRO_poloidalfluxover2pi(:)
+  read(io,*) EXPRO_z_eff(:)
+  read(io,*) dummy
 
-  ! 21-25
+  ! 16-20
   read(io,*) EXPRO_ni(1,:)
   read(io,*) EXPRO_ni(2,:)
   read(io,*) EXPRO_ni(3,:)
   read(io,*) EXPRO_ni(4,:)
   read(io,*) EXPRO_ni(5,:)
+
+  ! 21-25
+  read(io,*) EXPRO_ni(6,:)
+  read(io,*) EXPRO_ni(7,:)
+  read(io,*) EXPRO_ni(8,:)
+  read(io,*) EXPRO_ni(9,:)
+  read(io,*) EXPRO_ni(10,:)
 
   ! 26-30
   read(io,*) EXPRO_ti(1,:)
@@ -76,47 +75,60 @@ subroutine EXPRO_read_driver
   read(io,*) EXPRO_ti(5,:)
 
   ! 31-35
+  read(io,*) EXPRO_ti(6,:)
+  read(io,*) EXPRO_ti(7,:)
+  read(io,*) EXPRO_ti(8,:)
+  read(io,*) EXPRO_ti(9,:)
+  read(io,*) EXPRO_ti(10,:)
+
+  ! 36-40
   read(io,*) EXPRO_vtor(1,:)
   read(io,*) EXPRO_vtor(2,:)
   read(io,*) EXPRO_vtor(3,:)
   read(io,*) EXPRO_vtor(4,:)
   read(io,*) EXPRO_vtor(5,:)
 
-  ! 36-40
+  ! 41-45
+  read(io,*) EXPRO_vtor(6,:)
+  read(io,*) EXPRO_vtor(7,:)
+  read(io,*) EXPRO_vtor(8,:)
+  read(io,*) EXPRO_vtor(9,:)
+  read(io,*) EXPRO_vtor(10,:)
+
+  ! 46-50
   read(io,*) EXPRO_vpol(1,:)
   read(io,*) EXPRO_vpol(2,:)
   read(io,*) EXPRO_vpol(3,:)
   read(io,*) EXPRO_vpol(4,:)
   read(io,*) EXPRO_vpol(5,:)
 
-  ! 41-45
-  read(io,*,iostat=ierr) EXPRO_pow_e_fus(:)
-  if (ierr == 0) then
+  ! 51-55
+  read(io,*) EXPRO_vpol(6,:)
+  read(io,*) EXPRO_vpol(7,:)
+  read(io,*) EXPRO_vpol(8,:)
+  read(io,*) EXPRO_vpol(9,:)
+  read(io,*) EXPRO_vpol(10,:)
 
-     read(io,*) EXPRO_pow_i_fus(:)
-     read(io,*) EXPRO_pow_e_sync(:)
-     read(io,*) EXPRO_pow_e_brem(:)
-     read(io,*) EXPRO_pow_e_line(:)
+  ! 56-60
+  read(io,*) EXPRO_flow_beam(:)
+  read(io,*) EXPRO_flow_wall(:)
+  read(io,*) EXPRO_flow_mom(:)
+  read(io,*) dummy
+  read(io,*) dummy
 
-     ! 46-47
-     read(io,*) EXPRO_pow_e_aux(:)
-     read(io,*) EXPRO_pow_i_aux(:)
+  ! 61-65
+  read(io,*) EXPRO_pow_e(:)
+  read(io,*) EXPRO_pow_i(:)
+  read(io,*) EXPRO_pow_ei(:)
+  read(io,*) EXPRO_pow_e_aux(:)
+  read(io,*) EXPRO_pow_i_aux(:)
 
-  else
-
-     close(io)
-     open(unit=io,file=trim(path)//trim(runfile),status='replace')
-     !print '(a)', 'INFO: (EXPRO_read_driver) Old input.profiles found; please regenerate with profiles_gen.'
-     EXPRO_pow_e_fus(:) = 0.0
-     EXPRO_pow_i_fus(:) = 0.0
-     EXPRO_pow_e_sync(:) = 0.0
-     EXPRO_pow_e_brem(:) = 0.0
-     EXPRO_pow_e_line(:) = 0.0
-
-     EXPRO_pow_e_aux(:) = 0.0
-     EXPRO_pow_i_aux(:) = 0.0
-
-  endif
+  ! 66-70
+  read(io,*) EXPRO_pow_e_fus(:)
+  read(io,*) EXPRO_pow_i_fus(:)
+  read(io,*) EXPRO_pow_e_sync(:)
+  read(io,*) EXPRO_pow_e_brem(:)
+  read(io,*) EXPRO_pow_e_line(:)
 
   close(io)
   !--------------------------------------------------------------

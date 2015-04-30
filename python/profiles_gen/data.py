@@ -40,35 +40,35 @@ class profiles_genData:
 
         n = self.n_exp
 
-        self.data['rho']   = data[0:n,0]
-        self.data['rmin']  = data[0:n,1]
-        self.data['rmaj']  = data[0:n,2]
-        self.data['q']     = data[0:n,3]
-        self.data['kappa'] = data[0:n,4]
-
-        self.data['delta']  = data[n:2*n,0]
-        self.data['Te']     = data[n:2*n,1]
-        self.data['ne']     = data[n:2*n,2]
-        self.data['z_eff']  = data[n:2*n,3]
-        self.data['omega0'] = data[n:2*n,4]
-
-        self.data['flow_mom'] = data[2*n:3*n,0]
-        self.data['pow_e']    = data[2*n:3*n,1]
-        self.data['pow_i']    = data[2*n:3*n,2]
-        self.data['pow_ei']   = data[2*n:3*n,3]
-        self.data['zeta']     = data[2*n:3*n,4]
-
-        self.data['flow_beam'] = data[3*n:4*n,0]
-        self.data['flow_wall'] = data[3*n:4*n,1]
-        self.data['zmag']      = data[3*n:4*n,2]
-        self.data['ptot']      = data[3*n:4*n,3]
-        self.data['polflux']   = data[3*n:4*n,4]
-
-        self.data['ni_1'] = data[4*n:5*n,0]
-        self.data['ni_2'] = data[4*n:5*n,1]
-        self.data['ni_3'] = data[4*n:5*n,2]
-        self.data['ni_4'] = data[4*n:5*n,3]
-        self.data['ni_5'] = data[4*n:5*n,4]
+        self.data['rho']     = data[0:n,0]
+        self.data['rmin']    = data[0:n,1]
+        self.data['polflux'] = data[0*n,2]
+        self.data['q']       = data[0:n,3]
+        self.data['omega0']  = data[0:n,4]
+        
+        self.data['rmaj']  = data[n:2*n,0]
+        self.data['zmag']  = data[n:2*n,1]
+        self.data['kappa'] = data[n:2*n,2]
+        self.data['delta'] = data[n:2*n,3]
+        self.data['zeta']  = data[n:2*n,4]
+ 
+        self.data['ne']     = data[2*n:3*n,0]
+        self.data['Te']     = data[2*n:3*n,1]
+        self.data['ptot']   = data[2*n:3*n,2]
+        self.data['z_eff']  = data[2*n:3*n,3]
+        # NULL
+        
+        self.data['ni_1'] = data[3*n:4*n,0]
+        self.data['ni_2'] = data[3*n:4*n,1]
+        self.data['ni_3'] = data[3*n:4*n,2]
+        self.data['ni_4'] = data[3*n:4*n,3]
+        self.data['ni_5'] = data[3*n:4*n,4]
+        
+        self.data['ni_6'] = data[4*n:5*n,0]
+        self.data['ni_7'] = data[4*n:5*n,1]
+        self.data['ni_8'] = data[4*n:5*n,2]
+        self.data['ni_9'] = data[4*n:5*n,3]
+        self.data['ni_10'] = data[4*n:5*n,4]
 
         self.data['Ti_1'] = data[5*n:6*n,0]
         self.data['Ti_2'] = data[5*n:6*n,1]
@@ -76,28 +76,53 @@ class profiles_genData:
         self.data['Ti_4'] = data[5*n:6*n,3]
         self.data['Ti_5'] = data[5*n:6*n,4]
 
-        self.data['vtor_1'] = data[6*n:7*n,0]
-        self.data['vtor_2'] = data[6*n:7*n,1]
-        self.data['vtor_3'] = data[6*n:7*n,2]
-        self.data['vtor_4'] = data[6*n:7*n,3]
-        self.data['vtor_5'] = data[6*n:7*n,4]
+        self.data['Ti_6'] = data[6*n:7*n,0]
+        self.data['Ti_7'] = data[6*n:7*n,1]
+        self.data['Ti_8'] = data[6*n:7*n,2]
+        self.data['Ti_9'] = data[6*n:7*n,3]
+        self.data['Ti_10'] = data[6*n:7*n,4]
 
-        self.data['vpol_1'] = data[7*n:8*n,0]
-        self.data['vpol_2'] = data[7*n:8*n,1]
-        self.data['vpol_3'] = data[7*n:8*n,2]
-        self.data['vpol_4'] = data[7*n:8*n,3]
-        self.data['vpol_5'] = data[7*n:8*n,4]
+        self.data['vtor_1'] = data[7*n:8*n,0]
+        self.data['vtor_2'] = data[7*n:8*n,1]
+        self.data['vtor_3'] = data[7*n:8*n,2]
+        self.data['vtor_4'] = data[7*n:8*n,3]
+        self.data['vtor_5'] = data[7*n:8*n,4]
+
+        self.data['vtor_6'] = data[8*n:9*n,0]
+        self.data['vtor_7'] = data[8*n:9*n,1]
+        self.data['vtor_8'] = data[8*n:9*n,2]
+        self.data['vtor_9'] = data[8*n:9*n,3]
+        self.data['vtor_10'] = data[8*n:9*n,4]
+
+        self.data['vpol_1'] = data[10*n:11*n,0]
+        self.data['vpol_2'] = data[10*n:11*n,1]
+        self.data['vpol_3'] = data[10*n:11*n,2]
+        self.data['vpol_4'] = data[10*n:11*n,3]
+        self.data['vpol_5'] = data[10*n:11*n,4]
+
+        self.data['vpol_6'] = data[12*n:13*n,0]
+        self.data['vpol_7'] = data[12*n:13*n,1]
+        self.data['vpol_8'] = data[12*n:13*n,2]
+        self.data['vpol_9'] = data[12*n:13*n,3]
+        self.data['vpol_10'] = data[12*n:13*n,4]
  
-        if n > 40:    
-            self.data['pow_e_fus'] = data[8*n:9*n,0]
-            self.data['pow_i_fus'] = data[8*n:9*n,1]
-            self.data['pow_e_sync'] = data[8*n:9*n,2]
-            self.data['pow_e_brem'] = data[8*n:9*n,3]
-            self.data['pow_e_line'] = data[8*n:9*n,4]
- 
-            self.data['pow_e_aux'] = data[9*n:10*n,0]
-            self.data['pow_i_aux'] = data[9*n:10*n,1]
- 
+        self.data['flow_beam'] = data[13*n:14*n,0]
+        self.data['flow_wall'] = data[13*n:14*n,1]
+        self.data['flow_mom']  = data[13*n:14*n,2]
+        # NULL
+        # NULL
+        
+        self.data['pow_e']     = data[14*n:15*n,0]
+        self.data['pow_i']     = data[14*n:15*n,1]
+        self.data['pow_ei']    = data[14*n:15*n,2]
+        self.data['pow_e_aux'] = data[14*n:15*n,3]
+        self.data['pow_i_aux'] = data[14*n:15*n,4]
+
+        self.data['pow_e_fus']  = data[15*n:16*n,0]
+        self.data['pow_i_fus']  = data[15*n:16*n,1]
+        self.data['pow_e_sync'] = data[15*n:16*n,2]
+        self.data['pow_e_brem'] = data[15*n:16*n,3]
+        self.data['pow_e_line'] = data[15*n:16*n,4]
 
         # OPTIONAL: Read input.profiles.extra if it exists
         try:

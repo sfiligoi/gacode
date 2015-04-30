@@ -80,10 +80,11 @@ module prgen_globals
   real, dimension(:,:), allocatable :: vec2
 
   ! Ion name,type,mass,charge
-  character (len=6), dimension(5) :: ion_name
-  character (len=7), dimension(5) :: ion_type
-  real, dimension(5) :: ion_mass
-  integer, dimension(5) :: ion_z
+  integer :: n_ion
+  character (len=6), dimension(10) :: ion_name
+  character (len=7), dimension(10) :: ion_type
+  real, dimension(10) :: ion_mass
+  integer, dimension(10) :: ion_z
   character (len=7) :: type_therm = '[therm]'
   character (len=7) :: type_fast  = '[fast] '
 
