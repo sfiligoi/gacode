@@ -12,7 +12,8 @@
 subroutine prgen_map_plasmastate
 
   use prgen_globals
-
+  use EXPRO_interface
+   
   implicit none
 
   integer :: i,j
@@ -310,7 +311,7 @@ subroutine prgen_map_plasmastate
      allocate(vpolc_exp(nx))
      allocate(vtorc_exp(nx))
      call prgen_read_cer
-     vec(10,:) = omega0(:)
+     EXPRO_w0 = omega0(:)
      do i=1,5
         if (reorder_vec(i) == onetwo_nprim+1) then
            EXPRO_vtor(i,:) = vtorc_exp(:)
