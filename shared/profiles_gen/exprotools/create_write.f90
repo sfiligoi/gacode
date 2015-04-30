@@ -34,7 +34,6 @@ subroutine create_write
 
   close(1)
 
-10 format(5(1pe14.7,2x))
 20 format(30(a))
 25 format(a,i2)
 30 format(a,i3)
