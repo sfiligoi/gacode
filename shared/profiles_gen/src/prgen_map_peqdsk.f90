@@ -51,66 +51,58 @@ subroutine prgen_map_peqdsk
   !---------------------------------------------------------
   ! Map profile data onto single array:
   !
-  allocate(vec(n_indx,peqdsk_nj))
-  vec(:,:) = 0.0
+  call EXPRO_alloc('./',1)
   !
-  vec(1,:)  = rho(:)
-  vec(2,:)  = rmin(:)
-  vec(3,:)  = rmaj(:)
+  EXPRO_rho(:)  = rho(:)
+  EXPRO_rmin(:) = rmin(:)
+  EXPRO_rmaj(:)  = rmaj(:)
   ! COORDINATES: set sign of q
-  vec(4,:)  = abs(q(:))*ipccw*btccw
-  vec(5,:)  = kappa(:)
-  vec(6,:)  = delta(:)
-  vec(7,:)  = peqdsk_te(:)
-  vec(8,:)  = peqdsk_ne(:)*10
-  vec(9,:)  = z_eff(:)
+  EXPRO_q(:)      = abs(q(:))*ipccw*btccw
+  EXPRO_kappa(:)  = kappa(:)
+  EXPRO_delta(:)  = delta(:)
+  EXPRO_te(:)     = peqdsk_te(:)
+  EXPRO_ne(:)     = peqdsk_ne(:)*10
+  EXPRO_z_eff(:)  = z_eff(:)
   ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
-  vec(10,:) = -ipccw*1e3*peqdsk_omgeb(:) 
-  vec(11,:) = 0.0      ! flow_mom
-  vec(12,:) = 0.0      ! pow_e
-  vec(13,:) = 0.0      ! pow_i 
-  vec(14,:) = 0.0      ! pow_ei_exp
-  vec(15,:) = zeta(:)
-  vec(16,:) = 0.0      ! flow_beam
-  vec(17,:) = 0.0      ! flow_wall_exp
-  vec(18,:) = zmag(:)  
-  vec(19,:) = 0.0      
+  EXPRO_w0(:)        = -ipccw*1e3*peqdsk_omgeb(:) 
+  EXPRO_flow_mom(:)  = 0.0      ! flow_mom
+  EXPRO_pow_e(:)     = 0.0      ! pow_e
+  EXPRO_pow_i(:)     = 0.0      ! pow_i 
+  EXPRO_pow_ei(:)    = 0.0      ! pow_ei_exp
+  EXPRO_zeta(:)      = zeta(:)
+  EXPRO_flow_beam(:) = 0.0      ! flow_beam
+  EXPRO_flow_wall(:) = 0.0      ! flow_wall_exp
+  EXPRO_zmag(:)      = zmag(:)  
+  EXPRO_ptot(:)      = 0.0      
   ! COORDINATES: set sign of poloidal flux
-  vec(20,:) = abs(dpsi(:))*(-ipccw)
+  EXPRO_poloidalfluxover2pi(:) = abs(dpsi(:))*(-ipccw)
 
   ! ni, nc, nb
-  vec(21,:) = ni_d(:)
+  EXPRO_ni(1,:) = ni_d(:)
   do i=1,peqdsk_nimp
-     vec(21+i,:) = ni_imp(i,:)
+     EXPRO_ni(1+i,:) = ni_imp(i,:)
   enddo
-  vec(21+peqdsk_nimp+1,:) = ni_b(:)
+  EXPRO_ni(1+peqdsk_nimp+1,:) = ni_b(:)
 
   ! ti, tc, tb
-  vec(26,:) = peqdsk_ti(:)
+  EXPRO_ti(1,:) = peqdsk_ti(:)
   do i=1,peqdsk_nimp
-     vec(26+i,:) = peqdsk_ti(:)
+     EXPRO_ti(1+i,:) = peqdsk_ti(:)
   enddo
   do i=1,peqdsk_nj
      if (peqdsk_nb(i) > epsilon(0.)) then
-        vec(26+peqdsk_nimp+1,i) = peqdsk_pb(i)/(peqdsk_nb(i)*10)/1.602
+        EXPRO_ti(1+peqdsk_nimp+1,i) = peqdsk_pb(i)/(peqdsk_nb(i)*10)/1.602
      else
-        vec(26+peqdsk_nimp+1,i) = 0.0
+        EXPRO_ti(1+peqdsk_nimp+1,i) = 0.0
      endif
   enddo
 
   ! vphi
   ! COORDINATES: -ipccw accounts for DIII-D toroidal angle convention
-  vec(31,:) = 0.0
-  vec(32,:) = -ipccw*1e3*peqdsk_omegat(:)*(rmaj(:)+rmin(:))
-  vec(33,:) = 0.0
-  vec(34,:) = 0.0
-  vec(35,:) = 0.0
+  EXPRO_vtor(:,:) = 0.0
+  EXPRO_vtor(2,:) = -ipccw*1e3*peqdsk_omegat(:)*(rmaj(:)+rmin(:))
 
   ! vpol
-  vec(36,:) = 0.0
-  vec(37,:) = 0.0
-  vec(38,:) = 0.0
-  vec(39,:) = 0.0
-  vec(40,:) = 0.0
+  EXPRO_vpol(:,:) = 0.0
 
 end subroutine prgen_map_peqdsk
