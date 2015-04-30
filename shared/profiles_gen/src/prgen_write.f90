@@ -59,7 +59,7 @@ subroutine prgen_write
      write(1,20) '#'
      write(1,'(a)') header
 
-     n_ion = min(plst_dp1_nspec_all,10)
+     n_ion = min(plst_dp1_nspec_all-1,10)
      do i=1,n_ion
         write(1,'(a,t27,a,t36,i3,t42,f5.1,t48,a)') '#',&
              ion_name(i),&
@@ -169,7 +169,7 @@ subroutine prgen_write
   !---------------------------------------------------------------
 
   EXPRO_n_exp = nx
-  
+
   ! COORDINATES: For all data sources, ensure correct sign of EXPRO_b_ref
   !              (and thus toroidal flux)
   !
@@ -196,7 +196,12 @@ subroutine prgen_write
   end select
 
   write(1,20) '# '
-  write(1,24) 'N_ION=',n_ion
+  if (n_ion < 10) then
+     write(1,24) 'N_ION=',n_ion
+  else
+     write(1,25) 'N_ION=',n_ion
+  endif
+
   if (EXPRO_n_exp > 99) then
      write(1,30) 'N_EXP=',EXPRO_n_exp
   else

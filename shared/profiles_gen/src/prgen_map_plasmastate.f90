@@ -246,7 +246,7 @@ subroutine prgen_map_plasmastate
   ! Compute the quasineutrality error with max 5 ions:
 
   quasi_err = 0.0
-  ix = min(plst_dp1_nspec_th+1,6)
+  ix = min(plst_dp1_nspec_th+1,n_ion_max+1)
   do i=1,nx
      quasi_err = quasi_err+sum(plst_ns(i,2:ix)*plst_q_all(2:ix))
   enddo
@@ -284,7 +284,7 @@ subroutine prgen_map_plasmastate
   EXPRO_polflux = dpsi(:)
 
   ! ni,ti
-  do i=1,10
+  do i=1,n_ion_max
      ip = reorder_vec(i)
      if (ip < plst_dp1_nspec_th+1) then
         EXPRO_ni(i,:) = plst_ns(:,ip+1)*1e-19
@@ -293,10 +293,10 @@ subroutine prgen_map_plasmastate
   enddo
 
   ! vphi
-  do i=1,10
-     ip = reorder_vec(i)+1
-     if (ip <= plst_dp1_nspec_th) then
-        if (trim(plst_all_name(ip)) == 'C') then
+  do i=1,n_ion_max
+     ip = reorder_vec(i)
+     if (ip < plst_dp1_nspec_th+1) then
+        if (trim(plst_all_name(ip+1)) == 'C') then
            ! COORDINATES: -ipccw accounts for plasmastate toroidal angle convention
            EXPRO_vtor(i,:) = -ipccw*plst_omegat(:)*(rmaj(:)+rmin(:))
         endif
@@ -312,7 +312,7 @@ subroutine prgen_map_plasmastate
      allocate(vtorc_exp(nx))
      call prgen_read_cer
      EXPRO_w0 = omega0(:)
-     do i=1,5
+     do i=1,n_ion_max
         if (reorder_vec(i) == onetwo_nprim+1) then
            EXPRO_vtor(i,:) = vtorc_exp(:)
            EXPRO_vpol(i,:) = vpolc_exp(:)
@@ -336,7 +336,7 @@ subroutine prgen_map_plasmastate
   ! Ion reordering diagnostics
 
   print '(a)','INFO: (prgen) Created these species:'
-  do i=1,5
+  do i=1,n_ion_max
      ip = reorder_vec(i)
      if (ip >= plst_dp1_nspec_all) then
         print '(t6,i2,1x,3(a))',i,'[null]'

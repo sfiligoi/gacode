@@ -111,7 +111,7 @@ subroutine prgen_map_ufile
   enddo
 
   ! reorder
-  do i=1,10 
+  do i=1,n_ion_max
      EXPRO_ni(i,:) = EXPRO_vtor(reorder_vec(i),:)
      EXPRO_ti(i,:) = EXPRO_vpol(reorder_vec(i),:)
   enddo
@@ -120,7 +120,7 @@ subroutine prgen_map_ufile
   EXPRO_vtor(:,:) = 0.0
 
   ! Insert carbon toroidal velocity
-  do i=1,10
+  do i=1,8
      j = reorder_vec(i)
      if (nint(ufile_m(j)) == 12) then
         print '(a)', 'INFO: (prgen) Assuming VROT is the carbon toroidal rotation.'
