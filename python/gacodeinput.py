@@ -171,9 +171,6 @@ class ProfileInput:
         nrow = int(self.data_dict['N_EXP'])
         nblock = len(profile_data)/(nrow*ncol)
 
-        file_out.write(str(ncol)+' ncol\n')
-        file_out.write(str(nblock)+' nblock\n')
-
         for x in self.data_orderlist:
             file_out.write(self.data_dict[x]+'  '+x+'\n')
 
