@@ -8,8 +8,10 @@
 subroutine prgen_map_peqdsk
 
   use prgen_globals
-
+  use EXPRO_interface
+  
   implicit none
+  
   integer :: i
   real, dimension(nx) :: ni_d
   real, dimension(3,nx) :: ni_imp

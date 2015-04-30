@@ -8,6 +8,7 @@
 subroutine prgen_map_null
 
   use prgen_globals
+  use EXPRO_interface
 
   implicit none
 
