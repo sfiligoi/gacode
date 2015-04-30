@@ -12,6 +12,7 @@
 subroutine prgen_map_ufile
 
   use prgen_globals
+  use EXPRO_interface
 
   implicit none
   real, dimension(:), allocatable :: powd_i

@@ -98,9 +98,9 @@ subroutine create_set
      do i=1,EXPRO_n_exp
         chi_t(i) = 0.5 * EXPRO_b_ref * (EXPRO_arho*EXPRO_rho(i))**2
      enddo
-     EXPRO_poloidalfluxover2pi(1) = 0.0
+     EXPRO_polflux(1) = 0.0
      do i=2,EXPRO_n_exp
-        EXPRO_poloidalfluxover2pi(i) = EXPRO_poloidalfluxover2pi(i-1) &
+        EXPRO_polflux(i) = EXPRO_polflux(i-1) &
              + 1.0/(0.5*(EXPRO_q(i) + EXPRO_q(i+1))) &
              * (chi_t(i) - chi_t(i-1))
      enddo
