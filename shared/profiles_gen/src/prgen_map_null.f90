@@ -15,7 +15,7 @@ subroutine prgen_map_null
   call prgen_get_chi(nx,q_gato,kappa,rmin,dpsi,rho,null_bref,null_arho)
 
   !---------------------------------------------------------
-  ! Map profile data inot EXPRO interface names:
+  ! Map profile data into EXPRO interface names:
   !
   EXPRO_n_exp = nx
   call EXPRO_alloc('./',1)
