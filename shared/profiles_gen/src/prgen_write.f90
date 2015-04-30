@@ -169,7 +169,7 @@ subroutine prgen_write
   !---------------------------------------------------------------
 
   EXPRO_n_exp = nx
-
+  
   ! COORDINATES: For all data sources, ensure correct sign of EXPRO_b_ref
   !              (and thus toroidal flux)
   !
@@ -196,7 +196,7 @@ subroutine prgen_write
   end select
 
   write(1,20) '# '
-  write(1,25) 'N_ION=',n_ion
+  write(1,24) 'N_ION=',n_ion
   if (EXPRO_n_exp > 99) then
      write(1,30) 'N_EXP=',EXPRO_n_exp
   else
@@ -216,6 +216,7 @@ subroutine prgen_write
   !-----------------------------------------------------------
   ! Set EXPRO ctrl parameters for derived parameter calc.
   !
+  EXPRO_ctrl_n_ion = n_ion
   EXPRO_ctrl_quasineutral_flag = 0
   EXPRO_ctrl_z(1) = 1.0
   if (efit_method > 1) then
@@ -231,6 +232,7 @@ subroutine prgen_write
   !-----------------------------------------------------------------------------------
 
 20 format(5(a))
+24 format(a,i1)
 25 format(a,i2)
 30 format(a,i3)
 40 format(a,i6)
