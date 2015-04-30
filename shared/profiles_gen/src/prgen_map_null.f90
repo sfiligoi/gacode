@@ -34,7 +34,7 @@ subroutine prgen_map_null
   EXPRO_ne = 1.0
 
   ! COORDINATES: set sign of poloidal flux
-  EXPRO_poloidalfluxover2pi = abs(dpsi(:))*(-ipccw)
+  EXPRO_polflux = abs(dpsi(:))*(-ipccw)
 
   ! Ion temperatures and densities
   EXPRO_ni(1,:) = 1.0
