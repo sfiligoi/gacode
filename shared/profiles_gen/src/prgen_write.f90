@@ -222,7 +222,6 @@ subroutine prgen_write
   !-----------------------------------------------------------------------------------
   ! Define EXPRO interface variables, then compute and write derived quantities:
   !
-  call EXPRO_alloc('./',1)
 
   EXPRO_rho(:)   = vec(1,:)
   EXPRO_rmin(:)  = vec(2,:)

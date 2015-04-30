@@ -14,43 +14,30 @@ subroutine prgen_map_null
   ! Compute rho, bref and arho:
   call prgen_get_chi(nx,q_gato,kappa,rmin,dpsi,rho,null_bref,null_arho)
 
-  
-
   !---------------------------------------------------------
-  ! Map profile data onto single array:
+  ! Map profile data inot EXPRO interface names:
   !
-  allocate(vec(n_indx,nx))
-  vec(:,:) = 0.0
-
-  vec(1,:)  = rho(:)
-  vec(2,:)  = rmin(:)
-  vec(3,:)  = rmaj(:)
+  EXPRO_n_exp = nx
+  call EXPRO_alloc('./',1)
+  
+  EXPRO_rho  = rho
+  EXPRO_rmin = rmin(:)
+  EXPRO_rmaj = rmaj(:)
   ! COORDINATES: set sign of q
-  vec(4,:)  = abs(q(:))*ipccw*btccw
-  vec(5,:)  = kappa(:)
-  vec(6,:)  = delta(:)
-  vec(7,:)  = 1.0
-  vec(8,:)  = 1.0
-  vec(9,:)  = 0.0
-  vec(10,:) = 0.0
-  vec(11,:) = 0.0
-  vec(12,:) = 0.0
-  vec(13,:) = 0.0
-  vec(14,:) = 0.0
-  vec(15,:) = zeta(:)
-  vec(16,:) = 0.0
-  vec(17,:) = 0.0
-  vec(18,:) = zmag(:)
-  vec(19,:) = 0.0
+  EXPRO_q = abs(q(:))*ipccw*btccw
+  EXPRO_kappa = kappa(:)
+  EXPRO_delta = delta(:)
+  EXPRO_zeta = zeta(:)
+  EXPRO_zmag = zmag(:)
+  EXPRO_te = 1.0
+  EXPRO_ne = 1.0
+
   ! COORDINATES: set sign of poloidal flux
-  vec(20,:) = abs(dpsi(:))*(-ipccw)
+  EXPRO_poloidalfluxover2pi = abs(dpsi(:))*(-ipccw)
 
   ! Ion temperatures and densities
-  vec(21:25,:) = 1.0
-  vec(26:30,:) = 1.0
-
-  ! Ion velocities
-  vec(31:40,:) = 0.0
+  EXPRO_ni(1,:) = 1.0
+  EXPRO_ti(1,:) = 1.0
 
  end subroutine prgen_map_null
 
