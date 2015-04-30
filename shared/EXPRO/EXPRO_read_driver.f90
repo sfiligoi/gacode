@@ -35,7 +35,7 @@ subroutine EXPRO_read_driver
   ! 1-5
   read(io,*) EXPRO_rho(:)
   read(io,*) EXPRO_rmin(:)
-  read(io,*) EXPRO_poloidalfluxover2pi(:)
+  read(io,*) EXPRO_polflux(:)
   read(io,*) EXPRO_q(:)    
   read(io,*) EXPRO_w0(:) 
 
