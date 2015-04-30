@@ -51,6 +51,7 @@ subroutine prgen_map_peqdsk
   !---------------------------------------------------------
   ! Map profile data onto single array:
   !
+  EXPRO_n_exp = peqdsk_nj
   call EXPRO_alloc('./',1)
   !
   EXPRO_rho(:)  = rho(:)
