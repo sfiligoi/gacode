@@ -174,9 +174,11 @@ class ProfileInput:
         for x in self.data_orderlist:
             file_out.write(self.data_dict[x]+'  '+x+'\n')
 
+        nblock = 14
+        ncol   = 5
         # Write vector data
-        for k in range (0,nblock):
-            for j in range (0,ncol):
+        for k in range(nblock):
+            for j in range(ncol):
                 for i in range(0,nrow):
                     indx = ncol*i+j+k*nrow*ncol
                     file_out.write(profile_data[indx]+'\n')
