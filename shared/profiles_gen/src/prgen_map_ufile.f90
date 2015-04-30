@@ -98,7 +98,7 @@ subroutine prgen_map_ufile
   EXPRO_flow_wall(:) = 0.0
   EXPRO_zmag(:)      = 0.0
   EXPRO_ptot(:)      = ufile_pres(:)
-  EXPRO_poloidalfluxover2pi(:) = dpsi(:)
+  EXPRO_polflux = dpsi(:)
 
   !-----------------------------------------------------------------
   ! Construct ion densities and temperatures with reordering

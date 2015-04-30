@@ -78,7 +78,7 @@ subroutine prgen_map_peqdsk
   EXPRO_zmag(:)      = zmag(:)  
   EXPRO_ptot(:)      = 0.0      
   ! COORDINATES: set sign of poloidal flux
-  EXPRO_poloidalfluxover2pi(:) = abs(dpsi(:))*(-ipccw)
+  EXPRO_polflux = abs(dpsi(:))*(-ipccw)
 
   ! ni, nc, nb
   EXPRO_ni(1,:) = ni_d(:)

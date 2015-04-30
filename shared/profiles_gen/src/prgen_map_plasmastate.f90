@@ -281,7 +281,7 @@ subroutine prgen_map_plasmastate
   EXPRO_zmag = zmag(:)
   EXPRO_ptot = plst_ptowb ! total pressure, thermal + fast ion
   ! COORDINATES: This poloidal flux has correct sign (see above).
-  EXPRO_poloidalfluxover2pi = dpsi(:)
+  EXPRO_polflux = dpsi(:)
 
   ! ni,ti
   do i=1,10

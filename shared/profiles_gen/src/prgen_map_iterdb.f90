@@ -124,7 +124,7 @@ subroutine prgen_map_iterdb
   EXPRO_zmag = zmag(:)
   EXPRO_ptot = onetwo_press(:) ! Total pressure
   ! COORDINATES: set sign of poloidal flux
-  EXPRO_poloidalfluxover2pi = abs(dpsi(:))*(-ipccw)
+  EXPRO_polflux = abs(dpsi(:))*(-ipccw)
 
   !----------------------------------------------------------------------
   ! Construct ion densities and temperatures, manage naming and numbering
