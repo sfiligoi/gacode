@@ -21,7 +21,7 @@ subroutine create_write
   !---------------------------------------------------------------
 
   write(1,20) '# '
-  write(1,25) 'N_ION=',EXPRO_n_ion
+  write(1,24) 'N_ION=',EXPRO_n_ion
   if (EXPRO_n_exp > 99) then
      write(1,30) 'N_EXP=',EXPRO_n_exp
   else
@@ -35,6 +35,7 @@ subroutine create_write
   close(1)
 
 20 format(30(a))
+24 format(a,i1)
 25 format(a,i2)
 30 format(a,i3)
 60 format(a,1pe13.7)
