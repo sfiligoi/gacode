@@ -284,7 +284,7 @@ subroutine prgen_map_iterdb
   !
 
   print '(a)','INFO: (prgen) Created these species'
-  do i=1,5
+  do i=1,n_ion_max
 
      ip = reorder_vec(i)
 
