@@ -28,8 +28,7 @@ subroutine EXPRO_pread
      call EXPRO_read_driver
   endif
 
-  call MPI_BCAST(EXPRO_ncol,1,MPI_INTEGER,0,comm,ierr)
-  call MPI_BCAST(EXPRO_nblock,1,MPI_INTEGER,0,comm,ierr)
+  call MPI_BCAST(EXPRO_n_ion,1,MPI_INTEGER,0,comm,ierr)
   call MPI_BCAST(EXPRO_n_exp,1,MPI_INTEGER,0,comm,ierr)
   call MPI_BCAST(EXPRO_b_ref,1,MPI_DOUBLE_PRECISION,0,comm,ierr)
   call MPI_BCAST(EXPRO_arho,1,MPI_DOUBLE_PRECISION,0,comm,ierr)

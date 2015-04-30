@@ -39,33 +39,85 @@ subroutine EXPRO_write_original(tag)
            write(2,'(5(1pe14.7,2x))') &
                 EXPRO_rho(i),&
                 EXPRO_rmin(i),&
-                EXPRO_rmaj(i),&
+                EXPRO_poloidalfluxover2pi(i),&
                 EXPRO_q(i),&
-                EXPRO_kappa(i)
-        enddo
-     endif
-
-     if (line(2:6) == 'delta') then
-        do i=1,EXPRO_n_exp
-           read(1,'(a)',iostat=ierr) line
-           write(2,'(5(1pe14.7,2x))') &
-                EXPRO_delta(i),&
-                EXPRO_te(i),&
-                EXPRO_ne(i),&
-                EXPRO_z_eff(i),&
                 EXPRO_w0(i)
         enddo
      endif
 
-     if (line(2:9) == 'flow_mom') then
+     if (line(2:5) == 'rmaj') then
         do i=1,EXPRO_n_exp
            read(1,'(a)',iostat=ierr) line
            write(2,'(5(1pe14.7,2x))') &
-                EXPRO_flow_mom(i),&
-                EXPRO_pow_e(i),&
-                EXPRO_pow_i(i),&
-                EXPRO_pow_ei(i),&
+                EXPRO_rmaj(i),&
+                EXPRO_zmag(i),&
+                EXPRO_kappa(i),&
+                EXPRO_delta(i),&
                 EXPRO_zeta(i)
+        enddo
+     endif
+
+     if (line(2:3) == 'ne') then
+        do i=1,EXPRO_n_exp
+           read(1,'(a)',iostat=ierr) line
+           write(2,'(5(1pe14.7,2x))') &
+                EXPRO_ne(i),&
+                EXPRO_te(i),&
+                EXPRO_ptot(i),&
+                EXPRO_z_eff(i),&
+                0.0
+        enddo
+     endif
+
+     if (line(2:5) == 'ni_1') then
+        do i=1,EXPRO_n_exp
+           read(1,'(a)',iostat=ierr) line
+           write(2,'(5(1pe14.7,2x))') EXPRO_ni(1:5,i)
+        enddo
+     endif
+     if (line(2:5) == 'ni_6') then
+        do i=1,EXPRO_n_exp
+           read(1,'(a)',iostat=ierr) line
+           write(2,'(5(1pe14.7,2x))') EXPRO_ni(6:10,i)
+        enddo
+     endif
+
+     if (line(2:5) == 'Ti_1') then
+        do i=1,EXPRO_n_exp
+           read(1,'(a)',iostat=ierr) line
+           write(2,'(5(1pe14.7,2x))') EXPRO_ti(1:5,i)
+        enddo
+     endif
+     if (line(2:5) == 'Ti_6') then
+        do i=1,EXPRO_n_exp
+           read(1,'(a)',iostat=ierr) line
+           write(2,'(5(1pe14.7,2x))') EXPRO_ti(6:10,i)
+        enddo
+     endif
+
+     if (line(2:7) == 'vtor_1') then
+        do i=1,EXPRO_n_exp
+           read(1,'(a)',iostat=ierr) line
+           write(2,'(5(1pe14.7,2x))') EXPRO_vtor(1:5,i)
+        enddo
+     endif
+     if (line(2:7) == 'vtor_6') then
+        do i=1,EXPRO_n_exp
+           read(1,'(a)',iostat=ierr) line
+           write(2,'(5(1pe14.7,2x))') EXPRO_vtor(6:10,i)
+        enddo
+     endif
+
+     if (line(2:7) == 'vpol_1') then
+        do i=1,EXPRO_n_exp
+           read(1,'(a)',iostat=ierr) line
+           write(2,'(5(1pe14.7,2x))') EXPRO_vpol(1:5,i)
+        enddo
+     endif
+     if (line(2:7) == 'vpol_6') then
+        do i=1,EXPRO_n_exp
+           read(1,'(a)',iostat=ierr) line
+           write(2,'(5(1pe14.7,2x))') EXPRO_vpol(6:10,i)
         enddo
      endif
 
@@ -75,39 +127,36 @@ subroutine EXPRO_write_original(tag)
            write(2,'(5(1pe14.7,2x))') &
                 EXPRO_flow_beam(i),&
                 EXPRO_flow_wall(i),&
-                EXPRO_zmag(i),&
-                EXPRO_ptot(i),&
-                EXPRO_poloidalfluxover2pi(i)
+                EXPRO_flow_mom(i),&
+                0.0,&
+                0.0
         enddo
      endif
 
-     if (line(2:3) == 'ni') then
+     if (line(2:7) == 'pow_e(') then
         do i=1,EXPRO_n_exp
            read(1,'(a)',iostat=ierr) line
-           write(2,'(5(1pe14.7,2x))') EXPRO_ni(:,i)
+           write(2,'(5(1pe14.7,2x))') &
+                EXPRO_pow_e(i),&
+                EXPRO_pow_i(i),&
+                EXPRO_pow_ei(i),&
+                EXPRO_pow_e_aux(i),&
+                EXPRO_pow_i_aux(i)
         enddo
      endif
 
-     if (line(2:3) == 'Ti') then
+     if (line(2:10) == 'pow_e_fus') then
         do i=1,EXPRO_n_exp
            read(1,'(a)',iostat=ierr) line
-           write(2,'(5(1pe14.7,2x))') EXPRO_ti(:,i)
+           write(2,'(5(1pe14.7,2x))') &
+                EXPRO_pow_e_fus(i),&
+                EXPRO_pow_i_fus(i),&
+                EXPRO_pow_e_sync(i),&
+                EXPRO_pow_e_brem(i),&
+                EXPRO_pow_e_line(i)
         enddo
      endif
 
-    if (line(2:5) == 'vtor') then
-        do i=1,EXPRO_n_exp
-           read(1,'(a)',iostat=ierr) line
-           write(2,'(5(1pe14.7,2x))') EXPRO_vtor(:,i)
-        enddo
-     endif
-
-    if (line(2:5) == 'vpol') then
-        do i=1,EXPRO_n_exp
-           read(1,'(a)',iostat=ierr) line
-           write(2,'(5(1pe14.7,2x))') EXPRO_vpol(:,i)
-        enddo
-     endif
   enddo
 
   close(1)

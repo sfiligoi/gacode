@@ -21,6 +21,7 @@ subroutine prgen_read_inputprofiles
   call EXPRO_read
 
   nx = EXPRO_n_exp
+  n_ion = EXPRO_n_ion
 
   call allocate_internals
 
