@@ -76,6 +76,7 @@ subroutine prgen_map_ufile
   !---------------------------------------------------------
   ! Map profile data onto single array:
   !
+  EXPRO_n_exp = nx
   call EXPRO_alloc('./',1)
   !
   EXPRO_rho(:)       = rho(:)
