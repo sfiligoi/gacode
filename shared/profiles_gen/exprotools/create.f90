@@ -19,6 +19,7 @@ program create
   EXPRO_ctrl_quasineutral_flag = 0
   EXPRO_ctrl_z(1:3) = exm_z(1:3)
   EXPRO_ctrl_numeq_flag = 0 
+  EXPRO_ctrl_n_ion = 3
 
   ! We're going to see if this file exists
   open(unit=1,file='input.profiles.gen',status='old',iostat=ierr)
