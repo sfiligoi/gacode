@@ -62,8 +62,10 @@ module tgyro_globals
   !===============================================================
   ! Variables for LOCAL transport mode
   !
+  integer, parameter :: n_ion_max = 9
   character(len=14) :: runfile='out.tgyro.run'
-  character(len=1), dimension(5) :: ion_tag=(/' ','2','3','4','5'/)
+  character(len=1), dimension(n_ion_max) :: &
+       ion_tag=(/' ','2','3','4','5','6','7','8','9'/)
   !
   ! Component fluxes
   !
@@ -218,7 +220,7 @@ module tgyro_globals
   integer, dimension(:), allocatable :: therm_vec
   real, dimension(:,:), allocatable :: dlnridr
 
-  real, dimension(5) :: mi
+  real, dimension(n_ion_max) :: mi
 
   ! Physical constants
   real :: pi
@@ -263,9 +265,9 @@ module tgyro_globals
   integer :: tgyro_quasineutral_flag
   integer :: loc_neo_method
   integer :: loc_n_ion
-  real, dimension(5) :: zi_vec
-  real, dimension(5) :: mi_vec
-  integer, dimension(5) :: therm_flag
+  real, dimension(n_ion_max) :: zi_vec
+  real, dimension(n_ion_max) :: mi_vec
+  integer, dimension(n_ion_max) :: therm_flag
   real :: loc_betae_scale
   integer :: loc_chang_hinton
   real :: loc_me_multiplier
