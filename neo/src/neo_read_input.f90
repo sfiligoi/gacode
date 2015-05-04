@@ -45,7 +45,7 @@ subroutine neo_read_input
 
   read(1,*) nu_1_in
 
-  do is=1,6
+  do is=1,11
      read(1,*) z_in(is)
      read(1,*) mass_in(is)
      read(1,*) dens_in(is)

@@ -19,12 +19,17 @@
     
     zfac(:) = 0
     do j=1,neo_n_species_in
-       if(j==1) zfac(1)=neo_z_1_in
-       if(j==2) zfac(2)=neo_z_2_in
-       if(j==3) zfac(3)=neo_z_3_in
-       if(j==4) zfac(4)=neo_z_4_in
-       if(j==5) zfac(5)=neo_z_5_in
-       if(j==6) zfac(6)=neo_z_6_in
+       if(j==1)  zfac(1)=neo_z_1_in
+       if(j==2)  zfac(2)=neo_z_2_in
+       if(j==3)  zfac(3)=neo_z_3_in
+       if(j==4)  zfac(4)=neo_z_4_in
+       if(j==5)  zfac(5)=neo_z_5_in
+       if(j==6)  zfac(6)=neo_z_6_in
+       if(j==7)  zfac(7)=neo_z_7_in
+       if(j==8)  zfac(8)=neo_z_8_in
+       if(j==9)  zfac(9)=neo_z_9_in
+       if(j==10) zfac(10)=neo_z_10_in
+       if(j==11) zfac(11)=neo_z_11_in
     enddo
     
     
@@ -79,12 +84,13 @@
 
   ! Reset species 1 density for quasineutrality
  
-  EXPRO_ctrl_rotation_method = 1
-  EXPRO_ctrl_density_method = 2 
+  EXPRO_ctrl_quasineutral_flag = 1
   EXPRO_ctrl_z(:) = 0.0
+  EXPRO_ctrl_n_ion = 0
   do j=1,neo_n_species_in
      if(zfac(j) /= -1) then
         EXPRO_ctrl_z(j) = 1.0*zfac(j)
+        EXPRO_ctrl_n_ion = EXPRO_ctrl_n_ion + 1
      endif
   enddo
   
@@ -119,7 +125,7 @@
   jbs_nclass(:) = 0.0
   pflux_sum(:)  = 0.0
   
-  do j=1,5
+  do j=1,10
      if (j == erspecies_indx) then
         vtor_measured(:) = EXPRO_vtor(j,:)
      endif

@@ -28,9 +28,7 @@ subroutine neo_experimental_profiles
   ! use EXPRO routines to read data:
   !
   call EXPRO_alloc(path,1)
-  EXPRO_ctrl_density_method = 2  ! quasi-neutrality density flag
-  EXPRO_ctrl_rotation_method = 1 ! Standard method 
-                                 ! (Waltz=2 is not consistent with NEO)
+  EXPRO_ctrl_quasineutral_flag = 1  ! quasi-neutrality density flag
 
   if (profile_equilibrium_model == 2) then
      EXPRO_ctrl_numeq_flag = 1
@@ -55,13 +53,16 @@ subroutine neo_experimental_profiles
 
   ! charge of ion species
   EXPRO_ctrl_z(:) = 0.0
+  EXPRO_ctrl_n_ion = 0
   if(adiabatic_ele_model == 1) then
      do is=1,n_species
         EXPRO_ctrl_z(is) = 1.0 * Z(is)
+        EXPRO_ctrl_n_ion = EXPRO_ctrl_n_ion + 1
      enddo
   else
      do is=1,n_species-1
         EXPRO_ctrl_z(is) = 1.0 * Z(is)
+        EXPRO_ctrl_n_ion = EXPRO_ctrl_n_ion + 1
      enddo
   endif
 
@@ -80,13 +81,13 @@ subroutine neo_experimental_profiles
   !
   rhoN_torflux_a      = EXPRO_arho
   rhoN_torflux_exp(:) = EXPRO_rho(:)
-  if(abs(EXPRO_poloidalfluxover2pi(n_grid_exp)) < epsilon(0.)) then
+  if(abs(EXPRO_polflux(n_grid_exp)) < epsilon(0.)) then
      psiN_polflux_exp(:) = 0.0
      psiN_polflux_a      = 0.0
   else
-     psiN_polflux_exp(:) = EXPRO_poloidalfluxover2pi(:) &
-          / EXPRO_poloidalfluxover2pi(n_grid_exp)
-     psiN_polflux_a     = EXPRO_poloidalfluxover2pi(n_grid_exp)
+     psiN_polflux_exp(:) = EXPRO_polflux(:) &
+          / EXPRO_polflux(n_grid_exp)
+     psiN_polflux_a     = EXPRO_polflux(n_grid_exp)
   endif
   rmin_exp(:)         = EXPRO_rmin(:)
   rmaj_exp(:)         = EXPRO_rmaj(:)
