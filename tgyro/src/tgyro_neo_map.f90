@@ -7,7 +7,7 @@ subroutine tgyro_neo_map
   real :: mu1
   real :: gamma_p0,u000
 
-  if (loc_n_ion > 5) then
+  if (loc_n_ion > 10) then
      call tgyro_catch_error('ERROR: (TGYRO) Too many ions for NEO') 
   endif
 
@@ -117,6 +117,66 @@ subroutine tgyro_neo_map
      neo_temp_6_in   = ti(5,i_r)/ti(1,i_r)
      neo_dlnndr_6_in = r_min*dlnnidr(5,i_r)
      neo_dlntdr_6_in = r_min*dlntidr(5,i_r)
+
+  endif
+
+  ! Ion #6
+  if (neo_n_species_in > 6) then
+
+     neo_z_7_in      = int(zi_vec(6))
+     neo_mass_7_in   = 1.0/sqrt(mi(1)/mi(6))**2
+     neo_dens_7_in   = ni(6,i_r)/ne(i_r)
+     neo_temp_7_in   = ti(6,i_r)/ti(1,i_r)
+     neo_dlnndr_7_in = r_min*dlnnidr(6,i_r)
+     neo_dlntdr_7_in = r_min*dlntidr(6,i_r)
+
+  endif
+
+  ! Ion #7
+  if (neo_n_species_in > 7) then
+
+     neo_z_8_in      = int(zi_vec(7))
+     neo_mass_8_in   = 1.0/sqrt(mi(1)/mi(7))**2
+     neo_dens_8_in   = ni(7,i_r)/ne(i_r)
+     neo_temp_8_in   = ti(7,i_r)/ti(1,i_r)
+     neo_dlnndr_8_in = r_min*dlnnidr(7,i_r)
+     neo_dlntdr_8_in = r_min*dlntidr(7,i_r)
+
+  endif
+
+  ! Ion #8
+  if (neo_n_species_in > 8) then
+
+     neo_z_9_in      = int(zi_vec(8))
+     neo_mass_9_in   = 1.0/sqrt(mi(1)/mi(8))**2
+     neo_dens_9_in   = ni(8,i_r)/ne(i_r)
+     neo_temp_9_in   = ti(8,i_r)/ti(1,i_r)
+     neo_dlnndr_9_in = r_min*dlnnidr(8,i_r)
+     neo_dlntdr_9_in = r_min*dlntidr(8,i_r)
+
+  endif
+
+  ! Ion #9
+  if (neo_n_species_in > 9) then
+
+     neo_z_10_in      = int(zi_vec(9))
+     neo_mass_10_in   = 1.0/sqrt(mi(1)/mi(9))**2
+     neo_dens_10_in   = ni(9,i_r)/ne(i_r)
+     neo_temp_10_in   = ti(9,i_r)/ti(1,i_r)
+     neo_dlnndr_10_in = r_min*dlnnidr(9,i_r)
+     neo_dlntdr_10_in = r_min*dlntidr(9,i_r)
+
+  endif
+
+  ! Ion #10
+  if (neo_n_species_in > 10) then
+
+     neo_z_11_in      = int(zi_vec(10))
+     neo_mass_11_in   = 1.0/sqrt(mi(1)/mi(10))**2
+     neo_dens_11_in   = ni(10,i_r)/ne(i_r)
+     neo_temp_11_in   = ti(10,i_r)/ti(1,i_r)
+     neo_dlnndr_11_in = r_min*dlnnidr(10,i_r)
+     neo_dlntdr_11_in = r_min*dlntidr(10,i_r)
 
   endif
 
