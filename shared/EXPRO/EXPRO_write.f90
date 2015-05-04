@@ -31,7 +31,7 @@ subroutine EXPRO_write(io)
   write(io,20) '# '
   write(io,20) '#',EXPRO_ne_tag,EXPRO_te_tag,EXPRO_ptot_tag,EXPRO_z_eff_tag,EXPRO_null_tag
   do i=1,nx
-     write(io,10) EXPRO_ne(i),EXPRO_te(i),EXPRO_ptot(i),EXPRO_delta(i),0.0
+     write(io,10) EXPRO_ne(i),EXPRO_te(i),EXPRO_ptot(i),EXPRO_z_eff(i),0.0
   enddo
   write(io,20) '# '
   write(io,20) '#',EXPRO_ni_tag(1:5)
