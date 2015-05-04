@@ -377,11 +377,11 @@ program vgen
      ! Generate new input.profiles.* files
 
      ! 1. input.profiles
-     call EXPRO_write_original(' ')
+     call EXPRO_write_original(1,'input.profiles',2,'input.profiles.new',' ')
 
      ! 2. input.profiles.extra
      call EXPRO_compute_derived
-     call EXPRO_write_derived
+     call EXPRO_write_derived(1,'input.profiles.extra')
 
      ! 3. input.profiles.jbs
      open(unit=1,file='input.profiles.jbs',status='replace')
