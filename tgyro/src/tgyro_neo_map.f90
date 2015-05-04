@@ -7,8 +7,8 @@ subroutine tgyro_neo_map
   real :: mu1
   real :: gamma_p0,u000
 
-  if (loc_n_ion > 10) then
-     call tgyro_catch_error('ERROR: (TGYRO) Too many ions for NEO') 
+  if (loc_n_ion > 9) then
+     call tgyro_catch_error('ERROR: (TGYRO) n_ion > 9 not supported in NEO interface.') 
   endif
 
   ! Assuming NEO m_norm = mi(1) (first ion)
@@ -165,18 +165,6 @@ subroutine tgyro_neo_map
      neo_temp_10_in   = ti(9,i_r)/ti(1,i_r)
      neo_dlnndr_10_in = r_min*dlnnidr(9,i_r)
      neo_dlntdr_10_in = r_min*dlntidr(9,i_r)
-
-  endif
-
-  ! Ion #10
-  if (neo_n_species_in > 10) then
-
-     neo_z_11_in      = int(zi_vec(10))
-     neo_mass_11_in   = 1.0/sqrt(mi(1)/mi(10))**2
-     neo_dens_11_in   = ni(10,i_r)/ne(i_r)
-     neo_temp_11_in   = ti(10,i_r)/ti(1,i_r)
-     neo_dlnndr_11_in = r_min*dlnnidr(10,i_r)
-     neo_dlntdr_11_in = r_min*dlntidr(10,i_r)
 
   endif
 
