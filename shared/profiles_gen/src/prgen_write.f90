@@ -232,7 +232,7 @@ subroutine prgen_write
   endif
   !
   call EXPRO_compute_derived
-  call EXPRO_write_derived
+  call EXPRO_write_derived(1,'input.profiles.extra')
   print '(a)','INFO: (prgen) Wrote input.profiles.extra.'
   !-----------------------------------------------------------------------------------
 

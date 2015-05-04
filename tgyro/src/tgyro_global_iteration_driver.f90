@@ -136,11 +136,10 @@ subroutine tgyro_global_iteration_driver
      r(i) = tgyro_rmin+dlength/2+(i-2)*dlength
   enddo
 
-  EXPRO_ctrl_density_method = tgyro_quasineutral_flag+1
+  EXPRO_ctrl_quasineutral_flag = tgyro_quasineutral_flag
   EXPRO_ctrl_z = 0.0
   EXPRO_ctrl_z(1:loc_n_ion) = zi_vec(1:loc_n_ion)
   EXPRO_ctrl_numeq_flag = loc_num_equil_flag
-  EXPRO_ctrl_rotation_method = 1
 
   call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
   call EXPRO_pread

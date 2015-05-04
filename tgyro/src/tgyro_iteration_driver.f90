@@ -233,10 +233,12 @@ subroutine tgyro_iteration_driver
            call tgyro_expro_map(r,dlnnidr(i_ion,:),n_r,100*EXPRO_rmin,EXPRO_ni(i_ion,:),EXPRO_n_exp)
            call tgyro_expro_map(r,dlntidr(i_ion,:),n_r,100*EXPRO_rmin,EXPRO_ti(i_ion,:),EXPRO_n_exp)
         enddo
-        EXPRO_ctrl_extension = '.new'
-        call EXPRO_write_original('Profiles modified by TGYRO')
+        call EXPRO_write_original(&
+             1,'input.profiles',&
+             2,'input.profiles.new',&
+             'Profiles modified by TGYRO')
         call EXPRO_compute_derived
-        call EXPRO_write_derived
+        call EXPRO_write_derived(1,'input.profiles.extra')
      endif
      call EXPRO_palloc(MPI_COMM_WORLD,'./',0) 
   endif

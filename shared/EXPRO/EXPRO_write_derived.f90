@@ -5,15 +5,15 @@
 !  Write all derived quantities to input.profiles.extra
 !--------------------------------------------------------
 
-subroutine EXPRO_write_derived
+subroutine EXPRO_write_derived(io,datafile)
 
   use EXPRO_globals
   use EXPRO_interface
 
-  integer, parameter :: io=1
+  integer, intent(in) :: io
+  character (len=*), intent(in) :: datafile
 
-  open(unit=io,&
-       file=trim(path)//'input.profiles.extra',status='replace')
+  open(unit=io,file=trim(path)//trim(datafile),status='replace')
 
   write(io,'(a)') '# input.profiles.extra'
   write(io,'(a)') '#'
