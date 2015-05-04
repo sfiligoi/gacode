@@ -78,7 +78,7 @@
        stop
     endif
 
-      ! Read experimental profiles using EXPRO library.
+    ! Read experimental profiles using EXPRO library.
 
   call EXPRO_palloc(MPI_COMM_WORLD,path,1)
 
@@ -106,7 +106,7 @@
 
   ! Write the derived quantities to input.profiles.extra
 
-  if (i_proc == 0) call EXPRO_write_derived
+  if (i_proc == 0) call EXPRO_write_derived(1,'input.profiles.extra')
 
   ! Set sign of btccw and ipccw from sign of b and q from EXPRO
   neo_btccw_in = -EXPRO_signb
