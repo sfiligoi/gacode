@@ -19,7 +19,7 @@ subroutine tgyro_restart
   integer :: p
   real, dimension(9) :: x_read
   character(len=1) :: dummy
-  real, dimension(2:n_r,4) :: res2,relax2
+  real, dimension(2:n_r,n_evolve_max) :: res2,relax2
   real :: gamma_p0
 
 
@@ -101,6 +101,11 @@ subroutine tgyro_restart
                  res(p) = res2(i,4) 
                  relax(p) = relax2(i,4)
               endif
+              if (loc_he_feedback_flag == 1) then
+                 p = p+1
+                 res(p) = res2(i,5) 
+                 relax(p) = relax2(i,5)
+              endif
            enddo
         enddo
         close(1)
@@ -115,7 +120,8 @@ subroutine tgyro_restart
        loc_ti_feedback_flag+&
        loc_te_feedback_flag+&
        loc_ne_feedback_flag+&
-       loc_er_feedback_flag
+       loc_er_feedback_flag+&
+       loc_he_feedback_flag
 
   call MPI_BCAST(loc_restart_flag,&
        1,&

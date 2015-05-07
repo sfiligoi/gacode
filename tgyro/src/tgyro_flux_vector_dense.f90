@@ -31,6 +31,10 @@ subroutine tgyro_flux_vector_dense(x_vec,f_vec)
         p = p+1
         f_rot(i) = x_vec(p)
      endif
+     if (loc_he_feedback_flag == 1) then
+        p = p+1
+        f_rot(i) = x_vec(p)
+     endif
   enddo
 
   ! Make profile consistent with new gradients
@@ -60,6 +64,11 @@ subroutine tgyro_flux_vector_dense(x_vec,f_vec)
      if (loc_er_feedback_flag == 1) then
         p = p+1
         f_vec(p) = mflux_tot(i) ! * pi_gb(i) * c_s(i)
+     endif
+
+     if (loc_he_feedback_flag == 1) then
+        p = p+1
+        f_vec(p) = pflux_i_neo(i_ash,i)+pflux_i_tur(i_ash,i) ! * gamma_gb(i) * c_s(i)
      endif
 
   enddo

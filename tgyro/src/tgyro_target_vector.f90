@@ -29,6 +29,10 @@ subroutine tgyro_target_vector(x_vec,g_vec)
         p = p+1
         f_rot(i) = x_vec(p)
      endif
+     if (loc_he_feedback_flag == 1) then
+        p = p+1
+        f_rot(i) = x_vec(p)
+     endif
   enddo
 
   call tgyro_profile_functions
@@ -53,6 +57,10 @@ subroutine tgyro_target_vector(x_vec,g_vec)
      if (loc_er_feedback_flag == 1) then
         p = p+1
         g_vec(p) = mflux_target(i) !* pi_gb(i) * c_s(i)
+     endif
+     if (loc_he_feedback_flag == 1) then
+        p = p+1
+        g_vec(p) = pflux_he_target(i) !* gamma_gb(i) * k * te(i) 
      endif
   enddo
 

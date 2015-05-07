@@ -66,6 +66,7 @@ subroutine tgyro_init_profiles
   p_sync(:)  = 0.0
   p_brem(:)  = 0.0
   p_expwd(:) = 0.0
+  f_he_fus(:) = 0.0
   !------------------------------------------------------------
 
   !----------------------------------------------
@@ -410,7 +411,8 @@ subroutine tgyro_init_profiles
   eflux_e_target(1) = 0.0
   pflux_e_target(1) = 0.0
   mflux_target(1)   = 0.0
-
+  pflux_he_target(1) = 0.0
+  
   ! Also need to zero initial exchanges to prevent use in tgyro_source 
   ! on iteration 0 before definition
   expwd_i_tur(:,:) = 0.0

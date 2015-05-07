@@ -81,6 +81,12 @@ subroutine tgyro_iteration_driver
            pmap(i,ip) = p
            quant(p) = 'er'
         endif
+        if (loc_he_feedback_flag == 1) then
+           p  = p+1
+           ip = ip+1
+           pmap(i,ip) = p
+           quant(p) = 'he'
+        endif
      enddo
   endif
 
@@ -184,6 +190,10 @@ subroutine tgyro_iteration_driver
         x_vec(p) = dlnnedr(i)
      endif
      if (loc_er_feedback_flag == 1) then
+        p = p+1
+        x_vec(p) = f_rot(i)
+     endif
+     if (loc_he_feedback_flag == 1) then
         p = p+1
         x_vec(p) = f_rot(i)
      endif
