@@ -12,6 +12,7 @@ subroutine tgyro_allocate_globals
   allocate(pflux_e_tot(n_r))
   allocate(pflux_i_tot(n_r))
   allocate(pflux_e_target(n_r))
+  allocate(pflux_he_tot(n_r))
   allocate(pflux_he_target(n_r))
 
   ! momentum fluxes
@@ -148,7 +149,6 @@ subroutine tgyro_allocate_globals
   allocate(res0(p_max))
   allocate(relax(p_max))
   allocate(therm_vec(sum(therm_flag(1:loc_n_ion))))
-  allocate(dlnridr(loc_n_ion,n_r))
 
   allocate(a_fourier_geo(8,0:32,n_r))
 

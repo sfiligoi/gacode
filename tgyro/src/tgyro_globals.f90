@@ -82,6 +82,7 @@ module tgyro_globals
   real, dimension(:,:), allocatable :: pflux_i_tur
   real, dimension(:), allocatable   :: pflux_e_tot
   real, dimension(:), allocatable   :: pflux_i_tot
+  real, dimension(:), allocatable   :: pflux_he_tot
   real, dimension(:), allocatable   :: pflux_e_target
   real, dimension(:), allocatable   :: pflux_he_target
 
@@ -222,7 +223,6 @@ module tgyro_globals
   real, dimension(:), allocatable :: relax
 
   integer, dimension(:), allocatable :: therm_vec
-  real, dimension(:,:), allocatable :: dlnridr
 
   real, dimension(n_ion_max) :: mi
 

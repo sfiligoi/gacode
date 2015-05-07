@@ -17,7 +17,7 @@ subroutine tgyro_restart
   integer :: j
   integer :: ioerr
   integer :: p
-  real, dimension(9) :: x_read
+  real, dimension(1+2*n_evolve_max) :: x_read
   character(len=1) :: dummy
   real, dimension(2:n_r,n_evolve_max) :: res2,relax2
   real :: gamma_p0
@@ -65,11 +65,12 @@ subroutine tgyro_restart
            read(1,'(a)') dummy
            read(1,'(a)') dummy
            do i=1,n_r
-              read(1,*) x_read(1:9)
+              read(1,*) x_read(1:11)
               eflux_i_tot(i) = x_read(2)
               eflux_e_tot(i) = x_read(4)
               pflux_e_tot(i) = x_read(6)
               mflux_tot(i)   = x_read(8)
+              pflux_he_tot(i)= x_read(10)
            enddo
         enddo
         close(1)

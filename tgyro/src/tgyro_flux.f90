@@ -214,7 +214,7 @@ subroutine tgyro_flux
 
      if (gyrotest_flag == 0) call glf23_run
 
-!     call tgyro_trap_component_error(glf23_error_status,glf23_error_message)
+     !     call tgyro_trap_component_error(glf23_error_status,glf23_error_message)
 
      pflux_e_tur(i_r) = glf23_elec_pflux_out
      eflux_e_tur(i_r) = glf23_elec_eflux_out
@@ -283,6 +283,12 @@ subroutine tgyro_flux
 
   mflux_tot(i_r) = mflux_e_neo(i_r)+mflux_e_tur(i_r)+&
        sum(mflux_i_neo(therm_vec(:),i_r)+mflux_i_tur(therm_vec(:),i_r))
+
+  if (loc_he_feedback_flag == 1) then
+     pflux_he_tot(i_r) = pflux_i_neo(i_ash,i_r)+pflux_i_tur(i_ash,i_r)
+  else
+     pflux_he_tot(i_r) = 0.0
+  endif
   !-------------------------------------------------------------------
 
   !----------------------------------------------------------

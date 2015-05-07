@@ -242,7 +242,7 @@ subroutine tgyro_write_data(i_print)
           pflux_e_target(i),&
           mflux_tot(i),&
           mflux_target(i),&
-          pflux_i_neo(i_ash,i)+pflux_i_tur(i_ash,i),&
+          pflux_he_tot(i),&
           pflux_he_target(i)
   enddo
 

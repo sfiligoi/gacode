@@ -21,7 +21,6 @@ subroutine tgyro_iteration_driver
   implicit none
 
   integer :: i_ion
-  integer :: iky
 
   n_r   = n_inst+1
   p_max = n_evolve*(n_r-1)
@@ -173,7 +172,6 @@ subroutine tgyro_iteration_driver
 
   correct_flag = 0
 
-
   p = 0
   do i=2,n_r
      if (loc_ti_feedback_flag == 1) then
@@ -195,7 +193,7 @@ subroutine tgyro_iteration_driver
      endif
      if (loc_he_feedback_flag == 1) then
         p = p+1
-        x_vec(p) = f_rot(i)
+        x_vec(p) = dlnnidr(i_ash,i)
      endif
   enddo
 

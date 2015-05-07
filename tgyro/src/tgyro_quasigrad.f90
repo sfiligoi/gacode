@@ -9,7 +9,7 @@
 ! according to different rules.
 !------------------------------------------------------------
 
-subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion,dlnridr)
+subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion)
 
   use tgyro_globals, only : &
        tgyro_quasineutral_flag, &
@@ -24,7 +24,6 @@ subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion,dlnridr)
   real, dimension(n_ion), intent(in) :: zi
   real, dimension(n_ion), intent(inout) :: ni
   real, dimension(n_ion), intent(inout) :: dlnnidr
-  real, dimension(n_ion), intent(in) :: dlnridr
 
   integer :: i
 

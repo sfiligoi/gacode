@@ -122,6 +122,26 @@ subroutine tgyro_comm_sync
        gyro_comm,&
        ierr)
 
+  ! sync pflux_he
+
+  call MPI_ALLGATHER(pflux_he_tot(i_r),&
+       1,&
+       MPI_DOUBLE_PRECISION,&
+       collect,&
+       1,&
+       MPI_DOUBLE_PRECISION,&
+       gyro_adj,&
+       ierr)
+
+  pflux_he_tot(2:n_r) = collect(:)
+
+  call MPI_BCAST(pflux_he_tot(2:n_r),&
+       n_r-1,&
+       MPI_DOUBLE_PRECISION,&
+       0,&
+       gyro_comm,&
+       ierr)
+
   ! sync-0 GYRO diagnostics
 
   do i_ion=1,loc_n_ion
