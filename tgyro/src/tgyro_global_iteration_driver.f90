@@ -65,6 +65,12 @@ subroutine tgyro_global_iteration_driver
      call tgyro_catch_error('ERROR: Must have odd number of GYRO radii')
   endif
 
+  if (loc_he_feedback_flag == 1) then
+     call tgyro_catch_error('ERROR: He feedback not supported globally.')
+  else
+     i_ash = 0
+  endif
+
   p_max = n_evolve*(n_r-1)
 
   call tgyro_allocate_globals
@@ -100,12 +106,7 @@ subroutine tgyro_global_iteration_driver
         ip = ip+1
         pmap(i,ip) = p
      endif
-     if (loc_he_feedback_flag == 1) then
-        p  = p+1
-        ip = ip+1
-        pmap(i,ip) = p
-     endif
-  enddo
+   enddo
 
   ! Set initial values
   res(:)   = 1.0

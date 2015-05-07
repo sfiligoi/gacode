@@ -209,10 +209,11 @@ subroutine tgyro_source
    
   !------------------------------------------------
   ! Target fluxes in GB units
-  eflux_i_target(:) = eflux_i_target(:)/q_gb(:)
-  eflux_e_target(:) = eflux_e_target(:)/q_gb(:)
-  pflux_e_target(:) = pflux_e_target(:)/gamma_gb(:)
-  mflux_target(:)   = mflux_target(:)/pi_gb(:)
+  eflux_i_target(:)  = eflux_i_target(:)/q_gb(:)
+  eflux_e_target(:)  = eflux_e_target(:)/q_gb(:)
+  pflux_e_target(:)  = pflux_e_target(:)/gamma_gb(:)
+  mflux_target(:)    = mflux_target(:)/pi_gb(:)
+  pflux_he_target(:) = pflux_he_target(:)/gamma_gb(:)
   !------------------------------------------------
 
 end subroutine tgyro_source

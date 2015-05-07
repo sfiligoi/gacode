@@ -312,13 +312,11 @@ subroutine tgyro_write_input
 
      case (0)
 
-        write(1,10) 'LOC_HE_FEEDBACK_FLAG','Helium ash evolution OFF'
-        i_ash = 0
+        write(1,10) 'LOC_HE_FEEDBACK_FLAG','He evolution OFF'
         
      case (1)
 
-        write(1,10) 'LOC_HE_FEEDBACK_FLAG','Helium ash evolution ON'
-        i_ash = 3
+        write(1,10) 'LOC_HE_FEEDBACK_FLAG','He evolution ON'
         
      case default
 
@@ -626,6 +624,7 @@ subroutine tgyro_write_input
      do i_ion=1,loc_n_ion
         if (therm_flag(i_ion) == 1) then
            ttext = 'thermal'
+           if (i_ion == i_ash) ttext = 'ash'
         else
            ttext = 'fast'
         endif

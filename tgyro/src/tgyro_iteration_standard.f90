@@ -58,7 +58,7 @@ subroutine tgyro_iteration_standard
         endif
         if (loc_he_feedback_flag == 1) then
            p = p+1
-           f_vec(p) = pflux_i_neo(i_ash,i)+pflux_i_tur(i_ash,i)
+           f_vec(p) = pflux_he_tot(i)
         endif
      enddo
      ! GYRO restart data available
@@ -117,7 +117,7 @@ subroutine tgyro_iteration_standard
            p = p+1
            dlnnedr(i) = x_vec(p)
            ! Set dlnnidr(1,i) according to quasineutrality
-           call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(:),loc_n_ion,dlnridr(:,i))
+           call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(:),loc_n_ion)
         endif
         if (loc_er_feedback_flag == 1) then
            p = p+1
@@ -125,7 +125,7 @@ subroutine tgyro_iteration_standard
         endif
         if (loc_he_feedback_flag == 1) then
            p = p+1
-           f_rot(i) = x_vec(p)
+           dlnnidr(i_ash,i) = x_vec(p)
         endif
      enddo
 
