@@ -12,6 +12,7 @@ subroutine tgyro_allocate_globals
   allocate(pflux_e_tot(n_r))
   allocate(pflux_i_tot(n_r))
   allocate(pflux_e_target(n_r))
+  allocate(pflux_he_target(n_r))
 
   ! momentum fluxes
   allocate(mflux_e_neo(n_r))
@@ -125,6 +126,7 @@ subroutine tgyro_allocate_globals
   allocate(p_e(n_r))
   allocate(s_alpha_i(n_r))
   allocate(s_alpha_e(n_r))
+  allocate(sn_alpha(n_r))
   allocate(s_brem(n_r))
   allocate(p_brem(n_r))
   allocate(s_sync(n_r))
@@ -139,6 +141,7 @@ subroutine tgyro_allocate_globals
   allocate(p_expwd(n_r))
   allocate(f_b_in(n_r))
   allocate(f_w_in(n_r))
+  allocate(f_he_fus(n_r))
   allocate(mf_in(n_r))
 
   allocate(res(p_max))

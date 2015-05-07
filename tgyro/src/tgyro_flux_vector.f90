@@ -61,6 +61,15 @@ subroutine tgyro_flux_vector(x_vec,f_vec,dx,index)
         endif
      endif
 
+     if (loc_he_feedback_flag == 1) then
+        p = p+1
+        if (index == 5) then
+           f_rot(i) = x_vec(p)+dx
+        else
+           f_rot(i) = x_vec(p)
+        endif
+     endif
+
   enddo
 
   call tgyro_flux
@@ -87,6 +96,11 @@ subroutine tgyro_flux_vector(x_vec,f_vec,dx,index)
      if (loc_er_feedback_flag == 1) then
         p = p+1
         f_vec(p) = mflux_tot(i)
+     endif
+
+     if (loc_he_feedback_flag == 1) then
+        p = p+1
+        f_vec(p) = pflux_i_neo(i_ash,i)+pflux_i_tur(i_ash,i)
      endif
 
   enddo

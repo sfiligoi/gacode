@@ -100,6 +100,11 @@ subroutine tgyro_global_iteration_driver
         ip = ip+1
         pmap(i,ip) = p
      endif
+     if (loc_he_feedback_flag == 1) then
+        p  = p+1
+        ip = ip+1
+        pmap(i,ip) = p
+     endif
   enddo
 
   ! Set initial values
@@ -136,6 +141,7 @@ subroutine tgyro_global_iteration_driver
      r(i) = tgyro_rmin+dlength/2+(i-2)*dlength
   enddo
 
+  EXPRO_ctrl_n_ion = loc_n_ion
   EXPRO_ctrl_quasineutral_flag = tgyro_quasineutral_flag
   EXPRO_ctrl_z = 0.0
   EXPRO_ctrl_z(1:loc_n_ion) = zi_vec(1:loc_n_ion)

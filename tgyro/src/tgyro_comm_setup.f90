@@ -50,7 +50,8 @@ subroutine tgyro_comm_setup
           loc_ti_feedback_flag+&
           loc_te_feedback_flag+&
           loc_ne_feedback_flag+&
-          loc_er_feedback_flag
+          loc_er_feedback_flag+&
+          loc_he_feedback_flag
 
      if (tgyro_iteration_method == 5) then
 
@@ -119,7 +120,8 @@ subroutine tgyro_comm_setup
           loc_ti_feedback_flag+&
           loc_te_feedback_flag+&
           loc_ne_feedback_flag+&
-          loc_er_feedback_flag
+          loc_er_feedback_flag+&
+          loc_he_feedback_flag
 
   end select
 
@@ -235,6 +237,10 @@ subroutine tgyro_comm_setup
      if (loc_er_feedback_flag == 1) then
         ip = ip+1
         if (worker == ip) worker_index=4
+     endif
+     if (loc_he_feedback_flag == 1) then
+        ip = ip+1
+        if (worker == ip) worker_index=5
      endif
 
   endif
