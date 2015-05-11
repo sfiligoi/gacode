@@ -29,6 +29,7 @@ program exprodump
   read(1,*) density_method
   close(1)
 
+  EXPRO_ctrl_n_ion = 5
   EXPRO_ctrl_quasineutral_flag = density_method-1
   EXPRO_ctrl_z(1:5) = z(1:5)
   EXPRO_ctrl_numeq_flag = 0 
