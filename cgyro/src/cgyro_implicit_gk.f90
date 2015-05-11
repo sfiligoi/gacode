@@ -31,7 +31,7 @@ subroutine cgyro_init_implicit_gk
      allocate(gkmat(nc,nc,nv_loc))
      allocate(i_piv_gk(nc,nv_loc))
      gkmat(:,:,:) = (0.0,0.0)
-     
+
      iv_loc = 0
      do iv=nv1,nv2
         
@@ -52,7 +52,7 @@ subroutine cgyro_init_implicit_gk
               jt = thcyc(it+id)
               jr = rcyc(ir,it,id)
               jc = ic_c(jr,jt)
-              
+
               gkmat(ic,jc,iv_loc) = gkmat(ic,jc,iv_loc) &
                    + (rval*dtheta(ir,it,id) &
                    + abs(rval)*dtheta_up(ir,it,id)) * 0.5 * delta_t
@@ -110,12 +110,12 @@ subroutine cgyro_init_implicit_gk
            it = it_c(ic)
            
            rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
-           
+              
            do id=-2,2
               jt = thcyc(it+id)
               jr = rcyc(ir,it,id)
               jc = ic_c(jr,jt)
-  
+              
               k=k+1
               gksp_mat(k,iv_loc) = (rval*dtheta(ir,it,id) &
                    + abs(rval)*dtheta_up(ir,it,id)) * 0.5 * delta_t
@@ -125,7 +125,7 @@ subroutine cgyro_init_implicit_gk
                  gksp_mat(k,iv_loc) = gksp_mat(k,iv_loc) + 1.0
               endif
            enddo
-
+           
         enddo
 
         ! Umfpack factorization 
@@ -255,6 +255,40 @@ subroutine cgyro_init_implicit_gk
      enddo
   endif
 
+  ! Special case for n=0,p=0
+  if(n == 0) then
+     do ic=1,nc
+        ir = ir_c(ic)
+        it = it_c(ic)
+        if(px(ir) == 0) then
+           
+           do jc=1,nc
+              do ifield=1,n_field
+                 id = idfield(ic,ifield)
+                 jd = idfield(jc,jfield)
+                 fieldmat_loc(id,jd) = 0.0
+              enddo
+           enddo
+           
+           do jc=1,nc
+              jr = ir_c(jc)
+              jt = it_c(jc)
+              if(jt==it .and. px(jr)==0) then
+                 id = idfield(ic,1)
+                 jd = idfield(jc,1)
+                 fieldmat_loc(id,jd) = 1.0
+                 if(n_field > 1) then
+                    id = idfield(ic,2)
+                    jd = idfield(jc,2)
+                    fieldmat_loc(id,jd) = 1.0
+                 endif
+              endif
+           enddo
+
+        endif
+     enddo
+  endif
+
   deallocate(akmat)
   deallocate(i_piv_field)
   deallocate(work_field)
@@ -367,6 +401,18 @@ subroutine cgyro_step_implicit_gk
   ! RHS = (1 - delta_t/2 * stream)*H_old - (Z f0/T)G field_old
 
   ! form the rhs
+
+  ! Special case for n=0, p=0
+  if(n == 0) then
+     do ic=1,nc
+        ir = ir_c(ic)
+        it = it_c(ic)
+        if(px(ir) == 0) then
+           cap_h_c(ic,:) = 0.0
+           field(ir,it,:)  = 0.0
+        endif
+     enddo
+  endif
 
   gkvec(:,:) = cap_h_c(:,:)
   iv_loc = 0
