@@ -18,6 +18,6 @@ clean:
 	cd gyro ; make clean 
 	cd cgyro ; make clean 
 	cd tgyro ; make clean
-	rm -f shared/python/pyrats/*/*.pyc
-	rm -f shared/python/*/*.pyc
+	rm -f python/*/*.pyc
+	rm -f python/*.pyc
 	rm -f modules/*genmod*
