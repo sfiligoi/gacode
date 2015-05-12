@@ -8,16 +8,6 @@ endif
 
 FC += ${FOMP}
 
-ifeq ($(ACC),true)
-   FC += ${FACC}
-endif
-
-ifeq ($(HDF5),true)
-  HDF5LIBS = \
-    ${GACODE_ROOT}/shared/vshdf5/vshdf5_lib.a \
-    ${HDF5_LIBS} 
-endif
- 
 EXEC=gyro
 
 export EXTRA_LIBS = \
@@ -29,7 +19,7 @@ export EXTRA_LIBS = \
        ${GACODE_ROOT}/gyro/TRANSPOSE/TRANSP_lib.a \
        ${GACODE_ROOT}/gyro/SSUB/SSUB_lib.a \
        ${GACODE_ROOT}/gyro/GKEIGEN/GKEIGEN_lib.a \
-       ${HDF5LIBS} ${LMATH} ${LIPM}	
+       ${LMATH}	
 
 all:
 	gacode_getversion > .VERSION
@@ -40,15 +30,11 @@ all:
 	cd src ; make
 	cd GKEIGEN ; make
 
-	cd src ; $(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o gyro_lib.a ${EXTRA_LIBS} ${FPETSC}
-
 clean:
 	cd BLEND ; make clean
 	cd TRANSPOSE ; make clean
 	cd SSUB ; make clean
 	cd src ; make clean
 	cd GKEIGEN ; make clean
-
-	cd src ; rm -f $(EXEC) .VERSION
 
 .IGNORE:

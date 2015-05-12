@@ -57,30 +57,30 @@ fancyNames = {'NULL'       : (''                ,''             ,'[null]'),
               'pow_e_brem' : ('p_{e,brem}'      ,'MW'           ,'pow_e_brem(MW)'),
               'pow_e_line' : ('p_{e,line}'      ,'MW'           ,'pow_e_line(MW)'),
               # extra (needs units)
-              'bunit'      : ('bunit'           ,''             ,''),
+              'bunit'      : ('bunit'           ,'T'            ,''),
               's'          : ('s'               ,''             ,''),
               'drmaj'      : ('drmaj'           ,''             ,''),
               'dzmag'      : ('dzmag'           ,''             ,''),
               'sdelta'     : ('sdelta'          ,''             ,''),
               'skappa'     : ('skappa'          ,''             ,''),
               'szeta'      : ('szeta'           ,''             ,''),
-              'dlnnedr'    : ('dlnnedr'         ,''             ,''),
-              'dlntedr'    : ('dlntedr'         ,''             ,''),
-              'dlnptotdr'  : ('dlnptotdr'       ,''             ,''),
-              'drdrho'     : ('drdrho'          ,''             ,''),
-              'w0p'        : ('w0p'             ,''             ,''),
-              'vol'        : ('vol'             ,''             ,''),
-              'volp'       : ('volp'            ,''             ,''),
-              'cs'         : ('cs'              ,''             ,''),
-              'rhos'       : ('rhos'            ,''             ,''),
-              'ni_new'     : ('ni_new'          ,''             ,''),
-              'dlnnidr_new': ('dlnnidr_new'     ,''             ,''),
+              'dlnnedr'    : ('dlnnedr'         ,'1/m'          ,''),
+              'dlntedr'    : ('dlntedr'         ,'1/m'          ,''),
+              'dlnptotdr'  : ('dlnptotdr'       ,'1/m'          ,''),
+              'drdrho'     : ('drdrho'          ,'1/m'          ,''),
+              'w0p'        : ('w0p'             ,'1/s/m'        ,''),
+              'vol'        : ('vol'             ,'m^3'          ,''),
+              'volp'       : ('volp'            ,'m^2'          ,''),
+              'cs'         : ('cs'              ,'m/s'          ,''),
+              'rhos'       : ('rhos'            ,'m'            ,''),
+              'ni_new'     : ('ni_new'          ,'10^{19}/m^3'  ,''),
+              'dlnnidr_new': ('dlnnidr_new'     ,'1/m'          ,''),
               'grad_r0'    : ('grad_r0'         ,''             ,''),
               'ave_grad_r' : ('ave_grad_r'      ,''             ,''),
-              'bp0'        : ('bp0'             ,''             ,''),
-              'bt0'        : ('bt0'             ,''             ,''),
-              'gamma_e'    : ('gamma_e'         ,''             ,''),
-              'gamma_p'    : ('gamma_p'         ,''             ,''),
+              'bp0'        : ('bp0'             ,'T'            ,''),
+              'bt0'        : ('bt0'             ,'T'            ,''),
+              'gamma_e'    : ('gamma_e'         ,'1/s'          ,''),
+              'gamma_p'    : ('gamma_p'         ,'1/s'          ,''),
               'mach'       : ('mach'            ,''             ,''),
               #jbs
               'expro_rho'  : ('rho'             ,''             ,''),
@@ -125,30 +125,30 @@ class profiles_genData:
             tmp = profiles_gen(infile)
             self.data.update(tmp.data)
             self.n_exp = tmp.n_exp
-            print('(INFO): (profiles_gen_plot) ' + infile + ' found.')
+            print('(INFO): (profiles_genData) ' + infile + ' found.')
         except Exception as E:
-            raise (IOError('(ERROR): (profiles_gen_plot) ' + infile + ' not found: ' + str(E)))
+            raise (IOError('(ERROR): (profiles_genData) ' + infile + ' not found: ' + str(E)))
 
         # OPTIONAL: Read input.profiles.extra if it exists
         try:
             self.data.update(profiles_gen_extra(infile + '.extra').data)
-            print('(INFO): (profiles_gen_plot) ' + infile + '.extra found.')
+            print('(INFO): (profiles_genData) ' + infile + '.extra found.')
         except Exception as E:
-            print('(INFO): (profiles_gen_plot) ' + infile + '.extra NOT loaded: ' + str(E))
+            print('(INFO): (profiles_genData) ' + infile + '.extra NOT loaded: ' + str(E))
 
         # OPTIONAL: Read input.profiles.geo if it exists
         try:
             self.geo.update(profiles_gen_geo(infile + '.geo').geo)
-            print('(INFO): (profiles_gen_plot) ' + infile + '.geo found.')
+            print('(INFO): (profiles_genData) ' + infile + '.geo found.')
         except Exception as E:
-            print('(INFO): (profiles_gen_plot) ' + infile + '.geo NOT loaded: ' + str(E))
+            print('(INFO): (profiles_genData) ' + infile + '.geo NOT loaded: ' + str(E))
 
         # OPTIONAL: Read input.profiles.jbs if it exists
         try:
             self.data.update(profiles_gen_jbs(infile + '.jbs').data)
-            print('(INFO): (profiles_gen_plot) ' + infile + '.jbs found.')
+            print('(INFO): (profiles_genData) ' + infile + '.jbs found.')
         except Exception as E:
-            print('(INFO): (profiles_gen_plot) ' + infile + '.jbs NOT loaded: ' + str(E))
+            print('(INFO): (profiles_genData) ' + infile + '.jbs NOT loaded: ' + str(E))
 
 class profiles_gen:
     def __init__(self, infile):
