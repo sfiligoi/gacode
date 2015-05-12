@@ -31,7 +31,7 @@ vars_input_profiles_jbs = ['expro_rho', 'jbs_err', 'jbs_neo', 'jbs_sauter', 'jbs
 fancyNames = {'NULL'       : (''                ,''             ,'[null]'),
               'rho'        : ('\\rho'           ,''             ,'rho(-)'),
               'rmin'       : ('r_{min}'         ,'m'            ,'rmin(m)'),
-              'rmaj'       : ('r_{maj}'         ,''             ,'rmax(m)'),
+              'rmaj'       : ('r_{maj}'         ,''             ,'rmaj(m)'),
               'q'          : ('q'               ,''             ,'q(-)'),
               'kappa'      : ('\\kappa'         ,''             ,'kappa(-)'),
               'delta'      : ('\\delta'         ,''             ,'delta(-)'),
@@ -64,23 +64,23 @@ fancyNames = {'NULL'       : (''                ,''             ,'[null]'),
               'sdelta'     : ('sdelta'          ,''             ,''),
               'skappa'     : ('skappa'          ,''             ,''),
               'szeta'      : ('szeta'           ,''             ,''),
-              'dlnnedr'    : ('dlnnedr'         ,'1/m'          ,''),
-              'dlntedr'    : ('dlntedr'         ,'1/m'          ,''),
-              'dlnptotdr'  : ('dlnptotdr'       ,'1/m'          ,''),
-              'drdrho'     : ('drdrho'          ,'1/m'          ,''),
+              'dlnnedr'    : ('-dln(n_e)/dr'    ,'1/m'          ,''),
+              'dlntedr'    : ('-dln(T_e)/dr'    ,'1/m'          ,''),
+              'dlnptotdr'  : ('-dln(ptot)/dr'   ,'1/m'          ,''),
+              'drdrho'     : ('dr/drho'         ,'1/m'          ,''),
               'w0p'        : ('w0p'             ,'1/s/m'        ,''),
               'vol'        : ('vol'             ,'m^3'          ,''),
               'volp'       : ('volp'            ,'m^2'          ,''),
               'cs'         : ('cs'              ,'m/s'          ,''),
-              'rhos'       : ('rhos'            ,'m'            ,''),
+              'rhos'       : ('\\rho_*'         ,'m'            ,''),
               'ni_new'     : ('ni_new'          ,'10^{19}/m^3'  ,''),
               'dlnnidr_new': ('dlnnidr_new'     ,'1/m'          ,''),
               'grad_r0'    : ('grad_r0'         ,''             ,''),
               'ave_grad_r' : ('ave_grad_r'      ,''             ,''),
               'bp0'        : ('bp0'             ,'T'            ,''),
               'bt0'        : ('bt0'             ,'T'            ,''),
-              'gamma_e'    : ('gamma_e'         ,'1/s'          ,''),
-              'gamma_p'    : ('gamma_p'         ,'1/s'          ,''),
+              'gamma_e'    : ('\\gamma_e'       ,'1/s'          ,''),
+              'gamma_p'    : ('\\gamma_p'       ,'1/s'          ,''),
               'mach'       : ('mach'            ,''             ,''),
               #jbs
               'expro_rho'  : ('rho'             ,''             ,''),
@@ -89,15 +89,13 @@ fancyNames = {'NULL'       : (''                ,''             ,'[null]'),
               'jbs_sauter' : ('jbs_{sauter}'    ,'MA/m^2'       ,''),
               'jbs_nclass' : ('jbs_{nclass}'    ,'MA/m^2'       ,''),
               'jbs_koh'    : ('jbs_{koh}'       ,'MA/m^2'       ,''),
-              }
 for _k in range(1, 11):
-    fancyNames['ni_%d'%_k]     =('ni_%d'%_k     ,'10^19/m^3'    ,'ni_%d(10^19/m^3)'%_k)
-    fancyNames['Ti_%d'%_k]     =('Ti_%d'%_k     ,'keV'          ,'Ti_%d(keV)'%_k)
-    fancyNames['vtor_%d'%_k]   =('vtor_%d'%_k   ,'m/s'          ,'vtor_%d(m/s)')
-    fancyNames['vpol_%d'%_k]   =('vpol_%d'%_k   ,'m/s'          ,'vpol_%d(m/s)')
-    fancyNames['dlntedr_%d'%_k]=('dlntedr_%s'%_k,''             ,'')  # needs to be fixed
-    fancyNames['dlntidr_%d'%_k]=('dlntidr_%s'%_k,''             ,'')  # needs to be fixed
-    fancyNames['dlnnidr_%d'%_k]=('dlnnidr_%s'%_k,''             ,'')  # needs to be fixed
+    fancyNames['ni_%d'%_k]     =('ni_%d'%_k           ,'10^19/m^3'    ,'ni_%d(10^19/m^3)'%_k)
+    fancyNames['Ti_%d'%_k]     =('Ti_%d'%_k           ,'keV'          ,'Ti_%d(keV)'%_k)
+    fancyNames['vtor_%d'%_k]   =('vtor_%d'%_k         ,'m/s'          ,'vtor_%d(m/s)'%_k)
+    fancyNames['vpol_%d'%_k]   =('vpol_%d'%_k         ,'m/s'          ,'vpol_%d(m/s)'%_k)
+    fancyNames['dlntidr_%d'%_k]=('-dln(T_{i%d})/dr'%_k,'1/m'        ,'')
+    fancyNames['dlnnidr_%d'%_k]=('-dln(n_{i%d})/dr'%_k,'1/m'        ,'')
 
 class profiles_genData:
     """
@@ -229,5 +227,3 @@ if __name__ == '__main__':
     tmp = tmp.union(set(vars_input_profiles_jbs))
     tmp = tmp.union(set(vars_input_profiles_extra))
     print tmp.difference(set(fancyNames.keys()))
-    
-    profiles_genData('/Users/meneghini/Dropbox/pycode/OMFIT-source/samples/input.profiles')
