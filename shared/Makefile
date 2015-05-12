@@ -17,4 +17,3 @@ clean:
 	cd fluxfit ; make clean
 	cd profiles_gen ; make clean
 	cd nclass ; make clean
-	cd python ; rm -f *.pyc	
