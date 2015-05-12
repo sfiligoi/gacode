@@ -37,4 +37,7 @@ clean:
 	cd src ; make clean
 	cd GKEIGEN ; make clean
 
+distclean:
+	cd src ; make clean
+
 .IGNORE:
