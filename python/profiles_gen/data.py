@@ -88,7 +88,7 @@ fancyNames = {'NULL'       : (''                ,''             ,'[null]'),
               'jbs_neo'    : ('jbs_{neo}'       ,'MA/m^2'       ,''),
               'jbs_sauter' : ('jbs_{sauter}'    ,'MA/m^2'       ,''),
               'jbs_nclass' : ('jbs_{nclass}'    ,'MA/m^2'       ,''),
-              'jbs_koh'    : ('jbs_{koh}'       ,'MA/m^2'       ,''),
+              'jbs_koh'    : ('jbs_{koh}'       ,'MA/m^2'       ,'')}
 for _k in range(1, 11):
     fancyNames['ni_%d'%_k]     =('ni_%d'%_k           ,'10^19/m^3'    ,'ni_%d(10^19/m^3)'%_k)
     fancyNames['Ti_%d'%_k]     =('Ti_%d'%_k           ,'keV'          ,'Ti_%d(keV)'%_k)
