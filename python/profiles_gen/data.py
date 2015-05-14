@@ -45,18 +45,18 @@ fancyNames = \
               'pow_i'      : ('P_i'                       ,'MW'           ,'pow_i(MW)'),
               'pow_ei'     : ('P_{ei}'                    ,'MW'           ,'pow_ei(MW)'),
               'zeta'       : ('\\zeta'                    ,''             ,'zeta(-)'),
-              'flow_beam'  : ('S_\mathrm{n,beam}'               ,'kW/eV'        ,'flow_beam(kW/eV)'),
-              'flow_wall'  : ('S_\mathrm{n,wall}'               ,'kW/eV'        ,'flow_wall(kW/eV)'),
+              'flow_beam'  : ('S_\mathrm{n,beam}'         ,'kW/eV'        ,'flow_beam(kW/eV)'),
+              'flow_wall'  : ('S_\mathrm{n,wall}'         ,'kW/eV'        ,'flow_wall(kW/eV)'),
               'zmag'       : ('Z_0'                       ,'m'            ,'zmag(m)'),
               'ptot'       : ('p_\mathrm{total}'          ,'Pa'           ,'ptot(Pa)'),
               'polflux'    : ('\\psi'                     ,'Wb/rad'       ,'polflux(Wb/rad)'),
-              'pow_e_aux'  : ('P_{e,aux}'                 ,'MW'           ,'pow_e_aux(MW)'),
-              'pow_i_aux'  : ('P_{i,aux}'                 ,'MW'           ,'pow_i_aux(MW)'),
-              'pow_e_fus'  : ('P_{e,fus}'                 ,'MW'           ,'pow_e_fus(MW)'),
-              'pow_i_fus'  : ('P_{i,fus}'                 ,'MW'           ,'pow_i_fus(MW)'),
-              'pow_e_sync' : ('P_{e,sync}'                ,'MW'           ,'pow_e_sync(MW)'),
-              'pow_e_brem' : ('P_{e,brem}'                ,'MW'           ,'pow_e_brem(MW)'),
-              'pow_e_line' : ('P_{e,line}'                ,'MW'           ,'pow_e_line(MW)'),
+              'pow_e_aux'  : ('P_{e,\\rm aux}'            ,'MW'           ,'pow_e_aux(MW)'),
+              'pow_i_aux'  : ('P_{i,\\rm aux}'            ,'MW'           ,'pow_i_aux(MW)'),
+              'pow_e_fus'  : ('P_{e,\\rm fus}'            ,'MW'           ,'pow_e_fus(MW)'),
+              'pow_i_fus'  : ('P_{i,\\rm fus}'            ,'MW'           ,'pow_i_fus(MW)'),
+              'pow_e_sync' : ('P_{e,\\rm sync}'           ,'MW'           ,'pow_e_sync(MW)'),
+              'pow_e_brem' : ('P_{e,\\rm brem}'           ,'MW'           ,'pow_e_brem(MW)'),
+              'pow_e_line' : ('P_{e,\\rm line}'           ,'MW'           ,'pow_e_line(MW)'),
               # extra (needs units)
               'bunit'      : ('B_\mathrm{unit}'           ,'T'            ,''),
               's'          : ('s'                         ,''             ,''),
@@ -85,17 +85,17 @@ fancyNames = \
               'mach'       : ('R_0 \\omega_0/c_s'         ,''             ,''),
               #jbs
               'expro_rho'  : ('\\rho'                     ,''             ,''),
-              'jbs_err'    : ('j_{bs,\rm err}'            ,'MA/m^2'       ,''),
-              'jbs_neo'    : ('j_{bs,\rm neo}'            ,'MA/m^2'       ,''),
-              'jbs_sauter' : ('j_{bs,\rm sauter}'         ,'MA/m^2'       ,''),
-              'jbs_nclass' : ('j_{bs,\rm nclass}'         ,'MA/m^2'       ,''),
-              'jbs_koh'    : ('j_{bs,\rm koh}'            ,'MA/m^2'       ,''),
+              'jbs_err'    : ('j_\mathrm{bs,err}'         ,'MA/m^2'       ,''),
+              'jbs_neo'    : ('j_\mathrm{bs,neo}'         ,'MA/m^2'       ,''),
+              'jbs_sauter' : ('j_\mathrm{bs,sauter}'      ,'MA/m^2'       ,''),
+              'jbs_nclass' : ('j_\mathrm{bs,nclass}'      ,'MA/m^2'       ,''),
+              'jbs_koh'    : ('j_\mathrm{bs,koh}'         ,'MA/m^2'       ,''),
               }
 for _k in range(1, 11):
     fancyNames['ni_%d'%_k]     =('n_{i,%d}'%_k          ,'10^{19}/m^3'  ,'ni_%d(10^19/m^3)'%_k)
     fancyNames['Ti_%d'%_k]     =('T_{i,%d}'%_k          ,'keV'          ,'Ti_%d(keV)'%_k)
-    fancyNames['vtor_%d'%_k]   =('v_{tor,%d}'%_k        ,'m/s'          ,'vtor_%d(m/s)'%_k)
-    fancyNames['vpol_%d'%_k]   =('v_{pol,%d}'%_k        ,'m/s'          ,'vpol_%d(m/s)'%_k)
+    fancyNames['vtor_%d'%_k]   =('v_{\\varphi,%d}'%_k   ,'m/s'          ,'vtor_%d(m/s)'%_k)
+    fancyNames['vpol_%d'%_k]   =('v_{\\theta,%d}'%_k    ,'m/s'          ,'vpol_%d(m/s)'%_k)
     fancyNames['dlntidr_%d'%_k]=('-dln(T_{i,%d})/dr'%_k ,'1/m'          ,'')
     fancyNames['dlnnidr_%d'%_k]=('-dln(n_{i,%d})/dr'%_k ,'1/m'          ,'')
 
