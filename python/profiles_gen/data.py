@@ -28,74 +28,76 @@ vars_input_profiles_extra = [
 vars_input_profiles_jbs = ['expro_rho', 'jbs_err', 'jbs_neo', 'jbs_sauter', 'jbs_nclass', 'jbs_koh']
 
 #tuple: 1) latex 2) units 3) profiles column name
-fancyNames = {'NULL'       : (''                ,''             ,'[null]'),
-              'rho'        : ('\\rho'           ,''             ,'rho(-)'),
-              'rmin'       : ('r_{min}'         ,'m'            ,'rmin(m)'),
-              'rmaj'       : ('r_{maj}'         ,''             ,'rmaj(m)'),
-              'q'          : ('q'               ,''             ,'q(-)'),
-              'kappa'      : ('\\kappa'         ,''             ,'kappa(-)'),
-              'delta'      : ('\\delta'         ,''             ,'delta(-)'),
-              'Te'         : ('T_e'             ,'keV'          ,'Te(keV)'),
-              'ne'         : ('n_e'             ,'10^{19}/m^3'  ,'ne(10^19/m^3)'),
-              'z_eff'      : ('z_{eff}'         ,''             ,'zeff(-)'),
-              'omega0'     : ('\\omega_0'       ,'1/s'          ,'omega0(1/s)'),
-              'flow_mom'   : ('flow_{mom}'      ,'Nm'           ,'flow_mom(Nm)'),
-              'pow_e'      : ('p_e'             ,'MW'           ,'pow_e(MW)'),
-              'pow_i'      : ('p_i'             ,'MW'           ,'pow_i(MW)'),
-              'pow_ei'     : ('p_{ei}'          ,'MW'           ,'pow_ei(MW)'),
-              'zeta'       : ('\\zeta'          ,''             ,'zeta(-)'),
-              'flow_beam'  : ('flow_{beam}'     ,'kW/eV'        ,'flow_beam(kW/eV)'),
-              'flow_wall'  : ('flow_{wall}'     ,'kW/eV'        ,'flow_wall(kW/eV)'),
-              'zmag'       : ('z_{mag}'         ,'m'            ,'zmag(m)'),
-              'ptot'       : ('p_{tot}'         ,'Pa'           ,'ptot(Pa)'),
-              'polflux'    : ('\\psi'           ,'Wb/rad'       ,'polflux(Wb/rad)'),
-              'pow_e_aux'  : ('p_{e,aux}'       ,'MW'           ,'pow_e_aux(MW)'),
-              'pow_i_aux'  : ('p_{i,aux}'       ,'MW'           ,'pow_i_aux(MW)'),
-              'pow_e_fus'  : ('p_{e,fus}'       ,'MW'           ,'pow_e_fus(MW)'),
-              'pow_i_fus'  : ('p_{i,fus}'       ,'MW'           ,'pow_i_fus(MW)'),
-              'pow_e_sync' : ('p_{e,sync}'      ,'MW'           ,'pow_e_sync(MW)'),
-              'pow_e_brem' : ('p_{e,brem}'      ,'MW'           ,'pow_e_brem(MW)'),
-              'pow_e_line' : ('p_{e,line}'      ,'MW'           ,'pow_e_line(MW)'),
+fancyNames = \
+             {'NULL'       : (''                          ,''             ,'[null]'),
+              'rho'        : ('\\rho'                     ,''             ,'rho(-)'),
+              'rmin'       : ('a'                         ,'m'            ,'rmin(m)'),
+              'rmaj'       : ('R_0'                       ,'m'            ,'rmaj(m)'),
+              'q'          : ('q'                         ,''             ,'q(-)'),
+              'kappa'      : ('\\kappa'                   ,''             ,'kappa(-)'),
+              'delta'      : ('\\delta'                   ,''             ,'delta(-)'),
+              'Te'         : ('T_e'                       ,'keV'          ,'Te(keV)'),
+              'ne'         : ('n_e'                       ,'10^{19}/m^3'  ,'ne(10^19/m^3)'),
+              'z_eff'      : ('z_{eff}'                   ,''             ,'zeff(-)'),
+              'omega0'     : ('\\omega_0'                 ,'1/s'          ,'omega0(1/s)'),
+              'flow_mom'   : ('flow_{mom}'                ,'Nm'           ,'flow_mom(Nm)'),
+              'pow_e'      : ('p_e'                       ,'MW'           ,'pow_e(MW)'),
+              'pow_i'      : ('p_i'                       ,'MW'           ,'pow_i(MW)'),
+              'pow_ei'     : ('p_{ei}'                    ,'MW'           ,'pow_ei(MW)'),
+              'zeta'       : ('\\zeta'                    ,''             ,'zeta(-)'),
+              'flow_beam'  : ('flow_{beam}'               ,'kW/eV'        ,'flow_beam(kW/eV)'),
+              'flow_wall'  : ('flow_{wall}'               ,'kW/eV'        ,'flow_wall(kW/eV)'),
+              'zmag'       : ('z_0'                       ,'m'            ,'zmag(m)'),
+              'ptot'       : ('p_{tot}'                   ,'Pa'           ,'ptot(Pa)'),
+              'polflux'    : ('\\psi'                     ,'Wb/rad'       ,'polflux(Wb/rad)'),
+              'pow_e_aux'  : ('p_{e,aux}'                 ,'MW'           ,'pow_e_aux(MW)'),
+              'pow_i_aux'  : ('p_{i,aux}'                 ,'MW'           ,'pow_i_aux(MW)'),
+              'pow_e_fus'  : ('p_{e,fus}'                 ,'MW'           ,'pow_e_fus(MW)'),
+              'pow_i_fus'  : ('p_{i,fus}'                 ,'MW'           ,'pow_i_fus(MW)'),
+              'pow_e_sync' : ('p_{e,sync}'                ,'MW'           ,'pow_e_sync(MW)'),
+              'pow_e_brem' : ('p_{e,brem}'                ,'MW'           ,'pow_e_brem(MW)'),
+              'pow_e_line' : ('p_{e,line}'                ,'MW'           ,'pow_e_line(MW)'),
               # extra (needs units)
-              'bunit'      : ('bunit'           ,'T'            ,''),
-              's'          : ('s'               ,''             ,''),
-              'drmaj'      : ('drmaj'           ,''             ,''),
-              'dzmag'      : ('dzmag'           ,''             ,''),
-              'sdelta'     : ('sdelta'          ,''             ,''),
-              'skappa'     : ('skappa'          ,''             ,''),
-              'szeta'      : ('szeta'           ,''             ,''),
-              'dlnnedr'    : ('-dln(n_e)/dr'    ,'1/m'          ,''),
-              'dlntedr'    : ('-dln(T_e)/dr'    ,'1/m'          ,''),
-              'dlnptotdr'  : ('-dln(ptot)/dr'   ,'1/m'          ,''),
-              'drdrho'     : ('dr/drho'         ,'1/m'          ,''),
-              'w0p'        : ('w0p'             ,'1/s/m'        ,''),
-              'vol'        : ('vol'             ,'m^3'          ,''),
-              'volp'       : ('volp'            ,'m^2'          ,''),
-              'cs'         : ('cs'              ,'m/s'          ,''),
-              'rhos'       : ('\\rho_*'         ,'m'            ,''),
-              'ni_new'     : ('ni_new'          ,'10^{19}/m^3'  ,''),
-              'dlnnidr_new': ('dlnnidr_new'     ,'1/m'          ,''),
-              'grad_r0'    : ('grad_r0'         ,''             ,''),
-              'ave_grad_r' : ('ave_grad_r'      ,''             ,''),
-              'bp0'        : ('bp0'             ,'T'            ,''),
-              'bt0'        : ('bt0'             ,'T'            ,''),
-              'gamma_e'    : ('\\gamma_e'       ,'1/s'          ,''),
-              'gamma_p'    : ('\\gamma_p'       ,'1/s'          ,''),
-              'mach'       : ('mach'            ,''             ,''),
+              'bunit'      : ('B_{unit}'                  ,'T'            ,''),
+              's'          : ('r dq/q dr'                 ,''             ,''),
+              'drmaj'      : ('dR_0/dr'                   ,''             ,''),
+              'dzmag'      : ('dZ_0/dr'                   ,''             ,''),
+              'sdelta'     : ('r d\\delta / \\delta dr'   ,''             ,''), #???? different from header of input.profiles.extra
+              'skappa'     : ('r d\\kappa / \\kappa dr'   ,''             ,''),
+              'szeta'      : ('r d\\zeta / \\zeta dr'     ,''             ,''), #???? different from header of input.profiles.extra
+              'dlnnedr'    : ('-dln(n_e)/dr'              ,'1/m'          ,''),
+              'dlntedr'    : ('-dln(T_e)/dr'              ,'1/m'          ,''),
+              'dlnptotdr'  : ('-dln(p_{tot})/dr'          ,'1/m'          ,''),
+              'drdrho'     : ('dr/d\\rho'                 ,''             ,''),
+              'w0p'        : ('d(w_0)/dr'                 ,'1/s/m'        ,''), #[r and rho have units of length]
+              'vol'        : ('V'                         ,'m^3'          ,''),
+              'volp'       : ('dV/dr'                     ,'m^2'          ,''),
+              'cs'         : ('c_s'                       ,'m/s'          ,''),
+              'rhos'       : ('\\rho_*'                   ,'m'            ,''),
+              'ni_new'     : ('n_i'                       ,'10^{19}/m^3'  ,''), #[Corrected for quasin.]
+              'dlnnidr_new': ('-dln(n_i)/dr'              ,'1/m'          ,''), #[Corrected for quasin.]
+              'grad_r0'    : ('|\\nabla_{r}|_{\\theta=0}' ,''             ,''),
+              'ave_grad_r' : ('<|\\nabla_r|>'             ,''             ,''),
+              'bp0'        : ('B_p|_{\\theta=0}'          ,'T'            ,''),
+              'bt0'        : ('B_t|_{\\theta=0}'          ,'T'            ,''),
+              'gamma_e'    : ('r/q d(w_0)/dr'             ,'1/s'          ,''),
+              'gamma_p'    : ('R_0 d(w_0)/dr'             ,'1/s'          ,''),
+              'mach'       : ('R_0 w_0/c_s'               ,''             ,''),
               #jbs
-              'expro_rho'  : ('rho'             ,''             ,''),
-              'jbs_err'    : ('jbs_{err}'       ,'MA/m^2'       ,''),
-              'jbs_neo'    : ('jbs_{neo}'       ,'MA/m^2'       ,''),
-              'jbs_sauter' : ('jbs_{sauter}'    ,'MA/m^2'       ,''),
-              'jbs_nclass' : ('jbs_{nclass}'    ,'MA/m^2'       ,''),
-              'jbs_koh'    : ('jbs_{koh}'       ,'MA/m^2'       ,'')}
+              'expro_rho'  : ('\\rho'                     ,''             ,''),
+              'jbs_err'    : ('j_{bs,\rm err}'             ,'MA/m^2'       ,''),
+              'jbs_neo'    : ('j_{bs,\rm neo}'             ,'MA/m^2'       ,''),
+              'jbs_sauter' : ('j_{bs,\rm sauter}'          ,'MA/m^2'       ,''),
+              'jbs_nclass' : ('j_{bs,\rm nclass}'         ,'MA/m^2'       ,''),
+              'jbs_koh'    : ('j_{bs,\rm koh}'            ,'MA/m^2'       ,''),
+              }
 for _k in range(1, 11):
-    fancyNames['ni_%d'%_k]     =('ni_%d'%_k           ,'10^19/m^3'    ,'ni_%d(10^19/m^3)'%_k)
-    fancyNames['Ti_%d'%_k]     =('Ti_%d'%_k           ,'keV'          ,'Ti_%d(keV)'%_k)
-    fancyNames['vtor_%d'%_k]   =('vtor_%d'%_k         ,'m/s'          ,'vtor_%d(m/s)'%_k)
-    fancyNames['vpol_%d'%_k]   =('vpol_%d'%_k         ,'m/s'          ,'vpol_%d(m/s)'%_k)
-    fancyNames['dlntidr_%d'%_k]=('-dln(T_{i%d})/dr'%_k,'1/m'        ,'')
-    fancyNames['dlnnidr_%d'%_k]=('-dln(n_{i%d})/dr'%_k,'1/m'        ,'')
+    fancyNames['ni_%d'%_k]     =('n_{i,%d}'%_k          ,'10^19/m^3'    ,'ni_%d(10^19/m^3)'%_k)
+    fancyNames['Ti_%d'%_k]     =('T_{i,%d}'%_k          ,'keV'          ,'Ti_%d(keV)'%_k)
+    fancyNames['vtor_%d'%_k]   =('v_{tor,%d}'%_k        ,'m/s'          ,'vtor_%d(m/s)'%_k)
+    fancyNames['vpol_%d'%_k]   =('v_{pol,%d}'%_k        ,'m/s'          ,'vpol_%d(m/s)'%_k)
+    fancyNames['dlntidr_%d'%_k]=('-dln(T_{i,%d})/dr'%_k ,'1/m'          ,'')
+    fancyNames['dlnnidr_%d'%_k]=('-dln(n_{i,%d})/dr'%_k ,'1/m'          ,'')
 
 class profiles_genData:
     """
