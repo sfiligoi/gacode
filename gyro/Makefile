@@ -27,7 +27,7 @@ all:
 	cd BLEND ; make 
 	cd TRANSPOSE ; make 
 	cd SSUB ; make 
-	cd src ; make
+	cd src ; $(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o gyro_lib.a $(EXTRA_LIBS)
 	cd GKEIGEN ; make
 
 clean:

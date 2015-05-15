@@ -35,9 +35,7 @@ for j in range(n):
     prof = profiles_genData(filevec[j])
     tag  = plotvec[j]
     keys  = sorted(prof.data.keys())
-
-    print prof.fancy[tag][1]
-    
+   
     success = 0
     for i in range(len(keys)):
         if tag == keys[i].split()[0]:
