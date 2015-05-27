@@ -270,6 +270,9 @@ subroutine prgen_map_iterdb
      case ('c')
         onetwo_z(i) = 6
         onetwo_m(i) = 12.0
+     case ('ar')
+        onetwo_z(i) = 18
+        onetwo_m(i) = 40.0
      case default
         onetwo_z(i) = 0
         onetwo_m(i) = 0.0
