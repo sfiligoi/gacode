@@ -33,7 +33,8 @@ subroutine cgyro_kernel
   call timer_lib_init('field_v')
   call timer_lib_init('field_c')
   call timer_lib_init('rhs')
-  call timer_lib_init('rhs_imp')
+  call timer_lib_init('rhs_impgk')
+  call timer_lib_init('rhs_impphi')
   call timer_lib_init('rhs_nl')
   call timer_lib_init('coll_set1')
   call timer_lib_init('coll_set2')
@@ -160,21 +161,6 @@ subroutine cgyro_kernel
   !---------------------------------------------------------------------------
 
   !---------------------------------------------------------------------------
-  ! Print final distribution
-  if (n_toroidal == 1) then
-     io_control = 1*(1-silent_flag)
-     call write_distribution(trim(path)//runfile_hb,1)
-     io_control = 2*(1-silent_flag)
-     call write_distribution(trim(path)//runfile_hb,1)
-
-     io_control = 1*(1-silent_flag)
-     call write_distribution(trim(path)//runfile_caphb,2)
-     io_control = 2*(1-silent_flag)
-     call write_distribution(trim(path)//runfile_caphb,2)
-  endif
-  !---------------------------------------------------------------------------
-
-  !---------------------------------------------------------------------------
   ! Print timers
   if (i_proc == 0) then
      print *
@@ -183,7 +169,8 @@ subroutine cgyro_kernel
      print '(a,1x,1pe11.4)',' field_v     ',timer_lib_time('field_v')
      print '(a,1x,1pe11.4)',' field_c     ',timer_lib_time('field_c')
      print '(a,1x,1pe11.4)',' rhs         ',timer_lib_time('rhs')
-     print '(a,1x,1pe11.4)',' rhs_imp     ',timer_lib_time('rhs_imp')
+     print '(a,1x,1pe11.4)',' rhs_impgk   ',timer_lib_time('rhs_impgk')
+     print '(a,1x,1pe11.4)',' rhs_impphi  ',timer_lib_time('rhs_impphi')
      print '(a,1x,1pe11.4)',' rhs_nl      ',timer_lib_time('rhs_nl')
      print '(a,1x,1pe11.4)',' coll_set1   ',timer_lib_time('coll_set1')
      print '(a,1x,1pe11.4)',' coll_set2   ',timer_lib_time('coll_set2')

@@ -35,7 +35,11 @@ subroutine tgyro_write_input
   ! - Need to set at least one profile to evolve, even for zero iterations, just to 
   !   define a residual error.
   !  
-  if (loc_er_feedback_flag+loc_ne_feedback_flag+loc_te_feedback_flag+loc_ti_feedback_flag == 0) then
+  if (loc_er_feedback_flag+&
+       loc_ne_feedback_flag+&
+       loc_te_feedback_flag+&
+       loc_ti_feedback_flag+&
+       loc_he_feedback_flag == 0) then
      error_flag = 1
      error_msg = 'ERROR: (TGYRO) Must set one profile to evolve, even if running for 0 iterations.'
   endif
@@ -304,6 +308,25 @@ subroutine tgyro_write_input
      !--------------------------------------------------------
 
      !--------------------------------------------------------
+     select case (loc_he_feedback_flag)
+
+     case (0)
+
+        write(1,10) 'LOC_HE_FEEDBACK_FLAG','He evolution OFF'
+        
+     case (1)
+
+        write(1,10) 'LOC_HE_FEEDBACK_FLAG','He evolution ON'
+        
+     case default
+
+        error_flag = 1
+        error_msg = 'Error: LOC_HE_FEEDBACK_FLAG'
+
+     end select
+     !--------------------------------------------------------
+
+     !--------------------------------------------------------
      select case (TGYRO_EXPWD_FLAG)
 
      case (0)
@@ -425,6 +448,10 @@ subroutine tgyro_write_input
      !--------------------------------------------------------
      select case (tgyro_tglf_revision)
 
+     case(0)
+
+        write(1,10) 'TGYRO_TGLF_REVISION', 'DEFAULTS + OVERWRITES'
+
      case (1)
 
         write(1,10) 'TGYRO_TGLF_REVISION','APS07'
@@ -447,16 +474,16 @@ subroutine tgyro_write_input
 
      select case(tgyro_glf23_revision)
      case (1)
- 
-         write(1,10) 'TGYRO_GLF23_REVISION','Original GLF23'
+
+        write(1,10) 'TGYRO_GLF23_REVISION','Original GLF23'
 
      case (2)
 
-         write(1,10) 'TGYRO_GLF23_REVISION','retuned GLF23 v1.61'
+        write(1,10) 'TGYRO_GLF23_REVISION','retuned GLF23 v1.61'
 
      case(3)
 
-         write(1,10) 'TGYRO_GLF23_REVISION','renormed GLF23'
+        write(1,10) 'TGYRO_GLF23_REVISION','renormed GLF23'
      case default
 
         error_flag = 1
@@ -597,6 +624,7 @@ subroutine tgyro_write_input
      do i_ion=1,loc_n_ion
         if (therm_flag(i_ion) == 1) then
            ttext = 'thermal'
+           if (i_ion == i_ash) ttext = 'ash'
         else
            ttext = 'fast'
         endif

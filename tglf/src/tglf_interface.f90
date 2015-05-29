@@ -37,9 +37,10 @@ module tglf_interface
   implicit none
 
   ! CONTROL PARAMETERS
-  character (len=256)  :: tglf_path_in        = ''
-  logical              :: tglf_dump_flag_in   = .false.
-  logical              :: tglf_quiet_flag_in  = .true.
+  character (len=256)  :: tglf_path_in       = ''
+  logical              :: tglf_dump_flag_in  = .false.
+  logical              :: tglf_quiet_flag_in = .true.
+  integer              :: tglf_test_flag_in  = 0
 
   ! INPUT PARAMETERS
 
@@ -59,7 +60,7 @@ module tglf_interface
   real    :: tglf_wd_zero_in        = 0.1
   real    :: tglf_linsker_factor_in = 0.0
   real    :: tglf_gradb_factor_in   = 0.0
-  real    :: tglf_filter_in         = 0.0
+  real    :: tglf_filter_in         = 2.0
   real    :: tglf_damp_psi_in       = 0.0
   real    :: tglf_damp_sig_in       = 0.0
 

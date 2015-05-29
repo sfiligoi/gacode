@@ -65,6 +65,12 @@ then
   echo "                                   -moment 3 (all fields)],"
   echo "                    moment_zero"
   echo
+  echo "          -pwidth <mult>"
+  echo "          Plot width multiplier (1.0 gives square plot)"
+  echo
+  echo "          -title <mult>"
+  echo "          Plot title"
+  echo
   echo "          -i"
   echo "          Use python in interactive mode.  Useful if matplotlibrc has interactive:True"
   echo
@@ -93,7 +99,10 @@ WINDOW=0.8
 FTYPE=screen
 DATAFILE=none
 TMAX=-1.0
+PWIDTH=1.5
 INTERACTIVE=
+TITLE=`basename $PWD`
+YMAX=-1.0
 #==============================================================================
 
 #==============================================================================
@@ -126,6 +135,12 @@ while [ $# -gt 0 ] ; do
   
   -i) INTERACTIVE=-i ;;
 
+  -pwidth) shift ; PWIDTH=$1 ;;
+
+  -title) shift ; TITLE=$1 ;;
+
+  -ymax) shift ; YMAX=$1 ;;
+  
   *) echo "ERROR: incorrect gyro_plot syntax." ; exit 1 ;;
 
   esac
@@ -171,7 +186,8 @@ case "$PLOT_TYPE" in
 	python $INTERACTIVE  $PYROOT/freq.py $SIMDIR $WINDOW $FTYPE $DATAFILE ;;
 
    gbflux)  
-	python $INTERACTIVE  $PYROOT/gbflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE $DATAFILE ;;
+       python $INTERACTIVE  $PYROOT/gbflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE \
+	      $DATAFILE $PWIDTH $TITLE $YMAX;;
 
    gbflux_n) 
         python $INTERACTIVE  $PYROOT/gbflux_n.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE $DATAFILE ;;

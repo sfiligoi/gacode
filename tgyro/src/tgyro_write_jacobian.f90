@@ -41,6 +41,11 @@ subroutine tgyro_write_jacobian(init)
         vary(ipt) = 'dPi/'
         varx(ipt) = 'dw0'
      endif
+     if (loc_he_feedback_flag == 1) then
+        ipt = ipt+1
+        vary(ipt) = 'dNh/'
+        varx(ipt) = 'dw0'
+     endif
 
      do p=1,p_max,n_evolve
         write(101,'(a,1pe13.6)') 'r/a = ',r((p-1)/n_evolve+2)/r_min

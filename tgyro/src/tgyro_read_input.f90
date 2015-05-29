@@ -56,16 +56,28 @@ subroutine tgyro_read_input
   call tgyro_readbc_real(zi_vec(3)) 
   call tgyro_readbc_real(zi_vec(4)) 
   call tgyro_readbc_real(zi_vec(5)) 
+  call tgyro_readbc_real(zi_vec(6)) 
+  call tgyro_readbc_real(zi_vec(7)) 
+  call tgyro_readbc_real(zi_vec(8)) 
+  call tgyro_readbc_real(zi_vec(9)) 
   call tgyro_readbc_real(mi_vec(1)) 
   call tgyro_readbc_real(mi_vec(2)) 
   call tgyro_readbc_real(mi_vec(3)) 
   call tgyro_readbc_real(mi_vec(4)) 
   call tgyro_readbc_real(mi_vec(5)) 
+  call tgyro_readbc_real(mi_vec(6)) 
+  call tgyro_readbc_real(mi_vec(7)) 
+  call tgyro_readbc_real(mi_vec(8)) 
+  call tgyro_readbc_real(mi_vec(9)) 
   call tgyro_readbc_int(therm_flag(1)) 
   call tgyro_readbc_int(therm_flag(2)) 
   call tgyro_readbc_int(therm_flag(3)) 
   call tgyro_readbc_int(therm_flag(4)) 
   call tgyro_readbc_int(therm_flag(5)) 
+  call tgyro_readbc_int(therm_flag(6)) 
+  call tgyro_readbc_int(therm_flag(7)) 
+  call tgyro_readbc_int(therm_flag(8)) 
+  call tgyro_readbc_int(therm_flag(9)) 
   call tgyro_readbc_real(loc_betae_scale) 
   call tgyro_readbc_int(loc_chang_hinton) 
   call tgyro_readbc_real(loc_me_multiplier) 
@@ -79,6 +91,7 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(loc_te_feedback_flag)
   call tgyro_readbc_int(loc_ne_feedback_flag)
   call tgyro_readbc_int(loc_er_feedback_flag)
+  call tgyro_readbc_int(loc_he_feedback_flag)
   call tgyro_readbc_int(loc_zeff_flag)
   call tgyro_readbc_int(loc_pflux_method)
   call tgyro_readbc_int(loc_residual_method)
@@ -119,6 +132,7 @@ subroutine tgyro_read_input
 
   allocate(paths(n_inst))
   allocate(procs(n_inst))
+  allocate(inputrads(n_inst))
 
   if (i_proc_global == 0) then
 
@@ -126,7 +140,7 @@ subroutine tgyro_read_input
 
      do i=1,n_inst
 
-        read(1,*) ipath,procs(i)
+        read(1,*) ipath,procs(i),inputrads(i)
         ind = index(ipath,' ')
 
         ! Append '/' to path name for use later
@@ -177,5 +191,26 @@ subroutine tgyro_read_input
      procs(:) = 1
   endif
   !------------------------------------------------------------------
+
+  call MPI_BCAST(paths,&
+       n_inst*80,&
+       MPI_CHARACTER,&
+       0,&
+       MPI_COMM_WORLD,&
+       ierr)
+
+  call MPI_BCAST(procs,&
+       n_inst,&
+       MPI_INTEGER,&
+       0,&
+       MPI_COMM_WORLD,&
+       ierr)
+
+  call MPI_BCAST(inputrads,&
+       n_inst,&
+       MPI_DOUBLE_PRECISION,&
+       0,&
+       MPI_COMM_WORLD,&
+       ierr)
 
 end subroutine tgyro_read_input

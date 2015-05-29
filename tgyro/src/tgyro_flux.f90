@@ -88,7 +88,7 @@ subroutine tgyro_flux
 
   case (1)
 
-     ! Call NEO analtytic theory
+     ! Call NEO analytic theory
      call neo_run
 
      pflux_i_neo(1,i_r) = neo_pflux_thHH_out/Gamma_neo_GB
@@ -188,7 +188,7 @@ subroutine tgyro_flux
      ! Map TGYRO parameters to TGLF
      call tgyro_tglf_map
 
-     if (gyrotest_flag == 0) call tglf_run_mpi
+     call tglf_run_mpi
 
      call tgyro_trap_component_error(tglf_error_status,tglf_error_message)
 
@@ -214,7 +214,7 @@ subroutine tgyro_flux
 
      if (gyrotest_flag == 0) call glf23_run
 
-!     call tgyro_trap_component_error(glf23_error_status,glf23_error_message)
+     !     call tgyro_trap_component_error(glf23_error_status,glf23_error_message)
 
      pflux_e_tur(i_r) = glf23_elec_pflux_out
      eflux_e_tur(i_r) = glf23_elec_eflux_out
@@ -225,11 +225,6 @@ subroutine tgyro_flux
      eflux_i_tur(1:loc_n_ion,i_r) = glf23_ion_eflux_out(1:loc_n_ion)
      mflux_i_tur(1:loc_n_ion,i_r) = glf23_ion_mflux_out(1:loc_n_ion)
      expwd_i_tur(1:loc_n_ion,i_r) = glf23_ion_expwd_out(1:loc_n_ion)
-
-!     if (tglf_q_low_flag == 1) then
-!        eflux_e_tur(i_r) = glf23_elec_eflux_low_out
-!        eflux_i_tur(1:loc_n_ion,i_r) = glf23_ion_eflux_low_out(1:loc_n_ion)
-!     endif
 
   case (4)
 
@@ -267,18 +262,6 @@ subroutine tgyro_flux
 
      ! No fluxes (tgyro_noturb_flag=1)
 
-  case (6)
-
-     ! User-provided function (FUN*)
-
-     eflux_e_tur(i_r) = tgyro_funflux(r(i_r)/r_min,r_min*dlntidr(1,i_r),r_min*dlntedr(i_r),2,0)
-
-     do i_ion=1,loc_n_ion
-        eflux_i_tur(i_ion,i_r) = tgyro_funflux(r(i_r)/r_min,r_min*dlntidr(1,i_r),r_min*dlntedr(i_r),2,i_ion)
-     enddo
-
-     call tgyro_trap_component_error(0,'null')
-
   case default
 
      call tgyro_catch_error('ERROR: (TGYRO) No matching flux method in tgyro_flux.')
@@ -300,6 +283,12 @@ subroutine tgyro_flux
 
   mflux_tot(i_r) = mflux_e_neo(i_r)+mflux_e_tur(i_r)+&
        sum(mflux_i_neo(therm_vec(:),i_r)+mflux_i_tur(therm_vec(:),i_r))
+
+  if (loc_he_feedback_flag == 1) then
+     pflux_he_tot(i_r) = pflux_i_neo(i_ash,i_r)+pflux_i_tur(i_ash,i_r)
+  else
+     pflux_he_tot(i_r) = 0.0
+  endif
   !-------------------------------------------------------------------
 
   !----------------------------------------------------------

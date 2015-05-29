@@ -53,42 +53,20 @@ subroutine prgen_map_inputprofiles
   enddo
 
   !---------------------------------------------------------
-  ! Map profile data onto single array:
+  ! Map profile data into EXPRO interface.
+  ! NOTE: EXPRO_alloc already called in prgen_read_inputprofiles
   !
-  allocate(vec(n_indx,nx))
-  vec(1,:)  = rho(:)
-  vec(2,:)  = rmin(:)
-  vec(3,:)  = rmaj(:)
+  EXPRO_rho(:)  = rho(:)
+  EXPRO_rmin(:) = rmin
+  EXPRO_rmaj(:) = rmaj(:)
   ! COORDINATES: set sign of q
-  vec(4,:)  = abs(q(:))*ipccw*btccw
-  vec(5,:)  = kappa(:)
-  vec(6,:)  = delta(:)
-  vec(7,:)  = EXPRO_te(:)
-  vec(8,:)  = EXPRO_ne(:)
-  vec(9,:)  = EXPRO_z_eff(:)
-  vec(10,:) = EXPRO_w0(:)
-  vec(11,:) = EXPRO_flow_mom(:)
-  vec(12,:) = EXPRO_pow_e(:)
-  vec(13,:) = EXPRO_pow_i(:)
-  vec(14,:) = EXPRO_pow_ei(:)
-  vec(15,:) = zeta(:)
-  vec(16,:) = EXPRO_flow_beam(:)
-  vec(17,:) = EXPRO_flow_wall(:)
-  vec(18,:) = zmag(:)
-  vec(19,:) = EXPRO_ptot(:)
+  EXPRO_q(:)     = abs(q(:))*ipccw*btccw
+  EXPRO_kappa(:) = kappa(:)
+  EXPRO_delta(:) = delta(:)
+  EXPRO_zeta(:)  = zeta(:)
+  EXPRO_zmag(:)  = zmag(:)
   ! COORDINATES: set sign of poloidal flux
-  vec(20,:) = abs(dpsi(:))*(-ipccw)
-
-  ! Ion temperatures and densities
-  vec(21:25,:) = EXPRO_ni(1:5,:)
-  vec(26:30,:) = EXPRO_ti(1:5,:)
-
-  ! Ion velocities
-  vec(31:35,:) = EXPRO_vtor(1:5,:)
-  vec(36:40,:) = EXPRO_vpol(1:5,:)
-
-  ! Deallocate arrays
-  call EXPRO_alloc('./',0)
+  EXPRO_polflux = abs(dpsi(:))*(-ipccw)
 
 end subroutine prgen_map_inputprofiles
 

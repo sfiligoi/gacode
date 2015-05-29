@@ -16,6 +16,11 @@ subroutine cgyro_init_implicit_gk
 
   if(implicit_flag == 0) return
 
+  if(zf_test_flag == 1 .and. ae_flag == 1) then
+     print *, 'ZF test with adiabatic electrons not implemented for implicit'
+     stop
+  endif
+
   ! Kinetic eqn solve matrix(ic,ic,nv_loc) 
   ! gkmat = (1 + delta_t/2 * stream)
 
@@ -26,7 +31,7 @@ subroutine cgyro_init_implicit_gk
      allocate(gkmat(nc,nc,nv_loc))
      allocate(i_piv_gk(nc,nv_loc))
      gkmat(:,:,:) = (0.0,0.0)
-     
+
      iv_loc = 0
      do iv=nv1,nv2
         
@@ -42,12 +47,12 @@ subroutine cgyro_init_implicit_gk
            it = it_c(ic)
            
            rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
-           
+
            do id=-2,2
               jt = thcyc(it+id)
               jr = rcyc(ir,it,id)
               jc = ic_c(jr,jt)
-              
+
               gkmat(ic,jc,iv_loc) = gkmat(ic,jc,iv_loc) &
                    + (rval*dtheta(ir,it,id) &
                    + abs(rval)*dtheta_up(ir,it,id)) * 0.5 * delta_t
@@ -105,12 +110,12 @@ subroutine cgyro_init_implicit_gk
            it = it_c(ic)
            
            rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
-           
+              
            do id=-2,2
               jt = thcyc(it+id)
               jr = rcyc(ir,it,id)
               jc = ic_c(jr,jt)
-           
+              
               k=k+1
               gksp_mat(k,iv_loc) = (rval*dtheta(ir,it,id) &
                    + abs(rval)*dtheta_up(ir,it,id)) * 0.5 * delta_t
@@ -120,7 +125,7 @@ subroutine cgyro_init_implicit_gk
                  gksp_mat(k,iv_loc) = gksp_mat(k,iv_loc) + 1.0
               endif
            enddo
-
+           
         enddo
 
         ! Umfpack factorization 
@@ -142,6 +147,7 @@ subroutine cgyro_init_implicit_gk
   allocate(akmat(nc,nc))
   allocate(i_piv_field(nc))
   allocate(work_field(nc))
+  fieldmat_loc(:,:) = (0.0,0.0)
 
   id=0
   do ifield=1,n_field
@@ -249,6 +255,40 @@ subroutine cgyro_init_implicit_gk
      enddo
   endif
 
+  ! Special case for n=0,p=0
+  if(n == 0) then
+     do ic=1,nc
+        ir = ir_c(ic)
+        it = it_c(ic)
+        if(px(ir) == 0) then
+           
+           do jc=1,nc
+              do ifield=1,n_field
+                 id = idfield(ic,ifield)
+                 jd = idfield(jc,jfield)
+                 fieldmat_loc(id,jd) = 0.0
+              enddo
+           enddo
+           
+           do jc=1,nc
+              jr = ir_c(jc)
+              jt = it_c(jc)
+              if(jt==it .and. px(jr)==0) then
+                 id = idfield(ic,1)
+                 jd = idfield(jc,1)
+                 fieldmat_loc(id,jd) = 1.0
+                 if(n_field > 1) then
+                    id = idfield(ic,2)
+                    jd = idfield(jc,2)
+                    fieldmat_loc(id,jd) = 1.0
+                 endif
+              endif
+           enddo
+
+        endif
+     enddo
+  endif
+
   deallocate(akmat)
   deallocate(i_piv_field)
   deallocate(work_field)
@@ -351,16 +391,28 @@ subroutine cgyro_step_implicit_gk
   integer :: is, ir, it, ie, ix
   integer :: id, jt, jr, jc, ifield
   complex :: efac(n_field)
-  real    :: rval, rfac, vfac
+  real    :: rval, rfac(nc), vfac
 
-  if(implicit_flag == 0) return
-
-  call timer_lib_in('rhs_imp')
+  if (implicit_flag == 0) return
+  
+  call timer_lib_in('rhs_impgk')
 
   ! Solve the gk eqn for the part of RHS depending on old H,fields
   ! RHS = (1 - delta_t/2 * stream)*H_old - (Z f0/T)G field_old
 
   ! form the rhs
+
+  ! Special case for n=0, p=0
+  if(n == 0) then
+     do ic=1,nc
+        ir = ir_c(ic)
+        it = it_c(ic)
+        if(px(ir) == 0) then
+           cap_h_c(ic,:) = 0.0
+           field(ir,it,:)  = 0.0
+        endif
+     enddo
+  endif
 
   gkvec(:,:) = cap_h_c(:,:)
   iv_loc = 0
@@ -369,7 +421,7 @@ subroutine cgyro_step_implicit_gk
      is = is_v(iv)
      ix = ix_v(iv)
      ie = ie_v(iv)
-  
+
      efac(1) = 1.0
      if (n_field > 1) then
         efac(2) = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
@@ -380,7 +432,7 @@ subroutine cgyro_step_implicit_gk
         it = it_c(ic)
 
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
-        
+
         do id=-2,2
            jt = thcyc(it+id)
            jr = rcyc(ir,it,id)
@@ -390,7 +442,7 @@ subroutine cgyro_step_implicit_gk
                 + (rval*dtheta(ir,it,id) &
                 + abs(rval)*dtheta_up(ir,it,id)) &
                 * (-0.5 * delta_t) * cap_h_c(jc,iv_loc)
-           
+
         enddo
 
         gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &
@@ -399,7 +451,7 @@ subroutine cgyro_step_implicit_gk
      enddo
 
      ! matrix solve
-     
+
      if(gkmatsolve_flag == 0) then
         call ZGETRS('N',nc,1,gkmat(:,:,iv_loc),nc,i_piv_gk(:,iv_loc),&
              gkvec(:,iv_loc),nc,info)
@@ -415,6 +467,8 @@ subroutine cgyro_step_implicit_gk
   enddo
 
   ! Field solve
+  call timer_lib_out('rhs_impgk')
+  call timer_lib_in('rhs_impphi')
 
   ! form the rhs
 
@@ -423,34 +477,28 @@ subroutine cgyro_step_implicit_gk
   do iv=nv1,nv2
 
      iv_loc = iv_loc+1
-     
+
      is = is_v(iv)
      ix = ix_v(iv)
      ie = ie_v(iv)
 
-     rfac = z(is) * 0.5*w_xi(ix)*w_e(ie)*dens(is)
-     vfac = xi(ix) * sqrt(2.0*energy(ie)) * vth(is)
-
+     rfac(:) = z(is) * 0.5*w_xi(ix)*w_e(ie)*dens(is)*j0_c(:,iv_loc)
      ifield = 1
+     
      do ic=1,nc
         id = idfield(ic,ifield)
-        ir = ir_c(ic) 
-        it = it_c(ic)
-        fieldvec_loc(id) = fieldvec_loc(id) + gkvec(ic,iv_loc) &
-             * rfac * j0_c(ic,iv_loc)
+        fieldvec_loc(id) = fieldvec_loc(id) + gkvec(ic,iv_loc) * rfac(ic)
      enddo
 
      if(n_field > 1) then
+        rfac(:) = rfac(:) * xi(ix) * sqrt(2.0*energy(ie)) * vth(is) 
         ifield = 2
         do ic=1,nc
            id = idfield(ic,ifield)
-           ir = ir_c(ic) 
-           it = it_c(ic)
-           fieldvec_loc(id) = fieldvec_loc(id) + gkvec(ic,iv_loc) &
-                * rfac * j0_c(ic,iv_loc) * vfac
+           fieldvec_loc(id) = fieldvec_loc(id) + gkvec(ic,iv_loc) * rfac(ic)
         enddo
      endif
-  
+
   enddo
 
   call MPI_ALLREDUCE(fieldvec_loc(:),&
@@ -463,7 +511,7 @@ subroutine cgyro_step_implicit_gk
 
   ! matrix solve
   call ZGETRS('N',nc*n_field,1,fieldmat(:,:),nc*n_field,i_piv_field(:),&
-      fieldvec(:),nc*n_field,info)
+       fieldvec(:),nc*n_field,info)
 
   ! map back into field(ir,it)
   do ic=1,nc
@@ -474,10 +522,12 @@ subroutine cgyro_step_implicit_gk
         it = it_c(ic)
 
         field(ir,it,ifield) = fieldvec(id)
-        
+
      enddo
   enddo
 
+  call timer_lib_out('rhs_impphi')
+  call timer_lib_in('rhs_impgk')
 
   ! Solve the gk eqn for the part of RHS depending on new fields
   ! RHS = (Z f0/T)G field_new
@@ -491,7 +541,7 @@ subroutine cgyro_step_implicit_gk
      is = is_v(iv)
      ix = ix_v(iv)
      ie = ie_v(iv)
-  
+
      efac(1) = 1.0
      if (n_field > 1) then
         efac(2) = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
@@ -507,7 +557,7 @@ subroutine cgyro_step_implicit_gk
      enddo
 
      ! matrix solve
-      if(gkmatsolve_flag == 0) then
+     if(gkmatsolve_flag == 0) then
         call ZGETRS('N',nc,1,gkmat(:,:,iv_loc),nc,i_piv_gk(:,iv_loc),&
              gkvec(:,iv_loc),nc,info)
      else
@@ -527,7 +577,7 @@ subroutine cgyro_step_implicit_gk
 
   iv_loc = 0
   do iv=nv1,nv2
-     
+
      iv_loc = iv_loc+1
 
      is = is_v(iv)
@@ -550,6 +600,6 @@ subroutine cgyro_step_implicit_gk
      enddo
   enddo
 
-  call timer_lib_out('rhs_imp')
+  call timer_lib_out('rhs_impgk')
 
 end subroutine cgyro_step_implicit_gk

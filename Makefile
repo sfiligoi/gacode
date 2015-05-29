@@ -6,6 +6,7 @@ all:
 	cd glf23 ; make
 	cd tglf ; make
 	cd gyro ; make 
+	cd cgyro ; make 
 	cd tgyro ; make
 
 clean:
@@ -18,6 +19,17 @@ clean:
 	cd gyro ; make clean 
 	cd cgyro ; make clean 
 	cd tgyro ; make clean
-	rm -f shared/python/pyrats/*/*.pyc
-	rm -f shared/python/*/*.pyc
+	rm -f python/*/*.pyc
+	rm -f python/*.pyc
+	rm -f modules/*genmod*
+
+distclean:
+	cd shared ; make distclean
+	cd neo ; make clean 
+	cd tglf ; make clean
+	cd gyro ; make distclean 
+	cd cgyro ; make clean 
+	cd tgyro ; make clean
+	rm -f python/*/*.pyc
+	rm -f python/*.pyc
 	rm -f modules/*genmod*

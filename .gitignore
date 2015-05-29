@@ -1,4 +1,6 @@
 *~
+.DS_Store
+.idea
 
 # Gyro build stuff
 modules/*.mod
@@ -38,8 +40,7 @@ shared/profiles_gen/exprotools/create
 shared/profiles_gen/exprotools/expromake
 tglf/src/tglf
 tglf/src/tglf_mpi
-tglf/src/xtglf
-tglf/src/xtglf_mpi
+tglf/src/tglf_driver_mpi
 tgyro/src/tgyro_main
 xptor/driver/xptor
 le3/src/le3

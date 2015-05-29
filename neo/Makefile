@@ -19,7 +19,7 @@ all:
 	cd tools/vgen ; make
 
 clean:
-	cd ../modules ; rm -f neo*.mod .VERSION
+	cd ../modules ; rm -f neo*.mod
 	cd src ; make clean
 	cd tools/vgen ; make clean 
 

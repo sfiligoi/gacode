@@ -25,6 +25,9 @@ subroutine tgyro_tglf_map
   ! Initialize TGLF
   call tglf_init(paths(i_r-1), gyro_comm)
 
+  ! Are we just testing (to get dump file, for example)?
+  tglf_test_flag_in = gyrotest_flag
+
   ! Want fluxes from TGLF
   tglf_use_transport_model_in = .true.
 
@@ -72,8 +75,9 @@ subroutine tgyro_tglf_map
   ! TGLF-specific quantities
   q_prime = (q_abs/(r(i_r)/r_min))**2*s(i_r)
   p_prime = (q_abs/(r(i_r)/r_min))*(beta_unit(i_r)/(8*pi))*(-r_min*dlnpdr(i_r))
+  p_prime = loc_betae_scale*p_prime
   !----------------------------------------------------------------
-
+  
   !----------------------------------------------------------------
   ! Geometry parameters:
   !
@@ -173,13 +177,13 @@ subroutine tgyro_tglf_map
      tglf_vpar_in(:)       = -tglf_sign_it_in*r_maj(i_r)*w0(i_r)/c_s(i_r)
   endif
   !----------------------------------------------------------------
-
+  ! set ky_in to value for n=1
+  tglf_ky_in = ABS(rho_s(i_r)*q(i_r)/r(i_r))
   !-----------------------------------
   ! Number of high-k modes
   !  nky=12 (default to include ETG)
   !  nky=0  (low-k only)
-  ! JC: remove override
-  ! tglf_nky_in = 12
+  !  tglf_nky_in = 12
   !-----------------------------------
 
   !----------------------------------------------------------------
@@ -201,7 +205,7 @@ subroutine tgyro_tglf_map
   !
   ! Use bisection method to determine Gaussian width;
   ! bisection is better, faster.
-  tglf_use_bisection_in = .true.
+  !  tglf_use_bisection_in = .true.
   !
   ! Number of Hermite functions to determine Gaussian Width (1-2)
   !  tglf_nbasis_min_in = 1
@@ -245,21 +249,25 @@ subroutine tgyro_tglf_map
   !----------------------------------------------------------------
 
   !----------------------------------------------------------------
-  ! OTHER PARAMETERS
+  ! OTHER DEFAULT PARAMETERS
   !
-  tglf_find_width_in    = .true.
-  tglf_iflux_in         = .true.
-  tglf_theta_trapped_in = 0.7
-  tglf_xnu_factor_in    = 1.0
-  tglf_debye_factor_in  = 1.0
-  tglf_filter_in        = 2.0
-  tglf_debye_in         = 0.0
+  !  tglf_find_width_in    = .true.
+  !  tglf_iflux_in         = .true.
+  !  tglf_theta_trapped_in = 0.7
+  !  tglf_xnu_factor_in    = 1.0
+  !  tglf_debye_factor_in  = 1.0
+  !  tglf_filter_in        = 2.0
+  !  tglf_debye_in         = 0.0
   !----------------------------------------------------------------
 
   !----------------------------------------------------------------
   ! New TGLF settings
   !
   select case (tgyro_tglf_revision)
+
+  case(0)
+
+     ! use defaults and overwrites
 
   case (1)
 

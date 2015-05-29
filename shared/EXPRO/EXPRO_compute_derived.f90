@@ -13,7 +13,6 @@ subroutine EXPRO_compute_derived
 
   implicit none
 
-  integer :: n_ion
   integer :: n
   integer :: i
   integer :: is
@@ -25,7 +24,6 @@ subroutine EXPRO_compute_derived
 
   real, dimension(:), allocatable :: rho
   real, dimension(:), allocatable :: dummy
-  real, dimension(:), allocatable :: u_par
 
   real :: r_min
   real :: fa,fb
@@ -37,16 +35,16 @@ subroutine EXPRO_compute_derived
      print '(a)','ERROR: (EXPRO) input.profiles.geo missing'
      stop
   endif
-  if (EXPRO_ctrl_density_method == -1) then
-     print '(a)','ERROR: (EXPRO) EXPRO_ctrl_density_method not set.'
+  if (EXPRO_ctrl_quasineutral_flag == -1) then
+     print '(a)','ERROR: (EXPRO) EXPRO_ctrl_quasineutral_flag not set.'
      stop
   endif
   if (EXPRO_ctrl_numeq_flag == -1) then
      print '(a)','ERROR: (EXPRO) EXPRO_ctrl_numeq_flag not set.'
      stop
   endif
-  if (EXPRO_ctrl_rotation_method == -1) then
-     print '(a)','ERROR: (EXPRO) EXPRO_ctrl_rotation_method not set.'
+  if (EXPRO_ctrl_n_ion == -1) then
+     print '(a)','ERROR: (EXPRO) EXPRO_ctrl_n_ion not set.'
      stop
   endif
   !---------------------------------------------------------------------
@@ -112,7 +110,7 @@ subroutine EXPRO_compute_derived
   EXPRO_dlnnidr = 0.0
   EXPRO_dlntidr = 0.0
 
-  do is=1,nion_max
+  do is=1,EXPRO_n_ion
      if (minval(EXPRO_ni(is,:)) > 0.0) then
         ! 1/L_ni = -dln(ni)/dr (1/m)
         call bound_deriv(EXPRO_dlnnidr(is,:),-log(EXPRO_ni(is,:)),&
@@ -154,6 +152,7 @@ subroutine EXPRO_compute_derived
         enddo
      enddo
   endif
+
   !-------------------------------------------------------------------
 
   !---------------------------------------------------------------------
@@ -243,6 +242,7 @@ subroutine EXPRO_compute_derived
   EXPRO_vol(1)  = 0.0
   EXPRO_volp(1) = 0.0  
   EXPRO_thetascale(1) = EXPRO_thetascale(2)
+
   !--------------------------------------------------------------
 
   !-----------------------------------------------------------------
@@ -261,34 +261,11 @@ subroutine EXPRO_compute_derived
   !--------------------------------------------------------------
   ! Compute w0p, gamma_e, gamma_p and mach:
   !
-  allocate(u_par(EXPRO_n_exp))
-  !
   call bound_deriv(EXPRO_w0p,EXPRO_w0,EXPRO_rmin,EXPRO_n_exp)
   !  
   EXPRO_gamma_e(:) = -EXPRO_rmin(:)/EXPRO_q(:)*EXPRO_w0p(:)
-
-  if (EXPRO_ctrl_rotation_method == 1) then 
-
-     ! Candy convention
-
-     EXPRO_gamma_p(:) = -EXPRO_rmaj(:)*EXPRO_w0p(:)
-     EXPRO_mach(:)    = EXPRO_rmaj(:)*EXPRO_w0(:)/EXPRO_cs(:)
-
-  else
-
-     ! Waltz convention
-
-     u_par(:) = (EXPRO_bp0(:)*EXPRO_vpol(1,:)+EXPRO_bt0(:)*EXPRO_vtor(1,:))/&
-          sqrt(EXPRO_bt0(:)**2+EXPRO_bp0(:)**2)
-
-     call bound_deriv(dummy,u_par/EXPRO_rmaj(:),EXPRO_rmin,EXPRO_n_exp)
-
-     EXPRO_gamma_p(:) = -EXPRO_rmaj(:)*dummy(:)
-     EXPRO_mach(:)    = u_par(:)/EXPRO_cs(:)
-
-  endif
-  !
-  deallocate(u_par)
+  EXPRO_gamma_p(:) = -EXPRO_rmaj(:)*EXPRO_w0p(:)
+  EXPRO_mach(:)    = EXPRO_rmaj(:)*EXPRO_w0(:)/EXPRO_cs(:)
   !--------------------------------------------------------------
 
   ! Clean up
@@ -297,16 +274,10 @@ subroutine EXPRO_compute_derived
 
   ! Density profile control
 
-  n_ion = 1
-  if (EXPRO_ctrl_z(2) /= 0.0) n_ion=2
-  if (EXPRO_ctrl_z(3) /= 0.0) n_ion=3
-  if (EXPRO_ctrl_z(4) /= 0.0) n_ion=4
-  if (EXPRO_ctrl_z(5) /= 0.0) n_ion=5
-
-  if (EXPRO_ctrl_density_method == 2) then
+  if (EXPRO_ctrl_quasineutral_flag == 1) then
 
      EXPRO_ni_new(:) = 0.0
-     do is=2,n_ion
+     do is=2,EXPRO_ctrl_n_ion
         EXPRO_ni_new(:) = EXPRO_ni_new(:)+EXPRO_ctrl_z(is)*EXPRO_ni(is,:)
      enddo
      EXPRO_ni_new(:) = (EXPRO_ne(:)-EXPRO_ni_new(:))/EXPRO_ctrl_z(1)

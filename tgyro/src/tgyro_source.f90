@@ -41,10 +41,11 @@ subroutine tgyro_source
      endif
 
      if (loc_scenario == 3) then
-        ! Alpha power 
+        ! Alpha particle source and power 
         ! - Can use 'hively' or 'bosch' formulae.
-        s_alpha = n_d*n_t*sigv(ti(1,i)/1e3,'bosch')*e_alpha
+        sn_alpha(i) = n_d*n_t*sigv(ti(1,i)/1e3,'bosch')
 
+        s_alpha      = sn_alpha(i)*e_alpha
         s_alpha_i(i) = s_alpha*frac_ai(i)
         s_alpha_e(i) = s_alpha*frac_ae(i)
      else
@@ -65,7 +66,7 @@ subroutine tgyro_source
      ! Synchrotron radiation
      ! - Trubnikov, JETP Lett. 16 (1972) 25.
      wpe = sqrt(4*pi*ne(i)*e**2/me)
-     wce = e*b_ref/(me*c)
+     wce = e*abs(b_ref)/(me*c)
      g   = k*te(i)/(me*c**2)
      phi = 60*g**1.5*sqrt((1.0-r_coeff)*(1+1/aspect_rat/sqrt(g))/(r_min*wpe**2/c/wce))
 
@@ -102,6 +103,7 @@ subroutine tgyro_source
   ! Get integrated alpha-power
   call tgyro_volume_int(s_alpha_i,p_i_fus)
   call tgyro_volume_int(s_alpha_e,p_e_fus)
+  call tgyro_volume_int(sn_alpha,f_he_fus)
 
   ! Get integrated collisional exchange power
   call tgyro_volume_int(s_exch,p_exch)
@@ -144,13 +146,13 @@ subroutine tgyro_source
 
      p_i(:) = &
           +p_i_fus(:) &                ! Fusion power to ions
-          +tgyro_input_paux_scale*p_i_aux_in(:) &             ! Auxiliary ion heating [fixed]
+          +tgyro_input_paux_scale*p_i_aux_in(:) & ! Auxiliary ion heating [fixed]
           +p_exch(:) &                 ! Collisional exchange
           +p_expwd(:)*tgyro_expwd_flag ! Turbulent exchange
 
      p_e(:) = &
           +p_e_fus(:) &                ! Fusion power to electrons
-          +tgyro_input_paux_scale*p_e_aux_in(:) &             ! Auxiliary electron heating [fixed]
+          +tgyro_input_paux_scale*p_e_aux_in(:) & ! Auxiliary electron heating [fixed]
           -p_exch(:)   &               ! Collisional exchange
           -p_brem(:) &                 ! Bremsstrahlung radiation
           -p_sync(:) &                 ! Synchrotron radiation
@@ -199,11 +201,19 @@ subroutine tgyro_source
   !------------------------------------------------
 
   !------------------------------------------------
+  ! Target He ash flux in 1/s/cm^2
+  !
+  pflux_he_target(1) = 0.0
+  pflux_he_target(2:n_r) = f_he_fus(2:n_r)/volp(2:n_r)
+  !------------------------------------------------
+   
+  !------------------------------------------------
   ! Target fluxes in GB units
-  eflux_i_target(:) = eflux_i_target(:)/q_gb(:)
-  eflux_e_target(:) = eflux_e_target(:)/q_gb(:)
-  pflux_e_target(:) = pflux_e_target(:)/gamma_gb(:)
-  mflux_target(:)   = mflux_target(:)/pi_gb(:)
+  eflux_i_target(:)  = eflux_i_target(:)/q_gb(:)
+  eflux_e_target(:)  = eflux_e_target(:)/q_gb(:)
+  pflux_e_target(:)  = pflux_e_target(:)/gamma_gb(:)
+  mflux_target(:)    = mflux_target(:)/pi_gb(:)
+  pflux_he_target(:) = pflux_he_target(:)/gamma_gb(:)
   !------------------------------------------------
 
 end subroutine tgyro_source

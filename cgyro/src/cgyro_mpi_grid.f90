@@ -17,14 +17,37 @@ subroutine cgyro_mpi_grid
   implicit none
 
   integer :: ie,ix,is,ir,it
-
-
+  integer :: d
   integer :: splitkey
   integer, external :: parallel_dim
 
   ! Velocity-space (v) and configuration-space (c) dimensions
   nv = n_energy*n_xi*n_species
   nc = n_radial*n_theta
+
+  call gcd(nv,nc,d)
+
+  !-------------------------------------------------------------------------
+  ! MPI diagnostics need to come early
+  !
+  if (silent_flag == 0 .and. i_proc == 0) then
+     open(unit=io,file=trim(path)//runfile_mpi,status='replace')
+     write(io,*) 'Parallel grid dimensions.'
+     write(io,*)
+     write(io,'(a,i4)') '        nv :',nv
+     write(io,'(a,i4)') '        nc :',nc
+     write(io,'(a,i4)') 'GCD(nv,nc) :',d
+     write(io,*)
+     write(io,*) 'Acceptable core counts.'
+     write(io,*)
+     do it=1,d*n_toroidal
+        if (mod(d*n_toroidal,it) == 0 .and. mod(it,n_toroidal) == 0) then
+           write(io,*) it
+        endif
+     enddo
+     close(io)
+  endif
+  !-------------------------------------------------------------------------
 
   allocate(ie_v(nv))
   allocate(ix_v(nv))
@@ -63,7 +86,7 @@ subroutine cgyro_mpi_grid
   i_group_1 = i_proc/n_proc_1
   i_group_2 = modulo(i_proc,n_proc_1)
   !------------------------------------------------
-  
+
   !-----------------------------------------------------------
   ! Split up GYRO_COMM_WORLD into groups and adjoint:
   !
@@ -139,3 +162,31 @@ subroutine cgyro_mpi_grid
   call parallel_slib_init(n_toroidal,nv_loc,nc,nsplit,NEW_COMM_2)
 
 end subroutine cgyro_mpi_grid
+
+subroutine gcd(m,n,d)
+
+  implicit none
+
+  integer, intent(in) :: m,n
+  integer, intent(inout) :: d
+  integer :: a,b,c
+
+  a = m
+  b = n
+
+  if (a < b) then
+     c = a
+     a = b
+     b = c
+  endif
+
+  do          
+     c = mod(a, b)    
+     if (c == 0) exit
+     a = b         
+     b = c 
+  enddo
+
+  d = b
+
+end subroutine gcd

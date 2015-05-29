@@ -111,9 +111,6 @@ subroutine cgyro_rhs(ij)
   ! TRAPPING TERM
   if (collision_model == 0 .or. collision_trap_model == 0) call cgyro_rhs_trap(ij)
 
-  ! TRAPPING UPWIND TERM
-  call cgyro_rhs_trap_upwind(ij)
-
   call timer_lib_out('rhs')
 
   ! Nonlinear evaluation [f,g]
@@ -189,71 +186,6 @@ subroutine cgyro_rhs_trap(ij)
   enddo
 
 end subroutine cgyro_rhs_trap
-
-!==========================================================================
-
-!==========================================================================
-
-subroutine cgyro_rhs_trap_upwind(ij)
-
-  use parallel_lib
-
-  use cgyro_globals
-  use cgyro_equilibrium
-
-  implicit none
-
-  integer, intent(in) :: ij
-  integer :: is,ir,it,ie,ix,jx
-  complex :: val
-
-  call parallel_lib_r(transpose(cap_h_c),cap_h_v)
-  cap_h_v_prime(:,:) = (0.0,0.0)
-  ic_loc = 0
-  do ic=nc1,nc2
-     ic_loc = ic_loc+1
-     it = it_c(ic)
-     ir = ir_c(ic)
-     do iv=1,nv
-        is = is_v(iv)
-        ix = ix_v(iv)
-        ie = ie_v(iv)
-
-        do jx=1,n_xi
-           cap_h_v_prime(ic_loc,iv) = cap_h_v_prime(ic_loc,iv) &
-                +xi_upderiv_mat(ix,jx)*(cap_h_v(ic_loc,iv_v(ie,jx,is)) &
-                -z(is)/temp(is)*j0_v(ic_loc,iv_v(ie,jx,is))*field(ir,it,1))
-        enddo
-     enddo
-  enddo
-
-  ! Now have cap_h_v(ic_loc,iv)   
-
-  call parallel_lib_f(cap_h_v_prime,cap_h_ct)
-  cap_h_c = transpose(cap_h_ct)
-
-  iv_loc = 0
-  do iv=nv1,nv2
-
-     iv_loc = iv_loc+1
-
-     is = is_v(iv)
-     ix = ix_v(iv)
-     ie = ie_v(iv)
-
-     do ic=1,nc
-
-        ir = ir_c(ic) 
-        it = it_c(ic)
-
-        val = omega_trap(it,is)*sqrt(energy(ie))*(1.0-xi(ix)**2) 
-
-        rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc) &
-             -(up_xi/n_xi**6)*abs(val)*cap_h_c(ic,iv_loc)
-     enddo
-  enddo
-
-end subroutine cgyro_rhs_trap_upwind
 
 !==========================================================================
 

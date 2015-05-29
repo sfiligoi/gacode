@@ -12,6 +12,7 @@
 subroutine prgen_map_ufile
 
   use prgen_globals
+  use EXPRO_interface
 
   implicit none
   real, dimension(:), allocatable :: powd_i
@@ -76,70 +77,71 @@ subroutine prgen_map_ufile
   !---------------------------------------------------------
   ! Map profile data onto single array:
   !
-  allocate(vec(n_indx,nx))
-  vec(:,:) = 0.0
+  EXPRO_n_exp = nx
+  call EXPRO_alloc('./',1)
   !
-  vec(1,:)  = rho(:)
-  vec(2,:)  = rmin(:)
-  vec(3,:)  = rmaj(:)
-  vec(4,:)  = q(:)
-  vec(5,:)  = kappa(:)
-  vec(6,:)  = delta(:)
-  vec(7,:)  = ufile_te(:)*1e-3
-  vec(8,:)  = ufile_ne(:)*1e-19
-  vec(9,:)  = ufile_zeff(:)
-  vec(11,:) = 0.0
-  vec(12,:) = pow_e(:)
-  vec(13,:) = pow_i(:)
-  vec(14,:) = pow_ei(:)
-  vec(15,:) = 0.0
-  vec(16,:) = 0.0
-  vec(17,:) = 0.0
-  vec(18,:) = 0.0
-  vec(19,:) = ufile_pres(:)
-  vec(20,:) = dpsi(:)
+  EXPRO_rho(:)       = rho(:)
+  EXPRO_rmin(:)      = rmin(:)
+  EXPRO_rmaj(:)      = rmaj(:)
+  EXPRO_q(:)         = q(:)
+  EXPRO_kappa(:)     = kappa(:)
+  EXPRO_delta(:)     = delta(:)
+  EXPRO_te(:)        = ufile_te(:)*1e-3
+  EXPRO_ne(:)        = ufile_ne(:)*1e-19
+  EXPRO_z_eff(:)     = ufile_zeff(:)
+  EXPRO_w0(:)        = 0.0
+  EXPRO_flow_mom(:)  = 0.0
+  EXPRO_pow_e(:)     = pow_e(:)
+  EXPRO_pow_i(:)     = pow_i(:)
+  EXPRO_pow_ei(:)    = pow_ei(:)
+  EXPRO_zeta(:)      = 0.0
+  EXPRO_flow_beam(:) = 0.0
+  EXPRO_flow_wall(:) = 0.0
+  EXPRO_zmag(:)      = 0.0
+  EXPRO_ptot(:)      = ufile_pres(:)
+  EXPRO_polflux = dpsi(:)
 
   !-----------------------------------------------------------------
   ! Construct ion densities and temperatures with reordering
   ! in general case.  Use vphi and vpol as temporary arrays.
   !
   do i=1,ufile_nion
-     vec(30+i,:) = ufile_ni(:,i)*1e-19
-     vec(35+i,:) = ufile_ti(:,i)*1e-3
+     EXPRO_vtor(i,:) = ufile_ni(:,i)*1e-19
+     EXPRO_vpol(i,:) = ufile_ti(:,i)*1e-3
   enddo
 
   ! reorder
-  do i=1,5 
-     vec(20+i,:) = vec(30+reorder_vec(i),:)
-     vec(25+i,:) = vec(35+reorder_vec(i),:)
+  do i=1,n_ion_max
+     EXPRO_ni(i,:) = EXPRO_vtor(reorder_vec(i),:)
+     EXPRO_ti(i,:) = EXPRO_vpol(reorder_vec(i),:)
   enddo
 
   ! vphi
-  vec(31:35,:) = 0.0
+  EXPRO_vtor(:,:) = 0.0
 
   ! Insert carbon toroidal velocity
-  do i=1,5
+  do i=1,8
      j = reorder_vec(i)
-     if (ufile_m(j) == 12.0) then
+     if (nint(ufile_m(j)) == 12) then
         print '(a)', 'INFO: (prgen) Assuming VROT is the carbon toroidal rotation.'
-        vec(30+i,:) = -ufile_vrot(:)*(rmaj(:)+rmin(:))
+        EXPRO_vtor(i,:) = -ufile_vrot(:)*(rmaj(:)+rmin(:))
      endif
   enddo
 
   ! vpol
-  vec(36:40,:) = 0.0
+  EXPRO_vpol(:,:) = 0.0
 
   ! Additional powers (fusion and radiation)
   ! * for iterdb, put all radiated power in pow_e_line
-  vec(41,:) = pow_e_fus(:)
-  vec(42,:) = pow_i_fus(:)
-  vec(43,:) = 0.0
-  vec(44,:) = 0.0
-  vec(45,:) = pow_e_rad(:)
+  EXPRO_pow_e_fus(:) = pow_e_fus(:)
+  EXPRO_pow_i_fus(:) = pow_i_fus(:)
+  EXPRO_pow_e_sync(:) = 0.0
+  EXPRO_pow_e_brem(:) = 0.0
+  EXPRO_pow_e_line(:) = pow_e_rad(:)
 
   ! Additional powers (external heating)
-  vec(46,:) = pow_e_aux(:)
-  vec(47,:) = pow_i_aux(:)
+  EXPRO_pow_e_aux(:) = pow_e_aux(:)
+  EXPRO_pow_i_aux(:) = pow_i_aux(:)
 
 end subroutine prgen_map_ufile
 

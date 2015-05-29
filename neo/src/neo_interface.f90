@@ -124,6 +124,71 @@ module neo_interface
   real    :: neo_dlntdr_perp_6_in  = 1.0
   real    :: neo_profile_dlnndr_6_scale_in = 1.0
   real    :: neo_profile_dlntdr_6_scale_in = 1.0
+  integer :: neo_z_7_in = 1
+  real    :: neo_mass_7_in = 1.0
+  real    :: neo_dens_7_in = 0.0
+  real    :: neo_temp_7_in = 1.0
+  real    :: neo_dlnndr_7_in = 1.0
+  real    :: neo_dlntdr_7_in = 1.0
+  integer :: neo_aniso_model_7_in  = 1
+  real    :: neo_temp_para_7_in    = 1.0
+  real    :: neo_dlntdr_para_7_in  = 1.0
+  real    :: neo_temp_perp_7_in    = 1.0
+  real    :: neo_dlntdr_perp_7_in  = 1.0
+  real    :: neo_profile_dlnndr_7_scale_in = 1.0
+  real    :: neo_profile_dlntdr_7_scale_in = 1.0
+  integer :: neo_z_8_in = 1
+  real    :: neo_mass_8_in = 1.0
+  real    :: neo_dens_8_in = 0.0
+  real    :: neo_temp_8_in = 1.0
+  real    :: neo_dlnndr_8_in = 1.0
+  real    :: neo_dlntdr_8_in = 1.0
+  integer :: neo_aniso_model_8_in  = 1
+  real    :: neo_temp_para_8_in    = 1.0
+  real    :: neo_dlntdr_para_8_in  = 1.0
+  real    :: neo_temp_perp_8_in    = 1.0
+  real    :: neo_dlntdr_perp_8_in  = 1.0
+  real    :: neo_profile_dlnndr_8_scale_in = 1.0
+  real    :: neo_profile_dlntdr_8_scale_in = 1.0
+  integer :: neo_z_9_in = 1
+  real    :: neo_mass_9_in = 1.0
+  real    :: neo_dens_9_in = 0.0
+  real    :: neo_temp_9_in = 1.0
+  real    :: neo_dlnndr_9_in = 1.0
+  real    :: neo_dlntdr_9_in = 1.0
+  integer :: neo_aniso_model_9_in  = 1
+  real    :: neo_temp_para_9_in    = 1.0
+  real    :: neo_dlntdr_para_9_in  = 1.0
+  real    :: neo_temp_perp_9_in    = 1.0
+  real    :: neo_dlntdr_perp_9_in  = 1.0
+  real    :: neo_profile_dlnndr_9_scale_in = 1.0
+  real    :: neo_profile_dlntdr_9_scale_in = 1.0
+  integer :: neo_z_10_in = 1
+  real    :: neo_mass_10_in = 1.0
+  real    :: neo_dens_10_in = 0.0
+  real    :: neo_temp_10_in = 1.0
+  real    :: neo_dlnndr_10_in = 1.0
+  real    :: neo_dlntdr_10_in = 1.0
+  integer :: neo_aniso_model_10_in  = 1
+  real    :: neo_temp_para_10_in    = 1.0
+  real    :: neo_dlntdr_para_10_in  = 1.0
+  real    :: neo_temp_perp_10_in    = 1.0
+  real    :: neo_dlntdr_perp_10_in  = 1.0
+  real    :: neo_profile_dlnndr_10_scale_in = 1.0
+  real    :: neo_profile_dlntdr_10_scale_in = 1.0
+  integer :: neo_z_11_in = 1
+  real    :: neo_mass_11_in = 1.0
+  real    :: neo_dens_11_in = 0.0
+  real    :: neo_temp_11_in = 1.0
+  real    :: neo_dlnndr_11_in = 1.0
+  real    :: neo_dlntdr_11_in = 1.0
+  integer :: neo_aniso_model_11_in  = 1
+  real    :: neo_temp_para_11_in    = 1.0
+  real    :: neo_dlntdr_para_11_in  = 1.0
+  real    :: neo_temp_perp_11_in    = 1.0
+  real    :: neo_dlntdr_perp_11_in  = 1.0
+  real    :: neo_profile_dlnndr_11_scale_in = 1.0
+  real    :: neo_profile_dlntdr_11_scale_in = 1.0
   real    :: neo_dphi0dr_in = 0.0
   real    :: neo_epar0_in = 0.0
   real    :: neo_q_in = 2.0
@@ -154,33 +219,34 @@ module neo_interface
   real, dimension(8,0:32) :: neo_geo_yin_in = 0.0
   ! the exception of the default is subroutine_flag
   integer :: neo_subroutine_flag = 1
-
+  integer :: neo_test_flag_in = 0
+  
   ! Output parameters
   ! theory
   real    :: neo_pflux_thHH_out  = 0.0
   real    :: neo_eflux_thHHi_out = 0.0
   real    :: neo_eflux_thHHe_out = 0.0
   real    :: neo_eflux_thCHi_out = 0.0
-  real, dimension(6) :: neo_pflux_thHS_out = 0.0
-  real, dimension(6) :: neo_eflux_thHS_out = 0.0
+  real, dimension(11) :: neo_pflux_thHS_out = 0.0
+  real, dimension(11) :: neo_eflux_thHS_out = 0.0
   real    :: neo_jpar_thS_out    = 0.0
   real    :: neo_jpar_thK_out    = 0.0
   real    :: neo_jpar_thN_out    = 0.0
   ! drift-kinetic soln
-  real, dimension(6) :: neo_pflux_dke_out    = 0.0
-  real, dimension(6) :: neo_efluxtot_dke_out = 0.0
-  real, dimension(6) :: neo_efluxncv_dke_out = 0.0
-  real, dimension(6) :: neo_mflux_dke_out    = 0.0
-  real, dimension(6) :: neo_vpol_dke_out     = 0.0
-  real, dimension(6) :: neo_vtor_dke_out     = 0.0
+  real, dimension(11) :: neo_pflux_dke_out    = 0.0
+  real, dimension(11) :: neo_efluxtot_dke_out = 0.0
+  real, dimension(11) :: neo_efluxncv_dke_out = 0.0
+  real, dimension(11) :: neo_mflux_dke_out    = 0.0
+  real, dimension(11) :: neo_vpol_dke_out     = 0.0
+  real, dimension(11) :: neo_vtor_dke_out     = 0.0
   real               :: neo_jpar_dke_out     = 0.0
   ! gyro-viscosity
-  real, dimension(6) :: neo_pflux_gv_out  = 0.0
-  real, dimension(6) :: neo_efluxtot_gv_out  = 0.0
-  real, dimension(6) :: neo_efluxncv_gv_out  = 0.0
-  real, dimension(6) :: neo_mflux_gv_out  = 0.0
+  real, dimension(11) :: neo_pflux_gv_out  = 0.0
+  real, dimension(11) :: neo_efluxtot_gv_out  = 0.0
+  real, dimension(11) :: neo_efluxncv_gv_out  = 0.0
+  real, dimension(11) :: neo_mflux_gv_out  = 0.0
   ! nclass viscosities
-  real, dimension(6) :: neo_nclassvis_out  = 0.0
+  real, dimension(11) :: neo_nclassvis_out  = 0.0
   ! error checking
   integer :: neo_error_status_out=0
   character(len=80) :: neo_error_message_out=''
@@ -302,6 +368,71 @@ contains
     neo_dlntdr_6_in = dlntdr_in(6)
     neo_profile_dlnndr_6_scale_in = profile_dlnndr_scale(6)
     neo_profile_dlntdr_6_scale_in = profile_dlntdr_scale(6)
+    neo_z_7_in = z_in(7)
+    neo_mass_7_in = mass_in(7)
+    neo_dens_7_in = dens_in(7)
+    neo_temp_7_in = temp_in(7)
+    neo_dlnndr_7_in = dlnndr_in(7)
+    neo_dlntdr_7_in = dlntdr_in(7)
+    neo_aniso_model_7_in = aniso_model_in(7)
+    neo_temp_para_7_in   = temp_para_in(7)
+    neo_dlntdr_para_7_in = dlntdr_para_in(7)
+    neo_temp_perp_7_in   = temp_perp_in(7)
+    neo_dlntdr_perp_7_in = dlntdr_perp_in(7)
+    neo_profile_dlnndr_7_scale_in = profile_dlnndr_scale(7)
+    neo_profile_dlntdr_7_scale_in = profile_dlntdr_scale(7)
+    neo_z_8_in = z_in(8)
+    neo_mass_8_in = mass_in(8)
+    neo_dens_8_in = dens_in(8)
+    neo_temp_8_in = temp_in(8)
+    neo_dlnndr_8_in = dlnndr_in(8)
+    neo_dlntdr_8_in = dlntdr_in(8)
+    neo_aniso_model_8_in = aniso_model_in(8)
+    neo_temp_para_8_in   = temp_para_in(8)
+    neo_dlntdr_para_8_in = dlntdr_para_in(8)
+    neo_temp_perp_8_in   = temp_perp_in(8)
+    neo_dlntdr_perp_8_in = dlntdr_perp_in(8)
+    neo_profile_dlnndr_8_scale_in = profile_dlnndr_scale(8)
+    neo_profile_dlntdr_8_scale_in = profile_dlntdr_scale(8)
+    neo_z_9_in = z_in(9)
+    neo_mass_9_in = mass_in(9)
+    neo_dens_9_in = dens_in(9)
+    neo_temp_9_in = temp_in(9)
+    neo_dlnndr_9_in = dlnndr_in(9)
+    neo_dlntdr_9_in = dlntdr_in(9)
+    neo_aniso_model_9_in = aniso_model_in(9)
+    neo_temp_para_9_in   = temp_para_in(9)
+    neo_dlntdr_para_9_in = dlntdr_para_in(9)
+    neo_temp_perp_9_in   = temp_perp_in(9)
+    neo_dlntdr_perp_9_in = dlntdr_perp_in(9)
+    neo_profile_dlnndr_9_scale_in = profile_dlnndr_scale(9)
+    neo_profile_dlntdr_9_scale_in = profile_dlntdr_scale(9)
+    neo_z_10_in = z_in(10)
+    neo_mass_10_in = mass_in(10)
+    neo_dens_10_in = dens_in(10)
+    neo_temp_10_in = temp_in(10)
+    neo_dlnndr_10_in = dlnndr_in(10)
+    neo_dlntdr_10_in = dlntdr_in(10)
+    neo_aniso_model_10_in = aniso_model_in(10)
+    neo_temp_para_10_in   = temp_para_in(10)
+    neo_dlntdr_para_10_in = dlntdr_para_in(10)
+    neo_temp_perp_10_in   = temp_perp_in(10)
+    neo_dlntdr_perp_10_in = dlntdr_perp_in(10)
+    neo_profile_dlnndr_10_scale_in = profile_dlnndr_scale(10)
+    neo_profile_dlntdr_10_scale_in = profile_dlntdr_scale(10)
+    neo_z_11_in = z_in(11)
+    neo_mass_11_in = mass_in(11)
+    neo_dens_11_in = dens_in(11)
+    neo_temp_11_in = temp_in(11)
+    neo_aniso_model_11_in = aniso_model_in(11)
+    neo_temp_para_11_in   = temp_para_in(11)
+    neo_dlntdr_para_11_in = dlntdr_para_in(11)
+    neo_temp_perp_11_in   = temp_perp_in(11)
+    neo_dlntdr_perp_11_in = dlntdr_perp_in(11)
+    neo_dlnndr_11_in = dlnndr_in(11)
+    neo_dlntdr_11_in = dlntdr_in(11)
+    neo_profile_dlnndr_11_scale_in = profile_dlnndr_scale(11)
+    neo_profile_dlntdr_11_scale_in = profile_dlntdr_scale(11)
     neo_dphi0dr_in = dphi0dr_in
     neo_epar0_in = epar0_in
     neo_q_in = q_in
@@ -449,6 +580,71 @@ contains
     dlntdr_perp_in(6) = neo_dlntdr_perp_6_in 
     profile_dlnndr_scale(6) = neo_profile_dlnndr_6_scale_in
     profile_dlntdr_scale(6) = neo_profile_dlntdr_6_scale_in
+    z_in(7) = neo_z_7_in
+    mass_in(7) = neo_mass_7_in
+    dens_in(7) = neo_dens_7_in
+    temp_in(7) = neo_temp_7_in
+    dlnndr_in(7) = neo_dlnndr_7_in
+    dlntdr_in(7) = neo_dlntdr_7_in
+    aniso_model_in(7) = neo_aniso_model_7_in 
+    temp_para_in(7)   = neo_temp_para_7_in   
+    dlntdr_para_in(7) = neo_dlntdr_para_7_in 
+    temp_perp_in(7)   = neo_temp_perp_7_in   
+    dlntdr_perp_in(7) = neo_dlntdr_perp_7_in 
+    profile_dlnndr_scale(7) = neo_profile_dlnndr_7_scale_in
+    profile_dlntdr_scale(7) = neo_profile_dlntdr_7_scale_in
+    z_in(8) = neo_z_8_in
+    mass_in(8) = neo_mass_8_in
+    dens_in(8) = neo_dens_8_in
+    temp_in(8) = neo_temp_8_in
+    dlnndr_in(8) = neo_dlnndr_8_in
+    dlntdr_in(8) = neo_dlntdr_8_in
+    aniso_model_in(8) = neo_aniso_model_8_in
+    temp_para_in(8)   = neo_temp_para_8_in   
+    dlntdr_para_in(8) = neo_dlntdr_para_8_in 
+    temp_perp_in(8)   = neo_temp_perp_8_in   
+    dlntdr_perp_in(8) = neo_dlntdr_perp_8_in 
+    profile_dlnndr_scale(8) = neo_profile_dlnndr_8_scale_in
+    profile_dlntdr_scale(8) = neo_profile_dlntdr_8_scale_in
+    z_in(9) = neo_z_9_in
+    mass_in(9) = neo_mass_9_in
+    dens_in(9) = neo_dens_9_in
+    temp_in(9) = neo_temp_9_in
+    dlnndr_in(9) = neo_dlnndr_9_in
+    dlntdr_in(9) = neo_dlntdr_9_in
+    aniso_model_in(9) = neo_aniso_model_9_in
+    temp_para_in(9)   = neo_temp_para_9_in   
+    dlntdr_para_in(9) = neo_dlntdr_para_9_in 
+    temp_perp_in(9)   = neo_temp_perp_9_in   
+    dlntdr_perp_in(9) = neo_dlntdr_perp_9_in 
+    profile_dlnndr_scale(9) = neo_profile_dlnndr_9_scale_in
+    profile_dlntdr_scale(9) = neo_profile_dlntdr_9_scale_in
+    z_in(10) = neo_z_10_in
+    mass_in(10) = neo_mass_10_in
+    dens_in(10) = neo_dens_10_in
+    temp_in(10) = neo_temp_10_in
+    dlnndr_in(10) = neo_dlnndr_10_in
+    dlntdr_in(10) = neo_dlntdr_10_in
+    aniso_model_in(10) = neo_aniso_model_10_in
+    temp_para_in(10)   = neo_temp_para_10_in   
+    dlntdr_para_in(10) = neo_dlntdr_para_10_in 
+    temp_perp_in(10)   = neo_temp_perp_10_in   
+    dlntdr_perp_in(10) = neo_dlntdr_perp_10_in 
+    profile_dlnndr_scale(10) = neo_profile_dlnndr_10_scale_in
+    profile_dlntdr_scale(10) = neo_profile_dlntdr_10_scale_in
+    z_in(11) = neo_z_11_in
+    mass_in(11) = neo_mass_11_in
+    dens_in(11) = neo_dens_11_in
+    temp_in(11) = neo_temp_11_in
+    dlnndr_in(11) = neo_dlnndr_11_in
+    dlntdr_in(11) = neo_dlntdr_11_in
+    aniso_model_in(11) = neo_aniso_model_11_in
+    temp_para_in(11)   = neo_temp_para_11_in   
+    dlntdr_para_in(11) = neo_dlntdr_para_11_in 
+    temp_perp_in(11)   = neo_temp_perp_11_in   
+    dlntdr_perp_in(11) = neo_dlntdr_perp_11_in 
+    profile_dlnndr_scale(11) = neo_profile_dlnndr_11_scale_in
+    profile_dlntdr_scale(11) = neo_profile_dlntdr_11_scale_in
     dphi0dr_in = neo_dphi0dr_in
     epar0_in = neo_epar0_in
     q_in = neo_q_in
@@ -615,6 +811,81 @@ contains
           write(1,30) 'DLNTDR_PARA_6=', neo_dlntdr_para_6_in
           write(1,30) 'TEMP_PERP_6=', neo_temp_perp_6_in 
           write(1,30) 'DLNTDR_PERP_6=', neo_dlntdr_perp_6_in 
+       endif
+    endif
+    if (neo_n_species_in > 6) then
+       write(1,20) 'Z_7=',neo_z_7_in
+       write(1,30) 'MASS_7=',neo_mass_7_in
+       write(1,30) 'DENS_7=',neo_dens_7_in
+       write(1,30) 'TEMP_7=',neo_temp_7_in
+       write(1,30) 'DLNNDR_7=',neo_dlnndr_7_in
+       write(1,30) 'DLNTDR_7=',neo_dlntdr_7_in
+       write(1,20) 'ANISO_MODEL_7=', neo_aniso_model_7_in  
+       if(neo_aniso_model_7_in == 2) then              
+          write(1,30) 'TEMP_PARA_7=', neo_temp_para_7_in 
+          write(1,30) 'DLNTDR_PARA_7=', neo_dlntdr_para_7_in
+          write(1,30) 'TEMP_PERP_7=', neo_temp_perp_7_in 
+          write(1,30) 'DLNTDR_PERP_7=', neo_dlntdr_perp_7_in 
+       endif
+    endif
+    if (neo_n_species_in > 7) then
+       write(1,20) 'Z_8=',neo_z_8_in
+       write(1,30) 'MASS_8=',neo_mass_8_in
+       write(1,30) 'DENS_8=',neo_dens_8_in
+       write(1,30) 'TEMP_8=',neo_temp_8_in
+       write(1,30) 'DLNNDR_8=',neo_dlnndr_8_in
+       write(1,30) 'DLNTDR_8=',neo_dlntdr_8_in
+       write(1,20) 'ANISO_MODEL_8=', neo_aniso_model_8_in  
+       if(neo_aniso_model_8_in == 2) then              
+          write(1,30) 'TEMP_PARA_8=', neo_temp_para_8_in 
+          write(1,30) 'DLNTDR_PARA_8=', neo_dlntdr_para_8_in
+          write(1,30) 'TEMP_PERP_8=', neo_temp_perp_8_in 
+          write(1,30) 'DLNTDR_PERP_8=', neo_dlntdr_perp_8_in 
+       endif
+    endif
+    if (neo_n_species_in > 8) then
+       write(1,20) 'Z_9=',neo_z_9_in
+       write(1,30) 'MASS_9=',neo_mass_9_in
+       write(1,30) 'DENS_9=',neo_dens_9_in
+       write(1,30) 'TEMP_9=',neo_temp_9_in
+       write(1,30) 'DLNNDR_9=',neo_dlnndr_9_in
+       write(1,30) 'DLNTDR_9=',neo_dlntdr_9_in
+       write(1,20) 'ANISO_MODEL_9=', neo_aniso_model_9_in  
+       if(neo_aniso_model_9_in == 2) then              
+          write(1,30) 'TEMP_PARA_9=', neo_temp_para_9_in 
+          write(1,30) 'DLNTDR_PARA_9=', neo_dlntdr_para_9_in
+          write(1,30) 'TEMP_PERP_9=', neo_temp_perp_9_in 
+          write(1,30) 'DLNTDR_PERP_9=', neo_dlntdr_perp_9_in 
+       endif
+    endif
+    if (neo_n_species_in > 9) then
+       write(1,20) 'Z_10=',neo_z_10_in
+       write(1,30) 'MASS_10=',neo_mass_10_in
+       write(1,30) 'DENS_10=',neo_dens_10_in
+       write(1,30) 'TEMP_10=',neo_temp_10_in
+       write(1,30) 'DLNNDR_10=',neo_dlnndr_10_in
+       write(1,30) 'DLNTDR_10=',neo_dlntdr_10_in
+       write(1,20) 'ANISO_MODEL_10=', neo_aniso_model_10_in  
+       if(neo_aniso_model_10_in == 2) then              
+          write(1,30) 'TEMP_PARA_10=', neo_temp_para_10_in 
+          write(1,30) 'DLNTDR_PARA_10=', neo_dlntdr_para_10_in
+          write(1,30) 'TEMP_PERP_10=', neo_temp_perp_10_in 
+          write(1,30) 'DLNTDR_PERP_10=', neo_dlntdr_perp_10_in 
+       endif
+    endif
+    if (neo_n_species_in > 10) then
+       write(1,20) 'Z_11=',neo_z_11_in
+       write(1,30) 'MASS_11=',neo_mass_11_in
+       write(1,30) 'DENS_11=',neo_dens_11_in
+       write(1,30) 'TEMP_11=',neo_temp_11_in
+       write(1,30) 'DLNNDR_11=',neo_dlnndr_11_in
+       write(1,30) 'DLNTDR_11=',neo_dlntdr_11_in
+       write(1,20) 'ANISO_MODEL_11=', neo_aniso_model_11_in  
+       if(neo_aniso_model_11_in == 2) then              
+          write(1,30) 'TEMP_PARA_11=', neo_temp_para_11_in 
+          write(1,30) 'DLNTDR_PARA_11=', neo_dlntdr_para_11_in
+          write(1,30) 'TEMP_PERP_11=', neo_temp_perp_11_in 
+          write(1,30) 'DLNTDR_PERP_11=', neo_dlntdr_perp_11_in 
        endif
     endif
 

@@ -65,6 +65,12 @@ subroutine tgyro_global_iteration_driver
      call tgyro_catch_error('ERROR: Must have odd number of GYRO radii')
   endif
 
+  if (loc_he_feedback_flag == 1) then
+     call tgyro_catch_error('ERROR: He feedback not supported globally.')
+  else
+     i_ash = 0
+  endif
+
   p_max = n_evolve*(n_r-1)
 
   call tgyro_allocate_globals
@@ -100,7 +106,7 @@ subroutine tgyro_global_iteration_driver
         ip = ip+1
         pmap(i,ip) = p
      endif
-  enddo
+   enddo
 
   ! Set initial values
   res(:)   = 1.0
@@ -136,11 +142,11 @@ subroutine tgyro_global_iteration_driver
      r(i) = tgyro_rmin+dlength/2+(i-2)*dlength
   enddo
 
-  EXPRO_ctrl_density_method = tgyro_quasineutral_flag+1
+  EXPRO_ctrl_n_ion = loc_n_ion
+  EXPRO_ctrl_quasineutral_flag = tgyro_quasineutral_flag
   EXPRO_ctrl_z = 0.0
   EXPRO_ctrl_z(1:loc_n_ion) = zi_vec(1:loc_n_ion)
   EXPRO_ctrl_numeq_flag = loc_num_equil_flag
-  EXPRO_ctrl_rotation_method = 1
 
   call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
   call EXPRO_pread

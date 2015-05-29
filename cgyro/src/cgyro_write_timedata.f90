@@ -20,6 +20,12 @@ subroutine cgyro_write_timedata
   ! Print this data on print steps only; otherwise exit now
   if (mod(i_time,print_step) /= 0) return
 
+  !---------------------------------------------------------------------------
+  if (n_toroidal == 1 .and. h_print_flag == 1) then
+     call write_distribution(trim(path)//runfile_hb,1)
+  endif
+  !---------------------------------------------------------------------------
+
   if (nonlinear_flag == 1) then
 
      ! Density flux
@@ -512,27 +518,15 @@ subroutine write_distribution(datafile,indx)
      allocate(h_x_glob(nc,nv))
 
      ! Collect distribution onto process 0
-     if (indx == 1) then
-        call MPI_GATHER(h_x(:,:),&
-             size(h_x),&
-             MPI_DOUBLE_COMPLEX,&
-             h_x_glob(:,:),&
-             size(h_x),&
-             MPI_DOUBLE_COMPLEX,&
-             0,&
-             NEW_COMM_1,&
-             i_err)
-     else
-        call MPI_GATHER(cap_h_c(:,:),&
-             size(cap_h_c),&
-             MPI_DOUBLE_COMPLEX,&
-             h_x_glob(:,:),&
-             size(h_x),&
-             MPI_DOUBLE_COMPLEX,&
-             0,&
-             NEW_COMM_1,&
-             i_err)
-     endif
+     call MPI_GATHER(h_x(:,:),&
+          size(h_x),&
+          MPI_DOUBLE_COMPLEX,&
+          h_x_glob(:,:),&
+          size(h_x),&
+          MPI_DOUBLE_COMPLEX,&
+          0,&
+          NEW_COMM_1,&
+          i_err)
 
      if (i_proc == 0) then
         do iv=1,nv

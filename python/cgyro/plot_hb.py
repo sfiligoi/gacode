@@ -7,8 +7,12 @@ from cgyro.data import cgyrodata
 ftype = sys.argv[1]
 itime = int(sys.argv[2])
 ispec = int(sys.argv[3])
+tmax = float(sys.argv[4])
 
 sim = cgyrodata('./')
+
+if itime > sim.n_time-1:
+    itime = sim.n_time-1
 
 fig = plt.figure(figsize=(14,12))
 fig.subplots_adjust(left=0.1,right=0.95,top=0.94,bottom=0.06,wspace=0.25,hspace=0.32)
@@ -33,7 +37,7 @@ for row in range(3):
     ax.set_xlabel(r'$\theta/\pi$')
     ax.set_ylabel(r'$\xi = v_\parallel/v$')
 
-    hp = np.transpose(np.array(sim.hb[0,:,ispec,:,ie]))
+    hp = np.transpose(np.array(sim.hb[0,:,ispec,:,ie,itime]))
     hmin = hp.min()
     hmax = hp.max()
     dh = (hmax-hmin)/100.0
@@ -41,7 +45,10 @@ for row in range(3):
     levels = np.arange(hmin-dh,hmax+dh,dh)
 
     ax.contourf(sim.thetab/np.pi,sim.xi,hp,levels,cmap=cm.jet,origin='lower')
-    ax.set_xlim([1-sim.n_radial,-1+sim.n_radial])
+    if tmax < 0.0:
+        ax.set_xlim([1-sim.n_radial,-1+sim.n_radial])
+    else:
+        ax.set_xlim([-tmax,tmax])
 
     # Plot dots for mesh points
     if (row == 1):
@@ -61,7 +68,7 @@ for row in range(3):
     ax.set_xlabel(r'$\theta/\pi$')
     ax.set_ylabel(r'$\xi = v_\parallel/v$')
 
-    hp = np.transpose(np.array(sim.hb[1,:,ispec,:,ie]))
+    hp = np.transpose(np.array(sim.hb[1,:,ispec,:,ie,itime]))
     hmin = hp.min()
     hmax = hp.max()
     dh = (hmax-hmin)/100.0
@@ -69,7 +76,10 @@ for row in range(3):
     levels = np.arange(hmin-dh,hmax+dh,dh)
 
     ax.contourf(sim.thetab/np.pi,sim.xi,hp,levels,cmap=cm.jet,origin='lower')
-    ax.set_xlim([1-sim.n_radial,-1+sim.n_radial])
+    if tmax < 0.0:
+        ax.set_xlim([1-sim.n_radial,-1+sim.n_radial])
+    else:
+        ax.set_xlim([-tmax,tmax])
     #======================================
 
 

@@ -25,8 +25,7 @@ subroutine EXPRO_alloc_control(i_proc,flag)
              iostat=ierr)
 
         if (ierr == 0) then
-           read(io,*) EXPRO_ncol
-           read(io,*) EXPRO_nblock
+           read(io,*) EXPRO_n_ion
            read(io,*) EXPRO_n_exp
            close(io)
            open(unit=io,file=trim(path)//trim(runfile),status='replace')
@@ -113,13 +112,13 @@ subroutine EXPRO_alloc_control(i_proc,flag)
      allocate(EXPRO_dlnptotdr(EXPRO_n_exp))
      EXPRO_dlnptotdr(:)=0.0
 
-     allocate(EXPRO_ni(nion_max,EXPRO_n_exp))
+     allocate(EXPRO_ni(EXPRO_n_ion_max,EXPRO_n_exp))
      EXPRO_ni(:,:)=0.0
-     allocate(EXPRO_ti(nion_max,EXPRO_n_exp))
+     allocate(EXPRO_ti(EXPRO_n_ion_max,EXPRO_n_exp))
      EXPRO_ti(:,:)=0.0
-     allocate(EXPRO_vtor(nion_max,EXPRO_n_exp))
+     allocate(EXPRO_vtor(EXPRO_n_ion_max,EXPRO_n_exp))
      EXPRO_vtor(:,:)=0.0
-     allocate(EXPRO_vpol(nion_max,EXPRO_n_exp))
+     allocate(EXPRO_vpol(EXPRO_n_ion_max,EXPRO_n_exp))
      EXPRO_vpol(:,:)=0.0
 
      allocate(EXPRO_pow_e_fus(EXPRO_n_exp))
@@ -157,9 +156,9 @@ subroutine EXPRO_alloc_control(i_proc,flag)
      allocate(EXPRO_dlntedr(EXPRO_n_exp))
      EXPRO_dlntedr(:)=0.0
 
-     allocate(EXPRO_dlnnidr(nion_max,EXPRO_n_exp))
+     allocate(EXPRO_dlnnidr(EXPRO_n_ion_max,EXPRO_n_exp))
      EXPRO_dlnnidr(:,:)=0.0
-     allocate(EXPRO_dlntidr(nion_max,EXPRO_n_exp))
+     allocate(EXPRO_dlntidr(EXPRO_n_ion_max,EXPRO_n_exp))
      EXPRO_dlntidr(:,:)=0.0
 
      allocate(EXPRO_vol(EXPRO_n_exp))
@@ -204,8 +203,8 @@ subroutine EXPRO_alloc_control(i_proc,flag)
      EXPRO_bp0(:)=0.0
      allocate(EXPRO_bt0(EXPRO_n_exp))
      EXPRO_bt0(:)=0.0
-     allocate(EXPRO_poloidalfluxover2pi(EXPRO_n_exp))
-     EXPRO_poloidalfluxover2pi(:)=0.0
+     allocate(EXPRO_polflux(EXPRO_n_exp))
+     EXPRO_polflux(:)=0.0
 
   else
 
@@ -231,7 +230,7 @@ subroutine EXPRO_alloc_control(i_proc,flag)
      deallocate(EXPRO_flow_wall)
      deallocate(EXPRO_zmag)
      deallocate(EXPRO_ptot)
-     deallocate(EXPRO_poloidalfluxover2pi)
+     deallocate(EXPRO_polflux)
 
      deallocate(EXPRO_ni)
      deallocate(EXPRO_ti)

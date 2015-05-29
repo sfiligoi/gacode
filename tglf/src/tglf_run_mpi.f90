@@ -127,6 +127,7 @@ subroutine tglf_run_mpi()
   ! Create parameter dump file
   if (tglf_dump_flag_in .eqv. .true.) then
      call tglf_dump_local
+     if (tglf_test_flag_in == 1) return
   endif
 
   if (tglf_use_transport_model_in) then

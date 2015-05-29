@@ -21,7 +21,6 @@ subroutine tgyro_iteration_driver
   implicit none
 
   integer :: i_ion
-  integer :: iky
 
   n_r   = n_inst+1
   p_max = n_evolve*(n_r-1)
@@ -80,6 +79,12 @@ subroutine tgyro_iteration_driver
            ip = ip+1
            pmap(i,ip) = p
            quant(p) = 'er'
+        endif
+        if (loc_he_feedback_flag == 1) then
+           p  = p+1
+           ip = ip+1
+           pmap(i,ip) = p
+           quant(p) = 'he'
         endif
      enddo
   endif
@@ -167,7 +172,6 @@ subroutine tgyro_iteration_driver
 
   correct_flag = 0
 
-
   p = 0
   do i=2,n_r
      if (loc_ti_feedback_flag == 1) then
@@ -186,6 +190,10 @@ subroutine tgyro_iteration_driver
      if (loc_er_feedback_flag == 1) then
         p = p+1
         x_vec(p) = f_rot(i)
+     endif
+     if (loc_he_feedback_flag == 1) then
+        p = p+1
+        x_vec(p) = dlnnidr(i_ash,i)
      endif
   enddo
 
@@ -233,10 +241,12 @@ subroutine tgyro_iteration_driver
            call tgyro_expro_map(r,dlnnidr(i_ion,:),n_r,100*EXPRO_rmin,EXPRO_ni(i_ion,:),EXPRO_n_exp)
            call tgyro_expro_map(r,dlntidr(i_ion,:),n_r,100*EXPRO_rmin,EXPRO_ti(i_ion,:),EXPRO_n_exp)
         enddo
-        EXPRO_ctrl_extension = '.new'
-        call EXPRO_write_original('Profiles modified by TGYRO')
+        call EXPRO_write_original(&
+             1,'input.profiles',&
+             2,'input.profiles.new',&
+             'Profiles modified by TGYRO')
         call EXPRO_compute_derived
-        call EXPRO_write_derived
+        call EXPRO_write_derived(1,'input.profiles.extra')
      endif
      call EXPRO_palloc(MPI_COMM_WORLD,'./',0) 
   endif

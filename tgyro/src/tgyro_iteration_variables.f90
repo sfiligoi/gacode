@@ -55,12 +55,12 @@ module tgyro_iteration_variables
   integer :: i_worker
   integer :: search_index=1 
   integer :: search_max=4
-  real, dimension(5,4) :: search
+  real, dimension(6,4) :: search
   data search/&
-       1.0,0.1,0.75,0.5,0.25,&
-       -1.0,-0.1,-0.75,-0.5,-0.25,&
-       2.0,0.2,1.5,1.1,0.6,&
-       -2.0,-0.2,-1.5,-1.1,-0.6/
+       1.0,0.1,0.75,0.5,0.25,0.5,&
+       -1.0,-0.1,-0.75,-0.5,-0.25,-0.5,&
+       2.0,0.2,1.5,1.1,0.6,1.1,&
+       -2.0,-0.2,-1.5,-1.1,-0.6,-1.1/
   !
   ! To be allocated in tgyro_iteration_serial:
   !

@@ -20,5 +20,5 @@ echo $simdir
 
 cd $simdir
 export OMP_NUM_THREADS=$nomp 
-openmpirun -np $nmpi $exec
+mpirun -np $nmpi $exec
 

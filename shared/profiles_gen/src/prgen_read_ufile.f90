@@ -156,10 +156,10 @@ subroutine prgen_read_ufile
      endif
   enddo
 
-  ! Compute the quasineutrality error with max 5 ions:
+  ! Compute the quasineutrality error with all ions:
 
   quasi_err = 0.0
-  ix = min(ufile_nion,5)
+  ix = min(ufile_nion,n_ion_max)
   do i=1,nx
      quasi_err = quasi_err+sum(ufile_ni(i,1:ix)*ufile_z(1:ix))
   enddo
@@ -221,6 +221,12 @@ subroutine ufile_mapper(file,x,y,nx,neg_protect)
      return
   endif
 
+  ! Check for zero profile (1.0 is effectively zero).
+  if (sum(y0(1:nx0)) < 1.0) then 
+     y(:) = 0.0
+     return
+  endif
+  
   if (x0(1) > 0.0 .and. x0(nx0) < 1.0) then
      ! Extrapolate to 0 and 1
      x0(0)     = 0.0

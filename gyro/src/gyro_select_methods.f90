@@ -672,15 +672,10 @@ subroutine gyro_select_methods
   ! KROOK COLLISIONS FLAG:
   !
   if (nu_i_krook > 0.0) then
-
      krook_flag = 1
      call send_line('ion Krook coll.      : ON for all n')
-
   else
-
      krook_flag = 0
-     !     call send_line('Ion Krook coll.      : OFF')
-
   endif
   !-------------------------------------------------------
 
@@ -692,7 +687,7 @@ subroutine gyro_select_methods
   case (1)
      call send_line('rotation parameters  : CANDY METHOD')
   case (2)
-     call send_line('rotation effects     : WALTZ METHOD')
+     call catch_error('ERROR: (GYRO) rotation_theory_method=2 no longer supported.')
   case default
      call catch_error('ERROR: (GYRO) rotation_theory_method')
   end select
