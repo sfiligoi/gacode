@@ -38,8 +38,8 @@ tg = {}
 
 # ky-grid
 tg['KYGRID_MODEL'] = 0
-tg['NKY'] = g['TOROIDAL_GRID']
-tg['KY'] = g['TOROIDAL_GRID']*g['TOROIDAL_SEP']*g['RHO_STAR']*g['SAFETY_FACTOR']/g['RADIUS']
+tg['NKY'] = g['TOROIDAL_GRID']-1
+tg['KY'] = tg['NKY']*g['TOROIDAL_SEP']*g['RHO_STAR']*g['SAFETY_FACTOR']/g['RADIUS']
 if tg['KY'] < 0.0 :
     tg['KY'] = -tg['KY']
 
@@ -115,27 +115,29 @@ tg['AS_3'] = g['NI_OVER_NE_2']
 tg['AS_4'] = g['NI_OVER_NE_3']
 tg['AS_5'] = g['NI_OVER_NE_4']
 tg['AS_6'] = g['NI_OVER_NE_5']
-tg['VPAR_1'] = g['MACH']
-tg['VPAR_2'] = g['MACH']
-tg['VPAR_3'] = g['MACH']
-tg['VPAR_4'] = g['MACH']
-tg['VPAR_5'] = g['MACH']
-tg['VPAR_6'] = g['MACH']
-tg['VPAR_SHEAR_1'] = g['PGAMMA']
-tg['VPAR_SHEAR_2'] = g['PGAMMA']
-tg['VPAR_SHEAR_3'] = g['PGAMMA']
-tg['VPAR_SHEAR_4'] = g['PGAMMA']
-tg['VPAR_SHEAR_5'] = g['PGAMMA']
-tg['VPAR_SHEAR_6'] = g['PGAMMA']
-tg['VEXB_SHEAR'] = g['GAMMA_E']
+tg['VPAR_1'] = -tg['SIGN_IT']*g['MACH']
+tg['VPAR_2'] = -tg['SIGN_IT']*g['MACH']
+tg['VPAR_3'] = -tg['SIGN_IT']*g['MACH']
+tg['VPAR_4'] = -tg['SIGN_IT']*g['MACH']
+tg['VPAR_5'] = -tg['SIGN_IT']*g['MACH']
+tg['VPAR_6'] = -tg['SIGN_IT']*g['MACH']
+tg['VPAR_SHEAR_1'] = -tg['SIGN_IT']*g['PGAMMA']
+tg['VPAR_SHEAR_2'] = -tg['SIGN_IT']*g['PGAMMA']
+tg['VPAR_SHEAR_3'] = -tg['SIGN_IT']*g['PGAMMA']
+tg['VPAR_SHEAR_4'] = -tg['SIGN_IT']*g['PGAMMA']
+tg['VPAR_SHEAR_5'] = -tg['SIGN_IT']*g['PGAMMA']
+tg['VPAR_SHEAR_6'] = -tg['SIGN_IT']*g['PGAMMA']
+tg['VEXB_SHEAR'] = -tg['SIGN_BT']*g['GAMMA_E']
 tg['BETAE'] = g['BETAE_UNIT']*g['AMPERE_SCALE']
 tg['ZEFF'] = g['Z_EFF']
-tg['DEBYE'] = g['LAMBDA_DEBYE']
+tg['DEBYE'] = g['LAMBDA_DEBYE']/g['RHO_STAR']
 tg['XNUE'] = g['NU_EI']
 #S-ALPHA GEOMETRY
 tg['RMIN_SA'] = g['RADIUS']
 tg['RMAJ_SA'] = g['ASPECT_RATIO']
 tg['Q_SA'] = g['SAFETY_FACTOR']
+if tg['Q_SA'] < 0.0 :
+   tg['Q_SA'] = -tg['Q_SA']
 tg['SHAT_SA'] = g['SHEAR']
 tg['ALPHA_SA'] = g['SHIFT']
 tg['XWELL_SA'] = 0.0
@@ -146,9 +148,9 @@ tg['FT_MODEL_SA'] = 1
 tg['RMIN_LOC'] = g['RADIUS']
 tg['RMAJ_LOC'] = g['ASPECT_RATIO']
 tg['ZMAJ_LOC'] = g['ZMAG']
-tg['DRMINDX_LOC'] = g['DZMAG']
+tg['DRMINDX_LOC'] = 1.0
 tg['DRMAJDX_LOC'] = g['SHIFT']
-tg['DZMAJDX_LOC'] = 0.0
+tg['DZMAJDX_LOC'] = g['DZMAG']
 tg['KAPPA_LOC'] = g['KAPPA']
 tg['S_KAPPA_LOC'] = g['S_KAPPA']
 tg['DELTA_LOC'] = g['DELTA']
@@ -156,13 +158,15 @@ tg['S_DELTA_LOC'] = g['S_DELTA']
 tg['ZETA_LOC'] = g['ZETA']
 tg['S_ZETA_LOC'] = g['S_ZETA']
 tg['Q_LOC'] = g['SAFETY_FACTOR']
+if tg['Q_LOC'] < 0.0 :
+   tg['Q_LOC'] = -tg['Q_LOC']
 tg['Q_PRIME_LOC'] = g['SHEAR']*(tg['Q_LOC']/tg['RMIN_LOC'])**2
 tg['KX0_LOC'] = 0.0
 # compute P_PRIME_LOC
 scale = g['GEO_BETAPRIME_SCALE']/(8.0*3.1415927)
 betae = g['BETAE_UNIT']
 rloc = g['RADIUS']
-qloc = g['SAFETY_FACTOR']
+qloc = tg['Q_LOC']
 dpdr = g['DLNNDR_ELECTRON'] + g['DLNTDR_ELECTRON'] +                              \
             g['NI_OVER_NE']*g['TI_OVER_TE']*(g['DLNTDR'] + g['DLNNDR']) +          \
             g['NI_OVER_NE_2']*g['TI_OVER_TE_2']*(g['DLNTDR_2'] + g['DLNNDR_2']) +  \
