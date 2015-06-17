@@ -9,6 +9,7 @@ x.set_extension('.gen')
 
 # input.profiles scalar parameters
 
+x.add('N_ION','1')
 x.add('N_EXP','41')
 x.add('BT_EXP','-2.0')
 x.add('ARHO_EXP','0.3')

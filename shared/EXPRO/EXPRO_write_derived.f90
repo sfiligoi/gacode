@@ -5,16 +5,15 @@
 !  Write all derived quantities to input.profiles.extra
 !--------------------------------------------------------
 
-subroutine EXPRO_write_derived
+subroutine EXPRO_write_derived(io,datafile)
 
   use EXPRO_globals
   use EXPRO_interface
 
-  integer, parameter :: io=1
+  integer, intent(in) :: io
+  character (len=*), intent(in) :: datafile
 
-  open(unit=io,&
-       file=trim(path)//'input.profiles.extra'//trim(EXPRO_ctrl_extension),&
-       status='replace')
+  open(unit=io,file=trim(path)//trim(datafile),status='replace')
 
   write(io,'(a)') '# input.profiles.extra'
   write(io,'(a)') '#'
@@ -58,24 +57,24 @@ subroutine EXPRO_write_derived
   write(io,10) EXPRO_szeta(:)    ! 7
   write(io,10) EXPRO_dlnnedr(:)  ! 8
   write(io,10) EXPRO_dlntedr(:)  ! 9 
-  write(io,10) transpose(EXPRO_dlnnidr(:,:)) ! 10-14 
-  write(io,10) transpose(EXPRO_dlntidr(:,:)) ! 15-19
-  write(io,10) EXPRO_dlnptotdr(:)! 20 
-  write(io,10) EXPRO_drdrho(:)   ! 21
-  write(io,10) EXPRO_w0p(:)      ! 22
-  write(io,10) EXPRO_vol(:)      ! 23
-  write(io,10) EXPRO_volp(:)     ! 24
-  write(io,10) EXPRO_cs(:)       ! 25
-  write(io,10) EXPRO_rhos(:)     ! 26
-  write(io,10) EXPRO_ni_new(:)   ! 27
-  write(io,10) EXPRO_dlnnidr_new(:) ! 28 
-  write(io,10) EXPRO_grad_r0(:)     ! 29
-  write(io,10) EXPRO_ave_grad_r(:)  ! 30 
-  write(io,10) EXPRO_bp0(:)      ! 31
-  write(io,10) EXPRO_bt0(:)      ! 32
-  write(io,10) EXPRO_gamma_e(:)  ! 33
-  write(io,10) EXPRO_gamma_p(:)  ! 34
-  write(io,10) EXPRO_mach(:)     ! 35
+  write(io,10) transpose(EXPRO_dlnnidr(:,:)) ! 10-19
+  write(io,10) transpose(EXPRO_dlntidr(:,:)) ! 20-29
+  write(io,10) EXPRO_dlnptotdr(:)! 30 
+  write(io,10) EXPRO_drdrho(:)   ! 31
+  write(io,10) EXPRO_w0p(:)      ! 32
+  write(io,10) EXPRO_vol(:)      ! 33
+  write(io,10) EXPRO_volp(:)     ! 34
+  write(io,10) EXPRO_cs(:)       ! 35
+  write(io,10) EXPRO_rhos(:)     ! 36
+  write(io,10) EXPRO_ni_new(:)   ! 37
+  write(io,10) EXPRO_dlnnidr_new(:) ! 38 
+  write(io,10) EXPRO_grad_r0(:)     ! 39
+  write(io,10) EXPRO_ave_grad_r(:)  ! 40 
+  write(io,10) EXPRO_bp0(:)      ! 41
+  write(io,10) EXPRO_bt0(:)      ! 42
+  write(io,10) EXPRO_gamma_e(:)  ! 43
+  write(io,10) EXPRO_gamma_p(:)  ! 44
+  write(io,10) EXPRO_mach(:)     ! 45
 
   close(io)
 

@@ -23,12 +23,13 @@ ax = fig.add_subplot(111)
 ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
 ax.set_xlabel(r'$(c_s/a)\, t$',fontsize=GFONTSIZE)
+ax.set_ylabel(r'$Re \, \Phi/\Phi_0$',fontsize=GFONTSIZE)
 
-ax.plot(sim.t,y,color='k',label='Re')
+ax.plot(sim.t,y,color='k')
 ax.plot([0,max(sim.t)],[y_ave,y_ave],color='r',label='ave')
 
-#y_th = 1.0/(1.0+1.6*2.0**2/np.sqrt(0.5/3.0))
-#ax.plot([0,max(t)],[y_th,y_th],color='b',label='RH theory')
+y_th = 1.0/(1.0+1.6*2.0**2/np.sqrt(0.5/3.0))
+ax.plot([0,max(sim.t)],[y_th,y_th],color='b',label='RH theory')
 
 ax.legend()
 #======================================

@@ -29,10 +29,10 @@ program exprodump
   read(1,*) density_method
   close(1)
 
-  EXPRO_ctrl_density_method = density_method
+  EXPRO_ctrl_n_ion = 5
+  EXPRO_ctrl_quasineutral_flag = density_method-1
   EXPRO_ctrl_z(1:5) = z(1:5)
   EXPRO_ctrl_numeq_flag = 0 
-  EXPRO_ctrl_rotation_method = 1
 
   call EXPRO_alloc('./',1) 
   call EXPRO_read
@@ -115,7 +115,7 @@ program exprodump
         case ('rho')
            write(*,10,advance='no') EXPRO_rho(i)
         case ('psi')
-           write(*,10,advance='no') EXPRO_poloidalfluxover2pi(i)/EXPRO_poloidalfluxover2pi(EXPRO_n_exp)
+           write(*,10,advance='no') EXPRO_polflux(i)/EXPRO_polflux(EXPRO_n_exp)
         end select
 
         ! Column 2
@@ -160,9 +160,9 @@ program exprodump
         case ('ptot')
            print 20,EXPRO_ptot(i)
         case ('polflux')
-           print 20,EXPRO_poloidalfluxover2pi(i)
+           print 20,EXPRO_polflux(i)
         case ('ni_1')
-           if(EXPRO_ctrl_density_method == 2) then
+           if (EXPRO_ctrl_quasineutral_flag == 1) then
               print 20,EXPRO_ni_new(i)
            else
               print 20,EXPRO_ni(1,i)

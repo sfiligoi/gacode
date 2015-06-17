@@ -19,6 +19,7 @@ OBJECTS = EXPRO_interface.o \
           EXPRO_read_geo.o \
           EXPRO_skip_header.o \
           EXPRO_compute_derived.o \
+          EXPRO_write.o \
           EXPRO_write_derived.o \
           EXPRO_write_original.o
 

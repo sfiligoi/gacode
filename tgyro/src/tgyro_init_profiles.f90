@@ -66,6 +66,7 @@ subroutine tgyro_init_profiles
   p_sync(:)  = 0.0
   p_brem(:)  = 0.0
   p_expwd(:) = 0.0
+  f_he_fus(:) = 0.0
   !------------------------------------------------------------
 
   !----------------------------------------------
@@ -95,7 +96,7 @@ subroutine tgyro_init_profiles
   do i=2,n_r
      if (inputrads(i-1) > 0.0) r(i) = inputrads(i-1)
   enddo
-  
+
   if (tgyro_use_rho == 1) then
      ! Using equally-spaced rho grid, not default r grid.  This is 
      ! useful for benchmarking with other codes.
@@ -109,11 +110,11 @@ subroutine tgyro_init_profiles
   i_bc = n_r-loc_bc_offset
   !----------------------------------------------
 
-  EXPRO_ctrl_density_method = tgyro_quasineutral_flag+1
+  EXPRO_ctrl_n_ion = loc_n_ion
+  EXPRO_ctrl_quasineutral_flag = tgyro_quasineutral_flag
   EXPRO_ctrl_z = 0.0
   EXPRO_ctrl_z(1:loc_n_ion) = zi_vec(1:loc_n_ion)
   EXPRO_ctrl_numeq_flag = loc_num_equil_flag
-  EXPRO_ctrl_rotation_method = 1
 
   call EXPRO_palloc(MPI_COMM_WORLD,'./',1) 
   call EXPRO_pread
@@ -190,7 +191,7 @@ subroutine tgyro_init_profiles
      ! There are 2 options for quasineurality: see TGYRO_FIX_CONCENTRATION_FLAG
 
      do i=1,n_r
-        call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(:),loc_n_ion,dlnridr(:,i))
+        call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(:),loc_n_ion)
      enddo
 
      ! Reintegrate density profiles
@@ -201,6 +202,17 @@ subroutine tgyro_init_profiles
      enddo
 
   endif
+  !------------------------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------------------------
+  ! Helium ash option
+  !
+  i_ash = 0
+  do i=1,loc_n_ion
+     if (zi_vec(i) == 2.0 .and. mi_vec(i) == 4.0 .and. therm_flag(i) == 1) then
+        i_ash = i
+     endif
+  enddo
   !------------------------------------------------------------------------------------------
 
   !------------------------------------------------------------------------------------------
@@ -405,31 +417,18 @@ subroutine tgyro_init_profiles
   eflux_e_tot(1) = 0.0
 
   mflux_tot(1) = 0.0
+  pflux_he_tot(1) = 0.0
 
   eflux_i_target(1) = 0.0
   eflux_e_target(1) = 0.0
   pflux_e_target(1) = 0.0
   mflux_target(1)   = 0.0
+  pflux_he_target(1) = 0.0
 
   ! Also need to zero initial exchanges to prevent use in tgyro_source 
   ! on iteration 0 before definition
   expwd_i_tur(:,:) = 0.0
   expwd_e_tur(:) = 0.0
-  !----------------------------------------------------
-
-  !----------------------------------------------------
-  ! Density ratios 
-  !  Used when tgyro_fix_concentration_flag=1
-  !
-  !  ri = ni/n1, 
-  !  dlnridr = -ri'/ri
-  !          = dlnnidr-dlnn1dr
-  !  
-  ! Need only dlnridr:
-  !
-  do i_ion=1,loc_n_ion
-     dlnridr(i_ion,:) = dlnnidr(i_ion,:)-dlnnidr(1,:)
-  enddo
   !----------------------------------------------------
 
 end subroutine tgyro_init_profiles

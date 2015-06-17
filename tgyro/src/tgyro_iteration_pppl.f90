@@ -58,6 +58,10 @@ subroutine tgyro_iteration_pppl
            p = p+1
            f_vec(p) = mflux_tot(i)
         endif
+        if (loc_he_feedback_flag == 1) then
+           p = p+1
+           f_vec(p) = pflux_he_tot(i)
+        endif
      enddo
      ! GYRO restart data available
      gyro_restart_method = 2
@@ -103,22 +107,26 @@ subroutine tgyro_iteration_pppl
      p = 0
      do i=2,n_r
         if (loc_ti_feedback_flag == 1) then
-           p = p + 1
+           p = p+1
            dlntidr(therm_vec(:),i) = x_vec(p)
         endif
         if (loc_te_feedback_flag == 1) then
-           p = p + 1
+           p = p+1
            dlntedr(i) = x_vec(p)
         endif
         if (loc_ne_feedback_flag == 1) then
-           p = p + 1
+           p = p+1
            dlnnedr(i) = x_vec(p)
            ! Set dlnnidr(1,i) according to quasineutrality
-           call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(:),loc_n_ion,dlnridr(:,i))
+           call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(:),loc_n_ion)
         endif
         if (loc_er_feedback_flag == 1) then
-           p = p + 1
+           p = p+1
            f_rot(i) = x_vec(p)
+        endif
+        if (loc_he_feedback_flag == 1) then
+           p = p+1
+           dlnnidr(i_ash,i) = x_vec(p)
         endif
      enddo
 
@@ -195,6 +203,18 @@ subroutine tgyro_iteration_pppl
 
            ip = ip+1
            call tgyro_flux_vector(x_vec,f_vec,dx,4)
+           do p=1,p_max,n_evolve
+              do pp=0,n_evolve-1
+                 jf(p+pp,p+ip) = (f_vec(p+pp)-f_vec0(p+pp))/dx
+              enddo
+           enddo
+
+        endif
+
+        if (loc_he_feedback_flag == 1) then
+
+           ip = ip+1
+           call tgyro_flux_vector(x_vec,f_vec,dx,5)
            do p=1,p_max,n_evolve
               do pp=0,n_evolve-1
                  jf(p+pp,p+ip) = (f_vec(p+pp)-f_vec0(p+pp))/dx
@@ -474,8 +494,8 @@ subroutine tgyro_iteration_pppl
 
               ! If doing L-M and line search failed, increase damping factor
               if ((tgyro_iteration_method == 2) .and. (correct_num > correct_max) .or. (sum_res >= sum_res0)) then
-                nu = nu * lm_boost
-                nu = max(0.01, nu)
+                 nu = nu * lm_boost
+                 nu = max(0.01, nu)
               endif
 
               ! Diagnostics

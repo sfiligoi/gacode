@@ -7,6 +7,10 @@ subroutine tgyro_gyro_map
   integer :: i_ion
   real :: gamma_eb0,gamma_p0,u000
 
+  if (loc_n_ion > 5) then
+     call tgyro_catch_error('ERROR: (TGYRO) n_ion > 5 not supported in GYRO interface.')
+  endif
+  
   ! Initialize GYRO
   call gyro_init(paths(i_r-1), gyro_comm)
 
@@ -42,7 +46,7 @@ subroutine tgyro_gyro_map
   gyro_mu_1_in       = sqrt(2*mp/mi(1))
   gyro_dlnndr_in     = r_min*dlnnidr(1,i_r)
   gyro_dlntdr_in     = r_min*dlntidr(1,i_r)
-
+  
   if (loc_n_ion > 1) then
      gyro_z_2_in          = zi_vec(2)
      gyro_ni_over_ne_2_in = ni(2,i_r)/ne(i_r)

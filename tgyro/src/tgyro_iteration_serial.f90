@@ -125,6 +125,18 @@ subroutine tgyro_iteration_serial
         enddo
 
      endif
+
+     if (loc_he_feedback_flag == 1) then
+
+        ip = ip+1
+        call tgyro_flux_vector(x_vec,f_vec,dx,5)
+        do p=1,p_max,n_evolve
+           do pp=0,n_evolve-1
+              jf(p+pp,p+ip) = (f_vec(p+pp)-f_vec0(p+pp))/dx
+           enddo
+        enddo
+
+     endif
      !
      !----------------------------------------------
 

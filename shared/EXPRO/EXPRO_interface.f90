@@ -9,85 +9,12 @@
 !
 !  http://fusion.gat.com/theory/input.profiles
 !  
-!  * Scalars:
-!
-!  EXPRO_ncol
-!  EXPRO_nblock
-!  EXPRO_n_exp
-!  EXPRO_b_ref
-!  EXPRO_arho
-!
-!  * Vectors:
-!
-!  EXPRO_rho(:)
-!  EXPRO_rmin(:)
-!  EXPRO_rmaj(:)
-!  EXPRO_q(:)
-!  EXPRO_kappa(:)
-!
-!  EXPRO_delta(:)
-!  EXPRO_te(:)
-!  EXPRO_ne(:)
-!  EXPRO_z_eff(:)
-!  EXPRO_w0(:)
-!
-!  EXPRO_flow_mom(:)
-!  EXPRO_pow_e(:)
-!  EXPRO_pow_i(:)
-!  EXPRO_pow_ei(:)
-!  EXPRO_zeta(:)
-!
-!  EXPRO_flow_beam(:)
-!  EXPRO_flow_wall(:)
-!  EXPRO_zmag(:)
-!  EXPRO_ptot(:)
-!  EXPRO_poloidalfluxover2pi(:)
-!
-!  EXPRO_ni(1,:)
-!  EXPRO_ni(2,:)
-!  EXPRO_ni(3,:)
-!  EXPRO_ni(4,:)
-!  EXPRO_ni(5,:)
-!
-!  EXPRO_ti(1,:)
-!  EXPRO_ti(2,:)
-!  EXPRO_ti(3,:)
-!  EXPRO_ti(4,:)
-!  EXPRO_ti(5,:)
-!
-!  EXPRO_vtor(1,:)
-!  EXPRO_vtor(2,:)
-!  EXPRO_vtor(3,:)
-!  EXPRO_vtor(4,:)
-!  EXPRO_vtor(5,:)
-!
-!  EXPRO_vpol(1,:)
-!  EXPRO_vpol(2,:)
-!  EXPRO_vpol(3,:)
-!  EXPRO_vpol(4,:)
-!  EXPRO_vpol(5,:)
-!
-!  EXPRO_pow_e_fus(:)
-!  EXPRO_pow_i_fus(:)
-!  EXPRO_pow_e_sync(:)
-!  EXPRO_pow_e_brem(:)
-!  EXPRO_pow_e_line(:)
-!
-!  EXPRO_pow_e_aux(:)
-!  EXPRO_pow_i_aux(:)
-!  [null]
-!  [null]
-!  [null]
-!
-!  EXPRO_signq 
-!  EXPRO_signb
-!
 !  * Control parameters (user can change these)
 ! 
-!  EXPRO_ctrl_density_method (1=do nothing, 2=force quasin.)
+!  EXPRO_ctrl_quasineutral_flag (0=do nothing, 1=quasineutral)
 !  EXPRO_ctrl_z(1:5) (ion charges)
 !  EXPRO_ctrl_numeq_flag (0=model,1=numerical)
-!  EXPRO_ctrl_rotation_method (1=candy-phi,2=waltz-U_parallel)
+!  EXPRO_ctrl_silent_flag (0=normal,1=silent)
 !
 !  * Derived quantities:
 !
@@ -129,55 +56,152 @@
 module EXPRO_interface
 
   integer :: EXPRO_error=0
-  integer, parameter :: nion_max=5
+  integer, parameter :: EXPRO_n_ion_max=10
 
   ! Fundamental input.profiles scalars
 
-  integer :: EXPRO_ncol
-  integer :: EXPRO_nblock
+  integer :: EXPRO_n_ion=0
   integer :: EXPRO_n_exp=0
   real    :: EXPRO_b_ref
   real    :: EXPRO_arho
 
   ! Fundamental input.profiles arrays
 
+  character (len=16) :: EXPRO_null_tag = '[null]'
+
   real, dimension(:),allocatable :: EXPRO_rho
+  character (len=16) :: EXPRO_rho_tag = 'rho(-)'
+
   real, dimension(:),allocatable :: EXPRO_rmin
+  character (len=16) :: EXPRO_rmin_tag = 'rmin(m)'
+
   real, dimension(:),allocatable :: EXPRO_rmaj
+  character (len=16) :: EXPRO_rmaj_tag = 'rmaj(m)'
+
   real, dimension(:),allocatable :: EXPRO_q
+  character (len=16) :: EXPRO_q_tag = 'q(-)'
+
   real, dimension(:),allocatable :: EXPRO_kappa
+  character (len=16) :: EXPRO_kappa_tag = 'kappa(-)'
 
   real, dimension(:),allocatable :: EXPRO_delta
-  real, dimension(:),allocatable :: EXPRO_te
-  real, dimension(:),allocatable :: EXPRO_ne
+  character (len=16) :: EXPRO_delta_tag = 'delta(-)'
+
   real, dimension(:),allocatable :: EXPRO_z_eff
+  character (len=16) :: EXPRO_z_eff_tag = 'z_eff(-)'
+
   real, dimension(:),allocatable :: EXPRO_w0
+  character (len=16) :: EXPRO_w0_tag = 'omega0(rad/s)'
 
   real, dimension(:),allocatable :: EXPRO_flow_mom
+  character (len=16) :: EXPRO_flow_mom_tag = 'flow_mom(N-m)'
+
   real, dimension(:),allocatable :: EXPRO_pow_e
+  character (len=16) :: EXPRO_pow_e_tag = 'pow_e(MW)'
+
   real, dimension(:),allocatable :: EXPRO_pow_i
+  character (len=16) :: EXPRO_pow_i_tag = 'pow_i(MW)'
+
   real, dimension(:),allocatable :: EXPRO_pow_ei
+  character (len=16) :: EXPRO_pow_ei_tag = 'pow_ei(MW)'
+
   real, dimension(:),allocatable :: EXPRO_zeta
+  character (len=16) :: EXPRO_zeta_tag = 'zeta(-)'
 
   real, dimension(:),allocatable :: EXPRO_flow_beam
-  real, dimension(:),allocatable :: EXPRO_flow_wall
-  real, dimension(:),allocatable :: EXPRO_zmag
-  real, dimension(:),allocatable :: EXPRO_ptot
-  real, dimension(:),allocatable :: EXPRO_poloidalfluxover2pi
+  character (len=16) :: EXPRO_flow_beam_tag = 'flow_beam(kW/eV)'
 
-  real, dimension(:,:),allocatable :: EXPRO_ni
-  real, dimension(:,:),allocatable :: EXPRO_ti
-  real, dimension(:,:),allocatable :: EXPRO_vtor
-  real, dimension(:,:),allocatable :: EXPRO_vpol
+  real, dimension(:),allocatable :: EXPRO_flow_wall
+  character (len=16) :: EXPRO_flow_wall_tag = 'flow_wall(kW/eV)'
+
+  real, dimension(:),allocatable :: EXPRO_zmag
+  character (len=16) :: EXPRO_zmag_tag = 'zmag(m)'
+
+  real, dimension(:),allocatable :: EXPRO_ptot
+  character (len=16) :: EXPRO_ptot_tag = 'ptot(Pa)'
+
+  real, dimension(:),allocatable :: EXPRO_polflux
+  character (len=16) :: EXPRO_polflux_tag = 'polflux(Wb/rad)'
 
   real, dimension(:),allocatable :: EXPRO_pow_e_fus
+  character (len=16) :: EXPRO_pow_e_fus_tag = 'pow_e_fus(MW)'
+
   real, dimension(:),allocatable :: EXPRO_pow_i_fus
+  character (len=16) :: EXPRO_pow_i_fus_tag = 'pow_i_fus(MW)'
+
   real, dimension(:),allocatable :: EXPRO_pow_e_sync
+  character (len=16) :: EXPRO_pow_e_sync_tag = 'pow_e_sync(MW)'
+
   real, dimension(:),allocatable :: EXPRO_pow_e_brem
+  character (len=16) :: EXPRO_pow_e_brem_tag = 'pow_e_brem(MW)'
+
   real, dimension(:),allocatable :: EXPRO_pow_e_line
+  character (len=16) :: EXPRO_pow_e_line_tag = 'pow_e_line(MW)'
 
   real, dimension(:),allocatable :: EXPRO_pow_e_aux
+  character (len=16) :: EXPRO_pow_e_aux_tag = 'pow_e_aux(MW)'
+
   real, dimension(:),allocatable :: EXPRO_pow_i_aux
+  character (len=16) :: EXPRO_pow_i_aux_tag = 'pow_i_aux(MW)'
+
+
+  real, dimension(:),allocatable :: EXPRO_ne
+  character (len=16) :: EXPRO_ne_tag = 'ne(10^19/m^3)'
+
+  real, dimension(:,:),allocatable :: EXPRO_ni
+  character (len=16), dimension(EXPRO_n_ion_max) :: EXPRO_ni_tag = (/ &
+       'ni_1(10^19/m^3) ',&
+       'ni_2(10^19/m^3) ',&
+       'ni_3(10^19/m^3) ',&
+       'ni_4(10^19/m^3) ',&
+       'ni_5(10^19/m^3) ',&
+       'ni_6(10^19/m^3) ',&
+       'ni_7(10^19/m^3) ',&
+       'ni_8(10^19/m^3) ',&
+       'ni_9(10^19/m^3) ',&
+       'ni_10(10^19/m^3)'/)
+
+  real, dimension(:),allocatable :: EXPRO_te
+  character (len=16) :: EXPRO_te_tag = 'Te(keV)'
+
+  real, dimension(:,:),allocatable :: EXPRO_ti
+  character (len=16), dimension(EXPRO_n_ion_max) :: EXPRO_ti_tag = (/ &
+       'Ti_1(keV)       ',&
+       'Ti_2(keV)       ',&
+       'Ti_3(keV)       ',&
+       'Ti_4(keV)       ',&
+       'Ti_5(keV)       ',&
+       'Ti_6(keV)       ',&
+       'Ti_7(keV)       ',&
+       'Ti_8(keV)       ',&
+       'Ti_9(keV)       ',&
+       'Ti_10(keV)      '/)
+
+  real, dimension(:,:),allocatable :: EXPRO_vtor
+  character (len=16), dimension(EXPRO_n_ion_max) :: EXPRO_vtor_tag = (/ &
+       'vtor_1(m/s)     ',&
+       'vtor_2(m/s)     ',&
+       'vtor_3(m/s)     ',&
+       'vtor_4(m/s)     ',&
+       'vtor_5(m/s)     ',&
+       'vtor_6(m/s)     ',&
+       'vtor_7(m/s)     ',&
+       'vtor_8(m/s)     ',&
+       'vtor_9(m/s)     ',&
+       'vtor_10(m/s)    '/)
+
+  real, dimension(:,:),allocatable :: EXPRO_vpol
+  character (len=16), dimension(EXPRO_n_ion_max) :: EXPRO_vpol_tag = (/ &
+       'vpol_1(m/s)     ',&
+       'vpol_2(m/s)     ',&
+       'vpol_3(m/s)     ',&
+       'vpol_4(m/s)     ',&
+       'vpol_5(m/s)     ',&
+       'vpol_6(m/s)     ',&
+       'vpol_7(m/s)     ',&
+       'vpol_8(m/s)     ',&
+       'vpol_9(m/s)     ',&
+       'vpol_10(m/s)    '/)
 
   ! Derived quantities
 
@@ -234,67 +258,12 @@ module EXPRO_interface
 
   !------------------------------------------------------------------------
 
-  ! Control parameters (force nonsensical defaults for usage check)
+  ! Control parameters (force nonsensical default -1 for usage check)
 
-  integer :: EXPRO_ctrl_density_method = -1
-  real, dimension(5) :: EXPRO_ctrl_z
-  integer :: EXPRO_ctrl_numeq_flag=-1
-  integer :: EXPRO_ctrl_rotation_method = -1
+  integer :: EXPRO_ctrl_quasineutral_flag = -1
+  integer :: EXPRO_ctrl_n_ion = -1
+  real, dimension(EXPRO_n_ion_max) :: EXPRO_ctrl_z = 0.0
+  integer :: EXPRO_ctrl_numeq_flag = -1
   integer :: EXPRO_ctrl_silent_flag = 0
-  character (len=20) :: EXPRO_ctrl_extension = ''
-
-  ! Standard variable tags
-
-  character (len=16), dimension(50) :: EXPRO_tag=(/&
-       'rho(-)          ',&
-       'rmin(m)         ',&
-       'rmaj(m)         ',&
-       'q(-)            ',&
-       'kappa(-)        ',&
-       'delta(-)        ',&
-       'Te(keV)         ',&
-       'ne(10^19/m^3)   ',&
-       'z_eff(-)        ',&
-       'omega0(rad/s)   ',&
-       'flow_mom(N-m)   ',&
-       'pow_e(MW)       ',&
-       'pow_i(MW)       ',&
-       'pow_ei(MW)      ',&
-       'zeta(-)         ',&
-       'flow_beam(kW/eV)',&
-       'flow_wall(kW/eV)',&
-       'zmag(m)         ',&
-       'ptot(Pa)        ',&
-       'polflux(Wb/rad) ',&
-       'ni_1(10^19/m^3) ',&
-       'ni_2(10^19/m^3) ',&
-       'ni_3(10^19/m^3) ',&
-       'ni_4(10^19/m^3) ',&
-       'ni_5(10^19/m^3) ',&
-       'Ti_1(keV)       ',&
-       'Ti_2(keV)       ',&
-       'Ti_3(keV)       ',&
-       'Ti_4(keV)       ',&
-       'Ti_5(keV)       ',&
-       'vtor_1(m/s)     ',&
-       'vtor_2(m/s)     ',&
-       'vtor_3(m/s)     ',&
-       'vtor_4(m/s)     ',&
-       'vtor_5(m/s)     ',&
-       'vpol_1(m/s)     ',&
-       'vpol_2(m/s)     ',&
-       'vpol_3(m/s)     ',&
-       'vpol_4(m/s)     ',&
-       'vpol_5(m/s)     ',&
-       'pow_e_fus(MW)   ',&
-       'pow_i_fus(MW)   ',&
-       'pow_e_sync(MW)  ',&
-       'pow_e_brem(MW)  ',&
-       'pow_e_line(MW)  ',&
-       'pow_e_aux(MW)   ',&
-       'pow_i_aux(MW)   ',&
-       '[null]          ',&
-       '[null]          ',&
-       '[null]          '/)
-
+ 
 end module EXPRO_interface

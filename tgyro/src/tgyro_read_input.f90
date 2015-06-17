@@ -79,6 +79,7 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(loc_te_feedback_flag)
   call tgyro_readbc_int(loc_ne_feedback_flag)
   call tgyro_readbc_int(loc_er_feedback_flag)
+  call tgyro_readbc_int(loc_he_feedback_flag)
   call tgyro_readbc_int(loc_zeff_flag)
   call tgyro_readbc_int(loc_pflux_method)
   call tgyro_readbc_int(loc_residual_method)
@@ -178,5 +179,26 @@ subroutine tgyro_read_input
      procs(:) = 1
   endif
   !------------------------------------------------------------------
+
+  call MPI_BCAST(paths,&
+       n_inst*80,&
+       MPI_CHARACTER,&
+       0,&
+       MPI_COMM_WORLD,&
+       ierr)
+
+  call MPI_BCAST(procs,&
+       n_inst,&
+       MPI_INTEGER,&
+       0,&
+       MPI_COMM_WORLD,&
+       ierr)
+
+  call MPI_BCAST(inputrads,&
+       n_inst,&
+       MPI_DOUBLE_PRECISION,&
+       0,&
+       MPI_COMM_WORLD,&
+       ierr)
 
 end subroutine tgyro_read_input

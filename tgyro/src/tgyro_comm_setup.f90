@@ -32,20 +32,7 @@ subroutine tgyro_comm_setup
   integer, dimension(n_proc_global) :: adjointvec
   integer, dimension(n_proc_global) :: workeradjvec
 
-  call MPI_BCAST(paths,&
-       n_inst*80,&
-       MPI_CHARACTER,&
-       0,&
-       MPI_COMM_WORLD,&
-       ierr)
-
-  call MPI_BCAST(procs,&
-       n_inst,&
-       MPI_INTEGER,&
-       0,&
-       MPI_COMM_WORLD,&
-       ierr)
-
+  
   ! Determine the number of "workers" at each radius
 
   select case (tgyro_mode)
@@ -63,7 +50,8 @@ subroutine tgyro_comm_setup
           loc_ti_feedback_flag+&
           loc_te_feedback_flag+&
           loc_ne_feedback_flag+&
-          loc_er_feedback_flag
+          loc_er_feedback_flag+&
+          loc_he_feedback_flag
 
      if (tgyro_iteration_method == 5) then
 
@@ -132,7 +120,8 @@ subroutine tgyro_comm_setup
           loc_ti_feedback_flag+&
           loc_te_feedback_flag+&
           loc_ne_feedback_flag+&
-          loc_er_feedback_flag
+          loc_er_feedback_flag+&
+          loc_he_feedback_flag
 
   end select
 
@@ -248,6 +237,10 @@ subroutine tgyro_comm_setup
      if (loc_er_feedback_flag == 1) then
         ip = ip+1
         if (worker == ip) worker_index=4
+     endif
+     if (loc_he_feedback_flag == 1) then
+        ip = ip+1
+        if (worker == ip) worker_index=5
      endif
 
   endif

@@ -5,9 +5,11 @@ subroutine allocate_ufile_vars
   implicit none
 
   allocate(ufile_ne(nx))
-  allocate(ufile_ni(nx,5))
+  allocate(ufile_ni(nx,n_ion_max))
+  ufile_ni = 0.0
   allocate(ufile_te(nx))
-  allocate(ufile_ti(nx,5))
+  allocate(ufile_ti(nx,n_ion_max))
+  ufile_ti = 0.0
   allocate(ufile_zeff(nx))
   allocate(ufile_pres(nx))
   allocate(ufile_vrot(nx))

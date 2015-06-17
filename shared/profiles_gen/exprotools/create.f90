@@ -16,10 +16,10 @@ program create
   call create_read_input 
   call create_check
 
-  EXPRO_ctrl_density_method = 1
+  EXPRO_ctrl_quasineutral_flag = 0
   EXPRO_ctrl_z(1:3) = exm_z(1:3)
   EXPRO_ctrl_numeq_flag = 0 
-  EXPRO_ctrl_rotation_method = 1
+  EXPRO_ctrl_n_ion = 3
 
   ! We're going to see if this file exists
   open(unit=1,file='input.profiles.gen',status='old',iostat=ierr)
@@ -31,8 +31,6 @@ program create
      ! Setting EXPRO_n_exp > 0 skips reading input.profiles
 
      EXPRO_n_exp  = nx
-     EXPRO_ncol   = 5
-     EXPRO_nblock = 8
 
      call EXPRO_alloc('./',1) 
 

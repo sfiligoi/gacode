@@ -161,8 +161,8 @@ class TGYROData:
         # Data dimensions 
         nr = self.n_radial
         nb = self.n_iterations+1
-        # 9 = 1+2*n_evolve, where n_evolve=4 (ti,te,ne,er)
-        nc = 9
+        # 11 = 1+2*n_evolve, where n_evolve=5 (ti,te,ne,er,he)
+        nc = 11
         
         numdata = np.zeros((nc,nb,nr-1),dtype=float)
         

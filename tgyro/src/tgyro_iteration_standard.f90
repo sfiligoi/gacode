@@ -56,6 +56,10 @@ subroutine tgyro_iteration_standard
            p = p+1
            f_vec(p) = mflux_tot(i)
         endif
+        if (loc_he_feedback_flag == 1) then
+           p = p+1
+           f_vec(p) = pflux_he_tot(i)
+        endif
      enddo
      ! GYRO restart data available
      gyro_restart_method = 2
@@ -113,11 +117,15 @@ subroutine tgyro_iteration_standard
            p = p+1
            dlnnedr(i) = x_vec(p)
            ! Set dlnnidr(1,i) according to quasineutrality
-           call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(:),loc_n_ion,dlnridr(:,i))
+           call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(:),loc_n_ion)
         endif
         if (loc_er_feedback_flag == 1) then
            p = p+1
            f_rot(i) = x_vec(p)
+        endif
+        if (loc_he_feedback_flag == 1) then
+           p = p+1
+           dlnnidr(i_ash,i) = x_vec(p)
         endif
      enddo
 
@@ -198,6 +206,19 @@ subroutine tgyro_iteration_standard
 
            ip = ip+1
            call tgyro_flux_vector(x_vec,f_vec,dx,4)
+           do p=1,p_max,n_evolve
+              do pp=0,n_evolve-1
+                 jf(p+pp,p+ip) = (f_vec(p+pp)-f_vec0(p+pp))/dx
+              enddo
+           enddo
+           call tgyro_write_jacobian(0)
+
+        endif
+
+        if (loc_he_feedback_flag == 1) then
+
+           ip = ip+1
+           call tgyro_flux_vector(x_vec,f_vec,dx,5)
            do p=1,p_max,n_evolve
               do pp=0,n_evolve-1
                  jf(p+pp,p+ip) = (f_vec(p+pp)-f_vec0(p+pp))/dx

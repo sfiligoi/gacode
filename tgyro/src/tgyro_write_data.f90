@@ -21,7 +21,7 @@ subroutine tgyro_write_data(i_print)
   integer :: i_ion
   integer :: p
   integer, parameter :: trinity_flag=0
-  real, dimension(2:n_r,4) :: res2,relax2
+  real, dimension(2:n_r,n_evolve_max) :: res2,relax2
 
   !--------------------------------------------------------------------------------
   ! First, generate and write TGLF linear growth rates
@@ -230,8 +230,8 @@ subroutine tgyro_write_data(i_print)
   open(unit=1,file='out.tgyro.flux_target',status='old',position='append')
 
   write(1,20) 'r/a','eflux_i_tot','eflux_i_target','eflux_e_tot',&
-       'eflux_e_target','pflux_e_tot','pflux_e_target','mflux_tot','mflux_target'
-  write(1,20) '','(GB)','(GB)','(GB)','(GB)','(GB)','(GB)','(GB)','(GB)'
+       'eflux_e_target','pflux_e_tot','pflux_e_target','mflux_tot','mflux_target','hflux_tot','hflux_target'
+  write(1,20) '','(GB)','(GB)','(GB)','(GB)','(GB)','(GB)','(GB)','(GB)','(GB)','(GB)'
   do i=1,n_r
      write(1,10) r(i)/r_min,&
           eflux_i_tot(i),&
@@ -241,7 +241,9 @@ subroutine tgyro_write_data(i_print)
           pflux_e_tot(i),&
           pflux_e_target(i),&
           mflux_tot(i),&
-          mflux_target(i)
+          mflux_target(i),&
+          pflux_he_tot(i),&
+          pflux_he_target(i)
   enddo
 
   close(1)
@@ -427,7 +429,7 @@ subroutine tgyro_write_data(i_print)
   if (gyrotest_flag == 1) return
 
   ! Residuals
-  
+
   open(unit=1,file='out.tgyro.residual',status='old',position='append')
 
   if (tgyro_relax_iterations == 0) then
@@ -461,8 +463,13 @@ subroutine tgyro_write_data(i_print)
         res2(i,4) = res(p)
         relax2(i,4) = relax(p)
      endif
+     if (loc_he_feedback_flag == 1) then
+        p  = p+1
+        res2(i,5) = res(p)
+        relax2(i,5) = relax(p)
+     endif
      write(1,40) &
-          r(i)/r_min,(res2(i,ip),relax2(i,ip),ip=1,4)
+          r(i)/r_min,(res2(i,ip),relax2(i,ip),ip=1,5)
   enddo
 
   close(1)
@@ -514,6 +521,6 @@ subroutine tgyro_write_data(i_print)
   ! Residual header
 30 format(t2,a,i3,1pe12.5,2x,'[',i6,']')
   ! Residuals
-40 format(t2,f8.6,4(2x,2(1pe10.3,1x)))
+40 format(t2,f8.6,5(2x,2(1pe10.3,1x)))
 
 end subroutine tgyro_write_data

@@ -9,11 +9,12 @@
 ! according to different rules.
 !------------------------------------------------------------
 
-subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion,dlnridr)
+subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion)
 
   use tgyro_globals, only : &
        tgyro_quasineutral_flag, &
-       tgyro_fix_concentration_flag
+       tgyro_fix_concentration_flag, &
+       i_ash
 
   implicit none
 
@@ -23,7 +24,6 @@ subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion,dlnridr)
   real, dimension(n_ion), intent(in) :: zi
   real, dimension(n_ion), intent(inout) :: ni
   real, dimension(n_ion), intent(inout) :: dlnnidr
-  real, dimension(n_ion), intent(in) :: dlnridr
 
   integer :: i
 
@@ -53,9 +53,10 @@ subroutine tgyro_quasigrad(ne,dlnnedr,ni,dlnnidr,zi,n_ion,dlnridr)
         ! Adjust all ion gradients at fixed concentration ratios (n2/n1, n3/n1, etc)
 
         ! Some algebra shows that this implies all gradient scale lengths are equal
-
-        dlnnidr(1:n_ion) = dlnnedr 
-
+        do i=1,n_ion
+           if (i /= i_ash) dlnnidr(i) = dlnnedr 
+        enddo
+     
      endif
 
   endif

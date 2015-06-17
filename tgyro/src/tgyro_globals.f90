@@ -62,8 +62,11 @@ module tgyro_globals
   !===============================================================
   ! Variables for LOCAL transport mode
   !
+  integer, parameter :: n_ion_max = 9
+  integer, parameter :: n_evolve_max = 5
   character(len=14) :: runfile='out.tgyro.run'
-  character(len=1), dimension(5) :: ion_tag=(/' ','2','3','4','5'/)
+  character(len=1), dimension(n_ion_max) :: &
+       ion_tag=(/' ','2','3','4','5','6','7','8','9'/)
   !
   ! Component fluxes
   !
@@ -79,7 +82,9 @@ module tgyro_globals
   real, dimension(:,:), allocatable :: pflux_i_tur
   real, dimension(:), allocatable   :: pflux_e_tot
   real, dimension(:), allocatable   :: pflux_i_tot
+  real, dimension(:), allocatable   :: pflux_he_tot
   real, dimension(:), allocatable   :: pflux_e_target
+  real, dimension(:), allocatable   :: pflux_he_target
 
   ! - momentum fluxes
   real, dimension(:), allocatable   :: mflux_e_neo
@@ -203,12 +208,14 @@ module tgyro_globals
   real, dimension(:), allocatable :: p_expwd
   real, dimension(:), allocatable :: s_alpha_i
   real, dimension(:), allocatable :: s_alpha_e
+  real, dimension(:), allocatable :: sn_alpha
   real, dimension(:), allocatable :: s_brem
   real, dimension(:), allocatable :: s_sync
   real, dimension(:), allocatable :: s_exch
   real, dimension(:), allocatable :: s_expwd
   real, dimension(:), allocatable :: f_b_in
   real, dimension(:), allocatable :: f_w_in
+  real, dimension(:), allocatable :: f_he_fus
   real, dimension(:), allocatable :: mf_in
 
   real, dimension(:), allocatable :: res
@@ -216,9 +223,8 @@ module tgyro_globals
   real, dimension(:), allocatable :: relax
 
   integer, dimension(:), allocatable :: therm_vec
-  real, dimension(:,:), allocatable :: dlnridr
 
-  real, dimension(5) :: mi
+  real, dimension(n_ion_max) :: mi
 
   ! Physical constants
   real :: pi
@@ -263,9 +269,9 @@ module tgyro_globals
   integer :: tgyro_quasineutral_flag
   integer :: loc_neo_method
   integer :: loc_n_ion
-  real, dimension(5) :: zi_vec
-  real, dimension(5) :: mi_vec
-  integer, dimension(5) :: therm_flag
+  real, dimension(n_ion_max) :: zi_vec
+  real, dimension(n_ion_max) :: mi_vec
+  integer, dimension(n_ion_max) :: therm_flag
   real :: loc_betae_scale
   integer :: loc_chang_hinton
   real :: loc_me_multiplier
@@ -279,6 +285,7 @@ module tgyro_globals
   integer :: loc_te_feedback_flag
   integer :: loc_ne_feedback_flag
   integer :: loc_er_feedback_flag
+  integer :: loc_he_feedback_flag
   integer :: loc_zeff_flag
   integer :: loc_pflux_method
   integer :: loc_residual_method
@@ -324,6 +331,7 @@ module tgyro_globals
   integer :: i_tran
   integer :: i_bc
   integer :: flux_counter
+  integer :: i_ash
   !
   ! Global TGYRO variables
   integer :: igmin

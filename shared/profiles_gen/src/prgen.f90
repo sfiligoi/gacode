@@ -53,8 +53,6 @@ program prgen
   close(1)
   !--------------------------------------------------
 
-  n_indx  = size(EXPRO_tag) 
-
   !------------------------------------------------------------------
   ! Read the iterdb file and define standard variables.
   !

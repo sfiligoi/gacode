@@ -54,7 +54,7 @@ subroutine allocate_iterdb_vars
   allocate(onetwo_sbeam(onetwo_nj)) 
   allocate(onetwo_storqueb(onetwo_nj))
   
-  allocate(onetwo_enion_vec(5,onetwo_nj))
-  allocate(onetwo_Tion_vec(5,onetwo_nj))
+  allocate(onetwo_enion_vec(n_ion_max,onetwo_nj))
+  allocate(onetwo_Tion_vec(n_ion_max,onetwo_nj))
 
 end subroutine allocate_iterdb_vars

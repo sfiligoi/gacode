@@ -58,6 +58,10 @@ subroutine tgyro_iteration_simplerelax
            p = p+1
            f_vec(p) = mflux_tot(i)
         endif
+        if (loc_he_feedback_flag == 1) then
+           p = p+1
+           f_vec(p) = pflux_he_tot(i)
+        endif
      enddo
      ! GYRO restart data available
      gyro_restart_method = 2
@@ -122,6 +126,15 @@ subroutine tgyro_iteration_simplerelax
            endif
            x_vec(p) = x_vec(p)*(1.0-simpledz)
         endif
+        if (loc_he_feedback_flag == 1) then
+           p = p+1
+           simpledz = loc_relax*(f_vec(p) - g_vec(p))/&
+                max(max(abs(f_vec(p)),abs(g_vec(p))),1.0)
+           if (abs(simpledz) > loc_dx_max) then
+              simpledz = loc_dx_max*(simpledz/abs(simpledz))
+           endif
+           x_vec(p) = x_vec(p)*(1.0-simpledz)
+        endif
      enddo
 
      !----------------------------------------------
@@ -140,11 +153,15 @@ subroutine tgyro_iteration_simplerelax
            p = p+1
            dlnnedr(i) = x_vec(p)
            ! Set dlnnidr(1,i) according to quasineutrality
-           call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(:),loc_n_ion,dlnridr(:,i))
+           call tgyro_quasigrad(ne(i),dlnnedr(i),ni(:,i),dlnnidr(:,i),zi_vec(:),loc_n_ion)
         endif
         if (loc_er_feedback_flag == 1) then
            p = p+1
            f_rot(i) = x_vec(p)
+        endif
+        if (loc_he_feedback_flag == 1) then
+           p = p+1
+           dlnnidr(i_ash,i) = x_vec(p)
         endif
      enddo
 
