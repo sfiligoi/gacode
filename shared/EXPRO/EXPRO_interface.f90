@@ -12,7 +12,7 @@
 !  * Control parameters (user can change these)
 ! 
 !  EXPRO_ctrl_quasineutral_flag (0=do nothing, 1=quasineutral)
-!  EXPRO_ctrl_z(1:5) (ion charges)
+!  EXPRO_ctrl_z(1:10) (ion charges)
 !  EXPRO_ctrl_numeq_flag (0=model,1=numerical)
 !  EXPRO_ctrl_silent_flag (0=normal,1=silent)
 !

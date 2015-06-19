@@ -28,76 +28,76 @@ vars_input_profiles_extra = [
 vars_input_profiles_jbs = ['expro_rho', 'jbs_err', 'jbs_neo', 'jbs_sauter', 'jbs_nclass', 'jbs_koh']
 
 #tuple: 1) latex 2) units 3) profiles column name
-fancyNames = {'NULL'       : (''                ,''             ,'[null]'),
-              'rho'        : ('\\rho'           ,''             ,'rho(-)'),
-              'rmin'       : ('r_{min}'         ,'m'            ,'rmin(m)'),
-              'rmaj'       : ('r_{maj}'         ,''             ,'rmax(m)'),
-              'q'          : ('q'               ,''             ,'q(-)'),
-              'kappa'      : ('\\kappa'         ,''             ,'kappa(-)'),
-              'delta'      : ('\\delta'         ,''             ,'delta(-)'),
-              'Te'         : ('T_e'             ,'keV'          ,'Te(keV)'),
-              'ne'         : ('n_e'             ,'10^{19}/m^3'  ,'ne(10^19/m^3)'),
-              'z_eff'      : ('z_{eff}'         ,''             ,'zeff(-)'),
-              'omega0'     : ('\\omega_0'       ,'1/s'          ,'omega0(1/s)'),
-              'flow_mom'   : ('flow_{mom}'      ,'Nm'           ,'flow_mom(Nm)'),
-              'pow_e'      : ('p_e'             ,'MW'           ,'pow_e(MW)'),
-              'pow_i'      : ('p_i'             ,'MW'           ,'pow_i(MW)'),
-              'pow_ei'     : ('p_{ei}'          ,'MW'           ,'pow_ei(MW)'),
-              'zeta'       : ('\\zeta'          ,''             ,'zeta(-)'),
-              'flow_beam'  : ('flow_{beam}'     ,'kW/eV'        ,'flow_beam(kW/eV)'),
-              'flow_wall'  : ('flow_{wall}'     ,'kW/eV'        ,'flow_wall(kW/eV)'),
-              'zmag'       : ('z_{mag}'         ,'m'            ,'zmag(m)'),
-              'ptot'       : ('p_{tot}'         ,'Pa'           ,'ptot(Pa)'),
-              'polflux'    : ('\\psi'           ,'Wb/rad'       ,'polflux(Wb/rad)'),
-              'pow_e_aux'  : ('p_{e,aux}'       ,'MW'           ,'pow_e_aux(MW)'),
-              'pow_i_aux'  : ('p_{i,aux}'       ,'MW'           ,'pow_i_aux(MW)'),
-              'pow_e_fus'  : ('p_{e,fus}'       ,'MW'           ,'pow_e_fus(MW)'),
-              'pow_i_fus'  : ('p_{i,fus}'       ,'MW'           ,'pow_i_fus(MW)'),
-              'pow_e_sync' : ('p_{e,sync}'      ,'MW'           ,'pow_e_sync(MW)'),
-              'pow_e_brem' : ('p_{e,brem}'      ,'MW'           ,'pow_e_brem(MW)'),
-              'pow_e_line' : ('p_{e,line}'      ,'MW'           ,'pow_e_line(MW)'),
+fancyNames = \
+             {'NULL'       : (''                          ,''             ,'[null]'),
+              'rho'        : ('{\\hat \\rho}'             ,''             ,'rho(-)'),
+              'rmin'       : ('a'                         ,'m'            ,'rmin(m)'),
+              'rmaj'       : ('R_0'                       ,'m'            ,'rmaj(m)'),
+              'q'          : ('q'                         ,''             ,'q(-)'),
+              'kappa'      : ('\\kappa'                   ,''             ,'kappa(-)'),
+              'delta'      : ('\\delta'                   ,''             ,'delta(-)'),
+              'Te'         : ('T_e'                       ,'keV'          ,'Te(keV)'),
+              'ne'         : ('n_e'                       ,'10^{19}/m^3'  ,'ne(10^19/m^3)'),
+              'z_eff'      : ('Z_\mathrm{eff}'            ,''             ,'zeff(-)'),
+              'omega0'     : ('\\omega_0'                 ,'1/s'          ,'omega0(1/s)'),
+              'flow_mom'   : ('S_\mathrm{\\omega}'        ,'Nm'           ,'flow_mom(Nm)'),
+              'pow_e'      : ('P_e'                       ,'MW'           ,'pow_e(MW)'),
+              'pow_i'      : ('P_i'                       ,'MW'           ,'pow_i(MW)'),
+              'pow_ei'     : ('P_{ei}'                    ,'MW'           ,'pow_ei(MW)'),
+              'zeta'       : ('\\zeta'                    ,''             ,'zeta(-)'),
+              'flow_beam'  : ('S_\mathrm{n,beam}'         ,'kW/eV'        ,'flow_beam(kW/eV)'),
+              'flow_wall'  : ('S_\mathrm{n,wall}'         ,'kW/eV'        ,'flow_wall(kW/eV)'),
+              'zmag'       : ('Z_0'                       ,'m'            ,'zmag(m)'),
+              'ptot'       : ('p_\mathrm{total}'          ,'Pa'           ,'ptot(Pa)'),
+              'polflux'    : ('\\psi'                     ,'Wb/rad'       ,'polflux(Wb/rad)'),
+              'pow_e_aux'  : ('P_{e,\\rm aux}'            ,'MW'           ,'pow_e_aux(MW)'),
+              'pow_i_aux'  : ('P_{i,\\rm aux}'            ,'MW'           ,'pow_i_aux(MW)'),
+              'pow_e_fus'  : ('P_{e,\\rm fus}'            ,'MW'           ,'pow_e_fus(MW)'),
+              'pow_i_fus'  : ('P_{i,\\rm fus}'            ,'MW'           ,'pow_i_fus(MW)'),
+              'pow_e_sync' : ('P_{e,\\rm sync}'           ,'MW'           ,'pow_e_sync(MW)'),
+              'pow_e_brem' : ('P_{e,\\rm brem}'           ,'MW'           ,'pow_e_brem(MW)'),
+              'pow_e_line' : ('P_{e,\\rm line}'           ,'MW'           ,'pow_e_line(MW)'),
               # extra (needs units)
-              'bunit'      : ('bunit'           ,''             ,''),
-              's'          : ('s'               ,''             ,''),
-              'drmaj'      : ('drmaj'           ,''             ,''),
-              'dzmag'      : ('dzmag'           ,''             ,''),
-              'sdelta'     : ('sdelta'          ,''             ,''),
-              'skappa'     : ('skappa'          ,''             ,''),
-              'szeta'      : ('szeta'           ,''             ,''),
-              'dlnnedr'    : ('dlnnedr'         ,''             ,''),
-              'dlntedr'    : ('dlntedr'         ,''             ,''),
-              'dlnptotdr'  : ('dlnptotdr'       ,''             ,''),
-              'drdrho'     : ('drdrho'          ,''             ,''),
-              'w0p'        : ('w0p'             ,''             ,''),
-              'vol'        : ('vol'             ,''             ,''),
-              'volp'       : ('volp'            ,''             ,''),
-              'cs'         : ('cs'              ,''             ,''),
-              'rhos'       : ('rhos'            ,''             ,''),
-              'ni_new'     : ('ni_new'          ,''             ,''),
-              'dlnnidr_new': ('dlnnidr_new'     ,''             ,''),
-              'grad_r0'    : ('grad_r0'         ,''             ,''),
-              'ave_grad_r' : ('ave_grad_r'      ,''             ,''),
-              'bp0'        : ('bp0'             ,''             ,''),
-              'bt0'        : ('bt0'             ,''             ,''),
-              'gamma_e'    : ('gamma_e'         ,''             ,''),
-              'gamma_p'    : ('gamma_p'         ,''             ,''),
-              'mach'       : ('mach'            ,''             ,''),
+              'bunit'      : ('B_\mathrm{unit}'           ,'T'            ,''),
+              's'          : ('s'                         ,''             ,''),
+              'drmaj'      : ('dR_0/dr'                   ,''             ,''),
+              'dzmag'      : ('dZ_0/dr'                   ,''             ,''),
+              'sdelta'     : ('s_\\delta'                  ,''             ,''),
+              'skappa'     : ('s_\\kappa'                  ,''             ,''),
+              'szeta'      : ('s_\\zeta'                   ,''             ,''),
+              'dlnnedr'    : ('-dln(n_e)/dr'              ,'1/m'          ,''),
+              'dlntedr'    : ('-dln(T_e)/dr'              ,'1/m'          ,''),
+              'dlnptotdr'  : ('-dln(p_\mathrm{tot})/dr'   ,'1/m'          ,''),
+              'drdrho'     : ('dr/d\\rho'                 ,''             ,''),
+              'w0p'        : ('d(\\omega_0)/dr'           ,'1/s/m'        ,''),
+              'vol'        : ('V'                         ,'m^3'          ,''),
+              'volp'       : ('dV/dr'                     ,'m^2'          ,''),
+              'cs'         : ('c_\mathrm{s}'              ,'m/s'          ,''),
+              'rhos'       : ('\\rho_\mathrm{s,unit}'     ,'m'            ,''),
+              'ni_new'     : ('n_i'                       ,'10^{19}/m^3'  ,''), #[Corrected for quasin.]
+              'dlnnidr_new': ('-dln(n_i)/dr'              ,'1/m'          ,''), #[Corrected for quasin.]
+              'grad_r0'    : ('|\\nabla_r|_{\\theta=0}'   ,''             ,''),
+              'ave_grad_r' : ('<|\\nabla_r|>'             ,''             ,''),
+              'bp0'        : ('B_p|_{\\theta=0}'          ,'T'            ,''),
+              'bt0'        : ('B_t|_{\\theta=0}'          ,'T'            ,''),
+              'gamma_e'    : ('r/q d(\\omega_0)/dr'       ,'1/s'          ,''),
+              'gamma_p'    : ('R_0 d(\\omega_0)/dr'       ,'1/s'          ,''),
+              'mach'       : ('R_0 \\omega_0/c_s'         ,''             ,''),
               #jbs
-              'expro_rho'  : ('rho'             ,''             ,''),
-              'jbs_err'    : ('jbs_{err}'       ,'MA/m^2'       ,''),
-              'jbs_neo'    : ('jbs_{neo}'       ,'MA/m^2'       ,''),
-              'jbs_sauter' : ('jbs_{sauter}'    ,'MA/m^2'       ,''),
-              'jbs_nclass' : ('jbs_{nclass}'    ,'MA/m^2'       ,''),
-              'jbs_koh'    : ('jbs_{koh}'       ,'MA/m^2'       ,''),
+              'expro_rho'  : ('\\rho'                     ,''             ,''),
+              'jbs_err'    : ('j_\mathrm{bs,err}'         ,'MA/m^2'       ,''),
+              'jbs_neo'    : ('j_\mathrm{bs,neo}'         ,'MA/m^2'       ,''),
+              'jbs_sauter' : ('j_\mathrm{bs,sauter}'      ,'MA/m^2'       ,''),
+              'jbs_nclass' : ('j_\mathrm{bs,nclass}'      ,'MA/m^2'       ,''),
+              'jbs_koh'    : ('j_\mathrm{bs,koh}'         ,'MA/m^2'       ,''),
               }
 for _k in range(1, 11):
-    fancyNames['ni_%d'%_k]     =('ni_%d'%_k     ,'10^19/m^3'    ,'ni_%d(10^19/m^3)'%_k)
-    fancyNames['Ti_%d'%_k]     =('Ti_%d'%_k     ,'keV'          ,'Ti_%d(keV)'%_k)
-    fancyNames['vtor_%d'%_k]   =('vtor_%d'%_k   ,'m/s'          ,'vtor_%d(m/s)')
-    fancyNames['vpol_%d'%_k]   =('vpol_%d'%_k   ,'m/s'          ,'vpol_%d(m/s)')
-    fancyNames['dlntedr_%d'%_k]=('dlntedr_%s'%_k,''             ,'')  # needs to be fixed
-    fancyNames['dlntidr_%d'%_k]=('dlntidr_%s'%_k,''             ,'')  # needs to be fixed
-    fancyNames['dlnnidr_%d'%_k]=('dlnnidr_%s'%_k,''             ,'')  # needs to be fixed
+    fancyNames['ni_%d'%_k]     =('n_{i,%d}'%_k          ,'10^{19}/m^3'  ,'ni_%d(10^19/m^3)'%_k)
+    fancyNames['Ti_%d'%_k]     =('T_{i,%d}'%_k          ,'keV'          ,'Ti_%d(keV)'%_k)
+    fancyNames['vtor_%d'%_k]   =('v_{\\varphi,%d}'%_k   ,'m/s'          ,'vtor_%d(m/s)'%_k)
+    fancyNames['vpol_%d'%_k]   =('v_{\\theta,%d}'%_k    ,'m/s'          ,'vpol_%d(m/s)'%_k)
+    fancyNames['dlntidr_%d'%_k]=('-dln(T_{i,%d})/dr'%_k ,'1/m'          ,'')
+    fancyNames['dlnnidr_%d'%_k]=('-dln(n_{i,%d})/dr'%_k ,'1/m'          ,'')
 
 class profiles_genData:
     """
@@ -119,36 +119,37 @@ class profiles_genData:
         self.data = {}
         self.n_exp = 0
         self.geo = {}
-
+        self.fancy = fancyNames
+        
         # Read input.profiles
         try:
             tmp = profiles_gen(infile)
             self.data.update(tmp.data)
             self.n_exp = tmp.n_exp
-            print('(INFO): (profiles_gen_plot) ' + infile + ' found.')
+            print('(INFO): (profiles_genData) ' + infile + ' found.')
         except Exception as E:
-            raise (IOError('(ERROR): (profiles_gen_plot) ' + infile + ' not found: ' + str(E)))
+            raise (IOError('(ERROR): (profiles_genData) ' + infile + ' not found: ' + str(E)))
 
         # OPTIONAL: Read input.profiles.extra if it exists
         try:
             self.data.update(profiles_gen_extra(infile + '.extra').data)
-            print('(INFO): (profiles_gen_plot) ' + infile + '.extra found.')
+            print('(INFO): (profiles_genData) ' + infile + '.extra found.')
         except Exception as E:
-            print('(INFO): (profiles_gen_plot) ' + infile + '.extra NOT loaded: ' + str(E))
+            print('(INFO): (profiles_genData) ' + infile + '.extra NOT loaded: ' + str(E))
 
         # OPTIONAL: Read input.profiles.geo if it exists
         try:
             self.geo.update(profiles_gen_geo(infile + '.geo').geo)
-            print('(INFO): (profiles_gen_plot) ' + infile + '.geo found.')
+            print('(INFO): (profiles_genData) ' + infile + '.geo found.')
         except Exception as E:
-            print('(INFO): (profiles_gen_plot) ' + infile + '.geo NOT loaded: ' + str(E))
+            print('(INFO): (profiles_genData) ' + infile + '.geo NOT loaded: ' + str(E))
 
         # OPTIONAL: Read input.profiles.jbs if it exists
         try:
             self.data.update(profiles_gen_jbs(infile + '.jbs').data)
-            print('(INFO): (profiles_gen_plot) ' + infile + '.jbs found.')
+            print('(INFO): (profiles_genData) ' + infile + '.jbs found.')
         except Exception as E:
-            print('(INFO): (profiles_gen_plot) ' + infile + '.jbs NOT loaded: ' + str(E))
+            print('(INFO): (profiles_genData) ' + infile + '.jbs NOT loaded: ' + str(E))
 
 class profiles_gen:
     def __init__(self, infile):
@@ -229,5 +230,3 @@ if __name__ == '__main__':
     tmp = tmp.union(set(vars_input_profiles_jbs))
     tmp = tmp.union(set(vars_input_profiles_extra))
     print tmp.difference(set(fancyNames.keys()))
-    
-    profiles_genData('/Users/meneghini/Dropbox/pycode/OMFIT-source/samples/input.profiles')

@@ -6,77 +6,6 @@ import numpy as np
 from gacodeplotdefs import *
 from profiles_gen.data import profiles_genData
 
-#---------------------------------------------------------------
-def fancytag(tag):
- 
-    if tag == 'bunit':
-        fancy = r'$B_\mathrm{unit}$'
-    elif tag == 'rmin':
-        fancy = r'$r$'
-    elif tag == 'rmaj':
-        fancy = r'$R_0$'
-    elif tag == 'drmaj':
-        fancy = r'$dR_0/dr$'
-    elif tag == 'kappa':
-        fancy = r'$\kappa$'
-    elif tag == 'skappa':
-        fancy = r'$r \, d\kappa/dr$'
-    elif tag == 'delta':
-        fancy = r'$\delta$'
-    elif tag == 'sdelta':
-        fancy = r'$r \, d\delta/dr$'
-    elif tag == 'Te':
-        fancy = r'$T_\mathrm{e}$'
-    elif tag == 'ne':
-        fancy = r'$n_\mathrm{e}$'
-    elif tag == 'Ti_1':
-        fancy = r'$T_\mathrm{i1}$'
-    elif tag == 'Ti_2':
-        fancy = r'$T_\mathrm{i2}$'
-    elif tag == 'Ti_3':
-        fancy = r'$T_\mathrm{i3}$'
-    elif tag == 'Ti_4':
-        fancy = r'$T_\mathrm{i4}$'
-    elif tag == 'Ti_5':
-        fancy = r'$T_\mathrm{i5}$'
-    elif tag == 'ni_1':
-        fancy = r'$n_\mathrm{i1}$'
-    elif tag == 'ni_2':
-        fancy = r'$n_\mathrm{i2}$'
-    elif tag == 'ni_3':
-        fancy = r'$n_\mathrm{i3}$'
-    elif tag == 'ni_4':
-        fancy = r'$n_\mathrm{i4}$'
-    elif tag == 'ni_5':
-        fancy = r'$n_\mathrm{i5}$'
-    elif tag == 'omega0':
-        fancy = r'$\omega_0$'
-    elif tag == 'w0p':
-        fancy = r'$d \omega_0/dr$'
-    elif tag == 'jbs_neo':
-        fancy = r'$\mathrm{jbs}_\mathrm{neo}$'
-    elif tag == 'jbs_sauter':
-        fancy = r'$\mathrm{jbs}_\mathrm{sauter}$'
-    elif tag == 'jbs_nclass':
-        fancy = r'$\mathrm{jbs}_\mathrm{nclass}$'
-    elif tag == 'pow_e':
-        fancy = r'$\mathrm{P}_\mathrm{e}\;\mathrm(MW)$'
-    elif tag == 'pow_i':
-        fancy = r'$\mathrm{P}_\mathrm{i}\;\mathrm(MW)$'
-    elif tag == 'pow_e_aux':
-        fancy = r'$\mathrm{P}_\mathrm{e,aux}\;\mathrm(MW)$'
-    elif tag == 'pow_i_aux':
-        fancy = r'$\mathrm{P}_\mathrm{i,aux}\;\mathrm(MW)$'
-    elif tag == 'pow_ei':
-        fancy = r'$\mathrm{P}_\mathrm{ei}\;\mathrm(MW)$'
-    elif tag == 'pow_e_line':
-        fancy = r'$\mathrm{P}_\mathrm{e,rad}\;\mathrm(MW)$'
-    else:
-        fancy = r'$\mathrm{'+tag+'}$'
-
-    return fancy
-#---------------------------------------------------------------
-
 rvar    = sys.argv[1]
 infiles = sys.argv[2]
 plots   = sys.argv[3]
@@ -106,7 +35,7 @@ for j in range(n):
     prof = profiles_genData(filevec[j])
     tag  = plotvec[j]
     keys  = sorted(prof.data.keys())
-
+   
     success = 0
     for i in range(len(keys)):
         if tag == keys[i].split()[0]:
@@ -144,7 +73,7 @@ for j in range(n):
     if rvar == "rho":
         x = prof.data['rho']
 
-    ftag = fancytag(tag)
+    ftag = r'$'+prof.fancy[tag][0]+'\;[\mathrm{'+prof.fancy[tag][1]+'}]$'
     ax.plot(x,prof.data[fulltag],'o-',label=ftag+tlabel)
 
 ax.legend(loc=loc)
