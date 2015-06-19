@@ -198,8 +198,6 @@ module cgyro_globals
   real, dimension(-2:2) :: cderiv
   integer, dimension(:), allocatable :: thcyc
   integer, dimension(:,:,:), allocatable :: rcyc
-  integer, dimension(:), allocatable :: pcyc
-  integer, dimension(:), allocatable :: ncyc
   complex, dimension(:,:,:), allocatable :: dtheta
   complex, dimension(:,:,:), allocatable :: dtheta_up
   !
@@ -267,7 +265,6 @@ module cgyro_globals
   integer, dimension(:,:), allocatable :: gksp_indx
   complex, dimension(:), allocatable   :: gksvec, gkwvec 
   integer :: gksp_nelem, gksp_nmax
-  !
   !
   ! Some field solve parameters
   !

@@ -21,6 +21,8 @@ subroutine cgyro_nl_direct(ij)
   integer :: ix,ixp,iy,iyp
   integer :: ixpp,iypp
   integer :: ir,it,j,in
+  integer, dimension(:), allocatable :: pcyc
+  integer, dimension(:), allocatable :: ncyc
   complex, dimension(:,:), allocatable :: f
   complex, dimension(:,:), allocatable :: g
   complex, dimension(:,:), allocatable :: fg
@@ -30,20 +32,20 @@ subroutine cgyro_nl_direct(ij)
   ny = int(1.5*ny0)+1
   nx = int(1.5*nx0)+1
 
-  if (.not.allocated(pcyc)) then
-     allocate(pcyc(-3*nx:3*nx-1))
-     allocate(ncyc(-3*ny-1:3*ny+1))
-     do ix=-nx,nx-1
-        pcyc(ix-2*nx) = ix
-        pcyc(ix) = ix
-        pcyc(ix+2*nx) = ix
-     enddo
-     do iy=-ny,ny
-        ncyc(iy-(2*ny+1)) = iy
-        ncyc(iy) = iy
-        ncyc(iy+(2*ny+1)) = iy
-     enddo
-  endif
+  ! To keep code self-contained, just recompute these every time
+  ! rather than storing in globals.  Cost is tiny.
+  allocate(pcyc(-3*nx:3*nx-1))
+  allocate(ncyc(-3*ny-1:3*ny+1))
+  do ix=-nx,nx-1
+     pcyc(ix-2*nx) = ix
+     pcyc(ix) = ix
+     pcyc(ix+2*nx) = ix
+  enddo
+  do iy=-ny,ny
+     ncyc(iy-(2*ny+1)) = iy
+     ncyc(iy) = iy
+     ncyc(iy+(2*ny+1)) = iy
+  enddo
 
   allocate( f(-nx:nx,-ny:ny) )
   allocate( g(-nx:nx,-ny:ny) )
@@ -117,6 +119,9 @@ subroutine cgyro_nl_direct(ij)
   deallocate( f)
   deallocate( g)
   deallocate(fg)
+  
+  deallocate(pcyc)
+  deallocate(ncyc)
 
   ! RHS -> -[f,g] = (n'' p' - n' p'') f'' g' 
 
@@ -137,7 +142,6 @@ end subroutine cgyro_nl_direct
 !-----------------------------------------------------------------
 
 subroutine cgyro_nl_fftw(ij)
-
 
   use timer_lib
   use parallel_lib
@@ -179,18 +183,17 @@ subroutine cgyro_nl_fftw(ij)
 
   call timer_lib_in('rhs_nl')
 
-  if (.not.allocated(fx)) then
-     allocate(fx(0:ny/2,0:nx-1))
-     allocate(gx(0:ny/2,0:nx-1))
-     allocate(fy(0:ny/2,0:nx-1))
-     allocate(gy(0:ny/2,0:nx-1))
+  ! Allocate and deallocate these every time.
+  allocate(fx(0:ny/2,0:nx-1))
+  allocate(gx(0:ny/2,0:nx-1))
+  allocate(fy(0:ny/2,0:nx-1))
+  allocate(gy(0:ny/2,0:nx-1))
 
-     allocate(ux(0:ny-1,0:nx-1))
-     allocate(vx(0:ny-1,0:nx-1))
-     allocate(uy(0:ny-1,0:nx-1))
-     allocate(vy(0:ny-1,0:nx-1))
-     allocate(uv(0:ny-1,0:nx-1))
-  endif
+  allocate(ux(0:ny-1,0:nx-1))
+  allocate(vx(0:ny-1,0:nx-1))
+  allocate(uy(0:ny-1,0:nx-1))
+  allocate(vy(0:ny-1,0:nx-1))
+  allocate(uv(0:ny-1,0:nx-1))
 
   ! To avoid memory leak, create this plan every time :-(
   plan_c2r = fftw_plan_dft_c2r_2d(nx,ny,fx,ux,FFTW_MEASURE)
@@ -249,6 +252,18 @@ subroutine cgyro_nl_fftw(ij)
   enddo ! j
   call fftw_destroy_plan(plan_c2r)
   call fftw_destroy_plan(plan_r2c)
+
+  deallocate(fx)
+  deallocate(gx)
+  deallocate(fy)
+  deallocate(gy)
+
+  deallocate(ux)
+  deallocate(vx)
+  deallocate(uy)
+  deallocate(vy)
+  deallocate(uv)
+
   call timer_lib_out('rhs_nl')
 
   call timer_lib_in('comm_nl')
