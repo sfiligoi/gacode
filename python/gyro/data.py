@@ -401,6 +401,27 @@ class GYROData:
         self.gbflux_exc = gbflux_exc.reshape((n_kinetic,4,nt),order='F')
         self.loaded.append('gbflux_exc')
 
+        #---------------------------------------------------------------------------#
+
+    def read_kxkyspec(self):
+
+        try:
+            kxkyspec = np.fromfile(self.dirname+'/out.gyro.kxkyspec',dtype=float,sep=" ")
+        except:
+            raise IOError("ERROR (GYROData): out.gyro.kxkyspec not found.")
+            
+        n_x = self.profile['n_x']
+        n_n = self.profile['n_n']
+        nt  = len(kxkyspec)/(n_x*n_n)
+
+        if self.n > nt:
+            raise IOError('ERROR (GYROData): '+self.dirname+
+              '/out.gyro.kxkyspec too small. ')
+            
+        
+        self.kxkyspec = kxkyspec.reshape((n_x,n_n,nt),order='F')
+        self.loaded.append('kxkyspec')
+
     #---------------------------------------------------------------------------#
 
     def read_moment_u(self):
