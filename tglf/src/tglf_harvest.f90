@@ -8,90 +8,91 @@
 
       INTEGER :: j,ierr
 
-      CHARACTER  NUL
-       CHARACTER(LEN=3) :: NUM
-      PARAMETER (NUL = CHAR(0))
+      CHARACTER(LEN=65507) :: harvest_sendline
+      CHARACTER(LEN=3) :: NUM
+      CHARACTER NUL
+      PARAMETER(NUL = CHAR(0))
 
       ierr=set_harvest_verbose(1)
-
       ierr=set_harvest_table('TGLF_harvest?'//NUL)
       ierr=set_harvest_host('127.0.0.1'//NUL)
       ierr=set_harvest_port(32000)
+      ierr=init_harvest(harvest_sendline,65507)
 
       WRITE(*,*)'===HARVEST starts==='
 
-      ierr=set_harvest_payload_dbl('ky'//NUL,ky_in)
-      ierr=set_harvest_payload_int('sign_Bt'//NUL,INT(sign_Bt_in))
-      ierr=set_harvest_payload_int('sign_Ip'//NUL,INT(sign_It_in))
-      ierr=set_harvest_payload_dbl('vexb_shear'//NUL,vexb_shear_in)
-      ierr=set_harvest_payload_dbl('vexb'//NUL,vexb_in)
-      ierr=set_harvest_payload_dbl('betae'//NUL,betae_in)
-      ierr=set_harvest_payload_dbl('xnue'//NUL,xnue_in)
-      ierr=set_harvest_payload_dbl('zeff'//NUL,zeff_in)
-      ierr=set_harvest_payload_dbl('debye'//NUL,debye_in)
-      ierr=set_harvest_payload_bol('iflux'//NUL,iflux_in)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'ky'//NUL,ky_in)
+      ierr=set_harvest_payload_int(harvest_sendline,'sign_Bt'//NUL,INT(sign_Bt_in))
+      ierr=set_harvest_payload_int(harvest_sendline,'sign_Ip'//NUL,INT(sign_It_in))
+      ierr=set_harvest_payload_dbl(harvest_sendline,'vexb_shear'//NUL,vexb_shear_in)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'vexb'//NUL,vexb_in)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'betae'//NUL,betae_in)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'xnue'//NUL,xnue_in)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'zeff'//NUL,zeff_in)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'debye'//NUL,debye_in)
+      ierr=set_harvest_payload_bol(harvest_sendline,'iflux'//NUL,iflux_in)
 
-      ierr=set_harvest_payload_bol('use_bper'//NUL,use_bper_in)
-      ierr=set_harvest_payload_bol('use_bpar'//NUL,use_bpar_in)
-      ierr=set_harvest_payload_bol('use_mhd_rule'//NUL,use_mhd_rule_in)
-      ierr=set_harvest_payload_bol('use_bisection'//NUL,use_bisection_in)
-      ierr=set_harvest_payload_int('ibranch'//NUL,ibranch_in)
-      ierr=set_harvest_payload_int('nmodes'//NUL,nmodes_in)
-      ierr=set_harvest_payload_int('nbasis_max'//NUL,nbasis_max_in)
-      ierr=set_harvest_payload_int('nbasis_min'//NUL,nbasis_min_in)
-      ierr=set_harvest_payload_int('nxgrid'//NUL,nxgrid_in)
-      ierr=set_harvest_payload_int('nky'//NUL,nky_in)
+      ierr=set_harvest_payload_bol(harvest_sendline,'use_bper'//NUL,use_bper_in)
+      ierr=set_harvest_payload_bol(harvest_sendline,'use_bpar'//NUL,use_bpar_in)
+      ierr=set_harvest_payload_bol(harvest_sendline,'use_mhd_rule'//NUL,use_mhd_rule_in)
+      ierr=set_harvest_payload_bol(harvest_sendline,'use_bisection'//NUL,use_bisection_in)
+      ierr=set_harvest_payload_int(harvest_sendline,'ibranch'//NUL,ibranch_in)
+      ierr=set_harvest_payload_int(harvest_sendline,'nmodes'//NUL,nmodes_in)
+      ierr=set_harvest_payload_int(harvest_sendline,'nbasis_max'//NUL,nbasis_max_in)
+      ierr=set_harvest_payload_int(harvest_sendline,'nbasis_min'//NUL,nbasis_min_in)
+      ierr=set_harvest_payload_int(harvest_sendline,'nxgrid'//NUL,nxgrid_in)
+      ierr=set_harvest_payload_int(harvest_sendline,'nky'//NUL,nky_in)
 
-      ierr=set_harvest_payload_dbl('theta_trapped'//NUL,theta_trapped_in)
-      ierr=set_harvest_payload_dbl('park'//NUL,park_in)
-      ierr=set_harvest_payload_dbl('ghat'//NUL,ghat_in)
-      ierr=set_harvest_payload_dbl('gchat'//NUL,gchat_in)
-      ierr=set_harvest_payload_dbl('wd_zero'//NUL,wd_zero_in)
-      ierr=set_harvest_payload_dbl('Linsker_factor'//NUL,Linsker_factor_in)
-      ierr=set_harvest_payload_dbl('gradB_factor'//NUL,gradB_factor_in)
-      ierr=set_harvest_payload_dbl('filter'//NUL,filter_in)
-      ierr=set_harvest_payload_dbl('damp_psi'//NUL,damp_psi_in)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'theta_trapped'//NUL,theta_trapped_in)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'park'//NUL,park_in)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'ghat'//NUL,ghat_in)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'gchat'//NUL,gchat_in)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'wd_zero'//NUL,wd_zero_in)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'Linsker_factor'//NUL,Linsker_factor_in)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'gradB_factor'//NUL,gradB_factor_in)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'filter'//NUL,filter_in)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'damp_psi'//NUL,damp_psi_in)
 
-      ierr=set_harvest_payload_bol('adiabatic_elec'//NUL,adiabatic_elec_in)
-      ierr=set_harvest_payload_dbl('alpha_mach'//NUL,alpha_mach_in)
-      ierr=set_harvest_payload_dbl('alpha_p'//NUL,alpha_p_in)
-      ierr=set_harvest_payload_dbl('alpha_e'//NUL,alpha_e_in)
-      ierr=set_harvest_payload_dbl('alpha_quench'//NUL,alpha_quench_in)
-      ierr=set_harvest_payload_dbl('xnu_factor'//NUL,xnu_factor_in)
-      ierr=set_harvest_payload_dbl('debye_factor'//NUL,debye_factor_in)
-      ierr=set_harvest_payload_dbl('etg_factor'//NUL,etg_factor_in)
-      ierr=set_harvest_payload_int('sat_rule'//NUL,sat_rule_in)
-      ierr=set_harvest_payload_int('xnu_model'//NUL,xnu_model_in)
-      ierr=set_harvest_payload_int('kygrid_model'//NUL,kygrid_model_in)
-      ierr=set_harvest_payload_int('vpar_model'//NUL,vpar_model_in)
-      ierr=set_harvest_payload_int('vpar_shear_model'//NUL,vpar_shear_model_in)
+      ierr=set_harvest_payload_bol(harvest_sendline,'adiabatic_elec'//NUL,adiabatic_elec_in)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'alpha_mach'//NUL,alpha_mach_in)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'alpha_p'//NUL,alpha_p_in)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'alpha_e'//NUL,alpha_e_in)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'alpha_quench'//NUL,alpha_quench_in)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'xnu_factor'//NUL,xnu_factor_in)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'debye_factor'//NUL,debye_factor_in)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'etg_factor'//NUL,etg_factor_in)
+      ierr=set_harvest_payload_int(harvest_sendline,'sat_rule'//NUL,sat_rule_in)
+      ierr=set_harvest_payload_int(harvest_sendline,'xnu_model'//NUL,xnu_model_in)
+      ierr=set_harvest_payload_int(harvest_sendline,'kygrid_model'//NUL,kygrid_model_in)
+      ierr=set_harvest_payload_int(harvest_sendline,'vpar_model'//NUL,vpar_model_in)
+      ierr=set_harvest_payload_int(harvest_sendline,'vpar_shear_model'//NUL,vpar_shear_model_in)
 
-      ierr=set_harvest_payload_dbl('rmin_sa'//NUL,rmin_sa)
-      ierr=set_harvest_payload_dbl('rmaj_sa'//NUL,rmaj_sa)
-      ierr=set_harvest_payload_dbl('q_sa'//NUL,q_in)
-      ierr=set_harvest_payload_dbl('shat_sa'//NUL,shat_sa)
-      ierr=set_harvest_payload_dbl('alpha_sa'//NUL,alpha_sa)
-      ierr=set_harvest_payload_dbl('xwell_sa'//NUL,xwell_sa)
-      ierr=set_harvest_payload_dbl('theta0_sa'//NUL,theta0_sa)
-      ierr=set_harvest_payload_int('b_model_sa'//NUL,b_model_sa)
-      ierr=set_harvest_payload_int('ft_model_sa'//NUL,ft_model_sa)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'rmin_sa'//NUL,rmin_sa)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'rmaj_sa'//NUL,rmaj_sa)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'q_sa'//NUL,q_in)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'shat_sa'//NUL,shat_sa)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'alpha_sa'//NUL,alpha_sa)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'xwell_sa'//NUL,xwell_sa)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'theta0_sa'//NUL,theta0_sa)
+      ierr=set_harvest_payload_int(harvest_sendline,'b_model_sa'//NUL,b_model_sa)
+      ierr=set_harvest_payload_int(harvest_sendline,'ft_model_sa'//NUL,ft_model_sa)
 
-      ierr=set_harvest_payload_dbl('rmin_loc'//NUL,rmin_loc)
-      ierr=set_harvest_payload_dbl('rmaj_loc'//NUL,rmaj_loc)
-      ierr=set_harvest_payload_dbl('zmaj_loc'//NUL,zmaj_loc)
-      ierr=set_harvest_payload_dbl('q_loc'//NUL,q_in)
-      ierr=set_harvest_payload_dbl('p_prime_loc'//NUL,p_prime_loc)
-      ierr=set_harvest_payload_dbl('q_prime_loc'//NUL,q_prime_loc)
-      ierr=set_harvest_payload_dbl('drmindx_loc'//NUL,drmindx_loc)
-      ierr=set_harvest_payload_dbl('drmajdx_loc'//NUL,drmajdx_loc)
-      ierr=set_harvest_payload_dbl('dzmajdx_loc'//NUL,dzmajdx_loc)
-      ierr=set_harvest_payload_dbl('kappa_loc'//NUL,kappa_loc)
-      ierr=set_harvest_payload_dbl('s_kappa_loc'//NUL,s_kappa_loc)
-      ierr=set_harvest_payload_dbl('delta_loc'//NUL,delta_loc)
-      ierr=set_harvest_payload_dbl('s_delta_loc'//NUL,s_delta_loc)
-      ierr=set_harvest_payload_dbl('zeta_loc'//NUL,zeta_loc)
-      ierr=set_harvest_payload_dbl('s_zeta_loc'//NUL,s_zeta_loc)
-      ierr=set_harvest_payload_dbl('kx0_loc'//NUL,kx0_loc)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'rmin_loc'//NUL,rmin_loc)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'rmaj_loc'//NUL,rmaj_loc)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'zmaj_loc'//NUL,zmaj_loc)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'q_loc'//NUL,q_in)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'p_prime_loc'//NUL,p_prime_loc)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'q_prime_loc'//NUL,q_prime_loc)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'drmindx_loc'//NUL,drmindx_loc)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'drmajdx_loc'//NUL,drmajdx_loc)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'dzmajdx_loc'//NUL,dzmajdx_loc)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'kappa_loc'//NUL,kappa_loc)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'s_kappa_loc'//NUL,s_kappa_loc)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'delta_loc'//NUL,delta_loc)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'s_delta_loc'//NUL,s_delta_loc)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'zeta_loc'//NUL,zeta_loc)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'s_zeta_loc'//NUL,s_zeta_loc)
+      ierr=set_harvest_payload_dbl(harvest_sendline,'kx0_loc'//NUL,kx0_loc)
 
 !      write(*,*)'q_fourier=',q_fourier_in
 !      write(*,*)'q_fourier=',q_in
@@ -102,7 +103,7 @@
 
       write(*,*)"---------------------------"
 
-      ierr=set_harvest_payload_int('ns'//NUL,ns_in)
+      ierr=set_harvest_payload_int(harvest_sendline,'ns'//NUL,ns_in)
 
       do j=1,ns_in
          if (j < 10) then
@@ -111,32 +112,32 @@
             write (NUM, "(A1,I02)") "_", j
          endif
 
-         ierr=set_harvest_payload_dbl('Z'//NUM//NUL,zs_in(j))
-         ierr=set_harvest_payload_dbl('A'//NUM//NUL,mass_in(j))
-         ierr=set_harvest_payload_dbl('rlns'//NUM//NUL,rlns_in(j))
-         ierr=set_harvest_payload_dbl('rlts'//NUM//NUL,rlts_in(j))
-         ierr=set_harvest_payload_dbl('vpar_shear'//NUM//NUL,vpar_shear_in(j))
-         ierr=set_harvest_payload_dbl('vns_shear'//NUM//NUL,vns_shear_in(j))
-         ierr=set_harvest_payload_dbl('vts_shear'//NUM//NUL,vts_shear_in(j))
-         ierr=set_harvest_payload_dbl('taus'//NUM//NUL,taus_in(j))
-         ierr=set_harvest_payload_dbl('as'//NUM//NUL,as_in(j))
-         ierr=set_harvest_payload_dbl('vpar'//NUM//NUL,vpar_in(j))
+         ierr=set_harvest_payload_dbl(harvest_sendline,'Z'//NUM//NUL,zs_in(j))
+         ierr=set_harvest_payload_dbl(harvest_sendline,'A'//NUM//NUL,mass_in(j))
+         ierr=set_harvest_payload_dbl(harvest_sendline,'rlns'//NUM//NUL,rlns_in(j))
+         ierr=set_harvest_payload_dbl(harvest_sendline,'rlts'//NUM//NUL,rlts_in(j))
+         ierr=set_harvest_payload_dbl(harvest_sendline,'vpar_shear'//NUM//NUL,vpar_shear_in(j))
+         ierr=set_harvest_payload_dbl(harvest_sendline,'vns_shear'//NUM//NUL,vns_shear_in(j))
+         ierr=set_harvest_payload_dbl(harvest_sendline,'vts_shear'//NUM//NUL,vts_shear_in(j))
+         ierr=set_harvest_payload_dbl(harvest_sendline,'taus'//NUM//NUL,taus_in(j))
+         ierr=set_harvest_payload_dbl(harvest_sendline,'as'//NUM//NUL,as_in(j))
+         ierr=set_harvest_payload_dbl(harvest_sendline,'vpar'//NUM//NUL,vpar_in(j))
 
 !        electrostatic
-         ierr=set_harvest_payload_dbl('particle_flux'//NUM//NUL,get_particle_flux(j,1))
-         ierr=set_harvest_payload_dbl('energy_flux'//NUM//NUL,get_energy_flux(j,1))
-         ierr=set_harvest_payload_dbl('stress_par'//NUM//NUL,get_stress_par(j,1))
-         ierr=set_harvest_payload_dbl('stress_tor'//NUM//NUL,get_stress_tor(j,1))
-         ierr=set_harvest_payload_dbl('exchange'//NUM//NUL,get_exchange(j,1))
+         ierr=set_harvest_payload_dbl(harvest_sendline,'particle_flux'//NUM//NUL,get_particle_flux(j,1))
+         ierr=set_harvest_payload_dbl(harvest_sendline,'energy_flux'//NUM//NUL,get_energy_flux(j,1))
+         ierr=set_harvest_payload_dbl(harvest_sendline,'stress_par'//NUM//NUL,get_stress_par(j,1))
+         ierr=set_harvest_payload_dbl(harvest_sendline,'stress_tor'//NUM//NUL,get_stress_tor(j,1))
+         ierr=set_harvest_payload_dbl(harvest_sendline,'exchange'//NUM//NUL,get_exchange(j,1))
          write(*,*)"---------------------------"
       enddo
 
-      ierr=set_harvest_payload_dbl('gmax'//NUL,get_growthrate(1))
-      ierr=set_harvest_payload_dbl('fmax'//NUL,get_frequency(1))
+      ierr=set_harvest_payload_dbl(harvest_sendline,'gmax'//NUL,get_growthrate(1))
+      ierr=set_harvest_payload_dbl(harvest_sendline,'fmax'//NUL,get_frequency(1))
 
       WRITE(*,*)'===HARVEST sends==='
 
-      ierr=harvest_send()
+      ierr=harvest_send(harvest_sendline)
 
       WRITE(*,*)'===HARVEST ends==='
 
