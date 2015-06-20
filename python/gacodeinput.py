@@ -261,9 +261,10 @@ class ManagerInput:
                 self.slavepath.append(data[1])
                 # slaveproc stores number of cores
                 self.slaveproc.append(data[2])
-                # Optional simulation radius
-                nover = 0
+
+                # Now manage overlays and optional radii
                 if (len(data) > 3):
+                    # Overlay or optional radius
                     if data[3][0:1] == 'X':
                         # This is the special option X=<xmin> for min(r/a) or min(rho)
                         self.slaveradius.append(string.splitfields(data[3],'=')[1])
@@ -274,7 +275,11 @@ class ManagerInput:
                         nover = len(data)-3
                         nj    = 3
                         self.slaveradius.append("-1")
-                    
+                else:
+                    # No overlay
+                    self.slaveradius.append("-1")
+                    nover = 0
+                        
                 # Overlay parameters reside in data[3], ... 
                 self.overlayfile.append('overlay.'+str(n))
                 file_overlay = open('overlay.'+str(n),'w')
