@@ -1,0 +1,3 @@
+[submodule "shared/gadb"]
+	path = shared/gadb
+	url = git@github.com:gafusion/gadb.git
