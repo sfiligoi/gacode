@@ -17,7 +17,7 @@
       ierr=set_harvest_table('TGLF_harvest?'//NUL)
       ierr=set_harvest_host('127.0.0.1'//NUL)
       ierr=set_harvest_port(32000)
-      ierr=init_harvest(harvest_sendline,65507)
+      ierr=init_harvest(harvest_sendline,LEN(harvest_sendline))
 
       WRITE(*,*)'===HARVEST starts==='
 
@@ -132,8 +132,15 @@
          write(*,*)"---------------------------"
       enddo
 
-      ierr=set_harvest_payload_dbl(harvest_sendline,'gmax'//NUL,get_growthrate(1))
-      ierr=set_harvest_payload_dbl(harvest_sendline,'fmax'//NUL,get_frequency(1))
+      do j=i,SIZE(gamma_out)
+         if (j < 10) then
+            write (NUM, "(A1,I01)") "_", j
+         else
+            write (NUM, "(A1,I02)") "_", j
+         endif
+         ierr=set_harvest_payload_dbl(harvest_sendline,'gamma_out'//NUM//NUL,gamma_out(j))
+         ierr=set_harvest_payload_dbl(harvest_sendline,'freq_out'//NUM//NUL,freq_out(j))
+      enddo
 
       WRITE(*,*)'===HARVEST sends==='
 
