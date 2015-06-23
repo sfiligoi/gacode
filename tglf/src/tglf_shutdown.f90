@@ -4,7 +4,7 @@
 !
       IMPLICIT NONE
 
-      CALL tglf_harvest
+      CALL tglf_harvest_local
       CALL tglf_deallocate
  
       END SUBROUTINE tglf_shutdown
