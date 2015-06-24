@@ -216,7 +216,7 @@ subroutine gyro_write_input
 
      write(1,*) '--------------------- TGLF PARAMETERS ---------------------'
      write(1,20) 'Q_PRIME',(q_norm/r_norm)**2*shat_norm
-     write(1,20) 'P_PRIME',(q_norm/r_norm)*beta_unit_s(ir_norm)/(8*pi)*dlnpdr_s(ir_norm)
+     write(1,20) 'P_PRIME',-1.0*(q_norm/r_norm)*beta_unit_s(ir_norm)/(8*pi)*dlnpdr_s(ir_norm)
      write(1,*) '---------------------- GS2 PARAMETERS ---------------------'
      write(1,*) '        [User must set R_geo=Rmaj in GS2 namelist]'
      write(1,20) 'B_unit/B_T0',rmaj_s(ir_norm)/GEO_f
