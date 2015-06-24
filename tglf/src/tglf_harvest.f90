@@ -9,16 +9,19 @@
 
     USE tglf_interface
 
-    INTEGER :: ierr, i
+    INTEGER :: ierr, i, j
     CHARACTER(LEN=65507) :: harvest_sendline
     CHARACTER(LEN=2) :: NUM
     CHARACTER NUL
     PARAMETER(NUL = CHAR(0))
 
-!    IF (.NOT.tglf_use_transport_model_in) THEN
-!        WRITE(1,*) 'HARVEST ONLY WHEN `TRANSPORT_MODEL=.TRUE.`' !only when computing fluxes
-!        RETURN
-!    ENDIF
+    REAL, DIMENSION(10) :: tmp
+    INTEGER, DIMENSION(10) :: ions_order
+
+    IF (.NOT.tglf_use_transport_model_in) THEN
+        WRITE(1,*) 'HARVEST ONLY WHEN `TRANSPORT_MODEL=.TRUE.`' !only when computing fluxes
+        RETURN
+    ENDIF
 
     IF (.NOT.tglf_iflux_in) THEN
         WRITE(1,*) 'HARVEST ONLY AVAILABLE WHEN `IFLUX=.TRUE.' !only when computing fluxes
@@ -50,6 +53,20 @@
     ENDIF
 
 !   '#---------------------------------------------------'
+!   '# Sort ions by A, Z, Te/Ti'
+!   '#---------------------------------------------------'
+    tmp=0.0
+    tmp(1)=1E10
+    DO i = 2,tglf_ns_in
+        tmp(i)=tglf_mass_in(i)*100000+tglf_zs_in(i)*1000+1./(1+tglf_rlts_in(i))
+    ENDDO
+    DO i = 1,tglf_ns_in
+        j=MAXLOC(tmp, DIM=1)
+        ions_order(i)=j
+        tmp(j)=0
+    ENDDO
+
+!   '#---------------------------------------------------'
 !   '# Species vectors:'
 !   '#---------------------------------------------------'
     DO i = 1,tglf_ns_in
@@ -58,14 +75,17 @@
       ELSE
          write (NUM, "(I02,A1)") i,NUL
       ENDIF
-      ierr=set_harvest_payload_dbl(harvest_sendline,'ZS_'//NUM,tglf_zs_in(i))
-      ierr=set_harvest_payload_dbl(harvest_sendline,'MASS_'//NUM,tglf_mass_in(i))
-      ierr=set_harvest_payload_dbl(harvest_sendline,'RLNS_'//NUM,tglf_rlns_in(i))
-      ierr=set_harvest_payload_dbl(harvest_sendline,'RLTS_'//NUM,tglf_rlts_in(i))
-      ierr=set_harvest_payload_dbl(harvest_sendline,'TAUS_'//NUM,tglf_taus_in(i))
-      ierr=set_harvest_payload_dbl(harvest_sendline,'AS_'//NUM,tglf_as_in(i))
-      ierr=set_harvest_payload_dbl(harvest_sendline,'VPAR_'//NUM,tglf_vpar_in(i))
-      ierr=set_harvest_payload_dbl(harvest_sendline,'VPAR_SHEAR_'//NUM,tglf_vpar_shear_in(i))
+
+      j=ions_order(i)
+
+      ierr=set_harvest_payload_dbl(harvest_sendline,'+ZS_'//NUM,tglf_zs_in(j))     !make new tables for different charges
+      ierr=set_harvest_payload_dbl(harvest_sendline,'+MASS_'//NUM,tglf_mass_in(j)) !make new tables for different masses
+      ierr=set_harvest_payload_dbl(harvest_sendline,'RLNS_'//NUM,tglf_rlns_in(j))
+      ierr=set_harvest_payload_dbl(harvest_sendline,'RLTS_'//NUM,tglf_rlts_in(j))
+      ierr=set_harvest_payload_dbl(harvest_sendline,'TAUS_'//NUM,tglf_taus_in(j))
+      ierr=set_harvest_payload_dbl(harvest_sendline,'AS_'//NUM,tglf_as_in(j))
+      ierr=set_harvest_payload_dbl(harvest_sendline,'VPAR_'//NUM,tglf_vpar_in(j))
+      ierr=set_harvest_payload_dbl(harvest_sendline,'VPAR_SHEAR_'//NUM,tglf_vpar_shear_in(j))
     ENDDO
 
 !   '#---------------------------------------------------'
@@ -151,8 +171,8 @@
 !   ierr=set_harvest_payload_bol(harvest_sendline,'+NEW_EIKONAL'//NUL,tglf_new_eikonal_in) !DISABLED because not used anymore and should not make difference anyways
 !   ierr=set_harvest_payload_dbl(harvest_sendline,'+VEXB'//NUL,tglf_vexb_in) !DISABLED because not used anymore
 !   ierr=set_harvest_payload_int(harvest_sendline,'+WRITE_WAVEFUNCTION_FLAG'//NUL,tglf_write_wavefunction_flag_in)  ! DISABLED because it does not matter for us
-!   ierr=set_harvest_payload_dbl(harvest_sendline,'VNS_SHEAR_'//NUM,tglf_vns_shear_in(i)) !DISABLED because not used anymore
-!   ierr=set_harvest_payload_dbl(harvest_sendline,'VTS_SHEAR_'//NUM,tglf_vts_shear_in(i)) !DISABLED because not used anymore
+!   ierr=set_harvest_payload_dbl(harvest_sendline,'VNS_SHEAR_'//NUM,tglf_vns_shear_in(j)) !DISABLED because not used anymore
+!   ierr=set_harvest_payload_dbl(harvest_sendline,'VTS_SHEAR_'//NUM,tglf_vts_shear_in(j)) !DISABLED because not used anymore
 
 !   '#---------------------------------------------------'
 !   '# Output results:'
@@ -163,16 +183,26 @@
       ELSE
          write (NUM, "(I02,A1)") i,NUL
       ENDIF
-      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_PARTICLE_FLUX_'//NUM, &
-                                   get_particle_flux(i,1)+get_particle_flux(i,2)+get_particle_flux(i,3))
-      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_ENERGY_FLUX_'//NUM, &
-                                   get_energy_flux(i,1)+get_energy_flux(i,2)+get_energy_flux(i,3))
-      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_PAR_'//NUM, &
-                                   get_stress_par(i,1)+get_stress_par(i,2)+get_stress_par(i,3))
-      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_TOR_'//NUM, &
-                                   get_stress_tor(i,1)+get_stress_tor(i,2)+get_stress_tor(i,3))
-      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_EXCHANGE_'//NUM, &
-                                   get_exchange(i,1)+get_exchange(i,2)+get_exchange(i,3))
+
+      j=ions_order(i)
+
+      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_PARTICLE_FLUX_ESTATIC_'//NUM,get_particle_flux(j,1))
+      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_ENERGY_FLUX_ESTATIC_'//NUM,get_energy_flux(j,1))
+      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_PAR_ESTATIC_'//NUM,get_stress_par(j,1))
+      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_TOR_ESTATIC_'//NUM,get_stress_tor(j,1))
+      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_EXCHANGE_ESTATIC_'//NUM,get_exchange(j,1))
+
+      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_PARTICLE_FLUX_EMPAR_'//NUM,get_particle_flux(j,2))
+      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_ENERGY_FLUX_EMPAR_'//NUM,get_energy_flux(j,2))
+      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_PAR_EMPAR_'//NUM,get_stress_par(j,2))
+      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_TOR_EMPAR_'//NUM,get_stress_tor(j,2))
+      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_EXCHANGE_EMPAR_'//NUM,get_exchange(j,2))
+
+      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_PARTICLE_FLUX_EMPER_'//NUM,get_particle_flux(j,3))
+      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_ENERGY_FLUX_EMPER_'//NUM,get_energy_flux(j,3))
+      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_PAR_EMPER_'//NUM,get_stress_par(j,3))
+      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_TOR_EMPER_'//NUM,get_stress_tor(j,3))
+      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_EXCHANGE_EMPER_'//NUM,get_exchange(j,3))
    ENDDO
 
    ierr=harvest_send(harvest_sendline)
