@@ -123,6 +123,9 @@ subroutine tglf_run()
 
   endif
 
+  ! harvest input/output data to database
+  CALL tglf_harvest_local
+
   ! Create paramter dump files
   if (tglf_dump_flag_in .eqv. .true.) then
      call tglf_dump_local

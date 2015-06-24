@@ -1,6 +1,12 @@
   ! Harvest LOCAL INTERFACE variables
   SUBROUTINE tglf_harvest_local()
 
+! _bol : boolean
+! _int : integer
+! _dbl : double
+!
+! entries starting with `+` will generate a new table alltogether if the value changes
+
     USE tglf_interface
 
     INTEGER :: ierr, i
@@ -9,33 +15,18 @@
     CHARACTER NUL
     PARAMETER(NUL = CHAR(0))
 
-    IF (.NOT.tglf_use_transport_model_in) THEN
-        WRITE(1,*) 'HARVEST ONLY WHEN `TRANSPORT_MODEL=.TRUE.`'
-        RETURN
-    ENDIF
-
-    IF (.NOT.tglf_new_eikonal_in) THEN
-        WRITE(1,*) 'HARVEST ONLY WHEN `NEW_EIKONAL=.TRUE.`'
-        RETURN
-    ENDIF
-
-    IF (tglf_vexb_in.NE.0) THEN
-        WRITE(1,*) 'HARVEST ONLY WHEN `VEXB=0.0`'
-        RETURN
-    ENDIF
+!    IF (.NOT.tglf_use_transport_model_in) THEN
+!        WRITE(1,*) 'HARVEST ONLY WHEN `TRANSPORT_MODEL=.TRUE.`' !only when computing fluxes
+!        RETURN
+!    ENDIF
 
     IF (.NOT.tglf_iflux_in) THEN
-        WRITE(1,*) 'HARVEST ONLY AVAILABLE WHEN `IFLUX=.TRUE.'
-        RETURN
-    ENDIF
-
-    IF (tglf_debye_in.NE.0) THEN
-        WRITE(1,*) 'HARVEST ONLY SUPPORTS `DEBYE=0.0`'
+        WRITE(1,*) 'HARVEST ONLY AVAILABLE WHEN `IFLUX=.TRUE.' !only when computing fluxes
         RETURN
     ENDIF
 
     IF (tglf_geometry_flag_in .NE. 1 ) THEN
-       WRITE(1,*) 'HARVEST ONLY SUPPORTS MILLER `GEOMETRY_FLAG=1`'
+       WRITE(1,*) 'HARVEST ONLY SUPPORTS MILLER `GEOMETRY_FLAG=1`' !only when using miller
        RETURN
     ENDIF
 
@@ -47,11 +38,16 @@
 !   '#---------------------------------------------------'
     ierr=set_harvest_payload_bol(harvest_sendline,'SIGN_BT'//NUL,INT((tglf_sign_bt_in+1)/2.))
     ierr=set_harvest_payload_bol(harvest_sendline,'SIGN_IT'//NUL,INT((tglf_sign_it_in+1)/2.))
-    ierr=set_harvest_payload_dbl(harvest_sendline,'KY'//NUL,tglf_ky_in)
+    IF (tglf_kygrid_model_in.NE.1) THEN
+        ierr=set_harvest_payload_dbl(harvest_sendline,'KY'//NUL,tglf_ky_in)
+    ENDIF
     ierr=set_harvest_payload_dbl(harvest_sendline,'VEXB_SHEAR'//NUL,tglf_vexb_shear_in)
     ierr=set_harvest_payload_dbl(harvest_sendline,'BETAE'//NUL,tglf_betae_in)
     ierr=set_harvest_payload_dbl(harvest_sendline,'XNUE'//NUL,tglf_xnue_in)
     ierr=set_harvest_payload_dbl(harvest_sendline,'ZEFF'//NUL,tglf_zeff_in)
+    IF (tglf_debye_in.NE.0) THEN
+        ierr=set_harvest_payload_dbl(harvest_sendline,'DEBYE'//NUL,tglf_debye_in)
+    ENDIF
 
 !   '#---------------------------------------------------'
 !   '# Species vectors:'
@@ -59,7 +55,7 @@
     DO i = 1,tglf_ns_in
       IF (i < 10) THEN
          write (NUM, "(I01,A1)") i,NUL
-      else
+      ELSE
          write (NUM, "(I02,A1)") i,NUL
       ENDIF
       ierr=set_harvest_payload_dbl(harvest_sendline,'ZS_'//NUM,tglf_zs_in(i))
@@ -70,8 +66,6 @@
       ierr=set_harvest_payload_dbl(harvest_sendline,'AS_'//NUM,tglf_as_in(i))
       ierr=set_harvest_payload_dbl(harvest_sendline,'VPAR_'//NUM,tglf_vpar_in(i))
       ierr=set_harvest_payload_dbl(harvest_sendline,'VPAR_SHEAR_'//NUM,tglf_vpar_shear_in(i))
-      ierr=set_harvest_payload_dbl(harvest_sendline,'VNS_SHEAR_'//NUM,tglf_vns_shear_in(i))
-      ierr=set_harvest_payload_dbl(harvest_sendline,'VTS_SHEAR_'//NUM,tglf_vts_shear_in(i))
     ENDDO
 
 !   '#---------------------------------------------------'
@@ -80,7 +74,9 @@
     ierr=set_harvest_payload_dbl(harvest_sendline,'RMIN_LOC'//NUL,tglf_rmin_loc_in)
     ierr=set_harvest_payload_dbl(harvest_sendline,'RMAJ_LOC'//NUL,tglf_rmaj_loc_in)
     ierr=set_harvest_payload_dbl(harvest_sendline,'ZMAJ_LOC'//NUL,tglf_zmaj_loc_in)
-    ierr=set_harvest_payload_dbl(harvest_sendline,'DRMINDX_LOC'//NUL,tglf_drmindx_loc_in)
+    IF (tglf_drmindx_loc_in.NE.1) THEN
+        ierr=set_harvest_payload_dbl(harvest_sendline,'DRMINDX_LOC'//NUL,tglf_drmindx_loc_in) ! different derivatives affect everything!
+    ENDIF
     ierr=set_harvest_payload_dbl(harvest_sendline,'DRMAJDX_LOC'//NUL,tglf_drmajdx_loc_in)
     ierr=set_harvest_payload_dbl(harvest_sendline,'DZMAJDX_LOC'//NUL,tglf_dzmajdx_loc_in)
     ierr=set_harvest_payload_dbl(harvest_sendline,'Q_LOC'//NUL,tglf_q_loc_in)
@@ -92,7 +88,9 @@
     ierr=set_harvest_payload_dbl(harvest_sendline,'S_ZETA_LOC'//NUL,tglf_s_zeta_loc_in)
     ierr=set_harvest_payload_dbl(harvest_sendline,'P_PRIME_LOC'//NUL,tglf_p_prime_loc_in)
     ierr=set_harvest_payload_dbl(harvest_sendline,'Q_PRIME_LOC'//NUL,tglf_q_prime_loc_in)
-    ierr=set_harvest_payload_dbl(harvest_sendline,'KX0_LOC'//NUL,tglf_kx0_loc_in)
+    IF (tglf_kx0_loc_in.NE.0) THEN
+        ierr=set_harvest_payload_dbl(harvest_sendline,'KX0_LOC'//NUL,tglf_kx0_loc_in) !should be always 0.0
+    ENDIF
 
 !   '#---------------------------------------------------'
 !   '# Gaussian width parameters:'
@@ -105,6 +103,9 @@
 !   '#---------------------------------------------------'
 !   '# Control parameters:'
 !   '#---------------------------------------------------'
+    ierr=set_harvest_payload_bol(harvest_sendline,'+USE_TRANSPORT_MODEL'//NUL,tglf_use_transport_model_in)
+    ierr=set_harvest_payload_int(harvest_sendline,'+GEOMETRY_FLAG'//NUL,tglf_geometry_flag_in)
+    ierr=set_harvest_payload_bol(harvest_sendline,'+IFLUX'//NUL,tglf_iflux_in)
     ierr=set_harvest_payload_int(harvest_sendline,'+NS'//NUL,tglf_ns_in)
     ierr=set_harvest_payload_bol(harvest_sendline,'+ADIABATIC_ELEC'//NUL,tglf_adiabatic_elec_in)
     ierr=set_harvest_payload_bol(harvest_sendline,'+USE_BPER'//NUL,tglf_use_bper_in)
@@ -118,6 +119,8 @@
     ierr=set_harvest_payload_int(harvest_sendline,'+VPAR_SHEAR_MODEL'//NUL,tglf_vpar_shear_model_in)
     ierr=set_harvest_payload_int(harvest_sendline,'+IBRANCH'//NUL,tglf_ibranch_in)
     ierr=set_harvest_payload_int(harvest_sendline,'+NMODES'//NUL,tglf_nmodes_in)
+    ierr=set_harvest_payload_int(harvest_sendline,'+NBASIS_MAX'//NUL,tglf_nbasis_max_in)
+    ierr=set_harvest_payload_int(harvest_sendline,'+NBASIS_MIN'//NUL,tglf_nbasis_min_in)
     ierr=set_harvest_payload_int(harvest_sendline,'+NXGRID'//NUL,tglf_nxgrid_in)
     ierr=set_harvest_payload_int(harvest_sendline,'+NKY'//NUL,tglf_nky_in)
     ierr=set_harvest_payload_dbl(harvest_sendline,'+ALPHA_MACH'//NUL,tglf_alpha_mach_in)
@@ -145,15 +148,11 @@
 !   '#---------------------------------------------------'
 !   '# Disabled harvest:'
 !   '#---------------------------------------------------'
-!   ierr=set_harvest_payload_bol(harvest_sendline,'+USE_TRANSPORT_MODEL'//NUL,tglf_use_transport_model_in) ! DISABLED because we only allow runs with flux calculations
-!   ierr=set_harvest_payload_int(harvest_sendline,'+GEOMETRY_FLAG'//NUL,tglf_geometry_flag_in) ! DISABLED because we only allow Miller geometry
-!   ierr=set_harvest_payload_bol(harvest_sendline,'+NEW_EIKONAL'//NUL,tglf_new_eikonal_in) ! DISABLED because we only allow freshly computed eikonal
-!   ierr=set_harvest_payload_dbl(harvest_sendline,'+VEXB'//NUL,tglf_vexb_in) !DISABLED because not in use, see VPAR
-!   ierr=set_harvest_payload_bol(harvest_sendline,'+IFLUX'//NUL,tglf_iflux_in)  ! DISABLED because if not True then we do not come here
-!   ierr=set_harvest_payload_int(harvest_sendline,'+NBASIS_MAX'//NUL,tglf_nbasis_max_in) ! DISABLED because not physics inputs/outputs
-!   ierr=set_harvest_payload_int(harvest_sendline,'+NBASIS_MIN'//NUL,tglf_nbasis_min_in) ! DISABLED because not physics inputs/outputs
-!   ierr=set_harvest_payload_int(harvest_sendline,'+WRITE_WAVEFUNCTION_FLAG'//NUL,tglf_write_wavefunction_flag_in)  ! DISABLED because not physics inputs/outputs
-!   ierr=set_harvest_payload_dbl(harvest_sendline,'+DEBYE'//NUL,tglf_debye_in) ! a control parameter because usually set to zero (also by TGYRO)
+!   ierr=set_harvest_payload_bol(harvest_sendline,'+NEW_EIKONAL'//NUL,tglf_new_eikonal_in) !DISABLED because not used anymore and should not make difference anyways
+!   ierr=set_harvest_payload_dbl(harvest_sendline,'+VEXB'//NUL,tglf_vexb_in) !DISABLED because not used anymore
+!   ierr=set_harvest_payload_int(harvest_sendline,'+WRITE_WAVEFUNCTION_FLAG'//NUL,tglf_write_wavefunction_flag_in)  ! DISABLED because it does not matter for us
+!   ierr=set_harvest_payload_dbl(harvest_sendline,'VNS_SHEAR_'//NUM,tglf_vns_shear_in(i)) !DISABLED because not used anymore
+!   ierr=set_harvest_payload_dbl(harvest_sendline,'VTS_SHEAR_'//NUM,tglf_vts_shear_in(i)) !DISABLED because not used anymore
 
 !   '#---------------------------------------------------'
 !   '# Output results:'
@@ -161,7 +160,7 @@
     DO i = 1,tglf_ns_in
       IF (i < 10) THEN
          write (NUM, "(I01,A1)") i,NUL
-      else
+      ELSE
          write (NUM, "(I02,A1)") i,NUL
       ENDIF
       ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_PARTICLE_FLUX_'//NUM, &
