@@ -23,3 +23,13 @@ if ( $?IDL_PATH ) then
 else
  setenv IDL_PATH $GACODE_ROOT/gyro/vugyro
 endif
+
+if ( $?GACODE_PLATFORM ) then
+  set GA = (BANACH DROP LOHAN SATURN VENUS)
+  foreach server ($GA)
+    if ( $GACODE_PLATFORM == $server ) then
+      setenv HARVEST_HOST venus.gat.com
+      setenv HARVEST_PORT 32000
+    endif
+  end
+endif

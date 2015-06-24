@@ -10,32 +10,37 @@
     PARAMETER(NUL = CHAR(0))
 
     IF (.NOT.tglf_use_transport_model_in) THEN
+        WRITE(1,*) 'HARVEST ONLY WHEN `TRANSPORT_MODEL=.TRUE.`'
         RETURN
     ENDIF
 
     IF (.NOT.tglf_new_eikonal_in) THEN
+        WRITE(1,*) 'HARVEST ONLY WHEN `NEW_EIKONAL=.TRUE.`'
         RETURN
     ENDIF
 
     IF (tglf_vexb_in.NE.0) THEN
+        WRITE(1,*) 'HARVEST ONLY WHEN `VEXB=0.0`'
         RETURN
     ENDIF
 
     IF (.NOT.tglf_iflux_in) THEN
+        WRITE(1,*) 'HARVEST ONLY AVAILABLE WHEN `IFLUX=.TRUE.'
+        RETURN
+    ENDIF
+
+    IF (tglf_debye_in.NE.0) THEN
+        WRITE(1,*) 'HARVEST ONLY SUPPORTS `DEBYE=0.0`'
         RETURN
     ENDIF
 
     IF (tglf_geometry_flag_in .NE. 1 ) THEN
-       WRITE(1,*) 'HARVEST ONLY SUPPORTS MILLER GEOMETRY'
-       CLOSE(1)
+       WRITE(1,*) 'HARVEST ONLY SUPPORTS MILLER `GEOMETRY_FLAG=1`'
        RETURN
     ENDIF
 
     ierr=set_harvest_verbose(1)
-    ierr=set_harvest_table('TGLF_harvest?'//NUL)
-    ierr=set_harvest_host('127.0.0.1'//NUL)
-    ierr=set_harvest_port(32000)
-    ierr=init_harvest(harvest_sendline,LEN(harvest_sendline))
+    ierr=init_harvest('TGLF_harvest?10'//NUL,harvest_sendline,LEN(harvest_sendline))
 
 !   '#---------------------------------------------------'
 !   '# Plasma parameters:'
@@ -47,7 +52,6 @@
     ierr=set_harvest_payload_dbl(harvest_sendline,'BETAE'//NUL,tglf_betae_in)
     ierr=set_harvest_payload_dbl(harvest_sendline,'XNUE'//NUL,tglf_xnue_in)
     ierr=set_harvest_payload_dbl(harvest_sendline,'ZEFF'//NUL,tglf_zeff_in)
-    ierr=set_harvest_payload_dbl(harvest_sendline,'DEBYE'//NUL,tglf_debye_in)
 
 !   '#---------------------------------------------------'
 !   '# Species vectors:'
@@ -149,6 +153,7 @@
 !   ierr=set_harvest_payload_int(harvest_sendline,'+NBASIS_MAX'//NUL,tglf_nbasis_max_in) ! DISABLED because not physics inputs/outputs
 !   ierr=set_harvest_payload_int(harvest_sendline,'+NBASIS_MIN'//NUL,tglf_nbasis_min_in) ! DISABLED because not physics inputs/outputs
 !   ierr=set_harvest_payload_int(harvest_sendline,'+WRITE_WAVEFUNCTION_FLAG'//NUL,tglf_write_wavefunction_flag_in)  ! DISABLED because not physics inputs/outputs
+!   ierr=set_harvest_payload_dbl(harvest_sendline,'+DEBYE'//NUL,tglf_debye_in) ! a control parameter because usually set to zero (also by TGYRO)
 
 !   '#---------------------------------------------------'
 !   '# Output results:'
