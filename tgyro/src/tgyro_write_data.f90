@@ -25,8 +25,8 @@ subroutine tgyro_write_data(i_print)
 
   !--------------------------------------------------------------------------------
   ! First, generate and write TGLF linear growth rates
-  !
-  call tgyro_stab_driver
+  ! (commenting out because not used as of 24 June 2015)
+  !call tgyro_stab_driver
   !--------------------------------------------------------------------------------
 
   if (i_proc_global > 0) return
