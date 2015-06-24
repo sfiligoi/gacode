@@ -192,17 +192,22 @@
       ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_TOR_ESTATIC_'//NUM,get_stress_tor(j,1))
       ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_EXCHANGE_ESTATIC_'//NUM,get_exchange(j,1))
 
-      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_PARTICLE_FLUX_EMPAR_'//NUM,get_particle_flux(j,2))
-      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_ENERGY_FLUX_EMPAR_'//NUM,get_energy_flux(j,2))
-      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_PAR_EMPAR_'//NUM,get_stress_par(j,2))
-      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_TOR_EMPAR_'//NUM,get_stress_tor(j,2))
-      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_EXCHANGE_EMPAR_'//NUM,get_exchange(j,2))
+      if (tglf_use_bper_in) THEN
+          ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_PARTICLE_FLUX_EMPER_'//NUM,get_particle_flux(j,2))
+          ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_ENERGY_FLUX_EMPER_'//NUM,get_energy_flux(j,2))
+          ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_PAR_EMPER_'//NUM,get_stress_par(j,2))
+          ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_TOR_EMPER_'//NUM,get_stress_tor(j,2))
+          ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_EXCHANGE_EMPER_'//NUM,get_exchange(j,2))
+      ENDIF
 
-      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_PARTICLE_FLUX_EMPER_'//NUM,get_particle_flux(j,3))
-      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_ENERGY_FLUX_EMPER_'//NUM,get_energy_flux(j,3))
-      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_PAR_EMPER_'//NUM,get_stress_par(j,3))
-      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_TOR_EMPER_'//NUM,get_stress_tor(j,3))
-      ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_EXCHANGE_EMPER_'//NUM,get_exchange(j,3))
+      if (tglf_use_bpar_in) THEN
+          ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_PARTICLE_FLUX_EMPAR_'//NUM,get_particle_flux(j,3))
+          ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_ENERGY_FLUX_EMPAR_'//NUM,get_energy_flux(j,3))
+          ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_PAR_EMPAR_'//NUM,get_stress_par(j,3))
+          ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_TOR_EMPAR_'//NUM,get_stress_tor(j,3))
+          ierr=set_harvest_payload_dbl(harvest_sendline,'OUT_STRESS_EXCHANGE_EMPAR_'//NUM,get_exchange(j,3))
+      ENDIF
+
    ENDDO
 
    ierr=harvest_send(harvest_sendline)
