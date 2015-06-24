@@ -124,9 +124,6 @@ subroutine tglf_run_mpi()
 
   endif
 
-  ! harvest input/output data to database
-  CALL tglf_harvest_local
-
   ! Create parameter dump file
   if (tglf_dump_flag_in .eqv. .true.) then
      call tglf_dump_local

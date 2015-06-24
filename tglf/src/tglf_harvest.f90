@@ -1,11 +1,12 @@
   ! Harvest LOCAL INTERFACE variables
-  SUBROUTINE tglf_harvest_local()
+  !
+  ! _bol : boolean
+  ! _int : integer
+  ! _dbl : double
+  !
+  ! entries starting with `+` will generate a new table alltogether if the value changes
 
-! _bol : boolean
-! _int : integer
-! _dbl : double
-!
-! entries starting with `+` will generate a new table alltogether if the value changes
+  SUBROUTINE tglf_harvest_local()
 
     USE tglf_interface
 
