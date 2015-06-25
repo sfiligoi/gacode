@@ -194,4 +194,8 @@ subroutine tglf_run_mpi()
 
   call get_error_status(tglf_error_message,tglf_error_status)
 
+  IF (tglf_error_status.EQ.0) THEN
+    CALL tglf_harvest_local
+  ENDIF
+
 end subroutine tglf_run_mpi
