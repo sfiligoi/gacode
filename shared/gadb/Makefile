@@ -11,7 +11,7 @@ OBJECTS = send2DB.o \
 
 .SUFFIXES : .o .c
 
-lib: send2DB.o
+lib: send2DB.o send2DB.c Makefile
 	$(ARCH) $(LLIB).a send2DB.o
 
 .c.o :
