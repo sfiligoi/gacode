@@ -166,6 +166,10 @@ int init_harvest(char *table, char *harvest_sendline, int n){
   if (getenv("HARVEST_PORT")!=NULL)
     set_harvest_port(atoi(getenv("HARVEST_PORT")));
 
+  set_harvest_verbose(0);
+  if (getenv("HARVEST_VERBOSE")!=NULL)
+    set_harvest_verbose(atoi(getenv("HARVEST_VERBOSE")));
+
   set_harvest_table(table);
 
   harvest_sendline_n=n;
@@ -197,7 +201,7 @@ int harvest_send(char* harvest_sendline){
   servaddr.sin_addr.s_addr=inet_addr(harvest_host);
   servaddr.sin_port=htons(harvest_port);
 
-  sprintf(sendline,"%d:%s:s@omfituser=%s%s\n",version,harvest_table,getenv("USER"),harvest_sendline);
+  sprintf(sendline,"%d:%s:s@omfituser=%s%s",version,harvest_table,getenv("USER"),harvest_sendline);
   memset(harvest_sendline, 0, harvest_sendline_n);
   sendto(sockfd,sendline,strlen(sendline),0,
              (struct sockaddr *)&servaddr,sizeof(servaddr));

@@ -34,7 +34,6 @@
        RETURN
     ENDIF
 
-    ierr=set_harvest_verbose(1)
     ierr=init_harvest('TGLF_harvest?10'//NUL,harvest_sendline,LEN(harvest_sendline))
 
 !   '#---------------------------------------------------'
