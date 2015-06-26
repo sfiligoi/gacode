@@ -82,8 +82,10 @@
       ierr=set_harvest_payload_dbl(harvest_sendline,'+MASS_'//NUM,tglf_mass_in(j)) !make new tables for different masses
       ierr=set_harvest_payload_dbl(harvest_sendline,'RLNS_'//NUM,tglf_rlns_in(j))
       ierr=set_harvest_payload_dbl(harvest_sendline,'RLTS_'//NUM,tglf_rlts_in(j))
-      ierr=set_harvest_payload_dbl(harvest_sendline,'TAUS_'//NUM,tglf_taus_in(j))
-      ierr=set_harvest_payload_dbl(harvest_sendline,'AS_'//NUM,tglf_as_in(j))
+      if (i.NE.1) THEN !these are always 1, by definition
+        ierr=set_harvest_payload_dbl(harvest_sendline,'TAUS_'//NUM,tglf_taus_in(j))
+        ierr=set_harvest_payload_dbl(harvest_sendline,'AS_'//NUM,tglf_as_in(j))
+      ENDIF
       ierr=set_harvest_payload_dbl(harvest_sendline,'VPAR_'//NUM,tglf_vpar_in(j))
       ierr=set_harvest_payload_dbl(harvest_sendline,'VPAR_SHEAR_'//NUM,tglf_vpar_shear_in(j))
     ENDDO
