@@ -201,7 +201,7 @@ int harvest_send(char* harvest_sendline){
   servaddr.sin_addr.s_addr=inet_addr(harvest_host);
   servaddr.sin_port=htons(harvest_port);
 
-  sprintf(sendline,"%d:%s:s@omfituser=%s%s",version,harvest_table,getenv("USER"),harvest_sendline);
+  sprintf(sendline,"%d:%s:s@_user=%s%s",version,harvest_table,getenv("USER"),harvest_sendline);
   memset(harvest_sendline, 0, harvest_sendline_n);
   sendto(sockfd,sendline,strlen(sendline),0,
              (struct sockaddr *)&servaddr,sizeof(servaddr));
