@@ -10,6 +10,8 @@ int  harvest_port=3200;
 int  harvest_verbose=1;
 int  harvest_sendline_n=65507;
 char harvest_tag[255];
+clock_t harvest_tic;
+clock_t harvest_toc;
 
 int print_storage(char *harvest_sendline){
   printf("[%3.3f%%] ",(float)100*strlen(harvest_sendline)/harvest_sendline_n);
@@ -170,6 +172,8 @@ int set_harvest_table_(char *table){
 
 //init
 int init_harvest(char *table, char *harvest_sendline, int n){
+  harvest_tic=clock();
+
   set_harvest_host("127.0.0.1");
   if (getenv("HARVEST_HOST")!=NULL)
     set_harvest_host(getenv("HARVEST_HOST"));
@@ -222,9 +226,10 @@ int harvest_send(char* harvest_sendline){
   sendto(sockfd,sendline,strlen(sendline),0,
              (struct sockaddr *)&servaddr,sizeof(servaddr));
 
+  harvest_toc=clock();
   if (harvest_verbose){
     printf("%s:%d --> %s\n",harvest_host,harvest_port,sendline);
-    printf("===HARVEST ends===\n");
+    printf("===HARVEST ends=== (%3.3f ms)\n",(double)(harvest_toc - harvest_tic) / CLOCKS_PER_SEC * 1E3);
   }
   return 0;
 }

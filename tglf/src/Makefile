@@ -44,10 +44,10 @@ OBJECTS = ${TGLFISNAN}      \
 
 all: $(LLIB).a $(EXEC1) $(EXEC2)
 
-$(EXEC1): $(LLIB).a $(EXEC1).o
+$(EXEC1): $(LLIB).a $(EXEC1).o ${GACODE_ROOT}/shared/gadb/GADB_lib.a
 	$(FC) $(FFLAGS) -o $(EXEC1) $(EXEC1).o $(LLIB).a $(EXTRA_LIBS)
 
-$(EXEC2): $(LLIB).a $(EXEC2).o
+$(EXEC2): $(LLIB).a $(EXEC2).o ${GACODE_ROOT}/shared/gadb/GADB_lib.a
 	$(FC) $(FFLAGS) -o $(EXEC2) $(EXEC2).o $(LLIB).a $(EXTRA_LIBS)
 
 $(LLIB).a: $(OBJECTS)
@@ -59,4 +59,3 @@ $(LLIB).a: $(OBJECTS)
 clean:
 	rm -f *.o *.lst $(LLIB).a $(EXEC1) $(EXEC2)
 	rm -f ${GACODE_ROOT}/modules/tglf*.mod 
-
