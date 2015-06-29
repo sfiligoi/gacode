@@ -8,6 +8,7 @@ all:
 	cd fluxfit ; make "OPT=${OPT}"
 	cd profiles_gen ; make "OPT=${OPT}"
 	cd nclass ; make "OPT=${OPT}"
+	cd gadb; make
 
 clean:
 	cd math ; make clean
@@ -17,10 +18,11 @@ clean:
 	cd fluxfit ; make clean
 	cd profiles_gen ; make clean
 	cd nclass ; make clean
+	cd gadb; make clean
 
 distclean:
 	cd math ; make clean
 	cd GEO ; make clean
 	cd EXPRO ; make clean
 	cd profiles_gen ; make clean
-
+	cd gadb; make clean
