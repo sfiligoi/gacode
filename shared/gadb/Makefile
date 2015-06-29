@@ -11,16 +11,16 @@ OBJECTS = send2DB.o \
 
 .SUFFIXES : .o .c
 
-lib: send2DB.o send2DB.c Makefile
+lib: send2DB.o Makefile
 	$(ARCH) $(LLIB).a send2DB.o
 
-.c.o :
+.c.o : *.c Makefile
 	$(CC) $(CFLAGS) -Wno-implicit-function-declaration -c $<
 
-gadb_clientF.o : gadb_clientF.f90
+gadb_clientF.o : gadb_clientF.f90 Makefile
 	$(FC) $(FFLAGS) -c $<
 
-all: $(OBJECTS)
+all: $(OBJECTS) Makefile
 	$(CC) $(CFLAGS) -o clientC send2DB.o gadb_clientC.o
 	$(FC) $(FFLAGS) -o clientF send2DB.o gadb_clientF.o
 

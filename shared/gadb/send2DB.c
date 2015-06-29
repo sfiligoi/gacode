@@ -9,6 +9,7 @@ char harvest_host[100];
 int  harvest_port=3200;
 int  harvest_verbose=1;
 int  harvest_sendline_n=65507;
+char harvest_tag[255];
 
 int print_storage(char *harvest_sendline){
   printf("[%3.3f%%] ",(float)100*strlen(harvest_sendline)/harvest_sendline_n);
@@ -133,6 +134,17 @@ int set_harvest_host_(char *host){
   return 0;
 }
 
+//tag
+int set_harvest_tag(char *tag){
+  sprintf(harvest_tag,"%s",tag);
+  return 0;
+}
+
+int set_harvest_tag_(char *tag){
+  set_harvest_tag(tag);
+  return 0;
+}
+
 //port
 int set_harvest_port(int port){
   harvest_port=port;
@@ -170,6 +182,10 @@ int init_harvest(char *table, char *harvest_sendline, int n){
   if (getenv("HARVEST_VERBOSE")!=NULL)
     set_harvest_verbose(atoi(getenv("HARVEST_VERBOSE")));
 
+  set_harvest_tag("");
+  if (getenv("HARVEST_TAG")!=NULL)
+    set_harvest_tag(getenv("HARVEST_TAG"));
+
   set_harvest_table(table);
 
   harvest_sendline_n=n;
@@ -201,7 +217,7 @@ int harvest_send(char* harvest_sendline){
   servaddr.sin_addr.s_addr=inet_addr(harvest_host);
   servaddr.sin_port=htons(harvest_port);
 
-  sprintf(sendline,"%d:%s:s@_user=%s%s",version,harvest_table,getenv("USER"),harvest_sendline);
+  sprintf(sendline,"%d:%s:s@_user=%s,s@_tag=%s%s",version,harvest_table,getenv("USER"),harvest_tag,harvest_sendline);
   memset(harvest_sendline, 0, harvest_sendline_n);
   sendto(sockfd,sendline,strlen(sendline),0,
              (struct sockaddr *)&servaddr,sizeof(servaddr));
