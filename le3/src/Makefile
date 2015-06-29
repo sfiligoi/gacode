@@ -22,8 +22,8 @@ OBJECTS = le3_globals.o \
 
 .SUFFIXES : .o .f90
 
-all: $(OBJECTS)
-	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS)
+all: $(OBJECTS) $(EXTRA_LIBS)
+	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS) $(LMATH)
 
 .f90.o :
 	$(FC) $(FMATH) $(FFLAGS) -c $<

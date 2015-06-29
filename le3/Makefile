@@ -7,8 +7,7 @@ include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 export EXTRA_LIBS = \
        ${GACODE_ROOT}/le3/minpack/minpack_lib.a \
        ${GACODE_ROOT}/shared/GEO/GEO_lib.a \
-       ${GACODE_ROOT}/shared/fluxfit/fluxfit_lib.a \
-       ${LMATH}
+       ${GACODE_ROOT}/shared/fluxfit/fluxfit_lib.a
 
 all:
 	gacode_getversion > .VERSION

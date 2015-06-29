@@ -37,8 +37,8 @@ OBJECTS = neo_globals.o \
 
 .SUFFIXES : .o .f90
 
-all: neo_lib.a $(EXEC).o
-	$(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o neo_lib.a $(EXTRA_LIBS)
+all: neo_lib.a $(EXEC).o $(EXTRA_LIBS)
+	$(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o neo_lib.a $(EXTRA_LIBS) $(LMATH)
 
 neo_lib.a: $(OBJECTS)
 	$(ARCH) neo_lib.a $(OBJECTS)

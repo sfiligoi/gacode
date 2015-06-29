@@ -57,8 +57,8 @@ OBJECTS +=	tgyro_globals.o \
 
 .SUFFIXES : .o .f90 
 
-all: $(OBJECTS) ${GACODE_ROOT}/shared/gadb/GADB_lib.a
-	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS) $(FPETSC)
+all: $(OBJECTS) $(EXTRA_LIBS)
+	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS) $(LMATH)
 
 .f90.o :
 	$(FC) $(FMATH) $(FFLAGS) -c $<

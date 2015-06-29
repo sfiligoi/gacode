@@ -10,7 +10,6 @@ FOMP   =
 FMATH  = -s real64
 FOPT   = -O3 -hfp3
 FDEBUG = -eD -Ktrap=fp -m 1
-FPETSC =
 
 # System math libraries
 LMATH = -L/opt/fftw/3.3.0.4/x86_64/lib -Wl,-rpath=/opt/fftw/3.3.0.4/x86_64/lib \

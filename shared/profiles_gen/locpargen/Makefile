@@ -16,7 +16,7 @@ OBJECTS = $(EXEC).o
 
 .SUFFIXES : .o .f90
 
-exec: $(OBJECTS)
+exec: $(OBJECTS) $(EXTRA_LIBS)
 	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS) $(LMATH)
 
 .f90.o :

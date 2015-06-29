@@ -19,22 +19,22 @@ OBJECTS = cgyro_globals.o \
           cgyro_interface.o \
           cgyro_init.o \
           cgyro_init_arrays.o \
-	  cgyro_implicit_gk.o \
+	      cgyro_implicit_gk.o \
           cgyro_kernel.o \
           cgyro_mpi_grid.o \
-	  cgyro_make_profiles.o \
-	  cgyro_nl.o \
+	      cgyro_make_profiles.o \
+	      cgyro_nl.o \
           cgyro_read_input.o \
           cgyro_run.o \
           cgyro_shear.o \
-	  cgyro_step_gk.o \
+	      cgyro_step_gk.o \
           cgyro_write_initdata.o \
           cgyro_write_timedata.o
 
 .SUFFIXES : .o .f90
 
-all: cgyro_lib.a $(EXEC).o
-	$(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o cgyro_lib.a $(EXTRA_LIBS)
+all: cgyro_lib.a $(EXEC).o $(EXTRA_LIBS)
+	$(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o cgyro_lib.a $(EXTRA_LIBS) $(LMATH)
 
 cgyro_lib.a: $(OBJECTS)
 	$(ARCH) cgyro_lib.a $(OBJECTS)
