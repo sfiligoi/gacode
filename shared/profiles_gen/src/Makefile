@@ -49,7 +49,7 @@ OBJECTS = prgen_globals.o \
 all: $(EXEC)
 
 $(EXEC): $(OBJECTS) $(EXEC).o $(EXTRA_LIBS)
-	$(FC) $(FMATH) $(FFLAGS) -o $(EXEC) $(EXEC).o $(OBJECTS) $(EXTRA_LIBS) $(LMATH) ${NETCDF}
+	$(FC) $(FMATH) $(FFLAGS) -o $(EXEC) $(EXEC).o $(OBJECTS) $(EXTRA_LIBS) $(LMATH) $(NETCDF)
 
 .f90.o :
 	$(FC) $(FMATH) $(FFLAGS) -I $(NETCDF_INC) -c $<
