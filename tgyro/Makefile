@@ -18,8 +18,7 @@ export EXTRA_LIBS = \
        ${GACODE_ROOT}/gyro/SSUB/SSUB_lib.a \
        ${GACODE_ROOT}/shared/GEO/GEO_lib.a \
        ${GACODE_ROOT}/shared/UMFPACK/UMFPACK_lib.a \
-       ${GACODE_ROOT}/gyro/GKEIGEN/GKEIGEN_lib.a \
-       ${LMATH}
+       ${GACODE_ROOT}/gyro/GKEIGEN/GKEIGEN_lib.a
 
 all:
 	gacode_getversion > .VERSION

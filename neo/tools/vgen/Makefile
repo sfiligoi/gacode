@@ -11,17 +11,17 @@ endif
       
 EXEC = vgen
 
-OBJECTS = vgen_globals.o \
-	  vgen_init.o \
-	  vgen_compute_neo.o \
-	  vgen_getgeo.o \
-          vgen_reduce.o \
-	  $(EXEC).o 
+OBJECTS =	vgen_globals.o \
+			vgen_init.o \
+			vgen_compute_neo.o \
+			vgen_getgeo.o \
+			vgen_reduce.o \
+			$(EXEC).o
 
 .SUFFIXES : .o .f90
 
-all: $(OBJECTS)
-	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) ../../src/neo_lib.a $(EXTRA_LIBS)
+all: $(OBJECTS) $(EXTRA_LIBS)
+	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) ../../src/neo_lib.a $(EXTRA_LIBS) $(LMATH)
 
 .f90.o :
 	$(FC) $(FMATH) $(FFLAGS) -c $<

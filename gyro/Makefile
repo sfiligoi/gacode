@@ -18,8 +18,7 @@ export EXTRA_LIBS = \
        ${GACODE_ROOT}/gyro/BLEND/BLEND_lib.a \
        ${GACODE_ROOT}/gyro/TRANSPOSE/TRANSP_lib.a \
        ${GACODE_ROOT}/gyro/SSUB/SSUB_lib.a \
-       ${GACODE_ROOT}/gyro/GKEIGEN/GKEIGEN_lib.a \
-       ${LMATH}	
+       ${GACODE_ROOT}/gyro/GKEIGEN/GKEIGEN_lib.a
 
 all:
 	gacode_getversion > .VERSION
@@ -29,7 +28,7 @@ all:
 	cd SSUB ; make 
 	cd src ; make
 	cd GKEIGEN ; make
-	cd src ; $(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o gyro_lib.a ${EXTRA_LIBS}
+	cd src ; $(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o gyro_lib.a ${EXTRA_LIBS} $(LMATH)
 
 clean:
 	cd BLEND ; make clean

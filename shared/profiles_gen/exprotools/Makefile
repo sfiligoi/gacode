@@ -14,7 +14,7 @@ EXTRA_LIBS = ${GACODE_ROOT}/shared/EXPRO/EXPRO_lib.a \
              ${GACODE_ROOT}/shared/math/math_lib.a 
 
 OBJECTS = create_globals.o \
-	  create_check.o \
+          create_check.o \
           create_importvec.o \
           create_set.o \
           create_read_input.o \
@@ -24,10 +24,10 @@ OBJECTS = create_globals.o \
 
 all : $(EXEC1) $(EXEC2)
 
-$(EXEC1): $(EXEC1).o $(OBJECTS)
+$(EXEC1): $(EXEC1).o $(OBJECTS) $(EXTRA_LIBS)
 	$(FC) $(FFLAGS) -o $(EXEC1) $(EXEC1).o $(EXTRA_LIBS) $(LMATH)
 
-$(EXEC2): $(EXEC2).o $(OBJECTS)
+$(EXEC2): $(EXEC2).o $(OBJECTS) $(EXTRA_LIBS)
 	$(FC) $(FFLAGS) -o $(EXEC2) $(EXEC2).o $(OBJECTS) $(EXTRA_LIBS) $(LMATH)
 
 .f90.o :
