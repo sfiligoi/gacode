@@ -9,7 +9,6 @@ subroutine cgyro_write_initdata
 
   use mpi
   use cgyro_globals
-  use cgyro_equilibrium
 
   implicit none
 

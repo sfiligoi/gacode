@@ -3,7 +3,6 @@ subroutine cgyro_init_implicit_gk
   use mpi
   use parallel_lib
   use cgyro_globals
-  use cgyro_equilibrium
 
   implicit none
 
@@ -384,7 +383,6 @@ subroutine cgyro_step_implicit_gk
   use mpi
   use timer_lib
   use cgyro_globals
-  use cgyro_equilibrium
 
   implicit none
 

@@ -49,7 +49,6 @@ subroutine cgyro_rhs(ij)
   use timer_lib
 
   use cgyro_globals
-  use cgyro_equilibrium
 
   implicit none
 
@@ -132,7 +131,6 @@ subroutine cgyro_rhs_trap(ij)
   use parallel_lib
 
   use cgyro_globals
-  use cgyro_equilibrium
 
   implicit none
 
@@ -192,7 +190,6 @@ end subroutine cgyro_rhs_trap
 subroutine filter(f)
 
   use cgyro_globals
-  use cgyro_equilibrium
 
   implicit none
 

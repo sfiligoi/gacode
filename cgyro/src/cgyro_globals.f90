@@ -275,6 +275,25 @@ module cgyro_globals
   !
   real, dimension(:,:,:), allocatable :: hzf, xzf 
   real, dimension(:), allocatable :: pvec_in, pvec_outr, pvec_outi
+  !
+  ! Collision step arrays
+  !
+  real, dimension(:,:,:), allocatable :: cmat
+  complex, dimension(:), allocatable  :: cvec,bvec
+  ! 
+  ! Equilibrium/geometry arrays
+  real :: d_theta
+  real, dimension(:,:), allocatable   :: thetab
+  real, dimension(:), allocatable   :: w_theta
+  real, dimension(:,:), allocatable :: k_perp    
+  real, dimension(:), allocatable   :: Bmag
+  real, dimension(:,:), allocatable :: omega_stream
+  real, dimension(:,:), allocatable :: omega_trap
+  real, dimension(:,:), allocatable :: omega_rdrift
+  real, dimension(:,:), allocatable :: omega_adrift
+  real, dimension(:,:), allocatable :: omega_aprdrift
+  integer, parameter :: geo_ntheta=1001 ! num grid pts for Miller geo grid
+  !
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------

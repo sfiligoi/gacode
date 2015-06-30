@@ -12,7 +12,6 @@ subroutine cgyro_nl_direct(ij)
   use parallel_lib
 
   use cgyro_globals
-  use cgyro_equilibrium
 
   implicit none
 

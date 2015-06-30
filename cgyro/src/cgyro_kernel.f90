@@ -17,10 +17,11 @@ subroutine cgyro_kernel
 
   use cgyro_globals
   use cgyro_io
-  use cgyro_equilibrium
-  use cgyro_collision
+  use GEO_interface
 
   implicit none
+
+  integer :: ir, it
 
   ! Need to initialize the info and error runfiles very early
   if (silent_flag == 0 .and. i_proc == 0) then
@@ -103,15 +104,52 @@ subroutine cgyro_kernel
      allocate(dtheta(n_radial,n_theta,-3:3))
      allocate(dtheta_up(n_radial,n_theta,-3:3))
 
-     call EQUIL_alloc(1)
-     call EQUIL_do
+     
+     ! Equilibrium set-up
+     allocate(theta(n_theta))
+     allocate(thetab(n_radial/box_size,n_theta))
+     allocate(w_theta(n_theta))
+     allocate(Bmag(n_theta))
+     allocate(k_perp(n_theta,n_radial))
+     allocate(omega_stream(n_theta,n_species))
+     allocate(omega_trap(n_theta,n_species))
+     allocate(omega_rdrift(n_theta,n_species))
+     allocate(omega_adrift(n_theta,n_species))
+     allocate(omega_aprdrift(n_theta,n_species))
 
+     d_theta = (2*pi/n_theta)
+     do it=1,n_theta
+        theta(it) = -pi+(it-1)*d_theta
+     enddo
+     
+     do ir=1,n_radial/box_size
+        do it=1,n_theta
+           thetab(ir,it) = theta(it)+2*pi*(ir-1-n_radial/2/box_size)
+        enddo
+     enddo
+     
+     if(equilibrium_model == 0) then
+        GEO_model_in = 0
+     else if (equilibrium_model == 2 .or. equilibrium_model == 3) then
+        GEO_model_in = geo_numeq_flag
+     endif
+     GEO_ntheta_in   = geo_ntheta
+     GEO_nfourier_in = geo_ny
+     call GEO_alloc(1)
+     
+     call cgyro_equilibrium
+     
      ! 4. Array initialization
      call cgyro_init_arrays
 
      call cgyro_init_implicit_gk
 
-     call COLLISION_alloc(1)
+     if(collision_model /= 0) then
+        allocate(cmat(nv,nv,nc_loc))
+        allocate(cvec(nv))
+        allocate(bvec(nv))
+     endif
+     call cgyro_init_collision
 
   endif
 
@@ -182,11 +220,21 @@ subroutine cgyro_kernel
 
 100 continue
 
-  call EQUIL_alloc(0)
-  call COLLISION_alloc(0)
+  if(allocated(theta))        deallocate(theta)
+  if(allocated(thetab))       deallocate(thetab)
+  if(allocated(w_theta))      deallocate(w_theta)
+  if(allocated(Bmag))         deallocate(Bmag)
+  if(allocated(k_perp))       deallocate(k_perp)
+  if(allocated(omega_stream)) deallocate(omega_stream)
+  if(allocated(omega_trap))   deallocate(omega_trap)
+  if(allocated(omega_rdrift)) deallocate(omega_rdrift)
+  if(allocated(omega_adrift)) deallocate(omega_adrift)
+  if(allocated(omega_aprdrift)) deallocate(omega_aprdrift)
+  
+  call GEO_alloc(0)
 
   if(allocated(indx_xi))       deallocate(indx_xi)
-  if(allocated(px))        deallocate(px)
+  if(allocated(px))            deallocate(px)
   if(allocated(energy))        deallocate(energy)
   if(allocated(w_e))           deallocate(w_e)
   if(allocated(e_deriv1_mat))  deallocate(e_deriv1_mat)
@@ -208,6 +256,12 @@ subroutine cgyro_kernel
   if(allocated(pvec_in))       deallocate(pvec_in)
   if(allocated(pvec_outr))     deallocate(pvec_outr)
   if(allocated(pvec_outi))     deallocate(pvec_outi)
+
+  if(collision_model /= 0) then
+     if(allocated(cmat))       deallocate(cmat)
+     if(allocated(cvec))       deallocate(cvec)
+     if(allocated(bvec))       deallocate(bvec)
+  endif
 
   call cgyro_clean_implicit_gk
 

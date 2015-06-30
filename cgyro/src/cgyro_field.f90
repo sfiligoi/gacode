@@ -7,7 +7,6 @@ subroutine cgyro_field_v
   use timer_lib
 
   use cgyro_globals
-  use cgyro_equilibrium
 
   implicit none
 
@@ -117,7 +116,6 @@ subroutine cgyro_field_c
   use timer_lib
 
   use cgyro_globals
-  use cgyro_equilibrium
 
   implicit none
 
