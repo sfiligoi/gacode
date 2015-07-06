@@ -315,7 +315,7 @@ END SUBROUTINE put_rare_switches
 !-----------------------------------------------------------------
 !
 SUBROUTINE put_model_parameters(adi_elec,alpha_e,alpha_p,alpha_mach,  &
-     alpha_quench,xnu_fac,debye_fac,etg_fac, &
+     alpha_quench,alpha_zf,xnu_fac,debye_fac,etg_fac, &
      sat_rule,kygrid_model,xnu_model,vpar_model,vpar_shear_model)
   !
   USE tglf_global
@@ -324,7 +324,7 @@ SUBROUTINE put_model_parameters(adi_elec,alpha_e,alpha_p,alpha_mach,  &
   LOGICAL,INTENT(IN) :: adi_elec
   INTEGER :: sat_rule,xnu_model,kygrid_model
   INTEGER :: vpar_model,vpar_shear_model
-  REAL,INTENT(IN) :: alpha_e,alpha_p,alpha_mach
+  REAL,INTENT(IN) :: alpha_e,alpha_p,alpha_mach,alpha_zf
   REAL,INTENT(IN) :: alpha_quench,xnu_fac,debye_fac,etg_fac
   !
   ! check for changes and update flow controls
@@ -343,6 +343,7 @@ SUBROUTINE put_model_parameters(adi_elec,alpha_e,alpha_p,alpha_mach,  &
   alpha_p_in = alpha_p
   alpha_e_in = alpha_e
   alpha_quench_in = alpha_quench
+  alpha_zf_in = alpha_zf
   xnu_factor_in = xnu_fac
   debye_factor_in = debye_fac
   etg_factor_in = etg_fac

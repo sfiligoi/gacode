@@ -73,6 +73,7 @@ subroutine tglf_run()
        tglf_alpha_p_in, &
        tglf_alpha_mach_in, &
        tglf_alpha_quench_in, &
+       tglf_alpha_zf_in, &
        tglf_xnu_factor_in, &
        tglf_debye_factor_in, &
        tglf_etg_factor_in, &

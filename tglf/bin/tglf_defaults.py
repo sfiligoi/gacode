@@ -44,6 +44,7 @@ def set_defaults() :
      t.add('ALPHA_E','1.0')
      t.add('ALPHA_P','1.0')
      t.add('ALPHA_QUENCH','0.0')
+     t.add('ALPHA_ZF','0.0')
      t.add('XNU_FACTOR','1.0')
      t.add('DEBYE_FACTOR','1.0')
      t.add('ETG_FACTOR','1.25')

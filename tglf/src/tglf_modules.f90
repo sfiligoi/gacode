@@ -83,6 +83,7 @@
       REAL :: damp_sig_in = 0.0
 ! input rare switches
       REAL :: alpha_quench_in=0.0
+      REAL :: alpha_zf_in = 0.0
       REAL :: park_in=1.0
       REAL :: ghat_in=1.0
       REAL :: gchat_in=1.0
@@ -732,6 +733,7 @@
       REAL :: vexb_shear_tg=0.0
       REAL :: vexb_tg
       REAL :: alpha_quench_tg=0.0
+      REAL :: alpha_zf_tg=0.0
       REAL :: alpha_mach_tg=1.0
       REAL :: alpha_p_tg=1.0
       REAL :: alpha_e_tg=1.0
@@ -797,7 +799,7 @@
         nmodes_tg, iflux_tg, ky_tg, width_max_tg, width_min_tg, &
         nwidth_tg, park_tg, ghat_tg, gchat_tg, &
         alpha_e_tg, alpha_n_tg, alpha_t_tg, alpha_p_tg, alpha_mach_tg, &
-        vexb_shear_tg, vpar_shear_tg, alpha_quench_tg, igeo_tg, theta_trapped_tg, &
+        vexb_shear_tg, vpar_shear_tg, alpha_quench_tg, alpha_zf_tg, igeo_tg, theta_trapped_tg, &
         theta0_tg,taus_tg,as_tg,rlns_tg,rlts_tg,mass_tg,zs_tg, &
         rmin_tg, rmaj_tg, zmaj_tg,use_bisection_tg,vpar_tg, &
         q_tg, xnue_tg, wd_zero_tg, betae_tg, shat_tg, alpha_tg, &

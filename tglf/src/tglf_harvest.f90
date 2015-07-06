@@ -149,6 +149,7 @@
     ierr=set_harvest_payload_dbl(harvest_sendline,'+ALPHA_E'//NUL,tglf_alpha_e_in)
     ierr=set_harvest_payload_dbl(harvest_sendline,'+ALPHA_P'//NUL,tglf_alpha_p_in)
     ierr=set_harvest_payload_dbl(harvest_sendline,'+ALPHA_QUENCH'//NUL,tglf_alpha_quench_in)
+    ierr=set_harvest_payload_dbl(harvest_sendline,'+ALPHA_ZF'//NUL,tglf_alpha_zf_in)
     ierr=set_harvest_payload_dbl(harvest_sendline,'+XNU_FACTOR'//NUL,tglf_xnu_factor_in)
     ierr=set_harvest_payload_dbl(harvest_sendline,'+DEBYE_FACTOR'//NUL,tglf_debye_factor_in)
     ierr=set_harvest_payload_dbl(harvest_sendline,'+ETG_FACTOR'//NUL,tglf_etg_factor_in)

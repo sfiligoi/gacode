@@ -83,6 +83,7 @@ module tglf_interface
   real    :: tglf_alpha_e_in        = 1.0
   real    :: tglf_alpha_p_in        = 1.0
   real    :: tglf_alpha_quench_in   = 0.0
+  real    :: tglf_alpha_zf_in       = 0.0
   real    :: tglf_xnu_factor_in     = 1.0
   real    :: tglf_debye_factor_in   = 1.0
   real    :: tglf_etg_factor_in     = 1.25
@@ -256,6 +257,7 @@ contains
     write(1,30) 'ALPHA_E',tglf_alpha_e_in
     write(1,30) 'ALPHA_P',tglf_alpha_p_in
     write(1,30) 'ALPHA_QUENCH',tglf_alpha_quench_in
+    write(1,30) 'ALPHA_ZF',tglf_alpha_zf_in
     write(1,30) 'XNU_FACTOR',tglf_xnu_factor_in
     write(1,30) 'DEBYE_FACTOR',tglf_debye_factor_in
     write(1,30) 'ETG_FACTOR',tglf_etg_factor_in
@@ -403,6 +405,7 @@ contains
     write(1,*) 'filter = ', filter_in
     write(1,*) 'sat_rule = ', sat_rule_in
     write(1,*) 'alpha_quench = ', alpha_quench_in
+    write(1,*) 'alpha_zf = ', alpha_zf_in
     write(1,*) 'alpha_e = ', alpha_e_in
     write(1,*) 'alpha_p = ', alpha_p_in
     write(1,*) 'alpha_mach = ',alpha_mach_in

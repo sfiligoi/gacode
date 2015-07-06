@@ -374,7 +374,7 @@
       REAL :: wd0,gnet
       REAL :: c1,pols,ks
       REAL :: get_GAM_freq
-      REAL :: intensity
+      REAL :: intensity,ca
 !
       pols = (ave_p0(1,1)/ABS(as(1)*zs(1)*zs(1)))**2 ! scale invariant pol
       ks = kp*SQRT(taus(1)*mass(2))   ! scale invariant gyroradius * poloidal wavenumber
@@ -427,7 +427,12 @@
       if(alpha_quench_in.eq.0.0.and.ABS(kx0_e).gt.0.0)then
         intensity = intensity/(1.0+0.56*kx0_e**2)**2
         intensity = intensity/(1.0+(1.15*kx0_e)**4)**2
-      endif
+     endif
+     if(alpha_zf_in.gt.0.0)then
+        ca = 4.3*Tanh((gp/alpha_zf_in)**6)
+        intensity = intensity*(ca/(1.0 + ca))*(5.3/4.3)
+     endif
+!     
       get_intensity = intensity/B_unit**2
 !
       END FUNCTION get_intensity
