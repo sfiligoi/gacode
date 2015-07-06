@@ -707,21 +707,6 @@
         enddo
       enddo
 !
-!   add the vpar shifts to the total  moments
-!
-      if(vpar_model_in.eq.0)then
-        do is=ns0,ns
-        do j=1,nbasis
-          n(is,j) = n(is,j) + vpar_s(is)*(zs(is)/taus(is))*psi(j)
-          u_par(is,j) = u_par(is,j) -(vpar_s(is)/vs(is))*(zs(is)/taus(is))*phi(j)
-          p_par(is,j) = p_par(is,j) + vpar_s(is)*(zs(is)/taus(is))*psi(j)
-          p_tot(is,j) = p_tot(is,j) + vpar_s(is)*(zs(is)/taus(is))*psi(j)
-          q_par(is,j) = q_par(is,j) - 3.0*(vpar_s(is)/vs(is))*(zs(is)/taus(is))*phi(j)
-          q_tot(is,j) = q_tot(is,j) -(5.0/3.0)*(vpar_s(is)/vs(is))*(zs(is)/taus(is))*phi(j)
-        enddo
-        enddo
-      endif
-!
 !  compute phi_norm
 !
       phi_norm = 0.0
@@ -782,7 +767,7 @@
 !            write(*,*)is,"stress_corr=",stress_correction
         do i=1,nbasis
           stress_par(is,i,1) = u_par(is,i)*stress_correction
-          stress_par(is,i,2) = p_par(is,i)
+          stress_par(is,i,2) = p_par(is,i)*stress_correction
           stress_per(is,i,1) = 0.0
           stress_per(is,i,2) = 0.0
           do j=1,nbasis
@@ -853,6 +838,21 @@
           exchange_weight(is,j) = as(is)*exchange_weight(is,j)/phi_norm
         enddo
       enddo
+!
+!   add the vpar shifts to the total  moments
+!
+      if(vpar_model_in.eq.0)then
+        do is=ns0,ns
+        do j=1,nbasis
+          n(is,j) = n(is,j) + vpar_s(is)*(zs(is)/taus(is))*psi(j)
+          u_par(is,j) = u_par(is,j) -(vpar_s(is)/vs(is))*(zs(is)/taus(is))*phi(j)
+          p_par(is,j) = p_par(is,j) + vpar_s(is)*(zs(is)/taus(is))*psi(j)
+          p_tot(is,j) = p_tot(is,j) + vpar_s(is)*(zs(is)/taus(is))*psi(j)
+          q_par(is,j) = q_par(is,j) - 3.0*(vpar_s(is)/vs(is))*(zs(is)/taus(is))*phi(j)
+          q_tot(is,j) = q_tot(is,j) -(5.0/3.0)*(vpar_s(is)/vs(is))*(zs(is)/taus(is))*phi(j)
+        enddo
+        enddo
+      endif
 ! 
 !  compute the density and temperature amplitude weights 
 !    
