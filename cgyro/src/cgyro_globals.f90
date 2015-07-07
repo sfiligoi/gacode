@@ -15,6 +15,7 @@ module cgyro_globals
   real    :: delta_t
   real    :: max_time
   integer :: print_step
+  integer :: restart_step
   real    :: freq_tol
   integer :: restart_write
   integer :: restart_mode
@@ -128,6 +129,7 @@ module cgyro_globals
   character(len=18) :: runfile_info    = 'out.cgyro.info'
   character(len=18) :: runfile_mpi     = 'out.cgyro.mpi'
   character(len=18) :: runfile_restart = 'out.cgyro.restart'
+  character(len=18) :: runfile_restart_tag = 'out.cgyro.tag'
   character(len=18) :: runfile_hb      = 'out.cgyro.hb'
   character(len=18) :: runfile_grids   = 'out.cgyro.grids'
   character(len=18) :: runfile_time    = 'out.cgyro.time'
@@ -158,6 +160,8 @@ module cgyro_globals
   ! Time stepping
   integer :: i_time
   integer :: n_time
+  integer :: i_current
+  real :: t_current
   complex :: freq
   complex :: freq_err
   real :: gtime

@@ -104,7 +104,7 @@ subroutine cgyro_kernel
      allocate(dtheta(n_radial,n_theta,-3:3))
      allocate(dtheta_up(n_radial,n_theta,-3:3))
 
-     
+
      ! Equilibrium set-up
      allocate(theta(n_theta))
      allocate(thetab(n_radial/box_size,n_theta))
@@ -121,13 +121,13 @@ subroutine cgyro_kernel
      do it=1,n_theta
         theta(it) = -pi+(it-1)*d_theta
      enddo
-     
+
      do ir=1,n_radial/box_size
         do it=1,n_theta
            thetab(ir,it) = theta(it)+2*pi*(ir-1-n_radial/2/box_size)
         enddo
      enddo
-     
+
      if(equilibrium_model == 0) then
         GEO_model_in = 0
      else if (equilibrium_model == 2 .or. equilibrium_model == 3) then
@@ -136,15 +136,15 @@ subroutine cgyro_kernel
      GEO_ntheta_in   = geo_ntheta
      GEO_nfourier_in = geo_ny
      call GEO_alloc(1)
-     
+
      call cgyro_equilibrium
-     
+
      ! 4. Array initialization
      call cgyro_init_arrays
 
      call cgyro_init_implicit_gk
 
-     if(collision_model /= 0) then
+     if (collision_model /= 0) then
         allocate(cmat(nv,nv,nc_loc))
         allocate(cvec(nv))
         allocate(bvec(nv))
@@ -163,14 +163,18 @@ subroutine cgyro_kernel
   ! Time-stepping
   n_time = nint(max_time/delta_t)
 
-  i_time = 0
+  ! Initialize h (via restart or analytic IC)
+  call cgyro_init_h
 
   io_control = 1*(1-silent_flag)
   call cgyro_write_timedata
   io_control = 2*(1-silent_flag)
 
   do i_time=1,n_time
-  
+
+     i_current = i_current+1
+     t_current = t_current+delta_t
+
      ! Collisionless step: returns new h_x, cap_h_x, fields 
      call cgyro_step_gk
 
@@ -184,6 +188,7 @@ subroutine cgyro_kernel
      ! Collision step: returns new h_x, cap_h_x, fields
      call cgyro_step_collision
 
+
      ! Compute fluxes
      call cgyro_flux
 
@@ -192,6 +197,9 @@ subroutine cgyro_kernel
 
      ! Print results
      call cgyro_write_timedata
+
+     ! Print restart data
+     call cgyro_write_restart
 
      if (abs(signal) == 1) exit
 
@@ -230,7 +238,7 @@ subroutine cgyro_kernel
   if(allocated(omega_rdrift)) deallocate(omega_rdrift)
   if(allocated(omega_adrift)) deallocate(omega_adrift)
   if(allocated(omega_aprdrift)) deallocate(omega_aprdrift)
-  
+
   call GEO_alloc(0)
 
   if(allocated(indx_xi))       deallocate(indx_xi)

@@ -17,6 +17,7 @@ subroutine cgyro_read_input
   read(1,*) delta_t
   read(1,*) max_time
   read(1,*) print_step
+  read(1,*) restart_step
   read(1,*) freq_tol
   read(1,*) restart_write
   read(1,*) restart_mode

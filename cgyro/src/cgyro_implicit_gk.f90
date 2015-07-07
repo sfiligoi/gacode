@@ -23,7 +23,7 @@ subroutine cgyro_init_implicit_gk
   ! Kinetic eqn solve matrix(ic,ic,nv_loc) 
   ! gkmat = (1 + delta_t/2 * stream)
 
-  if(gkmatsolve_flag == 0) then
+  if (gkmatsolve_flag == 0) then
 
      ! Dense solve with Lapack
 

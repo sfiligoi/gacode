@@ -17,10 +17,11 @@ OBJECTS = cgyro_globals.o \
           cgyro_freq.o \
           cgyro_interface.o \
           cgyro_init.o \
+          cgyro_init_h.o \
           cgyro_init_arrays.o \
-	  cgyro_implicit_gk.o \
           cgyro_init_collision.o \
           cgyro_step_collision.o \
+	  cgyro_implicit_gk.o \
           cgyro_kernel.o \
           cgyro_mpi_grid.o \
 	  cgyro_make_profiles.o \
@@ -30,6 +31,8 @@ OBJECTS = cgyro_globals.o \
           cgyro_shear.o \
 	  cgyro_step_gk.o \
           cgyro_write_initdata.o \
+          cgyro_read_restart.o \
+          cgyro_write_restart.o \
           cgyro_write_timedata.o
 
 .SUFFIXES : .o .f90

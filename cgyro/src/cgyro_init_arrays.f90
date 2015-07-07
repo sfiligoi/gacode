@@ -2,13 +2,12 @@ subroutine cgyro_init_arrays
 
   use timer_lib
   use mpi
-
   use cgyro_globals
 
   implicit none
 
   real, external :: BESJ0
-  real :: arg,ang
+  real :: arg
   integer :: ir,it,is,ie,ix
   integer :: jr,jt,id
   complex :: thfac
@@ -353,63 +352,6 @@ subroutine cgyro_init_arrays
      enddo
   enddo
 
-  !-------------------------------------------------------------------------
-
-  !-------------------------------------------------------------------------
-  ! Initial conditions
-  !
-  h_x(:,:) = (0.0,0.0)
-  !
-  iv_loc = 0
-  do iv=nv1,nv2
-
-     iv_loc = iv_loc+1
-
-     is = is_v(iv)
-     ix = ix_v(iv)
-     ie = ie_v(iv)
-
-     do ic=1,nc
-
-        ir = ir_c(ic) 
-        it = it_c(ic)
-
-        if (n == 0) then
-
-           ! Zonal-flow initial condition
-
-           if (zf_test_flag == 1) then
-              if (is == 1 .and. abs(px(ir)) == 1) then
-                 h_x(ic,iv_loc) = 1e-6
-              endif
-           else
-              ! CAUTION: Need f(p) = conjg[ f(-p) ] for n=0
-              arg = abs(px(ir))/real(n_radial)
-              h_x(ic,iv_loc) = arg*rho*exp(-4.0*arg)
-              if (ir == 1) h_x(ic,iv_loc) = (0.0,0.0)
-           endif
-
-        else 
-
-           ! Exponential in ballooning angle.
-
-           if (n_toroidal == 1) then
-              if (is == 1) then
-                 ang = theta(it)+2*pi*px(ir)
-                 h_x(ic,iv_loc) = rho*exp(-(ang/2)**2) 
-              endif
-           else
-              h_x(ic,iv_loc) = amp*rho*exp(-px(ir)*4.0/n_radial) 
-           endif
-
-        endif
-
-     enddo
-  enddo
-
-  call cgyro_field_c
-
-  field_old = field
   !-------------------------------------------------------------------------
 
   call timer_lib_out('init_arrays')
