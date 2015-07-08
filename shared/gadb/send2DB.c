@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include<netdb.h>
+#include<arpa/inet.h>
 char harvest_table[50];
 char harvest_host[100];
 int  harvest_port=3200;
@@ -12,6 +14,32 @@ int  harvest_sendline_n=65507;
 char harvest_tag[255];
 clock_t harvest_tic;
 clock_t harvest_toc;
+
+//Get ip from domain name
+int hostname_to_ip(char * hostname , char* ip)
+{
+    struct hostent *he;
+    struct in_addr **addr_list;
+    int i;
+
+    if ( (he = gethostbyname( hostname ) ) == NULL)
+    {
+        // get the host info
+        herror("gethostbyname");
+        return 1;
+    }
+
+    addr_list = (struct in_addr **) he->h_addr_list;
+
+    for(i = 0; addr_list[i] != NULL; i++)
+    {
+        //Return the first one;
+        strcpy(ip , inet_ntoa(*addr_list[i]) );
+        return 0;
+    }
+
+    return 1;
+}
 
 int print_storage(char *harvest_sendline){
   printf("[%3.3f%%] ",(float)100*strlen(harvest_sendline)/harvest_sendline_n);
@@ -174,7 +202,7 @@ int set_harvest_table_(char *table){
 int init_harvest(char *table, char *harvest_sendline, int n){
   harvest_tic=clock();
 
-  set_harvest_host("127.0.0.1");
+  set_harvest_host("gadb-harvest.ddns.net");
   if (getenv("HARVEST_HOST")!=NULL)
     set_harvest_host(getenv("HARVEST_HOST"));
 
@@ -212,13 +240,16 @@ int harvest_send(char* harvest_sendline){
   int version;
   struct sockaddr_in servaddr,cliaddr;
   char sendline[harvest_sendline_n]; //max UDP message size
+  char ip[15];
 
   version=2;
+
+  hostname_to_ip(harvest_host, ip);
 
   sockfd=socket(AF_INET,SOCK_DGRAM,0);
   bzero(&servaddr,sizeof(servaddr));
   servaddr.sin_family = AF_INET;
-  servaddr.sin_addr.s_addr=inet_addr(harvest_host);
+  servaddr.sin_addr.s_addr=inet_addr(ip);
   servaddr.sin_port=htons(harvest_port);
 
   sprintf(sendline,"%d:%s:s@_user=%s,s@_tag=%s%s",version,harvest_table,getenv("USER"),harvest_tag,harvest_sendline);
@@ -228,7 +259,7 @@ int harvest_send(char* harvest_sendline){
 
   harvest_toc=clock();
   if (harvest_verbose){
-    printf("%s:%d --> %s\n",harvest_host,harvest_port,sendline);
+    printf("%s:%d --> %s\n",ip,harvest_port,sendline);
     printf("===HARVEST ends=== (%3.3f ms)\n",(double)(harvest_toc - harvest_tic) / CLOCKS_PER_SEC * 1E3);
   }
   return 0;

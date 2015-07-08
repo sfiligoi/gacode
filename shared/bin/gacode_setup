@@ -16,10 +16,3 @@ export PYTHONPATH=${PYTHONPATH}:$GACODE_ROOT/python
 
 export IDL_PATH=${IDL_PATH}:$GACODE_ROOT/gyro/vugyro
 
-GA=(BANACH, DROP, LOHAN, SATURN, VENUS)
-for server in ${GA[@]}; do
-    if [[ $GACODE_PLATFORM == ${server}  ]]; then
-        export HARVEST_HOST=192.5.166.160 #venus
-        export HARVEST_PORT=32000
-    fi
-done
