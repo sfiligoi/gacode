@@ -158,15 +158,22 @@ class profiles_gen:
         import numpy as np
 
         self.data = {}
+        self.n_ion = 0
         self.n_exp = 0
+        self.bt_exp = 0.0
+        self.arho_exp = 0.0
 
         row = 0
         for line in open(infile, 'r').readlines():
             row = row + 1
+            if line[0:5] == 'N_ION':
+                self.n_ion = int(line.split('=')[1])
             if line[0:5] == 'N_EXP':
                 self.n_exp = int(line.split('=')[1])
+            if line[0:6] == 'BT_EXP':
+                self.bt_exp = float(line.split('=')[1])
             if line[0:8] == 'ARHO_EXP':
-                self.max_rho = float(line.split('=')[1])
+                self.arho_exp = float(line.split('=')[1])
             if line[0:7] == '#rho(-)':
                 break
 
