@@ -139,7 +139,9 @@ class profiles_genData:
 
         # OPTIONAL: Read input.profiles.geo if it exists
         try:
-            self.geo.update(profiles_gen_geo(infile + '.geo').geo)
+            tmp = profiles_gen_geo(infile + '.geo')
+            self.geo.update(tmp.geo)
+            self.nfourier = tmp.nfourier
             print('(INFO): (profiles_genData) ' + infile + '.geo found.')
         except Exception as E:
             print('(INFO): (profiles_genData) ' + infile + '.geo NOT loaded: ' + str(E))
@@ -200,7 +202,7 @@ class profiles_gen_geo:
                 self.nfourier = int(line)
                 break
         fp.close()
-
+        
         data = np.loadtxt(infile, skiprows=12)
 
         # Dimension 9 assumes nfourier=8
