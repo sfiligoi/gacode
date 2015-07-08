@@ -10,6 +10,7 @@ subroutine cgyro_write_restart
 
   use mpi
   use cgyro_globals
+  use cgyro_io
 
   !----------------------------------------------
   implicit none
@@ -27,10 +28,6 @@ subroutine cgyro_write_restart
 
   ! Print this data on restart steps only; otherwise exit now
   if (mod(i_time,restart_step*print_step) /= 0) return
-
-  if (i_proc == 0) then
-     print *,'[Saving to ',trim(path)//runfile_restart,']'
-  endif
 
   !-----------------------------------------------
   ! Dump h and blending coefficients:
@@ -72,6 +69,8 @@ subroutine cgyro_write_restart
   ! Dump restart parameters
   !
   if (i_proc == 0) then
+
+     print *,'[Saving restart data]'
 
      open(unit=io,file=trim(path)//runfile_restart_tag,status='replace')
      write(io,*) i_current

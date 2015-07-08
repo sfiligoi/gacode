@@ -166,13 +166,16 @@ subroutine cgyro_kernel
   ! Initialize h (via restart or analytic IC)
   call cgyro_init_h
 
-  io_control = 1*(1-silent_flag)
+  if (restart_flag == 0) then
+     io_control = 1*(1-silent_flag)
+  else
+     io_control = 3*(1-silent_flag)
+  endif
   call cgyro_write_timedata
   io_control = 2*(1-silent_flag)
 
   do i_time=1,n_time
 
-     i_current = i_current+1
      t_current = t_current+delta_t
 
      ! Collisionless step: returns new h_x, cap_h_x, fields 
@@ -187,7 +190,6 @@ subroutine cgyro_kernel
 
      ! Collision step: returns new h_x, cap_h_x, fields
      call cgyro_step_collision
-
 
      ! Compute fluxes
      call cgyro_flux

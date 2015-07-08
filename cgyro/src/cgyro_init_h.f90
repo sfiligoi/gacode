@@ -8,10 +8,6 @@ subroutine cgyro_init_h
 
   integer :: ir,it,is,ie,ix
   real :: arg, ang
-  integer :: restart_flag
-
-  i_current = 0
-  t_current = 0.0
 
   !---------------------------------------------------------------------
   ! Check to see if we have restart data available
@@ -40,6 +36,9 @@ subroutine cgyro_init_h
      call cgyro_read_restart
 
   else
+
+     i_current = 0
+     t_current = 0.0
 
      !-------------------------------------------------------------------------
      ! Generate analytic initial conditions

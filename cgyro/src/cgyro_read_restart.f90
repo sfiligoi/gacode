@@ -29,7 +29,9 @@ subroutine cgyro_read_restart
 
   if (i_proc == 0) then
 
-     open(unit=io,&
+    print *,'[Reading restart data]'
+
+    open(unit=io,&
           file=trim(path)//runfile_restart_tag,&
           status='old')
 

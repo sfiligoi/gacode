@@ -150,6 +150,7 @@ module cgyro_globals
   !
   integer :: io_control
   integer :: signal
+  integer :: restart_flag
   !
   ! Standard precision for IO 
   character(len=8) :: fmtstr='(es11.4)'

@@ -20,6 +20,9 @@ subroutine cgyro_write_timedata
   ! Print this data on print steps only; otherwise exit now
   if (mod(i_time,print_step) /= 0) return
 
+  ! Increment the print counter on actual output steps
+  if (io_control == 2) i_current = i_current+1
+  
   !---------------------------------------------------------------------------
   if (n_toroidal == 1 .and. h_print_flag == 1) then
      call write_distribution(trim(path)//runfile_hb,1)
@@ -203,6 +206,15 @@ subroutine write_distributed_complex(datafile,n_fn,fn)
      if (i_proc == 0) then
 
         open(unit=io,file=datafile,status='old')
+        do i_time=1,i_current
+
+           do in=1,n_toroidal
+              read(io,fmtstr) fn_recv(:)
+           enddo
+
+        enddo
+
+        endfile(io)
         close(io)
 
      endif
@@ -319,6 +331,15 @@ subroutine write_distributed_real(datafile,n_fn,fn)
      if (i_proc == 0) then
 
         open(unit=io,file=datafile,status='old')
+        do i_time=1,i_current
+
+           do in=1,n_toroidal
+              read(io,fmtstr) fn_recv(:)
+           enddo
+
+        enddo 
+
+        endfile(io)
         close(io)
 
      endif
@@ -383,6 +404,9 @@ subroutine write_balloon(datafile,fn)
      ! Rewind
 
      open(unit=io,file=datafile,status='old')
+     do i_time=1,i_current
+        read(io,fmtstr) f_balloon(:,:)
+     enddo
      endfile(io)
      close(io)
 
@@ -400,6 +424,7 @@ subroutine write_time(datafile)
   implicit none
   !
   character (len=*), intent(in) :: datafile
+  real :: dummy
   !------------------------------------------------------
 
   if (i_proc > 0) return
@@ -422,13 +447,13 @@ subroutine write_time(datafile)
      ! Append
 
      if (n_toroidal > 1 .and. i_proc == 0) then
-         print '(a,1pe9.3,a,5(1pe9.3,1x))',&
-                '[t = ',i_time*delta_t,&
-                '] t_err: ',field_error
+        print '(a,1pe9.3,a,5(1pe9.3,1x))',&
+             '[t = ',t_current,&
+             '] t_err: ',field_error
      endif
 
      open(unit=io,file=datafile,status='old',position='append')
-     write(io,fmtstr) i_time*delta_t
+     write(io,fmtstr2) t_current,field_error
      close(io)
 
      !-------------------------------------------------------
@@ -438,6 +463,9 @@ subroutine write_time(datafile)
      ! Rewind
 
      open(unit=io,file=datafile,status='old')
+     do i_time=1,i_current
+        read(io,fmtstr2) dummy,dummy
+     enddo
      endfile(io)
      close(io)
 
@@ -467,7 +495,7 @@ subroutine write_freq()
 
      if (i_proc == 0) then
         print '(a,1pe9.3,a,1pe10.3,1pe10.3,a,1pe9.3,a,5(1pe9.3,1x))',&
-             '[t = ',i_time*delta_t,&
+             '[t = ',t_current,&
              '][w = ',freq,&
              '][dw = ',abs(freq_err),&
              '] t_err: ',field_error
