@@ -10,7 +10,7 @@ vars_input_profiles = [
     ['vtor_6', 'vtor_7', 'vtor_8', 'vtor_9', 'vtor_10'],
     ['vpol_1', 'vpol_2', 'vpol_3', 'vpol_4', 'vpol_5'],
     ['vpol_6', 'vpol_7', 'vpol_8', 'vpol_9', 'vpol_10'],
-    ['flow_beam', 'flow_wall', 'flow_mom', 'NULL', 'NULL'],
+    ['flow_beam', 'flow_wall', 'flow_mom', 'sbcx', 'sbeame'],
     ['pow_e', 'pow_i', 'pow_ei', 'pow_e_aux', 'pow_i_aux'],
     ['pow_e_fus', 'pow_i_fus', 'pow_e_sync', 'pow_e_brem', 'pow_e_line']
 ]
@@ -41,6 +41,8 @@ fancyNames = \
               'z_eff'      : ('Z_\mathrm{eff}'            ,''             ,'zeff(-)'),
               'omega0'     : ('\\omega_0'                 ,'1/s'          ,'omega0(1/s)'),
               'flow_mom'   : ('S_\mathrm{\\omega}'        ,'Nm'           ,'flow_mom(Nm)'),
+              'sbcx'       : ('sbcx'                      ,'1/m^3/s'      ,'sbcx(/m^3/s)'),
+              'sbeame'     : ('sbeame'                    ,'1/m^3/s'      ,'sbeame(/m^3/s)'),
               'pow_e'      : ('P_e'                       ,'MW'           ,'pow_e(MW)'),
               'pow_i'      : ('P_i'                       ,'MW'           ,'pow_i(MW)'),
               'pow_ei'     : ('P_{ei}'                    ,'MW'           ,'pow_ei(MW)'),

@@ -11,8 +11,8 @@ ROOT=/home/candy/SOFTWARE
 
 # Compilers
 
-FC	= mpif90 -I $(GACODE_ROOT)/modules -I/usr/local/include
-F77	= ${FC}
+FC	= mpif90 -std=f2008 -I $(GACODE_ROOT)/modules -I/usr/local/include
+F77	= mpif77
 FOMP    = -fopenmp
 FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules
 FOPT	= -O3

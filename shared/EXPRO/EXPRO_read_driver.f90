@@ -51,7 +51,7 @@ subroutine EXPRO_read_driver
   read(io,*) EXPRO_te(:)
   read(io,*) EXPRO_ptot(:)
   read(io,*) EXPRO_z_eff(:)
-  read(io,*) dummy
+  read(io,*) dummy(:)
 
   ! 16-20
   read(io,*) EXPRO_ni(1,:)
@@ -113,9 +113,9 @@ subroutine EXPRO_read_driver
   read(io,*) EXPRO_flow_beam(:)
   read(io,*) EXPRO_flow_wall(:)
   read(io,*) EXPRO_flow_mom(:)
-  read(io,*) dummy
-  read(io,*) dummy
-
+  read(io,*) EXPRO_sbcx(:)
+  read(io,*) EXPRO_sbeame(:)
+  
   ! 61-65
   read(io,*) EXPRO_pow_e(:)
   read(io,*) EXPRO_pow_i(:)

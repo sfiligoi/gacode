@@ -90,7 +90,6 @@ subroutine prgen_read_iterdb
 
   read(1,*) t ; read(1,*) onetwo_enbeam(:,1) ! fast ion density
 
-
   do i=1,onetwo_nprim
      read(1,*) t ; read(1,*) xv ! neutral density
   enddo
@@ -107,8 +106,8 @@ subroutine prgen_read_iterdb
      read(1,*) t ; read(1,*) xv ! volume source of neutrals
   enddo
 
-  read(1,*) t ; read(1,*) xv ! sbion, beam electron source
-  read(1,*) t ; read(1,*) onetwo_sbeam ! sbion, beam thermal ion source
+  read(1,*) t ; read(1,*) onetwo_sbeame ! (sbion) beam electron source
+  read(1,*) t ; read(1,*) onetwo_sbeam  ! (sbion) beam thermal ion source
   read(1,*) t ; read(1,*) xv ! total current density
   read(1,*) t ; read(1,*) xv ! ohmic current density
   read(1,*) t ; read(1,*) xv ! bootstrap current density

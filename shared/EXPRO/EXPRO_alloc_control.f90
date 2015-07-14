@@ -101,6 +101,11 @@ subroutine EXPRO_alloc_control(i_proc,flag)
      allocate(EXPRO_zeta(EXPRO_n_exp))
      EXPRO_zeta(:)=0.0
 
+     allocate(EXPRO_sbeame(EXPRO_n_exp))
+     EXPRO_sbeame(:)=0.0
+     allocate(EXPRO_sbcx(EXPRO_n_exp))
+     EXPRO_sbcx(:)=0.0
+
      allocate(EXPRO_flow_beam(EXPRO_n_exp))
      EXPRO_flow_beam(:)=0.0
      allocate(EXPRO_flow_wall(EXPRO_n_exp))

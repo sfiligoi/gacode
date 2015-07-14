@@ -144,6 +144,9 @@ subroutine prgen_read_iterdb_nc
   err = nf90_inq_varid(ncid,trim('sbeam'),varid)
   err = nf90_get_var(ncid,varid,onetwo_sbeam)
 
+  err = nf90_inq_varid(ncid,trim('sbeame'),varid)
+  err = nf90_get_var(ncid,varid,onetwo_sbeame)
+
   err = nf90_inq_varid(ncid,trim('zeff'),varid)
   err = nf90_get_var(ncid,varid,onetwo_zeff)
 

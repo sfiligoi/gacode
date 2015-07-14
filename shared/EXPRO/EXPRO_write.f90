@@ -74,9 +74,9 @@ subroutine EXPRO_write(io)
      write(io,10) EXPRO_vpol(6:10,i)
   enddo
   write(io,20) '# '
-  write(io,20) '#',EXPRO_flow_beam_tag,EXPRO_flow_wall_tag,EXPRO_flow_mom_tag,EXPRO_null_tag,EXPRO_null_tag
+  write(io,20) '#',EXPRO_flow_beam_tag,EXPRO_flow_wall_tag,EXPRO_flow_mom_tag,EXPRO_sbcx_tag,EXPRO_sbeame_tag
   do i=1,nx
-     write(io,10) EXPRO_flow_beam(i),EXPRO_flow_wall(i),EXPRO_flow_mom(i),0.0,0.0
+     write(io,10) EXPRO_flow_beam(i),EXPRO_flow_wall(i),EXPRO_flow_mom(i),EXPRO_sbcx(i),EXPRO_sbeame(i)
   enddo
   write(io,20) '# '
   write(io,20) '#',EXPRO_pow_e_tag,EXPRO_pow_i_tag,EXPRO_pow_ei_tag,EXPRO_pow_e_aux_tag,EXPRO_pow_i_aux_tag
