@@ -7,8 +7,9 @@ subroutine cgyro_equilibrium
   
   integer :: it, ir, is
   
-  ! parameters needed for Miller equilibrium
-  ! geo_numeq_flag, geo_ny, and geo_yin already set    
+  ! parameters needed for equilibrium
+  ! geo_numeq_flag, geo_ny, and geo_yin already set 
+
   GEO_rmin_in      = rmin
   GEO_rmaj_in      = rmaj
   GEO_drmaj_in     = shift

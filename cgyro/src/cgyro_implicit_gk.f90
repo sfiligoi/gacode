@@ -3,6 +3,7 @@ subroutine cgyro_init_implicit_gk
   use mpi
   use parallel_lib
   use cgyro_globals
+  use cgyro_io
 
   implicit none
 
@@ -16,8 +17,8 @@ subroutine cgyro_init_implicit_gk
   if(implicit_flag == 0) return
 
   if(zf_test_flag == 1 .and. ae_flag == 1) then
-     print *, 'ZF test with adiabatic electrons not implemented for implicit'
-     stop
+     call cgyro_error('ERROR: (CGYRO) ZF test with adiabatic electrons not implemented for implicit')
+     return
   endif
 
   ! Kinetic eqn solve matrix(ic,ic,nv_loc) 
@@ -133,8 +134,8 @@ subroutine cgyro_init_implicit_gk
              gksp_keep(:,iv_loc),gksp_cntl(:,iv_loc),gksp_icntl(:,iv_loc),&
              gksp_uinfo,gksp_rinfo)
         if(gksp_uinfo(1) < 0) then
-           print *, 'umfpack error', gksp_uinfo(1)
-           stop
+           call cgyro_error('ERROR: (CGYRO) umfpack error in cgyro_init_implicit_gk')
+           return
         endif
         
      enddo

@@ -38,6 +38,7 @@ module cgyro_interface
   real    :: cgyro_ky_in = 0.3
   real    :: cgyro_box_size_in  = 1.0
   integer :: cgyro_silent_flag_in = 0
+  integer :: cgyro_profile_model_in = 1
   integer :: cgyro_equilibrium_model_in = 2
   integer :: cgyro_collision_model_in   = 4
   integer :: cgyro_collision_mom_restore_in = 1
@@ -52,6 +53,7 @@ module cgyro_interface
   real    :: cgyro_ne_ade_in = 1.0
   real    :: cgyro_masse_ade_in = 0.0002724486
   real    :: cgyro_lambda_debye_in = 0.0
+  real    :: cgyro_lambda_debye_scale_in = 0.0
 
   real    :: cgyro_rmin_in    = 0.5
   real    :: cgyro_rmaj_in    = 3.0
@@ -80,7 +82,9 @@ module cgyro_interface
 
   ! Fourier geometry
   integer :: cgyro_geo_ny_in   = 0
-  real, dimension(8,0:16) :: cgyro_geo_yin_in = 0.0
+  real, dimension(8,0:32) :: cgyro_geo_yin_in = 0.0
+
+  integer :: cgyro_subroutine_flag = 1
 
   ! Error checking
   integer :: cgyro_error_status_out=0
@@ -112,6 +116,7 @@ contains
     cgyro_rmin_in     = rmin
     cgyro_rmaj_in     = rmaj
     cgyro_silent_flag_in       = silent_flag
+    cgyro_profile_model_in     = profile_model
     cgyro_equilibrium_model_in = equilibrium_model
     cgyro_collision_model_in   = collision_model
     cgyro_collision_mom_restore_in = collision_mom_restore
@@ -124,6 +129,7 @@ contains
     cgyro_ne_ade_in = ne_ade
     cgyro_masse_ade_in = masse_ade
     cgyro_lambda_debye_in = lambda_debye
+    cgyro_lambda_debye_scale_in = lambda_debye_scale
     cgyro_n_species_in = n_species
     cgyro_z_in(:)    = z(:)
     cgyro_mass_in(:) = mass(:)
@@ -147,6 +153,7 @@ contains
     cgyro_betae_unit_in = betae_unit
     cgyro_geo_ny_in   = geo_ny_in
     cgyro_geo_yin_in(:,:) = geo_yin_in(:,:)
+    cgyro_subroutine_flag = subroutine_flag
 
   end subroutine map_global2interface
 
@@ -173,6 +180,7 @@ contains
     rmin     = cgyro_rmin_in
     rmaj     = cgyro_rmaj_in
     silent_flag       = cgyro_silent_flag_in
+    profile_model     = cgyro_profile_model_in
     equilibrium_model = cgyro_equilibrium_model_in
     collision_model   = cgyro_collision_model_in
     collision_mom_restore = cgyro_collision_mom_restore_in
@@ -185,6 +193,7 @@ contains
     ne_ade    = cgyro_ne_ade_in
     masse_ade = cgyro_masse_ade_in
     lambda_debye = cgyro_lambda_debye_in
+    lambda_debye_scale = cgyro_lambda_debye_scale_in
     n_species = cgyro_n_species_in
     z(:)      = cgyro_z_in(:)
     mass(:)   = cgyro_mass_in(:)
@@ -208,6 +217,7 @@ contains
     betae_unit = cgyro_betae_unit_in
     geo_ny_in  = cgyro_geo_ny_in
     geo_yin_in(:,:) = cgyro_geo_yin_in(:,:)
+    subroutine_flag = cgyro_subroutine_flag
 
   end subroutine map_interface2global
 

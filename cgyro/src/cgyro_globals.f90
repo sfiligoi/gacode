@@ -26,6 +26,7 @@ module cgyro_globals
   real    :: ky
   integer :: box_size
   integer :: silent_flag
+  integer :: profile_model
   integer :: equilibrium_model
   integer :: collision_model
   integer :: collision_mom_restore
@@ -39,8 +40,11 @@ module cgyro_globals
   integer :: nonlinear_method
   real :: te_ade
   real :: ne_ade
+  real :: dlntdre_ade   ! used only for experimental profiles
+  real :: dlnndre_ade   ! used only for experimental profiles
   real :: masse_ade
   real :: lambda_debye
+  real :: lambda_debye_scale
   integer :: test_flag
   integer :: h_print_flag
   real :: amp
@@ -74,6 +78,9 @@ module cgyro_globals
   real, dimension(6) :: temp
   real, dimension(6) :: dlnndr
   real, dimension(6) :: dlntdr
+
+  integer :: subroutine_flag  ! only used for cgyro_read_input
+
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -303,7 +310,7 @@ module cgyro_globals
 
   !---------------------------------------------------------------
   integer :: geo_ny_in
-  real, dimension(8,0:16) :: geo_yin_in
+  real, dimension(8,0:32) :: geo_yin_in
   !
   integer :: geo_numeq_flag
   integer :: geo_ny

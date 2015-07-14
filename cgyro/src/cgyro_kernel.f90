@@ -128,11 +128,7 @@ subroutine cgyro_kernel
         enddo
      enddo
 
-     if(equilibrium_model == 0) then
-        GEO_model_in = 0
-     else if (equilibrium_model == 2 .or. equilibrium_model == 3) then
-        GEO_model_in = geo_numeq_flag
-     endif
+     GEO_model_in = geo_numeq_flag
      GEO_ntheta_in   = geo_ntheta
      GEO_nfourier_in = geo_ny
      call GEO_alloc(1)
