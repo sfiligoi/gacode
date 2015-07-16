@@ -86,6 +86,7 @@ subroutine cgyro_write_initdata
 
      write(io,*)
      write(io,20) 'gamma_e', gamma_e
+     write(io,20) 'gamma_p', gamma_p
 
      write(io,*)
      write(io,'(a)') &
@@ -167,6 +168,9 @@ subroutine cgyro_write_initdata
      enddo
      do it=1,n_theta
         write(io,fmtstr) omega_aprdrift(it,1)
+     enddo
+     do it=1,n_theta
+        write(io,fmtstr) omega_gammap(it)
      enddo
      do it=1,n_theta
         write(io,fmtstr) k_perp(it,n_radial/2+1)

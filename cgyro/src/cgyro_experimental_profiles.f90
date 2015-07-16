@@ -155,6 +155,8 @@ subroutine cgyro_experimental_profiles
 
   gamma_e_exp(:)       = -EXPRO_w0p(:) * a_meters * rmin_exp(:) / q_exp(:)
 
+  gamma_p_exp(:)       = -EXPRO_w0p(:) * a_meters * rmaj_exp(:)
+
   call EXPRO_alloc(path,0)
 
 end subroutine cgyro_experimental_profiles

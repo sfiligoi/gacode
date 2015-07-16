@@ -49,6 +49,7 @@ subroutine cgyro_read_input
   read(1,*) h_print_flag
   read(1,*) amp
   read(1,*) gamma_e
+  read(1,*) gamma_p
 
   read(1,*) rmin
   read(1,*) rmaj
@@ -70,7 +71,7 @@ subroutine cgyro_read_input
 
   read(1,*) n_species
 
-  read(1,*) nu_ee_in
+  read(1,*) nu_ee
 
   do is=1,6
      read(1,*) z(is)

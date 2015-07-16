@@ -49,6 +49,7 @@ module cgyro_globals
   integer :: h_print_flag
   real :: amp
   real :: gamma_e
+  real :: gamma_p
   !
   ! Geometry input
   !
@@ -71,7 +72,7 @@ module cgyro_globals
   ! Species parameters
   !
   integer :: n_species
-  real :: nu_ee_in
+  real :: nu_ee
   integer, dimension(6) :: z
   real, dimension(6) :: mass
   real, dimension(6) :: dens
@@ -304,6 +305,7 @@ module cgyro_globals
   real, dimension(:,:), allocatable :: omega_rdrift
   real, dimension(:,:), allocatable :: omega_adrift
   real, dimension(:,:), allocatable :: omega_aprdrift
+  real, dimension(:),   allocatable :: omega_gammap
   integer, parameter :: geo_ntheta=1001 ! num grid pts for Miller geo grid
   !
   !---------------------------------------------------------------

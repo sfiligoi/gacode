@@ -39,6 +39,7 @@ module cgyro_experimental_globals
   real, dimension(:), allocatable :: b_unit_exp
 
   real, dimension(:), allocatable :: gamma_e_exp
+  real, dimension(:), allocatable :: gamma_p_exp
 
   real, dimension(:,:,:), allocatable :: geo_yin_exp
 

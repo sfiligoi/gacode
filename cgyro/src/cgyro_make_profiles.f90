@@ -104,7 +104,7 @@ subroutine cgyro_make_profiles
           * 1e9
 
      loglam = 24.0 - log(sqrt(dens_ele*1e13)/(temp_ele*1000))
-     nu_ee_in = cc * loglam * dens_ele / (sqrt(mass_ele) * temp_ele**1.5) &
+     nu_ee  = cc * loglam * dens_ele / (sqrt(mass_ele) * temp_ele**1.5) &
           / (vth_norm/a_meters)
 
      ! beta calculation in CGS:
@@ -134,9 +134,10 @@ subroutine cgyro_make_profiles
      dens_ele = dens_ele/dens_norm
      temp_ele = temp_ele/temp_norm
      gamma_e  = gamma_e/(vth_norm/a_meters)
+     gamma_p  = gamma_p/(vth_norm/a_meters)
 
      do is=1,n_species
-        nu(is) = nu_ee_in *(1.0*z(is))**4 &
+        nu(is) = nu_ee *(1.0*z(is))**4 &
              * dens(is) / dens_ele &
              * sqrt(mass_ele/mass(is)) * (temp_ele/temp(is))**1.5
      enddo
@@ -169,7 +170,7 @@ subroutine cgyro_make_profiles
         vth(is) = sqrt(temp(is)/mass(is))
         
         ! collision frequency
-        nu(is) = nu_ee_in *(1.0*z(is))**4 &
+        nu(is) = nu_ee *(1.0*z(is))**4 &
              * dens(is) / dens_ele &
              * sqrt(mass_ele/mass(is)) * (temp_ele/temp(is))**1.5
         

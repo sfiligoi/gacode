@@ -339,10 +339,14 @@ subroutine cgyro_init_arrays
              *(2.0*px(ir)/(1.0*n_radial))**(up_radial_n-1.0) &
              *(2.0*pi*px(ir)/length)
 
-        ! omega_star
+        ! omega_star and rotation shearing
         omega_s(1,ic,iv_loc) = &
              -i_c*k_theta*rho*(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
              *j0_c(ic,iv_loc)
+
+        omega_s(1,ic,iv_loc) = omega_s(1,ic,iv_loc) &
+             -i_c*k_theta*rho*(sqrt(2.0*energy(ie))*xi(ix)/vth(is) &
+             *omega_gammap(it)) * j0_c(ic,iv_loc)
 
         if (n_field > 1) then
            omega_s(2,ic,iv_loc) = -omega_s(1,ic,iv_loc)* &

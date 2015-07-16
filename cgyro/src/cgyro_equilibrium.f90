@@ -50,6 +50,8 @@ subroutine cgyro_equilibrium
              * mass(is)/(Z(is)*GEO_b) * GEO_gq / rmaj * GEO_gcos2
         
      enddo
+
+     omega_gammap(it) = GEO_bt/GEO_b * GEO_bigr/rmaj * gamma_p
      
      Bmag(it) = GEO_b
      
