@@ -6,6 +6,7 @@ NUMAS_PER_NODE=2
 # Compilers and flags
 FC     = ftn -e m -J ${GACODE_ROOT}/modules
 F77    = ${FC}
+CC     = gcc
 FOMP   =
 FMATH  = -s real64
 FOPT   = -O3 -hfp3
