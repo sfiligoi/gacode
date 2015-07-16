@@ -15,7 +15,7 @@ lib: send2DB.o Makefile
 	$(ARCH) $(LLIB).a send2DB.o
 
 .c.o : *.c Makefile
-	$(CC) $(CFLAGS) -Wno-implicit-function-declaration -c $<
+	$(CC) $(CFLAGS) -c $<
 
 gadb_clientF.o : gadb_clientF.f90 Makefile
 	$(FC) $(FFLAGS) -c $<
