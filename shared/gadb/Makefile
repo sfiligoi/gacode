@@ -28,4 +28,4 @@ clean:
 	rm -f *.o $(LLIB).a $(EXEC)
 
 gacode_install: all
-	cp -f Makefile send2DB.c ${GACODE_ROOT}/shared/gadb/
+	cp -f Makefile send2DB.c send2DB.h ${GACODE_ROOT}/shared/gadb/
