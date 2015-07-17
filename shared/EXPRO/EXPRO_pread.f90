@@ -57,8 +57,6 @@ subroutine EXPRO_pread
   ! 16-20
   call MPI_BCAST(EXPRO_flow_beam,size(EXPRO_flow_beam),MPI_DOUBLE_PRECISION,0,comm,ierr)
   call MPI_BCAST(EXPRO_flow_wall,size(EXPRO_flow_wall),MPI_DOUBLE_PRECISION,0,comm,ierr)
-  call MPI_BCAST(EXPRO_sbeame,size(EXPRO_sbeame),MPI_DOUBLE_PRECISION,0,comm,ierr)
-  call MPI_BCAST(EXPRO_sbcx,size(EXPRO_sbcx),MPI_DOUBLE_PRECISION,0,comm,ierr)
   call MPI_BCAST(EXPRO_zmag,size(EXPRO_zmag),MPI_DOUBLE_PRECISION,0,comm,ierr)
   call MPI_BCAST(EXPRO_ptot,size(EXPRO_ptot),MPI_DOUBLE_PRECISION,0,comm,ierr)
   call MPI_BCAST(EXPRO_polflux,size(EXPRO_polflux),MPI_DOUBLE_PRECISION,0,comm,ierr)
@@ -86,6 +84,10 @@ subroutine EXPRO_pread
   ! 46-50
   call MPI_BCAST(EXPRO_pow_e_aux,size(EXPRO_pow_e_aux),MPI_DOUBLE_PRECISION,0,comm,ierr)
   call MPI_BCAST(EXPRO_pow_i_aux,size(EXPRO_pow_i_aux),MPI_DOUBLE_PRECISION,0,comm,ierr)
+
+  call MPI_BCAST(EXPRO_sbeame,size(EXPRO_sbeame),MPI_DOUBLE_PRECISION,0,comm,ierr)
+  call MPI_BCAST(EXPRO_sbcx,size(EXPRO_sbcx),MPI_DOUBLE_PRECISION,0,comm,ierr)
+  call MPI_BCAST(EXPRO_sscxl,size(EXPRO_sscxl),MPI_DOUBLE_PRECISION,0,comm,ierr)
 
   if (EXPRO_nfourier > 0) then
 

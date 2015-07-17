@@ -248,6 +248,10 @@ subroutine prgen_read_iterdb_nc
 
   call reorder(work,onetwo_triangnpsi_l,onetwo_npsi)
 
+  ! New sscxl added by Kinsey
+  err = nf90_inq_varid(ncid,trim('sscxl'),varid)
+  err = nf90_get_var(ncid,varid,onetwo_sscxl)
+  
   call cub_spline(onetwo_rho_mhd_gridnpsi,onetwo_rmajavnpsi,onetwo_npsi,&
        onetwo_rho_grid,rmaj,onetwo_nj)
 

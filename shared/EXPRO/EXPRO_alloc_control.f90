@@ -105,6 +105,8 @@ subroutine EXPRO_alloc_control(i_proc,flag)
      EXPRO_sbeame(:)=0.0
      allocate(EXPRO_sbcx(EXPRO_n_exp))
      EXPRO_sbcx(:)=0.0
+     allocate(EXPRO_sscxl(EXPRO_n_exp))
+     EXPRO_sscxl(:)=0.0
 
      allocate(EXPRO_flow_beam(EXPRO_n_exp))
      EXPRO_flow_beam(:)=0.0

@@ -102,6 +102,9 @@ module EXPRO_interface
   real, dimension(:),allocatable :: EXPRO_sbeame
   character (len=16) :: EXPRO_sbeame_tag = 'sbeame(/m^3/s)'
 
+  real, dimension(:),allocatable :: EXPRO_sscxl
+  character (len=16) :: EXPRO_sscxl_tag = 'sscxl(/m^3/s)'
+
   real, dimension(:),allocatable :: EXPRO_pow_e
   character (len=16) :: EXPRO_pow_e_tag = 'pow_e(MW)'
 

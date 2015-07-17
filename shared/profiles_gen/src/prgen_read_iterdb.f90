@@ -162,7 +162,7 @@ subroutine prgen_read_iterdb
   read(1,*) t ; read(1,*) xvv !plasma boundary r
   read(1,*) t ; read(1,*) xvv !plasma boundary z
 
-  ! Torque density may be missing on iterdb file
+  ! Torque density may be missing in iterdb file
   read(1,'(a)',iostat=i) t
   if (i == 0) then
      print '(3(a))', 'INFO: (prgen) Assuming "', trim(t), '" is beam torque density.'
@@ -171,7 +171,7 @@ subroutine prgen_read_iterdb
      onetwo_storqueb(:) = 0.0
   endif
 
-  ! Beam pressure may be missing on iterdb file
+  ! Beam pressure may be missing in iterdb file
   read(1,'(a)',iostat=i) t
   if (i == 0) then
      print '(3(a))', 'INFO: (prgen) Assuming "', trim(t), '" is beam pressure.'
@@ -181,7 +181,7 @@ subroutine prgen_read_iterdb
      onetwo_nbion = 0 ! Need beam pressure to get effective beam temp
   endif
 
-  ! Total pressure may be missing on iterdb file
+  ! Total pressure may be missing in iterdb file
   read(1,'(a)',iostat=i) t
   if (i == 0) then
      print '(3(a))', 'INFO: (prgen) Assuming "', trim(t), '" is total pressure.'
@@ -190,6 +190,17 @@ subroutine prgen_read_iterdb
     onetwo_press(:) = 0.0
   endif
 
+  ! sscxl may be missing in iterdb file
+  read(1,'(a)',iostat=i) t
+  if (i == 0) then
+     print '(3(a))', 'INFO: (prgen) Found new quantity "', trim(t), '" in iterdb file.'
+    read(1,*) onetwo_sscxl(:)
+  else
+    onetwo_sscxl(:) = 0.0
+  endif
+
+
+  
   dpsi(:) = onetwo_psi(:)-onetwo_psi(1)
 
   ! No squareness
