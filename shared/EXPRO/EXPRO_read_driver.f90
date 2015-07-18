@@ -115,7 +115,7 @@ subroutine EXPRO_read_driver
   read(io,*) EXPRO_flow_mom(:)
   read(io,*) dummy(:)
   read(io,*) dummy(:)
-  
+
   ! 61-65
   read(io,*) EXPRO_pow_e(:)
   read(io,*) EXPRO_pow_i(:)
@@ -131,11 +131,13 @@ subroutine EXPRO_read_driver
   read(io,*) EXPRO_pow_e_line(:)
 
   ! 71-75
-  read(io,*) EXPRO_sbeame(:)
-  read(io,*) EXPRO_sbcx(:)
-  read(io,*) EXPRO_sscxl(:)
-  read(io,*) dummy(:)
-  read(io,*) dummy(:)
+  read(io,*,iostat=ierr) EXPRO_sbeame(:)
+  if (ierr == 0) then
+     read(io,*) EXPRO_sbcx(:)
+     read(io,*) EXPRO_sscxl(:)
+     read(io,*) dummy(:)
+     read(io,*) dummy(:)
+  endif
 
   close(io)
   !--------------------------------------------------------------

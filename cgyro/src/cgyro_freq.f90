@@ -32,7 +32,7 @@ subroutine cgyro_freq
 
   ! Fractional Frequency Error
   dfr = sum(abs(real(freq_loc(:,:)-freq))*mode_weight(:,:))
-  dfi = sum(abs(imag(freq_loc(:,:)-freq))*mode_weight(:,:))
+  dfi = sum(abs(aimag(freq_loc(:,:)-freq))*mode_weight(:,:))
 
   freq_err = (dfr+i_c*dfi)/total_weight/abs(freq)
 
