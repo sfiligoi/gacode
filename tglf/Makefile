@@ -1,6 +1,6 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
-export EXTRA_LIBS = ${GACODE_ROOT}/shared/gadb/GADB_lib.a
+export EXTRA_LIBS = ${GACODE_ROOT}/shared/harvest_client/harvest_lib.a
 
 all:
 	cd src ; make

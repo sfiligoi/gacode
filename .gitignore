@@ -59,9 +59,3 @@ onetwo/Doc/*/*.blg
 onetwo/Doc/*/*.ddthermal
 onetwo/Doc/*/*.points
 onetwo/Doc/*/*~
-
-# Harvest
-shared/gadb/gadb_server.py
-shared/gadb/clientC
-shared/gadb/clientF
-shared/gadb/.git
