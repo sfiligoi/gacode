@@ -153,9 +153,11 @@ subroutine cgyro_experimental_profiles
 
   ! Rotation
 
-  gamma_e_exp(:)       = -EXPRO_w0p(:) * a_meters * rmin_exp(:) / q_exp(:)
+  gamma_e_exp(:)       = -EXPRO_w0p(:) * (a_meters * rmin_exp(:)) / q_exp(:)
 
-  gamma_p_exp(:)       = -EXPRO_w0p(:) * a_meters * rmaj_exp(:)
+  gamma_p_exp(:)       = -EXPRO_w0p(:) * (a_meters * rmaj_exp(:))
+
+  mach_exp(:)          = EXPRO_w0(:) * (a_meters * rmaj_exp(:))
 
   call EXPRO_alloc(path,0)
 

@@ -48,6 +48,10 @@ subroutine cgyro_equilibrium
         
         omega_aprdrift(it,is) = 2.0 * rho * vth(is)**2 &
              * mass(is)/(Z(is)*GEO_b) * GEO_gq / rmaj * GEO_gcos2
+
+        omega_cdrift(it,is) = -2.0 * sqrt(2.0) * rho * vth(is) &
+             * mass(is)/(Z(is)*GEO_b) * GEO_gq / rmaj &
+             * (GEO_ucos + GEO_captheta * GEO_usin) * mach
         
      enddo
 

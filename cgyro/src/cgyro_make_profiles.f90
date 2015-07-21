@@ -135,6 +135,7 @@ subroutine cgyro_make_profiles
      temp_ele = temp_ele/temp_norm
      gamma_e  = gamma_e/(vth_norm/a_meters)
      gamma_p  = gamma_p/(vth_norm/a_meters)
+     mach     = mach/vth_norm 
 
      do is=1,n_species
         nu(is) = nu_ee *(1.0*z(is))**4 &

@@ -61,6 +61,7 @@ module cgyro_interface
   real    :: cgyro_amp_in     = 0.1
   real    :: cgyro_gamma_e_in = 0.0
   real    :: cgyro_gamma_p_in = 0.0
+  real    :: cgyro_mach_in    = 0.0
   real    :: cgyro_rmin_in    = 0.5
   real    :: cgyro_rmaj_in    = 3.0
   real    :: cgyro_q_in       = 2.0
@@ -148,6 +149,7 @@ contains
     cgyro_amp_in                = amp
     cgyro_gamma_e_in            = gamma_e
     cgyro_gamma_p_in            = gamma_p
+    cgyro_mach_in               = mach
     cgyro_rmin_in               = rmin
     cgyro_rmaj_in               = rmaj
     cgyro_q_in                  = q
@@ -226,6 +228,7 @@ contains
     amp                     = cgyro_amp_in
     gamma_e                 = cgyro_gamma_e_in 
     gamma_p                 = cgyro_gamma_p_in
+    mach                    = cgyro_mach_in
     rmin                    = cgyro_rmin_in
     rmaj                    = cgyro_rmaj_in
     q                       = cgyro_q_in

@@ -33,6 +33,7 @@ subroutine cgyro_experimental_map
   call cub_spline(rmin_exp,s_zmag_exp,n_grid_exp,rmin,s_zmag,1)
   call cub_spline(rmin_exp,gamma_e_exp,n_grid_exp,rmin,gamma_e,1)
   call cub_spline(rmin_exp,gamma_p_exp,n_grid_exp,rmin,gamma_p,1)
+  call cub_spline(rmin_exp,mach_exp,n_grid_exp,rmin,mach,1)
   call cub_spline(rmin_exp,b_unit_exp,n_grid_exp,rmin,b_unit,1)
 
   call cub_spline(rmin_exp,te_ade_exp,n_grid_exp,rmin,te_ade,1)

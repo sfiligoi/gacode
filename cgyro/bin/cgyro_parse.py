@@ -48,6 +48,7 @@ x.add('H_PRINT_FLAG','0')
 x.add('AMP','0.1')
 x.add('GAMMA_E','0.0')
 x.add('GAMMA_P','0.0')
+x.add('MACH','0.0')
 
 x.add('RMIN','0.5')
 x.add('RMAJ','3.0')

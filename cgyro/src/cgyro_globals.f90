@@ -50,6 +50,7 @@ module cgyro_globals
   real :: amp
   real :: gamma_e
   real :: gamma_p
+  real :: mach
   !
   ! Geometry input
   !
@@ -305,6 +306,7 @@ module cgyro_globals
   real, dimension(:,:), allocatable :: omega_rdrift
   real, dimension(:,:), allocatable :: omega_adrift
   real, dimension(:,:), allocatable :: omega_aprdrift
+  real, dimension(:,:), allocatable :: omega_cdrift
   real, dimension(:),   allocatable :: omega_gammap
   integer, parameter :: geo_ntheta=1001 ! num grid pts for Miller geo grid
   !

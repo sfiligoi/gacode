@@ -116,6 +116,7 @@ subroutine cgyro_kernel
      allocate(omega_rdrift(n_theta,n_species))
      allocate(omega_adrift(n_theta,n_species))
      allocate(omega_aprdrift(n_theta,n_species))
+     allocate(omega_cdrift(n_theta,n_species))
      allocate(omega_gammap(n_theta))
 
      d_theta = (2*pi/n_theta)
@@ -237,6 +238,7 @@ subroutine cgyro_kernel
   if(allocated(omega_rdrift))   deallocate(omega_rdrift)
   if(allocated(omega_adrift))   deallocate(omega_adrift)
   if(allocated(omega_aprdrift)) deallocate(omega_aprdrift)
+  if(allocated(omega_cdrift))   deallocate(omega_cdrift)
   if(allocated(omega_gammap))   deallocate(omega_gammap)
 
   call GEO_alloc(0)

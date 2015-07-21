@@ -332,6 +332,10 @@ subroutine cgyro_init_arrays
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
              -omega_aprdrift(it,is)*energy(ie)*xi(ix)**2*i_c*k_theta
 
+        ! omega_cdrift - mach component
+        omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
+             -omega_cdrift(it,is)*sqrt(energy(ie))*xi(ix)*i_c*k_theta
+
         ! radial upwind
         up_radial_n=n_radial
         omega_h(ic,iv_loc) = &
