@@ -55,4 +55,4 @@ lib: $(OBJECTS)
 	$(FC) $(FMATH) $(FFLAGS) -c $<
  
 clean:
-	rm -f *.o $(LLIB).a ${GACODE_ROOT}/modules/math_constants.mod
+	rm -f *.o $(LLIB).a ${GACODE_ROOT}/modules/math_constants.mod *.mod
