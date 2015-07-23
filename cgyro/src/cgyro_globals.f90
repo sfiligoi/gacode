@@ -51,6 +51,9 @@ module cgyro_globals
   real :: gamma_e
   real :: gamma_p
   real :: mach
+  real :: gamma_e_scale
+  real :: gamma_p_scale
+  real :: mach_scale
   !
   ! Geometry input
   !

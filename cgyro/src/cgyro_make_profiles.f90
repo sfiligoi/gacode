@@ -133,9 +133,9 @@ subroutine cgyro_make_profiles
      te_ade   = te_ade/temp_norm
      dens_ele = dens_ele/dens_norm
      temp_ele = temp_ele/temp_norm
-     gamma_e  = gamma_e/(vth_norm/a_meters)
-     gamma_p  = gamma_p/(vth_norm/a_meters)
-     mach     = mach/vth_norm 
+     gamma_e  = gamma_e/(vth_norm/a_meters) * gamma_e_scale
+     gamma_p  = gamma_p/(vth_norm/a_meters) * gamma_p_scale
+     mach     = mach/vth_norm * mach_scale
 
      do is=1,n_species
         nu(is) = nu_ee *(1.0*z(is))**4 &

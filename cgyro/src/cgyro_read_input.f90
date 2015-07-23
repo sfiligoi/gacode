@@ -51,6 +51,9 @@ subroutine cgyro_read_input
   read(1,*) gamma_e
   read(1,*) gamma_p
   read(1,*) mach
+  read(1,*) gamma_e_scale
+  read(1,*) gamma_p_scale
+  read(1,*) mach_scale
 
   read(1,*) rmin
   read(1,*) rmaj
