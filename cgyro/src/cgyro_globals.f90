@@ -265,15 +265,12 @@ module cgyro_globals
   !
   ! Implicit streaminggk/field matrices
   !
-  complex, dimension(:,:,:), allocatable :: gkmat
-  integer, dimension(:,:), allocatable   :: i_piv_gk
   complex, dimension(:,:), allocatable   :: gkvec
   complex, dimension(:,:), allocatable   :: fieldmat
   integer, dimension(:,:), allocatable   :: idfield
   integer, dimension(:),   allocatable   :: i_piv_field
   complex, dimension(:),   allocatable   :: fieldvec, fieldvec_loc
   ! umfpack
-  integer, parameter :: gkmatsolve_flag=1
   real,    dimension(:,:), allocatable :: gksp_cntl
   integer, dimension(:,:), allocatable :: gksp_icntl, gksp_keep
   real,    dimension(20) ::  gksp_rinfo
