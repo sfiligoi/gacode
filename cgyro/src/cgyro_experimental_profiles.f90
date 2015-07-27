@@ -53,7 +53,7 @@ subroutine cgyro_experimental_profiles
   ! charge of ion species
   EXPRO_ctrl_z(:) = 0.0
   EXPRO_ctrl_n_ion = 0
-  if(ae_flag == 0) then
+  if(ae_flag == 1) then
      do is=1,n_species
         EXPRO_ctrl_z(is) = 1.0 * z(is)
         EXPRO_ctrl_n_ion = EXPRO_ctrl_n_ion + 1
@@ -129,15 +129,12 @@ subroutine cgyro_experimental_profiles
      ! first species density is re-set by quasi-neutrality
      if(i_ion == 1) then
         dens_exp(i_ion,:)   = EXPRO_ni_new(:)
-        dlnndr_exp(i_ion,:) = EXPRO_dlnnidr_new(:) * a_meters 
+        dlnndr_exp(i_ion,:) = EXPRO_dlnnidr_new(:) * a_meters
      else
         dens_exp(i_ion,:)   = EXPRO_ni(i_ion,:)
         dlnndr_exp(i_ion,:) = EXPRO_dlnnidr(i_ion,:) * a_meters
-
      endif
   enddo
-
-  
 
   ! Sanity check for densities
   do i=1,n_species_exp
