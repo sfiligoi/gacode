@@ -76,6 +76,7 @@ subroutine cgyro_kernel
      allocate(j0_c(nc,nv_loc))
      allocate(j0_v(nc_loc,nv))
      allocate(h_x(nc,nv_loc))
+     allocate(h_xs(nc,nv_loc))
      allocate(psi(nc,nv_loc))
      allocate(f_nl(nc,nsplit,n_toroidal))
      allocate(g_nl(nc,nsplit,n_toroidal))

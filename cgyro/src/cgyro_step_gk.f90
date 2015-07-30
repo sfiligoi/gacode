@@ -62,6 +62,8 @@ subroutine cgyro_rhs(ij)
 
   rhs(ij,:,:) = (0.0,0.0)
 
+  call cgyro_hsym
+
   iv_loc = 0
   do iv=nv1,nv2
 
@@ -81,28 +83,33 @@ subroutine cgyro_rhs(ij)
              omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+&
              omega_h(ic,iv_loc)*h_x(ic,iv_loc)+&
              sum(omega_s(:,ic,iv_loc)*field(ir,it,:))
-           
+
         ! Parallel streaming with upwind dissipation
-        
+
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
         rhs_stream = 0.0
-        
-        if(implicit_flag == 0) then
+
+        if (implicit_flag == 0) then
            do id=-2,2
               jt = thcyc(it+id)
               jr = rcyc(ir,it,id)
               jc = ic_c(jr,jt)
-              rhs_stream = rhs_stream &
-                   -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)  &
-                   -abs(rval)*dtheta_up(ir,it,id)*( &
-                   cap_h_c(jc,iv_loc) &
-                   - z(is)/temp(is)*j0_c(jc,iv_loc)*field(jr,jt,1))
-              
+              if (0 == 0) then
+                 rhs_stream = rhs_stream &
+                      -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)  &
+                      -abs(rval)*dtheta_up(ir,it,id)*( &
+                      cap_h_c(jc,iv_loc) &
+                      - z(is)/temp(is)*j0_c(jc,iv_loc)*field(jr,jt,1))
+              else
+                 rhs_stream = rhs_stream &
+                      -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)  &
+                      -abs(rval)*dtheta_up(ir,it,id)*h_xs(jc,iv_loc)
+              endif
            enddo
         endif
 
         rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc)+rhs_stream
-        
+
      enddo
 
   enddo

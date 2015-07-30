@@ -15,6 +15,7 @@ OBJECTS = cgyro_globals.o \
           cgyro_field.o \
           cgyro_flux.o \
           cgyro_freq.o \
+          cgyro_hsym.o \
           cgyro_interface.o \
           cgyro_init.o \
           cgyro_init_h.o \
