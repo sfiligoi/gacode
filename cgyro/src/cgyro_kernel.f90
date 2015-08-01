@@ -101,9 +101,9 @@ subroutine cgyro_kernel
      allocate(recv_status(MPI_STATUS_SIZE))
 
      allocate(thcyc(1-n_theta:2*n_theta))
-     allocate(rcyc(n_radial,n_theta,-3:3))
-     allocate(dtheta(n_radial,n_theta,-3:3))
-     allocate(dtheta_up(n_radial,n_theta,-3:3))
+     allocate(rcyc(n_radial,n_theta,-nup:nup))
+     allocate(dtheta(n_radial,n_theta,-nup:nup))
+     allocate(dtheta_up(n_radial,n_theta,-nup:nup))
 
 
      ! Equilibrium set-up

@@ -228,33 +228,60 @@ subroutine cgyro_init_arrays
      thcyc(it+n_theta) = it
   enddo
 
-  ! coefficients for 4th order centered derivative
-  cderiv(-2) =  1.0 / (12.0 * d_theta)
-  cderiv(-1) = -8.0 / (12.0 * d_theta)
-  cderiv(0)  =  0.0 / (12.0 * d_theta)
-  cderiv(1)  =  8.0 / (12.0 * d_theta)
-  cderiv(2)  = -1.0 / (12.0 * d_theta)
-  ! coefficients for 4th order filter for 3rd order upwinded derivative
-  uderiv(-2) =  1.0 / (12.0 * d_theta)
-  uderiv(-1) = -4.0 / (12.0 * d_theta)
-  uderiv(0)  =  6.0 / (12.0 * d_theta)
-  uderiv(1)  = -4.0 / (12.0 * d_theta)
-  uderiv(2)  =  1.0 / (12.0 * d_theta)
+  allocate(cderiv(-nup:nup))
+  allocate(uderiv(-nup:nup))
+  
+  select case (nup)
 
-  ! coefficients for 2nd order centered derivative
-  !cderiv(-2) =  0.0 / (2.0 * d_theta)
-  !cderiv(-1) = -1.0 / (2.0 * d_theta)
-  !cderiv(0)  =  0.0 / (2.0 * d_theta)
-  !cderiv(1)  =  1.0 / (2.0 * d_theta)
-  !cderiv(2)  =  0.0 / (2.0 * d_theta)
-  ! coefficients for 2nd order filter for 2nd order upwinded derivative
-  !uderiv(-2) =  0.0 / (2.0 * d_theta)
-  !uderiv(-1) =  -1.0 / (2.0 * d_theta)
-  !uderiv(0)  =  2.0 / (2.0 * d_theta)
-  !uderiv(1)  =  -1.0 / (2.0 * d_theta)
-  !uderiv(2)  =  0.0 / (2.0 * d_theta)
+  case (1)
 
-  !up_theta = up_theta * n_theta/2.0
+     ! coefficients for 2nd order centered derivative
+     cderiv(-1) = -1.0 / (2.0 * d_theta)
+     cderiv(0)  =  0.0 / (2.0 * d_theta)
+     cderiv(1)  =  1.0 / (2.0 * d_theta)
+
+     ! coefficients for 2nd order filter for 2nd order upwinded derivative
+     uderiv(-1) = -1.0 / (2.0 * d_theta)
+     uderiv(0)  =  2.0 / (2.0 * d_theta)
+     uderiv(1)  = -1.0 / (2.0 * d_theta)
+
+  case (2)
+
+     ! coefficients for 4th order centered derivative
+     cderiv(-2) =  1.0 / (12.0 * d_theta)
+     cderiv(-1) = -8.0 / (12.0 * d_theta)
+     cderiv(0)  =  0.0 / (12.0 * d_theta)
+     cderiv(1)  =  8.0 / (12.0 * d_theta)
+     cderiv(2)  = -1.0 / (12.0 * d_theta)
+
+     ! coefficients for 4th order filter for 3rd order upwinded derivative
+     uderiv(-2) =  1.0 / (12.0 * d_theta)
+     uderiv(-1) = -4.0 / (12.0 * d_theta)
+     uderiv(0)  =  6.0 / (12.0 * d_theta)
+     uderiv(1)  = -4.0 / (12.0 * d_theta)
+     uderiv(2)  =  1.0 / (12.0 * d_theta)
+
+  case (3)
+
+     ! coefficients for 6th order centered derivative
+     cderiv(-3) =  -1.0 / (60.0 * d_theta)
+     cderiv(-2) =   9.0 / (60.0 * d_theta)
+     cderiv(-1) = -45.0 / (60.0 * d_theta)
+     cderiv(0)  =   0.0 / (60.0 * d_theta)
+     cderiv(1)  =  45.0 / (60.0 * d_theta)
+     cderiv(2)  =  -9.0 / (60.0 * d_theta)
+     cderiv(3)  =   1.0 / (60.0 * d_theta)
+     
+     ! coefficients for 6th order filter for 3rd order upwinded derivative
+     uderiv(-3) =  -1.0 / (60.0 * d_theta)
+     uderiv(-2) =   6.0 / (60.0 * d_theta)
+     uderiv(-1) = -15.0 / (60.0 * d_theta)
+     uderiv(0)  =  20.0 / (60.0 * d_theta)
+     uderiv(1)  = -15.0 / (60.0 * d_theta)
+     uderiv(2)  =   6.0 / (60.0 * d_theta)
+     uderiv(3)  =  -1.0 / (60.0 * d_theta)
+
+  end select
 
   ! Indices for parallel streaming with upwinding
   if (zf_test_flag == 1) then
@@ -263,7 +290,7 @@ subroutine cgyro_init_arrays
 
      do ir=1,n_radial
         do it=1,n_theta
-           do id=-2,2
+           do id=-nup,nup
               dtheta(ir,it,id)    = cderiv(id)
               dtheta_up(ir,it,id) = uderiv(id)*up_theta
               rcyc(ir,it,id)      = ir
@@ -277,7 +304,7 @@ subroutine cgyro_init_arrays
 
      do ir=1,n_radial
         do it=1,n_theta
-           do id=-2,2
+           do id=-nup,nup
               jt = thcyc(it+id)
               if (it+id < 1) then
                  thfac = exp(2*pi*i_c*k_theta*rmin)

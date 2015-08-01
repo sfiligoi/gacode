@@ -546,7 +546,7 @@ subroutine write_distribution(datafile,indx)
      allocate(h_x_glob(nc,nv))
 
      ! Collect distribution onto process 0
-     call MPI_GATHER(h_x(:,:),&
+     call MPI_GATHER(cap_h_c(:,:),&
           size(h_x),&
           MPI_DOUBLE_COMPLEX,&
           h_x_glob(:,:),&

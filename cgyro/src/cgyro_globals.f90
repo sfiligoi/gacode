@@ -22,6 +22,7 @@ module cgyro_globals
   real    :: up_radial
   integer :: up_radial_n
   real    :: up_theta
+  integer :: nup
   integer :: implicit_flag
   real    :: ky
   integer :: box_size
@@ -211,8 +212,8 @@ module cgyro_globals
   ! Parallel streaming
   !
   real, dimension(:), allocatable :: theta
-  real, dimension(-2:2) :: uderiv
-  real, dimension(-2:2) :: cderiv
+  real, dimension(:), allocatable :: uderiv
+  real, dimension(:), allocatable :: cderiv
   integer, dimension(:), allocatable :: thcyc
   integer, dimension(:,:,:), allocatable :: rcyc
   complex, dimension(:,:,:), allocatable :: dtheta
