@@ -1,6 +1,6 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
-export EXTRA_LIBS = ${GACODE_ROOT}/shared/harvest_client/harvest_lib.a
+export EXTRA_LIBS = ${GACODE_ROOT}/shared/harvest_client/libharvest.a
 
 all:
 	cd src ; make
