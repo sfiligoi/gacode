@@ -23,6 +23,7 @@ OBJECTS = cgyro_globals.o \
           cgyro_init_collision.o \
           cgyro_step_collision.o \
 	  cgyro_implicit_gk.o \
+	  cgyro_implicit_partial_gk.o \
           cgyro_kernel.o \
           cgyro_mpi_grid.o \
 	  cgyro_experimental_globals.o \

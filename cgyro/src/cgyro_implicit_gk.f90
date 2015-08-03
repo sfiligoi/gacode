@@ -14,7 +14,7 @@ subroutine cgyro_init_implicit_gk
   complex, dimension(:,:), allocatable   :: akmat, fieldmat_loc
   complex, dimension(:), allocatable     :: work_field
 
-  if(implicit_flag == 0) return
+  if(implicit_flag /= 1) return
 
   if(zf_test_flag == 1 .and. ae_flag == 1) then
      call cgyro_error('ERROR: (CGYRO) ZF test with adiabatic electrons not implemented for implicit')
@@ -303,7 +303,7 @@ subroutine cgyro_clean_implicit_gk
 
   implicit none
 
-  if(implicit_flag == 0) return
+  if(implicit_flag /= 1) return
 
   if(allocated(gkvec))        deallocate(gkvec)
   if(allocated(fieldmat))     deallocate(fieldmat)
@@ -335,7 +335,7 @@ subroutine cgyro_step_implicit_gk
   complex :: efac(n_field)
   real    :: rval, rfac(nc), vfac
 
-  if (implicit_flag == 0) return
+  if (implicit_flag /= 1) return
   
   call timer_lib_in('rhs_impgk')
 
