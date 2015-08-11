@@ -18,6 +18,10 @@
 
     REAL, DIMENSION(10) :: tmp
     INTEGER, DIMENSION(10) :: ions_order
+    
+    REAL, DIMENSION(:), ALLOCATABLE :: spectrum
+    
+    ALLOCATE(spectrum(tglf_nky_in))
 
     IF (.NOT.tglf_use_transport_model_in) THEN
         WRITE(1,*) 'HARVEST ONLY WHEN `TRANSPORT_MODEL=.TRUE.`' !only when computing fluxes
@@ -212,7 +216,31 @@
       ENDIF
 
    ENDDO
-
+   
+   DO i = 1, tglf_nky_in
+      spectrum(i) = get_ky_spectrum_out(i)
+   ENDDO
+   
+   ierr=set_harvest_payload_flt_array(harvest_sendline,'KY'//NUL,spectrum,tglf_nky_in)
+   
+   DO i = 1, tglf_nmodes_in
+      IF (i < 10) THEN
+         write (NUM, "(I01,A1)") i,NUL
+      ELSE
+         write (NUM, "(I02,A1)") i,NUL
+      ENDIF
+      
+      DO j = 1, tglf_nky_in
+         spectrum(j) = get_eigenvalue_spectrum_out(1,j,i)
+      ENDDO 
+      ierr=set_harvest_payload_flt_array(harvest_sendline,'OUT_EIGENVALUE_SPECTRUM_GAMMA'//NUM,spectrum,tglf_nky_in)
+      DO j = 1, tglf_nky_in
+         spectrum(j) = get_eigenvalue_spectrum_out(2,j,i)
+      ENDDO
+      ierr=set_harvest_payload_flt_array(harvest_sendline,'OUT_EIGENVALUE_SPECTRUM_OMEGA'//NUM,spectrum,tglf_nky_in)
+   ENDDO
    ierr=harvest_send(harvest_sendline)
-
+   
+   DEALLOCATE(spectrum)
+   
   END SUBROUTINE tglf_harvest_local
