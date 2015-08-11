@@ -10,7 +10,7 @@
 
     USE tglf_interface
 
-    INTEGER :: ierr, i, j, nky
+    INTEGER :: ierr, i, j, nky, get_nky_out
     CHARACTER(LEN=65507) :: harvest_sendline
     CHARACTER(LEN=2) :: NUM
     CHARACTER NUL
@@ -21,7 +21,8 @@
     
     REAL, DIMENSION(:), ALLOCATABLE :: spectrum
     
-    ALLOCATE(spectrum(tglf_nky_in))
+    EXTERNAL :: get_nky_out
+
 
     IF (.NOT.tglf_use_transport_model_in) THEN
         WRITE(1,*) 'HARVEST ONLY WHEN `TRANSPORT_MODEL=.TRUE.`' !only when computing fluxes
@@ -217,7 +218,10 @@
 
    ENDDO
    
+
    nky = get_nky_out()
+
+   ALLOCATE(spectrum(nky))
    
    DO i = 1, nky
       spectrum(i) = get_ky_spectrum_out(i)
