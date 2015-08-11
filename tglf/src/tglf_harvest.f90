@@ -221,7 +221,7 @@
       spectrum(i) = get_ky_spectrum_out(i)
    ENDDO
    
-   ierr=set_harvest_payload_dbl_array(harvest_sendline,'KY'//NUL,spectrum,tglf_nky_in)
+   ierr=set_harvest_payload_dbl_array(harvest_sendline,'KY_SPECTRUM'//NUL,spectrum,tglf_nky_in)
    
    DO i = 1, tglf_nmodes_in
       IF (i < 10) THEN
