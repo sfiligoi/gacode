@@ -38,7 +38,7 @@
        RETURN
     ENDIF
 
-    ierr=init_harvest('TGLF_harvest?10'//NUL,harvest_sendline,LEN(harvest_sendline))
+    ierr=init_harvest('TGLF_spectrum?10'//NUL,harvest_sendline,LEN(harvest_sendline))
 
 !   '#---------------------------------------------------'
 !   '# Plasma parameters:'
@@ -221,7 +221,7 @@
       spectrum(i) = get_ky_spectrum_out(i)
    ENDDO
    
-   ierr=set_harvest_payload_flt_array(harvest_sendline,'KY'//NUL,spectrum,tglf_nky_in)
+   ierr=set_harvest_payload_dbl_array(harvest_sendline,'KY'//NUL,spectrum,tglf_nky_in)
    
    DO i = 1, tglf_nmodes_in
       IF (i < 10) THEN
@@ -233,11 +233,11 @@
       DO j = 1, tglf_nky_in
          spectrum(j) = get_eigenvalue_spectrum_out(1,j,i)
       ENDDO 
-      ierr=set_harvest_payload_flt_array(harvest_sendline,'OUT_EIGENVALUE_SPECTRUM_GAMMA'//NUM,spectrum,tglf_nky_in)
+      ierr=set_harvest_payload_dbl_array(harvest_sendline,'OUT_EIGENVALUE_SPECTRUM_GAMMA'//NUM,spectrum,tglf_nky_in)
       DO j = 1, tglf_nky_in
          spectrum(j) = get_eigenvalue_spectrum_out(2,j,i)
       ENDDO
-      ierr=set_harvest_payload_flt_array(harvest_sendline,'OUT_EIGENVALUE_SPECTRUM_OMEGA'//NUM,spectrum,tglf_nky_in)
+      ierr=set_harvest_payload_dbl_array(harvest_sendline,'OUT_EIGENVALUE_SPECTRUM_OMEGA'//NUM,spectrum,tglf_nky_in)
    ENDDO
    ierr=harvest_send(harvest_sendline)
    
