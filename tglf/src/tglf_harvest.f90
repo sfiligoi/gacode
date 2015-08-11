@@ -10,7 +10,7 @@
 
     USE tglf_interface
 
-    INTEGER :: ierr, i, j
+    INTEGER :: ierr, i, j, nky
     CHARACTER(LEN=65507) :: harvest_sendline
     CHARACTER(LEN=2) :: NUM
     CHARACTER NUL
@@ -217,11 +217,13 @@
 
    ENDDO
    
-   DO i = 1, tglf_nky_in
+   nky = get_nky_out()
+   
+   DO i = 1, nky
       spectrum(i) = get_ky_spectrum_out(i)
    ENDDO
    
-   ierr=set_harvest_payload_dbl_array(harvest_sendline,'KY_SPECTRUM'//NUL,spectrum,tglf_nky_in)
+   ierr=set_harvest_payload_dbl_array(harvest_sendline,'KY_SPECTRUM'//NUL,spectrum,nky)
    
    DO i = 1, tglf_nmodes_in
       IF (i < 10) THEN
@@ -230,14 +232,14 @@
          write (NUM, "(I02,A1)") i,NUL
       ENDIF
       
-      DO j = 1, tglf_nky_in
+      DO j = 1, nky
          spectrum(j) = get_eigenvalue_spectrum_out(1,j,i)
       ENDDO 
-      ierr=set_harvest_payload_dbl_array(harvest_sendline,'OUT_EIGENVALUE_SPECTRUM_GAMMA'//NUM,spectrum,tglf_nky_in)
-      DO j = 1, tglf_nky_in
+      ierr=set_harvest_payload_dbl_array(harvest_sendline,'OUT_EIGENVALUE_SPECTRUM_GAMMA'//NUM,spectrum,nky)
+      DO j = 1, nky
          spectrum(j) = get_eigenvalue_spectrum_out(2,j,i)
       ENDDO
-      ierr=set_harvest_payload_dbl_array(harvest_sendline,'OUT_EIGENVALUE_SPECTRUM_OMEGA'//NUM,spectrum,tglf_nky_in)
+      ierr=set_harvest_payload_dbl_array(harvest_sendline,'OUT_EIGENVALUE_SPECTRUM_OMEGA'//NUM,spectrum,nky)
    ENDDO
    ierr=harvest_send(harvest_sendline)
    
