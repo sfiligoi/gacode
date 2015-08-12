@@ -10,7 +10,7 @@
 
     USE tglf_interface
 
-    INTEGER :: ierr, i, j
+    INTEGER :: ierr, i, j, nky, get_nky_out
     CHARACTER(LEN=65507) :: harvest_sendline
     CHARACTER(LEN=2) :: NUM
     CHARACTER NUL
@@ -18,6 +18,11 @@
 
     REAL, DIMENSION(10) :: tmp
     INTEGER, DIMENSION(10) :: ions_order
+    
+    REAL, DIMENSION(:), ALLOCATABLE :: spectrum
+    
+    EXTERNAL :: get_nky_out
+
 
     IF (.NOT.tglf_use_transport_model_in) THEN
         WRITE(1,*) 'HARVEST ONLY WHEN `TRANSPORT_MODEL=.TRUE.`' !only when computing fluxes
@@ -34,7 +39,7 @@
        RETURN
     ENDIF
 
-    ierr=init_harvest('TGLF_harvest?10'//NUL,harvest_sendline,LEN(harvest_sendline))
+    ierr=init_harvest('TGLF_spectrum?10'//NUL,harvest_sendline,LEN(harvest_sendline))
 
 !   '#---------------------------------------------------'
 !   '# Plasma parameters:'
@@ -212,7 +217,36 @@
       ENDIF
 
    ENDDO
+   
 
+   nky = get_nky_out()
+
+   ALLOCATE(spectrum(nky))
+   
+   DO i = 1, nky
+      spectrum(i) = get_ky_spectrum_out(i)
+   ENDDO
+   
+   ierr=set_harvest_payload_dbl_array(harvest_sendline,'KY_SPECTRUM'//NUL,spectrum,nky)
+   
+   DO i = 1, tglf_nmodes_in
+      IF (i < 10) THEN
+         write (NUM, "(I01,A1)") i,NUL
+      ELSE
+         write (NUM, "(I02,A1)") i,NUL
+      ENDIF
+      
+      DO j = 1, nky
+         spectrum(j) = get_eigenvalue_spectrum_out(1,j,i)
+      ENDDO 
+      ierr=set_harvest_payload_dbl_array(harvest_sendline,'OUT_EIGENVALUE_SPECTRUM_GAMMA'//NUM,spectrum,nky)
+      DO j = 1, nky
+         spectrum(j) = get_eigenvalue_spectrum_out(2,j,i)
+      ENDDO
+      ierr=set_harvest_payload_dbl_array(harvest_sendline,'OUT_EIGENVALUE_SPECTRUM_OMEGA'//NUM,spectrum,nky)
+   ENDDO
    ierr=harvest_send(harvest_sendline)
-
+   
+   DEALLOCATE(spectrum)
+   
   END SUBROUTINE tglf_harvest_local
