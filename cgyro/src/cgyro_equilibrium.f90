@@ -34,7 +34,7 @@ subroutine cgyro_equilibrium
 
   !-----------------------------------------------------------------
   ! Generate theta-grid (equally-spaced or constant-wind-speed)
-
+  !
   d_theta = (2*pi/n_theta)
   do it=1,n_theta+1
      y(it) = -pi+(it-1)*d_theta
@@ -56,15 +56,11 @@ subroutine cgyro_equilibrium
         ga  = (2*pi)/(x(n_theta+1)-x(1))
         y   = (x-x(1))*ga-pi
         err = abs((ga-ga0)/ga)
-        print *,ga,err
-        !do it=1,n_theta+1
-        !   print *,it,-pi+(it-1)*d_theta,y(it)
-        !enddo
      enddo
 
   endif
 
-  theta(:) = x(1:n_theta)
+  theta(:) = y(1:n_theta)
   !-----------------------------------------------------------------
 
   do ir=1,n_radial/box_size
