@@ -230,31 +230,35 @@ subroutine cgyro_init_arrays
 
   allocate(cderiv(-nup:nup))
   allocate(uderiv(-nup:nup))
-  
+
   select case (nup)
 
   case (1)
 
-     ! coefficients for 2nd order centered derivative
+     ! 1st-order UPWIND
+
+     ! 2nd-order centered derivative
      cderiv(-1) = -1.0 / (2.0 * d_theta)
      cderiv(0)  =  0.0 / (2.0 * d_theta)
      cderiv(1)  =  1.0 / (2.0 * d_theta)
 
-     ! coefficients for 2nd order filter for 2nd order upwinded derivative
+     ! 2nd-derivative filter
      uderiv(-1) = -1.0 / (2.0 * d_theta)
      uderiv(0)  =  2.0 / (2.0 * d_theta)
      uderiv(1)  = -1.0 / (2.0 * d_theta)
 
   case (2)
 
-     ! coefficients for 4th order centered derivative
+     ! 3rd-order UPWIND
+
+     ! 4th-order centered derivative
      cderiv(-2) =  1.0 / (12.0 * d_theta)
      cderiv(-1) = -8.0 / (12.0 * d_theta)
      cderiv(0)  =  0.0 / (12.0 * d_theta)
      cderiv(1)  =  8.0 / (12.0 * d_theta)
      cderiv(2)  = -1.0 / (12.0 * d_theta)
 
-     ! coefficients for 4th order filter for 3rd order upwinded derivative
+     ! 4th-derivative filter 
      uderiv(-2) =  1.0 / (12.0 * d_theta)
      uderiv(-1) = -4.0 / (12.0 * d_theta)
      uderiv(0)  =  6.0 / (12.0 * d_theta)
@@ -263,7 +267,9 @@ subroutine cgyro_init_arrays
 
   case (3)
 
-     ! coefficients for 6th order centered derivative
+     ! 5th-order UPWIND
+
+     ! 6th-order centered derivative
      cderiv(-3) =  -1.0 / (60.0 * d_theta)
      cderiv(-2) =   9.0 / (60.0 * d_theta)
      cderiv(-1) = -45.0 / (60.0 * d_theta)
@@ -271,8 +277,8 @@ subroutine cgyro_init_arrays
      cderiv(1)  =  45.0 / (60.0 * d_theta)
      cderiv(2)  =  -9.0 / (60.0 * d_theta)
      cderiv(3)  =   1.0 / (60.0 * d_theta)
-     
-     ! coefficients for 6th order filter for 3rd order upwinded derivative
+
+     ! 6th-derivative filter 
      uderiv(-3) =  -1.0 / (60.0 * d_theta)
      uderiv(-2) =   6.0 / (60.0 * d_theta)
      uderiv(-1) = -15.0 / (60.0 * d_theta)

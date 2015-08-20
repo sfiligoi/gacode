@@ -24,6 +24,7 @@ module cgyro_globals
   real    :: up_theta
   integer :: nup
   integer :: implicit_flag
+  integer :: constant_wind_flag
   real    :: ky
   integer :: box_size
   integer :: silent_flag

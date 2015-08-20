@@ -120,18 +120,8 @@ subroutine cgyro_kernel
      allocate(omega_cdrift(n_theta,n_species))
      allocate(omega_gammap(n_theta))
 
-     d_theta = (2*pi/n_theta)
-     do it=1,n_theta
-        theta(it) = -pi+(it-1)*d_theta
-     enddo
 
-     do ir=1,n_radial/box_size
-        do it=1,n_theta
-           thetab(ir,it) = theta(it)+2*pi*(ir-1-n_radial/2/box_size)
-        enddo
-     enddo
-
-     GEO_model_in = geo_numeq_flag
+     GEO_model_in    = geo_numeq_flag
      GEO_ntheta_in   = geo_ntheta
      GEO_nfourier_in = geo_ny
      call GEO_alloc(1)
