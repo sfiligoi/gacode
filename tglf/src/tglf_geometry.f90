@@ -144,6 +144,7 @@ SUBROUTINE xgrid_functions_sa
   B2_ave_out = B2_ave_out/pi_2
   B_ave_out = B_ave_out/pi_2
   Bt_ave_out = Bt_ave_out/pi_2
+  Grad_r_ave_out = 1.0
   !
   ! poloidal magnetic field at outboard midplane
   !
@@ -373,6 +374,7 @@ SUBROUTINE xgrid_functions_geo
   R2_ave_out = 0.0
   B_ave_out = 0.0
   Bt_ave_out = 0.0
+  Grad_r_ave_out = 0.0
   norm_ave=0.0
   do i=1,ms
      dlp = s_p(i)*ds*(0.5/Bp(i)+0.5/Bp(i-1))
@@ -385,12 +387,14 @@ SUBROUTINE xgrid_functions_geo
      R2_ave_out = R2_ave_out + dlp*(R2x1+R2x2)/2.0
      B_ave_out = B_ave_out + dlp*(b_geo(i-1)+b_geo(i))/2.0
      Bt_ave_out = Bt_ave_out + dlp*(f/b_geo(i-1)+f/b_geo(i))/(2.0*Rmaj_s)
+     Grad_r_ave_out = Grad_r_ave_out + dlp*0.5*((R(i-1)*Bp(i-1))+(R(i)*Bp(i)))*(q_s/rmin_s)
   enddo
   R2_ave_out = R2_ave_out/norm_ave
   B2_ave_out = B2_ave_out/norm_ave
   B2_ave_out = B2_ave_out/B_unit**2
   B_ave_out = B_ave_out/norm_ave
   Bt_ave_out = Bt_ave_out/norm_ave
+  Grad_r_ave_out = Grad_r_ave_out/norm_ave
   !
   ! poloidal magnetic field on outboard midplane
   !
@@ -552,6 +556,7 @@ SUBROUTINE get_ft_geo
   enddo
   ! write(*,*)"global Bmax = ",Bmax,"at m =",m_max
   ! write(*,*)"global Bmin = ",Bmin,"at m =",m_min
+  ! write(*,*)"Bmax/Bmin = ",Bmax/Bmin
   !
   ! make a table of Bmin=< By <= Bmax
   !

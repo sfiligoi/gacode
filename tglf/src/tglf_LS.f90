@@ -409,31 +409,23 @@
        gnet = gp/wd0
        intensity = cnorm*(wd0**2)*(gnet**exponent1 &
         + c1*gnet)/(kp**4)
+       if(alpha_quench_in.eq.0.0.and.ABS(kx0_e).gt.0.0)then
+         intensity = intensity/(1.0+0.56*kx0_e**2)**2
+         intensity = intensity/(1.0+(1.15*kx0_e)**4)**2
+       endif
+       if(alpha_zf_in.gt.0.0)then
+         ca = 4.3*Tanh((gp/alpha_zf_in)**6)
+         intensity = intensity*(ca/(1.0 + ca))*(5.3/4.3)
+      endif
+         intensity = intensity/B_unit**2
       elseif(sat_rule_in.eq.1)then
 !
-!  GAM frequency version
+!   will be computed later by get_multiscale_spectrum
 !
-!       wd0 = get_GAM_freq()
-       wd0 =  1.219*get_GAM_freq()
-!       exponent1 = 1.22
-       exponent1 = 1.208
-       gnet = gp
-!       intensity = 9.09*pols*(gnet**exponent1)*(gnet**2+0.3935*wd0**2)**(1.0-exponent/2.0)
-       intensity = 8.347*pols*(gnet**exponent1)*(gnet**2+wd0**2)**(1.0-exponent1/2.0)
-!       exponent1 = 1.53
-!       intensity = 15.29*pols*(gnet**exponent1)*get_GAM_freq()**(2.0-exponent1)
-       intensity = intensity/(kp**4)
+       intensity = 1.0
       endif
-      if(alpha_quench_in.eq.0.0.and.ABS(kx0_e).gt.0.0)then
-        intensity = intensity/(1.0+0.56*kx0_e**2)**2
-        intensity = intensity/(1.0+(1.15*kx0_e)**4)**2
-     endif
-     if(alpha_zf_in.gt.0.0)then
-        ca = 4.3*Tanh((gp/alpha_zf_in)**6)
-        intensity = intensity*(ca/(1.0 + ca))*(5.3/4.3)
-     endif
 !     
-      get_intensity = intensity/B_unit**2
+      get_intensity = intensity
 !
       END FUNCTION get_intensity
 !

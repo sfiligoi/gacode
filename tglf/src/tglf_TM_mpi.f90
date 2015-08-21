@@ -295,7 +295,8 @@
           reduce = (gamma_net_1/gamma_cutoff)**rexp
 !            write(*,*)"phi reduced",ky_in,gamma_nb_min_out,gamma_out(1)
           endif
-        endif
+       endif
+       if(sat_rule_in.eq.1)reduce=1.0
 ! 
         if(unstable)then
 ! save field_spectrum_out and eigenvalue_spectrum_out
@@ -387,7 +388,11 @@
                         ,iCommTglf                   &
                         ,ierr)
 
-!
+      ! recompute spectrum using non-local in ky multiscale model
+      
+      if(sat_rule_in.eq.1)call get_multiscale_spectrum
+      
+      !
       if(new_eikonal_in)eikonal_unsaved=.FALSE.
       gamma_out(1) = gmax
       freq_out(1) = fmax

@@ -34,6 +34,7 @@ OBJECTS = ${TGLFISNAN}      \
           tglf_isinf.o      \
           tglf_shutdown.o   \
           tglf_read_input.o \
+          tglf_multiscale_spectrum.o \
           tglf_kygrid.o     \
           tglf_run.o        \
           tglf_TM.o         \
