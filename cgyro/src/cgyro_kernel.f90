@@ -132,7 +132,6 @@ subroutine cgyro_kernel
      call cgyro_init_arrays
 
      call cgyro_init_implicit_gk
-     call cgyro_init_implicit_partial_gk
 
      if (collision_model /= 0) then
         allocate(cmat(nv,nv,nc_loc))
@@ -177,7 +176,6 @@ subroutine cgyro_kernel
      ! Collisionless implicit streaming term step
      ! : returns new h_x, cap_h_x, fields 
      call cgyro_step_implicit_gk
-     call cgyro_step_implicit_partial_gk
 
      ! Collision step: returns new h_x, cap_h_x, fields
      call cgyro_step_collision
@@ -267,7 +265,6 @@ subroutine cgyro_kernel
   endif
 
   call cgyro_clean_implicit_gk
-  call cgyro_clean_implicit_partial_gk
 
 end subroutine cgyro_kernel
 

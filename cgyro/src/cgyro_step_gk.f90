@@ -106,21 +106,6 @@ subroutine cgyro_rhs(ij)
            enddo
         endif
 
-        if (implicit_flag == 2) then
-           do id=-nup,nup
-              jt = thcyc(it+id)
-              jr = rcyc(ir,it,id)
-              jc = ic_c(jr,jt)
-              if (0 == 0) then
-                 rhs_stream = rhs_stream &
-                      -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)
-              else
-                 rhs_stream = rhs_stream &
-                      -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc) 
-              endif
-           enddo
-        endif
-
         rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc)+rhs_stream
 
      enddo
