@@ -55,7 +55,7 @@ subroutine cgyro_rhs(ij)
   integer, intent(in) :: ij
   integer :: is, ir, it, ie, ix
   integer :: id, jt, jr, jc
-  real :: rval
+  real :: rval,rval2
   complex :: rhs_stream
 
   call timer_lib_in('rhs')
@@ -87,6 +87,7 @@ subroutine cgyro_rhs(ij)
         ! Parallel streaming with upwind dissipation
 
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
+        rval2 = omega_stream(it,is)*sqrt(energy(ie)) 
         rhs_stream = 0.0
 
         if (implicit_flag == 0) then
@@ -94,16 +95,18 @@ subroutine cgyro_rhs(ij)
               jt = thcyc(it+id)
               jr = rcyc(ir,it,id)
               jc = ic_c(jr,jt)
-              if (0 == 0) then
+              if (1 == 0) then
                  rhs_stream = rhs_stream &
                       -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)  &
                       -abs(rval)*dtheta_up(ir,it,id)*( &
-                      cap_h_c(jc,iv_loc) &
-                      - z(is)/temp(is)*j0_c(jc,iv_loc)*field(jr,jt,1))
+                      cap_h_c(jc,iv_loc)-z(is)/temp(is)*j0_c(jc,iv_loc)*field(jr,jt,1))
               else
                  rhs_stream = rhs_stream &
                       -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)  &
-                      -abs(rval)*dtheta_up(ir,it,id)*h_xs(jc,iv_loc)
+          !           -abs(rval)*dtheta_up(ir,it,id)*h_xs(jc,iv_loc)
+                      -abs(rval)*dtheta_up(ir,it,id)*( &
+                      cap_h_c(jc,iv_loc)-z(is)/temp(is)*j0_c(jc,iv_loc)*field(jr,jt,1)) &
+                      +rval2*dtheta_up(ir,it,id)*h_xs(jc,iv_loc)
               endif
            enddo
         endif
