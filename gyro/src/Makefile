@@ -157,7 +157,7 @@ lib: $(OBJECTS)
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:
-	rm -f *.o $(LLIB).a 
+	rm -f *.o $(LLIB).a gyro
 	rm -f ${GACODE_ROOT}/modules/gyro*.mod ${GACODE_ROOT}/modules/ompdata.mod
 
 include ../install/make.ext.${GACODE_PLATFORM}

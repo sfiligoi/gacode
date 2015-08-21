@@ -15,6 +15,7 @@ OBJECTS = cgyro_globals.o \
           cgyro_field.o \
           cgyro_flux.o \
           cgyro_freq.o \
+          cgyro_hsym.o \
           cgyro_interface.o \
           cgyro_init.o \
           cgyro_init_h.o \
@@ -22,8 +23,13 @@ OBJECTS = cgyro_globals.o \
           cgyro_init_collision.o \
           cgyro_step_collision.o \
 	  cgyro_implicit_gk.o \
+	  cgyro_implicit_partial_gk.o \
           cgyro_kernel.o \
           cgyro_mpi_grid.o \
+	  cgyro_experimental_globals.o \
+	  cgyro_experimental_alloc.o \
+	  cgyro_experimental_profiles.o \
+	  cgyro_experimental_map.o \
 	  cgyro_make_profiles.o \
 	  cgyro_nl.o \
           cgyro_read_input.o \

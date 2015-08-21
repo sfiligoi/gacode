@@ -1240,7 +1240,7 @@ REAL FUNCTION get_v_bar_sum()
 END FUNCTION get_v_bar_sum
 !-----------------------------------------------------------------
 !
-REAL FUNCTION get_nky_out()
+INTEGER FUNCTION get_nky_out()
   !
   USE tglf_global
   USE tglf_kyspectrum

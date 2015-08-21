@@ -38,29 +38,29 @@ subroutine tgyro_target_vector(x_vec,g_vec)
   call tgyro_profile_functions
   call tgyro_source
 
-  ! Build vector in erg/cm^2/s, then normalize to bc energy flux
+  ! Build vector (already converted to GB units in tgyro_source)
 
   p = 0
   do i=2,n_r
      if (loc_ti_feedback_flag == 1) then
         p = p+1
-        g_vec(p) = eflux_i_target(i)! * q_gb(i)
+        g_vec(p) = eflux_i_target(i)
      endif
      if (loc_te_feedback_flag == 1) then
         p = p+1
-        g_vec(p) = eflux_e_target(i)! * q_gb(i)
+        g_vec(p) = eflux_e_target(i)
      endif
      if (loc_ne_feedback_flag == 1) then
         p = p+1
-        g_vec(p) = pflux_e_target(i)! * gamma_gb(i) * k * te(i)
+        g_vec(p) = pflux_e_target(i)
      endif
      if (loc_er_feedback_flag == 1) then
         p = p+1
-        g_vec(p) = mflux_target(i) !* pi_gb(i) * c_s(i)
+        g_vec(p) = mflux_target(i)
      endif
      if (loc_he_feedback_flag == 1) then
         p = p+1
-        g_vec(p) = pflux_he_target(i) !* gamma_gb(i) * k * te(i) 
+        g_vec(p) = pflux_he_target(i)
      endif
   enddo
 

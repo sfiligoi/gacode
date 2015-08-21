@@ -49,6 +49,7 @@ subroutine tgyro_source
         s_alpha_i(i) = s_alpha*frac_ai(i)
         s_alpha_e(i) = s_alpha*frac_ae(i)
      else
+        sn_alpha(i)  = 0.0
         s_alpha_i(i) = 0.0
         s_alpha_e(i) = 0.0
      endif
@@ -199,7 +200,7 @@ subroutine tgyro_source
   mflux_target(1) = 0.0 
   mflux_target(2:n_r) = mf_in(2:n_r)/volp(2:n_r)
   !------------------------------------------------
-
+  
   !------------------------------------------------
   ! Target He ash flux in 1/s/cm^2
   !

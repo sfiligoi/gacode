@@ -76,6 +76,7 @@ subroutine cgyro_kernel
      allocate(j0_c(nc,nv_loc))
      allocate(j0_v(nc_loc,nv))
      allocate(h_x(nc,nv_loc))
+     allocate(h_xs(nc,nv_loc))
      allocate(psi(nc,nv_loc))
      allocate(f_nl(nc,nsplit,n_toroidal))
      allocate(g_nl(nc,nsplit,n_toroidal))
@@ -100,9 +101,9 @@ subroutine cgyro_kernel
      allocate(recv_status(MPI_STATUS_SIZE))
 
      allocate(thcyc(1-n_theta:2*n_theta))
-     allocate(rcyc(n_radial,n_theta,-3:3))
-     allocate(dtheta(n_radial,n_theta,-3:3))
-     allocate(dtheta_up(n_radial,n_theta,-3:3))
+     allocate(rcyc(n_radial,n_theta,-nup:nup))
+     allocate(dtheta(n_radial,n_theta,-nup:nup))
+     allocate(dtheta_up(n_radial,n_theta,-nup:nup))
 
 
      ! Equilibrium set-up
@@ -116,23 +117,11 @@ subroutine cgyro_kernel
      allocate(omega_rdrift(n_theta,n_species))
      allocate(omega_adrift(n_theta,n_species))
      allocate(omega_aprdrift(n_theta,n_species))
+     allocate(omega_cdrift(n_theta,n_species))
+     allocate(omega_gammap(n_theta))
 
-     d_theta = (2*pi/n_theta)
-     do it=1,n_theta
-        theta(it) = -pi+(it-1)*d_theta
-     enddo
 
-     do ir=1,n_radial/box_size
-        do it=1,n_theta
-           thetab(ir,it) = theta(it)+2*pi*(ir-1-n_radial/2/box_size)
-        enddo
-     enddo
-
-     if(equilibrium_model == 0) then
-        GEO_model_in = 0
-     else if (equilibrium_model == 2 .or. equilibrium_model == 3) then
-        GEO_model_in = geo_numeq_flag
-     endif
+     GEO_model_in    = geo_numeq_flag
      GEO_ntheta_in   = geo_ntheta
      GEO_nfourier_in = geo_ny
      call GEO_alloc(1)
@@ -143,6 +132,7 @@ subroutine cgyro_kernel
      call cgyro_init_arrays
 
      call cgyro_init_implicit_gk
+     call cgyro_init_implicit_partial_gk
 
      if (collision_model /= 0) then
         allocate(cmat(nv,nv,nc_loc))
@@ -187,6 +177,7 @@ subroutine cgyro_kernel
      ! Collisionless implicit streaming term step
      ! : returns new h_x, cap_h_x, fields 
      call cgyro_step_implicit_gk
+     call cgyro_step_implicit_partial_gk
 
      ! Collision step: returns new h_x, cap_h_x, fields
      call cgyro_step_collision
@@ -230,16 +221,18 @@ subroutine cgyro_kernel
 
 100 continue
 
-  if(allocated(theta))        deallocate(theta)
-  if(allocated(thetab))       deallocate(thetab)
-  if(allocated(w_theta))      deallocate(w_theta)
-  if(allocated(Bmag))         deallocate(Bmag)
-  if(allocated(k_perp))       deallocate(k_perp)
-  if(allocated(omega_stream)) deallocate(omega_stream)
-  if(allocated(omega_trap))   deallocate(omega_trap)
-  if(allocated(omega_rdrift)) deallocate(omega_rdrift)
-  if(allocated(omega_adrift)) deallocate(omega_adrift)
+  if(allocated(theta))          deallocate(theta)
+  if(allocated(thetab))         deallocate(thetab)
+  if(allocated(w_theta))        deallocate(w_theta)
+  if(allocated(Bmag))           deallocate(Bmag)
+  if(allocated(k_perp))         deallocate(k_perp)
+  if(allocated(omega_stream))   deallocate(omega_stream)
+  if(allocated(omega_trap))     deallocate(omega_trap)
+  if(allocated(omega_rdrift))   deallocate(omega_rdrift)
+  if(allocated(omega_adrift))   deallocate(omega_adrift)
   if(allocated(omega_aprdrift)) deallocate(omega_aprdrift)
+  if(allocated(omega_cdrift))   deallocate(omega_cdrift)
+  if(allocated(omega_gammap))   deallocate(omega_gammap)
 
   call GEO_alloc(0)
 
@@ -274,6 +267,7 @@ subroutine cgyro_kernel
   endif
 
   call cgyro_clean_implicit_gk
+  call cgyro_clean_implicit_partial_gk
 
 end subroutine cgyro_kernel
 

@@ -29,12 +29,12 @@ subroutine EXPRO_alloc_control(i_proc,flag)
            read(io,*) EXPRO_n_exp
            close(io)
            open(unit=io,file=trim(path)//trim(runfile),status='replace')
-           write(io,'(a)') 'INFO: (EXPRO) input.profiles.gen found'
+           print('(a)'),'INFO: (EXPRO) input.profiles.gen found'
            close(io)
         else
            close(io)
            open(unit=io,file=trim(path)//trim(runfile),status='replace')
-           write(io,'(a)') 'ERROR: (EXPRO) input.profiles.gen does not exist'
+           print('(a)'),'ERROR: (EXPRO) input.profiles.gen does not exist'
            close(io)
            stop
         endif
@@ -100,6 +100,13 @@ subroutine EXPRO_alloc_control(i_proc,flag)
      EXPRO_pow_ei(:)=0.0
      allocate(EXPRO_zeta(EXPRO_n_exp))
      EXPRO_zeta(:)=0.0
+
+     allocate(EXPRO_sbeame(EXPRO_n_exp))
+     EXPRO_sbeame(:)=0.0
+     allocate(EXPRO_sbcx(EXPRO_n_exp))
+     EXPRO_sbcx(:)=0.0
+     allocate(EXPRO_sscxl(EXPRO_n_exp))
+     EXPRO_sscxl(:)=0.0
 
      allocate(EXPRO_flow_beam(EXPRO_n_exp))
      EXPRO_flow_beam(:)=0.0

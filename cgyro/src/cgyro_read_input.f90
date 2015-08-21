@@ -5,6 +5,7 @@ subroutine cgyro_read_input
   implicit none
 
   integer :: is
+  character (len=1) :: cdummy
 
   open(unit=1,file=trim(path)//'input.cgyro.gen',status='old')
   read(1,*) n_energy
@@ -23,10 +24,13 @@ subroutine cgyro_read_input
   read(1,*) restart_mode
   read(1,*) up_radial
   read(1,*) up_theta
+  read(1,*) nup
   read(1,*) implicit_flag
+  read(1,*) constant_wind_flag
   read(1,*) ky
   read(1,*) box_size
   read(1,*) silent_flag
+  read(1,*) profile_model
   read(1,*) equilibrium_model
   read(1,*) collision_model
   read(1,*) collision_mom_restore
@@ -42,10 +46,16 @@ subroutine cgyro_read_input
   read(1,*) ne_ade
   read(1,*) masse_ade
   read(1,*) lambda_debye
+  read(1,*) lambda_debye_scale
   read(1,*) test_flag
   read(1,*) h_print_flag
   read(1,*) amp
   read(1,*) gamma_e
+  read(1,*) gamma_p
+  read(1,*) mach
+  read(1,*) gamma_e_scale
+  read(1,*) gamma_p_scale
+  read(1,*) mach_scale
 
   read(1,*) rmin
   read(1,*) rmaj
@@ -63,9 +73,11 @@ subroutine cgyro_read_input
   read(1,*) beta_star
   read(1,*) betae_unit
 
+  read(1,*) subroutine_flag
+
   read(1,*) n_species
 
-  read(1,*) nu_ee_in
+  read(1,*) nu_ee
 
   do is=1,6
      read(1,*) z(is)
@@ -78,8 +90,23 @@ subroutine cgyro_read_input
 
   close(1)
 
-  ! GEO fourier coefficients are not yet available to read-in
+  ! GEO fourier coefficients
   geo_ny_in = 0
   geo_yin_in(:,:) = 0.0
+  if (subroutine_flag == 0 .and. equilibrium_model == 3 & 
+       .and. profile_model == 1) then
+     open(unit=1,file=trim(path)//'input.geo',status='old')
+     ! header skip
+     do
+        read(1,'(a)') cdummy
+        if (cdummy /= '#') exit
+     enddo
+     backspace 1
+     ! n_fourier
+     read(1,*) geo_ny_in
+     ! fourier coefficients
+     read(1,*) geo_yin_in(:,0:geo_ny_in)
+     close(1)
+  endif
 
 end subroutine cgyro_read_input

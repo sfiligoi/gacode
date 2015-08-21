@@ -9,6 +9,7 @@ subroutine cgyro_write_initdata
 
   use mpi
   use cgyro_globals
+  use cgyro_experimental_globals
 
   implicit none
 
@@ -78,12 +79,32 @@ subroutine cgyro_write_initdata
      write(io,20) 's_zmag',s_zmag
 
      write(io,*)
+     write(io,20) 'beta_star', beta_star
+     if(n_field > 1) then
+        write(io,20) 'betae_unit', betae_unit
+     endif
+
+     write(io,*)
+     write(io,20) 'gamma_e', gamma_e
+     write(io,20) 'gamma_p', gamma_p
+     write(io,20) 'mach', mach
+
+     write(io,*)
      write(io,'(a)') &
-          'indx  z    n/n_norm    T/T_norm    m/m_norm     a/Ln        a/Lt        nu'
+          'indx  z     n/n_norm     T/T_norm     m/m_norm      a/Ln         a/Lt         nu'
      do is=1,n_species
-        write(io,'(t2,i2,2x,i2,2x,6(1pe10.4,2x))') &
+        write(io,'(t2,i2,2x,i2,2x,6(1pe11.4,2x))') &
              is,z(is),dens(is),temp(is),mass(is),dlnndr(is),dlntdr(is),nu(is)
      enddo
+
+     if(profile_model == 2) then
+        write(io,*)
+        write(io,20) 'a_meters',  a_meters
+        write(io,20) 'b_unit',    b_unit
+        write(io,20) 'dens_norm', dens_norm
+        write(io,20) 'temp_norm', temp_norm
+        write(io,20) 'vth_norm',  vth_norm
+     endif
 
      write(io,*)
 
@@ -148,6 +169,12 @@ subroutine cgyro_write_initdata
      enddo
      do it=1,n_theta
         write(io,fmtstr) omega_aprdrift(it,1)
+     enddo
+     do it=1,n_theta
+        write(io,fmtstr) omega_cdrift(it,1)
+     enddo
+     do it=1,n_theta
+        write(io,fmtstr) omega_gammap(it)
      enddo
      do it=1,n_theta
         write(io,fmtstr) k_perp(it,n_radial/2+1)

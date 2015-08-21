@@ -64,7 +64,7 @@ subroutine cgyro_field_v
            pvec_in(:) = real(field(ir,:,1))
            call DGEMV('N',n_theta,n_theta,num1,hzf(ir,:,:),&
                 n_theta,pvec_in(:),1,num0,pvec_outr(:),1)
-           pvec_in(:) = imag(field(ir,:,1))
+           pvec_in(:) = aimag(field(ir,:,1))
            call DGEMV('N',n_theta,n_theta,num1,hzf(ir,:,:),&
                 n_theta,pvec_in(:),1,num0,pvec_outi(:),1)
            field(ir,:,1) = pvec_outr(:) + i_c * pvec_outi(:)
@@ -175,7 +175,7 @@ subroutine cgyro_field_c
            pvec_in(:) = real(field(ir,:,1))
            call DGEMV('N',n_theta,n_theta,num1,xzf(ir,:,:),&
                 n_theta,pvec_in(:),1,num0,pvec_outr(:),1)
-           pvec_in(:) = imag(field(ir,:,1))
+           pvec_in(:) = aimag(field(ir,:,1))
            call DGEMV('N',n_theta,n_theta,num1,xzf(ir,:,:),&
                 n_theta,pvec_in(:),1,num0,pvec_outi(:),1)
            field(ir,:,1) = pvec_outr(:) + i_c * pvec_outi(:)

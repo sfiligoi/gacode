@@ -39,6 +39,7 @@ subroutine tgyro_iteration_driver
   allocate(g_vec0(p_max))
   allocate(quant(p_max))
   allocate(b(p_max))
+  allocate(weight(p_max))
 
   call tgyro_allocate_globals
 

@@ -120,7 +120,7 @@ subroutine gyro_map_experimental_profiles
   call cub_spline(r_p,s_delta_p,n_grid_exp,r_s,s_delta_s,n_x)
   call cub_spline(r_p,zeta_exp,n_grid_exp,r_s,zeta_s,n_x)
   call cub_spline(r_p,s_zeta_p,n_grid_exp,r_s,s_zeta_s,n_x)
-  call cub_spline(r_p,zmag_exp,n_grid_exp,r_s,zmag_s,n_x)
+  call cub_spline(r_p,zmag_exp/rmin_exp(n_grid_exp),n_grid_exp,r_s,zmag_s,n_x)
   call cub_spline(r_p,dzmag_p,n_grid_exp,r_s,dzmag_s,n_x)
 
   do is=1,n_spec

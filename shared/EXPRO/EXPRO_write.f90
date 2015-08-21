@@ -88,6 +88,11 @@ subroutine EXPRO_write(io)
   do i=1,nx
      write(io,10) EXPRO_pow_e_fus(i),EXPRO_pow_i_fus(i),EXPRO_pow_e_sync(i),EXPRO_pow_e_brem(i),EXPRO_pow_e_line(i)
   enddo
+  write(io,20) '# '
+  write(io,20) '#',EXPRO_sbeame_tag,EXPRO_sbcx_tag,EXPRO_sscxl_tag,EXPRO_null_tag,EXPRO_null_tag
+  do i=1,nx
+     write(io,10) EXPRO_sbeame(i),EXPRO_sbcx(i),EXPRO_sscxl(i),0.0,0.0
+  enddo
 
 10 format(5(1pe14.7,2x))
 20 format(6(a))
