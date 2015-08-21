@@ -27,6 +27,7 @@ subroutine cgyro_read_input
   read(1,*) nup
   read(1,*) implicit_flag
   read(1,*) constant_wind_flag
+  read(1,*) upconserve_flag
   read(1,*) ky
   read(1,*) box_size
   read(1,*) silent_flag
