@@ -12,6 +12,7 @@ OBJECTS = cgyro_globals.o \
           cgyro_io.o \
           cgyro_equilibrium.o \
           cgyro_check.o \
+          cgyro_error_estimate.o \
           cgyro_field.o \
           cgyro_flux.o \
           cgyro_freq.o \
@@ -21,6 +22,7 @@ OBJECTS = cgyro_globals.o \
           cgyro_init_h.o \
           cgyro_init_arrays.o \
           cgyro_init_collision.o \
+          cgyro_init_manager.o \
           cgyro_step_collision.o \
 	  cgyro_implicit_gk.o \
           cgyro_kernel.o \

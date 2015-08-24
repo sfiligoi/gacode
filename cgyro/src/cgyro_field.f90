@@ -13,7 +13,7 @@ subroutine cgyro_field_v
   integer :: is, ie, ix, ir, it
   complex :: fac
 
-  call timer_lib_in('field_v')
+  call timer_lib_in('field_H')
 
   field_loc(:,:,:) = (0.0,0.0)
 
@@ -103,7 +103,7 @@ subroutine cgyro_field_v
      enddo
   endif
 
-  call timer_lib_out('field_v')
+  call timer_lib_out('field_H')
 
 end subroutine cgyro_field_v
 
@@ -123,7 +123,7 @@ subroutine cgyro_field_c
   complex :: fac
   complex :: efac(n_field)
 
-  call timer_lib_in('field_c')
+  call timer_lib_in('field_h')
 
   field_loc(:,:,:) = (0.0,0.0)
 
@@ -242,6 +242,6 @@ subroutine cgyro_field_c
      enddo
   enddo
 
-  call timer_lib_out('field_c')
+  call timer_lib_out('field_h')
 
 end subroutine cgyro_field_c

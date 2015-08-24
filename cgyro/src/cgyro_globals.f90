@@ -148,6 +148,7 @@ module cgyro_globals
   character(len=18) :: runfile_hb      = 'out.cgyro.hb'
   character(len=18) :: runfile_grids   = 'out.cgyro.grids'
   character(len=18) :: runfile_time    = 'out.cgyro.time'
+  character(len=18) :: runfile_timers  = 'out.cgyro.timers'
   character(len=18) :: runfile_freq    = 'out.cgyro.freq'
   character(len=14), dimension(3)  :: runfile_field = &
        (/'out.cgyro.phi ','out.cgyro.apar','out.cgyro.bpar'/)

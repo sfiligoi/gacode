@@ -13,7 +13,7 @@ subroutine cgyro_hsym
 
   implicit none
 
-  integer :: is,ir,it,ie,ix
+  integer :: is,ie,ix
   complex :: moment
 
   call parallel_lib_r(transpose(h_x),cap_h_v)

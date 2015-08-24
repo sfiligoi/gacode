@@ -22,10 +22,10 @@ subroutine cgyro_write_timedata
 
   ! Increment the print counter on actual output steps
   if (io_control == 2) i_current = i_current+1
-  
+
   !---------------------------------------------------------------------------
   if (n_toroidal == 1 .and. h_print_flag == 1) then
-     call write_distribution(trim(path)//runfile_hb,1)
+     call write_distribution(trim(path)//runfile_hb)
   endif
   !---------------------------------------------------------------------------
 
@@ -69,15 +69,17 @@ subroutine cgyro_write_timedata
      endif
 
   enddo
- 
+
   ! Linear frequency diagnostics for every value of n
   call cgyro_freq
   vfreq(1) = real(freq) 
   vfreq(2) = aimag(freq)
   call write_distributed_real(trim(path)//runfile_freq,size(vfreq),vfreq)
-  if (n_toroidal == 1) call write_freq()
+
+  if (n_toroidal == 1) call print_scrdata()
 
   call write_time(trim(path)//runfile_time)
+  call write_timers(trim(path)//runfile_timers)
 
   ! Check for manual halt signal
   if (i_proc == 0) then
@@ -92,7 +94,6 @@ subroutine cgyro_write_timedata
   call MPI_BCAST(signal,1,MPI_INTEGER,0,CGYRO_COMM_WORLD,i_err)
 
 end subroutine cgyro_write_timedata
-
 
 !===============================================================================
 ! Individual parallel-safe I/O routines
@@ -337,7 +338,7 @@ subroutine write_distributed_real(datafile,n_fn,fn)
               read(io,fmtstr) fn_recv(:)
            enddo
 
-        enddo 
+        enddo
 
         endfile(io)
         close(io)
@@ -414,7 +415,7 @@ subroutine write_balloon(datafile,fn)
 
 end subroutine write_balloon
 
-!=========================================================================================
+
 
 subroutine write_time(datafile)
 
@@ -446,7 +447,7 @@ subroutine write_time(datafile)
 
      ! Append
 
-     if (n_toroidal > 1 .and. i_proc == 0) then
+     if (n_toroidal > 1) then
         print '(a,1pe9.3,a,5(1pe9.3,1x))',&
              '[t = ',t_current,&
              '] t_err: ',field_error
@@ -473,50 +474,17 @@ subroutine write_time(datafile)
 
 end subroutine write_time
 
-!====================================================================================
-
-subroutine write_freq()
-
-  use cgyro_globals
-
-  !------------------------------------------------------
-  implicit none
-  !------------------------------------------------------
- 
-  select case (io_control)
-
-  case(0,1,3)
-
-     return
-
-  case(2)
-
-     ! Append
-
-     if (i_proc == 0) then
-        print '(a,1pe9.3,a,1pe10.3,1pe10.3,a,1pe9.3,a,5(1pe9.3,1x))',&
-             '[t = ',t_current,&
-             '][w = ',freq,&
-             '][dw = ',abs(freq_err),&
-             '] t_err: ',field_error
-     endif
-
-  end select
-
-end subroutine write_freq
 
 !====================================================================================
 
-subroutine write_distribution(datafile,indx)
+subroutine write_distribution(datafile)
 
   use mpi
-
   use cgyro_globals
 
   !------------------------------------------------------
   implicit none
   !
-  integer, intent(in) :: indx
   character (len=*), intent(in) :: datafile
   complex, dimension(:,:), allocatable :: h_x_glob
   !------------------------------------------------------
@@ -575,12 +543,126 @@ subroutine write_distribution(datafile,indx)
 
   case(3)
 
-     ! Rewind
-
-     open(unit=io,file=datafile,status='old')
-     endfile(io)
-     close(io)
+     ! Rewind not implemented
 
   end select
 
 end subroutine write_distribution
+
+!====================================================================================
+
+!----------------------------------------------------------------
+! write_timers.f90
+!
+! PURPOSE:
+!
+! Initialization:  stream_init, coll_init
+! Runtime: field,stream,nl,nl_comm,coll,coll_field,coll_comm,io
+!
+!----------------------------------------------------------------
+
+subroutine write_timers(datafile)
+
+  use cgyro_globals
+  use timer_lib
+
+  !-----------------------------------------------
+  implicit none
+  !
+  character (len=*), intent(in) :: datafile
+  real, dimension(8) :: dummy
+  character (len=1) :: sdummy
+  !-------------------------------------------------
+
+  select case (io_control)
+
+  case(0)
+
+     return
+
+  case (1)
+
+     ! Timer initialization (starts at timer 3)
+     call timer_lib_init('field_h')
+     call timer_lib_init('stream')
+     call timer_lib_init('nl')
+     call timer_lib_init('nl_comm')
+     call timer_lib_init('field_H')
+     call timer_lib_init('coll')
+     call timer_lib_init('coll_comm')
+     call timer_lib_init('io')
+
+     ! Initial open
+     if (i_proc == 0) then
+        open(unit=io,file=datafile,status='replace')
+        write(io,'(a)') 'Timing Summary'
+        write(io,'(1x,8(a10,1x))') timer_cpu_tag(3:10)
+        close(io)
+     endif
+
+  case (2)
+
+     !---------------------------------------------------------------------------
+     ! Print timers
+     if (i_proc == 0) then
+        open(unit=io,file=datafile,status='old',position='append')
+        write(io,'(8(1pe10.3,1x))') &
+             timer_lib_time('field_h'),&
+             timer_lib_time('stream'),& 
+             timer_lib_time('nl'),& 
+             timer_lib_time('nl_comm'),&
+             timer_lib_time('field_H'),&
+             timer_lib_time('coll'),&
+             timer_lib_time('coll_comm'),&
+             timer_lib_time('io') 
+        close(io)
+     endif
+     !---------------------------------------------------------------------------
+
+     ! Reset all timers
+     timer_cpu = 0.0
+
+  case (3)
+
+     ! Rewind
+
+     if (i_proc == 0) then 
+        open(unit=io,file=datafile,status='old')
+        read(io,'(a)') sdummy
+        do i_time=1,i_current
+           read(io,*) dummy(:)
+        enddo
+        endfile(io)
+        close(io)
+     endif
+
+     ! Reset all timers
+     ! CODE
+
+  end select
+
+end subroutine write_timers
+
+!====================================================================================
+
+subroutine print_scrdata()
+
+  use cgyro_globals
+
+  !------------------------------------------------------
+  implicit none
+  !------------------------------------------------------
+
+  if (io_control == 0) then
+     return
+  else
+     if (i_proc == 0) then
+        print '(a,1pe9.3,a,1pe10.3,1pe10.3,a,1pe9.3,a,5(1pe9.3,1x))',&
+             '[t = ',t_current,&
+             '][w = ',freq,&
+             '][dw = ',abs(freq_err),&
+             '] t_err: ',field_error
+     endif
+  endif
+
+end subroutine print_scrdata

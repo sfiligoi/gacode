@@ -14,10 +14,10 @@ subroutine cgyro_init_implicit_gk
   complex, dimension(:,:), allocatable   :: akmat, fieldmat_loc
   complex, dimension(:), allocatable     :: work_field
 
-  if(implicit_flag /= 1) return
+  if (implicit_flag /= 1) return
 
-  if(zf_test_flag == 1 .and. ae_flag == 1) then
-     call cgyro_error('ERROR: (CGYRO) ZF test with adiabatic electrons not implemented for implicit')
+  if (zf_test_flag == 1 .and. ae_flag == 1) then
+     call cgyro_error('ERROR: (CGYRO) Implicit ZF test with adiab. electrons not implemented')
      return
   endif
 
@@ -299,11 +299,12 @@ subroutine cgyro_init_implicit_gk
 end subroutine cgyro_init_implicit_gk
 
 subroutine cgyro_clean_implicit_gk
+
   use cgyro_globals
 
   implicit none
 
-  if(implicit_flag /= 1) return
+  if (implicit_flag /= 1) return
 
   if(allocated(gkvec))        deallocate(gkvec)
   if(allocated(fieldmat))     deallocate(fieldmat)
@@ -333,11 +334,11 @@ subroutine cgyro_step_implicit_gk
   integer :: is, ir, it, ie, ix
   integer :: id, jt, jr, jc, ifield
   complex :: efac(n_field)
-  real    :: rval, rfac(nc), vfac
+  real    :: rval,rfac(nc)
 
   if (implicit_flag /= 1) return
   
-  call timer_lib_in('rhs_impgk')
+  call timer_lib_in('stream')
 
   ! Solve the gk eqn for the part of RHS depending on old H,fields
   ! RHS = (1 - delta_t/2 * stream)*H_old - (Z f0/T)G field_old
@@ -402,11 +403,7 @@ subroutine cgyro_step_implicit_gk
 
   enddo
 
-  ! Field solve
-  call timer_lib_out('rhs_impgk')
-  call timer_lib_in('rhs_impphi')
-
-  ! form the rhs
+  ! Field solve -- form the RHS
 
   fieldvec_loc(:) = (0.0,0.0)
   iv_loc = 0
@@ -461,9 +458,6 @@ subroutine cgyro_step_implicit_gk
 
      enddo
   enddo
-
-  call timer_lib_out('rhs_impphi')
-  call timer_lib_in('rhs_impgk')
 
   ! Solve the gk eqn for the part of RHS depending on new fields
   ! RHS = (Z f0/T)G field_new
@@ -531,6 +525,6 @@ subroutine cgyro_step_implicit_gk
      enddo
   enddo
 
-  call timer_lib_out('rhs_impgk')
+  call timer_lib_out('stream')
 
 end subroutine cgyro_step_implicit_gk

@@ -14,8 +14,6 @@ subroutine cgyro_init_arrays
   real, dimension(n_radial,n_theta) :: sum_loc
   real, dimension(nv_loc) :: vfac
 
-  call timer_lib_in('init_arrays')
-
   !-------------------------------------------------------------------------
   ! Distributed Bessel-function Gyroaverages
 
@@ -394,7 +392,5 @@ subroutine cgyro_init_arrays
   enddo
 
   !-------------------------------------------------------------------------
-
-  call timer_lib_out('init_arrays')
 
 end subroutine cgyro_init_arrays
