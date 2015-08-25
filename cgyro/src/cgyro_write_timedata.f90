@@ -570,7 +570,7 @@ subroutine write_timers(datafile)
   implicit none
   !
   character (len=*), intent(in) :: datafile
-  real, dimension(8) :: dummy
+  real, dimension(9) :: dummy
   character (len=1) :: sdummy
   !-------------------------------------------------
 
@@ -591,15 +591,16 @@ subroutine write_timers(datafile)
      call timer_lib_init('coll')
      call timer_lib_init('coll_comm')
      call timer_lib_init('io')
+     call timer_lib_init('TOTAL')
 
      ! Initial open
      if (i_proc == 0) then
         open(unit=io,file=datafile,status='replace')
         write(io,'(a)') 'Setup time'
-        write(io,'(1x,8(a11,1x))') timer_cpu_tag(1:2)
-        write(io,'(8(1pe10.3,2x))') timer_lib_time('stream_init'),timer_lib_time('coll_init')
+        write(io,'(1x,9(a11,1x))') timer_cpu_tag(1:2)
+        write(io,'(9(1pe10.3,2x))') timer_lib_time('stream_init'),timer_lib_time('coll_init')
         write(io,'(a)') 'Run time'
-        write(io,'(1x,8(a10,1x))') timer_cpu_tag(3:10)
+        write(io,'(1x,9(a10,1x))') timer_cpu_tag(3:11)
         close(io)
      endif
 
@@ -609,7 +610,7 @@ subroutine write_timers(datafile)
      ! Print timers
      if (i_proc == 0) then
         open(unit=io,file=datafile,status='old',position='append')
-        write(io,'(8(1pe10.3,1x))') &
+        write(io,'(9(1pe10.3,1x))') &
              timer_lib_time('field_h'),&
              timer_lib_time('stream'),& 
              timer_lib_time('nl'),& 
@@ -617,7 +618,8 @@ subroutine write_timers(datafile)
              timer_lib_time('field_H'),&
              timer_lib_time('coll'),&
              timer_lib_time('coll_comm'),&
-             timer_lib_time('io') 
+             timer_lib_time('io'),& 
+             timer_lib_time('TOTAL') 
         close(io)
      endif
      !---------------------------------------------------------------------------

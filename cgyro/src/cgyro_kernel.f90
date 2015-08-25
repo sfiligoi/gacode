@@ -56,6 +56,11 @@ subroutine cgyro_kernel
 
   do i_time=1,n_time
 
+     call timer_lib_in('TOTAL')
+     
+     !------------------------------------------------------------
+     ! Time advance
+     !
      t_current = t_current+delta_t
 
      ! Collisionless step: returns new h_x, cap_h_x, fields 
@@ -68,24 +73,35 @@ subroutine cgyro_kernel
      ! : returns new h_x, cap_h_x, fields 
      call cgyro_step_implicit_gk
 
-     call timer_lib_out('stream')
-
      ! Collision step: returns new h_x, cap_h_x, fields
      call cgyro_step_collision
+     !------------------------------------------------------------
 
-     ! Compute fluxes
+     !------------------------------------------------------------
+     ! Diagnostics
+     !
+     ! Fluxes
      call cgyro_flux
 
      ! Error estimate
      call cgyro_error_estimate
+     !------------------------------------------------------------
 
+     !---------------------------------------
+     ! IO
+     !
      call timer_lib_in('io')
-     ! Print results
+
+     ! Write simulation data
      call cgyro_write_timedata
 
-     ! Print restart data
+     ! Write restart data
      call cgyro_write_restart
+
      call timer_lib_out('io')
+     !---------------------------------------
+
+     call timer_lib_out('TOTAL')
 
      if (abs(signal) == 1) exit
 

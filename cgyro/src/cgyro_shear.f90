@@ -1,10 +1,13 @@
 subroutine cgyro_shear
 
   use cgyro_globals
-
+  use timer_lib
+  
   implicit none
 
   integer :: ir,it
+
+  call timer_lib_in('stream')
 
   if (i_time == 1) gtime = 0.0
 
@@ -31,5 +34,6 @@ subroutine cgyro_shear
      field(n_radial,:,:) = 0.0
 
   endif
+  call timer_lib_out('stream')
 
 end subroutine cgyro_shear
