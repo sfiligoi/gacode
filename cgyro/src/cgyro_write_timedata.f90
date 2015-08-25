@@ -595,7 +595,10 @@ subroutine write_timers(datafile)
      ! Initial open
      if (i_proc == 0) then
         open(unit=io,file=datafile,status='replace')
-        write(io,'(a)') 'Timing Summary'
+        write(io,'(a)') 'Setup time'
+        write(io,'(1x,8(a11,1x))') timer_cpu_tag(1:2)
+        write(io,'(8(1pe10.3,2x))') timer_lib_time('stream_init'),timer_lib_time('coll_init')
+        write(io,'(a)') 'Run time'
         write(io,'(1x,8(a10,1x))') timer_cpu_tag(3:10)
         close(io)
      endif
