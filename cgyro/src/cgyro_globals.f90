@@ -140,7 +140,6 @@ module cgyro_globals
   ! I/O and error management variables
   !
   character(len=80) :: path
-  character(len=18) :: runfile_err     = 'out.cgyro.err'
   character(len=18) :: runfile_info    = 'out.cgyro.info'
   character(len=18) :: runfile_mpi     = 'out.cgyro.mpi'
   character(len=18) :: runfile_restart = 'out.cgyro.restart'
@@ -148,7 +147,7 @@ module cgyro_globals
   character(len=18) :: runfile_hb      = 'out.cgyro.hb'
   character(len=18) :: runfile_grids   = 'out.cgyro.grids'
   character(len=18) :: runfile_time    = 'out.cgyro.time'
-  character(len=18) :: runfile_timers  = 'out.cgyro.timers'
+  character(len=18) :: runfile_timers  = 'out.cgyro.timing'
   character(len=18) :: runfile_freq    = 'out.cgyro.freq'
   character(len=14), dimension(3)  :: runfile_field = &
        (/'out.cgyro.phi ','out.cgyro.apar','out.cgyro.bpar'/)

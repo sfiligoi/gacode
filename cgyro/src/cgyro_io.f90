@@ -45,7 +45,7 @@ contains
     error_message = message
 
     if (silent_flag == 0 .and. i_proc == 0) then
-       open(unit=io,file=trim(path)//runfile_err,status='old',position='append')
+       open(unit=io,file=trim(path)//runfile_info,status='old',position='append')
        write(io,'(a)') 'ERROR: (CGYRO) '//message
        close(io)
     endif
