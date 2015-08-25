@@ -178,7 +178,11 @@ fi
 #==========================================================
 # echo number of tasks, then parse input.cgyro
 #
-python $CGYRO_DIR/bin/cgyro_parse.py 
+python $CGYRO_DIR/bin/cgyro_parse.py
+if [ $? -eq 1 ]
+then
+    exit 1 
+fi
 #==========================================================
 
 #============================================================
