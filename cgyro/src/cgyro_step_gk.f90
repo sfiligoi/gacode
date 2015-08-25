@@ -57,6 +57,7 @@ subroutine cgyro_rhs(ij)
   integer :: id, jt, jr, jc
   real :: rval,rval2
   complex :: rhs_stream
+  complex, dimension(nc) :: hp
 
   call timer_lib_in('stream')
 
@@ -74,6 +75,12 @@ subroutine cgyro_rhs(ij)
      ie = ie_v(iv)
 
      do ic=1,nc
+        ir = ir_c(ic) 
+        it = it_c(ic)
+        hp(ic) = cap_h_c(ic,iv_loc)-z(is)/temp(is)*j0_c(ic,iv_loc)*field(ir,it,1)
+     enddo
+
+     do ic=1,nc
 
         ir = ir_c(ic) 
         it = it_c(ic)
@@ -87,7 +94,11 @@ subroutine cgyro_rhs(ij)
         ! Parallel streaming with upwind dissipation 
 
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
-        rval2 = omega_stream(it,is)*sqrt(energy(ie)) 
+        if (upconserve_flag == 1) then
+           rval2 = omega_stream(it,is)*sqrt(energy(ie)) 
+        else
+           rval2 = 0.0
+        endif
         rhs_stream = 0.0
 
         if (implicit_flag == 0) then
@@ -97,12 +108,8 @@ subroutine cgyro_rhs(ij)
               jc = ic_c(jr,jt)
               rhs_stream = rhs_stream &
                    -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)  &
-                   -abs(rval)*dtheta_up(ir,it,id)*( &
-                   cap_h_c(jc,iv_loc)-z(is)/temp(is)*j0_c(jc,iv_loc)*field(jr,jt,1))
-              if (upconserve_flag == 1) then
-                 rhs_stream = rhs_stream &
-                      +rval2*dtheta_up(ir,it,id)*h_xs(jc,iv_loc)
-              endif
+                   -abs(rval)*dtheta_up(ir,it,id)*hp(jc) &
+                   +rval2*dtheta_up(ir,it,id)*h_xs(jc,iv_loc)
            enddo
         endif
 
@@ -118,7 +125,7 @@ subroutine cgyro_rhs(ij)
   call timer_lib_out('stream')
 
   ! Nonlinear evaluation [f,g]
-  
+
   if (nonlinear_flag == 1) then
      if (nonlinear_method == 1) then
         call cgyro_nl_direct(ij)

@@ -19,16 +19,15 @@ subroutine cgyro_hsym
   call parallel_lib_r(transpose(h_x),cap_h_v)
   cap_h_v_prime(:,:) = (0.0,0.0)
 
-     do is=1,n_species
-        do ie=1,n_energy
-           moment(:) = 0.0
-           do ix=1,n_xi
-              moment(:) = moment(:)+&
-                   cap_h_v(:,iv_v(ie,ix,is))*0.5*w_xi(ix)*abs(xi(ix))
-           enddo
-           do ix=1,n_xi
-              cap_h_v_prime(:,iv_v(ie,ix,is)) = moment
-           enddo
+  do is=1,n_species
+     do ie=1,n_energy
+        moment(:) = 0.0
+        do ix=1,n_xi
+           moment(:) = moment(:)+&
+                cap_h_v(:,iv_v(ie,ix,is))*0.5*w_xi(ix)*abs(xi(ix))
+        enddo
+        do ix=1,n_xi
+           cap_h_v_prime(:,iv_v(ie,ix,is)) = moment
         enddo
      enddo
   enddo
