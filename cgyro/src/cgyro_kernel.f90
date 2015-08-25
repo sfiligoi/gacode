@@ -20,10 +20,9 @@ subroutine cgyro_kernel
 
   implicit none
 
-  ! Need to initialize the info and error runfiles very early
+  ! Need to initialize the info runfile very early
   if (silent_flag == 0 .and. i_proc == 0) then
      open(unit=io,file=trim(path)//runfile_info,status='replace')
-     open(unit=io,file=trim(path)//runfile_err,status='replace')
   endif
 
   ! 1. MPI setup

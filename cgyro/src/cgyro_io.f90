@@ -35,7 +35,7 @@ contains
   subroutine cgyro_error(message)
 
     use cgyro_globals, only : error_status, error_message, &
-         silent_flag, io, runfile_err, i_proc, path
+         silent_flag, io, runfile_info, i_proc, path
 
     implicit none
 

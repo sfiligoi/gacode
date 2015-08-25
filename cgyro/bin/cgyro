@@ -210,8 +210,6 @@ gacode_printversion CGYRO
   
 $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM \
   $SIMDIR $NPROC $CGYRO_DIR/src/cgyro $NOMP $NUMA $MPINUMA
-
-cat out.cgyro.err
 #===========================================================
 
 #============================================================
