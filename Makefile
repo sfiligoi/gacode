@@ -22,6 +22,8 @@ clean:
 	rm -f python/*/*.pyc
 	rm -f python/*.pyc
 	rm -f modules/*genmod*
+	rm -f *.log
+	rm -rf *regression_test/
 
 distclean:
 	cd shared ; make distclean
