@@ -38,13 +38,15 @@ subroutine cgyro_kernel
   if (error_status > 0) goto 100
 
   ! 4. Array initialization and construction
+  !    NOTE: On exit, field_old = field 
   call cgyro_init_manager
 
   !---------------------------------------------------------------------------
   !
   ! Time-stepping
   n_time = nint(max_time/delta_t)
-
+  i_time = 0
+  
   if (restart_flag == 0) then
      io_control = 1*(1-silent_flag)
   else

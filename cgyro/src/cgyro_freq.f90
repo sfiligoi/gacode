@@ -8,9 +8,7 @@ subroutine cgyro_freq
   real, dimension(n_radial,n_theta) :: mode_weight
   complex, dimension(n_radial,n_theta) :: freq_loc
 
-  if (i_time == 0) return
-
-  if (n == 0) then
+  if (i_time == 0 .or. n == 0) then
      freq = 0.0
      freq_err = 0.0
      return

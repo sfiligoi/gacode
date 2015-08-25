@@ -121,6 +121,7 @@ subroutine write_distributed_complex(datafile,n_fn,fn)
   integer :: i_group_send
   integer :: i_send
   integer :: in
+  integer :: i_dummy
   !
   complex :: fn_recv(n_fn)
   !------------------------------------------------------
@@ -207,7 +208,7 @@ subroutine write_distributed_complex(datafile,n_fn,fn)
      if (i_proc == 0) then
 
         open(unit=io,file=datafile,status='old')
-        do i_time=1,i_current
+        do i_dummy=1,i_current
 
            do in=1,n_toroidal
               read(io,fmtstr) fn_recv(:)
@@ -247,6 +248,7 @@ subroutine write_distributed_real(datafile,n_fn,fn)
   integer :: i_group_send
   integer :: i_send
   integer :: in
+  integer :: i_dummy
   !
   real :: fn_recv(n_fn)
   !------------------------------------------------------
@@ -332,7 +334,7 @@ subroutine write_distributed_real(datafile,n_fn,fn)
      if (i_proc == 0) then
 
         open(unit=io,file=datafile,status='old')
-        do i_time=1,i_current
+        do i_dummy=1,i_current
 
            do in=1,n_toroidal
               read(io,fmtstr) fn_recv(:)
@@ -360,6 +362,7 @@ subroutine write_balloon(datafile,fn)
   complex, intent(in) :: fn(n_radial,n_theta)
   !
   integer :: ir,jr,it,np
+  integer :: i_dummy
   !------------------------------------------------------
 
   if (i_proc > 0) return
@@ -405,7 +408,7 @@ subroutine write_balloon(datafile,fn)
      ! Rewind
 
      open(unit=io,file=datafile,status='old')
-     do i_time=1,i_current
+     do i_dummy=1,i_current
         read(io,fmtstr) f_balloon(:,:)
      enddo
      endfile(io)
@@ -416,7 +419,6 @@ subroutine write_balloon(datafile,fn)
 end subroutine write_balloon
 
 
-
 subroutine write_time(datafile)
 
   use cgyro_globals
@@ -425,6 +427,7 @@ subroutine write_time(datafile)
   implicit none
   !
   character (len=*), intent(in) :: datafile
+  integer :: i_dummy
   real :: dummy
   !------------------------------------------------------
 
@@ -464,7 +467,7 @@ subroutine write_time(datafile)
      ! Rewind
 
      open(unit=io,file=datafile,status='old')
-     do i_time=1,i_current
+     do i_dummy=1,i_current
         read(io,fmtstr2) dummy,dummy
      enddo
      endfile(io)
@@ -570,6 +573,7 @@ subroutine write_timers(datafile)
   implicit none
   !
   character (len=*), intent(in) :: datafile
+  integer :: i_dummy
   real, dimension(9) :: dummy
   character (len=1) :: sdummy
   !-------------------------------------------------
@@ -634,7 +638,11 @@ subroutine write_timers(datafile)
      if (i_proc == 0) then 
         open(unit=io,file=datafile,status='old')
         read(io,'(a)') sdummy
-        do i_time=1,i_current
+        read(io,'(a)') sdummy
+        read(io,'(a)') sdummy
+        read(io,'(a)') sdummy
+        read(io,'(a)') sdummy
+        do i_dummy=1,i_current
            read(io,*) dummy(:)
         enddo
         endfile(io)
@@ -658,6 +666,8 @@ subroutine print_scrdata()
   implicit none
   !------------------------------------------------------
 
+  if (restart_flag == 1 .and. i_time == 0) return
+  
   if (io_control == 0) then
      return
   else

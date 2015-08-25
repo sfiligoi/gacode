@@ -10,6 +10,7 @@ subroutine cgyro_error_estimate
 
   if (i_time == 1) then
 
+     field_old  = 0.0
      field_old2 = 0.0
 
   else 
