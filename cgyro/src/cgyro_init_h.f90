@@ -84,7 +84,7 @@ subroutine cgyro_init_h
                     h_x(ic,iv_loc) = rho*exp(-(ang/2)**2) 
                  endif
               else
-                 h_x(ic,iv_loc) = amp*rho*exp(-px(ir)*4.0/n_radial) 
+                 h_x(ic,iv_loc) = amp*rho*exp(-px(ir)*4.0/n_radial)/n**2 
               endif
 
            endif
