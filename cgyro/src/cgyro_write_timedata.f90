@@ -578,14 +578,7 @@ subroutine write_timers(datafile)
   character (len=1) :: sdummy
   !-------------------------------------------------
 
-  select case (io_control)
-
-  case(0)
-
-     return
-
-  case (1)
-
+  if (io_control == 1 .or. io_control == 3) then
      ! Timer initialization (starts at timer 3)
      call timer_lib_init('field_h')
      call timer_lib_init('stream')
@@ -596,6 +589,15 @@ subroutine write_timers(datafile)
      call timer_lib_init('coll_comm')
      call timer_lib_init('io')
      call timer_lib_init('TOTAL')
+  endif
+
+  select case (io_control)
+
+  case(0)
+
+     return
+
+  case (1)
 
      ! Initial open
      if (i_proc == 0) then
@@ -650,7 +652,7 @@ subroutine write_timers(datafile)
      endif
 
      ! Reset all timers
-     ! CODE
+     timer_cpu = 0.0
 
   end select
 
