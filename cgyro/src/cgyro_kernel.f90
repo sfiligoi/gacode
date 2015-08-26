@@ -104,7 +104,7 @@ subroutine cgyro_kernel
 
      call timer_lib_out('TOTAL')
 
-     if (abs(signal) == 1) exit
+     if (abs(signal) == 1 .or. error_status > 0) exit
 
   enddo
   !---------------------------------------------------------------------------

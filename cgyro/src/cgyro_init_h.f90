@@ -96,6 +96,8 @@ subroutine cgyro_init_h
 
   call cgyro_field_c
 
-  field_old = field
+  field_old  = field
+  field_old2 = field
+  field_old3 = field
 
 end subroutine cgyro_init_h
