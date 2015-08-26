@@ -38,7 +38,7 @@ CC      = mpicc
 
 FOMP    = -mp
 FMATH	= -r8
-FOPT	= -Ofast -mcpu=opteron -fPIC
+FOPT	= -Ofast -mcpu=opteron -fPIC -fno-second-underscore
 FDEBUG	= -ffortran-bounds-check 
 
 # Libraries
