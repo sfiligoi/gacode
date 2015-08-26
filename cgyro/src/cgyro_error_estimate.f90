@@ -18,8 +18,8 @@ subroutine cgyro_error_estimate
   field_old2 = field_old
   field_old  = field
 
-  if (field_error > 0.02 .and. i_time > 2) then
-     call cgyro_error('Integration error > 0.02')
+  if (field_error > 0.1 .and. i_time > 2) then
+     call cgyro_error('Integration error > 0.1')
   endif
 
 end subroutine cgyro_error_estimate
