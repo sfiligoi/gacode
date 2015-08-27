@@ -1,3 +1,10 @@
+!-----------------------------------------------------------------
+! cgyro_hsym.f90
+!
+! PURPOSE:
+!  Compute moment used in conservative advection scheme
+!-----------------------------------------------------------------
+
 subroutine cgyro_hsym
 
   use parallel_lib
@@ -6,51 +13,26 @@ subroutine cgyro_hsym
 
   implicit none
 
-  integer :: is,ir,it,ie,ix,jx
-  integer :: icp,icm
+  integer :: is,ie,ix
+  complex, dimension(nc_loc) :: moment
 
   call parallel_lib_r(transpose(h_x),cap_h_v)
   cap_h_v_prime(:,:) = (0.0,0.0)
 
-  ic_loc = 0
-  do ic=nc1,nc2
-     ic_loc = ic_loc+1
-     it = it_c(ic)
-     ir = ir_c(ic)
-     do iv=1,nv
-        is = is_v(iv)
-        ix = ix_v(iv)
-        ie = ie_v(iv)
-
-        cap_h_v_prime(ic_loc,iv) = cap_h_v(ic_loc,iv_v(ie,ix,is)) &
-             +cap_h_v(ic_loc,iv_v(ie,n_xi-ix+1,is))
-
+  do is=1,n_species
+     do ie=1,n_energy
+        moment(:) = 0.0
+        do ix=1,n_xi
+           moment(:) = moment(:)+&
+                cap_h_v(:,iv_v(ie,ix,is))*0.5*w_xi(ix)*abs(xi(ix))
+        enddo
+        do ix=1,n_xi
+           cap_h_v_prime(:,iv_v(ie,ix,is)) = moment
+        enddo
      enddo
   enddo
 
   call parallel_lib_f(cap_h_v_prime,cap_h_ct)
-  h_xs = transpose(cap_h_ct)*0.25
-
-  cap_h_ct = h_xs
-
-  iv_loc = 0
-  do iv=nv1,nv2
-
-     iv_loc = iv_loc+1
-
-     is = is_v(iv)
-     ix = ix_v(iv)
-     ie = ie_v(iv)
-
-     do ir=1,n_radial
-        do it=1,n_theta
-
-           icp = ic_c(ir,it)
-           icm = ic_c(ir,n_theta-it+1)
-           h_xs(ic,iv_loc) = cap_h_ct(icp,iv_loc)+cap_h_ct(icm,iv_loc)
-
-        enddo
-     enddo
-  enddo
+  h_xs = transpose(cap_h_ct)
 
 end subroutine cgyro_hsym

@@ -15,11 +15,11 @@ subroutine cgyro_step_collision
   ! compute new collisional cap_H: H = h + ze/T G phi
   ! assumes have cap_h_x
   
-  call timer_lib_in('comm')
+  call timer_lib_in('coll_comm')
   call parallel_lib_r(transpose(cap_h_c),cap_h_v)
-  call timer_lib_out('comm')
+  call timer_lib_out('coll_comm')
   
-  call timer_lib_in('collision')
+  call timer_lib_in('coll')
   
   ic_loc = 0
   do ic=nc1,nc2
@@ -41,19 +41,19 @@ subroutine cgyro_step_collision
      
   enddo
   
-  call timer_lib_out('collision')
+  call timer_lib_out('coll')
   
   ! Compute the new phi
-  if(collision_field_model == 1) then
+  if (collision_field_model == 1) then
      call cgyro_field_v
   endif
   
-  call timer_lib_in('comm')
+  call timer_lib_in('coll_comm')
   call parallel_lib_f(cap_h_v,cap_h_ct)
   cap_h_c = transpose(cap_h_ct)
-  call timer_lib_out('comm')
+  call timer_lib_out('coll_comm')
   
-  call timer_lib_in('collision')
+  call timer_lib_in('coll')
   ! Compute the new h_x
   iv_loc = 0
   do iv=nv1,nv2
@@ -81,6 +81,6 @@ subroutine cgyro_step_collision
      enddo
   enddo
   
-  call timer_lib_out('collision')
+  call timer_lib_out('coll')
   
 end subroutine cgyro_step_collision

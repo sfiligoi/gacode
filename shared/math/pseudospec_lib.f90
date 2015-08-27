@@ -54,7 +54,7 @@ subroutine pseudo_legendre(n,x,w,d1,dl,dd)
         ! L
         cl(i,j) = -(j-1)*j*c(i,j)
         ! 6th order dissipation j**6
-        cd(i,j) = j**6*c(i,j)
+        cd(i,j) = (j-1)**4/(n-1.0)**4*c(i,j)
      enddo
   enddo
 

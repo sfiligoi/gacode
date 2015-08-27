@@ -289,8 +289,10 @@ subroutine tgyro_iteration_standard
            relax(p) = relax(p)/loc_relax
 
            ! If relaxation gets too small, try large value.
-           if (relax(p) < 1/loc_relax**3) relax(p) = 0.75*loc_relax
-
+           if (relax(p) < 1/loc_relax**3) then
+              relax(p) = 0.75*loc_relax
+              x_vec(p) = x_vec0(p)+2*b(p)
+           endif
         else
 
            ! Reset relaxation

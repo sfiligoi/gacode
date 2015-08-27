@@ -84,7 +84,7 @@ subroutine cgyro_init_h
                     h_x(ic,iv_loc) = rho*exp(-(ang/2)**2) 
                  endif
               else
-                 h_x(ic,iv_loc) = amp*rho*exp(-px(ir)*4.0/n_radial) 
+                 h_x(ic,iv_loc) = amp*rho*exp(-px(ir)*4.0/n_radial)/n**2 
               endif
 
            endif
@@ -96,6 +96,9 @@ subroutine cgyro_init_h
 
   call cgyro_field_c
 
-  field_old = field
+  ! Initialize time-history of fields (-3,-2,-1) to initial field.
+  field_old  = field
+  field_old2 = field
+  field_old3 = field
 
 end subroutine cgyro_init_h

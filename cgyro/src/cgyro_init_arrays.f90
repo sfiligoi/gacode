@@ -14,8 +14,6 @@ subroutine cgyro_init_arrays
   real, dimension(n_radial,n_theta) :: sum_loc
   real, dimension(nv_loc) :: vfac
 
-  call timer_lib_in('init_arrays')
-
   !-------------------------------------------------------------------------
   ! Distributed Bessel-function Gyroaverages
 
@@ -290,52 +288,32 @@ subroutine cgyro_init_arrays
   end select
 
   ! Indices for parallel streaming with upwinding
-  if (zf_test_flag == 1) then
-
-     ! 4th order upwind for zonal flow test
-
-     do ir=1,n_radial
-        do it=1,n_theta
-           do id=-nup,nup
-              dtheta(ir,it,id)    = cderiv(id)
-              dtheta_up(ir,it,id) = uderiv(id)*up_theta
-              rcyc(ir,it,id)      = ir
-           enddo
-        enddo
-     enddo
-
-  else
-
-     ! 4th order upwind 
-
-     do ir=1,n_radial
-        do it=1,n_theta
-           do id=-nup,nup
-              jt = thcyc(it+id)
-              if (it+id < 1) then
-                 thfac = exp(2*pi*i_c*k_theta*rmin)
-                 jr = ir-n*box_size
-                 if (jr < 1) then
-                    jr = jr+n_radial
-                 endif
-              else if (it+id > n_theta) then
-                 thfac = exp(-2*pi*i_c*k_theta*rmin)
-                 jr = ir+n*box_size
-                 if (jr > n_radial) then
-                    jr = jr-n_radial
-                 endif
-              else
-                 thfac = (1.0,0.0)
-                 jr = ir
+  do ir=1,n_radial
+     do it=1,n_theta
+        do id=-nup,nup
+           jt = thcyc(it+id)
+           if (it+id < 1) then
+              thfac = exp(2*pi*i_c*k_theta*rmin)
+              jr = ir-n*box_size
+              if (jr < 1) then
+                 jr = jr+n_radial
               endif
-              dtheta(ir,it,id)    = cderiv(id)*thfac
-              dtheta_up(ir,it,id) = uderiv(id)*thfac*up_theta
-              rcyc(ir,it,id)      = jr
-           enddo
+           else if (it+id > n_theta) then
+              thfac = exp(-2*pi*i_c*k_theta*rmin)
+              jr = ir+n*box_size
+              if (jr > n_radial) then
+                 jr = jr-n_radial
+              endif
+           else
+              thfac = (1.0,0.0)
+              jr = ir
+           endif
+           dtheta(ir,it,id)    = cderiv(id)*thfac
+           dtheta_up(ir,it,id) = uderiv(id)*thfac*up_theta
+           rcyc(ir,it,id)      = jr
         enddo
      enddo
-
-  endif
+  enddo
 
   ! Streaming coefficients (for speed optimization)
 
@@ -394,7 +372,5 @@ subroutine cgyro_init_arrays
   enddo
 
   !-------------------------------------------------------------------------
-
-  call timer_lib_out('init_arrays')
 
 end subroutine cgyro_init_arrays

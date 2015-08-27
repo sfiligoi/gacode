@@ -12,18 +12,18 @@ OBJECTS = cgyro_globals.o \
           cgyro_io.o \
           cgyro_equilibrium.o \
           cgyro_check.o \
+          cgyro_error_estimate.o \
           cgyro_field.o \
           cgyro_flux.o \
           cgyro_freq.o \
           cgyro_hsym.o \
           cgyro_interface.o \
-          cgyro_init.o \
           cgyro_init_h.o \
           cgyro_init_arrays.o \
           cgyro_init_collision.o \
+          cgyro_init_manager.o \
           cgyro_step_collision.o \
 	  cgyro_implicit_gk.o \
-	  cgyro_implicit_partial_gk.o \
           cgyro_kernel.o \
           cgyro_mpi_grid.o \
 	  cgyro_experimental_globals.o \
@@ -33,7 +33,6 @@ OBJECTS = cgyro_globals.o \
 	  cgyro_make_profiles.o \
 	  cgyro_nl.o \
           cgyro_read_input.o \
-          cgyro_run.o \
           cgyro_shear.o \
 	  cgyro_step_gk.o \
           cgyro_write_initdata.o \
