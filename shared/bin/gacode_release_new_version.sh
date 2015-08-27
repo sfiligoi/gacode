@@ -14,3 +14,4 @@ git merge master
 python shared/bin/gacode_regression.py -clean
 git tag -a $1
 git push
+git push --tags
