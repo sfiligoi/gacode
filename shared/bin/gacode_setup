@@ -14,3 +14,5 @@ export PATH=${PATH}:$GACODE_ROOT/shared/bin
 
 export PYTHONPATH=${PYTHONPATH}:$GACODE_ROOT/python
 
+export IDL_PATH=${IDL_PATH}:$GACODE_ROOT/gyro/vugyro
+

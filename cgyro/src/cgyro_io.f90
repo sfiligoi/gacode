@@ -35,7 +35,7 @@ contains
   subroutine cgyro_error(message)
 
     use cgyro_globals, only : error_status, error_message, &
-         silent_flag, io, runfile_err, i_proc, path
+         silent_flag, io, runfile_info, i_proc, path
 
     implicit none
 
@@ -45,7 +45,7 @@ contains
     error_message = message
 
     if (silent_flag == 0 .and. i_proc == 0) then
-       open(unit=io,file=trim(path)//runfile_err,status='old',position='append')
+       open(unit=io,file=trim(path)//runfile_info,status='old',position='append')
        write(io,'(a)') 'ERROR: (CGYRO) '//message
        close(io)
     endif

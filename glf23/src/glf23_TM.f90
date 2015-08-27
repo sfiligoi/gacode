@@ -1444,7 +1444,7 @@
         ri(j1) = 0.00
         do j2=1,neq
           ar(j1,j2) = REAL(  amat(j1,j2) )
-          ai(j1,j2) = IMAG( amat(j1,j2) )
+          ai(j1,j2) = AIMAG( amat(j1,j2) )
 !...test tmp
 !         ai(j1,j2) = 0.0
 !         ar(j1,j2) = 0.0
@@ -1590,7 +1590,7 @@
         if ( lprint .gt. 6 ) then
           write (6,123)
           do j=1,ieq
-            write (6,122) real(zomega(j)), imag(zomega(j))
+            write (6,122) real(zomega(j)), aimag(zomega(j))
           enddo
  123      format (/' Multiplied by i: '  &
            /t4,'zomegar',t18,'zomegai')
@@ -1607,15 +1607,15 @@
         gamma=0.0
         do j=1,ieq
          if(j.ne.jroot(1).and.j.ne.jroot(2).and.j.ne.jroot(3)) then
-          if (imag(zomega(j)).gt. zgamax) then
-            zgamax = imag(zomega(j))
+          if (aimag(zomega(j)).gt. zgamax) then
+            zgamax = aimag(zomega(j))
             jmax=j
           endif
          endif
         enddo
 !
         freq = REAL( zomega(jmax) )
-        gamma = imag( zomega(jmax) )
+        gamma = aimag( zomega(jmax) )
         if(lprint.eq.3) write(*,'(1x,a17,i3,1p3e12.4)') &
           'ilh,gamma,freq = ',ilh,gamma,freq
 !
@@ -1686,7 +1686,7 @@
 !
 ! idelta=xi*yparam(1)+yparam(2)   for trapped electrons
 !
-      yparam(1)=imag(-(n_t-reps*ph)/ph)
+      yparam(1)=aimag(-(n_t-reps*ph)/ph)
       yparam(2)=REAL(-(n_t-reps*ph)/ph)
 !
       chknu=n_u/(1.0-reps)/ph

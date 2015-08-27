@@ -55,6 +55,7 @@ subroutine tglf_read_input
   read(1,*) tglf_alpha_e_in
   read(1,*) tglf_alpha_p_in
   read(1,*) tglf_alpha_quench_in
+  read(1,*) tglf_alpha_zf_in
   read(1,*) tglf_xnu_factor_in
   read(1,*) tglf_debye_factor_in
   read(1,*) tglf_etg_factor_in

@@ -138,6 +138,8 @@ module prgen_globals
   real, dimension(:), allocatable :: onetwo_qfusi
   real, dimension(:), allocatable :: onetwo_qdelt
   real, dimension(:), allocatable :: onetwo_sbeam
+  real, dimension(:), allocatable :: onetwo_sbeame
+  real, dimension(:), allocatable :: onetwo_sscxl
   real, dimension(:), allocatable :: onetwo_te
   real, dimension(:), allocatable :: onetwo_ti
   real, dimension(:), allocatable :: onetwo_talp

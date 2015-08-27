@@ -34,20 +34,25 @@ OBJECTS = ${TGLFISNAN}      \
           tglf_isinf.o      \
           tglf_shutdown.o   \
           tglf_read_input.o \
+          tglf_multiscale_spectrum.o \
+          tglf_kygrid.o     \
+          tglf_run.o        \
+          tglf_TM.o         \
           tglf_init_mpi.o   \
           tglf_run_mpi.o    \
-          tglf_TM_mpi.o 
+          tglf_TM_mpi.o \
+          tglf_harvest.o
 
 
 .SUFFIXES : .o .f90
 
 all: $(LLIB).a $(EXEC1) $(EXEC2)
 
-$(EXEC1): $(LLIB).a $(EXEC1).o
-	$(FC) $(FFLAGS) -o $(EXEC1) $(EXEC1).o $(LLIB).a $(EXTRA_LIBS)
+$(EXEC1): $(LLIB).a $(EXEC1).o $(EXTRA_LIBS)
+	$(FC) $(FFLAGS) -o $(EXEC1) $(EXEC1).o $(LLIB).a $(EXTRA_LIBS) $(LMATH)
 
-$(EXEC2): $(LLIB).a $(EXEC2).o
-	$(FC) $(FFLAGS) -o $(EXEC2) $(EXEC2).o $(LLIB).a $(EXTRA_LIBS)
+$(EXEC2): $(LLIB).a $(EXEC2).o $(EXTRA_LIBS)
+	$(FC) $(FFLAGS) -o $(EXEC2) $(EXEC2).o $(LLIB).a $(EXTRA_LIBS) $(LMATH)
 
 $(LLIB).a: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
@@ -58,4 +63,3 @@ $(LLIB).a: $(OBJECTS)
 clean:
 	rm -f *.o *.lst $(LLIB).a $(EXEC1) $(EXEC2)
 	rm -f ${GACODE_ROOT}/modules/tglf*.mod 
-

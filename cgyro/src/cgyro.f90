@@ -1,13 +1,11 @@
 program cgyro
 
   use mpi
-  use cgyro_globals, only : path, CGYRO_COMM_WORLD, i_proc, n_proc
+  use cgyro_globals, only : path, CGYRO_COMM_WORLD, i_proc, n_proc, i_err
 
   implicit none
 
-  integer :: ierr
-
-  call MPI_INIT(ierr)
+  call MPI_INIT(i_err)
   
   ! Path is cwd:
   path= './'
@@ -19,13 +17,13 @@ program cgyro
   !
   ! Query rank and size
   !
-  call MPI_COMM_RANK(CGYRO_COMM_WORLD,i_proc,ierr)
-  call MPI_COMM_SIZE(CGYRO_COMM_WORLD,n_proc,ierr)
+  call MPI_COMM_RANK(CGYRO_COMM_WORLD,i_proc,i_err)
+  call MPI_COMM_SIZE(CGYRO_COMM_WORLD,n_proc,i_err)
   !-----------------------------------------------------------------
 
   call cgyro_read_input
   call cgyro_kernel
 
-  call MPI_FINALIZE(ierr)
+  call MPI_FINALIZE(i_err)
 
 end program cgyro

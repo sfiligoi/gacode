@@ -49,19 +49,21 @@ subroutine cgyro_rhs(ij)
   use timer_lib
 
   use cgyro_globals
-  use cgyro_equilibrium
 
   implicit none
 
   integer, intent(in) :: ij
   integer :: is, ir, it, ie, ix
   integer :: id, jt, jr, jc
-  real :: rval
+  real :: rval,rval2
   complex :: rhs_stream
+  complex, dimension(nc) :: hp
 
-  call timer_lib_in('rhs')
+  call timer_lib_in('stream')
 
   rhs(ij,:,:) = (0.0,0.0)
+
+  if (upconserve_flag == 1) call cgyro_hsym
 
   iv_loc = 0
   do iv=nv1,nv2
@@ -73,6 +75,12 @@ subroutine cgyro_rhs(ij)
      ie = ie_v(iv)
 
      do ic=1,nc
+        ir = ir_c(ic) 
+        it = it_c(ic)
+        hp(ic) = cap_h_c(ic,iv_loc)-z(is)/temp(is)*j0_c(ic,iv_loc)*field(ir,it,1)
+     enddo
+
+     do ic=1,nc
 
         ir = ir_c(ic) 
         it = it_c(ic)
@@ -82,28 +90,31 @@ subroutine cgyro_rhs(ij)
              omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+&
              omega_h(ic,iv_loc)*h_x(ic,iv_loc)+&
              sum(omega_s(:,ic,iv_loc)*field(ir,it,:))
-           
-        ! Parallel streaming with upwind dissipation
-        
+
+        ! Parallel streaming with upwind dissipation 
+
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
+        if (upconserve_flag == 1) then
+           rval2 = omega_stream(it,is)*sqrt(energy(ie)) 
+        else
+           rval2 = 0.0
+        endif
         rhs_stream = 0.0
-        
-        if(implicit_flag == 0) then
-           do id=-2,2
+
+        if (implicit_flag == 0) then
+           do id=-nup,nup
               jt = thcyc(it+id)
               jr = rcyc(ir,it,id)
               jc = ic_c(jr,jt)
               rhs_stream = rhs_stream &
                    -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)  &
-                   -abs(rval)*dtheta_up(ir,it,id)*( &
-                   cap_h_c(jc,iv_loc) &
-                   - z(is)/temp(is)*j0_c(jc,iv_loc)*field(jr,jt,1))
-              
+                   -abs(rval)*dtheta_up(ir,it,id)*hp(jc) &
+                   +rval2*dtheta_up(ir,it,id)*h_xs(jc,iv_loc)
            enddo
         endif
 
         rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc)+rhs_stream
-        
+
      enddo
 
   enddo
@@ -111,7 +122,7 @@ subroutine cgyro_rhs(ij)
   ! TRAPPING TERM
   if (collision_model == 0 .or. collision_trap_model == 0) call cgyro_rhs_trap(ij)
 
-  call timer_lib_out('rhs')
+  call timer_lib_out('stream')
 
   ! Nonlinear evaluation [f,g]
 
@@ -132,7 +143,6 @@ subroutine cgyro_rhs_trap(ij)
   use parallel_lib
 
   use cgyro_globals
-  use cgyro_equilibrium
 
   implicit none
 
@@ -186,45 +196,3 @@ subroutine cgyro_rhs_trap(ij)
   enddo
 
 end subroutine cgyro_rhs_trap
-
-!==========================================================================
-
-subroutine filter(f)
-
-  use cgyro_globals
-  use cgyro_equilibrium
-
-  implicit none
-
-  integer :: ie,ir,is,it,ix
-
-  complex, dimension(nc,nv_loc), intent(in) :: f
-  complex, dimension(n_radial):: fs
-
-  fs = (0.0,0.0)
-
-  iv_loc = 0
-  do iv=nv1,nv2
-
-     iv_loc = iv_loc+1
-
-     is = is_v(iv)
-     ix = ix_v(iv)
-     ie = ie_v(iv)
-
-     do ic=1,nc
-
-        ir = ir_c(ic) 
-        it = it_c(ic)
-
-        fs(ir) = fs(ir)+f(ic,iv_loc)
-
-     enddo
-  enddo
-
-  if (n==0) print *
-  do ir=1,n_radial
-     if (n == 0) print *,px(ir),fs(ir)
-  enddo
-
-end subroutine filter

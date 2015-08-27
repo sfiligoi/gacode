@@ -3,7 +3,7 @@ subroutine cgyro_init_implicit_gk
   use mpi
   use parallel_lib
   use cgyro_globals
-  use cgyro_equilibrium
+  use cgyro_io
 
   implicit none
 
@@ -14,132 +14,83 @@ subroutine cgyro_init_implicit_gk
   complex, dimension(:,:), allocatable   :: akmat, fieldmat_loc
   complex, dimension(:), allocatable     :: work_field
 
-  if(implicit_flag == 0) return
+  if (implicit_flag /= 1) return
 
-  if(zf_test_flag == 1 .and. ae_flag == 1) then
-     print *, 'ZF test with adiabatic electrons not implemented for implicit'
-     stop
+  if (zf_test_flag == 1 .and. ae_flag == 1) then
+     call cgyro_error('ERROR: (CGYRO) Implicit ZF test with adiab. electrons not implemented')
+     return
   endif
 
   ! Kinetic eqn solve matrix(ic,ic,nv_loc) 
-  ! gkmat = (1 + delta_t/2 * stream)
+  ! gksp_mat = (1 + delta_t/2 * stream)
 
-  if(gkmatsolve_flag == 0) then
-
-     ! Dense solve with Lapack
-
-     allocate(gkmat(nc,nc,nv_loc))
-     allocate(i_piv_gk(nc,nv_loc))
-     gkmat(:,:,:) = (0.0,0.0)
-
-     iv_loc = 0
-     do iv=nv1,nv2
-        
-        iv_loc = iv_loc+1
-        
-        is = is_v(iv)
-        ix = ix_v(iv)
-        ie = ie_v(iv)
-        
-        do ic=1,nc
-           
-           ir = ir_c(ic) 
-           it = it_c(ic)
-           
-           rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
-
-           do id=-2,2
-              jt = thcyc(it+id)
-              jr = rcyc(ir,it,id)
-              jc = ic_c(jr,jt)
-
-              gkmat(ic,jc,iv_loc) = gkmat(ic,jc,iv_loc) &
-                   + (rval*dtheta(ir,it,id) &
-                   + abs(rval)*dtheta_up(ir,it,id)) * 0.5 * delta_t
-
-           enddo
-
-           gkmat(ic,ic,iv_loc) = gkmat(ic,ic,iv_loc) + 1.0
-
-        enddo
-
-        ! Lapack factorization 
-        call ZGETRF(nc,nc,gkmat(:,:,iv_loc),nc,i_piv_gk(:,iv_loc),info)
-        
-     enddo
-
-  else
+  ! initialization for umfpack
+  allocate(gksp_cntl(10,nv_loc))
+  allocate(gksp_icntl(20,nv_loc))
+  allocate(gksp_keep(20,nv_loc))
+  gksp_icntl(1,:) = 6
+  gksp_icntl(2,:) = 6
+  gksp_icntl(3,:) = 1
+  gksp_icntl(8,:) = 0
+  iv_loc = 0
+  do iv=nv1,nv2
+     iv_loc = iv_loc+1
+     call UMZ21I(gksp_keep(:,iv_loc),gksp_cntl(:,iv_loc),&
+          gksp_icntl(:,iv_loc))
+  enddo
+  
+  gksp_nelem=(2*nup+1)*nc
+  gksp_nmax=gksp_nelem*10
+  allocate(gksp_mat(gksp_nmax,nv_loc))
+  allocate(gksp_indx(2*gksp_nmax,nv_loc))
+  gksp_mat(:,:) = (0.0,0.0)
+  gksp_indx(:,:) = 0
+  
+  iv_loc = 0
+  do iv=nv1,nv2
      
-     ! Sparse solve with Umfpack
-
-     ! initialization for umfpack
-     allocate(gksp_cntl(10,nv_loc))
-     allocate(gksp_icntl(20,nv_loc))
-     allocate(gksp_keep(20,nv_loc))
-     gksp_icntl(1,:) = 6
-     gksp_icntl(2,:) = 6
-     gksp_icntl(3,:) = 1
-     gksp_icntl(8,:) = 0
-     iv_loc = 0
-     do iv=nv1,nv2
-        iv_loc = iv_loc+1
-        call UMZ21I(gksp_keep(:,iv_loc),gksp_cntl(:,iv_loc),&
-             gksp_icntl(:,iv_loc))
+     iv_loc = iv_loc+1
+     
+     is = is_v(iv)
+     ix = ix_v(iv)
+     ie = ie_v(iv)
+     
+     k=0
+     do ic=1,nc
+        
+        ir = ir_c(ic) 
+        it = it_c(ic)
+        
+        rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
+        
+        do id=-nup,nup
+           jt = thcyc(it+id)
+           jr = rcyc(ir,it,id)
+           jc = ic_c(jr,jt)
+           
+           k=k+1
+           gksp_mat(k,iv_loc) = (rval*dtheta(ir,it,id) &
+                + abs(rval)*dtheta_up(ir,it,id)) * 0.5 * delta_t
+           gksp_indx(k,iv_loc) = ic
+           gksp_indx(k+gksp_nelem,iv_loc) = jc 
+           if(ic == jc) then
+              gksp_mat(k,iv_loc) = gksp_mat(k,iv_loc) + 1.0
+           endif
+        enddo
+        
      enddo
      
-     gksp_nelem=5*nc
-     gksp_nmax=gksp_nelem*10
-     allocate(gksp_mat(gksp_nmax,nv_loc))
-     allocate(gksp_indx(2*gksp_nmax,nv_loc))
-     gksp_mat(:,:) = (0.0,0.0)
-     gksp_indx(:,:) = 0
-
-     iv_loc = 0
-     do iv=nv1,nv2
-        
-        iv_loc = iv_loc+1
-        
-        is = is_v(iv)
-        ix = ix_v(iv)
-        ie = ie_v(iv)
-        
-        k=0
-        do ic=1,nc
-           
-           ir = ir_c(ic) 
-           it = it_c(ic)
-           
-           rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
-              
-           do id=-2,2
-              jt = thcyc(it+id)
-              jr = rcyc(ir,it,id)
-              jc = ic_c(jr,jt)
-              
-              k=k+1
-              gksp_mat(k,iv_loc) = (rval*dtheta(ir,it,id) &
-                   + abs(rval)*dtheta_up(ir,it,id)) * 0.5 * delta_t
-              gksp_indx(k,iv_loc) = ic
-              gksp_indx(k+gksp_nelem,iv_loc) = jc 
-              if(ic == jc) then
-                 gksp_mat(k,iv_loc) = gksp_mat(k,iv_loc) + 1.0
-              endif
-           enddo
-           
-        enddo
-
-        ! Umfpack factorization 
-        call UMZ2FA(nc,gksp_nelem,0,.false.,gksp_nmax,2*gksp_nmax,&
-             gksp_mat(:,iv_loc),gksp_indx(:,iv_loc),&
-             gksp_keep(:,iv_loc),gksp_cntl(:,iv_loc),gksp_icntl(:,iv_loc),&
-             gksp_uinfo,gksp_rinfo)
-        if(gksp_uinfo(1) < 0) then
-           print *, 'umfpack error', gksp_uinfo(1)
-           stop
-        endif
-        
-     enddo
-  endif
+     ! Umfpack factorization 
+     call UMZ2FA(nc,gksp_nelem,0,.false.,gksp_nmax,2*gksp_nmax,&
+          gksp_mat(:,iv_loc),gksp_indx(:,iv_loc),&
+          gksp_keep(:,iv_loc),gksp_cntl(:,iv_loc),gksp_icntl(:,iv_loc),&
+          gksp_uinfo,gksp_rinfo)
+     if(gksp_uinfo(1) < 0) then
+        call cgyro_error('ERROR: (CGYRO) umfpack error in cgyro_init_implicit_gk')
+        return
+     endif
+     
+  enddo
 
   ! Field eqn matrix (ic*ifield,ic*ifield) (dense)
   allocate(idfield(nc,n_field))
@@ -178,7 +129,7 @@ subroutine cgyro_init_implicit_gk
 
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
         
-        do id=-2,2
+        do id=-nup,nup
            jt = thcyc(it+id)
            jr = rcyc(ir,it,id)
            jc = ic_c(jr,jt)
@@ -340,22 +291,20 @@ subroutine cgyro_init_implicit_gk
 
   ! Extra allocations needed for solve
   allocate(gkvec(nc,nv_loc))
+  allocate(gksvec(nc))
+  allocate(gkwvec(2*nc))
   allocate(fieldvec(nc*n_field))
   allocate(fieldvec_loc(nc*n_field))
-
-  if(gkmatsolve_flag == 1) then
-     allocate(gksvec(nc))
-     allocate(gkwvec(2*nc))
-  endif
 
 end subroutine cgyro_init_implicit_gk
 
 subroutine cgyro_clean_implicit_gk
+
   use cgyro_globals
 
   implicit none
 
-  if(implicit_flag == 0) return
+  if (implicit_flag /= 1) return
 
   if(allocated(gkvec))        deallocate(gkvec)
   if(allocated(fieldmat))     deallocate(fieldmat)
@@ -364,18 +313,13 @@ subroutine cgyro_clean_implicit_gk
   if(allocated(fieldvec))     deallocate(fieldvec)
   if(allocated(fieldvec_loc)) deallocate(fieldvec_loc)
 
-  if(gkmatsolve_flag == 0) then
-     if(allocated(gkmat))        deallocate(gkmat)
-     if(allocated(i_piv_gk))     deallocate(i_piv_gk)
-  else
-     if(allocated(gksp_mat))     deallocate(gksp_mat)
-     if(allocated(gksp_indx))    deallocate(gksp_indx)
-     if(allocated(gksp_cntl))    deallocate(gksp_cntl)
-     if(allocated(gksp_icntl))   deallocate(gksp_icntl)
-     if(allocated(gksp_keep))    deallocate(gksp_keep)
-     if(allocated(gksvec))       deallocate(gksvec)
-     if(allocated(gkwvec))       deallocate(gkwvec)
-  endif
+  if(allocated(gksp_mat))     deallocate(gksp_mat)
+  if(allocated(gksp_indx))    deallocate(gksp_indx)
+  if(allocated(gksp_cntl))    deallocate(gksp_cntl)
+  if(allocated(gksp_icntl))   deallocate(gksp_icntl)
+  if(allocated(gksp_keep))    deallocate(gksp_keep)
+  if(allocated(gksvec))       deallocate(gksvec)
+  if(allocated(gkwvec))       deallocate(gkwvec)
 
 end subroutine cgyro_clean_implicit_gk
 
@@ -384,18 +328,17 @@ subroutine cgyro_step_implicit_gk
   use mpi
   use timer_lib
   use cgyro_globals
-  use cgyro_equilibrium
 
   implicit none
 
   integer :: is, ir, it, ie, ix
   integer :: id, jt, jr, jc, ifield
   complex :: efac(n_field)
-  real    :: rval, rfac(nc), vfac
+  real    :: rval,rfac(nc)
 
-  if (implicit_flag == 0) return
+  if (implicit_flag /= 1) return
   
-  call timer_lib_in('rhs_impgk')
+  call timer_lib_in('stream')
 
   ! Solve the gk eqn for the part of RHS depending on old H,fields
   ! RHS = (1 - delta_t/2 * stream)*H_old - (Z f0/T)G field_old
@@ -433,7 +376,7 @@ subroutine cgyro_step_implicit_gk
 
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
 
-        do id=-2,2
+        do id=-nup,nup
            jt = thcyc(it+id)
            jr = rcyc(ir,it,id)
            jc = ic_c(jr,jt)
@@ -451,26 +394,16 @@ subroutine cgyro_step_implicit_gk
      enddo
 
      ! matrix solve
-
-     if(gkmatsolve_flag == 0) then
-        call ZGETRS('N',nc,1,gkmat(:,:,iv_loc),nc,i_piv_gk(:,iv_loc),&
-             gkvec(:,iv_loc),nc,info)
-     else
-        call UMZ2SO(nc,0,.false.,gksp_nmax,2*gksp_nmax,&
-             gksp_mat(:,iv_loc),gksp_indx(:,iv_loc),gksp_keep(:,iv_loc),&
-             gkvec(:,iv_loc),gksvec,gkwvec,&
-             gksp_cntl(:,iv_loc),gksp_icntl(:,iv_loc),&
-             gksp_uinfo,gksp_rinfo)
-        gkvec(:,iv_loc) = gksvec(:)
-     endif
+     call UMZ2SO(nc,0,.false.,gksp_nmax,2*gksp_nmax,&
+          gksp_mat(:,iv_loc),gksp_indx(:,iv_loc),gksp_keep(:,iv_loc),&
+          gkvec(:,iv_loc),gksvec,gkwvec,&
+          gksp_cntl(:,iv_loc),gksp_icntl(:,iv_loc),&
+          gksp_uinfo,gksp_rinfo)
+     gkvec(:,iv_loc) = gksvec(:)
 
   enddo
 
-  ! Field solve
-  call timer_lib_out('rhs_impgk')
-  call timer_lib_in('rhs_impphi')
-
-  ! form the rhs
+  ! Field solve -- form the RHS
 
   fieldvec_loc(:) = (0.0,0.0)
   iv_loc = 0
@@ -526,9 +459,6 @@ subroutine cgyro_step_implicit_gk
      enddo
   enddo
 
-  call timer_lib_out('rhs_impphi')
-  call timer_lib_in('rhs_impgk')
-
   ! Solve the gk eqn for the part of RHS depending on new fields
   ! RHS = (Z f0/T)G field_new
 
@@ -557,17 +487,12 @@ subroutine cgyro_step_implicit_gk
      enddo
 
      ! matrix solve
-     if(gkmatsolve_flag == 0) then
-        call ZGETRS('N',nc,1,gkmat(:,:,iv_loc),nc,i_piv_gk(:,iv_loc),&
-             gkvec(:,iv_loc),nc,info)
-     else
-        call UMZ2SO(nc,0,.false.,gksp_nmax,2*gksp_nmax,&
-             gksp_mat(:,iv_loc),gksp_indx(:,iv_loc),gksp_keep(:,iv_loc),&
-             gkvec(:,iv_loc),gksvec,gkwvec,&
-             gksp_cntl(:,iv_loc),gksp_icntl(:,iv_loc),&
-             gksp_uinfo,gksp_rinfo)
-        gkvec(:,iv_loc) = gksvec(:)
-     endif
+     call UMZ2SO(nc,0,.false.,gksp_nmax,2*gksp_nmax,&
+          gksp_mat(:,iv_loc),gksp_indx(:,iv_loc),gksp_keep(:,iv_loc),&
+          gkvec(:,iv_loc),gksvec,gkwvec,&
+          gksp_cntl(:,iv_loc),gksp_icntl(:,iv_loc),&
+          gksp_uinfo,gksp_rinfo)
+     gkvec(:,iv_loc) = gksvec(:)
 
   enddo
 
@@ -600,6 +525,6 @@ subroutine cgyro_step_implicit_gk
      enddo
   enddo
 
-  call timer_lib_out('rhs_impgk')
+  call timer_lib_out('stream')
 
 end subroutine cgyro_step_implicit_gk

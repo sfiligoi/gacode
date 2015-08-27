@@ -374,7 +374,7 @@
       REAL :: wd0,gnet
       REAL :: c1,pols,ks
       REAL :: get_GAM_freq
-      REAL :: intensity
+      REAL :: intensity,ca
 !
       pols = (ave_p0(1,1)/ABS(as(1)*zs(1)*zs(1)))**2 ! scale invariant pol
       ks = kp*SQRT(taus(1)*mass(2))   ! scale invariant gyroradius * poloidal wavenumber
@@ -409,26 +409,23 @@
        gnet = gp/wd0
        intensity = cnorm*(wd0**2)*(gnet**exponent1 &
         + c1*gnet)/(kp**4)
+       if(alpha_quench_in.eq.0.0.and.ABS(kx0_e).gt.0.0)then
+         intensity = intensity/(1.0+0.56*kx0_e**2)**2
+         intensity = intensity/(1.0+(1.15*kx0_e)**4)**2
+       endif
+       if(alpha_zf_in.gt.0.0)then
+         ca = 4.3*Tanh((gp/alpha_zf_in)**6)
+         intensity = intensity*(ca/(1.0 + ca))*(5.3/4.3)
+      endif
+         intensity = intensity/B_unit**2
       elseif(sat_rule_in.eq.1)then
 !
-!  GAM frequency version
+!   will be computed later by get_multiscale_spectrum
 !
-!       wd0 = get_GAM_freq()
-       wd0 =  1.219*get_GAM_freq()
-!       exponent1 = 1.22
-       exponent1 = 1.208
-       gnet = gp
-!       intensity = 9.09*pols*(gnet**exponent1)*(gnet**2+0.3935*wd0**2)**(1.0-exponent/2.0)
-       intensity = 8.347*pols*(gnet**exponent1)*(gnet**2+wd0**2)**(1.0-exponent1/2.0)
-!       exponent1 = 1.53
-!       intensity = 15.29*pols*(gnet**exponent1)*get_GAM_freq()**(2.0-exponent1)
-       intensity = intensity/(kp**4)
+       intensity = 1.0
       endif
-      if(alpha_quench_in.eq.0.0.and.ABS(kx0_e).gt.0.0)then
-        intensity = intensity/(1.0+0.56*kx0_e**2)**2
-        intensity = intensity/(1.0+(1.15*kx0_e)**4)**2
-      endif
-      get_intensity = intensity/B_unit**2
+!     
+      get_intensity = intensity
 !
       END FUNCTION get_intensity
 !
@@ -702,21 +699,6 @@
         enddo
       enddo
 !
-!   add the vpar shifts to the total  moments
-!
-      if(vpar_model_in.eq.0)then
-        do is=ns0,ns
-        do j=1,nbasis
-          n(is,j) = n(is,j) + vpar_s(is)*(zs(is)/taus(is))*psi(j)
-          u_par(is,j) = u_par(is,j) -(vpar_s(is)/vs(is))*(zs(is)/taus(is))*phi(j)
-          p_par(is,j) = p_par(is,j) + vpar_s(is)*(zs(is)/taus(is))*psi(j)
-          p_tot(is,j) = p_tot(is,j) + vpar_s(is)*(zs(is)/taus(is))*psi(j)
-          q_par(is,j) = q_par(is,j) - 3.0*(vpar_s(is)/vs(is))*(zs(is)/taus(is))*phi(j)
-          q_tot(is,j) = q_tot(is,j) -(5.0/3.0)*(vpar_s(is)/vs(is))*(zs(is)/taus(is))*phi(j)
-        enddo
-        enddo
-      endif
-!
 !  compute phi_norm
 !
       phi_norm = 0.0
@@ -777,7 +759,7 @@
 !            write(*,*)is,"stress_corr=",stress_correction
         do i=1,nbasis
           stress_par(is,i,1) = u_par(is,i)*stress_correction
-          stress_par(is,i,2) = p_par(is,i)
+          stress_par(is,i,2) = p_par(is,i)*stress_correction
           stress_per(is,i,1) = 0.0
           stress_per(is,i,2) = 0.0
           do j=1,nbasis
@@ -848,6 +830,21 @@
           exchange_weight(is,j) = as(is)*exchange_weight(is,j)/phi_norm
         enddo
       enddo
+!
+!   add the vpar shifts to the total  moments
+!
+      if(vpar_model_in.eq.0)then
+        do is=ns0,ns
+        do j=1,nbasis
+          n(is,j) = n(is,j) + vpar_s(is)*(zs(is)/taus(is))*psi(j)
+          u_par(is,j) = u_par(is,j) -(vpar_s(is)/vs(is))*(zs(is)/taus(is))*phi(j)
+          p_par(is,j) = p_par(is,j) + vpar_s(is)*(zs(is)/taus(is))*psi(j)
+          p_tot(is,j) = p_tot(is,j) + vpar_s(is)*(zs(is)/taus(is))*psi(j)
+          q_par(is,j) = q_par(is,j) - 3.0*(vpar_s(is)/vs(is))*(zs(is)/taus(is))*phi(j)
+          q_tot(is,j) = q_tot(is,j) -(5.0/3.0)*(vpar_s(is)/vs(is))*(zs(is)/taus(is))*phi(j)
+        enddo
+        enddo
+      endif
 ! 
 !  compute the density and temperature amplitude weights 
 !    

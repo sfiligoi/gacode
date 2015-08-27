@@ -65,7 +65,7 @@ subroutine cgyro_mpi_grid
   ! Check that n_proc is a multiple of n_toroidal
   !
   if (modulo(n_proc,n_toroidal) /= 0) then
-     call cgyro_error('Number of processors must be a multiple of N_TOROIDAL.')
+     call cgyro_error('ERROR: (CGYRO) Number of processors must be a multiple of N_TOROIDAL.')
      return
   endif
 
@@ -77,7 +77,7 @@ subroutine cgyro_mpi_grid
   ! Check that nv anc nc are multiples of the local processor count
 
   if (modulo(nv,n_proc_1) /= 0 .or. modulo(nc,n_proc_1) /= 0) then
-     call cgyro_error('nv or nc not a multiple of the local processor count.')
+     call cgyro_error('ERROR: (CGYRO) nv or nc not a multiple of the local processor count.')
      return
   endif
 

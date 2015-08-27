@@ -7,14 +7,13 @@ subroutine cgyro_field_v
   use timer_lib
 
   use cgyro_globals
-  use cgyro_equilibrium
 
   implicit none
 
   integer :: is, ie, ix, ir, it
   complex :: fac
 
-  call timer_lib_in('field_v')
+  call timer_lib_in('field_H')
 
   field_loc(:,:,:) = (0.0,0.0)
 
@@ -65,7 +64,7 @@ subroutine cgyro_field_v
            pvec_in(:) = real(field(ir,:,1))
            call DGEMV('N',n_theta,n_theta,num1,hzf(ir,:,:),&
                 n_theta,pvec_in(:),1,num0,pvec_outr(:),1)
-           pvec_in(:) = imag(field(ir,:,1))
+           pvec_in(:) = aimag(field(ir,:,1))
            call DGEMV('N',n_theta,n_theta,num1,hzf(ir,:,:),&
                 n_theta,pvec_in(:),1,num0,pvec_outi(:),1)
            field(ir,:,1) = pvec_outr(:) + i_c * pvec_outi(:)
@@ -104,7 +103,7 @@ subroutine cgyro_field_v
      enddo
   endif
 
-  call timer_lib_out('field_v')
+  call timer_lib_out('field_H')
 
 end subroutine cgyro_field_v
 
@@ -117,7 +116,6 @@ subroutine cgyro_field_c
   use timer_lib
 
   use cgyro_globals
-  use cgyro_equilibrium
 
   implicit none
 
@@ -125,7 +123,7 @@ subroutine cgyro_field_c
   complex :: fac
   complex :: efac(n_field)
 
-  call timer_lib_in('field_c')
+  call timer_lib_in('field_h')
 
   field_loc(:,:,:) = (0.0,0.0)
 
@@ -177,7 +175,7 @@ subroutine cgyro_field_c
            pvec_in(:) = real(field(ir,:,1))
            call DGEMV('N',n_theta,n_theta,num1,xzf(ir,:,:),&
                 n_theta,pvec_in(:),1,num0,pvec_outr(:),1)
-           pvec_in(:) = imag(field(ir,:,1))
+           pvec_in(:) = aimag(field(ir,:,1))
            call DGEMV('N',n_theta,n_theta,num1,xzf(ir,:,:),&
                 n_theta,pvec_in(:),1,num0,pvec_outi(:),1)
            field(ir,:,1) = pvec_outr(:) + i_c * pvec_outi(:)
@@ -244,6 +242,6 @@ subroutine cgyro_field_c
      enddo
   enddo
 
-  call timer_lib_out('field_c')
+  call timer_lib_out('field_h')
 
 end subroutine cgyro_field_c

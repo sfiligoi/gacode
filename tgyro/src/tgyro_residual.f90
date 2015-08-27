@@ -10,6 +10,7 @@ subroutine tgyro_residual(f,g,res,n,method)
   real, intent(in), dimension(n) :: g
   real, intent(inout), dimension(n) :: res
 
+
   select case (method)
 
   case (1) 
@@ -36,11 +37,11 @@ subroutine tgyro_residual(f,g,res,n,method)
 
      ! WEIGHTED
      res(:) = 0.0
-     do i=1,n
-        if (quant(i) == 'ne') then 
-           res(i) = 0.005*(f(i)-g(i))**2
+     do p=1,n
+        if (quant(p) == 'ne') then 
+           res(p) = 0.005*(f(p)-g(p))**2
         else
-           res(i) = 0.5*(f(i)-g(i))**2
+           res(p) = 0.5*(f(p)-g(p))**2
         endif
      enddo
 

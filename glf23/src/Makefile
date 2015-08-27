@@ -28,8 +28,8 @@ OBJECTS = glf23_module.o   \
 
 all: $(LLIB).a $(EXEC) 
 
-$(EXEC): $(LLIB).a $(SRC).o
-	$(FC) $(FFLAGS) -o $(EXEC) $(SRC).o $(LLIB).a $(EXTRA_LIBS)
+$(EXEC): $(LLIB).a $(SRC).o $(EXTRA_LIBS)
+	$(FC) $(FFLAGS) -o $(EXEC) $(SRC).o $(LLIB).a $(EXTRA_LIBS) $(LMATH)
 
 $(LLIB).a: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)

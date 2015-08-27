@@ -144,6 +144,9 @@ subroutine prgen_read_iterdb_nc
   err = nf90_inq_varid(ncid,trim('sbeam'),varid)
   err = nf90_get_var(ncid,varid,onetwo_sbeam)
 
+  err = nf90_inq_varid(ncid,trim('sbeame'),varid)
+  err = nf90_get_var(ncid,varid,onetwo_sbeame)
+
   err = nf90_inq_varid(ncid,trim('zeff'),varid)
   err = nf90_get_var(ncid,varid,onetwo_zeff)
 
@@ -245,6 +248,10 @@ subroutine prgen_read_iterdb_nc
 
   call reorder(work,onetwo_triangnpsi_l,onetwo_npsi)
 
+  ! New sscxl added by Kinsey
+  err = nf90_inq_varid(ncid,trim('sscxl'),varid)
+  err = nf90_get_var(ncid,varid,onetwo_sscxl)
+  
   call cub_spline(onetwo_rho_mhd_gridnpsi,onetwo_rmajavnpsi,onetwo_npsi,&
        onetwo_rho_grid,rmaj,onetwo_nj)
 

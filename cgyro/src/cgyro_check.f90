@@ -28,6 +28,34 @@ subroutine cgyro_check
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
+  ! Time integration
+  !
+  if (implicit_flag == 0) then
+     call cgyro_info('Explicit RK4 integration for collisionless terms')
+  else
+     call cgyro_info('Implicit streaming, RK4 for other collisionless terms')
+  endif
+  !------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------
+  ! Profile checks
+  !
+  select case(profile_model)
+
+  case (1)
+     call cgyro_info('Profile model = local input (input.cgyro)')
+
+  case (2)
+     call cgyro_info('Profile model = experimental (input.profiles)')
+
+  case default
+     call cgyro_error('Invalid value for profile_model')
+     return
+
+  end select
+  !-----------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
   ! Field consistency checks
   if (n_field > 1) then
      if (abs(betae_unit) < epsilon(0.0)) then
@@ -51,23 +79,20 @@ subroutine cgyro_check
   case (2)
      call cgyro_info('Transverse electromagnetic fluctuations (Phi,A_par)')
 
-  case (3)
-     call cgyro_info('Compressional electromagnetic fluctuations (Phi,A_par,B_par)')
-     stop
   case default
      call cgyro_error('Invalid value for n_field.')
      return
   end select
 
   if (collision_model == 1 .and. ae_flag == 1) then
-     call cgyro_error('collision_model=1 requires kinetic electrons')
+     call cgyro_error('Collision_model=1 requires kinetic electrons')
      return
   endif
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
-  ! Collision model
-
+  ! Collision model and settings
+  !
   select case (collision_model)  
 
   case(0)
@@ -86,7 +111,6 @@ subroutine cgyro_check
      call cgyro_info('Collision model = Ad hoc Fokker-Planck')
 
   case default
-
      call cgyro_error('Invalid value for collision_model')
      return
 
@@ -102,7 +126,7 @@ subroutine cgyro_check
      return
   end select
 
-  if(collision_model == 4) then
+  if (collision_model == 4) then
      select case (collision_ene_diffusion)
      case(0)
         call cgyro_info('Collision energy diffusion = not included')
@@ -153,7 +177,7 @@ subroutine cgyro_check
      call cgyro_error('Invalid value for collision_trap_model')
      return
   end select
-
+  !
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -161,18 +185,18 @@ subroutine cgyro_check
   !
   select case (equilibrium_model)  
 
-  case (0) 
-     call cgyro_info('Equlibrium model = s-alpha')
-
   case (1) 
-     call cgyro_error('Invalid value for equilibrium_model.')
-     return
+     call cgyro_info('Equilibrium model = s-alpha')
+     if (profile_model == 2) then
+        call cgyro_error('s-alpha equilibrium model not valid with experimental profiles')
+        return
+     endif
 
   case (2) 
-     call cgyro_info('Equlibrium model = Miller')
+     call cgyro_info('Equilibrium model = Miller')
 
   case (3) 
-     call cgyro_info('Equlibrium model = General (Fourier)')
+     call cgyro_info('Equilibrium model = General (Fourier)')
 
      if (geo_ny <= 0) then
         call cgyro_error('Fourier geometry coefficients missing.')
@@ -181,7 +205,7 @@ subroutine cgyro_check
 
   case default
 
-     call cgyro_error('ERROR: (CGYRO) equilibrium_model invalid')
+     call cgyro_error('Invalid value for equilibrium_model')
      return
 
   end select
@@ -217,7 +241,7 @@ subroutine cgyro_check
 
      inquire(file=trim(path)//runfile_restart,exist=lfe)
      if (lfe .eqv. .false.) then
-        call cgyro_error('ERROR: (CGYRO) Missing restart file')
+        call cgyro_error('Missing restart file')
         return
      endif
 

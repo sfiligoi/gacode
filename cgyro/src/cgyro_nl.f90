@@ -12,7 +12,6 @@ subroutine cgyro_nl_direct(ij)
   use parallel_lib
 
   use cgyro_globals
-  use cgyro_equilibrium
 
   implicit none
 
@@ -51,12 +50,12 @@ subroutine cgyro_nl_direct(ij)
   allocate( g(-nx:nx,-ny:ny) )
   allocate(fg(-nx:nx,-ny:ny) )
 
-  call timer_lib_in('comm_nl')
+  call timer_lib_in('nl_comm')
   call parallel_slib_f(h_x,f_nl)
   call parallel_slib_f(psi,g_nl)
-  call timer_lib_out('comm_nl')
+  call timer_lib_out('nl_comm')
 
-  call timer_lib_in('rhs_nl')
+  call timer_lib_in('nl')
   do j=1,nsplit
      do it=1,n_theta 
 
@@ -110,11 +109,11 @@ subroutine cgyro_nl_direct(ij)
 
      enddo ! it
   enddo ! j
-  call timer_lib_out('rhs_nl')
+  call timer_lib_out('nl')
 
-  call timer_lib_in('comm_nl')
+  call timer_lib_in('nl_comm')
   call parallel_slib_r(g_nl,psi)
-  call timer_lib_out('comm_nl')
+  call timer_lib_out('nl_comm')
 
   deallocate( f)
   deallocate( g)
@@ -176,12 +175,12 @@ subroutine cgyro_nl_fftw(ij)
   nx = (3*nx0)/2
   ny = (3*ny0)/2
 
-  call timer_lib_in('comm_nl')
+  call timer_lib_in('nl_comm')
   call parallel_slib_f(h_x,f_nl)
   call parallel_slib_f(psi,g_nl)
-  call timer_lib_out('comm_nl')
+  call timer_lib_out('nl_comm')
 
-  call timer_lib_in('rhs_nl')
+  call timer_lib_in('nl')
 
   ! Allocate and deallocate these every time.
   allocate(fx(0:ny/2,0:nx-1))
@@ -264,11 +263,11 @@ subroutine cgyro_nl_fftw(ij)
   deallocate(vy)
   deallocate(uv)
 
-  call timer_lib_out('rhs_nl')
+  call timer_lib_out('nl')
 
-  call timer_lib_in('comm_nl')
+  call timer_lib_in('nl_comm')
   call parallel_slib_r(g_nl,psi)
-  call timer_lib_out('comm_nl')
+  call timer_lib_out('nl_comm')
 
   ! RHS -> -[f,g] = [f,g]_{r,-alpha}
 

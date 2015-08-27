@@ -12,7 +12,6 @@ subroutine tgyro_iteration_standard
   use tgyro_globals
   use tgyro_iteration_variables
 
-  call MPI_BARRIER(MPI_COMM_WORLD,ierr)
   if (i_proc_global == 0) then
      open(unit=1,file=trim(runfile),position='append')
      write(1,'(t2,a)') 'INFO: (TGYRO) Beginning standard iterations'
@@ -290,8 +289,10 @@ subroutine tgyro_iteration_standard
            relax(p) = relax(p)/loc_relax
 
            ! If relaxation gets too small, try large value.
-           if (relax(p) < 1/loc_relax**3) relax(p) = 0.75*loc_relax
-
+           if (relax(p) < 1/loc_relax**3) then
+              relax(p) = 0.75*loc_relax
+              x_vec(p) = x_vec0(p)+2*b(p)
+           endif
         else
 
            ! Reset relaxation

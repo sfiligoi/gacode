@@ -15,16 +15,21 @@ module cgyro_globals
   real    :: delta_t
   real    :: max_time
   integer :: print_step
+  integer :: restart_step
   real    :: freq_tol
   integer :: restart_write
   integer :: restart_mode
   real    :: up_radial
   integer :: up_radial_n
   real    :: up_theta
+  integer :: nup
   integer :: implicit_flag
+  integer :: constant_wind_flag
+  integer :: upconserve_flag
   real    :: ky
   integer :: box_size
   integer :: silent_flag
+  integer :: profile_model
   integer :: equilibrium_model
   integer :: collision_model
   integer :: collision_mom_restore
@@ -38,12 +43,20 @@ module cgyro_globals
   integer :: nonlinear_method
   real :: te_ade
   real :: ne_ade
+  real :: dlntdre_ade   ! used only for experimental profiles
+  real :: dlnndre_ade   ! used only for experimental profiles
   real :: masse_ade
   real :: lambda_debye
+  real :: lambda_debye_scale
   integer :: test_flag
   integer :: h_print_flag
   real :: amp
   real :: gamma_e
+  real :: gamma_p
+  real :: mach
+  real :: gamma_e_scale
+  real :: gamma_p_scale
+  real :: mach_scale
   !
   ! Geometry input
   !
@@ -66,13 +79,16 @@ module cgyro_globals
   ! Species parameters
   !
   integer :: n_species
-  real :: nu_ee_in
+  real :: nu_ee
   integer, dimension(6) :: z
   real, dimension(6) :: mass
   real, dimension(6) :: dens
   real, dimension(6) :: temp
   real, dimension(6) :: dlnndr
   real, dimension(6) :: dlntdr
+
+  integer :: subroutine_flag  ! only used for cgyro_read_input
+
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -124,13 +140,14 @@ module cgyro_globals
   ! I/O and error management variables
   !
   character(len=80) :: path
-  character(len=18) :: runfile_err     = 'out.cgyro.err'
   character(len=18) :: runfile_info    = 'out.cgyro.info'
   character(len=18) :: runfile_mpi     = 'out.cgyro.mpi'
   character(len=18) :: runfile_restart = 'out.cgyro.restart'
+  character(len=18) :: runfile_restart_tag = 'out.cgyro.tag'
   character(len=18) :: runfile_hb      = 'out.cgyro.hb'
   character(len=18) :: runfile_grids   = 'out.cgyro.grids'
   character(len=18) :: runfile_time    = 'out.cgyro.time'
+  character(len=18) :: runfile_timers  = 'out.cgyro.timing'
   character(len=18) :: runfile_freq    = 'out.cgyro.freq'
   character(len=14), dimension(3)  :: runfile_field = &
        (/'out.cgyro.phi ','out.cgyro.apar','out.cgyro.bpar'/)
@@ -148,6 +165,7 @@ module cgyro_globals
   !
   integer :: io_control
   integer :: signal
+  integer :: restart_flag
   !
   ! Standard precision for IO 
   character(len=8) :: fmtstr='(es11.4)'
@@ -158,6 +176,8 @@ module cgyro_globals
   ! Time stepping
   integer :: i_time
   integer :: n_time
+  integer :: i_current
+  real :: t_current
   complex :: freq
   complex :: freq_err
   real :: gtime
@@ -194,8 +214,8 @@ module cgyro_globals
   ! Parallel streaming
   !
   real, dimension(:), allocatable :: theta
-  real, dimension(-2:2) :: uderiv
-  real, dimension(-2:2) :: cderiv
+  real, dimension(:), allocatable :: uderiv
+  real, dimension(:), allocatable :: cderiv
   integer, dimension(:), allocatable :: thcyc
   integer, dimension(:,:,:), allocatable :: rcyc
   complex, dimension(:,:,:), allocatable :: dtheta
@@ -205,6 +225,7 @@ module cgyro_globals
   !
   complex, dimension(:,:,:), allocatable :: rhs
   complex, dimension(:,:), allocatable :: h_x
+  complex, dimension(:,:), allocatable :: h_xs
   complex, dimension(:,:), allocatable :: h0_x
   complex, dimension(:,:), allocatable :: psi
   complex, dimension(:,:,:), allocatable :: f_nl
@@ -248,15 +269,12 @@ module cgyro_globals
   !
   ! Implicit streaminggk/field matrices
   !
-  complex, dimension(:,:,:), allocatable :: gkmat
-  integer, dimension(:,:), allocatable   :: i_piv_gk
   complex, dimension(:,:), allocatable   :: gkvec
   complex, dimension(:,:), allocatable   :: fieldmat
   integer, dimension(:,:), allocatable   :: idfield
   integer, dimension(:),   allocatable   :: i_piv_field
   complex, dimension(:),   allocatable   :: fieldvec, fieldvec_loc
   ! umfpack
-  integer, parameter :: gkmatsolve_flag=1
   real,    dimension(:,:), allocatable :: gksp_cntl
   integer, dimension(:,:), allocatable :: gksp_icntl, gksp_keep
   real,    dimension(20) ::  gksp_rinfo
@@ -275,11 +293,32 @@ module cgyro_globals
   !
   real, dimension(:,:,:), allocatable :: hzf, xzf 
   real, dimension(:), allocatable :: pvec_in, pvec_outr, pvec_outi
+  !
+  ! Collision step arrays
+  !
+  real, dimension(:,:,:), allocatable :: cmat
+  complex, dimension(:), allocatable  :: cvec,bvec
+  ! 
+  ! Equilibrium/geometry arrays
+  real :: d_theta
+  real, dimension(:,:), allocatable   :: thetab
+  real, dimension(:), allocatable   :: w_theta
+  real, dimension(:,:), allocatable :: k_perp    
+  real, dimension(:), allocatable   :: Bmag
+  real, dimension(:,:), allocatable :: omega_stream
+  real, dimension(:,:), allocatable :: omega_trap
+  real, dimension(:,:), allocatable :: omega_rdrift
+  real, dimension(:,:), allocatable :: omega_adrift
+  real, dimension(:,:), allocatable :: omega_aprdrift
+  real, dimension(:,:), allocatable :: omega_cdrift
+  real, dimension(:),   allocatable :: omega_gammap
+  integer, parameter :: geo_ntheta=1001 ! num grid pts for Miller geo grid
+  !
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
   integer :: geo_ny_in
-  real, dimension(8,0:16) :: geo_yin_in
+  real, dimension(8,0:32) :: geo_yin_in
   !
   integer :: geo_numeq_flag
   integer :: geo_ny

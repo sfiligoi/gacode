@@ -25,8 +25,7 @@ F77    = ${FC}
 FOMP   = -openmp
 FMATH  = -r8
 FOPT   = -O3
-FDEBUG = -check all 
-FPETSC =
+FDEBUG = -check all
 
 # System math libraries
 

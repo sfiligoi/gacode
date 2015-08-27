@@ -74,6 +74,7 @@ subroutine tglf_run_mpi()
        tglf_alpha_p_in, &
        tglf_alpha_mach_in, &
        tglf_alpha_quench_in, &
+       tglf_alpha_zf_in, &
        tglf_xnu_factor_in, &
        tglf_debye_factor_in, &
        tglf_etg_factor_in, &
@@ -133,44 +134,61 @@ subroutine tglf_run_mpi()
   if (tglf_use_transport_model_in) then
 
      call tglf_tm_mpi
-
      !---------------------------------------------
      ! Output (normalized to Q_GB)
      ! 
      ! Electrons
 
      ! Gammae/Gamma_GB
-     tglf_elec_pflux_out = get_particle_flux(1,1)
+     tglf_elec_pflux_out = get_particle_flux(1,1)  &
+          + get_particle_flux(1,2)                 &
+          + get_particle_flux(1,3)
 
      ! Qe/Q_GB
      tglf_elec_eflux_low_out = get_q_low(1)
-     tglf_elec_eflux_out     = get_energy_flux(1,1)
+        ! _low already included EM terms
+     tglf_elec_eflux_out     = get_energy_flux(1,1) &
+          + get_energy_flux(1,2)                    &
+          + get_energy_flux(1,3)
 
      ! Pi_e/Pi_GB
-     tglf_elec_mflux_out = get_stress_tor(1,1)
+     tglf_elec_mflux_out = get_stress_tor(1,1)   &
+          + get_stress_tor(1,2)                  &
+          + get_stress_tor(1,3)
 
      ! S_e/S_GB
-     tglf_elec_expwd_out = get_exchange(1,1)
+     tglf_elec_expwd_out = get_exchange(1,1)  &
+          + get_exchange(1,2)                 &
+          + get_exchange(1,3)
 
      ! Ions
 
      do i_ion=1,5
 
         ! Gammai/Gamma_GB
-        tglf_ion_pflux_out(i_ion) = get_particle_flux(i_ion+1,1)
+        tglf_ion_pflux_out(i_ion) = get_particle_flux(i_ion+1,1) &
+             + get_particle_flux(i_ion+1,2)                      &
+             + get_particle_flux(i_ion+1,3)
 
         ! Qi/Q_GB
         tglf_ion_eflux_low_out(i_ion) = get_q_low(i_ion+1)
-        tglf_ion_eflux_out(i_ion)     = get_energy_flux(i_ion+1,1)
+        ! _low already included EM terms
+        tglf_ion_eflux_out(i_ion)     = get_energy_flux(i_ion+1,1) &
+             + get_energy_flux(i_ion+1,2)                          &
+             + get_energy_flux(i_ion+1,3)
 
         ! Pi_i/Pi_GB
-        tglf_ion_mflux_out(i_ion) = get_stress_tor(i_ion+1,1)
+        tglf_ion_mflux_out(i_ion) = get_stress_tor(i_ion+1,1)  &
+             + get_stress_tor(i_ion+1,2)                       &
+             + get_stress_tor(i_ion+1,3)
 
         ! S_i/S_GB
-        tglf_ion_expwd_out(i_ion) = get_exchange(i_ion+1,1)
+        tglf_ion_expwd_out(i_ion) = get_exchange(i_ion+1,1)    &
+             + get_exchange(i_ion+1,2)                         &
+             + get_exchange(i_ion+1,3)
 
      enddo
-
+     
   else
 
      ! Run single-ky linear stability
@@ -193,5 +211,9 @@ subroutine tglf_run_mpi()
   interchange_DM = get_DM()
 
   call get_error_status(tglf_error_message,tglf_error_status)
+
+  IF (tglf_error_status.EQ.0) THEN
+    CALL tglf_harvest_local
+  ENDIF
 
 end subroutine tglf_run_mpi

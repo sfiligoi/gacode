@@ -317,11 +317,17 @@ contains
        write(1,'(a)') "#   gradpar_Bmag(:)" 
        write(1,'(a)') "#   Bmag(:)" 
        write(1,'(a)') "#   w_theta(:)" 
+       write(1,'(a)') "#   R(:)"
+       write(1,'(a)') "#   R(theta=0)" 
+       write(1,'(a)') "#   dR(theta=0)/dr" 
        write(1,'(1pe16.8)') theta(:)
        write(1,'(1pe16.8)') v_drift_x(:)
        write(1,'(1pe16.8)') gradpar_Bmag(:)
        write(1,'(1pe16.8)') Bmag(:)
        write(1,'(1pe16.8)') w_theta(:)
+       write(1,'(1pe16.8)') bigR(:)
+       write(1,'(1pe16.8)') bigR_th0
+       write(1,'(1pe16.8)') bigR_th0_rderiv
        close(1)
     endif
 

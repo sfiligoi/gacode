@@ -8,6 +8,7 @@ export EXTRA_LIBS = \
        ${GACODE_ROOT}/neo/src/neo_lib.a \
        ${GACODE_ROOT}/shared/nclass/nclass_lib.a \
        ${GACODE_ROOT}/tglf/src/tglf_lib.a \
+       ${GACODE_ROOT}/shared/harvest_client/libharvest.a \
        ${GACODE_ROOT}/glf23/src/glf23_lib.a \
        ${GACODE_ROOT}/gyro/src/gyro_lib.a \
        ${GACODE_ROOT}/gyro/BLEND/BLEND_lib.a \
@@ -17,8 +18,7 @@ export EXTRA_LIBS = \
        ${GACODE_ROOT}/gyro/SSUB/SSUB_lib.a \
        ${GACODE_ROOT}/shared/GEO/GEO_lib.a \
        ${GACODE_ROOT}/shared/UMFPACK/UMFPACK_lib.a \
-       ${GACODE_ROOT}/gyro/GKEIGEN/GKEIGEN_lib.a \
-       ${LMATH}
+       ${GACODE_ROOT}/gyro/GKEIGEN/GKEIGEN_lib.a
 
 all:
 	gacode_getversion > .VERSION

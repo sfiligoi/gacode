@@ -121,6 +121,9 @@ subroutine prgen_map_iterdb
   EXPRO_zeta = zeta(:)
   EXPRO_flow_beam = flow_beam(:)
   EXPRO_flow_wall = flow_wall_exp(:)
+  EXPRO_sbeame = onetwo_sbeame(:)
+  EXPRO_sbcx = sbcx_d(:)
+  EXPRO_sscxl = onetwo_sscxl(:)
   EXPRO_zmag = zmag(:)
   EXPRO_ptot = onetwo_press(:) ! Total pressure
   ! COORDINATES: set sign of poloidal flux

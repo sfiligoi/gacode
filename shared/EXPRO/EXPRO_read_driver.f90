@@ -51,7 +51,7 @@ subroutine EXPRO_read_driver
   read(io,*) EXPRO_te(:)
   read(io,*) EXPRO_ptot(:)
   read(io,*) EXPRO_z_eff(:)
-  read(io,*) dummy
+  read(io,*) dummy(:)
 
   ! 16-20
   read(io,*) EXPRO_ni(1,:)
@@ -113,8 +113,8 @@ subroutine EXPRO_read_driver
   read(io,*) EXPRO_flow_beam(:)
   read(io,*) EXPRO_flow_wall(:)
   read(io,*) EXPRO_flow_mom(:)
-  read(io,*) dummy
-  read(io,*) dummy
+  read(io,*) dummy(:)
+  read(io,*) dummy(:)
 
   ! 61-65
   read(io,*) EXPRO_pow_e(:)
@@ -129,6 +129,17 @@ subroutine EXPRO_read_driver
   read(io,*) EXPRO_pow_e_sync(:)
   read(io,*) EXPRO_pow_e_brem(:)
   read(io,*) EXPRO_pow_e_line(:)
+
+  ! 71-75
+  read(io,*,iostat=ierr) EXPRO_sbeame(:)
+  if (ierr == 0) then
+     read(io,*) EXPRO_sbcx(:)
+     read(io,*) EXPRO_sscxl(:)
+     read(io,*) dummy(:)
+     read(io,*) dummy(:)
+  else
+     print('(a)'),'INFO: (EXPRO) This is an OLD format input.profiles.  Please regenerate.'
+  endif
 
   close(io)
   !--------------------------------------------------------------

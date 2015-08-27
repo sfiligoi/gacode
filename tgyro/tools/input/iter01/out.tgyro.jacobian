@@ -1,96 +1,96 @@
 r/a =  1.000000E-01
-dQi/dzTi -1.615572E+01
-dQi/dzTe -2.093729E+02
-dQi/dzne  5.387998E+00
+dQi/dzTi  3.361012E+00
+dQi/dzTe  4.726126E-01
+dQi/dzne -5.183581E-01
 r/a =  2.000000E-01
-dQi/dzTi  1.107102E+02
-dQi/dzTe  2.049949E+01
-dQi/dzne  6.552395E+00
+dQi/dzTi  2.593736E+01
+dQi/dzTe -7.406352E+01
+dQi/dzne  5.543925E+00
 r/a =  3.000000E-01
-dQi/dzTi  2.140430E+02
-dQi/dzTe -1.050450E+01
-dQi/dzne  1.986753E+01
+dQi/dzTi  2.474359E+02
+dQi/dzTe  6.245034E+01
+dQi/dzne  2.857604E+01
 r/a =  4.000000E-01
-dQi/dzTi  4.882282E+02
-dQi/dzTe  1.464297E+02
-dQi/dzne  2.515990E+01
+dQi/dzTi  2.550494E+02
+dQi/dzTe  4.863675E+01
+dQi/dzne  7.234949E+00
 r/a =  5.000000E-01
-dQi/dzTi  3.719248E+02
-dQi/dzTe  5.290586E+01
-dQi/dzne  1.697341E+01
+dQi/dzTi  3.424252E+02
+dQi/dzTe  6.480660E+01
+dQi/dzne  9.542087E+00
 r/a =  6.000000E-01
-dQi/dzTi  6.108092E+02
-dQi/dzTe -6.896165E+01
-dQi/dzne  5.712304E+01
+dQi/dzTi  5.333112E+02
+dQi/dzTe  7.830848E+01
+dQi/dzne  5.565946E+01
 r/a =  7.000000E-01
-dQi/dzTi  9.975338E+02
-dQi/dzTe -5.775900E+02
-dQi/dzne  7.853244E+01
+dQi/dzTi  8.897139E+02
+dQi/dzTe  5.984922E+01
+dQi/dzne  2.390343E+01
 r/a =  8.000000E-01
-dQi/dzTi  1.257092E+03
-dQi/dzTe -4.124304E+02
-dQi/dzne  9.365175E+01
+dQi/dzTi  1.011634E+03
+dQi/dzTe -5.030421E+02
+dQi/dzne  7.667358E+01
 r/a =  1.000000E-01
-dQe/dzTi  1.370280E+01
-dQe/dzTe  2.540713E+01
-dQe/dzne  3.885452E+00
+dQe/dzTi -7.673626E-01
+dQe/dzTe -3.406757E+00
+dQe/dzne -6.057795E-01
 r/a =  2.000000E-01
-dQe/dzTi -5.243261E+00
-dQe/dzTe  4.187847E+01
-dQe/dzne -1.293445E+01
+dQe/dzTi  1.241072E+01
+dQe/dzTe  1.049136E+02
+dQe/dzne -2.595120E+00
 r/a =  3.000000E-01
-dQe/dzTi -2.267302E+01
-dQe/dzTe  1.349814E+02
-dQe/dzne -2.543138E+01
+dQe/dzTi -1.333025E+01
+dQe/dzTe  9.689265E+01
+dQe/dzne -1.141112E+01
 r/a =  4.000000E-01
-dQe/dzTi -1.900485E+01
-dQe/dzTe  1.994487E+02
-dQe/dzne -1.897367E+01
+dQe/dzTi -4.924726E+00
+dQe/dzTe  2.129824E+02
+dQe/dzne -2.260330E+01
 r/a =  5.000000E-01
-dQe/dzTi -1.178150E+01
-dQe/dzTe  2.805156E+02
-dQe/dzne -5.037792E+01
+dQe/dzTi -3.724625E+01
+dQe/dzTe  4.468150E+02
+dQe/dzne -5.307099E+01
 r/a =  6.000000E-01
-dQe/dzTi -3.592283E+01
-dQe/dzTe  4.883795E+02
-dQe/dzne -5.748316E+01
+dQe/dzTi -1.392010E+01
+dQe/dzTe  3.804610E+02
+dQe/dzne -4.246629E+01
 r/a =  7.000000E-01
-dQe/dzTi -9.367724E+01
-dQe/dzTe  8.374491E+02
-dQe/dzne -9.629055E+01
+dQe/dzTi -5.334429E+01
+dQe/dzTe  7.355088E+02
+dQe/dzne -7.289887E+01
 r/a =  8.000000E-01
-dQe/dzTi -1.033654E+02
-dQe/dzTe  1.149785E+03
-dQe/dzne -1.605368E+02
+dQe/dzTi -1.385231E+02
+dQe/dzTe  1.389749E+03
+dQe/dzne -1.714781E+02
 r/a =  1.000000E-01
-dGe/dzTi  3.253498E+01
-dGe/dzTe -4.282796E+01
-dGe/dzne  1.746926E+01
+dGe/dzTi  1.211022E+01
+dGe/dzTe -2.970658E+00
+dGe/dzne  1.495394E+00
 r/a =  2.000000E-01
-dGe/dzTi  6.452221E+01
-dGe/dzTe  1.958217E+01
-dGe/dzne  3.016776E+01
+dGe/dzTi  5.997414E+01
+dGe/dzTe -4.611503E+01
+dGe/dzne  2.206973E+01
 r/a =  3.000000E-01
-dGe/dzTi  1.446288E+02
-dGe/dzTe  7.194089E+01
-dGe/dzne  3.454824E+01
+dGe/dzTi  5.478044E+01
+dGe/dzTe  2.579234E+00
+dGe/dzne  1.391147E+01
 r/a =  4.000000E-01
-dGe/dzTi  1.655656E+02
-dGe/dzTe  4.528347E+01
-dGe/dzne  8.470207E+01
+dGe/dzTi  9.983543E+01
+dGe/dzTe  1.593822E+01
+dGe/dzne  4.595925E+01
 r/a =  5.000000E-01
-dGe/dzTi  1.563957E+02
-dGe/dzTe  4.437029E+01
-dGe/dzne  6.264718E+01
+dGe/dzTi  1.285330E+02
+dGe/dzTe  4.381642E+01
+dGe/dzne  8.409352E+01
 r/a =  6.000000E-01
-dGe/dzTi  4.460670E+02
-dGe/dzTe  1.147203E+02
-dGe/dzne  8.027696E+01
+dGe/dzTi  2.271863E+02
+dGe/dzTe  2.074810E+01
+dGe/dzne  6.177617E+01
 r/a =  7.000000E-01
-dGe/dzTi  6.459849E+02
-dGe/dzTe  2.903546E+02
-dGe/dzne  6.826885E+01
+dGe/dzTi  4.286192E+02
+dGe/dzTe  2.297375E+02
+dGe/dzne  4.885160E+01
 r/a =  8.000000E-01
-dGe/dzTi  1.077915E+03
-dGe/dzTe  1.894898E+02
-dGe/dzne  1.584292E+02
+dGe/dzTi  6.931526E+02
+dGe/dzTe  6.411678E+02
+dGe/dzne  3.302642E+01

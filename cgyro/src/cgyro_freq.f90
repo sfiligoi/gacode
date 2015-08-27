@@ -8,9 +8,7 @@ subroutine cgyro_freq
   real, dimension(n_radial,n_theta) :: mode_weight
   complex, dimension(n_radial,n_theta) :: freq_loc
 
-  if (i_time == 0) return
-
-  if (n == 0) then
+  if (i_time == 0 .or. n == 0) then
      freq = 0.0
      freq_err = 0.0
      return
@@ -32,7 +30,7 @@ subroutine cgyro_freq
 
   ! Fractional Frequency Error
   dfr = sum(abs(real(freq_loc(:,:)-freq))*mode_weight(:,:))
-  dfi = sum(abs(imag(freq_loc(:,:)-freq))*mode_weight(:,:))
+  dfi = sum(abs(aimag(freq_loc(:,:)-freq))*mode_weight(:,:))
 
   freq_err = (dfr+i_c*dfi)/total_weight/abs(freq)
 

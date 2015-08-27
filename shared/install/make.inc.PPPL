@@ -9,6 +9,7 @@
 
 FC	= mpif90 -mod $(GACODE_ROOT)/modules -I $(GACODE_ROOT)/modules
 F77	= mpif90
+CC	= mpicc
 
 FOMP    = -openmp
 FMATH	= -r8

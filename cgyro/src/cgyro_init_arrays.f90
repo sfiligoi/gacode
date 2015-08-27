@@ -2,21 +2,17 @@ subroutine cgyro_init_arrays
 
   use timer_lib
   use mpi
-
   use cgyro_globals
-  use cgyro_equilibrium
 
   implicit none
 
   real, external :: BESJ0
-  real :: arg,ang
+  real :: arg
   integer :: ir,it,is,ie,ix
   integer :: jr,jt,id
   complex :: thfac
   real, dimension(n_radial,n_theta) :: sum_loc
   real, dimension(nv_loc) :: vfac
-
-  call timer_lib_in('init_arrays')
 
   !-------------------------------------------------------------------------
   ! Distributed Bessel-function Gyroaverages
@@ -230,81 +226,94 @@ subroutine cgyro_init_arrays
      thcyc(it+n_theta) = it
   enddo
 
-  ! coefficients for 4th order centered derivative
-  cderiv(-2) =  1.0 / (12.0 * d_theta)
-  cderiv(-1) = -8.0 / (12.0 * d_theta)
-  cderiv(0)  =  0.0 / (12.0 * d_theta)
-  cderiv(1)  =  8.0 / (12.0 * d_theta)
-  cderiv(2)  = -1.0 / (12.0 * d_theta)
-  ! coefficients for 4th order filter for 3rd order upwinded derivative
-  uderiv(-2) =  1.0 / (12.0 * d_theta)
-  uderiv(-1) = -4.0 / (12.0 * d_theta)
-  uderiv(0)  =  6.0 / (12.0 * d_theta)
-  uderiv(1)  = -4.0 / (12.0 * d_theta)
-  uderiv(2)  =  1.0 / (12.0 * d_theta)
+  allocate(cderiv(-nup:nup))
+  allocate(uderiv(-nup:nup))
 
-  ! coefficients for 2nd order centered derivative
-  !cderiv(-2) =  0.0 / (2.0 * d_theta)
-  !cderiv(-1) = -1.0 / (2.0 * d_theta)
-  !cderiv(0)  =  0.0 / (2.0 * d_theta)
-  !cderiv(1)  =  1.0 / (2.0 * d_theta)
-  !cderiv(2)  =  0.0 / (2.0 * d_theta)
-  ! coefficients for 2nd order filter for 2nd order upwinded derivative
-  !uderiv(-2) =  0.0 / (2.0 * d_theta)
-  !uderiv(-1) =  -1.0 / (2.0 * d_theta)
-  !uderiv(0)  =  2.0 / (2.0 * d_theta)
-  !uderiv(1)  =  -1.0 / (2.0 * d_theta)
-  !uderiv(2)  =  0.0 / (2.0 * d_theta)
+  select case (nup)
 
-  !up_theta = up_theta * n_theta/2.0
+  case (1)
+
+     ! 1st-order UPWIND
+
+     ! 2nd-order centered derivative
+     cderiv(-1) = -1.0 / (2.0 * d_theta)
+     cderiv(0)  =  0.0 / (2.0 * d_theta)
+     cderiv(1)  =  1.0 / (2.0 * d_theta)
+
+     ! 2nd-derivative filter
+     uderiv(-1) = -1.0 / (2.0 * d_theta)
+     uderiv(0)  =  2.0 / (2.0 * d_theta)
+     uderiv(1)  = -1.0 / (2.0 * d_theta)
+
+  case (2)
+
+     ! 3rd-order UPWIND
+
+     ! 4th-order centered derivative
+     cderiv(-2) =  1.0 / (12.0 * d_theta)
+     cderiv(-1) = -8.0 / (12.0 * d_theta)
+     cderiv(0)  =  0.0 / (12.0 * d_theta)
+     cderiv(1)  =  8.0 / (12.0 * d_theta)
+     cderiv(2)  = -1.0 / (12.0 * d_theta)
+
+     ! 4th-derivative filter 
+     uderiv(-2) =  1.0 / (12.0 * d_theta)
+     uderiv(-1) = -4.0 / (12.0 * d_theta)
+     uderiv(0)  =  6.0 / (12.0 * d_theta)
+     uderiv(1)  = -4.0 / (12.0 * d_theta)
+     uderiv(2)  =  1.0 / (12.0 * d_theta)
+
+  case (3)
+
+     ! 5th-order UPWIND
+
+     ! 6th-order centered derivative
+     cderiv(-3) =  -1.0 / (60.0 * d_theta)
+     cderiv(-2) =   9.0 / (60.0 * d_theta)
+     cderiv(-1) = -45.0 / (60.0 * d_theta)
+     cderiv(0)  =   0.0 / (60.0 * d_theta)
+     cderiv(1)  =  45.0 / (60.0 * d_theta)
+     cderiv(2)  =  -9.0 / (60.0 * d_theta)
+     cderiv(3)  =   1.0 / (60.0 * d_theta)
+
+     ! 6th-derivative filter 
+     uderiv(-3) =  -1.0 / (60.0 * d_theta)
+     uderiv(-2) =   6.0 / (60.0 * d_theta)
+     uderiv(-1) = -15.0 / (60.0 * d_theta)
+     uderiv(0)  =  20.0 / (60.0 * d_theta)
+     uderiv(1)  = -15.0 / (60.0 * d_theta)
+     uderiv(2)  =   6.0 / (60.0 * d_theta)
+     uderiv(3)  =  -1.0 / (60.0 * d_theta)
+
+  end select
 
   ! Indices for parallel streaming with upwinding
-  if (zf_test_flag == 1) then
-
-     ! 4th order upwind for zonal flow test
-
-     do ir=1,n_radial
-        do it=1,n_theta
-           do id=-2,2
-              dtheta(ir,it,id)    = cderiv(id)
-              dtheta_up(ir,it,id) = uderiv(id)*up_theta
-              rcyc(ir,it,id)      = ir
-           enddo
-        enddo
-     enddo
-
-  else
-
-     ! 4th order upwind 
-
-     do ir=1,n_radial
-        do it=1,n_theta
-           do id=-2,2
-              jt = thcyc(it+id)
-              if (it+id < 1) then
-                 thfac = exp(2*pi*i_c*k_theta*rmin)
-                 jr = ir-n*box_size
-                 if (jr < 1) then
-                    jr = jr+n_radial
-                 endif
-              else if (it+id > n_theta) then
-                 thfac = exp(-2*pi*i_c*k_theta*rmin)
-                 jr = ir+n*box_size
-                 if (jr > n_radial) then
-                    jr = jr-n_radial
-                 endif
-              else
-                 thfac = (1.0,0.0)
-                 jr = ir
+  do ir=1,n_radial
+     do it=1,n_theta
+        do id=-nup,nup
+           jt = thcyc(it+id)
+           if (it+id < 1) then
+              thfac = exp(2*pi*i_c*k_theta*rmin)
+              jr = ir-n*box_size
+              if (jr < 1) then
+                 jr = jr+n_radial
               endif
-              dtheta(ir,it,id)    = cderiv(id)*thfac
-              dtheta_up(ir,it,id) = uderiv(id)*thfac*up_theta
-              rcyc(ir,it,id)      = jr
-           enddo
+           else if (it+id > n_theta) then
+              thfac = exp(-2*pi*i_c*k_theta*rmin)
+              jr = ir+n*box_size
+              if (jr > n_radial) then
+                 jr = jr-n_radial
+              endif
+           else
+              thfac = (1.0,0.0)
+              jr = ir
+           endif
+           dtheta(ir,it,id)    = cderiv(id)*thfac
+           dtheta_up(ir,it,id) = uderiv(id)*thfac*up_theta
+           rcyc(ir,it,id)      = jr
         enddo
      enddo
-
-  endif
+  enddo
 
   ! Streaming coefficients (for speed optimization)
 
@@ -334,6 +343,10 @@ subroutine cgyro_init_arrays
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
              -omega_aprdrift(it,is)*energy(ie)*xi(ix)**2*i_c*k_theta
 
+        ! omega_cdrift - mach component
+        omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
+             -omega_cdrift(it,is)*sqrt(energy(ie))*xi(ix)*i_c*k_theta
+
         ! radial upwind
         up_radial_n=n_radial
         omega_h(ic,iv_loc) = &
@@ -341,10 +354,14 @@ subroutine cgyro_init_arrays
              *(2.0*px(ir)/(1.0*n_radial))**(up_radial_n-1.0) &
              *(2.0*pi*px(ir)/length)
 
-        ! omega_star
+        ! omega_star and rotation shearing
         omega_s(1,ic,iv_loc) = &
              -i_c*k_theta*rho*(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
              *j0_c(ic,iv_loc)
+
+        omega_s(1,ic,iv_loc) = omega_s(1,ic,iv_loc) &
+             -i_c*k_theta*rho*(sqrt(2.0*energy(ie))*xi(ix)/vth(is) &
+             *omega_gammap(it)) * j0_c(ic,iv_loc)
 
         if (n_field > 1) then
            omega_s(2,ic,iv_loc) = -omega_s(1,ic,iv_loc)* &
@@ -355,64 +372,5 @@ subroutine cgyro_init_arrays
   enddo
 
   !-------------------------------------------------------------------------
-
-  !-------------------------------------------------------------------------
-  ! Initial conditions
-  !
-  h_x(:,:) = (0.0,0.0)
-  !
-  iv_loc = 0
-  do iv=nv1,nv2
-
-     iv_loc = iv_loc+1
-
-     is = is_v(iv)
-     ix = ix_v(iv)
-     ie = ie_v(iv)
-
-     do ic=1,nc
-
-        ir = ir_c(ic) 
-        it = it_c(ic)
-
-        if (n == 0) then
-
-           ! Zonal-flow initial condition
-
-           if (zf_test_flag == 1) then
-              if (is == 1 .and. abs(px(ir)) == 1) then
-                 h_x(ic,iv_loc) = 1e-6
-              endif
-           else
-              ! CAUTION: Need f(p) = conjg[ f(-p) ] for n=0
-              arg = abs(px(ir))/real(n_radial)
-              h_x(ic,iv_loc) = arg*rho*exp(-4.0*arg)
-              if (ir == 1) h_x(ic,iv_loc) = (0.0,0.0)
-           endif
-
-        else 
-
-           ! Exponential in ballooning angle.
-
-           if (n_toroidal == 1) then
-              if (is == 1) then
-                 ang = theta(it)+2*pi*px(ir)
-                 h_x(ic,iv_loc) = rho*exp(-(ang/2)**2) 
-              endif
-           else
-              h_x(ic,iv_loc) = amp*rho*exp(-px(ir)*4.0/n_radial) 
-           endif
-
-        endif
-
-     enddo
-  enddo
-
-  call cgyro_field_c
-
-  field_old = field
-  !-------------------------------------------------------------------------
-
-  call timer_lib_out('init_arrays')
 
 end subroutine cgyro_init_arrays

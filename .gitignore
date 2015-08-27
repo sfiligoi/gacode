@@ -1,6 +1,7 @@
 *~
 .DS_Store
 .idea
+\#*\#
 
 # Gyro build stuff
 modules/*.mod
@@ -46,17 +47,6 @@ xptor/driver/xptor
 le3/src/le3
 le3/profiles_3d/profiles_3d
 
-# Onetwo cvs-committed stuff
-onetwo/Doc/*/*.pdf
-onetwo/Doc/*/*.bak
-onetwo/Doc/*/*.log
-onetwo/Doc/*/*.aux
-onetwo/Doc/*/*.dvi
-onetwo/Doc/*/*.fig
-onetwo/Doc/*/*.ps
-onetwo/Doc/*/*.bbl
-onetwo/Doc/*/*.blg
-onetwo/Doc/*/*.ddthermal
-onetwo/Doc/*/*.points
-onetwo/Doc/*/*~
-
+# Regression logs and directories
+*.log
+*regression_test/
