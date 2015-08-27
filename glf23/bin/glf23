@@ -178,7 +178,7 @@ cd $SIMDIR
 #==========================================================
 # echo number of tasks, then parse INPUT
 #
-echo "[Parsing data in input.tglf]" > $RUNBASE
+echo "[Parsing data in input.glf23]" > $RUNBASE
 
 python $GLF23_DIR/bin/glf23_parse.py >> $RUNBASE
 if [ $? -eq 1 ] 
