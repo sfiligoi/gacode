@@ -340,6 +340,9 @@
 !
       enddo  ! i 
 !
+! recompute spectrum using non-local in ky multiscale model
+     if(sat_rule_in .eq. 1) call get_multiscale_spectrum
+!
       if(new_eikonal_in)eikonal_unsaved=.FALSE.
       gamma_out(1) = gmax
       freq_out(1) = fmax
