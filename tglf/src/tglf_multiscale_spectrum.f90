@@ -20,14 +20,14 @@
       !
       INTEGER :: i,is,k,j,j1,jmax1
       REAL :: test1,testmax1
-      REAL :: gammamax1,kymax1,ky0
+      REAL :: gammamax1,kymax1,ky0,kymax2
       REAL :: f0,f1,f2,a,b,c,x0,x02,dky,xmax
       REAL :: gamma0,gamma,gammaeff,delta
       REAL :: cnorm, phinorm, exp1, exp2, cax, kylow
       REAL,PARAMETER :: small=1.0E-10
       !
       ! model fit parameters
-      cnorm = 12.36
+      cnorm = 11.19
       if(igeo.eq.0)cnorm = 12.47
       exp1=2.0
       cax=0.84
@@ -70,8 +70,9 @@
       enddo
       gammamax1 = eigenvalue_spectrum_out(1,jmax1,1)
       kymax1 = ky_spectrum(jmax1)
-      !interpolate to find a more accurate maximum gamma/ky
-      if(jmax1.gt.1.and.jmax1.lt.nky)then
+      !interpolate to find a more accurate low-k maximum gamma/ky 
+      ! this is cut of at j1 since a maximum may not exist in the low-k range
+      if(jmax1.gt.1.and.jmax1.lt.j1)then
          f0 =  eigenvalue_spectrum_out(1,jmax1-1,1)/ky_spectrum(jmax1-1)
          f1 =  eigenvalue_spectrum_out(1,jmax1,1)/ky_spectrum(jmax1)
          f2 =  eigenvalue_spectrum_out(1,jmax1+1,1)/ky_spectrum(jmax1+1)
@@ -93,8 +94,8 @@
            gammamax1 = (a+b*xmax+c*xmax*xmax)*kymax1
          endif     
       endif
-      kymax1 = cax*kymax1
-      gammamax1 = cax*gammamax1 
+      kymax2 = cax*kymax1
+      gammamax1 = gammamax1*etg_factor_in 
       ! compute multi-scale phi-intensity spectrum field_spectrum(2,,) = phi_bar_out
       ! note that the field_spectrum(1,,) = v_bar_out = 1.0 for sat_rule_in = 1
       do j=1,nky
@@ -103,8 +104,8 @@
           gamma0 = eigenvalue_spectrum_out(1,j,1)
           ky0=ky_spectrum(j)
           delta = Max(gamma0 - gammamax1*ky0/kymax1,0.0)
-          if(ky0.lt.kymax1)then
-            gamma = (gammamax1+delta)*(ky0/kymax1)**exp1
+          if(ky0.lt.kymax2)then
+            gamma = (gammamax1+delta)*(ky0/kymax2)**exp1
           else
             gamma = gammamax1 + delta
           endif        
