@@ -27,10 +27,15 @@
       REAL,PARAMETER :: small=1.0E-10
       !
       ! model fit parameters
+      ! need to set etg_factor_in = 0.6
+      ! Miller geometry values igeo=1
       cnorm = 11.19
-      if(igeo.eq.0)cnorm = 12.47
-      exp1=2.0
       cax=0.84
+      if(igeo.eq.0)then ! s-alpha 
+       cnorm = 10.99
+       cax=1.0
+      endif
+      exp1=2.0
       !
       ! renormalize the fluxes and intensities to the phi-norm from the v-norm
       do j=1,nky
