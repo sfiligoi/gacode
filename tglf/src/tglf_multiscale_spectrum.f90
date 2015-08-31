@@ -55,7 +55,7 @@
       kymax1 = ky_spectrum(1)
       testmax1 = gammamax1/kymax1
       jmax1=1
-      kylow=0.5*SQRT(taus_in(2)/mass_in(2))
+      kylow=0.8/SQRT(taus_in(2)/mass_in(2))
       j1=0
       do j=2,nky
          ky0 = ky_spectrum(j)
