@@ -11,7 +11,7 @@ else
 endif
 
 EXEC1=tglf_mpi
-EXEC2=tglf_driver_mpi
+EXEC2=tglf
 
 LLIB=tglf_lib
 
