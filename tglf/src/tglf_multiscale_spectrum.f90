@@ -22,16 +22,16 @@
       REAL :: test1,testmax1
       REAL :: gammamax1,kymax1,ky0
       REAL :: f0,f1,f2,a,b,c,x0,x02,dky,xmax
-      REAL :: gamma0,gamma,gammaeff,delta
+      REAL :: gamma0,gamma,gammaeff,delta,gammamax2
       REAL :: cnorm, phinorm, kylow
       REAL,PARAMETER :: small=1.0E-10
       !
       ! model fit parameters
-      ! need to set etg_factor_in = 0.6
+      ! need to set alpha_zf_in = 1.0
       ! Miller geometry values igeo=1
       cnorm = 7.19
       if(igeo.eq.0)then ! s-alpha 
-       cnorm=3.90
+       cnorm=10.03
       endif
       !
       ! renormalize the fluxes and intensities to the phi-norm from the v-norm
@@ -96,7 +96,7 @@
            gammamax1 = (a+b*xmax+c*xmax*xmax)*kymax1
          endif     
       endif
-      gammamax1 = gammamax1*alpha_zf_in 
+      gammamax2 = gammamax1*0.42*alpha_zf_in 
 !      write(*,*)"gammamax1 = ",gammamax1," kymax1 = ",kymax1," kylow = ",kylow
       ! compute multi-scale phi-intensity spectrum field_spectrum(2,,) = phi_bar_out
       ! note that the field_spectrum(1,,) = v_bar_out = 1.0 for sat_rule_in = 1
@@ -105,12 +105,13 @@
           gamma=0.0
           gamma0 = eigenvalue_spectrum_out(1,j,1)
           ky0=ky_spectrum(j)
-          delta = Max(gamma0 - gammamax1*ky0/kymax1,0.0)
+          delta = Max(gamma0 - gammamax2*ky0/kymax1,0.0)
           if(ky0.lt.kymax1)then
             gamma = gamma0
+            if(igeo.eq.0)gamma = gamma0*MIN(ky0/kymax1,1.0)
           else
-            gamma = gammamax1 + delta
-          endif        
+            gamma = gammamax2 + delta
+          endif   
 ! intensity model
         do i=1,nmodes_in
           gammaeff = 0.0
