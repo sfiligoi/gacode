@@ -233,6 +233,10 @@ subroutine EXPRO_alloc_control(i_proc,flag)
      deallocate(EXPRO_pow_ei)
      deallocate(EXPRO_zeta)
 
+     deallocate(EXPRO_sbeame)
+     deallocate(EXPRO_sbcx)
+     deallocate(EXPRO_sscxl)
+
      deallocate(EXPRO_flow_beam)
      deallocate(EXPRO_flow_wall)
      deallocate(EXPRO_zmag)
