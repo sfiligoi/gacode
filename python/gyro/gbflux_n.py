@@ -36,7 +36,7 @@ mtag = sim.tagmom[i_moment]
 fig = plt.figure(figsize=(7*n_kinetic,6))
 #=====================================
 
-color = ['k','m','b','c']
+color = ['k','m','b','c','g','r']
 
 k   = sim.profile['kt_rho']
 dk  = k[1]-k[0]
