@@ -2,7 +2,7 @@
 ! cgyro_write_timedata.f90
 !
 ! PURPOSE:
-!  Output of time-dependent data 
+!  Output of time-dependent data.
 !-----------------------------------------------------------------
 
 subroutine cgyro_write_timedata

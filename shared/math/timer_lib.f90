@@ -1,3 +1,23 @@
+!-------------------------------------------------------------------
+! timer_lib.f90
+!
+! PURPOSE:
+!  A library to manage a series of up to 64 code timers in Fortran.
+!
+! NOTES:
+!  ! Initialize timer
+!  call timer_lib_init('mytimer')
+!
+!  ! Start 
+!  call timer_lib_in('mytimer')
+!   ...
+!  ! Stop 
+!  call timer_lib_out('mytimer')
+!
+!  ! Get value
+!  print *,timer_lib_time('mytimer')
+!-------------------------------------------------------------------
+
 module timer_lib
 
   implicit none 
@@ -6,10 +26,10 @@ module timer_lib
   public :: timer_lib_in
   public :: timer_lib_out
 
-  real, dimension(64) :: timer_cpu
+  real, dimension(64) :: timer_cpu=0.0
   real, dimension(64) :: timer_cpu_in
   character(len=19), dimension(64) :: timer_cpu_tag
-  integer :: timer_cpu_maxindx
+  integer :: timer_cpu_maxindx=0
 
 contains 
 
