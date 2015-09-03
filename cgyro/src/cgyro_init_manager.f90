@@ -1,3 +1,16 @@
+!-----------------------------------------------------------------
+! cgyro_init_manager.f90
+!
+! PURPOSE:
+!  Manage initialization of arrays and other setup issues.
+!  In particular,
+!
+!  1. collisionless streaming arrays (timed setup)
+!  2. collision arrays (timed)
+!  3. write initial data
+!  4. Construct initial distributions
+!-----------------------------------------------------------------
+
 subroutine cgyro_init_manager
 
   use mpi
