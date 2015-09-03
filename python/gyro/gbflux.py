@@ -51,7 +51,7 @@ for i in range(len(t)):
     if t[i] < (1.0-window)*t[len(t)-1]:
         imin = i
 
-color = ['k','m','b','c']
+color = ['k','m','b','c','g','r']
 
 # Loop over species
 if datafile == 'none':

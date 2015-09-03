@@ -83,7 +83,7 @@
       REAL :: damp_sig_in = 0.0
 ! input rare switches
       REAL :: alpha_quench_in=0.0
-      REAL :: alpha_zf_in = 0.0
+      REAL :: alpha_zf_in = 0.42
       REAL :: park_in=1.0
       REAL :: ghat_in=1.0
       REAL :: gchat_in=1.0
@@ -734,7 +734,7 @@
       REAL :: vexb_shear_tg=0.0
       REAL :: vexb_tg
       REAL :: alpha_quench_tg=0.0
-      REAL :: alpha_zf_tg=0.0
+      REAL :: alpha_zf_tg=0.42
       REAL :: alpha_mach_tg=1.0
       REAL :: alpha_p_tg=1.0
       REAL :: alpha_e_tg=1.0

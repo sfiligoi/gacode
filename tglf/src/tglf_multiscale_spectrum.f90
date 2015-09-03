@@ -20,22 +20,19 @@
       !
       INTEGER :: i,is,k,j,j1,jmax1
       REAL :: test1,testmax1
-      REAL :: gammamax1,kymax1,ky0,kymax2
+      REAL :: gammamax1,kymax1,ky0
       REAL :: f0,f1,f2,a,b,c,x0,x02,dky,xmax
-      REAL :: gamma0,gamma,gammaeff,delta
-      REAL :: cnorm, phinorm, exp1, exp2, cax, kylow
+      REAL :: gamma0,gamma,gammaeff,delta,gammamax2
+      REAL :: cnorm, phinorm, kylow
       REAL,PARAMETER :: small=1.0E-10
       !
       ! model fit parameters
-      ! need to set etg_factor_in = 0.6
+      ! need to set alpha_zf_in = 1.0
       ! Miller geometry values igeo=1
-      cnorm = 11.19
-      cax=0.84
+      cnorm = 7.19
       if(igeo.eq.0)then ! s-alpha 
-       cnorm = 10.99
-       cax=1.0
+       cnorm=10.03
       endif
-      exp1=2.0
       !
       ! renormalize the fluxes and intensities to the phi-norm from the v-norm
       do j=1,nky
@@ -60,7 +57,7 @@
       kymax1 = ky_spectrum(1)
       testmax1 = gammamax1/kymax1
       jmax1=1
-      kylow=0.5*SQRT(taus_in(2)/mass_in(2))
+      kylow=0.8/SQRT(taus_in(2)/mass_in(2))
       j1=0
       do j=2,nky
          ky0 = ky_spectrum(j)
@@ -99,8 +96,8 @@
            gammamax1 = (a+b*xmax+c*xmax*xmax)*kymax1
          endif     
       endif
-      kymax2 = cax*kymax1
-      gammamax1 = gammamax1*etg_factor_in 
+      gammamax2 = gammamax1*0.42*alpha_zf_in 
+!      write(*,*)"gammamax1 = ",gammamax1," kymax1 = ",kymax1," kylow = ",kylow
       ! compute multi-scale phi-intensity spectrum field_spectrum(2,,) = phi_bar_out
       ! note that the field_spectrum(1,,) = v_bar_out = 1.0 for sat_rule_in = 1
       do j=1,nky
@@ -108,29 +105,19 @@
           gamma=0.0
           gamma0 = eigenvalue_spectrum_out(1,j,1)
           ky0=ky_spectrum(j)
-          delta = Max(gamma0 - gammamax1*ky0/kymax1,0.0)
-          if(ky0.lt.kymax2)then
-            gamma = (gammamax1+delta)*(ky0/kymax2)**exp1
+          delta = Max(gamma0 - gammamax2*ky0/kymax1,0.0)
+          if(ky0.lt.kymax1)then
+            gamma = gamma0
+            if(igeo.eq.0)gamma = gamma0*MIN(ky0/kymax1,1.0)
           else
-            gamma = gammamax1 + delta
-          endif        
+            gamma = gammamax2 + delta
+          endif   
 ! intensity model
         do i=1,nmodes_in
           gammaeff = 0.0
           if(gamma0.gt.small)gammaeff = gamma*(eigenvalue_spectrum_out(1,j,i)/gamma0)**2
           field_spectrum_out(2,j,i) = cnorm*gammaeff*gammaeff/ky0**4
-          if(tglf_isnan(field_spectrum_out(2,j,i)))then
-            write(*,*)"NaN detected"
-            write(*,*)gammamax1,kymax1,jmax1
-            write(*,*)gammaeff,ky0,j,i
-            STOP
-          endif
-          if(tglf_isinf(field_spectrum_out(2,j,i)))then
-            write(*,*)"INF detected"
-            write(*,*)gammamax1,kymax1,jmax1
-            write(*,*)gammaeff,ky0,j,i
-            STOP
-          endif
+!
         enddo
      enddo
      ! recompute the intensity and flux spectra
