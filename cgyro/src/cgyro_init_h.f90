@@ -83,7 +83,7 @@ subroutine cgyro_init_h
                     ang = theta(it)+2*pi*px(ir)
                     h_x(ic,iv_loc) = rho*exp(-(ang/2)**2) 
                  endif
-              else if (n == n_toroidal/2) then
+              else
                  h_x(ic,iv_loc) = amp*rho
               endif
 
