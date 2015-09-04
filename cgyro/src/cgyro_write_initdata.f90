@@ -14,8 +14,8 @@ subroutine cgyro_write_initdata
   implicit none
 
   integer :: in,is, it
-  real :: z_eff
-  
+  real :: kymax,z_eff
+
   !----------------------------------------------------------------------------
   ! Runfile to give complete summary to user
   ! 
@@ -26,33 +26,50 @@ subroutine cgyro_write_initdata
      open(unit=io,file=trim(path)//runfile_info,status='old',position='append')
 
      write(io,*)
-     write(io,'(a)') 'n_radial  n_theta   n_species n_energy  n_xi'
-     write(io,'(t1,5(i4,6x))') n_radial,n_theta,n_species,n_energy,n_xi
-     write(io,*) 
-     write(io,'(a,f7.2,a,f7.2)') '(Lx,Ly)/rho',length/rho,',',2*pi/ky
-     write(io,*) 
+     write(io,'(a)') ' n_theta | n_species | n_energy | n_xi '
+     write(io,'(t4,i3,t16,i1,t26,i2,t36,i2)') n_theta,n_species,n_energy,n_xi
+     if (test_flag == 0) then
+        write(io,*) 
+        write(io,'(a)') ' nc_loc | nv_loc | nsplit | n_MPI'
+        write(io,'(t3,i4,t12,i4,t21,i3,t29,i4)') nc_loc,nv_loc,nsplit,n_proc
+     endif
 
-     if (zf_test_flag == 1) then
-        write(io,20) 'ky*rho',0.0
-     else 
-        if (n_toroidal > 1) then
-           write(io,20) 'ky*rho'
-           write(io,'(8f6.3,1x)') (in*q/rmin*rho,in=0,n_toroidal-1)
+     if (zf_test_flag == 0) then
+
+        ! Compute kymax
+        if (n_toroidal == 1) then
+           kymax = q/rmin*rho
         else
-           write(io,'(a,f6.3)') 'ky*rho ',q/rmin*rho
+           kymax = q/rmin*(n_toroidal-1)*rho
         endif
+
+        write(io,*)
+        write(io,*) '          n   Delta     Max     L/rho'
+        write(io,'(a,i4,2x,2(f6.3,2x),2x,f6.2)') ' kx*rho:',&
+             n_radial,2*pi*rho/length,2*pi*rho*(n_radial/2-1)/length,length/rho
+        write(io,'(a,i4,2x,2(f6.3,2x),2x,f6.2)') ' ky*rho:',&
+             n_toroidal,q/rmin*rho,kymax,2*pi/ky
+
+     else
+
+        write(io,*) ' kx*rho:',2*pi*rho/length
+
      endif
 
      write(io,*) 
-
-     if (zf_test_flag == 1) then
-        write(io,20) 'kx*rho',2*pi*rho/length
-     else
-        write(io,20) 'min(kx*rho)',2*pi*rho/length
-        write(io,20) 'max(kx*rho)',2*pi*rho*(n_radial/2-1)/length
-     endif
+     write(io,20) '    r/a:',rmin
+     write(io,20) '    R/a:',rmaj, '  shift:',shift
+     write(io,20) '      q:',q,    '      s:',s
+     write(io,20) '  kappa:',kappa,'s_kappa:',s_kappa
+     write(io,20) '  delta:',delta,'s_delta:',s_delta
+     write(io,20) '   zeta:',zeta, ' s_zeta:',s_zeta
+     write(io,20) '   zmag:',zmag, ' s_zmag:',s_zmag
+     write(io,*)
+     write(io,20) '  betae:',betae_unit, ' beta_*:',beta_star
 
      write(io,*)
+     write(io,20) 'gamma_e:', gamma_e,'   mach:', mach
+     write(io,20) 'gamma_p:', gamma_p
 
      z_eff = 0.0
      do is=1,n_species
@@ -60,34 +77,8 @@ subroutine cgyro_write_initdata
            z_eff = z_eff+dens(is)*z(is)**2/dens_ele
         endif
      enddo
-     write(io,20) 'z_eff',z_eff
-
-     write(io,*) 
-     write(io,20) 'rho',rho
-     write(io,20) 'r/a',rmin
-     write(io,20) 'R/a',rmaj
-     write(io,20) 'q',q
-     write(io,20) 's',s
-     write(io,20) 'shift',shift
-     write(io,20) 'kappa',kappa
-     write(io,20) 's_kappa',s_kappa
-     write(io,20) 'delta',delta
-     write(io,20) 's_delta',s_delta
-     write(io,20) 'zeta',zeta
-     write(io,20) 's_zeta',s_zeta
-     write(io,20) 'zmag',zmag
-     write(io,20) 's_zmag',s_zmag
-
      write(io,*)
-     write(io,20) 'beta_star', beta_star
-     if(n_field > 1) then
-        write(io,20) 'betae_unit', betae_unit
-     endif
-
-     write(io,*)
-     write(io,20) 'gamma_e', gamma_e
-     write(io,20) 'gamma_p', gamma_p
-     write(io,20) 'mach', mach
+     write(io,20) '    rho:',rho,'  z_eff:',z_eff
 
      write(io,*)
      write(io,'(a)') &
@@ -97,13 +88,13 @@ subroutine cgyro_write_initdata
              is,z(is),dens(is),temp(is),mass(is),dlnndr(is),dlntdr(is),nu(is)
      enddo
 
-     if(profile_model == 2) then
+     if (profile_model == 2) then
         write(io,*)
-        write(io,20) 'a_meters',  a_meters
-        write(io,20) 'b_unit',    b_unit
-        write(io,20) 'dens_norm', dens_norm
-        write(io,20) 'temp_norm', temp_norm
-        write(io,20) 'vth_norm',  vth_norm
+        write(io,20) ' a_meters:',a_meters
+        write(io,20) '   b_unit:',b_unit
+        write(io,20) 'dens_norm:',dens_norm
+        write(io,20) 'temp_norm:',temp_norm
+        write(io,20) ' vth_norm:',vth_norm
      endif
 
      write(io,*)
@@ -209,6 +200,6 @@ subroutine cgyro_write_initdata
   endif
   !----------------------------------------------------------------------------
 
-20 format(t2,a,':',t13,1pe12.4) 
+20 format(t2,2(a,1x,1pe11.4,4x)) 
 
 end subroutine cgyro_write_initdata

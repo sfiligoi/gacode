@@ -153,6 +153,7 @@ contains
 
     slib_comm = comm
 
+
     !-------------------------------------------------
     ! Get rank and number of processors from slib_comm 
     ! (which is assumed to already exist).
