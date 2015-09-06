@@ -39,7 +39,8 @@
        RETURN
     ENDIF
 
-    ierr=init_harvest('TGLF_spectrum?10'//NUL,harvest_sendline,LEN(harvest_sendline))
+    ierr=init_harvest('TGLF'//NUL,harvest_sendline,LEN(harvest_sendline))
+    ierr=set_harvest_payload_str(harvest_sendline,'VERSION'//NUL,'APS15_1'//NUL) !no underscore to allow different versions of the same run
 
 !   '#---------------------------------------------------'
 !   '# Plasma parameters:'
