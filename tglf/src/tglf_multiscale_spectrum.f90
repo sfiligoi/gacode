@@ -23,7 +23,7 @@
       REAL :: gammamax1,kymax1,ky0
       REAL :: f0,f1,f2,a,b,c,x0,x02,dky,xmax
       REAL :: gamma0,gamma,gammaeff
-      REAL :: cnorm, phinorm, kylow, czf, cz1,cz2
+      REAL :: cnorm, phinorm, kylow, czf, cz1, cz2, kyetg
       REAL,PARAMETER :: small=1.0E-10
       !
       ! model fit parameters
@@ -34,6 +34,10 @@
       cnorm = 12.84
       cz1 = 0.35*czf
       cz2=0.60*czf
+      cnorm=14.21
+      cz1=0.48*czf
+      cz2=1.0*czf
+      kyetg = etg_factor_in*SQRT(taus(2)/mass(2))
       if(igeo.eq.0)then ! s-alpha 
        cnorm=12.14
        cz1=0.61*czf
@@ -119,6 +123,7 @@
         do i=1,nmodes_in
           gammaeff = 0.0
           if(gamma0.gt.small)gammaeff = gamma*(eigenvalue_spectrum_out(1,j,i)/gamma0)**2
+          if(ky0.gt.kyetg)gammaeff = gammaeff*SQRT(ky0/kyetg)
           field_spectrum_out(2,j,i) = cnorm*gammaeff*gammaeff/ky0**4
 !
         enddo
