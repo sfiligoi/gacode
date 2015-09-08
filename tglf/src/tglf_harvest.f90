@@ -245,6 +245,7 @@
       ENDDO
       ierr=set_harvest_payload_dbl_array(harvest_sendline,'OUT_EIGENVALUE_SPECTRUM_OMEGA'//NUM,spectrum,nky)
    ENDDO
+   harvest_sendline = TRIM(harvest_sendline) // TRIM(tglf_harvest_extra_in) // NUL
    ierr=harvest_send(harvest_sendline)
    
    DEALLOCATE(spectrum)
