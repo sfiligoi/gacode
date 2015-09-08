@@ -130,7 +130,11 @@ subroutine cgyro_rhs(ij)
      if (nonlinear_method == 1) then
         call cgyro_nl_direct(ij)
      else
-        call cgyro_nl_fftw(ij)
+        if (split_method == 1) then
+           call cgyro_nl_fftw(ij)
+        else
+           call cgyro_nl_fftw_split(ij)
+        endif
      endif
   endif
 

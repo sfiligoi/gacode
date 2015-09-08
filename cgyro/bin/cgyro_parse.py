@@ -55,6 +55,8 @@ x.add('MACH','0.0')
 x.add('GAMMA_E_SCALE','1.0')
 x.add('GAMMA_P_SCALE','1.0')
 x.add('MACH_SCALE','1.0')
+x.add('SPLIT_METHOD','1')
+
 
 x.add('RMIN','0.5')
 x.add('RMAJ','3.0')

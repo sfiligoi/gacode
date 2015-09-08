@@ -57,6 +57,7 @@ module cgyro_globals
   real :: gamma_e_scale
   real :: gamma_p_scale
   real :: mach_scale
+  integer :: split_method
   !
   ! Geometry input
   !
