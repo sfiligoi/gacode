@@ -102,7 +102,7 @@ subroutine cgyro_rhs(ij)
         rhs_stream = 0.0
 
         if (implicit_flag == 0) then
-           do id=-nup,nup
+           do id=-nup_theta,nup_theta
               jt = thcyc(it+id)
               jr = rcyc(ir,it,id)
               jc = ic_c(jr,jt)

@@ -235,6 +235,51 @@ subroutine cgyro_check
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
+  ! Theta dissipation
+  !
+  select case (nup_theta)  
+
+  case (1) 
+     call cgyro_info('Theta dissipation: 2nd order')
+
+  case (2) 
+     call cgyro_info('Theta dissipation: 4th order')
+
+  case (3) 
+     call cgyro_info('Theta dissipation: 6th order')
+
+  case default
+     call cgyro_error('Invalid value for nup_theta')
+     return
+
+  end select
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  ! Radial dissipation
+  !
+  select case (nup_radial)  
+
+  case (1) 
+     call cgyro_info('radial dissipation: 2nd order')
+
+  case (2) 
+     call cgyro_info('Radial dissipation: 4th order')
+
+  case (3) 
+     call cgyro_info('Radial dissipation: 6th order')
+
+  case (4) 
+     call cgyro_info('Radial dissipation: 8th order')
+
+  case default
+     call cgyro_error('Invalid value for nup_radial')
+     return
+
+  end select
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
   ! Check for existence of restart file
   !
   if (restart_mode == 1) then
