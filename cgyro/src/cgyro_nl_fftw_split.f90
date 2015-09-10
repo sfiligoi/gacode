@@ -41,10 +41,11 @@ subroutine cgyro_nl_fftw_split(ij)
   include 'fftw3.f03'
 
 
+  ! 2D FFT lengths 
   nx0 = n_radial
   ny0 = 2*n_toroidal-1
 
-  ! 3/2-rule for dealiasing
+  ! 3/2-rule for dealiasing the nonlinear product
   nx = (3*nx0)/2
   ny = (3*ny0)/2
 
