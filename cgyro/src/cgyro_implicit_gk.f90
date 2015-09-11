@@ -39,7 +39,7 @@ subroutine cgyro_init_implicit_gk
           gksp_icntl(:,iv_loc))
   enddo
   
-  gksp_nelem=(2*nup+1)*nc
+  gksp_nelem=(2*nup_theta+1)*nc
   gksp_nmax=gksp_nelem*10
   allocate(gksp_mat(gksp_nmax,nv_loc))
   allocate(gksp_indx(2*gksp_nmax,nv_loc))
@@ -63,7 +63,7 @@ subroutine cgyro_init_implicit_gk
         
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
         
-        do id=-nup,nup
+        do id=-nup_theta,nup_theta
            jt = thcyc(it+id)
            jr = rcyc(ir,it,id)
            jc = ic_c(jr,jt)
@@ -129,7 +129,7 @@ subroutine cgyro_init_implicit_gk
 
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
         
-        do id=-nup,nup
+        do id=-nup_theta,nup_theta
            jt = thcyc(it+id)
            jr = rcyc(ir,it,id)
            jc = ic_c(jr,jt)
@@ -376,7 +376,7 @@ subroutine cgyro_step_implicit_gk
 
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
 
-        do id=-nup,nup
+        do id=-nup_theta,nup_theta
            jt = thcyc(it+id)
            jr = rcyc(ir,it,id)
            jc = ic_c(jr,jt)

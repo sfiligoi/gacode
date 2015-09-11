@@ -22,7 +22,8 @@ module cgyro_globals
   real    :: up_radial
   integer :: up_radial_n
   real    :: up_theta
-  integer :: nup
+  integer :: nup_theta
+  integer :: nup_radial
   integer :: implicit_flag
   integer :: constant_wind_flag
   integer :: upconserve_flag
@@ -57,6 +58,7 @@ module cgyro_globals
   real :: gamma_e_scale
   real :: gamma_p_scale
   real :: mach_scale
+  integer :: split_method
   !
   ! Geometry input
   !
@@ -216,6 +218,7 @@ module cgyro_globals
   real, dimension(:), allocatable :: theta
   real, dimension(:), allocatable :: uderiv
   real, dimension(:), allocatable :: cderiv
+  real, dimension(:), allocatable :: spec_uderiv
   integer, dimension(:), allocatable :: thcyc
   integer, dimension(:,:,:), allocatable :: rcyc
   complex, dimension(:,:,:), allocatable :: dtheta

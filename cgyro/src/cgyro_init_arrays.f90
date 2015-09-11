@@ -1,3 +1,4 @@
+
 subroutine cgyro_init_arrays
 
   use timer_lib
@@ -13,6 +14,7 @@ subroutine cgyro_init_arrays
   complex :: thfac
   real, dimension(n_radial,n_theta) :: sum_loc
   real, dimension(nv_loc) :: vfac
+  real,dimension(n_radial) :: argv
 
   !-------------------------------------------------------------------------
   ! Distributed Bessel-function Gyroaverages
@@ -226,10 +228,10 @@ subroutine cgyro_init_arrays
      thcyc(it+n_theta) = it
   enddo
 
-  allocate(cderiv(-nup:nup))
-  allocate(uderiv(-nup:nup))
+  allocate(cderiv(-nup_theta:nup_theta))
+  allocate(uderiv(-nup_theta:nup_theta))
 
-  select case (nup)
+  select case (nup_theta)
 
   case (1)
 
@@ -290,7 +292,7 @@ subroutine cgyro_init_arrays
   ! Indices for parallel streaming with upwinding
   do ir=1,n_radial
      do it=1,n_theta
-        do id=-nup,nup
+        do id=-nup_theta,nup_theta
            jt = thcyc(it+id)
            if (it+id < 1) then
               thfac = exp(2*pi*i_c*k_theta*rmin)
@@ -315,6 +317,27 @@ subroutine cgyro_init_arrays
      enddo
   enddo
 
+  allocate(spec_uderiv(n_radial))
+  argv(:) = (2.0*pi/n_radial)*px(:)
+
+  select case(nup_radial)
+
+  case(1)
+     spec_uderiv(:) = 1.0 - cos(argv(:))
+
+  case(2)
+     spec_uderiv(:) = (3.0 - 4.0*cos(argv(:)) + cos(2.0*argv(:))) / 6.0
+
+  case(3)
+     spec_uderiv(:) = (20.0 - 30.0*cos(argv(:)) + 12.0*cos(2.0*argv(:)) &
+          - 2.0*cos(3.0*argv(:))) / 60.0
+
+  case(4)
+     spec_uderiv(:) = (70.0 - 112.0*cos(argv(:)) + 56.0*cos(2.0*argv(:)) &
+          - 16.0*cos(3.0*argv(:)) + 2.0*cos(4.0*argv(:))) / 280.0
+
+  end select
+
   ! Streaming coefficients (for speed optimization)
 
   iv_loc = 0
@@ -331,12 +354,8 @@ subroutine cgyro_init_arrays
         ir = ir_c(ic) 
         it = it_c(ic)
 
-        ! omega_rdrift
-        omega_cap_h(ic,iv_loc) = -omega_rdrift(it,is)*energy(ie)*&
-             (1.0 + xi(ix)**2)*(2.0*pi*i_c*px(ir)/length) 
-
         ! omega_dalpha
-        omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
+        omega_cap_h(ic,iv_loc) = &
              -omega_adrift(it,is)*energy(ie)*(1.0 + xi(ix)**2)*i_c*k_theta
 
         ! omega_dalpha - pressure component
@@ -347,12 +366,21 @@ subroutine cgyro_init_arrays
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
              -omega_cdrift(it,is)*sqrt(energy(ie))*xi(ix)*i_c*k_theta
 
+        ! omega_rdrift
+        omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) & 
+             -omega_rdrift(it,is)*energy(ie)*&
+             (1.0 + xi(ix)**2)*(2.0*pi*i_c*px(ir)/length) 
+
         ! radial upwind
-        up_radial_n=n_radial
+        !up_radial_n=n_radial
+        !omega_h(ic,iv_loc) = &
+        !     -abs(omega_rdrift(it,is))*energy(ie)*(1.0 + xi(ix)**2)*up_radial &
+        !     *(2.0*px(ir)/(1.0*n_radial))**(up_radial_n-1.0) &
+        !     *(2.0*pi*px(ir)/length)
+
         omega_h(ic,iv_loc) = &
-             -abs(omega_rdrift(it,is))*energy(ie)*(1.0 + xi(ix)**2)*up_radial & 
-             *(2.0*px(ir)/(1.0*n_radial))**(up_radial_n-1.0) &
-             *(2.0*pi*px(ir)/length)
+             -abs(omega_rdrift(it,is))*energy(ie)*(1.0 + xi(ix)**2) &
+             *up_radial *(n_radial/length) * spec_uderiv(ir)
 
         ! omega_star and rotation shearing
         omega_s(1,ic,iv_loc) = &

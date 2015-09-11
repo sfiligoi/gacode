@@ -31,7 +31,7 @@ subroutine cgyro_write_initdata
      if (test_flag == 0) then
         write(io,*) 
         write(io,'(a)') ' nc_loc | nv_loc | nsplit | n_MPI'
-        write(io,'(t3,i4,t12,i4,t21,i3,t29,i4)') nc_loc,nv_loc,nsplit,n_proc
+        write(io,'(t3,i4,t12,i4,t21,i4,t29,i4)') nc_loc,nv_loc,nsplit,n_proc
      endif
 
      if (zf_test_flag == 0) then

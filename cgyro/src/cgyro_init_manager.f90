@@ -20,7 +20,7 @@ subroutine cgyro_init_manager
   use GEO_interface
 
   implicit none
-  
+
   ! Manage array initializations
 
   call timer_lib_init('stream_init')
@@ -51,8 +51,7 @@ subroutine cgyro_init_manager
      allocate(h_x(nc,nv_loc))
      allocate(h_xs(nc,nv_loc))
      allocate(psi(nc,nv_loc))
-     allocate(f_nl(nc,nsplit,n_toroidal))
-     allocate(g_nl(nc,nsplit,n_toroidal))
+
      allocate(rhs(4,nc,nv_loc))
      allocate(h0_x(nc,nv_loc))
      allocate(cap_h_c(nc,nv_loc))
@@ -74,9 +73,9 @@ subroutine cgyro_init_manager
      allocate(recv_status(MPI_STATUS_SIZE))
 
      allocate(thcyc(1-n_theta:2*n_theta))
-     allocate(rcyc(n_radial,n_theta,-nup:nup))
-     allocate(dtheta(n_radial,n_theta,-nup:nup))
-     allocate(dtheta_up(n_radial,n_theta,-nup:nup))
+     allocate(rcyc(n_radial,n_theta,-nup_theta:nup_theta))
+     allocate(dtheta(n_radial,n_theta,-nup_theta:nup_theta))
+     allocate(dtheta_up(n_radial,n_theta,-nup_theta:nup_theta))
 
      allocate(theta(n_theta))
      allocate(thetab(n_radial/box_size,n_theta))
@@ -90,6 +89,15 @@ subroutine cgyro_init_manager
      allocate(omega_aprdrift(n_theta,n_species))
      allocate(omega_cdrift(n_theta,n_species))
      allocate(omega_gammap(n_theta))
+
+     ! Nonlinear arrays
+     if (split_method == 1) then
+        allocate(f_nl(nc,nsplit,n_toroidal))
+        allocate(g_nl(nc,nsplit,n_toroidal))
+     else
+        allocate(f_nl(n_radial,nsplit,n_toroidal))
+        allocate(g_nl(n_radial,nsplit,n_toroidal))
+     endif
 
      GEO_model_in    = geo_numeq_flag
      GEO_ntheta_in   = geo_ntheta
