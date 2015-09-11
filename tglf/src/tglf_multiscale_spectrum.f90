@@ -30,18 +30,14 @@
       ! need to set alpha_zf_in = 1.0
       ! Miller geometry values igeo=1
       czf = alpha_zf_in
-      cnorm = 13.51
-      cnorm = 12.84
-      cz1 = 0.35*czf
-      cz2=0.60*czf
       cnorm=14.21
       cz1=0.48*czf
       cz2=1.0*czf
       kyetg = etg_factor_in*SQRT(taus(2)/mass(2))
       if(igeo.eq.0)then ! s-alpha 
-       cnorm=12.14
-       cz1=0.61*czf
-       cz2=0.60*czf
+       cnorm=14.63
+       cz1=0.90*czf
+       cz2=1.0*czf
       endif
       !
       ! renormalize the fluxes and intensities to the phi-norm from the v-norm
