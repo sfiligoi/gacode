@@ -40,7 +40,6 @@ subroutine cgyro_read_input
   read(1,*) collision_ene_diffusion
   read(1,*) collision_kperp
   read(1,*) collision_field_model
-  read(1,*) collision_trap_model
   read(1,*) zf_test_flag
   read(1,*) nonlinear_flag
   read(1,*) nonlinear_method
