@@ -99,18 +99,58 @@ subroutine cgyro_read_input
   geo_yin_in(:,:) = 0.0
   if (subroutine_flag == 0 .and. equilibrium_model == 3 & 
        .and. profile_model == 1) then
-     open(unit=1,file=trim(path)//'input.geo',status='old')
-     ! header skip
-     do
-        read(1,'(a)') cdummy
-        if (cdummy /= '#') exit
-     enddo
-     backspace 1
-     ! n_fourier
-     read(1,*) geo_ny_in
-     ! fourier coefficients
-     read(1,*) geo_yin_in(:,0:geo_ny_in)
-     close(1)
+     if (i_proc == 0) then
+        open(unit=1,file=trim(path)//'input.geo',status='old')
+        ! header skip
+        do
+           read(1,'(a)') cdummy
+           if (cdummy /= '#') exit
+        enddo
+        backspace 1
+        ! n_fourier
+        read(1,*) geo_ny_in
+        ! fourier coefficients
+        read(1,*) geo_yin_in(:,0:geo_ny_in)
+        close(1)
+     endif
+     call MPI_BCAST(geo_ny_in,1,MPI_INTEGER,0,CGYRO_COMM_WORLD,i_err)
+     call MPI_BCAST(geo_yin_in,size(geo_yin_in),MPI_DOUBLE_PRECISION,0,CGYRO_COMM_WORLD,i_err)
   endif
 
 end subroutine cgyro_read_input
+
+!------------------------------------------------------------
+! Service routines: 
+!
+! (1) read and broadcast an integer:
+!
+subroutine readbc_int(p)
+
+  use mpi
+  use gyro_globals
+
+  implicit none
+  integer, intent(inout) :: p
+
+  if (i_proc == 0) read(1,*) p
+
+  call MPI_BCAST(p,1,MPI_INTEGER,0,CGYRO_COMM_WORLD,i_err)
+
+end subroutine readbc_int
+!
+! (2) read and broadcast a real:
+!
+subroutine readbc_real(x)
+  
+  use mpi
+  use gyro_globals
+
+  implicit none
+  real, intent(inout) :: x
+
+  if (i_proc == 0) read(1,*) x
+
+  call MPI_BCAST(x,1,MPI_DOUBLE_PRECISION,0,CGYRO_COMM_WORLD,i_err)
+
+end subroutine readbc_real
+!------------------------------------------------------------
