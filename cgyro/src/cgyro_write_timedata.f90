@@ -457,7 +457,7 @@ subroutine write_time(datafile)
      endif
 
      open(unit=io,file=datafile,status='old',position='append')
-     write(io,fmtstr2) t_current,field_error,gamma_eff
+     write(io,fmtstrn) t_current,field_error,gamma_eff
      close(io)
 
      !-------------------------------------------------------
