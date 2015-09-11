@@ -72,6 +72,8 @@ subroutine cgyro_init_h
                  arg = abs(px(ir))/real(n_radial)
                  h_x(ic,iv_loc) = amp*rho*exp(-arg)
                  if (ir == 1) h_x(ic,iv_loc) = (0.0,0.0)
+                 ! Safer to zero out completely
+                 h_x = 0.0
               endif
 
            else 
