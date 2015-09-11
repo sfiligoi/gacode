@@ -59,6 +59,8 @@ module cgyro_globals
   real :: gamma_p_scale
   real :: mach_scale
   integer :: split_method
+  real :: flux_transient
+  real :: gamma_transient
   !
   ! Geometry input
   !
@@ -183,6 +185,7 @@ module cgyro_globals
   complex :: freq
   complex :: freq_err
   real :: gtime
+  real :: gamma_eff
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------

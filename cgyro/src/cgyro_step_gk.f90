@@ -119,8 +119,16 @@ subroutine cgyro_rhs(ij)
 
   enddo
 
-  ! TRAPPING TERM
+  ! Option to evaulate trapping term separately 
   if (collision_model == 0 .or. collision_trap_model == 0) call cgyro_rhs_trap(ij)
+
+  ! Limit growth of finite-n modes artificially to control initial transient
+  if (sum(abs(flux(:,2))) > flux_transient) then
+     if (n > 0) rhs(ij,:,:) = rhs(ij,:,:)-gamma_transient*h_x(:,:)
+     gamma_eff = gamma_transient
+  else
+     gamma_eff = 0.0
+  endif
 
   call timer_lib_out('stream')
 
