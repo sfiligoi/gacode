@@ -29,6 +29,8 @@ module cgyro_globals
   integer :: upconserve_flag
   real    :: ky
   integer :: box_size
+  real    :: ipccw
+  real    :: btccw
   integer :: silent_flag
   integer :: profile_model
   integer :: equilibrium_model

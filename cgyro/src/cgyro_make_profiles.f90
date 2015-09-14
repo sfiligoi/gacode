@@ -63,6 +63,14 @@ subroutine cgyro_make_profiles
   !-------------------------------------------------------------
   ! Profiles
 
+  ! FIELD ORIENTATION NOTES:
+  !  Field orientation is accomplished by giving signs to a minimal 
+  !  set of quantities:
+  !  
+  !  1. sign(b_unit)   = -btccw
+  !  2. sign(q)        = ipccw*btccw
+  !  3. sign(rho_star) = -btccw
+  !-----------------------------------------------------------------------
 
   if(profile_model == 2) then
 
@@ -155,6 +163,8 @@ subroutine cgyro_make_profiles
 
   else
 
+     q = abs(q)*(ipccw)*(btccw)
+     
      if (ae_flag == 1) then
         dens_ele = ne_ade
         temp_ele = te_ade
@@ -182,15 +192,14 @@ subroutine cgyro_make_profiles
   !-------------------------------------------------------------
   ! Manage simulation type (n=0,linear,nonlinear)
   !
-  q = abs(q) 
 
   if (zf_test_flag == 1) then
 
      ! Zonal flow (n=0) test
 
      k_theta = q/rmin
-     rho     = ky/k_theta
-     length  = box_size/(s*k_theta)
+     rho     = abs(ky/k_theta)*(-btccw)
+     length  = abs(box_size/(s*k_theta))
 
      k_theta = 0
 
@@ -208,8 +217,8 @@ subroutine cgyro_make_profiles
      ! Single linear mode (assume n=1, compute rho)
 
      k_theta = q/rmin
-     rho     = ky/k_theta
-     length  = box_size/(s*k_theta)
+     rho     = abs(ky/k_theta)*(-btccw)
+     length  = abs(box_size/(s*k_theta))
 
      n = 1
 
@@ -220,8 +229,8 @@ subroutine cgyro_make_profiles
      ! Multiple modes (n=0,1,2,...,n_toroidal-1)
 
      k_theta = q/rmin
-     rho     = ky/k_theta
-     length  = box_size/(s*k_theta)
+     rho     = abs(ky/k_theta)*(-btccw)
+     length  = abs(box_size/(s*k_theta))
 
      ! Now define individual k_thetas
 

@@ -14,6 +14,7 @@ subroutine cgyro_equilibrium
   ! Parameters needed for equilibrium
   ! geo_numeq_flag, geo_ny, and geo_yin already set 
 
+  GEO_signb_in     = -btccw
   GEO_rmin_in      = rmin
   GEO_rmaj_in      = rmaj
   GEO_drmaj_in     = shift

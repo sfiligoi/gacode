@@ -35,6 +35,8 @@ subroutine cgyro_read_input
   call readbc_int(upconserve_flag)
   call readbc_real(ky)
   call readbc_int(box_size)
+  call readbc_real(ipccw)
+  call readbc_real(btccw)
   call readbc_int(silent_flag)
   call readbc_int(profile_model)
   call readbc_int(equilibrium_model)
