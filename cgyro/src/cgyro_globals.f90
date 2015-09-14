@@ -49,16 +49,12 @@ module cgyro_globals
   real :: dlnndre_ade   ! used only for experimental profiles
   real :: masse_ade
   real :: lambda_debye
-  real :: lambda_debye_scale
   integer :: test_flag
   integer :: h_print_flag
   real :: amp
   real :: gamma_e
   real :: gamma_p
   real :: mach
-  real :: gamma_e_scale
-  real :: gamma_p_scale
-  real :: mach_scale
   integer :: split_method
   real :: flux_transient
   real :: gamma_transient
@@ -93,6 +89,16 @@ module cgyro_globals
   real, dimension(6) :: dlntdr
 
   integer :: subroutine_flag  ! only used for cgyro_read_input
+
+  ! Re-scaling parameters for experimental profiles
+  real :: lambda_debye_scale
+  real :: gamma_e_scale
+  real :: gamma_p_scale
+  real :: mach_scale
+  real :: q_scale
+  real :: s_scale
+  real, dimension(6) :: dlnndr_scale
+  real, dimension(6) :: dlntdr_scale
 
   !---------------------------------------------------------------
 

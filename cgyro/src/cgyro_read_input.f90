@@ -53,16 +53,12 @@ subroutine cgyro_read_input
   call readbc_real(ne_ade)
   call readbc_real(masse_ade)
   call readbc_real(lambda_debye)
-  call readbc_real(lambda_debye_scale)
   call readbc_int(test_flag)
   call readbc_int(h_print_flag)
   call readbc_real(amp)
   call readbc_real(gamma_e)
   call readbc_real(gamma_p)
   call readbc_real(mach)
-  call readbc_real(gamma_e_scale)
-  call readbc_real(gamma_p_scale)
-  call readbc_real(mach_scale)
   call readbc_int(split_method)
   call readbc_real(flux_transient)
   call readbc_real(gamma_transient)
@@ -96,6 +92,17 @@ subroutine cgyro_read_input
      call readbc_real(x)   ; temp(is) = x
      call readbc_real(x)   ; dlnndr(is) = x
      call readbc_real(x)   ; dlntdr(is) = x
+  enddo
+
+  call readbc_real(lambda_debye_scale)
+  call readbc_real(gamma_e_scale)
+  call readbc_real(gamma_p_scale)
+  call readbc_real(mach_scale)
+  call readbc_real(q_scale)
+  call readbc_real(s_scale)
+  do is=1,6
+     call readbc_real(x)   ; dlnndr_scale(is) = x
+     call readbc_real(x)   ; dlntdr_scale(is) = x
   enddo
 
   if (i_proc == 0) close(1)

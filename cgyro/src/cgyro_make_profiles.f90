@@ -128,8 +128,7 @@ subroutine cgyro_make_profiles
      ! Debye length (from NRL plasma formulary):
      ! Use input lambda_debye as scaling parameter
      
-     lambda_debye = 7.43 * sqrt((1e3*temp_norm)/(1e13*dens_norm))/a_meters &
-          * lambda_debye_scale
+     lambda_debye = 7.43 * sqrt((1e3*temp_norm)/(1e13*dens_norm))/a_meters 
 
      ! Normalize
      do is=1,n_species
@@ -141,9 +140,9 @@ subroutine cgyro_make_profiles
      te_ade   = te_ade/temp_norm
      dens_ele = dens_ele/dens_norm
      temp_ele = temp_ele/temp_norm
-     gamma_e  = gamma_e/(vth_norm/a_meters) * gamma_e_scale
-     gamma_p  = gamma_p/(vth_norm/a_meters) * gamma_p_scale
-     mach     = mach/vth_norm * mach_scale
+     gamma_e  = gamma_e/(vth_norm/a_meters)
+     gamma_p  = gamma_p/(vth_norm/a_meters)
+     mach     = mach/vth_norm
 
      do is=1,n_species
         nu(is) = nu_ee *(1.0*z(is))**4 &
@@ -160,6 +159,18 @@ subroutine cgyro_make_profiles
         beta_star = beta_star + (dlnndre_ade + dlntdre_ade)
      endif
      beta_star = beta_star * betae_unit
+
+     ! Re-scaling
+     lambda_debye = lambda_debye * lambda_debye_scale
+     gamma_e      = gamma_e      * gamma_e_scale
+     gamma_p      = gamma_p      * gamma_p_scale
+     mach         = mach         * mach_scale
+     q            = q            * q_scale
+     s            = s            * s_scale
+     do is=1,n_species
+        dlnndr(is) = dlnndr(is)  * dlnndr_scale(is) 
+        dlntdr(is) = dlntdr(is)  * dlntdr_scale(is)  
+     enddo
 
   else
 
