@@ -177,6 +177,7 @@ module cgyro_globals
   integer :: io_control
   integer :: signal
   integer :: restart_flag
+  integer :: n_theta_plot=1
   !
   ! Standard precision for IO 
   character(len=8) :: fmtstr='(es11.4)'
@@ -263,8 +264,8 @@ module cgyro_globals
   complex, dimension(:,:,:), allocatable :: field_old3
   !
   ! Nonlinear fluxes
-  real, dimension(:,:), allocatable :: flux_loc
-  real, dimension(:,:), allocatable :: flux
+  real, dimension(:,:,:), allocatable :: flux_loc
+  real, dimension(:,:,:), allocatable :: flux
   real, dimension(:,:), allocatable :: power
   !
   type(C_PTR) :: plan_r2c

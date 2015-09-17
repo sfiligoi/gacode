@@ -126,7 +126,7 @@ subroutine cgyro_rhs(ij)
 
   if (nonlinear_flag == 1) then
      ! Limit growth of finite-n modes artificially to control initial transient
-     if (sum(abs(flux(:,2))) > flux_transient) then
+     if (sum(abs(flux(:,:,2))) > flux_transient) then
         if (n > 0) rhs(ij,:,:) = rhs(ij,:,:)-gamma_transient*h_x(:,:)
         gamma_eff = gamma_transient
      else

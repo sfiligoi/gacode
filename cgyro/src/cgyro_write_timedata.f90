@@ -34,13 +34,13 @@ subroutine cgyro_write_timedata
      ! Density flux
      call write_distributed_real(&
           trim(path)//runfile_flux(1),&
-          size(flux(:,1)),&
-          flux(:,1))
+          size(flux(:,:,1)),&
+          flux(:,:,1))
      ! Energy flux
      call write_distributed_real(&
           trim(path)//runfile_flux(2),&
-          size(flux(:,2)),&
-          flux(:,2))
+          size(flux(:,:,2)),&
+          flux(:,:,2))
   endif
 
   do i_field=1,n_field

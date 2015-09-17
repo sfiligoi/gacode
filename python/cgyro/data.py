@@ -46,10 +46,12 @@ class cgyrodata:
         self.n_energy  = int(data[5])
         self.n_xi      = int(data[6])
         self.m_box     = int(data[7])
+        self.length    = float(data[8])
         # Set l to last data index plus one.
-        l=8
+        l=9
 
         self.p = np.array(data[l:l+self.n_radial],dtype=int)
+        self.kx = 2*np.pi*self.p/self.length
         
         mark = l+self.n_radial
         self.theta = np.array(data[mark:mark+self.n_theta])
@@ -154,15 +156,16 @@ class cgyrodata:
         try:
             data = np.loadtxt(self.dir+'out.cgyro.pwr_phi')
             self.pwr_phi = np.reshape(data,(self.n_radial,self.n_n,nt),'F')
-            print "INFO: (data.py) Read data in out.cgyro.pwr_phi."
         except:
             pass
+        
         try:
             data = np.loadtxt(self.dir+'out.cgyro.pwr_apar')
             self.pwr_apar = np.reshape(data,(self.n_radial,self.n_n,nt),'F')
             print "INFO: (data.py) Read data in out.cgyro.pwr_apar."
         except:
             pass
+
         try:
             data = np.loadtxt(self.dir+'out.cgyro.pwr_bpar')
             self.pwr_bpar = np.reshape(data,(self.n_radial,self.n_n,nt),'F')
@@ -211,7 +214,8 @@ class cgyrodata:
         """Get large files"""
 
         import numpy as np
-
+        import time
+        
         # Convenience definition
         nt = self.n_time
 
@@ -219,9 +223,11 @@ class cgyrodata:
         # Read standard potentials
         #
         try:
+            start = time.time()
             data = np.loadtxt(self.dir+'out.cgyro.phi')
+            end = time.time()
             self.phi = np.reshape(data,(2,self.n_theta,self.n_radial,self.n_n,nt),'F')
-            print "INFO: (data.py) Read data in out.cgyro.phi."
+            print "INFO: (data.py) Read data in out.cgyro.phi."+str(end-start)
         except:
             pass
         try:

@@ -8,8 +8,8 @@ subroutine cgyro_flux
   integer :: ie,ix,is,it,ir
   real :: c_n,c_t
 
-  flux_loc(:,:) = 0.0
-
+  flux_loc(:,:,:) = 0.0
+  
   iv_loc = 0
   do iv=nv1,nv2
 
@@ -24,31 +24,32 @@ subroutine cgyro_flux
 
      do ic=1,nc
 
+        ir = ir_c(ic)
         it = it_c(ic)
 
-        flux_loc(is,1) = flux_loc(is,1)-&
+        flux_loc(ir,is,1) = flux_loc(ir,is,1)-&
              c_n*aimag(2.0*cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc)))*w_theta(it)
 
-        flux_loc(is,2) = flux_loc(is,2)-&
+        flux_loc(ir,is,2) = flux_loc(ir,is,2)-&
              c_t*aimag(2.0*cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc)))*w_theta(it)
-
+        
      enddo
-  enddo
 
+  enddo
+  
   ! GyroBohm normalization
   flux_loc = flux_loc/rho**2
 
-  ! Reduced flux, below, is still distributed over n
+  ! Reduced flux(kx,ky), below, is still distributed over n 
 
-  call MPI_ALLREDUCE(flux_loc(:,:), &
-       flux(:,:), &
+  call MPI_ALLREDUCE(flux_loc(:,:,:), &
+       flux(:,:,:), &
        size(flux), &
        MPI_DOUBLE_PRECISION, &
        MPI_SUM, &
        NEW_COMM_1, &
        i_err)
-
-
+  
   ! Now capture flux-surface averaged field intensities
   ! No need for reduction since fields are not distributed within NEW_COMM_1.
 
