@@ -104,8 +104,6 @@ subroutine cgyro_write_initdata
   endif
   !----------------------------------------------------------------------------
 
-  if (test_flag == 1) return
-
   !----------------------------------------------------------------------------
   ! Write the initial equilibrium data
   !
@@ -189,6 +187,7 @@ subroutine cgyro_write_initdata
      write(io,'(i4)') n_energy
      write(io,'(i4)') n_xi
      write(io,'(i4)') box_size
+     write(io,'(1pe12.5)') length/rho
      write(io,'(i4)') px(:)
      write(io,'(1pe12.5)') theta(:)
      write(io,'(1pe12.5)') energy(:)
