@@ -4,7 +4,8 @@ from gacodeplotdefs import *
 from cgyro.data import cgyrodata
 
 ftype = sys.argv[1]
-field = sys.argv[2]
+w     = float(sys.argv[2])
+field = sys.argv[3]
 
 sim = cgyrodata('./')
 sim.getbig()
@@ -26,9 +27,10 @@ ny=sim.n_n
 f = np.zeros([nx,ny])
 n = sim.n_time
 
-for i in np.arange(n/2,n):
+for i in np.arange((1-w)*n,n):
     f = f+sim.phisq[:,:,i]
-f = f/(n-n/2)
+
+f = f/(w*n)
     
 f[nx/2,0] = 1e-12
 f[0,0]    = 1e-12

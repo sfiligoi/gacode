@@ -172,7 +172,7 @@ module cgyro_globals
   character(len=18) :: runfile_kxky_n   = 'out.cgyro.kxky_n'
   character(len=15), dimension(3)  :: runfile_fieldb = &
        (/'out.cgyro.phib ','out.cgyro.aparb','out.cgyro.bparb'/)
-  character(len=16), dimension(2)  :: runfile_kxky_flux = &
+  character(len=21), dimension(2)  :: runfile_kxky_flux = &
        (/'out.cgyro.kxky_flux_n','out.cgyro.kxky_flux_e'/)
   integer, parameter :: io=1
   !

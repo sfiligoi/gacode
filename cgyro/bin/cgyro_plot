@@ -150,13 +150,10 @@ case "$PLOT_TYPE" in
 	python $PYROOT/plot_pwr.py $FTYPE $FIELD & ;;
 
    pwr_np)  
-	python $PYROOT/plot_pwr_np.py $FTYPE $FIELD & ;;
+	python $PYROOT/plot_pwr_np.py $FTYPE $W $FIELD & ;;
 
    zf)  
 	python $PYROOT/plot_zf.py $FTYPE $FIELD & ;;
-
-   zffield)
-	python $PYROOT/plot_zffield.py $FTYPE $TIME $FIELD $TMAX & ;;
 
    geo)
 	python $PYROOT/plot_geo.py $FTYPE & ;;
