@@ -10,14 +10,7 @@ field = sys.argv[3]
 sim = cgyrodata('./')
 sim.getbig()
 
-fig = plt.figure(figsize=(10,8))
-
-ax = fig.add_subplot(111)
-ax.grid(which="majorminor",ls=":")
-ax.grid(which="major",ls=":")
-ax.set_xlabel(r'$k_y$',fontsize=GFONTSIZE)
-ax.set_ylabel(r'$k_x$',fontsize=GFONTSIZE)
-
+#-----------------------------------------------------------------
 # Note array structure
 # self.phi = np.reshape(data,(2,self.n_radial,self.n_n,nt),'F')
 
@@ -27,16 +20,28 @@ ny=sim.n_n
 f = np.zeros([nx,ny])
 n = sim.n_time
 
-for i in np.arange((1-w)*n,n):
-    f = f+sim.phisq[:,:,i]
+imin = int((1.0-w)*n)
+for i in np.arange(imin,n):
+    f = f+abs(sim.flux_e[:,0,:,i])
 
-f = f/(w*n)
+f = 1e-12+f/(n-imin)
     
 f[nx/2,0] = 1e-12
 f[0,0]    = 1e-12
 f = np.log10(f)
+#-----------------------------------------------------------------
+
+fig = plt.figure(figsize=(10,8))
+
+ax = fig.add_subplot(111)
+ax.grid(which="majorminor",ls=":")
+ax.grid(which="major",ls=":")
+ax.set_xlabel(r'$k_y \rho_s$',fontsize=GFONTSIZE)
+ax.set_ylabel(r'$k_x \rho_s$',fontsize=GFONTSIZE)
+ax.set_title(r'$'+str(sim.t[imin])+' < (c_s/a) t < '+str(sim.t[-1])+'$')
+
 fmax = f.max()
-fmin = f.max()-7
+fmin = f.max()-5
 
 d = (fmax-fmin)/200.0
 levels = np.arange(fmin-d,fmax+d,d)

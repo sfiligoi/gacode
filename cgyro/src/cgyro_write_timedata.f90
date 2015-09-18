@@ -52,7 +52,7 @@ subroutine cgyro_write_timedata
   call write_distributed_complex(&
        trim(path)//runfile_kxky_phi,&
        size(field(:,it0,1)),&
-       field(:,:,1))
+       field(:,it0,1))
 
   !---------------------------------------------------------------
   ! Ballooning mode output for linear runs with a single mode
