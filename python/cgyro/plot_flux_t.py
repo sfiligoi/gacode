@@ -15,6 +15,7 @@ t = sim.t
 #======================================
 # Set figure size and axes
 fig = plt.figure(figsize=(12,6))
+fig.subplots_adjust(left=0.05,right=0.95,top=0.92,bottom=0.12)
 ax = fig.add_subplot(111)
 ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
@@ -45,6 +46,8 @@ else:
 for i in range(len(t)):
     if t[i] < (1.0-w)*t[len(t)-1]:
         imin = i
+
+ax.set_title(r'$'+str(sim.t[imin])+' < (c_s/a) t < '+str(sim.t[-1])+'$')
 
 for ispec in range(ns):
     ave = average(y[ispec,:],t,w)

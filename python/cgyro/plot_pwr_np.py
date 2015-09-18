@@ -22,12 +22,9 @@ n = sim.n_time
 
 imin = int((1.0-w)*n)
 for i in np.arange(imin,n):
-    f = f+abs(sim.flux_e[:,0,:,i])
+    f = f+sim.phisq[:,:,i]
 
 f = 1e-12+f/(n-imin)
-    
-f[nx/2,0] = 1e-12
-f[0,0]    = 1e-12
 f = np.log10(f)
 #-----------------------------------------------------------------
 
