@@ -23,16 +23,17 @@ ax.set_ylabel(r'$k_x$',fontsize=GFONTSIZE)
 nx=sim.n_radial
 ny=sim.n_n
 
-#f = sim.phisq[:,:,-1]
-f = sim.flux_e[:,0,:,-1]
+f = np.zeros([nx,ny])
+for i in range(100):
+    f = f+sim.phisq[:,:,95+i]
 
-#f[nx/2,0] = 1e-12
-#f[0,0]    = 1e-12
-#f = np.log10(f)
+f[nx/2,0] = 1e-12
+f[0,0]    = 1e-12
+f = np.log10(f)
 fmax = f.max()
-fmin = 0.0
+fmin = f.max()-7
 
-d = (fmax-fmin)/100.0
+d = (fmax-fmin)/200.0
 levels = np.arange(fmin-d,fmax+d,d)
 
 ax.contourf(sim.ky,sim.kx,f,levels,origin='lower')
