@@ -26,11 +26,11 @@ color = ['m','k','b','c']
 if moment == 'n':
     imoment = 0 
     mtag = '\Gamma'
-    y = np.sum(sim.flux_n,axis=1)
+    y = np.sum(sim.flux_n,axis=(0,2))
 elif moment == 'e':
     imoment = 1
     mtag = 'Q'
-    y = np.sum(sim.flux_e,axis=1)
+    y = np.sum(sim.flux_e,axis=(0,2))
 elif moment == 'm':
     print 'm not implemented.'
     sys.exit()

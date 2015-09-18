@@ -127,53 +127,19 @@ class cgyrodata:
         # Particle and energy fluxes
         #
         try:
-            data = np.loadtxt(self.dir+'out.cgyro.flux_n')
-            self.flux_n = np.reshape(data,(self.n_species,self.n_n,nt),'F')
-            print "INFO: (data.py) Read data in out.cgyro.flux_n."
+            data = np.loadtxt(self.dir+'out.cgyro.kxky_flux_n')
+            self.flux_n = np.reshape(data,(self.n_radial,self.n_species,self.n_n,nt),'F')
+            print "INFO: (data.py) Read data in out.cgyro.kxky_flux_n."
         except:
             pass
 
         try:
-            data = np.loadtxt(self.dir+'out.cgyro.flux_e')
-            self.flux_e = np.reshape(data,(self.n_species,self.n_n,nt),'F')
-            print "INFO: (data.py) Read data in out.cgyro.flux_e."
+            data = np.loadtxt(self.dir+'out.cgyro.kxky_flux_e')
+            self.flux_e = np.reshape(data,(self.n_radial,self.n_species,self.n_n,nt),'F')
+            print "INFO: (data.py) Read data in out.cgyro.kxky_flux_e."
         except:
             pass
       #-----------------------------------------------------------------
-
-
-    def getmedium(self):
-
-        """Get medium-sized files"""
-
-        import numpy as np
-
-        # Convenience definition
-        nt = self.n_time
-
-        #-----------------------------------------------------------------
-        # Read powers
-        #
-        try:
-            data = np.loadtxt(self.dir+'out.cgyro.pwr_phi')
-            self.pwr_phi = np.reshape(data,(self.n_radial,self.n_n,nt),'F')
-        except:
-            pass
-        
-        try:
-            data = np.loadtxt(self.dir+'out.cgyro.pwr_apar')
-            self.pwr_apar = np.reshape(data,(self.n_radial,self.n_n,nt),'F')
-            print "INFO: (data.py) Read data in out.cgyro.pwr_apar."
-        except:
-            pass
-
-        try:
-            data = np.loadtxt(self.dir+'out.cgyro.pwr_bpar')
-            self.pwr_bpar = np.reshape(data,(self.n_radial,self.n_n,nt),'F')
-            print "INFO: (data.py) Read data in out.cgyro.pwr_bpar."
-        except:
-            pass
-        #-----------------------------------------------------------------
 
 
     def getgeo(self):
@@ -221,26 +187,25 @@ class cgyrodata:
         nt = self.n_time
 
         #-----------------------------------------------------------------
-        # Read standard potentials
+        # Read complex fields
         #
         try:
             start = time.time()
-            data = np.loadtxt(self.dir+'out.cgyro.phi')
+            data = np.loadtxt(self.dir+'out.cgyro.kxky_phi')
             end = time.time()
-            self.phi = np.reshape(data,(2,self.n_theta,self.n_radial,self.n_n,nt),'F')
-            print "INFO: (data.py) Read data in out.cgyro.phi."+str(end-start)
+            self.phi = np.reshape(data,(2,self.n_radial,self.n_n,nt),'F')
+            self.phisq = self.phi[0,:,:]**2+self.phi[1,:,:]**2
+            print "INFO: (data.py) Read data in out.cgyro.phi. TIME = "+str(end-start)
         except:
             pass
         try:
-            data = np.loadtxt(self.dir+'out.cgyro.apar')
-            self.apar = np.reshape(data,(2,self.n_theta,self.n_radial,self.n_n,nt),'F')
-            print "INFO: (data.py) Read data in out.cgyro.apar."
-        except:
-            pass
-        try:
-            data = np.loadtxt(self.dir+'out.cgyro.bpar')
-            self.bpar = np.reshape(data,(2,self.n_theta,self.n_radial,self.n_n,nt),'F')
-            print "INFO: (data.py) Read data in out.cgyro.bpar."
+            start = time.time()
+            data = np.loadtxt(self.dir+'out.cgyro.kxky_n')
+            end = time.time()
+            self.n = np.reshape(data,(2,self.n_radial,seld.n_species,self.n_n,nt),'F')
+            self.nsq = self.n[0,:,:,:]**2+self.n[1,:,:,:]**2
+            print "INFO: (data.py) Read data in out.cgyro.phi. TIME = "+str(end-start)
         except:
             pass
         #-----------------------------------------------------------------
+
