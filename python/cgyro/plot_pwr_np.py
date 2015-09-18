@@ -24,9 +24,12 @@ nx=sim.n_radial
 ny=sim.n_n
 
 f = np.zeros([nx,ny])
-for i in range(100):
-    f = f+sim.phisq[:,:,95+i]
+n = sim.n_time
 
+for i in np.arange(n/2,n):
+    f = f+sim.phisq[:,:,i]
+f = f/(n-n/2)
+    
 f[nx/2,0] = 1e-12
 f[0,0]    = 1e-12
 f = np.log10(f)
