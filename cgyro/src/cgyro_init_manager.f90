@@ -66,31 +66,17 @@ subroutine cgyro_init_manager
 
      call timer_lib_in('stream_init')
 
-     ! Allocate distribution function and field arrays
-     allocate(j0_c(nc,nv_loc))
-     allocate(j0_v(nc_loc,nv))
-     allocate(h_x(nc,nv_loc))
-     allocate(h_xs(nc,nv_loc))
-     allocate(psi(nc,nv_loc))
-
-     allocate(rhs(4,nc,nv_loc))
-     allocate(h0_x(nc,nv_loc))
-     allocate(cap_h_c(nc,nv_loc))
-     allocate(cap_h_ct(nv_loc,nc))
-     allocate(cap_h_v(nc_loc,nv))
-     allocate(cap_h_v_prime(nc_loc,nv))
-     allocate(omega_cap_h(nc,nv_loc))
-     allocate(omega_h(nc,nv_loc))
-     allocate(omega_s(n_field,nc,nv_loc))
+     ! Global (undistributed) arrays
      allocate(field(n_radial,n_theta,n_field))
      allocate(field_loc(n_radial,n_theta,n_field))
      allocate(field_old(n_radial,n_theta,n_field))
      allocate(field_old2(n_radial,n_theta,n_field))
      allocate(field_old3(n_radial,n_theta,n_field))
+     allocate(moment_loc(n_radial,n_species))
+     allocate(moment(n_radial,n_species))
      allocate(f_balloon(n_radial/box_size,n_theta))
      allocate(    flux(n_radial,n_species,2))
      allocate(flux_loc(n_radial,n_species,2))
-     allocate(power(n_radial,n_field))
      allocate(recv_status(MPI_STATUS_SIZE))
 
      allocate(thcyc(1-n_theta:2*n_theta))
@@ -98,6 +84,24 @@ subroutine cgyro_init_manager
      allocate(dtheta(n_radial,n_theta,-nup_theta:nup_theta))
      allocate(dtheta_up(n_radial,n_theta,-nup_theta:nup_theta))
 
+     ! Velocity-distributed arrays
+     allocate(rhs(4,nc,nv_loc))
+     allocate(j0_c(nc,nv_loc))
+     allocate(j0_v(nc_loc,nv))
+     allocate(h_x(nc,nv_loc))
+     allocate(h_xs(nc,nv_loc))
+     allocate(psi(nc,nv_loc))
+     allocate(h0_x(nc,nv_loc))
+     allocate(cap_h_c(nc,nv_loc))
+     allocate(cap_h_ct(nv_loc,nc))
+     allocate(omega_cap_h(nc,nv_loc))
+     allocate(omega_h(nc,nv_loc))
+     allocate(omega_s(n_field,nc,nv_loc))
+
+     ! Real-space distributed arrays
+     allocate(cap_h_v(nc_loc,nv))
+     allocate(cap_h_v_prime(nc_loc,nv))
+     
      ! Nonlinear arrays
      if (split_method == 1) then
         allocate(f_nl(nc,nsplit,n_toroidal))

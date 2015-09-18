@@ -62,6 +62,14 @@ subroutine cgyro_equilibrium
   endif
 
   theta(:) = y(1:n_theta)
+
+  ! Theta location of field output:
+  if (zf_test_flag == 0) then
+  ! Location of theta=0
+     it0 = n_theta/2+1
+  else
+     it0 = n_theta/3
+  endif
   !-----------------------------------------------------------------
 
   do ir=1,n_radial/box_size

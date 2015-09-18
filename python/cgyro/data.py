@@ -45,10 +45,11 @@ class cgyrodata:
         self.n_theta   = int(data[4])
         self.n_energy  = int(data[5])
         self.n_xi      = int(data[6])
-        self.m_box     = int(data[7])
-        self.length    = float(data[8])
+        self.n_theta_plot = int(data[7])
+        self.m_box     = int(data[8])
+        self.length    = float(data[9])
         # Set l to last data index plus one.
-        l=9
+        l=10
 
         self.p = np.array(data[l:l+self.n_radial],dtype=int)
         self.kx = 2*np.pi*self.p/self.length

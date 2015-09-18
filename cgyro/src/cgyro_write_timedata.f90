@@ -31,44 +31,44 @@ subroutine cgyro_write_timedata
 
   if (nonlinear_flag == 1) then
 
-     ! Density flux
+     ! Density flux for all species
      call write_distributed_real(&
-          trim(path)//runfile_flux(1),&
+          trim(path)//runfile_kxky_flux(1),&
           size(flux(:,:,1)),&
           flux(:,:,1))
-     ! Energy flux
+     ! Energy flux for all species
      call write_distributed_real(&
-          trim(path)//runfile_flux(2),&
+          trim(path)//runfile_kxky_flux(2),&
           size(flux(:,:,2)),&
           flux(:,:,2))
+     ! Density moment for all species at theta=0
+     call write_distributed_complex(&
+          trim(path)//runfile_kxky_n,&
+          size(moment(:,:)),&
+          moment(:,:))
   endif
 
-  do i_field=1,n_field
+  ! Complex potential at theta=0 
+  call write_distributed_complex(&
+       trim(path)//runfile_kxky_phi,&
+       size(field(:,it0,1)),&
+       field(:,:,1))
 
-     ! Complete field output 
-     call write_distributed_complex(&
-          trim(path)//runfile_field(i_field),&
-          size(field(:,:,i_field)),&
-          field(:,:,i_field))
-
-     ! Field intensity
-     call write_distributed_real(&
-          trim(path)//runfile_power(i_field),&
-          size(power(:,i_field)),&
-          power(:,i_field))
-
-     if (n_toroidal == 1 .and. n > 0) then
-
-        ! Ballooning mode output for linear runs with a single mode
+  !---------------------------------------------------------------
+  ! Ballooning mode output for linear runs with a single mode
+  !
+  if (n_toroidal == 1 .and. n > 0) then
+     do i_field=1,n_field
 
         a_norm = field(n_radial/2+1,n_theta/2+1,1) 
 
         call write_balloon(&
              trim(path)//runfile_fieldb(i_field),&
              field(:,:,i_field)/a_norm)
-     endif
 
-  enddo
+     enddo
+  endif
+  !---------------------------------------------------------------
 
   ! Linear frequency diagnostics for every value of n
   call cgyro_freq

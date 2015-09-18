@@ -1,3 +1,11 @@
+!-----------------------------------------------------------------
+! cgyro_flux.f90
+!
+! PURPOSE:
+!  Compute flux and mean-square fluctuation amplitudes as
+!  functions of (kx,ky).
+!-----------------------------------------------------------------
+
 subroutine cgyro_flux
 
   use mpi
@@ -6,10 +14,11 @@ subroutine cgyro_flux
   implicit none
 
   integer :: ie,ix,is,it,ir
-  real :: c_n,c_t
+  real :: dv,c_n,c_t
 
   flux_loc(:,:,:) = 0.0
-  
+  moment_loc(:,:) = 0.0
+
   iv_loc = 0
   do iv=nv1,nv2
 
@@ -19,28 +28,37 @@ subroutine cgyro_flux
      ix = ix_v(iv)
      ie = ie_v(iv)
 
-     c_n = dens(is)*                    (w_e(ie)*0.5*w_xi(ix))*k_theta*rho
-     c_t = dens(is)*temp(is)*energy(ie)*(w_e(ie)*0.5*w_xi(ix))*k_theta*rho
+     dv  = 0.5*w_xi(ix)*w_e(ie)
+     c_n = dens(is)*                    dv*k_theta*rho
+     c_t = dens(is)*temp(is)*energy(ie)*dv*k_theta*rho
 
      do ic=1,nc
 
         ir = ir_c(ic)
         it = it_c(ic)
 
+        ! Density flux: Gamma_a
         flux_loc(ir,is,1) = flux_loc(ir,is,1)-&
              c_n*aimag(2.0*cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc)))*w_theta(it)
 
+        ! Energy flux: Q_a
         flux_loc(ir,is,2) = flux_loc(ir,is,2)-&
              c_t*aimag(2.0*cap_h_c(ic,iv_loc)*conjg(psi(ic,iv_loc)))*w_theta(it)
-        
+
+        ! Density moment: delta n_a
+        if (it == it0) then
+           moment_loc(ir,is) = moment_loc(ir,is)+dens(is)*dv*cap_h_c(ic,iv_loc)
+        endif
+
      enddo
 
   enddo
-  
+
   ! GyroBohm normalization
   flux_loc = flux_loc/rho**2
-
-  ! Reduced flux(kx,ky), below, is still distributed over n 
+  moment_loc = moment_loc/rho
+  
+  ! Reduced real flux(kx,ky), below, is still distributed over n 
 
   call MPI_ALLREDUCE(flux_loc(:,:,:), &
        flux(:,:,:), &
@@ -49,19 +67,16 @@ subroutine cgyro_flux
        MPI_SUM, &
        NEW_COMM_1, &
        i_err)
-  
-  ! Now capture flux-surface averaged field intensities
-  ! No need for reduction since fields are not distributed within NEW_COMM_1.
 
-  power(:,:) = 0.0
-  do ic=1,nc
+  ! Reduced complex moment(kx,ky), below, is still distributed over n 
 
-     ir = ir_c(ic)
-     it = it_c(ic)
-
-     power(ir,:) = power(ir,:)+w_theta(it)*abs(field(ir,it,:))**2
-
-  enddo
+  call MPI_ALLREDUCE(moment_loc(:,:), &
+       moment(:,:), &
+       size(moment), &
+       MPI_DOUBLE_COMPLEX, &
+       MPI_SUM, &
+       NEW_COMM_1, &
+       i_err)
 
 end subroutine cgyro_flux
 
