@@ -48,17 +48,16 @@ then
   echo "          -plot <type>"
   echo 
   echo "              <type> = text   (text summary of fluxes)"
+  echo "                     = freq   (frequency versus time),"
   echo "                     = ball   (ballooning modes)"
   echo "                     = hb     (2D ballooning distribution)"
   echo "                     = hbcut  (1D ballooning distribution line plots),"
-  echo "                     = freq   (frequency versus time),"
+  echo "                     = geo    (geometry arrays)"
   echo "                     = zf     (zonal flow potential plot vs. time),"
-  echo "                     = zffield(zonal flow potential plot vs. theta),"
   echo "                     = fluxt  (time-trace of fluxes for all species)"
   echo "                     = fluxn  (bar plot of flux versus n)"
   echo "                     = pwr    (time dependent field intensities)"
   echo "                     = pwr_np (n-p spectra at final time)"
-  echo "                     = geo    (geometry arrays)"
 
   exit 1
 fi
@@ -106,6 +105,8 @@ while [ $# -gt 0 ] ; do
   -tmax) shift ; TMAX=$1 ;;
 
   -w) shift ; W=$1 ;;
+
+  -h) shift ; cat $GACODE_ROOT/cgyro/bin/FILE_FORMAT ; exit 0 ;;
 
   *) echo "ERROR: incorrect syntax." ; exit 1 ;;
 
