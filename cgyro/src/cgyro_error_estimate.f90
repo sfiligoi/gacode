@@ -14,13 +14,19 @@ subroutine cgyro_error_estimate
 
   implicit none
 
-  real :: field_error_loc
+  real :: norm
+  real :: norm_loc
+  real :: error_loc
 
   ! Estimate of field via quadratic interpolation
-  field_loc       = 3.0*field_old-3.0*field_old2+field_old3
-  field_error_loc = sum(abs(field-field_loc))/sum(abs(field))/n_toroidal
+  field_loc = 3.0*field_old-3.0*field_old2+field_old3
 
-  call MPI_ALLREDUCE(field_error_loc, &
+  ! Define norm and error for each mode number n
+  norm_loc  = sum(abs(field))
+  error_loc = sum(abs(field-field_loc))
+  
+  ! Get sum of all errors
+  call MPI_ALLREDUCE(error_loc, &
        field_error, &
        1, &
        MPI_DOUBLE_PRECISION, &
@@ -28,12 +34,23 @@ subroutine cgyro_error_estimate
        NEW_COMM_2, &
        i_err)
 
+  ! Get sum of all norms
+  call MPI_ALLREDUCE(norm_loc, &
+       norm, &
+       1, &
+       MPI_DOUBLE_PRECISION, &
+       MPI_SUM, &
+       NEW_COMM_2, &
+       i_err)
+
+  field_error = field_error/norm
+  
   field_old3 = field_old2
   field_old2 = field_old
   field_old  = field
 
-  if (field_error > 0.5 .and. i_time > 2) then
-     call cgyro_error('Integration error > 0.5')
+  if (field_error > 1.0 .and. i_time > 2) then
+     call cgyro_error('Integration error > 1.0')
   endif
 
 end subroutine cgyro_error_estimate
