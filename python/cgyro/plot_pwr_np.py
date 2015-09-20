@@ -4,41 +4,49 @@ from gacodeplotdefs import *
 from cgyro.data import cgyrodata
 
 ftype = sys.argv[1]
-field = sys.argv[2]
+w     = float(sys.argv[2])
+field = sys.argv[3]
 
 sim = cgyrodata('./')
+sim.getbig()
+
+#-----------------------------------------------------------------
+# Note array structure
+# self.phi = np.reshape(data,(2,self.n_radial,self.n_n,nt),'F')
+
+nx=sim.n_radial
+ny=sim.n_n
+
+f = np.zeros([nx,ny])
+n = sim.n_time
+
+imin = int((1.0-w)*n)
+for i in np.arange(imin,n):
+    f = f+sim.phisq[:,:,i]
+
+f = 1e-12+f/(n-imin)
+f = np.log10(f)
+#-----------------------------------------------------------------
 
 fig = plt.figure(figsize=(10,8))
 
 ax = fig.add_subplot(111)
 ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
-ax.set_xlabel(r'$ky$',fontsize=GFONTSIZE)
-ax.set_ylabel(r'$p$',fontsize=GFONTSIZE)
+ax.set_xlabel(r'$k_y \rho_s$',fontsize=GFONTSIZE)
+ax.set_ylabel(r'$k_x \rho_s$',fontsize=GFONTSIZE)
+ax.set_title(r'$'+str(sim.t[imin])+' < (c_s/a) t < '+str(sim.t[-1])+'$')
 
-p = np.arange(sim.n_radial)
-
-f = sim.pwr_phi[:,:,-1]
 fmax = f.max()
+fmin = f.max()-5
 
-# Zero wavenumebrs
-f[0,0] = 1.0
-f[sim.n_radial/2,0] = 1.0
-
-f = np.log(f)
-
-fmin = f.min()
-fmax = np.log(fmax)
-
-d = (fmax-fmin)/100.0
+d = (fmax-fmin)/200.0
 levels = np.arange(fmin-d,fmax+d,d)
 
-kx = (p-sim.n_radial/2)
-
-ax.contourf(sim.ky,kx,f,levels,origin='lower')
+ax.contourf(sim.ky,sim.kx,f,levels,origin='lower')
 
 if ftype == 'screen':
     plt.show()
 else:
-    outfile = 'pwr_np.'+ftype
+    outfile = 'kxky_phisq.'+ftype
     plt.savefig(outfile)

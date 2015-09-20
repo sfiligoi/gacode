@@ -14,7 +14,7 @@ subroutine cgyro_init_arrays
   complex :: thfac
   real, dimension(n_radial,n_theta) :: sum_loc
   real, dimension(nv_loc) :: vfac
-  real,dimension(n_radial) :: argv
+  real, dimension(n_radial) :: u
 
   !-------------------------------------------------------------------------
   ! Distributed Bessel-function Gyroaverages
@@ -289,6 +289,33 @@ subroutine cgyro_init_arrays
 
   end select
 
+  allocate(spec_uderiv(n_radial))
+  u(:) = (2.0*pi/n_radial)*px(:)
+
+  select case(nup_radial)
+
+  case (1)
+
+     ! 2nd order spectral dissipation
+     spec_uderiv(:) = 1-cos(u)
+
+  case (2)
+
+     ! 4th order spectral dissipation
+     spec_uderiv(:) = (3-4*cos(u)+cos(2*u))/6
+
+  case (3)
+
+     ! 6th order spectral dissipation
+     spec_uderiv(:) = (20-30*cos(u)+12*cos(2*u)-2*cos(3*u))/60
+
+  case (4)
+
+     ! 8th order spectral dissipation
+     spec_uderiv(:) = (70-112*cos(u)+56*cos(2*u)-16*cos(3*u)+2*cos(4*u))/280
+
+  end select
+
   ! Indices for parallel streaming with upwinding
   do ir=1,n_radial
      do it=1,n_theta
@@ -316,27 +343,6 @@ subroutine cgyro_init_arrays
         enddo
      enddo
   enddo
-
-  allocate(spec_uderiv(n_radial))
-  argv(:) = (2.0*pi/n_radial)*px(:)
-
-  select case(nup_radial)
-
-  case(1)
-     spec_uderiv(:) = 1.0 - cos(argv(:))
-
-  case(2)
-     spec_uderiv(:) = (3.0 - 4.0*cos(argv(:)) + cos(2.0*argv(:))) / 6.0
-
-  case(3)
-     spec_uderiv(:) = (20.0 - 30.0*cos(argv(:)) + 12.0*cos(2.0*argv(:)) &
-          - 2.0*cos(3.0*argv(:))) / 60.0
-
-  case(4)
-     spec_uderiv(:) = (70.0 - 112.0*cos(argv(:)) + 56.0*cos(2.0*argv(:)) &
-          - 16.0*cos(3.0*argv(:)) + 2.0*cos(4.0*argv(:))) / 280.0
-
-  end select
 
   ! Streaming coefficients (for speed optimization)
 

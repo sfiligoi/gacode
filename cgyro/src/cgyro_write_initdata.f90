@@ -13,7 +13,7 @@ subroutine cgyro_write_initdata
 
   implicit none
 
-  integer :: in,is, it
+  integer :: in,is
   real :: kymax,z_eff
 
   !----------------------------------------------------------------------------
@@ -104,8 +104,6 @@ subroutine cgyro_write_initdata
   endif
   !----------------------------------------------------------------------------
 
-  if (test_flag == 1) return
-
   !----------------------------------------------------------------------------
   ! Write the initial equilibrium data
   !
@@ -137,39 +135,17 @@ subroutine cgyro_write_initdata
   if (silent_flag == 0 .and. i_proc == 0) then
 
      open(unit=io,file=trim(path)//'out.cgyro.geo',status='replace')
-     do it=1,n_theta
-        write(io,fmtstr) theta(it)
-     enddo
-     do it=1,n_theta
-        write(io,fmtstr) w_theta(it)
-     enddo
-     do it=1,n_theta
-        write(io,fmtstr) Bmag(it)
-     enddo
-     do it=1,n_theta
-        write(io,fmtstr) omega_stream(it,1)
-     enddo
-     do it=1,n_theta
-        write(io,fmtstr) omega_trap(it,1)
-     enddo
-     do it=1,n_theta
-        write(io,fmtstr) omega_rdrift(it,1)
-     enddo
-     do it=1,n_theta
-        write(io,fmtstr) omega_adrift(it,1)
-     enddo
-     do it=1,n_theta
-        write(io,fmtstr) omega_aprdrift(it,1)
-     enddo
-     do it=1,n_theta
-        write(io,fmtstr) omega_cdrift(it,1)
-     enddo
-     do it=1,n_theta
-        write(io,fmtstr) omega_gammap(it)
-     enddo
-     do it=1,n_theta
-        write(io,fmtstr) k_perp(it,n_radial/2+1)
-     enddo
+     write(io,fmtstr) theta(:)
+     write(io,fmtstr) w_theta(:)
+     write(io,fmtstr) bmag(:)
+     write(io,fmtstr) omega_stream(:,1)
+     write(io,fmtstr) omega_trap(:,1)
+     write(io,fmtstr) omega_rdrift(:,1)
+     write(io,fmtstr) omega_adrift(:,1)
+     write(io,fmtstr) omega_aprdrift(:,1)
+     write(io,fmtstr) omega_cdrift(:,1)
+     write(io,fmtstr) omega_gammap(:)
+     write(io,fmtstr) k_perp(:,n_radial/2+1)
      close(io)
 
   endif
@@ -188,7 +164,9 @@ subroutine cgyro_write_initdata
      write(io,'(i4)') n_theta
      write(io,'(i4)') n_energy
      write(io,'(i4)') n_xi
+     write(io,'(i4)') n_theta_plot
      write(io,'(i4)') box_size
+     write(io,'(1pe12.5)') length/rho
      write(io,'(i4)') px(:)
      write(io,'(1pe12.5)') theta(:)
      write(io,'(1pe12.5)') energy(:)

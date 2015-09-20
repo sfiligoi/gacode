@@ -1,3 +1,11 @@
+!-----------------------------------------------------------------
+! cgyro_globals.f90
+!
+! PURPOSE:
+!  CGYRO global variables.  The idea is to have a primary, large
+!  module containing all essential CGYRO arrays and scalars.
+!-----------------------------------------------------------------
+
 module cgyro_globals
 
   use, intrinsic :: iso_c_binding
@@ -29,6 +37,8 @@ module cgyro_globals
   integer :: upconserve_flag
   real    :: ky
   integer :: box_size
+  real    :: ipccw
+  real    :: btccw
   integer :: silent_flag
   integer :: profile_model
   integer :: equilibrium_model
@@ -38,7 +48,6 @@ module cgyro_globals
   integer :: collision_ene_diffusion
   integer :: collision_kperp
   integer :: collision_field_model
-  integer :: collision_trap_model
   integer :: zf_test_flag 
   integer :: nonlinear_flag 
   integer :: nonlinear_method
@@ -48,17 +57,15 @@ module cgyro_globals
   real :: dlnndre_ade   ! used only for experimental profiles
   real :: masse_ade
   real :: lambda_debye
-  real :: lambda_debye_scale
   integer :: test_flag
   integer :: h_print_flag
   real :: amp
   real :: gamma_e
   real :: gamma_p
   real :: mach
-  real :: gamma_e_scale
-  real :: gamma_p_scale
-  real :: mach_scale
   integer :: split_method
+  real :: flux_transient
+  real :: gamma_transient
   !
   ! Geometry input
   !
@@ -90,6 +97,16 @@ module cgyro_globals
   real, dimension(6) :: dlntdr
 
   integer :: subroutine_flag  ! only used for cgyro_read_input
+
+  ! Re-scaling parameters for experimental profiles
+  real :: lambda_debye_scale
+  real :: gamma_e_scale
+  real :: gamma_p_scale
+  real :: mach_scale
+  real :: q_scale
+  real :: s_scale
+  real, dimension(6) :: dlnndr_scale
+  real, dimension(6) :: dlntdr_scale
 
   !---------------------------------------------------------------
 
@@ -151,14 +168,12 @@ module cgyro_globals
   character(len=18) :: runfile_time    = 'out.cgyro.time'
   character(len=18) :: runfile_timers  = 'out.cgyro.timing'
   character(len=18) :: runfile_freq    = 'out.cgyro.freq'
-  character(len=14), dimension(3)  :: runfile_field = &
-       (/'out.cgyro.phi ','out.cgyro.apar','out.cgyro.bpar'/)
+  character(len=18) :: runfile_kxky_phi = 'out.cgyro.kxky_phi'
+  character(len=18) :: runfile_kxky_n   = 'out.cgyro.kxky_n'
   character(len=15), dimension(3)  :: runfile_fieldb = &
        (/'out.cgyro.phib ','out.cgyro.aparb','out.cgyro.bparb'/)
-  character(len=16), dimension(2)  :: runfile_flux = &
-       (/'out.cgyro.flux_n','out.cgyro.flux_e'/)
-  character(len=18), dimension(3)  :: runfile_power = &
-       (/'out.cgyro.pwr_phi ','out.cgyro.pwr_apar','out.cgyro.pwr_bpar'/)
+  character(len=21), dimension(2)  :: runfile_kxky_flux = &
+       (/'out.cgyro.kxky_flux_n','out.cgyro.kxky_flux_e'/)
   integer, parameter :: io=1
   !
   ! error checking
@@ -168,10 +183,12 @@ module cgyro_globals
   integer :: io_control
   integer :: signal
   integer :: restart_flag
+  integer :: n_theta_plot=1
   !
   ! Standard precision for IO 
   character(len=8) :: fmtstr='(es11.4)'
   character(len=14) :: fmtstr2='(2(es11.4,1x))'
+  character(len=15) :: fmtstrn='(10(es11.4,1x))'
   !----------------------------------------------------
 
   !---------------------------------------------------------------
@@ -183,6 +200,7 @@ module cgyro_globals
   complex :: freq
   complex :: freq_err
   real :: gtime
+  real :: gamma_eff
   !---------------------------------------------------------------
 
   !---------------------------------------------------------------
@@ -250,11 +268,12 @@ module cgyro_globals
   complex, dimension(:,:,:), allocatable :: field_old
   complex, dimension(:,:,:), allocatable :: field_old2
   complex, dimension(:,:,:), allocatable :: field_old3
+  complex, dimension(:,:), allocatable :: moment_loc
+  complex, dimension(:,:), allocatable :: moment
   !
-  ! Nonlinear fluxes
-  real, dimension(:,:), allocatable :: flux_loc
-  real, dimension(:,:), allocatable :: flux
-  real, dimension(:,:), allocatable :: power
+  ! Nonlinear fluxes 
+  real, dimension(:,:,:), allocatable :: flux_loc
+  real, dimension(:,:,:), allocatable :: flux
   !
   type(C_PTR) :: plan_r2c
   type(C_PTR) :: plan_c2r
@@ -303,6 +322,7 @@ module cgyro_globals
   complex, dimension(:), allocatable  :: cvec,bvec
   ! 
   ! Equilibrium/geometry arrays
+  integer :: it0
   real :: d_theta
   real, dimension(:,:), allocatable   :: thetab
   real, dimension(:), allocatable   :: w_theta
@@ -315,7 +335,9 @@ module cgyro_globals
   real, dimension(:,:), allocatable :: omega_aprdrift
   real, dimension(:,:), allocatable :: omega_cdrift
   real, dimension(:),   allocatable :: omega_gammap
-  integer, parameter :: geo_ntheta=1001 ! num grid pts for Miller geo grid
+  !
+  ! Number of gridpoints for Miller geometry integration grid
+  integer, parameter :: geo_ntheta=1001 
   !
   !---------------------------------------------------------------
 

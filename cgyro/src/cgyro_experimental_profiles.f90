@@ -75,6 +75,10 @@ subroutine cgyro_experimental_profiles
   !--------------------------------------------------------------
   ! Transfer data from read vector to individual arrays:
   !
+
+  btccw = -EXPRO_signb
+  ipccw = -EXPRO_signq*EXPRO_signb
+
   rmin_exp(:)         = EXPRO_rmin(:)
   rmaj_exp(:)         = EXPRO_rmaj(:)
   q_exp(:)            = EXPRO_q(:)

@@ -150,9 +150,7 @@ contains
     integer :: ierr
     !-------------------------------------------
 
-
     slib_comm = comm
-
 
     !-------------------------------------------------
     ! Get rank and number of processors from slib_comm 

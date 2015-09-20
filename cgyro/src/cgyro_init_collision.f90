@@ -527,20 +527,6 @@ subroutine cgyro_init_collision
                  endif
               endif
 
-              if(collision_trap_model == 1) then
-                 ! Trapping term
-                 if (is == js .and. ie == je) then
-                    cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                         + (0.5*delta_t) * omega_trap(it,is) &
-                         * sqrt(energy(ie)) * (1.0 - xi(ix)**2) &
-                         * xi_deriv_mat(ix,jx) 
-                    amat(iv,jv) = amat(iv,jv) &
-                         - (0.5*delta_t) * omega_trap(it,is) &
-                         * sqrt(energy(ie)) * (1.0 - xi(ix)**2) &
-                         * xi_deriv_mat(ix,jx) 
-                 endif
-              endif
-
               if(collision_field_model == 1) then
 
                  ! Poisson component 

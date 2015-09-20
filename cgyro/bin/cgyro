@@ -101,8 +101,6 @@ while [ $# -gt 0 ] ; do
 
   -r) shift ; REGRESS_FLAG=1 ;;
 
-  -h) cgyro_version_message ; exit 0 ;;
-
   -clean) CLEAN_FLAG=1 ;;
 
   *) echo "ERROR (cgyro script): incorrect cgyro syntax." ; exit 1 ;;
