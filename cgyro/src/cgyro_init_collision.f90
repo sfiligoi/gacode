@@ -19,8 +19,6 @@ subroutine cgyro_init_collision
   real :: arg
   real, dimension(:,:,:,:,:), allocatable :: bessel
 
-  if (collision_model == 0) return
-
   allocate(nu_d(n_energy,n_species,n_species))
   allocate(nu_s(n_energy,n_species,n_species))
   allocate(nu_par(n_energy,n_species,n_species))
