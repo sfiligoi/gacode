@@ -56,7 +56,7 @@ subroutine cgyro_kernel
   io_control = 2*(1-silent_flag)
 
   do i_time=1,n_time
-     
+
      call timer_lib_in('TOTAL')
      
      !------------------------------------------------------------

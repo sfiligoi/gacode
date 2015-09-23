@@ -68,7 +68,7 @@ subroutine cgyro_equilibrium
   ! Location of theta=0
      it0 = n_theta/2+1
   else
-     it0 = n_theta/3
+     it0 = n_theta/3+1
   endif
   !-----------------------------------------------------------------
 

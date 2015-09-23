@@ -507,6 +507,18 @@ subroutine cgyro_init_collision
                  enddo
               endif
 
+              ! Trapping (not part of collision operator but contains xi-derivative)
+              if (is == js .and. ie == je) then
+                 cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
+                      + (0.5*delta_t) * omega_trap(it,is) &
+                      * sqrt(energy(ie)) * (1.0 - xi(ix)**2) &
+                      * xi_deriv_mat(ix,jx) 
+                 amat(iv,jv) = amat(iv,jv) &
+                      - (0.5*delta_t) * omega_trap(it,is) &
+                      * sqrt(energy(ie)) * (1.0 - xi(ix)**2) &
+                      * xi_deriv_mat(ix,jx) 
+              endif
+
               ! Finite-kperp test particle corrections
               if(collision_model == 4 .and. collision_kperp == 1) then
                  if(is == js .and. jx == ix .and. je == ie) then
