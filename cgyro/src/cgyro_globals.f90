@@ -165,6 +165,7 @@ module cgyro_globals
   character(len=18) :: runfile_restart_tag = 'out.cgyro.tag'
   character(len=18) :: runfile_hb      = 'out.cgyro.hb'
   character(len=18) :: runfile_grids   = 'out.cgyro.grids'
+  character(len=18) :: runfile_prec    = 'out.cgyro.prec'
   character(len=18) :: runfile_time    = 'out.cgyro.time'
   character(len=18) :: runfile_timers  = 'out.cgyro.timing'
   character(len=18) :: runfile_freq    = 'out.cgyro.freq'
@@ -186,9 +187,10 @@ module cgyro_globals
   integer :: n_theta_plot=1
   !
   ! Standard precision for IO 
-  character(len=8) :: fmtstr='(es11.4)'
-  character(len=14) :: fmtstr2='(2(es11.4,1x))'
-  character(len=15) :: fmtstrn='(10(es11.4,1x))'
+  character(len=8)  :: fmtstr    ='(es11.4)'
+  character(len=14) :: fmtstr2   ='(2(es11.4,1x))'
+  character(len=15) :: fmtstrn   ='(10(es11.4,1x))'
+  character(len=9)  :: fmtstr_hi ='(es18.12)'
   !----------------------------------------------------
 
   !---------------------------------------------------------------
