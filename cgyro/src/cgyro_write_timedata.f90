@@ -356,10 +356,10 @@ subroutine write_distributed_real(datafile,n_fn,fn)
 end subroutine write_distributed_real
 
 !------------------------------------------------------
-! write_distributed_real.f90
+! write_precision.f90
 !
 ! PURPOSE:
-!  Control merged output of real distributed array.
+!  Reduce across n and then write precision scalar.
 !------------------------------------------------------
 
 subroutine write_precision(datafile,fn)
