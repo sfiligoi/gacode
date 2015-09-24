@@ -56,7 +56,7 @@ subroutine cgyro_write_timedata
 
   ! Checksum for regression testing
   ! Note that value is a distributed real scalar
-  call write_precision(trim(path)//runfile_prec,sum(abs(flux)))
+  call write_precision(trim(path)//runfile_prec,sum(abs(flux))+sum(abs(moment)))
 
   !---------------------------------------------------------------
   ! Ballooning mode output for linear runs with a single mode
@@ -372,14 +372,19 @@ subroutine write_precision(datafile,fn)
   !
   character (len=*), intent(in) :: datafile
   real, intent(in) :: fn
-  !
-  integer :: i_group_send
-  integer :: i_send
-  integer :: in
+  real :: fn_sum
   integer :: i_dummy
-  !
-  real :: fn_recv
   !------------------------------------------------------
+
+  call MPI_ALLREDUCE(fn, &
+       fn_sum, &
+       1, &
+       MPI_DOUBLE_PRECISION, &
+       MPI_SUM, &
+       NEW_COMM_2, &
+       i_err)
+
+  if (i_proc > 0) return
 
   select case (io_control)
 
@@ -391,89 +396,27 @@ subroutine write_precision(datafile,fn)
 
      ! Open
 
-     if (i_proc == 0) then
-        open(unit=io,file=datafile,status='replace')
-        close(io)
-     endif
+     open(unit=io,file=datafile,status='replace')
+     close(io)
 
   case(2)
 
      ! Append
 
-     if (i_proc == 0) &
-          open(unit=io,file=datafile,status='old',position='append')
-
-     do in=1,n_toroidal
-
-        !-----------------------------------------
-        ! Subgroup collector:
-        !
-        i_group_send = in-1
-
-        if (i_group_send /= 0) then
-
-           i_send = i_group_send*n_proc_1
-
-           if (i_proc == 0) then
-
-              call MPI_RECV(fn_recv,&
-                   1,&
-                   MPI_DOUBLE_PRECISION,&
-                   i_send,&
-                   in,&
-                   CGYRO_COMM_WORLD,&
-                   recv_status,&
-                   i_err)
-
-           else if (i_proc == i_send) then
-
-              call MPI_SEND(fn,&
-                   1,&
-                   MPI_DOUBLE_PRECISION,&
-                   0,&
-                   in,&
-                   CGYRO_COMM_WORLD,&
-                   i_err)
-
-           endif
-
-        else
-
-           fn_recv = fn
-
-        endif
-        !
-        !-----------------------------------------
-
-        if (i_proc == 0) then
-
-           write(io,fmtstr_hi) fn_recv
-
-        endif
-
-     enddo ! in
-
-     if (i_proc == 0) close(io)
+     open(unit=io,file=datafile,status='old',position='append')
+     write(io,fmtstr_hi) fn_sum
+     close(io)
 
   case(3)
 
      ! Rewind
 
-     if (i_proc == 0) then
-
-        open(unit=io,file=datafile,status='old')
-        do i_dummy=1,i_current
-
-           do in=1,n_toroidal
-              read(io,fmtstr_hi) fn_recv
-           enddo
-
-        enddo
-
-        endfile(io)
-        close(io)
-
-     endif
+     open(unit=io,file=datafile,status='old')
+     do i_dummy=1,i_current
+        read(io,fmtstr_hi) fn_sum
+     enddo
+     endfile(io)
+     close(io)
 
   end select
 

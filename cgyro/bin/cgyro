@@ -99,7 +99,7 @@ while [ $# -gt 0 ] ; do
 
   -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
 
-  -r) shift ; REGRESS_FLAG=1 ;;
+  -r) REGRESS_FLAG=1 ;;
 
   -clean) CLEAN_FLAG=1 ;;
 
@@ -157,7 +157,14 @@ fi
 #
 if [ $REGRESS_FLAG -eq 1 ] 
 then 
-   cgyro_reg_do
+   N2=$[ NPROC / 2 ]
+   if [ $[ NPROC - 2 * N2 ] -eq 1 ]
+   then
+      echo "ERROR: (CGYRO) For regression test, number of processors must be multiple of 2." 
+      exit 1
+   fi
+   # NOMP=1 RESET=0
+   gacode_reg_do $NPROC 1 0 cgyro 1e-6
    exit 0
 fi
 #============================================================
