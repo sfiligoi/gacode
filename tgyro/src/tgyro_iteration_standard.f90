@@ -280,7 +280,7 @@ subroutine tgyro_iteration_standard
      call tgyro_write_intermediate(0,res)
      !
      do p=1,p_max
-        if (res0(p) < tgyro_resmax*res(p) .and. loc_relax > 1.0) then
+        if (tgyro_resmax*res0(p) < res(p) .and. loc_relax > 1.0) then
 
            correct_flag = 1
 

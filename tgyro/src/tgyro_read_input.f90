@@ -126,7 +126,7 @@ subroutine tgyro_read_input
   call tgyro_readbc_int(tgyro_fix_concentration_flag)
   call tgyro_readbc_int(tgyro_write_profiles_flag)
   call tgyro_readbc_int(tgyro_neo_n_theta)
-  call tgyro_readbc_int(tgyro_resmax)
+  call tgyro_readbc_real(tgyro_resmax)
   ! ** END input read; ADD NEW PARAMETERS ABOVE HERE!!
   call tgyro_readbc_int(n_inst)
   !-------------------------------------------------------

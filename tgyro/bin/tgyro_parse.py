@@ -96,7 +96,7 @@ x.add('TGYRO_GYRO_RESTART_FLAG','0')
 x.add('TGYRO_FIX_CONCENTRATION_FLAG','0')
 x.add('TGYRO_WRITE_PROFILES_FLAG','0')
 x.add('TGYRO_NEO_N_THETA','11')
-x.add('TGYRO_RESMAX','1')
+x.add('TGYRO_RESMAX','1.0')
 
 # Deprecated parameters
 x.dep('LOC_N_FEEDBACK','new parameter is LOC_NE_FEEDBACK_FLAG')
