@@ -520,12 +520,20 @@ subroutine write_balloon(datafile,fn)
 
      do ir=-np,np-1
         do it=1,n_theta
-           jr = box_size*ir+n_radial/2+1
+           if(ipccw*btccw > 0) then
+              jr = box_size*ir+n_radial/2+1
+           else
+              jr = -box_size*ir+n_radial/2
+           endif
            f_balloon(ir+np+1,it) = fn(jr,it) &
                 *exp(-2*pi*i_c*ir*k_theta*rmin)
         enddo
      enddo
 
+      if(ipccw*btccw < 0) then
+         f_balloon = f_balloon * exp(2*pi*i_c*abs(k_theta)*rmin)
+      endif
+         
      write(io,fmtstr) transpose(f_balloon(:,:))
      close(io)
 

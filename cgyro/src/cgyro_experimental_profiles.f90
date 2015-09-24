@@ -90,9 +90,9 @@ subroutine cgyro_experimental_profiles
   s_delta_exp(:)      = EXPRO_sdelta(:) 
   zeta_exp(:)         = EXPRO_zeta(:)
   s_zeta_exp(:)       = EXPRO_szeta(:)  
-  zmag_exp(:)         = EXPRO_zmag(:)   
-  s_zmag_exp(:)       = EXPRO_dzmag(:)  
-
+  zmag_exp(:)         = EXPRO_zmag(:)*0.0   
+  s_zmag_exp(:)       = EXPRO_dzmag(:)*0.0
+  
   ! Minor radius, a, in meters:
   a_meters = rmin_exp(n_grid_exp)
 
