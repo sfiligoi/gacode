@@ -239,6 +239,7 @@
           endif
         enddo
 !      write(*,*)"debug jmax =",jmax(1),jmax(2)
+!      write(*,*)"debug nmodes_out = ",nmodes_out
       endif
 !
       if(alpha_quench_in.ne.0.0)then
