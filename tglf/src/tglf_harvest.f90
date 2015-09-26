@@ -39,7 +39,7 @@
        RETURN
     ENDIF
 
-    ierr=init_harvest('TGLF_spectrum?10'//NUL,harvest_sendline,LEN(harvest_sendline))
+    ierr=init_harvest('TGLF_spectrum_2?10'//NUL,harvest_sendline,LEN(harvest_sendline))
 
 !   '#---------------------------------------------------'
 !   '# Plasma parameters:'

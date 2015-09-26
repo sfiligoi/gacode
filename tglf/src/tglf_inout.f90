@@ -1800,7 +1800,7 @@ SUBROUTINE write_tglf_density_spectrum
   do i=1,nky
     do is=1,ns
       density(is) = 0.0
-      do n = 1,nmodes_out
+      do n = 1,nmodes_in
         density(is) = density(is) + intensity_spectrum_out(1,is,i,n)
       enddo
       density(is) = SQRT(density(is))
@@ -1836,7 +1836,7 @@ SUBROUTINE write_tglf_temperature_spectrum
   do i=1,nky
     do is=1,ns
       temp(is) = 0.0
-      do n = 1,nmodes_out
+      do n = 1,nmodes_in
         temp(is) = temp(is) + intensity_spectrum_out(2,is,i,n)
       enddo
       temp(is) = SQRT(temp(is))
@@ -1871,7 +1871,7 @@ SUBROUTINE write_tglf_potential_spectrum
   write(33,*)"ky,potential"
   do i=1,nky
     phi = 0.0
-    do n = 1,nmodes_out
+    do n = 1,nmodes_in
       phi = phi + field_spectrum_out(2,i,n)
     enddo
     phi = SQRT(phi)
