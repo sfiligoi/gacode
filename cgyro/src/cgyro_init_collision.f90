@@ -19,8 +19,6 @@ subroutine cgyro_init_collision
   real :: arg
   real, dimension(:,:,:,:,:), allocatable :: bessel
 
-  if (collision_model == 0) return
-
   allocate(nu_d(n_energy,n_species,n_species))
   allocate(nu_s(n_energy,n_species,n_species))
   allocate(nu_par(n_energy,n_species,n_species))
@@ -505,6 +503,18 @@ subroutine cgyro_init_collision
                     amat(iv,jv) = amat(iv,jv) &
                          + (0.5*delta_t) * ctest(is,ks,ix,jx,ie,je)
                  enddo
+              endif
+
+              ! Trapping (not part of collision operator but contains xi-derivative)
+              if (is == js .and. ie == je) then
+                 cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
+                      + (0.5*delta_t) * omega_trap(it,is) &
+                      * sqrt(energy(ie)) * (1.0 - xi(ix)**2) &
+                      * xi_deriv_mat(ix,jx) 
+                 amat(iv,jv) = amat(iv,jv) &
+                      - (0.5*delta_t) * omega_trap(it,is) &
+                      * sqrt(energy(ie)) * (1.0 - xi(ix)**2) &
+                      * xi_deriv_mat(ix,jx) 
               endif
 
               ! Finite-kperp test particle corrections

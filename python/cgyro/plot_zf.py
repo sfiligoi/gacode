@@ -11,8 +11,8 @@ sim.getbig()
 
 phic = sim.phi[0,0,0,:]
 
-y     = np.real(phic)/np.real(phic[0])
-y_ave = np.sum(y)/len(y)
+y     = phic[:]/phic[0]
+y_ave = np.average(y)
 
 print 'INFO: (plot_zf) Average =',y_ave
 

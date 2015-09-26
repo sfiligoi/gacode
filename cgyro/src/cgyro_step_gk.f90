@@ -119,7 +119,6 @@ subroutine cgyro_rhs(ij)
 
   enddo
 
-
   call timer_lib_out('stream')
 
   ! Nonlinear evaluation [f,g]
@@ -145,3 +144,4 @@ subroutine cgyro_rhs(ij)
   endif
 
 end subroutine cgyro_rhs
+

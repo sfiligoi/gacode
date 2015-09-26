@@ -23,7 +23,7 @@ then
   echo "          -e <simdir>"
   echo "          Use data in <simdir>."
   echo 
-  echo "          -f <filetype>"
+  echo "          -ext <filetype>"
   echo "          Output file type."
   echo "           <filetype>=emf, eps, pdf, png, ps, raw, rgba, svg, svgz, dump"
   echo 
@@ -58,6 +58,7 @@ then
   echo "                     = fluxn  (bar plot of flux versus n)"
   echo "                     = pwr    (time dependent field intensities)"
   echo "                     = pwr_np (n-p spectra at final time)"
+  echo "                     = note   (notebook)"
 
   exit 1
 fi
@@ -98,7 +99,7 @@ while [ $# -gt 0 ] ; do
 
   -moment) shift ; MOMENT=$1 ;;
 
-  -f) shift ; FTYPE=$1 ;;
+  -ext) shift ; FTYPE=$1 ;;
 
   -t) shift ; TIME=$1 ;;
 
@@ -160,6 +161,9 @@ case "$PLOT_TYPE" in
 
    text)
    	python $PYROOT/text.py $W & ;;
+
+   note)
+   	python $PYROOT/plot_notebook.py $W $FTYPE $SPECIES & ;;
 
    *)
         echo "Unrecognized argument to -plot" ; exit 1 ;;

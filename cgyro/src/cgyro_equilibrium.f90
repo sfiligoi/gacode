@@ -68,13 +68,17 @@ subroutine cgyro_equilibrium
   ! Location of theta=0
      it0 = n_theta/2+1
   else
-     it0 = n_theta/3
+     it0 = n_theta/3+1
   endif
   !-----------------------------------------------------------------
 
   do ir=1,n_radial/box_size
      do it=1,n_theta
-        thetab(ir,it) = theta(it)+2*pi*(ir-1-n_radial/2/box_size)
+        if(ipccw*btccw > 0) then
+           thetab(ir,it) = theta(it)+2*pi*(ir-1-n_radial/2/box_size)
+        else
+           thetab(ir,it) = -theta(it)+2*pi*(-ir+n_radial/2/box_size)
+        endif
      enddo
   enddo
 

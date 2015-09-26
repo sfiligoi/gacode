@@ -95,9 +95,6 @@ subroutine cgyro_check
   !
   select case (collision_model)  
 
-  case(0)
-     call cgyro_info('Collision model = none')
-
   case (1) 
      call cgyro_info('Collision model = CONNOR EE+EI LORENTZ only')
 

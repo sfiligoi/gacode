@@ -129,11 +129,9 @@ subroutine cgyro_init_manager
 
      call timer_lib_in('coll_init')
 
-     if (collision_model /= 0) then
-        allocate(cmat(nv,nv,nc_loc))
-        allocate(cvec(nv))
-        allocate(bvec(nv))
-     endif
+     allocate(cmat(nv,nv,nc_loc))
+     allocate(cvec(nv))
+     allocate(bvec(nv))
 
      call cgyro_init_collision
 

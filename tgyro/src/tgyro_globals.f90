@@ -320,7 +320,7 @@ module tgyro_globals
   integer :: tgyro_fix_concentration_flag
   integer :: tgyro_write_profiles_flag
   integer :: tgyro_neo_n_theta
-  integer :: tgyro_resnorm
+  real :: tgyro_resmax
   !
   ! Iteration variables (global)
   !

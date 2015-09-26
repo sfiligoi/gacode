@@ -10,8 +10,6 @@ subroutine cgyro_step_collision
   integer :: is,ir,it,ie,ix
   integer :: ivp
 
-  if (collision_model == 0) return
-  
   ! compute new collisional cap_H: H = h + ze/T G phi
   ! assumes have cap_h_x
   

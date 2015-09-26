@@ -54,6 +54,10 @@ subroutine cgyro_write_timedata
        size(field(:,it0,1)),&
        field(:,it0,1))
 
+  ! Checksum for regression testing
+  ! Note that value is a distributed real scalar
+  call write_precision(trim(path)//runfile_prec,sum(abs(flux))+sum(abs(moment)))
+
   !---------------------------------------------------------------
   ! Ballooning mode output for linear runs with a single mode
   !
@@ -351,6 +355,73 @@ subroutine write_distributed_real(datafile,n_fn,fn)
 
 end subroutine write_distributed_real
 
+!------------------------------------------------------
+! write_precision.f90
+!
+! PURPOSE:
+!  Reduce across n and then write precision scalar.
+!------------------------------------------------------
+
+subroutine write_precision(datafile,fn)
+
+  use mpi
+  use cgyro_globals
+
+  !------------------------------------------------------
+  implicit none
+  !
+  character (len=*), intent(in) :: datafile
+  real, intent(in) :: fn
+  real :: fn_sum
+  integer :: i_dummy
+  !------------------------------------------------------
+
+  call MPI_ALLREDUCE(fn, &
+       fn_sum, &
+       1, &
+       MPI_DOUBLE_PRECISION, &
+       MPI_SUM, &
+       NEW_COMM_2, &
+       i_err)
+
+  if (i_proc > 0) return
+
+  select case (io_control)
+
+  case(0)
+
+     return
+
+  case(1)
+
+     ! Open
+
+     open(unit=io,file=datafile,status='replace')
+     close(io)
+
+  case(2)
+
+     ! Append
+
+     open(unit=io,file=datafile,status='old',position='append')
+     write(io,fmtstr_hi) fn_sum
+     close(io)
+
+  case(3)
+
+     ! Rewind
+
+     open(unit=io,file=datafile,status='old')
+     do i_dummy=1,i_current
+        read(io,fmtstr_hi) fn_sum
+     enddo
+     endfile(io)
+     close(io)
+
+  end select
+
+end subroutine write_precision
+
 subroutine write_balloon(datafile,fn)
 
   use cgyro_globals
@@ -392,12 +463,20 @@ subroutine write_balloon(datafile,fn)
 
      do ir=-np,np-1
         do it=1,n_theta
-           jr = box_size*ir+n_radial/2+1
+           if(ipccw*btccw > 0) then
+              jr = box_size*ir+n_radial/2+1
+           else
+              jr = -box_size*ir+n_radial/2
+           endif
            f_balloon(ir+np+1,it) = fn(jr,it) &
                 *exp(-2*pi*i_c*ir*k_theta*rmin)
         enddo
      enddo
 
+      if(ipccw*btccw < 0) then
+         f_balloon = f_balloon * exp(2*pi*i_c*abs(k_theta)*rmin)
+      endif
+         
      write(io,fmtstr) transpose(f_balloon(:,:))
      close(io)
 
