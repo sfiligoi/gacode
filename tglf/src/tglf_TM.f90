@@ -289,6 +289,8 @@
 !            write(*,*)"phi reduced",ky_in,gamma_nb_min_out,gamma_out(1)
           endif
         endif
+        if(sat_rule_in.eq.1)reduce=1.0
+!
         if(unstable)then
 ! save field_spectrum_out and eigenvalue_spectrum_out
          do imax=1,nmodes_out
