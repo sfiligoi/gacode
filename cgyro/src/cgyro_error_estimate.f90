@@ -24,7 +24,7 @@ subroutine cgyro_error_estimate
   ! Define norm and error for each mode number n
   norm_loc  = sum(abs(field))
   error_loc = sum(abs(field-field_loc))
-  
+
   ! Get sum of all errors
   call MPI_ALLREDUCE(error_loc, &
        field_error, &
@@ -44,13 +44,15 @@ subroutine cgyro_error_estimate
        i_err)
 
   field_error = field_error/norm
-  
+
   field_old3 = field_old2
   field_old2 = field_old
   field_old  = field
 
-  if (field_error > 1.0 .and. i_time > 2) then
-     call cgyro_error('Integration error > 1.0')
+  if (error_tol > 0.0) then
+     if (field_error > error_tol .and. i_time > 2) then
+        call cgyro_error('Integration error > 1.0')
+     endif
   endif
 
 end subroutine cgyro_error_estimate
