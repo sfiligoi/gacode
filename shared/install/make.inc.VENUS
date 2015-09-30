@@ -4,6 +4,11 @@
 # (even in your .login file on VENUS)
 #---------------------------------------------------
 
+# Hardware features
+IDENTITY="venus.gat.com"
+CORES_PER_NODE=1
+NUMAS_PER_NODE=1
+
 FC	= mpif90 -module $(GACODE_ROOT)/modules
 F77	= mpif90
 
