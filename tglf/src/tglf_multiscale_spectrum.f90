@@ -40,7 +40,7 @@
       cz1=0.50*czf
       cz2=1.0*czf
       cz2=0.92*czf
-      kyetg = etg_factor_in*SQRT(taus(2)/mass(2))
+      kyetg = etg_factor_in*ABS(zs(2))/SQRT(taus(2)*mass(2))
       if(igeo.eq.0)then ! s-alpha 
        cnorm=14.63
        cz1=0.90*czf
