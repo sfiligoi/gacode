@@ -79,6 +79,9 @@ subroutine cgyro_check
   case (2)
      call cgyro_info('Transverse electromagnetic fluctuations (Phi,A_par)')
 
+  case (3)
+     call cgyro_info('Transverse and compressional electromagnetic fluctuations (Phi,A_par,B_par)')
+
   case default
      call cgyro_error('Invalid value for n_field.')
      return
