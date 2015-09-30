@@ -6,9 +6,9 @@ subroutine cgyro_step_gk
 
   ! RK4 time-advance for the distribution 
   !
-  !           z e             vpar
-  !  h = H - ----- G ( phi - ----- Apar )
-  !            T               c
+  !           z e             vpar            z e  vperp^2
+  !  h = H - ----- G0 ( phi - ----- Apar ) + ----- ---------- Gperp Bpar
+  !            T               c               T   omega_a c
   !
   ! After time advance, we will have 
   !
@@ -16,6 +16,7 @@ subroutine cgyro_step_gk
   ! H    -> cap_h_c
   ! phi  -> field(1)
   ! Apar -> field(2)
+  ! Bpar -> field(3)
 
   h0_x = h_x
   
@@ -78,6 +79,10 @@ subroutine cgyro_rhs(ij)
         ir = ir_c(ic) 
         it = it_c(ic)
         hp(ic) = cap_h_c(ic,iv_loc)-z(is)/temp(is)*j0_c(ic,iv_loc)*field(ir,it,1)
+        if(n_field > 2) then
+           hp(ic) = hp(ic) - 2.0*energy(ie)*(1-xi(ix)**2)/Bmag(it) &
+                *j0perp_c(ic,iv_loc)*field(ir,it,3)
+        endif
      enddo
 
      do ic=1,nc

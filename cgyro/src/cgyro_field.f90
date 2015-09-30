@@ -42,6 +42,13 @@ subroutine cgyro_field_v
                 *xi(ix)*sqrt(2.0*energy(ie))*vth(is)
         endif
 
+        if (n_field > 2) then
+           fac = w_e(ie)*0.5*w_xi(ix)*dens(is)*temp(is) &
+                *j0perp_v(ic_loc,iv)*cap_h_v(ic_loc,iv)
+           field_loc(ir,it,3) = field_loc(ir,it,3) + fac &
+                * 2.0*energy(ie)*(1-xi(ix)**2)
+        endif
+
      enddo
   enddo
 
@@ -103,6 +110,21 @@ subroutine cgyro_field_v
      enddo
   endif
 
+  ! Ampere Bpar LHS factors
+
+  if (n_field > 2) then
+     do ir=1,n_radial
+        if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
+           field(ir,:,3) = 0.0
+        else
+           do it=1,n_theta
+              field(ir,it,3) = field(ir,it,3) &
+                   * (-0.5*betae_unit)/(dens_ele*temp_ele)/Bmag(it)
+           enddo
+        endif
+     enddo
+  endif
+
   call timer_lib_out('field_H')
 
 end subroutine cgyro_field_v
@@ -153,6 +175,13 @@ subroutine cgyro_field_c
                 fac*xi(ix)*sqrt(2.0*energy(ie))*vth(is)
         endif
 
+        if (n_field > 2) then
+           fac = w_e(ie)*0.5*w_xi(ix)*dens(is)*temp(is) &
+                *j0perp_v(ic_loc,iv)*h_x(ic,iv_loc)
+           field_loc(ir,it,3) = field_loc(ir,it,3) + fac &
+                * 2.0*energy(ie)*(1-xi(ix)**2)
+        endif
+
      enddo
   enddo
 
@@ -185,17 +214,39 @@ subroutine cgyro_field_c
   else
 
      do ir=1,n_radial
+
         if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
            field(ir,:,1) = 0.0
+           if(n_field > 3) then
+              field(ir,:,3) = 0.0
+           endif
+
         else
-           do it=1,n_theta
-              field(ir,it,1) = field(ir,it,1) &
-                   /(k_perp(it,ir)**2*lambda_debye**2* &
-                   dens_ele/temp_ele+sum_den_x(ir,it))
-           enddo
+
+           if(n_field == 3) then
+              do it=1,n_theta
+                 fac = field(ir,it,1)
+
+                 field(ir,it,1) =  poisson_pb22(ir,it)*field(ir,it,1) &
+                      - poisson_pb12(ir,it)*field(ir,it,3) &
+                      *(-0.5*betae_unit)/(dens_ele*temp_ele)/Bmag(it)
+                 
+                 field(ir,it,3) =  -poisson_pb21(ir,it)*fac &
+                      + poisson_pb11(ir,it)*field(ir,it,3) &
+                      *(-0.5*betae_unit)/(dens_ele*temp_ele)/Bmag(it)
+
+              enddo
+           
+           else
+              do it=1,n_theta
+                 field(ir,it,1) = field(ir,it,1) &
+                      /(k_perp(it,ir)**2*lambda_debye**2* &
+                      dens_ele/temp_ele+sum_den_x(ir,it))
+              enddo
+           endif
+
         endif
      enddo
-
   endif
 
   ! Ampere LHS factors
@@ -229,15 +280,28 @@ subroutine cgyro_field_c
      if (n_field > 1) then
         efac(2) = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
      endif
+     if(n_field > 2) then
+        efac(3) = 2.0*energy(ie)*(1-xi(ix)**2)
+     endif
 
      do ic=1,nc
 
         ir = ir_c(ic)
         it = it_c(ic)
 
-        psi(ic,iv_loc) = j0_c(ic,iv_loc)*sum(efac(:)*field(ir,it,:))
+        
+        psi(ic,iv_loc) = j0_c(ic,iv_loc)*efac(1)*field(ir,it,1)
+        if(n_field > 1) then
+           psi(ic,iv_loc) = psi(ic,iv_loc) &
+                + j0_c(ic,iv_loc)*efac(2)*field(ir,it,2)
+        endif
+        if(n_field > 2) then
+           psi(ic,iv_loc) = psi(ic,iv_loc) &
+                + j0perp_c(ic,iv_loc)*efac(3)/Bmag(it)*temp(is)/z(is) &
+                * field(ir,it,3)
+        endif
 
-        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+z(is)*psi(ic,iv_loc)/temp(is) 
+        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+z(is)*psi(ic,iv_loc)/temp(is)
 
      enddo
   enddo

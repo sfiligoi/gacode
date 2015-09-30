@@ -8,10 +8,11 @@ subroutine cgyro_init_arrays
   implicit none
 
   real, external :: BESJ0
+  real :: bessel(0:2)
   real :: arg
   integer :: ir,it,is,ie,ix
-  integer :: jr,jt,id
-  complex :: thfac
+  integer :: jr,jt,id, ccw_fac
+  complex :: thfac, carg
   real, dimension(n_radial,n_theta) :: sum_loc
   real, dimension(nv_loc) :: vfac
   real, dimension(n_radial) :: u
@@ -38,6 +39,10 @@ subroutine cgyro_init_arrays
 
         j0_c(ic,iv_loc) = BESJ0(abs(arg))
 
+        call RJBESL(abs(arg),0.0,3,bessel,i_err)
+
+        j0perp_c(ic,iv_loc) = 0.5*(bessel(0)+bessel(2))
+
      enddo
   enddo
 
@@ -58,6 +63,10 @@ subroutine cgyro_init_arrays
              *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
 
         j0_v(ic_loc,iv) = BESJ0(abs(arg))
+
+        call RJBESL(abs(arg),0.0,3,bessel,i_err)
+
+        j0perp_v(ic_loc,iv) = 0.5*(bessel(0)+bessel(2))
 
      enddo
   enddo
@@ -130,6 +139,7 @@ subroutine cgyro_init_arrays
   if (n_field > 1) then
 
      allocate(sum_cur_x(n_radial,n_theta))
+
      sum_loc(:,:)  = 0.0
 
      iv_loc = 0
@@ -160,6 +170,86 @@ subroutine cgyro_init_arrays
           i_err)
 
   endif
+
+  if (n_field > 2) then
+     allocate(poisson_pb11(n_radial,n_theta))
+     allocate(poisson_pb12(n_radial,n_theta))
+     allocate(poisson_pb21(n_radial,n_theta))
+     allocate(poisson_pb22(n_radial,n_theta))
+
+     do ir=1,n_radial
+        do it=1,n_theta
+           poisson_pb11(ir,it) = k_perp(it,ir)**2*lambda_debye**2* &
+                dens_ele/temp_ele+sum_den_x(ir,it)
+        enddo
+     enddo
+
+     sum_loc(:,:)  = 0.0
+     iv_loc = 0
+     do iv=nv1,nv2
+        iv_loc = iv_loc+1
+        is = is_v(iv)
+        ix = ix_v(iv)
+        ie = ie_v(iv)
+        do ic=1,nc
+           ir = ir_c(ic) 
+           it = it_c(ic)
+           sum_loc(ir,it) = sum_loc(ir,it) - 0.5*w_xi(ix)*w_e(ie)*dens(is) &
+                * z(is)/Bmag(it) * 2.0*energy(ie)*(1-xi(ix)**2) &
+                *j0_c(ic,iv_loc) *j0perp_c(ic,iv_loc)
+        enddo
+     enddo
+     call MPI_ALLREDUCE(sum_loc,&
+          poisson_pb12,&
+          size(poisson_pb12),&
+          MPI_DOUBLE_PRECISION,&
+          MPI_SUM,&
+          NEW_COMM_1,&
+          i_err)
+
+     poisson_pb21(:,:) = poisson_pb12(:,:) * (-0.5*betae_unit) &
+          /(dens_ele*temp_ele)
+
+     sum_loc(:,:)  = 0.0
+     iv_loc = 0
+     do iv=nv1,nv2
+        iv_loc = iv_loc+1
+        is = is_v(iv)
+        ix = ix_v(iv)
+        ie = ie_v(iv)
+        do ic=1,nc
+           ir = ir_c(ic) 
+           it = it_c(ic)
+           sum_loc(ir,it) = sum_loc(ir,it) + 0.5*w_xi(ix)*w_e(ie)*dens(is) &
+                * temp(is)/Bmag(it) * (2.0*energy(ie)*(1-xi(ix)**2))**2 &
+                * j0perp_c(ic,iv_loc)**2
+        enddo
+     enddo
+     call MPI_ALLREDUCE(sum_loc,&
+          poisson_pb22,&
+          size(poisson_pb22),&
+          MPI_DOUBLE_PRECISION,&
+          MPI_SUM,&
+          NEW_COMM_1,&
+          i_err)
+
+     do ir=1,n_radial
+        do it=1,n_theta
+           poisson_pb22(ir,it) = 1.0 - poisson_pb22(ir,it) &
+                * (-0.5*betae_unit) /(dens_ele*temp_ele)/Bmag(it)
+        enddo
+     enddo
+
+     ! determinant
+     sum_loc = poisson_pb11 * poisson_pb22 - poisson_pb12 * poisson_pb21
+
+     poisson_pb11 = poisson_pb11/sum_loc
+     poisson_pb12 = poisson_pb12/sum_loc
+     poisson_pb21 = poisson_pb21/sum_loc
+     poisson_pb22 = poisson_pb22/sum_loc
+
+  endif
+
   !-------------------------------------------------------------------------
 
   !-------------------------------------------------------------------------
@@ -316,6 +406,13 @@ subroutine cgyro_init_arrays
 
   end select
 
+  if(ipccw*btccw < 0) then
+     ccw_fac = -1
+  else
+     ccw_fac = 1
+  endif
+
+
   ! Indices for parallel streaming with upwinding
   do ir=1,n_radial
      do it=1,n_theta
@@ -323,7 +420,7 @@ subroutine cgyro_init_arrays
            jt = thcyc(it+id)
            if (it+id < 1) then
               thfac = exp(2*pi*i_c*k_theta*rmin)
-              jr = ir-n*box_size*ipccw*btccw
+              jr = ir-n*box_size*ccw_fac
               if (jr < 1) then
                  jr = jr+n_radial
               endif
@@ -332,7 +429,7 @@ subroutine cgyro_init_arrays
               endif
            else if (it+id > n_theta) then
               thfac = exp(-2*pi*i_c*k_theta*rmin)
-              jr = ir+n*box_size*ipccw*btccw
+              jr = ir+n*box_size*ccw_fac
               if (jr > n_radial) then
                  jr = jr-n_radial
               endif
@@ -395,19 +492,22 @@ subroutine cgyro_init_arrays
              *up_radial *(n_radial/length) * spec_uderiv(ir)
 
         ! omega_star and rotation shearing
-        omega_s(1,ic,iv_loc) = &
-             -i_c*k_theta*rho*(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
-             *j0_c(ic,iv_loc)
-
-        omega_s(1,ic,iv_loc) = omega_s(1,ic,iv_loc) &
+        carg = -i_c*k_theta*rho*(dlnndr(is)+dlntdr(is)*(energy(ie)-1.5)) &
              -i_c*k_theta*rho*(sqrt(2.0*energy(ie))*xi(ix)/vth(is) &
-             *omega_gammap(it)) * j0_c(ic,iv_loc)
+             *omega_gammap(it))
+
+        omega_s(1,ic,iv_loc) = carg * j0_c(ic,iv_loc)
 
         if (n_field > 1) then
-           omega_s(2,ic,iv_loc) = -omega_s(1,ic,iv_loc)* &
-                xi(ix)*sqrt(2.0*energy(ie))*vth(is)
+           omega_s(2,ic,iv_loc) = carg * (-j0_c(ic,iv_loc)) &
+                * xi(ix)*sqrt(2.0*energy(ie))*vth(is)
         endif
 
+        if (n_field > 2) then
+           omega_s(3,ic,iv_loc) = carg * j0perp_c(ic,iv_loc) &
+                * 2.0*energy(ie)*(1-xi(ix)**2)/Bmag(it)
+        endif
+           
      enddo
   enddo
 
