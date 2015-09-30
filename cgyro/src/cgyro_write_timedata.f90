@@ -473,8 +473,8 @@ subroutine write_balloon(datafile,fn)
         enddo
      enddo
 
-      if(ipccw*btccw < 0) then
-         f_balloon = f_balloon * exp(2*pi*i_c*abs(k_theta)*rmin)
+      if (ipccw*btccw < 0) then
+         f_balloon = f_balloon*exp(2*pi*i_c*abs(k_theta)*rmin)
       endif
          
      write(io,fmtstr) transpose(f_balloon(:,:))
@@ -536,7 +536,7 @@ subroutine write_time(datafile)
      endif
 
      open(unit=io,file=datafile,status='old',position='append')
-     write(io,fmtstrn) t_current,field_error,gamma_eff
+     write(io,fmtstr2) t_current,field_error
      close(io)
 
      !-------------------------------------------------------
