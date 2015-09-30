@@ -55,6 +55,7 @@ x.add('GAMMA_P','0.0')
 x.add('MACH','0.0')
 x.add('SPLIT_METHOD','2')
 x.add('ERROR_TOL','10.0')
+x.add('KXFILTER_FLAG','0')
 
 x.add('RMIN','0.5')
 x.add('RMAJ','3.0')

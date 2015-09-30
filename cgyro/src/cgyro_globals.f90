@@ -65,6 +65,7 @@ module cgyro_globals
   real :: mach
   integer :: split_method
   real :: error_tol
+  integer :: kxfilter_flag
   !
   ! Geometry input
   !

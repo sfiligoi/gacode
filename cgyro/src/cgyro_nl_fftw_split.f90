@@ -37,7 +37,7 @@ subroutine cgyro_nl_fftw_split(ij)
 
   complex, dimension(:,:), allocatable :: fpack
   complex, dimension(:,:), allocatable :: gpack
-  
+
   include 'fftw3.f03'
 
 
@@ -108,6 +108,12 @@ subroutine cgyro_nl_fftw_split(ij)
            gy(iy,ix) = i_c*iy*g0
         enddo
      enddo
+     if (kxfilter_flag == 1) then
+        fx(:,-nx0/2+nx) = 0.0
+        fy(:,-nx0/2+nx) = 0.0
+        gx(:,-nx0/2+nx) = 0.0
+        gy(:,-nx0/2+nx) = 0.0
+     endif
 
      call fftw_execute_dft_c2r(plan_c2r,fx,ux)
      call fftw_execute_dft_c2r(plan_c2r,fy,uy)
@@ -121,6 +127,8 @@ subroutine cgyro_nl_fftw_split(ij)
      call fftw_execute_dft_r2c(plan_r2c,uv,fx)
 
      ! Must annhilate n=0,p=-nr/2
+     !print *,fx(0,0)
+     !print *,fx(0,-nx0/2+nx)
      fx(0,-nx0/2+nx) = 0.0       
 
      do ir=1,n_radial 
@@ -167,5 +175,5 @@ subroutine cgyro_nl_fftw_split(ij)
   ! RHS -> -[f,g] = [f,g]_{r,-alpha}
 
   rhs(ij,:,:) = rhs(ij,:,:)+(q*rho/rmin)*(2*pi/length)*psi(:,:)
-  
+
 end subroutine cgyro_nl_fftw_split
