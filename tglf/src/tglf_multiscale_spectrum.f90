@@ -20,11 +20,12 @@
       !
       INTEGER :: i,is,k,j,j1,jmax1
       REAL :: test1,testmax1
-      REAL :: gammamax1,kymax1,ky0
+      REAL :: gammamax1,kymax1,ky0,ky1,ky2
       REAL :: f0,f1,f2,a,b,c,x0,x02,dky,xmax
       REAL :: gamma0,gammaeff
-      REAL :: cnorm, phinorm, kylow, czf, cz1, cz2, kyetg, cky
-      REAL :: mix, mixnorm, gamma_ave
+      REAL :: cnorm, phinorm, kylow, czf, cz1, cz2, kyetg
+      REAL :: cky,sqcky
+      REAL :: mix1,mix2,mixnorm,gamma_ave
       REAL,DIMENSION(nkym) :: gamma=0.0
       REAL,DIMENSION(nkym) :: gamma_mix=0.0
       REAL,PARAMETER :: small=1.0E-10
@@ -34,6 +35,7 @@
       ! Miller geometry values igeo=1
       czf = alpha_zf_in
       cky=2.0
+      sqcky=SQRT(cky)
       cnorm=14.21
       cnorm=15.73
       cz1=0.48*czf
@@ -124,23 +126,28 @@
           endif 
           gamma_mix(j) = gamma(j)
       enddo
-! mix over ky > kymax1
+! mix over ky > kymax with integration weight = sqcky*ky0**2/(ky0**2 + cky*(ky-ky0)**2)
       do j=jmax1,nky
-        mixnorm = 0.0
         gamma_ave = 0.0
         ky0 = ky_spectrum(j)
-        do i=jmax1,nky
-          mix = 1.0/(1.0 + cky*(1.0 - ky_spectrum(i)/ky0)**2)
-          mixnorm = mixnorm + mix
-          gamma_ave = gamma_ave + gamma(i)*mix
+        mixnorm = ky0*(ATAN(sqcky*(ky_spectrum(nky)/ky0-1.0))-  &
+                  ATAN(sqcky*(ky_spectrum(jmax1)/ky0-1.0)))
+        do i=jmax1,nky-1
+          ky1 = ky_spectrum(i)
+          ky2 = ky_spectrum(i+1)
+          mix1 = ky0*(ATAN(sqcky*(ky2/ky0-1.0))- ATAN(sqcky*(ky1/ky0-1.0)))
+          mix2 = ky0*mix1 + (ky0*ky0/(2.0*sqcky))*(LOG(cky*(ky2-ky0)**2+ky0**2)- &
+                 LOG(cky*(ky1-ky0)**2+ky0**2))
+          gamma_ave = gamma_ave + (gamma(i)-ky0*(gamma(i+1)-gamma(i)))*mix1 + &
+                      (gamma(i+1)-gamma(i))*mix2
         enddo  
         gamma_mix(j) = gamma_ave/mixnorm     
+!        write(*,*)j,ky0,gamma(j),gamma_mix(j)
       enddo        
 ! intensity model
       do j=1,nky
         gamma0 = eigenvalue_spectrum_out(1,j,1)
         ky0 = ky_spectrum(j)
-!        write(*,*)j,ky0,gamma(j),gamma_mix(j)
         do i=1,nmodes_in
           gammaeff = 0.0
           if(gamma0.gt.small)gammaeff = gamma_mix(j)*(eigenvalue_spectrum_out(1,j,i)/gamma0)**2
