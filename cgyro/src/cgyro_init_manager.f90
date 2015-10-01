@@ -88,6 +88,8 @@ subroutine cgyro_init_manager
      allocate(rhs(4,nc,nv_loc))
      allocate(j0_c(nc,nv_loc))
      allocate(j0_v(nc_loc,nv))
+     allocate(j0perp_c(nc,nv_loc))
+     allocate(j0perp_v(nc_loc,nv))
      allocate(h_x(nc,nv_loc))
      allocate(h_xs(nc,nv_loc))
      allocate(psi(nc,nv_loc))

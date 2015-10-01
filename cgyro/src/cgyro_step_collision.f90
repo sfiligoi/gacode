@@ -75,6 +75,12 @@ subroutine cgyro_step_collision
                 +z(is)/temp(is)*j0_c(ic,iv_loc)*field(ir,it,2) &
                 *xi(ix)*sqrt(2.0*energy(ie))*vth(is) 
         endif
+
+        if (n_field > 2) then
+           h_x(ic,iv_loc) = h_x(ic,iv_loc) &
+                - 2.0*energy(ie)*(1-xi(ix)**2)/Bmag(it) &
+                *j0perp_c(ic,iv_loc)*field(ir,it,3)
+        endif
         
      enddo
   enddo

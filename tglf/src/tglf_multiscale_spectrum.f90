@@ -22,18 +22,25 @@
       REAL :: test1,testmax1
       REAL :: gammamax1,kymax1,ky0
       REAL :: f0,f1,f2,a,b,c,x0,x02,dky,xmax
-      REAL :: gamma0,gamma,gammaeff
-      REAL :: cnorm, phinorm, kylow, czf, cz1, cz2, kyetg
+      REAL :: gamma0,gammaeff
+      REAL :: cnorm, phinorm, kylow, czf, cz1, cz2, kyetg, cky
+      REAL :: mix, mixnorm, gamma_ave
+      REAL,DIMENSION(nkym) :: gamma=0.0
+      REAL,DIMENSION(nkym) :: gamma_mix=0.0
       REAL,PARAMETER :: small=1.0E-10
       !
       ! model fit parameters
       ! need to set alpha_zf_in = 1.0
       ! Miller geometry values igeo=1
       czf = alpha_zf_in
+      cky=2.0
       cnorm=14.21
+      cnorm=15.73
       cz1=0.48*czf
+      cz1=0.50*czf
       cz2=1.0*czf
-      kyetg = etg_factor_in*SQRT(taus(2)/mass(2))
+      cz2=0.92*czf
+      kyetg = etg_factor_in*ABS(zs(2))/SQRT(taus(2)*mass(2))
       if(igeo.eq.0)then ! s-alpha 
        cnorm=14.63
        cz1=0.90*czf
@@ -106,22 +113,39 @@
       ! compute multi-scale phi-intensity spectrum field_spectrum(2,,) = phi_bar_out
       ! note that the field_spectrum(1,,) = v_bar_out = 1.0 for sat_rule_in = 1
       do j=1,nky
-! efective growthrate model
-          gamma=0.0
+! include zonal flow effects on growthrate model
+!          gamma=0.0
           gamma0 = eigenvalue_spectrum_out(1,j,1)
           ky0=ky_spectrum(j)
           if(ky0.lt.kymax1)then
-            gamma = Max(gamma0 - cz1*(1.0 - ky0/kymax1)*gammamax1,0.0)
+            gamma(j) = Max(gamma0 - cz1*(1.0 - ky0/kymax1)*gammamax1,0.0)
           else
-            gamma = cz2*gammamax1 +  Max(gamma0 - cz2*gammamax1*ky0/kymax1,0.0)
-          endif   
+            gamma(j) = cz2*gammamax1 +  Max(gamma0 - cz2*gammamax1*ky0/kymax1,0.0)
+          endif 
+          gamma_mix(j) = gamma(j)
+      enddo
+! mix over ky > kymax1
+      do j=jmax1,nky
+        mixnorm = 0.0
+        gamma_ave = 0.0
+        ky0 = ky_spectrum(j)
+        do i=jmax1,nky
+          mix = 1.0/(1.0 + cky*(1.0 - ky_spectrum(i)/ky0)**2)
+          mixnorm = mixnorm + mix
+          gamma_ave = gamma_ave + gamma(i)*mix
+        enddo  
+        gamma_mix(j) = gamma_ave/mixnorm     
+      enddo        
 ! intensity model
+      do j=1,nky
+        gamma0 = eigenvalue_spectrum_out(1,j,1)
+        ky0 = ky_spectrum(j)
+!        write(*,*)j,ky0,gamma(j),gamma_mix(j)
         do i=1,nmodes_in
           gammaeff = 0.0
-          if(gamma0.gt.small)gammaeff = gamma*(eigenvalue_spectrum_out(1,j,i)/gamma0)**2
+          if(gamma0.gt.small)gammaeff = gamma_mix(j)*(eigenvalue_spectrum_out(1,j,i)/gamma0)**2
           if(ky0.gt.kyetg)gammaeff = gammaeff*SQRT(ky0/kyetg)
           field_spectrum_out(2,j,i) = cnorm*gammaeff*gammaeff/ky0**4
-!
         enddo
      enddo
      ! recompute the intensity and flux spectra

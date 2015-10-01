@@ -259,8 +259,8 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: cap_h_ct
   complex, dimension(:,:), allocatable :: cap_h_v
   complex, dimension(:,:), allocatable :: cap_h_v_prime
-  real, dimension(:,:), allocatable :: j0_c
-  real, dimension(:,:), allocatable :: j0_v
+  real, dimension(:,:), allocatable :: j0_c, j0perp_c
+  real, dimension(:,:), allocatable :: j0_v, j0perp_v
   !
   ! Fields
   !
@@ -311,6 +311,8 @@ module cgyro_globals
   !
   real :: sum_den_h
   real, dimension(:,:), allocatable :: sum_den_x, sum_cur_x
+  real, dimension(:,:), allocatable :: poisson_pb11, poisson_pb12, &
+       poisson_pb21, poisson_pb22
   !
   ! n=0 test variables
   !
