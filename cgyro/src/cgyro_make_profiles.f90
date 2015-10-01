@@ -63,6 +63,14 @@ subroutine cgyro_make_profiles
   !-------------------------------------------------------------
   ! Profiles
 
+  ! FIELD ORIENTATION NOTES:
+  !  Field orientation is accomplished by giving signs to a minimal 
+  !  set of quantities:
+  !  
+  !  1. sign(b_unit)   = -btccw
+  !  2. sign(q)        = ipccw*btccw
+  !  3. sign(rho_star) = -btccw
+  !-----------------------------------------------------------------------
 
   if(profile_model == 2) then
 
@@ -120,8 +128,7 @@ subroutine cgyro_make_profiles
      ! Debye length (from NRL plasma formulary):
      ! Use input lambda_debye as scaling parameter
      
-     lambda_debye = 7.43 * sqrt((1e3*temp_norm)/(1e13*dens_norm))/a_meters &
-          * lambda_debye_scale
+     lambda_debye = 7.43 * sqrt((1e3*temp_norm)/(1e13*dens_norm))/a_meters 
 
      ! Normalize
      do is=1,n_species
@@ -133,9 +140,9 @@ subroutine cgyro_make_profiles
      te_ade   = te_ade/temp_norm
      dens_ele = dens_ele/dens_norm
      temp_ele = temp_ele/temp_norm
-     gamma_e  = gamma_e/(vth_norm/a_meters) * gamma_e_scale
-     gamma_p  = gamma_p/(vth_norm/a_meters) * gamma_p_scale
-     mach     = mach/vth_norm * mach_scale
+     gamma_e  = gamma_e/(vth_norm/a_meters)
+     gamma_p  = gamma_p/(vth_norm/a_meters)
+     mach     = mach/vth_norm
 
      do is=1,n_species
         nu(is) = nu_ee *(1.0*z(is))**4 &
@@ -153,8 +160,22 @@ subroutine cgyro_make_profiles
      endif
      beta_star = beta_star * betae_unit
 
+     ! Re-scaling
+     lambda_debye = lambda_debye * lambda_debye_scale
+     gamma_e      = gamma_e      * gamma_e_scale
+     gamma_p      = gamma_p      * gamma_p_scale
+     mach         = mach         * mach_scale
+     q            = q            * q_scale
+     s            = s            * s_scale
+     do is=1,n_species
+        dlnndr(is) = dlnndr(is)  * dlnndr_scale(is) 
+        dlntdr(is) = dlntdr(is)  * dlntdr_scale(is)  
+     enddo
+
   else
 
+     q = abs(q)*(ipccw)*(btccw)
+     
      if (ae_flag == 1) then
         dens_ele = ne_ade
         temp_ele = te_ade
@@ -182,15 +203,14 @@ subroutine cgyro_make_profiles
   !-------------------------------------------------------------
   ! Manage simulation type (n=0,linear,nonlinear)
   !
-  q = abs(q) 
 
   if (zf_test_flag == 1) then
 
      ! Zonal flow (n=0) test
 
      k_theta = q/rmin
-     rho     = ky/k_theta
-     length  = box_size/(s*k_theta)
+     rho     = abs(ky/k_theta)*(-btccw)
+     length  = abs(box_size/(s*k_theta))
 
      k_theta = 0
 
@@ -208,8 +228,8 @@ subroutine cgyro_make_profiles
      ! Single linear mode (assume n=1, compute rho)
 
      k_theta = q/rmin
-     rho     = ky/k_theta
-     length  = box_size/(s*k_theta)
+     rho     = abs(ky/k_theta)*(-btccw)
+     length  = abs(box_size/(s*k_theta))
 
      n = 1
 
@@ -220,8 +240,8 @@ subroutine cgyro_make_profiles
      ! Multiple modes (n=0,1,2,...,n_toroidal-1)
 
      k_theta = q/rmin
-     rho     = ky/k_theta
-     length  = box_size/(s*k_theta)
+     rho     = abs(ky/k_theta)*(-btccw)
+     length  = abs(box_size/(s*k_theta))
 
      ! Now define individual k_thetas
 

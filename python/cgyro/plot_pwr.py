@@ -7,7 +7,7 @@ ftype = sys.argv[1]
 field = sys.argv[2]
 
 sim = cgyrodata('./')
-sim.getmedium()
+sim.getbig()
 
 fig = plt.figure(figsize=(12,6))
 
@@ -17,7 +17,7 @@ ax.grid(which="major",ls=":")
 ax.set_xlabel(r'$(c_s/a)\, t$')
 ax.set_ylabel(r'$\Phi$')
 
-y = np.sum(sim.pwr_phi,axis=0)
+y = np.sum(sim.phisq,axis=0)
 
 for n in range(sim.n_n):
     num = r'$n='+str(n)+'$'

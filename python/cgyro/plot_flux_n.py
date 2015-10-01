@@ -23,11 +23,11 @@ ave = np.zeros((sim.n_n))
 if moment == 'n':
     imoment = 0 
     mtag = '\Gamma'
-    y = sim.flux_n
+    y = np.sum(sim.flux_n,axis=0)
 elif moment == 'e':
     imoment = 1
     mtag = 'Q'
-    y = sim.flux_e
+    y = np.sum(sim.flux_e,axis=0)
 elif moment == 'm':
     print 'm not implemented.'
     sys.exit()

@@ -83,7 +83,7 @@ module tglf_interface
   real    :: tglf_alpha_e_in        = 1.0
   real    :: tglf_alpha_p_in        = 1.0
   real    :: tglf_alpha_quench_in   = 0.0
-  real    :: tglf_alpha_zf_in       = 0.0
+  real    :: tglf_alpha_zf_in       = 1.0
   real    :: tglf_xnu_factor_in     = 1.0
   real    :: tglf_debye_factor_in   = 1.0
   real    :: tglf_etg_factor_in     = 1.25

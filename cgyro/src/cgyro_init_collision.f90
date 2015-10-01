@@ -19,8 +19,6 @@ subroutine cgyro_init_collision
   real :: arg
   real, dimension(:,:,:,:,:), allocatable :: bessel
 
-  if (collision_model == 0) return
-
   allocate(nu_d(n_energy,n_species,n_species))
   allocate(nu_s(n_energy,n_species,n_species))
   allocate(nu_par(n_energy,n_species,n_species))
@@ -507,6 +505,18 @@ subroutine cgyro_init_collision
                  enddo
               endif
 
+              ! Trapping (not part of collision operator but contains xi-derivative)
+              if (is == js .and. ie == je) then
+                 cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
+                      + (0.5*delta_t) * omega_trap(it,is) &
+                      * sqrt(energy(ie)) * (1.0 - xi(ix)**2) &
+                      * xi_deriv_mat(ix,jx) 
+                 amat(iv,jv) = amat(iv,jv) &
+                      - (0.5*delta_t) * omega_trap(it,is) &
+                      * sqrt(energy(ie)) * (1.0 - xi(ix)**2) &
+                      * xi_deriv_mat(ix,jx) 
+              endif
+
               ! Finite-kperp test particle corrections
               if(collision_model == 4 .and. collision_kperp == 1) then
                  if(is == js .and. jx == ix .and. je == ie) then
@@ -527,23 +537,9 @@ subroutine cgyro_init_collision
                  endif
               endif
 
-              if(collision_trap_model == 1) then
-                 ! Trapping term
-                 if (is == js .and. ie == je) then
-                    cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                         + (0.5*delta_t) * omega_trap(it,is) &
-                         * sqrt(energy(ie)) * (1.0 - xi(ix)**2) &
-                         * xi_deriv_mat(ix,jx) 
-                    amat(iv,jv) = amat(iv,jv) &
-                         - (0.5*delta_t) * omega_trap(it,is) &
-                         * sqrt(energy(ie)) * (1.0 - xi(ix)**2) &
-                         * xi_deriv_mat(ix,jx) 
-                 endif
-              endif
-
               if(collision_field_model == 1) then
 
-                 ! Poisson component 
+                 ! Poisson component l
                  if (n == 0 .and. ae_flag == 1) then
                     ! Cannot include Poisson in collision matrix
                     ! for n=0 with ade because depends on theta
@@ -552,37 +548,55 @@ subroutine cgyro_init_collision
                     amat(iv,jv)        = amat(iv,jv) + 0.0
                  else
                     cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                         - z(is)/temp(is) / &
-                         (k_perp(it,ir)**2 * lambda_debye**2 &
+                         - z(is)/temp(is) * j0_v(ic_loc,iv) &
+                         / (k_perp(it,ir)**2 * lambda_debye**2 &
                          * dens_ele / temp_ele + sum_den_h) &
-                         * j0_v(ic_loc,iv) * z(js)*dens(js) &
+                         * z(js)*dens(js) &
                          * j0_v(ic_loc,jv) * w_e(je) * 0.5 * w_xi(jx) 
                     amat(iv,jv) = amat(iv,jv) &
-                         - z(is)/temp(is) / &
-                         (k_perp(it,ir)**2 * lambda_debye**2 &
+                         - z(is)/temp(is) * j0_v(ic_loc,iv) &
+                         / (k_perp(it,ir)**2 * lambda_debye**2 &
                          * dens_ele / temp_ele + sum_den_h) &
-                         * j0_v(ic_loc,iv) * z(js)*dens(js) &
+                         * z(js)*dens(js) &
                          * j0_v(ic_loc,jv) * w_e(je) * 0.5 * w_xi(jx) 
                  endif
 
                  ! Ampere component
                  if (n_field > 1) then
                     cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                         - z(is)/temp(is) / &
-                         (2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
-                         * dens_ele * temp_ele) * (-j0_v(ic_loc,iv)) &
-                         * z(js)*dens(js) &
+                         - z(is)/temp(is) * (-j0_v(ic_loc,iv) &
                          * xi(ix) * sqrt(2.0*energy(ie)) *vth(is) &
+                         / (2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
+                         * dens_ele * temp_ele)) &
+                         * z(js)*dens(js) &
                          * j0_v(ic_loc,jv) * w_e(je) * 0.5 * w_xi(jx) &
                          * xi(jx) * sqrt(2.0*energy(je)) * vth(js) 
                     amat(iv,jv) = amat(iv,jv) &
-                         - z(is)/temp(is) / &
-                         (2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
-                         * dens_ele * temp_ele) * (-j0_v(ic_loc,iv)) &
-                         * z(js)*dens(js) &
+                         - z(is)/temp(is) * (-j0_v(ic_loc,iv) &
                          * xi(ix) * sqrt(2.0*energy(ie)) * vth(is) &
+                         / (2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
+                         * dens_ele * temp_ele)) &
+                         * z(js)*dens(js) &
                          * j0_v(ic_loc,jv) * w_e(je) * 0.5 * w_xi(jx) &
                          * xi(jx) * sqrt(2.0*energy(je)) * vth(js) 
+                 endif
+
+                 ! Ampere Bpar component
+                 if (n_field > 2) then
+                    cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
+                         - 2.0*energy(ie)*(1-xi(ix)**2)/Bmag(it) &
+                         * j0perp_v(ic_loc,iv) &
+                         * (-0.5*betae_unit)/(dens_ele*temp_ele)/Bmag(it) &
+                         * w_e(je)*0.5*w_xi(jx)*dens(js)*temp(js) &
+                         * j0perp_v(ic_loc,jv) &
+                         * 2.0*energy(je)*(1-xi(jx)**2)
+                    amat(iv,jv) = amat(iv,jv) &
+                         - 2.0*energy(ie)*(1-xi(ix)**2)/Bmag(it) &
+                         * j0perp_v(ic_loc,iv) &
+                         * (-0.5*betae_unit)/(dens_ele*temp_ele)/Bmag(it) &
+                         * w_e(je)*0.5*w_xi(jx)*dens(js)*temp(js) &
+                         * j0perp_v(ic_loc,jv) &
+                         * 2.0*energy(je)*(1-xi(jx)**2)
                  endif
 
               endif

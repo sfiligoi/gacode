@@ -70,8 +70,10 @@ subroutine cgyro_init_h
               else
                  ! CAUTION: Need f(p) = conjg[ f(-p) ] for n=0
                  arg = abs(px(ir))/real(n_radial)
-                 h_x(ic,iv_loc) = arg*rho*exp(-4.0*arg)
+                 h_x(ic,iv_loc) = amp*rho*exp(-arg)
                  if (ir == 1) h_x(ic,iv_loc) = (0.0,0.0)
+                 ! Safer to zero out completely
+                 h_x = 0.0
               endif
 
            else 
@@ -84,7 +86,7 @@ subroutine cgyro_init_h
                     h_x(ic,iv_loc) = rho*exp(-(ang/2)**2) 
                  endif
               else
-                 h_x(ic,iv_loc) = amp*rho*exp(-px(ir)*4.0/n_radial)/n**2 
+                 h_x(ic,iv_loc) = amp*rho
               endif
 
            endif

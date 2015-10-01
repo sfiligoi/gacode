@@ -14,6 +14,7 @@ subroutine cgyro_equilibrium
   ! Parameters needed for equilibrium
   ! geo_numeq_flag, geo_ny, and geo_yin already set 
 
+  GEO_signb_in     = -btccw
   GEO_rmin_in      = rmin
   GEO_rmaj_in      = rmaj
   GEO_drmaj_in     = shift
@@ -61,11 +62,23 @@ subroutine cgyro_equilibrium
   endif
 
   theta(:) = y(1:n_theta)
+
+  ! Theta location of field output:
+  if (zf_test_flag == 0) then
+  ! Location of theta=0
+     it0 = n_theta/2+1
+  else
+     it0 = n_theta/3+1
+  endif
   !-----------------------------------------------------------------
 
   do ir=1,n_radial/box_size
      do it=1,n_theta
-        thetab(ir,it) = theta(it)+2*pi*(ir-1-n_radial/2/box_size)
+        if(ipccw*btccw > 0) then
+           thetab(ir,it) = theta(it)+2*pi*(ir-1-n_radial/2/box_size)
+        else
+           thetab(ir,it) = -theta(it)+2*pi*(-ir+n_radial/2/box_size)
+        endif
      enddo
   enddo
 

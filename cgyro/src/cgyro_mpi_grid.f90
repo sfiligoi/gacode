@@ -74,7 +74,7 @@ subroutine cgyro_mpi_grid
   n_proc_2 = n_toroidal
   n_proc_1 = n_proc/n_toroidal
 
-  ! Check that nv anc nc are multiples of the local processor count
+  ! Check that nv and nc are multiples of the local processor count
 
   if (modulo(nv,n_proc_1) /= 0 .or. modulo(nc,n_proc_1) /= 0) then
      call cgyro_error('ERROR: (CGYRO) nv or nc not a multiple of the local processor count.')
@@ -159,7 +159,11 @@ subroutine cgyro_mpi_grid
 
   ! Nonlinear parallelization dimensions (returns nsplit)
 
-  call parallel_slib_init(n_toroidal,nv_loc,nc,nsplit,NEW_COMM_2)
+  if (split_method == 1) then
+     call parallel_slib_init(n_toroidal,nv_loc,nc,nsplit,NEW_COMM_2)
+  else
+     call parallel_slib_init(n_toroidal,nv_loc*n_theta,n_radial,nsplit,NEW_COMM_2)
+  endif
 
 end subroutine cgyro_mpi_grid
 

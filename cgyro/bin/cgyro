@@ -50,6 +50,9 @@ then
   echo
   echo "         -h" 
   echo "         Version and platform information."
+  echo
+  echo "         -clean" 
+  echo "         Clean simulation directory."
 
   exit 1
 fi
@@ -69,6 +72,7 @@ MPINUMA=0
 TEST_FLAG=0
 GENERATE_FLAG=0
 REGRESS_FLAG=0
+CLEAN_FLAG=0
 #=============================================================
 
 #=============================================================
@@ -95,9 +99,9 @@ while [ $# -gt 0 ] ; do
 
   -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
 
-  -r) shift ; REGRESS_FLAG=1 ;;
+  -r) REGRESS_FLAG=1 ;;
 
-  -h) cgyro_version_message ; exit 0 ;;
+  -clean) CLEAN_FLAG=1 ;;
 
   *) echo "ERROR (cgyro script): incorrect cgyro syntax." ; exit 1 ;;
  
@@ -120,12 +124,18 @@ RUN_FILE=$SIMDIR/out.cgyro.run
 # Check for inconsistent flags:
 FLAG_SUM=$[ $EXEC_FLAG + $TEST_FLAG + $GENERATE_FLAG 
                        + $REGRESS_FLAG]
-if [ "$FLAG_SUM" -gt 1 ]
+if [ $FLAG_SUM -gt 1 ]
 then
    echo "ERROR: Can only specify one of -e, -t, -g, -r"
    exit 1
 fi
 #============================================================
+
+if [ $CLEAN_FLAG -eq 1 ]
+then
+    rm -f out.* batch.out batch.err *~ *gen
+    exit 1
+fi
 
 #============================================================
 # Generate simdir if -g set, then exit.
@@ -147,7 +157,14 @@ fi
 #
 if [ $REGRESS_FLAG -eq 1 ] 
 then 
-   cgyro_reg_do
+   N2=$[ NPROC / 2 ]
+   if [ $[ NPROC - 2 * N2 ] -eq 1 ]
+   then
+      echo "ERROR: (CGYRO) For regression test, number of processors must be multiple of 2." 
+      exit 1
+   fi
+   # NOMP=1 RESET=0
+   gacode_reg_do $NPROC 1 0 cgyro 1e-6
    exit 0
 fi
 #============================================================

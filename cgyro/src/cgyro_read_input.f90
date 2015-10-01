@@ -1,113 +1,169 @@
 subroutine cgyro_read_input
 
+  use mpi
   use cgyro_globals
 
   implicit none
 
   integer :: is
+  integer :: xint
+  real :: x
   character (len=1) :: cdummy
 
-  open(unit=1,file=trim(path)//'input.cgyro.gen',status='old')
-  read(1,*) n_energy
-  read(1,*) n_xi
-  read(1,*) n_theta
-  read(1,*) n_radial
-  read(1,*) n_toroidal
-  read(1,*) n_field
-  read(1,*) e_max
-  read(1,*) delta_t
-  read(1,*) max_time
-  read(1,*) print_step
-  read(1,*) restart_step
-  read(1,*) freq_tol
-  read(1,*) restart_write
-  read(1,*) restart_mode
-  read(1,*) up_radial
-  read(1,*) up_theta
-  read(1,*) nup
-  read(1,*) implicit_flag
-  read(1,*) constant_wind_flag
-  read(1,*) upconserve_flag
-  read(1,*) ky
-  read(1,*) box_size
-  read(1,*) silent_flag
-  read(1,*) profile_model
-  read(1,*) equilibrium_model
-  read(1,*) collision_model
-  read(1,*) collision_mom_restore
-  read(1,*) collision_ene_restore
-  read(1,*) collision_ene_diffusion
-  read(1,*) collision_kperp
-  read(1,*) collision_field_model
-  read(1,*) collision_trap_model
-  read(1,*) zf_test_flag
-  read(1,*) nonlinear_flag
-  read(1,*) nonlinear_method
-  read(1,*) te_ade
-  read(1,*) ne_ade
-  read(1,*) masse_ade
-  read(1,*) lambda_debye
-  read(1,*) lambda_debye_scale
-  read(1,*) test_flag
-  read(1,*) h_print_flag
-  read(1,*) amp
-  read(1,*) gamma_e
-  read(1,*) gamma_p
-  read(1,*) mach
-  read(1,*) gamma_e_scale
-  read(1,*) gamma_p_scale
-  read(1,*) mach_scale
+  if (i_proc == 0) open(unit=1,file=trim(path)//'input.cgyro.gen',status='old')
 
-  read(1,*) rmin
-  read(1,*) rmaj
-  read(1,*) q
-  read(1,*) s
-  read(1,*) shift    
-  read(1,*) kappa   
-  read(1,*) s_kappa  
-  read(1,*) delta       
-  read(1,*) s_delta
-  read(1,*) zeta      
-  read(1,*) s_zeta
-  read(1,*) zmag       
-  read(1,*) s_zmag
-  read(1,*) beta_star
-  read(1,*) betae_unit
+  call readbc_int(n_energy)
+  call readbc_int(n_xi)
+  call readbc_int(n_theta)
+  call readbc_int(n_radial)
+  call readbc_int(n_toroidal)
+  call readbc_int(n_field)
+  call readbc_int(e_max)
+  call readbc_real(delta_t)
+  call readbc_real(max_time)
+  call readbc_int(print_step)
+  call readbc_int(restart_step)
+  call readbc_real(freq_tol)
+  call readbc_int(restart_write)
+  call readbc_int(restart_mode)
+  call readbc_real(up_radial)
+  call readbc_real(up_theta)
+  call readbc_int(nup_theta)
+  call readbc_int(nup_radial)
+  call readbc_int(implicit_flag)
+  call readbc_int(constant_wind_flag)
+  call readbc_int(upconserve_flag)
+  call readbc_real(ky)
+  call readbc_int(box_size)
+  call readbc_real(ipccw)
+  call readbc_real(btccw)
+  call readbc_int(silent_flag)
+  call readbc_int(profile_model)
+  call readbc_int(equilibrium_model)
+  call readbc_int(collision_model)
+  call readbc_int(collision_mom_restore)
+  call readbc_int(collision_ene_restore)
+  call readbc_int(collision_ene_diffusion)
+  call readbc_int(collision_kperp)
+  call readbc_int(collision_field_model)
+  call readbc_int(zf_test_flag)
+  call readbc_int(nonlinear_flag)
+  call readbc_int(nonlinear_method)
+  call readbc_real(te_ade)
+  call readbc_real(ne_ade)
+  call readbc_real(masse_ade)
+  call readbc_real(lambda_debye)
+  call readbc_int(test_flag)
+  call readbc_int(h_print_flag)
+  call readbc_real(amp)
+  call readbc_real(gamma_e)
+  call readbc_real(gamma_p)
+  call readbc_real(mach)
+  call readbc_int(split_method)
+  call readbc_real(error_tol)
+  call readbc_int(kxfilter_flag)
 
-  read(1,*) subroutine_flag
+  call readbc_real(rmin)
+  call readbc_real(rmaj)
+  call readbc_real(q)
+  call readbc_real(s)
+  call readbc_real(shift)    
+  call readbc_real(kappa)   
+  call readbc_real(s_kappa)  
+  call readbc_real(delta)       
+  call readbc_real(s_delta)
+  call readbc_real(zeta)      
+  call readbc_real(s_zeta)
+  call readbc_real(zmag)       
+  call readbc_real(s_zmag)
+  call readbc_real(beta_star)
+  call readbc_real(betae_unit)
 
-  read(1,*) n_species
+  call readbc_int(subroutine_flag)
 
-  read(1,*) nu_ee
+  call readbc_int(n_species)
+
+  call readbc_real(nu_ee)
 
   do is=1,6
-     read(1,*) z(is)
-     read(1,*) mass(is)
-     read(1,*) dens(is)
-     read(1,*) temp(is)
-     read(1,*) dlnndr(is)
-     read(1,*) dlntdr(is)
+     call readbc_int(xint) ; z(is) = xint
+     call readbc_real(x)   ; mass(is) = x
+     call readbc_real(x)   ; dens(is) = x
+     call readbc_real(x)   ; temp(is) = x
+     call readbc_real(x)   ; dlnndr(is) = x
+     call readbc_real(x)   ; dlntdr(is) = x
   enddo
 
-  close(1)
+  call readbc_real(lambda_debye_scale)
+  call readbc_real(gamma_e_scale)
+  call readbc_real(gamma_p_scale)
+  call readbc_real(mach_scale)
+  call readbc_real(q_scale)
+  call readbc_real(s_scale)
+  do is=1,6
+     call readbc_real(x)   ; dlnndr_scale(is) = x
+     call readbc_real(x)   ; dlntdr_scale(is) = x
+  enddo
+
+  if (i_proc == 0) close(1)
 
   ! GEO fourier coefficients
   geo_ny_in = 0
   geo_yin_in(:,:) = 0.0
   if (subroutine_flag == 0 .and. equilibrium_model == 3 & 
        .and. profile_model == 1) then
-     open(unit=1,file=trim(path)//'input.geo',status='old')
-     ! header skip
-     do
-        read(1,'(a)') cdummy
-        if (cdummy /= '#') exit
-     enddo
-     backspace 1
-     ! n_fourier
-     read(1,*) geo_ny_in
-     ! fourier coefficients
-     read(1,*) geo_yin_in(:,0:geo_ny_in)
-     close(1)
+     if (i_proc == 0) then
+        open(unit=1,file=trim(path)//'input.geo',status='old')
+        ! header skip
+        do
+           read(1,'(a)') cdummy
+           if (cdummy /= '#') exit
+        enddo
+        backspace 1
+        ! n_fourier
+        read(1,*) geo_ny_in
+        ! fourier coefficients
+        read(1,*) geo_yin_in(:,0:geo_ny_in)
+        close(1)
+     endif
+     call MPI_BCAST(geo_ny_in,1,MPI_INTEGER,0,CGYRO_COMM_WORLD,i_err)
+     call MPI_BCAST(geo_yin_in,size(geo_yin_in),MPI_DOUBLE_PRECISION,0,CGYRO_COMM_WORLD,i_err)
   endif
 
 end subroutine cgyro_read_input
+
+!------------------------------------------------------------
+! Service routines: 
+!
+! (1) read and broadcast an integer:
+!
+subroutine readbc_int(p)
+
+  use mpi
+  use cgyro_globals
+
+  implicit none
+  integer, intent(inout) :: p
+
+  if (i_proc == 0) read(1,*) p
+
+  call MPI_BCAST(p,1,MPI_INTEGER,0,CGYRO_COMM_WORLD,i_err)
+
+end subroutine readbc_int
+!
+! (2) read and broadcast a real:
+!
+subroutine readbc_real(x)
+  
+  use mpi
+  use cgyro_globals
+
+  implicit none
+  real, intent(inout) :: x
+
+  if (i_proc == 0) read(1,*) x
+
+  call MPI_BCAST(x,1,MPI_DOUBLE_PRECISION,0,CGYRO_COMM_WORLD,i_err)
+
+end subroutine readbc_real
+!------------------------------------------------------------

@@ -148,11 +148,9 @@ subroutine cgyro_kernel
   if(allocated(pvec_outr))     deallocate(pvec_outr)
   if(allocated(pvec_outi))     deallocate(pvec_outi)
 
-  if(collision_model /= 0) then
-     if(allocated(cmat))       deallocate(cmat)
-     if(allocated(cvec))       deallocate(cvec)
-     if(allocated(bvec))       deallocate(bvec)
-  endif
+  if(allocated(cmat))       deallocate(cmat)
+  if(allocated(cvec))       deallocate(cvec)
+  if(allocated(bvec))       deallocate(bvec)
 
   call cgyro_clean_implicit_gk
 

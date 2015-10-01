@@ -18,73 +18,134 @@
       USE tglf_xgrid
       IMPLICIT NONE
       !
-      INTEGER i,is,k,j,jmax0
-      REAL test,testmax,gammamax,kymax,ky0
-      REAL f0,f1,f2,a,b,c,dky,xmax
-      REAL gamma0,gamma1,gamma2
-      REAL cnorm
+      INTEGER :: i,is,k,j,j1,jmax1
+      REAL :: test1,testmax1
+      REAL :: gammamax1,kymax1,ky0
+      REAL :: f0,f1,f2,a,b,c,x0,x02,dky,xmax
+      REAL :: gamma0,gammaeff
+      REAL :: cnorm, phinorm, kylow, czf, cz1, cz2, kyetg, cky
+      REAL :: mix, mixnorm, gamma_ave
+      REAL,DIMENSION(nkym) :: gamma=0.0
+      REAL,DIMENSION(nkym) :: gamma_mix=0.0
+      REAL,PARAMETER :: small=1.0E-10
       !
-      cnorm = 12.66
-      if(igeo.eq.0)cnorm = 8.95
+      ! model fit parameters
+      ! need to set alpha_zf_in = 1.0
+      ! Miller geometry values igeo=1
+      czf = alpha_zf_in
+      cky=2.0
+      cnorm=14.21
+      cnorm=15.73
+      cz1=0.48*czf
+      cz1=0.50*czf
+      cz2=1.0*czf
+      cz2=0.92*czf
+      kyetg = etg_factor_in*ABS(zs(2))/SQRT(taus(2)*mass(2))
+      if(igeo.eq.0)then ! s-alpha 
+       cnorm=14.63
+       cz1=0.90*czf
+       cz2=1.0*czf
+      endif
+      !
       ! renormalize the fluxes and intensities to the phi-norm from the v-norm
       do j=1,nky
          do i=1,nmodes_in
-            if(field_spectrum_out(2,j,i).ne.0.0)then
-               do is=1,ns
-                 intensity_spectrum_out(1,is,j,i) = intensity_spectrum_out(1,is,j,i)/field_spectrum_out(2,j,i)
-                 intensity_spectrum_out(2,is,j,i) = intensity_spectrum_out(2,is,j,i)/field_spectrum_out(2,j,i)
-                 do k=1,3
-                    flux_spectrum_out(1,is,k,j,i) = flux_spectrum_out(1,is,k,j,i)/field_spectrum_out(2,j,i)
-                    flux_spectrum_out(2,is,k,j,i) = flux_spectrum_out(2,is,k,j,i)/field_spectrum_out(2,j,i)
-                    flux_spectrum_out(3,is,k,j,i) = flux_spectrum_out(3,is,k,j,i)/field_spectrum_out(2,j,i)
-                    flux_spectrum_out(4,is,k,j,i) = flux_spectrum_out(4,is,k,j,i)/field_spectrum_out(2,j,i)
-                    flux_spectrum_out(5,is,k,j,i) = flux_spectrum_out(5,is,k,j,i)/field_spectrum_out(2,j,i)
-                enddo
-             enddo
-          endif
+            phinorm=1.0
+            if(ABS(field_spectrum_out(2,j,i)).gt.small)phinorm=field_spectrum_out(2,j,i)
+            do is=1,ns
+               intensity_spectrum_out(1,is,j,i) = intensity_spectrum_out(1,is,j,i)/phinorm
+               intensity_spectrum_out(2,is,j,i) = intensity_spectrum_out(2,is,j,i)/phinorm
+               do k=1,3
+                  flux_spectrum_out(1,is,k,j,i) = flux_spectrum_out(1,is,k,j,i)/phinorm
+                  flux_spectrum_out(2,is,k,j,i) = flux_spectrum_out(2,is,k,j,i)/phinorm
+                  flux_spectrum_out(3,is,k,j,i) = flux_spectrum_out(3,is,k,j,i)/phinorm
+                  flux_spectrum_out(4,is,k,j,i) = flux_spectrum_out(4,is,k,j,i)/phinorm
+                  flux_spectrum_out(5,is,k,j,i) = flux_spectrum_out(5,is,k,j,i)/phinorm
+              enddo
+           enddo
         enddo
       enddo
-      ! find the maximum of gamma/ky for ky < 1
-      testmax=0
-      jmax0=0
-      do j=1,nky
+      ! find the maximum of gamma/ky 
+      gammamax1= eigenvalue_spectrum_out(1,1,1)
+      kymax1 = ky_spectrum(1)
+      testmax1 = gammamax1/kymax1
+      jmax1=1
+      kylow=0.8/SQRT(taus_in(2)/mass_in(2))
+      j1=0
+      do j=2,nky
          ky0 = ky_spectrum(j)
-         if(ky0.le.1.0)then
-           test = eigenvalue_spectrum_out(1,j,1)/ky0
-           if(test .ge. testmax)then
-              testmax = test
-              jmax0=j
-           endif
+         if(ky0 .lt. kylow)then
+           j1=j1+1
+           test1 = eigenvalue_spectrum_out(1,j,1)/ky0
+           if(test1 .gt. testmax1)then
+            testmax1 = test1
+            jmax1=j
+           endif        
          endif        
       enddo
-      gammamax = eigenvalue_spectrum_out(1,jmax0,1)
-      kymax = ky_spectrum(jmax0)
-      !interpolate to find a more accurate maximum gamma/ky
-      if(jmax0.gt.1.and.jmax0.lt.nky)then
-         f0 =  eigenvalue_spectrum_out(1,jmax0-1,1)/ky_spectrum(jmax0-1)
-         f1 =  eigenvalue_spectrum_out(1,jmax0,1)/ky_spectrum(jmax0)
-         f2 =  eigenvalue_spectrum_out(1,jmax0+1,1)/ky_spectrum(jmax0+1)
+      gammamax1 = eigenvalue_spectrum_out(1,jmax1,1)
+      kymax1 = ky_spectrum(jmax1)
+      !interpolate to find a more accurate low-k maximum gamma/ky 
+      ! this is cut of at j1 since a maximum may not exist in the low-k range
+      if(jmax1.gt.1.and.jmax1.lt.j1)then
+         f0 =  eigenvalue_spectrum_out(1,jmax1-1,1)/ky_spectrum(jmax1-1)
+         f1 =  eigenvalue_spectrum_out(1,jmax1,1)/ky_spectrum(jmax1)
+         f2 =  eigenvalue_spectrum_out(1,jmax1+1,1)/ky_spectrum(jmax1+1)
+         dky = (ky_spectrum(jmax1+1)-ky_spectrum(jmax1-1))
+         x0 = (ky_spectrum(jmax1)-ky_spectrum(jmax1-1))/dky
          a = f0
-         b = 2.0*f1 - 0.5*f2 - 1.5*f0
-         c = 0.5*f0 + 0.5*f2 - f1
-         dky=(ky_spectrum(jmax0+1)-ky_spectrum(jmax0-1))/2.0
+         x02 = x0*x0
+         b = (f1 - f0*(1-x02)-f2*x02)/(x0-x02)
+         c = f2 - f0 - b
          xmax = -b/(2.0*c)
-         kymax = ky_spectrum(jmax0-1)+dky*xmax
-         gammamax = (a-0.25*b*b/c)*kymax       
+         if(xmax .ge. 1.0)then
+           kymax1 = ky_spectrum(jmax1+1)
+           gammamax1 = f2*kymax1
+         elseif(xmax.lt.0.0)then
+           kymax1 = ky_spectrum(jmax1-1)
+           gammamax1 = f0*kymax1
+         else
+           kymax1 = ky_spectrum(jmax1-1)+dky*xmax
+           gammamax1 = (a+b*xmax+c*xmax*xmax)*kymax1
+         endif     
       endif
+!      write(*,*)"gammamax1 = ",gammamax1," kymax1 = ",kymax1," kylow = ",kylow
       ! compute multi-scale phi-intensity spectrum field_spectrum(2,,) = phi_bar_out
       ! note that the field_spectrum(1,,) = v_bar_out = 1.0 for sat_rule_in = 1
       do j=1,nky
-        gamma0 = 0.0
-        gamma1 = eigenvalue_spectrum_out(1,j,1)
-        gamma0 = gammamax
-        ky0=ky_spectrum(j)
-        if(ky0.le.kymax)gamma0 = gammamax*(ky0/kymax)**2.5
-        if(gamma1 .ge. ky0*gammamax/kymax)gamma0 = gammamax + gamma1 - ky0*gammamax/kymax
+! include zonal flow effects on growthrate model
+!          gamma=0.0
+          gamma0 = eigenvalue_spectrum_out(1,j,1)
+          ky0=ky_spectrum(j)
+          if(ky0.lt.kymax1)then
+            gamma(j) = Max(gamma0 - cz1*(1.0 - ky0/kymax1)*gammamax1,0.0)
+          else
+            gamma(j) = cz2*gammamax1 +  Max(gamma0 - cz2*gammamax1*ky0/kymax1,0.0)
+          endif 
+          gamma_mix(j) = gamma(j)
+      enddo
+! mix over ky > kymax1
+      do j=jmax1,nky
+        mixnorm = 0.0
+        gamma_ave = 0.0
+        ky0 = ky_spectrum(j)
+        do i=jmax1,nky
+          mix = 1.0/(1.0 + cky*(1.0 - ky_spectrum(i)/ky0)**2)
+          mixnorm = mixnorm + mix
+          gamma_ave = gamma_ave + gamma(i)*mix
+        enddo  
+        gamma_mix(j) = gamma_ave/mixnorm     
+      enddo        
+! intensity model
+      do j=1,nky
+        gamma0 = eigenvalue_spectrum_out(1,j,1)
+        ky0 = ky_spectrum(j)
+!        write(*,*)j,ky0,gamma(j),gamma_mix(j)
         do i=1,nmodes_in
-          gamma2 = 0.0
-          if(gamma1.ne.0.0)gamma2 = gamma0*(eigenvalue_spectrum_out(1,j,i)/gamma1)**2
-          field_spectrum_out(2,j,i) = cnorm*gamma2*gamma2/ky0**4
+          gammaeff = 0.0
+          if(gamma0.gt.small)gammaeff = gamma_mix(j)*(eigenvalue_spectrum_out(1,j,i)/gamma0)**2
+          if(ky0.gt.kyetg)gammaeff = gammaeff*SQRT(ky0/kyetg)
+          field_spectrum_out(2,j,i) = cnorm*gammaeff*gammaeff/ky0**4
         enddo
      enddo
      ! recompute the intensity and flux spectra

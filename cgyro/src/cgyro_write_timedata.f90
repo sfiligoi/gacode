@@ -2,7 +2,7 @@
 ! cgyro_write_timedata.f90
 !
 ! PURPOSE:
-!  Output of time-dependent data 
+!  Output of time-dependent data.
 !-----------------------------------------------------------------
 
 subroutine cgyro_write_timedata
@@ -31,44 +31,48 @@ subroutine cgyro_write_timedata
 
   if (nonlinear_flag == 1) then
 
-     ! Density flux
+     ! Density flux for all species
      call write_distributed_real(&
-          trim(path)//runfile_flux(1),&
-          size(flux(:,1)),&
-          flux(:,1))
-     ! Energy flux
+          trim(path)//runfile_kxky_flux(1),&
+          size(flux(:,:,1)),&
+          flux(:,:,1))
+     ! Energy flux for all species
      call write_distributed_real(&
-          trim(path)//runfile_flux(2),&
-          size(flux(:,2)),&
-          flux(:,2))
+          trim(path)//runfile_kxky_flux(2),&
+          size(flux(:,:,2)),&
+          flux(:,:,2))
+     ! Density moment for all species at theta=0
+     call write_distributed_complex(&
+          trim(path)//runfile_kxky_n,&
+          size(moment(:,:)),&
+          moment(:,:))
   endif
 
-  do i_field=1,n_field
+  ! Complex potential at theta=0 
+  call write_distributed_complex(&
+       trim(path)//runfile_kxky_phi,&
+       size(field(:,it0,1)),&
+       field(:,it0,1))
 
-     ! Complete field output 
-     call write_distributed_complex(&
-          trim(path)//runfile_field(i_field),&
-          size(field(:,:,i_field)),&
-          field(:,:,i_field))
+  ! Checksum for regression testing
+  ! Note that value is a distributed real scalar
+  call write_precision(trim(path)//runfile_prec,sum(abs(flux))+sum(abs(moment)))
 
-     ! Field intensity
-     call write_distributed_real(&
-          trim(path)//runfile_power(i_field),&
-          size(power(:,i_field)),&
-          power(:,i_field))
-
-     if (n_toroidal == 1 .and. n > 0) then
-
-        ! Ballooning mode output for linear runs with a single mode
+  !---------------------------------------------------------------
+  ! Ballooning mode output for linear runs with a single mode
+  !
+  if (n_toroidal == 1 .and. n > 0) then
+     do i_field=1,n_field
 
         a_norm = field(n_radial/2+1,n_theta/2+1,1) 
 
         call write_balloon(&
              trim(path)//runfile_fieldb(i_field),&
              field(:,:,i_field)/a_norm)
-     endif
 
-  enddo
+     enddo
+  endif
+  !---------------------------------------------------------------
 
   ! Linear frequency diagnostics for every value of n
   call cgyro_freq
@@ -351,6 +355,73 @@ subroutine write_distributed_real(datafile,n_fn,fn)
 
 end subroutine write_distributed_real
 
+!------------------------------------------------------
+! write_precision.f90
+!
+! PURPOSE:
+!  Reduce across n and then write precision scalar.
+!------------------------------------------------------
+
+subroutine write_precision(datafile,fn)
+
+  use mpi
+  use cgyro_globals
+
+  !------------------------------------------------------
+  implicit none
+  !
+  character (len=*), intent(in) :: datafile
+  real, intent(in) :: fn
+  real :: fn_sum
+  integer :: i_dummy
+  !------------------------------------------------------
+
+  call MPI_ALLREDUCE(fn, &
+       fn_sum, &
+       1, &
+       MPI_DOUBLE_PRECISION, &
+       MPI_SUM, &
+       NEW_COMM_2, &
+       i_err)
+
+  if (i_proc > 0) return
+
+  select case (io_control)
+
+  case(0)
+
+     return
+
+  case(1)
+
+     ! Open
+
+     open(unit=io,file=datafile,status='replace')
+     close(io)
+
+  case(2)
+
+     ! Append
+
+     open(unit=io,file=datafile,status='old',position='append')
+     write(io,fmtstr_hi) fn_sum
+     close(io)
+
+  case(3)
+
+     ! Rewind
+
+     open(unit=io,file=datafile,status='old')
+     do i_dummy=1,i_current
+        read(io,fmtstr_hi) fn_sum
+     enddo
+     endfile(io)
+     close(io)
+
+  end select
+
+end subroutine write_precision
+
 subroutine write_balloon(datafile,fn)
 
   use cgyro_globals
@@ -392,12 +463,20 @@ subroutine write_balloon(datafile,fn)
 
      do ir=-np,np-1
         do it=1,n_theta
-           jr = box_size*ir+n_radial/2+1
+           if(ipccw*btccw > 0) then
+              jr = box_size*ir+n_radial/2+1
+           else
+              jr = -box_size*ir+n_radial/2
+           endif
            f_balloon(ir+np+1,it) = fn(jr,it) &
                 *exp(-2*pi*i_c*ir*k_theta*rmin)
         enddo
      enddo
 
+      if (ipccw*btccw < 0) then
+         f_balloon = f_balloon*exp(2*pi*i_c*abs(k_theta)*rmin)
+      endif
+         
      write(io,fmtstr) transpose(f_balloon(:,:))
      close(io)
 

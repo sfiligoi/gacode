@@ -26,7 +26,7 @@ subroutine cgyro_experimental_profiles
   !--------------------------------------------------------------
   ! use EXPRO routines to read data:
   !
-  call EXPRO_alloc(path,1)
+  call EXPRO_palloc(CGYRO_COMM_WORLD,path,1)
   EXPRO_ctrl_quasineutral_flag = 1  ! quasi-neutrality density flag
 
   if (equilibrium_model == 3) then
@@ -65,7 +65,7 @@ subroutine cgyro_experimental_profiles
      enddo
   endif
 
-  call EXPRO_read
+  call EXPRO_pread
 
   n_grid_exp = EXPRO_n_exp
   call cgyro_experimental_alloc(1)
@@ -75,6 +75,10 @@ subroutine cgyro_experimental_profiles
   !--------------------------------------------------------------
   ! Transfer data from read vector to individual arrays:
   !
+
+  btccw = -EXPRO_signb
+  ipccw = -EXPRO_signq*EXPRO_signb
+
   rmin_exp(:)         = EXPRO_rmin(:)
   rmaj_exp(:)         = EXPRO_rmaj(:)
   q_exp(:)            = EXPRO_q(:)
@@ -86,9 +90,9 @@ subroutine cgyro_experimental_profiles
   s_delta_exp(:)      = EXPRO_sdelta(:) 
   zeta_exp(:)         = EXPRO_zeta(:)
   s_zeta_exp(:)       = EXPRO_szeta(:)  
-  zmag_exp(:)         = EXPRO_zmag(:)   
-  s_zmag_exp(:)       = EXPRO_dzmag(:)  
-
+  zmag_exp(:)         = EXPRO_zmag(:)*0.0   
+  s_zmag_exp(:)       = EXPRO_dzmag(:)*0.0
+  
   ! Minor radius, a, in meters:
   a_meters = rmin_exp(n_grid_exp)
 
@@ -156,6 +160,6 @@ subroutine cgyro_experimental_profiles
 
   mach_exp(:)          = EXPRO_w0(:) * (a_meters * rmaj_exp(:))
 
-  call EXPRO_alloc(path,0)
+  call EXPRO_palloc(CGYRO_COMM_WORLD,path,0)
 
 end subroutine cgyro_experimental_profiles

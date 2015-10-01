@@ -79,6 +79,9 @@ subroutine cgyro_check
   case (2)
      call cgyro_info('Transverse electromagnetic fluctuations (Phi,A_par)')
 
+  case (3)
+     call cgyro_info('Transverse and compressional electromagnetic fluctuations (Phi,A_par,B_par)')
+
   case default
      call cgyro_error('Invalid value for n_field.')
      return
@@ -94,9 +97,6 @@ subroutine cgyro_check
   ! Collision model and settings
   !
   select case (collision_model)  
-
-  case(0)
-     call cgyro_info('Collision model = none')
 
   case (1) 
      call cgyro_info('Collision model = CONNOR EE+EI LORENTZ only')
@@ -165,18 +165,6 @@ subroutine cgyro_check
      call cgyro_error('Invalid value for collision_kperp')
      return
   end select
-
-  select case (collision_trap_model)
-  case(0)
-     call cgyro_info('Trapping term in collisionless step')
-  case (1)
-     if(collision_model /= 0) then
-        call cgyro_info('Trapping term in collisional step')
-     endif
-  case default
-     call cgyro_error('Invalid value for collision_trap_model')
-     return
-  end select
   !
   !------------------------------------------------------------------------
 
@@ -232,6 +220,51 @@ subroutine cgyro_check
         return
      endif
   enddo
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  ! Theta dissipation
+  !
+  select case (nup_theta)  
+
+  case (1) 
+     call cgyro_info('Theta dissipation: 2nd order')
+
+  case (2) 
+     call cgyro_info('Theta dissipation: 4th order')
+
+  case (3) 
+     call cgyro_info('Theta dissipation: 6th order')
+
+  case default
+     call cgyro_error('Invalid value for nup_theta')
+     return
+
+  end select
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  ! Radial dissipation
+  !
+  select case (nup_radial)  
+
+  case (1) 
+     call cgyro_info('radial dissipation: 2nd order')
+
+  case (2) 
+     call cgyro_info('Radial dissipation: 4th order')
+
+  case (3) 
+     call cgyro_info('Radial dissipation: 6th order')
+
+  case (4) 
+     call cgyro_info('Radial dissipation: 8th order')
+
+  case default
+     call cgyro_error('Invalid value for nup_radial')
+     return
+
+  end select
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------

@@ -178,7 +178,7 @@ subroutine tgyro_tglf_map
   endif
   !----------------------------------------------------------------
   ! set ky_in to value for n=1
-  tglf_ky_in = ABS(rho_s(i_r)*q(i_r)/r(i_r))
+  if (tglf_kygrid_model_in.eq.3) tglf_ky_in = ABS(rho_s(i_r)*q(i_r)/r(i_r))
   !-----------------------------------
   ! Number of high-k modes
   !  nky=12 (default to include ETG)
