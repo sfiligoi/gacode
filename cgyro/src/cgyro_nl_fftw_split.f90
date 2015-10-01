@@ -108,6 +108,7 @@ subroutine cgyro_nl_fftw_split(ij)
            gy(iy,ix) = i_c*iy*g0
         enddo
      enddo
+
      if (kxfilter_flag == 1) then
         fx(:,-nx0/2+nx) = 0.0
         fy(:,-nx0/2+nx) = 0.0
@@ -127,8 +128,6 @@ subroutine cgyro_nl_fftw_split(ij)
      call fftw_execute_dft_r2c(plan_r2c,uv,fx)
 
      ! Must annhilate n=0,p=-nr/2
-     !print *,fx(0,0)
-     !print *,fx(0,-nx0/2+nx)
      fx(0,-nx0/2+nx) = 0.0       
 
      do ir=1,n_radial 
