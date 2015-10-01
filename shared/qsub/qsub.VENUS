@@ -6,5 +6,5 @@ echo "#$ -e $SIMDIR/batch.err" >> $bfile
 echo "#$ -q $QUEUE" >> $bfile
 echo "#$ -V" >> $bfile
 echo "#$ -S /bin/bash" >> $bfile
-echo "#$ -pe mpi $nmpi" >> $bfile
+echo "#$ -pe make $nmpi" >> $bfile
 echo "$CODE -e $LOCDIR -n $nmpi -nomp $nomp -p $SIMROOT" >> $bfile
