@@ -9,8 +9,8 @@ x.set_extension('.gen')
 x.add('ER_METHOD','1')
 x.add('VEL_METHOD','2')
 x.add('ERSPECIES_INDX','2')
-x.add('NTHETA_MIN','16')
-x.add('NTHETA_MAX','22')
+x.add('NTHETA_MIN','17')
+x.add('NTHETA_MAX','39')
 x.add('TYPE','DC')
 
 # Perform the parsing
