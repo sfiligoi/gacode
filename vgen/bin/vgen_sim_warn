@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# SCRIPT:
+#  vgen_sim_warn
+#
+# FUNCTION:
+#  Check for existence of sim directory
+#-------------------------------------------------------------
+
+if [ $1 = $PWD ]
+  then
+  echo "ERROR (vgen): missing simdir"
+  exit 1
+fi
+
+if [ ! -d "$1" ]
+  then
+  echo "$1 is not a valid simulation directory."
+  echo "Please create the directory first."
+  exit 1
+fi
