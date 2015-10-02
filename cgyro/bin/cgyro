@@ -25,7 +25,7 @@ then
   echo "         -t <simdir>"  
   echo "         Sanity test for INPUT data in <simdir>."
   echo
-  echo "EXECUTE MODE (single core)"
+  echo "EXECUTE MODE"
   echo
   echo "         -e <simdir>" 
   echo "         Run CGYRO using INPUT data in <simdir>."
