@@ -13,6 +13,7 @@ module parallel_lib
 
   complex, dimension(:,:,:), allocatable, private :: fsendf
   complex, dimension(:,:,:), allocatable, private :: fsendr
+  real, dimension(:,:,:), allocatable, private :: fsendr_real
 
   ! slib
 
@@ -60,6 +61,7 @@ contains
 
     allocate(fsendf(nj_loc,ni_loc,nproc))
     allocate(fsendr(ni_loc,nj_loc,nproc))
+    allocate(fsendr_real(ni_loc,nj_loc,nproc))
 
   end subroutine parallel_lib_init
 
@@ -129,6 +131,39 @@ contains
          ierr)
 
   end subroutine parallel_lib_r
+
+  !=========================================================
+
+  subroutine parallel_lib_r_real(ft,f)
+
+    use mpi
+
+    implicit none
+
+    real, intent(in), dimension(nj_loc,ni) :: ft
+    real, intent(inout), dimension(ni_loc,nj) :: f
+    integer :: ierr,j_loc,i,j,k
+
+    do k=1,nproc
+       j_loc = 0
+       do j=1+iproc*nj_loc,(1+iproc)*nj_loc
+          j_loc = j_loc+1
+          do i=1,ni_loc
+             fsendr_real(i,j_loc,k) = ft(j_loc,i+(k-1)*ni_loc) 
+          enddo
+       enddo
+    enddo
+
+    call MPI_ALLTOALL(fsendr_real, &
+         nsend, &
+         MPI_DOUBLE_PRECISION,&
+         f, &
+         nsend, &
+         MPI_DOUBLE_PRECISION, &
+         lib_comm, &
+         ierr)
+
+  end subroutine parallel_lib_r_real
 
   !=========================================================
 
