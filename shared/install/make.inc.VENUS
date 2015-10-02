@@ -19,8 +19,8 @@ FDEBUG	= -g -Ktrap=fp -Mbounds -Minform,inform
 
 # System math libraries
 
-LMATH=/opt/pgi/linux86-64/12.10/lib/liblapack.a \
-      /opt/pgi/linux86-64/12.10/lib/libblas.a
+LMATH=/opt/pgi/linux86-64/14.10/lib/liblapack.a \
+      /opt/pgi/linux86-64/14.10/lib/libblas.a
 
 # NetCDF
 
