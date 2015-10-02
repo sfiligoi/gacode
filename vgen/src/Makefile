@@ -1,6 +1,3 @@
-# This should be made from the NEO directory, to get the right definition of 
-# EXTRA_LIBS
-
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
 ifeq ($(OPT),debug)
@@ -11,17 +8,17 @@ endif
       
 EXEC = vgen
 
-OBJECTS =	vgen_globals.o \
-			vgen_init.o \
-			vgen_compute_neo.o \
-			vgen_getgeo.o \
-			vgen_reduce.o \
-			$(EXEC).o
+OBJECTS = vgen_globals.o \
+	  vgen_init.o \
+	  vgen_compute_neo.o \
+	  vgen_getgeo.o \
+	  vgen_reduce.o \
+	  $(EXEC).o
 
 .SUFFIXES : .o .f90
 
 all: $(OBJECTS) $(EXTRA_LIBS)
-	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) ../../src/neo_lib.a $(EXTRA_LIBS) $(LMATH)
+	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS) $(LMATH)
 
 .f90.o :
 	$(FC) $(FMATH) $(FFLAGS) -c $<
