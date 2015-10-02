@@ -27,9 +27,9 @@
 # GYRO directory
 GYRO_DIR=${GACODE_ROOT}/gyro
 # VGEN inputs directory
-VGEN_DIR=${GACODE_ROOT}/neo/tools/input/vgen
+VGEN_DIR=${GACODE_ROOT}/vgen/templates
 # VGEN exec directory
-VGEN_EXE=${GACODE_ROOT}/neo/tools/vgen
+VGEN_EXE=${GACODE_ROOT}/vgen/src
 # - profiles_gen converter executable
 EXEC=${GACODE_ROOT}/shared/profiles_gen/src/prgen
 # - GATO executable

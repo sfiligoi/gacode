@@ -114,7 +114,7 @@ subroutine cgyro_rhs(ij)
               rhs_stream = rhs_stream &
                    -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)  &
                    -abs(rval)*dtheta_up(ir,it,id)*hp(jc) &
-                   +rval2*dtheta_up(ir,it,id)*h_xs(jc,iv_loc)
+                   +abs(rval2)*dtheta_up(ir,it,id)*h_xs(jc,iv_loc)
            enddo
         endif
 

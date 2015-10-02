@@ -32,8 +32,7 @@ cgyro/src/cgyro
 le3/src/le3
 le3/profiles_3d/profiles_3d
 neo/src/neo
-neo/tools/squeeze/squeeze
-neo/tools/vgen/vgen
+vgen/src/vgen
 shared/profiles_gen/src/prgen
 shared/profiles_gen/locpargen/locpargen
 shared/profiles_gen/exprotools/exprodump

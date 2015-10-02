@@ -4,6 +4,7 @@ subroutine cgyro_init_arrays
   use timer_lib
   use mpi
   use cgyro_globals
+  use parallel_lib
 
   implicit none
 
@@ -37,39 +38,24 @@ subroutine cgyro_init_arrays
         arg = k_perp(it,ir)*rho*vth(is)*mass(is)/(z(is)*Bmag(it)) &
              *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
 
-        j0_c(ic,iv_loc) = BESJ0(abs(arg))
+        ! Need this for (Phi, A_parallel) terms in GK and field equations
 
-        call RJBESL(abs(arg),0.0,3,bessel,i_err)
+        !j0_c(ic,iv_loc) = BESJ0(abs(arg))
+        j0_c(ic,iv_loc) = bessel_j0(abs(arg))
 
-        j0perp_c(ic,iv_loc) = 0.5*(bessel(0)+bessel(2))
-
+        ! Needed for B_parallel in GK and field equations
+        
+        !call RJBESL(abs(arg),0.0,3,bessel,i_err)
+        !j0perp_c(ic,iv_loc) = 0.5*(bessel(0)+bessel(2))
+        
+        j0perp_c(ic,iv_loc) = 0.5*(j0_c(ic,iv_loc) + bessel_jn(2,abs(arg)))
+        
      enddo
   enddo
 
-  ic_loc = 0
-  do ic=nc1,nc2
-     ic_loc = ic_loc+1
+  call parallel_lib_r_real(transpose(j0_c),j0_v)
+  call parallel_lib_r_real(transpose(j0perp_c),j0perp_v)
 
-     it = it_c(ic)
-     ir = ir_c(ic)
-
-     do iv=1,nv
-
-        is = is_v(iv)
-        ix = ix_v(iv)
-        ie = ie_v(iv)
-
-        arg = k_perp(it,ir)*rho*vth(is)*mass(is)/(z(is)*Bmag(it)) &
-             *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
-
-        j0_v(ic_loc,iv) = BESJ0(abs(arg))
-
-        call RJBESL(abs(arg),0.0,3,bessel,i_err)
-
-        j0perp_v(ic_loc,iv) = 0.5*(bessel(0)+bessel(2))
-
-     enddo
-  enddo
   !-------------------------------------------------------------------------
 
   !-------------------------------------------------------------------------
@@ -507,7 +493,7 @@ subroutine cgyro_init_arrays
            omega_s(3,ic,iv_loc) = carg * j0perp_c(ic,iv_loc) &
                 * 2.0*energy(ie)*(1-xi(ix)**2)/Bmag(it)
         endif
-           
+
      enddo
   enddo
 
