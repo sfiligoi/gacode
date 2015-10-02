@@ -24,7 +24,7 @@
       REAL :: f0,f1,f2,a,b,c,x0,x02,dky,xmax
       REAL :: gamma0,gammaeff
       REAL :: cnorm, phinorm, kylow, czf, cz1, cz2, kyetg
-      REAL :: cky,sqcky
+      REAL :: cky,sqcky,delta
       REAL :: mix1,mix2,mixnorm,gamma_ave
       REAL,DIMENSION(nkym) :: gamma=0.0
       REAL,DIMENSION(nkym) :: gamma_mix=0.0
@@ -136,12 +136,12 @@
           ky1 = ky_spectrum(i)
           ky2 = ky_spectrum(i+1)
           mix1 = ky0*(ATAN(sqcky*(ky2/ky0-1.0))- ATAN(sqcky*(ky1/ky0-1.0)))
+          delta = (gamma(i+1)-gamma(i))/(ky2-ky1)
           mix2 = ky0*mix1 + (ky0*ky0/(2.0*sqcky))*(LOG(cky*(ky2-ky0)**2+ky0**2)- &
                  LOG(cky*(ky1-ky0)**2+ky0**2))
-          gamma_ave = gamma_ave + (gamma(i)-ky0*(gamma(i+1)-gamma(i)))*mix1 + &
-                      (gamma(i+1)-gamma(i))*mix2
+          gamma_ave = gamma_ave + (gamma(i)-ky1*delta)*mix1 + delta*mix2
         enddo  
-        gamma_mix(j) = gamma_ave/mixnorm     
+        gamma_mix(j) = gamma_ave/mixnorm  
 !        write(*,*)j,ky0,gamma(j),gamma_mix(j)
       enddo        
 ! intensity model
