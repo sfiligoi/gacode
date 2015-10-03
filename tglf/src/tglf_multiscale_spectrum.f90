@@ -18,6 +18,7 @@
       USE tglf_xgrid
       IMPLICIT NONE
       !
+      LOGICAL :: USE_MIX=.FALSE.
       INTEGER :: i,is,k,j,j1,jmax1
       REAL :: test1,testmax1
       REAL :: gammamax1,kymax1,ky0,ky1,ky2
@@ -34,14 +35,16 @@
       ! need to set alpha_zf_in = 1.0
       ! Miller geometry values igeo=1
       czf = alpha_zf_in
-      cky=2.0
-      sqcky=SQRT(cky)
       cnorm=14.21
-      cnorm=15.73
       cz1=0.48*czf
-      cz1=0.50*czf
       cz2=1.0*czf
-      cz2=0.92*czf
+      if(USE_MIX)then
+        cky=2.0
+        sqcky=SQRT(cky)
+        cnorm=15.73
+        cz1=0.50*czf
+        cz2=0.92*czf  
+      endif    
       kyetg = etg_factor_in*ABS(zs(2))/SQRT(taus(2)*mass(2))
       if(igeo.eq.0)then ! s-alpha 
        cnorm=14.63
@@ -126,7 +129,8 @@
           endif 
           gamma_mix(j) = gamma(j)
       enddo
-! mix over ky > kymax with integration weight = sqcky*ky0**2/(ky0**2 + cky*(ky-ky0)**2)
+    if(USE_MIX)then
+      !mix over ky > kymax with integration weight = sqcky*ky0**2/(ky0**2 + cky*(ky-ky0)**2)
       do j=jmax1,nky
         gamma_ave = 0.0
         ky0 = ky_spectrum(j)
@@ -143,7 +147,8 @@
         enddo  
         gamma_mix(j) = gamma_ave/mixnorm  
 !        write(*,*)j,ky0,gamma(j),gamma_mix(j)
-      enddo        
+      enddo  
+    endif      
 ! intensity model
       do j=1,nky
         gamma0 = eigenvalue_spectrum_out(1,j,1)
