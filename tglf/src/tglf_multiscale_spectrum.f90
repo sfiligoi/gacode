@@ -35,14 +35,16 @@
       ! need to set alpha_zf_in = 1.0
       ! Miller geometry values igeo=1
       czf = alpha_zf_in
+      ! goes with etg_factor=1.28
       cnorm=14.21
       cz1=0.48*czf
       cz2=1.0*czf
       if(USE_MIX)then
+      ! goes with etg_factor=2.2
         cky=2.0
         sqcky=SQRT(cky)
-        cnorm=15.73
-        cz1=0.50*czf
+        cnorm=15.06
+        cz1=0.48*czf
         cz2=0.92*czf  
       endif    
       kyetg = etg_factor_in*ABS(zs(2))/SQRT(taus(2)*mass(2))
@@ -131,12 +133,12 @@
       enddo
     if(USE_MIX)then
       !mix over ky > kymax with integration weight = sqcky*ky0**2/(ky0**2 + cky*(ky-ky0)**2)
-      do j=jmax1,nky
+      do j=jmax1+1,nky
         gamma_ave = 0.0
         ky0 = ky_spectrum(j)
         mixnorm = ky0*(ATAN(sqcky*(ky_spectrum(nky)/ky0-1.0))-  &
                   ATAN(sqcky*(ky_spectrum(jmax1)/ky0-1.0)))
-        do i=jmax1,nky-1
+        do i=jmax1+1,nky-1
           ky1 = ky_spectrum(i)
           ky2 = ky_spectrum(i+1)
           mix1 = ky0*(ATAN(sqcky*(ky2/ky0-1.0))- ATAN(sqcky*(ky1/ky0-1.0)))
