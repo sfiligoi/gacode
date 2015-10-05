@@ -130,12 +130,23 @@ VGEN_IN=(${IN// / })
 
 rm -rf vgen ; mkdir vgen ; cd vgen
 
-# Check for template input.vgen.TYPE
-if [ -f $TEMPLATE_DIR/input.vgen.$VGEN_IN ]
+# Check for template input.neo.TYPE
+
+if [ "$VGEN_IN" == "NULL" ]
+then 
+    if [ -f "../input.neo" ]
+    then
+	cp ../input.neo input.neo
+    else
+	echo "ERROR: (vgen) input.neo needed with TYPE=NULL"
+	exit 1
+    fi
+
+elif [ -f $TEMPLATE_DIR/input.neo.$VGEN_IN ]
 then
-   cp $TEMPLATE_DIR/input.vgen.$VGEN_IN input.neo
+   cp $TEMPLATE_DIR/input.neo.$VGEN_IN input.neo
 else 
-   echo "ERROR: (vgen) $TYPE not found"
+   echo "ERROR: (vgen) TYPE=$VGEN_IN not found"
    exit 1
 fi
 
