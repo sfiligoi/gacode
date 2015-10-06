@@ -129,6 +129,7 @@ subroutine cgyro_nl_fftw_split(ij)
 
      ! Must annhilate n=0,p=-nr/2
      fx(0,-nx0/2+nx) = 0.0       
+     fx(0,0)         = 0.0       
 
      do ir=1,n_radial 
         ix = ir-1-nx0/2

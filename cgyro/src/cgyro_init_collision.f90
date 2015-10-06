@@ -472,6 +472,7 @@ subroutine cgyro_init_collision
 
      ! Avoid singularity of n=0,p=0:
      if (px(ir) == 0 .and. n == 0) then
+
         do iv=1,nv
            cmat(iv,iv,ic_loc) =  1.0
            amat(iv,iv) = 1.0
