@@ -752,7 +752,7 @@
 !        wp =(wp*sqrt_two*R_unit*q_unit*width_in/vs(is))/3.6
 !        stress_correction = (1.0 + alpha_p_in*wp)/(1.0 + wp)
 !        stress_correction = (1.0 + 2.3*wp)/(1.0 + wp)
-        stress_correction = (AIMAG(freq_QL)+2.0*wp)/(AIMAG(freq_QL)+wp)
+        if(sat_rule_in.eq.0)stress_correction = (AIMAG(freq_QL)+2.0*wp)/(AIMAG(freq_QL)+wp)
 !            write(*,*)is,"stress_corr=",stress_correction
         do i=1,nbasis
           stress_par(is,i,1) = u_par(is,i)*stress_correction
