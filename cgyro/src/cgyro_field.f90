@@ -143,7 +143,7 @@ subroutine cgyro_field_c
 
   integer :: is, ie, ix, ir, it
   complex :: fac
-  complex :: efac(n_field)
+  real    :: efac(n_field)
 
   call timer_lib_in('field_h')
 
@@ -217,7 +217,7 @@ subroutine cgyro_field_c
 
         if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
            field(ir,:,1) = 0.0
-           if(n_field > 3) then
+           if(n_field > 2) then
               field(ir,:,3) = 0.0
            endif
 
@@ -281,7 +281,7 @@ subroutine cgyro_field_c
         efac(2) = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
      endif
      if(n_field > 2) then
-        efac(3) = 2.0*energy(ie)*(1-xi(ix)**2)
+        efac(3) = 2.0*energy(ie)*(1-xi(ix)**2)*temp(is)/z(is)
      endif
 
      do ic=1,nc
@@ -297,11 +297,10 @@ subroutine cgyro_field_c
         endif
         if(n_field > 2) then
            psi(ic,iv_loc) = psi(ic,iv_loc) &
-                + j0perp_c(ic,iv_loc)*efac(3)/Bmag(it)*temp(is)/z(is) &
-                * field(ir,it,3)
+                + j0perp_c(ic,iv_loc)*efac(3)/Bmag(it) * field(ir,it,3)
         endif
 
-        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+z(is)*psi(ic,iv_loc)/temp(is)
+        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+psi(ic,iv_loc)*z(is)/temp(is)
 
      enddo
   enddo
