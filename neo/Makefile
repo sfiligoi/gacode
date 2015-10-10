@@ -15,11 +15,8 @@ all:
 	gacode_getversion > .VERSION
 	cd ${GACODE_ROOT}/shared ; make
 	cd src ; make
-	cd tools/vgen ; make
 
 clean:
-	cd ../modules ; rm -f neo*.mod
 	cd src ; make clean
-	cd tools/vgen ; make clean 
 
 .IGNORE:
