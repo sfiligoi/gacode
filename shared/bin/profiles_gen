@@ -690,17 +690,17 @@ then
 
    rm -rf vgen ; mkdir vgen ; cd vgen
 
-   # Check for input.vgen file
+   # Check for input.neo file
 
-   if [ -f $VGEN_DIR/input.vgen.$VGEN_IN ]
+   if [ -f $VGEN_DIR/input.neo.$VGEN_IN ]
    then
-     cp $VGEN_DIR/input.vgen.$VGEN_IN input.neo
+     cp $VGEN_DIR/input.neo.$VGEN_IN input.neo
    else 
-      if [ -f ../input.vgen ]
+      if [ -f ../input.neo ]
       then
-         cp ../input.vgen input.neo
+         cp ../input.neo input.neo
       else
-         echo "ERROR: (profiles_gen) Specify ion string with -vgen_in, or create input.vgen"
+         echo "ERROR: (profiles_gen) Specify ion string with -in, or create input.neo"
          exit 1
       fi
    fi
