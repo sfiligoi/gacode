@@ -155,7 +155,8 @@ subroutine cgyro_filter
      do ic=1,nc
         ir = ir_c(ic) 
         if (ir == 1 .or. px(ir) == 0) then
-           h_x(ic,:) = 0.0
+           h_x(ic,:)     = 0.0
+           cap_h_c(ic,:) = 0.0
         endif
      enddo
   endif
