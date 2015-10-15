@@ -16,7 +16,6 @@ subroutine cgyro_nl_direct(ij)
   implicit none
 
   integer, intent(in) :: ij
-  integer :: nx,ny,nx0,ny0
   integer :: ix,ixp,iy,iyp
   integer :: ixpp,iypp
   integer :: ir,it,j,in
@@ -26,10 +25,6 @@ subroutine cgyro_nl_direct(ij)
   complex, dimension(:,:), allocatable :: g
   complex, dimension(:,:), allocatable :: fg
 
-  ny0 = n_toroidal-1
-  nx0 = n_radial/2
-  ny = int(1.5*ny0)+1
-  nx = int(1.5*nx0)+1
 
   ! To keep code self-contained, just recompute these every time
   ! rather than storing in globals.  Cost is tiny.

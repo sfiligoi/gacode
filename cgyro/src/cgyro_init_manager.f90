@@ -21,8 +21,11 @@ subroutine cgyro_init_manager
 
   implicit none
 
-  ! Manage array initializations
+  include 'fftw3.f03'
 
+  !----------------------------------------------------
+  ! Initialize startup timers
+  !----------------------------------------------------
   call timer_lib_init('stream_init')
   call timer_lib_init('coll_init')
 
@@ -30,19 +33,19 @@ subroutine cgyro_init_manager
   ! Initialize GLOBAL arrays
   !----------------------------------------------------
 
-  ! Construct energy nodes and weights
   allocate(energy(n_energy))
   allocate(w_e(n_energy))
   allocate(e_deriv1_mat(n_energy,n_energy))
   allocate(e_deriv2_mat(n_energy,n_energy))
+  ! Construct energy nodes and weights
   call pseudo_maxwell(n_energy,e_max,energy,w_e,e_deriv1_mat,e_deriv2_mat)
 
-  ! Construct xi (pitch-angle) nodes and weights
   allocate(xi(n_xi))
   allocate(w_xi(n_xi))
   allocate(xi_lor_mat(n_xi,n_xi))
   allocate(xi_deriv_mat(n_xi,n_xi))
   allocate(xi_upderiv_mat(n_xi,n_xi))
+  ! Construct xi (pitch-angle) nodes and weights
   call pseudo_legendre(n_xi,xi,w_xi,xi_deriv_mat,xi_lor_mat,xi_upderiv_mat)
 
   allocate(theta(n_theta))
@@ -103,7 +106,7 @@ subroutine cgyro_init_manager
      ! Real-space distributed arrays
      allocate(cap_h_v(nc_loc,nv))
      allocate(cap_h_v_prime(nc_loc,nv))
-     
+
      ! Nonlinear arrays
      if (nonlinear_method == 1) then
         allocate(f_nl(nc,nsplit,n_toroidal))
@@ -141,7 +144,7 @@ subroutine cgyro_init_manager
 
   endif
 
-  ! 5. Write initial data
+  ! Write initial data
   call cgyro_write_initdata
 
   if (test_flag == 1) then
@@ -153,6 +156,40 @@ subroutine cgyro_init_manager
   call timer_lib_in('stream_init')
   call cgyro_init_h
   call timer_lib_out('stream_init')
+
+  ! Initialize nonlinear dimensions and arrays 
+  if (nonlinear_method == 1) then
+
+     ny0 = n_toroidal-1
+     nx0 = n_radial/2
+     ny = int(1.5*ny0)+1
+     nx = int(1.5*nx0)+1
+
+  else
+     ! 2D FFT lengths 
+     nx0 = n_radial
+     ny0 = 2*n_toroidal-1
+
+     ! 3/2-rule for dealiasing the nonlinear product
+     nx = (3*nx0)/2
+     ny = (3*ny0)/2
+     ! Allocate and deallocate these every time.
+     allocate(fx(0:ny/2,0:nx-1))
+     allocate(gx(0:ny/2,0:nx-1))
+     allocate(fy(0:ny/2,0:nx-1))
+     allocate(gy(0:ny/2,0:nx-1))
+
+     allocate(ux(0:ny-1,0:nx-1))
+     allocate(vx(0:ny-1,0:nx-1))
+     allocate(uy(0:ny-1,0:nx-1))
+     allocate(vy(0:ny-1,0:nx-1))
+     allocate(uv(0:ny-1,0:nx-1))
+
+     ! To avoid memory leak, create this plan every time :-(
+     plan_c2r = fftw_plan_dft_c2r_2d(nx,ny,fx,ux,FFTW_MEASURE)
+     plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,ux,fx,FFTW_MEASURE)
+
+  endif
 
   call GEO_alloc(0)
 

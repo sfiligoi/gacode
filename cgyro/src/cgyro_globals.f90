@@ -279,6 +279,19 @@ module cgyro_globals
   type(C_PTR) :: plan_r2c
   type(C_PTR) :: plan_c2r
   !  
+  integer :: nx,ny
+  integer :: nx0,ny0
+  !
+  real, dimension(:,:), allocatable :: ux
+  real, dimension(:,:), allocatable :: uy
+  real, dimension(:,:), allocatable :: vx
+  real, dimension(:,:), allocatable :: vy
+  real, dimension(:,:), allocatable :: uv
+  complex, dimension(:,:),allocatable :: fx
+  complex, dimension(:,:),allocatable :: fy
+  complex, dimension(:,:),allocatable :: gx
+  complex, dimension(:,:),allocatable :: gy
+  !
   ! Work arrays
   !
   complex, dimension(:,:), allocatable :: f_balloon

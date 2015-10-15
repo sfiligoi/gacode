@@ -18,38 +18,16 @@ subroutine cgyro_nl_fftw(ij)
   use cgyro_globals
 
   integer, intent(in) :: ij
-
-  integer :: nx,ny
-  integer :: nx0,ny0
   integer :: j,p,iexch
 
   complex :: f0,g0
-
-  real, dimension(:,:), allocatable :: ux
-  real, dimension(:,:), allocatable :: uy
-  real, dimension(:,:), allocatable :: vx
-  real, dimension(:,:), allocatable :: vy
-  real, dimension(:,:), allocatable :: uv
-  complex, dimension(:,:),allocatable :: fx
-  complex, dimension(:,:),allocatable :: fy
-  complex, dimension(:,:),allocatable :: gx
-  complex, dimension(:,:),allocatable :: gy
-
   complex, dimension(:,:), allocatable :: fpack
   complex, dimension(:,:), allocatable :: gpack
 
   include 'fftw3.f03'
 
-
-  ! 2D FFT lengths 
-  nx0 = n_radial
-  ny0 = 2*n_toroidal-1
-
-  ! 3/2-rule for dealiasing the nonlinear product
-  nx = (3*nx0)/2
-  ny = (3*ny0)/2
-
   call timer_lib_in('nl_comm')
+
   allocate(fpack(n_radial,nv_loc*n_theta))
   allocate(gpack(n_radial,nv_loc*n_theta))
   fpack = 0.0
@@ -69,22 +47,6 @@ subroutine cgyro_nl_fftw(ij)
   call timer_lib_out('nl_comm')
 
   call timer_lib_in('nl')
-
-  ! Allocate and deallocate these every time.
-  allocate(fx(0:ny/2,0:nx-1))
-  allocate(gx(0:ny/2,0:nx-1))
-  allocate(fy(0:ny/2,0:nx-1))
-  allocate(gy(0:ny/2,0:nx-1))
-
-  allocate(ux(0:ny-1,0:nx-1))
-  allocate(vx(0:ny-1,0:nx-1))
-  allocate(uy(0:ny-1,0:nx-1))
-  allocate(vy(0:ny-1,0:nx-1))
-  allocate(uv(0:ny-1,0:nx-1))
-
-  ! To avoid memory leak, create this plan every time :-(
-  plan_c2r = fftw_plan_dft_c2r_2d(nx,ny,fx,ux,FFTW_MEASURE)
-  plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,ux,fx,FFTW_MEASURE)
 
   do j=1,nsplit
 
@@ -140,19 +102,6 @@ subroutine cgyro_nl_fftw(ij)
      enddo
 
   enddo ! j
-  call fftw_destroy_plan(plan_c2r)
-  call fftw_destroy_plan(plan_r2c)
-
-  deallocate(fx)
-  deallocate(gx)
-  deallocate(fy)
-  deallocate(gy)
-
-  deallocate(ux)
-  deallocate(vx)
-  deallocate(uy)
-  deallocate(vy)
-  deallocate(uv)
 
   call timer_lib_out('nl')
 
