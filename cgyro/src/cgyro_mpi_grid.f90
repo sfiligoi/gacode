@@ -159,7 +159,7 @@ subroutine cgyro_mpi_grid
 
   ! Nonlinear parallelization dimensions (returns nsplit)
 
-  if (split_method == 1) then
+  if (nonlinear_method == 1) then
      call parallel_slib_init(n_toroidal,nv_loc,nc,nsplit,NEW_COMM_2)
   else
      call parallel_slib_init(n_toroidal,nv_loc*n_theta,n_radial,nsplit,NEW_COMM_2)

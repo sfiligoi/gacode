@@ -49,11 +49,11 @@ x.add('MASSE_ADE','0.0002724486');
 x.add('LAMBDA_DEBYE','0.0')
 x.add('TEST_FLAG','0')
 x.add('H_PRINT_FLAG','0')
+x.add('AMP0','0.0')
 x.add('AMP','0.1')
 x.add('GAMMA_E','0.0')
 x.add('GAMMA_P','0.0')
 x.add('MACH','0.0')
-x.add('SPLIT_METHOD','2')
 x.add('ERROR_TOL','10.0')
 x.add('KXFILTER_FLAG','0')
 

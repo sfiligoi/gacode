@@ -59,11 +59,11 @@ module cgyro_globals
   real :: lambda_debye
   integer :: test_flag
   integer :: h_print_flag
+  real :: amp0
   real :: amp
   real :: gamma_e
   real :: gamma_p
   real :: mach
-  integer :: split_method
   real :: error_tol
   integer :: kxfilter_flag
   !

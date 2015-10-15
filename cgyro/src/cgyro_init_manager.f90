@@ -105,7 +105,7 @@ subroutine cgyro_init_manager
      allocate(cap_h_v_prime(nc_loc,nv))
      
      ! Nonlinear arrays
-     if (split_method == 1) then
+     if (nonlinear_method == 1) then
         allocate(f_nl(nc,nsplit,n_toroidal))
         allocate(g_nl(nc,nsplit,n_toroidal))
      else

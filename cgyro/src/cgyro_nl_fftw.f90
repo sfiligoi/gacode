@@ -1,5 +1,5 @@
 !-----------------------------------------------------------------
-! cgyro_nl_fftw_split.f90
+! cgyro_nl_fftw.f90
 !
 ! PURPOSE:
 !  Evaluate nonlinear bracket with dealiased FFT.  It is natural 
@@ -10,7 +10,7 @@
 !  NOTE: Need to be careful with (p=-nr/2,n=0) component.
 !-----------------------------------------------------------------
 
-subroutine cgyro_nl_fftw_split(ij)
+subroutine cgyro_nl_fftw(ij)
 
   use timer_lib
   use parallel_lib
@@ -127,9 +127,8 @@ subroutine cgyro_nl_fftw_split(ij)
 
      call fftw_execute_dft_r2c(plan_r2c,uv,fx)
 
-     ! Must annhilate n=0,p=-nr/2
-     fx(0,-nx0/2+nx) = 0.0       
-     fx(0,0)         = 0.0       
+     ! NOTE: The FFT will generate an unwanted n=0,p=-nr/2 component
+     ! that will be filtered in the main time-stepping loop
 
      do ir=1,n_radial 
         ix = ir-1-nx0/2
@@ -176,4 +175,4 @@ subroutine cgyro_nl_fftw_split(ij)
 
   rhs(ij,:,:) = rhs(ij,:,:)+(q*rho/rmin)*(2*pi/length)*psi(:,:)
 
-end subroutine cgyro_nl_fftw_split
+end subroutine cgyro_nl_fftw
