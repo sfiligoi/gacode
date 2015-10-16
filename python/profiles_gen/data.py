@@ -95,6 +95,7 @@ fancyNames = \
               'jbs_nclass' : ('j_\mathrm{bs,nclass}'      ,'MA/m^2'       ,''),
               'jbs_koh'    : ('j_\mathrm{bs,koh}'         ,'MA/m^2'       ,''),
               }
+
 for _k in range(1, 11):
     fancyNames['ni_%d'%_k]     =('n_{i,%d}'%_k          ,'10^{19}/m^3'  ,'ni_%d(10^19/m^3)'%_k)
     fancyNames['Ti_%d'%_k]     =('T_{i,%d}'%_k          ,'keV'          ,'Ti_%d(keV)'%_k)
@@ -102,6 +103,50 @@ for _k in range(1, 11):
     fancyNames['vpol_%d'%_k]   =('v_{\\theta,%d}'%_k    ,'m/s'          ,'vpol_%d(m/s)'%_k)
     fancyNames['dlntidr_%d'%_k]=('-dln(T_{i,%d})/dr'%_k ,'1/m'          ,'')
     fancyNames['dlnnidr_%d'%_k]=('-dln(n_{i,%d})/dr'%_k ,'1/m'          ,'')
+
+definition = \
+             {'NULL' : 'Empty Column',
+              'rho'  : 'Square root of the normalized toroidal flux\n'+
+              '- Should span the region [0,1]\n'+
+              '- Grid spacing can be nonuniform',
+              #
+              'rmin' : 'The generalized minor radius, r, in units of metres.\n'+
+              '- see https://fusion.gat.com/theory/Gyrogeometry',
+              #
+              'polflux' : 'The polflux!',
+              #
+              'q' : 'The safety factor q (dimensionless)',
+              #
+              'omega0' : 'The omega0!',
+              #
+              'rmaj' : 'The generalized major radius, R_0(r), in units of metres.\n'+
+              '- see https://fusion.gat.com/theory/Gyrogeometry',
+              #
+              'zmag' : 'The omega0!',
+              #
+              'kappa'     : 'The omega0!',
+              #
+              'delta'     : 'The omega0!',
+              #
+              'zeta'     : 'The omega0!',
+              #
+              'ne'     : 'The omega0!',
+              #
+              'Te'     : 'The omega0!',
+              #
+              'ptot'     : 'The omega0!',
+              #
+              'z_eff'     : 'The omega0!',
+              }
+
+for _k in range(1, 11):
+    definition['ni_%d'%_k] = 'Ion %d density (10^19/m^3)'%_k
+    definition['Ti_%d'%_k] = 'Ion %d temperature in keV'%_k
+    definition['vtor_%d'%_k] = 'Ion %d toroidal velocity (m/s)'%_k
+    definition['vpol_%d'%_k] = 'Ion %d poloidal velocity (m/s)'%_k
+
+
+
 
 class profiles_genData:
     """
@@ -235,6 +280,15 @@ class profiles_gen_jbs:
         for k, var in enumerate(vars_input_profiles_jbs):
             self.data[var] = data[:, k]
 
+class profiles_gen_format:
+    def __init__(self):
+
+        self.tags = vars_input_profiles
+        self.desc = fancyNames
+        self.defs = definition
+        
+
+
 if __name__ == '__main__':
     # check that all fancy names have been assigned
     import numpy
@@ -243,3 +297,4 @@ if __name__ == '__main__':
     tmp = tmp.union(set(vars_input_profiles_jbs))
     tmp = tmp.union(set(vars_input_profiles_extra))
     print tmp.difference(set(fancyNames.keys()))
+
