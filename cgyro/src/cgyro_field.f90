@@ -177,7 +177,7 @@ subroutine cgyro_field_c
 
            if (n_field > 2) then
               fac = w_e(ie)*0.5*w_xi(ix)*dens(is)*temp(is) &
-                   *j0perp_v(ic_loc,iv)*h_x(ic,iv_loc)
+                   *j0perp_c(ic,iv_loc)*h_x(ic,iv_loc)
               field_loc(ir,it,3) = field_loc(ir,it,3) + fac &
                    * 2.0*energy(ie)*(1-xi(ix)**2)
            endif
@@ -193,6 +193,13 @@ subroutine cgyro_field_c
        MPI_SUM,&
        NEW_COMM_1,&
        i_err)
+
+  if(n_field > 2) then
+     do it=1,n_theta
+        field(:,it,3) = field(:,it,3) &
+             *(-0.5*betae_unit)/(dens_ele*temp_ele)/Bmag(it)
+     enddo
+  endif
 
   ! Poisson LHS factors
 
@@ -229,12 +236,10 @@ subroutine cgyro_field_c
                  fac = field(ir,it,1)
 
                  field(ir,it,1) =  poisson_pb22(ir,it)*field(ir,it,1) &
-                      - poisson_pb12(ir,it)*field(ir,it,3) &
-                      *(-0.5*betae_unit)/(dens_ele*temp_ele)/Bmag(it)
+                      - poisson_pb12(ir,it)*field(ir,it,3)
                  
                  field(ir,it,3) =  -poisson_pb21(ir,it)*fac &
-                      + poisson_pb11(ir,it)*field(ir,it,3) &
-                      *(-0.5*betae_unit)/(dens_ele*temp_ele)/Bmag(it)
+                      + poisson_pb11(ir,it)*field(ir,it,3)
 
               enddo
            

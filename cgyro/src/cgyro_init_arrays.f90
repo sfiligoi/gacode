@@ -220,7 +220,7 @@ subroutine cgyro_init_arrays
           i_err)
 
      poisson_pb22(:,:) = 1.0 - poisson_pb22(:,:) &
-          * (-0.5*betae_unit) /(dens_ele*temp_ele)
+          * (-0.5*betae_unit) /(dens_ele*temp_ele) 
 
      ! determinant
      sum_loc = poisson_pb11 * poisson_pb22 - poisson_pb12 * poisson_pb21
