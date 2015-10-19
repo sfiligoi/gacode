@@ -376,6 +376,18 @@ subroutine cgyro_init_implicit_gk
              /betae_unit*dens_ele*temp_ele)
      enddo
 
+     if(n_field > 2) then
+        ifield=3
+        jfield=3
+        do ic=1,nc
+           id = idfield(ic,ifield)
+           ir = ir_c(ic) 
+           it = it_c(ic)
+           fieldmat(id,id) = fieldmat(id,id) &
+                + 1.0
+        enddo
+     endif
+
   endif
 
   ! Lapack factorization
