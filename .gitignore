@@ -15,6 +15,9 @@ modules/*.mod
 */*/*/*.pyc
 */*/*/*/*.pyc
 
+# Old directory structure
+neo/tools/vgen/
+
 # Version tags
 gyro/.VERSION
 cgyro/.VERSION
