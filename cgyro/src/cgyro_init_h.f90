@@ -34,7 +34,8 @@ subroutine cgyro_init_h
 
      call cgyro_info('Restart data found.')
      call cgyro_read_restart
-
+     gtime = 0.0
+     
   else
 
      i_current = 0

@@ -74,7 +74,6 @@ subroutine cgyro_write_restart
      open(unit=io,file=trim(path)//runfile_restart_tag,status='replace')
      write(io,*) i_current
      write(io,fmtstr) t_current
-     write(io,fmtstr) gtime
      close(io)
 
   endif

@@ -39,7 +39,6 @@ subroutine cgyro_read_restart
 
      read(io,*) i_current
      read(io,fmtstr) t_current
-     read(io,fmtstr) gtime
      close(io)
 
   endif
