@@ -40,14 +40,10 @@ subroutine cgyro_init_arrays
 
         ! Need this for (Phi, A_parallel) terms in GK and field equations
 
-        !j0_c(ic,iv_loc) = BESJ0(abs(arg))
         j0_c(ic,iv_loc) = bessel_j0(abs(arg))
 
         ! Needed for B_parallel in GK and field equations
-        
-        !call RJBESL(abs(arg),0.0,3,bessel,i_err)
-        !j0perp_c(ic,iv_loc) = 0.5*(bessel(0)+bessel(2))
-        
+               
         j0perp_c(ic,iv_loc) = 0.5*(j0_c(ic,iv_loc) + bessel_jn(2,abs(arg)))
         
      enddo

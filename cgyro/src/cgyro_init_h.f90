@@ -39,6 +39,7 @@ subroutine cgyro_init_h
 
      i_current = 0
      t_current = 0.0
+     gtime = 0.0
 
      !-------------------------------------------------------------------------
      ! Generate analytic initial conditions

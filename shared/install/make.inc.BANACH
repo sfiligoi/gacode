@@ -12,12 +12,12 @@ ROOT=/home/SOFTWARE
 
 # Compilers
 
-FC	= mpif90 -fall-intrinsics -std=f2008 -I $(GACODE_ROOT)/modules -I /usr/local/include
+FC	= mpif90 -std=f2008 -I $(GACODE_ROOT)/modules -I /usr/local/include
 F77	= mpif77 -I $(GACODE_ROOT)/modules
 
 FOMP    = -fopenmp
 FMATH	= -fdefault-real-8 -J $(GACODE_ROOT)/modules
-FOPT	= -O3
+FOPT	= -Ofast
 FDEBUG	= -Wall -fcheck=all -O -W -finit-real=nan -fbounds-check -ffpe-trap=invalid,zero,overflow
 
 # System math libraries

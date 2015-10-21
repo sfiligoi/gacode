@@ -9,14 +9,14 @@ subroutine cgyro_init_collision
   real, dimension(:,:,:), allocatable :: nu_d, nu_s, nu_par, nu_par_deriv
   real, dimension(:,:), allocatable :: rs
   real, dimension(:,:,:,:), allocatable :: rsvec
-  real, external :: derf
+
+  real :: arg
   real :: xa, xb, tauinv_ab
   integer :: jv
   integer :: is,ir,it,ix,ie,js,je,jx,ks
   ! parameters for matrix solve
   real, dimension(:,:), allocatable :: amat, bmat
   real, dimension(:,:,:,:,:,:), allocatable :: ctest
-  real :: arg
   real, dimension(:,:,:,:,:), allocatable :: bessel
 
   allocate(nu_d(n_energy,n_species,n_species))
@@ -47,7 +47,7 @@ subroutine cgyro_init_collision
                     ! e-e
                     nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
                          * (exp(-xb*xb)/(xb*sqrt(pi)) &
-                         + (1.0-1.0/(2.0*xb*xb)) * DERF(xb))
+                         + (1.0-1.0/(2.0*xb*xb)) * erf(xb))
                  else
                     ! e-i
                     nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3)
@@ -62,7 +62,7 @@ subroutine cgyro_init_collision
                  ! case 1: like-species/same mass collisions
                  nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
                       * (exp(-xb*xb)/(xb*sqrt(pi)) &
-                      + (1.0-1.0/(2.0*xb*xb)) * DERF(xb))
+                      + (1.0-1.0/(2.0*xb*xb)) * erf(xb))
 
               else if (mass(is) < mass(js)) then
                  ! case 2: ele-ion and ion-imp(heavy) collisions
@@ -81,10 +81,10 @@ subroutine cgyro_init_collision
               ! Reduced Hirshman-Sigmar model
               nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
                    * (exp(-xb*xb)/(xb*sqrt(pi)) &
-                   + (1.0-1.0/(2.0*xb*xb)) * DERF(xb))
+                   + (1.0-1.0/(2.0*xb*xb)) * erf(xb))
               nu_s(ie,is,js) = tauinv_ab * (1.0/xa) &
                    * (-exp(-xb*xb)/(xb*sqrt(pi)) &
-                   + (1.0/(2.0*xb*xb)) * DERF(xb)) &
+                   + (1.0/(2.0*xb*xb)) * erf(xb)) &
                    * (2.0*temp(is)/temp(js))*(1.0+mass(js)/mass(is))
 
            case(4)
@@ -92,7 +92,7 @@ subroutine cgyro_init_collision
               ! Ad hoc op
               nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
                    * (exp(-xb*xb)/(xb*sqrt(pi)) &
-                   + (1.0-1.0/(2.0*xb*xb)) * DERF(xb))
+                   + (1.0-1.0/(2.0*xb*xb)) * erf(xb))
               ! No i-e Lorentz
               if(is /= is_ele .and. js == is_ele) then
                  nu_d(ie,is,js) = 0.0
@@ -102,12 +102,12 @@ subroutine cgyro_init_collision
               if(is == js) then
                  nu_par(ie,is,js) = tauinv_ab * (2.0/xa**3) &
                       * (-exp(-xb*xb)/(xb*sqrt(pi)) &
-                      + (1.0/(2.0*xb*xb)) * DERF(xb))
+                      + (1.0/(2.0*xb*xb)) * erf(xb))
                  nu_par_deriv(ie,is,js) = tauinv_ab * (2.0/xa**3) &
                       * (-3/xa * (-exp(-xb*xb)/(xb*sqrt(pi)) &
-                      + (1.0/(2.0*xb*xb)) * DERF(xb)) + vth(is)/vth(js) &
+                      + (1.0/(2.0*xb*xb)) * erf(xb)) + vth(is)/vth(js) &
                       * (2.0*exp(-xb*xb)/(xb**2*sqrt(pi)) &
-                      + 2.0*exp(-xb*xb)/sqrt(pi) - DERF(xb)/xb**3))
+                      + 2.0*exp(-xb*xb)/sqrt(pi) - erf(xb)/xb**3))
               endif
 
            end select
@@ -130,8 +130,8 @@ subroutine cgyro_init_collision
                  arg = k_perp(it,ir)*rho*vth(is)*mass(is)&
                       /(z(is)*Bmag(it)) *sqrt(2.0*energy(ie)) &
                       *sqrt(1.0-xi(ix)**2)
-                 call RJBESL(abs(arg),0.0,2,bessel(is,ix,ie,ic_loc,:),&
-                      i_err)
+                 bessel(is,ix,ie,ic_loc,0) = bessel_j0(abs(arg))
+                 bessel(is,ix,ie,ic_loc,1) = bessel_j1(abs(arg))
               enddo
            enddo
         enddo

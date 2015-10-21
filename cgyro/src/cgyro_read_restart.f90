@@ -10,12 +10,10 @@ subroutine cgyro_read_restart
 
   use mpi
   use cgyro_globals
+  use cgyro_io
 
   !---------------------------------------------------
-  ! Local variables:
-  !
   implicit none
-  !---------------------------------------------------
   !
   ! Required for MPI-IO: 
   !
@@ -27,25 +25,36 @@ subroutine cgyro_read_restart
   integer(kind=MPI_OFFSET_KIND) :: offset1
   !---------------------------------------------------
 
+  call cgyro_info('Reading MPI-IO restart data.')
+
+  !---------------------------------------------------------
+  ! Read restart parameters from ASCII file.
+  !
+  call cgyro_info('Writing MPI-IO restart data.')
   if (i_proc == 0) then
 
-    print *,'[Reading restart data]'
-
-    open(unit=io,&
+     open(unit=io,&
           file=trim(path)//runfile_restart_tag,&
           status='old')
 
      read(io,*) i_current
      read(io,fmtstr) t_current
+     read(io,fmtstr) gtime
      close(io)
 
   endif
+
+  ! Broadcast to all cores.
 
   call MPI_BCAST(i_current,&
        1,MPI_INTEGER,0,CGYRO_COMM_WORLD,i_err)
 
   call MPI_BCAST(t_current,&
        1,MPI_DOUBLE_PRECISION,0,CGYRO_COMM_WORLD,i_err)
+
+  call MPI_BCAST(gtime,&
+       1,MPI_DOUBLE_PRECISION,0,CGYRO_COMM_WORLD,i_err)
+  !---------------------------------------------------------
 
   filemode = IOR(MPI_MODE_RDWR,MPI_MODE_CREATE)
   disp     = 0

@@ -381,8 +381,9 @@
          go to 20
   170 continue
 !     .......... now balance the submatrix in rows k to l ..........
-      do 180 i = k, l
-  180 scale(i) = 1.000
+      do i = k,l
+         scale(i) = 1.0
+      enddo
 !     .......... iterative loop for norm reduction ..........
   190 noconv = .false.
 
@@ -1016,12 +1017,12 @@
 !                vectors of upper triangular form ..........
   680 norm = 0.000
 
-      do 720 i = 1, n
-
-         do 720 j = i, n
+      do i=1,n
+         do j=i,n
             tr = abs(hr(i,j)) + abs(hi(i,j))
             if (tr .gt. norm) norm = tr
-  720 continue
+         enddo
+      enddo
 
       if (n .eq. 1 .or. norm .eq. 0.000) go to 1001
 !     .......... for en=n step -1 until 2 do -- ..........
@@ -1082,22 +1083,20 @@
 !     .......... multiply by transformation matrix to give
 !                vectors of original full matrix.
 !                for j=n step -1 until low do -- ..........
-      do 880 jj = low, N
+      do jj = low, N
          j = n + low - jj
          m = min0(j,igh)
-
-         do 880 i = low, igh
-            zzr = 0.000
-            zzi = 0.000
-
-            do 860 k = low, m
+         do i = low, igh
+            zzr = 0.0
+            zzi = 0.0
+            do k = low, m
                zzr = zzr + zr(i,k) * hr(k,j) - zi(i,k) * hi(k,j)
                zzi = zzi + zr(i,k) * hi(k,j) + zi(i,k) * hr(k,j)
-  860       continue
-
+            enddo
             zr(i,j) = zzr
             zi(i,j) = zzi
-  880 continue
+         enddo
+      enddo
 
       go to 1001
 !     .......... set error -- all eigenvalues have not
@@ -1170,9 +1169,10 @@
          orti(m) = 0.000
          scale = 0.000
 !     .......... scale column (algol tol then not needed) ..........
-         do 90 i = m, igh
-   90    scale = scale + abs(ar(i,m-1)) + abs(ai(i,m-1))
-
+         do i=m,igh
+            scale = scale + abs(ar(i,m-1)) + abs(ai(i,m-1))
+         enddo
+         
          if (scale .eq. 0.000) go to 180
          mp = m + igh
 !     .......... for i=igh step -1 until m do -- ..........

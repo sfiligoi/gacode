@@ -14,7 +14,6 @@ subroutine cgyro_write_restart
 
   !----------------------------------------------
   implicit none
-  !----------------------------------------------
   !
   ! Required for MPI-IO: 
   !
@@ -66,18 +65,19 @@ subroutine cgyro_write_restart
   call MPI_FILE_CLOSE(fhv,i_err)
 
   !---------------------------------------------------------
-  ! Dump restart parameters
+  ! Dump restart parameters to ASCII file.
   !
-  if (i_proc == 0) then
+  call cgyro_info('Writing MPI-IO restart data.')
 
-     print *,'[Saving restart data]'
+  if (i_proc == 0) then
 
      open(unit=io,file=trim(path)//runfile_restart_tag,status='replace')
      write(io,*) i_current
      write(io,fmtstr) t_current
+     write(io,fmtstr) gtime
      close(io)
 
   endif
-
+  !---------------------------------------------------------
 
 end subroutine cgyro_write_restart
