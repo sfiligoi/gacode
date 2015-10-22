@@ -13,7 +13,9 @@ subroutine cgyro_shear
 
   implicit none
 
-  integer :: ir,it
+  integer :: ir
+  real, parameter :: eps=1e-10
+  complex, dimension(n_theta,nv_loc) :: a1
 
   call timer_lib_in('stream')
 
@@ -24,16 +26,15 @@ subroutine cgyro_shear
 
      gtime = gtime-1.0
 
+     a1 = h_x(ic_c(1,:),:)
+
      do ir=2,n_radial
-        h_x(ic_c(ir-1,:),:)     = h_x(ic_c(ir,:),:)
-        cap_h_c(ic_c(ir-1,:),:) = cap_h_c(ic_c(ir,:),:)
-        psi(ic_c(ir-1,:),:)     = psi(ic_c(ir,:),:)
-        field(ir-1,:,:)         = field(ir,:,:)
+        h_x(ic_c(ir-1,:),:) = h_x(ic_c(ir,:),:)
      enddo
-     h_x(ic_c(n_radial,:),:)     = 0.0
-     cap_h_c(ic_c(n_radial,:),:) = 0.0
-     psi(ic_c(n_radial,:),:)     = 0.0
-     field(n_radial,:,:)         = 0.0
+
+     h_x(ic_c(n_radial,:),:) = eps*a1
+
+     call cgyro_field_c
 
   endif
 
@@ -42,16 +43,15 @@ subroutine cgyro_shear
 
      gtime = gtime+1.0
 
+     a1 = h_x(ic_c(n_radial,:),:) 
+
      do ir=n_radial-1,1,-1
-        h_x(ic_c(ir+1,:),:)     = h_x(ic_c(ir,:),:)
-        cap_h_c(ic_c(ir+1,:),:) = cap_h_c(ic_c(ir,:),:)
-        psi(ic_c(ir+1,:),:)     = psi(ic_c(ir,:),:)
-        field(ir+1,:,:)         = field(ir,:,:)
+        h_x(ic_c(ir+1,:),:) = h_x(ic_c(ir,:),:)
      enddo
-     h_x(ic_c(1,:),:)     = 0.0
-     cap_h_c(ic_c(1,:),:) = 0.0
-     psi(ic_c(1,:),:)     = 0.0
-     field(1,:,:)         = 0.0
+
+     h_x(ic_c(1,:),:) = eps*a1
+
+     call cgyro_field_c
 
   endif
 

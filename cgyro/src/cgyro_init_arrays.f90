@@ -8,8 +8,6 @@ subroutine cgyro_init_arrays
 
   implicit none
 
-  real, external :: BESJ0
-  real :: bessel(0:2)
   real :: arg
   integer :: ir,it,is,ie,ix
   integer :: jr,jt,id, ccw_fac
