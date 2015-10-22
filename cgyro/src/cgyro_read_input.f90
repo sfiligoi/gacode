@@ -62,6 +62,7 @@ subroutine cgyro_read_input
   call readbc_real(mach)
   call readbc_real(error_tol)
   call readbc_int(kxfilter_flag)
+  call readbc_real(gamma_e_decay)
 
   call readbc_real(rmin)
   call readbc_real(rmaj)

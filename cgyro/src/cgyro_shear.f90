@@ -14,11 +14,9 @@ subroutine cgyro_shear
   implicit none
 
   integer :: ir
-  real, parameter :: eps=1e-10
   complex, dimension(n_theta,nv_loc) :: a1
 
-  call timer_lib_in('stream')
-
+  
   gtime = gtime+omega_eb*delta_t
 
   ! Forward shearing
@@ -32,7 +30,7 @@ subroutine cgyro_shear
         h_x(ic_c(ir-1,:),:) = h_x(ic_c(ir,:),:)
      enddo
 
-     h_x(ic_c(n_radial,:),:) = eps*a1
+     h_x(ic_c(n_radial,:),:) = a1*gamma_e_decay
 
      call cgyro_field_c
 
@@ -49,12 +47,10 @@ subroutine cgyro_shear
         h_x(ic_c(ir+1,:),:) = h_x(ic_c(ir,:),:)
      enddo
 
-     h_x(ic_c(1,:),:) = eps*a1
+     h_x(ic_c(1,:),:) = a1*gamma_e_decay
 
      call cgyro_field_c
 
   endif
-
-  call timer_lib_out('stream')
 
 end subroutine cgyro_shear

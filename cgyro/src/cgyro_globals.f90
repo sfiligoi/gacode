@@ -66,6 +66,7 @@ module cgyro_globals
   real :: mach
   real :: error_tol
   integer :: kxfilter_flag
+  real :: gamma_e_decay
   !
   ! Geometry input
   !
