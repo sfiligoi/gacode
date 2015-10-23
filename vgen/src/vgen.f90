@@ -19,7 +19,6 @@ program vgen
   integer :: i
   integer :: j
   integer :: ix
-  integer :: ia,ib
   integer :: rotation_model 
   real :: grad_p
   real :: ya
@@ -33,11 +32,25 @@ program vgen
 
   real, dimension(:), allocatable :: er_exp
 
+  !---------------------------------------------------------------------
   ! Initialize MPI_COMM_WORLD communicator.
-
+  !
   call MPI_INIT(i_err)
   call MPI_COMM_RANK(MPI_COMM_WORLD,i_proc,i_err)
   call MPI_COMM_SIZE(MPI_COMM_WORLD,n_proc,i_err)
+
+  !if (i_proc < n_proc-n_pad) then
+  !   color = 0
+  !else
+  !   color = 1
+  !endif
+
+  !call MPI_COMM_SPLIT(MPI_COMM_WORLD,&
+  !     color,&
+  !     i_proc,&
+  !     vgen_comm,&
+  !     ierr)
+  !---------------------------------------------------------------------
 
   cpu_tot_in = MPI_Wtime()
 
@@ -57,6 +70,7 @@ program vgen
   read(1,*) erspecies_indx
   read(1,*) nth_min
   read(1,*) nth_max
+  read(1,*) n_pad
   close(1)
 
   select case(er_method)
@@ -102,8 +116,9 @@ program vgen
      print '(a,i2)','INFO: (VGEN) MPI tasks: ',n_proc
   endif
 
-  ! initialize vgen parameters
-
+  !---------------------------------------------------------------------
+  ! Initialize vgen parameters
+  !
   call vgen_init
   allocate(er_exp(EXPRO_n_exp))
   if (er_method /= 4) then
@@ -111,6 +126,21 @@ program vgen
      EXPRO_w0(:) = 0.0
      EXPRO_w0p(:) = 0.0
   endif
+  !---------------------------------------------------------------------
+
+  !---------------------------------------------------------------------
+  ! Distribution scheme
+  !
+  n_loc = EXPRO_n_exp/n_proc+1
+  allocate(i_glob(n_loc))
+
+  i_loc = 0
+  do i=2+i_proc,EXPRO_n_exp-1,n_proc
+     i_loc = i_loc+1
+     i_glob(i_loc) = i
+  enddo
+  n_loc = i_loc
+  !---------------------------------------------------------------------
 
   !======================================================================
   ! Four alternatives for Er calculation:
@@ -134,7 +164,8 @@ program vgen
 
         open(unit=1,file='out.vgen.ercomp'//tag(i_proc+1),status='replace')
         close(1)
-        do i=2+i_proc,EXPRO_n_exp-1,n_proc
+        do i_loc=1,n_loc
+           i = i_glob(i_loc)
            if (erspecies_indx == 1) then
               grad_p = -(EXPRO_dlnnidr_new(i) + EXPRO_dlntidr(1,i))
            else
@@ -184,8 +215,9 @@ program vgen
 
      ! Flow calculation based on existing EXPRO_w0 and EXPRO_w0p
 
-     do i=2+i_proc,EXPRO_n_exp-1,n_proc
+     do i_loc=1,n_loc
 
+        i = i_glob(i_loc)
         if (vel_method == 1) then
            rotation_model = 1   ! weak rotation
         else
@@ -213,7 +245,9 @@ program vgen
      ! Compute Er using NEO (weak rotation limit) 
      ! by matching vtor_measured with vtor_neo at theta=0 
 
-     do i=2+i_proc,EXPRO_n_exp-1,n_proc
+     do i_loc=1,n_loc
+
+        i = i_glob(i_loc)
 
         rotation_model = 1
         er0 = 0.0
@@ -270,7 +304,10 @@ program vgen
         call bound_deriv(EXPRO_w0p(2:EXPRO_n_exp-1),EXPRO_w0(2:EXPRO_n_exp-1),&
              EXPRO_rmin,EXPRO_n_exp-2)
 
-        do i=2+i_proc,EXPRO_n_exp-1,n_proc
+        do i_loc=1,n_loc
+
+           i = i_glob(i_loc)
+
            rotation_model = 2  
            er0 = er_exp(i)
            omega = EXPRO_w0(i) 
@@ -301,14 +338,31 @@ program vgen
   call vgen_reduce(jbs_nclass(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
   call vgen_reduce(jbs_koh(2:EXPRO_n_exp-1),EXPRO_n_exp-2)
 
-  ! extrapolation for r=0 and r=n_exp boundary points
+  !------------------------------------------------------------------------
+  ! Extrapolation for r=0 and r=n_exp boundary points
+  !
+  if (er_method /= 4) then
 
-  if(er_method /= 4) then
      call bound_extrap(ya,yb,er_exp,EXPRO_rmin,EXPRO_n_exp)
      er_exp(1) = ya
      er_exp(EXPRO_n_exp) = yb
-  endif
 
+     do i=2,EXPRO_n_exp-1
+        EXPRO_w0(i) = 2.9979e10*EXPRO_q(i)*(er_exp(i)/30.0)/ &
+             ((1e4*EXPRO_bunit(i))*(1e2*EXPRO_rmin(i))*EXPRO_grad_r0(i))
+     enddo
+     call bound_extrap(ya,yb,EXPRO_w0,EXPRO_rmin,EXPRO_n_exp)
+     EXPRO_w0(1) = ya
+     EXPRO_w0(EXPRO_n_exp) = yb
+
+     call bound_deriv(EXPRO_w0p(2:EXPRO_n_exp-1),EXPRO_w0(2:EXPRO_n_exp-1),&
+          EXPRO_rmin,EXPRO_n_exp-2)
+     call bound_extrap(ya,yb,EXPRO_w0p,EXPRO_rmin,EXPRO_n_exp)
+     EXPRO_w0p(1) = ya
+     EXPRO_w0p(EXPRO_n_exp) = yb
+
+  endif
+  !
   do j=1,n_ions
      call bound_extrap(ya,yb,EXPRO_vpol(j,:),EXPRO_rmin,EXPRO_n_exp)
      EXPRO_vpol(j,1) = ya
@@ -317,6 +371,7 @@ program vgen
      EXPRO_vtor(j,1) = ya
      EXPRO_vtor(j,EXPRO_n_exp) = yb
   enddo
+  !
   call bound_extrap(ya,yb,jbs_neo,EXPRO_rmin,EXPRO_n_exp)
   jbs_neo(1)           = ya
   jbs_neo(EXPRO_n_exp) = yb
@@ -332,24 +387,7 @@ program vgen
   call bound_extrap(ya,yb,pflux_sum,EXPRO_rmin,EXPRO_n_exp)
   pflux_sum(1)           = ya
   pflux_sum(EXPRO_n_exp) = yb
-
-  ! output omega_E, vtor_1 
-  ! omega
-  if(er_method /= 4) then
-     do i=2,EXPRO_n_exp-1
-        EXPRO_w0(i) = 2.9979e10*EXPRO_q(i)*(er_exp(i)/30.0)/ &
-             ((1e4*EXPRO_bunit(i))*(1e2*EXPRO_rmin(i))*EXPRO_grad_r0(i))
-     enddo
-     call bound_extrap(ya,yb,EXPRO_w0,EXPRO_rmin,EXPRO_n_exp)
-     EXPRO_w0(1) = ya
-     EXPRO_w0(EXPRO_n_exp) = yb
-     ! omega_p
-     call bound_deriv(EXPRO_w0p(2:EXPRO_n_exp-1),EXPRO_w0(2:EXPRO_n_exp-1),&
-          EXPRO_rmin,EXPRO_n_exp-2)
-     call bound_extrap(ya,yb,EXPRO_w0p,EXPRO_rmin,EXPRO_n_exp)
-     EXPRO_w0p(1) = ya
-     EXPRO_w0p(EXPRO_n_exp) = yb
-  endif
+  !------------------------------------------------------------------------
 
   ! Write output on processor 0
 
@@ -412,18 +450,22 @@ program vgen
   deallocate(jbs_koh)
   deallocate(jbs_nclass)
   deallocate(pflux_sum)
+  deallocate(i_glob)
 
   call EXPRO_palloc(MPI_COMM_WORLD,path,0)
 
   cpu_tot_out = MPI_Wtime()
 
-  if(timing_flag == 1) then
+  if (timing_flag == 1) then
      print *, 'total cpu time=', cpu_tot_out-cpu_tot_in
   endif
 
   call MPI_finalize(i_err)
 
-10 format('rho=',f6.4,2x,'Er_0(kV/m)=',1pe9.2,2x,'vpol_1(km/s)=',1pe9.2,2x,&
-'nth=',i2,2x,'[',i2,']')
+10 format(&
+       'rho=',f6.4,2x,&
+       'Er_0(kV/m)=',1pe9.2,2x,&
+       'vpol_1(km/s)=',1pe9.2,2x,&
+       'nth=',i2,2x,'[',i2,']')
 
 end program vgen

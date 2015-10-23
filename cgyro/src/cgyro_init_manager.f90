@@ -185,7 +185,7 @@ subroutine cgyro_init_manager
      allocate(vy(0:ny-1,0:nx-1))
      allocate(uv(0:ny-1,0:nx-1))
 
-     ! To avoid memory leak, create this plan every time :-(
+     ! Create plans once and for all, with global arrays fx,ux
      plan_c2r = fftw_plan_dft_c2r_2d(nx,ny,fx,ux,FFTW_MEASURE)
      plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,ux,fx,FFTW_MEASURE)
 
