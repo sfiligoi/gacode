@@ -38,18 +38,6 @@ program vgen
   call MPI_INIT(i_err)
   call MPI_COMM_RANK(MPI_COMM_WORLD,i_proc,i_err)
   call MPI_COMM_SIZE(MPI_COMM_WORLD,n_proc,i_err)
-
-  !if (i_proc < n_proc-n_pad) then
-  !   color = 0
-  !else
-  !   color = 1
-  !endif
-
-  !call MPI_COMM_SPLIT(MPI_COMM_WORLD,&
-  !     color,&
-  !     i_proc,&
-  !     vgen_comm,&
-  !     ierr)
   !---------------------------------------------------------------------
 
   cpu_tot_in = MPI_Wtime()
@@ -70,7 +58,6 @@ program vgen
   read(1,*) erspecies_indx
   read(1,*) nth_min
   read(1,*) nth_max
-  read(1,*) n_pad
   close(1)
 
   select case(er_method)
@@ -129,13 +116,13 @@ program vgen
   !---------------------------------------------------------------------
 
   !---------------------------------------------------------------------
-  ! Distribution scheme
+  ! Distribution scheme (pad cores with n_pad "empty" tasks).
   !
-  n_loc = EXPRO_n_exp/n_proc+1
+  n_loc = EXPRO_n_exp/(n_proc-n_pad)+1
   allocate(i_glob(n_loc))
 
   i_loc = 0
-  do i=2+i_proc,EXPRO_n_exp-1,n_proc
+  do i=2+i_proc,EXPRO_n_exp-1,n_proc-n_pad
      i_loc = i_loc+1
      i_glob(i_loc) = i
   enddo

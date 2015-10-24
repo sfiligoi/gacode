@@ -15,7 +15,6 @@ module vgen_globals
   integer :: vel_method
   integer :: nth_min
   integer :: nth_max
-  integer :: n_pad
   
   real, parameter :: pi=3.1415926535897932
   real, parameter :: mass_deuterium = 3.3452   ! (x 10-27 kg)

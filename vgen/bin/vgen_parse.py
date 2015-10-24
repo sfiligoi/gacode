@@ -11,7 +11,6 @@ x.add('VEL_METHOD','2')
 x.add('ERSPECIES_INDX','2')
 x.add('NTHETA_MIN','17')
 x.add('NTHETA_MAX','39')
-x.add('N_PAD','0')
 x.add('TYPE','DC')
 
 # Perform the parsing
