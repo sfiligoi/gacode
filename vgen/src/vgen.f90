@@ -118,11 +118,11 @@ program vgen
   !---------------------------------------------------------------------
   ! Distribution scheme (pad cores with n_pad "empty" tasks).
   !
-  n_loc = EXPRO_n_exp/(n_proc-n_pad)+1
+  n_loc = EXPRO_n_exp/n_proc+1
   allocate(i_glob(n_loc))
 
   i_loc = 0
-  do i=2+i_proc,EXPRO_n_exp-1,n_proc-n_pad
+  do i=2+i_proc,EXPRO_n_exp-1,n_proc
      i_loc = i_loc+1
      i_glob(i_loc) = i
   enddo
