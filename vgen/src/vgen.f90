@@ -1,11 +1,11 @@
-!--------------------------------------------------------------------
+!------------------------------------------------------------------------
 ! vgen.f90
 !
 ! PURPOSE: 
 !  Driver for the vgen (velocity-generation) capability of NEO.  This 
-!  will write a new input.profiles with NEO-computer electric field 
-!  and/or velocities, and also generate a new input.profiles.extra.
-!--------------------------------------------------------------------
+!  will write a new input.profiles with NEO-computed electric field 
+!  and/or velocities. A new input.profiles.extra will also be generated.
+!------------------------------------------------------------------------
 
 program vgen
 
@@ -83,15 +83,15 @@ program vgen
 
   select case(vel_method)
   case(1)
-     if(i_proc == 0) then
+     if (i_proc == 0) then
         print '(a)','INFO: (VGEN) Computing velocities from NEO (weak rotation limit)'
      endif
   case(2)
-     if(i_proc == 0) then
+     if (i_proc == 0) then
         print '(a)','INFO: (VGEN) Computing velocities from NEO (strong rotation limit)'
      endif
   case default
-     if(i_proc == 0) then
+     if (i_proc == 0) then
         print '(a)','ERROR: Invalid vel_method'
      endif
      call MPI_finalize(i_err)
@@ -109,14 +109,14 @@ program vgen
   call vgen_init
   allocate(er_exp(EXPRO_n_exp))
   if (er_method /= 4) then
-     er_exp(:) = 0.0
-     EXPRO_w0(:) = 0.0
+     er_exp(:)    = 0.0
+     EXPRO_w0(:)  = 0.0
      EXPRO_w0p(:) = 0.0
   endif
   !---------------------------------------------------------------------
 
   !---------------------------------------------------------------------
-  ! Distribution scheme (pad cores with n_pad "empty" tasks).
+  ! Distribution scheme.
   !
   n_loc = EXPRO_n_exp/n_proc+1
   allocate(i_glob(n_loc))
