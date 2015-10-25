@@ -17,7 +17,7 @@ module vgen_globals
   integer :: nth_max
   
   real, parameter :: pi=3.1415926535897932
-  real, parameter :: mass_deuterium = 3.3452   ! (x 10-27 kg)
+  real, parameter :: mass_deuterium = 3.3452   ! (x 1e-27 kg)
   real, parameter :: temp_norm_fac   = 1602.2
   real, parameter :: charge_norm_fac = 1.6022
   
@@ -38,6 +38,6 @@ module vgen_globals
 
   integer :: n_ions
 
-  integer, parameter :: timing_flag=0
+  integer, parameter :: timing_flag = 0
 
 end module vgen_globals
