@@ -42,6 +42,9 @@ then
   echo "          -tmax <float>"
   echo "          Maximum value of ballooning angle."
   echo
+  echo "          -ymax <float>"
+  echo "          Maximum value of vertical axis (where applicable)."
+  echo
   echo "          -w <float>"
   echo "          Width of time-average window (1.0 is entire time history)."
   echo
@@ -76,6 +79,7 @@ FTYPE=screen
 PLOT_TYPE=field
 TIME=-1
 TMAX=-1.0
+YMAX=auto
 W=0.5
 MOMENT=e
 INDX=1
@@ -104,6 +108,8 @@ while [ $# -gt 0 ] ; do
   -t) shift ; TIME=$1 ;;
 
   -tmax) shift ; TMAX=$1 ;;
+
+  -ymax) shift ; YMAX=$1 ;;
 
   -w) shift ; W=$1 ;;
 
@@ -145,7 +151,7 @@ case "$PLOT_TYPE" in
 	python $PYROOT/plot_flux_n.py $FTYPE $W $MOMENT & ;;
 
    fluxt)  
-	python $PYROOT/plot_flux_t.py $FTYPE $W $MOMENT & ;;
+	python $PYROOT/plot_flux_t.py $FTYPE $W $MOMENT $YMAX & ;;
 
    pwr)  
 	python $PYROOT/plot_pwr.py $FTYPE $FIELD & ;;

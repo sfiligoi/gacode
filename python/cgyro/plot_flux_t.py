@@ -6,6 +6,7 @@ from cgyro.data import cgyrodata
 ftype = sys.argv[1]
 w = float(sys.argv[2])
 moment = sys.argv[3]
+ymax = sys.argv[4]
 
 sim = cgyrodata('./')
 
@@ -59,6 +60,9 @@ for ispec in range(ns):
     ax.plot(sim.t,y[ispec,:],label=label,color=color[ispec])
 
 ax.legend(loc=2)
+
+if ymax != 'auto':
+    ax.set_ylim([0,float(ymax)])
 
 if ftype == 'screen':
    plt.show()
