@@ -1,12 +1,14 @@
 #!/task/imd/anaconda/bin/python
 import os, sys
 def make_clean():
-    ret = os.system('make clean')
+    ret = os.system('cd $GACODE_ROOT; make clean')
     if ret:
+        print('GACODE failed to make clean')
         sys.exit(125)
 def make():
-    ret = os.system('make')
+    ret = os.system('cd $GACODE_ROOT; make')
     if ret:
+        print('GACODE failed to make')
         sys.exit(125)
 class RegressionError():
     pass
@@ -28,7 +30,8 @@ def run_regressions():
         print('Regression testing of the %s code PASSED %d tests'%(code,num_tests))
 if '-clean' in sys.argv:
     make_clean()
-make()
+if '-nomake' not in sys.argv:
+    make()
 try:
     run_regressions()
 except RegressionError:
