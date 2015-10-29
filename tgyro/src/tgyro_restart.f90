@@ -17,10 +17,10 @@ subroutine tgyro_restart
   integer :: j
   integer :: ioerr
   integer :: p
-  real, dimension(1+2*n_evolve_max) :: x_read
+
   character(len=1) :: dummy
+  real, dimension(1+2*n_evolve_max) :: x_read
   real, dimension(2:n_r,n_evolve_max) :: res2,relax2
-  real :: gamma_p0
 
 
   if (i_proc_global == 0) then

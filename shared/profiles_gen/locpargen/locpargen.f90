@@ -36,7 +36,7 @@ program locpargen
   read(1,*) z(5)
   close(1)
 
-  EXPRO_ctrl_n_ion = 5
+  EXPRO_n_ion = 5
   EXPRO_ctrl_quasineutral_flag = 0
   EXPRO_ctrl_z(1:5) = z(1:5)
   ! We don't need the numerical eq. flag set for this routine.

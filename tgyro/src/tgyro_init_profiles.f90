@@ -110,7 +110,7 @@ subroutine tgyro_init_profiles
   i_bc = n_r-loc_bc_offset
   !----------------------------------------------
 
-  EXPRO_ctrl_n_ion = loc_n_ion
+  EXPRO_n_ion = loc_n_ion
   EXPRO_ctrl_quasineutral_flag = tgyro_quasineutral_flag
   EXPRO_ctrl_z = 0.0
   EXPRO_ctrl_z(1:loc_n_ion) = zi_vec(1:loc_n_ion)
