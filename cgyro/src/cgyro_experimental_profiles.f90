@@ -21,7 +21,7 @@ subroutine cgyro_experimental_profiles
 
   implicit none
 
-  integer :: i,is,i_ion
+  integer :: i, is, i_ion
 
   !--------------------------------------------------------------
   ! use EXPRO routines to read data:
@@ -50,18 +50,18 @@ subroutine cgyro_experimental_profiles
      n_species_exp = n_species + 1
   endif
 
-  ! Charges of ion species
+  ! charge of ion species
   EXPRO_ctrl_z(:) = 0.0
-  EXPRO_n_ion = 0
-  if (ae_flag == 1) then
+  EXPRO_ctrl_n_ion = 0
+  if(ae_flag == 1) then
      do is=1,n_species
-        EXPRO_ctrl_z(is) = 1.0*z(is)
-        EXPRO_n_ion = EXPRO_n_ion+1
+        EXPRO_ctrl_z(is) = 1.0 * z(is)
+        EXPRO_ctrl_n_ion = EXPRO_ctrl_n_ion + 1
      enddo
   else
      do is=1,n_species-1
-        EXPRO_ctrl_z(is) = 1.0*z(is)
-        EXPRO_n_ion = EXPRO_n_ion+1
+        EXPRO_ctrl_z(is) = 1.0 * z(is)
+        EXPRO_ctrl_n_ion = EXPRO_ctrl_n_ion + 1
      enddo
   endif
 

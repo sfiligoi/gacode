@@ -27,7 +27,7 @@ subroutine gyro_read_experimental_profiles
   EXPRO_ctrl_quasineutral_flag = density_method-1
   EXPRO_ctrl_z(1:5) = z_vec(1:5)
   EXPRO_ctrl_numeq_flag = num_equil_flag
-  EXPRO_n_ion = n_spec-1
+  EXPRO_ctrl_n_ion = n_spec-1
   !
   ! Kludge 
   if (n_vec(2) == 0.0) EXPRO_ctrl_z(2) = 0.0

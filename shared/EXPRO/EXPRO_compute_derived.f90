@@ -43,6 +43,10 @@ subroutine EXPRO_compute_derived
      print '(a)','ERROR: (EXPRO) EXPRO_ctrl_numeq_flag not set.'
      stop
   endif
+  if (EXPRO_ctrl_n_ion == -1) then
+     print '(a)','ERROR: (EXPRO) EXPRO_ctrl_n_ion not set.'
+     stop
+  endif
   !---------------------------------------------------------------------
 
 
@@ -273,7 +277,7 @@ subroutine EXPRO_compute_derived
   if (EXPRO_ctrl_quasineutral_flag == 1) then
 
      EXPRO_ni_new(:) = 0.0
-     do is=2,EXPRO_n_ion
+     do is=2,EXPRO_ctrl_n_ion
         EXPRO_ni_new(:) = EXPRO_ni_new(:)+EXPRO_ctrl_z(is)*EXPRO_ni(is,:)
      enddo
      EXPRO_ni_new(:) = (EXPRO_ne(:)-EXPRO_ni_new(:))/EXPRO_ctrl_z(1)

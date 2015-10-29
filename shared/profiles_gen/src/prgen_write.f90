@@ -221,7 +221,7 @@ subroutine prgen_write
   !-----------------------------------------------------------
   ! Set EXPRO ctrl parameters for derived parameter calc.
   !
-  EXPRO_n_ion = n_ion
+  EXPRO_ctrl_n_ion = n_ion
   EXPRO_ctrl_quasineutral_flag = 0
   EXPRO_ctrl_z(1) = 1.0
   if (efit_method > 1) then

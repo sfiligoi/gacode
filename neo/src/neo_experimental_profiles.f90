@@ -53,16 +53,16 @@ subroutine neo_experimental_profiles
 
   ! charge of ion species
   EXPRO_ctrl_z(:) = 0.0
-  EXPRO_n_ion = 0
+  EXPRO_ctrl_n_ion = 0
   if(adiabatic_ele_model == 1) then
      do is=1,n_species
         EXPRO_ctrl_z(is) = 1.0 * Z(is)
-        EXPRO_n_ion = EXPRO_n_ion + 1
+        EXPRO_ctrl_n_ion = EXPRO_ctrl_n_ion + 1
      enddo
   else
      do is=1,n_species-1
         EXPRO_ctrl_z(is) = 1.0 * Z(is)
-        EXPRO_n_ion = EXPRO_n_ion + 1
+        EXPRO_ctrl_n_ion = EXPRO_ctrl_n_ion + 1
      enddo
   endif
 
