@@ -160,7 +160,7 @@ case "$PLOT_TYPE" in
 	python $PYROOT/plot_pwr_np.py $FTYPE $W $FIELD & ;;
 
    zf)  
-	python $PYROOT/plot_zf.py $FTYPE $FIELD & ;;
+	python $PYROOT/plot_zf.py $FTYPE $W $FIELD & ;;
 
    geo)
 	python $PYROOT/plot_geo.py $FTYPE & ;;
