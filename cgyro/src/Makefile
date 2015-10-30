@@ -30,8 +30,8 @@ OBJECTS = cgyro_globals.o \
 	  cgyro_experimental_profiles.o \
 	  cgyro_experimental_map.o \
 	  cgyro_make_profiles.o \
-	  cgyro_nl.o \
-	  cgyro_nl_fftw_split.o \
+	  cgyro_nl_direct.o \
+	  cgyro_nl_fftw.o \
           cgyro_read_input.o \
           cgyro_shear.o \
 	  cgyro_step_gk.o \

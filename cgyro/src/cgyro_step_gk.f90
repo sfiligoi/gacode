@@ -41,6 +41,9 @@ subroutine cgyro_step_gk
        (rhs(1,:,:)+2.0*rhs(2,:,:)+2.0*rhs(3,:,:)+rhs(4,:,:))  
   call cgyro_field_c
 
+  ! Filter special spectral components
+  call cgyro_filter
+  
 end subroutine cgyro_step_gk
   
 !==========================================================================
@@ -79,12 +82,12 @@ subroutine cgyro_rhs(ij)
         ir = ir_c(ic) 
         it = it_c(ic)
         hp(ic) = cap_h_c(ic,iv_loc)-z(is)/temp(is)*j0_c(ic,iv_loc)*field(ir,it,1)
-        if(n_field > 2) then
+        if (n_field > 2) then
            hp(ic) = hp(ic) - 2.0*energy(ie)*(1-xi(ix)**2)/Bmag(it) &
                 *j0perp_c(ic,iv_loc)*field(ir,it,3)
         endif
      enddo
-
+     
      do ic=1,nc
 
         ir = ir_c(ic) 
@@ -132,13 +135,30 @@ subroutine cgyro_rhs(ij)
      if (nonlinear_method == 1) then
         call cgyro_nl_direct(ij)
      else
-        if (split_method == 1) then
-           call cgyro_nl_fftw(ij)
-        else
-           call cgyro_nl_fftw_split(ij)
-        endif
+        call cgyro_nl_fftw(ij)
      endif
   endif
 
 end subroutine cgyro_rhs
 
+!==========================================================================
+
+subroutine cgyro_filter
+
+  use cgyro_globals
+
+  implicit none
+
+  integer :: ir
+  
+  if (n == 0 .and. zf_test_flag == 0) then
+     do ic=1,nc
+        ir = ir_c(ic) 
+        if (ir == 1 .or. px(ir) == 0) then
+           h_x(ic,:)     = 0.0
+           cap_h_c(ic,:) = 0.0
+        endif
+     enddo
+  endif
+
+end subroutine cgyro_filter

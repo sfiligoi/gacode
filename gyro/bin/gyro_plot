@@ -53,6 +53,7 @@ then
   echo "          Generate plot of given type."
   echo "          If this keyword is omitted, data will be listed to the screen."
   echo "           <type> = freq,"
+  echo "                    zf,"
   echo "                    gbflux,"
   echo "                    gbflux_i,"
   echo "                    gbflux_n,"
@@ -66,7 +67,7 @@ then
   echo "                    moment_zero"
   echo
   echo "          -pwidth <mult>"
-  echo "          Plot width multiplier (1.0 gives square plot)"
+  echo "          Plot width multiplier (default 1.0)"
   echo
   echo "          -title <mult>"
   echo "          Plot title"
@@ -95,11 +96,11 @@ DIFF_FLAG=0
 I_KINETIC=0
 I_FIELD="s"
 I_MOMENT=0
-WINDOW=0.8
+WINDOW=0.5
 FTYPE=screen
 DATAFILE=none
 TMAX=-1.0
-PWIDTH=1.5
+PWIDTH=1.0
 INTERACTIVE=
 TITLE=`basename $PWD`
 YMAX=-1.0
@@ -184,6 +185,9 @@ case "$PLOT_TYPE" in
 
    freq)  
 	python $INTERACTIVE  $PYROOT/freq.py $SIMDIR $WINDOW $FTYPE $DATAFILE ;;
+
+   zf)  
+	python $INTERACTIVE  $PYROOT/zf.py $SIMDIR $WINDOW $FTYPE $DATAFILE ;;
 
    gbflux)  
        python $INTERACTIVE  $PYROOT/gbflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE \

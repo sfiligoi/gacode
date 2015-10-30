@@ -59,13 +59,14 @@ module cgyro_globals
   real :: lambda_debye
   integer :: test_flag
   integer :: h_print_flag
+  real :: amp0
   real :: amp
   real :: gamma_e
   real :: gamma_p
   real :: mach
-  integer :: split_method
   real :: error_tol
   integer :: kxfilter_flag
+  real :: gamma_e_decay
   !
   ! Geometry input
   !
@@ -279,6 +280,19 @@ module cgyro_globals
   type(C_PTR) :: plan_r2c
   type(C_PTR) :: plan_c2r
   !  
+  integer :: nx,ny
+  integer :: nx0,ny0
+  !
+  real, dimension(:,:), allocatable :: ux
+  real, dimension(:,:), allocatable :: uy
+  real, dimension(:,:), allocatable :: vx
+  real, dimension(:,:), allocatable :: vy
+  real, dimension(:,:), allocatable :: uv
+  complex, dimension(:,:),allocatable :: fx
+  complex, dimension(:,:),allocatable :: fy
+  complex, dimension(:,:),allocatable :: gx
+  complex, dimension(:,:),allocatable :: gy
+  !
   ! Work arrays
   !
   complex, dimension(:,:), allocatable :: f_balloon

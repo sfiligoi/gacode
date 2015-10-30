@@ -237,6 +237,6 @@ $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM \
 # Print runfile if test case
 if [ $TEST_FLAG -eq 1 ]
 then
-   cat out.cgyro.info
+   more -100 out.cgyro.info
 fi
 #============================================================

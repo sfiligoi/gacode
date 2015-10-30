@@ -1,18 +1,23 @@
 import sys
 import numpy as np
 from gacodeplotdefs import *
-from cgyro.data import cgyrodata
+from gyro.data import GYROData
 
-ftype  = sys.argv[1]
-w      = float(sys.argv[2])
-ifield = sys.argv[3]
+sim   = GYROData(sys.argv[1])
+w     = float(sys.argv[2])
+ftype = sys.argv[3]
 
-sim = cgyrodata('./')
-sim.getbig()
+# Read freq data
+sim.read_moment_u()
 
-phic = sim.phi[0,0,0,:]
-y    = phic[:]/phic[0]
-t    = sim.t
+ntheta = sim.profile['n_theta_plot']
+nx = sim.profile['n_x']
+
+print nx,ntheta
+y = np.real(sim.moment_u[ntheta/3,nx/3,0,0,:])
+
+y = y[:]/y[0]
+t = sim.t['(c_s/a)t']
 
 #----------------------------------------------------
 # Average calculations
@@ -50,6 +55,6 @@ ax.legend()
 if ftype == 'screen':
     plt.show()
 else:
-    outfile = 'zf.'+str(ifield)+'.'+ftype
+    outfile = 'zf.'+ftype
     plt.savefig(outfile)
 

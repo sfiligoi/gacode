@@ -9,7 +9,7 @@ subroutine cgyro_step_collision
 
   integer :: is,ir,it,ie,ix
   integer :: ivp
-  complex :: efac(n_field)
+  real    :: efac(n_field)
 
   ! compute new collisional cap_H: H = h + ze/T G phi
   ! assumes have cap_h_x
@@ -70,7 +70,7 @@ subroutine cgyro_step_collision
         efac(2) = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
      endif
      if(n_field > 2) then
-        efac(3) = 2.0*energy(ie)*(1-xi(ix)**2)
+        efac(3) = 2.0*energy(ie)*(1-xi(ix)**2)*temp(is)/z(is)
      endif
 
      do ic=1,nc
@@ -85,11 +85,10 @@ subroutine cgyro_step_collision
         endif
         if(n_field > 2) then
            psi(ic,iv_loc) = psi(ic,iv_loc) &
-                + j0perp_c(ic,iv_loc)*efac(3)/Bmag(it)*temp(is)/z(is) &
-                * field(ir,it,3)
+                + j0perp_c(ic,iv_loc)*efac(3)/Bmag(it) * field(ir,it,3)
         endif
 
-        h_x(ic,iv_loc) = cap_h_c(ic,iv_loc)-z(is)*psi(ic,iv_loc)/temp(is)
+        h_x(ic,iv_loc) = cap_h_c(ic,iv_loc)-psi(ic,iv_loc)*z(is)/temp(is)
 
      enddo
   enddo

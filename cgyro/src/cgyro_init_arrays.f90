@@ -8,8 +8,6 @@ subroutine cgyro_init_arrays
 
   implicit none
 
-  real, external :: BESJ0
-  real :: bessel(0:2)
   real :: arg
   integer :: ir,it,is,ie,ix
   integer :: jr,jt,id, ccw_fac
@@ -40,14 +38,10 @@ subroutine cgyro_init_arrays
 
         ! Need this for (Phi, A_parallel) terms in GK and field equations
 
-        !j0_c(ic,iv_loc) = BESJ0(abs(arg))
         j0_c(ic,iv_loc) = bessel_j0(abs(arg))
 
         ! Needed for B_parallel in GK and field equations
-        
-        !call RJBESL(abs(arg),0.0,3,bessel,i_err)
-        !j0perp_c(ic,iv_loc) = 0.5*(bessel(0)+bessel(2))
-        
+               
         j0perp_c(ic,iv_loc) = 0.5*(j0_c(ic,iv_loc) + bessel_jn(2,abs(arg)))
         
      enddo
@@ -207,7 +201,7 @@ subroutine cgyro_init_arrays
            ir = ir_c(ic) 
            it = it_c(ic)
            sum_loc(ir,it) = sum_loc(ir,it) + 0.5*w_xi(ix)*w_e(ie)*dens(is) &
-                * temp(is)/Bmag(it) * (2.0*energy(ie)*(1-xi(ix)**2))**2 &
+                * temp(is)/Bmag(it)**2 * (2.0*energy(ie)*(1-xi(ix)**2))**2 &
                 * j0perp_c(ic,iv_loc)**2
         enddo
      enddo
@@ -219,12 +213,8 @@ subroutine cgyro_init_arrays
           NEW_COMM_1,&
           i_err)
 
-     do ir=1,n_radial
-        do it=1,n_theta
-           poisson_pb22(ir,it) = 1.0 - poisson_pb22(ir,it) &
-                * (-0.5*betae_unit) /(dens_ele*temp_ele)/Bmag(it)
-        enddo
-     enddo
+     poisson_pb22(:,:) = 1.0 - poisson_pb22(:,:) &
+          * (-0.5*betae_unit) /(dens_ele*temp_ele) 
 
      ! determinant
      sum_loc = poisson_pb11 * poisson_pb22 - poisson_pb12 * poisson_pb21
@@ -491,7 +481,7 @@ subroutine cgyro_init_arrays
 
         if (n_field > 2) then
            omega_s(3,ic,iv_loc) = carg * j0perp_c(ic,iv_loc) &
-                * 2.0*energy(ie)*(1-xi(ix)**2)/Bmag(it)
+                * 2.0*energy(ie)*(1-xi(ix)**2)/Bmag(it) * temp(is)/z(is)
         endif
 
      enddo

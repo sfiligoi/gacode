@@ -37,41 +37,41 @@
     num_ele = 0
     indx_ele = 0
     do j=1,neo_n_species_in
-       if(zfac(j) == -1) then
+       if (zfac(j) == -1) then
           num_ele  = num_ele + 1
           indx_ele = j
        endif
     enddo
     
-    if(num_ele == 0) then
+    if (num_ele == 0) then
        n_ions = neo_n_species_in
-    else if(num_ele == 1) then
+    else if (num_ele == 1) then
        n_ions = neo_n_species_in - 1
-       if(indx_ele /= neo_n_species_in) then
-          if(i_proc == 0) then
+       if (indx_ele /= neo_n_species_in) then
+          if (i_proc == 0) then
              print '(a)','ERROR: (VGEN) Electron species must be n_species'
           endif
           call MPI_finalize(i_err)
           stop
        endif
     else
-       if(i_proc == 0) then
+       if (i_proc == 0) then
           print '(a)', 'ERROR: (VGEN) Only one electron species allowed'
        endif
        call MPI_finalize(i_err)
        stop
-    end if
+    endif
     
-    if(n_ions < 1) then
-       if(i_proc == 0) then
+    if (n_ions < 1) then
+       if (i_proc == 0) then
           print '(a)', 'ERROR: (VGEN) There must be at least one ion species'
        endif
        call MPI_finalize(i_err)
        stop
     endif
     
-    if(erspecies_indx > n_ions) then
-       if(i_proc == 0) then
+    if (erspecies_indx > n_ions) then
+       if (i_proc == 0) then
           print '(a)', 'ERROR: (VGEN) Invalid species index'
        endif
        call MPI_finalize(i_err)
@@ -88,9 +88,9 @@
   EXPRO_ctrl_z(:) = 0.0
   EXPRO_ctrl_n_ion = 0
   do j=1,neo_n_species_in
-     if(zfac(j) /= -1) then
+     if (zfac(j) /= -1) then
         EXPRO_ctrl_z(j) = 1.0*zfac(j)
-        EXPRO_ctrl_n_ion = EXPRO_ctrl_n_ion + 1
+        EXPRO_ctrl_n_ion = EXPRO_ctrl_n_ion+1
      endif
   enddo
   

@@ -76,10 +76,6 @@ program tgyro_main
 
      call tgyro_multi_driver
 
-  case (4)
-
-     call tgyro_global_iteration_driver          
-
   case default
 
      call tgyro_catch_error('ERROR: (TGYRO) Bad value for tgyro_mode')

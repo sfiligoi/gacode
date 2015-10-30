@@ -1,11 +1,10 @@
 #!/bin/bash
-echo " Queue determined by value of nomp"
 
-case "$nomp" in
-  1) QUEUE="all.q" ;;
-  2) QUEUE="hybrid.q" ;;
-  *) echo "ERROR: (qsub.DROP) Invalid value for OpenMP threads" ; exit ;;
-esac
+#case "$nomp" in
+#  1) QUEUE="all.q" ;;
+#  2) QUEUE="hybrid.q" ;;
+#  *) echo "ERROR: (qsub.DROP) Invalid value for OpenMP threads" ; exit ;;
+#esac
 
 bfile=$SIMDIR/batch.src
 echo "#$ -N $LOCDIR" > $bfile
