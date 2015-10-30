@@ -18,7 +18,7 @@
       USE tglf_xgrid
       IMPLICIT NONE
       !
-      LOGICAL :: USE_MIX=.FALSE.
+      LOGICAL :: USE_MIX=.TRUE.
       INTEGER :: i,is,k,j,j1,jmax1
       REAL :: test1,testmax1
       REAL :: gammamax1,kymax1,ky0,ky1,ky2
@@ -35,19 +35,19 @@
       ! need to set alpha_zf_in = 1.0
       ! Miller geometry values igeo=1
       czf = alpha_zf_in
-      ! goes with etg_factor=1.28
+      kyetg=1.28
       cnorm=14.21
       cz1=0.48*czf
       cz2=1.0*czf
       if(USE_MIX)then
-      ! goes with etg_factor=2.2
-        cky=2.0
+        kyetg=2.1
+        cky=2.8
         sqcky=SQRT(cky)
-        cnorm=15.06
+        cnorm=15.075
         cz1=0.48*czf
-        cz2=0.92*czf  
+        cz2=0.91*czf  
       endif    
-      kyetg = etg_factor_in*ABS(zs(2))/SQRT(taus(2)*mass(2))
+      kyetg = kyetg*ABS(zs(2))/SQRT(taus(2)*mass(2))
       if(igeo.eq.0)then ! s-alpha 
        cnorm=14.63
        cz1=0.90*czf
