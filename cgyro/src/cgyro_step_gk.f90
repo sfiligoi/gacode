@@ -78,16 +78,17 @@ subroutine cgyro_rhs(ij)
      ix = ix_v(iv)
      ie = ie_v(iv)
 
-     do ic=1,nc
-        ir = ir_c(ic) 
-        it = it_c(ic)
-        hp(ic) = cap_h_c(ic,iv_loc)-z(is)/temp(is)*j0_c(ic,iv_loc)*field(ir,it,1)
-        if (n_field > 2) then
-           hp(ic) = hp(ic) - 2.0*energy(ie)*(1-xi(ix)**2)/Bmag(it) &
-                *j0perp_c(ic,iv_loc)*field(ir,it,3)
-        endif
-     enddo
-     
+     hp(:) = h_x(:,iv_loc) 
+
+     ! Address cancellation problem
+     if (n_field > 1) then
+        do ic=1,nc
+           ir = ir_c(ic) 
+           it = it_c(ic)
+           hp(ic) = hp(ic)+z(is)/temp(is)*j0_c(ic,iv_loc)*field(ir,it,2)*efac(iv_loc,2)
+        enddo
+     endif
+
      do ic=1,nc
 
         ir = ir_c(ic) 

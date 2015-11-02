@@ -262,6 +262,7 @@ module cgyro_globals
   complex, dimension(:,:), allocatable :: cap_h_v_prime
   real, dimension(:,:), allocatable :: j0_c, j0perp_c
   real, dimension(:,:), allocatable :: j0_v, j0perp_v
+  real, dimension(:,:), allocatable :: efac
   !
   ! Fields
   !

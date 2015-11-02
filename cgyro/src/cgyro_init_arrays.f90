@@ -41,9 +41,9 @@ subroutine cgyro_init_arrays
         j0_c(ic,iv_loc) = bessel_j0(abs(arg))
 
         ! Needed for B_parallel in GK and field equations
-               
+
         j0perp_c(ic,iv_loc) = 0.5*(j0_c(ic,iv_loc) + bessel_jn(2,abs(arg)))
-        
+
      enddo
   enddo
 
@@ -485,8 +485,18 @@ subroutine cgyro_init_arrays
         endif
 
      enddo
-  enddo
 
+     ! Energy factors used in definition of psi
+
+     efac(iv_loc,1) = 1.0
+     if (n_field > 1) then
+        efac(iv_loc,2) = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
+        if (n_field > 2) then
+           efac(iv_loc,3) = 2.0*energy(ie)*(1-xi(ix)**2)*temp(is)/z(is)
+        endif
+     endif
+
+  enddo
   !-------------------------------------------------------------------------
 
 end subroutine cgyro_init_arrays

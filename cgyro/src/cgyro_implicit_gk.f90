@@ -438,11 +438,10 @@ subroutine cgyro_step_implicit_gk
 
   integer :: is, ir, it, ie, ix
   integer :: id, jt, jr, jc, ifield
-  real    :: efac(n_field)
   real    :: rval,rfac(nc),rfac_b(nc)
 
   if (implicit_flag /= 1) return
-  
+
   call timer_lib_in('stream')
 
   ! Solve the gk eqn for the part of RHS depending on old H,fields
@@ -470,14 +469,6 @@ subroutine cgyro_step_implicit_gk
      ix = ix_v(iv)
      ie = ie_v(iv)
 
-     efac(1) = 1.0
-     if (n_field > 1) then
-        efac(2) = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
-        if(n_field > 2) then
-           efac(3) = 2.0*energy(ie)*(1-xi(ix)**2)*temp(is)/z(is)
-        endif
-     endif
-
      do ic=1,nc
         ir = ir_c(ic)
         it = it_c(ic)
@@ -497,13 +488,13 @@ subroutine cgyro_step_implicit_gk
         enddo
 
         gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &
-             - z(is)/temp(is)*j0_c(ic,iv_loc)*efac(1)*field(ir,it,1)
-        if(n_field > 1) then
+             - z(is)/temp(is)*j0_c(ic,iv_loc)*efac(iv_loc,1)*field(ir,it,1)
+        if (n_field > 1) then
            gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &
-                - z(is)/temp(is)*j0_c(ic,iv_loc)*efac(2)*field(ir,it,2)
-           if(n_field > 2) then
+                - z(is)/temp(is)*j0_c(ic,iv_loc)*efac(iv_loc,2)*field(ir,it,2)
+           if (n_field > 2) then
               gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &
-                   - z(is)/temp(is)*j0perp_c(ic,iv_loc)*efac(3)/Bmag(it) &
+                   - z(is)/temp(is)*j0perp_c(ic,iv_loc)*efac(iv_loc,3)/Bmag(it) &
                    *field(ir,it,3)
            endif
         endif
@@ -534,7 +525,7 @@ subroutine cgyro_step_implicit_gk
 
      rfac(:) = z(is) * 0.5*w_xi(ix)*w_e(ie)*dens(is)*j0_c(:,iv_loc)
      ifield = 1
-     
+
      do ic=1,nc
         id = idfield(ic,ifield)
         fieldvec_loc(id) = fieldvec_loc(id) + gkvec(ic,iv_loc) * rfac(ic)
@@ -603,29 +594,21 @@ subroutine cgyro_step_implicit_gk
      ix = ix_v(iv)
      ie = ie_v(iv)
 
-     efac(1) = 1.0
-     if (n_field > 1) then
-        efac(2) = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
-        if(n_field > 2) then
-           efac(3) = 2.0*energy(ie)*(1-xi(ix)**2)*temp(is)/z(is)
-        endif
-     endif
-
      do ic=1,nc
         ir = ir_c(ic)
         it = it_c(ic)
 
         gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &
-             + z(is)/temp(is)*j0_c(ic,iv_loc)*efac(1)*field(ir,it,1)
-        if(n_field > 1) then
+             +z(is)/temp(is)*j0_c(ic,iv_loc)*efac(iv_loc,1)*field(ir,it,1)
+        if (n_field > 1) then
            gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &
-             + z(is)/temp(is)*j0_c(ic,iv_loc)*efac(2)*field(ir,it,2)
-           if(n_field > 2) then
-             gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &
-             + z(is)/temp(is)*j0perp_c(ic,iv_loc)*efac(3)/Bmag(it) &
-             *field(ir,it,3)
-          endif
-       endif
+                +z(is)/temp(is)*j0_c(ic,iv_loc)*efac(iv_loc,2)*field(ir,it,2)
+           if (n_field > 2) then
+              gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &
+                   +z(is)/temp(is)*j0perp_c(ic,iv_loc)*efac(iv_loc,3)/Bmag(it) &
+                   *field(ir,it,3)
+           endif
+        endif
 
      enddo
 
@@ -652,35 +635,25 @@ subroutine cgyro_step_implicit_gk
      ix = ix_v(iv)
      ie = ie_v(iv)
 
-     efac(1) = 1.0
-     if (n_field > 1) then
-        efac(2) = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
-        if(n_field > 2) then
-           efac(3) = 2.0*energy(ie)*(1-xi(ix)**2)*temp(is)/z(is)
-        endif
-     endif
-
      do ic=1,nc
 
         ir = ir_c(ic)
         it = it_c(ic)
 
-        psi(ic,iv_loc) = j0_c(ic,iv_loc)*efac(1)*field(ir,it,1)
-        if(n_field > 1) then
-           psi(ic,iv_loc) = psi(ic,iv_loc) &
-                + j0_c(ic,iv_loc)*efac(2)*field(ir,it,2)
-           
-           if(n_field > 2) then
+        psi(ic,iv_loc) = j0_c(ic,iv_loc)*efac(iv_loc,1)*field(ir,it,1)
+        if (n_field > 1) then
+           psi(ic,iv_loc) = psi(ic,iv_loc)+j0_c(ic,iv_loc)*efac(iv_loc,2)*field(ir,it,2)
+           if (n_field > 2) then
               psi(ic,iv_loc) = psi(ic,iv_loc) &
-                   + j0perp_c(ic,iv_loc)*efac(3)/Bmag(it) * field(ir,it,3)
+                   +j0perp_c(ic,iv_loc)*efac(iv_loc,3)/Bmag(it)*field(ir,it,3)
            endif
         endif
-        
-        h_x(ic,iv_loc) = cap_h_c(ic,iv_loc) - z(is)*psi(ic,iv_loc)/temp(is)
-        
+
+        h_x(ic,iv_loc) = cap_h_c(ic,iv_loc)-z(is)*psi(ic,iv_loc)/temp(is)
+
      enddo
   enddo
-  
+
   call timer_lib_out('stream')
-  
+
 end subroutine cgyro_step_implicit_gk
