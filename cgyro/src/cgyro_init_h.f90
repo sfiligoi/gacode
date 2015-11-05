@@ -34,11 +34,13 @@ subroutine cgyro_init_h
 
      call cgyro_info('Restart data found.')
      call cgyro_read_restart
-
+     gtime = 0.0
+     
   else
 
      i_current = 0
      t_current = 0.0
+     gtime = 0.0
 
      !-------------------------------------------------------------------------
      ! Generate analytic initial conditions
@@ -68,12 +70,8 @@ subroutine cgyro_init_h
                     h_x(ic,iv_loc) = 1e-6
                  endif
               else
-                 ! CAUTION: Need f(p) = conjg[ f(-p) ] for n=0
                  arg = abs(px(ir))/real(n_radial)
-                 h_x(ic,iv_loc) = amp*rho*exp(-arg)
-                 if (ir == 1) h_x(ic,iv_loc) = (0.0,0.0)
-                 ! Safer to zero out completely
-                 h_x(ic,iv_loc) = 0.0
+                 h_x(ic,iv_loc) = amp0*rho*exp(-arg)
               endif
 
            else 
@@ -96,6 +94,7 @@ subroutine cgyro_init_h
 
   endif
 
+  call cgyro_filter
   call cgyro_field_c
 
   ! Initialize time-history of fields (-3,-2,-1) to initial field.

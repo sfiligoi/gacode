@@ -4,8 +4,10 @@ subroutine tgyro_gyro_map
   use gyro_interface
 
   implicit none
-  integer :: i_ion
-  real :: gamma_eb0,gamma_p0,u000
+
+  real :: gamma_eb0
+  real :: gamma_p0
+  real :: u000
 
   if (loc_n_ion > 5) then
      call tgyro_catch_error('ERROR: (TGYRO) n_ion > 5 not supported in GYRO interface.')

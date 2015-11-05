@@ -13,7 +13,6 @@ subroutine tgyro_multi_driver
 
   implicit none
 
-  integer :: i
 
   gyro_restart_method = 1
 

@@ -79,6 +79,9 @@ then
    echo "             -e <workdir>"
    echo "             Working directory (default is present directory)"
    echo 
+   echo "             -describe"
+   echo "             Print structure of current input.profiles to screen."
+   echo 
    echo "             -V"
    echo "             Verbose (for debugging; use this if you get an error)."
    echo 
@@ -327,6 +330,7 @@ fi
 SIMROOT=$PWD
 
 CONFIG=.config
+DESCRIBE_FLAG=0
 
 FILE_FLAG=0
 G_FLAG=0
@@ -404,6 +408,8 @@ while [ $# -gt 0 ] ; do
   -e) shift ; LOCDIR=$1 ;;
 
   -i) shift ; FILE_FLAG=1 ; FILE="$1" ;;
+
+  -describe) shift ; DESCRIBE_FLAG=1 ;;
 
   -cer) shift ; 
         echo "INFO: (profiles_gen) Will merge data from $CER_FILE" ; CER_FILE="$1" ;;
@@ -488,6 +494,12 @@ SIMDIR=$SIMROOT/$LOCDIR
 
 cd $SIMDIR
 #=============================================================
+
+if [ $DESCRIBE_FLAG -eq 1 ]
+then
+    python $GACODE_ROOT/python/profiles_gen/profileplot_describe.py
+    exit 0
+fi
 
 #=============================================================
 # Manage CREATE MODE
@@ -690,17 +702,17 @@ then
 
    rm -rf vgen ; mkdir vgen ; cd vgen
 
-   # Check for input.vgen file
+   # Check for input.neo file
 
-   if [ -f $VGEN_DIR/input.vgen.$VGEN_IN ]
+   if [ -f $VGEN_DIR/input.neo.$VGEN_IN ]
    then
-     cp $VGEN_DIR/input.vgen.$VGEN_IN input.neo
+     cp $VGEN_DIR/input.neo.$VGEN_IN input.neo
    else 
-      if [ -f ../input.vgen ]
+      if [ -f ../input.neo ]
       then
-         cp ../input.vgen input.neo
+         cp ../input.neo input.neo
       else
-         echo "ERROR: (profiles_gen) Specify ion string with -vgen_in, or create input.vgen"
+         echo "ERROR: (profiles_gen) Specify ion string with -in, or create input.neo"
          exit 1
       fi
    fi

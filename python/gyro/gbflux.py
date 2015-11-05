@@ -6,7 +6,7 @@ from gyro.data import GYROData
 sim       = GYROData(sys.argv[1])
 field     = sys.argv[2]
 i_moment  = int(sys.argv[3])
-window    = float(sys.argv[4])
+w         = float(sys.argv[4])
 plotfile  = sys.argv[5]
 datafile  = sys.argv[6]
 width     = float(sys.argv[7])
@@ -37,27 +37,29 @@ else:
 mtag = sim.tagmom[i_moment]
 
 #======================================
-fig = plt.figure(figsize=(8*width,8))
+fig = plt.figure(figsize=(12*width,6))
+fig.subplots_adjust(left=0.08,right=0.95,top=0.92,bottom=0.12)
 ax = fig.add_subplot(111)
 ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
 ax.set_xlabel(r'$(c_s/a) t$',fontsize=GFONTSIZE)
 ax.set_ylabel(r'$'+mtag+' \;('+ftag+')$',color='k',fontsize=GFONTSIZE)
-ax.set_title(r''+title)
 #=====================================
+
+color = ['k','m','b','c','g','r']
 
 # Determine tmin
 for i in range(len(t)):
-    if t[i] < (1.0-window)*t[len(t)-1]:
+    if t[i] < (1.0-w)*t[len(t)-1]:
         imin = i
 
-color = ['k','m','b','c','g','r']
+ax.set_title(r'$'+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'$')
 
 # Loop over species
 if datafile == 'none':
     # Plot data to screen or image file.
     for i in range(n_kinetic):
-        ave   = average(flux0[i,i_moment,:],t,window)
+        ave   = average(flux0[i,i_moment,:],t,w)
         stag  = sim.tagspec[i]
         label = stag+': '+str(round(ave,3))
         y     = ave*np.ones(len(t))

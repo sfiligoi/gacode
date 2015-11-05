@@ -29,18 +29,14 @@ print
 b = np.zeros([sim.n_species])
 
 for ispec in range(sim.n_species):
-    s = 0.0
-    for p in range(sim.n_n):
-        s = s+average(sim.flux_n[ispec,p,:],sim.t,w)
-    b[ispec] = s
+    y = np.sum(sim.flux_n,axis=(0,2))
+    b[ispec] = average(y[ispec,:],sim.t,w)
 
 print 'GAMMA [GB]  ',b
     
 for ispec in range(sim.n_species):
-    s = 0.0
-    for p in range(sim.n_n):
-        s = s+average(sim.flux_e[ispec,p,:],sim.t,w)
-    b[ispec] = s
+    y = np.sum(sim.flux_e,axis=(0,2))
+    b[ispec] = average(y[ispec,:],sim.t,w)
 
 print 'Q     [GB]  ',b
 

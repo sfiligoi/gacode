@@ -6,6 +6,7 @@ from cgyro.data import cgyrodata
 ftype = sys.argv[1]
 w = float(sys.argv[2])
 moment = sys.argv[3]
+ymax = sys.argv[4]
 
 sim = cgyrodata('./')
 
@@ -22,14 +23,13 @@ ax.grid(which="major",ls=":")
 ax.set_xlabel(r'$(c_s/a)\, t$')
 #======================================
 
-color = ['m','k','b','c']
+color = ['k','m','b','c','g','r']
 
 if moment == 'n':
-    imoment = 0 
+    im
     mtag = '\Gamma'
     y = np.sum(sim.flux_n,axis=(0,2))
 elif moment == 'e':
-    imoment = 1
     mtag = 'Q'
     y = np.sum(sim.flux_e,axis=(0,2))
 elif moment == 'm':
@@ -47,18 +47,21 @@ for i in range(len(t)):
     if t[i] < (1.0-w)*t[len(t)-1]:
         imin = i
 
-ax.set_title(r'$'+str(sim.t[imin])+' < (c_s/a) t < '+str(sim.t[-1])+'$')
+ax.set_title(r'$'+str(t[imin])+' < (c_s/a) t < '+str(t[-1])+'$')
 
 for ispec in range(ns):
     ave = average(y[ispec,:],t,w)
     y_ave = ave*np.ones(len(t))
-    label = r'$'+mtag+'_'+str(ispec)+': '+str(round(ave,3))+'$'
+    label = r'$'+mtag+'_'+str(ispec)+'/'+mtag+'_\mathrm{GB}: '+str(round(ave,3))+'$'
     # Average
     ax.plot(t[imin:],y_ave[imin:],'--',color=color[ispec])
     # Time trace
     ax.plot(sim.t,y[ispec,:],label=label,color=color[ispec])
 
 ax.legend(loc=2)
+
+if ymax != 'auto':
+    ax.set_ylim([0,float(ymax)])
 
 if ftype == 'screen':
    plt.show()
