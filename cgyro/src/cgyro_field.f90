@@ -144,8 +144,7 @@ subroutine cgyro_field_c
 
   integer :: is, ie, ix, ir, it
   complex :: fac
-  real    :: efac(n_field)
-
+ 
   call timer_lib_in('field_h')
 
   field_loc(:,:,:) = (0.0,0.0)
@@ -231,7 +230,7 @@ subroutine cgyro_field_c
 
         else
 
-           if(n_field == 3) then
+           if (n_field == 3) then
               do it=1,n_theta
                  fac = field(ir,it,1)
 
@@ -240,7 +239,6 @@ subroutine cgyro_field_c
                  
                  field(ir,it,3) =  -poisson_pb21(ir,it)*fac &
                       + poisson_pb11(ir,it)*field(ir,it,3)
-
               enddo
            
            else
@@ -282,28 +280,17 @@ subroutine cgyro_field_c
      ix = ix_v(iv)
      ie = ie_v(iv)
 
-     efac(1) = 1.0
-     if (n_field > 1) then
-        efac(2) = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
-        if(n_field > 2) then
-           efac(3) = 2.0*energy(ie)*(1-xi(ix)**2)*temp(is)/z(is)
-        endif
-     endif
-
      do ic=1,nc
 
         ir = ir_c(ic)
         it = it_c(ic)
 
-        
-        psi(ic,iv_loc) = j0_c(ic,iv_loc)*efac(1)*field(ir,it,1)
-        if(n_field > 1) then
-           psi(ic,iv_loc) = psi(ic,iv_loc) &
-                + j0_c(ic,iv_loc)*efac(2)*field(ir,it,2)
-        
-           if(n_field > 2) then
+        psi(ic,iv_loc) = j0_c(ic,iv_loc)*efac(iv_loc,1)*field(ir,it,1)
+        if (n_field > 1) then
+           psi(ic,iv_loc) = psi(ic,iv_loc)+j0_c(ic,iv_loc)*efac(iv_loc,2)*field(ir,it,2)
+           if (n_field > 2) then
               psi(ic,iv_loc) = psi(ic,iv_loc) &
-                   + j0perp_c(ic,iv_loc)*efac(3)/Bmag(it) * field(ir,it,3)
+                   + j0perp_c(ic,iv_loc)*efac(iv_loc,3)/Bmag(it) * field(ir,it,3)
            endif
         endif
 
