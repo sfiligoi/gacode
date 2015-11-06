@@ -136,6 +136,13 @@ subroutine cgyro_init_collision
            enddo
         enddo
      enddo
+     ! asymptotic limits for electrons
+     do is=1,n_species
+        if(is == is_ele) then
+           bessel(is,:,:,:,0) = 1.0
+           bessel(is,:,:,:,1) = 0.0
+        endif
+     enddo
   endif
 
   allocate(ctest(n_species,n_species,n_xi,n_xi,n_energy,n_energy))
@@ -518,9 +525,10 @@ subroutine cgyro_init_collision
                       * xi_deriv_mat(ix,jx) 
               endif
 
-              ! Finite-kperp test particle corrections
+              ! Finite-kperp test particle corrections -- ion w/ ions only
               if(collision_model == 4 .and. collision_kperp == 1) then
-                 if(is == js .and. jx == ix .and. je == ie) then
+                 if(is == js .and. jx == ix .and. je == ie .and. &
+                      is /= is_ele) then
                     do ks=1,n_species
                        cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                             - (0.5*delta_t) &
