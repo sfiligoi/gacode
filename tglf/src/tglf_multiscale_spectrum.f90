@@ -149,7 +149,7 @@
           gamma_ave = gamma_ave + (gamma(i)-ky1*delta)*mix1 + delta*mix2
         enddo  
         gamma_mix(j) = gamma_ave/mixnorm  
-        write(*,*)j,ky0,gamma(j),gamma_mix(j)
+!        write(*,*)j,ky0,gamma(j),gamma_mix(j)
       enddo  
     endif      
 ! intensity model
