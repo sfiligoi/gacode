@@ -153,6 +153,35 @@ int set_harvest_payload_swt__(char *harvest_sendline, char *what, int *data){
   return 0;
 }
 
+//payload int array
+int set_harvest_payload_int_array(char *harvest_sendline, char *what, int *data, int len){
+  int i;
+  char datastr[65507];
+  sprintf(datastr,"[");
+  for(i = 0; i < len-1; i++){
+    sprintf(datastr,"%s%d,",datastr,*(data+i));
+  }
+  sprintf(datastr,"%s%d]",datastr,*(data+len-1));
+  sprintf(harvest_sendline,"%s|a@%s=%s",harvest_sendline,what,datastr);
+  if (harvest_verbose){
+    print_storage(harvest_sendline);
+    printf("a@%s=%s\n",what,datastr);
+  }
+  return 0;
+}
+
+int set_harvest_payload_int_array_(char *harvest_sendline, char *what, int *data, int *len){
+  int len_ = *len;
+  set_harvest_payload_int_array(harvest_sendline,what,data,len_);
+  return 0;
+}
+
+int set_harvest_payload_int_array__(char *harvest_sendline, char *what, int *data, int *len){
+  int len_ = *len;
+  set_harvest_payload_int_array(harvest_sendline,what,data,len_);
+  return 0;
+}
+
 ////payload float
 int set_harvest_payload_flt(char *harvest_sendline, char *what, float data){
   sprintf(harvest_sendline,"%s|f@%s=%g",harvest_sendline,what,data);
@@ -313,6 +342,24 @@ int set_harvest_tag_(char *tag){
 int set_harvest_tag__(char *tag){
   set_harvest_tag(tag);
   return 0;
+}
+
+int get_harvest_tag(char *tag, int len){
+  //int max_i = len < strlen(tag) ? len : strlen(tag);
+  //for(int i=0;i<max_i;i++){
+  //  tag[i] = harvest_tag[i];
+  //}
+  //tag[max_i] = NULL;
+  sprintf(tag,"%s",harvest_tag);
+  return 0;
+}
+
+int get_harvest_tag_(char *tag, int *len){
+  return get_harvest_tag(tag, *len);
+}
+
+int get_harvest_tag__(char *tag, int *len){
+  return get_harvest_tag(tag, *len);
 }
 
 //port

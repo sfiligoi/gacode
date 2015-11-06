@@ -57,7 +57,7 @@ all: $(OBJECTS) $(EXTRA_LIBS)
 	$(FC) $(FFLAGS) -o $(EXEC) $(OBJECTS) $(EXTRA_LIBS) $(LMATH)
 
 .f90.o :
-	$(FC) $(FMATH) $(FFLAGS) -c $<
+	$(FC) $(FMATH) $(FFLAGS) -I$(GACODE_ROOT)/shared/harvest_client/ -c $<
 
 clean:
 	rm -f $(EXEC)
