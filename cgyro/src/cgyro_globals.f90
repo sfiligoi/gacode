@@ -20,6 +20,7 @@ module cgyro_globals
   integer :: n_toroidal
   integer :: n_field
   integer :: e_max
+  integer :: e_method
   real    :: delta_t
   real    :: max_time
   integer :: print_step
