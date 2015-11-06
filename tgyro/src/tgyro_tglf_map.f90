@@ -13,13 +13,19 @@ subroutine tgyro_tglf_map
   implicit none
 
   ! Local variables
-  integer :: i_ion
+  integer :: i_ion, harvest_err
   real :: q_abs
   real :: q_prime
   real :: p_prime
   real :: gamma_eb0
   real :: gamma_p0
 
+  include 'harvest_lib.inc'
+  
+  CHARACTER NUL
+  PARAMETER(NUL = CHAR(0))
+  
+  
   q_abs = abs(q(i_r))
 
   ! Initialize TGLF
@@ -304,5 +310,31 @@ subroutine tgyro_tglf_map
   endif
 
   tglf_quiet_flag_in = .true.
+  
+  ! Harvest targets and gyro-bohm normalizations
+  
+  if ( i_tran ==0 ) then
+    ! Initialization
+    tglf_harvest_extra_in = NUL
+    harvest_err=set_harvest_verbose(0)
 
+    ! Target fluxes
+    harvest_err=set_harvest_payload_dbl(tglf_harvest_extra_in,'tgyro_eflux_e_target'//NUL,eflux_e_target(i_r))
+    harvest_err=set_harvest_payload_dbl(tglf_harvest_extra_in,'tgyro_eflux_i_target'//NUL,eflux_i_target(i_r))
+    harvest_err=set_harvest_payload_dbl(tglf_harvest_extra_in,'tgyro_pflux_e_target'//NUL,pflux_e_target(i_r))
+    harvest_err=set_harvest_payload_dbl(tglf_harvest_extra_in,'tgyro_mflux_target'//NUL,mflux_target(i_r))
+
+    ! Neoclassical fluxes
+    harvest_err=set_harvest_payload_dbl(tglf_harvest_extra_in,'tgyro_sum_eflux_i_neo'//NUL,&
+    & sum(eflux_i_neo(therm_vec(:),i_r)))
+    harvest_err=set_harvest_payload_dbl(tglf_harvest_extra_in,'tgyro_pflux_e_neo'//NUL,pflux_e_neo(i_r))
+
+    ! Gyrobohm normalizations
+    harvest_err=set_harvest_payload_dbl(tglf_harvest_extra_in,'tgyro_q_gb'//NUL,q_gb(i_r))
+    harvest_err=set_harvest_payload_dbl(tglf_harvest_extra_in,'tgyro_pi_gb'//NUL,pi_gb(i_r))
+    harvest_err=set_harvest_payload_dbl(tglf_harvest_extra_in,'tgyro_gamma_gb'//NUL,gamma_gb(i_r))
+
+    ! Indication of thermal ions
+    harvest_err=set_harvest_payload_int_array(tglf_harvest_extra_in,'tgyro_therm_vec'//NUL,therm_vec(:),size(therm_vec))
+  endif
 end subroutine tgyro_tglf_map
