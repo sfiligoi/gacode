@@ -21,6 +21,8 @@ subroutine cgyro_init_manager
 
   implicit none
 
+  integer :: ie
+  
   include 'fftw3.f03'
 
   !----------------------------------------------------
@@ -38,7 +40,7 @@ subroutine cgyro_init_manager
   allocate(e_deriv1_mat(n_energy,n_energy))
   allocate(e_deriv2_mat(n_energy,n_energy))
   ! Construct energy nodes and weights
-  call pseudo_maxwell(n_energy,e_max,energy,w_e,e_deriv1_mat,e_deriv2_mat)
+  call pseudo_maxwell_new(n_energy,e_max,energy,w_e,e_deriv1_mat,e_deriv2_mat,trim(path)//'out.cgyro.egrid')
 
   allocate(xi(n_xi))
   allocate(w_xi(n_xi))

@@ -111,11 +111,13 @@ end subroutine pseudo_legendre
 !                0
 !----------------------------------------------------
 
-subroutine pseudo_maxwell_new(n,emax,e,w,d1,d2)
+subroutine pseudo_maxwell_new(n,emax,e,w,d1,d2,datafile)
 
   use math_constants
 
   implicit none
+
+  character (len=*), intent(in) :: datafile
 
   integer, intent(in) :: n
   integer, intent(in) :: emax
@@ -126,15 +128,17 @@ subroutine pseudo_maxwell_new(n,emax,e,w,d1,d2)
   real, intent(out) :: d1(n,n)
   real, intent(out) :: d2(n,n)
 
+  open(unit=1,file=trim(datafile),status='old')
   do i=1,n
-     !read(1,*) e(i),w(i)
+     read(1,*) e(i),w(i)
   enddo
   do i=1,n
-     !read(1,*) d1(i,:)
+     read(1,*) d1(i,:)
   enddo
   do i=1,n
-    !read(1,*) d2(i,:)
+     read(1,*) d2(i,:)
   enddo
+  close(1)
 
 end subroutine pseudo_maxwell_new
 
