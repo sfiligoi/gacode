@@ -12,6 +12,7 @@
 
     INTEGER :: ierr, i, j, nky, get_nky_out
     CHARACTER(LEN=65507) :: harvest_sendline
+    CHARACTER(LEN=255) :: harvest_tag
     CHARACTER(LEN=2) :: NUM
     CHARACTER NUL
     PARAMETER(NUL = CHAR(0))
@@ -246,6 +247,11 @@
       ENDDO
       ierr=set_harvest_payload_dbl_array(harvest_sendline,'OUT_EIGENVALUE_SPECTRUM_OMEGA'//NUM,spectrum,nky)
    ENDDO
+   harvest_tag = NUL
+   ierr = get_harvest_tag(harvest_tag,len(harvest_tag))
+   if ( len_trim(harvest_tag) > 1) then
+      harvest_sendline = TRIM(harvest_sendline) // TRIM(tglf_harvest_extra_in) // NUL
+   endif
    ierr=harvest_send(harvest_sendline)
    
    DEALLOCATE(spectrum)
