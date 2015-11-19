@@ -25,6 +25,12 @@ subroutine cgyro_init_manager
 
   include 'fftw3.f03'
 
+  if (hiprec_flag == 1) then
+     fmtstr    ='(es13.6)'
+     fmtstr2   ='(2(es13.6,1x))'
+     fmtstrn   ='(10(es13.6,1x))'
+  endif
+
   !----------------------------------------------------
   ! Initialize startup timers
   !----------------------------------------------------
@@ -41,7 +47,7 @@ subroutine cgyro_init_manager
   allocate(e_deriv2_mat(n_energy,n_energy))
   ! Construct energy nodes and weights
   if (e_method == 1) then
-     call pseudo_maxwell(n_energy,e_max,energy,w_e,e_deriv1_mat,e_deriv2_mat)
+     call pseudo_maxwell(n_energy,nint(e_max),energy,w_e,e_deriv1_mat,e_deriv2_mat)
   else
      call pseudo_maxwell_new(n_energy,e_max,energy,w_e,e_deriv1_mat,e_deriv2_mat,trim(path)//'out.cgyro.egrid')
   endif

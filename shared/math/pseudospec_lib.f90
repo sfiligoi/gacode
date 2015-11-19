@@ -120,7 +120,7 @@ subroutine pseudo_maxwell_new(n,emax,e,w,d1,d2,datafile)
   character (len=*), intent(in) :: datafile
 
   integer, intent(in) :: n
-  integer, intent(in) :: emax
+  real, intent(in) :: emax
   integer :: i
 
   real, intent(out) :: e(n)

@@ -18,7 +18,7 @@ subroutine cgyro_read_input
   call readbc_int(n_radial)
   call readbc_int(n_toroidal)
   call readbc_int(n_field)
-  call readbc_int(e_max)
+  call readbc_real(e_max)
   call readbc_int(e_method)
   call readbc_real(delta_t)
   call readbc_real(max_time)
@@ -64,6 +64,7 @@ subroutine cgyro_read_input
   call readbc_real(error_tol)
   call readbc_int(kxfilter_flag)
   call readbc_real(gamma_e_decay)
+  call readbc_int(hiprec_flag)
 
   call readbc_real(rmin)
   call readbc_real(rmaj)

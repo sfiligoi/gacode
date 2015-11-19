@@ -19,7 +19,7 @@ module cgyro_globals
   integer :: n_radial
   integer :: n_toroidal
   integer :: n_field
-  integer :: e_max
+  real    :: e_max
   integer :: e_method
   real    :: delta_t
   real    :: max_time
@@ -68,6 +68,7 @@ module cgyro_globals
   real :: error_tol
   integer :: kxfilter_flag
   real :: gamma_e_decay
+  integer :: hiprec_flag
   !
   ! Geometry input
   !
@@ -188,7 +189,7 @@ module cgyro_globals
   integer :: restart_flag
   integer :: n_theta_plot=1
   !
-  ! Standard precision for IO 
+  ! Standard precision for IO (there are optionally reset to higher precision later)
   character(len=8)  :: fmtstr    ='(es11.4)'
   character(len=14) :: fmtstr2   ='(2(es11.4,1x))'
   character(len=15) :: fmtstrn   ='(10(es11.4,1x))'
