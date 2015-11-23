@@ -155,7 +155,7 @@ then
    cd .. ; SIMROOT=$PWD
 fi
 SIMDIR=$SIMROOT/$LOCDIR
-#cd $SIMDIR
+cd $SIMDIR
 
 PYROOT=$GACODE_ROOT/python/gyro
 
@@ -167,9 +167,9 @@ then
 
    if [ $DIFF_FLAG -eq 1 ]
    then
-      python $INTERACTIVE  $PYROOT/ldiff.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW
+      python $PYROOT/ldiff.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW
    else
-      python $INTERACTIVE  $PYROOT/lflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW
+      python $PYROOT/lflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW
    fi
    exit 0
 

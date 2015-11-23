@@ -382,7 +382,7 @@ subroutine cgyro_init_arrays
 
   end select
 
-  if(ipccw*btccw < 0) then
+  if (ipccw*btccw < 0) then
      ccw_fac = -1
   else
      ccw_fac = 1
@@ -457,12 +457,6 @@ subroutine cgyro_init_arrays
              (1.0 + xi(ix)**2)*(2.0*pi*i_c*px(ir)/length) 
 
         ! radial upwind
-        !up_radial_n=n_radial
-        !omega_h(ic,iv_loc) = &
-        !     -abs(omega_rdrift(it,is))*energy(ie)*(1.0 + xi(ix)**2)*up_radial &
-        !     *(2.0*px(ir)/(1.0*n_radial))**(up_radial_n-1.0) &
-        !     *(2.0*pi*px(ir)/length)
-
         omega_h(ic,iv_loc) = &
              -abs(omega_rdrift(it,is))*energy(ie)*(1.0 + xi(ix)**2) &
              *up_radial *(n_radial/length) * spec_uderiv(ir)

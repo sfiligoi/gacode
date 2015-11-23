@@ -133,6 +133,7 @@ cd $SIMDIR
 PYROOT=$GACODE_ROOT/python/cgyro
 
 #==============================================================================
+
 case "$PLOT_TYPE" in
 
    ball)  
@@ -166,7 +167,7 @@ case "$PLOT_TYPE" in
 	python $PYROOT/plot_geo.py $FTYPE & ;;
 
    text)
-   	python $PYROOT/text.py $W & ;;
+   	python $PYROOT/text.py $W $FTYPE & ;;
 
    note)
    	python $PYROOT/plot_notebook.py $W $FTYPE $SPECIES & ;;
