@@ -201,14 +201,18 @@ then
     exit 1 
 fi
 #==========================================================
-IN=`grep E_MAX  input.cgyro.gen`
+IN=`grep E_MAX input.cgyro.gen`
 emax=(${IN// / })
-IN=`grep N_ENERGY  input.cgyro.gen`
+IN=`grep N_ENERGY input.cgyro.gen`
 ne=(${IN// / })
+IN=`grep E_METHOD input.cgyro.gen`
+emethod=(${IN// / })
 
-python $GACODE_ROOT/shared/math/gauss_exp_quad.py $emax $ne
-echo "INFO (cgyro) Generated energy mesh data"
-
+if [ $emethod -eq 2 ]
+then
+   python $GACODE_ROOT/shared/math/gauss_exp_quad.py $emax $ne
+   echo "INFO (cgyro) Generated energy mesh data"
+fi
 #============================================================
 # Now remove test flag if it was added
 if [ $TEST_FLAG -eq 1 ]

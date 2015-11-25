@@ -1,15 +1,13 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
-include ../install/make.ext.${GACODE_PLATFORM}
-
 ifeq ($(OPT),debug)
-   FFLAGS=${FDEBUG} ${GLF23FLAGS}
+   FFLAGS=${FDEBUG}
 else
-   FFLAGS=${FOPT} ${GLF23FLAGS}
+   FFLAGS=${FOPT}
 endif
 
-   EXEC=glf23
-   SRC=glf23
+EXEC=glf23
+SRC=glf23
 
 LLIB=glf23_lib
 
