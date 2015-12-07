@@ -10,12 +10,12 @@ git checkout master
 #git pull
 git checkout stable
 git pull
-git merge master
+#git merge master
 python shared/bin/gacode_regression.py -clean
 git tag -a $1
 git push
 git push --tags
 git checkout master
 git pull
-git merge stable
-git push
+#git merge stable
+#git push
