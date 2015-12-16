@@ -7,12 +7,12 @@ IDENTITY="banach.gat.com 12 core workstation"
 CORES_PER_NODE=12
 NUMAS_PER_NODE=1
 
-FFTWDIR=/usr/local
+FFTWDIR=/usr/lib/x86_64-linux-gnu
 ROOT=/home/SOFTWARE
 
 # Compilers
 
-FC	= mpif90 -std=f2008 -I $(GACODE_ROOT)/modules -I /usr/local/include
+FC	= mpif90 -std=f2008 -I $(GACODE_ROOT)/modules -I /usr/include
 F77	= mpif77 -I $(GACODE_ROOT)/modules
 
 FOMP    = -fopenmp
@@ -22,13 +22,12 @@ FDEBUG	= -Wall -fcheck=all -O -W -finit-real=nan -fbounds-check -ffpe-trap=inval
 
 # System math libraries
 
-LMATH = $(ROOT)/scalapack-2.0.2/libscalapack.a \
-        $(ROOT)/OpenBLAS/libopenblas.a \
-        $(FFTWDIR)/lib/libfftw3_omp.a $(FFTWDIR)/lib/libfftw3.a 
+LMATH = $(ROOT)/OpenBLAS/libopenblas.a \
+        $(FFTWDIR)/libfftw3_omp.a $(FFTWDIR)/libfftw3.a 
         
 # NetCDF:
-NETCDF=-L/usr/local/lib -lnetcdff -lnetcdf -lm
-NETCDF_INC=/usr/local/include
+NETCDF=-L/usr/lib -lnetcdff -lnetcdf
+NETCDF_INC=/usr/include
 
 # Archive 
 
