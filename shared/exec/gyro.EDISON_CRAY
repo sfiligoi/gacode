@@ -25,5 +25,5 @@ cd $simdir
 
 export OMP_NUM_THREADS=$nomp
 export KMP_AFFINITY=compact
-echo "> aprun -n $nmpi -N $mpinode -d $nomp -S $mpinuma -ss $exec"
-aprun -n $nmpi -N $mpinode -d $nomp -S $mpinuma -ss $exec
+echo "> srun -n $nmpi -c $nomp $exec"
+srun -n $nmpi -c $nomp $exec
