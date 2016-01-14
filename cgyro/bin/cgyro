@@ -217,7 +217,9 @@ fi
 # Now remove test flag if it was added
 if [ $TEST_FLAG -eq 1 ]
 then
-   sed -i '$d' input.cgyro 
+   # Nondestructive sed required for MacOS
+   sed -i.0 '$d' input.cgyro 
+   rm input.cgyro.0
 fi
 #============================================================
 
