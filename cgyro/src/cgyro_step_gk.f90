@@ -63,11 +63,13 @@ subroutine cgyro_rhs(ij)
   complex :: rhs_stream
   complex, dimension(nc) :: hp
 
-  call timer_lib_in('stream')
 
-  rhs(ij,:,:) = (0.0,0.0)
-
+  call timer_lib_in('str_comm')
   if (upconserve_flag == 1) call cgyro_hsym
+  call timer_lib_out('str_comm')
+
+  call timer_lib_in('str')
+  rhs(ij,:,:) = (0.0,0.0)
 
   iv_loc = 0
   do iv=nv1,nv2
@@ -128,7 +130,7 @@ subroutine cgyro_rhs(ij)
 
   enddo
 
-  call timer_lib_out('stream')
+  call timer_lib_out('str')
 
   ! Nonlinear evaluation [f,g]
 

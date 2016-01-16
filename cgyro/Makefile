@@ -2,8 +2,6 @@
 # Toplevel makefile for cgyro
 #----------------------------
 
-
-
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
 export EXTRA_LIBS = \
@@ -12,15 +10,8 @@ export EXTRA_LIBS = \
         ${GACODE_ROOT}/shared/math/math_lib.a \
         ${GACODE_ROOT}/shared/UMFPACK/UMFPACK_lib.a
 
-ifeq ($(GACODE_PLATFORM),VENUS)
-all:
-else
 all:
 	cd ${GACODE_ROOT}/shared ; make
-	cd src ; make
-endif
-
-fast:
 	cd src ; make
 
 clean:

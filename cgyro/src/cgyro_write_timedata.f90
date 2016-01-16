@@ -660,7 +660,8 @@ subroutine write_timers(datafile)
   if (io_control == 1 .or. io_control == 3) then
      ! Timer initialization (starts at timer 3)
      call timer_lib_init('field_h')
-     call timer_lib_init('stream')
+     call timer_lib_init('str')
+     call timer_lib_init('str_comm')
      call timer_lib_init('nl')
      call timer_lib_init('nl_comm')
      call timer_lib_init('field_H')
@@ -683,7 +684,7 @@ subroutine write_timers(datafile)
         open(unit=io,file=datafile,status='replace')
         write(io,'(a)') 'Setup time'
         write(io,'(1x,9(a11,1x))') timer_cpu_tag(1:2)
-        write(io,'(9(1pe10.3,2x))') timer_lib_time('stream_init'),timer_lib_time('coll_init')
+        write(io,'(9(1pe10.3,2x))') timer_lib_time('str_init'),timer_lib_time('coll_init')
         write(io,'(a)') 'Run time'
         write(io,'(1x,9(a10,1x))') timer_cpu_tag(3:11)
         close(io)
@@ -695,9 +696,10 @@ subroutine write_timers(datafile)
      ! Print timers
      if (i_proc == 0) then
         open(unit=io,file=datafile,status='old',position='append')
-        write(io,'(9(1pe10.3,1x))') &
+        write(io,'(10(1pe10.3,1x))') &
              timer_lib_time('field_h'),&
-             timer_lib_time('stream'),& 
+             timer_lib_time('str'),& 
+             timer_lib_time('str_comm'),& 
              timer_lib_time('nl'),& 
              timer_lib_time('nl_comm'),&
              timer_lib_time('field_H'),&

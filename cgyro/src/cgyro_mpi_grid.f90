@@ -32,17 +32,21 @@ subroutine cgyro_mpi_grid
   !
   if (silent_flag == 0 .and. i_proc == 0) then
      open(unit=io,file=trim(path)//runfile_mpi,status='replace')
-     write(io,*) 'Parallel grid dimensions.'
+     write(io,*) 'Parallelization and distribution diagnostics'
      write(io,*)
-     write(io,'(a,i4)') '        nv :',nv
-     write(io,'(a,i4)') '        nc :',nc
-     write(io,'(a,i4)') 'GCD(nv,nc) :',d
+     write(io,'(a,i5)') '         nv: ',nv
+     write(io,'(a,i5)') '         nc: ',nc
+     write(io,'(a,i5)') ' GCD(nv,nc): ',d
      write(io,*)
-     write(io,*) 'Acceptable core counts.'
-     write(io,*)
+     write(io,*) '        [coll]    [str]     [NL]'
+     write(io,*) 'n_MPI   nc_loc   nv_loc  n_split'
+     write(io,*) '-----   ------   ------  -------'
      do it=1,d*n_toroidal
         if (mod(d*n_toroidal,it) == 0 .and. mod(it,n_toroidal) == 0) then
-           write(io,*) it
+           n_proc_1 = it/n_toroidal
+           nc_loc = nc/n_proc_1           
+           nv_loc = nv/n_proc_1           
+           write(io,'(t2,4(i5,4x))') it,nc_loc,nv_loc,1+(nv_loc*n_theta-1)/n_toroidal
         endif
      enddo
      close(io)

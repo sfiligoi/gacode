@@ -31,10 +31,12 @@ subroutine cgyro_init_manager
      fmtstrn   ='(10(es13.6,1x))'
   endif
 
-  !----------------------------------------------------
-  ! Initialize startup timers
-  !----------------------------------------------------
-  call timer_lib_init('stream_init')
+  !------------------------------------------------------
+  ! Initialize startup timers 
+  !  NOTE: All "runtime" timers are initialized 
+  !        in cgyro_write_timedata
+  !------------------------------------------------------
+  call timer_lib_init('str_init')
   call timer_lib_init('coll_init')
 
   !----------------------------------------------------
