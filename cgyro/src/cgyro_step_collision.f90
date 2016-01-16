@@ -19,9 +19,12 @@ subroutine cgyro_step_collision
 
   call timer_lib_in('coll')
 
-  ic_loc = 0
-  do ic=nc1,nc2
-     ic_loc = ic_loc+1
+!$omp parallel private(ic,ic_loc,cvec,bvec,ivp,iv)
+do ic=ibeg,iend
+   ic_loc = ic_locv(ic)
+  !ic_loc = 0
+  !do ic=nc1,nc2
+   !  ic_loc = ic_loc+1
 
      ! Set-up the RHS: H = f + ze/T G phi
 
@@ -38,6 +41,7 @@ subroutine cgyro_step_collision
      cap_h_v(ic_loc,:) = bvec(:)
 
   enddo
+!$omp end parallel
 
   call timer_lib_out('coll')
 

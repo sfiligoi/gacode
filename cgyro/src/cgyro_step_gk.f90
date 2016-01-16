@@ -62,6 +62,7 @@ subroutine cgyro_rhs(ij)
   real :: rval,rval2
   complex :: rhs_stream
   complex, dimension(nc) :: hp
+  !integer, external :: omp_get_dynamic
 
 
   call timer_lib_in('str_comm')
@@ -71,25 +72,28 @@ subroutine cgyro_rhs(ij)
   call timer_lib_in('str')
   rhs(ij,:,:) = (0.0,0.0)
 
-  iv_loc = 0
-  do iv=nv1,nv2
+  !print *,omp_get_dynamic()
+!$omp parallel default(shared) private(iv,ic,iv_loc,is,ix,ie,ir,it,rval,rval2,rhs_stream,jt,jr,jc)
+  do iv=jbeg,jend
+!  iv_loc = 0
+!  do iv=nv1,nv2
 
-     iv_loc = iv_loc+1
-
+     iv_loc = iv_locv(iv)
+     !iv_loc = iv_loc+1
      is = is_v(iv)
      ix = ix_v(iv)
      ie = ie_v(iv)
 
-     hp(:) = h_x(:,iv_loc) 
+     !hp(:) = h_x(:,iv_loc) 
 
      ! Address cancellation problem
-     if (n_field > 1) then
-        do ic=1,nc
-           ir = ir_c(ic) 
-           it = it_c(ic)
-           hp(ic) = hp(ic)+z(is)/temp(is)*j0_c(ic,iv_loc)*field(ir,it,2)*efac(iv_loc,2)
-        enddo
-     endif
+     !if (n_field > 1) then
+     !   do ic=1,nc
+     !      ir = ir_c(ic) 
+     !      it = it_c(ic)
+     !      hp(ic) = hp(ic)+z(is)/temp(is)*j0_c(ic,iv_loc)*field(ir,it,2)*efac(iv_loc,2)
+     !   enddo
+     !endif
 
      do ic=1,nc
 
@@ -105,31 +109,32 @@ subroutine cgyro_rhs(ij)
         ! Parallel streaming with upwind dissipation 
 
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
-        if (upconserve_flag == 1) then
+        !if (upconserve_flag == 1) then
            rval2 = omega_stream(it,is)*sqrt(energy(ie)) 
-        else
-           rval2 = 0.0
-        endif
+        !else
+        !   rval2 = 0.0
+        !endif
         rhs_stream = 0.0
 
-        if (implicit_flag == 0) then
+        !if (implicit_flag == 0) then
            do id=-nup_theta,nup_theta
               jt = thcyc(it+id)
               jr = rcyc(ir,it,id)
               jc = ic_c(jr,jt)
               rhs_stream = rhs_stream &
                    -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)  &
-                   -abs(rval)*dtheta_up(ir,it,id)*hp(jc) &
+                   -abs(rval)*dtheta_up(ir,it,id)*h_x(jc,iv_loc) &
                    +abs(rval2)*dtheta_up(ir,it,id)*h_xs(jc,iv_loc)
            enddo
-        endif
+        !endif
 
         rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc)+rhs_stream
 
      enddo
 
   enddo
-
+!$omp end parallel
+  
   call timer_lib_out('str')
 
   ! Nonlinear evaluation [f,g]

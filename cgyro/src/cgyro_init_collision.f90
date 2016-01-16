@@ -116,7 +116,16 @@ subroutine cgyro_init_collision
      enddo
   enddo
 
-  if(collision_model == 4 .and. collision_kperp == 1 .and. &
+  ! Printout used for CGYRO paper.
+  !if (i_proc == 0) then
+  !   do ie=1,n_energy
+  !      print '(i1,3(" &{\tt ",f9.5,"}")," \\")',&
+  !           ie,sqrt(energy(ie)),w_e(ie),nu_d(ie,n_species,n_species)
+  !   enddo
+  !   print *,sum(w_e)
+  !endif
+  
+  if (collision_model == 4 .and. collision_kperp == 1 .and. &
        (collision_mom_restore == 1 .or. collision_ene_restore == 1)) then
      allocate(bessel(n_species,n_xi,n_energy,nc_loc,0:1))
      ic_loc = 0
@@ -144,7 +153,7 @@ subroutine cgyro_init_collision
         endif
      enddo
   endif
-
+  
   allocate(ctest(n_species,n_species,n_xi,n_xi,n_energy,n_energy))
   allocate(rs(n_species,n_species))
   allocate(rsvec(n_species,n_species,n_xi,n_energy))
