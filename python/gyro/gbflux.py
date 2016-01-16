@@ -9,9 +9,10 @@ i_moment  = int(sys.argv[3])
 w         = float(sys.argv[4])
 plotfile  = sys.argv[5]
 datafile  = sys.argv[6]
-width     = float(sys.argv[7])
-title     = sys.argv[8]
-ymax      = float(sys.argv[9])
+lx        = float(sys.argv[7])
+ly        = float(sys.argv[8])
+title     = sys.argv[9]
+ymax      = float(sys.argv[10])
 
 n_field   = int(sim.profile['n_field'])
 n_kinetic = int(sim.profile['n_kinetic'])
@@ -37,8 +38,8 @@ else:
 mtag = sim.tagmom[i_moment]
 
 #======================================
-fig = plt.figure(figsize=(12*width,6))
-fig.subplots_adjust(left=0.08,right=0.95,top=0.92,bottom=0.12)
+fig = plt.figure(figsize=(lx,ly))
+fig.subplots_adjust(left=0.1,right=0.95,top=0.92,bottom=0.12)
 ax = fig.add_subplot(111)
 ax.grid(which="majorminor",ls=":")
 ax.grid(which="major",ls=":")
