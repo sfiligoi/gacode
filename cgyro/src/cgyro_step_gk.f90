@@ -75,11 +75,17 @@ subroutine cgyro_rhs(ij)
 
   ! Address cancellation problem
   if (n_field > 1) then
+  do iv=nv1,nv2
+     iv_loc = iv_locv(iv)
+     is = is_v(iv)
+     ix = ix_v(iv)
+     ie = ie_v(iv)
      do ic=1,nc
         ir = ir_c(ic) 
         it = it_c(ic)
-        g_x(ic,:) = g_x(ic,:)+z(is)/temp(is)*j0_c(ic,:)*field(ir,it,2)*efac(:,2)
+        g_x(ic,iv_loc) = g_x(ic,iv_loc)+z(is)/temp(is)*j0_c(ic,iv_loc)*field(ir,it,2)*efac(iv_loc,2)
      enddo
+  enddo
   endif
 
 !$omp parallel private(ic,iv_loc,is,ix,ie,ir,it,rval,rval2,rhs_stream,jt,jr,jc)
