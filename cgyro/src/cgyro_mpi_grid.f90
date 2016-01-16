@@ -173,13 +173,6 @@ subroutine cgyro_mpi_grid
 
   ! OMP code
   n_omp = omp_get_max_threads()
-!$omp parallel 
-  i_omp = omp_get_thread_num()
-  call looplimits(i_omp,n_omp,nc1,nc2,ibeg,iend)
-  print *,'I',i_omp,ibeg,iend  
-  call looplimits(i_omp,n_omp,nv1,nv2,jbeg,jend)
-  print *,'J',i_omp,jbeg,jend  
-!$omp end parallel
 
   allocate(ic_locv(nc1:nc2))
   allocate(iv_locv(nv1:nv2))

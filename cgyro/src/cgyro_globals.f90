@@ -370,8 +370,7 @@ module cgyro_globals
   real, dimension(:,:), allocatable :: geo_yin
   !---------------------------------------------------------------
 
-  integer :: i_omp, n_omp, ibeg, iend, jbeg, jend
-!$omp threadprivate(i_omp, ibeg, iend)
+  integer :: n_omp
   integer, dimension(:), allocatable :: ic_locv,iv_locv
   
 end module cgyro_globals
