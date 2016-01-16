@@ -21,6 +21,8 @@ subroutine cgyro_mpi_grid
   integer :: splitkey
   integer, external :: parallel_dim
 
+  integer, external :: omp_get_max_threads, omp_get_thread_num
+
   ! Velocity-space (v) and configuration-space (c) dimensions
   nv = n_energy*n_xi*n_species
   nc = n_radial*n_theta
@@ -169,6 +171,13 @@ subroutine cgyro_mpi_grid
      call parallel_slib_init(n_toroidal,nv_loc*n_theta,n_radial,nsplit,NEW_COMM_2)
   endif
 
+  ! OMP code
+  n_omp = omp_get_max_threads()
+!$omp parallel 
+  i_omp = omp_get_thread_num()
+  call looplimits(i_omp,n_omp,nc1,nc2,ibeg,iend)
+!$omp end parallel
+
 end subroutine cgyro_mpi_grid
 
 subroutine gcd(m,n,d)
@@ -198,3 +207,26 @@ subroutine gcd(m,n,d)
   d = b
 
 end subroutine gcd
+
+subroutine looplimits(mythd,nthds,i1,i2,ibeg,iend)
+
+  implicit none
+  integer, intent(in) :: mythd, nthds, i1, i2
+  integer, intent(out) :: ibeg, iend
+  integer :: nwork, chunk, extra, ntcut  
+
+  nwork = i2 - i1 + 1
+  chunk = nwork/nthds
+  extra = nwork - nthds*chunk
+  ntcut = nthds - extra
+  if (mythd < ntcut) then
+    ibeg = i1 + mythd*chunk
+    iend = ibeg + chunk - 1
+  else
+    ibeg = i1 + ntcut*chunk + (mythd - ntcut)*(chunk + 1)
+    iend = ibeg + chunk
+  end if
+  if (iend > i2) iend = i2
+
+end subroutine looplimits
+
