@@ -48,6 +48,8 @@ subroutine cgyro_nl_fftw(ij)
 
   call timer_lib_in('nl')
 
+!$omp parallel private(fx,gx,fy,gy,in,iy,ir,p,ix,f0,g0,uv,ux,uy,vx,vy)
+!$omp do
   do j=1,nsplit
 
      fx = 0.0
@@ -102,7 +104,9 @@ subroutine cgyro_nl_fftw(ij)
      enddo
 
   enddo ! j
-
+!omp end do
+!$omp end parallel
+  
   call timer_lib_out('nl')
 
   call timer_lib_in('nl_comm')

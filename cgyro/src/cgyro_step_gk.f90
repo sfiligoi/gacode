@@ -61,8 +61,7 @@ subroutine cgyro_rhs(ij)
   integer :: id, jt, jr, jc
   real :: rval,rval2
   complex :: rhs_stream
-  complex, dimension(nc) :: hp
-
+  complex, dimension(:,:), allocatable :: g_x
 
   call timer_lib_in('str_comm')
   if (upconserve_flag == 1) call cgyro_hsym
@@ -71,25 +70,32 @@ subroutine cgyro_rhs(ij)
   call timer_lib_in('str')
   rhs(ij,:,:) = (0.0,0.0)
 
-  iv_loc = 0
+  allocate(g_x(nc,nv_loc))
+  g_x(:,:) = h_x(:,:) 
+
+  ! Address cancellation problem
+  if (n_field > 1) then
   do iv=nv1,nv2
-
-     iv_loc = iv_loc+1
-
+     iv_loc = iv_locv(iv)
      is = is_v(iv)
      ix = ix_v(iv)
      ie = ie_v(iv)
+     do ic=1,nc
+        ir = ir_c(ic) 
+        it = it_c(ic)
+        g_x(ic,iv_loc) = g_x(ic,iv_loc)+z(is)/temp(is)*j0_c(ic,iv_loc)*field(ir,it,2)*efac(iv_loc,2)
+     enddo
+  enddo
+  endif
 
-     hp(:) = h_x(:,iv_loc) 
+!$omp parallel private(ic,iv_loc,is,ix,ie,ir,it,rval,rval2,rhs_stream,jt,jr,jc)
+!$omp do
+  do iv=nv1,nv2
 
-     ! Address cancellation problem
-     if (n_field > 1) then
-        do ic=1,nc
-           ir = ir_c(ic) 
-           it = it_c(ic)
-           hp(ic) = hp(ic)+z(is)/temp(is)*j0_c(ic,iv_loc)*field(ir,it,2)*efac(iv_loc,2)
-        enddo
-     endif
+     iv_loc = iv_locv(iv)
+     is = is_v(iv)
+     ix = ix_v(iv)
+     ie = ie_v(iv)
 
      do ic=1,nc
 
@@ -119,7 +125,7 @@ subroutine cgyro_rhs(ij)
               jc = ic_c(jr,jt)
               rhs_stream = rhs_stream &
                    -rval*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)  &
-                   -abs(rval)*dtheta_up(ir,it,id)*hp(jc) &
+                   -abs(rval)*dtheta_up(ir,it,id)*g_x(jc,iv_loc) &
                    +abs(rval2)*dtheta_up(ir,it,id)*h_xs(jc,iv_loc)
            enddo
         endif
@@ -129,6 +135,10 @@ subroutine cgyro_rhs(ij)
      enddo
 
   enddo
+!$omp end do
+!$omp end parallel
+
+  deallocate(g_x)
 
   call timer_lib_out('str')
 

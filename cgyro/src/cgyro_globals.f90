@@ -370,4 +370,7 @@ module cgyro_globals
   real, dimension(:,:), allocatable :: geo_yin
   !---------------------------------------------------------------
 
+  integer :: n_omp
+  integer, dimension(:), allocatable :: ic_locv,iv_locv
+  
 end module cgyro_globals

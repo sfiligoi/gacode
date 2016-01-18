@@ -10,6 +10,16 @@ all:
 	cd gyro ; make 
 	cd tgyro ; make
 
+some:
+	cd shared ; make
+	cd gato ; make 
+	cd neo ; make 
+	cd vgen ; make 
+	cd glf23 ; make
+	cd tglf ; make
+	cd gyro ; make 
+	cd tgyro ; make
+
 clean:
 	cd shared ; make clean
 	cd cgyro ; make clean 

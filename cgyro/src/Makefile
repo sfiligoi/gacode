@@ -6,6 +6,8 @@ else
    FFLAGS=${FOPT}
 endif
 
+FC += ${FOMP}
+
 EXEC = cgyro
 
 OBJECTS = cgyro_globals.o \
