@@ -250,7 +250,7 @@ module cgyro_globals
   !
   complex, dimension(:,:,:), allocatable :: rhs
   complex, dimension(:,:), allocatable :: h_x
-  complex, dimension(:,:), allocatable :: h_xs
+  complex, dimension(:,:), allocatable :: g_x
   complex, dimension(:,:), allocatable :: h0_x
   complex, dimension(:,:), allocatable :: psi
   complex, dimension(:,:,:), allocatable :: f_nl

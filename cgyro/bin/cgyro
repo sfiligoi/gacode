@@ -33,6 +33,15 @@ then
   echo "         -n <MPI tasks>" 
   echo "         Number of MPI tasks."
   echo
+  echo "         -nomp <threads>" 
+  echo "         Number of OpenMP threads per MPI task."
+  echo
+  echo "         -numa <n>" 
+  echo "         NUMAs active per node."
+  echo
+  echo "         -mpinuma <n>" 
+  echo "         MPI tasks per active NUMA."
+  echo
   echo "REGRESSION TESTING"
   echo
   echo "         -r"
@@ -164,7 +173,7 @@ then
       exit 1
    fi
    # NOMP=1 RESET=0
-   gacode_reg_do $NPROC 1 0 cgyro 1e-6
+   gacode_reg_do $NPROC $NOMP 0 cgyro 1e-6
    exit 0
 fi
 #============================================================
