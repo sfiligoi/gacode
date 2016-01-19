@@ -77,7 +77,7 @@ subroutine cgyro_step_collision
            psi(ic,iv_loc) = psi(ic,iv_loc)+j0_c(ic,iv_loc)*efac(iv_loc,2)*field(ir,it,2)
            if (n_field > 2) then
               psi(ic,iv_loc) = psi(ic,iv_loc) &
-                   +j0perp_c(ic,iv_loc)*efac(iv_loc,3)/Bmag(it)*field(ir,it,3)
+                   +j0perp_c(ic,iv_loc)*efac(iv_loc,3)*field(ir,it,3)
            endif
         endif
 

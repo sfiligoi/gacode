@@ -602,16 +602,16 @@ subroutine cgyro_init_collision
                  ! Ampere Bpar component
                  if (n_field > 2) then
                     cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                         - 2.0*energy(ie)*(1-xi(ix)**2)/Bmag(it) &
+                         - 2.0*energy(ie)*(1-xi(ix)**2) &
                          * j0perp_v(ic_loc,iv) &
-                         * (-0.5*betae_unit)/(dens_ele*temp_ele)/Bmag(it) &
+                         * (-0.5*betae_unit)/(dens_ele*temp_ele) &
                          * w_e(je)*0.5*w_xi(jx)*dens(js)*temp(js) &
                          * j0perp_v(ic_loc,jv) &
                          * 2.0*energy(je)*(1-xi(jx)**2)
                     amat(iv,jv) = amat(iv,jv) &
-                         - 2.0*energy(ie)*(1-xi(ix)**2)/Bmag(it) &
+                         - 2.0*energy(ie)*(1-xi(ix)**2) &
                          * j0perp_v(ic_loc,iv) &
-                         * (-0.5*betae_unit)/(dens_ele*temp_ele)/Bmag(it) &
+                         * (-0.5*betae_unit)/(dens_ele*temp_ele) &
                          * w_e(je)*0.5*w_xi(jx)*dens(js)*temp(js) &
                          * j0perp_v(ic_loc,jv) &
                          * 2.0*energy(je)*(1-xi(jx)**2)

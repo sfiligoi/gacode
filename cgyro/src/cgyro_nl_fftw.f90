@@ -104,7 +104,7 @@ subroutine cgyro_nl_fftw(ij)
      enddo
 
   enddo ! j
-!omp end do
+!$omp end do
 !$omp end parallel
   
   call timer_lib_out('nl')

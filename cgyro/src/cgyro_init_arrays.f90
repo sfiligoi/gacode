@@ -42,7 +42,7 @@ subroutine cgyro_init_arrays
 
         ! Needed for B_parallel in GK and field equations
 
-        j0perp_c(ic,iv_loc) = 0.5*(j0_c(ic,iv_loc) + bessel_jn(2,abs(arg)))
+        j0perp_c(ic,iv_loc) = 0.5*(j0_c(ic,iv_loc) + bessel_jn(2,abs(arg)))/bmag(it)
 
      enddo
   enddo
@@ -175,7 +175,7 @@ subroutine cgyro_init_arrays
            ir = ir_c(ic) 
            it = it_c(ic)
            sum_loc(ir,it) = sum_loc(ir,it) - 0.5*w_xi(ix)*w_e(ie)*dens(is) &
-                * z(is)/Bmag(it) * 2.0*energy(ie)*(1-xi(ix)**2) &
+                * z(is) * 2.0*energy(ie)*(1-xi(ix)**2) &
                 *j0_c(ic,iv_loc) *j0perp_c(ic,iv_loc)
         enddo
      enddo
@@ -201,7 +201,7 @@ subroutine cgyro_init_arrays
            ir = ir_c(ic) 
            it = it_c(ic)
            sum_loc(ir,it) = sum_loc(ir,it) + 0.5*w_xi(ix)*w_e(ie)*dens(is) &
-                * temp(is)/Bmag(it)**2 * (2.0*energy(ie)*(1-xi(ix)**2))**2 &
+                * temp(is) * (2.0*energy(ie)*(1-xi(ix)**2))**2 &
                 * j0perp_c(ic,iv_loc)**2
         enddo
      enddo
@@ -475,7 +475,7 @@ subroutine cgyro_init_arrays
 
         if (n_field > 2) then
            omega_s(3,ic,iv_loc) = carg * j0perp_c(ic,iv_loc) &
-                * 2.0*energy(ie)*(1-xi(ix)**2)/Bmag(it) * temp(is)/z(is)
+                * 2.0*energy(ie)*(1-xi(ix)**2) * temp(is)/z(is)
         endif
 
      enddo

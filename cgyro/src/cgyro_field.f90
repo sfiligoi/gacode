@@ -116,10 +116,7 @@ subroutine cgyro_field_v
            if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
               field(ir,:,3) = 0.0
            else
-              do it=1,n_theta
-                 field(ir,it,3) = field(ir,it,3) &
-                      * (-0.5*betae_unit)/(dens_ele*temp_ele)/Bmag(it)
-              enddo
+              field(ir,:,3) = field(ir,:,3)*(-0.5*betae_unit)/(dens_ele*temp_ele)
            endif
         enddo
      endif
@@ -144,7 +141,7 @@ subroutine cgyro_field_c
 
   integer :: is, ie, ix, ir, it
   complex :: fac
- 
+
   call timer_lib_in('field_h')
 
   field_loc(:,:,:) = (0.0,0.0)
@@ -193,11 +190,8 @@ subroutine cgyro_field_c
        NEW_COMM_1,&
        i_err)
 
-  if(n_field > 2) then
-     do it=1,n_theta
-        field(:,it,3) = field(:,it,3) &
-             *(-0.5*betae_unit)/(dens_ele*temp_ele)/Bmag(it)
-     enddo
+  if (n_field > 2) then
+     field(:,:,3) = field(:,:,3)*(-0.5*betae_unit)/(dens_ele*temp_ele)
   endif
 
   ! Poisson LHS factors
@@ -236,11 +230,11 @@ subroutine cgyro_field_c
 
                  field(ir,it,1) =  poisson_pb22(ir,it)*field(ir,it,1) &
                       - poisson_pb12(ir,it)*field(ir,it,3)
-                 
+
                  field(ir,it,3) =  -poisson_pb21(ir,it)*fac &
                       + poisson_pb11(ir,it)*field(ir,it,3)
               enddo
-           
+
            else
               do it=1,n_theta
                  field(ir,it,1) = field(ir,it,1) &
@@ -290,7 +284,7 @@ subroutine cgyro_field_c
            psi(ic,iv_loc) = psi(ic,iv_loc)+j0_c(ic,iv_loc)*efac(iv_loc,2)*field(ir,it,2)
            if (n_field > 2) then
               psi(ic,iv_loc) = psi(ic,iv_loc) &
-                   + j0perp_c(ic,iv_loc)*efac(iv_loc,3)/Bmag(it) * field(ir,it,3)
+                   + j0perp_c(ic,iv_loc)*efac(iv_loc,3) * field(ir,it,3)
            endif
         endif
 

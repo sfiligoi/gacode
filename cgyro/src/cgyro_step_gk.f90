@@ -85,7 +85,7 @@ subroutine cgyro_rhs(ij)
   rhs(ij,:,:) = (0.0,0.0)
 
 !$omp parallel private(ic,iv_loc,is,ix,ie,ir,it,rval,rhs_stream,jt,jr,jc)
-!$omp do
+!$omp do 
   do iv=nv1,nv2
 
      iv_loc = iv_locv(iv)
