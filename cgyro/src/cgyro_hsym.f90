@@ -2,7 +2,11 @@
 ! cgyro_hsym.f90
 !
 ! PURPOSE:
-!  Compute moment used in conservative advection scheme
+!  Compute moment used in conservative advection scheme:
+!
+!              /
+!     |xi| g - | dxi |xi| g
+!              /
 !-----------------------------------------------------------------
 
 subroutine cgyro_hsym

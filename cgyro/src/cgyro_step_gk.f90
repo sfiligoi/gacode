@@ -62,7 +62,7 @@ subroutine cgyro_rhs(ij)
   real :: rval
   complex :: rhs_stream
 
-  ! Address cancellation problem
+  ! Prepare suitable distribution (g, not h) for conservative upwind method
   g_x(:,:) = h_x(:,:)
   if (n_field > 1) then
      do iv=nv1,nv2
