@@ -35,7 +35,6 @@ module cgyro_globals
   integer :: nup_radial
   integer :: implicit_flag
   integer :: constant_wind_flag
-  integer :: upconserve_flag
   real    :: ky
   integer :: box_size
   real    :: ipccw
@@ -242,9 +241,9 @@ module cgyro_globals
   real, dimension(:), allocatable :: cderiv
   real, dimension(:), allocatable :: spec_uderiv
   integer, dimension(:), allocatable :: thcyc
-  integer, dimension(:,:,:), allocatable :: rcyc
-  complex, dimension(:,:,:), allocatable :: dtheta
-  complex, dimension(:,:,:), allocatable :: dtheta_up
+  integer, dimension(:,:), allocatable :: icd_c
+  complex, dimension(:,:), allocatable :: dtheta
+  complex, dimension(:,:), allocatable :: dtheta_up
   !
   ! Distributions
   !

@@ -64,13 +64,10 @@ subroutine cgyro_init_implicit_gk
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
 
         do id=-nup_theta,nup_theta
-           jt = thcyc(it+id)
-           jr = rcyc(ir,it,id)
-           jc = ic_c(jr,jt)
-
+           jc = icd_c(ic,id)
            k=k+1
-           gksp_mat(k,iv_loc) = (rval*dtheta(ir,it,id) &
-                + abs(rval)*dtheta_up(ir,it,id)) * 0.5 * delta_t
+           gksp_mat(k,iv_loc) = (rval*dtheta(ic,id) &
+                + abs(rval)*dtheta_up(ic,id)) * 0.5 * delta_t
            gksp_indx(k,iv_loc) = ic
            gksp_indx(k+gksp_nelem,iv_loc) = jc 
            if(ic == jc) then
@@ -128,13 +125,11 @@ subroutine cgyro_init_implicit_gk
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
 
         do id=-nup_theta,nup_theta
-           jt = thcyc(it+id)
-           jr = rcyc(ir,it,id)
-           jc = ic_c(jr,jt)
+           jc = icd_c(ic,id)
 
            akmat(ic,jc) = akmat(ic,jc) &
-                + (rval*dtheta(ir,it,id) &
-                + abs(rval)*dtheta_up(ir,it,id)) * 0.5 * delta_t
+                + (rval*dtheta(ic,id) &
+                + abs(rval)*dtheta_up(ic,id)) * 0.5 * delta_t
 
         enddo
 
@@ -470,15 +465,11 @@ subroutine cgyro_step_implicit_gk
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
 
         do id=-nup_theta,nup_theta
-           jt = thcyc(it+id)
-           jr = rcyc(ir,it,id)
-           jc = ic_c(jr,jt)
-
+           jc = icd_c(ic,id)
            gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &
-                + (rval*dtheta(ir,it,id) &
-                + abs(rval)*dtheta_up(ir,it,id)) &
+                + (rval*dtheta(ic,id) &
+                + abs(rval)*dtheta_up(ic,id)) &
                 * (-0.5 * delta_t) * cap_h_c(jc,iv_loc)
-
         enddo
 
         gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &

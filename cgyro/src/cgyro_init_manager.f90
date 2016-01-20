@@ -95,9 +95,9 @@ subroutine cgyro_init_manager
      allocate(recv_status(MPI_STATUS_SIZE))
 
      allocate(thcyc(1-n_theta:2*n_theta))
-     allocate(rcyc(n_radial,n_theta,-nup_theta:nup_theta))
-     allocate(dtheta(n_radial,n_theta,-nup_theta:nup_theta))
-     allocate(dtheta_up(n_radial,n_theta,-nup_theta:nup_theta))
+     allocate(icd_c(nc,-nup_theta:nup_theta))
+     allocate(dtheta(nc,-nup_theta:nup_theta))
+     allocate(dtheta_up(nc,-nup_theta:nup_theta))
 
      ! Velocity-distributed arrays
      allocate(rhs(4,nc,nv_loc))
