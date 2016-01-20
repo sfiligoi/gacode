@@ -66,8 +66,11 @@ then
   echo "                                   -moment 3 (all fields)],"
   echo "                    moment_zero"
   echo
-  echo "          -pwidth <mult>"
-  echo "          Plot width multiplier (default 1.0)"
+  echo "          -lx <length>"
+  echo "          Plot width"
+  echo
+  echo "          -ly <length>"
+  echo "          Plot height"
   echo
   echo "          -title <mult>"
   echo "          Plot title"
@@ -100,7 +103,8 @@ WINDOW=0.5
 FTYPE=screen
 DATAFILE=none
 TMAX=-1.0
-PWIDTH=1.0
+LX=12
+LY=6
 INTERACTIVE=
 TITLE=`basename $PWD`
 YMAX=-1.0
@@ -136,7 +140,8 @@ while [ $# -gt 0 ] ; do
   
   -i) INTERACTIVE=-i ;;
 
-  -pwidth) shift ; PWIDTH=$1 ;;
+  -lx) shift ; LX=$1 ;;
+  -ly) shift ; LY=$1 ;;
 
   -title) shift ; TITLE=$1 ;;
 
@@ -191,7 +196,7 @@ case "$PLOT_TYPE" in
 
    gbflux)  
        python $INTERACTIVE  $PYROOT/gbflux.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE \
-	      $DATAFILE $PWIDTH $TITLE $YMAX;;
+	      $DATAFILE $LX $LY $TITLE $YMAX ;;
 
    gbflux_n) 
         python $INTERACTIVE  $PYROOT/gbflux_n.py $SIMDIR $I_FIELD $I_MOMENT $WINDOW $FTYPE $DATAFILE ;;

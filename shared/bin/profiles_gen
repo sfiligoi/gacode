@@ -36,7 +36,7 @@ EXEC=${GACODE_ROOT}/shared/profiles_gen/src/prgen
 GATO=${GACODE_ROOT}/gato/gato
 # - OMFIT script
 OMFIT_ROOT=${GACODE_ROOT}/../OMFIT-source
-OMFIT="${OMFIT_ROOT}/src/omfit.py fluxSurfaceTracer.py"
+OMFIT="${OMFIT_ROOT}/src/omfit.py"
 # - locpargen executable
 LOCPARGEN=${GACODE_ROOT}/shared/profiles_gen/locpargen/locpargen
 # - exprodump executable
@@ -1020,7 +1020,7 @@ fi
 if [ $EFIT_METHOD -eq 3 ]
 then
    cp $GFILE gfile
-   python $OMFIT -r 4 -u 200 -l 256 -x rho -a 0 -f 1 $GFILE >& out.omfit
+   python $OMFIT fluxSurfaceTracer "resolution=4, uniform=1000, levels=256, rhoVSpsi='rho', averages=0, namelist=0, fluxsurfaces=1, maxPSI=0.9999, gfiles='$GFILE'" >& out.omfit
    cat out.omfit
    cp flux_* ffile
 fi
