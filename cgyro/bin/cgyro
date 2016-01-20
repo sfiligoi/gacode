@@ -164,7 +164,7 @@ then
       exit 1
    fi
    # NOMP=1 RESET=0
-   gacode_reg_do $NPROC 1 0 cgyro 1e-6
+   gacode_reg_do $NPROC $NOMP 0 cgyro 1e-6
    exit 0
 fi
 #============================================================
