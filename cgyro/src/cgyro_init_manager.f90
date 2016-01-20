@@ -82,11 +82,11 @@ subroutine cgyro_init_manager
      call timer_lib_in('str_init')
 
      ! Global (undistributed) arrays
-     allocate(field(n_radial,n_theta,n_field))
-     allocate(field_loc(n_radial,n_theta,n_field))
-     allocate(field_old(n_radial,n_theta,n_field))
-     allocate(field_old2(n_radial,n_theta,n_field))
-     allocate(field_old3(n_radial,n_theta,n_field))
+     allocate(field(n_field,nc))
+     allocate(field_loc(n_field,nc))
+     allocate(field_old(n_field,nc))
+     allocate(field_old2(n_field,nc))
+     allocate(field_old3(n_field,nc))
      allocate(moment_loc(n_radial,n_species))
      allocate(moment(n_radial,n_species))
      allocate(f_balloon(n_radial/box_size,n_theta))

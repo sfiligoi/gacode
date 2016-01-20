@@ -7,7 +7,7 @@ subroutine cgyro_step_collision
 
   implicit none
 
-  integer :: is,ir,it,ie,ix
+  integer :: is,ie,ix
   integer :: ivp
 
   ! compute new collisional cap_H: H = h + ze/T G phi
@@ -68,13 +68,8 @@ subroutine cgyro_step_collision
      ie = ie_v(iv)
 
      do ic=1,nc
-
-        ir = ir_c(ic)
-        it = it_c(ic)
-
-        psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(ir,it,:))
+        psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
         h_x(ic,iv_loc) = cap_h_c(ic,iv_loc)-psi(ic,iv_loc)*z(is)/temp(is)
-
      enddo
   enddo
 

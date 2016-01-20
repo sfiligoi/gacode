@@ -69,10 +69,8 @@ subroutine cgyro_rhs(ij)
         iv_loc = iv_locv(iv)
         is = is_v(iv)
         do ic=1,nc
-           ir = ir_c(ic) 
-           it = it_c(ic)
            g_x(ic,iv_loc) = g_x(ic,iv_loc)+ & 
-                z(is)/temp(is)*jvec_c(2,ic,iv_loc)*field(ir,it,2)
+                z(is)/temp(is)*jvec_c(2,ic,iv_loc)*field(2,ic)
         enddo
      enddo
   endif
@@ -102,7 +100,7 @@ subroutine cgyro_rhs(ij)
         rhs(ij,ic,iv_loc) = rhs(ij,ic,iv_loc)+&
              omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+&
              omega_h(ic,iv_loc)*h_x(ic,iv_loc)+&
-             sum(omega_s(:,ic,iv_loc)*field(ir,it,:))
+             sum(omega_s(:,ic,iv_loc)*field(:,ic))
 
         if (implicit_flag == 0) then
            ! Parallel streaming with upwind dissipation 

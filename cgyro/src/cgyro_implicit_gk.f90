@@ -444,13 +444,13 @@ subroutine cgyro_step_implicit_gk
   ! form the rhs
 
   ! Special case for n=0, p=0
-  if(n == 0) then
+  if (n == 0) then
      do ic=1,nc
         ir = ir_c(ic)
         it = it_c(ic)
-        if(px(ir) == 0) then
+        if (px(ir) == 0) then
            cap_h_c(ic,:) = 0.0
-           field(ir,it,:)  = 0.0
+           field(:,ic)  = 0.0
         endif
      enddo
   endif
@@ -482,7 +482,7 @@ subroutine cgyro_step_implicit_gk
         enddo
 
         gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &
-             - z(is)/temp(is)*sum(jvec_c(:,ic,iv_loc)*field(ir,it,:))
+             - z(is)/temp(is)*sum(jvec_c(:,ic,iv_loc)*field(:,ic))
 
      enddo
 
@@ -548,16 +548,11 @@ subroutine cgyro_step_implicit_gk
   call ZGETRS('N',nc*n_field,1,fieldmat(:,:),nc*n_field,i_piv_field(:),&
        fieldvec(:),nc*n_field,info)
 
-  ! map back into field(ir,it)
+  ! map back into field(ic)
   do ic=1,nc
      do ifield=1,n_field
-
         id = idfield(ic,ifield)
-        ir = ir_c(ic) 
-        it = it_c(ic)
-
-        field(ir,it,ifield) = fieldvec(id)
-
+        field(ifield,ic) = fieldvec(id)
      enddo
   enddo
 
@@ -575,11 +570,8 @@ subroutine cgyro_step_implicit_gk
      ie = ie_v(iv)
 
      do ic=1,nc
-        ir = ir_c(ic)
-        it = it_c(ic)
-
         gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &
-             +z(is)/temp(is)*sum(jvec_c(:,ic,iv_loc)*field(ir,it,:))
+             +z(is)/temp(is)*sum(jvec_c(:,ic,iv_loc)*field(:,ic))
      enddo
 
      ! matrix solve
@@ -606,13 +598,8 @@ subroutine cgyro_step_implicit_gk
      ie = ie_v(iv)
 
      do ic=1,nc
-
-        ir = ir_c(ic)
-        it = it_c(ic)
-
-        psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(ir,it,:))
+        psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
         h_x(ic,iv_loc) = cap_h_c(ic,iv_loc)-z(is)*psi(ic,iv_loc)/temp(is)
-
      enddo
   enddo
 

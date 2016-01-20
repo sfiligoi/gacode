@@ -1,5 +1,5 @@
 !============================================================================================
-! Velocity-space field solve
+! Velocity (configuration-distributed) field solve
 
 subroutine cgyro_field_v
 
@@ -15,16 +15,13 @@ subroutine cgyro_field_v
 
   call timer_lib_in('field_H')
 
-  field_loc(:,:,:) = (0.0,0.0)
+  field_loc(:,:) = (0.0,0.0)
 
   ! Poisson and Ampere RHS integrals of H
 
   ic_loc = 0
   do ic=nc1,nc2
      ic_loc = ic_loc+1
-
-     it = it_c(ic)
-     ir = ir_c(ic)
 
      do iv=1,nv
 
@@ -33,15 +30,14 @@ subroutine cgyro_field_v
         ie = ie_v(iv)
 
         fac = w_e(ie)*0.5*w_xi(ix)*z(is)*dens(is)*cap_h_v(ic_loc,iv)
-
-        field_loc(ir,it,:) = field_loc(ir,it,:)+fac*jvec_v(:,ic_loc,iv) 
+        field_loc(:,ic) = field_loc(:,ic)+fac*jvec_v(:,ic_loc,iv) 
 
      enddo
   enddo
 
-  call MPI_ALLREDUCE(field_loc(:,:,:),&
-       field(:,:,:),&
-       size(field(:,:,:)),&
+  call MPI_ALLREDUCE(field_loc(:,:),&
+       field(:,:),&
+       size(field(:,:)),&
        MPI_DOUBLE_COMPLEX,&
        MPI_SUM,&
        NEW_COMM_1,&
@@ -53,15 +49,15 @@ subroutine cgyro_field_v
 
      do ir=1,n_radial
         if ((px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
-           field(ir,:,1) = 0.0
+           field(1,ic_c(ir,:)) = 0.0
         else
-           pvec_in(:) = real(field(ir,:,1))
+           pvec_in(:) = real(field(1,ic_c(ir,:)))
            call DGEMV('N',n_theta,n_theta,num1,hzf(ir,:,:),&
                 n_theta,pvec_in(:),1,num0,pvec_outr(:),1)
-           pvec_in(:) = aimag(field(ir,:,1))
+           pvec_in(:) = aimag(field(1,ic_c(ir,:)))
            call DGEMV('N',n_theta,n_theta,num1,hzf(ir,:,:),&
                 n_theta,pvec_in(:),1,num0,pvec_outi(:),1)
-           field(ir,:,1) = pvec_outr(:) + i_c * pvec_outi(:)
+           field(1,ic_c(ir,:)) = pvec_outr(:) + i_c * pvec_outi(:)
         endif
      enddo
 
@@ -69,10 +65,10 @@ subroutine cgyro_field_v
 
      do ir=1,n_radial
         if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
-           field(ir,:,1) = 0.0
+           field(1,ic_c(ir,:)) = 0.0
         else
            do it=1,n_theta
-              field(ir,it,1) = field(ir,it,1) &
+              field(1,ic_c(ir,it)) = field(1,ic_c(ir,it)) &
                    /(k_perp(it,ir)**2*lambda_debye**2* &
                    dens_ele/temp_ele+sum_den_h)
            enddo
@@ -86,10 +82,10 @@ subroutine cgyro_field_v
   if (n_field > 1) then
      do ir=1,n_radial
         if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
-           field(ir,:,2) = 0.0
+           field(2,ic_c(ir,:)) = 0.0
         else
            do it=1,n_theta
-              field(ir,it,2) = field(ir,it,2) &
+              field(2,ic_c(ir,it)) = field(2,ic_c(ir,it)) &
                    /(-2.0*k_perp(it,ir)**2*rho**2 &
                    /betae_unit*dens_ele*temp_ele)
            enddo
@@ -101,9 +97,9 @@ subroutine cgyro_field_v
      if (n_field > 2) then
         do ir=1,n_radial
            if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
-              field(ir,:,3) = 0.0
+              field(3,ic_c(ir,:)) = 0.0
            else
-              field(ir,:,3) = field(ir,:,3)*(-0.5*betae_unit)/(dens_ele*temp_ele)
+              field(3,ic_c(ir,:)) = field(3,ic_c(ir,:))*(-0.5*betae_unit)/(dens_ele*temp_ele)
            endif
         enddo
      endif
@@ -115,7 +111,7 @@ subroutine cgyro_field_v
 end subroutine cgyro_field_v
 
 !============================================================================================
-! Configuration-space field solve
+! Configuration (velocity-distributed) field solve
 
 subroutine cgyro_field_c
 
@@ -131,7 +127,7 @@ subroutine cgyro_field_c
 
   call timer_lib_in('field_h')
 
-  field_loc(:,:,:) = (0.0,0.0)
+  field_loc(:,:) = (0.0,0.0)
 
   ! Poisson and Ampere RHS integrals of h
 
@@ -145,30 +141,24 @@ subroutine cgyro_field_c
      ie = ie_v(iv)
 
      do ic=1,nc
-
-        ir = ir_c(ic)
-        it = it_c(ic)
-
         fac = w_e(ie)*0.5*w_xi(ix)*z(is)*dens(is)*h_x(ic,iv_loc)
-
-        field_loc(ir,it,:) = field_loc(ir,it,:)+jvec_c(:,ic,iv_loc)*fac
-
+        field_loc(:,ic) = field_loc(:,ic)+jvec_c(:,ic,iv_loc)*fac
      enddo
   enddo
 
-  call MPI_ALLREDUCE(field_loc(:,:,:),&
-       field(:,:,:),&
-       size(field(:,:,:)),&
+  call MPI_ALLREDUCE(field_loc(:,:),&
+       field(:,:),&
+       size(field(:,:)),&
        MPI_DOUBLE_COMPLEX,&
        MPI_SUM,&
        NEW_COMM_1,&
        i_err)
 
   if (n_field > 1) then
-     field(:,:,2) = -field(:,:,2)
+     field(2,:) = -field(2,:)
   endif
   if (n_field > 2) then
-     field(:,:,3) = field(:,:,3)*(-0.5*betae_unit)/(dens_ele*temp_ele)
+     field(3,:) = field(3,:)*(-0.5*betae_unit)/(dens_ele*temp_ele)
   endif
 
   ! Poisson LHS factors
@@ -177,15 +167,15 @@ subroutine cgyro_field_c
 
      do ir=1,n_radial
         if ((px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
-           field(ir,:,1) = 0.0
+           field(1,ic_c(ir,:)) = 0.0
         else
-           pvec_in(:) = real(field(ir,:,1))
+           pvec_in(:) = real(field(1,ic_c(ir,:)))
            call DGEMV('N',n_theta,n_theta,num1,xzf(ir,:,:),&
                 n_theta,pvec_in(:),1,num0,pvec_outr(:),1)
-           pvec_in(:) = aimag(field(ir,:,1))
+           pvec_in(:) = aimag(field(1,ic_c(ir,:)))
            call DGEMV('N',n_theta,n_theta,num1,xzf(ir,:,:),&
                 n_theta,pvec_in(:),1,num0,pvec_outi(:),1)
-           field(ir,:,1) = pvec_outr(:) + i_c * pvec_outi(:)
+           field(1,ic_c(ir,:)) = pvec_outr(:) + i_c * pvec_outi(:)
         endif
      enddo
 
@@ -194,26 +184,26 @@ subroutine cgyro_field_c
      do ir=1,n_radial
 
         if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
-           field(ir,:,1) = 0.0
+           field(1,ic_c(ir,:)) = 0.0
            if (n_field > 2) then
-              field(ir,:,3) = 0.0
+              field(3,ic_c(ir,:)) = 0.0
            endif
         else
 
            if (n_field == 3) then
               do it=1,n_theta
-                 fac = field(ir,it,1)
+                 fac = field(1,ic_c(ir,it))
 
-                 field(ir,it,1) =  poisson_pb22(ir,it)*field(ir,it,1) &
-                      - poisson_pb12(ir,it)*field(ir,it,3)
+                 field(1,ic_c(ir,it)) =  poisson_pb22(ir,it)*field(1,ic_c(ir,it)) &
+                      - poisson_pb12(ir,it)*field(3,ic_c(ir,it))
 
-                 field(ir,it,3) =  -poisson_pb21(ir,it)*fac &
-                      + poisson_pb11(ir,it)*field(ir,it,3)
+                 field(3,ic_c(ir,it)) =  -poisson_pb21(ir,it)*fac &
+                      + poisson_pb11(ir,it)*field(3,ic_c(ir,it))
               enddo
 
            else
               do it=1,n_theta
-                 field(ir,it,1) = field(ir,it,1) &
+                 field(1,ic_c(ir,it)) = field(1,ic_c(ir,it)) &
                       /(k_perp(it,ir)**2*lambda_debye**2* &
                       dens_ele/temp_ele+sum_den_x(ir,it))
               enddo
@@ -228,10 +218,10 @@ subroutine cgyro_field_c
   if (n_field > 1) then
      do ir=1,n_radial
         if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
-           field(ir,:,2) = 0.0
+           field(2,ic_c(ir,:)) = 0.0
         else
            do it=1,n_theta
-              field(ir,it,2) = field(ir,it,2) &
+              field(2,ic_c(ir,it)) = field(2,ic_c(ir,it)) &
                    /(2.0*k_perp(it,ir)**2*rho**2/betae_unit & 
                    *dens_ele*temp_ele+sum_cur_x(ir,it))
            enddo
@@ -251,14 +241,8 @@ subroutine cgyro_field_c
      ie = ie_v(iv)
 
      do ic=1,nc
-
-        ir = ir_c(ic)
-        it = it_c(ic)
-
-        psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(ir,it,:))
-
+        psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
         cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+psi(ic,iv_loc)*z(is)/temp(is)
-
      enddo
   enddo
 
