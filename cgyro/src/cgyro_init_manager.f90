@@ -79,7 +79,7 @@ subroutine cgyro_init_manager
      ! Initialize DISTRIBUTED arrays
      !----------------------------------------------------
 
-     call timer_lib_in('stream_init')
+     call timer_lib_in('str_init')
 
      ! Global (undistributed) arrays
      allocate(field(n_radial,n_theta,n_field))
@@ -140,7 +140,7 @@ subroutine cgyro_init_manager
      call cgyro_init_arrays
      call cgyro_init_implicit_gk
 
-     call timer_lib_out('stream_init')
+     call timer_lib_out('str_init')
 
      call timer_lib_in('coll_init')
 
@@ -163,9 +163,9 @@ subroutine cgyro_init_manager
   endif
 
   ! Initialize h (via restart or analytic IC)
-  call timer_lib_in('stream_init')
+  call timer_lib_in('str_init')
   call cgyro_init_h
-  call timer_lib_out('stream_init')
+  call timer_lib_out('str_init')
 
   ! Initialize nonlinear dimensions and arrays 
   if (nonlinear_method == 1) then
