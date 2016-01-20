@@ -115,7 +115,7 @@ subroutine cgyro_equilibrium
 
      omega_gammap(it) = GEO_bt/GEO_b * GEO_bigr/rmaj * gamma_p
 
-     Bmag(it) = GEO_b
+     bmag(it) = GEO_b
 
      ! flux-surface average weights
      w_theta(it) = GEO_g_theta / GEO_b

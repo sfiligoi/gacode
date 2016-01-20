@@ -34,7 +34,7 @@ subroutine cgyro_init_arrays
         ir = ir_c(ic) 
         it = it_c(ic)
 
-        arg = k_perp(it,ir)*rho*vth(is)*mass(is)/(z(is)*Bmag(it)) &
+        arg = k_perp(it,ir)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
              *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
 
         ! Need this for (Phi, A_parallel) terms in GK and field equations
@@ -77,7 +77,7 @@ subroutine cgyro_init_arrays
      ix = ix_v(iv)
      ie = ie_v(iv)
 
-     vfac(iv_loc) = 0.5*w_xi(ix)*w_e(ie)*z(is)**2/temp(is)*dens(is)
+     vfac(iv_loc) = w_xi(ix)*w_e(ie)*z(is)**2/temp(is)*dens(is)
 
   enddo
 
@@ -85,7 +85,7 @@ subroutine cgyro_init_arrays
   do is=1,n_species
      do ie=1,n_energy
         do ix=1,n_xi
-           sum_den_h = sum_den_h+0.5*w_xi(ix)*w_e(ie)*z(is)**2/temp(is)*dens(is)
+           sum_den_h = sum_den_h+w_xi(ix)*w_e(ie)*z(is)**2/temp(is)*dens(is)
         enddo
      enddo
   enddo
@@ -188,7 +188,7 @@ subroutine cgyro_init_arrays
         do ic=1,nc
            ir = ir_c(ic) 
            it = it_c(ic)
-           sum_loc(ir,it) = sum_loc(ir,it) - 0.5*w_xi(ix)*w_e(ie)*dens(is) &
+           sum_loc(ir,it) = sum_loc(ir,it)-w_xi(ix)*w_e(ie)*dens(is) &
                 * z(is) *jvec_c(1,ic,iv_loc) * jvec_c(3,ic,iv_loc) &
                 *z(is)/temp(is)
         enddo
@@ -214,7 +214,7 @@ subroutine cgyro_init_arrays
         do ic=1,nc
            ir = ir_c(ic) 
            it = it_c(ic)
-           sum_loc(ir,it) = sum_loc(ir,it) + 0.5*w_xi(ix)*w_e(ie)*dens(is) &
+           sum_loc(ir,it) = sum_loc(ir,it)+w_xi(ix)*w_e(ie)*dens(is) &
                 * temp(is) * jvec_c(3,ic,iv_loc)**2 &
                 *(z(is)/temp(is))**2
         enddo

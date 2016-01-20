@@ -114,7 +114,7 @@ subroutine cgyro_init_implicit_gk
      ix = ix_v(iv)
      ie = ie_v(iv)
 
-     rfac = 0.5*w_xi(ix)*w_e(ie)*dens(is) * z(is)**2/temp(is)
+     rfac = w_xi(ix)*w_e(ie)*dens(is) * z(is)**2/temp(is)
 
      akmat(:,:) = (0.0,0.0)
      do ic=1,nc
@@ -499,7 +499,7 @@ subroutine cgyro_step_implicit_gk
      ix = ix_v(iv)
      ie = ie_v(iv)
 
-     rfac(:) = z(is) * 0.5*w_xi(ix)*w_e(ie)*dens(is)*gkvec(:,iv_loc)
+     rfac(:) = z(is) * w_xi(ix)*w_e(ie)*dens(is)*gkvec(:,iv_loc)
      ifield = 1
 
      do ic=1,nc

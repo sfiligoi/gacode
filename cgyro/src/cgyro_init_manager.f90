@@ -59,6 +59,7 @@ subroutine cgyro_init_manager
   allocate(xi_upderiv_mat(n_xi,n_xi))
   ! Construct xi (pitch-angle) nodes and weights
   call pseudo_legendre(n_xi,xi,w_xi,xi_deriv_mat,xi_lor_mat,xi_upderiv_mat)
+  w_xi = 0.5*w_xi
 
   allocate(theta(n_theta))
   allocate(thetab(n_radial/box_size,n_theta))

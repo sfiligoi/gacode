@@ -114,7 +114,7 @@ subroutine cgyro_kernel
   if(allocated(theta))          deallocate(theta)
   if(allocated(thetab))         deallocate(thetab)
   if(allocated(w_theta))        deallocate(w_theta)
-  if(allocated(Bmag))           deallocate(Bmag)
+  if(allocated(bmag))           deallocate(bmag)
   if(allocated(k_perp))         deallocate(k_perp)
   if(allocated(omega_stream))   deallocate(omega_stream)
   if(allocated(omega_trap))     deallocate(omega_trap)

@@ -29,7 +29,7 @@ subroutine cgyro_field_v
         ix = ix_v(iv)
         ie = ie_v(iv)
 
-        fac = w_e(ie)*0.5*w_xi(ix)*z(is)*dens(is)*cap_h_v(ic_loc,iv)
+        fac = w_e(ie)*w_xi(ix)*z(is)*dens(is)*cap_h_v(ic_loc,iv)
         field_loc(:,ic) = field_loc(:,ic)+fac*jvec_v(:,ic_loc,iv) 
 
      enddo
@@ -141,7 +141,7 @@ subroutine cgyro_field_c
      ie = ie_v(iv)
 
      do ic=1,nc
-        fac = w_e(ie)*0.5*w_xi(ix)*z(is)*dens(is)*h_x(ic,iv_loc)
+        fac = w_e(ie)*w_xi(ix)*z(is)*dens(is)*h_x(ic,iv_loc)
         field_loc(:,ic) = field_loc(:,ic)+jvec_c(:,ic,iv_loc)*fac
      enddo
   enddo
