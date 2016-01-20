@@ -21,8 +21,6 @@ subroutine cgyro_init_manager
 
   implicit none
 
-  integer :: ie
-
   include 'fftw3.f03'
 
   if (hiprec_flag == 1) then
@@ -81,7 +79,7 @@ subroutine cgyro_init_manager
      ! Initialize DISTRIBUTED arrays
      !----------------------------------------------------
 
-     call timer_lib_in('stream_init')
+     call timer_lib_in('str_init')
 
      ! Global (undistributed) arrays
      allocate(field(n_radial,n_theta,n_field))
@@ -103,12 +101,8 @@ subroutine cgyro_init_manager
 
      ! Velocity-distributed arrays
      allocate(rhs(4,nc,nv_loc))
-     allocate(j0_c(nc,nv_loc))
-     allocate(j0_v(nc_loc,nv))
-     allocate(j0perp_c(nc,nv_loc))
-     allocate(j0perp_v(nc_loc,nv))
      allocate(h_x(nc,nv_loc))
-     allocate(h_xs(nc,nv_loc))
+     allocate(g_x(nc,nv_loc))
      allocate(psi(nc,nv_loc))
      allocate(h0_x(nc,nv_loc))
      allocate(cap_h_c(nc,nv_loc))
@@ -116,7 +110,8 @@ subroutine cgyro_init_manager
      allocate(omega_cap_h(nc,nv_loc))
      allocate(omega_h(nc,nv_loc))
      allocate(omega_s(n_field,nc,nv_loc))
-     allocate(efac(nv_loc,n_field))
+     allocate(jvec_c(n_field,nc,nv_loc))
+     allocate(jvec_v(n_field,nc_loc,nv))
 
      ! Real-space distributed arrays
      allocate(cap_h_v(nc_loc,nv))
@@ -145,7 +140,7 @@ subroutine cgyro_init_manager
      call cgyro_init_arrays
      call cgyro_init_implicit_gk
 
-     call timer_lib_out('stream_init')
+     call timer_lib_out('str_init')
 
      call timer_lib_in('coll_init')
 
@@ -168,9 +163,9 @@ subroutine cgyro_init_manager
   endif
 
   ! Initialize h (via restart or analytic IC)
-  call timer_lib_in('stream_init')
+  call timer_lib_in('str_init')
   call cgyro_init_h
-  call timer_lib_out('stream_init')
+  call timer_lib_out('str_init')
 
   ! Initialize nonlinear dimensions and arrays 
   if (nonlinear_method == 1) then

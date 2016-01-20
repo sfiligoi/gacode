@@ -33,6 +33,15 @@ then
   echo "         -n <MPI tasks>" 
   echo "         Number of MPI tasks."
   echo
+  echo "         -nomp <threads>" 
+  echo "         Number of OpenMP threads per MPI task."
+  echo
+  echo "         -numa <n>" 
+  echo "         NUMAs active per node."
+  echo
+  echo "         -mpinuma <n>" 
+  echo "         MPI tasks per active NUMA."
+  echo
   echo "REGRESSION TESTING"
   echo
   echo "         -r"
