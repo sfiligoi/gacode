@@ -12,6 +12,7 @@ endif
 
 EXEC1=tglf_mpi
 EXEC2=tglf
+EXEC3=tglf_nn
 
 LLIB=tglf_lib
 
@@ -37,6 +38,7 @@ OBJECTS = ${TGLFISNAN}      \
           tglf_multiscale_spectrum.o \
           tglf_kygrid.o     \
           tglf_run.o        \
+          tglf_run_nn.o        \
           tglf_TM.o         \
           tglf_init_mpi.o   \
           tglf_run_mpi.o    \
@@ -46,13 +48,16 @@ OBJECTS = ${TGLFISNAN}      \
 
 .SUFFIXES : .o .f90
 
-all: $(LLIB).a $(EXEC1) $(EXEC2)
+all: $(LLIB).a $(EXEC1) $(EXEC2) $(EXEC3)
 
 $(EXEC1): $(LLIB).a $(EXEC1).o $(EXTRA_LIBS)
 	$(FC) $(FFLAGS) -o $(EXEC1) $(EXEC1).o $(LLIB).a $(EXTRA_LIBS) $(LMATH)
 
 $(EXEC2): $(LLIB).a $(EXEC2).o $(EXTRA_LIBS)
 	$(FC) $(FFLAGS) -o $(EXEC2) $(EXEC2).o $(LLIB).a $(EXTRA_LIBS) $(LMATH)
+
+$(EXEC3): $(LLIB).a $(EXEC3).o $(EXTRA_LIBS)
+	$(FC) $(FFLAGS) -o $(EXEC3) $(EXEC3).o $(LLIB).a $(EXTRA_LIBS) $(LMATH)
 
 $(LLIB).a: $(OBJECTS)
 	$(ARCH) $(LLIB).a $(OBJECTS)
@@ -61,5 +66,5 @@ $(LLIB).a: $(OBJECTS)
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:
-	rm -f *.o *.lst $(LLIB).a $(EXEC1) $(EXEC2)
+	rm -f *.o *.lst $(LLIB).a $(EXEC1) $(EXEC2) $(EXEC3)
 	rm -f ${GACODE_ROOT}/modules/tglf*.mod 
