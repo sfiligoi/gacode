@@ -124,7 +124,7 @@ subroutine cgyro_init_collision
   !   enddo
   !   print *,sum(w_e)
   !endif
-  
+
   if (collision_model == 4 .and. collision_kperp == 1 .and. &
        (collision_mom_restore == 1 .or. collision_ene_restore == 1)) then
      allocate(bessel(n_species,n_xi,n_energy,nc_loc,0:1))
@@ -153,7 +153,7 @@ subroutine cgyro_init_collision
         endif
      enddo
   endif
-  
+
   allocate(ctest(n_species,n_species,n_xi,n_xi,n_energy,n_energy))
   allocate(rs(n_species,n_species))
   allocate(rsvec(n_species,n_species,n_xi,n_energy))
@@ -566,55 +566,47 @@ subroutine cgyro_init_collision
                     amat(iv,jv)        = amat(iv,jv) + 0.0
                  else
                     cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                         - z(is)/temp(is) * j0_v(ic_loc,iv) &
+                         - z(is)/temp(is) * jvec_v(1,ic_loc,iv) &
                          / (k_perp(it,ir)**2 * lambda_debye**2 &
                          * dens_ele / temp_ele + sum_den_h) &
                          * z(js)*dens(js) &
-                         * j0_v(ic_loc,jv) * w_e(je) * 0.5 * w_xi(jx) 
+                         * jvec_v(1,ic_loc,jv) * w_e(je) * 0.5 * w_xi(jx) 
                     amat(iv,jv) = amat(iv,jv) &
-                         - z(is)/temp(is) * j0_v(ic_loc,iv) &
+                         - z(is)/temp(is) * jvec_v(1,ic_loc,iv) &
                          / (k_perp(it,ir)**2 * lambda_debye**2 &
                          * dens_ele / temp_ele + sum_den_h) &
                          * z(js)*dens(js) &
-                         * j0_v(ic_loc,jv) * w_e(je) * 0.5 * w_xi(jx) 
+                         * jvec_v(1,ic_loc,jv) * w_e(je) * 0.5 * w_xi(jx) 
                  endif
 
                  ! Ampere component
                  if (n_field > 1) then
                     cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                         - z(is)/temp(is) * (-j0_v(ic_loc,iv) &
-                         * xi(ix) * sqrt(2.0*energy(ie)) *vth(is) &
+                         + z(is)/temp(is) * (jvec_v(2,ic_loc,iv) &
                          / (2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
                          * dens_ele * temp_ele)) &
                          * z(js)*dens(js) &
-                         * j0_v(ic_loc,jv) * w_e(je) * 0.5 * w_xi(jx) &
-                         * xi(jx) * sqrt(2.0*energy(je)) * vth(js) 
+                         * jvec_v(2,ic_loc,jv) * w_e(je) * 0.5 * w_xi(jx)  
                     amat(iv,jv) = amat(iv,jv) &
-                         - z(is)/temp(is) * (-j0_v(ic_loc,iv) &
-                         * xi(ix) * sqrt(2.0*energy(ie)) * vth(is) &
+                         + z(is)/temp(is) * (jvec_v(2,ic_loc,iv) &
                          / (2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
                          * dens_ele * temp_ele)) &
                          * z(js)*dens(js) &
-                         * j0_v(ic_loc,jv) * w_e(je) * 0.5 * w_xi(jx) &
-                         * xi(jx) * sqrt(2.0*energy(je)) * vth(js) 
+                         * jvec_v(2,ic_loc,jv) * w_e(je) * 0.5 * w_xi(jx) 
                  endif
 
                  ! Ampere Bpar component
                  if (n_field > 2) then
                     cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
-                         - 2.0*energy(ie)*(1-xi(ix)**2) &
-                         * j0perp_v(ic_loc,iv) &
+                         - jvec_v(3,ic_loc,iv) &
                          * (-0.5*betae_unit)/(dens_ele*temp_ele) &
                          * w_e(je)*0.5*w_xi(jx)*dens(js)*temp(js) &
-                         * j0perp_v(ic_loc,jv) &
-                         * 2.0*energy(je)*(1-xi(jx)**2)
+                         * jvec_v(3,ic_loc,jv)/(temp(is)/z(is))/(temp(js)/z(js))
                     amat(iv,jv) = amat(iv,jv) &
-                         - 2.0*energy(ie)*(1-xi(ix)**2) &
-                         * j0perp_v(ic_loc,iv) &
+                         - jvec_v(3,ic_loc,iv) &
                          * (-0.5*betae_unit)/(dens_ele*temp_ele) &
                          * w_e(je)*0.5*w_xi(jx)*dens(js)*temp(js) &
-                         * j0perp_v(ic_loc,jv) &
-                         * 2.0*energy(je)*(1-xi(jx)**2)
+                         * jvec_v(3,ic_loc,jv)/(temp(is)/z(is))/(temp(js)/z(js))
                  endif
 
               endif
@@ -624,7 +616,7 @@ subroutine cgyro_init_collision
 
         ! constant part
         do iv=1,nv
-           cmat(iv,iv,ic_loc) =  cmat(iv,iv,ic_loc) + 1.0
+           cmat(iv,iv,ic_loc) = cmat(iv,iv,ic_loc) + 1.0
            amat(iv,iv) = amat(iv,iv) + 1.0
         enddo
 

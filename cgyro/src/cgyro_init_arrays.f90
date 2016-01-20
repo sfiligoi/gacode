@@ -1,4 +1,3 @@
-
 subroutine cgyro_init_arrays
 
   use timer_lib
@@ -9,12 +8,14 @@ subroutine cgyro_init_arrays
   implicit none
 
   real :: arg
+  real :: efac
   integer :: ir,it,is,ie,ix
   integer :: jr,jt,id, ccw_fac
   complex :: thfac, carg
   real, dimension(n_radial,n_theta) :: sum_loc
   real, dimension(nv_loc) :: vfac
   real, dimension(n_radial) :: u
+  real, dimension(2,nc) :: jloc_c
 
   !-------------------------------------------------------------------------
   ! Distributed Bessel-function Gyroaverages
@@ -38,17 +39,30 @@ subroutine cgyro_init_arrays
 
         ! Need this for (Phi, A_parallel) terms in GK and field equations
 
-        j0_c(ic,iv_loc) = bessel_j0(abs(arg))
+        jloc_c(1,ic) = bessel_j0(abs(arg))
 
         ! Needed for B_parallel in GK and field equations
 
-        j0perp_c(ic,iv_loc) = 0.5*(j0_c(ic,iv_loc) + bessel_jn(2,abs(arg)))/bmag(it)
+        jloc_c(2,ic) = 0.5*(jloc_c(1,ic) + bessel_jn(2,abs(arg)))/bmag(it)
 
      enddo
+
+     efac = 1.0
+     jvec_c(1,:,iv_loc) = efac*jloc_c(1,:)
+     if (n_field > 1) then
+        efac = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
+        jvec_c(2,:,iv_loc) = efac*jloc_c(1,:)
+        if (n_field > 2) then
+           efac = 2.0*energy(ie)*(1-xi(ix)**2)*temp(is)/z(is)
+           jvec_c(3,:,iv_loc) = efac*jloc_c(2,:)
+        endif
+     endif
+
   enddo
 
-  call parallel_lib_r_real(transpose(j0_c),j0_v)
-  call parallel_lib_r_real(transpose(j0perp_c),j0perp_v)
+  call parallel_lib_r_real(transpose(jvec_c(1,:,:)),jvec_v(1,:,:))
+  if (n_field > 1) call parallel_lib_r_real(transpose(jvec_c(2,:,:)),jvec_v(2,:,:))
+  if (n_field > 2) call parallel_lib_r_real(transpose(jvec_c(3,:,:)),jvec_v(3,:,:))
 
   !-------------------------------------------------------------------------
 
@@ -97,7 +111,7 @@ subroutine cgyro_init_arrays
         ir = ir_c(ic) 
         it = it_c(ic)
 
-        sum_loc(ir,it) = sum_loc(ir,it)+vfac(iv_loc)*(1.0-j0_c(ic,iv_loc)**2) 
+        sum_loc(ir,it) = sum_loc(ir,it)+vfac(iv_loc)*(1.0-jvec_c(1,ic,iv_loc)**2) 
 
      enddo
   enddo
@@ -137,7 +151,7 @@ subroutine cgyro_init_arrays
            it = it_c(ic)
 
            sum_loc(ir,it) = sum_loc(ir,it)+vfac(iv_loc) &
-                *xi(ix)**2*2.0*energy(ie)*vth(is)**2*j0_c(ic,iv_loc)**2 
+                *jvec_c(2,ic,iv_loc)**2
         enddo
      enddo
 
@@ -175,8 +189,8 @@ subroutine cgyro_init_arrays
            ir = ir_c(ic) 
            it = it_c(ic)
            sum_loc(ir,it) = sum_loc(ir,it) - 0.5*w_xi(ix)*w_e(ie)*dens(is) &
-                * z(is) * 2.0*energy(ie)*(1-xi(ix)**2) &
-                *j0_c(ic,iv_loc) *j0perp_c(ic,iv_loc)
+                * z(is) *jvec_c(1,ic,iv_loc) * jvec_c(3,ic,iv_loc) &
+                *z(is)/temp(is)
         enddo
      enddo
      call MPI_ALLREDUCE(sum_loc,&
@@ -201,8 +215,8 @@ subroutine cgyro_init_arrays
            ir = ir_c(ic) 
            it = it_c(ic)
            sum_loc(ir,it) = sum_loc(ir,it) + 0.5*w_xi(ix)*w_e(ie)*dens(is) &
-                * temp(is) * (2.0*energy(ie)*(1-xi(ix)**2))**2 &
-                * j0perp_c(ic,iv_loc)**2
+                * temp(is) * jvec_c(3,ic,iv_loc)**2 &
+                *(z(is)/temp(is))**2
         enddo
      enddo
      call MPI_ALLREDUCE(sum_loc,&
@@ -466,29 +480,9 @@ subroutine cgyro_init_arrays
              -i_c*k_theta*rho*(sqrt(2.0*energy(ie))*xi(ix)/vth(is) &
              *omega_gammap(it))
 
-        omega_s(1,ic,iv_loc) = carg * j0_c(ic,iv_loc)
-
-        if (n_field > 1) then
-           omega_s(2,ic,iv_loc) = carg * (-j0_c(ic,iv_loc)) &
-                * xi(ix)*sqrt(2.0*energy(ie))*vth(is)
-        endif
-
-        if (n_field > 2) then
-           omega_s(3,ic,iv_loc) = carg * j0perp_c(ic,iv_loc) &
-                * 2.0*energy(ie)*(1-xi(ix)**2) * temp(is)/z(is)
-        endif
+        omega_s(:,ic,iv_loc) = carg*jvec_c(:,ic,iv_loc)
 
      enddo
-
-     ! Energy factors used in definition of psi
-
-     efac(iv_loc,1) = 1.0
-     if (n_field > 1) then
-        efac(iv_loc,2) = -xi(ix)*sqrt(2.0*energy(ie))*vth(is)
-        if (n_field > 2) then
-           efac(iv_loc,3) = 2.0*energy(ie)*(1-xi(ix)**2)*temp(is)/z(is)
-        endif
-     endif
 
   enddo
   !-------------------------------------------------------------------------

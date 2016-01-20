@@ -32,22 +32,9 @@ subroutine cgyro_field_v
         ix = ix_v(iv)
         ie = ie_v(iv)
 
-        fac = w_e(ie)*0.5*w_xi(ix)*z(is)*dens(is)*&
-             j0_v(ic_loc,iv)*cap_h_v(ic_loc,iv)
+        fac = w_e(ie)*0.5*w_xi(ix)*z(is)*dens(is)*cap_h_v(ic_loc,iv)
 
-        field_loc(ir,it,1) = field_loc(ir,it,1)+fac 
-
-        if (n_field > 1) then
-           field_loc(ir,it,2) = field_loc(ir,it,2) + fac &
-                *xi(ix)*sqrt(2.0*energy(ie))*vth(is)
-
-           if (n_field > 2) then
-              fac = w_e(ie)*0.5*w_xi(ix)*dens(is)*temp(is) &
-                   *j0perp_v(ic_loc,iv)*cap_h_v(ic_loc,iv)
-              field_loc(ir,it,3) = field_loc(ir,it,3) + fac &
-                   * 2.0*energy(ie)*(1-xi(ix)**2)
-           endif
-        endif
+        field_loc(ir,it,:) = field_loc(ir,it,:)+fac*jvec_v(:,ic_loc,iv) 
 
      enddo
   enddo
@@ -103,7 +90,7 @@ subroutine cgyro_field_v
         else
            do it=1,n_theta
               field(ir,it,2) = field(ir,it,2) &
-                   /(2.0*k_perp(it,ir)**2*rho**2 &
+                   /(-2.0*k_perp(it,ir)**2*rho**2 &
                    /betae_unit*dens_ele*temp_ele)
            enddo
         endif
@@ -162,22 +149,9 @@ subroutine cgyro_field_c
         ir = ir_c(ic)
         it = it_c(ic)
 
-        fac = w_e(ie)*0.5*w_xi(ix)*z(is)*dens(is)* &
-             j0_c(ic,iv_loc)*h_x(ic,iv_loc)
+        fac = w_e(ie)*0.5*w_xi(ix)*z(is)*dens(is)*h_x(ic,iv_loc)
 
-        field_loc(ir,it,1) = field_loc(ir,it,1)+fac 
-
-        if (n_field > 1) then
-           field_loc(ir,it,2) = field_loc(ir,it,2) + &
-                fac*xi(ix)*sqrt(2.0*energy(ie))*vth(is)
-
-           if (n_field > 2) then
-              fac = w_e(ie)*0.5*w_xi(ix)*dens(is)*temp(is) &
-                   *j0perp_c(ic,iv_loc)*h_x(ic,iv_loc)
-              field_loc(ir,it,3) = field_loc(ir,it,3) + fac &
-                   * 2.0*energy(ie)*(1-xi(ix)**2)
-           endif
-        endif
+        field_loc(ir,it,:) = field_loc(ir,it,:)+jvec_c(:,ic,iv_loc)*fac
 
      enddo
   enddo
@@ -190,6 +164,9 @@ subroutine cgyro_field_c
        NEW_COMM_1,&
        i_err)
 
+  if (n_field > 1) then
+     field(:,:,2) = -field(:,:,2)
+  endif
   if (n_field > 2) then
      field(:,:,3) = field(:,:,3)*(-0.5*betae_unit)/(dens_ele*temp_ele)
   endif
@@ -218,10 +195,9 @@ subroutine cgyro_field_c
 
         if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
            field(ir,:,1) = 0.0
-           if(n_field > 2) then
+           if (n_field > 2) then
               field(ir,:,3) = 0.0
            endif
-
         else
 
            if (n_field == 3) then
@@ -279,14 +255,7 @@ subroutine cgyro_field_c
         ir = ir_c(ic)
         it = it_c(ic)
 
-        psi(ic,iv_loc) = j0_c(ic,iv_loc)*efac(iv_loc,1)*field(ir,it,1)
-        if (n_field > 1) then
-           psi(ic,iv_loc) = psi(ic,iv_loc)+j0_c(ic,iv_loc)*efac(iv_loc,2)*field(ir,it,2)
-           if (n_field > 2) then
-              psi(ic,iv_loc) = psi(ic,iv_loc) &
-                   + j0perp_c(ic,iv_loc)*efac(iv_loc,3) * field(ir,it,3)
-           endif
-        endif
+        psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(ir,it,:))
 
         cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+psi(ic,iv_loc)*z(is)/temp(is)
 

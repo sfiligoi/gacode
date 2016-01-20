@@ -10,9 +10,9 @@ subroutine cgyro_init_implicit_gk
   integer :: is, ir, it, ie, ix, k
   integer :: id, jd, idp, jdp, jt, jr, jc, ifield, jfield
   real :: rval
-  real :: rfac, vfac, vfac2, vfac3, vfac4, vfac5
-  complex, dimension(:,:), allocatable   :: akmat, fieldmat_loc
-  complex, dimension(:), allocatable     :: work_field
+  real :: rfac
+  complex, dimension(:,:), allocatable :: akmat, fieldmat_loc
+  complex, dimension(:), allocatable   :: work_field
 
   if (implicit_flag /= 1) return
 
@@ -38,36 +38,36 @@ subroutine cgyro_init_implicit_gk
      call UMZ21I(gksp_keep(:,iv_loc),gksp_cntl(:,iv_loc),&
           gksp_icntl(:,iv_loc))
   enddo
-  
+
   gksp_nelem=(2*nup_theta+1)*nc
   gksp_nmax=gksp_nelem*10
   allocate(gksp_mat(gksp_nmax,nv_loc))
   allocate(gksp_indx(2*gksp_nmax,nv_loc))
   gksp_mat(:,:) = (0.0,0.0)
   gksp_indx(:,:) = 0
-  
+
   iv_loc = 0
   do iv=nv1,nv2
-     
+
      iv_loc = iv_loc+1
-     
+
      is = is_v(iv)
      ix = ix_v(iv)
      ie = ie_v(iv)
-     
+
      k=0
      do ic=1,nc
-        
+
         ir = ir_c(ic) 
         it = it_c(ic)
-        
+
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
-        
+
         do id=-nup_theta,nup_theta
            jt = thcyc(it+id)
            jr = rcyc(ir,it,id)
            jc = ic_c(jr,jt)
-           
+
            k=k+1
            gksp_mat(k,iv_loc) = (rval*dtheta(ir,it,id) &
                 + abs(rval)*dtheta_up(ir,it,id)) * 0.5 * delta_t
@@ -77,9 +77,9 @@ subroutine cgyro_init_implicit_gk
               gksp_mat(k,iv_loc) = gksp_mat(k,iv_loc) + 1.0
            endif
         enddo
-        
+
      enddo
-     
+
      ! Umfpack factorization 
      call UMZ2FA(nc,gksp_nelem,0,.false.,gksp_nmax,2*gksp_nmax,&
           gksp_mat(:,iv_loc),gksp_indx(:,iv_loc),&
@@ -89,7 +89,7 @@ subroutine cgyro_init_implicit_gk
         call cgyro_error('ERROR: (CGYRO) umfpack error in cgyro_init_implicit_gk')
         return
      endif
-     
+
   enddo
 
   ! Field eqn matrix (ic*ifield,ic*ifield) (dense)
@@ -112,26 +112,21 @@ subroutine cgyro_init_implicit_gk
   do iv=nv1,nv2
 
      iv_loc = iv_loc+1
-     
+
      is = is_v(iv)
      ix = ix_v(iv)
      ie = ie_v(iv)
 
-     rfac  = 0.5*w_xi(ix)*w_e(ie)*dens(is) * z(is)**2/temp(is)
-     vfac  = xi(ix) * sqrt(2.0*energy(ie)) * vth(is)
-     vfac2 = vfac**2
-     vfac3 = 2.0*energy(ie)*(1-xi(ix)**2)
-     vfac4 = vfac3**2
-     vfac5 = vfac3*vfac
+     rfac = 0.5*w_xi(ix)*w_e(ie)*dens(is) * z(is)**2/temp(is)
 
      akmat(:,:) = (0.0,0.0)
      do ic=1,nc
-        
+
         ir = ir_c(ic) 
         it = it_c(ic)
 
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
-        
+
         do id=-nup_theta,nup_theta
            jt = thcyc(it+id)
            jr = rcyc(ir,it,id)
@@ -140,7 +135,7 @@ subroutine cgyro_init_implicit_gk
            akmat(ic,jc) = akmat(ic,jc) &
                 + (rval*dtheta(ir,it,id) &
                 + abs(rval)*dtheta_up(ir,it,id)) * 0.5 * delta_t
-           
+
         enddo
 
         akmat(ic,ic) = akmat(ic,ic) + 1.0
@@ -151,7 +146,7 @@ subroutine cgyro_init_implicit_gk
      ! akmat = (1 + delta_t/2 * stream)^-1
      call ZGETRF(nc,nc,akmat(:,:),nc,i_piv_field,info)
      call ZGETRI(nc,akmat(:,:),nc,i_piv_field,work_field,nc,info)
-  
+
      ! int d^3 v (z G) akmat (z/T f0 G)
      ifield=1
      jfield=1
@@ -160,7 +155,7 @@ subroutine cgyro_init_implicit_gk
         do jc=1,nc
            jd = idfield(jc,jfield)
            fieldmat_loc(id,jd) = fieldmat_loc(id,jd) &
-                - j0_c(ic,iv_loc) * akmat(ic,jc) * j0_c(jc,iv_loc) &
+                - jvec_c(1,ic,iv_loc) * akmat(ic,jc) * jvec_c(1,jc,iv_loc) &
                 * rfac
         enddo
      enddo
@@ -175,8 +170,8 @@ subroutine cgyro_init_implicit_gk
            do jc=1,nc
               jd = idfield(jc,jfield)
               fieldmat_loc(id,jd) = fieldmat_loc(id,jd) &
-                   + j0_c(ic,iv_loc) * akmat(ic,jc) *j0_c(jc,iv_loc) &
-                   * rfac * vfac
+                   - jvec_c(1,ic,iv_loc) * akmat(ic,jc) *jvec_c(2,jc,iv_loc) &
+                   * rfac
            enddo
         enddo
 
@@ -188,8 +183,8 @@ subroutine cgyro_init_implicit_gk
            do jc=1,nc
               jd = idfield(jc,jfield)
               fieldmat_loc(id,jd) = fieldmat_loc(id,jd) &
-                   + j0_c(ic,iv_loc) * akmat(ic,jc) *j0_c(jc,iv_loc) &
-                   * rfac * vfac2
+                   + jvec_c(2,ic,iv_loc) * akmat(ic,jc) *jvec_c(2,jc,iv_loc) &
+                   * rfac
            enddo
         enddo
 
@@ -204,8 +199,8 @@ subroutine cgyro_init_implicit_gk
                  jt = it_c(jc)
                  jd = idfield(jc,jfield)
                  fieldmat_loc(id,jd) = fieldmat_loc(id,jd) &
-                      - j0_c(ic,iv_loc) * akmat(ic,jc) * j0perp_c(jc,iv_loc) &
-                      * (rfac*temp(is)/z(is)) * vfac3 
+                      - jvec_c(1,ic,iv_loc) * akmat(ic,jc) * jvec_c(3,jc,iv_loc) &
+                      * rfac 
               enddo
            enddo
 
@@ -218,9 +213,8 @@ subroutine cgyro_init_implicit_gk
                  jt = it_c(jc)
                  jd = idfield(jc,jfield)
                  fieldmat_loc(id,jd) = fieldmat_loc(id,jd) &
-                      - j0_c(ic,iv_loc) * vfac5 * akmat(ic,jc) &
-                      * j0perp_c(jc,iv_loc) &
-                      * (rfac*temp(is)/z(is))
+                      + jvec_c(2,ic,iv_loc) * akmat(ic,jc) * jvec_c(3,jc,iv_loc) &
+                      * rfac
               enddo
            enddo
 
@@ -235,12 +229,11 @@ subroutine cgyro_init_implicit_gk
                  jd = idfield(jc,jfield)
                  fieldmat_loc(id,jd) = fieldmat_loc(id,jd) &
                       - (-0.5*betae_unit)/(dens_ele*temp_ele) &
-                      * j0perp_c(ic,iv_loc) * vfac3  &
-                      * akmat(ic,jc) * j0_c(jc,iv_loc) &
-                      * (rfac*temp(is)/z(is)) 
+                      * jvec_c(3,ic,iv_loc) * akmat(ic,jc) * jvec_c(1,jc,iv_loc) &
+                      * rfac 
               enddo
            enddo
-           
+
            ! (bfac) int d^3 v (z G1 (vperp/vt)^2 Bunit/B) akmat G0 vpar
            ifield=3
            jfield=2
@@ -251,10 +244,9 @@ subroutine cgyro_init_implicit_gk
                  jt = it_c(jc)
                  jd = idfield(jc,jfield)
                  fieldmat_loc(id,jd) = fieldmat_loc(id,jd) &
-                      + (-0.5*betae_unit)/(dens_ele*temp_ele) &
-                      * j0perp_c(ic,iv_loc) * vfac5 &
-                      * akmat(ic,jc) * j0_c(jc,iv_loc) &
-                      * (rfac*temp(is)/z(is)) 
+                      - (-0.5*betae_unit)/(dens_ele*temp_ele) &
+                      * jvec_c(3,ic,iv_loc) * akmat(ic,jc) * jvec_c(2,jc,iv_loc) &
+                      * rfac 
               enddo
            enddo
 
@@ -270,9 +262,8 @@ subroutine cgyro_init_implicit_gk
                  jd = idfield(jc,jfield)
                  fieldmat_loc(id,jd) = fieldmat_loc(id,jd) &
                       - (-0.5*betae_unit)/(dens_ele*temp_ele) &
-                      * j0perp_c(ic,iv_loc) * vfac4 &
-                      * akmat(ic,jc) * j0perp_c(jc,iv_loc) &
-                      * rfac*(temp(is)/z(is))**2 
+                      * jvec_c(3,ic,iv_loc) * akmat(ic,jc) * jvec_c(3,jc,iv_loc) &
+                      * rfac 
               enddo
            enddo
 
@@ -300,15 +291,17 @@ subroutine cgyro_init_implicit_gk
         ir = ir_c(ic)
         it = it_c(ic)
         if(px(ir) == 0) then
-           
+
            do jc=1,nc
               do ifield=1,n_field
-                 id = idfield(ic,ifield)
-                 jd = idfield(jc,jfield)
-                 fieldmat_loc(id,jd) = 0.0
+                 do jfield=1,n_field
+                    id = idfield(ic,ifield)
+                    jd = idfield(jc,jfield)
+                    fieldmat_loc(id,jd) = 0.0
+                 enddo
               enddo
            enddo
-           
+
            do jc=1,nc
               jr = ir_c(jc)
               jt = it_c(jc)
@@ -438,7 +431,8 @@ subroutine cgyro_step_implicit_gk
 
   integer :: is, ir, it, ie, ix
   integer :: id, jt, jr, jc, ifield
-  real    :: rval,rfac(nc),rfac_b(nc)
+  real    :: rval
+  complex :: rfac(nc)
 
   if (implicit_flag /= 1) return
 
@@ -488,16 +482,7 @@ subroutine cgyro_step_implicit_gk
         enddo
 
         gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &
-             - z(is)/temp(is)*j0_c(ic,iv_loc)*efac(iv_loc,1)*field(ir,it,1)
-        if (n_field > 1) then
-           gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &
-                - z(is)/temp(is)*j0_c(ic,iv_loc)*efac(iv_loc,2)*field(ir,it,2)
-           if (n_field > 2) then
-              gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &
-                   - z(is)/temp(is)*j0perp_c(ic,iv_loc)*efac(iv_loc,3) &
-                   *field(ir,it,3)
-           endif
-        endif
+             - z(is)/temp(is)*sum(jvec_c(:,ic,iv_loc)*field(ir,it,:))
 
      enddo
 
@@ -523,32 +508,27 @@ subroutine cgyro_step_implicit_gk
      ix = ix_v(iv)
      ie = ie_v(iv)
 
-     rfac(:) = z(is) * 0.5*w_xi(ix)*w_e(ie)*dens(is)*j0_c(:,iv_loc)
+     rfac(:) = z(is) * 0.5*w_xi(ix)*w_e(ie)*dens(is)*gkvec(:,iv_loc)
      ifield = 1
 
      do ic=1,nc
         id = idfield(ic,ifield)
-        fieldvec_loc(id) = fieldvec_loc(id) + gkvec(ic,iv_loc) * rfac(ic)
+        fieldvec_loc(id) = fieldvec_loc(id) + rfac(ic)*jvec_c(1,ic,iv_loc) 
      enddo
 
      if(n_field > 1) then
-        rfac(:) = rfac(:) * xi(ix) * sqrt(2.0*energy(ie)) * vth(is) 
         ifield = 2
         do ic=1,nc
            id = idfield(ic,ifield)
-           fieldvec_loc(id) = fieldvec_loc(id) + gkvec(ic,iv_loc) * rfac(ic)
+           fieldvec_loc(id) = fieldvec_loc(id)-rfac(ic)*jvec_c(2,ic,iv_loc)
         enddo
 
         if(n_field > 2) then
            ifield = 3
-           rfac_b(:) = 0.5*w_xi(ix)*w_e(ie)*dens(is)*j0perp_c(:,iv_loc) &
-                * temp(is) * 2.0*energy(ie)*(1-xi(ix)**2) &
-                * (-0.5*betae_unit)/(dens_ele*temp_ele)
            do ic=1,nc
-              it = it_c(ic)
               id = idfield(ic,ifield)
-              fieldvec_loc(id) = fieldvec_loc(id) + gkvec(ic,iv_loc) &
-                   * rfac_b(ic)
+              fieldvec_loc(id) = fieldvec_loc(id)+rfac(ic)*jvec_c(3,ic,iv_loc) &
+                   *(-0.5*betae_unit)/(dens_ele*temp_ele)           
            enddo
         endif
 
@@ -599,17 +579,7 @@ subroutine cgyro_step_implicit_gk
         it = it_c(ic)
 
         gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &
-             +z(is)/temp(is)*j0_c(ic,iv_loc)*efac(iv_loc,1)*field(ir,it,1)
-        if (n_field > 1) then
-           gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &
-                +z(is)/temp(is)*j0_c(ic,iv_loc)*efac(iv_loc,2)*field(ir,it,2)
-           if (n_field > 2) then
-              gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &
-                   +z(is)/temp(is)*j0perp_c(ic,iv_loc)*efac(iv_loc,3) &
-                   *field(ir,it,3)
-           endif
-        endif
-
+             +z(is)/temp(is)*sum(jvec_c(:,ic,iv_loc)*field(ir,it,:))
      enddo
 
      ! matrix solve
@@ -640,15 +610,7 @@ subroutine cgyro_step_implicit_gk
         ir = ir_c(ic)
         it = it_c(ic)
 
-        psi(ic,iv_loc) = j0_c(ic,iv_loc)*efac(iv_loc,1)*field(ir,it,1)
-        if (n_field > 1) then
-           psi(ic,iv_loc) = psi(ic,iv_loc)+j0_c(ic,iv_loc)*efac(iv_loc,2)*field(ir,it,2)
-           if (n_field > 2) then
-              psi(ic,iv_loc) = psi(ic,iv_loc) &
-                   +j0perp_c(ic,iv_loc)*efac(iv_loc,3)*field(ir,it,3)
-           endif
-        endif
-
+        psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(ir,it,:))
         h_x(ic,iv_loc) = cap_h_c(ic,iv_loc)-z(is)*psi(ic,iv_loc)/temp(is)
 
      enddo

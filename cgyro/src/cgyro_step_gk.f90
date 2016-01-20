@@ -72,7 +72,7 @@ subroutine cgyro_rhs(ij)
            ir = ir_c(ic) 
            it = it_c(ic)
            g_x(ic,iv_loc) = g_x(ic,iv_loc)+ & 
-                z(is)/temp(is)*j0_c(ic,iv_loc)*field(ir,it,2)*efac(iv_loc,2)
+                z(is)/temp(is)*jvec_c(2,ic,iv_loc)*field(ir,it,2)
         enddo
      enddo
   endif

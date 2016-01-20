@@ -21,8 +21,6 @@ subroutine cgyro_init_manager
 
   implicit none
 
-  integer :: ie
-
   include 'fftw3.f03'
 
   if (hiprec_flag == 1) then
@@ -103,10 +101,6 @@ subroutine cgyro_init_manager
 
      ! Velocity-distributed arrays
      allocate(rhs(4,nc,nv_loc))
-     allocate(j0_c(nc,nv_loc))
-     allocate(j0_v(nc_loc,nv))
-     allocate(j0perp_c(nc,nv_loc))
-     allocate(j0perp_v(nc_loc,nv))
      allocate(h_x(nc,nv_loc))
      allocate(g_x(nc,nv_loc))
      allocate(psi(nc,nv_loc))
@@ -116,7 +110,8 @@ subroutine cgyro_init_manager
      allocate(omega_cap_h(nc,nv_loc))
      allocate(omega_h(nc,nv_loc))
      allocate(omega_s(n_field,nc,nv_loc))
-     allocate(efac(nv_loc,n_field))
+     allocate(jvec_c(n_field,nc,nv_loc))
+     allocate(jvec_v(n_field,nc_loc,nv))
 
      ! Real-space distributed arrays
      allocate(cap_h_v(nc_loc,nv))
