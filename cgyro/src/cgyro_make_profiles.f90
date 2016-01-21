@@ -113,7 +113,7 @@ subroutine cgyro_make_profiles
 
      loglam = 24.0 - log(sqrt(dens_ele*1e13)/(temp_ele*1000))
      nu_ee  = cc * loglam * dens_ele / (sqrt(mass_ele) * temp_ele**1.5) &
-          / (vth_norm/a_meters)
+          / (vth_norm/a_meters) 
 
      ! beta calculation in CGS:
      !

@@ -12,13 +12,14 @@ NCDIR=/opt/netcdf-4.1.3-intel
 # Compilers
 FC     = mpif90 -mod $(GACODE_ROOT)/modules -I $(GACODE_ROOT)/modules -I $(FFTWDIR)/include -mkl=sequential 
 F77    = ${FC}
-FOMP   = -openmp
+FOMP   = -openmp-stubs
 FMATH  = -r8 
 FOPT   = -O2
 FDEBUG = -check bounds,uninit -fpe0 -ftrapuv
 
 # System math libraries
-LMATH=$(FFTWDIR)/lib/libfftw3_omp.a $(FFTWDIR)/lib/libfftw3.a
+#LMATH=$(FFTWDIR)/lib/libfftw3_omp.a $(FFTWDIR)/lib/libfftw3.a
+LMATH=$(FFTWDIR)/lib/libfftw3.a
 
 # OPTIONAL NetCDF:
 NETCDF=-L$(NCDIR)/lib -lnetcdff -lnetcdf
