@@ -138,7 +138,7 @@ subroutine cgyro_init_collision
         do is=1,n_species   
            do ix=1,n_xi
               do ie=1,n_energy
-                 arg = k_perp(it,ir)*rho*vth(is)*mass(is)&
+                 arg = k_perp(ic)*rho*vth(is)*mass(is)&
                       /(z(is)*bmag(it)) *sqrt(2.0*energy(ie)) &
                       *sqrt(1.0-xi(ix)**2)
                  bessel(is,ix,ie,ic_loc,0) = bessel_j0(abs(arg))
@@ -581,13 +581,13 @@ subroutine cgyro_init_collision
                     do ks=1,n_species
                        cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                             - (0.5*delta_t) &
-                            * (-0.25*(k_perp(it,ir)*rho*vth(is)*mass(is) &
+                            * (-0.25*(k_perp(ic)*rho*vth(is)*mass(is) &
                             / (z(is)*bmag(it)))**2 * 2.0*energy(ie) &
                             * (nu_d(ie,is,ks) * (1+xi(ix)**2) &
                             + nu_par(ie,is,ks) * (1-xi(ix)**2)) )
                        amat(iv,jv) = amat(iv,jv) &
                             + (0.5*delta_t) &
-                            * (-0.25*(k_perp(it,ir)*rho*vth(is)*mass(is) &
+                            * (-0.25*(k_perp(ic)*rho*vth(is)*mass(is) &
                             / (z(is)*bmag(it)))**2 * 2.0*energy(ie) &
                             * (nu_d(ie,is,ks) * (1+xi(ix)**2) &
                             + nu_par(ie,is,ks) * (1-xi(ix)**2)) )
@@ -607,13 +607,13 @@ subroutine cgyro_init_collision
                  else
                     cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                          - z(is)/temp(is) * jvec_v(1,ic_loc,iv) &
-                         / (k_perp(it,ir)**2 * lambda_debye**2 &
+                         / (k_perp(ic)**2 * lambda_debye**2 &
                          * dens_ele / temp_ele + sum_den_h) &
                          * z(js)*dens(js) &
                          * jvec_v(1,ic_loc,jv) * w_e(je) * w_xi(jx) 
                     amat(iv,jv) = amat(iv,jv) &
                          - z(is)/temp(is) * jvec_v(1,ic_loc,iv) &
-                         / (k_perp(it,ir)**2 * lambda_debye**2 &
+                         / (k_perp(ic)**2 * lambda_debye**2 &
                          * dens_ele / temp_ele + sum_den_h) &
                          * z(js)*dens(js) &
                          * jvec_v(1,ic_loc,jv) * w_e(je) * w_xi(jx) 
@@ -623,13 +623,13 @@ subroutine cgyro_init_collision
                  if (n_field > 1) then
                     cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                          + z(is)/temp(is) * (jvec_v(2,ic_loc,iv) &
-                         / (2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
+                         / (2.0*k_perp(ic)**2 * rho**2 / betae_unit & 
                          * dens_ele * temp_ele)) &
                          * z(js)*dens(js) &
                          * jvec_v(2,ic_loc,jv) * w_e(je) * w_xi(jx)  
                     amat(iv,jv) = amat(iv,jv) &
                          + z(is)/temp(is) * (jvec_v(2,ic_loc,iv) &
-                         / (2.0*k_perp(it,ir)**2 * rho**2 / betae_unit & 
+                         / (2.0*k_perp(ic)**2 * rho**2 / betae_unit & 
                          * dens_ele * temp_ele)) &
                          * z(js)*dens(js) &
                          * jvec_v(2,ic_loc,jv) * w_e(je) * w_xi(jx) 

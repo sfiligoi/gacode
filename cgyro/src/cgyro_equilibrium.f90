@@ -121,7 +121,7 @@ subroutine cgyro_equilibrium
      w_theta(it) = GEO_g_theta / GEO_b
 
      do ir=1,n_radial
-        k_perp(it,ir) = sqrt((2.0*pi*px(ir)*GEO_grad_r/length &
+        k_perp(ic_c(ir,it)) = sqrt((2.0*pi*px(ir)*GEO_grad_r/length &
              + k_theta*GEO_gq*GEO_captheta)**2 &
              + (k_theta*GEO_gq)**2) 
      enddo

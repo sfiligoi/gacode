@@ -145,7 +145,7 @@ subroutine cgyro_write_initdata
      write(io,fmtstr) omega_aprdrift(:,1)
      write(io,fmtstr) omega_cdrift(:,1)
      write(io,fmtstr) omega_gammap(:)
-     write(io,fmtstr) k_perp(:,n_radial/2+1)
+     write(io,fmtstr) k_perp(ic_c(n_radial/2+1,:))
      close(io)
 
   endif

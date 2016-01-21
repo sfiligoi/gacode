@@ -12,13 +12,16 @@ subroutine cgyro_init_arrays
   integer :: ir,it,is,ie,ix
   integer :: jr,jt,id, ccw_fac
   complex :: thfac, carg
-  real, dimension(n_radial,n_theta) :: sum_loc
+  real, dimension(nc) :: sum_loc
   real, dimension(nv_loc) :: vfac
   real, dimension(n_radial) :: u
-  real, dimension(2,nc) :: jloc_c
+  real, dimension(:,:), allocatable :: jloc_c
+  real, dimension(:), allocatable :: pb11,pb12,pb21,pb22
 
   !-------------------------------------------------------------------------
   ! Distributed Bessel-function Gyroaverages
+
+  allocate(jloc_c(2,nc))
 
   iv_loc = 0
   do iv=nv1,nv2
@@ -31,10 +34,9 @@ subroutine cgyro_init_arrays
 
      do ic=1,nc
 
-        ir = ir_c(ic) 
         it = it_c(ic)
 
-        arg = k_perp(it,ir)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
+        arg = k_perp(ic)*rho*vth(is)*mass(is)/(z(is)*bmag(it)) &
              *sqrt(2.0*energy(ie))*sqrt(1.0-xi(ix)**2)
 
         ! Need this for (Phi, A_parallel) terms in GK and field equations
@@ -59,7 +61,7 @@ subroutine cgyro_init_arrays
      endif
 
   enddo
-
+  deallocate(jloc_c)
   call parallel_lib_r_real(transpose(jvec_c(1,:,:)),jvec_v(1,:,:))
   if (n_field > 1) call parallel_lib_r_real(transpose(jvec_c(2,:,:)),jvec_v(2,:,:))
   if (n_field > 2) call parallel_lib_r_real(transpose(jvec_c(3,:,:)),jvec_v(3,:,:))
@@ -94,8 +96,8 @@ subroutine cgyro_init_arrays
      sum_den_h = sum_den_h+dens_ele/temp_ele
   endif
 
-  allocate(sum_den_x(n_radial,n_theta))
-  sum_loc(:,:) = 0.0
+  allocate(sum_den_x(nc))
+  sum_loc(:) = 0.0
 
   iv_loc = 0
   do iv=nv1,nv2
@@ -107,13 +109,9 @@ subroutine cgyro_init_arrays
      ie = ie_v(iv)
 
      do ic=1,nc
-
-        ir = ir_c(ic) 
-        it = it_c(ic)
-
-        sum_loc(ir,it) = sum_loc(ir,it)+vfac(iv_loc)*(1.0-jvec_c(1,ic,iv_loc)**2) 
-
+        sum_loc(ic) = sum_loc(ic)+vfac(iv_loc)*(1.0-jvec_c(1,ic,iv_loc)**2) 
      enddo
+
   enddo
 
   call MPI_ALLREDUCE(sum_loc,&
@@ -125,16 +123,30 @@ subroutine cgyro_init_arrays
        i_err)
 
   if (ae_flag == 1) then
-     sum_den_x(:,:) = sum_den_x(:,:) + dens_ele / temp_ele
+     sum_den_x(:) = sum_den_x(:)+dens_ele/temp_ele
   endif
 
-  ! Pre-factors for Ampere eqn
+  !-----------------------------------------------------------------------
+  ! Field-solve coefficients (i.e., final numerical factors).
+  !
+  do ic=1,nc
+     ir = ir_c(ic) 
+     it = it_c(ic)
+     if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
+        fcoef(:,ic) = 0.0
+     else
+        fcoef(1,ic) = 1.0/(k_perp(ic)**2*lambda_debye**2*dens_ele/temp_ele+sum_den_h)
+        if (n_field > 1) fcoef(2,ic) = 1.0/(-2.0*k_perp(ic)**2* &
+             rho**2/betae_unit*dens_ele*temp_ele)
+        if (n_field > 2) fcoef(3,ic) = -betae_unit/(2.0*dens_ele*temp_ele)
+     endif
+  enddo
 
   if (n_field > 1) then
 
-     allocate(sum_cur_x(n_radial,n_theta))
+     allocate(sum_cur_x(nc))
 
-     sum_loc(:,:)  = 0.0
+     sum_loc(:)  = 0.0
 
      iv_loc = 0
      do iv=nv1,nv2
@@ -146,11 +158,7 @@ subroutine cgyro_init_arrays
         ie = ie_v(iv)
 
         do ic=1,nc
-
-           ir = ir_c(ic) 
-           it = it_c(ic)
-
-           sum_loc(ir,it) = sum_loc(ir,it)+vfac(iv_loc) &
+           sum_loc(ic) = sum_loc(ic)+vfac(iv_loc) &
                 *jvec_c(2,ic,iv_loc)**2
         enddo
      enddo
@@ -167,34 +175,30 @@ subroutine cgyro_init_arrays
 
   if (n_field == 1 .or. n_field == 2) then
      do ic=1,nc
-        ir = ir_c(ic) 
-        it = it_c(ic)
-        gcoef(1,ic) = 1.0/(k_perp(it,ir)**2*lambda_debye**2*dens_ele/temp_ele+sum_den_x(ir,it))
+        gcoef(1,ic) = 1.0/(k_perp(ic)**2*lambda_debye**2*&
+             dens_ele/temp_ele+sum_den_x(ic))
      enddo
   endif
 
   if (n_field > 1) then
      do ic=1,nc
-        ir = ir_c(ic) 
-        it = it_c(ic)
-        gcoef(2,ic) = 1.0/(-2.0*k_perp(it,ir)**2*rho**2/betae_unit*dens_ele*temp_ele-sum_cur_x(ir,it))
+        gcoef(2,ic) = 1.0/(-2.0*k_perp(ic)**2*&
+             rho**2/betae_unit*dens_ele*temp_ele-sum_cur_x(ic))
      enddo
   endif
 
   if (n_field > 2) then
-     allocate(poisson_pb11(n_radial,n_theta))
-     allocate(poisson_pb12(n_radial,n_theta))
-     allocate(poisson_pb21(n_radial,n_theta))
-     allocate(poisson_pb22(n_radial,n_theta))
+     allocate(pb11(nc))
+     allocate(pb12(nc))
+     allocate(pb21(nc))
+     allocate(pb22(nc))
 
-     do ir=1,n_radial
-        do it=1,n_theta
-           poisson_pb11(ir,it) = k_perp(it,ir)**2*lambda_debye**2* &
-                dens_ele/temp_ele+sum_den_x(ir,it)
-        enddo
+     do ic=1,nc
+        pb11(ic) = k_perp(ic)**2*lambda_debye**2* &
+             dens_ele/temp_ele+sum_den_x(ic)
      enddo
 
-     sum_loc(:,:)  = 0.0
+     sum_loc(:)  = 0.0
      iv_loc = 0
      do iv=nv1,nv2
         iv_loc = iv_loc+1
@@ -204,23 +208,22 @@ subroutine cgyro_init_arrays
         do ic=1,nc
            ir = ir_c(ic) 
            it = it_c(ic)
-           sum_loc(ir,it) = sum_loc(ir,it)-w_xi(ix)*w_e(ie)*dens(is) &
-                * z(is) *jvec_c(1,ic,iv_loc) * jvec_c(3,ic,iv_loc) &
+           sum_loc(ic) = sum_loc(ic)-w_xi(ix)*w_e(ie)*dens(is) &
+                *z(is)*jvec_c(1,ic,iv_loc)*jvec_c(3,ic,iv_loc) &
                 *z(is)/temp(is)
         enddo
      enddo
      call MPI_ALLREDUCE(sum_loc,&
-          poisson_pb12,&
-          size(poisson_pb12),&
+          pb12,&
+          size(pb12),&
           MPI_DOUBLE_PRECISION,&
           MPI_SUM,&
           NEW_COMM_1,&
           i_err)
 
-     poisson_pb21(:,:) = poisson_pb12(:,:) * (-0.5*betae_unit) &
-          /(dens_ele*temp_ele)
+     pb21(:) = pb12(:)*betae_unit/(-2*dens_ele*temp_ele)
 
-     sum_loc(:,:)  = 0.0
+     sum_loc(:)  = 0.0
      iv_loc = 0
      do iv=nv1,nv2
         iv_loc = iv_loc+1
@@ -230,40 +233,47 @@ subroutine cgyro_init_arrays
         do ic=1,nc
            ir = ir_c(ic) 
            it = it_c(ic)
-           sum_loc(ir,it) = sum_loc(ir,it)+w_xi(ix)*w_e(ie)*dens(is) &
-                * temp(is) * jvec_c(3,ic,iv_loc)**2 &
+           sum_loc(ic) = sum_loc(ic)+w_xi(ix)*w_e(ie)*dens(is) &
+                *temp(is)*jvec_c(3,ic,iv_loc)**2 &
                 *(z(is)/temp(is))**2
         enddo
      enddo
      call MPI_ALLREDUCE(sum_loc,&
-          poisson_pb22,&
-          size(poisson_pb22),&
+          pb22,&
+          size(pb22),&
           MPI_DOUBLE_PRECISION,&
           MPI_SUM,&
           NEW_COMM_1,&
           i_err)
 
-     poisson_pb22(:,:) = 1.0 - poisson_pb22(:,:) &
-          * (-0.5*betae_unit) /(dens_ele*temp_ele) 
+     pb22(:) = 1.0-pb22(:)*betae_unit/(-2*dens_ele*temp_ele) 
 
-     ! determinant
-     sum_loc = poisson_pb11 * poisson_pb22 - poisson_pb12 * poisson_pb21
+     ! Determinant
+     sum_loc = pb11*pb22-pb12*pb21
 
-     poisson_pb11 = poisson_pb11/sum_loc
-     poisson_pb12 = poisson_pb12/sum_loc
-     poisson_pb21 = poisson_pb21/sum_loc
-     poisson_pb22 = poisson_pb22/sum_loc
+     pb11 = pb11/sum_loc
+     pb12 = pb12/sum_loc
+     pb21 = pb21/sum_loc
+     pb22 = pb22/sum_loc
 
-     do ic=1,nc
-        ir = ir_c(ic) 
-        it = it_c(ic)
-        gcoef(3,ic) = poisson_pb11(ir,it)
-        gcoef(1,ic) = poisson_pb22(ir,it)
-        gcoef(4,ic) = -poisson_pb12(ir,it)
-        gcoef(5,ic) = -poisson_pb21(ir,it)
-     enddo
+     gcoef(3,:) = pb11
+     gcoef(1,:) = pb22
+     gcoef(4,:) = -pb12
+     gcoef(5,:) = -pb21
 
+     deallocate(pb11)
+     deallocate(pb12)
+     deallocate(pb21)
+     deallocate(pb22)
   endif
+
+  ! Set selected zeros
+  do ic=1,nc
+     ir = ir_c(ic) 
+     if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
+        gcoef(:,ic) = 0.0
+     endif
+  enddo
   !-------------------------------------------------------------------------
 
   !-------------------------------------------------------------------------
@@ -275,11 +285,11 @@ subroutine cgyro_init_arrays
      hzf(:,:,:) = 0.0      
      do ir=1,n_radial
         do it=1,n_theta
-           hzf(ir,it,it) = k_perp(it,ir)**2 * lambda_debye**2 &
+           hzf(ir,it,it) = k_perp(ic_c(ir,it))**2 * lambda_debye**2 &
                 * dens_ele / temp_ele + sum_den_h
            do jt=1,n_theta
               hzf(ir,it,jt) = hzf(ir,it,jt) &
-                   - dens_ele / temp_ele * w_theta(jt)
+                   - dens_ele/temp_ele*w_theta(jt)
            enddo
         enddo
      enddo
@@ -297,8 +307,8 @@ subroutine cgyro_init_arrays
      xzf(:,:,:) = 0.0     
      do ir=1,n_radial
         do it=1,n_theta
-           xzf(ir,it,it) = k_perp(it,ir)**2 * lambda_debye**2 &
-                * dens_ele / temp_ele + sum_den_x(ir,it)
+           xzf(ir,it,it) = k_perp(ic_c(ir,it))**2 * lambda_debye**2 &
+                * dens_ele / temp_ele + sum_den_x(ic_c(ir,it))
            do jt=1,n_theta
               xzf(ir,it,jt) = xzf(ir,it,jt) &
                    - dens_ele / temp_ele * w_theta(jt)
@@ -322,20 +332,6 @@ subroutine cgyro_init_arrays
   endif
   !-------------------------------------------------------------------------
 
-  ! Field-solve coefficients (i.e., final numerical factors).
-  do ic=1,nc
-     ir = ir_c(ic) 
-     it = it_c(ic)
-     ! Poisson coefficient
-     if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
-        fcoef(:,ic) = 0.0
-        gcoef(:,ic) = 0.0
-     else
-        fcoef(1,ic) = 1.0/(k_perp(it,ir)**2*lambda_debye**2*dens_ele/temp_ele+sum_den_h)
-        if (n_field > 1) fcoef(2,ic) = 1.0/(-2.0*k_perp(it,ir)**2*rho**2/betae_unit*dens_ele*temp_ele)
-        if (n_field > 2) fcoef(3,ic) = -(betae_unit)/(2.0*dens_ele*temp_ele)
-     endif
-  enddo
 
   !-------------------------------------------------------------------------
   ! Streaming arrays

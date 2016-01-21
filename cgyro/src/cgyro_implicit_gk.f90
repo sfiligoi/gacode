@@ -347,7 +347,7 @@ subroutine cgyro_init_implicit_gk
      ir = ir_c(ic) 
      it = it_c(ic)
      fieldmat(id,id) = fieldmat(id,id) &
-          + (k_perp(it,ir)**2*lambda_debye**2* &
+          + (k_perp(ic)**2*lambda_debye**2* &
           dens_ele/temp_ele+sum_den_h)
   enddo
 
@@ -360,7 +360,7 @@ subroutine cgyro_init_implicit_gk
         ir = ir_c(ic) 
         it = it_c(ic)
         fieldmat(id,id) = fieldmat(id,id) &
-             + (2.0*k_perp(it,ir)**2*rho**2 &
+             + (2.0*k_perp(ic)**2*rho**2 &
              /betae_unit*dens_ele*temp_ele)
      enddo
 
