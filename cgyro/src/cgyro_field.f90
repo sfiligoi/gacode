@@ -1,4 +1,14 @@
-!============================================================================================
+!-----------------------------------------------------------------
+! cgyro_field.f90
+!
+! PURPOSE:
+!  Perform field solves for data distributed in both the velocity 
+!  and configuration indices:
+!  
+!  - cgyro_field_v() (configuration distributed)
+!  - cgyro_field_c() (velocity distributed)
+!-----------------------------------------------------------------
+
 ! Velocity (configuration-distributed) field solve
 
 subroutine cgyro_field_v
@@ -63,46 +73,7 @@ subroutine cgyro_field_v
 
   else
 
-     do ir=1,n_radial
-        if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
-           field(1,ic_c(ir,:)) = 0.0
-        else
-           do it=1,n_theta
-              field(1,ic_c(ir,it)) = field(1,ic_c(ir,it)) &
-                   /(k_perp(it,ir)**2*lambda_debye**2* &
-                   dens_ele/temp_ele+sum_den_h)
-           enddo
-        endif
-     enddo
-
-  endif
-
-  ! Ampere LHS factors
-
-  if (n_field > 1) then
-     do ir=1,n_radial
-        if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
-           field(2,ic_c(ir,:)) = 0.0
-        else
-           do it=1,n_theta
-              field(2,ic_c(ir,it)) = field(2,ic_c(ir,it)) &
-                   /(-2.0*k_perp(it,ir)**2*rho**2 &
-                   /betae_unit*dens_ele*temp_ele)
-           enddo
-        endif
-     enddo
-
-     ! Ampere Bpar LHS factors
-     
-     if (n_field > 2) then
-        do ir=1,n_radial
-           if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
-              field(3,ic_c(ir,:)) = 0.0
-           else
-              field(3,ic_c(ir,:)) = field(3,ic_c(ir,:))*(-0.5*betae_unit)/(dens_ele*temp_ele)
-           endif
-        enddo
-     endif
+     field(:,:) = fcoef(:,:)*field(:,:)
 
   endif
 
@@ -124,6 +95,7 @@ subroutine cgyro_field_c
 
   integer :: is, ie, ix, ir, it
   complex :: fac
+  complex, dimension(nc) :: tmp
 
   call timer_lib_in('field_h')
 
@@ -154,11 +126,8 @@ subroutine cgyro_field_c
        NEW_COMM_1,&
        i_err)
 
-  if (n_field > 1) then
-     field(2,:) = -field(2,:)
-  endif
   if (n_field > 2) then
-     field(3,:) = field(3,:)*(-0.5*betae_unit)/(dens_ele*temp_ele)
+     field(3,:) = field(3,:)*fcoef(3,:)
   endif
 
   ! Poisson LHS factors
@@ -181,55 +150,16 @@ subroutine cgyro_field_c
 
   else
 
-     do ir=1,n_radial
+     if (n_field > 2) then
+        tmp(:) = field(1,:)
+        field(1,:) = gcoef(1,:)*field(1,:)+gcoef(4,:)*field(3,:)
+        field(2,:) = gcoef(2,:)*field(2,:)
+        field(3,:) = gcoef(3,:)*field(3,:)+gcoef(5,:)*tmp(:)
+     else
+        field(:,:) = gcoef(:,:)*field(:,:)
+     endif
 
-        if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
-           field(1,ic_c(ir,:)) = 0.0
-           if (n_field > 2) then
-              field(3,ic_c(ir,:)) = 0.0
-           endif
-        else
-
-           if (n_field == 3) then
-              do it=1,n_theta
-                 fac = field(1,ic_c(ir,it))
-
-                 field(1,ic_c(ir,it)) =  poisson_pb22(ir,it)*field(1,ic_c(ir,it)) &
-                      - poisson_pb12(ir,it)*field(3,ic_c(ir,it))
-
-                 field(3,ic_c(ir,it)) =  -poisson_pb21(ir,it)*fac &
-                      + poisson_pb11(ir,it)*field(3,ic_c(ir,it))
-              enddo
-
-           else
-              do it=1,n_theta
-                 field(1,ic_c(ir,it)) = field(1,ic_c(ir,it)) &
-                      /(k_perp(it,ir)**2*lambda_debye**2* &
-                      dens_ele/temp_ele+sum_den_x(ir,it))
-              enddo
-           endif
-
-        endif
-     enddo
   endif
-
-  ! Ampere LHS factors
-
-  if (n_field > 1) then
-     do ir=1,n_radial
-        if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
-           field(2,ic_c(ir,:)) = 0.0
-        else
-           do it=1,n_theta
-              field(2,ic_c(ir,it)) = field(2,ic_c(ir,it)) &
-                   /(2.0*k_perp(it,ir)**2*rho**2/betae_unit & 
-                   *dens_ele*temp_ele+sum_cur_x(ir,it))
-           enddo
-        endif
-     enddo
-  endif
-
-  ! Compute H given h and [phi(h), apar(h)]
 
   iv_loc = 0
   do iv=nv1,nv2

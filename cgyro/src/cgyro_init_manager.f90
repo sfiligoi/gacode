@@ -83,6 +83,12 @@ subroutine cgyro_init_manager
      call timer_lib_in('str_init')
 
      ! Global (undistributed) arrays
+     allocate(fcoef(n_field,nc))
+     if (n_field < 3) then
+        allocate(gcoef(n_field,nc))
+     else
+        allocate(gcoef(5,nc))
+     endif
      allocate(field(n_field,nc))
      allocate(field_loc(n_field,nc))
      allocate(field_old(n_field,nc))

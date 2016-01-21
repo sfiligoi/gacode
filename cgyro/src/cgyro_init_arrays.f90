@@ -165,6 +165,22 @@ subroutine cgyro_init_arrays
 
   endif
 
+  if (n_field == 1) then
+     do ic=1,nc
+        ir = ir_c(ic) 
+        it = it_c(ic)
+        gcoef(1,ic) = 1.0/(k_perp(it,ir)**2*lambda_debye**2*dens_ele/temp_ele+sum_den_x(ir,it))
+     enddo
+  endif
+
+  if (n_field > 1) then
+     do ic=1,nc
+        ir = ir_c(ic) 
+        it = it_c(ic)
+        gcoef(2,ic) = 1.0/(-2.0*k_perp(it,ir)**2*rho**2/betae_unit*dens_ele*temp_ele-sum_cur_x(ir,it))
+     enddo
+  endif
+
   if (n_field > 2) then
      allocate(poisson_pb11(n_radial,n_theta))
      allocate(poisson_pb12(n_radial,n_theta))
@@ -238,8 +254,16 @@ subroutine cgyro_init_arrays
      poisson_pb21 = poisson_pb21/sum_loc
      poisson_pb22 = poisson_pb22/sum_loc
 
-  endif
+     do ic=1,nc
+        ir = ir_c(ic) 
+        it = it_c(ic)
+        gcoef(3,ic) = poisson_pb11(ir,it)
+        gcoef(1,ic) = poisson_pb22(ir,it)
+        gcoef(4,ic) = -poisson_pb12(ir,it)
+        gcoef(5,ic) = -poisson_pb21(ir,it)
+     enddo
 
+  endif
   !-------------------------------------------------------------------------
 
   !-------------------------------------------------------------------------
@@ -297,6 +321,21 @@ subroutine cgyro_init_arrays
 
   endif
   !-------------------------------------------------------------------------
+
+  ! Field-solve coefficients (i.e., final numerical factors).
+  do ic=1,nc
+     ir = ir_c(ic) 
+     it = it_c(ic)
+     ! Poisson coefficient
+     if (n == 0 .and. (px(ir) == 0 .or. ir == 1) .and. zf_test_flag == 0) then
+        fcoef(:,ic) = 0.0
+        gcoef(:,ic) = 0.0
+     else
+        fcoef(1,ic) = 1.0/(k_perp(it,ir)**2*lambda_debye**2*dens_ele/temp_ele+sum_den_h)
+        if (n_field > 1) fcoef(2,ic) = 1.0/(-2.0*k_perp(it,ir)**2*rho**2/betae_unit*dens_ele*temp_ele)
+        if (n_field > 2) fcoef(3,ic) = -(betae_unit)/(2.0*dens_ele*temp_ele)
+     endif
+  enddo
 
   !-------------------------------------------------------------------------
   ! Streaming arrays
