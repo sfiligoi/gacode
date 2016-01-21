@@ -165,7 +165,7 @@ subroutine cgyro_init_arrays
 
   endif
 
-  if (n_field == 1) then
+  if (n_field == 1 .or. n_field == 2) then
      do ic=1,nc
         ir = ir_c(ic) 
         it = it_c(ic)
