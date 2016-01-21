@@ -14,7 +14,8 @@ subroutine tglf_run_nn()
 
   implicit none
 
-  real :: OUT_ENERGY_FLUX_1
+  real :: OUT_ENERGY_FLUX_1, OUT_PARTICLE_FLUX_1, OUT_STRESS_TOR_1
+  real :: OUT_ENERGY_FLUX_3, OUT_PARTICLE_FLUX_3, OUT_STRESS_TOR_3
 
   integer :: i_ion,n
   complex :: xi=(0.0,1.0)
@@ -141,7 +142,7 @@ subroutine tglf_run_nn()
      
      write (14,*) '1' 
 
-     write (14,"(15(f6.3,x))") tglf_as_in(2)*2, tglf_as_in(3), tglf_betae_in, &
+     write (14,"(15(f6.3,x))") tglf_as_in(2), tglf_as_in(3), tglf_betae_in, &
                              tglf_delta_loc_in, tglf_kappa_loc_in, tglf_q_loc_in, &
                              tglf_q_prime_loc_in, tglf_rlns_in(1), tglf_rlts_in(1), &
 		             tglf_rlts_in(2), tglf_rmaj_loc_in, tglf_rmin_loc_in, &
@@ -178,9 +179,17 @@ subroutine tglf_run_nn()
      
      open (unit=15, file="output.avg", action="read")
      
-     read(15,*) n, OUT_ENERGY_FLUX_1
-     write(*,*) 'Result=', OUT_ENERGY_FLUX_1
-     
+     read(15,*) n, OUT_ENERGY_FLUX_1, OUT_ENERGY_FLUX_3, &
+                   OUT_PARTICLE_FLUX_1, OUT_PARTICLE_FLUX_3, &
+	           OUT_STRESS_TOR_1, OUT_STRESS_TOR_3   
+		   
+     write(*,*) 'ELECTRON ENERGY FLUX=', OUT_ENERGY_FLUX_1
+     write(*,*) 'ION ENERGY FLUX=', OUT_ENERGY_FLUX_3
+     write(*,*) 'ELECTRON PARTICLE FLUX=', OUT_PARTICLE_FLUX_1
+     write(*,*) 'ION PARTICLE FLUX=', OUT_PARTICLE_FLUX_3
+     write(*,*) 'ELECTRON MOMENTUM FLUX=', OUT_STRESS_TOR_1
+     write(*,*) 'ION MOMENTUM FLUX=', OUT_STRESS_TOR_3
+               
      close(15)
      
      !---------------------------------------------
@@ -189,21 +198,15 @@ subroutine tglf_run_nn()
      ! Electrons
 
      ! Gammae/Gamma_GB
-     tglf_elec_pflux_out = get_particle_flux(1,1)  &
-          + get_particle_flux(1,2)                 &
-          + get_particle_flux(1,3)
+     tglf_elec_pflux_out = OUT_PARTICLE_FLUX_1
 
      ! Qe/Q_GB
-     tglf_elec_eflux_low_out = get_q_low(1)
+     tglf_elec_eflux_low_out = OUT_ENERGY_FLUX_1
         ! _low already included EM terms
-     tglf_elec_eflux_out     = get_energy_flux(1,1) &
-          + get_energy_flux(1,2)                    &
-          + get_energy_flux(1,3)
+     tglf_elec_eflux_out     = OUT_ENERGY_FLUX_1
 
      ! Pi_e/Pi_GB
-     tglf_elec_mflux_out = get_stress_tor(1,1)   &
-          + get_stress_tor(1,2)                  &
-          + get_stress_tor(1,3)
+     tglf_elec_mflux_out = OUT_STRESS_TOR_1
 
      ! S_e/S_GB
      tglf_elec_expwd_out = get_exchange(1,1)  &
@@ -215,21 +218,15 @@ subroutine tglf_run_nn()
      do i_ion=1,5
 
         ! Gammai/Gamma_GB
-        tglf_ion_pflux_out(i_ion) = get_particle_flux(i_ion+1,1) &
-             + get_particle_flux(i_ion+1,2)                      &
-             + get_particle_flux(i_ion+1,3)
+        tglf_ion_pflux_out(i_ion) = OUT_PARTICLE_FLUX_3
 
         ! Qi/Q_GB
-        tglf_ion_eflux_low_out(i_ion) = get_q_low(i_ion+1)
-        ! _low already included EM terms
-        tglf_ion_eflux_out(i_ion)     = get_energy_flux(i_ion+1,1) &
-             + get_energy_flux(i_ion+1,2)                          &
-             + get_energy_flux(i_ion+1,3)
+        tglf_ion_eflux_low_out(i_ion) = OUT_ENERGY_FLUX_3
+           ! _low already included EM terms
+        tglf_ion_eflux_out(i_ion)     = OUT_ENERGY_FLUX_3
 
         ! Pi_i/Pi_GB
-        tglf_ion_mflux_out(i_ion) = get_stress_tor(i_ion+1,1)  &
-             + get_stress_tor(i_ion+1,2)                       &
-             + get_stress_tor(i_ion+1,3)
+        tglf_ion_mflux_out(i_ion) = OUT_STRESS_TOR_3
 
         ! S_i/S_GB
         tglf_ion_expwd_out(i_ion) = get_exchange(i_ion+1,1)    &
