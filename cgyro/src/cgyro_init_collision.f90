@@ -79,6 +79,7 @@ subroutine cgyro_init_collision
            case (3)
 
               ! Reduced Hirshman-Sigmar model
+              ! (Fix for underflow)
               nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
                    * (exp(-xb*xb)/(xb*sqrt(pi)) &
                    + (1.0-1.0/(2.0*xb*xb)) * erf(xb))
@@ -90,6 +91,7 @@ subroutine cgyro_init_collision
            case(4)
 
               ! Ad hoc op
+              ! (Fix for underflow)
               nu_d(ie,is,js) = tauinv_ab * (1.0/xa**3) &
                    * (exp(-xb*xb)/(xb*sqrt(pi)) &
                    + (1.0-1.0/(2.0*xb*xb)) * erf(xb))
