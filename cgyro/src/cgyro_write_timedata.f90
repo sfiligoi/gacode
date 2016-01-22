@@ -30,6 +30,8 @@ subroutine cgyro_write_timedata
   endif
   !---------------------------------------------------------------------------
 
+  call cgyro_flux
+
   if (nonlinear_flag == 1) then
 
      ! Density flux for all species

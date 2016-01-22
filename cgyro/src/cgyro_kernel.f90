@@ -81,8 +81,7 @@ subroutine cgyro_kernel
      !------------------------------------------------------------
      ! Diagnostics
      !
-     ! Fluxes
-     call cgyro_flux
+     ! NOTE: Fluxes are calculated in cgyro_write_timedata
 
      ! Error estimate
      call cgyro_error_estimate
