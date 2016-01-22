@@ -175,7 +175,7 @@ subroutine tglf_run_nn()
      write (*,*) 'DRMAJDX_LOC=', tglf_drmajdx_loc_in
      
      
-     CALL SYSTEM('./run.exe brainfuse_0.net input.dat')
+     CALL SYSTEM('./run.exe ./nnets/brainfuse_* input.dat')
      
      open (unit=15, file="output.avg", action="read")
      
