@@ -9,9 +9,12 @@ subroutine cgyro_step_collision
 
   integer :: is,ir,it,ie,ix
   integer :: ivp
+  complex, dimension(size(cap_h_v,2),nc1:nc2) :: cvecm
+  complex, dimension(size(cap_h_v,2),nc1:nc2) :: bvecm
 
   ! compute new collisional cap_H: H = h + ze/T G phi
   ! assumes have cap_h_x
+
 
   call timer_lib_in('coll_comm')
   call parallel_lib_r(transpose(cap_h_c),cap_h_v)
@@ -19,28 +22,44 @@ subroutine cgyro_step_collision
 
   call timer_lib_in('coll')
 
-!$omp parallel private(ic_loc,cvec,bvec,ivp,iv)
+#ifdef _OPENACC
+!$acc  data present(cmat) &
+!$acc& pcreate(bvecm,cvecm)  pcopy(cap_h_v)
+
+!$acc  parallel 
+!$acc  loop gang private(ic_loc,ivp,iv)
+#else
+!$omp parallel private(ic_loc,ivp,iv)
 !$omp do
+#endif
   do ic=nc1,nc2
-     ic_loc = ic_locv(ic)
+     ! ic_loc = ic_locv(ic)
+     ic_loc = ic-nc1+1
 
      ! Set-up the RHS: H = f + ze/T G phi
 
-     cvec(:) = cap_h_v(ic_loc,:)
+     cvecm(:,ic) = cap_h_v(ic_loc,:)
 
      ! This is a key loop for performance
-     bvec = (0.0,0.0)
+     bvecm(:,ic) = (0.0,0.0)
      do ivp=1,nv
+!$acc   loop vector
         do iv=1,nv
-           bvec(iv) = bvec(iv)+cmat(iv,ivp,ic_loc)*cvec(ivp)
+           bvecm(iv,ic) = bvecm(iv,ic)+ &
+                               cmat(iv,ivp,ic_loc)*cvecm(ivp,ic)
         enddo
      enddo
 
-     cap_h_v(ic_loc,:) = bvec(:)
+     cap_h_v(ic_loc,:) = bvecm(:,ic)
 
   enddo
+#ifdef _OPENACC
+!$acc end parallel
+!$acc end data
+#else
 !$omp end do
 !$omp end parallel
+#endif
 
   call timer_lib_out('coll')
 
@@ -77,6 +96,7 @@ subroutine cgyro_step_collision
 
      enddo
   enddo
+
 
   call timer_lib_out('coll')
 
