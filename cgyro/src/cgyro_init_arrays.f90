@@ -101,17 +101,10 @@ subroutine cgyro_init_arrays
 
   iv_loc = 0
   do iv=nv1,nv2
-
      iv_loc = iv_loc+1
-
-     is = is_v(iv)
-     ix = ix_v(iv)
-     ie = ie_v(iv)
-
      do ic=1,nc
         sum_loc(ic) = sum_loc(ic)+vfac(iv_loc)*(1.0-jvec_c(1,ic,iv_loc)**2) 
      enddo
-
   enddo
 
   call MPI_ALLREDUCE(sum_loc,&
@@ -145,21 +138,13 @@ subroutine cgyro_init_arrays
   if (n_field > 1) then
 
      allocate(sum_cur_x(nc))
-
-     sum_loc(:)  = 0.0
+     sum_loc(:) = 0.0
 
      iv_loc = 0
      do iv=nv1,nv2
-
         iv_loc = iv_loc+1
-
-        is = is_v(iv)
-        ix = ix_v(iv)
-        ie = ie_v(iv)
-
         do ic=1,nc
-           sum_loc(ic) = sum_loc(ic)+vfac(iv_loc) &
-                *jvec_c(2,ic,iv_loc)**2
+           sum_loc(ic) = sum_loc(ic)+vfac(iv_loc)*jvec_c(2,ic,iv_loc)**2
         enddo
      enddo
 
@@ -213,6 +198,7 @@ subroutine cgyro_init_arrays
                 *z(is)/temp(is)
         enddo
      enddo
+
      call MPI_ALLREDUCE(sum_loc,&
           pb12,&
           size(pb12),&

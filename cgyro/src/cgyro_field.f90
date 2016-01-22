@@ -81,7 +81,7 @@ subroutine cgyro_field_v
 
 end subroutine cgyro_field_v
 
-!============================================================================================
+
 ! Configuration (velocity-distributed) field solve
 
 subroutine cgyro_field_c
@@ -103,11 +103,10 @@ subroutine cgyro_field_c
 
   ! Poisson and Ampere RHS integrals of h
 
-  iv_loc = 0
+!$omp parallel private(ic,iv_loc,is,ix,ie)
+!$omp do reduction(+:field_loc)
   do iv=nv1,nv2
-
-     iv_loc = iv_loc+1
-
+     iv_loc = iv_locv(iv)
      is = is_v(iv)
      ix = ix_v(iv)
      ie = ie_v(iv)
@@ -117,6 +116,8 @@ subroutine cgyro_field_c
         field_loc(:,ic) = field_loc(:,ic)+jvec_c(:,ic,iv_loc)*fac
      enddo
   enddo
+!$omp end do
+!$omp end parallel
 
   call MPI_ALLREDUCE(field_loc(:,:),&
        field(:,:),&
