@@ -112,6 +112,14 @@ subroutine tgyro_iteration_driver
      ! Step-length for Jacobian
      dx = loc_dx/r_min
 
+  else if (lpath(1:7) == "TGLF_NN") then
+
+     ! TGLF_NN
+     flux_method = 5
+
+     ! Step-length for Jacobian
+     dx = loc_dx/r_min
+
   else if (lpath(1:4) == "TGLF") then
 
      ! TGLF

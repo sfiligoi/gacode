@@ -10,12 +10,14 @@ subroutine tglf_run_nn()
 
   use tglf_pkg
   use tglf_interface
-  use tglf_mpi
 
   implicit none
 
   real :: OUT_ENERGY_FLUX_1, OUT_PARTICLE_FLUX_1, OUT_STRESS_TOR_1
   real :: OUT_ENERGY_FLUX_3, OUT_PARTICLE_FLUX_3, OUT_STRESS_TOR_3
+  real :: STD_0, STD_1, STD_2, STD_3, STD_4, STD_5
+  real :: LIM_0, LIM_1, LIM_2, LIM_3, LIM_4, LIM_5, LIM_6, LIM_7
+  real :: LIM_8, LIM_9, LIM_10, LIM_11, LIM_12, LIM_13, LIM_14 
 
   integer :: i_ion,n
   complex :: xi=(0.0,1.0)
@@ -138,7 +140,7 @@ subroutine tglf_run_nn()
 
      !call tglf_tm_mpi
      
-     open (unit=14, file="input.dat", action="write")
+     open (unit=14, file=TRIM(tglf_path_in)//"input.dat", action="write")
      
      write (14,*) '1' 
 
@@ -175,9 +177,9 @@ subroutine tglf_run_nn()
      write (*,*) 'DRMAJDX_LOC=', tglf_drmajdx_loc_in
      
      
-     CALL SYSTEM('./run.exe ./nnets/brainfuse_* input.dat')
+     CALL SYSTEM('cd '//TRIM(tglf_path_in)//' ;/u/ludat/tmp/tglf01/run.exe /u/ludat/tmp/tglf01/nnets/brainfuse_* input.dat')
      
-     open (unit=15, file="output.avg", action="read")
+     open (unit=15, file=TRIM(tglf_path_in)//"output.avg", action="read")
      
      read(15,*) n, OUT_ENERGY_FLUX_1, OUT_ENERGY_FLUX_3, &
                    OUT_PARTICLE_FLUX_1, OUT_PARTICLE_FLUX_3, &
@@ -191,6 +193,20 @@ subroutine tglf_run_nn()
      write(*,*) 'ION MOMENTUM FLUX=', OUT_STRESS_TOR_3
                
      close(15)
+     
+     open (unit=16, file=TRIM(tglf_path_in)//"output.std", action="read")
+     open (unit=17, file=TRIM(tglf_path_in)//"input.lim", action="read")
+
+     read(16,*) n, STD_0, STD_1, STD_2, STD_3, STD_4, STD_5
+     read(17,*) n, LIM_0, LIM_1, LIM_2, LIM_3, LIM_4, LIM_5, LIM_6, &
+                LIM_7, LIM_8, LIM_9, LIM_10, LIM_11, LIM_12, LIM_13, LIM_14
+		
+     write(*,*) 'Standard deviation=', STD_4	
+     write(*,*) 'Lim=', LIM_4	
+
+     close(16)
+     close(17)
+     
      
      !---------------------------------------------
      ! Output (normalized to Q_GB)
@@ -237,18 +253,7 @@ subroutine tglf_run_nn()
      
   else
 
-     ! Run single-ky linear stability
-     call tglf_ky
-
-     ! Collect linear eigenvalues
-     do n=1,tglf_nmodes_in
-        tglf_eigenvalue_out(n) = get_frequency(n) + xi*get_growthrate(n)
-     enddo
-
-     ! Print eigenfunction if flag set
-     if (iProcTglf == iProc0Tglf .and. tglf_write_wavefunction_flag_in == 1) then
-        call write_wavefunction_out(trim(tglf_path_in)//'out.tglf.wavefunction')
-     endif
+     stop
 
   endif
 
