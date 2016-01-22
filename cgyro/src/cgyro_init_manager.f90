@@ -65,7 +65,7 @@ subroutine cgyro_init_manager
   allocate(thetab(n_radial/box_size,n_theta))
   allocate(w_theta(n_theta))
   allocate(bmag(n_theta))
-  allocate(k_perp(n_theta,n_radial))
+  allocate(k_perp(nc))
   allocate(omega_stream(n_theta,n_species))
   allocate(omega_trap(n_theta,n_species))
   allocate(omega_rdrift(n_theta,n_species))

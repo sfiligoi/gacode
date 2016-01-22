@@ -327,9 +327,7 @@ module cgyro_globals
   ! Some field solve parameters
   !
   real :: sum_den_h
-  real, dimension(:,:), allocatable :: sum_den_x, sum_cur_x
-  real, dimension(:,:), allocatable :: poisson_pb11, poisson_pb12, &
-       poisson_pb21, poisson_pb22
+  real, dimension(:), allocatable :: sum_den_x, sum_cur_x
   !
   ! n=0 test variables
   !
@@ -346,7 +344,7 @@ module cgyro_globals
   real :: d_theta
   real, dimension(:,:), allocatable   :: thetab
   real, dimension(:), allocatable   :: w_theta
-  real, dimension(:,:), allocatable :: k_perp    
+  real, dimension(:), allocatable :: k_perp    
   real, dimension(:), allocatable   :: bmag
   real, dimension(:,:), allocatable :: omega_stream
   real, dimension(:,:), allocatable :: omega_trap
