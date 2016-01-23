@@ -58,18 +58,18 @@ subroutine cgyro_nl_fftw(ij)
      gy = 0.0
 
      ! Array mapping
-     do in=1,n_toroidal
-        iy = in-1
-        do ir=1,n_radial
-           p  = ir-1-nx0/2
-           ix = p
-           if (ix < 0) ix = ix+nx  
-           f0 = f_nl(ir,j,in)
-           g0 = g_nl(ir,j,in)
-           fx(iy,ix) = i_c*p*f0
-           gx(iy,ix) = i_c*p*g0
-           fy(iy,ix) = i_c*iy*f0
-           gy(iy,ix) = i_c*iy*g0
+     do ir=1,n_radial
+        p  = ir-1-nx0/2
+        ix = p
+        if (ix < 0) ix = ix+nx  
+        do in=1,n_toroidal
+           iy = in-1
+           f0 = i_c*f_nl(ir,j,in)
+           g0 = i_c*g_nl(ir,j,in)
+           fx(iy,ix) = p*f0
+           gx(iy,ix) = p*g0
+           fy(iy,ix) = iy*f0
+           gy(iy,ix) = iy*g0
         enddo
      enddo
 
@@ -106,7 +106,7 @@ subroutine cgyro_nl_fftw(ij)
   enddo ! j
 !$omp end do
 !$omp end parallel
-  
+
   call timer_lib_out('nl')
 
   call timer_lib_in('nl_comm')
