@@ -241,12 +241,14 @@ subroutine cgyro_init_arrays
      ! Determinant
      do ic=1,nc
      if (k_perp(ic) > 0.0) then
-        sum_loc = pb11*pb22-pb12*pb21
+        sum_loc(ic) = pb11(ic)*pb22(ic)-pb12(ic)*pb21(ic)
      else
-        sum_loc = 1.0
+        sum_loc(ic) = 1.0
      endif
      enddo
-        
+
+     print *,sum_loc
+     
      pb11 = pb11/sum_loc
      pb12 = pb12/sum_loc
      pb21 = pb21/sum_loc
