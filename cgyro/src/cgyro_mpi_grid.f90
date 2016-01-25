@@ -65,6 +65,31 @@ subroutine cgyro_mpi_grid
   allocate(ic_c(n_radial,n_theta))
   allocate(iv_v(n_energy,n_xi,n_species))
 
+    ! Velocity pointers
+  iv = 0
+  do ie=1,n_energy
+     do ix=1,n_xi
+        do is=1,n_species
+           iv = iv+1
+           ie_v(iv) = ie
+           ix_v(iv) = ix
+           is_v(iv) = is
+           iv_v(ie,ix,is) = iv
+        enddo
+     enddo
+  enddo
+
+  ! Configuration pointers
+  ic = 0
+  do ir=1,n_radial
+     do it=1,n_theta
+        ic = ic+1
+        ir_c(ic) = ir
+        it_c(ic) = it
+        ic_c(ir,it) = ic
+     enddo
+  enddo
+
   if (test_flag == 1) return
 
   !-------------------------------------------------------------
@@ -125,31 +150,6 @@ subroutine cgyro_mpi_grid
   call MPI_COMM_RANK(NEW_COMM_2,i_proc_2,i_err)
   !
   !-----------------------------------------------------------
-
-  ! Velocity pointers
-  iv = 0
-  do ie=1,n_energy
-     do ix=1,n_xi
-        do is=1,n_species
-           iv = iv+1
-           ie_v(iv) = ie
-           ix_v(iv) = ix
-           is_v(iv) = is
-           iv_v(ie,ix,is) = iv
-        enddo
-     enddo
-  enddo
-
-  ! Configuration pointers
-  ic = 0
-  do ir=1,n_radial
-     do it=1,n_theta
-        ic = ic+1
-        ir_c(ic) = ir
-        it_c(ic) = it
-        ic_c(ir,it) = ic
-     enddo
-  enddo
 
   ! Linear parallelization dimensions
 

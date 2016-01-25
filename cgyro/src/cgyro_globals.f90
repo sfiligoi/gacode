@@ -370,5 +370,7 @@ module cgyro_globals
 
   integer :: n_omp
   integer, dimension(:), allocatable :: ic_locv,iv_locv
+
+  real :: total_memory
   
 end module cgyro_globals

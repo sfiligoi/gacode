@@ -14,6 +14,7 @@ OBJECTS = cgyro_globals.o \
           cgyro_io.o \
           cgyro_equilibrium.o \
           cgyro_check.o \
+	  cgyro_check_memory.o \
           cgyro_error_estimate.o \
           cgyro_field.o \
           cgyro_flux.o \
