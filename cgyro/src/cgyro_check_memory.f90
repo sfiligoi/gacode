@@ -53,6 +53,28 @@ subroutine cgyro_check_memory(data_file)
      call alloc_add(io,nc,8,'sum_den_x')
      call alloc_add(io,nc,8,'sum_cur_x')
 
+      if(nonlinear_flag == 1) then
+        write(io,*)
+        write(io,*) 'nonlinear'
+        write(io,*)
+        ! nsplit * n_toroidal = nv_loc * n_theta
+        if(nonlinear_method /= 1) then
+           nx0 = n_radial
+           ny0 = 2*n_toroidal-1
+           nx = (3*nx0)/2
+           ny = (3*ny0)/2
+           call alloc_add(io,(ny/2_1)*nx,16,'fx')
+           call alloc_add(io,(ny/2_1)*nx,16,'gx')
+           call alloc_add(io,(ny/2_1)*nx,16,'fy')
+           call alloc_add(io,(ny/2_1)*nx,16,'gy')
+           call alloc_add(io,ny*nx,8,'ux')
+           call alloc_add(io,ny*nx,8,'vx')
+           call alloc_add(io,ny*nx,8,'uy')
+           call alloc_add(io,ny*nx,8,'vy')
+           call alloc_add(io,ny*nx,8,'uv')
+        endif
+     endif
+     
      if(implicit_flag == 1) then
         write(io,*)
         write(io,*) 'implicit gk'
@@ -115,19 +137,6 @@ subroutine cgyro_check_memory(data_file)
         else
            call alloc_add(io,n_radial*nsplit*n_toroidal,16,'f_nl')
            call alloc_add(io,n_radial*nsplit*n_toroidal,16,'g_nl')
-           nx0 = n_radial
-           ny0 = 2*n_toroidal-1
-           nx = (3*nx0)/2
-           ny = (3*ny0)/2
-           call alloc_add(io,(ny/2_1)*nx,16,'fx')
-           call alloc_add(io,(ny/2_1)*nx,16,'gx')
-           call alloc_add(io,(ny/2_1)*nx,16,'fy')
-           call alloc_add(io,(ny/2_1)*nx,16,'gy')
-           call alloc_add(io,ny*nx,8,'ux')
-           call alloc_add(io,ny*nx,8,'vx')
-           call alloc_add(io,ny*nx,8,'uy')
-           call alloc_add(io,ny*nx,8,'vy')
-           call alloc_add(io,ny*nx,8,'uv')
         endif
      endif
 
