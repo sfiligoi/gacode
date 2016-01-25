@@ -64,18 +64,19 @@ subroutine cgyro_rhs(ij)
   complex :: rhs_ij(size(rhs,2),size(rhs,3))
 
   ! Prepare suitable distribution (g, not h) for conservative upwind method
+!$omp workshare
   g_x(:,:) = h_x(:,:)
+!$omp end workshare
   if (n_field > 1) then
-!$omp  parallel do collapse(2) &
+!$omp  parallel do  &
 !$omp& private(iv,ic,iv_loc,is,ir,it)
      do iv=nv1,nv2
-     do ic=1,nc
         ! iv_loc = iv_locv(iv)
         iv_loc = iv-nv1+1
         is = is_v(iv)
         do ic=1,nc
            g_x(ic,iv_loc) = g_x(ic,iv_loc)+ & 
-                z(is)/temp(is)*jvec_c(2,ic,iv_loc)*field(2,ic)
+                (z(is)/temp(is))*jvec_c(2,ic,iv_loc)*field(2,ic)
         enddo
      enddo
   endif
@@ -86,14 +87,13 @@ subroutine cgyro_rhs(ij)
 
   call timer_lib_in('str')
 
-<<<<<<< HEAD
 !$acc data  &
 !$acc& pcopyout(rhs_ij) &
 !$acc& pcopyin(h_x,field,cap_h_c) &
 !$acc& present(is_v,ix_v,ie_v,ir_c,it_c) &
 !$acc& present(omega_cap_h,omega_h,omega_s) &
 !$acc& present(omega_stream,energy,xi) &
-!$acc& present(thcyc,rcyc,ic_c,dtheta,dtheta_up)
+!$acc& present(thcyc,ic_c,dtheta,dtheta_up)
 
 !$acc kernels
 !  rhs(ij,:,:) = (0.0,0.0)
