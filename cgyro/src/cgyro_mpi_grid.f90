@@ -65,6 +65,33 @@ subroutine cgyro_mpi_grid
   allocate(ic_c(n_radial,n_theta))
   allocate(iv_v(n_energy,n_xi,n_species))
 
+    ! Velocity pointers
+  iv = 0
+  do ie=1,n_energy
+     do ix=1,n_xi
+        do is=1,n_species
+           iv = iv+1
+           ie_v(iv) = ie
+           ix_v(iv) = ix
+           is_v(iv) = is
+           iv_v(ie,ix,is) = iv
+        enddo
+     enddo
+  enddo
+!$acc enter data copyin(ie_v,ix_v,is_v,iv_v)
+
+  ! Configuration pointers
+  ic = 0
+  do ir=1,n_radial
+     do it=1,n_theta
+        ic = ic+1
+        ir_c(ic) = ir
+        it_c(ic) = it
+        ic_c(ir,it) = ic
+     enddo
+  enddo
+!$acc enter data copyin(ir_c,it_c,ic_c)
+
   if (test_flag == 1) return
 
   !-------------------------------------------------------------
@@ -126,33 +153,6 @@ subroutine cgyro_mpi_grid
   !
   !-----------------------------------------------------------
 
-  ! Velocity pointers
-  iv = 0
-  do ie=1,n_energy
-     do ix=1,n_xi
-        do is=1,n_species
-           iv = iv+1
-           ie_v(iv) = ie
-           ix_v(iv) = ix
-           is_v(iv) = is
-           iv_v(ie,ix,is) = iv
-        enddo
-     enddo
-  enddo
-!$acc enter data copyin(ie_v,ix_v,is_v,iv_v)
-
-  ! Configuration pointers
-  ic = 0
-  do ir=1,n_radial
-     do it=1,n_theta
-        ic = ic+1
-        ir_c(ic) = ir
-        it_c(ic) = it
-        ic_c(ir,it) = ic
-     enddo
-  enddo
-!$acc enter data copyin(ir_c,it_c,ic_c)
-
   ! Linear parallelization dimensions
 
   ! ni -> nc
@@ -189,6 +189,7 @@ subroutine cgyro_mpi_grid
      iv_loc = iv_loc+1
      iv_locv(iv) = iv_loc
   enddo
+!$acc enter data copy(ic_locv,iv_locv)
 end subroutine cgyro_mpi_grid
 
 subroutine gcd(m,n,d)
@@ -218,26 +219,3 @@ subroutine gcd(m,n,d)
   d = b
 
 end subroutine gcd
-
-subroutine looplimits(mythd,nthds,i1,i2,ibeg,iend)
-
-  implicit none
-  integer, intent(in) :: mythd, nthds, i1, i2
-  integer, intent(out) :: ibeg, iend
-  integer :: nwork, chunk, extra, ntcut  
-
-  nwork = i2 - i1 + 1
-  chunk = nwork/nthds
-  extra = nwork - nthds*chunk
-  ntcut = nthds - extra
-  if (mythd < ntcut) then
-    ibeg = i1 + mythd*chunk
-    iend = ibeg + chunk - 1
-  else
-    ibeg = i1 + ntcut*chunk + (mythd - ntcut)*(chunk + 1)
-    iend = ibeg + chunk
-  end if
-  if (iend > i2) iend = i2
-
-end subroutine looplimits
-
