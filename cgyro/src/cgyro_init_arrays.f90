@@ -62,9 +62,9 @@ subroutine cgyro_init_arrays
 
   enddo
   deallocate(jloc_c)
-  call parallel_lib_r_real(transpose(jvec_c(1,:,:)),jvec_v(1,:,:))
-  if (n_field > 1) call parallel_lib_r_real(transpose(jvec_c(2,:,:)),jvec_v(2,:,:))
-  if (n_field > 2) call parallel_lib_r_real(transpose(jvec_c(3,:,:)),jvec_v(3,:,:))
+  call parallel_lib_rtrans_real(jvec_c(1,:,:),jvec_v(1,:,:))
+  if (n_field > 1) call parallel_lib_rtrans_real(jvec_c(2,:,:),jvec_v(2,:,:))
+  if (n_field > 2) call parallel_lib_rtrans_real(jvec_c(3,:,:),jvec_v(3,:,:))
 
   !-------------------------------------------------------------------------
 

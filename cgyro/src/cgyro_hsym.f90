@@ -20,7 +20,7 @@ subroutine cgyro_hsym
   integer :: is,ie,ix
   complex, dimension(nc_loc) :: tmp
 
-  call parallel_lib_r(transpose(g_x),cap_h_v)
+  call parallel_lib_rtrans(g_x,cap_h_v)
   cap_h_v_prime(:,:) = (0.0,0.0)
 
   do is=1,n_species

@@ -14,7 +14,7 @@ subroutine cgyro_step_collision
   ! assumes have cap_h_x
 
   call timer_lib_in('coll_comm')
-  call parallel_lib_r(transpose(cap_h_c),cap_h_v)
+  call parallel_lib_rtrans(cap_h_c,cap_h_v)
   call timer_lib_out('coll_comm')
 
   call timer_lib_in('coll')
