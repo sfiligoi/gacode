@@ -12,6 +12,7 @@ export `grep PER_NODE $GACODE_ROOT/shared/install/make.inc.$GACODE_PLATFORM`
 
 # Total omp threads (used plus idle)
 nomptot=$(($nomp+$nidle))
+echo $nomptot
 
 # Default to densely-packed pure-MPI.
 if [ $numa -eq 0 ]
