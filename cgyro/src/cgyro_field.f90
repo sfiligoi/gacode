@@ -103,7 +103,7 @@ subroutine cgyro_field_c
 
   ! Poisson and Ampere RHS integrals of h
 
-!$omp parallel private(ic,iv_loc,is,ix,ie)
+!$omp parallel private(ic,iv_loc,is,ix,ie,fac)
 !$omp do reduction(+:field_loc)
   do iv=nv1,nv2
      iv_loc = iv_locv(iv)
