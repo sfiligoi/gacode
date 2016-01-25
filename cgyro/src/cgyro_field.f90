@@ -257,7 +257,7 @@ subroutine cgyro_field_c
 
         psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(ir,it,:))
 
-        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+psi(ic,iv_loc)*z(is)/temp(is)
+        cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+psi(ic,iv_loc)*(z(is)/temp(is))
 
      enddo
   enddo

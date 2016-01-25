@@ -139,6 +139,7 @@ subroutine cgyro_mpi_grid
         enddo
      enddo
   enddo
+!$acc enter data copyin(ie_v,ix_v,is_v,iv_v)
 
   ! Configuration pointers
   ic = 0
@@ -150,6 +151,7 @@ subroutine cgyro_mpi_grid
         ic_c(ir,it) = ic
      enddo
   enddo
+!$acc enter data copyin(ir_c,it_c,ic_c)
 
   ! Linear parallelization dimensions
 
@@ -187,7 +189,6 @@ subroutine cgyro_mpi_grid
      iv_loc = iv_loc+1
      iv_locv(iv) = iv_loc
   enddo
-  
 end subroutine cgyro_mpi_grid
 
 subroutine gcd(m,n,d)
