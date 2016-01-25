@@ -81,8 +81,7 @@ subroutine cgyro_kernel
      !------------------------------------------------------------
      ! Diagnostics
      !
-     ! Fluxes
-     call cgyro_flux
+     ! NOTE: Fluxes are calculated in cgyro_write_timedata
 
      ! Error estimate
      call cgyro_error_estimate
@@ -114,7 +113,7 @@ subroutine cgyro_kernel
   if(allocated(theta))          deallocate(theta)
   if(allocated(thetab))         deallocate(thetab)
   if(allocated(w_theta))        deallocate(w_theta)
-  if(allocated(Bmag))           deallocate(Bmag)
+  if(allocated(bmag))           deallocate(bmag)
   if(allocated(k_perp))         deallocate(k_perp)
   if(allocated(omega_stream))   then
 !$acc exit data delete(omega_stream)

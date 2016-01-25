@@ -73,20 +73,20 @@ subroutine cgyro_rhs(ij)
         ! iv_loc = iv_locv(iv)
         iv_loc = iv-nv1+1
         is = is_v(iv)
-           ir = ir_c(ic) 
-           it = it_c(ic)
+        do ic=1,nc
            g_x(ic,iv_loc) = g_x(ic,iv_loc)+ & 
-                (z(is)/temp(is))*jvec_c(2,ic,iv_loc)*field(ir,it,2)
-     enddo
+                z(is)/temp(is)*jvec_c(2,ic,iv_loc)*field(2,ic)
+        enddo
      enddo
   endif
 
   call timer_lib_in('str_comm')
-  if (upconserve_flag == 1) call cgyro_hsym
+  call cgyro_hsym
   call timer_lib_out('str_comm')
 
   call timer_lib_in('str')
 
+<<<<<<< HEAD
 !$acc data  &
 !$acc& pcopyout(rhs_ij) &
 !$acc& pcopyin(h_x,field,cap_h_c) &
@@ -106,7 +106,7 @@ subroutine cgyro_rhs(ij)
 !$acc loop collapse(2) gang vector &
 !$acc& private(iv,ic,iv_loc,is,ix,ie,ir,it,rval,rhs_stream,id,jt,jr,jc)
 #else
-!$omp parallel private(ic,iv_loc,is,ix,ie,ir,it,rval,rhs_stream,jt,jr,jc)
+!$omp parallel private(ic,iv_loc,is,ix,ie,rval,rhs_stream,jc,id)
 !$omp do 
 #endif
   do iv=nv1,nv2
@@ -119,27 +119,22 @@ subroutine cgyro_rhs(ij)
      ie = ie_v(iv)
 
 
-        ir = ir_c(ic) 
-        it = it_c(ic)
-
         ! Diagonal terms
         rhs_ij(ic,iv_loc) = rhs_ij(ic,iv_loc)+&
              omega_cap_h(ic,iv_loc)*cap_h_c(ic,iv_loc)+&
              omega_h(ic,iv_loc)*h_x(ic,iv_loc)+&
-             sum(omega_s(:,ic,iv_loc)*field(ir,it,:))
+             sum(omega_s(:,ic,iv_loc)*field(:,ic))
 
         if (implicit_flag == 0) then
            ! Parallel streaming with upwind dissipation 
-           rval = omega_stream(it,is)*sqrt(energy(ie))
+           rval = omega_stream(it_c(ic),is)*sqrt(energy(ie))
            rhs_stream = 0.0
 
            do id=-nup_theta,nup_theta
-              jt = thcyc(it+id)
-              jr = rcyc(ir,it,id)
-              jc = ic_c(jr,jt)
+              jc = icd_c(ic,id)
               rhs_stream = rhs_stream &
-                   -rval*xi(ix)*dtheta(ir,it,id)*cap_h_c(jc,iv_loc)  &
-                   -abs(rval)*dtheta_up(ir,it,id)*g_x(jc,iv_loc) 
+                   -rval*xi(ix)*dtheta(ic,id)*cap_h_c(jc,iv_loc)  &
+                   -abs(rval)*dtheta_up(ic,id)*g_x(jc,iv_loc) 
            enddo
 
            rhs_ij(ic,iv_loc) = rhs_ij(ic,iv_loc)+rhs_stream

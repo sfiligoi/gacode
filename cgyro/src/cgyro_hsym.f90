@@ -28,7 +28,7 @@ subroutine cgyro_hsym
         tmp(:) = 0.0
         do ix=1,n_xi
            tmp(:) = tmp(:)+&
-                cap_h_v(:,iv_v(ie,ix,is))*0.5*w_xi(ix)*abs(xi(ix))
+                cap_h_v(:,iv_v(ie,ix,is))*w_xi(ix)*abs(xi(ix))
         enddo
         do ix=1,n_xi
            cap_h_v_prime(:,iv_v(ie,ix,is)) = abs(xi(ix))*cap_h_v(:,iv_v(ie,ix,is))-tmp(:)

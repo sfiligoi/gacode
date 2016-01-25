@@ -33,7 +33,6 @@ subroutine cgyro_read_input
   call readbc_int(nup_radial)
   call readbc_int(implicit_flag)
   call readbc_int(constant_wind_flag)
-  call readbc_int(upconserve_flag)
   call readbc_real(ky)
   call readbc_int(box_size)
   call readbc_real(ipccw)

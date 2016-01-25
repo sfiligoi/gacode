@@ -35,7 +35,6 @@ module cgyro_globals
   integer :: nup_radial
   integer :: implicit_flag
   integer :: constant_wind_flag
-  integer :: upconserve_flag
   real    :: ky
   integer :: box_size
   real    :: ipccw
@@ -242,9 +241,9 @@ module cgyro_globals
   real, dimension(:), allocatable :: cderiv
   real, dimension(:), allocatable :: spec_uderiv
   integer, dimension(:), allocatable :: thcyc
-  integer, dimension(:,:,:), allocatable :: rcyc
-  complex, dimension(:,:,:), allocatable :: dtheta
-  complex, dimension(:,:,:), allocatable :: dtheta_up
+  integer, dimension(:,:), allocatable :: icd_c
+  complex, dimension(:,:), allocatable :: dtheta
+  complex, dimension(:,:), allocatable :: dtheta_up
   !
   ! Distributions
   !
@@ -267,11 +266,13 @@ module cgyro_globals
   !
   ! Fields
   !
-  complex, dimension(:,:,:), allocatable :: field
-  complex, dimension(:,:,:), allocatable :: field_loc
-  complex, dimension(:,:,:), allocatable :: field_old
-  complex, dimension(:,:,:), allocatable :: field_old2
-  complex, dimension(:,:,:), allocatable :: field_old3
+  real, dimension(:,:), allocatable :: fcoef
+  real, dimension(:,:), allocatable :: gcoef
+  complex, dimension(:,:), allocatable :: field
+  complex, dimension(:,:), allocatable :: field_loc
+  complex, dimension(:,:), allocatable :: field_old
+  complex, dimension(:,:), allocatable :: field_old2
+  complex, dimension(:,:), allocatable :: field_old3
   complex, dimension(:,:), allocatable :: moment_loc
   complex, dimension(:,:), allocatable :: moment
   !
@@ -326,9 +327,7 @@ module cgyro_globals
   ! Some field solve parameters
   !
   real :: sum_den_h
-  real, dimension(:,:), allocatable :: sum_den_x, sum_cur_x
-  real, dimension(:,:), allocatable :: poisson_pb11, poisson_pb12, &
-       poisson_pb21, poisson_pb22
+  real, dimension(:), allocatable :: sum_den_x, sum_cur_x
   !
   ! n=0 test variables
   !
@@ -345,8 +344,8 @@ module cgyro_globals
   real :: d_theta
   real, dimension(:,:), allocatable   :: thetab
   real, dimension(:), allocatable   :: w_theta
-  real, dimension(:,:), allocatable :: k_perp    
-  real, dimension(:), allocatable   :: Bmag
+  real, dimension(:), allocatable :: k_perp    
+  real, dimension(:), allocatable   :: bmag
   real, dimension(:,:), allocatable :: omega_stream
   real, dimension(:,:), allocatable :: omega_trap
   real, dimension(:,:), allocatable :: omega_rdrift

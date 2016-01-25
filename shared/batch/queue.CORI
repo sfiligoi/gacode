@@ -71,10 +71,10 @@ bfile=$simpath/$sim/batch.src
 
 echo "#!/bin/bash -l" > $bfile
 echo "#SBATCH -J $sim" >> $bfile
-#if [ "$repo" != "0" ]
-#then
-#   echo "#PBS -A $repo" >> $bfile
-#fi
+if [ "$repo" != "0" ]
+then
+   echo "#SBATCH -A $repo" >> $bfile
+fi
 echo "#SBATCH -o $simpath/$sim/batch.out" >> $bfile
 echo "#SBATCH -e $simpath/$sim/batch.err" >> $bfile
 echo "#SBATCH -p $queue" >> $bfile

@@ -14,6 +14,7 @@ code=${4}
 nomp=${5}
 numa=${6}
 mpinuma=${7}
+nidle=${8}
 
 # nmpi = MPI tasks
 # nomp = OpenMP threads per MPI task
@@ -71,7 +72,7 @@ read -p "Specify a repository [0 for default] " repo
 
 echo "#!/bin/bash -l" > $bfile
 echo "#SBATCH -J $sim" >> $bfile
-echo "#PBS -A $repo" >> $bfile
+echo "#SBATCH -A $repo" >> $bfile
 echo "#SBATCH -o $simpath/$sim/batch.out" >> $bfile
 echo "#SBATCH -e $simpath/$sim/batch.err" >> $bfile
 echo "#SBATCH -p $queue" >> $bfile

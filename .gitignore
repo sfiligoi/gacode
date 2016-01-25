@@ -18,6 +18,9 @@ modules/*.mod
 # Old directory structure
 neo/tools/vgen/
 
+# OSX build stuff
+*.dSYM/
+
 # Version tags
 gyro/.VERSION
 cgyro/.VERSION

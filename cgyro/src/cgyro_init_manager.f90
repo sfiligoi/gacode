@@ -59,12 +59,13 @@ subroutine cgyro_init_manager
   allocate(xi_upderiv_mat(n_xi,n_xi))
   ! Construct xi (pitch-angle) nodes and weights
   call pseudo_legendre(n_xi,xi,w_xi,xi_deriv_mat,xi_lor_mat,xi_upderiv_mat)
+  w_xi = 0.5*w_xi
 
   allocate(theta(n_theta))
   allocate(thetab(n_radial/box_size,n_theta))
   allocate(w_theta(n_theta))
   allocate(bmag(n_theta))
-  allocate(k_perp(n_theta,n_radial))
+  allocate(k_perp(nc))
   allocate(omega_stream(n_theta,n_species))
   allocate(omega_trap(n_theta,n_species))
   allocate(omega_rdrift(n_theta,n_species))
@@ -82,11 +83,17 @@ subroutine cgyro_init_manager
      call timer_lib_in('str_init')
 
      ! Global (undistributed) arrays
-     allocate(field(n_radial,n_theta,n_field))
-     allocate(field_loc(n_radial,n_theta,n_field))
-     allocate(field_old(n_radial,n_theta,n_field))
-     allocate(field_old2(n_radial,n_theta,n_field))
-     allocate(field_old3(n_radial,n_theta,n_field))
+     allocate(fcoef(n_field,nc))
+     if (n_field < 3) then
+        allocate(gcoef(n_field,nc))
+     else
+        allocate(gcoef(5,nc))
+     endif
+     allocate(field(n_field,nc))
+     allocate(field_loc(n_field,nc))
+     allocate(field_old(n_field,nc))
+     allocate(field_old2(n_field,nc))
+     allocate(field_old3(n_field,nc))
      allocate(moment_loc(n_radial,n_species))
      allocate(moment(n_radial,n_species))
      allocate(f_balloon(n_radial/box_size,n_theta))
@@ -95,9 +102,9 @@ subroutine cgyro_init_manager
      allocate(recv_status(MPI_STATUS_SIZE))
 
      allocate(thcyc(1-n_theta:2*n_theta))
-     allocate(rcyc(n_radial,n_theta,-nup_theta:nup_theta))
-     allocate(dtheta(n_radial,n_theta,-nup_theta:nup_theta))
-     allocate(dtheta_up(n_radial,n_theta,-nup_theta:nup_theta))
+     allocate(icd_c(nc,-nup_theta:nup_theta))
+     allocate(dtheta(nc,-nup_theta:nup_theta))
+     allocate(dtheta_up(nc,-nup_theta:nup_theta))
 
      ! Velocity-distributed arrays
      allocate(rhs(4,nc,nv_loc))
@@ -196,8 +203,8 @@ subroutine cgyro_init_manager
      allocate(uv(0:ny-1,0:nx-1))
 
      ! Create plans once and for all, with global arrays fx,ux
-     plan_c2r = fftw_plan_dft_c2r_2d(nx,ny,fx,ux,FFTW_MEASURE)
-     plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,ux,fx,FFTW_MEASURE)
+     plan_c2r = fftw_plan_dft_c2r_2d(nx,ny,fx,ux,FFTW_PATIENT)
+     plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,ux,fx,FFTW_PATIENT)
 
   endif
 

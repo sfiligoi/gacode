@@ -7,7 +7,7 @@ subroutine cgyro_step_collision
 
   implicit none
 
-  integer :: is,ir,it,ie,ix
+  integer :: is,ie,ix
   integer :: ivp
   complex, dimension(size(cap_h_v,2),nc1:nc2) :: cvecm
   complex, dimension(size(cap_h_v,2),nc1:nc2) :: bvecm
@@ -87,13 +87,8 @@ subroutine cgyro_step_collision
      ie = ie_v(iv)
 
      do ic=1,nc
-
-        ir = ir_c(ic)
-        it = it_c(ic)
-
-        psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(ir,it,:))
+        psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
         h_x(ic,iv_loc) = cap_h_c(ic,iv_loc)-psi(ic,iv_loc)*z(is)/temp(is)
-
      enddo
   enddo
 

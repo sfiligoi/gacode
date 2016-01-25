@@ -13,9 +13,10 @@ subroutine cgyro_write_timedata
   implicit none
 
   complex :: a_norm
-  integer :: i_field
+  integer :: i_field,ir,it
   logical :: lfe
   real :: vfreq(2)
+  complex :: ftemp(n_radial,n_theta)
 
   ! Print this data on print steps only; otherwise exit now
   if (mod(i_time,print_step) /= 0) return
@@ -28,6 +29,8 @@ subroutine cgyro_write_timedata
      call write_distribution(trim(path)//runfile_hb)
   endif
   !---------------------------------------------------------------------------
+
+  call cgyro_flux
 
   if (nonlinear_flag == 1) then
 
@@ -51,8 +54,8 @@ subroutine cgyro_write_timedata
   ! Complex potential at theta=0 
   call write_distributed_complex(&
        trim(path)//runfile_kxky_phi,&
-       size(field(:,it0,1)),&
-       field(:,it0,1))
+       size(field(1,ic_c(:,it0))),&
+       field(1,ic_c(:,it0)))
 
   ! Checksum for regression testing
   ! Note that value is a distributed real scalar
@@ -64,12 +67,17 @@ subroutine cgyro_write_timedata
   if (n_toroidal == 1 .and. n > 0) then
      do i_field=1,n_field
 
-        a_norm = field(n_radial/2+1,n_theta/2+1,1) 
+        do ir=1,n_radial
+           do it=1,n_theta
+              ftemp(ir,it) = field(i_field,ic_c(ir,it))
+           enddo
+        enddo
+
+        a_norm = ftemp(n_radial/2+1,n_theta/2+1) 
 
         call write_balloon(&
              trim(path)//runfile_fieldb(i_field),&
-             field(:,:,i_field)/a_norm)
-
+             ftemp(:,:)/a_norm)
      enddo
   endif
   !---------------------------------------------------------------

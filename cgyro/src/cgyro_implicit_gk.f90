@@ -64,13 +64,10 @@ subroutine cgyro_init_implicit_gk
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
 
         do id=-nup_theta,nup_theta
-           jt = thcyc(it+id)
-           jr = rcyc(ir,it,id)
-           jc = ic_c(jr,jt)
-
+           jc = icd_c(ic,id)
            k=k+1
-           gksp_mat(k,iv_loc) = (rval*dtheta(ir,it,id) &
-                + abs(rval)*dtheta_up(ir,it,id)) * 0.5 * delta_t
+           gksp_mat(k,iv_loc) = (rval*dtheta(ic,id) &
+                + abs(rval)*dtheta_up(ic,id)) * 0.5 * delta_t
            gksp_indx(k,iv_loc) = ic
            gksp_indx(k+gksp_nelem,iv_loc) = jc 
            if(ic == jc) then
@@ -117,7 +114,7 @@ subroutine cgyro_init_implicit_gk
      ix = ix_v(iv)
      ie = ie_v(iv)
 
-     rfac = 0.5*w_xi(ix)*w_e(ie)*dens(is) * z(is)**2/temp(is)
+     rfac = w_xi(ix)*w_e(ie)*dens(is) * z(is)**2/temp(is)
 
      akmat(:,:) = (0.0,0.0)
      do ic=1,nc
@@ -128,13 +125,11 @@ subroutine cgyro_init_implicit_gk
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
 
         do id=-nup_theta,nup_theta
-           jt = thcyc(it+id)
-           jr = rcyc(ir,it,id)
-           jc = ic_c(jr,jt)
+           jc = icd_c(ic,id)
 
            akmat(ic,jc) = akmat(ic,jc) &
-                + (rval*dtheta(ir,it,id) &
-                + abs(rval)*dtheta_up(ir,it,id)) * 0.5 * delta_t
+                + (rval*dtheta(ic,id) &
+                + abs(rval)*dtheta_up(ic,id)) * 0.5 * delta_t
 
         enddo
 
@@ -352,7 +347,7 @@ subroutine cgyro_init_implicit_gk
      ir = ir_c(ic) 
      it = it_c(ic)
      fieldmat(id,id) = fieldmat(id,id) &
-          + (k_perp(it,ir)**2*lambda_debye**2* &
+          + (k_perp(ic)**2*lambda_debye**2* &
           dens_ele/temp_ele+sum_den_h)
   enddo
 
@@ -365,7 +360,7 @@ subroutine cgyro_init_implicit_gk
         ir = ir_c(ic) 
         it = it_c(ic)
         fieldmat(id,id) = fieldmat(id,id) &
-             + (2.0*k_perp(it,ir)**2*rho**2 &
+             + (2.0*k_perp(ic)**2*rho**2 &
              /betae_unit*dens_ele*temp_ele)
      enddo
 
@@ -444,13 +439,13 @@ subroutine cgyro_step_implicit_gk
   ! form the rhs
 
   ! Special case for n=0, p=0
-  if(n == 0) then
+  if (n == 0) then
      do ic=1,nc
         ir = ir_c(ic)
         it = it_c(ic)
-        if(px(ir) == 0) then
+        if (px(ir) == 0) then
            cap_h_c(ic,:) = 0.0
-           field(ir,it,:)  = 0.0
+           field(:,ic)  = 0.0
         endif
      enddo
   endif
@@ -470,19 +465,15 @@ subroutine cgyro_step_implicit_gk
         rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
 
         do id=-nup_theta,nup_theta
-           jt = thcyc(it+id)
-           jr = rcyc(ir,it,id)
-           jc = ic_c(jr,jt)
-
+           jc = icd_c(ic,id)
            gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &
-                + (rval*dtheta(ir,it,id) &
-                + abs(rval)*dtheta_up(ir,it,id)) &
+                + (rval*dtheta(ic,id) &
+                + abs(rval)*dtheta_up(ic,id)) &
                 * (-0.5 * delta_t) * cap_h_c(jc,iv_loc)
-
         enddo
 
         gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &
-             - z(is)/temp(is)*sum(jvec_c(:,ic,iv_loc)*field(ir,it,:))
+             - z(is)/temp(is)*sum(jvec_c(:,ic,iv_loc)*field(:,ic))
 
      enddo
 
@@ -508,7 +499,7 @@ subroutine cgyro_step_implicit_gk
      ix = ix_v(iv)
      ie = ie_v(iv)
 
-     rfac(:) = z(is) * 0.5*w_xi(ix)*w_e(ie)*dens(is)*gkvec(:,iv_loc)
+     rfac(:) = z(is) * w_xi(ix)*w_e(ie)*dens(is)*gkvec(:,iv_loc)
      ifield = 1
 
      do ic=1,nc
@@ -548,16 +539,11 @@ subroutine cgyro_step_implicit_gk
   call ZGETRS('N',nc*n_field,1,fieldmat(:,:),nc*n_field,i_piv_field(:),&
        fieldvec(:),nc*n_field,info)
 
-  ! map back into field(ir,it)
+  ! map back into field(ic)
   do ic=1,nc
      do ifield=1,n_field
-
         id = idfield(ic,ifield)
-        ir = ir_c(ic) 
-        it = it_c(ic)
-
-        field(ir,it,ifield) = fieldvec(id)
-
+        field(ifield,ic) = fieldvec(id)
      enddo
   enddo
 
@@ -575,11 +561,8 @@ subroutine cgyro_step_implicit_gk
      ie = ie_v(iv)
 
      do ic=1,nc
-        ir = ir_c(ic)
-        it = it_c(ic)
-
         gkvec(ic,iv_loc) = gkvec(ic,iv_loc) &
-             +z(is)/temp(is)*sum(jvec_c(:,ic,iv_loc)*field(ir,it,:))
+             +z(is)/temp(is)*sum(jvec_c(:,ic,iv_loc)*field(:,ic))
      enddo
 
      ! matrix solve
@@ -606,13 +589,8 @@ subroutine cgyro_step_implicit_gk
      ie = ie_v(iv)
 
      do ic=1,nc
-
-        ir = ir_c(ic)
-        it = it_c(ic)
-
-        psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(ir,it,:))
+        psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
         h_x(ic,iv_loc) = cap_h_c(ic,iv_loc)-z(is)*psi(ic,iv_loc)/temp(is)
-
      enddo
   enddo
 
