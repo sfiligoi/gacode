@@ -239,8 +239,14 @@ subroutine cgyro_init_arrays
      pb22(:) = 1.0-pb22(:)*betae_unit/(-2*dens_ele*temp_ele) 
 
      ! Determinant
-     sum_loc = pb11*pb22-pb12*pb21
-
+     do ic=1,nc
+     if (k_perp(ic) > 0.0) then
+        sum_loc = pb11*pb22-pb12*pb21
+     else
+        sum_loc = 1.0
+     endif
+     enddo
+        
      pb11 = pb11/sum_loc
      pb12 = pb12/sum_loc
      pb21 = pb21/sum_loc
