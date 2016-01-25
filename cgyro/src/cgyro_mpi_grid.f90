@@ -217,26 +217,3 @@ subroutine gcd(m,n,d)
   d = b
 
 end subroutine gcd
-
-subroutine looplimits(mythd,nthds,i1,i2,ibeg,iend)
-
-  implicit none
-  integer, intent(in) :: mythd, nthds, i1, i2
-  integer, intent(out) :: ibeg, iend
-  integer :: nwork, chunk, extra, ntcut  
-
-  nwork = i2 - i1 + 1
-  chunk = nwork/nthds
-  extra = nwork - nthds*chunk
-  ntcut = nthds - extra
-  if (mythd < ntcut) then
-    ibeg = i1 + mythd*chunk
-    iend = ibeg + chunk - 1
-  else
-    ibeg = i1 + ntcut*chunk + (mythd - ntcut)*(chunk + 1)
-    iend = ibeg + chunk
-  end if
-  if (iend > i2) iend = i2
-
-end subroutine looplimits
-
