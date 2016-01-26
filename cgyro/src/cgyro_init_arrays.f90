@@ -161,17 +161,17 @@ subroutine cgyro_init_arrays
   if (n_field == 1 .or. n_field == 2) then
      do ic=1,nc
         if (k_perp(ic) > 0.0) then
-        gcoef(1,ic) = 1.0/(k_perp(ic)**2*lambda_debye**2*&
-             dens_ele/temp_ele+sum_den_x(ic))
+           gcoef(1,ic) = 1.0/(k_perp(ic)**2*lambda_debye**2*&
+                dens_ele/temp_ele+sum_den_x(ic))
         endif
      enddo
   endif
- 
+
   if (n_field > 1) then
      do ic=1,nc
         if (k_perp(ic) > 0.0) then
-        gcoef(2,ic) = 1.0/(-2.0*k_perp(ic)**2*&
-             rho**2/betae_unit*dens_ele*temp_ele-sum_cur_x(ic))
+           gcoef(2,ic) = 1.0/(-2.0*k_perp(ic)**2*&
+                rho**2/betae_unit*dens_ele*temp_ele-sum_cur_x(ic))
         endif
      enddo
   endif
@@ -240,15 +240,15 @@ subroutine cgyro_init_arrays
 
      ! Determinant
      do ic=1,nc
-     if (k_perp(ic) > 0.0) then
-        sum_loc(ic) = pb11(ic)*pb22(ic)-pb12(ic)*pb21(ic)
-     else
-        sum_loc(ic) = 1.0
-     endif
+        if (k_perp(ic) > 0.0) then
+           sum_loc(ic) = pb11(ic)*pb22(ic)-pb12(ic)*pb21(ic)
+        else
+           sum_loc(ic) = 1.0
+        endif
      enddo
 
      print *,sum_loc
-     
+
      pb11 = pb11/sum_loc
      pb12 = pb12/sum_loc
      pb21 = pb21/sum_loc
