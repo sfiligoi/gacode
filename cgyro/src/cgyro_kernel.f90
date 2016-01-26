@@ -115,7 +115,10 @@ subroutine cgyro_kernel
   if(allocated(w_theta))        deallocate(w_theta)
   if(allocated(bmag))           deallocate(bmag)
   if(allocated(k_perp))         deallocate(k_perp)
-  if(allocated(omega_stream))   deallocate(omega_stream)
+  if(allocated(omega_stream))   then
+!$acc exit data delete(omega_stream)
+      deallocate(omega_stream)
+  endif
   if(allocated(omega_trap))     deallocate(omega_trap)
   if(allocated(omega_rdrift))   deallocate(omega_rdrift)
   if(allocated(omega_adrift))   deallocate(omega_adrift)
@@ -125,11 +128,17 @@ subroutine cgyro_kernel
 
   if(allocated(indx_xi))       deallocate(indx_xi)
   if(allocated(px))            deallocate(px)
-  if(allocated(energy))        deallocate(energy)
+  if(allocated(energy))        then
+!$acc exit data delete(energy)
+    deallocate(energy)
+  endif
   if(allocated(w_e))           deallocate(w_e)
   if(allocated(e_deriv1_mat))  deallocate(e_deriv1_mat)
   if(allocated(e_deriv2_mat))  deallocate(e_deriv2_mat)
-  if(allocated(xi))            deallocate(xi)
+  if(allocated(xi))            then
+!$acc exit data delete(xi)
+    deallocate(xi)
+  endif
   if(allocated(w_xi))          deallocate(w_xi)
   if(allocated(xi_lor_mat))    deallocate(xi_lor_mat)
   if(allocated(xi_deriv_mat))  deallocate(xi_deriv_mat)
@@ -147,7 +156,10 @@ subroutine cgyro_kernel
   if(allocated(pvec_outr))     deallocate(pvec_outr)
   if(allocated(pvec_outi))     deallocate(pvec_outi)
 
-  if(allocated(cmat))       deallocate(cmat)
+  if(allocated(cmat))       then
+!$acc exit data delete(cmat)
+    deallocate(cmat)
+  endif
   if(allocated(cvec))       deallocate(cvec)
   if(allocated(bvec))       deallocate(bvec)
 

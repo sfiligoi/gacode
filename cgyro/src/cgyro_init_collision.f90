@@ -672,6 +672,7 @@ subroutine cgyro_init_collision
      cmat(:,:,ic_loc) = bmat(:,:)
 
   enddo
+!$acc  enter data copyin(cmat)
 
   deallocate(amat)
   deallocate(bmat)
