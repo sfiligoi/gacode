@@ -43,7 +43,7 @@ OBJECTS = cgyro_globals.o \
           cgyro_write_restart.o \
           cgyro_write_timedata.o
 
-.SUFFIXES : .o .f90
+.SUFFIXES : .o .f90 .F90
 
 all: cgyro_lib.a $(EXEC).o $(EXTRA_LIBS)
 	$(FC) $(FFLAGS) -o $(EXEC) $(EXEC).o cgyro_lib.a $(EXTRA_LIBS) $(LMATH)
@@ -51,7 +51,7 @@ all: cgyro_lib.a $(EXEC).o $(EXTRA_LIBS)
 cgyro_lib.a: $(OBJECTS)
 	$(ARCH) cgyro_lib.a $(OBJECTS)
 
-.f90.o :
+.f90.o .F90.o :
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:  
