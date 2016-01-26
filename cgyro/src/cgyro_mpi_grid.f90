@@ -189,7 +189,7 @@ subroutine cgyro_mpi_grid
      iv_loc = iv_loc+1
      iv_locv(iv) = iv_loc
   enddo
-!$acc enter data copy(ic_locv,iv_locv)
+!$acc enter data copyin(ic_locv,iv_locv)
 end subroutine cgyro_mpi_grid
 
 subroutine gcd(m,n,d)
