@@ -212,6 +212,16 @@ subroutine tgyro_flux
      endif
 
 
+
+     open (unit=21, file="/u/ludat/tmp/tglf.vs.nn", position="append", action="write")
+
+     write (21,*) 'TGLF: OEF1 OEF3 OPF1 OPF3 OST1 OST3'
+     write (21,"(6(f6.3,x))") tglf_elec_eflux_out, tglf_ion_eflux_out(1), tglf_elec_pflux_out, &
+                              tglf_ion_pflux_out(1), tglf_elec_mflux_out, tglf_ion_mflux_out(1)
+     close(21)
+
+
+
   case(3)  ! Map TGYRO parameters to GLF23
 
      call tgyro_glf23_map
@@ -285,8 +295,7 @@ subroutine tgyro_flux
         eflux_e_tur(i_r) = tglf_elec_eflux_low_out
         eflux_i_tur(1:loc_n_ion,i_r) = tglf_ion_eflux_low_out(1:loc_n_ion)
      endif
-
-  
+      
   case default
 
      call tgyro_catch_error('ERROR: (TGYRO) No matching flux method in tgyro_flux.')

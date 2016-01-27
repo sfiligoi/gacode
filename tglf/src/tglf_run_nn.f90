@@ -15,9 +15,13 @@ subroutine tglf_run_nn()
 
   real :: OUT_ENERGY_FLUX_1, OUT_PARTICLE_FLUX_1, OUT_STRESS_TOR_1
   real :: OUT_ENERGY_FLUX_3, OUT_PARTICLE_FLUX_3, OUT_STRESS_TOR_3
-  real :: STD_0, STD_1, STD_2, STD_3, STD_4, STD_5
-  real :: LIM_0, LIM_1, LIM_2, LIM_3, LIM_4, LIM_5, LIM_6, LIM_7
-  real :: LIM_8, LIM_9, LIM_10, LIM_11, LIM_12, LIM_13, LIM_14 
+  real :: OUT_ENERGY_FLUX_1_STD, OUT_ENERGY_FLUX_3_STD, OUT_PARTICLE_FLUX_1_STD
+  real :: OUT_PARTICLE_FLUX_3_STD, OUT_STRESS_TOR_1_STD, OUT_STRESS_TOR_3_STD
+  real :: AS_2_LIM, AS_3_LIM, BETAE_LIM, DELTA_LOC_LIM, KAPPA_LOC_LIM, Q_LOC_LIM
+  real :: Q_PRIME_LOC_LIM, RLNS_1_LIM, RLTS_1_LIM, RLTS_2_LIM, RMAJ_LOC_LIM 
+  real :: RMIN_LOC_LIM, S_KAPPA_LOC_LIM, TAUS_2_LIM, XNUE_LIM
+  real :: OUT_ENERGY_FLUX_1_LIM, OUT_ENERGY_FLUX_3_LIM, OUT_PARTICLE_FLUX_1_LIM
+  real :: OUT_PARTICLE_FLUX_3_LIM, OUT_STRESS_TOR_1_LIM, OUT_STRESS_TOR_3_LIM
 
   integer :: i_ion,n
   complex :: xi=(0.0,1.0)
@@ -140,6 +144,8 @@ subroutine tglf_run_nn()
 
      !call tglf_tm_mpi
      
+     write(*,*) tglf_path_in
+     
      open (unit=14, file=TRIM(tglf_path_in)//"input.dat", action="write")
      
      write (14,*) '1' 
@@ -152,32 +158,32 @@ subroutine tglf_run_nn()
      
      close(14)
      
-     write (*,*) 'RMIN_LOC=', tglf_rmin_loc_in
-     write (*,*) 'RMAJ_LOC=', tglf_rmaj_loc_in
-     write (*,*) 'KAPPA_LOC=', tglf_kappa_loc_in
-     write (*,*) 'S_KAPPA_LOC=', tglf_s_kappa_loc_in
-     write (*,*) 'DELTA_LOC=', tglf_delta_loc_in
-     write (*,*) 'Q_LOC=', tglf_q_loc_in
-     write (*,*) 'Q_PRIME_LOC=', tglf_q_prime_loc_in
-     write (*,*) 'XNUE=', tglf_xnue_in
-     write (*,*) 'BETAE=', tglf_betae_in
-     write (*,*) 'TAUS_2=', tglf_taus_in(2)
-     write (*,*) 'AS_2=', tglf_as_in(2)
-     write (*,*) 'AS_3=', tglf_as_in(3)
-     write (*,*) 'RLNS_1=', tglf_rlns_in(1)
-     write (*,*) 'RLTS_1=', tglf_rlts_in(1)
-     write (*,*) 'RLTS_2=', tglf_rlts_in(2)
-     write (*,*) 'ZEFF=', tglf_zeff_in
-     write (*,*) 'S_ZETA_LOC=', tglf_s_zeta_loc_in
-     write (*,*) 'S_DELTA_LOC=', tglf_s_delta_loc_in
-     write (*,*) 'P_PRIME_LOC=', tglf_p_prime_loc_in
-     write (*,*) 'ZMAJ_LOC=', tglf_zmaj_loc_in
-     write (*,*) 'DZMAJDX_LOC=', tglf_dzmajdx_loc_in
-     write (*,*) 'ZETA_LOC=', tglf_zeta_loc_in
-     write (*,*) 'DRMAJDX_LOC=', tglf_drmajdx_loc_in
+     !write (*,*) 'RMIN_LOC=', tglf_rmin_loc_in
+     !write (*,*) 'RMAJ_LOC=', tglf_rmaj_loc_in
+     !write (*,*) 'KAPPA_LOC=', tglf_kappa_loc_in
+     !write (*,*) 'S_KAPPA_LOC=', tglf_s_kappa_loc_in
+     !write (*,*) 'DELTA_LOC=', tglf_delta_loc_in
+     !write (*,*) 'Q_LOC=', tglf_q_loc_in
+     !write (*,*) 'Q_PRIME_LOC=', tglf_q_prime_loc_in
+     !write (*,*) 'XNUE=', tglf_xnue_in
+     !write (*,*) 'BETAE=', tglf_betae_in
+     !write (*,*) 'TAUS_2=', tglf_taus_in(2)
+     !write (*,*) 'AS_2=', tglf_as_in(2)
+     !write (*,*) 'AS_3=', tglf_as_in(3)
+     !write (*,*) 'RLNS_1=', tglf_rlns_in(1)
+     !write (*,*) 'RLTS_1=', tglf_rlts_in(1)
+     !write (*,*) 'RLTS_2=', tglf_rlts_in(2)
+     !write (*,*) 'ZEFF=', tglf_zeff_in
+     !write (*,*) 'S_ZETA_LOC=', tglf_s_zeta_loc_in
+     !write (*,*) 'S_DELTA_LOC=', tglf_s_delta_loc_in
+     !write (*,*) 'P_PRIME_LOC=', tglf_p_prime_loc_in
+     !write (*,*) 'ZMAJ_LOC=', tglf_zmaj_loc_in
+     !write (*,*) 'DZMAJDX_LOC=', tglf_dzmajdx_loc_in
+     !write (*,*) 'ZETA_LOC=', tglf_zeta_loc_in
+     !write (*,*) 'DRMAJDX_LOC=', tglf_drmajdx_loc_in
      
      
-     CALL SYSTEM('cd '//TRIM(tglf_path_in)//' ;/u/ludat/tmp/tglf01/run.exe /u/ludat/tmp/tglf01/nnets/brainfuse_* input.dat')
+     CALL SYSTEM('cd '//TRIM(tglf_path_in)//' ;/u/ludat/tmp/nnfiles/run.exe /u/ludat/tmp/nnfiles/nnets/brainfuse_* input.dat')
      
      open (unit=15, file=TRIM(tglf_path_in)//"output.avg", action="read")
      
@@ -196,18 +202,50 @@ subroutine tglf_run_nn()
      
      open (unit=16, file=TRIM(tglf_path_in)//"output.std", action="read")
      open (unit=17, file=TRIM(tglf_path_in)//"input.lim", action="read")
+     open (unit=19, file=TRIM(tglf_path_in)//"output.lim", action="read")
 
-     read(16,*) n, STD_0, STD_1, STD_2, STD_3, STD_4, STD_5
-     read(17,*) n, LIM_0, LIM_1, LIM_2, LIM_3, LIM_4, LIM_5, LIM_6, &
-                LIM_7, LIM_8, LIM_9, LIM_10, LIM_11, LIM_12, LIM_13, LIM_14
+     read(16,*) n, OUT_ENERGY_FLUX_1_STD, OUT_ENERGY_FLUX_3_STD, OUT_PARTICLE_FLUX_1_STD, &
+                   OUT_PARTICLE_FLUX_3_STD, OUT_STRESS_TOR_1_STD, OUT_STRESS_TOR_3_STD     
+
+     read(17,*) n, AS_2_LIM, AS_3_LIM, BETAE_LIM, DELTA_LOC_LIM, KAPPA_LOC_LIM, Q_LOC_LIM, &
+                   Q_PRIME_LOC_LIM, RLNS_1_LIM, RLTS_1_LIM, RLTS_2_LIM, RMAJ_LOC_LIM, &
+		   RMIN_LOC_LIM, S_KAPPA_LOC_LIM, TAUS_2_LIM, XNUE_LIM
 		
-     write(*,*) 'Standard deviation=', STD_4	
-     write(*,*) 'Lim=', LIM_4	
-
+     read(19,*) n, OUT_ENERGY_FLUX_1_LIM, OUT_ENERGY_FLUX_3_LIM, OUT_PARTICLE_FLUX_1_LIM, &
+                   OUT_PARTICLE_FLUX_3_LIM, OUT_STRESS_TOR_1_LIM, OUT_STRESS_TOR_3_LIM
+		
      close(16)
      close(17)
+     close(19)
      
+     open (unit=18, file="results.nn", position="append", action="write")
      
+     write (18,*) 'STD: OEF1 OEF3 OPF1 OPF3 OST1 OST3'
+     write (18,"(6(f6.3,x))") OUT_ENERGY_FLUX_1_STD, OUT_ENERGY_FLUX_3_STD, OUT_PARTICLE_FLUX_1_STD, &
+                              OUT_PARTICLE_FLUX_3_STD, OUT_STRESS_TOR_1_STD, OUT_STRESS_TOR_3_STD
+     
+     write (18,*) 'OUT: OEF1 OEF3 OPF1 OPF3 OST1 OST3'
+     write (18,"(6(f6.3,x))") OUT_ENERGY_FLUX_1, OUT_ENERGY_FLUX_3, OUT_PARTICLE_FLUX_1, &
+                              OUT_PARTICLE_FLUX_3, OUT_STRESS_TOR_1, OUT_STRESS_TOR_3
+
+     write (18,*) 'LIM: AS2 AS3 BETAE DELTA KAPPA Q QPRIME RLNS1 RLTS1 RLTS2 RMAJ RMIN SKAPPA TAUS2 XNUE'
+     write (18,"(15(f8.3,x))") AS_2_LIM, AS_3_LIM, BETAE_LIM, DELTA_LOC_LIM, KAPPA_LOC_LIM, Q_LOC_LIM, &
+                               Q_PRIME_LOC_LIM, RLNS_1_LIM, RLTS_1_LIM, RLTS_2_LIM, RMAJ_LOC_LIM, &
+		               RMIN_LOC_LIM, S_KAPPA_LOC_LIM, TAUS_2_LIM, XNUE_LIM
+
+     write (18,*) 'LIM: OEF1 OEF3 OPF1 OPF3 OST1 OST3'
+     write (18,"(6(f6.3,x))") OUT_ENERGY_FLUX_1_LIM, OUT_ENERGY_FLUX_3_LIM, OUT_PARTICLE_FLUX_1_LIM, &
+                              OUT_PARTICLE_FLUX_3_LIM, OUT_STRESS_TOR_1_LIM, OUT_STRESS_TOR_3_LIM
+     
+     close(18)
+     
+     open (unit=21, file="/u/ludat/tmp/tglf.vs.nn", position="append", action="write")
+
+     write (21,*) 'NN: OEF1 OEF3 OPF1 OPF3 OST1 OST3'
+     write (21,"(6(f6.3,x))") OUT_ENERGY_FLUX_1, OUT_ENERGY_FLUX_3, OUT_PARTICLE_FLUX_1, &
+                              OUT_PARTICLE_FLUX_3, OUT_STRESS_TOR_1, OUT_STRESS_TOR_3
+     close(21)
+
      !---------------------------------------------
      ! Output (normalized to Q_GB)
      ! 

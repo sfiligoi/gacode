@@ -131,8 +131,8 @@ subroutine tglf_run()
 
   if (tglf_use_transport_model_in) then
 
-     call tglf_tm
-
+     call tglf_tm     
+     
      !---------------------------------------------
      ! Output (normalized to Q_GB)
      ! 
