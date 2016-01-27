@@ -56,3 +56,5 @@ cgyro_lib.a: $(OBJECTS)
 
 clean:  
 	rm -rf *.o cgyro_lib.a $(EXEC) *~ *.cub *.ptx
+
+-include ../install/make.ext.${GACODE_PLATFORM}
