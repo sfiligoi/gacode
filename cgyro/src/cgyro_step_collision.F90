@@ -9,8 +9,8 @@ subroutine cgyro_step_collision
 
   integer :: is,ie,ix
   integer :: ivp
-  complex, dimension(size(cap_h_v,2),nc1:nc2) :: cvecm
-  complex, dimension(size(cap_h_v,2),nc1:nc2) :: bvecm
+  complex, dimension(size(cap_h_v,2),nc1:nc2) :: cvec
+  complex, dimension(size(cap_h_v,2),nc1:nc2) :: bvec
 
   ! compute new collisional cap_H: H = h + ze/T G phi
   ! assumes have cap_h_x
@@ -38,19 +38,19 @@ subroutine cgyro_step_collision
 
      ! Set-up the RHS: H = f + ze/T G phi
 
-     cvecm(:,ic) = cap_h_v(ic_loc,:)
+     cvec(:,ic) = cap_h_v(ic_loc,:)
 
      ! This is a key loop for performance
-     bvecm(:,ic) = (0.0,0.0)
+     bvec(:,ic) = (0.0,0.0)
      do ivp=1,nv
 !$acc   loop vector
         do iv=1,nv
-           bvecm(iv,ic) = bvecm(iv,ic)+ &
-                               cmat(iv,ivp,ic_loc)*cvecm(ivp,ic)
+           bvec(iv,ic) = bvec(iv,ic)+ &
+                               cmat(iv,ivp,ic_loc)*cvec(ivp,ic)
         enddo
      enddo
 
-     cap_h_v(ic_loc,:) = bvecm(:,ic)
+     cap_h_v(ic_loc,:) = bvec(:,ic)
 
   enddo
 #ifdef _OPENACC

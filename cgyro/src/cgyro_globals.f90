@@ -163,6 +163,7 @@ module cgyro_globals
   character(len=80) :: path
   character(len=18) :: runfile_info    = 'out.cgyro.info'
   character(len=18) :: runfile_mpi     = 'out.cgyro.mpi'
+  character(len=18) :: runfile_memory  = 'out.cgyro.memory'
   character(len=18) :: runfile_restart = 'out.cgyro.restart'
   character(len=18) :: runfile_restart_tag = 'out.cgyro.tag'
   character(len=18) :: runfile_hb      = 'out.cgyro.hb'
@@ -334,12 +335,12 @@ module cgyro_globals
   real, dimension(:,:,:), allocatable :: hzf, xzf 
   real, dimension(:), allocatable :: pvec_in, pvec_outr, pvec_outi
   !
-  ! Collision step arrays
+  ! Collision operator
   !
   real, dimension(:,:,:), allocatable :: cmat
-  complex, dimension(:), allocatable  :: cvec,bvec
   ! 
   ! Equilibrium/geometry arrays
+  !
   integer :: it0
   real :: d_theta
   real, dimension(:,:), allocatable   :: thetab

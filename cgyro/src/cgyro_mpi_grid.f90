@@ -65,7 +65,7 @@ subroutine cgyro_mpi_grid
   allocate(ic_c(n_radial,n_theta))
   allocate(iv_v(n_energy,n_xi,n_species))
 
-    ! Velocity pointers
+  ! Velocity pointers
   iv = 0
   do ie=1,n_energy
      do ix=1,n_xi
@@ -92,8 +92,14 @@ subroutine cgyro_mpi_grid
   enddo
 !$acc enter data copyin(ir_c,it_c,ic_c)
 
-  if (test_flag == 1) return
-
+  if (test_flag == 1) then
+     ! Set dimensions for calculation of memory in test mode
+     nv_loc = nv
+     nc_loc = nc
+     nsplit = nv_loc*n_theta/n_toroidal
+     return
+  endif
+  
   !-------------------------------------------------------------
   ! Check that n_proc is a multiple of n_toroidal
   !
