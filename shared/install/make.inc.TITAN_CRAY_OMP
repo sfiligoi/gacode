@@ -1,5 +1,5 @@
 #---------------------------------------------------
-# Cray XK7 (titan.ccs.ornl.gov) [GPU version]
+# Cray XK7 (titan.ccs.ornl.gov) [OpenMP config only]
 #
 # SYSTEM INFO:
 # - 1x AMD 2.2GHZ 16-core CPU and 1x NVIDIA Kepler GPU per node
@@ -11,10 +11,10 @@ CORES_PER_NODE=16
 NUMAS_PER_NODE=2
 
 # Compilers and flags
-FC  = ftn -h acc -e m -J ${GACODE_ROOT}/modules
+FC  = ftn -e m -J ${GACODE_ROOT}/modules
 F77 = ${FC} 
 
-FOMP   = -h acc
+FOMP =
 FMATH  = -s real64
 FOPT   = -O3 -hfp3
 FDEBUG = -eD -Ktrap=fp -m 1

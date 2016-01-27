@@ -55,4 +55,4 @@ cgyro_lib.a: $(OBJECTS)
 	$(FC) $(FMATH) $(FFLAGS) -c $<
 
 clean:  
-	rm -rf *.o cgyro_lib.a $(EXEC) *~
+	rm -rf *.o cgyro_lib.a $(EXEC) *~ *.cub *.ptx
