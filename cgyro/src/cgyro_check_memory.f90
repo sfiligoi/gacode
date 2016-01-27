@@ -78,7 +78,7 @@ subroutine cgyro_check_memory(datafile)
         write(io,*)
         write(io,*) 'Implicit time advance'
         write(io,*)
-        call alloc_add(io,nc*nv_loc*16,'gkvec')
+        call alloc_add(io,nc*nv_loc*16.0,'gkvec')
         call alloc_add(io,(2*nup_theta+1)*nc*10*nv_loc*16.0,'gksp_mat')
         call alloc_add(io,(2*nup_theta+1)*nc*10*nv_loc*2*4.0,'gksp_indx')
         call alloc_add(io,10*nv_loc*8.0,'gksp_cntl')
