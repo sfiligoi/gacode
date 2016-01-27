@@ -11,7 +11,7 @@ CORES_PER_NODE=16
 NUMAS_PER_NODE=2
 
 # Compilers and flags
-FC  = ftn -e m -J ${GACODE_ROOT}/modules
+FC  = ftn -h acc -e m -J ${GACODE_ROOT}/modules
 F77 = ${FC} 
 
 FOMP   = 
