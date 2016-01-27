@@ -1,8 +1,6 @@
 include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
-TGLFISNAN = tglf_isnan_generic.o
-
-include ../install/make.ext.${GACODE_PLATFORM}
+-include ../install/make.ext.${GACODE_PLATFORM}
 
 ifeq ($(OPT),debug)
    FFLAGS=${FDEBUG}
@@ -15,7 +13,7 @@ EXEC2=tglf
 
 LLIB=tglf_lib
 
-OBJECTS = ${TGLFISNAN}      \
+OBJECTS = tglf_isnan.o      \
           tglf_modules.o    \
           tglf_pkg.o        \
           tglf_allocate.o   \
