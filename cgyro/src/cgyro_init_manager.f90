@@ -125,7 +125,7 @@ subroutine cgyro_init_manager
      allocate(cap_h_v_prime(nc_loc,nv))
 
      ! Nonlinear arrays
-     if(nonlinear_flag == 1) then
+     if (nonlinear_flag == 1) then
         if (nonlinear_method == 1) then
            allocate(f_nl(nc,nsplit,n_toroidal))
            allocate(g_nl(nc,nsplit,n_toroidal))
@@ -134,6 +134,8 @@ subroutine cgyro_init_manager
            allocate(g_nl(n_radial,nsplit,n_toroidal))
         endif
      endif
+
+     allocate(cmat(nv,nv,nc_loc))
 
   endif
 
@@ -150,12 +152,7 @@ subroutine cgyro_init_manager
      call cgyro_init_implicit_gk
 
      call timer_lib_out('str_init')
-
      call timer_lib_in('coll_init')
-
-     allocate(cmat(nv,nv,nc_loc))
-     allocate(cvec(nv))
-     allocate(bvec(nv))
 
      call cgyro_init_collision
 
@@ -163,10 +160,10 @@ subroutine cgyro_init_manager
 
   endif
 
+  call cgyro_check_memory(trim(path)//runfile_memory)
+
   ! Write initial data
   call cgyro_write_initdata
-
-  call cgyro_check_memory(trim(path)//'out.cgyro.memory')
 
   if (test_flag == 1) then
      call MPI_FINALIZE(i_err)
@@ -181,12 +178,15 @@ subroutine cgyro_init_manager
   ! Initialize nonlinear dimensions and arrays 
   if (nonlinear_method == 1) then
 
+     ! Direct convolution
+     
      ny0 = n_toroidal-1
      nx0 = n_radial/2
      ny = int(1.5*ny0)+1
      nx = int(1.5*nx0)+1
 
   else
+
      ! 2D FFT lengths 
      nx0 = n_radial
      ny0 = 2*n_toroidal-1

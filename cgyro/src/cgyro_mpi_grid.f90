@@ -40,15 +40,15 @@ subroutine cgyro_mpi_grid
      write(io,'(a,i5)') '         nc: ',nc
      write(io,'(a,i5)') ' GCD(nv,nc): ',d
      write(io,*)
-     write(io,*) '        [coll]    [str]     [NL]'
-     write(io,*) 'n_MPI   nc_loc   nv_loc  n_split'
-     write(io,*) '-----   ------   ------  -------'
+     write(io,*) '          [coll]     [str]      [NL]'
+     write(io,*) ' n_MPI    nc_loc    nv_loc   n_split'
+     write(io,*) '------    ------    ------   -------'
      do it=1,d*n_toroidal
         if (mod(d*n_toroidal,it) == 0 .and. mod(it,n_toroidal) == 0) then
            n_proc_1 = it/n_toroidal
            nc_loc = nc/n_proc_1           
            nv_loc = nv/n_proc_1           
-           write(io,'(t2,4(i5,4x))') it,nc_loc,nv_loc,1+(nv_loc*n_theta-1)/n_toroidal
+           write(io,'(t2,4(i6,4x))') it,nc_loc,nv_loc,1+(nv_loc*n_theta-1)/n_toroidal
         endif
      enddo
      close(io)
@@ -65,7 +65,7 @@ subroutine cgyro_mpi_grid
   allocate(ic_c(n_radial,n_theta))
   allocate(iv_v(n_energy,n_xi,n_species))
 
-    ! Velocity pointers
+  ! Velocity pointers
   iv = 0
   do ie=1,n_energy
      do ix=1,n_xi
@@ -92,8 +92,14 @@ subroutine cgyro_mpi_grid
   enddo
 !$acc enter data copyin(ir_c,it_c,ic_c)
 
-  if (test_flag == 1) return
-
+  if (test_flag == 1) then
+     ! Set dimensions for calculation of memory in test mode
+     nv_loc = nv
+     nc_loc = nc
+     nsplit = nv_loc*n_theta/n_toroidal
+     return
+  endif
+  
   !-------------------------------------------------------------
   ! Check that n_proc is a multiple of n_toroidal
   !

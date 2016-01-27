@@ -8,10 +8,6 @@ endif
 
 FC += ${FOMP}
 
-ifeq ($(ACC),true)
-   FC += ${FACC}
-endif
-
 LLIB = gyro_lib
 
 OBJECTS += gyro_globals.o \

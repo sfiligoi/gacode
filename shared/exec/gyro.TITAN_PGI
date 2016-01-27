@@ -26,6 +26,5 @@ cd $simdir
 
 export MPICH_MAX_THREAD_SAFETY=funneled
 export OMP_NUM_THREADS=$nomp
-export OMP_STACKSIZE=100M
-echo "> aprun -n $nmpi  -d $nomp   -ss $exec"
-aprun -n $nmpi  -d $nomp   -ss $exec
+echo "> aprun -n $nmpi -d $nomp -S $mpinuma -sn $numa -ss $exec"
+aprun -n $nmpi -d $nomp -S $mpinuma -sn $numa -ss $exec

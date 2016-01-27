@@ -160,8 +160,6 @@ subroutine cgyro_kernel
 !$acc exit data delete(cmat)
     deallocate(cmat)
   endif
-  if(allocated(cvec))       deallocate(cvec)
-  if(allocated(bvec))       deallocate(bvec)
 
   call cgyro_clean_implicit_gk
 

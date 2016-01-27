@@ -1,4 +1,4 @@
-include ../../shared/install/make.inc.${GACODE_PLATFORM}
+include ${GACODE_ROOT}/shared/install/make.inc.${GACODE_PLATFORM}
 
 ifeq ($(OPT),debug)
    FFLAGS=${FDEBUG}
@@ -50,4 +50,20 @@ clean:
 	rm -rf *.o neo_lib.a $(EXEC) *~
 	cd ${GACODE_ROOT}/modules ; rm -f neo*.mod
 
-include ../install/make.ext.${GACODE_PLATFORM}
+-include ../install/make.ext.${GACODE_PLATFORM}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

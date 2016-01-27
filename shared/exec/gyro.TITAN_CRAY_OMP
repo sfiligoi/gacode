@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 #
 # SCRIPT:
-#  gyro.HOPPER_CRAY
+#  gyro.TITAN_PGI
 #
 # FUNCTION:
 #  Parallel execution script
@@ -13,6 +13,7 @@ exec=${3}
 nomp=${4}
 numa=${5}
 mpinuma=${6}
+nidle=${7}
 
 # nmpi = MPI tasks
 # nomp = OpenMP threads per MPI task
@@ -25,5 +26,5 @@ cd $simdir
 
 export MPICH_MAX_THREAD_SAFETY=funneled
 export OMP_NUM_THREADS=$nomp
-echo "> aprun -n $nmpi -N $mpinode -d $nomp -S $mpinuma -sn $numa -ss $exec"
-aprun -n $nmpi -N $mpinode -d $nomp -S $mpinuma -sn $numa -ss $exec
+echo "> aprun -n $nmpi -d $nomp -S $mpinuma -sn $numa -ss $exec"
+aprun -n $nmpi -d $nomp -S $mpinuma -sn $numa -ss $exec
