@@ -1,3 +1,0 @@
-neo_scalapack.o : neo_scalapack.stub.f90
-	$(FC) $(FMATH) $(FFLAGS) -o neo_scalapack.o -c neo_scalapack.stub.f90
-
