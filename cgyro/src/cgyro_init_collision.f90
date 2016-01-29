@@ -18,6 +18,7 @@ subroutine cgyro_init_collision
   real, dimension(:,:), allocatable :: amat, bmat
   real, dimension(:,:,:,:,:,:), allocatable :: ctest
   real, dimension(:,:,:,:,:), allocatable :: bessel
+  logical, parameter :: use_dgetri = .false.
 
   allocate(nu_d(n_energy,n_species,n_species))
   allocate(nu_s(n_energy,n_species,n_species))
@@ -514,7 +515,7 @@ subroutine cgyro_init_collision
   end if
 
   ! matrix solve parameters
-  allocate(work(nv))
+  allocate(work(nv*nv))
   allocate(i_piv(nv))
   allocate(bmat(nv,nv))
 
@@ -664,11 +665,17 @@ subroutine cgyro_init_collision
 
      ! H_bar = (1 - dt/2 C - Poisson)^(-1) * (1 + dt/2 C + Poisson) H
      ! Lapack factorization and inverse of LHS
-     call DGETRF(nv,nv,cmat(:,:,ic_loc),nv,i_piv,info)
-     call DGETRI(nv,cmat(:,:,ic_loc),nv,i_piv,work,nv,info)
-     ! Matrix multiply
-     call DGEMM('N','N',nv,nv,nv,num1,cmat(:,:,ic_loc),&
+     if (use_dgetri) then
+       call DGETRF(nv,nv,cmat(:,:,ic_loc),nv,i_piv,info)
+       call DGETRI(nv,cmat(:,:,ic_loc),nv,i_piv,work,size(work),info)
+       ! Matrix multiply
+       call DGEMM('N','N',nv,nv,nv,num1,cmat(:,:,ic_loc),&
           nv,amat,nv,num0,bmat,nv)
+     else
+       call DGESV(nv,nv,cmat(:,:,ic_loc),size(cmat,1), &
+                  i_piv,amat,size(amat,1),info)
+       bmat(:,:) = amat(:,:)
+     endif
      cmat(:,:,ic_loc) = bmat(:,:)
 
   enddo
