@@ -24,7 +24,7 @@ subroutine cgyro_step_collision
 
 #ifdef _OPENACC
 !$acc  data present(cmat) &
-!$acc& pcreate(bvecm,cvecm)  pcopy(cap_h_v)
+!$acc& pcreate(bvec,cvec)  pcopy(cap_h_v)
 
 !$acc  parallel 
 !$acc  loop gang private(ic_loc,ivp,iv)
