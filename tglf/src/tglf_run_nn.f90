@@ -150,11 +150,11 @@ subroutine tglf_run_nn()
      
      write (14,*) '1' 
 
-     write (14,"(15(f6.3,x))") tglf_as_in(2), tglf_as_in(3), tglf_betae_in, &
+     write (14,"(15(f6.3,x))") tglf_as_in(3), tglf_as_in(2), tglf_betae_in, &
                              tglf_delta_loc_in, tglf_kappa_loc_in, tglf_q_loc_in, &
                              tglf_q_prime_loc_in, tglf_rlns_in(1), tglf_rlts_in(1), &
-		             tglf_rlts_in(2), tglf_rmaj_loc_in, tglf_rmin_loc_in, &
-		             tglf_s_kappa_loc_in, tglf_taus_in(2), tglf_xnue_in
+		             tglf_rlts_in(3), tglf_rmaj_loc_in, tglf_rmin_loc_in, &
+		             tglf_s_kappa_loc_in, tglf_taus_in(3), tglf_xnue_in
      
      close(14)
      
@@ -218,33 +218,124 @@ subroutine tglf_run_nn()
      close(17)
      close(19)
      
-     open (unit=18, file="results.nn", position="append", action="write")
+     if ((AS_2_LIM<2.) .and. (AS_3_LIM<2) .and. (BETAE_LIM<2) .and. (DELTA_LOC_LIM<2) .and. &
+        (KAPPA_LOC_LIM<2) .and. (Q_LOC_LIM<2) .and. (Q_PRIME_LOC_LIM<2) .and. (RLNS_1_LIM<2) &
+        .and. (RLTS_1_LIM<2) .and. (RLTS_2_LIM<2) .and. (RMAJ_LOC_LIM<2) .and. (RMIN_LOC_LIM<2) &
+        .and. (S_KAPPA_LOC_LIM<2) .and. (TAUS_2_LIM<2) .and. (XNUE_LIM<2)) then
      
-     write (18,*) 'STD: OEF1 OEF3 OPF1 OPF3 OST1 OST3'
-     write (18,"(6(f6.3,x))") OUT_ENERGY_FLUX_1_STD, OUT_ENERGY_FLUX_3_STD, OUT_PARTICLE_FLUX_1_STD, &
+     
+        open (unit=18, file=TRIM(tglf_path_in)//"results.nn", position="append", action="write")
+     
+        write (18,*) tglf_path_in
+     
+        write (18,*) 'STD: OEF1  OEF3  OPF1  OPF3  OST1  OST3'
+        write (18,"(6(f6.3,x))") OUT_ENERGY_FLUX_1_STD, OUT_ENERGY_FLUX_3_STD, OUT_PARTICLE_FLUX_1_STD, &
                               OUT_PARTICLE_FLUX_3_STD, OUT_STRESS_TOR_1_STD, OUT_STRESS_TOR_3_STD
      
-     write (18,*) 'OUT: OEF1 OEF3 OPF1 OPF3 OST1 OST3'
-     write (18,"(6(f6.3,x))") OUT_ENERGY_FLUX_1, OUT_ENERGY_FLUX_3, OUT_PARTICLE_FLUX_1, &
+        write (18,*) 'NN_OUT: OEF1  OEF3  OPF1  OPF3  OST1  OST3'
+        write (18,"(6(f6.3,x))") OUT_ENERGY_FLUX_1, OUT_ENERGY_FLUX_3, OUT_PARTICLE_FLUX_1, &
                               OUT_PARTICLE_FLUX_3, OUT_STRESS_TOR_1, OUT_STRESS_TOR_3
 
-     write (18,*) 'LIM: AS2 AS3 BETAE DELTA KAPPA Q QPRIME RLNS1 RLTS1 RLTS2 RMAJ RMIN SKAPPA TAUS2 XNUE'
-     write (18,"(15(f8.3,x))") AS_2_LIM, AS_3_LIM, BETAE_LIM, DELTA_LOC_LIM, KAPPA_LOC_LIM, Q_LOC_LIM, &
-                               Q_PRIME_LOC_LIM, RLNS_1_LIM, RLTS_1_LIM, RLTS_2_LIM, RMAJ_LOC_LIM, &
-		               RMIN_LOC_LIM, S_KAPPA_LOC_LIM, TAUS_2_LIM, XNUE_LIM
+        write (18,*) 'LIM: AS2  AS3  BETAE  DELTA  KAPPA  Q  QPRIME  RLNS1  RLTS1  RLTS2  RMAJ  RMIN  SKAPPA  TAUS2  XNUE'
+        write (18,"(15(f8.3,x))") AS_2_LIM, AS_3_LIM, BETAE_LIM, DELTA_LOC_LIM, KAPPA_LOC_LIM, Q_LOC_LIM, &
+                                  Q_PRIME_LOC_LIM, RLNS_1_LIM, RLTS_1_LIM, RLTS_2_LIM, RMAJ_LOC_LIM, &
+		                  RMIN_LOC_LIM, S_KAPPA_LOC_LIM, TAUS_2_LIM, XNUE_LIM
 
-     write (18,*) 'LIM: OEF1 OEF3 OPF1 OPF3 OST1 OST3'
-     write (18,"(6(f6.3,x))") OUT_ENERGY_FLUX_1_LIM, OUT_ENERGY_FLUX_3_LIM, OUT_PARTICLE_FLUX_1_LIM, &
-                              OUT_PARTICLE_FLUX_3_LIM, OUT_STRESS_TOR_1_LIM, OUT_STRESS_TOR_3_LIM
+        write (18,*) 'LIM: OEF1  OEF3  OPF1  OPF3  OST1  OST3'
+        write (18,"(6(f6.3,x))") OUT_ENERGY_FLUX_1_LIM, OUT_ENERGY_FLUX_3_LIM, OUT_PARTICLE_FLUX_1_LIM, &
+                                 OUT_PARTICLE_FLUX_3_LIM, OUT_STRESS_TOR_1_LIM, OUT_STRESS_TOR_3_LIM
      
-     close(18)
+        close(18)
      
-     open (unit=21, file="/u/ludat/tmp/tglf.vs.nn", position="append", action="write")
+     !open (unit=21, file="/u/ludat/tmp/tglf.vs.nn", position="append", action="write")
 
-     write (21,*) 'NN: OEF1 OEF3 OPF1 OPF3 OST1 OST3'
-     write (21,"(6(f6.3,x))") OUT_ENERGY_FLUX_1, OUT_ENERGY_FLUX_3, OUT_PARTICLE_FLUX_1, &
-                              OUT_PARTICLE_FLUX_3, OUT_STRESS_TOR_1, OUT_STRESS_TOR_3
-     close(21)
+     !write (21,*) 'NN: OEF1 OEF3 OPF1 OPF3 OST1 OST3'
+     !write (21,"(6(f6.3,x))") OUT_ENERGY_FLUX_1, OUT_ENERGY_FLUX_3, OUT_PARTICLE_FLUX_1, &
+     !                         OUT_PARTICLE_FLUX_3, OUT_STRESS_TOR_1, OUT_STRESS_TOR_3
+     !close(21)
+
+        open (unit=25, file="results.nns", position="append", action="write")
+     
+        write (25,*) tglf_path_in
+
+        write (25,*) 'NN: OEF1  OEF3  OPF1  OPF3  OST1  OST3'
+        write (25,"(6(f6.3,x))") OUT_ENERGY_FLUX_1, OUT_ENERGY_FLUX_3, OUT_PARTICLE_FLUX_1, &
+                                 OUT_PARTICLE_FLUX_3, OUT_STRESS_TOR_1, OUT_STRESS_TOR_3
+        write (25,*)
+        close(25)
+
+     else
+
+        call tglf_tm_mpi
+
+        tglf_elec_pflux_out = get_particle_flux(1,1)  &
+             + get_particle_flux(1,2)                 &
+             + get_particle_flux(1,3)
+
+        tglf_elec_eflux_low_out = get_q_low(1)
+        tglf_elec_eflux_out     = get_energy_flux(1,1) &
+             + get_energy_flux(1,2)                    &
+             + get_energy_flux(1,3)
+
+        tglf_elec_mflux_out = get_stress_tor(1,1)   &
+             + get_stress_tor(1,2)                  &
+             + get_stress_tor(1,3)
+
+        ! S_e/S_GB
+        tglf_elec_expwd_out = get_exchange(1,1)  &
+             + get_exchange(1,2)                 &
+             + get_exchange(1,3)
+
+        ! Ions
+
+        do i_ion=1,5
+
+           ! Gammai/Gamma_GB
+           tglf_ion_pflux_out(i_ion) = get_particle_flux(i_ion+1,1) &
+                + get_particle_flux(i_ion+1,2)                      &
+                + get_particle_flux(i_ion+1,3)
+ 
+           ! Qi/Q_GB
+           tglf_ion_eflux_low_out(i_ion) = get_q_low(i_ion+1)
+           ! _low already included EM terms
+           tglf_ion_eflux_out(i_ion)     = get_energy_flux(i_ion+1,1) &
+                + get_energy_flux(i_ion+1,2)                          &
+                + get_energy_flux(i_ion+1,3)
+
+           ! Pi_i/Pi_GB
+           tglf_ion_mflux_out(i_ion) = get_stress_tor(i_ion+1,1)  &
+                + get_stress_tor(i_ion+1,2)                       &
+                + get_stress_tor(i_ion+1,3)
+
+           ! S_i/S_GB
+           tglf_ion_expwd_out(i_ion) = get_exchange(i_ion+1,1)    &
+                + get_exchange(i_ion+1,2)                         &
+                + get_exchange(i_ion+1,3)
+
+        enddo
+	
+	
+	open (unit=21, file=TRIM(tglf_path_in)//"results.tglf", position="append", action="write")
+
+        write (21,*) tglf_path_in
+        write (21,*) 'TGLF: OEF1  OEF3  OPF1  OPF3  OST1  OST3'
+        write (21,"(6(f6.3,x))") tglf_elec_eflux_out, tglf_ion_eflux_out(1), tglf_elec_pflux_out, &
+                                 tglf_ion_pflux_out(1), tglf_elec_mflux_out, tglf_ion_mflux_out(1)
+     
+        close(21)
+	
+	open (unit=27, file="results.nns", position="append", action="write")
+     
+        write (27,*) tglf_path_in
+
+        write (27,*) 'TGLF: OEF1  OEF3  OPF1  OPF3  OST1  OST3'
+        write (27,"(6(f6.3,x))") OUT_ENERGY_FLUX_1, OUT_ENERGY_FLUX_3, OUT_PARTICLE_FLUX_1, &
+                                 OUT_PARTICLE_FLUX_3, OUT_STRESS_TOR_1, OUT_STRESS_TOR_3
+        write (27,*)
+        close(27)
+	
+
+     end if
 
      !---------------------------------------------
      ! Output (normalized to Q_GB)
