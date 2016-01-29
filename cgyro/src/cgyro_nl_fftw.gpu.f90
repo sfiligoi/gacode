@@ -43,7 +43,8 @@ subroutine cgyro_nl_fftw(ij)
         ! iexch = iexch+1
         iexch = it + (iv_loc-1)*n_theta
  
-           ic_loc = ic_c(ir,it)
+           ! ic_loc = ic_c(ir,it)
+           ic_loc = it + (ir-1)*n_theta
            fpack(ir,iexch) = h_x(ic_loc,iv_loc)
            gpack(ir,iexch) = psi(ic_loc,iv_loc)
         enddo
@@ -126,7 +127,8 @@ subroutine cgyro_nl_fftw(ij)
         do ir=1,n_radial
         ! iexch = iexch+1
         iexch = it + (iv_loc-1)*n_theta
-           ic_loc = ic_c(ir,it)
+           ! ic_loc = ic_c(ir,it)
+           ic_loc = it + (ir-1)*n_theta
            psi(ic_loc,iv_loc) = gpack(ir,iexch) 
         enddo
      enddo
