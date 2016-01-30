@@ -5,6 +5,10 @@
 !  CGYRO global variables.  The idea is to have a primary, large
 !  module containing all essential CGYRO arrays and scalars.
 !-----------------------------------------------------------------
+#ifdef _OPENACC
+#include "precision_m.f90"
+#include "cufft_m.f90"
+#endif
 
 module cgyro_globals
 
@@ -283,6 +287,30 @@ module cgyro_globals
   !
   type(C_PTR) :: plan_r2c
   type(C_PTR) :: plan_c2r
+#ifdef _OPENACC
+
+  ! ------------------------------------------------
+  ! values extracted from cufft_m module from nvidia
+  ! ------------------------------------------------
+  integer, parameter, public :: CUFFT_FORWARD = -1
+  integer, parameter, public :: CUFFT_INVERSE = 1
+  integer, parameter, public :: CUFFT_R2C = Z'2a' ! Real to Complex (interleaved)
+  integer, parameter, public :: CUFFT_C2R = Z'2c' ! Complex (interleaved) to Real
+  integer, parameter, public :: CUFFT_C2C = Z'29' ! Complex to Complex, interleaved
+  integer, parameter, public :: CUFFT_D2Z = Z'6a' ! Double to Double-Complex
+  integer, parameter, public :: CUFFT_Z2D = Z'6c' ! Double-Complex to Double
+  integer, parameter, public :: CUFFT_Z2Z = Z'69' ! Double-Complex to Double-Complex
+
+
+  integer(c_int) :: cu_plan_r2c_many
+  integer(c_int) :: cu_plan_c2r_many
+
+  complex, dimension(:,:,:),allocatable :: fxmany,fymany,gxmany,gymany
+  real, dimension(:,:,:), allocatable :: uxmany,uymany
+  real, dimension(:,:,:), allocatable :: vxmany,vymany,uvmany
+
+
+#endif
   !  
   integer :: nx,ny
   integer :: nx0,ny0
