@@ -70,16 +70,17 @@ subroutine cgyro_nl_fftw(ij)
 !$acc& pcreate(uxmany,uymany,vxmany,vymany) &
 !$acc& pcreate(uvmany)
 
+!$acc wait
+
 !$acc parallel
 !$acc loop gang 
 #else
-!$omp parallel do private(fx,gx,fy,gy,in,iy,ir,p,ix,f0,g0)
+!$omp parallel do private(in,iy,ir,p,ix,f0,g0)
 #endif
   do j=1,nsplit
 
-!$acc loop worker
+!$acc loop worker vector collapse(2)
     do ix=lbound(fxmany,2),ubound(fxmany,2)
-!$acc loop vector
     do iy=lbound(fxmany,1),ubound(fxmany,1)
      fxmany(iy,ix,j) = 0.0
      gxmany(iy,ix,j) = 0.0
@@ -89,13 +90,13 @@ subroutine cgyro_nl_fftw(ij)
     enddo
 
      ! Array mapping
-!$acc loop worker private(ir,p,ix)
+!$acc  loop worker vector collapse(2) &
+!$acc& private(ir,in,p,ix,iy,f0,g0)
      do ir=1,n_radial
+     do in=1,n_toroidal
         p  = ir-1-nx0/2
         ix = p
         if (ix < 0) ix = ix+nx  
-!$acc   loop  vector private(in,iy,f0,g0)
-        do in=1,n_toroidal
            iy = in-1
            f0 = i_c*f_nl(ir,j,in)
            g0 = i_c*g_nl(ir,j,in)
@@ -103,8 +104,8 @@ subroutine cgyro_nl_fftw(ij)
            gxmany(iy,ix,j) = p*g0
            fymany(iy,ix,j) = iy*f0
            gymany(iy,ix,j) = iy*g0
-        enddo
-     enddo
+      enddo
+      enddo
 
      if (kxfilter_flag == 1) then
 !$acc  loop vector private(iy)
@@ -117,11 +118,13 @@ subroutine cgyro_nl_fftw(ij)
      endif
    enddo ! end do j
 !$acc end parallel
+!$acc wait
 
 #ifdef _OPENACC
 ! --------------------------------------
 ! perform many Fourier Transforms at once
 ! --------------------------------------
+!$acc wait
 !$acc  host_data &
 !$acc& use_device(fxmany,fymany,gxmany,gymany) &
 !$acc& use_device(uxmany,uymany,vxmany,vymany)
@@ -137,6 +140,7 @@ subroutine cgyro_nl_fftw(ij)
     call cufftExecZ2D(cu_plan_c2r_many,gxmany,vxmany)
     call cufftExecZ2D(cu_plan_c2r_many,gymany,vymany)
   endif
+!$acc wait
 !$acc end host_data
 #else
 !$omp  parallel do   
@@ -157,7 +161,9 @@ subroutine cgyro_nl_fftw(ij)
 
 #ifdef _OPENACC
 !$acc  parallel 
-!$acc  loop gang 
+!$acc  loop gang vector collapse(3) &
+!$acc& private(j,ix,iy) &
+!$acc& private(r_ux,r_uy,r_vx,r_vy,r_uv)
 #else
 !$omp parallel do default(none) collapse(2) &
 !$omp& private(j,ix,iy) &
@@ -167,9 +173,7 @@ subroutine cgyro_nl_fftw(ij)
 !$omp& shared(uvmany)
 #endif
      do j=1,nsplit
-!$acc loop worker
      do ix=lbound(ux,2),ubound(ux,2)
-!$acc loop vector
      do iy=lbound(ux,1),ubound(ux,1)
 
 
@@ -186,6 +190,7 @@ subroutine cgyro_nl_fftw(ij)
      enddo
      enddo
 !$acc end parallel
+!$acc wait
 
 
 
@@ -195,12 +200,14 @@ subroutine cgyro_nl_fftw(ij)
 
        
 #ifdef _OPENACC
+!$acc wait
 !$acc host_data use_device(uvmany,fxmany)
    if (kind(uvmany).eq.singlePrecision) then
      call cufftExecR2C(cu_plan_r2c_many,uvmany,fxmany)
    else
      call cufftExecD2Z(cu_plan_r2c_many,uvmany,fxmany)
    endif
+!$acc wait
 !$acc end host_data
 #else
 !$omp parallel do private(j)
@@ -236,9 +243,11 @@ subroutine cgyro_nl_fftw(ij)
      enddo
      enddo
 !$acc end parallel
+!$acc wait
 
 
 #ifdef _OPENACC
+!$acc wait
 !$acc end data
 #endif
   call timer_lib_out('nl')
