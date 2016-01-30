@@ -30,7 +30,8 @@ FOPT   = -fast -fastsse  -Mvect -Minfo=all ${FMATH} ${FOMP} ${FACC}
 #        -lfftw3_threads -lfftw3f_threads -lfftw3 -lfftw3f
 LMATH=-I$FFTW_INC -L$FFTW_DIR \
          -lfftw3_threads -lfftw3f_threads -lfftw3f -lfftw3 \
-         -lfftw3_threads -lfftw3f_threads -lfftw3f -lfftw3  
+         -lfftw3_threads -lfftw3f_threads -lfftw3f -lfftw3   \
+        -lcufft
 
 
 # NetCDF
