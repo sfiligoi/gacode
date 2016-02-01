@@ -32,8 +32,8 @@ subroutine cgyro_nl_fftw(ij)
   complex*16, dimension(:,:), allocatable :: gpack
   real*8 :: inv_nxny
 
-  logical,parameter :: use_cufft = .false.
-  logical :: use_acc = .false.
+  logical, parameter :: use_cufft = .true.
+  logical, parameter :: use_acc = .true.
 
 
   include 'fftw3.f03'
@@ -75,24 +75,14 @@ subroutine cgyro_nl_fftw(ij)
 !$acc& pcreate(uvmany)
 #endif
 
-#ifdef _OPENACC
 !$acc kernels
     fxmany(:,:,:) = 0
     fymany(:,:,:) = 0
     gxmany(:,:,:) = 0
     gymany(:,:,:) = 0
 !$acc end kernels
-#else
-!$omp workshare
-    fxmany(:,:,:) = 0
-    fymany(:,:,:) = 0
-    gxmany(:,:,:) = 0
-    gymany(:,:,:) = 0
-!$omp end workshare
-#endif
 
 
-  use_acc = .true.
 
   if (use_acc) then
 !$acc kernels 
@@ -149,6 +139,7 @@ subroutine cgyro_nl_fftw(ij)
 
      if (kxfilter_flag == 1) then
 !$acc  kernels
+!$acc  loop independent gang
        do j=1,nsplit
         fxmany(:,-nx0/2+nx,j) = 0.0
         fymany(:,-nx0/2+nx,j) = 0.0
@@ -215,9 +206,9 @@ subroutine cgyro_nl_fftw(ij)
 
      inv_nxny = dble(1)/dble(nx*ny)
 
-   use_acc = .true.
    if (use_acc) then
 !$acc  kernels 
+!$acc loop independent gang
    do j=1,nsplit
    do ix=lbound(uvmany,2),ubound(uvmany,2)
    do iy=lbound(uvmany,1),ubound(uvmany,1)
@@ -280,7 +271,6 @@ subroutine cgyro_nl_fftw(ij)
      ! NOTE: The FFT will generate an unwanted n=0,p=-nr/2 component
      ! that will be filtered in the main time-stepping loop
 
-     use_acc = .true.
      
    if (use_acc) then
 !$acc kernels  

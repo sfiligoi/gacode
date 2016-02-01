@@ -207,11 +207,11 @@ module cufft_m
       integer(c_int), value :: rank
       integer(c_int), dimension(*), intent(in) :: n
 
-      integer(c_int), intent(inout) :: inembed
+      integer(c_int), dimension(*),intent(inout) :: inembed
       integer(c_int), value :: istride
       integer(c_int), value :: idist
 
-      integer(c_int), intent(inout) :: onembed
+      integer(c_int), dimension(*),intent(inout) :: onembed
       integer(c_int), value :: ostride
       integer(c_int), value :: odist
 

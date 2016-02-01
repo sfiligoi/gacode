@@ -31,7 +31,8 @@ subroutine cgyro_init_manager
 #ifdef _OPENACC
     integer :: howmany,istatus
     integer, parameter :: irank = 2
-    integer :: ndim(irank),idist,odist,istride,ostride,inembed,onembed
+    integer, dimension(irank) :: ndim,inembed,onembed
+    integer :: idist,odist,istride,ostride
 
 #endif
 
