@@ -247,8 +247,8 @@ subroutine cgyro_init_manager
 !                       1 == FFTW_BACKWARD
 !   -------------------------------------
 
-      ndim(1) = ny
-      ndim(2) = nx
+      ndim(1) = nx
+      ndim(2) = ny
       idist = size( fxmany,1)*size(fxmany,2)
       odist = size( uxmany,1)*size(uxmany,2)
       istride = 1
@@ -271,8 +271,6 @@ subroutine cgyro_init_manager
 
 
 
-      ndim(1) = ny
-      ndim(2) = nx
       idist = size(uxmany,1)*size(uxmany,2)
       odist = size(fxmany,1)*size(fxmany,2)
       inembed = size(uxmany,1)
