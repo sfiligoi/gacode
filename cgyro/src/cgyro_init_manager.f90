@@ -234,9 +234,9 @@ subroutine cgyro_init_manager
      allocate( vxmany(0:ny-1,0:nx-1,howmany) )
      allocate( vymany(0:ny-1,0:nx-1,howmany) )
      allocate( uvmany(0:ny-1,0:nx-1,howmany) )
-!$acc enter data create(fxmany,fymany,gxmany,gymany)
-!$acc enter data create(uxmany,uymany,vxmany,vymany)
-!$acc enter data create(uvmany)
+!!$acc enter data create(fxmany,fymany,gxmany,gymany)
+!!$acc enter data create(uxmany,uymany,vxmany,vymany)
+!!$acc enter data create(uvmany)
 
 
 !   -------------------------------------
