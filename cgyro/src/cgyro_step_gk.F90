@@ -102,12 +102,11 @@ subroutine cgyro_rhs(ij)
 
 
 #ifdef _OPENACC
-!$acc parallel
-!$acc loop collapse(2) gang vector &
-!$acc& private(iv,ic,iv_loc,is,ix,ie,rval,rhs_stream,id,jt,jr,jc)
+!$acc  parallel  loop gang vector collapse(2) & 
+!$acc& private(iv,ic,iv_loc,is,ix,ie,rval,rhs_stream,id,jc)
 #else
-!$omp parallel private(ic,iv_loc,is,ix,ie,rval,rhs_stream,jc,id)
-!$omp do 
+!$omp  parallel do &
+!$omp& private(iv,ic,iv_loc,is,ix,ie,rval,rhs_stream,id,jc)
 #endif
   do iv=nv1,nv2
   do ic=1,nc
@@ -142,14 +141,8 @@ subroutine cgyro_rhs(ij)
         endif
      enddo
   enddo
-#ifdef _OPENACC
-!$acc end parallel
-
 !$acc end data
-#else
-!$omp end do
-!$omp end parallel
-#endif
+
   rhs(ij,:,:) = rhs_ij(:,:)
 
   call timer_lib_out('str')

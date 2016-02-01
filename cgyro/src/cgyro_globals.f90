@@ -289,19 +289,6 @@ module cgyro_globals
   type(C_PTR) :: plan_c2r
 #ifdef _OPENACC
 
-  ! ------------------------------------------------
-  ! values extracted from cufft_m module from nvidia
-  ! ------------------------------------------------
-  integer, parameter, public :: CUFFT_FORWARD = -1
-  integer, parameter, public :: CUFFT_INVERSE = 1
-  integer, parameter, public :: CUFFT_R2C = Z'2a' ! Real to Complex (interleaved)
-  integer, parameter, public :: CUFFT_C2R = Z'2c' ! Complex (interleaved) to Real
-  integer, parameter, public :: CUFFT_C2C = Z'29' ! Complex to Complex, interleaved
-  integer, parameter, public :: CUFFT_D2Z = Z'6a' ! Double to Double-Complex
-  integer, parameter, public :: CUFFT_Z2D = Z'6c' ! Double-Complex to Double
-  integer, parameter, public :: CUFFT_Z2Z = Z'69' ! Double-Complex to Double-Complex
-
-
   integer(c_int) :: cu_plan_r2c_many
   integer(c_int) :: cu_plan_c2r_many
 

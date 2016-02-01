@@ -233,6 +233,9 @@ subroutine cgyro_init_manager
      allocate( vxmany(0:ny-1,0:nx-1,howmany) )
      allocate( vymany(0:ny-1,0:nx-1,howmany) )
      allocate( uvmany(0:ny-1,0:nx-1,howmany) )
+!$acc enter data create(fxmany,fymany,gxmany,gymany)
+!$acc enter data create(uxmany,uymany,vxmany,vymany)
+!$acc enter data create(uvmany)
 
 
 !   -------------------------------------
@@ -244,8 +247,8 @@ subroutine cgyro_init_manager
 !                       1 == FFTW_BACKWARD
 !   -------------------------------------
 
-      ndim(1) = nx
-      ndim(2) = ny
+      ndim(1) = ny
+      ndim(2) = nx
       idist = size( fxmany,1)*size(fxmany,2)
       odist = size( uxmany,1)*size(uxmany,2)
       istride = 1
@@ -268,8 +271,8 @@ subroutine cgyro_init_manager
 
 
 
-      ndim(1) = nx
-      ndim(2) = ny
+      ndim(1) = ny
+      ndim(2) = nx
       idist = size(uxmany,1)*size(uxmany,2)
       odist = size(fxmany,1)*size(fxmany,2)
       inembed = size(uxmany,1)

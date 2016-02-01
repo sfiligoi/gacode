@@ -1,5 +1,5 @@
 !-----------------------------------------------------------------
-! cgyro_nl_fftw.gpu.f90
+! cgyro_nl_fftw.f90
 !
 ! PURPOSE:
 !  Evaluate nonlinear bracket with dealiased FFT.  It is natural 
@@ -11,28 +11,18 @@
 !-----------------------------------------------------------------
 
 subroutine cgyro_nl_fftw(ij)
-#ifdef _OPENACC
-  use precision_m
-  use cufft_m
-#endif
 
   use timer_lib
   use parallel_lib
 
   use cgyro_globals
-  implicit none
 
   integer, intent(in) :: ij
   integer :: j,p,iexch
-  integer :: it,ir,in,ix,iy
 
   complex :: f0,g0
   complex, dimension(:,:), allocatable :: fpack
   complex, dimension(:,:), allocatable :: gpack
-  real :: inv_nxny
-  real :: r_ux,r_uy,r_vx,r_vy,r_uv
-
-
 
   include 'fftw3.f03'
 
@@ -40,21 +30,15 @@ subroutine cgyro_nl_fftw(ij)
 
   allocate(fpack(n_radial,nv_loc*n_theta))
   allocate(gpack(n_radial,nv_loc*n_theta))
-  ! fpack = 0.0
-  ! gpack = 0.0
+  fpack = 0.0
+  gpack = 0.0
   iexch = 0
-!$omp  parallel do collapse(2) &
-!$omp& private(iv_loc,it,ir,iexch,ic_loc)
   do iv_loc=1,nv_loc
      do it=1,n_theta
+        iexch = iexch+1
         do ir=1,n_radial
-        ! iexch = iexch+1
-        iexch = it + (iv_loc-1)*n_theta
- 
-           ! ic_loc = ic_c(ir,it)
-           ic_loc = it + (ir-1)*n_theta
-           fpack(ir,iexch) = h_x(ic_loc,iv_loc)
-           gpack(ir,iexch) = psi(ic_loc,iv_loc)
+           fpack(ir,iexch) = h_x(ic_c(ir,it),iv_loc)
+           gpack(ir,iexch) = psi(ic_c(ir,it),iv_loc)
         enddo
      enddo
   enddo
@@ -64,207 +48,75 @@ subroutine cgyro_nl_fftw(ij)
 
   call timer_lib_in('nl')
 
-#ifdef _OPENACC
-!$acc  data pcopyin(f_nl) pcopy(g_nl)   &
-!$acc& pcreate(fxmany,fymany,gxmany,gymany) &
-!$acc& pcreate(uxmany,uymany,vxmany,vymany) &
-!$acc& pcreate(uvmany)
-
-!$acc wait
-
-!$acc parallel
-!$acc loop gang 
-#else
-!$omp parallel do private(in,iy,ir,p,ix,f0,g0)
-#endif
+!$omp parallel private(fx,gx,fy,gy,in,iy,ir,p,ix,f0,g0,uv,ux,uy,vx,vy)
+!$omp do
   do j=1,nsplit
 
-!$acc loop worker vector collapse(2)
-    do ix=lbound(fxmany,2),ubound(fxmany,2)
-    do iy=lbound(fxmany,1),ubound(fxmany,1)
-     fxmany(iy,ix,j) = 0.0
-     gxmany(iy,ix,j) = 0.0
-     fymany(iy,ix,j) = 0.0
-     gymany(iy,ix,j) = 0.0
-    enddo
-    enddo
+     fx = 0.0
+     gx = 0.0
+     fy = 0.0
+     gy = 0.0
 
      ! Array mapping
-!$acc  loop worker vector collapse(2) &
-!$acc& private(ir,in,p,ix,iy,f0,g0)
      do ir=1,n_radial
-     do in=1,n_toroidal
         p  = ir-1-nx0/2
         ix = p
         if (ix < 0) ix = ix+nx  
+        do in=1,n_toroidal
            iy = in-1
            f0 = i_c*f_nl(ir,j,in)
            g0 = i_c*g_nl(ir,j,in)
-           fxmany(iy,ix,j) = p*f0
-           gxmany(iy,ix,j) = p*g0
-           fymany(iy,ix,j) = iy*f0
-           gymany(iy,ix,j) = iy*g0
-      enddo
-      enddo
+           fx(iy,ix) = p*f0
+           gx(iy,ix) = p*g0
+           fy(iy,ix) = iy*f0
+           gy(iy,ix) = iy*g0
+        enddo
+     enddo
 
      if (kxfilter_flag == 1) then
-!$acc  loop vector private(iy)
-       do iy=lbound(fxmany,1),ubound(fxmany,1)
-        fxmany(iy,-nx0/2+nx,j) = 0.0
-        fymany(iy,-nx0/2+nx,j) = 0.0
-        gxmany(iy,-nx0/2+nx,j) = 0.0
-        gymany(iy,-nx0/2+nx,j) = 0.0
-       enddo
+        fx(:,-nx0/2+nx) = 0.0
+        fy(:,-nx0/2+nx) = 0.0
+        gx(:,-nx0/2+nx) = 0.0
+        gy(:,-nx0/2+nx) = 0.0
      endif
-   enddo ! end do j
-!$acc end parallel
-!$acc wait
 
-#ifdef _OPENACC
-! --------------------------------------
-! perform many Fourier Transforms at once
-! --------------------------------------
-!$acc wait
-!$acc  host_data &
-!$acc& use_device(fxmany,fymany,gxmany,gymany) &
-!$acc& use_device(uxmany,uymany,vxmany,vymany)
-
-  if (kind(uxmany).eq.singlePrecision) then
-    call cufftExecC2R(cu_plan_c2r_many,fxmany,uxmany)
-    call cufftExecC2R(cu_plan_c2r_many,fymany,uymany)
-    call cufftExecC2R(cu_plan_c2r_many,gxmany,vxmany)
-    call cufftExecC2R(cu_plan_c2r_many,gymany,vymany)
-  else
-    call cufftExecZ2D(cu_plan_c2r_many,fxmany,uxmany)
-    call cufftExecZ2D(cu_plan_c2r_many,fymany,uymany)
-    call cufftExecZ2D(cu_plan_c2r_many,gxmany,vxmany)
-    call cufftExecZ2D(cu_plan_c2r_many,gymany,vymany)
-  endif
-!$acc wait
-!$acc end host_data
-#else
-!$omp  parallel do   
-   do j=1,nsplit
-     call fftw_execute_dft_c2r(plan_c2r, fxmany(:,:,j),uxmany(:,:,j))
-     call fftw_execute_dft_c2r(plan_c2r, fymany(:,:,j),uymany(:,:,j))
-     call fftw_execute_dft_c2r(plan_c2r, gxmany(:,:,j),vxmany(:,:,j))
-     call fftw_execute_dft_c2r(plan_c2r, gymany(:,:,j),vymany(:,:,j))
-    enddo
-#endif
-
-
+     call fftw_execute_dft_c2r(plan_c2r,fx,ux)
+     call fftw_execute_dft_c2r(plan_c2r,fy,uy)
+     call fftw_execute_dft_c2r(plan_c2r,gx,vx)
+     call fftw_execute_dft_c2r(plan_c2r,gy,vy)
 
      ! Poisson bracket in real space
-     ! uv = (ux*vy-uy*vx)/(nx*ny)
 
-     inv_nxny = dble(1)/dble(nx*ny)
+     uv = (ux*vy-uy*vx)/(nx*ny)
 
-#ifdef _OPENACC
-!$acc  parallel 
-!$acc  loop gang vector collapse(3) &
-!$acc& private(j,ix,iy) &
-!$acc& private(r_ux,r_uy,r_vx,r_vy,r_uv)
-#else
-!$omp parallel do default(none) collapse(2) &
-!$omp& private(j,ix,iy) &
-!$omp& private(r_ux,r_uy,r_vx,r_vy,r_uv) &
-!$omp& shared(nsplit,inv_nxny) &
-!$omp& shared(uxmany,uymany,vxmany,vymany) &
-!$omp& shared(uvmany)
-#endif
-     do j=1,nsplit
-     do ix=lbound(ux,2),ubound(ux,2)
-     do iy=lbound(ux,1),ubound(ux,1)
-
-
-       r_ux = uxmany(iy,ix,j)
-       r_uy = uymany(iy,ix,j)
-       r_vx = vxmany(iy,ix,j)
-       r_vy = vymany(iy,ix,j)
-
-       r_uv = (r_ux*r_vy-r_uy*r_vx)*inv_nxny
-
-       uvmany(iy,ix,j) = r_uv
-
-     enddo
-     enddo
-     enddo
-!$acc end parallel
-!$acc wait
-
-
-
-! ------------------
-! Transform uv to fx
-! ------------------
-
-       
-#ifdef _OPENACC
-!$acc wait
-!$acc host_data use_device(uvmany,fxmany)
-   if (kind(uvmany).eq.singlePrecision) then
-     call cufftExecR2C(cu_plan_r2c_many,uvmany,fxmany)
-   else
-     call cufftExecD2Z(cu_plan_r2c_many,uvmany,fxmany)
-   endif
-!$acc wait
-!$acc end host_data
-#else
-!$omp parallel do private(j)
-     do j=1,nsplit
-       call fftw_execute_dft_r2c(plan_r2c,uvmany(:,:,j),fxmany(:,:,j))
-     enddo
-#endif
-
-
-
-
+     call fftw_execute_dft_r2c(plan_r2c,uv,fx)
 
      ! NOTE: The FFT will generate an unwanted n=0,p=-nr/2 component
      ! that will be filtered in the main time-stepping loop
 
-#ifdef _OPENACC
-!$acc parallel 
-!$acc loop gang
-#else
-!$omp parallel do  &
-!$omp& private(ir,in,ix,iy)
-#endif
-     do j=1,nsplit
-!$acc loop worker
-     do in=1,n_toroidal
+     do ir=1,n_radial 
         ix = ir-1-nx0/2
         if (ix < 0) ix = ix+nx
-!$acc   loop vector
-        do ir=1,n_radial 
+        do in=1,n_toroidal
            iy = in-1
-           g_nl(ir,j,in) = fxmany(iy,ix,j)
+           g_nl(ir,j,in) = fx(iy,ix)
         enddo
      enddo
-     enddo
-!$acc end parallel
-!$acc wait
 
+  enddo ! j
+!$omp end do
+!$omp end parallel
 
-#ifdef _OPENACC
-!$acc wait
-!$acc end data
-#endif
   call timer_lib_out('nl')
 
   call timer_lib_in('nl_comm')
   call parallel_slib_r(g_nl,gpack)
   iexch = 0
-!$omp  parallel do collapse(2) &
-!$omp& private(iv_loc,it,ir,iexch,ic_loc)
   do iv_loc=1,nv_loc
      do it=1,n_theta
+        iexch = iexch+1
         do ir=1,n_radial
-        ! iexch = iexch+1
-        iexch = it + (iv_loc-1)*n_theta
-           ! ic_loc = ic_c(ir,it)
-           ic_loc = it + (ir-1)*n_theta
-           psi(ic_loc,iv_loc) = gpack(ir,iexch) 
+           psi(ic_c(ir,it),iv_loc) = gpack(ir,iexch) 
         enddo
      enddo
   enddo

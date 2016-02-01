@@ -117,6 +117,7 @@ module cufft_m
        use iso_c_binding
        use precision_m
        integer (c_int), value :: plan
+       !type (c_ptr), value :: plan
        !pgi$ ignore_tkr idata, odata
        real (singlePrecision), device :: idata(*)
        complex (singlePrecision), device :: odata(*)
@@ -131,6 +132,7 @@ module cufft_m
        use iso_c_binding
        use precision_m
        integer (c_int), value :: plan
+       !type (c_ptr), value :: plan
        !pgi$ ignore_tkr idata, odata
        complex (singlePrecision), device :: idata(*)
        real (singlePrecision), device :: odata(*)
@@ -160,6 +162,7 @@ module cufft_m
        use iso_c_binding
        use precision_m
        integer (c_int), value :: plan
+       !type (c_ptr), value :: plan
        !pgi$ ignore_tkr idata, odata
        real (doublePrecision), device :: idata(*)
        complex (doublePrecision), device :: odata(*)
@@ -174,6 +177,7 @@ module cufft_m
        use iso_c_binding
        use precision_m
        integer (c_int), value :: plan
+       !type (c_ptr), value :: plan
        !pgi$ ignore_tkr idata, odata
        complex (doublePrecision), device :: idata(*)
        real (doublePrecision), device :: odata(*)
