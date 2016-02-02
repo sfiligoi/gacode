@@ -7,11 +7,11 @@
 #  Check for existence of sim directory
 #-------------------------------------------------------------
 
-if [ $1 = $PWD ]
-  then
-  echo "ERROR: missing simdir"
-  exit 1
-fi
+#if [ $1 = $PWD ]
+#  then
+#  echo "ERROR: missing simdir"
+#  exit 1
+#fi
 
 if [ ! -d "$1" ]
   then
