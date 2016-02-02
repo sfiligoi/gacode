@@ -21,8 +21,7 @@ F77 = ${FC}
 FOMP   =  -mp  -Mstack_arrays
 FMATH  = -r8 -Mr8 -Mr8intrinsics
 FDEBUG = -g -Kieee -Ktrap=divz  -Mbounds
-FACC   = -acc -Minfo=accel -Mcuda=kepler,nollvm
-#FACC=${FDEBUG}
+FACC   = -acc -Minfo=accel -Mcuda=kepler,nollvm,keepgpu 
 FOPT   = -fast -fastsse  -Mvect -Minfo=all ${FMATH} ${FOMP} ${FACC}
 
 # System math libraries
@@ -30,7 +29,8 @@ FOPT   = -fast -fastsse  -Mvect -Minfo=all ${FMATH} ${FOMP} ${FACC}
 #        -lfftw3_threads -lfftw3f_threads -lfftw3 -lfftw3f
 LMATH=-I$FFTW_INC -L$FFTW_DIR \
          -lfftw3_threads -lfftw3f_threads -lfftw3f -lfftw3 \
-         -lfftw3_threads -lfftw3f_threads -lfftw3f -lfftw3  
+         -lfftw3_threads -lfftw3f_threads -lfftw3f -lfftw3   \
+        -lcufft
 
 
 # NetCDF

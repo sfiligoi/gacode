@@ -521,8 +521,21 @@ subroutine cgyro_init_collision
 
   ! set-up the collision matrix
   ic_loc = 0
+!$omp  parallel do  default(none) &
+!$omp& shared(nc1,nc2,nv,n,delta_t,n_species,rho,is_ele,n_field) &
+!$omp& shared(collision_model,collision_kperp,collision_field_model) &
+!$omp& shared(ae_flag,lambda_debye,dens_ele,temp_ele) &
+!$omp& shared(betae_unit,sum_den_h) &
+!$omp& shared(it_c,ir_c,px,is_v,ix_v,ie_v,ctest,xi_deriv_mat) &
+!$omp& shared(temp,jvec_v,omega_trap,dens,energy) &
+!$omp& shared(k_perp,vth,mass,z,bmag,nu_d,xi,nu_par,w_e,w_xi) &
+!$omp& private(ic,ic_loc,it,ir,info) &
+!$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
+!$omp& private(amat,bmat,work,i_piv) &
+!$omp& shared(cmat)
   do ic=nc1,nc2
-     ic_loc = ic_loc+1
+     !ic_loc = ic_loc+1
+     ic_loc = ic-nc1+1
 
      it = it_c(ic)
      ir = ir_c(ic)

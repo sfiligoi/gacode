@@ -5,6 +5,10 @@
 !  CGYRO global variables.  The idea is to have a primary, large
 !  module containing all essential CGYRO arrays and scalars.
 !-----------------------------------------------------------------
+#ifdef _OPENACC
+#include "precision_m.f90"
+#include "cufft_m.f90"
+#endif
 
 module cgyro_globals
 
@@ -283,6 +287,17 @@ module cgyro_globals
   !
   type(C_PTR) :: plan_r2c
   type(C_PTR) :: plan_c2r
+#ifdef _OPENACC
+
+  integer(c_int) :: cu_plan_r2c_many
+  integer(c_int) :: cu_plan_c2r_many
+
+  complex, dimension(:,:,:),allocatable :: fxmany,fymany,gxmany,gymany
+  real, dimension(:,:,:), allocatable :: uxmany,uymany
+  real, dimension(:,:,:), allocatable :: vxmany,vymany,uvmany
+
+
+#endif
   !  
   integer :: nx,ny
   integer :: nx0,ny0

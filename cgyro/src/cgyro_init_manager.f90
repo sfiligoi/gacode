@@ -19,9 +19,22 @@ subroutine cgyro_init_manager
   use cgyro_globals
   use GEO_interface
 
+#ifdef _OPENACC
+  use precision_m, only : singlePrecision
+  use cufft_m, only : cufftPlanMany, &
+        CUFFT_C2R,CUFFT_Z2D,CUFFT_R2C,CUFFT_D2Z
+#endif
   implicit none
 
   include 'fftw3.f03'
+
+#ifdef _OPENACC
+    integer :: howmany,istatus
+    integer, parameter :: irank = 2
+    integer, dimension(irank) :: ndim,inembed,onembed
+    integer :: idist,odist,istride,ostride
+
+#endif
 
   if (hiprec_flag == 1) then
      fmtstr    ='(es13.6)'
@@ -209,6 +222,75 @@ subroutine cgyro_init_manager
      ! Create plans once and for all, with global arrays fx,ux
      plan_c2r = fftw_plan_dft_c2r_2d(nx,ny,fx,ux,FFTW_PATIENT)
      plan_r2c = fftw_plan_dft_r2c_2d(nx,ny,ux,fx,FFTW_PATIENT)
+#ifdef _OPENACC
+     howmany = nsplit
+     allocate( fxmany(0:ny/2,0:nx-1,howmany) )
+     allocate( fymany(0:ny/2,0:nx-1,howmany) )
+     allocate( gxmany(0:ny/2,0:nx-1,howmany) )
+     allocate( gymany(0:ny/2,0:nx-1,howmany) )
+
+     allocate( uxmany(0:ny-1,0:nx-1,howmany) )
+     allocate( uymany(0:ny-1,0:nx-1,howmany) )
+     allocate( vxmany(0:ny-1,0:nx-1,howmany) )
+     allocate( vymany(0:ny-1,0:nx-1,howmany) )
+     allocate( uvmany(0:ny-1,0:nx-1,howmany) )
+!!$acc enter data create(fxmany,fymany,gxmany,gymany)
+!!$acc enter data create(uxmany,uymany,vxmany,vymany)
+!!$acc enter data create(uvmany)
+
+
+!   -------------------------------------
+! 2D
+!   input[ b*idist + (x * inembed[1] + y) * istride ]
+!   output[ b*odist + (x * onembed[1] + y)*ostride ]
+!   isign is the sign of the exponent in the formula that defines
+!   Fourier transform  -1 == FFTW_FORWARD
+!                       1 == FFTW_BACKWARD
+!   -------------------------------------
+
+      ndim(1) = nx
+      ndim(2) = ny
+      idist = size( fxmany,1)*size(fxmany,2)
+      odist = size( uxmany,1)*size(uxmany,2)
+      istride = 1
+      ostride = 1
+      inembed = size(fxmany,1)
+      onembed = size(uxmany,1)
+
+      istatus = cufftPlanMany( cu_plan_c2r_many,                         &
+     &                                    irank,                         &
+     &                                    ndim,                          &
+     &                                    inembed,                       &
+     &                                    istride,                       &
+     &                                    idist,                         &
+     &                                    onembed,                       &
+     &                                    ostride,                       &
+     &                                    odist,                         &
+     &  merge(CUFFT_C2R,CUFFT_Z2D,kind(uxmany).eq.singlePrecision),      &
+     &                                    howmany )
+      
+
+
+
+      idist = size(uxmany,1)*size(uxmany,2)
+      odist = size(fxmany,1)*size(fxmany,2)
+      inembed = size(uxmany,1)
+      onembed = size(fxmany,1) 
+      istride = 1
+      ostride = 1
+      istatus = cufftPlanMany( cu_plan_r2c_many,                         &
+     &                     irank,                                        &
+     &                     ndim,                                         &
+     &                     inembed,                                      &
+     &                     istride,                                      &
+     &                     idist,                                        &
+     &                     onembed,                                      &
+     &                     ostride,                                      &
+     &                     odist,                                        &
+     & merge(CUFFT_R2C,CUFFT_D2Z,kind(uxmany).eq.singlePrecision),       &
+     &                     howmany )
+#endif
+
 
   endif
 

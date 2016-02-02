@@ -99,14 +99,17 @@ subroutine cgyro_field_c
 
   call timer_lib_in('field_h')
 
+!$omp workshare
   field_loc(:,:) = (0.0,0.0)
+!$omp end workshare
 
   ! Poisson and Ampere RHS integrals of h
 
 !$omp parallel private(ic,iv_loc,is,ix,ie,fac)
 !$omp do reduction(+:field_loc)
   do iv=nv1,nv2
-     iv_loc = iv_locv(iv)
+     !iv_loc = iv_locv(iv)
+     iv_loc = iv-nv1+1
      is = is_v(iv)
      ix = ix_v(iv)
      ie = ie_v(iv)
@@ -165,7 +168,8 @@ subroutine cgyro_field_c
   iv_loc = 0
   do iv=nv1,nv2
 
-     iv_loc = iv_loc+1
+     !iv_loc = iv_loc+1
+     iv_loc = iv-nv1+1
 
      is = is_v(iv)
      ix = ix_v(iv)
