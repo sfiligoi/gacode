@@ -97,7 +97,7 @@ subroutine cgyro_field_c
   complex :: fac
   complex, dimension(nc) :: tmp
   integer :: i,j
-  logical, parameter :: use_dgemv
+  logical, parameter :: use_dgemv = .false.
   real, dimension(n_theta) :: pvec_inr,pvec_ini
 
   call timer_lib_in('field_h')
