@@ -27,6 +27,10 @@ subroutine cgyro_check
   endif
   !------------------------------------------------------------------------
 
+  if (n_radial < n_toroidal*box_size) then
+     call cgyro_info('LOW RESOLUTION WARNING -- n_radial < n_toroidal*box_size')
+  endif
+
   !------------------------------------------------------------------------
   ! Time integration
   !
