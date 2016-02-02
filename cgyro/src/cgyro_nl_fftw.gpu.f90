@@ -27,10 +27,10 @@ subroutine cgyro_nl_fftw(ij)
   integer :: it,ir,in,ix,iy
   integer :: i1,i2
 
-  complex*16 :: f0,g0
-  complex*16, dimension(:,:), allocatable :: fpack
-  complex*16, dimension(:,:), allocatable :: gpack
-  real*8 :: inv_nxny
+  complex :: f0,g0
+  complex, dimension(:,:), allocatable :: fpack
+  complex, dimension(:,:), allocatable :: gpack
+  real :: inv_nxny
 
   logical, parameter :: use_cufft = .true.
   logical, parameter :: use_acc = .true.
