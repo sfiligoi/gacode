@@ -11,6 +11,7 @@ subroutine cgyro_step_collision
   integer :: ivp
   complex, dimension(size(cap_h_v,2),nc1:nc2) :: cvec
   complex, dimension(size(cap_h_v,2),nc1:nc2) :: bvec
+  real :: cvec_re,cvec_im
 
   ! compute new collisional cap_H: H = h + ze/T G phi
   ! assumes have cap_h_x
@@ -27,9 +28,9 @@ subroutine cgyro_step_collision
 !$acc& pcreate(bvec,cvec)  pcopy(cap_h_v)
 
 !$acc  parallel 
-!$acc  loop gang private(ic_loc,ivp,iv)
+!$acc  loop gang private(ic_loc,ivp,iv,cvec_re,cvec_im)
 #else
-!$omp parallel private(ic_loc,ivp,iv)
+!$omp parallel private(ic_loc,ivp,iv,cvec_re,cvec_im)
 !$omp do
 #endif
   do ic=nc1,nc2
@@ -38,19 +39,32 @@ subroutine cgyro_step_collision
 
      ! Set-up the RHS: H = f + ze/T G phi
 
-     cvec(:,ic) = cap_h_v(ic_loc,:)
+!$acc loop vector
+     do iv=1,nv
+       cvec(iv,ic) = cap_h_v(ic_loc,iv)
+     enddo
+
+!$acc loop vector
+     do iv=1,nv
+       bvec(iv,ic) = (0.0,0.0)
+     enddo
 
      ! This is a key loop for performance
-     bvec(:,ic) = (0.0,0.0)
      do ivp=1,nv
+        cvec_re = real(cvec(ivp,ic),kind=kind(cmat))
+        cvec_im = aimag(cvec(ivp,ic))
 !$acc   loop vector
         do iv=1,nv
            bvec(iv,ic) = bvec(iv,ic)+ &
-                               cmat(iv,ivp,ic_loc)*cvec(ivp,ic)
+                 cmplx(cmat(iv,ivp,ic_loc)*cvec_re, &
+                       cmat(iv,ivp,ic_loc)*cvec_im)
         enddo
      enddo
 
-     cap_h_v(ic_loc,:) = bvec(:,ic)
+!$acc loop vector
+     do iv=1,nv
+       cap_h_v(ic_loc,iv) = bvec(iv,ic)
+     enddo
 
   enddo
 #ifdef _OPENACC
