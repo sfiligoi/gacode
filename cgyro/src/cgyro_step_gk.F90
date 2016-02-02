@@ -22,23 +22,31 @@ subroutine cgyro_step_gk
   
   ! Stage 1
   call cgyro_rhs(1)
+!$omp workshare
   h_x = h0_x + 0.5 * delta_t * rhs(1,:,:)
+!$omp end workshare
   call cgyro_field_c
 
   ! Stage 2
   call cgyro_rhs(2)
+!$omp workshare
   h_x = h0_x + 0.5 * delta_t * rhs(2,:,:)
+!$omp end workshare
   call cgyro_field_c
 
   ! Stage 3
   call cgyro_rhs(3)
+!$omp workshare
   h_x = h0_x + delta_t * rhs(3,:,:)
+!$omp end workshare
   call cgyro_field_c
 
   ! Stage 4
   call cgyro_rhs(4)
+!$omp workshare
   h_x = h0_x + delta_t/6.0 * &
        (rhs(1,:,:)+2.0*rhs(2,:,:)+2.0*rhs(3,:,:)+rhs(4,:,:))  
+!$omp end workshare
   call cgyro_field_c
 
   ! Filter special spectral components
