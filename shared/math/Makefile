@@ -54,4 +54,8 @@ lib: $(OBJECTS)
 	$(FC) $(FMATH) $(FFLAGS) -c $<
  
 clean:
-	rm -f *.o $(LLIB).a ${GACODE_ROOT}/modules/math_constants.mod *.mod
+	rm -f *.o $(LLIB).a *.mod
+	rm -f ${GACODE_ROOT}/modules/math_constants.mod
+	rm -f ${GACODE_ROOT}/modules/parallel_lib.mod
+	rm -f ${GACODE_ROOT}/modules/timer_lib.mod
+
