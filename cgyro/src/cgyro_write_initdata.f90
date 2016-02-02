@@ -10,7 +10,7 @@ subroutine cgyro_write_initdata
   use mpi
   use cgyro_globals
   use cgyro_experimental_globals
-
+  
   implicit none
 
   integer :: in,is
@@ -104,7 +104,7 @@ subroutine cgyro_write_initdata
 
   endif
   !----------------------------------------------------------------------------
-
+  
   !----------------------------------------------------------------------------
   ! Write the initial equilibrium data
   !
