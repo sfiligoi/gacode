@@ -76,8 +76,11 @@ subroutine cgyro_nl_fftw(ij)
 #endif
 
 !$acc parallel
+!$acc loop gang
   do  j=lbound(fxmany,3),ubound(fxmany,3)
+!$acc loop worker
   do ix=lbound(fxmany,2),ubound(fxmany,2)
+!$acc loop vector
   do iy=lbound(fxmany,1),ubound(fxmany,1)
     fxmany(iy,ix,j) = 0
     fymany(iy,ix,j) = 0
