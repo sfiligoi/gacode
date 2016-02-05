@@ -106,6 +106,7 @@ NPROC=1
 NOMP=1
 NUMA=1
 MPINUMA=1
+NIDLE=0
 # Execute/test mode flags
 EXEC_FLAG=0
 TEST_FLAG=0
@@ -352,7 +353,7 @@ then
       # Call platform-specific exec file:
       echo " INFO: (tgyro script) Passing control to TGYRO executable" >> $RUNBASE
       $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM \
-       $SIMDIR $NPROC $TGYRO_DIR/src/tgyro_main $NOMP $NUMA $MPINUMA
+       $SIMDIR $NPROC $TGYRO_DIR/src/tgyro_main $NOMP $NUMA $MPINUMA $NIDLE
       exit 0
    fi
 fi
@@ -369,7 +370,7 @@ then
       echo "1" > "$SIMDIR/gyrotest_flag"
       echo " Passing control to TGYRO executable (test mode) ..." >> $RUNBASE
       $GACODE_ROOT/shared/exec/gyro.$GACODE_PLATFORM \
-       $SIMDIR $NPROC $TGYRO_DIR/src/tgyro_main $NOMP $NUMA $MPINUMA
+       $SIMDIR $NPROC $TGYRO_DIR/src/tgyro_main $NOMP $NUMA $MPINUMA $NIDLE
       exit 0
    fi
 fi
