@@ -14,11 +14,6 @@ subroutine tglf_run_mpi()
 
   implicit none
 
-
-  !real :: OUT_PARTICLE_FLUX_1, OUT_PARTICLE_FLUX_3, OUT_ENERGY_FLUX_1
-  !real :: OUT_ENERGY_FLUX_3, OUT_STRESS_TOR_1, OUT_STRESS_TOR_3
-
-
   integer :: i_ion,n
   complex :: xi=(0.0,1.0)
 
@@ -194,25 +189,6 @@ subroutine tglf_run_mpi()
              + get_exchange(i_ion+1,3)
 
      enddo
-     
-          
-     
-     
-     
-          
-     open (unit=21, file=TRIM(tglf_path_in)//"results.tglf", position="append", action="write")
-
-     write (21,*) tglf_path_in
-     write (21,*) 'OEF1  OEF3  OPF1  OPF3  OST1  OST3'
-     write (21,"(6(f6.3,x))") tglf_elec_eflux_out, tglf_ion_eflux_out(1), tglf_elec_pflux_out, &
-                  tglf_ion_pflux_out(1), tglf_elec_mflux_out, tglf_ion_mflux_out(1)
-     
-     close(21)
-     
-     
-
-
-
 
   else
 
