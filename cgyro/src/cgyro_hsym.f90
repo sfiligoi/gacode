@@ -19,6 +19,7 @@ subroutine cgyro_hsym
 
   integer :: is,ie,ix
   complex, dimension(nc_loc) :: tmp
+  real, dimension(nc_loc) :: jtmp
 
   call parallel_lib_rtrans(g_x,cap_h_v)
   cap_h_v_prime(:,:) = (0.0,0.0)
@@ -26,12 +27,14 @@ subroutine cgyro_hsym
   do is=1,n_species
      do ie=1,n_energy
         tmp(:) = 0.0
+        jtmp(:) = 0.0
         do ix=1,n_xi
-           tmp(:) = tmp(:)+&
-                cap_h_v(:,iv_v(ie,ix,is))*w_xi(ix)*abs(xi(ix))
+           iv = iv_v(ie,ix,is)
+           tmp(:) = tmp(:)+cap_h_v(:,iv)*w_xi(ix)*abs(xi(ix))
         enddo
         do ix=1,n_xi
-           cap_h_v_prime(:,iv_v(ie,ix,is)) = abs(xi(ix))*cap_h_v(:,iv_v(ie,ix,is))-tmp(:)
+           iv = iv_v(ie,ix,is)
+           cap_h_v_prime(:,iv) = abs(xi(ix))*cap_h_v(:,iv)-tmp(:)/(1.0+(k_theta*rho)**2)
         enddo
      enddo
   enddo
