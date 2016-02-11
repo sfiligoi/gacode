@@ -25,16 +25,19 @@ subroutine cgyro_hsym
   cap_h_v_prime(:,:) = (0.0,0.0)
 
   do is=1,n_species
+     tmp(:) = 0.0
+     jtmp(:) = 0.0
      do ie=1,n_energy
-        tmp(:) = 0.0
-        jtmp(:) = 0.0
         do ix=1,n_xi
            iv = iv_v(ie,ix,is)
-           tmp(:) = tmp(:)+cap_h_v(:,iv)*w_xi(ix)*abs(xi(ix))
+           tmp(:) = tmp(:)+cap_h_v(:,iv)*w_xi(ix)*w_e(ie)*abs(xi(ix))*jvec_v(1,:,iv)*sqrt(energy(ie))
+           jtmp(:) = jtmp(:)+w_xi(ix)*w_e(ie)*jvec_v(1,:,iv)**2
         enddo
+     enddo
+     do ie=1,n_energy
         do ix=1,n_xi
            iv = iv_v(ie,ix,is)
-           cap_h_v_prime(:,iv) = abs(xi(ix))*cap_h_v(:,iv)-tmp(:)/(1.0+(k_theta*rho)**2)
+           cap_h_v_prime(:,iv) = sqrt(energy(ie))*abs(xi(ix))*cap_h_v(:,iv)-tmp(:)*jvec_v(1,:,iv)
         enddo
      enddo
   enddo

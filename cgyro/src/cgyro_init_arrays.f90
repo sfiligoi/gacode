@@ -161,17 +161,17 @@ subroutine cgyro_init_arrays
   if (n_field == 1 .or. n_field == 2) then
      do ic=1,nc
         if (k_perp(ic) > 0.0) then
-        gcoef(1,ic) = 1.0/(k_perp(ic)**2*lambda_debye**2*&
-             dens_ele/temp_ele+sum_den_x(ic))
+           gcoef(1,ic) = 1.0/(k_perp(ic)**2*lambda_debye**2*&
+                dens_ele/temp_ele+sum_den_x(ic))
         endif
      enddo
   endif
- 
+
   if (n_field > 1) then
      do ic=1,nc
         if (k_perp(ic) > 0.0) then
-        gcoef(2,ic) = 1.0/(-2.0*k_perp(ic)**2*&
-             rho**2/betae_unit*dens_ele*temp_ele-sum_cur_x(ic))
+           gcoef(2,ic) = 1.0/(-2.0*k_perp(ic)**2*&
+                rho**2/betae_unit*dens_ele*temp_ele-sum_cur_x(ic))
         endif
      enddo
   endif
@@ -240,15 +240,13 @@ subroutine cgyro_init_arrays
 
      ! Determinant
      do ic=1,nc
-     if (k_perp(ic) > 0.0) then
-        sum_loc(ic) = pb11(ic)*pb22(ic)-pb12(ic)*pb21(ic)
-     else
-        sum_loc(ic) = 1.0
-     endif
+        if (k_perp(ic) > 0.0) then
+           sum_loc(ic) = pb11(ic)*pb22(ic)-pb12(ic)*pb21(ic)
+        else
+           sum_loc(ic) = 1.0
+        endif
      enddo
 
-     print *,sum_loc
-     
      pb11 = pb11/sum_loc
      pb12 = pb12/sum_loc
      pb21 = pb21/sum_loc
@@ -340,7 +338,7 @@ subroutine cgyro_init_arrays
      thcyc(it) = it
      thcyc(it+n_theta) = it
   enddo
-!$acc enter data copyin(thcyc)
+  !$acc enter data copyin(thcyc)
 
   allocate(cderiv(-nup_theta:nup_theta))
   allocate(uderiv(-nup_theta:nup_theta))
@@ -470,22 +468,22 @@ subroutine cgyro_init_arrays
         enddo
      enddo
   enddo
-!$acc enter data copyin(dtheta,dtheta_up)
+  !$acc enter data copyin(dtheta,dtheta_up)
 
   ! Streaming coefficients (for speed optimization)
 
   iv_loc = 0
-!$omp parallel do collapse(2) &
-!$omp& private(iv,ic,iv_loc,is,ix,ie,ir,it,carg)
+  !$omp parallel do collapse(2) &
+  !$omp& private(iv,ic,iv_loc,is,ix,ie,ir,it,carg)
   do iv=nv1,nv2
      do ic=1,nc
 
-     ! iv_loc = iv_loc+1
-     iv_loc = iv-nv1+1
+        ! iv_loc = iv_loc+1
+        iv_loc = iv-nv1+1
 
-     is = is_v(iv)
-     ix = ix_v(iv)
-     ie = ie_v(iv)
+        is = is_v(iv)
+        ix = ix_v(iv)
+        ie = ie_v(iv)
 
 
         ir = ir_c(ic) 
@@ -524,5 +522,5 @@ subroutine cgyro_init_arrays
 
   enddo
   !-------------------------------------------------------------------------
-!$acc enter data copyin(omega_cap_h,omega_h,omega_s)
+  !$acc enter data copyin(omega_cap_h,omega_h,omega_s)
 end subroutine cgyro_init_arrays
