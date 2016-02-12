@@ -362,7 +362,7 @@ subroutine cgyro_init_arrays
      thcyc(it) = it
      thcyc(it+n_theta) = it
   enddo
-  !$acc enter data copyin(thcyc)
+!$acc enter data copyin(thcyc)
 
   allocate(cderiv(-nup_theta:nup_theta))
   allocate(uderiv(-nup_theta:nup_theta))
@@ -492,13 +492,13 @@ subroutine cgyro_init_arrays
         enddo
      enddo
   enddo
-  !$acc enter data copyin(dtheta,dtheta_up)
+!$acc enter data copyin(dtheta,dtheta_up)
 
   ! Streaming coefficients (for speed optimization)
 
   iv_loc = 0
-  !$omp parallel do collapse(2) &
-  !$omp& private(iv,ic,iv_loc,is,ix,ie,ir,it,carg)
+!$omp parallel do collapse(2) &
+!$omp& private(iv,ic,iv_loc,is,ix,ie,ir,it,carg)
   do iv=nv1,nv2
      do ic=1,nc
 
@@ -546,5 +546,5 @@ subroutine cgyro_init_arrays
 
   enddo
   !-------------------------------------------------------------------------
-  !$acc enter data copyin(omega_cap_h,omega_h,omega_s)
+!$acc enter data copyin(omega_cap_h,omega_h,omega_s)
 end subroutine cgyro_init_arrays
