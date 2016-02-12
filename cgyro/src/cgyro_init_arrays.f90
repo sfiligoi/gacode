@@ -523,7 +523,7 @@ subroutine cgyro_init_arrays
 
         ! omega_cdrift - mach component
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
-             -omega_cdrift(it,is)*sqrt(energy(ie))*xi(ix)*i_c*k_theta
+             -omega_cdrift(it,is)*vel(ie)*xi(ix)*i_c*k_theta
 
         ! omega_rdrift
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) & 

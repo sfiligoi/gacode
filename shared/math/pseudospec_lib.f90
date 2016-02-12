@@ -13,7 +13,7 @@
 !      -1
 !---------------------------------------------------
 
-subroutine pseudo_legendre(n,x,w,d1,dl,dd)
+subroutine pseudo_legendre(n,x,w,d1,dl)
 
   implicit none
 
@@ -23,7 +23,6 @@ subroutine pseudo_legendre(n,x,w,d1,dl,dd)
   real, intent(out) :: w(n)
   real, intent(out) :: d1(n,n)
   real, intent(out) :: dl(n,n)
-  real, intent(out) :: dd(n,n)
 
   integer :: i,j
   integer :: lwork,info
@@ -32,7 +31,6 @@ subroutine pseudo_legendre(n,x,w,d1,dl,dd)
   real, dimension(:,:), allocatable :: c
   real, dimension(:,:), allocatable :: cp
   real, dimension(:,:), allocatable :: cl
-  real, dimension(:,:), allocatable :: cd
 
   integer, parameter :: print_flag=0
 
@@ -45,7 +43,6 @@ subroutine pseudo_legendre(n,x,w,d1,dl,dd)
   allocate(c(n,n))
   allocate(cp(n,n))
   allocate(cl(n,n))
-  allocate(cd(n,n))
 
   do i=1,n
      do j=1,n
@@ -53,8 +50,6 @@ subroutine pseudo_legendre(n,x,w,d1,dl,dd)
         call pseudo_rec_legendre(j-1,x(i),c(i,j),cp(i,j))
         ! L
         cl(i,j) = -(j-1)*j*c(i,j)
-        ! 6th order dissipation j**6
-        cd(i,j) = (j-1)**4/(n-1.0)**4*c(i,j)
      enddo
   enddo
 
@@ -65,8 +60,6 @@ subroutine pseudo_legendre(n,x,w,d1,dl,dd)
   ! d1 -> (Cp C^(-1))
   call DGEMM('N','N',n,n,n,1.0,cl,n,c,n,0.0,dl,n)
   ! dl -> (L C^(-1))
-  call DGEMM('N','N',n,n,n,1.0,cd,n,c,n,0.0,dd,n)
-  ! dd -> (D6 C^(-1))
 
   if (print_flag == 1) then
      print *

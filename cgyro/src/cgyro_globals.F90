@@ -234,9 +234,9 @@ module cgyro_globals
   ! Velocity space
   ! 
   integer, dimension(:), allocatable :: indx_xi, px
-  real, dimension(:), allocatable :: energy, w_e
+  real, dimension(:), allocatable :: energy, vel, w_e
   real, dimension(:), allocatable :: xi, w_xi
-  real, dimension(:,:), allocatable :: xi_deriv_mat, xi_lor_mat, xi_upderiv_mat
+  real, dimension(:,:), allocatable :: xi_deriv_mat, xi_lor_mat
   real, dimension(:,:), allocatable :: e_deriv1_mat, e_deriv2_mat
   !
   ! Parallel streaming

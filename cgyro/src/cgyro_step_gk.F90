@@ -58,7 +58,7 @@ subroutine cgyro_rhs(ij)
 
   integer, intent(in) :: ij
   integer :: is, ir, it, ie, ix
-  integer :: id, jt, jr, jc
+  integer :: id, jc
   real :: rval,rval2
   complex :: rhs_stream
   complex :: rhs_ij(nc,nv_loc)
@@ -123,7 +123,7 @@ subroutine cgyro_rhs(ij)
 
         if (implicit_flag == 0) then
            ! Parallel streaming with upwind dissipation 
-           rval  = omega_stream(it_c(ic),is)*sqrt(energy(ie))*xi(ix)
+           rval  = omega_stream(it_c(ic),is)*vel(ie)*xi(ix)
            rval2 = abs(omega_stream(it_c(ic),is))
            rhs_stream = 0.0
 

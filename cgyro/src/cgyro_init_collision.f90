@@ -33,7 +33,7 @@ subroutine cgyro_init_collision
      do is=1,n_species
         do js=1,n_species
 
-           xa = sqrt(energy(ie))
+           xa = vel(ie)
            xb = xa * vth(is) / vth(js)
            tauinv_ab = nu(is) * (1.0*z(js))**2 / (1.0*z(is))**2 &
                 * dens(js)/dens(is)
@@ -123,7 +123,7 @@ subroutine cgyro_init_collision
   !if (i_proc == 0) then
   !   do ie=1,n_energy
   !      print '(i1,3(" &{\tt ",f9.5,"}")," \\")',&
-  !           ie,sqrt(energy(ie)),w_e(ie),nu_d(ie,n_species,n_species)
+  !           ie,vel(ie),w_e(ie),nu_d(ie,n_species,n_species)
   !   enddo
   !   print *,sum(w_e)
   !endif
@@ -225,7 +225,7 @@ subroutine cgyro_init_collision
                          = ctest(is,js,ix,jx,ie,je) &
                          + e_deriv1_mat(ie,je)/sqrt(1.0*e_max) &
                          * (nu_par_deriv(ie,is,js) * 0.5*energy(ie) &
-                         + nu_par(ie,is,js) * (2.0*sqrt(energy(ie)) &
+                         + nu_par(ie,is,js) * (2.0*vel(ie) &
                          + (temp(is)/temp(js)-2.0) * energy(ie)**1.5))
                  enddo
               enddo
@@ -270,7 +270,7 @@ subroutine cgyro_init_collision
                          cmat(iv,jv,ic_loc) &
                          + 3.0 * (mass(js)/mass(is)) * (dens(js)/dens(is)) &
                          * (vth(js)/vth(is)) * nu_s(ie,is,js) &
-                         * sqrt(energy(ie)) * xi(ix) &
+                         * vel(ie) * xi(ix) &
                          * nu_s(je,js,is) * sqrt(energy(je)) &
                          * xi(jx) * w_e(je) * w_xi(jx) / rs(is,js)
                  endif
@@ -527,7 +527,7 @@ subroutine cgyro_init_collision
 !$omp& shared(ae_flag,lambda_debye,dens_ele,temp_ele) &
 !$omp& shared(betae_unit,sum_den_h) &
 !$omp& shared(it_c,ir_c,px,is_v,ix_v,ie_v,ctest,xi_deriv_mat) &
-!$omp& shared(temp,jvec_v,omega_trap,dens,energy) &
+!$omp& shared(temp,jvec_v,omega_trap,dens,energy,vel) &
 !$omp& shared(k_perp,vth,mass,z,bmag,nu_d,xi,nu_par,w_e,w_xi) &
 !$omp& private(ic,ic_loc,it,ir,info) &
 !$omp& private(iv,is,ix,ie,jv,js,jx,je,ks) &
@@ -580,11 +580,11 @@ subroutine cgyro_init_collision
               if (is == js .and. ie == je) then
                  cmat(iv,jv,ic_loc) = cmat(iv,jv,ic_loc) &
                       + (0.5*delta_t) * omega_trap(it,is) &
-                      * sqrt(energy(ie)) * (1.0 - xi(ix)**2) &
+                      * vel(ie) * (1.0 - xi(ix)**2) &
                       * xi_deriv_mat(ix,jx) 
                  amat(iv,jv) = amat(iv,jv) &
                       - (0.5*delta_t) * omega_trap(it,is) &
-                      * sqrt(energy(ie)) * (1.0 - xi(ix)**2) &
+                      * vel(ie) * (1.0 - xi(ix)**2) &
                       * xi_deriv_mat(ix,jx) 
               endif
 

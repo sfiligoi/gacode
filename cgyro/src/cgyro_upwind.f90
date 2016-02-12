@@ -39,7 +39,7 @@ subroutine cgyro_upwind
      ie = ie_v(iv)
 
      do ic=1,nc
-        fac = w_e(ie)*w_xi(ix)*abs(xi(ix))*sqrt(energy(ie))*g_x(ic,iv_loc)
+        fac = w_e(ie)*w_xi(ix)*abs(xi(ix))*vel(ie)*g_x(ic,iv_loc)
         res_loc(is,ic) = res_loc(is,ic)+jvec_c(1,ic,iv_loc)*fac
      enddo
   enddo
@@ -62,7 +62,7 @@ subroutine cgyro_upwind
         ix = ix_v(iv)
         ie = ie_v(iv)
 
-        g_x(ic,iv_loc) = abs(xi(ix))*sqrt(energy(ie))*g_x(ic,iv_loc) &
+        g_x(ic,iv_loc) = abs(xi(ix))*vel(ie)*g_x(ic,iv_loc) &
              -jvec_c(1,ic,iv_loc)*res(is,ic)/res_norm(is,ic)
 
      enddo
