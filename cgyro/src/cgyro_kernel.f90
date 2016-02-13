@@ -142,7 +142,6 @@ subroutine cgyro_kernel
   if(allocated(w_xi))          deallocate(w_xi)
   if(allocated(xi_lor_mat))    deallocate(xi_lor_mat)
   if(allocated(xi_deriv_mat))  deallocate(xi_deriv_mat)
-  if(allocated(xi_upderiv_mat)) deallocate(xi_upderiv_mat)
   if(allocated(h_x))           deallocate(h_x)
   if(allocated(cap_h_c))       deallocate(cap_h_c)
   if(allocated(cap_h_v))       deallocate(cap_h_v)

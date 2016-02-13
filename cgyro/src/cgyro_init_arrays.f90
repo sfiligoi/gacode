@@ -13,6 +13,7 @@ subroutine cgyro_init_arrays
   integer :: jr,jt,id, ccw_fac
   complex :: thfac, carg
   real, dimension(nc) :: sum_loc
+  real, dimension(n_species,nc) :: res_loc
   real, dimension(nv_loc) :: vfac
   real, dimension(n_radial) :: u
   real, dimension(:,:), allocatable :: jloc_c
@@ -65,16 +66,14 @@ subroutine cgyro_init_arrays
   call parallel_lib_rtrans_real(jvec_c(1,:,:),jvec_v(1,:,:))
   if (n_field > 1) call parallel_lib_rtrans_real(jvec_c(2,:,:),jvec_v(2,:,:))
   if (n_field > 2) call parallel_lib_rtrans_real(jvec_c(3,:,:),jvec_v(3,:,:))
-
   !-------------------------------------------------------------------------
 
   !-------------------------------------------------------------------------
   ! Field equation prefactors, sums.
   !
-  iv_loc = 0
   do iv=nv1,nv2
 
-     iv_loc = iv_loc+1
+     iv_loc = iv-nv1+1
      is = is_v(iv)
      ix = ix_v(iv)
      ie = ie_v(iv)
@@ -99,9 +98,8 @@ subroutine cgyro_init_arrays
   allocate(sum_den_x(nc))
   sum_loc(:) = 0.0
 
-  iv_loc = 0
   do iv=nv1,nv2
-     iv_loc = iv_loc+1
+     iv_loc = iv-nv1+1
      do ic=1,nc
         sum_loc(ic) = sum_loc(ic)+vfac(iv_loc)*(1.0-jvec_c(1,ic,iv_loc)**2) 
      enddo
@@ -118,6 +116,33 @@ subroutine cgyro_init_arrays
   if (ae_flag == 1) then
      sum_den_x(:) = sum_den_x(:)+dens_ele/temp_ele
   endif
+  !------------------------------------------------------------------------------
+
+  !-------------------------------------------------------------------------
+  ! Conservative upwind factor
+  !
+  allocate(res_norm(n_species,nc))
+
+  res_loc(:,:) = 0.0
+
+  do iv=nv1,nv2
+     iv_loc = iv-nv1+1
+     is = is_v(iv)
+     ix = ix_v(iv)
+     ie = ie_v(iv)
+     do ic=1,nc
+        res_loc(is,ic) = res_loc(is,ic)+w_xi(ix)*w_e(ie)*jvec_c(1,ic,iv_loc)**2 
+     enddo
+  enddo
+
+  call MPI_ALLREDUCE(res_loc,&
+       res_norm,&
+       size(res_norm),&
+       MPI_DOUBLE_PRECISION,&
+       MPI_SUM,&
+       NEW_COMM_1,&
+       i_err)
+  !------------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------
   ! Field-solve coefficients (i.e., final numerical factors).
@@ -161,17 +186,17 @@ subroutine cgyro_init_arrays
   if (n_field == 1 .or. n_field == 2) then
      do ic=1,nc
         if (k_perp(ic) > 0.0) then
-        gcoef(1,ic) = 1.0/(k_perp(ic)**2*lambda_debye**2*&
-             dens_ele/temp_ele+sum_den_x(ic))
+           gcoef(1,ic) = 1.0/(k_perp(ic)**2*lambda_debye**2*&
+                dens_ele/temp_ele+sum_den_x(ic))
         endif
      enddo
   endif
- 
+
   if (n_field > 1) then
      do ic=1,nc
         if (k_perp(ic) > 0.0) then
-        gcoef(2,ic) = 1.0/(-2.0*k_perp(ic)**2*&
-             rho**2/betae_unit*dens_ele*temp_ele-sum_cur_x(ic))
+           gcoef(2,ic) = 1.0/(-2.0*k_perp(ic)**2*&
+                rho**2/betae_unit*dens_ele*temp_ele-sum_cur_x(ic))
         endif
      enddo
   endif
@@ -188,9 +213,8 @@ subroutine cgyro_init_arrays
      enddo
 
      sum_loc(:)  = 0.0
-     iv_loc = 0
      do iv=nv1,nv2
-        iv_loc = iv_loc+1
+        iv_loc = iv-nv1+1
         is = is_v(iv)
         ix = ix_v(iv)
         ie = ie_v(iv)
@@ -240,15 +264,13 @@ subroutine cgyro_init_arrays
 
      ! Determinant
      do ic=1,nc
-     if (k_perp(ic) > 0.0) then
-        sum_loc(ic) = pb11(ic)*pb22(ic)-pb12(ic)*pb21(ic)
-     else
-        sum_loc(ic) = 1.0
-     endif
+        if (k_perp(ic) > 0.0) then
+           sum_loc(ic) = pb11(ic)*pb22(ic)-pb12(ic)*pb21(ic)
+        else
+           sum_loc(ic) = 1.0
+        endif
      enddo
 
-     print *,sum_loc
-     
      pb11 = pb11/sum_loc
      pb12 = pb12/sum_loc
      pb21 = pb21/sum_loc
@@ -480,12 +502,12 @@ subroutine cgyro_init_arrays
   do iv=nv1,nv2
      do ic=1,nc
 
-     ! iv_loc = iv_loc+1
-     iv_loc = iv-nv1+1
+        ! iv_loc = iv_loc+1
+        iv_loc = iv-nv1+1
 
-     is = is_v(iv)
-     ix = ix_v(iv)
-     ie = ie_v(iv)
+        is = is_v(iv)
+        ix = ix_v(iv)
+        ie = ie_v(iv)
 
 
         ir = ir_c(ic) 
@@ -501,7 +523,7 @@ subroutine cgyro_init_arrays
 
         ! omega_cdrift - mach component
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &
-             -omega_cdrift(it,is)*sqrt(energy(ie))*xi(ix)*i_c*k_theta
+             -omega_cdrift(it,is)*vel(ie)*xi(ix)*i_c*k_theta
 
         ! omega_rdrift
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) & 

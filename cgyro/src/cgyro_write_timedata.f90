@@ -73,7 +73,7 @@ subroutine cgyro_write_timedata
            enddo
         enddo
 
-        a_norm = ftemp(n_radial/2+1,n_theta/2+1) 
+        if (i_field == 1) a_norm = ftemp(n_radial/2+1,n_theta/2+1) 
 
         call write_balloon(&
              trim(path)//runfile_fieldb(i_field),&

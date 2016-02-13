@@ -108,7 +108,6 @@ subroutine cgyro_field_c
 !$omp parallel private(ic,iv_loc,is,ix,ie,fac)
 !$omp do reduction(+:field_loc)
   do iv=nv1,nv2
-     !iv_loc = iv_locv(iv)
      iv_loc = iv-nv1+1
      is = is_v(iv)
      ix = ix_v(iv)
