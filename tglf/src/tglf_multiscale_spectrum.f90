@@ -25,8 +25,9 @@
       REAL :: f0,f1,f2,a,b,c,x0,x02,dky,xmax
       REAL :: gamma0,gammaeff
       REAL :: cnorm, phinorm, kylow, czf, cz1, cz2, kyetg
-      REAL :: cky,sqcky,delta
+      REAL :: cky,sqcky,delta,ax,ay,kx
       REAL :: mix1,mix2,mixnorm,gamma_ave
+      REAL,DIMENSION(nkym) :: gamma_net=0.0
       REAL,DIMENSION(nkym) :: gamma=0.0
       REAL,DIMENSION(nkym) :: gamma_mix=0.0
       REAL,PARAMETER :: small=1.0E-10
@@ -39,6 +40,19 @@
       cnorm=14.21
       cz1=0.48*czf
       cz2=1.0*czf
+      ax=0.0
+      ay=0.0
+      if(alpha_quench_in.eq.0.0)then
+      !spectral shift model parameters
+        ax = 1.15
+        ay = 0.56
+      endif
+      !   write(*,*)" ax= ",ax," ay= ",ay
+      do i=1,nky
+         kx=spectral_shift_out(i)
+         gamma_net(i) = eigenvalue_spectrum_out(1,i,1)/(1.0 + (ax*kx)**4)
+      !   write(*,*)i,"gamma_net = ",gamma_net(i)
+      enddo
       if(USE_MIX)then
         kyetg=1.9
         cky=3.0
@@ -56,6 +70,7 @@
       !
       ! renormalize the fluxes and intensities to the phi-norm from the v-norm
       do j=1,nky
+      !  write(*,*)"spectal_shift_out(",j,") = ",spectral_shift_out(j)
          do i=1,nmodes_in
             phinorm=1.0
             if(ABS(field_spectrum_out(2,j,i)).gt.small)phinorm=field_spectrum_out(2,j,i)
@@ -73,7 +88,7 @@
         enddo
       enddo
       ! find the maximum of gamma/ky 
-      gammamax1= eigenvalue_spectrum_out(1,1,1)
+      gammamax1= gamma_net(1)
       kymax1 = ky_spectrum(1)
       testmax1 = gammamax1/kymax1
       jmax1=1
@@ -83,21 +98,21 @@
          ky0 = ky_spectrum(j)
          if(ky0 .lt. kylow)then
            j1=j1+1
-           test1 = eigenvalue_spectrum_out(1,j,1)/ky0
+           test1 = gamma_net(j)/ky0
            if(test1 .gt. testmax1)then
             testmax1 = test1
             jmax1=j
            endif        
          endif        
       enddo
-      gammamax1 = eigenvalue_spectrum_out(1,jmax1,1)
+      gammamax1 = gamma_net(jmax1)
       kymax1 = ky_spectrum(jmax1)
       !interpolate to find a more accurate low-k maximum gamma/ky 
       ! this is cut of at j1 since a maximum may not exist in the low-k range
       if(jmax1.gt.1.and.jmax1.lt.j1)then
-         f0 =  eigenvalue_spectrum_out(1,jmax1-1,1)/ky_spectrum(jmax1-1)
-         f1 =  eigenvalue_spectrum_out(1,jmax1,1)/ky_spectrum(jmax1)
-         f2 =  eigenvalue_spectrum_out(1,jmax1+1,1)/ky_spectrum(jmax1+1)
+         f0 =  gamma_net(jmax1-1)/ky_spectrum(jmax1-1)
+         f1 =  gamma_net(jmax1)/ky_spectrum(jmax1)
+         f2 =  gamma_net(jmax1+1)/ky_spectrum(jmax1+1)
          dky = (ky_spectrum(jmax1+1)-ky_spectrum(jmax1-1))
          x0 = (ky_spectrum(jmax1)-ky_spectrum(jmax1-1))/dky
          a = f0
@@ -123,7 +138,7 @@
       do j=1,nky
 ! include zonal flow effects on growthrate model
 !          gamma=0.0
-          gamma0 = eigenvalue_spectrum_out(1,j,1)
+          gamma0 = gamma_net(j)
           ky0=ky_spectrum(j)
           if(ky0.lt.kymax1)then
             gamma(j) = Max(gamma0 - cz1*(1.0 - ky0/kymax1)*gammamax1,0.0)
@@ -156,11 +171,12 @@
       do j=1,nky
         gamma0 = eigenvalue_spectrum_out(1,j,1)
         ky0 = ky_spectrum(j)
+        kx = spectral_shift_out(j)
         do i=1,nmodes_in
           gammaeff = 0.0
           if(gamma0.gt.small)gammaeff = gamma_mix(j)*(eigenvalue_spectrum_out(1,j,i)/gamma0)**2
           if(ky0.gt.kyetg)gammaeff = gammaeff*SQRT(ky0/kyetg)
-          field_spectrum_out(2,j,i) = cnorm*gammaeff*gammaeff/ky0**4
+          field_spectrum_out(2,j,i) = (cnorm*gammaeff*gammaeff/ky0**4)/(1.0+ay*kx**2)**2
         enddo
      enddo
      ! recompute the intensity and flux spectra
