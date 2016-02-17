@@ -199,9 +199,9 @@
 ! debug
 !      write(*,*)"ky_min=",ky_min,"ky_max=",ky_max
 !      write(*,*)"nky = ",nky,"ky0 = ",ky0," ky1 = ",ky1
-      do i=1,nky
-       write(*,*)i,"ky=",ky_spectrum(i),"dky=",dky_spectrum(i)
-      enddo
+!      do i=1,nky
+!      write(*,*)i,"ky=",ky_spectrum(i),"dky=",dky_spectrum(i)
+!      enddo
 !
       END SUBROUTINE get_ky_spectrum
 
