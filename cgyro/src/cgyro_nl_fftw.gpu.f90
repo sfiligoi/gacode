@@ -339,7 +339,7 @@ subroutine cgyro_nl_fftw(ij)
   ! RHS -> -[f,g] = [f,g]_{r,-alpha}
 
 !$omp workshare
-  rhs(ij,:,:) = rhs(ij,:,:)+((q*rho/rmin)*(2*pi/length))*psi(:,:)
+  rhs(:,:,ij) = rhs(:,:,ij)+((q*rho/rmin)*(2*pi/length))*psi(:,:)
 !$omp end workshare
 
 end subroutine cgyro_nl_fftw

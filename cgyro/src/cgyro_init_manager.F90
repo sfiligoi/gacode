@@ -122,7 +122,7 @@ subroutine cgyro_init_manager
      allocate(dtheta_up(nc,-nup_theta:nup_theta))
 
      ! Velocity-distributed arrays
-     allocate(rhs(4,nc,nv_loc))
+     allocate(rhs(nc,nv_loc,4))
      allocate(h_x(nc,nv_loc))
      allocate(g_x(nc,nv_loc))
      allocate(psi(nc,nv_loc))
