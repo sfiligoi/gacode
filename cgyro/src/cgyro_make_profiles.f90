@@ -39,19 +39,22 @@ subroutine cgyro_make_profiles
   endif
 
   !-------------------------------------------------------------
-  ! Geometry 
-
-  if(equilibrium_model == 1) then
+  ! Local geometry treatment
+  !
+  if (equilibrium_model == 1) then
+     ! s-alpha
      geo_numeq_flag = -1
      geo_ny = 0      
      allocate(geo_yin(8,0:geo_ny))
      geo_yin(:,:) = 0.0
-  else if(equilibrium_model == 2) then
+  else if (equilibrium_model == 2) then
+     ! Miller
      geo_numeq_flag = 0
      geo_ny = 0
      allocate(geo_yin(8,0:geo_ny))
      geo_yin(:,:) = 0.0
   else
+     ! Fourier
      geo_numeq_flag = 1
      geo_ny = geo_ny_in  
      allocate(geo_yin(8,0:geo_ny))
@@ -59,10 +62,11 @@ subroutine cgyro_make_profiles
         geo_yin(:,j) = geo_yin_in(:,j)
      enddo
   endif
+  !-------------------------------------------------------------
 
   !-------------------------------------------------------------
-  ! Profiles
-
+  ! Plasma radial profiles (n,T,etc)
+  !
   ! FIELD ORIENTATION NOTES:
   !  Field orientation is accomplished by giving signs to a minimal 
   !  set of quantities:
@@ -72,7 +76,7 @@ subroutine cgyro_make_profiles
   !  3. sign(rho_star) = -btccw
   !-----------------------------------------------------------------------
 
-  if(profile_model == 2) then
+  if (profile_model == 2) then
 
      ! Experimental profiles
 
@@ -203,7 +207,6 @@ subroutine cgyro_make_profiles
   !-------------------------------------------------------------
   ! Manage simulation type (n=0,linear,nonlinear)
   !
-
   if (zf_test_flag == 1) then
 
      ! Zonal flow (n=0) test
@@ -211,7 +214,7 @@ subroutine cgyro_make_profiles
      k_theta = q/rmin
      rho     = abs(ky/k_theta)*(-btccw)
      length  = abs(box_size/(s*k_theta))
-
+     
      k_theta = 0
 
      call cgyro_info('Triggered zonal flow test.')

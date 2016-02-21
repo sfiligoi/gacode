@@ -72,6 +72,7 @@ module cgyro_globals
   integer :: kxfilter_flag
   real :: gamma_e_decay
   integer :: hiprec_flag
+  integer :: udsymmetry_flag
   !
   ! Geometry input
   !
@@ -87,7 +88,7 @@ module cgyro_globals
   real :: zeta
   real :: s_zeta
   real :: zmag
-  real :: s_zmag
+  real :: dzmag
   real :: beta_star
   real :: betae_unit
   !
@@ -246,6 +247,7 @@ module cgyro_globals
   real, dimension(:), allocatable :: cderiv
   real, dimension(:), allocatable :: spec_uderiv
   integer, dimension(:), allocatable :: thcyc
+  integer, dimension(:), allocatable :: rcyc
   integer, dimension(:,:), allocatable :: icd_c
   complex, dimension(:,:), allocatable :: dtheta
   complex, dimension(:,:), allocatable :: dtheta_up

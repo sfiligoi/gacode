@@ -24,7 +24,7 @@ module cgyro_experimental_globals
   real, dimension(:), allocatable :: zeta_exp
   real, dimension(:), allocatable :: s_zeta_exp
   real, dimension(:), allocatable :: zmag_exp
-  real, dimension(:), allocatable :: s_zmag_exp
+  real, dimension(:), allocatable :: dzmag_exp
 
   real, dimension(:), allocatable :: te_ade_exp
   real, dimension(:), allocatable :: ne_ade_exp

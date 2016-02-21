@@ -64,6 +64,7 @@ subroutine cgyro_read_input
   call readbc_int(kxfilter_flag)
   call readbc_real(gamma_e_decay)
   call readbc_int(hiprec_flag)
+  call readbc_int(udsymmetry_flag)
 
   call readbc_real(rmin)
   call readbc_real(rmaj)
@@ -77,7 +78,7 @@ subroutine cgyro_read_input
   call readbc_real(zeta)      
   call readbc_real(s_zeta)
   call readbc_real(zmag)       
-  call readbc_real(s_zmag)
+  call readbc_real(dzmag)
   call readbc_real(beta_star)
   call readbc_real(betae_unit)
 

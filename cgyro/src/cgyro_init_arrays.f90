@@ -356,13 +356,17 @@ subroutine cgyro_init_arrays
   !-------------------------------------------------------------------------
   ! Streaming arrays
   !
-  ! cyclic index (for theta-periodicity)
+  ! cyclic functions (for radial and theta periodicity)
   do it=1,n_theta
      thcyc(it-n_theta) = it
      thcyc(it) = it
      thcyc(it+n_theta) = it
   enddo
-!$acc enter data copyin(thcyc)
+  do ir=1,n_radial
+     rcyc(ir-n_radial) = ir
+     rcyc(ir) = ir
+     rcyc(ir+n_radial) = ir
+  enddo
 
   allocate(cderiv(-nup_theta:nup_theta))
   allocate(uderiv(-nup_theta:nup_theta))
@@ -466,22 +470,10 @@ subroutine cgyro_init_arrays
            jt = thcyc(it+id)
            if (it+id < 1) then
               thfac = exp(2*pi*i_c*k_theta*rmin)
-              jr = ir-n*box_size*ccw_fac
-              if (jr < 1) then
-                 jr = jr+n_radial
-              endif
-              if (jr > n_radial) then
-                 jr = jr-n_radial
-              endif
+              jr = rcyc(ir-n*box_size*ccw_fac)
            else if (it+id > n_theta) then
               thfac = exp(-2*pi*i_c*k_theta*rmin)
-              jr = ir+n*box_size*ccw_fac
-              if (jr > n_radial) then
-                 jr = jr-n_radial
-              endif
-              if(jr < 1) then
-                 jr = jr+n_radial
-              end if
+              jr = rcyc(ir+n*box_size*ccw_fac)
            else
               thfac = (1.0,0.0)
               jr = ir

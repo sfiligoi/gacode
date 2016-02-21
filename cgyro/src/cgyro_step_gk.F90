@@ -81,7 +81,6 @@ subroutine cgyro_rhs(ij)
   endif
 
   call timer_lib_in('str_comm')
-  !call cgyro_hsym
   call cgyro_upwind
   call timer_lib_out('str_comm')
 
@@ -93,7 +92,7 @@ subroutine cgyro_rhs(ij)
 !$acc& present(is_v,ix_v,ie_v,it_c) &
 !$acc& present(omega_cap_h,omega_h,omega_s) &
 !$acc& present(omega_stream,energy,xi) &
-!$acc& present(thcyc,ic_c,dtheta,dtheta_up)
+!$acc& present(dtheta,dtheta_up)
 
 !$acc kernels
    rhs_ij(:,:) = (0.0,0.0)

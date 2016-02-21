@@ -19,7 +19,7 @@ subroutine cgyro_equilibrium
   GEO_rmaj_in      = rmaj
   GEO_drmaj_in     = shift
   GEO_zmag_in      = zmag
-  GEO_dzmag_in     = s_zmag
+  GEO_dzmag_in     = dzmag
   GEO_q_in         = q
   GEO_s_in         = s
   GEO_kappa_in     = kappa
