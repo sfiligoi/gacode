@@ -92,7 +92,7 @@ subroutine cgyro_rhs(ij)
 !$acc& present(is_v,ix_v,ie_v,it_c) &
 !$acc& present(omega_cap_h,omega_h,omega_s) &
 !$acc& present(omega_stream,energy,xi) &
-!$acc& present(dtheta,dtheta_up)
+!$acc& present(dtheta,dtheta_up,icd_c)
 
 !$acc kernels
    rhs_ij(:,:) = (0.0,0.0)
