@@ -55,6 +55,7 @@ subroutine cgyro_init_manager
   !----------------------------------------------------
 
   allocate(energy(n_energy))
+  allocate(vel(n_energy))
   allocate(w_e(n_energy))
   allocate(e_deriv1_mat(n_energy,n_energy))
   allocate(e_deriv2_mat(n_energy,n_energy))
@@ -64,14 +65,14 @@ subroutine cgyro_init_manager
   else
      call pseudo_maxwell_new(n_energy,e_max,energy,w_e,e_deriv1_mat,e_deriv2_mat,trim(path)//'out.cgyro.egrid')
   endif
+  vel(:) = sqrt(energy(:))
 
   allocate(xi(n_xi))
   allocate(w_xi(n_xi))
   allocate(xi_lor_mat(n_xi,n_xi))
   allocate(xi_deriv_mat(n_xi,n_xi))
-  allocate(xi_upderiv_mat(n_xi,n_xi))
   ! Construct xi (pitch-angle) nodes and weights
-  call pseudo_legendre(n_xi,xi,w_xi,xi_deriv_mat,xi_lor_mat,xi_upderiv_mat)
+  call pseudo_legendre(n_xi,xi,w_xi,xi_deriv_mat,xi_lor_mat)
   w_xi = 0.5*w_xi
 
   allocate(theta(n_theta))
@@ -115,12 +116,13 @@ subroutine cgyro_init_manager
      allocate(recv_status(MPI_STATUS_SIZE))
 
      allocate(thcyc(1-n_theta:2*n_theta))
+     allocate(rcyc(1-n_radial:2*n_radial))
      allocate(icd_c(nc,-nup_theta:nup_theta))
      allocate(dtheta(nc,-nup_theta:nup_theta))
      allocate(dtheta_up(nc,-nup_theta:nup_theta))
 
      ! Velocity-distributed arrays
-     allocate(rhs(4,nc,nv_loc))
+     allocate(rhs(nc,nv_loc,4))
      allocate(h_x(nc,nv_loc))
      allocate(g_x(nc,nv_loc))
      allocate(psi(nc,nv_loc))

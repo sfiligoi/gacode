@@ -79,19 +79,24 @@ subroutine cgyro_experimental_profiles
   btccw = -EXPRO_signb
   ipccw = -EXPRO_signq*EXPRO_signb
 
-  rmin_exp(:)         = EXPRO_rmin(:)
-  rmaj_exp(:)         = EXPRO_rmaj(:)
-  q_exp(:)            = EXPRO_q(:)
-  s_exp(:)            = EXPRO_s(:)
-  shift_exp(:)        = EXPRO_drmaj(:)
-  kappa_exp(:)        = EXPRO_kappa(:)
-  s_kappa_exp(:)      = EXPRO_skappa(:)
-  delta_exp(:)        = EXPRO_delta(:) 
-  s_delta_exp(:)      = EXPRO_sdelta(:) 
-  zeta_exp(:)         = EXPRO_zeta(:)
-  s_zeta_exp(:)       = EXPRO_szeta(:)  
-  zmag_exp(:)         = EXPRO_zmag(:)   
-  s_zmag_exp(:)       = EXPRO_dzmag(:)
+  rmin_exp(:)    = EXPRO_rmin(:)
+  rmaj_exp(:)    = EXPRO_rmaj(:)
+  q_exp(:)       = EXPRO_q(:)
+  s_exp(:)       = EXPRO_s(:)
+  shift_exp(:)   = EXPRO_drmaj(:)
+  kappa_exp(:)   = EXPRO_kappa(:)
+  s_kappa_exp(:) = EXPRO_skappa(:)
+  delta_exp(:)   = EXPRO_delta(:) 
+  s_delta_exp(:) = EXPRO_sdelta(:) 
+  zeta_exp(:)    = EXPRO_zeta(:)
+  s_zeta_exp(:)  = EXPRO_szeta(:)
+  if (udsymmetry_flag == 1) then
+     zmag_exp(:)    = 0.0   
+     dzmag_exp(:)   = 0.0
+  else
+     zmag_exp(:)    = EXPRO_zmag(:)   
+     dzmag_exp(:)   = EXPRO_dzmag(:)
+  endif
   
   ! Minor radius, a, in meters:
   a_meters = rmin_exp(n_grid_exp)
@@ -101,7 +106,7 @@ subroutine cgyro_experimental_profiles
   zmag_exp(:) = zmag_exp(:)/a_meters
 
   if (equilibrium_model == 3) then
-     if(EXPRO_nfourier <= 0) then
+     if (EXPRO_nfourier <= 0) then
         call cgyro_error('ERROR: (CGYRO) Geometry coefficients missing')
         return
      endif
@@ -150,15 +155,15 @@ subroutine cgyro_experimental_profiles
 
   ! Bunit 
 
-  b_unit_exp(:)  = EXPRO_bunit(:)
+  b_unit_exp(:) = EXPRO_bunit(:)
 
   ! Rotation
 
-  gamma_e_exp(:)       = -EXPRO_w0p(:) * (a_meters * rmin_exp(:)) / q_exp(:)
+  gamma_e_exp(:) = -EXPRO_w0p(:) * (a_meters * rmin_exp(:)) / q_exp(:)
 
-  gamma_p_exp(:)       = -EXPRO_w0p(:) * (a_meters * rmaj_exp(:))
+  gamma_p_exp(:) = -EXPRO_w0p(:) * (a_meters * rmaj_exp(:))
 
-  mach_exp(:)          = EXPRO_w0(:) * (a_meters * rmaj_exp(:))
+  mach_exp(:)    = EXPRO_w0(:) * (a_meters * rmaj_exp(:))
 
   call EXPRO_palloc(CGYRO_COMM_WORLD,path,0)
 

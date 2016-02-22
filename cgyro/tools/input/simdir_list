@@ -10,10 +10,11 @@ reg07: exp+sug+em +lin+iec+pro+gen+ rot
 reg08: imp+sug+em +lin+ie +pro+mil+ rot
 reg09: exp+sug+es + nl+i  +loc+mil+nrot
 reg10: exp+sug+em + nl+ie +loc+mil+nrot
-reg11: exp+sug+es + nl+i  +loc+mil+ rot
+reg11: exp+sug+es + nl+i  +loc+mil+ rot 
 reg12: exp+sug+cem+lin+ie +loc+mil+nrot
 reg13: imp+sug+cem+lin+ie +loc+mil+nrot
 reg14: exp+sug+cem+ nl+ie +loc+mil+nrot
+reg15: exp+sug+cem+lin+ie +loc+mil+nrot [high-k]
 
 nl01: 16  mode nl performance optimization case
 nl02: 64  mode nl performance optimization case

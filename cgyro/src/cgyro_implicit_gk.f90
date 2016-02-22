@@ -61,7 +61,7 @@ subroutine cgyro_init_implicit_gk
         ir = ir_c(ic) 
         it = it_c(ic)
 
-        rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
+        rval = omega_stream(it,is)*vel(ie)*xi(ix) 
 
         do id=-nup_theta,nup_theta
            jc = icd_c(ic,id)
@@ -122,7 +122,7 @@ subroutine cgyro_init_implicit_gk
         ir = ir_c(ic) 
         it = it_c(ic)
 
-        rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
+        rval = omega_stream(it,is)*vel(ie)*xi(ix) 
 
         do id=-nup_theta,nup_theta
            jc = icd_c(ic,id)
@@ -425,7 +425,7 @@ subroutine cgyro_step_implicit_gk
   implicit none
 
   integer :: is, ir, it, ie, ix
-  integer :: id, jt, jr, jc, ifield
+  integer :: id, jc, ifield
   real    :: rval
   complex :: rfac(nc)
 
@@ -462,7 +462,7 @@ subroutine cgyro_step_implicit_gk
         ir = ir_c(ic)
         it = it_c(ic)
 
-        rval = omega_stream(it,is)*sqrt(energy(ie))*xi(ix) 
+        rval = omega_stream(it,is)*vel(ie)*xi(ix) 
 
         do id=-nup_theta,nup_theta
            jc = icd_c(ic,id)
