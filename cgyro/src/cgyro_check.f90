@@ -22,7 +22,6 @@ subroutine cgyro_check
 !  endif
   if (zf_test_flag == 0 .and. modulo(n_radial,box_size) /= 0) then 
      call cgyro_info('RESOLUTION WARNING -- n_radial not a multiple of box_size.')
-     return
   endif
 
   if (n_species > 6) then
