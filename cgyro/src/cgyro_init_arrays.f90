@@ -484,7 +484,7 @@ subroutine cgyro_init_arrays
         enddo
      enddo
   enddo
-!$acc enter data copyin(dtheta,dtheta_up)
+!$acc enter data copyin(dtheta,dtheta_up,icd_c)
 
   ! Streaming coefficients (for speed optimization)
 

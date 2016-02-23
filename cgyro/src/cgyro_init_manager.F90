@@ -298,5 +298,5 @@ subroutine cgyro_init_manager
 
   call GEO_alloc(0)
 
-!$acc enter data copyin(energy,xi)
+!$acc enter data copyin(energy,xi,vel)
 end subroutine cgyro_init_manager
