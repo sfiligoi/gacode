@@ -119,6 +119,6 @@ subroutine cgyro_nl_direct(ij)
 
   ! RHS -> -[f,g] = (n'' p' - n' p'') f'' g' 
 
-  rhs(ij,:,:) = rhs(ij,:,:)+(q*rho/rmin)*(2*pi/length)*psi(:,:)
+  rhs(:,:,ij) = rhs(:,:,ij)+(q*rho/rmin)*(2*pi/length)*psi(:,:)
 
 end subroutine cgyro_nl_direct

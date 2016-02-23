@@ -196,8 +196,9 @@
 !
 ! initialize output arrays
 !
-      do k=1,nmodes_in
-       do i=1,nky
+      do i=1,nky
+       spectral_shift_out(i) = 0.0
+       do k=1,nmodes_in
         do t = 1,2
           eigenvalue_spectrum_out(t,i,k) = 0.0
           field_spectrum_out(t,i,k) = 0.0
@@ -213,8 +214,8 @@
           enddo ! j
         enddo ! is
         ne_te_phase_spectrum_out(i,k)=0.0
-       enddo  !i
-      enddo  !k
+       enddo  !k
+      enddo  !i
 !
 ! loop over ky spectrum
 !
@@ -292,6 +293,8 @@
         if(sat_rule_in.eq.1)reduce=1.0
 !
         if(unstable)then
+! save the spectral shift of the radial wavenumber due to VEXB_SHEAR
+         spectral_shift_out(i) = kx0_e
 ! save field_spectrum_out and eigenvalue_spectrum_out
          do imax=1,nmodes_out
            field_spectrum_out(1,i,imax) = reduce*v_bar_out(imax)

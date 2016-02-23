@@ -47,6 +47,9 @@ then
   echo "         -r"
   echo "         Run full regression suite."
   echo 
+  echo "         -reset"
+  echo "         Reset regression data."
+  echo 
   echo "TEMPLATE GENERATION"
   echo
   echo "         -g"
@@ -83,6 +86,7 @@ TEST_FLAG=0
 GENERATE_FLAG=0
 REGRESS_FLAG=0
 CLEAN_FLAG=0
+RESET=0
 #=============================================================
 
 #=============================================================
@@ -112,6 +116,8 @@ while [ $# -gt 0 ] ; do
   -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
 
   -r) REGRESS_FLAG=1 ;;
+
+  -reset) RESET=1 ;;
 
   -clean) CLEAN_FLAG=1 ;;
 
@@ -176,7 +182,7 @@ then
       exit 1
    fi
    # NOMP=1 RESET=0
-   gacode_reg_do $NPROC $NOMP 0 cgyro 1e-6
+   gacode_reg_do $NPROC $NOMP $RESET cgyro 1e-6
    exit 0
 fi
 #============================================================

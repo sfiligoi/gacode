@@ -22,31 +22,23 @@ subroutine cgyro_step_gk
   
   ! Stage 1
   call cgyro_rhs(1)
-!$omp workshare
-  h_x = h0_x + 0.5 * delta_t * rhs(1,:,:)
-!$omp end workshare
+  h_x = h0_x + 0.5 * delta_t * rhs(:,:,1)
   call cgyro_field_c
 
   ! Stage 2
   call cgyro_rhs(2)
-!$omp workshare
-  h_x = h0_x + 0.5 * delta_t * rhs(2,:,:)
-!$omp end workshare
+  h_x = h0_x + 0.5 * delta_t * rhs(:,:,2)
   call cgyro_field_c
 
   ! Stage 3
   call cgyro_rhs(3)
-!$omp workshare
-  h_x = h0_x + delta_t * rhs(3,:,:)
-!$omp end workshare
+  h_x = h0_x + delta_t * rhs(:,:,3)
   call cgyro_field_c
 
   ! Stage 4
   call cgyro_rhs(4)
-!$omp workshare
   h_x = h0_x + delta_t/6.0 * &
-       (rhs(1,:,:)+2.0*rhs(2,:,:)+2.0*rhs(3,:,:)+rhs(4,:,:))  
-!$omp end workshare
+       (rhs(:,:,1)+2.0*rhs(:,:,2)+2.0*rhs(:,:,3)+rhs(:,:,4))  
   call cgyro_field_c
 
   ! Filter special spectral components
@@ -66,10 +58,10 @@ subroutine cgyro_rhs(ij)
 
   integer, intent(in) :: ij
   integer :: is, ir, it, ie, ix
-  integer :: id, jt, jr, jc
-  real :: rval
+  integer :: id, jc
+  real :: rval,rval2
   complex :: rhs_stream
-  complex :: rhs_ij(size(rhs,2),size(rhs,3))
+  complex :: rhs_ij(nc,nv_loc)
 
   ! Prepare suitable distribution (g, not h) for conservative upwind method
 !$omp workshare
@@ -79,7 +71,6 @@ subroutine cgyro_rhs(ij)
 !$omp  parallel do  &
 !$omp& private(iv,ic,iv_loc,is,ir,it)
      do iv=nv1,nv2
-        ! iv_loc = iv_locv(iv)
         iv_loc = iv-nv1+1
         is = is_v(iv)
         do ic=1,nc
@@ -90,7 +81,7 @@ subroutine cgyro_rhs(ij)
   endif
 
   call timer_lib_in('str_comm')
-  call cgyro_hsym
+  call cgyro_upwind
   call timer_lib_out('str_comm')
 
   call timer_lib_in('str')
@@ -100,11 +91,10 @@ subroutine cgyro_rhs(ij)
 !$acc& pcopyin(h_x,field,cap_h_c) &
 !$acc& present(is_v,ix_v,ie_v,it_c) &
 !$acc& present(omega_cap_h,omega_h,omega_s) &
-!$acc& present(omega_stream,energy,xi) &
-!$acc& present(thcyc,ic_c,dtheta,dtheta_up)
+!$acc& present(omega_stream,energy,xi,vel) &
+!$acc& present(dtheta,dtheta_up,icd_c)
 
 !$acc kernels
-!  rhs(ij,:,:) = (0.0,0.0)
    rhs_ij(:,:) = (0.0,0.0)
 !$acc end kernels
 
@@ -117,14 +107,12 @@ subroutine cgyro_rhs(ij)
 !$omp& private(iv,ic,iv_loc,is,ix,ie,rval,rhs_stream,id,jc)
 #endif
   do iv=nv1,nv2
-  do ic=1,nc
+     do ic=1,nc
 
-     ! iv_loc = iv_locv(iv)
-     iv_loc = iv-nv1+1
-     is = is_v(iv)
-     ix = ix_v(iv)
-     ie = ie_v(iv)
-
+        iv_loc = iv-nv1+1
+        is = is_v(iv)
+        ix = ix_v(iv)
+        ie = ie_v(iv)
 
         ! Diagonal terms
         rhs_ij(ic,iv_loc) = rhs_ij(ic,iv_loc)+&
@@ -134,14 +122,15 @@ subroutine cgyro_rhs(ij)
 
         if (implicit_flag == 0) then
            ! Parallel streaming with upwind dissipation 
-           rval = omega_stream(it_c(ic),is)*sqrt(energy(ie))
+           rval  = omega_stream(it_c(ic),is)*vel(ie)*xi(ix)
+           rval2 = abs(omega_stream(it_c(ic),is))
            rhs_stream = 0.0
 
            do id=-nup_theta,nup_theta
               jc = icd_c(ic,id)
               rhs_stream = rhs_stream &
-                   -rval*xi(ix)*dtheta(ic,id)*cap_h_c(jc,iv_loc)  &
-                   -abs(rval)*dtheta_up(ic,id)*g_x(jc,iv_loc) 
+                   -rval*dtheta(ic,id)*cap_h_c(jc,iv_loc)  &
+                   -rval2*dtheta_up(ic,id)*g_x(jc,iv_loc) 
            enddo
 
            rhs_ij(ic,iv_loc) = rhs_ij(ic,iv_loc)+rhs_stream
@@ -151,7 +140,7 @@ subroutine cgyro_rhs(ij)
   enddo
 !$acc end data
 
-  rhs(ij,:,:) = rhs_ij(:,:)
+  rhs(:,:,ij) = rhs_ij(:,:)
 
   call timer_lib_out('str')
 

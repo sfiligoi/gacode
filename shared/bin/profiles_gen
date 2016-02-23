@@ -35,8 +35,7 @@ EXEC=${GACODE_ROOT}/shared/profiles_gen/src/prgen
 # - GATO executable
 GATO=${GACODE_ROOT}/gato/gato
 # - OMFIT script
-OMFIT_ROOT=${GACODE_ROOT}/../OMFIT-source
-OMFIT="${OMFIT_ROOT}/src/omfit.py"
+OMFIT=${OMFIT_ROOT}/src/omfit.py
 # - locpargen executable
 LOCPARGEN=${GACODE_ROOT}/shared/profiles_gen/locpargen/locpargen
 # - exprodump executable

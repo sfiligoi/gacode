@@ -236,7 +236,7 @@ subroutine gyro_memory_usage(data_file,io)
         if (allocated(indx_poissonaperp)) call alloc_add(io,size(indx_poissonaperp),4,'indx_poissonaperp')
 
         write(io,*) '---------------------'
-        write(io,'(f7.3,a,3x,a)') total_memory/1048576.0,' MB'
+        write(io,'(f8.3,a,3x,a)') total_memory/1e6,' MB'
 
         close(io)
 
@@ -279,12 +279,12 @@ subroutine alloc_add(io,n_size,bytes,name)
         this_memory  = 1.0*n_size*bytes
         total_memory = total_memory+this_memory 
 
-        write(io,10) this_memory/1048576.0,' MB',name
+        write(io,10) this_memory/1e6,' MB',name
 
      endif
 
   end select
 
-10 format(f7.3,a,3x,a)
+10 format(f8.3,a,3x,a)
 
 end subroutine alloc_add

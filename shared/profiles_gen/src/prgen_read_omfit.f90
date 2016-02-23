@@ -38,7 +38,7 @@ subroutine prgen_read_omfit
   ! Read the OMFIT mapper file
   open(unit=1,file='ffile',status='old')
 
-  do i=1,6
+  do i=1,7
      read(1,*) a
   enddo
   read(1,*) nsurf
@@ -54,7 +54,8 @@ subroutine prgen_read_omfit
   allocate(z_raw(ntot))
   allocate(l_raw(ntot))
 
-  read(1,*) psi(:) 
+  read(1,*) psi(:)
+  read(1,*) q(:)
   read(1,*) r_raw(:)
   read(1,*) z_raw(:)
   read(1,*) l_raw(:)
@@ -74,8 +75,6 @@ subroutine prgen_read_omfit
         i1 = sum(narcv(1:(i-1)))+1
      endif
      i2 = sum(narcv(1:i))
-!     r2(:,i) = r_raw(i1:i2)
-!     z2(:,i) = z_raw(i1:i2)
      ! Reverse order
      r2(:,i) = r_raw(i2:i1:-1)
      z2(:,i) = z_raw(i2:i1:-1)

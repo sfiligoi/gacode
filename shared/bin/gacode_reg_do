@@ -52,7 +52,7 @@ do
       # Overwrite regression data with current data
       echo "$sim/out.$code.prec -> $GACODE_ROOT/$code/tools/input/$sim"
       cp $sim/out.$code.prec $GACODE_ROOT/$code/tools/input/$sim
-      echo "$sim/out.$code.run -> $GACODE_ROOT/$code/tools/input/$sim"
-      cp $sim/out.$code.run  $GACODE_ROOT/$code/tools/input/$sim
+      #echo "$sim/out.$code.run -> $GACODE_ROOT/$code/tools/input/$sim"
+      #cp $sim/out.$code.run  $GACODE_ROOT/$code/tools/input/$sim
    fi
 done

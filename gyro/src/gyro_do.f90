@@ -303,11 +303,11 @@ subroutine gyro_do
   endif
   !------------------------------------------------------------
 
-  if (restart_method == 0) then
-     ! Open
+  if (restart_method == 0 .or. restart_method == 3) then
+     ! Open (new or init)
      io_control = output_flag*1
   else
-     ! Rewind
+     ! Rewind (cont)
      io_control = output_flag*3
   endif
   if (gkeigen_j_set == 0) then
