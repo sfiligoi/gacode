@@ -1,3 +1,13 @@
+!------------------------------------------------------------------------------
+! cgyro_step_collision.F90
+!
+! PURPOSE:
+!  Take an implicit collision step using the pre-computed collision 
+!  matrix.  Effectively, we compute the new collisional cap_H: 
+!
+!                       H = h + ze/T G phi
+!------------------------------------------------------------------------------
+
 subroutine cgyro_step_collision
 
   use parallel_lib
@@ -13,13 +23,12 @@ subroutine cgyro_step_collision
   complex, dimension(size(cap_h_v,2),nc1:nc2) :: bvec
   real :: cvec_re,cvec_im
 
-  ! compute new collisional cap_H: H = h + ze/T G phi
-  ! assumes have cap_h_x
-
-
+  !----------------------------------------------------------------
+  ! Perform data tranpose from _c to _v data layouts:
   call timer_lib_in('coll_comm')
   call parallel_lib_rtrans(cap_h_c,cap_h_v)
   call timer_lib_out('coll_comm')
+  !----------------------------------------------------------------
 
   call timer_lib_in('coll')
 
@@ -34,7 +43,6 @@ subroutine cgyro_step_collision
 !$omp do
 #endif
   do ic=nc1,nc2
-     ! ic_loc = ic_locv(ic)
      ic_loc = ic-nc1+1
 
      ! Set-up the RHS: H = f + ze/T G phi
@@ -91,24 +99,18 @@ subroutine cgyro_step_collision
 
   ! Compute H given h and [phi(h), apar(h)]
 
-  iv_loc = 0
 !$omp parallel do &
 !$omp& private(iv,iv_loc,is,ix,ie,ic)
   do iv=nv1,nv2
-
-     !iv_loc = iv_loc+1
      iv_loc = iv-nv1+1
-
      is = is_v(iv)
      ix = ix_v(iv)
      ie = ie_v(iv)
-
      do ic=1,nc
         psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
         h_x(ic,iv_loc) = cap_h_c(ic,iv_loc)-psi(ic,iv_loc)*(z(is)/temp(is))
      enddo
   enddo
-
 
   call timer_lib_out('coll')
 
