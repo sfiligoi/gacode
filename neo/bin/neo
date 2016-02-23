@@ -53,7 +53,7 @@ then
   echo "         Copy <template> into simulation path."
   echo
   echo "UTILITIES"
-  echo
+  echo 
   echo "         -h" 
   echo "         Version and platform information."
 
@@ -92,13 +92,13 @@ while [ $# -gt 0 ] ; do
 
   -g) shift ; LOCDIR=$1 ; GENERATE_FLAG=1 ;;
 
+  -h) gacode_printversion NEO ; exit 0 ;;
+
   -r) shift ; REGRESS=1 ;;
 
   -rc) shift ; LOCDIR=$1 ; REGRESS=2 ;;
 
   -reset) REGRESS_RESET=1 ;;
-
-  -h) neo_version_message ; exit 0 ;;
 
   *) echo "ERROR: incorrect neo syntax." ; exit 1 ;;
  
@@ -165,7 +165,7 @@ fi
 # Everything else must be done in $SIMDIR; so ensure existence 
 # of $SIMDIR (needed at this point) and go there: 
 #
-if ! neo_sim_warn $SIMDIR
+if ! gacode_sim_warn $SIMDIR
 then
    exit 1 
 fi 
@@ -199,7 +199,7 @@ then
    # Empty old runfile
    > out.neo.run 
 
-   neo_version_message 
+   gacode_printversion NEO
 
   #==========================================================
   # Version stamp:

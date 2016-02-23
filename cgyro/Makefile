@@ -11,6 +11,7 @@ export EXTRA_LIBS = \
         ${GACODE_ROOT}/shared/UMFPACK/UMFPACK_lib.a
 
 all:
+	gacode_getversion > .VERSION
 	cd ${GACODE_ROOT}/shared ; make
 	cd src ; make
 

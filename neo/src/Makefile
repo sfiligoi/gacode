@@ -51,19 +51,3 @@ clean:
 	cd ${GACODE_ROOT}/modules ; rm -f neo*.mod
 
 -include ../install/make.ext.${GACODE_PLATFORM}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

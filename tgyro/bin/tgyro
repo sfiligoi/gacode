@@ -221,7 +221,7 @@ fi
 # Everything else must be done in $SIMDIR; so ensure existence 
 # of $SIMDIR (needed at this point) and go there: 
 #
-if ! tgyro_sim_warn $SIMDIR
+if ! gacode_sim_warn $SIMDIR
 then
    exit 1 
 fi 
