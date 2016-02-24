@@ -306,7 +306,7 @@ subroutine cgyro_init_arrays
      do ir=1,n_radial
         do it=1,n_theta
            hzf(ir,it,it) = k_perp(ic_c(ir,it))**2 * lambda_debye**2 &
-                * dens_ele / temp_ele + sum_den_h
+                * dens_ele/temp_ele + sum_den_h
            do jt=1,n_theta
               hzf(ir,it,jt) = hzf(ir,it,jt) &
                    - dens_ele/temp_ele*w_theta(jt)
@@ -327,11 +327,11 @@ subroutine cgyro_init_arrays
      xzf(:,:,:) = 0.0     
      do ir=1,n_radial
         do it=1,n_theta
-           xzf(ir,it,it) = k_perp(ic_c(ir,it))**2 * lambda_debye**2 &
-                * dens_ele / temp_ele + sum_den_x(ic_c(ir,it))
+           xzf(ir,it,it) = k_perp(ic_c(ir,it))**2*lambda_debye**2 &
+                * dens_ele/temp_ele+sum_den_x(ic_c(ir,it))
            do jt=1,n_theta
               xzf(ir,it,jt) = xzf(ir,it,jt) &
-                   - dens_ele / temp_ele * w_theta(jt)
+                   - dens_ele/temp_ele*w_theta(jt)
            enddo
         enddo
      enddo
@@ -492,7 +492,7 @@ subroutine cgyro_init_arrays
 
         ! omega_dalpha
         omega_cap_h(ic,iv_loc) = &
-             -omega_adrift(it,is)*energy(ie)*(1.0 + xi(ix)**2)*i_c*k_theta
+             -omega_adrift(it,is)*energy(ie)*(1.0+xi(ix)**2)*i_c*k_theta
 
         ! omega_dalpha - pressure component
         omega_cap_h(ic,iv_loc) = omega_cap_h(ic,iv_loc) &

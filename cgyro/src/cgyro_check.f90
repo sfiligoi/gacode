@@ -20,8 +20,13 @@ subroutine cgyro_check
      call cgyro_info('RESOLUTION WARNING -- n_radial not a multiple of box_size.')
   endif
 
-  if (n_radial < (n_toroidal-1)*box_size) then
-     call cgyro_info('RESOLUTION WARNING -- n_radial < n*box_size')
+  if (n_radial < (n_toroidal-1)*box_size .and. zf_test_flag == 0) then
+     call cgyro_info('RESOLUTION WARNING -- n_radial < n*box_size.')
+  endif
+
+  if (n_radial < box_size .and. zf_test_flag == 0) then
+     call cgyro_error('RESOLUTION ERROR -- n_radial < box_size.')
+     return
   endif
 
   if (n_species > 6) then
