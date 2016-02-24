@@ -115,8 +115,6 @@ subroutine cgyro_init_manager
      allocate(flux_loc(n_radial,n_species,2))
      allocate(recv_status(MPI_STATUS_SIZE))
 
-     allocate(thcyc(1-n_theta:2*n_theta))
-     allocate(rcyc(1-n_radial:2*n_radial))
      allocate(icd_c(nc,-nup_theta:nup_theta))
      allocate(dtheta(nc,-nup_theta:nup_theta))
      allocate(dtheta_up(nc,-nup_theta:nup_theta))

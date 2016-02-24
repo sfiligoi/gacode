@@ -47,11 +47,9 @@ subroutine cgyro_init_h
      !
      h_x(:,:) = (0.0,0.0)
      !
-     iv_loc = 0
      do iv=nv1,nv2
 
-        iv_loc = iv_loc+1
-
+        iv_loc = iv-nv1+1
         is = is_v(iv)
         ix = ix_v(iv)
         ie = ie_v(iv)

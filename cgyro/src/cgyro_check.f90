@@ -16,23 +16,19 @@ subroutine cgyro_check
      return
   endif
 
-!  if (zf_test_flag == 0 .and. modulo(n_radial,box_size) /= 0) then 
-!     call cgyro_error('n_radial must be a multiple of m_box.')
-!     return
-!  endif
   if (zf_test_flag == 0 .and. modulo(n_radial,box_size) /= 0) then 
      call cgyro_info('RESOLUTION WARNING -- n_radial not a multiple of box_size.')
+  endif
+
+  if (n_radial < (n_toroidal-1)*box_size) then
+     call cgyro_info('RESOLUTION WARNING -- n_radial < n*box_size')
   endif
 
   if (n_species > 6) then
      call cgyro_error('n_species <= 6.')
      return
-  endif
-  !------------------------------------------------------------------------
-
-  if (n_radial < n_toroidal*box_size) then
-     call cgyro_info('RESOLUTION WARNING -- n_radial < n_toroidal*box_size')
-  endif
+  endif 
+ !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   ! Time integration

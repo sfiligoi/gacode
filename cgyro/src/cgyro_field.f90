@@ -20,7 +20,7 @@ subroutine cgyro_field_v
 
   implicit none
 
-  integer :: is, ie, ix, ir, it
+  integer :: is, ie, ix, ir
   complex :: fac
 
   logical, parameter :: use_dgemv = .false.
@@ -35,22 +35,16 @@ subroutine cgyro_field_v
 
   ! Poisson and Ampere RHS integrals of H
 
-  ic_loc = 0
 !$omp parallel do    &
 !$omp& private(ic,ic_loc,iv,is,ix,ie,fac)
   do ic=nc1,nc2
-     !ic_loc = ic_loc+1
      ic_loc = ic-nc1+1
-
      do iv=1,nv
-
         is = is_v(iv)
         ix = ix_v(iv)
         ie = ie_v(iv)
-
         fac = (w_e(ie)*w_xi(ix)*z(is)*dens(is))*cap_h_v(ic_loc,iv)
         field_loc(:,ic) = field_loc(:,ic)+fac*jvec_v(:,ic_loc,iv) 
-
      enddo
   enddo
 
@@ -65,8 +59,6 @@ subroutine cgyro_field_v
   ! Poisson LHS factors
 
   if (n == 0 .and. ae_flag == 1) then
-
-
 !$omp parallel do &
 !$omp& private(ir,i,j) &
 !$omp& private(pvec_in,pvec_outr,pvec_outi) &
@@ -133,7 +125,7 @@ subroutine cgyro_field_c
 
   implicit none
 
-  integer :: is, ie, ix, ir, it
+  integer :: is, ie, ix, ir
   complex :: fac
   complex, dimension(nc) :: tmp
   integer :: i,j
@@ -179,7 +171,6 @@ subroutine cgyro_field_c
   ! Poisson LHS factors
 
   if (n == 0 .and. ae_flag == 1) then
-
 !$omp parallel do &
 !$omp& private(ir,i,j) &
 !$omp& private(pvec_in,pvec_inr,pvec_ini,pvec_outr,pvec_outi)
@@ -235,18 +226,13 @@ subroutine cgyro_field_c
 
   endif
 
-  iv_loc = 0
 !$omp parallel do  &
 !$omp& private(iv,iv_loc,is,ix,ie,ic)
   do iv=nv1,nv2
-
-     !iv_loc = iv_loc+1
      iv_loc = iv-nv1+1
-
      is = is_v(iv)
      ix = ix_v(iv)
      ie = ie_v(iv)
-
      do ic=1,nc
         psi(ic,iv_loc) = sum(jvec_c(:,ic,iv_loc)*field(:,ic))
         cap_h_c(ic,iv_loc) = h_x(ic,iv_loc)+psi(ic,iv_loc)*(z(is)/temp(is))
